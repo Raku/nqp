@@ -487,7 +487,7 @@ class NQP::World is HLL::World {
         my @loadlibs := ['nqp_group', 'nqp_ops', 'nqp_bigint_ops', 'trans_ops', 'io_ops'];
         if %*COMPILING<%?OPTIONS><vmlibs> {
             for nqp::split(',', %*COMPILING<%?OPTIONS><vmlibs>) {
-                @loadlibs.push($_);
+                nqp::push(@loadlibs, $_);
             }
         }
         QAST::VM.new(
@@ -591,7 +591,7 @@ class NQP::World is HLL::World {
                 if +%sym {
                     if nqp::existskey(%sym, 'value') {
                         $result := %sym<value>;
-                        @name.shift();
+                        nqp::shift(@name);
                         $i := 0;
                     }
                     else {

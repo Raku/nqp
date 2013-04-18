@@ -1609,7 +1609,7 @@ class NQP::Actions is HLL::Actions {
             my $path;
             if $*W.is_lexical(@name[0]) {
                 try {
-                    my $first := @name.shift();
+                    my $first := nqp::shift(@name);
                     $path := QAST::WVal.new( :value($*W.find_sym([$first])) );
                     CATCH {
                         $path := QAST::Var.new( :name($first), :scope('lexical') );
@@ -1620,7 +1620,7 @@ class NQP::Actions is HLL::Actions {
                 $path := QAST::WVal.new( :value($*GLOBALish) );
             }
             if @name[0] eq 'GLOBAL' {
-                @name.shift();
+                nqp::shift(@name);
             }
             for @name {
                 my $path_temp := QAST::Node.unique('pkg_lookup_tmp');

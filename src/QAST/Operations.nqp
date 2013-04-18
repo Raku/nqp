@@ -189,7 +189,7 @@ class QAST::Operations {
     sub pirop_mapper($pirop, $sig) {
         # Parse arg types out.
         my @arg_types := nqp::split('', $sig);
-        my $ret_type  := @arg_types.shift();
+        my $ret_type  := nqp::shift(@arg_types);
         
         # Work out register method for return type, if any.
         my $ret_meth;
@@ -206,7 +206,7 @@ class QAST::Operations {
             my @args;
             if $ret_meth {
                 my $reg := $*REGALLOC."$ret_meth"();
-                @args.push($reg);
+                nqp::push(@args, $reg);
                 $ops.result($reg);
             }
             
@@ -234,7 +234,7 @@ class QAST::Operations {
                     }
                     my $post := $qastcomp.coerce($qastcomp.as_post($operand), $arg_type);
                     $ops.push($post);
-                    @args.push("$aggregate[" ~ $post.result ~ "]");
+                    nqp::push(@args, "$aggregate[" ~ $post.result ~ "]");
                     $last_argtype_was_Q := 0;
                 }
                 else {
@@ -243,7 +243,7 @@ class QAST::Operations {
                     }
                     my $post := $qastcomp.coerce($qastcomp.as_post($operand), $arg_type);
                     $ops.push($post);
-                    @args.push($post.result);
+                    nqp::push(@args, $post.result);
                 }
                 $i := $i + 1;
             }
@@ -441,11 +441,11 @@ for <if unless> -> $op_name {
             my $*HAVE_IMM_ARG := $_.arity > 0 && !($_ =:= $op[0]);
             my $*IMM_ARG;
             my $comp := $qastcomp.as_post($_);
-            @comp_ops.push($comp);
-            @op_types.push(nqp::uc($qastcomp.infer_type($comp.result)));
+            nqp::push(@comp_ops, $comp);
+            nqp::push(@op_types, nqp::uc($qastcomp.infer_type($comp.result)));
             if $*HAVE_IMM_ARG {
                 if $*IMM_ARG {
-                    @im_args.push($*IMM_ARG);
+                    nqp::push(@im_args, $*IMM_ARG);
                 }
                 else {
                     nqp::die("$op_name block expects an argument, but there's no immediate block to take it");
@@ -560,8 +560,8 @@ for ('', 'repeat_') -> $repness {
                 else {
                     my $*HAVE_IMM_ARG := $_.arity > 0 && $_ =:= $op.list[1];
                     my $comp := $qastcomp.as_post($_);
-                    @comp_ops.push($comp);
-                    @comp_types.push($qastcomp.infer_type($comp.result));
+                    nqp::push(@comp_ops, $comp);
+                    nqp::push(@comp_types, $qastcomp.infer_type($comp.result));
                     if $*HAVE_IMM_ARG && !$*IMM_ARG {
                         nqp::die("$op_name block expects an argument, but there's no immediate block to take it");
                     }
@@ -656,7 +656,7 @@ QAST::Operations.add_core_op('for', :inlinable(1), -> $qastcomp, $op {
     my @operands;
     for $op.list {
         if $_.named eq 'nohandler' { $handler := 0; }
-        else { @operands.push($_) }
+        else { nqp::push(@operands, $_) }
     }
     
     if +@operands != 2 {
@@ -863,10 +863,10 @@ sub handle_arg($arg, $qastcomp, $ops, @pos_arg_results, @named_arg_results, :$co
         $result := "$result :named(" ~ $qastcomp.escape($name) ~ ")";
     }
     if $arg.named {
-        @named_arg_results.push($result);
+        nqp::push(@named_arg_results, $result);
     }
     else {
-        @pos_arg_results.push($result);
+        nqp::push(@pos_arg_results, $result);
     }
 }
 
@@ -878,7 +878,7 @@ QAST::Operations.add_core_op('call', -> $qastcomp, $op {
         $callee := PIRT::Ops.new(:result($qastcomp.escape($op.name)));
     }
     elsif +@args {
-        $callee := $qastcomp.as_post(@args.shift());
+        $callee := $qastcomp.as_post(nqp::shift(@args));
     }
     else {
         nqp::die("No name for call and empty children list");
@@ -919,9 +919,9 @@ QAST::Operations.add_core_op('callmethod', :inlinable(1), -> $qastcomp, $op {
         $name := PIRT::Ops.new(:result($qastcomp.escape($op.name)));
     }
     elsif +@args >= 2 {
-        my $invocant := @args.shift();
-        $name := $qastcomp.coerce($qastcomp.as_post(@args.shift()), 's');
-        @args.unshift($invocant);
+        my $invocant := nqp::shift(@args);
+        $name := $qastcomp.coerce($qastcomp.as_post(nqp::shift(@args)), 's');
+        nqp::unshift(@args, $invocant);
     }
     else {
         nqp::die("Method call must either supply a name or have a child node that evaluates to the name");
@@ -1184,7 +1184,7 @@ QAST::Operations.add_core_op('handle', -> $qastcomp, $op {
     
     # Compile the protected statements. If we've no handlers at all
     # then that's it.
-    my $protected := @children.shift();
+    my $protected := nqp::shift(@children);
     my $procpost  := $qastcomp.coerce($qastcomp.as_post($protected), 'P');
     unless @children {
         return $procpost;

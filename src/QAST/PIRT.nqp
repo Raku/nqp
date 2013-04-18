@@ -22,13 +22,13 @@ class PIRT::Node {
     my %op_compilers := nqp::hash(
         'call', sub (@args) {
             "    " ~
-                ($*HAS_RESULT ?? @args.shift() ~ " = " !! '') ~
-                @args.shift() ~ "(" ~ nqp::join(", ", @args) ~ ")"
+                ($*HAS_RESULT ?? nqp::shift(@args) ~ " = " !! '') ~
+                nqp::shift(@args) ~ "(" ~ nqp::join(", ", @args) ~ ")"
         },
         'callmethod', sub (@args) {
-            my $pir := "    " ~ ($*HAS_RESULT ?? @args.shift() ~ " = " !! '');
-            my $name := @args.shift;
-            my $invocant := @args.shift;
+            my $pir := "    " ~ ($*HAS_RESULT ?? nqp::shift(@args) ~ " = " !! '');
+            my $name := nqp::shift(@args);
+            my $invocant := nqp::shift(@args);
             "$pir$invocant.$name(" ~ nqp::join(", ", @args) ~ ")"
         },
         'return', sub (@args) {
@@ -43,11 +43,11 @@ class PIRT::Node {
         'inline', sub (@args) {
             my $pir;
             if $*HAS_RESULT {
-                my $result := @args.shift();
-                $pir := subst(@args.shift(), /'%r'/, $result, :global);
+                my $result := nqp::shift(@args);
+                $pir := subst(nqp::shift(@args), /'%r'/, $result, :global);
             }
             else {
-                $pir := @args.shift();
+                $pir := nqp::shift(@args);
             }
             my $i := 0;
             for @args {
@@ -238,7 +238,7 @@ class PIRT::Sub is PIRT::Node {
         }
         
         # Add our PIR followed by that of any nested blocks.
-        @result.push($!cached_pir);
+        nqp::push(@result, $!cached_pir);
         for @!nested_blocks {
             $_.collect_sub_pir_into(@result);
         }

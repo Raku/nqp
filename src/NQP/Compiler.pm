@@ -10,14 +10,14 @@ hll-config($nqpcomp.config);
 
 # Add extra command line options.
 my @clo := $nqpcomp.commandline_options();
-@clo.push('parsetrace');
-@clo.push('setting=s');
-@clo.push('setting-path=s');
-@clo.push('module-path=s');
-@clo.push('vmlibs=s');
-@clo.push('no-regex-lib');
-@clo.push('dynext=s');
-@clo.push('stable-sc');
+nqp::push(@clo, 'parsetrace');
+nqp::push(@clo, 'setting=s');
+nqp::push(@clo, 'setting-path=s');
+nqp::push(@clo, 'module-path=s');
+nqp::push(@clo, 'vmlibs=s');
+nqp::push(@clo, 'no-regex-lib');
+nqp::push(@clo, 'dynext=s');
+nqp::push(@clo, 'stable-sc');
 
 sub MAIN(@ARGS) {
     # Enter the compiler.
