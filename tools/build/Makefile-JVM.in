@@ -297,3 +297,23 @@ $(ALL_OUTPUT): $(STAGE2_OUTPUT)
 $(RUNNER):
 	$(CP) src/vm/jvm/$(RUNNER) .
 	$(CHMOD) 755 $(RUNNER)
+
+## testing
+
+test: all
+	prove -r --exec .@slash@$(RUNNER) t/nqp t/qregex t/p5regex t/qast t/serialization
+
+test-loud: all
+	prove -r -v --exec .@slash@$(RUNNER) t/nqp t/qregex t/p5regex t/qast t/serialization
+
+core-test: $(RUNNER)
+	prove -r --exec .@slash@$(RUNNER) t/nqp
+
+core-test-loud: $(RUNNER)
+	prove -r -v --exec .@slash@$(RUNNER) t/nqp
+
+qregex-test: $(RUNNER)
+	prove -r --exec .@slash@$(RUNNER) t/qregex
+
+qregex-test-loud: $(RUNNER)
+	prove -r -v --exec .@slash@$(RUNNER) t/qregex
