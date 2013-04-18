@@ -89,8 +89,10 @@ class JAST::InstructionList {
 class JAST::Local is JAST::Node {
     has str $!name;
     
-    method BUILD(:$name!) {
-        $!name := $name;
+    method new(:$name!) {
+        my $node := nqp::create(JAST::Local);
+        nqp::bindattr_s($node, JAST::Local, '$!name', $name);
+        $node
     }
     
     method name() { $!name }
@@ -169,8 +171,10 @@ class JAST::Method is JAST::Node {
 class JAST::Label is JAST::Node {
     has str $!name;
     
-    method BUILD(:$name!) {
-        $!name := $name;
+    method new(:$name!) {
+        my $node := nqp::create(JAST::Label);
+        nqp::bindattr_s($node, JAST::Label, '$!name', $name);
+        $node
     }
     
     method name() { $!name }
@@ -185,12 +189,10 @@ class JAST::Instruction is JAST::Node {
     has @!args;
     
     method new(:$op!, *@args) {
-        self.bless(:$op, :@args)
-    }
-    
-    method BUILD(:$op!, :@args) {
-        $!op   := opname2code($op);
-        @!args := @args;
+        my $node := nqp::create(JAST::Instruction);
+        nqp::bindattr_i($node, JAST::Instruction, '$!op', opname2code($op));
+        nqp::bindattr($node, JAST::Instruction, '@!args', @args);
+        $node
     }
     
     method op() { $!op }
@@ -246,8 +248,10 @@ class JAST::InvokeDynamic is JAST::Node {
 class JAST::PushIVal is JAST::Node {
     has int $!value;
     
-    method BUILD(:$value) {
-        $!value := $value;
+    method new(:$value) {
+        my $node := nqp::create(JAST::PushIVal);
+        nqp::bindattr_i($node, JAST::PushIVal, '$!value', $value);
+        $node
     }
     
     method value() { $!value }
@@ -257,8 +261,10 @@ class JAST::PushIVal is JAST::Node {
 class JAST::PushIndex is JAST::Node {
     has int $!value;
     
-    method BUILD(:$value) {
-        $!value := $value;
+    method new(:$value) {
+        my $node := nqp::create(JAST::PushIndex);
+        nqp::bindattr_i($node, JAST::PushIndex, '$!value', $value);
+        $node
     }
     
     method value() { $!value }
@@ -268,8 +274,10 @@ class JAST::PushIndex is JAST::Node {
 class JAST::PushNVal is JAST::Node {
     has num $!value;
     
-    method BUILD(:$value) {
-        $!value := $value;
+    method new(:$value) {
+        my $node := nqp::create(JAST::PushNVal);
+        nqp::bindattr_n($node, JAST::PushNVal, '$!value', $value);
+        $node
     }
     
     method value() { $!value }
@@ -279,8 +287,10 @@ class JAST::PushNVal is JAST::Node {
 class JAST::PushSVal is JAST::Node {
     has str $!value;
     
-    method BUILD(:$value) {
-        $!value := $value;
+    method new(:$value) {
+        my $node := nqp::create(JAST::PushSVal);
+        nqp::bindattr_s($node, JAST::PushSVal, '$!value', $value);
+        $node
     }
     
     method value() { $!value }
@@ -304,8 +314,10 @@ class JAST::PushSVal is JAST::Node {
 class JAST::PushCVal is JAST::Node {
     has str $!value;
     
-    method BUILD(:$value) {
-        $!value := $value;
+    method new(:$value) {
+        my $node := nqp::create(JAST::PushCVal);
+        nqp::bindattr_s($node, JAST::PushCVal, '$!value', $value);
+        $node
     }
     
     method value() { $!value }
