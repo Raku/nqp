@@ -149,7 +149,7 @@ class NQP::World is HLL::World {
     # makes sure this happens on deserialization also.
     method install_package_symbol($package, @sym, $obj) {
         @sym := nqp::clone(@sym);
-        my $name := ~@sym.pop();
+        my $name := ~nqp::pop(@sym);
         
         # Install symbol immediately.
         my $target := $package;
