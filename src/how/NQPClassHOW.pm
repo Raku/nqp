@@ -65,20 +65,20 @@ knowhow NQPClassHOW {
 
     method BUILD(:$name = '<anon>') {
         $!name := $name;
-        @!attributes := nqp::list();
+        @!attributes := nqp::qlist();
         %!methods := nqp::hash();
-        @!method_order := nqp::list();
-        @!multi_methods_to_incorporate := nqp::list();
-        @!parents := nqp::list();
-        @!roles := nqp::list();
-        @!vtable := nqp::list();
+        @!method_order := nqp::qlist();
+        @!multi_methods_to_incorporate := nqp::qlist();
+        @!parents := nqp::qlist();
+        @!roles := nqp::qlist();
+        @!vtable := nqp::qlist();
         %!method-vtable-slots := nqp::hash();
-        @!mro := nqp::list();
-        @!done := nqp::list();
+        @!mro := nqp::qlist();
+        @!done := nqp::qlist();
         %!parrot_vtable_mapping := nqp::hash();
         %!parrot_vtable_handler_mapping := nqp::hash();
-        @!BUILDALLPLAN := nqp::list();
-        @!BUILDPLAN := nqp::list();
+        @!BUILDALLPLAN := nqp::qlist();
+        @!BUILDPLAN := nqp::qlist();
         $!trace := 0;
         $!trace_depth := 0;
         $!composed := 0;
@@ -519,7 +519,7 @@ knowhow NQPClassHOW {
     # nested array is an "op" representing the task to perform:
     #   0 code = call specified BUILD method
     #   1 class name attr_name = try to find initialization value
-    #   2 class name attr_name = try to find initialization value, or set nqp::list()
+    #   2 class name attr_name = try to find initialization value, or set nqp::qlist()
     #   3 class name attr_name = try to find initialization value, or set nqp::hash()
     #   4 class attr_name code = call default value closure if needed
     method create_BUILDPLAN($obj) {

@@ -44,10 +44,10 @@ knowhow NQPParametricRoleHOW {
 
     method BUILD(:$name!) {
         $!name := $name;
-        @!attributes := nqp::list();
+        @!attributes := nqp::qlist();
         %!methods := nqp::hash();
-        @!multi_methods_to_incorporate := nqp::list();
-        @!roles := nqp::list();
+        @!multi_methods_to_incorporate := nqp::qlist();
+        @!roles := nqp::qlist();
         $!composed := 0;
     }
 

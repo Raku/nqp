@@ -27,12 +27,12 @@ class NQP::World is HLL::World {
     has @!clearup_tasks; 
     
     method BUILD(*%opts) {
-        @!BLOCKS := nqp::list();
+        @!BLOCKS := nqp::qlist();
         %!code_objects_to_fix_up := nqp::hash();
         %!code_object_types := nqp::hash();
         %!code_object_fixup_list := nqp::hash();
         %!code_stub_sc_idx := nqp::hash();
-        @!clearup_tasks := nqp::list();
+        @!clearup_tasks := nqp::qlist();
     }
     
     # Creates a new lexical scope and puts it on top of the stack.
@@ -48,7 +48,7 @@ class NQP::World is HLL::World {
     
     # Pops a lexical scope off the stack.
     method pop_lexpad() {
-        @!BLOCKS.pop()
+        nqp::pop(@!BLOCKS)
     }
     
     # Gets the top lexpad.
@@ -233,7 +233,7 @@ class NQP::World is HLL::World {
                     # First, go over the code objects. Update the $!do, and the
                     # entry in the SC. Make sure the newly compiled code is marked
                     # as a static code ref.
-                    my $static := %!code_objects_to_fix_up{$subid}.shift();
+                    my $static := nqp::shift(%!code_objects_to_fix_up{$subid});
                     nqp::bindattr($static, %!code_object_types{$subid}, '$!do', @allcodes[$i]);
                     nqp::bindattr($static, %!code_object_types{$subid}, '$!clone_callback', nqp::null());
                     for %!code_objects_to_fix_up{$subid} {
@@ -286,7 +286,7 @@ class NQP::World is HLL::World {
                 %!code_object_fixup_list{$past.cuid()} := $fixups;
                 if self.is_precompilation_mode() {
                     my $cb := sub ($orig, $clone, $code_obj) {
-                        %!code_objects_to_fix_up{$past.cuid()}.push($code_obj);
+                        nqp::push(%!code_objects_to_fix_up{$past.cuid()}, $code_obj);
                         nqp::bindattr($code_obj, $code_type, '$!clone_callback', nqp::null());
                         my $do := nqp::getattr($code_obj, $code_type, '$!do');
                         nqp::markcodestub($do);
@@ -313,7 +313,7 @@ class NQP::World is HLL::World {
                         ));
                             
                         # Add to dynamic compilation fixup list.
-                        %!code_objects_to_fix_up{$past.cuid()}.push($code_obj);
+                        nqp::push(%!code_objects_to_fix_up{$past.cuid()}, $code_obj);
                     };
                     nqp::bindattr($code_obj, $code_type, '$!clone_callback', $cb);
                     nqp::push(@!clearup_tasks, sub () {
@@ -331,7 +331,7 @@ class NQP::World is HLL::World {
         if $have_code_type {
             # Create it now.
             nqp::bindattr($code_obj, $code_type, '$!do', $dummy);
-            nqp::bindattr($code_obj, $code_type, '$!dispatchees', nqp::list())
+            nqp::bindattr($code_obj, $code_type, '$!dispatchees', nqp::qlist())
                 if $is_dispatcher;
             my $slot := self.add_object($code_obj);
 
@@ -487,7 +487,7 @@ class NQP::World is HLL::World {
         my @loadlibs := ['nqp_group', 'nqp_ops', 'nqp_bigint_ops', 'trans_ops', 'io_ops'];
         if %*COMPILING<%?OPTIONS><vmlibs> {
             for nqp::split(',', %*COMPILING<%?OPTIONS><vmlibs>) {
-                @loadlibs.push($_);
+                nqp::push(@loadlibs, $_);
             }
         }
         QAST::VM.new(
@@ -591,7 +591,7 @@ class NQP::World is HLL::World {
                 if +%sym {
                     if nqp::existskey(%sym, 'value') {
                         $result := %sym<value>;
-                        @name.shift();
+                        nqp::shift(@name);
                         $i := 0;
                     }
                     else {

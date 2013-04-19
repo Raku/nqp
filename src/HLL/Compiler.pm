@@ -416,7 +416,7 @@ class HLL::Compiler does HLL::Backend::Default {
 
     method process_args(@args) {
         # First argument is the program name.
-        self.compiler_progname(@args.shift);
+        self.compiler_progname(nqp::shift(@args));
 
         my $p := HLL::CommandLine::Parser.new(@!cmdoptions);
         $p.add-stopper('-e');
@@ -614,7 +614,7 @@ class HLL::Compiler does HLL::Backend::Default {
         my @new_stages := nqp::list_s();
         for @!stages {
             if $_ ne $stagename {
-                @new_stages.push($_);
+                nqp::push(@new_stages, $_);
             }
         }
         @!stages := @new_stages;
@@ -635,7 +635,7 @@ class HLL::Compiler does HLL::Backend::Default {
             self.stages(@new-stages);
             return 1;
         }
-        my @new-stages := nqp::list();
+        my @new-stages := nqp::qlist();
         for self.stages {
             if $_ eq $where {
                 if $position eq 'before' {

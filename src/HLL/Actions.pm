@@ -90,10 +90,10 @@ class HLL::Actions {
             }
         }
         if $key eq 'POSTFIX' {
-            $past.unshift($/[0].ast);
+            nqp::unshift($past, $/[0].ast);
         }
         else {
-            for $/.list { if nqp::defined($_.ast) { $past.push($_.ast); } }
+            for $/.list { if nqp::defined($_.ast) { nqp::push($past, $_.ast); } }
         }
         make $past;
     }
@@ -120,7 +120,7 @@ class HLL::Actions {
                 my @words := HLL::Grammar::split_words($/, $past.value);
                 if +@words != 1 {
                     $past := QAST::Op.new( :op('list'), :node($/) );
-                    for @words { $past.push(QAST::SVal.new( :value($_) )); }
+                    for @words { nqp::push($past, QAST::SVal.new( :value($_) )); }
                 }
                 else {
                     $past := QAST::SVal.new( :value(~@words[0]) );
@@ -146,18 +146,18 @@ class HLL::Actions {
             }
             else {
                 if $lastlit gt '' {
-                    @parts.push(QAST::SVal.new( :value($lastlit) ));
+                    nqp::push(@parts, QAST::SVal.new( :value($lastlit) ));
                 }
-                @parts.push(nqp::istype($ast, QAST::Node)
+                nqp::push(@parts, nqp::istype($ast, QAST::Node)
                     ?? $ast
                     !! QAST::SVal.new( :value($ast) ));
                 $lastlit := '';
             }
         }
-        if $lastlit gt '' { @parts.push(QAST::SVal.new( :value($lastlit) )); }
-        my $past := @parts ?? @parts.shift !! QAST::SVal.new( :value('') );
+        if $lastlit gt '' { nqp::push(@parts, QAST::SVal.new( :value($lastlit) )); }
+        my $past := @parts ?? nqp::shift(@parts) !! QAST::SVal.new( :value('') );
         while @parts {
-            $past := QAST::Op.new( $past, @parts.shift, :op('concat') );
+            $past := QAST::Op.new( $past, nqp::shift(@parts), :op('concat') );
         }
         make $past;
     }

@@ -267,11 +267,11 @@ of the match.
     method panic(*@args) {
         my $pos := self.pos();
         my $target := self.target();
-        @args.push(' at line ');
-        @args.push(HLL::Compiler.lineof($target, $pos) + 1);
-        @args.push(', near "');
-        @args.push(nqp::escape(nqp::substr($target, $pos, 10)));
-        @args.push('"');
+        nqp::push(@args, ' at line ');
+        nqp::push(@args, HLL::Compiler.lineof($target, $pos) + 1);
+        nqp::push(@args, ', near "');
+        nqp::push(@args, nqp::escape(nqp::substr($target, $pos, 10)));
+        nqp::push(@args, '"');
         nqp::die(join('', @args))
     }
     
@@ -551,7 +551,7 @@ An operator precedence parser.
         
         # Give it a fresh capture list, since we'll have assumed it has
         # no positional captures and not taken them.
-        nqp::bindattr($op, NQPCapture, '@!array', nqp::list());
+        nqp::bindattr($op, NQPCapture, '@!array', nqp::qlist());
         my %opOPER      := nqp::atkey($op, 'OPER');
         my %opO         := nqp::atkey(%opOPER, 'O');
         my str $opassoc := ~nqp::atkey(%opO, 'assoc');

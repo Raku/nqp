@@ -378,7 +378,7 @@ my knowhow NQPRegex {
         $!generic_nfa := $nfa.save();
     }
     method ADD_NESTED_CODE($code) {
-        nqp::ifnull(@!nested_codes, @!nested_codes := nqp::list());
+        nqp::ifnull(@!nested_codes, @!nested_codes := nqp::qlist());
         nqp::push(@!nested_codes, $code);
     }
     method CAPS() {
@@ -394,7 +394,7 @@ my knowhow NQPRegex {
         nqp::isnull(%!alt_nfas) ?? nqp::null() !! %!alt_nfas{$name}
     }
     method NESTED_CODES() {
-        nqp::isnull(@!nested_codes) ?? nqp::list() !! @!nested_codes
+        nqp::isnull(@!nested_codes) ?? nqp::qlist() !! @!nested_codes
     }
     method clone() {
         # Clone the underlying VM code ref.

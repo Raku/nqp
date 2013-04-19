@@ -8,7 +8,7 @@ class NQP::Actions is HLL::Actions {
         $block.blocktype('immediate');
         unless $block.symtable() {
             my $stmts := QAST::Stmts.new( :node($block.node) );
-            for $block.list { $stmts.push($_); }
+            for $block.list { nqp::push($stmts, $_); }
             $block := $stmts;
         }
         $block;
@@ -16,7 +16,7 @@ class NQP::Actions is HLL::Actions {
     
     sub default_for($sigil) {
         if $sigil eq '@' {
-            QAST::Op.new( :op('list') )
+            QAST::Op.new( :op('qlist') )
         }
         elsif $sigil eq '%' {
             QAST::Op.new( :op('hash') )
@@ -49,7 +49,7 @@ class NQP::Actions is HLL::Actions {
     sub colonpair_str($ast) {
         if nqp::istype($ast, QAST::Op) {
             my @parts;
-            for $ast.list { @parts.push($_.value) }
+            for $ast.list { nqp::push(@parts, $_.value) }
             join(' ', @parts)
         } else {
             $ast.value
@@ -64,7 +64,7 @@ class NQP::Actions is HLL::Actions {
         # (CTXSAVE is inherited from HLL::Actions.) Don't do this when
         # there was an explicit {YOU_ARE_HERE}.
         unless $*HAS_YOU_ARE_HERE {
-            $unit.push( self.CTXSAVE() );
+            nqp::push($unit,  self.CTXSAVE() );
         }
         
         # Detect if we're the main unit by if we were given any args. If so,
@@ -73,7 +73,7 @@ class NQP::Actions is HLL::Actions {
         # mainline.
         $unit.unshift(QAST::Var.new( :scope('lexical'), :name('@ARGS'), :decl('param'), :slurpy(1) ));
         if $*MAIN_SUB {
-            $mainline.push(QAST::Op.new(
+            nqp::push($mainline, QAST::Op.new(
                 :op('if'),
                 QAST::Var.new( :scope('lexical'), :name('@ARGS') ),
                 QAST::Op.new(
@@ -84,10 +84,10 @@ class NQP::Actions is HLL::Actions {
         }
         
         # Push mainline statements into UNIT.
-        $unit.push($mainline);
+        nqp::push($unit, $mainline);
 
         # Load the needed libraries.
-        $unit.push($*W.libs());
+        nqp::push($unit, $*W.libs());
         
         # Wrap everything in a QAST::CompUnit.
         my $compunit := QAST::CompUnit.new(
@@ -136,11 +136,11 @@ class NQP::Actions is HLL::Actions {
                 $ast := $ast<sink> if nqp::defined($ast<sink>);
                 if $ast<bareblock> { $ast := block_immediate($ast[0]); }
                 $ast := QAST::Stmts.new($ast) if nqp::istype($ast, QAST::Node);
-                $past.push( $ast );
+                nqp::push($past,  $ast );
             }
         }
         else {
-            $past.push(default_for('$'));
+            nqp::push($past, default_for('$'));
         }
         make $past;
     }
@@ -192,11 +192,11 @@ class NQP::Actions is HLL::Actions {
             if %*HANDLERS {
                 $past := QAST::Op.new( :op('handle'), $past );
                 for %*HANDLERS {
-                    $past.push($_.key);
-                    $past.push($_.value);
+                    nqp::push($past, $_.key);
+                    nqp::push($past, $_.value);
                 }
             }
-            $BLOCK.push($past);
+            nqp::push($BLOCK, $past);
             $BLOCK.node($/);
             $BLOCK<handlers> := %*HANDLERS if %*HANDLERS;
             make $BLOCK;
@@ -268,14 +268,14 @@ class NQP::Actions is HLL::Actions {
         my $count := +$<xblock> - 1;
         my $past := xblock_immediate( $<xblock>[$count].ast );
         if $<else> {
-            $past.push( block_immediate( $<else>[0].ast ) );
+            nqp::push($past,  block_immediate( $<else>[0].ast ) );
         }
         # build if/then/elsif structure
         while $count > 0 {
             $count--;
             my $else := $past;
             $past := xblock_immediate( $<xblock>[$count].ast );
-            $past.push($else);
+            nqp::push($past, $else);
         }
         make $past;
     }
@@ -290,7 +290,7 @@ class NQP::Actions is HLL::Actions {
         my $past := xblock_immediate( $<xblock>.ast );
         $past.op(~$<sym>);
         unless $*CONTROL_USED {
-            $past.push(QAST::IVal.new( :value(1), :named('nohandler') ));
+            nqp::push($past, QAST::IVal.new( :value(1), :named('nohandler') ));
         }
         make $past;
     }
@@ -307,7 +307,7 @@ class NQP::Actions is HLL::Actions {
                                    :op($op), :node($/) );
         }
         unless $*CONTROL_USED {
-            $past.push(QAST::IVal.new( :value(1), :named('nohandler') ));
+            nqp::push($past, QAST::IVal.new( :value(1), :named('nohandler') ));
         }
         make $past;
     }
@@ -317,13 +317,13 @@ class NQP::Actions is HLL::Actions {
         $past.op('for');
         my $block := $past[1];
         unless $block.arity {
-            $block[0].push( QAST::Var.new( :name('$_'), :scope('lexical'), :decl('param') ) );
+            nqp::push($block[0], QAST::Var.new( :name('$_'), :scope('lexical'), :decl('param') ) );
             $block.symbol('$_', :scope('lexical') );
             $block.arity(1);
         }
         $block.blocktype('immediate');
         unless $*CONTROL_USED {
-            $past.push(QAST::IVal.new( :value(1), :named('nohandler') ));
+            nqp::push($past, QAST::IVal.new( :value(1), :named('nohandler') ));
         }
         make $past;
     }
@@ -379,7 +379,7 @@ class NQP::Actions is HLL::Actions {
     }
 
     method statement_prefix:sym<INIT>($/) {
-        $*W.cur_lexpad().push($<blorst>.ast);
+        nqp::push($*W.cur_lexpad(), $<blorst>.ast);
         make QAST::Stmts.new();
     }
 
@@ -484,12 +484,12 @@ class NQP::Actions is HLL::Actions {
                         QAST::SVal.new( :value('Contextual ' ~ ~$/ ~ ' not found') )
                     ));
                 $past := QAST::VarWithFallback.new(
-                    :name(~@name.pop), :scope('contextual'),
+                    :name(~nqp::pop(@name)), :scope('contextual'),
                     :fallback($global_fallback)
                 );
             }
             elsif $<twigil>[0] eq '!' {
-                my $name := ~@name.pop;
+                my $name := ~nqp::pop(@name);
                 my $ch;
                 if $*PKGDECL eq 'role' {
                     $ch := QAST::Var.new( :name('$?CLASS'), :scope('lexical') );
@@ -535,7 +535,7 @@ class NQP::Actions is HLL::Actions {
                 $past.fallback( default_for( $<sigil> ) );
             }
             else {
-                my $name := ~@name.pop;
+                my $name := ~nqp::pop(@name);
                 if $*IN_DECL eq 'variable' || $name eq '$_' || $name eq '$/'
                 || $name eq '$!' || $<twigil>[0] eq '?' || $*W.is_lexical($name) {
                     $past := QAST::Var.new( :name($name), :scope('lexical') );
@@ -584,7 +584,7 @@ class NQP::Actions is HLL::Actions {
     method package_def($/) {
         # Get name and meta-object.
         my @ns := nqp::clone($<name><identifier>);
-        my $name := ~@ns.pop;
+        my $name := ~nqp::pop(@ns);
         my $how := %*HOW{$*PKGDECL};
 
         # Get the body code.
@@ -594,7 +594,7 @@ class NQP::Actions is HLL::Actions {
         }
         else {
             $past := $*W.pop_lexpad();
-            $past.push($<statementlist>.ast);
+            nqp::push($past, $<statementlist>.ast);
         }
 
         # Evaluate everything in the package in-line unless this is a generic
@@ -608,11 +608,11 @@ class NQP::Actions is HLL::Actions {
             );
             if $<role_params> {
                 for $<role_params>[0]<variable> {
-                    $params.push($_.ast);
+                    nqp::push($params, $_.ast);
                 }
             }
-            $past.unshift($params);
-            $past.push(QAST::Op.new( :op('curlexpad') ));
+            nqp::unshift($past, $params);
+            nqp::push($past, QAST::Op.new( :op('curlexpad') ));
             $past.symbol('$?CLASS', :scope('lexical'));
             $*W.pkg_set_body_block($*PACKAGE, $past);
             $*W.install_lexical_symbol($past, '$?PACKAGE', $*PACKAGE);
@@ -775,7 +775,7 @@ class NQP::Actions is HLL::Actions {
             else {
                 $default := default_for($sigil);
             }
-            $BLOCK[0].push(QAST::Op.new(
+            nqp::push($BLOCK[0], QAST::Op.new(
                 :op('bind'), :node($/),
                 QAST::Var.new( :name($name), :scope('lexical'), :decl('var'), :returns($type) ),
                 $default
@@ -856,7 +856,7 @@ class NQP::Actions is HLL::Actions {
                     
                     # Ensure we emit the code block.
                     my $BLOCK := $*W.cur_lexpad();
-					$BLOCK[0].push($past);
+                    nqp::push($BLOCK[0], $past);
                 }
                 elsif $*MULTINESS eq 'proto' {
                     # Create a candidate list holder for the dispatchees
@@ -865,7 +865,7 @@ class NQP::Actions is HLL::Actions {
                     if $*SCOPE eq 'our' { nqp::die('our-scoped protos not yet implemented') }
                     my $code := $*W.create_code($past, $name, 1);
                     my $BLOCK := $*W.cur_lexpad();
-					$BLOCK[0].push(QAST::Op.new(
+                    nqp::push($BLOCK[0], QAST::Op.new(
                         :op('bind'),
                         QAST::Var.new( :name('&' ~ $name), :scope('lexical'), :decl('var') ),
                         $past
@@ -874,12 +874,12 @@ class NQP::Actions is HLL::Actions {
                     
                     # Also stash the current lexical dispatcher and capture, for the {*}
                     # to resolve.
-                    $block[0].push(QAST::Op.new(
+                    nqp::push($block[0], QAST::Op.new(
                         :op('bind'),
                         QAST::Var.new( :name('CURRENT_DISPATCH_CAPTURE'), :scope('lexical'), :decl('var') ),
                         QAST::Op.new( :op('savecapture') )
                     ));
-                    $block[0].push(QAST::Op.new(
+                    nqp::push($block[0], QAST::Op.new(
                         :op('bind'),
                         QAST::Var.new( :name('&*CURRENT_DISPATCHER'), :scope('lexical'), :decl('var') ),
                         QAST::Op.new( :op('getcodeobj'), QAST::Op.new( :op('curcode') ) )
@@ -887,7 +887,7 @@ class NQP::Actions is HLL::Actions {
                 }
                 else {
                     my $BLOCK := $*W.cur_lexpad();
-					$BLOCK[0].push(QAST::Op.new(
+                    nqp::push($BLOCK[0], QAST::Op.new(
                         :op('bind'),
                         QAST::Var.new( :name('&' ~ $name), :scope('lexical'), :decl('var') ),
                         $past
@@ -1038,14 +1038,14 @@ class NQP::Actions is HLL::Actions {
     }
 
     sub attach_multi_signature($code_obj, $routine) {
-        my $types := nqp::list();
-        my $definednesses := nqp::list();
+        my $types := nqp::qlist();
+        my $definednesses := nqp::qlist();
         for @($routine[0]) {
             if nqp::istype($_, QAST::Var) && $_.decl eq 'param' && !$_.named {
-                $types.push($_.returns =:= NQPMu
+                nqp::push($types, $_.returns =:= NQPMu
                     ?? nqp::null()
                     !! $_.returns);
-                $definednesses.push($_<definedness> eq 'D' ?? 1 !!
+                nqp::push($definednesses, $_<definedness> eq 'D' ?? 1 !!
                                     $_<definedness> eq 'U' ?? 2 !! 0);
             }
         }
@@ -1435,7 +1435,7 @@ class NQP::Actions is HLL::Actions {
     method circumfix:sym<( )>($/) {
         make $<EXPR>
              ?? $<EXPR>[0].ast
-             !! QAST::Op.new( :op('list'), :node($/) );
+             !! QAST::Op.new( :op('qlist'), :node($/) );
     }
 
     method circumfix:sym<[ ]>($/) {
@@ -1443,11 +1443,11 @@ class NQP::Actions is HLL::Actions {
         if $<EXPR> {
             $past := $<EXPR>[0].ast;
             unless nqp::istype($past, QAST::Op) && $past.name eq '&infix:<,>' {
-                $past := QAST::Op.new( $past, :op('list') );
+                $past := QAST::Op.new( $past, :op('qlist') );
             }
         }
         else {
-            $past := QAST::Op.new( :op('list') );
+            $past := QAST::Op.new( :op('qlist') );
         }
         $past.name('&circumfix:<[ ]>');
         make $past;
@@ -1576,7 +1576,7 @@ class NQP::Actions is HLL::Actions {
         
         # The final lookup will always be just a keyed access to a
         # symbol table.
-        my $final_name := @name.pop();
+        my $final_name := nqp::pop(@name);
         my $lookup := QAST::VarWithFallback.new(
             :scope('associative'),
             QAST::SVal.new( :value(~$final_name) )
@@ -1609,7 +1609,7 @@ class NQP::Actions is HLL::Actions {
             my $path;
             if $*W.is_lexical(@name[0]) {
                 try {
-                    my $first := @name.shift();
+                    my $first := nqp::shift(@name);
                     $path := QAST::WVal.new( :value($*W.find_sym([$first])) );
                     CATCH {
                         $path := QAST::Var.new( :name($first), :scope('lexical') );
@@ -1620,7 +1620,7 @@ class NQP::Actions is HLL::Actions {
                 $path := QAST::WVal.new( :value($*GLOBALish) );
             }
             if @name[0] eq 'GLOBAL' {
-                @name.shift();
+                nqp::shift(@name);
             }
             for @name {
                 my $path_temp := QAST::Node.unique('pkg_lookup_tmp');
@@ -1750,12 +1750,12 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
                                      :node($/), :name($name),
                                      QAST::Node.new( QAST::SVal.new( :value($name) ) ) );
             if $<arglist> {
-                for $<arglist>[0].ast.list { $qast[0].push( $_ ) }
+                for $<arglist>[0].ast.list { nqp::push($qast[0], $_ ) }
             }
             elsif $<nibbler> {
                 $name eq 'after' ??
-                    $qast[0].push(self.qbuildsub(self.flip_ast($<nibbler>[0].ast), :anon(1), :addself(1))) !!
-                    $qast[0].push(self.qbuildsub($<nibbler>[0].ast, :anon(1), :addself(1)));
+                    nqp::push($qast[0], self.qbuildsub(self.flip_ast($<nibbler>[0].ast), :anon(1), :addself(1))) !!
+                    nqp::push($qast[0], self.qbuildsub($<nibbler>[0].ast, :anon(1), :addself(1)));
             }
         }
         make $qast;
@@ -1784,7 +1784,7 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
     method store_regex_alt_nfa($code_obj, $block, $key, @alternatives) {
         my @saved;
         for @alternatives {
-            @saved.push($_.save(:non_empty));
+            nqp::push(@saved, $_.save(:non_empty));
         }
         $code_obj.SET_ALT_NFA($key, @saved);
     }

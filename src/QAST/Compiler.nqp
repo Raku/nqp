@@ -581,7 +581,7 @@ class QAST::Compiler is HLL::Compiler {
         my $blocktype := $node.blocktype;
         if $blocktype eq 'immediate' {
             # Look up and capture the block.
-            try @*INNERS.push($node.cuid());
+            try nqp::push(@*INNERS, $node.cuid());
             my $breg := $*REGALLOC.fresh_p();
             $ops.push_pirop(".const 'Sub' $breg = '" ~ $node.cuid() ~ "'");
             $ops.push_pirop("capture_lex", $breg);
@@ -606,7 +606,7 @@ class QAST::Compiler is HLL::Compiler {
         }
         elsif $blocktype eq 'declaration' || $blocktype eq '' {
             # Get the block and newclosure it.
-            try @*INNERS.push($node.cuid());
+            try nqp::push(@*INNERS, $node.cuid());
             my $breg := $*REGALLOC.fresh_p();
             $ops.push_pirop(".const 'Sub' $breg = '" ~ $node.cuid() ~ "'");
             $ops.push_pirop("capture_lex", $breg);
@@ -666,7 +666,7 @@ class QAST::Compiler is HLL::Compiler {
     
     sub want($node, $type) {
         my @possibles := nqp::clone($node.list);
-        my $best := @possibles.shift;
+        my $best := nqp::shift(possibles);
         for @possibles -> $sel, $ast {
             if nqp::index($sel, $type) >= 0 {
                 $best := $ast;
@@ -1153,7 +1153,7 @@ class QAST::Compiler is HLL::Compiler {
         for @($node) {
             my $post := self.as_post($_);
             $posts.push($post);
-            @results.push($post.result);
+            nqp::push(@results, $post.result);
         }
         [$posts, @results, []]
     }

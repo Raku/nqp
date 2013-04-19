@@ -19,14 +19,14 @@ class QRegex::P5Regex::World is HLL::World {
             
         # Add fixup of the code object and the $!do attribute.
         my $fixups := QAST::Stmt.new();
-        $fixups.push(QAST::Op.new(
+        nqp::push($fixups, QAST::Op.new(
             :op('bindattr'),
             QAST::WVal.new( :value($code_obj) ),
             QAST::WVal.new( :value(NQPRegex) ),
             QAST::SVal.new( :value('$!do') ),
             QAST::BVal.new( :value($past) )
         ));
-        $fixups.push(QAST::Op.new(
+        nqp::push($fixups, QAST::Op.new(
             :op('setcodeobj'),
             QAST::BVal.new( :value($past) ),
             QAST::WVal.new( :value($code_obj) )

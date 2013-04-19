@@ -53,8 +53,8 @@ class HLL::World {
         $!sc              := nqp::createsc($handle);
         $!handle          := $handle;
         %!addr_to_slot    := nqp::hash();
-        @!fixup_tasks     := nqp::list();
-        @!load_dependency_tasks := nqp::list();
+        @!fixup_tasks     := nqp::qlist();
+        @!load_dependency_tasks := nqp::qlist();
         $!precomp_mode    := %*COMPILING<%?OPTIONS><precomp>;
         $!num_code_refs   := 0;
         $!code_ref_blocks := [];
@@ -86,7 +86,7 @@ class HLL::World {
     method add_root_code_ref($code_ref, $past_block) {
         my $code_ref_idx := $!num_code_refs;
         $!num_code_refs := $!num_code_refs + 1;
-        $!code_ref_blocks.push($past_block);
+        nqp::push($!code_ref_blocks, $past_block);
         nqp::scsetcode($!sc, $code_ref_idx, $code_ref);
         $code_ref_idx
     }
@@ -105,10 +105,10 @@ class HLL::World {
     # other fixup.
     method add_load_dependency_task(:$deserialize_past, :$fixup_past) {
         if $!precomp_mode {
-            @!load_dependency_tasks.push($deserialize_past) if $deserialize_past;
+            nqp::push(@!load_dependency_tasks, $deserialize_past) if $deserialize_past;
         }
         else {
-            @!load_dependency_tasks.push($fixup_past) if $fixup_past;
+            nqp::push(@!load_dependency_tasks, $fixup_past) if $fixup_past;
         }
     }
     
@@ -116,10 +116,10 @@ class HLL::World {
     # between compilation and runtime).
     method add_fixup_task(:$deserialize_past, :$fixup_past) {
         if $!precomp_mode {
-            @!fixup_tasks.push($deserialize_past) if $deserialize_past;
+            nqp::push(@!fixup_tasks, $deserialize_past) if $deserialize_past;
         }
         else {
-            @!fixup_tasks.push($fixup_past) if $fixup_past;
+            nqp::push(@!fixup_tasks, $fixup_past) if $fixup_past;
         }
     }
     
