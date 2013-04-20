@@ -5,6 +5,8 @@ PERL   = perl
 PROVE  = prove
 ASM    = 3rdparty/asm/
 
+PREFIX = @prefix@
+
 MKPATH = $(PERL) -MExtUtils::Command -e mkpath
 CP     = $(PERL) -MExtUtils::Command -e cp
 CHMOD  = $(PERL) -MExtUtils::Command -e chmod
@@ -135,6 +137,22 @@ ALL_OUTPUT = $(NQP_MO_CLASS) $(MODULE_LOADER_CLASS) \
 RUNNER = @runner@
 
 all: $(ALL_OUTPUT) $(RUNNER)
+
+install: all
+	$(MKPATH) $(PREFIX)
+	$(CP) 3rdparty/asm/asm-4.1.jar $(PREFIX)
+	$(CP) $(RUNTIME_JAR) $(PREFIX)
+	$(CP) $(NQP_MO_CLASS) $(PREFIX)
+	$(CP) $(MODULE_LOADER_CLASS) $(PREFIX)
+	$(CP) $(CORE_SETTING_CLASS) $(PREFIX)
+	$(CP) $(QASTNODE_CLASS) $(PREFIX)
+	$(CP) $(QREGEX_CLASS) $(PREFIX)
+	$(CP) $(HLL_CLASS) $(PREFIX)
+	$(CP) $(JASTNODES_CLASS) $(PREFIX)
+	$(CP) $(QAST_CLASS) $(PREFIX)
+	$(CP) $(P6QREGEX_CLASS) $(PREFIX)
+	$(CP) $(NQP_CLASS) $(PREFIX)
+	$(PERL) tools/build/install-jvm-runner.pl $(PREFIX)
 
 $(RUNTIME_JAR): $(RUNTIME_JAVAS)
 	$(PERL) -MExtUtils::Command -e mkpath bin
@@ -295,7 +313,7 @@ $(ALL_OUTPUT): $(STAGE2_OUTPUT)
 	$(CP) $(STAGE2)/$(NQP_CLASS) .
 
 $(RUNNER):
-	$(CP) src/vm/jvm/$(RUNNER) .
+	$(CP) src/vm/jvm/runners/$(RUNNER) .
 	$(CHMOD) 755 $(RUNNER)
 
 bootstrap-files: $(STAGE2_OUTPUT)

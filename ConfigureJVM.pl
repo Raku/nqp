@@ -31,7 +31,7 @@ MAIN: {
         exit(0);
     }
 
-    my $prefix      = $options{'prefix'} || cwd().'/install';
+    my $prefix = $options{'prefix'} || cwd().'/install';
 
     # Save options in config.status
     unlink('config.status');
@@ -79,7 +79,8 @@ MAIN: {
     $config{'make'} = $^O eq 'MSWin32' ? 'nmake' : 'make';
     $config{'cpsep'} = $^O eq 'MSWin32' ? ';' : ':';
     $config{'slash'} = $^O eq 'MSWin32' ? '\\' : '/';
-    $config{'runner'} = $^O eq 'MSWin32' ? 'nqp.bat' : 'nqp.sh';
+    $config{'runner'} = $^O eq 'MSWin32' ? 'nqp.bat' : 'nqp';
+    $config{'prefix'} = $prefix;
 
     fill_template_file('tools/build/Makefile-JVM.in', 'Makefile', %config);
     
