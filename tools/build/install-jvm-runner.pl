@@ -26,4 +26,5 @@ else {
     print $fh 'exec java -cp ' . $prefix . ':' . $prefix . '/nqp-runtime.jar:' .
               $prefix . '/asm-4.1.jar nqp "$@"' . "\n";
     close $fh;
+    chmod 0755, $install_to;
 }
