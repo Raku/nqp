@@ -30,26 +30,26 @@ public class VMHash extends REPR {
         return new StorageSpec();
     }
 
-	public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
-		VMHashInstance obj = new VMHashInstance();
+    public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
+        VMHashInstance obj = new VMHashInstance();
         obj.st = st;
         obj.storage = new HashMap<String, SixModelObject>();
         return obj;
-	}
+    }
 
-	public void deserialize_finish(ThreadContext tc, STable st,
-			SerializationReader reader, SixModelObject obj) {
-		HashMap<String, SixModelObject> storage = ((VMHashInstance)obj).storage;
-		int elems = reader.readInt32();
-		for (int i = 0; i < elems; i++) {
-			String key = reader.readStr();
-			SixModelObject value = reader.readRef();
-			storage.put(key, value);
-		}
-	}
-	
+    public void deserialize_finish(ThreadContext tc, STable st,
+            SerializationReader reader, SixModelObject obj) {
+        HashMap<String, SixModelObject> storage = ((VMHashInstance)obj).storage;
+        int elems = reader.readInt32();
+        for (int i = 0; i < elems; i++) {
+            String key = reader.readStr();
+            SixModelObject value = reader.readRef();
+            storage.put(key, value);
+        }
+    }
+    
     public void serialize(ThreadContext tc, SerializationWriter writer, SixModelObject obj) {
-    	HashMap<String, SixModelObject> storage = ((VMHashInstance)obj).storage;
+        HashMap<String, SixModelObject> storage = ((VMHashInstance)obj).storage;
         
         /* Write out element count. */
         writer.writeInt32(storage.size());

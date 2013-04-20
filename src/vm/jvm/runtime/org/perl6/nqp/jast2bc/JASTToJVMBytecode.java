@@ -30,7 +30,7 @@ public class JASTToJVMBytecode {
         try
         {
             BufferedReader in = new BufferedReader(new InputStreamReader(
-            		new FileInputStream(argv[0]), "UTF-8"));
+                    new FileInputStream(argv[0]), "UTF-8"));
             JavaClass c = buildClassFrom(in);
             in.close();
             FileOutputStream fos = new FileOutputStream(argv[1]);
@@ -45,27 +45,27 @@ public class JASTToJVMBytecode {
     }
     
     public static JavaClass buildClassFromString(String in) {
-    	try {
-	    	BufferedReader br = new BufferedReader(new StringReader(in));
-	    	JavaClass c = buildClassFrom(br);
-	    	return c;
-    	}
-    	catch (Exception e) {
-    		throw new RuntimeException(e);
-    	}
+        try {
+            BufferedReader br = new BufferedReader(new StringReader(in));
+            JavaClass c = buildClassFrom(br);
+            return c;
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
     
     public static void writeClassFromString(String in, String filename) {
-    	try {
-	    	BufferedReader br = new BufferedReader(new StringReader(in));
-	    	JavaClass c = buildClassFrom(br);
-	    	FileOutputStream fos = new FileOutputStream(filename);
+        try {
+            BufferedReader br = new BufferedReader(new StringReader(in));
+            JavaClass c = buildClassFrom(br);
+            FileOutputStream fos = new FileOutputStream(filename);
             fos.write(c.bytes);
             fos.close();
-    	}
-    	catch (Exception e) {
-    		throw new RuntimeException(e);
-    	}
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
     
     private static JavaClass buildClassFrom(BufferedReader in) throws Exception
@@ -100,17 +100,17 @@ public class JASTToJVMBytecode {
 
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
         cw.visit(Opcodes.V1_7, Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, className, null, 
-        		superName, null);
+                superName, null);
         
         // Add the fields.
         for (String field : fieldLines) {
             String[] bits = field.split("\\s");
             
             cw.visitField(
-            		bits[2].equals("static")
-            			? Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC
-            			: Opcodes.ACC_PUBLIC, 
-            		bits[0], processType(bits[1]).getDescriptor(), null, null);
+                    bits[2].equals("static")
+                        ? Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC
+                        : Opcodes.ACC_PUBLIC, 
+                    bits[0], processType(bits[1]).getDescriptor(), null, null);
         }
         
         // Process all of the methods.
@@ -124,7 +124,7 @@ public class JASTToJVMBytecode {
         constructor.visitCode();
         constructor.visitVarInsn(Opcodes.ALOAD, 0);
         constructor.visitMethodInsn(Opcodes.INVOKESPECIAL, 
-        		superName, "<init>", "()V");
+                superName, "<init>", "()V");
         constructor.visitInsn(Opcodes.RETURN);
         constructor.visitMaxs(1, 1);
         constructor.visitEnd();
@@ -201,15 +201,15 @@ public class JASTToJVMBytecode {
                 // Create method object.
                 String desc = Type.getMethodDescriptor(processType(returnType), argTypes.toArray(new Type[0]));
                 m = c.visitMethod(
-                		(isStatic
-                			? Opcodes.ACC_STATIC | Opcodes.ACC_PUBLIC
-                			: Opcodes.ACC_PUBLIC), 
-                			methodName, desc, null, null);
+                        (isStatic
+                            ? Opcodes.ACC_STATIC | Opcodes.ACC_PUBLIC
+                            : Opcodes.ACC_PUBLIC), 
+                            methodName, desc, null, null);
                  
                  // Add locals.
                  for (Map.Entry<String, VariableDef> e : localVariables.entrySet()) {
-                	 VariableDef def = e.getValue();
-                	 m.visitLocalVariable(e.getKey(), def.type, null, def.start, def.end, def.index);
+                     VariableDef def = e.getValue();
+                     m.visitLocalVariable(e.getKey(), def.type, null, def.start, def.end, def.index);
                  }
             }
             
@@ -217,7 +217,7 @@ public class JASTToJVMBytecode {
             if (curLine.startsWith(":")) {
                 String labelName = curLine.substring(1);
                 if (!labelMap.containsKey(labelName))
-                	labelMap.put(labelName, new Label());
+                    labelMap.put(labelName, new Label());
                 m.visitLabel(labelMap.get(labelName));
                 continue;
             }
@@ -236,21 +236,21 @@ public class JASTToJVMBytecode {
                     String value = curLine.substring(".push_sc ".length());
                     StringBuilder sb = new StringBuilder(value.length());
                     for (int i = 0; i < value.length(); i++) {
-                    	char ch = value.charAt(i);
-                    	if (ch == '\\') {
-                    		i++;
-                    		switch (value.charAt(i)) {
-                    		case '\\': sb.append('\\'); break;
-                    		case 'n': sb.append('\n'); break;
-                    		case 'r': sb.append('\r'); break;
-                    		case 't': sb.append('\t'); break;
-                    		default:
-                    			new RuntimeException("Invalid string literal");
-                    		}
-                    	}
-                    	else {
-                    		sb.append(ch);
-                    	}
+                        char ch = value.charAt(i);
+                        if (ch == '\\') {
+                            i++;
+                            switch (value.charAt(i)) {
+                            case '\\': sb.append('\\'); break;
+                            case 'n': sb.append('\n'); break;
+                            case 'r': sb.append('\r'); break;
+                            case 't': sb.append('\t'); break;
+                            default:
+                                new RuntimeException("Invalid string literal");
+                            }
+                        }
+                        else {
+                            sb.append(ch);
+                        }
                     }
                     m.visitLdcInsn(sb.toString());
                 }
@@ -264,20 +264,20 @@ public class JASTToJVMBytecode {
                     m.visitLdcInsn(value);
                 }
                 else if (curLine.equals(".try")) {
-                	Label start = new Label();
-                	m.visitLabel(start);
-                	tryStartStack.push(start);
+                    Label start = new Label();
+                    m.visitLabel(start);
+                    tryStartStack.push(start);
                 }
                 else if (curLine.startsWith(".catch ")) {
                     Label afterCatch = new Label();
                     m.visitJumpInsn(Opcodes.GOTO, afterCatch);
                     tryEndStack.push(afterCatch);
                     
-                	String typeName = curLine.substring(".catch ".length());
+                    String typeName = curLine.substring(".catch ".length());
                     if (typeName.equals(""))
-                    	typeName = null;
+                        typeName = null;
                     else
-                    	typeName = typeName.substring(1, typeName.length() - 1); 
+                        typeName = typeName.substring(1, typeName.length() - 1); 
                     Label start = tryStartStack.peek();
                     Label end = new Label();
                     Label handler = new Label();
@@ -286,8 +286,8 @@ public class JASTToJVMBytecode {
                     m.visitTryCatchBlock(start, end, handler, typeName);
                 }
                 else if (curLine.equals(".endtry")) {
-                	tryStartStack.pop();
-                	m.visitLabel(tryEndStack.pop());
+                    tryStartStack.pop();
+                    m.visitLabel(tryEndStack.pop());
                 }
                 else {
                     throw new Exception("Don't understand directive: " + curLine);
@@ -343,72 +343,72 @@ public class JASTToJVMBytecode {
         case 0x17: // fload
         case 0x18: // dload
         case 0x19: // aload
-        	if (localVariables.containsKey(rest))
-        		m.visitVarInsn(instruction, localVariables.get(rest).index);
+            if (localVariables.containsKey(rest))
+                m.visitVarInsn(instruction, localVariables.get(rest).index);
             else if (argIndexes.containsKey(rest))
-            	m.visitVarInsn(instruction, argIndexes.get(rest));
+                m.visitVarInsn(instruction, argIndexes.get(rest));
             else
-            	throw new Exception("Undeclared local variable: " + rest);
+                throw new Exception("Undeclared local variable: " + rest);
             break;
         case 0x1a: // iload_0
-        	m.visitVarInsn(Opcodes.ILOAD, 0);
+            m.visitVarInsn(Opcodes.ILOAD, 0);
             break;
         case 0x1b: // iload_1
-        	m.visitVarInsn(Opcodes.ILOAD, 1);
+            m.visitVarInsn(Opcodes.ILOAD, 1);
             break;
         case 0x1c: // iload_2
-        	m.visitVarInsn(Opcodes.ILOAD, 2);
+            m.visitVarInsn(Opcodes.ILOAD, 2);
             break;
         case 0x1d: // iload_3
-        	m.visitVarInsn(Opcodes.ILOAD, 3);
+            m.visitVarInsn(Opcodes.ILOAD, 3);
             break;
         case 0x1e: // lload_0
-        	m.visitVarInsn(Opcodes.LLOAD, 0);
+            m.visitVarInsn(Opcodes.LLOAD, 0);
             break;
         case 0x1f: // lload_1
-        	m.visitVarInsn(Opcodes.LLOAD, 1);
+            m.visitVarInsn(Opcodes.LLOAD, 1);
             break;
         case 0x20: // lload_2
-        	m.visitVarInsn(Opcodes.LLOAD, 2);
+            m.visitVarInsn(Opcodes.LLOAD, 2);
             break;
         case 0x21: // lload_3
-        	m.visitVarInsn(Opcodes.LLOAD, 3);
+            m.visitVarInsn(Opcodes.LLOAD, 3);
             break;
         case 0x22: // fload_0
-        	m.visitVarInsn(Opcodes.FLOAD, 0);
+            m.visitVarInsn(Opcodes.FLOAD, 0);
             break;
         case 0x23: // fload_1
-        	m.visitVarInsn(Opcodes.FLOAD, 1);
+            m.visitVarInsn(Opcodes.FLOAD, 1);
             break;
         case 0x24: // fload_2
-        	m.visitVarInsn(Opcodes.FLOAD, 2);
+            m.visitVarInsn(Opcodes.FLOAD, 2);
             break;
         case 0x25: // fload_3
-        	m.visitVarInsn(Opcodes.FLOAD, 3);
+            m.visitVarInsn(Opcodes.FLOAD, 3);
             break;
         case 0x26: // dload_0
-        	m.visitVarInsn(Opcodes.DLOAD, 0);
+            m.visitVarInsn(Opcodes.DLOAD, 0);
             break;
         case 0x27: // dload_1
-        	m.visitVarInsn(Opcodes.DLOAD, 1);
+            m.visitVarInsn(Opcodes.DLOAD, 1);
             break;
         case 0x28: // dload_2
-        	m.visitVarInsn(Opcodes.DLOAD, 2);
+            m.visitVarInsn(Opcodes.DLOAD, 2);
             break;
         case 0x29: // dload_3
-        	m.visitVarInsn(Opcodes.DLOAD, 3);
+            m.visitVarInsn(Opcodes.DLOAD, 3);
             break;
         case 0x2a: // aload_0
-        	m.visitVarInsn(Opcodes.ALOAD, 0);
+            m.visitVarInsn(Opcodes.ALOAD, 0);
             break;
         case 0x2b: // aload_1
-        	m.visitVarInsn(Opcodes.ALOAD, 1);
+            m.visitVarInsn(Opcodes.ALOAD, 1);
             break;
         case 0x2c: // aload_2
-        	m.visitVarInsn(Opcodes.ALOAD, 2);
+            m.visitVarInsn(Opcodes.ALOAD, 2);
             break;
         case 0x2d: // aload_3
-        	m.visitVarInsn(Opcodes.ALOAD, 3);
+            m.visitVarInsn(Opcodes.ALOAD, 3);
             break;
         case 0x2e: // iaload
         case 0x2f: // laload
@@ -425,72 +425,72 @@ public class JASTToJVMBytecode {
         case 0x38: // fstore
         case 0x39: // dstore
         case 0x3a: // astore
-        	if (localVariables.containsKey(rest))
-        		m.visitVarInsn(instruction, localVariables.get(rest).index);
+            if (localVariables.containsKey(rest))
+                m.visitVarInsn(instruction, localVariables.get(rest).index);
             else if (argIndexes.containsKey(rest))
-            	m.visitVarInsn(instruction, argIndexes.get(rest));
+                m.visitVarInsn(instruction, argIndexes.get(rest));
             else
-            	throw new Exception("Undeclared local variable: " + rest);
+                throw new Exception("Undeclared local variable: " + rest);
             break;
         case 0x3b: // istore_0
-        	m.visitVarInsn(Opcodes.ISTORE, 0);
+            m.visitVarInsn(Opcodes.ISTORE, 0);
             break;
         case 0x3c: // istore_1
-        	m.visitVarInsn(Opcodes.ISTORE, 1);
+            m.visitVarInsn(Opcodes.ISTORE, 1);
             break;
         case 0x3d: // istore_2
-        	m.visitVarInsn(Opcodes.ISTORE, 2);
+            m.visitVarInsn(Opcodes.ISTORE, 2);
             break;
         case 0x3e: // istore_3
-        	m.visitVarInsn(Opcodes.ISTORE, 3);
+            m.visitVarInsn(Opcodes.ISTORE, 3);
             break;
         case 0x3f: // lstore_0
-        	m.visitVarInsn(Opcodes.LSTORE, 0);
+            m.visitVarInsn(Opcodes.LSTORE, 0);
             break;
         case 0x40: // lstore_1
-        	m.visitVarInsn(Opcodes.LSTORE, 1);
+            m.visitVarInsn(Opcodes.LSTORE, 1);
             break;
         case 0x41: // lstore_2
-        	m.visitVarInsn(Opcodes.LSTORE, 2);
+            m.visitVarInsn(Opcodes.LSTORE, 2);
             break;
         case 0x42: // lstore_3
-        	m.visitVarInsn(Opcodes.LSTORE, 3);
+            m.visitVarInsn(Opcodes.LSTORE, 3);
             break;
         case 0x43: // fstore_0
-        	m.visitVarInsn(Opcodes.FSTORE, 0);
+            m.visitVarInsn(Opcodes.FSTORE, 0);
             break;
         case 0x44: // fstore_1
-        	m.visitVarInsn(Opcodes.FSTORE, 1);
+            m.visitVarInsn(Opcodes.FSTORE, 1);
             break;
         case 0x45: // fstore_2
-        	m.visitVarInsn(Opcodes.FSTORE, 2);
+            m.visitVarInsn(Opcodes.FSTORE, 2);
             break;
         case 0x46: // fstore_3
-        	m.visitVarInsn(Opcodes.FSTORE, 3);
+            m.visitVarInsn(Opcodes.FSTORE, 3);
             break;
         case 0x47: // dstore_0
-        	m.visitVarInsn(Opcodes.DSTORE, 0);
+            m.visitVarInsn(Opcodes.DSTORE, 0);
             break;
         case 0x48: // dstore_1
-        	m.visitVarInsn(Opcodes.DSTORE, 1);
+            m.visitVarInsn(Opcodes.DSTORE, 1);
             break;
         case 0x49: // dstore_2
-        	m.visitVarInsn(Opcodes.DSTORE, 2);
+            m.visitVarInsn(Opcodes.DSTORE, 2);
             break;
         case 0x4a: // dstore_3
-        	m.visitVarInsn(Opcodes.DSTORE, 3);
+            m.visitVarInsn(Opcodes.DSTORE, 3);
             break;
         case 0x4b: // astore_0
-        	m.visitVarInsn(Opcodes.DSTORE, 0);
+            m.visitVarInsn(Opcodes.DSTORE, 0);
             break;
         case 0x4c: // astore_1
-        	m.visitVarInsn(Opcodes.DSTORE, 1);
+            m.visitVarInsn(Opcodes.DSTORE, 1);
             break;
         case 0x4d: // astore_2
-        	m.visitVarInsn(Opcodes.DSTORE, 2);
+            m.visitVarInsn(Opcodes.DSTORE, 2);
             break;
         case 0x4e: // astore_3
-        	m.visitVarInsn(Opcodes.DSTORE, 3);
+            m.visitVarInsn(Opcodes.DSTORE, 3);
             break;
         case 0x4f: // iastore
         case 0x50: // lastore
@@ -565,7 +565,7 @@ public class JASTToJVMBytecode {
         case 0x96: // fcmpg
         case 0x97: // dcmpl
         case 0x98: // dcmpg
-        	m.visitInsn(instruction);
+            m.visitInsn(instruction);
             break;
         case 0x99: // ifeq
         case 0x9a: // ifne
@@ -585,7 +585,7 @@ public class JASTToJVMBytecode {
             emitBranchInstruction(m, labelMap, rest, instruction);
             break;
         case 0xaa: // tableswitch
-        	emitTableSwitchInstruction(m, labelMap, rest);
+            emitTableSwitchInstruction(m, labelMap, rest);
             break;
         case 0xac: // ireturn
         case 0xad: // lreturn
@@ -593,7 +593,7 @@ public class JASTToJVMBytecode {
         case 0xaf: // dreturn
         case 0xb0: // areturn
         case 0xb1: // return
-        	m.visitInsn(instruction);
+            m.visitInsn(instruction);
             break;
         case 0xb2: // getstatic
         case 0xb3: // putstatic
@@ -607,38 +607,38 @@ public class JASTToJVMBytecode {
             emitCall(m, rest, instruction);
             break;
         case 0xba:
-        	emitInvokeDynamic(m, rest);
-        	break;
+            emitInvokeDynamic(m, rest);
+            break;
         case 0xbb: // new
             Type t = processType(rest);
-        	m.visitTypeInsn(instruction, t.getInternalName());
+            m.visitTypeInsn(instruction, t.getInternalName());
             break;
         case 0xbc: // newarray
-        	int type;
-        	if (rest.equals("Integer"))
-        		type = Opcodes.T_INT;
-        	else if (rest.equals("Long"))
-        		type = Opcodes.T_LONG;
-        	else if (rest.equals("Double"))
-        		type = Opcodes.T_DOUBLE;
-        	else if (rest.equals("Boolean"))
-        		type = Opcodes.T_BOOLEAN;
-        	else if (rest.equals("J") || rest.equals("Long"))
-        		type = Opcodes.T_LONG;
-        	else if (rest.equals("Byte"))
-        		type = Opcodes.T_BYTE;
-        	else 
-        		throw new RuntimeException("Unknown native array type");
-        	m.visitIntInsn(Opcodes.NEWARRAY, type);
-        	break;
+            int type;
+            if (rest.equals("Integer"))
+                type = Opcodes.T_INT;
+            else if (rest.equals("Long"))
+                type = Opcodes.T_LONG;
+            else if (rest.equals("Double"))
+                type = Opcodes.T_DOUBLE;
+            else if (rest.equals("Boolean"))
+                type = Opcodes.T_BOOLEAN;
+            else if (rest.equals("J") || rest.equals("Long"))
+                type = Opcodes.T_LONG;
+            else if (rest.equals("Byte"))
+                type = Opcodes.T_BYTE;
+            else 
+                throw new RuntimeException("Unknown native array type");
+            m.visitIntInsn(Opcodes.NEWARRAY, type);
+            break;
         case 0xbd: // anewarray
-        	m.visitTypeInsn(Opcodes.ANEWARRAY, processType(rest).getInternalName());
+            m.visitTypeInsn(Opcodes.ANEWARRAY, processType(rest).getInternalName());
             break;
         case 0xbe: // arraylength
-        	m.visitInsn(Opcodes.ARRAYLENGTH);
+            m.visitInsn(Opcodes.ARRAYLENGTH);
             break;
         case 0xbf: // athrow
-        	m.visitInsn(Opcodes.ATHROW);
+            m.visitInsn(Opcodes.ATHROW);
             break;
         case 0xc6: // ifnull
         case 0xc7: // ifnonnull
@@ -668,15 +668,15 @@ public class JASTToJVMBytecode {
         for (int i = 3; i < bits.length; i++)
             argumentTypes[i - 3] = processType(bits[i]);
         m.visitMethodInsn(callType, targetType.getInternalName(), methodName, 
-        		Type.getMethodDescriptor(returnType, argumentTypes));
+                Type.getMethodDescriptor(returnType, argumentTypes));
     }
 
     private static void emitInvokeDynamic(MethodVisitor m, String callSpec) {
         String[] bits = callSpec.split("\\s");
         if (bits.length != 4)
-        	throw new RuntimeException("invokedynamic needs 4 arguments");
+            throw new RuntimeException("invokedynamic needs 4 arguments");
         MethodType bsmMT = MethodType.methodType(CallSite.class, MethodHandles.Lookup.class,
-        		java.lang.String.class, MethodType.class);
+                java.lang.String.class, MethodType.class);
         Handle bsmHandle = new Handle(Opcodes.H_INVOKESTATIC, bits[2], bits[3], bsmMT.toMethodDescriptorString());
         m.visitInvokeDynamicInsn(bits[0], bits[1], bsmHandle);
     }
@@ -684,29 +684,29 @@ public class JASTToJVMBytecode {
     private static void emitBranchInstruction(MethodVisitor m,
             Map<String, Label> labelFixups,
             String label, int icode) {
-    	
+        
         if (!labelFixups.containsKey(label))
             labelFixups.put(label, new Label());
         m.visitJumpInsn(icode, labelFixups.get(label));
     }
     
     private static void emitTableSwitchInstruction(MethodVisitor m, Map<String, Label> labelMap, String rest) {
-    	String[] labelKeys = rest.split("\\s");
-    	Label[] labels = new Label[labelKeys.length - 1];
-    	Label defaultLabel = null;
-    	
-    	for (int i = 0; i < labelKeys.length; i++) {
-    		String key = labelKeys[i];
-    		if (!labelMap.containsKey(key)) {
-    			labelMap.put(key, new Label());
-    		}
-    		if (i == 0) {
-    			defaultLabel = labelMap.get(key);
-    		} else {
-    			labels[i - 1] = labelMap.get(key);
-    		}
-    	}
-    	m.visitTableSwitchInsn(0, labels.length - 1, defaultLabel, labels);
+        String[] labelKeys = rest.split("\\s");
+        Label[] labels = new Label[labelKeys.length - 1];
+        Label defaultLabel = null;
+        
+        for (int i = 0; i < labelKeys.length; i++) {
+            String key = labelKeys[i];
+            if (!labelMap.containsKey(key)) {
+                labelMap.put(key, new Label());
+            }
+            if (i == 0) {
+                defaultLabel = labelMap.get(key);
+            } else {
+                labels[i - 1] = labelMap.get(key);
+            }
+        }
+        m.visitTableSwitchInsn(0, labels.length - 1, defaultLabel, labels);
     }
 
     private static void finishMethod(MethodVisitor m) throws Exception {        
@@ -728,16 +728,16 @@ public class JASTToJVMBytecode {
     }
     
     static class VariableDef {
-    	public VariableDef(int i, String t) {
-    		index = i;
-    		type = t;
-    		start = new Label();
-    		end = new Label();
-    	}
-    	
-    	public final int index;
-    	public final String type;
-    	public final Label start;
-    	public final Label end;
+        public VariableDef(int i, String t) {
+            index = i;
+            type = t;
+            start = new Label();
+            end = new Label();
+        }
+        
+        public final int index;
+        public final String type;
+        public final Label start;
+        public final Label end;
     }
 }

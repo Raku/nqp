@@ -33,14 +33,14 @@ public class VMHashInstance extends SixModelObject {
     }
     
     @SuppressWarnings("unchecked")
-	public SixModelObject clone(ThreadContext tc) {
-    	try {
-    		VMHashInstance copy = (VMHashInstance)this.clone();
-    		copy.sc = null;
-    		copy.storage = (HashMap<String, SixModelObject>)storage.clone();
-    		return copy;
-    	} catch (CloneNotSupportedException e) {
-			throw new RuntimeException(e);
-		}
+    public SixModelObject clone(ThreadContext tc) {
+        try {
+            VMHashInstance copy = (VMHashInstance)this.clone();
+            copy.sc = null;
+            copy.storage = (HashMap<String, SixModelObject>)storage.clone();
+            return copy;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

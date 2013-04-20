@@ -116,7 +116,7 @@ public class StaticCodeInfo implements Cloneable {
      * Initializes the static code info data structure.
      */
     public StaticCodeInfo(CompilationUnit compUnit, MethodHandle mh,
-    		String name, String uniqueId,
+            String name, String uniqueId,
             String[] oLexicalNames, String[] iLexicalNames,
             String[] nLexicalNames, String[] sLexicalNames,
             long[][] handlers, SixModelObject staticCode) {
@@ -131,18 +131,18 @@ public class StaticCodeInfo implements Cloneable {
         this.handlers = handlers;
         this.staticCode = staticCode;
         if (oLexicalNames != null)
-        	this.oLexStatic = new SixModelObject[oLexicalNames.length];
+            this.oLexStatic = new SixModelObject[oLexicalNames.length];
     }
     
     public StaticCodeInfo clone() {
-    	try {
-    		StaticCodeInfo result = (StaticCodeInfo)super.clone();
-    		if (result.oLexStatic != null)
-    			result.oLexStatic = result.oLexStatic.clone();
-    		return result;
-    	}
-    	catch (Exception e) {
-    		throw new RuntimeException(e);
-    	}
+        try {
+            StaticCodeInfo result = (StaticCodeInfo)super.clone();
+            if (result.oLexStatic != null)
+                result.oLexStatic = result.oLexStatic.clone();
+            return result;
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

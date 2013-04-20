@@ -87,8 +87,8 @@ public class ThreadContext {
         this.unwinder = new UnwindException();
         this.handlers = new ArrayList<HandlerInfo>();
         if (gc.CallCapture != null) {
-        	savedCC = (CallCaptureInstance)gc.CallCapture.st.REPR.allocate(this, gc.CallCapture.st);
-        	savedCC.initialize(this);
+            savedCC = (CallCaptureInstance)gc.CallCapture.st.REPR.allocate(this, gc.CallCapture.st);
+            savedCC.initialize(this);
         }
     }
 }

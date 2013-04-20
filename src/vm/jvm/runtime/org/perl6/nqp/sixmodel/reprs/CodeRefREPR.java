@@ -9,24 +9,24 @@ import org.perl6.nqp.sixmodel.SixModelObject;
 import org.perl6.nqp.sixmodel.TypeObject;
 
 public class CodeRefREPR extends REPR {
-	public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
-		STable st = new STable(this, HOW);
+    public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
+        STable st = new STable(this, HOW);
         SixModelObject obj = new TypeObject();
         obj.st = st;
         st.WHAT = obj;
         return st.WHAT;
-	}
+    }
 
-	public SixModelObject allocate(ThreadContext tc, STable st) {
-		throw ExceptionHandling.dieInternal(tc, "CodeRef cannot be allocated directly");
-	}
+    public SixModelObject allocate(ThreadContext tc, STable st) {
+        throw ExceptionHandling.dieInternal(tc, "CodeRef cannot be allocated directly");
+    }
 
-	public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
-		throw ExceptionHandling.dieInternal(tc, "CodeRef does not participate in serialization");
-	}
+    public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
+        throw ExceptionHandling.dieInternal(tc, "CodeRef does not participate in serialization");
+    }
 
-	public void deserialize_finish(ThreadContext tc, STable st,
-			SerializationReader reader, SixModelObject obj) {
-		throw ExceptionHandling.dieInternal(tc, "CodeRef does not participate in serialization");
-	}
+    public void deserialize_finish(ThreadContext tc, STable st,
+            SerializationReader reader, SixModelObject obj) {
+        throw ExceptionHandling.dieInternal(tc, "CodeRef does not participate in serialization");
+    }
 }

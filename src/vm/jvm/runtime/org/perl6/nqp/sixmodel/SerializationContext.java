@@ -9,7 +9,7 @@ import org.perl6.nqp.runtime.CodeRef;
  * within a serialization boundary.
  */
 public class SerializationContext {
-	/* The handle of this SC. */
+    /* The handle of this SC. */
     public String handle;
     
     /* Description (probably the file name) if any. */
@@ -30,12 +30,12 @@ public class SerializationContext {
     public ArrayList<Integer> rep_indexes;
     public ArrayList<SerializationContext> rep_scs;
     
-	public SerializationContext(String handle) {
-		this.handle = handle;
-		this.root_objects = new ArrayList<SixModelObject>();
-		this.root_stables = new ArrayList<STable>();
-		this.root_codes = new ArrayList<CodeRef>();
-		this.rep_indexes = new ArrayList<Integer>();
-		this.rep_scs = new ArrayList<SerializationContext>();
-	}
+    public SerializationContext(String handle) {
+        this.handle = handle;
+        this.root_objects = new ArrayList<SixModelObject>();
+        this.root_stables = new ArrayList<STable>();
+        this.root_codes = new ArrayList<CodeRef>();
+        this.rep_indexes = new ArrayList<Integer>();
+        this.rep_scs = new ArrayList<SerializationContext>();
+    }
 }

@@ -5,25 +5,25 @@ import org.perl6.nqp.sixmodel.SixModelObject;
 
 public class P6OpaqueDelegateInstance extends P6OpaqueBaseInstance {
     public void initialize(ThreadContext tc) {
-    	delegate.initialize(tc);
+        delegate.initialize(tc);
     }
     public SixModelObject get_attribute_boxed(ThreadContext tc, SixModelObject class_handle,
-    		String name, long hint) {
-    	return delegate.get_attribute_boxed(tc, class_handle, name, hint);
+            String name, long hint) {
+        return delegate.get_attribute_boxed(tc, class_handle, name, hint);
     }
     public void get_attribute_native(ThreadContext tc, SixModelObject class_handle, String name, long hint) {
-    	delegate.get_attribute_native(tc, class_handle, name, hint);
+        delegate.get_attribute_native(tc, class_handle, name, hint);
     }
     public void bind_attribute_boxed(ThreadContext tc,SixModelObject class_handle,
-    		String name, long hint, SixModelObject value) {
-    	delegate.bind_attribute_boxed(tc, class_handle, name, hint, value);
+            String name, long hint, SixModelObject value) {
+        delegate.bind_attribute_boxed(tc, class_handle, name, hint, value);
     }
     public void bind_attribute_native(ThreadContext tc,SixModelObject class_handle, String name, long hint) {
-    	delegate.bind_attribute_native(tc, class_handle, name, hint);
+        delegate.bind_attribute_native(tc, class_handle, name, hint);
     }
     public long is_attribute_initialized(ThreadContext tc, SixModelObject class_handle,
-    		String name, long hint) {
-    	return delegate.is_attribute_initialized(tc, class_handle, name, hint);
+            String name, long hint) {
+        return delegate.is_attribute_initialized(tc, class_handle, name, hint);
     }
     public void set_int(ThreadContext tc, long value) {
         delegate.set_int(tc, value);

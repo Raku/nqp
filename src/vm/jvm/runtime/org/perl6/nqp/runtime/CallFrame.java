@@ -79,13 +79,13 @@ public class CallFrame {
     
     // Normal constructor.
     public CallFrame(ThreadContext tc, CodeRef cr) {
-    	this.tc = tc;
-    	this.codeRef = cr;
-    	this.caller = tc.curFrame;
-    	
-    	// Set outer; if it's explicitly in the code ref, use that. If not,
+        this.tc = tc;
+        this.codeRef = cr;
+        this.caller = tc.curFrame;
+        
+        // Set outer; if it's explicitly in the code ref, use that. If not,
         // go hunting for one. Fall back to outer's prior invocation.
-    	StaticCodeInfo sci = cr.staticInfo;
+        StaticCodeInfo sci = cr.staticInfo;
         if (cr.outer != null) {
             this.outer = cr.outer;
         }
@@ -95,14 +95,14 @@ public class CallFrame {
                 CallFrame checkFrame = tc.curFrame;
                 while (checkFrame != null) {
                     if (checkFrame.codeRef.staticInfo.mh == wanted.mh &&
-                    		checkFrame.codeRef.staticInfo.compUnit == wanted.compUnit) {
+                            checkFrame.codeRef.staticInfo.compUnit == wanted.compUnit) {
                         this.outer = checkFrame;
                         break;
                     }
                     checkFrame = checkFrame.caller;
                 }
                 if (this.outer == null)
-                	this.outer = wanted.priorInvocation;
+                    this.outer = wanted.priorInvocation;
                 if (this.outer == null)
                     throw ExceptionHandling.dieInternal(tc, "Could not locate an outer for code reference " +
                         cr.staticInfo.uniqueId);
@@ -125,7 +125,7 @@ public class CallFrame {
     
     // Does work needed to leave this callframe.
     public void leave() {
-    	this.codeRef.staticInfo.priorInvocation = this;
-    	this.tc.curFrame = this.caller;
+        this.codeRef.staticInfo.priorInvocation = this;
+        this.tc.curFrame = this.caller;
     }
 }

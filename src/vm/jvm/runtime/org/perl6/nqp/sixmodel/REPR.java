@@ -43,7 +43,7 @@ public abstract class REPR {
      * Gets attribute access hint for the representation.
      */
     public long hint_for(ThreadContext tc, STable st, SixModelObject class_handle, String name) {
-    	return STable.NO_HINT;
+        return STable.NO_HINT;
     }
     
     /**
@@ -78,7 +78,7 @@ public abstract class REPR {
      * Object serialization. Writes the objects body out using the passed
      * serialization writer. */
     public void serialize(ThreadContext tc, SerializationWriter writer, SixModelObject obj) {
-    	throw ExceptionHandling.dieInternal(tc, "Missing serialize function for REPR");
+        throw ExceptionHandling.dieInternal(tc, "Missing serialize function for REPR");
     }
     
     /**
@@ -124,12 +124,12 @@ public abstract class REPR {
         throw ExceptionHandling.dieInternal(tc, "This representation does not support being a box target");        
     }
     public void serialize_inlined(ThreadContext tc, STable st, SerializationWriter writer, 
-    		String prefix, SixModelObject obj) {
-    	throw ExceptionHandling.dieInternal(tc, "This representation cannot serialize an inlined representation of itself");
+            String prefix, SixModelObject obj) {
+        throw ExceptionHandling.dieInternal(tc, "This representation cannot serialize an inlined representation of itself");
     }
     public void deserialize_inlined(ThreadContext tc, STable st, SerializationReader reader, 
-    		String prefix, SixModelObject obj) {
-    	throw ExceptionHandling.dieInternal(tc, "This representation cannot deserialize an inlined representation of itself");
+            String prefix, SixModelObject obj) {
+        throw ExceptionHandling.dieInternal(tc, "This representation cannot deserialize an inlined representation of itself");
     }
 }
 

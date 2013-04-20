@@ -16,7 +16,7 @@ public class VMArrayInstance_s extends SixModelObject {
                 throw ExceptionHandling.dieInternal(tc, "VMArray: Index out of bounds");
         }
         else if (index >= elems) {
-        	tc.native_type = ThreadContext.NATIVE_STR;
+            tc.native_type = ThreadContext.NATIVE_STR;
             tc.native_s = null;
             return;
         }
@@ -238,7 +238,7 @@ public class VMArrayInstance_s extends SixModelObject {
             int i;
             int from_pos = (int)(start + offset);
             for (i = 0; i < elems1; i++) {
-            	from.at_pos_native(tc, i);
+                from.at_pos_native(tc, i);
                 slots[from_pos + i] = tc.native_s;
             }
         }
@@ -256,14 +256,14 @@ public class VMArrayInstance_s extends SixModelObject {
     }
     
     public SixModelObject clone(ThreadContext tc) {
-		try {
-			VMArrayInstance_s clone = (VMArrayInstance_s)this.clone();
-			clone.sc = null;
-			if (clone.slots != null)
-				clone.slots = this.slots.clone();
-			return clone;
-		} catch (CloneNotSupportedException e) {
-			throw new RuntimeException(e);
-		}
+        try {
+            VMArrayInstance_s clone = (VMArrayInstance_s)this.clone();
+            clone.sc = null;
+            if (clone.slots != null)
+                clone.slots = this.slots.clone();
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

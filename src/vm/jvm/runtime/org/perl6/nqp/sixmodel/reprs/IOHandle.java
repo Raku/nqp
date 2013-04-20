@@ -9,26 +9,26 @@ import org.perl6.nqp.sixmodel.SixModelObject;
 import org.perl6.nqp.sixmodel.TypeObject;
 
 public class IOHandle extends REPR {
-	public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
-		STable st = new STable(this, HOW);
+    public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
+        STable st = new STable(this, HOW);
         SixModelObject obj = new TypeObject();
         obj.st = st;
         st.WHAT = obj;
         return st.WHAT;
-	}
+    }
 
-	public SixModelObject allocate(ThreadContext tc, STable st) {
-		IOHandleInstance obj = new IOHandleInstance();
+    public SixModelObject allocate(ThreadContext tc, STable st) {
+        IOHandleInstance obj = new IOHandleInstance();
         obj.st = st;
         return obj;
-	}
+    }
 
-	public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
-		throw ExceptionHandling.dieInternal(tc, "Cannot deserialize an IO handle");
-	}
+    public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
+        throw ExceptionHandling.dieInternal(tc, "Cannot deserialize an IO handle");
+    }
 
-	public void deserialize_finish(ThreadContext tc, STable st,
-			SerializationReader reader, SixModelObject obj) {
-		throw ExceptionHandling.dieInternal(tc, "Cannot deserialize an IO handle");
-	}
+    public void deserialize_finish(ThreadContext tc, STable st,
+            SerializationReader reader, SixModelObject obj) {
+        throw ExceptionHandling.dieInternal(tc, "Cannot deserialize an IO handle");
+    }
 }

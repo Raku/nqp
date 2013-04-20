@@ -28,12 +28,12 @@ public class VMIter extends REPR {
         return new StorageSpec();
     }
 
-	public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
-		throw ExceptionHandling.dieInternal(tc, "VMIter does not participate in serialization");
-	}
+    public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
+        throw ExceptionHandling.dieInternal(tc, "VMIter does not participate in serialization");
+    }
 
-	public void deserialize_finish(ThreadContext tc, STable st,
-			SerializationReader reader, SixModelObject obj) {
-		throw ExceptionHandling.dieInternal(tc, "VMIter does not participate in serialization");
-	}
+    public void deserialize_finish(ThreadContext tc, STable st,
+            SerializationReader reader, SixModelObject obj) {
+        throw ExceptionHandling.dieInternal(tc, "VMIter does not participate in serialization");
+    }
 }

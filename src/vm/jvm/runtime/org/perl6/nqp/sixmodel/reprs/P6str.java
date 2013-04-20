@@ -38,12 +38,12 @@ public class P6str extends REPR {
     }
     
     public void inlineStorage(ThreadContext tc, STable st, ClassWriter cw, String prefix) {
-    	cw.visitField(Opcodes.ACC_PUBLIC, prefix, "Ljava/lang/String;", null, null);
+        cw.visitField(Opcodes.ACC_PUBLIC, prefix, "Ljava/lang/String;", null, null);
     }
     
     public void inlineBind(ThreadContext tc, STable st, MethodVisitor mv, String className, String prefix) {
         mv.visitVarInsn(Opcodes.ALOAD, 1);
-    	mv.visitInsn(Opcodes.ICONST_0 + ThreadContext.NATIVE_STR);
+        mv.visitInsn(Opcodes.ICONST_0 + ThreadContext.NATIVE_STR);
         mv.visitFieldInsn(Opcodes.PUTFIELD, "org/perl6/nqp/runtime/ThreadContext", "native_type", "I");
         mv.visitVarInsn(Opcodes.ALOAD, 0);
         mv.visitVarInsn(Opcodes.ALOAD, 1);
@@ -55,61 +55,61 @@ public class P6str extends REPR {
     public void inlineGet(ThreadContext tc, STable st, MethodVisitor mv, String className, String prefix) {
         mv.visitVarInsn(Opcodes.ALOAD, 1);
         mv.visitInsn(Opcodes.DUP);
-    	mv.visitInsn(Opcodes.ICONST_0 + ThreadContext.NATIVE_STR);
+        mv.visitInsn(Opcodes.ICONST_0 + ThreadContext.NATIVE_STR);
         mv.visitFieldInsn(Opcodes.PUTFIELD, "org/perl6/nqp/runtime/ThreadContext", "native_type", "I");
         mv.visitVarInsn(Opcodes.ALOAD, 0);
         mv.visitFieldInsn(Opcodes.GETFIELD, className, prefix, "Ljava/lang/String;");
         mv.visitFieldInsn(Opcodes.PUTFIELD, "org/perl6/nqp/runtime/ThreadContext", "native_s", "Ljava/lang/String;");
-        mv.visitInsn(Opcodes.RETURN);    	
+        mv.visitInsn(Opcodes.RETURN);        
     }
     
     public void generateBoxingMethods(ThreadContext tc, STable st, ClassWriter cw, String className, String prefix) {
-    	MethodVisitor getMeth = cw.visitMethod(Opcodes.ACC_PUBLIC, "get_str", 
-    			"(Lorg/perl6/nqp/runtime/ThreadContext;)Ljava/lang/String;", null, null);
-    	getMeth.visitVarInsn(Opcodes.ALOAD, 0);
-    	getMeth.visitFieldInsn(Opcodes.GETFIELD, className, prefix, "Ljava/lang/String;");
-    	getMeth.visitInsn(Opcodes.ARETURN);
-    	getMeth.visitMaxs(0, 0);
+        MethodVisitor getMeth = cw.visitMethod(Opcodes.ACC_PUBLIC, "get_str", 
+                "(Lorg/perl6/nqp/runtime/ThreadContext;)Ljava/lang/String;", null, null);
+        getMeth.visitVarInsn(Opcodes.ALOAD, 0);
+        getMeth.visitFieldInsn(Opcodes.GETFIELD, className, prefix, "Ljava/lang/String;");
+        getMeth.visitInsn(Opcodes.ARETURN);
+        getMeth.visitMaxs(0, 0);
         
-    	MethodVisitor setMeth = cw.visitMethod(Opcodes.ACC_PUBLIC, "set_str", 
-    			"(Lorg/perl6/nqp/runtime/ThreadContext;Ljava/lang/String;)V", null, null);
-    	setMeth.visitVarInsn(Opcodes.ALOAD, 0);
-    	setMeth.visitVarInsn(Opcodes.ALOAD, 2);
-    	setMeth.visitFieldInsn(Opcodes.PUTFIELD, className, prefix, "Ljava/lang/String;");
-    	setMeth.visitInsn(Opcodes.RETURN);
-    	setMeth.visitMaxs(0, 0);
+        MethodVisitor setMeth = cw.visitMethod(Opcodes.ACC_PUBLIC, "set_str", 
+                "(Lorg/perl6/nqp/runtime/ThreadContext;Ljava/lang/String;)V", null, null);
+        setMeth.visitVarInsn(Opcodes.ALOAD, 0);
+        setMeth.visitVarInsn(Opcodes.ALOAD, 2);
+        setMeth.visitFieldInsn(Opcodes.PUTFIELD, className, prefix, "Ljava/lang/String;");
+        setMeth.visitInsn(Opcodes.RETURN);
+        setMeth.visitMaxs(0, 0);
     }
 
-	public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
-		P6strInstance obj = new P6strInstance();
+    public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
+        P6strInstance obj = new P6strInstance();
         obj.st = st;
         return obj;
-	}
-
-	public void deserialize_finish(ThreadContext tc, STable st,
-			SerializationReader reader, SixModelObject obj) {
-		((P6strInstance)obj).value = reader.readStr();
-	}
-	
-	public void serialize(ThreadContext tc, SerializationWriter writer, SixModelObject obj) {
-    	writer.writeStr(((P6strInstance)obj).value);
     }
-	
-	public void deserialize_inlined(ThreadContext tc, STable st, SerializationReader reader,
-			String prefix, SixModelObject obj) {
-		try {
-			obj.getClass().getField(prefix).set(obj, reader.readStr());
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-	
-	public void serialize_inlined(ThreadContext tc, STable st, SerializationWriter writer,
-			String prefix, SixModelObject obj) {
-		try {
-			writer.writeStr((String)obj.getClass().getField(prefix).get(obj));
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
+
+    public void deserialize_finish(ThreadContext tc, STable st,
+            SerializationReader reader, SixModelObject obj) {
+        ((P6strInstance)obj).value = reader.readStr();
+    }
+    
+    public void serialize(ThreadContext tc, SerializationWriter writer, SixModelObject obj) {
+        writer.writeStr(((P6strInstance)obj).value);
+    }
+    
+    public void deserialize_inlined(ThreadContext tc, STable st, SerializationReader reader,
+            String prefix, SixModelObject obj) {
+        try {
+            obj.getClass().getField(prefix).set(obj, reader.readStr());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    public void serialize_inlined(ThreadContext tc, STable st, SerializationWriter writer,
+            String prefix, SixModelObject obj) {
+        try {
+            writer.writeStr((String)obj.getClass().getField(prefix).get(obj));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

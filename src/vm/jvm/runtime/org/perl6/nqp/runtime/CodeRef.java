@@ -37,7 +37,7 @@ public class CodeRef extends SixModelObject {
      * Sets up the code-ref data structure.
      */
     public CodeRef(CompilationUnit compUnit, MethodHandle mh,
-    		String name, String uniqueId,
+            String name, String uniqueId,
             String[] oLexicalNames, String[] iLexicalNames,
             String[] nLexicalNames, String[] sLexicalNames,
             long[][] handlers) {
@@ -54,9 +54,9 @@ public class CodeRef extends SixModelObject {
         clone.st = this.st;
         clone.staticInfo = this.staticInfo;
         if (this.outer != null)
-        	clone.outer = this.outer;
+            clone.outer = this.outer;
         else
-        	clone.outer = staticInfo.outerStaticInfo.priorInvocation;
+            clone.outer = staticInfo.outerStaticInfo.priorInvocation;
         return clone;
     }
     

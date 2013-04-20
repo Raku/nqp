@@ -61,10 +61,10 @@ public abstract class CompilationUnit {
         /* Place code references into a lookup table by unique ID. Also
          * make sure each code ref has the appropriate STable. */
         STable BOOTCodeSTable = tc.gc.BOOTCode == null ? null : tc.gc.BOOTCode.st;
-    	codeRefs = getCodeRefs();
+        codeRefs = getCodeRefs();
         for (CodeRef c : codeRefs) {
             c.st = BOOTCodeSTable;
-        	cuidToCodeRef.put(c.staticInfo.uniqueId, c);
+            cuidToCodeRef.put(c.staticInfo.uniqueId, c);
         }
         
         /* Wire up outer relationships. */
@@ -82,28 +82,28 @@ public abstract class CompilationUnit {
         /* Run any deserialization code. */
         int dIdx = deserializeIdx();
         if (dIdx >= 0)
-        	try {
-        		Ops.invokeArgless(tc, codeRefs[dIdx]);
-        	}
-        	catch (Exception e)
-        	{
-        		throw ExceptionHandling.dieInternal(tc, e.getMessage());
-        	}
+            try {
+                Ops.invokeArgless(tc, codeRefs[dIdx]);
+            }
+            catch (Exception e)
+            {
+                throw ExceptionHandling.dieInternal(tc, e.getMessage());
+            }
     }
     
     /**
      * Runs code in the on-load hook, if one is available.
      */
     public void runLoadIfAvailable(ThreadContext tc) {
-    	int lIdx = loadIdx();
+        int lIdx = loadIdx();
         if (lIdx >= 0)
-        	try {
-        		Ops.invokeArgless(tc, codeRefs[lIdx]);
-        	}
-        	catch (Exception e)
-        	{
-        		throw ExceptionHandling.dieInternal(tc, e.getMessage());
-        	}
+            try {
+                Ops.invokeArgless(tc, codeRefs[lIdx]);
+            }
+            catch (Exception e)
+            {
+                throw ExceptionHandling.dieInternal(tc, e.getMessage());
+            }
     }
     
     /**
@@ -117,12 +117,12 @@ public abstract class CompilationUnit {
      * Installs a static lexical value.
      */
     public SixModelObject setStaticLex(SixModelObject value, String name, String uniqueId) {
-    	CodeRef cr = cuidToCodeRef.get(uniqueId);
-    	Integer idx = cr.staticInfo.oTryGetLexicalIdx(name);
-    	if (idx == null)
-    		new RuntimeException("Invalid lexical name '" + name + "' in static lexical installation");
-    	cr.staticInfo.oLexStatic[idx] = value;
-    	return value;
+        CodeRef cr = cuidToCodeRef.get(uniqueId);
+        Integer idx = cr.staticInfo.oTryGetLexicalIdx(name);
+        if (idx == null)
+            new RuntimeException("Invalid lexical name '" + name + "' in static lexical installation");
+        cr.staticInfo.oLexStatic[idx] = value;
+        return value;
     }
     
     /**
@@ -152,20 +152,20 @@ public abstract class CompilationUnit {
      * Code generation overrides this if there's an SC to deserialize.
      */
     public int deserializeIdx() {
-    	return -1;
+        return -1;
     }
     
     /**
      * Code generation overrides this if there's an SC to deserialize.
      */
     public int loadIdx() {
-    	return -1;
+        return -1;
     }
     
     /**
      * Code generation overrides this with the mainline blcok.
      */
     public int mainlineIdx() {
-    	return -1;
+        return -1;
     }
 }

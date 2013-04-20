@@ -23,21 +23,21 @@ public class KnowHOWAttribute extends REPR {
         return obj;
     }
 
-	public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
-		KnowHOWAttributeInstance obj = new KnowHOWAttributeInstance();
+    public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
+        KnowHOWAttributeInstance obj = new KnowHOWAttributeInstance();
         obj.st = st;
         return obj;
-	}
+    }
 
-	public void deserialize_finish(ThreadContext tc, STable st,
-			SerializationReader reader, SixModelObject obj) {
-		KnowHOWAttributeInstance data = (KnowHOWAttributeInstance)obj;
-		data.name = reader.readStr();
-		data.type = tc.gc.KnowHOW; // Not serialized yet
-	}
-	
+    public void deserialize_finish(ThreadContext tc, STable st,
+            SerializationReader reader, SixModelObject obj) {
+        KnowHOWAttributeInstance data = (KnowHOWAttributeInstance)obj;
+        data.name = reader.readStr();
+        data.type = tc.gc.KnowHOW; // Not serialized yet
+    }
+    
     public void serialize(ThreadContext tc, SerializationWriter writer, SixModelObject obj) {
-    	KnowHOWAttributeInstance data = (KnowHOWAttributeInstance)obj;
-    	writer.writeStr(data.name);
+        KnowHOWAttributeInstance data = (KnowHOWAttributeInstance)obj;
+        writer.writeStr(data.name);
     }
 }

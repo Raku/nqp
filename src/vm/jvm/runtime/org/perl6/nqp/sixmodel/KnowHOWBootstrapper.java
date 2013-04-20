@@ -43,7 +43,7 @@ public class KnowHOWBootstrapper {
         Ops.setboolspec(tc.gc.BOOTHash, BoolificationSpec.MODE_HAS_ELEMS, null, tc);
     }
 
-	private static void bootstrapKnowHOW(ThreadContext tc, CompilationUnit knowhowUnit) {
+    private static void bootstrapKnowHOW(ThreadContext tc, CompilationUnit knowhowUnit) {
         /* Create our KnowHOW type object. Note we don't have a HOW just yet, so
          * pass in NULL. */
         REPR REPR = REPRRegistry.getByName("KnowHOWREPR");
@@ -135,7 +135,7 @@ public class KnowHOWBootstrapper {
     }
     
     private static SixModelObject bootType(ThreadContext tc, String typeName, String reprName) {
-    	SixModelObject knowhow_how = tc.gc.KnowHOW.st.HOW;
+        SixModelObject knowhow_how = tc.gc.KnowHOW.st.HOW;
         KnowHOWREPRInstance meta_obj = (KnowHOWREPRInstance)knowhow_how.st.REPR.allocate(tc, knowhow_how.st);
         meta_obj.initialize(tc);
         meta_obj.name = typeName;
@@ -156,17 +156,17 @@ public class KnowHOWBootstrapper {
     }
 
     private static SixModelObject bootTypedArray(ThreadContext tc, String name, SixModelObject type) {
-    	SixModelObject booted = bootType(tc, name, "VMArray");
-    	
-    	SixModelObject BOOTHash = tc.gc.BOOTHash;
-    	SixModelObject repr_info = BOOTHash.st.REPR.allocate(tc, BOOTHash.st);
-    	repr_info.initialize(tc);
-    	SixModelObject repr_array_info = BOOTHash.st.REPR.allocate(tc, BOOTHash.st);
-    	repr_array_info.initialize(tc);
-    	repr_array_info.bind_key_boxed(tc, "type", type);
-    	repr_info.bind_key_boxed(tc, "array", repr_array_info);
-    	booted.st.REPR.compose(tc, booted.st, repr_info);
-    	
-    	return booted;
-	}
+        SixModelObject booted = bootType(tc, name, "VMArray");
+        
+        SixModelObject BOOTHash = tc.gc.BOOTHash;
+        SixModelObject repr_info = BOOTHash.st.REPR.allocate(tc, BOOTHash.st);
+        repr_info.initialize(tc);
+        SixModelObject repr_array_info = BOOTHash.st.REPR.allocate(tc, BOOTHash.st);
+        repr_array_info.initialize(tc);
+        repr_array_info.bind_key_boxed(tc, "type", type);
+        repr_info.bind_key_boxed(tc, "array", repr_array_info);
+        booted.st.REPR.compose(tc, booted.st, repr_info);
+        
+        return booted;
+    }
 }

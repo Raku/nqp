@@ -136,13 +136,13 @@ public class GlobalContext {
      */
     public GlobalContext()
     {
-    	compileeHLLConfiguration = new HashMap<String, HLLConfig>();
-    	hllConfiguration = compileeHLLConfiguration;
-    	getHLLConfigFor("");
-    	compilerHLLConfiguration = new HashMap<String, HLLConfig>();
-    	hllConfiguration = compilerHLLConfiguration;
-    	getHLLConfigFor("");
-		
+        compileeHLLConfiguration = new HashMap<String, HLLConfig>();
+        hllConfiguration = compileeHLLConfiguration;
+        getHLLConfigFor("");
+        compilerHLLConfiguration = new HashMap<String, HLLConfig>();
+        hllConfiguration = compilerHLLConfiguration;
+        getHLLConfigFor("");
+        
         scs = new HashMap<String, SerializationContext>();
         scRefs = new HashMap<String, SixModelObject>();
         compilerRegistry = new HashMap<String, SixModelObject>();
@@ -187,11 +187,11 @@ public class GlobalContext {
         config.ioType = BOOTIO;
     }
 
-	public void useCompileeHLLConfig() {
-		this.hllConfiguration = this.compileeHLLConfiguration;
-	}
+    public void useCompileeHLLConfig() {
+        this.hllConfiguration = this.compileeHLLConfiguration;
+    }
 
-	public void useCompilerHLLConfig() {
-		this.hllConfiguration = this.compilerHLLConfiguration;
-	}
+    public void useCompilerHLLConfig() {
+        this.hllConfiguration = this.compilerHLLConfiguration;
+    }
 }

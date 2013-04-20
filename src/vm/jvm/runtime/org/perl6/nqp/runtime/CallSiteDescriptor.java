@@ -62,7 +62,7 @@ public class CallSiteDescriptor {
                 numPositionals++;
                 break;
             case ARG_STR:
-            	pos++;
+                pos++;
                 numPositionals++;
                 break;
             case ARG_OBJ | ARG_NAMED:
@@ -78,15 +78,15 @@ public class CallSiteDescriptor {
                 nameMap.put(names[name++], (pos++ << 3) | ARG_STR);
                 break;
             case ARG_OBJ | ARG_FLAT:
-            	pos++;
-            	hasFlattening = true;
+                pos++;
+                hasFlattening = true;
                 break;
             case ARG_OBJ | ARG_FLAT | ARG_NAMED:
-            	pos++;
-            	hasFlattening = true;
+                pos++;
+                hasFlattening = true;
                 break;
             default:
-            	new RuntimeException("Unhandld argument flag: " + af);
+                new RuntimeException("Unhandld argument flag: " + af);
             }
         }
     }
@@ -130,12 +130,12 @@ public class CallSiteDescriptor {
             case ARG_NUM | ARG_NAMED:
             case ARG_STR | ARG_NAMED:
                 newArgs.add(oldArgs[oldArgsIdx++]);
-            	newNames.add(names[oldNameIdx++]);
+                newNames.add(names[oldNameIdx++]);
                 newFlags.add(af);
                 break;
             default:
-            	newArgs.add(oldArgs[oldArgsIdx++]);
-            	newFlags.add(af);
+                newArgs.add(oldArgs[oldArgsIdx++]);
+                newFlags.add(af);
             }
         }
         
