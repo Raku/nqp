@@ -1,5 +1,5 @@
 class HLL::Actions {
-    sub string_to_int($src, $base) {
+    method string_to_int($src, $base) {
         my $res := nqp::radix($base, $src, 0, 2);
         $src.CURSOR.panic("'$src' is not a valid number")
             unless nqp::atpos($res, 2) == nqp::chars($src);
@@ -108,10 +108,10 @@ class HLL::Actions {
 
     method dec_number($/) { make +$/; }
 
-    method decint($/) { make string_to_int( $/, 10); }
-    method hexint($/) { make string_to_int( $/, 16); }
-    method octint($/) { make string_to_int( $/, 8 ); }
-    method binint($/) { make string_to_int( $/, 2 ); }
+    method decint($/) { make self.string_to_int( $/, 10); }
+    method hexint($/) { make self.string_to_int( $/, 16); }
+    method octint($/) { make self.string_to_int( $/, 8 ); }
+    method binint($/) { make self.string_to_int( $/, 2 ); }
 
     method quote_EXPR($/) {
         my $past := $<quote_delimited>.ast;
@@ -211,6 +211,6 @@ class HLL::Actions {
     }
 
     method charspec($/) {
-        make $<charnames> ?? $<charnames>.ast !! nqp::chr(string_to_int( $/, 10 ));
+        make $<charnames> ?? $<charnames>.ast !! nqp::chr(self.string_to_int( $/, 10 ));
     }
 }

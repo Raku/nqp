@@ -19,7 +19,7 @@ my %expansions;
 %expansions<f> := "\f";
 sub unescape($s) {
     $s := subst($s, /\\(<[nretf]>)/, -> $m { %expansions{$m[0]} }, :global);
-    subst($s, /\\x(<[a..fA..F0..9]>**4)/, -> $m { nqp::chr(HLL::Actions::string_to_int(~$m[0], 16)) }, :global);
+    subst($s, /\\x(<[a..fA..F0..9]>**4)/, -> $m { nqp::chr(HLL::Actions.string_to_int(~$m[0], 16)) }, :global);
 }
 
 
