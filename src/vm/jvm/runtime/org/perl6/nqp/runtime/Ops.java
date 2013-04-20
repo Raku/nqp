@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.perl6.nqp.jast2bc.JASTToJVMBytecode;
@@ -2729,6 +2730,19 @@ public final class Ops {
         }
 
         return seconds;
+    }
+    
+    public static SixModelObject getenvhash(ThreadContext tc) {
+        SixModelObject hashType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.hashType;
+        SixModelObject strType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strBoxType;
+        SixModelObject res = hashType.st.REPR.allocate(tc, hashType.st);
+        res.initialize(tc);
+        
+        Map<String, String> env = System.getenv();
+        for (String envName : env.keySet())
+            res.bind_key_boxed(tc, envName, box_s(env.get(envName), strType, tc));
+        
+        return res;
     }
     
     /* Exception related. */
