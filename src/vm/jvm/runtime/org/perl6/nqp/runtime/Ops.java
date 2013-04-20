@@ -2855,6 +2855,19 @@ public final class Ops {
         hllSyms.put(name, value);
         return value;
     }
+    public static SixModelObject gethllsym(String hllName, String name, ThreadContext tc) {
+        HashMap<String, SixModelObject> hllSyms = tc.gc.hllSyms.get(hllName);
+        return hllSyms == null ? null : hllSyms.get(name);
+    }
+    public static SixModelObject bindhllsym(String hllName, String name, SixModelObject value, ThreadContext tc) {
+        HashMap<String, SixModelObject> hllSyms = tc.gc.hllSyms.get(hllName);
+        if (hllSyms == null) {
+            hllSyms = new HashMap<String, SixModelObject>();
+            tc.gc.hllSyms.put(hllName, hllSyms);
+        }
+        hllSyms.put(name, value);
+        return value;
+    }
     public static String loadbytecode(String filename, ThreadContext tc) {
         new LibraryLoader().load(tc, filename);
         return filename;

@@ -1891,6 +1891,8 @@ QAST::OperationsJAST.map_classlib_core_op('getcomp', $TYPE_OPS, 'getcomp', [$RT_
 QAST::OperationsJAST.map_classlib_core_op('bindcomp', $TYPE_OPS, 'bindcomp', [$RT_STR, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getcurhllsym', $TYPE_OPS, 'getcurhllsym', [$RT_STR], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bindcurhllsym', $TYPE_OPS, 'bindcurhllsym', [$RT_STR, $RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('gethllsym', $TYPE_OPS, 'gethllsym', [$RT_STR, $RT_STR], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('bindhllsym', $TYPE_OPS, 'bindhllsym', [$RT_STR, $RT_STR, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('sethllconfig', $TYPE_OPS, 'sethllconfig', [$RT_STR, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('loadbytecode', $TYPE_OPS, 'loadbytecode', [$RT_STR], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('usecompilerhllconfig', $TYPE_OPS, 'usecompilerhllconfig', [], $RT_INT, :tc);
