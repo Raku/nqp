@@ -2231,3 +2231,12 @@ QAST::Operations.add_core_pirop_mapping('nfarunalt', 'nqp_nfa_run_alt', '0PsiPPP
 # process related opcodes
 QAST::Operations.add_core_pirop_mapping('exit', 'exit', '0i', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('sleep', 'sleep', '0n', :inlinable(1));
+QAST::Operations.add_core_op('getenvhash', -> $qastcomp, $op {
+    if +@($op) != 0 {
+        nqp::die('getenvhash requires three operands');
+    }
+    $qastcomp.as_post(QAST::VM.new(
+        :pirop('new__Ps'),
+        QAST::SVal.new( :value('Env') )
+    ))
+});
