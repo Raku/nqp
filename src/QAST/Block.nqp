@@ -5,8 +5,14 @@ class QAST::Block is QAST::Node {
     has str $!cuid;
     has %!symbol;
     
-    method name(*@value)        { $!name := @value[0] if @value; $!name || "" }
-    method blocktype(*@value)   { $!blocktype := @value[0] if @value; $!blocktype }
+    method name(*@value) {
+        $!name := @value[0] if @value;
+        nqp::isnull_s($!name) ?? "" !! $!name
+    }
+    method blocktype(*@value) {
+        $!blocktype := @value[0] if @value;
+        nqp::isnull_s($!blocktype) ?? "" !! $!blocktype
+    }
     method custom_args(*@value) { $!custom_args := @value[0] if @value; $!custom_args }
     
     my $cur_cuid := 0;

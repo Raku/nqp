@@ -24,6 +24,7 @@ class QAST::Stmt is QAST::Node {
         }
         $result
     }
+    
     method dump_extra_node_info() {
         nqp::defined($!resultchild) ?? ":resultchild($!resultchild))" !! ''
     }

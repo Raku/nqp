@@ -5,9 +5,18 @@ class QAST::Var is QAST::Node {
     has int $!slurpy;
     has $!default;
     
-    method name(*@value)    { $!name := @value[0] if @value; $!name || "" }
-    method scope(*@value)   { $!scope := @value[0] if @value; $!scope }
-    method decl(*@value)    { $!decl := @value[0] if @value; $!decl }
+    method name(*@value) {
+        $!name := @value[0] if @value;
+        !nqp::isnull_s($!name) ?? $!name !! ""
+    }
+    method scope(*@value) {
+        $!scope := @value[0] if @value;
+        !nqp::isnull_s($!scope) ?? $!scope !! ""
+    }
+    method decl(*@value) {
+        $!decl := @value[0] if @value;
+        !nqp::isnull_s($!decl) ?? $!decl !! ""
+    }
     method slurpy(*@value)  { $!slurpy := @value[0] if @value; $!slurpy }
     method default(*@value) { $!default := @value[0] if @value; $!default }
     

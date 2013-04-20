@@ -1,0 +1,331 @@
+JAVA   = java
+JAVAC  = javac
+JAR    = jar
+PERL   = perl
+PROVE  = prove
+ASM    = 3rdparty/asm/
+
+MKPATH = $(PERL) -MExtUtils::Command -e mkpath
+CP     = $(PERL) -MExtUtils::Command -e cp
+CHMOD  = $(PERL) -MExtUtils::Command -e chmod
+
+RUNTIME_JAVAS = \
+  src/vm/jvm/runtime/org/perl6/nqp/jast2bc/*.java \
+  src/vm/jvm/runtime/org/perl6/nqp/runtime/*.java \
+  src/vm/jvm/runtime/org/perl6/nqp/sixmodel/*.java \
+  src/vm/jvm/runtime/org/perl6/nqp/sixmodel/reprs/*.java
+
+RUNTIME_JAR = nqp-runtime.jar
+
+STAGE0 = src/vm/jvm/stage0
+STAGE1 = src/stage1
+STAGE2 = src/stage2
+
+STAGE0_NQP = $(JAVA) -cp $(STAGE0)@cpsep@nqp-runtime.jar@cpsep@3rdparty/asm/asm-4.1.jar nqp --bootstrap
+STAGE1_NQP = $(JAVA) -cp $(STAGE1)@cpsep@nqp-runtime.jar@cpsep@3rdparty/asm/asm-4.1.jar nqp --bootstrap
+
+NQP_MO_CLASS    = nqpmo.class
+NQP_MO_COMBINED = gen/nqpmo.nqp
+NQP_MO_SOURCES  = src/how/Archetypes.nqp src/how/RoleToRoleApplier.nqp \
+                  src/how/NQPConcreteRoleHOW.nqp src/how/RoleToClassApplier.nqp \
+                  src/how/NQPCurriedRoleHOW.nqp src/how/NQPParametricRoleHOW.nqp \
+                  src/how/NQPClassHOW.nqp src/how/NQPNativeHOW.nqp \
+                  src/how/NQPAttribute.nqp src/how/NQPModuleHOW.nqp \
+                  src/how/EXPORTHOW.nqp \
+
+MODULE_LOADER_CLASS = ModuleLoader.class
+
+CORE_SETTING_CLASS    = NQPCORE.setting.class
+CORE_SETTING_COMBINED = gen/NQPCORE.setting
+CORE_SETTING_SOURCES  = \
+  src/core/NativeTypes.nqp \
+  src/core/NQPRoutine.nqp \
+  src/core/NQPMu.nqp \
+  src/core/NQPCapture.nqp \
+  src/core/IO.nqp \
+  src/core/Regex.nqp \
+  src/core/Hash.nqp \
+  src/core/testing.nqp \
+  src/core/YOUAREHERE.nqp \
+
+QASTNODE_CLASS    = QASTNode.class
+QASTNODE_COMBINED = gen/QASTNode.nqp
+QASTNODE_SOURCES  = \
+  src/QAST/CompileTimeValue.nqp \
+  src/QAST/SpecialArg.nqp \
+  src/QAST/Node.nqp \
+  src/QAST/Regex.nqp \
+  src/QAST/IVal.nqp \
+  src/QAST/NVal.nqp \
+  src/QAST/SVal.nqp \
+  src/QAST/BVal.nqp \
+  src/QAST/WVal.nqp \
+  src/QAST/Want.nqp \
+  src/QAST/Var.nqp \
+  src/QAST/VarWithFallback.nqp \
+  src/QAST/Op.nqp \
+  src/QAST/VM.nqp \
+  src/QAST/Stmts.nqp \
+  src/QAST/Stmt.nqp \
+  src/QAST/Block.nqp \
+  src/QAST/Unquote.nqp \
+  src/QAST/CompUnit.nqp \
+  src/QAST/InlinePlaceholder.nqp \
+
+QREGEX_CLASS    = QRegex.class
+QREGEX_COMBINED = gen/QRegex.nqp
+QREGEX_SOURCES = \
+  src/QRegex/NFA.nqp \
+  src/QRegex/Cursor.nqp \
+
+HLL_CLASS    = NQPHLL.class
+HLL_COMBINED = gen/NQPHLL.nqp
+HLL_SOURCES  = \
+  src/HLL/Grammar.nqp \
+  src/HLL/Actions.nqp \
+  src/vm/jvm/HLL/Backend.nqp \
+  src/HLL/Compiler.nqp \
+  src/HLL/CommandLine.nqp \
+  src/HLL/World.nqp \
+
+JASTNODES_CLASS    = JASTNodes.class
+JASTNODES_COMBINED = gen/JASTNodes.nqp
+JASTNODES_SOURCES  = \
+  src/vm/jvm/QAST/JASTNodes.nqp \
+
+QAST_CLASS    = QAST.class
+QAST_COMBINED = gen/QAST.nqp
+QAST_SOURCES  = \
+  src/vm/jvm/QAST/Compiler.nqp \
+
+P6QREGEX_CLASS    = NQPP6QRegex.class
+P6QREGEX_COMBINED = gen/NQPP6QRegex.nqp
+P6QREGEX_SOURCES  = \
+  src/QRegex/P6Regex/Grammar.nqp \
+  src/QRegex/P6Regex/Actions.nqp \
+  src/QRegex/P6Regex/Compiler.nqp \
+
+NQP_CLASS    = nqp.class
+NQP_COMBINED = gen/NQP.nqp
+NQP_SOURCES  = \
+  src/NQP/World.nqp \
+  src/NQP/Grammar.nqp \
+  src/vm/jvm/NQP/Ops.nqp \
+  src/NQP/Actions.nqp \
+  src/NQP/Compiler.nqp \
+
+STAGE1_OUTPUT = $(STAGE1)/$(NQP_MO_CLASS) $(STAGE1)/$(MODULE_LOADER_CLASS) \
+                $(STAGE1)/$(CORE_SETTING_CLASS) $(STAGE1)/$(QASTNODE_CLASS) \
+                $(STAGE1)/$(QREGEX_CLASS) $(STAGE1)/$(HLL_CLASS) \
+                $(STAGE1)/$(JASTNODES_CLASS) $(STAGE1)/$(QAST_CLASS) \
+                $(STAGE1)/$(P6QREGEX_CLASS) $(STAGE1)/$(NQP_CLASS) \
+
+STAGE2_OUTPUT = $(STAGE2)/$(NQP_MO_CLASS) $(STAGE2)/$(MODULE_LOADER_CLASS) \
+                $(STAGE2)/$(CORE_SETTING_CLASS) $(STAGE2)/$(QASTNODE_CLASS) \
+                $(STAGE2)/$(QREGEX_CLASS) $(STAGE2)/$(HLL_CLASS) \
+                $(STAGE2)/$(JASTNODES_CLASS) $(STAGE2)/$(QAST_CLASS) \
+                $(STAGE2)/$(P6QREGEX_CLASS) $(STAGE2)/$(NQP_CLASS) \
+
+ALL_OUTPUT = $(NQP_MO_CLASS) $(MODULE_LOADER_CLASS) \
+             $(CORE_SETTING_CLASS) $(QASTNODE_CLASS) \
+             $(QREGEX_CLASS) $(HLL_CLASS) \
+             $(JASTNODES_CLASS) $(QAST_CLASS) \
+             $(P6QREGEX_CLASS) $(NQP_CLASS) \
+
+RUNNER = @runner@
+
+all: $(ALL_OUTPUT) $(RUNNER)
+
+$(RUNTIME_JAR): $(RUNTIME_JAVAS)
+	$(PERL) -MExtUtils::Command -e mkpath bin
+	$(JAVAC) -source 1.7 -cp 3rdparty/asm/asm-4.1.jar -g -d bin $(RUNTIME_JAVAS)
+	$(JAR) cf0 nqp-runtime.jar -C bin/ .
+
+clean:
+	$(PERL) -MExtUtils::Command -e rm_rf *.class *.jar src/stage1 src/stage2 bin
+
+$(STAGE0): $(RUNTIME_JAR)
+
+$(STAGE1): $(STAGE1_OUTPUT)
+
+$(STAGE1)/$(NQP_MO_CLASS): $(STAGE0) $(NQP_MO_SOURCES)
+	$(MKPATH) $(STAGE1)/gen
+	$(PERL) tools/build/gen-cat.pl jvm $(NQP_MO_SOURCES) > $(STAGE1)/$(NQP_MO_COMBINED)
+	$(STAGE0_NQP) --setting=NULL --no-regex-lib --target=classfile \
+	    --output=$(STAGE1)/$(NQP_MO_CLASS) $(STAGE1)/$(NQP_MO_COMBINED)
+
+$(STAGE1)/$(MODULE_LOADER_CLASS): $(STAGE0) src/vm/jvm/ModuleLoader.nqp
+	$(STAGE0_NQP) --setting=NULL --no-regex-lib --target=classfile \
+	    --output=$(STAGE1)/$(MODULE_LOADER_CLASS) src/vm/jvm/ModuleLoader.nqp
+
+$(STAGE1)/$(CORE_SETTING_CLASS): $(STAGE0) $(CORE_SETTING_SOURCES) $(STAGE1)/$(NQP_MO_CLASS) $(STAGE1)/$(MODULE_LOADER_CLASS)
+	$(MKPATH) $(STAGE1)/gen
+	$(PERL) tools/build/gen-cat.pl jvm $(CORE_SETTING_SOURCES) > $(STAGE1)/$(CORE_SETTING_COMBINED)
+	$(STAGE0_NQP) --module-path=$(STAGE1) --setting=NULL --no-regex-lib --target=classfile \
+	    --output=$(STAGE1)/$(CORE_SETTING_CLASS) $(STAGE1)/$(CORE_SETTING_COMBINED)
+
+$(STAGE1)/$(QASTNODE_CLASS): $(STAGE0) $(QASTNODE_SOURCES) $(STAGE1)/$(CORE_SETTING_CLASS)
+	$(MKPATH) $(STAGE1)/gen
+	$(PERL) tools/build/gen-cat.pl jvm $(QASTNODE_SOURCES) > $(STAGE1)/$(QASTNODE_COMBINED)
+	$(STAGE0_NQP) --module-path=$(STAGE1) --setting-path=$(STAGE1) \
+         --setting=NQPCORE --no-regex-lib --target=classfile \
+	    --output=$(STAGE1)/$(QASTNODE_CLASS) $(STAGE1)/$(QASTNODE_COMBINED)
+
+$(STAGE1)/$(QREGEX_CLASS): $(STAGE0) $(QREGEX_SOURCES) $(STAGE1)/$(QASTNODE_CLASS)
+	$(MKPATH) $(STAGE1)/gen
+	$(PERL) tools/build/gen-cat.pl jvm $(QREGEX_SOURCES) > $(STAGE1)/$(QREGEX_COMBINED)
+	$(STAGE0_NQP) --module-path=$(STAGE1) --setting-path=$(STAGE1) \
+         --setting=NQPCORE --no-regex-lib --target=classfile \
+	    --output=$(STAGE1)/$(QREGEX_CLASS) $(STAGE1)/$(QREGEX_COMBINED)
+
+$(STAGE1)/$(HLL_CLASS): $(STAGE0) $(HLL_SOURCES) $(STAGE1)/$(QREGEX_CLASS)
+	$(MKPATH) $(STAGE1)/gen
+	$(PERL) tools/build/gen-cat.pl jvm $(HLL_SOURCES) > $(STAGE1)/$(HLL_COMBINED)
+	$(STAGE0_NQP) --module-path=$(STAGE1) --setting-path=$(STAGE1) \
+         --setting=NQPCORE --no-regex-lib --target=classfile \
+	    --output=$(STAGE1)/$(HLL_CLASS) $(STAGE1)/$(HLL_COMBINED)
+
+$(STAGE1)/$(JASTNODES_CLASS): $(STAGE0) $(JASTNODES_SOURCES) $(STAGE1)/$(CORE_SETTING_CLASS)
+	$(MKPATH) $(STAGE1)/gen
+	$(PERL) tools/build/gen-cat.pl jvm $(JASTNODES_SOURCES) > $(STAGE1)/$(JASTNODES_COMBINED)
+	$(STAGE0_NQP) --module-path=$(STAGE1) --setting-path=$(STAGE1) \
+         --setting=NQPCORE --no-regex-lib --target=classfile \
+	    --output=$(STAGE1)/$(JASTNODES_CLASS) $(STAGE1)/$(JASTNODES_COMBINED)
+
+$(STAGE1)/$(QAST_CLASS): $(STAGE0) $(QAST_SOURCES) $(STAGE1)/$(HLL_CLASS) $(STAGE1)/$(JASTNODES_CLASS)
+	$(MKPATH) $(STAGE1)/gen
+	$(PERL) tools/build/gen-cat.pl jvm $(QAST_SOURCES) > $(STAGE1)/$(QAST_COMBINED)
+	$(STAGE0_NQP) --module-path=$(STAGE1) --setting-path=$(STAGE1) \
+         --setting=NQPCORE --no-regex-lib --target=classfile \
+	    --output=$(STAGE1)/$(QAST_CLASS) $(STAGE1)/$(QAST_COMBINED)
+
+$(STAGE1)/$(P6QREGEX_CLASS): $(STAGE0) $(P6QREGEX_SOURCES) $(STAGE1)/$(QAST_CLASS)
+	$(MKPATH) $(STAGE1)/gen
+	$(PERL) tools/build/gen-cat.pl jvm $(P6QREGEX_SOURCES) > $(STAGE1)/$(P6QREGEX_COMBINED)
+	$(STAGE0_NQP) --module-path=$(STAGE1) --setting-path=$(STAGE1) \
+         --setting=NQPCORE --no-regex-lib --target=classfile \
+	    --output=$(STAGE1)/$(P6QREGEX_CLASS) $(STAGE1)/$(P6QREGEX_COMBINED)
+
+$(STAGE1)/$(NQP_CLASS): $(STAGE0) $(NQP_SOURCES) $(STAGE1)/$(P6QREGEX_CLASS)
+	$(MKPATH) $(STAGE1)/gen
+	$(PERL) tools/build/gen-version.pl > src/gen/nqp-config.nqp
+	$(PERL) tools/build/gen-cat.pl jvm $(NQP_SOURCES) src/gen/nqp-config.nqp > $(STAGE1)/$(NQP_COMBINED)
+	$(STAGE0_NQP) --module-path=$(STAGE1) --setting-path=$(STAGE1) \
+         --setting=NQPCORE --target=classfile --no-regex-lib --javaclass=nqp \
+	    --output=$(STAGE1)/$(NQP_CLASS) $(STAGE1)/$(NQP_COMBINED)
+
+$(STAGE2): $(STAGE2_OUTPUT)
+
+$(STAGE2)/$(NQP_MO_CLASS): $(STAGE1) $(NQP_MO_SOURCES)
+	$(MKPATH) $(STAGE2)/gen
+	$(PERL) tools/build/gen-cat.pl jvm $(NQP_MO_SOURCES) > $(STAGE2)/$(NQP_MO_COMBINED)
+	$(STAGE1_NQP) --setting=NULL --no-regex-lib --target=classfile \
+	    --output=$(STAGE2)/$(NQP_MO_CLASS) $(STAGE2)/$(NQP_MO_COMBINED)
+
+$(STAGE2)/$(MODULE_LOADER_CLASS): $(STAGE1) src/vm/jvm/ModuleLoader.nqp
+	$(STAGE1_NQP) --setting=NULL --no-regex-lib --target=classfile \
+	    --output=$(STAGE2)/$(MODULE_LOADER_CLASS) src/vm/jvm/ModuleLoader.nqp
+
+$(STAGE2)/$(CORE_SETTING_CLASS): $(STAGE1) $(CORE_SETTING_SOURCES) $(STAGE2)/$(NQP_MO_CLASS) $(STAGE2)/$(MODULE_LOADER_CLASS)
+	$(MKPATH) $(STAGE2)/gen
+	$(PERL) tools/build/gen-cat.pl jvm $(CORE_SETTING_SOURCES) > $(STAGE2)/$(CORE_SETTING_COMBINED)
+	$(STAGE1_NQP) --module-path=$(STAGE2) --setting=NULL --no-regex-lib --target=classfile \
+	    --output=$(STAGE2)/$(CORE_SETTING_CLASS) $(STAGE2)/$(CORE_SETTING_COMBINED)
+
+$(STAGE2)/$(QASTNODE_CLASS): $(STAGE1) $(QASTNODE_SOURCES) $(STAGE2)/$(CORE_SETTING_CLASS)
+	$(MKPATH) $(STAGE2)/gen
+	$(PERL) tools/build/gen-cat.pl jvm $(QASTNODE_SOURCES) > $(STAGE2)/$(QASTNODE_COMBINED)
+	$(STAGE1_NQP) --module-path=$(STAGE2) --setting-path=$(STAGE2) \
+         --setting=NQPCORE --no-regex-lib --target=classfile \
+	    --output=$(STAGE2)/$(QASTNODE_CLASS) $(STAGE2)/$(QASTNODE_COMBINED)
+
+$(STAGE2)/$(QREGEX_CLASS): $(STAGE1) $(QREGEX_SOURCES) $(STAGE2)/$(QASTNODE_CLASS)
+	$(MKPATH) $(STAGE2)/gen
+	$(PERL) tools/build/gen-cat.pl jvm $(QREGEX_SOURCES) > $(STAGE2)/$(QREGEX_COMBINED)
+	$(STAGE1_NQP) --module-path=$(STAGE2) --setting-path=$(STAGE2) \
+         --setting=NQPCORE --no-regex-lib --target=classfile \
+	    --output=$(STAGE2)/$(QREGEX_CLASS) $(STAGE2)/$(QREGEX_COMBINED)
+
+$(STAGE2)/$(HLL_CLASS): $(STAGE1) $(HLL_SOURCES) $(STAGE2)/$(QREGEX_CLASS)
+	$(MKPATH) $(STAGE2)/gen
+	$(PERL) tools/build/gen-cat.pl jvm $(HLL_SOURCES) > $(STAGE2)/$(HLL_COMBINED)
+	$(STAGE1_NQP) --module-path=$(STAGE2) --setting-path=$(STAGE2) \
+         --setting=NQPCORE --no-regex-lib --target=classfile \
+	    --output=$(STAGE2)/$(HLL_CLASS) $(STAGE2)/$(HLL_COMBINED)
+
+$(STAGE2)/$(JASTNODES_CLASS): $(STAGE1) $(JASTNODES_SOURCES) $(STAGE2)/$(CORE_SETTING_CLASS)
+	$(MKPATH) $(STAGE2)/gen
+	$(PERL) tools/build/gen-cat.pl jvm $(JASTNODES_SOURCES) > $(STAGE2)/$(JASTNODES_COMBINED)
+	$(STAGE1_NQP) --module-path=$(STAGE2) --setting-path=$(STAGE2) \
+         --setting=NQPCORE --no-regex-lib --target=classfile \
+	    --output=$(STAGE2)/$(JASTNODES_CLASS) $(STAGE2)/$(JASTNODES_COMBINED)
+
+$(STAGE2)/$(QAST_CLASS): $(STAGE1) $(QAST_SOURCES) $(STAGE2)/$(HLL_CLASS) $(STAGE2)/$(JASTNODES_CLASS)
+	$(MKPATH) $(STAGE2)/gen
+	$(PERL) tools/build/gen-cat.pl jvm $(QAST_SOURCES) > $(STAGE2)/$(QAST_COMBINED)
+	$(STAGE1_NQP) --module-path=$(STAGE2) --setting-path=$(STAGE2) \
+         --setting=NQPCORE --no-regex-lib --target=classfile \
+	    --output=$(STAGE2)/$(QAST_CLASS) $(STAGE2)/$(QAST_COMBINED)
+
+$(STAGE2)/$(P6QREGEX_CLASS): $(STAGE1) $(P6QREGEX_SOURCES) $(STAGE2)/$(QAST_CLASS)
+	$(MKPATH) $(STAGE2)/gen
+	$(PERL) tools/build/gen-cat.pl jvm $(P6QREGEX_SOURCES) > $(STAGE2)/$(P6QREGEX_COMBINED)
+	$(STAGE1_NQP) --module-path=$(STAGE2) --setting-path=$(STAGE2) \
+         --setting=NQPCORE --no-regex-lib --target=classfile \
+	    --output=$(STAGE2)/$(P6QREGEX_CLASS) $(STAGE2)/$(P6QREGEX_COMBINED)
+
+$(STAGE2)/$(NQP_CLASS): $(STAGE1) $(NQP_SOURCES) $(STAGE2)/$(P6QREGEX_CLASS)
+	$(MKPATH) $(STAGE2)/gen
+	$(PERL) tools/build/gen-version.pl > src/gen/nqp-config.nqp
+	$(PERL) tools/build/gen-cat.pl jvm $(NQP_SOURCES) src/gen/nqp-config.nqp > $(STAGE2)/$(NQP_COMBINED)
+	$(STAGE1_NQP) --module-path=$(STAGE2) --setting-path=$(STAGE2) \
+         --setting=NQPCORE --target=classfile --no-regex-lib --javaclass=nqp \
+	    --output=$(STAGE2)/$(NQP_CLASS) $(STAGE2)/$(NQP_COMBINED)
+
+$(ALL_OUTPUT): $(STAGE2_OUTPUT)
+	$(CP) $(STAGE2)/$(NQP_MO_CLASS) .
+	$(CP) $(STAGE2)/$(MODULE_LOADER_CLASS) .
+	$(CP) $(STAGE2)/$(CORE_SETTING_CLASS) .
+	$(CP) $(STAGE2)/$(QASTNODE_CLASS) .
+	$(CP) $(STAGE2)/$(QREGEX_CLASS) .
+	$(CP) $(STAGE2)/$(HLL_CLASS) .
+	$(CP) $(STAGE2)/$(JASTNODES_CLASS) .
+	$(CP) $(STAGE2)/$(QAST_CLASS) .
+	$(CP) $(STAGE2)/$(P6QREGEX_CLASS) .
+	$(CP) $(STAGE2)/$(NQP_CLASS) .
+
+$(RUNNER):
+	$(CP) src/vm/jvm/$(RUNNER) .
+	$(CHMOD) 755 $(RUNNER)
+
+bootstrap-files: $(STAGE2_OUTPUT)
+	$(CP) $(STAGE2)/$(NQP_MO_CLASS) $(STAGE0)
+	$(CP) $(STAGE2)/$(MODULE_LOADER_CLASS) $(STAGE0)
+	$(CP) $(STAGE2)/$(CORE_SETTING_CLASS) $(STAGE0)
+	$(CP) $(STAGE2)/$(QASTNODE_CLASS) $(STAGE0)
+	$(CP) $(STAGE2)/$(QREGEX_CLASS) $(STAGE0)
+	$(CP) $(STAGE2)/$(HLL_CLASS) $(STAGE0)
+	$(CP) $(STAGE2)/$(JASTNODES_CLASS) $(STAGE0)
+	$(CP) $(STAGE2)/$(QAST_CLASS) $(STAGE0)
+	$(CP) $(STAGE2)/$(P6QREGEX_CLASS) $(STAGE0)
+	$(CP) $(STAGE2)/$(NQP_CLASS) $(STAGE0)
+
+## testing
+
+test: all
+	prove -r --exec .@slash@$(RUNNER) t/nqp t/qregex t/p5regex t/qast t/serialization
+
+test-loud: all
+	prove -r -v --exec .@slash@$(RUNNER) t/nqp t/qregex t/p5regex t/qast t/serialization
+
+core-test: $(RUNNER)
+	prove -r --exec .@slash@$(RUNNER) t/nqp
+
+core-test-loud: $(RUNNER)
+	prove -r -v --exec .@slash@$(RUNNER) t/nqp
+
+qregex-test: $(RUNNER)
+	prove -r --exec .@slash@$(RUNNER) t/qregex
+
+qregex-test-loud: $(RUNNER)
+	prove -r -v --exec .@slash@$(RUNNER) t/qregex

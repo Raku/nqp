@@ -3,9 +3,18 @@ class QAST::Op is QAST::Node {
     has str $!op;
     has str $!childorder;
     
-    method name(*@value)       { $!name := @value[0] if @value; $!name || "" }
-    method op(*@value)         { $!op := @value[0] if @value; $!op }
-    method childorder(*@value) { $!childorder := @value[0] if @value; $!childorder || "" }
+    method name(*@value) {
+        $!name := @value[0] if @value;
+        nqp::isnull_s($!name) ?? "" !! $!name
+    }
+    method op(*@value) {
+        $!op := @value[0] if @value;
+        nqp::isnull_s($!op) ?? "" !! $!op
+    }
+    method childorder(*@value) {
+        $!childorder := @value[0] if @value;
+        nqp::isnull_s($!childorder) ?? "" !! $!childorder
+    }
     
     method substitute_inline_placeholders(@fillers) {
         my $result := self.shallow_clone();
@@ -30,7 +39,7 @@ class QAST::Op is QAST::Node {
     }
 
     method dump_extra_node_info() {
-        nqp::chars($!name)
+        !nqp::isnull_s($!name) && nqp::chars($!name)
             ?? "$!op $!name"
             !! $!op;
     }
