@@ -3387,6 +3387,14 @@ public final class Ops {
         }
     }
     
+    public static SixModelObject neg_I(SixModelObject a, SixModelObject type, ThreadContext tc) {
+        return makeBI(tc, type, getBI(tc, a).negate());
+    }
+    
+    public static SixModelObject abs_I(SixModelObject a, SixModelObject type, ThreadContext tc) {
+        return makeBI(tc, type, getBI(tc, a).abs());
+    }
+    
     public static SixModelObject bitor_I(SixModelObject a, SixModelObject b, SixModelObject type, ThreadContext tc) {
         return makeBI(tc, type, getBI(tc, a).or(getBI(tc, b)));
     }
