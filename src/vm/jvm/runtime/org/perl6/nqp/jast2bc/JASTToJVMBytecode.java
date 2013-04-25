@@ -234,25 +234,7 @@ public class JASTToJVMBytecode {
                 }
                 else if (curLine.startsWith(".push_sc ")) {
                     String value = curLine.substring(".push_sc ".length());
-                    StringBuilder sb = new StringBuilder(value.length());
-                    for (int i = 0; i < value.length(); i++) {
-                        char ch = value.charAt(i);
-                        if (ch == '\\') {
-                            i++;
-                            switch (value.charAt(i)) {
-                            case '\\': sb.append('\\'); break;
-                            case 'n': sb.append('\n'); break;
-                            case 'r': sb.append('\r'); break;
-                            case 't': sb.append('\t'); break;
-                            default:
-                                new RuntimeException("Invalid string literal");
-                            }
-                        }
-                        else {
-                            sb.append(ch);
-                        }
-                    }
-                    m.visitLdcInsn(sb.toString());
+                    m.visitLdcInsn(decodeString(value));
                 }
                 else if (curLine.startsWith(".push_cc ")) {
                     String cName = curLine.substring(".push_cc ".length());
@@ -296,15 +278,37 @@ public class JASTToJVMBytecode {
             }
             
             // Process line as an instruction.
-            emitInstruction(m, labelMap, argIndexes, localVariables, curLine);
+            emitInstruction(in, m, labelMap, argIndexes, localVariables, curLine);
         }
         if (inMethodHeader)
             throw new Exception("Unexpected end of file in method header");
         finishMethod(m);
         return false;
     }
+    
+    private static String decodeString(String value) {
+        StringBuilder sb = new StringBuilder(value.length());
+        for (int i = 0; i < value.length(); i++) {
+            char ch = value.charAt(i);
+            if (ch == '\\') {
+                i++;
+                switch (value.charAt(i)) {
+                case '\\': sb.append('\\'); break;
+                case 'n': sb.append('\n'); break;
+                case 'r': sb.append('\r'); break;
+                case 't': sb.append('\t'); break;
+                default:
+                    new RuntimeException("Invalid string literal");
+                }
+            }
+            else {
+                sb.append(ch);
+            }
+        }
+        return sb.toString();
+    }
 
-    private static void emitInstruction(MethodVisitor m,
+    private static void emitInstruction(BufferedReader in, MethodVisitor m,
             Map<String, Label> labelMap,
             Map<String, Integer> argIndexes,
             Map<String, VariableDef> localVariables,
@@ -607,7 +611,7 @@ public class JASTToJVMBytecode {
             emitCall(m, rest, instruction);
             break;
         case 0xba:
-            emitInvokeDynamic(m, rest);
+            emitInvokeDynamic(in, m, rest);
             break;
         case 0xbb: // new
         case 0xc0: // checkcast
@@ -673,14 +677,50 @@ public class JASTToJVMBytecode {
                 Type.getMethodDescriptor(returnType, argumentTypes));
     }
 
-    private static void emitInvokeDynamic(MethodVisitor m, String callSpec) {
+    private static void emitInvokeDynamic(BufferedReader in, MethodVisitor m, String callSpec) {
         String[] bits = callSpec.split("\\s");
-        if (bits.length != 4)
+        int numExtraArgs;
+        if (bits.length == 4)
+            numExtraArgs = 0;
+        else if (bits.length == 5)
+            numExtraArgs = new Integer(bits[4]);
+        else
             throw new RuntimeException("invokedynamic needs 4 arguments");
+        
         MethodType bsmMT = MethodType.methodType(CallSite.class, MethodHandles.Lookup.class,
                 java.lang.String.class, MethodType.class);
+        
+        Object[] extraArgs = new Object[numExtraArgs];
+        for (int i = 0; i < numExtraArgs; i++) {
+            try {
+                String curLine = in.readLine();
+                if (curLine.startsWith(".push_ic ")) {
+                    extraArgs[i] = Long.parseLong(curLine.substring(".push_ic ".length()));
+                    bsmMT = bsmMT.appendParameterTypes(long.class);
+                }
+                else if (curLine.startsWith(".push_nc ")) {
+                    extraArgs[i] = Double.parseDouble(curLine.substring(".push_nc ".length()));
+                    bsmMT = bsmMT.appendParameterTypes(double.class);
+                }
+                else if (curLine.startsWith(".push_sc ")) {
+                    extraArgs[i] = decodeString(curLine.substring(".push_sc ".length()));
+                    bsmMT = bsmMT.appendParameterTypes(String.class);
+                }
+                else if (curLine.startsWith(".push_idx ")) {
+                    extraArgs[i] = Integer.parseInt(curLine.substring(".push_idx ".length()));
+                    bsmMT = bsmMT.appendParameterTypes(int.class);
+                }
+                else {
+                    throw new RuntimeException("Unrecognized extra argument for invokedynamic");
+                }
+            }
+            catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         Handle bsmHandle = new Handle(Opcodes.H_INVOKESTATIC, bits[2], bits[3], bsmMT.toMethodDescriptorString());
-        m.visitInvokeDynamicInsn(bits[0], bits[1], bsmHandle);
+        m.visitInvokeDynamicInsn(bits[0], bits[1], bsmHandle, extraArgs);
     }
 
     private static void emitBranchInstruction(MethodVisitor m,

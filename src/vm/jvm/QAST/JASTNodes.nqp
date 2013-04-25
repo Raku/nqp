@@ -215,33 +215,40 @@ class JAST::Instruction is JAST::Node {
 }
 
 # Really an instruction, but makes things a bit more pleasant to work with.
-# For now, we only support the default signature of a bootstrap method and
-# assume that it is static.
+# For now, we assume that the bootstrap method is static. Extra args are
+# specified as JAST::PushIVal, etc.
 class JAST::InvokeDynamic is JAST::Node {
     has $!name;
     has @!arg_types;
     has $!ret_type;
     has $!bsm_type;
     has $!bsm_name;
+    has @!extra_args;
     
-    method new($name, $ret_type, @arg_types, $bsm_type, $bsm_name) {
-        self.bless(:$name, :$ret_type, :@arg_types, :$bsm_type, :$bsm_name)
+    method new($name, $ret_type, @arg_types, $bsm_type, $bsm_name, @extra_args?) {
+        self.bless(:$name, :$ret_type, :@arg_types, :$bsm_type, :$bsm_name, :@extra_args)
     }
     
-    method BUILD(:$name, :$ret_type, :@arg_types, :$bsm_type, :$bsm_name) {
+    method BUILD(:$name, :$ret_type, :@arg_types, :$bsm_type, :$bsm_name, :@extra_args) {
         $!name := $name;
         $!ret_type := $ret_type;
         @!arg_types := @arg_types;
         $!bsm_type := $bsm_type;
         $!bsm_name := $bsm_name;
+        @!extra_args := @extra_args;
     }
     
     method dump() {
-        my @dump := [opname2code('invokedynamic'), $!name];
-        nqp::push(@dump, '(' ~ join('', @!arg_types) ~ ')' ~ $!ret_type);
-        nqp::push(@dump, $!bsm_type);
-        nqp::push(@dump, $!bsm_name);
-        join(" ", @dump)
+        my @op_dump := [opname2code('invokedynamic'), $!name];
+        nqp::push(@op_dump, '(' ~ join('', @!arg_types) ~ ')' ~ $!ret_type);
+        nqp::push(@op_dump, $!bsm_type);
+        nqp::push(@op_dump, $!bsm_name);
+        nqp::push(@op_dump, +@!extra_args);
+        my @dump := [join(" ", @op_dump)];
+        for @!extra_args {
+            nqp::push(@dump, $_.dump())
+        }
+        join("\n", @dump)
     }
 }
 
