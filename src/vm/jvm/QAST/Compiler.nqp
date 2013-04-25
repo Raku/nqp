@@ -1112,13 +1112,17 @@ QAST::OperationsJAST.add_core_op('call', sub ($qastcomp, $node) {
         my @argstuff := process_args($qastcomp, @($node), $il, $node.name eq "" ?? 1 !! 0);
         my $cs_idx := @argstuff[0];
         
-        # Emit the call.
+        # Emit the call. Note, name passed as extra arg as some valid
+        # names in Perl 6 are not valid method names on the JVM.
         $il.append(JAST::Instruction.new( :op('aload_1') ));
         $il.append(JAST::PushIndex.new( :value($cs_idx) ));
         $il.append(JAST::Instruction.new( :op('aload'), @argstuff[1] ));
         $il.append(JAST::InvokeDynamic.new(
-            $node.name, 'V', [$TYPE_TC, 'I', "[$TYPE_OBJ"],
-            'org/perl6/nqp/runtime/IndyBootstrap', 'subcall'
+            'subcall', 'V', [$TYPE_TC, 'I', "[$TYPE_OBJ"],
+            'org/perl6/nqp/runtime/IndyBootstrap', 'subcall',
+            [
+                JAST::PushSVal.new( :value($node.name) )
+            ]
         ));
     }
     

@@ -41,7 +41,7 @@ public class IndyBootstrap {
         return res;
     }
     
-    public static CallSite subcall(Lookup caller, String name, MethodType type) {
+    public static CallSite subcall(Lookup caller, String _, MethodType type, String name) {
         try {
             /* Look up subcall resolver method. */
             MethodType resType = MethodType.methodType(void.class,
