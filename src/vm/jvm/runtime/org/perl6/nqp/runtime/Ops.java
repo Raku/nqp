@@ -1266,17 +1266,11 @@ public final class Ops {
             // Do the invocation.
             cr.staticInfo.mh.invokeExact(tc, cr, csd, args);
         }
-        catch (UnwindException e) {
-            throw e;
-        }
-        catch (LexoticException e) {
-            throw e;
-        }
-        catch (ResumeException e) {
+        catch (ControlException e) {
             throw e;
         }
         catch (Throwable e) {
-            ExceptionHandling.dieInternal(tc, e.toString());
+            ExceptionHandling.dieInternal(tc, e);
         }
     }
     public static SixModelObject invokewithcapture(SixModelObject invokee, SixModelObject capture, ThreadContext tc) throws Exception {

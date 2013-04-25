@@ -2,7 +2,7 @@ package org.perl6.nqp.runtime;
 
 import org.perl6.nqp.sixmodel.SixModelObject;
 
-public class UnwindException extends RuntimeException {
+public class UnwindException extends ControlException {
     private static final long serialVersionUID = -2452898396745530180L;
     
     /* What we're unwinding to. */

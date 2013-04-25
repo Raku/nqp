@@ -39,6 +39,9 @@ public class ExceptionHandling {
         handlerDynamic(tc, ExceptionHandling.EX_CAT_CATCH, exObj);
         return stooge;
     }
+    public static RuntimeException dieInternal(ThreadContext tc, Throwable e) {
+        return dieInternal(tc, e.toString());
+    }
     
     /* Finds and executes a handler, using dynamic scope to find it. */
     public static SixModelObject handlerDynamic(ThreadContext tc, long category,
