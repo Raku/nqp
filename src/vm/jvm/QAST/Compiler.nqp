@@ -22,8 +22,12 @@ my $TYPE_MHL       := 'Ljava/lang/invoke/MethodHandles$Lookup;';
 my $TYPE_CLASS     := 'Ljava/lang/Class;';
 my $TYPE_LONG      := 'Ljava/lang/Long;';
 my $TYPE_DOUBLE    := 'Ljava/lang/Double;';
+my $TYPE_EH        := 'Lorg/perl6/nqp/runtime/ExceptionHandling;';
 my $TYPE_EX_LEX    := 'Lorg/perl6/nqp/runtime/LexoticException;';
 my $TYPE_EX_UNWIND := 'Lorg/perl6/nqp/runtime/UnwindException;';
+my $TYPE_EX_CONT   := 'Lorg/perl6/nqp/runtime/ControlException;';
+my $TYPE_EX_RT     := 'Ljava/lang/RuntimeException;';
+my $TYPE_THROWABLE := 'Ljava/lang/Throwable;';
 
 # Exception handler categories.
 my $EX_CAT_CATCH   := 1;
@@ -2755,7 +2759,7 @@ class QAST::CompilerJAST {
             # Stash lexical names.
             $*CODEREFS.set_lexical_names($node.cuid, |$block.lexical_names_by_type());
             
-            # Emit prelude. This crates and stashes the CallFrame.
+            # Emit prelude. This creates and stashes the CallFrame.
             $*JMETH.add_local('cf', $TYPE_CF);
             $*JMETH.append(JAST::Instruction.new( :op('new'), $TYPE_CF ));
             $*JMETH.append(JAST::Instruction.new( :op('dup') ));
@@ -2895,17 +2899,30 @@ class QAST::CompilerJAST {
             $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
                 'return_' ~ typechar($body.type), 'Void', jtype($body.type), $TYPE_CF ));
             
-            # Keep the thread state in sync. Note, JVM doesn't do finally
-            # natively, so we just emit this in a catch as well as at the
-            # end before exit.
-            my $unwind := JAST::InstructionList.new();
-            for ($il, $unwind) {
-                $_.append(JAST::Instruction.new( :op('aload'), 'cf' ));
-                $_.append(JAST::Instruction.new( :op('invokevirtual'),
-                    $TYPE_CF, 'leave', 'Void' ));
-            }
-            $unwind.append(JAST::Instruction.new( :op('athrow') ));
-            $*JMETH.append(JAST::TryCatch.new( :try($il), :catch($unwind), :type('') ));
+            # Emit the postlude. We catch any exceptions. Control ones are
+            # rethrown, after calling CallFrame.leave. Others are passed on to
+            # dieInternal. Finally, if there's no exception, we also need to
+            # call CallFrame.leave.
+            $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
+            $il.append(JAST::Instruction.new( :op('invokevirtual'),
+                $TYPE_CF, 'leave', 'Void' ));
+            my $posthan := JAST::InstructionList.new();
+            my $nclab   := JAST::Label.new( :name('non_cont_ex') );
+            $posthan.append(JAST::Instruction.new( :op('dup') ));
+            $posthan.append(JAST::Instruction.new( :op('instanceof'), $TYPE_EX_CONT ));
+            $posthan.append(JAST::Instruction.new( :op('ifeq'), $nclab ));
+            $posthan.append(JAST::Instruction.new( :op('aload'), 'cf' ));
+            $posthan.append(JAST::Instruction.new( :op('invokevirtual'),
+                $TYPE_CF, 'leave', 'Void' ));
+            $posthan.append(JAST::Instruction.new( :op('athrow') ));
+            $posthan.append($nclab);
+            $posthan.append(JAST::Instruction.new( :op('aload_1') ));
+            $posthan.append(JAST::Instruction.new( :op('swap') ));
+            $posthan.append(JAST::Instruction.new( :op('invokestatic'),
+                $TYPE_EH, 'dieInternal', $TYPE_EX_RT, $TYPE_TC, $TYPE_THROWABLE ));
+            $posthan.append(JAST::Instruction.new( :op('athrow') ));
+            $*JMETH.append(JAST::TryCatch.new( :try($il), :catch($posthan),
+                :type($TYPE_THROWABLE) ));
             $*JMETH.append(JAST::Instruction.new( :op('return') ));
             
             # Finalize method and add it to the class.

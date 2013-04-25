@@ -610,6 +610,8 @@ public class JASTToJVMBytecode {
             emitInvokeDynamic(m, rest);
             break;
         case 0xbb: // new
+        case 0xc0: // checkcast
+        case 0xc1: // instanceof
             Type t = processType(rest);
             m.visitTypeInsn(instruction, t.getInternalName());
             break;
