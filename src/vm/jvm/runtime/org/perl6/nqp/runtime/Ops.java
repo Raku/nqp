@@ -2694,6 +2694,7 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc, "freshcoderef must be used on a CodeRef");
         CodeRef clone = (CodeRef)code.clone(tc);
         clone.staticInfo = clone.staticInfo.clone();
+        clone.staticInfo.staticCode = clone;
         return clone;
     }
     public static SixModelObject markcodestatic(SixModelObject code, ThreadContext tc) {
