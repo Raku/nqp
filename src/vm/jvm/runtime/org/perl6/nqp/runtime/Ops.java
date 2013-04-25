@@ -2786,10 +2786,13 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc, "getextype needs an object with VMException representation");
     }
     public static String getmessage(SixModelObject obj, ThreadContext tc) {
-        if (obj instanceof VMExceptionInstance)
-            return ((VMExceptionInstance)obj).message;
-        else
+        if (obj instanceof VMExceptionInstance) {
+            String msg = ((VMExceptionInstance)obj).message;
+            return msg == null ? "Died" : msg;
+        }
+        else {
             throw ExceptionHandling.dieInternal(tc, "getmessage needs an object with VMException representation");
+        }
     }
     public static SixModelObject getpayload(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof VMExceptionInstance)
