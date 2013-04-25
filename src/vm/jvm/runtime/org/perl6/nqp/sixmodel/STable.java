@@ -1,6 +1,7 @@
 package org.perl6.nqp.sixmodel;
 
 import java.util.Map;
+import org.perl6.nqp.runtime.HLLConfig;
 
 /**
  * An STable (Shared Table) represents a given HOW/REPR pairing, and thus a type.
@@ -24,6 +25,17 @@ public class STable {
      * This flag is set if we consider the method cache authoritative.
      */
     public static final int METHOD_CACHE_AUTHORITATIVE = 4;
+    
+    /**
+     * HLL type roles.
+     */
+    private static final int HLL_ROLE_NONE = 0;
+    private static final int HLL_ROLE_INT = 1;
+    private static final int HLL_ROLE_NUM = 2;
+    private static final int HLL_ROLE_STR = 3;
+    private static final int HLL_ROLE_ARRAY = 4;
+    private static final int HLL_ROLE_HASH = 5;
+    private static final int HLL_ROLE_CODE = 6;
     
     /**
      * Indicates that there's no attribute access hint.
@@ -116,4 +128,14 @@ public class STable {
      * Serialization context that this s-table belongs to.
      */
     public SerializationContext sc;
+    
+    /**
+     * The HLL that this type is owned by, if any.
+     */
+    public HLLConfig hllOwner;
+    
+    /**
+     * The role that the type plays in the HLL, if any.
+     */
+    public long hllRole;
 }

@@ -2872,6 +2872,14 @@ public final class Ops {
         new LibraryLoader().load(tc, filename);
         return filename;
     }
+    public static SixModelObject settypehll(SixModelObject type, String language, ThreadContext tc) {
+        type.st.hllOwner = tc.gc.getHLLConfigFor(language);
+        return type;
+    }
+    public static SixModelObject settypehllrole(SixModelObject type, long role, ThreadContext tc) {
+        type.st.hllRole = role;
+        return type;
+    }
     
     /* NFA operations. */
     public static SixModelObject nfafromstatelist(SixModelObject states, SixModelObject nfaType, ThreadContext tc) {
