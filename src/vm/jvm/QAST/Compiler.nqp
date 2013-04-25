@@ -2070,15 +2070,7 @@ class QAST::CompilerJAST {
                 
                 for @!lexical_name_lists[$i] {
                     if $_ {
-                        $cra.append(JAST::PushIndex.new( :value(+$_) ));
-                        $cra.append(JAST::Instruction.new( :op('anewarray'), $TYPE_STR ));
-                        my int $i := 0;
-                        for $_ {
-                            $cra.append(JAST::Instruction.new( :op('dup') ));
-                            $cra.append(JAST::PushIndex.new( :value($i++) ));
-                            $cra.append(JAST::PushSVal.new( :value($_) ));
-                            $cra.append(JAST::Instruction.new( :op('aastore') ));
-                        }
+                        $cra.append(JAST::PushSVal.new( :value(nqp::join("\0", $_)) ));
                     }
                     else {
                         $cra.append(JAST::Instruction.new( :op('aconst_null') ));
@@ -2106,7 +2098,7 @@ class QAST::CompilerJAST {
                 $cra.append(JAST::Instruction.new( :op('invokespecial'),
                     $TYPE_CR, '<init>',
                     'Void', $TYPE_CU, $TYPE_MH, $TYPE_STR, $TYPE_STR,
-                    $TYPE_STRARR, $TYPE_STRARR, $TYPE_STRARR, $TYPE_STRARR,
+                    $TYPE_STR, $TYPE_STR, $TYPE_STR, $TYPE_STR,
                     "[[J"));
                 $cra.append(JAST::Instruction.new( :op('aastore') )); # Push to the array
                 $i++;
