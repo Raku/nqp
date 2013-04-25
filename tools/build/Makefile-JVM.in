@@ -327,7 +327,7 @@ $(RUNNER):
 $(P5QREGEX_CLASS): $(ALL_OUTPUT) $(P5QREGEX_SOURCES)
 	$(MKPATH) $(STAGE2)/gen
 	$(PERL) tools/build/gen-cat.pl jvm $(P5QREGEX_SOURCES) > $(STAGE2)/$(P5QREGEX_COMBINED)
-	$(RUNNER) --target=classfile --output=$(P5QREGEX_CLASS) \
+	.@slash@$(RUNNER) --target=classfile --output=$(P5QREGEX_CLASS) \
 	    $(STAGE2)/$(P5QREGEX_COMBINED)
 
 bootstrap-files: $(STAGE2_OUTPUT)
