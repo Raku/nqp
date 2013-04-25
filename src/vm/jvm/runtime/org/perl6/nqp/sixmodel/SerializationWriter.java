@@ -552,14 +552,16 @@ public class SerializationWriter {
         {
             if (fatal)
                 throw ExceptionHandling.dieInternal(tc,
-                    "Serialization Error: missing static code ref for closure");
+                    "Serialization Error: missing static code ref for closure " +
+                    ((CodeRef)staticCode).staticInfo.name);
             else
                 return null;
         }
         if (staticCode.sc == null) {
             if (fatal)
                 throw ExceptionHandling.dieInternal(tc,
-                    "Serialization Error: could not locate static code ref for closure");
+                    "Serialization Error: could not locate static code ref for closure " +
+                    ((CodeRef)staticCode).staticInfo.name);
             else
                 return null;
         }
