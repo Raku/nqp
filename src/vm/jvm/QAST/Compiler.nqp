@@ -1105,38 +1105,43 @@ sub process_args($qastcomp, @children, $il, $first, :$inv_temp) {
 QAST::OperationsJAST.add_core_op('call', sub ($qastcomp, $node) {
     my $il := JAST::InstructionList.new();
     
-    # Small hack for JVM-specific ops until we have a better way.
-    if $node.name ne "" && nqp::substr($node.name, 0, 8) eq '&__JVM__' {
-        return $qastcomp.as_jast(QAST::Op.new(
-            :op(nqp::substr($node.name, 8)),
-            |$node.list
+    # If it's a direct call, then use invokedynamic to resolve the name in
+    # the current lexical scope.
+    if $node.name ne "" {
+        # Process arguments.
+        my @argstuff := process_args($qastcomp, @($node), $il, $node.name eq "" ?? 1 !! 0);
+        my $cs_idx := @argstuff[0];
+        
+        # Emit the call.
+        $il.append(JAST::Instruction.new( :op('aload_1') ));
+        $il.append(JAST::PushIndex.new( :value($cs_idx) ));
+        $il.append(JAST::Instruction.new( :op('aload'), @argstuff[1] ));
+        $il.append(JAST::InvokeDynamic.new(
+            $node.name, 'V', [$TYPE_TC, 'I', "[$TYPE_OBJ"],
+            'org/perl6/nqp/runtime/IndyBootstrap', 'subcall'
         ));
     }
     
-    # Get thing to call.
-    my $invokee;
-    if $node.name ne "" {
-        $invokee := $qastcomp.as_jast(QAST::Var.new( :name($node.name), :scope('lexical') ));
-    }
+    # Otherwise, it's an indirect call.
     else {
+        # Compile the thing to invoke.
         nqp::die("A 'call' node must have a name or at least one child") unless +@($node) >= 1;
-        $invokee := $qastcomp.as_jast($node[0]);
-    }
-    nqp::die("Invocation target must be an object") unless $invokee.type == $RT_OBJ;
-    $il.append($invokee.jast);
-    
-    # Process arguments.
-    my @argstuff := process_args($qastcomp, @($node), $il, $node.name eq "" ?? 1 !! 0);
-    my $cs_idx := @argstuff[0];
+        my $invokee := $qastcomp.as_jast($node[0], :want($RT_OBJ));
+        $il.append($invokee.jast);
 
-    # Emit call.
-    $*STACK.obtain($il, $invokee);
-    $il.append(JAST::PushIndex.new( :value($cs_idx) ));
-    $il.append(JAST::Instruction.new( :op('aload'), @argstuff[1] ));
-    $il.append(JAST::Instruction.new( :op('aload_1') ));
-    $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS, 'invoke',
-        'Void', $TYPE_SMO, 'Integer', "[$TYPE_OBJ", $TYPE_TC ));
-    
+        # Process arguments.
+        my @argstuff := process_args($qastcomp, @($node), $il, $node.name eq "" ?? 1 !! 0);
+        my $cs_idx := @argstuff[0];
+        
+        # Emit the call.
+        $*STACK.obtain($il, $invokee);
+        $il.append(JAST::PushIndex.new( :value($cs_idx) ));
+        $il.append(JAST::Instruction.new( :op('aload'), @argstuff[1] ));
+        $il.append(JAST::Instruction.new( :op('aload_1') ));
+        $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS, 'invoke',
+            'Void', $TYPE_SMO, 'Integer', "[$TYPE_OBJ", $TYPE_TC ));
+    }
+
     # Load result onto the stack, unless in void context.
     if $*WANT != $RT_VOID {
         my $rtype := rttype_from_typeobj($node.returns);
