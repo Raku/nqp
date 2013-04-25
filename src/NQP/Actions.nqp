@@ -902,6 +902,10 @@ class NQP::Actions is HLL::Actions {
                             lexical_package_lookup([$name], $/),
                             QAST::Var.new( :name('&' ~ $name), :scope('lexical') )
                         ));
+                        
+                        # Also need to make sure it gets a code object so it's
+                        # in the SC.
+                        $*W.create_code($past, $name, 0);
                     }
                 }
                 $past := QAST::Var.new( :name('&' ~ $name), :scope('lexical') );
