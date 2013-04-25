@@ -3395,6 +3395,59 @@ public final class Ops {
         return makeBI(tc, type, getBI(tc, a).abs());
     }
     
+    public static SixModelObject radix_I(long radix_l, String str, long zpos, long flags, SixModelObject type, ThreadContext tc) {
+        BigInteger zvalue = BigInteger.ZERO;
+        BigInteger zbase = BigInteger.ONE;
+        int chars = str.length();
+        BigInteger value = zvalue;
+        BigInteger base = zbase;
+        long pos = -1;
+        char ch;
+        boolean neg = false;
+        BigInteger radix = BigInteger.valueOf(radix_l);
+
+        if (radix_l > 36) {
+            throw ExceptionHandling.dieInternal(tc, "Cannot convert radix of " + radix_l + " (max 36)");
+        }
+
+        ch = (zpos < chars) ? str.charAt((int)zpos) : 0;
+        if ((flags & 0x02) != 0 && (ch == '+' || ch == '-')) {
+            neg = (ch == '-');
+            zpos++;
+            ch = (zpos < chars) ? str.charAt((int)zpos) : 0;
+        }
+        while (zpos < chars) {
+            if (ch >= '0' && ch <= '9') ch = (char)(ch - '0');
+            else if (ch >= 'a' && ch <= 'z') ch = (char)(ch - 'a' + 10);
+            else if (ch >= 'A' && ch <= 'Z') ch = (char)(ch - 'A' + 10);
+            else break;
+            if (ch >= radix_l) break;
+            zvalue = zvalue.multiply(radix).add(BigInteger.valueOf(ch));
+            zbase = zbase.multiply(radix);
+            zpos++; pos = zpos;
+            if (ch != 0 || (flags & 0x04) == 0) { value=zvalue; base=zbase; }
+            if (zpos >= chars) break;
+            ch = str.charAt((int)zpos);
+            if (ch != '_') continue;
+            zpos++;
+            if (zpos >= chars) break;
+            ch = str.charAt((int)zpos);
+        }
+
+        if (neg || (flags & 0x01) != 0) { value = value.negate(); }
+        
+        HLLConfig hllConfig = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig;
+        SixModelObject result = hllConfig.slurpyArrayType.st.REPR.allocate(tc,
+                hllConfig.slurpyArrayType.st);
+        result.initialize(tc);
+        
+        result.push_boxed(tc, makeBI(tc, type, value));
+        result.push_boxed(tc, makeBI(tc, type, base));
+        result.push_boxed(tc, makeBI(tc, type, BigInteger.valueOf(pos)));
+        
+        return result;
+    }
+    
     public static SixModelObject bitor_I(SixModelObject a, SixModelObject b, SixModelObject type, ThreadContext tc) {
         return makeBI(tc, type, getBI(tc, a).or(getBI(tc, b)));
     }

@@ -1580,6 +1580,7 @@ QAST::OperationsJAST.map_classlib_core_op('ln_n', $TYPE_MATH, 'log', [$RT_NUM], 
 QAST::OperationsJAST.map_classlib_core_op('sqrt_n', $TYPE_MATH, 'sqrt', [$RT_NUM], $RT_NUM);
 QAST::OperationsJAST.map_classlib_core_op('exp_n', $TYPE_MATH, 'exp', [$RT_NUM], $RT_NUM);
 QAST::OperationsJAST.map_classlib_core_op('radix', $TYPE_OPS, 'radix', [$RT_INT, $RT_STR, $RT_INT, $RT_INT], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('radix_I', $TYPE_OPS, 'radix_I', [$RT_INT, $RT_STR, $RT_INT, $RT_INT, $RT_OBJ], $RT_OBJ, :tc);
 
 # trig opcodes
 QAST::OperationsJAST.map_classlib_core_op('sin_n', $TYPE_MATH, 'sin', [$RT_NUM], $RT_NUM);
