@@ -1957,6 +1957,9 @@ QAST::Operations.add_core_pirop_mapping('unshift_s', 'unshift', '0Ps', :inlinabl
 QAST::Operations.add_core_pirop_mapping('unshift_i', 'unshift', '0Pi', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('unshift_n', 'unshift', '0Pn', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('splice', 'splice', '0PPii', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('isint', 'nqp_isint', 'IP', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('isnum', 'nqp_isnum', 'IP', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('isstr', 'nqp_isstr', 'IP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('islist', 'nqp_islist', 'IP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('ishash', 'nqp_ishash', 'IP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('isinvokable', 'is_invokable', 'IP', :inlinable(1));

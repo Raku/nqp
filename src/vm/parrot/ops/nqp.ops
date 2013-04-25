@@ -3060,3 +3060,63 @@ inline op nqp_hllizefor(out PMC, invar PMC, in STR) {
     else
         $1 = hllize(interp, $2, tgt_hll);
 }
+
+/*
+
+=item nqp_isint
+
+Checks if the type of thing in $2 is unboxable to an int.
+
+=cut
+
+*/
+inline op nqp_isint(out INT, invar PMC) :base_core {
+    PMC *var = decontainerize(interp, $2);
+    if (var->vtable->base_type == smo_id) {
+        storage_spec ss = REPR(var)->get_storage_spec(interp, STABLE(var));
+        $1 = ss.boxed_primitive == STORAGE_SPEC_BP_INT ? 1 : 0;
+    }
+    else {
+        $1 = var->vtable->base_type == enum_class_Integer ? 1 : 0;
+    }
+}
+
+/*
+
+=item nqp_isnum
+
+Checks if the type of thing in $2 is unboxable to a num.
+
+=cut
+
+*/
+inline op nqp_isnum(out INT, invar PMC) :base_core {
+    PMC *var = decontainerize(interp, $2);
+    if (var->vtable->base_type == smo_id) {
+        storage_spec ss = REPR(var)->get_storage_spec(interp, STABLE(var));
+        $1 = ss.boxed_primitive == STORAGE_SPEC_BP_NUM ? 1 : 0;
+    }
+    else {
+        $1 = var->vtable->base_type == enum_class_Float ? 1 : 0;
+    }
+}
+
+/*
+
+=item nqp_isstr
+
+Checks if the type of thing in $2 is unboxable to a str.
+
+=cut
+
+*/
+inline op nqp_isstr(out INT, invar PMC) :base_core {
+    PMC *var = decontainerize(interp, $2);
+    if (var->vtable->base_type == smo_id) {
+        storage_spec ss = REPR(var)->get_storage_spec(interp, STABLE(var));
+        $1 = ss.boxed_primitive == STORAGE_SPEC_BP_STR ? 1 : 0;
+    }
+    else {
+        $1 = var->vtable->base_type == enum_class_String ? 1 : 0;
+    }
+}
