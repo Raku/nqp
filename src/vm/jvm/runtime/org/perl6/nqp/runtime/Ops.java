@@ -3254,6 +3254,12 @@ public final class Ops {
         return getBI(tc, value).toString((int)radix).toUpperCase();
     }
     
+    public static long isbig_I(SixModelObject value, ThreadContext tc) {
+        /* Check if it needs more bits than a long can offer; note that
+         * bitLength excludes sign considerations, thus 63 rather than 64. */
+        return getBI(tc, value).bitLength() > 63 ? 1 : 0;
+    }
+    
     public static SixModelObject fromnum_I(double num, SixModelObject type, ThreadContext tc) {
         return makeBI(tc, type, BigDecimal.valueOf(num).toBigInteger());
     }
