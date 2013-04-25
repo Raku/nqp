@@ -2779,6 +2779,12 @@ public final class Ops {
         else
             throw ExceptionHandling.dieInternal(tc, "getmessage needs an object with VMException representation");
     }
+    public static SixModelObject getpayload(SixModelObject obj, ThreadContext tc) {
+        if (obj instanceof VMExceptionInstance)
+            return ((VMExceptionInstance)obj).payload;
+        else
+            throw ExceptionHandling.dieInternal(tc, "getpayload needs an object with VMException representation");
+    }
     public static SixModelObject backtracestrings(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof VMExceptionInstance) {
             SixModelObject Array = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.listType;
