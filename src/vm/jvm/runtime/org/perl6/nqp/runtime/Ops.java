@@ -1493,6 +1493,18 @@ public final class Ops {
     public static String unbox_s(SixModelObject obj, ThreadContext tc) {
         return obj.get_str(tc);
     }
+    public static long isint(SixModelObject obj, ThreadContext tc) {
+        StorageSpec ss = obj.st.REPR.get_storage_spec(tc, obj.st);
+        return (ss.can_box & StorageSpec.CAN_BOX_INT) == 0 ? 0 : 1;
+    }
+    public static long isnum(SixModelObject obj, ThreadContext tc) {
+        StorageSpec ss = obj.st.REPR.get_storage_spec(tc, obj.st);
+        return (ss.can_box & StorageSpec.CAN_BOX_NUM) == 0 ? 0 : 1;
+    }
+    public static long isstr(SixModelObject obj, ThreadContext tc) {
+        StorageSpec ss = obj.st.REPR.get_storage_spec(tc, obj.st);
+        return (ss.can_box & StorageSpec.CAN_BOX_STR) == 0 ? 0 : 1;
+    }
     
     /* Attribute operations. */
     public static SixModelObject getattr(SixModelObject obj, SixModelObject ch, String name, ThreadContext tc) {

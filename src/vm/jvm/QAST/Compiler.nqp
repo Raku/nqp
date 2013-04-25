@@ -1774,6 +1774,9 @@ QAST::OperationsJAST.map_classlib_core_op('shift_i', $TYPE_OPS, 'shift_i', [$RT_
 QAST::OperationsJAST.map_classlib_core_op('shift_n', $TYPE_OPS, 'shift_n', [$RT_OBJ], $RT_NUM, :tc);
 QAST::OperationsJAST.map_classlib_core_op('shift_s', $TYPE_OPS, 'shift_s', [$RT_OBJ], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('splice', $TYPE_OPS, 'splice', [$RT_OBJ, $RT_OBJ, $RT_INT, $RT_INT], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('isint', $TYPE_OPS, 'isint', [$RT_OBJ], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('isnum', $TYPE_OPS, 'isnum', [$RT_OBJ], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('isstr', $TYPE_OPS, 'isstr', [$RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('islist', $TYPE_OPS, 'islist', [$RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('ishash', $TYPE_OPS, 'ishash', [$RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('iterator', $TYPE_OPS, 'iter', [$RT_OBJ], $RT_OBJ, :tc);
