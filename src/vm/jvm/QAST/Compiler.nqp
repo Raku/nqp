@@ -123,6 +123,10 @@ sub fresh($type) {
     my $meth := @fresh_methods[$type];
     $*TA."$meth"()
 }
+sub bfresh($type) {
+    my $meth := @fresh_methods[$type];
+    $*BLOCK_TA."$meth"()
+}
 
 # Argument flags.
 my $ARG_OBJ   := 0;
@@ -570,6 +574,7 @@ for <if unless> -> $op_name {
         
         # Compile conditional expression and saving of it if we need to.
         my $il := JAST::InstructionList.new();
+        $*STACK.spill_to_locals($il);
         my $cond := $qastcomp.as_jast($op[0]);
         $il.append($cond.jast);
         $*STACK.obtain($il, $cond);
@@ -719,6 +724,7 @@ QAST::OperationsJAST.add_core_op('ifnull', -> $qastcomp, $op {
     
     # Compile the expression.
     my $il   := JAST::InstructionList.new();
+    $*STACK.spill_to_locals($il);
     my $expr := $qastcomp.as_jast($op[0], :want($RT_OBJ));
     $il.append($expr.jast);
     
@@ -770,6 +776,7 @@ for ('', 'repeat_') -> $repness {
             
             # Emit loop prelude, evaluating condition. 
             my $testil := JAST::InstructionList.new();
+            $*STACK.spill_to_locals($testil);
             if $repness {
                 # It's a repeat_ variant, need to go straight into the
                 # loop body unconditionally.
@@ -904,6 +911,7 @@ QAST::OperationsJAST.add_core_op('for', -> $qastcomp, $op {
     # Evaluate the thing we'll iterate over, get the iterator and
     # store it in a temporary.
     my $il := JAST::InstructionList.new();
+    $*STACK.spill_to_locals($il);
     my $list_res := $qastcomp.as_jast(@operands[0]);
     $il.append($list_res.jast);
     $*STACK.obtain($il, $list_res);
@@ -1198,6 +1206,7 @@ QAST::OperationsJAST.add_core_op('call', sub ($qastcomp, $node) {
         # Process arguments.
         my @argstuff := process_args($qastcomp, @($node), $il, $node.name eq "" ?? 1 !! 0);
         my $cs_idx := @argstuff[0];
+        $*STACK.spill_to_locals($il);
         
         # Emit the call.
         $*STACK.obtain($il, $invokee);
@@ -1248,6 +1257,7 @@ QAST::OperationsJAST.add_core_op('callmethod', -> $qastcomp, $node {
     my $inv_temp := $*TA.fresh_o();
     my @argstuff := process_args($qastcomp, @children, $il, 0, :$inv_temp);
     my $cs_idx := @argstuff[0];
+    $*STACK.spill_to_locals($il);
     
     # Look up method.
     $il.append(JAST::Instruction.new( :op('aload_1') ));
@@ -2541,7 +2551,7 @@ class QAST::CompilerJAST {
                     nqp::pop(@!spill_locals[$type])
                 }
                 else {
-                    fresh($type);
+                    bfresh($type);
                 }
             }
             
@@ -3123,6 +3133,7 @@ class QAST::CompilerJAST {
             
             my $il := JAST::InstructionList.new();
             $il.append($var_res.jast);
+            $*STACK.spill_to_locals($il);
             $*STACK.obtain($il, $var_res);
             
             my $lbl := JAST::Label.new(:name($node.unique('fallback')));
