@@ -839,6 +839,7 @@ for ('', 'repeat_') -> $repness {
                 my $next_res := $qastcomp.as_jast_in_handler(@operands[2],
                     $l_handler_id || $*HANDLER_IDX, :want($RT_VOID));
                 $il.append($next_res.jast);
+                $*STACK.obtain($il, $next_res);
             }
             
             # Emit the iteration jump and end label.
@@ -2533,6 +2534,9 @@ class QAST::CompilerJAST {
         # Spills the currnet stack contents to local variables.
         method spill_to_locals($il) {
             sub obtain_temp($type) {
+                if $type == $RT_VOID {
+                    nqp::die("Cannot spill a stack containing a void");
+                }
                 if @!spill_locals[$type] {
                     nqp::pop(@!spill_locals[$type])
                 }
@@ -2826,6 +2830,7 @@ class QAST::CompilerJAST {
                 my $*BLOCK := $block;
                 my $*WANT;
                 $body := self.compile_all_the_stmts($node.list, :node($node.node));
+                $*STACK.obtain(NQPMu, $body);
             }
             
             # Stash lexical names.
@@ -3878,7 +3883,9 @@ class QAST::CompilerJAST {
             QAST::SVal.new( :value($node.name) ),
             QAST::Var.new( :name(%*REG<altmarks>), :scope('local') )
         );
-        $il_alts.append(self.as_jast($altmeth, :want($RT_VOID)).jast);
+        my $altres := self.as_jast($altmeth, :want($RT_VOID));
+        $il_alts.append($altres.jast);
+        $*STACK.obtain($il_alts, $altres);
         $il_alts.append(JAST::Instruction.new( :op('goto'), %*REG<fail> ));
 
         # Emit all the possible alternations.
@@ -4211,7 +4218,9 @@ class QAST::CompilerJAST {
             QAST::Var.new( :name(%*REG<pos>), :scope('local'), :returns(int) ),
             QAST::SVal.new( :value($node.name()) )
         );
-        self.as_jast($qast, :want($RT_VOID)).jast
+        my $res := self.as_jast($qast, :want($RT_VOID));
+        $*STACK.obtain(NQPMu, $res);
+        $res.jast
     }
     
     method enumcharlist($node) {
@@ -4298,7 +4307,9 @@ class QAST::CompilerJAST {
         if $node.backtrack ne 'r' {
             $qast.push(QAST::IVal.new( :value(1), :named('backtrack') ));
         }
-        self.as_jast($qast, :want($RT_VOID)).jast
+        my $res := self.as_jast($qast, :want($RT_VOID));
+        $*STACK.obtain(NQPMu, $res);
+        $res.jast;
     }
 
     method qastnode($node) {
@@ -4567,7 +4578,9 @@ class QAST::CompilerJAST {
                     QAST::Var.new( :name($temp), :scope('local') ),
                     QAST::SVal.new( :value($node.name) )
                 )));
-        $il.append(self.as_jast($methqast, :want($RT_VOID)).jast);
+        my $methres := self.as_jast($methqast, :want($RT_VOID));
+        $il.append($methres.jast);
+        $*STACK.obtain($il, $methres);
         
         $il.append(JAST::Instruction.new( :op('goto'), $donelabel ));
         $il.append($faillabel);
