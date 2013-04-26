@@ -237,7 +237,8 @@ public class IndyBootstrap {
             : Ops.emptyCallSite;
         
         /* Try to resolve method to a coderef. */
-        SixModelObject invokee = ((SixModelObject)args[0]).st.MethodCache.get(name);
+        SixModelObject invocant = (SixModelObject)args[0];
+        SixModelObject invokee = invocant.st.MethodCache.get(name);
         if (invokee == null)
             throw ExceptionHandling.dieInternal(tc, "Method '" + name + "' not found"); 
         CodeRef cr;
@@ -254,8 +255,25 @@ public class IndyBootstrap {
                 cr = (CodeRef)is.InvocationHandler;
         }
         
-        /* TODO: update callsite, stacking up guarded clauses. */
-        
+        /* Update callsite, stacking up guarded clauses. */
+        MethodType gType = MethodType.methodType(boolean.class,
+                STable.class, ThreadContext.class, SixModelObject.class);
+        MethodHandle guard;
+        try {
+            guard = caller.findStatic(IndyBootstrap.class, "stGuard", gType);
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        cs.setTarget(MethodHandles
+            .guardWithTest(
+                guard.bindTo(invocant.st),
+                MethodHandles
+                    .insertArguments(cr.staticInfo.mh, 1, cr, csd)
+                    .asVarargsCollector(Object[].class)
+                    .asType(cs.getTarget().type()),
+                cs.getTarget()));
+
         /* Make the sub call directly for this initial call. */
         try {
             cr.staticInfo.mh.invokeExact(tc, cr, csd, args);
@@ -264,9 +282,11 @@ public class IndyBootstrap {
             throw e;
         }
         catch (Throwable e) {
-            System.err.println(e.toString());
-            e.printStackTrace();
             ExceptionHandling.dieInternal(tc, e);
         }
+    }
+    
+    public static boolean stGuard(STable expected, ThreadContext _, SixModelObject obj) {
+        return obj.st == expected;
     }
 }
