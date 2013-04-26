@@ -1111,7 +1111,7 @@ sub process_args($qastcomp, @children, $il, $first, :$inv_temp) {
     # Return callsite index (which may create it if needed).
     return [$*CODEREFS.get_callsite_idx(@callsite, @argnames), $arg_array];
 }
-sub process_args_onto_stack($qastcomp, @children, $il, $first, :$inv_temp) {
+sub process_args_onto_stack($qastcomp, @children, $il, :$obj_first) {
     # Make sure we do positionals before nameds.
     my @pos;
     my @named;
@@ -1127,9 +1127,11 @@ sub process_args_onto_stack($qastcomp, @children, $il, $first, :$inv_temp) {
     my @arg_jtypes := [$TYPE_TC];
     my @callsite;
     my @argnames;
-    my int $i := $first;
+    my int $i := 0;
     while $i < +@order {
-        my $arg_res := $qastcomp.as_jast(@order[$i]);
+        my $arg_res := $i == 0 && $obj_first
+            ?? $qastcomp.as_jast(@order[$i], :want($RT_OBJ))
+            !! $qastcomp.as_jast(@order[$i]);
         $il.append($arg_res.jast);
         nqp::push(@arg_results, $arg_res);
         
@@ -1142,16 +1144,6 @@ sub process_args_onto_stack($qastcomp, @children, $il, $first, :$inv_temp) {
         }
         else {
             nqp::push(@arg_jtypes, jtype($arg_res.type));
-        }
-        
-        if $i == $first && $inv_temp {
-            if $type == $RT_OBJ {
-                $il.append(JAST::Instruction.new( :op('dup') ));
-                $il.append(JAST::Instruction.new( :op('astore'), $inv_temp ));
-            }
-            else {
-                nqp::die("Invocant must be an object");
-            }
         }
         
         my int $flags := 0;
@@ -1177,7 +1169,7 @@ QAST::OperationsJAST.add_core_op('call', sub ($qastcomp, $node) {
     # the current lexical scope.
     if $node.name ne "" {
         # Process arguments and force them into locals.
-        my @argstuff := process_args_onto_stack($qastcomp, @($node), $il, $node.name eq "" ?? 1 !! 0);
+        my @argstuff := process_args_onto_stack($qastcomp, @($node), $il);
         my $cs_idx := @argstuff[0];
         $*STACK.spill_to_locals($il);
         
@@ -1238,45 +1230,68 @@ QAST::OperationsJAST.add_core_op('callmethod', -> $qastcomp, $node {
     }
     my @children := nqp::clone(@($node));
     
-    # Handle indirect naming.
-    my $name_tmp;
-    if $node.name eq '' {
+    # If it's a direct call, we can go through invokedynamic to optimize the
+    # calling.
+    if $node.name ne '' {
+        # Process arguments and force them into locals.
+        my @argstuff := process_args_onto_stack($qastcomp, @children, $il);
+        my $cs_idx := @argstuff[0];
+        $*STACK.spill_to_locals($il);
+        
+        # Emit the call. Note, name passed as extra arg as some valid names in
+        # Perl 6 are not valid method names on the JVM. We use the fact that
+        # the stack was spilled to sneak the ThreadContext arg in.
+        $il.append(JAST::Instruction.new( :op('aload_1') ));
+        $*STACK.obtain($il, |@argstuff[1]) if @argstuff[1];
+        $il.append(JAST::InvokeDynamic.new(
+            'methcall', 'V', @argstuff[2],
+            'org/perl6/nqp/runtime/IndyBootstrap', 'methcall',
+            [
+                JAST::PushSVal.new( :value($node.name) ),
+                JAST::PushIndex.new( :value($cs_idx) )
+            ]
+        ));
+    }
+    
+    # Otherwise, it's indirect, and we need to resolve the method each and
+    # every call.
+    else {
+        # Process the name.
         if +@children == 1 {
             nqp::die("Method call must either supply a name or have a child node that evaluates to the name");
         }
         my $inv := @children.shift();
-        $name_tmp := $*TA.fresh_s();
+        my $name_tmp := $*TA.fresh_s();
         my $name_res := $qastcomp.as_jast(@children.shift(), :want($RT_STR));
         $il.append($name_res.jast);
         $*STACK.obtain($il, $name_res);
         $il.append(JAST::Instruction.new( :op('astore'), $name_tmp ));
         @children.unshift($inv);
-    }
-    
-    # Process arguments, stashing the invocant.
-    my $inv_temp := $*TA.fresh_o();
-    my @argstuff := process_args($qastcomp, @children, $il, 0, :$inv_temp);
-    my $cs_idx := @argstuff[0];
-    $*STACK.spill_to_locals($il);
-    
-    # Look up method.
-    $il.append(JAST::Instruction.new( :op('aload_1') ));
-    $il.append(JAST::Instruction.new( :op('aload'), $inv_temp ));
-    if $name_tmp {
-        $il.append(JAST::Instruction.new( :op('aload'), $name_tmp ));
-    }
-    else {
-        $il.append(JAST::PushSVal.new( :value($node.name) ));
-    }
-    $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS, 'findmethod', $TYPE_SMO, $TYPE_TC, $TYPE_SMO, $TYPE_STR ));
+        
+        # Process arguments, stashing the invocant.
+        my $inv_temp := $*TA.fresh_o();
+        my @argstuff := process_args($qastcomp, @children, $il, 0, :$inv_temp);
+        my $cs_idx := @argstuff[0];
+        
+        # Look up method.
+        $il.append(JAST::Instruction.new( :op('aload_1') ));
+        $il.append(JAST::Instruction.new( :op('aload'), $inv_temp ));
+        if $name_tmp {
+            $il.append(JAST::Instruction.new( :op('aload'), $name_tmp ));
+        }
+        else {
+            $il.append(JAST::PushSVal.new( :value($node.name) ));
+        }
+        $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS, 'findmethod', $TYPE_SMO, $TYPE_TC, $TYPE_SMO, $TYPE_STR ));
 
-    # Emit call.
-    $il.append(JAST::PushIndex.new( :value($cs_idx) ));
-    $il.append(JAST::Instruction.new( :op('aload'), @argstuff[1] ));
-    $il.append(JAST::Instruction.new( :op('aload_1') ));
-    $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS, 'invoke',
-        'Void', $TYPE_SMO, 'Integer', "[$TYPE_OBJ", $TYPE_TC ));
-    
+        # Emit call.
+        $il.append(JAST::PushIndex.new( :value($cs_idx) ));
+        $il.append(JAST::Instruction.new( :op('aload'), @argstuff[1] ));
+        $il.append(JAST::Instruction.new( :op('aload_1') ));
+        $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS, 'invoke',
+            'Void', $TYPE_SMO, 'Integer', "[$TYPE_OBJ", $TYPE_TC ));
+    }
+
     # Load result onto the stack, unless in void context.
     if $*WANT != $RT_VOID {
         my $rtype := rttype_from_typeobj($node.returns);
