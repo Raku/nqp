@@ -511,6 +511,7 @@ grammar NQP::Grammar is HLL::Grammar {
 
     token signature {
         [ <?{ $*INVOCANT_OK }> <.ws><invocant=.parameter><.ws> ':' ]?
+
         [ [<.ws><parameter><.ws> [',' | <before \s* [')' | '{']>]]* ]?
     }
 
@@ -525,7 +526,7 @@ grammar NQP::Grammar is HLL::Grammar {
 
     token param_var {
         <sigil> <twigil>?
-        [ <name=.ident> | $<name>=[<[/!]>] ]
+        [ <name=.identifier> | $<name>=[<[/!]>] ]
     }
 
     token named_param {
