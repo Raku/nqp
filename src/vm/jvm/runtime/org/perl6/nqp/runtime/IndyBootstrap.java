@@ -52,7 +52,10 @@ public class IndyBootstrap {
             /* Create a mutable callsite, and curry the resolver with it and
              * the sub name. */
             MutableCallSite cs = new MutableCallSite(type);
-            cs.setTarget(MethodHandles.insertArguments(res, 0, caller, cs, name, csIdx));
+            cs.setTarget(MethodHandles
+                .insertArguments(res, 0, caller, cs, name, csIdx)
+                .asCollector(Object[].class, type.parameterCount() - 1)
+                .asType(type));
             
             /* Produce callsite; it'll be updated with the resolved call upon the
              * first invocation. */
@@ -63,7 +66,7 @@ public class IndyBootstrap {
         }
     }
     
-    public static void subcallResolve(Lookup caller, MutableCallSite cs, String name, int csIdx, ThreadContext tc, Object[] args) {
+    public static void subcallResolve(Lookup caller, MutableCallSite cs, String name, int csIdx, ThreadContext tc, Object... args) {
         /* Locate the thing to call. */
         SixModelObject invokee = Ops.getlex(name, tc);
         
@@ -84,7 +87,7 @@ public class IndyBootstrap {
                 try {
                     cs.setTarget(caller
                         .findStatic(IndyBootstrap.class, "lexotic_o",
-                            MethodType.methodType(long.class, ThreadContext.class, Object[].class))
+                            MethodType.methodType(long.class, ThreadContext.class, SixModelObject.class))
                         .bindTo(throwee.target));
                 }
                 catch (Exception e) {
@@ -97,7 +100,7 @@ public class IndyBootstrap {
                 try {
                     cs.setTarget(MethodHandles.insertArguments(
                         caller.findStatic(IndyBootstrap.class, "lexotic_i",
-                            MethodType.methodType(long.class, ThreadContext.class, Object[].class)),
+                            MethodType.methodType(long.class, ThreadContext.class, long.class)),
                         0, throwee.target, intBoxType));
                 }
                 catch (Exception e) {
@@ -110,7 +113,7 @@ public class IndyBootstrap {
                 try {
                     cs.setTarget(MethodHandles.insertArguments(
                         caller.findStatic(IndyBootstrap.class, "lexotic_n",
-                            MethodType.methodType(long.class, ThreadContext.class, Object[].class)),
+                            MethodType.methodType(long.class, ThreadContext.class, double.class)),
                         0, throwee.target, numBoxType));
                 }
                 catch (Exception e) {
@@ -123,7 +126,7 @@ public class IndyBootstrap {
                 try {
                     cs.setTarget(MethodHandles.insertArguments(
                         caller.findStatic(IndyBootstrap.class, "lexotic_s",
-                            MethodType.methodType(long.class, ThreadContext.class, Object[].class)),
+                            MethodType.methodType(long.class, ThreadContext.class, String.class)),
                         0, throwee.target, strBoxType));
                 }
                 catch (Exception e) {
@@ -153,7 +156,10 @@ public class IndyBootstrap {
         
         /* Now need to adapt to the target callsite by binding the CodeRef
          * and callsite with what they've been resolved to. */
-        cs.setTarget(MethodHandles.insertArguments(cr.staticInfo.mh, 1, cr, csd));
+        cs.setTarget(MethodHandles
+            .insertArguments(cr.staticInfo.mh, 1, cr, csd)
+            .asVarargsCollector(Object[].class)
+            .asType(cs.getTarget().type()));
        
         /* Make the sub call directly for this initial call. */
         try {
@@ -167,31 +173,31 @@ public class IndyBootstrap {
         }
     }
     
-    public static void lexotic_o(long target, ThreadContext tc, Object[] args) {
+    public static void lexotic_o(long target, ThreadContext tc, SixModelObject arg) {
         LexoticException throwee = tc.theLexotic;
         throwee.target = target;
-        throwee.payload = (SixModelObject)args[0];
+        throwee.payload = arg;
         throw throwee;
     }
     
-    public static void lexotic_i(long target, SixModelObject boxType, ThreadContext tc, Object[] args) {
+    public static void lexotic_i(long target, SixModelObject boxType, ThreadContext tc, long arg) {
         LexoticException throwee = tc.theLexotic;
         throwee.target = target;
-        throwee.payload = Ops.box_i((long)args[0], boxType, tc);
+        throwee.payload = Ops.box_i(arg, boxType, tc);
         throw throwee;
     }
     
-    public static void lexotic_n(long target, SixModelObject boxType, ThreadContext tc, Object[] args) {
+    public static void lexotic_n(long target, SixModelObject boxType, ThreadContext tc, double arg) {
         LexoticException throwee = tc.theLexotic;
         throwee.target = target;
-        throwee.payload = Ops.box_n((double)args[0], boxType, tc);
+        throwee.payload = Ops.box_n(arg, boxType, tc);
         throw throwee;
     }
     
-    public static void lexotic_s(long target, SixModelObject boxType, ThreadContext tc, Object[] args) {
+    public static void lexotic_s(long target, SixModelObject boxType, ThreadContext tc, String arg) {
         LexoticException throwee = tc.theLexotic;
         throwee.target = target;
-        throwee.payload = Ops.box_s((String)args[0], boxType, tc);
+        throwee.payload = Ops.box_s(arg, boxType, tc);
         throw throwee;
     }
 }

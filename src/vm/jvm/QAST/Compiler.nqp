@@ -1102,22 +1102,83 @@ sub process_args($qastcomp, @children, $il, $first, :$inv_temp) {
     # Return callsite index (which may create it if needed).
     return [$*CODEREFS.get_callsite_idx(@callsite, @argnames), $arg_array];
 }
+sub process_args_onto_stack($qastcomp, @children, $il, $first, :$inv_temp) {
+    # Make sure we do positionals before nameds.
+    my @pos;
+    my @named;
+    for @children {
+        nqp::push(($_.named ?? @named !! @pos), $_);
+    }
+    my @order := @pos;
+    for @named { nqp::push(@order, $_) }
+    
+    # Process the arguments, computing each of them and putting them onto the
+    # stack.
+    my @arg_results;
+    my @arg_jtypes := [$TYPE_TC];
+    my @callsite;
+    my @argnames;
+    my int $i := $first;
+    while $i < +@order {
+        my $arg_res := $qastcomp.as_jast(@order[$i]);
+        $il.append($arg_res.jast);
+        nqp::push(@arg_results, $arg_res);
+        
+        my int $type := $arg_res.type;
+        if $type == $RT_INT {
+            nqp::push(@arg_jtypes, 'J');
+        }
+        elsif $type == $RT_NUM {
+            nqp::push(@arg_jtypes, 'D');
+        }
+        else {
+            nqp::push(@arg_jtypes, jtype($arg_res.type));
+        }
+        
+        if $i == $first && $inv_temp {
+            if $type == $RT_OBJ {
+                $il.append(JAST::Instruction.new( :op('dup') ));
+                $il.append(JAST::Instruction.new( :op('astore'), $inv_temp ));
+            }
+            else {
+                nqp::die("Invocant must be an object");
+            }
+        }
+        
+        my int $flags := 0;
+        if @order[$i].flat {
+            $flags := @order[$i].named ?? 24 !! 16;
+        }
+        elsif @order[$i].named -> $name {
+            $flags := 8;
+            nqp::push(@argnames, $name);
+        }
+        nqp::push(@callsite, arg_type($type) + $flags);
+        
+        $i++;
+    }
+
+    # Return callsite index (which may create it if needed).
+    return [$*CODEREFS.get_callsite_idx(@callsite, @argnames), @arg_results, @arg_jtypes];
+}
 QAST::OperationsJAST.add_core_op('call', sub ($qastcomp, $node) {
     my $il := JAST::InstructionList.new();
     
     # If it's a direct call, then use invokedynamic to resolve the name in
     # the current lexical scope.
     if $node.name ne "" {
-        # Process arguments.
-        my @argstuff := process_args($qastcomp, @($node), $il, $node.name eq "" ?? 1 !! 0);
+        # Process arguments and force them into locals.
+        my @argstuff := process_args_onto_stack($qastcomp, @($node), $il, $node.name eq "" ?? 1 !! 0);
         my $cs_idx := @argstuff[0];
+        $*STACK.spill_to_locals($il);
         
-        # Emit the call. Note, name passed as extra arg as some valid
-        # names in Perl 6 are not valid method names on the JVM.
+        # Emit the call. Note, name passed as extra arg as some valid names in
+        # Perl 6 are not valid method names on the JVM. We use the fact that
+        # the stack was spilled to sneak the ThreadContext arg in.
         $il.append(JAST::Instruction.new( :op('aload_1') ));
-        $il.append(JAST::Instruction.new( :op('aload'), @argstuff[1] ));
+        $*STACK.obtain($il, |@argstuff[1]) if @argstuff[1];
         $il.append(JAST::InvokeDynamic.new(
-            'subcall', 'V', [$TYPE_TC, "[$TYPE_OBJ"],
+            'subcall', 'V', @argstuff[2],
             'org/perl6/nqp/runtime/IndyBootstrap', 'subcall',
             [
                 JAST::PushSVal.new( :value($node.name) ),
@@ -2457,9 +2518,11 @@ class QAST::CompilerJAST {
                     return 1;
                 }
                 
-                # Mix of local and stack is not yet supported.
+                # Mix of local and stack: just spill everything still on the
+                # stack, and try again.
                 else {
-                    nqp::die("Mix of local and stack items in obtain NYI");
+                    self.spill_to_locals($il);
+                    return self.obtain($il, |@things);
                 }
             }
             
