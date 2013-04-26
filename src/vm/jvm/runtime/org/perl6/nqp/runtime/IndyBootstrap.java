@@ -85,10 +85,10 @@ public class IndyBootstrap {
             case CallSiteDescriptor.ARG_OBJ:
                 throwee.payload = (SixModelObject)args[0];
                 try {
-                    cs.setTarget(caller
-                        .findStatic(IndyBootstrap.class, "lexotic_o",
-                            MethodType.methodType(long.class, ThreadContext.class, SixModelObject.class))
-                        .bindTo(throwee.target));
+                    cs.setTarget(MethodHandles.insertArguments(
+                        caller.findStatic(IndyBootstrap.class, "lexotic_o",
+                            MethodType.methodType(void.class, long.class, ThreadContext.class, SixModelObject.class)),
+                        0, throwee.target));
                 }
                 catch (Exception e) {
                     throw new RuntimeException(e);
@@ -100,7 +100,8 @@ public class IndyBootstrap {
                 try {
                     cs.setTarget(MethodHandles.insertArguments(
                         caller.findStatic(IndyBootstrap.class, "lexotic_i",
-                            MethodType.methodType(long.class, ThreadContext.class, long.class)),
+                            MethodType.methodType(void.class, long.class,
+                                    SixModelObject.class, ThreadContext.class, long.class)),
                         0, throwee.target, intBoxType));
                 }
                 catch (Exception e) {
@@ -113,7 +114,8 @@ public class IndyBootstrap {
                 try {
                     cs.setTarget(MethodHandles.insertArguments(
                         caller.findStatic(IndyBootstrap.class, "lexotic_n",
-                            MethodType.methodType(long.class, ThreadContext.class, double.class)),
+                            MethodType.methodType(void.class, long.class,
+                                    SixModelObject.class, ThreadContext.class, double.class)),
                         0, throwee.target, numBoxType));
                 }
                 catch (Exception e) {
@@ -126,7 +128,8 @@ public class IndyBootstrap {
                 try {
                     cs.setTarget(MethodHandles.insertArguments(
                         caller.findStatic(IndyBootstrap.class, "lexotic_s",
-                            MethodType.methodType(long.class, ThreadContext.class, String.class)),
+                            MethodType.methodType(void.class, long.class,
+                                    SixModelObject.class, ThreadContext.class, String.class)),
                         0, throwee.target, strBoxType));
                 }
                 catch (Exception e) {
