@@ -385,4 +385,66 @@ public class IndyBootstrap {
     public static boolean stGuard(STable expected, ThreadContext _, SixModelObject obj) {
         return obj.st == expected;
     }
+    
+    public static CallSite indmethcall(Lookup caller, String _, MethodType type, int csIdx) {
+        try {
+            /* Look up methcall invoker method. */
+            MethodType resType = MethodType.methodType(void.class,
+                    MutableCallSite.class, int.class,
+                    ThreadContext.class, String.class, Object[].class);
+            MethodHandle res = caller.findStatic(IndyBootstrap.class, "indmethcallInvoker", resType);
+            
+            /* Create a mutable callsite, and curry the resolver with it and
+             * the method name. */
+            MutableCallSite cs = new MutableCallSite(type);
+            cs.setTarget(MethodHandles
+                .insertArguments(res, 0, cs, csIdx)
+                .asCollector(Object[].class, type.parameterCount() - 2)
+                .asType(type));
+            
+            /* Produce callsite. */
+            return cs;
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    public static void indmethcallInvoker(MutableCallSite cs, int csIdx,
+            ThreadContext tc, String name, Object... args) {
+        /* Resolve callsite descriptor. */
+        CallSiteDescriptor csd = csIdx >= 0
+            ? tc.curFrame.codeRef.staticInfo.compUnit.callSites[csIdx]
+            : Ops.emptyCallSite;
+        
+        /* Try to resolve method to a coderef. */
+        SixModelObject invocant = (SixModelObject)args[0];
+        SixModelObject invokee = invocant.st.MethodCache.get(name);
+        if (invokee == null)
+            throw ExceptionHandling.dieInternal(tc, "Method '" + name + "' not found"); 
+        CodeRef cr;
+        if (invokee instanceof CodeRef) {
+            cr = (CodeRef)invokee;
+        }
+        else {
+            InvocationSpec is = invokee.st.InvocationSpec;
+            if (is == null)
+                throw ExceptionHandling.dieInternal(tc, "Can not invoke this object");
+            if (is.ClassHandle != null)
+                cr = (CodeRef)invokee.get_attribute_boxed(tc, is.ClassHandle, is.AttrName, is.Hint);
+            else
+                cr = (CodeRef)is.InvocationHandler;
+        }
+
+        /* Make the call. */
+        try {
+            cr.staticInfo.mh.invokeExact(tc, cr, csd, args);
+        }
+        catch (ControlException e) {
+            throw e;
+        }
+        catch (Throwable e) {
+            ExceptionHandling.dieInternal(tc, e);
+        }
+    }
 }
