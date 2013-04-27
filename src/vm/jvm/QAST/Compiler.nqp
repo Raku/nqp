@@ -927,7 +927,8 @@ QAST::OperationsJAST.add_core_op('for', -> $qastcomp, $op {
     
     # Do similar for the block.
     my $block_res := $qastcomp.as_jast(@operands[1], :want($RT_OBJ));
-    my $block_tmp := $*TA.fresh_o();
+    my $block_tmp := $op.unique('iterblock');
+    $*BLOCK.add_local(QAST::Var.new( :name($block_tmp), :scope('local') ));
     $il.append($block_res.jast);
     $*STACK.obtain($il, $block_res);
     $il.append(JAST::Instruction.new( :op('astore'), $block_tmp ));
@@ -954,7 +955,8 @@ QAST::OperationsJAST.add_core_op('for', -> $qastcomp, $op {
     my @val_temps;
     my $arity := @operands[1].arity || 1;
     while $arity > 0 {
-        my $tmp := $*TA.fresh_o();
+        my $tmp := $op.unique('itertmp');
+        $*BLOCK.add_local(QAST::Var.new( :name($tmp), :scope('local') ));
         $val_il.append(JAST::Instruction.new( :op('aload'), $iter_tmp ));
         $val_il.append(JAST::Instruction.new( :op('aload_1') ));
         $val_il.append(JAST::Instruction.new( :op('invokestatic'),
@@ -966,31 +968,18 @@ QAST::OperationsJAST.add_core_op('for', -> $qastcomp, $op {
     $val_il.append($lbl_redo);
     
     # Now do block invocation.
-    my $inv_il := JAST::InstructionList.new();
-    my $for_array := &*GET_ARG_ARRAY(+@val_temps);
-    my @callsite;
-    my int $i := 0;
+    my $inv_ast := QAST::Op.new(
+        :op('call'),
+        QAST::Var.new( :name($block_tmp), :scope('local') )
+    );
     for @val_temps {
-        $inv_il.append(JAST::Instruction.new( :op('aload'), $for_array ));
-        $inv_il.append(JAST::PushIndex.new( :value($i++) ));
-        $inv_il.append(JAST::Instruction.new( :op('aload'), $_ ));
-        $inv_il.append(JAST::Instruction.new( :op('aastore') ));
-        nqp::push(@callsite, arg_type($RT_OBJ));
+        $inv_ast.push(QAST::Var.new( :name($_), :scope('local') ));
     }
-    &*FREE_ARG_ARRAY($for_array);
-    my $cs_idx := $*CODEREFS.get_callsite_idx(@callsite, []);
-    $inv_il.append(JAST::Instruction.new( :op('aload'), $block_tmp ));
-    $inv_il.append(JAST::PushIndex.new( :value($cs_idx) ));
-    $inv_il.append(JAST::Instruction.new( :op('aload'), $for_array ));
-    $inv_il.append(JAST::Instruction.new( :op('aload_1') ));
-    $inv_il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS, 'invoke',
-        'Void', $TYPE_SMO, 'Integer', "[$TYPE_OBJ", $TYPE_TC ));
-    
-    # Load result onto the stack, unless in void context.
+    my $inv_res := $qastcomp.as_jast($inv_ast, :want($res ?? $RT_OBJ !! $RT_VOID));
+    my $inv_il := JAST::InstructionList.new();
+    $inv_il.append($inv_res.jast);
+    $*STACK.obtain($inv_il, $inv_res);
     if $res {
-        $inv_il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
-        $inv_il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
-            'result_o', $TYPE_SMO, $TYPE_CF ));
         $inv_il.append(JAST::Instruction.new( :op('astore'), $res ));
     }
 
