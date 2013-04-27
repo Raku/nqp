@@ -41,6 +41,42 @@ public class IndyBootstrap {
         return res;
     }
     
+    public static CallSite wval(Lookup caller, String name, MethodType type,
+            String sc, long idx) {
+        try {
+            /* Look up wval resolver method. */
+            MethodType resType = MethodType.methodType(SixModelObject.class,
+                    String.class, long.class, MutableCallSite.class, ThreadContext.class);
+            MethodHandle res = caller.findStatic(IndyBootstrap.class, "wvalResolve", resType);
+            
+            /* Create a mutable callsite, and curry the resolver with it. */
+            MutableCallSite cs = new MutableCallSite(type);
+            cs.setTarget(MethodHandles.insertArguments(res, 0, sc, idx, cs));
+            
+            /* Produce callsite; it'll be updated with the resolved WVal upon the
+             * first invocation. */
+            return cs;
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    public static SixModelObject wvalResolve(String sc, long idx, MutableCallSite cs, ThreadContext tc) {
+        /* Look up the WVal. */
+        SixModelObject res = tc.gc.scs.get(sc).root_objects.get((int)idx);
+        
+        /* Update this callsite, so that we never run the lookup again and instead
+         * just always use the resolved object. Discards incoming arguments, as
+         * they are no longer needed. */
+        cs.setTarget(MethodHandles.dropArguments(
+                MethodHandles.constant(SixModelObject.class, res),
+                0, ThreadContext.class));
+        
+        /* Hand back the resulting object, for this first call. */
+        return res;
+    }
+    
     public static CallSite subcall(Lookup caller, String _, MethodType type, String name, int csIdx) {
         try {
             /* Look up subcall resolver method. */

@@ -3476,12 +3476,14 @@ class QAST::CompilerJAST {
         my $handle := nqp::scgethandle($sc);
         my $idx    := nqp::scgetobjidx($sc, $val);
         my $il     := JAST::InstructionList.new();
-        $il.append(JAST::PushSVal.new( :value($handle) ));
-        $il.append(JAST::PushIVal.new( :value($idx) ));
         $il.append(JAST::Instruction.new( :op('aload_1') ));
         $il.append(JAST::InvokeDynamic.new(
-            'wval', $TYPE_SMO, [$TYPE_STR, 'J', $TYPE_TC],
-            'org/perl6/nqp/runtime/IndyBootstrap', 'wval'
+            'wval', $TYPE_SMO, [$TYPE_TC],
+            'org/perl6/nqp/runtime/IndyBootstrap', 'wval',
+            [
+                JAST::PushSVal.new( :value($handle) ),
+                JAST::PushIVal.new( :value($idx) )
+            ]
         ));
         result($il, $RT_OBJ);
     }
