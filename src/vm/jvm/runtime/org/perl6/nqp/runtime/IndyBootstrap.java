@@ -240,6 +240,66 @@ public class IndyBootstrap {
         throw throwee;
     }
     
+    public static CallSite indcall(Lookup caller, String _, MethodType type, int csIdx) {
+        try {
+            /* Look up indirect call invoker method. */
+            MethodType resType = MethodType.methodType(void.class,
+                    MutableCallSite.class, int.class, ThreadContext.class,
+                    SixModelObject.class, Object[].class);
+            MethodHandle res = caller.findStatic(IndyBootstrap.class, "indcallInvoker", resType);
+            
+            /* Create a mutable callsite, and curry the resolver with it and
+             * the sub name. */
+            MutableCallSite cs = new MutableCallSite(type);
+            cs.setTarget(MethodHandles
+                .insertArguments(res, 0, cs, csIdx)
+                .asCollector(Object[].class, type.parameterCount() - 2)
+                .asType(type));
+            
+            /* Produce callsite. */
+            return cs;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+    
+    public static void indcallInvoker(MutableCallSite cs, int csIdx,
+            ThreadContext tc, SixModelObject invokee, Object... args) {
+        /* Resolve callsite descriptor. */
+        CallSiteDescriptor csd = csIdx >= 0
+            ? tc.curFrame.codeRef.staticInfo.compUnit.callSites[csIdx]
+            : Ops.emptyCallSite;
+        
+        /* Get the code ref. */
+        CodeRef cr;
+        if (invokee instanceof CodeRef) {
+            cr = (CodeRef)invokee;
+        }
+        else {
+            InvocationSpec is = invokee.st.InvocationSpec;
+            if (is == null)
+                throw ExceptionHandling.dieInternal(tc, "Can not invoke this object");
+            if (is.ClassHandle != null)
+                cr = (CodeRef)invokee.get_attribute_boxed(tc, is.ClassHandle, is.AttrName, is.Hint);
+            else
+                cr = (CodeRef)is.InvocationHandler;
+        }
+        
+        /* Make the call. */
+        try {
+            cr.staticInfo.mh.invokeExact(tc, cr, csd, args);
+        }
+        catch (ControlException e) {
+            throw e;
+        }
+        catch (Throwable e) {
+            e.printStackTrace();
+            ExceptionHandling.dieInternal(tc, e);
+        }
+    }
+    
     public static CallSite methcall(Lookup caller, String _, MethodType type, String name, int csIdx) {
         try {
             /* Look up methcall resolver method. */

@@ -1111,7 +1111,7 @@ sub process_args($qastcomp, @children, $il, $first, :$inv_temp) {
     # Return callsite index (which may create it if needed).
     return [$*CODEREFS.get_callsite_idx(@callsite, @argnames), $arg_array];
 }
-sub process_args_onto_stack($qastcomp, @children, $il, :$obj_first) {
+sub process_args_onto_stack($qastcomp, @children, $il, :$obj_first, :$inv_first) {
     # Make sure we do positionals before nameds.
     my @pos;
     my @named;
@@ -1129,7 +1129,7 @@ sub process_args_onto_stack($qastcomp, @children, $il, :$obj_first) {
     my @argnames;
     my int $i := 0;
     while $i < +@order {
-        my $arg_res := $i == 0 && $obj_first
+        my $arg_res := $i == 0 && ($obj_first || $inv_first)
             ?? $qastcomp.as_jast(@order[$i], :want($RT_OBJ))
             !! $qastcomp.as_jast(@order[$i]);
         $il.append($arg_res.jast);
@@ -1146,15 +1146,17 @@ sub process_args_onto_stack($qastcomp, @children, $il, :$obj_first) {
             nqp::push(@arg_jtypes, jtype($arg_res.type));
         }
         
-        my int $flags := 0;
-        if @order[$i].flat {
-            $flags := @order[$i].named ?? 24 !! 16;
+        unless $i == 0 && $inv_first {
+            my int $flags := 0;
+            if @order[$i].flat {
+                $flags := @order[$i].named ?? 24 !! 16;
+            }
+            elsif @order[$i].named -> $name {
+                $flags := 8;
+                nqp::push(@argnames, $name);
+            }
+            nqp::push(@callsite, arg_type($type) + $flags);
         }
-        elsif @order[$i].named -> $name {
-            $flags := 8;
-            nqp::push(@argnames, $name);
-        }
-        nqp::push(@callsite, arg_type($type) + $flags);
         
         $i++;
     }
@@ -1190,23 +1192,26 @@ QAST::OperationsJAST.add_core_op('call', sub ($qastcomp, $node) {
     
     # Otherwise, it's an indirect call.
     else {
-        # Compile the thing to invoke.
+        # Ensure we have a thing to invoke.
         nqp::die("A 'call' node must have a name or at least one child") unless +@($node) >= 1;
-        my $invokee := $qastcomp.as_jast($node[0], :want($RT_OBJ));
-        $il.append($invokee.jast);
-
-        # Process arguments.
-        my @argstuff := process_args($qastcomp, @($node), $il, $node.name eq "" ?? 1 !! 0);
+        
+        # Proces arguments, making sure first one is an object (since that is
+        # the thing to invoke).
+        my @argstuff := process_args_onto_stack($qastcomp, @($node), $il, :inv_first);
         my $cs_idx := @argstuff[0];
         $*STACK.spill_to_locals($il);
-        
-        # Emit the call.
-        $*STACK.obtain($il, $invokee);
-        $il.append(JAST::PushIndex.new( :value($cs_idx) ));
-        $il.append(JAST::Instruction.new( :op('aload'), @argstuff[1] ));
+
+        # Emit the call, using the same thread context trick. The first thing
+        # will be invoked.
         $il.append(JAST::Instruction.new( :op('aload_1') ));
-        $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS, 'invoke',
-            'Void', $TYPE_SMO, 'Integer', "[$TYPE_OBJ", $TYPE_TC ));
+        $*STACK.obtain($il, |@argstuff[1]) if @argstuff[1];
+        $il.append(JAST::InvokeDynamic.new(
+            'indcall', 'V', @argstuff[2],
+            'org/perl6/nqp/runtime/IndyBootstrap', 'indcall',
+            [
+                JAST::PushIndex.new( :value($cs_idx) )
+            ]
+        ));
     }
 
     # Load result onto the stack, unless in void context.
@@ -1234,7 +1239,7 @@ QAST::OperationsJAST.add_core_op('callmethod', -> $qastcomp, $node {
     # calling.
     if $node.name ne '' {
         # Process arguments and force them into locals.
-        my @argstuff := process_args_onto_stack($qastcomp, @children, $il);
+        my @argstuff := process_args_onto_stack($qastcomp, @children, $il, :obj_first);
         my $cs_idx := @argstuff[0];
         $*STACK.spill_to_locals($il);
         
