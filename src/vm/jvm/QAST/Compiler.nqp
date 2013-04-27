@@ -3066,7 +3066,7 @@ class QAST::CompilerJAST {
         if $*BINDVAL {
             self.compile_var($node)
         }
-        elsif $node.scope ne 'positional' && $node.scope ne 'associative' {
+        else {
             my $var_res := self.compile_var($node);
             if ($var_res.type != $RT_OBJ) {
                 return $var_res;
@@ -3088,30 +3088,6 @@ class QAST::CompilerJAST {
             $il.append($lbl);
             
             result($il, $RT_OBJ);
-        }
-        else {
-            my $fb_temp := $node.unique('fb_tmp');
-            self.as_jast(QAST::Op.new(
-                :op('ifnull'),
-                QAST::Op.new(
-                    :op('if'),
-                    QAST::Op.new(
-                        :op('isconcrete'),
-                        QAST::Op.new(
-                            :op('bind'),
-                            QAST::Var.new( :name($fb_temp), :scope('local'), :decl('var') ),
-                            $node[0]
-                        )
-                    ),
-                    QAST::Var.new(
-                        :scope($node.scope),
-                        QAST::Var.new( :name($fb_temp), :scope('local') ),
-                        $node[1]
-                    ),
-                    QAST::Op.new( :op('null') )
-                 ),
-                $node.fallback
-            ))
         }
     }
     

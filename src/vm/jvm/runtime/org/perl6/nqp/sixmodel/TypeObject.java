@@ -34,7 +34,7 @@ public class TypeObject extends SixModelObject {
     }
     
     public SixModelObject at_pos_boxed(ThreadContext tc, long index) {
-        throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation on a type object");
+        return null;
     }
     public void bind_pos_boxed(ThreadContext tc, long index, SixModelObject value) {
         throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation on a type object");
@@ -58,7 +58,7 @@ public class TypeObject extends SixModelObject {
         throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation on a type object");
     }
     public SixModelObject at_key_boxed(ThreadContext tc, String key) {
-        throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation on a type object");
+        return null;
     }
     public void bind_key_boxed(ThreadContext tc, String key, SixModelObject value) {
         throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation on a type object");
