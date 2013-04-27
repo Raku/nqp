@@ -2076,6 +2076,10 @@ class QAST::CompilerJAST {
                 !! nqp::die("Unknown CUID '$cuid'")
         }
         
+        method cuid_to_jastmethname($cuid) {
+            @!jastmeth_names[self.cuid_to_idx($cuid)]
+        }
+        
         method set_lexical_names($cuid, @ilex, @nlex, @slex, @olex) {
             @!lexical_name_lists[self.cuid_to_idx($cuid)] := [@ilex, @nlex, @slex, @olex];
         }
@@ -3039,7 +3043,37 @@ class QAST::CompilerJAST {
                 return self.as_jast(QAST::BVal.new( :value($node) ));
             }
             elsif $blocktype eq 'immediate' {
-                return self.as_jast(QAST::Op.new( :op('call'), QAST::BVal.new( :value($node) ) ));
+                # Can emit a direct JVM level call. First, get self, TC,
+                # code ref, callsite descriptor and args (both empty) onto
+                # the stack.
+                my $il := JAST::InstructionList.new();
+                $il.append(JAST::Instruction.new( :op('aload_0') ));
+                $il.append(JAST::Instruction.new( :op('aload_1') ));
+                $il.append(JAST::Instruction.new( :op('aload_0') ));
+                $il.append(JAST::PushSVal.new( :value($node.cuid) ));
+                $il.append(JAST::Instruction.new( :op('invokevirtual'),
+                    $TYPE_CU, 'lookupCodeRef', $TYPE_CR, $TYPE_STR ));
+                $il.append(JAST::Instruction.new( :op('getstatic'),
+                    $TYPE_OPS, 'emptyCallSite', $TYPE_CSD ));
+                $il.append(JAST::Instruction.new( :op('getstatic'),
+                    $TYPE_OPS, 'emptyArgList', "[$TYPE_OBJ" ));
+                
+                # Emit the virtual call.
+                $il.append(JAST::Instruction.new( :op('invokevirtual'),
+                    'L' ~ $*JCLASS.name ~ ';',
+                    $*CODEREFS.cuid_to_jastmethname($node.cuid),
+                    'V', $TYPE_TC, $TYPE_CR, $TYPE_CSD, "[$TYPE_OBJ" ));
+                
+                # Load result onto the stack, unless in void context.
+                if $*WANT != $RT_VOID {
+                    $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
+                    $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+                        'result_' ~ typechar($RT_OBJ), jtype($RT_OBJ), $TYPE_CF ));
+                    return result($il, $RT_OBJ)
+                }
+                else {
+                    return result($il, $RT_VOID)
+                }
             }
             elsif $blocktype eq 'raw' {
                 return self.as_jast(QAST::Op.new( :op('null') ));
