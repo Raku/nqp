@@ -1078,8 +1078,9 @@ QAST::Operations.add_core_pirop_mapping('captureposarg', 'set', 'PQi');
 QAST::Operations.add_core_pirop_mapping('captureposarg_i', 'set', 'IQi');
 QAST::Operations.add_core_pirop_mapping('captureposarg_n', 'set', 'NQi');
 QAST::Operations.add_core_pirop_mapping('captureposarg_s', 'set', 'SQi');
-QAST::Operations.add_core_pirop_mapping('captureexistsnamed', 'exists', 'IQs');
 QAST::Operations.add_core_pirop_mapping('captureposprimspec', 'captureposprimspec', 'IPi');
+QAST::Operations.add_core_pirop_mapping('captureexistsnamed', 'exists', 'IQs');
+QAST::Operations.add_core_pirop_mapping('capturehasnameds', 'nqp_capturehasnameds', 'IP');
 
 # Multiple dispatch related.
 QAST::Operations.add_core_op('invokewithcapture', -> $qastcomp, $op {

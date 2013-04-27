@@ -3135,10 +3135,9 @@ in one will take.
 =cut
 
 */
-inline op nqp_setdispatcher(in PMC) :base_core {
+inline op nqp_setdispatcher(invar PMC) :base_core {
     current_dispatcher = $1;
 }
-
 
 /*
 
@@ -3155,5 +3154,26 @@ inline op nqp_takedispatcher(in STR) :base_core {
         PMC *lexpad = Parrot_pcc_get_lex_pad(interp, CURRENT_CONTEXT(interp));
         VTABLE_set_pmc_keyed_str(interp, lexpad, $1, current_dispatcher);
         current_dispatcher = NULL;
+    }
+}
+
+/*
+
+=item nqp_capturehasnameds(out INT, invar PMC)
+
+Checks if the specified capture has any named arguments.
+
+=cut
+
+*/
+inline op nqp_capturehasnameds(out INT, invar PMC) :base_core {
+    PMC *capture = $2;
+    if (capture->vtable->base_type == enum_class_CallContext) {
+        Hash *nameds;
+        GETATTR_CallContext_hash(interp, capture, nameds);
+        $1 = nameds && Parrot_hash_size(interp, nameds) ? 1 : 0;
+    }
+    else {
+        $1 = 0;
     }
 }
