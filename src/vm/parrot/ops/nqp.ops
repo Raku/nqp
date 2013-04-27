@@ -300,6 +300,10 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
 #define BIND_VAL_STR 3
 #define BIND_VAL_OBJ 4
 
+/* The current dispatcher, for the next thing that wants one to take.
+ * Note, should really be per thread. */
+static PMC *current_dispatcher = NULL;
+
 END_OPS_PREAMBLE
 
 /*
@@ -3118,5 +3122,38 @@ inline op nqp_isstr(out INT, invar PMC) :base_core {
     }
     else {
         $1 = var->vtable->base_type == enum_class_String ? 1 : 0;
+    }
+}
+
+/*
+
+=item nqp_setdispatcher(in PMC)
+
+Sets the dispatcher that the next thing we call that is interested
+in one will take.
+
+=cut
+
+*/
+inline op nqp_setdispatcher(in PMC) :base_core {
+    current_dispatcher = $1;
+}
+
+
+/*
+
+=item nqp_takedispatcher(in STR)
+
+If a disptcher was set, places it into the lexical in the current frame
+with the specified name.
+
+=cut
+
+*/
+inline op nqp_takedispatcher(in STR) :base_core {
+    if (current_dispatcher) {
+        PMC *lexpad = Parrot_pcc_get_lex_pad(interp, CURRENT_CONTEXT(interp));
+        VTABLE_set_pmc_keyed_str(interp, lexpad, $1, current_dispatcher);
+        current_dispatcher = NULL;
     }
 }
