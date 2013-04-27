@@ -2714,29 +2714,6 @@ class QAST::CompilerJAST {
             my $outer     := try $*BLOCK;
             my $block     := BlockInfo.new($node, $outer);
             
-            # We manage sharing of argument arrays.
-            my @free_arg_arrays;
-            my %arg_array_lengths;
-            my &*GET_ARG_ARRAY := sub ($size) {
-                if @free_arg_arrays[$size] {
-                    nqp::pop(@free_arg_arrays[$size]);
-                }
-                else {
-                    my $new_name := '__ARG_ARRAY_' ~ nqp::elems(%arg_array_lengths);
-                    %arg_array_lengths{$new_name} := $size;
-                    $new_name
-                }
-            }
-            my &*FREE_ARG_ARRAY := sub ($name) {
-                my $len := %arg_array_lengths{$name};
-                if nqp::islist(@free_arg_arrays[$len]) {
-                    nqp::push(@free_arg_arrays[$len], $name);
-                }
-                else {
-                    @free_arg_arrays[$len] := [$name];
-                }
-            }
-            
             # This array will contain any catch/control exception handlers the
             # block gets. A contextual lets us track nesting of handlers.
             my @handlers;
@@ -2911,14 +2888,6 @@ class QAST::CompilerJAST {
                 $*JMETH.add_local($_.name, jtype($block.local_type($_.name)));
             }
             $*BLOCK_TA.add_temps_to_method($*JMETH);
-            
-            # Add declarations and setup of arg arrays.
-            for %arg_array_lengths {
-                $*JMETH.add_local($_.key, "[$TYPE_OBJ");
-                $*JMETH.append(JAST::PushIndex.new( :value($_.value) ));
-                $*JMETH.append(JAST::Instruction.new( :op('anewarray'), $TYPE_OBJ ));
-                $*JMETH.append(JAST::Instruction.new( :op('astore'), $_.key ));
-            }
             
             # Add method body JAST.
             $il.append($body.jast);
