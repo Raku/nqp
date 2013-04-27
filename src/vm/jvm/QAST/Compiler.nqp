@@ -301,6 +301,12 @@ class QAST::OperationsJAST {
     method unbox($qastcomp, $hll, $type) {
         (%hll_unbox{$hll} // %hll_unbox{''}){$type}($qastcomp)
     }
+    
+    # Builds a result; helper method for extensions to the ops from outside
+    # of this file.
+    method result($jast, int $type) {
+        result($jast, $type)
+    }
 }
 
 # Set of sequential statements
@@ -1916,6 +1922,35 @@ QAST::OperationsJAST.map_classlib_core_op('freshcoderef', $TYPE_OPS, 'freshcoder
 QAST::OperationsJAST.map_classlib_core_op('markcodestatic', $TYPE_OPS, 'markcodestatic', [$RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('markcodestub', $TYPE_OPS, 'markcodestub', [$RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getstaticcode', $TYPE_OPS, 'getstaticcode', [$RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.add_core_op('setdispatcher', -> $qastcomp, $op {
+    if +@($op) != 1 {
+        nqp::die('setdispatcher requires one operand');
+    }
+    my $il := JAST::InstructionList.new();
+    my $dispres := $qastcomp.as_jast($op[0], :want($RT_OBJ));
+    $il.append($dispres.jast);
+    $*STACK.obtain($il, $dispres);
+    $il.append(JAST::Instruction.new( :op('dup') ));
+    $il.append(JAST::Instruction.new( :op('aload_1') ));
+    $il.append(JAST::Instruction.new( :op('swap') ));
+    $il.append(JAST::Instruction.new( :op('putfield'), $TYPE_TC, 'currentDispatcher', $TYPE_SMO ));
+    result($il, $RT_OBJ);
+});
+QAST::OperationsJAST.add_core_op('takedispatcher', -> $qastcomp, $op {
+    if +@($op) != 1 || !nqp::istype($op[0], QAST::SVal) {
+        nqp::die('takedispatcher requires one string literal operand');
+    }
+    my $idx := $*BLOCK.lexical_type($op[0].value);
+    unless nqp::defined($idx) {
+        nqp::die('takedispatcher used with non-existing lexical');
+    }
+    my $il := JAST::InstructionList.new();
+    $il.append(JAST::PushIndex.new( :value($idx) ));
+    $il.append(JAST::Instruction.new( :op('aload_1') ));
+    $il.append(JAST::Instruction.new( :op('invokestatic'),
+        $TYPE_OPS, 'takedispatcher', 'V', 'I', $TYPE_TC ));
+    result($il, $RT_VOID);
+});
 
 # language/compiler ops
 QAST::OperationsJAST.map_classlib_core_op('getcomp', $TYPE_OPS, 'getcomp', [$RT_STR], $RT_OBJ, :tc);

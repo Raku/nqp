@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.perl6.nqp.sixmodel.reprs.CallCaptureInstance;
 import org.perl6.nqp.sixmodel.reprs.SCRefInstance;
+import org.perl6.nqp.sixmodel.SixModelObject;
 
 /**
  * State of a currently running thread.
@@ -69,6 +70,11 @@ public class ThreadContext {
      * The currently saved capture for custom processing.
      */
     public CallCaptureInstance savedCC;
+    
+    /**
+     * The currently set dispatcher, for the next interested call to take.
+     */
+    public SixModelObject currentDispatcher;
     
     /**
      * Serialization context write barrier disabled depth (anything non-zero

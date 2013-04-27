@@ -2710,6 +2710,10 @@ public final class Ops {
         else
             throw ExceptionHandling.dieInternal(tc, "getstaticcode can only be used with a CodeRef");
     }
+    public static void takedispatcher(int lexIdx, ThreadContext tc) {
+        tc.curFrame.oLex[lexIdx] = tc.currentDispatcher;
+        tc.currentDispatcher = null;
+    }
 
     /* process related opcodes */
     public static long exit(final long status) {
