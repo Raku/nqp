@@ -1431,6 +1431,11 @@ public final class Ops {
         obj.st.TypeCheckCache = cache;
         return obj;
     }
+    public static SixModelObject settypecheckmode(SixModelObject obj, long mode, ThreadContext tc) {
+        obj.st.ModeFlags = (int)mode |
+            (obj.st.ModeFlags & (~STable.TYPE_CHECK_CACHE_FLAG_MASK));
+        return obj;
+    }
     public static long objprimspec(SixModelObject obj, ThreadContext tc) {
         return obj.st.REPR.get_storage_spec(tc, obj.st).boxed_primitive;
     }
@@ -1448,15 +1453,38 @@ public final class Ops {
         return obj instanceof CodeRef || obj.st.InvocationSpec != null ? 1 : 0;
     }
     public static long istype(SixModelObject obj, SixModelObject type, ThreadContext tc) {
-        /* Just the basic case so far. */
+        /* Null always type checks false. */
         if (obj == null)
             return 0;
+
+        int typeCheckMode = type.st.ModeFlags & STable.TYPE_CHECK_CACHE_FLAG_MASK;
         SixModelObject[] cache = obj.st.TypeCheckCache;
         if (cache != null) {
+            /* We have the cache, so just look for the type object we
+             * want to be in there. */
             for (int i = 0; i < cache.length; i++)
                 if (cache[i] == type)
                     return 1;
+            
+            /* If the type check cache is definitive, we're done. */
+            if ((typeCheckMode & STable.TYPE_CHECK_CACHE_THEN_METHOD) == 0 &&
+                    (typeCheckMode & STable.TYPE_CHECK_NEEDS_ACCEPTS) == 0)
+                return 0;
         }
+        
+        /* If we get here, need to call .^type_check on the value we're
+         * checking. */
+        if (cache == null || (typeCheckMode & STable.TYPE_CHECK_CACHE_THEN_METHOD) != 0) {
+            /* TODO: Implement this. */
+            return 0;
+        }
+        
+        /* If the flag to call .accepts_type on the target value is set, do so. */
+        if ((typeCheckMode & STable.TYPE_CHECK_NEEDS_ACCEPTS) != 0) {
+            throw new RuntimeException("Type accepts method fallback NYI");
+        }
+        
+        /* If we get here, type check failed. */
         return 0;
     }
     
