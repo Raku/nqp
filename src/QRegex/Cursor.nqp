@@ -362,7 +362,7 @@ role NQPCursorRole is export {
     
     method !fresh_highexpect() {
         my @old := nqp::getattr($!shared, ParseShared, '@!highexpect');
-        nqp::bindattr($!shared, ParseShared, '@!highexpect', []);
+        nqp::bindattr($!shared, ParseShared, '@!highexpect', nqp::list_s());
         @old
     }
     
@@ -412,7 +412,7 @@ role NQPCursorRole is export {
     method before($regex) {
         my int $orig_highwater := nqp::getattr_i($!shared, ParseShared, '$!highwater');
         my $orig_highexpect := nqp::getattr($!shared, ParseShared, '@!highexpect');
-        nqp::bindattr($!shared, ParseShared, '@!highexpect', []);
+        nqp::bindattr($!shared, ParseShared, '@!highexpect', nqp::list_s());
         my $cur := self."!cursor_start_cur"();
         nqp::bindattr_i($cur, $?CLASS, '$!pos', $!pos);
         nqp::getattr_i($regex($cur), $?CLASS, '$!pos') >= 0 ??
