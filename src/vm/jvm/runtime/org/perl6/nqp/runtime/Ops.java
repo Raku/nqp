@@ -1343,7 +1343,8 @@ public final class Ops {
         return o;
     }
     public static SixModelObject rebless(SixModelObject obj, SixModelObject newType, ThreadContext tc) {
-        obj.st.REPR.change_type(tc, obj, newType);
+        if (obj.st != newType.st)
+            obj.st.REPR.change_type(tc, obj, newType);
         return obj;
     }
     public static SixModelObject create(SixModelObject obj, ThreadContext tc) {
