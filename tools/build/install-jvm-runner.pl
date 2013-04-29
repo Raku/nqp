@@ -24,7 +24,7 @@ else {
     open my $fh, ">", $install_to;
     print $fh "#!/bin/sh\n";
     print $fh 'exec java -Xbootclasspath/a:' . $prefix . ':' . $prefix . '/nqp-runtime.jar:' .
-              $prefix . '/asm-4.1.jar nqp -cp ' . $prefix . ' "$@"' . "\n";
+              $prefix . '/asm-4.1.jar -cp ' . $prefix . ' nqp "$@"' . "\n";
     close $fh;
     chmod 0755, $install_to;
 }
