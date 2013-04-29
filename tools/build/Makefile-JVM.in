@@ -168,7 +168,7 @@ $(RUNTIME_JAR): $(RUNTIME_JAVAS)
 	$(JAR) cf0 nqp-runtime.jar -C bin/ .
 
 clean:
-	$(PERL) -MExtUtils::Command -e rm_rf *.class *.jar src/stage1 src/stage2 bin
+	$(PERL) -MExtUtils::Command -e rm_rf *.class *.jar src/stage1 src/stage2 bin nqp nqp.bat
 
 $(STAGE0): $(RUNTIME_JAR)
 
