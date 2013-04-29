@@ -688,14 +688,16 @@ class NQPMatch is NQPCapture {
             if $item ~~ NQPCapture {
                 $str := $str ~ $item."!dump_str"($key)
             }
-            elsif !nqp::isnull($item) {
+            elsif nqp::islist($item) {
+                $str := $str ~ "$key: list\n";
                 my $n := 0;
                 for $item { $str := $str ~ dump_array($key ~ "[$n]", $_); $n++ }
             }
             $str;
         }
         my $str := $key ~ ': ' ~ nqp::escape(self.Str) ~ ' @ ' ~ self.from ~ "\n";
-        $str := $str ~ dump_array($key, self.list);
+        my $n := 0;
+        for self.list { $str := $str ~ dump_array($key ~ '[' ~ $n ~ ']', $_); $n++ }
         for self.hash { $str := $str ~ dump_array($key ~ '<' ~ $_.key ~ '>', $_.value); }
         $str;
     }
