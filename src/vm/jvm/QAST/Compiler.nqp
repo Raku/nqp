@@ -4,6 +4,40 @@ use QASTNode;
 # Should we try handling all the SC stuff?
 my $ENABLE_SC_COMP := 1;
 
+# Instruction constants for argument-less ops.
+my $ACONST_NULL := JAST::Instruction.new( :op('aconst_null') );
+my $ALOAD_0     := JAST::Instruction.new( :op('aload_0') );
+my $ALOAD_1     := JAST::Instruction.new( :op('aload_1') );
+my $IASTORE     := JAST::Instruction.new( :op('iastore') );
+my $LASTORE     := JAST::Instruction.new( :op('lastore') );
+my $AASTORE     := JAST::Instruction.new( :op('aastore') );
+my $BASTORE     := JAST::Instruction.new( :op('bastore') );
+my $POP         := JAST::Instruction.new( :op('pop') );
+my $POP2        := JAST::Instruction.new( :op('pop2') );
+my $DUP         := JAST::Instruction.new( :op('dup') );
+my $DUP_X2      := JAST::Instruction.new( :op('dup_x2') );
+my $DUP2        := JAST::Instruction.new( :op('dup2') );
+my $SWAP        := JAST::Instruction.new( :op('swap') );
+my $IADD        := JAST::Instruction.new( :op('iadd') );
+my $LADD        := JAST::Instruction.new( :op('ladd') );
+my $LSUB        := JAST::Instruction.new( :op('lsub') );
+my $I2L         := JAST::Instruction.new( :op('i2l') );
+my $I2B         := JAST::Instruction.new( :op('i2b') );
+my $L2I         := JAST::Instruction.new( :op('l2i') );
+my $L2D         := JAST::Instruction.new( :op('l2d') );
+my $D2L         := JAST::Instruction.new( :op('d2l') );
+my $LCMP        := JAST::Instruction.new( :op('lcmp') );
+my $DCMPL       := JAST::Instruction.new( :op('dcmpl') );
+my $RETURN      := JAST::Instruction.new( :op('return') );
+my $ARETURN     := JAST::Instruction.new( :op('areturn') );
+my $ATHROW      := JAST::Instruction.new( :op('athrow') );
+
+# Common constant loads.
+my $IVAL_ZERO     := JAST::PushIVal.new( :value(0) );
+my $IVAL_ONE      := JAST::PushIVal.new( :value(1) );
+my $IVAL_MINUSONE := JAST::PushIVal.new( :value(-1) );
+my $NVAL_ZERO     := JAST::PushNVal.new( :value(0.0) );
+
 # Some common types we'll need.
 my $TYPE_TC        := 'Lorg/perl6/nqp/runtime/ThreadContext;';
 my $TYPE_CU        := 'Lorg/perl6/nqp/runtime/CompilationUnit;';
@@ -90,19 +124,19 @@ sub load_ins($type) {
     @load_ins[$type]
 }
 my @dup_ins := [
-    JAST::Instruction.new( :op('dup') ),
-    JAST::Instruction.new( :op('dup2') ),
-    JAST::Instruction.new( :op('dup2') ),
-    JAST::Instruction.new( :op('dup') )
+    $DUP,
+    $DUP2,
+    $DUP2,
+    $DUP
 ];
 sub dup_ins($type) {
     @dup_ins[$type]
 }
 my @pop_ins := [
-    JAST::Instruction.new( :op('pop') ),
-    JAST::Instruction.new( :op('pop2') ),
-    JAST::Instruction.new( :op('pop2') ),
-    JAST::Instruction.new( :op('pop') )
+    $POP,
+    $POP2,
+    $POP2,
+    $POP
 ];
 sub pop_ins($type) {
     @pop_ins[$type]
@@ -267,7 +301,7 @@ class QAST::OperationsJAST {
             # Emit operation.
             $*STACK.obtain($il, |@arg_res) if @arg_res;
             if $tc {
-                $il.append(JAST::Instruction.new( :op('aload_1') ));
+                $il.append($ALOAD_1);
             }
             $il.append($instruction);
             result($il, $stack_out)
@@ -335,11 +369,11 @@ QAST::OperationsJAST.add_core_op('list', -> $qastcomp, $op {
             $il.append($item.jast);
             $*STACK.obtain($il, $item);
             $il.append(JAST::Instruction.new( :op('aload'), $list_tmp ));
-            $il.append(JAST::Instruction.new( :op('swap') ));
-            $il.append(JAST::Instruction.new( :op('aload_1') ));
+            $il.append($SWAP);
+            $il.append($ALOAD_1);
             $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS, 'push',
                 $TYPE_SMO, $TYPE_SMO, $TYPE_SMO, $TYPE_TC ));
-            $il.append(JAST::Instruction.new( :op('pop') ));
+            $il.append($POP);
         }
         
         $il.append(JAST::Instruction.new( :op('aload'), $list_tmp ));
@@ -369,12 +403,12 @@ QAST::OperationsJAST.add_core_op('list_i', -> $qastcomp, $op {
             $il.append($item.jast);
             $*STACK.obtain($il, $item);
             $il.append(JAST::Instruction.new( :op('aload'), $list_tmp ));
-            $il.append(JAST::Instruction.new( :op('dup_x2') ));
-            $il.append(JAST::Instruction.new( :op('pop') ));
-            $il.append(JAST::Instruction.new( :op('aload_1') ));
+            $il.append($DUP_X2);
+            $il.append($POP);
+            $il.append($ALOAD_1);
             $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS, 'push_i',
                 'Long', $TYPE_SMO, 'Long', $TYPE_TC ));
-            $il.append(JAST::Instruction.new( :op('pop2') ));
+            $il.append($POP2);
         }
         
         $il.append(JAST::Instruction.new( :op('aload'), $list_tmp ));
@@ -404,12 +438,12 @@ QAST::OperationsJAST.add_core_op('list_n', -> $qastcomp, $op {
             $il.append($item.jast);
             $*STACK.obtain($il, $item);
             $il.append(JAST::Instruction.new( :op('aload'), $list_tmp ));
-            $il.append(JAST::Instruction.new( :op('dup_x2') ));
-            $il.append(JAST::Instruction.new( :op('pop') ));
-            $il.append(JAST::Instruction.new( :op('aload_1') ));
+            $il.append($DUP_X2);
+            $il.append($POP);
+            $il.append($ALOAD_1);
             $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS, 'push_n',
                 'Double', $TYPE_SMO, 'Double', $TYPE_TC ));
-            $il.append(JAST::Instruction.new( :op('pop2') ));
+            $il.append($POP2);
         }
         
         $il.append(JAST::Instruction.new( :op('aload'), $list_tmp ));
@@ -439,11 +473,11 @@ QAST::OperationsJAST.add_core_op('list_s', -> $qastcomp, $op {
             $il.append($item.jast);
             $*STACK.obtain($il, $item);
             $il.append(JAST::Instruction.new( :op('aload'), $list_tmp ));
-            $il.append(JAST::Instruction.new( :op('swap') ));
-            $il.append(JAST::Instruction.new( :op('aload_1') ));
+            $il.append($SWAP);
+            $il.append($ALOAD_1);
             $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS, 'push_s',
                 $TYPE_STR, $TYPE_SMO, $TYPE_STR, $TYPE_TC ));
-            $il.append(JAST::Instruction.new( :op('pop') ));
+            $il.append($POP);
         }
         
         $il.append(JAST::Instruction.new( :op('aload'), $list_tmp ));
@@ -467,15 +501,15 @@ QAST::OperationsJAST.add_core_op('list_b', -> $qastcomp, $op {
         for $op.list {
             nqp::die("list_b must have a list of blocks")
                 unless nqp::istype($_, QAST::Block);
-            $il.append(JAST::Instruction.new( :op('dup') ));
-            $il.append(JAST::Instruction.new( :op('aload_0') ));
+            $il.append($DUP);
+            $il.append($ALOAD_0);
             $il.append(JAST::PushSVal.new( :value($_.cuid) ));
             $il.append(JAST::Instruction.new( :op('invokevirtual'),
                 $TYPE_CU, 'lookupCodeRef', $TYPE_CR, $TYPE_STR ));
-            $il.append(JAST::Instruction.new( :op('aload_1') ));
+            $il.append($ALOAD_1);
             $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS, 'push',
                 $TYPE_SMO, $TYPE_SMO, $TYPE_SMO, $TYPE_TC ));
-            $il.append(JAST::Instruction.new( :op('pop') ));
+            $il.append($POP);
         }
         
         result($il, $RT_OBJ);
@@ -517,10 +551,10 @@ QAST::OperationsJAST.add_core_op('hash', -> $qastcomp, $op {
             $il.append(JAST::Instruction.new( :op('aload'), $hash_tmp ));
             $il.append(JAST::Instruction.new( :op('aload'), $key_tmp ));
             $il.append(JAST::Instruction.new( :op('aload'), $val_tmp ));
-            $il.append(JAST::Instruction.new( :op('aload_1') ));
+            $il.append($ALOAD_1);
             $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS, 'bindkey',
                 $TYPE_SMO, $TYPE_SMO, $TYPE_STR, $TYPE_SMO, $TYPE_TC ));
-            $il.append(JAST::Instruction.new( :op('pop') ));
+            $il.append($POP);
         }
         
         $il.append(JAST::Instruction.new( :op('aload'), $hash_tmp ));
@@ -534,25 +568,25 @@ QAST::OperationsJAST.add_core_op('hash', -> $qastcomp, $op {
 # Conditionals.
 sub boolify_instructions($il, $cond_type) {
     if $cond_type == $RT_INT {
-        $il.append(JAST::PushIVal.new( :value(0) ));
-        $il.append(JAST::Instruction.new( :op('lcmp') ));
+        $il.append($IVAL_ZERO);
+        $il.append($LCMP);
     }
     elsif $cond_type == $RT_NUM {
-        $il.append(JAST::PushNVal.new( :value(0.0) ));
-        $il.append(JAST::Instruction.new( :op('dcmpl') ));
+        $il.append($NVAL_ZERO);
+        $il.append($DCMPL);
     }
     elsif $cond_type == $RT_STR {
         $il.append(JAST::Instruction.new( :op('invokestatic'),
             $TYPE_OPS, 'istrue_s', 'Long', $TYPE_STR ));
-        $il.append(JAST::PushIVal.new( :value(0) ));
-        $il.append(JAST::Instruction.new( :op('lcmp') ));
+        $il.append($IVAL_ZERO);
+        $il.append($LCMP);
     }
     else {
-        $il.append(JAST::Instruction.new( :op('aload_1') ));
+        $il.append($ALOAD_1);
         $il.append(JAST::Instruction.new( :op('invokestatic'),
             $TYPE_OPS, 'istrue', 'Long', $TYPE_SMO, $TYPE_TC ));
-        $il.append(JAST::PushIVal.new( :value(0) ));
-        $il.append(JAST::Instruction.new( :op('lcmp') ));
+        $il.append($IVAL_ZERO);
+        $il.append($LCMP);
     }
 }
 for <if unless> -> $op_name {
@@ -737,11 +771,11 @@ QAST::OperationsJAST.add_core_op('ifnull', -> $qastcomp, $op {
     # Emit null check.
     my $lbl := JAST::Label.new( :name($qastcomp.unique('ifnull_')) );
     $*STACK.obtain($il, $expr);
-    $il.append(JAST::Instruction.new( :op('dup') ));
+    $il.append($DUP);
     $il.append(JAST::Instruction.new( :op('ifnonnull'), $lbl ));
     
     # Emit "then" part.
-    $il.append(JAST::Instruction.new( :op('pop') ));
+    $il.append($POP);
     my $then := $qastcomp.as_jast($op[1], :want($RT_OBJ));
     $il.append($then.jast);
     $*STACK.obtain($il, $then);
@@ -838,7 +872,7 @@ for ('', 'repeat_') -> $repness {
                 $qastcomp.unwind_check($catch, $nr_handler_id);
                 $catch.append(JAST::Instruction.new( :op('getfield'), $TYPE_EX_UNWIND, 'category', 'Long' ));
                 $catch.append(JAST::PushIVal.new( :value($EX_CAT_REDO) ));
-                $catch.append(JAST::Instruction.new( :op('lcmp') ));
+                $catch.append($LCMP);
                 $catch.append(JAST::Instruction.new( :op('ifeq'), $redo_lbl ));
                 $body_il := $qastcomp.delimit_handler(
                     JAST::TryCatch.new( :try($body_il), :$catch, :type($TYPE_EX_UNWIND) ),
@@ -863,7 +897,7 @@ for ('', 'repeat_') -> $repness {
             if $handler {
                 my $catch := JAST::InstructionList.new();
                 $qastcomp.unwind_check($catch, $l_handler_id);
-                $catch.append(JAST::Instruction.new( :op('pop') ));
+                $catch.append($POP);
                 $il := $qastcomp.delimit_handler(
                     JAST::TryCatch.new( :try($il), :catch($catch), :type($TYPE_EX_UNWIND) ),
                     $*HANDLER_IDX, $l_handler_id);
@@ -922,11 +956,11 @@ QAST::OperationsJAST.add_core_op('for', -> $qastcomp, $op {
     $il.append($list_res.jast);
     $*STACK.obtain($il, $list_res);
     if $res {
-        $il.append(JAST::Instruction.new( :op('dup') ));
+        $il.append($DUP);
         $il.append(JAST::Instruction.new( :op('astore'), $res ));
     }
     my $iter_tmp := $*TA.fresh_o();
-    $il.append(JAST::Instruction.new( :op('aload_1') ));
+    $il.append($ALOAD_1);
     $il.append(JAST::Instruction.new( :op('invokestatic'),
         $TYPE_OPS, 'iter', $TYPE_SMO, $TYPE_SMO, $TYPE_TC ));
     $il.append(JAST::Instruction.new( :op('astore'), $iter_tmp ));
@@ -949,10 +983,10 @@ QAST::OperationsJAST.add_core_op('for', -> $qastcomp, $op {
     my $loop_il := JAST::InstructionList.new();
     $loop_il.append($lbl_next);
     $loop_il.append(JAST::Instruction.new( :op('aload'), $iter_tmp ));
-    $loop_il.append(JAST::Instruction.new( :op('aload_1') ));
+    $loop_il.append($ALOAD_1);
     $loop_il.append(JAST::Instruction.new( :op('invokestatic'),
         $TYPE_OPS, 'istrue', 'Long', $TYPE_SMO, $TYPE_TC ));
-    $loop_il.append(JAST::Instruction.new( :op('l2i') ));
+    $loop_il.append($L2I);
     $loop_il.append(JAST::Instruction.new( :op('ifeq'), $lbl_done ));
     
     # Fetch values into temporaries (on the stack ain't enough in case
@@ -964,7 +998,7 @@ QAST::OperationsJAST.add_core_op('for', -> $qastcomp, $op {
         my $tmp := $op.unique('itertmp');
         $*BLOCK.add_local(QAST::Var.new( :name($tmp), :scope('local') ));
         $val_il.append(JAST::Instruction.new( :op('aload'), $iter_tmp ));
-        $val_il.append(JAST::Instruction.new( :op('aload_1') ));
+        $val_il.append($ALOAD_1);
         $val_il.append(JAST::Instruction.new( :op('invokestatic'),
             $TYPE_OPS, 'shift', $TYPE_SMO, $TYPE_SMO, $TYPE_TC ));
         $val_il.append(JAST::Instruction.new( :op('astore'), $tmp ));
@@ -993,7 +1027,7 @@ QAST::OperationsJAST.add_core_op('for', -> $qastcomp, $op {
     if $handler {
         my $catch := JAST::InstructionList.new();
         $qastcomp.unwind_check($catch, $r_handler_id);
-        $catch.append(JAST::Instruction.new( :op('pop') ));
+        $catch.append($POP);
         $catch.append(JAST::Instruction.new( :op('goto'), $lbl_redo ));
         $inv_il := $qastcomp.delimit_handler(
             JAST::TryCatch.new( :try($inv_il), :$catch, :type($TYPE_EX_UNWIND) ),
@@ -1005,7 +1039,7 @@ QAST::OperationsJAST.add_core_op('for', -> $qastcomp, $op {
     if $handler {
         my $catch := JAST::InstructionList.new();
         $qastcomp.unwind_check($catch, $n_handler_id);
-        $catch.append(JAST::Instruction.new( :op('pop') ));
+        $catch.append($POP);
         $val_il := $qastcomp.delimit_handler(
             JAST::TryCatch.new( :try($val_il), :$catch, :type($TYPE_EX_UNWIND) ),
             $l_handler_id, $n_handler_id);
@@ -1017,7 +1051,7 @@ QAST::OperationsJAST.add_core_op('for', -> $qastcomp, $op {
     if $handler {
         my $catch := JAST::InstructionList.new();
         $qastcomp.unwind_check($catch, $l_handler_id);
-        $catch.append(JAST::Instruction.new( :op('pop') ));
+        $catch.append($POP);
         $catch.append(JAST::Instruction.new( :op('goto'), $lbl_done ));
         $loop_il := $qastcomp.delimit_handler(
             JAST::TryCatch.new( :try($loop_il), :$catch, :type($TYPE_EX_UNWIND) ),
@@ -1111,7 +1145,7 @@ QAST::OperationsJAST.add_core_op('call', sub ($qastcomp, $node) {
         # Emit the call. Note, name passed as extra arg as some valid names in
         # Perl 6 are not valid method names on the JVM. We use the fact that
         # the stack was spilled to sneak the ThreadContext arg in.
-        $il.append(JAST::Instruction.new( :op('aload_1') ));
+        $il.append($ALOAD_1);
         $*STACK.obtain($il, |@argstuff[1]) if @argstuff[1];
         $il.append(JAST::InvokeDynamic.new(
             'subcall', 'V', @argstuff[2],
@@ -1136,7 +1170,7 @@ QAST::OperationsJAST.add_core_op('call', sub ($qastcomp, $node) {
 
         # Emit the call, using the same thread context trick. The first thing
         # will be invoked.
-        $il.append(JAST::Instruction.new( :op('aload_1') ));
+        $il.append($ALOAD_1);
         $*STACK.obtain($il, |@argstuff[1]) if @argstuff[1];
         $il.append(JAST::InvokeDynamic.new(
             'indcall', 'V', @argstuff[2],
@@ -1179,7 +1213,7 @@ QAST::OperationsJAST.add_core_op('callmethod', -> $qastcomp, $node {
         # Emit the call. Note, name passed as extra arg as some valid names in
         # Perl 6 are not valid method names on the JVM. We use the fact that
         # the stack was spilled to sneak the ThreadContext arg in.
-        $il.append(JAST::Instruction.new( :op('aload_1') ));
+        $il.append($ALOAD_1);
         $*STACK.obtain($il, |@argstuff[1]) if @argstuff[1];
         $il.append(JAST::InvokeDynamic.new(
             'methcall', 'V', @argstuff[2],
@@ -1210,7 +1244,7 @@ QAST::OperationsJAST.add_core_op('callmethod', -> $qastcomp, $node {
         $*STACK.spill_to_locals($il);
         
         # Emit the call.
-        $il.append(JAST::Instruction.new( :op('aload_1') ));
+        $il.append($ALOAD_1);
         $*STACK.obtain($il, |@argstuff[1]) if @argstuff[1];
         $il.append(JAST::InvokeDynamic.new(
             'indmethcall', 'V', @argstuff[2],
@@ -1247,7 +1281,7 @@ QAST::OperationsJAST.add_core_op('lexotic', -> $qastcomp, $op {
     $il.append(JAST::PushIndex.new( :value($*BLOCK.lexical_idx($op.name)) ));
     $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
         'bindlex_o', $TYPE_SMO, $TYPE_SMO, $TYPE_CF, 'Integer' ));
-    $il.append(JAST::Instruction.new( :op('pop') ));
+    $il.append($POP);
     
     # Compile the things inside the lexotic
     my $*WANT := $RT_OBJ;
@@ -1258,15 +1292,15 @@ QAST::OperationsJAST.add_core_op('lexotic', -> $qastcomp, $op {
     my $miss_lbl := JAST::Label.new( :name($qastcomp.unique('lexotic_miss_')) );
     my $done_lbl := JAST::Label.new( :name($qastcomp.unique('lexotic_done_')) );
     my $catch_il := JAST::InstructionList.new();
-    $catch_il.append(JAST::Instruction.new( :op('dup') ));
+    $catch_il.append($DUP);
     $catch_il.append(JAST::Instruction.new( :op('getfield'), $TYPE_EX_LEX, 'target', 'Long' ));
     $catch_il.append(JAST::PushIVal.new( :value($target) ));
-    $catch_il.append(JAST::Instruction.new( :op('lcmp') ));
+    $catch_il.append($LCMP);
     $catch_il.append(JAST::Instruction.new( :op('ifne'), $miss_lbl ));
     $catch_il.append(JAST::Instruction.new( :op('getfield'), $TYPE_EX_LEX, 'payload', $TYPE_SMO ));
     $catch_il.append(JAST::Instruction.new( :op('goto'), $done_lbl ));
     $catch_il.append($miss_lbl);
-    $catch_il.append(JAST::Instruction.new( :op('athrow') ));
+    $catch_il.append($ATHROW);
     $catch_il.append($done_lbl);
     
     # Finally, assemble try/catch.
@@ -1376,7 +1410,7 @@ QAST::OperationsJAST.add_core_op('handle', sub ($qastcomp, $op) {
     $il.append(JAST::PushIndex.new( :value($lexidx) ));
     $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
         'bindlex_o', $TYPE_SMO, $TYPE_SMO, $TYPE_CF, 'Integer' ));
-    $il.append(JAST::Instruction.new( :op('pop') ));
+    $il.append($POP);
     
     # Register a handler.
     my $handler := &*REGISTER_BLOCK_HANDLER($*HANDLER_IDX, $mask, $lexidx);
@@ -1417,7 +1451,7 @@ QAST::OperationsJAST.add_core_op('control', -> $qastcomp, $op {
         my $cat := %control_map{$name};
         my $il := JAST::InstructionList.new();
         $il.append(JAST::PushIVal.new( :value($cat) ));
-        $il.append(JAST::Instruction.new( :op('aload_1') ));
+        $il.append($ALOAD_1);
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
             'throwcatdyn', $TYPE_SMO, 'Long', $TYPE_TC ));
         result($il, $RT_OBJ);
@@ -1430,51 +1464,51 @@ QAST::OperationsJAST.add_core_op('control', -> $qastcomp, $op {
 # Default ways to box/unbox (for no particular HLL).
 QAST::OperationsJAST.add_hll_box('', $RT_INT, -> $qastcomp {
     my $il := JAST::InstructionList.new();
-    $il.append(JAST::Instruction.new( :op('aload_1') ));
+    $il.append($ALOAD_1);
     $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
         'bootint', $TYPE_SMO, $TYPE_TC ));
-    $il.append(JAST::Instruction.new( :op('aload_1') ));
+    $il.append($ALOAD_1);
     $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
         'box_i', $TYPE_SMO, 'Long', $TYPE_SMO, $TYPE_TC ));
     $il
 });
 QAST::OperationsJAST.add_hll_box('', $RT_NUM, -> $qastcomp {
     my $il := JAST::InstructionList.new();
-    $il.append(JAST::Instruction.new( :op('aload_1') ));
+    $il.append($ALOAD_1);
     $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
         'bootnum', $TYPE_SMO, $TYPE_TC ));
-    $il.append(JAST::Instruction.new( :op('aload_1') ));
+    $il.append($ALOAD_1);
     $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
         'box_n', $TYPE_SMO, 'Double', $TYPE_SMO, $TYPE_TC ));
     $il
 });
 QAST::OperationsJAST.add_hll_box('', $RT_STR, -> $qastcomp {
     my $il := JAST::InstructionList.new();
-    $il.append(JAST::Instruction.new( :op('aload_1') ));
+    $il.append($ALOAD_1);
     $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
         'bootstr', $TYPE_SMO, $TYPE_TC ));
-    $il.append(JAST::Instruction.new( :op('aload_1') ));
+    $il.append($ALOAD_1);
     $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
         'box_s', $TYPE_SMO, $TYPE_STR, $TYPE_SMO, $TYPE_TC ));
     $il
 });
 QAST::OperationsJAST.add_hll_unbox('', $RT_INT, -> $qastcomp {
     my $il := JAST::InstructionList.new();
-    $il.append(JAST::Instruction.new( :op('aload_1') ));
+    $il.append($ALOAD_1);
     $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
         'unbox_i', 'Long', $TYPE_SMO, $TYPE_TC ));
     $il
 });
 QAST::OperationsJAST.add_hll_unbox('', $RT_NUM, -> $qastcomp {
     my $il := JAST::InstructionList.new();
-    $il.append(JAST::Instruction.new( :op('aload_1') ));
+    $il.append($ALOAD_1);
     $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
         'unbox_n', 'Double', $TYPE_SMO, $TYPE_TC ));
     $il
 });
 QAST::OperationsJAST.add_hll_unbox('', $RT_STR, -> $qastcomp {
     my $il := JAST::InstructionList.new();
-    $il.append(JAST::Instruction.new( :op('aload_1') ));
+    $il.append($ALOAD_1);
     $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
         'unbox_s', $TYPE_STR, $TYPE_SMO, $TYPE_TC ));
     $il
@@ -1495,7 +1529,7 @@ QAST::OperationsJAST.map_classlib_core_op('lexprimspec', $TYPE_OPS, 'lexprimspec
 # high level languages.
 QAST::OperationsJAST.add_core_op('usecapture', -> $qastcomp, $op {
     my $il := JAST::InstructionList.new();
-    $il.append(JAST::Instruction.new( :op('aload_1') ));
+    $il.append($ALOAD_1);
     $il.append(JAST::Instruction.new( :op('aload'), 'csd' ));
     $il.append(JAST::Instruction.new( :op('aload'), '__args' ));
     $il.append(JAST::Instruction.new( :op('invokestatic'),
@@ -1504,7 +1538,7 @@ QAST::OperationsJAST.add_core_op('usecapture', -> $qastcomp, $op {
 });
 QAST::OperationsJAST.add_core_op('savecapture', -> $qastcomp, $op {
     my $il := JAST::InstructionList.new();
-    $il.append(JAST::Instruction.new( :op('aload_1') ));
+    $il.append($ALOAD_1);
     $il.append(JAST::Instruction.new( :op('aload'), 'csd' ));
     $il.append(JAST::Instruction.new( :op('aload'), '__args' ));
     $il.append(JAST::Instruction.new( :op('invokestatic'),
@@ -1913,7 +1947,7 @@ QAST::OperationsJAST.add_core_op('setstaticlex', -> $qastcomp, $op {
         nqp::die('First operand to setstaticlex must be a QAST::Block');
     }
     my $il := JAST::InstructionList.new();
-    $il.append(JAST::Instruction.new( :op('aload_0') ));
+    $il.append($ALOAD_0);
     my $obj_res := $qastcomp.as_jast($op[2], :want($RT_OBJ));
     $il.append($obj_res.jast);
     $*STACK.obtain($il, $obj_res);
@@ -1938,9 +1972,9 @@ QAST::OperationsJAST.add_core_op('setdispatcher', -> $qastcomp, $op {
     my $dispres := $qastcomp.as_jast($op[0], :want($RT_OBJ));
     $il.append($dispres.jast);
     $*STACK.obtain($il, $dispres);
-    $il.append(JAST::Instruction.new( :op('dup') ));
-    $il.append(JAST::Instruction.new( :op('aload_1') ));
-    $il.append(JAST::Instruction.new( :op('swap') ));
+    $il.append($DUP);
+    $il.append($ALOAD_1);
+    $il.append($SWAP);
     $il.append(JAST::Instruction.new( :op('putfield'), $TYPE_TC, 'currentDispatcher', $TYPE_SMO ));
     result($il, $RT_OBJ);
 });
@@ -1954,7 +1988,7 @@ QAST::OperationsJAST.add_core_op('takedispatcher', -> $qastcomp, $op {
     }
     my $il := JAST::InstructionList.new();
     $il.append(JAST::PushIndex.new( :value($idx) ));
-    $il.append(JAST::Instruction.new( :op('aload_1') ));
+    $il.append($ALOAD_1);
     $il.append(JAST::Instruction.new( :op('invokestatic'),
         $TYPE_OPS, 'takedispatcher', 'V', 'I', $TYPE_TC ));
     result($il, $RT_VOID);
@@ -2091,18 +2125,18 @@ class QAST::CompilerJAST {
             $cra.append(JAST::PushCVal.new( :value($TYPE_TC) ));
             $cra.append(JAST::PushIndex.new( :value(3) ));
             $cra.append(JAST::Instruction.new( :op('anewarray'), $TYPE_CLASS ));
-            $cra.append(JAST::Instruction.new( :op('dup') ));
+            $cra.append($DUP);
             $cra.append(JAST::PushIndex.new( :value(0) ));
             $cra.append(JAST::PushCVal.new( :value($TYPE_CR) ));
-            $cra.append(JAST::Instruction.new( :op('aastore') ));
-            $cra.append(JAST::Instruction.new( :op('dup') ));
+            $cra.append($AASTORE);
+            $cra.append($DUP);
             $cra.append(JAST::PushIndex.new( :value(1) ));
             $cra.append(JAST::PushCVal.new( :value($TYPE_CSD) ));
-            $cra.append(JAST::Instruction.new( :op('aastore') ));
-            $cra.append(JAST::Instruction.new( :op('dup') ));
+            $cra.append($AASTORE);
+            $cra.append($DUP);
             $cra.append(JAST::PushIndex.new( :value(2) ));
             $cra.append(JAST::PushCVal.new( :value("[$TYPE_OBJ") ));
-            $cra.append(JAST::Instruction.new( :op('aastore') ));
+            $cra.append($AASTORE);
             $cra.append(JAST::Instruction.new( :op('invokestatic'),
                 $TYPE_MT, 'methodType', $TYPE_MT, $TYPE_CLASS, $TYPE_CLASS, "[$TYPE_CLASS" ));
             $cra.append(JAST::Instruction.new( :op('astore'), 'mt' ));
@@ -2115,13 +2149,13 @@ class QAST::CompilerJAST {
             my $TYPE_STRARR := "[$TYPE_STR;";
             my int $i := 0;
             while $i < $!cur_idx {
-                $cra.append(JAST::Instruction.new( :op('dup') )); # The target array
+                $cra.append($DUP); # The target array
                 $cra.append(JAST::PushIndex.new( :value($i) ));  # The array index
                 $cra.append(JAST::Instruction.new( :op('new'), $TYPE_CR ));
-                $cra.append(JAST::Instruction.new( :op('dup') ));
+                $cra.append($DUP);
                 
                 # Compilation unit.
-                $cra.append(JAST::Instruction.new( :op('aload_0') ));
+                $cra.append($ALOAD_0);
                 
                 # Method handle.
                 $cra.append(JAST::Instruction.new( :op('aload'), 'mhl' ));
@@ -2130,7 +2164,7 @@ class QAST::CompilerJAST {
                 $cra.append(JAST::Instruction.new( :op('aload'), 'mt' ));
                 $cra.append(JAST::Instruction.new( :op('invokevirtual'),
                     $TYPE_MHL, 'findVirtual', $TYPE_MH, $TYPE_CLASS, $TYPE_STR, $TYPE_MT ));
-                $cra.append(JAST::Instruction.new( :op('aload_0') ));
+                $cra.append($ALOAD_0);
                 $cra.append(JAST::Instruction.new( :op('invokevirtual'),
                     $TYPE_MH, 'bindTo', $TYPE_MH, $TYPE_OBJ ));
 
@@ -2143,7 +2177,7 @@ class QAST::CompilerJAST {
                         $cra.append(JAST::PushSVal.new( :value(nqp::join("\0", $_)) ));
                     }
                     else {
-                        $cra.append(JAST::Instruction.new( :op('aconst_null') ));
+                        $cra.append($ACONST_NULL);
                     }
                 }
                 
@@ -2151,18 +2185,18 @@ class QAST::CompilerJAST {
                 $cra.append(JAST::Instruction.new( :op('anewarray'), "[J" ));
                 my $hidx := 0;
                 for @!handlers[$i] {
-                    $cra.append(JAST::Instruction.new( :op('dup') ));
+                    $cra.append($DUP);
                     $cra.append(JAST::PushIndex.new( :value($hidx++) ));
                     $cra.append(JAST::PushIndex.new( :value(nqp::elems($_)) ));
                     $cra.append(JAST::Instruction.new( :op('newarray'), "J" ));
                     my $idx := 0;
                     for $_ {
-                        $cra.append(JAST::Instruction.new( :op('dup') ));
+                        $cra.append($DUP);
                         $cra.append(JAST::PushIndex.new( :value($idx++) ));
                         $cra.append(JAST::PushIVal.new( :value($_) ));
-                        $cra.append(JAST::Instruction.new( :op('lastore') ));
+                        $cra.append($LASTORE);
                     }
-                    $cra.append(JAST::Instruction.new( :op('aastore') ));
+                    $cra.append($AASTORE);
                 }
                 
                 $cra.append(JAST::Instruction.new( :op('invokespecial'),
@@ -2170,12 +2204,12 @@ class QAST::CompilerJAST {
                     'Void', $TYPE_CU, $TYPE_MH, $TYPE_STR, $TYPE_STR,
                     $TYPE_STR, $TYPE_STR, $TYPE_STR, $TYPE_STR,
                     "[[J"));
-                $cra.append(JAST::Instruction.new( :op('aastore') )); # Push to the array
+                $cra.append($AASTORE); # Push to the array
                 $i++;
             }
             
             # Return the array. Add method to class.
-            $cra.append(JAST::Instruction.new( :op('areturn') ));
+            $cra.append($ARETURN);
             $*JCLASS.add_method($cra);
         }
         
@@ -2191,15 +2225,15 @@ class QAST::CompilerJAST {
             my int $i := 0;
             for @!outer_mappings -> @m {
                 for @m {
-                    $oma.append(JAST::Instruction.new( :op('dup') ));
+                    $oma.append($DUP);
                     $oma.append(JAST::PushIndex.new( :value($i++) ));
                     $oma.append(JAST::PushIndex.new( :value($_) ));
-                    $oma.append(JAST::Instruction.new( :op('iastore') ));
+                    $oma.append($IASTORE);
                 }
             }
             
             # Return the array. Add method to class.
-            $oma.append(JAST::Instruction.new( :op('areturn') ));
+            $oma.append($ARETURN);
             $*JCLASS.add_method($oma);
         }
         
@@ -2215,41 +2249,41 @@ class QAST::CompilerJAST {
             for @!callsites -> @cs {
                 my @cs_flags := @cs[0];
                 my @cs_names := @cs[1];
-                $csa.append(JAST::Instruction.new( :op('dup') )); # Target array.
+                $csa.append($DUP); # Target array.
                 $csa.append(JAST::PushIndex.new( :value($i++) )); # Index.
                 $csa.append(JAST::Instruction.new( :op('new'), $TYPE_CSD ));
-                $csa.append(JAST::Instruction.new( :op('dup') ));
+                $csa.append($DUP);
                 $csa.append(JAST::PushIndex.new( :value(+@cs_flags) ));
                 $csa.append(JAST::Instruction.new( :op('newarray'), 'Byte' ));
                 my int $j := 0;
                 for @cs_flags {
-                    $csa.append(JAST::Instruction.new( :op('dup') ));
+                    $csa.append($DUP);
                     $csa.append(JAST::PushIndex.new( :value($j++) ));
                     $csa.append(JAST::PushIndex.new( :value($_) ));
-                    $csa.append(JAST::Instruction.new( :op('i2b') ));
-                    $csa.append(JAST::Instruction.new( :op('bastore') ));
+                    $csa.append($I2B);
+                    $csa.append($BASTORE);
                 }
                 if @cs_names {
                     $csa.append(JAST::PushIndex.new( :value(+@cs_names) ));
                     $csa.append(JAST::Instruction.new( :op('anewarray'), $TYPE_STR ));
                     $j := 0;
                     for @cs_names {
-                        $csa.append(JAST::Instruction.new( :op('dup') ));
+                        $csa.append($DUP);
                         $csa.append(JAST::PushIndex.new( :value($j++) ));
                         $csa.append(JAST::PushSVal.new( :value($_) ));
-                        $csa.append(JAST::Instruction.new( :op('aastore') ));
+                        $csa.append($AASTORE);
                     }
                 }
                 else {
-                    $csa.append(JAST::Instruction.new( :op('aconst_null') ));
+                    $csa.append($ACONST_NULL);
                 }
                 $csa.append(JAST::Instruction.new( :op('invokespecial'),
                     $TYPE_CSD, '<init>', 'Void', '[Byte', "[$TYPE_STR"));
-                $csa.append(JAST::Instruction.new( :op('aastore') ));
+                $csa.append($AASTORE);
             }
             
             # Return the array. Add method to class.
-            $csa.append(JAST::Instruction.new( :op('areturn') ));
+            $csa.append($ARETURN);
             $*JCLASS.add_method($csa);
         }
     }
@@ -2656,18 +2690,18 @@ class QAST::CompilerJAST {
             $main_meth.add_argument('argv', "[$TYPE_STR");
             $main_meth.append(JAST::PushCVal.new( :value('L' ~ $*JCLASS.name ~ ';') ));
             $main_meth.append(JAST::PushIndex.new( :value($*CODEREFS.cuid_to_idx($main_block.cuid)) ));
-            $main_meth.append(JAST::Instruction.new( :op('aload_0') ));
+            $main_meth.append($ALOAD_0);
             $main_meth.append(JAST::Instruction.new( :op('invokestatic'),
                 $TYPE_CU, 'enterFromMain',
                 'Void', 'Ljava/lang/Class;', 'Integer', "[$TYPE_STR"));
-            $main_meth.append(JAST::Instruction.new( :op('return') ));
+            $main_meth.append($RETURN);
             $*JCLASS.add_method($main_meth);
         }
         
         # Add method that returns HLL name.
         my $hll_meth := JAST::Method.new( :name('hllName'), :returns($TYPE_STR), :static(0) );
         $hll_meth.append(JAST::PushSVal.new( :value($*HLL) ));
-        $hll_meth.append(JAST::Instruction.new( :op('areturn') ));
+        $hll_meth.append($ARETURN);
         $*JCLASS.add_method($hll_meth);
         
         # Add method that returns the mainline block.
@@ -2811,8 +2845,8 @@ class QAST::CompilerJAST {
             # Emit prelude. This creates and stashes the CallFrame.
             $*JMETH.add_local('cf', $TYPE_CF);
             $*JMETH.append(JAST::Instruction.new( :op('new'), $TYPE_CF ));
-            $*JMETH.append(JAST::Instruction.new( :op('dup') ));
-            $*JMETH.append(JAST::Instruction.new( :op('aload_1') ));
+            $*JMETH.append($DUP);
+            $*JMETH.append($ALOAD_1);
             $*JMETH.append(JAST::Instruction.new( :op('aload'), 'cr' ));
             $*JMETH.append(JAST::Instruction.new( :op('invokespecial'), $TYPE_CF, '<init>',
                 'Void', $TYPE_TC, $TYPE_CR ));
@@ -2857,7 +2891,7 @@ class QAST::CompilerJAST {
             $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
                 "checkarity", $TYPE_CSD, $TYPE_CF, $TYPE_CSD, "[$TYPE_OBJ", 'Integer', 'Integer' ));
             $il.append(JAST::Instruction.new( :op('astore'), 'csd' ));
-            $il.append(JAST::Instruction.new( :op('aload_1') ));
+            $il.append($ALOAD_1);
             $il.append(JAST::Instruction.new( :op('getfield'), $TYPE_TC, 'flatArgs', "[$TYPE_OBJ" ));
             $il.append(JAST::Instruction.new( :op('astore'), '__args' ));
             
@@ -2867,7 +2901,7 @@ class QAST::CompilerJAST {
                 my $type;
                 if $_.slurpy {
                     $type := $RT_OBJ;
-                    $il.append(JAST::Instruction.new( :op('aload_1') ));
+                    $il.append($ALOAD_1);
                     $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
                     $il.append(JAST::Instruction.new( :op('aload'), 'csd' ));
                     $il.append(JAST::Instruction.new( :op('aload'), '__args' ));
@@ -2901,7 +2935,7 @@ class QAST::CompilerJAST {
                     }
                     if $opt {
                         my $lbl := JAST::Label.new( :name(self.unique("opt_param")) );
-                        $il.append(JAST::Instruction.new( :op('aload_1') ));
+                        $il.append($ALOAD_1);
                         $il.append(JAST::Instruction.new( :op('getfield'), $TYPE_TC,
                             'lastParameterExisted', "Integer" ));
                         $il.append(JAST::Instruction.new( :op('ifne'), $lbl ));
@@ -2949,22 +2983,22 @@ class QAST::CompilerJAST {
                 $TYPE_CF, 'leave', 'Void' ));
             my $posthan := JAST::InstructionList.new();
             my $nclab   := JAST::Label.new( :name('non_cont_ex') );
-            $posthan.append(JAST::Instruction.new( :op('dup') ));
+            $posthan.append($DUP);
             $posthan.append(JAST::Instruction.new( :op('instanceof'), $TYPE_EX_CONT ));
             $posthan.append(JAST::Instruction.new( :op('ifeq'), $nclab ));
             $posthan.append(JAST::Instruction.new( :op('aload'), 'cf' ));
             $posthan.append(JAST::Instruction.new( :op('invokevirtual'),
                 $TYPE_CF, 'leave', 'Void' ));
-            $posthan.append(JAST::Instruction.new( :op('athrow') ));
+            $posthan.append($ATHROW);
             $posthan.append($nclab);
-            $posthan.append(JAST::Instruction.new( :op('aload_1') ));
-            $posthan.append(JAST::Instruction.new( :op('swap') ));
+            $posthan.append($ALOAD_1);
+            $posthan.append($SWAP);
             $posthan.append(JAST::Instruction.new( :op('invokestatic'),
                 $TYPE_EH, 'dieInternal', $TYPE_EX_RT, $TYPE_TC, $TYPE_THROWABLE ));
-            $posthan.append(JAST::Instruction.new( :op('athrow') ));
+            $posthan.append($ATHROW);
             $*JMETH.append(JAST::TryCatch.new( :try($il), :catch($posthan),
                 :type($TYPE_THROWABLE) ));
-            $*JMETH.append(JAST::Instruction.new( :op('return') ));
+            $*JMETH.append($RETURN);
             
             # Finalize method and add it to the class.
             $*JCLASS.add_method($*JMETH);
@@ -2982,9 +3016,9 @@ class QAST::CompilerJAST {
                 # code ref, callsite descriptor and args (both empty) onto
                 # the stack.
                 my $il := JAST::InstructionList.new();
-                $il.append(JAST::Instruction.new( :op('aload_0') ));
-                $il.append(JAST::Instruction.new( :op('aload_1') ));
-                $il.append(JAST::Instruction.new( :op('aload_0') ));
+                $il.append($ALOAD_0);
+                $il.append($ALOAD_1);
+                $il.append($ALOAD_0);
                 $il.append(JAST::PushSVal.new( :value($node.cuid) ));
                 $il.append(JAST::Instruction.new( :op('invokevirtual'),
                     $TYPE_CU, 'lookupCodeRef', $TYPE_CR, $TYPE_STR ));
@@ -3121,11 +3155,11 @@ class QAST::CompilerJAST {
             $*STACK.obtain($il, $var_res);
             
             my $lbl := JAST::Label.new(:name($node.unique('fallback')));
-            $il.append(JAST::Instruction.new( :op('dup') ));
+            $il.append($DUP);
             $il.append(JAST::Instruction.new( :op('ifnonnull'), $lbl ));
             
             my $fallback_res := self.as_jast($node.fallback, :want($RT_OBJ));
-            $il.append(JAST::Instruction.new( :op('pop') ));
+            $il.append($POP);
             $il.append($fallback_res.jast);
             $*STACK.obtain($il, $fallback_res);
             $il.append($lbl);
@@ -3256,7 +3290,7 @@ class QAST::CompilerJAST {
                         $*STACK.obtain($il, $valres);
                     }
                     $il.append(JAST::PushSVal.new( :value($name) ));
-                    $il.append(JAST::Instruction.new( :op('aload_1') ));
+                    $il.append($ALOAD_1);
                     $il.append($*BINDVAL
                         ?? JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
                                 "bindlexdyn", $TYPE_SMO, $TYPE_SMO, $TYPE_STR, $TYPE_TC )
@@ -3327,13 +3361,13 @@ class QAST::CompilerJAST {
                 my $val_res := self.as_jast_clear_bindval($*BINDVAL, :want($type));
                 $il.append($val_res.jast);
                 $*STACK.obtain($il, $obj_res, $han_res, $name_res, $val_res);
-                $il.append(JAST::Instruction.new( :op('aload_1') ));
+                $il.append($ALOAD_1);
                 $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
                     "bindattr$suffix", $jtype, $TYPE_SMO, $TYPE_SMO, $TYPE_STR, $jtype, $TYPE_TC ));
             }
             else {
                 $*STACK.obtain($il, $obj_res, $han_res, $name_res);
-                $il.append(JAST::Instruction.new( :op('aload_1') ));
+                $il.append($ALOAD_1);
                 $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
                     "getattr$suffix", $jtype, $TYPE_SMO, $TYPE_SMO, $TYPE_STR, $TYPE_TC ));
             }
@@ -3395,10 +3429,10 @@ class QAST::CompilerJAST {
             $il.append(JAST::Instruction.new( :op('anewarray'), $TYPE_STR ));
             my int $i := 0;
             for @chunks {
-                $il.append(JAST::Instruction.new( :op('dup') ));
+                $il.append($DUP);
                 $il.append(JAST::PushIndex.new( :value($i++) ));
                 $il.append(JAST::PushSVal.new( :value($_) ));
-                $il.append(JAST::Instruction.new( :op('aastore') ));
+                $il.append($AASTORE);
             }
             $il.append(JAST::Instruction.new( :op('invokestatic'),
                 $TYPE_OPS, 'join_literal', $TYPE_STR, "[$TYPE_STR" ));
@@ -3408,7 +3442,7 @@ class QAST::CompilerJAST {
     
     multi method as_jast(QAST::BVal $node, :$want) {
         my $il := JAST::InstructionList.new();
-        $il.append(JAST::Instruction.new( :op('aload_0') ));
+        $il.append($ALOAD_0);
         $il.append(JAST::PushSVal.new( :value($node.value.cuid) ));
         $il.append(JAST::Instruction.new( :op('invokevirtual'),
             $TYPE_CU, 'lookupCodeRef', $TYPE_CR, $TYPE_STR ));
@@ -3421,7 +3455,7 @@ class QAST::CompilerJAST {
         my $handle := nqp::scgethandle($sc);
         my $idx    := nqp::scgetobjidx($sc, $val);
         my $il     := JAST::InstructionList.new();
-        $il.append(JAST::Instruction.new( :op('aload_1') ));
+        $il.append($ALOAD_1);
         $il.append(JAST::InvokeDynamic.new(
             'wval', $TYPE_SMO, [$TYPE_TC],
             'org/perl6/nqp/runtime/IndyBootstrap', 'wval',
@@ -3471,7 +3505,7 @@ class QAST::CompilerJAST {
         }
         elsif $desired == $RT_INT {
             if $got == $RT_NUM {
-                $il.append(JAST::Instruction.new( :op('d2l') ));
+                $il.append($D2L);
             }
             elsif $got == $RT_STR {
                 $il.append(JAST::Instruction.new( :op('invokestatic'),
@@ -3483,7 +3517,7 @@ class QAST::CompilerJAST {
         }
         elsif $desired == $RT_NUM {
             if $got == $RT_INT {
-                $il.append(JAST::Instruction.new( :op('l2d') ));
+                $il.append($L2D);
             }
             elsif $got == $RT_STR {
                 $il.append(JAST::Instruction.new( :op('invokestatic'),
@@ -3519,18 +3553,18 @@ class QAST::CompilerJAST {
     method unwind_check($il, $desired) {
         my $lbl_i := JAST::Label.new( :name('unwind_' ~ $unwind_lbl++) );
         my $lbl_c := JAST::Label.new( :name('unwind_' ~ $unwind_lbl++) );
-        $il.append(JAST::Instruction.new( :op('dup') ));
+        $il.append($DUP);
         $il.append(JAST::Instruction.new( :op('getfield'), $TYPE_EX_UNWIND, 'unwindTarget', 'Long' ));
         $il.append(JAST::PushIVal.new( :value($desired) ));
-        $il.append(JAST::Instruction.new( :op('lcmp') ));
+        $il.append($LCMP);
         $il.append(JAST::Instruction.new( :op('ifeq'), $lbl_i ));
-        $il.append(JAST::Instruction.new( :op('athrow') ));
+        $il.append($ATHROW);
         $il.append($lbl_i);
-        $il.append(JAST::Instruction.new( :op('dup') ));
+        $il.append($DUP);
         $il.append(JAST::Instruction.new( :op('getfield'), $TYPE_EX_UNWIND, 'unwindCompUnit', $TYPE_CU ));
-        $il.append(JAST::Instruction.new( :op('aload_0') ));
+        $il.append($ALOAD_0);
         $il.append(JAST::Instruction.new( :op('if_acmpeq'), $lbl_c ));
-        $il.append(JAST::Instruction.new( :op('athrow') ));
+        $il.append($ATHROW);
         $il.append($lbl_c);
     }
     
@@ -3550,9 +3584,9 @@ class QAST::CompilerJAST {
     # Emits an exception throw.
     sub emit_throw($il, $type = 'Ljava/lang/Exception;') {
         $il.append(JAST::Instruction.new( :op('new'), $type ));
-        $il.append(JAST::Instruction.new( :op('dup') ));
+        $il.append($DUP);
         $il.append(JAST::Instruction.new( :op('invokespecial'), $type, '<init>', 'Void' ));
-        $il.append(JAST::Instruction.new( :op('athrow') ));
+        $il.append($ATHROW);
     }
     
     multi method as_jast(QAST::Regex $node, :$want) {
@@ -3666,18 +3700,18 @@ class QAST::CompilerJAST {
         $il.append(JAST::Instruction.new( :op('invokestatic'),
             $TYPE_OPS, 'chars', 'Long', $TYPE_STR ));
         $il.append(JAST::Instruction.new( :op('lstore'), %*REG<eos> ));
-        $il.append(JAST::Instruction.new( :op('aconst_null') ));
+        $il.append($ACONST_NULL);
         $il.append(JAST::Instruction.new( :op('astore'), %*REG<cstack> ));
-        $il.append(JAST::Instruction.new( :op('aconst_null') ));
+        $il.append($ACONST_NULL);
         $il.append(JAST::Instruction.new( :op('astore'), %*REG<subcur> ));
-        $il.append(JAST::PushIVal.new( :value(0) ));
+        $il.append($IVAL_ZERO);
         $il.append(JAST::Instruction.new( :op('lstore'), %*REG<rep> ));
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<restart> ));
-        $il.append(JAST::Instruction.new( :op('l2i') ));
+        $il.append($L2I);
         $il.append(JAST::Instruction.new( :op('ifne'), $restartlabel ));
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<eos> ));
-        $il.append(JAST::Instruction.new( :op('lcmp') ));
+        $il.append($LCMP);
         $il.append(JAST::Instruction.new( :op('ifgt'), %*REG<fail> ));
         
         # Compile the regex body itself; if we make it thorugh it, we go to
@@ -3690,7 +3724,7 @@ class QAST::CompilerJAST {
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<cur> ));
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<curclass> ));
         $il.append(JAST::PushSVal.new( :value('$!cstack') ));
-        $il.append(JAST::Instruction.new( :op('aload_1') ));
+        $il.append($ALOAD_1);
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
             "getattr", $TYPE_SMO, $TYPE_SMO, $TYPE_SMO, $TYPE_STR, $TYPE_TC ));
         $il.append(JAST::Instruction.new( :op('astore'), %*REG<cstack> ));
@@ -3698,36 +3732,36 @@ class QAST::CompilerJAST {
         # Failure/backtrack handling. If no bstack, we're done.
         $il.append($faillabel);
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<bstack> ));
-        $il.append(JAST::Instruction.new( :op('aload_1') ));
+        $il.append($ALOAD_1);
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
                 "elems", 'Long', $TYPE_SMO, $TYPE_TC ));
-        $il.append(JAST::Instruction.new( :op('l2i') ));
+        $il.append($L2I);
         $il.append(JAST::Instruction.new( :op('ifeq'), $donelabel ));
         
         # Otherwise, start handling the cstack, if it's not empty.
         # The setup done here is used when we backtrack into subrules.
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<bstack> ));
-        $il.append(JAST::Instruction.new( :op('aload_1') ));
+        $il.append($ALOAD_1);
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
                 "pop_i", 'Long', $TYPE_SMO, $TYPE_TC ));
         $il.append(JAST::Instruction.new( :op('lstore'), %*REG<itemp> ));
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<cstack> ));
-        $il.append(JAST::Instruction.new( :op('aload_1') ));
+        $il.append($ALOAD_1);
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
             "islist", 'Long', $TYPE_SMO, $TYPE_TC ));
-        $il.append(JAST::Instruction.new( :op('l2i') ));
+        $il.append($L2I);
         $il.append(JAST::Instruction.new( :op('ifeq'), $cstacklabel ));
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<cstack> ));
-        $il.append(JAST::Instruction.new( :op('aload_1') ));
+        $il.append($ALOAD_1);
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
                 "elems", 'Long', $TYPE_SMO, $TYPE_TC ));
-        $il.append(JAST::Instruction.new( :op('l2i') ));
+        $il.append($L2I);
         $il.append(JAST::Instruction.new( :op('ifeq'), $cstacklabel ));
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<cstack> ));
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<itemp> ));
-        $il.append(JAST::PushIVal.new( :value(1) ));
-        $il.append(JAST::Instruction.new( :op('lsub') ));
-        $il.append(JAST::Instruction.new( :op('aload_1') ));
+        $il.append($IVAL_ONE);
+        $il.append($LSUB);
+        $il.append($ALOAD_1);
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
                 "atpos", $TYPE_SMO, $TYPE_SMO, 'Long', $TYPE_TC ));
         $il.append(JAST::Instruction.new( :op('astore'), %*REG<subcur> ));
@@ -3735,9 +3769,9 @@ class QAST::CompilerJAST {
         
         # Pop rep, pos and mark off the stack and store them.
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<bstack> ));
-        $il.append(JAST::Instruction.new( :op('aload_1') ));
-        $il.append(JAST::Instruction.new( :op('dup2') ));
-        $il.append(JAST::Instruction.new( :op('dup2') ));
+        $il.append($ALOAD_1);
+        $il.append($DUP2);
+        $il.append($DUP2);
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
                 "pop_i", 'Long', $TYPE_SMO, $TYPE_TC ));
         $il.append(JAST::Instruction.new( :op('lstore'), %*REG<rep> ));
@@ -3750,44 +3784,44 @@ class QAST::CompilerJAST {
         
         # Handle position and mark special cases.
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
-        $il.append(JAST::PushIVal.new( :value(-1) ));
-        $il.append(JAST::Instruction.new( :op('lcmp') ));
+        $il.append($IVAL_MINUSONE);
+        $il.append($LCMP);
         $il.append(JAST::Instruction.new( :op('iflt'), $donelabel ));
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
-        $il.append(JAST::PushIVal.new( :value(0) ));
-        $il.append(JAST::Instruction.new( :op('lcmp') ));
+        $il.append($IVAL_ZERO);
+        $il.append($LCMP);
         $il.append(JAST::Instruction.new( :op('iflt'), $faillabel ));
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<itemp> ));
-        $il.append(JAST::PushIVal.new( :value(0) ));
-        $il.append(JAST::Instruction.new( :op('lcmp') ));
+        $il.append($IVAL_ZERO);
+        $il.append($LCMP);
         $il.append(JAST::Instruction.new( :op('ifeq'), $faillabel ));
         
         # Backtrack the cursor stack
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<cstack> ));
         $il.append(JAST::Instruction.new( :op('ifnull'), $jumplabel ));
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<cstack> ));
-        $il.append(JAST::Instruction.new( :op('aload_1') ));
+        $il.append($ALOAD_1);
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
             "islist", 'Long', $TYPE_SMO, $TYPE_TC ));
-        $il.append(JAST::Instruction.new( :op('l2i') ));
+        $il.append($L2I);
         $il.append(JAST::Instruction.new( :op('ifeq'), $jumplabel ));
         
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<cstack> ));
-        $il.append(JAST::Instruction.new( :op('aload_1') ));
+        $il.append($ALOAD_1);
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<bstack> ));
-        $il.append(JAST::Instruction.new( :op('aload_1') ));
+        $il.append($ALOAD_1);
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
             "elems", 'Long', $TYPE_SMO, $TYPE_TC ));
-        $il.append(JAST::Instruction.new( :op('dup2') ));
-        $il.append(JAST::Instruction.new( :op('l2i') ));
+        $il.append($DUP2);
+        $il.append($L2I);
         $il.append(JAST::Instruction.new( :op('ifeq'), $cutlabel ));
         
-        $il.append(JAST::PushIVal.new( :value(1) ));
-        $il.append(JAST::Instruction.new( :op('lsub') ));
+        $il.append($IVAL_ONE);
+        $il.append($LSUB);
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<bstack> ));
-        $il.append(JAST::Instruction.new( :op('dup_x2') ));
-        $il.append(JAST::Instruction.new( :op('pop') ));
-        $il.append(JAST::Instruction.new( :op('aload_1') ));
+        $il.append($DUP_X2);
+        $il.append($POP);
+        $il.append($ALOAD_1);
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
             "atpos_i", 'Long', $TYPE_SMO, 'Long', $TYPE_TC ));
         
@@ -3799,7 +3833,7 @@ class QAST::CompilerJAST {
         # jump table.
         $il.append($jumplabel);
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<itemp> ));
-        $il.append(JAST::Instruction.new( :op('l2i') ));
+        $il.append($L2I);
         my $ts := JAST::Instruction.new( :op('tableswitch'), $donelabel );
         for @mark_labels {
             $ts.push($_);
@@ -3814,7 +3848,7 @@ class QAST::CompilerJAST {
         ));
         $il.append($fail_res.jast);
         $*STACK.obtain($il, $fail_res);
-        $il.append(JAST::Instruction.new( :op('pop') ));
+        $il.append($POP);
 
         # Evaluate to the curosr.
         $il.append($endlabel);
@@ -3839,15 +3873,15 @@ class QAST::CompilerJAST {
         my $il_marks := JAST::InstructionList.new();
         my $il_alts  := JAST::InstructionList.new();
         $il_marks.append(JAST::Instruction.new( :op('aload'), %*REG<altmarks> ));
-        $il_marks.append(JAST::Instruction.new( :op('aload_1') ));
-        $il_marks.append(JAST::PushIVal.new( :value(0) ));
+        $il_marks.append($ALOAD_1);
+        $il_marks.append($IVAL_ZERO);
         $il_marks.append(JAST::Instruction.new( :op('invokevirtual'), $TYPE_SMO,
             "set_elems", 'Void', $TYPE_TC, 'Long' ));
         
         my $mark_endlabel := &*REGISTER_MARK($endlabel);
         self.regex_mark($il_alts, $mark_endlabel,
-            JAST::PushIVal.new( :value(-1) ),
-            JAST::PushIVal.new( :value(0) ));
+            $IVAL_MINUSONE,
+            $IVAL_ZERO);
         
         my $altmeth := QAST::Op.new(
             :op('callmethod'), :name('!alt'),
@@ -3873,10 +3907,10 @@ class QAST::CompilerJAST {
             my $altmark := &*REGISTER_MARK($altlabel);
             $il_marks.append(JAST::Instruction.new( :op('aload'), %*REG<altmarks> ));
             $il_marks.append(JAST::PushIVal.new( :value($altmark) ));
-            $il_marks.append(JAST::Instruction.new( :op('aload_1') ));
+            $il_marks.append($ALOAD_1);
             $il_marks.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS, 'push_i',
                 'Long', $TYPE_SMO, 'Long', $TYPE_TC ));
-            $il_marks.append(JAST::Instruction.new( :op('pop2') ));
+            $il_marks.append($POP2);
             $altcount++;
         }
         
@@ -3904,7 +3938,7 @@ class QAST::CompilerJAST {
             my $mark := &*REGISTER_MARK($altlabel);
             self.regex_mark($il, $mark,
                 JAST::Instruction.new( :op('lload'), %*REG<pos> ),
-                JAST::PushIVal.new( :value(0) ));
+                $IVAL_ZERO);
             $il.append($ajast);
             $il.append(JAST::Instruction.new( :op('goto'), $endlabel ));
             $ajast := self.regex_jast(nqp::shift($iter));
@@ -3921,19 +3955,19 @@ class QAST::CompilerJAST {
         my $donelabel := JAST::Label.new( :name(self.unique('rxanchor') ~ '_done') );
         if $subtype eq 'bos' {
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
-            $il.append(JAST::Instruction.new( :op('l2i') ));
+            $il.append($L2I);
             $il.append(JAST::Instruction.new( :op('ifne'), %*REG<fail> ));
         }
         elsif $subtype eq 'eos' {
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<eos> ));
-            $il.append(JAST::Instruction.new( :op('lcmp') ));
+            $il.append($LCMP);
             $il.append(JAST::Instruction.new( :op('iflt'), %*REG<fail> ));
         }
         elsif $subtype eq 'lwb' {
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<eos> ));
-            $il.append(JAST::Instruction.new( :op('lcmp') ));
+            $il.append($LCMP);
             $il.append(JAST::Instruction.new( :op('ifge'), %*REG<fail> ));
             
             $il.append(JAST::PushIVal.new( :value(nqp::const::CCLASS_WORD) ));
@@ -3941,23 +3975,23 @@ class QAST::CompilerJAST {
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
             $il.append(JAST::Instruction.new( :op('invokestatic'),
                 $TYPE_OPS, 'iscclass', 'Long', 'Long', $TYPE_STR, 'Long' ));
-            $il.append(JAST::Instruction.new( :op('l2i') ));
+            $il.append($L2I);
             $il.append(JAST::Instruction.new( :op('ifeq'), %*REG<fail> ));
             
             $il.append(JAST::PushIVal.new( :value(nqp::const::CCLASS_WORD) ));
             $il.append(JAST::Instruction.new( :op('aload'), %*REG<tgt> ));
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
-            $il.append(JAST::PushIVal.new( :value(1) ));
-            $il.append(JAST::Instruction.new( :op('lsub') ));
+            $il.append($IVAL_ONE);
+            $il.append($LSUB);
             $il.append(JAST::Instruction.new( :op('invokestatic'),
                 $TYPE_OPS, 'iscclass', 'Long', 'Long', $TYPE_STR, 'Long' ));
-            $il.append(JAST::Instruction.new( :op('l2i') ));
+            $il.append($L2I);
             $il.append(JAST::Instruction.new( :op('ifne'), %*REG<fail> ));
         }
         elsif $subtype eq 'rwb' {
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
-            $il.append(JAST::PushIVal.new( :value(0) ));
-            $il.append(JAST::Instruction.new( :op('lcmp') ));
+            $il.append($IVAL_ZERO);
+            $il.append($LCMP);
             $il.append(JAST::Instruction.new( :op('ifle'), %*REG<fail> ));
             
             $il.append(JAST::PushIVal.new( :value(nqp::const::CCLASS_WORD) ));
@@ -3965,37 +3999,37 @@ class QAST::CompilerJAST {
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
             $il.append(JAST::Instruction.new( :op('invokestatic'),
                 $TYPE_OPS, 'iscclass', 'Long', 'Long', $TYPE_STR, 'Long' ));
-            $il.append(JAST::Instruction.new( :op('l2i') ));
+            $il.append($L2I);
             $il.append(JAST::Instruction.new( :op('ifne'), %*REG<fail> ));
             
             $il.append(JAST::PushIVal.new( :value(nqp::const::CCLASS_WORD) ));
             $il.append(JAST::Instruction.new( :op('aload'), %*REG<tgt> ));
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
-            $il.append(JAST::PushIVal.new( :value(1) ));
-            $il.append(JAST::Instruction.new( :op('lsub') ));
+            $il.append($IVAL_ONE);
+            $il.append($LSUB);
             $il.append(JAST::Instruction.new( :op('invokestatic'),
                 $TYPE_OPS, 'iscclass', 'Long', 'Long', $TYPE_STR, 'Long' ));
-            $il.append(JAST::Instruction.new( :op('l2i') ));
+            $il.append($L2I);
             $il.append(JAST::Instruction.new( :op('ifeq'), %*REG<fail> ));
         }
         elsif $subtype eq 'bol' {
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
-            $il.append(JAST::Instruction.new( :op('l2i') ));
+            $il.append($L2I);
             $il.append(JAST::Instruction.new( :op('ifeq'), $donelabel ));
             
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<eos> ));
-            $il.append(JAST::Instruction.new( :op('lcmp') ));
+            $il.append($LCMP);
             $il.append(JAST::Instruction.new( :op('ifge'), %*REG<fail> ));
             
             $il.append(JAST::PushIVal.new( :value(nqp::const::CCLASS_NEWLINE) ));
             $il.append(JAST::Instruction.new( :op('aload'), %*REG<tgt> ));
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
-            $il.append(JAST::PushIVal.new( :value(1) ));
-            $il.append(JAST::Instruction.new( :op('lsub') ));
+            $il.append($IVAL_ONE);
+            $il.append($LSUB);
             $il.append(JAST::Instruction.new( :op('invokestatic'),
                 $TYPE_OPS, 'iscclass', 'Long', 'Long', $TYPE_STR, 'Long' ));
-            $il.append(JAST::Instruction.new( :op('l2i') ));
+            $il.append($L2I);
             $il.append(JAST::Instruction.new( :op('ifeq'), %*REG<fail> ));
             
             $il.append($donelabel);
@@ -4006,26 +4040,26 @@ class QAST::CompilerJAST {
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
             $il.append(JAST::Instruction.new( :op('invokestatic'),
                 $TYPE_OPS, 'iscclass', 'Long', 'Long', $TYPE_STR, 'Long' ));
-            $il.append(JAST::Instruction.new( :op('l2i') ));
+            $il.append($L2I);
             $il.append(JAST::Instruction.new( :op('ifne'), $donelabel ));
             
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<eos> ));
-            $il.append(JAST::Instruction.new( :op('lcmp') ));
+            $il.append($LCMP);
             $il.append(JAST::Instruction.new( :op('ifne'), %*REG<fail> ));
             
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
-            $il.append(JAST::Instruction.new( :op('l2i') ));
+            $il.append($L2I);
             $il.append(JAST::Instruction.new( :op('ifeq'), $donelabel ));
             
             $il.append(JAST::PushIVal.new( :value(nqp::const::CCLASS_NEWLINE) ));
             $il.append(JAST::Instruction.new( :op('aload'), %*REG<tgt> ));
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
-            $il.append(JAST::PushIVal.new( :value(1) ));
-            $il.append(JAST::Instruction.new( :op('lsub') ));
+            $il.append($IVAL_ONE);
+            $il.append($LSUB);
             $il.append(JAST::Instruction.new( :op('invokestatic'),
                 $TYPE_OPS, 'iscclass', 'Long', 'Long', $TYPE_STR, 'Long' ));
-            $il.append(JAST::Instruction.new( :op('l2i') ));
+            $il.append($L2I);
             $il.append(JAST::Instruction.new( :op('ifne'), %*REG<fail> ));
             
             $il.append($donelabel);
@@ -4058,7 +4092,7 @@ class QAST::CompilerJAST {
         my $mark := &*REGISTER_MARK($conjlabel);
         self.regex_mark($il, $mark,
              JAST::Instruction.new( :op('lload'), %*REG<pos> ),
-             JAST::PushIVal.new( :value(0) ));
+             $IVAL_ZERO);
         
         $il.append(JAST::Instruction.new( :op('goto'), $firstlabel ));
         $il.append($conjlabel);
@@ -4070,14 +4104,14 @@ class QAST::CompilerJAST {
         
         # use previous mark to make one with pos=start, rep=end
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<bstack> ));
-        $il.append(JAST::Instruction.new( :op('dup') ));
+        $il.append($DUP);
         $il.append(JAST::PushIVal.new( :value($mark) ));
-        $il.append(JAST::Instruction.new( :op('aload_1') ));
+        $il.append($ALOAD_1);
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
             "rxpeek", 'Long', $TYPE_SMO, 'Long', $TYPE_TC ));
-        $il.append(JAST::PushIVal.new( :value(1) ));
-        $il.append(JAST::Instruction.new( :op('ladd') ));
-        $il.append(JAST::Instruction.new( :op('aload_1') ));
+        $il.append($IVAL_ONE);
+        $il.append($LADD);
+        $il.append($ALOAD_1);
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
             "atpos_i", 'Long', $TYPE_SMO, 'Long', $TYPE_TC ));
         $il.append(JAST::Instruction.new( :op('lstore'), %*REG<itemp> ));
@@ -4092,7 +4126,7 @@ class QAST::CompilerJAST {
             
             $il.append(JAST::Instruction.new( :op('aload'), %*REG<bstack> ));
             $il.append(JAST::PushIVal.new( :value($mark) ));
-            $il.append(JAST::Instruction.new( :op('aload_1') ));
+            $il.append($ALOAD_1);
             $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
                 "rxpeek", 'Long', $TYPE_SMO, 'Long', $TYPE_TC ));
             $il.append(JAST::Instruction.new( :op('lstore'), %*REG<itemp> ));
@@ -4100,19 +4134,19 @@ class QAST::CompilerJAST {
             $il.append(JAST::Instruction.new( :op('aload'), %*REG<bstack> ));
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<itemp> ));
             $il.append(JAST::PushIVal.new( :value(2) ));
-            $il.append(JAST::Instruction.new( :op('ladd') ));
-            $il.append(JAST::Instruction.new( :op('aload_1') ));
+            $il.append($LADD);
+            $il.append($ALOAD_1);
             $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
                 "atpos_i", 'Long', $TYPE_SMO, 'Long', $TYPE_TC ));
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
-            $il.append(JAST::Instruction.new( :op('lcmp') ));
+            $il.append($LCMP);
             $il.append(JAST::Instruction.new( :op('ifne'), %*REG<fail> ));
             
             $il.append(JAST::Instruction.new( :op('aload'), %*REG<bstack> ));
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<itemp> ));
-            $il.append(JAST::PushIVal.new( :value(1) ));
-            $il.append(JAST::Instruction.new( :op('ladd') ));
-            $il.append(JAST::Instruction.new( :op('aload_1') ));
+            $il.append($IVAL_ONE);
+            $il.append($LADD);
+            $il.append($ALOAD_1);
             $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
                 "atpos_i", 'Long', $TYPE_SMO, 'Long', $TYPE_TC ));
             $il.append(JAST::Instruction.new( :op('lstore'), %*REG<itemp> ));
@@ -4141,7 +4175,7 @@ class QAST::CompilerJAST {
         
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<eos> ));
-        $il.append(JAST::Instruction.new( :op('lcmp') ));
+        $il.append($LCMP);
         $il.append(JAST::Instruction.new( :op('ifge'), %*REG<fail> ));
         
         my $subtype := nqp::lc($node.name);
@@ -4154,31 +4188,31 @@ class QAST::CompilerJAST {
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
             $il.append(JAST::Instruction.new( :op('invokestatic'),
                 $TYPE_OPS, 'iscclass', 'Long', 'Long', $TYPE_STR, 'Long' ));
-            $il.append(JAST::Instruction.new( :op('l2i') ));
+            $il.append($L2I);
             $il.append(JAST::Instruction.new( :op($node.negate ?? 'ifne' !! 'ifeq'), %*REG<fail> ));
             
             if $subtype == nqp::const::CCLASS_NEWLINE {
                 $il.append(JAST::Instruction.new( :op('aload'), %*REG<tgt> ));
                 $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
-                $il.append(JAST::Instruction.new( :op('l2i') ));
-                $il.append(JAST::Instruction.new( :op('dup') ));
+                $il.append($L2I);
+                $il.append($DUP);
                 $il.append(JAST::PushIndex.new( :value(2) ));
-                $il.append(JAST::Instruction.new( :op('iadd') ));
+                $il.append($IADD);
                 $il.append(JAST::Instruction.new( :op('invokevirtual'),
                     $TYPE_STR, 'substring', $TYPE_STR, 'Integer', 'Integer' ));
                 $il.append(JAST::PushSVal.new( :value("\r\n") ));
                 $il.append(JAST::Instruction.new( :op('invokevirtual'),
                     $TYPE_STR, 'equals', 'Z', $TYPE_OBJ ));
-                $il.append(JAST::Instruction.new( :op('i2l') ));
+                $il.append($I2L);
                 $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
-                $il.append(JAST::Instruction.new( :op('ladd') ));
+                $il.append($LADD);
                 $il.append(JAST::Instruction.new( :op('lstore'), %*REG<pos> ));
             } 
         }
         
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
-        $il.append(JAST::PushIVal.new( :value(1) ));
-        $il.append(JAST::Instruction.new( :op('ladd') ));
+        $il.append($IVAL_ONE);
+        $il.append($LADD);
         $il.append(JAST::Instruction.new( :op('lstore'), %*REG<pos> ));
         
         $il
@@ -4201,13 +4235,13 @@ class QAST::CompilerJAST {
         
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<eos> ));
-        $il.append(JAST::Instruction.new( :op('lcmp') ));
+        $il.append($LCMP);
         $il.append(JAST::Instruction.new( :op('ifge'), %*REG<fail> ));
         
         $il.append(JAST::PushSVal.new( :value($node[0]) ));
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<tgt> ));
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
-        $il.append(JAST::Instruction.new( :op('l2i') ));
+        $il.append($L2I);
         $il.append(JAST::Instruction.new( :op('invokevirtual'),
             $TYPE_STR, 'charAt', 'Char', 'Integer' ));
         $il.append(JAST::Instruction.new( :op('invokevirtual'),
@@ -4216,8 +4250,8 @@ class QAST::CompilerJAST {
         
         unless $node.subtype eq 'zerowidth' {
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
-            $il.append(JAST::PushIVal.new( :value(1) ));
-            $il.append(JAST::Instruction.new( :op('ladd') ));
+            $il.append($IVAL_ONE);
+            $il.append($LADD);
             $il.append(JAST::Instruction.new( :op('lstore'), %*REG<pos> ));
         }
         
@@ -4233,17 +4267,17 @@ class QAST::CompilerJAST {
         
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
         $il.append(JAST::PushIVal.new( :value($litlen) ));
-        $il.append(JAST::Instruction.new( :op('ladd') ));
+        $il.append($LADD);
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<eos> ));
-        $il.append(JAST::Instruction.new( :op('lcmp') ));
+        $il.append($LCMP);
         $il.append(JAST::Instruction.new( :op('ifgt'), %*REG<fail> ));
         
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<tgt> ));
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
-        $il.append(JAST::Instruction.new( :op('l2i') ));
-        $il.append(JAST::Instruction.new( :op('dup') ));
+        $il.append($L2I);
+        $il.append($DUP);
         $il.append(JAST::PushIndex.new( :value($litlen) ));
-        $il.append(JAST::Instruction.new( :op('iadd') ));
+        $il.append($IADD);
         $il.append(JAST::Instruction.new( :op('invokevirtual'),
             $TYPE_STR, 'substring', $TYPE_STR, 'Integer', 'Integer' ));
         $il.append(JAST::PushSVal.new( :value($litconst) ));
@@ -4259,7 +4293,7 @@ class QAST::CompilerJAST {
         
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
         $il.append(JAST::PushIVal.new( :value($litlen) ));
-        $il.append(JAST::Instruction.new( :op('ladd') ));
+        $il.append($LADD);
         $il.append(JAST::Instruction.new( :op('lstore'), %*REG<pos> ));
         
         $il;
@@ -4290,32 +4324,32 @@ class QAST::CompilerJAST {
         
         $il.append(JAST::PushSVal.new( :value("\$\xa2") ));
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<cur> ));
-        $il.append(JAST::Instruction.new( :op('dup') ));
+        $il.append($DUP);
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<curclass> ));
         $il.append(JAST::PushSVal.new( :value('$!pos') ));
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
-        $il.append(JAST::Instruction.new( :op('aload_1') ));
+        $il.append($ALOAD_1);
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
             "bindattr_i", 'Long', $TYPE_SMO, $TYPE_SMO, $TYPE_STR, 'Long', $TYPE_TC ));
-        $il.append(JAST::Instruction.new( :op('pop2') ));
-        $il.append(JAST::Instruction.new( :op('aload_1') ));
+        $il.append($POP2);
+        $il.append($ALOAD_1);
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
             "bindlex", $TYPE_SMO, $TYPE_STR, $TYPE_SMO, $TYPE_TC ));
-        $il.append(JAST::Instruction.new( :op('pop') ));
+        $il.append($POP);
 
         my $node_res := self.as_jast($node[0], :want($RT_OBJ));
         $il.append($node_res.jast);
         $*STACK.obtain($il, $node_res);
         
         if $node.subtype eq 'zerowidth' {
-            $il.append(JAST::Instruction.new( :op('aload_1') ));
+            $il.append($ALOAD_1);
             $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
                 "istrue", 'Long', $TYPE_SMO, $TYPE_TC ));
-            $il.append(JAST::Instruction.new( :op('l2i') ));
+            $il.append($L2I);
             $il.append(JAST::Instruction.new( :op($node.negate ?? 'ifne' !! 'ifeq'), %*REG<fail> ));
         }
         else {
-            $il.append(JAST::Instruction.new( :op('pop') ));
+            $il.append($POP);
         }
         
         $il;
@@ -4340,7 +4374,7 @@ class QAST::CompilerJAST {
             my $seplabel := JAST::Label.new( :name($prefix ~ '_sep') );
             my $mark     := &*REGISTER_MARK($looplabel);
             
-            $il.append(JAST::PushIVal.new( :value(0) ));
+            $il.append($IVAL_ZERO);
             $il.append(JAST::Instruction.new( :op('lstore'), %*REG<rep> ));
             if $min < 1 {
                 self.regex_mark($il, $mark,
@@ -4356,20 +4390,20 @@ class QAST::CompilerJAST {
             $il.append($seplabel) if $sep;
             $il.append(self.regex_jast($node[0]));
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<itemp> ));
-            $il.append(JAST::PushIVal.new( :value(1) ));
-            $il.append(JAST::Instruction.new( :op('ladd') ));
+            $il.append($IVAL_ONE);
+            $il.append($LADD);
             $il.append(JAST::Instruction.new( :op('lstore'), %*REG<rep> ));
             
             if $min > 1 {
                 $il.append(JAST::Instruction.new( :op('lload'), %*REG<rep> ));
                 $il.append(JAST::PushIVal.new( :value($min) ));
-                $il.append(JAST::Instruction.new( :op('lcmp') ));
+                $il.append($LCMP);
                 $il.append(JAST::Instruction.new( :op('iflt'), $looplabel ));
             }
             if $max > 1 {
                 $il.append(JAST::Instruction.new( :op('lload'), %*REG<rep> ));
                 $il.append(JAST::PushIVal.new( :value($max) ));
-                $il.append(JAST::Instruction.new( :op('lcmp') ));
+                $il.append($LCMP);
                 $il.append(JAST::Instruction.new( :op('ifge'), $donelabel ));
             }
             if $max != 1 {
@@ -4386,12 +4420,12 @@ class QAST::CompilerJAST {
             if $min == 0 {
                 self.regex_mark($il, $mark,
                     JAST::Instruction.new( :op('lload'), %*REG<pos> ),
-                    JAST::PushIVal.new( :value(0) ));
+                    $IVAL_ZERO);
             }
             elsif $needmark {
                 self.regex_mark($il, $mark,
-                    JAST::PushIVal.new( :value(-1) ),
-                    JAST::PushIVal.new( :value(0) ));
+                    $IVAL_MINUSONE,
+                    $IVAL_ZERO);
             }
             
             $il.append($looplabel);
@@ -4399,14 +4433,14 @@ class QAST::CompilerJAST {
             
             if $needmark {
                 $il.append(JAST::Instruction.new( :op('aload'), %*REG<bstack> ));
-                $il.append(JAST::Instruction.new( :op('dup') ));
+                $il.append($DUP);
                 $il.append(JAST::PushIVal.new( :value($mark) ));
-                $il.append(JAST::Instruction.new( :op('aload_1') ));
+                $il.append($ALOAD_1);
                 $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
                     "rxpeek", 'Long', $TYPE_SMO, 'Long', $TYPE_TC ));
                 $il.append(JAST::PushIVal.new( :value(2) ));
-                $il.append(JAST::Instruction.new( :op('ladd') ));
-                $il.append(JAST::Instruction.new( :op('aload_1') ));
+                $il.append($LADD);
+                $il.append($ALOAD_1);
                 $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
                     "atpos_i", 'Long', $TYPE_SMO, 'Long', $TYPE_TC ));
                 $il.append(JAST::Instruction.new( :op('lstore'), %*REG<rep> ));
@@ -4416,14 +4450,14 @@ class QAST::CompilerJAST {
                 }
                 
                 $il.append(JAST::Instruction.new( :op('lload'), %*REG<rep> ));
-                $il.append(JAST::PushIVal.new( :value(1) ));
-                $il.append(JAST::Instruction.new( :op('ladd') ));
+                $il.append($IVAL_ONE);
+                $il.append($LADD);
                 $il.append(JAST::Instruction.new( :op('lstore'), %*REG<rep> ));
                 
                 if $max > 1 {
                     $il.append(JAST::Instruction.new( :op('lload'), %*REG<rep> ));
                     $il.append(JAST::PushIVal.new( :value($node.max) ));
-                    $il.append(JAST::Instruction.new( :op('lcmp') ));
+                    $il.append($LCMP);
                     $il.append(JAST::Instruction.new( :op('ifge'), $donelabel ));
                 }
             }
@@ -4440,7 +4474,7 @@ class QAST::CompilerJAST {
             if $min > 1 {
                 $il.append(JAST::Instruction.new( :op('lload'), %*REG<rep> ));
                 $il.append(JAST::PushIVal.new( :value(+$node.min) ));
-                $il.append(JAST::Instruction.new( :op('lcmp') ));
+                $il.append($LCMP);
                 $il.append(JAST::Instruction.new( :op('iflt'), %*REG<fail> ));
             }
         }
@@ -4459,38 +4493,38 @@ class QAST::CompilerJAST {
         $il.append(JAST::Instruction.new( :op('aload'), 'self' ));
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<curclass> ));
         $il.append(JAST::PushSVal.new( :value('$!from') ));
-        $il.append(JAST::Instruction.new( :op('aload_1') ));
+        $il.append($ALOAD_1);
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
                 "getattr_i", 'Long', $TYPE_SMO, $TYPE_SMO, $TYPE_STR, $TYPE_TC ));
-        $il.append(JAST::PushIVal.new( :value(-1) ));
-        $il.append(JAST::Instruction.new( :op('lcmp') ));
+        $il.append($IVAL_MINUSONE);
+        $il.append($LCMP);
         $il.append(JAST::Instruction.new( :op('ifne'), $donelabel ));
         $il.append(JAST::Instruction.new( :op('goto'), $scanlabel ));
         
         $il.append($looplabel);
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
-        $il.append(JAST::PushIVal.new( :value(1) ));
-        $il.append(JAST::Instruction.new( :op('ladd') ));
-        $il.append(JAST::Instruction.new( :op('dup2') ));
+        $il.append($IVAL_ONE);
+        $il.append($LADD);
+        $il.append($DUP2);
         $il.append(JAST::Instruction.new( :op('lstore'), %*REG<pos> ));
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<eos> ));
-        $il.append(JAST::Instruction.new( :op('lcmp') ));
+        $il.append($LCMP);
         $il.append(JAST::Instruction.new( :op('ifgt'), %*REG<fail> ));
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<cur> ));
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<curclass> ));
         $il.append(JAST::PushSVal.new( :value('$!from') ));
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
-        $il.append(JAST::Instruction.new( :op('aload_1') ));
+        $il.append($ALOAD_1);
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
                 "bindattr_i", 'Long', $TYPE_SMO, $TYPE_SMO, $TYPE_STR, 'Long', $TYPE_TC ));
-        $il.append(JAST::Instruction.new( :op('pop2') ));
+        $il.append($POP2);
         
         $il.append($scanlabel);
         
         my $mark := &*REGISTER_MARK($looplabel);
         self.regex_mark($il, $mark,
             JAST::Instruction.new( :op('lload'), %*REG<pos> ),
-            JAST::PushIVal.new( :value(0) ));
+            $IVAL_ZERO);
         $il.append($donelabel);
         
         $il;
@@ -4505,17 +4539,17 @@ class QAST::CompilerJAST {
         my $mark := &*REGISTER_MARK($faillabel);
         self.regex_mark($il, $mark,
             JAST::Instruction.new( :op('lload'), %*REG<pos> ),
-            JAST::PushIVal.new( :value(0) ));
+            $IVAL_ZERO);
         $il.append(self.regex_jast($node[0]));
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<bstack> ));
-        $il.append(JAST::Instruction.new( :op('dup') ));
+        $il.append($DUP);
         $il.append(JAST::PushIVal.new( :value($mark) ));
-        $il.append(JAST::Instruction.new( :op('aload_1') ));
+        $il.append($ALOAD_1);
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
             "rxpeek", 'Long', $TYPE_SMO, 'Long', $TYPE_TC ));
-        $il.append(JAST::PushIVal.new( :value(1) ));
-        $il.append(JAST::Instruction.new( :op('ladd') ));
-        $il.append(JAST::Instruction.new( :op('aload_1') ));
+        $il.append($IVAL_ONE);
+        $il.append($LADD);
+        $il.append($ALOAD_1);
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
                     "atpos_i", 'Long', $TYPE_SMO, 'Long', $TYPE_TC ));
         $il.append(JAST::Instruction.new( :op('lstore'), %*REG<itemp> ));
@@ -4601,15 +4635,15 @@ class QAST::CompilerJAST {
         my $invres := self.as_jast($callqast, :want($RT_OBJ));
         $il.append($invres.jast);
         $*STACK.obtain($il, $invres);
-        $il.append(JAST::Instruction.new( :op('dup') ));
+        $il.append($DUP);
         $il.append(JAST::Instruction.new( :op('astore'), %*REG<subcur> ));
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<curclass> ));
         $il.append(JAST::PushSVal.new( :value('$!pos') ));
-        $il.append(JAST::Instruction.new( :op('aload_1') ));
+        $il.append($ALOAD_1);
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
             "getattr_i", 'Long', $TYPE_SMO, $TYPE_SMO, $TYPE_STR, $TYPE_TC ));
-        $il.append(JAST::PushIVal.new( :value(0) ));
-        $il.append(JAST::Instruction.new( :op('lcmp') ));
+        $il.append($IVAL_ZERO);
+        $il.append($LCMP);
         $il.append(JAST::Instruction.new( :op($node.negate ?? 'ifge' !! 'iflt'), %*REG<fail> ));
         
         if $subtype ne 'zerowidth' {
@@ -4619,8 +4653,8 @@ class QAST::CompilerJAST {
                 unless $subtype eq 'method' {
                     my $mark := &*REGISTER_MARK($passlabel);
                     self.regex_mark($il, $mark,
-                        JAST::PushIVal.new( :value(-1) ),
-                        JAST::PushIVal.new( :value(0) ));
+                        $IVAL_MINUSONE,
+                        $IVAL_ZERO);
                     $il.append($passlabel);
                 }
             }
@@ -4635,15 +4669,15 @@ class QAST::CompilerJAST {
                 ), :want($RT_OBJ));
                 $il.append($nextres.jast);
                 $*STACK.obtain($il, $nextres);
-                $il.append(JAST::Instruction.new( :op('dup') ));
+                $il.append($DUP);
                 $il.append(JAST::Instruction.new( :op('astore'), %*REG<subcur> ));
                 $il.append(JAST::Instruction.new( :op('aload'), %*REG<curclass> ));
                 $il.append(JAST::PushSVal.new( :value('$!pos') ));
-                $il.append(JAST::Instruction.new( :op('aload_1') ));
+                $il.append($ALOAD_1);
                 $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
                     "getattr_i", 'Long', $TYPE_SMO, $TYPE_SMO, $TYPE_STR, $TYPE_TC ));
-                $il.append(JAST::PushIVal.new( :value(0) ));
-                $il.append(JAST::Instruction.new( :op('lcmp') ));
+                $il.append($IVAL_ZERO);
+                $il.append($LCMP);
                 $il.append(JAST::Instruction.new( :op($node.negate ?? 'ifge' !! 'iflt'), %*REG<fail> ));
                 
                 $il.append($passlabel);
@@ -4672,31 +4706,31 @@ class QAST::CompilerJAST {
                 
                 my $mark := &*REGISTER_MARK($backlabel);
                 $il.append(JAST::Instruction.new( :op('aload'), %*REG<bstack> ));
-                $il.append(JAST::Instruction.new( :op('dup') ));
-                $il.append(JAST::Instruction.new( :op('dup2') ));
+                $il.append($DUP);
+                $il.append($DUP2);
                 $il.append(JAST::PushIVal.new( :value($mark) ));
-                $il.append(JAST::Instruction.new( :op('aload_1') ));
+                $il.append($ALOAD_1);
                 $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS, 'push_i',
                     'Long', $TYPE_SMO, 'Long', $TYPE_TC ));
-                $il.append(JAST::Instruction.new( :op('pop2') ));
-                $il.append(JAST::PushIVal.new( :value(0) ));
-                $il.append(JAST::Instruction.new( :op('aload_1') ));
+                $il.append($POP2);
+                $il.append($IVAL_ZERO);
+                $il.append($ALOAD_1);
                 $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS, 'push_i',
                     'Long', $TYPE_SMO, 'Long', $TYPE_TC ));
-                $il.append(JAST::Instruction.new( :op('pop2') ));
+                $il.append($POP2);
                 $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
-                $il.append(JAST::Instruction.new( :op('aload_1') ));
+                $il.append($ALOAD_1);
                 $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS, 'push_i',
                     'Long', $TYPE_SMO, 'Long', $TYPE_TC ));
-                $il.append(JAST::Instruction.new( :op('pop2') ));
+                $il.append($POP2);
                 $il.append(JAST::Instruction.new( :op('aload'), %*REG<cstack> ));
-                $il.append(JAST::Instruction.new( :op('aload_1') ));
+                $il.append($ALOAD_1);
                 $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS, 'elems',
                     'Long', $TYPE_SMO, $TYPE_TC ));
-                $il.append(JAST::Instruction.new( :op('aload_1') ));
+                $il.append($ALOAD_1);
                 $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS, 'push_i',
                     'Long', $TYPE_SMO, 'Long', $TYPE_TC ));
-                $il.append(JAST::Instruction.new( :op('pop2') ));
+                $il.append($POP2);
             }
         }
         
@@ -4716,7 +4750,7 @@ class QAST::CompilerJAST {
             $il.append(JAST::Instruction.new( :op('aload'), %*REG<subcur> ));
             $il.append(JAST::Instruction.new( :op('aload'), %*REG<curclass> ));
             $il.append(JAST::PushSVal.new( :value('$!pos') ));
-            $il.append(JAST::Instruction.new( :op('aload_1') ));
+            $il.append($ALOAD_1);
             $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
                 "getattr_i", 'Long', $TYPE_SMO, $TYPE_SMO, $TYPE_STR, $TYPE_TC ));
             $il.append(JAST::Instruction.new( :op('lstore'), %*REG<pos> ));
@@ -4733,13 +4767,13 @@ class QAST::CompilerJAST {
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
             "ischarprop", 'Long', $TYPE_STR, $TYPE_STR, 'Long' ));
-        $il.append(JAST::Instruction.new( :op('l2i') ));
+        $il.append($L2I);
         $il.append(JAST::Instruction.new( :op($node.negate ?? 'ifne' !! 'ifeq'), %*REG<fail> ));
         
         unless $node.subtype eq 'zerowidth' {
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
-            $il.append(JAST::PushIVal.new( :value(1) ));
-            $il.append(JAST::Instruction.new( :op('ladd') ));
+            $il.append($IVAL_ONE);
+            $il.append($LADD);
             $il.append(JAST::Instruction.new( :op('lstore'), %*REG<pos> ));
         }
         
@@ -4754,7 +4788,7 @@ class QAST::CompilerJAST {
         $il.append(JAST::PushIVal.new( :value($mark) ));
         $il.append($pos);
         $il.append($rep);
-        $il.append(JAST::Instruction.new( :op('aload_1') ));
+        $il.append($ALOAD_1);
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
             "rxmark", 'Void', $TYPE_SMO, 'Long', 'Long', 'Long', $TYPE_TC ));
     }
@@ -4762,7 +4796,7 @@ class QAST::CompilerJAST {
     method regex_commit($il, $mark) {
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<bstack> ));
         $il.append(JAST::PushIVal.new( :value($mark) ));
-        $il.append(JAST::Instruction.new( :op('aload_1') ));
+        $il.append($ALOAD_1);
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
             "rxcommit", 'Void', $TYPE_SMO, 'Long', $TYPE_TC ));
     }
