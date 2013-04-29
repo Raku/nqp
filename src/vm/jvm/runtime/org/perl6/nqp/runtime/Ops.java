@@ -1190,6 +1190,24 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc, "captureposarg requires a CallCapture");
         }
     }
+    public static long captureexistsnamed(SixModelObject obj, String name, ThreadContext tc) {
+        if (obj instanceof CallCaptureInstance) {
+            CallCaptureInstance cc = (CallCaptureInstance)obj;
+            return cc.descriptor.nameMap.containsKey(name) ? 1 : 0;
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc, "capturehasnameds requires a CallCapture");
+        }
+    }
+    public static long capturehasnameds(SixModelObject obj, ThreadContext tc) {
+        if (obj instanceof CallCaptureInstance) {
+            CallCaptureInstance cc = (CallCaptureInstance)obj;
+            return cc.descriptor.names == null ? 0 : 1;
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc, "capturehasnameds requires a CallCapture");
+        }
+    }
     
     /* Invocation. */
     public static final CallSiteDescriptor emptyCallSite = new CallSiteDescriptor(new byte[0], null);

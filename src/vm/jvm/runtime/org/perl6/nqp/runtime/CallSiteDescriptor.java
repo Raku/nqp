@@ -36,7 +36,7 @@ public class CallSiteDescriptor {
     public boolean hasFlattening = false;
     
     /* Original names list. */
-    private String[] names;
+    public String[] names;
     
     public CallSiteDescriptor(byte[] flags, String[] names) {
         argFlags = flags;
