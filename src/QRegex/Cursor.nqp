@@ -79,9 +79,14 @@ role NQPCursorRole is export {
             $shared := nqp::create(ParseShared);
             nqp::bindattr($shared, ParseShared, '$!orig', $orig);
             nqp::bindattr_s($shared, ParseShared, '$!target',
+#?if parrot
                 pir::trans_encoding__Ssi($orig, pir::find_encoding__Is('ucs4')));
+#?endif
+#?if !parrot
+                $orig);
+#?endif
             nqp::bindattr_i($shared, ParseShared, '$!highwater', 0);
-            nqp::bindattr($shared, ParseShared, '@!highexpect', nqp::list());
+            nqp::bindattr($shared, ParseShared, '@!highexpect', nqp::list_s());
             nqp::bindattr($shared, ParseShared, '%!marks', nqp::hash());
         }
         nqp::bindattr($new, $?CLASS, '$!shared', $shared);
@@ -319,7 +324,7 @@ role NQPCursorRole is export {
         sub precomp_alt_nfas($meth) {
             if nqp::can($meth, 'ALT_NFAS') {
                 for $meth.ALT_NFAS -> $name {
-                    self.HOW.cache(self, $name, { self.'!alt_nfa'($meth, $name) });
+                    self.HOW.cache(self, $name, { self.'!alt_nfa'($meth, $name.key) });
                 }
             }
         }
@@ -340,7 +345,7 @@ role NQPCursorRole is export {
         if $pos >= $highwater {
             $highexpect := nqp::getattr($shared, ParseShared, '@!highexpect');
             if $pos > $highwater {
-                pir::assign__0Pi($highexpect, 0);
+                nqp::setelems($highexpect, 0);
                 nqp::bindattr_i($shared, ParseShared, '$!highwater', $pos);
             }
             nqp::push_s($highexpect, $dba);
@@ -367,7 +372,7 @@ role NQPCursorRole is export {
     
     method !clear_highwater() {
         my $highexpect := nqp::getattr($!shared, ParseShared, '@!highexpect');
-        pir::assign__0Pi($highexpect, 0);
+        nqp::setelems($highexpect, 0);
         nqp::bindattr_i($!shared, ParseShared, '$!highwater', -1)
     }
 
@@ -423,11 +428,11 @@ role NQPCursorRole is export {
     method after($regex) {
         my int $orig_highwater := nqp::getattr_i($!shared, ParseShared, '$!highwater');
         my $orig_highexpect := nqp::getattr($!shared, ParseShared, '@!highexpect');
-        nqp::bindattr($!shared, ParseShared, '@!highexpect', []);
+        nqp::bindattr($!shared, ParseShared, '@!highexpect', nqp::list_s());
         my $cur := self."!cursor_start_cur"();
         my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
         my $shared := nqp::clone($!shared);
-        nqp::bindattr_s($shared, ParseShared, '$!target', $target.reverse());
+        nqp::bindattr_s($shared, ParseShared, '$!target', nqp::flip($target));
         nqp::bindattr($cur, $?CLASS, '$!shared', $shared);
         nqp::bindattr_i($cur, $?CLASS, '$!from', nqp::chars($target) - $!pos);
         nqp::bindattr_i($cur, $?CLASS, '$!pos', nqp::chars($target) - $!pos);
@@ -603,9 +608,16 @@ class NQPMatch is NQPCapture {
     method orig() { $!orig }
     method to()   { $!to }
     method CURSOR() { $!cursor }
+#?if parrot
     method Str() is parrot_vtable('get_string')  { nqp::substr($!orig, $!from, $!to-$!from) }
     method Int() is parrot_vtable('get_integer') { +self.Str() }
     method Num() is parrot_vtable('get_number')  { +self.Str() }
+#?endif
+#?if !parrot
+    method Str() { nqp::substr($!orig, $!from, $!to-$!from) }
+    method Int() { +self.Str() }
+    method Num() { +self.Str() }
+#?endif
     method Bool() { $!to >= $!from }
     method chars() { $!to >= $!from ?? $!to - $!from !! 0 }
     
@@ -663,7 +675,7 @@ class NQPMatch is NQPCapture {
                         !! dump_match($_.key, $_.value);
                 }
             }
-            return nqp::join('', @chunks);
+            return join('', @chunks);
         }
         else {
             return nqp::x(' ', $indent) ~ "- NO MATCH\n";
@@ -809,8 +821,11 @@ class NQPRegexMethod {
     method ACCEPTS($target) {
         NQPCursor.parse($target, :rule(self))
     }
-    method Str() is parrot_vtable('get_string') {
+    method name() {
         nqp::getcodename($!code)
+    }
+    method Str() {
+        self.name()
     }
 }
 nqp::setinvokespec(NQPRegexMethod, NQPRegexMethod, '$!code', nqp::null);

@@ -97,7 +97,7 @@ class QAST::Node {
         }
         nqp::push(@chunks, "\n");
         self.dump_children($indent + 2, @chunks);
-        return nqp::join('', @chunks);
+        return join('', @chunks);
     }
 
     method dump_children(int $indent, @onto) {

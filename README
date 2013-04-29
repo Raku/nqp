@@ -1,6 +1,6 @@
 =head1 NQP - Not Quite Perl (6)
 
-NQP is Copyright (C) 2009-2012 by The Perl Foundation.  See F<LICENSE>
+NQP is Copyright (C) 2009-2013 by The Perl Foundation.  See F<LICENSE>
 for licensing details.
 
 This is "Not Quite Perl" -- a lightweight Perl 6-like environment
@@ -8,9 +8,9 @@ for virtual machines.  The key feature of NQP is that it's
 designed to be a very small environment (as compared with, say, perl6
 or Rakudo) and is focused on being a high-level way to create
 compilers and libraries for virtual machines (such as the Parrot
-Virtual Machine [1]).  Unlike a full-fledged implementation of Perl 6,
-NQP strives to have as small a runtime footprint as it can, while
-still providing a Perl 6 object model and regular expression engine
+Virtual Machine [1] and the JVM).  Unlike a full-fledged implementation
+of Perl 6, NQP strives to have as small a runtime footprint as it can,
+while still providing a Perl 6 object model and regular expression engine
 for the virtual machine.
 
     [1] http://parrot.org/
@@ -82,9 +82,8 @@ NQP is the successor implementation of "nqp-rx" [2].  Unlike nqp-rx,
 which aimed to have almost no runtime component whatsoever, this new
 version of NQP accepts that a minimal Perl 6 object metamodel,
 multidispatcher, and regular expression engine are needed on top of
-the underlying virtual machine.  Also, nqp-rx is likely to only run
-on Parrot, whereas we expect NQP to eventually run on other virtual
-machine backends.
+the underlying virtual machine.  Also, nqp-rx only ran on Parrot,
+whereas NQP also runs on the JVM and is designed to be portable to
+more.
 
     [2] http://github.com/perl6/nqp-rx
-

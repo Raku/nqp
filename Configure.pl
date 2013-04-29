@@ -134,7 +134,7 @@ MAIN: {
         }
     }
 
-    fill_template_file('tools/build/Makefile.in', 'Makefile', %config);
+    fill_template_file('tools/build/Makefile-Parrot.in', 'Makefile', %config);
 
     {
         no warnings;
