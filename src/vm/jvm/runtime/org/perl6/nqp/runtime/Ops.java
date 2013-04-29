@@ -1996,6 +1996,12 @@ public final class Ops {
             return coerce_i2s(obj.get_int(tc));
         if ((ss.can_box & StorageSpec.CAN_BOX_NUM) != 0)
             return coerce_n2s(obj.get_num(tc));
+            
+        // If it's an exception, take the message.
+        if (obj instanceof VMExceptionInstance) {
+            String msg = ((VMExceptionInstance)obj).message;
+            return msg == null ? "Died" : msg;
+        }
         
         // If anything else, we can't do it.
         throw ExceptionHandling.dieInternal(tc, "Cannot stringify this");
