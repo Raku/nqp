@@ -194,12 +194,15 @@ public class IndyBootstrap {
         }
         
         /* Now need to adapt to the target callsite by binding the CodeRef
-         * and callsite with what they've been resolved to. */
-        cs.setTarget(MethodHandles
-            .insertArguments(cr.staticInfo.mh, 1, cr, csd)
-            .asVarargsCollector(Object[].class)
-            .asType(cs.getTarget().type()));
-       
+         * and callsite with what they've been resolved to. Don't do it if
+         * it's a compiler stub, though. */
+        if (!cr.isCompilerStub) {
+            cs.setTarget(MethodHandles
+                .insertArguments(cr.staticInfo.mh, 1, cr, csd)
+                .asVarargsCollector(Object[].class)
+                .asType(cs.getTarget().type()));
+        }
+        
         /* Make the sub call directly for this initial call. */
         try {
             cr.staticInfo.mh.invokeExact(tc, cr, csd, args);
@@ -351,26 +354,29 @@ public class IndyBootstrap {
                 cr = (CodeRef)is.InvocationHandler;
         }
         
-        /* Update callsite, stacking up guarded clauses. */
-        MethodType gType = MethodType.methodType(boolean.class,
-                STable.class, ThreadContext.class, SixModelObject.class);
-        MethodHandle guard;
-        try {
-            guard = caller.findStatic(IndyBootstrap.class, "stGuard", gType);
+        /* Update callsite, stacking up guarded clauses. Don't do it if it
+         * is a dynamic compiler stub, though. */
+        if (!cr.isCompilerStub) {
+            MethodType gType = MethodType.methodType(boolean.class,
+                    STable.class, ThreadContext.class, SixModelObject.class);
+            MethodHandle guard;
+            try {
+                guard = caller.findStatic(IndyBootstrap.class, "stGuard", gType);
+            }
+            catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            cs.setTarget(MethodHandles
+                .guardWithTest(
+                    MethodHandles.insertArguments(guard, 0, invocant.st),
+                    MethodHandles
+                        .insertArguments(cr.staticInfo.mh, 1, cr, csd)
+                        .asVarargsCollector(Object[].class)
+                        .asType(cs.getTarget().type()),
+                    cs.getTarget()));
         }
-        catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        cs.setTarget(MethodHandles
-            .guardWithTest(
-                guard.bindTo(invocant.st),
-                MethodHandles
-                    .insertArguments(cr.staticInfo.mh, 1, cr, csd)
-                    .asVarargsCollector(Object[].class)
-                    .asType(cs.getTarget().type()),
-                cs.getTarget()));
-
-        /* Make the sub call directly for this initial call. */
+        
+        /* Make the call directly for this initial call. */
         try {
             cr.staticInfo.mh.invokeExact(tc, cr, csd, args);
         }
