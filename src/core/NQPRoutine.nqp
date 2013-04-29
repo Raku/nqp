@@ -442,7 +442,7 @@ my knowhow NQPRegex {
     }
     method instantiate_generic($env) {
         if nqp::isnull($!generic_nfa) {
-            self
+            self.clone()
         }
         else {
             my $ins := self.clone();
