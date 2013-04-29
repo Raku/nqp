@@ -700,12 +700,14 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
         /* First, see if we've an invocation spec. */
         InvocationSpec *is = STABLE(decont)->invocation_spec;
         if (is) {
-            if (is->value_slot.class_handle) {
+            if (!PMC_IS_NULL(is->value_slot.class_handle)) {
                 PMC *val = get_attr(interp, decont, is->value_slot.class_handle,
                     is->value_slot.attr_name, is->value_slot.hint);
                 return VTABLE_invoke(interp, val, next);
             }
             else {
+                PMC *cur_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+                VTABLE_unshift_pmc(interp, cur_ctx, decont);
                 return VTABLE_invoke(interp, is->invocation_handler, next);
             }
         }
