@@ -277,7 +277,7 @@ of the match.
     
     method FAILGOAL($goal, $dba?) {
         unless $dba {
-            $dba := ~nqp::callercode();
+            $dba := nqp::getcodename(nqp::callercode());
         }
         self.panic("Unable to parse expression in $dba; couldn't find final $goal");
     }
