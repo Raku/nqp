@@ -41,7 +41,7 @@ grammar NQP::Grammar is HLL::Grammar {
     token name { <identifier> ['::'<identifier>]* }
 
     token deflongname {
-        <identifier> <colonpair>?
+        <identifier> <colonpair>**0..1
     }
 
     token ENDSTMT {
@@ -154,9 +154,9 @@ grammar NQP::Grammar is HLL::Grammar {
         | <EXPR> <.ws>
             [
             || <?MARKED('endstmt')>
-            || <statement_mod_cond> <statement_mod_loop>?
+            || <statement_mod_cond> <statement_mod_loop>**0..1
             || <statement_mod_loop>
-            ]?
+            ]**0..1
         ]
     }
 
@@ -222,7 +222,7 @@ grammar NQP::Grammar is HLL::Grammar {
         <sym> \s :s
         <xblock>
         [ 'elsif'\s <xblock> ]*
-        [ 'else'\s <else=.pblock> ]?
+        [ 'else'\s <else=.pblock> ]**0..1
     }
 
     token statement_control:sym<unless> {
@@ -313,14 +313,14 @@ grammar NQP::Grammar is HLL::Grammar {
         ':'
         [
         | $<not>='!' <identifier>
-        | <identifier> <circumfix>?
+        | <identifier> <circumfix>**0..1
         | <circumfix>
         | <variable>
         ]
     }
 
     token variable {
-        | <sigil> <twigil>? <desigilname=.name>
+        | <sigil> <twigil>**0..1 <desigilname=.name>
         | <sigil> <?[<]> <postcircumfix>
         | <sigil> '(' ~ ')' <semilist>
         | $<sigil>=['$'] $<desigilname>=[<[/_!]>]
@@ -375,8 +375,8 @@ grammar NQP::Grammar is HLL::Grammar {
         
         <name>
         <.newpad>
-        [ <?{ $*PKGDECL eq 'role' }> '[' ~ ']' <role_params> ]?
-        [ 'is' 'repr(' <repr=.quote_EXPR> ')' ]?
+        [ <?{ $*PKGDECL eq 'role' }> '[' ~ ']' <role_params> ]**0..1
+        [ 'is' 'repr(' <repr=.quote_EXPR> ')' ]**0..1
         
         {
             # Construct meta-object for this package, adding it to the
@@ -406,8 +406,8 @@ grammar NQP::Grammar is HLL::Grammar {
             }
         }
         
-        [ $<export>=['is export'] ]?
-        [ 'is' <parent=.name> ]?
+        [ $<export>=['is export'] ]**0..1
+        [ 'is' <parent=.name> ]**0..1
         [ 'does' <role=.name> ]*
         [
         || ';' <statementlist> [ $ || <.panic: 'Confused'> ]
@@ -444,7 +444,7 @@ grammar NQP::Grammar is HLL::Grammar {
     }
 
     rule variable_declarator {
-        <typename>?
+        <typename>**0..1
         :my $*IN_DECL := 'variable';
         <variable>
         { $*IN_DECL := 0; }
@@ -457,7 +457,7 @@ grammar NQP::Grammar is HLL::Grammar {
 
     rule routine_def {
         :my $*RETURN_USED := 0;
-        [ $<sigil>=['&'?]<deflongname> ]?
+        [ $<sigil>=['&'?]<deflongname> ]**0..1
         <.newpad>
         [ '(' <signature> ')'
             || <.panic: 'Routine declaration requires a signature'> ]
@@ -473,7 +473,7 @@ grammar NQP::Grammar is HLL::Grammar {
         :my $*INVOCANT_OK := 1;
         [
         || '::(' <latename=variable> ')'
-        || $<private>=['!'?] <deflongname>?
+        || $<private>=['!'?] <deflongname>**0..1
         ]
         <.newpad>
         [ '(' <signature> ')'
@@ -510,21 +510,21 @@ grammar NQP::Grammar is HLL::Grammar {
     }
 
     token signature {
-        [ <?{ $*INVOCANT_OK }> <.ws><invocant=.parameter><.ws> ':' ]?
-        [ [<.ws><parameter><.ws> [',' | <before \s* [')' | '{']>]]* ]?
+        [ <?{ $*INVOCANT_OK }> <.ws><invocant=.parameter><.ws> ':' ]**0..1
+        [ [<.ws><parameter><.ws> [',' | <before \s* [')' | '{']>]]* ]**0..1
     }
 
     token parameter {
-        [ <typename> [ ':' $<definedness>=<[_DU]> ]? <.ws> ]*      # <type_constraint>
+        [ <typename> [ ':' $<definedness>=<[_DU]> ]**0..1 <.ws> ]*      # <type_constraint>
         [
         | $<quant>=['*'] <param_var>
         | [ <param_var> | <named_param> ] $<quant>=['?'|'!'|<?>]
         ]
-        <default_value>?
+        <default_value>**0..1
     }
 
     token param_var {
-        <sigil> <twigil>?
+        <sigil> <twigil>**0..1
         [ <name=.ident> | $<name>=[<[/!]>] ]
     }
 
@@ -537,7 +537,7 @@ grammar NQP::Grammar is HLL::Grammar {
     rule trait { <trait_mod> }
 
     proto token trait_mod { <...> }
-    token trait_mod:sym<is> { <sym>:s <longname=.deflongname><circumfix>? }
+    token trait_mod:sym<is> { <sym>:s <longname=.deflongname><circumfix>**0..1 }
 
     token regex_declarator {
         [
@@ -558,7 +558,7 @@ grammar NQP::Grammar is HLL::Grammar {
           || <deflongname>
           ]
           <.newpad>
-          [ '(' <signature> ')' ]?
+          [ '(' <signature> ')' ]**0..1
           :my %*RX;
           {   
               %*RX<s>    := $<sym> eq 'rule'; 
@@ -580,7 +580,7 @@ grammar NQP::Grammar is HLL::Grammar {
         [
         | <?[(]> <args>
         | ':' \s <args=.arglist>
-        ]?
+        ]**0..1
     }
 
     token term:sym<self> { <sym> » }
@@ -590,11 +590,11 @@ grammar NQP::Grammar is HLL::Grammar {
     }
 
     token term:sym<name> {
-        <name> <args>?
+        <name> <args>**0..1
     }
 
     token term:sym<pir::op> {
-        'pir::' $<op>=[\w+] <args>?
+        'pir::' $<op>=[\w+] <args>**0..1
     }
 
     token term:sym<pir::const> {
@@ -602,7 +602,7 @@ grammar NQP::Grammar is HLL::Grammar {
     }
 
     token term:sym<nqp::op> {
-        'nqp::' $<op>=[\w+] <args>?
+        'nqp::' $<op>=[\w+] <args>**0..1
     }
 
     token term:sym<nqp::const> {
@@ -658,8 +658,8 @@ grammar NQP::Grammar is HLL::Grammar {
     token quote_escape:sym<{ }> { <?[{]> <?quotemod_check('c')> <block> }
     token quote_escape:sym<esc> { \\ e <?quotemod_check('b')> }
 
-    token circumfix:sym<( )> { '(' <.ws> <EXPR>? ')' }
-    token circumfix:sym<[ ]> { '[' <.ws> <EXPR>? ']' }
+    token circumfix:sym<( )> { '(' <.ws> <EXPR>**0..1 ')' }
+    token circumfix:sym<[ ]> { '[' <.ws> <EXPR>**0..1 ']' }
     token circumfix:sym<ang> { <?[<]>  <quote_EXPR: ':q', ':w'>  }
     token circumfix:sym<« »> { <?[«]>  <quote_EXPR: ':qq', ':w'>  }
     token circumfix:sym<{ }> { <?[{]> <pblock> }
@@ -823,7 +823,7 @@ grammar NQP::Regex is QRegex::P6Regex::Grammar {
             | ':' <arglist>
             | '(' <arglist=.LANG('MAIN','arglist')> ')'
             | <.normspace> <nibbler>
-            ]?
+            ]**0..1
     }
 
     token assertion:sym<var> {
