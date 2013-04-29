@@ -263,7 +263,6 @@ public class IndyBootstrap {
             return cs;
         }
         catch (Exception e) {
-            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
@@ -298,7 +297,6 @@ public class IndyBootstrap {
             throw e;
         }
         catch (Throwable e) {
-            e.printStackTrace();
             ExceptionHandling.dieInternal(tc, e);
         }
     }
