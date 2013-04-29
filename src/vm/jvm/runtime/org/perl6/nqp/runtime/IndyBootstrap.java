@@ -335,7 +335,7 @@ public class IndyBootstrap {
         
         /* Try to resolve method to a coderef. */
         SixModelObject invocant = (SixModelObject)args[0];
-        SixModelObject invokee = invocant.st.MethodCache.get(name);
+        SixModelObject invokee = Ops.findmethod(invocant, name, tc);
         if (invokee == null)
             throw ExceptionHandling.dieInternal(tc, "Method '" + name + "' not found"); 
         CodeRef cr;
@@ -423,7 +423,7 @@ public class IndyBootstrap {
         
         /* Try to resolve method to a coderef. */
         SixModelObject invocant = (SixModelObject)args[0];
-        SixModelObject invokee = invocant.st.MethodCache.get(name);
+        SixModelObject invokee = Ops.findmethod(invocant, name, tc);
         if (invokee == null)
             throw ExceptionHandling.dieInternal(tc, "Method '" + name + "' not found"); 
         CodeRef cr;

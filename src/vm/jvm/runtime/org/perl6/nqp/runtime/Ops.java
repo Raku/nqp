@@ -1213,6 +1213,7 @@ public final class Ops {
     public static final CallSiteDescriptor emptyCallSite = new CallSiteDescriptor(new byte[0], null);
     public static final Object[] emptyArgList = new Object[0];
     public static final CallSiteDescriptor invocantCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ }, null);
+    public static final CallSiteDescriptor findmethCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_STR }, null);
     public static void invoke(SixModelObject invokee, int callsiteIndex, Object[] args, ThreadContext tc) throws Exception {
         // If it's lexotic, throw the exception right off.
         if (invokee instanceof Lexotic) {
@@ -1399,11 +1400,26 @@ public final class Ops {
         return meth;
     }
     public static SixModelObject findmethod(SixModelObject invocant, String name, ThreadContext tc) {
-        return invocant.st.MethodCache.get(name);
+        Map<String, SixModelObject> cache = invocant.st.MethodCache;
+        
+        /* Try the by-name method cache, if the HOW published one. */
+        if (cache != null) {
+            SixModelObject found = cache.get(name);
+            if (found != null)
+                return found;
+            if ((invocant.st.ModeFlags & STable.METHOD_CACHE_AUTHORITATIVE) != 0)
+                return null;
+        }
+        
+        /* Otherwise delegate to the HOW. */
+        SixModelObject how = invocant.st.HOW;
+        SixModelObject find_method = findmethod(how, "find_method", tc);
+        invokeInternal(tc, find_method, findmethCallSite,
+                new Object[] { how, invocant, name });
+        return result_o(tc.curFrame);
     }
     public static long can(SixModelObject invocant, String name, ThreadContext tc) {
-        SixModelObject meth = invocant.st.MethodCache.get(name);
-        return meth == null ? 0 : 1;
+        return findmethod(invocant, name, tc) == null ? 0 : 1;
     }
     public static long eqaddr(SixModelObject a, SixModelObject b) {
         return a == b ? 1 : 0;
