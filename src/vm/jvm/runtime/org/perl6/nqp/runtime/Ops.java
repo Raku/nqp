@@ -1844,6 +1844,10 @@ public final class Ops {
     }
     
     /* Container operations. */
+    public static SixModelObject setcontspec(SixModelObject obj, String confname, SixModelObject confarg, ThreadContext tc) {
+        /* XXX TODO */
+        return obj;
+    }
     public static long iscont(SixModelObject obj) {
         return obj.st.ContainerSpec == null ? 0 : 1;
     }
@@ -1851,6 +1855,12 @@ public final class Ops {
         if (obj.st.ContainerSpec == null)
             return obj;
         throw ExceptionHandling.dieInternal(tc, "Decontainerization NYI");
+    }
+    public static SixModelObject assign(SixModelObject cont, SixModelObject value, ThreadContext tc) {
+        throw ExceptionHandling.dieInternal(tc, "assign NYI");
+    }
+    public static SixModelObject assignunchecked(SixModelObject cont, SixModelObject value, ThreadContext tc) {
+        throw ExceptionHandling.dieInternal(tc, "assignunchecked NYI");
     }
     
     /* Iteration. */
