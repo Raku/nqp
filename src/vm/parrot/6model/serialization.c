@@ -19,7 +19,7 @@
 
 /* Version of the serialization format that we are currently at and lowest
  * version we support. */
-#define CURRENT_VERSION 4
+#define CURRENT_VERSION 5
 #define MIN_VERSION 1
 
 /* Various sizes (in bytes). */
@@ -758,6 +758,17 @@ static void serialize_stable(PARROT_INTERP, SerializationWriter *writer, PMC *st
         write_str_func(interp, writer, st->container_spec->value_slot.attr_name);
         write_int_func(interp, writer, st->container_spec->value_slot.hint);
         write_ref_func(interp, writer, st->container_spec->fetch_method);
+    }
+    
+    /* Invocation spec. */
+    if (writer->root.version >= 5) {
+        write_int_func(interp, writer, st->invocation_spec != NULL);
+        if (st->invocation_spec) {
+            write_ref_func(interp, writer, st->invocation_spec->value_slot.class_handle);
+            write_str_func(interp, writer, st->invocation_spec->value_slot.attr_name);
+            write_int_func(interp, writer, st->invocation_spec->value_slot.hint);
+            write_ref_func(interp, writer, st->invocation_spec->invocation_handler);
+        }
     }
     
     /* Store offset we save REPR data at. */
@@ -1634,6 +1645,17 @@ static void deserialize_stable(PARROT_INTERP, SerializationReader *reader, INTVA
         st->container_spec->value_slot.attr_name = read_str_func(interp, reader);
         st->container_spec->value_slot.hint = read_int_func(interp, reader);
         st->container_spec->fetch_method = read_ref_func(interp, reader);
+    }
+
+    /* Invocation spec. */
+    if (reader->root.version >= 5) {
+        if (read_int_func(interp, reader)) {
+            st->invocation_spec = (InvocationSpec *)mem_sys_allocate(sizeof(InvocationSpec));
+            st->invocation_spec->value_slot.class_handle = read_ref_func(interp, reader);
+            st->invocation_spec->value_slot.attr_name = read_str_func(interp, reader);
+            st->invocation_spec->value_slot.hint = read_int_func(interp, reader);
+            st->invocation_spec->invocation_handler = read_ref_func(interp, reader);
+        }
     }
 
     /* Mark it as being in the SC we're currently deserializing. */
