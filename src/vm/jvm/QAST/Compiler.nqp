@@ -1608,6 +1608,10 @@ QAST::OperationsJAST.map_classlib_core_op('readallfh', $TYPE_OPS, 'readallfh', [
 QAST::OperationsJAST.map_classlib_core_op('eoffh', $TYPE_OPS, 'eoffh', [$RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('closefh', $TYPE_OPS, 'closefh', [$RT_OBJ], $RT_OBJ, :tc);
 
+QAST::OperationsJAST.map_classlib_core_op('chmod', $TYPE_OPS, 'chmod', [$RT_STR, $RT_INT], $RT_INT);
+QAST::OperationsJAST.map_classlib_core_op('rmdir', $TYPE_OPS, 'rmdir', [$RT_STR], $RT_INT);
+QAST::OperationsJAST.map_classlib_core_op('mkdir', $TYPE_OPS, 'mkdir', [$RT_STR, $RT_INT], $RT_INT);
+
 # terms
 QAST::OperationsJAST.map_classlib_core_op('time_i', $TYPE_OPS, 'time_i', [], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('time_n', $TYPE_OPS, 'time_n', [], $RT_NUM);
