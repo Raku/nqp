@@ -2,7 +2,7 @@
 
 # Tests for try and catch
 
-plan(8);
+plan(9);
 
 sub oops($msg = "oops!") { # throw an exception
     nqp::die($msg);
@@ -67,3 +67,15 @@ $ok := 1;
 }
 
 ok($ok == 16, "resuming from resumable exceptions works");
+
+$ok := "";
+{
+  try {
+    oops();
+    CATCH {
+      $ok := $_;
+    }
+  }
+}
+
+ok($ok eq "oops!", "combination of both try and CATCH");
