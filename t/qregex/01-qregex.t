@@ -5,7 +5,7 @@ use QRegex;
 
 my @files := [
     'rx_captures',
-#    'rx_qcaps',
+    'rx_qcaps',
     'rx_basic',
     'rx_quantifiers',
     'rx_metachars',

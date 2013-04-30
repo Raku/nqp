@@ -60,9 +60,9 @@ $1=[ (.) (.) (.) ] (.)			abcdefg	<mob[5]: d @ 3>		perl5 numbered captures $1
 $<key>=<alpha>				12ab34		<mob<key>: a @ 2>	alias capture
 <key=alpha>				12ab34		<mob<key>: a @ 2>	alias capture
 
-:s $<w1>=(\w+) $<w2>=(\w+)? $<w3>=(\w+)?			one two three		<mob<w3>[0]: three @ 8>	RT #107254
-:s $<w1>=(\w+) $<w2>=(\w+)? $<w3>=(\w+)?			one two three		<mob<w2>[0]: two @ 4>	RT #107254
-:s $<w1>=(\w+) $<w2>=(\w+)? $<w3>=(\w+)?			one two			<mob<w2>[0]: two @ 4>	RT #107254
-:s :r $<w1>=(\w+) $<w2>=(\w+)? $<w3>=(\w+)?			one two			<mob<w2>[0]: two @ 4>	RT #107254
+:s $<w1>=(\w+) $<w2>=(\w+)? $<w3>=(\w+)?			one two three		<mob<w3>: three @ 8>	RT #107254
+:s $<w1>=(\w+) $<w2>=(\w+)? $<w3>=(\w+)?			one two three		<mob<w2>: two @ 4>	RT #107254
+:s $<w1>=(\w+) $<w2>=(\w+)? $<w3>=(\w+)?			one two			<mob<w2>: two @ 4>	RT #107254
+:s :r $<w1>=(\w+) $<w2>=(\w+)? $<w3>=(\w+)?			one two			<mob<w2>: two @ 4>	RT #107254
 
 ## vim: noexpandtab tabstop=4 shiftwidth=4
