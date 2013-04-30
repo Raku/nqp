@@ -25,7 +25,7 @@
 /* Various sizes (in bytes). */
 #define HEADER_SIZE                 4 * 16
 #define DEP_TABLE_ENTRY_SIZE        8
-#define STABLES_TABLE_ENTRY_SIZE    (version == 4 ? 12 : 8)
+#define STABLES_TABLE_ENTRY_SIZE    (version >= 4 ? 12 : 8)
 #define OBJECTS_TABLE_ENTRY_SIZE    16
 #define CLOSURES_TABLE_ENTRY_SIZE   24
 #define CONTEXTS_TABLE_ENTRY_SIZE   16
