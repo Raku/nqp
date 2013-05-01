@@ -2,6 +2,7 @@ package org.perl6.nqp.runtime;
 
 import java.util.HashMap;
 
+import org.perl6.nqp.sixmodel.InvocationSpec;
 import org.perl6.nqp.sixmodel.SerializationContext;
 import org.perl6.nqp.sixmodel.SixModelObject;
 
@@ -104,8 +105,7 @@ public class CallFrame {
                 if (this.outer == null)
                     this.outer = wanted.priorInvocation;
                 if (this.outer == null)
-                    throw ExceptionHandling.dieInternal(tc, "Could not locate an outer for code reference " +
-                        cr.staticInfo.uniqueId);
+                    this.autoClose(wanted);
             }
         }
         
@@ -121,6 +121,58 @@ public class CallFrame {
 
         // Current call frame becomes this new one.
         tc.curFrame = this;
+    }
+    
+    // Constructor supporting auto-close.
+    private CallFrame(ThreadContext tc, StaticCodeInfo sci) {
+        this.tc = tc;
+        
+        // Figure out a code ref.
+        if (sci.staticCode instanceof CodeRef) {
+            this.codeRef = (CodeRef)sci.staticCode;
+        }
+        else {
+            InvocationSpec is = sci.staticCode.st.InvocationSpec;
+            if (is == null)
+                throw ExceptionHandling.dieInternal(tc, "Can not invoke this object");
+            if (is.ClassHandle != null)
+                this.codeRef = (CodeRef)sci.staticCode.get_attribute_boxed(tc, is.ClassHandle, is.AttrName, is.Hint);
+            else
+                this.codeRef = (CodeRef)is.InvocationHandler;
+        }
+        
+        // Set outer.
+        StaticCodeInfo wanted = sci.outerStaticInfo;
+        if (wanted != null) {
+            CallFrame checkFrame = tc.curFrame;
+            while (checkFrame != null) {
+                if (checkFrame.codeRef.staticInfo.mh == wanted.mh &&
+                        checkFrame.codeRef.staticInfo.compUnit == wanted.compUnit) {
+                    this.outer = checkFrame;
+                    break;
+                }
+                checkFrame = checkFrame.caller;
+            }
+            if (this.outer == null)
+                this.outer = wanted.priorInvocation;
+            if (this.outer == null)
+                this.autoClose(wanted);
+        }
+        
+        // Set up lexical storage.
+        if (sci.oLexicalNames != null)
+            this.oLex = sci.oLexStatic.clone();
+        if (sci.iLexicalNames != null)
+            this.iLex = new long[sci.iLexicalNames.length];
+        if (sci.nLexicalNames != null)
+            this.nLex = new double[sci.nLexicalNames.length];
+        if (sci.sLexicalNames != null)
+            this.sLex = new String[sci.sLexicalNames.length];
+    }
+    
+    public void autoClose(StaticCodeInfo wanted) {
+        this.outer = new CallFrame(tc, wanted);
+        wanted.priorInvocation = this.outer;
     }
     
     // Does work needed to leave this callframe.
