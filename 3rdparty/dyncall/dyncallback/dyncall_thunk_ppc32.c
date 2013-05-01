@@ -25,8 +25,8 @@
 
 #include "dyncall_thunk.h"
 
-unsigned short hi16(x) { return ( (unsigned short) (((unsigned int)x)>>16UL) ); }
-unsigned short lo16(x) { return ( (unsigned short)  ((unsigned int)x)        ); }   
+unsigned short hi16(unsigned int x) { return ( (unsigned short) (((unsigned int)x)>>16UL) ); }
+unsigned short lo16(unsigned int x) { return ( (unsigned short)  ((unsigned int)x)        ); }   
 
 void dcbInitThunk(DCThunk* p, void (*entry)())
 {
