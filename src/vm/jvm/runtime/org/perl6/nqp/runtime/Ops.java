@@ -575,9 +575,45 @@ public final class Ops {
     
     public static long rename(String before, String after) {
         Path before_o = Paths.get(before);
-        Path after_ = Paths.get(after);
+        Path after_o = Paths.get(after);
         try {
             Files.move(before_o, after_o);
+        }
+        catch (Exception e) {
+            return -1;
+        }
+        return 0;
+    }
+    
+    public static long copy(String before, String after) {
+        Path before_o = Paths.get(before);
+        Path after_o = Paths.get(after);
+        try {
+            Files.copy(before_o, after_o);
+        }
+        catch (Exception e) {
+            return -1;
+        }
+        return 0;
+    }
+    
+    public static long link(String before, String after) {
+        Path before_o = Paths.get(before);
+        Path after_o = Paths.get(after);
+        try {
+            Files.createLink(before_o, after_o);
+        }
+        catch (Exception e) {
+            return -1;
+        }
+        return 0;
+    }
+    
+    public static long symlink(String before, String after) {
+        Path before_o = Paths.get(before);
+        Path after_o = Paths.get(after);
+        try {
+            Files.createSymbolicLink(before_o, after_o);
         }
         catch (Exception e) {
             return -1;
