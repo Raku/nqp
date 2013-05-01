@@ -4821,6 +4821,6 @@ class QAST::CompilerJAST {
 }
 
 # Register as the QAST compiler.
-if nqp::isnull(nqp::getcomp('qast')) {
-    nqp::bindcomp('qast', QAST::CompilerJAST);
+if nqp::isnull(nqp::getcomp('QAST')) {
+    nqp::bindcomp('QAST', QAST::CompilerJAST);
 }
