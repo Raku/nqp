@@ -69,7 +69,7 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
         <![|)]>
         <!rxstopper>
         <atom>
-        [ <.ws> <quantifier=p5quantifier> ]?
+        [ <.ws> <quantifier=p5quantifier> ]**0..1
         <.ws>
     }
     
@@ -110,7 +110,7 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
                [
                    \s* '-' \s*
                    ( '\\' <backslash=p5backslash> || (<-[\]\\]>) )
-               ]?
+               ]**0..1
                { $pastfirst++ }
            )+
            \s* ']'
@@ -135,7 +135,7 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     token p5assertion:sym<!> { <sym> [ <?before ')'> | <nibbler> ] }
     
     token p5mod  { <[imsox]>* }
-    token p5mods { <on=p5mod> [ '-' <off=p5mod> ]? }
+    token p5mods { <on=p5mod> [ '-' <off=p5mod> ]**0..1 }
     token p5assertion:sym<mod> {
         :my %*OLDRX := nqp::getlexdyn('%*RX');
         :my %*RX;
@@ -144,7 +144,7 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
         }
         <mods=p5mods>
         [
-        | ':' <nibbler>?
+        | ':' <nibbler>**0..1
         | <?before ')' >
         ]
     }
@@ -157,7 +157,7 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     token p5quantifier:sym<{ }> {
         '{' 
         $<start>=[\d+] 
-        [ $<comma>=',' $<end>=[\d*] ]?
+        [ $<comma>=',' $<end>=[\d*] ]**0..1
         '}' <quantmod>
     }
     
@@ -201,7 +201,7 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
         | '$' $<pos>=[\d+]
         ]
 
-        [ <.ws> '=' <.ws> <quantified_atom> ]?
+        [ <.ws> '=' <.ws> <quantified_atom> ]**0..1
     }
 
     proto token backslash { <...> }
@@ -230,6 +230,6 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
             | ':' <arglist>
             | '(' <arglist> ')'
             | <.normspace> <nibbler>
-            ]?
+            ]**0..1
     }
 }

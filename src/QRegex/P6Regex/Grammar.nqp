@@ -143,12 +143,12 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         <atom>
         [
             <.ws> [ <quantifier> | <?before ':'> <backmod> <!alpha> ]
-            [ <.ws> <separator> ]?
-        ]?
+            [ <.ws> <separator> ]**0..1
+        ]**0..1
     }
 
     token separator {
-        $<septype>=['%''%'?] <normspace>? <quantified_atom>
+        $<septype>=['%''%'?] <normspace>**0..1 <quantified_atom>
     }
     
     token atom {
@@ -167,7 +167,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         <.obs: '{N,M} as general quantifier', '** N..M (or ** N..*)'>
     }
     token quantifier:sym<**> {
-        <sym> <normspace>? <backmod> <normspace>?
+        <sym> <normspace>**0..1 <backmod> <normspace>**0..1
         [
         ||  $<min>=[\d+] 
             [   '..' 
@@ -177,7 +177,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
                        || \-\d+ <.panic: "Negative numbers are not allowed as range quantifier endpoint">
                        || <.panic: "Only integers or '*' allowed as range quantifier endpoint"> 
                        ] 
-            ]?
+            ]**0..1
         || \-\d+ <.panic: "Negative numbers are not allowed as quantifiers">
         ]
     }
@@ -216,7 +216,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     token metachar:sym<{*}> {
         <sym>
-        [ \h* '#= ' \h* $<key>=[\S+ [\h+ \S+]*] ]?
+        [ \h* '#= ' \h* $<key>=[\S+ [\h+ \S+]*] ]**0..1
     }
     token metachar:sym<assert> {
         '<' <assertion>
@@ -231,7 +231,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         | '$' $<pos>=[\d+]
         ]
 
-        [ <.ws> '=' <.ws> <quantified_atom> ]?
+        [ <.ws> '=' <.ws> <quantified_atom> ]**0..1
     }
 
     proto token backslash { <...> }
@@ -271,7 +271,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
             | ':' <arglist>
             | '(' <arglist> ')'
             | <.normspace> <nibbler>
-            ]?
+            ]**0..1
     }
 
     token assertion:sym<[> { <?before '['|'+'|'-'|':'> <cclass_elem>+ }
@@ -286,7 +286,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
                      [
                          \s* '..' \s*
                          ( '\\' <backslash> || (<-[\]\\]>) )
-                     ]?
+                     ]**0..1
               )*
           \s* ']'
         | $<name>=[\w+]
@@ -307,7 +307,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
                 | <?["]> <quote_EXPR: ':qq'>
                 ]
                 ')'
-            ]?
+            ]**0..1
         ]
     }
 

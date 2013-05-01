@@ -688,14 +688,16 @@ class NQPMatch is NQPCapture {
             if $item ~~ NQPCapture {
                 $str := $str ~ $item."!dump_str"($key)
             }
-            elsif !nqp::isnull($item) {
+            elsif nqp::islist($item) {
+                $str := $str ~ "$key: list\n";
                 my $n := 0;
                 for $item { $str := $str ~ dump_array($key ~ "[$n]", $_); $n++ }
             }
             $str;
         }
         my $str := $key ~ ': ' ~ nqp::escape(self.Str) ~ ' @ ' ~ self.from ~ "\n";
-        $str := $str ~ dump_array($key, self.list);
+        my $n := 0;
+        for self.list { $str := $str ~ dump_array($key ~ '[' ~ $n ~ ']', $_); $n++ }
         for self.hash { $str := $str ~ dump_array($key ~ '<' ~ $_.key ~ '>', $_.value); }
         $str;
     }
@@ -818,7 +820,7 @@ class NQPRegexMethod {
     method new($code) {
         self.bless(:code($code));
     }
-    method ACCEPTS($target) {
+    multi method ACCEPTS(NQPRegexMethod:D $self: $target) {
         NQPCursor.parse($target, :rule(self))
     }
     method name() {
@@ -831,7 +833,7 @@ class NQPRegexMethod {
 nqp::setinvokespec(NQPRegexMethod, NQPRegexMethod, '$!code', nqp::null);
 
 class NQPRegex is NQPRegexMethod {
-    method ACCEPTS($target) {
+    multi method ACCEPTS(NQPRegex:D $self: $target) {
         NQPCursor.parse($target, :rule(self), :c(0))
     }
 }
