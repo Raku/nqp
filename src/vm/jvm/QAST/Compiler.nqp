@@ -188,6 +188,10 @@ class QAST::OperationsJAST {
     my %core_inlinability;
     my %hll_inlinability;
     
+    # What we know about op native results types.
+    my %core_result_type;
+    my %hll_result_type;
+    
     # Compiles an operation.
     method compile_op($qastcomp, $hll, $op) {
         my $name := $op.op;
@@ -241,12 +245,14 @@ class QAST::OperationsJAST {
     method map_jvm_core_op($op, $jvm_op, @stack_in, $stack_out) {
         my $ins := JAST::Instruction.new( :op($jvm_op) );
         self.add_core_op($op, op_mapper($op, $ins, @stack_in, $stack_out));
+        self.set_core_op_result_type($op, $stack_out);
     }
     
     # Adds a HLL nqp:: op provided directly by a JVM op.
     method map_jvm_hll_op($hll, $op, $jvm_op, @stack_in, $stack_out) {
         my $ins := JAST::Instruction.new( :op($jvm_op) );
         self.add_hll_op($hll, $op, op_mapper($op, $ins, @stack_in, $stack_out));
+        self.set_hll_op_result_type($hll, $op, $stack_out);
     }
     
     # Adds a core nqp:: op provided by a static method in the
@@ -260,6 +266,7 @@ class QAST::OperationsJAST {
         my $ins := JAST::Instruction.new( :op('invokestatic'),
             $class, $method, jtype($stack_out), |@jtypes_in );
         self.add_core_op($op, op_mapper($op, $ins, @stack_in, $stack_out, :$tc));
+        self.set_core_op_result_type($op, $stack_out);
     }
     
     # Adds a core nqp:: op provided by a static method in the
@@ -273,6 +280,7 @@ class QAST::OperationsJAST {
         my $ins := JAST::Instruction.new( :op('invokestatic'),
             $class, $method, jtype($stack_out), |@jtypes_in );
         self.add_hll_op($hll, $op, op_mapper($op, $ins, @stack_in, $stack_out, :$tc));
+        self.set_hll_op_result_type($hll, $op, $stack_out);
     }
     
     # Generates an operation mapper. Covers a range of operations,
@@ -305,6 +313,48 @@ class QAST::OperationsJAST {
             }
             $il.append($instruction);
             result($il, $stack_out)
+        }
+    }
+    
+    # Sets op native result type at a core level.
+    method set_core_op_result_type($op, $type) {
+        if $type == $RT_INT {
+            %core_result_type{$op} := int;
+        }
+        elsif $type == $RT_NUM {
+            %core_result_type{$op} := num;
+        }
+        elsif $type == $RT_STR {
+            %core_result_type{$op} := str;
+        }
+    }
+    
+    # Sets op inlinability at a HLL level. (Can override at HLL level whether
+    # or not the HLL overrides the op itself.)
+    method set_hll_op_result_type($hll, $op, $type) {
+        %hll_result_type{$hll} := {} unless nqp::existskey(%hll_result_type, $hll);
+        if $type == $RT_INT {
+            %hll_result_type{$hll}{$op} := int;
+        }
+        elsif $type == $RT_NUM {
+            %hll_result_type{$hll}{$op} := num;
+        }
+        elsif $type == $RT_STR {
+            %hll_result_type{$hll}{$op} := str;
+        }
+    }
+    
+    # Sets returns on an op node if we it has a native result type.
+    method attach_result_type($hll, $node) {
+        my $op := $node.op;
+        if nqp::existskey(%hll_result_type, $hll) {
+            if nqp::existskey(%hll_result_type{$hll}, $op) {
+                $node.returns(%hll_result_type{$hll}{$op});
+                return 1;
+            }
+        }
+        if nqp::existskey(%core_result_type, $op) {
+            $node.returns(%core_result_type{$op});
         }
     }
 
