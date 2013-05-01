@@ -531,14 +531,34 @@ public final class Ops {
         return 0;
     }
     
-    public static long rmdir(String path) {
+    public static long unlink(String path) {
         try {
-            Files.delete(Paths.get(path));
+            if(!Files.deleteIfExists(Paths.get(path))) {
+                return -2;
+            }
         }
         catch (IOException e) {
             return -1;
         }
         return 0;
+    }
+    
+    public static long rmdir(String path) {
+        Path path_o = Paths.get(path);
+        try {
+            if (!Files.isDirectory(path_o)) {
+                return -2;
+            }
+            Files.delete(path_o);
+        }
+        catch (IOException e) {
+            return -1;
+        }
+        return 0;
+    }
+    
+    public static String cwd() {
+        return new File(".").getAbsolutePath();
     }
     
     public static long mkdir(String path, long mode) {
@@ -550,6 +570,18 @@ public final class Ops {
             return -1;
         }
 
+        return 0;
+    }
+    
+    public static long rename(String before, String after) {
+        Path before_o = Paths.get(before);
+        Path after_ = Paths.get(after);
+        try {
+            Files.move(before_o, after_o);
+        }
+        catch (Exception e) {
+            return -1;
+        }
         return 0;
     }
     
