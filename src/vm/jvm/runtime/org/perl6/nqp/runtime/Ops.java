@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 import org.perl6.nqp.jast2bc.JASTToJVMBytecode;
@@ -2002,8 +2003,19 @@ public final class Ops {
                 .longValue();
     }
 
+    public static SixModelObject gcd_I(SixModelObject a, SixModelObject b, SixModelObject type, ThreadContext tc) {
+        return makeBI(tc, type, getBI(tc, a).gcd(getBI(tc, b)));
+    }
+    
     public static long lcm_i(long valA, long valB) {
         return valA * (valB / gcd_i(valA, valB));
+    }
+    
+    public static SixModelObject lcm_I(SixModelObject a, SixModelObject b, SixModelObject type, ThreadContext tc) {
+        BigInteger valA = getBI(tc, a);
+        BigInteger valB = getBI(tc, b);
+        BigInteger gcd = valA.gcd(valB);
+        return makeBI(tc, type, valA.multiply(valB).divide(gcd));
     }
     
     public static SixModelObject radix(long radix, String str, long zpos, long flags, ThreadContext tc) {
@@ -3375,6 +3387,20 @@ public final class Ops {
     
     public static SixModelObject expmod_I(SixModelObject a, SixModelObject b, SixModelObject c, SixModelObject type, ThreadContext tc) {
         return makeBI(tc, type, getBI(tc, a).modPow(getBI(tc, b), getBI(tc, c)));
+    }
+    
+    public static long isprime_I(SixModelObject a, long certainty, ThreadContext tc) {
+        BigInteger bi = getBI(tc, a);
+        if (bi.compareTo(BigInteger.valueOf(1)) <= 0) {
+            return 0;
+    	}
+        return bi.isProbablePrime((int)certainty) ? 1 : 0;
+    }
+    
+    public static SixModelObject rand_I(SixModelObject a, SixModelObject type, ThreadContext tc) {
+        BigInteger size = getBI(tc, a);
+        BigInteger random = new BigInteger(size.bitLength(), ThreadLocalRandom.current()).mod(size);
+        return makeBI(tc, type, random);
     }
     
     public static SixModelObject pow_I(SixModelObject a, SixModelObject b, SixModelObject biType, SixModelObject nType, ThreadContext tc) {
