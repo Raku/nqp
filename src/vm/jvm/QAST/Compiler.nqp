@@ -2669,6 +2669,19 @@ class QAST::CompilerJAST {
         }
     }
     
+    my %want_char := nqp::hash($RT_INT, 'I', $RT_NUM, 'N', $RT_STR, 'S');
+    sub want($node, $type) {
+        my @possibles := nqp::clone($node.list);
+        my $best := @possibles.shift;
+        my $char := %want_char{$type};
+        for @possibles -> $sel, $ast {
+            if nqp::index($sel, $char) >= 0 {
+                $best := $ast;
+            }
+        }
+        $best
+    }
+    
     multi method as_jast(QAST::CompUnit $cu, :$want) {
         # A compilation-unit-wide source of IDs for handlers.
         my $*EH_IDX := 1;
