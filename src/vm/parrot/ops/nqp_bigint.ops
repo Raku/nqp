@@ -215,7 +215,9 @@ inline op nqp_bigint_is_prime(out INT, invar PMC, in INT) {
         $1 = 0;
     }
     else {
-        mp_prime_is_prime(a, $3, (int *) &$1);
+        int result;
+        mp_prime_is_prime(a, $3, &result);
+        $1 = result;
     }
 }
 

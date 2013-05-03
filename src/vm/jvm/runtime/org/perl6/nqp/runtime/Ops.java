@@ -13,8 +13,11 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -22,6 +25,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.EnumSet;
 import java.util.concurrent.TimeUnit;
 
 import org.perl6.nqp.jast2bc.JASTToJVMBytecode;
@@ -491,6 +496,129 @@ public final class Ops {
             die_s("closefh requires an object with the IOHandle REPR", tc);
         }
         return obj;
+    }
+    
+    public static Set<PosixFilePermission> modeToPosixFilePermission(long mode) {
+        Set<PosixFilePermission> perms = EnumSet.noneOf(PosixFilePermission.class);
+        if ((mode & 0001) != 0) perms.add(PosixFilePermission.OTHERS_EXECUTE);
+        if ((mode & 0002) != 0) perms.add(PosixFilePermission.OTHERS_WRITE);
+        if ((mode & 0004) != 0) perms.add(PosixFilePermission.OTHERS_READ);
+        if ((mode & 0010) != 0) perms.add(PosixFilePermission.GROUP_EXECUTE);
+        if ((mode & 0020) != 0) perms.add(PosixFilePermission.GROUP_WRITE);
+        if ((mode & 0040) != 0) perms.add(PosixFilePermission.GROUP_READ);
+        if ((mode & 0100) != 0) perms.add(PosixFilePermission.OWNER_EXECUTE);
+        if ((mode & 0200) != 0) perms.add(PosixFilePermission.OWNER_WRITE);
+        if ((mode & 0400) != 0) perms.add(PosixFilePermission.OWNER_READ);
+        return perms;
+    }
+    
+    public static long chmod(String path, long mode) {
+        Path path_o;
+        try {
+            path_o = Paths.get(path);
+        }
+        catch (Exception e) {
+            return -1;
+        }
+        
+        Set<PosixFilePermission> perms = modeToPosixFilePermission(mode);
+        try {
+            Files.setPosixFilePermissions(path_o, perms);
+        }
+        catch (Exception e) {
+            return -1;
+        }
+        return 0;
+    }
+    
+    public static long unlink(String path) {
+        try {
+            if(!Files.deleteIfExists(Paths.get(path))) {
+                return -2;
+            }
+        }
+        catch (IOException e) {
+            return -1;
+        }
+        return 0;
+    }
+    
+    public static long rmdir(String path) {
+        Path path_o = Paths.get(path);
+        try {
+            if (!Files.isDirectory(path_o)) {
+                return -2;
+            }
+            Files.delete(path_o);
+        }
+        catch (IOException e) {
+            return -1;
+        }
+        return 0;
+    }
+    
+    public static String cwd() {
+        return new File(".").getAbsolutePath();
+    }
+    
+    public static long mkdir(String path, long mode) {
+        try {
+            Files.createDirectory(Paths.get(path),
+                        PosixFilePermissions.asFileAttribute(modeToPosixFilePermission(mode)));
+        }
+        catch (Exception e) {
+            return -1;
+        }
+
+        return 0;
+    }
+    
+    public static long rename(String before, String after) {
+        Path before_o = Paths.get(before);
+        Path after_o = Paths.get(after);
+        try {
+            Files.move(before_o, after_o);
+        }
+        catch (Exception e) {
+            return -1;
+        }
+        return 0;
+    }
+    
+    public static long copy(String before, String after) {
+        Path before_o = Paths.get(before);
+        Path after_o = Paths.get(after);
+        try {
+            Files.copy(before_o, after_o);
+        }
+        catch (Exception e) {
+            return -1;
+        }
+        return 0;
+    }
+    
+    public static long link(String before, String after) {
+        Path before_o = Paths.get(before);
+        Path after_o = Paths.get(after);
+        try {
+            Files.createLink(before_o, after_o);
+        }
+        catch (Exception e) {
+            return -1;
+        }
+        return 0;
+    }
+    
+    public static long symlink(String before, String after) {
+        Path before_o = Paths.get(before);
+        Path after_o = Paths.get(after);
+        try {
+            Files.createSymbolicLink(before_o, after_o);
+        }
+        catch (Exception e) {
+            return -1;
+        }
+        return 0;
     }
     
     /* Lexical lookup in current scope. */

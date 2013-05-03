@@ -119,7 +119,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     method quantifier:sym<?>($/) {
-        my $qast := QAST::Regex.new( :rxtype<quant>, :min(0), :max(1), :node($/) );
+        my $qast := QAST::Regex.new( :rxtype<quant>, :subtype<item>, :min(0), :max(1), :node($/) );
         make backmod($qast, $<backmod>);
     }
 
@@ -633,7 +633,8 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         }
         elsif $rxtype eq 'quant' {
             my %astcap := capnames($ast[0], $count);
-            for %astcap { %capnames{$_} := 2 }
+            my $ilist := ($ast.subtype eq 'item');
+            for %astcap { %capnames{$_.key} := $ilist ?? $_.value !! 2 }
             $count := %astcap{''};
         }
         %capnames{''} := $count;
