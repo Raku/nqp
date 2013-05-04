@@ -525,7 +525,7 @@ grammar NQP::Grammar is HLL::Grammar {
 
     token param_var {
         <sigil> <twigil>**0..1
-        [ <name=.ident> | $<name>=[<[/!]>] ]
+        [ <name=.identifier> | $<name>=[<[/!]>] ]
     }
 
     token named_param {
