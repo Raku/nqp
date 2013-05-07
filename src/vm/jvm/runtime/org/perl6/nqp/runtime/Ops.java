@@ -22,13 +22,15 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.EnumSet;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+
+import jline.ConsoleReader;
 
 import org.perl6.nqp.jast2bc.JASTToJVMBytecode;
 import org.perl6.nqp.sixmodel.BoolificationSpec;
@@ -402,13 +404,10 @@ public final class Ops {
             if (h.is == null)
                 die_s("File handle is not opened for read", tc);
             try {
-                if (h.isr == null)
-                    h.isr = new InputStreamReader(h.is, "UTF-8");
-                if (h.br == null)
-                    h.br = new BufferedReader(h.isr);
-                System.out.print(prompt);
-                System.out.flush();
-                String line = h.br.readLine();
+            	if (h.cr == null) {
+            		h.cr = new ConsoleReader(h.is, new OutputStreamWriter(System.out));
+            	}
+            	String line = h.cr.readLine(prompt);
                 if (line == null) {
                 	h.eof = true;
                 }

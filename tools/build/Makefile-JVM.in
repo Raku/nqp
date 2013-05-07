@@ -19,12 +19,13 @@ RUNTIME_JAVAS = \
 
 RUNTIME_JAR = nqp-runtime.jar
 
+THIRDPARTY_JARS = 3rdparty/asm/asm-4.1.jar@cpsep@3rdparty/jline/jline-1.0.jar
 STAGE0 = src/vm/jvm/stage0
 STAGE1 = src/stage1
 STAGE2 = src/stage2
 
-STAGE0_NQP = $(JAVA) -cp $(STAGE0) -Xbootclasspath/a:$(STAGE0)@cpsep@nqp-runtime.jar@cpsep@3rdparty/asm/asm-4.1.jar nqp --bootstrap
-STAGE1_NQP = $(JAVA) -cp $(STAGE1) -Xbootclasspath/a:$(STAGE1)@cpsep@nqp-runtime.jar@cpsep@3rdparty/asm/asm-4.1.jar nqp --bootstrap
+STAGE0_NQP = $(JAVA) -cp $(STAGE0) -Xbootclasspath/a:$(STAGE0)@cpsep@nqp-runtime.jar@cpsep@$(THIRDPARTY_JARS) nqp --bootstrap
+STAGE1_NQP = $(JAVA) -cp $(STAGE1) -Xbootclasspath/a:$(STAGE1)@cpsep@nqp-runtime.jar@cpsep@$(THIRDPARTY_JARS) nqp --bootstrap
 
 NQP_MO_CLASS    = nqpmo.class
 NQP_MO_COMBINED = gen/nqpmo.nqp
@@ -148,6 +149,7 @@ all: $(ALL_OUTPUT) $(RUNNER) $(P5QREGEX_CLASS)
 install: all
 	$(MKPATH) $(PREFIX)
 	$(CP) 3rdparty/asm/asm-4.1.jar $(PREFIX)
+    $(CP) 3rdparty/jline/jline-1.0.jar $(PREFIX)
 	$(CP) $(RUNTIME_JAR) $(PREFIX)
 	$(CP) $(NQP_MO_CLASS) $(PREFIX)
 	$(CP) $(MODULE_LOADER_CLASS) $(PREFIX)
@@ -164,7 +166,7 @@ install: all
 
 $(RUNTIME_JAR): $(RUNTIME_JAVAS)
 	$(PERL) -MExtUtils::Command -e mkpath bin
-	$(JAVAC) -source 1.7 -cp 3rdparty/asm/asm-4.1.jar -g -d bin $(RUNTIME_JAVAS)
+	$(JAVAC) -source 1.7 -cp $(THIRDPARTY_JARS) -g -d bin $(RUNTIME_JAVAS)
 	$(JAR) cf0 nqp-runtime.jar -C bin/ .
 
 clean:

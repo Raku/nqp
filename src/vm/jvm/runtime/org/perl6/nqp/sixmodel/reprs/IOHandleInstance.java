@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
+import jline.ConsoleReader;
+
 import org.perl6.nqp.sixmodel.SixModelObject;
 
 public class IOHandleInstance extends SixModelObject {
@@ -29,5 +31,8 @@ public class IOHandleInstance extends SixModelObject {
      * This further wraps the input stream reader for the case of doing
      * line-based I/O.
      */
-    public BufferedReader br;    
+    public BufferedReader br;
+    
+    /* This wraps the input stream for interactive readline */
+    public ConsoleReader cr;
 }
