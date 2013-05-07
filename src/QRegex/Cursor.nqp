@@ -685,7 +685,7 @@ class NQPMatch is NQPCapture {
     method !dump_str($key) {
         sub dump_array($key, $item) {
             my $str := '';
-            if $item ~~ NQPCapture {
+            if nqp::istype($item, NQPCapture) {
                 $str := $str ~ $item."!dump_str"($key)
             }
             elsif nqp::islist($item) {
