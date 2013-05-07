@@ -263,7 +263,7 @@ make_num_result(PARROT_INTERP, PMC *type, FLOATVAL value) {
 PMC *
 make_str_result(PARROT_INTERP, PMC *type, INTVAL ret_type, char *cstring) {
     PMC *result = type;
-    if (result != NULL && !PMC_IS_NULL(type)) {
+    if (cstring != NULL && !PMC_IS_NULL(type)) {
         STRING *value = STRINGNULL;
         switch (ret_type & DYNCALL_ARG_TYPE_MASK) {
             case DYNCALL_ARG_ASCIISTR:

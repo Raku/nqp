@@ -1689,6 +1689,8 @@ QAST::OperationsJAST.map_jvm_core_op('div_n', 'ddiv', [$RT_NUM, $RT_NUM], $RT_NU
 QAST::OperationsJAST.map_jvm_core_op('mod_i', 'lrem', [$RT_INT, $RT_INT], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('mod_I', $TYPE_OPS, 'mod_I', [$RT_OBJ, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('expmod_I', $TYPE_OPS, 'expmod_I', [$RT_OBJ, $RT_OBJ, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('isprime_I', $TYPE_OPS, 'isprime_I', [$RT_OBJ, $RT_INT], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('rand_I', $TYPE_OPS, 'rand_I', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_jvm_core_op('mod_n', 'drem', [$RT_NUM, $RT_NUM], $RT_NUM);
 QAST::OperationsJAST.map_classlib_core_op('pow_n', $TYPE_MATH, 'pow', [$RT_NUM, $RT_NUM], $RT_NUM);
 QAST::OperationsJAST.map_classlib_core_op('pow_I', $TYPE_OPS, 'pow_I', [$RT_OBJ, $RT_OBJ, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
@@ -1724,7 +1726,9 @@ QAST::OperationsJAST.map_classlib_core_op('sech_n', $TYPE_OPS, 'sech_n', [$RT_NU
 
 # esoteric math opcodes
 QAST::OperationsJAST.map_classlib_core_op('gcd_i', $TYPE_OPS, 'gcd_i', [$RT_INT, $RT_INT], $RT_INT);
+QAST::OperationsJAST.map_classlib_core_op('gcd_I', $TYPE_OPS, 'gcd_I', [$RT_OBJ, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('lcm_i', $TYPE_OPS, 'lcm_i', [$RT_INT, $RT_INT], $RT_INT);
+QAST::OperationsJAST.map_classlib_core_op('lcm_I', $TYPE_OPS, 'lcm_I', [$RT_OBJ, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 
 # string opcodes
 QAST::OperationsJAST.map_classlib_core_op('chars', $TYPE_OPS, 'chars', [$RT_STR], $RT_INT);

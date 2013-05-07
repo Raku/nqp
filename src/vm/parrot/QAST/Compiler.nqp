@@ -1572,6 +1572,7 @@ class QAST::Compiler is HLL::Compiler {
     method uniprop($node) {
         my $ops := self.post_new('Ops', :result(%*REG<cur>));
         my $cmpop := $node.negate ?? 'ne' !! 'eq';
+        $ops.push_pirop('ge', %*REG<pos>, %*REG<eos>, %*REG<fail>);
         $ops.push_pirop('assign', '$S10', '"' ~ $node[0] ~ '"');
         $ops.push_pirop('is_uprop', '$I11', '$S10', %*REG<tgt>, %*REG<pos>);
         $ops.push_pirop($cmpop, '$I11', 0, %*REG<fail>);

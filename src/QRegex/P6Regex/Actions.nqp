@@ -632,10 +632,16 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             $count := %x{''};
         }
         elsif $rxtype eq 'quant' {
-            my %astcap := capnames($ast[0], $count);
             my $ilist := ($ast.subtype eq 'item');
+            my %astcap := capnames($ast[0], $count);
             for %astcap { %capnames{$_.key} := $ilist ?? $_.value !! 2 }
             $count := %astcap{''};
+            if $ast[1] {
+                # handle any separator quantification
+                my %astcap := capnames($ast[1], $count);
+                for %astcap { %capnames{$_.key} := $ilist ?? $_.value !! 2 }
+                $count := %astcap{''};
+            }
         }
         %capnames{''} := $count;
         nqp::deletekey(%capnames, '$!from');

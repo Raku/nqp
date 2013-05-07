@@ -125,7 +125,13 @@ MAIN: {
             system_or_die('cd 3rdparty\dyncall && Configure.bat' . $configure_args);
             $config{'dyncall_build'} = "cd 3rdparty/dyncall && $make BUILD_DIR=. -f GNUmakefile";
         } else {
-            system_or_die('cd 3rdparty/dyncall && sh configure');
+            my $target_args = '';
+            #assume it's 64 bit for OSX, not perfect but better than nothing
+            if ($^O eq 'darwin') {
+              $target_args = " --target-x64";
+            }
+            system_or_die('cd 3rdparty/dyncall && sh configure' . $target_args);
+
             if ($^O eq 'netbsd') {
                 $config{'dyncall_build'} = "cd 3rdparty/dyncall && BUILD_DIR=. $make -f BSDmakefile";
             } else {
