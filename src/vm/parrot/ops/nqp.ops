@@ -305,6 +305,28 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
  * Note, should really be per thread. */
 static PMC *current_dispatcher = NULL;
 
+PARROT_CAN_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
+static PMC* sub_find_pad(PARROT_INTERP, ARGIN(STRING *lex_name), ARGIN(PMC *ctx))
+{
+    ASSERT_ARGS(Parrot_sub_find_pad)
+    while (1) {
+        PMC * const lex_pad = Parrot_pcc_get_lex_pad(interp, ctx);
+        PMC * outer = Parrot_pcc_get_outer_ctx(interp, ctx);
+
+        if (PMC_IS_NULL(outer))
+            return lex_pad;
+
+        PARROT_ASSERT(outer->vtable->base_type == enum_class_CallContext);
+
+        if (!PMC_IS_NULL(lex_pad))
+            if (VTABLE_exists_keyed_str(interp, lex_pad, lex_name))
+                return lex_pad;
+
+        ctx = outer;
+    }
+}
+
 END_OPS_PREAMBLE
 
 /*
@@ -3232,4 +3254,116 @@ inline op nqp_capturehasnameds(out INT, invar PMC) :base_core {
     else {
         $1 = 0;
     }
+}
+
+
+/*
+
+=item nqp_getlexouter(out PMC, in STR)
+
+Finds the lexical named $2 and returns it. However, unlike nqp::getlex this op
+skips the current scope and starts looking immediately at its outers.
+
+=cut
+
+*/
+inline op nqp_getlexouter(out PMC, in STR) :base_core {
+    PMC *ctx = CURRENT_CONTEXT(interp);
+    $1 = PMCNULL;
+
+    while (Parrot_pcc_get_outer_ctx(interp, ctx)) {
+        PMC   * const outer   = Parrot_pcc_get_outer_ctx(interp, ctx);
+        PMC   * const lex_pad = Parrot_pcc_get_lex_pad(interp, outer);
+
+        if (!PMC_IS_NULL(lex_pad) && VTABLE_exists_keyed_str(interp, lex_pad, $2)) {
+            $1 = VTABLE_get_pmc_keyed_str(interp, lex_pad, $2);
+            break;
+        }
+
+        ctx = outer;
+    }
+}
+
+
+/*
+
+=item nqp_getlexrel(out PMC, in PMC, in STR)
+
+Finds the lexical named $3 relative to scope $2, following the outer
+chain. Places it in $1. Places a NULL PMC in $1 if it is not found.
+
+=cut
+
+*/
+inline op nqp_getlexrel(out PMC, in PMC, in STR) :base_core {
+    PMC *ctx = $2;
+    $1 = PMCNULL;
+
+    while (!PMC_IS_NULL(ctx)) {
+        PMC   * const lex_pad = Parrot_pcc_get_lex_pad(interp, ctx);
+        PMC   * const outer   = Parrot_pcc_get_outer_ctx(interp, ctx);
+
+        if (!PMC_IS_NULL(lex_pad) && VTABLE_exists_keyed_str(interp, lex_pad, $3)) {
+            $1 = VTABLE_get_pmc_keyed_str(interp, lex_pad, $3);
+            break;
+        }
+
+        ctx = outer;
+    }
+}
+
+/*
+
+=item nqp_getlexreldyn(out PMC, in PMC, in STR)
+
+Finds the lexical named $3 relative to scope $2, following the caller
+chain. Places it in $1. Places a NULL PMC in $1 if it is not found.
+
+=cut
+
+*/
+inline op nqp_getlexreldyn(out PMC, in PMC, in STR) :base_core {
+    PMC *ctx = $2;
+    $1 = PMCNULL;
+
+    while (!PMC_IS_NULL(ctx)) {
+        PMC   * const lex_pad = Parrot_pcc_get_lex_pad(interp, ctx);
+        PMC   * const caller  = Parrot_pcc_get_caller_ctx(interp, ctx);
+
+        if (!PMC_IS_NULL(lex_pad) && VTABLE_exists_keyed_str(interp, lex_pad, $3)) {
+            $1 = VTABLE_get_pmc_keyed_str(interp, lex_pad, $3);
+            break;
+        }
+
+        ctx = caller;
+    }
+}
+
+/*
+
+=item nqp_getlexrelcaller(out PMC, in PMC, in STR)
+
+Finds the lexical named $3 relative to scope $2, following the caller
+chain but also seraching the outer chain for each caller. Places it in $1.
+Places a NULL PMC in $1 if it is not found.
+
+=cut
+
+*/
+inline op nqp_getlexrelcaller(out PMC, in PMC, in STR) :base_core {
+    STRING  * const lex_name = $3;
+    PMC     * ctx            = $2;
+    PMC     * result         = PMCNULL;
+
+    for (; !PMC_IS_NULL(ctx) && PMC_IS_NULL(result);
+           ctx = Parrot_pcc_get_caller_ctx(interp, ctx))
+    {
+        PMC * const lex_pad = sub_find_pad(interp, lex_name, ctx);
+        if (!PMC_IS_NULL(lex_pad)) {
+            result = VTABLE_get_pmc_keyed_str(interp, lex_pad, lex_name);
+        }
+        if (!result)
+            result = PMCNULL;
+    }
+    $1 = result;
 }

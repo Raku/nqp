@@ -2032,6 +2032,10 @@ QAST::Operations.add_core_pirop_mapping('bindlex_s', 'store_lex', '1ss');
 QAST::Operations.add_core_pirop_mapping('getlexdyn', 'find_dynamic_lex', 'Ps');
 QAST::Operations.add_core_pirop_mapping('bindlexdyn', 'store_dynamic_lex', '1sP');
 QAST::Operations.add_core_pirop_mapping('getlexcaller', 'find_caller_lex', 'Ps');
+QAST::Operations.add_core_pirop_mapping('getlexouter', 'nqp_getlexouter', 'Ps');
+QAST::Operations.add_core_pirop_mapping('getlexrel', 'nqp_getlexrel', 'PPs');
+QAST::Operations.add_core_pirop_mapping('getlexreldyn', 'nqp_getlexreldyn', 'PPs');
+QAST::Operations.add_core_pirop_mapping('getlexrelcaller', 'nqp_getlexrelcaller', 'PPs');
 
 # code object related opcodes
 QAST::Operations.add_core_pirop_mapping('takeclosure', 'newclosure', 'PP');
