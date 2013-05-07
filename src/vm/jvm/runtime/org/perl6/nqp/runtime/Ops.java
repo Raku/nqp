@@ -329,13 +329,13 @@ public final class Ops {
         return obj;
     }
     
-    public static long tellfh(SixModelObject obj, String data, ThreadContext tc) {
+    public static long tellfh(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
             /* TODO */
             return 0;
         }
         else {
-            die_s("printfh requires an object with the IOHandle REPR", tc);
+            die_s("tellfh requires an object with the IOHandle REPR", tc);
             return 0; /* Unreachable */
         }
     }
@@ -377,7 +377,11 @@ public final class Ops {
                     h.isr = new InputStreamReader(h.is, "UTF-8");
                 if (h.br == null)
                     h.br = new BufferedReader(h.isr);
-                return h.br.readLine();
+                String line = h.br.readLine();
+                if (line == null) {
+                	h.eof = true;
+                }
+                return line;
             }
             catch (IOException e) {
                 die_s(e.getMessage(), tc);
@@ -403,7 +407,11 @@ public final class Ops {
                     h.br = new BufferedReader(h.isr);
                 System.out.print(prompt);
                 System.out.flush();
-                return h.br.readLine();
+                String line = h.br.readLine();
+                if (line == null) {
+                	h.eof = true;
+                }
+                return line;
             }
             catch (IOException e) {
                 die_s(e.getMessage(), tc);
@@ -432,6 +440,7 @@ public final class Ops {
                 int read = 0;
                 while((read = h.br.read(buf)) != -1)
                     data.append(String.valueOf(buf, 0, read));
+                h.eof = true;
                 return data.toString();
             }
             catch (IOException e) {
@@ -450,22 +459,8 @@ public final class Ops {
             IOHandleInstance h = (IOHandleInstance)obj;
             if (h.is == null)
                 die_s("File handle is not opened for read", tc);
-            try {
-                if (h.isr == null)
-                    h.isr = new InputStreamReader(h.is, "UTF-8");
-                if (h.br == null)
-                    h.br = new BufferedReader(h.isr);
-                
-                char[] buf = new char[1];
-                h.br.mark(1);
-                int res = h.br.read(buf);
-                h.br.reset();
-                return res == 1 ? 1 : 0;
-            }
-            catch (IOException e) {
-                die_s(e.getMessage(), tc);
-                return 0; /* Unreachable */
-            }
+            
+            return h.eof ? 1 : 0;
         }
         else {
             die_s("eoffh requires an object with the IOHandle REPR", tc);
@@ -2075,7 +2070,7 @@ public final class Ops {
             if (obj instanceof TypeObject)
                 return 0;
             String str = obj.get_str(tc);
-            return str.equals("") || str.equals("0") ? 0 : 1;
+            return str == null || str.equals("") || str.equals("0") ? 0 : 1;
         case BoolificationSpec.MODE_NOT_TYPE_OBJECT:
             return obj instanceof TypeObject ? 0 : 1;
         case BoolificationSpec.MODE_BIGINT:
@@ -2115,7 +2110,7 @@ public final class Ops {
         // If it's a type object, empty string.
         if (obj instanceof TypeObject)
             return "";
-
+        
         // See if it can unbox to a primitive we can stringify.
         StorageSpec ss = obj.st.REPR.get_storage_spec(tc, obj.st);
         if ((ss.can_box & StorageSpec.CAN_BOX_STR) != 0)
