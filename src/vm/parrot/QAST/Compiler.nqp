@@ -849,7 +849,7 @@ class QAST::Compiler is HLL::Compiler {
             # If the lexical is directly declared in this block, we use the
             # register directly.
             my %sym := $*BLOCK.qast.symbol($name);
-            if (!%sym || !%sym<lazyinit>) && $*BLOCK.lexical_type($name) -> $type {
+            if $*BLOCK.lexical_type($name) -> $type {
                 my $reg := $*BLOCK.lex_reg($name);
                 if $*BINDVAL {
                     my $valpost := self.as_post_clear_bindval($*BINDVAL, :want(nqp::lc($type)));
