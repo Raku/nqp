@@ -38,9 +38,11 @@ class QRegex::P5Regex::World is HLL::World {
 }
 
 grammar QRegex::P5Regex::Grammar is HLL::Grammar {
+    my $cur_handle := 0;
     token TOP {
         :my %*RX;
-        :my $*W := QRegex::P5Regex::World.new(:handle(nqp::sha1(self.target)));
+        :my $handle := '__QREGEX_P5REGEX__' ~ $cur_handle++;
+        :my $*W := QRegex::P5Regex::World.new(:$handle);
         <nibbler>
         [ $ || <.panic: 'Confused'> ]
     }
