@@ -9,9 +9,13 @@ import java.io.OutputStreamWriter;
 import org.perl6.nqp.sixmodel.SixModelObject;
 
 public class IOHandleInstance extends SixModelObject {
+	
     /* The input stream; if null, we can't read from this. */
     public InputStream is;
     
+    /* EOF gets marked by read operations */
+    public boolean eof;
+
     /* The output stream; if null, we can't write to this. */
     public OutputStream os;
     
@@ -25,5 +29,5 @@ public class IOHandleInstance extends SixModelObject {
      * This further wraps the input stream reader for the case of doing
      * line-based I/O.
      */
-    public BufferedReader br;
+    public BufferedReader br;    
 }
