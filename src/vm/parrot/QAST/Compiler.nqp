@@ -104,8 +104,17 @@ class QAST::Compiler is HLL::Compiler {
             @!params[+@!params] := $var;
         }
         
-        method add_lexical($var) {
+        method add_lexical($var, :$is_static, :$is_cont, :$is_state) {
             self.register_lexical($var);
+            if $is_static || $is_cont || $is_state {
+                my %blv := %*BLOCK_LEX_VALUES;
+                unless nqp::existskey(%blv, $!qast.cuid) {
+                    %blv{$!qast.cuid} := [];
+                }
+                my $flags := $is_static ?? 0 !!
+                             $is_cont   ?? 1 !! 2;
+                nqp::push(%blv{$!qast.cuid}, [$var.name, $var.value, $flags]);
+            }
             @!lexicals[+@!lexicals] := $var;
         }
         
@@ -203,9 +212,12 @@ class QAST::Compiler is HLL::Compiler {
     }
 
     method post($source, *%adverbs) {
-        # Wrap $source in a QAST::Block if it's not already a viable root node.
-        $source := QAST::Block.new($source)
-            unless nqp::istype($source, QAST::CompUnit) || nqp::istype($source, QAST::Block);
+        # Ensure we have a QAST::CompUnit that in turn contains a QAST::Block.
+        unless nqp::istype($source, QAST::CompUnit) {
+            $source := QAST::Block.new($source) unless nqp::istype($source, QAST::Block);
+            $source := QAST::CompUnit.new($source);
+        }
+
         # Now compile $source and return the result.
         self.as_post($source);
     }
@@ -265,6 +277,11 @@ class QAST::Compiler is HLL::Compiler {
         if +@($cu) != 1 || !nqp::istype($cu[0], QAST::Block) {
             nqp::die("QAST::CompUnit should have one child that is a QAST::Block");
         }
+        
+        # Hash mapping blocks with static lexicals to an array of arrays. Each
+        # of the sub-arrays has the form [$name, $value, $flags], where flags
+        # are 0 = static lex, 1 = container, 2 = state container.
+        my %*BLOCK_LEX_VALUES;
 
         # Compile the block.
         my $*QAST_BLOCK_NO_CLOSE := 1;
@@ -276,6 +293,7 @@ class QAST::Compiler is HLL::Compiler {
         my $comp_mode := $cu.compilation_mode;
         my @pre_des   := $cu.pre_deserialize;
         my @post_des  := $cu.post_deserialize;
+        self.block_lex_values_to_post_des(@post_des, %*BLOCK_LEX_VALUES);
         if $comp_mode || @pre_des || @post_des {
             # Create a block into which we'll install all of the other
             # pieces.
@@ -384,6 +402,31 @@ class QAST::Compiler is HLL::Compiler {
                 $repo_conf_res
             )
         )
+    }
+    
+    method block_lex_values_to_post_des(@post_des, %blv) {
+        for %blv {
+            my $cuid := $_.key;
+            my $tasks := QAST::Stmt.new();
+            for $_.value -> @lex {
+                $tasks.push(QAST::Op.new(
+                    :op('callmethod'), :name('set_lexpad_value'),
+                    QAST::VM.new(
+                        pir => '    .const "LexInfo" %r = "' ~ $cuid ~ '"'
+                    ),
+                    QAST::SVal.new( :value(@lex[0]) ),
+                    QAST::WVal.new( :value(@lex[1]) ),
+                    QAST::IVal.new( :value(@lex[2]) )
+                ));
+            }
+            $tasks.push(QAST::Op.new(
+                :op('callmethod'), :name('finish_static_lexpad'),
+                QAST::VM.new(
+                    pir => '    .const "LexInfo" %r = "' ~ $cuid ~ '"'
+                ),
+            ));
+            nqp::push(@post_des, $tasks);
+        }
     }
 
     multi method as_post(QAST::Block $node, :$want) {
@@ -803,6 +846,24 @@ class QAST::Compiler is HLL::Compiler {
                 else {
                     nqp::die("Cannot declare variable with scope '$scope'; use 'local' or 'lexical'");
                 }
+            }
+            elsif $decl eq 'static' {
+                if $scope ne 'lexical' {
+                    nqp::die("Can only use 'static' decl with scope 'lexical'");
+                }
+                $*BLOCK.add_lexical($node, :is_static);
+            }
+            elsif $decl eq 'contvar' {
+                if $scope ne 'lexical' {
+                    nqp::die("Can only use 'contvar' decl with scope 'lexical'");
+                }
+                $*BLOCK.add_lexical($node, :is_cont);
+            }
+            elsif $decl eq 'statevar' {
+                if $scope ne 'lexical' {
+                    nqp::die("Can only use 'statevar' decl with scope 'lexical'");
+                }
+                $*BLOCK.add_lexical($node, :is_state);
             }
             else {
                 nqp::die("Don't understand declaration type '$decl'");
