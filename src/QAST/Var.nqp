@@ -3,7 +3,7 @@ class QAST::Var is QAST::Node {
     has str $!scope;
     has str $!decl;
     has int $!slurpy;
-    has $!default;
+    has $!default_or_value;
     
     method name(*@value) {
         $!name := @value[0] if @value;
@@ -18,7 +18,8 @@ class QAST::Var is QAST::Node {
         !nqp::isnull_s($!decl) ?? $!decl !! ""
     }
     method slurpy(*@value)  { $!slurpy := @value[0] if @value; $!slurpy }
-    method default(*@value) { $!default := @value[0] if @value; $!default }
+    method default(*@value) { $!default_or_value := @value[0] if @value; $!default_or_value }
+    method value(*@value) { $!default_or_value := @value[0] if @value; $!default_or_value }
     
     method substitute_inline_placeholders(@fillers) {
         self
