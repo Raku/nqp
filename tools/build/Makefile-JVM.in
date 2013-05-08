@@ -149,7 +149,7 @@ all: $(ALL_OUTPUT) $(RUNNER) $(P5QREGEX_CLASS)
 install: all
 	$(MKPATH) $(PREFIX)
 	$(CP) 3rdparty/asm/asm-4.1.jar $(PREFIX)
-    $(CP) 3rdparty/jline/jline-1.0.jar $(PREFIX)
+	$(CP) 3rdparty/jline/jline-1.0.jar $(PREFIX)
 	$(CP) $(RUNTIME_JAR) $(PREFIX)
 	$(CP) $(NQP_MO_CLASS) $(PREFIX)
 	$(CP) $(MODULE_LOADER_CLASS) $(PREFIX)
