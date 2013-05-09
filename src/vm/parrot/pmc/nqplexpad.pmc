@@ -166,7 +166,7 @@ Return the LexInfo PMC, if any or a Null PMC.
                             state = Parrot_pmc_getprop(interp, sub, CONST_STRING(interp, "state_vars"));
                             if (PMC_IS_NULL(state)) {
                                 state = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
-                                Parrot_pmc_getprop(interp, sub, CONST_STRING(interp, "state_vars"), state);
+                                Parrot_pmc_setprop(interp, sub, CONST_STRING(interp, "state_vars"), state);
                                 had_state = 0;
                                 PObj_flag_SET(LEXPAD_STATE_INIT, (PMC *)ctx);
                             }
