@@ -73,6 +73,8 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     method quantified_atom($/) {
         my $qast := $<atom>.ast;
         if $<quantifier> {
+            $/.CURSOR.panic('Quantifier quantifies nothing')
+                unless $qast;
             my $ast := $<quantifier>[0].ast;
             $ast.unshift($qast);
             $qast := $ast;
