@@ -18,21 +18,11 @@ pmclass NQPLexInfo
      * value. */
     ATTR PMC *name_to_register_map;
     
-    /* Hash mapping names to static values. This is the authoritative
-     * source of these, but we always build a more quickly usable
-     * cache in the next two attributes. */
-    ATTR PMC *static_values;
-    
-    /* Hash mapping names to static values flags (0 = static value,
-     * 1 = container cloned per instantiation, 2 = state container). */
-    ATTR PMC *static_flags;
-    
     /* Integer array of slots that we always want to pre-initialize
-     * with static values; built from the static_values hash. */
+     * with static values. */
     ATTR PMC *static_slots_cache;
     
-    /* Matching PMC array of the values to pre-init with; built from
-    * the static_values hash. */
+    /* Matching PMC array of the values to pre-init with. */
     ATTR PMC *static_values_cache;
     
     /* Matching PMC array of the pre-init flags. */
@@ -56,14 +46,10 @@ pmclass NQPLexInfo
     }
     
     VTABLE void mark() {
-        PMC *name_to_register_map, *static_values, *static_flags;
+        PMC *name_to_register_map;
         PMC *static_slots_cache, *static_values_cache, *static_flags_cache;
         GET_ATTR_name_to_register_map(INTERP, SELF, name_to_register_map);
         Parrot_gc_mark_PMC_alive(INTERP, name_to_register_map);
-        GET_ATTR_static_values(INTERP, SELF, static_values);
-        Parrot_gc_mark_PMC_alive(INTERP, static_values);
-        GET_ATTR_static_flags(INTERP, SELF, static_flags);
-        Parrot_gc_mark_PMC_alive(INTERP, static_flags);
         GET_ATTR_static_slots_cache(INTERP, SELF, static_slots_cache);
         Parrot_gc_mark_PMC_alive(INTERP, static_slots_cache);
         GET_ATTR_static_values_cache(INTERP, SELF, static_values_cache);
@@ -130,53 +116,6 @@ compiler calls this method in response to a ".lex STRING, PREG" directive.
         PMC *name_to_register_map;
         GET_ATTR_name_to_register_map(INTERP, SELF, name_to_register_map);
         VTABLE_set_integer_keyed_str(INTERP, name_to_register_map, name, preg);
-    }
-    
-    METHOD set_static_lexpad_value(STRING *key, PMC *value) {
-        /* Stash static value in hash. */
-        PMC *svs, *sfs;
-        GET_ATTR_static_values(INTERP, SELF, svs);
-        GET_ATTR_static_flags(INTERP, SELF, sfs);
-        if (PMC_IS_NULL(svs)) {
-            svs = Parrot_pmc_new(interp, enum_class_Hash);
-            SET_ATTR_static_values(INTERP, SELF, svs);
-            sfs = Parrot_pmc_new(interp, enum_class_Hash);
-            SET_ATTR_static_flags(INTERP, SELF, sfs);
-        }
-        VTABLE_set_pmc_keyed_str(interp, svs, key, value);
-        VTABLE_set_integer_keyed_str(interp, sfs, key, 0);
-    }
-    
-    METHOD finish_static_lexpad() {
-        /* Build caches from the static lexpad. */
-        PMC *svs, *sfs;
-        GET_ATTR_static_values(INTERP, SELF, svs);
-        GET_ATTR_static_flags(INTERP, SELF, sfs);
-        if (PMC_IS_NULL(svs) || !VTABLE_elements(interp, svs)) {
-            /* No values; clear caches. */
-            SET_ATTR_static_slots_cache(INTERP, SELF, PMCNULL);
-            SET_ATTR_static_values_cache(INTERP, SELF, PMCNULL);
-            SET_ATTR_static_flags_cache(INTERP, SELF, PMCNULL);
-        }
-        else {
-            /* Build caches. */
-            PMC *slots  = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
-            PMC *values = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
-            PMC *flags  = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
-            PMC *iter   = VTABLE_get_iter(interp, svs);
-            while (VTABLE_get_bool(interp, iter)) {
-                STRING *name  = VTABLE_shift_string(interp, iter);
-                INTVAL  slot  = VTABLE_get_integer_keyed_str(interp, SELF, name);
-                PMC    *value = VTABLE_get_pmc_keyed_str(interp, svs, name);
-                INTVAL  flag  = VTABLE_get_integer_keyed_str(interp, sfs, name);
-                VTABLE_push_integer(interp, slots, slot >> 2);
-                VTABLE_push_pmc(interp, values, value);
-                VTABLE_push_integer(interp, flags, flag);
-            }
-            SET_ATTR_static_slots_cache(INTERP, SELF, slots);
-            SET_ATTR_static_values_cache(INTERP, SELF, values);
-            SET_ATTR_static_flags_cache(INTERP, SELF, flags);
-        }
     }
     
     METHOD setup_static_lexpad(PMC *names, PMC *values, PMC *flags) {
