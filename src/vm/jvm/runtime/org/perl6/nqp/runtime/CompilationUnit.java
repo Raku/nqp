@@ -115,6 +115,7 @@ public abstract class CompilationUnit {
     
     /**
      * Installs a static lexical value.
+     * XXX Legacy, can go after re-bootstrap.
      */
     public SixModelObject setStaticLex(SixModelObject value, String name, String uniqueId) {
         CodeRef cr = cuidToCodeRef.get(uniqueId);
@@ -123,6 +124,18 @@ public abstract class CompilationUnit {
             new RuntimeException("Invalid lexical name '" + name + "' in static lexical installation");
         cr.staticInfo.oLexStatic[idx] = value;
         return value;
+    }
+    
+    /**
+     * Installs a lexical value, either static, container or state.
+     */
+    public void setLexValue(String uniqueId, String name, String scHandle, int scIdx, int flags, ThreadContext tc) {
+        CodeRef cr = cuidToCodeRef.get(uniqueId);
+        Integer idx = cr.staticInfo.oTryGetLexicalIdx(name);
+        if (idx == null)
+            new RuntimeException("Invalid lexical name '" + name + "' in static lexical installation");
+        cr.staticInfo.oLexStatic[idx] = tc.gc.scs.get(scHandle).root_objects.get(scIdx);
+        /* XXX Process flags. */
     }
     
     /**

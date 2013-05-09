@@ -1,9 +1,6 @@
 use JASTNodes;
 use QASTNode;
 
-# Should we try handling all the SC stuff?
-my $ENABLE_SC_COMP := 1;
-
 # Instruction constants for argument-less ops.
 my $ACONST_NULL := JAST::Instruction.new( :op('aconst_null') );
 my $ALOAD_0     := JAST::Instruction.new( :op('aload_0') );
@@ -2003,26 +2000,6 @@ QAST::OperationsJAST.map_classlib_core_op('setcodeobj', $TYPE_OPS, 'setcodeobj',
 QAST::OperationsJAST.map_classlib_core_op('getcodename', $TYPE_OPS, 'getcodename', [$RT_OBJ], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('setcodename', $TYPE_OPS, 'setcodename', [$RT_OBJ, $RT_STR], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getcodecuid', $TYPE_OPS, 'getcodecuid', [$RT_OBJ], $RT_STR, :tc);
-QAST::OperationsJAST.add_core_op('setstaticlex', -> $qastcomp, $op {
-    if +@($op) != 3 {
-        nqp::die('setstaticlex requires three operands');
-    }
-    unless nqp::istype($op[0], QAST::Block) {
-        nqp::die('First operand to setstaticlex must be a QAST::Block');
-    }
-    my $il := JAST::InstructionList.new();
-    $il.append($ALOAD_0);
-    my $obj_res := $qastcomp.as_jast($op[2], :want($RT_OBJ));
-    $il.append($obj_res.jast);
-    $*STACK.obtain($il, $obj_res);
-    my $name_res := $qastcomp.as_jast($op[1], :want($RT_STR));
-    $il.append($name_res.jast);
-    $*STACK.obtain($il, $name_res);
-    $il.append(JAST::PushSVal.new( :value($op[0].cuid) ));
-    $il.append(JAST::Instruction.new( :op('invokevirtual'),
-        $TYPE_CU, 'setStaticLex', $TYPE_SMO, $TYPE_SMO, $TYPE_STR, $TYPE_STR ));
-    result($il, $RT_OBJ)
-});
 QAST::OperationsJAST.map_classlib_core_op('forceouterctx', $TYPE_OPS, 'forceouterctx', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('freshcoderef', $TYPE_OPS, 'freshcoderef', [$RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('markcodestatic', $TYPE_OPS, 'markcodestatic', [$RT_OBJ], $RT_OBJ, :tc);
@@ -2056,6 +2033,34 @@ QAST::OperationsJAST.add_core_op('takedispatcher', -> $qastcomp, $op {
     $il.append(JAST::Instruction.new( :op('invokestatic'),
         $TYPE_OPS, 'takedispatcher', 'V', 'I', $TYPE_TC ));
     result($il, $RT_VOID);
+});
+QAST::OperationsJAST.add_core_op('setup_blv', -> $qastcomp, $op {
+    if +@($op) != 1 || !nqp::ishash($op[0]) {
+        nqp::die('setup_blv requires one hash operand');
+    }
+    my $il := JAST::InstructionList.new();
+    for $op[0] {
+        my $cuid := $_.key;
+        $il.append($ALOAD_0);
+        $il.append(JAST::PushSVal.new( :value($cuid) ));
+        for $_.value -> @lex {
+            my $sc     := nqp::getobjsc(@lex[1]);
+            my $handle := nqp::scgethandle($sc);
+            my $idx    := nqp::scgetobjidx($sc, @lex[1]);
+            $il.append($DUP2);
+            $il.append(JAST::PushSVal.new( :value(@lex[0]) ));
+            $il.append(JAST::PushSVal.new( :value($handle) ));
+            $il.append(JAST::PushIndex.new( :value($idx) ));
+            $il.append(JAST::PushIndex.new( :value(@lex[2]) ));
+            $il.append($ALOAD_1);
+            $il.append(JAST::Instruction.new( :op('invokevirtual'),
+                $TYPE_CU, 'setLexValue', 'Void', $TYPE_STR, $TYPE_STR, $TYPE_STR, 'I', 'I', $TYPE_TC ));
+        }
+        $il.append($POP2);
+    }
+    
+    $il.append($ACONST_NULL);
+    result($il, $RT_OBJ)
 });
 
 # language/compiler ops
@@ -2392,8 +2397,17 @@ class QAST::CompilerJAST {
             @!params[+@!params] := $var;
         }
         
-        method add_lexical($var) {
+        method add_lexical($var, :$is_static, :$is_cont, :$is_state) {
             self.register_lexical($var);
+            if $is_static || $is_cont || $is_state {
+                my %blv := %*BLOCK_LEX_VALUES;
+                unless nqp::existskey(%blv, $!qast.cuid) {
+                    %blv{$!qast.cuid} := [];
+                }
+                my $flags := $is_static ?? 0 !!
+                             $is_cont   ?? 1 !! 2;
+                nqp::push(%blv{$!qast.cuid}, [$var.name, $var.value, $flags]);
+            }
             @!lexicals[+@!lexicals] := $var;
         }
         
@@ -2700,6 +2714,11 @@ class QAST::CompilerJAST {
         if +@($cu) != 1 || !nqp::istype($cu[0], QAST::Block) {
             nqp::die("QAST::CompUnit should have one child that is a QAST::Block");
         }
+        
+        # Hash mapping blocks with static lexicals to an array of arrays. Each
+        # of the sub-arrays has the form [$name, $value, $flags], where flags
+        # are 0 = static lex, 1 = container, 2 = state container.
+        my %*BLOCK_LEX_VALUES;
 
         # Compile the block.
         my $block_jast := self.as_jast($cu[0]);
@@ -2710,7 +2729,10 @@ class QAST::CompilerJAST {
         my $comp_mode := $cu.compilation_mode;
         my @pre_des   := $cu.pre_deserialize;
         my @post_des  := $cu.post_deserialize;
-        if $ENABLE_SC_COMP && ($comp_mode || @pre_des || @post_des) {
+        if %*BLOCK_LEX_VALUES {
+            nqp::push(@post_des, QAST::Op.new( :op('setup_blv'), %*BLOCK_LEX_VALUES ));
+        }
+        if $comp_mode || @pre_des || @post_des {
             # Create a block into which we'll install all of the other
             # pieces.
             my $block := QAST::Block.new( :blocktype('raw') );
@@ -3272,6 +3294,24 @@ class QAST::CompilerJAST {
                 else {
                     nqp::die("Cannot declare variable with scope '$scope'; use 'local' or 'lexical'");
                 }
+            }
+            elsif $decl eq 'static' {
+                if $scope ne 'lexical' {
+                    nqp::die("Can only use 'static' decl with scope 'lexical'");
+                }
+                $*BLOCK.add_lexical($node, :is_static);
+            }
+            elsif $decl eq 'contvar' {
+                if $scope ne 'lexical' {
+                    nqp::die("Can only use 'contvar' decl with scope 'lexical'");
+                }
+                $*BLOCK.add_lexical($node, :is_cont);
+            }
+            elsif $decl eq 'statevar' {
+                if $scope ne 'lexical' {
+                    nqp::die("Can only use 'statevar' decl with scope 'lexical'");
+                }
+                $*BLOCK.add_lexical($node, :is_state);
             }
             else {
                 nqp::die("Don't understand declaration type '$decl'");
