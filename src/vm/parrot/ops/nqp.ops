@@ -43,11 +43,6 @@ static PMC *KnowHOWAttribute = NULL;
 static PMC *nqpevent_fh = NULL;
 static INTVAL nqpdebflags_i = 0;
 
-/* Objects we use every time we run an NFA; since we always run one NFA
- * at a time, we can re-use these. */
-static PMC *nfa_curst   = NULL;
-static PMC *nfa_nextst  = NULL;
-
 /* Serialization context upside-down stack (element 0 is the latest, new entries
  * unshifted). Tracks the SC (if any) that we are currently in; stack because we
  * may have multiple on the go due to compiling nested module dependencies. */
@@ -142,43 +137,39 @@ quicksort(INTVAL *arr, INTVAL elements) {
 static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL offset, INTVAL *total_fates_out) {
     INTVAL  eos     = Parrot_str_length(interp, target);
     INTVAL  gen     = 1;
-    PMC    *curst   = nfa_curst;
-    PMC    *nextst  = nfa_nextst;
-    INTVAL *done, *fates;
+    INTVAL  numcur  = 0;
+    INTVAL  numnext = 0;
+    INTVAL *done, *fates, *curst, *nextst;
     INTVAL  i, fate_arr_len, num_states, total_fates, prev_fates;
     
-    /* Allocate a "done states" array. */
+    /* Allocate "done states", "current states" and "next states" arrays. */
     num_states = nfa->num_states;
-    done = (INTVAL *)mem_sys_allocate_zeroed((num_states + 1) * sizeof(INTVAL));
-    
-    /* Clear out other re-used arrays. */
-    VTABLE_set_integer_native(interp, curst, 0);
-    VTABLE_set_integer_native(interp, nextst, 0);
+    done   = (INTVAL *)mem_sys_allocate_zeroed((num_states + 1) * sizeof(INTVAL));
+    curst  = (INTVAL *)mem_sys_allocate_zeroed((num_states + 1) * sizeof(INTVAL));
+    nextst = (INTVAL *)mem_sys_allocate_zeroed((num_states + 1) * sizeof(INTVAL));
     
     /* Allocate fates array. */
     fate_arr_len = 1 + VTABLE_elements(interp, nfa->fates);
     fates = (INTVAL *)mem_sys_allocate(sizeof(INTVAL) * fate_arr_len);
     total_fates = 0;
     
-    VTABLE_push_integer(interp, nextst, 1);
-    while (VTABLE_elements(interp, nextst) && offset <= eos) {
-        /* Translation of:
-         *    my @curst := @nextst;
-         *    @nextst := [];
-         * But avoids an extra allocation per offset. */
-        PMC *temp = curst;
-        curst = nextst;
-        VTABLE_set_integer_native(interp, temp, 0);
-        nextst = temp;
+    nextst[numnext++] = 1;
+    while (numnext && offset <= eos) {
+        /* Swap next and current */
+        INTVAL *temp = curst;
+        curst   = nextst;
+        nextst  = temp;
+        numcur  = numnext;
+        numnext = 0;
         
         /* Save how many fates we have before this position is considered. */
         prev_fates = total_fates;
         
-        while (VTABLE_elements(interp, curst)) {
+        while (numcur) {
             NFAStateInfo *edge_info;
             INTVAL        edge_info_elems;
             
-            INTVAL st = VTABLE_pop_integer(interp, curst);
+            INTVAL st = curst[--numcur];
             if (st <= num_states) {
                 if (done[st] == gen)
                     continue;
@@ -219,7 +210,7 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
                     }
                 }
                 else if (act == EDGE_EPSILON && to <= num_states && done[to] != gen) {
-                    VTABLE_push_integer(interp, curst, to);
+                    curst[numcur++] = to;
                 }
                 else if (offset >= eos) {
                     /* Can't match, so drop state. */
@@ -227,48 +218,48 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
                 else if (act == EDGE_CODEPOINT) {
                     UINTVAL arg = edge_info[i].arg.i;
                     if (STRING_ord(interp, target, offset) == arg)
-                        VTABLE_push_integer(interp, nextst, to);
+                        nextst[numnext++] = to;
                 }
                 else if (act == EDGE_CODEPOINT_NEG) {
                     UINTVAL arg = edge_info[i].arg.i;
                     if (STRING_ord(interp, target, offset) != arg)
-                        VTABLE_push_integer(interp, nextst, to);
+                        nextst[numnext++] = to;
                 }
                 else if (act == EDGE_CHARCLASS) {
                     INTVAL arg = edge_info[i].arg.i;
                     if (Parrot_str_is_cclass(interp, arg, target, offset))
-                        VTABLE_push_integer(interp, nextst, to);
+                        nextst[numnext++] = to;
                 }
                 else if (act == EDGE_CHARCLASS_NEG) {
                     INTVAL arg = edge_info[i].arg.i;
                     if (!Parrot_str_is_cclass(interp, arg, target, offset))
-                        VTABLE_push_integer(interp, nextst, to);
+                        nextst[numnext++] = to;
                 }
                 else if (act == EDGE_CHARLIST) {
                     STRING *arg = edge_info[i].arg.s;
                     STRING *chr = STRING_substr(interp, target, offset, 1);
                     if (STRING_index(interp, arg, chr, 0) >= 0)
-                        VTABLE_push_integer(interp, nextst, to);
+                        nextst[numnext++] = to;
                 }
                 else if (act == EDGE_CHARLIST_NEG) {
                     STRING *arg = edge_info[i].arg.s;
                     STRING *chr = STRING_substr(interp, target, offset, 1);
                     if (STRING_index(interp, arg, chr, 0) < 0)
-                        VTABLE_push_integer(interp, nextst, to);
+                        nextst[numnext++] = to;
                 }
                 else if (act == EDGE_CODEPOINT_I) {
                     UINTVAL  uc_arg = edge_info[i].arg.uclc.uc;
                     UINTVAL  lc_arg = edge_info[i].arg.uclc.lc;
                     UINTVAL  ord    = STRING_ord(interp, target, offset);
                     if (ord == lc_arg || ord == uc_arg)
-                        VTABLE_push_integer(interp, nextst, to);
+                        nextst[numnext++] = to;
                 }
                 else if (act == EDGE_CODEPOINT_I_NEG) {
                     UINTVAL  uc_arg = edge_info[i].arg.uclc.uc;
                     UINTVAL  lc_arg = edge_info[i].arg.uclc.lc;
                     UINTVAL  ord    = STRING_ord(interp, target, offset);
                     if (ord != lc_arg && ord != uc_arg)
-                        VTABLE_push_integer(interp, nextst, to);
+                        nextst[numnext++] = to;
                 }
             }
         }
@@ -290,6 +281,8 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
         }
     }
     mem_sys_free(done);
+    mem_sys_free(curst);
+    mem_sys_free(nextst);
     
     *total_fates_out = total_fates;
     return fates;
@@ -368,12 +361,6 @@ inline op nqp_dynop_setup() :base_core {
         VTABLE_set_pointer(interp, st_sc_barrier, SC_write_barrier_st);
         VTABLE_set_pmc_keyed_str(interp, interp->root_namespace,
             Parrot_str_new_constant(interp, "_ST_SC_BARRIER"), st_sc_barrier);
-        
-        /* Create and anchor NFA objects. */
-        nfa_curst = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
-        Parrot_pmc_gc_register(interp, nfa_curst);
-        nfa_nextst = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
-        Parrot_pmc_gc_register(interp, nfa_nextst);
         
         /* Create and anchor empty hash. */
         empty_hash = Parrot_pmc_new(interp, enum_class_Hash);
