@@ -2662,6 +2662,8 @@ public final class Ops {
     }
     public static SixModelObject getobjsc(SixModelObject obj, ThreadContext tc) {
         SerializationContext sc = obj.sc;
+        if (sc == null)
+            return null;
         if (!tc.gc.scRefs.containsKey(sc.handle)) {
             SixModelObject SCRef = tc.gc.SCRef;
             SCRefInstance ref = (SCRefInstance)SCRef.st.REPR.allocate(tc, SCRef.st);
