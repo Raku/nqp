@@ -717,6 +717,16 @@ public final class Ops {
         }
         throw ExceptionHandling.dieInternal(tc, "Lexical '" + name + "' not found");
     }
+    public static SixModelObject getlexouter(String name, ThreadContext tc) {
+        CallFrame curFrame = tc.curFrame.outer;
+        while (curFrame != null) {
+            Integer found = curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
+            if (found != null)
+                return curFrame.oLex[found];
+            curFrame = curFrame.outer;
+        }
+        throw ExceptionHandling.dieInternal(tc, "Lexical '" + name + "' not found");
+    }
     
     /* Lexical binding by name. */
     public static SixModelObject bindlex(String name, SixModelObject value, ThreadContext tc) {
