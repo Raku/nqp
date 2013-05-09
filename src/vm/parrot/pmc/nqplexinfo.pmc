@@ -147,20 +147,6 @@ compiler calls this method in response to a ".lex STRING, PREG" directive.
         VTABLE_set_integer_keyed_str(interp, sfs, key, 0);
     }
     
-    METHOD set_lexpad_value(STRING *key, PMC *value, INTVAL flags) {
-        PMC *svs, *sfs;
-        GET_ATTR_static_values(INTERP, SELF, svs);
-        GET_ATTR_static_flags(INTERP, SELF, sfs);
-        if (PMC_IS_NULL(svs)) {
-            svs = Parrot_pmc_new(interp, enum_class_Hash);
-            SET_ATTR_static_values(INTERP, SELF, svs);
-            sfs = Parrot_pmc_new(interp, enum_class_Hash);
-            SET_ATTR_static_flags(INTERP, SELF, sfs);
-        }
-        VTABLE_set_pmc_keyed_str(interp, svs, key, value);
-        VTABLE_set_integer_keyed_str(interp, sfs, key, flags);
-    }
-    
     METHOD finish_static_lexpad() {
         /* Build caches from the static lexpad. */
         PMC *svs, *sfs;
@@ -191,6 +177,23 @@ compiler calls this method in response to a ".lex STRING, PREG" directive.
             SET_ATTR_static_values_cache(INTERP, SELF, values);
             SET_ATTR_static_flags_cache(INTERP, SELF, flags);
         }
+    }
+    
+    METHOD setup_static_lexpad(PMC *names, PMC *values, PMC *flags) {
+        /* Need to turn name list into slot list. */
+        PMC    *slots = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
+        INTVAL  elems = VTABLE_elements(interp, names);
+        INTVAL  i;
+        for (i = 0; i < elems; i++) {
+            STRING *name = VTABLE_get_string_keyed_int(interp, names, i);
+            INTVAL  slot = VTABLE_get_integer_keyed_str(interp, SELF, name);
+            VTABLE_push_integer(interp, slots, slot >> 2);
+        }
+        SET_ATTR_static_slots_cache(INTERP, SELF, slots);
+        
+        /* Just store values and flags. */
+        SET_ATTR_static_values_cache(INTERP, SELF, values);
+        SET_ATTR_static_flags_cache(INTERP, SELF, flags);
     }
     
     METHOD get_static_code() {

@@ -406,26 +406,22 @@ class QAST::Compiler is HLL::Compiler {
     
     method block_lex_values_to_post_des(@post_des, %blv) {
         for %blv {
-            my $cuid := $_.key;
-            my $tasks := QAST::Stmt.new();
+            my $cuid   := $_.key;
+            my $names  := QAST::Op.new( :op('list_s') );
+            my $values := QAST::Op.new( :op('list') );
+            my $flags  := QAST::Op.new( :op('list_i') );
             for $_.value -> @lex {
-                $tasks.push(QAST::Op.new(
-                    :op('callmethod'), :name('set_lexpad_value'),
-                    QAST::VM.new(
-                        pir => '    .const "LexInfo" %r = "' ~ $cuid ~ '"'
-                    ),
-                    QAST::SVal.new( :value(@lex[0]) ),
-                    QAST::WVal.new( :value(@lex[1]) ),
-                    QAST::IVal.new( :value(@lex[2]) )
-                ));
+                $names.push(QAST::SVal.new( :value(@lex[0]) ));
+                $values.push(QAST::WVal.new( :value(@lex[1]) ));
+                $flags.push(QAST::IVal.new( :value(@lex[2]) ));
             }
-            $tasks.push(QAST::Op.new(
-                :op('callmethod'), :name('finish_static_lexpad'),
+            nqp::push(@post_des, QAST::Op.new(
+                :op('callmethod'), :name('setup_static_lexpad'),
                 QAST::VM.new(
                     pir => '    .const "LexInfo" %r = "' ~ $cuid ~ '"'
                 ),
+                $names, $values, $flags
             ));
-            nqp::push(@post_des, $tasks);
         }
     }
 
