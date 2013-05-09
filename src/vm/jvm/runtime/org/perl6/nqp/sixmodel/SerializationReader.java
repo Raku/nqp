@@ -11,7 +11,10 @@ import org.perl6.nqp.sixmodel.reprs.VMHashInstance;
 
 public class SerializationReader {
     /* The current version of the serialization format. */
-    private final int CURRENT_VERSION = 4;
+    private final int CURRENT_VERSION = 5;
+    
+    /* The minimum version of the serialization format. */
+    private final int MIN_VERSION = 4;
     
     /* Various sizes (in bytes). */
     private final int HEADER_SIZE               = 4 * 16;
@@ -123,7 +126,7 @@ public class SerializationReader {
         if (data_len < 4)
             throw new RuntimeException("Serialized data too short to read a version number (< 4 bytes)");
         version = orig.getInt();
-        if (version != CURRENT_VERSION)
+        if (version < MIN_VERSION || version > CURRENT_VERSION)
             throw new RuntimeException("Unknown serialization format version " + version);
 
         /* Ensure that the data is at least as long as the header is expected to be. */
@@ -330,6 +333,17 @@ public class SerializationReader {
                 st.ContainerSpec.AttrName = lookupString(orig.getInt());
                 st.ContainerSpec.Hint = (int)orig.getLong();
                 st.ContainerSpec.FetchMethod = readRef();
+            }
+            
+            /* Invocation spec. */
+            if (version >= 5) {
+                if (orig.getLong() != 0) {
+                    st.InvocationSpec = new InvocationSpec();
+                    st.InvocationSpec.ClassHandle = readRef();
+                    st.InvocationSpec.AttrName = lookupString(orig.getInt());
+                    st.InvocationSpec.Hint = (int)orig.getLong();
+                    st.InvocationSpec.InvocationHandler = readRef();
+                }
             }
 
             /* If the REPR has a function to deserialize representation data, call it. */

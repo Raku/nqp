@@ -17,7 +17,7 @@ import org.perl6.nqp.sixmodel.reprs.IOHandle;
 
 public class SerializationWriter {
     /* The current version of the serialization format. */
-    private final int CURRENT_VERSION = 4;
+    private final int CURRENT_VERSION = 5;
     
     /* Various sizes (in bytes). */
     private final int HEADER_SIZE               = 4 * 16;
@@ -537,6 +537,15 @@ public class SerializationWriter {
             writeStr(st.ContainerSpec.AttrName);
             writeInt(st.ContainerSpec.Hint);
             writeRef(st.ContainerSpec.FetchMethod);
+        }
+        
+        /* Invocation spec. */
+        writeInt(st.InvocationSpec == null ? 0 : 1);
+        if (st.InvocationSpec != null) {
+            writeRef(st.InvocationSpec.ClassHandle);
+            writeStr(st.InvocationSpec.AttrName);
+            writeInt(st.InvocationSpec.Hint);
+            writeRef(st.InvocationSpec.InvocationHandler);
         }
         
         /* Location of REPR data. */
