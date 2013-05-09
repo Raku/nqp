@@ -1,6 +1,9 @@
 #include "pmc_nqplexinfo.h"
 #include "../6model/sixmodelobject.h"
 
+/* Flag for indicating that we initialized the lexpad state. */
+#define PObj_LEXPAD_STATE_INIT_FLAG PObj_private1_FLAG
+
 /* Possible options for boxed primitives. */
 #define STORAGE_SPEC_BP_NONE    0
 #define STORAGE_SPEC_BP_INT     1
@@ -136,14 +139,16 @@ Return the LexInfo PMC, if any or a Null PMC.
             if (!PMC_IS_NULL(static_slots_cache)) {
                 /* Yes, we have some. Grab values/flags too, then iterate. */
                 PMC *static_values_cache, *static_flags_cache;
+                PMC *state = NULL;
                 INTVAL num_statics = VTABLE_elements(interp, static_slots_cache);
-                INTVAL i;
+                INTVAL i, had_state = 0;
                 GETATTR_NQPLexInfo_static_values_cache(INTERP, info, static_values_cache);
                 GETATTR_NQPLexInfo_static_flags_cache(INTERP, info, static_flags_cache);
                 for (i = 0; i < num_statics; i++) {
                     INTVAL  slot  = VTABLE_get_integer_keyed_int(interp, static_slots_cache, i);
                     PMC    *value = VTABLE_get_pmc_keyed_int(interp, static_values_cache, i);
                     INTVAL  flag  = VTABLE_get_integer_keyed_int(interp, static_flags_cache, i);
+
                     switch (flag) {
                     case 0:
                         CTX_REG_PMC(interp, (PMC *)ctx, slot) = value;
@@ -155,6 +160,32 @@ Return the LexInfo PMC, if any or a Null PMC.
                         CTX_REG_PMC(interp, (PMC *)ctx, slot) = cont;
                         break;
                     }
+                    case 2: {
+                        if (!state) {
+                            PMC *sub = Parrot_pcc_get_sub(interp, (PMC *)ctx);
+                            state = Parrot_pmc_getprop(interp, sub, CONST_STRING(interp, "state_vars"));
+                            if (PMC_IS_NULL(state)) {
+                                state = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
+                                Parrot_pmc_getprop(interp, sub, CONST_STRING(interp, "state_vars"), state);
+                                had_state = 0;
+                                PObj_flag_SET(LEXPAD_STATE_INIT, (PMC *)ctx);
+                            }
+                            else {
+                                had_state = 1;
+                            }
+                        }
+                        if (had_state) {
+                            CTX_REG_PMC(interp, (PMC *)ctx, slot) = VTABLE_get_pmc_keyed_int(interp, state, i);
+                        }
+                        else {
+                            PMC *cont = REPR(value)->allocate(interp, STABLE(value));
+                            REPR(value)->copy_to(interp, STABLE(value), OBJECT_BODY(value), OBJECT_BODY(cont));
+                            PARROT_GC_WRITE_BARRIER(INTERP, cont);
+                            VTABLE_set_pmc_keyed_int(interp, state, i, cont);
+                            CTX_REG_PMC(interp, (PMC *)ctx, slot) = cont;
+                        }
+                    }
+                    break;
                     default:
                         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                             "Unknown flag in NQPLexPad.set_pointer");
