@@ -2052,33 +2052,6 @@ QAST::Operations.add_core_op('getcodecuid', -> $qastcomp, $op {
         $op[0]
     ))
 });
-QAST::Operations.add_core_op('setstaticlex', -> $qastcomp, $op {
-    if +@($op) != 3 {
-        nqp::die('setstaticlex requires three operands');
-    }
-    unless nqp::istype($op[0], QAST::Block) {
-        nqp::die('First operand to setstaticlex must be a QAST::Block');
-    }
-    my $cuid := $op[0].cuid;
-    $qastcomp.as_post(QAST::Stmts.new(
-            QAST::Op.new(
-                :op('callmethod'), :name('set_static_lexpad_value'),
-                QAST::VM.new(
-                    pir => '    .const "LexInfo" %r = "' ~ $cuid ~ '"'
-                ),
-                $op[1],
-                $op[2]
-            ),
-            # XXX Should only do this once per block we put static stuff
-            # in...or find a way to not do it at all.
-            QAST::Op.new(
-                :op('callmethod'), :name('finish_static_lexpad'),
-                QAST::VM.new(
-                    pir => '    .const "LexInfo" %r = "' ~ $cuid ~ '"'
-                ),
-            )
-        ))
-});
 QAST::Operations.add_core_op('forceouterctx', -> $qastcomp, $op {
     if +@($op) != 2 {
         nqp::die('forceouterctx requires two operands');
