@@ -171,22 +171,12 @@ class NQP::World is HLL::World {
     }
     
     # Installs a lexical symbol. Takes a QAST::Block object, name and
-    # the object to install. Does an immediate installation in the
-    # compile-time block symbol table, and ensures that the installation
-    # gets fixed up at runtime too.
+    # the object to install.
     method install_lexical_symbol($block, $name, $obj) {
-        # Install the object directly as a block symbol.
         $block.symbol($name, :scope('lexical'), :value($obj));
-        $block[0].push(QAST::Var.new( :scope('lexical'), :name($name), :decl('var') ));
-        
-        # Fixup and deserialization task is the same.
-        my $fixup := QAST::Op.new(
-            :op('setstaticlex'),
-            $block,
-            QAST::SVal.new( :value($name) ),
-            QAST::WVal.new( :value($obj) )
-        );
-        self.add_fixup_task(:deserialize_past($fixup), :fixup_past($fixup));
+        $block[0].push(QAST::Var.new(
+            :scope('lexical'), :name($name), :decl('static'), :value($obj)
+        ));
     }
     
     # Adds a fixup to install a specified QAST::Block in a package under the
