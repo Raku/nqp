@@ -3115,6 +3115,26 @@ public final class Ops {
             config.arrayIteratorType = configHash.at_key_boxed(tc, "array_iter");
         if (configHash.exists_key(tc, "hash_iter") != 0)
             config.hashIteratorType = configHash.at_key_boxed(tc, "hash_iter");
+        if (configHash.exists_key(tc, "foreign_type_int") != 0)
+            config.foreignTypeInt = configHash.at_key_boxed(tc, "foreign_type_int");
+        if (configHash.exists_key(tc, "foreign_type_num") != 0)
+            config.foreignTypeNum = configHash.at_key_boxed(tc, "foreign_type_num");
+        if (configHash.exists_key(tc, "foreign_type_str") != 0)
+            config.foreignTypeStr = configHash.at_key_boxed(tc, "foreign_type_str");
+        if (configHash.exists_key(tc, "foreign_transform_int") != 0)
+            config.foreignTransformInt = configHash.at_key_boxed(tc, "foreign_transform_int");
+        if (configHash.exists_key(tc, "foreign_transform_str") != 0)
+            config.foreignTransformNum = configHash.at_key_boxed(tc, "foreign_transform_num");
+        if (configHash.exists_key(tc, "foreign_transform_num") != 0)
+            config.foreignTransformStr = configHash.at_key_boxed(tc, "foreign_transform_str");
+        if (configHash.exists_key(tc, "foreign_transform_array") != 0)
+            config.foreignTransformArray = configHash.at_key_boxed(tc, "foreign_transform_array");
+        if (configHash.exists_key(tc, "foreign_transform_hash") != 0)
+            config.foreignTransformHash = configHash.at_key_boxed(tc, "foreign_transform_hash");
+        if (configHash.exists_key(tc, "foreign_transform_any") != 0)
+            config.foreignTransformAny = configHash.at_key_boxed(tc, "foreign_transform_any");
+        if (configHash.exists_key(tc, "null_value") != 0)
+            config.nullValue = configHash.at_key_boxed(tc, "null_value");
         return configHash;
     }
     public static SixModelObject getcomp(String name, ThreadContext tc) {

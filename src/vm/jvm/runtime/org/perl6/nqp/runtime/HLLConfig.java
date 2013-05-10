@@ -66,4 +66,23 @@ public class HLLConfig {
      * The type to construct for IO handles.
      */
     public SixModelObject ioType;
+    
+    /**
+     * HLL interop types.
+     */
+    public SixModelObject foreignTypeInt;
+    public SixModelObject foreignTypeNum;
+    public SixModelObject foreignTypeStr;
+    public SixModelObject nullValue;
+    
+    /**
+     * HLL interop mappers.
+     */
+    public SixModelObject foreignTransformInt;
+    public SixModelObject foreignTransformNum;
+    public SixModelObject foreignTransformStr;
+    public SixModelObject foreignTransformArray;
+    public SixModelObject foreignTransformHash;
+    public SixModelObject foreignTransformCode;
+    public SixModelObject foreignTransformAny;
 }
