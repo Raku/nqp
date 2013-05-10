@@ -6,6 +6,20 @@ import org.perl6.nqp.sixmodel.SixModelObject;
  * Contains configuration specific to a given HLL.
  */
 public class HLLConfig {
+    /* HLL type roles. */
+    public static final int ROLE_NONE  = 0;
+    public static final int ROLE_INT   = 1;
+    public static final int ROLE_NUM   = 2;
+    public static final int ROLE_STR   = 3;
+    public static final int ROLE_ARRAY = 4;
+    public static final int ROLE_HASH  = 5;
+    public static final int ROLE_CODE  = 6;
+    
+    /**
+     * HLL name.
+     */
+    public String name;
+    
     /**
      * The types the languages wish to get things boxed as.
      */

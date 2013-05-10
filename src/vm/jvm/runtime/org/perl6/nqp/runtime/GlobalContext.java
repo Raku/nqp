@@ -176,6 +176,7 @@ public class GlobalContext {
             HLLConfig config = hllConfiguration.get(language);
             if (config == null) {
                 config = new HLLConfig();
+                config.name = language;
                 setupConfig(config);
                 hllConfiguration.put(language, config);
             }

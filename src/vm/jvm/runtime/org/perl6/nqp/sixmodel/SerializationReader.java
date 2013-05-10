@@ -11,7 +11,7 @@ import org.perl6.nqp.sixmodel.reprs.VMHashInstance;
 
 public class SerializationReader {
     /* The current version of the serialization format. */
-    private final int CURRENT_VERSION = 5;
+    private final int CURRENT_VERSION = 6;
     
     /* The minimum version of the serialization format. */
     private final int MIN_VERSION = 4;
@@ -350,6 +350,12 @@ public class SerializationReader {
                     st.InvocationSpec.Hint = (int)orig.getLong();
                     st.InvocationSpec.InvocationHandler = readRef();
                 }
+            }
+            
+            /* HLL stuff. */
+            if (version >= 6) {
+                st.hllOwner = tc.gc.getHLLConfigFor(readStr());
+                st.hllRole = orig.getLong();
             }
 
             /* If the REPR has a function to deserialize representation data, call it. */
