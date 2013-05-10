@@ -2955,112 +2955,115 @@ class QAST::CompilerJAST {
                 'Void', $TYPE_TC, $TYPE_CR ));
             $*JMETH.append(JAST::Instruction.new( :op('astore'), 'cf' ));
             
-            # Analyze parameters to get count of required/optional and make sure
-            # all is in order.
-            my int $pos_required := 0;
-            my int $pos_optional := 0;
-            my int $pos_slurpy   := 0;
-            for $block.params {
-                if $_.named {
-                    # Don't count.
-                }
-                elsif $_.slurpy {
-                    $pos_slurpy := 1;
-                }
-                elsif $_.default {
-                    if $pos_slurpy {
-                        nqp::die("Optional positionals must come before all slurpy positionals");
-                    }
-                    $pos_optional++;
-                }
-                else {
-                    if $pos_optional {
-                        nqp::die("Required positionals must come before all optional positionals");
-                    }
-                    if $pos_slurpy {
-                        nqp::die("Required positionals must come before all slurpy positionals");
-                    }
-                    $pos_required++;
-                }
-            }
-            
-            # Emit arity check instruction.
+            # Unless we have custom args processing...
             my $il := JAST::InstructionList.new();
-            $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
-            $il.append(JAST::Instruction.new( :op('aload'), 'csd' ));
-            $il.append(JAST::Instruction.new( :op('aload'), '__args' ));
-            $il.append(JAST::PushIndex.new( :value($pos_required) ));
-            $il.append(JAST::PushIndex.new( :value($pos_slurpy ?? -1 !! $pos_required + $pos_optional) ));
-            $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
-                "checkarity", $TYPE_CSD, $TYPE_CF, $TYPE_CSD, "[$TYPE_OBJ", 'Integer', 'Integer' ));
-            $il.append(JAST::Instruction.new( :op('astore'), 'csd' ));
-            $il.append($ALOAD_1);
-            $il.append(JAST::Instruction.new( :op('getfield'), $TYPE_TC, 'flatArgs', "[$TYPE_OBJ" ));
-            $il.append(JAST::Instruction.new( :op('astore'), '__args' ));
-            
-            # Emit instructions to load each parameter.
-            my int $param_idx := 0;
-            for $block.params {
-                my $type;
-                if $_.slurpy {
-                    $type := $RT_OBJ;
-                    $il.append($ALOAD_1);
-                    $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
-                    $il.append(JAST::Instruction.new( :op('aload'), 'csd' ));
-                    $il.append(JAST::Instruction.new( :op('aload'), '__args' ));
+            unless $node.custom_args {
+                # Analyze parameters to get count of required/optional and make sure
+                # all is in order.
+                my int $pos_required := 0;
+                my int $pos_optional := 0;
+                my int $pos_slurpy   := 0;
+                for $block.params {
                     if $_.named {
-                        $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
-                            "namedslurpy", $TYPE_SMO, $TYPE_TC, $TYPE_CF, $TYPE_CSD, "[$TYPE_OBJ" ));
+                        # Don't count.
+                    }
+                    elsif $_.slurpy {
+                        $pos_slurpy := 1;
+                    }
+                    elsif $_.default {
+                        if $pos_slurpy {
+                            nqp::die("Optional positionals must come before all slurpy positionals");
+                        }
+                        $pos_optional++;
                     }
                     else {
-                        $il.append(JAST::PushIndex.new( :value($pos_required + $pos_optional) ));
-                        $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
-                            "posslurpy", $TYPE_SMO, $TYPE_TC, $TYPE_CF, $TYPE_CSD, "[$TYPE_OBJ", 'Integer' ));
+                        if $pos_optional {
+                            nqp::die("Required positionals must come before all optional positionals");
+                        }
+                        if $pos_slurpy {
+                            nqp::die("Required positionals must come before all slurpy positionals");
+                        }
+                        $pos_required++;
                     }
                 }
-                else {
-                    $type    := rttype_from_typeobj($_.returns);
-                    my $jt   := jtype($type);
-                    my $tc   := typechar($type);
-                    my $opt  := $_.default ?? "opt_" !! "";
-                    $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
-                    $il.append(JAST::Instruction.new( :op('aload'), 'csd' ));
-                    $il.append(JAST::Instruction.new( :op('aload'), '__args' ));
-                    if $_.named {
-                        $il.append(JAST::PushSVal.new( :value($_.named) ));
-                        $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
-                            "namedparam_$opt$tc", $jt, $TYPE_CF, $TYPE_CSD, "[$TYPE_OBJ", $TYPE_STR ));
-                    }
-                    else {
-                        $il.append(JAST::PushIndex.new( :value($param_idx) ));
-                        $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
-                            "posparam_$opt$tc", $jt, $TYPE_CF, $TYPE_CSD, "[$TYPE_OBJ", 'Integer' ));
-                    }
-                    if $opt {
-                        my $lbl := JAST::Label.new( :name(self.unique("opt_param")) );
+                
+                # Emit arity check instruction.
+                $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
+                $il.append(JAST::Instruction.new( :op('aload'), 'csd' ));
+                $il.append(JAST::Instruction.new( :op('aload'), '__args' ));
+                $il.append(JAST::PushIndex.new( :value($pos_required) ));
+                $il.append(JAST::PushIndex.new( :value($pos_slurpy ?? -1 !! $pos_required + $pos_optional) ));
+                $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+                    "checkarity", $TYPE_CSD, $TYPE_CF, $TYPE_CSD, "[$TYPE_OBJ", 'Integer', 'Integer' ));
+                $il.append(JAST::Instruction.new( :op('astore'), 'csd' ));
+                $il.append($ALOAD_1);
+                $il.append(JAST::Instruction.new( :op('getfield'), $TYPE_TC, 'flatArgs', "[$TYPE_OBJ" ));
+                $il.append(JAST::Instruction.new( :op('astore'), '__args' ));
+                
+                # Emit instructions to load each parameter.
+                my int $param_idx := 0;
+                for $block.params {
+                    my $type;
+                    if $_.slurpy {
+                        $type := $RT_OBJ;
                         $il.append($ALOAD_1);
-                        $il.append(JAST::Instruction.new( :op('getfield'), $TYPE_TC,
-                            'lastParameterExisted', "Integer" ));
-                        $il.append(JAST::Instruction.new( :op('ifne'), $lbl ));
-                        $il.append(pop_ins($type));
-                        my $default := self.as_jast($_.default, :want($type));
-                        $il.append($default.jast);
-                        $*STACK.obtain($il, $default);
-                        $il.append($lbl);
+                        $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
+                        $il.append(JAST::Instruction.new( :op('aload'), 'csd' ));
+                        $il.append(JAST::Instruction.new( :op('aload'), '__args' ));
+                        if $_.named {
+                            $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+                                "namedslurpy", $TYPE_SMO, $TYPE_TC, $TYPE_CF, $TYPE_CSD, "[$TYPE_OBJ" ));
+                        }
+                        else {
+                            $il.append(JAST::PushIndex.new( :value($pos_required + $pos_optional) ));
+                            $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+                                "posslurpy", $TYPE_SMO, $TYPE_TC, $TYPE_CF, $TYPE_CSD, "[$TYPE_OBJ", 'Integer' ));
+                        }
                     }
+                    else {
+                        $type    := rttype_from_typeobj($_.returns);
+                        my $jt   := jtype($type);
+                        my $tc   := typechar($type);
+                        my $opt  := $_.default ?? "opt_" !! "";
+                        $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
+                        $il.append(JAST::Instruction.new( :op('aload'), 'csd' ));
+                        $il.append(JAST::Instruction.new( :op('aload'), '__args' ));
+                        if $_.named {
+                            $il.append(JAST::PushSVal.new( :value($_.named) ));
+                            $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+                                "namedparam_$opt$tc", $jt, $TYPE_CF, $TYPE_CSD, "[$TYPE_OBJ", $TYPE_STR ));
+                        }
+                        else {
+                            $il.append(JAST::PushIndex.new( :value($param_idx) ));
+                            $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+                                "posparam_$opt$tc", $jt, $TYPE_CF, $TYPE_CSD, "[$TYPE_OBJ", 'Integer' ));
+                        }
+                        if $opt {
+                            my $lbl := JAST::Label.new( :name(self.unique("opt_param")) );
+                            $il.append($ALOAD_1);
+                            $il.append(JAST::Instruction.new( :op('getfield'), $TYPE_TC,
+                                'lastParameterExisted', "Integer" ));
+                            $il.append(JAST::Instruction.new( :op('ifne'), $lbl ));
+                            $il.append(pop_ins($type));
+                            my $default := self.as_jast($_.default, :want($type));
+                            $il.append($default.jast);
+                            $*STACK.obtain($il, $default);
+                            $il.append($lbl);
+                        }
+                    }
+                    if $_.scope eq 'local' {
+                        $il.append(JAST::Instruction.new( :op(store_ins($type)), $_.name ));
+                    }
+                    else {
+                        my $jtype := jtype($type);
+                        $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
+                        $il.append(JAST::PushIndex.new( :value($block.lexical_idx($_.name)) ));
+                        $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+                            'bindlex_' ~ typechar($type), $jtype, $jtype, $TYPE_CF, 'Integer' ));
+                        $il.append(pop_ins($type));
+                    }
+                    $param_idx++;
                 }
-                if $_.scope eq 'local' {
-                    $il.append(JAST::Instruction.new( :op(store_ins($type)), $_.name ));
-                }
-                else {
-                    my $jtype := jtype($type);
-                    $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
-                    $il.append(JAST::PushIndex.new( :value($block.lexical_idx($_.name)) ));
-                    $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
-                        'bindlex_' ~ typechar($type), $jtype, $jtype, $TYPE_CF, 'Integer' ));
-                    $il.append(pop_ins($type));
-                }
-                $param_idx++;
             }
             
             # Add all the locals.
