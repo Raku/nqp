@@ -118,6 +118,7 @@ my class NQPArray is repr('VMArray') {
     method shift() { nqp::shift(self) }
 }
 nqp::setboolspec(NQPArray, 8, nqp::null());
+nqp::settypehllrole(NQPArray, 4);
 my class NQPArrayIter is repr('VMIter') { }
 nqp::setboolspec(NQPArrayIter, 7, nqp::null());
 my class NQPHashIter is repr('VMIter') {

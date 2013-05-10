@@ -1,5 +1,6 @@
 package org.perl6.nqp.sixmodel;
 import org.perl6.nqp.runtime.CompilationUnit;
+import org.perl6.nqp.runtime.HLLConfig;
 import org.perl6.nqp.runtime.Ops;
 import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.reprs.KnowHOWREPRInstance;
@@ -25,6 +26,13 @@ public class KnowHOWBootstrapper {
         tc.gc.CallCapture = bootType(tc, "CallCapture", "CallCapture");
         tc.gc.BOOTException = bootType(tc, "BOOTException", "VMException");
         tc.gc.BOOTIO = bootType(tc, "BOOTIO", "IOHandle");
+        
+        tc.gc.BOOTArray.st.hllRole = HLLConfig.ROLE_ARRAY;
+        tc.gc.BOOTHash.st.hllRole = HLLConfig.ROLE_HASH;
+        tc.gc.BOOTInt.st.hllRole = HLLConfig.ROLE_INT;
+        tc.gc.BOOTNum.st.hllRole = HLLConfig.ROLE_NUM;
+        tc.gc.BOOTStr.st.hllRole = HLLConfig.ROLE_STR;
+        tc.gc.BOOTCode.st.hllRole = HLLConfig.ROLE_CODE;
         
         tc.gc.BOOTIntArray = bootTypedArray(tc, "BOOTIntArray", tc.gc.BOOTInt);
         tc.gc.BOOTNumArray = bootTypedArray(tc, "BOOTNumArray", tc.gc.BOOTNum);
