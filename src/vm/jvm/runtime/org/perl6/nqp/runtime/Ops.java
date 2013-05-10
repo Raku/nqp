@@ -3186,17 +3186,92 @@ public final class Ops {
     }
     public static SixModelObject hllize(SixModelObject obj, ThreadContext tc) {
         HLLConfig wanted = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig;
-        if (obj.st.hllOwner == wanted)
+        if (obj != null && obj.st.hllOwner == wanted)
             return obj;
-        System.err.println("Warning: HLL mapping NYI");
-        return obj;
+        else
+            return hllizeInternal(obj, wanted, tc);
     }
     public static SixModelObject hllizefor(SixModelObject obj, String language, ThreadContext tc) {
         HLLConfig wanted = tc.gc.getHLLConfigFor(language);
-        if (obj.st.hllOwner == wanted)
+        if (obj != null && obj.st.hllOwner == wanted)
             return obj;
-        System.err.println("Warning: HLL mapping NYI");
-        return obj;
+        else
+            return hllizeInternal(obj, wanted, tc);
+    }
+    private static SixModelObject hllizeInternal(SixModelObject obj, HLLConfig wanted, ThreadContext tc) {
+        /* Map nulls to the language's designated null value. */
+        if (obj == null)
+            return wanted.nullValue;
+
+        /* Go by what role the object plays. */
+        switch ((int)obj.st.hllRole) {
+            case HLLConfig.ROLE_INT:
+                if (wanted.foreignTypeInt != null) {
+                    return box_i(obj.get_int(tc), wanted.foreignTypeInt, tc);
+                }
+                else if (wanted.foreignTransformInt != null) {
+                    throw new RuntimeException("foreign_transform_int NYI");
+                }
+                else {
+                    return obj;
+                }
+            case HLLConfig.ROLE_NUM:
+                if (wanted.foreignTypeNum != null) {
+                    return box_n(obj.get_num(tc), wanted.foreignTypeNum, tc);
+                }
+                else if (wanted.foreignTransformNum != null) {
+                    throw new RuntimeException("foreign_transform_num NYI");
+                }
+                else {
+                    return obj;
+                }
+            case HLLConfig.ROLE_STR:
+                if (wanted.foreignTypeStr != null) {
+                    return box_s(obj.get_str(tc), wanted.foreignTypeStr, tc);
+                }
+                else if (wanted.foreignTransformStr != null) {
+                    throw new RuntimeException("foreign_transform_str NYI");
+                }
+                else {
+                    return obj;
+                }
+            case HLLConfig.ROLE_ARRAY:
+                if (wanted.foreignTransformArray != null) {
+                    invokeDirect(tc, wanted.foreignTransformArray,
+                        invocantCallSite, new Object[] { obj });
+                    return result_o(tc.curFrame);
+                }
+                else {
+                    return obj;
+                }
+            case HLLConfig.ROLE_HASH:
+                if (wanted.foreignTransformHash != null) {
+                    invokeDirect(tc, wanted.foreignTransformHash,
+                        invocantCallSite, new Object[] { obj });
+                    return result_o(tc.curFrame);
+                }
+                else {
+                    return obj;
+                }
+            case HLLConfig.ROLE_CODE:
+                if (wanted.foreignTransformCode != null) {
+                    invokeDirect(tc, wanted.foreignTransformCode,
+                        invocantCallSite, new Object[] { obj });
+                    return result_o(tc.curFrame);
+                }
+                else {
+                    return obj;
+                }
+            default:
+                if (wanted.foreignTransformAny != null) {
+                    invokeDirect(tc, wanted.foreignTransformAny,
+                        invocantCallSite, new Object[] { obj });
+                    return result_o(tc.curFrame);
+                }
+                else {
+                    return obj;
+                }
+        }
     }
     
     /* NFA operations. */
