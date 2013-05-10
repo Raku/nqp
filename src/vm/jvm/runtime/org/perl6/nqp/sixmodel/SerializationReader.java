@@ -328,11 +328,17 @@ public class SerializationReader {
 
             /* Container spec. */
             if (orig.getLong() != 0) {
-                st.ContainerSpec = new ContainerSpec();
-                st.ContainerSpec.ClassHandle = readRef();
-                st.ContainerSpec.AttrName = lookupString(orig.getInt());
-                st.ContainerSpec.Hint = (int)orig.getLong();
-                st.ContainerSpec.FetchMethod = readRef();
+                if (version >= 5) {
+                    String ccName = readStr();
+                    ContainerConfigurer cc = tc.gc.contConfigs.get(ccName);
+                    if (cc == null)
+                        throw new RuntimeException("Unknown container config " + ccName);
+                    cc.setContainerSpec(tc, st);
+                    st.ContainerSpec.deserialize(tc, st, this);
+                }
+                else {
+                    throw new RuntimeException("Unable to deserialize old container spec format");
+                }
             }
             
             /* Invocation spec. */

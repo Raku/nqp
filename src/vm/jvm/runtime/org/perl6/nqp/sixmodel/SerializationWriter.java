@@ -533,10 +533,8 @@ public class SerializationWriter {
         /* Container spec. */
         writeInt(st.ContainerSpec == null ? 0 : 1);
         if (st.ContainerSpec != null) {
-            writeRef(st.ContainerSpec.ClassHandle);
-            writeStr(st.ContainerSpec.AttrName);
-            writeInt(st.ContainerSpec.Hint);
-            writeRef(st.ContainerSpec.FetchMethod);
+            writeStr(st.ContainerSpec.name);
+            st.ContainerSpec.serialize(tc, st, this);
         }
         
         /* Invocation spec. */
