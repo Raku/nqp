@@ -2,6 +2,7 @@ package org.perl6.nqp.runtime;
 
 import java.util.HashMap;
 
+import org.perl6.nqp.sixmodel.CodePairContainerConfigurer;
 import org.perl6.nqp.sixmodel.ContainerConfigurer;
 import org.perl6.nqp.sixmodel.KnowHOWBootstrapper;
 import org.perl6.nqp.sixmodel.SerializationContext;
@@ -155,6 +156,7 @@ public class GlobalContext {
         hllSyms = new HashMap<String, HashMap<String, SixModelObject>>();
         
         contConfigs = new HashMap<String, ContainerConfigurer>();
+        contConfigs.put("code_pair", new CodePairContainerConfigurer());
         
         mainThread = new ThreadContext(this);
         KnowHOWBootstrapper.bootstrap(mainThread);

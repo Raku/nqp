@@ -533,7 +533,7 @@ public class SerializationWriter {
         /* Container spec. */
         writeInt(st.ContainerSpec == null ? 0 : 1);
         if (st.ContainerSpec != null) {
-            writeStr(st.ContainerSpec.name);
+            writeStr(st.ContainerSpec.name());
             st.ContainerSpec.serialize(tc, st, this);
         }
         

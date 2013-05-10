@@ -34,6 +34,8 @@ import jline.ConsoleReader;
 
 import org.perl6.nqp.jast2bc.JASTToJVMBytecode;
 import org.perl6.nqp.sixmodel.BoolificationSpec;
+import org.perl6.nqp.sixmodel.ContainerConfigurer;
+import org.perl6.nqp.sixmodel.ContainerSpec;
 import org.perl6.nqp.sixmodel.InvocationSpec;
 import org.perl6.nqp.sixmodel.REPRRegistry;
 import org.perl6.nqp.sixmodel.STable;
@@ -1346,6 +1348,7 @@ public final class Ops {
     public static final CallSiteDescriptor emptyCallSite = new CallSiteDescriptor(new byte[0], null);
     public static final Object[] emptyArgList = new Object[0];
     public static final CallSiteDescriptor invocantCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ }, null);
+    public static final CallSiteDescriptor storeCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ }, null);
     public static final CallSiteDescriptor findmethCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_STR }, null);
     public static void invoke(SixModelObject invokee, int callsiteIndex, Object[] args, ThreadContext tc) throws Exception {
         // If it's lexotic, throw the exception right off.
@@ -1377,12 +1380,12 @@ public final class Ops {
         
         // TODO Find a smarter way to do this without all the pointer chasing.
         if (callsiteIndex >= 0)
-            invokeInternal(tc, invokee, tc.curFrame.codeRef.staticInfo.compUnit.callSites[callsiteIndex], args);
+            invokeDirect(tc, invokee, tc.curFrame.codeRef.staticInfo.compUnit.callSites[callsiteIndex], args);
         else
-            invokeInternal(tc, invokee, emptyCallSite, args);
+            invokeDirect(tc, invokee, emptyCallSite, args);
     }
     public static void invokeArgless(ThreadContext tc, SixModelObject invokee) {
-        invokeInternal(tc, invokee, emptyCallSite, new Object[0]);
+        invokeDirect(tc, invokee, emptyCallSite, new Object[0]);
     }
     public static void invokeMain(ThreadContext tc, SixModelObject invokee, String prog, String[] argv) {
         /* Build argument list from argv. */
@@ -1397,9 +1400,9 @@ public final class Ops {
         }
         
         /* Invoke with the descriptor and arg list. */
-        invokeInternal(tc, invokee, new CallSiteDescriptor(callsite, null), args);
+        invokeDirect(tc, invokee, new CallSiteDescriptor(callsite, null), args);
     }
-    private static void invokeInternal(ThreadContext tc, SixModelObject invokee, CallSiteDescriptor csd, Object[] args) {
+    public static void invokeDirect(ThreadContext tc, SixModelObject invokee, CallSiteDescriptor csd, Object[] args) {
         // Otherwise, get the code ref.
         CodeRef cr;
         if (invokee instanceof CodeRef) {
@@ -1429,7 +1432,7 @@ public final class Ops {
     public static SixModelObject invokewithcapture(SixModelObject invokee, SixModelObject capture, ThreadContext tc) throws Exception {
         if (capture instanceof CallCaptureInstance) {
             CallCaptureInstance cc = (CallCaptureInstance)capture;
-            invokeInternal(tc, invokee, cc.descriptor, cc.args);
+            invokeDirect(tc, invokee, cc.descriptor, cc.args);
             return result_o(tc.curFrame);
         }
         else {
@@ -1548,7 +1551,7 @@ public final class Ops {
         /* Otherwise delegate to the HOW. */
         SixModelObject how = invocant.st.HOW;
         SixModelObject find_method = findmethod(how, "find_method", tc);
-        invokeInternal(tc, find_method, findmethCallSite,
+        invokeDirect(tc, find_method, findmethCallSite,
                 new Object[] { how, invocant, name });
         return result_o(tc.curFrame);
     }
@@ -1979,22 +1982,39 @@ public final class Ops {
     
     /* Container operations. */
     public static SixModelObject setcontspec(SixModelObject obj, String confname, SixModelObject confarg, ThreadContext tc) {
-        /* XXX TODO */
+        if (obj.st.ContainerSpec != null)
+            ExceptionHandling.dieInternal(tc, "Cannot change a type's container specification");
+        
+        ContainerConfigurer cc = tc.gc.contConfigs.get(confname);
+        if (cc == null)
+            ExceptionHandling.dieInternal(tc, "No such container spec " + confname);
+        cc.setContainerSpec(tc, obj.st);
+        cc.configureContainerSpec(tc, obj.st, confarg);
+        
         return obj;
     }
     public static long iscont(SixModelObject obj) {
         return obj.st.ContainerSpec == null ? 0 : 1;
     }
     public static SixModelObject decont(SixModelObject obj, ThreadContext tc) {
-        if (obj.st.ContainerSpec == null)
-            return obj;
-        throw ExceptionHandling.dieInternal(tc, "Decontainerization NYI");
+        ContainerSpec cs = obj.st.ContainerSpec;
+        return cs == null ? obj : cs.fetch(tc, obj);
     }
     public static SixModelObject assign(SixModelObject cont, SixModelObject value, ThreadContext tc) {
-        throw ExceptionHandling.dieInternal(tc, "assign NYI");
+        ContainerSpec cs = cont.st.ContainerSpec;
+        if (cs != null)
+            cs.store(tc, cont, value);
+        else
+            ExceptionHandling.dieInternal(tc, "Cannot assign to an immutable value");
+        return cont;
     }
     public static SixModelObject assignunchecked(SixModelObject cont, SixModelObject value, ThreadContext tc) {
-        throw ExceptionHandling.dieInternal(tc, "assignunchecked NYI");
+        ContainerSpec cs = cont.st.ContainerSpec;
+        if (cs != null)
+            cs.storeUnchecked(tc, cont, value);
+        else
+            ExceptionHandling.dieInternal(tc, "Cannot assign to an immutable value");
+        return cont;
     }
     
     /* Iteration. */
@@ -2068,7 +2088,7 @@ public final class Ops {
         BoolificationSpec bs = obj.st.BoolificationSpec;
         switch (bs == null ? BoolificationSpec.MODE_NOT_TYPE_OBJECT : bs.Mode) {
         case BoolificationSpec.MODE_CALL_METHOD:
-            invokeInternal(tc, bs.Method, invocantCallSite, new Object[] { obj });
+            invokeDirect(tc, bs.Method, invocantCallSite, new Object[] { obj });
             return istrue(result_o(tc.curFrame), tc);
         case BoolificationSpec.MODE_UNBOX_INT:
             return obj instanceof TypeObject || obj.get_int(tc) == 0 ? 0 : 1;
@@ -2113,7 +2133,7 @@ public final class Ops {
         // bulk.
         SixModelObject numMeth = obj.st.MethodCache.get("Str");
         if (numMeth != null) {
-            invokeInternal(tc, numMeth, invocantCallSite, new Object[] { obj });
+            invokeDirect(tc, numMeth, invocantCallSite, new Object[] { obj });
             return result_s(tc.curFrame);
         }
         
@@ -2145,7 +2165,7 @@ public final class Ops {
         // bulk.
         SixModelObject numMeth = obj.st.MethodCache.get("Num");
         if (numMeth != null) {
-            invokeInternal(tc, numMeth, invocantCallSite, new Object[] { obj });
+            invokeDirect(tc, numMeth, invocantCallSite, new Object[] { obj });
             return result_n(tc.curFrame);
         }
         

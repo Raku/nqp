@@ -18,7 +18,7 @@ public abstract class ContainerSpec {
     public abstract void storeUnchecked(ThreadContext tc, SixModelObject cont, SixModelObject obj);
     
     /* Name of this container specification. */
-    public String name;
+    public abstract String name();
     
     /* Serializes the container data, if any. */
     public abstract void serialize(ThreadContext tc, STable st, SerializationWriter writer);
