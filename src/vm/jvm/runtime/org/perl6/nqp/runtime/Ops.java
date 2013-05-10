@@ -3171,7 +3171,7 @@ public final class Ops {
         System.err.println("Warning: HLL mapping NYI");
         return obj;
     }
-    public static SixModelObject hllize(SixModelObject obj, String language, ThreadContext tc) {
+    public static SixModelObject hllizefor(SixModelObject obj, String language, ThreadContext tc) {
         HLLConfig wanted = tc.gc.getHLLConfigFor(language);
         if (obj.st.hllOwner == wanted)
             return obj;
