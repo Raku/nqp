@@ -3146,6 +3146,20 @@ public final class Ops {
         type.st.hllRole = role;
         return type;
     }
+    public static SixModelObject hllize(SixModelObject obj, ThreadContext tc) {
+        HLLConfig wanted = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig;
+        if (obj.st.hllOwner == wanted)
+            return obj;
+        System.err.println("Warning: HLL mapping NYI");
+        return obj;
+    }
+    public static SixModelObject hllize(SixModelObject obj, String language, ThreadContext tc) {
+        HLLConfig wanted = tc.gc.getHLLConfigFor(language);
+        if (obj.st.hllOwner == wanted)
+            return obj;
+        System.err.println("Warning: HLL mapping NYI");
+        return obj;
+    }
     
     /* NFA operations. */
     public static SixModelObject nfafromstatelist(SixModelObject states, SixModelObject nfaType, ThreadContext tc) {
