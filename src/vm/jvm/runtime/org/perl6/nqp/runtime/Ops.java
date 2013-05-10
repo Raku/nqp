@@ -1343,6 +1343,24 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc, "capturehasnameds requires a CallCapture");
         }
     }
+    public static long captureposprimspec(SixModelObject obj, long idx, ThreadContext tc) {
+        if (obj instanceof CallCaptureInstance) {
+            CallCaptureInstance cc = (CallCaptureInstance)obj;
+            switch (cc.descriptor.argFlags[(int)idx]) {
+            case CallSiteDescriptor.ARG_INT:
+                return StorageSpec.BP_INT;
+            case CallSiteDescriptor.ARG_NUM:
+                return StorageSpec.BP_NUM;
+            case CallSiteDescriptor.ARG_STR:
+                return StorageSpec.BP_STR;
+            default:
+                return StorageSpec.BP_NONE;
+            }
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc, "captureposarg requires a CallCapture");
+        }
+    }
     
     /* Invocation. */
     public static final CallSiteDescriptor emptyCallSite = new CallSiteDescriptor(new byte[0], null);
