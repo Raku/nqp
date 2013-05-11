@@ -1556,6 +1556,9 @@ public final class Ops {
         return meth;
     }
     public static SixModelObject findmethod(SixModelObject invocant, String name, ThreadContext tc) {
+        if (invocant == null)
+            throw ExceptionHandling.dieInternal(tc, "Can not call method '" + name + "' on a null object"); 
+        
         Map<String, SixModelObject> cache = invocant.st.MethodCache;
         
         /* Try the by-name method cache, if the HOW published one. */
