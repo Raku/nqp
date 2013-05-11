@@ -312,9 +312,12 @@ public class SerializationReader {
                 st.VTable[j] = readRef();
             
             /* Type check cache. */
-            st.TypeCheckCache = new SixModelObject[(int)orig.getLong()];
-            for (int j = 0; j < st.TypeCheckCache.length; j++)
-                st.TypeCheckCache[j] = readRef();
+            int tcCacheSize = (int)orig.getLong();
+            if (tcCacheSize > 0) {
+                st.TypeCheckCache = new SixModelObject[tcCacheSize];
+                for (int j = 0; j < st.TypeCheckCache.length; j++)
+                    st.TypeCheckCache[j] = readRef();
+            }
             
             /* Mode flags. */
             st.ModeFlags = (int)orig.getLong();
