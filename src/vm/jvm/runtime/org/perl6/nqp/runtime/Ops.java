@@ -1514,6 +1514,8 @@ public final class Ops {
         return o;
     }
     public static SixModelObject rebless(SixModelObject obj, SixModelObject newType, ThreadContext tc) {
+        obj = decont(obj, tc);
+        newType = decont(newType, tc);
         if (obj.st != newType.st)
             obj.st.REPR.change_type(tc, obj, newType);
         return obj;
