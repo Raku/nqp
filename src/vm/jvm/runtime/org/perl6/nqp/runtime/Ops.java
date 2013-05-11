@@ -1368,6 +1368,7 @@ public final class Ops {
     public static final CallSiteDescriptor invocantCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ }, null);
     public static final CallSiteDescriptor storeCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ }, null);
     public static final CallSiteDescriptor findmethCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_STR }, null);
+    public static final CallSiteDescriptor typeCheckCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ }, null);
     public static void invoke(SixModelObject invokee, int callsiteIndex, Object[] args, ThreadContext tc) throws Exception {
         // If it's lexotic, throw the exception right off.
         if (invokee instanceof Lexotic) {
@@ -1664,8 +1665,17 @@ public final class Ops {
         /* If we get here, need to call .^type_check on the value we're
          * checking. */
         if (cache == null || (typeCheckMode & STable.TYPE_CHECK_CACHE_THEN_METHOD) != 0) {
-            /* TODO: Implement this. */
-            return 0;
+            SixModelObject tcMeth = findmethod(obj.st.HOW, "type_check", tc);
+            if (tcMeth == null)
+                return 0;
+                /* TODO: Review why the following busts stuff. */
+                /*throw ExceptionHandling.dieInternal(tc,
+                    "No type check cache and no type_check method in meta-object");*/
+            invokeDirect(tc, tcMeth, typeCheckCallSite, new Object[] { obj.st.HOW, obj, type });
+            if (tc.curFrame.retType == CallFrame.RET_INT)
+                return result_i(tc.curFrame);
+            else
+                return istrue(result_o(tc.curFrame), tc);
         }
         
         /* If the flag to call .accepts_type on the target value is set, do so. */
