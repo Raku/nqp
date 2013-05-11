@@ -1526,10 +1526,10 @@ public final class Ops {
         return res;
     }
     public static SixModelObject clone(SixModelObject obj, ThreadContext tc) {
-        return obj.clone(tc);
+        return decont(obj, tc).clone(tc);
     }
     public static long isconcrete(SixModelObject obj, ThreadContext tc) {
-        return obj == null || obj instanceof TypeObject ? 0 : 1;
+        return obj == null || decont(obj, tc) instanceof TypeObject ? 0 : 1;
     }
     public static SixModelObject knowhow(ThreadContext tc) {
         return tc.gc.KnowHOW;
@@ -1733,24 +1733,24 @@ public final class Ops {
         return res;
     }
     public static long unbox_i(SixModelObject obj, ThreadContext tc) {
-        return obj.get_int(tc);
+        return decont(obj, tc).get_int(tc);
     }
     public static double unbox_n(SixModelObject obj, ThreadContext tc) {
-        return obj.get_num(tc);
+        return decont(obj, tc).get_num(tc);
     }
     public static String unbox_s(SixModelObject obj, ThreadContext tc) {
-        return obj.get_str(tc);
+        return decont(obj, tc).get_str(tc);
     }
     public static long isint(SixModelObject obj, ThreadContext tc) {
-        StorageSpec ss = obj.st.REPR.get_storage_spec(tc, obj.st);
+        StorageSpec ss = decont(obj, tc).st.REPR.get_storage_spec(tc, obj.st);
         return (ss.can_box & StorageSpec.CAN_BOX_INT) == 0 ? 0 : 1;
     }
     public static long isnum(SixModelObject obj, ThreadContext tc) {
-        StorageSpec ss = obj.st.REPR.get_storage_spec(tc, obj.st);
+        StorageSpec ss = decont(obj, tc).st.REPR.get_storage_spec(tc, obj.st);
         return (ss.can_box & StorageSpec.CAN_BOX_NUM) == 0 ? 0 : 1;
     }
     public static long isstr(SixModelObject obj, ThreadContext tc) {
-        StorageSpec ss = obj.st.REPR.get_storage_spec(tc, obj.st);
+        StorageSpec ss = decont(obj, tc).st.REPR.get_storage_spec(tc, obj.st);
         return (ss.can_box & StorageSpec.CAN_BOX_STR) == 0 ? 0 : 1;
     }
     
