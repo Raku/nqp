@@ -687,7 +687,7 @@ public final class Ops {
                 return curFrame.oLex[found];
             curFrame = curFrame.outer;
         }
-        throw ExceptionHandling.dieInternal(tc, "Lexical '" + name + "' not found");
+        return null;
     }
     public static long getlex_i(String name, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame;
