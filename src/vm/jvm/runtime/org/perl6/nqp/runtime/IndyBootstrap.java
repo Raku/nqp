@@ -358,15 +358,23 @@ public class IndyBootstrap {
             MethodType gType = MethodType.methodType(boolean.class,
                     STable.class, ThreadContext.class, SixModelObject.class);
             MethodHandle guard;
+            STable guardSTable;
             try {
-                guard = caller.findStatic(IndyBootstrap.class, "stGuard", gType);
+                if (invocant.st.ContainerSpec == null) {
+                    guard = caller.findStatic(IndyBootstrap.class, "stGuard", gType);
+                    guardSTable = invocant.st;
+                }
+                else {
+                    guard = caller.findStatic(IndyBootstrap.class, "stGuardCont", gType);
+                    guardSTable = Ops.decont(invocant, tc).st;
+                }
             }
             catch (Exception e) {
                 throw new RuntimeException(e);
             }
             cs.setTarget(MethodHandles
                 .guardWithTest(
-                    MethodHandles.insertArguments(guard, 0, invocant.st),
+                    MethodHandles.insertArguments(guard, 0, guardSTable),
                     MethodHandles
                         .insertArguments(cr.staticInfo.mh, 1, cr, csd)
                         .asVarargsCollector(Object[].class)
@@ -388,6 +396,10 @@ public class IndyBootstrap {
     
     public static boolean stGuard(STable expected, ThreadContext _, SixModelObject obj) {
         return obj.st == expected;
+    }
+    
+    public static boolean stGuardCont(STable expected, ThreadContext tc, SixModelObject obj) {
+        return Ops.decont(obj, tc).st == expected;
     }
     
     public static CallSite indmethcall(Lookup caller, String _, MethodType type, int csIdx) {

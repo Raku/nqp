@@ -1550,6 +1550,10 @@ public final class Ops {
         return tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.hashType;
     }
     public static SixModelObject findmethod(ThreadContext tc, SixModelObject invocant, String name) {
+        if (invocant == null)
+            throw ExceptionHandling.dieInternal(tc, "Can not call method '" + name + "' on a null object"); 
+        invocant = decont(invocant, tc);
+        
         SixModelObject meth = invocant.st.MethodCache.get(name);
         if (meth == null)
             throw ExceptionHandling.dieInternal(tc, "Method '" + name + "' not found"); 
@@ -1558,6 +1562,7 @@ public final class Ops {
     public static SixModelObject findmethod(SixModelObject invocant, String name, ThreadContext tc) {
         if (invocant == null)
             throw ExceptionHandling.dieInternal(tc, "Can not call method '" + name + "' on a null object"); 
+        invocant = decont(invocant, tc);
         
         Map<String, SixModelObject> cache = invocant.st.MethodCache;
         
