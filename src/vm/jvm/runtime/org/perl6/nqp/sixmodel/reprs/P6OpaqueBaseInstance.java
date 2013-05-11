@@ -22,12 +22,13 @@ public class P6OpaqueBaseInstance extends SixModelObject {
         throw new RuntimeException("No such attribute '" + name + "' for this object");
     }
     
-    public final SixModelObject autoViv(int slot) {
+    public final SixModelObject autoViv(int slot, ThreadContext tc) {
         P6OpaqueREPRData rd = (P6OpaqueREPRData)this.st.REPRData;
         SixModelObject av = rd.autoVivContainers[slot];
         if (av instanceof TypeObject)
             return av;
-        throw new RuntimeException("Cloning auto-viv container NYI");
+        else
+            return av.clone(tc);
     }
     
     public SixModelObject clone(ThreadContext tc) {
