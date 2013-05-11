@@ -390,6 +390,75 @@ class QAST::OperationsJAST {
     }
 }
 
+# Chaining.
+QAST::OperationsJAST.add_core_op('chain', -> $qastcomp, $op {
+    # First, we build up the list of nodes in the chain
+    my @clist;
+    my $cpast := $op;
+    while nqp::istype($cpast, QAST::Op) && $cpast.op eq 'chain' {
+        nqp::push(@clist, $cpast);
+        $cpast := $cpast[0];
+    }
+
+    my $il       := JAST::InstructionList.new();
+    my $result   := $*TA.fresh_o();
+    my $endlabel := JAST::Label.new(:name($qastcomp.unique('chain_end_')));
+
+    $cpast := nqp::pop(@clist);
+    my $apast := $cpast[0];
+    my $ares  := $qastcomp.as_jast($apast, :want($RT_OBJ));
+    my $atmp  := $*TA.fresh_o();
+    $il.append($ares.jast);
+    $*STACK.obtain($il, $ares);
+    $il.append(JAST::Instruction.new( :op('astore'), $atmp ));
+
+    my $more := 1;
+    while $more {
+        my $bpast := $cpast[1];
+        my $bres  := $qastcomp.as_jast($bpast, :want($RT_OBJ));
+        my $btmp  := $*TA.fresh_o();
+        $il.append($bres.jast);
+        $*STACK.obtain($il, $bres);
+        $il.append(JAST::Instruction.new( :op('astore'), $btmp ));
+
+        my $cs_idx := $*CODEREFS.get_callsite_idx([$ARG_OBJ, $ARG_OBJ], []);
+        $il.append($ALOAD_1);
+        $il.append(JAST::Instruction.new( :op('aload'), $atmp ));
+        $il.append(JAST::Instruction.new( :op('aload'), $btmp ));
+        $il.append(JAST::InvokeDynamic.new(
+            'subcall', 'V', [$TYPE_TC, $TYPE_SMO, $TYPE_SMO],
+            'org/perl6/nqp/runtime/IndyBootstrap', 'subcall',
+            [
+                JAST::PushSVal.new( :value($cpast.name) ),
+                JAST::PushIndex.new( :value($cs_idx) )
+            ]
+        ));
+        $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
+        $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+            'result_o', $TYPE_SMO, $TYPE_CF ));
+        $il.append(JAST::Instruction.new( :op('astore'), $result ));
+
+        if @clist {
+            $il.append(JAST::Instruction.new( :op('aload'), $result ));
+            $il.append($ALOAD_1);
+            $il.append(JAST::Instruction.new( :op('invokestatic'),
+                $TYPE_OPS, 'istrue', 'Long', $TYPE_SMO, $TYPE_TC ));
+            $il.append($IVAL_ZERO);
+            $il.append($LCMP);
+            $il.append(JAST::Instruction.new( :op('ifeq'), $endlabel ));
+            $cpast := nqp::pop(@clist);
+            $atmp := $btmp;
+        }
+        else {
+            $more := 0;
+        }
+    }
+
+    $il.append($endlabel);
+    $il.append(JAST::Instruction.new( :op('aload'), $result ));
+    result($il, $RT_OBJ)
+});
+
 # Set of sequential statements
 QAST::OperationsJAST.add_core_op('stmts', -> $qastcomp, $op {
     $qastcomp.as_jast(QAST::Stmts.new( |@($op) ))
