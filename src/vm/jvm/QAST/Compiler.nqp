@@ -2027,12 +2027,13 @@ QAST::OperationsJAST.add_core_op('takedispatcher', -> $qastcomp, $op {
     if +@($op) != 1 || !nqp::istype($op[0], QAST::SVal) {
         nqp::die('takedispatcher requires one string literal operand');
     }
-    my $idx := $*BLOCK.lexical_type($op[0].value);
+    my $name := $op[0].value;
+    my $idx := $*BLOCK.lexical_type($name);
     unless nqp::defined($idx) {
         nqp::die('takedispatcher used with non-existing lexical');
     }
     my $il := JAST::InstructionList.new();
-    $il.append(JAST::PushIndex.new( :value($idx) ));
+    $il.append(JAST::PushIndex.new( :value($*BLOCK.lexical_idx($name)) ));
     $il.append($ALOAD_1);
     $il.append(JAST::Instruction.new( :op('invokestatic'),
         $TYPE_OPS, 'takedispatcher', 'V', 'I', $TYPE_TC ));
