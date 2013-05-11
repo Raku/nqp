@@ -2428,6 +2428,8 @@ public final class Ops {
     public static String substr2(String val, long offset) {
         if (offset >= val.length())
             return "";
+        if (offset < 0)
+            offset += val.length();
         return val.substring((int)offset);
     }
     
