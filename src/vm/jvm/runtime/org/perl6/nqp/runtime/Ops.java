@@ -1497,6 +1497,22 @@ public final class Ops {
         o.st.WHO = who;
         return o;
     }
+    public static SixModelObject what(SixModelObject o, ThreadContext tc) {
+        return decont(o, tc).st.WHAT;
+    }
+    public static SixModelObject how(SixModelObject o, ThreadContext tc) {
+        return decont(o, tc).st.HOW;
+    }
+    public static SixModelObject who(SixModelObject o, ThreadContext tc) {
+        return decont(o, tc).st.WHO;
+    }
+    public static long where(SixModelObject o, ThreadContext tc) {
+        return decont(o, tc).hashCode();
+    }
+    public static SixModelObject setwho(SixModelObject o, SixModelObject who, ThreadContext tc) {
+        decont(o, tc).st.WHO = who;
+        return o;
+    }
     public static SixModelObject rebless(SixModelObject obj, SixModelObject newType, ThreadContext tc) {
         if (obj.st != newType.st)
             obj.st.REPR.change_type(tc, obj, newType);
@@ -1598,7 +1614,7 @@ public final class Ops {
         return obj.st.REPR.name;
     }
     public static SixModelObject newtype(SixModelObject how, String reprname, ThreadContext tc) {
-        return REPRRegistry.getByName(reprname).type_object_for(tc, how);
+        return REPRRegistry.getByName(reprname).type_object_for(tc, decont(how, tc));
     }
     public static SixModelObject composetype(SixModelObject obj, SixModelObject reprinfo, ThreadContext tc) {
         obj.st.REPR.compose(tc, obj.st, reprinfo);
@@ -1738,56 +1754,56 @@ public final class Ops {
     
     /* Attribute operations. */
     public static SixModelObject getattr(SixModelObject obj, SixModelObject ch, String name, ThreadContext tc) {
-        return obj.get_attribute_boxed(tc, ch, name, STable.NO_HINT);
+        return obj.get_attribute_boxed(tc, decont(ch, tc), name, STable.NO_HINT);
     }
     public static long getattr_i(SixModelObject obj, SixModelObject ch, String name, ThreadContext tc) {
-        obj.get_attribute_native(tc, ch, name, STable.NO_HINT);
+        obj.get_attribute_native(tc, decont(ch, tc), name, STable.NO_HINT);
         if (tc.native_type == ThreadContext.NATIVE_INT)
             return tc.native_i;
         else
             throw ExceptionHandling.dieInternal(tc, "Attribute '" + name + "' is not a native int");
     }
     public static double getattr_n(SixModelObject obj, SixModelObject ch, String name, ThreadContext tc) {
-        obj.get_attribute_native(tc, ch, name, STable.NO_HINT);
+        obj.get_attribute_native(tc, decont(ch, tc), name, STable.NO_HINT);
         if (tc.native_type == ThreadContext.NATIVE_NUM)
             return tc.native_n;
         else
             throw ExceptionHandling.dieInternal(tc, "Attribute '" + name + "' is not a native num");
     }
     public static String getattr_s(SixModelObject obj, SixModelObject ch, String name, ThreadContext tc) {
-        obj.get_attribute_native(tc, ch, name, STable.NO_HINT);
+        obj.get_attribute_native(tc, decont(ch, tc), name, STable.NO_HINT);
         if (tc.native_type == ThreadContext.NATIVE_STR)
             return tc.native_s;
         else
             throw ExceptionHandling.dieInternal(tc, "Attribute '" + name + "' is not a native str");
     }
     public static SixModelObject bindattr(SixModelObject obj, SixModelObject ch, String name, SixModelObject value, ThreadContext tc) {
-        obj.bind_attribute_boxed(tc, ch, name, STable.NO_HINT, value);
+        obj.bind_attribute_boxed(tc, decont(ch, tc), name, STable.NO_HINT, value);
         return value;
     }
     public static long bindattr_i(SixModelObject obj, SixModelObject ch, String name, long value, ThreadContext tc) {
         tc.native_i = value;
-        obj.bind_attribute_native(tc, ch, name, STable.NO_HINT);
+        obj.bind_attribute_native(tc, decont(ch, tc), name, STable.NO_HINT);
         if (tc.native_type != ThreadContext.NATIVE_INT)
             throw ExceptionHandling.dieInternal(tc, "Attribute '" + name + "' is not a native int");
         return value;
     }
     public static double bindattr_n(SixModelObject obj, SixModelObject ch, String name, double value, ThreadContext tc) {
         tc.native_n = value;
-        obj.bind_attribute_native(tc, ch, name, STable.NO_HINT);
+        obj.bind_attribute_native(tc, decont(ch, tc), name, STable.NO_HINT);
         if (tc.native_type != ThreadContext.NATIVE_NUM)
             throw ExceptionHandling.dieInternal(tc, "Attribute '" + name + "' is not a native num");
         return value;
     }
     public static String bindattr_s(SixModelObject obj, SixModelObject ch, String name, String value, ThreadContext tc) {
         tc.native_s = value;
-        obj.bind_attribute_native(tc, ch, name, STable.NO_HINT);
+        obj.bind_attribute_native(tc, decont(ch, tc), name, STable.NO_HINT);
         if (tc.native_type != ThreadContext.NATIVE_STR)
             throw ExceptionHandling.dieInternal(tc, "Attribute '" + name + "' is not a native str");
         return value;
     }
     public static long attrinited(SixModelObject obj, SixModelObject ch, String name, ThreadContext tc) {
-        return obj.is_attribute_initialized(tc, ch, name, STable.NO_HINT);
+        return obj.is_attribute_initialized(tc, decont(ch, tc), name, STable.NO_HINT);
     }
     
     /* Positional operations. */
@@ -2034,7 +2050,7 @@ public final class Ops {
     }
     public static SixModelObject decont(SixModelObject obj, ThreadContext tc) {
         ContainerSpec cs = obj.st.ContainerSpec;
-        return cs == null ? obj : cs.fetch(tc, obj);
+        return cs == null || obj instanceof TypeObject ? obj : cs.fetch(tc, obj);
     }
     public static SixModelObject assign(SixModelObject cont, SixModelObject value, ThreadContext tc) {
         ContainerSpec cs = cont.st.ContainerSpec;
@@ -2121,6 +2137,7 @@ public final class Ops {
         return obj;
     }
     public static long istrue(SixModelObject obj, ThreadContext tc) {
+        obj = decont(obj, tc);
         BoolificationSpec bs = obj.st.BoolificationSpec;
         switch (bs == null ? BoolificationSpec.MODE_NOT_TYPE_OBJECT : bs.Mode) {
         case BoolificationSpec.MODE_CALL_METHOD:
