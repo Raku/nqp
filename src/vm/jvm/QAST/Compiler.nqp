@@ -1689,7 +1689,28 @@ my %const_map := nqp::hash(
     'CCLASS_PUNCTUATION',   1024,
     'CCLASS_ALPHANUMERIC',  2048,
     'CCLASS_NEWLINE',       4096,
-    'CCLASS_WORD',          8192
+    'CCLASS_WORD',          8192,
+    
+    'STAT_EXISTS',             0,
+    'STAT_FILESIZE',           1,
+    'STAT_ISDIR',              2,
+    'STAT_ISREG',              3,
+    'STAT_ISDEV',              4,
+    'STAT_CREATETIME',         5,
+    'STAT_ACCESSTIME',         6,
+    'STAT_MODIFYTIME',         7,
+    'STAT_CHANGETIME',         8,
+    'STAT_BACKUPTIME',         9,
+    'STAT_UID',                10,
+    'STAT_GID',                11,
+    'STAT_ISLNK',              12,
+    'STAT_PLATFORM_DEV',       -1,
+    'STAT_PLATFORM_INODE',     -2,
+    'STAT_PLATFORM_MODE',      -3,
+    'STAT_PLATFORM_NLINKS',    -4,
+    'STAT_PLATFORM_DEVTYPE',   -5,
+    'STAT_PLATFORM_BLOCKSIZE', -6,
+    'STAT_PLATFORM_BLOCKS',    -7,
 );
 QAST::OperationsJAST.add_core_op('const', -> $qastcomp, $op {
     if nqp::existskey(%const_map, $op.name) {
