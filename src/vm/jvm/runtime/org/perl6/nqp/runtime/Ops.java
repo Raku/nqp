@@ -2520,6 +2520,7 @@ public final class Ops {
     private static final int CCLASS_NUMERIC      = 8;
     private static final int CCLASS_HEXADECIMAL  = 16;
     private static final int CCLASS_WHITESPACE   = 32;
+    private static final int CCLASS_PRINTING     = 64;
     private static final int CCLASS_BLANK        = 256;
     private static final int CCLASS_CONTROL      = 512;
     private static final int CCLASS_PUNCTUATION  = 1024;
@@ -2544,6 +2545,8 @@ public final class Ops {
             return Character.isDigit(test) ? 1 : 0;
         case CCLASS_WHITESPACE:
             return Character.isWhitespace(test) ? 1 : 0;
+        case CCLASS_PRINTING:
+            throw new RuntimeException("CCLASS_PRINTING NYI");
         case CCLASS_WORD:
             return test == '_' || Character.isLetterOrDigit(test) ? 1 : 0;
         case CCLASS_NEWLINE:

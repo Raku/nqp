@@ -1790,6 +1790,7 @@ my %const_map := nqp::hash(
     'CCLASS_NUMERIC',       8,
     'CCLASS_HEXADECIMAL',   16,
     'CCLASS_WHITESPACE',    32,
+    'CCLASS_PRINTING',      64,
     'CCLASS_BLANK',         256,
     'CCLASS_CONTROL',       512,
     'CCLASS_PUNCTUATION',   1024,
