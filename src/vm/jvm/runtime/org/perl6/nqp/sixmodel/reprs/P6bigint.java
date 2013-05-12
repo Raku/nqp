@@ -10,6 +10,7 @@ import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.REPR;
 import org.perl6.nqp.sixmodel.STable;
 import org.perl6.nqp.sixmodel.SerializationReader;
+import org.perl6.nqp.sixmodel.SerializationWriter;
 import org.perl6.nqp.sixmodel.SixModelObject;
 import org.perl6.nqp.sixmodel.StorageSpec;
 import org.perl6.nqp.sixmodel.TypeObject;
@@ -101,5 +102,23 @@ public class P6bigint extends REPR {
     public void deserialize_finish(ThreadContext tc, STable st,
             SerializationReader reader, SixModelObject obj) {
         throw new RuntimeException("Deserialization NYI for P6bigint");
+    }
+    
+    public void deserialize_inlined(ThreadContext tc, STable st, SerializationReader reader,
+            String prefix, SixModelObject obj) {
+        try {
+            obj.getClass().getField(prefix).set(obj, new BigInteger(reader.readStr()));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    public void serialize_inlined(ThreadContext tc, STable st, SerializationWriter writer,
+            String prefix, SixModelObject obj) {
+        try {
+            writer.writeStr(obj.getClass().getField(prefix).get(obj).toString());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
