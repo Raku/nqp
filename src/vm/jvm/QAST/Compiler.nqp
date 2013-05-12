@@ -3357,7 +3357,10 @@ class QAST::CompilerJAST {
                 !! self.as_jast($node.alternative('jvm'));
         }
         else {
-            nqp::die("To compile on the JVM backend, QAST::VM must have an alternative 'jvm'");
+            nqp::die("To compile on the JVM backend, QAST::VM must have an alternative 'jvm'" ~
+                ($node.supports('pirop')
+                    ?? ' (got pirop = ' ~ $node.alternative('pirop') ~ ')'
+                    !! ''));
         }
     }
     
