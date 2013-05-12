@@ -1696,6 +1696,22 @@ my %const_map := nqp::hash(
     'CCLASS_NEWLINE',       4096,
     'CCLASS_WORD',          8192,
     
+    'HLL_ROLE_NONE',        0,
+    'HLL_ROLE_INT',         1,
+    'HLL_ROLE_NUM',         2,
+    'HLL_ROLE_STR',         3,
+    'HLL_ROLE_ARRAY',       4,
+    'HLL_ROLE_HASH',        5,
+    'HLL_ROLE_CODE',        6,
+    
+    'CONTROL_TAKE',         32,
+    'CONTROL_LAST',         16,
+    'CONTROL_NEXT',         4,
+    'CONTROL_REDO',         8,
+    'CONTROL_SUCCEED',      128,
+    'CONTROL_PROCEED',      256,
+    'CONTROL_WARN',         64,
+    
     'STAT_EXISTS',             0,
     'STAT_FILESIZE',           1,
     'STAT_ISDIR',              2,
