@@ -923,6 +923,7 @@ QAST::OperationsJAST.add_core_op('xor', -> $qastcomp, $op {
         $il.append($ALOAD_1);
         $il.append(JAST::Instruction.new( :op('invokestatic'),
             $TYPE_OPS, 'istrue', 'Long', $TYPE_SMO, $TYPE_TC ));
+        $il.append($DUP2);
         $il.append(JAST::Instruction.new( :op('lstore'), $u ));
         $il.append($L2I);
         $il.append(JAST::Instruction.new( :op('lload'), $t ));
