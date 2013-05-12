@@ -1122,6 +1122,7 @@ my %const_map := nqp::hash(
     'CCLASS_CONTROL',       pir::const::CCLASS_CONTROL,
     'CCLASS_PUNCTUATION',   pir::const::CCLASS_PUNCTUATION,
     'CCLASS_ALPHANUMERIC',  pir::const::CCLASS_ALPHANUMERIC,
+    
     'HLL_ROLE_NONE',        0,
     'HLL_ROLE_INT',         1,
     'HLL_ROLE_NUM',         2,
@@ -1129,6 +1130,14 @@ my %const_map := nqp::hash(
     'HLL_ROLE_ARRAY',       4,
     'HLL_ROLE_HASH',        5,
     'HLL_ROLE_CODE',        6,
+    
+    'CONTROL_TAKE',         pir::const::CONTROL_TAKE,
+    'CONTROL_LAST',         pir::const::CONTROL_LOOP_LAST,
+    'CONTROL_NEXT',         pir::const::CONTROL_LOOP_NEXT,
+    'CONTROL_REDO',         pir::const::CONTROL_LOOP_REDO,
+    'CONTROL_SUCCEED',      pir::const::CONTROL_BREAK,
+    'CONTROL_PROCEED',      pir::const::CONTROL_CONTINUE,
+    'CONTROL_WARN',         pir::const::CONTROL_OK,
 
     'STAT_EXISTS',             pir::const::STAT_EXISTS,
     'STAT_FILESIZE',           pir::const::STAT_FILESIZE,
