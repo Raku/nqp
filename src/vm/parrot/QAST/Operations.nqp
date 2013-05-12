@@ -1848,6 +1848,7 @@ QAST::Operations.add_core_pirop_mapping('findcclass', 'find_cclass', 'Iisii', :i
 QAST::Operations.add_core_pirop_mapping('findnotcclass', 'find_not_cclass', 'Iisii', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('sprintf', 'sprintf', 'SsP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('escape', 'escape', 'Ss', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('replace', 'replace', 'Ssiis', :inlinable(1));
 
 QAST::Operations.add_core_op('flip', :inlinable(1), -> $qastcomp, $op {
     if +@($op) != 1 {
