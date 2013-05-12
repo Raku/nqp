@@ -18,6 +18,7 @@ my $SWAP        := JAST::Instruction.new( :op('swap') );
 my $IADD        := JAST::Instruction.new( :op('iadd') );
 my $LADD        := JAST::Instruction.new( :op('ladd') );
 my $LSUB        := JAST::Instruction.new( :op('lsub') );
+my $IAND        := JAST::Instruction.new( :op('iand') );
 my $I2L         := JAST::Instruction.new( :op('i2l') );
 my $I2B         := JAST::Instruction.new( :op('i2b') );
 my $L2I         := JAST::Instruction.new( :op('l2i') );
@@ -875,6 +876,98 @@ QAST::OperationsJAST.add_core_op('defor', -> $qastcomp, $op {
             QAST::Var.new( :name($tmp), :scope('local') ),
             $op[1]
         )))
+});
+
+QAST::OperationsJAST.add_core_op('xor', -> $qastcomp, $op {
+    my $falselabel := JAST::Label.new(:name('xor_false'));
+    my $endlabel   := JAST::Label.new(:name('xor_end'));
+
+    my @childlist;
+    my $fpast;
+    for $op.list {
+        if $_.named eq 'false' {
+            $fpast := $_;
+        }
+        else {
+            nqp::push(@childlist, $_);
+        }
+    }
+
+    my $r := $*TA.fresh_o();
+    my $b := $*TA.fresh_o();
+    my $i := $*TA.fresh_i();
+    my $t := $*TA.fresh_i();
+    my $u := $*TA.fresh_i();
+
+    my $il    := JAST::InstructionList.new();
+    my $apast := nqp::shift(@childlist);
+    my $ares := $qastcomp.as_jast($apast, :want($RT_OBJ));
+    $il.append($ares.jast);
+    $*STACK.obtain($il, $ares);
+    $il.append($DUP);
+    $il.append(JAST::Instruction.new( :op('astore'), $r ));
+    $il.append($ALOAD_1);
+    $il.append(JAST::Instruction.new( :op('invokestatic'),
+        $TYPE_OPS, 'istrue', 'Long', $TYPE_SMO, $TYPE_TC ));
+    $il.append(JAST::Instruction.new( :op('lstore'), $t ));
+
+    my $have_middle_child := 1;
+    my $bres;
+    while $have_middle_child {
+        my $bpast := nqp::shift(@childlist);
+        $bres := $qastcomp.as_jast($bpast, :want($RT_OBJ));
+        $il.append($bres.jast);
+        $*STACK.obtain($il, $bres);
+        $il.append($DUP);
+        $il.append(JAST::Instruction.new( :op('astore'), $b ));
+        $il.append($ALOAD_1);
+        $il.append(JAST::Instruction.new( :op('invokestatic'),
+            $TYPE_OPS, 'istrue', 'Long', $TYPE_SMO, $TYPE_TC ));
+        $il.append(JAST::Instruction.new( :op('lstore'), $u ));
+        $il.append($L2I);
+        $il.append(JAST::Instruction.new( :op('lload'), $t ));
+        $il.append($L2I);
+        $il.append($IAND);
+        $il.append(JAST::Instruction.new( :op('ifne'), $falselabel ));
+
+        if @childlist {
+            my $truelabel := JAST::Label.new(:name('xor_true'));
+            $il.append(JAST::Instruction.new( :op('lload'), $t ));
+            $il.append($L2I);
+            $il.append(JAST::Instruction.new( :op('ifne'), $truelabel ));
+            $il.append(JAST::Instruction.new( :op('aload'), $b ));
+            $il.append(JAST::Instruction.new( :op('astore'), $r ));
+            $il.append(JAST::Instruction.new( :op('lload'), $u ));
+            $il.append(JAST::Instruction.new( :op('lstore'), $t ));
+            $il.append($truelabel);
+        }
+        else {
+            $have_middle_child := 0;
+        }
+    }
+
+    $il.append(JAST::Instruction.new( :op('lload'), $t ));
+    $il.append($L2I);
+    $il.append(JAST::Instruction.new( :op('ifne'), $endlabel ));
+    $il.append(JAST::Instruction.new( :op('aload'), $b ));
+    $il.append(JAST::Instruction.new( :op('astore'), $r ));
+    $il.append(JAST::Instruction.new( :op('goto'), $endlabel ));
+    $il.append($falselabel);
+
+    if $fpast {
+        my $fres := $qastcomp.as_jast($fpast, :want($RT_OBJ));
+        $il.append($fres.jast);
+        $*STACK.obtain($il, $fres);
+        $il.append(JAST::Instruction.new( :op('astore'), $r ));
+    }
+    else {
+        $il.append($ACONST_NULL);
+        $il.append(JAST::Instruction.new( :op('astore'), $r ));
+    }
+
+    $il.append($endlabel);
+    $il.append(JAST::Instruction.new( :op('aload'), $r ));
+    result($il, $RT_OBJ)
 });
 
 QAST::OperationsJAST.add_core_op('ifnull', -> $qastcomp, $op {
