@@ -1720,6 +1720,8 @@ QAST::Operations.add_core_pirop_mapping('mod_i', 'mod', 'Iii', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('mod_I', 'nqp_bigint_mod', 'PPPP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('expmod_I', 'nqp_bigint_exp_mod', 'PPPPP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('isprime_I', 'nqp_bigint_is_prime', 'IPi', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('srand', 'srand', '0i', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('rand_n', 'rand', 'Nn', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('rand_I', 'nqp_bigint_rand', 'PPP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('mod_n', 'mod', 'Nnn', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('pow_n', 'pow', 'Nnn', :inlinable(1));
@@ -1745,6 +1747,24 @@ QAST::Operations.add_core_pirop_mapping('radix_I', 'nqp_bigint_radix', 'PisiiP',
 QAST::Operations.add_core_pirop_mapping('log_n', 'ln', 'NN', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('exp_n', 'exp', 'Nn', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('isnanorinf', 'is_inf_or_nan', 'In', :inlinable(1));
+QAST::Operations.add_core_op('inf', :inlinable(1), -> $qastcomp, $op {
+    $qastcomp.as_post(QAST::VM.new(
+        :pirop('set Ns'),
+        QAST::SVal.new( :value('Inf') )
+    ))
+});
+QAST::Operations.add_core_op('neginf', :inlinable(1), -> $qastcomp, $op {
+    $qastcomp.as_post(QAST::VM.new(
+        :pirop('set Ns'),
+        QAST::SVal.new( :value('-Inf') )
+    ))
+});
+QAST::Operations.add_core_op('nan', :inlinable(1), -> $qastcomp, $op {
+    $qastcomp.as_post(QAST::VM.new(
+        :pirop('set Ns'),
+        QAST::SVal.new( :value('NaN') )
+    ))
+});
 
 # trig opcodes
 QAST::Operations.add_core_pirop_mapping('sin_n', 'sin', 'NN', :inlinable(1));
