@@ -1871,6 +1871,7 @@ QAST::OperationsJAST.map_classlib_core_op('chmod', $TYPE_OPS, 'chmod', [$RT_STR,
 QAST::OperationsJAST.map_classlib_core_op('unlink', $TYPE_OPS, 'unlink', [$RT_STR], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('rmdir', $TYPE_OPS, 'rmdir', [$RT_STR], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('cwd', $TYPE_OPS, 'cwd', [], $RT_STR);
+QAST::OperationsJAST.map_classlib_core_op('chdir', $TYPE_OPS, 'chdir', [$RT_STR], $RT_STR);
 QAST::OperationsJAST.map_classlib_core_op('mkdir', $TYPE_OPS, 'mkdir', [$RT_STR, $RT_INT], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('rename', $TYPE_OPS, 'rename', [$RT_STR, $RT_STR], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('copy', $TYPE_OPS, 'copy', [$RT_STR, $RT_STR], $RT_INT);
@@ -1916,6 +1917,7 @@ QAST::OperationsJAST.map_classlib_core_op('ceil_n', $TYPE_MATH, 'ceil', [$RT_NUM
 QAST::OperationsJAST.map_classlib_core_op('floor_n', $TYPE_MATH, 'floor', [$RT_NUM], $RT_NUM);
 QAST::OperationsJAST.map_classlib_core_op('ln_n', $TYPE_MATH, 'log', [$RT_NUM], $RT_NUM);
 QAST::OperationsJAST.map_classlib_core_op('sqrt_n', $TYPE_MATH, 'sqrt', [$RT_NUM], $RT_NUM);
+QAST::OperationsJAST.map_classlib_core_op('log_n', $TYPE_MATH, 'log', [$RT_NUM], $RT_NUM);
 QAST::OperationsJAST.map_classlib_core_op('exp_n', $TYPE_MATH, 'exp', [$RT_NUM], $RT_NUM);
 QAST::OperationsJAST.map_classlib_core_op('isnanorinf', $TYPE_OPS, 'isnanorinf', [$RT_NUM], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('inf', $TYPE_OPS, 'inf', [], $RT_NUM);
@@ -1944,6 +1946,11 @@ QAST::OperationsJAST.map_classlib_core_op('gcd_i', $TYPE_OPS, 'gcd_i', [$RT_INT,
 QAST::OperationsJAST.map_classlib_core_op('gcd_I', $TYPE_OPS, 'gcd_I', [$RT_OBJ, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('lcm_i', $TYPE_OPS, 'lcm_i', [$RT_INT, $RT_INT], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('lcm_I', $TYPE_OPS, 'lcm_I', [$RT_OBJ, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
+
+# string bitwise ops
+QAST::OperationsJAST.map_classlib_core_op('bitor_s', $TYPE_OPS, 'bitor_s', [$RT_STR, $RT_STR], $RT_STR);
+QAST::OperationsJAST.map_classlib_core_op('bitxor_s', $TYPE_OPS, 'bitxor_s', [$RT_STR, $RT_STR], $RT_STR);
+QAST::OperationsJAST.map_classlib_core_op('bitand_s', $TYPE_OPS, 'bitand_s', [$RT_STR, $RT_STR], $RT_STR);
 
 # string opcodes
 QAST::OperationsJAST.map_classlib_core_op('chars', $TYPE_OPS, 'chars', [$RT_STR], $RT_INT);
