@@ -1391,6 +1391,35 @@ QAST::Operations.add_core_op('setmessage', -> $qastcomp, $op {
     $ops.result($message.result);
     $ops
 });
+QAST::Operations.add_core_op('getextype', -> $qastcomp, $op {
+    if +$op.list != 1 {
+        nqp::die("The 'getextype' op expects one child");
+    }
+    my $exc := $qastcomp.coerce($qastcomp.as_post($op[0]), 'P');
+    my $pmc := $*REGALLOC.fresh_p();
+    my $reg := $*REGALLOC.fresh_i();
+    my $ops := PIRT::Ops.new();
+    $ops.push($exc);
+    $ops.push_pirop('getattribute', $pmc, $exc.result, '"type"');
+    $ops.push_pirop('set', $reg, $pmc);
+    $ops.result($reg);
+    $ops
+});
+QAST::Operations.add_core_op('setextype', -> $qastcomp, $op {
+    if +$op.list != 2 {
+        nqp::die("The 'setextype' op expects two children");
+    }
+    my $exc := $qastcomp.coerce($qastcomp.as_post($op[0]), 'P');
+    my $type := $qastcomp.coerce($qastcomp.as_post($op[1]), 'I');
+    my $pmc := $*REGALLOC.fresh_p();
+    my $ops := PIRT::Ops.new();
+    $ops.push($exc);
+    $ops.push($type);
+    $ops.push_pirop('box', $pmc, $type);
+    $ops.push_pirop('setattribute', $exc, '"type"', $pmc);
+    $ops.result($type.result);
+    $ops
+});
 QAST::Operations.add_core_op('backtracestrings', -> $qastcomp, $op {
     if +$op.list != 1 {
         nqp::die("The 'backtracestrings' op expects one child");
