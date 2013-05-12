@@ -697,8 +697,11 @@ public class P6Opaque extends REPR {
         }    
     }
     
-    public void serialize(ThreadContext tc, SerializationWriter writer, SixModelObject obj) {
+    public void serialize(ThreadContext tc, SerializationWriter writer, SixModelObject origObj) {
         try {
+            P6OpaqueBaseInstance obj = (P6OpaqueBaseInstance)origObj;
+            if (obj.delegate != null)
+                obj = (P6OpaqueBaseInstance)obj.delegate;
             STable[] flattenedSTables = ((P6OpaqueREPRData)obj.st.REPRData).flattenedSTables;
             if (flattenedSTables == null)
                 throw ExceptionHandling.dieInternal(tc,

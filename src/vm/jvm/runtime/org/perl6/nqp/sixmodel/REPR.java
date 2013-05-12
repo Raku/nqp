@@ -78,7 +78,7 @@ public abstract class REPR {
      * Object serialization. Writes the objects body out using the passed
      * serialization writer. */
     public void serialize(ThreadContext tc, SerializationWriter writer, SixModelObject obj) {
-        throw ExceptionHandling.dieInternal(tc, "Missing serialize function for REPR");
+        throw ExceptionHandling.dieInternal(tc, "Missing serialize function for REPR " + name);
     }
     
     /**

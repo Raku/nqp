@@ -14,6 +14,7 @@ import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.reprs.CallCapture;
 import org.perl6.nqp.sixmodel.reprs.IOHandle;
+import org.perl6.nqp.sixmodel.reprs.MultiCache;
 
 public class SerializationWriter {
     /* The current version of the serialization format. */
@@ -259,6 +260,10 @@ public class SerializationWriter {
         else if (ref.st.REPR instanceof CallCapture) {
             /* This is a hack for Rakudo's sake; it keeps a CallCapture around in
              * the lexpad, for no really good reason. */
+            discrim = REFVAR_VM_NULL;
+        }
+        else if (ref.st.REPR instanceof MultiCache) {
+            /* These are re-computed each time. */
             discrim = REFVAR_VM_NULL;
         }
         else if (ref.st.WHAT == tc.gc.BOOTInt) {
