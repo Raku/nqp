@@ -1358,6 +1358,8 @@ QAST::Operations.add_core_op('setpayload', -> $qastcomp, $op {
     my $exc := $qastcomp.coerce($qastcomp.as_post($op[0]), 'P');
     my $payload := $qastcomp.coerce($qastcomp.as_post($op[1]), 'P');
     my $ops := PIRT::Ops.new();
+    $ops.push($exc);
+    $ops.push($payload);
     $ops.push_pirop('setattribute', $exc, '"payload"', $payload);
     $ops.result($payload.result);
     $ops
