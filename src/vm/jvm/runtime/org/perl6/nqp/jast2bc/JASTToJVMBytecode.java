@@ -243,7 +243,15 @@ public class JASTToJVMBytecode {
                 }
                 else if (curLine.startsWith(".push_idx ")) {
                     Integer value = Integer.parseInt(curLine.substring(".push_idx ".length()));
-                    m.visitLdcInsn(value);
+                    if (value >= Byte.MIN_VALUE && value <= Byte.MAX_VALUE) {
+                        m.visitIntInsn(Opcodes.BIPUSH, value);
+                    }
+                    else if (value >= Short.MIN_VALUE && value <= Short.MAX_VALUE) {
+                        m.visitIntInsn(Opcodes.SIPUSH, value);
+                    }
+                    else {
+                        m.visitLdcInsn(value);
+                    }
                 }
                 else if (curLine.equals(".try")) {
                     Label start = new Label();
