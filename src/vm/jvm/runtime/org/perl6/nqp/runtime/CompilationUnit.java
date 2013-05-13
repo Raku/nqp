@@ -127,7 +127,29 @@ public abstract class CompilationUnit {
     }
     
     /**
-     * Installs a lexical value, either static, container or state.
+     * Parses a bunch of info on static lexical values for a block and
+     * installs each of them. TODO: lazify so we don't do it for blocks we
+     * never execute.
+     */
+     public void setLexValues(ThreadContext tc, String uniqueId, String toParse) {
+        CodeRef cr = cuidToCodeRef.get(uniqueId);
+        String[] bits = toParse.split("\\x00");
+        for (int i = 0; i < bits.length; i += 4) {
+            String lexName = bits[i];
+            String handle  = bits[i + 1];
+            int    scIdx   = Integer.parseInt(bits[i + 2]);
+            int    flags   = Integer.parseInt(bits[i + 3]);
+            Integer idx = cr.staticInfo.oTryGetLexicalIdx(lexName);
+            if (idx == null)
+                new RuntimeException("Invalid lexical name '" + lexName + "' in static lexical installation");
+            cr.staticInfo.oLexStatic[idx] = tc.gc.scs.get(handle).root_objects.get(scIdx);
+            /* XXX Process flags. */
+        }
+     }
+    
+    /**
+     * Installs a single lexical value, either static, container or state.
+     * XXX Can go away after next rebootstrap.
      */
     public void setLexValue(String uniqueId, String name, String scHandle, int scIdx, int flags, ThreadContext tc) {
         CodeRef cr = cuidToCodeRef.get(uniqueId);

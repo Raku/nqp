@@ -2272,25 +2272,24 @@ QAST::OperationsJAST.add_core_op('setup_blv', -> $qastcomp, $op {
     if +@($op) != 1 || !nqp::ishash($op[0]) {
         nqp::die('setup_blv requires one hash operand');
     }
+
     my $il := JAST::InstructionList.new();
     for $op[0] {
         my $cuid := $_.key;
-        $il.append($ALOAD_0);
-        $il.append(JAST::PushSVal.new( :value($cuid) ));
+        my @bits;
         for $_.value -> @lex {
-            my $sc     := nqp::getobjsc(@lex[1]);
-            my $handle := nqp::scgethandle($sc);
-            my $idx    := nqp::scgetobjidx($sc, @lex[1]);
-            $il.append($DUP2);
-            $il.append(JAST::PushSVal.new( :value(@lex[0]) ));
-            $il.append(JAST::PushSVal.new( :value($handle) ));
-            $il.append(JAST::PushIndex.new( :value($idx) ));
-            $il.append(JAST::PushIndex.new( :value(@lex[2]) ));
-            $il.append($ALOAD_1);
-            $il.append(JAST::Instruction.new( :op('invokevirtual'),
-                $TYPE_CU, 'setLexValue', 'Void', $TYPE_STR, $TYPE_STR, $TYPE_STR, 'I', 'I', $TYPE_TC ));
+            nqp::push(@bits, @lex[0]);
+            my $sc := nqp::getobjsc(@lex[1]);
+            nqp::push(@bits, nqp::scgethandle($sc));
+            nqp::push(@bits, ~nqp::scgetobjidx($sc, @lex[1]));
+            nqp::push(@bits, ~@lex[2]);
         }
-        $il.append($POP2);
+        $il.append($ALOAD_0);
+        $il.append($ALOAD_1);
+        $il.append(JAST::PushSVal.new( :value($cuid) ));
+        $il.append(JAST::PushSVal.new( :value(nqp::join("\0", @bits)) ));
+        $il.append(JAST::Instruction.new( :op('invokevirtual'),
+            $TYPE_CU, 'setLexValues', 'Void', $TYPE_TC, $TYPE_STR, $TYPE_STR ));
     }
     
     $il.append($ACONST_NULL);
@@ -2413,44 +2412,70 @@ class QAST::CompilerJAST {
 
         # Emits the code-ref array construction.
         method coderef_array() {
-            my $cra := JAST::Method.new( :name('getCodeRefs'), :returns("[$TYPE_CR;"), :static(0) );
+            my $gcr := JAST::Method.new( :name('getCodeRefs'), :returns("[$TYPE_CR;"), :static(0) );
             
             # Get method handle lookup object.
-            $cra.add_local('mhl', $TYPE_MHL);
-            $cra.append(JAST::Instruction.new( :op('invokestatic'),
+            $gcr.add_local('mhl', $TYPE_MHL);
+            $gcr.append(JAST::Instruction.new( :op('invokestatic'),
                 $TYPE_MHS, 'lookup', $TYPE_MHL ));
-            $cra.append(JAST::Instruction.new( :op('astore'), 'mhl' ));
+            $gcr.append(JAST::Instruction.new( :op('astore'), 'mhl' ));
             
             # Everything is same type at the moment; construct MethodType.
-            $cra.add_local('mt', $TYPE_MT);
-            $cra.append(JAST::Instruction.new( :op('getstatic'),
+            $gcr.add_local('mt', $TYPE_MT);
+            $gcr.append(JAST::Instruction.new( :op('getstatic'),
                 'Ljava/lang/Void;', 'TYPE', $TYPE_CLASS ));
-            $cra.append(JAST::PushCVal.new( :value($TYPE_TC) ));
-            $cra.append(JAST::PushIndex.new( :value(3) ));
-            $cra.append(JAST::Instruction.new( :op('anewarray'), $TYPE_CLASS ));
-            $cra.append($DUP);
-            $cra.append(JAST::PushIndex.new( :value(0) ));
-            $cra.append(JAST::PushCVal.new( :value($TYPE_CR) ));
-            $cra.append($AASTORE);
-            $cra.append($DUP);
-            $cra.append(JAST::PushIndex.new( :value(1) ));
-            $cra.append(JAST::PushCVal.new( :value($TYPE_CSD) ));
-            $cra.append($AASTORE);
-            $cra.append($DUP);
-            $cra.append(JAST::PushIndex.new( :value(2) ));
-            $cra.append(JAST::PushCVal.new( :value("[$TYPE_OBJ") ));
-            $cra.append($AASTORE);
-            $cra.append(JAST::Instruction.new( :op('invokestatic'),
+            $gcr.append(JAST::PushCVal.new( :value($TYPE_TC) ));
+            $gcr.append(JAST::PushIndex.new( :value(3) ));
+            $gcr.append(JAST::Instruction.new( :op('anewarray'), $TYPE_CLASS ));
+            $gcr.append($DUP);
+            $gcr.append(JAST::PushIndex.new( :value(0) ));
+            $gcr.append(JAST::PushCVal.new( :value($TYPE_CR) ));
+            $gcr.append($AASTORE);
+            $gcr.append($DUP);
+            $gcr.append(JAST::PushIndex.new( :value(1) ));
+            $gcr.append(JAST::PushCVal.new( :value($TYPE_CSD) ));
+            $gcr.append($AASTORE);
+            $gcr.append($DUP);
+            $gcr.append(JAST::PushIndex.new( :value(2) ));
+            $gcr.append(JAST::PushCVal.new( :value("[$TYPE_OBJ") ));
+            $gcr.append($AASTORE);
+            $gcr.append(JAST::Instruction.new( :op('invokestatic'),
                 $TYPE_MT, 'methodType', $TYPE_MT, $TYPE_CLASS, $TYPE_CLASS, "[$TYPE_CLASS" ));
-            $cra.append(JAST::Instruction.new( :op('astore'), 'mt' ));
+            $gcr.append(JAST::Instruction.new( :op('astore'), 'mt' ));
             
             # Create array.
-            $cra.append(JAST::PushIndex.new( :value($!cur_idx) ));
-            $cra.append(JAST::Instruction.new( :op('anewarray'), $TYPE_CR ));
+            $gcr.append(JAST::PushIndex.new( :value($!cur_idx) ));
+            $gcr.append(JAST::Instruction.new( :op('anewarray'), $TYPE_CR ));
             
-            # Add all the code-refs.
+            # Add all the code-refs. We'll bunch them 1000 at a time in order
+            # to avoid blowing the JVM maximum method size.
+            my $crmeth_num := 0;
+            sub new_group() {
+                my $cra := JAST::Method.new( :name('getCodeRefs_' ~ $crmeth_num), :returns("V"), :static(0) );
+                $cra.add_argument('cra', "[$TYPE_CR");
+                $cra.add_argument('mhl', $TYPE_MHL);
+                $cra.add_argument('mt', $TYPE_MT);
+                $cra.append($ALOAD_1);
+                $*JCLASS.add_method($cra);
+                
+                $gcr.append($DUP);
+                $gcr.append($ALOAD_0);
+                $gcr.append($SWAP);
+                $gcr.append(JAST::Instruction.new( :op('aload'), 'mhl' ));
+                $gcr.append(JAST::Instruction.new( :op('aload'), 'mt' ));
+                $gcr.append(JAST::Instruction.new( :op('invokevirtual'),
+                    'L' ~ $*JCLASS.name ~ ';', 'getCodeRefs_' ~ $crmeth_num,
+                    'Void', "[$TYPE_CR", $TYPE_MHL, $TYPE_MT ));
+                
+                $crmeth_num++;
+                $cra
+            }
+            sub finish_group($cra) {
+                $cra.append($RETURN);
+            }
             my $TYPE_STRARR := "[$TYPE_STR;";
             my int $i := 0;
+            my $cra := new_group();
             while $i < $!cur_idx {
                 $cra.append($DUP); # The target array
                 $cra.append(JAST::PushIndex.new( :value($i) ));  # The array index
@@ -2509,23 +2534,49 @@ class QAST::CompilerJAST {
                     "[[J"));
                 $cra.append($AASTORE); # Push to the array
                 $i++;
+                
+                if $i % 1000 == 0 {
+                    finish_group($cra);
+                    $cra := new_group();
+                }
             }
+            finish_group($cra);
             
             # Return the array. Add method to class.
-            $cra.append($ARETURN);
-            $*JCLASS.add_method($cra);
+            $gcr.append($ARETURN);
+            $*JCLASS.add_method($gcr);
         }
         
         # Emits the mappings of code refs to their outer code refs.
         method outer_map_array() {
-            my $oma := JAST::Method.new( :name('getOuterMap'), :returns("[Integer;"), :static(0) );
+            my $gom := JAST::Method.new( :name('getOuterMap'), :returns("[Integer;"), :static(0) );
             
             # Create array.
-            $oma.append(JAST::PushIndex.new( :value(2 * @!outer_mappings) ));
-            $oma.append(JAST::Instruction.new( :op('newarray'), 'Integer' ));
+            $gom.append(JAST::PushIndex.new( :value(2 * @!outer_mappings) ));
+            $gom.append(JAST::Instruction.new( :op('newarray'), 'Integer' ));
             
-            # Add all the mappings.
+            # Add all the mappings, bunching them to avoid blowing JVM
+            # limits.
+            my $ommeth_num := 0;
+            sub new_group() {
+                my $oma := JAST::Method.new( :name('getOuterMap_' ~ $ommeth_num), :returns("V"), :static(1) );
+                $oma.add_argument('oma', '[I');
+                $oma.append($ALOAD_0);
+                $*JCLASS.add_method($oma);
+                
+                $gom.append($DUP);
+                $gom.append(JAST::Instruction.new( :op('invokestatic'),
+                    'L' ~ $*JCLASS.name ~ ';', 'getOuterMap_' ~ $ommeth_num,
+                    'Void', '[I' ));
+                
+                $ommeth_num++;
+                $oma
+            }
+            sub finish_group($oma) {
+                $oma.append($RETURN);
+            }
             my int $i := 0;
+            my $oma := new_group();
             for @!outer_mappings -> @m {
                 for @m {
                     $oma.append($DUP);
@@ -2533,11 +2584,17 @@ class QAST::CompilerJAST {
                     $oma.append(JAST::PushIndex.new( :value($_) ));
                     $oma.append($IASTORE);
                 }
+                
+                if $i % 1000 == 0 {
+                    finish_group($oma);
+                    $oma := new_group();
+                }
             }
+            finish_group($oma);
             
             # Return the array. Add method to class.
-            $oma.append($ARETURN);
-            $*JCLASS.add_method($oma);
+            $gom.append($ARETURN);
+            $*JCLASS.add_method($gom);
         }
         
         method callsites() {
@@ -2964,7 +3021,10 @@ class QAST::CompilerJAST {
         my @pre_des   := $cu.pre_deserialize;
         my @post_des  := $cu.post_deserialize;
         if %*BLOCK_LEX_VALUES {
-            nqp::push(@post_des, QAST::Op.new( :op('setup_blv'), %*BLOCK_LEX_VALUES ));
+            nqp::push(@post_des, QAST::Block.new(
+                :blocktype('immediate'),
+                QAST::Op.new( :op('setup_blv'), %*BLOCK_LEX_VALUES )
+            ));
         }
         if $comp_mode || @pre_des || @post_des {
             # Create a block into which we'll install all of the other
@@ -2983,9 +3043,18 @@ class QAST::CompilerJAST {
             }
             
             # Add post-deserialization tasks.
+            my $cur_pd_block := QAST::Block.new( :blocktype('immediate') );
+            my $i := 0;
             for @post_des {
-                $block.push(QAST::Stmt.new($_));
+                $cur_pd_block.push(QAST::Stmt.new($_));
+                $i++;
+                if $i == 2000 {
+                    $block.push($cur_pd_block);
+                    $cur_pd_block := QAST::Block.new( :blocktype('immediate') );
+                    $i := 0;
+                }
             }
+            $block.push($cur_pd_block);
             
             # Compile to JAST and register this block as the deserialization
             # handler.
@@ -3064,9 +3133,13 @@ class QAST::CompilerJAST {
                 !! QAST::SVal.new( :value(nqp::atpos_s($sh, $i)) ));
             $i := $i + 1;
         }
+        $sh_ast := QAST::Block.new( :blocktype('immediate'), $sh_ast );
         
         # Code references.
-        my $cr_past := QAST::Op.new( :op('list_b'), |@code_ref_blocks );
+        my $cr_past := QAST::Block.new(
+            :blocktype('immediate'),
+            QAST::Op.new( :op('list_b'), |@code_ref_blocks )
+        );
         
         # Handle repossession conflict resolution code, if any.
         if $repo_conf_res {
