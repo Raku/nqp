@@ -38,4 +38,28 @@ public class SerializationContext {
         this.rep_indexes = new ArrayList<Integer>();
         this.rep_scs = new ArrayList<SerializationContext>();
     }
+    
+    /* Takes an object and adds it to this SC's root set, and installs a
+     * reposession entry. */
+    public void repossessObject(SerializationContext origSC, SixModelObject obj) {
+        /* Add to root set. */
+        int newSlot = root_objects.size();
+        root_objects.add(obj);
+        
+        /* Add repossession entry. */
+        rep_indexes.add(newSlot << 1);
+        rep_scs.add(origSC);
+    }
+    
+    /* Takes an STable and adds it to this SC's root set, and installs a
+     * reposession entry. */
+    public void repossessSTable(SerializationContext origSC, STable st) {
+        /* Add to root set. */
+        int newSlot = root_stables.size();
+        root_stables.add(st);
+        
+        /* Add repossession entry. */
+        rep_indexes.add((newSlot << 1) | 1);
+        rep_scs.add(origSC);
+    }
 }

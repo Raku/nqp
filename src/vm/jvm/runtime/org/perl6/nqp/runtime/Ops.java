@@ -1516,8 +1516,11 @@ public final class Ops {
     public static SixModelObject rebless(SixModelObject obj, SixModelObject newType, ThreadContext tc) {
         obj = decont(obj, tc);
         newType = decont(newType, tc);
-        if (obj.st != newType.st)
+        if (obj.st != newType.st) {
             obj.st.REPR.change_type(tc, obj, newType);
+            if (obj.sc != null)
+                scwbObject(tc, obj);
+        }
         return obj;
     }
     public static SixModelObject create(SixModelObject obj, ThreadContext tc) {
@@ -1630,6 +1633,8 @@ public final class Ops {
             cache.put(iterkey_s(cur, tc), iterval(cur, tc));
         }
         obj.st.MethodCache = cache;
+        if (obj.st.sc != null)
+            scwbSTable(tc, obj.st);
         return obj;
     }
     public static SixModelObject setmethcacheauth(SixModelObject obj, long flag, ThreadContext tc) {
@@ -1637,6 +1642,8 @@ public final class Ops {
         if (flag != 0)
             newFlags = newFlags | STable.METHOD_CACHE_AUTHORITATIVE;
         obj.st.ModeFlags = newFlags;
+        if (obj.st.sc != null)
+            scwbSTable(tc, obj.st);
         return obj;
     }
     public static SixModelObject settypecache(SixModelObject obj, SixModelObject types, ThreadContext tc) {
@@ -1645,11 +1652,15 @@ public final class Ops {
         for (long i = 0; i < elems; i++)
             cache[(int)i] = types.at_pos_boxed(tc, i);
         obj.st.TypeCheckCache = cache;
+        if (obj.st.sc != null)
+            scwbSTable(tc, obj.st);
         return obj;
     }
     public static SixModelObject settypecheckmode(SixModelObject obj, long mode, ThreadContext tc) {
         obj.st.ModeFlags = (int)mode |
             (obj.st.ModeFlags & (~STable.TYPE_CHECK_CACHE_FLAG_MASK));
+        if (obj.st.sc != null)
+            scwbSTable(tc, obj.st);
         return obj;
     }
     public static long objprimspec(SixModelObject obj, ThreadContext tc) {
@@ -1781,6 +1792,8 @@ public final class Ops {
     }
     public static SixModelObject bindattr(SixModelObject obj, SixModelObject ch, String name, SixModelObject value, ThreadContext tc) {
         obj.bind_attribute_boxed(tc, decont(ch, tc), name, STable.NO_HINT, value);
+        if (obj.sc != null)
+            scwbObject(tc, obj);
         return value;
     }
     public static long bindattr_i(SixModelObject obj, SixModelObject ch, String name, long value, ThreadContext tc) {
@@ -1788,6 +1801,8 @@ public final class Ops {
         obj.bind_attribute_native(tc, decont(ch, tc), name, STable.NO_HINT);
         if (tc.native_type != ThreadContext.NATIVE_INT)
             throw ExceptionHandling.dieInternal(tc, "Attribute '" + name + "' is not a native int");
+        if (obj.sc != null)
+            scwbObject(tc, obj);
         return value;
     }
     public static double bindattr_n(SixModelObject obj, SixModelObject ch, String name, double value, ThreadContext tc) {
@@ -1795,6 +1810,8 @@ public final class Ops {
         obj.bind_attribute_native(tc, decont(ch, tc), name, STable.NO_HINT);
         if (tc.native_type != ThreadContext.NATIVE_NUM)
             throw ExceptionHandling.dieInternal(tc, "Attribute '" + name + "' is not a native num");
+        if (obj.sc != null)
+            scwbObject(tc, obj);
         return value;
     }
     public static String bindattr_s(SixModelObject obj, SixModelObject ch, String name, String value, ThreadContext tc) {
@@ -1802,6 +1819,8 @@ public final class Ops {
         obj.bind_attribute_native(tc, decont(ch, tc), name, STable.NO_HINT);
         if (tc.native_type != ThreadContext.NATIVE_STR)
             throw ExceptionHandling.dieInternal(tc, "Attribute '" + name + "' is not a native str");
+        if (obj.sc != null)
+            scwbObject(tc, obj);
         return value;
     }
     public static long attrinited(SixModelObject obj, SixModelObject ch, String name, ThreadContext tc) {
@@ -2827,6 +2846,29 @@ public final class Ops {
         if (idx == 0)
             tc.compilingSCs = null;
         return result;
+    }
+    
+    /* SC write barriers (not really ops, but putting them here with the SC
+     * related bits). */
+    public static void scwbObject(ThreadContext tc, SixModelObject obj) {
+        int cscSize = tc.compilingSCs == null ? 0 : tc.compilingSCs.size();
+        if (cscSize == 0 || tc.scwbDisableDepth > 0)
+            return;
+        SerializationContext compSC = tc.compilingSCs.get(cscSize - 1).referencedSC;
+        if (obj.sc != compSC) {
+            compSC.repossessObject(obj.sc, obj);
+            obj.sc = compSC;
+        }
+    }
+    public static void scwbSTable(ThreadContext tc, STable st) {
+        int cscSize = tc.compilingSCs == null ? 0 : tc.compilingSCs.size();
+        if (cscSize == 0 || tc.scwbDisableDepth > 0)
+            return;
+        SerializationContext compSC = tc.compilingSCs.get(cscSize - 1).referencedSC;
+        if (st.sc != compSC) {
+            compSC.repossessSTable(st.sc, st);
+            st.sc = compSC;
+        }
     }
 
     /* bitwise operations. */
