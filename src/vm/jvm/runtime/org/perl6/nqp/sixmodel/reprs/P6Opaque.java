@@ -313,6 +313,10 @@ public class P6Opaque extends REPR {
                     getBoxedVisitor.visitVarInsn(Opcodes.ALOAD, 1);
                     String methodDesc = "(ILorg/perl6/nqp/runtime/ThreadContext;)Lorg/perl6/nqp/sixmodel/SixModelObject;";
                     getBoxedVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, className, "autoViv", methodDesc);
+                    getBoxedVisitor.visitInsn(Opcodes.DUP);
+                    getBoxedVisitor.visitVarInsn(Opcodes.ALOAD, 0);
+                    getBoxedVisitor.visitInsn(Opcodes.SWAP);
+                    getBoxedVisitor.visitFieldInsn(Opcodes.PUTFIELD, className, field, desc);
                     getBoxedVisitor.visitLabel(end);
                     getBoxedVisitor.visitInsn(Opcodes.ARETURN);
                 }
