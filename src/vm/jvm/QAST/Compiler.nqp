@@ -1359,15 +1359,15 @@ QAST::OperationsJAST.add_core_op('call', sub ($qastcomp, $node) {
         # Emit the call. Note, name passed as extra arg as some valid names in
         # Perl 6 are not valid method names on the JVM. We use the fact that
         # the stack was spilled to sneak the ThreadContext arg in.
+        nqp::unshift(@argstuff[2], 'I');
+        nqp::unshift(@argstuff[2], $TYPE_STR);
+        $il.append(JAST::PushSVal.new( :value($node.name) ));
+        $il.append(JAST::PushIndex.new( :value($cs_idx) ));
         $il.append($ALOAD_1);
         $*STACK.obtain($il, |@argstuff[1]) if @argstuff[1];
         $il.append(JAST::InvokeDynamic.new(
-            'subcall', 'V', @argstuff[2],
-            'org/perl6/nqp/runtime/IndyBootstrap', 'subcall',
-            [
-                JAST::PushSVal.new( :value($node.name) ),
-                JAST::PushIndex.new( :value($cs_idx) )
-            ]
+            'subcall_noa', 'V', @argstuff[2],
+            'org/perl6/nqp/runtime/IndyBootstrap', 'subcall_noa'
         ));
     }
     
@@ -1384,14 +1384,13 @@ QAST::OperationsJAST.add_core_op('call', sub ($qastcomp, $node) {
 
         # Emit the call, using the same thread context trick. The first thing
         # will be invoked.
+        nqp::unshift(@argstuff[2], 'I');
+        $il.append(JAST::PushIndex.new( :value($cs_idx) ));
         $il.append($ALOAD_1);
         $*STACK.obtain($il, |@argstuff[1]) if @argstuff[1];
         $il.append(JAST::InvokeDynamic.new(
-            'indcall', 'V', @argstuff[2],
-            'org/perl6/nqp/runtime/IndyBootstrap', 'indcall',
-            [
-                JAST::PushIndex.new( :value($cs_idx) )
-            ]
+            'indcall_noa', 'V', @argstuff[2],
+            'org/perl6/nqp/runtime/IndyBootstrap', 'indcall_noa'
         ));
     }
 
@@ -1427,15 +1426,15 @@ QAST::OperationsJAST.add_core_op('callmethod', -> $qastcomp, $node {
         # Emit the call. Note, name passed as extra arg as some valid names in
         # Perl 6 are not valid method names on the JVM. We use the fact that
         # the stack was spilled to sneak the ThreadContext arg in.
+        nqp::unshift(@argstuff[2], 'I');
+        nqp::unshift(@argstuff[2], $TYPE_STR);
+        $il.append(JAST::PushSVal.new( :value($node.name) ));
+        $il.append(JAST::PushIndex.new( :value($cs_idx) ));
         $il.append($ALOAD_1);
         $*STACK.obtain($il, |@argstuff[1]) if @argstuff[1];
         $il.append(JAST::InvokeDynamic.new(
-            'methcall', 'V', @argstuff[2],
-            'org/perl6/nqp/runtime/IndyBootstrap', 'methcall',
-            [
-                JAST::PushSVal.new( :value($node.name) ),
-                JAST::PushIndex.new( :value($cs_idx) )
-            ]
+            'methcall_noa', 'V', @argstuff[2],
+            'org/perl6/nqp/runtime/IndyBootstrap', 'methcall_noa',
         ));
     }
     
@@ -1458,14 +1457,13 @@ QAST::OperationsJAST.add_core_op('callmethod', -> $qastcomp, $node {
         $*STACK.spill_to_locals($il);
         
         # Emit the call.
+        nqp::unshift(@argstuff[2], 'I');
+        $il.append(JAST::PushIndex.new( :value($cs_idx) ));
         $il.append($ALOAD_1);
         $*STACK.obtain($il, |@argstuff[1]) if @argstuff[1];
         $il.append(JAST::InvokeDynamic.new(
-            'indmethcall', 'V', @argstuff[2],
-            'org/perl6/nqp/runtime/IndyBootstrap', 'indmethcall',
-            [
-                JAST::PushIndex.new( :value($cs_idx) )
-            ]
+            'indmethcall_noa', 'V', @argstuff[2],
+            'org/perl6/nqp/runtime/IndyBootstrap', 'indmethcall_noa'
         ));
     }
 
@@ -3885,14 +3883,12 @@ class QAST::CompilerJAST {
         my $handle := nqp::scgethandle($sc);
         my $idx    := nqp::scgetobjidx($sc, $val);
         my $il     := JAST::InstructionList.new();
+        $il.append(JAST::PushSVal.new( :value($handle) ));
+        $il.append(JAST::PushIndex.new( :value($idx) ));
         $il.append($ALOAD_1);
         $il.append(JAST::InvokeDynamic.new(
-            'wval', $TYPE_SMO, [$TYPE_TC],
-            'org/perl6/nqp/runtime/IndyBootstrap', 'wval',
-            [
-                JAST::PushSVal.new( :value($handle) ),
-                JAST::PushIVal.new( :value($idx) )
-            ]
+            'wval_noa', $TYPE_SMO, [$TYPE_STR, 'I', $TYPE_TC],
+            'org/perl6/nqp/runtime/IndyBootstrap', 'wval_noa'
         ));
         result($il, $RT_OBJ);
     }
