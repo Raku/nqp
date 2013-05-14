@@ -155,7 +155,9 @@ public class P6Opaque extends REPR {
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "org/perl6/nqp/sixmodel/SixModelObject", methodName, 
                 Type.getMethodDescriptor(retType, argTypes));
         
-        mv.visitInsn(retType == Type.VOID_TYPE ? Opcodes.RETURN : Opcodes.ARETURN);
+        mv.visitInsn(retType == Type.VOID_TYPE ? Opcodes.RETURN : 
+                     retType == Type.LONG_TYPE ? Opcodes.LRETURN :
+                                                 Opcodes.ARETURN);
         mv.visitLabel(label);
         mv.visitInsn(Opcodes.POP);
     }
@@ -279,6 +281,34 @@ public class P6Opaque extends REPR {
             }
         }
         
+        /* is_attribute_initialized */
+        MethodVisitor isInitVisitor;
+        Label isInitSwitch = null;
+        Label[] isInitLabels = null;
+        Label isInitDefault = new Label();
+        Label isInitNull = new Label();
+        {
+            String descriptor = Type.getMethodDescriptor(Type.LONG_TYPE, 
+                    new Type[] { tcType, smoType, Type.getType(String.class), Type.LONG_TYPE });
+            isInitVisitor = cw.visitMethod(Opcodes.ACC_PUBLIC, "is_attribute_initialized", descriptor, null, null);
+            isInitVisitor.visitCode();
+            addDelegation(isInitVisitor, "is_attribute_initialized", Type.LONG_TYPE,
+                    new Type[] { tcType, smoType, Type.getType(String.class), Type.LONG_TYPE }, false);
+
+            isInitVisitor.visitVarInsn(Opcodes.LLOAD, 4);
+            isInitVisitor.visitInsn(Opcodes.L2I);
+
+            if (attrInfoList.size() > 0) {
+                isInitLabels = new Label[attrInfoList.size()];
+                for (int i = 0; i < attrInfoList.size(); i++) {
+                    isInitLabels[i] = new Label();
+                }
+                isInitSwitch = new Label();
+                isInitVisitor.visitLabel(isInitSwitch);
+                isInitVisitor.visitTableSwitchInsn(0, attrInfoList.size() - 1, isInitDefault, isInitLabels);
+            }
+        }
+        
         /* Now add all of the required fields and fill out the methods. */
         for (int i = 0; i < attrInfoList.size(); i++) {
             AttrInfo attr = attrInfoList.get(i);
@@ -324,6 +354,15 @@ public class P6Opaque extends REPR {
                     getBoxedVisitor.visitInsn(Opcodes.ARETURN);
                 }
                 
+                /* Add is init code. */
+                isInitVisitor.visitLabel(isInitLabels[i]);
+                isInitVisitor.visitVarInsn(Opcodes.ALOAD, 0);
+                isInitVisitor.visitFieldInsn(Opcodes.GETFIELD, className, field, desc);
+                isInitVisitor.visitJumpInsn(Opcodes.IFNULL, isInitNull);
+                isInitVisitor.visitInsn(Opcodes.ICONST_1);
+                isInitVisitor.visitInsn(Opcodes.I2L);
+                isInitVisitor.visitInsn(Opcodes.LRETURN);
+                
                 /* Native variants should just throw. */
                 bindNativeVisitor.visitLabel(bindNativeLabels[i]);
                 bindNativeVisitor.visitVarInsn(Opcodes.ALOAD, 0);
@@ -343,6 +382,12 @@ public class P6Opaque extends REPR {
                 attr.st.REPR.inlineBind(tc, attr.st, bindNativeVisitor, className, prefix);
                 getNativeVisitor.visitLabel(getNativeLabels[i]);
                 attr.st.REPR.inlineGet(tc, attr.st, getNativeVisitor, className, prefix);
+                
+                /* Add is init code. */
+                isInitVisitor.visitLabel(isInitLabels[i]);
+                isInitVisitor.visitInsn(Opcodes.ICONST_1);
+                isInitVisitor.visitInsn(Opcodes.I2L);
+                isInitVisitor.visitInsn(Opcodes.LRETURN);
                 
                 /* Reference variants should just throw. */                
                 bindBoxedVisitor.visitLabel(bindBoxedLabels[i]);
@@ -426,9 +471,24 @@ public class P6Opaque extends REPR {
             getNativeVisitor.visitJumpInsn(Opcodes.GOTO, getNativeSwitch);
         else
             getNativeVisitor.visitInsn(Opcodes.RETURN);
-
         getNativeVisitor.visitMaxs(6, 6);
         getNativeVisitor.visitEnd();
+        
+        /* Finish is_attribute_initialized. */
+        isInitVisitor.visitLabel(isInitDefault);
+        isInitVisitor.visitVarInsn(Opcodes.ALOAD, 0);
+        isInitVisitor.visitVarInsn(Opcodes.ALOAD, 2);
+        isInitVisitor.visitVarInsn(Opcodes.ALOAD, 3);
+        isInitVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, className, "resolveAttribute", 
+                "(Lorg/perl6/nqp/sixmodel/SixModelObject;Ljava/lang/String;)I");
+        if (attrInfoList.size() > 0)
+            isInitVisitor.visitJumpInsn(Opcodes.GOTO, isInitSwitch);
+        isInitVisitor.visitLabel(isInitNull);
+        isInitVisitor.visitInsn(Opcodes.ICONST_1);
+        isInitVisitor.visitInsn(Opcodes.I2L);
+        isInitVisitor.visitInsn(Opcodes.LRETURN);
+        isInitVisitor.visitMaxs(0, 0);
+        isInitVisitor.visitEnd();   
 
         /* Finally, add empty constructor and generate the JVM storage class. */
         MethodVisitor constructor = cw.visitMethod(Opcodes.ACC_PUBLIC, "<init>", "()V", null, null);
