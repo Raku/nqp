@@ -1683,6 +1683,8 @@ public final class Ops {
         /* Null always type checks false. */
         if (obj == null)
             return 0;
+        obj = decont(obj, tc);
+        type = decont(type, tc);
 
         int typeCheckMode = type.st.ModeFlags & STable.TYPE_CHECK_CACHE_FLAG_MASK;
         SixModelObject[] cache = obj.st.TypeCheckCache;
