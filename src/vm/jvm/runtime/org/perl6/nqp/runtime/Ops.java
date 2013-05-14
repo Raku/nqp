@@ -2299,6 +2299,22 @@ public final class Ops {
         return makeBI(tc, type, valA.multiply(valB).divide(gcd));
     }
     
+    public static long isnanorinf(double n) {
+        return Double.isInfinite(n) || Double.isNaN(n) ? 1 : 0;
+    }
+    
+    public static double inf() {
+        return Double.POSITIVE_INFINITY;
+    }
+    
+    public static double neginf() {
+        return Double.NEGATIVE_INFINITY ;
+    }
+    
+    public static double nan() {
+        return Double.NaN;
+    }
+    
     public static SixModelObject radix(long radix, String str, long zpos, long flags, ThreadContext tc) {
         double zvalue = 0.0;
         double zbase = 1.0;
