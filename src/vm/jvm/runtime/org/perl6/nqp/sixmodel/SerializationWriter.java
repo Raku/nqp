@@ -738,6 +738,34 @@ public class SerializationWriter {
         }
     }
     
+    /* Goes through the list of repossessions and serializes them all. */
+    private void serializeRepossessions() {
+        /* Allocate table space, provided we've actually something to do. */
+        int numRepos = sc.rep_indexes.size();
+        if (numRepos == 0)
+            return;
+        growToHold(REPOS, numRepos * REPOS_TABLE_ENTRY_SIZE);
+        
+        /* Make entries. */
+        for (int i = 0; i < numRepos; i++) {
+            int objIdx = sc.rep_indexes.get(i) >> 1;
+            int isST = sc.rep_indexes.get(i) & 1;
+            SerializationContext origSC = sc.rep_scs.get(i);
+
+            /* Work out original object's SC location. */
+            int origSCIdx = getSCId(origSC);
+            int origIdx = isST != 0
+                ? origSC.root_stables.indexOf(sc.root_stables.get(objIdx))
+                : origSC.root_objects.indexOf(sc.root_objects.get(objIdx));
+            
+            /* Write table row. */
+            outputs[REPOS].putInt(isST);
+            outputs[REPOS].putInt(objIdx);
+            outputs[REPOS].putInt(origSCIdx);
+            outputs[REPOS].putInt(origIdx);
+        }
+    }
+    
     /* This is the overall serialization loop. It keeps an index into the list of
      * STables and objects in the SC. As we discover new ones, they get added. We
      * finished when we've serialized everything. */
@@ -777,7 +805,6 @@ public class SerializationWriter {
         
         /* Finally, serialize repossessions table (this can't make any more
          * work, so is done as a separate step here at the end). */
-        /* XXX */
-        /*serializeRepossessions();*/
+        serializeRepossessions();
     }
 }
