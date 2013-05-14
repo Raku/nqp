@@ -95,8 +95,14 @@ public class SerializationReader {
         }
         
         // Handle any reposessions.
+        sc.root_stables.ensureCapacity(stTableEntries);
+        for (int i = 0; i < stTableEntries; i++)
+            sc.root_stables.add(null);
+        sc.root_objects.ensureCapacity(objTableEntries);
+        for (int i = 0; i < objTableEntries; i++)
+            sc.root_objects.add(null);
         if (reposTableEntries > 0)
-            throw new RuntimeException("Reposession of SC objects NYI");
+            repossess();
         
         // Stub all of the STables and objects.
         stubSTables();
@@ -230,8 +236,51 @@ public class SerializationReader {
         }
     }
     
+    /* Repossess an object or STable. */
+    private void repossess() {
+        for (int i = 0; i < reposTableEntries; i++) {
+            /* Go to table row. */
+            orig.position(reposTableOffset + i * REPOS_TABLE_ENTRY_SIZE);
+            
+            /* Do appropriate type of repossession. */
+            int repoType = orig.getInt();
+            int objIdx = orig.getInt();
+            int origSCIdx = orig.getInt();
+            int origObjIdx = orig.getInt();
+            if (repoType == 0) {
+                /* Get object to repossess. */
+                SerializationContext origSC = locateSC(origSCIdx);
+                SixModelObject origObj = origSC.root_objects.get(origObjIdx);
+                
+                /* Put it into objects root set at the apporpriate slot. */
+                sc.root_objects.set(objIdx, origObj);
+                
+                /* Ensure we aren't already trying to repossess the object. */
+                /* XXX TODO */
+            }
+            else if (repoType == 1) {
+                /* Get STable to repossess. */
+                SerializationContext origSC = locateSC(origSCIdx);
+                STable origST = origSC.root_stables.get(origObjIdx);
+                
+                /* Put it into STables root set at the apporpriate slot. */
+                sc.root_stables.set(objIdx, origST);
+                
+                /* Ensure we aren't already trying to repossess the STable. */
+                /* XXX TODO */
+            }
+            else {
+                throw new RuntimeException("Unknown repossession type");
+            }
+        }
+    }
+    
     private void stubSTables() {
         for (int i = 0; i < stTableEntries; i++) {
+            // May already have it, due to repossession.
+            if (sc.root_stables.get(i) != null)
+                continue;
+            
             // Look up representation.
             orig.position(stTableOffset + i * STABLES_TABLE_ENTRY_SIZE);
             REPR repr = REPRRegistry.getByName(lookupString(orig.getInt()));
@@ -239,12 +288,16 @@ public class SerializationReader {
             // Create STable stub and add it to the root STable set.
             STable st = new STable(repr, null);
             st.sc = sc;
-            sc.root_stables.add(st);
+            sc.root_stables.set(i, st);
         }
     }
     
     private void stubObjects() {
         for (int i = 0; i < objTableEntries; i++) {
+            // May already have it, due to repossession.
+            if (sc.root_objects.get(i) != null)
+                continue;
+            
             // Look up STable.
             orig.position(objTableOffset + i * OBJECTS_TABLE_ENTRY_SIZE);
             STable st = lookupSTable(orig.getInt(), orig.getInt());
@@ -265,7 +318,7 @@ public class SerializationReader {
             
             // Place object in SC root set.
             stubObj.sc = sc;
-            sc.root_objects.add(stubObj);
+            sc.root_objects.set(i, stubObj);
         }
     }
     
