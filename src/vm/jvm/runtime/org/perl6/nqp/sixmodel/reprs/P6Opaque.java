@@ -517,6 +517,18 @@ public class P6Opaque extends REPR {
         obj.st = newType.st;
     }
     
+    public StorageSpec get_storage_spec(ThreadContext tc, STable st) {
+        P6OpaqueREPRData rd = (P6OpaqueREPRData)st.REPRData;
+        StorageSpec ss = new StorageSpec();
+        if (rd.unboxIntSlot >= 0)
+            ss.can_box += StorageSpec.CAN_BOX_INT;
+        if (rd.unboxNumSlot >= 0)
+            ss.can_box += StorageSpec.CAN_BOX_NUM;
+        if (rd.unboxStrSlot >= 0)
+            ss.can_box += StorageSpec.CAN_BOX_STR;
+        return ss;
+    }
+    
     private class ByteClassLoader extends ClassLoader {
         private byte[] bytes;
         
