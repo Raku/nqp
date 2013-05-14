@@ -42,6 +42,11 @@ public class StaticCodeInfo implements Cloneable {
     public SixModelObject[] oLexStatic;
     
     /**
+     * Flags for each static lexical usage.
+     */
+    public byte[] oLexStaticFlags;
+    
+    /**
      * Names of the lexicals we have of each of the base types.
      */
     public String[] oLexicalNames;
@@ -130,15 +135,19 @@ public class StaticCodeInfo implements Cloneable {
         this.sLexicalNames = sLexicalNames;
         this.handlers = handlers;
         this.staticCode = staticCode;
-        if (oLexicalNames != null)
+        if (oLexicalNames != null) {
             this.oLexStatic = new SixModelObject[oLexicalNames.length];
+            this.oLexStaticFlags = new byte[oLexicalNames.length];
+        }
     }
     
     public StaticCodeInfo clone() {
         try {
             StaticCodeInfo result = (StaticCodeInfo)super.clone();
-            if (result.oLexStatic != null)
+            if (result.oLexStatic != null) {
                 result.oLexStatic = result.oLexStatic.clone();
+                result.oLexStaticFlags = result.oLexStaticFlags.clone();
+            }
             return result;
         }
         catch (Exception e) {

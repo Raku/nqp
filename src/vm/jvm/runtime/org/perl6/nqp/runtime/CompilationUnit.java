@@ -143,7 +143,7 @@ public abstract class CompilationUnit {
             if (idx == null)
                 new RuntimeException("Invalid lexical name '" + lexName + "' in static lexical installation");
             cr.staticInfo.oLexStatic[idx] = tc.gc.scs.get(handle).root_objects.get(scIdx);
-            /* XXX Process flags. */
+            cr.staticInfo.oLexStaticFlags[idx] = (byte)flags;
         }
      }
     

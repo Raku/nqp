@@ -110,8 +110,20 @@ public class CallFrame {
         }
         
         // Set up lexical storage.
-        if (sci.oLexicalNames != null)
-            this.oLex = sci.oLexStatic.clone();
+        if (sci.oLexicalNames != null) {
+            int numoLex = sci.oLexStatic.length;
+            this.oLex = new SixModelObject[numoLex];
+            for (int i = 0; i < numoLex; i++) {
+                switch (sci.oLexStaticFlags[i]) {
+                case 0:
+                    this.oLex[i] = sci.oLexStatic[i];
+                    break;
+                default:
+                    this.oLex[i] = sci.oLexStatic[i].clone(tc);
+                    break;
+                }
+            }
+        }
         if (sci.iLexicalNames != null)
             this.iLex = new long[sci.iLexicalNames.length];
         if (sci.nLexicalNames != null)
