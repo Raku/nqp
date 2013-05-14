@@ -693,7 +693,7 @@ public class JASTToJVMBytecode {
         else if (bits.length == 5)
             numExtraArgs = new Integer(bits[4]);
         else
-            throw new RuntimeException("invokedynamic needs 4 arguments");
+            throw new RuntimeException("invokedynamic needs 4 or 5 arguments");
         
         MethodType bsmMT = MethodType.methodType(CallSite.class, MethodHandles.Lookup.class,
                 java.lang.String.class, MethodType.class);
