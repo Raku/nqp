@@ -729,7 +729,8 @@ public class SerializationWriter {
         ByteBuffer check = this.outputs[idx];
         int position = check.position();
         if (position + required >= check.capacity()) {
-            ByteBuffer replacement = ByteBuffer.allocate(check.capacity() * 2);
+            ByteBuffer replacement = ByteBuffer.allocate(
+                Math.max(check.capacity() * 2, position + required));
             replacement.order(ByteOrder.LITTLE_ENDIAN);
             check.position(0);
             replacement.put(check);
