@@ -3493,12 +3493,13 @@ class QAST::CompilerJAST {
             $resultchild := $n - 1;
         }
         
-        if $node {
-            my $line := HLL::Compiler.lineof($node.orig(), $node.from(), :cache(1));            
-            $il.append(JAST::Annotation.new( :line($line) ));
-        }
-            
         for @stmts {
+            if $_.node {
+                my $node := $_.node;
+                my $line := HLL::Compiler.lineof($node.orig(), $node.from(), :cache(1));            
+                $il.append(JAST::Annotation.new( :line($line) ));
+            }
+            
             my $void := $all_void || $i != $resultchild;
             if $void {
                 if nqp::istype($_, QAST::Want) {
