@@ -2204,10 +2204,15 @@ public final class Ops {
     
     /* Smart coercions. */
     public static String smart_stringify(SixModelObject obj, ThreadContext tc) {
+        // If it can unbox to a string, that wins right off.
+        StorageSpec ss = obj.st.REPR.get_storage_spec(tc, obj.st);
+        if ((ss.can_box & StorageSpec.CAN_BOX_STR) != 0 && !(obj instanceof TypeObject))
+            return obj.get_str(tc);
+        
         // If it has a Str method, that wins.
         // We could put this in the generated code, but it's here to avoid the
         // bulk.
-        SixModelObject numMeth = obj.st.MethodCache.get("Str");
+        SixModelObject numMeth = obj.st.MethodCache == null ? null : obj.st.MethodCache.get("Str");
         if (numMeth != null) {
             invokeDirect(tc, numMeth, invocantCallSite, new Object[] { obj });
             return result_s(tc.curFrame);
@@ -2217,10 +2222,7 @@ public final class Ops {
         if (obj instanceof TypeObject)
             return "";
         
-        // See if it can unbox to a primitive we can stringify.
-        StorageSpec ss = obj.st.REPR.get_storage_spec(tc, obj.st);
-        if ((ss.can_box & StorageSpec.CAN_BOX_STR) != 0)
-            return obj.get_str(tc);
+        // See if it can unbox to another primitive we can stringify.
         if ((ss.can_box & StorageSpec.CAN_BOX_INT) != 0)
             return coerce_i2s(obj.get_int(tc));
         if ((ss.can_box & StorageSpec.CAN_BOX_NUM) != 0)
