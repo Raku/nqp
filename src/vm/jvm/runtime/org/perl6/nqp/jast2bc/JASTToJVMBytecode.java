@@ -71,7 +71,7 @@ public class JASTToJVMBytecode {
     private static JavaClass buildClassFrom(BufferedReader in) throws Exception
     {
         // Read in class name, superclass and any fields.
-        String curLine, className = null, superName = null;
+        String curLine, className = null, superName = null, fileName = null;
         List<String> fieldLines = new ArrayList<String>();
         while ((curLine = in.readLine()) != null) {
             if (curLine.startsWith("+ class ")) {
@@ -79,6 +79,9 @@ public class JASTToJVMBytecode {
             }
             else if (curLine.startsWith("+ super ")) {
                 superName = curLine.substring("+ super ".length());
+            }
+            else if (curLine.startsWith("+ filename ")) {
+            	fileName = curLine.substring("+ filename ".length());
             }
             else if (curLine.startsWith("+ field ")) {
                 fieldLines.add(curLine.substring("+ field ".length()));
@@ -97,10 +100,11 @@ public class JASTToJVMBytecode {
 
         className = className.replace('.', '/');
         superName = superName.replace('.', '/');
-
+        
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
         cw.visit(Opcodes.V1_7, Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, className, null, 
                 superName, null);
+        cw.visitSource(fileName, null);
         
         // Add the fields.
         for (String field : fieldLines) {
@@ -278,6 +282,12 @@ public class JASTToJVMBytecode {
                 else if (curLine.equals(".endtry")) {
                     tryStartStack.pop();
                     m.visitLabel(tryEndStack.pop());
+                }
+                else if (curLine.startsWith(".line ")) {
+                	int lineNumber = Integer.parseInt(curLine.substring(".line ".length()), 10);
+                	Label l = new Label();
+                	m.visitLabel(l);
+                	m.visitLineNumber(lineNumber, l);
                 }
                 else {
                     throw new Exception("Don't understand directive: " + curLine);
