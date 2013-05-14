@@ -2540,6 +2540,10 @@ public final class Ops {
         return new StringBuffer(str).reverse().toString();
     }
     
+    public static String replace(String str, long offset, long count, String repl) {
+        return new StringBuffer(str).replace((int)offset, (int)(offset + count), repl).toString();
+    }
+    
     /* Brute force, but not normally needed for most programs. */
     private static HashMap<String, Character> cpNameMap;
     public static long codepointfromname(String name) {
