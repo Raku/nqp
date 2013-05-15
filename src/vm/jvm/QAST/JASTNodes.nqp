@@ -4,12 +4,14 @@ class JAST::Node {
 class JAST::Class is JAST::Node {
     has str $!name;
     has str $!super;
+    has str $!filename;
     has @!methods;
     has @!fields;
     
-    method BUILD(:$name!, :$super!) {
+    method BUILD(:$name!, :$super!, :$filename) {
         $!name    := $name;
         $!super   := $super;
+        $!filename := $filename;
         @!methods := [];
         @!fields  := [];
     }
@@ -30,6 +32,7 @@ class JAST::Class is JAST::Node {
         my @dumped;
         nqp::push(@dumped, "+ class $!name");
         nqp::push(@dumped, "+ super $!super");
+        nqp::push(@dumped, "+ filename $!filename");
         for @!fields {
             nqp::push(@dumped, $_.dump());
         }
@@ -352,6 +355,20 @@ class JAST::TryCatch is JAST::Node {
         ".catch $!type\n" ~
             $!catch.dump() ~ "\n" ~
         ".endtry"
+    }
+}
+
+class JAST::Annotation is JAST::Node {
+    has int $!line;
+    
+    method BUILD(:$line!) {
+        $!line := $line;
+    }    
+    
+    method line() { $!line }
+    
+    method dump() {
+        ".line $!line"
     }
 }
 

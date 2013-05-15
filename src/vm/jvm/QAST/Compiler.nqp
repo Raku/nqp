@@ -1,5 +1,6 @@
 use JASTNodes;
 use QASTNode;
+use NQPHLL;
 
 # Instruction constants for argument-less ops.
 my $ACONST_NULL := JAST::Instruction.new( :op('aconst_null') );
@@ -2823,12 +2824,15 @@ class QAST::CompilerJAST {
         # Wrap $source in a QAST::Block if it's not already a viable root node.
         $source := QAST::Block.new($source)
             unless nqp::istype($source, QAST::CompUnit) || nqp::istype($source, QAST::Block);
+
+        my $file := nqp::getlexdyn('$?FILES');
         
         # Set up a JAST::Class that will hold all the blocks (which become Java
         # methods) that we shall compile.
         my $*JCLASS := JAST::Class.new(
             :name($classname),
-            :super('org.perl6.nqp.runtime.CompilationUnit')
+            :super('org.perl6.nqp.runtime.CompilationUnit'),
+            :filename($file)
         );
         
         # We'll also need to keep track of all the blocks we compile into Java
@@ -3486,7 +3490,14 @@ class QAST::CompilerJAST {
         unless nqp::defined($resultchild) {
             $resultchild := $n - 1;
         }
+        
         for @stmts {
+            if $_.node {
+                my $node := $_.node;
+                my $line := HLL::Compiler.lineof($node.orig(), $node.from(), :cache(1));            
+                $il.append(JAST::Annotation.new( :line($line) ));
+            }
+            
             my $void := $all_void || $i != $resultchild;
             if $void {
                 if nqp::istype($_, QAST::Want) {
