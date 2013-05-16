@@ -2219,6 +2219,8 @@ public final class Ops {
     
     /* Smart coercions. */
     public static String smart_stringify(SixModelObject obj, ThreadContext tc) {
+        obj = decont(obj, tc);
+        
         // If it can unbox to a string, that wins right off.
         StorageSpec ss = obj.st.REPR.get_storage_spec(tc, obj.st);
         if ((ss.can_box & StorageSpec.CAN_BOX_STR) != 0 && !(obj instanceof TypeObject))
@@ -2253,9 +2255,16 @@ public final class Ops {
         throw ExceptionHandling.dieInternal(tc, "Cannot stringify this");
     }
     public static double smart_numify(SixModelObject obj, ThreadContext tc) {
-        // If it has a Num method, that wins.
-        // We could put this in the generated code, but it's here to avoid the
-        // bulk.
+        obj = decont(obj, tc);
+        
+        // If it can unbox as an int or a num, that wins right off.
+        StorageSpec ss = obj.st.REPR.get_storage_spec(tc, obj.st);
+        if ((ss.can_box & StorageSpec.CAN_BOX_INT) != 0)
+            return (double)obj.get_int(tc);
+        if ((ss.can_box & StorageSpec.CAN_BOX_NUM) != 0)
+            return obj.get_num(tc);
+        
+        // Otherwise, look for a Num method.
         SixModelObject numMeth = obj.st.MethodCache.get("Num");
         if (numMeth != null) {
             invokeDirect(tc, numMeth, invocantCallSite, new Object[] { obj });
@@ -2267,11 +2276,6 @@ public final class Ops {
             return 0.0;
 
         // See if it can unbox to a primitive we can numify.
-        StorageSpec ss = obj.st.REPR.get_storage_spec(tc, obj.st);
-        if ((ss.can_box & StorageSpec.CAN_BOX_INT) != 0)
-            return (double)obj.get_int(tc);
-        if ((ss.can_box & StorageSpec.CAN_BOX_NUM) != 0)
-            return obj.get_num(tc);
         if ((ss.can_box & StorageSpec.CAN_BOX_STR) != 0)
             return coerce_s2n(obj.get_str(tc));
         if (obj instanceof VMArrayInstance || obj instanceof VMHashInstance)
