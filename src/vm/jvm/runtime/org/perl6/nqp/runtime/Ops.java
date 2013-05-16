@@ -796,6 +796,20 @@ public final class Ops {
         }
         return null;
     }
+    public static SixModelObject getlexcaller(String name, ThreadContext tc) {
+        CallFrame curCallerFrame = tc.curFrame.caller;
+        while (curCallerFrame != null) {
+            CallFrame curFrame = curCallerFrame;
+            while (curFrame != null) {
+                Integer found = curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
+                if (found != null)
+                    return curFrame.oLex[found];
+                curFrame = curFrame.outer;    
+            }
+            curCallerFrame = curCallerFrame.caller;
+        }
+        return null;
+    }
     
     /* Context introspection. */
     public static SixModelObject ctx(ThreadContext tc) {
