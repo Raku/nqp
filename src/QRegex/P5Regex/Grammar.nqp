@@ -69,7 +69,7 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
         <![|)]>
         <!rxstopper>
         <atom>
-        [ <.ws> <quantifier=p5quantifier> ]**0..1
+        [ <.ws> <!before <rxstopper> > <quantifier=p5quantifier> ]**0..1
         <.ws>
     }
     
