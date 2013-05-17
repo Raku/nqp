@@ -3717,7 +3717,7 @@ class QAST::CompilerJAST {
                     $type := rttype_from_typeobj($node.returns);
                     my $char := $type == $RT_OBJ ?? '' !! '_' ~ typechar($type);
                     my $name_sval := QAST::SVal.new( :value($name) );
-                    return self.as_jast($*BINDVAL
+                    return self.as_jast_clear_bindval($*BINDVAL
                         ?? QAST::Op.new( :op("bindlex$char"), $name_sval, $*BINDVAL )
                         !! QAST::Op.new( :op("getlex$char"), $name_sval ));
                 }
