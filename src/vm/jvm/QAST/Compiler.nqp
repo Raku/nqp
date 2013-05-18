@@ -3220,10 +3220,13 @@ class QAST::CompilerJAST {
             # unique ID and name. (Note, always void return here as return values
             # are handled out of band).
             my $*JMETH := JAST::Method.new( :name(self.unique('qb_')), :returns('Void'), :static(0) );
+            $*JMETH.cr_name($node.name);
+            $*JMETH.cr_cuid($node.cuid);
             $*CODEREFS.register_method($*JMETH, $node.cuid, $node.name, @handlers);
             
             # Set outer if we have one.
             if nqp::istype($outer, BlockInfo) {
+                $*JMETH.cr_outer($outer.qast.cuid);
                 $*CODEREFS.set_outer($node.cuid, $outer.qast.cuid);
             }
             
@@ -3248,7 +3251,12 @@ class QAST::CompilerJAST {
             }
             
             # Stash lexical names.
-            $*CODEREFS.set_lexical_names($node.cuid, |$block.lexical_names_by_type());
+            my @lex_names := $block.lexical_names_by_type();
+            $*CODEREFS.set_lexical_names($node.cuid, |@lex_names);
+            $*JMETH.cr_olex(@lex_names[$RT_OBJ]);
+            $*JMETH.cr_ilex(@lex_names[$RT_INT]);
+            $*JMETH.cr_nlex(@lex_names[$RT_NUM]);
+            $*JMETH.cr_slex(@lex_names[$RT_STR]);
             
             # Emit prelude. This creates and stashes the CallFrame.
             $*JMETH.add_local('cf', $TYPE_CF);
@@ -3376,6 +3384,11 @@ class QAST::CompilerJAST {
                 $*JMETH.add_local($_.name, jtype($block.local_type($_.name)));
             }
             $*BLOCK_TA.add_temps_to_method($*JMETH);
+            
+            # Flatten handlers and store.
+            my @flat_handlers;
+            for @handlers { for $_ { nqp::push(@flat_handlers, $_) } }
+            $*JMETH.cr_handlers(@flat_handlers);
             
             # Add method body JAST.
             $il.append($body.jast);
