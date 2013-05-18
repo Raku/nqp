@@ -47,22 +47,6 @@ public class CodeRef extends SixModelObject {
     }
     
     /**
-     * Sets up the code-ref data structure.
-     */
-    public CodeRef(CompilationUnit compUnit, MethodHandle mh,
-            String name, String uniqueId,
-            String oLexicalNames, String iLexicalNames,
-            String nLexicalNames, String sLexicalNames,
-            long[][] handlers) {
-        staticInfo = new StaticCodeInfo(compUnit, mh, name,uniqueId,
-                oLexicalNames == null ? null : oLexicalNames.split("\\x00"),
-                iLexicalNames == null ? null : iLexicalNames.split("\\x00"),
-                nLexicalNames == null ? null : nLexicalNames.split("\\x00"),
-                sLexicalNames == null ? null : sLexicalNames.split("\\x00"),
-                handlers, this);
-    }
-    
-    /**
      * Clones the object.
      */
     public SixModelObject clone(ThreadContext tc) {

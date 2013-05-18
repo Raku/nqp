@@ -2339,35 +2339,22 @@ class QAST::CompilerJAST {
         has %!cuid_to_idx;
         has @!jastmeth_names;
         has @!cuids;
-        has @!names;
-        has @!lexical_name_lists;
-        has @!outer_mappings;
         has @!callsites;
         has %!callsite_map;
-        has @!handlers;
         
         method BUILD() {
             $!cur_idx := 0;
             %!cuid_to_idx := {};
             @!jastmeth_names := [];
             @!cuids := [];
-            @!names := [];
-            @!lexical_name_lists := [];
-            @!outer_mappings := [];
             @!callsites := [];
             %!callsite_map := {};
-            @!handlers := [];
         }
         
-        my $nolex := [[],[],[],[]];
-        my $noargs := [0,0,0,0];
-        method register_method($jastmeth, $cuid, $name, @handlers) {
+        method register_method($jastmeth, $cuid) {
             %!cuid_to_idx{$cuid} := $!cur_idx;
             nqp::push(@!jastmeth_names, $jastmeth.name);
             nqp::push(@!cuids, $cuid);
-            nqp::push(@!names, $name);
-            nqp::push(@!lexical_name_lists, $nolex);
-            nqp::push(@!handlers, @handlers);
             $!cur_idx := $!cur_idx + 1;
         }
         
@@ -2379,15 +2366,6 @@ class QAST::CompilerJAST {
         
         method cuid_to_jastmethname($cuid) {
             @!jastmeth_names[self.cuid_to_idx($cuid)]
-        }
-        
-        method set_lexical_names($cuid, @ilex, @nlex, @slex, @olex) {
-            @!lexical_name_lists[self.cuid_to_idx($cuid)] := [@ilex, @nlex, @slex, @olex];
-        }
-        
-        method set_outer($cuid, $outer_cuid) {
-            nqp::push(@!outer_mappings,
-                [self.cuid_to_idx($cuid), self.cuid_to_idx($outer_cuid)]);
         }
         
         method get_callsite_idx(@arg_types, @arg_names) {
@@ -3033,12 +3011,11 @@ class QAST::CompilerJAST {
             my $*JMETH := JAST::Method.new( :name(self.unique('qb_')), :returns('Void'), :static(0) );
             $*JMETH.cr_name($node.name);
             $*JMETH.cr_cuid($node.cuid);
-            $*CODEREFS.register_method($*JMETH, $node.cuid, $node.name, @handlers);
+            $*CODEREFS.register_method($*JMETH, $node.cuid);
             
             # Set outer if we have one.
             if nqp::istype($outer, BlockInfo) {
                 $*JMETH.cr_outer($outer.qast.cuid);
-                $*CODEREFS.set_outer($node.cuid, $outer.qast.cuid);
             }
             
             # Always take ThreadContext and callsite descriptor as arguments.
@@ -3063,7 +3040,6 @@ class QAST::CompilerJAST {
             
             # Stash lexical names.
             my @lex_names := $block.lexical_names_by_type();
-            $*CODEREFS.set_lexical_names($node.cuid, |@lex_names);
             $*JMETH.cr_olex(@lex_names[$RT_OBJ]);
             $*JMETH.cr_ilex(@lex_names[$RT_INT]);
             $*JMETH.cr_nlex(@lex_names[$RT_NUM]);

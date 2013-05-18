@@ -175,19 +175,6 @@ public abstract class CompilationUnit {
     }
     
     /**
-     * Installs a static lexical value.
-     * XXX Legacy, can go after re-bootstrap.
-     */
-    public SixModelObject setStaticLex(SixModelObject value, String name, String uniqueId) {
-        CodeRef cr = cuidToCodeRef.get(uniqueId);
-        Integer idx = cr.staticInfo.oTryGetLexicalIdx(name);
-        if (idx == null)
-            new RuntimeException("Invalid lexical name '" + name + "' in static lexical installation");
-        cr.staticInfo.oLexStatic[idx] = value;
-        return value;
-    }
-    
-    /**
      * Parses a bunch of info on static lexical values for a block and
      * installs each of them. TODO: lazify so we don't do it for blocks we
      * never execute.
