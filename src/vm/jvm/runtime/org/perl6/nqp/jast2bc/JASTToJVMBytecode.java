@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
@@ -241,6 +242,36 @@ public class JASTToJVMBytecode {
                             ? Opcodes.ACC_STATIC | Opcodes.ACC_PUBLIC
                             : Opcodes.ACC_PUBLIC), 
                             methodName, desc, null, null);
+                                  
+                 // Add code ref info annotation.
+                 if (crName != null) {
+                    Type crAnnType = Type.getType("Lorg/perl6/nqp/runtime/CodeRefAnnotation;");
+                    AnnotationVisitor av = m.visitAnnotation(crAnnType.getDescriptor(), true);
+                    av.visit("name", crName);
+                    av.visit("cuid", crCuid);
+                    av.visit("outerCuid", crOuter);
+                    
+                    AnnotationVisitor avLex;
+                    avLex = av.visitArray("oLexicalNames");
+                    for (int i = 0; i < croLex.size(); i++)
+                        avLex.visit(null, croLex.get(i));
+                    avLex.visitEnd();
+                    avLex = av.visitArray("iLexicalNames");
+                    for (int i = 0; i < criLex.size(); i++)
+                        avLex.visit(null, criLex.get(i));
+                    avLex.visitEnd();
+                    avLex = av.visitArray("nLexicalNames");
+                    for (int i = 0; i < crnLex.size(); i++)
+                        avLex.visit(null, crnLex.get(i));
+                    avLex.visitEnd();
+                    avLex = av.visitArray("sLexicalNames");
+                    for (int i = 0; i < crsLex.size(); i++)
+                        avLex.visit(null, crsLex.get(i));
+                    avLex.visitEnd();
+                    
+                    av.visit("handlers", crHandlers);
+                    av.visitEnd();
+                 }
                  
                  // Add locals.
                  for (Map.Entry<String, VariableDef> e : localVariables.entrySet()) {
