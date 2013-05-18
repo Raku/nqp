@@ -4017,9 +4017,6 @@ public final class Ops {
     }
     public static SixModelObject compunitmainline(SixModelObject obj, ThreadContext tc) {
         EvalResult res = (EvalResult)obj;
-        int mIdx = res.cu.mainlineIdx();
-        if (mIdx >= 0)
-            return res.cu.codeRefs[mIdx];
         return res.cu.lookupCodeRef(res.cu.mainlineCuid());
     }
     public static SixModelObject compunitcodes(SixModelObject obj, ThreadContext tc) {

@@ -2404,27 +2404,9 @@ class QAST::CompilerJAST {
         }
         
         method jastify() {
-            self.coderef_array();
-            self.outer_map_array();
             self.callsites();
         }
 
-        # Emits the code-ref array construction.
-        method coderef_array() {
-            my $gcr := JAST::Method.new( :name('getCodeRefs'), :returns("[$TYPE_CR;"), :static(0) );
-            $gcr.append($ACONST_NULL);
-            $gcr.append($ARETURN);
-            $*JCLASS.add_method($gcr);
-        }
-        
-        # Emits the mappings of code refs to their outer code refs.
-        method outer_map_array() {
-            my $gom := JAST::Method.new( :name('getOuterMap'), :returns("[Integer;"), :static(0) );
-            $gom.append($ACONST_NULL);
-            $gom.append($ARETURN);
-            $*JCLASS.add_method($gom);
-        }
-        
         method callsites() {
             my $csa := JAST::Method.new( :name('getCallSites'), :returns("[$TYPE_CSD"), :static(0) );
             

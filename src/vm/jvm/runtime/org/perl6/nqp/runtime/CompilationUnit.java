@@ -126,12 +126,6 @@ public abstract class CompilationUnit {
                 c.st = BOOTCodeSTable;
                 cuidToCodeRef.put(c.staticInfo.uniqueId, c);
             }
-            
-            /* Wire up outer relationships. */
-            int[] outerMap = getOuterMap();
-            for (int i = 0; i < outerMap.length; i += 2)
-                codeRefs[outerMap[i]].staticInfo.outerStaticInfo = 
-                    codeRefs[outerMap[i + 1]].staticInfo; 
         }
         
         /* Build callsite descriptors. */
@@ -143,14 +137,8 @@ public abstract class CompilationUnit {
         /* Run any deserialization code. */
         CodeRef desCodeRef = null;
         String desCuid = deserializeCuid();
-        if (desCuid != null) {
+        if (desCuid != null)
             desCodeRef = lookupCodeRef(desCuid);
-        }
-        else {
-            int dIdx = deserializeIdx();
-            if (dIdx >= 0)
-                desCodeRef = codeRefs[dIdx];
-        }
         if (desCodeRef != null)
             try {
                 Ops.invokeArgless(tc, desCodeRef);
@@ -167,14 +155,8 @@ public abstract class CompilationUnit {
     public void runLoadIfAvailable(ThreadContext tc) {
         CodeRef loadCodeRef = null;
         String loadCuid = loadCuid();
-        if (loadCuid != null) {
+        if (loadCuid != null)
             loadCodeRef = lookupCodeRef(loadCuid);
-        }
-        else {
-            int lIdx = loadIdx();
-            if (lIdx >= 0)
-                loadCodeRef = codeRefs[lIdx];
-        }
         if (loadCodeRef != null)
             try {
                 Ops.invokeArgless(tc, loadCodeRef);
@@ -227,29 +209,10 @@ public abstract class CompilationUnit {
      }
     
     /**
-     * Installs a single lexical value, either static, container or state.
-     * XXX Can go away after next rebootstrap.
-     */
-    public void setLexValue(String uniqueId, String name, String scHandle, int scIdx, int flags, ThreadContext tc) {
-        CodeRef cr = cuidToCodeRef.get(uniqueId);
-        Integer idx = cr.staticInfo.oTryGetLexicalIdx(name);
-        if (idx == null)
-            new RuntimeException("Invalid lexical name '" + name + "' in static lexical installation");
-        cr.staticInfo.oLexStatic[idx] = tc.gc.scs.get(scHandle).root_objects.get(scIdx);
-        /* XXX Process flags. */
-    }
-    
-    /**
      * Code generation emits this to build up the various CodeRef related
      * data structures.
      */
-    public abstract CodeRef[] getCodeRefs();
-    
-    /**
-     * Code generation emits this to describe outer relationships between
-     * the static code references.
-     */
-    public abstract int[] getOuterMap();
+    public CodeRef[] getCodeRefs() { return null; }
     
     /**
      * Code generation emits this to build up all the callsite descriptors
@@ -265,9 +228,6 @@ public abstract class CompilationUnit {
     /**
      * Code generation overrides this if there's an SC to deserialize.
      */
-    public int deserializeIdx() {
-        return -1;
-    }
     public String deserializeCuid() {
         return null;
     }
@@ -275,9 +235,6 @@ public abstract class CompilationUnit {
     /**
      * Code generation overrides this if there's an SC to deserialize.
      */
-    public int loadIdx() {
-        return -1;
-    }
     public String loadCuid() {
         return null;
     }
@@ -285,9 +242,6 @@ public abstract class CompilationUnit {
     /**
      * Code generation overrides this with the mainline blcok.
      */
-    public int mainlineIdx() {
-        return -1;
-    }
     public String mainlineCuid() {
         return null;
     }
