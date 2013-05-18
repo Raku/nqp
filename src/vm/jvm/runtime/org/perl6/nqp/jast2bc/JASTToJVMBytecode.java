@@ -141,6 +141,7 @@ public class JASTToJVMBytecode {
     
     private static boolean processMethod(BufferedReader in, ClassWriter c, String className) throws Exception {
         String curLine, methodName = null, returnType = null;
+        String crName = null, crCuid = null, crOuter = null;
         boolean isStatic = false;
         List<String> argNames = new ArrayList<String>();
         List<Type> argTypes = new ArrayList<Type>();
@@ -149,6 +150,11 @@ public class JASTToJVMBytecode {
         Map<String, Label> labelMap = new HashMap<String, Label>();
         Stack<Label> tryStartStack = new Stack<Label>();
         Stack<Label> tryEndStack = new Stack<Label>();
+        List<String> croLex = new ArrayList<String>();
+        List<String> criLex = new ArrayList<String>();
+        List<String> crnLex = new ArrayList<String>();
+        List<String> crsLex = new ArrayList<String>();
+        long[] crHandlers = null;
         int curArgIndex = 1;
         
         MethodVisitor m = null;
@@ -190,6 +196,32 @@ public class JASTToJVMBytecode {
                     Type t = processType(bits[3]);
                     localVariables.put(bits[2], new VariableDef(curArgIndex, t.getDescriptor()));
                     curArgIndex += (t == Type.LONG_TYPE || t == Type.DOUBLE_TYPE ? 2 : 1);
+                }
+                else if (curLine.startsWith("++ crname "))
+                    crName = curLine.substring("++ crname ".length());
+                else if (curLine.startsWith("++ crcuid "))
+                    crCuid = curLine.substring("++ crcuid ".length());
+                else if (curLine.startsWith("++ crouter "))
+                    crOuter = curLine.substring("++ crouter ".length());
+                else if (curLine.startsWith("++ olex "))
+                    croLex.add(curLine.substring("++ olex ".length()));
+                else if (curLine.startsWith("++ ilex "))
+                    criLex.add(curLine.substring("++ ilex ".length()));
+                else if (curLine.startsWith("++ nlex "))
+                    crnLex.add(curLine.substring("++ nlex ".length()));
+                else if (curLine.startsWith("++ slex "))
+                    crsLex.add(curLine.substring("++ slex ".length()));
+                else if (curLine.startsWith("++ handlers ")) {
+                    String suffix = curLine.substring("++ handlers ".length());
+                    if (!suffix.equals("")) {
+                        String[] longStrs = suffix.split("\\s");
+                        crHandlers = new long[longStrs.length];
+                        for (int i = 0; i < longStrs.length; i++)
+                            crHandlers[i] = Long.parseLong(longStrs[i]);
+                    }
+                    else {
+                        crHandlers = new long[0];
+                    }
                 }
                 else
                     throw new Exception("Cannot understand '" + curLine + "'");

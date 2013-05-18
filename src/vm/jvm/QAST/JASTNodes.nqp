@@ -57,7 +57,7 @@ class JAST::Field {
     method name(*@value) { @value ?? ($!name := @value[0]) !! $!name }
     method type(*@value) { @value ?? ($!type := @value[0]) !! $!type }
     method static(*@value) { @value ?? ($!static := @value[0]) !! $!static }
-
+    
     method dump() {
         "+ field $!name $!type " ~ ($!static ?? 'static' !! 'instance')
     }
@@ -112,6 +112,14 @@ class JAST::Method is JAST::Node {
     has @!arguments;
     has @!locals;
     has @!instructions;
+    has str $!cr_name;
+    has str $!cr_cuid;
+    has str $!cr_outer;
+    has @!cr_olex;
+    has @!cr_ilex;
+    has @!cr_nlex;
+    has @!cr_slex;
+    has @!cr_handlers;
     
     method BUILD(:$name!, :$returns!, :$static = 1) {
         $!name := $name;
@@ -120,6 +128,11 @@ class JAST::Method is JAST::Node {
         @!arguments := [];
         @!locals := [];
         @!instructions := [];
+        @!cr_olex := [];
+        @!cr_ilex := [];
+        @!cr_nlex := [];
+        @!cr_slex := [];
+        @!cr_handlers := [];
     }
     
     method add_argument($name, $type) {
@@ -150,6 +163,15 @@ class JAST::Method is JAST::Node {
     method locals() { @!locals }
     method instructions() { @!instructions }
     
+    method cr_name(*@value) { @value ?? ($!cr_name := @value[0]) !! $!cr_name }
+    method cr_cuid(*@value) { @value ?? ($!cr_cuid := @value[0]) !! $!cr_cuid }
+    method cr_outer(*@value) { @value ?? ($!cr_outer := @value[0]) !! $!cr_outer }
+    method cr_olex(*@value) { @value ?? (@!cr_olex := @value[0]) !! @!cr_olex }
+    method cr_ilex(*@value) { @value ?? (@!cr_ilex := @value[0]) !! @!cr_ilex }
+    method cr_nlex(*@value) { @value ?? (@!cr_nlex := @value[0]) !! @!cr_nlex }
+    method cr_slex(*@value) { @value ?? (@!cr_slex := @value[0]) !! @!cr_slex }
+    method cr_handlers(*@value) { @value ?? (@!cr_handlers := @value[0]) !! @!cr_handlers }
+    
     method dump() {
         my @dumped;
         nqp::push(@dumped, "+ method");
@@ -164,6 +186,14 @@ class JAST::Method is JAST::Node {
         for @!locals {
             nqp::push(@dumped, "++ local " ~ $_[0] ~ " " ~ $_[1]);
         }
+        nqp::push(@dumped, "++ crname $!cr_name");
+        nqp::push(@dumped, "++ crcuid $!cr_cuid");
+        nqp::push(@dumped, "++ crouter $!cr_outer");
+        for @!cr_olex { nqp::push(@dumped, "++ olex $_"); }
+        for @!cr_ilex { nqp::push(@dumped, "++ ilex $_"); }
+        for @!cr_nlex { nqp::push(@dumped, "++ nlex $_"); }
+        for @!cr_slex { nqp::push(@dumped, "++ slex $_"); }
+        nqp::push(@dumped, "++ handlers " ~ join(' ', @!cr_handlers));
         for @!instructions {
             nqp::push(@dumped, $_.dump());
         }
