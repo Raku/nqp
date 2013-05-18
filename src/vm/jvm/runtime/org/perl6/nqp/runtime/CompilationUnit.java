@@ -1,5 +1,11 @@
 package org.perl6.nqp.runtime;
 
+import java.lang.annotation.*;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodHandles.Lookup;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,20 +64,75 @@ public abstract class CompilationUnit {
      * Does initialization work for the compilation unit.
      */
     public void initializeCompilationUnit(ThreadContext tc) {
-        /* Place code references into a lookup table by unique ID. Also
-         * make sure each code ref has the appropriate STable. */
+        /* Look through methods for code refs. */
         STable BOOTCodeSTable = tc.gc.BOOTCode == null ? null : tc.gc.BOOTCode.st;
-        codeRefs = getCodeRefs();
-        for (CodeRef c : codeRefs) {
-            c.st = BOOTCodeSTable;
-            cuidToCodeRef.put(c.staticInfo.uniqueId, c);
+        ArrayList<CodeRef> codeRefList = new ArrayList<CodeRef>();
+        ArrayList<String> outerCuid = new ArrayList<String>();
+        Lookup l = MethodHandles.lookup();
+        boolean codeRefsFound = false;
+        try {
+            for (Method m : this.getClass().getDeclaredMethods()) {
+                if (m.isAnnotationPresent(CodeRefAnnotation.class)) {
+                    /* Got a code ref annotation. Turn to method handle. */
+                    CodeRefAnnotation cra = m.getAnnotation(CodeRefAnnotation.class);
+                    MethodHandle mh = l.unreflect(m).bindTo(this);
+                    
+                    /* Munge handlers. */
+                    long[] flatHandlers = cra.handlers();
+                    int hptr = 0;
+                    int numHandlers = (int)flatHandlers[hptr++];
+                    long[][] handlers = new long[numHandlers][];
+                    for (int i = 0; i < numHandlers; i++) {
+                        int handlerThings = (int)flatHandlers[hptr++];
+                        handlers[i] = new long[handlerThings];
+                        for (int j = 0; j < handlerThings; j++)
+                            handlers[i][j] = flatHandlers[hptr++];
+                    }
+                    
+                    /* Create and store. */
+                    String cuid = cra.cuid();
+                    CodeRef cr = new CodeRef(this, mh, cra.name(), cuid,
+                        cra.oLexicalNames(), cra.iLexicalNames(),
+                        cra.nLexicalNames(), cra.sLexicalNames(),
+                        handlers);
+                    cr.st = BOOTCodeSTable;
+                    codeRefList.add(cr);
+                    cuidToCodeRef.put(cuid, cr);
+                    
+                    /* Stash outer, for later resolution. */
+                    outerCuid.add(cra.outerCuid());
+                    
+                    codeRefsFound = true;
+                }
+            }
+            
+            /* Resolve outers. */
+            codeRefs = codeRefList.toArray(new CodeRef[0]);
+            for (int i = 0; i < codeRefs.length; i++) {
+                CodeRef outer = cuidToCodeRef.get(outerCuid.get(i));
+                if (outer != null)
+                    codeRefs[i].staticInfo.outerStaticInfo = outer.staticInfo;
+            }
+        }
+        catch (Throwable e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
         }
         
-        /* Wire up outer relationships. */
-        int[] outerMap = getOuterMap();
-        for (int i = 0; i < outerMap.length; i += 2)
-            codeRefs[outerMap[i]].staticInfo.outerStaticInfo = 
-                codeRefs[outerMap[i + 1]].staticInfo; 
+        /* If we didn't find any by annotations, this is the fallback. */
+        if (!codeRefsFound) {
+            codeRefs = getCodeRefs();
+            for (CodeRef c : codeRefs) {
+                c.st = BOOTCodeSTable;
+                cuidToCodeRef.put(c.staticInfo.uniqueId, c);
+            }
+            
+            /* Wire up outer relationships. */
+            int[] outerMap = getOuterMap();
+            for (int i = 0; i < outerMap.length; i += 2)
+                codeRefs[outerMap[i]].staticInfo.outerStaticInfo = 
+                    codeRefs[outerMap[i + 1]].staticInfo; 
+        }
         
         /* Build callsite descriptors. */
         callSites = getCallSites();
@@ -80,14 +141,23 @@ public abstract class CompilationUnit {
         hllConfig = tc.gc.getHLLConfigFor(this.hllName());
         
         /* Run any deserialization code. */
-        int dIdx = deserializeIdx();
-        if (dIdx >= 0)
+        CodeRef desCodeRef = null;
+        String desCuid = deserializeCuid();
+        if (desCuid != null) {
+            desCodeRef = lookupCodeRef(desCuid);
+        }
+        else {
+            int dIdx = deserializeIdx();
+            if (dIdx >= 0)
+                desCodeRef = codeRefs[dIdx];
+        }
+        if (desCodeRef != null)
             try {
-                Ops.invokeArgless(tc, codeRefs[dIdx]);
+                Ops.invokeArgless(tc, desCodeRef);
             }
             catch (Exception e)
             {
-                throw ExceptionHandling.dieInternal(tc, e.getMessage());
+                throw ExceptionHandling.dieInternal(tc, e.toString());
             }
     }
     
@@ -95,14 +165,23 @@ public abstract class CompilationUnit {
      * Runs code in the on-load hook, if one is available.
      */
     public void runLoadIfAvailable(ThreadContext tc) {
-        int lIdx = loadIdx();
-        if (lIdx >= 0)
+        CodeRef loadCodeRef = null;
+        String loadCuid = loadCuid();
+        if (loadCuid != null) {
+            loadCodeRef = lookupCodeRef(loadCuid);
+        }
+        else {
+            int lIdx = loadIdx();
+            if (lIdx >= 0)
+                loadCodeRef = codeRefs[lIdx];
+        }
+        if (loadCodeRef != null)
             try {
-                Ops.invokeArgless(tc, codeRefs[lIdx]);
+                Ops.invokeArgless(tc, loadCodeRef);
             }
             catch (Exception e)
             {
-                throw ExceptionHandling.dieInternal(tc, e.getMessage());
+                throw ExceptionHandling.dieInternal(tc, e.toString());
             }
     }
     
@@ -189,6 +268,9 @@ public abstract class CompilationUnit {
     public int deserializeIdx() {
         return -1;
     }
+    public String deserializeCuid() {
+        return null;
+    }
     
     /**
      * Code generation overrides this if there's an SC to deserialize.
@@ -196,11 +278,17 @@ public abstract class CompilationUnit {
     public int loadIdx() {
         return -1;
     }
+    public String loadCuid() {
+        return null;
+    }
     
     /**
      * Code generation overrides this with the mainline blcok.
      */
     public int mainlineIdx() {
         return -1;
+    }
+    public String mainlineCuid() {
+        return null;
     }
 }

@@ -244,7 +244,7 @@ public class JASTToJVMBytecode {
                             methodName, desc, null, null);
                                   
                  // Add code ref info annotation.
-                 if (crName != null) {
+                 if (crCuid != null && !crCuid.equals("")) {
                     Type crAnnType = Type.getType("Lorg/perl6/nqp/runtime/CodeRefAnnotation;");
                     AnnotationVisitor av = m.visitAnnotation(crAnnType.getDescriptor(), true);
                     av.visit("name", crName);

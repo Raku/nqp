@@ -128,6 +128,9 @@ class JAST::Method is JAST::Node {
         @!arguments := [];
         @!locals := [];
         @!instructions := [];
+        $!cr_name := '';
+        $!cr_cuid := '';
+        $!cr_outer := '';
         @!cr_olex := [];
         @!cr_ilex := [];
         @!cr_nlex := [];
