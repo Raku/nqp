@@ -3175,6 +3175,14 @@ public final class Ops {
         else
             throw ExceptionHandling.dieInternal(tc, "getextype needs an object with VMException representation");
     }
+    public static long setextype(SixModelObject obj, long category, ThreadContext tc) {
+        if (obj instanceof VMExceptionInstance) {
+            ((VMExceptionInstance)obj).category = category;
+            return category;
+        }
+        else
+            throw ExceptionHandling.dieInternal(tc, "setextype needs an object with VMException representation");
+    }
     public static String getmessage(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof VMExceptionInstance) {
             String msg = ((VMExceptionInstance)obj).message;
@@ -3184,11 +3192,35 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc, "getmessage needs an object with VMException representation");
         }
     }
+    public static String setmessage(SixModelObject obj, String msg, ThreadContext tc) {
+        if (obj instanceof VMExceptionInstance) {
+            ((VMExceptionInstance)obj).message = msg;
+            return msg;
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc, "setmessage needs an object with VMException representation");
+        }
+    }
     public static SixModelObject getpayload(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof VMExceptionInstance)
             return ((VMExceptionInstance)obj).payload;
         else
             throw ExceptionHandling.dieInternal(tc, "getpayload needs an object with VMException representation");
+    }
+    public static SixModelObject setpayload(SixModelObject obj, SixModelObject payload, ThreadContext tc) {
+        if (obj instanceof VMExceptionInstance) {
+            ((VMExceptionInstance)obj).payload = payload;
+            return payload;
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc, "setpayload needs an object with VMException representation");
+        }
+    }
+    public static SixModelObject newexception(ThreadContext tc) {
+        SixModelObject exType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.exceptionType;
+        SixModelObject exObj = (VMExceptionInstance)exType.st.REPR.allocate(tc, exType.st);
+        exObj.initialize(tc);
+        return exObj;
     }
     public static SixModelObject backtracestrings(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof VMExceptionInstance) {
