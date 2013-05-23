@@ -4008,6 +4008,9 @@ public final class Ops {
             res.jc = null;
             return obj;
         }
+        catch (ControlException e) {
+            throw e;
+        }
         catch (Exception e) {
             throw new RuntimeException(e);
         }

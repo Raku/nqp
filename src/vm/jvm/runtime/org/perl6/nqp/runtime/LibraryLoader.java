@@ -41,8 +41,12 @@ public class LibraryLoader {
             
             // Note that we already loaded it.
             loaded.add(origFilename);
-        } catch (Exception e) {
-            throw ExceptionHandling.dieInternal(tc, e.getMessage());
+        }
+        catch (ControlException e) {
+            throw e;
+        }
+        catch (Throwable e) {
+            throw ExceptionHandling.dieInternal(tc, e.toString());
         }
     }
     
