@@ -541,6 +541,7 @@ public class IndyBootstrap {
         
         /* Get the code ref. */
         CodeRef cr;
+        invokee = Ops.decont(invokee, tc);
         if (invokee instanceof CodeRef) {
             cr = (CodeRef)invokee;
         }
