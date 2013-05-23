@@ -75,7 +75,7 @@ Tag NQP by its release month ("YYYY.MM")
 
 =item 7.
 
-Uplaod the release tarball to L<http://rakudo.org/downloads/rakudo>:
+Upload the release tarball to L<http://rakudo.org/downloads/rakudo>:
 
   $ scp nqp-2013.12.tar.gz rakudo@rakudo.org:public_html/downloads/nqp/
 
