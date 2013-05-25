@@ -2613,11 +2613,10 @@ class QAST::CompilerJAST {
         # Wrap $source in a QAST::Block if it's not already a viable root node.
         $source := QAST::Block.new($source)
             unless nqp::istype($source, QAST::CompUnit) || nqp::istype($source, QAST::Block);
-
-        my $file := nqp::getlexdyn('$?FILES');
         
         # Set up a JAST::Class that will hold all the blocks (which become Java
         # methods) that we shall compile.
+        my $file := nqp::ifnull(nqp::getlexdyn('$?FILES'), "");
         my $*JCLASS := JAST::Class.new(
             :name($classname),
             :super('org.perl6.nqp.runtime.CompilationUnit'),
