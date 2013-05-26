@@ -44,10 +44,91 @@ public class NFA extends REPR {
 
     public void deserialize_finish(ThreadContext tc, STable st,
             SerializationReader reader, SixModelObject obj) {
-        // XXX TODO
+        NFAInstance body = (NFAInstance)obj;
+        
+        /* Read fates. */
+        body.fates = reader.readRef();
+        
+        /* Read number of states. */
+        body.numStates = (int)reader.readLong();
+        
+        if (body.numStates > 0) {
+            /* Read state edge list counts. */
+            int[] numStateEdges = new int[body.numStates];
+            for (int i = 0; i < body.numStates; i++)
+                numStateEdges[i] = (int)reader.readLong();
+                
+            /* Read state graph. */
+            body.states = new NFAStateInfo[body.numStates][];
+            for (int i = 0; i < body.numStates; i++) {
+                int edges = numStateEdges[i];
+                body.states[i] = new NFAStateInfo[edges];
+                for (int j = 0; j < edges; j++) {
+                    body.states[i][j] = new NFAStateInfo();
+                    body.states[i][j].act = (int)reader.readLong();
+                    body.states[i][j].to = (int)reader.readLong();
+                    switch (body.states[i][j].act) {
+                    case EDGE_FATE:
+                    case EDGE_CODEPOINT:
+                    case EDGE_CODEPOINT_NEG:
+                    case EDGE_CHARCLASS:
+                    case EDGE_CHARCLASS_NEG:
+                        body.states[i][j].arg_i = (int)reader.readLong();
+                        break;
+                    case EDGE_CHARLIST:
+                    case EDGE_CHARLIST_NEG:
+                        body.states[i][j].arg_s = reader.readStr();
+                        break;
+                    case EDGE_CODEPOINT_I:
+                    case EDGE_CODEPOINT_I_NEG: {
+                        body.states[i][j].arg_lc = (char)reader.readLong();
+                        body.states[i][j].arg_uc = (char)reader.readLong();
+                        break;
+                    }
+                    }
+                }
+            }
+        }
     }
     
     public void serialize(ThreadContext tc, SerializationWriter writer, SixModelObject obj) {
-        // XXX TODO
+        NFAInstance body = (NFAInstance)obj;
+        
+        /* Write fates. */
+        writer.writeRef(body.fates);
+        
+        /* Write number of states. */
+        writer.writeInt(body.numStates);
+        
+        /* Write state edge list counts. */
+        for (int i = 0; i < body.numStates; i++)
+            writer.writeInt(body.states[i].length);
+
+        /* Write state graph. */
+        for (int i = 0; i < body.numStates; i++) {
+            for (int j = 0; j < body.states[i].length; j++) {
+                writer.writeInt(body.states[i][j].act);
+                writer.writeInt(body.states[i][j].to);
+                switch (body.states[i][j].act) {
+                case EDGE_FATE:
+                case EDGE_CODEPOINT:
+                case EDGE_CODEPOINT_NEG:
+                case EDGE_CHARCLASS:
+                case EDGE_CHARCLASS_NEG:
+                    writer.writeInt(body.states[i][j].arg_i);
+                    break;
+                case EDGE_CHARLIST:
+                case EDGE_CHARLIST_NEG:
+                    writer.writeStr(body.states[i][j].arg_s);
+                    break;
+                case EDGE_CODEPOINT_I:
+                case EDGE_CODEPOINT_I_NEG: {
+                    writer.writeInt(body.states[i][j].arg_lc);
+                    writer.writeInt(body.states[i][j].arg_uc);
+                    break;
+                }
+                }
+            }
+        }
     }
 }
