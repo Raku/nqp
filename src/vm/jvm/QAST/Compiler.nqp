@@ -3498,15 +3498,20 @@ class QAST::CompilerJAST {
                 my int $i := 1;
                 my $cur_block := $*BLOCK.outer();
                 while nqp::istype($cur_block, BlockInfo) {
-                    $type := $cur_block.lexical_type($name);
-                    if nqp::defined($type) {
-                        $scopes := $i;
-                        $declarer := $cur_block;
+                    if $cur_block.qast<DYN_COMP_WRAPPER> {
                         $cur_block := NQPMu;
                     }
                     else {
-                        $cur_block := $cur_block.outer();
-                        $i++;
+                        $type := $cur_block.lexical_type($name);
+                        if nqp::defined($type) {
+                            $scopes := $i;
+                            $declarer := $cur_block;
+                            $cur_block := NQPMu;
+                        }
+                        else {
+                            $cur_block := $cur_block.outer();
+                            $i++;
+                        }
                     }
                 }
             }
