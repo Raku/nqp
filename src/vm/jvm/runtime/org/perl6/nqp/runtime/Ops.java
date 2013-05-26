@@ -3239,6 +3239,16 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc, "backtracestring needs an object with VMException representation");
         }
     }
+    public static SixModelObject _throw(SixModelObject obj, ThreadContext tc) {
+        if (obj instanceof VMExceptionInstance) {
+            VMExceptionInstance ex = (VMExceptionInstance)obj;
+            ex.origin = tc.curFrame;
+            return ExceptionHandling.handlerDynamic(tc, ex.category, ex);
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc, "throw needs an object with VMException representation");
+        }
+    }
     public static SixModelObject rethrow(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof VMExceptionInstance) {
             VMExceptionInstance ex = (VMExceptionInstance)obj;
