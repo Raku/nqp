@@ -105,6 +105,8 @@ following order.
   for the mode and a ref for the method slot)
 * container_spec (native int flag for if it exists; if true, then ref/string/int for
   the attribute and ref for the fetch method)
+* invocation_spec (native int flag for if it exists; if true, then ref for class handle,
+  str for attr name, int for hint and ref for invocation handler)
 
 After this, the REPR data is serialized (which is specific to the REPR in question).
 
