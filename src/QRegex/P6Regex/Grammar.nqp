@@ -125,12 +125,12 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     token termalt {
         <termconj>
-        [ '|' <![|]> [ { $*SEQ := 0; } <termconj> || <.throw_null_pattern> ] ]*
+        [ <!before <rxstopper> > '|' <![|]> [ { $*SEQ := 0; } <termconj> || <.throw_null_pattern> ] ]*
     }
 
     token termconj {
         <termish>
-        [ '&' <![&]> [ { $*SEQ := 0; } <termish> || <.throw_null_pattern> ] ]*
+        [ <!before <rxstopper> > '&' <![&]> [ { $*SEQ := 0; } <termish> || <.throw_null_pattern> ] ]*
     }
 
     token termish {
@@ -140,9 +140,10 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     }
 
     token quantified_atom {
+        <!rxstopper>
         <atom>
         [
-            <.ws> [ <quantifier> | <?before ':'> <backmod> <!alpha> ]
+            <.ws> [ <!before <rxstopper> > <quantifier> | <?before ':'> <backmod> <!alpha> ]
             [ <.ws> <separator> ]**0..1
         ]**0..1
     }
@@ -204,7 +205,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token metachar:sym<bs> { \\ <backslash> }
     token metachar:sym<mod> { <mod_internal> }
     token metachar:sym<quantifier> {
-        <quantifier> <.panic: 'Quantifier quantifies nothing'>
+        <!before <rxstopper> > <quantifier> <.panic: 'Quantifier quantifies nothing'>
     }
 
     ## we cheat here, really should be regex_infix:sym<~>

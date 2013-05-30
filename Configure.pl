@@ -126,9 +126,10 @@ MAIN: {
             $config{'dyncall_build'} = "cd 3rdparty/dyncall && $make BUILD_DIR=. -f GNUmakefile";
         } else {
             my $target_args = '';
-            #assume it's 64 bit for OSX, not perfect but better than nothing
-            if ($^O eq 'darwin') {
-              $target_args = " --target-x64";
+            # heuristic according to
+            # https://github.com/perl6/nqp/issues/100#issuecomment-18523608
+            if ($^O eq 'darwin' && qx/ld 2>&1/ =~ /inferred architecture x86_64/) {
+                $target_args = " --target-x64";
             }
             system_or_die('cd 3rdparty/dyncall && sh configure' . $target_args);
 

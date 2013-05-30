@@ -393,7 +393,7 @@ PMC * hllize(PARROT_INTERP, PMC *obj, INTVAL hll_id) {
             return obj;
         }
     }
-    else if (obj->vtable->base_type == enum_class_Sub) {
+    else if (obj->vtable->base_type == enum_class_Sub || obj->vtable->base_type == enum_class_Coroutine) {
         if (VTABLE_exists_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_code")))  {
             PMC *result;
             PMC *code = VTABLE_get_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_code"));

@@ -2139,6 +2139,7 @@ QAST::OperationsJAST.map_classlib_core_op('iterator', $TYPE_OPS, 'iter', [$RT_OB
 QAST::OperationsJAST.map_classlib_core_op('iterkey_s', $TYPE_OPS, 'iterkey_s', [$RT_OBJ], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('iterval', $TYPE_OPS, 'iterval', [$RT_OBJ], $RT_OBJ, :tc);
 
+(-> {
 # object opcodes
 QAST::OperationsJAST.map_jvm_core_op('null', 'aconst_null', [], $RT_OBJ);
 QAST::OperationsJAST.map_jvm_core_op('null_s', 'aconst_null', [], $RT_STR);
@@ -2197,6 +2198,7 @@ QAST::OperationsJAST.map_classlib_core_op('settypecheckmode', $TYPE_OPS, 'settyp
 QAST::OperationsJAST.map_classlib_core_op('objprimspec', $TYPE_OPS, 'objprimspec', [$RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('isinvokable', $TYPE_OPS, 'isinvokable', [$RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('setinvokespec', $TYPE_OPS, 'setinvokespec', [$RT_OBJ, $RT_OBJ, $RT_STR, $RT_OBJ], $RT_OBJ, :tc);
+})();
 
 # defined - overridden by HLL, but by default same as .DEFINITE.
 QAST::OperationsJAST.map_classlib_core_op('defined', $TYPE_OPS, 'isconcrete', [$RT_OBJ], $RT_INT, :tc);
