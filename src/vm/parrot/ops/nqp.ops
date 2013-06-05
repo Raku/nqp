@@ -2674,8 +2674,8 @@ inline op nqp_nfa_from_statelist(out PMC, invar PMC, invar PMC) :base_core {
     num_states = VTABLE_elements(interp, states) - 1;
     nfa->num_states = num_states;
     if (num_states > 0) {
-        nfa->num_state_edges = mem_sys_allocate(num_states * sizeof(INTVAL));
-        nfa->states = mem_sys_allocate(num_states * sizeof(NFAStateInfo *));
+        nfa->num_state_edges = mem_sys_allocate_zeroed(num_states * sizeof(INTVAL));
+        nfa->states = mem_sys_allocate_zeroed(num_states * sizeof(NFAStateInfo *));
     }
     for (i = 0; i < num_states; i++) {
         PMC    *edge_info = VTABLE_get_pmc_keyed_int(interp, states, i + 1);
@@ -2685,7 +2685,7 @@ inline op nqp_nfa_from_statelist(out PMC, invar PMC, invar PMC) :base_core {
 
         nfa->num_state_edges[i] = edges;
         if (edges > 0)
-            nfa->states[i] = mem_sys_allocate(edges * sizeof(NFAStateInfo));
+            nfa->states[i] = mem_sys_allocate_zeroed(edges * sizeof(NFAStateInfo));
         
         for (j = 0; j < elems; j += 3) {
             INTVAL act = VTABLE_get_integer_keyed_int(interp, edge_info, j);
