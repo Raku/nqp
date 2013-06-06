@@ -190,6 +190,10 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *repr_info, P6opaqueR
             INTVAL unboxed_type = STORAGE_SPEC_BP_NONE;
             INTVAL bits         = sizeof(PMC *) * 8;
             INTVAL align        = ALIGNOF1(PMC *);
+
+            /* True if this member is flattened into the object body. */
+            INTVAL inlined      = 0;
+
             if (!PMC_IS_NULL(type)) {
                 /* Get the storage spec of the type and see what it wants. */
                 storage_spec spec = REPR(type)->get_storage_spec(interp, STABLE(type));
@@ -199,6 +203,7 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *repr_info, P6opaqueR
                     bits = spec.bits;
                     align = spec.align;
                     repr_data->flattened_stables[i] = STABLE(type);
+                    inlined = 0;
                     
                     if (bits % 8) bits += 8 - bits%8;
 
@@ -269,7 +274,7 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *repr_info, P6opaqueR
             repr_data->attribute_offsets[i] = cur_size;
 
             /* Handle PMC attributes, which need marking and may have auto-viv needs. */
-            if (unboxed_type == STORAGE_SPEC_BP_NONE) {
+            if (!inlined) {
                 if (!repr_data->gc_pmc_mark_offsets)
                     repr_data->gc_pmc_mark_offsets = (INTVAL *) mem_sys_allocate_zeroed(info_alloc * sizeof(INTVAL));
                 repr_data->gc_pmc_mark_offsets[cur_pmc_attr] = cur_size;
