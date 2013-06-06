@@ -1984,7 +1984,6 @@ QAST::Operations.add_core_pirop_mapping('bindpos_i', 'set', '1Qii', :inlinable(1
 QAST::Operations.add_core_pirop_mapping('bindpos_n', 'set', '1Qin', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('bindpos_s', 'set', '1Qis', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('deletekey', 'delete', '0Qs', :inlinable(1));
-QAST::Operations.add_core_pirop_mapping('deletepos', 'delete', '0Qi', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('existskey', 'exists', 'IQs', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('existspos', 'exists', 'IQi', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('elems', 'elements', 'IP', :inlinable(1));

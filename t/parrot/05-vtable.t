@@ -5,7 +5,7 @@ class ABC {
     method () is parrot_vtable('get_string') { 'abc' }
 }
 
-plan(10);
+plan(8);
 
 my $abc := ABC.new;
 ok($abc == 123,   "get_number vtable works");
@@ -42,7 +42,6 @@ class Arrayy {
     method ($k)     is parrot_vtable('get_pmc_keyed_int') { @!a{$k}}
     method ($k, $v) is parrot_vtable('set_pmc_keyed_int') { @!a{$k} := $v }
     method ($k)     is parrot_vtable('exists_keyed_int')  { nqp::existspos(@!a, $k)      }
-    method ($k)     is parrot_vtable('delete_keyed_int')  { nqp::deletepos(@!a, $k)      }
 }
 
 my $a := Arrayy.new; $a.init();
@@ -50,5 +49,3 @@ my $a := Arrayy.new; $a.init();
 $a[0] := 'bar';
 ok($a[0] eq 'bar', '{set,get}_pmc_keyed_int');
 ok(nqp::existspos($a, 0), 'exists');
-nqp::deletepos($a, 0);
-ok(!nqp::existspos($a, 0), 'delete');
