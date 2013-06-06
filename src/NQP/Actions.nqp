@@ -615,13 +615,9 @@ class NQP::Actions is HLL::Actions {
             $past.push(QAST::Op.new( :op('curlexpad') ));
             $past.symbol('$?CLASS', :scope('lexical'));
             $*W.pkg_set_body_block($*PACKAGE, $past);
-            $*W.install_lexical_symbol($past, '$?PACKAGE', $*PACKAGE);
-            $*W.install_lexical_symbol($past, '$?ROLE', $*PACKAGE);
         }
         else {
             $past.blocktype('immediate');
-            $*W.install_lexical_symbol($past, '$?PACKAGE', $*PACKAGE);
-            $*W.install_lexical_symbol($past, '$?CLASS', $*PACKAGE);
         }
 
         # Add parent, if we have one; otherwise set default.

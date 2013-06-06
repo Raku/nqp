@@ -386,8 +386,20 @@ grammar NQP::Grammar is HLL::Grammar {
             if $<repr> {
                 %args<repr> := ~$<repr>[0]<quote_delimited><quote_atom>[0];
             }
-            $*PACKAGE := $*W.pkg_create_mo(%*HOW{$*PKGDECL}, |%args);
-            
+            my $how := %*HOW{$*PKGDECL};
+            my $INNER := $*W.cur_lexpad();
+            $*PACKAGE := $*W.pkg_create_mo($how, |%args);
+
+            # these need to be installed early so that they may be referenced from subs in the block
+            if nqp::can($how, 'parametric') && $how.parametric($how) {
+                $*W.install_lexical_symbol($INNER, '$?PACKAGE', $*PACKAGE);
+                $*W.install_lexical_symbol($INNER, '$?ROLE', $*PACKAGE);
+            }
+            else {
+                $*W.install_lexical_symbol($INNER, '$?PACKAGE', $*PACKAGE);
+                $*W.install_lexical_symbol($INNER, '$?CLASS', $*PACKAGE);
+            }
+
             # Install it in the current package or current lexpad as needed.
             if $*SCOPE eq 'our' || $*SCOPE eq '' {
                 $*W.install_package_symbol($*OUTERPACKAGE, $<name><identifier>, $*PACKAGE);
