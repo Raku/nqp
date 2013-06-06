@@ -203,7 +203,7 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *repr_info, P6opaqueR
                     bits = spec.bits;
                     align = spec.align;
                     repr_data->flattened_stables[i] = STABLE(type);
-                    inlined = 0;
+                    inlined = 1;
                     
                     if (bits % 8) bits += 8 - bits%8;
 
