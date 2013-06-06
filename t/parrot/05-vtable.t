@@ -5,7 +5,7 @@ class ABC {
     method () is parrot_vtable('get_string') { 'abc' }
 }
 
-plan(8);
+plan(9);
 
 my $abc := ABC.new;
 ok($abc == 123,   "get_number vtable works");
