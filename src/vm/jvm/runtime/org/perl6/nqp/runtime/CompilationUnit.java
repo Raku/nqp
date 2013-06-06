@@ -49,6 +49,12 @@ public abstract class CompilationUnit {
         CompilationUnit cu = setupCompilationUnit(tc, cuType);
         Ops.invokeMain(tc, cu.codeRefs[entryCodeRefIdx], cuType.getName(), argv);
     }
+    public static void enterFromMain(Class<?> cuType, String cuid, String[] argv)
+            throws Exception {
+        ThreadContext tc = (new GlobalContext()).mainThread;
+        CompilationUnit cu = setupCompilationUnit(tc, cuType);
+        Ops.invokeMain(tc, cu.lookupCodeRef(cuid), cuType.getName(), argv);
+    }
     
     /**
      * Takes the class object for some compilation unit and sets it up. 
