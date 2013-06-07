@@ -2606,7 +2606,10 @@ public final class Ops {
         case CCLASS_NUMERIC:
             return Character.isDigit(test) ? 1 : 0;
         case CCLASS_WHITESPACE:
-            return Character.isWhitespace(test) ? 1 : 0;
+            if (Character.isSpaceChar(test)) return 1;
+            if (test >= '\t' && test <= '\r') return 1;
+            if (test == '\u0085') return 1;
+            return 0;
         case CCLASS_PRINTING:
             throw new RuntimeException("CCLASS_PRINTING NYI");
         case CCLASS_WORD:
