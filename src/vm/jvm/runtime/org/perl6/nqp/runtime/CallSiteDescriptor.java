@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.perl6.nqp.sixmodel.SixModelObject;
+import org.perl6.nqp.sixmodel.StorageSpec;
 import org.perl6.nqp.sixmodel.reprs.VMHashInstance;
 
 /**
@@ -105,10 +106,31 @@ public class CallSiteDescriptor {
             switch (af) {
             case ARG_OBJ | ARG_FLAT:
                 SixModelObject flatArray = (SixModelObject)oldArgs[oldArgsIdx++];
+                int prim = flatArray.st.REPR.get_value_storage_spec(cf.tc, flatArray.st).boxed_primitive;
                 long elems = flatArray.elems(cf.tc);
                 for (long i = 0; i < elems; i++) {
-                    newArgs.add(flatArray.at_pos_boxed(cf.tc, i));
-                    newFlags.add(ARG_OBJ);
+                    if (prim == StorageSpec.BP_NONE) {
+                        newArgs.add(flatArray.at_pos_boxed(cf.tc, i));
+                        newFlags.add(ARG_OBJ);
+                    } else {
+                        flatArray.at_pos_native(cf.tc, i);
+                        switch (prim) {
+                            case StorageSpec.BP_INT:
+                                newArgs.add(cf.tc.native_i);
+                                newFlags.add(ARG_INT);
+                                break;
+                            case StorageSpec.BP_NUM:
+                                newArgs.add(cf.tc.native_n);
+                                newFlags.add(ARG_NUM);
+                                break;
+                            case StorageSpec.BP_STR:
+                                newArgs.add(cf.tc.native_s);
+                                newFlags.add(ARG_STR);
+                                break;
+                            default:
+                                throw ExceptionHandling.dieInternal(cf.tc, "Unknown boxed primitive");
+                        }
+                    }
                 }
                 break;
             case ARG_OBJ | ARG_FLAT | ARG_NAMED:

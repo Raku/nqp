@@ -36,4 +36,6 @@ public class StorageSpec {
     
     /* The types that this one can box/unbox to. */
     public short can_box;
+
+    public static final StorageSpec BOXED = new StorageSpec();
 }
