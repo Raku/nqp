@@ -4440,21 +4440,12 @@ class QAST::CompilerJAST {
             $il.append($L2I);
             $il.append(JAST::Instruction.new( :op($node.negate ?? 'ifne' !! 'ifeq'), %*REG<fail> ));
             
-            if $subtype == nqp::const::CCLASS_NEWLINE {
+            if $cclass == nqp::const::CCLASS_NEWLINE && !$node.negate {
                 $il.append(JAST::Instruction.new( :op('aload'), %*REG<tgt> ));
                 $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
-                $il.append($L2I);
-                $il.append($DUP);
-                $il.append(JAST::PushIndex.new( :value(2) ));
-                $il.append($IADD);
-                $il.append(JAST::Instruction.new( :op('invokevirtual'),
-                    $TYPE_STR, 'substring', $TYPE_STR, 'Integer', 'Integer' ));
-                $il.append(JAST::PushSVal.new( :value("\r\n") ));
-                $il.append(JAST::Instruction.new( :op('invokevirtual'),
-                    $TYPE_STR, 'equals', 'Z', $TYPE_OBJ ));
-                $il.append($I2L);
-                $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
-                $il.append($LADD);
+                $il.append(JAST::Instruction.new( :op('lload'), %*REG<eos> ));
+                $il.append(JAST::Instruction.new( :op('invokestatic'),
+                    $TYPE_OPS, 'checkcrlf', 'Long', $TYPE_STR, 'Long', 'Long' ));
                 $il.append(JAST::Instruction.new( :op('lstore'), %*REG<pos> ));
             } 
         }

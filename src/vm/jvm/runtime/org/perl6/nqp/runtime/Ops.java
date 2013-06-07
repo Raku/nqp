@@ -2643,7 +2643,11 @@ public final class Ops {
             return 0;
         }
     }
-    
+
+    public static long checkcrlf(String tgt, long pos, long eos) {
+        return (pos <= eos-2 && tgt.substring((int)pos, ((int) pos)+2).equals("\r\n")) ? pos+1 : pos;
+    }
+
     public static long findcclass(long cclass, String target, long offset, long count) {
         long length = target.length();
         long end = offset + count;
