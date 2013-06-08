@@ -297,7 +297,7 @@ sub gen_nqp {
         return $nqp_exe;
     }
 
-    my @cmd = ($^X, 'Configure.pl', "--with-parrot=$with_parrot",
+    my @cmd = ($^X, 'Configure.pl', "--with-parrot=\"$with_parrot\"",
                "--make-install");
     print "Building NQP ...\n";
     chdir("$startdir/nqp");
@@ -348,7 +348,7 @@ sub gen_parrot {
     $prefix =~ s{\\}{/}g;
 
     print "\nConfiguring Parrot ...\n";
-    my @cmd = ($^X, "Configure.pl", @opts, "--prefix=$prefix");
+    my @cmd = ($^X, "Configure.pl", @opts, "--prefix=\"$prefix\"");
     print "@cmd\n";
     system_or_die(@cmd);
 
