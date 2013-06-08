@@ -155,10 +155,13 @@ public class JASTToJVMBytecode {
         List<String> criLex = new ArrayList<String>();
         List<String> crnLex = new ArrayList<String>();
         List<String> crsLex = new ArrayList<String>();
+        Label beginAll = new Label();
+        Label endAll = new Label();
         long[] crHandlers = null;
         int curArgIndex = 1;
         
         MethodVisitor m = null;
+        boolean contAfter = false;
         
         boolean inMethodHeader = true;
         while ((curLine = in.readLine()) != null) {
@@ -166,8 +169,8 @@ public class JASTToJVMBytecode {
             if (curLine.equals("+ method")) {
                 if (inMethodHeader)
                     throw new Exception("Unexpected + method in method header");
-                finishMethod(m);
-                return true;
+                contAfter = true;
+                break;
             }
             
             // Is it a header line?
@@ -195,7 +198,7 @@ public class JASTToJVMBytecode {
                     if (localVariables.containsKey(bits[2]))
                         throw new Exception("Duplicate local name: " + bits[2]);
                     Type t = processType(bits[3]);
-                    localVariables.put(bits[2], new VariableDef(curArgIndex, t.getDescriptor()));
+                    localVariables.put(bits[2], new VariableDef(curArgIndex, t.getDescriptor(), beginAll, endAll));
                     curArgIndex += (t == Type.LONG_TYPE || t == Type.DOUBLE_TYPE ? 2 : 1);
                 }
                 else if (curLine.startsWith("++ crname "))
@@ -273,11 +276,8 @@ public class JASTToJVMBytecode {
                     av.visitEnd();
                  }
                  
-                 // Add locals.
-                 for (Map.Entry<String, VariableDef> e : localVariables.entrySet()) {
-                     VariableDef def = e.getValue();
-                     m.visitLocalVariable(e.getKey(), def.type, null, def.start, def.end, def.index);
-                 }
+                 m.visitCode();
+                 m.visitLabel(beginAll);
             }
             
             // Check if it's a label.
@@ -363,8 +363,23 @@ public class JASTToJVMBytecode {
         }
         if (inMethodHeader)
             throw new Exception("Unexpected end of file in method header");
-        finishMethod(m);
-        return false;
+
+        // Add locals.
+        m.visitLabel(endAll);
+        for (Map.Entry<String, VariableDef> e : localVariables.entrySet()) {
+            VariableDef def = e.getValue();
+            m.visitLocalVariable(e.getKey(), def.type, null, def.start, def.end, def.index);
+        }
+        if (!isStatic)
+            m.visitLocalVariable("this", "L"+className+";", null, beginAll, endAll, 0);
+        for (int i = 0; i < argTypes.size(); i++) {
+            m.visitLocalVariable(argNames.get(i), argTypes.get(i).getDescriptor(), null,
+                    beginAll, endAll, argIndexes.get(argNames.get(i)));
+        }
+
+        m.visitMaxs(0, 0);
+        m.visitEnd();
+        return contAfter;
     }
     
     private static String decodeString(String value) {
@@ -832,11 +847,6 @@ public class JASTToJVMBytecode {
         m.visitTableSwitchInsn(0, labels.length - 1, defaultLabel, labels);
     }
 
-    private static void finishMethod(MethodVisitor m) throws Exception {        
-        // Finalize method.
-        m.visitMaxs(0, 0);
-    }
-
     private static Type processType(String typeName) {
         // Long needs special treatment; getType doesn't cope with it.
         if (typeName.equals("Long"))
@@ -851,11 +861,11 @@ public class JASTToJVMBytecode {
     }
     
     static class VariableDef {
-        public VariableDef(int i, String t) {
+        public VariableDef(int i, String t, Label s, Label e) {
             index = i;
             type = t;
-            start = new Label();
-            end = new Label();
+            start = s;
+            end = e;
         }
         
         public final int index;
