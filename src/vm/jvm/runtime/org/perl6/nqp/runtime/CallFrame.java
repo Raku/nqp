@@ -7,9 +7,9 @@ import org.perl6.nqp.sixmodel.SerializationContext;
 import org.perl6.nqp.sixmodel.SixModelObject;
 
 /**
- * Represents a call frame that is to be or is currently executing, and holds
- * state relating to it. Call frames are created by the caller and arguments
- * placed into them. The rest is filled out when the invocation is made.
+ * Represents a call frame that is currently executing, and holds state
+ * relating to it. Call frames are created by the callee after arguments are
+ * passed in but before argument checking.
  */
 public class CallFrame {
     /**
