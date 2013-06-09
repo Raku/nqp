@@ -132,7 +132,7 @@ END
             }
             close($PARROT_CONFIG) or die $!;
         }
-        elsif (open my $PARROT, '-|', "$file parrot-config.pir") {
+        elsif (open my $PARROT, '-|', "\"$file\" parrot-config.pir") {
             while (<$PARROT>) {
                 if (/^([\w:]+)=(.*)/) { $config{$1} = $2 }
             }
@@ -165,7 +165,7 @@ sub fill_template_text {
 
     my $escape = sub {
         my $str = $_[0];
-        $str =~ s{ }{\\\\ }g;
+        $str =~ s{ }{\\ }g;
         $str;
     };
 
