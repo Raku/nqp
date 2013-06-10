@@ -144,9 +144,7 @@ public class JASTToJVMBytecode {
         String curLine, methodName = null, returnType = null;
         String crName = null, crCuid = null, crOuter = null;
         boolean isStatic = false;
-        List<String> argNames = new ArrayList<String>();
         List<Type> argTypes = new ArrayList<Type>();
-        Map<String, Integer> argIndexes = new HashMap<String, Integer>();
         Map<String, VariableDef> localVariables = new HashMap<String, VariableDef>();
         Map<String, Label> labelMap = new HashMap<String, Label>();
         Stack<Label> tryStartStack = new Stack<Label>();
@@ -162,7 +160,6 @@ public class JASTToJVMBytecode {
         
         MethodVisitor m = null;
         boolean contAfter = false;
-        
         boolean inMethodHeader = true;
         while ((curLine = in.readLine()) != null) {
             // See if we need to move to the next method.
@@ -185,21 +182,16 @@ public class JASTToJVMBytecode {
                     isStatic = true;
                     curArgIndex = 0; /* No invocant. */
                 }
-                else if (curLine.startsWith("++ arg ")) {
-                    String[] bits = curLine.split("\\s", 4);
-                    Type t = processType(bits[3]);
-                    argNames.add(bits[2]);
-                    argTypes.add(t);
-                    argIndexes.put(bits[2], curArgIndex);
-                    curArgIndex += (t == Type.LONG_TYPE || t == Type.DOUBLE_TYPE ? 2 : 1);
-                }
-                else if (curLine.startsWith("++ local ")) {
+                else if (curLine.startsWith("++ local ") || curLine.startsWith("++ arg")) {
                     String[] bits = curLine.split("\\s", 4);
                     if (localVariables.containsKey(bits[2]))
                         throw new Exception("Duplicate local name: " + bits[2]);
                     Type t = processType(bits[3]);
                     localVariables.put(bits[2], new VariableDef(curArgIndex, t.getDescriptor(), beginAll, endAll));
                     curArgIndex += (t == Type.LONG_TYPE || t == Type.DOUBLE_TYPE ? 2 : 1);
+                    if (curLine.startsWith("++ arg")) {
+                    	argTypes.add(t);
+                    }
                 }
                 else if (curLine.startsWith("++ crname "))
                     crName = curLine.substring("++ crname ".length());
@@ -275,7 +267,11 @@ public class JASTToJVMBytecode {
                     av.visit("handlers", crHandlers);
                     av.visitEnd();
                  }
-                 
+
+                 if (!isStatic) {
+                	 localVariables.put("this", new VariableDef(0, "L"+className+";", beginAll, endAll));
+                 }                 
+
                  m.visitCode();
                  m.visitLabel(beginAll);
             }
@@ -359,7 +355,7 @@ public class JASTToJVMBytecode {
             }
             
             // Process line as an instruction.
-            emitInstruction(in, m, labelMap, argIndexes, localVariables, curLine);
+            emitInstruction(in, m, labelMap, localVariables, curLine);
         }
         if (inMethodHeader)
             throw new Exception("Unexpected end of file in method header");
@@ -369,12 +365,6 @@ public class JASTToJVMBytecode {
         for (Map.Entry<String, VariableDef> e : localVariables.entrySet()) {
             VariableDef def = e.getValue();
             m.visitLocalVariable(e.getKey(), def.type, null, def.start, def.end, def.index);
-        }
-        if (!isStatic)
-            m.visitLocalVariable("this", "L"+className+";", null, beginAll, endAll, 0);
-        for (int i = 0; i < argTypes.size(); i++) {
-            m.visitLocalVariable(argNames.get(i), argTypes.get(i).getDescriptor(), null,
-                    beginAll, endAll, argIndexes.get(argNames.get(i)));
         }
 
         m.visitMaxs(0, 0);
@@ -406,7 +396,6 @@ public class JASTToJVMBytecode {
 
     private static void emitInstruction(BufferedReader in, MethodVisitor m,
             Map<String, Label> labelMap,
-            Map<String, Integer> argIndexes,
             Map<String, VariableDef> localVariables,
             String curLine) throws Exception {
         // Find instruction code and get rest of the string.
@@ -445,8 +434,6 @@ public class JASTToJVMBytecode {
         case 0x19: // aload
             if (localVariables.containsKey(rest))
                 m.visitVarInsn(instruction, localVariables.get(rest).index);
-            else if (argIndexes.containsKey(rest))
-                m.visitVarInsn(instruction, argIndexes.get(rest));
             else
                 throw new Exception("Undeclared local variable: " + rest);
             break;
@@ -527,8 +514,6 @@ public class JASTToJVMBytecode {
         case 0x3a: // astore
             if (localVariables.containsKey(rest))
                 m.visitVarInsn(instruction, localVariables.get(rest).index);
-            else if (argIndexes.containsKey(rest))
-                m.visitVarInsn(instruction, argIndexes.get(rest));
             else
                 throw new Exception("Undeclared local variable: " + rest);
             break;
