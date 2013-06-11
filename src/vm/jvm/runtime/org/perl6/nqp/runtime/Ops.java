@@ -1797,6 +1797,30 @@ public final class Ops {
         else
             throw ExceptionHandling.dieInternal(tc, "Attribute '" + name + "' is not a native str");
     }
+    public static SixModelObject getattr(SixModelObject obj, SixModelObject ch, String name, long hint, ThreadContext tc) {
+        return obj.get_attribute_boxed(tc, decont(ch, tc), name, hint);
+    }
+    public static long getattr_i(SixModelObject obj, SixModelObject ch, String name, long hint, ThreadContext tc) {
+        obj.get_attribute_native(tc, decont(ch, tc), name, hint);
+        if (tc.native_type == ThreadContext.NATIVE_INT)
+            return tc.native_i;
+        else
+            throw ExceptionHandling.dieInternal(tc, "Attribute '" + name + "' is not a native int");
+    }
+    public static double getattr_n(SixModelObject obj, SixModelObject ch, String name, long hint, ThreadContext tc) {
+        obj.get_attribute_native(tc, decont(ch, tc), name, hint);
+        if (tc.native_type == ThreadContext.NATIVE_NUM)
+            return tc.native_n;
+        else
+            throw ExceptionHandling.dieInternal(tc, "Attribute '" + name + "' is not a native num");
+    }
+    public static String getattr_s(SixModelObject obj, SixModelObject ch, String name, long hint, ThreadContext tc) {
+        obj.get_attribute_native(tc, decont(ch, tc), name, hint);
+        if (tc.native_type == ThreadContext.NATIVE_STR)
+            return tc.native_s;
+        else
+            throw ExceptionHandling.dieInternal(tc, "Attribute '" + name + "' is not a native str");
+    }
     public static SixModelObject bindattr(SixModelObject obj, SixModelObject ch, String name, SixModelObject value, ThreadContext tc) {
         obj.bind_attribute_boxed(tc, decont(ch, tc), name, STable.NO_HINT, value);
         if (obj.sc != null)
@@ -1824,6 +1848,39 @@ public final class Ops {
     public static String bindattr_s(SixModelObject obj, SixModelObject ch, String name, String value, ThreadContext tc) {
         tc.native_s = value;
         obj.bind_attribute_native(tc, decont(ch, tc), name, STable.NO_HINT);
+        if (tc.native_type != ThreadContext.NATIVE_STR)
+            throw ExceptionHandling.dieInternal(tc, "Attribute '" + name + "' is not a native str");
+        if (obj.sc != null)
+            scwbObject(tc, obj);
+        return value;
+    }
+    public static SixModelObject bindattr(SixModelObject obj, SixModelObject ch, String name, SixModelObject value, long hint, ThreadContext tc) {
+        obj.bind_attribute_boxed(tc, decont(ch, tc), name, hint, value);
+        if (obj.sc != null)
+            scwbObject(tc, obj);
+        return value;
+    }
+    public static long bindattr_i(SixModelObject obj, SixModelObject ch, String name, long value, long hint, ThreadContext tc) {
+        tc.native_i = value;
+        obj.bind_attribute_native(tc, decont(ch, tc), name, hint);
+        if (tc.native_type != ThreadContext.NATIVE_INT)
+            throw ExceptionHandling.dieInternal(tc, "Attribute '" + name + "' is not a native int");
+        if (obj.sc != null)
+            scwbObject(tc, obj);
+        return value;
+    }
+    public static double bindattr_n(SixModelObject obj, SixModelObject ch, String name, double value, long hint, ThreadContext tc) {
+        tc.native_n = value;
+        obj.bind_attribute_native(tc, decont(ch, tc), name, hint);
+        if (tc.native_type != ThreadContext.NATIVE_NUM)
+            throw ExceptionHandling.dieInternal(tc, "Attribute '" + name + "' is not a native num");
+        if (obj.sc != null)
+            scwbObject(tc, obj);
+        return value;
+    }
+    public static String bindattr_s(SixModelObject obj, SixModelObject ch, String name, String value, long hint, ThreadContext tc) {
+        tc.native_s = value;
+        obj.bind_attribute_native(tc, decont(ch, tc), name, hint);
         if (tc.native_type != ThreadContext.NATIVE_STR)
             throw ExceptionHandling.dieInternal(tc, "Attribute '" + name + "' is not a native str");
         if (obj.sc != null)

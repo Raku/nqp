@@ -3698,6 +3698,12 @@ class QAST::CompilerJAST {
             my $name_res := self.as_jast_clear_bindval(QAST::SVal.new( :value($name) ), :want($RT_STR));
             $il.append($name_res.jast);
             
+            # Get lookup hint if possible.
+            my int $hint := -1;
+            if @args[1].has_compile_time_value {
+                $hint := nqp::attrhintfor(@args[1].compile_time_value, $name);
+            }
+            
             # Go by whether it's a bind or lookup.
             my $type := rttype_from_typeobj($node.returns);
             my $jtype := jtype($type);
@@ -3706,15 +3712,17 @@ class QAST::CompilerJAST {
                 my $val_res := self.as_jast_clear_bindval($*BINDVAL, :want($type));
                 $il.append($val_res.jast);
                 $*STACK.obtain($il, $obj_res, $han_res, $name_res, $val_res);
+                $il.append(JAST::PushIVal.new( :value($hint) ));
                 $il.append($ALOAD_1);
                 $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
-                    "bindattr$suffix", $jtype, $TYPE_SMO, $TYPE_SMO, $TYPE_STR, $jtype, $TYPE_TC ));
+                    "bindattr$suffix", $jtype, $TYPE_SMO, $TYPE_SMO, $TYPE_STR, $jtype, 'Long', $TYPE_TC ));
             }
             else {
                 $*STACK.obtain($il, $obj_res, $han_res, $name_res);
+                $il.append(JAST::PushIVal.new( :value($hint) ));
                 $il.append($ALOAD_1);
                 $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
-                    "getattr$suffix", $jtype, $TYPE_SMO, $TYPE_SMO, $TYPE_STR, $TYPE_TC ));
+                    "getattr$suffix", $jtype, $TYPE_SMO, $TYPE_SMO, $TYPE_STR, 'Long', $TYPE_TC ));
             }
             
             return result($il, $type);
