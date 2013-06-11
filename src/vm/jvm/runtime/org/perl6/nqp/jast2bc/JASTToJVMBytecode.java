@@ -141,7 +141,7 @@ public class JASTToJVMBytecode {
     }
     
     private static boolean processMethod(BufferedReader in, ClassWriter c, String className) throws Exception {
-        String curLine, methodName = null, returnType = null;
+        String curLine, methodName = null, returnType = null, desc = null;
         String crName = null, crCuid = null, crOuter = null;
         boolean isStatic = false;
         List<Type> argTypes = new ArrayList<Type>();
@@ -231,7 +231,7 @@ public class JASTToJVMBytecode {
                 inMethodHeader = false;
                 
                 // Create method object.
-                String desc = Type.getMethodDescriptor(processType(returnType), argTypes.toArray(new Type[0]));
+                desc = Type.getMethodDescriptor(processType(returnType), argTypes.toArray(new Type[0]));
                 m = c.visitMethod(
                         (isStatic
                             ? Opcodes.ACC_STATIC | Opcodes.ACC_PUBLIC
@@ -303,6 +303,11 @@ public class JASTToJVMBytecode {
                     String cName = curLine.substring(".push_cc ".length());
                     Type t = Type.getType(cName);
                     m.visitLdcInsn(t);
+                }
+                else if (curLine.equals(".push_self")) {
+                    m.visitLdcInsn(new Handle(
+                        isStatic ? Opcodes.H_INVOKESTATIC : Opcodes.H_INVOKESPECIAL,
+                        className, methodName, desc));
                 }
                 else if (curLine.startsWith(".push_idx ")) {
                     Integer value = Integer.parseInt(curLine.substring(".push_idx ".length()));

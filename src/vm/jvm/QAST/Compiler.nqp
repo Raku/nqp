@@ -60,6 +60,7 @@ my $TYPE_EX_LEX    := 'Lorg/perl6/nqp/runtime/LexoticException;';
 my $TYPE_EX_UNWIND := 'Lorg/perl6/nqp/runtime/UnwindException;';
 my $TYPE_EX_CONT   := 'Lorg/perl6/nqp/runtime/ControlException;';
 my $TYPE_EX_RT     := 'Ljava/lang/RuntimeException;';
+my $TYPE_EX_SAVE   := 'Lorg/perl6/nqp/runtime/SaveStackException;';
 my $TYPE_THROWABLE := 'Ljava/lang/Throwable;';
 
 # Exception handler categories.
@@ -394,6 +395,22 @@ class QAST::OperationsJAST {
     method result($jast, int $type) {
         result($jast, $type)
     }
+}
+
+sub savesite($il) {
+    my $index   := $*BLOCK.alloc_save_site;
+    my $reenter := JAST::Label.new( :name( "reenter_"~$index ) );
+    my $saver   := JAST::Label.new( :name( "SAVER" ) );
+    my $try     := JAST::InstructionList.new();
+    my $catch   := JAST::InstructionList.new();
+
+    $try.append($il);
+    $try.append($reenter);
+
+    $catch.append(JAST::PushIndex.new( :value($index) ));
+    $catch.append(JAST::Instruction.new( :op('goto'), $saver ));
+
+    JAST::TryCatch.new( :try($il), :catch($catch), :type($TYPE_EX_SAVE) );
 }
 
 # Chaining.
@@ -1366,10 +1383,10 @@ QAST::OperationsJAST.add_core_op('call', sub ($qastcomp, $node) {
         $il.append(JAST::PushIndex.new( :value($cs_idx) ));
         $il.append($ALOAD_1);
         $*STACK.obtain($il, |@argstuff[1]) if @argstuff[1];
-        $il.append(JAST::InvokeDynamic.new(
+        $il.append(savesite(JAST::InvokeDynamic.new(
             'subcall_noa', 'V', @argstuff[2],
             'org/perl6/nqp/runtime/IndyBootstrap', 'subcall_noa'
-        ));
+        )));
     }
     
     # Otherwise, it's an indirect call.
@@ -1389,10 +1406,10 @@ QAST::OperationsJAST.add_core_op('call', sub ($qastcomp, $node) {
         $il.append(JAST::PushIndex.new( :value($cs_idx) ));
         $il.append($ALOAD_1);
         $*STACK.obtain($il, |@argstuff[1]) if @argstuff[1];
-        $il.append(JAST::InvokeDynamic.new(
+        $il.append(savesite(JAST::InvokeDynamic.new(
             'indcall_noa', 'V', @argstuff[2],
             'org/perl6/nqp/runtime/IndyBootstrap', 'indcall_noa'
-        ));
+        )));
     }
 
     # Load result onto the stack, unless in void context.
@@ -1433,10 +1450,10 @@ QAST::OperationsJAST.add_core_op('callmethod', -> $qastcomp, $node {
         $il.append(JAST::PushIndex.new( :value($cs_idx) ));
         $il.append($ALOAD_1);
         $*STACK.obtain($il, |@argstuff[1]) if @argstuff[1];
-        $il.append(JAST::InvokeDynamic.new(
+        $il.append(savesite(JAST::InvokeDynamic.new(
             'methcall_noa', 'V', @argstuff[2],
             'org/perl6/nqp/runtime/IndyBootstrap', 'methcall_noa',
-        ));
+        )));
     }
     
     # Otherwise, it's indirect, and we need to resolve the method each and
@@ -1462,10 +1479,10 @@ QAST::OperationsJAST.add_core_op('callmethod', -> $qastcomp, $node {
         $il.append(JAST::PushIndex.new( :value($cs_idx) ));
         $il.append($ALOAD_1);
         $*STACK.obtain($il, |@argstuff[1]) if @argstuff[1];
-        $il.append(JAST::InvokeDynamic.new(
+        $il.append(savesite(JAST::InvokeDynamic.new(
             'indmethcall_noa', 'V', @argstuff[2],
             'org/perl6/nqp/runtime/IndyBootstrap', 'indmethcall_noa'
-        ));
+        )));
     }
 
     # Load result onto the stack, unless in void context.
@@ -2449,6 +2466,7 @@ class QAST::CompilerJAST {
         has %!lexical_types;    # Mapping of lexical names to types
         has %!lexical_idxs;     # Lexical indexes (but have to know type too)
         has @!lexical_names;    # List by type of lexial name lists
+        has $!num_save_sites;   # Count of points where a SaveStackException handler is needed
         
         method new($qast, $outer) {
             my $obj := nqp::create(self);
@@ -2515,7 +2533,15 @@ class QAST::CompilerJAST {
             }
             %!local_types{$name} := rttype_from_typeobj($var.returns);
         }
-        
+
+        method alloc_save_site() {
+            my $index := $!num_save_sites;
+            $!num_save_sites := $index + 1;
+            $index;
+        }
+
+        method num_save_sites() { $!num_save_sites }
+
         method qast() { $!qast }
         method outer() { $!outer }
         method params() { @!params }
@@ -2561,18 +2587,18 @@ class QAST::CompilerJAST {
             for @o { nqp::push(@!free_o, $_) }
         }
         
-        method add_temps_to_method($jmeth) {
+        method add_temps_to_set($set) {
             sub temps($prefix, $n, $type) {
                 my int $i := 0;
                 while $i < $n {
-                    $jmeth.add_local("$prefix$i", $type);
+                    nqp::push($set, ["$prefix$i", $type]);
                     $i++;
                 }
             }
-            temps("__TMP_I_", $!cur_i, 'Long');
-            temps("__TMP_N_", $!cur_n, 'Double');
-            temps("__TMP_S_", $!cur_s, $TYPE_STR);
-            temps("__TMP_O_", $!cur_o, $TYPE_SMO);
+            temps("__TMP_I_", $!cur_i, $RT_INT);
+            temps("__TMP_N_", $!cur_n, $RT_NUM);
+            temps("__TMP_S_", $!cur_s, $RT_STR);
+            temps("__TMP_O_", $!cur_o, $RT_OBJ);
         }
     }
     
@@ -3171,10 +3197,26 @@ class QAST::CompilerJAST {
             }
             
             # Add all the locals.
-            for $block.locals {
-                $*JMETH.add_local($_.name, jtype($block.local_type($_.name)));
+            my @all_locals;
+            for $block.locals { nqp::push(@all_locals, [$_.name, $block.local_type($_.name)]) }
+            $*BLOCK_TA.add_temps_to_set(@all_locals);
+
+            for @all_locals {
+                my $name := $_[0];
+                my $type := $_[1];
+                $*JMETH.add_local($name, jtype($type));
+                # use $*JMETH so it goes into the prelude section and doesn't clobber the assignments above...
+                if $type == $RT_INT {
+                    $*JMETH.append(JAST::PushIVal.new( :value(0) ));
+                }
+                elsif $type == $RT_NUM {
+                    $*JMETH.append(JAST::PushNVal.new( :value(0) ));
+                }
+                else {
+                    $*JMETH.append($ACONST_NULL);
+                }
+                $*JMETH.append(JAST::Instruction.new( :op(store_ins($type)), $name ));
             }
-            $*BLOCK_TA.add_temps_to_method($*JMETH);
             
             # Flatten handlers and store.
             my @flat_handlers := [nqp::elems(@handlers)];
@@ -3217,6 +3259,56 @@ class QAST::CompilerJAST {
             $*JMETH.append(JAST::TryCatch.new( :try($il), :catch($posthan),
                 :type($TYPE_THROWABLE) ));
             $*JMETH.append($RETURN);
+
+            if $block.num_save_sites {
+                my $saver := JAST::InstructionList.new;
+                $saver.append(JAST::Label.new( :name( 'SAVER' ) ));
+                $saver.append(JAST::PushSelf.new);
+
+                my @merged;
+                for $*JMETH.arguments { nqp::push(@merged, $_); }
+                for $*JMETH.locals { nqp::push(@merged, $_); }
+
+                $saver.append(JAST::PushIndex.new( :value(1+@merged) ));
+                $saver.append(JAST::Instruction.new( :op('anewarray'), $TYPE_OBJ ));
+
+                # HACK need to save this but it's not a local
+                $saver.append($DUP);
+                $saver.append(JAST::PushIndex.new( :value(0) ));
+                $saver.append($ALOAD_0);
+                $saver.append($AASTORE);
+
+                my int $i := 1;
+
+                for @merged {
+                    $saver.append($DUP);
+                    $saver.append(JAST::PushIndex.new( :value($i++) ));
+
+                    # later, we might want to consolidate multiple doubles/longs into a single part of the save record
+                    if $_[1] eq 'Double' {
+                        $saver.append(JAST::Instruction.new( :op('dload'), $_[0] ));
+                        $saver.append(JAST::Instruction.new( :op('invokestatic'),
+                            $TYPE_DOUBLE, 'valueOf', $TYPE_DOUBLE, 'Double' ));
+                    }
+                    elsif $_[1] eq 'Long' {
+                        $saver.append(JAST::Instruction.new( :op('lload'), $_[0] ));
+                        $saver.append(JAST::Instruction.new( :op('invokestatic'),
+                            $TYPE_LONG, 'valueOf', $TYPE_LONG, 'Long' ));
+                    }
+                    else {
+                        $saver.append(JAST::Instruction.new( :op('aload'), $_[0] ));
+                    }
+
+                    $saver.append($AASTORE);
+                }
+
+                $saver.append(JAST::Instruction.new( :op('aload'), 'cf' ));
+                $saver.append(JAST::Instruction.new( :op('invokevirtual'),
+                    $TYPE_EX_SAVE, 'pushFrame', $TYPE_EX_SAVE, "Integer", $TYPE_MH, '['~$TYPE_OBJ, $TYPE_CF ));
+                $saver.append($ATHROW);
+
+                $*JMETH.append($saver);
+            }
             
             # Finalize method and add it to the class.
             $*JCLASS.add_method($*JMETH);
@@ -3234,6 +3326,7 @@ class QAST::CompilerJAST {
                 # code ref, callsite descriptor and args (both empty) onto
                 # the stack.
                 my $il := JAST::InstructionList.new();
+                $*STACK.spill_to_locals($il);
                 $il.append($ALOAD_0);
                 $il.append($ALOAD_1);
                 $il.append($ALOAD_0);
@@ -3246,10 +3339,10 @@ class QAST::CompilerJAST {
                     $TYPE_OPS, 'emptyArgList', "[$TYPE_OBJ" ));
                 
                 # Emit the virtual call.
-                $il.append(JAST::Instruction.new( :op('invokevirtual'),
+                $il.append(savesite(JAST::Instruction.new( :op('invokevirtual'),
                     'L' ~ $*JCLASS.name ~ ';',
                     $*CODEREFS.cuid_to_jastmethname($node.cuid),
-                    'V', $TYPE_TC, $TYPE_CR, $TYPE_CSD, "[$TYPE_OBJ" ));
+                    'V', $TYPE_TC, $TYPE_CR, $TYPE_CSD, "[$TYPE_OBJ" )));
                 
                 # Load result onto the stack, unless in void context.
                 if $*WANT != $RT_VOID {
