@@ -13,6 +13,11 @@ public class P6OpaqueREPRData {
     public Class<?> jvmClass;
     
     /**
+     * Instance of jvmClass, cloned per allocation.
+     */
+    public P6OpaqueBaseInstance instance;
+    
+    /**
      * List of class handles that have attributes in this type.
      */
     public SixModelObject[] classHandles;

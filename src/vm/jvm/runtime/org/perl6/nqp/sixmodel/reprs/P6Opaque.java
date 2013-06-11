@@ -127,10 +127,14 @@ public class P6Opaque extends REPR {
         
         /* Provided we have attributes, generate the JVM backing type. If not,
          * P6OpaqueBaseInstance will do. */
-        if (attrInfoList.size() > 0)
+        if (attrInfoList.size() > 0) {
             generateJVMType(tc, st, attrInfoList);
-        else
+        }
+        else {
             ((P6OpaqueREPRData)st.REPRData).jvmClass = P6OpaqueBaseInstance.class;
+            ((P6OpaqueREPRData)st.REPRData).instance = new P6OpaqueBaseInstance();
+            ((P6OpaqueREPRData)st.REPRData).instance.st = st;
+        }
     }
     
     /* Adds delegation, needed for mixin support. */
@@ -511,6 +515,13 @@ public class P6Opaque extends REPR {
 //        } catch (IOException e) {
 //        }
         ((P6OpaqueREPRData)st.REPRData).jvmClass = new ByteClassLoader(classCompiled).findClass(className);
+        try {
+            ((P6OpaqueREPRData)st.REPRData).instance = (P6OpaqueBaseInstance)((P6OpaqueREPRData)st.REPRData).jvmClass.newInstance();
+        }
+        catch (InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+        ((P6OpaqueREPRData)st.REPRData).instance.st = st;
     }
 
     private void generateDelegateMethod(ThreadContext tc, ClassWriter cw, String className, String field, String methodName) {
@@ -524,15 +535,7 @@ public class P6Opaque extends REPR {
     }
 
     public SixModelObject allocate(ThreadContext tc, STable st) {
-        try {
-            P6OpaqueBaseInstance obj = (P6OpaqueBaseInstance)((P6OpaqueREPRData)st.REPRData).jvmClass.newInstance();
-            obj.st = st;
-            return obj;
-        }
-        catch (Exception e)
-        {
-            throw new RuntimeException(e);
-        }
+        return ((P6OpaqueREPRData)st.REPRData).instance.instClone();
     }
     
     public void change_type(ThreadContext tc, SixModelObject obj, SixModelObject newType) {
@@ -705,7 +708,14 @@ public class P6Opaque extends REPR {
             info.hasAutoVivContainer = REPRData.autoVivContainers[i] != null;
             attrInfoList.add(info);
         }
-        generateJVMType(tc, st, attrInfoList);
+        if (numAttributes > 0) {
+            generateJVMType(tc, st, attrInfoList);
+        }
+        else {
+            ((P6OpaqueREPRData)st.REPRData).jvmClass = P6OpaqueBaseInstance.class;
+            ((P6OpaqueREPRData)st.REPRData).instance = new P6OpaqueBaseInstance();
+            ((P6OpaqueREPRData)st.REPRData).instance.st = st;
+        }
     }
     
     public void serialize_repr_data(ThreadContext tc, STable st, SerializationWriter writer) {
@@ -763,8 +773,7 @@ public class P6Opaque extends REPR {
             SerializationReader reader, SixModelObject stub) {
         try {
             // Create instance that we'll deserialize into.
-            P6OpaqueBaseInstance obj = (P6OpaqueBaseInstance)((P6OpaqueREPRData)st.REPRData).jvmClass.newInstance();
-            obj.st = st;
+            P6OpaqueBaseInstance obj = (P6OpaqueBaseInstance)((P6OpaqueREPRData)st.REPRData).instance.instClone();
             
             // Install it as the stub's delegate.
             ((P6OpaqueDelegateInstance)stub).delegate = obj;
@@ -781,7 +790,7 @@ public class P6Opaque extends REPR {
                 }
             }
         }
-        catch (IllegalAccessException | NoSuchFieldException | InstantiationException e)
+        catch (IllegalAccessException | NoSuchFieldException e)
         {
             throw new RuntimeException(e);
         }    

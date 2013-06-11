@@ -45,6 +45,14 @@ public class P6OpaqueBaseInstance extends SixModelObject {
         }
     }
     
+    public SixModelObject instClone() {
+        try {
+            return (SixModelObject)this.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
     public void badNative() {
         throw new RuntimeException("Cannot access a reference attribute as a native attribute");
     }
