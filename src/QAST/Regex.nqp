@@ -23,5 +23,9 @@ class QAST::Regex is QAST::Node {
     method negate(*@value)    { $!negate := @value[0] if @value; $!negate }
     method min(*@value)       { $!min := @value[0] if @value; $!min }
     method max(*@value)       { $!max := @value[0] if @value; $!max }
+    
+    method dump_extra_node_info() {
+        ":rxtype($!rxtype)"
+    }
 }
 
