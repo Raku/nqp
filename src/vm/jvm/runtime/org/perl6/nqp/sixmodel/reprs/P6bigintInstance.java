@@ -8,10 +8,6 @@ import org.perl6.nqp.sixmodel.SixModelObject;
 public class P6bigintInstance extends SixModelObject {
     public BigInteger value;
     
-    public void initialize(ThreadContext tc) {
-        value = BigInteger.ZERO;
-    }
-    
     public void set_int(ThreadContext tc, long value) {
         this.value = BigInteger.valueOf(value);
     }

@@ -48,14 +48,12 @@ public class KnowHOWMethods extends CompilationUnit {
             SixModelObject type_object = repr_to_use.type_object_for(tc, HOW);
             
             /* See if we were given a name; put it into the meta-object if so. */
-            HOW.initialize(tc);
             if (name_arg != null)
                 ((KnowHOWREPRInstance)HOW).name = name_arg;
             
             /* Set .WHO to an empty hash. */
             SixModelObject Hash = tc.gc.BOOTHash;
             type_object.st.WHO = Hash.st.REPR.allocate(tc, Hash.st);
-            type_object.st.WHO.initialize(tc);
     
             /* Return the type object. */
             Ops.return_o(type_object, cf);
@@ -129,11 +127,9 @@ public class KnowHOWMethods extends CompilationUnit {
             /* Use any attribute information to produce attribute protocol
              * data. The protocol consists of an array... */
             SixModelObject repr_info = tc.gc.BOOTArray.st.REPR.allocate(tc, tc.gc.BOOTArray.st);
-            repr_info.initialize(tc);
             
             /* ...which contains an array per MRO entry... */
             SixModelObject type_info = tc.gc.BOOTArray.st.REPR.allocate(tc, tc.gc.BOOTArray.st);
-            type_info.initialize(tc);
             repr_info.push_boxed(tc, type_info);
                 
             /* ...which in turn contains this type... */
@@ -141,15 +137,12 @@ public class KnowHOWMethods extends CompilationUnit {
             
             /* ...then an array of hashes per attribute... */
             SixModelObject attr_info_list = tc.gc.BOOTArray.st.REPR.allocate(tc, tc.gc.BOOTArray.st);
-            attr_info_list.initialize(tc);
             type_info.push_boxed(tc, attr_info_list);
             List<SixModelObject> attributes = ((KnowHOWREPRInstance)self).attributes;
             for (int i = 0; i < attributes.size(); i++) {
                 KnowHOWAttributeInstance attribute = (KnowHOWAttributeInstance)attributes.get(i);
                 SixModelObject attr_info = tc.gc.BOOTHash.st.REPR.allocate(tc, tc.gc.BOOTHash.st);
-                attr_info.initialize(tc);
                 SixModelObject name_obj = tc.gc.BOOTStr.st.REPR.allocate(tc, tc.gc.BOOTStr.st);
-                name_obj.initialize(tc);
                 name_obj.set_str(tc, attribute.name);
                 attr_info.bind_key_boxed(tc, "name", name_obj);
                 attr_info.bind_key_boxed(tc, "type", attribute.type);
@@ -162,12 +155,10 @@ public class KnowHOWMethods extends CompilationUnit {
             
             /* ...followed by a list of parents (none). */
             SixModelObject parent_info = tc.gc.BOOTArray.st.REPR.allocate(tc, tc.gc.BOOTArray.st);
-            parent_info.initialize(tc);
             type_info.push_boxed(tc, parent_info);
             
             /* All of this goes in a hash. */
             SixModelObject repr_info_hash = tc.gc.BOOTHash.st.REPR.allocate(tc, tc.gc.BOOTHash.st);
-            repr_info_hash.initialize(tc);
             repr_info_hash.bind_key_boxed(tc, "attribute", repr_info);
             
             /* Compose the representation using it. */
@@ -192,7 +183,6 @@ public class KnowHOWMethods extends CompilationUnit {
             
             SixModelObject BOOTArray = tc.gc.BOOTArray;
             SixModelObject result = BOOTArray.st.REPR.allocate(tc, BOOTArray.st);
-            result.initialize(tc);
             
             List<SixModelObject> attributes = ((KnowHOWREPRInstance)self).attributes;
             for (SixModelObject attr : attributes)
@@ -217,7 +207,6 @@ public class KnowHOWMethods extends CompilationUnit {
             
             SixModelObject BOOTHash = tc.gc.BOOTHash;
             SixModelObject result = BOOTHash.st.REPR.allocate(tc, BOOTHash.st);
-            result.initialize(tc);
             
             HashMap<String, SixModelObject> methods = ((KnowHOWREPRInstance)self).methods;
             for (String name : methods.keySet())
@@ -261,7 +250,6 @@ public class KnowHOWMethods extends CompilationUnit {
             /* Allocate attribute object. */
             REPR repr = REPRRegistry.getByName("KnowHOWAttribute");
             KnowHOWAttributeInstance obj = (KnowHOWAttributeInstance)repr.allocate(tc, self.st);
-            obj.initialize(tc);
             
             /* Populate it. */
             obj.name = name_arg;

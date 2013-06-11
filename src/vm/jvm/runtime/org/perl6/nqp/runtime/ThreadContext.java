@@ -94,7 +94,6 @@ public class ThreadContext {
         this.handlers = new ArrayList<HandlerInfo>();
         if (gc.CallCapture != null) {
             savedCC = (CallCaptureInstance)gc.CallCapture.st.REPR.allocate(this, gc.CallCapture.st);
-            savedCC.initialize(this);
         }
     }
 }

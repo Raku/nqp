@@ -8,10 +8,6 @@ import org.perl6.nqp.sixmodel.SixModelObject;
 public class VMHashInstance extends SixModelObject {
     public HashMap<String, SixModelObject> storage;
     
-    public void initialize(ThreadContext tc) {
-        storage = new HashMap<String, SixModelObject>();
-    }
-    
     public SixModelObject at_key_boxed(ThreadContext tc, String key) {
         return storage.get(key);
     }

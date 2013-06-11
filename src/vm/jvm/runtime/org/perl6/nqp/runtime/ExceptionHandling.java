@@ -32,7 +32,6 @@ public class ExceptionHandling {
         try {
             exType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.exceptionType;
             exObj = (VMExceptionInstance)exType.st.REPR.allocate(tc, exType.st);
-            exObj.initialize(tc);
             exObj.message = msg;
             exObj.category = ExceptionHandling.EX_CAT_CATCH;
             exObj.origin = tc.curFrame;

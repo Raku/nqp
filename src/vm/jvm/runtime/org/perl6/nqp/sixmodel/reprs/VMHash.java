@@ -23,6 +23,7 @@ public class VMHash extends REPR {
     public SixModelObject allocate(ThreadContext tc, STable st) {
         VMHashInstance obj = new VMHashInstance();
         obj.st = st;
+        obj.storage = new HashMap<String, SixModelObject>();
         return obj;
     }
     

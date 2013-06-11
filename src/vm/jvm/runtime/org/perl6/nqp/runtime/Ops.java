@@ -252,7 +252,6 @@ public final class Ops {
     public static SixModelObject open(String path, String mode, ThreadContext tc) {
         SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType; 
         IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
-        h.initialize(tc);
         
         try {
             if (mode.equals("r")) {
@@ -278,7 +277,6 @@ public final class Ops {
     public static SixModelObject getstdin(ThreadContext tc) {
         SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType; 
         IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
-        h.initialize(tc);
         h.is = System.in;
         return h;
     }
@@ -286,7 +284,6 @@ public final class Ops {
     public static SixModelObject getstdout(ThreadContext tc) {
         SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType; 
         IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
-        h.initialize(tc);
         h.os = System.out;
         return h;
     }
@@ -294,7 +291,6 @@ public final class Ops {
     public static SixModelObject getstderr(ThreadContext tc) {
         SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType; 
         IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
-        h.initialize(tc);
         h.os = System.err;
         return h;
     }
@@ -998,7 +994,6 @@ public final class Ops {
         HLLConfig hllConfig = cf.codeRef.staticInfo.compUnit.hllConfig;
         SixModelObject resType = hllConfig.slurpyArrayType;
         SixModelObject result = resType.st.REPR.allocate(tc, resType.st);
-        result.initialize(tc);
         
         /* Populate it. */
         for (int i = fromIdx; i < cs.numPositionals; i++) {
@@ -1211,7 +1206,6 @@ public final class Ops {
         HLLConfig hllConfig = cf.codeRef.staticInfo.compUnit.hllConfig;
         SixModelObject resType = hllConfig.slurpyHashType;
         SixModelObject result = resType.st.REPR.allocate(tc, resType.st);
-        result.initialize(tc);
         
         /* Populate it. */
         if (cf.workingNameMap == null)
@@ -1540,7 +1534,6 @@ public final class Ops {
     }
     public static SixModelObject create(SixModelObject obj, ThreadContext tc) {
         SixModelObject res = obj.st.REPR.allocate(tc, obj.st);
-        res.initialize(tc);
         return res;
     }
     public static SixModelObject clone(SixModelObject obj, ThreadContext tc) {
@@ -1744,19 +1737,16 @@ public final class Ops {
     /* Box/unbox operations. */
     public static SixModelObject box_i(long value, SixModelObject type, ThreadContext tc) {
         SixModelObject res = type.st.REPR.allocate(tc, type.st);
-        res.initialize(tc);
         res.set_int(tc, value);
         return res;
     }
     public static SixModelObject box_n(double value, SixModelObject type, ThreadContext tc) {
         SixModelObject res = type.st.REPR.allocate(tc, type.st);
-        res.initialize(tc);
         res.set_num(tc, value);
         return res;
     }
     public static SixModelObject box_s(String value, SixModelObject type, ThreadContext tc) {
         SixModelObject res = type.st.REPR.allocate(tc, type.st);
-        res.initialize(tc);
         res.set_str(tc, value);
         return res;
     }
@@ -2130,7 +2120,6 @@ public final class Ops {
             /* Fake up a VMHash and then get its iterator. */
             SixModelObject BOOTHash = tc.gc.BOOTHash;
             SixModelObject hash = BOOTHash.st.REPR.allocate(tc, BOOTHash.st);
-            hash.initialize(tc);
             
             /* TODO: don't cheat and just shove the nulls in. It's enough for
              * the initial use case of this, though.
@@ -2377,7 +2366,6 @@ public final class Ops {
         HLLConfig hllConfig = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig;
         SixModelObject result = hllConfig.slurpyArrayType.st.REPR.allocate(tc,
                 hllConfig.slurpyArrayType.st);
-        result.initialize(tc);
         
         result.push_boxed(tc, box_n(value, hllConfig.numBoxType, tc));
         result.push_boxed(tc, box_n(base, hllConfig.numBoxType, tc));
@@ -2438,7 +2426,6 @@ public final class Ops {
         HLLConfig hllConfig = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig;
         SixModelObject arrayType = hllConfig.slurpyArrayType;
         SixModelObject array = arrayType.st.REPR.allocate(tc, arrayType.st);
-        array.initialize(tc);
 
         int slen = string.length();
         if (slen == 0) {
@@ -3145,7 +3132,6 @@ public final class Ops {
         SixModelObject hashType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.hashType;
         SixModelObject strType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strBoxType;
         SixModelObject res = hashType.st.REPR.allocate(tc, hashType.st);
-        res.initialize(tc);
         
         Map<String, String> env = System.getenv();
         for (String envName : env.keySet())
@@ -3159,7 +3145,6 @@ public final class Ops {
         // Construct exception object.
         SixModelObject exType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.exceptionType;
         VMExceptionInstance exObj = (VMExceptionInstance)exType.st.REPR.allocate(tc, exType.st);
-        exObj.initialize(tc);
         exObj.message = msg;
         exObj.category = ExceptionHandling.EX_CAT_CATCH;
         exObj.origin = tc.curFrame;
@@ -3226,7 +3211,6 @@ public final class Ops {
     public static SixModelObject newexception(ThreadContext tc) {
         SixModelObject exType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.exceptionType;
         SixModelObject exObj = (VMExceptionInstance)exType.st.REPR.allocate(tc, exType.st);
-        exObj.initialize(tc);
         return exObj;
     }
     public static SixModelObject backtracestrings(SixModelObject obj, ThreadContext tc) {
@@ -3234,7 +3218,6 @@ public final class Ops {
             SixModelObject Array = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.listType;
             SixModelObject Str = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strBoxType;
             SixModelObject result = Array.st.REPR.allocate(tc, Array.st);
-            result.initialize(tc);
             
             List<String> lines = ExceptionHandling.backtraceStrings(((VMExceptionInstance)obj).origin);
             for (int i = 0; i < lines.size(); i++)
@@ -3454,7 +3437,6 @@ public final class Ops {
     public static SixModelObject nfafromstatelist(SixModelObject states, SixModelObject nfaType, ThreadContext tc) {
         /* Create NFA object. */
         NFAInstance nfa = (NFAInstance)nfaType.st.REPR.allocate(tc, nfaType.st);
-        nfa.initialize(tc);
         
         /* The first state entry is the fates list. */
         nfa.fates = states.at_pos_boxed(tc, 0);
@@ -3514,7 +3496,6 @@ public final class Ops {
         /* Copy results into an RIA. */
         SixModelObject BOOTIntArray = tc.gc.BOOTIntArray;
         SixModelObject fateRes = BOOTIntArray.st.REPR.allocate(tc, BOOTIntArray.st);
-        fateRes.initialize(tc);
         for (int i = 0; i < fates.length; i++) {
             tc.native_i = fates[i];
             fateRes.bind_pos_native(tc, i);
@@ -3800,7 +3781,6 @@ public final class Ops {
     
     private static SixModelObject makeBI(ThreadContext tc, SixModelObject type, BigInteger value) {
         SixModelObject res = type.st.REPR.allocate(tc, type.st);
-        res.initialize(tc);
         if (res instanceof P6bigintInstance) {
             ((P6bigintInstance)res).value = value;
         }
@@ -3929,7 +3909,6 @@ public final class Ops {
                 else {
                     /* Otherwise, do floating point infinity of the right sign. */
                     SixModelObject result = nType.st.REPR.allocate(tc, nType.st);
-                    result.initialize(tc);
                     result.set_num(tc, cmp > 0 ? Double.POSITIVE_INFINITY : Double.NEGATIVE_INFINITY);
                     return result;
                 }
@@ -3943,7 +3922,6 @@ public final class Ops {
             double fBase = base.doubleValue();
             double fExponent = exponent.doubleValue();
             SixModelObject result = nType.st.REPR.allocate(tc, nType.st);
-            result.initialize(tc);
             result.set_num(tc, Math.pow(fBase, fExponent));
             return result;
         }
@@ -4001,7 +3979,6 @@ public final class Ops {
         HLLConfig hllConfig = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig;
         SixModelObject result = hllConfig.slurpyArrayType.st.REPR.allocate(tc,
                 hllConfig.slurpyArrayType.st);
-        result.initialize(tc);
         
         result.push_boxed(tc, makeBI(tc, type, value));
         result.push_boxed(tc, makeBI(tc, type, base));
@@ -4075,7 +4052,6 @@ public final class Ops {
         EvalResult res = (EvalResult)obj;
         SixModelObject Array = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.listType;
         SixModelObject result = Array.st.REPR.allocate(tc, Array.st);
-        result.initialize(tc);
         for (int i = 0; i < res.cu.codeRefs.length; i++)
             result.bind_pos_boxed(tc, i, res.cu.codeRefs[i]);
         return result;
@@ -4084,7 +4060,6 @@ public final class Ops {
         SixModelObject Array = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.listType;
         SixModelObject Str = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strBoxType;
         SixModelObject result = Array.st.REPR.allocate(tc, Array.st);
-        result.initialize(tc);
         String cpStr = System.getProperty("java.class.path");
         String[] cps = cpStr.split("[:;]");
         for (int i = 0; i < cps.length; i++)

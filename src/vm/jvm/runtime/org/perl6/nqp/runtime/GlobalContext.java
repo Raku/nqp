@@ -165,7 +165,6 @@ public class GlobalContext {
         setupConfig(compileeHLLConfiguration.get(""));
         setupConfig(compilerHLLConfiguration.get(""));
         mainThread.savedCC = (CallCaptureInstance)CallCapture.st.REPR.allocate(mainThread, CallCapture.st);
-        mainThread.savedCC.initialize(mainThread);
     }
     
     /**

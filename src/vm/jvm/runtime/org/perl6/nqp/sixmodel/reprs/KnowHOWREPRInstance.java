@@ -11,10 +11,4 @@ public class KnowHOWREPRInstance extends SixModelObject {
     public String name;
     public List<SixModelObject> attributes;
     public HashMap<String, SixModelObject> methods;
-    
-    public void initialize(ThreadContext tc) {
-        this.name = "<anon>";
-        this.attributes = new ArrayList<SixModelObject>();
-        this.methods = new HashMap<String, SixModelObject>();
-    }
 }

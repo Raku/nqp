@@ -23,12 +23,6 @@ public abstract class SixModelObject implements Cloneable {
     public SerializationContext sc;
     
     /**
-     * Used to initialize the body of an object representing the type
-     * describe by the specified s-table. */
-    public void initialize(ThreadContext tc) {
-    }
-    
-    /**
      * Attribute access functions. The native variants load the value into
      * or store a value from the Thread Context.
      */

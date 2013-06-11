@@ -4,9 +4,6 @@ import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.SixModelObject;
 
 public class P6OpaqueDelegateInstance extends P6OpaqueBaseInstance {
-    public void initialize(ThreadContext tc) {
-        delegate.initialize(tc);
-    }
     public SixModelObject get_attribute_boxed(ThreadContext tc, SixModelObject class_handle,
             String name, long hint) {
         return delegate.get_attribute_boxed(tc, class_handle, name, hint);

@@ -63,7 +63,6 @@ public class KnowHOWBootstrapper {
         STable st = new STable(REPR, null);
         st.WHAT = knowhow;
         KnowHOWREPRInstance knowhow_how = (KnowHOWREPRInstance)REPR.allocate(tc, st);
-        knowhow_how.initialize(tc);
         st.HOW = knowhow_how;
         knowhow_how.st = st;
         
@@ -110,7 +109,6 @@ public class KnowHOWBootstrapper {
         /* Create meta-object. */
         SixModelObject knowhow_how = tc.gc.KnowHOW.st.HOW;
         KnowHOWREPRInstance meta_obj = (KnowHOWREPRInstance)knowhow_how.st.REPR.allocate(tc, knowhow_how.st);
-        meta_obj.initialize(tc);
         
         /* Add methods. */
         meta_obj.methods.put("new", knowhowUnit.lookupCodeRef("attr_new"));
@@ -145,7 +143,6 @@ public class KnowHOWBootstrapper {
     private static SixModelObject bootType(ThreadContext tc, String typeName, String reprName) {
         SixModelObject knowhow_how = tc.gc.KnowHOW.st.HOW;
         KnowHOWREPRInstance meta_obj = (KnowHOWREPRInstance)knowhow_how.st.REPR.allocate(tc, knowhow_how.st);
-        meta_obj.initialize(tc);
         meta_obj.name = typeName;
         REPR repr = REPRRegistry.getByName(reprName);
         SixModelObject type_obj = repr.type_object_for(tc, meta_obj);
@@ -168,9 +165,7 @@ public class KnowHOWBootstrapper {
         
         SixModelObject BOOTHash = tc.gc.BOOTHash;
         SixModelObject repr_info = BOOTHash.st.REPR.allocate(tc, BOOTHash.st);
-        repr_info.initialize(tc);
         SixModelObject repr_array_info = BOOTHash.st.REPR.allocate(tc, BOOTHash.st);
-        repr_array_info.initialize(tc);
         repr_array_info.bind_key_boxed(tc, "type", type);
         repr_info.bind_key_boxed(tc, "array", repr_array_info);
         booted.st.REPR.compose(tc, booted.st, repr_info);
