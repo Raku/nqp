@@ -1833,6 +1833,10 @@ public final class Ops {
     public static long attrinited(SixModelObject obj, SixModelObject ch, String name, ThreadContext tc) {
         return obj.is_attribute_initialized(tc, decont(ch, tc), name, STable.NO_HINT);
     }
+    public static long attrhintfor(SixModelObject ch, String name, ThreadContext tc) {
+        ch = decont(ch, tc);
+        return ch.st.REPR.hint_for(tc, ch.st, ch, name);
+    }
     
     /* Positional operations. */
     public static SixModelObject atpos(SixModelObject arr, long idx, ThreadContext tc) {
