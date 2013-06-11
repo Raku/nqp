@@ -4603,8 +4603,6 @@ class QAST::CompilerJAST {
     method literal($node) {
         my $il := JAST::InstructionList.new();
         my $litconst := $node[0];
-        $litconst := nqp::lc($litconst)
-            if $node.subtype eq 'ignorecase';
         my $litlen := nqp::chars($litconst);
         
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
@@ -4615,22 +4613,15 @@ class QAST::CompilerJAST {
         $il.append(JAST::Instruction.new( :op('ifgt'), %*REG<fail> ));
         
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<tgt> ));
+        $il.append(JAST::PushIndex.new(
+            :value($node.subtype eq 'ignorecase' ?? 1 !! 0) ));
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
         $il.append($L2I);
-        $il.append($DUP);
-        $il.append(JAST::PushIndex.new( :value($litlen) ));
-        $il.append($IADD);
-        $il.append(JAST::Instruction.new( :op('invokevirtual'),
-            $TYPE_STR, 'substring', $TYPE_STR, 'Integer', 'Integer' ));
         $il.append(JAST::PushSVal.new( :value($litconst) ));
-        if $node.subtype eq 'ignorecase' {
-            $il.append(JAST::Instruction.new( :op('invokevirtual'),
-                $TYPE_STR, 'equalsIgnoreCase', 'Z', $TYPE_STR ));
-        }
-        else {
-            $il.append(JAST::Instruction.new( :op('invokevirtual'),
-                $TYPE_STR, 'equals', 'Z', $TYPE_OBJ ));
-        }
+        $il.append(JAST::PushIndex.new( :value(0) ));
+        $il.append(JAST::PushIndex.new( :value($litlen) ));
+        $il.append(JAST::Instruction.new( :op('invokevirtual'),
+            $TYPE_STR, 'regionMatches', 'Z', 'Z', 'Integer', $TYPE_STR, 'Integer', 'Integer' ));
         $il.append(JAST::Instruction.new( :op($node.negate ?? 'ifne' !! 'ifeq'), %*REG<fail> ));
         
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
