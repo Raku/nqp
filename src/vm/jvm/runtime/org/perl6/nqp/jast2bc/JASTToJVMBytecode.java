@@ -304,7 +304,7 @@ public class JASTToJVMBytecode {
                     Type t = Type.getType(cName);
                     m.visitLdcInsn(t);
                 }
-                else if (curLine.equals(".push_self")) {
+                else if (curLine.equals(".push_self") || curLine.equals(".push_cur_meth")) {
                     m.visitLdcInsn(new Handle(
                         isStatic ? Opcodes.H_INVOKESTATIC : Opcodes.H_INVOKESPECIAL,
                         className, methodName, desc));

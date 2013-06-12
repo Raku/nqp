@@ -3264,7 +3264,7 @@ class QAST::CompilerJAST {
             if $block.num_save_sites {
                 my $saver := JAST::InstructionList.new;
                 $saver.append(JAST::Label.new( :name( 'SAVER' ) ));
-                $saver.append(JAST::PushSelf.new);
+                $saver.append(JAST::PushCurMeth.new);
 
                 my @merged;
                 for $*JMETH.arguments { nqp::push(@merged, $_); }
