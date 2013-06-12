@@ -1,6 +1,8 @@
 package org.perl6.nqp.runtime;
 
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.HashMap;
 
 import org.perl6.nqp.sixmodel.SixModelObject;
@@ -15,6 +17,11 @@ public class StaticCodeInfo implements Cloneable {
      * Method handle for the code ref.
      */
     MethodHandle mh;
+
+    /**
+     * Curried method handle for resuming.
+     */
+    MethodHandle mhResume;
     
     /**
      * The (human-readable) name of the code-ref.
@@ -138,6 +145,11 @@ public class StaticCodeInfo implements Cloneable {
         if (oLexicalNames != null) {
             this.oLexStatic = new SixModelObject[oLexicalNames.length];
             this.oLexStaticFlags = new byte[oLexicalNames.length];
+        }
+        MethodType t = mh.type();
+        if (t.parameterCount() == 5 && t.parameterType(4) == ResumeStatus.class) {
+            mhResume = MethodHandles.insertArguments(mh, 0, null, null, null, null);
+            this.mh = MethodHandles.insertArguments(mh, 4, (Object)null);
         }
     }
     

@@ -367,15 +367,6 @@ class JAST::PushCVal is JAST::Node {
     method dump() { ".push_cc $!value" }
 }
 
-class JAST::PushCurMeth is JAST::Node {
-    method new() {
-        my $node := nqp::create(JAST::PushCurMeth);
-        $node
-    }
-
-    method dump() { ".push_cur_meth" }
-}
-
 class JAST::TryCatch is JAST::Node {
     has $!try;
     has $!catch;

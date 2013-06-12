@@ -16,7 +16,9 @@ public class SaveStackException extends ControlException {
     }
 
     public SaveStackException pushFrame(int resumePoint, MethodHandle method, Object[] saveSpace, CallFrame callFrame) {
+        if (method == null) method = callFrame.codeRef.staticInfo.mhResume;
         top = new ResumeStatus.Frame(method, resumePoint, saveSpace, callFrame, top);
+        if (callFrame != null) callFrame.tc.curFrame = callFrame.caller;
         return this;
     }
 }

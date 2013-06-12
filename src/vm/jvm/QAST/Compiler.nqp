@@ -62,6 +62,7 @@ my $TYPE_EX_CONT   := 'Lorg/perl6/nqp/runtime/ControlException;';
 my $TYPE_EX_RT     := 'Ljava/lang/RuntimeException;';
 my $TYPE_EX_SAVE   := 'Lorg/perl6/nqp/runtime/SaveStackException;';
 my $TYPE_THROWABLE := 'Ljava/lang/Throwable;';
+my $TYPE_RESUME    := 'Lorg/perl6/nqp/runtime/ResumeStatus;';
 
 # Exception handler categories.
 my $EX_CAT_CATCH   := 1;
@@ -3054,6 +3055,7 @@ class QAST::CompilerJAST {
             $*JMETH.add_argument('cr', $TYPE_CR);
             $*JMETH.add_argument('csd', $TYPE_CSD);
             $*JMETH.add_argument('__args', "[$TYPE_OBJ");
+            $*JMETH.add_argument('resume', $TYPE_RESUME);
             
             # Set up temporaries allocator.
             my $*BLOCK_TA := BlockTempAlloc.new();
@@ -3264,7 +3266,7 @@ class QAST::CompilerJAST {
             if $block.num_save_sites {
                 my $saver := JAST::InstructionList.new;
                 $saver.append(JAST::Label.new( :name( 'SAVER' ) ));
-                $saver.append(JAST::PushCurMeth.new);
+                $saver.append($ACONST_NULL);
 
                 my @merged;
                 for $*JMETH.arguments { nqp::push(@merged, $_); }
@@ -3338,12 +3340,13 @@ class QAST::CompilerJAST {
                     $TYPE_OPS, 'emptyCallSite', $TYPE_CSD ));
                 $il.append(JAST::Instruction.new( :op('getstatic'),
                     $TYPE_OPS, 'emptyArgList', "[$TYPE_OBJ" ));
+                $il.append($ACONST_NULL);
                 
                 # Emit the virtual call.
                 $il.append(savesite(JAST::Instruction.new( :op('invokevirtual'),
                     'L' ~ $*JCLASS.name ~ ';',
                     $*CODEREFS.cuid_to_jastmethname($node.cuid),
-                    'V', $TYPE_TC, $TYPE_CR, $TYPE_CSD, "[$TYPE_OBJ" )));
+                    'V', $TYPE_TC, $TYPE_CR, $TYPE_CSD, "[$TYPE_OBJ", $TYPE_RESUME )));
                 
                 # Load result onto the stack, unless in void context.
                 if $*WANT != $RT_VOID {
