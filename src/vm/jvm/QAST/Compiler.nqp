@@ -8,6 +8,7 @@ my $ALOAD_0     := JAST::Instruction.new( :op('aload_0') );
 my $ALOAD_1     := JAST::Instruction.new( :op('aload_1') );
 my $IASTORE     := JAST::Instruction.new( :op('iastore') );
 my $LASTORE     := JAST::Instruction.new( :op('lastore') );
+my $AALOAD      := JAST::Instruction.new( :op('aaload') );
 my $AASTORE     := JAST::Instruction.new( :op('aastore') );
 my $BASTORE     := JAST::Instruction.new( :op('bastore') );
 my $POP         := JAST::Instruction.new( :op('pop') );
@@ -62,7 +63,7 @@ my $TYPE_EX_CONT   := 'Lorg/perl6/nqp/runtime/ControlException;';
 my $TYPE_EX_RT     := 'Ljava/lang/RuntimeException;';
 my $TYPE_EX_SAVE   := 'Lorg/perl6/nqp/runtime/SaveStackException;';
 my $TYPE_THROWABLE := 'Ljava/lang/Throwable;';
-my $TYPE_RESUME    := 'Lorg/perl6/nqp/runtime/ResumeStatus;';
+my $TYPE_RESUME    := 'Lorg/perl6/nqp/runtime/ResumeStatus$Frame;';
 
 # Exception handler categories.
 my $EX_CAT_CATCH   := 1;
@@ -411,7 +412,7 @@ sub savesite($il) {
     $catch.append(JAST::PushIndex.new( :value($index) ));
     $catch.append(JAST::Instruction.new( :op('goto'), $saver ));
 
-    JAST::TryCatch.new( :try($il), :catch($catch), :type($TYPE_EX_SAVE) );
+    JAST::TryCatch.new( :try($try), :catch($catch), :type($TYPE_EX_SAVE) );
 }
 
 # Chaining.
@@ -2468,7 +2469,7 @@ class QAST::CompilerJAST {
         has %!lexical_types;    # Mapping of lexical names to types
         has %!lexical_idxs;     # Lexical indexes (but have to know type too)
         has @!lexical_names;    # List by type of lexial name lists
-        has $!num_save_sites;   # Count of points where a SaveStackException handler is needed
+        has int $!num_save_sites;   # Count of points where a SaveStackException handler is needed
         
         method new($qast, $outer) {
             my $obj := nqp::create(self);
@@ -3178,9 +3179,12 @@ class QAST::CompilerJAST {
                                 'lastParameterExisted', "Integer" ));
                             $il.append(JAST::Instruction.new( :op('ifne'), $lbl ));
                             $il.append(pop_ins($type));
-                            my $default := self.as_jast($_.default, :want($type));
-                            $il.append($default.jast);
-                            $*STACK.obtain($il, $default);
+                            {
+                                my $*BLOCK := $block;
+                                my $default := self.as_jast($_.default, :want($type));
+                                $il.append($default.jast);
+                                $*STACK.obtain($il, $default);
+                            }
                             $il.append($lbl);
                         }
                     }
@@ -3236,7 +3240,14 @@ class QAST::CompilerJAST {
             $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
             $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
                 'return_' ~ typechar($body.type), 'Void', jtype($body.type), $TYPE_CF ));
-            
+
+            # make sure this goes before the body
+            my int $save_sites := $block.num_save_sites;
+            if $save_sites {
+                $*JMETH.append(JAST::Instruction.new( :op('aload'), 'resume' ));
+                $*JMETH.append(JAST::Instruction.new( :op('ifnonnull'), JAST::Label.new( :name('RESUME') ) ));
+            }
+
             # Emit the postlude. We catch any exceptions. Control ones are
             # rethrown, after calling CallFrame.leave. Others are passed on to
             # dieInternal. Finally, if there's no exception, we also need to
@@ -3263,8 +3274,10 @@ class QAST::CompilerJAST {
                 :type($TYPE_THROWABLE) ));
             $*JMETH.append($RETURN);
 
-            if $block.num_save_sites {
+            if $save_sites {
                 my $saver := JAST::InstructionList.new;
+                my $resume := JAST::InstructionList.new;
+
                 $saver.append(JAST::Label.new( :name( 'SAVER' ) ));
                 $saver.append($ACONST_NULL);
 
@@ -3272,34 +3285,50 @@ class QAST::CompilerJAST {
                 for $*JMETH.arguments { nqp::push(@merged, $_); }
                 for $*JMETH.locals { nqp::push(@merged, $_); }
 
-                $saver.append(JAST::PushIndex.new( :value(1+@merged) ));
+                my int $i := 0;
+                my int $ict := +@merged;
+
+                $saver.append(JAST::PushIndex.new( :value(+@merged) ));
                 $saver.append(JAST::Instruction.new( :op('anewarray'), $TYPE_OBJ ));
 
-                # HACK need to save this but it's not a local
-                $saver.append($DUP);
-                $saver.append(JAST::PushIndex.new( :value(0) ));
-                $saver.append($ALOAD_0);
-                $saver.append($AASTORE);
-
-                my int $i := 1;
+                $resume.append(JAST::Label.new( :name( 'RESUME' ) ));
+                $resume.append(JAST::Instruction.new( :op('aload'), 'resume' ));
+                $resume.append(JAST::Instruction.new( :op('getfield'), $TYPE_RESUME, 'saveSpace', '['~$TYPE_OBJ ));
 
                 for @merged {
                     $saver.append($DUP);
-                    $saver.append(JAST::PushIndex.new( :value($i++) ));
+                    $saver.append(JAST::PushIndex.new( :value($i) ));
+
+                    $resume.append($DUP) if $i+1 != $ict; # assuming @merged > 0, which is guaranteed currently
+                    $resume.append(JAST::PushIndex.new( :value($i) ));
+                    $resume.append($AALOAD);
+                    $i++;
 
                     # later, we might want to consolidate multiple doubles/longs into a single part of the save record
                     if $_[1] eq 'Double' {
                         $saver.append(JAST::Instruction.new( :op('dload'), $_[0] ));
                         $saver.append(JAST::Instruction.new( :op('invokestatic'),
                             $TYPE_DOUBLE, 'valueOf', $TYPE_DOUBLE, 'Double' ));
+
+                        $resume.append(JAST::Instruction.new( :op('checkcast'), $TYPE_DOUBLE ));
+                        $resume.append(JAST::Instruction.new( :op('invokevirtual'),
+                            $TYPE_DOUBLE, 'doubleValue', 'Double' ));
+                        $resume.append(JAST::Instruction.new( :op('dstore'), $_[0] ));
                     }
                     elsif $_[1] eq 'Long' {
                         $saver.append(JAST::Instruction.new( :op('lload'), $_[0] ));
                         $saver.append(JAST::Instruction.new( :op('invokestatic'),
                             $TYPE_LONG, 'valueOf', $TYPE_LONG, 'Long' ));
+
+                        $resume.append(JAST::Instruction.new( :op('checkcast'), $TYPE_LONG ));
+                        $resume.append(JAST::Instruction.new( :op('invokevirtual'),
+                            $TYPE_LONG, 'longValue', 'Long' ));
+                        $resume.append(JAST::Instruction.new( :op('lstore'), $_[0] ));
                     }
                     else {
                         $saver.append(JAST::Instruction.new( :op('aload'), $_[0] ));
+                        $resume.append(JAST::Instruction.new( :op('checkcast'), $_[1] ));
+                        $resume.append(JAST::Instruction.new( :op('astore'), $_[0] ));
                     }
 
                     $saver.append($AASTORE);
@@ -3310,7 +3339,22 @@ class QAST::CompilerJAST {
                     $TYPE_EX_SAVE, 'pushFrame', $TYPE_EX_SAVE, "Integer", $TYPE_MH, '['~$TYPE_OBJ, $TYPE_CF ));
                 $saver.append($ATHROW);
 
+                $resume.append(JAST::Instruction.new( :op('aload'), 'resume' ));
+                $resume.append(JAST::Instruction.new( :op('invokevirtual'),
+                    $TYPE_RESUME, 'resumeNext', 'Void' ));
+
+                $resume.append(JAST::Instruction.new( :op('aload'), 'resume' ));
+                $resume.append(JAST::Instruction.new( :op('getfield'), $TYPE_RESUME, 'resumePoint', 'Integer' ));
+                my $switch := JAST::Instruction.new( :op('tableswitch'), JAST::Label.new( :name('reenter_0') ) );
+                my int $labelno := 0;
+                while ($labelno < $save_sites) {
+                    $switch.push( JAST::Label.new( :name('reenter_'~$labelno) ) );
+                    $labelno++;
+                }
+                $resume.append($switch);
+
                 $*JMETH.append($saver);
+                $*JMETH.append($resume);
             }
             
             # Finalize method and add it to the class.
