@@ -4141,4 +4141,17 @@ public final class Ops {
             tc.gc.useCompilerHLLConfig();
         return 1;
     }
+
+    public static SixModelObject continuationclone(SixModelObject in, ThreadContext tc) {
+        throw new UnsupportedOperationException();
+    }
+    public static SixModelObject continuationreset(SixModelObject key, SixModelObject run, ThreadContext tc, ResumeStatus.Frame resume) {
+        throw new UnsupportedOperationException();
+    }
+    public static SixModelObject continuationshift(SixModelObject key, SixModelObject run, ThreadContext tc, ResumeStatus.Frame resume) {
+        throw new UnsupportedOperationException();
+    }
+    public static SixModelObject continuationinvoke(SixModelObject cont, ThreadContext tc, ResumeStatus.Frame resume) {
+        throw new UnsupportedOperationException();
+    }
 }

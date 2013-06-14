@@ -2353,6 +2353,60 @@ QAST::OperationsJAST.map_classlib_core_op('compunitmainline', $TYPE_OPS, 'compun
 QAST::OperationsJAST.map_classlib_core_op('compunitcodes', $TYPE_OPS, 'compunitcodes', [$RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('jvmclasspaths', $TYPE_OPS, 'jvmclasspaths', [], $RT_OBJ, :tc);
 
+# JVM-specific ops for continuation handling
+# The three main continuation ops are fudgy because they need to be called partially like subs
+sub contop($name, @params) {
+    my int $expected_args := +@params;
+    my @jtypes_in;
+    for @params {
+        nqp::push(@jtypes_in, jtype($_));
+    }
+    QAST::OperationsJAST.add_core_op($name, -> $qastcomp, $node {
+        if +@($node) != $expected_args {
+            nqp::die("Operation '$name' requires $expected_args operands");
+        }
+
+        # Emit operands.
+        my $il := JAST::InstructionList.new();
+        my int $i := 0;
+        my @arg_res;
+        while $i < $expected_args {
+            my $type := @params[$i];
+            my $operand := $node[$i];
+            my $operand_res := $qastcomp.as_jast($node[$i], :want($type));
+            $il.append($operand_res.jast);
+            $i++;
+            nqp::push(@arg_res, $operand_res);
+        }
+
+        # Emit operation.
+        $*STACK.spill_to_locals($il);
+        $*STACK.obtain($il, |@arg_res) if @arg_res;
+        $il.append($ALOAD_1);
+        $il.append($ACONST_NULL);
+        $il.append(savesite(JAST::Instruction.new(
+            :op('invokestatic'), $TYPE_OPS, $name, 'Void', |@jtypes_in, $TYPE_TC, $TYPE_RESUME
+        )));
+
+        # Load result onto the stack, unless in void context.
+        if $*WANT != $RT_VOID {
+            my $rtype := rttype_from_typeobj($node.returns);
+            $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
+            $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+                    'result_' ~ typechar($rtype), jtype($rtype), $TYPE_CF ));
+            result($il, $rtype)
+        }
+        else {
+            result($il, $RT_VOID)
+        }
+    });
+}
+QAST::OperationsJAST.map_classlib_core_op('continuationclone', $TYPE_OPS, 'continuationclone', [$RT_OBJ], $RT_OBJ, :tc);
+contop('continuationreset', [$RT_OBJ, $RT_OBJ]);
+contop('continuationshift', [$RT_OBJ, $RT_OBJ]);
+contop('continuationinvoke', [$RT_OBJ]);
+
+
 class QAST::CompilerJAST {
     # Responsible for handling issues around code references, building the
     # switch statement dispatcher, etc.
