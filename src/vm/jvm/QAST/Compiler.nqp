@@ -3133,16 +3133,6 @@ class QAST::CompilerJAST {
             $*JMETH.cr_nlex(@lex_names[$RT_NUM]);
             $*JMETH.cr_slex(@lex_names[$RT_STR]);
             
-            # Emit prelude. This creates and stashes the CallFrame.
-            $*JMETH.add_local('cf', $TYPE_CF);
-            $*JMETH.append(JAST::Instruction.new( :op('new'), $TYPE_CF ));
-            $*JMETH.append($DUP);
-            $*JMETH.append($ALOAD_1);
-            $*JMETH.append(JAST::Instruction.new( :op('aload'), 'cr' ));
-            $*JMETH.append(JAST::Instruction.new( :op('invokespecial'), $TYPE_CF, '<init>',
-                'Void', $TYPE_TC, $TYPE_CR ));
-            $*JMETH.append(JAST::Instruction.new( :op('astore'), 'cf' ));
-            
             # Unless we have custom args processing...
             my $il := JAST::InstructionList.new();
             unless $node.custom_args {
@@ -3302,6 +3292,16 @@ class QAST::CompilerJAST {
                 $*JMETH.append(JAST::Instruction.new( :op('ifnonnull'), JAST::Label.new( :name('RESUME') ) ));
             }
 
+            # Emit prelude (after checking for resume). This creates and stashes the CallFrame.
+            $*JMETH.add_local('cf', $TYPE_CF);
+            $*JMETH.append(JAST::Instruction.new( :op('new'), $TYPE_CF ));
+            $*JMETH.append($DUP);
+            $*JMETH.append($ALOAD_1);
+            $*JMETH.append(JAST::Instruction.new( :op('aload'), 'cr' ));
+            $*JMETH.append(JAST::Instruction.new( :op('invokespecial'), $TYPE_CF, '<init>',
+                'Void', $TYPE_TC, $TYPE_CR ));
+            $*JMETH.append(JAST::Instruction.new( :op('astore'), 'cf' ));
+            
             # Emit the postlude. We catch any exceptions. Control ones are
             # rethrown, after calling CallFrame.leave. Others are passed on to
             # dieInternal. Finally, if there's no exception, we also need to
@@ -3336,8 +3336,11 @@ class QAST::CompilerJAST {
                 $saver.append($ACONST_NULL);
 
                 my @merged;
-                for $*JMETH.arguments { nqp::push(@merged, $_); }
-                for $*JMETH.locals { nqp::push(@merged, $_); }
+                # don't save/reload the resume pointer (could get messy :p) or the thread context (restored separately since we can change threads)
+                # or the callframe (can also change)
+                # also self doesn't get saved/restored, but that's OK because the resume handle is primed with it.
+                for $*JMETH.arguments { nqp::push(@merged, $_) unless $_[0] eq 'resume' || $_[0] eq 'tc' }
+                for $*JMETH.locals { nqp::push(@merged, $_) unless $_[0] eq 'cf' }
 
                 my int $i := 0;
                 my int $ict := +@merged;
@@ -3346,6 +3349,12 @@ class QAST::CompilerJAST {
                 $saver.append(JAST::Instruction.new( :op('anewarray'), $TYPE_OBJ ));
 
                 $resume.append(JAST::Label.new( :name( 'RESUME' ) ));
+                $resume.append(JAST::Instruction.new( :op('aload'), 'resume' ));
+                $resume.append(JAST::Instruction.new( :op('getfield'), $TYPE_RESUME, 'tc', $TYPE_TC ));
+                $resume.append(JAST::Instruction.new( :op('astore'), 'tc' ));
+                $resume.append(JAST::Instruction.new( :op('aload'), 'resume' ));
+                $resume.append(JAST::Instruction.new( :op('getfield'), $TYPE_RESUME, 'callFrame', $TYPE_CF ));
+                $resume.append(JAST::Instruction.new( :op('astore'), 'cf' ));
                 $resume.append(JAST::Instruction.new( :op('aload'), 'resume' ));
                 $resume.append(JAST::Instruction.new( :op('getfield'), $TYPE_RESUME, 'saveSpace', '['~$TYPE_OBJ ));
 
@@ -3395,7 +3404,7 @@ class QAST::CompilerJAST {
 
                 $resume.append(JAST::Instruction.new( :op('aload'), 'resume' ));
                 $resume.append(JAST::Instruction.new( :op('invokevirtual'),
-                    $TYPE_RESUME, 'resumeNext', 'Void' ));
+                    $TYPE_RESUME, 'resumeNextSave', 'Void' ));
 
                 $resume.append(JAST::Instruction.new( :op('aload'), 'resume' ));
                 $resume.append(JAST::Instruction.new( :op('getfield'), $TYPE_RESUME, 'resumePoint', 'Integer' ));

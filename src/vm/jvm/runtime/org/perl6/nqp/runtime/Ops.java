@@ -4167,7 +4167,6 @@ public final class Ops {
 
         if (resume != null) {
             // reload stuff here, then don't goto because java source doesn't have that
-            // XXX: compiler should be modified to take ThreadContext from continuation, NOT RELOAD RESUME..., wrap resumeNext in an appropriate handler
             Object[] bits = resume.saveSpace;
             key = (SixModelObject) bits[0];
             tc = resume.tc;
@@ -4221,6 +4220,7 @@ public final class Ops {
                 nroot = nnew;
             }
             ntail = nnew;
+            read = read.next;
         }
 
         STable contType = tc.gc.Continuation.st;

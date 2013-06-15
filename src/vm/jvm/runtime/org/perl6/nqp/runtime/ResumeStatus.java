@@ -54,6 +54,15 @@ public class ResumeStatus extends SixModelObject {
                 Ops.invokeDirect(tc, thunk, Ops.emptyCallSite, false, Ops.emptyArgList);
             }
         }
+
+        /** Restores the next frame.  If it suspends, put this frame on the new continuation. */
+        public void resumeNextSave() throws Throwable {
+            try {
+                resumeNext();
+            } catch (SaveStackException sse) {
+                throw sse.pushFrame(resumePoint, method, saveSpace, callFrame);
+            }
+        }
     }
 
     /** The first frame of this continuation.  Subsequent frames can be accessed using {@link Frame#next}. */
