@@ -1,5 +1,8 @@
 package org.perl6.nqp.runtime;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -1431,6 +1434,9 @@ public final class Ops {
         invokeDirect(tc, invokee, new CallSiteDescriptor(callsite, null), args);
     }
     public static void invokeDirect(ThreadContext tc, SixModelObject invokee, CallSiteDescriptor csd, Object[] args) {
+        invokeDirect(tc, invokee, csd, true, args);
+    }
+    public static void invokeDirect(ThreadContext tc, SixModelObject invokee, CallSiteDescriptor csd, boolean barrier, Object[] args) {
         // Otherwise, get the code ref.
         CodeRef cr;
         if (invokee instanceof CodeRef) {
@@ -1451,6 +1457,8 @@ public final class Ops {
             cr.staticInfo.mh.invokeExact(tc, cr, csd, args);
         }
         catch (ControlException e) {
+            if (barrier && (e instanceof SaveStackException))
+                ExceptionHandling.dieInternal(tc, "control operator crossed continuation barrier");
             throw e;
         }
         catch (Throwable e) {
@@ -4142,16 +4150,104 @@ public final class Ops {
         return 1;
     }
 
+    private static MethodHandle reset_reenter;
+    static {
+        try {
+            reset_reenter = MethodHandles.insertArguments(
+                    MethodHandles.publicLookup().findStatic(Ops.class, "continuationreset",
+                        MethodType.methodType(Void.TYPE, SixModelObject.class, SixModelObject.class, ThreadContext.class, ResumeStatus.Frame.class)),
+                    0, null, null, null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    // this is the most complicated one because it's not doing a tailcall, so we need to actually use the resumeframe
+    public static void continuationreset(SixModelObject key, SixModelObject run, ThreadContext tc, ResumeStatus.Frame resume) throws Throwable {
+        SixModelObject cont = null;
+
+        if (resume != null) {
+            // reload stuff here, then don't goto because java source doesn't have that
+            // XXX: compiler should be modified to take ThreadContext from continuation, NOT RELOAD RESUME..., wrap resumeNext in an appropriate handler
+            Object[] bits = resume.saveSpace;
+            key = (SixModelObject) bits[0];
+            tc = resume.tc;
+        }
+
+        while (true) {
+            try {
+                if (resume != null) {
+                    resume.resumeNext();
+                } else if (cont != null) {
+                    invokeDirect(tc, run, invocantCallSite, false, new Object[] { cont });
+                } else {
+                    invokeDirect(tc, run, emptyCallSite, false, emptyArgList);
+                }
+                // If we get here, the reset argument or something placed using control returned normally
+                // so we should just return.
+                return;
+            } catch (SaveStackException sse) {
+                if (sse.key != null && sse.key != key) {
+                    // This is intended for an outer scope, so just append ourself
+                    throw sse.pushFrame(0, reset_reenter, new Object[] { key }, null);
+                }
+                // Ooo!  This is ours!
+                resume = null;
+                STable contType = tc.gc.Continuation.st;
+                cont = contType.REPR.allocate(tc, contType);
+                ((ResumeStatus)cont).top = sse.top;
+                run = sse.handler;
+                if (!sse.protect) break;
+            }
+        }
+        // now, if we get HERE, it means we saw an unprotected control operator
+        // so run it without protection
+
+        invokeDirect(tc, run, invocantCallSite, false, new Object[] { cont });
+    }
+
     public static SixModelObject continuationclone(SixModelObject in, ThreadContext tc) {
-        throw new UnsupportedOperationException();
+        if (!(in instanceof ResumeStatus))
+            ExceptionHandling.dieInternal(tc, "applied continuationinvoke to non-continuation");
+
+        ResumeStatus.Frame read = ((ResumeStatus)in).top;
+        ResumeStatus.Frame nroot = null, ntail = null, nnew;
+
+        while (read != null) {
+            CallFrame cf = read.callFrame == null ? null : read.callFrame.cloneContinuation();
+            nnew = new ResumeStatus.Frame(read.method, read.resumePoint, read.saveSpace, cf, null);
+            if (ntail != null) {
+                ntail.next = nnew;
+            } else {
+                nroot = nnew;
+            }
+            ntail = nnew;
+        }
+
+        STable contType = tc.gc.Continuation.st;
+        SixModelObject cont = contType.REPR.allocate(tc, contType);
+        ((ResumeStatus)cont).top = nroot;
+        return cont;
     }
-    public static SixModelObject continuationreset(SixModelObject key, SixModelObject run, ThreadContext tc, ResumeStatus.Frame resume) {
-        throw new UnsupportedOperationException();
+
+    public static void continuationcontrol(long protect, SixModelObject key, SixModelObject run, ThreadContext tc, ResumeStatus.Frame resume) {
+        throw new SaveStackException(key, protect != 0, run);
     }
-    public static SixModelObject continuationcontrol(long protect, SixModelObject key, SixModelObject run, ThreadContext tc, ResumeStatus.Frame resume) {
-        throw new UnsupportedOperationException();
-    }
-    public static SixModelObject continuationinvoke(SixModelObject cont, SixModelObject arg, ThreadContext tc, ResumeStatus.Frame resume) {
-        throw new UnsupportedOperationException();
+
+    public static void continuationinvoke(SixModelObject cont, SixModelObject arg, ThreadContext tc, ResumeStatus.Frame resume) throws Throwable {
+        if (!(cont instanceof ResumeStatus))
+            ExceptionHandling.dieInternal(tc, "applied continuationinvoke to non-continuation");
+
+        ResumeStatus.Frame root = ((ResumeStatus)cont).top;
+
+        // fixups: safe to do more than once, but not concurrently
+        // these are why continuationclone is needed...
+        ResumeStatus.Frame csr = root;
+        while (csr != null) {
+            csr.tc = tc; // csr.callFrame.{csr,tc} will be set on resume
+            if (csr.next == null) csr.thunk = arg;
+            csr = csr.next;
+        }
+
+        root.resume();
     }
 }

@@ -11,7 +11,7 @@ import org.perl6.nqp.sixmodel.SixModelObject;
  * relating to it. Call frames are created by the callee after arguments are
  * passed in but before argument checking.
  */
-public class CallFrame {
+public class CallFrame implements Cloneable {
     /**
      * The thread context that created this call frame.
      */
@@ -191,5 +191,13 @@ public class CallFrame {
     public void leave() {
         this.codeRef.staticInfo.priorInvocation = this;
         this.tc.curFrame = this.caller;
+    }
+
+    CallFrame cloneContinuation() {
+        try {
+            return (CallFrame)clone();
+        } catch (CloneNotSupportedException e) {
+            return null;
+        }
     }
 }

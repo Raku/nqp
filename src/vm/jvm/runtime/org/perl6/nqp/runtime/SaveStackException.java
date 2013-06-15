@@ -1,6 +1,7 @@
 package org.perl6.nqp.runtime;
 
 import java.lang.invoke.MethodHandle;
+import org.perl6.nqp.sixmodel.SixModelObject;
 
 /** Thrown by dcshift operations to cause all currently executing frames to save their state. */
 
@@ -9,10 +10,16 @@ public class SaveStackException extends ControlException {
     /** Topmost frame saved so far. */
     public ResumeStatus.Frame top;
     /** Tag identifying a specific instance of reset. */
-    public int tag; /* make a sixmodelobject? */
+    public SixModelObject key;
+    /** If true, the reset should reinstate itself while running the handler. */
+    public boolean protect;
+    /** Handler function passed to control. */
+    public SixModelObject handler;
 
-    public SaveStackException(int tag) {
-        this.tag = tag;
+    public SaveStackException(SixModelObject key, boolean protect, SixModelObject handler) {
+        this.key = key;
+        this.protect = protect;
+        this.handler = handler;
     }
 
     public SaveStackException pushFrame(int resumePoint, MethodHandle method, Object[] saveSpace, CallFrame callFrame) {

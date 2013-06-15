@@ -21,6 +21,11 @@ public class ResumeStatus extends SixModelObject {
         public final CallFrame callFrame;
         /** The next deeper frame.  Don't modify after exposing to the world. */
         public Frame next;
+        /** Thread context which the frame is being restored on.  Only valid during restore. */
+        public transient ThreadContext tc;
+        /** Set during resume to a thunk which is called once the stack is restored. */
+        public transient SixModelObject thunk;
+
 
         /** Constructor which sets all fields. */
         public Frame(MethodHandle method, int resumePoint, Object[] saveSpace, CallFrame callFrame, Frame next) {
@@ -34,7 +39,7 @@ public class ResumeStatus extends SixModelObject {
         /** Restores a frame to the VM stack. */
         public void resume() throws Throwable {
             if (callFrame != null) {
-                ThreadContext tc = callFrame.tc;
+                callFrame.tc = tc;
                 callFrame.caller = tc.curFrame;
                 tc.curFrame = callFrame;
             }
@@ -43,7 +48,11 @@ public class ResumeStatus extends SixModelObject {
 
         /** Restores the next frame, if any. */
         public void resumeNext() throws Throwable {
-            if (next != null) next.resume();
+            if (next != null) {
+                next.resume();
+            } else {
+                Ops.invokeDirect(tc, thunk, Ops.emptyCallSite, false, Ops.emptyArgList);
+            }
         }
     }
 
