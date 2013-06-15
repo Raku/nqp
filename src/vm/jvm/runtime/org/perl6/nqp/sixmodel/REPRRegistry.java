@@ -6,6 +6,7 @@ import java.util.HashMap;
 import org.perl6.nqp.sixmodel.reprs.CallCapture;
 import org.perl6.nqp.sixmodel.reprs.CodeRefREPR;
 import org.perl6.nqp.sixmodel.reprs.ContextRef;
+import org.perl6.nqp.sixmodel.reprs.Continuation;
 import org.perl6.nqp.sixmodel.reprs.IOHandle;
 import org.perl6.nqp.sixmodel.reprs.KnowHOWAttribute;
 import org.perl6.nqp.sixmodel.reprs.KnowHOWREPR;
@@ -61,6 +62,7 @@ public class REPRRegistry {
         addREPR("Uninstantiable", new Uninstantiable());
         addREPR("SCRef", new SCRef());
         addREPR("ContextRef", new ContextRef());
+        addREPR("Continuation", new Continuation());
         addREPR("CodeRef", new CodeRefREPR());
         addREPR("CallCapture", new CallCapture());
         addREPR("NFA", new NFA());

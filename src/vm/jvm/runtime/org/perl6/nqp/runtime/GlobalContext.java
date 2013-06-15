@@ -61,6 +61,11 @@ public class GlobalContext {
     public SixModelObject SCRef;
     
     /**
+     * Continuation type; a basic, method-less type with the Continuation REPR.
+     */
+    public SixModelObject Continuation;
+    
+    /**
      * ContextRef type; a basic, method-less type with the ContextRef REPR.
      */
     public SixModelObject ContextRef;

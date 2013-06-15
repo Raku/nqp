@@ -2403,8 +2403,8 @@ sub contop($name, @params) {
 }
 QAST::OperationsJAST.map_classlib_core_op('continuationclone', $TYPE_OPS, 'continuationclone', [$RT_OBJ], $RT_OBJ, :tc);
 contop('continuationreset', [$RT_OBJ, $RT_OBJ]);
-contop('continuationshift', [$RT_OBJ, $RT_OBJ]);
-contop('continuationinvoke', [$RT_OBJ]);
+contop('continuationcontrol', [$RT_INT, $RT_OBJ, $RT_OBJ]);
+contop('continuationinvoke', [$RT_OBJ, $RT_OBJ]);
 
 
 class QAST::CompilerJAST {

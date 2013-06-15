@@ -1,11 +1,12 @@
 package org.perl6.nqp.runtime;
 
 import java.lang.invoke.MethodHandle;
+import org.perl6.nqp.sixmodel.SixModelObject;
 
 /**
  * Represents a composable continuation.
  */
-public class ResumeStatus {
+public class ResumeStatus extends SixModelObject {
     /**
      * Represents one saved, not-currently-executing execution frame.
      */
@@ -48,9 +49,4 @@ public class ResumeStatus {
 
     /** The first frame of this continuation.  Subsequent frames can be accessed using {@link Frame#next}. */
     public Frame top;
-
-    /** Builds a new continuation from the stack stored in a {@link SaveStackException}. */
-    public ResumeStatus(SaveStackException ex) {
-        this.top = ex.top;
-    }
 }

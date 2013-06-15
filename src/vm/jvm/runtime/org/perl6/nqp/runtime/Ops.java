@@ -4148,10 +4148,10 @@ public final class Ops {
     public static SixModelObject continuationreset(SixModelObject key, SixModelObject run, ThreadContext tc, ResumeStatus.Frame resume) {
         throw new UnsupportedOperationException();
     }
-    public static SixModelObject continuationshift(SixModelObject key, SixModelObject run, ThreadContext tc, ResumeStatus.Frame resume) {
+    public static SixModelObject continuationcontrol(long protect, SixModelObject key, SixModelObject run, ThreadContext tc, ResumeStatus.Frame resume) {
         throw new UnsupportedOperationException();
     }
-    public static SixModelObject continuationinvoke(SixModelObject cont, ThreadContext tc, ResumeStatus.Frame resume) {
+    public static SixModelObject continuationinvoke(SixModelObject cont, SixModelObject arg, ThreadContext tc, ResumeStatus.Frame resume) {
         throw new UnsupportedOperationException();
     }
 }

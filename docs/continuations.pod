@@ -48,8 +48,8 @@ B<Details here are subject greatly to change.>
 
     # should be 3 * 3 * 10 = 90
     # will infinite loop if the clones are removed
-    my $cont := nqp::continuationreset(-> $ {
-        3 * (nqp::continuationshift(0, -> $k { $k }))();
+    my $cont := nqp::continuationreset(nqp::null(), {
+        3 * (nqp::continuationshift(nqp::null(), -> $k { $k }))();
     });
     nqp::continuationinvoke(nqp::continuationclone($cont),
         -> { nqp::continuationinvoke(nqp::continuationclone($cont)), -> { 10 }) });
