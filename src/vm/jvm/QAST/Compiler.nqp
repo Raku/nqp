@@ -1570,6 +1570,7 @@ QAST::OperationsJAST.map_classlib_core_op('setpayload', $TYPE_OPS, 'setpayload',
 QAST::OperationsJAST.map_classlib_core_op('getmessage', $TYPE_OPS, 'getmessage', [$RT_OBJ], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('setmessage', $TYPE_OPS, 'setmessage', [$RT_OBJ, $RT_STR], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('newexception', $TYPE_OPS, 'newexception', [], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('backtrace', $TYPE_OPS, 'backtrace', [$RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('backtracestrings', $TYPE_OPS, 'backtracestrings', [$RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('throw', $TYPE_OPS, '_throw_c', [$RT_OBJ], $RT_OBJ, :tc, :cont);
 QAST::OperationsJAST.map_classlib_core_op('rethrow', $TYPE_OPS, 'rethrow_c', [$RT_OBJ], $RT_OBJ, :tc, :cont);

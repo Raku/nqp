@@ -9,4 +9,5 @@ public class VMExceptionInstance extends SixModelObject {
     public long category;
     public boolean resumable;
     public CallFrame origin;
+    public StackTraceElement[] nativeTrace;
 }

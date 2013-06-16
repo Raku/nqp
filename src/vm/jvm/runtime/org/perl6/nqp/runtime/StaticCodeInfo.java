@@ -22,6 +22,11 @@ public class StaticCodeInfo implements Cloneable {
      * Curried method handle for resuming.
      */
     MethodHandle mhResume;
+
+    /**
+     * Method name for correlation with stack traces.
+     */
+    public String methodName;
     
     /**
      * The (human-readable) name of the code-ref.

@@ -42,6 +42,7 @@ public class ExceptionHandling {
             exObj.message = msg;
             exObj.category = ExceptionHandling.EX_CAT_CATCH;
             exObj.origin = tc.curFrame;
+            exObj.nativeTrace = (new Throwable()).getStackTrace();
         }
         catch (Exception e) {
             throw new RuntimeException(msg);
@@ -129,6 +130,7 @@ all:
             exObj = (VMExceptionInstance)bits[3];
         }
 
+        if (tc.gc.noisyExceptions) tc.unwinder = new UnwindException(); // capture stack
         switch ((int)handlerInfo[3]) {
         case EX_UNWIND_SIMPLE:
             tc.unwinder.unwindTarget = handlerInfo[0];
@@ -180,8 +182,12 @@ all:
             message.append("Unhandled exception: " + exObj.message + "\n");
         else
             message.append("Unhandled exception; category = " + category + "\n");
-        
-        for (String line : backtraceStrings(tc.curFrame)) {
+
+        exObj = new VMExceptionInstance();
+        exObj.origin = tc.curFrame;
+        exObj.nativeTrace = (new Throwable()).getStackTrace();
+
+        for (String line : backtraceStrings(exObj)) {
             message.append(line);
             message.append("\n");
         }
@@ -191,14 +197,49 @@ all:
         return exObj;
     }
     
-    public static List<String> backtraceStrings(CallFrame curFrame) {
+    public static List<String> backtraceStrings(VMExceptionInstance ex) {
         List<String> result = new ArrayList<String>();
-        while (curFrame != null) {
-            String name = curFrame.codeRef.staticInfo.name;
+        for (TraceElement e : backtrace(ex)) {
+            String name = e.frame.codeRef.staticInfo.name;
             if (name == null || name == "")
                 name = "<anon>";
-            result.add("  in " + name);
-            curFrame = curFrame.caller;
+
+            result.add("  in " + name + (e.file == null ? "" : " (" + e.file + (e.line >= 0 ? ":" + e.line : "") + ")"));
+        }
+        return result;
+    }
+
+    public static class TraceElement {
+        public CallFrame frame;
+        public String file;
+        public int line;
+
+        public TraceElement(CallFrame frame, String file, int line) {
+            this.frame = frame; this.file = file; this.line = line;
+        }
+    }
+
+    public static List<TraceElement> backtrace(VMExceptionInstance ex) {
+        List<TraceElement> result = new ArrayList<TraceElement>();
+        // Each CallFrame which is actually on the stack corresponds, except in exceptional circumstances, to a native frame
+        // We probably ought to use a Levenshteiny thing eventually, but this should be good enough for now.
+
+        int jcursor = 0;
+        CallFrame ncursor = ex.origin;
+
+        while (ncursor != null) {
+            StaticCodeInfo info = ncursor.codeRef.staticInfo;
+            String kls = info.compUnit.getClass().getName();
+            String method = info.methodName;
+
+            while (jcursor < ex.nativeTrace.length && !kls.equals(ex.nativeTrace[jcursor].getClassName()) &&
+                        (method == null || !method.equals(ex.nativeTrace[jcursor].getMethodName())))
+                jcursor++;
+
+            StackTraceElement el = jcursor < ex.nativeTrace.length ? ex.nativeTrace[jcursor++] : null;
+
+            result.add(new TraceElement(ncursor, el != null ? el.getFileName() : null, el != null ? el.getLineNumber() : -1));
+            ncursor = ncursor.caller;
         }
         return result;
     }

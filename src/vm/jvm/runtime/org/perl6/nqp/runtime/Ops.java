@@ -3217,6 +3217,7 @@ public final class Ops {
         exObj.message = msg;
         exObj.category = ExceptionHandling.EX_CAT_CATCH;
         exObj.origin = tc.curFrame;
+        exObj.nativeTrace = (new Throwable()).getStackTrace();
         ExceptionHandling.handlerDynamic(tc, ExceptionHandling.EX_CAT_CATCH, true, exObj);
     }
     public static void throwcatdyn_c(long category, ThreadContext tc) {
@@ -3287,7 +3288,7 @@ public final class Ops {
             SixModelObject Str = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strBoxType;
             SixModelObject result = Array.st.REPR.allocate(tc, Array.st);
             
-            List<String> lines = ExceptionHandling.backtraceStrings(((VMExceptionInstance)obj).origin);
+            List<String> lines = ExceptionHandling.backtraceStrings(((VMExceptionInstance)obj));
             for (int i = 0; i < lines.size(); i++)
                 result.bind_pos_boxed(tc, i, box_s(lines.get(i), Str, tc));
             
@@ -3301,6 +3302,7 @@ public final class Ops {
         if (obj instanceof VMExceptionInstance) {
             VMExceptionInstance ex = (VMExceptionInstance)obj;
             ex.origin = tc.curFrame;
+            ex.nativeTrace = (new Throwable()).getStackTrace();
             ExceptionHandling.handlerDynamic(tc, ex.category, false, ex);
         }
         else {

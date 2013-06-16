@@ -1431,6 +1431,15 @@ QAST::Operations.add_core_op('backtracestrings', -> $qastcomp, $op {
         $op[0]
     ))
 });
+QAST::Operations.add_core_op('backtrace', -> $qastcomp, $op {
+    if +$op.list != 1 {
+        nqp::die("The 'backtrace' op expects one child");
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'), :name('backtrace'),
+        $op[0]
+    ))
+});
 QAST::Operations.add_core_op('newexception', -> $qastcomp, $op {
     if +$op.list != 0 {
         nqp::die("The 'newexception' op expects no children");

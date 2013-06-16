@@ -101,6 +101,7 @@ public abstract class CompilationUnit {
                         cra.oLexicalNames(), cra.iLexicalNames(),
                         cra.nLexicalNames(), cra.sLexicalNames(),
                         handlers);
+                    cr.staticInfo.methodName = m.getName();
                     cr.st = BOOTCodeSTable;
                     codeRefList.add(cr);
                     cuidToCodeRef.put(cuid, cr);
