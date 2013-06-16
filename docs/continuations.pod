@@ -35,7 +35,7 @@ Other values are undefined.  In no case will the matched reset be included in
 the captured continuation object (although an unmatched reset which is skipped
 over would be).  Thus, C<control(1, ...)> corresponds to the standard C<control>
 operator, while C<control(0, ...)> corresponds to the standard C<control0>
-operator.  To simulate C<shift> and C<shift0>, manually add the prompt before
+operator.  To simulate C<shift> and C<shift0>, manually add the reset before
 invoking the continuation.
 
 =item nqp::continuationinvoke($cont, $inject)
