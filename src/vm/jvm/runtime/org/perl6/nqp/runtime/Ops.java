@@ -3210,18 +3210,17 @@ public final class Ops {
     }
     
     /* Exception related. */
-    public static String die_s(String msg, ThreadContext tc) {
+    public static void die_s_c(String msg, ThreadContext tc) {
         // Construct exception object.
         SixModelObject exType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.exceptionType;
         VMExceptionInstance exObj = (VMExceptionInstance)exType.st.REPR.allocate(tc, exType.st);
         exObj.message = msg;
         exObj.category = ExceptionHandling.EX_CAT_CATCH;
         exObj.origin = tc.curFrame;
-        ExceptionHandling.handlerDynamic(tc, ExceptionHandling.EX_CAT_CATCH, exObj);
-        return msg;
+        ExceptionHandling.handlerDynamic(tc, ExceptionHandling.EX_CAT_CATCH, true, exObj);
     }
-    public static SixModelObject throwcatdyn(long category, ThreadContext tc) {
-        return ExceptionHandling.handlerDynamic(tc, category, null);
+    public static void throwcatdyn_c(long category, ThreadContext tc) {
+        ExceptionHandling.handlerDynamic(tc, category, false, null);
     }
     public static SixModelObject exception(ThreadContext tc) {
         int numHandlers = tc.handlers.size();
@@ -3298,20 +3297,20 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc, "backtracestring needs an object with VMException representation");
         }
     }
-    public static SixModelObject _throw(SixModelObject obj, ThreadContext tc) {
+    public static void _throw_c(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof VMExceptionInstance) {
             VMExceptionInstance ex = (VMExceptionInstance)obj;
             ex.origin = tc.curFrame;
-            return ExceptionHandling.handlerDynamic(tc, ex.category, ex);
+            ExceptionHandling.handlerDynamic(tc, ex.category, false, ex);
         }
         else {
             throw ExceptionHandling.dieInternal(tc, "throw needs an object with VMException representation");
         }
     }
-    public static SixModelObject rethrow(SixModelObject obj, ThreadContext tc) {
+    public static void rethrow_c(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof VMExceptionInstance) {
             VMExceptionInstance ex = (VMExceptionInstance)obj;
-            return ExceptionHandling.handlerDynamic(tc, ex.category, ex);
+            ExceptionHandling.handlerDynamic(tc, ex.category, false, ex);
         }
         else {
             throw ExceptionHandling.dieInternal(tc, "rethrow needs an object with VMException representation");
@@ -3320,6 +3319,40 @@ public final class Ops {
     private static ResumeException theResumer = new ResumeException(); 
     public static SixModelObject resume(SixModelObject obj, ThreadContext tc) {
         throw theResumer;
+    }
+
+    /* compatibility shims for next bootstrap TODO */
+    public static String die_s(String msg, ThreadContext tc) {
+        try {
+            die_s_c(msg, tc);
+        } catch (SaveStackException sse) {
+            ExceptionHandling.dieInternal(tc, "control operator crossed continuation barrier");
+        }
+        return result_s(tc.curFrame);
+    }
+    public static SixModelObject throwcatdyn(long category, ThreadContext tc) {
+        try {
+            throwcatdyn_c(category, tc);
+        } catch (SaveStackException sse) {
+            ExceptionHandling.dieInternal(tc, "control operator crossed continuation barrier");
+        }
+        return result_o(tc.curFrame);
+    }
+    public static SixModelObject _throw(SixModelObject obj, ThreadContext tc) {
+        try {
+            _throw_c(obj, tc);
+        } catch (SaveStackException sse) {
+            ExceptionHandling.dieInternal(tc, "control operator crossed continuation barrier");
+        }
+        return result_o(tc.curFrame);
+    }
+    public static SixModelObject rethrow(SixModelObject obj, ThreadContext tc) {
+        try {
+            rethrow_c(obj, tc);
+        } catch (SaveStackException sse) {
+            ExceptionHandling.dieInternal(tc, "control operator crossed continuation barrier");
+        }
+        return result_o(tc.curFrame);
     }
 
     /* HLL configuration and compiler related options. */

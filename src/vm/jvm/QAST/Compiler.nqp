@@ -1560,8 +1560,8 @@ QAST::OperationsJAST.add_core_op('bind', -> $qastcomp, $op {
 });
 
 # Exception handling/munging.
-QAST::OperationsJAST.map_classlib_core_op('die_s', $TYPE_OPS, 'die_s', [$RT_STR], $RT_STR, :tc);
-QAST::OperationsJAST.map_classlib_core_op('die', $TYPE_OPS, 'die_s', [$RT_STR], $RT_STR, :tc);
+QAST::OperationsJAST.map_classlib_core_op('die_s', $TYPE_OPS, 'die_s_c', [$RT_STR], $RT_STR, :tc, :cont);
+QAST::OperationsJAST.map_classlib_core_op('die', $TYPE_OPS, 'die_s_c', [$RT_STR], $RT_STR, :tc, :cont);
 QAST::OperationsJAST.map_classlib_core_op('exception', $TYPE_OPS, 'exception', [], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getextype', $TYPE_OPS, 'getextype', [$RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('setextype', $TYPE_OPS, 'setextype', [$RT_OBJ, $RT_INT], $RT_INT, :tc);
@@ -1571,8 +1571,8 @@ QAST::OperationsJAST.map_classlib_core_op('getmessage', $TYPE_OPS, 'getmessage',
 QAST::OperationsJAST.map_classlib_core_op('setmessage', $TYPE_OPS, 'setmessage', [$RT_OBJ, $RT_STR], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('newexception', $TYPE_OPS, 'newexception', [], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('backtracestrings', $TYPE_OPS, 'backtracestrings', [$RT_OBJ], $RT_OBJ, :tc);
-QAST::OperationsJAST.map_classlib_core_op('throw', $TYPE_OPS, '_throw', [$RT_OBJ], $RT_OBJ, :tc);
-QAST::OperationsJAST.map_classlib_core_op('rethrow', $TYPE_OPS, 'rethrow', [$RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('throw', $TYPE_OPS, '_throw_c', [$RT_OBJ], $RT_OBJ, :tc, :cont);
+QAST::OperationsJAST.map_classlib_core_op('rethrow', $TYPE_OPS, 'rethrow_c', [$RT_OBJ], $RT_OBJ, :tc, :cont);
 QAST::OperationsJAST.map_classlib_core_op('resume', $TYPE_OPS, 'resume', [$RT_OBJ], $RT_OBJ, :tc);
 my %handler_names := nqp::hash(
     'CATCH',   $EX_CAT_CATCH,
@@ -1688,11 +1688,12 @@ QAST::OperationsJAST.add_core_op('control', -> $qastcomp, $op {
     if nqp::existskey(%control_map, $name) {
         my $cat := %control_map{$name};
         my $il := JAST::InstructionList.new();
+        $*STACK.spill_to_locals($il);
         $il.append(JAST::PushIVal.new( :value($cat) ));
         $il.append($ALOAD_1);
-        $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
-            'throwcatdyn', $TYPE_SMO, 'Long', $TYPE_TC ));
-        result($il, $RT_OBJ);
+        $il.append(savesite(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+            'throwcatdyn_c', 'Void', 'Long', $TYPE_TC )));
+        result_from_cf($il, $RT_OBJ);
     }
     else {
         nqp::die("Unknown control exception type '$name'");
@@ -3469,8 +3470,9 @@ class QAST::CompilerJAST {
             else {
                 $last_res := self.as_jast($_);
             }
+            # variables with fallback can have side effects and cannot be elided
             $il.append($last_res.jast)
-                unless $void && nqp::istype($_, QAST::Var);
+                unless $void && nqp::istype($_, QAST::Var) && !nqp::istype($_, QAST::VarWithFallback);
             $*STACK.obtain($il, $last_res);
             if $resultchild == $i && $resultchild != $n - 1 {
                 $res_type := $last_res.type;
@@ -3545,7 +3547,7 @@ class QAST::CompilerJAST {
             $il.append($fallback_res.jast);
             $*STACK.obtain($il, $fallback_res);
             $il.append($lbl);
-            
+
             result($il, $RT_OBJ);
         }
     }

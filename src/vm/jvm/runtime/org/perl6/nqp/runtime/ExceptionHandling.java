@@ -43,7 +43,7 @@ public class ExceptionHandling {
         catch (Exception e) {
             throw new RuntimeException(msg);
         }
-        handlerDynamic(tc, ExceptionHandling.EX_CAT_CATCH, exObj);
+        handlerDynamic(tc, ExceptionHandling.EX_CAT_CATCH, false, exObj);
         return stooge;
     }
     public static RuntimeException dieInternal(ThreadContext tc, Throwable e) {
@@ -54,9 +54,12 @@ public class ExceptionHandling {
     }
     
     /* Finds and executes a handler, using dynamic scope to find it. */
-    public static SixModelObject handlerDynamic(ThreadContext tc, long category,
-            VMExceptionInstance exObj) {
+    /* die_s_return causes handlerDynamic to return the exception message instead of the exception object. */
+    public static void handlerDynamic(ThreadContext tc, long category,
+            boolean die_s_return, VMExceptionInstance exObj) {
         CallFrame f = tc.curFrame;
+        long[] handler = null;
+all:
         while (f != null) {
             if (f.curHandler != 0) {
                 long tryHandler = f.curHandler;                
@@ -74,8 +77,10 @@ public class ExceptionHandling {
                                         break;
                                     }
                                 }
-                                if (valid)
-                                    return invokeHandler(tc, handlers[i], category, f, exObj);
+                                if (valid) {
+                                    handler = handlers[i];
+                                    break all;
+                                }
                             }
                             
                             // If not, try outer one.
@@ -87,12 +92,15 @@ public class ExceptionHandling {
             }
             f = f.caller;
         }
-        return panic(tc, category, exObj);
+        if (handler != null)
+            invokeHandler(tc, handler, category, f, die_s_return, exObj);
+        else
+            panic(tc, category, exObj);
     }
 
     /* Invokes the handler. */
-    private static SixModelObject invokeHandler(ThreadContext tc, long[] handlerInfo,
-            long category, CallFrame handlerFrame, VMExceptionInstance exObj) {
+    private static void invokeHandler(ThreadContext tc, long[] handlerInfo,
+            long category, CallFrame handlerFrame, boolean die_s_return, VMExceptionInstance exObj) {
         switch ((int)handlerInfo[3]) {
         case EX_UNWIND_SIMPLE:
             tc.unwinder.unwindTarget = handlerInfo[0];
@@ -105,7 +113,12 @@ public class ExceptionHandling {
                 Ops.invokeArgless(tc, Ops.getlex_o(handlerFrame, (int)handlerInfo[4]));
             }
             catch (ResumeException e) {
-                return exObj;
+                tc.curFrame.retType = (byte)(die_s_return ? CallFrame.RET_STR : CallFrame.RET_OBJ);
+                if (die_s_return)
+                    tc.curFrame.sRet = exObj.message;
+                else
+                    tc.curFrame.oRet = exObj;
+                return;
             }
             finally {
                 tc.handlers.remove(tc.handlers.size() - 1);
