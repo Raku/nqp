@@ -142,6 +142,11 @@ public class GlobalContext {
      * Serialization context wrapper object hash.
      */
     public HashMap<String, SixModelObject> scRefs;
+
+    /**
+     * Whether to dump VM-level stack traces for all exceptions.
+     */
+    public boolean noisyExceptions;
     
     /**
      * Initializes the runtime environment.
@@ -170,6 +175,7 @@ public class GlobalContext {
         setupConfig(compileeHLLConfiguration.get(""));
         setupConfig(compilerHLLConfiguration.get(""));
         mainThread.savedCC = (CallCaptureInstance)CallCapture.st.REPR.allocate(mainThread, CallCapture.st);
+        noisyExceptions = System.getenv("NQP_VERBOSE_EXCEPTIONS") != null;
     }
     
     /**

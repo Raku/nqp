@@ -26,9 +26,13 @@ public class ExceptionHandling {
     /* Throws a simple string exception for some internal error, using our own
      * handler model. Note the exception is not resumable. */
     private static RuntimeException stooge = new RuntimeException("Stooge exception leaked");
-    public static RuntimeException dieInternal(ThreadContext tc, String msg) {
+    private static RuntimeException dieInternal(ThreadContext tc, String msg, Throwable t) {
         SixModelObject exType;
         VMExceptionInstance exObj;
+        if (tc.gc.noisyExceptions) {
+            if (t == null) t = new Throwable(msg);
+            t.printStackTrace();
+        }
         try {
             exType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.exceptionType;
             exObj = (VMExceptionInstance)exType.st.REPR.allocate(tc, exType.st);
@@ -43,7 +47,10 @@ public class ExceptionHandling {
         return stooge;
     }
     public static RuntimeException dieInternal(ThreadContext tc, Throwable e) {
-        return dieInternal(tc, e.toString());
+        return dieInternal(tc, e.toString(), e);
+    }
+    public static RuntimeException dieInternal(ThreadContext tc, String msg) {
+        return dieInternal(tc, msg, null);
     }
     
     /* Finds and executes a handler, using dynamic scope to find it. */
