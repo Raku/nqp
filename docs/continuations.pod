@@ -149,3 +149,13 @@ list is used).  So we might need to B<add a dynamicCaller field to CallFrame
 and come up with updating logic>.  Niecza does precisely this, and I think
 parrot is doing something similar.
 
+=head2 Saner cloning
+
+C<nqp::continuationclone> is bad because it exposes details of what the JVM
+implementation can do without warning and what requires warnings.  It would be
+better to expliclty declare exactly what you intend to do with the continuation
+as a bit flag passed to control and/or invoke, and let the op set figure out
+itself when cloning is needed.  Flags could include "I don't intend to call
+this at all" (control used as an escape operator), "I intend to call this
+exactly once" (coroutines), "I may use this more than once, but only on one
+thread", "I want to use this on several threads".
