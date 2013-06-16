@@ -7,7 +7,6 @@ ability to freeze and thaw stack frames for implementing unusual control flow.
 
 I think that the best abstraction to what I'm trying to build here is the
 B<delimited continuation> (L<https://en.wikipedia.org/wiki/Delimited_continuation>).
-Those traditionally have three operations:
 
 =over 4
 
@@ -17,7 +16,7 @@ Executes the argument, marking the stack for a subsequent C<nqp::continuationshi
 operation within the dynamic scope.  The C<$tag> is an object which can be used
 later by C<nqp::continuationshift> to find a specific reset frame.
 
-=item nqp::continuationshift($tag, -> $cont { ... })
+=item nqp::continuationcontrol($protect, $tag, -> $cont { ... })
 
 Slices off the part of the evaluation stack between the current call frame and
 the innermost enclosing C<nqp::continuationreset>.  If C<$tag> is not null,
@@ -30,14 +29,24 @@ from the stack, so B<if the callback returns without using the continuation,
 the effect is to cause C<nqp::continuationreset> to return immediately with the
 returned value>.
 
-=item nqp::continuationinvoke($cont, $return)
+C<$protect> is an integer.  If it is 1, the reset will be retained on the stack
+while the handler is being executed; if it is 0, the reset will be removed.
+Other values are undefined.  In no case will the matched reset be included in
+the captured continuation object (although an unmatched reset which is skipped
+over would be).  Thus, C<control(1, ...)> corresponds to the standard C<control>
+operator, while C<control(0, ...)> corresponds to the standard C<control0>
+operator.  To simulate C<shift> and C<shift0>, manually add the prompt before
+invoking the continuation.
+
+=item nqp::continuationinvoke($cont, $inject)
 
 Pastes the saved call frames onto the current stack, such that
-C<nqp::continuationshift> returns C<$return>.  Control returns to the caller
-when the callback to C<nqp::continuationreset> returns, with the same value.
-This can be used multiple times on the same continuation.  (Actually, delimited
-continuations are traditionally represented as functions, so this operator is
-implicit and unnamed.  But sixmodel makes that slightly tricky.)
+C<nqp::continuationshift> calls C<$inject> within the restored dynamic scope
+and returns its return value.  Control returns to the caller when the callback
+to C<nqp::continuationreset> returns, with the same value.  This can be used
+multiple times on the same continuation.  (Actually, delimited continuations
+are traditionally represented as functions, so this operator is implicit and
+unnamed.  But sixmodel makes that slightly tricky.)
 
 =item nqp::continuationclone($cont)
 
@@ -49,10 +58,10 @@ B<Details here are subject greatly to change.>
     # should be 3 * 3 * 10 = 90
     # will infinite loop if the clones are removed
     my $cont := nqp::continuationreset(nqp::null(), {
-        3 * (nqp::continuationshift(nqp::null(), -> $k { $k }))();
+        3 * nqp::continuationcontrol(0, nqp::null(), -> $k { $k });
     });
-    nqp::continuationinvoke(nqp::continuationclone($cont),
-        -> { nqp::continuationinvoke(nqp::continuationclone($cont)), -> { 10 }) });
+    my $val := nqp::continuationinvoke(nqp::continuationclone($cont),
+        { nqp::continuationinvoke(nqp::continuationclone($cont), { 10 }) });
 
 =back
 
@@ -61,41 +70,46 @@ continuations:
 
     # for proper R5RS semantics, run this once wrapping your main function
     sub run_main($f) {
-        nqp::continuationreset(nqp::null(), { $f() });
+        nqp::continuationreset(nqp::null(), $f);
     }
 
     sub callcc($f) {
         # first get the current continuation
-        nqp::continuationshift(nqp::null(), -> $dcont {
+        nqp::continuationcontrol(1, nqp::null(), -> $dcont {
             my $scheme_cont := -> $val {
                 # when the scheme continuation is invoked, we need to *replace*
                 # the current continuation with this one
-                nqp::continuationshift(nqp::null(), -> $ {
-                    nqp::continuationinvoke($dcont, $val)
+                nqp::continuationcontrol(1, nqp::null(), -> $c {
+                    nqp::continuationinvoke($dcont, { $val })
                 });
             };
-            $scheme_cont($f($scheme_cont));
+            nqp::continuationinvoke($dcont, { $f($scheme_cont) });
         });
     }
 
 And here is something resembling gather/take:
 
+    my $SENTINEL := [];
     sub yield($value) {
-        nqp::continuationshift(nqp::null(), -> $dcont { [$value, $dcont] });
+        nqp::continuationcontrol(0, nqp::null(), -> $dcont {
+            [$value, { nqp::continuationinvoke($dcont, {0}) }]
+        });
     }
 
     sub start_iter($body) {
-        my $state := -> $ { $body() };
+        my $state := { $body(); yield($SENTINEL) };
         -> {
-            my $pkt := nqp::continuationreset(nqp::null(), { $state(NQPMu); });
+            my $pkt := nqp::continuationreset(nqp::null(), $state);
             $state := $pkt[1];
             $pkt[0];
         }
     }
 
+Complete examples may be found in t/jvm/01-continuations.t in the source distribution.
+
 =head1 Conjectures
 
-=head1 Lazy recursive reinstate optimization
+=head2 Lazy recursive reinstate optimization
 
 Consider the following (Perl 6):
 
@@ -120,7 +134,7 @@ the top frame(s) that will be executed, and skip the work of reinstating the
 non-top frames only to resave them later.  The design of this is a bit
 handwavey at the moment.
 
-=head1 Multiple callers
+=head2 Multiple callers
 
 There are two sensible ways to define the caller of a call frame.  Either the
 frame which caused this frame to exist (henceforth, the static caller) or the
