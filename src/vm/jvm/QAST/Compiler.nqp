@@ -107,6 +107,17 @@ sub result($jast, int $type) {
     $*STACK.push($r);
     $r
 }
+sub result_from_cf($il, $rtype) {
+    if $*WANT != $RT_VOID {
+        $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
+        $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+            'result_' ~ typechar($rtype), jtype($rtype), $TYPE_CF ));
+        result($il, $rtype)
+    }
+    else {
+        result($il, $RT_VOID)
+    }
+}
 my @jtypes := [$TYPE_SMO, 'Long', 'Double', $TYPE_STR];
 sub jtype($type_idx) { @jtypes[$type_idx] }
 my @rttypes := [$RT_OBJ, $RT_INT, $RT_NUM, $RT_STR];
@@ -263,36 +274,36 @@ class QAST::OperationsJAST {
     
     # Adds a core nqp:: op provided by a static method in the
     # class library.
-    method map_classlib_core_op($op, $class, $method, @stack_in, $stack_out, :$tc) {
+    method map_classlib_core_op($op, $class, $method, @stack_in, $stack_out, :$tc, :$cont) {
         my @jtypes_in;
         for @stack_in {
             nqp::push(@jtypes_in, jtype($_));
         }
         nqp::push(@jtypes_in, $TYPE_TC) if $tc;
         my $ins := JAST::Instruction.new( :op('invokestatic'),
-            $class, $method, jtype($stack_out), |@jtypes_in );
-        self.add_core_op($op, op_mapper($op, $ins, @stack_in, $stack_out, :$tc));
+            $class, $method, $cont ?? 'Void' !! jtype($stack_out), |@jtypes_in );
+        self.add_core_op($op, op_mapper($op, $ins, @stack_in, $stack_out, :$tc, :$cont));
         self.set_core_op_result_type($op, $stack_out);
     }
     
     # Adds a core nqp:: op provided by a static method in the
     # class library.
-    method map_classlib_hll_op($hll, $op, $class, $method, @stack_in, $stack_out, :$tc) {
+    method map_classlib_hll_op($hll, $op, $class, $method, @stack_in, $stack_out, :$tc, :$cont) {
         my @jtypes_in;
         for @stack_in {
             nqp::push(@jtypes_in, jtype($_));
         }
         nqp::push(@jtypes_in, $TYPE_TC) if $tc;
         my $ins := JAST::Instruction.new( :op('invokestatic'),
-            $class, $method, jtype($stack_out), |@jtypes_in );
-        self.add_hll_op($hll, $op, op_mapper($op, $ins, @stack_in, $stack_out, :$tc));
+            $class, $method, $cont ?? 'Void' !! jtype($stack_out), |@jtypes_in );
+        self.add_hll_op($hll, $op, op_mapper($op, $ins, @stack_in, $stack_out, :$tc, :$cont));
         self.set_hll_op_result_type($hll, $op, $stack_out);
     }
     
     # Generates an operation mapper. Covers a range of operations,
     # including those provided by calling a method and those that are
     # just JVM op invocations.
-    sub op_mapper($op, $instruction, @stack_in, $stack_out, :$tc = 0) {
+    sub op_mapper($op, $instruction, @stack_in, $stack_out, :$tc = 0, :$cont = 0) {
         my int $expected_args := +@stack_in;
         return -> $qastcomp, $node {
             if +@($node) != $expected_args {
@@ -313,12 +324,18 @@ class QAST::OperationsJAST {
             }
             
             # Emit operation.
+            $*STACK.spill_to_locals($il) if $cont;
             $*STACK.obtain($il, |@arg_res) if @arg_res;
             if $tc {
                 $il.append($ALOAD_1);
             }
-            $il.append($instruction);
-            result($il, $stack_out)
+            if $cont {
+                $il.append(savesite($instruction));
+                result_from_cf($il, $stack_out);
+            } else {
+                $il.append($instruction);
+                result($il, $stack_out)
+            }
         }
     }
     
@@ -1414,17 +1431,7 @@ QAST::OperationsJAST.add_core_op('call', sub ($qastcomp, $node) {
         )));
     }
 
-    # Load result onto the stack, unless in void context.
-    if $*WANT != $RT_VOID {
-        my $rtype := rttype_from_typeobj($node.returns);
-        $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
-        $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
-            'result_' ~ typechar($rtype), jtype($rtype), $TYPE_CF ));
-        result($il, $rtype)
-    }
-    else {
-        result($il, $RT_VOID)
-    }
+    result_from_cf($il, rttype_from_typeobj($node.returns));
 });
 QAST::OperationsJAST.add_core_op('callmethod', -> $qastcomp, $node {
     my $il := JAST::InstructionList.new();
@@ -1487,17 +1494,7 @@ QAST::OperationsJAST.add_core_op('callmethod', -> $qastcomp, $node {
         )));
     }
 
-    # Load result onto the stack, unless in void context.
-    if $*WANT != $RT_VOID {
-        my $rtype := rttype_from_typeobj($node.returns);
-        $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
-        $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
-            'result_' ~ typechar($rtype), jtype($rtype), $TYPE_CF ));
-        result($il, $rtype)
-    }
-    else {
-        result($il, $RT_VOID)
-    }
+    result_from_cf($il, rttype_from_typeobj($node.returns));
 });
 
 my $num_lexotics := 0;
@@ -2355,57 +2352,10 @@ QAST::OperationsJAST.map_classlib_core_op('jvmclasspaths', $TYPE_OPS, 'jvmclassp
 
 # JVM-specific ops for continuation handling
 # The three main continuation ops are fudgy because they need to be called partially like subs
-sub contop($name, @params) {
-    my int $expected_args := +@params;
-    my @jtypes_in;
-    for @params {
-        nqp::push(@jtypes_in, jtype($_));
-    }
-    QAST::OperationsJAST.add_core_op($name, -> $qastcomp, $node {
-        if +@($node) != $expected_args {
-            nqp::die("Operation '$name' requires $expected_args operands");
-        }
-
-        # Emit operands.
-        my $il := JAST::InstructionList.new();
-        my int $i := 0;
-        my @arg_res;
-        while $i < $expected_args {
-            my $type := @params[$i];
-            my $operand := $node[$i];
-            my $operand_res := $qastcomp.as_jast($node[$i], :want($type));
-            $il.append($operand_res.jast);
-            $i++;
-            nqp::push(@arg_res, $operand_res);
-        }
-
-        # Emit operation.
-        $*STACK.spill_to_locals($il);
-        $*STACK.obtain($il, |@arg_res) if @arg_res;
-        $il.append($ALOAD_1);
-        $il.append($ACONST_NULL);
-        $il.append(savesite(JAST::Instruction.new(
-            :op('invokestatic'), $TYPE_OPS, $name, 'Void', |@jtypes_in, $TYPE_TC, $TYPE_RESUME
-        )));
-
-        # Load result onto the stack, unless in void context.
-        if $*WANT != $RT_VOID {
-            my $rtype := rttype_from_typeobj($node.returns);
-            $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
-            $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
-                    'result_' ~ typechar($rtype), jtype($rtype), $TYPE_CF ));
-            result($il, $rtype)
-        }
-        else {
-            result($il, $RT_VOID)
-        }
-    });
-}
 QAST::OperationsJAST.map_classlib_core_op('continuationclone', $TYPE_OPS, 'continuationclone', [$RT_OBJ], $RT_OBJ, :tc);
-contop('continuationreset', [$RT_OBJ, $RT_OBJ]);
-contop('continuationcontrol', [$RT_INT, $RT_OBJ, $RT_OBJ]);
-contop('continuationinvoke', [$RT_OBJ, $RT_OBJ]);
-
+QAST::OperationsJAST.map_classlib_core_op('continuationreset', $TYPE_OPS, 'continuationreset', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc, :cont);
+QAST::OperationsJAST.map_classlib_core_op('continuationcontrol', $TYPE_OPS, 'continuationcontrol', [$RT_INT, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc, :cont);
+QAST::OperationsJAST.map_classlib_core_op('continuationinvoke', $TYPE_OPS, 'continuationinvoke', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc, :cont);
 
 class QAST::CompilerJAST {
     # Responsible for handling issues around code references, building the

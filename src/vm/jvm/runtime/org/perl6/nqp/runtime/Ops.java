@@ -4162,6 +4162,9 @@ public final class Ops {
         }
     }
     // this is the most complicated one because it's not doing a tailcall, so we need to actually use the resumeframe
+    public static void continuationreset(SixModelObject key, SixModelObject run, ThreadContext tc) throws Throwable {
+        continuationreset(key, run, tc, null);
+    }
     public static void continuationreset(SixModelObject key, SixModelObject run, ThreadContext tc, ResumeStatus.Frame resume) throws Throwable {
         SixModelObject cont = null;
 
@@ -4229,11 +4232,11 @@ public final class Ops {
         return cont;
     }
 
-    public static void continuationcontrol(long protect, SixModelObject key, SixModelObject run, ThreadContext tc, ResumeStatus.Frame resume) {
+    public static void continuationcontrol(long protect, SixModelObject key, SixModelObject run, ThreadContext tc) {
         throw new SaveStackException(key, protect != 0, run);
     }
 
-    public static void continuationinvoke(SixModelObject cont, SixModelObject arg, ThreadContext tc, ResumeStatus.Frame resume) throws Throwable {
+    public static void continuationinvoke(SixModelObject cont, SixModelObject arg, ThreadContext tc) throws Throwable {
         if (!(cont instanceof ResumeStatus))
             ExceptionHandling.dieInternal(tc, "applied continuationinvoke to non-continuation");
 
