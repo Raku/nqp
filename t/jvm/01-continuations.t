@@ -2,7 +2,7 @@
 
 # continuations.
 
-plan(17);
+plan(21);
 
 {
     # unique objects
@@ -20,6 +20,7 @@ plan(17);
 
     my $ex := '';
     $run := 0;
+
     # These tests are problematic.  Currently the continuation bubbles up to the nearest
     # continuation barrier in invokeMain and dies there, with no chance to catch the
     # resulting exception
@@ -103,6 +104,32 @@ plan(17);
         }) * 3;
     });
     ok(nqp::continuationinvoke($cont, {10}) == 60, 'continuations can capture reset frames');
+
+    my $*A := 10;
+    my int $A_in_reset;
+    my int $A_in_control;
+    my int $A_in_invoke;
+    my int $B_in_invoke;
+    $cont := nqp::continuationreset($A, {
+        $A_in_reset := $*A;
+        {
+            my $*A := 30;
+            nqp::continuationcontrol(0, $A, -> $c {
+                $A_in_control := $*A;
+                $c
+            });
+        }
+    });
+    {
+        my $*B := 20;
+        my $*A := 40;
+        nqp::continuationinvoke($cont, { $A_in_invoke := $*A; $B_in_invoke := $*B; });
+    }
+
+    ok($A_in_reset == 10, 'reset sees calling scope');
+    ok($A_in_control == 10, 'control does not see intervening scopes');
+    ok($A_in_invoke == 30, 'invoke sees the continuation body');
+    ok($B_in_invoke == 20, 'invoke also sees the invocation context');
 }
 
 {
@@ -121,7 +148,7 @@ plan(17);
 {
     # for proper R5RS semantics, run this once wrapping your main function
     sub run_main($f) {
-        nqp::continuationreset(nqp::null(), { $f() });
+        nqp::continuationreset(nqp::null(), $f);
     }
 
     sub callcc($f) {
