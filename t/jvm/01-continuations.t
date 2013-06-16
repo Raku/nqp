@@ -2,7 +2,7 @@
 
 # continuations.
 
-plan(21);
+plan(22);
 
 {
     # unique objects
@@ -228,10 +228,22 @@ plan(21);
         }
     }
 
-    my $iter := start_iter({ walktree(mktree(3,'')) });
-    my $rv;
-    my @list;
-    until ($rv := $iter()) =:= $SENTINEL { nqp::push(@list, $rv); }
+    sub uniter($block) {
+        my $iter := start_iter($block);
+        my $rv;
+        my @list;
+        until ($rv := $iter()) =:= $SENTINEL { nqp::push(@list, $rv); }
+        nqp::join('~',@list);
+    }
 
-    ok(nqp::join('~',@list) eq '000~001~010~011~100~101~110~111', 'gather example works');
+
+    ok(uniter({ walktree(mktree(3,'')) }) eq '000~001~010~011~100~101~110~111', 'gather example works');
+
+    sub exntest() {
+        nqp::die("foo");
+        nqp::die("bar");
+        nqp::die("baz");
+        CATCH { yield(nqp::getmessage($!)); nqp::resume($!); }
+    }
+    ok(uniter(&exntest) eq 'foo~bar~baz', 'take from handler works');
 }

@@ -1,5 +1,8 @@
 package org.perl6.nqp.runtime;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,7 +46,12 @@ public class ExceptionHandling {
         catch (Exception e) {
             throw new RuntimeException(msg);
         }
-        handlerDynamic(tc, ExceptionHandling.EX_CAT_CATCH, false, exObj);
+        try {
+            handlerDynamic(tc, ExceptionHandling.EX_CAT_CATCH, false, exObj);
+        } catch (SaveStackException sse) {
+            // maaaaybe should be a panic instead
+            ExceptionHandling.dieInternal(tc, "control operator crossed continuation barrier");
+        }
         return stooge;
     }
     public static RuntimeException dieInternal(ThreadContext tc, Throwable e) {
@@ -93,14 +101,34 @@ all:
             f = f.caller;
         }
         if (handler != null)
-            invokeHandler(tc, handler, category, f, die_s_return, exObj);
+            invokeHandler(tc, handler, category, f, die_s_return, exObj, null);
         else
             panic(tc, category, exObj);
     }
 
     /* Invokes the handler. */
+    private static final MethodHandle invokeHandlerReenter;
+    static {
+        try {
+            invokeHandlerReenter = MethodHandles.insertArguments(
+                    MethodHandles.lookup().findStatic(ExceptionHandling.class, "invokeHandler",
+                        MethodType.methodType(Void.TYPE, ThreadContext.class, long[].class, long.class, CallFrame.class, boolean.class, VMExceptionInstance.class, ResumeStatus.Frame.class)),
+                    0, null, null, 0L, null, false, null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
     private static void invokeHandler(ThreadContext tc, long[] handlerInfo,
-            long category, CallFrame handlerFrame, boolean die_s_return, VMExceptionInstance exObj) {
+            long category, CallFrame handlerFrame, boolean die_s_return, VMExceptionInstance exObj, ResumeStatus.Frame resume) {
+        if (resume != null) {
+            Object[] bits = resume.saveSpace;
+            tc = resume.tc;
+            handlerInfo = (long[])bits[0];
+            handlerFrame = (CallFrame)bits[1];
+            die_s_return = (boolean)bits[2];
+            exObj = (VMExceptionInstance)bits[3];
+        }
+
         switch ((int)handlerInfo[3]) {
         case EX_UNWIND_SIMPLE:
             tc.unwinder.unwindTarget = handlerInfo[0];
@@ -110,7 +138,10 @@ all:
         case EX_BLOCK:
             try {
                 tc.handlers.add(new HandlerInfo(exObj, handlerInfo));
-                Ops.invokeArgless(tc, Ops.getlex_o(handlerFrame, (int)handlerInfo[4]));
+                if (resume != null)
+                    resume.resumeNext();
+                else
+                    Ops.invokeDirect(tc, Ops.getlex_o(handlerFrame, (int)handlerInfo[4]), Ops.emptyCallSite, false, Ops.emptyArgList);
             }
             catch (ResumeException e) {
                 tc.curFrame.retType = (byte)(die_s_return ? CallFrame.RET_STR : CallFrame.RET_OBJ);
@@ -119,6 +150,15 @@ all:
                 else
                     tc.curFrame.oRet = exObj;
                 return;
+            }
+            catch (SaveStackException sse) {
+                throw sse.pushFrame(0, invokeHandlerReenter, new Object[] { handlerInfo, handlerFrame, die_s_return, exObj }, null);
+            }
+            catch (RuntimeException re) {
+                throw re;
+            }
+            catch (Throwable t) {
+                throw new RuntimeException(t);
             }
             finally {
                 tc.handlers.remove(tc.handlers.size() - 1);
