@@ -31,7 +31,7 @@ class QAST::Var is QAST::Node {
 
     method dump_extra_node_info() {
         $!decl
-            ?? "$!scope $!name :decl"
+            ?? "$!scope $!name :decl($!decl)"
             !! "$!scope $!name";
     }
 }
