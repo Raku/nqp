@@ -1278,19 +1278,40 @@ public final class Ops {
         }
     }
     public static long result_i(CallFrame cf) {
-        if (cf.retType == CallFrame.RET_INT)
-            return cf.iRet;
-        throw ExceptionHandling.dieInternal(cf.tc, "Return value coercion NYI");
+        switch (cf.retType) {
+            case CallFrame.RET_INT:
+                return cf.iRet;
+            case CallFrame.RET_NUM:
+                return (long)cf.nRet;
+            case CallFrame.RET_STR:
+                return coerce_s2i(cf.sRet);
+            default:
+                return unbox_i(cf.oRet, cf.tc);
+        }
     }
     public static double result_n(CallFrame cf) {
-        if (cf.retType == CallFrame.RET_NUM)
-            return cf.nRet;
-        throw ExceptionHandling.dieInternal(cf.tc, "Return value coercion NYI");
+        switch (cf.retType) {
+            case CallFrame.RET_INT:
+                return (double)cf.iRet;
+            case CallFrame.RET_NUM:
+                return cf.nRet;
+            case CallFrame.RET_STR:
+                return coerce_s2n(cf.sRet);
+            default:
+                return unbox_n(cf.oRet, cf.tc);
+        }
     }
     public static String result_s(CallFrame cf) {
-        if (cf.retType == CallFrame.RET_STR)
-            return cf.sRet;
-        throw ExceptionHandling.dieInternal(cf.tc, "Return value coercion NYI");
+        switch (cf.retType) {
+            case CallFrame.RET_INT:
+                return coerce_i2s(cf.iRet);
+            case CallFrame.RET_NUM:
+                return coerce_n2s(cf.nRet);
+            case CallFrame.RET_STR:
+                return cf.sRet;
+            default:
+                return unbox_s(cf.oRet, cf.tc);
+        }
     }
     
     /* Capture related operations. */
