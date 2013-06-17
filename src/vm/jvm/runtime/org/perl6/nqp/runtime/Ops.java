@@ -3322,6 +3322,30 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc, "backtracestring needs an object with VMException representation");
         }
     }
+    public static SixModelObject backtrace(SixModelObject obj, ThreadContext tc) {
+        if (obj instanceof VMExceptionInstance) {
+            SixModelObject Array = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.listType;
+            SixModelObject Hash = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.hashType;
+            SixModelObject Str = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strBoxType;
+            SixModelObject Int = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intBoxType;
+            SixModelObject result = Array.st.REPR.allocate(tc, Array.st);
+
+            for (ExceptionHandling.TraceElement te : ExceptionHandling.backtrace(((VMExceptionInstance)obj))) {
+                SixModelObject annots = Hash.st.REPR.allocate(tc, Hash.st);
+                if (te.file != null) annots.bind_key_boxed(tc, "file", box_s(te.file, Str, tc));
+                if (te.line >= 0) annots.bind_key_boxed(tc, "line", box_i(te.line, Int, tc));
+                SixModelObject row = Hash.st.REPR.allocate(tc, Hash.st);
+                row.bind_key_boxed(tc, "sub", te.frame.codeRef.codeObject);
+                row.bind_key_boxed(tc, "annotations", annots);
+                result.push_boxed(tc, row);
+            }
+
+            return result;
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc, "backtrace needs an object with VMException representation");
+        }
+    }
     public static void _throw_c(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof VMExceptionInstance) {
             VMExceptionInstance ex = (VMExceptionInstance)obj;
