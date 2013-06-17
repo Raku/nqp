@@ -2498,13 +2498,21 @@ public final class Ops {
     
     public static String join(String delimiter, SixModelObject arr, ThreadContext tc) {
         final StringBuilder sb = new StringBuilder();
+        int prim = arr.st.REPR.get_value_storage_spec(tc, arr.st).boxed_primitive;
+        if (prim != StorageSpec.BP_NONE && prim != StorageSpec.BP_STR)
+            ExceptionHandling.dieInternal(tc, "Unsupported native array type in join");
 
         final int numElems = (int) arr.elems(tc);
         for (int i = 0; i < numElems; i++) {
             if (sb.length() > 0) {
                 sb.append(delimiter);
             }
-            sb.append(arr.at_pos_boxed(tc, i).get_str(tc));
+            if (prim == StorageSpec.BP_STR) {
+                arr.at_pos_native(tc, i);
+                sb.append(tc.native_s);
+            } else {
+                sb.append(arr.at_pos_boxed(tc, i).get_str(tc));
+            }
         }
 
         return sb.toString();
