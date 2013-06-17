@@ -224,8 +224,11 @@ public class IndyBootstrap {
                 throw ExceptionHandling.dieInternal(tc, "Can not invoke this object");
             if (is.ClassHandle != null)
                 cr = (CodeRef)invokee.get_attribute_boxed(tc, is.ClassHandle, is.AttrName, is.Hint);
-            else
+            else {
                 cr = (CodeRef)is.InvocationHandler;
+                csd = csd.injectInvokee(tc, args, invokee);
+                args = tc.flatArgs;
+            }
         }
         
         /* Now need to adapt to the target callsite by binding the CodeRef
@@ -394,8 +397,11 @@ public class IndyBootstrap {
                 throw ExceptionHandling.dieInternal(tc, "Can not invoke this object");
             if (is.ClassHandle != null)
                 cr = (CodeRef)invokee.get_attribute_boxed(tc, is.ClassHandle, is.AttrName, is.Hint);
-            else
+            else {
                 cr = (CodeRef)is.InvocationHandler;
+                csd = csd.injectInvokee(tc, args, invokee);
+                args = tc.flatArgs;
+            }
         }
         
         /* Now need to adapt to the target callsite by binding the CodeRef
@@ -492,8 +498,11 @@ public class IndyBootstrap {
                 throw ExceptionHandling.dieInternal(tc, "Can not invoke this object");
             if (is.ClassHandle != null)
                 cr = (CodeRef)invokee.get_attribute_boxed(tc, is.ClassHandle, is.AttrName, is.Hint);
-            else
+            else {
                 cr = (CodeRef)is.InvocationHandler;
+                csd = csd.injectInvokee(tc, args, invokee);
+                args = tc.flatArgs;
+            }
         }
         
         /* Make the call. */
@@ -551,8 +560,11 @@ public class IndyBootstrap {
                 throw ExceptionHandling.dieInternal(tc, "Can not invoke this object");
             if (is.ClassHandle != null)
                 cr = (CodeRef)invokee.get_attribute_boxed(tc, is.ClassHandle, is.AttrName, is.Hint);
-            else
+            else {
                 cr = (CodeRef)is.InvocationHandler;
+                csd = csd.injectInvokee(tc, args, invokee);
+                args = tc.flatArgs;
+            }
         }
         
         /* Make the call. */
@@ -614,8 +626,11 @@ public class IndyBootstrap {
                 throw ExceptionHandling.dieInternal(tc, "Can not invoke this object");
             if (is.ClassHandle != null)
                 cr = (CodeRef)invokee.get_attribute_boxed(tc, is.ClassHandle, is.AttrName, is.Hint);
-            else
+            else {
                 cr = (CodeRef)is.InvocationHandler;
+                csd = csd.injectInvokee(tc, args, invokee);
+                args = tc.flatArgs;
+            }
         }
         
         /* Update callsite, stacking up guarded clauses. Don't do it if it
@@ -707,8 +722,11 @@ public class IndyBootstrap {
                 throw ExceptionHandling.dieInternal(tc, "Can not invoke this object");
             if (is.ClassHandle != null)
                 cr = (CodeRef)invokee.get_attribute_boxed(tc, is.ClassHandle, is.AttrName, is.Hint);
-            else
+            else {
                 cr = (CodeRef)is.InvocationHandler;
+                csd = csd.injectInvokee(tc, args, invokee);
+                args = tc.flatArgs;
+            }
         }
         
         /* Update callsite, stacking up guarded clauses. Don't do it if it
@@ -808,8 +826,11 @@ public class IndyBootstrap {
                 throw ExceptionHandling.dieInternal(tc, "Can not invoke this object");
             if (is.ClassHandle != null)
                 cr = (CodeRef)invokee.get_attribute_boxed(tc, is.ClassHandle, is.AttrName, is.Hint);
-            else
+            else {
                 cr = (CodeRef)is.InvocationHandler;
+                csd = csd.injectInvokee(tc, args, invokee);
+                args = tc.flatArgs;
+            }
         }
 
         /* Make the call. */
@@ -870,8 +891,11 @@ public class IndyBootstrap {
                 throw ExceptionHandling.dieInternal(tc, "Can not invoke this object");
             if (is.ClassHandle != null)
                 cr = (CodeRef)invokee.get_attribute_boxed(tc, is.ClassHandle, is.AttrName, is.Hint);
-            else
+            else {
                 cr = (CodeRef)is.InvocationHandler;
+                csd = csd.injectInvokee(tc, args, invokee);
+                args = tc.flatArgs;
+            }
         }
 
         /* Make the call. */

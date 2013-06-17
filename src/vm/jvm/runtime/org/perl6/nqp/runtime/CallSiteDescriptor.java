@@ -176,4 +176,18 @@ public class CallSiteDescriptor {
         
         return exploded;
     }
+
+    /** Create a new callframe and arg list to add an invokee argument at the front. */
+    public CallSiteDescriptor injectInvokee(ThreadContext tc, Object[] oldArgs, SixModelObject invokee) {
+        Object[] newArgs = new Object[oldArgs.length + 1];
+        System.arraycopy(oldArgs, 0, newArgs, 1, oldArgs.length);
+        newArgs[0] = invokee;
+
+        byte[] newFlags  = new byte[argFlags.length + 1];
+        System.arraycopy(argFlags, 0, newFlags, 1, argFlags.length);
+        newFlags[0] = ARG_OBJ;
+
+        tc.flatArgs = newArgs;
+        return new CallSiteDescriptor(newFlags, names);
+    }
 }

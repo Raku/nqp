@@ -1448,8 +1448,11 @@ public final class Ops {
                 throw ExceptionHandling.dieInternal(tc, "Can not invoke this object");
             if (is.ClassHandle != null)
                 cr = (CodeRef)invokee.get_attribute_boxed(tc, is.ClassHandle, is.AttrName, is.Hint);
-            else
+            else {
                 cr = (CodeRef)is.InvocationHandler;
+                csd = csd.injectInvokee(tc, args, invokee);
+                args = tc.flatArgs;
+            }
         }
         
         try {
