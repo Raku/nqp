@@ -93,7 +93,11 @@ class QAST::Node {
         }
         if (self.node) {
             nqp::push(@chunks, ' ');
-            nqp::push(@chunks, nqp::escape(self.node));
+            my $escaped_node := nqp::escape(self.node);
+            nqp::push(@chunks, nqp::substr($escaped_node, 0, 50));
+            if (nqp::chars($escaped_node) > 50) {
+                nqp::push(@chunks, "…");
+            }
         }
         nqp::push(@chunks, "\n");
         self.dump_children($indent + 2, @chunks);
