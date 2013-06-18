@@ -1029,7 +1029,7 @@ class NQP::Actions is HLL::Actions {
                 QAST::Op.new(
                     :op('callmethod'), :name('dispatch'),
                     QAST::Op.new( :op('getcodeobj'), QAST::Op.new( :op('curcode') ) ),
-                    QAST::Op.new( :op('usecapture') )
+                    QAST::Op.new( :op('savecapture') )
                 )
             ),
             QAST::Op.new( :op('usecapture') )
