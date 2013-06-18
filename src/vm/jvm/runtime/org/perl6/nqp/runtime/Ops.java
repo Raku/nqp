@@ -4344,4 +4344,8 @@ public final class Ops {
 
         root.resume();
     }
+    /* noop, exists only so you can set a breakpoint in it */
+    public static SixModelObject debugnoop(SixModelObject in, ThreadContext tc) {
+        return in;
+    }
 }
