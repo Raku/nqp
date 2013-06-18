@@ -30,6 +30,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -3238,6 +3239,18 @@ public final class Ops {
         for (String envName : env.keySet())
             res.bind_key_boxed(tc, envName, box_s(env.get(envName), strType, tc));
         
+        return res;
+    }
+
+    public static SixModelObject jvmgetproperties(ThreadContext tc) {
+        SixModelObject hashType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.hashType;
+        SixModelObject strType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strBoxType;
+        SixModelObject res = hashType.st.REPR.allocate(tc, hashType.st);
+
+        Properties env = System.getProperties();
+        for (String envName : env.stringPropertyNames())
+            res.bind_key_boxed(tc, envName, box_s(env.getProperty(envName), strType, tc));
+
         return res;
     }
     
