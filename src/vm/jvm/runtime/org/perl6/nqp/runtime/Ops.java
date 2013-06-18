@@ -1511,12 +1511,12 @@ public final class Ops {
     public static SixModelObject multicacheadd(SixModelObject cache, SixModelObject capture, SixModelObject result, ThreadContext tc) {
         if (!(cache instanceof MultiCacheInstance))
             cache = tc.gc.MultiCache.st.REPR.allocate(tc, tc.gc.MultiCache.st);
-        ((MultiCacheInstance)cache).add((CallCaptureInstance)capture, result);
+        ((MultiCacheInstance)cache).add((CallCaptureInstance)capture, result, tc);
         return cache;
     }
     public static SixModelObject multicachefind(SixModelObject cache, SixModelObject capture, ThreadContext tc) {
         if (cache instanceof MultiCacheInstance)
-            return ((MultiCacheInstance)cache).lookup((CallCaptureInstance)capture);
+            return ((MultiCacheInstance)cache).lookup((CallCaptureInstance)capture, tc);
         else
             return null;
     }

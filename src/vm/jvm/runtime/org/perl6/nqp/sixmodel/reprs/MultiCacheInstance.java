@@ -1,6 +1,8 @@
 package org.perl6.nqp.sixmodel.reprs;
 
 import org.perl6.nqp.runtime.CallSiteDescriptor;
+import org.perl6.nqp.runtime.Ops;
+import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.SixModelObject;
 import org.perl6.nqp.sixmodel.TypeObject;
 
@@ -34,7 +36,7 @@ public class MultiCacheInstance extends SixModelObject {
         public SixModelObject[] results;
     }
     
-    public void add(CallCaptureInstance capture, SixModelObject result) {
+    public void add(CallCaptureInstance capture, SixModelObject result, ThreadContext tc) {
         /* If there's flattenings, we can't cache. */
         if (capture.descriptor.hasFlattening)
             return;
@@ -71,7 +73,7 @@ public class MultiCacheInstance extends SixModelObject {
             case CallSiteDescriptor.ARG_OBJ:
                 if (numArgs >= MD_CACHE_MAX_ARITY)
                     return;
-                long flag = ((long)((SixModelObject)args[i]).st.hashCode()) << 1;
+                long flag = ((long)Ops.decont((SixModelObject)args[i], tc).st.hashCode()) << 1;
                 if (!(args[i] instanceof TypeObject))
                     flag |= 1;
                 argTup[numArgs++] = flag;
@@ -107,7 +109,7 @@ public class MultiCacheInstance extends SixModelObject {
         ac.numEntries++;
     }
 
-    public SixModelObject lookup(CallCaptureInstance capture) {
+    public SixModelObject lookup(CallCaptureInstance capture, ThreadContext tc) {
         /* If there's flattenings, we can't use the cache. */
         if (capture.descriptor.hasFlattening)
             return null;
@@ -138,7 +140,7 @@ public class MultiCacheInstance extends SixModelObject {
             case CallSiteDescriptor.ARG_OBJ:
                 if (numArgs >= MD_CACHE_MAX_ARITY)
                     return null;
-                long flag = ((long)((SixModelObject)args[i]).st.hashCode()) << 1;
+                long flag = ((long)Ops.decont((SixModelObject)args[i], tc).st.hashCode()) << 1;
                 if (!(args[i] instanceof TypeObject))
                     flag |= 1;
                 argTup[numArgs++] = flag;
