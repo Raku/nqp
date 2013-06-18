@@ -2678,13 +2678,16 @@ public final class Ops {
     private static final int CCLASS_ALPHANUMERIC = 2048;
     private static final int CCLASS_NEWLINE      = 4096;
     private static final int CCLASS_WORD         = 8192;    
-    private static final int[] PUNCT_TYPES = {
-        Character.CONNECTOR_PUNCTUATION, Character.DASH_PUNCTUATION,
-           Character.END_PUNCTUATION, Character.FINAL_QUOTE_PUNCTUATION,
-           Character.INITIAL_QUOTE_PUNCTUATION, Character.OTHER_PUNCTUATION,
-           Character.START_PUNCTUATION
-    };
-    
+    private static final int PUNCT_TYPES =
+        (1 << Character.CONNECTOR_PUNCTUATION) | (1 << Character.DASH_PUNCTUATION) |
+        (1 << Character.END_PUNCTUATION) | (1 << Character.FINAL_QUOTE_PUNCTUATION) |
+        (1 << Character.INITIAL_QUOTE_PUNCTUATION) | (1 << Character.OTHER_PUNCTUATION) |
+        (1 << Character.START_PUNCTUATION);
+    private static final int NONPRINT_TYPES =
+        (1 << Character.CONTROL) | (1 << Character.SURROGATE) | (1 << Character.UNASSIGNED) |
+        (1 << Character.LINE_SEPARATOR) | (1 << Character.PARAGRAPH_SEPARATOR);
+
+
     public static long iscclass(long cclass, String target, long offset) {
         if (offset < 0 || offset >= target.length())
             return 0;
@@ -2700,7 +2703,8 @@ public final class Ops {
             if (test == '\u0085') return 1;
             return 0;
         case CCLASS_PRINTING:
-            throw new RuntimeException("CCLASS_PRINTING NYI");
+            if (((1 << Character.getType(test)) & NONPRINT_TYPES) != 0) return 0;
+            return test < '\t' || test > '\r' ? 1 : 0;
         case CCLASS_WORD:
             return test == '_' || Character.isLetterOrDigit(test) ? 1 : 0;
         case CCLASS_NEWLINE:
@@ -2724,11 +2728,7 @@ public final class Ops {
         case CCLASS_CONTROL:
             return Character.isISOControl(test) ? 1 : 0;
         case CCLASS_PUNCTUATION:
-            int type = Character.getType(test);
-            for (int punct : PUNCT_TYPES) {
-                if (type == punct) { return 1; }
-            }
-            return 0;
+            return ((1 << Character.getType(test)) & PUNCT_TYPES) != 0 ? 1 : 0;
         case CCLASS_ALPHANUMERIC:
             return Character.isLetterOrDigit(test) ? 1 : 0;
         default:
@@ -3246,11 +3246,11 @@ public final class Ops {
         SixModelObject hashType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.hashType;
         SixModelObject strType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strBoxType;
         SixModelObject res = hashType.st.REPR.allocate(tc, hashType.st);
-
+        
         Properties env = System.getProperties();
         for (String envName : env.stringPropertyNames())
             res.bind_key_boxed(tc, envName, box_s(env.getProperty(envName), strType, tc));
-
+        
         return res;
     }
     
