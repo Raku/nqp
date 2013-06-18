@@ -3463,6 +3463,8 @@ public final class Ops {
             config.foreignTransformArray = configHash.at_key_boxed(tc, "foreign_transform_array");
         if (configHash.exists_key(tc, "foreign_transform_hash") != 0)
             config.foreignTransformHash = configHash.at_key_boxed(tc, "foreign_transform_hash");
+        if (configHash.exists_key(tc, "foreign_transform_code") != 0)
+            config.foreignTransformCode = configHash.at_key_boxed(tc, "foreign_transform_code");
         if (configHash.exists_key(tc, "foreign_transform_any") != 0)
             config.foreignTransformAny = configHash.at_key_boxed(tc, "foreign_transform_any");
         if (configHash.exists_key(tc, "null_value") != 0)
