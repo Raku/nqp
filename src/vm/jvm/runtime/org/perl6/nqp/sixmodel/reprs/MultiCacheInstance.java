@@ -73,8 +73,9 @@ public class MultiCacheInstance extends SixModelObject {
             case CallSiteDescriptor.ARG_OBJ:
                 if (numArgs >= MD_CACHE_MAX_ARITY)
                     return;
-                long flag = ((long)Ops.decont((SixModelObject)args[i], tc).st.hashCode()) << 1;
-                if (!(args[i] instanceof TypeObject))
+                SixModelObject decont = Ops.decont((SixModelObject)args[i], tc);
+                long flag = ((long)decont.st.hashCode()) << 1;
+                if (!(decont instanceof TypeObject))
                     flag |= 1;
                 argTup[numArgs++] = flag;
                 break;
@@ -140,8 +141,9 @@ public class MultiCacheInstance extends SixModelObject {
             case CallSiteDescriptor.ARG_OBJ:
                 if (numArgs >= MD_CACHE_MAX_ARITY)
                     return null;
-                long flag = ((long)Ops.decont((SixModelObject)args[i], tc).st.hashCode()) << 1;
-                if (!(args[i] instanceof TypeObject))
+                SixModelObject decont = Ops.decont((SixModelObject)args[i], tc);
+                long flag = ((long)decont.st.hashCode()) << 1;
+                if (!(decont instanceof TypeObject))
                     flag |= 1;
                 argTup[numArgs++] = flag;
                 break;
