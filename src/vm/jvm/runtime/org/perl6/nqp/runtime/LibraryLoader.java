@@ -32,7 +32,7 @@ public class LibraryLoader {
             dis.close();
             
             // Load the class.
-            Class<?> c = new IgnoreNameClassLoader(bytes).loadClass();
+            Class<?> c = loadNew(bytes);
             CompilationUnit cu = (CompilationUnit)c.newInstance();
             cu.initializeCompilationUnit(tc);
             cu.runLoadIfAvailable(tc);
@@ -47,8 +47,12 @@ public class LibraryLoader {
             throw ExceptionHandling.dieInternal(tc, e.toString());
         }
     }
+
+    public static Class<?> loadNew(byte[] bytes) {
+        return new IgnoreNameClassLoader(bytes).loadClass();
+    }
     
-    private class IgnoreNameClassLoader extends ClassLoader {
+    private static class IgnoreNameClassLoader extends ClassLoader {
         private byte[] bytes;
         
         public IgnoreNameClassLoader(byte[] bytes) {
