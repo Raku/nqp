@@ -5,7 +5,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
 /**
- * Provides a simple way for HLL authors to hang data off of ThreadContext and GlobalContext.  The implementation uses a monomorphic inline cache for speed when a single HLL is running most of the time.
+ * Provides a simple way for HLL authors to hang data off of ThreadContext and GlobalContext.  The implementation uses a monomorphic thread-local cache for speed when a single HLL is running most of the time.
  */
 public class ContextKey<T,G> {
     Class<T> tclass;
