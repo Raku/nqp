@@ -158,7 +158,10 @@ public class GlobalContext {
      * Whether to dump VM-level stack traces for all exceptions.
      */
     public boolean noisyExceptions;
-    
+
+    HashMap<ContextKey<?,?>,Object> hllGlobalAll;
+    Object hllGlobalAllLock;
+
     /**
      * Initializes the runtime environment.
      */
@@ -188,6 +191,9 @@ public class GlobalContext {
         setupConfig(compilerHLLConfiguration.get(""));
         mainThread.savedCC = (CallCaptureInstance)CallCapture.st.REPR.allocate(mainThread, CallCapture.st);
         noisyExceptions = System.getenv("NQP_VERBOSE_EXCEPTIONS") != null;
+
+        hllGlobalAll = new HashMap<ContextKey<?,?>, Object>();
+        hllGlobalAllLock = new Object();
     }
     
     /**

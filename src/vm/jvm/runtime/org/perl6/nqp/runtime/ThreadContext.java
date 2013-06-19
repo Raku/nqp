@@ -1,6 +1,7 @@
 package org.perl6.nqp.runtime;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.perl6.nqp.sixmodel.reprs.CallCaptureInstance;
 import org.perl6.nqp.sixmodel.reprs.SCRefInstance;
@@ -86,12 +87,22 @@ public class ThreadContext {
      * Any serialization contexts we are compiling; null if none.
      */
     public ArrayList<SCRefInstance> compilingSCs;
-    
+
+    Object hllThreadData;
+    ContextKey<?,?> hllThreadKey;
+    HashMap<ContextKey<?,?>, Object> hllThreadAll;
+
+    Object hllGlobalData;
+    ContextKey<?,?> hllGlobalKey;
+    HashMap<ContextKey<?,?>, Object> hllGlobalAllCache;
+
     public ThreadContext(GlobalContext gc) {
         this.gc = gc;
         this.theLexotic = new LexoticException();
         this.unwinder = new UnwindException();
         this.handlers = new ArrayList<HandlerInfo>();
+        this.hllThreadAll = new HashMap<ContextKey<?,?>, Object>();
+        this.hllGlobalAllCache = new HashMap<ContextKey<?,?>, Object>();
         if (gc.CallCapture != null) {
             savedCC = (CallCaptureInstance)gc.CallCapture.st.REPR.allocate(this, gc.CallCapture.st);
         }
