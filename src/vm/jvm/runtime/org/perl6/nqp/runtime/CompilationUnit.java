@@ -241,4 +241,11 @@ public abstract class CompilationUnit {
     public String mainlineCuid() {
         return null;
     }
+
+    /**
+     * Code generation overrides this with the entry-point block, if any.
+     */
+    public String entryCuid() {
+        return null;
+    }
 }

@@ -2931,6 +2931,10 @@ class QAST::CompilerJAST {
                 'Void', 'Ljava/lang/Class;', $TYPE_STR, "[$TYPE_STR"));
             $main_meth.append($RETURN);
             $*JCLASS.add_method($main_meth);
+            my $entry_cuid_meth := JAST::Method.new( :name('entryCuid'), :returns($TYPE_STR), :static(0) );
+            $entry_cuid_meth.append(JAST::PushSVal.new( :value($main_block.cuid) ));
+            $entry_cuid_meth.append($ARETURN);
+            $*JCLASS.add_method($entry_cuid_meth);
         }
         
         # Add method that returns HLL name.
