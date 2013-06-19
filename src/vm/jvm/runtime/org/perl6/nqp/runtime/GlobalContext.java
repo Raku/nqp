@@ -1,6 +1,7 @@
 package org.perl6.nqp.runtime;
 
 import java.util.HashMap;
+import java.util.HashSet;
 
 import org.perl6.nqp.sixmodel.CodePairContainerConfigurer;
 import org.perl6.nqp.sixmodel.ContainerConfigurer;
@@ -149,6 +150,11 @@ public class GlobalContext {
     public HashMap<String, SixModelObject> scRefs;
 
     /**
+     * Set of library filenames which have been loaded so far.
+     */
+    public HashSet<String> loaded;
+
+    /**
      * Whether to dump VM-level stack traces for all exceptions.
      */
     public boolean noisyExceptions;
@@ -169,6 +175,7 @@ public class GlobalContext {
         scRefs = new HashMap<String, SixModelObject>();
         compilerRegistry = new HashMap<String, SixModelObject>();
         hllSyms = new HashMap<String, HashMap<String, SixModelObject>>();
+        loaded = new HashSet<String>();
         
         contConfigs = new HashMap<String, ContainerConfigurer>();
         contConfigs.put("code_pair", new CodePairContainerConfigurer());

@@ -6,11 +6,9 @@ import java.io.FileInputStream;
 import java.util.HashSet;
 
 public class LibraryLoader {
-    public static HashSet<String> loaded = new HashSet<String>();
-    
     public void load(ThreadContext tc, String origFilename) {        
         // Don't load the same thing multiple times.
-        if (loaded.contains(origFilename))
+        if (tc.gc.loaded.contains(origFilename))
             return;
         
         try {
@@ -40,7 +38,7 @@ public class LibraryLoader {
             cu.runLoadIfAvailable(tc);
             
             // Note that we already loaded it.
-            loaded.add(origFilename);
+            tc.gc.loaded.add(origFilename);
         }
         catch (ControlException e) {
             throw e;
