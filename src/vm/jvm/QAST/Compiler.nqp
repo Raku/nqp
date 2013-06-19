@@ -1504,8 +1504,9 @@ QAST::OperationsJAST.add_core_op('lexotic', -> $qastcomp, $op {
     my $il := JAST::InstructionList.new();
     $*BLOCK.add_lexical(QAST::Var.new( :name($op.name) ));
     $il.append(JAST::PushIVal.new( :value($target) ));
+    $il.append(JAST::Instruction.new( :op('aload'), 'tc' ));
     $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
-        'lexotic', $TYPE_SMO, 'Long' ));
+        'lexotic_tc', $TYPE_SMO, 'Long', $TYPE_TC ));
     $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
     $il.append(JAST::PushIndex.new( :value($*BLOCK.lexical_idx($op.name)) ));
     $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,

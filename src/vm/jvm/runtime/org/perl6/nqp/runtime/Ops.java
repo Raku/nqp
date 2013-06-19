@@ -54,6 +54,7 @@ import org.perl6.nqp.sixmodel.reprs.CallCaptureInstance;
 import org.perl6.nqp.sixmodel.reprs.ContextRef;
 import org.perl6.nqp.sixmodel.reprs.ContextRefInstance;
 import org.perl6.nqp.sixmodel.reprs.IOHandleInstance;
+import org.perl6.nqp.sixmodel.reprs.LexoticInstance;
 import org.perl6.nqp.sixmodel.reprs.MultiCacheInstance;
 import org.perl6.nqp.sixmodel.reprs.NFA;
 import org.perl6.nqp.sixmodel.reprs.NFAInstance;
@@ -1403,34 +1404,31 @@ public final class Ops {
     public static final CallSiteDescriptor storeCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ }, null);
     public static final CallSiteDescriptor findmethCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_STR }, null);
     public static final CallSiteDescriptor typeCheckCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ }, null);
-    public static void invoke(SixModelObject invokee, int callsiteIndex, Object[] args, ThreadContext tc) throws Exception {
-        // If it's lexotic, throw the exception right off.
-        if (invokee instanceof Lexotic) {
-            LexoticException throwee = tc.theLexotic;
-            throwee.target = ((Lexotic)invokee).target;
-            CallSiteDescriptor csd = tc.curFrame.codeRef.staticInfo.compUnit.callSites[callsiteIndex];
-            switch (csd.argFlags[0]) {
-            case CallSiteDescriptor.ARG_OBJ:
-                throwee.payload = (SixModelObject)args[0];
-                break;
-            case CallSiteDescriptor.ARG_INT:
-                throwee.payload = box_i((long)args[0],
-                        tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intBoxType, tc);
-                break;
-            case CallSiteDescriptor.ARG_NUM:
-                throwee.payload = box_n((double)args[0],
-                        tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.numBoxType, tc);
-                break;
-            case CallSiteDescriptor.ARG_STR:
-                throwee.payload = box_s((String)args[0],
-                        tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strBoxType, tc);
-                break;
-            default:
-                throw ExceptionHandling.dieInternal(tc, "Invalid lexotic invocation argument");
-            }
-            throw throwee;
+    public static void invokeLexotic(SixModelObject invokee, CallSiteDescriptor csd, Object[] args, ThreadContext tc) {
+        LexoticException throwee = tc.theLexotic;
+        throwee.target = ((LexoticInstance)invokee).target;
+        switch (csd.argFlags[0]) {
+        case CallSiteDescriptor.ARG_OBJ:
+            throwee.payload = (SixModelObject)args[0];
+            break;
+        case CallSiteDescriptor.ARG_INT:
+            throwee.payload = box_i((long)args[0],
+                    tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intBoxType, tc);
+            break;
+        case CallSiteDescriptor.ARG_NUM:
+            throwee.payload = box_n((double)args[0],
+                    tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.numBoxType, tc);
+            break;
+        case CallSiteDescriptor.ARG_STR:
+            throwee.payload = box_s((String)args[0],
+                    tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strBoxType, tc);
+            break;
+        default:
+            throw ExceptionHandling.dieInternal(tc, "Invalid lexotic invocation argument");
         }
-        
+        throw throwee;
+    }
+    public static void invoke(SixModelObject invokee, int callsiteIndex, Object[] args, ThreadContext tc) throws Exception {
         // TODO Find a smarter way to do this without all the pointer chasing.
         if (callsiteIndex >= 0)
             invokeDirect(tc, invokee, tc.curFrame.codeRef.staticInfo.compUnit.callSites[callsiteIndex], args);
@@ -1459,6 +1457,10 @@ public final class Ops {
         invokeDirect(tc, invokee, csd, true, args);
     }
     public static void invokeDirect(ThreadContext tc, SixModelObject invokee, CallSiteDescriptor csd, boolean barrier, Object[] args) {
+        // If it's lexotic, throw the exception right off.
+        if (invokee instanceof LexoticInstance) {
+            invokeLexotic(invokee, csd, args, tc);
+        }
         // Otherwise, get the code ref.
         CodeRef cr;
         if (invokee instanceof CodeRef) {
@@ -1503,7 +1505,13 @@ public final class Ops {
     
     /* Lexotic. */
     public static SixModelObject lexotic(long target) {
-        Lexotic res = new Lexotic();
+        LexoticInstance res = new LexoticInstance();
+        res.target = target;
+        return res;
+    }
+    public static SixModelObject lexotic_tc(long target, ThreadContext tc) {
+        LexoticInstance res = new LexoticInstance();
+        res.st = tc.gc.Lexotic.st;
         res.target = target;
         return res;
     }

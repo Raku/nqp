@@ -10,6 +10,7 @@ import org.perl6.nqp.sixmodel.reprs.Continuation;
 import org.perl6.nqp.sixmodel.reprs.IOHandle;
 import org.perl6.nqp.sixmodel.reprs.KnowHOWAttribute;
 import org.perl6.nqp.sixmodel.reprs.KnowHOWREPR;
+import org.perl6.nqp.sixmodel.reprs.Lexotic;
 import org.perl6.nqp.sixmodel.reprs.MultiCache;
 import org.perl6.nqp.sixmodel.reprs.NFA;
 import org.perl6.nqp.sixmodel.reprs.P6Opaque;
@@ -63,6 +64,7 @@ public class REPRRegistry {
         addREPR("SCRef", new SCRef());
         addREPR("ContextRef", new ContextRef());
         addREPR("Continuation", new Continuation());
+        addREPR("Lexotic", new Lexotic());
         addREPR("CodeRef", new CodeRefREPR());
         addREPR("CallCapture", new CallCapture());
         addREPR("NFA", new NFA());

@@ -64,6 +64,11 @@ public class GlobalContext {
      * Continuation type; a basic, method-less type with the Continuation REPR.
      */
     public SixModelObject Continuation;
+
+    /**
+     * Lexotic type; a basic, method-less type with the Lexotic REPR.
+     */
+    public SixModelObject Lexotic;
     
     /**
      * ContextRef type; a basic, method-less type with the ContextRef REPR.

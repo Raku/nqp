@@ -4,6 +4,7 @@ import java.lang.invoke.*;
 import java.lang.invoke.MethodHandles.Lookup;
 
 import org.perl6.nqp.sixmodel.*;
+import org.perl6.nqp.sixmodel.reprs.LexoticInstance;
 
 public class IndyBootstrap {
     public static CallSite wval(Lookup caller, String name, MethodType type) {
@@ -147,11 +148,11 @@ public class IndyBootstrap {
             : Ops.emptyCallSite;
         
         /* If it's lexotic, then resolve to something to do the throwing. */
-        if (invokee instanceof Lexotic) {
+        if (invokee instanceof LexoticInstance) {
             /* Go by result type, updating callsite appropriately so we
              * don't have to do this in the future. */
             LexoticException throwee = tc.theLexotic;
-            throwee.target = ((Lexotic)invokee).target;
+            throwee.target = ((LexoticInstance)invokee).target;
             switch (csd.argFlags[0]) {
             case CallSiteDescriptor.ARG_OBJ:
                 throwee.payload = (SixModelObject)args[0];
@@ -316,11 +317,11 @@ public class IndyBootstrap {
             : Ops.emptyCallSite;
         
         /* If it's lexotic, then resolve to something to do the throwing. */
-        if (invokee instanceof Lexotic) {
+        if (invokee instanceof LexoticInstance) {
             /* Go by result type, updating callsite appropriately so we
              * don't have to do this in the future. */
             LexoticException throwee = tc.theLexotic;
-            throwee.target = ((Lexotic)invokee).target;
+            throwee.target = ((LexoticInstance)invokee).target;
             switch (csd.argFlags[0]) {
             case CallSiteDescriptor.ARG_OBJ:
                 throwee.payload = (SixModelObject)args[0];
@@ -489,6 +490,8 @@ public class IndyBootstrap {
         
         /* Get the code ref. */
         CodeRef cr;
+        if (invokee instanceof LexoticInstance)
+            Ops.invokeLexotic(invokee, csd, args, tc);
         if (invokee instanceof CodeRef) {
             cr = (CodeRef)invokee;
         }
@@ -551,6 +554,8 @@ public class IndyBootstrap {
         /* Get the code ref. */
         CodeRef cr;
         invokee = Ops.decont(invokee, tc);
+        if (invokee instanceof LexoticInstance)
+            Ops.invokeLexotic(invokee, csd, args, tc);
         if (invokee instanceof CodeRef) {
             cr = (CodeRef)invokee;
         }
