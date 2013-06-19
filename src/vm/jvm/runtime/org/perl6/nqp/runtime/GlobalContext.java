@@ -1,5 +1,7 @@
 package org.perl6.nqp.runtime;
 
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -159,6 +161,19 @@ public class GlobalContext {
      */
     public boolean noisyExceptions;
 
+    /** Redirected output for eval-server. */
+    public PrintStream out = System.out;
+    /** Redirected error for eval-server. */
+    public PrintStream err = System.err;
+    /** Redirected input for eval-server. */
+    public InputStream in = System.in;
+    /** Whether to disallow exit. */
+    public boolean interceptExit;
+    /** If true, we're killing all threads, so disable exception handling. */
+    public volatile boolean shuttingDown;
+    /** Exit status or -1. */
+    public int exitStatus = -1;
+
     HashMap<ContextKey<?,?>,Object> hllGlobalAll;
     Object hllGlobalAllLock;
 
@@ -232,5 +247,13 @@ public class GlobalContext {
 
     public void useCompilerHLLConfig() {
         this.hllConfiguration = this.compilerHLLConfiguration;
+    }
+
+    public void exit(int status) {
+        if (!interceptExit) System.exit(status);
+
+        if (exitStatus < 0) exitStatus = status;
+        shuttingDown = true;
+        throw new ThreadDeath();
     }
 }

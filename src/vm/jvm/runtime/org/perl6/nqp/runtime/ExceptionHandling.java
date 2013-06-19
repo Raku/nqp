@@ -29,6 +29,7 @@ public class ExceptionHandling {
     /* Throws a simple string exception for some internal error, using our own
      * handler model. Note the exception is not resumable. */
     private static RuntimeException stooge = new RuntimeException("Stooge exception leaked");
+    private static ThreadDeath death = new ThreadDeath();
     private static RuntimeException dieInternal(ThreadContext tc, String msg, Throwable t) {
         SixModelObject exType;
         VMExceptionInstance exObj;
@@ -66,6 +67,9 @@ public class ExceptionHandling {
     /* die_s_return causes handlerDynamic to return the exception message instead of the exception object. */
     public static void handlerDynamic(ThreadContext tc, long category,
             boolean die_s_return, VMExceptionInstance exObj) {
+        if (tc.gc.shuttingDown)
+            throw death;
+
         CallFrame f = tc.curFrame;
         long[] handler = null;
 all:
@@ -192,8 +196,8 @@ all:
             message.append("\n");
         }
         
-        System.err.println(message.toString());
-        System.exit(1);
+        tc.gc.err.println(message.toString());
+        tc.gc.exit(1);
         return exObj;
     }
     

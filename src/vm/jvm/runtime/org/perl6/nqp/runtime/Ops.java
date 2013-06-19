@@ -83,6 +83,16 @@ public final class Ops {
         System.out.println(v);
         return v;
     }
+
+    public static String print(String v, ThreadContext tc) {
+        tc.gc.out.print(v);
+        return v;
+    }
+    
+    public static String say(String v, ThreadContext tc) {
+        tc.gc.out.println(v);
+        return v;
+    }
     
     public static final int STAT_EXISTS             =  0;
     public static final int STAT_FILESIZE           =  1;
@@ -282,21 +292,21 @@ public final class Ops {
     public static SixModelObject getstdin(ThreadContext tc) {
         SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType; 
         IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
-        h.is = System.in;
+        h.is = tc.gc.in;
         return h;
     }
     
     public static SixModelObject getstdout(ThreadContext tc) {
         SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType; 
         IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
-        h.os = System.out;
+        h.os = tc.gc.out;
         return h;
     }
     
     public static SixModelObject getstderr(ThreadContext tc) {
         SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType; 
         IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
-        h.os = System.err;
+        h.os = tc.gc.err;
         return h;
     }
     
@@ -409,7 +419,7 @@ public final class Ops {
                 die_s("File handle is not opened for read", tc);
             try {
             	if (h.cr == null) {
-            		h.cr = new ConsoleReader(h.is, new OutputStreamWriter(System.out));
+            		h.cr = new ConsoleReader(h.is, new OutputStreamWriter(tc.gc.out));
             	}
             	String line = h.cr.readLine(prompt);
                 if (line == null) {
@@ -3212,6 +3222,10 @@ public final class Ops {
     /* process related opcodes */
     public static long exit(final long status) {
         System.exit((int) status);
+        return status;
+    }
+    public static long exit(final long status, ThreadContext tc) {
+        tc.gc.exit((int) status);
         return status;
     }
     

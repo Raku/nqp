@@ -1870,8 +1870,8 @@ QAST::OperationsJAST.map_classlib_core_op('associative_get', $TYPE_OPS, 'atkey',
 QAST::OperationsJAST.map_classlib_core_op('associative_bind', $TYPE_OPS, 'bindkey', [$RT_OBJ, $RT_STR, $RT_OBJ], $RT_OBJ, :tc);
 
 # I/O opcodes
-QAST::OperationsJAST.map_classlib_core_op('print', $TYPE_OPS, 'print', [$RT_STR], $RT_STR);
-QAST::OperationsJAST.map_classlib_core_op('say', $TYPE_OPS, 'say', [$RT_STR], $RT_STR);
+QAST::OperationsJAST.map_classlib_core_op('print', $TYPE_OPS, 'print', [$RT_STR], $RT_STR, :tc);
+QAST::OperationsJAST.map_classlib_core_op('say', $TYPE_OPS, 'say', [$RT_STR], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('stat', $TYPE_OPS, 'stat', [$RT_STR, $RT_INT], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('open', $TYPE_OPS, 'open', [$RT_STR, $RT_STR], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getstdin', $TYPE_OPS, 'getstdin', [], $RT_OBJ, :tc);
@@ -2341,7 +2341,7 @@ QAST::OperationsJAST.map_classlib_core_op('nfarunproto', $TYPE_OPS, 'nfarunproto
 QAST::OperationsJAST.map_classlib_core_op('nfarunalt', $TYPE_OPS, 'nfarunalt', [$RT_OBJ, $RT_STR, $RT_INT, $RT_OBJ, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 
 # process related opcodes
-QAST::OperationsJAST.map_classlib_core_op('exit', $TYPE_OPS, 'exit', [$RT_INT], $RT_INT);
+QAST::OperationsJAST.map_classlib_core_op('exit', $TYPE_OPS, 'exit', [$RT_INT], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('sleep', $TYPE_OPS, 'sleep', [$RT_NUM], $RT_NUM);
 QAST::OperationsJAST.map_classlib_core_op('getenvhash', $TYPE_OPS, 'getenvhash', [], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('jvmgetproperties', $TYPE_OPS, 'jvmgetproperties', [], $RT_OBJ, :tc);
