@@ -916,8 +916,9 @@ QAST::OperationsJAST.add_core_op('defor', -> $qastcomp, $op {
 });
 
 QAST::OperationsJAST.add_core_op('xor', -> $qastcomp, $op {
-    my $falselabel := JAST::Label.new(:name('xor_false'));
-    my $endlabel   := JAST::Label.new(:name('xor_end'));
+    my $prefix     := $op.unique('xor');
+    my $falselabel := JAST::Label.new(:name($prefix ~ '_false'));
+    my $endlabel   := JAST::Label.new(:name($prefix ~ '_end'));
 
     my @childlist;
     my $fpast;
