@@ -4088,7 +4088,7 @@ public final class Ops {
         return makeBI(tc, type, random);
     }
     
-    public static SixModelObject pow_I(SixModelObject a, SixModelObject b, SixModelObject biType, SixModelObject nType, ThreadContext tc) {
+    public static SixModelObject pow_I(SixModelObject a, SixModelObject b, SixModelObject nType, SixModelObject biType, ThreadContext tc) {
         BigInteger base = getBI(tc, a);
         BigInteger exponent = getBI(tc, b);
         int cmp = exponent.compareTo(BigInteger.ZERO);
