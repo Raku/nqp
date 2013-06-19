@@ -822,6 +822,57 @@ public final class Ops {
         return null;
     }
     
+    /* Relative lexical lookups. */
+    public static SixModelObject getlexrel(SixModelObject ctx, String name, ThreadContext tc) {
+        if (ctx instanceof ContextRefInstance) {
+            CallFrame curFrame = ((ContextRefInstance)ctx).context;
+            while (curFrame != null) {
+                Integer found = curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
+                if (found != null)
+                    return curFrame.oLex[found];
+                curFrame = curFrame.outer;
+            }
+            return null;
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc, "getlexrel requires an operand with REPR ContextRef");
+        }
+    }
+    public static SixModelObject getlexreldyn(SixModelObject ctx, String name, ThreadContext tc) {
+        if (ctx instanceof ContextRefInstance) {
+            CallFrame curFrame = ((ContextRefInstance)ctx).context;
+            while (curFrame != null) {
+                Integer idx =  curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
+                if (idx != null)
+                    return curFrame.oLex[idx]; 
+                curFrame = curFrame.caller;
+            }
+            return null;
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc, "getlexreldyn requires an operand with REPR ContextRef");
+        }
+    }
+    public static SixModelObject getlexrelcaller(SixModelObject ctx, String name, ThreadContext tc) {
+        if (ctx instanceof ContextRefInstance) {
+            CallFrame curCallerFrame = ((ContextRefInstance)ctx).context;
+            while (curCallerFrame != null) {
+                CallFrame curFrame = curCallerFrame;
+                while (curFrame != null) {
+                    Integer found = curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
+                    if (found != null)
+                        return curFrame.oLex[found];
+                    curFrame = curFrame.outer;    
+                }
+                curCallerFrame = curCallerFrame.caller;
+            }
+            return null;
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc, "getlexrelcaller requires an operand with REPR ContextRef");
+        }
+    }
+    
     /* Context introspection. */
     public static SixModelObject ctx(ThreadContext tc) {
         SixModelObject ContextRef = tc.gc.ContextRef;
