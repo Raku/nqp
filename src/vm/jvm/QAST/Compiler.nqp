@@ -3054,7 +3054,7 @@ class QAST::CompilerJAST {
             # Create JAST method and register it with the block's compilation unit
             # unique ID and name. (Note, always void return here as return values
             # are handled out of band).
-            my $*JMETH := JAST::Method.new( :name(self.unique('qb_')), :returns('Void'), :static(0) );
+            my $*JMETH := JAST::Method.new( :name(self.unique('qb_')), :returns('Void'), :static(1) );
             $*JMETH.cr_name($node.name);
             $*JMETH.cr_cuid($node.cuid);
             $*CODEREFS.register_method($*JMETH, $node.cuid);
@@ -3065,6 +3065,7 @@ class QAST::CompilerJAST {
             }
             
             # Always take ThreadContext and callsite descriptor as arguments.
+            $*JMETH.add_argument('cu', $TYPE_CU);
             $*JMETH.add_argument('tc', $TYPE_TC);
             $*JMETH.add_argument('cr', $TYPE_CR);
             $*JMETH.add_argument('csd', $TYPE_CSD);
@@ -3298,7 +3299,7 @@ class QAST::CompilerJAST {
                 # don't save/reload the resume pointer (could get messy :p) or the thread context (restored separately since we can change threads)
                 # or the callframe (can also change)
                 # also self doesn't get saved/restored, but that's OK because the resume handle is primed with it.
-                for $*JMETH.arguments { nqp::push(@merged, $_) unless $_[0] eq 'resume' || $_[0] eq 'tc' }
+                for $*JMETH.arguments { nqp::push(@merged, $_) unless $_[0] eq 'resume' || $_[0] eq 'tc' || $_[0] eq 'cu' }
                 for $*JMETH.locals { nqp::push(@merged, $_) unless $_[0] eq 'cf' }
 
                 my int $i := 0;
@@ -3409,10 +3410,10 @@ class QAST::CompilerJAST {
                 $il.append($ACONST_NULL);
                 
                 # Emit the virtual call.
-                $il.append(savesite(JAST::Instruction.new( :op('invokevirtual'),
+                $il.append(savesite(JAST::Instruction.new( :op('invokestatic'),
                     'L' ~ $*JCLASS.name ~ ';',
                     $*CODEREFS.cuid_to_jastmethname($node.cuid),
-                    'V', $TYPE_TC, $TYPE_CR, $TYPE_CSD, "[$TYPE_OBJ", $TYPE_RESUME )));
+                    'V', $TYPE_CU, $TYPE_TC, $TYPE_CR, $TYPE_CSD, "[$TYPE_OBJ", $TYPE_RESUME )));
                 
                 # Load result onto the stack, unless in void context.
                 if $*WANT != $RT_VOID {
