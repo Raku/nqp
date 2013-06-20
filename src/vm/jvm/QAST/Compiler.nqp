@@ -463,18 +463,17 @@ QAST::OperationsJAST.add_core_op('chain', -> $qastcomp, $op {
         $*STACK.obtain($il, $bres);
         $il.append(JAST::Instruction.new( :op('astore'), $btmp ));
 
+        $*STACK.spill_to_locals($il);
         my $cs_idx := $*CODEREFS.get_callsite_idx([$ARG_OBJ, $ARG_OBJ], []);
+        $il.append(JAST::PushSVal.new( :value($cpast.name) )),
+        $il.append(JAST::PushIndex.new( :value($cs_idx) )),
         $il.append($ALOAD_1);
         $il.append(JAST::Instruction.new( :op('aload'), $atmp ));
         $il.append(JAST::Instruction.new( :op('aload'), $btmp ));
-        $il.append(JAST::InvokeDynamic.new(
-            'subcall', 'V', [$TYPE_TC, $TYPE_SMO, $TYPE_SMO],
-            'org/perl6/nqp/runtime/IndyBootstrap', 'subcall',
-            [
-                JAST::PushSVal.new( :value($cpast.name) ),
-                JAST::PushIndex.new( :value($cs_idx) )
-            ]
-        ));
+        $il.append(savesite(JAST::InvokeDynamic.new(
+            'subcall_noa', 'V', [$TYPE_STR, 'I', $TYPE_TC, $TYPE_SMO, $TYPE_SMO],
+            'org/perl6/nqp/runtime/IndyBootstrap', 'subcall_noa',
+        )));
         $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
             'result_o', $TYPE_SMO, $TYPE_CF ));
