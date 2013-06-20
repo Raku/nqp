@@ -84,9 +84,9 @@ public abstract class CompilationUnit {
         boolean codeRefsFound = false;
         try {
             for (Method m : this.getClass().getDeclaredMethods()) {
-                if (m.isAnnotationPresent(CodeRefAnnotation.class)) {
+                CodeRefAnnotation cra = m.getAnnotation(CodeRefAnnotation.class);
+                if (cra != null) {
                     /* Got a code ref annotation. Turn to method handle. */
-                    CodeRefAnnotation cra = m.getAnnotation(CodeRefAnnotation.class);
                     MethodHandle mh = l.unreflect(m).bindTo(this);
                     
                     /* Munge handlers. */
