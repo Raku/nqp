@@ -1,7 +1,7 @@
 package org.perl6.nqp.sixmodel.reprs;
 
 import java.lang.ref.ReferenceQueue;
-import java.lang.ref.WeakReference;
+import java.lang.ref.SoftReference;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,7 +36,7 @@ public class P6Opaque extends REPR {
     // this is a weak *value* map; it provides instances of V, but does not retain them, and keeps strong refs to the keys
     @SuppressWarnings("unchecked")
     private static class ObjectCache<K,V> {
-        private class Ref extends WeakReference<V> {
+        private class Ref extends SoftReference<V> {
             public K key;
             public Ref(K key, V obj, ReferenceQueue<V> queue) { super(obj, queue); this.key = key; }
         }
