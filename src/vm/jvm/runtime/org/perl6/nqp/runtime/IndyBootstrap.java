@@ -171,17 +171,26 @@ public class IndyBootstrap {
          * and callsite with what they've been resolved to. Don't do it if
          * it's a compiler stub, though. */
         if (!cr.isCompilerStub && !shared) {
-            cs.setTarget(MethodHandles
-                .insertArguments(
-                    MethodHandles.dropArguments(cr.staticInfo.mh, 0, String.class, int.class),
-                    3, cr, csd)
-                .asVarargsCollector(Object[].class)
-                .asType(cs.getTarget().type()));
+            try {
+                MethodType invType = MethodType.methodType(void.class,
+                    MethodHandle.class, String.class, CallSiteDescriptor.class,
+                    ThreadContext.class, Object[].class);
+                MethodHandle inv = caller.findStatic(IndyBootstrap.class, "subInvoker", invType);
+                cs.setTarget(MethodHandles
+                    .dropArguments(
+                        MethodHandles.insertArguments(inv, 0, cr.staticInfo.mh, name, csd),
+                        0, String.class, int.class)
+                    .asVarargsCollector(Object[].class)
+                    .asType(cs.getTarget().type()));
+            }
+            catch (Throwable t) {
+                throw ExceptionHandling.dieInternal(tc, t);
+            }
         }
         
         /* Make the sub call directly for this initial call. */
         try {
-            cr.staticInfo.mh.invokeExact(tc, cr, csd, args);
+            cr.staticInfo.mh.invokeExact(tc, (CodeRef)cr, csd, args);
         }
         catch (ControlException e) {
             throw e;
@@ -217,6 +226,27 @@ public class IndyBootstrap {
         throwee.target = target;
         throwee.payload = Ops.box_s(arg, boxType, tc);
         throw throwee;
+    }
+    
+    public static void subInvoker(MethodHandle mh, String name, CallSiteDescriptor csd, ThreadContext tc, Object[] args) throws Throwable { 
+        SixModelObject invokee = Ops.getlex(name, tc);
+        CodeRef cr;
+        if (invokee instanceof CodeRef) {
+            cr = (CodeRef)invokee;
+        }
+        else {
+            InvocationSpec is = invokee.st.InvocationSpec;
+            if (is == null)
+                throw ExceptionHandling.dieInternal(tc, "Can not invoke this object");
+            if (is.ClassHandle != null)
+                cr = (CodeRef)invokee.get_attribute_boxed(tc, is.ClassHandle, is.AttrName, is.Hint);
+            else {
+                cr = (CodeRef)is.InvocationHandler;
+                csd = csd.injectInvokee(tc, args, invokee);
+                args = tc.flatArgs;
+            }
+        }
+        mh.invokeExact(tc, cr, csd, args);
     }
     
     public static CallSite indcall_noa(Lookup caller, String _, MethodType type) {
