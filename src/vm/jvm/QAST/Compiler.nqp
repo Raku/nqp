@@ -67,7 +67,6 @@ my $TYPE_RESUME    := 'Lorg/perl6/nqp/runtime/ResumeStatus$Frame;';
 
 # Exception handler categories.
 my $EX_CAT_CATCH   := 1;
-my $EX_CAT_CONTROL := 2;
 my $EX_CAT_NEXT    := 4;
 my $EX_CAT_REDO    := 8;
 my $EX_CAT_LAST    := 16;
@@ -75,6 +74,9 @@ my $EX_CAT_TAKE    := 32;
 my $EX_CAT_WARN    := 64;
 my $EX_CAT_SUCCEED := 128;
 my $EX_CAT_PROCEED := 256;
+my $EX_CAT_CONTROL := $EX_CAT_CATCH +| $EX_CAT_NEXT +| $EX_CAT_REDO +|
+                      $EX_CAT_LAST +| $EX_CAT_TAKE +| $EX_CAT_WARN +|
+                      $EX_CAT_SUCCEED +| $EX_CAT_PROCEED;
 
 # Exception handler kinds.
 my $EX_UNWIND_SIMPLE := 0;
