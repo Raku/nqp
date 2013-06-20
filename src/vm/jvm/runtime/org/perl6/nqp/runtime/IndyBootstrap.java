@@ -71,7 +71,13 @@ public class IndyBootstrap {
     public static void subcallResolve_noa(Lookup caller, MutableCallSite cs, String name, int csIdx, ThreadContext tc, Object... args) {
         /* Locate the thing to call. */
         SixModelObject invokee = Ops.getlex(name, tc);
+        
+        /* Don't update callsite in cases where it's not safe. */
         boolean shared = tc.curFrame.codeRef.staticInfo.compUnit.shared;
+        if (invokee.st != null && invokee.st.ContainerSpec != null) {
+            invokee = Ops.decont(invokee, tc);
+            shared = true;
+        }
         
         /* Resolve callsite descriptor. */
         CallSiteDescriptor csd = csIdx >= 0
