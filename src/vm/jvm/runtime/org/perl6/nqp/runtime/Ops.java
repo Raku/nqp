@@ -2843,6 +2843,57 @@ public final class Ops {
         String check = target.substring((int)offset, (int)offset + 1);
         return check.matches("\\p{" + propName + "}") ? 1 : 0;
     }
+    
+    public static String bitor_s(String a, String b) {
+        int alength = a.length();
+        int blength = b.length();
+        int mlength = alength > blength ? alength : blength;
+        StringBuilder r = new StringBuilder(mlength);
+        int apos = 0;
+        int bpos = 0;
+        while (apos < alength || bpos < blength) {
+           int cpa = apos < alength ? a.codePointAt(apos) : 0;
+           int cpb = bpos < blength ? b.codePointAt(bpos) : 0;
+           r.appendCodePoint(cpa | cpb);
+           apos += Character.charCount(cpa);
+           bpos += Character.charCount(cpb);
+        }
+        return r.toString();
+    }
+    
+    public static String bitxor_s(String a, String b) {
+        int alength = a.length();
+        int blength = b.length();
+        int mlength = alength > blength ? alength : blength;
+        StringBuilder r = new StringBuilder(mlength);
+        int apos = 0;
+        int bpos = 0;
+        while (apos < alength || bpos < blength) {
+           int cpa = apos < alength ? a.codePointAt(apos) : 0;
+           int cpb = bpos < blength ? b.codePointAt(bpos) : 0;
+           r.appendCodePoint(cpa ^ cpb);
+           apos += Character.charCount(cpa);
+           bpos += Character.charCount(cpb);
+        }
+        return r.toString();
+    }
+    
+    public static String bitand_s(String a, String b) {
+        int alength = a.length();
+        int blength = b.length();
+        int mlength = alength > blength ? alength : blength;
+        StringBuilder r = new StringBuilder(mlength);
+        int apos = 0;
+        int bpos = 0;
+        while (apos < alength || bpos < blength) {
+           int cpa = apos < alength ? a.codePointAt(apos) : 0;
+           int cpb = bpos < blength ? b.codePointAt(bpos) : 0;
+           r.appendCodePoint(cpa & cpb);
+           apos += Character.charCount(cpa);
+           bpos += Character.charCount(cpb);
+        }
+        return r.toString();
+    }
 
     /* serialization context related opcodes */
     public static String sha1(String str) throws NoSuchAlgorithmException, UnsupportedEncodingException {
