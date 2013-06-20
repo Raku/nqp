@@ -1,5 +1,7 @@
 package org.perl6.nqp.sixmodel.reprs;
 
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,14 +25,41 @@ import org.perl6.nqp.sixmodel.TypeObject;
 public class P6Opaque extends REPR {
     private static long typeId = 0;
     
-    private class AttrInfo {
+    private static class AttrInfo {
         public STable st;
         public boolean boxTarget;
         public boolean hasAutoVivContainer;
         public boolean posDelegate;
         public boolean assDelegate;
     }
-    
+
+    // this is a weak *value* map; it provides instances of V, but does not retain them, and keeps strong refs to the keys
+    @SuppressWarnings("unchecked")
+    private static class ObjectCache<K,V> {
+        private class Ref extends WeakReference<V> {
+            public K key;
+            public Ref(K key, V obj, ReferenceQueue<V> queue) { super(obj, queue); this.key = key; }
+        }
+
+        private HashMap<K, Ref> store = new HashMap< >();
+        private ReferenceQueue<V> queue = new ReferenceQueue< >();
+
+        public synchronized V get(K key) {
+            Ref ref;
+            while ((ref = (Ref) queue.poll()) != null) store.remove(ref.key);
+            ref = store.get(key);
+            return ref == null ? null : ref.get();
+        }
+
+        public synchronized void put(K key, V value) {
+            Ref ref;
+            while ((ref = (Ref) queue.poll()) != null) store.remove(ref.key);
+            store.put(key, new Ref(key, value, queue));
+        }
+    }
+
+    private static ObjectCache<String, Class<?>> classCache = new ObjectCache< >();
+
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
         STable st = new STable(this, HOW);
         st.REPRData = new P6OpaqueREPRData();
@@ -128,7 +157,7 @@ public class P6Opaque extends REPR {
         /* Provided we have attributes, generate the JVM backing type. If not,
          * P6OpaqueBaseInstance will do. */
         if (attrInfoList.size() > 0) {
-            generateJVMType(tc, st, attrInfoList);
+            installJVMType(tc, st, attrInfoList);
         }
         else {
             ((P6OpaqueREPRData)st.REPRData).jvmClass = P6OpaqueBaseInstance.class;
@@ -165,11 +194,66 @@ public class P6Opaque extends REPR {
         mv.visitLabel(label);
         mv.visitInsn(Opcodes.POP);
     }
-    
-    private void generateJVMType(ThreadContext tc, STable st, List<AttrInfo> attrInfoList) {
+
+    private void installJVMType(ThreadContext tc, STable st, List<AttrInfo> attrInfoList) {
+        StringBuilder sigBuilder = new StringBuilder();
+
+        boolean forceNew = false;
+        for (AttrInfo attr : attrInfoList) {
+
+            if (attr.hasAutoVivContainer) sigBuilder.append('v');
+            if (attr.posDelegate) sigBuilder.append('p');
+            if (attr.assDelegate) sigBuilder.append('a');
+
+            StorageSpec ss = attr.st.REPR.get_storage_spec(tc, attr.st);
+            if (ss.inlineable != StorageSpec.REFERENCE) {
+                sigBuilder.append('I');
+                sigBuilder.append(attr.st.REPR.name);
+                sigBuilder.append('(');
+                if (!attr.st.REPR.inline_description(tc, attr.st, sigBuilder)) forceNew = true;
+                sigBuilder.append(')');
+            }
+
+            if (attr.boxTarget) {
+                sigBuilder.append('B');
+                sigBuilder.append(attr.st.REPR.name);
+                sigBuilder.append('(');
+                if (!attr.st.REPR.box_description(tc, attr.st, sigBuilder)) forceNew = true;
+                sigBuilder.append(')');
+            }
+
+            sigBuilder.append(';');
+        }
+
+        Class<?> use;
+        if (forceNew) {
+            use = generateJVMClass(tc, attrInfoList);
+        } else {
+            String sig = sigBuilder.toString();
+            use = classCache.get(sig);
+            if (use == null) {
+                use = generateJVMClass(tc, attrInfoList);
+                classCache.put(sig, use);
+                //System.out.println("CREATE "+sig);
+            } else {
+                //System.out.println("REUSE "+sig);
+            }
+        }
+
+        ((P6OpaqueREPRData)st.REPRData).jvmClass = use;
+        try {
+            ((P6OpaqueREPRData)st.REPRData).instance = (P6OpaqueBaseInstance)((P6OpaqueREPRData)st.REPRData).jvmClass.newInstance();
+        }
+        catch (InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+        ((P6OpaqueREPRData)st.REPRData).instance.st = st;
+    }
+
+    private Class<?> generateJVMClass(ThreadContext tc, List<AttrInfo> attrInfoList) {
         /* Create a unique name. */
         String className = "__P6opaque__" + typeId++;
-        
+
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
         cw.visit(Opcodes.V1_7, Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, className, null, 
                 "org/perl6/nqp/sixmodel/reprs/P6OpaqueBaseInstance", null);
@@ -514,14 +598,7 @@ public class P6Opaque extends REPR {
 //            fos.close();
 //        } catch (IOException e) {
 //        }
-        ((P6OpaqueREPRData)st.REPRData).jvmClass = new ByteClassLoader(classCompiled).findClass(className);
-        try {
-            ((P6OpaqueREPRData)st.REPRData).instance = (P6OpaqueBaseInstance)((P6OpaqueREPRData)st.REPRData).jvmClass.newInstance();
-        }
-        catch (InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-        ((P6OpaqueREPRData)st.REPRData).instance.st = st;
+        return new ByteClassLoader(classCompiled).findClass(className);
     }
 
     private void generateDelegateMethod(ThreadContext tc, ClassWriter cw, String className, String field, String methodName) {
@@ -709,7 +786,7 @@ public class P6Opaque extends REPR {
             attrInfoList.add(info);
         }
         if (numAttributes > 0) {
-            generateJVMType(tc, st, attrInfoList);
+            installJVMType(tc, st, attrInfoList);
         }
         else {
             ((P6OpaqueREPRData)st.REPRData).jvmClass = P6OpaqueBaseInstance.class;

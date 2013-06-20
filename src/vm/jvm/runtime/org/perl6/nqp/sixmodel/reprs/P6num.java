@@ -80,6 +80,14 @@ public class P6num extends REPR {
         setMeth.visitMaxs(0, 0);
     }
 
+    // We don't depend on any details of the STable, so no description is needed
+    @Override public boolean inline_description(ThreadContext tc, STable st, StringBuilder out) {
+        return true;
+    }
+    @Override public boolean box_description(ThreadContext tc, STable st, StringBuilder out) {
+        return true;
+    }
+
     public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
         P6numInstance obj = new P6numInstance();
         obj.st = st;

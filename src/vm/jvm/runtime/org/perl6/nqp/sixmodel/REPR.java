@@ -131,5 +131,15 @@ public abstract class REPR {
             String prefix, SixModelObject obj) {
         throw ExceptionHandling.dieInternal(tc, "This representation cannot deserialize an inlined representation of itself");
     }
+    // These two functions are called when determining if a new class is needed; they should append a complete description
+    // of the code they would use for inline* or generateBoxingMethods, in a format which is arbitrary except that it may
+    // not contain imbalanced parens, and return true.  Returning false means no description is possible and the class must
+    // always be created fresh.
+    public boolean inline_description(ThreadContext tc, STable st, StringBuilder out) {
+        return false;
+    }
+    public boolean box_description(ThreadContext tc, STable st, StringBuilder out) {
+        return false;
+    }
 }
 
