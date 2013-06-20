@@ -260,6 +260,8 @@ public class P6Opaque extends REPR {
         
         Type tcType = Type.getType("Lorg/perl6/nqp/runtime/ThreadContext;");
         Type smoType = Type.getType("Lorg/perl6/nqp/sixmodel/SixModelObject;");
+        Type srType = Type.getType("Lorg/perl6/nqp/sixmodel/SerializationReader;");
+        Type stType = Type.getType("Lorg/perl6/nqp/sixmodel/STable;");
         
         /* bind_attribute_boxed */
         MethodVisitor bindBoxedVisitor;
@@ -397,10 +399,19 @@ public class P6Opaque extends REPR {
             }
         }
         
+        /* deserializeFields */
+        MethodVisitor deserVisitor;
+        {
+            String descriptor = Type.getMethodDescriptor(Type.VOID_TYPE,
+                    new Type[] { tcType, stType, srType });
+            deserVisitor = cw.visitMethod(Opcodes.ACC_PUBLIC, "deserializeFields", descriptor, null, null);
+            deserVisitor.visitCode();
+        }
+        
         /* Now add all of the required fields and fill out the methods. */
         for (int i = 0; i < attrInfoList.size(); i++) {
             AttrInfo attr = attrInfoList.get(i);
-            
+
             /* Is it a reference type or not? */
             StorageSpec ss = attr.st.REPR.get_storage_spec(tc, attr.st);
             if (ss.inlineable == StorageSpec.REFERENCE) {
@@ -459,6 +470,12 @@ public class P6Opaque extends REPR {
                 getNativeVisitor.visitLabel(getNativeLabels[i]);
                 getNativeVisitor.visitVarInsn(Opcodes.ALOAD, 0);
                 getNativeVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, className, "badNative", "()V");
+
+                /* We deserialize these ourselves */
+                deserVisitor.visitVarInsn(Opcodes.ALOAD, 0);
+                deserVisitor.visitVarInsn(Opcodes.ALOAD, 3);
+                deserVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "org/perl6/nqp/sixmodel/SerializationReader", "readRef", "()Lorg/perl6/nqp/sixmodel/SixModelObject;");
+                deserVisitor.visitFieldInsn(Opcodes.PUTFIELD, className, field, desc);
             }
             else {
                 /* Generate field prefix and have target REPR install the field. */
@@ -470,6 +487,9 @@ public class P6Opaque extends REPR {
                 attr.st.REPR.inlineBind(tc, attr.st, bindNativeVisitor, className, prefix);
                 getNativeVisitor.visitLabel(getNativeLabels[i]);
                 attr.st.REPR.inlineGet(tc, attr.st, getNativeVisitor, className, prefix);
+
+                /* Deserialization */
+                attr.st.REPR.inlineDeserialize(tc, attr.st, deserVisitor, className, prefix);
                 
                 /* Add is init code. */
                 isInitVisitor.visitLabel(isInitLabels[i]);
@@ -576,7 +596,12 @@ public class P6Opaque extends REPR {
         isInitVisitor.visitInsn(Opcodes.I2L);
         isInitVisitor.visitInsn(Opcodes.LRETURN);
         isInitVisitor.visitMaxs(0, 0);
-        isInitVisitor.visitEnd();   
+        isInitVisitor.visitEnd();
+        
+        /* Finish deserializeFields. */
+        deserVisitor.visitInsn(Opcodes.RETURN);
+        deserVisitor.visitMaxs(0, 0);
+        deserVisitor.visitEnd();
 
         /* Finally, add empty constructor and generate the JVM storage class. */
         MethodVisitor constructor = cw.visitMethod(Opcodes.ACC_PUBLIC, "<init>", "()V", null, null);
@@ -848,29 +873,14 @@ public class P6Opaque extends REPR {
 
     public void deserialize_finish(ThreadContext tc, STable st,
             SerializationReader reader, SixModelObject stub) {
-        try {
-            // Create instance that we'll deserialize into.
-            P6OpaqueBaseInstance obj = (P6OpaqueBaseInstance)((P6OpaqueREPRData)st.REPRData).instance.instClone();
-            
-            // Install it as the stub's delegate.
-            ((P6OpaqueDelegateInstance)stub).delegate = obj;
-            
-            // Now deserialize all the fields.
-            STable[] flattenedSTables = ((P6OpaqueREPRData)st.REPRData).flattenedSTables;
-            for (int i = 0; i < flattenedSTables.length; i++) {
-                if (flattenedSTables[i] == null) {
-                    obj.getClass().getField("field_" + i).set(obj, reader.readRef());
-                }
-                else {
-                    flattenedSTables[i].REPR.deserialize_inlined(tc, flattenedSTables[i],
-                            reader, "field_" + i, obj);
-                }
-            }
-        }
-        catch (IllegalAccessException | NoSuchFieldException e)
-        {
-            throw new RuntimeException(e);
-        }    
+        // Create instance that we'll deserialize into.
+        P6OpaqueBaseInstance obj = (P6OpaqueBaseInstance)((P6OpaqueREPRData)st.REPRData).instance.instClone();
+
+        // Install it as the stub's delegate.
+        ((P6OpaqueDelegateInstance)stub).delegate = obj;
+
+        // Now deserialize all the fields.
+        obj.deserializeFields(tc, st, reader);
     }
     
     public void serialize(ThreadContext tc, SerializationWriter writer, SixModelObject origObj) {

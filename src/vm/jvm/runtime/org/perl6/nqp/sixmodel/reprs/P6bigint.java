@@ -72,6 +72,16 @@ public class P6bigint extends REPR {
         mv.visitInsn(Opcodes.RETURN);
     }
     
+    public void inlineDeserialize(ThreadContext tc, STable st, MethodVisitor mv, String className, String prefix) {
+        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        mv.visitTypeInsn(Opcodes.NEW, "java/math/BigInteger");
+        mv.visitInsn(Opcodes.DUP);
+        mv.visitVarInsn(Opcodes.ALOAD, 3);
+        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "org/perl6/nqp/sixmodel/SerializationReader", "readStr", "()Ljava/lang/String;");
+        mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/math/BigInteger", "<init>", "(Ljava/lang/String;)V");
+        mv.visitFieldInsn(Opcodes.PUTFIELD, className, prefix, "Ljava/math/BigInteger;");
+    }
+
     public void generateBoxingMethods(ThreadContext tc, STable st, ClassWriter cw, String className, String prefix) {
         String bigIntegerType = Type.getType(BigInteger.class).getDescriptor();
         String bigIntegerIN = Type.getType(BigInteger.class).getInternalName();
@@ -110,15 +120,6 @@ public class P6bigint extends REPR {
     public void deserialize_finish(ThreadContext tc, STable st,
             SerializationReader reader, SixModelObject obj) {
         throw new RuntimeException("Deserialization NYI for P6bigint");
-    }
-    
-    public void deserialize_inlined(ThreadContext tc, STable st, SerializationReader reader,
-            String prefix, SixModelObject obj) {
-        try {
-            obj.getClass().getField(prefix).set(obj, new BigInteger(reader.readStr()));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
     
     public void serialize_inlined(ThreadContext tc, STable st, SerializationWriter writer,

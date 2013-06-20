@@ -1,5 +1,7 @@
 package org.perl6.nqp.sixmodel.reprs;
 import org.perl6.nqp.runtime.ThreadContext;
+import org.perl6.nqp.sixmodel.STable;
+import org.perl6.nqp.sixmodel.SerializationReader;
 import org.perl6.nqp.sixmodel.SixModelObject;
 import org.perl6.nqp.sixmodel.TypeObject;
 
@@ -52,7 +54,10 @@ public class P6OpaqueBaseInstance extends SixModelObject {
             throw new RuntimeException(e);
         }
     }
-    
+
+    public void deserializeFields(ThreadContext tc, STable st, SerializationReader reader) {
+    }
+
     public void badNative() {
         throw new RuntimeException("Cannot access a reference attribute as a native attribute");
     }

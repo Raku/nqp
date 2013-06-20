@@ -120,16 +120,15 @@ public abstract class REPR {
     public void inlineGet(ThreadContext tc, STable st, MethodVisitor mv, String className, String prefix) {
         throw ExceptionHandling.dieInternal(tc, "This representation cannot inline itself into another");
     }
+    public void inlineDeserialize(ThreadContext tc, STable st, MethodVisitor mv, String className, String prefix) {
+        throw ExceptionHandling.dieInternal(tc, "This representation cannot inline itself into another");
+    }
     public void generateBoxingMethods(ThreadContext tc, STable st, ClassWriter cw, String className, String prefix) {
         throw ExceptionHandling.dieInternal(tc, "This representation does not support being a box target");        
     }
     public void serialize_inlined(ThreadContext tc, STable st, SerializationWriter writer, 
             String prefix, SixModelObject obj) {
         throw ExceptionHandling.dieInternal(tc, "This representation cannot serialize an inlined representation of itself");
-    }
-    public void deserialize_inlined(ThreadContext tc, STable st, SerializationReader reader, 
-            String prefix, SixModelObject obj) {
-        throw ExceptionHandling.dieInternal(tc, "This representation cannot deserialize an inlined representation of itself");
     }
     // These two functions are called when determining if a new class is needed; they should append a complete description
     // of the code they would use for inline* or generateBoxingMethods, in a format which is arbitrary except that it may

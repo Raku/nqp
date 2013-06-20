@@ -61,7 +61,14 @@ public class P6int extends REPR {
         mv.visitFieldInsn(Opcodes.PUTFIELD, "org/perl6/nqp/runtime/ThreadContext", "native_i", "J");
         mv.visitInsn(Opcodes.RETURN);
     }
-    
+
+    public void inlineDeserialize(ThreadContext tc, STable st, MethodVisitor mv, String className, String prefix) {
+        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        mv.visitVarInsn(Opcodes.ALOAD, 3);
+        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "org/perl6/nqp/sixmodel/SerializationReader", "readLong", "()J");
+        mv.visitFieldInsn(Opcodes.PUTFIELD, className, prefix, "J");
+    }
+
     public void generateBoxingMethods(ThreadContext tc, STable st, ClassWriter cw, String className, String prefix) {
         String getDesc = "(Lorg/perl6/nqp/runtime/ThreadContext;)J";
         MethodVisitor getMeth = cw.visitMethod(Opcodes.ACC_PUBLIC, "get_int", getDesc, null, null);
@@ -100,15 +107,6 @@ public class P6int extends REPR {
     
     public void serialize(ThreadContext tc, SerializationWriter writer, SixModelObject obj) {
         writer.writeInt(((P6intInstance)obj).value);
-    }
-    
-    public void deserialize_inlined(ThreadContext tc, STable st, SerializationReader reader,
-            String prefix, SixModelObject obj) {
-        try {
-            obj.getClass().getField(prefix).set(obj, reader.readLong());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
     
     public void serialize_inlined(ThreadContext tc, STable st, SerializationWriter writer,
