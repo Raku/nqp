@@ -10,6 +10,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
@@ -139,14 +140,19 @@ public class JASTToJVMBytecode {
         JavaClass c = new JavaClass(className, cw.toByteArray());
         return c;
     }
-    
+
+    private static class LabelInfo {
+        public Label label = new Label();
+        public boolean defined;
+    }
+
     private static boolean processMethod(BufferedReader in, ClassWriter c, String className) throws Exception {
         String curLine, methodName = null, returnType = null, desc = null;
         String crName = null, crCuid = null, crOuter = null;
         boolean isStatic = false;
         List<Type> argTypes = new ArrayList<Type>();
         Map<String, VariableDef> localVariables = new HashMap<String, VariableDef>();
-        Map<String, Label> labelMap = new HashMap<String, Label>();
+        Map<String, LabelInfo> labelMap = new HashMap< >();
         Stack<Label> tryStartStack = new Stack<Label>();
         Stack<Label> tryEndStack = new Stack<Label>();
         List<String> croLex = new ArrayList<String>();
@@ -280,8 +286,11 @@ public class JASTToJVMBytecode {
             if (curLine.startsWith(":")) {
                 String labelName = curLine.substring(1);
                 if (!labelMap.containsKey(labelName))
-                    labelMap.put(labelName, new Label());
-                m.visitLabel(labelMap.get(labelName));
+                    labelMap.put(labelName, new LabelInfo());
+                LabelInfo inf = labelMap.get(labelName);
+                if (inf.defined) throw new RuntimeException(labelName + " defined twice in " + methodName);
+                inf.defined = true;
+                m.visitLabel(inf.label);
                 continue;
             }
             
@@ -372,6 +381,11 @@ public class JASTToJVMBytecode {
             m.visitLocalVariable(e.getKey(), def.type, null, def.start, def.end, def.index);
         }
 
+        for (Map.Entry<String, LabelInfo> e : labelMap.entrySet()) {
+            if (!e.getValue().defined)
+                throw new Exception(e.getKey() + " used but not defined in " + methodName);
+        }
+
         m.visitMaxs(0, 0);
         m.visitEnd();
         return contAfter;
@@ -400,7 +414,7 @@ public class JASTToJVMBytecode {
     }
 
     private static void emitInstruction(BufferedReader in, MethodVisitor m,
-            Map<String, Label> labelMap,
+            Map<String, LabelInfo> labelMap,
             Map<String, VariableDef> localVariables,
             String curLine) throws Exception {
         // Find instruction code and get rest of the string.
@@ -810,15 +824,15 @@ public class JASTToJVMBytecode {
     }
 
     private static void emitBranchInstruction(MethodVisitor m,
-            Map<String, Label> labelFixups,
+            Map<String, LabelInfo> labelFixups,
             String label, int icode) {
         
         if (!labelFixups.containsKey(label))
-            labelFixups.put(label, new Label());
-        m.visitJumpInsn(icode, labelFixups.get(label));
+            labelFixups.put(label, new LabelInfo());
+        m.visitJumpInsn(icode, labelFixups.get(label).label);
     }
     
-    private static void emitTableSwitchInstruction(MethodVisitor m, Map<String, Label> labelMap, String rest) {
+    private static void emitTableSwitchInstruction(MethodVisitor m, Map<String, LabelInfo> labelMap, String rest) {
         String[] labelKeys = rest.split("\\s");
         Label[] labels = new Label[labelKeys.length - 1];
         Label defaultLabel = null;
@@ -826,12 +840,12 @@ public class JASTToJVMBytecode {
         for (int i = 0; i < labelKeys.length; i++) {
             String key = labelKeys[i];
             if (!labelMap.containsKey(key)) {
-                labelMap.put(key, new Label());
+                labelMap.put(key, new LabelInfo());
             }
             if (i == 0) {
-                defaultLabel = labelMap.get(key);
+                defaultLabel = labelMap.get(key).label;
             } else {
-                labels[i - 1] = labelMap.get(key);
+                labels[i - 1] = labelMap.get(key).label;
             }
         }
         m.visitTableSwitchInsn(0, labels.length - 1, defaultLabel, labels);

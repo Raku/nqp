@@ -971,7 +971,7 @@ QAST::OperationsJAST.add_core_op('xor', -> $qastcomp, $op {
         $il.append(JAST::Instruction.new( :op('ifne'), $falselabel ));
 
         if @childlist {
-            my $truelabel := JAST::Label.new(:name('xor_true'));
+            my $truelabel := JAST::Label.new(:name($op.unique('xor_true')));
             $il.append(JAST::Instruction.new( :op('lload'), $t ));
             $il.append($L2I);
             $il.append(JAST::Instruction.new( :op('ifne'), $truelabel ));
