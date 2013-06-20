@@ -72,4 +72,14 @@ public class TypeObject extends SixModelObject {
     public long elems(ThreadContext tc) {
         throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation on a type object");
     }
+    
+    public SixModelObject clone(ThreadContext tc) {
+        try {
+            SixModelObject cloned = (SixModelObject)this.clone();
+            cloned.sc = null;
+            return cloned;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
