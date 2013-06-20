@@ -2851,9 +2851,9 @@ public final class Ops {
         StringBuilder r = new StringBuilder(mlength);
         int apos = 0;
         int bpos = 0;
-        while (apos < alength || bpos < blength) {
-           int cpa = apos < alength ? a.codePointAt(apos) : 0;
-           int cpb = bpos < blength ? b.codePointAt(bpos) : 0;
+        while (apos < alength && bpos < blength) {
+           int cpa = a.codePointAt(apos);
+           int cpb = b.codePointAt(bpos);
            r.appendCodePoint(cpa | cpb);
            apos += Character.charCount(cpa);
            bpos += Character.charCount(cpb);
@@ -2868,9 +2868,9 @@ public final class Ops {
         StringBuilder r = new StringBuilder(mlength);
         int apos = 0;
         int bpos = 0;
-        while (apos < alength || bpos < blength) {
-           int cpa = apos < alength ? a.codePointAt(apos) : 0;
-           int cpb = bpos < blength ? b.codePointAt(bpos) : 0;
+        while (apos < alength && bpos < blength) {
+           int cpa = a.codePointAt(apos);
+           int cpb = b.codePointAt(bpos);
            r.appendCodePoint(cpa ^ cpb);
            apos += Character.charCount(cpa);
            bpos += Character.charCount(cpb);
@@ -2885,9 +2885,9 @@ public final class Ops {
         StringBuilder r = new StringBuilder(mlength);
         int apos = 0;
         int bpos = 0;
-        while (apos < alength || bpos < blength) {
-           int cpa = apos < alength ? a.codePointAt(apos) : 0;
-           int cpb = bpos < blength ? b.codePointAt(bpos) : 0;
+        while (apos < alength && bpos < blength) {
+           int cpa = a.codePointAt(apos);
+           int cpb = b.codePointAt(bpos);
            r.appendCodePoint(cpa & cpb);
            apos += Character.charCount(cpa);
            bpos += Character.charCount(cpb);
