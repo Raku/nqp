@@ -34,10 +34,10 @@ class JAST::Class is JAST::Node {
         nqp::push(@dumped, "+ super $!super");
         nqp::push(@dumped, "+ filename $!filename");
         for @!fields {
-            nqp::push(@dumped, $_.dump());
+            $_.dump(@dumped);
         }
         for @!methods {
-            nqp::push(@dumped, $_.dump());
+            $_.dump(@dumped);
         }
         return nqp::join("\n", @dumped);
     }
@@ -58,8 +58,8 @@ class JAST::Field {
     method type(*@value) { @value ?? ($!type := @value[0]) !! $!type }
     method static(*@value) { @value ?? ($!static := @value[0]) !! $!static }
     
-    method dump() {
-        "+ field $!name $!type " ~ ($!static ?? 'static' !! 'instance')
+    method dump(@dumped) {
+        nqp::push(@dumped, "+ field $!name $!type " ~ ($!static ?? 'static' !! 'instance'))
     }
 }
 
@@ -67,25 +67,15 @@ class JAST::InstructionList {
     has @!instructions;
     
     method append($ins) {
-        nqp::istype($ins, JAST::InstructionList)
-            ?? self.push_instructions($ins)
-            !! nqp::push(@!instructions, $ins)
-    }
-    
-    method push_instructions($ilist) {
-        for $ilist.instructions {
-            nqp::push(@!instructions, $_)
-        }
+        nqp::push(@!instructions, $ins)
     }
     
     method instructions() { @!instructions }
     
-    method dump() {
-        my @dumped;
+    method dump(@dumped) {
         for @!instructions {
-            nqp::push(@dumped, $_.dump());
+            $_.dump(@dumped);
         }
-        return nqp::join("\n", @dumped);
     }
 }
 
@@ -100,8 +90,8 @@ class JAST::Local is JAST::Node {
     
     method name() { $!name }
     
-    method dump() {
-        ":$!name"
+    method dump(@dumped) {
+        nqp::push(@dumped, ":$!name")
     }
 }
 
@@ -148,15 +138,7 @@ class JAST::Method is JAST::Node {
     }
     
     method append($ins) {
-        nqp::istype($ins, JAST::InstructionList)
-            ?? self.push_instructions($ins)
-            !! nqp::push(@!instructions, $ins)
-    }
-    
-    method push_instructions($ilist) {
-        for $ilist.instructions {
-            nqp::push(@!instructions, $_)
-        }
+        nqp::push(@!instructions, $ins)
     }
 
     method name(*@value) { @value ?? ($!name := @value[0]) !! $!name }
@@ -175,8 +157,7 @@ class JAST::Method is JAST::Node {
     method cr_slex(*@value) { @value ?? (@!cr_slex := @value[0]) !! @!cr_slex }
     method cr_handlers(*@value) { @value ?? (@!cr_handlers := @value[0]) !! @!cr_handlers }
     
-    method dump() {
-        my @dumped;
+    method dump(@dumped) {
         nqp::push(@dumped, "+ method");
         nqp::push(@dumped, "++ name $!name");
         nqp::push(@dumped, "++ returns $!returns");
@@ -198,9 +179,8 @@ class JAST::Method is JAST::Node {
         for @!cr_slex { nqp::push(@dumped, "++ slex $_"); }
         nqp::push(@dumped, "++ handlers " ~ join(' ', @!cr_handlers));
         for @!instructions {
-            nqp::push(@dumped, $_.dump());
+            $_.dump(@dumped);
         }
-        return nqp::join("\n", @dumped);
     }
 }
 
@@ -215,8 +195,8 @@ class JAST::Label is JAST::Node {
     
     method name() { $!name }
     
-    method dump() {
-        ":$!name"
+    method dump(@dumped) {
+        nqp::push(@dumped, ":$!name")
     }
 }
 
@@ -239,14 +219,14 @@ class JAST::Instruction is JAST::Node {
     method unshift($arg) { nqp::unshift(@!args, $arg); }
     method shift() { nqp::shift(@!args); }
     
-    method dump() {
+    method dump(@dumped) {
         my @processed;
         for @!args {
             nqp::push(@processed, nqp::istype($_, JAST::Node)
                 ?? $_.name
                 !! ~$_)
         }
-        "$!op " ~ nqp::join(" ", @processed)
+        nqp::push(@dumped, "$!op " ~ nqp::join(" ", @processed))
     }
 }
 
@@ -274,17 +254,16 @@ class JAST::InvokeDynamic is JAST::Node {
         @!extra_args := @extra_args;
     }
     
-    method dump() {
+    method dump(@dumped) {
         my @op_dump := [opname2code('invokedynamic'), $!name];
         nqp::push(@op_dump, '(' ~ join('', @!arg_types) ~ ')' ~ $!ret_type);
         nqp::push(@op_dump, $!bsm_type);
         nqp::push(@op_dump, $!bsm_name);
         nqp::push(@op_dump, +@!extra_args);
-        my @dump := [join(" ", @op_dump)];
+        nqp::push(@dumped, join(" ", @op_dump));
         for @!extra_args {
-            nqp::push(@dump, $_.dump())
+            $_.dump(@dumped);
         }
-        join("\n", @dump)
     }
 }
 
@@ -298,7 +277,7 @@ class JAST::PushIVal is JAST::Node {
     }
     
     method value() { $!value }
-    method dump() { ".push_ic $!value" }
+    method dump(@dumped) { nqp::push(@dumped, ".push_ic $!value") }
 }
 
 class JAST::PushIndex is JAST::Node {
@@ -311,7 +290,7 @@ class JAST::PushIndex is JAST::Node {
     }
     
     method value() { $!value }
-    method dump() { ".push_idx $!value" }
+    method dump(@dumped) { nqp::push(@dumped, ".push_idx $!value") }
 }
 
 class JAST::PushNVal is JAST::Node {
@@ -324,7 +303,7 @@ class JAST::PushNVal is JAST::Node {
     }
     
     method value() { $!value }
-    method dump() { ".push_nc $!value" }
+    method dump(@dumped) { nqp::push(@dumped, ".push_nc $!value") }
 }
 
 class JAST::PushSVal is JAST::Node {
@@ -337,7 +316,7 @@ class JAST::PushSVal is JAST::Node {
     }
     
     method value() { $!value }
-    method dump() {
+    method dump(@dumped) {
         my @chars := nqp::split('', $!value);
         my int $i := 0;
         my int $n := nqp::elems(@chars);
@@ -350,7 +329,7 @@ class JAST::PushSVal is JAST::Node {
             elsif $c eq "\t" { @chars[$i] := "\\t"; }
             $i++;
         }
-        ".push_sc " ~ nqp::join('', @chars)
+        nqp::push(@dumped, ".push_sc " ~ nqp::join('', @chars))
     }
 }
 
@@ -364,7 +343,7 @@ class JAST::PushCVal is JAST::Node {
     }
     
     method value() { $!value }
-    method dump() { ".push_cc $!value" }
+    method dump(@dumped) { nqp::push(@dumped, ".push_cc $!value") }
 }
 
 class JAST::TryCatch is JAST::Node {
@@ -382,12 +361,12 @@ class JAST::TryCatch is JAST::Node {
     method catch(*@value) { @value ?? ($!catch := @value[0]) !! $!catch }
     method type(*@value) { @value ?? ($!type := @value[0]) !! $!type }
     
-    method dump() {
-        ".try\n" ~
-            $!try.dump() ~ "\n" ~
-        ".catch $!type\n" ~
-            $!catch.dump() ~ "\n" ~
-        ".endtry"
+    method dump(@dumped) {
+        nqp::push(@dumped, ".try");
+        $!try.dump(@dumped);
+        nqp::push(@dumped, ".catch $!type");
+        $!catch.dump(@dumped);
+        nqp::push(@dumped, ".endtry");
     }
 }
 
@@ -400,8 +379,8 @@ class JAST::Annotation is JAST::Node {
     
     method line() { $!line }
     
-    method dump() {
-        ".line $!line"
+    method dump(@dumped) {
+        nqp::push(@dumped, ".line $!line")
     }
 }
 
