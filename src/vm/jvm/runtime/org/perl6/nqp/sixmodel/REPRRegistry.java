@@ -50,7 +50,7 @@ public class REPRRegistry {
         reprs.add(REPR);
     }
     
-    public static void setup() {
+    static {
         addREPR("KnowHOWREPR", new KnowHOWREPR());
         addREPR("KnowHOWAttribute", new KnowHOWAttribute());
         addREPR("P6opaque", new P6Opaque());

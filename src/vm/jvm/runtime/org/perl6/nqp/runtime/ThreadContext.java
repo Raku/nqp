@@ -96,6 +96,9 @@ public class ThreadContext {
     ContextKey<?,?> hllGlobalKey;
     HashMap<ContextKey<?,?>, Object> hllGlobalAllCache;
 
+    // odds and ends for nqp
+    ArrayList<Integer> fates = new ArrayList<Integer>(), curst = new ArrayList<Integer>(), nextst = new ArrayList<Integer>();
+
     public ThreadContext(GlobalContext gc) {
         this.gc = gc;
         this.theLexotic = new LexoticException();

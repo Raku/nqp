@@ -174,6 +174,9 @@ public class GlobalContext {
     /** Exit status or -1. */
     public int exitStatus = -1;
 
+    // odds and ends nqp wants
+    int compileeDepth;
+
     /** If true, libraries will be loaded in shared mode by default. */
     public boolean sharingHint;
 

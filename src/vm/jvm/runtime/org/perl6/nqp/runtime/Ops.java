@@ -2721,15 +2721,17 @@ public final class Ops {
     }
     
     /* Brute force, but not normally needed for most programs. */
-    private static HashMap<String, Character> cpNameMap;
+    private static volatile HashMap<String, Character> cpNameMap;
     public static long codepointfromname(String name) {
-        if (cpNameMap == null) {
-            cpNameMap = new HashMap<String, Character>();
+        HashMap<String, Character> names = cpNameMap;
+        if (names == null) {
+            names = new HashMap< >();
             for (char i = 0; i < Character.MAX_VALUE; i++)
                 if (Character.isValidCodePoint(i))
-                    cpNameMap.put(Character.getName(i), i);
+                    names.put(Character.getName(i), i);
+            cpNameMap = names;
         }
-        Character found = cpNameMap.get(name);
+        Character found = names.get(name);
         return found == null ? -1 : found;
     }
     
@@ -3773,9 +3775,6 @@ public final class Ops {
     }
     
     /* The NFA evaluator. */
-    private static ArrayList<Integer> fates = new ArrayList<Integer>();
-    private static ArrayList<Integer> curst = new ArrayList<Integer>();
-    private static ArrayList<Integer> nextst = new ArrayList<Integer>();
     private static int[] runNFA(ThreadContext tc, NFAInstance nfa, String target, long pos) {
         int eos = target.length();
         int gen = 1;
@@ -3785,6 +3784,9 @@ public final class Ops {
         int[] done = new int[numStates + 1];
         
         /* Clear out other re-used arrays. */
+        ArrayList<Integer> fates = tc.fates;
+        ArrayList<Integer> curst = tc.curst;
+        ArrayList<Integer> nextst = tc.nextst;
         curst.clear();
         nextst.clear();
         fates.clear();
@@ -4315,16 +4317,15 @@ public final class Ops {
         return result;
     }
     
-    private static int compileeDepth = 0;
     public static long usecompileehllconfig(ThreadContext tc) {
-        if (compileeDepth == 0)
+        if (tc.gc.compileeDepth == 0)
             tc.gc.useCompileeHLLConfig();
-        compileeDepth++;
+        tc.gc.compileeDepth++;
         return 1;
     }
     public static long usecompilerhllconfig(ThreadContext tc) {
-        compileeDepth--;
-        if (compileeDepth == 0)
+        tc.gc.compileeDepth--;
+        if (tc.gc.compileeDepth == 0)
             tc.gc.useCompilerHLLConfig();
         return 1;
     }

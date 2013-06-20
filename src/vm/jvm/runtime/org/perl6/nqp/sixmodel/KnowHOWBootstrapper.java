@@ -8,7 +8,6 @@ import org.perl6.nqp.sixmodel.reprs.KnowHOWREPRInstance;
 public class KnowHOWBootstrapper {
     public static void bootstrap(ThreadContext tc)
     {
-        REPRRegistry.setup();
         CompilationUnit knowhowUnit = new KnowHOWMethods();
         knowhowUnit.initializeCompilationUnit(tc);
         bootstrapKnowHOW(tc, knowhowUnit);
