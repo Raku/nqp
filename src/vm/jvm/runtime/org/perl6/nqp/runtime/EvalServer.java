@@ -21,7 +21,7 @@ import java.util.EnumSet;
 import java.util.Set;
 
 public class EvalServer {
-    private byte[] cuData;
+    private Class<?> cuType;
     private String cookie;
     private ServerSocketChannel serv;
     private WritableByteChannel tokenCh;
@@ -34,7 +34,7 @@ public class EvalServer {
         }
 
         final EvalServer me = new EvalServer();
-        me.cuData = Files.readAllBytes(FileSystems.getDefault().getPath(args[1]));
+        me.cuType = LibraryLoader.loadFile( args[1], true );
 
         SecureRandom rng = new SecureRandom();
         byte[] raw = new byte[16];
@@ -103,9 +103,9 @@ public class EvalServer {
                 gc.in = new ByteArrayInputStream(new byte[0]);
                 gc.out = gc.err = new PrintStream( Channels.newOutputStream(sock), true, "UTF-8" );
                 gc.interceptExit = true;
+                gc.sharingHint = true;
 
-                Class<?> cuType = LibraryLoader.loadNew(cuData);
-                CompilationUnit cu = CompilationUnit.setupCompilationUnit(gc.mainThread, cuType);
+                CompilationUnit cu = CompilationUnit.setupCompilationUnit(gc.mainThread, cuType, true);
                 if (cu.entryCuid() == null)
                     throw new RuntimeException("This class is not an entry point");
                 Ops.invokeMain(gc.mainThread, cu.lookupCodeRef(cu.entryCuid()), cuType.getName(), argv);

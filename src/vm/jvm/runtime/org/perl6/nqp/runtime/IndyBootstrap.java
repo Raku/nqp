@@ -34,9 +34,10 @@ public class IndyBootstrap {
         /* Update this callsite, so that we never run the lookup again and instead
          * just always use the resolved object. Discards incoming arguments, as
          * they are no longer needed. */
-        cs.setTarget(MethodHandles.dropArguments(
-                MethodHandles.constant(SixModelObject.class, res),
-                0, String.class, int.class, ThreadContext.class));
+        if (!tc.curFrame.codeRef.staticInfo.compUnit.shared)
+            cs.setTarget(MethodHandles.dropArguments(
+                        MethodHandles.constant(SixModelObject.class, res),
+                        0, String.class, int.class, ThreadContext.class));
         
         /* Hand back the resulting object, for this first call. */
         return res;
@@ -70,6 +71,7 @@ public class IndyBootstrap {
     public static void subcallResolve_noa(Lookup caller, MutableCallSite cs, String name, int csIdx, ThreadContext tc, Object... args) {
         /* Locate the thing to call. */
         SixModelObject invokee = Ops.getlex(name, tc);
+        boolean shared = tc.curFrame.codeRef.staticInfo.compUnit.shared;
         
         /* Resolve callsite descriptor. */
         CallSiteDescriptor csd = csIdx >= 0
@@ -86,7 +88,7 @@ public class IndyBootstrap {
             case CallSiteDescriptor.ARG_OBJ:
                 throwee.payload = (SixModelObject)args[0];
                 try {
-                    cs.setTarget(MethodHandles.insertArguments(
+                    if (!shared) cs.setTarget(MethodHandles.insertArguments(
                         caller.findStatic(IndyBootstrap.class, "lexotic_o_noa",
                             MethodType.methodType(void.class, long.class, String.class, int.class,
                                     ThreadContext.class, SixModelObject.class)),
@@ -100,7 +102,7 @@ public class IndyBootstrap {
                 SixModelObject intBoxType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intBoxType;
                 throwee.payload = Ops.box_i((long)args[0], intBoxType, tc);
                 try {
-                    cs.setTarget(MethodHandles.insertArguments(
+                    if (!shared) cs.setTarget(MethodHandles.insertArguments(
                         caller.findStatic(IndyBootstrap.class, "lexotic_i_noa",
                             MethodType.methodType(void.class, long.class,
                                     SixModelObject.class, String.class, int.class,
@@ -115,7 +117,7 @@ public class IndyBootstrap {
                 SixModelObject numBoxType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.numBoxType;
                 throwee.payload = Ops.box_n((double)args[0], numBoxType, tc);
                 try {
-                    cs.setTarget(MethodHandles.insertArguments(
+                    if (!shared) cs.setTarget(MethodHandles.insertArguments(
                         caller.findStatic(IndyBootstrap.class, "lexotic_n_noa",
                             MethodType.methodType(void.class, long.class,
                                     SixModelObject.class, String.class, int.class,
@@ -130,7 +132,7 @@ public class IndyBootstrap {
                 SixModelObject strBoxType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strBoxType;
                 throwee.payload = Ops.box_s((String)args[0], strBoxType, tc);
                 try {
-                    cs.setTarget(MethodHandles.insertArguments(
+                    if (!shared) cs.setTarget(MethodHandles.insertArguments(
                         caller.findStatic(IndyBootstrap.class, "lexotic_s_noa",
                             MethodType.methodType(void.class, long.class,
                                     SixModelObject.class, String.class, int.class,
@@ -168,7 +170,7 @@ public class IndyBootstrap {
         /* Now need to adapt to the target callsite by binding the CodeRef
          * and callsite with what they've been resolved to. Don't do it if
          * it's a compiler stub, though. */
-        if (!cr.isCompilerStub) {
+        if (!cr.isCompilerStub && !shared) {
             cs.setTarget(MethodHandles
                 .insertArguments(
                     MethodHandles.dropArguments(cr.staticInfo.mh, 0, String.class, int.class),

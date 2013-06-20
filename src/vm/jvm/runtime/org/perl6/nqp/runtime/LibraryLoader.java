@@ -3,14 +3,19 @@ package org.perl6.nqp.runtime;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.util.HashSet;
+import java.util.HashMap;
 
 public class LibraryLoader {
+    static HashMap<String,Class<?>> sharedClassHash = new HashMap<String,Class<?>>();
+
     public void load(ThreadContext tc, String origFilename) {        
         // Don't load the same thing multiple times.
         if (tc.gc.loaded.contains(origFilename))
             return;
-        
+
         try {
             // Read in class data.
             String filename = origFilename;
@@ -26,14 +31,12 @@ public class LibraryLoader {
                     }
                 }
             }
-            byte[] bytes = new byte[(int)file.length()];
-            DataInputStream dis = new DataInputStream((new FileInputStream(filename)));
-            dis.readFully(bytes);
-            dis.close();
-            
+
+            Class<?> c = loadFile(filename, tc.gc.sharingHint);
+
             // Load the class.
-            Class<?> c = loadNew(bytes);
             CompilationUnit cu = (CompilationUnit)c.newInstance();
+            cu.shared = tc.gc.sharingHint;
             cu.initializeCompilationUnit(tc);
             cu.runLoadIfAvailable(tc);
             
@@ -46,6 +49,22 @@ public class LibraryLoader {
         catch (Throwable e) {
             throw ExceptionHandling.dieInternal(tc, e.toString());
         }
+    }
+
+    public static Class<?> loadFile(String cf, boolean shared) throws Exception {
+        if (shared) {
+            synchronized(sharedClassHash) {
+                if (sharedClassHash.containsKey(cf))
+                    return sharedClassHash.get(cf);
+
+                Class<?> n = loadFile(cf, false);
+                sharedClassHash.put(cf, n);
+                return n;
+            }
+        }
+
+        byte[] bytes = Files.readAllBytes( FileSystems.getDefault().getPath(cf) );
+        return loadNew(bytes);
     }
 
     public static Class<?> loadNew(byte[] bytes) {

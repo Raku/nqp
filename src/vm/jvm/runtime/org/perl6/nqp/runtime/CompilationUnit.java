@@ -37,6 +37,11 @@ public abstract class CompilationUnit {
      * HLL configuration for this compilation unit.
      */
     public HLLConfig hllConfig;
+
+    /**
+     * If true, the class corresponding to this CompilationUnit is shared between GlobalContexts.
+     */
+    public boolean shared;
     
     /**
      * When a compilation unit is serving as the main entry point, its main
@@ -46,22 +51,23 @@ public abstract class CompilationUnit {
     public static void enterFromMain(Class<?> cuType, int entryCodeRefIdx, String[] argv)
             throws Exception {
         ThreadContext tc = (new GlobalContext()).mainThread;
-        CompilationUnit cu = setupCompilationUnit(tc, cuType);
+        CompilationUnit cu = setupCompilationUnit(tc, cuType, false);
         Ops.invokeMain(tc, cu.codeRefs[entryCodeRefIdx], cuType.getName(), argv);
     }
     public static void enterFromMain(Class<?> cuType, String cuid, String[] argv)
             throws Exception {
         ThreadContext tc = (new GlobalContext()).mainThread;
-        CompilationUnit cu = setupCompilationUnit(tc, cuType);
+        CompilationUnit cu = setupCompilationUnit(tc, cuType, false);
         Ops.invokeMain(tc, cu.lookupCodeRef(cuid), cuType.getName(), argv);
     }
     
     /**
      * Takes the class object for some compilation unit and sets it up. 
      */
-    public static CompilationUnit setupCompilationUnit(ThreadContext tc, Class<?> cuType)
+    public static CompilationUnit setupCompilationUnit(ThreadContext tc, Class<?> cuType, boolean shared)
             throws InstantiationException, IllegalAccessException {
         CompilationUnit cu = (CompilationUnit)cuType.newInstance();
+        cu.shared = shared;
         cu.initializeCompilationUnit(tc);
         return cu;
     }
