@@ -2536,6 +2536,10 @@ public final class Ops {
         
         return result;
     }
+    
+    public static double rand_n(double n) {
+        return ThreadLocalRandom.current().nextDouble(n);
+    }
 
     /* String operations. */
     public static long chars(String val) {
