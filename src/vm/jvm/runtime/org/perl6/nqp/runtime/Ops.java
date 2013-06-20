@@ -4055,6 +4055,12 @@ public final class Ops {
             return Double.parseDouble(in);
         }
         catch (NumberFormatException e) {
+            if (in.equals("Inf"))
+                return Double.POSITIVE_INFINITY;
+            if (in.equals("-Inf"))
+                return Double.NEGATIVE_INFINITY;
+            if (in.equals("NaN"))
+                return Double.NaN;
             return 0.0;
         }
     }
@@ -4062,7 +4068,18 @@ public final class Ops {
         return Long.toString(in);
     }
     public static String coerce_n2s(double in) {
-        return in == (long)in ? Long.toString((long)in) : Double.toString(in);
+        if (in == (long)in) {
+            return Long.toString((long)in);
+        }
+        else {
+            if (in == Double.POSITIVE_INFINITY)
+                return "Inf";
+            if (in == Double.NEGATIVE_INFINITY)
+                return "-Inf";
+            if (in != in)
+                return "NaN";
+            return Double.toString(in);
+        }
     }
     
     /* Long literal workaround. */
