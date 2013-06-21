@@ -646,37 +646,6 @@ QAST::OperationsJAST.add_core_op('list_s', -> $qastcomp, $op {
         $arr
     }
 });
-QAST::OperationsJAST.add_core_op('list_b', -> $qastcomp, $op {
-    # Just desugar to create the empty list.
-    my $arr := $qastcomp.as_jast(QAST::Op.new(
-        :op('create'),
-        QAST::Op.new( :op('hlllist') )
-    ));
-    if +$op.list {
-        my $il := JAST::InstructionList.new();
-        $il.append($arr.jast);
-        $*STACK.obtain($il, $arr);
-
-        for $op.list {
-            nqp::die("list_b must have a list of blocks")
-                unless nqp::istype($_, QAST::Block);
-            $il.append($DUP);
-            $il.append($ALOAD_0);
-            $il.append(JAST::PushIndex.new( :value($qastcomp.cuid_to_qbid($_.cuid)) ));
-            $il.append(JAST::Instruction.new( :op('invokevirtual'),
-                $TYPE_CU, 'lookupCodeRef', $TYPE_CR, 'I' ));
-            $il.append($ALOAD_1);
-            $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS, 'push',
-                $TYPE_SMO, $TYPE_SMO, $TYPE_SMO, $TYPE_TC ));
-            $il.append($POP);
-        }
-        
-        result($il, $RT_OBJ);
-    }
-    else {
-        $arr
-    }
-});
 QAST::OperationsJAST.add_core_op('qlist', -> $qastcomp, $op {
     $qastcomp.as_jast(QAST::Op.new( :op('list'), |@($op) ))
 });
@@ -2988,12 +2957,6 @@ class QAST::CompilerJAST {
         }
         $sh_ast := QAST::Block.new( :blocktype('immediate'), $sh_ast );
         
-        # Code references.
-        my $cr_past := QAST::Block.new(
-            :blocktype('immediate'),
-            QAST::Op.new( :op('list_b'), |@code_ref_blocks )
-        );
-        
         # Handle repossession conflict resolution code, if any.
         if $repo_conf_res {
             $repo_conf_res.push(QAST::Var.new( :name('conflicts'), :scope('local') ));
@@ -3027,7 +2990,7 @@ class QAST::CompilerJAST {
                 QAST::SVal.new( :value($serialized) ),
                 QAST::Var.new( :name('cur_sc'), :scope('local') ),
                 $sh_ast,
-                QAST::Block.new( :blocktype('immediate'), $cr_past ),
+                QAST::Op.new( :op('null') ),
                 QAST::Var.new( :name('conflicts'), :scope('local') )
             ),
             QAST::Op.new(

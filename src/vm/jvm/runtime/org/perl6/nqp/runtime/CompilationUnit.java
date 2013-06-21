@@ -26,7 +26,7 @@ public abstract class CompilationUnit {
     /**
      * Mapping of local integer IDs to matching code reference.
      */
-    private CodeRef[] qbidToCodeRef;
+    public CodeRef[] qbidToCodeRef;
     
     /**
      * Array of all code references.

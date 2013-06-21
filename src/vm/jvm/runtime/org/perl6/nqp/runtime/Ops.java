@@ -3067,9 +3067,14 @@ public final class Ops {
                 shArray[i] = tc.native_s;
             }
             
-            CodeRef[] crArray = new CodeRef[(int)cr.elems(tc)];
-            for (int i = 0; i < crArray.length; i++)
-                crArray[i] = (CodeRef)cr.at_pos_boxed(tc, i);
+            CodeRef[] crArray;
+            if (cr == null) {
+                crArray = tc.curFrame.codeRef.staticInfo.compUnit.qbidToCodeRef;
+            } else {
+                crArray = new CodeRef[(int)cr.elems(tc)];
+                for (int i = 0; i < crArray.length; i++)
+                    crArray[i] = (CodeRef)cr.at_pos_boxed(tc, i);
+            }
             
             SerializationReader sr = new SerializationReader(
                     tc, sc, shArray, crArray,
