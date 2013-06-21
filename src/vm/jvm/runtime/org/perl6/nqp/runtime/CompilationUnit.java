@@ -299,4 +299,8 @@ public abstract class CompilationUnit {
     public int entryQbid() {
         return -1;
     }
+
+    public int serializedCodeRefCount() {
+        return -1;
+    }
 }

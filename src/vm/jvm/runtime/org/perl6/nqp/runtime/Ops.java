@@ -3057,7 +3057,7 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc, "serialize was not passed a valid SCRef");
         }
     }
-    public static String deserialize(String blob, SixModelObject scRef, SixModelObject sh, SixModelObject cr, SixModelObject conflict, ThreadContext tc) { /*FOR_STAGE0*/
+    public static String deserialize(String blob, SixModelObject scRef, SixModelObject sh, SixModelObject cr, SixModelObject conflict, ThreadContext tc) {
         if (scRef instanceof SCRefInstance) {
             SerializationContext sc = ((SCRefInstance)scRef).referencedSC;
             
@@ -3067,12 +3067,22 @@ public final class Ops {
                 shArray[i] = tc.native_s;
             }
             
-            CodeRef[] crArray = new CodeRef[(int)cr.elems(tc)];
-            for (int i = 0; i < crArray.length; i++)
-                crArray[i] = (CodeRef)cr.at_pos_boxed(tc, i);
-            
+            CodeRef[] crArray;
+            int crCount;
+
+            if (cr == null) {
+                CompilationUnit cu = tc.curFrame.codeRef.staticInfo.compUnit;
+                crArray = cu.qbidToCodeRef;
+                crCount = cu.serializedCodeRefCount();
+            } else {
+                crArray = new CodeRef[(int)cr.elems(tc)];
+                crCount = crArray.length;
+                for (int i = 0; i < crArray.length; i++)
+                    crArray[i] = (CodeRef)cr.at_pos_boxed(tc, i);
+            }
+
             SerializationReader sr = new SerializationReader(
-                    tc, sc, shArray, crArray, crArray.length,
+                    tc, sc, shArray, crArray, crCount,
                     Base64.decode(blob));
             sr.deserialize();
             
@@ -3081,25 +3091,6 @@ public final class Ops {
         else {
             throw ExceptionHandling.dieInternal(tc, "deserialize was not passed a valid SCRef");
         }
-    }
-    public static String deserialize(String blob, SixModelObject scRef, SixModelObject sh, long crCount, SixModelObject conflict, ThreadContext tc) {
-        if (!(scRef instanceof SCRefInstance))
-            throw ExceptionHandling.dieInternal(tc, "deserialize was not passed a valid SCRef");
-
-        SerializationContext sc = ((SCRefInstance)scRef).referencedSC;
-
-        String[] shArray = new String[(int)sh.elems(tc)];
-        for (int i = 0; i < shArray.length; i++) {
-            sh.at_pos_native(tc, i);
-            shArray[i] = tc.native_s;
-        }
-
-        SerializationReader sr = new SerializationReader(
-                tc, sc, shArray, tc.curFrame.codeRef.staticInfo.compUnit.qbidToCodeRef,
-                (int)crCount, Base64.decode(blob));
-        sr.deserialize();
-
-        return blob;
     }
     public static SixModelObject wval(String sc, long idx, ThreadContext tc) {
         return tc.gc.scs.get(sc).root_objects.get((int)idx);
