@@ -35,6 +35,11 @@ public class LibraryLoader {
                         filename = cps[i] + "/" + filename;
                         break;
                     }
+                    file = new File(cps[i] + "/ModuleLoader.jar");
+                    if (file.exists()) {
+                        filename = cps[i] + "/ModuleLoader.jar";
+                        break;
+                    }
                 }
             }
 
@@ -87,8 +92,7 @@ public class LibraryLoader {
             byte[] ser = null;
 
             while ((je = jis.getNextJarEntry()) != null) {
-                byte[] data = new byte[(int)je.getSize()];
-                new DataInputStream(jis).readFully(data);
+                byte[] data = readEverything(jis);
 
                 if (je.getName().endsWith(".class") && kl == null) kl = data;
                 else if (je.getName().endsWith(".serialized") && ser == null) ser = data;
