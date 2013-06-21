@@ -84,7 +84,7 @@ public abstract class CompilationUnit {
         /* Look through methods for code refs. */
         STable BOOTCodeSTable = tc.gc.BOOTCode == null ? null : tc.gc.BOOTCode.st;
         ArrayList<CodeRef> codeRefList = new ArrayList<CodeRef>();
-        ArrayList<String> outerCuid = new ArrayList<String>();
+        ArrayList<CodeRefAnnotation> outerCuid = new ArrayList< >();
         Lookup l = MethodHandles.lookup();
         boolean codeRefsFound = false;
         try {
@@ -119,7 +119,7 @@ public abstract class CompilationUnit {
                     cr.staticInfo.methodName = name;
                     cr.st = BOOTCodeSTable;
                     codeRefList.add(cr);
-                    cuidToCodeRef.put(cuid, cr);
+                    if (!cuid.isEmpty()) cuidToCodeRef.put(cuid, cr);
                     
                     if (name.startsWith("qb_")) {
                         int i = 3;
@@ -130,7 +130,7 @@ public abstract class CompilationUnit {
                     }
                     
                     /* Stash outer, for later resolution. */
-                    outerCuid.add(cra.outerCuid());
+                    outerCuid.add(cra);
                     
                     codeRefsFound = true;
                 }
@@ -139,7 +139,12 @@ public abstract class CompilationUnit {
             /* Resolve outers. */
             codeRefs = codeRefList.toArray(new CodeRef[0]);
             for (int i = 0; i < codeRefs.length; i++) {
-                CodeRef outer = cuidToCodeRef.get(outerCuid.get(i));
+                CodeRefAnnotation cra = outerCuid.get(i);
+                String cuid = cra.outerCuid();
+                int qbid = cra.outerQbid();
+
+                CodeRef outer = qbid >= 0 ? qbidToCodeRef[qbid] :
+                    cuid != null ? cuidToCodeRef.get(cuid) : null;
                 if (outer != null)
                     codeRefs[i].staticInfo.outerStaticInfo = outer.staticInfo;
             }

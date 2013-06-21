@@ -104,7 +104,7 @@ class JAST::Method is JAST::Node {
     has @!instructions;
     has str $!cr_name;
     has str $!cr_cuid;
-    has str $!cr_outer;
+    has int $!cr_outer; # -1 = has no outer  -2 = not a coderef
     has @!cr_olex;
     has @!cr_ilex;
     has @!cr_nlex;
@@ -120,7 +120,7 @@ class JAST::Method is JAST::Node {
         @!instructions := [];
         $!cr_name := '';
         $!cr_cuid := '';
-        $!cr_outer := '';
+        $!cr_outer := -2;
         @!cr_olex := [];
         @!cr_ilex := [];
         @!cr_nlex := [];
@@ -172,7 +172,7 @@ class JAST::Method is JAST::Node {
         }
         nqp::push(@dumped, "++ crname $!cr_name");
         nqp::push(@dumped, "++ crcuid $!cr_cuid");
-        nqp::push(@dumped, "++ crouter $!cr_outer");
+        nqp::push(@dumped, "++ crouterix $!cr_outer");
         for @!cr_olex { nqp::push(@dumped, "++ olex $_"); }
         for @!cr_ilex { nqp::push(@dumped, "++ ilex $_"); }
         for @!cr_nlex { nqp::push(@dumped, "++ nlex $_"); }

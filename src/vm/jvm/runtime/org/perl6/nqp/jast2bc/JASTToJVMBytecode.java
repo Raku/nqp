@@ -149,6 +149,7 @@ public class JASTToJVMBytecode {
     private static boolean processMethod(BufferedReader in, ClassWriter c, String className) throws Exception {
         String curLine, methodName = null, returnType = null, desc = null;
         String crName = null, crCuid = null, crOuter = null;
+        int crOuterIx = -2; // not coderef
         boolean isStatic = false;
         List<Type> argTypes = new ArrayList<Type>();
         Map<String, VariableDef> localVariables = new HashMap<String, VariableDef>();
@@ -203,8 +204,10 @@ public class JASTToJVMBytecode {
                     crName = curLine.substring("++ crname ".length());
                 else if (curLine.startsWith("++ crcuid "))
                     crCuid = curLine.substring("++ crcuid ".length());
-                else if (curLine.startsWith("++ crouter "))
+                else if (curLine.startsWith("++ crouter "))  /*FOR_STAGE0*/
                     crOuter = curLine.substring("++ crouter ".length());
+                else if (curLine.startsWith("++ crouterix "))
+                    crOuterIx = Integer.parseInt(curLine.substring("++ crouterix ".length()));
                 else if (curLine.startsWith("++ olex "))
                     croLex.add(curLine.substring("++ olex ".length()));
                 else if (curLine.startsWith("++ ilex "))
@@ -245,32 +248,41 @@ public class JASTToJVMBytecode {
                             methodName, desc, null, null);
                                   
                  // Add code ref info annotation.
-                 if (crCuid != null && !crCuid.equals("")) {
+                 if ((crCuid != null && !crCuid.equals("")) || crOuterIx >= -1) {
                     Type crAnnType = Type.getType("Lorg/perl6/nqp/runtime/CodeRefAnnotation;");
                     AnnotationVisitor av = m.visitAnnotation(crAnnType.getDescriptor(), true);
                     av.visit("name", crName);
-                    av.visit("cuid", crCuid);
-                    av.visit("outerCuid", crOuter);
-                    
+                    if (crCuid != null && !crCuid.isEmpty()) av.visit("cuid", crCuid);
+                    if (crOuter != null && !crOuter.isEmpty()) av.visit("outerCuid", crOuter);
+                    if (crOuterIx >= 0) av.visit("outerQbid", crOuterIx);
+
                     AnnotationVisitor avLex;
-                    avLex = av.visitArray("oLexicalNames");
-                    for (int i = 0; i < croLex.size(); i++)
-                        avLex.visit(null, croLex.get(i));
-                    avLex.visitEnd();
-                    avLex = av.visitArray("iLexicalNames");
-                    for (int i = 0; i < criLex.size(); i++)
-                        avLex.visit(null, criLex.get(i));
-                    avLex.visitEnd();
-                    avLex = av.visitArray("nLexicalNames");
-                    for (int i = 0; i < crnLex.size(); i++)
-                        avLex.visit(null, crnLex.get(i));
-                    avLex.visitEnd();
-                    avLex = av.visitArray("sLexicalNames");
-                    for (int i = 0; i < crsLex.size(); i++)
-                        avLex.visit(null, crsLex.get(i));
-                    avLex.visitEnd();
-                    
-                    av.visit("handlers", crHandlers);
+                    if (croLex.size() > 0) {
+                        avLex = av.visitArray("oLexicalNames");
+                        for (int i = 0; i < croLex.size(); i++)
+                            avLex.visit(null, croLex.get(i));
+                        avLex.visitEnd();
+                    }
+                    if (criLex.size() > 0) {
+                        avLex = av.visitArray("iLexicalNames");
+                        for (int i = 0; i < criLex.size(); i++)
+                            avLex.visit(null, criLex.get(i));
+                        avLex.visitEnd();
+                    }
+                    if (crnLex.size() > 0) {
+                        avLex = av.visitArray("nLexicalNames");
+                        for (int i = 0; i < crnLex.size(); i++)
+                            avLex.visit(null, crnLex.get(i));
+                        avLex.visitEnd();
+                    }
+                    if (crsLex.size() > 0) {
+                        avLex = av.visitArray("sLexicalNames");
+                        for (int i = 0; i < crsLex.size(); i++)
+                            avLex.visit(null, crsLex.get(i));
+                        avLex.visitEnd();
+                    }
+
+                    if (crHandlers.length != 1 || crHandlers[0] != 0) av.visit("handlers", crHandlers);
                     av.visitEnd();
                  }
 

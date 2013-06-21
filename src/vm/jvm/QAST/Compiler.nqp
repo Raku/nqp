@@ -2819,8 +2819,8 @@ class QAST::CompilerJAST {
         my %*CUID_TO_QBID;
         my $*NEXT_QBID := 0;
         # Pre-seed to make sure that qbids correspond to serialization IDs
-        my $comp_mode := $cu.compilation_mode;
-        if $comp_mode {
+        my $*COMP_MODE := $cu.compilation_mode;
+        if $*COMP_MODE {
             for $cu.code_ref_blocks() -> $qblock {
                 %*CUID_TO_QBID{$qblock.cuid} := $*NEXT_QBID++;
             }
@@ -2845,7 +2845,7 @@ class QAST::CompilerJAST {
                 QAST::Op.new( :op('setup_blv'), %*BLOCK_LEX_VALUES )
             ));
         }
-        if $comp_mode || @pre_des || @post_des {
+        if $*COMP_MODE || @pre_des || @post_des {
             # Create a block into which we'll install all of the other
             # pieces.
             my $block := QAST::Block.new( :blocktype('raw') );
@@ -2856,7 +2856,7 @@ class QAST::CompilerJAST {
             }
             
             # If we need to do deserialization, emit code for that.
-            if $comp_mode {
+            if $*COMP_MODE {
                 $block.push(self.deserialization_code($cu.sc(), $cu.code_ref_blocks(),
                     $cu.repo_conflict_resolver()));
             }
@@ -3042,12 +3042,14 @@ class QAST::CompilerJAST {
             # are handled out of band).
             my $*JMETH := JAST::Method.new( :name('qb_'~self.cuid_to_qbid($node.cuid)), :returns('Void'), :static(1) );
             $*JMETH.cr_name($node.name);
-            $*JMETH.cr_cuid($node.cuid);
+            $*JMETH.cr_cuid($node.cuid) unless $*COMP_MODE;
             $*CODEREFS.register_method($*JMETH, $node.cuid);
             
             # Set outer if we have one.
             if nqp::istype($outer, BlockInfo) {
-                $*JMETH.cr_outer($outer.qast.cuid);
+                $*JMETH.cr_outer(self.cuid_to_qbid($outer.qast.cuid));
+            } else {
+                $*JMETH.cr_outer(-1); # marks as coderef
             }
             
             # Always take ThreadContext and callsite descriptor as arguments.

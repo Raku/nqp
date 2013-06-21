@@ -6,12 +6,13 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CodeRefAnnotation
 {
-    String name();
-    String cuid();
-    String outerCuid();
-    String[] oLexicalNames();
-    String[] iLexicalNames();
-    String[] nLexicalNames();
-    String[] sLexicalNames();
-    long[] handlers();
+    String name() default "";
+    String cuid() default "";
+    String outerCuid() default "";
+    int outerQbid() default -1;
+    String[] oLexicalNames() default {};
+    String[] iLexicalNames() default {};
+    String[] nLexicalNames() default {};
+    String[] sLexicalNames() default {};
+    long[] handlers() default {0};
 }
