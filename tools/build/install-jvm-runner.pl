@@ -14,17 +14,21 @@ unless (File::Spec->file_name_is_absolute($prefix)) {
 
 if ($^O eq 'MSWin32') {
     my $install_to = File::Spec->catfile($prefix, 'nqp.bat');
-    open my $fh, ">", $install_to;
+    open my $fh, ">", $install_to
+        or die "Could not open $install_to: $!";
     print $fh '@java -Xbootclasspath/a:' . $prefix . ';' . $prefix . '\\nqp-runtime.jar;' .
               $prefix . '\\asm-4.1.jar;' . $prefix . '\\jline-1.0.jar -cp ' . $prefix . ' nqp %*' . "\n";
-    close $fh;
+    close $fh
+        or die "Could not close $install_to: $!";
 }
 else {
     my $install_to = File::Spec->catfile($prefix, 'nqp');
-    open my $fh, ">", $install_to;
+    open my $fh, ">", $install_to
+        or die "Could not open $install_to: $!";
     print $fh "#!/bin/sh\n";
     print $fh 'exec java -Xbootclasspath/a:' . $prefix . ':' . $prefix . '/nqp-runtime.jar:' .
               $prefix . '/asm-4.1.jar:' . $prefix . '/jline-1.0.jar -cp ' . $prefix . ' nqp "$@"' . "\n";
-    close $fh;
+    close $fh
+        or die "Could not close $install_to: $!";
     chmod 0755, $install_to;
 }
