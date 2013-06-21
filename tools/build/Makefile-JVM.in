@@ -115,6 +115,8 @@ P5QREGEX_SOURCES = \
   src/QRegex/P5Regex/Actions.nqp \
   src/QRegex/P5Regex/Compiler.nqp \
 
+EVAL_CLIENT = tools/jvm/eval-client.pl
+
 NQP_CLASS    = nqp.class
 NQP_COMBINED = gen/NQP.nqp
 NQP_SOURCES  = \
@@ -162,6 +164,7 @@ install: all
 	$(CP) $(P6QREGEX_CLASS) $(PREFIX)
 	$(CP) $(NQP_CLASS) $(PREFIX)
 	$(CP) $(P5QREGEX_CLASS) $(PREFIX)
+	$(CP) $(EVAL_CLIENT) $(PREFIX)
 	$(PERL) tools/build/install-jvm-runner.pl $(PREFIX)
 
 $(RUNTIME_JAR): $(RUNTIME_JAVAS)
