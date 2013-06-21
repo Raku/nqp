@@ -34,6 +34,11 @@ public class CodeRef extends SixModelObject {
     public boolean isCompilerStub;
     
     /**
+     * State variable storage, if needed.
+     */
+    public SixModelObject[] oLexState;
+    
+    /**
      * Sets up the code-ref data structure.
      */
     public CodeRef(CompilationUnit compUnit, MethodHandle mh,

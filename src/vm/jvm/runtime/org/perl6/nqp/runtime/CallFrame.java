@@ -118,8 +118,16 @@ public class CallFrame implements Cloneable {
                 case 0:
                     this.oLex[i] = sci.oLexStatic[i];
                     break;
-                default:
+                case 1:
                     this.oLex[i] = sci.oLexStatic[i].clone(tc);
+                    break;
+                case 2:
+                    if (cr.oLexState == null)
+                        cr.oLexState = new SixModelObject[sci.oLexStatic.length];
+                    if (cr.oLexState[i] == null)
+                        this.oLex[i] = cr.oLexState[i] = sci.oLexStatic[i].clone(tc);
+                    else
+                        this.oLex[i] = cr.oLexState[i];
                     break;
                 }
             }
