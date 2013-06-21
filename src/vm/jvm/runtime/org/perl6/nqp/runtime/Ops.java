@@ -15,6 +15,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -3057,7 +3058,7 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc, "serialize was not passed a valid SCRef");
         }
     }
-    public static String deserialize(String blob, SixModelObject scRef, SixModelObject sh, SixModelObject cr, SixModelObject conflict, ThreadContext tc) {
+    public static String deserialize(String blob, SixModelObject scRef, SixModelObject sh, SixModelObject cr, SixModelObject conflict, ThreadContext tc) throws IOException {
         if (scRef instanceof SCRefInstance) {
             SerializationContext sc = ((SCRefInstance)scRef).referencedSC;
             
@@ -3070,8 +3071,8 @@ public final class Ops {
             CodeRef[] crArray;
             int crCount;
 
+            CompilationUnit cu = tc.curFrame.codeRef.staticInfo.compUnit;
             if (cr == null) {
-                CompilationUnit cu = tc.curFrame.codeRef.staticInfo.compUnit;
                 crArray = cu.qbidToCodeRef;
                 crCount = cu.serializedCodeRefCount();
             } else {
@@ -3081,11 +3082,17 @@ public final class Ops {
                     crArray[i] = (CodeRef)cr.at_pos_boxed(tc, i);
             }
 
+            ByteBuffer binaryBlob;
+            if (blob == null) {
+                binaryBlob = ByteBuffer.wrap( LibraryLoader.readEverything( cu.getClass().getResourceAsStream( cu.getClass().getSimpleName() + ".serialized" ) ) );
+            } else {
+                binaryBlob = Base64.decode(blob);
+            }
+
             SerializationReader sr = new SerializationReader(
-                    tc, sc, shArray, crArray, crCount,
-                    Base64.decode(blob));
+                    tc, sc, shArray, crArray, crCount, binaryBlob);
             sr.deserialize();
-            
+
             return blob;
         }
         else {
