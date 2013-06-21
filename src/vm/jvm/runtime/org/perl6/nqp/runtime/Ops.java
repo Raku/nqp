@@ -2269,7 +2269,19 @@ public final class Ops {
             iter.target = agg;
             iter.idx = -1;
             iter.limit = agg.elems(tc);
-            iter.iterMode = VMIterInstance.MODE_ARRAY;
+            switch (agg.st.REPR.get_value_storage_spec(tc, agg.st).boxed_primitive) {
+                case StorageSpec.BP_INT:
+                    iter.iterMode = VMIterInstance.MODE_ARRAY_INT;
+                    break;
+                case StorageSpec.BP_NUM:
+                    iter.iterMode = VMIterInstance.MODE_ARRAY_NUM;
+                    break;
+                case StorageSpec.BP_STR:
+                    iter.iterMode = VMIterInstance.MODE_ARRAY_STR;
+                    break;
+                default:
+                    iter.iterMode = VMIterInstance.MODE_ARRAY;
+            }
             return iter;
         }
         else if (agg.st.REPR instanceof VMHash) {
