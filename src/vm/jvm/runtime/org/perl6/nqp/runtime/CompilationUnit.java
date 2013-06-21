@@ -57,10 +57,10 @@ public abstract class CompilationUnit {
             throws Exception {
         ThreadContext tc = (new GlobalContext()).mainThread;
         CompilationUnit cu = setupCompilationUnit(tc, cuType, false);
-        Ops.invokeMain(tc, cu.codeRefs[entryCodeRefIdx], cuType.getName(), argv);
+        Ops.invokeMain(tc, cu.qbidToCodeRef[entryCodeRefIdx], cuType.getName(), argv);
     }
     public static void enterFromMain(Class<?> cuType, String cuid, String[] argv)
-            throws Exception {
+            throws Exception { /*FOR_STAGE0*/
         ThreadContext tc = (new GlobalContext()).mainThread;
         CompilationUnit cu = setupCompilationUnit(tc, cuType, false);
         Ops.invokeMain(tc, cu.lookupCodeRef(cuid), cuType.getName(), argv);
@@ -166,9 +166,10 @@ public abstract class CompilationUnit {
         
         /* Run any deserialization code. */
         CodeRef desCodeRef = null;
-        String desCuid = deserializeCuid();
-        if (desCuid != null)
-            desCodeRef = lookupCodeRef(desCuid);
+        if (deserializeCuid() != null)
+            desCodeRef = lookupCodeRef(deserializeCuid());
+        if (deserializeQbid() >= 0)
+            desCodeRef = lookupCodeRef(deserializeQbid());
         if (desCodeRef != null)
             try {
                 Ops.invokeArgless(tc, desCodeRef);
@@ -186,9 +187,10 @@ public abstract class CompilationUnit {
      */
     public void runLoadIfAvailable(ThreadContext tc) {
         CodeRef loadCodeRef = null;
-        String loadCuid = loadCuid();
-        if (loadCuid != null)
-            loadCodeRef = lookupCodeRef(loadCuid);
+        if (loadCuid() != null)
+            loadCodeRef = lookupCodeRef(loadCuid());
+        if (loadQbid() >= 0)
+            loadCodeRef = lookupCodeRef(loadQbid());
         if (loadCodeRef != null)
             try {
                 Ops.invokeArgless(tc, loadCodeRef);
@@ -261,28 +263,40 @@ public abstract class CompilationUnit {
     /**
      * Code generation overrides this if there's an SC to deserialize.
      */
-    public String deserializeCuid() {
+    public String deserializeCuid() { /*FOR_STAGE0*/
         return null;
+    }
+    public int deserializeQbid() {
+        return -1;
     }
     
     /**
      * Code generation overrides this if there's an SC to deserialize.
      */
-    public String loadCuid() {
+    public String loadCuid() { /*FOR_STAGE0*/
         return null;
+    }
+    public int loadQbid() {
+        return -1;
     }
     
     /**
      * Code generation overrides this with the mainline blcok.
      */
-    public String mainlineCuid() {
+    public String mainlineCuid() { /*FOR_STAGE0*/
         return null;
+    }
+    public int mainlineQbid() {
+        return -1;
     }
 
     /**
      * Code generation overrides this with the entry-point block, if any.
      */
-    public String entryCuid() {
+    public String entryCuid() { /*FOR_STAGE0*/
         return null;
+    }
+    public int entryQbid() {
+        return -1;
     }
 }

@@ -4387,7 +4387,9 @@ public final class Ops {
     }
     public static SixModelObject compunitmainline(SixModelObject obj, ThreadContext tc) {
         EvalResult res = (EvalResult)obj;
-        return res.cu.lookupCodeRef(res.cu.mainlineCuid());
+        return res.cu.mainlineCuid() == null ?
+            res.cu.lookupCodeRef(res.cu.mainlineQbid()) :
+            res.cu.lookupCodeRef(res.cu.mainlineCuid());
     }
     public static SixModelObject compunitcodes(SixModelObject obj, ThreadContext tc) {
         EvalResult res = (EvalResult)obj;

@@ -30,6 +30,7 @@ my $LCMP        := JAST::Instruction.new( :op('lcmp') );
 my $DCMPL       := JAST::Instruction.new( :op('dcmpl') );
 my $RETURN      := JAST::Instruction.new( :op('return') );
 my $ARETURN     := JAST::Instruction.new( :op('areturn') );
+my $IRETURN     := JAST::Instruction.new( :op('ireturn') );
 my $ATHROW      := JAST::Instruction.new( :op('athrow') );
 
 # Common constant loads.
@@ -2877,9 +2878,9 @@ class QAST::CompilerJAST {
             # Compile to JAST and register this block as the deserialization
             # handler.
             self.as_jast($block);
-            my $des_meth := JAST::Method.new( :name('deserializeCuid'), :returns($TYPE_STR), :static(0) );
-            $des_meth.append(JAST::PushSVal.new( :value($block.cuid) ));
-            $des_meth.append(JAST::Instruction.new( :op('areturn') ));
+            my $des_meth := JAST::Method.new( :name('deserializeQbid'), :returns('I'), :static(0) );
+            $des_meth.append(JAST::PushIndex.new( :value(self.cuid_to_qbid($block.cuid)) ));
+            $des_meth.append($IRETURN);
             $*JCLASS.add_method($des_meth);
         }
         
@@ -2891,9 +2892,9 @@ class QAST::CompilerJAST {
                 QAST::Op.new( :op('null') )
             );
             self.as_jast($load_block);
-            my $load_meth := JAST::Method.new( :name('loadCuid'), :returns($TYPE_STR), :static(0) );
-            $load_meth.append(JAST::PushSVal.new( :value($load_block.cuid) ));
-            $load_meth.append(JAST::Instruction.new( :op('areturn') ));
+            my $load_meth := JAST::Method.new( :name('loadQbid'), :returns('I'), :static(0) );
+            $load_meth.append(JAST::PushIndex.new( :value(self.cuid_to_qbid($load_block.cuid)) ));
+            $load_meth.append($IRETURN);
             $*JCLASS.add_method($load_meth);
         }
         
@@ -2909,16 +2910,16 @@ class QAST::CompilerJAST {
             my $main_meth := JAST::Method.new( :name('main'), :returns('Void') );
             $main_meth.add_argument('argv', "[$TYPE_STR");
             $main_meth.append(JAST::PushCVal.new( :value('L' ~ $*JCLASS.name ~ ';') ));
-            $main_meth.append(JAST::PushSVal.new( :value($main_block.cuid) ));
+            $main_meth.append(JAST::PushIndex.new( :value(self.cuid_to_qbid($main_block.cuid)) ));
             $main_meth.append($ALOAD_0);
             $main_meth.append(JAST::Instruction.new( :op('invokestatic'),
                 $TYPE_CU, 'enterFromMain',
-                'Void', 'Ljava/lang/Class;', $TYPE_STR, "[$TYPE_STR"));
+                'Void', 'Ljava/lang/Class;', 'I', "[$TYPE_STR"));
             $main_meth.append($RETURN);
             $*JCLASS.add_method($main_meth);
-            my $entry_cuid_meth := JAST::Method.new( :name('entryCuid'), :returns($TYPE_STR), :static(0) );
-            $entry_cuid_meth.append(JAST::PushSVal.new( :value($main_block.cuid) ));
-            $entry_cuid_meth.append($ARETURN);
+            my $entry_cuid_meth := JAST::Method.new( :name('entryQbid'), :returns('I'), :static(0) );
+            $entry_cuid_meth.append(JAST::PushIndex.new( :value(self.cuid_to_qbid($main_block.cuid)) ));
+            $entry_cuid_meth.append($IRETURN);
             $*JCLASS.add_method($entry_cuid_meth);
         }
         
@@ -2929,9 +2930,9 @@ class QAST::CompilerJAST {
         $*JCLASS.add_method($hll_meth);
         
         # Add method that returns the mainline block.
-        my $mainline_meth := JAST::Method.new( :name('mainlineCuid'), :returns($TYPE_STR), :static(0) );
-        $mainline_meth.append(JAST::PushSVal.new( :value($cu[0].cuid) ));
-        $mainline_meth.append(JAST::Instruction.new( :op('areturn') ));
+        my $mainline_meth := JAST::Method.new( :name('mainlineQbid'), :returns('I'), :static(0) );
+        $mainline_meth.append(JAST::PushIndex.new( :value(self.cuid_to_qbid($cu[0].cuid)) ));
+        $mainline_meth.append($IRETURN);
         $*JCLASS.add_method($mainline_meth);
         
         return $*JCLASS;

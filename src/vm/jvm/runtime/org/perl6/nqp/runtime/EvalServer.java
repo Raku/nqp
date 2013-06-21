@@ -106,9 +106,12 @@ public class EvalServer {
                 gc.sharingHint = true;
 
                 CompilationUnit cu = CompilationUnit.setupCompilationUnit(gc.mainThread, cuType, true);
-                if (cu.entryCuid() == null)
+                CodeRef entryRef = null;
+                if (cu.entryCuid() != null) entryRef = cu.lookupCodeRef(cu.entryCuid());
+                if (cu.entryQbid() >= 0) entryRef = cu.lookupCodeRef(cu.entryQbid());
+                if (entryRef == null)
                     throw new RuntimeException("This class is not an entry point");
-                Ops.invokeMain(gc.mainThread, cu.lookupCodeRef(cu.entryCuid()), cuType.getName(), argv);
+                Ops.invokeMain(gc.mainThread, entryRef, cuType.getName(), argv);
             }
             else {
                 throw new RuntimeException("Unknown command "+cmdStrings[1]);
