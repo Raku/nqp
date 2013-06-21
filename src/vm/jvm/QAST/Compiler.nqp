@@ -2016,7 +2016,7 @@ QAST::OperationsJAST.map_classlib_core_op('scobjcount', $TYPE_OPS, 'scobjcount',
 QAST::OperationsJAST.map_classlib_core_op('setobjsc', $TYPE_OPS, 'setobjsc', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getobjsc', $TYPE_OPS, 'getobjsc', [$RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('serialize', $TYPE_OPS, 'serialize', [$RT_OBJ, $RT_OBJ], $RT_STR, :tc);
-QAST::OperationsJAST.map_classlib_core_op('deserialize', $TYPE_OPS, 'deserialize', [$RT_STR, $RT_OBJ, $RT_OBJ, $RT_OBJ, $RT_OBJ], $RT_STR, :tc);
+QAST::OperationsJAST.map_classlib_core_op('deserialize', $TYPE_OPS, 'deserialize', [$RT_STR, $RT_OBJ, $RT_OBJ, $RT_INT, $RT_OBJ], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('wval', $TYPE_OPS, 'wval', [$RT_STR, $RT_INT], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('scwbdisable', $TYPE_OPS, 'scwbdisable', [], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('scwbenable', $TYPE_OPS, 'scwbenable', [], $RT_INT, :tc);
@@ -2990,7 +2990,7 @@ class QAST::CompilerJAST {
                 QAST::SVal.new( :value($serialized) ),
                 QAST::Var.new( :name('cur_sc'), :scope('local') ),
                 $sh_ast,
-                QAST::Op.new( :op('null') ),
+                QAST::IVal.new( :value(+@code_ref_blocks) ),
                 QAST::Var.new( :name('conflicts'), :scope('local') )
             ),
             QAST::Op.new(

@@ -44,6 +44,7 @@ public class SerializationReader {
     private SerializationContext sc;
     private String[] sh;
     private CodeRef[] cr;
+    private int crCount;
     private CallFrame[] contexts;
     private ByteBuffer orig;
     
@@ -71,11 +72,12 @@ public class SerializationReader {
     SerializationContext[] dependentSCs;
     
     public SerializationReader(ThreadContext tc, SerializationContext sc,
-            String[] sh, CodeRef[] cr, ByteBuffer orig) {
+            String[] sh, CodeRef[] cr, int crCount, ByteBuffer orig) {
         this.tc = tc;
         this.sc = sc;
         this.sh = sh;
         this.cr = cr;
+        this.crCount = crCount;
         this.orig = orig;
     }
     
@@ -88,8 +90,7 @@ public class SerializationReader {
         resolveDependencies();
         
         // Put code refs in place.
-        for (int i = 0; i < cr.length; i++) {
-            if (cr[i] == null) break;
+        for (int i = 0; i < crCount; i++) {
             cr[i].isStaticCodeRef = true;
             cr[i].sc = sc;
             sc.root_codes.add(cr[i]);
@@ -118,7 +119,7 @@ public class SerializationReader {
         
         // Finish up contexts and closures.
         deserializeContexts();
-        attachClosureOuters(cr.length);
+        attachClosureOuters(crCount);
         attachContextOuters();
     }
     
