@@ -8,12 +8,17 @@ import java.io.StringReader;
 import java.lang.invoke.CallSite;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.jar.Attributes;
+import java.util.jar.JarEntry;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
 
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -22,6 +27,8 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+
+import org.perl6.nqp.runtime.Base64;
 
 public class JASTToJVMBytecode {
     public static void main(String[] argv)
@@ -61,9 +68,30 @@ public class JASTToJVMBytecode {
         try {
             BufferedReader br = new BufferedReader(new StringReader(in));
             JavaClass c = buildClassFrom(br);
+
             FileOutputStream fos = new FileOutputStream(filename);
-            fos.write(c.bytes);
-            fos.close();
+            if (c.serialized == null) {
+                // we're writing a plain java class
+
+                fos.write(c.bytes);
+                fos.close();
+            } else {
+                // writing a jar
+                Manifest mf = new Manifest();
+
+                mf.getMainAttributes().put( Attributes.Name.MANIFEST_VERSION, "1.0" );
+                if (c.hasMain)
+                    mf.getMainAttributes().put( Attributes.Name.MAIN_CLASS, c.name );
+
+                JarOutputStream jos = new JarOutputStream(fos, mf);
+
+                jos.putNextEntry(new JarEntry(c.name.replace('.','/') + ".class"));
+                jos.write(c.bytes);
+                jos.putNextEntry(new JarEntry(c.name.replace('.','/') + ".serialized"));
+                jos.write(c.serialized);
+
+                jos.close();
+            }
         }
         catch (Exception e) {
             throw new RuntimeException(e);
@@ -72,15 +100,22 @@ public class JASTToJVMBytecode {
     
     private static JavaClass buildClassFrom(BufferedReader in) throws Exception
     {
+        JavaClass c = new JavaClass();
         // Read in class name, superclass and any fields.
         String curLine, className = null, superName = null, fileName = null;
+        byte[] serData = null;
         List<String> fieldLines = new ArrayList<String>();
         while ((curLine = in.readLine()) != null) {
             if (curLine.startsWith("+ class ")) {
-                className = curLine.substring("+ class ".length());
+                className = c.name = curLine.substring("+ class ".length());
             }
             else if (curLine.startsWith("+ super ")) {
                 superName = curLine.substring("+ super ".length());
+            }
+            else if (curLine.startsWith("+ serialized ")) {
+                ByteBuffer sbuf = Base64.decode(curLine.substring("+ serialized ".length()));
+                c.serialized = new byte[sbuf.remaining()];
+                sbuf.get(c.serialized);
             }
             else if (curLine.startsWith("+ filename ")) {
             	fileName = curLine.substring("+ filename ".length());
@@ -122,7 +157,7 @@ public class JASTToJVMBytecode {
         // Process all of the methods.
         if (!curLine.equals("+ method"))
             throw new Exception("Expected method after class configuration");
-        while (processMethod(in, cw, className))
+        while (processMethod(c, in, cw, className))
             ;
         
         // Add empty constructor.
@@ -136,8 +171,8 @@ public class JASTToJVMBytecode {
         constructor.visitEnd();
 
         cw.visitEnd();
-        
-        JavaClass c = new JavaClass(className, cw.toByteArray());
+        c.bytes = cw.toByteArray();
+
         return c;
     }
 
@@ -146,7 +181,7 @@ public class JASTToJVMBytecode {
         public boolean defined;
     }
 
-    private static boolean processMethod(BufferedReader in, ClassWriter c, String className) throws Exception {
+    private static boolean processMethod(JavaClass jcout, BufferedReader in, ClassWriter c, String className) throws Exception {
         String curLine, methodName = null, returnType = null, desc = null;
         String crName = null, crCuid = null, crOuter = null;
         int crOuterIx = -2; // not coderef
@@ -238,7 +273,9 @@ public class JASTToJVMBytecode {
             if (inMethodHeader) {
                 // Transition to instructions mode.
                 inMethodHeader = false;
-                
+
+                if (methodName.equals("main")) jcout.hasMain = true;
+
                 // Create method object.
                 desc = Type.getMethodDescriptor(processType(returnType), argTypes.toArray(new Type[0]));
                 m = c.visitMethod(

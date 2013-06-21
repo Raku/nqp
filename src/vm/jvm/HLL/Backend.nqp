@@ -40,7 +40,7 @@ class HLL::Backend::JVM {
     }
     
     method is_precomp_stage($stage) {
-        $stage eq 'classfile'
+        $stage eq 'classfile' || $stage eq 'jar'
     }
     
     method is_textual_stage($stage) {
