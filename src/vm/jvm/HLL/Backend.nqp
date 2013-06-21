@@ -36,7 +36,7 @@ class HLL::Backend::JVM {
     }
     
     method stages() {
-        'jast classfile jvm'
+        'jast classfile jar jvm'
     }
     
     method is_precomp_stage($stage) {
@@ -60,13 +60,17 @@ class HLL::Backend::JVM {
     }
     
     method classfile($jast, *%adverbs) {
-        if %adverbs<target> eq 'classfile' && %adverbs<output> {
+        if (%adverbs<target> eq 'classfile' || %adverbs<target> eq 'jar') && %adverbs<output> {
             nqp::compilejasttofile($jast.dump(), %adverbs<output>);
             nqp::null()
         }
         else {
             nqp::compilejast($jast.dump());
         }
+    }
+
+    method jar($cu, *%adverbs) {
+        $cu; # the actual work is done in classfile and compilejast...
     }
     
     method jvm($cu, *%adverbs) {

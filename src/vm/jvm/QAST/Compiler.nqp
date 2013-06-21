@@ -2942,6 +2942,11 @@ class QAST::CompilerJAST {
         # Serialize it.
         my $sh := nqp::list_s();
         my $serialized := nqp::serialize($sc, $sh);
+
+        if %*COMPILING<%?OPTIONS><target> eq 'jar' {
+            $*JCLASS.serialized($serialized);
+            $serialized := nqp::null();
+        }
         
         # Now it's serialized, pop this SC off the compiling SC stack.
         nqp::popcompsc();
@@ -2994,7 +2999,7 @@ class QAST::CompilerJAST {
             ),
             QAST::Op.new(
                 :op('deserialize'),
-                QAST::SVal.new( :value($serialized) ),
+                nqp::isnull($serialized) ?? QAST::Op.new( :op('null_s') ) !! QAST::SVal.new( :value($serialized) ),
                 QAST::Var.new( :name('cur_sc'), :scope('local') ),
                 $sh_ast,
                 QAST::Op.new( :op('null') ),

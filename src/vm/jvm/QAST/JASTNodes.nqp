@@ -5,6 +5,7 @@ class JAST::Class is JAST::Node {
     has str $!name;
     has str $!super;
     has str $!filename;
+    has str $!serialized;
     has @!methods;
     has @!fields;
     
@@ -26,6 +27,7 @@ class JAST::Class is JAST::Node {
     
     method name(*@value) { @value ?? ($!name := @value[0]) !! $!name }
     method super(*@value) { @value ?? ($!super := @value[0]) !! $!super }
+    method serialized(*@value) { @value ?? ($!serialized := @value[0]) !! $!serialized }
     method methods() { @!methods }
     
     method dump() {
@@ -33,6 +35,7 @@ class JAST::Class is JAST::Node {
         nqp::push(@dumped, "+ class $!name");
         nqp::push(@dumped, "+ super $!super");
         nqp::push(@dumped, "+ filename $!filename");
+        nqp::push(@dumped, "+ serialized $!serialized") unless nqp::isnull_s($!serialized);
         for @!fields {
             $_.dump(@dumped);
         }
