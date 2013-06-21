@@ -2578,7 +2578,7 @@ public final class Ops {
 
         final int numElems = (int) arr.elems(tc);
         for (int i = 0; i < numElems; i++) {
-            if (sb.length() > 0) {
+            if (i > 0) {
                 sb.append(delimiter);
             }
             if (prim == StorageSpec.BP_STR) {
