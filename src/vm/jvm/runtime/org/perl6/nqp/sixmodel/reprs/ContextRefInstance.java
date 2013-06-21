@@ -36,6 +36,35 @@ public class ContextRefInstance extends SixModelObject {
         throw ExceptionHandling.dieInternal(tc, "No lexical " + key + " in this lexpad");
     }
     
+    public void bind_key_boxed(ThreadContext tc, String key, SixModelObject value) {
+        Integer idx = context.codeRef.staticInfo.oTryGetLexicalIdx(key);
+        if (idx == null)
+            throw ExceptionHandling.dieInternal(tc, "No lexical " + key + " in this lexpad");
+        context.oLex[idx] = value;
+    }
+    
+    public void bind_key_native(ThreadContext tc, String key) {
+        Integer idx = context.codeRef.staticInfo.iTryGetLexicalIdx(key);
+        if (idx != null) {
+            context.iLex[idx] = tc.native_i;
+            tc.native_type = ThreadContext.NATIVE_INT;
+            return;
+        }
+        idx = context.codeRef.staticInfo.nTryGetLexicalIdx(key);
+        if (idx != null) {
+            context.nLex[idx] = tc.native_n;
+            tc.native_type = ThreadContext.NATIVE_NUM;
+            return;
+        }
+        idx = context.codeRef.staticInfo.sTryGetLexicalIdx(key);
+        if (idx != null) {
+            context.sLex[idx] = tc.native_s;
+            tc.native_type = ThreadContext.NATIVE_STR;
+            return;
+        }
+        throw ExceptionHandling.dieInternal(tc, "No lexical " + key + " in this lexpad");
+    }
+    
     public long exists_key(ThreadContext tc, String key) {
         StaticCodeInfo sci = context.codeRef.staticInfo;
         return sci.oTryGetLexicalIdx(key) != null ||
