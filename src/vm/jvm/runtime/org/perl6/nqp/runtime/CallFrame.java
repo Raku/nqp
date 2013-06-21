@@ -73,6 +73,11 @@ public class CallFrame implements Cloneable {
      */
     public SerializationContext sc;
     
+    /**
+     * This this invocation do the initial setup of state vars?
+     */
+    public boolean stateInit;
+    
     // Empty constructor for things that want to fake one up.
     public CallFrame()
     {
@@ -122,8 +127,10 @@ public class CallFrame implements Cloneable {
                     this.oLex[i] = sci.oLexStatic[i].clone(tc);
                     break;
                 case 2:
-                    if (cr.oLexState == null)
+                    if (cr.oLexState == null) {
                         cr.oLexState = new SixModelObject[sci.oLexStatic.length];
+                        this.stateInit = true;
+                    }
                     if (cr.oLexState[i] == null)
                         this.oLex[i] = cr.oLexState[i] = sci.oLexStatic[i].clone(tc);
                     else
