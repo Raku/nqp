@@ -662,9 +662,9 @@ QAST::OperationsJAST.add_core_op('list_b', -> $qastcomp, $op {
                 unless nqp::istype($_, QAST::Block);
             $il.append($DUP);
             $il.append($ALOAD_0);
-            $il.append(JAST::PushSVal.new( :value($_.cuid) ));
+            $il.append(JAST::PushIndex.new( :value($qastcomp.cuid_to_qbid($_.cuid)) ));
             $il.append(JAST::Instruction.new( :op('invokevirtual'),
-                $TYPE_CU, 'lookupCodeRef', $TYPE_CR, $TYPE_STR ));
+                $TYPE_CU, 'lookupCodeRef', $TYPE_CR, 'I' ));
             $il.append($ALOAD_1);
             $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS, 'push',
                 $TYPE_SMO, $TYPE_SMO, $TYPE_SMO, $TYPE_TC ));
@@ -2310,10 +2310,10 @@ QAST::OperationsJAST.add_core_op('setup_blv', -> $qastcomp, $op {
         }
         $il.append($ALOAD_0);
         $il.append($ALOAD_1);
-        $il.append(JAST::PushSVal.new( :value($cuid) ));
+        $il.append(JAST::PushIndex.new( :value($qastcomp.cuid_to_qbid($cuid)) ));
         $il.append(JAST::PushSVal.new( :value(nqp::join("\0", @bits)) ));
         $il.append(JAST::Instruction.new( :op('invokevirtual'),
-            $TYPE_CU, 'setLexValues', 'Void', $TYPE_TC, $TYPE_STR, $TYPE_STR ));
+            $TYPE_CU, 'setLexValues', 'Void', $TYPE_TC, 'I', $TYPE_STR ));
     }
     
     $il.append($ACONST_NULL);
@@ -2825,6 +2825,11 @@ class QAST::CompilerJAST {
         }
         $best
     }
+
+    method cuid_to_qbid(str $cuid) {
+        my $map := %*CUID_TO_QBID;
+        nqp::existskey($map, $cuid) ?? $map{$cuid} !! ($map{$cuid} := $*NEXT_QBID++);
+    }
     
     multi method as_jast(QAST::CompUnit $cu, :$want) {
         # A compilation-unit-wide source of IDs for handlers.
@@ -2840,7 +2845,17 @@ class QAST::CompilerJAST {
         if +@($cu) != 1 || !nqp::istype($cu[0], QAST::Block) {
             nqp::die("QAST::CompUnit should have one child that is a QAST::Block");
         }
-        
+
+        my %*CUID_TO_QBID;
+        my $*NEXT_QBID := 0;
+        # Pre-seed to make sure that qbids correspond to serialization IDs
+        my $comp_mode := $cu.compilation_mode;
+        if $comp_mode {
+            for $cu.code_ref_blocks() -> $qblock {
+                %*CUID_TO_QBID{$qblock.cuid} := $*NEXT_QBID++;
+            }
+        }
+
         # Hash mapping blocks with static lexicals to an array of arrays. Each
         # of the sub-arrays has the form [$name, $value, $flags], where flags
         # are 0 = static lex, 1 = container, 2 = state container.
@@ -2852,7 +2867,6 @@ class QAST::CompilerJAST {
         # If we are in compilation mode, or have pre-deserialization or
         # post-deserialization tasks, handle those. Overall, the process
         # is to desugar this into simpler QAST nodes, then compile those.
-        my $comp_mode := $cu.compilation_mode;
         my @pre_des   := $cu.pre_deserialize;
         my @post_des  := $cu.post_deserialize;
         if %*BLOCK_LEX_VALUES {
@@ -3056,7 +3070,7 @@ class QAST::CompilerJAST {
             # Create JAST method and register it with the block's compilation unit
             # unique ID and name. (Note, always void return here as return values
             # are handled out of band).
-            my $*JMETH := JAST::Method.new( :name(self.unique('qb_')), :returns('Void'), :static(1) );
+            my $*JMETH := JAST::Method.new( :name('qb_'~self.cuid_to_qbid($node.cuid)), :returns('Void'), :static(1) );
             $*JMETH.cr_name($node.name);
             $*JMETH.cr_cuid($node.cuid);
             $*CODEREFS.register_method($*JMETH, $node.cuid);
@@ -3402,9 +3416,9 @@ class QAST::CompilerJAST {
                 $il.append($ALOAD_0);
                 $il.append($ALOAD_1);
                 $il.append($ALOAD_0);
-                $il.append(JAST::PushSVal.new( :value($node.cuid) ));
+                $il.append(JAST::PushIndex.new( :value(self.cuid_to_qbid($node.cuid)) ));
                 $il.append(JAST::Instruction.new( :op('invokevirtual'),
-                    $TYPE_CU, 'lookupCodeRef', $TYPE_CR, $TYPE_STR ));
+                    $TYPE_CU, 'lookupCodeRef', $TYPE_CR, 'I' ));
                 $il.append(JAST::Instruction.new( :op('getstatic'),
                     $TYPE_OPS, 'emptyCallSite', $TYPE_CSD ));
                 $il.append(JAST::Instruction.new( :op('getstatic'),
@@ -3869,9 +3883,9 @@ class QAST::CompilerJAST {
     multi method as_jast(QAST::BVal $node, :$want) {
         my $il := JAST::InstructionList.new();
         $il.append($ALOAD_0);
-        $il.append(JAST::PushSVal.new( :value($node.value.cuid) ));
+        $il.append(JAST::PushIndex.new( :value(self.cuid_to_qbid($node.value.cuid)) ));
         $il.append(JAST::Instruction.new( :op('invokevirtual'),
-            $TYPE_CU, 'lookupCodeRef', $TYPE_CR, $TYPE_STR ));
+            $TYPE_CU, 'lookupCodeRef', $TYPE_CR, 'I' ));
         result($il, $RT_OBJ)
     }
     

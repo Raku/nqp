@@ -24,6 +24,11 @@ public abstract class CompilationUnit {
     private Map<String, CodeRef> cuidToCodeRef = new HashMap<String, CodeRef>(); 
     
     /**
+     * Mapping of local integer IDs to matching code reference.
+     */
+    private CodeRef[] qbidToCodeRef;
+    
+    /**
      * Array of all code references.
      */
     public CodeRef[] codeRefs;
@@ -83,12 +88,15 @@ public abstract class CompilationUnit {
         Lookup l = MethodHandles.lookup();
         boolean codeRefsFound = false;
         try {
+            Method[] mlist = this.getClass().getDeclaredMethods();
+            qbidToCodeRef = new CodeRef[mlist.length];
+
             for (Method m : this.getClass().getDeclaredMethods()) {
                 CodeRefAnnotation cra = m.getAnnotation(CodeRefAnnotation.class);
                 if (cra != null) {
                     /* Got a code ref annotation. Turn to method handle. */
                     MethodHandle mh = l.unreflect(m).bindTo(this);
-                    
+
                     /* Munge handlers. */
                     long[] flatHandlers = cra.handlers();
                     int hptr = 0;
@@ -103,14 +111,23 @@ public abstract class CompilationUnit {
                     
                     /* Create and store. */
                     String cuid = cra.cuid();
+                    String name = m.getName();
                     CodeRef cr = new CodeRef(this, mh, cra.name(), cuid,
                         cra.oLexicalNames(), cra.iLexicalNames(),
                         cra.nLexicalNames(), cra.sLexicalNames(),
                         handlers);
-                    cr.staticInfo.methodName = m.getName();
+                    cr.staticInfo.methodName = name;
                     cr.st = BOOTCodeSTable;
                     codeRefList.add(cr);
                     cuidToCodeRef.put(cuid, cr);
+                    
+                    if (name.startsWith("qb_")) {
+                        int i = 3;
+                        int imax = name.length();
+                        int acc = 0;
+                        while (i < imax) acc = acc * 10 + (int)name.charAt(i++) - (int)'0';
+                        if (acc >= 0 && acc < qbidToCodeRef.length) qbidToCodeRef[acc] = cr;
+                    }
                     
                     /* Stash outer, for later resolution. */
                     outerCuid.add(cra.outerCuid());
@@ -185,8 +202,15 @@ public abstract class CompilationUnit {
     /**
      * Turns a compilation unit unique ID into the matching code-ref.
      */
-    public CodeRef lookupCodeRef(String uniqueId) {
+    public CodeRef lookupCodeRef(String uniqueId) { /*FOR_STAGE0*/
         return cuidToCodeRef.get(uniqueId);
+    }
+    
+    /**
+     * Turns a local integer ID into the matching code-ref.
+     */
+    public CodeRef lookupCodeRef(int localId) {
+        return qbidToCodeRef[localId];
     }
     
     /**
@@ -194,8 +218,15 @@ public abstract class CompilationUnit {
      * installs each of them. TODO: lazify so we don't do it for blocks we
      * never execute.
      */
-     public void setLexValues(ThreadContext tc, String uniqueId, String toParse) {
-        CodeRef cr = cuidToCodeRef.get(uniqueId);
+    public void setLexValues(ThreadContext tc, int localId, String toParse) {
+        setLexValues(tc, qbidToCodeRef[localId], toParse);
+    }
+
+    public void setLexValues(ThreadContext tc, String uniqueId, String toParse) { /*FOR_STAGE0*/
+        setLexValues(tc, cuidToCodeRef.get(uniqueId), toParse);
+    }
+
+    private void setLexValues(ThreadContext tc, CodeRef cr, String toParse) {
         String[] bits = toParse.split("\\x00");
         for (int i = 0; i < bits.length; i += 4) {
             String lexName = bits[i];
