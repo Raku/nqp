@@ -350,8 +350,15 @@ public class JASTToJVMBytecode {
                     m.visitLdcInsn(value);
                 }
                 else if (curLine.startsWith(".push_nc ")) {
-                    Double value = Double.parseDouble(curLine.substring(".push_nc ".length()));
-                    m.visitLdcInsn(value);
+                    String dStr = curLine.substring(".push_nc ".length());
+                    if (dStr.equals("Inf"))
+                        m.visitLdcInsn(Double.POSITIVE_INFINITY);
+                    else if (dStr.equals("-Inf"))
+                        m.visitLdcInsn(Double.NEGATIVE_INFINITY);
+                    else if (dStr.equals("NaN"))
+                        m.visitLdcInsn(Double.NaN);
+                    else
+                        m.visitLdcInsn(Double.parseDouble(dStr));
                 }
                 else if (curLine.startsWith(".push_sc ")) {
                     String value = curLine.substring(".push_sc ".length());
