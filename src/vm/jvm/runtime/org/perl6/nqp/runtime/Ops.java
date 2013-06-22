@@ -2480,7 +2480,7 @@ public final class Ops {
         BigInteger valA = getBI(tc, a);
         BigInteger valB = getBI(tc, b);
         BigInteger gcd = valA.gcd(valB);
-        return makeBI(tc, type, valA.multiply(valB).divide(gcd));
+        return makeBI(tc, type, valA.multiply(valB).divide(gcd).abs());
     }
     
     public static long isnanorinf(double n) {
