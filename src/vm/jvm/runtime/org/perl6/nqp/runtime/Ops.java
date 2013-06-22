@@ -4221,7 +4221,15 @@ public final class Ops {
     }
     
     public static SixModelObject mod_I(SixModelObject a, SixModelObject b, SixModelObject type, ThreadContext tc) {
-        return makeBI(tc, type, getBI(tc, a).mod(getBI(tc, b)));
+        BigInteger divisor = getBI(tc, b);
+        if (divisor.compareTo(BigInteger.ZERO) < 0) {
+            BigInteger negDivisor = divisor.negate();
+            BigInteger res = getBI(tc, a).mod(negDivisor);
+            return makeBI(tc, type, res.equals(BigInteger.ZERO) ? res : divisor.add(res));
+        }
+        else {
+            return makeBI(tc, type, getBI(tc, a).mod(divisor));
+        }
     }
     
     public static SixModelObject expmod_I(SixModelObject a, SixModelObject b, SixModelObject c, SixModelObject type, ThreadContext tc) {
