@@ -2091,6 +2091,13 @@ QAST::Operations.add_core_pirop_mapping('iscont', 'is_container', 'IP', :inlinab
 QAST::Operations.add_core_pirop_mapping('decont', 'nqp_decontainerize', 'PP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('assign', 'nqp_assign', '0PP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('assignunchecked', 'nqp_assignunchecked', '0PP', :inlinable(1));
+QAST::Operations.add_core_op('eqaddr', -> $qastcomp, $op {
+    $qastcomp.as_post(QAST::Op.new(
+        :op('iseq_i'),
+        QAST::Op.new( :op('where'), $op[0] ),
+        QAST::Op.new( :op('where'), $op[1] )
+    ))
+});
 
 # lexical related opcodes
 QAST::Operations.add_core_pirop_mapping('getlex', 'find_lex', 'Ps');
