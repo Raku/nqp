@@ -679,7 +679,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     method flip_ast($qast) {
         return $qast unless nqp::istype($qast, QAST::Regex);
         if $qast.rxtype eq 'literal' {
-            $qast[0] := $qast[0].reverse();
+            $qast[0] := nqp::flip($qast[0]);
         }
         elsif $qast.rxtype eq 'concat' {
             my @tmp;
