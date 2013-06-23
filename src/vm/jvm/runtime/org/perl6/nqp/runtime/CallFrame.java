@@ -78,6 +78,12 @@ public class CallFrame implements Cloneable {
      */
     public boolean stateInit;
     
+    /**
+     * Flags that this frame should leave immediately upon unwinding from the
+     * current exception handler.
+     */
+    public boolean exitAfterUnwind;
+    
     // Empty constructor for things that want to fake one up.
     public CallFrame()
     {

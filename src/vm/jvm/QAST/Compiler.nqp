@@ -1635,11 +1635,22 @@ QAST::OperationsJAST.add_core_op('handle', sub ($qastcomp, $op) {
     $*STACK.obtain($tryil, $prores);
     $tryil.append(JAST::Instruction.new( :op('astore'), $result ));
     
-    # The catch part just handles unwind; grab the result.
+    # The catch part just handles unwind; grab the result. Also check "exit
+    # after unwind" flag, used to force this whole block to exit.
     my $catchil := JAST::InstructionList.new();
+    my $exitlbl := JAST::Label.new( :name($qastcomp.unique('unwindexit')) );
     $qastcomp.unwind_check($catchil, $handler);
     $catchil.append(JAST::Instruction.new( :op('getfield'), $TYPE_EX_UNWIND, 'result', $TYPE_SMO ));
     $catchil.append(JAST::Instruction.new( :op('astore'), $result ));
+    $catchil.append(JAST::Instruction.new( :op('aload'), 'cf' ));
+    $catchil.append(JAST::Instruction.new( :op('getfield'), $TYPE_CF, 'exitAfterUnwind', "Z" ));
+    $catchil.append(JAST::Instruction.new( :op('ifeq'), $exitlbl ));
+    $catchil.append(JAST::Instruction.new( :op('aload'), $result ));
+    $catchil.append(JAST::Instruction.new( :op('aload'), 'cf' ));
+    $catchil.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+        'return_o', 'Void', $TYPE_SMO, $TYPE_CF ));
+    $catchil.append($RETURN);
+    $catchil.append($exitlbl);
     
     # Wrap it all up in try/catch etc.
     $il.append($qastcomp.delimit_handler(
