@@ -2293,7 +2293,7 @@ QAST::Operations.add_core_op('getenvhash', -> $qastcomp, $op {
 });
 QAST::Operations.add_core_op('getpid', -> $qastcomp, $op {
     if +@($op) != 0 {
-        nqp::die('getenvhash requires no operands');
+        nqp::die('getpid requires no operands');
     }
     $qastcomp.as_post(QAST::Op.new(
         :op('callmethod'), :name('getpid'), :returns(int),
