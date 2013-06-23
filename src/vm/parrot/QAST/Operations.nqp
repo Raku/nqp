@@ -2284,10 +2284,19 @@ QAST::Operations.add_core_pirop_mapping('exit', 'exit', '0i', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('sleep', 'sleep', '0n', :inlinable(1));
 QAST::Operations.add_core_op('getenvhash', -> $qastcomp, $op {
     if +@($op) != 0 {
-        nqp::die('getenvhash requires three operands');
+        nqp::die('getenvhash requires no operands');
     }
     $qastcomp.as_post(QAST::VM.new(
         :pirop('new__Ps'),
         QAST::SVal.new( :value('Env') )
+    ))
+});
+QAST::Operations.add_core_op('getpid', -> $qastcomp, $op {
+    if +@($op) != 0 {
+        nqp::die('getenvhash requires no operands');
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'), :name('getpid'),
+        QAST::VM.new( :pirop('getinterp__P') )
     ))
 });
