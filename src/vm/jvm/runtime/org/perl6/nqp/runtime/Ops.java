@@ -1830,7 +1830,12 @@ public final class Ops {
         
         /* If the flag to call .accepts_type on the target value is set, do so. */
         if ((typeCheckMode & STable.TYPE_CHECK_NEEDS_ACCEPTS) != 0) {
-            throw new RuntimeException("Type accepts method fallback NYI");
+            SixModelObject atMeth = findmethod(type.st.HOW, "accepts_type", tc);
+            if (atMeth == null)
+                throw ExceptionHandling.dieInternal(tc,
+                    "Expected accepts_type method, but none found in meta-object");
+            invokeDirect(tc, atMeth, typeCheckCallSite, new Object[] { obj.st.HOW, type, obj });
+            return istrue(result_o(tc.curFrame), tc);
         }
         
         /* If we get here, type check failed. */
