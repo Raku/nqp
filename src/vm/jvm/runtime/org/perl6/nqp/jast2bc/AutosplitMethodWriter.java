@@ -1,27 +1,28 @@
 package org.perl6.nqp.jast2bc;
 
 import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.Handle;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.Handle;
 import org.objectweb.asm.commons.CodeSizeEvaluator;
 import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.JumpInsnNode;
-import org.objectweb.asm.tree.LabelNode;
-import org.objectweb.asm.tree.VarInsnNode;
-import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.TypeInsnNode;
+import org.objectweb.asm.tree.FieldInsnNode;
+import org.objectweb.asm.tree.IincInsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.InvokeDynamicInsnNode;
-import org.objectweb.asm.tree.MultiANewArrayInsnNode;
+import org.objectweb.asm.tree.JumpInsnNode;
+import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LdcInsnNode;
-import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.LineNumberNode;
 import org.objectweb.asm.tree.LookupSwitchInsnNode;
+import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.MultiANewArrayInsnNode;
 import org.objectweb.asm.tree.TableSwitchInsnNode;
 import org.objectweb.asm.tree.TryCatchBlockNode;
+import org.objectweb.asm.tree.TypeInsnNode;
+import org.objectweb.asm.tree.VarInsnNode;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,6 +49,8 @@ class AutosplitMethodWriter extends MethodNode {
     private ControlEdge[] controlEdges;
     private ControlEdge[][] successors;
     private int[] depth;
+    private int[] baselineSize;
+    private Frame[] types;
 
     private static class ControlEdge {
         public final int from, to;
@@ -88,6 +91,7 @@ class AutosplitMethodWriter extends MethodNode {
         getControlFlow();
         if (DEBUG_CONTROL) printControlFlow();
         getTypes();
+        getBaselineSize();
 
         System.exit(1);
     }
@@ -620,7 +624,7 @@ class AutosplitMethodWriter extends MethodNode {
     }
 
     private static class TypeInference {
-        Frame[] frames;
+        public Frame[] frames;
         int[] changedStack;
         int changedSp;
         boolean[] changedVec;
@@ -638,10 +642,6 @@ class AutosplitMethodWriter extends MethodNode {
             int n = changedStack[--changedSp];
             changedVec[n] = false;
             return n;
-        }
-
-        public Frame get(int index) {
-            return frames[index].clone();
         }
 
         public void merge(int index, Frame f) {
@@ -743,7 +743,7 @@ class AutosplitMethodWriter extends MethodNode {
 
         int insn;
         while ((insn = state.next()) >= 0) {
-            Frame in = state.get(insn);
+            Frame in = state.frames[insn].clone();
 
             if (TYPE_TRACE) System.out.printf("INFERENCE STEP: insn=%d locals=[%s] stack=[%s]\n", insn, Arrays.toString(Arrays.copyOfRange(in.stack, 0, nlocal)), Arrays.toString(Arrays.copyOfRange(in.stack, in.sbase, in.sp)));
             in.execute(insn, insnList[insn]);
@@ -754,5 +754,122 @@ class AutosplitMethodWriter extends MethodNode {
                 state.merge(ce.to, in);
             }
         }
+        types = state.frames;
+    }
+
+    private int insnSize(AbstractInsnNode ai) {
+        int opc = ai.getOpcode();
+        switch (ai.getType()) {
+            case AbstractInsnNode.INSN:
+                return 1;
+            case AbstractInsnNode.INT_INSN:
+                return (opc == Opcodes.SIPUSH) ? 3 : 2;
+            case AbstractInsnNode.VAR_INSN:
+                {
+                    int var = ((VarInsnNode)ai).var;
+                    return (var < 4 && opc != Opcodes.RET) ? 1 : (var >= 256) ? 4 : 2;
+                }
+            case AbstractInsnNode.TYPE_INSN:
+                return 3;
+            case AbstractInsnNode.FIELD_INSN:
+                return 3;
+            case AbstractInsnNode.METHOD_INSN:
+                return (opc == Opcodes.INVOKEINTERFACE) ? 5 : 3;
+            case AbstractInsnNode.INVOKE_DYNAMIC_INSN:
+                return 5;
+            case AbstractInsnNode.JUMP_INSN:
+                return (opc == Opcodes.GOTO || opc == Opcodes.JSR) ? 5 : 8;
+            case AbstractInsnNode.LDC_INSN:
+                return 3;
+            case AbstractInsnNode.IINC_INSN:
+                {
+                    IincInsnNode ii = (IincInsnNode) ai;
+                    return (ii.var >= 256 || ii.incr > 127 || ii.incr < -128) ? 6 : 3;
+                }
+            case AbstractInsnNode.TABLESWITCH_INSN:
+                {
+                    TableSwitchInsnNode si = (TableSwitchInsnNode) ai;
+                    return 16 + si.labels.size() * 4;
+                }
+            case AbstractInsnNode.LOOKUPSWITCH_INSN:
+                {
+                    LookupSwitchInsnNode si = (LookupSwitchInsnNode) ai;
+                    return 12 + si.labels.size() * 8;
+                }
+            case AbstractInsnNode.MULTIANEWARRAY_INSN:
+                return 4;
+            default:
+                throw new RuntimeException();
+        }
+    }
+
+    // loosely based on the codesizeevaluator; 
+    private void getBaselineSize() {
+        baselineSize = new int[insnList.length+1];
+
+        int accum=0;
+
+        for (int i = 0; i < insnList.length; i++) {
+            AbstractInsnNode ai = insnList[i];
+            MethodInsnNode mi;
+            int size = insnSize(ai);
+
+            // some of these require special handling
+            switch (ai.getOpcode()) {
+                case Opcodes.RETURN:
+                    // iconst_m1; ireturn
+                    size = 2;
+                    break;
+                case Opcodes.IRETURN:
+                case Opcodes.FRETURN:
+                case Opcodes.LRETURN:
+                case Opcodes.DRETURN:
+                    // xstore tmp[0-2]; aload buf; iconst_0; new java/lang/Wrapper; dup; xload tmp; invokespecial; aastore; iconst_m1; ireturn
+                    size = 1+(nlocal >= 254 ? 4 : 2)+1+3+1+1+3+1+1+1;
+                    break;
+                // Opcodes.NEW may be rewritten into aconst_null if a spill is needed, but that doesn't affect the max
+                case Opcodes.INVOKESPECIAL:
+                    mi = (MethodInsnNode) ai;
+                    if ("<init>".equals(mi.name)) {
+                        int skeep = 0;
+                        Frame f1 = types[i];
+                        Frame f2 = types[i+1];
+                        String uninit = f1.stack[f2.sp];
+
+                        while (skeep < f1.sp && !uninit.equals(f1.stack[skeep])) skeep++;
+
+                        size = 0;
+                        int ltmp = nlocal + 2; /*buf*/
+                        // spill everything relevant above skeep into locals
+                        for (int j = skeep; j < f1.sp; j++) {
+                            if (uninit.equals(f1.stack[j])) continue;
+                            size += (ltmp < 256) ? 2 : 4;
+                            ltmp += 2;
+                        }
+                        ltmp++; // keep a copy of the value
+
+                        int argc = Type.getArgumentTypes(mi.desc).length;
+
+                        // newobj, dup, unspill, invokespecial
+                        size += 3 + 1 + argc*(ltmp < 256 ? 2 : 4) + 3;
+
+                        // store in locals, including <tmp>
+                        for (int j = 0; j < nlocal; j++) {
+                            if (uninit.equals(f1.stack[j]))
+                                size += 1 + (j < 256 ? 2 : 4);
+                        }
+                        size += (ltmp < 256 ? 2 : 4);
+                        // unspill
+                        size += (ltmp < 256 ? 2 : 4) * (f2.sp - skeep);
+                    }
+                    break;
+            }
+
+            baselineSize[i] = accum;
+            accum += size;
+        }
+        baselineSize[insnList.length] = accum;
+
+        if (DEBUG_CONTROL) System.out.println(Arrays.toString(baselineSize));
     }
 }
