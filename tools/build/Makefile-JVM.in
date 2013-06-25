@@ -19,7 +19,7 @@ RUNTIME_JAVAS = \
 
 RUNTIME_JAR = nqp-runtime.jar
 
-THIRDPARTY_JARS = 3rdparty/asm/asm-4.1.jar@cpsep@3rdparty/jline/jline-1.0.jar
+THIRDPARTY_JARS = $(ASM)asm-4.1.jar@cpsep@$(ASM)asm-tree-4.1.jar@cpsep@$(ASM)asm-commons-4.1.jar@cpsep@3rdparty/jline/jline-1.0.jar
 STAGE0 = src/vm/jvm/stage0
 STAGE1 = src/stage1
 STAGE2 = src/stage2
