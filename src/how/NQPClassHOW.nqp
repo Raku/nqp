@@ -34,6 +34,7 @@ knowhow NQPClassHOW {
     
     # Cached values, which are thrown away if the class changes.
     has %!caches;
+    has $!is_mixin;
 
 #?if parrot
     # Parrot-specific vtable mapping hash. Maps vtable name to method.
@@ -83,6 +84,7 @@ knowhow NQPClassHOW {
 #?endif
         @!BUILDALLPLAN := nqp::list();
         @!BUILDPLAN := nqp::list();
+        $!is_mixin := 0;
         $!trace := 0;
         $!trace_depth := 0;
         $!composed := 0;
@@ -746,7 +748,6 @@ knowhow NQPClassHOW {
     ## Mix-ins
     ## 
     has @!mixin_cache;
-    has $!is_mixin;
     method set_is_mixin($obj) { $!is_mixin := 1 }
     method is_mixin($obj) { $!is_mixin }
 
