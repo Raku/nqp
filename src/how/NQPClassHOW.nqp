@@ -738,11 +738,18 @@ knowhow NQPClassHOW {
             (%!caches{$key} := $value_generator())
     }
     
+    method flush_cache($obj) {
+        %!caches := {} unless nqp::isnull(%!caches)
+    }
     
     ##
     ## Mix-ins
     ## 
     has @!mixin_cache;
+    has $!is_mixin;
+    method set_is_mixin($obj) { $!is_mixin := 1 }
+    method is_mixin($obj) { $!is_mixin }
+
     method mixin($obj, $role) {
         # See if we mixed in before.
         my $found := 0;
@@ -759,12 +766,15 @@ knowhow NQPClassHOW {
         
         # Create and cache mixin-type if needed.
         unless $found {
+            # Flush its cache as promised, otherwise outdated NFAs will stick around.
+            self.flush_cache($obj) if !nqp::isnull($obj) || self.is_mixin($obj);
             # Work out a type name for the post-mixed-in role.
             my $new_name := self.name($obj) ~ '+{' ~ $role.HOW.name($role) ~ '}';
             
             # Create new type, derive it from ourself and then add
             # all the roles we're mixing it.
             $new_type := self.new_type(:name($new_name), :repr($obj.REPR));
+            $new_type.HOW.set_is_mixin($new_type);
             $new_type.HOW.add_parent($new_type, $obj.WHAT);
             $new_type.HOW.add_role($new_type, $role);
             $new_type.HOW.compose($new_type);
