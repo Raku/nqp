@@ -348,7 +348,7 @@ class AutosplitMethodWriter extends MethodNode {
         simpleEffects[Opcodes.LCONST_0] = new StackEffect("", "J");
         simpleEffects[Opcodes.LCONST_1] = new StackEffect("", "J");
         simpleEffects[Opcodes.LDIV] = new StackEffect("J", "J", "", "J");
-        simpleEffects[Opcodes.LLOAD] = new StackEffect("", "L");
+        simpleEffects[Opcodes.LLOAD] = new StackEffect("", "J");
         simpleEffects[Opcodes.LMUL] = new StackEffect("J", "J", "", "J");
         simpleEffects[Opcodes.LNEG] = new StackEffect("J", "", "J");
         simpleEffects[Opcodes.LOOKUPSWITCH] = new StackEffect("I", "");
