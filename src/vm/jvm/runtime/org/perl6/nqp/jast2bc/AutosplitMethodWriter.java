@@ -924,7 +924,7 @@ class AutosplitMethodWriter extends MethodNode {
 
     private int calcFragmentSize(int from, int to) {
         // we have to include the instructions
-        int size = baselineSize[to] - baselineSize[from];
+        int base = baselineSize[to] - baselineSize[from];
 
         // need to include entry trampolines and exit trampolines
         int[] entryPts = new int[to-from];
@@ -963,32 +963,33 @@ class AutosplitMethodWriter extends MethodNode {
         // common entry code
         // aload; {dup; ipush; aaload; UNBOX; xstore; }; iload; tableswitch
 
-        size++;
+        int centry = 1;
         for (int i = 0; i < commonEntry.length; i++) {
-            size += localEntrySize(i, commonEntry[i]);
+            centry += localEntrySize(i, commonEntry[i]);
         }
-        size += 13; // iload+tswitch
+        centry += 13; // iload+tswitch
 
         // uncommon entry code
+        int uentry = 0;
 
         for (int i = 0; i < entryCt; i++) {
-            size += 4; // dispatch vector
+            uentry += 4; // dispatch vector
             Frame f = types[entryPts[i]];
             for (int j = 0; j < f.sp; j++) {
                 if (j < commonEntry.length && commonEntry[j].equals(f.stack[j])) {
                     /* no action */
                 } else if (j < nlocal) {
-                    size += localEntrySize(j, f.stack[j]);
+                    uentry += localEntrySize(j, f.stack[j]);
                 } else {
-                    size += stackEntrySize(j, f.stack[j]);
+                    uentry += stackEntrySize(j, f.stack[j]);
                 }
             }
-            size += 4; // astore
-            size += 5; // final jump
+            uentry += 4; // astore
+            uentry += 5; // final jump
         }
 
         // jump insertion
-        size += 3;
+        int uexit = 3;
 
         // uncommon exit code
         for (int i = 0; i < exitCt; i++) {
@@ -997,23 +998,27 @@ class AutosplitMethodWriter extends MethodNode {
                 if (j < commonExit.length && commonExit[j].equals(f.stack[j])) {
                     /* no action */
                 } else if (j < nlocal) {
-                    size += localExitSize(j, f.stack[j]);
+                    uexit += localExitSize(j, f.stack[j]);
                 } else {
-                    size += stackExitSize(j, f.stack[j]);
+                    uexit += stackExitSize(j, f.stack[j]);
                 }
             }
-            size += 3; // ipush
-            size += 5; // jump to combiner
+            uexit += 3; // ipush
+            uexit += 5; // jump to combiner
         }
 
         // common exit code
-        size += 4; // aload
+        int cexit = 4; // aload
         for (int i = 0; i < commonExit.length; i++) {
-            size += localExitSize(i, commonExit[i]);
+            cexit += localExitSize(i, commonExit[i]);
         }
-        size += 2; // pop; ireturn
+        cexit += 2; // pop; ireturn
 
-        return size;
+        int total = centry + uentry + base + uexit + cexit;
+
+        System.out.printf("calcSize: %d-%d : centry(%d) uentry(%d) base(%d) uexit(%d) cexit(%d) total(%d)\n", from, to, centry, uentry, base, uexit, cexit, total);
+
+        return total;
     }
 
     private int localEntrySize(int loc, String desc) {
