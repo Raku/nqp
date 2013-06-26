@@ -2230,10 +2230,10 @@ QAST::OperationsJAST.map_classlib_core_op('getlexouter', $TYPE_OPS, 'getlexouter
 QAST::OperationsJAST.map_classlib_core_op('getlexrel', $TYPE_OPS, 'getlexrel', [$RT_OBJ, $RT_STR], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getlexreldyn', $TYPE_OPS, 'getlexreldyn', [$RT_OBJ, $RT_STR], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getlexrelcaller', $TYPE_OPS, 'getlexrelcaller', [$RT_OBJ, $RT_STR], $RT_OBJ, :tc);
-QAST::OperationsJAST.add_core_op('local_lifetime', -> $qastcomp, $op {
+QAST::OperationsJAST.add_core_op('locallifetime', -> $qastcomp, $op {
     my @children := nqp::clone($op.list());
     if @children == 0 {
-        nqp::die('local_lifetime requires at least one child');
+        nqp::die('locallifetime requires at least one child');
     }
     my $arg := @children.shift();
     my $ta := $qastcomp.new_temp_allocator;

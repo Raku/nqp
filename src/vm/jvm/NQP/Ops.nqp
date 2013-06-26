@@ -46,7 +46,7 @@ $ops.add_hll_op('nqp', 'postinc', -> $qastcomp, $op {
         nqp::die("Post-increment can only work on a variable");
     }
     $qastcomp.as_jast(QAST::Op.new(
-        :op('local_lifetime'),
+        :op('locallifetime'),
         QAST::Stmt.new(
             :resultchild(0),
             QAST::Op.new(
@@ -73,7 +73,7 @@ $ops.add_hll_op('nqp', 'postdec', -> $qastcomp, $op {
         nqp::die("Post-decrement can only work on a variable");
     }
     $qastcomp.as_jast(QAST::Op.new(
-        :op('local_lifetime'),
+        :op('locallifetime'),
         QAST::Stmt.new(
             :resultchild(0),
             QAST::Op.new(

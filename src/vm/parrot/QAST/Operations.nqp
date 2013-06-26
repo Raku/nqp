@@ -2115,9 +2115,9 @@ QAST::Operations.add_core_pirop_mapping('getlexouter', 'nqp_getlexouter', 'Ps');
 QAST::Operations.add_core_pirop_mapping('getlexrel', 'nqp_getlexrel', 'PPs');
 QAST::Operations.add_core_pirop_mapping('getlexreldyn', 'nqp_getlexreldyn', 'PPs');
 QAST::Operations.add_core_pirop_mapping('getlexrelcaller', 'nqp_getlexrelcaller', 'PPs');
-QAST::Operations.add_core_op('local_lifetime', :inlinable(1), -> $qastcomp, $op {
+QAST::Operations.add_core_op('locallifetime', :inlinable(1), -> $qastcomp, $op {
     if +@($op) < 1 {
-        nqp::die('local_lifetime requires at least one operand');
+        nqp::die('locallifetime requires at least one operand');
     }
 
     $qastcomp.as_post( $op[0] );

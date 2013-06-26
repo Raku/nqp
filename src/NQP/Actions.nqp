@@ -1401,7 +1401,7 @@ class NQP::Actions is HLL::Actions {
                 ),
                 QAST::Var.new( :name($dc_name), :scope('local') )
             ));
-        make QAST::Op.new( :op('local_lifetime'), $stmts, $dc_name );
+        make QAST::Op.new( :op('locallifetime'), $stmts, $dc_name );
     }
 
     method args($/) { make $<arglist>.ast; }
@@ -1642,7 +1642,7 @@ class NQP::Actions is HLL::Actions {
                         ),
                         default_for('$')
                     ));
-                $path := QAST::Op.new( :op('local_lifetime'), $path, $path_temp );
+                $path := QAST::Op.new( :op('locallifetime'), $path, $path_temp );
             }
             $lookup.unshift(QAST::Op.new(:op('who'), $path));
             my $sigil := nqp::substr(~$final_name, 0, 1);
