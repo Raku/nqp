@@ -409,7 +409,7 @@ class AutosplitMethodWriter extends MethodNode {
 
         public void thrown(String ex) {
             sp = sbase;
-            stack[sp++] = 'L'+ex+';';
+            stack[sp++] = ('L'+ex+';').intern();
         }
 
         private void pushReturn(String s) {
@@ -445,7 +445,7 @@ class AutosplitMethodWriter extends MethodNode {
             switch (anode.getType()) {
                 case AbstractInsnNode.VAR_INSN:
                     vi = (VarInsnNode) anode;
-                    if (vi.var != 0 && ("D".equals(stack[vi.var-1]) || "J".equals(stack[vi.var-1])))
+                    if (vi.var != 0 && ("D" == stack[vi.var-1] || "J" == stack[vi.var-1]))
                         stack[vi.var-1] = "T";
                     break;
                 case AbstractInsnNode.TYPE_INSN:
@@ -475,13 +475,13 @@ class AutosplitMethodWriter extends MethodNode {
                     stack[sp++] = stack[vi.var];
                     break;
                 case Opcodes.ANEWARRAY:
-                    stack[sp-1] = "[" + tidesc;
+                    stack[sp-1] = ("[" + tidesc).intern();
                     break;
                 case Opcodes.ASTORE:
                     stack[vi.var] = stack[--sp];
                     break;
                 case Opcodes.CHECKCAST:
-                    stack[sp-1] = tidesc;
+                    stack[sp-1] = tidesc.intern();
                     break;
                 case Opcodes.DSTORE:
                     stack[vi.var] = "D";
@@ -491,7 +491,7 @@ class AutosplitMethodWriter extends MethodNode {
                 case Opcodes.DUP2:
                     // [b] a -> [b] a [b] a
                     a = stack[--sp];
-                    b = ("D".equals(a) || "J".equals(a)) ? "X" : stack[--sp];
+                    b = ("D" == a || "J" == a) ? "X" : stack[--sp];
 
                     if (!"X".equals(b)) stack[sp++] = b;
                     stack[sp++] = a;
@@ -501,27 +501,27 @@ class AutosplitMethodWriter extends MethodNode {
                 case Opcodes.DUP2_X1:
                     // c [b] a -> [b] a c [b] a
                     a = stack[--sp];
-                    b = ("D".equals(a) || "J".equals(a)) ? "X" : stack[--sp];
+                    b = ("D" == a || "J" == a) ? "X" : stack[--sp];
                     c = stack[--sp];
 
-                    if (!"X".equals(b)) stack[sp++] = b;
+                    if ("X" != b) stack[sp++] = b;
                     stack[sp++] = a;
                     stack[sp++] = c;
-                    if (!"X".equals(b)) stack[sp++] = b;
+                    if ("X" != b) stack[sp++] = b;
                     stack[sp++] = a;
                     break;
                 case Opcodes.DUP2_X2:
                     // [d] c [b] a -> b a d c b a
                     a = stack[--sp];
-                    b = ("D".equals(a) || "J".equals(a)) ? "X" : stack[--sp];
+                    b = ("D" == a || "J" == a) ? "X" : stack[--sp];
                     c = stack[--sp];
-                    d = ("D".equals(c) || "J".equals(c)) ? "X" : stack[--sp];
+                    d = ("D" == c || "J" == c) ? "X" : stack[--sp];
 
-                    if (!"X".equals(b)) stack[sp++] = b;
+                    if ("X" != b) stack[sp++] = b;
                     stack[sp++] = a;
-                    if (!"X".equals(d)) stack[sp++] = d;
+                    if ("X" != d) stack[sp++] = d;
                     stack[sp++] = c;
-                    if (!"X".equals(b)) stack[sp++] = b;
+                    if ("X" != b) stack[sp++] = b;
                     stack[sp++] = a;
 
                     break;
@@ -544,10 +544,10 @@ class AutosplitMethodWriter extends MethodNode {
                     // [d] c a -> a [d] c a
                     a = stack[--sp];
                     c = stack[--sp];
-                    d = ("D".equals(c) || "J".equals(c)) ? "X" : stack[--sp];
+                    d = ("D" == c || "J" == c) ? "X" : stack[--sp];
 
                     stack[sp++] = a;
-                    if (!"X".equals(d)) stack[sp++] = d;
+                    if ("X" != d) stack[sp++] = d;
                     stack[sp++] = c;
                     stack[sp++] = a;
                     break;
@@ -558,11 +558,11 @@ class AutosplitMethodWriter extends MethodNode {
 
                 case Opcodes.GETFIELD:
                     sp--;
-                    pushReturn(fi.desc);
+                    pushReturn(fi.desc.intern());
                     break;
 
                 case Opcodes.GETSTATIC:
-                    pushReturn(fi.desc);
+                    pushReturn(fi.desc.intern());
                     break;
 
                 case Opcodes.INVOKEINTERFACE:
@@ -577,10 +577,10 @@ class AutosplitMethodWriter extends MethodNode {
                         if (a.charAt(0) == 'U') {
                             b = a.substring(a.indexOf(':')+1);
                             for (int i = 0; i < stack.length; i++)
-                                if (a.equals(stack[i])) stack[i] = b;
+                                if (a == stack[i]) stack[i] = b;
                         }
                     }
-                    pushReturn(midesc.getReturnType().getDescriptor());
+                    pushReturn(midesc.getReturnType().getDescriptor().intern());
                     break;
 
                 case Opcodes.ISTORE:
@@ -639,7 +639,7 @@ class AutosplitMethodWriter extends MethodNode {
                     }
 
                 case Opcodes.NEW:
-                    stack[sp++] = "U"+index+':'+tidesc;
+                    stack[sp++] = ("U"+index+':'+tidesc).intern();
                     break;
 
                 case Opcodes.POP2:
@@ -702,7 +702,8 @@ class AutosplitMethodWriter extends MethodNode {
                 String a = f.stack[i];
                 String b = slot.stack[i];
                 String c = lub(a,b);
-                if (!b.equals(c)) {
+                if (b != c) {
+                    //System.out.printf("%d.%d %s -> %s\n", index, i, b, c);
                     slot.stack[i] = c;
                     changed = true;
                 }
@@ -715,13 +716,16 @@ class AutosplitMethodWriter extends MethodNode {
         void mark(int index) {
             if (changedVec[index]) return;
             changedVec[index] = true;
-            changedStack[changedSp++] = index;
+            changedQueue[changedHead++] = index;
+            if (changedHead == changedQueue.length) changedHead = 0;
         }
 
         // computes the least upper bound of two verification types; we use descriptors, but U44:Lbar; for uninitialized(44), 0 for null, and T for TOP
         String lub(String a,String b) {
             // same type?  trivial
-            if (a.equals(b)) return a;
+            if (a == b) return a;
+            if (a == "T") return a;
+            if (b == "T") return b;
 
             char a0 = a.charAt(0);
             char b0 = b.charAt(0);
@@ -742,7 +746,7 @@ class AutosplitMethodWriter extends MethodNode {
                 String cc = lub(a.substring(1), b.substring(1));
                 if (cc.charAt(0) == 'T') // children are not compatible, but we know we have *some* array, which is an object
                     return "Ljava/lang/Object;";
-                return '['+cc;
+                return ('['+cc).intern();
             } else {
                 if (b0 != 'L') return "Ljava/lang/Object;";
 
@@ -772,20 +776,21 @@ class AutosplitMethodWriter extends MethodNode {
         int locwp = 0;
 
         if ((access & Opcodes.ACC_STATIC) == 0) {
-            initial.stack[locwp++] = 'L'+tgtype+';';
+            initial.stack[locwp++] = ('L'+tgtype+';').intern();
         }
         for (Type arg : Type.getArgumentTypes(desc)) {
-            initial.stack[locwp] = arg.getDescriptor();
+            initial.stack[locwp] = arg.getDescriptor().intern();
             locwp += arg.getSize();
         }
         initial.sp = initial.sbase = nlocal;
         state.merge(0, initial);
 
         int insn;
+        int step = 0;
         while ((insn = state.next()) >= 0) {
             Frame in = state.frames[insn].clone();
 
-            if (TYPE_TRACE) System.out.printf("INFERENCE STEP: insn=%d locals=[%s] stack=[%s]\n", insn, Arrays.toString(Arrays.copyOfRange(in.stack, 0, nlocal)), Arrays.toString(Arrays.copyOfRange(in.stack, in.sbase, in.sp)));
+            if (TYPE_TRACE) System.out.printf("INFERENCE STEP: insn=%d [%d] locals=[%s] stack=[%s]\n", insn, insnList[insn].getOpcode(), Arrays.toString(Arrays.copyOfRange(in.stack, 0, nlocal)), Arrays.toString(Arrays.copyOfRange(in.stack, in.sbase, in.sp)));
             in.execute(insn, insnList[insn]);
 
             for (ControlEdge ce : successors[insn]) {
@@ -793,6 +798,8 @@ class AutosplitMethodWriter extends MethodNode {
                 if (ce.exn != null) in.thrown(ce.exn);
                 state.merge(ce.to, in);
             }
+            step++;
+            if ((step % 10000) == 0) System.out.printf("Inference step %d\n", step);
         }
         types = state.frames;
     }
