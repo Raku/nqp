@@ -34,11 +34,11 @@ import java.util.Map;
 class AutosplitMethodWriter extends MethodNode {
 
     /** Maximum size of a method to leave alone. */
-    private static final int MAX_UNSPLIT_METHOD = 1;
+    private static final int MAX_UNSPLIT_METHOD = 65535;
 
     /** True to dump control flow analysis. */
-    private static final boolean DEBUG_CONTROL = true;
-    private static final boolean TYPE_TRACE = true;
+    private static final boolean DEBUG_CONTROL = false;
+    private static final boolean TYPE_TRACE = false;
 
     /** The real instructions (not branches) in program order.  Filled out by {@link getControlFlow()}. */
     private AbstractInsnNode[] insnList;
@@ -98,7 +98,7 @@ class AutosplitMethodWriter extends MethodNode {
                 System.out.printf("from=%d to=%d frag=%d\n", 0,i,calcFragmentSize(0, i));
         }
 
-        System.exit(1);
+        //System.exit(1);
     }
 
     private boolean isRealInsn(AbstractInsnNode node) {
@@ -144,12 +144,16 @@ class AutosplitMethodWriter extends MethodNode {
     /** Build the control flow graph. */
     private void getControlFlow() {
         List<ControlEdge> controlTemp = new ArrayList< >();
+        List<ControlEdge>[] succTemps = new List[insnList.length];
 
         successors = new ControlEdge[insnList.length][];
+
+
         for (int insnNo = 0; insnNo < insnList.length; insnNo++) {
             AbstractInsnNode node = insnList[insnNo];
 
             List<ControlEdge> succTemp = new ArrayList< >();
+            succTemps[insnNo] = succTemp;
 
             switch (node.getType()) {
                 case AbstractInsnNode.JUMP_INSN:
@@ -180,14 +184,21 @@ class AutosplitMethodWriter extends MethodNode {
                         succTemp.add(new ControlEdge(insnNo, insnNo+1, null));
                     break;
             }
+        }
 
-            for (TryCatchBlockNode tcb : (List<TryCatchBlockNode>) tryCatchBlocks) {
-                if (insnNo < insnMap.get(tcb.start) || insnNo >= insnMap.get(tcb.end)) continue;
-                succTemp.add(new ControlEdge(insnNo, insnMap.get(tcb.handler), tcb.type == null ? "java/lang/Throwable" : tcb.type));
-            }
+        for (TryCatchBlockNode tcb : (List<TryCatchBlockNode>) tryCatchBlocks) {
+            int start = insnMap.get(tcb.start);
+            int end = insnMap.get(tcb.end);
+            int handler = insnMap.get(tcb.handler);
+            String type = tcb.type == null ? "java/lang/Throwable" : tcb.type;
 
-            successors[insnNo] = succTemp.toArray(new ControlEdge[0]);
-            controlTemp.addAll(succTemp);
+            for (int i = start; i < end; i++)
+                succTemps[i].add(new ControlEdge(i, handler, type));
+        }
+
+        for (int insnNo = 0; insnNo < insnList.length; insnNo++) {
+            successors[insnNo] = succTemps[insnNo].toArray(new ControlEdge[0]);
+            controlTemp.addAll(succTemps[insnNo]);
         }
 
         controlEdges = controlTemp.toArray(new ControlEdge[0]);
@@ -450,7 +461,7 @@ class AutosplitMethodWriter extends MethodNode {
                     break;
                 case Opcodes.DSTORE:
                     stack[vi.var] = "D";
-                    stack[vi.var+1] = null;
+                    stack[vi.var+1] = "T";
                     sp--;
                     break;
                 case Opcodes.DUP2:
@@ -574,7 +585,7 @@ class AutosplitMethodWriter extends MethodNode {
 
                 case Opcodes.LSTORE:
                     stack[vi.var] = "J";
-                    stack[vi.var+1] = null;
+                    stack[vi.var+1] = "T";
                     sp--;
                     break;
 
