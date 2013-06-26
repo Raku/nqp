@@ -93,6 +93,11 @@ class AutosplitMethodWriter extends MethodNode {
         getTypes();
         getBaselineSize();
 
+        if (DEBUG_CONTROL) {
+            for (int i = 1; i <= insnList.length; i++)
+                System.out.printf("from=%d to=%d frag=%d\n", 0,i,calcFragmentSize(0, i));
+        }
+
         System.exit(1);
     }
 
@@ -871,5 +876,184 @@ class AutosplitMethodWriter extends MethodNode {
         baselineSize[insnList.length] = accum;
 
         if (DEBUG_CONTROL) System.out.println(Arrays.toString(baselineSize));
+    }
+
+    private int calcFragmentSize(int from, int to) {
+        // we have to include the instructions
+        int size = baselineSize[to] - baselineSize[from];
+
+        // need to include entry trampolines and exit trampolines
+        int[] entryPts = new int[to-from];
+        int entryCt = 0;
+        boolean[] entryDedup = new boolean[to-from];
+        int[] exitPts = new int[insnList.length];
+        int exitCt = 0;
+        boolean[] exitDedup = new boolean[insnList.length];
+
+        for (ControlEdge ce : controlEdges) {
+            boolean from_this = (ce.from >= from && ce.from < to);
+            boolean to_this   = (ce.to >= from && ce.to < to);
+            if (!from_this && to_this && !entryDedup[ce.to-from]) {
+                entryDedup[ce.to-from] = true;
+                entryPts[entryCt++] = ce.to;
+            }
+            if (from_this && !to_this && !exitDedup[ce.to]) {
+                exitDedup[ce.to] = true;
+                exitPts[exitCt++] = ce.to;
+            }
+        }
+
+        if (from == 0 && !entryDedup[0]) {
+            entryPts[entryCt++] = 0;
+        }
+
+        if (DEBUG_CONTROL) {
+            System.out.printf("NONLOCAL ENTRY: %s\n", Arrays.toString(Arrays.copyOfRange(entryPts,0,entryCt)));
+            System.out.printf("NONLOCAL EXIT: %s\n", Arrays.toString(Arrays.copyOfRange(exitPts,0,exitCt)));
+        }
+
+        // factor out commonalities from the trampolines
+        String[] commonEntry = commonTrampoline(entryPts, entryCt);
+        String[] commonExit  = commonTrampoline(exitPts, exitCt);
+
+        // common entry code
+        // aload; {dup; ipush; aaload; UNBOX; xstore; }; iload; tableswitch
+
+        size++;
+        for (int i = 0; i < commonEntry.length; i++) {
+            size += localEntrySize(i, commonEntry[i]);
+        }
+        size += 13; // iload+tswitch
+
+        // uncommon entry code
+
+        for (int i = 0; i < entryCt; i++) {
+            size += 4; // dispatch vector
+            Frame f = types[entryPts[i]];
+            for (int j = 0; j < f.sp; j++) {
+                if (j < commonEntry.length && commonEntry[j].equals(f.stack[j])) {
+                    /* no action */
+                } else if (j < nlocal) {
+                    size += localEntrySize(j, f.stack[j]);
+                } else {
+                    size += stackEntrySize(j, f.stack[j]);
+                }
+            }
+            size += 4; // astore
+            size += 5; // final jump
+        }
+
+        // jump insertion
+        size += 3;
+
+        // uncommon exit code
+        for (int i = 0; i < exitCt; i++) {
+            Frame f = types[exitPts[i]];
+            for (int j = 0; j < f.sp; j++) {
+                if (j < commonExit.length && commonExit[j].equals(f.stack[j])) {
+                    /* no action */
+                } else if (j < nlocal) {
+                    size += localExitSize(j, f.stack[j]);
+                } else {
+                    size += stackExitSize(j, f.stack[j]);
+                }
+            }
+            size += 3; // ipush
+            size += 5; // jump to combiner
+        }
+
+        // common exit code
+        size += 4; // aload
+        for (int i = 0; i < commonExit.length; i++) {
+            size += localExitSize(i, commonExit[i]);
+        }
+        size += 2; // pop; ireturn
+
+        return size;
+    }
+
+    private int localEntrySize(int loc, String desc) {
+        char c0 = desc.charAt(0);
+        if (c0 == 'T') return 0; // not loaded
+        int sz;
+        switch (c0) {
+            case '0':
+            case 'U':
+                // just load as a null
+                sz = 1;
+                break;
+            case 'L':
+            case '[':
+                // dup, ipush, aaload, checkcast
+                sz = (loc < 128) ? 7 : 8;
+                break;
+            default:
+                // dup, ipush, aaload, checkcast, fooValue
+                sz = (loc < 128) ? 10 : 11;
+                break;
+        }
+        return sz + ((loc < 256) ? 2 : 4);
+    }
+
+    private int localExitSize(int loc, String desc) {
+        char c0 = desc.charAt(0);
+        if (c0 == 'T' || c0 == '0' || c0 == 'U') return 0; // not saved
+        int sz = (loc < 256) ? 2 : 4;
+        switch (c0) {
+            case 'L':
+            case '[':
+                // dup, ipush, xload, aastore
+                return sz + ((loc < 128) ? 4 : 5);
+            default:
+                // dup, ipush, new, dup, xload, invokespecial, aastore
+                return sz + ((loc < 128) ? 11 : 12);
+        }
+    }
+
+    private int stackEntrySize(int loc, String desc) {
+        char c0 = desc.charAt(0);
+        switch (c0) {
+            case '0':
+            case 'U':
+                // just load as a null
+                return 1;
+            case 'L':
+            case '[':
+                // aload, ipush, aaload, checkcast
+                return (loc < 128) ? 10 : 11;
+            default:
+                // aload, ipush, aaload, checkcast, fooValue
+                return (loc < 128) ? 13 : 14;
+        }
+    }
+
+    private int stackExitSize(int loc, String desc) {
+        char c0 = desc.charAt(0);
+        if (c0 == 'T' || c0 == '0' || c0 == 'U') return 1; // not saved
+        switch (c0) {
+            case 'L':
+            case '[':
+                // xstore, aload, ipush, xload, aastore
+                return (loc < 128) ? 15 : 16;
+            default:
+                // xstore, aload, ipush, new, dup, xload, invokespecial, aastore
+                return (loc < 128) ? 22 : 23;
+        }
+    }
+
+    private String[] commonTrampoline(int[] points, int ct) {
+        String[] common = null;
+        for (int i = 0; i < ct; i++) {
+            Frame f = types[points[i]];
+            if (common == null) {
+                common = Arrays.copyOf(f.stack, nlocal);
+            } else {
+                for (int j = 0; j < common.length; j++) {
+                    if (j >= f.sp || !f.stack[j].equals(common[j]))
+                        common[j] = "T";
+                }
+            }
+        }
+        return common == null ? new String[] { } : common;
     }
 }
