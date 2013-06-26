@@ -2,6 +2,7 @@ package org.perl6.nqp.jast2bc;
 
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Handle;
+import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -27,8 +28,10 @@ import org.objectweb.asm.tree.VarInsnNode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @SuppressWarnings("unchecked") /* our asm is stripped */
 class AutosplitMethodWriter extends MethodNode {
@@ -56,6 +59,7 @@ class AutosplitMethodWriter extends MethodNode {
 
     private int nextJumpNo;
     private int[] jumpNoMap;
+    private List<Integer> firstJump = new ArrayList< >();
 
     private static class ControlEdge {
         public final int from, to;
@@ -887,6 +891,7 @@ class AutosplitMethodWriter extends MethodNode {
                 case Opcodes.FRETURN:
                 case Opcodes.LRETURN:
                 case Opcodes.DRETURN:
+                case Opcodes.ARETURN:
                     // xstore tmp[0-2]; aload buf; iconst_0; new java/lang/Wrapper; dup; xload tmp; invokespecial; aastore; iconst_m1; ireturn
                     size = 1+(nlocal >= 254 ? 4 : 2)+1+3+1+1+3+1+1+1;
                     break;
@@ -964,6 +969,8 @@ class AutosplitMethodWriter extends MethodNode {
 
         entryPts = Arrays.copyOf(entryPts, entryCt);
         exitPts = Arrays.copyOf(exitPts, exitCt);
+        Arrays.sort(entryPts);
+        Arrays.sort(exitPts);
 
         if (DEBUG_CONTROL) {
             System.out.printf("NONLOCAL ENTRY: %s\n", Arrays.toString(entryPts));
@@ -980,17 +987,17 @@ class AutosplitMethodWriter extends MethodNode {
         int[] entryPts = ee[0];
         int[] exitPts = ee[1];
         // factor out commonalities from the trampolines
-        String[] commonEntry = commonTrampoline(entryPts);
-        String[] commonExit  = commonTrampoline(exitPts);
+        String[] commonEntry = commonTrampoline(entryPts, null);
+        String[] commonExit  = commonTrampoline(exitPts, null);
 
         // common entry code
-        // aload; {dup; ipush; aaload; UNBOX; xstore; }; iload; tableswitch
+        // iload; aload; {dup; ipush; aaload; UNBOX; xstore; }; swap; tableswitch
 
-        int centry = 1;
+        int centry = 2;
         for (int i = 0; i < commonEntry.length; i++) {
             centry += localEntrySize(i, commonEntry[i]);
         }
-        centry += 13; // iload+tswitch
+        centry += 13; // swap+tswitch
 
         // uncommon entry code
         int uentry = 0;
@@ -1007,7 +1014,7 @@ class AutosplitMethodWriter extends MethodNode {
                     uentry += stackEntrySize(j, f.stack[j]);
                 }
             }
-            uentry += 4; // astore
+            uentry += (nlocal <= 255 ? 2 : 4); // astore
             uentry += 5; // final jump
         }
 
@@ -1026,12 +1033,13 @@ class AutosplitMethodWriter extends MethodNode {
                     uexit += stackExitSize(j, f.stack[j]);
                 }
             }
+            uexit += (nlocal <= 255 ? 2 : 4); // aload in middle
             uexit += 3; // ipush
             uexit += 5; // jump to combiner
         }
 
         // common exit code
-        int cexit = 4; // aload
+        int cexit = 1; // swap
         for (int i = 0; i < commonExit.length; i++) {
             cexit += localExitSize(i, commonExit[i]);
         }
@@ -1113,10 +1121,13 @@ class AutosplitMethodWriter extends MethodNode {
         }
     }
 
-    private String[] commonTrampoline(int[] points) {
+    private String[] commonTrampoline(int[] points, Set<String> spills) {
         String[] common = null;
         for (int i = 0; i < points.length; i++) {
             Frame f = types[points[i]];
+            if (spills != null) {
+                for (int j = 0; j < f.sp; j++) spills.add(f.stack[j]);
+            }
             if (common == null) {
                 common = Arrays.copyOf(f.stack, nlocal);
             } else {
@@ -1130,28 +1141,231 @@ class AutosplitMethodWriter extends MethodNode {
     }
 
     private void allocateJumpNrs(int begin, int end) {
-        boolean[] entryDedup = new boolean[end-begin];
+        int[][] ee = nonlocalEntryExit(begin, end);
+
         int firstEntry = nextJumpNo;
-
-        for (ControlEdge ce : controlEdges) {
-            boolean from_this = (ce.from >= begin && ce.from < end);
-            boolean to_this   = (ce.to >= begin && ce.to < end);
-            if (!from_this && to_this) {
-                entryDedup[ce.to-begin] = true;
-            }
+        for (int entry : ee[0]) {
+            jumpNoMap[entry] = nextJumpNo++;
         }
-
-        if (begin == 0) entryDedup[0] = true;
-
-        for (int i = begin; i < end; i++) {
-            if (entryDedup[i - begin]) jumpNoMap[i] = nextJumpNo++;
-        }
+        firstJump.add(firstEntry);
 
         if (DEBUG_FRAGMENT) System.out.printf("Fragment %d-%d has jump numbers %d-%d\n", begin, end, firstEntry, nextJumpNo);
     }
 
     private void emitFragment(int fno, int begin, int end) {
+
+        MethodVisitor v = target.visitMethod(Opcodes.ACC_STATIC | Opcodes.ACC_PRIVATE | Opcodes.ACC_SYNTHETIC, name+"$f"+fno, "(I[Ljava/lang/Object;)I", null, null);
+        v.visitCode();
+
+        int[][] ee = nonlocalEntryExit(begin, end);
+        int[] entryPts = ee[0];
+        int[] exitPts = ee[1];
+        // factor out commonalities from the trampolines
+        Set<String> spilledUTypes = new HashSet< >();
+        String[] commonEntry = commonTrampoline(entryPts, spilledUTypes);
+        String[] commonExit  = commonTrampoline(exitPts, spilledUTypes);
+
+        Label[] entryTrampolineLabels = new Label[entryPts.length];
+        for (int i = 0; i < entryPts.length; i++)
+            entryTrampolineLabels[i] = new Label();
+
+        Map<Integer, Label> exitTrampolineLabels = new HashMap< >();
+        for (int i = 0; i < exitPts.length; i++)
+            exitTrampolineLabels.put(exitPts[i], new Label());
+
+        Label[] insnLabels = new Label[end - begin];
+        for (int i = 0; i < end - begin; i++)
+            insnLabels[i] = new Label();
+
+        // common entry code
+        // aload; {dup; ipush; aaload; UNBOX; xstore; }; iload; tableswitch
+        v.visitVarInsn(Opcodes.ILOAD, 0);
+        v.visitVarInsn(Opcodes.ALOAD, 0);
+
+        for (int i = 0; i < commonEntry.length; i++) {
+            localEntryCode(v, i, commonEntry[i]);
+        }
+        v.visitInsn(Opcodes.SWAP);
+        int firstj = firstJump.get(fno);
+        v.visitTableSwitchInsn(firstj, firstj + entryPts.length - 1, entryTrampolineLabels[0] /*XXX*/, entryTrampolineLabels);
+
+        int stash = nlocal;
+        int scratch = nlocal+1;
+
+        // uncommon entry code
+        for (int ept : entryPts) {
+            v.visitLabel(entryTrampolineLabels[jumpNoMap[ept]-firstj]);
+            Frame f = types[ept];
+            for (int j = 0; j < nlocal; j++) {
+                if (j < commonEntry.length && commonEntry[j].equals(f.stack[j]))
+                    continue;
+                localEntryCode(v, j, f.stack[j]);
+            }
+            v.visitVarInsn(Opcodes.ASTORE, stash);
+            for (int j = nlocal; j < f.sp; j++) {
+                stackEntryCode(v, stash, j, f.stack[j]);
+            }
+            v.visitJumpInsn(Opcodes.GOTO, insnLabels[ept - begin]);
+        }
+
+        // we have to include the instructions
+        for (int iix = begin; iix < end; iix++) {
+            emitFragmentInsn(v, iix, begin, insnLabels, exitTrampolineLabels, spilledUTypes);
+        }
+
+        if (exitTrampolineLabels.containsKey(end))
+            v.visitJumpInsn(Opcodes.GOTO, exitTrampolineLabels.get(end));
+
+        Label commonExitLabel = new Label();
+
+        // uncommon exit code
+        for (int pt : exitPts) {
+            v.visitLabel(exitTrampolineLabels.get(pt));
+            Frame f = types[pt];
+            for (int j = f.sp-1; j >= nlocal; j--) {
+                stackExitCode(v, stash, scratch, j, f.stack[j]);
+            }
+            v.visitVarInsn(Opcodes.ALOAD, stash);
+            for (int j = 0; j < nlocal; j++) {
+                if (j < commonExit.length && commonExit[j].equals(f.stack[j]))
+                    continue;
+
+                localExitCode(v, j, f.stack[j]);
+            }
+            pushInt(v, jumpNoMap[pt]);
+            v.visitJumpInsn(Opcodes.GOTO, commonExitLabel);
+        }
+
+        // common exit code
+        v.visitLabel(commonExitLabel);
+        v.visitInsn(Opcodes.SWAP);
+        for (int i = 0; i < commonExit.length; i++) {
+            localExitCode(v, i, commonExit[i]);
+        }
+        v.visitInsn(Opcodes.POP);
+        v.visitInsn(Opcodes.IRETURN);
+        v.visitMaxs(0,0);
+        v.visitEnd();
     }
+
+    private String[] box_types = new String[] { "java/lang/Integer", "java/lang/Long", "java/lang/Float", "java/lang/Double" };
+    private String[] box_descs = new String[] { "(I)V", "(J)V", "(F)V", "(D)V" };
+
+    private void emitFragmentInsn(MethodVisitor v, int iix, int begin, Label[] insnLabels, Map<Integer,Label> exitTrampolineLabels, Set<String> spilledUTypes) {
+        v.visitLabel(insnLabels[iix - begin]);
+        AbstractInsnNode ai = insnList[iix];
+
+        // some instructions require very special handling
+        int opc = ai.getOpcode();
+        if (opc == Opcodes.RETURN) {
+            v.visitInsn(Opcodes.ICONST_M1);
+            v.visitInsn(Opcodes.IRETURN);
+            return;
+        }
+
+        if (opc >= Opcodes.IRETURN && opc <= Opcodes.ARETURN) {
+            int t = opc - Opcodes.IRETURN;
+            v.visitVarInsn(Opcodes.ISTORE + t, nlocal+1);
+            v.visitVarInsn(Opcodes.ALOAD, nlocal);
+            v.visitInsn(Opcodes.ICONST_0);
+            if (opc != Opcodes.ARETURN) {
+                v.visitTypeInsn(Opcodes.NEW, box_types[t]);
+                v.visitInsn(Opcodes.DUP);
+                v.visitVarInsn(Opcodes.ILOAD + t, nlocal+1);
+                v.visitMethodInsn(Opcodes.INVOKESPECIAL, box_types[t], "<init>", box_descs[t]);
+            }
+            v.visitInsn(Opcodes.AASTORE);
+            v.visitInsn(Opcodes.ICONST_M1);
+            v.visitInsn(Opcodes.IRETURN);
+            return;
+        }
+
+        if (opc == Opcodes.NEW) {
+            Frame f = types[iix+1];
+            if (spilledUTypes.contains(f.stack[f.sp-1])) {
+                v.visitInsn(Opcodes.ACONST_NULL);
+                return;
+            }
+        }
+
+        if (opc == Opcodes.INVOKESPECIAL) {
+            MethodInsnNode mi = (MethodInsnNode)ai;
+            Frame f1 = types[iix];
+            Frame f2 = types[iix+1];
+            String uninit = f1.stack[f2.sp];
+            if (mi.name.equals("<init>") && spilledUTypes.contains(uninit)) {
+                if (!f2.stack[f2.sp-1].equals(uninit)) throw new RuntimeException("general case of INVOKESPECIAL spill not implemented");
+                for (int i = 0; i < f2.sp-1; i++) if (f2.stack[i].equals(uninit)) throw new RuntimeException("general case of INVOKESPECIAL spill not implemented");
+
+                int ltmp = nlocal+1;
+                int argc = Type.getArgumentTypes(mi.desc).length;
+                int[] spillarg = new int[argc];
+
+                for (int d = 0; d < argc; d++) {
+                    char ty0 = f1.stack[f1.sp-d-1].charAt(0);
+
+                    spillarg[d] = ltmp;
+                    v.visitVarInsn(ty0 == 'D' ? Opcodes.DSTORE : ty0 == 'J' ? Opcodes.LSTORE : ty0 == 'I' ? Opcodes.ISTORE : ty0 == 'F' ? Opcodes.FSTORE : Opcodes.ASTORE, ltmp);
+                    ltmp += (ty0 == 'D' || ty0 == 'J') ? 2 : 1;
+                }
+                v.visitInsn(Opcodes.POP2);
+                v.visitTypeInsn(Opcodes.NEW, mi.owner);
+                v.visitInsn(Opcodes.DUP);
+
+                for (int d = argc-1; d >= 0; d++) {
+                    char ty0 = f1.stack[f1.sp-d-1].charAt(0);
+                    v.visitVarInsn(ty0 == 'D' ? Opcodes.DLOAD : ty0 == 'J' ? Opcodes.LLOAD : ty0 == 'I' ? Opcodes.ILOAD : ty0 == 'F' ? Opcodes.FLOAD : Opcodes.ALOAD, spillarg[d]);
+                }
+
+                v.visitMethodInsn(Opcodes.INVOKESPECIAL, mi.owner, mi.name, mi.desc);
+                return;
+            }
+        }
+
+        // all other instructions can be processed normally, perhaps with some control-flow fudging
+
+        switch (ai.getType()) {
+            case AbstractInsnNode.JUMP_INSN:
+                {
+                    JumpInsnNode ji = (JumpInsnNode)ai;
+                    v.visitJumpInsn(opc, mapLabel(ji.label, begin, insnLabels, exitTrampolineLabels));
+                    break;
+                }
+            case AbstractInsnNode.TABLESWITCH_INSN:
+                {
+                    TableSwitchInsnNode si = (TableSwitchInsnNode)ai;
+                    Label[] mapped = new Label[si.labels.size()];
+                    for (int i = 0; i < mapped.length; i++)
+                        mapped[i] = mapLabel((LabelNode)si.labels.get(i), begin, insnLabels, exitTrampolineLabels);
+                    v.visitTableSwitchInsn(si.min, si.max, mapLabel(si.dflt, begin, insnLabels, exitTrampolineLabels), mapped);
+                    break;
+                }
+            case AbstractInsnNode.LOOKUPSWITCH_INSN:
+                {
+                    LookupSwitchInsnNode si = (LookupSwitchInsnNode)ai;
+                    Label[] mapped = new Label[si.labels.size()];
+                    for (int i = 0; i < mapped.length; i++)
+                        mapped[i] = mapLabel((LabelNode)si.labels.get(i), begin, insnLabels, exitTrampolineLabels);
+                    int[] keys = new int[si.keys.size()];
+                    for (int i = 0; i < keys.length; i++)
+                        keys[i] = (int)si.keys.get(i);
+                    v.visitLookupSwitchInsn(mapLabel(si.dflt, begin, insnLabels, exitTrampolineLabels), keys, mapped);
+                    break;
+                }
+            default:
+                ai.accept(v);
+                break;
+        }
+    }
+
+    private Label mapLabel(LabelNode ln, int begin, Label[] insnLabels, Map<Integer,Label> exitTrampolineLabels) {
+        int lni = insnMap.get(ln);
+        if (exitTrampolineLabels.containsKey(lni))
+            return exitTrampolineLabels.get(lni);
+
+        return insnLabels[lni - begin];
+    }
+
 
     private void localEntryCode(MethodVisitor v, int loc, String desc) {
         char c0 = desc.charAt(0);
@@ -1169,7 +1383,7 @@ class AutosplitMethodWriter extends MethodNode {
                 v.visitInsn(Opcodes.DUP);
                 pushInt(v, loc);
                 v.visitInsn(Opcodes.AALOAD);
-                if (!desc.equals("Ljava/lang/Object;")) v.visitTypeInsn(Opcodes.CHECKCAST, desc);
+                if (!desc.equals("Ljava/lang/Object;")) v.visitTypeInsn(Opcodes.CHECKCAST, c0 == '[' ? desc : desc.substring(1, desc.length()-1));
                 break;
             default:
                 // dup, ipush, aaload, checkcast, fooValue
@@ -1254,7 +1468,7 @@ class AutosplitMethodWriter extends MethodNode {
                 v.visitVarInsn(Opcodes.ALOAD, stash);
                 pushInt(v, loc);
                 v.visitInsn(Opcodes.AALOAD);
-                if (!desc.equals("java/lang/Object")) v.visitTypeInsn(Opcodes.CHECKCAST, desc);
+                if (!desc.equals("Ljava/lang/Object;")) v.visitTypeInsn(Opcodes.CHECKCAST, c0 == '[' ? desc : desc.substring(1, desc.length()-1));
                 break;
             default:
                 v.visitVarInsn(Opcodes.ALOAD, stash);
