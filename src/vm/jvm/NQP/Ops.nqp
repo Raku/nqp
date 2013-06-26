@@ -45,22 +45,25 @@ $ops.add_hll_op('nqp', 'postinc', -> $qastcomp, $op {
     unless nqp::istype($var, QAST::Var) {
         nqp::die("Post-increment can only work on a variable");
     }
-    $qastcomp.as_jast(QAST::Stmt.new(
-        :resultchild(0),
-        QAST::Op.new(
-            :op('bind'),
-            QAST::Var.new( :name($tmp), :scope('local'), :decl('var'), :returns($var.returns) ),
-            $var
-        ),
-        QAST::Op.new(
-            :op('bind'),
-            $var,
+    $qastcomp.as_jast(QAST::Op.new(
+        :op('local_lifetime'),
+        QAST::Stmt.new(
+            :resultchild(0),
             QAST::Op.new(
-                :op('add_n'),
-                QAST::Var.new( :name($tmp), :scope('local'), :returns($var.returns)  ),
-                QAST::IVal.new( :value(1) )
-            )
-        )));
+                :op('bind'),
+                QAST::Var.new( :name($tmp), :scope('local'), :decl('var'), :returns($var.returns) ),
+                $var
+            ),
+            QAST::Op.new(
+                :op('bind'),
+                $var,
+                QAST::Op.new(
+                    :op('add_n'),
+                    QAST::Var.new( :name($tmp), :scope('local'), :returns($var.returns)  ),
+                    QAST::IVal.new( :value(1) )
+                )
+            )),
+        $tmp));
 });
 
 $ops.add_hll_op('nqp', 'postdec', -> $qastcomp, $op {
@@ -69,22 +72,25 @@ $ops.add_hll_op('nqp', 'postdec', -> $qastcomp, $op {
     unless nqp::istype($var, QAST::Var) {
         nqp::die("Post-decrement can only work on a variable");
     }
-    $qastcomp.as_jast(QAST::Stmt.new(
-        :resultchild(0),
-        QAST::Op.new(
-            :op('bind'),
-            QAST::Var.new( :name($tmp), :scope('local'), :decl('var') ),
-            $var
-        ),
-        QAST::Op.new(
-            :op('bind'),
-            $var,
+    $qastcomp.as_jast(QAST::Op.new(
+        :op('local_lifetime'),
+        QAST::Stmt.new(
+            :resultchild(0),
             QAST::Op.new(
-                :op('sub_n'),
-                QAST::Var.new( :name($tmp), :scope('local') ),
-                QAST::IVal.new( :value(1) )
-            )
-        )));
+                :op('bind'),
+                QAST::Var.new( :name($tmp), :scope('local'), :decl('var') ),
+                $var
+            ),
+            QAST::Op.new(
+                :op('bind'),
+                $var,
+                QAST::Op.new(
+                    :op('sub_n'),
+                    QAST::Var.new( :name($tmp), :scope('local') ),
+                    QAST::IVal.new( :value(1) )
+                )
+            )),
+        $tmp));
 });
 
 $ops.add_hll_op('nqp', 'numify', -> $qastcomp, $op {

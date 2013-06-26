@@ -2230,6 +2230,20 @@ QAST::OperationsJAST.map_classlib_core_op('getlexouter', $TYPE_OPS, 'getlexouter
 QAST::OperationsJAST.map_classlib_core_op('getlexrel', $TYPE_OPS, 'getlexrel', [$RT_OBJ, $RT_STR], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getlexreldyn', $TYPE_OPS, 'getlexreldyn', [$RT_OBJ, $RT_STR], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getlexrelcaller', $TYPE_OPS, 'getlexrelcaller', [$RT_OBJ, $RT_STR], $RT_OBJ, :tc);
+QAST::OperationsJAST.add_core_op('local_lifetime', -> $qastcomp, $op {
+    my @children := nqp::clone($op.list());
+    if @children == 0 {
+        nqp::die('local_lifetime requires at least one child');
+    }
+    my $arg := @children.shift();
+    my $ta := $qastcomp.new_temp_allocator;
+
+    $*BLOCK.tempify($ta, @children);
+    my $res := $qastcomp.as_jast($op[0]);
+    $*BLOCK.untempify($ta, @children);
+
+    $res;
+});
 
 # code object related opcodes
 QAST::OperationsJAST.map_classlib_core_op('takeclosure', $TYPE_OPS, 'takeclosure', [$RT_OBJ], $RT_OBJ, :tc);
@@ -2463,6 +2477,7 @@ class QAST::CompilerJAST {
         has %!lexical_idxs;     # Lexical indexes (but have to know type too)
         has @!lexical_names;    # List by type of lexial name lists
         has int $!num_save_sites;   # Count of points where a SaveStackException handler is needed
+        has %!local2temp;       # Maps local names to temporarization info
         
         method new($qast, $outer) {
             my $obj := nqp::create(self);
@@ -2479,6 +2494,7 @@ class QAST::CompilerJAST {
             %!local_types := nqp::hash();
             %!lexical_types := nqp::hash();
             %!lexical_idxs := nqp::hash();
+            %!local2temp := nqp::hash();
             @!lexical_names := nqp::list([],[],[],[]);
         }
         
@@ -2507,10 +2523,34 @@ class QAST::CompilerJAST {
         }
         
         method add_local($var) {
-            self.register_local($var);
-            @!locals[+@!locals] := $var;
+            my $tempify := %!local2temp{$var.name};
+            if $tempify {
+                if $tempify[0] {
+                    nqp::die("Local '"~$var.name~"' already declared");
+                }
+                my int $type  := rttype_from_typeobj($var.returns);
+                my str $tch   := typechar($type);
+                my str $local := $tempify[1]."fresh_$tch"();
+                $tempify[0] := [ $local, $type ];
+            } else {
+                self.register_local($var);
+                @!locals[+@!locals] := $var;
+            }
         }
-        
+
+        method tempify($ta, @vars) {
+            for @vars -> $v {
+                %!local2temp{$v} := [ '', $ta ];
+            }
+        }
+
+        method untempify($ta, @vars) {
+            for @vars -> $v {
+                nqp::deletekey(%!local2temp, $v);
+            }
+            $ta.release();
+        }
+
         method register_lexical($var) {
             my $name := $var.name;
             my $type := rttype_from_typeobj($var.returns);
@@ -2544,7 +2584,10 @@ class QAST::CompilerJAST {
         method lexicals() { @!lexicals }
         method locals() { @!locals }
         
-        method local_type($name) { %!local_types{$name} }
+        method local_info($name) {
+            my $tempify := %!local2temp{$name};
+            $tempify ?? $tempify[0] !! [ $name, %!local_types{$name} ]
+        }
         method lexical_type($name) { %!lexical_types{$name} }
         method lexical_idx($name) { %!lexical_idxs{$name} }
         method lexical_names_by_type() { @!lexical_names }
@@ -2632,7 +2675,9 @@ class QAST::CompilerJAST {
             $*BLOCK_TA.release(@!used_i, @!used_n, @!used_s, @!used_o)
         }
     }
-    
+
+    method new_temp_allocator() { StmtTempAlloc.new }
+
     method jast($source, :$classname!, *%adverbs) {
         # Wrap $source in a QAST::CompUnit if it's not already a viable root node.
         unless nqp::istype($source, QAST::CompUnit) {
@@ -3214,7 +3259,7 @@ class QAST::CompilerJAST {
             
             # Add all the locals.
             my @all_locals;
-            for $block.locals { nqp::push(@all_locals, [$_.name, $block.local_type($_.name)]) }
+            for $block.locals { nqp::push(@all_locals, $block.local_info($_.name)) }
             $*BLOCK_TA.add_temps_to_set(@all_locals);
 
             for @all_locals {
@@ -3639,7 +3684,8 @@ class QAST::CompilerJAST {
         
         # Now go by scope.
         if $scope eq 'local' {
-            my $type := $*BLOCK.local_type($name);
+            my $info := $*BLOCK.local_info($name);
+            my $type := $info[1];
             if nqp::defined($type) {
                 my $il := JAST::InstructionList.new();
                 if $*BINDVAL {
@@ -3647,10 +3693,10 @@ class QAST::CompilerJAST {
                     $il.append($valres.jast);
                     $*STACK.obtain($il, $valres);
                     $il.append(dup_ins($type));
-                    $il.append(JAST::Instruction.new( :op(store_ins($type)), $name ));
+                    $il.append(JAST::Instruction.new( :op(store_ins($type)), $info[0] ));
                 }
                 else {
-                    $il.append(JAST::Instruction.new( :op(load_ins($type)), $name ));
+                    $il.append(JAST::Instruction.new( :op(load_ins($type)), $info[0] ));
                 }
                 return result($il, $type);
             }

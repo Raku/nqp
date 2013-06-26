@@ -1374,7 +1374,7 @@ class NQP::Actions is HLL::Actions {
 
     method term:sym<onlystar>($/) {
         my $dc_name := QAST::Node.unique('dispatch_cap');
-        make QAST::Stmts.new(
+        my $stmts := QAST::Stmts.new(
             QAST::Op.new(
                 :op('bind'),
                 QAST::Var.new( :name($dc_name), :scope('local'), :decl('var') ),
@@ -1401,6 +1401,7 @@ class NQP::Actions is HLL::Actions {
                 ),
                 QAST::Var.new( :name($dc_name), :scope('local') )
             ));
+        make QAST::Op.new( :op('local_lifetime'), $stmts, $dc_name );
     }
 
     method args($/) { make $<arglist>.ast; }
@@ -1641,6 +1642,7 @@ class NQP::Actions is HLL::Actions {
                         ),
                         default_for('$')
                     ));
+                $path := QAST::Op.new( :op('local_lifetime'), $path, $path_temp );
             }
             $lookup.unshift(QAST::Op.new(:op('who'), $path));
             my $sigil := nqp::substr(~$final_name, 0, 1);
