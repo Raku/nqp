@@ -35,6 +35,7 @@ class AutosplitMethodWriter extends MethodNode {
 
     /** Maximum size of a method to leave alone. */
     private static final int MAX_UNSPLIT_METHOD = 65535;
+    private static final int MAX_FRAGMENT = 65535;
 
     /** True to dump control flow analysis. */
     private static final boolean DEBUG_CONTROL = false;
@@ -98,7 +99,30 @@ class AutosplitMethodWriter extends MethodNode {
                 System.out.printf("from=%d to=%d frag=%d\n", 0,i,calcFragmentSize(0, i));
         }
 
+        int taken = 0;
+        while (taken < insnList.length) {
+            if (calcFragmentSize(taken, taken+1) > MAX_FRAGMENT)
+                throw new RuntimeException("cannot take even one more instruction at "+taken);
+            int takeable = bite(taken, 1, insnList.length - taken);
+
+            System.out.printf("fragment: %d - %d (max %d bytes)\n", taken, taken + takeable - 1, calcFragmentSize(taken, taken+takeable));
+            taken += takeable;
+        }
+
         //System.exit(1);
+    }
+
+    private int bite(int from, int min_take, int max_take) { /* min_take is known good */
+        while (true) {
+            if (min_take == max_take) return min_take;
+            int mid_take = (min_take + max_take + 1) / 2;
+
+            if (calcFragmentSize(from, from+mid_take) <= MAX_FRAGMENT) {
+                min_take = mid_take;
+            } else {
+                max_take = mid_take-1;
+            }
+        }
     }
 
     private boolean isRealInsn(AbstractInsnNode node) {
