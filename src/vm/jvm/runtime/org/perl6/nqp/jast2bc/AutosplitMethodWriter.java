@@ -665,21 +665,23 @@ class AutosplitMethodWriter extends MethodNode {
 
     private static class TypeInference {
         public Frame[] frames;
-        int[] changedStack;
-        int changedSp;
+        int[] changedQueue;
+        int changedHead;
+        int changedTail;
         boolean[] changedVec;
 
 
         public TypeInference(int size) {
             frames = new Frame[size];
 
-            changedStack = new int[size];
+            changedQueue = new int[size+1];
             changedVec = new boolean[size];
         }
 
         public int next() {
-            if (changedSp == 0) return -1;
-            int n = changedStack[--changedSp];
+            if (changedHead == changedTail) return -1;
+            int n = changedQueue[changedTail++];
+            if (changedTail == changedQueue.length) changedTail = 0;
             changedVec[n] = false;
             return n;
         }
