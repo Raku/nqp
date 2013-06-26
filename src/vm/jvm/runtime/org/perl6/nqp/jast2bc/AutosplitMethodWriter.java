@@ -39,6 +39,7 @@ class AutosplitMethodWriter extends MethodNode {
 
     /** True to dump control flow analysis. */
     private static final boolean DEBUG_CONTROL = false;
+    private static final boolean DEBUG_FRAGMENT = true;
     private static final boolean TYPE_TRACE = false;
 
     /** The real instructions (not branches) in program order.  Filled out by {@link getControlFlow()}. */
@@ -52,6 +53,9 @@ class AutosplitMethodWriter extends MethodNode {
     private int[] depth;
     private int[] baselineSize;
     private Frame[] types;
+
+    private int nextJumpNo;
+    private int[] jumpNoMap;
 
     private static class ControlEdge {
         public final int from, to;
@@ -86,7 +90,7 @@ class AutosplitMethodWriter extends MethodNode {
 
         /* we need to split this thing */
 
-        System.out.printf("method=%s min=%d max=%d\n", name, cse.getMinSize(), cse.getMaxSize());
+        if (DEBUG_FRAGMENT) System.out.printf("method=%s min=%d max=%d\n", name, cse.getMinSize(), cse.getMaxSize());
 
         getInstructions();
         getControlFlow();
@@ -99,17 +103,27 @@ class AutosplitMethodWriter extends MethodNode {
                 System.out.printf("from=%d to=%d frag=%d\n", 0,i,calcFragmentSize(0, i));
         }
 
+        jumpNoMap = new int[insnList.length];
+        Arrays.fill(jumpNoMap, -1);
+        List<Integer> fragmentSizes = new ArrayList< >();
         int taken = 0;
         while (taken < insnList.length) {
             if (calcFragmentSize(taken, taken+1) > MAX_FRAGMENT)
                 throw new RuntimeException("cannot take even one more instruction at "+taken);
             int takeable = bite(taken, 1, insnList.length - taken);
 
-            System.out.printf("fragment: %d - %d (max %d bytes)\n", taken, taken + takeable - 1, calcFragmentSize(taken, taken+takeable));
+            if (DEBUG_FRAGMENT) System.out.printf("fragment: %d - %d (max %d bytes)\n", taken, taken + takeable - 1, calcFragmentSize(taken, taken+takeable));
+            fragmentSizes.add(takeable);
+            allocateJumpNrs(taken, taken+takeable);
             taken += takeable;
         }
 
-        //System.exit(1);
+        taken = 0;
+        int fno = 0;
+        for (int sz : fragmentSizes) {
+            emitFragment(fno++, taken, taken+sz);
+            taken += sz;
+        }
     }
 
     private int bite(int from, int min_take, int max_take) { /* min_take is known good */
@@ -801,7 +815,7 @@ class AutosplitMethodWriter extends MethodNode {
                 state.merge(ce.to, in);
             }
             step++;
-            if ((step % 10000) == 0) System.out.printf("Inference step %d\n", step);
+            if (DEBUG_FRAGMENT && (step % 10000) == 0) System.out.printf("Inference step %d\n", step);
         }
         types = state.frames;
     }
@@ -922,10 +936,7 @@ class AutosplitMethodWriter extends MethodNode {
         if (DEBUG_CONTROL) System.out.println(Arrays.toString(baselineSize));
     }
 
-    private int calcFragmentSize(int from, int to) {
-        // we have to include the instructions
-        int base = baselineSize[to] - baselineSize[from];
-
+    private int[][] nonlocalEntryExit(int from, int to) {
         // need to include entry trampolines and exit trampolines
         int[] entryPts = new int[to-from];
         int entryCt = 0;
@@ -951,14 +962,26 @@ class AutosplitMethodWriter extends MethodNode {
             entryPts[entryCt++] = 0;
         }
 
-        if (DEBUG_CONTROL) {
-            System.out.printf("NONLOCAL ENTRY: %s\n", Arrays.toString(Arrays.copyOfRange(entryPts,0,entryCt)));
-            System.out.printf("NONLOCAL EXIT: %s\n", Arrays.toString(Arrays.copyOfRange(exitPts,0,exitCt)));
-        }
+        entryPts = Arrays.copyOf(entryPts, entryCt);
+        exitPts = Arrays.copyOf(exitPts, exitCt);
 
+        if (DEBUG_CONTROL) {
+            System.out.printf("NONLOCAL ENTRY: %s\n", Arrays.toString(entryPts));
+            System.out.printf("NONLOCAL EXIT: %s\n", Arrays.toString(exitPts));
+        }
+        return new int[][] { entryPts, exitPts };
+    }
+
+    private int calcFragmentSize(int from, int to) {
+        // we have to include the instructions
+        int base = baselineSize[to] - baselineSize[from];
+
+        int[][] ee = nonlocalEntryExit(from, to);
+        int[] entryPts = ee[0];
+        int[] exitPts = ee[1];
         // factor out commonalities from the trampolines
-        String[] commonEntry = commonTrampoline(entryPts, entryCt);
-        String[] commonExit  = commonTrampoline(exitPts, exitCt);
+        String[] commonEntry = commonTrampoline(entryPts);
+        String[] commonExit  = commonTrampoline(exitPts);
 
         // common entry code
         // aload; {dup; ipush; aaload; UNBOX; xstore; }; iload; tableswitch
@@ -972,9 +995,9 @@ class AutosplitMethodWriter extends MethodNode {
         // uncommon entry code
         int uentry = 0;
 
-        for (int i = 0; i < entryCt; i++) {
+        for (int ept : entryPts) {
             uentry += 4; // dispatch vector
-            Frame f = types[entryPts[i]];
+            Frame f = types[ept];
             for (int j = 0; j < f.sp; j++) {
                 if (j < commonEntry.length && commonEntry[j].equals(f.stack[j])) {
                     /* no action */
@@ -992,8 +1015,8 @@ class AutosplitMethodWriter extends MethodNode {
         int uexit = 3;
 
         // uncommon exit code
-        for (int i = 0; i < exitCt; i++) {
-            Frame f = types[exitPts[i]];
+        for (int pt : exitPts) {
+            Frame f = types[pt];
             for (int j = 0; j < f.sp; j++) {
                 if (j < commonExit.length && commonExit[j].equals(f.stack[j])) {
                     /* no action */
@@ -1016,7 +1039,7 @@ class AutosplitMethodWriter extends MethodNode {
 
         int total = centry + uentry + base + uexit + cexit;
 
-        System.out.printf("calcSize: %d-%d : centry(%d) uentry(%d) base(%d) uexit(%d) cexit(%d) total(%d)\n", from, to, centry, uentry, base, uexit, cexit, total);
+        if (DEBUG_FRAGMENT) System.out.printf("calcSize: %d-%d : centry(%d) uentry(%d) base(%d) uexit(%d) cexit(%d) total(%d)\n", from, to, centry, uentry, base, uexit, cexit, total);
 
         return total;
     }
@@ -1090,9 +1113,9 @@ class AutosplitMethodWriter extends MethodNode {
         }
     }
 
-    private String[] commonTrampoline(int[] points, int ct) {
+    private String[] commonTrampoline(int[] points) {
         String[] common = null;
-        for (int i = 0; i < ct; i++) {
+        for (int i = 0; i < points.length; i++) {
             Frame f = types[points[i]];
             if (common == null) {
                 common = Arrays.copyOf(f.stack, nlocal);
@@ -1104,5 +1127,175 @@ class AutosplitMethodWriter extends MethodNode {
             }
         }
         return common == null ? new String[] { } : common;
+    }
+
+    private void allocateJumpNrs(int begin, int end) {
+        boolean[] entryDedup = new boolean[end-begin];
+        int firstEntry = nextJumpNo;
+
+        for (ControlEdge ce : controlEdges) {
+            boolean from_this = (ce.from >= begin && ce.from < end);
+            boolean to_this   = (ce.to >= begin && ce.to < end);
+            if (!from_this && to_this) {
+                entryDedup[ce.to-begin] = true;
+            }
+        }
+
+        if (begin == 0) entryDedup[0] = true;
+
+        for (int i = begin; i < end; i++) {
+            if (entryDedup[i - begin]) jumpNoMap[i] = nextJumpNo++;
+        }
+
+        if (DEBUG_FRAGMENT) System.out.printf("Fragment %d-%d has jump numbers %d-%d\n", begin, end, firstEntry, nextJumpNo);
+    }
+
+    private void emitFragment(int fno, int begin, int end) {
+    }
+
+    private void localEntryCode(MethodVisitor v, int loc, String desc) {
+        char c0 = desc.charAt(0);
+        if (c0 == 'T') return; // not loaded
+        int sz;
+        switch (c0) {
+            case '0':
+            case 'U':
+                // just load as a null
+                v.visitInsn(Opcodes.ACONST_NULL);
+                break;
+            case 'L':
+            case '[':
+                // dup, ipush, aaload, checkcast
+                v.visitInsn(Opcodes.DUP);
+                pushInt(v, loc);
+                v.visitInsn(Opcodes.AALOAD);
+                if (!desc.equals("Ljava/lang/Object;")) v.visitTypeInsn(Opcodes.CHECKCAST, desc);
+                break;
+            default:
+                // dup, ipush, aaload, checkcast, fooValue
+                v.visitInsn(Opcodes.DUP);
+                pushInt(v, loc);
+                v.visitInsn(Opcodes.AALOAD);
+                unbox(v, c0);
+                v.visitVarInsn( c0=='I' ? Opcodes.ISTORE : c0=='J' ? Opcodes.LSTORE : c0=='F' ? Opcodes.FSTORE : Opcodes.DSTORE, loc );
+                return;
+        }
+        v.visitVarInsn(Opcodes.ASTORE, loc);
+    }
+
+    private void pushInt(MethodVisitor v, int value) {
+        if (value >= -1 && value <= 5)
+            v.visitInsn(Opcodes.ICONST_0 + value);
+        else if (value >= -128 && value <= 127)
+            v.visitIntInsn(Opcodes.BIPUSH, value);
+        else if (value >= -32768 && value <= 32767)
+            v.visitIntInsn(Opcodes.SIPUSH, value);
+        else
+            v.visitLdcInsn(value);
+    }
+
+    private void unbox(MethodVisitor v, char c0) {
+        String c,m,d;
+        switch (c0) {
+            case 'I': c = "java/lang/Integer"; m = "intValue";    d = "()I"; break;
+            case 'J': c = "java/lang/Long";    m = "longValue";   d = "()J"; break;
+            case 'F': c = "java/lang/Float";   m = "floatValue";  d = "()F"; break;
+            case 'D': c = "java/lang/Double";  m = "doubleValue"; d = "()D"; break;
+            default: throw new IllegalArgumentException();
+        }
+        v.visitTypeInsn(Opcodes.CHECKCAST, c);
+        v.visitMethodInsn(Opcodes.INVOKEVIRTUAL, c, m, d);
+    }
+
+    private void localExitCode(MethodVisitor v, int loc, String desc) {
+        char c0 = desc.charAt(0);
+        if (c0 == 'T' || c0 == '0' || c0 == 'U') return; // not saved
+        switch (c0) {
+            case 'L':
+            case '[':
+                v.visitInsn(Opcodes.DUP);
+                pushInt(v, loc);
+                v.visitVarInsn(Opcodes.ALOAD, loc);
+                v.visitInsn(Opcodes.AASTORE);
+                break;
+            default:
+                v.visitInsn(Opcodes.DUP);
+                pushInt(v, loc);
+                {
+                    String ty;
+                    int load;
+                    switch (c0) {
+                        case 'I': ty = "java/lang/Integer"; load = Opcodes.ILOAD; break;
+                        case 'J': ty = "java/lang/Long"; load = Opcodes.ILOAD; break;
+                        case 'F': ty = "java/lang/Float"; load = Opcodes.ILOAD; break;
+                        case 'D': ty = "java/lang/Double"; load = Opcodes.ILOAD; break;
+                        default: throw new IllegalArgumentException(desc);
+                    }
+
+                    v.visitTypeInsn(Opcodes.NEW, ty);
+                    v.visitInsn(Opcodes.DUP);
+                    v.visitVarInsn(load, loc);
+                    v.visitMethodInsn(Opcodes.INVOKESPECIAL, ty, "<init>", "("+c0+")V");
+                }
+                v.visitInsn(Opcodes.AASTORE);
+                break;
+        }
+    }
+
+    private void stackEntryCode(MethodVisitor v, int stash, int loc, String desc) {
+        char c0 = desc.charAt(0);
+        switch (c0) {
+            case '0':
+            case 'U':
+                v.visitInsn(Opcodes.ACONST_NULL);
+                break;
+            case 'L':
+            case '[':
+                v.visitVarInsn(Opcodes.ALOAD, stash);
+                pushInt(v, loc);
+                v.visitInsn(Opcodes.AALOAD);
+                if (!desc.equals("java/lang/Object")) v.visitTypeInsn(Opcodes.CHECKCAST, desc);
+                break;
+            default:
+                v.visitVarInsn(Opcodes.ALOAD, stash);
+                pushInt(v, loc);
+                v.visitInsn(Opcodes.AALOAD);
+                unbox(v, c0);
+                break;
+        }
+    }
+
+    private void stackExitCode(MethodVisitor v, int stash, int scratch, int loc, String desc) {
+        char c0 = desc.charAt(0);
+        if (c0 == 'T' || c0 == '0' || c0 == 'U') {
+            v.visitInsn(Opcodes.POP);
+            return;
+        }
+        String ty;
+        int load, store;
+        switch (c0) {
+            case 'L':
+            case '[':
+                v.visitVarInsn(Opcodes.ASTORE, scratch);
+                v.visitVarInsn(Opcodes.ALOAD, stash);
+                pushInt(v, loc);
+                v.visitVarInsn(Opcodes.ALOAD, scratch);
+                v.visitInsn(Opcodes.AASTORE);
+                return;
+            case 'I': ty = "java/lang/Integer"; load = Opcodes.ILOAD; store = Opcodes.ISTORE; break;
+            case 'J': ty = "java/lang/Long"; load = Opcodes.LLOAD; store = Opcodes.LSTORE; break;
+            case 'F': ty = "java/lang/Float"; load = Opcodes.FLOAD; store = Opcodes.FSTORE; break;
+            case 'D': ty = "java/lang/Double"; load = Opcodes.DLOAD; store = Opcodes.DSTORE; break;
+            default: throw new IllegalArgumentException(desc);
+        }
+
+        v.visitVarInsn(store, scratch);
+        v.visitVarInsn(Opcodes.ALOAD, stash);
+        pushInt(v, loc);
+        v.visitTypeInsn(Opcodes.NEW, ty);
+        v.visitInsn(Opcodes.DUP);
+        v.visitVarInsn(load, scratch);
+        v.visitMethodInsn(Opcodes.INVOKESPECIAL, ty, "<init>", "("+c0+")V");
+        v.visitInsn(Opcodes.AASTORE);
     }
 }
