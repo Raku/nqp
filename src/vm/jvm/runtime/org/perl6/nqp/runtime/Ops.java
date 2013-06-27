@@ -2885,11 +2885,19 @@ public final class Ops {
         canonNames.put("insupplementaryprivateuseareab", "InSupplementaryPrivateUseArea-B");
     }
     public static long ischarprop(String propName, String target, long offset) {
-        String canon = canonNames.get(propName.toLowerCase());
-        if (canon != null)
-            propName = canon;
-        String check = target.substring((int)offset, (int)offset + 1);
-        return check.matches("\\p{" + propName + "}") ? 1 : 0;
+        String check = target.substring((int)offset, Math.min((int)offset + 2, target.length()));
+        try {
+            // This throws if we can't get the script name, meaning it's
+            // not a script.
+            Character.UnicodeScript script = Character.UnicodeScript.forName(propName);
+            return Character.UnicodeScript.of(check.codePointAt(0)) == script ? 1 : 0;
+        }
+        catch (IllegalArgumentException e) {
+            String canon = canonNames.get(propName.toLowerCase());
+            if (canon != null)
+                propName = canon;
+            return check.matches("\\p{" + propName + "}") ? 1 : 0;
+        }
     }
     
     public static String bitor_s(String a, String b) {
