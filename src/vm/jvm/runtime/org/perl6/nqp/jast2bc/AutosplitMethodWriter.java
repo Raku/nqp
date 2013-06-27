@@ -10,6 +10,7 @@ import org.objectweb.asm.commons.CodeSizeEvaluator;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.IincInsnNode;
+import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.InvokeDynamicInsnNode;
@@ -131,6 +132,9 @@ class AutosplitMethodWriter extends MethodNode {
             emitFragment(fno++, taken, taken+sz);
             taken += sz;
         }
+
+        becomeWrapper();
+        accept(target);
     }
 
     private int bite(int from, int min_take, int max_take) { /* min_take is known good */
@@ -1256,7 +1260,7 @@ class AutosplitMethodWriter extends MethodNode {
         // common entry code
         // aload; {dup; ipush; aaload; UNBOX; xstore; }; iload; tableswitch
         v.visitVarInsn(Opcodes.ILOAD, 0);
-        v.visitVarInsn(Opcodes.ALOAD, 0);
+        v.visitVarInsn(Opcodes.ALOAD, 1);
 
         for (int i = 0; i < commonEntry.length; i++) {
             localEntryCode(v, i, commonEntry[i]);
@@ -1608,5 +1612,106 @@ class AutosplitMethodWriter extends MethodNode {
         v.visitVarInsn(load, scratch);
         v.visitMethodInsn(Opcodes.INVOKESPECIAL, ty, "<init>", "("+c0+")V");
         v.visitInsn(Opcodes.AASTORE);
+    }
+
+    private void becomeWrapper() {
+        int maxStack = 0;
+        for (Frame f : types)
+            maxStack = Math.max(maxStack, f.sp);
+
+        tryCatchBlocks = null;
+        localVariables = null;
+        instructions.clear();
+
+        // allocate the scratchpad
+        instructions.add(intNode(maxStack));
+        instructions.add(new TypeInsnNode(Opcodes.ANEWARRAY, "Ljava/lang/Object;"));
+        // move the arguments onto the scratchpad
+        int ltmp = 0;
+        if ((access & Opcodes.ACC_STATIC) == 0) ltmp += saveArg(instructions, ltmp, Type.getType(Object.class));
+        for (Type at : Type.getArgumentTypes(desc)) ltmp += saveArg(instructions, ltmp, at);
+
+        instructions.add(new VarInsnNode(Opcodes.ASTORE, 0));
+        instructions.add(intNode(0));
+        instructions.add(new VarInsnNode(Opcodes.ISTORE, 1));
+
+        LabelNode loop = new LabelNode();
+        instructions.add(loop);
+
+        for (int i = firstJump.size() - 1; i >= 0; i--) {
+            LabelNode not_my_problem = new LabelNode();
+            instructions.add(new VarInsnNode(Opcodes.ILOAD, 1));
+            instructions.add(intNode(firstJump.get(i)));
+            instructions.add(new JumpInsnNode(Opcodes.IF_ICMPLT, not_my_problem));
+            instructions.add(new VarInsnNode(Opcodes.ILOAD, 1));
+            instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
+            instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, tgtype, name + "$f" + i, "(I[Ljava/lang/Object;)I"));
+            instructions.add(new VarInsnNode(Opcodes.ISTORE, 1));
+            instructions.add(new JumpInsnNode(Opcodes.GOTO, loop));
+            instructions.add(not_my_problem);
+        }
+
+        // time for return
+        String rty = null, unboxName = null, unboxDesc = null;
+        int retinst;
+        Type rtyty = Type.getReturnType(desc);
+        switch (rtyty.getSort()) {
+            case Type.VOID:
+                retinst = Opcodes.RETURN; break;
+            case Type.BOOLEAN:
+            case Type.CHAR:
+            case Type.INT:
+            case Type.SHORT:
+            case Type.BYTE:
+                retinst = Opcodes.IRETURN; rty = "java/lang/Integer"; unboxName = "intValue"; unboxDesc = "()I"; break;
+            case Type.LONG:
+                retinst = Opcodes.LRETURN; rty = "java/lang/Long"; unboxName = "longValue"; unboxDesc = "()J"; break;
+            case Type.FLOAT:
+                retinst = Opcodes.FRETURN; rty = "java/lang/Float"; unboxName = "floatValue"; unboxDesc = "()F"; break;
+            case Type.DOUBLE:
+                retinst = Opcodes.DRETURN; rty = "java/lang/Double"; unboxName = "doubleValue"; unboxDesc = "()D"; break;
+            default:
+                retinst = Opcodes.ARETURN; rty = rtyty.getInternalName(); break;
+        }
+
+        if (rty != null) {
+            instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
+            instructions.add(new TypeInsnNode(Opcodes.CHECKCAST, rty));
+            if (unboxName != null)
+                instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, rty, unboxName, unboxDesc));
+        }
+        instructions.add(new InsnNode(retinst));
+    }
+
+    private int saveArg(InsnList il, int ltmp, Type at) {
+        il.add(new InsnNode(Opcodes.DUP));
+        il.add(intNode(ltmp));
+        int opc;
+        String ty = null, desc = null;
+        switch (at.getSort()) {
+            case Type.BOOLEAN:
+            case Type.CHAR:
+            case Type.INT:
+            case Type.SHORT:
+            case Type.BYTE:
+                opc = Opcodes.ILOAD; ty = "java/lang/Integer"; desc = "(I)V"; break;
+            case Type.LONG:
+                opc = Opcodes.LLOAD; ty = "java/lang/Long"; desc = "(J)V"; break;
+            case Type.FLOAT:
+                opc = Opcodes.FLOAD; ty = "java/lang/Float"; desc = "(F)V"; break;
+            case Type.DOUBLE:
+                opc = Opcodes.DLOAD; ty = "java/lang/Double"; desc = "(D)V"; break;
+            default:
+                opc = Opcodes.ALOAD; break;
+        }
+
+        if (ty != null) {
+            il.add(new TypeInsnNode(Opcodes.NEW, ty));
+            il.add(new InsnNode(Opcodes.DUP));
+        }
+        il.add(new VarInsnNode(opc, ltmp));
+        if (ty != null) il.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, ty, "<init>", desc));
+        il.add(new InsnNode(Opcodes.AASTORE));
+        return at.getSize();
     }
 }
