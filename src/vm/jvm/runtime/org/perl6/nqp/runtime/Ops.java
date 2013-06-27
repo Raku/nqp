@@ -2861,7 +2861,33 @@ public final class Ops {
         return end;        
     }
     
+    private static HashMap<String,String> canonNames = new HashMap<String, String>();
+    static {
+        canonNames.put("inlatin1supplement", "InLatin-1Supplement");
+        canonNames.put("inlatinextendeda", "InLatinExtended-A");
+        canonNames.put("inlatinextendedb", "InLatinExtended-B");
+        canonNames.put("inarabicextendeda", "InArabicExtended-A");
+        canonNames.put("inmiscellaneousmathematicalsymbolsa", "InMiscellaneousMathematicalSymbols-A");
+        canonNames.put("insupplementalarrowsa", "InSupplementalArrows-A");
+        canonNames.put("insupplementalarrowsb", "InSupplementalArrows-B");
+        canonNames.put("inmiscellaneousmathematicalsymbolsb", "InMiscellaneousMathematicalSymbols-B");
+        canonNames.put("inlatinextendedc", "InLatinExtended-C");
+        canonNames.put("incyrillicextendeda", "InCyrillicExtended-A");
+        canonNames.put("incyrillicextendedb", "InCyrillicExtended-B");
+        canonNames.put("inlatinextendedd", "InLatinExtended-D");
+        canonNames.put("inhanguljamoextendeda", "InHangulJamoExtended-A");
+        canonNames.put("inmyanmarextendeda", "InMyanmarExtended-A");
+        canonNames.put("inethiopicextendeda", "InEthiopicExtended-A");
+        canonNames.put("inhanguljamoextendedb", "InHangulJamoExtended-B");
+        canonNames.put("inarabicpresentationformsa", "InArabicPresentationForms-A");
+        canonNames.put("inarabicpresentationformsb", "InArabicPresentationForms-B");
+        canonNames.put("insupplementaryprivateuseareaa", "InSupplementaryPrivateUseArea-A");
+        canonNames.put("insupplementaryprivateuseareab", "InSupplementaryPrivateUseArea-B");
+    }
     public static long ischarprop(String propName, String target, long offset) {
+        String canon = canonNames.get(propName.toLowerCase());
+        if (canon != null)
+            propName = canon;
         String check = target.substring((int)offset, (int)offset + 1);
         return check.matches("\\p{" + propName + "}") ? 1 : 0;
     }
