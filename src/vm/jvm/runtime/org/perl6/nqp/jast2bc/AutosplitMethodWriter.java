@@ -10,6 +10,7 @@ import org.objectweb.asm.commons.CodeSizeEvaluator;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.IincInsnNode;
+import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.InvokeDynamicInsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
@@ -39,6 +40,7 @@ class AutosplitMethodWriter extends MethodNode {
     /** Maximum size of a method to leave alone. */
     private static final int MAX_UNSPLIT_METHOD = 65535;
     private static final int MAX_FRAGMENT = 65535;
+    private static final int MAX_SWITCH = 256;
 
     /** True to dump control flow analysis. */
     private static final boolean DEBUG_CONTROL = false;
@@ -96,6 +98,7 @@ class AutosplitMethodWriter extends MethodNode {
 
         if (DEBUG_FRAGMENT) System.out.printf("method=%s min=%d max=%d\n", name, cse.getMinSize(), cse.getMaxSize());
 
+        splitSwitches();
         getInstructions();
         getControlFlow();
         if (DEBUG_CONTROL) printControlFlow();
@@ -152,6 +155,79 @@ class AutosplitMethodWriter extends MethodNode {
             default:
                 return true;
         }
+    }
+
+    /** Break apart large switch instructions so that they may fit in a fragment. Runs before {@link getInstructions} because it changes instruction sequence. */
+    private void splitSwitches() {
+        AbstractInsnNode ptr = instructions.getFirst();
+
+        while (ptr != null) {
+            int cutoff = 0;
+            AbstractInsnNode left = null, right = null;
+
+            switch (ptr.getType()) {
+                case AbstractInsnNode.LOOKUPSWITCH_INSN:
+                    {
+                        LookupSwitchInsnNode lsi = (LookupSwitchInsnNode) ptr;
+                        if (lsi.labels.size() <= MAX_SWITCH) break;
+                        LookupSwitchInsnNode lsl = new LookupSwitchInsnNode(lsi.dflt, new int[0], new LabelNode[0]);
+                        LookupSwitchInsnNode lsr = new LookupSwitchInsnNode(lsi.dflt, new int[0], new LabelNode[0]);
+
+                        int lsisz = lsi.labels.size();
+                        lsl.keys.addAll(lsi.keys.subList(0, lsisz / 2));
+                        lsr.keys.addAll(lsi.keys.subList(lsisz / 2, lsisz));
+                        lsl.labels.addAll(lsi.labels.subList(0, lsisz / 2));
+                        lsr.labels.addAll(lsi.labels.subList(lsisz / 2, lsisz));
+                        left = lsl;
+                        right = lsr;
+                        cutoff = (Integer)lsr.keys.get(0);
+                    }
+                    break;
+
+                case AbstractInsnNode.TABLESWITCH_INSN:
+                    {
+                        TableSwitchInsnNode lsi = (TableSwitchInsnNode) ptr;
+                        if (lsi.labels.size() <= MAX_SWITCH) break;
+                        cutoff = (lsi.min + lsi.max) / 2;
+                        TableSwitchInsnNode lsl = new TableSwitchInsnNode(lsi.min, cutoff-1, lsi.dflt);
+                        TableSwitchInsnNode lsr = new TableSwitchInsnNode(cutoff, lsi.max, lsi.dflt);
+
+                        int lsisz = lsi.labels.size();
+
+                        lsl.labels.addAll(lsi.labels.subList(0, cutoff - lsi.min));
+                        lsr.labels.addAll(lsi.labels.subList(cutoff - lsi.min, lsi.max + 1 - lsi.min));
+                        left = lsl;
+                        right = lsr;
+                    }
+                    break;
+
+                default: break;
+            }
+
+            if (left != null) {
+                if (DEBUG_FRAGMENT) System.out.printf("Breaking switch at %d\n", cutoff);
+
+                LabelNode high = new LabelNode();
+                instructions.insertBefore(ptr, new InsnNode(Opcodes.DUP));
+                instructions.insertBefore(ptr, intNode(cutoff));
+                instructions.insertBefore(ptr, new JumpInsnNode(Opcodes.IF_ICMPGE, high));
+                instructions.insertBefore(ptr, left);
+                instructions.insertBefore(ptr, high);
+                instructions.insertBefore(ptr, right);
+                instructions.remove(ptr);
+
+                ptr = left;
+            } else {
+                ptr = ptr.getNext();
+            }
+        }
+    }
+
+    private AbstractInsnNode intNode(int value) {
+        return (value >= -1   && value <= 5) ? new InsnNode(Opcodes.ICONST_0 + value) :
+               (value >= -128 && value <= 127) ? new IntInsnNode(Opcodes.BIPUSH, value) :
+               (value >= -32768 && value <= 32767) ? new IntInsnNode(Opcodes.SIPUSH, value) :
+               new LdcInsnNode(value);
     }
 
     /** Extract the real instructions from the instruction list. */
