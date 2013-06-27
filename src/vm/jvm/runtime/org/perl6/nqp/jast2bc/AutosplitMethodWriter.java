@@ -6,7 +6,6 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.commons.CodeSizeEvaluator;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.IincInsnNode;
@@ -85,10 +84,11 @@ class AutosplitMethodWriter extends MethodNode {
     public void visitEnd() {
         super.visitEnd();
 
-        CodeSizeEvaluator cse = new CodeSizeEvaluator(null);
-        accept(cse);
+        int maxsize = 0;
+        for (AbstractInsnNode ai = instructions.getFirst(); ai != null; ai = ai.getNext())
+            maxsize += insnSize(ai);
 
-        if (cse.getMaxSize() <= MAX_UNSPLIT_METHOD) {
+        if (maxsize <= MAX_UNSPLIT_METHOD) {
             // hey cool, we don't need to do anything fancy here
             MethodVisitor mw = target.visitMethod(access, name, desc, signature, ((List<String>)exceptions).toArray(new String[0]));
             accept(mw);
@@ -97,7 +97,7 @@ class AutosplitMethodWriter extends MethodNode {
 
         /* we need to split this thing */
 
-        if (DEBUG_FRAGMENT) System.out.printf("method=%s min=%d max=%d\n", name, cse.getMinSize(), cse.getMaxSize());
+        if (DEBUG_FRAGMENT) System.out.printf("method=%s max=%d\n", name, maxsize);
 
         splitSwitches();
         getInstructions();
@@ -946,7 +946,7 @@ class AutosplitMethodWriter extends MethodNode {
             case AbstractInsnNode.MULTIANEWARRAY_INSN:
                 return 4;
             default:
-                throw new RuntimeException();
+                return 0;
         }
     }
 
