@@ -673,7 +673,7 @@ class AutosplitMethodWriter extends MethodNode {
                         a = stack[--sp]; // pop this
                         // initialize
                         if (a.charAt(0) == 'U') {
-                            b = a.substring(a.indexOf(':')+1);
+                            b = a.substring(a.indexOf(':')+1).intern();
                             for (int i = 0; i < stack.length; i++)
                                 if (a == stack[i]) stack[i] = b;
                         }
@@ -804,6 +804,7 @@ class AutosplitMethodWriter extends MethodNode {
                 String c = lub(a,b);
                 if (b != c) {
                     //System.out.printf("%d.%d %s -> %s\n", index, i, b, c);
+                    if (DEBUG_FRAGMENT && a != c && b != c) System.out.printf("%d.%d  %s | %s => %s\n", index, i, a, b, c);
                     slot.stack[i] = c;
                     changed = true;
                 }
@@ -853,6 +854,9 @@ class AutosplitMethodWriter extends MethodNode {
                 // at this point in a real verifier we would load the named classes and use their common superclass
                 // lub(P6OpaqueInstance, CodeRef) = SixModelObject
                 // punt.
+                if (a == "Lorg/perl6/nqp/runtime/CodeRef;" && b == "Lorg/perl6/nqp/sixmodel/SixModelObject;") return b;
+                if (b == "Lorg/perl6/nqp/runtime/CodeRef;" && a == "Lorg/perl6/nqp/sixmodel/SixModelObject;") return a;
+
                 return "Ljava/lang/Object;";
             }
         }
@@ -902,6 +906,18 @@ class AutosplitMethodWriter extends MethodNode {
             if (DEBUG_FRAGMENT && (step % 10000) == 0) System.out.printf("Inference step %d\n", step);
         }
         types = state.frames;
+
+        if (DEBUG_FRAGMENT) {
+            Map<String,Integer> histog = new HashMap< >();
+            for (Frame fr : types) {
+                for (int i = 0; i < fr.sp; i++) {
+                    Integer r = histog.get(fr.stack[i]);
+                    histog.put(fr.stack[i], r == null ? 1 : 1+r);
+                }
+            }
+            for (Map.Entry<String,Integer> ent : histog.entrySet())
+                System.out.printf("%s : %d\n", ent.getKey(), ent.getValue());
+        }
     }
 
     private int insnSize(AbstractInsnNode ai) {
@@ -1306,7 +1322,15 @@ class AutosplitMethodWriter extends MethodNode {
         }
         v.visitLabel(insnLabels[end - begin]);
 
-        if (exitTrampolineLabels.containsKey(end))
+        boolean fallthru = false;
+        for (ControlEdge ce : successors[end-1]) {
+            if (ce.to == end) {
+                fallthru = true;
+                break;
+            }
+        }
+
+        if (fallthru)
             v.visitJumpInsn(Opcodes.GOTO, exitTrampolineLabels.get(end));
 
         int lineno = -1;
@@ -1338,13 +1362,15 @@ class AutosplitMethodWriter extends MethodNode {
         }
 
         // common exit code
-        v.visitLabel(commonExitLabel);
-        v.visitInsn(Opcodes.SWAP);
-        for (int i = 0; i < commonExit.length; i++) {
-            localExitCode(v, i, commonExit[i]);
+        if (exitPts.length > 0) {
+            v.visitLabel(commonExitLabel);
+            v.visitInsn(Opcodes.SWAP);
+            for (int i = 0; i < commonExit.length; i++) {
+                localExitCode(v, i, commonExit[i]);
+            }
+            v.visitInsn(Opcodes.POP);
+            v.visitInsn(Opcodes.IRETURN);
         }
-        v.visitInsn(Opcodes.POP);
-        v.visitInsn(Opcodes.IRETURN);
         v.visitMaxs(0,0);
         v.visitEnd();
     }
@@ -1374,6 +1400,8 @@ class AutosplitMethodWriter extends MethodNode {
                 v.visitInsn(Opcodes.DUP);
                 v.visitVarInsn(Opcodes.ILOAD + t, nlocal+1);
                 v.visitMethodInsn(Opcodes.INVOKESPECIAL, box_types[t], "<init>", box_descs[t]);
+            } else {
+                v.visitVarInsn(Opcodes.ILOAD + t, nlocal+1);
             }
             v.visitInsn(Opcodes.AASTORE);
             v.visitInsn(Opcodes.ICONST_M1);
@@ -1541,9 +1569,9 @@ class AutosplitMethodWriter extends MethodNode {
                     int load;
                     switch (c0) {
                         case 'I': ty = "java/lang/Integer"; load = Opcodes.ILOAD; break;
-                        case 'J': ty = "java/lang/Long"; load = Opcodes.ILOAD; break;
-                        case 'F': ty = "java/lang/Float"; load = Opcodes.ILOAD; break;
-                        case 'D': ty = "java/lang/Double"; load = Opcodes.ILOAD; break;
+                        case 'J': ty = "java/lang/Long"; load = Opcodes.LLOAD; break;
+                        case 'F': ty = "java/lang/Float"; load = Opcodes.FLOAD; break;
+                        case 'D': ty = "java/lang/Double"; load = Opcodes.DLOAD; break;
                         default: throw new IllegalArgumentException(desc);
                     }
 
@@ -1625,7 +1653,7 @@ class AutosplitMethodWriter extends MethodNode {
 
         // allocate the scratchpad
         instructions.add(intNode(maxStack));
-        instructions.add(new TypeInsnNode(Opcodes.ANEWARRAY, "Ljava/lang/Object;"));
+        instructions.add(new TypeInsnNode(Opcodes.ANEWARRAY, "java/lang/Object"));
         // move the arguments onto the scratchpad
         int ltmp = 0;
         if ((access & Opcodes.ACC_STATIC) == 0) ltmp += saveArg(instructions, ltmp, Type.getType(Object.class));
@@ -1676,6 +1704,8 @@ class AutosplitMethodWriter extends MethodNode {
 
         if (rty != null) {
             instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
+            instructions.add(new InsnNode(Opcodes.ICONST_0));
+            instructions.add(new InsnNode(Opcodes.AALOAD));
             instructions.add(new TypeInsnNode(Opcodes.CHECKCAST, rty));
             if (unboxName != null)
                 instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, rty, unboxName, unboxDesc));
