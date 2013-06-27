@@ -44,7 +44,7 @@ class AutosplitMethodWriter extends MethodNode {
 
     /** True to dump control flow analysis. */
     private static final boolean DEBUG_CONTROL = false;
-    private static final boolean DEBUG_FRAGMENT = true;
+    private static final boolean DEBUG_FRAGMENT = false;
     private static final boolean TYPE_TRACE = false;
 
     /** The real instructions (not branches) in program order.  Filled out by {@link getControlFlow()}. */
