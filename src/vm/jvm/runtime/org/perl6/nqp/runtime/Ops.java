@@ -4397,7 +4397,7 @@ public final class Ops {
     /* Evaluation of code; JVM-specific ops. */
     public static SixModelObject compilejast(String dump, ThreadContext tc) {
         EvalResult res = new EvalResult();
-        res.jc = JASTToJVMBytecode.buildClassFromString(dump);
+        res.jc = JASTToJVMBytecode.buildClassFromString(dump, false);
         return res;
     }
     public static String compilejasttofile(String dump, String filename, ThreadContext tc) {

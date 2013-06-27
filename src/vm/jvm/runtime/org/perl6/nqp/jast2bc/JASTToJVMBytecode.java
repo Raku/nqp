@@ -40,7 +40,7 @@ public class JASTToJVMBytecode {
         {
             BufferedReader in = new BufferedReader(new InputStreamReader(
                     new FileInputStream(argv[0]), "UTF-8"));
-            JavaClass c = buildClassFrom(in);
+            JavaClass c = buildClassFrom(in, true);
             in.close();
             FileOutputStream fos = new FileOutputStream(argv[1]);
             fos.write(c.bytes);
@@ -48,27 +48,28 @@ public class JASTToJVMBytecode {
         }
         catch (Exception e)
         {
+            e.printStackTrace();
             System.err.println("Error: " + e.getMessage());
         }
         
     }
     
-    public static JavaClass buildClassFromString(String in) {
+    public static JavaClass buildClassFromString(String in, boolean split) {
         try {
             BufferedReader br = new BufferedReader(new StringReader(in));
-            JavaClass c = buildClassFrom(br);
+            JavaClass c = buildClassFrom(br, split);
             return c;
         }
         catch (Exception e) {
+            if (!split && "Method code too large!".equals(e.getMessage()))
+                return buildClassFromString(in, true);
             throw new RuntimeException(e);
         }
     }
     
     public static void writeClassFromString(String in, String filename) {
+        JavaClass c = buildClassFromString(in, false);
         try {
-            BufferedReader br = new BufferedReader(new StringReader(in));
-            JavaClass c = buildClassFrom(br);
-
             FileOutputStream fos = new FileOutputStream(filename);
             if (c.serialized == null) {
                 // we're writing a plain java class
@@ -98,7 +99,7 @@ public class JASTToJVMBytecode {
         }
     }
     
-    private static JavaClass buildClassFrom(BufferedReader in) throws Exception
+    private static JavaClass buildClassFrom(BufferedReader in, boolean split) throws Exception
     {
         JavaClass c = new JavaClass();
         // Read in class name, superclass and any fields.
@@ -157,7 +158,7 @@ public class JASTToJVMBytecode {
         // Process all of the methods.
         if (!curLine.equals("+ method"))
             throw new Exception("Expected method after class configuration");
-        while (processMethod(c, in, cw, className))
+        while (processMethod(c, in, cw, className, split))
             ;
         
         // Add empty constructor.
@@ -181,7 +182,7 @@ public class JASTToJVMBytecode {
         public boolean defined;
     }
 
-    private static boolean processMethod(JavaClass jcout, BufferedReader in, ClassWriter c, String className) throws Exception {
+    private static boolean processMethod(JavaClass jcout, BufferedReader in, ClassWriter c, String className, boolean split) throws Exception {
         String curLine, methodName = null, returnType = null, desc = null;
         String crName = null, crCuid = null, crOuter = null;
         int crOuterIx = -2; // not coderef
@@ -278,11 +279,9 @@ public class JASTToJVMBytecode {
 
                 // Create method object.
                 desc = Type.getMethodDescriptor(processType(returnType), argTypes.toArray(new Type[0]));
-                m = c.visitMethod(
-                        (isStatic
-                            ? Opcodes.ACC_STATIC | Opcodes.ACC_PUBLIC
-                            : Opcodes.ACC_PUBLIC), 
-                            methodName, desc, null, null);
+                int modifiers = isStatic ? Opcodes.ACC_STATIC | Opcodes.ACC_PUBLIC : Opcodes.ACC_PUBLIC;
+                m = split ? new AutosplitMethodWriter(c, className, modifiers, methodName, desc, null, null) :
+                    c.visitMethod(modifiers, methodName, desc, null, null);
                                   
                  // Add code ref info annotation.
                  if ((crCuid != null && !crCuid.equals("")) || crOuterIx >= -1) {
