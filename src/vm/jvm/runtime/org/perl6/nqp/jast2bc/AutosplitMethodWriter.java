@@ -1249,8 +1249,8 @@ class AutosplitMethodWriter extends MethodNode {
         for (int i = 0; i < exitPts.length; i++)
             exitTrampolineLabels.put(exitPts[i], new Label());
 
-        Label[] insnLabels = new Label[end - begin];
-        for (int i = 0; i < end - begin; i++)
+        Label[] insnLabels = new Label[end - begin + 1];
+        for (int i = 0; i < end - begin + 1; i++)
             insnLabels[i] = new Label();
 
         // common entry code
@@ -1267,6 +1267,18 @@ class AutosplitMethodWriter extends MethodNode {
 
         int stash = nlocal;
         int scratch = nlocal+1;
+
+        // emit salient tryblocks
+        for (TryCatchBlockNode tcbn : (List<TryCatchBlockNode>) tryCatchBlocks) {
+            int nstart = Math.max(begin, insnMap.get(tcbn.start));
+            int nend   = Math.min(end, insnMap.get(tcbn.end));
+            int nhndlr = insnMap.get(tcbn.handler);
+            if (nstart >= nend) continue;
+
+            v.visitTryCatchBlock(insnLabels[nstart - begin], insnLabels[nend - begin],
+                    exitTrampolineLabels.containsKey(nhndlr) ? exitTrampolineLabels.get(nhndlr) : insnLabels[nhndlr - begin],
+                    tcbn.type);
+        }
 
         // uncommon entry code
         for (int ept : entryPts) {
@@ -1288,9 +1300,18 @@ class AutosplitMethodWriter extends MethodNode {
         for (int iix = begin; iix < end; iix++) {
             emitFragmentInsn(v, iix, begin, insnLabels, exitTrampolineLabels, spilledUTypes);
         }
+        v.visitLabel(insnLabels[end - begin]);
 
         if (exitTrampolineLabels.containsKey(end))
             v.visitJumpInsn(Opcodes.GOTO, exitTrampolineLabels.get(end));
+
+        int lineno = -1;
+        for (int i = begin; i < end; i++) {
+            if (lineNumbers[i] != lineno) {
+                lineno = lineNumbers[i];
+                v.visitLineNumber(lineno, insnLabels[i-begin]);
+            }
+        }
 
         Label commonExitLabel = new Label();
 
