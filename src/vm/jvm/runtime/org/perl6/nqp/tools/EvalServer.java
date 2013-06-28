@@ -39,35 +39,40 @@ public class EvalServer {
     private Path tokenPath;
 
     public static void main(String[] args) throws Exception {
-        final EvalServer me = new EvalServer();
-        me.parseArgs(args);
-        me.cuType = LibraryLoader.loadFile( me.mainPath, true );
+        EvalServer e = new EvalServer();
+        e.parseArgs(args);
+        e.run();
+    }
+    private void run() throws Exception {
+        cuType = LibraryLoader.loadFile( mainPath, true );
 
         SecureRandom rng = new SecureRandom();
         byte[] raw = new byte[16];
         rng.nextBytes(raw);
-        me.cookie = Base64.encode(ByteBuffer.wrap(raw));
+        cookie = Base64.encode(ByteBuffer.wrap(raw));
 
-        me.serv = ServerSocketChannel.open();
-        me.serv.bind(new InetSocketAddress(0));
+        serv = ServerSocketChannel.open();
+        serv.bind(new InetSocketAddress(0));
 
         Set<StandardOpenOption> modes =
             EnumSet.of(StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW);
 
-        me.tokenPath = FileSystems.getDefault().getPath(me.cookiePath).toAbsolutePath();
-        me.tokenCh = Files.newByteChannel(me.tokenPath, modes);
+        tokenPath = FileSystems.getDefault().getPath(cookiePath).toAbsolutePath();
+        tokenCh = Files.newByteChannel(tokenPath, modes);
         try {
             Set<PosixFilePermission> perms =
                 EnumSet.of(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE);
-            Files.setPosixFilePermissions(me.tokenPath, perms);
+            Files.setPosixFilePermissions(tokenPath, perms);
         } catch (UnsupportedOperationException e) {
             // non-posix systems tend not to have such wide default perms, so this is safe to ignor
         }
-        me.tokenCh.write(ByteBuffer.wrap( String.format("%d %s\n", me.serv.socket().getLocalPort(), me.cookie).getBytes("UTF-8") ));
+        tokenCh.write(ByteBuffer.wrap( String.format("%d %s\n", serv.socket().getLocalPort(), cookie).getBytes("UTF-8") ));
+
+        if (bindStdin) new BinderThread().start();
 
         while (true) {
-            ServiceThread th = me.new ServiceThread();
-            th.sock = me.serv.accept();
+            ServiceThread th = new ServiceThread();
+            th.sock = serv.accept();
             th.start();
         }
     }
@@ -149,6 +154,17 @@ public class EvalServer {
             else {
                 throw new RuntimeException("Unknown command "+cmdStrings[1]);
             }
+        }
+    }
+
+    private class BinderThread extends Thread {
+        @Override
+        public void run() {
+            try {
+                System.in.read();
+                Files.delete(tokenPath);
+            } catch (Exception e) {}
+            System.exit(0);
         }
     }
 }
