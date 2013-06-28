@@ -1,4 +1,4 @@
-package org.perl6.nqp.runtime;
+package org.perl6.nqp.tools;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -19,6 +19,13 @@ import java.nio.file.attribute.PosixFilePermissions;
 import java.security.SecureRandom;
 import java.util.EnumSet;
 import java.util.Set;
+
+import org.perl6.nqp.runtime.Base64;
+import org.perl6.nqp.runtime.CodeRef;
+import org.perl6.nqp.runtime.CompilationUnit;
+import org.perl6.nqp.runtime.GlobalContext;
+import org.perl6.nqp.runtime.LibraryLoader;
+import org.perl6.nqp.runtime.Ops;
 
 public class EvalServer {
     private Class<?> cuType;
