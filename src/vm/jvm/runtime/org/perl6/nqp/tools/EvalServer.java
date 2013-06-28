@@ -28,6 +28,10 @@ import org.perl6.nqp.runtime.LibraryLoader;
 import org.perl6.nqp.runtime.Ops;
 
 public class EvalServer {
+    private boolean bindStdin;
+    private String cookiePath;
+    private String mainPath;
+
     private Class<?> cuType;
     private String cookie;
     private ServerSocketChannel serv;
@@ -35,13 +39,9 @@ public class EvalServer {
     private Path tokenPath;
 
     public static void main(String[] args) throws Exception {
-        if (args.length != 2) {
-            System.err.printf("Usage: %s <name-for-access-token-file> <main-class>\n", EvalServer.class.getName());
-            System.exit(1);
-        }
-
         final EvalServer me = new EvalServer();
-        me.cuType = LibraryLoader.loadFile( args[1], true );
+        me.parseArgs(args);
+        me.cuType = LibraryLoader.loadFile( me.mainPath, true );
 
         SecureRandom rng = new SecureRandom();
         byte[] raw = new byte[16];
@@ -56,7 +56,7 @@ public class EvalServer {
         Set<StandardOpenOption> modes =
             EnumSet.of(StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW);
 
-        me.tokenPath = FileSystems.getDefault().getPath(args[0]).toAbsolutePath();
+        me.tokenPath = FileSystems.getDefault().getPath(me.cookiePath).toAbsolutePath();
         me.tokenCh = Files.newByteChannel(me.tokenPath, modes, PosixFilePermissions.asFileAttribute(perms));
         me.tokenCh.write(ByteBuffer.wrap( String.format("%d %s\n", me.serv.socket().getLocalPort(), me.cookie).getBytes("UTF-8") ));
 
@@ -64,6 +64,27 @@ public class EvalServer {
             ServiceThread th = me.new ServiceThread();
             th.sock = me.serv.accept();
             th.start();
+        }
+    }
+
+    private void parseArgs(String[] args) {
+        int i = 0;
+
+        while (i != args.length) {
+            if (args[i].equals("-bind-stdin") && !bindStdin) {
+                bindStdin = true; i += 1;
+            } else if (args[i].equals("-app") && i+1 < args.length && mainPath == null) {
+                mainPath = args[i+1]; i += 2;
+            } else if (args[i].equals("-cookie") && i+1 < args.length && cookiePath == null) {
+                cookiePath = args[i+1]; i += 2;
+            } else {
+                break;
+            }
+        }
+
+        if (i < args.length || mainPath == null || cookiePath == null) {
+            System.err.printf("Usage: %s [-bind-stdin] -cookie <name-for-access-token-file> -app <main-class>\n", EvalServer.class.getName());
+            System.exit(1);
         }
     }
 
