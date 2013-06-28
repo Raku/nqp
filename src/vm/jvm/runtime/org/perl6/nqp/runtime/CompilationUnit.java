@@ -4,6 +4,7 @@ import java.lang.annotation.*;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -85,75 +86,44 @@ public abstract class CompilationUnit {
         STable BOOTCodeSTable = tc.gc.BOOTCode == null ? null : tc.gc.BOOTCode.st;
         ArrayList<CodeRef> codeRefList = new ArrayList<CodeRef>();
         ArrayList<CodeRefAnnotation> outerCuid = new ArrayList< >();
-        Lookup l = MethodHandles.lookup();
         boolean codeRefsFound = false;
-        try {
-            Method[] mlist = this.getClass().getDeclaredMethods();
-            qbidToCodeRef = new CodeRef[mlist.length];
 
-            for (Method m : this.getClass().getDeclaredMethods()) {
-                CodeRefAnnotation cra = m.getAnnotation(CodeRefAnnotation.class);
-                if (cra != null) {
-                    /* Got a code ref annotation. Turn to method handle. */
-                    MethodHandle mh = l.unreflect(m).bindTo(this);
+        ReflectiveCodeInfo[] mlist = shared ? codeInfoStash.get(getClass()) : getCodeInfo(getClass());
+        qbidToCodeRef = new CodeRef[mlist.length];
 
-                    /* Munge handlers. */
-                    long[] flatHandlers = cra.handlers();
-                    int hptr = 0;
-                    int numHandlers = (int)flatHandlers[hptr++];
-                    long[][] handlers = new long[numHandlers][];
-                    for (int i = 0; i < numHandlers; i++) {
-                        int handlerThings = (int)flatHandlers[hptr++];
-                        handlers[i] = new long[handlerThings];
-                        for (int j = 0; j < handlerThings; j++)
-                            handlers[i][j] = flatHandlers[hptr++];
-                    }
-                    
-                    /* Create and store. */
-                    String cuid = cra.cuid();
-                    String name = m.getName();
-                    CodeRef cr = new CodeRef(this, mh, cra.name(), cuid,
-                        cra.oLexicalNames(), cra.iLexicalNames(),
-                        cra.nLexicalNames(), cra.sLexicalNames(),
-                        handlers);
-                    cr.staticInfo.methodName = name;
-                    cr.st = BOOTCodeSTable;
-                    codeRefList.add(cr);
-                    if (!cuid.isEmpty()) cuidToCodeRef.put(cuid, cr);
-                    
-                    if (name.startsWith("qb_")) {
-                        int i = 3;
-                        int imax = name.length();
-                        int acc = 0;
-                        while (i < imax) acc = acc * 10 + (int)name.charAt(i++) - (int)'0';
-                        if (acc >= 0 && acc < qbidToCodeRef.length) qbidToCodeRef[acc] = cr;
-                    }
-                    
-                    /* Stash outer, for later resolution. */
-                    outerCuid.add(cra);
-                    
-                    codeRefsFound = true;
-                }
-            }
-            
-            /* Resolve outers. */
-            codeRefs = codeRefList.toArray(new CodeRef[0]);
-            for (int i = 0; i < codeRefs.length; i++) {
-                CodeRefAnnotation cra = outerCuid.get(i);
-                String cuid = cra.outerCuid();
-                int qbid = cra.outerQbid();
+        for (ReflectiveCodeInfo m : mlist) {
+            CodeRefAnnotation ann = m.annotation;
 
-                CodeRef outer = qbid >= 0 ? qbidToCodeRef[qbid] :
-                    cuid != null ? cuidToCodeRef.get(cuid) : null;
-                if (outer != null)
-                    codeRefs[i].staticInfo.outerStaticInfo = outer.staticInfo;
-            }
+            String cuid = ann.cuid();
+            CodeRef cr = new CodeRef(this, m.mh.bindTo(this), ann.name(), cuid,
+                ann.oLexicalNames(), ann.iLexicalNames(),
+                ann.nLexicalNames(), ann.sLexicalNames(),
+                m.handlers);
+            cr.staticInfo.methodName = m.methodName;
+            cr.st = BOOTCodeSTable;
+            codeRefList.add(cr);
+            if (!cuid.isEmpty()) cuidToCodeRef.put(cuid, cr);
+
+            if (m.qbid >= 0 && m.qbid < qbidToCodeRef.length) qbidToCodeRef[m.qbid] = cr;
+
+            /* Stash outer, for later resolution. */
+            outerCuid.add(ann);
+            codeRefsFound = true;
         }
-        catch (Throwable e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
+
+        /* Resolve outers. */
+        codeRefs = codeRefList.toArray(new CodeRef[0]);
+        for (int i = 0; i < codeRefs.length; i++) {
+            CodeRefAnnotation cra = outerCuid.get(i);
+            String cuid = cra.outerCuid();
+            int qbid = cra.outerQbid();
+
+            CodeRef outer = qbid >= 0 ? qbidToCodeRef[qbid] :
+                cuid != null ? cuidToCodeRef.get(cuid) : null;
+            if (outer != null)
+                codeRefs[i].staticInfo.outerStaticInfo = outer.staticInfo;
         }
-        
+
         /* If we didn't find any by annotations, this is the fallback. */
         if (!codeRefsFound) {
             codeRefs = getCodeRefs();
@@ -186,7 +156,64 @@ public abstract class CompilationUnit {
                 throw ExceptionHandling.dieInternal(tc, e.toString());
             }
     }
-    
+
+    private static class ReflectiveCodeInfo {
+        public MethodHandle mh;
+        public long[][] handlers;
+        public CodeRefAnnotation annotation;
+        public String methodName;
+        public int qbid;
+
+        public ReflectiveCodeInfo(MethodHandles.Lookup l, Method m, CodeRefAnnotation cra) {
+            annotation = cra;
+
+            /* Got a code ref annotation. Turn to method handle. */
+            try {
+                mh = l.unreflect(m);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+            /* Munge handlers. */
+            long[] flatHandlers = cra.handlers();
+            int hptr = 0;
+            int numHandlers = (int)flatHandlers[hptr++];
+            handlers = new long[numHandlers][];
+            for (int i = 0; i < numHandlers; i++) {
+                int handlerThings = (int)flatHandlers[hptr++];
+                handlers[i] = new long[handlerThings];
+                for (int j = 0; j < handlerThings; j++)
+                    handlers[i][j] = flatHandlers[hptr++];
+            }
+
+            methodName = m.getName();
+
+            qbid = -1;
+            if (methodName.startsWith("qb_")) {
+                int i = 3;
+                int imax = methodName.length();
+                int acc = 0;
+                while (i < imax) acc = acc * 10 + (int)methodName.charAt(i++) - (int)'0';
+                if (acc >= 0) qbid = acc;
+            }
+        }
+    }
+
+    private static ReflectiveCodeInfo[] getCodeInfo(Class<?> cls) {
+        ArrayList<ReflectiveCodeInfo> ret = new ArrayList< >();
+        Lookup l = MethodHandles.lookup();
+        for (Method m : cls.getDeclaredMethods()) {
+            CodeRefAnnotation cra = m.getAnnotation(CodeRefAnnotation.class);
+            if (cra != null) ret.add(new ReflectiveCodeInfo(l, m, cra));
+        }
+        return ret.toArray(new ReflectiveCodeInfo[0]);
+    }
+
+    private static final ClassValue<ReflectiveCodeInfo[]> codeInfoStash = new ClassValue<ReflectiveCodeInfo[]>() {
+        @Override
+        protected ReflectiveCodeInfo[] computeValue(Class<?> c) { return getCodeInfo(c); }
+    };
+
     /**
      * Runs code in the on-load hook, if one is available.
      */
