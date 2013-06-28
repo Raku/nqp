@@ -51,13 +51,18 @@ public class EvalServer {
         me.serv = ServerSocketChannel.open();
         me.serv.bind(new InetSocketAddress(0));
 
-        Set<PosixFilePermission> perms =
-            EnumSet.of(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE);
         Set<StandardOpenOption> modes =
             EnumSet.of(StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW);
 
         me.tokenPath = FileSystems.getDefault().getPath(me.cookiePath).toAbsolutePath();
-        me.tokenCh = Files.newByteChannel(me.tokenPath, modes, PosixFilePermissions.asFileAttribute(perms));
+        me.tokenCh = Files.newByteChannel(me.tokenPath, modes);
+        try {
+            Set<PosixFilePermission> perms =
+                EnumSet.of(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE);
+            Files.setPosixFilePermissions(me.tokenPath, perms);
+        } catch (UnsupportedOperationException e) {
+            // non-posix systems tend not to have such wide default perms, so this is safe to ignor
+        }
         me.tokenCh.write(ByteBuffer.wrap( String.format("%d %s\n", me.serv.socket().getLocalPort(), me.cookie).getBytes("UTF-8") ));
 
         while (true) {
