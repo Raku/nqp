@@ -4326,7 +4326,7 @@ public final class Ops {
     }
     
     public static double div_In(SixModelObject a, SixModelObject b, ThreadContext tc) {
-        return new BigDecimal(getBI(tc, a)).divide(new BigDecimal(getBI(tc, b)), 10, RoundingMode.HALF_UP).doubleValue();
+        return new BigDecimal(getBI(tc, a)).divide(new BigDecimal(getBI(tc, b)), 309, RoundingMode.HALF_UP).doubleValue();
     }
     
     public static SixModelObject mod_I(SixModelObject a, SixModelObject b, SixModelObject type, ThreadContext tc) {
