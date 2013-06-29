@@ -8,6 +8,11 @@ import java.io.OutputStreamWriter;
 
 import jline.ConsoleReader;
 
+import java.nio.file.DirectoryStream;
+import java.nio.file.Path;
+
+import java.util.Iterator;
+
 import org.perl6.nqp.sixmodel.SixModelObject;
 
 public class IOHandleInstance extends SixModelObject {
@@ -35,4 +40,10 @@ public class IOHandleInstance extends SixModelObject {
     
     /* This wraps the input stream for interactive readline */
     public ConsoleReader cr;
+    
+    /* This wraps directories that were opened for lazy file listings */
+    public DirectoryStream<Path> dirstrm;
+    
+    /* This is the iterator from the dirstrm */
+    public Iterator<Path> diri;
 }

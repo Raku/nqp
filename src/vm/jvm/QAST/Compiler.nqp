@@ -1880,6 +1880,12 @@ QAST::OperationsJAST.map_classlib_core_op('rename', $TYPE_OPS, 'rename', [$RT_ST
 QAST::OperationsJAST.map_classlib_core_op('copy', $TYPE_OPS, 'copy', [$RT_STR, $RT_STR], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('link', $TYPE_OPS, 'link', [$RT_STR, $RT_STR], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('symlink', $TYPE_OPS, 'symlink', [$RT_STR, $RT_STR], $RT_INT);
+
+
+QAST::OperationsJAST.map_classlib_core_op('opendir', $TYPE_OPS, 'opendir', [$RT_STR], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('nextfiledir', $TYPE_OPS, 'nextfiledir', [$RT_OBJ], $RT_STR, :tc);
+QAST::OperationsJAST.map_classlib_core_op('closedir', $TYPE_OPS, 'closedir', [$RT_OBJ], $RT_INT, :tc);
+
 QAST::OperationsJAST.map_classlib_core_op('debugnoop', $TYPE_OPS, 'debugnoop', [$RT_OBJ], $RT_OBJ, :tc);
 
 # terms

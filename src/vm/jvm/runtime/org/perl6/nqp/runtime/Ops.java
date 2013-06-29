@@ -20,6 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.DirectoryStream;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
@@ -31,6 +32,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Iterator;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -626,6 +628,61 @@ public final class Ops {
         }
         catch (Exception e) {
             return -1;
+        }
+        return 0;
+    }
+    
+    public static SixModelObject opendir(String path, ThreadContext tc) {
+        try {
+            DirectoryStream<Path> dirstrm = Files.newDirectoryStream(Paths.get(path));
+            SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType; 
+            IOHandleInstance ioh = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
+            ioh.dirstrm = dirstrm;
+            ioh.diri = dirstrm.iterator();
+            return ioh;
+        }
+        catch (Exception e) {
+            die_s("nqp::opendir: unable to get a DirectoryStream", tc);
+        }
+        return null;
+    }
+    
+    public static String nextfiledir(SixModelObject obj, ThreadContext tc) {
+        try {
+            if (obj instanceof IOHandleInstance) {
+                IOHandleInstance ioh = (IOHandleInstance)obj;
+                if (ioh.dirstrm != null && ioh.diri != null) {
+                    if (ioh.diri.hasNext()) {
+                        return ioh.diri.next().toString();
+                    } else {
+                        return null;
+                    }
+                } else {
+                    die_s("called nextfiledir on an IOHandle without a dirstream and/or iterator.", tc);
+                }
+            } else {
+                die_s("nextfiledir requires an object with the IOHandle REPR", tc);
+            }
+        }
+        catch (Exception e) {
+            die_s("nqp::nextfiledir: unhandled exception", tc);
+        }
+        return null;
+    }
+    
+    public static long closedir(SixModelObject obj, ThreadContext tc) {
+        try {
+            if (obj instanceof IOHandleInstance) {
+                IOHandleInstance ioh = (IOHandleInstance)obj;
+                ioh.diri = null;
+                ioh.dirstrm.close();
+                ioh.dirstrm = null;
+            } else {
+                die_s("closedir requires an object with the IOHandle REPR", tc);
+            }
+        }
+        catch (Exception e) {
+            die_s("nqp::closedir: unhandled exception", tc);
         }
         return 0;
     }
