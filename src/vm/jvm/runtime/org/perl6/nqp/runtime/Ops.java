@@ -4360,7 +4360,10 @@ public final class Ops {
     
     public static SixModelObject rand_I(SixModelObject a, SixModelObject type, ThreadContext tc) {
         BigInteger size = getBI(tc, a);
-        BigInteger random = new BigInteger(size.bitLength(), tc.random).mod(size);
+        BigInteger random = new BigInteger(size.bitLength(), tc.random);
+        while (random.compareTo (size) != -1) {
+            random = new BigInteger(size.bitLength(), tc.random);
+        }
         return makeBI(tc, type, random);
     }
     
