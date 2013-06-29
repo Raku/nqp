@@ -2,6 +2,7 @@ package org.perl6.nqp.runtime;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 
 import org.perl6.nqp.sixmodel.reprs.CallCaptureInstance;
 import org.perl6.nqp.sixmodel.reprs.SCRefInstance;
@@ -96,6 +97,8 @@ public class ThreadContext {
     ContextKey<?,?> hllGlobalKey;
     HashMap<ContextKey<?,?>, Object> hllGlobalAllCache;
 
+    Random random;
+
     // odds and ends for nqp
     ArrayList<Integer> fates = new ArrayList<Integer>(), curst = new ArrayList<Integer>(), nextst = new ArrayList<Integer>();
 
@@ -106,6 +109,7 @@ public class ThreadContext {
         this.handlers = new ArrayList<HandlerInfo>();
         this.hllThreadAll = new HashMap<ContextKey<?,?>, Object>();
         this.hllGlobalAllCache = new HashMap<ContextKey<?,?>, Object>();
+        this.random = new Random();
         if (gc.CallCapture != null) {
             savedCC = (CallCaptureInstance)gc.CallCapture.st.REPR.allocate(this, gc.CallCapture.st);
         }

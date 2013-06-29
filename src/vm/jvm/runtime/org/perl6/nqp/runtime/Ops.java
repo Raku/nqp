@@ -2555,8 +2555,13 @@ public final class Ops {
         return result;
     }
     
-    public static double rand_n(double n) {
-        return ThreadLocalRandom.current().nextDouble(n);
+    public static double rand_n(double n, ThreadContext tc) {
+        return n * tc.random.nextDouble();
+    }
+
+    public static long srand(long n, ThreadContext tc) {
+        tc.random.setSeed(n);
+        return n;
     }
 
     /* String operations. */
@@ -4355,7 +4360,7 @@ public final class Ops {
     
     public static SixModelObject rand_I(SixModelObject a, SixModelObject type, ThreadContext tc) {
         BigInteger size = getBI(tc, a);
-        BigInteger random = new BigInteger(size.bitLength(), ThreadLocalRandom.current()).mod(size);
+        BigInteger random = new BigInteger(size.bitLength(), tc.random).mod(size);
         return makeBI(tc, type, random);
     }
     
