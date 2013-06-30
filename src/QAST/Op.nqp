@@ -21,7 +21,8 @@ class QAST::Op is QAST::Node {
         my $i := 0;
         my $elems := +@(self);
         while $i < $elems {
-            $result[$i] := self[$i].substitute_inline_placeholders(@fillers);
+            $result[$i] := self[$i].substitute_inline_placeholders(@fillers)
+                unless nqp::isstr(self[$i]);
             $i := $i + 1;
         }
         $result
@@ -32,7 +33,8 @@ class QAST::Op is QAST::Node {
         my $i := 0;
         my $elems := +@(self);
         while $i < $elems {
-            $result[$i] := self[$i].evaluate_unquotes(@unquotes);
+            $result[$i] := self[$i].evaluate_unquotes(@unquotes)
+                unless nqp::isstr(self[$i]);
             $i := $i + 1;
         }
         $result
