@@ -592,7 +592,7 @@ public class P6Opaque extends REPR {
         if (attrInfoList.size() > 0)
             isInitVisitor.visitJumpInsn(Opcodes.GOTO, isInitSwitch);
         isInitVisitor.visitLabel(isInitNull);
-        isInitVisitor.visitInsn(Opcodes.ICONST_1);
+        isInitVisitor.visitInsn(Opcodes.ICONST_0);
         isInitVisitor.visitInsn(Opcodes.I2L);
         isInitVisitor.visitInsn(Opcodes.LRETURN);
         isInitVisitor.visitMaxs(0, 0);
