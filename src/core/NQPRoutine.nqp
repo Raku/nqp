@@ -350,6 +350,11 @@ my knowhow NQPRoutine {
     }
     
     method signature() { $!signature }
+
+    method freshcoderef() {
+        nqp::freshcoderef($!do);
+    }
+
 }
 nqp::setinvokespec(NQPRoutine, NQPRoutine, '$!do', nqp::null);
 nqp::setboolspec(NQPRoutine, 5, nqp::null());
