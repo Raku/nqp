@@ -399,6 +399,7 @@ public final class Ops {
                 String line = h.br.readLine();
                 if (line == null) {
                 	h.eof = true;
+                    line = "";
                 }
                 return line;
             }
