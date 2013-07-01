@@ -1676,7 +1676,7 @@ public final class Ops {
         return decont(o, tc).st.WHO;
     }
     public static long where(SixModelObject o, ThreadContext tc) {
-        return decont(o, tc).hashCode();
+        return o.hashCode();
     }
     public static SixModelObject setwho(SixModelObject o, SixModelObject who, ThreadContext tc) {
         decont(o, tc).st.WHO = who;
