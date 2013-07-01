@@ -790,33 +790,6 @@ class NQP::Actions is HLL::Actions {
     method routine_declarator:sym<sub>($/) { make $<routine_def>.ast; }
     method routine_declarator:sym<method>($/) { make $<method_def>.ast; }
 
-    # returns a QAST node to create the code object or 0 if not possible
-    method wrap_sub_in_code_object($block,$name) {
-        my $BLOCK := $*W.cur_lexpad();
-
-        my $code_type_name := 'NQPRoutine';
-        my $have_code_type;
-        try {
-            my $code_type := $*W.find_sym([$code_type_name]);
-            $have_code_type := $*PACKAGE.HOW.name($*PACKAGE) ne $code_type_name;
-        }
-
-        if $have_code_type {
-            my $code_object := $*W.create_code($block, $name, 0);
-
-            my $node := QAST::Op.new(
-                :op('callmethod'), :name('clone'),
-                QAST::WVal.new( :value($code_object) ));
-
-
-            $node<block_past> := $block;
-            $node<code_object> := $code_object; # so that we can avoid a clone if don't need it
-            $node;
-        } else {
-            0;
-        }
-    }
-
     method routine_def($/) {
         # If it's just got * as a body, make a multi-dispatch enterer.
         # Otherwise, need to build a sub.
@@ -832,10 +805,6 @@ class NQP::Actions is HLL::Actions {
             }
         }
         my $block := $past;
-
-        my $lexpast := QAST::Op.new( :op('takeclosure'), $past );
-        $lexpast<sink> := $past;
-        $lexpast<block_past> := $block;
 
         if $<deflongname> {
             my $name := ~$<sigil>[0] ~ $<deflongname>[0].ast;
@@ -914,25 +883,12 @@ class NQP::Actions is HLL::Actions {
                 }
                 else {
                     my $BLOCK := $*W.cur_lexpad();
-
-                    if self.wrap_sub_in_code_object($past,$name) -> $node {
-                        $BLOCK[0].push(QAST::Op.new(
-                            :op('bind'),
-                            QAST::Var.new( :name('&' ~ $name), :scope('lexical'), :decl('var') ),
-                            QAST::WVal.new( :value($node<code_object>) )
-                        ));
-                        $BLOCK[0].push($past);
-                        $lexpast := $node;
-                    } else {
-                        $BLOCK[0].push(QAST::Op.new(
-                            :op('bind'),
-                            QAST::Var.new( :name('&' ~ $name), :scope('lexical'), :decl('var') ),
-                            $past
-                        ));
-                    }
-
+					$BLOCK[0].push(QAST::Op.new(
+                        :op('bind'),
+                        QAST::Var.new( :name('&' ~ $name), :scope('lexical'), :decl('var') ),
+                        $past
+                    ));
                     $BLOCK.symbol('&' ~ $name, :scope('lexical'));
-
                     if $*SCOPE eq 'our' {
                         # Need to install it at loadinit time but also re-bind
                         # it per invocation.
@@ -960,15 +916,14 @@ class NQP::Actions is HLL::Actions {
             }
         }
         else {            
-            if self.wrap_sub_in_code_object($past,'<anon>') -> $node {
-                my $BLOCK := $*W.cur_lexpad();
-                $BLOCK[0].push($past);
-                $lexpast := $node;
-            } elsif $*W.is_precompilation_mode() {
+            if $*W.is_precompilation_mode() {
                 $*W.create_code($past, '<anon>', 0)
             }
         }
 
+        my $lexpast := QAST::Op.new( :op('takeclosure'), $past );
+        $lexpast<sink> := $past;
+        $lexpast<block_past> := $block;
         make $lexpast;
 
         # Apply traits.        

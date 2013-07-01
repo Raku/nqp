@@ -45,14 +45,12 @@ sub add_to_sc($sc, $idx, $obj) {
 {
     my $sc := nqp::createsc('TEST_SC_2_IN');
     my $sh := nqp::list_s();
-
-    my $sub := sub make_meth_with($x) {
+    
+    my $raw_sub := nqp::getstaticcode(sub make_meth_with($x) {
         my $m := method () { $x };
         $m;
-    };
-
-    my $raw_sub := nqp::getstaticcode(nqp::getattr($sub, NQPRoutine, '$!do'));
-
+    });
+    
     my $m1 := $raw_sub('dolphin');
     my $m2 := $raw_sub('whale');
     
