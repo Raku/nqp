@@ -270,7 +270,13 @@ class NQP::World is HLL::World {
         }
         else {
             # Create a fresh stub code, and set its name.
-            $dummy := nqp::freshcoderef($stub_code);
+
+            if nqp::istype($stub_code,NQPRoutine) {
+                $dummy := $stub_code.freshcoderef();
+            } else { # old nqp versions
+                $dummy := nqp::freshcoderef($stub_code);
+            }
+
             nqp::setcodename($dummy, $name);
             
             # Tag it as a static code ref and add it to the root code refs set.

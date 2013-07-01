@@ -4617,6 +4617,15 @@ public final class Ops {
         return 1;
     }
 
+
+    public static SixModelObject capturelex(SixModelObject codeObj,SixModelObject classHandle, ThreadContext tc) {
+        CodeRef closure = (CodeRef)codeObj.get_attribute_boxed(tc,
+                classHandle, "$!do", STable.NO_HINT);
+        closure.outer = tc.curFrame;
+        return codeObj;
+    }
+
+
     private static MethodHandle reset_reenter;
     static {
         try {

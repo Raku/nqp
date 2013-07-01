@@ -2125,6 +2125,7 @@ QAST::Operations.add_core_op('locallifetime', :inlinable(1), -> $qastcomp, $op {
 
 # code object related opcodes
 QAST::Operations.add_core_pirop_mapping('takeclosure', 'newclosure', 'PP');
+QAST::Operations.add_core_pirop_mapping('capturelex', 'nqp_capturelex', '0PP');
 QAST::Operations.add_core_pirop_mapping('getcodeobj', 'get_sub_code_object', 'PP');
 QAST::Operations.add_core_pirop_mapping('setcodeobj', 'set_sub_code_object', '1PP');
 QAST::Operations.add_core_pirop_mapping('getcodename', 'set', 'SP');
@@ -2307,3 +2308,4 @@ QAST::Operations.add_core_op('getpid', -> $qastcomp, $op {
         QAST::VM.new( :pirop('getinterp__P') )
     ))
 });
+
