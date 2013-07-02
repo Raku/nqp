@@ -92,6 +92,11 @@ public class GlobalContext {
      * BOOTIO type; a basic, method-less type with the IOHandle REPR.
      */
     public SixModelObject BOOTIO;
+
+    /**
+     * BOOTJava type; a basic, method-less type with the JavaWrap REPR.
+     */
+    public SixModelObject BOOTJava;
     
     /**
      * Typed VMArrays.

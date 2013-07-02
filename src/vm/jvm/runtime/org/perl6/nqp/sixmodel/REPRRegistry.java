@@ -8,6 +8,7 @@ import org.perl6.nqp.sixmodel.reprs.CodeRefREPR;
 import org.perl6.nqp.sixmodel.reprs.ContextRef;
 import org.perl6.nqp.sixmodel.reprs.Continuation;
 import org.perl6.nqp.sixmodel.reprs.IOHandle;
+import org.perl6.nqp.sixmodel.reprs.JavaWrap;
 import org.perl6.nqp.sixmodel.reprs.KnowHOWAttribute;
 import org.perl6.nqp.sixmodel.reprs.KnowHOWREPR;
 import org.perl6.nqp.sixmodel.reprs.Lexotic;
@@ -62,6 +63,7 @@ public class REPRRegistry {
         addREPR("P6num", new P6num());
         addREPR("Uninstantiable", new Uninstantiable());
         addREPR("SCRef", new SCRef());
+        addREPR("JavaWrap", new JavaWrap());
         addREPR("ContextRef", new ContextRef());
         addREPR("Continuation", new Continuation());
         addREPR("Lexotic", new Lexotic());
