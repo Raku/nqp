@@ -1022,6 +1022,11 @@ for ('', 'repeat_') -> $repness {
                 nqp::die("Operation '$repness$op_name' needs 2 or 3 operands");
             }
             
+            # See if there's an immediate block wanting to be passed the condition.
+            my $has_im := nqp::istype(@operands[1], QAST::Block) && 
+                          @operands[1].blocktype eq 'immediate' &&
+                          @operands[1].arity > 0;
+            
             # Create labels.
             my $while_id := $qastcomp.unique($op_name);
             my $test_lbl := JAST::Label.new( :name($while_id ~ '_test') );
@@ -1049,6 +1054,20 @@ for ('', 'repeat_') -> $repness {
             my $cond_res := $qastcomp.as_jast_in_handler(@operands[0], $l_handler_id || $*HANDLER_IDX);
             $testil.append($cond_res.jast);
             $*STACK.obtain($testil, $cond_res);
+            if $has_im {
+                my $im_local := QAST::Node.unique('__IM_');
+                $*BLOCK.add_local(QAST::Var.new(
+                    :name($im_local),
+                    :returns(typeobj_from_rttype($cond_res.type))
+                ));
+                @operands[1].blocktype('declaration');
+                @operands[1] := QAST::Op.new(
+                    :op('call'), @operands[1],
+                    QAST::Var.new( :name($im_local), :scope('local') )
+                );
+                $testil.append(dup_ins($cond_res.type));
+                $testil.append(JAST::Instruction.new( :op(store_ins($cond_res.type)), $im_local ));
+            }
             
             # Compile loop body, then do any analysis of result type if
             # in non-void context.
