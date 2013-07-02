@@ -1891,7 +1891,7 @@ public final class Ops {
             if (atMeth == null)
                 throw ExceptionHandling.dieInternal(tc,
                     "Expected accepts_type method, but none found in meta-object");
-            invokeDirect(tc, atMeth, typeCheckCallSite, new Object[] { obj.st.HOW, type, obj });
+            invokeDirect(tc, atMeth, typeCheckCallSite, new Object[] { type.st.HOW, type, obj });
             return istrue(result_o(tc.curFrame), tc);
         }
         
