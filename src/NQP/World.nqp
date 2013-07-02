@@ -458,36 +458,57 @@ class NQP::World is HLL::World {
             QAST::Stmts.new(),
             $past
         );
+
+        $past<DYN_COMP_WRAPPER> := 1;
         my %seen;
+        my $mu        := try { self.find_symbol(['NQPMu']) };
         my $i := +@!BLOCKS;
         while $i > 0 {
             $i := $i - 1;
             my %symbols := @!BLOCKS[$i].symtable();
             for %symbols {
-                if !%seen{$_.key} && nqp::existskey($_.value, 'value') {
+                unless %seen{$_.key} {
+                    # Add symbol.
+                    my %sym := $_.value;
+                    my $value := nqp::existskey(%sym, 'value') ?? %sym<value> !! $mu;
                     try {
-                        $wrapper[0].push(QAST::Op.new(
-                            :op('bind'),
-                            QAST::Var.new( :name($_.key), :scope('lexical'), :isdecl('var') ),
-                            QAST::WVal.new( :value(($_.value)<value>) )
+                        if nqp::isnull(nqp::getobjsc($value)) {
+                            self.add_object($value);
+                        }
+                        CATCH {
+                            $value := $mu;
+                        }
+                    }
+                    if !nqp::isnull($value) {
+                        $wrapper[0].push(QAST::Var.new(
+                                :name($_.key), :scope('lexical'),
+                                :decl('static'),
+                                :value($value),
                         ));
-                    };
-                    %seen{$_.key} := 1;
+                    }
+                    $wrapper.symbol($_.key, :scope('lexical'));
+                    
                 }
+                %seen{$_.key} := 1;
             }
         }
-        
+
         # Compile and run it.
         my $code := self.create_code($wrapper, 'BEGIN block', 0);
         my $old_global := nqp::getcurhllsym('GLOBAL');
-        nqp::bindcurhllsym('GLOBAL', $*GLOBALish);
-        $code();
+        nqp::bindcurhllsym('GLOBAL', $*GLOBALish); # cargo culted
+        my $r := $code();
         nqp::bindcurhllsym('GLOBAL', $old_global);
         
-        # Need any nested blocks inside the BEGIN block to make it into the
-        # output code.
-        $wrapper.shift();
-        return $wrapper;
+
+        if nqp::isint($r) {
+            QAST::IVal.new(:value($r));    
+        } elsif nqp::isstr($r) {
+            QAST::SVal.new(:value($r));    
+        } else {
+            self.add_object($r);
+            QAST::WVal.new(:value($r))
+        }
     }
     
     # Adds libraries that NQP code depends on.
