@@ -373,9 +373,29 @@ inline op nqp_bigint_div_num(out NUM, invar PMC, invar PMC) :base_core {
 
 inline op nqp_bigint_shr(out PMC, invar PMC, in INT, invar PMC) :base_core {
     mp_int *a = get_bigint(interp, $2);
+    mp_int *b;
+    mp_int c;
     $1 = REPR($4)->allocate(interp, STABLE($4));
     REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
-    mp_div_2d(a, $3, get_bigint(interp, $1), NULL);
+    b = get_bigint(interp, $1);
+    
+    if ($3 < 0) {
+        mp_mul_2d(a, -1 * $3, b);
+    }
+    else if (MP_NEG == SIGN(a)) {
+        mp_abs(a, b);
+        mp_init(&c);
+        mp_div_2d(b, $3, b, &c);
+        if ( USED(&c) & 1 ) {
+            mp_zero(&c);
+            mp_set_int(&c, 1);
+            mp_add(b, &c, b);
+        }
+        mp_neg(b, b);
+    }
+    else {
+        mp_div_2d(a, $3, b, NULL);
+    }
 }
 
 inline op nqp_bigint_shl(out PMC, invar PMC, in INT, invar PMC) :base_core {
