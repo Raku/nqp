@@ -1649,6 +1649,9 @@ QAST::OperationsJAST.add_core_op('handle', sub ($qastcomp, $op) {
     $catchil.append(JAST::Instruction.new( :op('aload'), 'cf' ));
     $catchil.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
         'return_o', 'Void', $TYPE_SMO, $TYPE_CF ));
+    $catchil.append(JAST::Instruction.new( :op('aload'), 'cf' ));
+    $catchil.append(JAST::Instruction.new( :op('invokevirtual'),
+        $TYPE_CF, 'leave', 'Void' ));
     $catchil.append($RETURN);
     $catchil.append($exitlbl);
     
