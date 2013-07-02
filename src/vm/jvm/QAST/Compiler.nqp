@@ -2388,6 +2388,10 @@ QAST::OperationsJAST.map_classlib_core_op('continuationreset', $TYPE_OPS, 'conti
 QAST::OperationsJAST.map_classlib_core_op('continuationcontrol', $TYPE_OPS, 'continuationcontrol', [$RT_INT, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc, :cont);
 QAST::OperationsJAST.map_classlib_core_op('continuationinvoke', $TYPE_OPS, 'continuationinvoke', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc, :cont);
 
+# JVM interop ops
+QAST::OperationsJAST.map_classlib_core_op('jvmeqaddr', $TYPE_OPS, 'jvmeqaddr', [$RT_OBJ, $RT_OBJ], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('jvmbootinterop', $TYPE_OPS, 'jvmbootinterop', [$RT_OBJ], $RT_OBJ, :tc);
+
 class QAST::CompilerJAST {
     # Responsible for handling issues around code references, building the
     # switch statement dispatcher, etc.
