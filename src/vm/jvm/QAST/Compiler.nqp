@@ -2209,7 +2209,6 @@ QAST::OperationsJAST.map_classlib_core_op('objprimspec', $TYPE_OPS, 'objprimspec
 QAST::OperationsJAST.map_classlib_core_op('isinvokable', $TYPE_OPS, 'isinvokable', [$RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('setinvokespec', $TYPE_OPS, 'setinvokespec', [$RT_OBJ, $RT_OBJ, $RT_STR, $RT_OBJ], $RT_OBJ, :tc);
 })();
-QAST::OperationsJAST.map_classlib_core_op('capturelex', $TYPE_OPS, 'capturelex', [$RT_OBJ,$RT_OBJ], $RT_OBJ, :tc);
 
 # defined - overridden by HLL, but by default same as .DEFINITE.
 QAST::OperationsJAST.map_classlib_core_op('defined', $TYPE_OPS, 'isconcrete', [$RT_OBJ], $RT_INT, :tc);
