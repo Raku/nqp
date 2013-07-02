@@ -2303,6 +2303,8 @@ public final class Ops {
         return obj.st.ContainerSpec == null ? 0 : 1;
     }
     public static SixModelObject decont(SixModelObject obj, ThreadContext tc) {
+        if (obj == null)
+            return null;
         ContainerSpec cs = obj.st.ContainerSpec;
         return cs == null || obj instanceof TypeObject ? obj : cs.fetch(tc, obj);
     }
