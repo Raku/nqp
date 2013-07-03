@@ -320,27 +320,17 @@ public final class Ops {
             
             String charset = null;
             if (encoding.equals("ascii"))
-                charset = "US-ASCII";
+                h.encoding = "US-ASCII";
             else if (encoding.equals("iso-8859-1"))
-                charset = "ISO-8859-1";
+                h.encoding = "ISO-8859-1";
             else if (encoding.equals("utf8"))
-                charset = "UTF-8";
+                h.encoding = "UTF-8";
             else if (encoding.equals("utf16"))
-                charset = "UTF-16";
+                h.encoding = "UTF-16";
             else if (encoding.equals("binary"))
-                charset = "ISO-8859-1"; /* Byte oriented... */
+                h.encoding = "ISO-8859-1"; /* Byte oriented... */
             else
                 die_s("Unsupported encoding " + encoding, tc);
-            
-            try {
-                if (h.is != null)
-                    h.isr = new InputStreamReader(h.is, charset);
-                if (h.os != null)
-                    h.osw = new OutputStreamWriter(h.os, charset);
-            }
-            catch (UnsupportedEncodingException e) {
-                die_s(e.getMessage(), tc);
-            }
         }
         else {
             die_s("setencoding requires an object with the IOHandle REPR", tc);
@@ -366,7 +356,7 @@ public final class Ops {
                 die_s("File handle is not opened for write", tc);
             try {
                 if (h.osw == null)
-                    h.osw = new OutputStreamWriter(h.os, "UTF-8");
+                    h.osw = new OutputStreamWriter(h.os, h.encoding);
                 h.osw.write(data);
                 h.osw.flush();
             }
@@ -393,7 +383,7 @@ public final class Ops {
                 die_s("File handle is not opened for read", tc);
             try {
                 if (h.isr == null)
-                    h.isr = new InputStreamReader(h.is, "UTF-8");
+                    h.isr = new InputStreamReader(h.is, h.encoding);
                 if (h.br == null)
                     h.br = new BufferedReader(h.isr);
                 String line = h.br.readLine();
@@ -448,7 +438,7 @@ public final class Ops {
                 die_s("File handle is not opened for read", tc);
             try {
                 if (h.isr == null)
-                    h.isr = new InputStreamReader(h.is, "UTF-8");
+                    h.isr = new InputStreamReader(h.is, h.encoding);
                 if (h.br == null)
                     h.br = new BufferedReader(h.isr);
                 

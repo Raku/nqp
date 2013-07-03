@@ -26,6 +26,9 @@ public class IOHandleInstance extends SixModelObject {
     /* The output stream; if null, we can't write to this. */
     public OutputStream os;
     
+    /* The (Java) encoding name to use. */
+    public String encoding = "UTF-8";
+    
     /* These wrap the above streams and knows about encodings. If they
      * are still null, the encoding can still be set.
      */
