@@ -135,6 +135,22 @@ static void two_complement_bitop(mp_int *a, mp_int *b, mp_int *c,
 
 }
 
+static void two_complement_shl(mp_int *result, mp_int *value, INTVAL count) {
+    if (count >= 0) {
+        mp_mul_2d(value, count, result);
+    }
+    else if (MP_NEG == SIGN(value)) {
+        /* fake two's complement semantics on top of sign-magnitude
+         * algorithm appears to work [citation needed]
+         */
+        mp_add_d(value, 1, result);
+        mp_div_2d(result, -count, result, NULL);
+        mp_sub_d(result, 1, result);
+    }
+    else {
+        mp_div_2d(value, -count, result, NULL);
+    }
+}
 
 END_OPS_PREAMBLE
 
@@ -372,32 +388,15 @@ inline op nqp_bigint_div_num(out NUM, invar PMC, invar PMC) :base_core {
 }
 
 inline op nqp_bigint_shr(out PMC, invar PMC, in INT, invar PMC) :base_core {
-    mp_int *a = get_bigint(interp, $2);
-    mp_int *b;
     $1 = REPR($4)->allocate(interp, STABLE($4));
     REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
-    b = get_bigint(interp, $1);
-    
-    if ($3 < 0) {
-        mp_mul_2d(a, -1 * $3, b);
-    }
-    else if (MP_NEG == SIGN(a)) {
-        mp_add_d(a, 1, b);
-        mp_div_2d(b, $3, b, NULL);
-        mp_sub_d(b, 1, b);
-    }
-    else {
-        mp_div_2d(a, $3, b, NULL);
-    }
+    two_complement_shl(get_bigint(interp, $1), get_bigint(interp, $2), -$3);
 }
 
 inline op nqp_bigint_shl(out PMC, invar PMC, in INT, invar PMC) :base_core {
-    mp_int *b;
-    mp_int *a = get_bigint(interp, $2);
     $1 = REPR($4)->allocate(interp, STABLE($4));
     REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
-    b = get_bigint(interp, $1);
-    mp_mul_2d(a, $3, b);
+    two_complement_shl(get_bigint(interp, $1), get_bigint(interp, $2), $3);
 }
 
 inline op nqp_bigint_band(out PMC, invar PMC, invar PMC, invar PMC) :base_core {
