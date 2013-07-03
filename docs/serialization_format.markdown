@@ -235,6 +235,7 @@ reference to do so. The reason being that
     9 = VM Array of Integers
     10 = VM Hash of Variant References with String Keys
     11 = VM Static Code Reference
+    12 = VM Cloned Code Reference (a serialized closure)
 
 ### Object references
 These are stored as a 32-bit SC index (base 1 into the dependencies
