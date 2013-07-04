@@ -42,6 +42,10 @@ public class SerializationContext {
     /* Takes an object and adds it to this SC's root set, and installs a
      * reposession entry. */
     public void repossessObject(SerializationContext origSC, SixModelObject obj) {
+        /* Check the object really lives in the SC root set. */
+        if (obj.sc.root_objects.indexOf(obj) < 0)
+            throw new RuntimeException("Attempt to repossess object not in this context");
+        
         /* Add to root set. */
         int newSlot = root_objects.size();
         root_objects.add(obj);
