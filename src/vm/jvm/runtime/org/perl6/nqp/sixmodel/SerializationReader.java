@@ -71,6 +71,9 @@ public class SerializationReader {
     /* Serialization contexts we depend on. */
     SerializationContext[] dependentSCs;
     
+    /* The object we're currently deserializing. */
+    SixModelObject curObject;
+    
     public SerializationReader(ThreadContext tc, SerializationContext sc,
             String[] sh, CodeRef[] cr, int crCount, ByteBuffer orig) {
         this.tc = tc;
@@ -433,7 +436,9 @@ public class SerializationReader {
             orig.position(objDataOffset + orig.getInt());
             
             // Complete the object's deserialization.
+            this.curObject = obj;
             obj.st.REPR.deserialize_finish(tc, obj.st, this, obj);
+            this.curObject = null;
         }
     }
     
@@ -533,7 +538,10 @@ public class SerializationReader {
             elems = orig.getInt();
             for (int i = 0; i < elems; i++)
                 resArray.bind_pos_boxed(tc, i, readRef());
-            resArray.sc = sc;
+            if (this.curObject != null) {
+                resArray.sc = sc;
+                sc.owned_objects.put(resArray, this.curObject);
+            }
             return resArray;
         }
         case REFVAR_VM_ARR_STR: {
@@ -544,7 +552,6 @@ public class SerializationReader {
                 tc.native_s = readStr();
                 resArray.bind_pos_native(tc, i);
             }
-            resArray.sc = sc;
             return resArray;
         }
         case REFVAR_VM_ARR_INT: {
@@ -555,7 +562,6 @@ public class SerializationReader {
                 tc.native_i = readLong();
                 resArray.bind_pos_native(tc, i);
             }
-            resArray.sc = sc;
             return resArray;
         }
         case REFVAR_VM_HASH_STR_VAR:
@@ -566,7 +572,10 @@ public class SerializationReader {
                 String key = lookupString(orig.getInt());
                 resHash.bind_key_boxed(tc, key, readRef());
             }
-            resHash.sc = sc;
+            if (this.curObject != null) {
+                resHash.sc = sc;
+                sc.owned_objects.put(resHash, this.curObject);
+            }
             return resHash;
         case REFVAR_STATIC_CODEREF:
         case REFVAR_CLONED_CODEREF:

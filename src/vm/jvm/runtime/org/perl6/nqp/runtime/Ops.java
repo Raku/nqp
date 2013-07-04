@@ -3338,6 +3338,13 @@ public final class Ops {
         int cscSize = tc.compilingSCs == null ? 0 : tc.compilingSCs.size();
         if (cscSize == 0 || tc.scwbDisableDepth > 0)
             return;
+        
+        /* See if the object is actually owned by another, and it's the
+         * owner we need to repossess. */
+        SixModelObject owner = obj.sc.owned_objects.get(obj);
+        if (owner != null)
+            obj = owner;
+        
         SerializationContext compSC = tc.compilingSCs.get(cscSize - 1).referencedSC;
         if (obj.sc != compSC) {
             compSC.repossessObject(obj.sc, obj);
