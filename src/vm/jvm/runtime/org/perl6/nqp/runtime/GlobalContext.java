@@ -2,8 +2,10 @@ package org.perl6.nqp.runtime;
 
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.WeakHashMap;
 
 import org.perl6.nqp.sixmodel.CodePairContainerConfigurer;
 import org.perl6.nqp.sixmodel.ContainerConfigurer;
@@ -190,6 +192,9 @@ public class GlobalContext {
     HashMap<ContextKey<?,?>,Object> hllGlobalAll;
     Object hllGlobalAllLock;
 
+    ThreadLocal<WeakReference<ThreadContext>> currentThreadCtxRef;
+    WeakHashMap<Thread, ThreadContext> allThreads;
+
     /**
      * Initializes the runtime environment.
      */
@@ -211,7 +216,10 @@ public class GlobalContext {
         contConfigs = new HashMap<String, ContainerConfigurer>();
         contConfigs.put("code_pair", new CodePairContainerConfigurer());
         
-        mainThread = new ThreadContext(this);
+        currentThreadCtxRef = new ThreadLocal< >();
+        allThreads = new WeakHashMap< >();
+
+        mainThread = getCurrentThreadContext();
         KnowHOWBootstrapper.bootstrap(mainThread);
         bootInterop = new BootJavaInterop(this);
         
@@ -269,5 +277,33 @@ public class GlobalContext {
         if (exitStatus < 0) exitStatus = status;
         shuttingDown = true;
         throw new ThreadDeath();
+    }
+
+    /** Gets the context object for the current thread, creating one if needed. */
+    public ThreadContext getCurrentThreadContext() {
+        // The implementation here is complicated by GC concerns.  A simple
+        // ThreadLocal<ThreadContext> would, with the current (1.7)
+        // implementation of ThreadLocal, indefinitely retain a strong
+        // reference to the ThreadContext - and anything that can leak
+        // references that retain a GlobalContext is potentially very bad.
+        // OTOH, we do want to reuse threadcontexts (they include important
+        // states like srand seeds), so we can't have them garbage collected at
+        // random just because no NQP code is running.
+
+        // Note that this implementation *does* retain strong references from
+        // the GlobalContext to the ThreadContext longer than strictly
+        // necessary.  This is judged to be a minor issue, because
+        // ThreadContexts retain much less than the full GlobalContext.
+
+        WeakReference<ThreadContext> tcRef = currentThreadCtxRef.get();
+
+        // the ref cannot be cleared while the thread is alive because the object
+        // is retained by the allThreads map
+        if (tcRef != null) return tcRef.get();
+
+        ThreadContext tc = new ThreadContext(this);
+        synchronized(this) { allThreads.put(Thread.currentThread(), tc); }
+        currentThreadCtxRef.set(new WeakReference< >(tc));
+        return tc;
     }
 }
