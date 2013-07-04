@@ -184,6 +184,8 @@ public class GlobalContext {
 
     /** If true, libraries will be loaded in shared mode by default. */
     public boolean sharingHint;
+    /** Interop object used for jvmbootinterop. */
+    public BootJavaInterop bootInterop;
 
     HashMap<ContextKey<?,?>,Object> hllGlobalAll;
     Object hllGlobalAllLock;
@@ -211,6 +213,7 @@ public class GlobalContext {
         
         mainThread = new ThreadContext(this);
         KnowHOWBootstrapper.bootstrap(mainThread);
+        bootInterop = new BootJavaInterop(this);
         
         // BOOT* not available earlier; fixup some stuff.
         setupConfig(compileeHLLConfiguration.get(""));
