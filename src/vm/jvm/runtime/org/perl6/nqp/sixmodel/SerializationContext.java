@@ -1,6 +1,7 @@
 package org.perl6.nqp.sixmodel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.perl6.nqp.runtime.CodeRef;
 
@@ -30,6 +31,13 @@ public class SerializationContext {
     public ArrayList<Integer> rep_indexes;
     public ArrayList<SerializationContext> rep_scs;
     
+    /* Some things we deserialize are not directly in an SC, root set, but
+     * rather are owned by others. This is mostly thanks to Parrot legacy,
+     * where not everything was a 6model object. This maps such owned
+     * objects to their owner. It is used to determine what object should
+     * be repossessed in the case a write barrier is hit. */
+    public HashMap<SixModelObject, SixModelObject> owned_objects;
+    
     public SerializationContext(String handle) {
         this.handle = handle;
         this.root_objects = new ArrayList<SixModelObject>();
@@ -37,6 +45,7 @@ public class SerializationContext {
         this.root_codes = new ArrayList<CodeRef>();
         this.rep_indexes = new ArrayList<Integer>();
         this.rep_scs = new ArrayList<SerializationContext>();
+        this.owned_objects = new HashMap<SixModelObject, SixModelObject>();
     }
     
     /* Takes an object and adds it to this SC's root set, and installs a
