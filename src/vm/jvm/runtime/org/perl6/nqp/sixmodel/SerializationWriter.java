@@ -758,6 +758,12 @@ public class SerializationWriter {
             int origIdx = isST != 0
                 ? origSC.root_stables.indexOf(sc.root_stables.get(objIdx))
                 : origSC.root_objects.indexOf(sc.root_objects.get(objIdx));
+            if (origIdx < 0)
+                throw new RuntimeException(
+                    "Could not find object when writing repossessions; " +
+                    (isST != 0
+                        ? "STable"
+                        : "REPR = " + sc.root_objects.get(objIdx).st.REPR.name));
             
             /* Write table row. */
             outputs[REPOS].putInt(isST);
