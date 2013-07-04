@@ -2074,6 +2074,8 @@ public final class Ops {
     }
     public static SixModelObject bindpos(SixModelObject arr, long idx, SixModelObject value, ThreadContext tc) {
         arr.bind_pos_boxed(tc, idx, value);
+        if (arr.sc != null) { /*new Exception("bindpos").printStackTrace(); */
+            scwbObject(tc, arr); }
         return value;
     }
     public static long bindpos_i(SixModelObject arr, long idx, long value, ThreadContext tc) {
@@ -2081,6 +2083,8 @@ public final class Ops {
         arr.bind_pos_native(tc, idx);
         if (tc.native_type != ThreadContext.NATIVE_INT)
             throw ExceptionHandling.dieInternal(tc, "This is not a native int array");
+        if (arr.sc != null) { /*new Exception("bindpos_i").printStackTrace(); */
+            scwbObject(tc, arr); }
         return value;
     }
     public static double bindpos_n(SixModelObject arr, long idx, double value, ThreadContext tc) {
@@ -2088,6 +2092,8 @@ public final class Ops {
         arr.bind_pos_native(tc, idx);
         if (tc.native_type != ThreadContext.NATIVE_NUM)
             throw ExceptionHandling.dieInternal(tc, "This is not a native num array");
+        if (arr.sc != null) { /*new Exception("bindpos_n").printStackTrace(); */
+            scwbObject(tc, arr); }
         return value;
     }
     public static String bindpos_s(SixModelObject arr, long idx, String value, ThreadContext tc) {
@@ -2095,6 +2101,8 @@ public final class Ops {
         arr.bind_pos_native(tc, idx);
         if (tc.native_type != ThreadContext.NATIVE_STR)
             throw ExceptionHandling.dieInternal(tc, "This is not a native str array");
+        if (arr.sc != null) { /*new Exception("bindpos_s").printStackTrace(); */
+            scwbObject(tc, arr); }
         return value;
     }
     public static SixModelObject push(SixModelObject arr, SixModelObject value, ThreadContext tc) {
@@ -2218,6 +2226,8 @@ public final class Ops {
     }
     public static SixModelObject bindkey(SixModelObject hash, String key, SixModelObject value, ThreadContext tc) {
         hash.bind_key_boxed(tc, key, value);
+        if (hash.sc != null)
+            scwbObject(tc, hash);
         return value;
     }
     public static long bindkey_i(SixModelObject hash, String key, long value, ThreadContext tc) {
@@ -2225,6 +2235,8 @@ public final class Ops {
         hash.bind_key_native(tc, key);
         if (tc.native_type != ThreadContext.NATIVE_INT)
             throw ExceptionHandling.dieInternal(tc, "This is not a native int hash");
+        if (hash.sc != null)
+            scwbObject(tc, hash);
         return value;
     }
     public static double bindkey_n(SixModelObject hash, String key, double value, ThreadContext tc) {
@@ -2232,6 +2244,8 @@ public final class Ops {
         hash.bind_key_native(tc, key);
         if (tc.native_type != ThreadContext.NATIVE_NUM)
             throw ExceptionHandling.dieInternal(tc, "This is not a native num hash");
+        if (hash.sc != null)
+            scwbObject(tc, hash);
         return value;
     }
     public static String bindkey_s(SixModelObject hash, String key, String value, ThreadContext tc) {
@@ -2239,6 +2253,8 @@ public final class Ops {
         hash.bind_key_native(tc, key);
         if (tc.native_type != ThreadContext.NATIVE_STR)
             throw ExceptionHandling.dieInternal(tc, "This is not a native str hash");
+        if (hash.sc != null)
+            scwbObject(tc, hash);
         return value;
     }
     public static long existskey(SixModelObject hash, String key, ThreadContext tc) {
@@ -2246,6 +2262,8 @@ public final class Ops {
     }
     public static SixModelObject deletekey(SixModelObject hash, String key, ThreadContext tc) {
         hash.delete_key(tc, key);
+        if (hash.sc != null)
+            scwbObject(tc, hash);
         return hash;
     }
 
