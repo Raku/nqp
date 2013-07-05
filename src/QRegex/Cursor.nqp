@@ -105,8 +105,8 @@ role NQPCursorRole is export {
     # The array is valid until the next call to !cursor_start_all.
     my $NO_RESTART := 0;
     my $RESTART := 1;
-    my @start_result;
     method !cursor_start_all() {
+        my @start_result;
         my $new := nqp::create(self);
         my $sub := nqp::callercode();
         nqp::bindattr($new, $?CLASS, '$!shared', $!shared);
