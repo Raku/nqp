@@ -203,7 +203,7 @@ all:
     public static List<String> backtraceStrings(VMExceptionInstance ex) {
         List<String> result = new ArrayList<String>();
         for (TraceElement e : backtrace(ex)) {
-            String name = e.frame.codeRef.staticInfo.name;
+            String name = e.frame.codeRef.name;
             if (name == null || name == "")
                 name = "<anon>";
 

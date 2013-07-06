@@ -3525,13 +3525,13 @@ public final class Ops {
     }
     public static String getcodename(SixModelObject code, ThreadContext tc) {
         if (code instanceof CodeRef)
-            return ((CodeRef)code).staticInfo.name;
+            return ((CodeRef)code).name;
         else
             throw ExceptionHandling.dieInternal(tc, "getcodename can only be used with a CodeRef");
     }
     public static SixModelObject setcodename(SixModelObject code, String name, ThreadContext tc) {
         if (code instanceof CodeRef) {
-            ((CodeRef)code).staticInfo.name = name;
+            ((CodeRef)code).name = name;
             return code;
         }
         else {

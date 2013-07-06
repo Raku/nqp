@@ -39,6 +39,12 @@ public class CodeRef extends SixModelObject {
     public SixModelObject[] oLexState;
     
     /**
+     * The (human-readable) name of the code-ref (not in staticInfo as a
+     * number of places want to tweak it per closure clone).
+     */
+    public String name;
+    
+    /**
      * Sets up the code-ref data structure.
      */
     public CodeRef(CompilationUnit compUnit, MethodHandle mh,
@@ -46,9 +52,10 @@ public class CodeRef extends SixModelObject {
             String[] oLexicalNames, String[] iLexicalNames,
             String[] nLexicalNames, String[] sLexicalNames,
             long[][] handlers) {
-        staticInfo = new StaticCodeInfo(compUnit, mh, name,uniqueId,
+        this.staticInfo = new StaticCodeInfo(compUnit, mh, uniqueId,
                 oLexicalNames, iLexicalNames, nLexicalNames, sLexicalNames,
                 handlers, this);
+        this.name = name;
     }
     
     /**
@@ -62,6 +69,7 @@ public class CodeRef extends SixModelObject {
             clone.outer = this.outer;
         else
             clone.outer = staticInfo.outerStaticInfo.priorInvocation;
+        clone.name = this.name;
         return clone;
     }
     

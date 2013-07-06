@@ -29,11 +29,6 @@ public class StaticCodeInfo implements Cloneable {
     public String methodName;
     
     /**
-     * The (human-readable) name of the code-ref.
-     */
-    public String name;
-    
-    /**
      * The compilation-unit unique ID of the routine (from QAST cuuid).
      */
     public String uniqueId;
@@ -133,13 +128,12 @@ public class StaticCodeInfo implements Cloneable {
      * Initializes the static code info data structure.
      */
     public StaticCodeInfo(CompilationUnit compUnit, MethodHandle mh,
-            String name, String uniqueId,
+            String uniqueId,
             String[] oLexicalNames, String[] iLexicalNames,
             String[] nLexicalNames, String[] sLexicalNames,
             long[][] handlers, SixModelObject staticCode) {
         this.compUnit = compUnit;
         this.mh = mh;
-        this.name = name;
         this.uniqueId = uniqueId;
         this.oLexicalNames = oLexicalNames;
         this.iLexicalNames = iLexicalNames;
