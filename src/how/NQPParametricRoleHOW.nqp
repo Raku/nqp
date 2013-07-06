@@ -143,7 +143,7 @@ knowhow NQPParametricRoleHOW {
                 !! nqp::iterval($_).clone();
             if nqp::substr($name, 0, 12) eq '!!LATENAME!!' {
                 $name := nqp::atkey($pad, nqp::substr($name, 12));
-                $meth := $meth.'!reify_name'($name);
+                $meth.'!set_name'($name);
             }
             $irole.HOW.add_method($irole, $name, $meth);
         }
