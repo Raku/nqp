@@ -2420,6 +2420,10 @@ class QAST::CompilerJAST {
             $!cur_idx := $!cur_idx + 1;
         }
         
+        method know_cuid($cuid) {
+            nqp::existskey(%!cuid_to_idx, $cuid)
+        }
+        
         method cuid_to_idx($cuid) {
             nqp::existskey(%!cuid_to_idx, $cuid)
                 ?? %!cuid_to_idx{$cuid}
@@ -3109,7 +3113,7 @@ class QAST::CompilerJAST {
     multi method as_jast(QAST::Block $node, :$want) {
         # Do block compilation in a tested block, so we can produce a result based on
         # the containing block's stack.
-        {
+        unless $*CODEREFS.know_cuid($node.cuid) {
             # Block gets fresh BlockInfo.
             my $*BINDVAL  := 0;
             my $outer     := try $*BLOCK;
