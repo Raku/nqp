@@ -615,8 +615,11 @@ public final class Ops {
     public static long shell(String cmd) {
         long retval = 255;
         try {
-            Process proc = new ProcessBuilder("sh", "-c", cmd)
-                .inheritIO().start();
+            String os = System.getProperty("os.name").toLowerCase();
+            ProcessBuilder pb = os.indexOf("win") >= 0
+                ? new ProcessBuilder("cmd", "/c", cmd.replace('/', '\\'))
+                : new ProcessBuilder("sh", "-c", cmd);
+            Process proc = pb.inheritIO().start();
             proc.waitFor();
             retval = proc.exitValue();
         }
