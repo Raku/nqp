@@ -611,6 +611,21 @@ public final class Ops {
         }
         return 0;
     }
+
+    public static long shell(String cmd) {
+        long retval = 255;
+        try {
+            Process proc = new ProcessBuilder("sh", "-c", cmd)
+                .inheritIO().start();
+            proc.waitFor();
+            retval = proc.exitValue();
+        }
+        catch (IOException e) {
+        }
+        catch (InterruptedException e) {
+        }
+        return retval;
+    }
     
     public static long symlink(String before, String after) {
         Path before_o = Paths.get(before);

@@ -1901,6 +1901,7 @@ QAST::OperationsJAST.map_classlib_core_op('mkdir', $TYPE_OPS, 'mkdir', [$RT_STR,
 QAST::OperationsJAST.map_classlib_core_op('rename', $TYPE_OPS, 'rename', [$RT_STR, $RT_STR], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('copy', $TYPE_OPS, 'copy', [$RT_STR, $RT_STR], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('link', $TYPE_OPS, 'link', [$RT_STR, $RT_STR], $RT_INT);
+QAST::OperationsJAST.map_classlib_core_op('shell', $TYPE_OPS, 'shell', [$RT_STR], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('symlink', $TYPE_OPS, 'symlink', [$RT_STR, $RT_STR], $RT_INT);
 
 
