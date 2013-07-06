@@ -345,6 +345,32 @@ my knowhow NQPRoutine {
         nqp::setcodename($!do, $name);
     }
     
+    method !reify_name($name) {
+#?if parrot
+        nqp::setcodename($!do, $name);
+        self
+#?endif
+#?if !parrot
+        # Make a fresh underlying VM code ref.
+        my $do  := nqp::freshcoderef($!do);
+        
+        # Clone and attach the code object.
+        my $der := nqp::clone(self);
+        nqp::bindattr($der, NQPRoutine, '$!do', $do);
+        nqp::setcodeobj($do, $der);
+        
+        # If needed, arrange for a fixup of the cloned code-ref.
+        unless nqp::isnull($!clone_callback) {
+            $!clone_callback($!do, $do, $der);
+        }
+        
+        # Update name.
+        nqp::setcodename($do, $name);
+        
+        $der
+#?endif
+    }
+    
     method name() {
         nqp::getcodename($!do)
     }
@@ -457,6 +483,31 @@ my knowhow NQPRegex {
     }
     method !set_name($name) {
         nqp::setcodename($!do, $name);
+    }
+    method !reify_name($name) {
+#?if parrot
+        nqp::setcodename($!do, $name);
+        self
+#?endif
+#?if !parrot
+        # Make a fresh underlying VM code ref.
+        my $do  := nqp::freshcoderef($!do);
+        
+        # Clone and attach the code object.
+        my $der := nqp::clone(self);
+        nqp::bindattr($der, NQPRegex, '$!do', $do);
+        nqp::setcodeobj($do, $der);
+        
+        # If needed, arrange for a fixup of the cloned code-ref.
+        unless nqp::isnull($!clone_callback) {
+            $!clone_callback($!do, $do, $der);
+        }
+        
+        # Update name.
+        nqp::setcodename($do, $name);
+        
+        $der
+#?endif
     }
 }
 nqp::setinvokespec(NQPRegex, NQPRegex, '$!do', nqp::null);
