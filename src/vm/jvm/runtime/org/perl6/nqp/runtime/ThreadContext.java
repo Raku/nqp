@@ -89,6 +89,11 @@ public class ThreadContext {
      */
     public ArrayList<SCRefInstance> compilingSCs;
 
+    /**
+     * A dummy frame into which return values are set when there is no real caller.
+     */
+    public CallFrame dummyCaller;
+
     Object hllThreadData;
     ContextKey<?,?> hllThreadKey;
     HashMap<ContextKey<?,?>, Object> hllThreadAll;
@@ -113,5 +118,10 @@ public class ThreadContext {
         if (gc.CallCapture != null) {
             savedCC = (CallCaptureInstance)gc.CallCapture.st.REPR.allocate(this, gc.CallCapture.st);
         }
+        this.dummyCaller = new CallFrame();
+    }
+
+    public CallFrame resultFrame() {
+        return curFrame != null ? curFrame : dummyCaller;
     }
 }

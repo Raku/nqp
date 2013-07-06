@@ -1364,31 +1364,27 @@ public final class Ops {
     /* Return value setting. */
     public static void return_o(SixModelObject v, CallFrame cf) {
         CallFrame caller = cf.caller;
-        if (caller != null) {
-            caller.oRet = v;
-            caller.retType = CallFrame.RET_OBJ;
-        }
+        if (caller == null) caller = cf.tc.dummyCaller;
+        caller.oRet = v;
+        caller.retType = CallFrame.RET_OBJ;
     }
     public static void return_i(long v, CallFrame cf) {
         CallFrame caller = cf.caller;
-        if (caller != null) {
-            caller.iRet = v;
-            caller.retType = CallFrame.RET_INT;
-        }
+        if (caller == null) caller = cf.tc.dummyCaller;
+        caller.iRet = v;
+        caller.retType = CallFrame.RET_INT;
     }
     public static void return_n(double v, CallFrame cf) {
         CallFrame caller = cf.caller;
-        if (caller != null) {
-            caller.nRet = v;
-            caller.retType = CallFrame.RET_NUM;
-        }
+        if (caller == null) caller = cf.tc.dummyCaller;
+        caller.nRet = v;
+        caller.retType = CallFrame.RET_NUM;
     }
     public static void return_s(String v, CallFrame cf) {
         CallFrame caller = cf.caller;
-        if (caller != null) {
-            caller.sRet = v;
-            caller.retType = CallFrame.RET_STR;
-        }
+        if (caller == null) caller = cf.tc.dummyCaller;
+        caller.sRet = v;
+        caller.retType = CallFrame.RET_STR;
     }
     
     /* Get returned result. */
