@@ -84,6 +84,19 @@ public class CallFrame implements Cloneable {
      */
     public boolean exitAfterUnwind;
     
+    /**
+     * The call site descriptor of the callsite that invoked us,
+     * possibly exploded. Not set by default, only for things that
+     * do custom binding and want to keep this around.
+     */
+    public CallSiteDescriptor csd;
+    
+    /**
+     * The arguments passed to this call. Not set by default, only
+     * for things that do custom binding and want to keep this around.
+     */
+    public Object[] args;
+    
     // Empty constructor for things that want to fake one up.
     public CallFrame()
     {
