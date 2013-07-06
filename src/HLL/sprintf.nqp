@@ -18,7 +18,7 @@ my module sprintf {
         proto token directive { <...> }
         token directive:sym<b> { '%' <flags>* <size>? [ '.' <precision=.size> ]? $<sym>=<[bB]> }
         token directive:sym<c> { '%' <flags>* <size>? <sym> }
-        token directive:sym<d> { '%' <flags>* <size>? <sym> }
+        token directive:sym<d> { '%' <flags>* <size>? $<sym>=<[di]> }
         token directive:sym<f> { '%' <flags>* <size>? [ '.' <precision=.size> ]? $<sym>=<[fF]> }
         token directive:sym<o> { '%' <flags>* <size>? [ '.' <precision=.size> ]? <sym> }
         token directive:sym<s> { '%' <flags>* <size>? <sym> }
