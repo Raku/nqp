@@ -91,6 +91,7 @@ HLL_SOURCES  = \
   src/HLL/Compiler.nqp \
   src/HLL/CommandLine.nqp \
   src/HLL/World.nqp \
+  src/HLL/sprintf.nqp \
 
 JASTNODES_JAR      = JASTNodes.jar
 JASTNODES_COMBINED = gen/JASTNodes.nqp
