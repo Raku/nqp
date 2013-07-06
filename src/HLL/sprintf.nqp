@@ -19,6 +19,7 @@ my module sprintf {
         token directive:sym<b> { '%' <flags>* <size>? [ '.' <precision=.size> ]? $<sym>=<[bB]> }
         token directive:sym<c> { '%' <flags>* <size>? <sym> }
         token directive:sym<d> { '%' <flags>* <size>? <sym> }
+        token directive:sym<f> { '%' <flags>* <size>? [ '.' <precision=.size> ]? $<sym>=<[fF]> }
         token directive:sym<o> { '%' <flags>* <size>? [ '.' <precision=.size> ]? <sym> }
         token directive:sym<s> { '%' <flags>* <size>? <sym> }
         token directive:sym<u> { '%' <flags>* <size>? <sym> }
@@ -83,7 +84,8 @@ my module sprintf {
 
         sub padding_char($st) {
             my $padding_char := ' ';
-            unless $st<precision> || has_flag($st, 'minus') {
+            if (!$st<precision> && !has_flag($st, 'minus'))
+            || $st<sym> ~~ /<[fF]>/ {
                 $padding_char := '0' if $_<zero> for $st<flags>;
             }
             make $padding_char
@@ -107,7 +109,7 @@ my module sprintf {
             has_flag($st, 'minus')
                 ?? @pieces.unshift: $st.ast
                 !! @pieces.push:    $st.ast;
-            make nqp::join('', @pieces)
+            make join('', @pieces)
         }
 
         method directive:sym<b>($/) {
@@ -129,10 +131,25 @@ my module sprintf {
         }
         method directive:sym<d>($/) {
             my $int := intify(next_argument());
-            if $<size> {
+            my $pad := padding_char($/);
+            if $pad ne ' ' && $<size> {
                 my $sign := $int < 0 ?? '-' !! '';
                 $int := nqp::abs_i($int);
-                $int := $sign ~ infix_x(padding_char($/), $<size>.ast - nqp::chars($int) - 1) ~ $int
+                $int := $sign ~ infix_x($pad, $<size>.ast - nqp::chars($int) - 1) ~ $int
+            }
+            make $int
+        }
+        method directive:sym<f>($/) {
+            my $int := next_argument();
+            my $precision := nqp::pow_n(10, $<precision> ?? $<precision>.ast !! 6);
+            $int := $int * $precision;
+            $int := $int - nqp::floor_n($int) >= 0.5 ?? nqp::ceil_n($int) !! nqp::floor_n($int);
+            $int := $int / $precision;
+            my $pad := padding_char($/);
+            if $pad ne ' ' && $<size> {
+                my $sign := $int < 0 ?? '-' !! '';
+                $int := nqp::abs_n($int);
+                $int := $sign ~ infix_x($pad, $<size>.ast - nqp::chars($int) - 1) ~ $int
             }
             make $int
         }
@@ -203,7 +220,7 @@ my module sprintf {
 
     my $actions := Actions.new();
 
-    sub sprintf($format, *@arguments) {
+    sub sprintf($format, @arguments) {
         my @*ARGS_HAVE := @arguments;
         return Syntax.parse( $format, :actions($actions) ).ast;
     }
