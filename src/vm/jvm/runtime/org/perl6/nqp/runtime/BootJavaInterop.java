@@ -12,6 +12,7 @@ import org.perl6.nqp.sixmodel.SixModelObject;
 import org.perl6.nqp.sixmodel.StorageSpec;
 import org.perl6.nqp.sixmodel.reprs.JavaObjectWrapper;
 
+import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
@@ -79,38 +80,81 @@ public class BootJavaInterop {
 
     /** Entry point for callback setup. */
     public SixModelObject implementClass(SixModelObject description, ThreadContext tc) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     // begin gory details
     protected SixModelObject computeInterop(Class<?> klass) {
         ThreadContext tc = gc.getCurrentThreadContext();
 
-        // fetch reflection stuff once so that order is consistent
-        Method[] ms = klass.getMethods();
-        Field[] fs = klass.getFields();
-        Constructor<?>[] cs = klass.getConstructors();
+        ClassContext adaptor = createAdaptor(klass);
 
-        Class<?> adaptor = createAdaptor(klass, ms, fs, cs);
-        return createInteropTable(klass, adaptor, ms, fs, cs);
+        CompilationUnit adaptorUnit;
+        try {
+            adaptor.constructed.getField("constants").set(null, adaptor.constants.toArray(new Object[0]));
+            adaptorUnit = (CompilationUnit) adaptor.constructed.newInstance();
+            adaptorUnit.initializeCompilationUnit(tc);
+        } catch (ReflectiveOperationException roe) {
+            throw new RuntimeException(roe);
+        }
+
+        SixModelObject hash = gc.BOOTHash.st.REPR.allocate(tc, gc.BOOTHash.st);
+
+        for (int i = 0; i < adaptor.descriptors.size(); i++)
+            hash.bind_key_boxed(tc, adaptor.descriptors.get(i), adaptorUnit.lookupCodeRef(i));
+
+        return hash;
     }
 
-    protected Class<?> createAdaptor(Class<?> target, Method[] ms, Field[] fs, Constructor<?>[] cs) {
+    protected ClassContext createAdaptor(Class<?> target) {
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
-        String className = "org/perl6/nqp/generated-adaptor/"+target.getName().replace('.','/');
+        String className = "org/perl6/nqp/generatedadaptor/"+target.getName().replace('.','/');
         cw.visit(Opcodes.V1_7, Opcodes.ACC_PUBLIC | Opcodes.ACC_SUPER, className, null, TYPE_CU.getInternalName(), null);
+
+        cw.visitField(Opcodes.ACC_STATIC | Opcodes.ACC_PUBLIC, "constants", "[Ljava/lang/Object;", null, null).visitEnd();
 
         ClassContext cc = new ClassContext();
         cc.cv = cw;
+        cc.className = className;
         cc.target = target;
 
-        for (Method m : ms) createAdaptorMethod(cc, m);
-        for (Field f : fs) createAdaptorField(cc, f);
-        for (Constructor<?> c : cs) createAdaptorConstructor(cc, c);
+        for (Method m : target.getMethods()) createAdaptorMethod(cc, m);
+        for (Field f : target.getFields()) createAdaptorField(cc, f);
+        for (Constructor<?> c : target.getConstructors()) createAdaptorConstructor(cc, c);
         createAdaptorSpecials(cc);
 
+        MethodVisitor mv;
+        mv = cw.visitMethod(Opcodes.ACC_PUBLIC, "getCallSites", "()[Lorg/perl6/nqp/runtime/CallSiteDescriptor;", null, null);
+        mv.visitCode();
+        mv.visitInsn(Opcodes.ACONST_NULL);
+        mv.visitInsn(Opcodes.ARETURN);
+        mv.visitMaxs(0,0);
+        mv.visitEnd();
+
+        mv = cw.visitMethod(Opcodes.ACC_PUBLIC, "hllName", "()Ljava/lang/String;", null, null);
+        mv.visitCode();
+        mv.visitLdcInsn("");
+        mv.visitInsn(Opcodes.ARETURN);
+        mv.visitMaxs(0,0);
+        mv.visitEnd();
+
+        mv = cw.visitMethod(Opcodes.ACC_PUBLIC, "<init>", "()V", null, null);
+        mv.visitCode();
+        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "org/perl6/nqp/runtime/CompilationUnit", "<init>", "()V");
+        mv.visitInsn(Opcodes.RETURN);
+        mv.visitMaxs(0,0);
+        mv.visitEnd();
+
         cw.visitEnd();
-        return new ByteClassLoader(cw.toByteArray()).findClass(className);
+        byte[] bits = cw.toByteArray();
+        //try {
+        //    java.nio.file.Files.write(new java.io.File(className.replace('/','_') + ".class").toPath(), bits);
+        //} catch (java.io.IOException e) {
+        //    e.printStackTrace();
+        //}
+        cc.constructed = new ByteClassLoader(bits).findClass(className.replace('/','.'));
+        return cc;
     }
 
     protected void createAdaptorMethod(ClassContext c, Method tobind) {
@@ -191,10 +235,6 @@ public class BootJavaInterop {
         endCallout(cc);
     }
 
-    protected SixModelObject createInteropTable(Class<?> tgt, Class<?> adaptor, Method[] ms, Field[] fs, Constructor<?>[] cs) {
-        throw new UnsupportedOperationException();
-    }
-
     /** Override this to customize marshalling. */
     protected int storageForType(Class<?> what) {
         int ty;
@@ -231,8 +271,13 @@ public class BootJavaInterop {
             c.mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/String", "valueOf", "(C)Ljava/lang/String;");
         }
         else {
-            // XXX class boxing
-            throw new UnsupportedOperationException();
+            if (commonSTable != null) {
+                emitConst(c, commonSTable, STable.class);
+            } else {
+                emitConst(c, new STableCache(what), STableCache.class);
+                c.mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, Type.getInternalName(STableCache.class), "getSTable", "()Lorg/perl6/nqp/sixmodel/STable;");
+            }
+            c.mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/BootJavaInterop$RuntimeSupport", "boxJava", Type.getMethodDescriptor(TYPE_SMO, TYPE_OBJ, TYPE_ST));
         }
 
         emitPutToNQP(c, ix, storageForType(what));
@@ -268,41 +313,111 @@ public class BootJavaInterop {
             c.mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/String", "charAt", "(I)C");
         }
         else {
-            // XXX class unboxing
-            throw new UnsupportedOperationException();
+            c.mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/BootJavaInterop$RuntimeSupport", "unboxJava", Type.getMethodDescriptor(TYPE_OBJ, TYPE_SMO));
+            c.mv.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(what));
         }
     }
 
     protected static final char[] TYPE_CHAR = new char[] { 'o', 'i', 'n', 's' };
     protected static final Type[] TYPES = new Type[] { Type.getType(SixModelObject.class), Type.LONG_TYPE, Type.DOUBLE_TYPE, Type.getType(String.class) };
-    protected static final Type TYPE_OPS = Type.getType(Ops.class);
-    protected static final Type TYPE_CU  = Type.getType(CompilationUnit.class);
-    protected static final Type TYPE_CF  = Type.getType(CallFrame.class);
-    protected static final Type TYPE_CSD = Type.getType(CallSiteDescriptor.class);
-    protected static final Type TYPE_SMO = Type.getType(SixModelObject.class);
     protected static final Type TYPE_AOBJ = Type.getType(Object[].class);
+    protected static final Type TYPE_CF  = Type.getType(CallFrame.class);
+    protected static final Type TYPE_CR = Type.getType(CodeRef.class);
+    protected static final Type TYPE_CSD = Type.getType(CallSiteDescriptor.class);
+    protected static final Type TYPE_CU  = Type.getType(CompilationUnit.class);
+    protected static final Type TYPE_OBJ = Type.getType(Object.class);
+    protected static final Type TYPE_OPS = Type.getType(Ops.class);
+    protected static final Type TYPE_SMO = Type.getType(SixModelObject.class);
+    protected static final Type TYPE_ST = Type.getType(STable.class);
+    protected static final Type TYPE_TC = Type.getType(ThreadContext.class);
 
     protected static class ClassContext {
         public ClassVisitor cv;
-        public Class<?> target;
+        public String className;
+        public List<Object> constants = new ArrayList< >();
+        public Class<?> target, constructed;
         public List<String> descriptors = new ArrayList< >();
         public int nextCallout;
     }
 
-    protected MethodContext startCallout(ClassContext c, int arity, String desc) {
-        throw new UnsupportedOperationException();
+    protected MethodContext startCallout(ClassContext cc, int arity, String desc) {
+        MethodContext mc = new MethodContext();
+        mc.cc = cc;
+        MethodVisitor mv = mc.mv = cc.cv.visitMethod(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, "qb_"+(cc.nextCallout++),
+                Type.getMethodDescriptor(Type.VOID_TYPE, TYPE_CU, TYPE_TC, TYPE_CR, TYPE_CSD, TYPE_AOBJ),
+                null, null);
+        AnnotationVisitor av = mv.visitAnnotation("Lorg/perl6/nqp/runtime/CodeRefAnnotation;", true);
+        av.visit("name", "callout "+cc.target.getName()+" "+desc);
+        av.visitEnd();
+        mv.visitCode();
+        cc.descriptors.add(desc);
+
+        mc.argsLoc = 4;
+        mc.csdLoc = 3;
+        mc.cfLoc = 5;
+
+        mv.visitTypeInsn(Opcodes.NEW, "org/perl6/nqp/runtime/CallFrame");
+        mv.visitInsn(Opcodes.DUP);
+        mv.visitVarInsn(Opcodes.ALOAD, 1); // tc
+        mv.visitVarInsn(Opcodes.ALOAD, 2); // cr
+        mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "org/perl6/nqp/runtime/CallFrame", "<init>", Type.getMethodDescriptor(Type.VOID_TYPE, TYPE_TC, TYPE_CR));
+        mv.visitVarInsn(Opcodes.ASTORE, 5); // cf;
+
+        mv.visitLabel(mc.tryStart = new Label());
+
+        mv.visitVarInsn(Opcodes.ALOAD, 5); // cf
+        mv.visitVarInsn(Opcodes.ALOAD, 3); // csd
+        mv.visitVarInsn(Opcodes.ALOAD, 4); // args
+        emitInteger(mc, arity);
+        emitInteger(mc, arity);
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, TYPE_OPS.getInternalName(), "checkarity", Type.getMethodDescriptor(TYPE_CSD, TYPE_CF, TYPE_CSD, TYPE_AOBJ, Type.INT_TYPE, Type.INT_TYPE));
+        mv.visitVarInsn(Opcodes.ASTORE, 3); // csd
+        mv.visitVarInsn(Opcodes.ALOAD, 1); // tc
+        mv.visitFieldInsn(Opcodes.GETFIELD, TYPE_TC.getInternalName(), "flatArgs", TYPE_AOBJ.getDescriptor());
+        mv.visitVarInsn(Opcodes.ASTORE, 4); // args
+
+        return mc;
     }
 
     protected void endCallout(MethodContext c) {
-        throw new UnsupportedOperationException();
+        MethodVisitor mv = c.mv;
+        Label endTry = new Label();
+        Label handler = new Label();
+        Label notcontrol = new Label();
+
+        mv.visitLabel(endTry);
+        mv.visitVarInsn(Opcodes.ALOAD, 5); //cf
+        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_CF.getInternalName(), "leave", "()V");
+        mv.visitInsn(Opcodes.RETURN);
+
+        mv.visitLabel(handler);
+        mv.visitInsn(Opcodes.DUP);
+        mv.visitTypeInsn(Opcodes.INSTANCEOF, "org/perl6/nqp/runtime/ControlException");
+        mv.visitJumpInsn(Opcodes.IFEQ, notcontrol);
+        mv.visitVarInsn(Opcodes.ALOAD, 5); //cf
+        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_CF.getInternalName(), "leave", "()V");
+        mv.visitInsn(Opcodes.ATHROW);
+
+        mv.visitLabel(notcontrol);
+        mv.visitVarInsn(Opcodes.ALOAD, 1); // tc
+        mv.visitInsn(Opcodes.SWAP);
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/ExceptionHandling", "dieInternal",
+                Type.getMethodDescriptor(Type.getType(RuntimeException.class), TYPE_TC, Type.getType(Throwable.class)));
+        mv.visitInsn(Opcodes.ATHROW);
+
+        c.mv.visitTryCatchBlock(c.tryStart, endTry, handler, null);
+        c.mv.visitMaxs(0,0);
+        c.mv.visitEnd();
     }
 
     protected static class MethodContext {
+        public ClassContext cc;
         public MethodVisitor mv;
         public boolean callback;
         public int cfLoc;
         public int argsLoc;
         public int csdLoc;
+        public Label tryStart;
     }
 
     protected void emitInteger(MethodContext c, int i) {
@@ -310,6 +425,16 @@ public class BootJavaInterop {
         else if (i == (byte)i) c.mv.visitIntInsn(Opcodes.BIPUSH, i);
         else if (i == (short)i) c.mv.visitIntInsn(Opcodes.SIPUSH, i);
         else c.mv.visitLdcInsn(i);
+    }
+
+    protected <T> void emitConst(MethodContext c, T k, Class<T> cls) {
+        List<Object> ks = c.cc.constants;
+        int kix = ks.size();
+        ks.add(k);
+        c.mv.visitFieldInsn(Opcodes.GETSTATIC, c.cc.className, "constants", "[Ljava/lang/Object;");
+        emitInteger(c, kix);
+        c.mv.visitInsn(Opcodes.AALOAD);
+        if (cls != Object.class) c.mv.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(cls));
     }
 
     protected void emitGetFromNQP(MethodContext c, int index, int type) {
@@ -332,13 +457,6 @@ public class BootJavaInterop {
             // an argument
             c.mv.visitVarInsn(Opcodes.ALOAD, c.argsLoc);
             emitInteger(c, index);
-            if (type == StorageSpec.BP_INT) {
-                c.mv.visitTypeInsn(Opcodes.NEW, "java/lang/Long");
-                c.mv.visitInsn(Opcodes.DUP);
-            } else if (type == StorageSpec.BP_NUM) {
-                c.mv.visitTypeInsn(Opcodes.NEW, "java/lang/Double");
-                c.mv.visitInsn(Opcodes.DUP);
-            }
         }
     }
 
@@ -346,14 +464,40 @@ public class BootJavaInterop {
         if (c.callback) {
             // an argument
             if (type == StorageSpec.BP_INT) {
-                c.mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/Long", "<init>", "(J)V");
+                c.mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Long", "valueOf", "(J)Ljava/lang/Long;");
             } else if (type == StorageSpec.BP_NUM) {
-                c.mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/Double", "<init>", "(D)V");
+                c.mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Double", "valueOf", "(D)Ljava/lang/Double");
             }
             c.mv.visitInsn(Opcodes.AASTORE);
         } else {
             c.mv.visitVarInsn(Opcodes.ALOAD, c.cfLoc);
-            c.mv.visitMethodInsn(Opcodes.INVOKESTATIC, TYPE_OPS.getInternalName(), "result_"+TYPE_CHAR[type], Type.getMethodDescriptor(Type.VOID_TYPE, TYPES[type], TYPE_CF));
+            c.mv.visitMethodInsn(Opcodes.INVOKESTATIC, TYPE_OPS.getInternalName(), "return_"+TYPE_CHAR[type], Type.getMethodDescriptor(Type.VOID_TYPE, TYPES[type], TYPE_CF));
+        }
+    }
+
+    /** No user-servicable parts inside.  Public for the sake of generated code only. */
+    public static class RuntimeSupport {
+        public static SixModelObject boxJava(Object o, STable st) {
+            JavaObjectWrapper jow = new JavaObjectWrapper();
+            jow.st = st;
+            jow.theObject = o;
+            return jow;
+        }
+
+        public static Object unboxJava(SixModelObject smo) {
+            return ((JavaObjectWrapper)smo).theObject;
+        }
+    }
+
+    public class STableCache {
+        private volatile STable localCache;
+        private Class<?> what;
+
+        public STableCache(Class<?> what) { this.what = what; }
+        public STable getSTable() {
+            STable fetch = localCache;
+            if (fetch != null) return fetch;
+            return localCache = getSTableForClass(what);
         }
     }
 }

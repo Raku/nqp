@@ -56,6 +56,7 @@ import org.perl6.nqp.sixmodel.reprs.CallCaptureInstance;
 import org.perl6.nqp.sixmodel.reprs.ContextRef;
 import org.perl6.nqp.sixmodel.reprs.ContextRefInstance;
 import org.perl6.nqp.sixmodel.reprs.IOHandleInstance;
+import org.perl6.nqp.sixmodel.reprs.JavaObjectWrapper;
 import org.perl6.nqp.sixmodel.reprs.LexoticInstance;
 import org.perl6.nqp.sixmodel.reprs.MultiCacheInstance;
 import org.perl6.nqp.sixmodel.reprs.NFA;
@@ -4786,5 +4787,17 @@ public final class Ops {
     /* noop, exists only so you can set a breakpoint in it */
     public static SixModelObject debugnoop(SixModelObject in, ThreadContext tc) {
         return in;
+    }
+
+    public static long jvmeqaddr(SixModelObject a, SixModelObject b) {
+        if (a instanceof TypeObject) {
+            return (b instanceof TypeObject) ? 1 : 0;
+        } else {
+            return (b instanceof TypeObject || ((JavaObjectWrapper)a).theObject != ((JavaObjectWrapper)b).theObject) ? 0 : 1;
+        }
+    }
+
+    public static SixModelObject jvmbootinterop(SixModelObject to, ThreadContext tc) {
+        return tc.gc.bootInterop.getInterop(to, tc);
     }
 }
