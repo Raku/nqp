@@ -68,6 +68,8 @@ is(nqp::sprintf('<%d>', [-18.42]), '<-18>', '%d on a negative float');
 is(nqp::sprintf('<%03d>', [1]), '<001>', '%d on decimal with 0-padding');
 is(nqp::sprintf('<%03d>', [-11]), '<-11>', '%d on negative decimal with 0-padding (but nothing to pad)');
 is(nqp::sprintf('<%04d>', [-1]), '<-001>', '%d on negative decimal with 0-padding');
+is(nqp::sprintf('<%+4d>', [42]), '< +42>', '%d on a positive decimal, space-padding with plus sign');
+is(nqp::sprintf('<%+04d>', [42]), '<+042>', '%d on a positive decimal, zero-padding with plus sign');
 
 is(nqp::sprintf('%c', [97]), 'a', '%c directive');
 is(nqp::sprintf('%10c', [65]), '         A', '%c directive with space padding');
@@ -90,6 +92,7 @@ is(nqp::sprintf('%#5.2x', [12]), ' 0x0c', '%x, hash, width and precision');
 is(nqp::sprintf('%5.2x', [12]), '   0c', '%x, no hash, but width and precision');
 is(nqp::sprintf('%05x', [12]), '0000c', '%x with zero-padding');
 is(nqp::sprintf('%0*x', [4, 12]), '000c', '%x with zero-padding, star-specified');
+
 is(nqp::sprintf('%u', [12]), '12', 'simple %u');
 is(nqp::sprintf('%u', [22.01]), '22', 'decimal %u');
 is(nqp::sprintf("%u", [2**32]), "4294967296", "max uint32 to %u");

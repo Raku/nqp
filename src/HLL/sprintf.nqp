@@ -132,10 +132,15 @@ my module sprintf {
         method directive:sym<d>($/) {
             my $int := intify(next_argument());
             my $pad := padding_char($/);
+            my $sign := $int < 0 ?? '-'
+                !! has_flag($/, 'plus')
+                    ?? '+' !! '';
             if $pad ne ' ' && $<size> {
-                my $sign := $int < 0 ?? '-' !! '';
                 $int := nqp::abs_i($int);
                 $int := $sign ~ infix_x($pad, $<size>.ast - nqp::chars($int) - 1) ~ $int
+            }
+            else {
+                $int := $sign ~ nqp::abs_i($int)
             }
             make $int
         }
