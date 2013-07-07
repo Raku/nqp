@@ -43,10 +43,10 @@ generic type system.  That would just be crazy.
     my %bji := nqp::jvmbootinterop('org.perl6.nqp.runtime.BootJavaInterop');
     my %cls := nqp::jvmbootinterop('java.lang.Class');
 
-    my $gc_get_bji := %gc<getfield:bootInterop;Lorg/perl6/nqp/runtime/BootJavaInterop;>;
-    my $bji_implement := %bji<method:implementClass(Lorg/perl6/nqp/sixmodel/SixModelObject;Lorg/perl6/nqp/runtime/ThreadContext;)Lorg/perl6/nqp/sixmodel/SixModelObject;>;
-    my $cls_new := %cls<method:newInstance()Ljava/lang/Object;>;
-    my $thr_run := %thr<method:start()V>;
+    my $gc_get_bji := %gc<get_bootInterop>;
+    my $bji_implement := %bji<implementClass>;
+    my $cls_new := %cls<newInstance>;
+    my $thr_run := %thr<start>;
 
     $thr_run(
         $cls_new(

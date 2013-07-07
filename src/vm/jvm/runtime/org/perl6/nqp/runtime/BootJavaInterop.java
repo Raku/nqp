@@ -5,7 +5,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.perl6.nqp.sixmodel.STable;
 import org.perl6.nqp.sixmodel.SixModelObject;
@@ -188,8 +190,24 @@ public class BootJavaInterop {
 
         SixModelObject hash = gc.BOOTHash.st.REPR.allocate(tc, gc.BOOTHash.st);
 
-        for (int i = 0; i < adaptor.descriptors.size(); i++)
-            hash.bind_key_boxed(tc, adaptor.descriptors.get(i), adaptorUnit.lookupCodeRef(i));
+        HashMap<String, CodeRef> names = new HashMap< >();
+
+        for (int i = 0; i < adaptor.descriptors.size(); i++) {
+            String desc = adaptor.descriptors.get(i);
+            CodeRef cr = adaptorUnit.lookupCodeRef(i);
+
+            int s1 = desc.indexOf('/');
+            int s2 = desc.indexOf('/', s1+1);
+
+            String shorten = desc.substring(s1+1, s2);
+            names.put(shorten, names.containsKey(shorten) ? null : cr);
+            names.put(desc, cr);
+        }
+
+        for (Map.Entry<String, CodeRef> ent : names.entrySet()) {
+            if (ent.getValue() != null)
+                hash.bind_key_boxed(tc, ent.getKey(), ent.getValue());
+        }
 
         return hash;
     }
@@ -211,7 +229,21 @@ public class BootJavaInterop {
         for (Field f : target.getFields()) createAdaptorField(cc, f);
         for (Constructor<?> c : target.getConstructors()) createAdaptorConstructor(cc, c);
         createAdaptorSpecials(cc);
+        compunitMethods(cc);
 
+        cw.visitEnd();
+        byte[] bits = cw.toByteArray();
+        //try {
+        //    java.nio.file.Files.write(new java.io.File(className.replace('/','_') + ".class").toPath(), bits);
+        //} catch (java.io.IOException e) {
+        //    e.printStackTrace();
+        //}
+        cc.constructed = new ByteClassLoader(bits).findClass(className.replace('/','.'));
+        return cc;
+    }
+
+    protected void compunitMethods(ClassContext c) {
+        ClassVisitor cw = c.cv;
         MethodVisitor mv;
         mv = cw.visitMethod(Opcodes.ACC_PUBLIC, "getCallSites", "()[Lorg/perl6/nqp/runtime/CallSiteDescriptor;", null, null);
         mv.visitCode();
@@ -234,16 +266,6 @@ public class BootJavaInterop {
         mv.visitInsn(Opcodes.RETURN);
         mv.visitMaxs(0,0);
         mv.visitEnd();
-
-        cw.visitEnd();
-        byte[] bits = cw.toByteArray();
-        //try {
-        //    java.nio.file.Files.write(new java.io.File(className.replace('/','_') + ".class").toPath(), bits);
-        //} catch (java.io.IOException e) {
-        //    e.printStackTrace();
-        //}
-        cc.constructed = new ByteClassLoader(bits).findClass(className.replace('/','.'));
-        return cc;
     }
 
     /** Override this to customize the calling convention for method adaptors. */
@@ -252,8 +274,7 @@ public class BootJavaInterop {
         boolean isStatic = Modifier.isStatic(tobind.getModifiers());
 
         String desc = Type.getMethodDescriptor(tobind);
-        MethodContext cc = startCallout(c, ptype.length + 1,
-                (isStatic ? "static_method:" : "method:") + tobind.getName() + desc);
+        MethodContext cc = startCallout(c, ptype.length + 1, "method/" + tobind.getName() + "/" + desc);
 
         int parix = 1;
         preMarshalIn(cc, tobind.getReturnType(), 0);
@@ -270,7 +291,7 @@ public class BootJavaInterop {
         boolean isStatic = Modifier.isStatic(f.getModifiers());
         MethodContext cc;
 
-        cc = startCallout(c, 1, (isStatic ? "getstatic:" : "getfield:") + f.getName() + ";" + Type.getDescriptor(f.getType()));
+        cc = startCallout(c, 1, "field/get_" + f.getName() + "/" + Type.getDescriptor(f.getType()));
         preMarshalIn(cc, f.getType(), 0);
         if (!isStatic) marshalOut(cc, f.getDeclaringClass(), 0);
         cc.mv.visitFieldInsn(isStatic ? Opcodes.GETSTATIC : Opcodes.GETFIELD, Type.getInternalName(f.getDeclaringClass()), f.getName(), Type.getDescriptor(f.getType()));
@@ -278,7 +299,7 @@ public class BootJavaInterop {
         endCallout(cc);
 
         if (!Modifier.isFinal(f.getModifiers())) {
-            cc = startCallout(c, 2, (isStatic ? "putstatic:" : "putfield:") + f.getName() + ";" + Type.getDescriptor(f.getType()));
+            cc = startCallout(c, 2, "field/set_" + f.getName() + "/" + Type.getDescriptor(f.getType()));
             preMarshalIn(cc, void.class, 0);
             if (!isStatic) marshalOut(cc, f.getDeclaringClass(), 0);
             marshalOut(cc, f.getType(), 1);
@@ -292,7 +313,7 @@ public class BootJavaInterop {
     protected void createAdaptorConstructor(ClassContext c, Constructor<?> k) {
         Class<?>[] ptypes = k.getParameterTypes();
         String desc = Type.getConstructorDescriptor(k);
-        MethodContext cc = startCallout(c, ptypes.length + 1, "constructor:"+desc);
+        MethodContext cc = startCallout(c, ptypes.length + 1, "constructor/new/"+desc);
         int parix = 1;
         preMarshalIn(cc, k.getDeclaringClass(), 0);
         cc.mv.visitTypeInsn(Opcodes.NEW, Type.getInternalName(k.getDeclaringClass()));
@@ -306,21 +327,21 @@ public class BootJavaInterop {
     /** Override this to add or customize special adaptors not tied to specific fields. */
     protected void createAdaptorSpecials(ClassContext c) {
         // odds and ends like early bound array stuff, isinst, nondefault marshalling...
-        MethodContext cc = startCallout(c, 2, "box");
+        MethodContext cc = startCallout(c, 2, "/box/");
         preMarshalIn(cc, Object.class, 0);
         marshalOut(cc, c.target, 1);
         // implicit widening conversion to Object
         marshalIn(cc, Object.class, 0);
         endCallout(cc);
 
-        cc = startCallout(c, 2, "unbox");
+        cc = startCallout(c, 2, "/unbox/");
         preMarshalIn(cc, c.target, 0);
         marshalOut(cc, Object.class, 1);
         cc.mv.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(c.target));
         marshalIn(cc, c.target, 0);
         endCallout(cc);
 
-        cc = startCallout(c, 2, "isinst");
+        cc = startCallout(c, 2, "/isinst/");
         preMarshalIn(cc, boolean.class, 0);
         marshalOut(cc, Object.class, 1);
         cc.mv.visitTypeInsn(Opcodes.INSTANCEOF, Type.getInternalName(c.target));
