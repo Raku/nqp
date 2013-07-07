@@ -19,7 +19,9 @@ my module sprintf {
         token directive:sym<b> { '%' <flags>* <size>? [ '.' <precision=.size> ]? $<sym>=<[bB]> }
         token directive:sym<c> { '%' <flags>* <size>? <sym> }
         token directive:sym<d> { '%' <flags>* <size>? $<sym>=<[di]> }
+        token directive:sym<e> { '%' <flags>* <size>? [ '.' <precision=.size> ]? $<sym>=<[eE]> }
         token directive:sym<f> { '%' <flags>* <size>? [ '.' <precision=.size> ]? $<sym>=<[fF]> }
+        token directive:sym<g> { '%' <flags>* <size>? [ '.' <precision=.size> ]? $<sym>=<[gG]> }
         token directive:sym<o> { '%' <flags>* <size>? [ '.' <precision=.size> ]? <sym> }
         token directive:sym<s> { '%' <flags>* <size>? <sym> }
         token directive:sym<u> { '%' <flags>* <size>? <sym> }
@@ -85,7 +87,7 @@ my module sprintf {
         sub padding_char($st) {
             my $padding_char := ' ';
             if (!$st<precision> && !has_flag($st, 'minus'))
-            || $st<sym> ~~ /<[fF]>/ {
+            || $st<sym> ~~ /<[eEfFgG]>/ {
                 $padding_char := '0' if $_<zero> for $st<flags>;
             }
             make $padding_char
@@ -129,6 +131,7 @@ my module sprintf {
         method directive:sym<c>($/) {
             make nqp::chr(next_argument())
         }
+
         method directive:sym<d>($/) {
             my $int := intify(next_argument());
             my $pad := padding_char($/);
@@ -143,6 +146,56 @@ my module sprintf {
                 $int := $sign ~ nqp::abs_i($int)
             }
             make $int
+        }
+
+        sub pad-with-sign($num, $size, $pad, $suffix) {
+            if $pad ne ' ' && $size {
+                my $sign := $num < 0 ?? '-' !! '';
+                $num := nqp::abs_n($num);
+                $num := $num ~ $suffix;
+                $num := $sign ~ infix_x($pad, $size - nqp::chars($num) - 1) ~ $num;
+            } else {
+                $num := $num ~ $suffix;
+            }
+            $num;
+        }
+        sub round-to-precision($float, $precision) {
+            $float := $float * $precision;
+            $float := $float - nqp::floor_n($float) >= 0.5 ?? nqp::ceil_n($float) !! nqp::floor_n($float);
+            $float := $float / $precision;
+        }
+        sub fixed-point($float, $precision, $size, $pad) {
+            $float := round-to-precision($float, $precision);
+            pad-with-sign($float, $size, $pad, '');
+        }
+        sub scientific($float, $e, $precision, $size, $pad) {
+            my $exp := nqp::floor_n(nqp::log_n(nqp::abs_n($float)) / nqp::log_n(10));
+            $float := $float / nqp::pow_n(10, $exp);
+            my $suffix := $e ~ '+' ~ $exp; 
+            $float := round-to-precision($float, $precision);
+            pad-with-sign($float, $size, $pad, $suffix);
+        }
+        sub shortest($float, $e, $precision, $size, $pad) {
+            my $fixed := round-to-precision($float, $precision);
+
+            my $exp := nqp::floor_n(nqp::log_n(nqp::abs_n($float)) / nqp::log_n(10));
+            $float := $float / nqp::pow_n(10, $exp);
+            my $suffix := $e ~ '+' ~ $exp; 
+            my $sci := round-to-precision($float, $precision);
+
+            if nqp::chars($sci) < nqp::chars($fixed) {
+                pad-with-sign($sci, $size, $pad, $suffix);
+            } else {
+                pad-with-sign($fixed, $size, $pad, '');
+            }
+        }
+
+        method directive:sym<e>($/) {
+            my $float := next_argument();
+            my $precision := nqp::pow_n(10, $<precision> ?? $<precision>.ast !! 6);
+            my $pad := padding_char($/);
+            my $size := $<size> ?? $<size>.ast !! 0;
+            make scientific($float, $<sym>, $precision, $size, $pad);
         }
         method directive:sym<f>($/) {
             my $int := next_argument();
@@ -160,6 +213,13 @@ my module sprintf {
             make $pad ne ' ' && $<size>
                 ?? $sign ~ infix_x($pad, $<size>.ast - nqp::chars($int) - 1) ~ $int
                 !! $sign ~ $int
+        }
+        method directive:sym<g>($/) {
+            my $float := next_argument();
+            my $precision := nqp::pow_n(10, $<precision> ?? $<precision>.ast !! 6);
+            my $pad := padding_char($/);
+            my $size := $<size> ?? $<size>.ast !! 0;
+            make shortest($float, 'e', $precision, $size, $pad);
         }
         method directive:sym<o>($/) {
             my $int := intify(next_argument());
