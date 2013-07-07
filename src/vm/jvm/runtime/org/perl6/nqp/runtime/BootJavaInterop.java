@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -32,8 +33,6 @@ public class BootJavaInterop {
 
     /**
      * Set this to a non-null value to use the same STable for every class.
-     * Defaults to BOOTJava, so you need to explicitly set it to null when
-     * overriding {@link computeSTable}.
      */
     protected STable commonSTable;
 
@@ -43,7 +42,6 @@ public class BootJavaInterop {
     /** Create a new interop object for a context. */
     public BootJavaInterop(GlobalContext gc) {
         this.gc = gc;
-        commonSTable = gc.BOOTJava.st;
     }
 
     private static class InteropInfo {
@@ -54,20 +52,20 @@ public class BootJavaInterop {
 
     private ClassValue<InteropInfo> cache = new ClassValue<InteropInfo>() {
         @Override public InteropInfo computeValue(Class<?> cl) {
+            ThreadContext tc = gc.getCurrentThreadContext();
             InteropInfo r = new InteropInfo();
             r.forClass = cl;
-            r.interop = computeInterop(cl);
-            r.stable = computeSTable(cl, r.interop);
+            r.interop = computeInterop(tc, cl);
+            r.stable = computeSTable(tc, cl, r.interop);
             return r;
         }
     };
 
     /**
-     * Override this to define per-class STables.  <b>Will not be used unless
-     * you set {@link commonSTable} to null in the constructor.</b>
+     * Override this to define per-class STables.
      */
-    protected STable computeSTable(Class<?> klass, SixModelObject interop) {
-        return null;
+    protected STable computeSTable(ThreadContext tc, Class<?> klass, SixModelObject interop) {
+        return interop.at_key_boxed(tc, "/TYPE/").st;
     }
 
     /**
@@ -174,9 +172,7 @@ public class BootJavaInterop {
 
     // begin gory details
     /** Constructs interop objects for a class.  Override this if you need something other than a hash. */
-    protected SixModelObject computeInterop(Class<?> klass) {
-        ThreadContext tc = gc.getCurrentThreadContext();
-
+    protected SixModelObject computeInterop(ThreadContext tc, Class<?> klass) {
         ClassContext adaptor = createAdaptor(klass);
 
         CompilationUnit adaptorUnit;
@@ -190,11 +186,11 @@ public class BootJavaInterop {
 
         SixModelObject hash = gc.BOOTHash.st.REPR.allocate(tc, gc.BOOTHash.st);
 
-        HashMap<String, CodeRef> names = new HashMap< >();
+        HashMap<String, SixModelObject> names = new HashMap< >();
 
         for (int i = 0; i < adaptor.descriptors.size(); i++) {
             String desc = adaptor.descriptors.get(i);
-            CodeRef cr = adaptorUnit.lookupCodeRef(i);
+            SixModelObject cr = adaptorUnit.lookupCodeRef(i);
 
             int s1 = desc.indexOf('/');
             int s2 = desc.indexOf('/', s1+1);
@@ -204,10 +200,20 @@ public class BootJavaInterop {
             names.put(desc, cr);
         }
 
-        for (Map.Entry<String, CodeRef> ent : names.entrySet()) {
+        for (Iterator<Map.Entry<String, SixModelObject>> it = names.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry<String, SixModelObject> ent = it.next();
             if (ent.getValue() != null)
                 hash.bind_key_boxed(tc, ent.getKey(), ent.getValue());
+            else
+                it.remove();
         }
+
+        STable protoSt = gc.BOOTJava.st;
+        SixModelObject freshType = protoSt.REPR.type_object_for(tc, protoSt.HOW);
+        freshType.st.MethodCache = names;
+        freshType.st.ModeFlags |= STable.METHOD_CACHE_AUTHORITATIVE;
+
+        hash.bind_key_boxed(tc, "/TYPE/", freshType);
 
         return hash;
     }

@@ -38,27 +38,15 @@ generic type system.  That would just be crazy.
 
 =head1 Direct use
 
-    my %gc  := nqp::jvmbootinterop('org.perl6.nqp.runtime.GlobalContext');
-    my %thr := nqp::jvmbootinterop('java.lang.Thread');
-    my %bji := nqp::jvmbootinterop('org.perl6.nqp.runtime.BootJavaInterop');
-    my %cls := nqp::jvmbootinterop('java.lang.Class');
+    my $GlobalContext := nqp::jvmbootinterop('org.perl6.nqp.runtime.GlobalContext')</TYPE/>;
+    my $Thread := nqp::jvmbootinterop('java.lang.Thread')</TYPE/>;
 
-    my $gc_get_bji := %gc<get_bootInterop>;
-    my $bji_implement := %bji<implementClass>;
-    my $cls_new := %cls<newInstance>;
-    my $thr_run := %thr<start>;
-
-    $thr_run(
-        $cls_new(
-            $bji_implement(
-                $gc_get_bji(
-                    nqp::null(), # current GC
-                ),
-                [ ['extends','java.lang.Thread'], ['instance_method', 'run', '()V', method () { say("Hello thread") }] ],
-                nqp::null(), # current TC
-            ),
-        ),
-    );
+    $Thread.unbox(
+        $GlobalContext.unbox($GlobalContext.box(nqp::null())).get_bootInterop.implementClass(
+            [ ['extends','java.lang.Thread'], ['instance_method', 'run', '()V', method () { say("Hello thread") }] ],
+            nqp::null(), # current TC
+        ).newInstance
+    ).start;
 
 =head1 Subclassing
 
