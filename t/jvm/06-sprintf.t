@@ -24,7 +24,7 @@ sub is($actual, $expected, $description) {
     }
 }
 
-plan(99);
+plan(101);
 
 is(nqp::sprintf('Walter Bishop', []), 'Walter Bishop', 'no directives' );
 
@@ -144,3 +144,5 @@ is(nqp::sprintf('%020.2F', [3.1415]),  '00000000000000003.14',    '020.2 %F');
 is(nqp::sprintf('%020.2f', [-3.1415]), '-0000000000000003.14',    'negative 020.2 %f');
 is(nqp::sprintf('%020.2F', [-3.1415]), '-0000000000000003.14',    'negative 020.2 %F');
 is(nqp::sprintf('%f', [2.718281828459]), nqp::sprintf('%.6f', [2.718281828459]), '%f defaults to .6');
+is(nqp::sprintf('<%7.3f>', [0]), '<  0.000>', '%f fills up to precision');
+is(nqp::sprintf('<%7.3f>', [0.1]), '<  0.100>', '%f fills up to precision');

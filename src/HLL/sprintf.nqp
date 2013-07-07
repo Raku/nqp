@@ -141,17 +141,20 @@ my module sprintf {
         }
         method directive:sym<f>($/) {
             my $int := next_argument();
-            my $precision := nqp::pow_n(10, $<precision> ?? $<precision>.ast !! 6);
-            $int := $int * $precision;
-            $int := $int - nqp::floor_n($int) >= 0.5 ?? nqp::ceil_n($int) !! nqp::floor_n($int);
-            $int := $int / $precision;
+            my $sign := $int < 0 ?? '-' !! '';
+            my $precision := $<precision> ?? $<precision>.ast !! 6;
+            $int := nqp::abs_n($int) + 1;
+            $int := $int * nqp::pow_n(10, $precision);
+            $int := ~nqp::floor_n($int + 0.5);
+            $int := $int - nqp::pow_n(10, $precision);
+            my $lhs := nqp::chars($int) > $precision ?? nqp::substr($int, 0, nqp::chars($int) - $precision) !! '0';
+            my $rhs := infix_x('0', $precision - nqp::chars($int)) ~ $int;
+            $rhs := nqp::substr($rhs, nqp::chars($rhs) - $precision);
+            $int := $lhs ~ '.' ~ $rhs;
             my $pad := padding_char($/);
-            if $pad ne ' ' && $<size> {
-                my $sign := $int < 0 ?? '-' !! '';
-                $int := nqp::abs_n($int);
-                $int := $sign ~ infix_x($pad, $<size>.ast - nqp::chars($int) - 1) ~ $int
-            }
-            make $int
+            make $pad ne ' ' && $<size>
+                ?? $sign ~ infix_x($pad, $<size>.ast - nqp::chars($int) - 1) ~ $int
+                !! $sign ~ $int
         }
         method directive:sym<o>($/) {
             my $int := intify(next_argument());
