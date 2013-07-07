@@ -1,5 +1,9 @@
-// $ javac -cp bin/ examples/CallFromJava.java && java -cp nqp-runtime.jar:3rdparty/asm/asm-4.1.jar:3rdparty/asm/asm-tree-4.1.jar:. examples.CallFromJava
+// nqp$ javac -cp bin/ examples/CallFromJava.java
+// nqp$ java -cp nqp-runtime.jar:3rdparty/asm/asm-4.1.jar:3rdparty/asm/asm-tree-4.1.jar:. examples.CallFromJava nqp.jar nqp 'say(2+2)'
 // 4
+// rakudo$ java -cp ../nqp-jvm:../nqp-jvm/3rdparty/asm/asm-4.1.jar:../nqp-jvm/3rdparty/asm/asm-tree-4.1.jar:../nqp-jvm/nqp-runtime.jar:rakudo-runtime.jar:. examples.CallFromJava perl6.jar perl6 'say 2 + 2'
+// 4
+
 
 // Note: curently nqp only functions properly in the application class path.
 
@@ -13,12 +17,12 @@ public class CallFromJava {
     private ThreadContext t;
     private SixModelObject nqpComp;
 
-    private CallFromJava() {
+    private CallFromJava(String bytecode, String hll) {
         g = new GlobalContext();
         t = g.getCurrentThreadContext();
 
-        Ops.loadbytecode("nqp.jar", t);
-        nqpComp = Ops.getcomp("nqp", t);
+        Ops.loadbytecode(bytecode, t);
+        nqpComp = Ops.getcomp(hll, t);
     }
 
     private SixModelObject eval(String nqp) {
@@ -31,9 +35,9 @@ public class CallFromJava {
     }
 
     public static void main(String[] args) {
-        CallFromJava nqp = new CallFromJava();
+        CallFromJava nqp = new CallFromJava(args[0], args[1]);
 
-        nqp.eval("say(2 + 2)");
+        nqp.eval(args[2]);
     }
 }
 
