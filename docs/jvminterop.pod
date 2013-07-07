@@ -41,10 +41,14 @@ generic type system.  That would just be crazy.
     my $interop := nqp::jvmbootinterop();
 
     $interop.typeForName('java.lang.Thread').unbox(
-        $interop.implementClass([
-            ['extends','java.lang.Thread'],
-            ['instance_method', 'run', '()V', method () { say("Hello thread") }],
-        ]).newInstance
+        $interop.implementClass(
+            [ ['extends','java.lang.Thread'], ['instance_method', 'run', '()V', method () { say("Hello thread") }] ],
+        ).newInstance
+    ).start;
+
+    $interop.typeForName('java.lang.Thread')."constructor/new/(Ljava/lang/Runnable;Ljava/lang/String;)V"(
+        $interop.proxy('java.lang.Runnable', nqp::hash( 'run', sub () { say("hello thread2") } )),
+        "AnotherThread"
     ).start;
 
 =head1 Subclassing

@@ -1,5 +1,8 @@
 package org.perl6.nqp.runtime;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -99,19 +102,23 @@ public class BootJavaInterop {
         return gc.getCurrentThreadContext();
     }
 
+    protected Class<?> unboxClass(SixModelObject to) {
+        if (to instanceof JavaObjectWrapper) {
+            Object o = ((JavaObjectWrapper)to).theObject;
+            if (o instanceof Class<?>) return (Class<?>)o;
+        }
+        try {
+            return Class.forName(Ops.unbox_s(to, gc.getCurrentThreadContext()));
+        } catch (ClassNotFoundException e) {
+            throw ExceptionHandling.dieInternal(gc.getCurrentThreadContext(), e);
+        }
+    }
+
     /**
      * Entry point for callouts.
      */
     public SixModelObject getInterop(SixModelObject to) {
-        if (to instanceof JavaObjectWrapper) {
-            Object o = ((JavaObjectWrapper)to).theObject;
-            if (o instanceof Class<?>) return getInteropForClass((Class<?>)o);
-        }
-        try {
-            return getInteropForClass(Class.forName(Ops.unbox_s(to, gc.getCurrentThreadContext())));
-        } catch (ClassNotFoundException e) {
-            throw ExceptionHandling.dieInternal(gc.getCurrentThreadContext(), e);
-        }
+        return getInteropForClass(unboxClass(to));
     }
 
     /** Entry point for callback setup. */
@@ -167,21 +174,25 @@ public class BootJavaInterop {
         mv.visitMaxs(0,0);
         mv.visitEnd();
 
-        cw.visitEnd();
+        finishClass(cc);
+        return RuntimeSupport.boxJava(cc.constructed, getSTableForClass(Class.class));
+    }
 
-        byte[] bits = cw.toByteArray();
+    protected void finishClass(ClassContext cc) {
+        cc.cv.visitEnd();
+
+        byte[] bits = cc.cv.toByteArray();
         //try {
         //    java.nio.file.Files.write(new java.io.File(className.replace('/','_') + ".class").toPath(), bits);
         //} catch (java.io.IOException e) {
         //    e.printStackTrace();
         //}
-        cc.constructed = new ByteClassLoader(bits).findClass(className.replace('/','.'));
+        cc.constructed = new ByteClassLoader(bits).findClass(cc.className.replace('/','.'));
         try {
             cc.constructed.getField("constants").set(null, cc.constants.toArray(new Object[0]));
         } catch (ReflectiveOperationException roe) {
             throw new RuntimeException(roe);
         }
-        return RuntimeSupport.boxJava(cc.constructed, getSTableForClass(Class.class));
     }
 
     /** Helper method for parsing descriptions in {@link #implementClass(SixModelObject,ThreadContext)}. */
@@ -196,12 +207,11 @@ public class BootJavaInterop {
 
         CompilationUnit adaptorUnit;
         try {
-            adaptor.constructed.getField("constants").set(null, adaptor.constants.toArray(new Object[0]));
             adaptorUnit = (CompilationUnit) adaptor.constructed.newInstance();
-            adaptorUnit.initializeCompilationUnit(tc);
         } catch (ReflectiveOperationException roe) {
             throw new RuntimeException(roe);
         }
+        adaptorUnit.initializeCompilationUnit(tc);
 
         SixModelObject hash = gc.BOOTHash.st.REPR.allocate(tc, gc.BOOTHash.st);
 
@@ -256,14 +266,7 @@ public class BootJavaInterop {
         createAdaptorSpecials(cc);
         compunitMethods(cc);
 
-        cw.visitEnd();
-        byte[] bits = cw.toByteArray();
-        //try {
-        //    java.nio.file.Files.write(new java.io.File(className.replace('/','_') + ".class").toPath(), bits);
-        //} catch (java.io.IOException e) {
-        //    e.printStackTrace();
-        //}
-        cc.constructed = new ByteClassLoader(bits).findClass(className.replace('/','.'));
+        finishClass(cc);
         return cc;
     }
 
@@ -392,7 +395,7 @@ public class BootJavaInterop {
         if (!isStatic) cbArgs[aidx++] = Object.class; // XXX we can't properly marshal here because the class doesn't exist yet!
         for (Type p : parm) cbArgs[aidx++] = typeToClass(p);
 
-        setupCallback(mc, row[3], cbArgs);
+        setupCallback(mc, row[3], null, cbArgs);
 
         int lidx = 0;
         for (int i = 0; i < cbArgs.length; i++) {
@@ -588,7 +591,7 @@ public class BootJavaInterop {
     /** Stores working information while building a class. */
     protected static class ClassContext {
         /** The ASM class writer. */
-        public ClassVisitor cv;
+        public ClassWriter cv;
         /** The new class' internal name. */
         public String className;
         /** The incomplete list of constants, used by {@link BootJavaInterop#emitConst}. */
@@ -713,7 +716,7 @@ public class BootJavaInterop {
     }
 
     /** Constructs a CallSiteDescriptor and argument array for a callback and begins the invokeDirect call. */
-    protected void setupCallback(MethodContext mc, SixModelObject invokee, Class<?>[] args) {
+    protected void setupCallback(MethodContext mc, SixModelObject invokee, Method invokeeKey, Class<?>[] args) {
         byte[] csdFlags = new byte[args.length];
         for (int i = 0; i < args.length; i++)
             csdFlags[i] = TYPE_argflag[storageForType(args[i])];
@@ -721,7 +724,15 @@ public class BootJavaInterop {
 
         MethodVisitor mv = mc.mv;
         mv.visitVarInsn(Opcodes.ALOAD, mc.tcLoc);
-        emitConst(mc, invokee, SixModelObject.class);
+        if (invokee != null) {
+            emitConst(mc, invokee, SixModelObject.class);
+        } else {
+            mv.visitVarInsn(Opcodes.ALOAD, 0);
+            mv.visitFieldInsn(Opcodes.GETFIELD, mc.cc.className, "methodMap", "Ljava/util/Map;");
+            emitConst(mc, invokeeKey, Object.class);
+            mv.visitMethodInsn(Opcodes.INVOKEINTERFACE, "java/util/Map", "get", "(Ljava/lang/Object;)Ljava/lang/Object;");
+            mv.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(SixModelObject.class));
+        }
         emitConst(mc, csd, CallSiteDescriptor.class);
         emitInteger(mc, args.length);
         mv.visitTypeInsn(Opcodes.ANEWARRAY, "java/lang/Object");
@@ -841,5 +852,117 @@ public class BootJavaInterop {
             if (fetch != null) return fetch;
             return localCache = getSTableForClass(what);
         }
+    }
+
+    private final ClassValue<MethodHandle> proxyClasses = new ClassValue<MethodHandle>() {
+        @Override
+        public MethodHandle computeValue(Class<?> iface) {
+            Class<?> cls = computeProxyClass(iface);
+            try {
+                return MethodHandles.publicLookup().findConstructor(cls, MethodType.methodType(void.class, Map.class));
+            } catch (ReflectiveOperationException roe) {
+                throw new RuntimeException(roe);
+            }
+        }
+    };
+
+    /** Produce an interface instance using a cached class, in the style of (but not using) {@link java.lang.reflect.Proxy}. */
+    public SixModelObject proxy(SixModelObject iface_smo, SixModelObject methods) {
+        Class<?> iface = unboxClass(iface_smo);
+        ThreadContext tc = gc.getCurrentThreadContext();
+        Map<Method, SixModelObject> methodImpl = proxyGetMethods(tc, iface, methods);
+        Object proxy;
+        try {
+            proxy = proxyClasses.get(iface).invoke(methodImpl);
+        } catch (Throwable t) {
+            throw ExceptionHandling.dieInternal(tc, t);
+        }
+
+        return RuntimeSupport.boxJava(proxy, getSTableForClass(iface));
+    }
+
+    /** Override this to customize {@link #proxy(Class,SixModelObject)} method extraction. */
+    protected Map<Method, SixModelObject> proxyGetMethods(ThreadContext tc, Class<?> iface, SixModelObject methods) {
+        // here in BOOTland we can't tell the difference between a coderef and a hash, so require a hash
+        Method[] ms = iface.getMethods();
+        Map<Method, SixModelObject> ret = new HashMap< >();
+        for (Method m : ms) {
+            if (m.getDeclaringClass() != iface) continue; // don't care about hashCode and equals
+
+            String s = m.getName();
+            String l = s + "/" + Type.getMethodDescriptor(m);
+
+            if (methods.exists_key(tc, l) != 0)
+                ret.put(m, methods.at_key_boxed(tc, l));
+            else if (methods.exists_key(tc, s) != 0)
+                ret.put(m, methods.at_key_boxed(tc, s));
+            else
+                throw ExceptionHandling.dieInternal(tc, "method hash has no definition for "+l);
+        }
+        return ret;
+    }
+
+    /** Override this to customize generation of proxy classes. */
+    protected Class<?> computeProxyClass(Class<?> iface) {
+        ClassContext cc = new ClassContext();
+        ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+        String className = "org/perl6/nqp/generatedproxy/"+Type.getInternalName(iface);
+        cc.className = className;
+        cc.cv = cw;
+
+        String superclass = "java/lang/Object";
+        List<String> ifaces = new ArrayList< >();
+
+        cw.visit(Opcodes.V1_7, Opcodes.ACC_PUBLIC | Opcodes.ACC_SUPER, className, null,
+                "java/lang/Object", new String[] { Type.getInternalName(iface) });
+        cw.visitField(Opcodes.ACC_STATIC | Opcodes.ACC_PUBLIC, "constants", "[Ljava/lang/Object;", null, null).visitEnd();
+        cw.visitField(Opcodes.ACC_PRIVATE, "methodMap", "Ljava/util/Map;", null, null).visitEnd();
+
+        for (Method m : iface.getMethods()) {
+            if (m.getDeclaringClass() != iface) continue; // no hashCode, equals
+            createProxyMethod(cc, m);
+        }
+
+        MethodVisitor mv = cw.visitMethod(Opcodes.ACC_PUBLIC, "<init>", "(Ljava/util/Map;)V", null, null);
+        mv.visitCode();
+        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        mv.visitMethodInsn(Opcodes.INVOKESPECIAL, superclass, "<init>", "()V");
+        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        mv.visitVarInsn(Opcodes.ALOAD, 1);
+        mv.visitFieldInsn(Opcodes.PUTFIELD, className, "methodMap", "Ljava/util/Map;");
+        mv.visitInsn(Opcodes.RETURN);
+        mv.visitMaxs(0,0);
+        mv.visitEnd();
+
+        finishClass(cc);
+        return cc.constructed;
+    }
+
+    /** Override this to customize proxy callins. */
+    protected void createProxyMethod(ClassContext cc, Method m) {
+        MethodContext mc = startCallin(cc, Opcodes.ACC_PUBLIC, m.getName(), Type.getType(m));
+        MethodVisitor mv = mc.mv;
+
+        Class<?> cret = m.getReturnType();
+        Class<?>[] cparm = m.getParameterTypes();
+
+        setupCallback(mc, null, m, cparm);
+
+        int lidx = 1; // skip self
+        for (int i = 0; i < cparm.length; i++) {
+            Class<?> arg = cparm[i];
+            Type ty = Type.getType(arg);
+            preMarshalIn(mc, arg, i);
+            mv.visitVarInsn( ty.getOpcode(Opcodes.ILOAD), lidx );
+            lidx += ty.getSize();
+            marshalIn(mc, arg, i);
+        }
+
+        fireCallback(mc);
+
+        marshalOut(mc, cret, 0);
+        mc.mv.visitInsn(Type.getType(cret).getOpcode(Opcodes.IRETURN));
+
+        endCallin(mc);
     }
 }
