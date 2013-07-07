@@ -252,12 +252,12 @@ public class BootJavaInterop {
         boolean isStatic = Modifier.isStatic(tobind.getModifiers());
 
         String desc = Type.getMethodDescriptor(tobind);
-        MethodContext cc = startCallout(c, ptype.length + (isStatic ? 0 : 1),
+        MethodContext cc = startCallout(c, ptype.length + 1,
                 (isStatic ? "static_method:" : "method:") + tobind.getName() + desc);
 
-        int parix = 0;
+        int parix = 1;
         preMarshalIn(cc, tobind.getReturnType(), 0);
-        if (!isStatic) marshalOut(cc, tobind.getDeclaringClass(), parix++);
+        if (!isStatic) marshalOut(cc, tobind.getDeclaringClass(), 0);
         for (Class<?> pt : ptype) marshalOut(cc, pt, parix++);
         cc.mv.visitMethodInsn(isStatic ? Opcodes.INVOKESTATIC : Opcodes.INVOKEVIRTUAL, Type.getInternalName(tobind.getDeclaringClass()), tobind.getName(), desc);
         marshalIn(cc, tobind.getReturnType(), 0);
@@ -270,7 +270,7 @@ public class BootJavaInterop {
         boolean isStatic = Modifier.isStatic(f.getModifiers());
         MethodContext cc;
 
-        cc = startCallout(c, isStatic ? 0 : 1, (isStatic ? "getstatic:" : "getfield:") + f.getName() + ";" + Type.getDescriptor(f.getType()));
+        cc = startCallout(c, 1, (isStatic ? "getstatic:" : "getfield:") + f.getName() + ";" + Type.getDescriptor(f.getType()));
         preMarshalIn(cc, f.getType(), 0);
         if (!isStatic) marshalOut(cc, f.getDeclaringClass(), 0);
         cc.mv.visitFieldInsn(isStatic ? Opcodes.GETSTATIC : Opcodes.GETFIELD, Type.getInternalName(f.getDeclaringClass()), f.getName(), Type.getDescriptor(f.getType()));
@@ -278,10 +278,10 @@ public class BootJavaInterop {
         endCallout(cc);
 
         if (!Modifier.isFinal(f.getModifiers())) {
-            cc = startCallout(c, isStatic ? 1 : 2, (isStatic ? "putstatic:" : "putfield:") + f.getName() + ";" + Type.getDescriptor(f.getType()));
+            cc = startCallout(c, 2, (isStatic ? "putstatic:" : "putfield:") + f.getName() + ";" + Type.getDescriptor(f.getType()));
             preMarshalIn(cc, void.class, 0);
             if (!isStatic) marshalOut(cc, f.getDeclaringClass(), 0);
-            marshalOut(cc, f.getType(), isStatic ? 0 : 1);
+            marshalOut(cc, f.getType(), 1);
             cc.mv.visitFieldInsn(isStatic ? Opcodes.PUTSTATIC : Opcodes.PUTFIELD, Type.getInternalName(f.getDeclaringClass()), f.getName(), Type.getDescriptor(f.getType()));
             marshalIn(cc, void.class, 0);
             endCallout(cc);
@@ -292,8 +292,8 @@ public class BootJavaInterop {
     protected void createAdaptorConstructor(ClassContext c, Constructor<?> k) {
         Class<?>[] ptypes = k.getParameterTypes();
         String desc = Type.getConstructorDescriptor(k);
-        MethodContext cc = startCallout(c, ptypes.length, "constructor:"+desc);
-        int parix = 0;
+        MethodContext cc = startCallout(c, ptypes.length + 1, "constructor:"+desc);
+        int parix = 1;
         preMarshalIn(cc, k.getDeclaringClass(), 0);
         cc.mv.visitTypeInsn(Opcodes.NEW, Type.getInternalName(k.getDeclaringClass()));
         cc.mv.visitInsn(Opcodes.DUP);
@@ -306,23 +306,23 @@ public class BootJavaInterop {
     /** Override this to add or customize special adaptors not tied to specific fields. */
     protected void createAdaptorSpecials(ClassContext c) {
         // odds and ends like early bound array stuff, isinst, nondefault marshalling...
-        MethodContext cc = startCallout(c, 1, "box");
+        MethodContext cc = startCallout(c, 2, "box");
         preMarshalIn(cc, Object.class, 0);
-        marshalOut(cc, c.target, 0);
+        marshalOut(cc, c.target, 1);
         // implicit widening conversion to Object
         marshalIn(cc, Object.class, 0);
         endCallout(cc);
 
-        cc = startCallout(c, 1, "unbox");
+        cc = startCallout(c, 2, "unbox");
         preMarshalIn(cc, c.target, 0);
-        marshalOut(cc, Object.class, 0);
+        marshalOut(cc, Object.class, 1);
         cc.mv.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(c.target));
         marshalIn(cc, c.target, 0);
         endCallout(cc);
 
-        cc = startCallout(c, 1, "isinst");
+        cc = startCallout(c, 2, "isinst");
         preMarshalIn(cc, boolean.class, 0);
-        marshalOut(cc, Object.class, 0);
+        marshalOut(cc, Object.class, 1);
         cc.mv.visitTypeInsn(Opcodes.INSTANCEOF, Type.getInternalName(c.target));
         marshalIn(cc, boolean.class, 0);
         endCallout(cc);
