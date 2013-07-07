@@ -1,0 +1,72 @@
+=head1 Basic principles
+
+We have some degree of interop with native Java objects provided through the
+C<BootJavaInterop> class.  The name Boot is intended to suggest that it will
+not be used directly in most cases; instead it can either be subclassed to
+provide useful (and fast) HLL-specific marshaling, or it can be wrapped with
+NQP code to achieve a similar effect.
+
+=head1 Common data model
+
+All Java objects are wrapped in instances of the C<JavaWrap> REPR.  The
+instances share a common methodless class by default, but a subclass of
+C<BootJavaInterop> can define an alternate class, or even dynamically create
+one class per Java type.  Marshalling and unmarshalling is done automatically
+on calls in a statically type-directed way: a function which declares a return
+type of C<String> will appear to return C<str>, but a function with a declared
+type of C<Object> will wrap any return value even if it is a string.
+
+When dynamically creating classes, return values are wrapped in a wrapper type
+appropriate to their B<static> type.  To use methods that exist only on a
+specific run-time subclass, a cast must be used. This is a deliberate
+difference from the Niecza CLR interop system, intended to avoid several
+related semantic traps that exist in Niecza.  For instance:
+
+    $obj.method1.method2;
+
+If C<method1> is declared to return an object of type C<Class2> with a single
+method C<method2>, and actually does so, this works in both NQP and Niecza.
+But if C<method1> is changed to return an object of type C<Class3> which is a
+subclass of C<Class2> but has additional methods that shadow or ambiguously
+overload C<method2>, it will B<not> work in Niecza because the binding is
+effectively too late to reflect host-language subclass substitutability; but
+it will work on NQP, because the binding is forced to be done based on the
+static type.
+
+When handling these "pseudostatic types", no attempt is made to reflect Java's
+generic type system.  That would just be crazy.
+
+=head1 Direct use
+
+    my %gc  := nqp::jvmbootinterop('org.perl6.nqp.runtime.GlobalContext');
+    my %thr := nqp::jvmbootinterop('java.lang.Thread');
+    my %bji := nqp::jvmbootinterop('org.perl6.nqp.runtime.BootJavaInterop');
+    my %cls := nqp::jvmbootinterop('java.lang.Class');
+
+    my $gc_get_bji := %gc<getfield:bootInterop;Lorg/perl6/nqp/runtime/BootJavaInterop;>;
+    my $bji_implement := %bji<method:implementClass(Lorg/perl6/nqp/sixmodel/SixModelObject;Lorg/perl6/nqp/runtime/ThreadContext;)Lorg/perl6/nqp/sixmodel/SixModelObject;>;
+    my $cls_new := %cls<method:newInstance()Ljava/lang/Object;>;
+    my $thr_run := %thr<method:start()V>;
+
+    $thr_run(
+        $cls_new(
+            $bji_implement(
+                $gc_get_bji(
+                    nqp::null(), # current GC
+                ),
+                [ ['extends','java.lang.Thread'], ['instance_method', 'run', '()V', method () { say("Hello thread") }] ],
+                nqp::null(), # current TC
+            ),
+        ),
+    );
+
+=head1 Subclassing
+
+The C<BootJavaInterop> class has a large number of protected methods which can
+be overriden to support things like automatic creation of C<STable>s to permit
+method calls against Java objects and types, or adding marshalling rules like
+C<java.math.BigInteger> <-> C<Int>.
+
+=head1 Wrapping
+
+TBD

@@ -20,15 +20,25 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
-/** Factory for Java object interop wrappers.  This class is designed to be subclassed by HLLs.  Not shareable between {@link GlobalContext}s. */
+/**
+ * Factory for Java object interop wrappers.  This class is designed to be
+ * subclassed by HLLs.  Not shareable between {@link GlobalContext}s.  Interop
+ * factories should generally be treated as singletons, because constructed
+ * wrappers and types cannot be shared between them.
+ */
 public class BootJavaInterop {
 
-    /** Set this to a non-null value to use the same STable for every class. */
+    /**
+     * Set this to a non-null value to use the same STable for every class.
+     * Defaults to BOOTJava, so you need to explicitly set it to null when
+     * overriding {@link computeSTable}.
+     */
     protected STable commonSTable;
 
     /** The global context that this interop factory is used for. */
     protected GlobalContext gc;
 
+    /** Create a new interop object for a context. */
     public BootJavaInterop(GlobalContext gc) {
         this.gc = gc;
         commonSTable = gc.BOOTJava.st;
@@ -50,12 +60,18 @@ public class BootJavaInterop {
         }
     };
 
-    /** Override this to define per-class STables.  <b>Will not be used unless you set {@link commonSTable} to null in the constructor.</b> */
+    /**
+     * Override this to define per-class STables.  <b>Will not be used unless
+     * you set {@link commonSTable} to null in the constructor.</b>
+     */
     protected STable computeSTable(Class<?> klass, SixModelObject interop) {
         return null;
     }
 
-    /** Get STable for class, computing if necessary. */
+    /**
+     * Get STable for class, computing if necessary.  You probably want to
+     * override {@link computeSTable} instead of this.
+     */
     public STable getSTableForClass(Class<?> c) {
         return commonSTable != null ? commonSTable : cache.get(c).stable;
     }
@@ -65,7 +81,9 @@ public class BootJavaInterop {
         return cache.get(c).interop;
     }
 
-    /** Entry point for callouts. */
+    /**
+     * Entry point for callouts.
+     */
     public SixModelObject getInterop(SixModelObject to, ThreadContext tc) {
         if (to instanceof JavaObjectWrapper) {
             Object o = ((JavaObjectWrapper)to).theObject;
@@ -147,11 +165,13 @@ public class BootJavaInterop {
         return RuntimeSupport.boxJava(cc.constructed, getSTableForClass(Class.class));
     }
 
+    /** Helper method for parsing descriptions in {@link #implementClass(SixModelObject,ThreadContext)}. */
     protected boolean matchName(ThreadContext tc, SixModelObject[][] rows, int rptr, String name) {
         return rptr < rows.length && rows[rptr].length > 0 && name.equals(Ops.unbox_s(rows[rptr][0], tc));
     }
 
     // begin gory details
+    /** Constructs interop objects for a class.  Override this if you need something other than a hash. */
     protected SixModelObject computeInterop(Class<?> klass) {
         ThreadContext tc = gc.getCurrentThreadContext();
 
@@ -174,6 +194,7 @@ public class BootJavaInterop {
         return hash;
     }
 
+    /** Handles class construction for adaptors. */
     protected ClassContext createAdaptor(Class<?> target) {
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
         String className = "org/perl6/nqp/generatedadaptor/"+target.getName().replace('.','/');
@@ -225,6 +246,7 @@ public class BootJavaInterop {
         return cc;
     }
 
+    /** Override this to customize the calling convention for method adaptors. */
     protected void createAdaptorMethod(ClassContext c, Method tobind) {
         Class<?>[] ptype = tobind.getParameterTypes();
         boolean isStatic = Modifier.isStatic(tobind.getModifiers());
@@ -243,6 +265,7 @@ public class BootJavaInterop {
         endCallout(cc);
     }
 
+    /** Override this to customize the calling convention for field adaptors. */
     protected void createAdaptorField(ClassContext c, Field f) {
         boolean isStatic = Modifier.isStatic(f.getModifiers());
         MethodContext cc;
@@ -265,6 +288,7 @@ public class BootJavaInterop {
         }
     }
 
+    /** Override this to customize the calling convention for constructor adaptors. */
     protected void createAdaptorConstructor(ClassContext c, Constructor<?> k) {
         Class<?>[] ptypes = k.getParameterTypes();
         String desc = Type.getConstructorDescriptor(k);
@@ -279,6 +303,7 @@ public class BootJavaInterop {
         endCallout(cc);
     }
 
+    /** Override this to add or customize special adaptors not tied to specific fields. */
     protected void createAdaptorSpecials(ClassContext c) {
         // odds and ends like early bound array stuff, isinst, nondefault marshalling...
         MethodContext cc = startCallout(c, 1, "box");
@@ -304,6 +329,7 @@ public class BootJavaInterop {
     }
 
     // [ "instance_method", "name", "descriptor", sub () {} ]
+    /** Override this to customize generation of callin methods. */
     protected int methodCallin(ThreadContext tc, ClassContext c, SixModelObject[][] rows, int rptr, boolean isStatic) {
         SixModelObject[] row = rows[rptr++];
         if (row.length != 4) throw ExceptionHandling.dieInternal(tc, "instance_method requires 3 arguments");
@@ -341,6 +367,13 @@ public class BootJavaInterop {
         return rptr;
     }
 
+    /**
+     * Attempt to resolve a type name in a callin signature to a type for
+     * marshalling.  This is icky factoring, we should either marshal by type
+     * name or pass actual types when building callins.  The former option
+     * makes subclass-sensitive marshalling tricky and the latter prevents
+     * recursively referencing callin classes, though.
+     */
     protected Class<?> typeToClass(Type t) {
         switch (t.getSort()) {
             case Type.ARRAY:
@@ -363,7 +396,11 @@ public class BootJavaInterop {
         }
     }
 
-    /** Override this to customize marshalling. */
+    /**
+     * Returns a {@link StorageSpec} BP_XXX constant for a given type.
+     * Override this to customize marshalling.  You will probably only need to
+     * change this if you want to make char or boolean come in as objects.
+     */
     protected int storageForType(Class<?> what) {
         int ty;
         if (what == String.class || what == char.class)
@@ -376,12 +413,12 @@ public class BootJavaInterop {
             return StorageSpec.BP_NONE;
     }
 
-    /** Override this to customize marshalling. */
+    /** Generates "early" code for a marshal-in, such as C<new> opcodes.  Override this to customize marshalling. */
     protected void preMarshalIn(MethodContext c, Class<?> what, int ix) {
         preEmitPutToNQP(c, ix, storageForType(what));
     }
 
-    /** Override this to customize marshalling. */
+    /** Generates "late" code for a marshal-in.  Override this to customize marshalling. */
     protected void marshalIn(MethodContext c, Class<?> what, int ix) {
         if (what == void.class) {
             c.mv.visitInsn(Opcodes.ACONST_NULL);
@@ -411,6 +448,9 @@ public class BootJavaInterop {
         emitPutToNQP(c, ix, storageForType(what));
     }
 
+    /**
+     * Generates code for a marshal-out (NQP to Java).
+     */
     protected void marshalOut(MethodContext c, Class<?> what, int ix) {
         emitGetFromNQP(c, ix, storageForType(what));
         MethodVisitor mv = c.mv;
@@ -472,29 +512,52 @@ public class BootJavaInterop {
         }
     }
 
+    /** Maps BP_XXX constants to o, i, n, s flags. */
     protected static final char[] TYPE_CHAR = new char[] { 'o', 'i', 'n', 's' };
+    /** Maps BP_XXX constants to ARG_XXX constants. */
     protected static final byte[] TYPE_argflag = new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_INT, CallSiteDescriptor.ARG_NUM, CallSiteDescriptor.ARG_STR };
+    /** Maps BP_XXX constants to type names. */
     protected static final Type[] TYPES = new Type[] { Type.getType(SixModelObject.class), Type.LONG_TYPE, Type.DOUBLE_TYPE, Type.getType(String.class) };
+    /** Name of arrays of Object. */
     protected static final Type TYPE_AOBJ = Type.getType(Object[].class);
+    /** Type name of {@link CallFrame}. */
     protected static final Type TYPE_CF  = Type.getType(CallFrame.class);
+    /** Type name of {@link CodeRef}. */
     protected static final Type TYPE_CR = Type.getType(CodeRef.class);
+    /** Type name of {@link CallSiteDescriptor}. */
     protected static final Type TYPE_CSD = Type.getType(CallSiteDescriptor.class);
+    /** Type name of {@link CompilationUnit}. */
     protected static final Type TYPE_CU  = Type.getType(CompilationUnit.class);
+    /** Type name of {@link Object}. */
     protected static final Type TYPE_OBJ = Type.getType(Object.class);
+    /** Type name of {@link Ops}. */
     protected static final Type TYPE_OPS = Type.getType(Ops.class);
+    /** Type name of {@link SixModelObject}. */
     protected static final Type TYPE_SMO = Type.getType(SixModelObject.class);
+    /** Type name of {@link STable}. */
     protected static final Type TYPE_ST = Type.getType(STable.class);
+    /** Type name of {@link ThreadContext}. */
     protected static final Type TYPE_TC = Type.getType(ThreadContext.class);
 
+    /** Stores working information while building a class. */
     protected static class ClassContext {
+        /** The ASM class writer. */
         public ClassVisitor cv;
+        /** The new class' internal name. */
         public String className;
+        /** The incomplete list of constants, used by {@link BootJavaInterop#emitConst}. */
         public List<Object> constants = new ArrayList< >();
-        public Class<?> target, constructed;
+        /** The referenced class (for adaptors only). */
+        public Class<?> target;
+        /** The newly minted class. */
+        public Class<?> constructed;
+        /** Adaptor names, in the same order as the qb_NNN indexes, for adaptors only. */
         public List<String> descriptors = new ArrayList< >();
+        /** The next qb_NNN index to use. */
         public int nextCallout;
     }
 
+    /** Start an adaptor method and generate standard prologue. */
     protected MethodContext startCallout(ClassContext cc, int arity, String desc) {
         MethodContext mc = new MethodContext();
         mc.cc = cc;
@@ -535,6 +598,7 @@ public class BootJavaInterop {
         return mc;
     }
 
+    /** Generate adaptor epilogue and end the method. */
     protected void endCallout(MethodContext c) {
         MethodVisitor mv = c.mv;
         Label endTry = new Label();
@@ -566,6 +630,7 @@ public class BootJavaInterop {
         c.mv.visitEnd();
     }
 
+    /** Generate callin prologue. */
     protected MethodContext startCallin(ClassContext cc, int modifiers, String name, Type desc) {
         MethodContext mc = new MethodContext();
         mc.cc = cc;
@@ -589,6 +654,7 @@ public class BootJavaInterop {
         return mc;
     }
 
+    /** Generate callin epilogue. */
     protected void endCallin(MethodContext mc) {
         Label end = new Label();
         MethodVisitor mv = mc.mv;
@@ -600,6 +666,7 @@ public class BootJavaInterop {
         mv.visitEnd();
     }
 
+    /** Constructs a CallSiteDescriptor and argument array for a callback and begins the invokeDirect call. */
     protected void setupCallback(MethodContext mc, SixModelObject invokee, Class<?>[] args) {
         byte[] csdFlags = new byte[args.length];
         for (int i = 0; i < args.length; i++)
@@ -615,6 +682,7 @@ public class BootJavaInterop {
         mv.visitVarInsn(Opcodes.ASTORE, mc.argsLoc);
     }
 
+    /** Finishes the invokeDirect call for a callback. */
     protected void fireCallback(MethodContext mc) {
         MethodVisitor mv = mc.mv;
         mv.visitVarInsn(Opcodes.ALOAD, mc.argsLoc);
@@ -622,17 +690,27 @@ public class BootJavaInterop {
                 Type.getMethodDescriptor(Type.VOID_TYPE, TYPE_TC, TYPE_SMO, TYPE_CSD, TYPE_AOBJ));
     }
 
+    /** Working information for a method under construction. */
     protected static class MethodContext {
+        /** The owning incomplete class. */
         public ClassContext cc;
+        /** The ASM method writer. */
         public MethodVisitor mv;
+        /** True if this is a callin. */
         public boolean callback;
+        /** Local variable index of the current {@link CallFrame}. */
         public int cfLoc;
+        /** Local variable index of the argument list being constructed or read. */
         public int argsLoc;
+        /** Local variable index of the {@link CallSiteDescriptor} being read. */
         public int csdLoc;
+        /** Local variable index of the current {@link ThreadContext}. */
         public int tcLoc;
+        /** Temporary used for whole-method exception catching. */
         public Label tryStart;
     }
 
+    /** Emits code to a working method to push an integer constant. */
     protected void emitInteger(MethodContext c, int i) {
         if (i >= -1 && i <= 5) c.mv.visitInsn(Opcodes.ICONST_0 + i);
         else if (i == (byte)i) c.mv.visitIntInsn(Opcodes.BIPUSH, i);
@@ -640,6 +718,7 @@ public class BootJavaInterop {
         else c.mv.visitLdcInsn(i);
     }
 
+    /** Emits code to a working method to push an object constant. */
     protected <T> void emitConst(MethodContext c, T k, Class<T> cls) {
         List<Object> ks = c.cc.constants;
         int kix = ks.size();
@@ -650,6 +729,7 @@ public class BootJavaInterop {
         if (cls != Object.class) c.mv.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(cls));
     }
 
+    /** Emits code to a working method to get a value from an argument list or return value. */
     protected void emitGetFromNQP(MethodContext c, int index, int type) {
         if (c.callback) {
             // return value
@@ -665,6 +745,7 @@ public class BootJavaInterop {
         }
     }
 
+    /** Emits "early" code to a working method to push a value to a return value or argument list constructor. */
     protected void preEmitPutToNQP(MethodContext c, int index, int type) {
         if (c.callback) {
             // an argument
@@ -673,6 +754,7 @@ public class BootJavaInterop {
         }
     }
 
+    /** Emits "late" code to a working method to push a value to a return value or argument list constructor. */
     protected void emitPutToNQP(MethodContext c, int index, int type) {
         if (c.callback) {
             // an argument
@@ -702,6 +784,7 @@ public class BootJavaInterop {
         }
     }
 
+    /** A non-invalidating inline cache for lazily turning a {@link Class} into a {@link STable}. */
     public class STableCache {
         private volatile STable localCache;
         private Class<?> what;
