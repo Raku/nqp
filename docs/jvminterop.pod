@@ -38,14 +38,13 @@ generic type system.  That would just be crazy.
 
 =head1 Direct use
 
-    my $GlobalContext := nqp::jvmbootinterop('org.perl6.nqp.runtime.GlobalContext')</TYPE/>;
-    my $Thread := nqp::jvmbootinterop('java.lang.Thread')</TYPE/>;
+    my $interop := nqp::jvmbootinterop();
 
-    $Thread.unbox(
-        $GlobalContext.unbox($GlobalContext.box(nqp::null())).get_bootInterop.implementClass(
-            [ ['extends','java.lang.Thread'], ['instance_method', 'run', '()V', method () { say("Hello thread") }] ],
-            nqp::null(), # current TC
-        ).newInstance
+    $interop.typeForName('java.lang.Thread').unbox(
+        $interop.implementClass([
+            ['extends','java.lang.Thread'],
+            ['instance_method', 'run', '()V', method () { say("Hello thread") }],
+        ]).newInstance
     ).start;
 
 =head1 Subclassing

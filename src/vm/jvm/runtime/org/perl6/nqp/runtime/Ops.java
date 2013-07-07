@@ -4811,7 +4811,7 @@ public final class Ops {
         }
     }
 
-    public static SixModelObject jvmbootinterop(SixModelObject to, ThreadContext tc) {
-        return tc.gc.bootInterop.getInterop(to, tc);
+    public static SixModelObject jvmbootinterop(ThreadContext tc) {
+        return BootJavaInterop.RuntimeSupport.boxJava(tc.gc.bootInterop, tc.gc.bootInterop.getSTableForClass(BootJavaInterop.class));
     }
 }

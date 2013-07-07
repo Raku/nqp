@@ -77,27 +77,46 @@ public class BootJavaInterop {
     }
 
     /** Get interop table for a class. */
-    public SixModelObject getInterop(Class<?> c) {
+    public SixModelObject getInteropForClass(Class<?> c) {
         return cache.get(c).interop;
+    }
+
+    /** Main entry point for OO-ish callouts. */
+    public SixModelObject typeForName(String name) {
+        try {
+            return getSTableForClass(Class.forName(name)).WHAT;
+        } catch (ClassNotFoundException e) {
+            throw ExceptionHandling.dieInternal(gc.getCurrentThreadContext(), e);
+        }
+    }
+
+    /** Convenience methods for NQP coding. */
+    public GlobalContext currentGC() {
+        return gc;
+    }
+
+    public ThreadContext currentTC() {
+        return gc.getCurrentThreadContext();
     }
 
     /**
      * Entry point for callouts.
      */
-    public SixModelObject getInterop(SixModelObject to, ThreadContext tc) {
+    public SixModelObject getInterop(SixModelObject to) {
         if (to instanceof JavaObjectWrapper) {
             Object o = ((JavaObjectWrapper)to).theObject;
-            if (o instanceof Class<?>) return getInterop((Class<?>)o);
+            if (o instanceof Class<?>) return getInteropForClass((Class<?>)o);
         }
         try {
-            return getInterop(Class.forName(Ops.unbox_s(to, tc), false, BootJavaInterop.class.getClassLoader()));
+            return getInteropForClass(Class.forName(Ops.unbox_s(to, gc.getCurrentThreadContext())));
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+            throw ExceptionHandling.dieInternal(gc.getCurrentThreadContext(), e);
         }
     }
 
     /** Entry point for callback setup. */
-    public SixModelObject implementClass(SixModelObject description, ThreadContext tc) {
+    public SixModelObject implementClass(SixModelObject description) {
+        ThreadContext tc = gc.getCurrentThreadContext();
         // unpack the list-of-lists
         SixModelObject[][] rows = new SixModelObject[(int)description.elems(tc)][];
         for (int i = 0; i < rows.length; i++) {
