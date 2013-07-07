@@ -85,6 +85,9 @@ public abstract class SixModelObject implements Cloneable {
     public void set_elems(ThreadContext tc, long count) {
         throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement set_elems");
     }
+    public long exists_pos(ThreadContext tc, long key) {
+        throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement exists_pos");
+    }
     public void push_boxed(ThreadContext tc, SixModelObject value) {
         throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement push_boxed");
     }
@@ -129,9 +132,6 @@ public abstract class SixModelObject implements Cloneable {
         throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement bind_key_native");
     }
     public long exists_key(ThreadContext tc, String key) {
-        throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement exists_key");
-    }
-    public long exists_pos(ThreadContext tc, long key) {
         throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement exists_key");
     }
     public void delete_key(ThreadContext tc, String key) {
