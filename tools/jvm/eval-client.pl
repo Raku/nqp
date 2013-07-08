@@ -3,8 +3,16 @@ use strict;
 use warnings;
 
 use IO::Socket::INET;
-use File::Slurp 'read_file';
 use Encode ();
+
+sub read_file {
+    my $filename = shift;
+    open my $IN, '<', $filename or die "Error while reading '$filename': $!";
+    local $/;
+    my $contents = <$IN>;
+    close $IN;
+    return $contents;
+}
 
 if (@ARGV < 2) {
     print STDERR <<USAGE ;
