@@ -2672,7 +2672,7 @@ public final class Ops {
     }
 
     public static String chr(long val) {
-        return (new StringBuffer()).append((char) val).toString();
+        return (new StringBuffer()).append(Character.toChars((int)val)).toString();
     }
     
     public static String join(String delimiter, SixModelObject arr, ThreadContext tc) {
