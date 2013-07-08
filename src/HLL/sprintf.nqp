@@ -148,75 +148,79 @@ my module sprintf {
             make $int
         }
 
-        sub pad-with-sign($num, $size, $pad, $suffix) {
+        sub pad-with-sign($sign, $num, $size, $pad) {
             if $pad ne ' ' && $size {
-                my $sign := $num < 0 ?? '-' !! '';
-                $num := nqp::abs_n($num);
-                $num := $num ~ $suffix;
-                $num := $sign ~ infix_x($pad, $size - nqp::chars($num) - 1) ~ $num;
+                $sign ~ infix_x($pad, $size - nqp::chars($num) - 1) ~ $num;
             } else {
-                $num := $num ~ $suffix;
+                $sign ~ $num;
             }
-            $num;
         }
-        sub round-to-precision($float, $precision) {
-            $float := $float * $precision;
-            $float := $float - nqp::floor_n($float) >= 0.5 ?? nqp::ceil_n($float) !! nqp::floor_n($float);
-            $float := $float / $precision;
+        sub stringify-to-precision($float, $precision) {
+            $float := nqp::abs_n($float);
+            my $lhs := nqp::floor_n($float);
+            my $rhs := $float - $lhs;
+
+            my $knowhow := nqp::knowhow().new_type(:repr("P6bigint"));
+            my $int := nqp::box_i($lhs, $knowhow);
+            $lhs := nqp::tostr_I($int);
+
+            $float := $rhs + 1;
+            $float := $float * nqp::pow_n(10, $precision);
+            $float := ~nqp::floor_n($float + 0.5);
+            $float := $float - nqp::pow_n(10, $precision);
+            $rhs := infix_x('0', $precision - nqp::chars($float)) ~ $float;
+            $rhs := nqp::substr($rhs, nqp::chars($rhs) - $precision);
+
+            $float := $lhs ~ '.' ~ $rhs;
         }
         sub fixed-point($float, $precision, $size, $pad) {
-            $float := round-to-precision($float, $precision);
-            pad-with-sign($float, $size, $pad, '');
+            my $sign := $float < 0 ?? '-' !! '';
+            $float := stringify-to-precision(nqp::abs_n($float), $precision);
+            pad-with-sign($sign, $float, $size, $pad);
         }
         sub scientific($float, $e, $precision, $size, $pad) {
-            my $exp := nqp::floor_n(nqp::log_n(nqp::abs_n($float)) / nqp::log_n(10));
+            my $sign := $float < 0 ?? '-' !! '';
+            $float := nqp::abs_n($float);
+            my $exp := nqp::floor_n(nqp::log_n($float) / nqp::log_n(10));
             $float := $float / nqp::pow_n(10, $exp);
-            my $suffix := $e ~ '+' ~ $exp; 
-            $float := round-to-precision($float, $precision);
-            pad-with-sign($float, $size, $pad, $suffix);
+            $float := stringify-to-precision($float, $precision);
+            $float := $float ~ $e ~ ($exp < 0 ?? '' !! '+') ~ $exp;
+            pad-with-sign($sign, $float, $size, $pad);
         }
         sub shortest($float, $e, $precision, $size, $pad) {
-            my $fixed := round-to-precision($float, $precision);
+            my $sign := $float < 0 ?? '-' !! '';
+            $float := nqp::abs_n($float);
+
+            my $fixed := stringify-to-precision($float, $precision);
 
             my $exp := nqp::floor_n(nqp::log_n(nqp::abs_n($float)) / nqp::log_n(10));
             $float := $float / nqp::pow_n(10, $exp);
-            my $suffix := $e ~ '+' ~ $exp; 
-            my $sci := round-to-precision($float, $precision);
+            my $sci := stringify-to-precision($float, $precision) ~ $e ~ '+' ~ $exp;
 
             if nqp::chars($sci) < nqp::chars($fixed) {
-                pad-with-sign($sci, $size, $pad, $suffix);
+                pad-with-sign($sign, $sci, $size, $pad);
             } else {
-                pad-with-sign($fixed, $size, $pad, '');
+                pad-with-sign($sign, $fixed, $size, $pad);
             }
         }
 
         method directive:sym<e>($/) {
             my $float := next_argument();
-            my $precision := nqp::pow_n(10, $<precision> ?? $<precision>.ast !! 6);
+            my $precision := $<precision> ?? $<precision>.ast !! 6;
             my $pad := padding_char($/);
             my $size := $<size> ?? $<size>.ast !! 0;
             make scientific($float, $<sym>, $precision, $size, $pad);
         }
         method directive:sym<f>($/) {
             my $int := next_argument();
-            my $sign := $int < 0 ?? '-' !! '';
             my $precision := $<precision> ?? $<precision>.ast !! 6;
-            $int := nqp::abs_n($int) + 1;
-            $int := $int * nqp::pow_n(10, $precision);
-            $int := ~nqp::floor_n($int + 0.5);
-            $int := $int - nqp::pow_n(10, $precision);
-            my $lhs := nqp::chars($int) > $precision ?? nqp::substr($int, 0, nqp::chars($int) - $precision) !! '0';
-            my $rhs := infix_x('0', $precision - nqp::chars($int)) ~ $int;
-            $rhs := nqp::substr($rhs, nqp::chars($rhs) - $precision);
-            $int := $lhs ~ '.' ~ $rhs;
             my $pad := padding_char($/);
-            make $pad ne ' ' && $<size>
-                ?? $sign ~ infix_x($pad, $<size>.ast - nqp::chars($int) - 1) ~ $int
-                !! $sign ~ $int
+            my $size := $<size> ?? $<size>.ast !! 0;
+            make fixed-point($int, $precision, $size, $pad);
         }
         method directive:sym<g>($/) {
             my $float := next_argument();
-            my $precision := nqp::pow_n(10, $<precision> ?? $<precision>.ast !! 6);
+            my $precision := $<precision> ?? $<precision>.ast !! 6;
             my $pad := padding_char($/);
             my $size := $<size> ?? $<size>.ast !! 0;
             make shortest($float, 'e', $precision, $size, $pad);
