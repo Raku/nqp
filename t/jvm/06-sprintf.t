@@ -196,5 +196,5 @@ is(nqp::sprintf('%020.2g', [3.1415e20]),  '0000000000003.14e+20',    '020.2 %g')
 is(nqp::sprintf('%020.2G', [3.1415e20]),  '0000000000003.14e+20',    '020.2 %G');
 is(nqp::sprintf('%020.2g', [-3.1415e20]), '-000000000003.14e+20',    'negative 020.2 %g');
 is(nqp::sprintf('%020.2G', [-3.1415e20]), '-000000000003.14e+20',    'negative 020.2 %G');
-is(nqp::sprintf('<%7.3g>', [3e20]), '<  3.000e+20>', '%g fills up to precision');
-is(nqp::sprintf('<%7.3g>', [3.1e20]), '<  3.100e+20>', '%g fills up to precision');
+is(nqp::sprintf('<%11.3g>', [3e20]), '<  3.000e+20>', '%g fills up to precision');
+is(nqp::sprintf('<%11.3g>', [3.1e20]), '<  3.100e+20>', '%g fills up to precision');
