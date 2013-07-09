@@ -161,7 +161,7 @@ my module sprintf {
             my $rhs := $float - $lhs;
 
             my $knowhow := nqp::knowhow().new_type(:repr("P6bigint"));
-            my $int := nqp::box_i($lhs, $knowhow);
+            my $int := nqp::fromnum_I($lhs, $knowhow);
             $lhs := nqp::tostr_I($int);
 
             $float := $rhs + 1;
@@ -181,7 +181,7 @@ my module sprintf {
         sub scientific($float, $e, $precision, $size, $pad) {
             my $sign := $float < 0 ?? '-' !! '';
             $float := nqp::abs_n($float);
-            my $exp := nqp::floor_n(nqp::log_n($float) / nqp::log_n(10));
+            my $exp := $float == 0.0 ?? 0 !! nqp::floor_n(nqp::log_n($float) / nqp::log_n(10));
             $float := $float / nqp::pow_n(10, $exp);
             $float := stringify-to-precision($float, $precision);
             $float := $float ~ $e ~ ($exp < 0 ?? '' !! '+') ~ $exp;
@@ -193,7 +193,7 @@ my module sprintf {
 
             my $fixed := stringify-to-precision($float, $precision);
 
-            my $exp := nqp::floor_n(nqp::log_n(nqp::abs_n($float)) / nqp::log_n(10));
+            my $exp := $float == 0.0 ?? 0 !! nqp::floor_n(nqp::log_n($float) / nqp::log_n(10));
             $float := $float / nqp::pow_n(10, $exp);
             my $sci := stringify-to-precision($float, $precision) ~ $e ~ '+' ~ $exp;
 
