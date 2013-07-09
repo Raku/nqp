@@ -24,7 +24,7 @@ sub is($actual, $expected, $description) {
     }
 }
 
-plan(150);
+plan(154);
 
 is(nqp::sprintf('Walter Bishop', []), 'Walter Bishop', 'no directives' );
 
@@ -183,19 +183,23 @@ is(nqp::sprintf('%020.2g', [3.1415]),  '000000000000000003.1',    '020.2 %g');
 is(nqp::sprintf('%020.2G', [3.1415]),  '000000000000000003.1',    '020.2 %G');
 is(nqp::sprintf('%020.2g', [-3.1415]), '-00000000000000003.1',    'negative 020.2 %g');
 is(nqp::sprintf('%020.2G', [-3.1415]), '-00000000000000003.1',    'negative 020.2 %G');
-is(nqp::sprintf('%g', [2.718281828459]), nqp::sprintf('%.6f', [2.718281828459]), '%g defaults to .6');
+is(nqp::sprintf('%g', [2.718281828459]), nqp::sprintf('%.6g', [2.718281828459]), '%g defaults to precision .6');
 is(nqp::sprintf('<%7.3g>', [0]), '<  0.000>', '%g fills up to precision');
 is(nqp::sprintf('<%7.3g>', [0.1]), '<  0.100>', '%g fills up to precision');
 
 is(nqp::sprintf('%5.2g', [3.1415e20]),    '3.1e+20',    '5.2 %g');
-is(nqp::sprintf('%5.2G', [3.1415e20]),    '3.1e+20',    '5.2 %G');
+is(nqp::sprintf('%5.2G', [3.1415e20]),    '3.1E+20',    '5.2 %G');
 is(nqp::sprintf('%20.2g', [3.1415e20]),   '             3.1e+20',    '20.2 %g');
-is(nqp::sprintf('%20.2G', [3.1415e20]),   '             3.1e+20',    '20.2 %G');
+is(nqp::sprintf('%20.2G', [3.1415e20]),   '             3.1E+20',    '20.2 %G');
 is(nqp::sprintf('%20.2g', [-3.1415e20]),  '            -3.1e+20',    'negative 20.2 %g');
-is(nqp::sprintf('%20.2G', [-3.1415e20]),  '            -3.1e+20',    'negative 20.2 %G');
+is(nqp::sprintf('%20.2G', [-3.1415e20]),  '            -3.1E+20',    'negative 20.2 %G');
+is(nqp::sprintf('%20.2g', [3.1415e-20]),  '             3.1e-20',    '20.2 %g');
+is(nqp::sprintf('%20.2G', [3.1415e-20]),  '             3.1E-20',    '20.2 %G');
+is(nqp::sprintf('%20.2g', [-3.1415e-20]), '            -3.1e-20',    'negative 20.2 %g');
+is(nqp::sprintf('%20.2G', [-3.1415e-20]), '            -3.1E-20',    'negative 20.2 %G');
 is(nqp::sprintf('%020.2g', [3.1415e20]),  '00000000000003.1e+20',    '020.2 %g');
-is(nqp::sprintf('%020.2G', [3.1415e20]),  '00000000000003.1e+20',    '020.2 %G');
+is(nqp::sprintf('%020.2G', [3.1415e20]),  '00000000000003.1E+20',    '020.2 %G');
 is(nqp::sprintf('%020.2g', [-3.1415e20]), '-0000000000003.1e+20',    'negative 020.2 %g');
-is(nqp::sprintf('%020.2G', [-3.1415e20]), '-0000000000003.1e+20',    'negative 020.2 %G');
+is(nqp::sprintf('%020.2G', [-3.1415e20]), '-0000000000003.1E+20',    'negative 020.2 %G');
 is(nqp::sprintf('<%7.3g>', [3e20]), '<3e+20>', '%g does not fill up to precision');
 is(nqp::sprintf('<%7.3g>', [3.1e20]), '<3.1e+20>', '%g does not fill up to precision');
