@@ -196,11 +196,20 @@ my module sprintf {
             my $sign := $float < 0 ?? '-' !! '';
             $float := nqp::abs_n($float);
 
-            my $fixed := stringify-to-precision($float, $precision);
-
             my $exp := $float == 0.0 ?? 0 !! nqp::floor_n(nqp::log_n($float) / nqp::log_n(10));
+
+            my $fixed-precision := $exp > $precision ?? 0 !! $precision - ($exp + 1);
+            my $fixed := stringify-to-precision($float, $fixed-precision);
+
             $float := $float / nqp::pow_n(10, $exp);
-            my $sci := stringify-to-precision($float, $precision - 1) ~ $e ~ '+' ~ $exp;
+            $float := stringify-to-precision($float, $precision - 1);
+            my $sci;
+            if $exp < 0 {
+                $exp := -$exp;
+                $sci := $float ~ $e ~ '-' ~ ($exp < 10 ?? '0' !! '') ~ $exp;
+            } else {
+                $sci := $float ~ $e ~ '+' ~ ($exp < 10 ?? '0' !! '') ~ $exp;
+            }
 
             if nqp::chars($sci) < nqp::chars($fixed) {
                 pad-with-sign($sign, $sci, $size, $pad);
@@ -228,7 +237,7 @@ my module sprintf {
             my $precision := $<precision> ?? $<precision>.ast !! 6;
             my $pad := padding_char($/);
             my $size := $<size> ?? $<size>.ast !! 0;
-            make shortest($float, 'e', $precision, $size, $pad);
+            make shortest($float, $<sym> eq 'G' ?? 'E' !! 'e', $precision, $size, $pad);
         }
         method directive:sym<o>($/) {
             my $int := intify(next_argument());
