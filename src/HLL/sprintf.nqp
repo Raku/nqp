@@ -184,7 +184,12 @@ my module sprintf {
             my $exp := $float == 0.0 ?? 0 !! nqp::floor_n(nqp::log_n($float) / nqp::log_n(10));
             $float := $float / nqp::pow_n(10, $exp);
             $float := stringify-to-precision($float, $precision);
-            $float := $float ~ $e ~ ($exp < 0 ?? '' !! '+') ~ $exp;
+            if $exp < 0 {
+                $exp := -$exp;
+                $float := $float ~ $e ~ '-' ~ ($exp < 10 ?? '0' !! '') ~ $exp;
+            } else {
+                $float := $float ~ $e ~ '+' ~ ($exp < 10 ?? '0' !! '') ~ $exp;
+            }
             pad-with-sign($sign, $float, $size, $pad);
         }
         sub shortest($float, $e, $precision, $size, $pad) {
@@ -195,7 +200,7 @@ my module sprintf {
 
             my $exp := $float == 0.0 ?? 0 !! nqp::floor_n(nqp::log_n($float) / nqp::log_n(10));
             $float := $float / nqp::pow_n(10, $exp);
-            my $sci := stringify-to-precision($float, $precision) ~ $e ~ '+' ~ $exp;
+            my $sci := stringify-to-precision($float, $precision - 1) ~ $e ~ '+' ~ $exp;
 
             if nqp::chars($sci) < nqp::chars($fixed) {
                 pad-with-sign($sign, $sci, $size, $pad);
