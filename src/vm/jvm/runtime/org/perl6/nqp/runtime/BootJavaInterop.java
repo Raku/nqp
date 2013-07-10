@@ -177,6 +177,15 @@ public class BootJavaInterop {
         finishClass(cc);
         return RuntimeSupport.boxJava(cc.constructed, getSTableForClass(Class.class));
     }
+    
+    /** Hiding arbitrary 6model objects under Object, for working with
+      * untyped collection classes, etc. */
+    public SixModelObject sixmodelToJavaObject(SixModelObject smo) {
+        return RuntimeSupport.boxJava(smo, getSTableForClass(Object.class));
+    }
+    public SixModelObject javaObjectToSixmodel(SixModelObject javaObj) {
+        return (SixModelObject)RuntimeSupport.unboxJava(javaObj);
+    }
 
     protected void finishClass(ClassContext cc) {
         cc.cv.visitEnd();
