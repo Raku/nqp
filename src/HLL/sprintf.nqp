@@ -168,10 +168,18 @@ my module sprintf {
             $float := $float * nqp::pow_n(10, $precision);
             $float := ~nqp::floor_n($float + 0.5);
             $float := $float - nqp::pow_n(10, $precision);
+
             $rhs := infix_x('0', $precision - nqp::chars($float)) ~ $float;
             $rhs := nqp::substr($rhs, nqp::chars($rhs) - $precision);
 
-            $float := $lhs ~ '.' ~ $rhs;
+            $lhs ~ '.' ~ $rhs;
+        }
+        sub stringify-to-precision2($float, $precision) {
+            my $exp := $float == 0.0 ?? 0 !! nqp::floor_n(nqp::log_n($float) / nqp::log_n(10));
+            $float := nqp::abs_n($float) * nqp::pow_n(10, $precision - ($exp + 1)) + 0.5;
+            $float := nqp::floor_n($float);
+            $float := $float / nqp::pow_n(10, $precision - ($exp + 1));
+            $exp == -4 ?? stringify-to-precision($float, $precision + 3) !! $float;
         }
         sub fixed-point($float, $precision, $size, $pad) {
             my $sign := $float < 0 ?? '-' !! '';
@@ -198,23 +206,22 @@ my module sprintf {
 
             my $exp := $float == 0.0 ?? 0 !! nqp::floor_n(nqp::log_n($float) / nqp::log_n(10));
 
-            my $fixed-precision := $exp > $precision ?? 0 !! $precision - ($exp + 1);
-            my $fixed := stringify-to-precision($float, $fixed-precision);
-
-            $float := $float / nqp::pow_n(10, $exp);
-            $float := stringify-to-precision($float, $precision - 1);
-            my $sci;
-            if $exp < 0 {
-                $exp := -$exp;
-                $sci := $float ~ $e ~ '-' ~ ($exp < 10 ?? '0' !! '') ~ $exp;
-            } else {
-                $sci := $float ~ $e ~ '+' ~ ($exp < 10 ?? '0' !! '') ~ $exp;
-            }
-
-            if nqp::chars($sci) < nqp::chars($fixed) {
-                pad-with-sign($sign, $sci, $size, $pad);
-            } else {
+            if -2 - $precision < $exp && $exp < $precision {
+                my $fixed-precision := $exp > $precision ?? 0 !! $precision - ($exp + 1);
+                my $fixed := stringify-to-precision2($float, $precision);
                 pad-with-sign($sign, $fixed, $size, $pad);
+            } else {
+                $float := $float / nqp::pow_n(10, $exp);
+                $float := stringify-to-precision2($float, $precision);
+                my $sci;
+                if $exp < 0 {
+                    $exp := -$exp;
+                    $sci := $float ~ $e ~ '-' ~ ($exp < 10 ?? '0' !! '') ~ $exp;
+                } else {
+                    $sci := $float ~ $e ~ '+' ~ ($exp < 10 ?? '0' !! '') ~ $exp;
+                }
+                
+                pad-with-sign($sign, $sci, $size, $pad);
             }
         }
 
