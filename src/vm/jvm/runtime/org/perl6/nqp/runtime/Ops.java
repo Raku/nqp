@@ -4518,11 +4518,17 @@ public final class Ops {
                 if (cmp == 0 || base.compareTo(BigInteger.ONE) == 0) {
                     /* 0 ** $big_number and 1 ** big_number are easy to do: */
                     return makeBI(tc, biType, base);
-                }
-                else {
+                } else if (base.compareTo(BigInteger.ONE.negate ()) == 0) {
+                    /* -1 ** exponent depends on whether b is odd or even */
+                    return makeBI(tc, biType, exponent.mod(BigInteger.valueOf(2)) == BigInteger.ZERO
+                                                ? BigInteger.ONE
+                                                : BigInteger.ONE.negate ());
+                } else {
                     /* Otherwise, do floating point infinity of the right sign. */
                     SixModelObject result = nType.st.REPR.allocate(tc, nType.st);
-                    result.set_num(tc, cmp > 0 ? Double.POSITIVE_INFINITY : Double.NEGATIVE_INFINITY);
+                    result.set_num(tc, exponent.mod(BigInteger.valueOf(2)) == BigInteger.ZERO
+                                        ? Double.POSITIVE_INFINITY
+                                        : Double.NEGATIVE_INFINITY);
                     return result;
                 }
             }
