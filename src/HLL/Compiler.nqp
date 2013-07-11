@@ -4,7 +4,6 @@ class HLL::Compiler does HLL::Backend::Default {
     has $!parsegrammar;
     has $!parseactions;
     has @!cmdoptions;
-    has $!usage;
     has $!compiler_progname;
     has $!language;
     has %!config;
@@ -22,10 +21,6 @@ class HLL::Compiler does HLL::Backend::Default {
         
         # Command options and usage.
         @!cmdoptions := nqp::split(' ', 'e=s help|h target=s trace|t=s encoding=s output|o=s combine version|v show-config verbose-config|V stagestats=s? ll-exception rxtrace nqpevent=s profile profile-compile');
-        $!usage := "This compiler is based on HLL::Compiler.\n\nOptions:\n";
-        for @!cmdoptions {
-            $!usage := $!usage ~ "    $_\n";
-        }
         %!config     := nqp::hash();
     }
     
@@ -446,7 +441,11 @@ class HLL::Compiler does HLL::Backend::Default {
         if $name {
             say($name);
         }
-        nqp::say($!usage);
+        my $usage := "This compiler is based on HLL::Compiler.\n\nOptions:\n";
+        for @!cmdoptions {
+            $usage := $usage ~ "    $_\n";
+        }
+        nqp::say($usage);
         nqp::exit(0);
     }
 
