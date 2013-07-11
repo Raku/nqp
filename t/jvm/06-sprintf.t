@@ -24,7 +24,7 @@ sub is($actual, $expected, $description) {
     }
 }
 
-plan(254);
+plan(255);
 
 is(nqp::sprintf('Walter Bishop', []), 'Walter Bishop', 'no directives' );
 
@@ -49,6 +49,10 @@ dies_ok({ nqp::sprintf('%a', 'Science') }, 'unknown directive' );
 is($die_message, "'a' is not valid in sprintf format sequence '%a'",
     'unknown directive error message' );
 
+my $knowhow := nqp::knowhow().new_type(:name('TestBigInt'), :repr("P6bigint"));
+my $large-positive-int := nqp::pow_I(nqp::box_i(33, $knowhow), nqp::box_i(21, $knowhow), $knowhow, $knowhow);
+# my $large-negative-int := fromnum_I(-nqp::pow_n(2.42, 42), $knowhow);
+    
 is(nqp::sprintf('<%6s>', [12]), '<    12>', 'right-justified %s with space padding');
 is(nqp::sprintf('<%6%>', []), '<     %>', 'right-justified %% with space padding');
 is(nqp::sprintf('<%06s>', ['hi']), '<0000hi>', 'right-justified %s with 0-padding');
@@ -70,6 +74,7 @@ is(nqp::sprintf('<%03d>', [-11]), '<-11>', '%d on negative decimal with 0-paddin
 is(nqp::sprintf('<%04d>', [-1]), '<-001>', '%d on negative decimal with 0-padding');
 is(nqp::sprintf('<%+4d>', [42]), '< +42>', '%d on a positive decimal, space-padding with plus sign');
 is(nqp::sprintf('<%+04d>', [42]), '<+042>', '%d on a positive decimal, zero-padding with plus sign');
+is(nqp::sprintf('<%d>', [$large-positive-int]), '<77409228207421416473589288028833>', '%d on bigint');
 
 is(nqp::sprintf('%c', [97]), 'a', '%c directive');
 is(nqp::sprintf('%10c', [65]), '         A', '%c directive with space padding');
