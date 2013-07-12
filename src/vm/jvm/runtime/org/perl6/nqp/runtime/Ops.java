@@ -4404,6 +4404,9 @@ public final class Ops {
     }
     public static String coerce_n2s(double in) {
         if (in == (long)in) {
+            if (in == 0 && Double.toString(in).equals("-0.0")) {
+                return "-0";
+            }
             return Long.toString((long)in);
         }
         else {
