@@ -291,7 +291,63 @@ public final class Ops {
         
         return h;
     }
-    
+
+    public static long filereadable(String path, ThreadContext tc) {
+        Path path_o;
+        long res;
+        try {
+            path_o = Paths.get(path);
+            res = Files.isReadable(path_o) ? 1 : 0;
+        }
+        catch (Exception e) {
+            die_s(e.getMessage(), tc);
+            res = -1; /* unreachable */
+        }
+        return res;
+    }
+
+    public static long filewritable(String path, ThreadContext tc) {
+        Path path_o;
+        long res;
+        try {
+            path_o = Paths.get(path);
+            res = Files.isWritable(path_o) ? 1 : 0;
+        }
+        catch (Exception e) {
+            die_s(e.getMessage(), tc);
+            res = -1; /* unreachable */
+        }
+        return res;
+    }
+
+    public static long fileexecutable(String path, ThreadContext tc) {
+        Path path_o;
+        long res;
+        try {
+            path_o = Paths.get(path);
+            res = Files.isExecutable(path_o) ? 1 : 0;
+        }
+        catch (Exception e) {
+            die_s(e.getMessage(), tc);
+            res = -1; /* unreachable */
+        }
+        return res;
+    }
+
+    public static long fileislink(String path, ThreadContext tc) {
+        Path path_o;
+        long res;
+        try {
+            path_o = Paths.get(path);
+            res = Files.isSymbolicLink(path_o) ? 1 : 0;
+        }
+        catch (Exception e) {
+            die_s(e.getMessage(), tc);
+            res = -1; /* unreachable */
+        }
+        return res;
+    }
+
     public static SixModelObject getstdin(ThreadContext tc) {
         SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType; 
         IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);

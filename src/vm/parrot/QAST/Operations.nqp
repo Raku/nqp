@@ -1516,6 +1516,52 @@ QAST::Operations.add_core_pirop_mapping('print', 'print', '0s', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('say', 'say', '0s', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('stat', 'stat', 'Isi', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('open', 'open', 'Pss', :inlinable(1));
+
+QAST::Operations.add_core_op('filereadable', -> $qastcomp, $op {
+    if +$op.list != 1 {
+        nqp::die("The 'filereadable' op expects one child");
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'),
+        :name('can_read'),
+        QAST::VM.new( :pirop('new__Ps'),
+                      QAST::SVal.new( :value('OS') ) ),
+        $op[0],) );
+});
+QAST::Operations.add_core_op('filewritable', -> $qastcomp, $op {
+    if +$op.list != 1 {
+        nqp::die("The 'filewritable' op expects one child");
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'),
+        :name('can_write'),
+        QAST::VM.new( :pirop('new__Ps'),
+                      QAST::SVal.new( :value('OS') ) ),
+        $op[0],) );
+});
+QAST::Operations.add_core_op('fileexecutable', -> $qastcomp, $op {
+    if +$op.list != 1 {
+        nqp::die("The 'fileexecutable' op expects one child");
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'),
+        :name('can_execute'),
+        QAST::VM.new( :pirop('new__Ps'),
+                      QAST::SVal.new( :value('OS') ) ),
+        $op[0],) );
+});
+QAST::Operations.add_core_op('fileislink', -> $qastcomp, $op {
+    if +$op.list != 1 {
+        nqp::die("The 'fileislink' op expects one child");
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'),
+        :name('is_link'),
+        QAST::VM.new( :pirop('new__Ps'),
+                      QAST::SVal.new( :value('File') ) ),
+        $op[0],) );
+});
+
 QAST::Operations.add_core_op('getstdin', -> $qastcomp, $op {
     if +$op.list != 0 {
         nqp::die("The 'getstdin' op expects no operands");
