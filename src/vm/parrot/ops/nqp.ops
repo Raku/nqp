@@ -2374,6 +2374,7 @@ inline op set_invocation_spec(invar PMC, invar PMC, in STR, invar PMC) :base_cor
         InvocationSpec *new_spec = mem_allocate_zeroed_typed(InvocationSpec);
         new_spec->value_slot.class_handle = $2;
         new_spec->value_slot.attr_name    = $3;
+        new_spec->value_slot.hint    = NO_HINT;
         new_spec->invocation_handler      = $4;
 
         /* Free any existing spec and put the new one in place. */
