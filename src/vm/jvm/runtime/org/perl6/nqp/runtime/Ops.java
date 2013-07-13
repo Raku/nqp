@@ -4509,7 +4509,16 @@ public final class Ops {
     }
     
     public static SixModelObject div_I(SixModelObject a, SixModelObject b, SixModelObject type, ThreadContext tc) {
-        return makeBI(tc, type, getBI(tc, a).divide(getBI(tc, b)));
+        BigInteger dividend = getBI(tc, a);
+        BigInteger divisor = getBI(tc, b);
+        long dividend_sign = dividend.signum();
+        long divisor_sign = divisor.signum();
+        if (dividend_sign * divisor_sign == -1) {
+            if (dividend.mod(divisor.abs ()).compareTo(BigInteger.ZERO) != 0) {
+                return makeBI(tc, type, dividend.divide(divisor).subtract(BigInteger.ONE));
+            }
+        } 
+        return makeBI(tc, type, dividend.divide(divisor));
     }
     
     public static double div_In(SixModelObject a, SixModelObject b, ThreadContext tc) {
