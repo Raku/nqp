@@ -4556,6 +4556,10 @@ public final class Ops {
         return Math.pow(a, b);
     }
 
+    public static double mod_n(double a, double b) {
+        return a - Math.floor(a / b) * b;
+    }
+
     public static SixModelObject pow_I(SixModelObject a, SixModelObject b, SixModelObject nType, SixModelObject biType, ThreadContext tc) {
         BigInteger base = getBI(tc, a);
         BigInteger exponent = getBI(tc, b);
