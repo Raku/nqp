@@ -77,16 +77,6 @@ import org.perl6.nqp.sixmodel.reprs.VMIterInstance;
  */
 public final class Ops {
     /* I/O opcodes */
-    public static String print(String v) {
-        System.out.print(v);
-        return v;
-    }
-    
-    public static String say(String v) {
-        System.out.println(v);
-        return v;
-    }
-
     public static String print(String v, ThreadContext tc) {
         tc.gc.out.print(v);
         return v;
@@ -3645,10 +3635,6 @@ public final class Ops {
     }
 
     /* process related opcodes */
-    public static long exit(final long status) {
-        System.exit((int) status);
-        return status;
-    }
     public static long exit(final long status, ThreadContext tc) {
         tc.gc.exit((int) status);
         return status;
@@ -4724,9 +4710,7 @@ public final class Ops {
     }
     public static SixModelObject compunitmainline(SixModelObject obj, ThreadContext tc) {
         EvalResult res = (EvalResult)obj;
-        return res.cu.mainlineCuid() == null ?
-            res.cu.lookupCodeRef(res.cu.mainlineQbid()) :
-            res.cu.lookupCodeRef(res.cu.mainlineCuid());
+        return res.cu.lookupCodeRef(res.cu.mainlineQbid());
     }
     public static SixModelObject compunitcodes(SixModelObject obj, ThreadContext tc) {
         EvalResult res = (EvalResult)obj;

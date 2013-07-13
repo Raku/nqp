@@ -8,7 +8,6 @@ public @interface CodeRefAnnotation
 {
     String name() default "";
     String cuid() default "";
-    String outerCuid() default "";
     int outerQbid() default -1;
     String[] oLexicalNames() default {};
     String[] iLexicalNames() default {};

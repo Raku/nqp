@@ -184,7 +184,7 @@ public class JASTToJVMBytecode {
 
     private static boolean processMethod(JavaClass jcout, BufferedReader in, ClassWriter c, String className, boolean split) throws Exception {
         String curLine, methodName = null, returnType = null, desc = null;
-        String crName = null, crCuid = null, crOuter = null;
+        String crName = null, crCuid = null;
         int crOuterIx = -2; // not coderef
         boolean isStatic = false;
         List<Type> argTypes = new ArrayList<Type>();
@@ -240,8 +240,6 @@ public class JASTToJVMBytecode {
                     crName = curLine.substring("++ crname ".length());
                 else if (curLine.startsWith("++ crcuid "))
                     crCuid = curLine.substring("++ crcuid ".length());
-                else if (curLine.startsWith("++ crouter "))  /*FOR_STAGE0*/
-                    crOuter = curLine.substring("++ crouter ".length());
                 else if (curLine.startsWith("++ crouterix "))
                     crOuterIx = Integer.parseInt(curLine.substring("++ crouterix ".length()));
                 else if (curLine.startsWith("++ olex "))
@@ -289,7 +287,6 @@ public class JASTToJVMBytecode {
                     AnnotationVisitor av = m.visitAnnotation(crAnnType.getDescriptor(), true);
                     av.visit("name", crName);
                     if (crCuid != null && !crCuid.isEmpty()) av.visit("cuid", crCuid);
-                    if (crOuter != null && !crOuter.isEmpty()) av.visit("outerCuid", crOuter);
                     if (crOuterIx >= 0) av.visit("outerQbid", crOuterIx);
 
                     AnnotationVisitor avLex;
@@ -367,11 +364,6 @@ public class JASTToJVMBytecode {
                     String cName = curLine.substring(".push_cc ".length());
                     Type t = Type.getType(cName);
                     m.visitLdcInsn(t);
-                }
-                else if (curLine.equals(".push_self") || curLine.equals(".push_cur_meth")) {
-                    m.visitLdcInsn(new Handle(
-                        isStatic ? Opcodes.H_INVOKESTATIC : Opcodes.H_INVOKESPECIAL,
-                        className, methodName, desc));
                 }
                 else if (curLine.startsWith(".push_idx ")) {
                     Integer value = Integer.parseInt(curLine.substring(".push_idx ".length()));

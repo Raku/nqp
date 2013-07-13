@@ -145,7 +145,6 @@ public class EvalServer {
 
                 CompilationUnit cu = CompilationUnit.setupCompilationUnit(gc.mainThread, cuType, true);
                 CodeRef entryRef = null;
-                if (cu.entryCuid() != null) entryRef = cu.lookupCodeRef(cu.entryCuid());
                 if (cu.entryQbid() >= 0) entryRef = cu.lookupCodeRef(cu.entryQbid());
                 if (entryRef == null)
                     throw new RuntimeException("This class is not an entry point");

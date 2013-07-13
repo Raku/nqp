@@ -22,8 +22,8 @@ public abstract class CompilationUnit {
     /**
      * Mapping of compilation unit unqiue IDs to matching code reference.
      */
-    private Map<String, CodeRef> cuidToCodeRef = new HashMap<String, CodeRef>(); 
-    
+    private Map<String, CodeRef> cuidToCodeRef = new HashMap<String, CodeRef>();
+
     /**
      * Mapping of local integer IDs to matching code reference.
      */
@@ -59,12 +59,6 @@ public abstract class CompilationUnit {
         ThreadContext tc = (new GlobalContext()).mainThread;
         CompilationUnit cu = setupCompilationUnit(tc, cuType, false);
         Ops.invokeMain(tc, cu.qbidToCodeRef[entryCodeRefIdx], cuType.getName(), argv);
-    }
-    public static void enterFromMain(Class<?> cuType, String cuid, String[] argv)
-            throws Exception { /*FOR_STAGE0*/
-        ThreadContext tc = (new GlobalContext()).mainThread;
-        CompilationUnit cu = setupCompilationUnit(tc, cuType, false);
-        Ops.invokeMain(tc, cu.lookupCodeRef(cuid), cuType.getName(), argv);
     }
     
     /**
@@ -102,7 +96,6 @@ public abstract class CompilationUnit {
             cr.staticInfo.methodName = m.methodName;
             cr.st = BOOTCodeSTable;
             codeRefList.add(cr);
-            if (!cuid.isEmpty()) cuidToCodeRef.put(cuid, cr);
 
             if (m.qbid >= 0 && m.qbid < qbidToCodeRef.length) qbidToCodeRef[m.qbid] = cr;
 
@@ -115,11 +108,9 @@ public abstract class CompilationUnit {
         codeRefs = codeRefList.toArray(new CodeRef[0]);
         for (int i = 0; i < codeRefs.length; i++) {
             CodeRefAnnotation cra = outerCuid.get(i);
-            String cuid = cra.outerCuid();
             int qbid = cra.outerQbid();
 
-            CodeRef outer = qbid >= 0 ? qbidToCodeRef[qbid] :
-                cuid != null ? cuidToCodeRef.get(cuid) : null;
+            CodeRef outer = qbid >= 0 ? qbidToCodeRef[qbid] : null;
             if (outer != null)
                 codeRefs[i].staticInfo.outerStaticInfo = outer.staticInfo;
         }
@@ -141,8 +132,6 @@ public abstract class CompilationUnit {
         
         /* Run any deserialization code. */
         CodeRef desCodeRef = null;
-        if (deserializeCuid() != null)
-            desCodeRef = lookupCodeRef(deserializeCuid());
         if (deserializeQbid() >= 0)
             desCodeRef = lookupCodeRef(deserializeQbid());
         if (desCodeRef != null)
@@ -219,8 +208,6 @@ public abstract class CompilationUnit {
      */
     public void runLoadIfAvailable(ThreadContext tc) {
         CodeRef loadCodeRef = null;
-        if (loadCuid() != null)
-            loadCodeRef = lookupCodeRef(loadCuid());
         if (loadQbid() >= 0)
             loadCodeRef = lookupCodeRef(loadQbid());
         if (loadCodeRef != null)
@@ -239,7 +226,7 @@ public abstract class CompilationUnit {
     public CodeRef lookupCodeRef(String uniqueId) { /*FOR_STAGE0*/
         return cuidToCodeRef.get(uniqueId);
     }
-    
+
     /**
      * Turns a local integer ID into the matching code-ref.
      */
@@ -254,10 +241,6 @@ public abstract class CompilationUnit {
      */
     public void setLexValues(ThreadContext tc, int localId, String toParse) {
         setLexValues(tc, qbidToCodeRef[localId], toParse);
-    }
-
-    public void setLexValues(ThreadContext tc, String uniqueId, String toParse) { /*FOR_STAGE0*/
-        setLexValues(tc, cuidToCodeRef.get(uniqueId), toParse);
     }
 
     private void setLexValues(ThreadContext tc, CodeRef cr, String toParse) {
@@ -295,9 +278,6 @@ public abstract class CompilationUnit {
     /**
      * Code generation overrides this if there's an SC to deserialize.
      */
-    public String deserializeCuid() { /*FOR_STAGE0*/
-        return null;
-    }
     public int deserializeQbid() {
         return -1;
     }
@@ -305,9 +285,6 @@ public abstract class CompilationUnit {
     /**
      * Code generation overrides this if there's an SC to deserialize.
      */
-    public String loadCuid() { /*FOR_STAGE0*/
-        return null;
-    }
     public int loadQbid() {
         return -1;
     }
@@ -315,9 +292,6 @@ public abstract class CompilationUnit {
     /**
      * Code generation overrides this with the mainline blcok.
      */
-    public String mainlineCuid() { /*FOR_STAGE0*/
-        return null;
-    }
     public int mainlineQbid() {
         return -1;
     }
@@ -325,9 +299,6 @@ public abstract class CompilationUnit {
     /**
      * Code generation overrides this with the entry-point block, if any.
      */
-    public String entryCuid() { /*FOR_STAGE0*/
-        return null;
-    }
     public int entryQbid() {
         return -1;
     }
