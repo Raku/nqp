@@ -4548,7 +4548,14 @@ public final class Ops {
         }
         return makeBI(tc, type, random);
     }
-    
+
+    public static double pow_n(double a, double b) {
+        if (a == 1 && !Double.isNaN(b)) {
+            return 1.0;
+        }
+        return Math.pow(a, b);
+    }
+
     public static SixModelObject pow_I(SixModelObject a, SixModelObject b, SixModelObject nType, SixModelObject biType, ThreadContext tc) {
         BigInteger base = getBI(tc, a);
         BigInteger exponent = getBI(tc, b);

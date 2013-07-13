@@ -1810,7 +1810,7 @@ QAST::Operations.add_core_pirop_mapping('srand', 'srand', '0i', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('rand_n', 'rand', 'Nn', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('rand_I', 'nqp_bigint_rand', 'PPP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('mod_n', 'mod', 'Nnn', :inlinable(1));
-QAST::Operations.add_core_pirop_mapping('pow_n', 'pow', 'Nnn', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('pow_n', 'pow_n', 'Nnn', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('pow_I', 'nqp_bigint_pow', 'PPPPP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('neg_i', 'neg', 'Ii', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('neg_I', 'nqp_bigint_neg', 'PPP', :inlinable(1));
