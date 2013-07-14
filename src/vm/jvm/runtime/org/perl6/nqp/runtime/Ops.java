@@ -3807,7 +3807,7 @@ public final class Ops {
                 if (te.file != null) annots.bind_key_boxed(tc, "file", box_s(te.file, Str, tc));
                 if (te.line >= 0) annots.bind_key_boxed(tc, "line", box_i(te.line, Int, tc));
                 SixModelObject row = Hash.st.REPR.allocate(tc, Hash.st);
-                row.bind_key_boxed(tc, "sub", te.frame.codeRef.codeObject);
+                row.bind_key_boxed(tc, "sub", te.frame.codeRef);
                 row.bind_key_boxed(tc, "annotations", annots);
                 result.push_boxed(tc, row);
             }
