@@ -3920,6 +3920,8 @@ public final class Ops {
             config.foreignTransformAny = configHash.at_key_boxed(tc, "foreign_transform_any");
         if (configHash.exists_key(tc, "null_value") != 0)
             config.nullValue = configHash.at_key_boxed(tc, "null_value");
+        if (configHash.exists_key(tc, "exit_handler") != 0)
+            config.exitHandler = configHash.at_key_boxed(tc, "exit_handler");
         return configHash;
     }
     public static SixModelObject getcomp(String name, ThreadContext tc) {

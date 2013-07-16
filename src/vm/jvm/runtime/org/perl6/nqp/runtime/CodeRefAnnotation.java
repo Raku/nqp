@@ -14,4 +14,5 @@ public @interface CodeRefAnnotation
     String[] nLexicalNames() default {};
     String[] sLexicalNames() default {};
     long[] handlers() default {0};
+    boolean hasExitHandler() default false;
 }

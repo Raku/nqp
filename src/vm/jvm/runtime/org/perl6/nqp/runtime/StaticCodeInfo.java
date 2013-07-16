@@ -80,6 +80,11 @@ public class StaticCodeInfo implements Cloneable {
     public HashMap<String, Integer> nLexicalMap;
     public HashMap<String, Integer> sLexicalMap;
     
+    /**
+     * Does this code object have a block exit handler?
+     */
+    public boolean hasExitHandler;
+    
     public Integer oTryGetLexicalIdx(String name) {
         if (oLexicalMap == null) {
             HashMap<String, Integer> map = new HashMap<String, Integer>();

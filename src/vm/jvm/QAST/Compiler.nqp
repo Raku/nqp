@@ -3484,6 +3484,11 @@ class QAST::CompilerJAST {
                 $*JMETH.append($resume);
             }
             
+            # Set exit handler flag if needed.
+            if $node.has_exit_handler {
+                $*JMETH.has_exit_handler(1);
+            }
+            
             # Finalize method and add it to the class.
             $*JCLASS.add_method($*JMETH);
         }

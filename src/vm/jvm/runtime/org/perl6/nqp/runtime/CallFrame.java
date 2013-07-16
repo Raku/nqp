@@ -222,8 +222,16 @@ public class CallFrame implements Cloneable {
     }
     
     // Does work needed to leave this callframe.
+    private static final CallSiteDescriptor exitHandlerCallSite = new CallSiteDescriptor(
+        new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ }, null);
     public void leave() {
-        this.codeRef.staticInfo.priorInvocation = this;
+        StaticCodeInfo sci = this.codeRef.staticInfo;
+        sci.priorInvocation = this;
+        if (sci.hasExitHandler) {
+            HLLConfig hll = sci.compUnit.hllConfig;
+            Ops.invokeDirect(tc, hll.exitHandler, exitHandlerCallSite,
+                new Object[] { this.codeRef, Ops.result_o(this.caller) });
+        }
         this.tc.curFrame = this.caller;
     }
 

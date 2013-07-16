@@ -113,6 +113,7 @@ class JAST::Method is JAST::Node {
     has @!cr_nlex;
     has @!cr_slex;
     has @!cr_handlers;
+    has int $!has_exit_handler;
     
     method BUILD(:$name!, :$returns!, :$static = 1) {
         $!name := $name;
@@ -159,6 +160,7 @@ class JAST::Method is JAST::Node {
     method cr_nlex(*@value) { @value ?? (@!cr_nlex := @value[0]) !! @!cr_nlex }
     method cr_slex(*@value) { @value ?? (@!cr_slex := @value[0]) !! @!cr_slex }
     method cr_handlers(*@value) { @value ?? (@!cr_handlers := @value[0]) !! @!cr_handlers }
+    method has_exit_handler(*@value) { $!has_exit_handler := @value[0] if @value; $!has_exit_handler }
     
     method dump(@dumped) {
         nqp::push(@dumped, "+ method");
@@ -181,6 +183,9 @@ class JAST::Method is JAST::Node {
         for @!cr_nlex { nqp::push(@dumped, "++ nlex $_"); }
         for @!cr_slex { nqp::push(@dumped, "++ slex $_"); }
         nqp::push(@dumped, "++ handlers " ~ join(' ', @!cr_handlers));
+        if $!has_exit_handler {
+            nqp::push(@dumped, "++ has_exit_handler");
+        }
         for @!instructions {
             $_.dump(@dumped);
         }

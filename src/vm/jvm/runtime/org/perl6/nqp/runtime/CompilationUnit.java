@@ -94,6 +94,7 @@ public abstract class CompilationUnit {
                 ann.nLexicalNames(), ann.sLexicalNames(),
                 m.handlers);
             cr.staticInfo.methodName = m.methodName;
+            cr.staticInfo.hasExitHandler = ann.hasExitHandler();
             cr.st = BOOTCodeSTable;
             codeRefList.add(cr);
 

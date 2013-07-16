@@ -85,4 +85,9 @@ public class HLLConfig {
     public SixModelObject foreignTransformHash;
     public SixModelObject foreignTransformCode;
     public SixModelObject foreignTransformAny;
+    
+    /**
+     * Block exit handler, for those that need it.
+     */
+    public SixModelObject exitHandler;
 }
