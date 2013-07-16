@@ -228,9 +228,12 @@ public class CallFrame implements Cloneable {
         StaticCodeInfo sci = this.codeRef.staticInfo;
         sci.priorInvocation = this;
         if (sci.hasExitHandler) {
+            UnwindException origUnwinder = tc.unwinder;
+            tc.unwinder = new UnwindException();
             HLLConfig hll = sci.compUnit.hllConfig;
             Ops.invokeDirect(tc, hll.exitHandler, exitHandlerCallSite,
                 new Object[] { this.codeRef, Ops.result_o(this.caller) });
+            tc.unwinder = origUnwinder;
         }
         this.tc.curFrame = this.caller;
     }
