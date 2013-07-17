@@ -83,6 +83,7 @@ public class IndyBootstrap {
         CallSiteDescriptor csd = csIdx >= 0
             ? tc.curFrame.codeRef.staticInfo.compUnit.callSites[csIdx]
             : Ops.emptyCallSite;
+        CallSiteDescriptor csdOrig = csd;
         
         /* If it's lexotic, then resolve to something to do the throwing. */
         if (invokee instanceof LexoticInstance) {
@@ -184,7 +185,7 @@ public class IndyBootstrap {
                 MethodHandle inv = caller.findStatic(IndyBootstrap.class, "subInvoker", invType);
                 cs.setTarget(MethodHandles
                     .dropArguments(
-                        MethodHandles.insertArguments(inv, 0, cr.staticInfo.mh, name, csd),
+                        MethodHandles.insertArguments(inv, 0, cr.staticInfo.mh, name, csdOrig),
                         0, String.class, int.class)
                     .asVarargsCollector(Object[].class)
                     .asType(cs.getTarget().type()));
