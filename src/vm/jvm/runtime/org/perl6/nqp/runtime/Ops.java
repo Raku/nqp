@@ -1930,10 +1930,14 @@ public final class Ops {
                 /*throw ExceptionHandling.dieInternal(tc,
                     "No type check cache and no type_check method in meta-object");*/
             invokeDirect(tc, tcMeth, typeCheckCallSite, new Object[] { obj.st.HOW, obj, type });
-            if (tc.curFrame.retType == CallFrame.RET_INT)
-                return result_i(tc.curFrame);
-            else
-                return istrue(result_o(tc.curFrame), tc);
+            if (tc.curFrame.retType == CallFrame.RET_INT) {
+                if (result_i(tc.curFrame) != 0)
+                    return 1;
+            }
+            else {
+                if (istrue(result_o(tc.curFrame), tc) != 0)
+                    return 1;
+            }
         }
         
         /* If the flag to call .accepts_type on the target value is set, do so. */
