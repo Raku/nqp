@@ -327,6 +327,7 @@ my module sprintf {
 
     sub sprintfAddHandler($interface) {
         @handlers.push($interface);
+        "Added!"; # return meaningless string
     }
 
     nqp::bindcurhllsym('sprintfAddHandler', &sprintfAddHandler);
