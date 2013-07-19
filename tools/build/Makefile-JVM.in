@@ -6,6 +6,10 @@ PROVE  = prove
 ASM    = 3rdparty/asm/
 
 PREFIX = @prefix@
+BIN_DIR = $(PREFIX)/bin
+NQP_LANG_DIR= $(PREFIX)/languages/nqp
+NQP_JAR_DIR = $(NQP_LANG_DIR)/runtime
+NQP_LIB_DIR = $(NQP_LANG_DIR)/lib
 
 MKPATH = $(PERL) -MExtUtils::Command -e mkpath
 CP     = $(PERL) -MExtUtils::Command -e cp
@@ -151,23 +155,26 @@ RUNNER = @runner@
 all: $(ALL_OUTPUT) $(RUNNER) $(P5QREGEX_JAR)
 
 install: all
-	$(MKPATH) $(PREFIX)
-	$(CP) 3rdparty/asm/asm-4.1.jar $(PREFIX)
-	$(CP) 3rdparty/asm/asm-tree-4.1.jar $(PREFIX)
-	$(CP) 3rdparty/jline/jline-1.0.jar $(PREFIX)
-	$(CP) $(RUNTIME_JAR) $(PREFIX)
-	$(CP) $(NQP_MO_JAR) $(PREFIX)
-	$(CP) $(MODULE_LOADER_JAR) $(PREFIX)
-	$(CP) $(CORE_SETTING_JAR) $(PREFIX)
-	$(CP) $(QASTNODE_JAR) $(PREFIX)
-	$(CP) $(QREGEX_JAR) $(PREFIX)
-	$(CP) $(HLL_JAR) $(PREFIX)
-	$(CP) $(JASTNODES_JAR) $(PREFIX)
-	$(CP) $(QAST_JAR) $(PREFIX)
-	$(CP) $(P6QREGEX_JAR) $(PREFIX)
-	$(CP) $(NQP_JAR) $(PREFIX)
-	$(CP) $(P5QREGEX_JAR) $(PREFIX)
-	$(CP) $(EVAL_CLIENT) $(PREFIX)
+	$(MKPATH) $(BIN_DIR)
+	$(MKPATH) $(NQP_JAR_DIR)
+	$(MKPATH) $(NQP_LIB_DIR)
+	$(CP) 3rdparty/asm/asm-4.1.jar $(NQP_JAR_DIR)
+	$(CP) 3rdparty/asm/asm-tree-4.1.jar $(NQP_JAR_DIR)
+	$(CP) 3rdparty/jline/jline-1.0.jar $(NQP_JAR_DIR)
+	$(CP) $(RUNTIME_JAR) $(NQP_JAR_DIR)
+	$(CP) $(NQP_MO_JAR) $(NQP_LIB_DIR)
+	$(CP) $(MODULE_LOADER_JAR) $(NQP_LIB_DIR)
+	$(CP) $(CORE_SETTING_JAR) $(NQP_LIB_DIR)
+	$(CP) $(QASTNODE_JAR) $(NQP_LIB_DIR)
+	$(CP) $(QREGEX_JAR) $(NQP_LIB_DIR)
+	$(CP) $(HLL_JAR) $(NQP_LIB_DIR)
+	$(CP) $(JASTNODES_JAR) $(NQP_LIB_DIR)
+	$(CP) $(QAST_JAR) $(NQP_LIB_DIR)
+	$(CP) $(P6QREGEX_JAR) $(NQP_LIB_DIR)
+	$(CP) $(NQP_JAR) $(NQP_LIB_DIR)
+	$(CP) $(P5QREGEX_JAR) $(NQP_LIB_DIR)
+	$(CP) $(EVAL_CLIENT) $(BIN_DIR)
+	$(CHMOD) 0755 $(BIN_DIR)/eval-client.pl
 	$(PERL) tools/build/install-jvm-runner.pl $(PREFIX)
 
 $(RUNTIME_JAR): $(RUNTIME_JAVAS)
