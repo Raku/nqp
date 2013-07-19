@@ -1,4 +1,6 @@
 my module sprintf {
+    my @handlers;
+
     grammar Syntax {
         token TOP {
             :my $*ARGS_USED := 0;
@@ -74,6 +76,12 @@ my module sprintf {
         }
 
         sub intify($number_representation) {
+            for @handlers -> $handler {
+                if $handler.mine($number_representation) {
+                    return $handler.int($number_representation);
+                }
+            }
+            
             my $result;
             if $number_representation > 0 {
                 $result := nqp::floor_n($number_representation);
@@ -316,4 +324,11 @@ my module sprintf {
     }
 
     nqp::bindcurhllsym('sprintf', &sprintf);
+
+    sub sprintfAddHandler($interface) {
+        @handlers.push($interface);
+    }
+
+    nqp::bindcurhllsym('sprintfAddHandler', &sprintfAddHandler);
+
 }

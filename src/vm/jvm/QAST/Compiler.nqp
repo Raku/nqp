@@ -2015,6 +2015,20 @@ QAST::OperationsJAST.add_core_op('sprintf', -> $qastcomp, $op {
             |@operands )
     );
 });
+QAST::OperationsJAST.add_core_op('sprintfAddHandler', -> $qastcomp, $op {
+    my @operands := $op.list;
+    $qastcomp.as_jast(
+        QAST::Op.new(
+            :op('call'),
+            :returns(str),
+            QAST::Op.new(
+                :op('gethllsym'),
+                QAST::SVal.new( :value('nqp') ),
+                QAST::SVal.new( :value('sprintfAddHandler') )
+            ),
+            |@operands )
+    );
+});
 QAST::OperationsJAST.map_classlib_core_op('escape', $TYPE_OPS, 'escape', [$RT_STR], $RT_STR);
 QAST::OperationsJAST.map_classlib_core_op('flip', $TYPE_OPS, 'flip', [$RT_STR], $RT_STR);
 QAST::OperationsJAST.map_classlib_core_op('replace', $TYPE_OPS, 'replace', [$RT_STR, $RT_INT, $RT_INT, $RT_STR], $RT_STR);
