@@ -1900,7 +1900,7 @@ QAST::OperationsJAST.map_classlib_core_op('chmod', $TYPE_OPS, 'chmod', [$RT_STR,
 QAST::OperationsJAST.map_classlib_core_op('unlink', $TYPE_OPS, 'unlink', [$RT_STR], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('rmdir', $TYPE_OPS, 'rmdir', [$RT_STR], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('cwd', $TYPE_OPS, 'cwd', [], $RT_STR);
-QAST::OperationsJAST.map_classlib_core_op('chdir', $TYPE_OPS, 'chdir', [$RT_STR], $RT_STR);
+QAST::OperationsJAST.map_classlib_core_op('chdir', $TYPE_OPS, 'chdir', [$RT_STR], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('mkdir', $TYPE_OPS, 'mkdir', [$RT_STR, $RT_INT], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('rename', $TYPE_OPS, 'rename', [$RT_STR, $RT_STR], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('copy', $TYPE_OPS, 'copy', [$RT_STR, $RT_STR], $RT_INT);

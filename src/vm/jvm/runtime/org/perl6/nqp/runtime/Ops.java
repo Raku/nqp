@@ -610,6 +610,11 @@ public final class Ops {
         return new File(".").getAbsolutePath();
     }
     
+    public static String chdir(String path, ThreadContext tc) {
+    	die_s("chdir is not available on JVM", tc);
+    	return null;
+    }
+    
     public static long mkdir(String path, long mode) {
         try {
             Files.createDirectory(Paths.get(path),
