@@ -23,7 +23,7 @@ MAIN: {
 
     my %options;
     GetOptions(\%options, 'help!', 'prefix=s',
-               'make-install!', 'makefile-timing!');
+               'make-install!', 'makefile-timing!', 'no-clean!');
 
     # Print help if it's requested
     if ($options{'help'}) {
@@ -85,7 +85,7 @@ MAIN: {
     fill_template_file('tools/build/Makefile-JVM.in', 'Makefile', %config);
     
     my $make = $config{'make'};
-    {
+    unless ($options{'no-clean'}) {
         no warnings;
         print "Cleaning up ...\n";
         if (open my $CLEAN, '-|', "$make clean") {
@@ -117,6 +117,9 @@ Configure.pl - NQP Configure
 General Options:
     --help             Show this text
     --prefix=dir       Install files in dir
+    --make-install     Automatically run make & make install
+    --makefile-timing  Enable timing of individual makefile commands
+    --no-clean         Do not run make clean
 
 Configure.pl also reads options from 'config.default' in the current directory.
 END
