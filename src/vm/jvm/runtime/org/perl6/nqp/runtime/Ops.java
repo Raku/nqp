@@ -66,6 +66,9 @@ import org.perl6.nqp.sixmodel.reprs.P6bigintInstance;
 import org.perl6.nqp.sixmodel.reprs.SCRefInstance;
 import org.perl6.nqp.sixmodel.reprs.VMArray;
 import org.perl6.nqp.sixmodel.reprs.VMArrayInstance;
+import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_i8;
+import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_i16;
+import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_i32;
 import org.perl6.nqp.sixmodel.reprs.VMExceptionInstance;
 import org.perl6.nqp.sixmodel.reprs.VMHash;
 import org.perl6.nqp.sixmodel.reprs.VMHashInstance;
@@ -2897,6 +2900,83 @@ public final class Ops {
         }
         Character found = names.get(name);
         return found == null ? -1 : found;
+    }
+    
+    private static void stashBytes(ThreadContext tc, SixModelObject res, byte[] bytes) {
+        if (res instanceof VMArrayInstance_i8) {
+            VMArrayInstance_i8 arr = (VMArrayInstance_i8)res;
+            arr.elems = bytes.length;
+            arr.start = 0;
+            arr.slots = bytes;
+        }
+        else {
+            res.set_elems(tc, bytes.length);
+            for (int i = 0; i < bytes.length; i++) {
+                tc.native_i = bytes[i];
+                res.bind_pos_native(tc, i);
+            }
+        }
+    }
+    public static SixModelObject encode(String str, String encoding, SixModelObject bufType, ThreadContext tc) {
+        try {
+            SixModelObject res = bufType.st.REPR.allocate(tc, bufType.st);
+            if (encoding.equals("utf8")) {
+                stashBytes(tc, res, str.getBytes("UTF-8"));
+            }
+            else if (encoding.equals("ascii")) {
+                stashBytes(tc, res, str.getBytes("US-ASCII"));
+            }
+            else if (encoding.equals("iso-8859-1")) {
+                stashBytes(tc, res, str.getBytes("ISO-8859-1"));
+            }
+            else if (encoding.equals("utf16")) {
+                short[] buffer = new short[str.length()];
+                for (int i = 0; i < str.length(); i++)
+                    buffer[i] = (short)str.charAt(i);
+                if (res instanceof VMArrayInstance_i16) {
+                    VMArrayInstance_i16 arr = (VMArrayInstance_i16)res;
+                    arr.elems = buffer.length;
+                    arr.start = 0;
+                    arr.slots = buffer;
+                }
+                else {
+                    res.set_elems(tc, buffer.length);
+                    for (int i = 0; i < buffer.length; i++) {
+                        tc.native_i = buffer[i];
+                        res.bind_pos_native(tc, i);
+                    }
+                }
+            }
+            else if (encoding.equals("utf32")) {
+                int[] buffer = new int[str.length()]; /* Can be an overestimate. */
+                int bufPos = 0;
+                for (int i = 0; i < str.length(); ) {
+                    int cp = str.codePointAt(i);
+                    buffer[bufPos++] = cp;
+                    i += Character.charCount(cp);
+                }
+                if (res instanceof VMArrayInstance_i32) {
+                    VMArrayInstance_i32 arr = (VMArrayInstance_i32)res;
+                    arr.elems = bufPos;
+                    arr.start = 0;
+                    arr.slots = buffer;
+                }
+                else {
+                    res.set_elems(tc, buffer.length);
+                    for (int i = 0; i < bufPos; i++) {
+                        tc.native_i = buffer[i];
+                        res.bind_pos_native(tc, i);
+                    }
+                }
+            }
+            else {
+                throw ExceptionHandling.dieInternal(tc, "Unknown encoding '" + encoding + "'");
+            }
+            return res;
+        }
+        catch (UnsupportedEncodingException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
+        }
     }
     
     private static final int CCLASS_ANY          = 65535;

@@ -2073,6 +2073,7 @@ QAST::OperationsJAST.add_core_op('rindex',  -> $qastcomp, $op {
 });
 
 QAST::OperationsJAST.map_classlib_core_op('codepointfromname', $TYPE_OPS, 'codepointfromname', [$RT_STR], $RT_INT);
+QAST::OperationsJAST.map_classlib_core_op('encode', $TYPE_OPS, 'encode', [$RT_STR, $RT_STR, $RT_OBJ], $RT_OBJ, :tc);
 
 # serialization context opcodes
 QAST::OperationsJAST.map_classlib_core_op('sha1', $TYPE_OPS, 'sha1', [$RT_STR], $RT_STR);
