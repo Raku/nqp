@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -2976,6 +2977,57 @@ public final class Ops {
         }
         catch (UnsupportedEncodingException e) {
             throw ExceptionHandling.dieInternal(tc, e);
+        }
+    }
+    
+    public static String decode8(SixModelObject buf, String csName, ThreadContext tc) {
+        ByteBuffer bb;
+        if (buf instanceof VMArrayInstance_i8) {
+            VMArrayInstance_i8 bufi8 = (VMArrayInstance_i8)buf;
+            bb = bufi8.slots != null
+                ? ByteBuffer.wrap(bufi8.slots, bufi8.start, bufi8.elems)
+                : ByteBuffer.allocate(0);
+        }
+        else {
+            int n = (int)buf.elems(tc);
+            bb = ByteBuffer.allocate(n);
+            for (int i = 0; i < n; i++) {
+                buf.at_pos_native(tc, i);
+                bb.put((byte)tc.native_i);
+            }
+        }
+        return Charset.forName(csName).decode(bb).toString();
+    }
+    public static String decode(SixModelObject buf, String encoding, ThreadContext tc) {
+        if (encoding.equals("utf8")) {
+            return decode8(buf, "UTF-8", tc);
+        }
+        else if (encoding.equals("ascii")) {
+            return decode8(buf, "US-ASCII", tc);
+        }
+        else if (encoding.equals("iso-8859-1")) {
+            return decode8(buf, "ISO-8859-1", tc);
+        }
+        else if (encoding.equals("utf16")) {
+            int n = (int)buf.elems(tc);
+            StringBuilder sb = new StringBuilder(n);
+            for (int i = 0; i < n; i++) {
+                buf.at_pos_native(tc, i);
+                sb.append((char)tc.native_i);
+            }
+            return sb.toString();
+        }
+        else if (encoding.equals("utf32")) {
+            int n = (int)buf.elems(tc);
+            StringBuilder sb = new StringBuilder(n);
+            for (int i = 0; i < n; i++) {
+                buf.at_pos_native(tc, i);
+                sb.appendCodePoint((int)tc.native_i);
+            }
+            return sb.toString();
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc, "Unknown encoding '" + encoding + "'");
         }
     }
     
