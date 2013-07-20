@@ -521,6 +521,11 @@ static PMC *shift_boxed(PARROT_INTERP, STable *st, void *data) {
     return value;
 }
 
+static STable * get_elem_stable(PARROT_INTERP, STable *st) {
+    VMArrayREPRData *repr_data = (VMArrayREPRData *)st->REPR_data;
+    return STABLE(repr_data->elem_type);
+}
+
 /* Initializes the VMArray representation. */
 REPROps * VMArray_initialize(PARROT_INTERP) {
     /* Allocate and populate the representation function table. */
@@ -547,5 +552,6 @@ REPROps * VMArray_initialize(PARROT_INTERP) {
     this_repr->pos_funcs->pop_boxed = pop_boxed;
     this_repr->pos_funcs->unshift_boxed = unshift_boxed;
     this_repr->pos_funcs->shift_boxed = shift_boxed;
+    this_repr->pos_funcs->get_elem_stable = get_elem_stable;
     return this_repr;
 }
