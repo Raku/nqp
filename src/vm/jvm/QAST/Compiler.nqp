@@ -2015,7 +2015,7 @@ QAST::OperationsJAST.add_core_op('sprintf', -> $qastcomp, $op {
             |@operands )
     );
 });
-QAST::OperationsJAST.add_core_op('sprintfAddHandler', -> $qastcomp, $op {
+QAST::OperationsJAST.add_core_op('sprintfaddargumenthandler', -> $qastcomp, $op {
     my @operands := $op.list;
     $qastcomp.as_jast(
         QAST::Op.new(
@@ -2024,7 +2024,7 @@ QAST::OperationsJAST.add_core_op('sprintfAddHandler', -> $qastcomp, $op {
             QAST::Op.new(
                 :op('gethllsym'),
                 QAST::SVal.new( :value('nqp') ),
-                QAST::SVal.new( :value('sprintfAddHandler') )
+                QAST::SVal.new( :value('sprintfaddargumenthandler') )
             ),
             |@operands )
     );
