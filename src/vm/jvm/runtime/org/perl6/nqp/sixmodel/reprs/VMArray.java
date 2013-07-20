@@ -25,9 +25,19 @@ public class VMArray extends REPR {
             obj = new VMArrayInstance();
         }
         else {
-            switch (((VMArrayREPRData)st.REPRData).ss.boxed_primitive) {
+            StorageSpec ss = ((VMArrayREPRData)st.REPRData).ss;
+            switch (ss.boxed_primitive) {
             case StorageSpec.BP_INT:
-                obj = new VMArrayInstance_i();
+                if (ss.bits == 64)
+                    obj = new VMArrayInstance_i();
+                if (ss.bits == 8)
+                    obj = new VMArrayInstance_i8();
+                else if (ss.bits == 16)
+                    obj = new VMArrayInstance_i16();
+                else if (ss.bits == 32)
+                    obj = new VMArrayInstance_i32();
+                else
+                    obj = new VMArrayInstance_i();
                 break;
             case StorageSpec.BP_NUM:
                 obj = new VMArrayInstance_n();
@@ -70,9 +80,17 @@ public class VMArray extends REPR {
             obj = new VMArrayInstance();
         }
         else {
-            switch (((VMArrayREPRData)st.REPRData).ss.boxed_primitive) {
+            StorageSpec ss = ((VMArrayREPRData)st.REPRData).ss;
+            switch (ss.boxed_primitive) {
             case StorageSpec.BP_INT:
-                obj = new VMArrayInstance_i();
+                if (ss.bits == 8)
+                    obj = new VMArrayInstance_i8();
+                else if (ss.bits == 16)
+                    obj = new VMArrayInstance_i16();
+                else if (ss.bits == 32)
+                    obj = new VMArrayInstance_i32();
+                else
+                    obj = new VMArrayInstance_i();
                 break;
             case StorageSpec.BP_NUM:
                 obj = new VMArrayInstance_n();
