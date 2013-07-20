@@ -115,15 +115,14 @@ static void ensure_size(PARROT_INTERP, VMArrayBody *body, VMArrayREPRData *repr_
     slots = (slots)
             ? mem_sys_realloc(slots, ssize*elem_size)
             : mem_sys_allocate(ssize*elem_size);
+    body->ssize = ssize;
+    body->slots = slots;
 
     /* Fill out any unused slots with PMCNULL pointers */
     while (elems < ssize) {
         null_pos(interp, body, repr_data, elems);
         elems++;
     }
-
-    body->ssize = ssize;
-    body->slots = slots;
 }
 
 static INTVAL get_pos_int(PARROT_INTERP, VMArrayBody *body, VMArrayREPRData *repr_data, INTVAL offset) {
