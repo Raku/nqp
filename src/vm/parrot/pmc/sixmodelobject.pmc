@@ -736,6 +736,50 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
         else
             return SUPER();
     }
+    
+    VTABLE void set_integer_native(INTVAL elems) {
+        PMC *decont = DECONT(interp, SELF);
+        if (REPR(decont)->pos_funcs)
+            /* TODO: forward to size-setting method when we have one. */;
+        else
+            SUPER(elems);
+    }
+    
+    VTABLE INTVAL get_integer_keyed_int(INTVAL i) {
+        PMC *decont = DECONT(interp, SELF);
+        if (REPR(decont)->pos_funcs) {
+            NativeValue nv;
+            nv.type = NATIVE_VALUE_INT;
+            REPR(decont)->pos_funcs->at_pos_native(interp, STABLE(decont),
+                OBJECT_BODY(decont), i, &nv);
+            return nv.value.intval;
+        }
+        else {
+            return SUPER(i);
+        }
+    }
+    
+    VTABLE void set_integer_keyed_int(INTVAL i, INTVAL value) {
+        PMC *decont = DECONT(interp, SELF);
+        if (REPR(decont)->pos_funcs) {
+            NativeValue nv;
+            nv.type = NATIVE_VALUE_INT;
+            nv.value.intval = value;
+            REPR(decont)->pos_funcs->bind_pos_native(interp, STABLE(decont),
+                OBJECT_BODY(decont), i, &nv);
+        }
+        else {
+            SUPER(i, value);
+        }
+    }
+    
+    VTABLE INTVAL elements() {
+        PMC *decont = DECONT(interp, SELF);
+        if (REPR(decont)->elems)
+            REPR(decont)->elems(interp, STABLE(decont), OBJECT_BODY(decont));
+        else
+            return SUPER();
+    }
 }
 
 /*
