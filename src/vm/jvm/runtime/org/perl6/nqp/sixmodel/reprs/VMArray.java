@@ -25,7 +25,7 @@ public class VMArray extends REPR {
             obj = new VMArrayInstance();
         }
         else {
-            switch (((StorageSpec)st.REPRData).boxed_primitive) {
+            switch (((VMArrayREPRData)st.REPRData).ss.boxed_primitive) {
             case StorageSpec.BP_INT:
                 obj = new VMArrayInstance_i();
                 break;
@@ -52,7 +52,10 @@ public class VMArray extends REPR {
             case StorageSpec.BP_INT:
             case StorageSpec.BP_NUM:
             case StorageSpec.BP_STR:
-                st.REPRData = ss;
+                VMArrayREPRData reprData = new VMArrayREPRData();
+                reprData.type = type;
+                reprData.ss = ss;
+                st.REPRData = reprData;
                 break;
             default:
                 if (ss.inlineable != StorageSpec.REFERENCE)
@@ -67,7 +70,7 @@ public class VMArray extends REPR {
             obj = new VMArrayInstance();
         }
         else {
-            switch (((StorageSpec)st.REPRData).boxed_primitive) {
+            switch (((VMArrayREPRData)st.REPRData).ss.boxed_primitive) {
             case StorageSpec.BP_INT:
                 obj = new VMArrayInstance_i();
                 break;
@@ -93,8 +96,9 @@ public class VMArray extends REPR {
                 obj.bind_pos_boxed(tc, i, reader.readRef());
         }
         else {
+            short boxPrim = ((VMArrayREPRData)st.REPRData).ss.boxed_primitive;
             for (long i = 0; i < elems; i++) {
-                switch (((StorageSpec)obj.st.REPRData).boxed_primitive) {
+                switch (boxPrim) {
                 case StorageSpec.BP_INT:
                     tc.native_i = reader.readLong();
                     break;
@@ -120,9 +124,10 @@ public class VMArray extends REPR {
                 writer.writeRef(obj.at_pos_boxed(tc, i));
         }
         else {
+            short boxPrim = ((VMArrayREPRData)obj.st.REPRData).ss.boxed_primitive;
             for (long i = 0; i < elems; i++) {
                 obj.at_pos_native(tc, i);
-                switch (((StorageSpec)obj.st.REPRData).boxed_primitive) {
+                switch (boxPrim) {
                 case StorageSpec.BP_INT:
                     writer.writeInt(tc.native_i);
                     break;
@@ -140,6 +145,34 @@ public class VMArray extends REPR {
     }
 
     public StorageSpec get_value_storage_spec(ThreadContext tc, STable st) {
-        return st.REPRData == null ? StorageSpec.BOXED : (StorageSpec)st.REPRData;
+        return st.REPRData == null ? StorageSpec.BOXED : ((VMArrayREPRData)st.REPRData).ss;
+    }
+    
+    /**
+     * REPR data serialization. Serializes the per-type representation data that
+     * is attached to the supplied STable.
+     */
+    public void serialize_repr_data(ThreadContext tc, STable st, SerializationWriter writer)
+    {
+        writer.writeRef(st.REPRData == null
+            ? null
+            : ((VMArrayREPRData)st.REPRData).type);
+    }
+    
+    /**
+     * REPR data deserialization. Deserializes the per-type representation data and
+     * attaches it to the supplied STable.
+     */
+    public void deserialize_repr_data(ThreadContext tc, STable st, SerializationReader reader)
+    {
+        if (reader.version >= 7) {
+            SixModelObject type = reader.readRef();
+            if (type != null) {
+                VMArrayREPRData reprData = new VMArrayREPRData();
+                reprData.type = type;
+                reprData.ss = type.st.REPR.get_storage_spec(tc, type.st);
+                st.REPRData = reprData;
+            }
+        }
     }
 }
