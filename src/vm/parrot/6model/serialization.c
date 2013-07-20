@@ -1678,8 +1678,9 @@ static void deserialize_stable(PARROT_INTERP, SerializationReader *reader, INTVA
     PARROT_GC_WRITE_BARRIER(interp, st->stable_pmc);
 }
 
-/* Deserializes a single object, along with its REPR data. */
-static void deserialize_object(PARROT_INTERP, SerializationReader *reader, INTVAL i, PMC *obj) {
+/* Does initial object deserialization tasks, so it gets an STable set at
+ * least. */
+static void pre_deserialize_object(PARROT_INTERP, SerializationReader *reader, INTVAL i, PMC *obj) {
     /* Calculate location of object's table row. */
     char *obj_table_row = reader->root.objects_table + i * OBJECTS_TABLE_ENTRY_SIZE;
     
@@ -1697,12 +1698,26 @@ static void deserialize_object(PARROT_INTERP, SerializationReader *reader, INTVA
         PMC_data(obj) = body;
         MARK_AS_TYPE_OBJECT(obj);
     }
-    else {        
-        /* Instance; allocate the object, fiddling things so that it gets wrapped
+}
+
+/* Finish deserializing a single object. */
+static void deserialize_object(PARROT_INTERP, SerializationReader *reader, INTVAL i, PMC *obj) {
+    /* Calculate location of object's table row. */
+    char *obj_table_row = reader->root.objects_table + i * OBJECTS_TABLE_ENTRY_SIZE;
+
+    /* Resolve the STable. */
+    PMC *stable = lookup_stable(interp, reader,
+        read_int32(obj_table_row, 0),   /* The SC in the dependencies table, + 1 */
+        read_int32(obj_table_row, 4));  /* The index in that SC */
+
+    /* If it's a type object, we did all already; only need to the rest if it's an
+     * instance. */
+    if ((read_int32(obj_table_row, 12) & 1) == 1) {
+        /* Allocate the object, fiddling things so that it gets wrapped
          * in the PMC we want it to. */
         set_wrapping_object(obj);
         STABLE_STRUCT(stable)->REPR->allocate(interp, STABLE_STRUCT(stable));
-
+        
         /* Set current read buffer to the correct thing. */
         reader->cur_read_buffer = &(reader->root.objects_data);
         reader->cur_read_offset = &(reader->objects_data_offset);
@@ -1900,12 +1915,18 @@ void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, PMC *st
         attach_context_outer(interp, reader, i,
             VTABLE_get_pmc_keyed_int(interp, reader->contexts_list, i));
     
+    /* Do initial object deserialization, so they at least get an STable
+     * pointer. */
+    for (i = 0; i < reader->root.num_objects; i++)
+        pre_deserialize_object(interp, reader, i,
+            VTABLE_get_pmc_keyed_int(interp, objects, i));
+    
      /* Deserialize STables, along with their representation data. */
      for (i = 0; i < reader->root.num_stables; i++)
         deserialize_stable(interp, reader, i,
             VTABLE_get_pmc_keyed_int(interp, stables, i));
 
-     /* Deserialize objects. */
+     /* Finish deserializing objects. */
      for (i = 0; i < reader->root.num_objects; i++)
         deserialize_object(interp, reader, i,
             VTABLE_get_pmc_keyed_int(interp, objects, i));
