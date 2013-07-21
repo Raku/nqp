@@ -3359,14 +3359,14 @@ inline op nqp_getlexrelcaller(out PMC, in PMC, in STR) :base_core {
 
 =item nqp_encode
 
-Encodes the specified string with the specified encoding into a buffer of
-the provided type.
+Encodes the specified string with the specified encoding into the provided
+empty buffer.
 
 =cut
 
 */
 inline op nqp_encode(out PMC, in STR, in STR, invar PMC) {
-    PMC *res_type = $4;
+    PMC *res = $4;
     STRING *enc;
     STable *res_elem_st;
     storage_spec res_elem_ss;
@@ -3374,10 +3374,6 @@ inline op nqp_encode(out PMC, in STR, in STR, invar PMC) {
     INTVAL bytes, i;
     NativeValue nv;
     
-    /* Allocate buffer result. */
-    PMC *res = REPR(res_type)->allocate(interp, STABLE(res_type));
-    REPR(res)->initialize(interp, STABLE(res), OBJECT_BODY(res));
-
     /* Transform string to the requested encoding (Parrot considers
      * everything as encoded strings rather than having a Buf/Str
      * split). */

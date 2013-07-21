@@ -2918,9 +2918,8 @@ public final class Ops {
             }
         }
     }
-    public static SixModelObject encode(String str, String encoding, SixModelObject bufType, ThreadContext tc) {
+    public static SixModelObject encode(String str, String encoding, SixModelObject res, ThreadContext tc) {
         try {
-            SixModelObject res = bufType.st.REPR.allocate(tc, bufType.st);
             if (encoding.equals("utf8")) {
                 stashBytes(tc, res, str.getBytes("UTF-8"));
             }
