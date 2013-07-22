@@ -115,15 +115,14 @@ static void ensure_size(PARROT_INTERP, VMArrayBody *body, VMArrayREPRData *repr_
     slots = (slots)
             ? mem_sys_realloc(slots, ssize*elem_size)
             : mem_sys_allocate(ssize*elem_size);
+    body->ssize = ssize;
+    body->slots = slots;
 
     /* Fill out any unused slots with PMCNULL pointers */
     while (elems < ssize) {
         null_pos(interp, body, repr_data, elems);
         elems++;
     }
-
-    body->ssize = ssize;
-    body->slots = slots;
 }
 
 static INTVAL get_pos_int(PARROT_INTERP, VMArrayBody *body, VMArrayREPRData *repr_data, INTVAL offset) {
@@ -332,6 +331,23 @@ static void gc_free(PARROT_INTERP, PMC *obj) {
     mem_sys_free(instance);
 }
 
+/* This Parrot-specific addition to the API is used to mark a repr's
+ * per-type data. */
+static void gc_mark_repr_data(PARROT_INTERP, STable *st) {
+    VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
+    if (repr_data)
+        Parrot_gc_mark_PMC_alive(interp, repr_data->elem_type);
+}
+
+/* This Parrot-specific addition to the API is used to free a repr instance. */
+static void gc_free_repr_data(PARROT_INTERP, STable *st) {
+    if (st->REPR_data) {
+        free(st->REPR_data);
+        st->REPR_data = NULL;
+    }
+}
+
+
 static void at_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index, NativeValue *value) {
     VMArrayBody *body = (VMArrayBody *) data;
     VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
@@ -504,6 +520,16 @@ static PMC *shift_boxed(PARROT_INTERP, STable *st, void *data) {
     return value;
 }
 
+static STable * get_elem_stable(PARROT_INTERP, STable *st) {
+    VMArrayREPRData *repr_data = (VMArrayREPRData *)st->REPR_data;
+    return STABLE(repr_data->elem_type);
+}
+
+static INTVAL elems(PARROT_INTERP, STable *st, void *data) {
+    VMArrayBody *body = (VMArrayBody *) data;
+    return body->elems;
+}
+
 /* Initializes the VMArray representation. */
 REPROps * VMArray_initialize(PARROT_INTERP) {
     /* Allocate and populate the representation function table. */
@@ -518,6 +544,8 @@ REPROps * VMArray_initialize(PARROT_INTERP) {
     this_repr->serialize_repr_data = serialize_repr_data;
     this_repr->deserialize_repr_data = deserialize_repr_data;
     this_repr->gc_free = gc_free;
+    this_repr->gc_mark_repr_data = gc_mark_repr_data;
+    this_repr->gc_free_repr_data = gc_free_repr_data;
     this_repr->get_storage_spec = get_storage_spec;
     this_repr->pos_funcs = mem_allocate_zeroed_typed(REPROps_Positional);
     this_repr->pos_funcs->at_pos_native = at_pos_native;
@@ -528,5 +556,7 @@ REPROps * VMArray_initialize(PARROT_INTERP) {
     this_repr->pos_funcs->pop_boxed = pop_boxed;
     this_repr->pos_funcs->unshift_boxed = unshift_boxed;
     this_repr->pos_funcs->shift_boxed = shift_boxed;
+    this_repr->pos_funcs->get_elem_stable = get_elem_stable;
+    this_repr->elems = elems;
     return this_repr;
 }

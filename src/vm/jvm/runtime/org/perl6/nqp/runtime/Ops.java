@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -66,6 +67,9 @@ import org.perl6.nqp.sixmodel.reprs.P6bigintInstance;
 import org.perl6.nqp.sixmodel.reprs.SCRefInstance;
 import org.perl6.nqp.sixmodel.reprs.VMArray;
 import org.perl6.nqp.sixmodel.reprs.VMArrayInstance;
+import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_i8;
+import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_i16;
+import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_i32;
 import org.perl6.nqp.sixmodel.reprs.VMExceptionInstance;
 import org.perl6.nqp.sixmodel.reprs.VMHash;
 import org.perl6.nqp.sixmodel.reprs.VMHashInstance;
@@ -2897,6 +2901,133 @@ public final class Ops {
         }
         Character found = names.get(name);
         return found == null ? -1 : found;
+    }
+    
+    private static void stashBytes(ThreadContext tc, SixModelObject res, byte[] bytes) {
+        if (res instanceof VMArrayInstance_i8) {
+            VMArrayInstance_i8 arr = (VMArrayInstance_i8)res;
+            arr.elems = bytes.length;
+            arr.start = 0;
+            arr.slots = bytes;
+        }
+        else {
+            res.set_elems(tc, bytes.length);
+            for (int i = 0; i < bytes.length; i++) {
+                tc.native_i = bytes[i];
+                res.bind_pos_native(tc, i);
+            }
+        }
+    }
+    public static SixModelObject encode(String str, String encoding, SixModelObject res, ThreadContext tc) {
+        try {
+            if (encoding.equals("utf8")) {
+                stashBytes(tc, res, str.getBytes("UTF-8"));
+            }
+            else if (encoding.equals("ascii")) {
+                stashBytes(tc, res, str.getBytes("US-ASCII"));
+            }
+            else if (encoding.equals("iso-8859-1")) {
+                stashBytes(tc, res, str.getBytes("ISO-8859-1"));
+            }
+            else if (encoding.equals("utf16")) {
+                short[] buffer = new short[str.length()];
+                for (int i = 0; i < str.length(); i++)
+                    buffer[i] = (short)str.charAt(i);
+                if (res instanceof VMArrayInstance_i16) {
+                    VMArrayInstance_i16 arr = (VMArrayInstance_i16)res;
+                    arr.elems = buffer.length;
+                    arr.start = 0;
+                    arr.slots = buffer;
+                }
+                else {
+                    res.set_elems(tc, buffer.length);
+                    for (int i = 0; i < buffer.length; i++) {
+                        tc.native_i = buffer[i];
+                        res.bind_pos_native(tc, i);
+                    }
+                }
+            }
+            else if (encoding.equals("utf32")) {
+                int[] buffer = new int[str.length()]; /* Can be an overestimate. */
+                int bufPos = 0;
+                for (int i = 0; i < str.length(); ) {
+                    int cp = str.codePointAt(i);
+                    buffer[bufPos++] = cp;
+                    i += Character.charCount(cp);
+                }
+                if (res instanceof VMArrayInstance_i32) {
+                    VMArrayInstance_i32 arr = (VMArrayInstance_i32)res;
+                    arr.elems = bufPos;
+                    arr.start = 0;
+                    arr.slots = buffer;
+                }
+                else {
+                    res.set_elems(tc, buffer.length);
+                    for (int i = 0; i < bufPos; i++) {
+                        tc.native_i = buffer[i];
+                        res.bind_pos_native(tc, i);
+                    }
+                }
+            }
+            else {
+                throw ExceptionHandling.dieInternal(tc, "Unknown encoding '" + encoding + "'");
+            }
+            return res;
+        }
+        catch (UnsupportedEncodingException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
+        }
+    }
+    
+    public static String decode8(SixModelObject buf, String csName, ThreadContext tc) {
+        ByteBuffer bb;
+        if (buf instanceof VMArrayInstance_i8) {
+            VMArrayInstance_i8 bufi8 = (VMArrayInstance_i8)buf;
+            bb = bufi8.slots != null
+                ? ByteBuffer.wrap(bufi8.slots, bufi8.start, bufi8.elems)
+                : ByteBuffer.allocate(0);
+        }
+        else {
+            int n = (int)buf.elems(tc);
+            bb = ByteBuffer.allocate(n);
+            for (int i = 0; i < n; i++) {
+                buf.at_pos_native(tc, i);
+                bb.put((byte)tc.native_i);
+            }
+        }
+        return Charset.forName(csName).decode(bb).toString();
+    }
+    public static String decode(SixModelObject buf, String encoding, ThreadContext tc) {
+        if (encoding.equals("utf8")) {
+            return decode8(buf, "UTF-8", tc);
+        }
+        else if (encoding.equals("ascii")) {
+            return decode8(buf, "US-ASCII", tc);
+        }
+        else if (encoding.equals("iso-8859-1")) {
+            return decode8(buf, "ISO-8859-1", tc);
+        }
+        else if (encoding.equals("utf16")) {
+            int n = (int)buf.elems(tc);
+            StringBuilder sb = new StringBuilder(n);
+            for (int i = 0; i < n; i++) {
+                buf.at_pos_native(tc, i);
+                sb.append((char)tc.native_i);
+            }
+            return sb.toString();
+        }
+        else if (encoding.equals("utf32")) {
+            int n = (int)buf.elems(tc);
+            StringBuilder sb = new StringBuilder(n);
+            for (int i = 0; i < n; i++) {
+                buf.at_pos_native(tc, i);
+                sb.appendCodePoint((int)tc.native_i);
+            }
+            return sb.toString();
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc, "Unknown encoding '" + encoding + "'");
+        }
     }
     
     private static final int CCLASS_ANY          = 65535;

@@ -1970,6 +1970,9 @@ QAST::Operations.add_core_op('codepointfromname', :inlinable(1), -> $qastcomp, $
     $ops
 });
 
+QAST::Operations.add_core_pirop_mapping('encode', 'nqp_encode', 'PssP', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('decode', 'nqp_decode', 'SPs', :inlinable(1));
+
 # relational opcodes
 QAST::Operations.add_core_pirop_mapping('cmp_i', 'cmp', 'Iii', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('iseq_i', 'iseq', 'Iii', :inlinable(1));

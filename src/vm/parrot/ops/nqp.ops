@@ -3354,3 +3354,149 @@ inline op nqp_getlexrelcaller(out PMC, in PMC, in STR) :base_core {
     }
     $1 = result;
 }
+
+/*
+
+=item nqp_encode
+
+Encodes the specified string with the specified encoding into the provided
+empty buffer.
+
+=cut
+
+*/
+inline op nqp_encode(out PMC, in STR, in STR, invar PMC) {
+    PMC *res = $4;
+    STRING *enc;
+    STable *res_elem_st;
+    storage_spec res_elem_ss;
+    const char *buffer_data;
+    INTVAL bytes, i;
+    NativeValue nv;
+    
+    /* Transform string to the requested encoding (Parrot considers
+     * everything as encoded strings rather than having a Buf/Str
+     * split). */
+    enc = Parrot_str_change_encoding(interp, $2,
+        Parrot_encoding_number(interp, $3));
+
+    /* Obtain underlying C string, whose contents will be used to
+     * assemble the buffer, and put it into the buffer. */
+    buffer_data = Parrot_str_cstring(interp, enc);
+    bytes = Parrot_str_byte_length(interp, enc);
+    res_elem_st = REPR(res)->pos_funcs->get_elem_stable(interp, STABLE(res));
+    res_elem_ss = res_elem_st->REPR->get_storage_spec(interp, res_elem_st);
+    if (res_elem_ss.boxed_primitive != STORAGE_SPEC_BP_INT)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "nqp_encode requires an integer buffer type");
+    nv.type = NATIVE_VALUE_INT;
+    switch (res_elem_ss.bits) {
+        case 8: {
+            for (i = 0; i < bytes; i++) {
+                nv.value.intval = buffer_data[i];
+                REPR(res)->pos_funcs->bind_pos_native(interp, STABLE(res),
+                    OBJECT_BODY(res), i, &nv);
+            }
+            break;
+        }
+        case 16: {
+            short *sbuffer_data = (short *)buffer_data;
+            short shorts = bytes / 2;
+            for (i = 0; i < shorts; i++) {
+                nv.value.intval = sbuffer_data[i];
+                REPR(res)->pos_funcs->bind_pos_native(interp, STABLE(res),
+                    OBJECT_BODY(res), i, &nv);
+            }
+            break;
+        }
+        case 32: {
+            int *ibuffer_data = (int *)buffer_data;
+            int ints = bytes / 4;
+            for (i = 0; i < ints; i++) {
+                nv.value.intval = ibuffer_data[i];
+                REPR(res)->pos_funcs->bind_pos_native(interp, STABLE(res),
+                    OBJECT_BODY(res), i, &nv);
+            }
+            break;
+        }
+        default:
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "nqp_encode got unexpected buffer element size (expected 8, 16 or 32)");
+    }
+    
+    $1 = res;
+}
+
+/*
+
+=item nqp_decode
+
+Decodes the specified buffer into a string.
+
+=cut
+
+*/
+inline op nqp_decode(out STR, invar PMC, in STR) {
+    PMC *buf = $2;
+    char *cbuffer;
+    INTVAL cbuflen, i;
+    NativeValue nv;
+    
+    /* Ensure we have some kind of integer array to decode from. */
+    STable *buf_elem_st;
+    storage_spec buf_elem_ss;
+    buf_elem_st = REPR(buf)->pos_funcs->get_elem_stable(interp, STABLE(buf));
+    buf_elem_ss = buf_elem_st->REPR->get_storage_spec(interp, buf_elem_st);
+    if (buf_elem_ss.boxed_primitive != STORAGE_SPEC_BP_INT)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "nqp_decode requires an integer buffer type");
+    
+    /* Assemble a memory buffer of the pieces. */
+    nv.type = NATIVE_VALUE_INT;
+    switch (buf_elem_ss.bits) {
+        case 8: {
+            cbuflen = REPR(buf)->elems(interp, STABLE(buf), OBJECT_BODY(buf));
+            cbuffer = mem_sys_allocate(cbuflen);
+            for (i = 0; i < cbuflen; i++) {
+                REPR(buf)->pos_funcs->at_pos_native(interp, STABLE(buf),
+                    OBJECT_BODY(buf), i, &nv);
+                cbuffer[i] = nv.value.intval;
+            }
+            break;
+        }
+        case 16: {
+            INTVAL elems = REPR(buf)->elems(interp, STABLE(buf), OBJECT_BODY(buf));
+            short *sview;
+            cbuflen = elems * 2;
+            cbuffer = mem_sys_allocate(cbuflen);
+            sview = (short *)cbuffer;
+            for (i = 0; i < cbuflen; i++) {
+                REPR(buf)->pos_funcs->at_pos_native(interp, STABLE(buf),
+                    OBJECT_BODY(buf), i, &nv);
+                sview[i] = nv.value.intval;
+            }
+            break;
+        }
+        case 32: {
+            INTVAL elems = REPR(buf)->elems(interp, STABLE(buf), OBJECT_BODY(buf));
+            int *iview;
+            cbuflen = elems * 4;
+            cbuffer = mem_sys_allocate(cbuflen);
+            iview = (int *)cbuffer;
+            for (i = 0; i < cbuflen; i++) {
+                REPR(buf)->pos_funcs->at_pos_native(interp, STABLE(buf),
+                    OBJECT_BODY(buf), i, &nv);
+                iview[i] = nv.value.intval;
+            }
+            break;
+        }
+        default:
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "nqp_encode got unexpected buffer element size (expected 8, 16 or 32)");
+    }
+    
+    /* Create a string from the the buffer. */
+    $1 = Parrot_str_new_init(interp, cbuffer, cbuflen,
+        Parrot_find_encoding_by_string(interp, $3), 0);
+    free(cbuffer);
+}

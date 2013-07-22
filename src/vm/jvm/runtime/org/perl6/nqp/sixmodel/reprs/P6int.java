@@ -18,7 +18,24 @@ public class P6int extends REPR {
         SixModelObject obj = new TypeObject();
         obj.st = st;
         st.WHAT = obj;
+        
+        StorageSpec ss = new StorageSpec();
+        ss.inlineable = StorageSpec.INLINED;
+        ss.boxed_primitive = StorageSpec.BP_INT;
+        ss.bits = 64;
+        ss.can_box = StorageSpec.CAN_BOX_INT;
+        st.REPRData = ss;
+        
         return st.WHAT;
+    }
+    
+    public void compose(ThreadContext tc, STable st, SixModelObject repr_info) {
+        SixModelObject integerInfo = repr_info.at_key_boxed(tc, "integer");
+        if (integerInfo != null) {
+            SixModelObject bits = integerInfo.at_key_boxed(tc, "bits");
+            if (bits != null)
+                ((StorageSpec)st.REPRData).bits = (short)bits.get_int(tc);
+        }
     }
 
     public SixModelObject allocate(ThreadContext tc, STable st) {
@@ -28,12 +45,7 @@ public class P6int extends REPR {
     }
     
     public StorageSpec get_storage_spec(ThreadContext tc, STable st) {
-        StorageSpec ss = new StorageSpec();
-        ss.inlineable = StorageSpec.INLINED;
-        ss.boxed_primitive = StorageSpec.BP_INT;
-        ss.bits = 64;
-        ss.can_box = StorageSpec.CAN_BOX_INT;
-        return ss;
+        return (StorageSpec)st.REPRData;
     }
     
     public void inlineStorage(ThreadContext tc, STable st, ClassWriter cw, String prefix) {
@@ -116,5 +128,31 @@ public class P6int extends REPR {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+    
+    /**
+     * REPR data serialization. Serializes the per-type representation data that
+     * is attached to the supplied STable.
+     */
+    public void serialize_repr_data(ThreadContext tc, STable st, SerializationWriter writer)
+    {
+        writer.writeInt(((StorageSpec)st.REPRData).bits);
+    }
+    
+    /**
+     * REPR data deserialization. Deserializes the per-type representation data and
+     * attaches it to the supplied STable.
+     */
+    public void deserialize_repr_data(ThreadContext tc, STable st, SerializationReader reader)
+    {
+        StorageSpec ss = new StorageSpec();
+        ss.inlineable = StorageSpec.INLINED;
+        ss.boxed_primitive = StorageSpec.BP_INT;
+        if (reader.version >= 7)
+            ss.bits = (short)reader.readLong();
+        else
+            ss.bits = 64;
+        ss.can_box = StorageSpec.CAN_BOX_INT;
+        st.REPRData = ss;
     }
 }
