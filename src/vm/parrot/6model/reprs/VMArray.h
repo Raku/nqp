@@ -19,6 +19,7 @@ typedef struct {
     PMC *elem_type;
     INTVAL elem_size;
     INTVAL elem_kind;
+    INTVAL elem_is_unsigned;
 } VMArrayREPRData;
 
 /* Initializes the VMArray REPR. */

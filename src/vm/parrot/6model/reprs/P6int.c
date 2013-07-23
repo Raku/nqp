@@ -65,6 +65,9 @@ static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
          && repr_data->bits != 64) {
             die_bad_bits(interp);
         }
+        
+        repr_data->is_unsigned = VTABLE_get_integer_keyed_str(interp, integer,
+            Parrot_str_new_constant(interp, "unsigned"));
     }
 }
 
@@ -220,6 +223,8 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     default:
         die_bad_bits(interp);
     }
+    
+    spec.is_unsigned = repr_data->is_unsigned;
 
     return spec;
 }
@@ -242,6 +247,9 @@ static void serialize_repr_data(PARROT_INTERP, STable *st, SerializationWriter *
     if (writer->root.version >= 2) {
         writer->write_int(interp, writer, repr_data->bits);
     }
+    if (writer->root.version >= 6) {
+        writer->write_int(interp, writer, repr_data->is_unsigned);
+    }
 }
 
 /* Serializes the REPR data. */
@@ -255,6 +263,12 @@ static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader
     }
     else {
         repr_data->bits = sizeof(INTVAL)*8;
+    }
+    if (reader->root.version >= 6) {
+        repr_data->is_unsigned = reader->read_int(interp, reader);
+    }
+    else {
+        repr_data->is_unsigned = 0;
     }
 }
 

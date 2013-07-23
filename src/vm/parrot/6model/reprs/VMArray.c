@@ -10,22 +10,43 @@ static REPROps *this_repr;
 /* Wrapper functions to set and get an array offset to a value for the various
  * types we support. */
 static void set_pos_int(PARROT_INTERP, VMArrayBody *body, VMArrayREPRData *repr_data, INTVAL offset, INTVAL val) {
-    switch(repr_data->elem_size) {
-    case 8:
-        ((Parrot_Int1 *) body->slots)[offset] = (Parrot_Int1) val;
-        break;
-    case 16:
-        ((Parrot_Int2 *) body->slots)[offset] = (Parrot_Int2) val;
-        break;
-    case 32:
-        ((Parrot_Int4 *) body->slots)[offset] = (Parrot_Int4) val;
-        break;
-    case 64:
-        ((Parrot_Int8 *) body->slots)[offset] = (Parrot_Int8) val;
-        break;
-    default:
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "VMArray: Only supports 8, 16, 32 and 64 bit integers.");
+    if (repr_data->elem_is_unsigned) {
+        switch(repr_data->elem_size) {
+        case 8:
+            ((Parrot_UInt1 *) body->slots)[offset] = (Parrot_UInt1) val;
+            break;
+        case 16:
+            ((Parrot_UInt2 *) body->slots)[offset] = (Parrot_UInt2) val;
+            break;
+        case 32:
+            ((Parrot_UInt4 *) body->slots)[offset] = (Parrot_UInt4) val;
+            break;
+        case 64:
+            ((Parrot_UInt8 *) body->slots)[offset] = (Parrot_UInt8) val;
+            break;
+        default:
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "VMArray: Only supports 8, 16, 32 and 64 bit integers.");
+        }
+    }
+    else {
+        switch(repr_data->elem_size) {
+        case 8:
+            ((Parrot_Int1 *) body->slots)[offset] = (Parrot_Int1) val;
+            break;
+        case 16:
+            ((Parrot_Int2 *) body->slots)[offset] = (Parrot_Int2) val;
+            break;
+        case 32:
+            ((Parrot_Int4 *) body->slots)[offset] = (Parrot_Int4) val;
+            break;
+        case 64:
+            ((Parrot_Int8 *) body->slots)[offset] = (Parrot_Int8) val;
+            break;
+        default:
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "VMArray: Only supports 8, 16, 32 and 64 bit integers.");
+        }
     }
 }
 
@@ -126,18 +147,35 @@ static void ensure_size(PARROT_INTERP, VMArrayBody *body, VMArrayREPRData *repr_
 }
 
 static INTVAL get_pos_int(PARROT_INTERP, VMArrayBody *body, VMArrayREPRData *repr_data, INTVAL offset) {
-    switch(repr_data->elem_size) {
-    case 8:
-        return ((Parrot_Int1 *) body->slots)[offset];
-    case 16:
-        return ((Parrot_Int2 *) body->slots)[offset];
-    case 32:
-        return ((Parrot_Int4 *) body->slots)[offset];
-    case 64:
-        return ((Parrot_Int8 *) body->slots)[offset];
-    default:
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "VMArray: Only supports 8, 16, 32 and 64 bit integers.");
+    if (repr_data->elem_is_unsigned) {
+        switch(repr_data->elem_size) {
+        case 8:
+            return ((Parrot_UInt1 *) body->slots)[offset];
+        case 16:
+            return ((Parrot_UInt2 *) body->slots)[offset];
+        case 32:
+            return ((Parrot_UInt4 *) body->slots)[offset];
+        case 64:
+            return ((Parrot_UInt8 *) body->slots)[offset];
+        default:
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "VMArray: Only supports 8, 16, 32 and 64 bit integers.");
+        }
+    }
+    else {
+        switch(repr_data->elem_size) {
+        case 8:
+            return ((Parrot_Int1 *) body->slots)[offset];
+        case 16:
+            return ((Parrot_Int2 *) body->slots)[offset];
+        case 32:
+            return ((Parrot_Int4 *) body->slots)[offset];
+        case 64:
+            return ((Parrot_Int8 *) body->slots)[offset];
+        default:
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "VMArray: Only supports 8, 16, 32 and 64 bit integers.");
+        }
     }
 }
 
@@ -194,6 +232,8 @@ static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
                  spec.boxed_primitive == STORAGE_SPEC_BP_NUM)) {
             repr_data->elem_size = spec.bits;
             repr_data->elem_kind = spec.boxed_primitive;
+            if (spec.boxed_primitive == STORAGE_SPEC_BP_INT)
+                repr_data->elem_is_unsigned = spec.is_unsigned;
         }
     }
 }
@@ -277,6 +317,8 @@ static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader
                  spec.boxed_primitive == STORAGE_SPEC_BP_NUM)) {
             repr_data->elem_size = spec.bits;
             repr_data->elem_kind = spec.boxed_primitive;
+            if (spec.boxed_primitive == STORAGE_SPEC_BP_INT)
+                repr_data->elem_is_unsigned = spec.is_unsigned;
         }
     }
 
