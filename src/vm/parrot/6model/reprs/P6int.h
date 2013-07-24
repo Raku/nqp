@@ -15,6 +15,7 @@ typedef struct {
 /* The bit width requirement is shared for all instances of the same type. */
 typedef struct {
     INTVAL bits;
+    INTVAL is_unsigned;
 } P6intREPRData;
 
 /* Initializes the P6int REPR. */
