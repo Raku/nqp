@@ -26,14 +26,14 @@ ok(nqp::elems($empty_fates) == 0,"an empty nfa matches no fates");
 
   my $matching := nqp::nfarunproto($simple,"foo",0);
   ok(nqp::elems($matching) == 1,"we can match a simple string");
-  ok($matching[0] == 11,"...and we get the right fate");
+  ok(nqp::atpos_i($matching, 0) == 11,"...and we get the right fate");
 
   my $not_matching := nqp::nfarunproto($simple,"barfoo",0);
   ok(nqp::elems($not_matching) == 0,"we don't match what we shouldn't");
 
   my $matching_at_specified_pos := nqp::nfarunproto($simple,"barfoo",3);
   ok(nqp::elems($matching_at_specified_pos) == 1,"we match at the right position");
-  ok($matching_at_specified_pos[0] == 11,"...and we get the right fate");
+  ok(nqp::atpos_i($matching_at_specified_pos, 0) == 11,"...and we get the right fate");
 }
 
 
