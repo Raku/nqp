@@ -87,8 +87,7 @@ public class VMArrayInstance_i32 extends SixModelObject {
         }
         else {
             int[] new_slots = new int[(int)ssize];
-            for (int i = 0; i < slots.length; i++)
-                new_slots[i] = slots[i];
+            System.arraycopy(slots, 0, new_slots, 0, slots.length);
             slots = new_slots;
         }
         

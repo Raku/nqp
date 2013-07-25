@@ -87,8 +87,7 @@ public class VMArrayInstance extends SixModelObject {
         }
         else {
             SixModelObject[] new_slots = new SixModelObject[(int)ssize];
-            for (int i = 0; i < slots.length; i++)
-                new_slots[i] = slots[i];
+            System.arraycopy(slots, 0, new_slots, 0, slots.length);
             slots = new_slots;
         }
         
