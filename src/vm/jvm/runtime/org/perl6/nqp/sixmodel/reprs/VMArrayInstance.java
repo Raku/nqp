@@ -1,5 +1,7 @@
 package org.perl6.nqp.sixmodel.reprs;
 
+import java.lang.System;
+
 import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.SixModelObject;
@@ -240,14 +242,7 @@ public class VMArrayInstance extends SixModelObject {
     }
 
     private void memmove(SixModelObject[] slots, long dest_start, long src_start, long l_n) {
-        // There are more optimal ways to do this (without the double copying),
-        // this is just the easiest possible implementation.
-        int n = (int)l_n;
-        SixModelObject[] temp = new SixModelObject[n];
-        for (int i = 0; i < n; i++)
-            temp[i] = slots[(int)src_start + i];
-        for (int i = 0; i < n; i++)
-            slots[(int)dest_start + i] = temp[i];
+        System.arraycopy(slots, (int)src_start, slots, (int)dest_start, (int)l_n);
     }
     
     public SixModelObject clone(ThreadContext tc) {
