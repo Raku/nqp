@@ -44,9 +44,6 @@ pir::load_bytecode
 to be nqp::changetype
 pir::repr_change_type__0PP
 
-to be nqp::primspec
-pir::repr_get_primitive_type_spec__IP
-
 to be nqp::pubmethcache
 pir::publish_method_cache
 
