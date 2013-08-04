@@ -227,13 +227,13 @@ class QAST::OperationsJAST {
     }
     
     # Adds a core op handler.
-    method add_core_op($op, $handler, :$inlinable = 0) {
+    method add_core_op($op, $handler, :$inlinable = 1) {
         %core_ops{$op} := $handler;
         self.set_core_op_inlinability($op, $inlinable);
     }
     
     # Adds a HLL op handler.
-    method add_hll_op($hll, $op, $handler, :$inlinable = 0) {
+    method add_hll_op($hll, $op, $handler, :$inlinable = 1) {
         %hll_ops{$hll} := {} unless nqp::existskey(%hll_ops, $hll);
         %hll_ops{$hll}{$op} := $handler;
         self.set_hll_op_inlinability($hll, $op, $inlinable);
@@ -277,7 +277,7 @@ class QAST::OperationsJAST {
     
     # Adds a core nqp:: op provided by a static method in the
     # class library.
-    method map_classlib_core_op($op, $class, $method, @stack_in, $stack_out, :$tc, :$cont) {
+    method map_classlib_core_op($op, $class, $method, @stack_in, $stack_out, :$tc, :$cont, :$inlinable = 1) {
         my @jtypes_in;
         for @stack_in {
             nqp::push(@jtypes_in, jtype($_));
@@ -286,12 +286,13 @@ class QAST::OperationsJAST {
         my $ins := JAST::Instruction.new( :op('invokestatic'),
             $class, $method, $cont ?? 'Void' !! jtype($stack_out), |@jtypes_in );
         self.add_core_op($op, op_mapper($op, $ins, @stack_in, $stack_out, :$tc, :$cont));
+        self.set_core_op_inlinability($op, $inlinable);
         self.set_core_op_result_type($op, $stack_out);
     }
     
     # Adds a core nqp:: op provided by a static method in the
     # class library.
-    method map_classlib_hll_op($hll, $op, $class, $method, @stack_in, $stack_out, :$tc, :$cont) {
+    method map_classlib_hll_op($hll, $op, $class, $method, @stack_in, $stack_out, :$tc, :$cont, :$inlinable = 1) {
         my @jtypes_in;
         for @stack_in {
             nqp::push(@jtypes_in, jtype($_));
@@ -300,6 +301,7 @@ class QAST::OperationsJAST {
         my $ins := JAST::Instruction.new( :op('invokestatic'),
             $class, $method, $cont ?? 'Void' !! jtype($stack_out), |@jtypes_in );
         self.add_hll_op($hll, $op, op_mapper($op, $ins, @stack_in, $stack_out, :$tc, :$cont));
+        self.set_core_op_inlinability($op, $inlinable);
         self.set_hll_op_result_type($hll, $op, $stack_out);
     }
     
@@ -1373,7 +1375,7 @@ sub process_args_onto_stack($qastcomp, @children, $il, :$obj_first, :$inv_first,
     # Return callsite index (which may create it if needed).
     return [$*CODEREFS.get_callsite_idx(@callsite, @argnames), @arg_results, @arg_jtypes];
 }
-QAST::OperationsJAST.add_core_op('call', sub ($qastcomp, $node) {
+QAST::OperationsJAST.add_core_op('call', :!inlinable, sub ($qastcomp, $node) {
     my $il := JAST::InstructionList.new();
     
     # If it's a direct call, then use invokedynamic to resolve the name in
@@ -1489,7 +1491,7 @@ QAST::OperationsJAST.add_core_op('callmethod', -> $qastcomp, $node {
 });
 
 my $num_lexotics := 0;
-QAST::OperationsJAST.add_core_op('lexotic', -> $qastcomp, $op {
+QAST::OperationsJAST.add_core_op('lexotic', :!inlinable, -> $qastcomp, $op {
     # Create the lexotic lexical.
     my $target := nqp::floor_n(nqp::time_n() * 1000) * 10000 + $num_lexotics++;
     my $il := JAST::InstructionList.new();
@@ -1578,7 +1580,7 @@ my %handler_names := nqp::hash(
     'PROCEED', $EX_CAT_PROCEED,
     'SUCCEED', $EX_CAT_SUCCEED,
 );
-QAST::OperationsJAST.add_core_op('handle', sub ($qastcomp, $op) {
+QAST::OperationsJAST.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
     my @children := nqp::clone($op.list());
     if @children == 0 {
         nqp::die("The 'handle' op requires at least one child");
@@ -1762,18 +1764,18 @@ QAST::OperationsJAST.add_hll_unbox('', $RT_STR, -> $qastcomp {
 
 # Context introspection; note that lexpads and contents are actually the same object
 # in the JVM port, which allows a little op re-use.
-QAST::OperationsJAST.map_classlib_core_op('ctx', $TYPE_OPS, 'ctx', [], $RT_OBJ, :tc);
-QAST::OperationsJAST.map_classlib_core_op('ctxouter', $TYPE_OPS, 'ctxouter', [$RT_OBJ], $RT_OBJ, :tc);
-QAST::OperationsJAST.map_classlib_core_op('ctxcaller', $TYPE_OPS, 'ctxcaller', [$RT_OBJ], $RT_OBJ, :tc);
-QAST::OperationsJAST.map_classlib_core_op('curcode', $TYPE_OPS, 'curcode', [], $RT_OBJ, :tc);
-QAST::OperationsJAST.map_classlib_core_op('callercode', $TYPE_OPS, 'callercode', [], $RT_OBJ, :tc);
-QAST::OperationsJAST.map_classlib_core_op('ctxlexpad', $TYPE_OPS, 'ctxlexpad', [$RT_OBJ], $RT_OBJ, :tc);
-QAST::OperationsJAST.map_classlib_core_op('curlexpad', $TYPE_OPS, 'ctx', [], $RT_OBJ, :tc);
-QAST::OperationsJAST.map_classlib_core_op('lexprimspec', $TYPE_OPS, 'lexprimspec', [$RT_OBJ, $RT_STR], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('ctx', $TYPE_OPS, 'ctx', [], $RT_OBJ, :tc, :!inlinable);
+QAST::OperationsJAST.map_classlib_core_op('ctxouter', $TYPE_OPS, 'ctxouter', [$RT_OBJ], $RT_OBJ, :tc, :!inlinable);
+QAST::OperationsJAST.map_classlib_core_op('ctxcaller', $TYPE_OPS, 'ctxcaller', [$RT_OBJ], $RT_OBJ, :tc, :!inlinable);
+QAST::OperationsJAST.map_classlib_core_op('curcode', $TYPE_OPS, 'curcode', [], $RT_OBJ, :tc, :!inlinable);
+QAST::OperationsJAST.map_classlib_core_op('callercode', $TYPE_OPS, 'callercode', [], $RT_OBJ, :tc, :!inlinable);
+QAST::OperationsJAST.map_classlib_core_op('ctxlexpad', $TYPE_OPS, 'ctxlexpad', [$RT_OBJ], $RT_OBJ, :tc, :!inlinable);
+QAST::OperationsJAST.map_classlib_core_op('curlexpad', $TYPE_OPS, 'ctx', [], $RT_OBJ, :tc, :!inlinable);
+QAST::OperationsJAST.map_classlib_core_op('lexprimspec', $TYPE_OPS, 'lexprimspec', [$RT_OBJ, $RT_STR], $RT_INT, :tc, :!inlinable);
 
 # Argument capture processing, for writing things like multi-dispatchers in
 # high level languages.
-QAST::OperationsJAST.add_core_op('usecapture', -> $qastcomp, $op {
+QAST::OperationsJAST.add_core_op('usecapture', :!inlinable, -> $qastcomp, $op {
     my $il := JAST::InstructionList.new();
     $il.append($ALOAD_1);
     $il.append(JAST::Instruction.new( :op('aload'), 'csd' ));
@@ -1782,7 +1784,7 @@ QAST::OperationsJAST.add_core_op('usecapture', -> $qastcomp, $op {
         $TYPE_OPS, 'usecapture', $TYPE_SMO, $TYPE_TC, $TYPE_CSD, "[$TYPE_OBJ" ));
     result($il, $RT_OBJ)
 });
-QAST::OperationsJAST.add_core_op('savecapture', -> $qastcomp, $op {
+QAST::OperationsJAST.add_core_op('savecapture', :!inlinable, -> $qastcomp, $op {
     my $il := JAST::InstructionList.new();
     $il.append($ALOAD_1);
     $il.append(JAST::Instruction.new( :op('aload'), 'csd' ));
