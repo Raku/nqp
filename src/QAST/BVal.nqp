@@ -5,5 +5,5 @@ class QAST::BVal is QAST::Node {
     method evaluate_unquotes(@unquotes) {
         self
     }
-    method dump_extra_node_info() { ~$!value }
+    method dump_extra_node_info() { ~$!value.cuid }
 }
