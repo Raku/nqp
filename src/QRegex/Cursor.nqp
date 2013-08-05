@@ -69,7 +69,10 @@ role NQPCursorRole is export {
                 }
                 $csi++;
             }
-        } 
+        }
+        if nqp::isnull($!bstack) {
+            $!cstack := NQPMu;
+        }
         $caps;
     }
 
