@@ -624,6 +624,12 @@ class NQPMatch is NQPCapture {
     method !make($ast) { $!ast := $ast }
     method ast()       { $!ast }
     
+    method prune() {
+        nqp::bindattr(self, NQPCapture, '@!array', NQPMu);
+        nqp::bindattr(self, NQPCapture, '%!hash',  NQPMu);
+        $!cursor := NQPMu;
+    }
+    
     method dump($indent?) {
         unless nqp::defined($indent) {
             $indent := 0;
