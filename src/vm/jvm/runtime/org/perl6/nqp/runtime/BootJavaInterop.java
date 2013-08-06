@@ -1,5 +1,6 @@
 package org.perl6.nqp.runtime;
 
+import java.io.File;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -7,6 +8,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -41,10 +45,14 @@ public class BootJavaInterop {
 
     /** The global context that this interop factory is used for. */
     protected GlobalContext gc;
+    
+    /** If we need to load stuff from a JAR, the class loader for doing so. */
+    private HashMap<String, URLClassLoader> jarClassLoaders;
 
     /** Create a new interop object for a context. */
     public BootJavaInterop(GlobalContext gc) {
         this.gc = gc;
+        this.jarClassLoaders = new HashMap<String, URLClassLoader>();
     }
 
     private static class InteropInfo {
@@ -90,6 +98,24 @@ public class BootJavaInterop {
             return getSTableForClass(Class.forName(name)).WHAT;
         } catch (ClassNotFoundException e) {
             throw ExceptionHandling.dieInternal(gc.getCurrentThreadContext(), e);
+        }
+    }
+    public SixModelObject typeForNameFromJAR(String name, String JAR) {
+        try {
+            URLClassLoader cl = jarClassLoaders.get(JAR);
+            if (cl == null) {
+                URL url = new URL("jar:" + new File(JAR).toURI().toURL() + "!/");
+                cl = new URLClassLoader(new URL[] { url });
+                jarClassLoaders.put(JAR, cl);
+            }
+            return getSTableForClass(Class.forName(name, true, cl)).WHAT;
+        } catch (ClassNotFoundException e) {
+            throw ExceptionHandling.dieInternal(gc.getCurrentThreadContext(), e);
+        } catch (MalformedURLException e) {
+            throw ExceptionHandling.dieInternal(gc.getCurrentThreadContext(), e);
+        } catch (Throwable e) {
+            e.printStackTrace();
+            throw e;
         }
     }
 
