@@ -276,13 +276,19 @@ public class BootJavaInterop {
         }
 
         STable protoSt = gc.BOOTJava.st;
-        SixModelObject freshType = protoSt.REPR.type_object_for(tc, protoSt.HOW);
+        SixModelObject freshType = protoSt.REPR.type_object_for(tc, computeHOW(tc, klass.getName()));
         freshType.st.MethodCache = names;
         freshType.st.ModeFlags |= STable.METHOD_CACHE_AUTHORITATIVE;
 
         hash.bind_key_boxed(tc, "/TYPE/", freshType);
 
         return hash;
+    }
+    
+    /** Produces a meta-object for a Java type. Override this to have something
+      * other than the BOOTJava one. */
+    protected SixModelObject computeHOW(ThreadContext tc, String name) {
+        return gc.BOOTJava.st.HOW;
     }
 
     /** Handles class construction for adaptors. */
