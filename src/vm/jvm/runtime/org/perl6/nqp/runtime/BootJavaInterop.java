@@ -222,7 +222,10 @@ public class BootJavaInterop {
         //} catch (java.io.IOException e) {
         //    e.printStackTrace();
         //}
-        cc.constructed = new ByteClassLoader(bits).findClass(cc.className.replace('/','.'));
+        cc.constructed = (cc.target == null
+                ? new ByteClassLoader(bits)
+                : new ByteClassLoader(bits, cc.target.getClassLoader())
+            ).findClass(cc.className.replace('/','.'));
         try {
             cc.constructed.getField("constants").set(null, cc.constants.toArray(new Object[0]));
         } catch (ReflectiveOperationException roe) {
