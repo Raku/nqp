@@ -600,6 +600,8 @@ public class BootJavaInterop {
             mv.visitLabel(done);
         }
         else {
+            mv.visitVarInsn(Opcodes.ALOAD, c.tcLoc);
+            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/Ops", "decont", Type.getMethodDescriptor(TYPE_SMO, TYPE_SMO, TYPE_TC));
             mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/BootJavaInterop$RuntimeSupport", "unboxJava", Type.getMethodDescriptor(TYPE_OBJ, TYPE_SMO));
             mv.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(what));
         }
