@@ -81,16 +81,24 @@ my module sprintf {
                     return $handler.int($number_representation);
                 }
             }
-            
-            my $result;
-            if $number_representation > 0 {
-                $result := nqp::floor_n($number_representation);
-            }
-            else {
-                $result := nqp::ceil_n($number_representation);
-            }
+
             my $knowhow := nqp::knowhow().new_type(:repr("P6bigint"));
-            nqp::box_i($result, $knowhow);
+
+            if nqp::eqaddr($number_representation.WHAT, 1.WHAT) {
+                nqp::box_i($number_representation, $knowhow);
+            } else {
+                if nqp::eqaddr($number_representation.WHAT, 1.01.WHAT)
+                || nqp::eqaddr($number_representation.WHAT, "1.01".WHAT) {
+                    if $number_representation > 0 {
+                        nqp::fromnum_I(nqp::floor_n($number_representation), $knowhow);
+                    }
+                    else {
+                        nqp::fromnum_I(nqp::ceil_n($number_representation), $knowhow);
+                    }
+                } else {
+                    $number_representation;
+                }
+            }
         }
 
         sub padding_char($st) {
