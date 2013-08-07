@@ -2426,6 +2426,7 @@ QAST::OperationsJAST.map_classlib_core_op('continuationinvoke', $TYPE_OPS, 'cont
 
 # JVM interop ops
 QAST::OperationsJAST.map_classlib_core_op('jvmeqaddr', $TYPE_OPS, 'jvmeqaddr', [$RT_OBJ, $RT_OBJ], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('jvmisnull', $TYPE_OPS, 'jvmisnull', [$RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('jvmbootinterop', $TYPE_OPS, 'jvmbootinterop', [], $RT_OBJ, :tc);
 
 class QAST::CompilerJAST {
