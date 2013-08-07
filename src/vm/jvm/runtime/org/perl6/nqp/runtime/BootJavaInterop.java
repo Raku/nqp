@@ -942,7 +942,7 @@ public class BootJavaInterop {
                 ret.put(m, methods.at_key_boxed(tc, l));
             else if (methods.exists_key(tc, s) != 0)
                 ret.put(m, methods.at_key_boxed(tc, s));
-            else
+            else if (!Modifier.isAbstract(iface.getModifiers()) || Modifier.isAbstract(m.getModifiers()))
                 throw ExceptionHandling.dieInternal(tc, "method hash has no definition for "+l);
         }
         return ret;
@@ -956,11 +956,18 @@ public class BootJavaInterop {
         cc.className = className;
         cc.cv = cw;
 
-        String superclass = "java/lang/Object";
+        String superclass;
         List<String> ifaces = new ArrayList< >();
-
-        cw.visit(Opcodes.V1_7, Opcodes.ACC_PUBLIC | Opcodes.ACC_SUPER, className, null,
-                "java/lang/Object", new String[] { Type.getInternalName(iface) });
+        if (Modifier.isInterface(iface.getModifiers())) {
+            cw.visit(Opcodes.V1_7, Opcodes.ACC_PUBLIC | Opcodes.ACC_SUPER, className, null,
+                    "java/lang/Object", new String[] { Type.getInternalName(iface) });
+            superclass = "java/lang/Object";
+        }
+        else {
+            superclass = Type.getInternalName(iface);
+            cw.visit(Opcodes.V1_7, Opcodes.ACC_PUBLIC | Opcodes.ACC_SUPER, className, null,
+                    superclass, new String[] { });
+        }
         cw.visitField(Opcodes.ACC_STATIC | Opcodes.ACC_PUBLIC, "constants", "[Ljava/lang/Object;", null, null).visitEnd();
         cw.visitField(Opcodes.ACC_PRIVATE, "methodMap", "Ljava/util/Map;", null, null).visitEnd();
 
