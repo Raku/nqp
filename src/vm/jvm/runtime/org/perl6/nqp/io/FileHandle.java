@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.ThreadContext;
 
-public class FileHandle implements IIOClosable, IIOSeekable, IIOEncodable, IIOSyncWritable {
+public class FileHandle implements IIOClosable, IIOSeekable, IIOEncodable, IIOSyncReadable, IIOSyncWritable {
     private FileChannel chan;
     private CharsetEncoder enc;
     private CharsetDecoder dec;
