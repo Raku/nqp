@@ -6,9 +6,7 @@ plan(4);
 my $x;
 sub savecapture($arg) {
   my $capture := nqp::savecapture();
-  $x := $capture;
-  my $ret := [$capture];
-  $ret;
+  $capture;
 }
 
 
@@ -22,9 +20,9 @@ foo(10,20,30);
 
 my $saved := savecapture(100);
 savecapture(200);
-ok(nqp::captureposarg($saved[0],0) == 100,"the capture returned by nqp::savecapture survives the next call to savecapture");
+ok(nqp::captureposarg($saved,0) == 100,"the capture returned by nqp::savecapture survives the next call to savecapture");
 
 sub invokee($arg) {
   ok($arg == 100,"nqp::invokewithcapture");
 }
-nqp::invokewithcapture(&invokee,$saved[0]);
+nqp::invokewithcapture(&invokee,$saved);
