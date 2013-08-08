@@ -46,6 +46,7 @@ import org.perl6.nqp.io.IIOEncodable;
 import org.perl6.nqp.io.IIOSeekable;
 import org.perl6.nqp.io.IIOSyncReadable;
 import org.perl6.nqp.io.IIOSyncWritable;
+import org.perl6.nqp.io.StandardWriteHandle;
 import org.perl6.nqp.jast2bc.JASTToJVMBytecode;
 import org.perl6.nqp.sixmodel.BoolificationSpec;
 import org.perl6.nqp.sixmodel.ContainerConfigurer;
@@ -340,14 +341,14 @@ public final class Ops {
     public static SixModelObject getstdout(ThreadContext tc) {
         SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType; 
         IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
-        h.os = tc.gc.out;
+        h.handle = new StandardWriteHandle(tc, tc.gc.out);
         return h;
     }
     
     public static SixModelObject getstderr(ThreadContext tc) {
         SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType; 
         IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
-        h.os = tc.gc.err;
+        h.handle = new StandardWriteHandle(tc, tc.gc.err);
         return h;
     }
     
