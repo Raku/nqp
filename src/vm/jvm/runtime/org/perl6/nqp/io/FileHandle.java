@@ -104,7 +104,8 @@ public class FileHandle implements IIOClosable, IIOSeekable, IIOEncodable, IIOSy
             // to be wary as UTF-8 chars may span a buffer boundary).
             ByteBuffer allBytes = ByteBuffer.allocate(total);
             for (ByteBuffer bb : buffers)
-                allBytes.put(bb);
+                allBytes.put(bb.array(), 0, bb.position());
+            allBytes.rewind();
             return dec.decode(allBytes).toString();
         } catch (IOException e) {
             throw ExceptionHandling.dieInternal(tc, e);
