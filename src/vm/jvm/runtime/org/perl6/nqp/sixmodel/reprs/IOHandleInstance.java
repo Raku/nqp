@@ -16,7 +16,10 @@ import java.util.Iterator;
 import org.perl6.nqp.sixmodel.SixModelObject;
 
 public class IOHandleInstance extends SixModelObject {
-	
+	/* Object that can perform I/O operations; will be checked for its
+     * capabilities by interface by ops and then invoked. */
+    public Object handle;
+    
     /* The input stream; if null, we can't read from this. */
     public InputStream is;
     
