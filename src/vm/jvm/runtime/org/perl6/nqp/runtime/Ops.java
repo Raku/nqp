@@ -3,14 +3,10 @@ package org.perl6.nqp.runtime;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -38,14 +34,14 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import jline.ConsoleReader;
-
 import org.perl6.nqp.io.FileHandle;
 import org.perl6.nqp.io.IIOClosable;
 import org.perl6.nqp.io.IIOEncodable;
+import org.perl6.nqp.io.IIOInteractive;
 import org.perl6.nqp.io.IIOSeekable;
 import org.perl6.nqp.io.IIOSyncReadable;
 import org.perl6.nqp.io.IIOSyncWritable;
+import org.perl6.nqp.io.StandardReadHandle;
 import org.perl6.nqp.io.StandardWriteHandle;
 import org.perl6.nqp.jast2bc.JASTToJVMBytecode;
 import org.perl6.nqp.sixmodel.BoolificationSpec;
@@ -334,7 +330,7 @@ public final class Ops {
     public static SixModelObject getstdin(ThreadContext tc) {
         SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType; 
         IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
-        h.is = tc.gc.in;
+        h.handle = new StandardReadHandle(tc, tc.gc.in);
         return h;
     }
     
@@ -446,26 +442,14 @@ public final class Ops {
         }
     }
     
-    /* We don't have proper readline support yet. */
     public static String readlineintfh(SixModelObject obj, String prompt, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
             IOHandleInstance h = (IOHandleInstance)obj;
-            if (h.is == null)
-                die_s("File handle is not opened for read", tc);
-            try {
-            	if (h.cr == null) {
-            		h.cr = new ConsoleReader(h.is, new OutputStreamWriter(tc.gc.out));
-            	}
-            	String line = h.cr.readLine(prompt);
-                if (line == null) {
-                	h.eof = true;
-                }
-                return line;
-            }
-            catch (IOException e) {
-                die_s(e.getMessage(), tc);
-                return null; /* Unreachable */
-            }
+            if (h.handle instanceof IIOInteractive)
+                return ((IIOInteractive)h.handle).readlineInteractive(tc, prompt);
+            else
+                throw ExceptionHandling.dieInternal(tc,
+                    "This handle does not support readline interactive");
         }
         else {
             throw ExceptionHandling.dieInternal(tc,
