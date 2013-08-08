@@ -2,7 +2,7 @@
 
 # check hash access methods
 
-plan(8);
+plan(10);
 
 my %h;
 
@@ -27,3 +27,6 @@ ok(%h{"foo"} eq "ok 7","curly braces and double quotes work");
 
 %h<a> := 0;
 ok(%h<a> eq '0',"we can fetch false values");
+
+ok(%h<c> eq '',"a missing key behaves properly when used as string");
+ok(%h<c> == 0,"a missing key behaves properly when used as number");
