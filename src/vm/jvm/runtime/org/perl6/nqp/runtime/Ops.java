@@ -32,9 +32,12 @@ import java.util.Map;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.perl6.nqp.io.AsyncFileHandle;
 import org.perl6.nqp.io.FileHandle;
+import org.perl6.nqp.io.IIOAsyncReadable;
 import org.perl6.nqp.io.IIOClosable;
 import org.perl6.nqp.io.IIOEncodable;
 import org.perl6.nqp.io.IIOInteractive;
@@ -270,6 +273,13 @@ public final class Ops {
         h.handle = new FileHandle(tc, path, mode);
         return h;
     }
+    
+    public static SixModelObject openasync(String path, String mode, ThreadContext tc) {
+        SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType; 
+        IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
+        h.handle = new AsyncFileHandle(tc, path, mode);
+        return h;
+    }
 
     public static long filereadable(String path, ThreadContext tc) {
         Path path_o;
@@ -485,6 +495,41 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc,
                 "eoffh requires an object with the IOHandle REPR");
         }
+    }
+    
+    public static SixModelObject slurpasync(SixModelObject obj, SixModelObject resultType,
+            SixModelObject done, SixModelObject error, ThreadContext tc) {
+        if (obj instanceof IOHandleInstance) {
+            IOHandleInstance h = (IOHandleInstance)obj;
+            if (h.handle instanceof IIOAsyncReadable)
+                ((IIOAsyncReadable)h.handle).slurp(tc, resultType, done, error);
+            else
+                throw ExceptionHandling.dieInternal(tc,
+                    "This handle does not support async slurp");
+        }
+        else {
+            die_s("slurpasync requires an object with the IOHandle REPR", tc);
+        }
+        return obj;
+    }
+    
+    public static SixModelObject linesasync(SixModelObject obj, SixModelObject resultType,
+            long chomp, SixModelObject queue, SixModelObject done, SixModelObject error,
+            ThreadContext tc) {
+        if (obj instanceof IOHandleInstance) {
+            IOHandleInstance h = (IOHandleInstance)obj;
+            if (h.handle instanceof IIOAsyncReadable)
+                ((IIOAsyncReadable)h.handle).lines(tc, resultType, chomp != 0,
+                    (LinkedBlockingQueue)((JavaObjectWrapper)queue).theObject,
+                    done, error);
+            else
+                throw ExceptionHandling.dieInternal(tc,
+                    "This handle does not support async lines");
+        }
+        else {
+            die_s("linesasync requires an object with the IOHandle REPR", tc);
+        }
+        return obj;
     }
     
     public static SixModelObject closefh(SixModelObject obj, ThreadContext tc) {

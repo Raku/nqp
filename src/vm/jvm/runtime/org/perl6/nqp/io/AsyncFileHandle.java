@@ -11,11 +11,13 @@ import java.nio.charset.CharsetEncoder;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.ThreadContext;
+import org.perl6.nqp.sixmodel.SixModelObject;
 
-public class AsyncFileHandle implements IIOClosable, IIOEncodable {
+public class AsyncFileHandle implements IIOClosable, IIOEncodable, IIOAsyncReadable {
     private AsynchronousFileChannel chan;
     private CharsetEncoder enc;
     private CharsetDecoder dec;
@@ -55,5 +57,16 @@ public class AsyncFileHandle implements IIOClosable, IIOEncodable {
     public void setEncoding(ThreadContext tc, Charset cs) {
         enc = cs.newEncoder();
         dec = cs.newDecoder();
+    }
+    
+    public void slurp(ThreadContext tc, SixModelObject Str, SixModelObject done,
+                      SixModelObject error) {
+        throw new RuntimeException("Async slurp NYI");
+    }
+    
+    public void lines(ThreadContext tc, SixModelObject Str, boolean chomp,
+                      LinkedBlockingQueue queue, SixModelObject done,
+                      SixModelObject error) {
+        throw new RuntimeException("Async lines NYI");
     }
 }
