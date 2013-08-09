@@ -1100,7 +1100,7 @@ public final class Ops {
         case CallSiteDescriptor.ARG_STR:
             return coerce_s2i((String)args[idx]);
         case CallSiteDescriptor.ARG_OBJ:
-            return ((SixModelObject)args[idx]).get_int(cf.tc);
+            return decont(((SixModelObject)args[idx]), cf.tc).get_int(cf.tc);
         default:
             throw ExceptionHandling.dieInternal(cf.tc, "Error in argument processing");
         }
@@ -1114,7 +1114,7 @@ public final class Ops {
         case CallSiteDescriptor.ARG_STR:
             return coerce_s2n((String)args[idx]);
         case CallSiteDescriptor.ARG_OBJ:
-            return ((SixModelObject)args[idx]).get_num(cf.tc);
+            return decont(((SixModelObject)args[idx]), cf.tc).get_num(cf.tc);
         default:
             throw ExceptionHandling.dieInternal(cf.tc, "Error in argument processing");
         }
@@ -1128,7 +1128,7 @@ public final class Ops {
         case CallSiteDescriptor.ARG_NUM:
             return coerce_n2s((double)args[idx]);
         case CallSiteDescriptor.ARG_OBJ:
-            return ((SixModelObject)args[idx]).get_str(cf.tc);
+            return decont(((SixModelObject)args[idx]), cf.tc).get_str(cf.tc);
         default:
             throw ExceptionHandling.dieInternal(cf.tc, "Error in argument processing");
         }
