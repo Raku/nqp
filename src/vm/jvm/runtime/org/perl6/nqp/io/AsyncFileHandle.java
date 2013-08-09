@@ -65,6 +65,7 @@ public class AsyncFileHandle implements IIOClosable, IIOEncodable, IIOAsyncReada
     private class SlurpState {
         public ByteBuffer bb;
         public long expected;
+        public int position;
     }
     private static final CallSiteDescriptor slurpResultCSD = new CallSiteDescriptor(
         new byte[] { CallSiteDescriptor.ARG_OBJ }, null);
@@ -93,7 +94,7 @@ public class AsyncFileHandle implements IIOClosable, IIOEncodable, IIOAsyncReada
                     }
                     else {
                         /* Need to read some more. */
-                        chan.read(ss.bb, 0, ss, this);
+                        chan.read(ss.bb, ss.bb.position(), ss, this);
                     }
                 }
                 
@@ -113,9 +114,121 @@ public class AsyncFileHandle implements IIOClosable, IIOEncodable, IIOAsyncReada
         }
     }
     
-    public void lines(ThreadContext tc, SixModelObject Str, boolean chomp,
-                      LinkedBlockingQueue queue, SixModelObject done,
-                      SixModelObject error) {
-        throw new RuntimeException("Async lines NYI");
+    private static final CallSiteDescriptor linesDoneCSD = new CallSiteDescriptor(
+        new byte[] { }, null);
+    private static final CallSiteDescriptor linesErrorCSD = new CallSiteDescriptor(
+        new byte[] { CallSiteDescriptor.ARG_OBJ }, null);
+    private class LinesState {
+        public ArrayList<ByteBuffer> lineChunks;
+        public ByteBuffer readBuffer;
+        public int total;
+        public int position;
+    }
+    public void lines(final ThreadContext tc, final SixModelObject Str,
+                      final boolean chomp, final LinkedBlockingQueue queue,
+                      final SixModelObject done, final SixModelObject error) {
+        final LinesState ls = new LinesState();
+        ls.lineChunks = new ArrayList<ByteBuffer>();
+        ls.readBuffer = ByteBuffer.allocate(32768);
+        ls.total = 0;
+        ls.position = 0;
+        
+        final CompletionHandler<Integer, LinesState> ch = new CompletionHandler<Integer, LinesState>() {
+            public void completed(Integer bytes, LinesState ss) {
+                try {
+                    ThreadContext curTC = tc.gc.getCurrentThreadContext();
+                    
+                    /* If we're read all, send done notification. */
+                    if (bytes == -1) {
+                        Ops.invokeDirect(curTC, done, linesDoneCSD, new Object[] { });
+                        return;
+                    }
+                    
+                    /* Flip the just-read buffer. */
+                    ss.readBuffer.flip();
+                    
+                    /* Look for lines. */
+                    while (true) {
+                        /* Hunt a line boundary. */
+                        boolean foundLine = false;
+                        int start = ss.readBuffer.position();
+                        int end = start;
+                        while (!foundLine && end < ss.readBuffer.limit()) {
+                            if (ss.readBuffer.get(end) == '\n')
+                                foundLine = true;
+                            end++;
+                        }
+                        
+                        /* Copy what we found into the results. */
+                        byte[] lineBytes = new byte[end - start];
+                        ss.readBuffer.get(lineBytes);
+                        ss.lineChunks.add(ByteBuffer.wrap(lineBytes));
+                        ss.total += lineBytes.length;
+                        
+                        /* If we found a line... */
+                        if (foundLine) {
+                            /* Decode. */
+                            String decoded = ss.lineChunks.size() == 1
+                                ? dec.decode(ss.lineChunks.get(0)).toString()
+                                : decodeBuffers(ss.lineChunks, ss.total);
+                            
+                            /* Chomp if needed. */
+                            if (chomp) {
+                                int decLen = decoded.length();
+                                int cutChars = 0;
+                                if (decLen >= 1 && decoded.charAt(decLen - 1) == '\n') {
+                                    cutChars++;
+                                    if (decLen >= 2 && decoded.charAt(decLen - 2) == '\r')
+                                        cutChars++;
+                                }
+                                if (cutChars > 0)
+                                    decoded = decoded.substring(0, decLen - cutChars);
+                            }
+                            
+                            /* Box and enqueue. */
+                            queue.put(Ops.box_s(decoded, Str, curTC));
+                            
+                            /* Reset for next line. */
+                            ss.lineChunks.clear();
+                            ss.total = 0;
+                        }
+                        else {
+                            /* Couldn't find an end of line, stop looping. */
+                            break;
+                        }
+                    }
+                    
+                    /* Read more. */
+                    ls.position += bytes;
+                    ls.readBuffer = ByteBuffer.allocate(32768);
+                    chan.read(ls.readBuffer, ls.position, ls, this);
+                } catch (IOException e) {
+                    failed(e, ls);
+                } catch (InterruptedException e) {
+                    failed(e, ls);
+                }
+            }
+    
+            private String decodeBuffers(ArrayList<ByteBuffer> buffers, int total) throws IOException {
+                // Copy to a single buffer and decode (could be smarter, but need
+                // to be wary as UTF-8 chars may span a buffer boundary).
+                ByteBuffer allBytes = ByteBuffer.allocate(total);
+                for (ByteBuffer bb : buffers)
+                    allBytes.put(bb.array(), 0, bb.limit());
+                allBytes.rewind();
+                return dec.decode(allBytes).toString();
+            }
+            
+            public void failed(Throwable exc, LinesState ss) {
+                /* Box error. */
+                ThreadContext curTC = tc.gc.getCurrentThreadContext();
+                SixModelObject boxed = Ops.box_s(exc.toString(), Str, curTC);
+                
+                /* Call error handler. */
+                Ops.invokeDirect(curTC, error, linesErrorCSD, new Object[] { boxed });
+            }
+        };
+        
+        chan.read(ls.readBuffer, 0, ls, ch);
     }
 }
