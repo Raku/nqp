@@ -44,7 +44,7 @@ public class StandardWriteHandle implements IIOClosable, IIOSeekable, IIOEncodab
         try {
             ByteBuffer buffer = enc.encode(CharBuffer.wrap(s));
             byte[] bytes = buffer.array();
-            ps.write(bytes, 0, bytes.length);
+            ps.write(bytes, 0, buffer.limit());
         } catch (IOException e) {
             throw ExceptionHandling.dieInternal(tc, e);
         }
