@@ -178,9 +178,10 @@ public class FileHandle implements IIOClosable, IIOSeekable, IIOEncodable, IIOSy
     public void print(ThreadContext tc, String s) {
         try {
             ByteBuffer buffer = enc.encode(CharBuffer.wrap(s));
-            while (buffer.position() > 0) {
-                buffer.flip();
-                chan.write(buffer);
+            int toWrite = buffer.limit();
+            int written = 0;
+            while (written < toWrite) {
+                written += chan.write(buffer);
                 buffer.compact();
             }
         } catch (IOException e) {
