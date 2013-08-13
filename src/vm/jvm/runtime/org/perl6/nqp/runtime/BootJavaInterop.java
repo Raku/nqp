@@ -1,5 +1,6 @@
 package org.perl6.nqp.runtime;
 
+import java.io.File;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -7,6 +8,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -41,10 +45,14 @@ public class BootJavaInterop {
 
     /** The global context that this interop factory is used for. */
     protected GlobalContext gc;
+    
+    /** If we need to load stuff from a JAR, the class loader for doing so. */
+    private HashMap<String, URLClassLoader> jarClassLoaders;
 
     /** Create a new interop object for a context. */
     public BootJavaInterop(GlobalContext gc) {
         this.gc = gc;
+        this.jarClassLoaders = new HashMap<String, URLClassLoader>();
     }
 
     private static class InteropInfo {
@@ -90,6 +98,24 @@ public class BootJavaInterop {
             return getSTableForClass(Class.forName(name)).WHAT;
         } catch (ClassNotFoundException e) {
             throw ExceptionHandling.dieInternal(gc.getCurrentThreadContext(), e);
+        }
+    }
+    public SixModelObject typeForNameFromJAR(String name, String JAR) {
+        try {
+            URLClassLoader cl = jarClassLoaders.get(JAR);
+            if (cl == null) {
+                URL url = new URL("jar:" + new File(JAR).toURI().toURL() + "!/");
+                cl = new URLClassLoader(new URL[] { url });
+                jarClassLoaders.put(JAR, cl);
+            }
+            return getSTableForClass(Class.forName(name, true, cl)).WHAT;
+        } catch (ClassNotFoundException e) {
+            throw ExceptionHandling.dieInternal(gc.getCurrentThreadContext(), e);
+        } catch (MalformedURLException e) {
+            throw ExceptionHandling.dieInternal(gc.getCurrentThreadContext(), e);
+        } catch (Throwable e) {
+            e.printStackTrace();
+            throw e;
         }
     }
 
@@ -196,7 +222,10 @@ public class BootJavaInterop {
         //} catch (java.io.IOException e) {
         //    e.printStackTrace();
         //}
-        cc.constructed = new ByteClassLoader(bits).findClass(cc.className.replace('/','.'));
+        cc.constructed = (cc.target == null
+                ? new ByteClassLoader(bits)
+                : new ByteClassLoader(bits, cc.target.getClassLoader())
+            ).findClass(cc.className.replace('/','.'));
         try {
             cc.constructed.getField("constants").set(null, cc.constants.toArray(new Object[0]));
         } catch (ReflectiveOperationException roe) {
@@ -247,13 +276,19 @@ public class BootJavaInterop {
         }
 
         STable protoSt = gc.BOOTJava.st;
-        SixModelObject freshType = protoSt.REPR.type_object_for(tc, protoSt.HOW);
+        SixModelObject freshType = protoSt.REPR.type_object_for(tc, computeHOW(tc, klass.getName()));
         freshType.st.MethodCache = names;
         freshType.st.ModeFlags |= STable.METHOD_CACHE_AUTHORITATIVE;
 
         hash.bind_key_boxed(tc, "/TYPE/", freshType);
 
         return hash;
+    }
+    
+    /** Produces a meta-object for a Java type. Override this to have something
+      * other than the BOOTJava one. */
+    protected SixModelObject computeHOW(ThreadContext tc, String name) {
+        return gc.BOOTJava.st.HOW;
     }
 
     /** Handles class construction for adaptors. */
@@ -565,6 +600,8 @@ public class BootJavaInterop {
             mv.visitLabel(done);
         }
         else {
+            mv.visitVarInsn(Opcodes.ALOAD, c.tcLoc);
+            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/Ops", "decont", Type.getMethodDescriptor(TYPE_SMO, TYPE_SMO, TYPE_TC));
             mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/BootJavaInterop$RuntimeSupport", "unboxJava", Type.getMethodDescriptor(TYPE_OBJ, TYPE_SMO));
             mv.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(what));
         }
@@ -905,7 +942,7 @@ public class BootJavaInterop {
                 ret.put(m, methods.at_key_boxed(tc, l));
             else if (methods.exists_key(tc, s) != 0)
                 ret.put(m, methods.at_key_boxed(tc, s));
-            else
+            else if (!Modifier.isAbstract(iface.getModifiers()) || Modifier.isAbstract(m.getModifiers()))
                 throw ExceptionHandling.dieInternal(tc, "method hash has no definition for "+l);
         }
         return ret;
@@ -919,11 +956,18 @@ public class BootJavaInterop {
         cc.className = className;
         cc.cv = cw;
 
-        String superclass = "java/lang/Object";
+        String superclass;
         List<String> ifaces = new ArrayList< >();
-
-        cw.visit(Opcodes.V1_7, Opcodes.ACC_PUBLIC | Opcodes.ACC_SUPER, className, null,
-                "java/lang/Object", new String[] { Type.getInternalName(iface) });
+        if (Modifier.isInterface(iface.getModifiers())) {
+            cw.visit(Opcodes.V1_7, Opcodes.ACC_PUBLIC | Opcodes.ACC_SUPER, className, null,
+                    "java/lang/Object", new String[] { Type.getInternalName(iface) });
+            superclass = "java/lang/Object";
+        }
+        else {
+            superclass = Type.getInternalName(iface);
+            cw.visit(Opcodes.V1_7, Opcodes.ACC_PUBLIC | Opcodes.ACC_SUPER, className, null,
+                    superclass, new String[] { });
+        }
         cw.visitField(Opcodes.ACC_STATIC | Opcodes.ACC_PUBLIC, "constants", "[Ljava/lang/Object;", null, null).visitEnd();
         cw.visitField(Opcodes.ACC_PRIVATE, "methodMap", "Ljava/util/Map;", null, null).visitEnd();
 

@@ -96,7 +96,7 @@ class QAST::Node {
             my $escaped_node := nqp::escape(self.node);
             nqp::push(@chunks, nqp::substr($escaped_node, 0, 50));
             if (nqp::chars($escaped_node) > 50) {
-                nqp::push(@chunks, "…");
+                nqp::push(@chunks, "...");
             }
         }
         nqp::push(@chunks, "\n");

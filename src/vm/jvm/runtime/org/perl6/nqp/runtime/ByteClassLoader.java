@@ -7,6 +7,11 @@ public class ByteClassLoader extends ClassLoader {
         this.bytes = bytes;
     }
     
+    public ByteClassLoader(byte[] bytes, ClassLoader parent) {
+        super(parent);
+        this.bytes = bytes;
+    }
+    
     public Class<?> findClass(String name) {
         return defineClass(name, this.bytes, 0, this.bytes.length);
     }
