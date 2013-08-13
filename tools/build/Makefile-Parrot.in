@@ -168,6 +168,7 @@ NQP_SOURCES = \
   src/NQP/Grammar.nqp \
   src/vm/parrot/NQP/Ops.nqp \
   src/NQP/Actions.nqp \
+  src/NQP/Optimizer.nqp \
   src/NQP/Compiler.nqp \
 
 NQP_MO_SOURCES = src/how/Archetypes.nqp src/how/RoleToRoleApplier.nqp \

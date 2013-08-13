@@ -130,6 +130,7 @@ NQP_SOURCES  = \
   src/NQP/World.nqp \
   src/NQP/Grammar.nqp \
   src/vm/jvm/NQP/Ops.nqp \
+  src/NQP/Optimizer.nqp \
   src/NQP/Actions.nqp \
   src/NQP/Compiler.nqp \
 

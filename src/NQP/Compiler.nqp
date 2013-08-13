@@ -1,4 +1,9 @@
 class NQP::Compiler is HLL::Compiler {
+    method optimize($past, *%adverbs) {
+        %adverbs<optimize> eq 'off'
+            ?? $past
+            !! NQP::Optimizer.new.optimize($past, |%adverbs)
+    }
 }
 
 # Create and configure compiler object.
@@ -7,6 +12,8 @@ $nqpcomp.language('nqp');
 $nqpcomp.parsegrammar(NQP::Grammar);
 $nqpcomp.parseactions(NQP::Actions);
 hll-config($nqpcomp.config);
+
+$nqpcomp.addstage('optimize', :after<ast>);
 
 # Add extra command line options.
 my @clo := $nqpcomp.commandline_options();
