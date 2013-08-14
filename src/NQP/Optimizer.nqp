@@ -58,7 +58,6 @@ class NQP::Optimizer {
             } elsif nqp::istype($node, QAST::Var) && $node.scope eq 'lexical' {
                 my %sym := self.find_lex($node.name);
                 if nqp::existskey(%sym, 'type') && nqp::objprimspec(%sym<type>) == 1 {
-                    say("var " ~ $node.name ~ " is native int.");
                     return 1
                 }
             }
@@ -78,15 +77,8 @@ class NQP::Optimizer {
                     my $newopn := $asm ~ "_i";
                     $op.op($newopn);
                     $op.returns(self.find_sym("int"));
-                    say($op.dump);
-                    say("transformed!");
-                    say("");
                 } else {
                     $op.returns(self.find_sym("num"));
-                    say(returns_int($op[0]) ~ " / " ~ returns_int($op[1]));
-                    say($op.dump);
-                    say("not transformed!");
-                    say("");
                 }
             } elsif $typeinfo eq '_i' {
                 $op.returns(self.find_sym("num"));
@@ -105,8 +97,6 @@ class NQP::Optimizer {
                 }
             }
             CATCH {
-                say("too bad, could not do the optimisation");
-                say($op.dump);
             }
         }
 
