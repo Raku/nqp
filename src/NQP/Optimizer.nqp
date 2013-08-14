@@ -45,7 +45,9 @@ class NQP::Optimizer {
                 return 1
             }
             if nqp::istype($node, QAST::Op) {
-                my $typeinfo := nqp::substr($node.op, nqp::chars($node.op) - 2, 2);
+                my $typeinfo := nqp::chars($node.op) >= 2
+                                ?? nqp::substr($node.op, nqp::chars($node.op) - 2, 2)
+                                !! "";
                 if $typeinfo eq "_i" {
                     return 1
                 } elsif $node.op eq 'chars' || $node.op eq 'ord' {
@@ -70,7 +72,9 @@ class NQP::Optimizer {
         }
         self.visit_children($op);
 
-        my $typeinfo := nqp::substr($op.op, nqp::chars($op.op) - 2, 2);
+        my $typeinfo := nqp::chars($op.op) >= 2
+                        ?? nqp::substr($op.op, nqp::chars($op.op) - 2, 2)
+                        !! "";
         my $asm := nqp::substr($op.op, 0, 3);
 
         try {
