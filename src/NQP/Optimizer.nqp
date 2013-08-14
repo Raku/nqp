@@ -56,13 +56,7 @@ class NQP::Optimizer {
             } elsif nqp::istype($node, QAST::IVal) {
                 return 1
             } elsif nqp::istype($node, QAST::Var) && $node.scope eq 'lexical' {
-                my %sym;
-                try {
-                    my %sym := self.find_lex($node.name);
-                    CATCH {
-                        say("could not find lexpad entry for " ~ $node.name);
-                    }
-                }
+                my %sym := self.find_lex($node.name);
                 if nqp::existskey(%sym, 'type') && nqp::objprimspec(%sym<type>) == 1 {
                     say("var " ~ $node.name ~ " is native int.");
                     return 1
