@@ -3,7 +3,7 @@ class NQP::Optimizer {
 
     method optimize($ast, *%adverbs) {
         @!block_stack := [$ast[0]];
-        self.visit_children($ast[0]);
+        self.visit_children($ast);
         $ast;
     }
 
@@ -50,7 +50,7 @@ class NQP::Optimizer {
                                 !! "";
                 if $typeinfo eq "_i" {
                     return 1
-                } elsif $node.op eq 'chars' || $node.op eq 'ord' {
+                } elsif $node.op eq 'chars' || $node.op eq 'ord' || $node.op eq 'elems' {
                     return 1
                 }
             } elsif nqp::istype($node, QAST::IVal) {
@@ -75,16 +75,16 @@ class NQP::Optimizer {
             if $typeinfo eq '_n' && ($asm eq 'add' || $asm eq 'sub' || $asm eq 'mul') {
                 my $newopn := $asm ~ "_i";
                 if returns_int($op[0]) && returns_int($op[1]) {
-                    my $newopn := nqp::substr($op.op, 0, 3) ~ "_i";
-                    $op.name($newopn);
+                    my $newopn := $asm ~ "_i";
+                    $op.op($newopn);
                     $op.returns(self.find_sym("int"));
-                    say($op.op ~ " " ~ $newopn ~ " " ~ $op.dump);
+                    say($op.dump);
                     say("transformed!");
                     say("");
                 } else {
                     $op.returns(self.find_sym("num"));
                     say(returns_int($op[0]) ~ " / " ~ returns_int($op[1]));
-                    say($op.op ~ " " ~ $newopn ~ " " ~ $op.dump);
+                    say($op.dump);
                     say("not transformed!");
                     say("");
                 }
