@@ -1,5 +1,6 @@
 my module sprintf {
     my @handlers;
+    my $assert_used_args;
 
     grammar Syntax {
         token TOP {
@@ -18,21 +19,25 @@ my module sprintf {
         }
 
         proto token directive { <...> }
-        token directive:sym<b> { '%' <flags>* <size>? [ '.' <precision=.size> ]? $<sym>=<[bB]> }
-        token directive:sym<c> { '%' <flags>* <size>? <sym> }
-        token directive:sym<d> { '%' <flags>* <size>? $<sym>=<[di]> }
-        token directive:sym<e> { '%' <flags>* <size>? [ '.' <precision=.size> ]? $<sym>=<[eE]> }
-        token directive:sym<f> { '%' <flags>* <size>? [ '.' <precision=.size> ]? $<sym>=<[fF]> }
-        token directive:sym<g> { '%' <flags>* <size>? [ '.' <precision=.size> ]? $<sym>=<[gG]> }
-        token directive:sym<o> { '%' <flags>* <size>? [ '.' <precision=.size> ]? <sym> }
-        token directive:sym<s> { '%' <flags>* <size>? <sym> }
-        token directive:sym<u> { '%' <flags>* <size>? <sym> }
-        token directive:sym<x> { '%' <flags>* <size>? [ '.' <precision=.size> ]? $<sym>=<[xX]> }
+        token directive:sym<b> { '%' <idx>? <flags>* <size>? [ '.' <precision=.size> ]? $<sym>=<[bB]> }
+        token directive:sym<c> { '%' <idx>? <flags>* <size>? <sym> }
+        token directive:sym<d> { '%' <idx>? <flags>* <size>? [ '.' <precision=.size> ]? $<sym>=<[di]> }
+        token directive:sym<e> { '%' <idx>? <flags>* <size>? [ '.' <precision=.size> ]? $<sym>=<[eE]> }
+        token directive:sym<f> { '%' <idx>? <flags>* <size>? [ '.' <precision=.size> ]? $<sym>=<[fF]> }
+        token directive:sym<g> { '%' <idx>? <flags>* <size>? [ '.' <precision=.size> ]? $<sym>=<[gG]> }
+        token directive:sym<o> { '%' <idx>? <flags>* <size>? [ '.' <precision=.size> ]? <sym> }
+        token directive:sym<s> { '%' <idx>? <flags>* <size>? [ '.' <precision=.size> ]? <sym> }
+        token directive:sym<u> { '%' <idx>? <flags>* <size>? <sym> }
+        token directive:sym<x> { '%' <idx>? <flags>* <size>? [ '.' <precision=.size> ]? $<sym>=<[xX]> }
 
         proto token escape { <...> }
         token escape:sym<%> { '%' <flags>* <size>? <sym> }
         
         token literal { <-[%]>+ }
+        
+        token idx {
+            $<param_index>=[\d+] '$'
+        }
         
         token flags {
             | $<space> = ' '
@@ -52,7 +57,7 @@ my module sprintf {
             my @statements;
             @statements.push( $_.ast ) for $<statement>;
 
-            if $*ARGS_USED < +@*ARGS_HAVE {
+            if $assert_used_args && $*ARGS_USED < +@*ARGS_HAVE {
                 nqp::die("Too few directives: found $*ARGS_USED,"
                 ~ " fewer than the " ~ +@*ARGS_HAVE ~ " arguments after the format string")
             }
@@ -71,8 +76,14 @@ my module sprintf {
             nqp::join('', @strings);
         }
 
-        sub next_argument() {
-            @*ARGS_HAVE[$*ARGS_USED++]
+        sub next_argument($/) {
+            if $<idx> {
+                $assert_used_args := 0;
+                @*ARGS_HAVE[$<idx>.ast]
+            }
+            else {
+                @*ARGS_HAVE[$*ARGS_USED++]
+            }
         }
 
         sub intify($number_representation) {
@@ -132,7 +143,7 @@ my module sprintf {
         }
 
         method directive:sym<b>($/) {
-            my $int := intify(next_argument());
+            my $int := intify(next_argument($/));
             $int := nqp::base_I($int, 2);
             my $pre := ($<sym> eq 'b' ?? '0b' !! '0B') if $int && has_flag($/, 'hash');
             if nqp::chars($<precision>) {
@@ -145,17 +156,18 @@ my module sprintf {
             make $int;
         }
         method directive:sym<c>($/) {
-            make nqp::chr(next_argument())
+            make nqp::chr(next_argument($/))
         }
 
         method directive:sym<d>($/) {
-            my $int := intify(next_argument());
+            my $int := intify(next_argument($/));
             my $knowhow := nqp::knowhow().new_type(:repr("P6bigint"));
             my $pad := padding_char($/);
             my $sign := nqp::islt_I($int, nqp::box_i(0, $knowhow)) ?? '-'
                 !! has_flag($/, 'plus')
                     ?? '+' !! '';
             $int := nqp::tostr_I(nqp::abs_I($int, $knowhow));
+            $int := nqp::substr($int, 0, $<precision>.ast) if nqp::chars($<precision>);
             if $pad ne ' ' && $<size> {
                 $int := $sign ~ infix_x($pad, $<size>.ast - nqp::chars($int) - 1) ~ $int;
             }
@@ -243,28 +255,28 @@ my module sprintf {
         }
 
         method directive:sym<e>($/) {
-            my $float := next_argument();
+            my $float := next_argument($/);
             my $precision := $<precision> ?? $<precision>.ast !! 6;
             my $pad := padding_char($/);
             my $size := $<size> ?? $<size>.ast !! 0;
             make scientific($float, $<sym>, $precision, $size, $pad);
         }
         method directive:sym<f>($/) {
-            my $int := next_argument();
+            my $int := next_argument($/);
             my $precision := $<precision> ?? $<precision>.ast !! 6;
             my $pad := padding_char($/);
             my $size := $<size> ?? $<size>.ast !! 0;
             make fixed-point($int, $precision, $size, $pad);
         }
         method directive:sym<g>($/) {
-            my $float := next_argument();
+            my $float := next_argument($/);
             my $precision := $<precision> ?? $<precision>.ast !! 6;
             my $pad := padding_char($/);
             my $size := $<size> ?? $<size>.ast !! 0;
             make shortest($float, $<sym> eq 'G' ?? 'E' !! 'e', $precision, $size, $pad);
         }
         method directive:sym<o>($/) {
-            my $int := intify(next_argument());
+            my $int := intify(next_argument($/));
             $int := nqp::base_I($int, 8);
             my $pre := '0' if $int && has_flag($/, 'hash');
             if nqp::chars($<precision>) {
@@ -278,12 +290,14 @@ my module sprintf {
         }
 
         method directive:sym<s>($/) {
-            make next_argument()
+            my $string := next_argument($/);
+            $string := nqp::substr($string, 0, $<precision>.ast) if nqp::chars($<precision>);
+            make $string
         }
         # XXX: Should we emulate an upper limit, like 2**64?
         # XXX: Should we emulate p5 behaviour for negative values passed to %u ?
         method directive:sym<u>($/) {
-            my $int := intify(next_argument());
+            my $int := intify(next_argument($/));
             if $int < 0 {
                     my $err := nqp::getstderr();
                     nqp::printfh($err, "negative value '" 
@@ -298,7 +312,7 @@ my module sprintf {
             make nqp::tostr_I($int)
         }
         method directive:sym<x>($/) {
-            my $int := intify(next_argument());
+            my $int := intify(next_argument($/));
             $int := nqp::base_I($int, 16);
             my $pre := '0X' if $int && has_flag($/, 'hash');
             if nqp::chars($<precision>) {
@@ -319,8 +333,14 @@ my module sprintf {
             make ~$/
         }
 
+        method idx($/) {
+            my $index := $<param_index> - 1;
+            nqp::die("Parameter index starts to count at 1 but 0 was passed") if $index < 0;
+            make $index
+        }
+
         method size($/) {
-            make $<star> ?? next_argument() !! ~$/
+            make $<star> ?? next_argument({}) !! ~$/
         }
     }
 
@@ -328,6 +348,7 @@ my module sprintf {
 
     sub sprintf($format, @arguments) {
         my @*ARGS_HAVE := @arguments;
+        $assert_used_args := 1;
         return Syntax.parse( $format, :actions($actions) ).ast;
     }
 
