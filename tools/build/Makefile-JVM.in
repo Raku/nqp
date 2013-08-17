@@ -178,13 +178,15 @@ install: all
 	$(CHMOD) 0755 $(BIN_DIR)/eval-client.pl
 	$(PERL) tools/build/install-jvm-runner.pl $(PREFIX)
 
-$(RUNTIME_JAR): $(RUNTIME_JAVAS)
+$(RUNTIME_JAR): $(RUNTIME_JAVAS) tools/build/gen-jvm-properties.pl
 	$(PERL) -MExtUtils::Command -e mkpath bin
 	$(JAVAC) -source 1.7 -cp $(THIRDPARTY_JARS) -g -d bin $(RUNTIME_JAVAS)
+	$(PERL) tools/build/gen-jvm-properties.pl . $(THIRDPARTY_JARS) > jvmconfig.properties
+	$(PERL) tools/build/gen-jvm-properties.pl @prefix@ $(THIRDPARTY_JARS) > bin/jvmconfig.properties
 	$(JAR) cf0 nqp-runtime.jar -C bin/ .
 
 clean:
-	$(PERL) -MExtUtils::Command -e rm_rf *.class *.jar src/stage1 src/stage2 bin nqp nqp.bat
+	$(PERL) -MExtUtils::Command -e rm_rf *.class *.jar src/stage1 src/stage2 bin nqp nqp.bat jvmconfig.properties
 
 $(STAGE0): $(RUNTIME_JAR)
 

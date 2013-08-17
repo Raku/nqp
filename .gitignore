@@ -46,3 +46,4 @@ nqp-runtime.jar
 *.jar
 /nqp.bat
 /nqp.sh
+/jvmconfig.properties
