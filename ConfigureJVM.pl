@@ -6,6 +6,7 @@ use strict;
 use warnings;
 use Text::ParseWords;
 use Getopt::Long;
+use File::Spec;
 use Cwd;
 use lib "tools/lib";
 use NQP::Configure qw(fill_template_file fill_template_text
@@ -32,6 +33,7 @@ MAIN: {
     }
 
     my $prefix = $options{'prefix'} || cwd().'/install';
+    $prefix    = File::Spec->rel2abs($prefix);
 
     # Save options in config.status
     unlink('config.status');
