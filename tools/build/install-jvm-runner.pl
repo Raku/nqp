@@ -19,7 +19,7 @@ if ($^O eq 'MSWin32') {
     my $install_to = File::Spec->catfile($prefix, 'bin', 'nqp.bat');
     open my $fh, ">", $install_to
         or die "Could not open $install_to: $!";
-    print $fh '@java -Xbootclasspath/a:$jar_dir\\nqp-runtime.jar;' .
+    print $fh '@java -Xmx512m -Xbootclasspath/a:$jar_dir\\nqp-runtime.jar;' .
               "$jar_dir\\asm-4.1.jar;$jar_dir\\jline-1.0.jar;$lib_dir\\nqp.jar -cp $lib_dir nqp %*\n";
     close $fh
         or die "Could not close $install_to: $!";
@@ -29,7 +29,7 @@ else {
     open my $fh, ">", $install_to
         or die "Could not open $install_to: $!";
     print $fh "#!/bin/sh\n";
-    print $fh "exec java -Xbootclasspath/a:$jar_dir/nqp-runtime.jar:" .
+    print $fh "exec java -Xmx512m -Xbootclasspath/a:$jar_dir/nqp-runtime.jar:" .
               "$jar_dir/asm-4.1.jar:$jar_dir/jline-1.0.jar:$lib_dir/nqp.jar -cp $lib_dir nqp \"\$\@\"\n";
     close $fh
         or die "Could not close $install_to: $!";
