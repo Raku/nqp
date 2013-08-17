@@ -5,7 +5,7 @@ class HLL::Backend::JVM {
     }
     
     method config() {
-        nqp::hash()
+        nqp::jvmgetconfig()
     }
     
     method force_gc() {

@@ -1,23 +1,22 @@
 package org.perl6.nqp.runtime;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.DirectoryStream;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
@@ -29,7 +28,6 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Iterator;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -73,9 +71,9 @@ import org.perl6.nqp.sixmodel.reprs.P6bigintInstance;
 import org.perl6.nqp.sixmodel.reprs.SCRefInstance;
 import org.perl6.nqp.sixmodel.reprs.VMArray;
 import org.perl6.nqp.sixmodel.reprs.VMArrayInstance;
-import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_i8;
 import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_i16;
 import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_i32;
+import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_i8;
 import org.perl6.nqp.sixmodel.reprs.VMExceptionInstance;
 import org.perl6.nqp.sixmodel.reprs.VMHash;
 import org.perl6.nqp.sixmodel.reprs.VMHashInstance;
@@ -5033,5 +5031,23 @@ public final class Ops {
 
     public static SixModelObject jvmbootinterop(ThreadContext tc) {
         return BootJavaInterop.RuntimeSupport.boxJava(tc.gc.bootInterop, tc.gc.bootInterop.getSTableForClass(BootJavaInterop.class));
+    }
+    
+    public static SixModelObject jvmgetconfig(ThreadContext tc) {
+        SixModelObject hashType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.hashType;
+        SixModelObject strType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strBoxType;
+        SixModelObject res = hashType.st.REPR.allocate(tc, hashType.st);
+        
+        try {
+			InputStream is = Ops.class.getResourceAsStream("/jvmconfig.properties");
+			Properties config = new Properties();
+			config.load(is);
+			for (String name : config.stringPropertyNames())
+			    res.bind_key_boxed(tc, name, box_s(config.getProperty(name), strType, tc));
+		} catch (Throwable e) {
+			die_s("Failed to load config.properties", tc);
+		}
+        
+        return res;    	
     }
 }
