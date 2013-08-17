@@ -108,14 +108,14 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
         $<sign>=['^'|<?>]
         [
         || $<charspec>=(
-               \s* ( '\\' <backslash=p5backslash> || (<?{ $pastfirst == 0 }> <-[\\]> || <-[\]\\]>) )
+               ( '\\' <backslash=p5backslash> || (<?{ $pastfirst == 0 }> <-[\\]> || <-[\]\\]>) )
                [
                    \s* '-' \s*
                    ( '\\' <backslash=p5backslash> || (<-[\]\\]>) )
                ]**0..1
                { $pastfirst++ }
            )+
-           \s* ']'
+           ']'
         || <.panic: "failed to parse character class; unescaped ']'?">
         ]
     }
