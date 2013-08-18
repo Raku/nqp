@@ -215,6 +215,9 @@ public abstract class CompilationUnit {
             try {
                 Ops.invokeArgless(tc, loadCodeRef);
             }
+            catch (ControlException e) {
+                throw e;
+            }
             catch (Exception e)
             {
                 throw ExceptionHandling.dieInternal(tc, e.toString());
