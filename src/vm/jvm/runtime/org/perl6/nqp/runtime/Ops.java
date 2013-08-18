@@ -661,13 +661,28 @@ public final class Ops {
         return 0;
     }
 
-    public static long shell(String cmd) {
+    public static long shell(String cmd, ThreadContext tc) {
         long retval = 255;
         try {
             String os = System.getProperty("os.name").toLowerCase();
             ProcessBuilder pb = os.indexOf("win") >= 0
                 ? new ProcessBuilder("cmd", "/c", cmd.replace('/', '\\'))
                 : new ProcessBuilder("sh", "-c", cmd);
+
+            Map<String, String> pbEnv = pb.environment();
+            SixModelObject processEnv = tc.gc.processEnvironment;        	
+            if (processEnv != null && processEnv.st.REPR instanceof VMHash) {
+            	for (String key : ((VMHashInstance)processEnv).storage.keySet()) {
+            		SixModelObject sixVal = processEnv.at_key_boxed(tc, key);
+            		if (sixVal != null) {
+            			String value = sixVal.get_str(tc);
+            			if (value != null) {
+            				pbEnv.put(key, value);
+            			}
+            		}
+            	}
+            }
+            
             Process proc = pb.inheritIO().start();
             proc.waitFor();
             retval = proc.exitValue();
@@ -3810,6 +3825,8 @@ public final class Ops {
         Map<String, String> env = System.getenv();
         for (String envName : env.keySet())
             res.bind_key_boxed(tc, envName, box_s(env.get(envName), strType, tc));
+        
+        tc.gc.processEnvironment = res;
         
         return res;
     }
