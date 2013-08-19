@@ -190,13 +190,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
     }
 
     method p5backslash:sym<A>($/) {
-                make QAST::Regex.new( :rxtype<anchor>, :subtype<bos>, :node($/) );
-
-    }
-    
-    method p5backslash:sym<s>($/) {
-        make QAST::Regex.new(:rxtype<cclass>, :name( nqp::lc(~$<sym>) ),
-                             :negate($<sym> le 'Z'), :node($/));
+        make QAST::Regex.new( :rxtype<anchor>, :subtype<bos>, :node($/) );
     }
 
     method p5backslash:sym<b>($/) {
@@ -204,7 +198,41 @@ class QRegex::P5Regex::Actions is HLL::Actions {
                              :node($/), :negate($<sym> eq 'B'), :name(''),
                              QAST::Node.new( QAST::SVal.new( :value('wb') ) ));
     }
-    
+
+    method p5backslash:sym<h>($/) {
+        make QAST::Regex.new( "\x[09,20,a0,1680,180e,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,200a,202f,205f,3000]", :rxtype('enumcharlist'),
+                        :negate($<sym> eq 'H'), :node($/) );
+    }
+
+    method p5backslash:sym<r>($/) {
+        make QAST::Regex.new( "\r", :rxtype('enumcharlist'), :node($/) );
+    }
+
+    method p5backslash:sym<R>($/) {
+        make QAST::Regex.new( :rxtype<cclass>, :name( 'n' ), :node($/) );
+    }
+
+    method p5backslash:sym<s>($/) {
+        make QAST::Regex.new(:rxtype<cclass>, :name( nqp::lc(~$<sym>) ),
+                             :negate($<sym> le 'Z'), :node($/));
+    }
+
+    method p5backslash:sym<t>($/) {
+        make QAST::Regex.new( "\t", :rxtype('enumcharlist'),
+                        :negate($<sym> eq 'T'), :node($/) );
+    }
+
+    method p5backslash:sym<v>($/) {
+        make QAST::Regex.new( "\x[0a,0b,0c,0d,85,2028,2029]",
+                        :rxtype('enumcharlist'),
+                        :negate($<sym> eq 'V'), :node($/) );
+    }
+
+    method p5backslash:sym<x>($/) {
+        my $hexlit := HLL::Actions.ints_to_string( $<hexint> );
+        make QAST::Regex.new( $hexlit, :rxtype('literal'), :node($/) );
+    }
+
     method p5backslash:sym<z>($/) {
         make QAST::Regex.new( :rxtype<anchor>, :subtype<eos>, :node($/) );
     }

@@ -130,10 +130,14 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     proto token p5backslash { <...> }
     
     token p5backslash:sym<A> { <sym> }
+    token p5backslash:sym<b> { $<sym>=[<[bB]>] }
+    token p5backslash:sym<r> { <sym> }
+    token p5backslash:sym<R> { <sym> }
+    token p5backslash:sym<s> { $<sym>=[<[dDnNsSwW]>] }
+    token p5backslash:sym<t> { <sym> }
+    token p5backslash:sym<x> { <sym> <hexint> }
     token p5backslash:sym<z> { <sym> }
     token p5backslash:sym<Z> { <sym> }
-    token p5backslash:sym<b> { $<sym>=[<[bB]>] }
-    token p5backslash:sym<s> { $<sym>=[<[dDnNsSwW]>] }
     token p5backslash:sym<misc> { $<litchar>=(\W) | $<number>=(\d+) }
     token p5backslash:sym<oops> { <.panic: "Unrecognized Perl 5 regex backslash sequence"> }
 
