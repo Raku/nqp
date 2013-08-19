@@ -86,6 +86,7 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     proto token p5metachar { <...> }
     
     token p5metachar:sym<quant> {
+        <![(?]>
         <quantifier=p5quantifier>
         <.panic: "quantifier quantifies nothing">
     }
@@ -96,9 +97,15 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
         '$' <?before \W | $>
     }
     token p5metachar:sym<(? )> {
-        '(?' {} <assertion=p5assertion>
-        [ ')' || <.panic: "Perl 5 regex assertion not terminated by parenthesis"> ]
+        '(?' <![?]>
+            [
+            | <?[<]> '<' $<name>=[<-[>]>+] '>' {} <nibbler>
+            | <?[']> "'" $<name>=[<-[']>+] "'" {} <nibbler>
+            | <assertion=p5assertion>
+            ]
+        [ ')' || <.panic: "Perl 5 named capture group not terminated by parenthesis"> ]
     }
+    token p5metachar:sym<(?: )> { '(?:' {} <nibbler> ')' }
     token p5metachar:sym<( )> { '(' {} <nibbler> ')' }
     token p5metachar:sym<[ ]> { <?before '['> <cclass> }
     
