@@ -53,6 +53,8 @@ my module sprintf {
     }
 
     class Actions {
+        my $knowhow := nqp::knowhow().new_type(:repr("P6bigint"));
+        my $zero    := nqp::box_i(0, $knowhow);
         method TOP($/) {
             my @statements;
             @statements.push( $_.ast ) for $<statement>;
@@ -93,13 +95,11 @@ my module sprintf {
                 }
             }
 
-            my $knowhow := nqp::knowhow().new_type(:repr("P6bigint"));
-
-            if nqp::eqaddr($number_representation.WHAT, 1.WHAT) {
+            if nqp::isint($number_representation) {
                 nqp::box_i($number_representation, $knowhow);
             } else {
-                if nqp::eqaddr($number_representation.WHAT, 1.01.WHAT)
-                || nqp::eqaddr($number_representation.WHAT, "1.01".WHAT) {
+                if nqp::isnum($number_representation)
+                || nqp::isstr($number_representation) {
                     if $number_representation > 0 {
                         nqp::fromnum_I(nqp::floor_n($number_representation), $knowhow);
                     }
@@ -148,7 +148,7 @@ my module sprintf {
             my $pre := ($<sym> eq 'b' ?? '0b' !! '0B') if $int && has_flag($/, 'hash');
             if nqp::chars($<precision>) {
                 $int := '' if $<precision>.ast == 0 && $int == 0;
-                $int := $pre ~ infix_x('0', intify($<precision>.ast) - nqp::chars($int)) ~ $int;
+                $int := $pre ~ infix_x('0', $<precision>.ast - nqp::chars($int)) ~ $int;
             }
             else {
                 $int := $pre ~ $int
@@ -161,9 +161,8 @@ my module sprintf {
 
         method directive:sym<d>($/) {
             my $int := intify(next_argument($/));
-            my $knowhow := nqp::knowhow().new_type(:repr("P6bigint"));
             my $pad := padding_char($/);
-            my $sign := nqp::islt_I($int, nqp::box_i(0, $knowhow)) ?? '-'
+            my $sign := nqp::islt_I($int, $zero) ?? '-'
                 !! has_flag($/, 'plus')
                     ?? '+' !! '';
             $int := nqp::tostr_I(nqp::abs_I($int, $knowhow));
@@ -189,7 +188,6 @@ my module sprintf {
             my $lhs := nqp::floor_n($float);
             my $rhs := $float - $lhs;
 
-            my $knowhow := nqp::knowhow().new_type(:repr("P6bigint"));
             my $int := nqp::fromnum_I($lhs, $knowhow);
             $lhs := nqp::tostr_I($int);
 
@@ -298,15 +296,13 @@ my module sprintf {
         # XXX: Should we emulate p5 behaviour for negative values passed to %u ?
         method directive:sym<u>($/) {
             my $int := intify(next_argument($/));
-            if $int < 0 {
+            if nqp::islt_I($int, $zero) {
                     my $err := nqp::getstderr();
                     nqp::printfh($err, "negative value '" 
                                     ~ $int
                                     ~ "' for %u in sprintf");
                     $int := 0;
             }
-
-            my $chars := nqp::chars($int);
 
             # Go through tostr_I to avoid scientific notation.
             make nqp::tostr_I($int)
@@ -317,7 +313,7 @@ my module sprintf {
             my $pre := '0X' if $int && has_flag($/, 'hash');
             if nqp::chars($<precision>) {
                 $int := '' if $<precision>.ast == 0 && $int == 0;
-                $int := $pre ~ infix_x('0', intify($<precision>.ast) - nqp::chars($int)) ~ $int;
+                $int := $pre ~ infix_x('0', $<precision>.ast - nqp::chars($int)) ~ $int;
             }
             else {
                 $int := $pre ~ $int
