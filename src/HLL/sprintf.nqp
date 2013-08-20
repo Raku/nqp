@@ -206,7 +206,14 @@ my module sprintf {
             $float := nqp::abs_n($float) * nqp::pow_n(10, $precision - ($exp + 1)) + 0.5;
             $float := nqp::floor_n($float);
             $float := $float / nqp::pow_n(10, $precision - ($exp + 1));
-            $exp == -4 ?? stringify-to-precision($float, $precision + 3) !! $float;
+#?if jvm
+            if $exp == -4 {
+                $float := stringify-to-precision($float, $precision + 3);
+                $float := nqp::substr($float, 0, nqp::chars($float) - 1) if nqp::chars($float) > 1 && $float ~~ /\.\d**4 0+$/;
+                $float := nqp::substr($float, 0, nqp::chars($float) - 1) if nqp::chars($float) > 1 && $float ~~ /\.\d**4 0+$/;
+            }
+            $float
+#?endif
         }
         sub fixed-point($float, $precision, $size, $pad) {
             my $sign := $float < 0 ?? '-' !! '';
