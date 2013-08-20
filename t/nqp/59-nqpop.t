@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(111);
+plan(112);
 
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
@@ -108,6 +108,7 @@ ok( nqp::istrue(0.0) == 0, 'nqp::istrue');
 ok( nqp::istrue(0.1) == 1, 'nqp::istrue');
 ok( nqp::istrue(nqp::list()) == 0, 'nqp::istrue on empty list');
 ok( nqp::istrue(nqp::list(1,2,3)) == 1, 'nqp::istrue on nonempty list');
+ok( nqp::istrue(nqp::null()) == 0, 'nqp::istrue on null');
 
 my $list := nqp::list(0, 'a', 'b', 3.0);
 ok( nqp::elems($list) == 4, 'nqp::elems');
