@@ -148,7 +148,7 @@ knowhow NQPParametricRoleHOW {
             $irole.HOW.add_method($irole, $name, $meth);
         }
         for @!multi_methods_to_incorporate {
-            $irole.HOW.add_multi_method($irole, $_<name>, $_<code>);
+            $irole.HOW.add_multi_method($irole, $_<name>, $_<code>.clone());
         }
 
         # Copy roles, instantiating them as we go.
