@@ -45,6 +45,7 @@ knowhow NQPClassHOW {
     # Call tracing.
     has $!trace;
     has $!trace_depth;
+    has @!trace_exclude;
     
     # Build plan.
     has @!BUILDALLPLAN;
@@ -716,7 +717,7 @@ knowhow NQPClassHOW {
             my %meths := $_.HOW.method_table($obj);
             if nqp::existskey(%meths, $name) {
                 my $found := %meths{$name};
-                return $!trace && !$no_trace && nqp::substr($name, 0, 1) ne '!' ??
+                return $!trace && !$no_trace && self.should_trace($obj, $name) ??
                     -> *@pos, *%named { 
                         nqp::say(nqp::x('  ', $!trace_depth) ~ "Calling $name");
                         $!trace_depth := $!trace_depth + 1;
@@ -799,13 +800,21 @@ knowhow NQPClassHOW {
     ##
     ## Tracing
     ##
-    method trace-on($obj, $depth?) {
+    method trace-on($obj, $depth?, :@exclude = <MATCH CAPHASH CREATE orig pos>) {
         $!trace := 1;
         $!trace_depth := $depth // 0;
+        @!trace_exclude := @exclude;
         nqp::setmethcacheauth($obj, 0);
         nqp::setmethcache($obj, nqp::hash());
     }
     method trace-off($obj) {
         $!trace := 0;
+    }
+    method should_trace($obj, $name) {
+        return 0 if nqp::substr($name, 0, 1) eq '!';
+        for @!trace_exclude {
+            return 0 if $name eq $_;
+        }
+        1;
     }
 }
