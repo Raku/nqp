@@ -357,6 +357,26 @@ my module sprintf {
 
     nqp::bindcurhllsym('sprintf', &sprintf);
 
+    class Directives {
+        method TOP($/) {
+            my $count := 0;
+            $count := $count + $_.ast for $<statement>;
+            make $count
+        }
+
+        method statement($/) {
+            make $<directive> && !$<directive><idx> ?? 1 !! 0
+        }
+    }
+    
+    my $directives := Directives.new();
+    
+    sub sprintfdirectives($format) {
+        return Syntax.parse( $format, :actions($directives) ).ast;
+    }
+
+    nqp::bindcurhllsym('sprintfdirectives', &sprintfdirectives);
+
     sub sprintfaddargumenthandler($interface) {
         @handlers.push($interface);
         "Added!"; # return meaningless string

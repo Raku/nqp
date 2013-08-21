@@ -59,6 +59,7 @@ HLL_SOURCES = \
   src/HLL/Compiler.nqp \
   src/HLL/CommandLine.nqp \
   src/HLL/World.nqp \
+  src/HLL/sprintf.nqp \
 
 QASTNODE_COMBINED = QASTNode.nqp
 QASTNODE_PIR = QASTNode.pir
