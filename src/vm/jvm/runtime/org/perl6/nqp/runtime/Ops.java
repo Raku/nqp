@@ -605,7 +605,7 @@ public final class Ops {
     }
     
     public static String cwd() {
-        return new File(".").getAbsolutePath();
+        return System.getProperty("user.dir");
     }
     
     public static String chdir(String path, ThreadContext tc) {
@@ -661,27 +661,34 @@ public final class Ops {
         return 0;
     }
 
-    public static long shell(String cmd, ThreadContext tc) {
+    // To be removed once shell3 is adopted
+    public static long shell1(String cmd, ThreadContext tc) {
+    	return shell3(cmd, cwd(), getenvhash(tc), tc);
+    }
+
+    public static long shell3(String cmd, String dir, SixModelObject envObj, ThreadContext tc) {
         long retval = 255;
         try {
+        	Map<String, String> env = new HashMap<String, String>();
+        	
+        	SixModelObject iter = iter(envObj, tc);
+        	while (istrue(iter, tc) != 0) {
+        		SixModelObject kv = iter.shift_boxed(tc);
+        		String key = iterkey_s(kv, tc);
+        		String value = unbox_s(iterval(kv, tc), tc);
+        		env.put(key, value);
+        	}
+
             String os = System.getProperty("os.name").toLowerCase();
             ProcessBuilder pb = os.indexOf("win") >= 0
                 ? new ProcessBuilder("cmd", "/c", cmd.replace('/', '\\'))
                 : new ProcessBuilder("sh", "-c", cmd);
+            pb.directory(new File(dir));
 
+            // Clear the JVM inherited environment and use provided only
             Map<String, String> pbEnv = pb.environment();
-            SixModelObject processEnv = tc.gc.processEnvironment;        	
-            if (processEnv != null && processEnv.st.REPR instanceof VMHash) {
-            	for (String key : ((VMHashInstance)processEnv).storage.keySet()) {
-            		SixModelObject sixVal = processEnv.at_key_boxed(tc, key);
-            		if (sixVal != null) {
-            			String value = sixVal.get_str(tc);
-            			if (value != null) {
-            				pbEnv.put(key, value);
-            			}
-            		}
-            	}
-            }
+            pbEnv.clear();
+            pbEnv.putAll(env);
             
             Process proc = pb.inheritIO().start();
             proc.waitFor();
@@ -3825,8 +3832,6 @@ public final class Ops {
         Map<String, String> env = System.getenv();
         for (String envName : env.keySet())
             res.bind_key_boxed(tc, envName, box_s(env.get(envName), strType, tc));
-        
-        tc.gc.processEnvironment = res;
         
         return res;
     }

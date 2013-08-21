@@ -194,8 +194,6 @@ public class GlobalContext {
 
     ThreadLocal<WeakReference<ThreadContext>> currentThreadCtxRef;
     WeakHashMap<Thread, ThreadContext> allThreads;
-    
-    public SixModelObject processEnvironment = null;
 
     /**
      * Initializes the runtime environment.
