@@ -24,7 +24,7 @@ sub is($actual, $expected, $description) {
     }
 }
 
-plan(255);
+plan(257);
 
 is(nqp::sprintf('Walter Bishop', []), 'Walter Bishop', 'no directives' );
 
@@ -49,9 +49,16 @@ dies_ok({ nqp::sprintf('%a', 'Science') }, 'unknown directive' );
 is($die_message, "'a' is not valid in sprintf format sequence '%a'",
     'unknown directive error message' );
 
+my class SprintfHandler {
+    method mine($x) { try nqp::reprname($x) eq "P6bigint" }
+    method int($x) { $x }
+}
+
 my $knowhow := nqp::knowhow().new_type(:name('TestBigInt'), :repr("P6bigint"));
+nqp::sprintfaddargumenthandler(SprintfHandler.new);
 my $large-positive-int := nqp::pow_I(nqp::box_i(33, $knowhow), nqp::box_i(21, $knowhow), $knowhow, $knowhow);
 # my $large-negative-int := fromnum_I(-nqp::pow_n(2.42, 42), $knowhow);
+
     
 is(nqp::sprintf('<%6s>', [12]), '<    12>', 'right-justified %s with space padding');
 is(nqp::sprintf('<%6%>', []), '<     %>', 'right-justified %% with space padding');
@@ -310,3 +317,6 @@ is(nqp::sprintf('%17.3g', [3.000000000000e+09]), '            3e+09', '%17.3g 3.
 is(nqp::sprintf('%17.3g', [3.000000000000e+10]), '            3e+10', '%17.3g 3.000000000000e+10');
 is(nqp::sprintf('%17.3g', [3.000000000000e+11]), '            3e+11', '%17.3g 3.000000000000e+11');
 is(nqp::sprintf('%17.3g', [3.000000000000e+12]), '            3e+12', '%17.3g 3.000000000000e+12');
+
+is(nqp::sprintf('%2$d %1$d',    [12, 34]),  '34 12', 'parameter index');
+is(nqp::sprintf('%3$d %d %1$d', [1, 2, 3]), '3 1 1', 'parameter index');

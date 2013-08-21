@@ -1901,7 +1901,48 @@ QAST::Operations.add_core_pirop_mapping('x', 'repeat', 'Ssi', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('iscclass', 'is_cclass', 'Iisi', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('findcclass', 'find_cclass', 'Iisii', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('findnotcclass', 'find_not_cclass', 'Iisii', :inlinable(1));
-QAST::Operations.add_core_pirop_mapping('sprintf', 'sprintf', 'SsP', :inlinable(1));
+QAST::Operations.add_core_op('sprintf', :inlinable(1), -> $qastcomp, $op {
+    my @operands := $op.list;
+    $qastcomp.as_post(
+        QAST::Op.new(
+            :op('call'),
+            :returns(str),
+            QAST::Op.new(
+                :op('gethllsym'),
+                QAST::SVal.new( :value('nqp') ),
+                QAST::SVal.new( :value('sprintf') )
+            ),
+            |@operands )
+    );
+});
+QAST::Operations.add_core_op('sprintfdirectives', :inlinable(1), -> $qastcomp, $op {
+    my @operands := $op.list;
+    $qastcomp.as_post(
+        QAST::Op.new(
+            :op('call'),
+            :returns(str),
+            QAST::Op.new(
+                :op('gethllsym'),
+                QAST::SVal.new( :value('nqp') ),
+                QAST::SVal.new( :value('sprintfdirectives') )
+            ),
+            |@operands )
+    );
+});
+QAST::Operations.add_core_op('sprintfaddargumenthandler', :inlinable(1), -> $qastcomp, $op {
+    my @operands := $op.list;
+    $qastcomp.as_post(
+        QAST::Op.new(
+            :op('call'),
+            :returns(str),
+            QAST::Op.new(
+                :op('gethllsym'),
+                QAST::SVal.new( :value('nqp') ),
+                QAST::SVal.new( :value('sprintfaddargumenthandler') )
+            ),
+            |@operands )
+    );
+});
 QAST::Operations.add_core_pirop_mapping('escape', 'escape', 'Ss', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('replace', 'replace', 'Ssiis', :inlinable(1));
 
