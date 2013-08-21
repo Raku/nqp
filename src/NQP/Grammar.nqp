@@ -688,7 +688,7 @@ grammar NQP::Grammar is HLL::Grammar {
         NQP::Grammar.O(':prec<u=>, :assoc<left>',  '%multiplicative');
         NQP::Grammar.O(':prec<t=>, :assoc<left>',  '%additive');
         NQP::Grammar.O(':prec<r=>, :assoc<left>',  '%concatenation');
-        NQP::Grammar.O(':prec<m=>, :assoc<left>',  '%relational');
+        NQP::Grammar.O(':prec<m=>, :assoc<non>',   '%relational');
         NQP::Grammar.O(':prec<l=>, :assoc<left>',  '%tight_and');
         NQP::Grammar.O(':prec<k=>, :assoc<left>',  '%tight_or');
         NQP::Grammar.O(':prec<j=>, :assoc<right>', '%conditional');
