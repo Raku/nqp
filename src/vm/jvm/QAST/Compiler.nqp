@@ -1907,7 +1907,17 @@ QAST::OperationsJAST.map_classlib_core_op('mkdir', $TYPE_OPS, 'mkdir', [$RT_STR,
 QAST::OperationsJAST.map_classlib_core_op('rename', $TYPE_OPS, 'rename', [$RT_STR, $RT_STR], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('copy', $TYPE_OPS, 'copy', [$RT_STR, $RT_STR], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('link', $TYPE_OPS, 'link', [$RT_STR, $RT_STR], $RT_INT);
-QAST::OperationsJAST.map_classlib_core_op('shell', $TYPE_OPS, 'shell', [$RT_STR], $RT_INT, :tc);
+
+# Two variants of shell until we deprecate shell1
+QAST::OperationsJAST.map_classlib_core_op('shell1', $TYPE_OPS, 'shell1', [$RT_STR], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('shell3', $TYPE_OPS, 'shell3', [$RT_STR, $RT_STR, $RT_OBJ], $RT_INT, :tc);
+QAST::OperationsJAST.add_core_op('shell', -> $qastcomp, $op {
+    my @operands := $op.list;
+    $qastcomp.as_jast(+@operands == 1
+        ?? QAST::Op.new( :op('shell1'), |@operands )
+        !! QAST::Op.new( :op('shell3'), |@operands ));
+});
+
 QAST::OperationsJAST.map_classlib_core_op('symlink', $TYPE_OPS, 'symlink', [$RT_STR, $RT_STR], $RT_INT);
 
 QAST::OperationsJAST.map_classlib_core_op('opendir', $TYPE_OPS, 'opendir', [$RT_STR], $RT_OBJ, :tc);
