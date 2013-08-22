@@ -167,12 +167,12 @@ class QAST::Operations {
 
     # Generates a box. Takes a POST tree.
     method box($qastcomp, $hll, $type, $post) {
-        %hll_box{$hll}{$type}($qastcomp, $post)
+        (%hll_box{$hll}{$type} // %hll_box{'nqp'}{$type})($qastcomp, $post)
     }
 
     # Generates an unbox. Takes a POST tree.
     method unbox($qastcomp, $hll, $type, $post) {
-        %hll_unbox{$hll}{$type}($qastcomp, $post)
+        (%hll_unbox{$hll}{$type} // %hll_unbox{'nqp'}{$type})($qastcomp, $post)
     }
 
     # Returns a mapper closure for turning an operation into a PIR op.
