@@ -50,7 +50,7 @@ MAIN: {
         my $jvm_found = 0;
         my $jvm_ok = 0;
         for (@jvm_info) {
-            if (/java version "(\d+)\.(\d+)/) {
+            if (/(?:java|jdk) version "(\d+)\.(\d+)/) {
                 $jvm_found = 1;
                 if ($1 > 1 || $1 == 1 && $2 >= 7) {
                     $jvm_ok = 1;
