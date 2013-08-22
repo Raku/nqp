@@ -2747,21 +2747,18 @@ public final class Ops {
     }
 
     public static String chr(long val, ThreadContext tc) {
-
-	// http://en.wikipedia.org/wiki/Mapping_of_Unicode_characters 
+        // http://en.wikipedia.org/wiki/Mapping_of_Unicode_characters 
         if ((val >= 0xfdd0
-	     && (val <= 0xfdef                     // non character
-		 || ((val & 0xfffe) == 0xfffe)     // non character
-		 || val > 0x10ffff)                // out of range
-	     )
-	    || (val >= 0xd800 && val <= 0xdbff)    // high surrogate
-	    || (val >= 0xdc00 && val <= 0xdcff)    // low surrogate
-	    ) {
-	    throw ExceptionHandling.dieInternal(tc, "Invalid code-point U+" + String.format("%05X", val));
+            && (val <= 0xfdef                     // non character
+                || ((val & 0xfffe) == 0xfffe)     // non character
+                || val > 0x10ffff)                // out of range
+            )
+        || (val >= 0xd800 && val <= 0xdbff)    // high surrogate
+        || (val >= 0xdc00 && val <= 0xdcff)    // low surrogate
+        ) {
+            throw ExceptionHandling.dieInternal(tc, "Invalid code-point U+" + String.format("%05X", val));
         }
-
-	return (new StringBuffer()).append(Character.toChars((int)val)).toString();
-
+        return (new StringBuffer()).append(Character.toChars((int)val)).toString();
     }
    
     public static String join(String delimiter, SixModelObject arr, ThreadContext tc) {
