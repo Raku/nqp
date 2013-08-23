@@ -3365,6 +3365,18 @@ inline op nqp_getlexrelcaller(out PMC, in PMC, in STR) :base_core {
     $1 = result;
 }
 
+inline op nqp_shell(out INT, in STR, in STR, in PMC) {
+     STRING *command = $2;  
+     STRING *dir = $3;  
+
+     PMC *env = $4;  
+     STRING * const old_cwd = Parrot_file_getcwd(interp);
+     Parrot_file_chdir(interp, dir);
+     $1 = Parrot_Run_OS_Command(interp, command);
+     Parrot_file_chdir(interp, old_cwd);
+}
+
+
 /*
 
 =item nqp_encode
