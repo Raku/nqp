@@ -2380,15 +2380,8 @@ QAST::Operations.add_core_pirop_mapping('nfarunalt', 'nqp_nfa_run_alt', '0PsiPPP
 QAST::Operations.add_core_pirop_mapping('exit', 'exit', '0i', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('sleep', 'sleep', '0n', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('shell', 'nqp_shell', 'IssP');
-QAST::Operations.add_core_op('getenvhash', -> $qastcomp, $op {
-    if +@($op) != 0 {
-        nqp::die('getenvhash requires no operands');
-    }
-    $qastcomp.as_post(QAST::VM.new(
-        :pirop('new__Ps'),
-        QAST::SVal.new( :value('Env') )
-    ))
-});
+QAST::Operations.add_core_pirop_mapping('getenvhash', 'nqp_getenvhash', 'P');
+
 QAST::Operations.add_core_op('getpid', -> $qastcomp, $op {
     if +@($op) != 0 {
         nqp::die('getpid requires no operands');

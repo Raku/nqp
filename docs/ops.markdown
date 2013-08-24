@@ -11,3 +11,8 @@ Gets hold of the argument capture passed to the current block.
 (a future usecapture may invalidate it)
 It's valid to implement this exactly the same way as savecapture if there's no performance benefit to be had in a split.
 Used by the multi-dispatcher.
+
+# getenvhash()
+
+Returns a hash containing the environment variables.
+Changing the hash doesn't affect the environment variables

@@ -320,6 +320,17 @@ static PMC* sub_find_pad(PARROT_INTERP, ARGIN(STRING *lex_name), ARGIN(PMC *ctx)
     }
 }
 
+/* the Parrot env variables abstraction doesn't support traversing through all the env variables so we need this ifdef*/
+
+#ifndef WIN32
+#  ifdef __APPLE_CC__
+#    include <crt_externs.h>
+#    define environ (*_NSGetEnviron())
+#  else /* !__APPLE_CC__ */
+extern char **environ;
+#  endif /* __APPLE_CC__ */
+#endif /* !WIN32 */
+
 END_OPS_PREAMBLE
 
 /*
@@ -3376,6 +3387,24 @@ inline op nqp_shell(out INT, in STR, in STR, in PMC) {
      Parrot_file_chdir(interp, old_cwd);
 }
 
+inline op nqp_getenvhash(out PMC) {
+    PMC * const hash = Parrot_pmc_new(interp, enum_class_Hash);
+    INTVAL rv = 0;
+    $1 = hash;
+
+    while (environ[rv] != NULL) {
+        STRING * const envp  = Parrot_str_from_platform_cstring(interp, environ[rv]);
+        const INTVAL   delim = STRING_index(interp, envp, Parrot_str_new_constant(interp, "="), 0);
+        STRING* key = STRING_substr(interp, envp, 0, delim);
+        STRING * const value = Parrot_getenv(interp, key);
+        if (!STRING_IS_NULL(value)) {
+            PMC * const value_pmc = Parrot_pmc_new(interp, enum_class_String);
+            VTABLE_set_string_native(interp, value_pmc, value);
+            VTABLE_set_pmc_keyed_str(interp, hash, key, value_pmc);
+        }
+        rv++;
+    }
+}
 
 /*
 
