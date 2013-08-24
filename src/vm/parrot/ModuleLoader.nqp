@@ -36,7 +36,7 @@ knowhow ModuleLoader {
         $*CTXSAVE := 0;
     }
     
-    method load_module($module_name, *@global_merge_target) {
+    method load_module($module_name, *@extras, :$line, :$file) {
         # If we didn't already do so, load the module and capture
         # its mainline. Otherwise, we already loaded it so go on
         # with what we already have.
@@ -66,8 +66,13 @@ knowhow ModuleLoader {
             # Merge any globals.
             my $UNIT := nqp::ctxlexpad($module_ctx);
             unless nqp::isnull($UNIT<GLOBALish>) {
-                if +@global_merge_target {
-                    merge_globals(@global_merge_target[0], $UNIT<GLOBALish>);
+                if +@extras {
+                    # There can be a hash at index zero, which contains adverbs
+                    # passed to the use-statement.
+                    my $index := nqp::ishash(@extras[0]) ?? 1 !! 0;
+                    if +@extras > $index {
+                        merge_globals(@extras[$index], $UNIT<GLOBALish>);
+                    }
                 }
             }
         }
