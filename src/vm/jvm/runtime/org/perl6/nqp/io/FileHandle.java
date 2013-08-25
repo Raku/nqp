@@ -76,7 +76,8 @@ public class FileHandle implements IIOClosable, IIOSeekable, IIOEncodable, IIOSy
     
     public long tell(ThreadContext tc) {
         try {
-            return chan.position();
+            long position = chan.position();
+            return readBuffer != null ? position - readBuffer.remaining() : position;
         } catch (IOException e) {
             throw ExceptionHandling.dieInternal(tc, e);
         }
@@ -95,8 +96,8 @@ public class FileHandle implements IIOClosable, IIOSeekable, IIOEncodable, IIOSy
             int total = 0;
             int read;
             if (readBuffer != null) {
-                buffers.add(ByteBuffer.wrap(readBuffer.array(), readBuffer.position(),
-                    readBuffer.limit() - readBuffer.position()));
+                total = readBuffer.limit() - readBuffer.position();
+                buffers.add(ByteBuffer.wrap(readBuffer.array(), readBuffer.position(), total));
                 readBuffer = null;
             }
             while ((read = chan.read(curBuffer)) != -1) {
@@ -127,6 +128,7 @@ public class FileHandle implements IIOClosable, IIOSeekable, IIOEncodable, IIOSy
                         /* End of file, so what we have is fine. */
                         eof = true;
                         foundLine = true;
+                        readBuffer.flip();
                         break;
                     }
                     readBuffer.flip();
@@ -165,8 +167,11 @@ public class FileHandle implements IIOClosable, IIOSeekable, IIOEncodable, IIOSy
         // Copy to a single buffer and decode (could be smarter, but need
         // to be wary as UTF-8 chars may span a buffer boundary).
         ByteBuffer allBytes = ByteBuffer.allocate(total);
-        for (ByteBuffer bb : buffers)
-            allBytes.put(bb.array(), 0, bb.limit());
+        for (ByteBuffer bb : buffers) {
+            int amount = total < bb.limit() ? total : bb.limit();
+            allBytes.put(bb.array(), 0, amount);
+            total -= amount;
+        }
         allBytes.rewind();
         return dec.decode(allBytes).toString();
     }
@@ -175,9 +180,8 @@ public class FileHandle implements IIOClosable, IIOSeekable, IIOEncodable, IIOSy
         return eof;
     }
     
-    public void print(ThreadContext tc, String s) {
+    public void write(ThreadContext tc, ByteBuffer buffer) {
         try {
-            ByteBuffer buffer = enc.encode(CharBuffer.wrap(s));
             int toWrite = buffer.limit();
             int written = 0;
             while (written < toWrite) {
@@ -186,7 +190,16 @@ public class FileHandle implements IIOClosable, IIOSeekable, IIOEncodable, IIOSy
             }
         } catch (IOException e) {
             throw ExceptionHandling.dieInternal(tc, e);
-        }
+        }    	
+    }
+    
+    public void print(ThreadContext tc, String s) {
+    	try {
+    		ByteBuffer buffer = enc.encode(CharBuffer.wrap(s));
+    		write(tc, buffer);
+    	} catch (IOException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
+    	}
     }
     
     public void say(ThreadContext tc, String s) {

@@ -403,6 +403,23 @@ public final class Ops {
         }
     }
     
+    public static SixModelObject writefh(SixModelObject obj, SixModelObject buf, ThreadContext tc) {
+        ByteBuffer bb = decode8(buf, tc);
+        if (obj instanceof IOHandleInstance) {
+            IOHandleInstance h = (IOHandleInstance)obj;
+            if (h.handle instanceof IIOSyncWritable)
+                ((IIOSyncWritable)h.handle).write(tc, bb);
+            else
+                throw ExceptionHandling.dieInternal(tc,
+                    "This handle does not support print");
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc,
+                "printfh requires an object with the IOHandle REPR");
+        }
+        return buf;
+    }
+    
     public static String printfh(SixModelObject obj, String data, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
             IOHandleInstance h = (IOHandleInstance)obj;
@@ -3005,7 +3022,7 @@ public final class Ops {
         }
     }
     
-    public static String decode8(SixModelObject buf, String csName, ThreadContext tc) {
+    protected static ByteBuffer decode8(SixModelObject buf, ThreadContext tc) {
         ByteBuffer bb;
         if (buf instanceof VMArrayInstance_i8) {
             VMArrayInstance_i8 bufi8 = (VMArrayInstance_i8)buf;
@@ -3021,8 +3038,14 @@ public final class Ops {
                 bb.put((byte)tc.native_i);
             }
         }
+    	return bb;
+    }
+    
+    public static String decode8(SixModelObject buf, String csName, ThreadContext tc) {
+        ByteBuffer bb = decode8(buf, tc);
         return Charset.forName(csName).decode(bb).toString();
     }
+    
     public static String decode(SixModelObject buf, String encoding, ThreadContext tc) {
         if (encoding.equals("utf8")) {
             return decode8(buf, "UTF-8", tc);
