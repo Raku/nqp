@@ -9,6 +9,6 @@ public interface IIOAsyncReadable {
     public void slurp(ThreadContext tc, SixModelObject Str, SixModelObject done,
                       SixModelObject error);
     public void lines(ThreadContext tc, SixModelObject Str, boolean chomp,
-                      LinkedBlockingQueue queue, SixModelObject done,
+                      LinkedBlockingQueue<SixModelObject> queue, SixModelObject done,
                       SixModelObject error);
 }

@@ -3,7 +3,6 @@ package org.perl6.nqp.io;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 import java.nio.channels.AsynchronousFileChannel;
 import java.nio.channels.CompletionHandler;
 import java.nio.charset.Charset;
@@ -125,7 +124,7 @@ public class AsyncFileHandle implements IIOClosable, IIOEncodable, IIOAsyncReada
         public int position;
     }
     public void lines(final ThreadContext tc, final SixModelObject Str,
-                      final boolean chomp, final LinkedBlockingQueue queue,
+                      final boolean chomp, final LinkedBlockingQueue<SixModelObject> queue,
                       final SixModelObject done, final SixModelObject error) {
         final LinesState ls = new LinesState();
         ls.lineChunks = new ArrayList<ByteBuffer>();
