@@ -2753,8 +2753,7 @@ public final class Ops {
                 || ((val & 0xfffe) == 0xfffe)     // non character
                 || val > 0x10ffff)                // out of range
             )
-        || (val >= 0xd800 && val <= 0xdbff)    // high surrogate
-        || (val >= 0xdc00 && val <= 0xdcff)    // low surrogate
+        || (val >= 0xd800 && val <= 0xdfff)       // surrogate
         ) {
             throw ExceptionHandling.dieInternal(tc, "Invalid code-point U+" + String.format("%05X", val));
         }
