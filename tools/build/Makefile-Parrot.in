@@ -1098,6 +1098,9 @@ bootstrap-files: $(STAGE2_PBCS) src/stage2/$(CORE_SETTING_NQP)
 
 ## testing
 
+t/*/*.t: all
+	prove -r -v --exec .@slash@$(RUNNER) $@
+
 test: all
 	prove -r --exec ./$(NQP_EXE) t/nqp t/parrot t/hll t/qregex t/p5regex t/qast t/serialization
 
