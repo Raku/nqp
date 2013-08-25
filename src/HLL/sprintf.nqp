@@ -360,7 +360,7 @@ my module sprintf {
     class Directives {
         method TOP($/) {
             my $count := 0;
-            $count := $count + $_.ast for $<statement>;
+            $count := nqp::add_i($count, $_.ast) for $<statement>;
             make $count
         }
 
