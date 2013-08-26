@@ -403,19 +403,46 @@ public final class Ops {
         }
     }
     
+    public static SixModelObject readfh(SixModelObject io, SixModelObject res, long bytes, ThreadContext tc) {
+        if (io instanceof IOHandleInstance) {
+            IOHandleInstance h = (IOHandleInstance)io;
+            if (h.handle instanceof IIOSyncReadable) {
+                if (res instanceof VMArrayInstance_i8) {
+                    VMArrayInstance_i8 arr = (VMArrayInstance_i8)res;
+
+                    byte[] array = ((IIOSyncReadable)h.handle).read(tc, (int)bytes);                    
+                    arr.elems = array.length;
+                    arr.start = 0;
+                    arr.slots = array;
+
+                    return res;
+                } else {
+                    throw ExceptionHandling.dieInternal(tc,
+                        "readfh requires a buf with the VMArrayInstance_i8 REPR");
+                }
+            } else {
+                throw ExceptionHandling.dieInternal(tc,
+                    "This handle does not support read");
+            }
+        } else {
+            throw ExceptionHandling.dieInternal(tc,
+                "readfh requires an object with the IOHandle REPR");
+        }
+    }
+    
     public static SixModelObject writefh(SixModelObject obj, SixModelObject buf, ThreadContext tc) {
         ByteBuffer bb = decode8(buf, tc);
         if (obj instanceof IOHandleInstance) {
             IOHandleInstance h = (IOHandleInstance)obj;
             if (h.handle instanceof IIOSyncWritable)
-                ((IIOSyncWritable)h.handle).write(tc, bb);
+                ((IIOSyncWritable)h.handle).write(tc, bb.array());
             else
                 throw ExceptionHandling.dieInternal(tc,
-                    "This handle does not support print");
+                    "This handle does not support write");
         }
         else {
             throw ExceptionHandling.dieInternal(tc,
-                "printfh requires an object with the IOHandle REPR");
+                "writefh requires an object with the IOHandle REPR");
         }
         return buf;
     }

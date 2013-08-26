@@ -43,6 +43,22 @@ public class StandardReadHandle implements IIOClosable, IIOEncodable, IIOSyncRea
         this.cs = cs;
     }
     
+    public byte[] read(ThreadContext tc, int bytes) {
+        try {
+            byte[] array = new byte[bytes];
+            int read = 0;
+            int offset = 0;
+            while ((read = is.read(array, offset, bytes - offset)) != -1) {
+                offset += read;
+            }
+            byte[] compact = new byte[offset];
+            System.arraycopy(array, 0, compact, 0, offset);
+            return compact;
+        } catch (IOException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
+        }
+    }
+
     public synchronized String slurp(ThreadContext tc) {
         try {
             if (br == null)

@@ -40,9 +40,8 @@ public class StandardWriteHandle implements IIOClosable, IIOSeekable, IIOEncodab
         dec = cs.newDecoder();
     }
     
-    public void write(ThreadContext tc, ByteBuffer buffer) {
-    	byte[] bytes = buffer.array();
-    	ps.write(bytes, 0, buffer.limit());
+    public void write(ThreadContext tc, byte[] bytes) {
+    	ps.write(bytes, 0, bytes.length);
     }
     
     public void print(ThreadContext tc, String s) {

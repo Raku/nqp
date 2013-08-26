@@ -30,7 +30,8 @@ public class FileHandle implements IIOClosable, IIOSeekable, IIOEncodable, IIOSy
             }
             else if (mode.equals("w")) {
                 chan = FileChannel.open(p, StandardOpenOption.WRITE,
-                                           StandardOpenOption.CREATE);
+                                           StandardOpenOption.CREATE,
+                                           StandardOpenOption.TRUNCATE_EXISTING);
             }
             else if (mode.equals("wa")) {
                 chan = FileChannel.open(p, StandardOpenOption.WRITE,
@@ -180,13 +181,30 @@ public class FileHandle implements IIOClosable, IIOSeekable, IIOEncodable, IIOSy
         return eof;
     }
     
-    public void write(ThreadContext tc, ByteBuffer buffer) {
+    public byte[] read(ThreadContext tc, int bytes) {
+        try {
+            ByteBuffer buffer = ByteBuffer.allocate(bytes);
+            chan.read(buffer);
+            buffer.flip();
+            byte[] res = new byte[buffer.limit()];
+            buffer.get(res);
+            return res;
+        } catch (IOException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
+        }
+    }
+    
+    public void write(ThreadContext tc, byte[] array) {
+        ByteBuffer buffer = ByteBuffer.wrap(array);
+        write(tc, buffer);
+    }
+     
+    protected void write(ThreadContext tc, ByteBuffer buffer) {
         try {
             int toWrite = buffer.limit();
             int written = 0;
             while (written < toWrite) {
                 written += chan.write(buffer);
-                buffer.compact();
             }
         } catch (IOException e) {
             throw ExceptionHandling.dieInternal(tc, e);
