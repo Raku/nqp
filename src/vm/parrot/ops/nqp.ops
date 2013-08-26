@@ -331,6 +331,119 @@ extern char **environ;
 #  endif /* __APPLE_CC__ */
 #endif /* !WIN32 */
 
+/* we have our own Run_OS_Command as the parrot one doesn't support passing env variables */
+
+#ifdef WIN32
+#include <windows.h>
+#include <process.h>
+static INTVAL Run_OS_Command(PARROT_INTERP, STRING *command, char **env)
+{
+    DWORD status = 0;
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+    const STRING *comspec = Parrot_str_new(interp, "ComSpec", 0);
+    char* const cmd       = (char *)mem_sys_allocate(command->strlen + 4);
+    char* const shell     = Parrot_str_to_cstring(interp, Parrot_getenv(interp, comspec));
+    char* const cmdin     = Parrot_str_to_cstring(interp, command);
+
+    strcpy(cmd, "/c ");
+    strcat(cmd, cmdin);
+    Parrot_str_free_cstring(cmdin);
+
+    memset(&si, 0, sizeof (si));
+    si.cb = sizeof (si);
+    memset(&pi, 0, sizeof (pi));
+
+    /* Start the child process. */
+    if (!CreateProcess(shell, cmd, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi))
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_NOSPAWN,
+            "Can't spawn child process");
+
+    WaitForSingleObject(pi.hProcess, INFINITE);
+
+    if (!GetExitCodeProcess(pi.hProcess, &status)) {
+        Parrot_warn(interp, PARROT_WARNINGS_PLATFORM_FLAG,
+            "Process completed: Failed to get exit code.");
+    }
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+    Parrot_str_free_cstring(shell);
+    mem_sys_free(cmd);
+
+    /* Return exit code left shifted by 8 for POSIX emulation. */
+    return status << 8;
+}
+#else
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+static INTVAL Run_OS_Command(PARROT_INTERP, STRING *command, char **env)
+{
+    pid_t child;
+    child = fork();
+    /* Did we fail? */
+    if (-1 == child)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_NOSPAWN,
+            "Can't spawn child process");
+
+    /* Are we the parent or child? */
+    if (child) {
+        /* parent */
+        int   status;
+        waitpid(child, &status, 0);
+        return status;
+    }
+    else {
+        /* child */
+        char * const cmd    = Parrot_str_to_cstring(interp, command);
+        const int    status = execle("/bin/sh", "sh", "-c", cmd, (void *)NULL, env); 
+        /* if we get here, something's horribly wrong, but free anyway... */
+        Parrot_str_free_cstring(cmd);
+
+        if (status)
+            PARROT_FORCE_EXIT(status);
+    }
+
+    /* make gcc happy */
+    return 1;
+}
+#endif
+
+/*
+    printf("key: %s\n", Parrot_str_to_cstring(interp,key));
+    printf("value: %s\n", Parrot_str_to_cstring(interp,value));
+    printf("env_var: %s\n", Parrot_str_to_cstring(interp,env_var));
+*/
+
+static char ** pack_env_hash(Parrot_Interp interp, PMC* hash_pmc) {
+    Hash *hash = VTABLE_get_pointer(interp,hash_pmc);
+    STRING *equal = Parrot_str_new_constant(interp,"=");
+    STRING *key, *value, *env_var;
+    INTVAL hash_size = Parrot_hash_size(interp,hash);
+    char** packed = mem_sys_allocate_zeroed(sizeof(char*) * (hash_size+1));
+    INTVAL i = 0;
+
+    
+    /* Parrot_hash_value_to_string is not exported*/
+    parrot_hash_iterate(hash,
+        key = (STRING *)_bucket->key;
+        value = VTABLE_get_string_keyed_str(interp,hash_pmc,key);
+        env_var = Parrot_str_concat(interp,key,Parrot_str_concat(interp,equal,value));
+        packed[i++] = Parrot_str_to_cstring(interp,env_var);
+    );
+    packed[hash_size] = NULL;
+    return packed;
+}
+
+static void free_packed_env(char **env) {
+    INTVAL i = 0;
+    while (env[i]) {
+        Parrot_str_free_cstring(env[i]);
+        i++;
+    }
+    mem_sys_free(env);
+}
+
 END_OPS_PREAMBLE
 
 /*
@@ -3380,11 +3493,14 @@ inline op nqp_shell(out INT, in STR, in STR, in PMC) {
      STRING *command = $2;  
      STRING *dir = $3;  
 
-     PMC *env = $4;  
      STRING * const old_cwd = Parrot_file_getcwd(interp);
+     char **env = pack_env_hash(interp,$4);
+
      Parrot_file_chdir(interp, dir);
-     $1 = Parrot_Run_OS_Command(interp, command);
+     $1 = Run_OS_Command(interp, command, env);
      Parrot_file_chdir(interp, old_cwd);
+
+     free_packed_env(env);
 }
 
 inline op nqp_getenvhash(out PMC) {
