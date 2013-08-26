@@ -355,7 +355,7 @@ static INTVAL Run_OS_Command(PARROT_INTERP, STRING *command, char **env)
     memset(&pi, 0, sizeof (pi));
 
     /* Start the child process. */
-    if (!CreateProcess(shell, cmd, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi))
+    if (!CreateProcess(shell, cmd, NULL, NULL, TRUE, 0, env, NULL, &si, &pi))
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_NOSPAWN,
             "Can't spawn child process");
 
