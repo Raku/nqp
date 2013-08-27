@@ -342,7 +342,7 @@ static char * pack_env_hash(Parrot_Interp interp, PMC* hash_pmc) {
     STRING *key, *value, *env_var, *env_var_with_null;
     INTVAL hash_size = Parrot_hash_size(interp, hash);
     STRING *packed = Parrot_str_new_constant(interp, "");
-    STRING *null = Parrot_str_new_constant(interp, "\n");
+    STRING *null = Parrot_str_new(interp, "\0", 1);
 
     
     /* Parrot_hash_value_to_string is not exported*/
