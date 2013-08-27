@@ -389,6 +389,7 @@ static INTVAL Run_OS_Command(PARROT_INTERP, STRING *command, PMC *env_hash)
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
     Parrot_str_free_cstring(shell);
+    Parrot_str_free_cstring(env);
     mem_sys_free(cmd);
 
     /* Return exit code left shifted by 8 for POSIX emulation. */
