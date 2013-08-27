@@ -2037,7 +2037,7 @@ QAST::OperationsJAST.add_core_op('sprintfdirectives', -> $qastcomp, $op {
     $qastcomp.as_jast(
         QAST::Op.new(
             :op('call'),
-            :returns(str),
+            :returns(int),
             QAST::Op.new(
                 :op('gethllsym'),
                 QAST::SVal.new( :value('nqp') ),
