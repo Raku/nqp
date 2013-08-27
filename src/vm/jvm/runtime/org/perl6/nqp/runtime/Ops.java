@@ -742,7 +742,8 @@ public final class Ops {
         }
         catch (InterruptedException e) {
         }
-        return retval;
+        /* Return exit code left shifted by 8 for POSIX emulation. */
+        return retval << 8;
     }
     
     public static long symlink(String before, String after) {
