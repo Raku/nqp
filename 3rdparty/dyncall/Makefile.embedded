@@ -24,6 +24,8 @@ linux64:
 minix-gcc:
 	cd dyncall	; CC=gcc CFLAGS= ${MAKE_CMD} 
 	cd dyncallback	; CC=gcc CFLAGS= ${MAKE_CMD} 
+mingw32:
+	${MAKE_CMD} CC=gcc AS="gcc -c" all
 osx:
 	${MAKE_CMD} all
 osx-universal:
