@@ -401,6 +401,11 @@ static void at_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index, N
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "VMArray: Can't get unboxed string value");
 
+    if (index >= body->elems) {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_OUT_OF_BOUNDS,
+            "VMArray: index out of bounds");
+    }
+
     if(repr_data->elem_kind == STORAGE_SPEC_BP_INT) {
         value->value.intval = get_pos_int(interp, body, repr_data, body->start + index);
     }
