@@ -123,7 +123,7 @@ MAIN: {
             $configure_args   .= $config{'parrot::cc'} eq 'gcc' ? ' /tool-gcc' : '';
 
             system_or_die('cd 3rdparty\dyncall && Configure.bat' . $configure_args);
-            $config{'dyncall_build'} = "cd 3rdparty/dyncall && $make BUILD_DIR=. -f GNUmakefile";
+            $config{'dyncall_build'} = "cd 3rdparty/dyncall && $make BUILD_DIR=. -f Makefile.embedded mingw32";
         } else {
             my $target_args = '';
             # heuristic according to
