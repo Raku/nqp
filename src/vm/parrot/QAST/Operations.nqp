@@ -1943,7 +1943,7 @@ QAST::Operations.add_core_op('sprintfaddargumenthandler', :inlinable(1), -> $qas
             |@operands )
     );
 });
-QAST::Operations.add_core_pirop_mapping('escape', 'escape', 'Ss', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('escape', 'escape', 'SS', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('replace', 'replace', 'Ssiis', :inlinable(1));
 
 QAST::Operations.add_core_op('flip', :inlinable(1), -> $qastcomp, $op {
