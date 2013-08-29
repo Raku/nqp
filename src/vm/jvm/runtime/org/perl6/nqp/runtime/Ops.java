@@ -15,6 +15,7 @@ import java.nio.charset.Charset;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
@@ -603,31 +604,20 @@ public final class Ops {
         return perms;
     }
     
-    public static long chmod(String path, long mode) {
-        return chmod(path, mode, null);
-    }
-    
     public static long chmod(String path, long mode, ThreadContext tc) {
         Path path_o;
         try {
             path_o = Paths.get(path);
-        }
-        catch (Exception e) {
-            return -1;
-        }
-        
-        Set<PosixFilePermission> perms = modeToPosixFilePermission(mode);
-        try {
+            Set<PosixFilePermission> perms = modeToPosixFilePermission(mode);
             Files.setPosixFilePermissions(path_o, perms);
         }
+        catch (IOException e) {
+            die_s("nqp::chmod: " + e.getClass().getSimpleName() + ": " + e.getMessage(), tc);            
+        }
         catch (Exception e) {
-            return -1;
+            die_s("nqp::chmod: unhandled exception", tc);
         }
         return 0;
-    }
-    
-    public static long unlink(String path) {
-        return unlink(path, null);
     }
     
     public static long unlink(String path, ThreadContext tc) {
@@ -637,13 +627,12 @@ public final class Ops {
             }
         }
         catch (IOException e) {
-            return -1;
+            die_s("nqp::unlink: " + e.getClass().getSimpleName() + ": " + e.getMessage(), tc);            
+        }
+        catch (Exception e) {
+            die_s("nqp::unlink: unhandled exception", tc);
         }
         return 0;
-    }
-    
-    public static long rmdir(String path) {
-        return rmdir(path, null);
     }
     
     public static long rmdir(String path, ThreadContext tc) {
@@ -655,7 +644,10 @@ public final class Ops {
             Files.delete(path_o);
         }
         catch (IOException e) {
-            return -1;
+            die_s("nqp::rmdir: " + e.getClass().getSimpleName() + ": " + e.getMessage(), tc);            
+        }
+        catch (Exception e) {
+            die_s("nqp::rmdir: unhandled exception", tc);
         }
         return 0;
     }
@@ -669,24 +661,19 @@ public final class Ops {
     	return null;
     }
         
-    public static long mkdir(String path, long mode) {
-        return mkdir(path, mode, null);
-    }
-    
     public static long mkdir(String path, long mode, ThreadContext tc) {
         try {
             Files.createDirectory(Paths.get(path),
                         PosixFilePermissions.asFileAttribute(modeToPosixFilePermission(mode)));
         }
+        catch (IOException e) {
+            die_s("nqp::mkdir: " + e.getClass().getSimpleName() + ": " + e.getMessage(), tc);            
+        }
         catch (Exception e) {
-            return -1;
+            die_s("nqp::mkdir: unhandled exception", tc);
         }
 
         return 0;
-    }
-    
-    public static long rename(String before, String after) {
-        return rename(before, after, null);
     }
     
     public static long rename(String before, String after, ThreadContext tc) {
@@ -695,14 +682,13 @@ public final class Ops {
         try {
             Files.move(before_o, after_o);
         }
+        catch (IOException e) {
+            die_s("nqp::rename: " + e.getClass().getSimpleName() + ": " + e.getMessage(), tc);            
+        }
         catch (Exception e) {
-            return -1;
+            die_s("nqp::rename: unhandled exception", tc);
         }
         return 0;
-    }
-    
-    public static long copy(String before, String after) {
-        return copy(before, after, null);
     }
     
     public static long copy(String before, String after, ThreadContext tc) {
@@ -711,15 +697,13 @@ public final class Ops {
         try {
             Files.copy(before_o, after_o);
         }
+        catch (IOException e) {
+            die_s("nqp::copy: " + e.getClass().getSimpleName() + ": " + e.getMessage(), tc);            
+        }
         catch (Exception e) {
-            return -1;
-//            die_s(e.getMessage(), tc);
+            die_s("nqp::copy: unhandled exception", tc);
         }
         return 0;
-    }
-    
-    public static long link(String before, String after) {
-        return link(before, after, null);
     }
     
     public static long link(String before, String after, ThreadContext tc) {
@@ -728,8 +712,11 @@ public final class Ops {
         try {
             Files.createLink(before_o, after_o);
         }
+        catch (IOException e) {
+            die_s("nqp::link: " + e.getClass().getSimpleName() + ": " + e.getMessage(), tc);            
+        }
         catch (Exception e) {
-            return -1;
+            die_s("nqp::link: unhandled exception", tc);
         }
         return 0;
     }
@@ -775,18 +762,17 @@ public final class Ops {
         return retval << 8;
     }
     
-    public static long symlink(String before, String after) {
-        return symlink(before, after, null);
-    }
-    
     public static long symlink(String before, String after, ThreadContext tc) {
         Path before_o = Paths.get(before);
         Path after_o = Paths.get(after);
         try {
             Files.createSymbolicLink(before_o, after_o);
         }
+        catch (IOException e) {
+            die_s("nqp::symlink: " + e.getClass().getSimpleName() + ": " + e.getMessage(), tc);            
+        }
         catch (Exception e) {
-            return -1;
+            die_s("nqp::symlink: unhandled exception", tc);
         }
         return 0;
     }
