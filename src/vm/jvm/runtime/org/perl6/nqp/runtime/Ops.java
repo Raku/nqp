@@ -611,11 +611,8 @@ public final class Ops {
             Set<PosixFilePermission> perms = modeToPosixFilePermission(mode);
             Files.setPosixFilePermissions(path_o, perms);
         }
-        catch (IOException e) {
-            die_s("nqp::chmod: " + e.getClass().getSimpleName() + ": " + e.getMessage(), tc);            
-        }
         catch (Exception e) {
-            die_s("nqp::chmod: unhandled exception", tc);
+            die_s(IOExceptionMessages.message(e), tc);
         }
         return 0;
     }
@@ -626,11 +623,8 @@ public final class Ops {
                 return -2;
             }
         }
-        catch (IOException e) {
-            die_s("nqp::unlink: " + e.getClass().getSimpleName() + ": " + e.getMessage(), tc);            
-        }
         catch (Exception e) {
-            die_s("nqp::unlink: unhandled exception", tc);
+            die_s(IOExceptionMessages.message(e), tc);
         }
         return 0;
     }
@@ -643,11 +637,8 @@ public final class Ops {
             }
             Files.delete(path_o);
         }
-        catch (IOException e) {
-            die_s("nqp::rmdir: " + e.getClass().getSimpleName() + ": " + e.getMessage(), tc);            
-        }
         catch (Exception e) {
-            die_s("nqp::rmdir: unhandled exception", tc);
+            die_s(IOExceptionMessages.message(e), tc);
         }
         return 0;
     }
@@ -666,13 +657,9 @@ public final class Ops {
             Files.createDirectory(Paths.get(path),
                         PosixFilePermissions.asFileAttribute(modeToPosixFilePermission(mode)));
         }
-        catch (IOException e) {
-            die_s("nqp::mkdir: " + e.getClass().getSimpleName() + ": " + e.getMessage(), tc);            
-        }
         catch (Exception e) {
-            die_s("nqp::mkdir: unhandled exception", tc);
+            die_s(IOExceptionMessages.message(e), tc);
         }
-
         return 0;
     }
     
@@ -682,11 +669,8 @@ public final class Ops {
         try {
             Files.move(before_o, after_o);
         }
-        catch (IOException e) {
-            die_s("nqp::rename: " + e.getClass().getSimpleName() + ": " + e.getMessage(), tc);            
-        }
         catch (Exception e) {
-            die_s("nqp::rename: unhandled exception", tc);
+            die_s(IOExceptionMessages.message(e), tc);
         }
         return 0;
     }
@@ -697,11 +681,8 @@ public final class Ops {
         try {
             Files.copy(before_o, after_o);
         }
-        catch (IOException e) {
-            die_s("nqp::copy: " + e.getClass().getSimpleName() + ": " + e.getMessage(), tc);            
-        }
         catch (Exception e) {
-            die_s("nqp::copy: unhandled exception", tc);
+            die_s(IOExceptionMessages.message(e), tc);
         }
         return 0;
     }
@@ -712,11 +693,8 @@ public final class Ops {
         try {
             Files.createLink(before_o, after_o);
         }
-        catch (IOException e) {
-            die_s("nqp::link: " + e.getClass().getSimpleName() + ": " + e.getMessage(), tc);            
-        }
         catch (Exception e) {
-            die_s("nqp::link: unhandled exception", tc);
+            die_s(IOExceptionMessages.message(e), tc);
         }
         return 0;
     }
@@ -768,11 +746,8 @@ public final class Ops {
         try {
             Files.createSymbolicLink(before_o, after_o);
         }
-        catch (IOException e) {
-            die_s("nqp::symlink: " + e.getClass().getSimpleName() + ": " + e.getMessage(), tc);            
-        }
         catch (Exception e) {
-            die_s("nqp::symlink: unhandled exception", tc);
+            die_s(IOExceptionMessages.message(e), tc);
         }
         return 0;
     }
