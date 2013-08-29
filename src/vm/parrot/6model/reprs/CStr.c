@@ -49,6 +49,34 @@ static void set_str(PARROT_INTERP, STable *st, void *data, STRING *value) {
     body->cstr = Parrot_str_to_encoded_cstring(interp, value, encoding);
 }
 
+static STRING *get_str(PARROT_INTERP, STable *st, void *data) {
+    CStrBody *body = (CStrBody *) data;
+    PMC *old_ctx, *cappy, *meth, *enc_pmc;
+    STRING *enc;
+    STR_VTABLE *encoding;
+
+    if (!body->cstr)
+        return (STRING *) NULL;
+
+    /* Look up "encoding" method. */
+    meth = VTABLE_find_method(interp, st->WHAT,
+        Parrot_str_new_constant(interp, "encoding"));
+    if (PMC_IS_NULL(meth))
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "CStr representation expects an 'encoding' method, specifying the encoding");
+
+    old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
+    VTABLE_push_pmc(interp, cappy, st->WHAT);
+    Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
+    cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
+    enc_pmc = decontainerize(interp, VTABLE_get_pmc_keyed_int(interp, cappy, 0));
+    enc = REPR(enc_pmc)->box_funcs->get_str(interp, STABLE(enc_pmc), OBJECT_BODY(enc_pmc));
+
+    return Parrot_str_new_from_cstring(interp, body->cstr, enc);
+}
+
 /* Creates a new type object of this representation, and associates it with
  * the given HOW. */
 static PMC *type_object_for(PARROT_INTERP, PMC *HOW) {
@@ -103,7 +131,7 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     storage_spec spec;
     spec.inlineable = STORAGE_SPEC_REFERENCE;
     spec.boxed_primitive = STORAGE_SPEC_BP_STR;
-    spec.can_box = 0;
+    spec.can_box = STORAGE_SPEC_CAN_BOX_STR;
     spec.bits = sizeof(void *) * 8;;
     spec.align = ALIGNOF1(void *);
     return spec;
@@ -126,6 +154,7 @@ REPROps *CStr_initialize(PARROT_INTERP,
     this_repr->get_storage_spec = get_storage_spec;
     this_repr->box_funcs = mem_allocate_typed(REPROps_Boxing);
     this_repr->box_funcs->set_str = set_str;
+    this_repr->box_funcs->get_str = get_str;
 
     return this_repr;
 }
