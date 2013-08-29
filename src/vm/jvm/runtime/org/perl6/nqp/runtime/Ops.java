@@ -604,6 +604,10 @@ public final class Ops {
     }
     
     public static long chmod(String path, long mode) {
+        return chmod(path, mode, null);
+    }
+    
+    public static long chmod(String path, long mode, ThreadContext tc) {
         Path path_o;
         try {
             path_o = Paths.get(path);
@@ -623,6 +627,10 @@ public final class Ops {
     }
     
     public static long unlink(String path) {
+        return unlink(path, null);
+    }
+    
+    public static long unlink(String path, ThreadContext tc) {
         try {
             if(!Files.deleteIfExists(Paths.get(path))) {
                 return -2;
@@ -635,6 +643,10 @@ public final class Ops {
     }
     
     public static long rmdir(String path) {
+        return rmdir(path, null);
+    }
+    
+    public static long rmdir(String path, ThreadContext tc) {
         Path path_o = Paths.get(path);
         try {
             if (!Files.isDirectory(path_o)) {
@@ -656,8 +668,12 @@ public final class Ops {
     	die_s("chdir is not available on JVM", tc);
     	return null;
     }
-    
+        
     public static long mkdir(String path, long mode) {
+        return mkdir(path, mode, null);
+    }
+    
+    public static long mkdir(String path, long mode, ThreadContext tc) {
         try {
             Files.createDirectory(Paths.get(path),
                         PosixFilePermissions.asFileAttribute(modeToPosixFilePermission(mode)));
@@ -670,6 +686,10 @@ public final class Ops {
     }
     
     public static long rename(String before, String after) {
+        return rename(before, after, null);
+    }
+    
+    public static long rename(String before, String after, ThreadContext tc) {
         Path before_o = Paths.get(before);
         Path after_o = Paths.get(after);
         try {
@@ -682,6 +702,10 @@ public final class Ops {
     }
     
     public static long copy(String before, String after) {
+        return copy(before, after, null);
+    }
+    
+    public static long copy(String before, String after, ThreadContext tc) {
         Path before_o = Paths.get(before);
         Path after_o = Paths.get(after);
         try {
@@ -689,11 +713,16 @@ public final class Ops {
         }
         catch (Exception e) {
             return -1;
+//            die_s(e.getMessage(), tc);
         }
         return 0;
     }
     
     public static long link(String before, String after) {
+        return link(before, after, null);
+    }
+    
+    public static long link(String before, String after, ThreadContext tc) {
         Path before_o = Paths.get(before);
         Path after_o = Paths.get(after);
         try {
@@ -747,6 +776,10 @@ public final class Ops {
     }
     
     public static long symlink(String before, String after) {
+        return symlink(before, after, null);
+    }
+    
+    public static long symlink(String before, String after, ThreadContext tc) {
         Path before_o = Paths.get(before);
         Path after_o = Paths.get(after);
         try {
