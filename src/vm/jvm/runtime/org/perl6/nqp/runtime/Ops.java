@@ -15,6 +15,7 @@ import java.nio.charset.Charset;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
@@ -603,38 +604,32 @@ public final class Ops {
         return perms;
     }
     
-    public static long chmod(String path, long mode) {
+    public static long chmod(String path, long mode, ThreadContext tc) {
         Path path_o;
         try {
             path_o = Paths.get(path);
-        }
-        catch (Exception e) {
-            return -1;
-        }
-        
-        Set<PosixFilePermission> perms = modeToPosixFilePermission(mode);
-        try {
+            Set<PosixFilePermission> perms = modeToPosixFilePermission(mode);
             Files.setPosixFilePermissions(path_o, perms);
         }
         catch (Exception e) {
-            return -1;
+            die_s(IOExceptionMessages.message(e), tc);
         }
         return 0;
     }
     
-    public static long unlink(String path) {
+    public static long unlink(String path, ThreadContext tc) {
         try {
             if(!Files.deleteIfExists(Paths.get(path))) {
                 return -2;
             }
         }
-        catch (IOException e) {
-            return -1;
+        catch (Exception e) {
+            die_s(IOExceptionMessages.message(e), tc);
         }
         return 0;
     }
     
-    public static long rmdir(String path) {
+    public static long rmdir(String path, ThreadContext tc) {
         Path path_o = Paths.get(path);
         try {
             if (!Files.isDirectory(path_o)) {
@@ -642,8 +637,8 @@ public final class Ops {
             }
             Files.delete(path_o);
         }
-        catch (IOException e) {
-            return -1;
+        catch (Exception e) {
+            die_s(IOExceptionMessages.message(e), tc);
         }
         return 0;
     }
@@ -656,51 +651,50 @@ public final class Ops {
     	die_s("chdir is not available on JVM", tc);
     	return null;
     }
-    
-    public static long mkdir(String path, long mode) {
+        
+    public static long mkdir(String path, long mode, ThreadContext tc) {
         try {
             Files.createDirectory(Paths.get(path),
                         PosixFilePermissions.asFileAttribute(modeToPosixFilePermission(mode)));
         }
         catch (Exception e) {
-            return -1;
+            die_s(IOExceptionMessages.message(e), tc);
         }
-
         return 0;
     }
     
-    public static long rename(String before, String after) {
+    public static long rename(String before, String after, ThreadContext tc) {
         Path before_o = Paths.get(before);
         Path after_o = Paths.get(after);
         try {
             Files.move(before_o, after_o);
         }
         catch (Exception e) {
-            return -1;
+            die_s(IOExceptionMessages.message(e), tc);
         }
         return 0;
     }
     
-    public static long copy(String before, String after) {
+    public static long copy(String before, String after, ThreadContext tc) {
         Path before_o = Paths.get(before);
         Path after_o = Paths.get(after);
         try {
             Files.copy(before_o, after_o);
         }
         catch (Exception e) {
-            return -1;
+            die_s(IOExceptionMessages.message(e), tc);
         }
         return 0;
     }
     
-    public static long link(String before, String after) {
+    public static long link(String before, String after, ThreadContext tc) {
         Path before_o = Paths.get(before);
         Path after_o = Paths.get(after);
         try {
             Files.createLink(before_o, after_o);
         }
         catch (Exception e) {
-            return -1;
+            die_s(IOExceptionMessages.message(e), tc);
         }
         return 0;
     }
@@ -746,14 +740,14 @@ public final class Ops {
         return retval << 8;
     }
     
-    public static long symlink(String before, String after) {
+    public static long symlink(String before, String after, ThreadContext tc) {
         Path before_o = Paths.get(before);
         Path after_o = Paths.get(after);
         try {
             Files.createSymbolicLink(before_o, after_o);
         }
         catch (Exception e) {
-            return -1;
+            die_s(IOExceptionMessages.message(e), tc);
         }
         return 0;
     }
