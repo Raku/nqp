@@ -10,11 +10,19 @@ import org.perl6.nqp.runtime.ThreadContext;
 
 public class SocketHandle extends SyncHandle {
 
-    public SocketHandle(ThreadContext tc, String host, int port) {
+    public SocketHandle(ThreadContext tc) {
         try {
-            InetSocketAddress addr = InetSocketAddress.createUnresolved(host, port);
-            chan = SocketChannel.open(addr);
+            chan = SocketChannel.open();
             setEncoding(tc, Charset.forName("UTF-8"));
+        } catch (IOException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
+        }
+    }
+    
+    public void connect(ThreadContext tc, String host, int port) {
+        try {
+            InetSocketAddress addr = new InetSocketAddress(host, port);
+            ((SocketChannel)chan).connect(addr);
         } catch (IOException e) {
             throw ExceptionHandling.dieInternal(tc, e);
         }

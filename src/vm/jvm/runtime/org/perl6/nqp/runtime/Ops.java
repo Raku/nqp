@@ -11,11 +11,11 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
@@ -43,6 +43,7 @@ import org.perl6.nqp.io.IIOInteractive;
 import org.perl6.nqp.io.IIOSeekable;
 import org.perl6.nqp.io.IIOSyncReadable;
 import org.perl6.nqp.io.IIOSyncWritable;
+import org.perl6.nqp.io.SocketHandle;
 import org.perl6.nqp.io.StandardReadHandle;
 import org.perl6.nqp.io.StandardWriteHandle;
 import org.perl6.nqp.jast2bc.JASTToJVMBytecode;
@@ -278,6 +279,21 @@ public final class Ops {
         IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
         h.handle = new AsyncFileHandle(tc, path, mode);
         return h;
+    }
+
+    public static SixModelObject socket(ThreadContext tc) {
+        SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType;
+        IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
+        h.handle = new SocketHandle(tc);
+        return h;
+    }
+
+    public static SixModelObject connect(SixModelObject obj, String host, long port, ThreadContext tc) {
+        IOHandleInstance h = (IOHandleInstance)obj;
+        if (h.handle instanceof SocketHandle) {
+            ((SocketHandle)h.handle).connect(tc, host, (int) port);            
+        }
+        return obj;
     }
 
     public static long filereadable(String path, ThreadContext tc) {
