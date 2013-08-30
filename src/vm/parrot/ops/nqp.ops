@@ -455,6 +455,8 @@ static INTVAL Run_OS_Command(PARROT_INTERP, STRING *command, PMC *env_hash)
 
         if (status)
             PARROT_FORCE_EXIT(status);
+        
+        _exit(0);
     }
 
     /* make gcc happy */
