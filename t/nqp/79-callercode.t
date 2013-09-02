@@ -1,4 +1,4 @@
-plan(3);
+plan(5);
 
 sub foo_inner() {
   my $caller := nqp::callercode();
@@ -28,3 +28,23 @@ sub bar($arg) {
 }
 nqp::setcodeobj(&bar,"first");
 bar(1);
+
+class Foo {
+  has $!attr;
+  method a($arg) {
+    if $arg == 1 {
+      $!attr := 100;
+      self.b(1);
+    } elsif $arg == 2 {
+      ok(1,'nqp::callercode work for methods'); 
+      ok($!attr == 110,'the attribute has the correct value'); 
+    }
+  }
+  method b($arg) {
+    $!attr := $!attr + 10;
+    my $caller := nqp::callercode();
+    $caller(self,2);
+  }
+}
+my $foo := Foo.new();
+$foo.a(1);
