@@ -631,7 +631,7 @@ class NQPMatch is NQPCapture {
         if self.Bool() {
             my @chunks;
             
-            sub dump_match($key, $value) {
+            my sub dump_match(@chunks, $indent, $key, $value) {
                 nqp::push(@chunks, nqp::x(' ', $indent));
                 nqp::push(@chunks, '- ');
                 nqp::push(@chunks, $key);
@@ -648,7 +648,7 @@ class NQPMatch is NQPCapture {
                 }
             }
             
-            sub dump_match_array($key, @matches) {
+            my sub dump_match_array(@chunks, $indent, $key, @matches) {
                 nqp::push(@chunks, nqp::x(' ', $indent));
                 nqp::push(@chunks, '- ');
                 nqp::push(@chunks, $key);
@@ -664,15 +664,16 @@ class NQPMatch is NQPCapture {
             for self.list() {
                 if $_ {
                     nqp::islist($_)
-                        ?? dump_match_array($i, $_)
-                        !! dump_match($i, $_);
+                        ?? dump_match_array(@chunks, $indent, $i, $_)
+                        !! dump_match(@chunks, $indent, $i, $_);
                 }
+                $i := $i + 1;
             }
             for self.hash() {
                 if $_.value {
                     nqp::islist($_.value)
-                        ?? dump_match_array($_.key, $_.value)
-                        !! dump_match($_.key, $_.value);
+                        ?? dump_match_array(@chunks, $indent, $_.key, $_.value)
+                        !! dump_match(@chunks, $indent, $_.key, $_.value);
                 }
             }
             return join('', @chunks);
