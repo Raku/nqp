@@ -599,9 +599,7 @@ class QAST::Compiler is HLL::Compiler {
             # Set compilation unit ID, name and, if applicable, outer.
             $sub.subid($node.cuid);
             if nqp::istype($block.outer, BlockInfo) {
-                if $node.name ne 'ed_os_thread' && $node.name ne 'ed_green_thread' {
-                    $sub.pirflags(':anon :lex :outer(' ~ self.escape($block.outer.qast.cuid) ~ ')');
-                }
+                $sub.pirflags(':anon :lex :outer(' ~ self.escape($block.outer.qast.cuid) ~ ')');
             }
             else {
                 $sub.pirflags(':anon :lex');
