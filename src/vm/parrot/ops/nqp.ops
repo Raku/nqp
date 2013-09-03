@@ -2330,7 +2330,7 @@ inline op repr_get_primitive_type_spec(out INT, invar PMC) :base_core {
     PMC *var = decontainerize(interp, $2);
     if (var->vtable->base_type == smo_id) {
         storage_spec ss = REPR(var)->get_storage_spec(interp, STABLE(var));
-        $1 = ss.boxed_primitive;
+        $1 = ss.inlineable ? ss.boxed_primitive : STORAGE_SPEC_BP_NONE;
     }
     else if (var->vtable->base_type == enum_class_Integer) {
         $1 = STORAGE_SPEC_BP_INT;
