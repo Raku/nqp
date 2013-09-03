@@ -1,6 +1,6 @@
 #! nqp
 
-say("1..0 skip design changes, need re-work");
+say("1..0 # Skipped: design changes, need re-work");
 
 # plan(4);
 #
