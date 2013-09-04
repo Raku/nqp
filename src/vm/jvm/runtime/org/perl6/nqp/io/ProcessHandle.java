@@ -23,7 +23,7 @@ public class ProcessHandle extends SyncHandle {
     public ProcessHandle(ThreadContext tc, String cmd, String dir, Map<String, String> env) {
         ProcessBuilder pb = new ProcessBuilder("sh", "-c", cmd);
         pb.directory(new File(dir));
-        pb.redirectError(Redirect.INHERIT);
+        pb.redirectErrorStream(true);
 
         // Clear the JVM inherited environment and use provided only
         Map<String, String> pbEnv = pb.environment();

@@ -754,7 +754,11 @@ public final class Ops {
         return 0;
     }
     
-    public static SixModelObject openpipe(String cmd, String dir, SixModelObject envObj, ThreadContext tc) {
+    public static SixModelObject openpipe(String cmd, String dir, 
+            SixModelObject envObj, String errPath, ThreadContext tc) {
+        
+        // TODO: errPath NYI
+        
         Map<String, String> env = new HashMap<String, String>();
         SixModelObject iter = iter(envObj, tc);
         while (istrue(iter, tc) != 0) {
