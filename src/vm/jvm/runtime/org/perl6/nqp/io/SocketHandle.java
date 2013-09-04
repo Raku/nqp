@@ -19,6 +19,11 @@ public class SocketHandle extends SyncHandle {
         }
     }
     
+    public SocketHandle(ThreadContext tc, SocketChannel existing) {
+        chan = existing;
+        setEncoding(tc, Charset.forName("UTF-8"));
+    }
+    
     public void connect(ThreadContext tc, String host, int port) {
         try {
             InetSocketAddress addr = new InetSocketAddress(host, port);
