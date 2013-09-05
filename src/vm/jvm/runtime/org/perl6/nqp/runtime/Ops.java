@@ -39,6 +39,7 @@ import org.perl6.nqp.io.IIOAsyncReadable;
 import org.perl6.nqp.io.IIOClosable;
 import org.perl6.nqp.io.IIOEncodable;
 import org.perl6.nqp.io.IIOInteractive;
+import org.perl6.nqp.io.IIOLineSeparable;
 import org.perl6.nqp.io.IIOSeekable;
 import org.perl6.nqp.io.IIOSyncReadable;
 import org.perl6.nqp.io.IIOSyncWritable;
@@ -440,6 +441,23 @@ public final class Ops {
         else {
             throw ExceptionHandling.dieInternal(tc,
                 "setencoding requires an object with the IOHandle REPR");
+        }
+        return obj;
+    }
+    
+    public static SixModelObject setinputlinesep(SixModelObject obj, String sep, ThreadContext tc) {
+        if (obj instanceof IOHandleInstance) {
+            IOHandleInstance h = (IOHandleInstance)obj;
+        
+            if (h.handle instanceof IIOLineSeparable)
+                ((IIOLineSeparable)h.handle).setInputLineSeparator(tc, sep);
+            else
+                throw ExceptionHandling.dieInternal(tc,
+                    "This handle does not support setting input line separator");
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc,
+                "setinputlinesep requires an object with the IOHandle REPR");
         }
         return obj;
     }

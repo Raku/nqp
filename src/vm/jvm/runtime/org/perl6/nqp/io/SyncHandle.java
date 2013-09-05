@@ -13,13 +13,14 @@ import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.ThreadContext;
 
 public abstract class SyncHandle implements IIOClosable, IIOEncodable, 
-        IIOSyncReadable, IIOSyncWritable {
+        IIOSyncReadable, IIOSyncWritable, IIOLineSeparable {
     
     protected ByteChannel chan;
     protected CharsetEncoder enc;
     protected CharsetDecoder dec;
     protected boolean eof = false;
     protected ByteBuffer readBuffer;
+    protected byte[] linesep = { '\n' };
     
     public void close(ThreadContext tc) {
         try {
@@ -84,9 +85,19 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
                 int start = readBuffer.position();
                 int end = start;
                 while (!foundLine && end < readBuffer.limit()) {
-                    if (readBuffer.get(end) == '\n')
+                    int index = 0;
+                    while (index < linesep.length
+                            && end + index < readBuffer.limit()
+                            && readBuffer.get(end + index) == linesep[index])
+                        index++;
+                    
+                    if (index == linesep.length)
+                    {
+                        end += index;
                         foundLine = true;
-                    end++;
+                    } else {
+                        end++;
+                    }
                 }
                 
                 /* Copy what we found into the results. */
@@ -168,5 +179,14 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
     public void say(ThreadContext tc, String s) {
         print(tc, s);
         print(tc, System.lineSeparator());
+    }
+
+    public void setInputLineSeparator(ThreadContext tc, String sep) {
+        try {
+            linesep = enc.charset().newEncoder().encode(
+                CharBuffer.wrap(sep)).array();
+        } catch (IOException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
+        }
     }
 }
