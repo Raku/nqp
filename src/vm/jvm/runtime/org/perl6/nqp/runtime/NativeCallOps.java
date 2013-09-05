@@ -9,11 +9,11 @@ public final class NativeCallOps {
         return 1L;
     }
 
-    public static long build() {
+    public static long build(SixModelObject target, String libname, String symbol, String convention, SixModelObject arguments, SixModelObject returns) {
         return 1L;
     }
 
-    public static SixModelObject call() {
+    public static SixModelObject call(SixModelObject returns, SixModelObject call, SixModelObject arguments) {
         return null;
     }
 }
