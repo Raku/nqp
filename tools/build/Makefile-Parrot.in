@@ -1103,10 +1103,10 @@ t/*/*.t: all
 	prove -r -v --exec ./$(NQP_EXE) $@
 
 test: all
-	prove -r --exec ./$(NQP_EXE) t/nqp t/parrot t/hll t/qregex t/p5regex t/qast t/serialization
+	prove -r --exec "./$(NQP_EXE) --vmlibs=nqp_dyncall_ops" t/nqp t/parrot t/hll t/qregex t/p5regex t/qast t/serialization t/nativecall
 
 test-loud: all
-	prove -r -v --exec ./$(NQP_EXE) t/nqp t/parrot t/hll t/qregex t/p5regex t/qast t/serialization
+	prove -r -v --exec "./$(NQP_EXE) --vmlibs=nqp_dyncall_ops" t/nqp t/parrot t/hll t/qregex t/p5regex t/qast t/serialization t/nativecall
 
 core-test: $(NQP_EXE)
 	prove -r --exec ./$(NQP_EXE) t/nqp t/parrot
