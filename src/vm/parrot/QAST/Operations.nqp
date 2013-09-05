@@ -2057,6 +2057,7 @@ QAST::Operations.add_core_pirop_mapping('fromnum_I', 'nqp_bigint_from_num', 'PNP
 QAST::Operations.add_core_pirop_mapping('tonum_I', 'nqp_bigint_to_num', 'NP', :inlinable(1));
 
 # native call ops
+QAST::Operations.add_core_pirop_mapping('initnativecall', 'nqp_native_call_setup', 'v');
 QAST::Operations.add_core_pirop_mapping('buildnativecall', 'nqp_native_call_build', 'vPsssPP');
 QAST::Operations.add_core_pirop_mapping('nativecall', 'nqp_native_call', 'PPPP');
 QAST::Operations.add_core_pirop_mapping('nativecallrefresh', 'nqp_native_call_wb', 'vP');
