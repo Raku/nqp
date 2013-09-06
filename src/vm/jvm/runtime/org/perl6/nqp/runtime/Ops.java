@@ -15,7 +15,6 @@ import java.nio.charset.Charset;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
@@ -40,9 +39,13 @@ import org.perl6.nqp.io.IIOAsyncReadable;
 import org.perl6.nqp.io.IIOClosable;
 import org.perl6.nqp.io.IIOEncodable;
 import org.perl6.nqp.io.IIOInteractive;
+import org.perl6.nqp.io.IIOLineSeparable;
 import org.perl6.nqp.io.IIOSeekable;
 import org.perl6.nqp.io.IIOSyncReadable;
 import org.perl6.nqp.io.IIOSyncWritable;
+import org.perl6.nqp.io.ProcessHandle;
+import org.perl6.nqp.io.ServerSocketHandle;
+import org.perl6.nqp.io.SocketHandle;
 import org.perl6.nqp.io.StandardReadHandle;
 import org.perl6.nqp.io.StandardWriteHandle;
 import org.perl6.nqp.jast2bc.JASTToJVMBytecode;
@@ -280,6 +283,59 @@ public final class Ops {
         return h;
     }
 
+    public static SixModelObject socket(long listener, ThreadContext tc) {
+        SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType;
+        IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
+        if (listener == 0) {
+            h.handle = new SocketHandle(tc);            
+        } else if (listener > 0) {
+            h.handle = new ServerSocketHandle(tc);
+        } else {
+            ExceptionHandling.dieInternal(tc, 
+                "Socket handle does not support a negative listener value");
+        }
+        return h;
+    }
+
+    public static SixModelObject connect(SixModelObject obj, String host, long port, ThreadContext tc) {
+        IOHandleInstance h = (IOHandleInstance)obj;
+        if (h.handle instanceof SocketHandle) {
+            ((SocketHandle)h.handle).connect(tc, host, (int) port);            
+        } else {
+            ExceptionHandling.dieInternal(tc, 
+                "This handle does not support connect");
+        }
+        return obj;
+    }
+
+    public static SixModelObject bindsock(SixModelObject obj, String host, long port, ThreadContext tc) {
+        IOHandleInstance h = (IOHandleInstance)obj;
+        if (h.handle instanceof ServerSocketHandle) {
+            ((ServerSocketHandle)h.handle).bind(tc, host, (int) port);            
+        } else {
+            ExceptionHandling.dieInternal(tc, 
+                "This handle does not support bind");
+        }
+        return obj;
+    }
+
+    public static SixModelObject accept(SixModelObject obj, ThreadContext tc) {
+        IOHandleInstance listener = (IOHandleInstance)obj;
+        if (listener.handle instanceof ServerSocketHandle) {
+            SocketHandle handle = ((ServerSocketHandle)listener.handle).accept(tc);
+            if (handle != null) {
+                SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType;
+                IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
+                h.handle = handle; 
+                return h;
+            }
+        } else {
+            ExceptionHandling.dieInternal(tc, 
+                "This handle does not support accept");
+        }
+        return null;
+    }
+
     public static long filereadable(String path, ThreadContext tc) {
         Path path_o;
         long res;
@@ -385,6 +441,23 @@ public final class Ops {
         else {
             throw ExceptionHandling.dieInternal(tc,
                 "setencoding requires an object with the IOHandle REPR");
+        }
+        return obj;
+    }
+    
+    public static SixModelObject setinputlinesep(SixModelObject obj, String sep, ThreadContext tc) {
+        if (obj instanceof IOHandleInstance) {
+            IOHandleInstance h = (IOHandleInstance)obj;
+        
+            if (h.handle instanceof IIOLineSeparable)
+                ((IIOLineSeparable)h.handle).setInputLineSeparator(tc, sep);
+            else
+                throw ExceptionHandling.dieInternal(tc,
+                    "This handle does not support setting input line separator");
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc,
+                "setinputlinesep requires an object with the IOHandle REPR");
         }
         return obj;
     }
@@ -698,6 +771,27 @@ public final class Ops {
         }
         return 0;
     }
+    
+    public static SixModelObject openpipe(String cmd, String dir, 
+            SixModelObject envObj, String errPath, ThreadContext tc) {
+        
+        // TODO: errPath NYI
+        
+        Map<String, String> env = new HashMap<String, String>();
+        SixModelObject iter = iter(envObj, tc);
+        while (istrue(iter, tc) != 0) {
+            SixModelObject kv = iter.shift_boxed(tc);
+            String key = iterkey_s(kv, tc);
+            String value = unbox_s(iterval(kv, tc), tc);
+            env.put(key, value);
+        }
+        
+        SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType; 
+        IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
+        h.handle = new ProcessHandle(tc, cmd, dir, env);
+        return h;
+    }
+
 
     // To be removed once shell3 is adopted
     public static long shell1(String cmd, ThreadContext tc) {
@@ -705,22 +799,56 @@ public final class Ops {
     }
 
     public static long shell3(String cmd, String dir, SixModelObject envObj, ThreadContext tc) {
+        Map<String, String> env = new HashMap<String, String>();
+        SixModelObject iter = iter(envObj, tc);
+        while (istrue(iter, tc) != 0) {
+            SixModelObject kv = iter.shift_boxed(tc);
+            String key = iterkey_s(kv, tc);
+            String value = unbox_s(iterval(kv, tc), tc);
+            env.put(key, value);
+        }
+
+        List<String> args = new ArrayList<String>();
+
+        String os = System.getProperty("os.name").toLowerCase();
+        if (os.indexOf("win") >= 0) {
+            args.add("cmd");
+            args.add("/c");
+            args.add(cmd.replace('/', '\\'));
+        } else {
+            args.add("sh");
+            args.add("-c");
+            args.add(cmd);
+        }
+
+        return spawn(args, dir, env);
+    }
+    
+    public static long spawn(SixModelObject argsObj, String dir, SixModelObject envObj, ThreadContext tc) {
+        List<String> args = new ArrayList<String>();
+        SixModelObject argIter = iter(argsObj, tc);
+        while (istrue(argIter, tc) != 0) {
+            SixModelObject v = argIter.shift_boxed(tc);
+            String arg = v.get_str(tc);
+            args.add(arg);
+        }
+            
+        Map<String, String> env = new HashMap<String, String>();            
+        SixModelObject iter = iter(envObj, tc);
+        while (istrue(iter, tc) != 0) {
+            SixModelObject kv = iter.shift_boxed(tc);
+            String key = iterkey_s(kv, tc);
+            String value = unbox_s(iterval(kv, tc), tc);
+            env.put(key, value);
+        }
+            
+        return spawn(args, dir , env);
+    }
+
+    private static long spawn(List<String> args, String dir, Map<String, String> env) {
         long retval = 255;
         try {
-        	Map<String, String> env = new HashMap<String, String>();
-        	
-        	SixModelObject iter = iter(envObj, tc);
-        	while (istrue(iter, tc) != 0) {
-        		SixModelObject kv = iter.shift_boxed(tc);
-        		String key = iterkey_s(kv, tc);
-        		String value = unbox_s(iterval(kv, tc), tc);
-        		env.put(key, value);
-        	}
-
-            String os = System.getProperty("os.name").toLowerCase();
-            ProcessBuilder pb = os.indexOf("win") >= 0
-                ? new ProcessBuilder("cmd", "/c", cmd.replace('/', '\\'))
-                : new ProcessBuilder("sh", "-c", cmd);
+            ProcessBuilder pb = new ProcessBuilder(args);
             pb.directory(new File(dir));
 
             // Clear the JVM inherited environment and use provided only
@@ -729,13 +857,21 @@ public final class Ops {
             pbEnv.putAll(env);
             
             Process proc = pb.inheritIO().start();
-            proc.waitFor();
+
+            boolean finished = false;
+            do {
+                try {
+                    proc.waitFor();
+                    finished = true;
+                } catch (InterruptedException e) {
+                }
+            } while (!finished);
+                
             retval = proc.exitValue();
         }
         catch (IOException e) {
         }
-        catch (InterruptedException e) {
-        }
+
         /* Return exit code left shifted by 8 for POSIX emulation. */
         return retval << 8;
     }
