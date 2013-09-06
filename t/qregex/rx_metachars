@@ -43,7 +43,7 @@ c \n d			abc\ndef	y	logical newline (\n)
 c \n d			abc\rdef	y	logical newline matches \r
 c \n+ d			abc\n\ndef	y	logical newline quantified
 a\n+f			abcdef		n	logical newline (\n)
-c \n d			abc\n\rdef	n	logical newline matches \n\r
+c \n d			abc\n\rdef	n	logical newline doesn't match \n\r
 # todo :pugs<feature>
 c \n d			abc\r\ndef	y	logical newline matches \r\n
 b \n c			abc\ndef	n	logical newline (\n)
