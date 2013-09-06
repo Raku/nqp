@@ -84,32 +84,37 @@ ok(nqp::chars(nqp::readallfh($fh)) == 2, 'switching to ansi results in 2 chars f
 nqp::closefh($fh);
 
 ## chdir
-nqp::chdir('t');
-$fh := nqp::open('../' ~ $test-file, 'r');
-nqp::setencoding($fh, 'utf8');
-ok(nqp::chars(nqp::readallfh($fh)) == 1, 'we can chdir into a subdir');
-nqp::closefh($fh);
+if nqp::getcomp('nqp').backend.name eq 'jvm' {
+    ok(1, "$_ # Skipped: chdir is not possible on jvm") for (33, 34, 35);
+}
+else {
+    nqp::chdir('t');
+    $fh := nqp::open('../' ~ $test-file, 'r');
+    nqp::setencoding($fh, 'utf8');
+    ok(nqp::chars(nqp::readallfh($fh)) == 1, 'we can chdir into a subdir');
+    nqp::closefh($fh);
 
-nqp::chdir('..');
-$fh := nqp::open($test-file, 'r');
-nqp::setencoding($fh, 'utf8');
-ok(nqp::chars(nqp::readallfh($fh)) == 1, 'we can chdir back to the parent dir');
-nqp::closefh($fh);
+    nqp::chdir('..');
+    $fh := nqp::open($test-file, 'r');
+    nqp::setencoding($fh, 'utf8');
+    ok(nqp::chars(nqp::readallfh($fh)) == 1, 'we can chdir back to the parent dir');
+    nqp::closefh($fh);
 
-## mkdir
-nqp::mkdir($test-file ~ '-dir', 0o777);
-nqp::chdir($test-file ~ '-dir');
-$fh := nqp::open('../' ~ $test-file, 'r');
-nqp::setencoding($fh, 'utf8');
-ok(nqp::chars(nqp::readallfh($fh)) == 1, 'we can create a new directory');
-nqp::closefh($fh);
-nqp::chdir('..');
+    ## mkdir
+    nqp::mkdir($test-file ~ '-dir', 0o777);
+    nqp::chdir($test-file ~ '-dir');
+    $fh := nqp::open('../' ~ $test-file, 'r');
+    nqp::setencoding($fh, 'utf8');
+    ok(nqp::chars(nqp::readallfh($fh)) == 1, 'we can create a new directory');
+    nqp::closefh($fh);
+    nqp::chdir('..');
 
-nqp::rmdir($test-file ~ '-dir');
-nqp::unlink($test-file);
+    nqp::rmdir($test-file ~ '-dir');
+    nqp::unlink($test-file);
+}
 
 if nqp::getcomp('nqp').backend.name eq 'parrot' {
-    say("ok $_ # Skipped: readlinefh is broken on parrot") for (36, 37, 38, 39, 40);
+    ok(1, "ok $_ # Skipped: readlinefh is broken on parrot") for (36, 37, 38, 39, 40);
 }
 else {
     $fh := nqp::open('t/nqp/19-readline.txt', 'r');
