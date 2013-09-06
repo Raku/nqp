@@ -750,7 +750,7 @@ inline op repr_defined(out INT, invar PMC) :base_core {
     if (var->vtable->base_type == smo_id)
         $1 = IS_CONCRETE(var);
     else
-        $1 = 1; /* Because other PMCs have no concept of type-object. */
+        $1 = PMC_IS_NULL(var) ? 0 : 1; /* Because other PMCs have no concept of type-object. */
 }
 
 /*
