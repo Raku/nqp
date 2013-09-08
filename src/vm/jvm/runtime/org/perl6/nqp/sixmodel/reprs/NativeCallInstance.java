@@ -1,5 +1,7 @@
 package org.perl6.nqp.sixmodel.reprs;
 
+import com.sun.jna.Function;
+
 import org.perl6.nqp.sixmodel.SixModelObject;
 
 public class NativeCallInstance extends SixModelObject {
@@ -26,4 +28,6 @@ public class NativeCallInstance extends SixModelObject {
     public static final byte ARG_NO_FREE_STR   = 0;
     public static final byte ARG_FREE_STR      = 1;
     public static final byte ARG_FREE_STR_MASK = 1;
+
+    public Function entry_point;
 }
