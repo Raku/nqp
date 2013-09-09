@@ -67,7 +67,7 @@ static void set_str(PARROT_INTERP, STable *st, void *data, STRING *value) {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Unknown encoding passed to CStr representation");
 
-    body->cstr = new_from_cstring(interp, value, encoding);
+    body->cstr = Parrot_str_to_encoded_cstring(interp, value, encoding);
 }
 
 static STRING *get_str(PARROT_INTERP, STable *st, void *data) {
