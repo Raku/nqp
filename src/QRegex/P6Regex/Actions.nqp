@@ -505,7 +505,15 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                     my $ord1 := nqp::ord($rhs);
                     $/.CURSOR.panic("Illegal reversed character range in regex: " ~ ~$_)
                         if $ord0 > $ord1;
-                    $str := nqp::concat($str, nqp::chr($ord0++)) while $ord0 <= $ord1;
+                    if %*RX<i> {
+                        while $ord0 <= $ord1 {
+                            my $c := nqp::chr($ord0++);
+                            $str := nqp::concat($str, nqp::lc($c) ~ nqp::uc($c));
+                        }
+                    }
+                    else {
+                        $str := nqp::concat($str, nqp::chr($ord0++)) while $ord0 <= $ord1;
+                    }
                 }
                 elsif $_[0]<backslash> {
                     my $bs := $_[0]<backslash>.ast;

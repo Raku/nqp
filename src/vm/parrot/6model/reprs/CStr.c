@@ -11,6 +11,27 @@ static REPROps *this_repr;
 static wrap_object_t   wrap_object_func;
 static create_stable_t create_stable_func;
 
+/* This is what Parrot_str_new_from_cstring does but that isn't exported. */
+static STRING *
+new_from_cstring(PARROT_INTERP, const char *buffer, STRING *encodingname)
+{
+    STRING *result = STRINGNULL;
+    if (buffer) {
+        const STR_VTABLE *encoding = STRING_IS_NULL(encodingname) ?
+                Parrot_platform_encoding_ptr :
+                Parrot_find_encoding_by_string(interp, encodingname);
+        if (encoding == NULL)
+            Parrot_ex_throw_from_c_args(interp, NULL,
+                    EXCEPTION_INVALID_ENCODING,
+                    "Invalid encoding");
+        else {
+            int size = strlen(buffer);
+            result = Parrot_str_new_init(interp, buffer, size, encoding, 0);
+        }
+    }
+    return result;
+}
+
 static void set_str(PARROT_INTERP, STable *st, void *data, STRING *value) {
     CStrBody *body = (CStrBody *) data;
     PMC *old_ctx, *cappy, *meth, *enc_pmc;
@@ -74,7 +95,7 @@ static STRING *get_str(PARROT_INTERP, STable *st, void *data) {
     enc_pmc = decontainerize(interp, VTABLE_get_pmc_keyed_int(interp, cappy, 0));
     enc = REPR(enc_pmc)->box_funcs->get_str(interp, STABLE(enc_pmc), OBJECT_BODY(enc_pmc));
 
-    return Parrot_str_new_from_cstring(interp, body->cstr, enc);
+    return new_from_cstring(interp, body->cstr, enc);
 }
 
 /* Creates a new type object of this representation, and associates it with

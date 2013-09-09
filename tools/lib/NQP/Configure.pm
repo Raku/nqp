@@ -2,6 +2,7 @@ package NQP::Configure;
 use strict;
 use warnings;
 use Cwd;
+use File::Copy qw(copy);
 
 use base qw(Exporter);
 our @EXPORT_OK = qw(sorry slurp system_or_die
@@ -358,6 +359,12 @@ sub gen_parrot {
         die "Unable to determine value for 'make' from parrot config\n";
     system_or_die($make, 'install-dev');
     chdir($startdir);
+
+    # That is a hack to get the import-lib in place. Parrot seems unpatchable because
+    # its static build shares the same libname as the import-lib.
+    if (-e "$startdir/parrot/libparrot.lib" && !-e "$startdir/install/bin/libparrot.lib") {
+        copy("$startdir/parrot/libparrot.lib", "$startdir/install/bin/libparrot.lib");
+    }
 
     print "Parrot installed.\n";
     return fill_template_text('@bindir@/parrot@exe@', %config);
