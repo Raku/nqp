@@ -7,7 +7,9 @@ import org.perl6.nqp.sixmodel.reprs.CallCapture;
 import org.perl6.nqp.sixmodel.reprs.CodeRefREPR;
 import org.perl6.nqp.sixmodel.reprs.ContextRef;
 import org.perl6.nqp.sixmodel.reprs.Continuation;
+import org.perl6.nqp.sixmodel.reprs.CArray;
 import org.perl6.nqp.sixmodel.reprs.CPointer;
+import org.perl6.nqp.sixmodel.reprs.CStr;
 import org.perl6.nqp.sixmodel.reprs.IOHandle;
 import org.perl6.nqp.sixmodel.reprs.JavaWrap;
 import org.perl6.nqp.sixmodel.reprs.KnowHOWAttribute;
@@ -78,5 +80,7 @@ public class REPRRegistry {
         addREPR("MultiCache", new MultiCache());
         addREPR("NativeCall", new NativeCall());
         addREPR("CPointer", new CPointer());
+        addREPR("CArray", new CArray());
+        addREPR("CStr", new CStr());
     }
 }
