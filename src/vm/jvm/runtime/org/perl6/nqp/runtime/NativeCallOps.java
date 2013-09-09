@@ -57,6 +57,10 @@ public final class NativeCallOps {
         return toNQPType(tc, call.ret_type, returns, returned);
     }
 
+    public static long refresh(SixModelObject obj) {
+        return 1L;
+    }
+
     private static NativeCallInstance getNativeCallInstance(SixModelObject target) {
         NativeCallInstance call;
         if (target instanceof NativeCallInstance) {
