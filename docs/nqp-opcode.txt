@@ -97,8 +97,8 @@ General notes:
     nqp::bindkey                   pir::set__1QsP
     nqp::atpos                     pir::set__PQi
     nqp::atkey                     pir::set__PQs
-    nqp::existpos                  pir::exists__IQi
-    nqp::existkey                  pir::exists__IQs
+    nqp::existspos                 pir::exists__IQi
+    nqp::existskey                 pir::exists__IQs
     nqp::deletekey                 pir::delete__0Qs
     nqp::elems                     pir::elements__IP
 
