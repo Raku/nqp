@@ -590,23 +590,23 @@ grammar NQP::Grammar is HLL::Grammar {
         ]
 
         [
-        | <?[(]> <args>
-        | ':' \s <args=.arglist>
+        | <parenthesized_arglist>
+        | ':' \s <parenthesized_arglist=.arglist>
         ]**0..1
     }
 
     token term:sym<self> { <sym> » }
 
     token term:sym<identifier> {
-        <deflongname> <?[(]> <args>
+        <deflongname> <parenthesized_arglist>
     }
 
     token term:sym<name> {
-        <name> <args>**0..1
+        <name> <parenthesized_arglist>**0..1
     }
 
     token term:sym<pir::op> {
-        'pir::' $<op>=[\w+] <args>**0..1
+        'pir::' $<op>=[\w+] <parenthesized_arglist>**0..1
     }
 
     token term:sym<pir::const> {
@@ -614,7 +614,7 @@ grammar NQP::Grammar is HLL::Grammar {
     }
 
     token term:sym<nqp::op> {
-        'nqp::' $<op>=[\w+] <args>**0..1
+        'nqp::' $<op>=[\w+] <parenthesized_arglist>**0..1
     }
 
     token term:sym<nqp::const> {
@@ -626,8 +626,8 @@ grammar NQP::Grammar is HLL::Grammar {
         [ <?{ $*MULTINESS eq 'proto' }> || <.panic: '{*} may only appear in proto'> ]
     }
 
-    token args {
-        | '(' <arglist> ')'
+    token parenthesized_arglist {
+        | '(' ~ ')' <arglist>
     }
 
     token arglist {
