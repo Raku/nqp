@@ -47,6 +47,9 @@ General notes:
     nqp::say                       pir::say
     nqp::stat                      pir::stat__Isi
     nqp::open                      pir::open__Pss
+    nqp::getstdout
+    nqp::getstderr
+    nqp::getstdin
 
   arithmetic:
     nqp::add_i                     pir::add__Iii
