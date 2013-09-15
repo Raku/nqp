@@ -55,6 +55,12 @@ General notes:
     ...etc...
     nqp::isnanorinf
 
+  logic:
+    nqp::not 
+
+  bitops:
+    nqp::bitneg
+
   string:
     nqp::chars                     pir::length__Is
     nqp::concat                    pir::concat__Sss
