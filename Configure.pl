@@ -6,7 +6,7 @@ use strict;
 use warnings;
 use Text::ParseWords;
 use Getopt::Long;
-use Cwd;
+use Cwd qw/abs_path cwd/;
 use lib "tools/lib";
 use NQP::Configure qw(cmp_rev read_parrot_config
                       fill_template_file fill_template_text
@@ -40,7 +40,7 @@ MAIN: {
               "Use --with-parrot to specify the parrot executable to use."
     }
 
-    my $prefix      = $options{'prefix'} || cwd().'/install';
+    my $prefix      = abs_path($options{'prefix'} || cwd().'/install');
     my $with_parrot = $options{'with-parrot'};
     my $gen_parrot  = $options{'gen-parrot'};
 
