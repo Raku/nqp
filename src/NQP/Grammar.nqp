@@ -262,6 +262,11 @@ grammar NQP::Grammar is HLL::Grammar {
         <block>
     }
 
+    token statement_control:sym<return> {
+        <sym> \s* <?before ';'>
+        { $*RETURN_USED := 1 }
+    }
+
     proto token statement_prefix { <...> }
     token statement_prefix:sym<BEGIN> { <sym> <blorst> }
     token statement_prefix:sym<INIT> { <sym> <blorst> }
