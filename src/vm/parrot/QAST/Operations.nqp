@@ -2130,7 +2130,38 @@ QAST::Operations.add_core_pirop_mapping('r_elems', 'repr_elems', 'IP', :inlinabl
 
 # object opcodes
 QAST::Operations.add_core_pirop_mapping('bindattr', 'setattribute', '3PPsP', :inlinable(1));
-QAST::Operations.add_core_pirop_mapping('bindattr_i', 'repr_bind_attr_int', '3PPsi', :inlinable(1));
+QAST::Operations.add_core_op('bindattr_i', -> $qastcomp, $op {
+    if +@($op) != 4 {
+        nqp::die('bindattr_i requires four operands');
+    }
+    if $op[1].has_compile_time_value && $op[2].has_compile_time_value {
+        my $hint := -1;
+        my $ops := PIRT::Ops.new();
+        $hint := pir::repr_hint_for__IPs($op[1].compile_time_value, $op[2].compile_time_value);
+        my $hint_reg := $*REGALLOC.fresh_i();
+        $hint := $qastcomp.coerce($qastcomp.as_post($hint), 'I');
+        $ops.push("# this bind_attr is improved");
+        $ops.push($hint);
+        $ops.push_pirop('set', $hint_reg, $hint);
+        $ops.push($qastcomp.as_post(QAST::VM.new(
+            :pirop<repr_bind_attr_int__0PPSII>,
+            $op[0],
+            $op[1],
+            $op[2],
+            $op[3],
+            $hint_reg
+        )));
+        $ops;
+    } else {
+        $qastcomp.as_post(QAST::VM.new(
+            :pirop<repr_bind_attr_int__0PPSI>,
+            $op[0],
+            $op[1],
+            $op[2],
+            $op[3]
+        ))
+    }
+});
 QAST::Operations.add_core_pirop_mapping('bindattr_n', 'repr_bind_attr_num', '3PPsn', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('bindattr_s', 'repr_bind_attr_str', '3PPss', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('getattr', 'getattribute', 'PPPs', :inlinable(1));

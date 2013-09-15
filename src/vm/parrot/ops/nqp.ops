@@ -1031,7 +1031,7 @@ inline op repr_get_attr_int(out INT, invar PMC, invar PMC, in STR, in INT) :base
         if (IS_CONCRETE(obj)) {
             NativeValue value;
             value.type = NATIVE_VALUE_INT;
-            REPR(obj)->attr_funcs->get_attribute_native(interp, STABLE(obj), OBJECT_BODY(obj), ch, name, NO_HINT, &value);
+            REPR(obj)->attr_funcs->get_attribute_native(interp, STABLE(obj), OBJECT_BODY(obj), ch, name, $5, &value);
             $1 = value.value.intval;
         }
         else
@@ -1062,7 +1062,7 @@ inline op repr_get_attr_num(out NUM, invar PMC, invar PMC, in STR, in INT) :base
         if (IS_CONCRETE(obj)) {
             NativeValue value;
             value.type = NATIVE_VALUE_FLOAT;
-            REPR(obj)->attr_funcs->get_attribute_native(interp, STABLE(obj), OBJECT_BODY(obj), ch, name, NO_HINT, &value);
+            REPR(obj)->attr_funcs->get_attribute_native(interp, STABLE(obj), OBJECT_BODY(obj), ch, name, $5, &value);
             $1 = value.value.floatval;
         }
         else
@@ -2355,10 +2355,10 @@ Gets lookup hint for an attribute.
 =cut
 
 */
-inline op repr_hint_for(out INT, invar PMC, invar PMC, in STR) :base_core {
-    PMC *ch = decontainerize(interp, $3);
+inline op repr_hint_for(out INT, invar PMC, in STR) :base_core {
+    PMC *ch = decontainerize(interp, $2);
     if ($2->vtable->base_type == smo_id)
-        $1 = REPR($2)->attr_funcs->hint_for(interp, STABLE($2), $3, $4);
+        $1 = REPR($2)->attr_funcs->hint_for(interp, STABLE($2), ch, $3);
     else
         $1 = NO_HINT;
 }

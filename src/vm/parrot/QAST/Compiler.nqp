@@ -983,20 +983,36 @@ class QAST::Compiler is HLL::Compiler {
             $ops.push($obj);
             $ops.push($han);
             
+            # Get lookup hint if possible.
+            my $hint := -1;
+            if @args[1].has_compile_time_value {
+                $hint := pir::repr_hint_for__IPs(@args[1].compile_time_value, $name);
+            }
+            
             # Go by whether it's a bind or lookup.
             my $type    := type_to_register_type($node.returns);
             my $op_type := type_to_lookup_name($node.returns);
             if $*BINDVAL {
                 my $valpost := self.as_post_clear_bindval($*BINDVAL, :want(nqp::lc($type)));
                 $ops.push($valpost);
-                $ops.push_pirop("repr_bind_attr_$op_type", $obj.result, $han.result,
-                    self.escape($name), $valpost.result);
+                if $hint == -1 {
+                    $ops.push_pirop("repr_bind_attr_$op_type", $obj.result, $han.result,
+                        self.escape($name), $valpost.result);
+                } else {
+                    $ops.push_pirop("repr_bind_attr_$op_type", $obj.result, $han.result,
+                        self.escape($name), $hint, $valpost.result);
+                }
                 $ops.result($valpost.result);
             }
             else {
                 my $res_reg := $*REGALLOC."fresh_{nqp::lc($type)}"();
-                $ops.push_pirop("repr_get_attr_$op_type", $res_reg, $obj.result, $han.result,
-                    self.escape($name));
+                if $hint == -1 {
+                    $ops.push_pirop("repr_get_attr_$op_type", $res_reg, $obj.result, $han.result,
+                        self.escape($name));
+                } else {
+                    $ops.push_pirop("repr_get_attr_$op_type", $res_reg, $obj.result, $han.result,
+                        self.escape($name), $hint);
+                }
                 $ops.result($res_reg);
             }
         }
