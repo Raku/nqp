@@ -1273,7 +1273,7 @@ class NQP::Actions is HLL::Actions {
 
 
     method dotty($/) {
-        my $past := $<args> ?? $<args>[0].ast !! QAST::Op.new( :node($/) );
+        my $past := $<parenthesized_arglist> ?? $<parenthesized_arglist>[0].ast !! QAST::Op.new( :node($/) );
         if $<quote> {
             $past.unshift($<quote>.ast);
             $past.op('callmethod');
@@ -1305,7 +1305,7 @@ class NQP::Actions is HLL::Actions {
     }
 
     method term:sym<identifier>($/) {
-        my $past := $<args>.ast;
+        my $past := $<parenthesized_arglist>.ast;
         $past.name('&' ~ ~$<deflongname>);
         make $past;
     }
@@ -1314,7 +1314,7 @@ class NQP::Actions is HLL::Actions {
         # See if it's a lexical symbol (known in any outer scope).
         my $var;
         if $*W.is_lexical(~$<name>) {
-            unless $<args> {
+            unless $<parenthesized_arglist> {
                 try {
                     my $sym := $*W.find_sym([~$<name>]);
                     unless nqp::isnull(nqp::getobjsc($sym)) {
@@ -1328,7 +1328,7 @@ class NQP::Actions is HLL::Actions {
         }
         else {
             my @ns := nqp::clone($<name><identifier>);
-            unless $<args> {
+            unless $<parenthesized_arglist> {
                 try {
                     my $sym := $*W.find_sym(@ns);
                     unless nqp::isnull(nqp::getobjsc($sym)) {
@@ -1343,15 +1343,15 @@ class NQP::Actions is HLL::Actions {
         
         # If it's a call, add the arguments.
         my $past := $var;
-        if $<args> {
-            $past := $<args>[0].ast;
+        if $<parenthesized_arglist> {
+            $past := $<parenthesized_arglist>[0].ast;
             $past.unshift($var);
         }
         make $past;
     }
 
     method term:sym<pir::op>($/) {
-        my @args := $<args> ?? $<args>[0].ast.list !! [];
+        my @args := $<parenthesized_arglist> ?? $<parenthesized_arglist>[0].ast.list !! [];
         my $pirop := ~$<op>;
         $pirop := join(' ', nqp::split('__', $pirop));
         make QAST::VM.new( :pirop($pirop), :node($/), |@args );
@@ -1363,7 +1363,7 @@ class NQP::Actions is HLL::Actions {
 
     method term:sym<nqp::op>($/) {
         my $op    := ~$<op>;
-        my @args  := $<args> ?? $<args>[0].ast.list !! [];
+        my @args  := $<parenthesized_arglist> ?? $<parenthesized_arglist>[0].ast.list !! [];
         my $past  := QAST::Op.new( :op($op), |@args, :node($/) );
         make $past;
     }
@@ -1404,7 +1404,7 @@ class NQP::Actions is HLL::Actions {
         make QAST::Op.new( :op('locallifetime'), $stmts, $dc_name );
     }
 
-    method args($/) { make $<arglist>.ast; }
+    method parenthesized_arglist($/) { make $<arglist>.ast; }
 
     method arglist($/) {
         my $past := QAST::Op.new( :op('call'), :node($/) );
