@@ -2128,46 +2128,134 @@ QAST::Operations.add_core_pirop_mapping('r_bindpos_i', 'repr_bind_pos_int', '2Pi
 QAST::Operations.add_core_pirop_mapping('r_bindpos_n', 'repr_bind_pos_num', '2Pin', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('r_elems', 'repr_elems', 'IP', :inlinable(1));
 
+sub str_or_want($op) {
+    nqp::istype($op, QAST::SVal) || nqp::istype($op, QAST::Want) && +@($op)[1] eq 'Ss';
+}
+
+sub val_from_str_or_want($op) {
+    nqp::istype($op, QAST::SVal)
+        ?? $op.value
+        !! $op[2].value
+}
+
 # object opcodes
 QAST::Operations.add_core_pirop_mapping('bindattr', 'setattribute', '3PPsP', :inlinable(1));
-QAST::Operations.add_core_op('bindattr_i', -> $qastcomp, $op {
+QAST::Operations.add_core_pirop_mapping('bindattr_i_nh', 'repr_bind_attr_int', '3PPsi', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('bindattr_i_h', 'repr_bind_attr_int', '3PPsii', :inlinable(1));
+QAST::Operations.add_core_op('bindattr_i', :inlinable(1), -> $qastcomp, $op {
     if +@($op) != 4 {
         nqp::die('bindattr_i requires four operands');
     }
-    if $op[1].has_compile_time_value && $op[2].has_compile_time_value {
-        my $hint := -1;
-        my $ops := PIRT::Ops.new();
-        $hint := pir::repr_hint_for__IPs($op[1].compile_time_value, $op[2].compile_time_value);
-        my $hint_reg := $*REGALLOC.fresh_i();
-        $hint := $qastcomp.coerce($qastcomp.as_post($hint), 'I');
-        $ops.push("# this bind_attr is improved");
-        $ops.push($hint);
-        $ops.push_pirop('set', $hint_reg, $hint);
-        $ops.push($qastcomp.as_post(QAST::VM.new(
-            :pirop<repr_bind_attr_int__0PPSII>,
+    my $hint := -1;
+    if nqp::istype($op[1], QAST::WVal) && str_or_want($op[2]) {
+        $hint := pir::repr_hint_for__IPs($op[1].value, val_from_str_or_want($op[2]));
+    }
+    if $hint != -1 {
+        $qastcomp.as_post(QAST::Op.new(
+            :op('bindattr_i_h'),
             $op[0],
             $op[1],
             $op[2],
             $op[3],
-            $hint_reg
-        )));
-        $ops;
+            QAST::IVal.new(:value($hint))
+        ));
     } else {
-        $qastcomp.as_post(QAST::VM.new(
-            :pirop<repr_bind_attr_int__0PPSI>,
+        $qastcomp.as_post(QAST::Op.new(
+            :op('bindattr_i_nh'),
             $op[0],
             $op[1],
             $op[2],
             $op[3]
-        ))
+        ));
     }
 });
 QAST::Operations.add_core_pirop_mapping('bindattr_n', 'repr_bind_attr_num', '3PPsn', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('bindattr_s', 'repr_bind_attr_str', '3PPss', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('bindattr_s_nh', 'repr_bind_attr_int', '3PPss', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('bindattr_s_h', 'repr_bind_attr_int', '3PPssi', :inlinable(1));
+QAST::Operations.add_core_op('bindattr_s', :inlinable(1), -> $qastcomp, $op {
+    if +@($op) != 4 {
+        nqp::die('bindattr_s requires four operands');
+    }
+    my $hint := -1;
+    if nqp::istype($op[1], QAST::WVal) && str_or_want($op[2]) {
+        $hint := pir::repr_hint_for__IPs($op[1].value, val_from_str_or_want($op[2]));
+    }
+    if $hint != -1 {
+        $qastcomp.as_post(QAST::Op.new(
+            :op('bindattr_s_h'),
+            $op[0],
+            $op[1],
+            $op[2],
+            $op[3],
+            QAST::IVal.new(:value($hint))
+        ));
+    } else {
+        $qastcomp.as_post(QAST::Op.new(
+            :op('bindattr_s_nh'),
+            $op[0],
+            $op[1],
+            $op[2],
+            $op[3]
+        ));
+    }
+});
 QAST::Operations.add_core_pirop_mapping('getattr', 'getattribute', 'PPPs', :inlinable(1));
-QAST::Operations.add_core_pirop_mapping('getattr_i', 'repr_get_attr_int', 'IPPs', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('getattr_i_nh', 'repr_get_attr_int', 'IPPs', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('getattr_i_h', 'repr_get_attr_int', 'IPPsi', :inlinable(1));
+QAST::Operations.add_core_op('getattr_i', :inlinable(1), -> $qastcomp, $op {
+    if +@($op) != 3 {
+        nqp::die('getattr_i requires three operands');
+    }
+    my $hint := -1;
+    if nqp::istype($op[1], QAST::WVal) && str_or_want($op[2]) {
+        $hint := pir::repr_hint_for__IPs($op[1].value, val_from_str_or_want($op[2]));
+    }
+    if $hint != -1 {
+        $qastcomp.as_post(QAST::Op.new(
+            :op('getattr_i_h'),
+            $op[0],
+            $op[1],
+            $op[2],
+            QAST::IVal.new(:value($hint))
+        ));
+    } else {
+        $qastcomp.as_post(QAST::Op.new(
+            :op('getattr_i_nh'),
+            $op[0],
+            $op[1],
+            $op[2]
+        ));
+    }
+});
 QAST::Operations.add_core_pirop_mapping('getattr_n', 'repr_get_attr_num', 'NPPs', :inlinable(1));
-QAST::Operations.add_core_pirop_mapping('getattr_s', 'repr_get_attr_str', 'SPPs', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('getattr_s_nh', 'repr_get_attr_str', 'SPPs', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('getattr_s_h', 'repr_get_attr_str', 'SPPsi', :inlinable(1));
+QAST::Operations.add_core_op('getattr_s', :inlinable(1), -> $qastcomp, $op {
+    if +@($op) != 3 {
+        nqp::die('getattr_s requires three operands');
+    }
+    my $hint := -1;
+    if nqp::istype($op[1], QAST::WVal) && str_or_want($op[2]) {
+        $hint := pir::repr_hint_for__IPs($op[1].value, val_from_str_or_want($op[2]));
+    }
+    if $hint != -1 {
+        $qastcomp.as_post(QAST::Op.new(
+            :op('getattr_s_h'),
+            $op[0],
+            $op[1],
+            $op[2],
+            QAST::IVal.new(:value($hint))
+        ));
+    } else {
+        $qastcomp.as_post(QAST::Op.new(
+            :op('getattr_s_nh'),
+            $op[0],
+            $op[1],
+            $op[2]
+        ));
+    }
+});
 QAST::Operations.add_core_pirop_mapping('attrinited', 'repr_is_attr_initialized', 'IPPs', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('create', 'repr_instance_of', 'PP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('clone', 'repr_clone', 'PP', :inlinable(1));
