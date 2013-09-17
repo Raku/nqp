@@ -16,61 +16,61 @@ variants (e.g. mul_i, mul_n) together with a single description.
 # Arithmetic Opcodes
 
 ## abs
-*  abs_i(Int $i)
-*  abs_n(Num $n)
+*  abs_i(int $i)
+*  abs_n(num $n)
 
 Return the absolute value of a number.
 
 ## add
-*  add_i(Int $l, Int $r)
-*  add_n(Num $l, Num $r)
+*  add_i(int $l, int $r)
+*  add_n(num $l, num $r)
 
 Add two numbers together, returning the result.
 
 ## div
-*  div_i(Int $l, Int $r)
-*  div_n(Num $l, Num $r)
+*  div_i(int $l, int $r)
+*  div_n(num $l, num $r)
 
 Divide $l by $r, returning the result.
 
 ## gcd
-*  gcd_i(Int $l, Int $r)
+*  gcd_i(int $l, int $r)
 
 Return the greatest common multiple of two numbers. 
 
 ## lcm
-*  lcm_i(Int $l, Int $r)
+*  lcm_i(int $l, int $r)
 
 Return the lowest common multiple of two numbers. 
 
 ## mod
-*  mod_i(Int $l, Int $r)
-*  mod_n(Num $l, Num $r)
+*  mod_i(int $l, int $r)
+*  mod_n(num $l, num $r)
 
 Return the modulus of $l by $r.
 
 ## mul
-*  mul_i(Int $l, Int $r)
-*  mul_n(Num $l, Num $r)
+*  mul_i(int $l, int $r)
+*  mul_n(num $l, num $r)
 
 Multiple two numbers, returning the result.
 
 ## neg
-*  neg_i(Int $i)
-*  neg_n(Num $n)
+*  neg_i(int $i)
+*  neg_n(num $n)
 
 Return the negative of a number.
 
 ## sub
-*  sub_i(Int $l, Int $r)
-*  sub_n(Num $l, Num $r)
+*  sub_i(int $l, int $r)
+*  sub_n(num $l, num $r)
 
 Subtract $r from $l, returning the result.
 
 # String Opcodes
 
 ## radix
-*  radix(Int $radix, String $str, Int $pos, Int $flags)
+*  radix(int $radix, String $str, int $pos, int $flags)
 
 Convert string $str into a number starting at offset $pos and using radix $radix.
 The result of the conversion returns an array with
