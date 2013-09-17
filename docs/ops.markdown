@@ -7,12 +7,70 @@ When invoking them directly, you'll need to prefix them with nqp::, e.g.
 
     nqp::mul_n(6,9);
 
-The ops are listed below by type. Each entry shows the name of the op, 
-its arguments and their types, and may provide a short description.
+The ops are listed below by type. Each entry shows the name of the op,
+its variants, and their arguments and types, and may provide a short
+description.  Some opcodes differ only by argument types - in that case,
+they are listed under their common name (e.g. mul), with each of their
+variants (e.g. mul_i, mul_n) together with a single description.
+
+# Arithmetic Opcodes
+
+## abs
+*  abs_i(Int $i)
+*  abs_n(Num $n)
+
+Return the absolute value of a number.
+
+## add
+*  add_i(Int $l, Int $r)
+*  add_n(Num $l, Num $r)
+
+Add two numbers together, returning the result.
+
+## div
+*  div_i(Int $l, Int $r)
+*  div_n(Num $l, Num $r)
+
+Divide $l by $r, returning the result.
+
+## gcd
+*  gcd_i(Int $l, Int $r)
+
+Return the greatest common multiple of two numbers. 
+
+## lcm
+*  lcm_i(Int $l, Int $r)
+
+Return the lowest common multiple of two numbers. 
+
+## mod
+*  mod_i(Int $l, Int $r)
+*  mod_n(Num $l, Num $r)
+
+Return the modulus of $l by $r.
+
+## mul
+*  mul_i(Int $l, Int $r)
+*  mul_n(Num $l, Num $r)
+
+Multiple two numbers, returning the result.
+
+## neg
+*  neg_i(Int $i)
+*  neg_n(Num $n)
+
+Return the negative of a number.
+
+## sub
+*  sub_i(Int $l, Int $r)
+*  sub_n(Num $l, Num $r)
+
+Subtract $r from $l, returning the result.
 
 # String Opcodes
 
-## radix($radix, $str, $pos, $flags)
+## radix
+*  radix(Int $radix, String $str, Int $pos, Int $flags)
 
 Convert string $str into a number starting at offset $pos and using radix $radix.
 The result of the conversion returns an array with
@@ -33,19 +91,22 @@ The $flags is a bitmask that modifies the parse and/or result:
 
 # Miscellaneous Opcodes
 
-## getenvhash()
+## getenvhash
+*  getenvhash()
 
 Returns a hash containing the environment variables.
 Changing the hash doesn't affect the environment variables
 
-## savecapture()
+## savecapture
+*  savecapture()
 
 Gets hold of the argument capture passed to the current block.
 Commits to doing enough copying that the list is valid any amount of time.
 See usecapture for a version of the op that doesn't promise that.
 Used by the multi-dispatcher.
 
-## usecapture()
+## usecapture
+*  usecapture()
 
 Gets hold of the argument capture passed to the current block.
 (a future usecapture may invalidate it)
