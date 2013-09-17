@@ -18,61 +18,61 @@ variants (e.g. mul_i, mul_n) together with a single description.
 ## abs
 *  `abs_i(int $i)`
 *  `abs_n(num $n)`
-*  `abs_I(Int $i)`
+*  `abs_I(Any $i)`
 
 Return the absolute value of a number.
 
 ## add
 *  `add_i(int $l, int $r)`
 *  `add_n(num $l, num $r)`
-*  `add_I(Int $l, Int $r)`
+*  `add_I(Any $l, Any $r)`
 
 Add two numbers together, returning the result.
 
 ## div
 *  `div_i(int $l, int $r)`
 *  `div_n(num $l, num $r)`
-*  `div_I(Int $l, Int $r)`
+*  `div_I(Any $l, Any $r)`
 
 Divide $l by $r, returning the result.
 
 ## gcd
 *  `gcd_i(int $l, int $r)`
-*  `gcd_I(Int $l, Int $r)`
+*  `gcd_I(Any $l, Any $r)`
 
 Return the greatest common multiple of two numbers. 
 
 ## lcm
 *  `lcm_i(int $l, int $r)`
-*  `lcm_I(Int $l, Int $r)`
+*  `lcm_I(Any $l, Any $r)`
 
 Return the lowest common multiple of two numbers. 
 
 ## mod
 *  `mod_i(int $l, int $r)`
 *  `mod_n(num $l, num $r)`
-*  `mod_I(Int $l, Int $r)`
+*  `mod_I(Any $l, Any $r)`
 
 Return the modulus of $l by $r.
 
 ## mul
 *  `mul_i(int $l, int $r)`
 *  `mul_n(num $l, num $r)`
-*  `mul_I(Int $l, Int $r)`
+*  `mul_I(Any $l, Any $r)`
 
 Multiple two numbers, returning the result.
 
 ## neg
 *  `neg_i(int $i)`
 *  `neg_n(num $n)`
-*  `neg_I(Int $i)`
+*  `neg_I(Any $i)`
 
 Return the negative of a number.
 
 ## sub
 *  `sub_i(int $l, int $r)`
 *  `sub_n(num $l, num $r)`
-*  `sub_I(Int $l, Int $r)`
+*  `sub_I(Any $l, Any $r)`
 
 Subtract $r from $l, returning the result.
 
