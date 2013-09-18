@@ -223,6 +223,10 @@ Return non-zero if $l is less than or equal two $r.
 
 Return non-zero if the two parameters are not equal.
 
+# Array opcodes
+
+# Hash opcodes
+
 # String Opcodes
 
 ## radix
@@ -245,7 +249,13 @@ The $flags is a bitmask that modifies the parse and/or result:
     0x04: parse trailing zeroes but do not include in result
           (for parsing values after a decimal point)
 
-# Miscellaneous Opcodes
+# Conditional Opcodes
+
+# Loop/Control Opcodes
+
+# Exceptional Opcodes
+
+# Context Introspection Opcodes
 
 ## getenvhash
 *  `getenvhash()`
