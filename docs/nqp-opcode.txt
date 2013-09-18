@@ -85,19 +85,7 @@ General notes:
     nqp::list_s(str0, str1, ...)   create a low-level string list
     nqp::hash(key0, val0, ...)     create a low-level hash
 
-    nqp::pop                       pir::pop__PP
-    nqp::push                      pir::push__0PP
-    nqp::push_s                    pir::push__0Ps
-    nqp::shift                     pir::shift__PP
-    nqp::unshift                   pir::unshift__0PP
     nqp::splice                    pir::splice__0PPii
-    nqp::bindpos                   pir::set__1QiP
-    nqp::bindkey                   pir::set__1QsP
-    nqp::atpos                     pir::set__PQi
-    nqp::atkey                     pir::set__PQs
-    nqp::existspos                 pir::exists__IQi
-    nqp::existskey                 pir::exists__IQs
-    nqp::deletekey                 pir::delete__0Qs
     nqp::elems                     pir::elements__IP
 
   object:
