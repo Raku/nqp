@@ -2490,7 +2490,6 @@ the container specification selected.
 
 */
 inline op set_container_spec(in PMC, in STR, in PMC) :base_core {
-    PMC *target = decontainerize(interp, $1);
     if ($1->vtable->base_type == smo_id) {
         STable *st = STABLE($1);
         ContainerConfigurer *cc = SixModelObject_get_container_config(interp, $2);
@@ -2526,7 +2525,6 @@ that will handle the invocation. $2/$3 take precedence over $4.
 
 */
 inline op set_invocation_spec(invar PMC, invar PMC, in STR, invar PMC) :base_core {
-    PMC *target = decontainerize(interp, $1);
     if ($1->vtable->base_type == smo_id) {
         STable *st = STABLE($1);
         
