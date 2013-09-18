@@ -227,6 +227,32 @@ Return non-zero if the two parameters are not equal.
 
 # Hash opcodes
 
+## atkey
+* `atkey(Any %hash, String $key)`
+* `atkey_i(int %hash, String $key)`
+* `atkey_n(num %hash, String $key)`
+* `atkey_s(str %hash, String $key)`
+
+Return the value of %hash at key $key.
+
+## bindkey
+* `bindkey(Any %hash, String $key, Any $b)`
+* `bindkey_i(int %hash, String $key, int $b)`
+* `bindkey_n(num %hash, String $key, num $b)`
+* `bindkey_s(str %hash, String $key, str $b)`
+
+Bind key $key of %hash to $b and return $b.
+
+## existskey
+* `existskey(Any %hash, String $key)`
+
+Return non-zero if %hash has key $key bound to something.
+
+## deletekey
+* `deletekey(Any %hash, String $key)`
+
+Delete the given key from %hash.
+
 # String Opcodes
 
 ## radix
