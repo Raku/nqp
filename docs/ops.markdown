@@ -225,6 +225,63 @@ Return non-zero if the two parameters are not equal.
 
 # Array opcodes
 
+## atpos
+* `atpos(Any @arr, int $i)`
+* `atpos_i(int @arr, int $i)`
+* `atpos_n(num @arr, int $i)`
+* `atpos_s(str @arr, int $i)`
+
+Return whatever is bound to @arr at position $i.
+
+## bindpos
+* `bindpos(Any @arr, int $i, Any $b)`
+* `bindpos_i(int @arr, int $i, int $b)`
+* `bindpos_n(num @arr, int $i, num $b)`
+* `bindpos_s(str @arr, int $i, str $b)`
+
+Bind $b to @arr at position $i and return $b.
+
+## push
+* `push(Any @arr, Any $v)`
+* `push_i(int @arr, int $v)`
+* `push_n(num @arr, num $v)`
+* `push_s(str @arr, str $v)`
+
+"Push $v onto the end of @arr."
+Bind $v to @arr at the position at the end of @arr, i.e., the position that is just after the last position of @arr that has been bound to.
+Return the number of elements of @arr on Parrot, $v on JVM.
+
+## pop
+* `pop(Any @arr)`
+* `pop_i(int @arr)`
+* `pop_n(num @arr)`
+* `pop_s(str @arr)`
+
+"Pop the last value off the end of @arr."
+Return the value of @arr at it's last bound position, and unbind @arr at that position.
+
+## unshift
+* `unshift(Any @arr, Any $v)`
+* `unshift_i(int @arr, int $v)`
+* `unshift_n(num @arr, num $v)`
+* `unshift_s(str @arr, str $v)`
+
+"Shift $v into the beginning of @arr."
+Bind $v to @arr at index 0, move all other bindings of @arr to the index one above what they were previously bound to.
+Return the number of elements of @arr on Parrot, $v on JVM.
+
+## shift
+* `shift(Any @arr)`
+* `shift_i(int @arr)`
+* `shift_n(num @arr)`
+* `shift_s(str @arr)`
+
+"Shift the last value from the beginning of @arr."
+Return the value of @arr at index 0, unbind @arr at index 0, and move all other binding of @arr to the index one below what they were previously bound to.
+
+## splice
+* `splice(Any @arr, Any $from, int $offset, int $count)`
+
 # Hash opcodes
 
 ## atkey
