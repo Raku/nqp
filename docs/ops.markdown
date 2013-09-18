@@ -171,6 +171,58 @@ name. `h` indicates a hyperbolic variant.
 ## tanh
 *  `tanh_n(num $n)`
 
+# Relational Opcodes
+
+## cmp
+*  `cmp_i(int $l, int $r)`
+*  `cmp_n(num $l, num $r)`
+*  `cmp_s(str $l, str $r)`
+
+Compare two values, returns -1 if $l is greater than $r, 0 if they are equal,
+and 1 if $r is greater than $l.
+
+## iseq
+*  `iseq_i(int $l, int $r)`
+*  `iseq_n(num $l, num $r)`
+*  `iseq_s(str $l, str $r)`
+
+Return non-zero if the two parameters are equal.
+
+## isgt 
+*  `isgt_i(int $l, int $r)`
+*  `isgt_n(num $l, num $r)`
+*  `isgt_s(str $l, str $r)`
+
+Return non-zero if $l is greater than two $r.
+
+## isge
+*  `isge_i(int $l, int $r)`
+*  `isge_n(num $l, num $r)`
+*  `isge_s(str $l, str $r)`
+
+Return non-zero if $l is greater than or equal two $r.
+
+## islt
+*  `islt_i(int $l, int $r)`
+*  `islt_n(num $l, num $r)`
+*  `islt_s(str $l, str $r)`
+
+Return non-zero if $l is less than two $r.
+
+## isle
+*  `isle_i(int $l, int $r)`
+*  `isle_n(num $l, num $r)`
+*  `isle_s(str $l, str $r)`
+
+Return non-zero if $l is less than or equal two $r.
+
+## isne
+*  `isne_i(int $l, int $r)`
+*  `isne_n(num $l, num $r)`
+*  `isne_s(str $l, str $r)`
+
+Return non-zero if the two parameters are not equal.
+
 # String Opcodes
 
 ## radix

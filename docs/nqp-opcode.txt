@@ -78,13 +78,6 @@ General notes:
     nqp::findcclass                pir::find_cclass__Iisii      (?)
     nqp::findnotcclass             pir::find_not_cclass__Iisii  (?)
 
-  relational:
-    nqp::iseq_i                    pir::iseq__Iii
-    nqp::iseq_n                    pir::iseq__Inn
-    nqp::iseq_s                    pir::iseq__Iss
-    nqp::iseq_I
-    ...etc...
-
   aggregate:
     nqp::list(item0, item1, ...)   create a low-level list
     nqp::qlist(item0, item1, ...)  temporary for QRPA
