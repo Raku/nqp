@@ -590,7 +590,7 @@ grammar NQP::Grammar is HLL::Grammar {
         ]
 
         [
-        | <?[(]> <args>
+        | <args>
         | ':' \s <args=.arglist>
         ]**0..1
     }
@@ -598,7 +598,7 @@ grammar NQP::Grammar is HLL::Grammar {
     token term:sym<self> { <sym> » }
 
     token term:sym<identifier> {
-        <deflongname> <?[(]> <args>
+        <deflongname> <args>
     }
 
     token term:sym<name> {
