@@ -1,3 +1,6 @@
+Opcode information now stored in ops.markdown - please refer
+to that file for any per op documentation (under construction)
+
 General notes:
   * Not really attempting to be exhaustive just yet -- only want
     to get the most significant ones done in this pass.
@@ -50,13 +53,6 @@ General notes:
     nqp::getstdout
     nqp::getstderr
     nqp::getstdin
-
-  arithmetic:
-    nqp::add_i                     pir::add__Iii
-    nqp::add_n                     pir::add__Nnn
-    nqp::add_I
-    ...etc...
-    nqp::isnanorinf
 
   logic:
     nqp::not 
