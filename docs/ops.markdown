@@ -225,31 +225,88 @@ Return non-zero if the two parameters are not equal.
 
 # Array opcodes
 
+## atpos
+* `atpos(Any @arr, int $i)`
+* `atpos_i(int @arr, int $i)`
+* `atpos_n(num @arr, int $i)`
+* `atpos_s(str @arr, int $i)`
+
+Return whatever is bound to @arr at position $i.
+
+## bindpos
+* `bindpos(Any @arr, int $i, Any $v)`
+* `bindpos_i(int @arr, int $i, int $v)`
+* `bindpos_n(num @arr, int $i, num $v)`
+* `bindpos_s(str @arr, int $i, str $v)`
+
+Bind $v to @arr at position $i and return $v.
+
+## push
+* `push(Any @arr, Any $v)`
+* `push_i(int @arr, int $v)`
+* `push_n(num @arr, num $v)`
+* `push_s(str @arr, str $v)`
+
+"Push $v onto the end of @arr."
+Bind $v to @arr at the position at the end of @arr, i.e., the position that is just after the last position of @arr that has been bound to.
+Return the number of elements of @arr on Parrot, $v on JVM.
+
+## pop
+* `pop(Any @arr)`
+* `pop_i(int @arr)`
+* `pop_n(num @arr)`
+* `pop_s(str @arr)`
+
+"Pop the last value off the end of @arr."
+Return the value of @arr at it's last bound position, and unbind @arr at that position.
+
+## unshift
+* `unshift(Any @arr, Any $v)`
+* `unshift_i(int @arr, int $v)`
+* `unshift_n(num @arr, num $v)`
+* `unshift_s(str @arr, str $v)`
+
+"Shift $v into the beginning of @arr."
+Bind $v to @arr at index 0, move all other bindings of @arr to the index one above what they were previously bound to.
+Return the number of elements of @arr on Parrot, $v on JVM.
+
+## shift
+* `shift(Any @arr)`
+* `shift_i(int @arr)`
+* `shift_n(num @arr)`
+* `shift_s(str @arr)`
+
+"Shift the last value from the beginning of @arr."
+Return the value of @arr at index 0, unbind @arr at index 0, and move all other binding of @arr to the index one below what they were previously bound to.
+
+## splice
+* `splice(Any @arr, Any $from, int $offset, int $count)`
+
 # Hash opcodes
 
 ## atkey
-* `atkey(Any %hash, String $key)`
-* `atkey_i(int %hash, String $key)`
-* `atkey_n(num %hash, String $key)`
-* `atkey_s(str %hash, String $key)`
+* `atkey(%hash, String $key)`
+* `atkey_i(%hash, String $key)`
+* `atkey_n(%hash, String $key)`
+* `atkey_s(%hash, String $key)`
 
 Return the value of %hash at key $key.
 
 ## bindkey
-* `bindkey(Any %hash, String $key, Any $b)`
-* `bindkey_i(int %hash, String $key, int $b)`
-* `bindkey_n(num %hash, String $key, num $b)`
-* `bindkey_s(str %hash, String $key, str $b)`
+* `bindkey(%hash, String $key, Any $v)`
+* `bindkey_i(%hash, String $key, int $v)`
+* `bindkey_n(%hash, String $key, num $v)`
+* `bindkey_s(%hash, String $key, str $v)`
 
-Bind key $key of %hash to $b and return $b.
+Bind key $key of %hash to $v and return $v.
 
 ## existskey
-* `existskey(Any %hash, String $key)`
+* `existskey(%hash, String $key)`
 
 Return non-zero if %hash has key $key bound to something.
 
 ## deletekey
-* `deletekey(Any %hash, String $key)`
+* `deletekey(%hash, String $key)`
 
 Delete the given key from %hash.
 
