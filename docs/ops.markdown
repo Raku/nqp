@@ -285,28 +285,28 @@ Return the value of @arr at index 0, unbind @arr at index 0, and move all other 
 # Hash opcodes
 
 ## atkey
-* `atkey(Any %hash, String $key)`
-* `atkey_i(int %hash, String $key)`
-* `atkey_n(num %hash, String $key)`
-* `atkey_s(str %hash, String $key)`
+* `atkey(%hash, String $key)`
+* `atkey_i(%hash, String $key)`
+* `atkey_n(%hash, String $key)`
+* `atkey_s(%hash, String $key)`
 
 Return the value of %hash at key $key.
 
 ## bindkey
-* `bindkey(Any %hash, String $key, Any $v)`
-* `bindkey_i(int %hash, String $key, int $v)`
-* `bindkey_n(num %hash, String $key, num $v)`
-* `bindkey_s(str %hash, String $key, str $v)`
+* `bindkey(%hash, String $key, Any $v)`
+* `bindkey_i(%hash, String $key, int $v)`
+* `bindkey_n(%hash, String $key, num $v)`
+* `bindkey_s(%hash, String $key, str $v)`
 
 Bind key $key of %hash to $v and return $v.
 
 ## existskey
-* `existskey(Any %hash, String $key)`
+* `existskey(%hash, String $key)`
 
 Return non-zero if %hash has key $key bound to something.
 
 ## deletekey
-* `deletekey(Any %hash, String $key)`
+* `deletekey(%hash, String $key)`
 
 Delete the given key from %hash.
 
