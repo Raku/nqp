@@ -234,12 +234,12 @@ Return non-zero if the two parameters are not equal.
 Return whatever is bound to @arr at position $i.
 
 ## bindpos
-* `bindpos(Any @arr, int $i, Any $b)`
-* `bindpos_i(int @arr, int $i, int $b)`
-* `bindpos_n(num @arr, int $i, num $b)`
-* `bindpos_s(str @arr, int $i, str $b)`
+* `bindpos(Any @arr, int $i, Any $v)`
+* `bindpos_i(int @arr, int $i, int $v)`
+* `bindpos_n(num @arr, int $i, num $v)`
+* `bindpos_s(str @arr, int $i, str $v)`
 
-Bind $b to @arr at position $i and return $b.
+Bind $v to @arr at position $i and return $v.
 
 ## push
 * `push(Any @arr, Any $v)`
@@ -293,12 +293,12 @@ Return the value of @arr at index 0, unbind @arr at index 0, and move all other 
 Return the value of %hash at key $key.
 
 ## bindkey
-* `bindkey(Any %hash, String $key, Any $b)`
-* `bindkey_i(int %hash, String $key, int $b)`
-* `bindkey_n(num %hash, String $key, num $b)`
-* `bindkey_s(str %hash, String $key, str $b)`
+* `bindkey(Any %hash, String $key, Any $v)`
+* `bindkey_i(int %hash, String $key, int $v)`
+* `bindkey_n(num %hash, String $key, num $v)`
+* `bindkey_s(str %hash, String $key, str $v)`
 
-Bind key $key of %hash to $b and return $b.
+Bind key $key of %hash to $v and return $v.
 
 ## existskey
 * `existskey(Any %hash, String $key)`
