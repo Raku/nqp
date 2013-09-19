@@ -2156,8 +2156,8 @@ QAST::Operations.add_core_op('bindattr_i', :inlinable(1), -> $qastcomp, $op {
             $op[0],
             $op[1],
             $op[2],
-            $op[3],
-            QAST::IVal.new(:value($hint))
+            QAST::IVal.new(:value($hint)),
+            $op[3]
         ));
     } else {
         $qastcomp.as_post(QAST::Op.new(
@@ -2171,8 +2171,8 @@ QAST::Operations.add_core_op('bindattr_i', :inlinable(1), -> $qastcomp, $op {
 });
 QAST::Operations.add_core_pirop_mapping('bindattr_n', 'repr_bind_attr_num', '3PPsn', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('bindattr_s', 'repr_bind_attr_str', '3PPss', :inlinable(1));
-QAST::Operations.add_core_pirop_mapping('bindattr_s_nh', 'repr_bind_attr_int', '3PPss', :inlinable(1));
-QAST::Operations.add_core_pirop_mapping('bindattr_s_h', 'repr_bind_attr_int', '3PPssi', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('bindattr_s_nh', 'repr_bind_attr_str', '3PPss', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('bindattr_s_h', 'repr_bind_attr_str', '3PPsis', :inlinable(1));
 QAST::Operations.add_core_op('bindattr_s', :inlinable(1), -> $qastcomp, $op {
     if +@($op) != 4 {
         nqp::die('bindattr_s requires four operands');
@@ -2187,8 +2187,8 @@ QAST::Operations.add_core_op('bindattr_s', :inlinable(1), -> $qastcomp, $op {
             $op[0],
             $op[1],
             $op[2],
-            $op[3],
-            QAST::IVal.new(:value($hint))
+            QAST::IVal.new(:value($hint)),
+            $op[3]
         ));
     } else {
         $qastcomp.as_post(QAST::Op.new(
