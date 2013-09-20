@@ -339,7 +339,7 @@ inline op nqp_bigint_to_str(out STR, invar PMC) :base_core {
     char *buf;
     mp_radix_size(i, 10, &len);
     buf = (char *) mem_sys_allocate(len);
-    mp_toradix_n(i, buf, 10, len);
+    mp_toradix(i, buf, 10);
     /* len - 1 because buf is \0-terminated */
     $1 = Parrot_str_new(interp, buf, len - 1);
     mem_sys_free(buf);
@@ -351,7 +351,7 @@ inline op nqp_bigint_to_str_base(out STR, invar PMC, in INT) :base_core {
     char *buf;
     mp_radix_size(i, $3, &len);
     buf = (char *) mem_sys_allocate(len);
-    mp_toradix_n(i, buf, $3, len);
+    mp_toradix(i, buf, $3);
     /* len - 1 because buf is \0-terminated */
     $1 = Parrot_str_new(interp, buf, len - 1);
     mem_sys_free(buf);
