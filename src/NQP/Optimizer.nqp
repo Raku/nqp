@@ -1,9 +1,8 @@
-upse NQPP6QRegex;
-
 class NQP::Optimizer {
     has @!block_stack;
     has %!adverbs;
     has @!local_var_stack;
+    has $!no_grasp_on_lexicals;
 
     method optimize($ast, *%adverbs) {
         %!adverbs := %adverbs;
@@ -21,7 +20,7 @@ class NQP::Optimizer {
         # Push all the lexically declared variables into our shallow vars hash.
         # Currently we limit ourselves to natives, because they are guaranteed
         # not to have some weird setup that we have to be careful about.
-        if nqp::istype($block[0], QAST::Stmts) {
+        if nqp::istype($block[0], QAST::Stmts) && !($!no_grasp_on_lexicals) {
             my int $idx := 0;
             # before the $_ come the arguments. we must not turn these into locals,
             # otherwise our signature binding will explode.
@@ -38,7 +37,7 @@ class NQP::Optimizer {
                     # also make sure we don't turn dynamic vars into locals
                     my $twigil := nqp::substr($var.name, 1, 1);
                     my $sigil := nqp::substr($var.name, 0, 1);
-                    if $sigil eq '$'  && $twigil ne '*'
+                    if $sigil eq '$'  && $twigil ne '*' && $twigil ne '?'
                             && $var.name ne '$_' && $var.name ne '$/' && $var.name ne '$!' && $var.name ne '$¢' {
                         %*shallow_var_usages{$var.name} := nqp::list($var);
                     }
@@ -54,25 +53,27 @@ class NQP::Optimizer {
         self.visit_children($block);
 
         my $succ;
-        for %*shallow_var_usages {
-            my $name := $_.key;
-            my $newname := $block.unique('lex_to_loc_' ~ +@!block_stack);
-            my @usages := $_.value;
-            say("found " ~ +@usages ~ " usages for $name");
-            for @usages -> $var {
-                say($var.scope ~ ": " ~ $var.name ~ " <- old");
-                $var.scope('local');
-                $var.name($newname);
-                #if $var.decl eq 'var' {
-                    #$var.decl('static');
-                #}
-                $succ := 1;
+        if !($!no_grasp_on_lexicals) {
+            for %*shallow_var_usages {
+                my $name := $_.key;
+                my $newname := $block.unique('lex_to_loc_' ~ +@!block_stack);
+                my @usages := $_.value;
+                #say("found " ~ +@usages ~ " usages for $name");
+                for @usages -> $var {
+                    #say($var.scope ~ ": " ~ $var.name ~ " <- old");
+                    $var.scope('local');
+                    $var.name($newname);
+                    #if $var.decl eq 'var' {
+                        #$var.decl('static');
+                    #}
+                    $succ := 1;
+                }
+                #say("turned $name into a local ($newname), yippie");
             }
-            say("turned $name into a local ($newname), yippie");
         }
-        if $succ {
-            say($block.dump);
-        }
+        #if $succ {
+            #say($block.dump);
+        #}
 
         @!block_stack.pop();
         @!local_var_stack.pop();
@@ -157,26 +158,47 @@ class NQP::Optimizer {
             }
         }
 
+        #/[cur|ctx][get|set]?[lex[pad]?][dyn|caller|rel]*['_'[i|n|s]]?/;
+        #if NQPCursor.parse($op.op, /[cur|ctx][get|set]?[lex[pad]?][dyn|caller|rel]*['_'[i|n|s]]?/, :c(0)) {
+        if nqp::index($op.op, "lex") >= 0 ||
+           nqp::index($op.op, "dyn") >= 0 ||
+           nqp::index($op.op, "ctx") >= 0 {
+            if $op.op ne 'lexotic' {
+                $!no_grasp_on_lexicals := 1;
+                #say("no hope for turning lex -> local: " ~ $op.op);
+            }
+        }
+
         $op;
     }
 
     method visit_var($var) {
-        if $var.scope eq 'lexical' {
-            my int $lexdepth := self.lexical_depth($var.name);
-            my int $vardepth := +@!block_stack - 1 - $lexdepth;
-            if $lexdepth != -1 {
-                if $vardepth == 0 {
-                    if nqp::existskey(%*shallow_var_usages, $var.name) {
-                        say("found a usage for " ~ $var.name);
-                        nqp::push(%*shallow_var_usages{$var.name}, $var);
+        if !($!no_grasp_on_lexicals) {
+            if $var.scope eq 'lexical' {
+                my int $lexdepth := self.lexical_depth($var.name);
+                my int $vardepth := +@!block_stack - 1 - $lexdepth;
+                if $lexdepth != -1 {
+                    if $vardepth == 0 {
+                        if nqp::existskey(%*shallow_var_usages, $var.name) {
+                            #say("found a usage for " ~ $var.name);
+                            nqp::push(%*shallow_var_usages{$var.name}, $var);
+                            #say($var.dump);
+                        }
+                    } else {
+                        #say("poisoned " ~ $var.name);
+                        #say($var.dump);
+                        #say("my local var stack is " ~ +@!local_var_stack ~ " deep, my lexdepth is $lexdepth");
+                        #say(nqp::existskey(@!local_var_stack[$lexdepth-1], $var.name));
+                        try {
+                            nqp::deletekey(@!local_var_stack[$lexdepth-1], $var.name);
+                        }
                     }
-                } else {
-                    say("poisoned " ~ $var.name);
-                    say("my local var stack is " ~ +@!local_var_stack ~ " deep, my lexdepth is $lexdepth");
-                    say(nqp::existskey(@!local_var_stack[$lexdepth-1], $var.name));
-                    try {
-                        nqp::deletekey(@!local_var_stack[$lexdepth-1], $var.name);
-                    }
+                }
+            } elsif $var.scope eq 'contextual' {
+                my int $lexdepth := self.lexical_depth($var.name);
+                try {
+                    nqp::deletekey(@!local_var_stack[$lexdepth-1], $var.name);
+                    #say("poisoned " ~ $var.name ~ " due to contextual.");
                 }
             }
         }
