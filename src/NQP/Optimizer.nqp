@@ -20,15 +20,22 @@ class NQP::Optimizer {
         # Push all the lexically declared variables into our shallow vars hash.
         # Currently we limit ourselves to natives, because they are guaranteed
         # not to have some weird setup that we have to be careful about.
-        if nqp::istype($block[0], QAST::Stmts) && !($!no_grasp_on_lexicals) {
+        if (nqp::istype($block[0], QAST::Stmts)
+            || nqp::istype($block[1], QAST::Stmts) && nqp::istype($block[0], QAST::Var) && $block[0].decl eq 'param')
+            && !($!no_grasp_on_lexicals) {
+
+            my $stmts := $block[0];
+            if nqp::istype($stmts, QAST::Var) {
+                $stmts := $block[1];
+            }
             my int $idx := 0;
             # before the $_ come the arguments. we must not turn these into locals,
             # otherwise our signature binding will explode.
             #say("THE BLOCK:::::::::::::::::::::::::::::::::::::::::::::::");
             #say($block.dump);
             #say(":::::::::::::::::::::::::::::::::::::::::::::::THE BLOCK");
-            while $idx < +@($block[0]) {
-                my $var := $block[0][$idx];
+            while $idx < +@($stmts) {
+                my $var := $stmts[$idx];
                 if nqp::istype($var, QAST::Op) && $var.op eq 'bind' {
                     # variables are initialised on the spot in nqp.
                     $var := $var[0]
