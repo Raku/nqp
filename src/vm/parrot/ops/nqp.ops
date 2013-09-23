@@ -3661,7 +3661,7 @@ inline op nqp_decode(out STR, invar PMC, in STR) {
                 cbuflen = elems * 2;
                 cbuffer = mem_sys_allocate(cbuflen);
                 sview = (short *)cbuffer;
-                for (i = 0; i < cbuflen; i++) {
+                for (i = 0; i < elems; i++) {
                     REPR(buf)->pos_funcs->at_pos_native(interp, STABLE(buf),
                         OBJECT_BODY(buf), i, &nv);
                     sview[i] = nv.value.intval;
@@ -3673,7 +3673,7 @@ inline op nqp_decode(out STR, invar PMC, in STR) {
                 cbuflen = elems * 4;
                 cbuffer = mem_sys_allocate(cbuflen);
                 iview = (int *)cbuffer;
-                for (i = 0; i < cbuflen; i++) {
+                for (i = 0; i < elems; i++) {
                     REPR(buf)->pos_funcs->at_pos_native(interp, STABLE(buf),
                         OBJECT_BODY(buf), i, &nv);
                     iview[i] = nv.value.intval;
