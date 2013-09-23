@@ -3629,7 +3629,7 @@ Decodes the specified buffer into a string.
 inline op nqp_decode(out STR, invar PMC, in STR) {
     PMC *buf = $2;
     char *cbuffer;
-    INTVAL cbuflen, i;
+    INTVAL cbuflen, i, elems;
     NativeValue nv;
     
     /* Ensure we have some kind of integer array to decode from. */
@@ -3640,53 +3640,60 @@ inline op nqp_decode(out STR, invar PMC, in STR) {
     if (buf_elem_ss.boxed_primitive != STORAGE_SPEC_BP_INT)
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "nqp_decode requires an integer buffer type");
-    
+
     /* Assemble a memory buffer of the pieces. */
     nv.type = NATIVE_VALUE_INT;
-    switch (buf_elem_ss.bits) {
-        case 8: {
-            cbuflen = REPR(buf)->elems(interp, STABLE(buf), OBJECT_BODY(buf));
-            cbuffer = mem_sys_allocate(cbuflen);
-            for (i = 0; i < cbuflen; i++) {
-                REPR(buf)->pos_funcs->at_pos_native(interp, STABLE(buf),
-                    OBJECT_BODY(buf), i, &nv);
-                cbuffer[i] = nv.value.intval;
+    elems = REPR(buf)->elems(interp, STABLE(buf), OBJECT_BODY(buf));
+    if (elems > 0) {
+        switch (buf_elem_ss.bits) {
+            case 8: {
+                cbuflen = elems;
+                cbuffer = mem_sys_allocate(cbuflen);
+                for (i = 0; i < cbuflen; i++) {
+                    REPR(buf)->pos_funcs->at_pos_native(interp, STABLE(buf),
+                        OBJECT_BODY(buf), i, &nv);
+                    cbuffer[i] = nv.value.intval;
+                }
+                break;
             }
-            break;
-        }
-        case 16: {
-            INTVAL elems = REPR(buf)->elems(interp, STABLE(buf), OBJECT_BODY(buf));
-            short *sview;
-            cbuflen = elems * 2;
-            cbuffer = mem_sys_allocate(cbuflen);
-            sview = (short *)cbuffer;
-            for (i = 0; i < cbuflen; i++) {
-                REPR(buf)->pos_funcs->at_pos_native(interp, STABLE(buf),
-                    OBJECT_BODY(buf), i, &nv);
-                sview[i] = nv.value.intval;
+            case 16: {
+                short *sview;
+                cbuflen = elems * 2;
+                cbuffer = mem_sys_allocate(cbuflen);
+                sview = (short *)cbuffer;
+                for (i = 0; i < cbuflen; i++) {
+                    REPR(buf)->pos_funcs->at_pos_native(interp, STABLE(buf),
+                        OBJECT_BODY(buf), i, &nv);
+                    sview[i] = nv.value.intval;
+                }
+                break;
             }
-            break;
-        }
-        case 32: {
-            INTVAL elems = REPR(buf)->elems(interp, STABLE(buf), OBJECT_BODY(buf));
-            int *iview;
-            cbuflen = elems * 4;
-            cbuffer = mem_sys_allocate(cbuflen);
-            iview = (int *)cbuffer;
-            for (i = 0; i < cbuflen; i++) {
-                REPR(buf)->pos_funcs->at_pos_native(interp, STABLE(buf),
-                    OBJECT_BODY(buf), i, &nv);
-                iview[i] = nv.value.intval;
+            case 32: {
+                int *iview;
+                cbuflen = elems * 4;
+                cbuffer = mem_sys_allocate(cbuflen);
+                iview = (int *)cbuffer;
+                for (i = 0; i < cbuflen; i++) {
+                    REPR(buf)->pos_funcs->at_pos_native(interp, STABLE(buf),
+                        OBJECT_BODY(buf), i, &nv);
+                    iview[i] = nv.value.intval;
+                }
+                break;
             }
-            break;
+            default:
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "nqp_encode got unexpected buffer element size (expected 8, 16 or 32)");
         }
-        default:
-            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "nqp_encode got unexpected buffer element size (expected 8, 16 or 32)");
     }
-    
+    else {
+        cbuffer = "";
+        cbuflen = 0;
+    }
+
     /* Create a string from the the buffer. */
     $1 = Parrot_str_new_init(interp, cbuffer, cbuflen,
         Parrot_find_encoding_by_string(interp, $3), 0);
-    free(cbuffer);
+
+    if (elems > 0)
+        free(cbuffer);
 }
