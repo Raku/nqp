@@ -42,7 +42,7 @@ class JAST::Class is JAST::Node {
         for @!methods {
             $_.dump(@dumped);
         }
-        return nqp::join("\n", @dumped);
+        return @dumped;
     }
 }
 
