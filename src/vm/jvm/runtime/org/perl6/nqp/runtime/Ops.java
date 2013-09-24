@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -641,6 +642,7 @@ public final class Ops {
         return obj;
     }
     
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public static SixModelObject linesasync(SixModelObject obj, SixModelObject resultType,
             long chomp, SixModelObject queue, SixModelObject done, SixModelObject error,
             ThreadContext tc) {
@@ -5093,10 +5095,39 @@ public final class Ops {
     }
     
     /* Evaluation of code; JVM-specific ops. */
+    public static SixModelObject compilejastlines(SixModelObject dump, ThreadContext tc) {
+        if (dump instanceof VMArrayInstance) {
+            VMArrayInstance array = (VMArrayInstance) dump;
+            List<String> lines = new LinkedList<String>();
+            for (int index = 0; index < array.elems; index++) {
+                lines.add(array.at_pos_boxed(tc, index).get_str(tc));
+            }
+            EvalResult res = new EvalResult();
+            res.jc = JASTToJVMBytecode.buildClassFromString(lines, false);
+            return res;
+        } else {
+            throw ExceptionHandling.dieInternal(tc,
+                "compilejastlines requires an array with the VMArrayInstance REPR");
+        }
+    }
     public static SixModelObject compilejast(String dump, ThreadContext tc) {
         EvalResult res = new EvalResult();
         res.jc = JASTToJVMBytecode.buildClassFromString(dump, false);
         return res;
+    }
+    public static SixModelObject compilejastlinestofile(SixModelObject dump, String filename, ThreadContext tc) {
+        if (dump instanceof VMArrayInstance) {
+            VMArrayInstance array = (VMArrayInstance) dump;
+            List<String> lines = new LinkedList<String>();
+            for (int index = 0; index < array.elems; index++) {
+                lines.add(array.at_pos_boxed(tc, index).get_str(tc));
+            }
+            JASTToJVMBytecode.writeClassFromString(lines, filename);
+            return dump;
+        } else {
+            throw ExceptionHandling.dieInternal(tc,
+                "compilejastlines requires an array with the VMArrayInstance REPR");
+        }
     }
     public static String compilejasttofile(String dump, String filename, ThreadContext tc) {
         JASTToJVMBytecode.writeClassFromString(dump, filename);
