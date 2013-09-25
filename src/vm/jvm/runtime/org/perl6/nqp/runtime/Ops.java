@@ -4060,10 +4060,12 @@ public final class Ops {
         for (String envName : env.stringPropertyNames()) {
             String propVal = env.getProperty(envName);
             if (envName.equals("os.name")) {
-                // Normalize OS name (handles the Windows case, maybe others
-                // are also needed).
-                if (propVal.startsWith("Windows"))
+                // Normalize OS name (some cases likely missing).
+                String pvlc = propVal.toLowerCase();
+                if (pvlc.indexOf("win") >= 0)
                     propVal = "MSWin32";
+                else if (pvlc.indexOf("mac os x") >= 0)
+                    propVal = "darwin";
             }
             res.bind_key_boxed(tc, envName, box_s(propVal, strType, tc));
         }
