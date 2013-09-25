@@ -30,12 +30,18 @@ public class VMArray extends REPR {
             case StorageSpec.BP_INT:
                 if (ss.bits == 64)
                     obj = new VMArrayInstance_i();
-                if (ss.bits == 8)
-                    obj = new VMArrayInstance_i8();
+                else if (ss.bits == 8)
+                    obj = ss.is_unsigned == 0
+                        ? new VMArrayInstance_i8()
+                        : new VMArrayInstance_u8();
                 else if (ss.bits == 16)
-                    obj = new VMArrayInstance_i16();
+                    obj = ss.is_unsigned == 0
+                        ? new VMArrayInstance_i16()
+                        : new VMArrayInstance_u16();
                 else if (ss.bits == 32)
-                    obj = new VMArrayInstance_i32();
+                    obj = ss.is_unsigned == 0
+                        ? new VMArrayInstance_i32()
+                        : new VMArrayInstance_u32();
                 else
                     obj = new VMArrayInstance_i();
                 break;
@@ -84,11 +90,17 @@ public class VMArray extends REPR {
             switch (ss.boxed_primitive) {
             case StorageSpec.BP_INT:
                 if (ss.bits == 8)
-                    obj = new VMArrayInstance_i8();
+                    obj = ss.is_unsigned == 0
+                        ? new VMArrayInstance_i8()
+                        : new VMArrayInstance_u8();
                 else if (ss.bits == 16)
-                    obj = new VMArrayInstance_i16();
+                    obj = ss.is_unsigned == 0
+                        ? new VMArrayInstance_i16()
+                        : new VMArrayInstance_u16();
                 else if (ss.bits == 32)
-                    obj = new VMArrayInstance_i32();
+                    obj = ss.is_unsigned == 0
+                        ? new VMArrayInstance_i32()
+                        : new VMArrayInstance_u32();
                 else
                     obj = new VMArrayInstance_i();
                 break;

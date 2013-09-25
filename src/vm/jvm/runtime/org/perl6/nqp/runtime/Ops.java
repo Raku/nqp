@@ -78,6 +78,7 @@ import org.perl6.nqp.sixmodel.reprs.VMArrayInstance;
 import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_i16;
 import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_i32;
 import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_i8;
+import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_u8;
 import org.perl6.nqp.sixmodel.reprs.VMExceptionInstance;
 import org.perl6.nqp.sixmodel.reprs.VMHash;
 import org.perl6.nqp.sixmodel.reprs.VMHashInstance;
@@ -3202,6 +3203,12 @@ public final class Ops {
                 ? ByteBuffer.wrap(bufi8.slots, bufi8.start, bufi8.elems)
                 : ByteBuffer.allocate(0);
         }
+        else if (buf instanceof VMArrayInstance_u8) {
+            VMArrayInstance_u8 bufu8 = (VMArrayInstance_u8)buf;
+            bb = bufu8.slots != null
+                ? ByteBuffer.wrap(bufu8.slots, bufu8.start, bufu8.elems)
+                : ByteBuffer.allocate(0);
+        }
         else {
             int n = (int)buf.elems(tc);
             bb = ByteBuffer.allocate(n);
@@ -3209,6 +3216,7 @@ public final class Ops {
                 buf.at_pos_native(tc, i);
                 bb.put((byte)tc.native_i);
             }
+            bb.rewind();
         }
     	return bb;
     }
