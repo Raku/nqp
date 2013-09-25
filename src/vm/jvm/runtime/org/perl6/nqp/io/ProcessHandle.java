@@ -21,7 +21,13 @@ public class ProcessHandle extends SyncHandle {
     Process process;
 
     public ProcessHandle(ThreadContext tc, String cmd, String dir, Map<String, String> env) {
-        ProcessBuilder pb = new ProcessBuilder("sh", "-c", cmd);
+        ProcessBuilder pb;
+        String os = System.getProperty("os.name").toLowerCase();
+        if (os.indexOf("win") >= 0) {
+            pb = new ProcessBuilder("cmd", "/c", cmd.replace('/', '\\'));
+        } else {
+            pb = new ProcessBuilder("sh", "-c", cmd);
+        }
         pb.directory(new File(dir));
         pb.redirectErrorStream(true);
 
