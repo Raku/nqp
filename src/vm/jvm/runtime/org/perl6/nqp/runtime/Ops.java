@@ -5098,7 +5098,7 @@ public final class Ops {
     public static SixModelObject compilejastlines(SixModelObject dump, ThreadContext tc) {
         if (dump instanceof VMArrayInstance) {
             VMArrayInstance array = (VMArrayInstance) dump;
-            List<String> lines = new LinkedList<String>();
+            List<String> lines = new ArrayList<String>(array.elems);
             for (int index = 0; index < array.elems; index++) {
                 lines.add(array.at_pos_boxed(tc, index).get_str(tc));
             }
@@ -5118,7 +5118,7 @@ public final class Ops {
     public static SixModelObject compilejastlinestofile(SixModelObject dump, String filename, ThreadContext tc) {
         if (dump instanceof VMArrayInstance) {
             VMArrayInstance array = (VMArrayInstance) dump;
-            List<String> lines = new LinkedList<String>();
+            List<String> lines = new ArrayList<String>(array.elems);
             for (int index = 0; index < array.elems; index++) {
                 lines.add(array.at_pos_boxed(tc, index).get_str(tc));
             }
