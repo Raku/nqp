@@ -491,9 +491,18 @@ public final class Ops {
                     arr.slots = array;
 
                     return res;
+                } else if (res instanceof VMArrayInstance_u8) {
+                    VMArrayInstance_u8 arr = (VMArrayInstance_u8)res;
+
+                    byte[] array = ((IIOSyncReadable)h.handle).read(tc, (int)bytes);                    
+                    arr.elems = array.length;
+                    arr.start = 0;
+                    arr.slots = array;
+
+                    return res;
                 } else {
                     throw ExceptionHandling.dieInternal(tc,
-                        "readfh requires a buf with the VMArrayInstance_i8 REPR");
+                        "readfh requires a Buf[int8] or a Buf[uint8]");
                 }
             } else {
                 throw ExceptionHandling.dieInternal(tc,
