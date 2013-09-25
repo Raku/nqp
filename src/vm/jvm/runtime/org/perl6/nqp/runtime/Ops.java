@@ -727,8 +727,12 @@ public final class Ops {
         
     public static long mkdir(String path, long mode, ThreadContext tc) {
         try {
-            Files.createDirectory(Paths.get(path),
-                        PosixFilePermissions.asFileAttribute(modeToPosixFilePermission(mode)));
+            String os = System.getProperty("os.name").toLowerCase();
+            if (os.indexOf("win") >= 0)
+                Files.createDirectory(Paths.get(path));
+            else
+                Files.createDirectory(Paths.get(path),
+                    PosixFilePermissions.asFileAttribute(modeToPosixFilePermission(mode)));
         }
         catch (Exception e) {
             die_s(IOExceptionMessages.message(e), tc);
