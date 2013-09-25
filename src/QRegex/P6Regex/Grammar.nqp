@@ -170,16 +170,20 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token quantifier:sym<**> {
         <sym> <normspace>**0..1 <backmod> <normspace>**0..1
         [
-        ||  $<min>=[\d+] 
-            [   '..' 
-                $<max>=[ 
-                       || \d+ 
-                       || '*' 
-                       || \-\d+ <.panic: "Negative numbers are not allowed as range quantifier endpoint">
-                       || <.panic: "Only integers or '*' allowed as range quantifier endpoint"> 
-                       ] 
-            ]**0..1
-        || \-\d+ <.panic: "Negative numbers are not allowed as quantifiers">
+        | <.decint> \s+ '..' <.panic: "Spaces not allowed in bare range">
+        | <min=.decint>
+          [ '..'
+            [
+            | <max=.decint> {
+                $/.CURSOR.panic("Negative numbers are not allowed as quantifiers") if $<max>.Str < 0;
+                $/.CURSOR.panic("Empty range") if $<min>.Str > $<max>.Str;
+              }
+            | $<max>=['*']
+            | <.panic: "Malformed range">
+            ]
+          ]?
+          { $/.CURSOR.panic("Negative numbers are not allowed as quantifiers") if $<min>.Str < 0 }
+        | <?[{]> { $/.CURSOR.panic("Block case of ** quantifier not yet implemented") }
         ]
     }
 

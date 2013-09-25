@@ -129,7 +129,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         my $qast;
         $qast := QAST::Regex.new( :rxtype<quant>, :min(+$<min>), :max(-1), :node($/) );
         if ! $<max> { $qast.max(+$<min>) }
-        elsif $<max>[0] ne '*' { $qast.max(+$<max>[0]); }
+        elsif $<max> ne '*' { $qast.max(+$<max>); }
         make backmod($qast, $<backmod>);
     }
 
