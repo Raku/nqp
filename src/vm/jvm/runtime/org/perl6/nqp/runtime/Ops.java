@@ -5110,11 +5110,6 @@ public final class Ops {
                 "compilejastlines requires an array with the VMArrayInstance REPR");
         }
     }
-    public static SixModelObject compilejast(String dump, ThreadContext tc) {
-        EvalResult res = new EvalResult();
-        res.jc = JASTToJVMBytecode.buildClassFromString(dump, false);
-        return res;
-    }
     public static SixModelObject compilejastlinestofile(SixModelObject dump, String filename, ThreadContext tc) {
         if (dump instanceof VMArrayInstance) {
             VMArrayInstance array = (VMArrayInstance) dump;
@@ -5128,10 +5123,6 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc,
                 "compilejastlines requires an array with the VMArrayInstance REPR");
         }
-    }
-    public static String compilejasttofile(String dump, String filename, ThreadContext tc) {
-        JASTToJVMBytecode.writeClassFromString(dump, filename);
-        return dump;
     }
     public static SixModelObject loadcompunit(SixModelObject obj, long compileeHLL, ThreadContext tc) {
         try {

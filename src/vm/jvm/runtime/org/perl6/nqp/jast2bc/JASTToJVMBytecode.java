@@ -9,7 +9,6 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -59,11 +58,6 @@ public class JASTToJVMBytecode {
         
     }
     
-    public static JavaClass buildClassFromString(String in, boolean split) {
-        List<String> lines = Arrays.asList(in.split("\n"));
-        return buildClassFromString(lines, split);
-    }
-    
     public static JavaClass buildClassFromString(List<String> lines, boolean split) {
         try {
             JavaClass c = buildClassFrom(lines, split);
@@ -74,11 +68,6 @@ public class JASTToJVMBytecode {
                 return buildClassFromString(lines, true);
             throw new RuntimeException(e);
         }
-    }
-    
-    public static void writeClassFromString(String in, String filename) {
-        List<String> lines = Arrays.asList(in.split("\n"));
-        writeClassFromString(lines, filename);
     }
     
     public static void writeClassFromString(List<String> lines, String filename) {    
