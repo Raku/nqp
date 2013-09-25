@@ -2103,12 +2103,14 @@ public final class Ops {
         return obj instanceof CodeRef || obj.st.InvocationSpec != null ? 1 : 0;
     }
     public static long istype(SixModelObject obj, SixModelObject type, ThreadContext tc) {
+        return istype_nodecont(decont(obj, tc), decont(type, tc), tc);
+    }
+    public static long istype_nodecont(SixModelObject obj, SixModelObject type, ThreadContext tc) {
         /* Null always type checks false. */
         if (obj == null)
             return 0;
-        obj = decont(obj, tc);
-        type = decont(type, tc);
-
+        
+        /* Start by considering cache. */
         int typeCheckMode = type.st.ModeFlags & STable.TYPE_CHECK_CACHE_FLAG_MASK;
         SixModelObject[] cache = obj.st.TypeCheckCache;
         if (cache != null) {
