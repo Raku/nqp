@@ -2573,7 +2573,7 @@ public final class Ops {
         return obj;
     }
     public static long iscont(SixModelObject obj) {
-        return obj.st.ContainerSpec == null ? 0 : 1;
+        return obj == null || obj.st.ContainerSpec == null ? 0 : 1;
     }
     public static SixModelObject decont(SixModelObject obj, ThreadContext tc) {
         if (obj == null)
