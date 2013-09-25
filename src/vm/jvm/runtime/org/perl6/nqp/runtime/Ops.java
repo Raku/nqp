@@ -518,8 +518,10 @@ public final class Ops {
         ByteBuffer bb = decode8(buf, tc);
         if (obj instanceof IOHandleInstance) {
             IOHandleInstance h = (IOHandleInstance)obj;
+            byte[] bytesToWrite = new byte[bb.limit()];
+            bb.get(bytesToWrite);
             if (h.handle instanceof IIOSyncWritable)
-                ((IIOSyncWritable)h.handle).write(tc, bb.array());
+                ((IIOSyncWritable)h.handle).write(tc, bytesToWrite);
             else
                 throw ExceptionHandling.dieInternal(tc,
                     "This handle does not support write");
