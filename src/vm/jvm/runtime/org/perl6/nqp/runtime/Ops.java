@@ -1778,6 +1778,7 @@ public final class Ops {
     public static final CallSiteDescriptor storeCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ }, null);
     public static final CallSiteDescriptor findmethCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_STR }, null);
     public static final CallSiteDescriptor typeCheckCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ }, null);
+    public static final CallSiteDescriptor howObjCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ }, null);
     public static void invokeLexotic(SixModelObject invokee, CallSiteDescriptor csd, Object[] args, ThreadContext tc) {
         LexoticException throwee = tc.theLexotic;
         throwee.target = ((LexoticInstance)invokee).target;
@@ -2000,7 +2001,8 @@ public final class Ops {
         
         SixModelObject meth = invocant.st.MethodCache.get(name);
         if (meth == null)
-            throw ExceptionHandling.dieInternal(tc, "Method '" + name + "' not found"); 
+            throw ExceptionHandling.dieInternal(tc,
+                "Method '" + name + "' not found for invocant of class '" + typeName(invocant, tc) + "'");
         return meth;
     }
     public static SixModelObject findmethod(SixModelObject invocant, String name, ThreadContext tc) {
@@ -2025,6 +2027,12 @@ public final class Ops {
         invokeDirect(tc, find_method, findmethCallSite,
                 new Object[] { how, invocant, name });
         return result_o(tc.curFrame);
+    }
+    public static String typeName(SixModelObject invocant, ThreadContext tc) {
+        SixModelObject how = invocant.st.HOW;
+        SixModelObject nameMeth = findmethod(tc, how, "name");
+        invokeDirect(tc, nameMeth, howObjCallSite, new Object[] { how, invocant });
+        return result_s(tc.curFrame);
     }
     public static long can(SixModelObject invocant, String name, ThreadContext tc) {
         return findmethod(invocant, name, tc) == null ? 0 : 1;
