@@ -4051,8 +4051,16 @@ public final class Ops {
         SixModelObject res = hashType.st.REPR.allocate(tc, hashType.st);
         
         Properties env = System.getProperties();
-        for (String envName : env.stringPropertyNames())
-            res.bind_key_boxed(tc, envName, box_s(env.getProperty(envName), strType, tc));
+        for (String envName : env.stringPropertyNames()) {
+            String propVal = env.getProperty(envName);
+            if (envName.equals("os.name")) {
+                // Normalize OS name (handles the Windows case, maybe others
+                // are also needed).
+                if (propVal.startsWith("Windows"))
+                    propVal = "MSWin32";
+            }
+            res.bind_key_boxed(tc, envName, box_s(propVal, strType, tc));
+        }
         
         return res;
     }
