@@ -338,6 +338,13 @@ The $flags is a bitmask that modifies the parse and/or result:
 
 # Exceptional Opcodes
 
+# I/O Opcodes
+
+##getcfh
+* getcfh(handle $in)
+
+Reads a single character from the supplied filehandle.
+
 # Context Introspection Opcodes
 
 ## getenvhash
