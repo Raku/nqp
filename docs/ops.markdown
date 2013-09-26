@@ -146,28 +146,40 @@ name. `h` indicates a hyperbolic variant.
 
 ## asec
 *  `asec_n(num $n)`
+
 ## asin
 *  `asin_n(num $n)`
+
 ## acos
 *  `acos_n(num $n)`
+
 ## atan
 *  `atan_n(num $n)`
+
 ## atan2
 *  `atan2_n(num $l, num $r)`
+
 ## cos
 *  `cos_n(num $n)`
+
 ## cosh
 *  `cosh_n(num $n)`
+
 ## sin
 *  `sin_n(num $n)`
+
 ## sinh
 *  `sinh_n(num $n)`
+
 ## sec
 *  `sec_n(num $n)`
+
 ## sech
 *  `sech_n(num $n)`
+
 ## tan
 *  `tan_n(num $n)`
+
 ## tanh
 *  `tanh_n(num $n)`
 
