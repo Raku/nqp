@@ -1652,6 +1652,15 @@ QAST::Operations.add_core_op('readallfh', -> $qastcomp, $op {
         $op[0]
     ))
 });
+QAST::Operations.add_core_op('getcfh', -> $qastcomp, $op {
+    if +$op.list != 1 {
+        nqp::die("The 'getcfh' op expects one operand");
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'), :name('read'),
+        $op[0], QAST::IVal.new( :value(1) )
+    ))
+});
 QAST::Operations.add_core_op('eoffh', -> $qastcomp, $op {
     if +$op.list != 1 {
         nqp::die("The 'eoffh' op expects one operand");
