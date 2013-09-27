@@ -127,9 +127,10 @@ class QRegex::P6Regex::Actions is HLL::Actions {
 
     method quantifier:sym<**>($/) {
         my $qast;
-        $qast := QAST::Regex.new( :rxtype<quant>, :min(+$<min>), :max(-1), :node($/) );
-        if ! $<max> { $qast.max(+$<min>) }
-        elsif $<max> ne '*' { $qast.max(+$<max>); }
+        my $min := $<min>.ast;
+        $qast := QAST::Regex.new( :rxtype<quant>, :min($min), :max(-1), :node($/) );
+        if ! $<max> { $qast.max($min) }
+        elsif $<max> ne '*' { $qast.max($<max>.ast); }
         make backmod($qast, $<backmod>);
     }
 
