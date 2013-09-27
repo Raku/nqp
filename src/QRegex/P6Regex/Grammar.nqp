@@ -176,7 +176,6 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
             [
             | <max=.decint> {
                 $/.CURSOR.panic("Negative numbers are not allowed as quantifiers") if $<max>.Str < 0;
-                $/.CURSOR.panic("Empty range") if $<min>.Str > $<max>.Str;
               }
             | $<max>=['*']
             | <.panic: "Malformed range">

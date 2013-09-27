@@ -128,9 +128,13 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     method quantifier:sym<**>($/) {
         my $qast;
         my $min := $<min>.ast;
-        $qast := QAST::Regex.new( :rxtype<quant>, :min($min), :max(-1), :node($/) );
-        if ! $<max> { $qast.max($min) }
-        elsif $<max> ne '*' { $qast.max($<max>.ast); }
+        my $max := -1;
+        if ! $<max> { $max := $min }
+        elsif $<max> ne '*' {
+            $max := $<max>.ast;
+            $/.CURSOR.panic("Empty range") if $min > $max;
+        }
+        $qast := QAST::Regex.new( :rxtype<quant>, :min($min), :max($max), :node($/) );
         make backmod($qast, $<backmod>);
     }
 
