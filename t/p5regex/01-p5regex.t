@@ -78,7 +78,7 @@ for @files -> $fn {
             todo($m[0], 1);
         }
         else {
-            next if $l ~~ /^\s*\# | ^\s*$ /;
+            next if $l ~~ /^ \s* '#' | ^\s*$ /;
             test_line($l);
             $tests := $tests + 1;
         }
