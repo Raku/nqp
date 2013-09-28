@@ -668,6 +668,9 @@ QAST::Operations.add_core_op('for', :inlinable(1), -> $qastcomp, $op {
     if @operands[1].blocktype eq 'immediate' {
         @operands[1].blocktype('declaration');
     }
+    elsif @operands[1].blocktype eq 'immediate_static' {
+        @operands[1].blocktype('declaration_static');
+    }
 
     # Evaluate the thing we'll iterate over and the block.
     my $res       := $*REGALLOC.fresh_p();
