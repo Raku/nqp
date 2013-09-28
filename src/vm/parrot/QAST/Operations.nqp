@@ -1689,17 +1689,7 @@ QAST::Operations.add_core_op('chmod', -> $qastcomp, $op {
         $op[0],
         $op[1]) );
 });
-QAST::Operations.add_core_op('unlink', -> $qastcomp, $op {
-    if +$op.list != 1 {
-        nqp::die("The 'unlink' op expects one operand");
-    }
-    $qastcomp.as_post(QAST::Op.new(
-        :op('callmethod'),
-        :name('unlink'),
-        QAST::VM.new( :pirop('new__Ps'),
-                      QAST::SVal.new( :value('OS') ) ),
-        $op[0] ) );
-});
+QAST::Operations.add_core_pirop_mapping('unlink', 'nqp_delete_f', 'Is');
 QAST::Operations.add_core_op('rmdir', -> $qastcomp, $op {
     if +$op.list != 1 {
         nqp::die("The 'rmdir' op expects one operand");
