@@ -602,7 +602,7 @@ class NQP::Actions is HLL::Actions {
         # a fixed lexical, but for generic types it becomes a parameter. Also
         # for parametric types, pass along the role body block.
         if nqp::can($how, 'parametric') && $how.parametric($how) {
-            $past.blocktype('declaration');
+            $past.blocktype('declaration_static');
             my $params := QAST::Stmts.new(
                 QAST::Var.new( :name('$?CLASS'), :scope('lexical'), :decl('param') )
             );
@@ -799,11 +799,11 @@ class NQP::Actions is HLL::Actions {
         }
         else {
             $past := $<blockoid>.ast;
-            $past.blocktype('declaration');
             if $*RETURN_USED {
                 $past[1] := wrap_return_handler($past[1]);
             }
         }
+        $past.blocktype('declaration');
         my $block := $past;
 
         if $<deflongname> {
@@ -945,11 +945,11 @@ class NQP::Actions is HLL::Actions {
         }
         else {
             $past := $<blockoid>.ast;
-            $past.blocktype('declaration_static');
             if $*RETURN_USED {
                 $past[1] := wrap_return_handler($past[1]);
             }
         }
+        $past.blocktype('declaration_static');
 
         # Always need an invocant.
         unless $past<signature_has_invocant> {
