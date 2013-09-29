@@ -626,7 +626,7 @@ class QAST::Compiler is HLL::Compiler {
         my $ops := PIRT::Ops.new();
         $ops.push($sub);
         my $blocktype := $node.blocktype;
-        if $blocktype eq 'immediate' {
+        if $blocktype eq 'immediate' || $blocktype eq 'immediate_static' {
             # Look up and capture the block.
             try @*INNERS.push($node.cuid());
             my $breg := $*REGALLOC.fresh_p();
@@ -651,7 +651,7 @@ class QAST::Compiler is HLL::Compiler {
             }
             $ops.result($rreg);
         }
-        elsif $blocktype eq 'declaration' || $blocktype eq '' {
+        elsif $blocktype eq 'declaration' || $blocktype eq 'declaration_static' || $blocktype eq '' {
             # Get the block and newclosure it.
             try @*INNERS.push($node.cuid());
             my $breg := $*REGALLOC.fresh_p();
