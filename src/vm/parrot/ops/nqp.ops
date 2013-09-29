@@ -3526,7 +3526,7 @@ inline op nqp_delete_f(out INT, in STR) :base_core {
     }
     else if (attrs & FILE_ATTRIBUTE_READONLY) {
         (void)SetFileAttributesA(filename, attrs & ~FILE_ATTRIBUTE_READONLY);
-        $1 = unlink(filename);
+        ret = unlink(filename);
         if (ret == -1)
             (void)SetFileAttributesA(filename, attrs);
     }
