@@ -5,6 +5,21 @@ my class ParseShared is export {
     has int $!highwater;
     has @!highexpect;
     has %!marks;
+    
+    # Follow is a little simple usage tracing infrastructure, used by the
+    # !cursor_start_* methods when uncommented.
+    my %cursors_created;
+    my $cursors_total;
+    method log_cc($name) {
+        %cursors_created{$name}++;
+        $cursors_total++;
+    }
+    method log_dump() {
+        for %cursors_created {
+            say($_.value ~ "\t" ~ $_.key);
+        }
+        say("TOTAL: " ~ $cursors_total);
+    }
 }
 
 role NQPCursorRole is export {
@@ -109,6 +124,8 @@ role NQPCursorRole is export {
         my @start_result;
         my $new := nqp::create(self);
         my $sub := nqp::callercode();
+        # Uncomment following to log cursor creation.
+        #$!shared.log_cc(nqp::getcodename($sub));
         nqp::bindattr($new, $?CLASS, '$!shared', $!shared);
         nqp::bindattr($new, $?CLASS, '$!regexsub', nqp::ifnull(nqp::getcodeobj($sub), $sub));
         if nqp::defined($!restart) {
@@ -138,6 +155,8 @@ role NQPCursorRole is export {
     method !cursor_start_cur() {
         my $new := nqp::create(self);
         my $sub := nqp::callercode();
+        # Uncomment following to log cursor creation.
+        #$!shared.log_cc(nqp::getcodename($sub));
         nqp::bindattr($new, $?CLASS, '$!shared', $!shared);
         nqp::bindattr($new, $?CLASS, '$!regexsub', nqp::ifnull(nqp::getcodeobj($sub), $sub));
         if nqp::defined($!restart) {

@@ -1,3 +1,5 @@
+use QRegex;
+
 class NQP::Compiler is HLL::Compiler {
     method optimize($past, *%adverbs) {
         %adverbs<optimize> eq 'off'
@@ -42,6 +44,10 @@ sub MAIN(*@ARGS) {
 #?endif
     # Enter the compiler.
     $nqpcomp.command_line(@ARGS, :encoding('utf8'), :transcode('ascii iso-8859-1'));
+
+    # Uncomment below to dump cursor usage logging (also need to uncomment two lines
+    # in src/QRegex/Cursor.nqp, in !cursor_start_cur and !cursor_start_all).
+    #ParseShared.log_dump();
 
     # Close event logging
     $nqpcomp.nqpevent();
