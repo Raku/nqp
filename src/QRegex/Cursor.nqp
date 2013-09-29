@@ -169,6 +169,10 @@ role NQPCursorRole is export {
         nqp::bindattr($new, $?CLASS, '$!bstack', nqp::list_i());
         $new
     }
+    
+    method !cursor_start_fail() {
+        nqp::getattr($!shared, ParseShared, '$!fail_cursor');
+    }
 
     method !cursor_start_subcapture($from) {
         my $new := nqp::create(self);

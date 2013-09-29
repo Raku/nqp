@@ -368,14 +368,14 @@ position C<pos>.
     method starter() {
         my $start := $*QUOTE_START;
         nqp::isnull($start)
-            ?? self.'!cursor_start_cur'()
+            ?? self.'!cusor_start_fail'()
             !! self.'!LITERAL'($start)
     }
 
     method stopper() {
         my $stop := $*QUOTE_STOP;
         nqp::isnull($stop)
-            ?? self.'!cursor_start_cur'()
+            ?? self.'!cursor_start_fail'()
             !! self.'!LITERAL'($stop)
     }
 
@@ -613,7 +613,7 @@ An operator precedence parser.
             ParseShared, '%!marks');
         my $cur := nqp::atkey(%markhash, $markname);
         unless nqp::istype($cur, NQPCursor) && $cur.pos() == self.pos() {
-            $cur := self."!cursor_start_cur"();
+            $cur := self.'!cursor_start_fail'();
         }
         $cur
     }
