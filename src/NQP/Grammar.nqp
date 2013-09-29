@@ -789,9 +789,9 @@ grammar NQP::Grammar is HLL::Grammar {
 
     token prefix:sym<return> { <sym> \s <O('%list_prefix')> { $*RETURN_USED := 1 } }
     token prefix:sym<make>   { <sym> \s <O('%list_prefix')> }
-    token term:sym<last>     { <sym> <!before <identifier> > { $*CONTROL_USED := 1 } }
-    token term:sym<next>     { <sym> <!before <identifier> > { $*CONTROL_USED := 1 } }
-    token term:sym<redo>     { <sym> <!before <identifier> > { $*CONTROL_USED := 1 } }
+    token term:sym<last>     { <sym> <!identifier> { $*CONTROL_USED := 1 } }
+    token term:sym<next>     { <sym> <!identifier> { $*CONTROL_USED := 1 } }
+    token term:sym<redo>     { <sym> <!identifier> { $*CONTROL_USED := 1 } }
 
     method smartmatch($/) {
         # swap rhs into invocant position
@@ -820,17 +820,17 @@ grammar NQP::Regex is QRegex::P6Regex::Grammar {
         <?[{]> <codeblock>
     }
     
-    token assertion:sym<?> { '?' [ <?before '>' > | <!before '{'> <assertion> ] }
-    token assertion:sym<!> { '!' [ <?before '>' > | <!before '{'> <assertion> ] }
+    token assertion:sym<?> { '?' [ <?[>]> | <![{]> <assertion> ] }
+    token assertion:sym<!> { '!' [ <?[>]> | <![{]> <assertion> ] }
 
     token assertion:sym<?{ }> {
-        $<zw>=[ <[?!]> <?before '{'> ] <codeblock>
+        $<zw>=[ <[?!]> <?[{]> ] <codeblock>
     }
 
     token assertion:sym<name> {
         <longname=.identifier>
             [
-            | <?before '>'>
+            | <?[>]>
             | '=' <assertion>
             | ':' <arglist>
             | '(' <arglist=.LANG('MAIN','arglist')> ')'
