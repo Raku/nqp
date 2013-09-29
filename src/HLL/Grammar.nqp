@@ -101,7 +101,7 @@ grammar HLL::Grammar {
     token quote_escape:sym<chr> { \\ c <?quotemod_check('b')> <charspec> }
     token quote_escape:sym<0> { \\ <sym> <?quotemod_check('b')> }
     token quote_escape:sym<misc> {
-        {} \\
+        \\ {}
         [
         || <?quotemod_check('b')>
              [
