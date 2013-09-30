@@ -413,7 +413,7 @@ class HLL::Compiler does HLL::Backend::Default {
         }
         my $grammar := self.parsegrammar;
         my $actions;
-        $actions    := self.parseactions unless %adverbs<target> eq 'parse';
+        $actions    := self.parseactions;
         $grammar.HOW.trace-on($grammar) if %adverbs<rxtrace>;
         my $match   := $grammar.parse($s, p => 0, actions => $actions);
         $grammar.HOW.trace-off($grammar) if %adverbs<rxtrace>;
