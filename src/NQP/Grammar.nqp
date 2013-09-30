@@ -304,6 +304,9 @@ grammar NQP::Grammar is HLL::Grammar {
     token term:sym<regex_declarator>   { <regex_declarator> }
     token term:sym<statement_prefix>   { <statement_prefix> }
     token term:sym<lambda>             { <?lambda> <pblock> }
+    token term:sym<last>               { <sym> <!identifier> { $*CONTROL_USED := 1 } }
+    token term:sym<next>               { <sym> <!identifier> { $*CONTROL_USED := 1 } }
+    token term:sym<redo>               { <sym> <!identifier> { $*CONTROL_USED := 1 } }
 
     token fatarrow {
         <key=.identifier> \h* '=>' <.ws> <val=.EXPR('i=')>
@@ -601,10 +604,6 @@ grammar NQP::Grammar is HLL::Grammar {
         <deflongname> <args>
     }
 
-    token term:sym<name> {
-        <name> <args>**0..1
-    }
-
     token term:sym<pir::op> {
         'pir::' $<op>=[\w+] <args>**0..1
     }
@@ -624,6 +623,10 @@ grammar NQP::Grammar is HLL::Grammar {
     token term:sym<onlystar> {
         '{*}' <?ENDSTMT>
         [ <?{ $*MULTINESS eq 'proto' }> || <.panic: '{*} may only appear in proto'> ]
+    }
+    
+    token term:sym<name> {
+        <name> <args>**0..1
     }
 
     token args {
@@ -789,9 +792,6 @@ grammar NQP::Grammar is HLL::Grammar {
 
     token prefix:sym<return> { <sym> \s <O('%list_prefix')> { $*RETURN_USED := 1 } }
     token prefix:sym<make>   { <sym> \s <O('%list_prefix')> }
-    token term:sym<last>     { <sym> <!identifier> { $*CONTROL_USED := 1 } }
-    token term:sym<next>     { <sym> <!identifier> { $*CONTROL_USED := 1 } }
-    token term:sym<redo>     { <sym> <!identifier> { $*CONTROL_USED := 1 } }
 
     method smartmatch($/) {
         # swap rhs into invocant position
