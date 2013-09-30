@@ -1389,7 +1389,7 @@ class QAST::Compiler is HLL::Compiler {
                 $ops.push_pirop('add', %*REG<pos>, '$I11');
             } 
         }
-        $ops.push_pirop('add', %*REG<pos>, 1);
+        $ops.push_pirop('add', %*REG<pos>, 1) unless $node.subtype eq 'zerowidth';
         $ops;
     }
 
