@@ -368,7 +368,7 @@ position C<pos>.
     method starter() {
         my $start := $*QUOTE_START;
         nqp::isnull($start)
-            ?? self.'!cusor_start_fail'()
+            ?? self.'!cursor_start_fail'()
             !! self.'!LITERAL'($start)
     }
 
