@@ -352,7 +352,7 @@ instead.
 A QAST::Block can only appear once in the QAST tree. So what if you want to
 refer to a block from elsewhere? The answer is to use a QAST::BVal.
 
-    QAST::BVal.new( :block($some_block) )
+    QAST::BVal.new( :value($some_block) )
 
 The $some_block should be a QAST::Block. Note that this only works if the
 block is in the same compilation unit as the one where the BVal is used
