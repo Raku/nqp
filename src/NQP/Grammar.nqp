@@ -563,7 +563,7 @@ grammar NQP::Grammar is HLL::Grammar {
           || '{' '<...>' '}'<?ENDSTMT>
           || '{' '<*>' '}'<?ENDSTMT>
           || <.panic: "Proto regex body must be \{*\} (or <*> or <...>, which are deprecated)">
-          ]
+          ] :!s
         | $<sym>=[regex|token|rule] :s
           [
           || '::(' <latename=variable> ')'
