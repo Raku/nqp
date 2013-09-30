@@ -602,9 +602,16 @@ An operator precedence parser.
         my %markhash := nqp::getattr(
             nqp::getattr(self, $cursor_class, '$!shared'),
             ParseShared, '%!marks');
-        my $cur := self."!cursor_start_cur"();
-        $cur."!cursor_pass"(self.pos());
-        nqp::bindkey(%markhash, $markname, $cur);
+        my $cur := nqp::atkey(%markhash, $markname);
+        if nqp::isnull($cur) {
+            $cur := self."!cursor_start_cur"();
+            $cur."!cursor_pass"(self.pos());
+            nqp::bindkey(%markhash, $markname, $cur);
+        }
+        else {
+            $cur."!cursor_pos"(self.pos());
+            $cur
+        }
     }
     
     method MARKED(str $markname) {
