@@ -4794,10 +4794,12 @@ class QAST::CompilerJAST {
             } 
         }
         
-        $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
-        $il.append($IVAL_ONE);
-        $il.append($LADD);
-        $il.append(JAST::Instruction.new( :op('lstore'), %*REG<pos> ));
+        unless $node.subtype eq 'zerowidth' {
+            $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
+            $il.append($IVAL_ONE);
+            $il.append($LADD);
+            $il.append(JAST::Instruction.new( :op('lstore'), %*REG<pos> ));
+        }
         
         $il
     }
