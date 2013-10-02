@@ -13,6 +13,26 @@ description.  Some opcodes differ only by argument types - in that case,
 they are listed under their common name (e.g. mul), with each of their
 variants (e.g. mul_i, mul_n) together with a single description.
 
+Opcode variants may contain a type suffix, which usually indicates:
+
+* `_i` argument is native int 
+* `_n` argument is native float
+* `_s` argument is native string
+* `_I` argument is Big Integer
+
+They may also have a numeric suffix, which typically indicates the number
+of arguments required.
+
+In opcode signatures below, we use the following types, which may not
+correspond directly to NQP types.
+
+* int    - native int
+* num    - native float
+* str    - native string
+* Any    - an NQP or VM object
+* Type   - a type object (e.g. `Int`)
+* Handle - an I/O Handle object
+
 # Arithmetic Opcodes
 
 ## abs
