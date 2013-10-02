@@ -344,12 +344,79 @@ The $flags is a bitmask that modifies the parse and/or result:
 
 # Exceptional Opcodes
 
-# I/O Opcodes
+# Input/Output Opcodes
+
+##close
+* `closefh(handle $fh)`
+
+Close the filehandle.
 
 ##getcfh
 * `getcfh(handle $in)`
 
 Reads a single character from the supplied filehandle.
+
+##getstderr
+* `getstdin()`
+
+Return the filehandle for standard error.
+
+##getstdin
+* `getstdin()`
+
+Return the filehandle for standard input.
+
+##getstdout
+* `getstdin()`
+
+Return the filehandle for standard output.
+
+##open
+* `open(str $filename, str $mode)`
+
+Open the specified file in the given mode. Valid modes include `r` for read,
+`w` for write, and `wa` for write with append.
+
+##openasync
+* `openasync(str $filename, str $mode)`
+
+Open the specified file in the given mode for async IO.
+See `open` for valid modes.
+
+##print
+* `print(sstr $str)`
+
+Output the given string to stdout.
+
+##printfh
+* `printfh(handle $fh, str $str)`
+
+Output the given string to the filehandle.
+
+##readallfh
+* `readallfh(handle $fh)`
+
+Return the contents of the open filehandle.
+
+##say
+* `say(str $str)`
+
+Output the given string to stdout, followed by a newline.
+
+##sayfh
+* `sayfh(handle $fh, str $str)`
+
+Output the given string to the filehandle, followed by a newline.
+
+##tellfh
+* `tellfh(handle $fh)`
+
+Return current access position for an open handle.
+
+##writefh
+* `writefh(handle $fh, Any $str)`
+
+Output the given object to the filehandle.
 
 # Context Introspection Opcodes
 
