@@ -10,8 +10,8 @@ When invoking them directly, you'll need to prefix them with nqp::, e.g.
 The ops are listed below by type. Each entry shows the name of the op,
 its variants, and their arguments and types, and may provide a short
 description.  Some opcodes differ only by argument types - in that case,
-they are listed under their common name (e.g. mul), with each of their
-variants (e.g. mul_i, mul_n) together with a single description.
+they are listed under their common name (e.g. `mul`), with each of their
+variants (e.g. `mul_i`, `mul_n`) together with a single description.
 
 Opcode variants may contain a type suffix, which usually indicates:
 
@@ -435,7 +435,7 @@ Return the filehandle for standard error.
 Return the filehandle for standard input.
 
 ##getstdout
-* `getstout()`
+* `getstdout()`
 
 Return the filehandle for standard output.
 
