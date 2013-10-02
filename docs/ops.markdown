@@ -16,122 +16,122 @@ variants (e.g. mul_i, mul_n) together with a single description.
 # Arithmetic Opcodes
 
 ## abs
-*  `abs_i(int $i)`
-*  `abs_n(num $n)`
-*  `abs_I(Any $i)`
+* `abs_i(int $i)`
+* `abs_n(num $n)`
+* `abs_I(Any $i)`
 
 Return the absolute value of a number.
 
 ## add
-*  `add_i(int $l, int $r)`
-*  `add_n(num $l, num $r)`
-*  `add_I(Any $l, Any $r)`
+* `add_i(int $l, int $r)`
+* `add_n(num $l, num $r)`
+* `add_I(Any $l, Any $r)`
 
 Add two numbers together, returning the result.
 
 ## div
-*  `div_i(int $l, int $r)`
-*  `div_n(num $l, num $r)`
-*  `div_I(Any $l, Any $r)`
+* `div_i(int $l, int $r)`
+* `div_n(num $l, num $r)`
+* `div_I(Any $l, Any $r)`
 
 Divide $l by $r, returning the result.
 
 ## gcd
-*  `gcd_i(int $l, int $r)`
-*  `gcd_I(Any $l, Any $r)`
+* `gcd_i(int $l, int $r)`
+* `gcd_I(Any $l, Any $r)`
 
 Return the greatest common multiple of two numbers. 
 
 ## lcm
-*  `lcm_i(int $l, int $r)`
-*  `lcm_I(Any $l, Any $r)`
+* `lcm_i(int $l, int $r)`
+* `lcm_I(Any $l, Any $r)`
 
 Return the lowest common multiple of two numbers. 
 
 ## mod
-*  `mod_i(int $l, int $r)`
-*  `mod_n(num $l, num $r)`
-*  `mod_I(Any $l, Any $r)`
+* `mod_i(int $l, int $r)`
+* `mod_n(num $l, num $r)`
+* `mod_I(Any $l, Any $r)`
 
 Return the modulus of $l by $r.
 
 ## mul
-*  `mul_i(int $l, int $r)`
-*  `mul_n(num $l, num $r)`
-*  `mul_I(Any $l, Any $r)`
+* `mul_i(int $l, int $r)`
+* `mul_n(num $l, num $r)`
+* `mul_I(Any $l, Any $r)`
 
 Multiple two numbers, returning the result.
 
 ## neg
-*  `neg_i(int $i)`
-*  `neg_n(num $n)`
-*  `neg_I(Any $i)`
+* `neg_i(int $i)`
+* `neg_n(num $n)`
+* `neg_I(Any $i)`
 
 Return the negative of a number.
 
 ## sub
-*  `sub_i(int $l, int $r)`
-*  `sub_n(num $l, num $r)`
-*  `sub_I(Any $l, Any $r)`
+* `sub_i(int $l, int $r)`
+* `sub_n(num $l, num $r)`
+* `sub_I(Any $l, Any $r)`
 
 Subtract $r from $l, returning the result.
 
 # Numeric Opcodes
 
 ## ceil
-*  `ceil_n(num $n)`
+* `ceil_n(num $n)`
 
 Return the ceiling of a number.
 
 ## exp
-*  `exp_n(num $exponent)`
+* `exp_n(num $exponent)`
 
 Return the value of `e` raised to $exponent;
 
 ## floor
-*  `floor_n(num $n)`
+* `floor_n(num $n)`
 
 Return the floor of a number.
 
 ## inf
-*  `inf()`
+* `inf()`
 
 Return infinity.
 
 ## isnanorinf
-*  `isnanorinf(num $n)`
+* `isnanorinf(num $n)`
 
 Return truth value indicating if this number represents any of the special
 values, postive infinity, negative infinity, or NaN.
 
 ## log
-*  `log_n(num $n)`
+* `log_n(num $n)`
 
 Return the log base 10 of a number.
 
 ## ln
-*  `ln_n(num $n)`
+* `ln_n(num $n)`
 
 Return the natural logarithm of a number.
 
 ## nan
-*  `nan()`
+* `nan()`
 
 Return NaN.
 
 ## neginf
-*  `neginf()`
+* `neginf()`
 
 Return negative infinity.
 
 ## pow
-*  `pow_n(num $base, num $exponent)`
-*  `pow_I(Any $base, Any $exponent)`
+* `pow_n(num $base, num $exponent)`
+* `pow_I(Any $base, Any $exponent)`
 
 Return the value of $base raised to $exponent;
 
 ## sqrt
-*  `sqrt_n(num $l, num $r)`
+* `sqrt_n(num $l, num $r)`
 
 # Trigonometric Opcodes
 
@@ -139,93 +139,93 @@ Each opcode corresponds directly to the trigonmetric function of the same
 name. `h` indicates a hyperbolic variant.
 
 ## asec
-*  `asec_n(num $n)`
+* `asec_n(num $n)`
 
 ## asin
-*  `asin_n(num $n)`
+* `asin_n(num $n)`
 
 ## acos
-*  `acos_n(num $n)`
+* `acos_n(num $n)`
 
 ## atan
-*  `atan_n(num $n)`
+* `atan_n(num $n)`
 
 ## atan2
-*  `atan2_n(num $l, num $r)`
+* `atan2_n(num $l, num $r)`
 
 ## cos
-*  `cos_n(num $n)`
+* `cos_n(num $n)`
 
 ## cosh
-*  `cosh_n(num $n)`
+* `cosh_n(num $n)`
 
 ## sin
-*  `sin_n(num $n)`
+* `sin_n(num $n)`
 
 ## sinh
-*  `sinh_n(num $n)`
+* `sinh_n(num $n)`
 
 ## sec
-*  `sec_n(num $n)`
+* `sec_n(num $n)`
 
 ## sech
-*  `sech_n(num $n)`
+* `sech_n(num $n)`
 
 ## tan
-*  `tan_n(num $n)`
+* `tan_n(num $n)`
 
 ## tanh
-*  `tanh_n(num $n)`
+* `tanh_n(num $n)`
 
 # Relational Opcodes
 
 ## cmp
-*  `cmp_i(int $l, int $r)`
-*  `cmp_n(num $l, num $r)`
-*  `cmp_s(str $l, str $r)`
+* `cmp_i(int $l, int $r)`
+* `cmp_n(num $l, num $r)`
+* `cmp_s(str $l, str $r)`
 
 Compare two values, returns -1 if $l is greater than $r, 0 if they are equal,
 and 1 if $r is greater than $l.
 
 ## iseq
-*  `iseq_i(int $l, int $r)`
-*  `iseq_n(num $l, num $r)`
-*  `iseq_s(str $l, str $r)`
+* `iseq_i(int $l, int $r)`
+* `iseq_n(num $l, num $r)`
+* `iseq_s(str $l, str $r)`
 
 Return non-zero if the two parameters are equal.
 
 ## isgt 
-*  `isgt_i(int $l, int $r)`
-*  `isgt_n(num $l, num $r)`
-*  `isgt_s(str $l, str $r)`
+* `isgt_i(int $l, int $r)`
+* `isgt_n(num $l, num $r)`
+* `isgt_s(str $l, str $r)`
 
 Return non-zero if $l is greater than two $r.
 
 ## isge
-*  `isge_i(int $l, int $r)`
-*  `isge_n(num $l, num $r)`
-*  `isge_s(str $l, str $r)`
+* `isge_i(int $l, int $r)`
+* `isge_n(num $l, num $r)`
+* `isge_s(str $l, str $r)`
 
 Return non-zero if $l is greater than or equal two $r.
 
 ## islt
-*  `islt_i(int $l, int $r)`
-*  `islt_n(num $l, num $r)`
-*  `islt_s(str $l, str $r)`
+* `islt_i(int $l, int $r)`
+* `islt_n(num $l, num $r)`
+* `islt_s(str $l, str $r)`
 
 Return non-zero if $l is less than two $r.
 
 ## isle
-*  `isle_i(int $l, int $r)`
-*  `isle_n(num $l, num $r)`
-*  `isle_s(str $l, str $r)`
+* `isle_i(int $l, int $r)`
+* `isle_n(num $l, num $r)`
+* `isle_s(str $l, str $r)`
 
 Return non-zero if $l is less than or equal two $r.
 
 ## isne
-*  `isne_i(int $l, int $r)`
-*  `isne_n(num $l, num $r)`
-*  `isne_s(str $l, str $r)`
+* `isne_i(int $l, int $r)`
+* `isne_n(num $l, num $r)`
+* `isne_s(str $l, str $r)`
 
 Return non-zero if the two parameters are not equal.
 
@@ -319,7 +319,7 @@ Delete the given key from %hash.
 # String Opcodes
 
 ## radix
-*  `radix_I(int $radix, String $str, int $pos, int $flags)`
+* `radix_I(int $radix, String $str, int $pos, int $flags)`
 
 Convert string $str into a number starting at offset $pos and using radix $radix.
 The result of the conversion returns an array with
@@ -354,13 +354,13 @@ Reads a single character from the supplied filehandle.
 # Context Introspection Opcodes
 
 ## getenvhash
-*  `getenvhash()`
+* `getenvhash()`
 
 Returns a hash containing the environment variables.
 Changing the hash doesn't affect the environment variables
 
 ## savecapture
-*  `savecapture()`
+* `savecapture()`
 
 Gets hold of the argument capture passed to the current block.
 Commits to doing enough copying that the list is valid any amount of time.
@@ -368,7 +368,7 @@ See usecapture for a version of the op that doesn't promise that.
 Used by the multi-dispatcher.
 
 ## usecapture
-*  `usecapture()`
+* `usecapture()`
 
 Gets hold of the argument capture passed to the current block.
 (a future usecapture may invalidate it)
