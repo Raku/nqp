@@ -112,4 +112,6 @@ abc <![d]>		abc		y	negated charclass at end of string (issue 9)
 <[\w]-[\D]>		1		<b>		character class substraction 19
 <[\w]-[\D]>+	123		<b>		character class substraction 20
 
+<[\ ]>			a b		y		space in character class escaped with backslash
+
 ## vim: noexpandtab tabstop=4 shiftwidth=4
