@@ -345,6 +345,16 @@ The $flags is a bitmask that modifies the parse and/or result:
     0x04: parse trailing zeroes but do not include in result
           (for parsing values after a decimal point)
 
+## substr
+* `substr(...)`
+* `substr2(str $str, int $position)`
+* `substr3(str $str, int $position, int $length)`
+
+Return the portion of the string starting at the given position.
+If `$length` is specified, only return that many characters. The
+numbered variants required the args specified - the unnumbered
+version may use either signature.
+
 # Conditional Opcodes
 
 # Loop/Control Opcodes
@@ -424,6 +434,76 @@ Return current access position for an open handle.
 * `writefh(handle $fh, Any $str)`
 
 Output the given object to the filehandle.
+
+# Type Opcodes
+
+## isbig
+* `isbig_I(Any $obj)`
+
+Returns a 1 if the object's numerical representation requires a big int, 0 otherwise.
+
+## isconcrete
+* `isconcrete(Any $obj)`
+
+Returns a 1 if the object is not a type object, 0 otherwise.
+
+## iscont
+* `iscont(Any $obj)`
+
+Returns a 1 if the object is a container type, 0 otherwise.
+
+
+## isfalse
+* `isfalse(Any $obj)`
+
+Returns a 0 if the object has a truthy value, 1 otherwise.
+
+## ishash
+* `ishash(Any $obj)`
+
+Returns a 1 if the object is a Hash, 0 otherwise.
+
+## isint
+* `isint(Any $obj)`
+
+Returns a 1 if the object is an int type, 0 otherwise.
+
+## isinvokable
+* `isinvokable(Any $obj)`
+
+Returns a 1 if the object represents something executable, 0 otherwise.
+
+
+## islist
+* `islist(Any $obj)`
+
+Returns a 1 if the object is an Array, 0 otherwise.
+
+## isnull
+* `isnull(Any $obj)`
+* `isnull_s(str $obj)`
+
+Returns a 1 if the object is a null, 0 otherwise.
+
+## isnum
+* `isnum(Any $obj)`
+
+Returns a 1 if the object is a float type, 0 otherwise.
+
+## isstr
+* `isstr(Any $obj)`
+
+Returns a 1 if the object is a str type, 0 otherwise.
+
+## istrue
+* `istrue(Any $obj)`
+
+Returns a 1 if the object has a truthy value, 0 otherwise.
+
+## istype
+* `istrue(Any $obj, Type $obj)`
+
+Returns a 1 if the object is of the given type, 0 otherwise.
 
 # Context Introspection Opcodes
 
