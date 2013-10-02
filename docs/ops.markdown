@@ -80,19 +80,16 @@ Subtract $r from $l, returning the result.
 
 ## ceil
 *  `ceil_n(num $n)`
-*  `ceil_I(Any $n)`
 
 Return the ceiling of a number.
 
 ## exp
 *  `exp_n(num $exponent)`
-*  `exp_I(Any $exponent)`
 
 Return the value of `e` raised to $exponent;
 
 ## floor
 *  `floor_n(num $n)`
-*  `floor_I(Any $n)`
 
 Return the floor of a number.
 
@@ -102,20 +99,18 @@ Return the floor of a number.
 Return infinity.
 
 ## isnanorinf
-*  `isnanorinf_n(num $n)`
+*  `isnanorinf(num $n)`
 
 Return truth value indicating if this number represents any of the special
 values, postive infinity, negative infinity, or NaN.
 
 ## log
 *  `log_n(num $n)`
-*  `log_I(Any $n)`
 
 Return the log base 10 of a number.
 
 ## ln
 *  `ln_n(num $n)`
-*  `ln_I(Any $n)`
 
 Return the natural logarithm of a number.
 
@@ -137,7 +132,6 @@ Return the value of $base raised to $exponent;
 
 ## sqrt
 *  `sqrt_n(num $l, num $r)`
-*  `sqrt_I(Any $l, Any $r)`
 
 # Trigonometric Opcodes
 
