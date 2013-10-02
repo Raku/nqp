@@ -363,7 +363,7 @@ version may use either signature.
 Close the filehandle.
 
 ##eoffh
-* `eofffh(handle $fh)`
+* `eoffh(handle $fh)`
 
 Return 1 if this filehandle is at the end of the file, otherwise 0.
 
