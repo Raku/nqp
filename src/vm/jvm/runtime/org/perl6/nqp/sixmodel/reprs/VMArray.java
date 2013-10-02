@@ -117,10 +117,11 @@ public class VMArray extends REPR {
         obj.st = st;
         return obj;
     }
-
+    
     public void deserialize_finish(ThreadContext tc, STable st,
             SerializationReader reader, SixModelObject obj) {
         int elems = reader.readInt32();
+        obj.set_elems(tc, elems);
         if (st.REPRData == null) {
             for (int i = 0; i < elems; i++)
                 obj.bind_pos_boxed(tc, i, reader.readRef());
