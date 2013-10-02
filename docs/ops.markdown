@@ -362,13 +362,18 @@ version may use either signature.
 
 Close the filehandle.
 
+##eoffh
+* `eofffh(handle $fh)`
+
+Return 1 if this filehandle is at the end of the file, otherwise 0.
+
 ##getcfh
 * `getcfh(handle $in)`
 
 Reads a single character from the supplied filehandle.
 
 ##getstderr
-* `getstdin()`
+* `getstderr()`
 
 Return the filehandle for standard error.
 
@@ -378,7 +383,7 @@ Return the filehandle for standard error.
 Return the filehandle for standard input.
 
 ##getstdout
-* `getstdin()`
+* `getstout()`
 
 Return the filehandle for standard output.
 
@@ -409,6 +414,16 @@ Output the given string to the filehandle.
 
 Return the contents of the open filehandle.
 
+##readlinefh
+* `readlinefh(handle $fh)`
+
+Return the next line of the open filehandle.
+
+##readlineintfh
+* `readlineintfh(handle $fh, str $prompt)`
+
+Prompt the user with `$prompt`, then return the next line of the open filehandle.
+
 ##say
 * `say(str $str)`
 
@@ -429,7 +444,26 @@ Return current access position for an open handle.
 
 Output the given object to the filehandle.
 
-# Type Opcodes
+# Type/Conversion Opcodes
+
+##box
+* `box_i(int $val, Type $type)`
+* `box_n(num $val, Type $type)`
+* `box_s(str $val, Type $type)`
+
+Given a native value, return a perl 6 object of the given Type
+with the same value.
+
+##fromnum
+* `fromnum_I(num $val, Type $type)`
+
+Convert float value to a Big Integer of the given type,
+discarding any decimal portion.
+
+##fromstr
+* `fromstr_I(str $val, Type $type)`
+
+Convert string value to a Big Integer of the given Type.
 
 ## isbig
 * `isbig_I(Any $obj)`
@@ -504,9 +538,27 @@ Returns a 1 if the object is a str type, 0 otherwise.
 Returns a 1 if the object has a truthy value, 0 otherwise.
 
 ## istype
-* `istrue(Any $obj, Type $obj)`
+* `istype(Any $obj, Type $obj)`
 
 Returns a 1 if the object is of the given type, 0 otherwise.
+
+##tostr
+* `tostr_I(Any $val)`
+
+Convert Big Integer value to a native string.
+
+##tonum
+* `tonum_I(Any $val)`
+
+Convert Big Integer value to a native number.
+
+##unbox
+* `unbox_i(Any $val)`
+* `unbox_n(Any $val)`
+* `unbox_s(Any $val)`
+
+Given a Perl 6 object, return a native with the same value,
+of the type indicated by the opcode suffix.
 
 # Bit Opcodes
 
