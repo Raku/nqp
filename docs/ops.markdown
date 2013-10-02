@@ -339,6 +339,28 @@ Delete the given key from %hash.
 
 # String Opcodes
 
+## chars
+* `chars(str $str)`
+
+Return the number of characters in the string.
+
+## concat
+* `concat(str $l, str $r)`
+
+Return a string that is the concatenation of the two
+passed in strings.
+
+## flip
+* `flip(str $str)`
+
+Return a string with the characters of `$string` in
+reverse order.
+
+## lc
+* `lc(str $str)`
+
+Return lowercase copy of string.
+
 ## radix
 * `radix_I(int $radix, String $str, int $pos, int $flags)`
 
@@ -359,6 +381,11 @@ The $flags is a bitmask that modifies the parse and/or result:
     0x04: parse trailing zeroes but do not include in result
           (for parsing values after a decimal point)
 
+## uc
+* `uc(str $str)`
+
+Return uppercase copy of string.
+
 ## substr
 * `substr(...)`
 * `substr2(str $str, int $position)`
@@ -368,6 +395,11 @@ Return the portion of the string starting at the given position.
 If `$length` is specified, only return that many characters. The
 numbered variants required the args specified - the unnumbered
 version may use either signature.
+
+## x
+* `x(str $str, int $count)`
+
+Return a string containing `$count` copies of the string.
 
 # Conditional Opcodes
 
