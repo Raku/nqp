@@ -17,6 +17,7 @@ my @jvm_lines := nqp::split("\n", nqp::readallfh(nqp::open("src/vm/jvm/QAST/Comp
 for @jvm_lines -> $line {
     next unless $line ~~ / 'map_classlib_core_op' | 'add_core_op' | 'map_jvm_core_op' /;
     $line := nqp::split("'", $line)[1];
+    next unless nqp::chars($line);
     %jvm_ops{$line} := 1;
 }
 
