@@ -238,18 +238,22 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         [ <.ws> '=' <.ws> <quantified_atom> ]**0..1
     }
 
+    # Backslash escapes shared between character classes and "running regex".
+    proto token shared_backslash { <...> }
+    token shared_backslash:sym<s> { $<sym>=[<[dDnNsSwW]>] }
+    token shared_backslash:sym<b> { $<sym>=[<[bB]>] }
+    token shared_backslash:sym<e> { $<sym>=[<[eE]>] }
+    token shared_backslash:sym<f> { $<sym>=[<[fF]>] }
+    token shared_backslash:sym<h> { $<sym>=[<[hH]>] }
+    token shared_backslash:sym<r> { $<sym>=[<[rR]>] }
+    token shared_backslash:sym<t> { $<sym>=[<[tT]>] }
+    token shared_backslash:sym<v> { $<sym>=[<[vV]>] }
+    token shared_backslash:sym<o> { $<sym>=[<[oO]>] [ <octint> | '[' <octints> ']' ] }
+    token shared_backslash:sym<x> { $<sym>=[<[xX]>] [ <hexint> | '[' <hexints> ']' ] }
+    token shared_backslash:sym<c> { $<sym>=[<[cC]>] <charspec> }
+
     proto token backslash { <...> }
-    token backslash:sym<s> { $<sym>=[<[dDnNsSwW]>] }
-    token backslash:sym<b> { $<sym>=[<[bB]>] }
-    token backslash:sym<e> { $<sym>=[<[eE]>] }
-    token backslash:sym<f> { $<sym>=[<[fF]>] }
-    token backslash:sym<h> { $<sym>=[<[hH]>] }
-    token backslash:sym<r> { $<sym>=[<[rR]>] }
-    token backslash:sym<t> { $<sym>=[<[tT]>] }
-    token backslash:sym<v> { $<sym>=[<[vV]>] }
-    token backslash:sym<o> { $<sym>=[<[oO]>] [ <octint> | '[' <octints> ']' ] }
-    token backslash:sym<x> { $<sym>=[<[xX]>] [ <hexint> | '[' <hexints> ']' ] }
-    token backslash:sym<c> { $<sym>=[<[cC]>] <charspec> }
+    token backslash:sym<shr> { <shared_backslash> }
     token backslash:sym<A> { 'A' <.obs: '\\A as beginning-of-string matcher', '^'> }
     token backslash:sym<z> { 'z' <.obs: '\\z as end-of-string matcher', '$'> }
     token backslash:sym<Z> { 'Z' <.obs: '\\Z as end-of-string matcher', '\\n?$'> }
@@ -257,6 +261,10 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token backslash:sym<unrec> { {} (\w) { self.throw_unrecog_backslash_seq: $/[0].Str } }
     token backslash:sym<unsp> { [\s|'#'] <.panic: 'Unspace not allowed in regex'> }
     token backslash:sym<misc> { \W }
+
+    proto token cclass_backslash { <...> }
+    token cclass_backslash:sym<shr> { <shared_backslash> }
+    token cclass_backslash:sym<any> { . }
 
     proto token assertion { <...> }
 
@@ -287,10 +295,10 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         [
         | '[' $<charspec>=(
                   || \s* '-' <!before \s* ']'> <.obs: '- as character range','.. for range, for explicit - in character class, escape it or place as last thing'>
-                  || \s* ( '\\' <backslash> || (<-[\]\\]>) )
+                  || \s* ( '\\' <cclass_backslash> || (<-[\]\\]>) )
                      [
                          \s* '..' \s*
-                         ( '\\' <backslash> || (<-[\]\\]>) )
+                         ( '\\' <cclass_backslash> || (<-[\]\\]>) )
                      ]**0..1
               )*
           \s* ']'

@@ -269,55 +269,55 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     
     method metachar:sym<mod>($/) { make $<mod_internal>.ast; }
 
-    method backslash:sym<s>($/) {
+    method shared_backslash:sym<s>($/) {
         make QAST::Regex.new(:rxtype<cclass>, :name( nqp::lc(~$<sym>) ),
                              :negate($<sym> le 'Z'), :node($/));
     }
 
-    method backslash:sym<b>($/) {
+    method shared_backslash:sym<b>($/) {
         my $qast := QAST::Regex.new( "\b", :rxtype('enumcharlist'),
                         :negate($<sym> eq 'B'), :node($/) );
         make $qast;
     }
 
-    method backslash:sym<e>($/) {
+    method shared_backslash:sym<e>($/) {
         my $qast := QAST::Regex.new( "\c[27]", :rxtype('enumcharlist'),
                         :negate($<sym> eq 'E'), :node($/) );
         make $qast;
     }
 
-    method backslash:sym<f>($/) {
+    method shared_backslash:sym<f>($/) {
         my $qast := QAST::Regex.new( "\c[12]", :rxtype('enumcharlist'),
                         :negate($<sym> eq 'F'), :node($/) );
         make $qast;
     }
 
-    method backslash:sym<h>($/) {
+    method shared_backslash:sym<h>($/) {
         my $qast := QAST::Regex.new( "\x[09,20,a0,1680,180e,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,200a,202f,205f,3000]", :rxtype('enumcharlist'),
                         :negate($<sym> eq 'H'), :node($/) );
         make $qast;
     }
 
-    method backslash:sym<r>($/) {
+    method shared_backslash:sym<r>($/) {
         my $qast := QAST::Regex.new( "\r", :rxtype('enumcharlist'),
                         :negate($<sym> eq 'R'), :node($/) );
         make $qast;
     }
 
-    method backslash:sym<t>($/) {
+    method shared_backslash:sym<t>($/) {
         my $qast := QAST::Regex.new( "\t", :rxtype('enumcharlist'),
                         :negate($<sym> eq 'T'), :node($/) );
         make $qast;
     }
 
-    method backslash:sym<v>($/) {
+    method shared_backslash:sym<v>($/) {
         my $qast := QAST::Regex.new( "\x[0a,0b,0c,0d,85,2028,2029]",
                         :rxtype('enumcharlist'),
                         :negate($<sym> eq 'V'), :node($/) );
         make $qast;
     }
 
-    method backslash:sym<o>($/) {
+    method shared_backslash:sym<o>($/) {
         my $octlit :=
             HLL::Actions.ints_to_string( $<octint> || $<octints><octint> );
         make $<sym> eq 'O'
@@ -326,7 +326,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
              !! QAST::Regex.new( $octlit, :rxtype('literal'), :node($/) );
     }
 
-    method backslash:sym<x>($/) {
+    method shared_backslash:sym<x>($/) {
         my $hexlit :=
             HLL::Actions.ints_to_string( $<hexint> || $<hexints><hexint> );
         make $<sym> eq 'X'
@@ -335,11 +335,24 @@ class QRegex::P6Regex::Actions is HLL::Actions {
              !! QAST::Regex.new( $hexlit, :rxtype('literal'), :node($/) );
     }
 
-    method backslash:sym<c>($/) {
+    method shared_backslash:sym<c>($/) {
         make QAST::Regex.new( $<charspec>.ast, :rxtype('literal'), :node($/) );
     }
 
+    method backslash:sym<shr>($/) {
+        make $<shared_backslash>.ast;
+    }
+
     method backslash:sym<misc>($/) {
+        my $qast := QAST::Regex.new( ~$/ , :rxtype('literal'), :node($/) );
+        make $qast;
+    }
+
+    method cclass_backslash:sym<shr>($/) {
+        make $<shared_backslash>.ast;
+    }
+
+    method cclass_backslash:sym<any>($/) {
         my $qast := QAST::Regex.new( ~$/ , :rxtype('literal'), :node($/) );
         make $qast;
     }
@@ -486,8 +499,8 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                     my $node;
                     my $lhs;
                     my $rhs;
-                    if $_[0]<backslash> {
-                        $node := $_[0]<backslash>.ast;
+                    if $_[0]<cclass_backslash> {
+                        $node := $_[0]<cclass_backslash>.ast;
                         $/.CURSOR.panic("Illegal range endpoint in regex: " ~ ~$_)
                             if $node.rxtype ne 'literal' && $node.rxtype ne 'enumcharlist'
                                 || $node.negate || nqp::chars($node[0]) != 1;
@@ -496,8 +509,8 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                     else {
                         $lhs := ~$_[0][0];
                     }
-                    if $_[1][0]<backslash> {
-                        $node := $_[1][0]<backslash>.ast;
+                    if $_[1][0]<cclass_backslash> {
+                        $node := $_[1][0]<cclass_backslash>.ast;
                         $/.CURSOR.panic("Illegal range endpoint in regex: " ~ ~$_)
                             if $node.rxtype ne 'literal' && $node.rxtype ne 'enumcharlist'
                                 || $node.negate || nqp::chars($node[0]) != 1;
@@ -520,8 +533,8 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                         $str := nqp::concat($str, nqp::chr($ord0++)) while $ord0 <= $ord1;
                     }
                 }
-                elsif $_[0]<backslash> {
-                    my $bs := $_[0]<backslash>.ast;
+                elsif $_[0]<cclass_backslash> {
+                    my $bs := $_[0]<cclass_backslash>.ast;
                     $bs.negate(!$bs.negate) if $<sign> eq '-';
                     @alts.push($bs);
                 }
