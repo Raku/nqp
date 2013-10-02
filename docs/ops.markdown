@@ -98,12 +98,6 @@ Return the floor of a number.
 
 Return infinity.
 
-## isnanorinf
-* `isnanorinf(num $n)`
-
-Return truth value indicating if this number represents any of the special
-values, postive infinity, negative infinity, or NaN.
-
 ## log
 * `log_n(num $n)`
 
@@ -452,7 +446,6 @@ Returns a 1 if the object is not a type object, 0 otherwise.
 
 Returns a 1 if the object is a container type, 0 otherwise.
 
-
 ## isfalse
 * `isfalse(Any $obj)`
 
@@ -473,11 +466,16 @@ Returns a 1 if the object is an int type, 0 otherwise.
 
 Returns a 1 if the object represents something executable, 0 otherwise.
 
-
 ## islist
 * `islist(Any $obj)`
 
 Returns a 1 if the object is an Array, 0 otherwise.
+
+## isnanorinf
+* `isnanorinf(num $n)`
+
+Return truth value indicating if this number represents any of the special
+values, postive infinity, negative infinity, or NaN.
 
 ## isnull
 * `isnull(Any $obj)`
@@ -489,6 +487,11 @@ Returns a 1 if the object is a null, 0 otherwise.
 * `isnum(Any $obj)`
 
 Returns a 1 if the object is a float type, 0 otherwise.
+
+## isprime
+* `isprime_I(Any $obj)`
+
+Returns a 1 if the integer value of the object is prime, 0 otherwise.
 
 ## isstr
 * `isstr(Any $obj)`
@@ -504,6 +507,53 @@ Returns a 1 if the object has a truthy value, 0 otherwise.
 * `istrue(Any $obj, Type $obj)`
 
 Returns a 1 if the object is of the given type, 0 otherwise.
+
+# Bit Opcodes
+
+## bitand
+* `bitand_i(int $l, int $r)`
+* `bitand_s(str $l, str $r)`
+* `bitand_I(Any $l, Any $r, Type $type)`
+
+AND the bits in `$l` and `$r`.
+If `$type` is specified, used as the type of the returned value.
+
+## bitneg
+* `bitneg_i(int $bits)`
+* `bitneg_I(Any $bits, Type $type)`
+
+Negate the bits in `$bits`.
+If `$type` is specified, used as the type of the returned value.
+
+## bitor
+* `bitor_i(int $l, int $r)`
+* `bitor_s(str $l, str $r)`
+* `bitor_I(Any $l, Any $r, Type $type)`
+
+OR the bits in `$l` and `$r`.
+If `$type` is specified, used as the type of the returned value.
+
+## bitshiftl
+* `bitshiftl_i(int $bits, int $count)`
+* `bitshiftl_I(Any $bits, int $count, Type $type)`
+
+Signed left shift of `$bits` by `$count`.
+If `$type` is specified, used as the type of the returned value.
+
+## bitshiftr
+* `bitshiftr_i(int $bits, int $count)`
+* `bitshiftr_I(Any $bits, int $count, Type $type)`
+
+Signed right shift of `$bits` by `$count`; if `$type` is specified,
+used as the type of the returned value.
+
+## bitxor
+* `bitxor_i(int $l, int $r)`
+* `bitxor_s(str $l, str $r)`
+* `bitxor_I(Any $l, Any $r, Type $type)`
+
+XOR the bits in `$l` and `$r`.
+If `$type` is specified, used as the type of the returned value.
 
 # Context Introspection Opcodes
 
