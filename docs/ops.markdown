@@ -183,6 +183,7 @@ name. `h` indicates a hyperbolic variant.
 * `cmp_i(int $l, int $r)`
 * `cmp_n(num $l, num $r)`
 * `cmp_s(str $l, str $r)`
+* `cmp_I(Any $l, Any $r)`
 
 Compare two values, returns -1 if $l is greater than $r, 0 if they are equal,
 and 1 if $r is greater than $l.
@@ -191,6 +192,7 @@ and 1 if $r is greater than $l.
 * `iseq_i(int $l, int $r)`
 * `iseq_n(num $l, num $r)`
 * `iseq_s(str $l, str $r)`
+* `iseq_I(Any $l, Any $r)`
 
 Return non-zero if the two parameters are equal.
 
@@ -198,6 +200,7 @@ Return non-zero if the two parameters are equal.
 * `isgt_i(int $l, int $r)`
 * `isgt_n(num $l, num $r)`
 * `isgt_s(str $l, str $r)`
+* `isgt_I(Any $l, Any $r)`
 
 Return non-zero if $l is greater than two $r.
 
@@ -205,6 +208,7 @@ Return non-zero if $l is greater than two $r.
 * `isge_i(int $l, int $r)`
 * `isge_n(num $l, num $r)`
 * `isge_s(str $l, str $r)`
+* `isge_I(Any $l, Any $r)`
 
 Return non-zero if $l is greater than or equal two $r.
 
@@ -212,6 +216,7 @@ Return non-zero if $l is greater than or equal two $r.
 * `islt_i(int $l, int $r)`
 * `islt_n(num $l, num $r)`
 * `islt_s(str $l, str $r)`
+* `islt_I(Any $l, Any $r)`
 
 Return non-zero if $l is less than two $r.
 
@@ -219,6 +224,7 @@ Return non-zero if $l is less than two $r.
 * `isle_i(int $l, int $r)`
 * `isle_n(num $l, num $r)`
 * `isle_s(str $l, str $r)`
+* `isle_I(Any $l, Any $r)`
 
 Return non-zero if $l is less than or equal two $r.
 
@@ -226,6 +232,7 @@ Return non-zero if $l is less than or equal two $r.
 * `isne_i(int $l, int $r)`
 * `isne_n(num $l, num $r)`
 * `isne_s(str $l, str $r)`
+* `isne_I(Any $l, Any $r)`
 
 Return non-zero if the two parameters are not equal.
 
