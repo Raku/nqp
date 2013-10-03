@@ -1628,6 +1628,15 @@ QAST::Operations.add_core_op('sayfh', -> $qastcomp, $op {
         $op[0], $op[1]
     ))
 });
+QAST::Operations.add_core_op('flushfh', -> $qastcomp, $op {
+    if +$op.list != 1 {
+        nqp::die("The 'flushfh' op expects two operands");
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'), :name('flush'),
+        $op[0]
+    ))
+});
 QAST::Operations.add_core_op('readlinefh', -> $qastcomp, $op {
     if +$op.list != 1 {
         nqp::die("The 'readlinefh' op expects one operand");
