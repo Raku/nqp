@@ -472,7 +472,7 @@ grammar NQP::Grammar is HLL::Grammar {
 
     rule routine_def {
         :my $*RETURN_USED := 0;
-        [ $<sigil>=['&'?]<deflongname> ]**0..1
+        [ $<sigil>=['&'?]<deflongname> ]?
         <.newpad>
         [ '(' <signature> ')'
             || <.panic: 'Routine declaration requires a signature'> ]
@@ -488,7 +488,7 @@ grammar NQP::Grammar is HLL::Grammar {
         :my $*INVOCANT_OK := 1;
         [
         || '::(' <latename=variable> ')'
-        || $<private>=['!'?] <deflongname>**0..1
+        || $<private>=['!'?] <deflongname>?
         ]
         <.newpad>
         [ '(' <signature> ')'

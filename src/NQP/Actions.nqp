@@ -807,7 +807,7 @@ class NQP::Actions is HLL::Actions {
         my $block := $past;
 
         if $<deflongname> {
-            my $name := ~$<sigil>[0] ~ $<deflongname>[0].ast;
+            my $name := ~$<sigil> ~ $<deflongname>.ast;
             $past.name($name);
             if $*SCOPE eq '' || $*SCOPE eq 'my' || $*SCOPE eq 'our' {
                 if $*MULTINESS eq 'multi' {
@@ -967,7 +967,7 @@ class NQP::Actions is HLL::Actions {
         # Install it where it should go (methods table / namespace).
         my $name := "";
         if $<deflongname> {
-            $name := ~$<private> ~ ~$<deflongname>[0].ast;
+            $name := ~$<private> ~ ~$<deflongname>.ast;
         }
         elsif $<latename> {
             if $*PKGDECL ne 'role' {
