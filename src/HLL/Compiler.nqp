@@ -589,6 +589,17 @@ class HLL::Compiler does HLL::Backend::Default {
     # command line options and arguments as provided by the user
     method cli-options()   { %!cli-options   }
     method cli-arguments() { @!cli-arguments }
+    
+    # set a recursion limit, if the backend supports it
+    method recursion_limit($limit) {
+        if nqp::can($!backend, 'recursion_limit') {
+            $!backend.recursion_limit($limit);
+            1;
+        }
+        else {
+            0;
+        }
+    }
 }
 
 my $compiler := HLL::Compiler.new();

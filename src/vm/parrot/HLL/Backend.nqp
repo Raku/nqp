@@ -128,6 +128,10 @@ class HLL::Backend::Parrot {
     method compunit_coderefs($cu) {
         $cu
     }
+    
+    method recursion_limit($limit) {
+        pir::getinterp__P().recursion_limit($limit);
+    }
 }
 
 # Role specifying the default backend for this build.
