@@ -148,8 +148,8 @@ class NQP::Actions is HLL::Actions {
     method statement($/, $key?) {
         my $past;
         if $<EXPR> {
-            my $mc := $<statement_mod_cond>[0];
-            my $ml := $<statement_mod_loop>[0];
+            my $mc := $<statement_mod_cond>;
+            my $ml := $<statement_mod_loop>;
             $past := $<EXPR>.ast;
             if $mc {
                 $past := QAST::Op.new($mc<cond>.ast, $past, :op(~$mc<sym>), :node($/) );

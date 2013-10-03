@@ -154,9 +154,9 @@ grammar NQP::Grammar is HLL::Grammar {
         | <EXPR> <.ws>
             [
             || <?MARKED('endstmt')>
-            || <statement_mod_cond> <statement_mod_loop>**0..1
+            || <statement_mod_cond> <statement_mod_loop>?
             || <statement_mod_loop>
-            ]**0..1
+            ]?
         ]
     }
 
