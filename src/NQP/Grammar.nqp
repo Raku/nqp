@@ -87,7 +87,7 @@ grammar NQP::Grammar is HLL::Grammar {
             || .*? \n \h* '=' 'end' » \N*
             || <.panic: '=begin without matching =end'>
             ]
-        | <identifier>
+        | <identifier> {}
             .*? ^^ <?before \h* [ 
                 '='
                 [ 'cut' »

@@ -86,9 +86,6 @@ Return an array of arguments.
 
 =end
 
-=cut
-
-
 class HLL::CommandLine::Result {
     has @!arguments;
     has %!options;
