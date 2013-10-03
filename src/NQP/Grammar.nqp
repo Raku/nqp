@@ -41,7 +41,7 @@ grammar NQP::Grammar is HLL::Grammar {
     token name { <identifier> ['::'<identifier>]* }
 
     token deflongname {
-        <identifier> <colonpair>**0..1
+        <identifier> <colonpair>?
     }
 
     token ENDSTMT {

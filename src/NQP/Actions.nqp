@@ -41,8 +41,8 @@ class NQP::Actions is HLL::Actions {
 
     method deflongname($/) {
         make $<colonpair>
-             ?? ~$<identifier> ~ ':' ~ $<colonpair>[0].ast.named 
-                    ~ '<' ~ colonpair_str($<colonpair>[0].ast) ~ '>'
+             ?? ~$<identifier> ~ ':' ~ $<colonpair>.ast.named 
+                    ~ '<' ~ colonpair_str($<colonpair>.ast) ~ '>'
              !! ~$/;
     }
 
