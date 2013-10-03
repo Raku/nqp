@@ -475,7 +475,7 @@ class NQP::Actions is HLL::Actions {
                 }
                 $past := lexical_package_lookup(@name, $/);
             }
-            elsif $<twigil>[0] eq '*' {
+            elsif $<twigil> eq '*' {
                 my $global_fallback := QAST::Op.new(
                     :op('ifnull'),
                     lexical_package_lookup(['GLOBAL',  ~$<sigil> ~ $<desigilname>], $/),
@@ -488,7 +488,7 @@ class NQP::Actions is HLL::Actions {
                     :fallback($global_fallback)
                 );
             }
-            elsif $<twigil>[0] eq '!' {
+            elsif $<twigil> eq '!' {
                 my $name := ~@name.pop;
                 my $ch;
                 if $*PKGDECL eq 'role' {
@@ -537,7 +537,7 @@ class NQP::Actions is HLL::Actions {
             else {
                 my $name := ~@name.pop;
                 if $*IN_DECL eq 'variable' || $name eq '$_' || $name eq '$/'
-                || $name eq '$!' || $<twigil>[0] eq '?' || $*W.is_lexical($name) {
+                || $name eq '$!' || $<twigil> eq '?' || $*W.is_lexical($name) {
                     $past := QAST::Var.new( :name($name), :scope('lexical') );
                 }
                 else {

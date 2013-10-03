@@ -323,7 +323,7 @@ grammar NQP::Grammar is HLL::Grammar {
     }
 
     token variable {
-        | <sigil> <twigil>**0..1 <desigilname=.name>
+        | <sigil> <twigil>? <desigilname=.name>
         | <sigil> <?[<]> <postcircumfix>
         | <sigil> '(' ~ ')' <semilist>
         | $<sigil>=['$'] $<desigilname>=[<[/_!]>]
@@ -539,7 +539,7 @@ grammar NQP::Grammar is HLL::Grammar {
     }
 
     token param_var {
-        <sigil> <twigil>**0..1
+        <sigil> <twigil>?
         [ <name=.identifier> | $<name>=[<[/!]>] ]
     }
 
