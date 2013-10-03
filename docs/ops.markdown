@@ -409,7 +409,7 @@ Return a string containing `$count` copies of the string.
 
 # Input/Output Opcodes
 
-##close
+##closefh
 * `closefh(handle $fh)`
 
 Close the filehandle.
@@ -418,6 +418,12 @@ Close the filehandle.
 * `eoffh(handle $fh)`
 
 Return 1 if this filehandle is at the end of the file, otherwise 0.
+
+##flushfh
+* `flushfh(handle $fh)`
+
+Flush any output to the handle.
+
 
 ##getcfh
 * `getcfh(handle $in)`
