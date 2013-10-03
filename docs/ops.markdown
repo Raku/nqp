@@ -422,8 +422,7 @@ Return 1 if this filehandle is at the end of the file, otherwise 0.
 ##flushfh
 * `flushfh(handle $fh)`
 
-Flush any output to the handle.
-
+Flushes the file handle, forcing it to write any buffered output.
 
 ##getcfh
 * `getcfh(handle $in)`
@@ -492,11 +491,6 @@ Output the given string to stdout, followed by a newline.
 * `sayfh(handle $fh, str $str)`
 
 Output the given string to the filehandle, followed by a newline.
-
-##flushfh
-* `flushfh(handle $fh)`
-
-Flushes the file handle, forcing it to write any buffered output.
 
 ##tellfh
 * `tellfh(handle $fh)`
