@@ -73,8 +73,8 @@ grammar HLL::Grammar {
     }
 
     token dec_number {
-        | $<coeff>=[     '.' \d+ ] <escale>**0..1
-        | $<coeff>=[ \d+ '.' \d+ ] <escale>**0..1
+        | $<coeff>=[     '.' \d+ ] <escale>?
+        | $<coeff>=[ \d+ '.' \d+ ] <escale>?
         | $<coeff>=[ \d+         ] <escale>
     }
 
