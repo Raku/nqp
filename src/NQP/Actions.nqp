@@ -725,7 +725,7 @@ class NQP::Actions is HLL::Actions {
             my %obj_args;
             %lit_args<name> := $name;
             if $<typename> {
-                %obj_args<type> := $*W.find_sym([~$<typename>[0]]);
+                %obj_args<type> := $*W.find_sym([~$<typename>]);
             }
             if $sigil eq '$' || $sigil eq '&' {
                 if $<typename> {
@@ -760,7 +760,7 @@ class NQP::Actions is HLL::Actions {
                 unless $sigil eq '$' {
                     $/.CURSOR.panic("Only typed scalars are currently supported in NQP");
                 }
-                $type := $*W.find_sym([~$<typename>[0]]);
+                $type := $*W.find_sym([~$<typename>]);
                 if nqp::objprimspec($type) -> $prim_spec {
                     $default := default_value_for_prim($prim_spec);
                 }

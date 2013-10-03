@@ -459,7 +459,7 @@ grammar NQP::Grammar is HLL::Grammar {
     }
 
     rule variable_declarator {
-        <typename>**0..1
+        <typename>?
         :my $*IN_DECL := 'variable';
         <variable>
         { $*IN_DECL := 0; }
