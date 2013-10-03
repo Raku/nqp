@@ -554,14 +554,29 @@ grammar NQP::Grammar is HLL::Grammar {
     token regex_declarator {
         [
         | $<proto>=[proto] :s [regex|token|rule]
+#          <.newpad>
           [
           || '::(' <latename=variable> ')'
           || <deflongname>
           ]
+#          :my %*RX;
+          {
+              %*RX<s> := $<sym> eq 'rule';
+              %*RX<r> := $<sym> eq 'token' || $<sym> eq 'rule';
+          }
           [ 
           || '{*}'<?ENDSTMT>
           || '{' '<...>' '}'<?ENDSTMT>
           || '{' '<*>' '}'<?ENDSTMT>
+          || '{'
+            [
+            || '{*}'
+            || <protostart=.LANG('Regex','nibbler')>'{*}'
+            ]
+            [
+            || '}'
+            || <protoend=.LANG('Regex','nibbler')>'}'
+            ]<?ENDSTMT>
           || <.panic: "Proto regex body must be \{*\} (or <*> or <...>, which are deprecated)">
           ]
         | $<sym>=[regex|token|rule] :s

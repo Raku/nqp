@@ -1225,19 +1225,24 @@ class NQP::Actions is HLL::Actions {
         }
         my $past;
         if $<proto> {
-            $past := QAST::Block.new(
-                    :name($name),
-                    QAST::Op.new(
-                        QAST::Var.new( :name('self'), :scope('local'), :decl('param') ),
-                        QAST::SVal.new( :value($name) ),
-                        :name('!protoregex'),
-                        :op('callmethod')
-                    ),
-                    :blocktype('declaration_static'),
-                    :node($/)
-                );
-                $*W.pkg_add_method($*PACKAGE, 'add_method', $name,
-                    $*W.create_code($past, $name, 0, :code_type_name<NQPRegex>));
+           $past := QAST::Block.new(
+                :name($name),
+                :blocktype('declaration_static'),
+                :node($/)
+            );
+            my $surrounding := QAST::Op.new(
+                QAST::Var.new( :name('self'), :scope('local'), :decl('param') ),
+                QAST::SVal.new( :value($name) ),
+                :name('!protoregex'),
+                :op('callmethod')
+            );
+            if $<protostart> || $<protoend> {
+                $surrounding.push($<protostart>.ast) if $<protostart>;
+                $surrounding.push($<protoend>.ast) if $<protoend>;
+            }
+            $past.push($surrounding);
+            $*W.pkg_add_method($*PACKAGE, 'add_method', $name,
+                $*W.create_code($past, $name, 0, :code_type_name<NQPRegex>));
         }
         else {
             my $block := $*W.pop_lexpad();

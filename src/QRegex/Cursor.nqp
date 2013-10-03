@@ -232,10 +232,18 @@ role NQPCursorRole is export {
     method !shared() { $!shared }
 
     my @EMPTY := [];
-    method !protoregex($name) {
+    method !protoregex($name, $startrx = '', $endrx = '') {
         # Obtain and run NFA.
         my $shared := $!shared;
-        my $nfa := self.HOW.cache(self, $name, { self.'!protoregex_nfa'($name) });
+        my $nfa := QRegex::NFA.new;
+        if $startrx || $endrx {
+            $nfa.addnode($startrx) if $startrx;
+            $nfa.addnode(self.HOW.cache(self, $name, { self.'!protoregex_nfa'($name) }));
+            $nfa.addnode($endrx)   if $endrx;
+        }
+        else {
+            $nfa := self.HOW.cache(self, $name, { self.'!protoregex_nfa'($name) });
+        }
         my @fates := $nfa.run(nqp::getattr_s($shared, ParseShared, '$!target'), $!pos);
         
         # Update highwater mark.
