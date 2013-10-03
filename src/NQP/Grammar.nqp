@@ -316,7 +316,7 @@ grammar NQP::Grammar is HLL::Grammar {
         ':'
         [
         | $<not>='!' <identifier>
-        | <identifier> <circumfix>**0..1
+        | <identifier> <circumfix>?
         | <circumfix>
         | <variable>
         ]

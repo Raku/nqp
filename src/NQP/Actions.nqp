@@ -452,7 +452,7 @@ class NQP::Actions is HLL::Actions {
             make $<variable>.ast;
         } else {
             my $past := $<circumfix>
-                        ?? $<circumfix>[0].ast
+                        ?? $<circumfix>.ast
                         !! QAST::IVal.new( :value( !$<not> ) );
             $past.named( ~$<identifier> );
             make $past;
