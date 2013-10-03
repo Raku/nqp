@@ -222,7 +222,7 @@ grammar NQP::Grammar is HLL::Grammar {
         <sym> \s :s
         <xblock>
         [ 'elsif'\s <xblock> ]*
-        [ 'else'\s <else=.pblock> ]**0..1
+        [ 'else'\s <else=.pblock> ]?
     }
 
     token statement_control:sym<unless> {

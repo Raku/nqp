@@ -268,7 +268,7 @@ class NQP::Actions is HLL::Actions {
         my $count := +$<xblock> - 1;
         my $past := xblock_immediate( $<xblock>[$count].ast );
         if $<else> {
-            $past.push( block_immediate( $<else>[0].ast ) );
+            $past.push( block_immediate( $<else>.ast ) );
         }
         # build if/then/elsif structure
         while $count > 0 {
