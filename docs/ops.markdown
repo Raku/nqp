@@ -30,7 +30,7 @@ correspond directly to NQP types.
 * num    - native float
 * str    - native string
 * Any    - an NQP or VM object
-* Type   - a type object (e.g. `Int`)
+* Type   - a type object, e.g. `Int`
 * Handle - an I/O Handle object
 
 # Arithmetic Opcodes
@@ -446,6 +446,7 @@ Open the specified file in the given mode. Valid modes include `r` for read,
 `w` for write, and `wa` for write with append.
 
 ##openasync
+_Experimental_
 * `openasync(str $filename, str $mode)`
 
 Open the specified file in the given mode for async IO.
