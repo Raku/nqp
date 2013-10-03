@@ -525,8 +525,8 @@ grammar NQP::Grammar is HLL::Grammar {
     }
 
     token signature {
-        [ <?{ $*INVOCANT_OK }> <.ws><invocant=.parameter><.ws> ':' ]**0..1
-        [ [<.ws><parameter><.ws> [',' | <before \s* [')' | '{']>]]* ]**0..1
+        [ <?{ $*INVOCANT_OK }> <.ws><invocant=.parameter><.ws> ':' ]?
+        [ [<.ws><parameter><.ws> [',' | <before \s* [')' | '{']>]]* ]?
     }
 
     token parameter {

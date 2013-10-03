@@ -1071,7 +1071,7 @@ class NQP::Actions is HLL::Actions {
 		my $BLOCK     := $*W.cur_lexpad();
         my $BLOCKINIT := $BLOCK[0];
         if $<invocant> {
-            my $inv := $<invocant>[0].ast;
+            my $inv := $<invocant>.ast;
             $BLOCKINIT.push($inv);
             $BLOCKINIT.push(QAST::Op.new(
                 :op('bind'),
@@ -1080,7 +1080,9 @@ class NQP::Actions is HLL::Actions {
             ));
             $BLOCK<signature_has_invocant> := 1
         }
-        for $<parameter> { $BLOCKINIT.push($_.ast); }
+        if $<parameter> {
+            for $<parameter> { $BLOCKINIT.push($_.ast); }
+        }
     }
 
     method parameter($/) {
