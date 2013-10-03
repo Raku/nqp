@@ -45,6 +45,10 @@ public class ProcessHandle extends SyncHandle {
         }
     }
     
+    public void flush(ThreadContext tc) {
+        // Not provided.
+    }
+    
     static class ProcessChannel implements ByteChannel {
         protected WritableByteChannel stdin;
         protected ReadableByteChannel stdout;

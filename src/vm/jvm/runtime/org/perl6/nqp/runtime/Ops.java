@@ -566,6 +566,21 @@ public final class Ops {
         return data;
     }
     
+    public static SixModelObject flushfh(SixModelObject obj, ThreadContext tc) {
+        if (obj instanceof IOHandleInstance) {
+            IOHandleInstance h = (IOHandleInstance)obj;
+            if (h.handle instanceof IIOSyncWritable)
+                ((IIOSyncWritable)h.handle).flush(tc);
+            else
+                throw ExceptionHandling.dieInternal(tc,
+                    "This handle does not support flush");
+        }
+        else {
+            die_s("flushfh requires an object with the IOHandle REPR", tc);
+        }
+        return obj;
+    }
+    
     public static String readlinefh(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
             IOHandleInstance h = (IOHandleInstance)obj;
