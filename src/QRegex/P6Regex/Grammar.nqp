@@ -160,7 +160,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         ]
     }
 
-    proto token quantifier { <...> }
+    proto token quantifier {*}
     token quantifier:sym<*> { <sym> <backmod> }
     token quantifier:sym<+> { <sym> <backmod> }
     token quantifier:sym<?> { <sym> <backmod> }
@@ -188,7 +188,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     token backmod { ':'? [ '?' | '!' | <!before ':'> ] }
 
-    proto token metachar { <...> }
+    proto token metachar {*}
     token metachar:sym<ws> { <.normspace> }
     token metachar:sym<[ ]> { '[' <nibbler> ']' }
     token metachar:sym<( )> { '(' <nibbler> ')' }
@@ -238,7 +238,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         [ <.ws> '=' <.ws> <quantified_atom> ]**0..1
     }
 
-    proto token backslash { <...> }
+    proto token backslash {*}
     token backslash:sym<s> { $<sym>=[<[dDnNsSwW]>] }
     token backslash:sym<b> { $<sym>=[<[bB]>] }
     token backslash:sym<e> { $<sym>=[<[eE]>] }
@@ -258,7 +258,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token backslash:sym<unsp> { [\s|'#'] <.panic: 'Unspace not allowed in regex'> }
     token backslash:sym<misc> { \W }
 
-    proto token cclass_backslash { <...> }
+    proto token cclass_backslash {*}
     token cclass_backslash:sym<s> { $<sym>=[<[dDnNsSwW]>] }
     token cclass_backslash:sym<b> { $<sym>=[<[bB]>] }
     token cclass_backslash:sym<e> { $<sym>=[<[eE]>] }
@@ -272,7 +272,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token cclass_backslash:sym<c> { $<sym>=[<[cC]>] <charspec> }
     token cclass_backslash:sym<any> { . }
 
-    proto token assertion { <...> }
+    proto token assertion {*}
 
     token assertion:sym<?> { '?' [ <?before '>' > | <assertion> ] }
     token assertion:sym<!> { '!' [ <?before '>' > | <assertion> ] }
@@ -330,7 +330,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         ]
     }
 
-    proto token mod_ident { <...> }
+    proto token mod_ident {*}
     token mod_ident:sym<ignorecase> { $<sym>=[i] 'gnorecase'? » }
     token mod_ident:sym<ratchet>    { $<sym>=[r] 'atchet'? » }
     token mod_ident:sym<sigspace>   { $<sym>=[s] 'igspace'? » }
