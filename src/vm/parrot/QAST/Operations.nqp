@@ -1621,10 +1621,10 @@ QAST::Operations.add_core_op('printfh', -> $qastcomp, $op {
 });
 QAST::Operations.add_core_op('sayfh', -> $qastcomp, $op {
     if +$op.list != 2 {
-        nqp::die("The 'printfh' op expects two operands");
+        nqp::die("The 'sayfh' op expects two operands");
     }
     $qastcomp.as_post(QAST::Op.new(
-        :op('callmethod'), :name('print'),
+        :op('callmethod'), :name('say'),
         $op[0], $op[1]
     ))
 });
