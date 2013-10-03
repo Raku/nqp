@@ -347,9 +347,9 @@ class HLL::Compiler does HLL::Backend::Default {
         return 0;
     }
 
-    method compile($source, :$from, *%adverbs) {
+    method compile($source, :$from, :$lineposcache, *%adverbs) {
         my %*COMPILING<%?OPTIONS> := %adverbs;
-        my $*LINEPOSCACHE;
+        my $*LINEPOSCACHE := $lineposcache;
 
         my $target := nqp::lc(%adverbs<target>);
         my $result := $source;
