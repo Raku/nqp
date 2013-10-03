@@ -497,6 +497,32 @@ Return current access position for an open handle.
 
 Output the given object to the filehandle.
 
+# File / Network Opcodes
+
+##fileexecutable
+* `fileexecutable(str $str)`
+
+If the specified filename refers to an executable file, returns 1.
+If not, returns 0. If an error occurs, return -1.
+
+##filereadable
+* `filereadable(str $str)`
+
+If the specified filename refers to a readable file, returns 1.
+If not, returns 0. If an error occurs, return -1.
+
+##filewritable
+* `filewritable(str $str)`
+
+If the specified filename refers to a writable file, returns 1.
+If not, returns 0. If an error occurs, return -1.
+
+##isfilelink
+* `isfilelink(str $str)`
+
+If the specified filename refers to a symbolic link, returns 1.
+If not, returns 0. If an error occurs, return -1.
+
 # Type/Conversion Opcodes
 
 ##box
