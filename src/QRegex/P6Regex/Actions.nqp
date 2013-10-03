@@ -597,7 +597,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                 }
                 elsif $_[0]<cclass_backslash> {
                     my $bs := $_[0]<cclass_backslash>.ast;
-                    if $bs.rxtype eq 'enumcharlist' || $bs.rxtype eq 'literal' {
+                    if $bs.rxtype eq 'enumcharlist' && !$bs.negate || $bs.rxtype eq 'literal' {
                         $str := $str ~ $bs[0];
                     }
                     else {
