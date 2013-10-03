@@ -607,7 +607,7 @@ class NQP::Actions is HLL::Actions {
                 QAST::Var.new( :name('$?CLASS'), :scope('lexical'), :decl('param') )
             );
             if $<role_params> {
-                for $<role_params>[0]<variable> {
+                for $<role_params><variable> {
                     $params.push($_.ast);
                 }
             }
@@ -625,14 +625,14 @@ class NQP::Actions is HLL::Actions {
             my $parent;
             my $parent_found;
             try {
-                $parent := $*W.find_sym(nqp::clone($<parent>[0]<identifier>));
+                $parent := $*W.find_sym(nqp::clone($<parent><identifier>));
                 $parent_found := 1;
             }
             if $parent_found {
                 $*W.pkg_add_parent_or_role($*PACKAGE, "add_parent", $parent);
             }
             else {
-                $/.CURSOR.panic("Could not find parent class '" ~ ~$<parent>[0] ~ "'");
+                $/.CURSOR.panic("Could not find parent class '" ~ ~$<parent> ~ "'");
             }
         }
         elsif nqp::can($how, 'set_default_parent') {

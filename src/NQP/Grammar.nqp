@@ -378,8 +378,8 @@ grammar NQP::Grammar is HLL::Grammar {
         
         <name>
         <.newpad>
-        [ <?{ $*PKGDECL eq 'role' }> '[' ~ ']' <role_params> ]**0..1
-        [ 'is' 'repr(' <repr=.quote_EXPR> ')' ]**0..1
+        [ <?{ $*PKGDECL eq 'role' }> '[' ~ ']' <role_params> ]?
+        [ 'is' 'repr(' <repr=.quote_EXPR> ')' ]?
         
         {
             # Construct meta-object for this package, adding it to the
@@ -387,7 +387,7 @@ grammar NQP::Grammar is HLL::Grammar {
             my %args;
             %args<name> := ~$<name>;
             if $<repr> {
-                %args<repr> := ~$<repr>[0]<quote_delimited><quote_atom>[0];
+                %args<repr> := ~$<repr><quote_delimited><quote_atom>[0];
             }
             my $how := %*HOW{$*PKGDECL};
             my $INNER := $*W.cur_lexpad();
@@ -421,8 +421,8 @@ grammar NQP::Grammar is HLL::Grammar {
             }
         }
         
-        [ $<export>=['is export'] ]**0..1
-        [ 'is' <parent=.name> ]**0..1
+        [ $<export>=['is export'] ]?
+        [ 'is' <parent=.name> ]?
         [ 'does' <role=.name> ]*
         [
         || ';' <statementlist> [ $ || <.panic: 'Confused'> ]
