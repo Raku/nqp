@@ -487,6 +487,11 @@ Output the given string to stdout, followed by a newline.
 
 Output the given string to the filehandle, followed by a newline.
 
+##flushfh
+* `flushfh(handle $fh)`
+
+Flushes the file handle, forcing it to write any buffered output.
+
 ##tellfh
 * `tellfh(handle $fh)`
 
