@@ -29,6 +29,7 @@ correspond directly to NQP types.
 * int       - native int
 * num       - native float
 * str       - native string
+* Int       - BigInt
 * Any       - an NQP or VM object
 * Type      - a type object, e.g. `Int`
 * Exception - an Exception object
@@ -39,63 +40,72 @@ correspond directly to NQP types.
 ## abs
 * `abs_i(int $i)`
 * `abs_n(num $n)`
-* `abs_I(Any $i)`
+* `abs_I(Int $i, Type $type)`
 
 Return the absolute value of a number.
+`_I` variant returns an object of the given type.
 
 ## add
 * `add_i(int $l, int $r)`
 * `add_n(num $l, num $r)`
-* `add_I(Any $l, Any $r)`
+* `add_I(Int $l, Int $r, Type $type)`
 
 Add two numbers together, returning the result.
+`_I` variant returns an object of the given type.
 
 ## div
 * `div_i(int $l, int $r)`
 * `div_n(num $l, num $r)`
-* `div_I(Any $l, Any $r)`
+* `div_I(Int $l, Int $r, Type $type)`
 
 Divide $l by $r, returning the result.
+`_I` variant returns an object of the given type.
 
 ## gcd
 * `gcd_i(int $l, int $r)`
-* `gcd_I(Any $l, Any $r)`
+* `gcd_I(Int $l, Int $r, Type $type)`
 
 Return the greatest common multiple of two numbers. 
+`_I` variant returns an object of the given type.
 
 ## lcm
 * `lcm_i(int $l, int $r)`
-* `lcm_I(Any $l, Any $r)`
+* `lcm_I(Int $l, Int $r, Type $type)`
 
 Return the lowest common multiple of two numbers. 
+`_I` variant returns an object of the given type.
 
 ## mod
 * `mod_i(int $l, int $r)`
 * `mod_n(num $l, num $r)`
-* `mod_I(Any $l, Any $r)`
+* `mod_I(Int $l, Int $r, Type $type)`
 
 Return the modulus of $l by $r.
+`_I` variant returns an object of the given type.
 
 ## mul
 * `mul_i(int $l, int $r)`
 * `mul_n(num $l, num $r)`
-* `mul_I(Any $l, Any $r)`
+* `mul_I(Int $l, Int $r, Type $type)`
 
 Multiple two numbers, returning the result.
+`_I` variant returns an object of the given type.
 
 ## neg
 * `neg_i(int $i)`
 * `neg_n(num $n)`
-* `neg_I(Any $i)`
+* `neg_I(Int $i, Type $type)`
 
 Return the negative of a number.
+`_I` variant returns an object of the given type.
 
 ## sub
 * `sub_i(int $l, int $r)`
 * `sub_n(num $l, num $r)`
-* `sub_I(Any $l, Any $r)`
+* `sub_I(Int $l, Int $r, Type $type)`
 
 Subtract $r from $l, returning the result.
+`_I` variant returns an object of the given type.
 
 # Numeric Opcodes
 
@@ -141,9 +151,11 @@ Return negative infinity.
 
 ## pow
 * `pow_n(num $base, num $exponent)`
-* `pow_I(Any $base, Any $exponent)`
+* `pow_I(Int $base, Int $exponent, Type $type_num, Type $type_bigint)`
 
 Return the value of $base raised to $exponent;
+`_I` variant returns an object of `$type_num` for negative exponents,
+and of type `$type_bigint` for positive exponents.
 
 ## sqrt
 * `sqrt_n(num $l, num $r)`
@@ -198,7 +210,7 @@ name. `h` indicates a hyperbolic variant.
 * `cmp_i(int $l, int $r)`
 * `cmp_n(num $l, num $r)`
 * `cmp_s(str $l, str $r)`
-* `cmp_I(Any $l, Any $r)`
+* `cmp_I(Int $l, Int $r)`
 
 Compare two values, returns -1 if $l is greater than $r, 0 if they are equal,
 and 1 if $r is greater than $l.
@@ -207,7 +219,7 @@ and 1 if $r is greater than $l.
 * `iseq_i(int $l, int $r)`
 * `iseq_n(num $l, num $r)`
 * `iseq_s(str $l, str $r)`
-* `iseq_I(Any $l, Any $r)`
+* `iseq_I(Int $l, Int $r)`
 
 Return non-zero if the two parameters are equal.
 
@@ -215,7 +227,7 @@ Return non-zero if the two parameters are equal.
 * `isgt_i(int $l, int $r)`
 * `isgt_n(num $l, num $r)`
 * `isgt_s(str $l, str $r)`
-* `isgt_I(Any $l, Any $r)`
+* `isgt_I(Int $l, Int $r)`
 
 Return non-zero if $l is greater than two $r.
 
@@ -223,7 +235,7 @@ Return non-zero if $l is greater than two $r.
 * `isge_i(int $l, int $r)`
 * `isge_n(num $l, num $r)`
 * `isge_s(str $l, str $r)`
-* `isge_I(Any $l, Any $r)`
+* `isge_I(Int $l, Int $r)`
 
 Return non-zero if $l is greater than or equal two $r.
 
@@ -231,7 +243,7 @@ Return non-zero if $l is greater than or equal two $r.
 * `islt_i(int $l, int $r)`
 * `islt_n(num $l, num $r)`
 * `islt_s(str $l, str $r)`
-* `islt_I(Any $l, Any $r)`
+* `islt_I(Int $l, Int $r)`
 
 Return non-zero if $l is less than two $r.
 
@@ -239,7 +251,7 @@ Return non-zero if $l is less than two $r.
 * `isle_i(int $l, int $r)`
 * `isle_n(num $l, num $r)`
 * `isle_s(str $l, str $r)`
-* `isle_I(Any $l, Any $r)`
+* `isle_I(Int $l, Int $r)`
 
 Return non-zero if $l is less than or equal two $r.
 
@@ -247,7 +259,7 @@ Return non-zero if $l is less than or equal two $r.
 * `isne_i(int $l, int $r)`
 * `isne_n(num $l, num $r)`
 * `isne_s(str $l, str $r)`
-* `isne_I(Any $l, Any $r)`
+* `isne_I(Int $l, Int $r)`
 
 Return non-zero if the two parameters are not equal.
 
@@ -606,7 +618,7 @@ If not, returns 0. If an error occurs, return -1.
 * `box_n(num $val, Type $type)`
 * `box_s(str $val, Type $type)`
 
-Given a native value, return a perl 6 object of the given Type
+Given a native value, return a perl 6 object of the given type
 with the same value.
 
 ##fromnum
@@ -618,7 +630,7 @@ discarding any decimal portion.
 ##fromstr
 * `fromstr_I(str $val, Type $type)`
 
-Convert string value to a Big Integer of the given Type.
+Convert string value to a Big Integer of the given type.
 
 ## isbig
 * `isbig_I(Any $obj)`
@@ -678,7 +690,7 @@ Returns a 1 if the object is a null, 0 otherwise.
 Returns a 1 if the object is a float type, 0 otherwise.
 
 ## isprime
-* `isprime_I(Any $obj)`
+* `isprime_I(Int $obj)`
 
 Returns a 1 if the integer value of the object is prime, 0 otherwise.
 
@@ -698,12 +710,12 @@ Returns a 1 if the object has a truthy value, 0 otherwise.
 Returns a 1 if the object is of the given type, 0 otherwise.
 
 ##tostr
-* `tostr_I(Any $val)`
+* `tostr_I(Int $val)`
 
 Convert Big Integer value to a native string.
 
 ##tonum
-* `tonum_I(Any $val)`
+* `tonum_I(Int $val)`
 
 Convert Big Integer value to a native number.
 
@@ -723,14 +735,14 @@ of the type indicated by the opcode suffix.
 * `bitand_I(Any $l, Any $r, Type $type)`
 
 AND the bits in `$l` and `$r`.
-If `$type` is specified, used as the type of the returned value.
+`_I` variant returns an object of the given type.
 
 ## bitneg
 * `bitneg_i(int $bits)`
 * `bitneg_I(Any $bits, Type $type)`
 
 Negate the bits in `$bits`.
-If `$type` is specified, used as the type of the returned value.
+`_I` variant returns an object of the given type.
 
 ## bitor
 * `bitor_i(int $l, int $r)`
@@ -738,21 +750,21 @@ If `$type` is specified, used as the type of the returned value.
 * `bitor_I(Any $l, Any $r, Type $type)`
 
 OR the bits in `$l` and `$r`.
-If `$type` is specified, used as the type of the returned value.
+`_I` variant returns an object of the given type.
 
 ## bitshiftl
 * `bitshiftl_i(int $bits, int $count)`
 * `bitshiftl_I(Any $bits, int $count, Type $type)`
 
 Signed left shift of `$bits` by `$count`.
-If `$type` is specified, used as the type of the returned value.
+`_I` variant returns an object of the given type.
 
 ## bitshiftr
 * `bitshiftr_i(int $bits, int $count)`
 * `bitshiftr_I(Any $bits, int $count, Type $type)`
 
-Signed right shift of `$bits` by `$count`; if `$type` is specified,
-used as the type of the returned value.
+Signed right shift of `$bits` by `$count`.
+`_I` variant returns an object of the given type.
 
 ## bitxor
 * `bitxor_i(int $l, int $r)`
@@ -760,7 +772,7 @@ used as the type of the returned value.
 * `bitxor_I(Any $l, Any $r, Type $type)`
 
 XOR the bits in `$l` and `$r`.
-If `$type` is specified, used as the type of the returned value.
+`_I` variant returns an object of the given type.
 
 # Context Introspection Opcodes
 
