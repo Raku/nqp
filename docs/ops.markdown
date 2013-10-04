@@ -26,12 +26,13 @@ of arguments required.
 In opcode signatures below, we use the following types, which may not
 correspond directly to NQP types.
 
-* int    - native int
-* num    - native float
-* str    - native string
-* Any    - an NQP or VM object
-* Type   - a type object, e.g. `Int`
-* Handle - an I/O Handle object
+* int       - native int
+* num       - native float
+* str       - native string
+* Any       - an NQP or VM object
+* Type      - a type object, e.g. `Int`
+* Exception - an Exception object
+* Handle    - an I/O Handle object
 
 # Arithmetic Opcodes
 
@@ -406,6 +407,76 @@ Return a string containing `$count` copies of the string.
 # Loop/Control Opcodes
 
 # Exceptional Opcodes
+
+##backtrace
+* `backtrace(Exception $ex)`
+
+Return an array of hashes, describing the backtrace of the given exception.
+
+##backtracestrings
+* `backtracestrings(Exception $ex)`
+
+Return an array of strings, describing the backtrace of the given exception.
+
+##die
+* `die(str $message)`
+
+Create and throw an exception using the given message.
+
+##getextype
+* `getextype(Exception $ex)`
+
+Gets the exception category (`nqp::const::CONTROL_*`)
+
+##getmessage
+* `getmessage(Exception $ex)`
+
+Gets the exception message.
+
+##getpayload
+* `getpayload(Exception $ex)`
+
+Gets the exception payload.
+
+##exception
+* `exception()`
+
+Return the current exception object.
+
+##newexception
+* `newexception()`
+
+Return a new exception object.
+
+##resume
+* `resume(Exception $ex)`
+
+Resume the exception, if possible.
+
+##rethrow
+* `rethrow(Exception $ex)`
+
+Re-throw the exception.
+
+##setextype
+* `setextype(Exception $ex, int $type)`
+
+Sets the exception category (`nqp::const::CONTROL_*`)
+
+##setmessage
+* `setmessage(Exception $ex, str $message)`
+
+Sets the exception message.
+
+##setpayload
+* `setpayload(Exception $ex, Any $obj)`
+
+Sets the exception payload.
+
+##throw
+* `throw(Exception $ex)`
+
+Throw the exception.
 
 # Input/Output Opcodes
 
