@@ -21,6 +21,11 @@ for @jvm_lines -> $line {
     %jvm_ops{$line} := 1;
 }
 
+# These are harder to tease out of the definitions in java, so add them manually
+for <if unless while until repeat_while repeat_until> -> $op_name {
+    %jvm_ops{$op_name} := 1;
+}
+
 # All the jvm ops must be documented
 
 for %jvm_ops -> $jvm_op {
