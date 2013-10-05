@@ -18,6 +18,7 @@ Opcode variants may contain a type suffix, which usually indicates:
 * `_i` argument is native int 
 * `_n` argument is native float
 * `_s` argument is native string
+* `_b` argument is code blocks
 * `_I` argument is Big Integer
 
 They may also have a numeric suffix, which typically indicates the number
@@ -36,6 +37,7 @@ correspond directly to NQP types.
 * Handle    - an I/O Handle object
 * @         - this sigil indicates an array parameter
 * %         - this sigil indicates a hash parameter
+* ...       - indicates variable args are accepted
 
 # Arithmetic Opcodes
 
@@ -165,9 +167,12 @@ Return the value of $base raised to $exponent;
 and of type `$type_bigint` for positive exponents.
 
 ## rand
+* `rand_n(num $n)`
 * `rand_I(Int $i, Type $type)`
 
-Returns a psuedo-random bigint up to the value of `$i`, of the given type.
+Returns a psuedo-random bigint up to the value of the
+given number. 
+`_I` variant returns an object of the given type.
 
 ## sqrt
 * `sqrt_n(num $l, num $r)`
@@ -298,6 +303,17 @@ Bind $v to @arr at position $i and return $v.
 Joins the separate strings of `@arr` into a single string with
 fields separated by the value of EXPR, and returns that new string.
 
+## list
+* `list(...)`
+* `list_i(...)`
+* `list_n(...)`
+* `list_s(...)`
+* `list_b(...)`
+
+Create a list of the given parameters. If no arguments are passed,
+an empty list is created. If a typed variant is used, the parameters
+are coerced to the appropriate type.
+
 ## push
 * `push(@arr, Any $v)`
 * `push_i(Array int @arr, int $v)`
@@ -392,7 +408,8 @@ reverse order.
 Return lowercase copy of string.
 
 ## radix
-* `radix_I(int $radix, String $str, int $pos, int $flags)`
+* `radix(int $radix, String $str, int $pos, int $flags)`
+* `radix_I(int $radix, String $str, int $pos, int $flags, Type $type)`
 
 Convert string $str into a number starting at offset $pos and using radix $radix.
 The result of the conversion returns an array with
@@ -449,6 +466,7 @@ Return an array of strings, describing the backtrace of the given exception.
 
 ##die
 * `die(str $message)`
+* `die_s(str $message)`
 
 Create and throw an exception using the given message.
 
@@ -602,12 +620,34 @@ Return current access position for an open handle.
 
 Output the given object to the filehandle.
 
-# File / Network Opcodes
+# File / Directory / Network Opcodes
+
+##chdir
+* `chdir(str $path)`
+
+Change the working directory to the given path.
+
+##chmod
+* `chmod(str $path, int $mode)`
+
+Change the permissions of `$path` to the posix style permissions of `$mode`.
+Returns 0 on success, throws an exception on failure.
+
+##cwd
+* `cwd()`
+
+Return a string containing the current working directory.
 
 ##fileexecutable
 * `fileexecutable(str $str)`
 
 If the specified filename refers to an executable file, returns 1.
+If not, returns 0. If an error occurs, return -1.
+
+##fileislink
+* `fileislink(str $str)`
+
+If the specified filename refers to a symbolic link, returns 1.
 If not, returns 0. If an error occurs, return -1.
 
 ##filereadable
@@ -622,13 +662,41 @@ If not, returns 0. If an error occurs, return -1.
 If the specified filename refers to a writable file, returns 1.
 If not, returns 0. If an error occurs, return -1.
 
-##isfilelink
-* `isfilelink(str $str)`
+##link
+* `link(str $before, str $after)`
 
-If the specified filename refers to a symbolic link, returns 1.
-If not, returns 0. If an error occurs, return -1.
+Create a link from `$after` to `$before`
+
+##mkdir
+* `mkdir(str $name, int $mode)`
+
+Create a directory of the given name. Use posix-style mode
+on non-windows platforms. Returns 0, or throws an exception.
+
+##rmdir
+* `rmdir(str $path)`
+
+Delete the given directory $path. Returns 0 on success, -2 if the
+directory didn't exist. May throw an exception.
+
+
+##symlink
+* `symlink(str $before, str $after)`
+
+Create a symbolic link from `$after` to `$before`
+
+##unlink
+* `unlink(str $path)`
+
+Delete the given file $path. Returns 0 on success, -2 if the file
+didn't exist. May throw an exception.
 
 # Type/Conversion Opcodes
+
+##bool
+* `bool_I(Int $val)`
+
+Returns 0 if `$val` is 0, otherwise 1.
 
 ##box
 * `box_i(int $val, Type $type)`
