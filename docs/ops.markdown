@@ -297,11 +297,18 @@ Return whatever is bound to @arr at position $i.
 * `bindpos_s(@arr, int $i, str $v)`
 
 Bind $v to @arr at position $i and return $v.
-## join
-* `join(str $delim, @arr)`
 
-Joins the separate strings of `@arr` into a single string with
-fields separated by the value of EXPR, and returns that new string.
+## elems
+* `elems(@arr)`
+* `elems(%hash)`
+
+Return the number of elements in `@arr`, or the number of keys in `%hash`.
+
+## existspos
+* `existspos(@arr, int $i)`
+
+Return 1 if anything is bound to `@arr` at position `$i`,
+0 otherwise.
 
 ## list
 * `list(...)`
@@ -331,17 +338,14 @@ Return the number of elements of @arr on Parrot, $v on JVM.
 * `pop_s(@arr)`
 
 "Pop the last value off the end of @arr."
-Return the value of @arr at it's last bound position, and unbind @arr at that position.
+Return the value of @arr at its last bound position, and unbind @arr at that position.
 
-## unshift
-* `unshift(@arr, Any $v)`
-* `unshift_i(@arr, int $v)`
-* `unshift_n(@arr, num $v)`
-* `unshift_s(@arr, str $v)`
+## setelems
+* `setelems(@arr, int $i)`
 
-"Shift $v into the beginning of @arr."
-Bind $v to @arr at index 0, move all other bindings of @arr to the index one above what they were previously bound to.
-Return the number of elements of @arr on Parrot, $v on JVM.
+Set the size of `@arr` to `$i` elements. If less than the current size,
+any elements after the newlast position are unbound. If greater, the empty
+elments at the end are bound with potentially VM specific null entries.
 
 ## shift
 * `shift(@arr)`
@@ -353,7 +357,21 @@ Return the number of elements of @arr on Parrot, $v on JVM.
 Return the value of @arr at index 0, unbind @arr at index 0, and move all other binding of @arr to the index one below what they were previously bound to.
 
 ## splice
-* `splice(Any @arr, Any $from, int $offset, int $count)`
+* `splice(@arr, @from, int $offset, int $count)`
+
+Remove the elements in `@arr` starting at `$offset`, for `$count` positions.
+Replace them with all the elements from `@from`.
+
+## unshift
+* `unshift(@arr, Any $v)`
+* `unshift_i(@arr, int $v)`
+* `unshift_n(@arr, num $v)`
+* `unshift_s(@arr, str $v)`
+
+"Shift $v into the beginning of @arr."
+Bind $v to @arr at index 0, move all other bindings of @arr to the index one above what they were previously bound to.
+Return the number of elements of @arr on Parrot, $v on JVM.
+
 
 # Hash opcodes
 
@@ -390,22 +408,86 @@ Delete the given key from %hash.
 
 Return the number of characters in the string.
 
+## chr
+* `chr(int $codepoint)`
+
+Given a unicode codepoint, return a str containing its character. Will
+throw an exception on invalid codepoints.
+
+## codepointfromname
+* `codepointfromname(str $name)`
+
+Returns the codepoint for the given unicode character name, or -1 if no
+match was found.
+
 ## concat
 * `concat(str $l, str $r)`
 
-Return a string that is the concatenation of the two
-passed in strings.
+Return a string that is the concatenation of the two passed in strings.
+
+## findcclass
+* `findcclass(int $class, str $str, int $i, int $count)`
+
+Search the string starting at the `$i`th character, for `$count` characters.
+Return the position of the first character that is of the specified class
+(`nqp::const::CCLASS_*`). If no characters match, return the position of the
+first character after the given range, or the length of the string, whichever
+is smaller.
+
+## findnotcclass
+* `findnotcclass(int $class, str $str, int $i, int $count)`
+
+Search the string starting at the `$i`th character, for `$count` characters.
+Return the position of the first character that is not of the specified class
+(`nqp::const::CCLASS_*`). If no characters match, return the position of the
+first character after the given range, or the length of the string, whichever
+is smaller.
 
 ## flip
 * `flip(str $str)`
 
-Return a string with the characters of `$string` in
-reverse order.
+Return a string with the characters of `$string` in reverse order.
+
+## hash
+* `hash(...)`
+
+Return a hash. The first argument is a key, the second its value, and so on.
+Be sure to pass an even number of arguments, a VM specific error may occur
+otherwise.
+
+## iscclass
+* `iscclass(int $class, str $str, int $i)`
+
+Return 1 if the `$i`th character of $str is of the specified class,
+(`nqp::const::CCLASS_*`), 0 otherwise.
+
+## join
+* `join(str $delim, @arr)`
+
+Joins the separate strings of `@arr` into a single string with
+fields separated by the value of EXPR, and returns that new string.
 
 ## lc
 * `lc(str $str)`
 
 Return lowercase copy of string.
+
+## ord
+* `ord(str $str)`
+* `ord(str $str, int $i)`
+
+Return the unicode codepoint of the first character in `$str`, or
+at the `$i`th character, if it's specified.
+
+## ordat
+* `ordat(str $str, int $i)`
+
+Return the unicode codepoint of the `$i`th character in `$str`
+
+## ordfirst
+* `ordfirst(str $str, int $i)`
+
+Return the unicode codepoint of the th character in `$str`
 
 ## radix
 * `radix(int $radix, String $str, int $pos, int $flags)`
@@ -428,10 +510,25 @@ The $flags is a bitmask that modifies the parse and/or result:
     0x04: parse trailing zeroes but do not include in result
           (for parsing values after a decimal point)
 
+## replace
+* `replace(str $str, int $offset, int $count, str $replacement)`
+
+Replace the the characters of `$str` starting at `$offset` for `$count`
+characters, with the `$replacement` string.
+
 ## uc
 * `uc(str $str)`
 
 Return uppercase copy of string.
+
+## split
+* `split(str $delimiter, str $string)`
+
+Splits the string `$string` into an array of elements; these elements are
+the substrings between delimiters in the original string.
+
+If the original string begins or ends with the delimiter, the resulting
+array will begin or end with an empty element.
 
 ## substr
 * `substr(...)`
@@ -450,7 +547,55 @@ Return a string containing `$count` copies of the string.
 
 # Conditional Opcodes
 
+## if
+* `if(Block $condition, Block $then)`
+* `if(Block $condition, Block $then, Block $else)`
+
+If the `$condition` evaluates to a non-zero value, run the `$then` block.
+If not, and an `$else` block is present, run that instead.
+
+## unless
+* `unless(Block $condition, Block $then)`
+* `unless(Block $condition, Block $then, Block $else)`
+
+If the `$condition` evaluates to 0, run the `$then` block.
+If not, and an `$else` block is present, run that instead.
+
 # Loop/Control Opcodes
+
+##repeat_until
+* `repeat_until(Block $condition, Block $body)`
+* `repeat_until(Block $condition, Block $body, Block $post)`
+
+First run the `$body`. Then, enter a loop, running the `$body`
+only if the condition returns 0.
+
+If a `$post` block is present, run that at the end, regardless of `$condition`.
+
+##repeat_while
+* `repeat_while(Block $condition, Block $body)`
+* `repeat_while(Block $condition, Block $body, Block $post)`
+
+First run the `$body`. Then, enter a loop, running the `$body`
+only if the condition returns a non-0 value.
+
+If a `$post` block is present, run that at the end, regardless of `$condition`.
+
+##until
+* `until(Block $condition, Block $body)`
+* `until(Block $condition, Block $body, Block $post)`
+
+Enter a loop, running the `$body` only if the condition returns 0.
+
+If a `$post` block is present, run that at the end, regardless of `$condition`.
+
+##while
+* `while(Block $condition, Block $body)`
+* `while(Block $condition, Block $body, Block $post)`
+
+Enter a loop, running the `$body` only if the condition returns a non-0 value.
+
+If a `$post` block is present, run that at the end, regardless of `$condition`.
 
 # Exceptional Opcodes
 
@@ -698,6 +843,46 @@ didn't exist. May throw an exception.
 
 Returns 0 if `$val` is 0, otherwise 1.
 
+## bootarray
+* `bootarray()`
+
+Returns a VM specific type object for a native array.
+
+## boothash
+* `boothash()`
+
+Returns a VM specific type object for a native hash.
+
+## bootint
+* `bootint()`
+
+Returns a VM specific type object that can box a native int.
+
+## bootintarray
+* `bootintarray()`
+
+Returns a VM specific type object for a native array of int.
+
+## bootnum
+* `bootnum()`
+
+Returns a VM specific type object that can box a native num.
+
+## bootnumarray
+* `bootnumarray()`
+
+Returns a VM specific type object for a native array of num.
+
+## bootstr
+* `bootstr()`
+
+Returns a VM specific type object that can box a native str.
+
+## bootstrarray
+* `bootstrarray()`
+
+Returns a VM specific type object for a native array of str.
+
 ##box
 * `box_i(int $val, Type $type)`
 * `box_n(num $val, Type $type)`
@@ -861,12 +1046,6 @@ XOR the bits in `$l` and `$r`.
 
 # Context Introspection Opcodes
 
-## getenvhash
-* `getenvhash()`
-
-Returns a hash containing the environment variables.
-Changing the hash doesn't affect the environment variables
-
 ## savecapture
 * `savecapture()`
 
@@ -882,3 +1061,17 @@ Gets hold of the argument capture passed to the current block.
 (a future usecapture may invalidate it)
 It's valid to implement this exactly the same way as savecapture if there's no performance benefit to be had in a split.
 Used by the multi-dispatcher.
+
+# Miscellaneous Opcodes
+
+## debugnoop
+* `debugnoop(Any $a)`
+
+Returns `$a`. Does nothing, exists only to provide a breakpoint location
+for debugging.
+
+## getenvhash
+* `getenvhash()`
+
+Returns a hash containing the environment variables.
+Changing the hash doesn't affect the environment variables
