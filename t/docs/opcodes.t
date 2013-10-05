@@ -45,6 +45,11 @@ for @pvm_lines -> $line {
     %pvm_ops{$line} := 1;
 }
 
+# These are harder to tease out of the definitions in java, so add them manually
+for <if unless while until repeat_while repeat_until> -> $op_name {
+    %pvm_ops{$op_name} := 1;
+}
+
 # All the pvm ops must be documented
 
 for %pvm_ops -> $pvm_op {
