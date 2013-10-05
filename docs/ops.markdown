@@ -35,6 +35,7 @@ correspond directly to NQP types.
 * Type      - a type object, e.g. `Int`
 * Exception - an Exception object
 * Handle    - an I/O Handle object
+* Iterable  - something iterable
 * @         - this sigil indicates an array parameter
 * %         - this sigil indicates a hash parameter
 * ...       - indicates variable args are accepted
@@ -563,6 +564,23 @@ If not, and an `$else` block is present, run that instead.
 
 # Loop/Control Opcodes
 
+##for
+* `for(Iterable $iter, Block $body)`
+
+Invoke the `$body` for every item available in `$iter`.
+
+##ifnull
+* `ifnull(Block $cond, Block $body)`
+
+If the `$cond` evaluates to null, evaluate the `$body`, otherwise return
+the result of `$cond`.
+
+##defor
+* `defor(Block $cond, Block $body)`
+
+If the `$cond` evaluates to defined value, return it, otherwise, evaluate
+the `$body`.
+
 ##repeat_until
 * `repeat_until(Block $condition, Block $body)`
 * `repeat_until(Block $condition, Block $body, Block $post)`
@@ -615,6 +633,11 @@ Return an array of strings, describing the backtrace of the given exception.
 
 Create and throw an exception using the given message.
 
+##exception
+* `exception()`
+
+Return the current exception object.
+
 ##getextype
 * `getextype(Exception $ex)`
 
@@ -629,11 +652,6 @@ Gets the exception message.
 * `getpayload(Exception $ex)`
 
 Gets the exception payload.
-
-##exception
-* `exception()`
-
-Return the current exception object.
 
 ##newexception
 * `newexception()`
