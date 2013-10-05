@@ -9,9 +9,17 @@ BEGIN_OPS_PREAMBLE
 
 /* The ID of the bigint REPR. */
 static INTVAL bigint_repr_id = 0;
+static INTVAL smo_id = 0;
 
 static mp_int * get_bigint(PARROT_INTERP, PMC *obj) {
-    struct SixModel_REPROps *r = REPR(obj);
+    struct SixModel_REPROps *r;
+
+    if (obj->vtable->base_type == smo_id)
+        r = REPR(obj);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Can't get bigint from something that isn't a SixModel object");
+
     if (r->ID == bigint_repr_id)
         return &((P6bigintInstance *)PMC_data(obj))->body.i;
     else
@@ -167,6 +175,7 @@ inline op nqp_bigint_setup() :base_core {
             P6bigint_initialize);
         srand((unsigned int) Parrot_util_int_rand(0));
     }
+    smo_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
 }
 
 inline op nqp_bigint_add(out PMC, invar PMC, invar PMC, invar PMC) :base_core {
