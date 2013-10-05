@@ -1,0 +1,27 @@
+PERL   = perl
+PROVE  = prove
+
+PREFIX       = @prefix@
+BIN_DIR      = $(PREFIX)/bin
+MOAR         = $(BIN_DIR)/moar
+NQP_LANG_DIR = $(PREFIX)/languages/nqp
+
+MKPATH = $(PERL) -MExtUtils::Command -e mkpath
+CP     = $(PERL) -MExtUtils::Command -e cp
+CHMOD  = $(PERL) -MExtUtils::Command -e chmod
+
+STAGE0 = src/vm/moar/stage0
+STAGE1 = src/stage1
+STAGE2 = src/stage2
+
+STAGE0_NQP = $(MOAR) --libpath=$(STAGE0) $(STAGE0)/nqp.moarvm --bootstrap
+STAGE1_NQP = $(MOAR) --libpath=$(STAGE1) $(STAGE1)/nqp.moarvm --bootstrap
+
+all:
+	echo "to do"
+
+clean:
+	$(PERL) -MExtUtils::Command -e rm_rf *.moarvm src/stage1 src/stage2 nqp nqp.bat
+
+# nqp::makefile <-- tells NQP::Configure to treat this file as a makefile,
+#                   performing win32 slash and makefile conversions
