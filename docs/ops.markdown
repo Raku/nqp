@@ -36,6 +36,8 @@ correspond directly to NQP types.
 * Exception - an Exception object
 * Handle    - an I/O Handle object
 * Iterable  - something iterable
+* Context   - a Context object
+* LexPad    - a Context object
 * @         - this sigil indicates an array parameter
 * %         - this sigil indicates a hash parameter
 * ...       - indicates variable args are accepted
@@ -1063,6 +1065,36 @@ XOR the bits in `$l` and `$r`.
 `_I` variant returns an object of the given type.
 
 # Context Introspection Opcodes
+
+## ctx
+* `ctx()`
+
+Return the object representing the current context.
+
+## ctxcaller
+* `ctxcaller(Context $ctx)`
+
+Given a context, return the caller context, or null.
+
+## ctxlexpad
+* `ctxlexpad(Context $ctx)`
+
+Given a context, return its lexpad
+
+## curlexpad
+* `curlexpad()`
+
+Return the current lexpad.
+
+## ctxouter
+* `ctxouter(Context $ctx)`
+
+Given a context, return the outer context, or null.
+
+## lexprimspec
+* `lexprimspec(LexPad $pad, str $name)`
+
+Given a lexpad and a name, return the name's primitive type.
 
 ## savecapture
 * `savecapture()`
