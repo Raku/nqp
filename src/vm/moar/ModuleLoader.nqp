@@ -42,8 +42,13 @@ knowhow ModuleLoader {
         else {
             my $*CTXSAVE := self;
             my $*MAIN_CTX := ModuleLoader;
+            my $boot_mode;
+            try { $boot_mode := nqp::ifnull(nqp::ifnull(%*COMPILING, {})<%?OPTIONS>, {})<bootstrap>; }
+            $boot_mode := !nqp::isnull($boot_mode) && $boot_mode;
             my $preserve_global := nqp::getcurhllsym('GLOBAL');
+            nqp::usecompileehllconfig() if $boot_mode;
             nqp::loadbytecode($path);
+            nqp::usecompilerhllconfig() if $boot_mode;
             nqp::bindcurhllsym('GLOBAL', $preserve_global);
             %modules_loaded{$path} := $module_ctx := $*MAIN_CTX;
         }
@@ -139,8 +144,13 @@ knowhow ModuleLoader {
             unless nqp::existskey(%settings_loaded, $path) {
                 my $*CTXSAVE := self;
                 my $*MAIN_CTX := ModuleLoader;
+                my $boot_mode;
+                try { $boot_mode := nqp::ifnull(nqp::ifnull(%*COMPILING, {})<%?OPTIONS>, {})<bootstrap>; }
+                $boot_mode := !nqp::isnull($boot_mode) && $boot_mode;
                 my $preserve_global := nqp::getcurhllsym('GLOBAL');
+                nqp::usecompileehllconfig() if $boot_mode;
                 nqp::loadbytecode($path);
+                nqp::usecompilerhllconfig() if $boot_mode;
                 nqp::bindcurhllsym('GLOBAL', $preserve_global);
                 unless nqp::defined($*MAIN_CTX) {
                     nqp::die("Unable to load setting $setting_name; maybe it is missing a YOU_ARE_HERE?");
