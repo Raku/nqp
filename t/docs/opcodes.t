@@ -82,3 +82,22 @@ for %pvm_ops -> $pvm_op {
 for %documented_ops<parrot> -> $doc_op {
     ok(%pvm_ops{$doc_op}, "documented op '$doc_op' exists in the PVM");
 }
+
+my %mvm_ops := nqp::hash();
+my @mvm_lines := nqp::split("\n", nqp::readallfh(nqp::open("src/vm/moar/QAST/QASTOperationsMAST.nqp","r")));
+for @mvm_lines -> $line {
+    next unless $line ~~ / 'add_core_op' | 'add_core_moarop_mapping' /;
+    $line := nqp::split("'", $line)[1];
+    next unless nqp::chars($line);
+    %mvm_ops{$line} := 1;
+}
+
+# All the mvm ops must be documented
+
+for %mvm_ops -> $mvm_op {
+    ok(%documented_ops{$mvm_op}, "MOAR op '$mvm_op' is documented");
+}
+
+for %documented_ops -> $doc_op {
+    ok(%mvm_ops{$doc_op}, "documented op '$doc_op' exists in MOAR");
+}
