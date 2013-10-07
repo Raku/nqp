@@ -25,6 +25,7 @@ my @clo := $nqpcomp.commandline_options();
 @clo.push('module-path=s');
 @clo.push('no-regex-lib');
 @clo.push('stable-sc');
+@clo.push('optimize=s');
 #?if parrot
 @clo.push('vmlibs=s');
 @clo.push('dynext=s');
