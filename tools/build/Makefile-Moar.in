@@ -123,7 +123,7 @@ STAGE2_OUTPUT = $(STAGE2)/$(NQP_MO_MOAR) $(STAGE2)/$(MODULE_LOADER_MOAR) \
                 $(STAGE2)/$(QAST_MOAR) $(STAGE2)/$(P6QREGEX_MOAR) \
                 $(STAGE2)/$(NQP_MOAR)
 
-all: $(STAGE2_OUTPUT)
+all: $(NQP_MOAR)
 
 clean:
 	$(PERL) -MExtUtils::Command -e rm_rf *.moarvm src/stage1 src/stage2 nqp nqp.bat
@@ -269,6 +269,42 @@ $(STAGE2)/$(NQP_MOAR): $(STAGE1) $(NQP_SOURCES) $(STAGE2)/$(P6QREGEX_MOAR)
 	$(STAGE1_NQP) --module-path=$(STAGE2) --setting-path=$(STAGE2) \
 	    --setting=NQPCORE --target=mbc --no-regex-lib \
 	    --output=$(STAGE2)/$(NQP_MOAR) $(STAGE2)/$(NQP_COMBINED)
+
+$(NQP_MOAR): $(STAGE2_OUTPUT)
+	$(CP) $(STAGE2)/$(NQP_MO_MOAR) .
+	$(CP) $(STAGE2)/$(MODULE_LOADER_MOAR) .
+	$(CP) $(STAGE2)/$(CORE_SETTING_MOAR) .
+	$(CP) $(STAGE2)/$(QASTNODE_MOAR) .
+	$(CP) $(STAGE2)/$(QREGEX_MOAR) .
+	$(CP) $(STAGE2)/$(HLL_MOAR) .
+	$(CP) $(STAGE2)/$(MASTOPS_MOAR) .
+	$(CP) $(STAGE2)/$(MASTNODES_MOAR) .
+	$(CP) $(STAGE2)/$(QAST_MOAR) .
+	$(CP) $(STAGE2)/$(P6QREGEX_MOAR) .
+	$(CP) $(STAGE2)/$(NQP_MOAR) .
+
+## testing
+
+t/*/*.t: all
+	prove -r -v --exec "$(MOAR) $(NQP_MOAR)" $@
+
+test: all
+	prove -r --exec "$(MOAR) $(NQP_MOAR)" t/nqp t/qregex t/p5regex t/qast t/serialization
+
+test-loud: all
+	prove -r -v --exec "$(MOAR) $(NQP_MOAR)" t/nqp t/qregex t/p5regex t/qast t/serialization
+
+core-test: $(RUNNER)
+	prove -r --exec "$(MOAR) $(NQP_MOAR)" t/nqp
+
+core-test-loud: $(RUNNER)
+	prove -r -v --exec "$(MOAR) $(NQP_MOAR)" t/nqp
+
+qregex-test: $(RUNNER)
+	prove -r --exec "$(MOAR) $(NQP_MOAR)" t/qregex
+
+qregex-test-loud: $(RUNNER)
+	prove -r -v --exec "$(MOAR) $(NQP_MOAR)" t/qregex
 
 # nqp::makefile <-- tells NQP::Configure to treat this file as a makefile,
 #                   performing win32 slash and makefile conversions
