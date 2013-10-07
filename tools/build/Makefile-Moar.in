@@ -99,6 +99,13 @@ P6QREGEX_SOURCES  = \
   src/QRegex/P6Regex/Actions.nqp \
   src/QRegex/P6Regex/Compiler.nqp \
 
+P5QREGEX_MOAR     = NQPP5QRegex.moarvm
+P5QREGEX_COMBINED = gen/NQPP5QRegex.nqp
+P5QREGEX_SOURCES  = \
+  src/QRegex/P5Regex/Grammar.nqp \
+  src/QRegex/P5Regex/Actions.nqp \
+  src/QRegex/P5Regex/Compiler.nqp \
+
 NQP_MOAR     = nqp.moarvm
 NQP_COMBINED = gen/NQP.nqp
 NQP_SOURCES  = \
@@ -123,7 +130,7 @@ STAGE2_OUTPUT = $(STAGE2)/$(NQP_MO_MOAR) $(STAGE2)/$(MODULE_LOADER_MOAR) \
                 $(STAGE2)/$(QAST_MOAR) $(STAGE2)/$(P6QREGEX_MOAR) \
                 $(STAGE2)/$(NQP_MOAR)
 
-all: $(NQP_MOAR)
+all: $(NQP_MOAR) $(P5QREGEX_MOAR)
 
 clean:
 	$(PERL) -MExtUtils::Command -e rm_rf *.moarvm src/stage1 src/stage2 nqp nqp.bat
@@ -282,6 +289,12 @@ $(NQP_MOAR): $(STAGE2_OUTPUT)
 	$(CP) $(STAGE2)/$(QAST_MOAR) .
 	$(CP) $(STAGE2)/$(P6QREGEX_MOAR) .
 	$(CP) $(STAGE2)/$(NQP_MOAR) .
+
+$(P5QREGEX_MOAR): $(NQP_MOAR) $(P5QREGEX_SOURCES)
+	$(MKPATH) $(STAGE2)/gen
+	$(PERL) tools/build/gen-cat.pl moar $(P5QREGEX_SOURCES) > $(STAGE2)/$(P5QREGEX_COMBINED)
+	$(MOAR) $(NQP_MOAR) --target=mbc --output=$(P5QREGEX_MOAR) \
+	    $(STAGE2)/$(P5QREGEX_COMBINED)
 
 ## testing
 
