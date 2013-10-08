@@ -235,6 +235,12 @@ name. `h` indicates a hyperbolic variant.
 Compare two values, returns -1 if $l is greater than $r, 0 if they are equal,
 and 1 if $r is greater than $l.
 
+## eqat
+* `eqat(str $haystack, str $needle, int $pos)`
+
+Return 1 if the string `$haystack` has the string `$needle` at position `$pos`,
+or 0 otherwise.
+
 ## iseq
 * `iseq_i(int $l, int $r)`
 * `iseq_n(num $l, num $r)`
