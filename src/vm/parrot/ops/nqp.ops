@@ -3739,30 +3739,40 @@ inline op nqp_string_equal_at(out INT, in STR, in STR, in INT) {
     String_iter hay_iter;
     String_iter needle_iter;
 
-    offset = (INTVAL)($4);
-
-    if (offset < 0) {
-        offset += ($2)->strlen;
-        if (offset < 0) {
-            offset = 0;
-        }
-    }
-
-    if (($2)->strlen - offset < ($3)->strlen || offset > ($2)->strlen) {
-        $1 = 0;
-    } else {
-        done = 0;
-        $1 = 1;
-
+    if (0 && ($3)->strlen == 1) {
         STRING_ITER_INIT(interp, &hay_iter);
         STRING_iter_skip(interp, $2, &hay_iter, offset);
-        STRING_ITER_INIT(interp, &needle_iter);
+        $1 = (STRING_ord(interp, $3, 0) == STRING_ord(interp, $2, hay_iter.bytepos));
+    } else {
+        offset = (INTVAL)($4);
 
-        for (cmp_index = 0; cmp_index < $3->strlen && !done; cmp_index++) {
-            if (STRING_iter_get_and_advance(interp, $2, &hay_iter)
-                    != STRING_iter_get_and_advance(interp, $3, &needle_iter)) {
-                $1 = 0;
-                done = 1;
+        if (offset < 0) {
+            offset += ($2)->strlen;
+            if (offset < 0) {
+                offset = 0;
+            }
+        }
+
+        if (($2)->encoding == ($3)->encoding) {
+            STRING_ITER_INIT(interp, &hay_iter);
+            STRING_iter_skip(interp, $2, &hay_iter, offset);
+            $1 = memcmp($2->strstart + hay_iter.bytepos, $3->strstart, STRING_byte_length($3)) == 0;
+        } else if (($2)->strlen - offset < ($3)->strlen || offset > ($2)->strlen) {
+            $1 = 0;
+        } else {
+            done = 0;
+            $1 = 1;
+
+            STRING_ITER_INIT(interp, &hay_iter);
+            STRING_iter_skip(interp, $2, &hay_iter, offset);
+            STRING_ITER_INIT(interp, &needle_iter);
+
+            for (cmp_index = 0; cmp_index < $3->strlen && !done; cmp_index++) {
+                if (STRING_iter_get_and_advance(interp, $2, &hay_iter)
+                        != STRING_iter_get_and_advance(interp, $3, &needle_iter)) {
+                    $1 = 0;
+                    done = 1;
+                }
             }
         }
     }
