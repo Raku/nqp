@@ -411,8 +411,7 @@ role NQPCursorRole is export {
             my int $litlen := $subcur.pos - $subcur.from;
             my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
             $cur."!cursor_pass"($!pos + $litlen, '')
-              if nqp::substr($target, $!pos, $litlen) 
-                   eq nqp::substr($target, $subcur.from, $litlen);
+              if nqp::eqat($target, nqp::substr($target, $subcur.from, $litlen), $!pos);
         }
         $cur;
     }
@@ -423,7 +422,7 @@ role NQPCursorRole is export {
         my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
         if $litlen < 1 ||
             ($i ?? nqp::lc(nqp::substr($target, $!pos, $litlen)) eq nqp::lc($str)
-                !! nqp::substr($target, $!pos, $litlen) eq $str) {
+                !! nqp::eqat($target, $str, $!pos)) {
             $cur := self."!cursor_start_cur"();
             $cur."!cursor_pass"($!pos + $litlen);
         }
@@ -812,7 +811,7 @@ class NQPCursor does NQPCursorRole {
                 else {
                     my int $len := nqp::chars($_);
                     $maxlen := $len if $len > $maxlen && $pos + $len <= $eos
-                        && nqp::substr($tgt, $pos, $len) eq $_;
+                        && nqp::eqat($tgt, $_, $pos);
                 }
                 last if $s && $maxlen > -1;
             }
@@ -827,7 +826,7 @@ class NQPCursor does NQPCursorRole {
             my int $len := nqp::chars($var);
             my int $adv := $pos + $len;
             return $cur if $adv > nqp::chars($tgt)
-                || nqp::substr($tgt, $pos, $len) ne $var;
+                || !(nqp::eqat($tgt, $var, $pos));
             $cur.'!cursor_pass'($adv, '');
             return $cur;
         }

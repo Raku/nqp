@@ -1436,7 +1436,7 @@ class NQP::Actions is HLL::Actions {
                 $past[$i] := $past[$i][0];
                 $past[$i].flat(1);
                 $past[$i].named(1) if nqp::istype($past[$i], QAST::Var)
-                    && nqp::substr($past[$i].name, 0, 1) eq '%';
+                    && nqp::eqat($past[$i].name, '%', 0);
             }
             $i++;
         }
