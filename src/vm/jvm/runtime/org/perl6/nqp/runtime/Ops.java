@@ -3085,7 +3085,7 @@ public final class Ops {
         return val.substring((int)offset, end);
     }
 
-    // does a have b as a substring at offset?
+    // does haystack have needle as a substring at offset?
     public static long string_equal_at(String haystack, String needle, long offset) {
         long haylen = haystack.length();
         long needlelen = needle.length();
