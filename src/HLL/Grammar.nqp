@@ -194,7 +194,7 @@ C< :!pair >, and C<< :pair<strval> >>.
                     # If the pair is of the form :!name, then reverse the value
                     # and skip the exclamation mark.
                     my $value := 1;
-                    if nqp::substr($spec, $pos, 1) eq '!' {
+                    if nqp::eqat($spec, "!", $pos) {
                         $pos++;
                         $value := 0;
                     }
@@ -206,7 +206,7 @@ C< :!pair >, and C<< :pair<strval> >>.
                     $pos     := $lpos;
 
                     # Look for a <...> that follows.
-                    if nqp::substr($spec, $pos, 1) eq '<' {
+                    if nqp::eqat($spec, '<', $pos) {
                         $pos   := $pos + 1;
                         $lpos  := nqp::index($spec, '>', $pos);
                         $value := nqp::substr($spec, $pos, $lpos - $pos);
