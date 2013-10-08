@@ -14,7 +14,9 @@ for @doc_lines -> $line {
     %documented_ops{$line} := 1 ;
 }
 
-my @folders := nqp::list('t');
+# Include indirect testing by presence in bootstrapped files.
+my @folders := nqp::list('t', 'src/NQP', 'src/how', 'src/core', 'src/HLL', 'src/QRegex');
+
 my @files := nqp::list();
 while (nqp::elems(@folders)) {
     my $dh := nqp::opendir(@folders.shift);
@@ -36,6 +38,10 @@ for @files -> $file {
     my @test_lines := nqp::split("\n", nqp::readallfh(nqp::open($file,"r")));
     for @test_lines -> $line {
         my $match := $line ~~ / 'nqp::' (<[a..z0..9_]>+?) '(' /;
+        if (?$match) {
+            %tested_ops{$match[0]} := 1;
+        }
+        $match := $line ~~ / ':op(\'' (<[a..z0..9_]>+?) '\')' /;
         if (?$match) {
             %tested_ops{$match[0]} := 1;
         }
