@@ -1,7 +1,5 @@
 #! nqp
 
-use NQPHLL;
-
 my %documented_ops := nqp::hash();
 
 my @doc_lines := nqp::split("\n", nqp::readallfh(nqp::open("docs/ops.markdown","r")));
