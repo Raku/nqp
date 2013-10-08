@@ -3739,19 +3739,18 @@ inline op nqp_string_equal_at(out INT, in STR, in STR, in INT) {
     String_iter hay_iter;
     String_iter needle_iter;
 
-    if (0 && ($3)->strlen == 1) {
-        STRING_ITER_INIT(interp, &hay_iter);
-        STRING_iter_skip(interp, $2, &hay_iter, offset);
-        $1 = (STRING_ord(interp, $3, 0) == STRING_ord(interp, $2, hay_iter.bytepos));
-    } else {
-        offset = (INTVAL)($4);
+    offset = (INTVAL)($4);
 
+    if (offset < 0) {
+        offset += ($2)->strlen;
         if (offset < 0) {
-            offset += ($2)->strlen;
-            if (offset < 0) {
-                offset = 0;
-            }
+            offset = 0;
         }
+    }
+
+    if (($3)->strlen == 1) {
+        $1 = (STRING_ord(interp, $3, 0) == STRING_ord(interp, $2, offset));
+    } else {
 
         if (($2)->encoding == ($3)->encoding) {
             STRING_ITER_INIT(interp, &hay_iter);
