@@ -2094,6 +2094,7 @@ QAST::OperationsJAST.add_core_op('substr', -> $qastcomp, $op {
         !! QAST::Op.new( :op('substr3'), |@operands ));
 });
 
+QAST::OperationsJAST.map_classlib_core_op('eqat', $TYPE_OPS, 'string_equal_at', [$RT_STR, $RT_STR, $RT_INT], $RT_INT);
 # ord can be on a the first char in a string or at a particular char.
 QAST::OperationsJAST.map_classlib_core_op('ordfirst', $TYPE_OPS, 'ordfirst', [$RT_STR], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('ordat',    $TYPE_OPS, 'ordat',    [$RT_STR, $RT_INT], $RT_INT);
