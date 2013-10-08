@@ -1980,6 +1980,8 @@ QAST::Operations.add_core_op('substr', :inlinable(1), -> $qastcomp, $op {
         !! QAST::Op.new( :op('substr3'), |@operands ));
 });
 
+QAST::Operations.add_core_pirop_mapping('eqat', 'nqp_string_equal_at', 'Issi', :inlinable(1));
+
 # ord can be on a the first char in a string or at a particular char.
 QAST::Operations.add_core_pirop_mapping('ordfirst', 'ord', 'Is', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('ordat', 'ord', 'Isi', :inlinable(1));
