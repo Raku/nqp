@@ -1980,7 +1980,41 @@ QAST::Operations.add_core_op('substr', :inlinable(1), -> $qastcomp, $op {
         !! QAST::Op.new( :op('substr3'), |@operands ));
 });
 
-QAST::Operations.add_core_pirop_mapping('eqat', 'nqp_string_equal_at', 'Issi', :inlinable(1));
+sub str_or_want($op) {
+    nqp::istype($op, QAST::SVal) || nqp::istype($op, QAST::Want) && +@($op)[1] eq 'Ss';
+}
+
+sub val_from_str_or_want($op) {
+    nqp::istype($op, QAST::SVal)
+        ?? $op.value
+        !! $op[2].value
+}
+
+
+QAST::Operations.add_core_pirop_mapping('eqat_internal', 'nqp_string_equal_at', 'Issi', :inlinable(1));
+QAST::Operations.add_core_op('eqat', :inlinable(1), -> $qastcomp, $op {
+    my $needle := $op.list[1];
+    my $result;
+    if str_or_want($needle) {
+        my $needleval := val_from_str_or_want($needle);
+        if nqp::chars($needleval) == 1 {
+            $result := $qastcomp.as_post(
+                QAST::Op.new( :op('iseq_i'),
+                    QAST::Op.new( :op('ordat'),
+                        $op.list[0],
+                        $op.list[2]),
+                    QAST::IVal.new( :value(nqp::ord($needleval)) )
+                    )
+                );
+        }
+    }
+    if $result =:= NQPMu {
+        $op.op('eqat_internal');
+        $qastcomp.as_post($op);
+    } else {
+        $result;
+    }
+});
 
 # ord can be on a the first char in a string or at a particular char.
 QAST::Operations.add_core_pirop_mapping('ordfirst', 'ord', 'Is', :inlinable(1));
@@ -2140,16 +2174,6 @@ QAST::Operations.add_core_pirop_mapping('r_bindpos', 'repr_bind_pos_obj', '2PiP'
 QAST::Operations.add_core_pirop_mapping('r_bindpos_i', 'repr_bind_pos_int', '2Pii', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('r_bindpos_n', 'repr_bind_pos_num', '2Pin', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('r_elems', 'repr_elems', 'IP', :inlinable(1));
-
-sub str_or_want($op) {
-    nqp::istype($op, QAST::SVal) || nqp::istype($op, QAST::Want) && +@($op)[1] eq 'Ss';
-}
-
-sub val_from_str_or_want($op) {
-    nqp::istype($op, QAST::SVal)
-        ?? $op.value
-        !! $op[2].value
-}
 
 # object opcodes
 QAST::Operations.add_core_pirop_mapping('bindattr', 'setattribute', '3PPsP', :inlinable(1));
