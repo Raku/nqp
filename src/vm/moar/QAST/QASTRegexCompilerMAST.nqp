@@ -521,6 +521,14 @@ class QAST::MASTRegexCompiler {
 
     method quant($node) {
         my @ins := nqp::list();
+        my $min := $node.min;
+        my $max := $node.max;
+
+        if $min == 0 && $max == 0 {
+            # Nothing to do, and nothing to backtrack into.
+            return @ins;
+        }
+
         my $backtrack := $node.backtrack || 'g';
         my $sep       := $node[1];
         my $prefix    := self.unique($*RXPREFIX ~ '_rxquant_' ~ $backtrack);
@@ -528,8 +536,6 @@ class QAST::MASTRegexCompiler {
         my $looplabel := @*RXJUMPS[$looplabel_index];
         my $donelabel_index := rxjump($prefix ~ '_done');
         my $donelabel := @*RXJUMPS[$donelabel_index];
-        my $min       := $node.min;
-        my $max       := $node.max;
         my $needrep   := $min > 1 || $max > 1;
         my $needmark  := $needrep || $backtrack eq 'r';
         my $rep       := %*REG<rep>;
@@ -540,10 +546,7 @@ class QAST::MASTRegexCompiler {
         nqp::push(@ins, op('const_i64', $maxreg, ival($max))) if $max > 1;
         my $ireg := fresh_i();
 
-        if $min == 0 && $max == 0 {
-            # Nothing to do, and nothing to backtrack into.
-        }
-        elsif $backtrack eq 'f' {
+        if $backtrack eq 'f' {
             my $seplabel := label($prefix ~ '_sep');
             nqp::push(@ins, op('set', $rep, %*REG<zero>));
             if $min < 1 {
