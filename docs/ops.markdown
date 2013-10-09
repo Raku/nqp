@@ -42,6 +42,10 @@ correspond directly to NQP types.
 * %         - this sigil indicates a hash parameter
 * ...       - indicates variable args are accepted
 
+VM-specific opcodes are denoted with a `jvm`, e.g. on the same line
+as the header. No annotation indicates this opcode should be supported on
+all nqp backends.
+
 # Arithmetic Opcodes
 
 ## abs
@@ -863,42 +867,42 @@ didn't exist. May throw an exception.
 
 Returns 0 if `$val` is 0, otherwise 1.
 
-## bootarray
+## bootarray `jvm` `moar`
 * `bootarray()`
 
 Returns a VM specific type object for a native array.
 
-## boothash
+## boothash `jvm` `moar`
 * `boothash()`
 
 Returns a VM specific type object for a native hash.
 
-## bootint
+## bootint `jvm` `moar`
 * `bootint()`
 
 Returns a VM specific type object that can box a native int.
 
-## bootintarray
+## bootintarray `jvm` `moar`
 * `bootintarray()`
 
 Returns a VM specific type object for a native array of int.
 
-## bootnum
+## bootnum `jvm` `moar`
 * `bootnum()`
 
 Returns a VM specific type object that can box a native num.
 
-## bootnumarray
+## bootnumarray `jvm` `moar`
 * `bootnumarray()`
 
 Returns a VM specific type object for a native array of num.
 
-## bootstr
+## bootstr `jvm` `moar`
 * `bootstr()`
 
 Returns a VM specific type object that can box a native str.
 
-## bootstrarray
+## bootstrarray `jvm` `moar`
 * `bootstrarray()`
 
 Returns a VM specific type object for a native array of str.
