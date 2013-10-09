@@ -432,6 +432,13 @@ match was found.
 
 Return a string that is the concatenation of the two passed in strings.
 
+## escape
+* `escape(str $str)`
+
+Given a string, return an escaped version that replaces the following
+characters with their escaped equivalents: "\\", "\b", "\n", "\r",
+"\t", "\f", "\"", "\a", and "\e".
+
 ## findcclass
 * `findcclass(int $class, str $str, int $i, int $count)`
 
@@ -697,22 +704,22 @@ Throw the exception.
 # Input/Output Opcodes
 
 ##closefh
-* `closefh(handle $fh)`
+* `closefh(Handle $fh)`
 
 Close the filehandle.
 
 ##eoffh
-* `eoffh(handle $fh)`
+* `eoffh(Handle $fh)`
 
 Return 1 if this filehandle is at the end of the file, otherwise 0.
 
 ##flushfh
-* `flushfh(handle $fh)`
+* `flushfh(Handle $fh)`
 
 Flushes the file handle, forcing it to write any buffered output.
 
 ##getcfh
-* `getcfh(handle $in)`
+* `getcfh(Handle $in)`
 
 Reads a single character from the supplied filehandle.
 
@@ -750,22 +757,22 @@ See `open` for valid modes.
 Output the given string to stdout.
 
 ##printfh
-* `printfh(handle $fh, str $str)`
+* `printfh(Handle $fh, str $str)`
 
 Output the given string to the filehandle.
 
 ##readallfh
-* `readallfh(handle $fh)`
+* `readallfh(Handle $fh)`
 
 Return the contents of the open filehandle.
 
 ##readlinefh
-* `readlinefh(handle $fh)`
+* `readlinefh(Handle $fh)`
 
 Return the next line of the open filehandle.
 
 ##readlineintfh
-* `readlineintfh(handle $fh, str $prompt)`
+* `readlineintfh(Handle $fh, str $prompt)`
 
 Prompt the user with `$prompt`, then return the next line of the open filehandle.
 
@@ -775,17 +782,17 @@ Prompt the user with `$prompt`, then return the next line of the open filehandle
 Output the given string to stdout, followed by a newline.
 
 ##sayfh
-* `sayfh(handle $fh, str $str)`
+* `sayfh(Handle $fh, str $str)`
 
 Output the given string to the filehandle, followed by a newline.
 
 ##tellfh
-* `tellfh(handle $fh)`
+* `tellfh(Handle $fh)`
 
 Return current access position for an open handle.
 
 ##writefh
-* `writefh(handle $fh, Any $str)`
+* `writefh(Handle $fh, Any $str)`
 
 Output the given object to the filehandle.
 
@@ -801,6 +808,11 @@ Change the working directory to the given path.
 
 Change the permissions of `$path` to the posix style permissions of `$mode`.
 Returns 0 on success, throws an exception on failure.
+
+## closedir
+* `closedir(Handle $)`
+
+Close the given directory handle.
 
 ##cwd
 * `cwd()`
@@ -841,6 +853,18 @@ Create a link from `$after` to `$before`
 
 Create a directory of the given name. Use posix-style mode
 on non-windows platforms. Returns 0, or throws an exception.
+
+## nextfiledir
+* `nextfiledir(handle $iterator)`
+
+Given the result of an opendir, return the next path from that directory.
+When no more items are available, return a null string. (check with `null_s`)
+
+## opendir
+* `opendir(str $path)`
+
+Return a directory handle on the given directory path. Throw an exception
+if `$path` is not a directory.
 
 ##rmdir
 * `rmdir(str $path)`
@@ -1021,6 +1045,31 @@ Convert Big Integer value to a native number.
 Given a Perl 6 object, return a native with the same value,
 of the type indicated by the opcode suffix.
 
+# OO Opcodes
+
+## can
+* `can(Any $obj, str $method)`
+
+If the object has a method of the given name, return it. Otherwise,
+throw an exception.
+
+## clone
+* `clone(Any $obj)`
+
+Return a clone of the passed in object.
+
+## eqaddr
+* `eqaddr(Any $l, Any $r)`
+
+Returns 1 if the objects are the same object in the underlying VM,
+0 otherwise.
+
+## findmethod
+* `findmethod(Any $obj, str $method)`
+
+If the object has a method of the given name, return it. Otherwise,
+throw an exception.
+
 # Bit Opcodes
 
 ## bitand
@@ -1129,3 +1178,9 @@ for debugging.
 
 Returns a hash containing the environment variables.
 Changing the hash doesn't affect the environment variables
+
+## sleep
+* `sleep(num $seconds)`
+
+Sleep for the given number of seconds (no guarantee is made how exact the
+time sleeping is spent.) Returns the passed in number.
