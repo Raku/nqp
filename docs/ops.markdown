@@ -577,24 +577,24 @@ If not, and an `$else` block is present, run that instead.
 
 # Loop/Control Opcodes
 
-##for
+## for
 * `for(Iterable $iter, Block $body)`
 
 Invoke the `$body` for every item available in `$iter`.
 
-##ifnull
+## ifnull
 * `ifnull(Block $cond, Block $body)`
 
 If the `$cond` evaluates to null, evaluate the `$body`, otherwise return
 the result of `$cond`.
 
-##defor
+## defor
 * `defor(Block $cond, Block $body)`
 
 If the `$cond` evaluates to defined value, return it, otherwise, evaluate
 the `$body`.
 
-##repeat_until
+## repeat\_until
 * `repeat_until(Block $condition, Block $body)`
 * `repeat_until(Block $condition, Block $body, Block $post)`
 
@@ -603,7 +603,7 @@ only if the condition returns 0.
 
 If a `$post` block is present, run that at the end, regardless of `$condition`.
 
-##repeat_while
+## repeat\_while
 * `repeat_while(Block $condition, Block $body)`
 * `repeat_while(Block $condition, Block $body, Block $post)`
 
@@ -612,7 +612,7 @@ only if the condition returns a non-0 value.
 
 If a `$post` block is present, run that at the end, regardless of `$condition`.
 
-##until
+## until
 * `until(Block $condition, Block $body)`
 * `until(Block $condition, Block $body, Block $post)`
 
@@ -620,7 +620,7 @@ Enter a loop, running the `$body` only if the condition returns 0.
 
 If a `$post` block is present, run that at the end, regardless of `$condition`.
 
-##while
+## while
 * `while(Block $condition, Block $body)`
 * `while(Block $condition, Block $body, Block $post)`
 
@@ -630,180 +630,180 @@ If a `$post` block is present, run that at the end, regardless of `$condition`.
 
 # Exceptional Opcodes
 
-##backtrace
+## backtrace
 * `backtrace(Exception $ex)`
 
 Return an array of hashes, describing the backtrace of the given exception.
 
-##backtracestrings
+## backtracestrings
 * `backtracestrings(Exception $ex)`
 
 Return an array of strings, describing the backtrace of the given exception.
 
-##die
+## die
 * `die(str $message)`
 * `die_s(str $message)`
 
 Create and throw an exception using the given message.
 
-##exception
+## exception
 * `exception()`
 
 Return the current exception object.
 
-##getextype
+## getextype
 * `getextype(Exception $ex)`
 
 Gets the exception category (`nqp::const::CONTROL_*`)
 
-##getmessage
+## getmessage
 * `getmessage(Exception $ex)`
 
 Gets the exception message.
 
-##getpayload
+## getpayload
 * `getpayload(Exception $ex)`
 
 Gets the exception payload.
 
-##newexception
+## newexception
 * `newexception()`
 
 Return a new exception object.
 
-##resume
+## resume
 * `resume(Exception $ex)`
 
 Resume the exception, if possible.
 
-##rethrow
+## rethrow
 * `rethrow(Exception $ex)`
 
 Re-throw the exception.
 
-##setextype
+## setextype
 * `setextype(Exception $ex, int $type)`
 
 Sets the exception category (`nqp::const::CONTROL_*`)
 
-##setmessage
+## setmessage
 * `setmessage(Exception $ex, str $message)`
 
 Sets the exception message.
 
-##setpayload
+## setpayload
 * `setpayload(Exception $ex, Any $obj)`
 
 Sets the exception payload.
 
-##throw
+## throw
 * `throw(Exception $ex)`
 
 Throw the exception.
 
 # Input/Output Opcodes
 
-##closefh
+## closefh
 * `closefh(Handle $fh)`
 
 Close the filehandle.
 
-##eoffh
+## eoffh
 * `eoffh(Handle $fh)`
 
 Return 1 if this filehandle is at the end of the file, otherwise 0.
 
-##flushfh
+## flushfh
 * `flushfh(Handle $fh)`
 
 Flushes the file handle, forcing it to write any buffered output.
 
-##getcfh
+## getcfh
 * `getcfh(Handle $in)`
 
 Reads a single character from the supplied filehandle.
 
-##getstderr
+## getstderr
 * `getstderr()`
 
 Return the filehandle for standard error.
 
-##getstdin
+## getstdin
 * `getstdin()`
 
 Return the filehandle for standard input.
 
-##getstdout
+## getstdout
 * `getstdout()`
 
 Return the filehandle for standard output.
 
-##open
+## open
 * `open(str $filename, str $mode)`
 
 Open the specified file in the given mode. Valid modes include `r` for read,
 `w` for write, and `wa` for write with append.
 
-##openasync
+## openasync `jvm`
 _Experimental_
 * `openasync(str $filename, str $mode)`
 
 Open the specified file in the given mode for async IO.
 See `open` for valid modes.
 
-##print
+## print
 * `print(sstr $str)`
 
 Output the given string to stdout.
 
-##printfh
+## printfh
 * `printfh(Handle $fh, str $str)`
 
 Output the given string to the filehandle.
 
-##readallfh
+## readallfh
 * `readallfh(Handle $fh)`
 
 Return the contents of the open filehandle.
 
-##readlinefh
+## readlinefh
 * `readlinefh(Handle $fh)`
 
 Return the next line of the open filehandle.
 
-##readlineintfh
+## readlineintfh
 * `readlineintfh(Handle $fh, str $prompt)`
 
 Prompt the user with `$prompt`, then return the next line of the open filehandle.
 
-##say
+## say
 * `say(str $str)`
 
 Output the given string to stdout, followed by a newline.
 
-##sayfh
+## sayfh
 * `sayfh(Handle $fh, str $str)`
 
 Output the given string to the filehandle, followed by a newline.
 
-##tellfh
+## tellfh
 * `tellfh(Handle $fh)`
 
 Return current access position for an open handle.
 
-##writefh
+## writefh
 * `writefh(Handle $fh, Any $str)`
 
 Output the given object to the filehandle.
 
 # File / Directory / Network Opcodes
 
-##chdir
+## chdir
 * `chdir(str $path)`
 
 Change the working directory to the given path.
 
-##chmod
+## chmod
 * `chmod(str $path, int $mode)`
 
 Change the permissions of `$path` to the posix style permissions of `$mode`.
@@ -814,41 +814,41 @@ Returns 0 on success, throws an exception on failure.
 
 Close the given directory handle.
 
-##cwd
+## cwd
 * `cwd()`
 
 Return a string containing the current working directory.
 
-##fileexecutable
+## fileexecutable
 * `fileexecutable(str $str)`
 
 If the specified filename refers to an executable file, returns 1.
 If not, returns 0. If an error occurs, return -1.
 
-##fileislink
+## fileislink
 * `fileislink(str $str)`
 
 If the specified filename refers to a symbolic link, returns 1.
 If not, returns 0. If an error occurs, return -1.
 
-##filereadable
+## filereadable
 * `filereadable(str $str)`
 
 If the specified filename refers to a readable file, returns 1.
 If not, returns 0. If an error occurs, return -1.
 
-##filewritable
+## filewritable
 * `filewritable(str $str)`
 
 If the specified filename refers to a writable file, returns 1.
 If not, returns 0. If an error occurs, return -1.
 
-##link
+## link
 * `link(str $before, str $after)`
 
 Create a link from `$after` to `$before`
 
-##mkdir
+## mkdir
 * `mkdir(str $name, int $mode)`
 
 Create a directory of the given name. Use posix-style mode
@@ -866,19 +866,18 @@ When no more items are available, return a null string. (check with `null_s`)
 Return a directory handle on the given directory path. Throw an exception
 if `$path` is not a directory.
 
-##rmdir
+## rmdir
 * `rmdir(str $path)`
 
 Delete the given directory $path. Returns 0 on success, -2 if the
 directory didn't exist. May throw an exception.
 
-
-##symlink
+## symlink
 * `symlink(str $before, str $after)`
 
 Create a symbolic link from `$after` to `$before`
 
-##unlink
+## unlink
 * `unlink(str $path)`
 
 Delete the given file $path. Returns 0 on success, -2 if the file
@@ -886,7 +885,7 @@ didn't exist. May throw an exception.
 
 # Type/Conversion Opcodes
 
-##bool
+## bool
 * `bool_I(Int $val)`
 
 Returns 0 if `$val` is 0, otherwise 1.
@@ -931,7 +930,7 @@ Returns a VM specific type object that can box a native str.
 
 Returns a VM specific type object for a native array of str.
 
-##box
+## box
 * `box_i(int $val, Type $type)`
 * `box_n(num $val, Type $type)`
 * `box_s(str $val, Type $type)`
@@ -939,13 +938,13 @@ Returns a VM specific type object for a native array of str.
 Given a native value, return a perl 6 object of the given type
 with the same value.
 
-##fromnum
+## fromnum
 * `fromnum_I(num $val, Type $type)`
 
 Convert float value to a Big Integer of the given type,
 discarding any decimal portion.
 
-##fromstr
+## fromstr
 * `fromstr_I(str $val, Type $type)`
 
 Convert string value to a Big Integer of the given type.
@@ -1027,17 +1026,17 @@ Returns a 1 if the object has a truthy value, 0 otherwise.
 
 Returns a 1 if the object is of the given type, 0 otherwise.
 
-##tostr
+## tostr
 * `tostr_I(Int $val)`
 
 Convert Big Integer value to a native string.
 
-##tonum
+## tonum
 * `tonum_I(Int $val)`
 
 Convert Big Integer value to a native number.
 
-##unbox
+## unbox
 * `unbox_i(Any $val)`
 * `unbox_n(Any $val)`
 * `unbox_s(Any $val)`
@@ -1178,6 +1177,11 @@ for debugging.
 
 Returns a hash containing the environment variables.
 Changing the hash doesn't affect the environment variables
+
+## sha1
+* `sha1(str $str)`
+
+Given a UTF-8 string, return the SHA-1 digest for that string.
 
 ## sleep
 * `sleep(num $seconds)`
