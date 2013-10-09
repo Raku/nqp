@@ -68,9 +68,12 @@ Add two numbers together, returning the result.
 * `div_i(int $l, int $r)`
 * `div_n(num $l, num $r)`
 * `div_I(Int $l, Int $r, Type $type)`
+* `div_In(Int $l, Int $r)`
 
 Divide $l by $r, returning the result.
-`_I` variant returns an object of the given type.
+`_I` variant returns an object of the given type. The `_In` variant returns
+a native num, using a scale of 309, and a rounding mode equivalent to Java's
+`ROUND_HALF_UP`.
 
 ## gcd
 * `gcd_i(int $l, int $r)`
@@ -155,6 +158,12 @@ Return the log base 10 of a number.
 
 Return the natural logarithm of a number.
 
+## expmod
+* `expmod_I(Int $base, Int $exponent, Int $modulus, Type $type)`
+
+Return a bigint that is `$base` raised to `$exponent` modulus `$modulus`.
+`_I` variant returns an object of the given type.
+
 ## nan
 * `nan()`
 
@@ -228,7 +237,7 @@ name. `h` indicates a hyperbolic variant.
 ## tanh
 * `tanh_n(num $n)`
 
-# Relational Opcodes
+# Relational / Logic Opcodes
 
 ## cmp
 * `cmp_i(int $l, int $r)`
@@ -286,6 +295,11 @@ Return non-zero if $l is less than or equal two $r.
 * `isne_I(Int $l, Int $r)`
 
 Return non-zero if the two parameters are not equal.
+
+## not
+* `not_i(int $val)`
+
+Return 1 if `$val` is 0, 1 otherwise.
 
 # Array opcodes
 
@@ -378,7 +392,6 @@ Replace them with all the elements from `@from`.
 "Shift $v into the beginning of @arr."
 Bind $v to @arr at index 0, move all other bindings of @arr to the index one above what they were previously bound to.
 Return the number of elements of @arr on Parrot, $v on JVM.
-
 
 # Hash opcodes
 
@@ -766,6 +779,12 @@ Output the given string to the filehandle.
 
 Return the contents of the open filehandle.
 
+## readfh
+* `readfh(Handle $fh, @arr, long $count)`
+
+Given a readable `$fh`, and an array of `Buf[int8]` or a `Buf[uint8]`, read
+in the next `$count` bytes from the filehandle and story them in the array.
+
 ## readlinefh
 * `readlinefh(Handle $fh)`
 
@@ -786,6 +805,17 @@ Output the given string to stdout, followed by a newline.
 
 Output the given string to the filehandle, followed by a newline.
 
+## setencoding
+* `setencoding(Handle $fh, str $encoding)`
+
+Set the encoding for the given handle. Valid encodings are: ascii,
+iso-8859-1, utf8, utf16, and binary.
+
+## setinputlinesep
+* `setinputlinesep(Handle $fh, str $sep)`
+
+Set the input line separator on the given file handle.
+
 ## tellfh
 * `tellfh(Handle $fh)`
 
@@ -795,6 +825,31 @@ Return current access position for an open handle.
 * `writefh(Handle $fh, Any $str)`
 
 Output the given object to the filehandle.
+
+# External command Opcodes
+
+# shell1
+_Deprecated: use shell3_
+* `shell1(str $cmd)`
+
+Same as `shell3`, using the current directory and an empty environment.
+
+# shell3
+* `shell3(str $cmd, str $path, %env)`
+
+Using $path as the working directory, execute the given command using the
+specified environment variables. Returns a POSIX-style return value. Command
+is executed using an OS-appropriate shell (`sh -c` or `cmd /c`). Blocks
+until command is complete.
+
+# spawn
+* `spawn(@cmd, str $path, %env)`
+
+Using $path as the working directory, execute the given command  using the
+specified environment variables. Returns a POSIX-style return value. No shell
+processing of args is done. The first value of `@args` is the command
+executed, further values are passed as arguments. Blocks until command is
+complete.
 
 # File / Directory / Network Opcodes
 
@@ -813,6 +868,12 @@ Returns 0 on success, throws an exception on failure.
 * `closedir(Handle $)`
 
 Close the given directory handle.
+
+## copy
+* `copy(str $from, str $to)`
+
+Copy file `$from` to file `$to`. Return 0 on success, throw an exception
+on failure.
 
 ## cwd
 * `cwd()`
@@ -865,6 +926,12 @@ When no more items are available, return a null string. (check with `null_s`)
 
 Return a directory handle on the given directory path. Throw an exception
 if `$path` is not a directory.
+
+## rename
+* `rename(str $from, str $to)`
+
+Rename file `$from` to file `$to`. Return 0 on success, throw an exception
+on failure.
 
 ## rmdir
 * `rmdir(str $path)`
@@ -937,6 +1004,11 @@ Returns a VM specific type object for a native array of str.
 
 Given a native value, return a perl 6 object of the given type
 with the same value.
+
+## defined
+* `defined(Any $obj)`
+
+Returns 1 if the object is not null and is not a Type object, 0 otherwise.
 
 ## fromnum
 * `fromnum_I(num $val, Type $type)`
@@ -1025,6 +1097,12 @@ Returns a 1 if the object has a truthy value, 0 otherwise.
 * `istype(Any $obj, Type $obj)`
 
 Returns a 1 if the object is of the given type, 0 otherwise.
+
+## jvmisnull `jvm`
+* `jvmisnull(Any $obj)`
+
+Returns a 1 if the object is an NQP Type object *or*  the underlying 
+JVM object is null. Returns 0 otherwise.
 
 ## tostr
 * `tostr_I(Int $val)`
@@ -1172,11 +1250,21 @@ Used by the multi-dispatcher.
 Returns `$a`. Does nothing, exists only to provide a breakpoint location
 for debugging.
 
+## exit
+* `exit(int $status)`
+
+Exit nqp, using the given status as the compiler's exit value.
+
 ## getenvhash
 * `getenvhash()`
 
 Returns a hash containing the environment variables.
 Changing the hash doesn't affect the environment variables
+
+## jvmclasspaths `jvm`
+* `jvmclasspaths()`
+
+Converts the JVM property `java.class.path` into a list of paths, returns it.
 
 ## sha1
 * `sha1(str $str)`
@@ -1188,3 +1276,10 @@ Given a UTF-8 string, return the SHA-1 digest for that string.
 
 Sleep for the given number of seconds (no guarantee is made how exact the
 time sleeping is spent.) Returns the passed in number.
+
+## time
+* `time_i()`
+* `time_n()`
+
+Return the time in seconds since January 1, 1970 UTC. `_i` variant returns
+an integral number of seconds, `_n` returns a fractional amount.
