@@ -367,16 +367,16 @@ position C<pos>.
 
     method starter() {
         my $start := $*QUOTE_START;
-        nqp::isnull($start)
-            ?? self.'!cursor_start_fail'()
-            !! self.'!LITERAL'($start)
+        nqp::isconcrete($start)
+            ?? self.'!LITERAL'($start)
+            !! self.'!cursor_start_fail'()
     }
 
     method stopper() {
         my $stop := $*QUOTE_STOP;
-        nqp::isnull($stop)
-            ?? self.'!cursor_start_fail'()
-            !! self.'!LITERAL'($stop)
+        nqp::isconcrete($stop)
+            ?? self.'!LITERAL'($stop)
+            !! self.'!cursor_start_fail'()
     }
 
     our method split_words(str $words) {
