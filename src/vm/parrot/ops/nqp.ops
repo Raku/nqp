@@ -3748,16 +3748,15 @@ inline op nqp_string_equal_at(out INT, in STR, in STR, in INT) {
         }
     }
 
-    if (($3)->strlen == 1) {
+    if (($2)->strlen - offset < ($3)->strlen || offset > ($2)->strlen) {
+        $1 = 0;
+    } else if (($3)->strlen == 1) {
         $1 = (STRING_ord(interp, $3, 0) == STRING_ord(interp, $2, offset));
     } else {
-
         if (($2)->encoding == ($3)->encoding) {
             STRING_ITER_INIT(interp, &hay_iter);
             STRING_iter_skip(interp, $2, &hay_iter, offset);
             $1 = memcmp($2->strstart + hay_iter.bytepos, $3->strstart, STRING_byte_length($3)) == 0;
-        } else if (($2)->strlen - offset < ($3)->strlen || offset > ($2)->strlen) {
-            $1 = 0;
         } else {
             done = 0;
             $1 = 1;
