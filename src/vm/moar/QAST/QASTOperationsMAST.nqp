@@ -962,6 +962,7 @@ QAST::MASTOperations.add_core_op('call', sub ($qastcomp, $op) {
         return $qastcomp.as_mast(QAST::Op.new( :op($realname), |$op.list ));
     }
 
+    # heisenbug!!!
     # Work out what callee is.
     my $callee;
     my @args := $op.list;
