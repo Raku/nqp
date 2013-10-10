@@ -1261,6 +1261,11 @@ Exit nqp, using the given status as the compiler's exit value.
 Returns a hash containing the environment variables.
 Changing the hash doesn't affect the environment variables
 
+## getpid
+* `getpid()`
+
+Return the current process id, an int. 
+
 ## jvmclasspaths `jvm`
 * `jvmclasspaths()`
 
