@@ -337,11 +337,11 @@ class QAST::MASTRegexCompiler {
         elsif $subtype eq 'fail' {
             nqp::push(@ins, op('goto', $fail));
         }
-        elsif $subtype eq 'pass' {
+        elsif $subtype eq 'pass' || $subtype eq '' {
             # Nothing to do.
         }
         else {
-            nqp::die("anchor subtype $subtype NYI");
+            nqp::die("Unknown anchor subtype $subtype");
         }
         release($i11, $MVM_reg_int64);
         @ins
