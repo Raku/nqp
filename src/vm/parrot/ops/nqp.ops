@@ -2185,8 +2185,7 @@ inline op nqp_get_sc_for_object(out PMC, invar PMC) :base_core {
         $1 = result ? result : PMCNULL;
     }
     else {
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "Can only use nqp_get_sc_for_object with a SixModelObject");
+        $1 = PMCNULL;
     }
 }
 
