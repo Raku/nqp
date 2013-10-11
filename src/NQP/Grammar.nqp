@@ -88,7 +88,7 @@ grammar NQP::Grammar is HLL::Grammar {
             || <.panic: '=begin without matching =end'>
             ]
         | <identifier> {}
-            .*? ^^ <?before \h* [ 
+            .*? \n <?before \h* [ 
                 '='
                 [ 'cut' »
                   <.panic: 'Obsolete pod format, please use =begin/=end instead'> ]?
