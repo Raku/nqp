@@ -92,6 +92,12 @@ for @mvm_lines -> $line {
     %mvm_ops{$line} := 1;
 }
 
+# These are harder to tease out of the definitions in moar, so add them manually
+for <if unless while until repeat_while repeat_until> -> $op_name {
+    %mvm_ops{$op_name} := 1;
+}
+
+
 # All the mvm ops must be documented
 
 for %mvm_ops -> $mvm_op {
