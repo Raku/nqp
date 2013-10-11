@@ -1583,6 +1583,8 @@ QAST::MASTOperations.add_core_moarop_mapping('index_s', 'index_s');
 QAST::MASTOperations.add_core_moarop_mapping('rindexfrom', 'rindexfrom');
 QAST::MASTOperations.add_core_moarop_mapping('substr_s', 'substr_s');
 QAST::MASTOperations.add_core_moarop_mapping('codepointfromname', 'getcpbyname');
+QAST::MASTOperations.add_core_moarop_mapping('encode', 'encode');
+QAST::MASTOperations.add_core_moarop_mapping('decode', 'decode');
 
 QAST::MASTOperations.add_core_op('substr', -> $qastcomp, $op {
     my @operands := $op.list;
