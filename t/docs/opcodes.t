@@ -95,9 +95,9 @@ for @mvm_lines -> $line {
 # All the mvm ops must be documented
 
 for %mvm_ops -> $mvm_op {
-    ok(%documented_ops{$mvm_op}, "MOAR op '$mvm_op' is documented");
+    ok(%documented_ops<moar>{$mvm_op}, "MOAR op '$mvm_op' is documented");
 }
 
-for %documented_ops -> $doc_op {
+for %documented_ops<moar> -> $doc_op {
     ok(%mvm_ops{$doc_op}, "documented op '$doc_op' exists in MOAR");
 }
