@@ -567,6 +567,11 @@ If `$length` is specified, only return that many characters. The
 numbered variants required the args specified - the unnumbered
 version may use either signature.
 
+## tc
+* `tc(str $str)`
+
+Return titlecase copy of string.
+
 ## x
 * `x(str $str, int $count)`
 
