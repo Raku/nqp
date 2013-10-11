@@ -8,12 +8,13 @@ for virtual machines.  The key feature of NQP is that it's
 designed to be a very small environment (as compared with, say, perl6
 or Rakudo) and is focused on being a high-level way to create
 compilers and libraries for virtual machines (such as the Parrot
-Virtual Machine [1] and the JVM).  Unlike a full-fledged implementation
-of Perl 6, NQP strives to have as small a runtime footprint as it can,
-while still providing a Perl 6 object model and regular expression engine
-for the virtual machine.
+Virtual Machine [1], the JVM, and MoarVM [2]).  Unlike a full-fledged
+implementation of Perl 6, NQP strives to have as small a runtime footprint
+as it can, while still providing a Perl 6 object model and regular expression
+engine for the virtual machine.
 
     [1] http://parrot.org/
+    [2] https://github.com/MoarVM/MoarVM
 
 =head2 Building from source
 
