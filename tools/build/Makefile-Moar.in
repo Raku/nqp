@@ -298,31 +298,31 @@ $(RUNNER): tools/build/gen-moar-runner.pl
 $(P5QREGEX_MOAR): $(P5QREGEX_SOURCES) $(NQP_MOAR) $(RUNNER)
 	$(MKPATH) $(STAGE2)/gen
 	$(PERL) tools/build/gen-cat.pl moar $(P5QREGEX_SOURCES) > $(STAGE2)/$(P5QREGEX_COMBINED)
-	$(RUNNER) --target=mbc --output=$(P5QREGEX_MOAR) \
+	.@slash@$(RUNNER) --target=mbc --output=$(P5QREGEX_MOAR) \
 	    $(STAGE2)/$(P5QREGEX_COMBINED)
 
 ## testing
 
 t/*/*.t: all
-	prove -r -v --exec .@slash@$(RUNNER) $@
+	prove -r -v --exec ".@slash@$(RUNNER)" $@
 
 test: all
-	prove -r --exec .@slash@$(RUNNER) t/nqp t/qregex t/p5regex t/qast t/serialization
+	prove -r --exec ".@slash@$(RUNNER)" t/nqp t/qregex t/p5regex t/qast t/serialization
 
 test-loud: all
-	prove -r -v --exec .@slash@$(RUNNER) t/nqp t/qregex t/p5regex t/qast t/serialization
+	prove -r -v --exec ".@slash@$(RUNNER)" t/nqp t/qregex t/p5regex t/qast t/serialization
 
 core-test: $(RUNNER)
-	prove -r --exec .@slash@$(RUNNER) t/nqp
+	prove -r --exec ".@slash@$(RUNNER)" t/nqp
 
 core-test-loud: $(RUNNER)
-	prove -r -v --exec .@slash@$(RUNNER) t/nqp
+	prove -r -v --exec ".@slash@$(RUNNER)" t/nqp
 
 qregex-test: $(RUNNER)
-	prove -r --exec .@slash@$(RUNNER) t/qregex
+	prove -r --exec ".@slash@$(RUNNER)" t/qregex
 
 qregex-test-loud: $(RUNNER)
-	prove -r -v --exec .@slash@$(RUNNER) t/qregex
+	prove -r -v --exec ".@slash@$(RUNNER)" t/qregex
 
 # nqp::makefile <-- tells NQP::Configure to treat this file as a makefile,
 #                   performing win32 slash and makefile conversions
