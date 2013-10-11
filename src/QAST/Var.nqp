@@ -30,8 +30,7 @@ class QAST::Var is QAST::Node {
     }
 
     method dump_extra_node_info() {
-        $!decl
-            ?? "$!scope $!name :decl($!decl)"
-            !! "$!scope $!name";
+        my $info := nqp::isnull_s($!name) ?? $!scope !! "$!scope $!name";
+        nqp::isnull_s($!decl) ?? $info !! "$info :decl($!decl)"
     }
 }
