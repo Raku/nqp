@@ -5,6 +5,7 @@ PREFIX       = @prefix@
 BIN_DIR      = $(PREFIX)/bin
 MOAR         = $(BIN_DIR)/moar
 NQP_LANG_DIR = $(PREFIX)/languages/nqp
+NQP_LIB_DIR  = $(NQP_LANG_DIR)/lib
 
 MKPATH = $(PERL) -MExtUtils::Command -e mkpath
 CP     = $(PERL) -MExtUtils::Command -e cp
@@ -133,6 +134,23 @@ STAGE2_OUTPUT = $(STAGE2)/$(NQP_MO_MOAR) $(STAGE2)/$(MODULE_LOADER_MOAR) \
 RUNNER = @runner@
 
 all: $(NQP_MOAR) $(RUNNER) $(P5QREGEX_MOAR)
+
+install: all
+	$(MKPATH) $(BIN_DIR)
+	$(MKPATH) $(NQP_LIB_DIR)
+	$(CP) $(NQP_MO_MOAR) $(NQP_LIB_DIR)
+	$(CP) $(MODULE_LOADER_MOAR) $(NQP_LIB_DIR)
+	$(CP) $(CORE_SETTING_MOAR) $(NQP_LIB_DIR)
+	$(CP) $(QASTNODE_MOAR) $(NQP_LIB_DIR)
+	$(CP) $(QREGEX_MOAR) $(NQP_LIB_DIR)
+	$(CP) $(HLL_MOAR) $(NQP_LIB_DIR)
+	$(CP) $(MASTOPS_MOAR) $(NQP_LIB_DIR)
+	$(CP) $(MASTNODES_MOAR) $(NQP_LIB_DIR)
+	$(CP) $(QAST_MOAR) $(NQP_LIB_DIR)
+	$(CP) $(P6QREGEX_MOAR) $(NQP_LIB_DIR)
+	$(CP) $(NQP_MOAR) $(NQP_LIB_DIR)
+	$(CP) $(P5QREGEX_MOAR) $(NQP_LIB_DIR)
+	$(PERL) tools/build/install-moar-runner.pl $(PREFIX)
 
 clean:
 	$(PERL) -MExtUtils::Command -e rm_rf *.moarvm src/stage1 src/stage2 nqp nqp.bat
