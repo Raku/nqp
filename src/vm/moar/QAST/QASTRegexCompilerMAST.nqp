@@ -654,6 +654,8 @@ class QAST::MASTRegexCompiler {
         merge_ins(@ins, self.regex_mast($node[0]));
         self.regex_peek(@ins, $faillabel_index, $i11);
         merge_ins(@ins, [
+            op('bindattr_i', %*REG<cur>, %*REG<curclass>, sval('$!pos'),
+                %*REG<pos>, ival(-1)),
             op('findmeth', %*REG<method>, %*REG<cur>, sval('!cursor_start_subcapture')),
             call(%*REG<method>, [$Arg::obj, $Arg::int], %*REG<cur>, $i11, :result($p11)),
             op('findmeth', %*REG<method>, $p11, sval('!cursor_pass')),
