@@ -130,7 +130,9 @@ STAGE2_OUTPUT = $(STAGE2)/$(NQP_MO_MOAR) $(STAGE2)/$(MODULE_LOADER_MOAR) \
                 $(STAGE2)/$(QAST_MOAR) $(STAGE2)/$(P6QREGEX_MOAR) \
                 $(STAGE2)/$(NQP_MOAR)
 
-all: $(NQP_MOAR) $(P5QREGEX_MOAR)
+RUNNER = @runner@
+
+all: $(NQP_MOAR) $(RUNNER) $(P5QREGEX_MOAR)
 
 clean:
 	$(PERL) -MExtUtils::Command -e rm_rf *.moarvm src/stage1 src/stage2 nqp nqp.bat
@@ -290,34 +292,37 @@ $(NQP_MOAR): $(STAGE2_OUTPUT)
 	$(CP) $(STAGE2)/$(P6QREGEX_MOAR) .
 	$(CP) $(STAGE2)/$(NQP_MOAR) .
 
-$(P5QREGEX_MOAR): $(NQP_MOAR) $(P5QREGEX_SOURCES)
+$(RUNNER): tools/build/gen-moar-runner.pl
+	$(PERL) tools/build/gen-moar-runner.pl "$(MOAR)"
+
+$(P5QREGEX_MOAR): $(P5QREGEX_SOURCES) $(NQP_MOAR) $(RUNNER)
 	$(MKPATH) $(STAGE2)/gen
 	$(PERL) tools/build/gen-cat.pl moar $(P5QREGEX_SOURCES) > $(STAGE2)/$(P5QREGEX_COMBINED)
-	$(MOAR) $(NQP_MOAR) --target=mbc --output=$(P5QREGEX_MOAR) \
+	$(RUNNER) --target=mbc --output=$(P5QREGEX_MOAR) \
 	    $(STAGE2)/$(P5QREGEX_COMBINED)
 
 ## testing
 
 t/*/*.t: all
-	prove -r -v --exec "$(MOAR) $(NQP_MOAR)" $@
+	prove -r -v --exec .@slash@$(RUNNER) $@
 
 test: all
-	prove -r --exec "$(MOAR) $(NQP_MOAR)" t/nqp t/qregex t/p5regex t/qast t/serialization
+	prove -r --exec .@slash@$(RUNNER) t/nqp t/qregex t/p5regex t/qast t/serialization
 
 test-loud: all
-	prove -r -v --exec "$(MOAR) $(NQP_MOAR)" t/nqp t/qregex t/p5regex t/qast t/serialization
+	prove -r -v --exec .@slash@$(RUNNER) t/nqp t/qregex t/p5regex t/qast t/serialization
 
 core-test: $(RUNNER)
-	prove -r --exec "$(MOAR) $(NQP_MOAR)" t/nqp
+	prove -r --exec .@slash@$(RUNNER) t/nqp
 
 core-test-loud: $(RUNNER)
-	prove -r -v --exec "$(MOAR) $(NQP_MOAR)" t/nqp
+	prove -r -v --exec .@slash@$(RUNNER) t/nqp
 
 qregex-test: $(RUNNER)
-	prove -r --exec "$(MOAR) $(NQP_MOAR)" t/qregex
+	prove -r --exec .@slash@$(RUNNER) t/qregex
 
 qregex-test-loud: $(RUNNER)
-	prove -r -v --exec "$(MOAR) $(NQP_MOAR)" t/qregex
+	prove -r -v --exec .@slash@$(RUNNER) t/qregex
 
 # nqp::makefile <-- tells NQP::Configure to treat this file as a makefile,
 #                   performing win32 slash and makefile conversions
