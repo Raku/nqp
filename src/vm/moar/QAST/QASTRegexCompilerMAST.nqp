@@ -445,18 +445,24 @@ class QAST::MASTRegexCompiler {
         my $s0 := fresh_s();
         my $i0 := fresh_i();
         my $cmpop := $node.negate ?? 'if_i' !! 'unless_i';
-        my @ins := [
-            label(self.unique($*RXPREFIX ~ '_literal')),
-            # XXX create some regex prologue system so these const assignments
-            # can happen only once at the beginning of a regex. hash of string constants
-            # to the registers to which they are assigned.
-            # XXX or make a specialized eqat_sc op that takes a constant string.
-            op('const_s', $s0, sval($litconst)),
-            # also, consider making the op branch directly from the comparison
-            # instead of storing an integer to a temporary register
-            op($eq_op, $i0, %*REG<tgt>, $s0, %*REG<pos>),
-            op($cmpop, $i0, %*REG<fail>)
-        ];
+        my @ins;
+        if $node.negate {
+            # Need explicit check we're not going beyond the string end in the
+            # negated case, to avoid false positive.
+            nqp::push(@ins, op('const_i64', $i0, ival(nqp::chars($litconst))));
+            nqp::push(@ins, op('add_i', $i0, %*REG<pos>, $i0));
+            nqp::push(@ins, op('gt_i', $i0, $i0, %*REG<eos>));
+            nqp::push(@ins, op('if_i', $i0, %*REG<fail>));
+        }
+        # XXX create some regex prologue system so these const assignments
+        # can happen only once at the beginning of a regex. hash of string constants
+        # to the registers to which they are assigned.
+        # XXX or make a specialized eqat_sc op that takes a constant string.
+        nqp::push(@ins, op('const_s', $s0, sval($litconst)));
+        # also, consider making the op branch directly from the comparison
+        # instead of storing an integer to a temporary register
+        nqp::push(@ins, op($eq_op, $i0, %*REG<tgt>, $s0, %*REG<pos>));
+        nqp::push(@ins, op($cmpop, $i0, %*REG<fail>));
         unless $node.subtype eq 'zerowidth' {
             nqp::push(@ins, op('const_i64', $i0, ival(nqp::chars($litconst))));
             nqp::push(@ins, op('add_i', %*REG<pos>, %*REG<pos>, $i0));
