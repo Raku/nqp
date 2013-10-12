@@ -7,7 +7,8 @@ import org.perl6.nqp.sixmodel.SixModelObject;
 
 import org.perl6.nqp.sixmodel.reprs.CPointerInstance;
 import org.perl6.nqp.sixmodel.reprs.NativeCallInstance;
-import org.perl6.nqp.sixmodel.reprs.NativeCallInstance.ArgType;
+import org.perl6.nqp.sixmodel.reprs.NativeCallBody;
+import org.perl6.nqp.sixmodel.reprs.NativeCallBody.ArgType;
 
 public final class NativeCallOps {
     public static long init() {
@@ -17,7 +18,7 @@ public final class NativeCallOps {
     }
 
     public static long build(SixModelObject target, String libname, String symbol, String convention, SixModelObject arguments, SixModelObject returns, ThreadContext tc) {
-        NativeCallInstance call = getNativeCallInstance(target);
+        NativeCallBody call = getNativeCallBody(target);
 
         try {
             /* Load the library and locate the symbol. */
@@ -46,7 +47,7 @@ public final class NativeCallOps {
     }
 
     public static SixModelObject call(SixModelObject returns, SixModelObject callObject, SixModelObject arguments, ThreadContext tc) {
-        NativeCallInstance call = getNativeCallInstance(callObject);
+        NativeCallBody call = getNativeCallBody(callObject);
 
         try {
             /* Convert arguments into array of appropriate objects. */
@@ -73,10 +74,10 @@ public final class NativeCallOps {
         return 1L;
     }
 
-    private static NativeCallInstance getNativeCallInstance(SixModelObject target) {
-        NativeCallInstance call;
+    private static NativeCallBody getNativeCallBody(SixModelObject target) {
+        NativeCallBody call;
         if (target instanceof NativeCallInstance) {
-            call = (NativeCallInstance) target;
+            call = ((NativeCallInstance)target).body;
         }
         else {
             /* TODO: Handle box target stuff here. */

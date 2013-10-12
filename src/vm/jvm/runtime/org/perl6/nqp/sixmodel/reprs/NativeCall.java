@@ -20,8 +20,9 @@ public class NativeCall extends REPR {
     }
 
     public SixModelObject allocate(ThreadContext tc, STable st) {
-        SixModelObject obj = new NativeCallInstance();
+        NativeCallInstance obj = new NativeCallInstance();
         obj.st = st;
+        obj.body = new NativeCallBody();
         return obj;
     }
 
