@@ -12,8 +12,9 @@ knowhow ModuleLoader {
             nqp::push(@search_paths, $explicit);
         }
 
-        # Add CWD.
+        # Add CWD and blib.
         nqp::push(@search_paths, '.');
+        nqp::push(@search_paths, 'blib');
 
         @search_paths
     }
@@ -134,10 +135,10 @@ knowhow ModuleLoader {
             my $path := "$setting_name.setting.moarvm";
             my @prefixes := self.search_path('setting-path');
             for @prefixes -> $prefix {
-            #    if nqp::stat("$prefix/$path", 0) {
+                if nqp::stat("$prefix/$path", 0) {
                     $path := "$prefix/$path";
-            #        last;
-            #    }
+                    last;
+                }
             }
 
             # Unless we already did so, load the setting.
