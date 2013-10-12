@@ -22,7 +22,9 @@ public final class NativeCallOps {
         try {
             /* Load the library and locate the symbol. */
             /* TODO: Error handling! */
-            NativeLibrary library = NativeLibrary.getInstance(libname);
+            NativeLibrary library = libname == null || libname.equals("")
+                ? NativeLibrary.getProcess()
+                : NativeLibrary.getInstance(libname);
             call.entry_point = library.getFunction(symbol);
     
             /* TODO: Set the calling convention. */
