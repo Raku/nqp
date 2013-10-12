@@ -15,6 +15,8 @@ public class VMArrayInstance extends SixModelObject {
     public int start;
     public SixModelObject[] slots;
     
+    public static final int INIT_SIZE = 4;
+    
     public SixModelObject at_pos_boxed(ThreadContext tc, long index) {
         if (index < 0) {
             index += elems;
@@ -75,7 +77,7 @@ public class VMArrayInstance extends SixModelObject {
         if (ssize < 8192) {
             ssize *= 2;
             if (n > ssize) ssize = n;
-            if (ssize < 8) ssize = 8;
+            if (ssize < INIT_SIZE) ssize = INIT_SIZE;
         }
         else {
             ssize = (n + 0x1000) & ~0xfff;

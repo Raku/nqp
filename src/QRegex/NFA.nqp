@@ -168,6 +168,24 @@ class QRegex::NFA {
                 nqp::const::CCLASS_ALPHABETIC);
             self.addedge($from, $to, $EDGE_CODEPOINT + $node.negate, 95);
         }
+        elsif !$node.negate && $subtype ne 'zerowidth' &&
+                ($node.name eq 'ident' ||
+                    $subtype eq 'method' &&
+                    ($node[0][0] ~~ QAST::SVal ?? $node[0][0].value !! $node[0][0]) eq 'ident') {
+            my int $beginstate := self.addstate();
+            self.addedge($from, $beginstate, $EDGE_EPSILON, 0);
+
+            my int $midstate := self.addstate();
+            self.addedge($beginstate, $midstate, $EDGE_CHARCLASS, nqp::const::CCLASS_ALPHABETIC);
+            self.addedge($beginstate, $midstate, $EDGE_CODEPOINT, 95);
+
+            my int $second := self.addstate();
+
+            self.addedge($midstate, $second, $EDGE_CHARCLASS, nqp::const::CCLASS_WORD);
+            self.addedge($second, $midstate, $EDGE_EPSILON, 0);
+            $to := self.addedge($midstate, $to, $EDGE_EPSILON, 0);
+            $to;
+        }
         elsif $subtype eq 'zerowidth' {
             if $node.negate {
                 self.fate($node, $from, $to)

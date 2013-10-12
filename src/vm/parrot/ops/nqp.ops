@@ -1031,7 +1031,7 @@ inline op repr_get_attr_int(out INT, invar PMC, invar PMC, in STR, in INT) :base
         if (IS_CONCRETE(obj)) {
             NativeValue value;
             value.type = NATIVE_VALUE_INT;
-            REPR(obj)->attr_funcs->get_attribute_native(interp, STABLE(obj), OBJECT_BODY(obj), ch, name, NO_HINT, &value);
+            REPR(obj)->attr_funcs->get_attribute_native(interp, STABLE(obj), OBJECT_BODY(obj), ch, name, $5, &value);
             $1 = value.value.intval;
         }
         else
@@ -1062,7 +1062,7 @@ inline op repr_get_attr_num(out NUM, invar PMC, invar PMC, in STR, in INT) :base
         if (IS_CONCRETE(obj)) {
             NativeValue value;
             value.type = NATIVE_VALUE_FLOAT;
-            REPR(obj)->attr_funcs->get_attribute_native(interp, STABLE(obj), OBJECT_BODY(obj), ch, name, NO_HINT, &value);
+            REPR(obj)->attr_funcs->get_attribute_native(interp, STABLE(obj), OBJECT_BODY(obj), ch, name, $5, &value);
             $1 = value.value.floatval;
         }
         else
@@ -2185,8 +2185,7 @@ inline op nqp_get_sc_for_object(out PMC, invar PMC) :base_core {
         $1 = result ? result : PMCNULL;
     }
     else {
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "Can only use nqp_get_sc_for_object with a SixModelObject");
+        $1 = PMCNULL;
     }
 }
 
@@ -2355,10 +2354,10 @@ Gets lookup hint for an attribute.
 =cut
 
 */
-inline op repr_hint_for(out INT, invar PMC, invar PMC, in STR) :base_core {
-    PMC *ch = decontainerize(interp, $3);
+inline op repr_hint_for(out INT, invar PMC, in STR) :base_core {
+    PMC *ch = decontainerize(interp, $2);
     if ($2->vtable->base_type == smo_id)
-        $1 = REPR($2)->attr_funcs->hint_for(interp, STABLE($2), $3, $4);
+        $1 = REPR($2)->attr_funcs->hint_for(interp, STABLE($2), ch, $3);
     else
         $1 = NO_HINT;
 }
@@ -2490,7 +2489,6 @@ the container specification selected.
 
 */
 inline op set_container_spec(in PMC, in STR, in PMC) :base_core {
-    PMC *target = decontainerize(interp, $1);
     if ($1->vtable->base_type == smo_id) {
         STable *st = STABLE($1);
         ContainerConfigurer *cc = SixModelObject_get_container_config(interp, $2);
@@ -2526,7 +2524,6 @@ that will handle the invocation. $2/$3 take precedence over $4.
 
 */
 inline op set_invocation_spec(invar PMC, invar PMC, in STR, invar PMC) :base_core {
-    PMC *target = decontainerize(interp, $1);
     if ($1->vtable->base_type == smo_id) {
         STable *st = STABLE($1);
         
@@ -3516,6 +3513,32 @@ inline op nqp_getlexrelcaller(out PMC, in PMC, in STR) :base_core {
     $1 = result;
 }
 
+inline op nqp_delete_f(out INT, in STR) :base_core {
+#ifdef WIN32
+    char* const filename = Parrot_str_to_platform_cstring(interp, $2);
+    DWORD attrs          = GetFileAttributesA(filename);
+    INTVAL ret;
+
+    if (attrs == 0xFFFFFFFF) {
+        errno = ENOENT;
+        ret = -1;
+    }
+    else if (attrs & FILE_ATTRIBUTE_READONLY) {
+        (void)SetFileAttributesA(filename, attrs & ~FILE_ATTRIBUTE_READONLY);
+        ret = unlink(filename);
+        if (ret == -1)
+            (void)SetFileAttributesA(filename, attrs);
+    }
+    else
+        ret = unlink(filename);
+
+    $1 = ret;
+#else
+    char* const filename = Parrot_str_to_platform_cstring(interp, $2);
+    $1 = unlink(filename);
+#endif
+}
+
 inline op nqp_shell(out INT, in STR, in STR, in PMC) {
      STRING *command = $2;  
      STRING *dir = $3;  
@@ -3631,7 +3654,7 @@ Decodes the specified buffer into a string.
 inline op nqp_decode(out STR, invar PMC, in STR) {
     PMC *buf = $2;
     char *cbuffer;
-    INTVAL cbuflen, i;
+    INTVAL cbuflen, i, elems;
     NativeValue nv;
     
     /* Ensure we have some kind of integer array to decode from. */
@@ -3642,53 +3665,60 @@ inline op nqp_decode(out STR, invar PMC, in STR) {
     if (buf_elem_ss.boxed_primitive != STORAGE_SPEC_BP_INT)
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "nqp_decode requires an integer buffer type");
-    
+
     /* Assemble a memory buffer of the pieces. */
     nv.type = NATIVE_VALUE_INT;
-    switch (buf_elem_ss.bits) {
-        case 8: {
-            cbuflen = REPR(buf)->elems(interp, STABLE(buf), OBJECT_BODY(buf));
-            cbuffer = mem_sys_allocate(cbuflen);
-            for (i = 0; i < cbuflen; i++) {
-                REPR(buf)->pos_funcs->at_pos_native(interp, STABLE(buf),
-                    OBJECT_BODY(buf), i, &nv);
-                cbuffer[i] = nv.value.intval;
+    elems = REPR(buf)->elems(interp, STABLE(buf), OBJECT_BODY(buf));
+    if (elems > 0) {
+        switch (buf_elem_ss.bits) {
+            case 8: {
+                cbuflen = elems;
+                cbuffer = mem_sys_allocate(cbuflen);
+                for (i = 0; i < cbuflen; i++) {
+                    REPR(buf)->pos_funcs->at_pos_native(interp, STABLE(buf),
+                        OBJECT_BODY(buf), i, &nv);
+                    cbuffer[i] = nv.value.intval;
+                }
+                break;
             }
-            break;
-        }
-        case 16: {
-            INTVAL elems = REPR(buf)->elems(interp, STABLE(buf), OBJECT_BODY(buf));
-            short *sview;
-            cbuflen = elems * 2;
-            cbuffer = mem_sys_allocate(cbuflen);
-            sview = (short *)cbuffer;
-            for (i = 0; i < cbuflen; i++) {
-                REPR(buf)->pos_funcs->at_pos_native(interp, STABLE(buf),
-                    OBJECT_BODY(buf), i, &nv);
-                sview[i] = nv.value.intval;
+            case 16: {
+                short *sview;
+                cbuflen = elems * 2;
+                cbuffer = mem_sys_allocate(cbuflen);
+                sview = (short *)cbuffer;
+                for (i = 0; i < elems; i++) {
+                    REPR(buf)->pos_funcs->at_pos_native(interp, STABLE(buf),
+                        OBJECT_BODY(buf), i, &nv);
+                    sview[i] = nv.value.intval;
+                }
+                break;
             }
-            break;
-        }
-        case 32: {
-            INTVAL elems = REPR(buf)->elems(interp, STABLE(buf), OBJECT_BODY(buf));
-            int *iview;
-            cbuflen = elems * 4;
-            cbuffer = mem_sys_allocate(cbuflen);
-            iview = (int *)cbuffer;
-            for (i = 0; i < cbuflen; i++) {
-                REPR(buf)->pos_funcs->at_pos_native(interp, STABLE(buf),
-                    OBJECT_BODY(buf), i, &nv);
-                iview[i] = nv.value.intval;
+            case 32: {
+                int *iview;
+                cbuflen = elems * 4;
+                cbuffer = mem_sys_allocate(cbuflen);
+                iview = (int *)cbuffer;
+                for (i = 0; i < elems; i++) {
+                    REPR(buf)->pos_funcs->at_pos_native(interp, STABLE(buf),
+                        OBJECT_BODY(buf), i, &nv);
+                    iview[i] = nv.value.intval;
+                }
+                break;
             }
-            break;
+            default:
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "nqp_encode got unexpected buffer element size (expected 8, 16 or 32)");
         }
-        default:
-            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "nqp_encode got unexpected buffer element size (expected 8, 16 or 32)");
     }
-    
+    else {
+        cbuffer = "";
+        cbuflen = 0;
+    }
+
     /* Create a string from the the buffer. */
     $1 = Parrot_str_new_init(interp, cbuffer, cbuflen,
         Parrot_find_encoding_by_string(interp, $3), 0);
-    free(cbuffer);
+
+    if (elems > 0)
+        free(cbuffer);
 }

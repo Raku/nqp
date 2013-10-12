@@ -7,6 +7,8 @@ import java.nio.channels.ByteChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
+import java.nio.charset.CoderResult;
+import java.nio.charset.MalformedInputException;
 import java.util.ArrayList;
 
 import org.perl6.nqp.runtime.ExceptionHandling;
@@ -131,6 +133,53 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
         }
         allBytes.rewind();
         return dec.decode(allBytes).toString();
+    }
+    
+    public synchronized String getc(ThreadContext tc) {
+        try {
+            int maxBytes = (int)enc.maxBytesPerChar();
+            ByteBuffer toDecode = ByteBuffer.allocate(maxBytes);
+            CharBuffer decoded = CharBuffer.allocate(1);
+            for (int i = 0; i < maxBytes; i++) {
+                /* Ensure we have a read buffer available. */
+                if (readBuffer == null) {
+                    readBuffer = ByteBuffer.allocate(32768);
+                    if (chan.read(readBuffer) == -1) {
+                        /* End of file. */
+                        eof = true;
+                        if (i == 0) {
+                            /* Fine, just no char. */
+                            return "";
+                        }
+                        else {
+                            /* Malformed; following will likely throw. */
+                            toDecode.position(0);
+                            dec.decode(toDecode, decoded, true).throwException();
+                            return decoded.toString();
+                        }    
+                    }
+                    readBuffer.flip();
+                }
+                
+                /* Get a character from the read buffer. */
+                toDecode.position(i);
+                toDecode.put(readBuffer.get());
+                if (readBuffer.remaining() == 0)
+                    readBuffer = null;
+
+                /* Try to decode; if we fail, try another byte. */
+                toDecode.position(0);
+                CoderResult cr = dec.decode(toDecode, decoded, false);
+                if (!cr.isError()) {
+                    decoded.rewind();
+                    return decoded.toString();
+                }
+            }
+            throw new MalformedInputException(maxBytes);
+        }
+        catch (IOException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
+        }
     }
     
     public boolean eof(ThreadContext tc) {

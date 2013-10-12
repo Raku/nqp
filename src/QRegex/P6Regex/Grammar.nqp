@@ -57,7 +57,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     token ws { [ \s+ | '#' \N* ]* }
 
-    token normspace { <?before \s | '#' > <.ws> }
+    token normspace { <?[\s#]> <.ws> }
 
     token identifier { <.ident> [ <[\-']> <.ident> ]* }
 
@@ -107,7 +107,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         [
         | <?before <[\) \} \]]> >
         | <?before '>' <-[>]> >
-        | <?before <rxstopper> >
+        | <?rxstopper>
         ]
     }
     
@@ -125,12 +125,12 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     token termalt {
         <termconj>
-        [ <!before <rxstopper> > '|' <![|]> [ { $*SEQ := 0; } <termconj> || <.throw_null_pattern> ] ]*
+        [ <!rxstopper> '|' <![|]> [ { $*SEQ := 0; } <termconj> || <.throw_null_pattern> ] ]*
     }
 
     token termconj {
         <termish>
-        [ <!before <rxstopper> > '&' <![&]> [ { $*SEQ := 0; } <termish> || <.throw_null_pattern> ] ]*
+        [ <!rxstopper> '&' <![&]> [ { $*SEQ := 0; } <termish> || <.throw_null_pattern> ] ]*
     }
 
     token termish {
@@ -143,7 +143,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         <!rxstopper>
         <atom>
         [
-            <.ws> [ <!before <rxstopper> > <quantifier> | <?before ':'> <backmod> <!alpha> ]
+            <.ws> [ <!rxstopper> <quantifier> | <?before ':'> <backmod> <!alpha> ]
             [ <.ws> <separator> ]**0..1
         ]**0..1
     }
@@ -170,16 +170,19 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token quantifier:sym<**> {
         <sym> <normspace>**0..1 <backmod> <normspace>**0..1
         [
-        ||  $<min>=[\d+] 
-            [   '..' 
-                $<max>=[ 
-                       || \d+ 
-                       || '*' 
-                       || \-\d+ <.panic: "Negative numbers are not allowed as range quantifier endpoint">
-                       || <.panic: "Only integers or '*' allowed as range quantifier endpoint"> 
-                       ] 
-            ]**0..1
-        || \-\d+ <.panic: "Negative numbers are not allowed as quantifiers">
+        | <.decint> \s+ '..' <.panic: "Spaces not allowed in bare range">
+        | <min=.decint>
+          [ '..'
+            [
+            | <max=.decint> {
+                $/.CURSOR.panic("Negative numbers are not allowed as quantifiers") if $<max>.Str < 0;
+              }
+            | $<max>=['*']
+            | <.panic: "Malformed range">
+            ]
+          ]?
+          { $/.CURSOR.panic("Negative numbers are not allowed as quantifiers") if $<min>.Str < 0 }
+        | <?[{]> { $/.CURSOR.panic("Block case of ** quantifier not yet implemented") }
         ]
     }
 
@@ -205,7 +208,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token metachar:sym<bs> { \\ <backslash> }
     token metachar:sym<mod> { <mod_internal> }
     token metachar:sym<quantifier> {
-        <!before <rxstopper> > <quantifier> <.panic: 'Quantifier quantifies nothing'>
+        <!rxstopper> <quantifier> <.panic: 'Quantifier quantifies nothing'>
     }
 
     ## we cheat here, really should be regex_infix:sym<~>
@@ -252,7 +255,22 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token backslash:sym<Z> { 'Z' <.obs: '\\Z as end-of-string matcher', '\\n?$'> }
     token backslash:sym<Q> { 'Q' <.obs: '\\Q as quotemeta', 'quotes or literal variable match'> }
     token backslash:sym<unrec> { {} (\w) { self.throw_unrecog_backslash_seq: $/[0].Str } }
+    token backslash:sym<unsp> { [\s|'#'] <.panic: 'Unspace not allowed in regex'> }
     token backslash:sym<misc> { \W }
+
+    proto token cclass_backslash { <...> }
+    token cclass_backslash:sym<s> { $<sym>=[<[dDnNsSwW]>] }
+    token cclass_backslash:sym<b> { $<sym>=[<[bB]>] }
+    token cclass_backslash:sym<e> { $<sym>=[<[eE]>] }
+    token cclass_backslash:sym<f> { $<sym>=[<[fF]>] }
+    token cclass_backslash:sym<h> { $<sym>=[<[hH]>] }
+    token cclass_backslash:sym<r> { $<sym>=[<[rR]>] }
+    token cclass_backslash:sym<t> { $<sym>=[<[tT]>] }
+    token cclass_backslash:sym<v> { $<sym>=[<[vV]>] }
+    token cclass_backslash:sym<o> { $<sym>=[<[oO]>] [ <octint> | '[' <octints> ']' ] }
+    token cclass_backslash:sym<x> { $<sym>=[<[xX]>] [ <hexint> | '[' <hexints> ']' ] }
+    token cclass_backslash:sym<c> { $<sym>=[<[cC]>] <charspec> }
+    token cclass_backslash:sym<any> { . }
 
     proto token assertion { <...> }
 
@@ -283,10 +301,10 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         [
         | '[' $<charspec>=(
                   || \s* '-' <!before \s* ']'> <.obs: '- as character range','.. for range, for explicit - in character class, escape it or place as last thing'>
-                  || \s* ( '\\' <backslash> || (<-[\]\\]>) )
+                  || \s* ( '\\' <cclass_backslash> || (<-[\]\\]>) )
                      [
                          \s* '..' \s*
-                         ( '\\' <backslash> || (<-[\]\\]>) )
+                         ( '\\' <cclass_backslash> || (<-[\]\\]>) )
                      ]**0..1
               )*
           \s* ']'

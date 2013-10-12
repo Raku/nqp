@@ -5,6 +5,22 @@ my class ParseShared is export {
     has int $!highwater;
     has @!highexpect;
     has %!marks;
+    has $!fail_cursor;
+    
+    # Follow is a little simple usage tracing infrastructure, used by the
+    # !cursor_start_* methods when uncommented.
+    my %cursors_created;
+    my $cursors_total;
+    method log_cc($name) {
+        %cursors_created{$name}++;
+        $cursors_total++;
+    }
+    method log_dump() {
+        for %cursors_created {
+            say($_.value ~ "\t" ~ $_.key);
+        }
+        say("TOTAL: " ~ $cursors_total);
+    }
 }
 
 role NQPCursorRole is export {
@@ -98,6 +114,7 @@ role NQPCursorRole is export {
             nqp::bindattr_i($new, $?CLASS, '$!from', $p);
             nqp::bindattr_i($new, $?CLASS, '$!pos', $p);
         }
+        nqp::bindattr($shared, ParseShared, '$!fail_cursor', $new.'!cursor_start_cur'());
         $new;
     }
     
@@ -109,6 +126,8 @@ role NQPCursorRole is export {
         my @start_result;
         my $new := nqp::create(self);
         my $sub := nqp::callercode();
+        # Uncomment following to log cursor creation.
+        #$!shared.log_cc(nqp::getcodename($sub));
         nqp::bindattr($new, $?CLASS, '$!shared', $!shared);
         nqp::bindattr($new, $?CLASS, '$!regexsub', nqp::ifnull(nqp::getcodeobj($sub), $sub));
         if nqp::defined($!restart) {
@@ -138,6 +157,8 @@ role NQPCursorRole is export {
     method !cursor_start_cur() {
         my $new := nqp::create(self);
         my $sub := nqp::callercode();
+        # Uncomment following to log cursor creation.
+        #$!shared.log_cc(nqp::getcodename($sub));
         nqp::bindattr($new, $?CLASS, '$!shared', $!shared);
         nqp::bindattr($new, $?CLASS, '$!regexsub', nqp::ifnull(nqp::getcodeobj($sub), $sub));
         if nqp::defined($!restart) {
@@ -147,6 +168,10 @@ role NQPCursorRole is export {
         nqp::bindattr_i($new, $?CLASS, '$!from', $!pos);
         nqp::bindattr($new, $?CLASS, '$!bstack', nqp::list_i());
         $new
+    }
+    
+    method !cursor_start_fail() {
+        nqp::getattr($!shared, ParseShared, '$!fail_cursor');
     }
 
     method !cursor_start_subcapture($from) {
@@ -254,7 +279,7 @@ role NQPCursorRole is export {
             $cur := self."$rxname"();
             @fates := @EMPTY if nqp::getattr_i($cur, $?CLASS, '$!pos') >= 0;
         }
-        $cur // self."!cursor_start_cur"();
+        $cur // nqp::getattr($shared, ParseShared, '$!fail_cursor');
     }
 
     method !protoregex_nfa($name) {
@@ -393,13 +418,18 @@ role NQPCursorRole is export {
     }
 
     method !LITERAL(str $str, int $i = 0) {
-        my $cur := self."!cursor_start_cur"();
+        my $cur;
         my int $litlen := nqp::chars($str);
         my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
-        $cur."!cursor_pass"($!pos + $litlen)
-          if $litlen < 1 
-              ||  ($i ?? nqp::lc(nqp::substr($target, $!pos, $litlen)) eq nqp::lc($str)
-                      !! nqp::substr($target, $!pos, $litlen) eq $str);
+        if $litlen < 1 ||
+            ($i ?? nqp::lc(nqp::substr($target, $!pos, $litlen)) eq nqp::lc($str)
+                !! nqp::substr($target, $!pos, $litlen) eq $str) {
+            $cur := self."!cursor_start_cur"();
+            $cur."!cursor_pass"($!pos + $litlen);
+        }
+        else {
+            $cur := nqp::getattr($!shared, ParseShared, '$!fail_cursor');
+        }
         $cur;
     }
 
@@ -461,13 +491,17 @@ role NQPCursorRole is export {
     }
     
     method ww() {
-        my $cur := self."!cursor_start_cur"();
+        my $cur;
         my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
-        $cur."!cursor_pass"($!pos, "ww")
-            if $!pos > 0
-            && $!pos != nqp::chars($target)
-            && nqp::iscclass(nqp::const::CCLASS_WORD, $target, $!pos)
-            && nqp::iscclass(nqp::const::CCLASS_WORD, $target, $!pos-1);
+        if $!pos > 0 && $!pos != nqp::chars($target)
+                && nqp::iscclass(nqp::const::CCLASS_WORD, $target, $!pos)
+                && nqp::iscclass(nqp::const::CCLASS_WORD, $target, $!pos-1) {
+            $cur := self."!cursor_start_cur"();
+            $cur."!cursor_pass"($!pos, "ww");
+        }
+        else {
+            $cur := nqp::getattr($!shared, ParseShared, '$!fail_cursor');
+        }
         $cur;
     }
 
@@ -484,15 +518,20 @@ role NQPCursorRole is export {
     }
 
     method ident() {
-        my $cur := self."!cursor_start_cur"();
+        my $cur;
         my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
-        $cur."!cursor_pass"(
+        if $!pos < nqp::chars($target) &&
+                (nqp::ord($target, $!pos) == 95
+                 || nqp::iscclass(nqp::const::CCLASS_ALPHABETIC, $target, $!pos)) {
+            $cur := self."!cursor_start_cur"();
+            $cur."!cursor_pass"(
                 nqp::findnotcclass(
                     nqp::const::CCLASS_WORD,
-                    $target, $!pos, nqp::chars($target)))
-            if $!pos < nqp::chars($target) &&
-                (nqp::ord($target, $!pos) == 95
-                 || nqp::iscclass(nqp::const::CCLASS_ALPHABETIC, $target, $!pos));
+                    $target, $!pos, nqp::chars($target)));
+        }
+        else {
+            $cur := nqp::getattr($!shared, ParseShared, '$!fail_cursor');
+        }
         $cur;
     }
 

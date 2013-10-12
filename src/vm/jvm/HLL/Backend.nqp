@@ -61,11 +61,11 @@ class HLL::Backend::JVM {
     
     method classfile($jast, *%adverbs) {
         if (%adverbs<target> eq 'classfile' || %adverbs<target> eq 'jar') && %adverbs<output> {
-            nqp::compilejasttofile($jast.dump(), %adverbs<output>);
+            nqp::compilejastlinestofile($jast.dump(), %adverbs<output>);
             nqp::null()
         }
         else {
-            nqp::compilejast($jast.dump());
+            nqp::compilejastlines($jast.dump());
         }
     }
 

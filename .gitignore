@@ -47,3 +47,4 @@ nqp-runtime.jar
 /nqp.bat
 /nqp.sh
 /jvmconfig.properties
+*.moarvm

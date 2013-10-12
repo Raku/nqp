@@ -90,8 +90,10 @@ public abstract class CompilationUnit {
 
             String cuid = ann.cuid();
             CodeRef cr = new CodeRef(this, m.mh.bindTo(this), ann.name(), cuid,
-                ann.oLexicalNames(), ann.iLexicalNames(),
-                ann.nLexicalNames(), ann.sLexicalNames(),
+                ann.oLexicalNames().length == 0 ? null : ann.oLexicalNames(), 
+                ann.iLexicalNames().length == 0 ? null : ann.iLexicalNames(),
+                ann.nLexicalNames().length == 0 ? null : ann.nLexicalNames(),
+                ann.sLexicalNames().length == 0 ? null : ann.sLexicalNames(),
                 m.handlers);
             cr.staticInfo.methodName = m.methodName;
             cr.staticInfo.hasExitHandler = ann.hasExitHandler();

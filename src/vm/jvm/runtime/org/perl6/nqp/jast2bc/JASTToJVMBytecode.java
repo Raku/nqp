@@ -4,14 +4,14 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
-import java.io.StringReader;
 import java.lang.invoke.CallSite;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
@@ -27,7 +27,6 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
-
 import org.perl6.nqp.runtime.Base64;
 
 public class JASTToJVMBytecode {
@@ -38,10 +37,15 @@ public class JASTToJVMBytecode {
         
         try
         {
+            List<String> lines = new LinkedList<String>();
+            String line;            
             BufferedReader in = new BufferedReader(new InputStreamReader(
                     new FileInputStream(argv[0]), "UTF-8"));
-            JavaClass c = buildClassFrom(in, true);
+            while ((line = in.readLine()) != null) {
+                lines.add(line);
+            }
             in.close();
+            JavaClass c = buildClassFrom(lines, true);
             FileOutputStream fos = new FileOutputStream(argv[1]);
             fos.write(c.bytes);
             fos.close();
@@ -54,21 +58,20 @@ public class JASTToJVMBytecode {
         
     }
     
-    public static JavaClass buildClassFromString(String in, boolean split) {
+    public static JavaClass buildClassFromString(List<String> lines, boolean split) {
         try {
-            BufferedReader br = new BufferedReader(new StringReader(in));
-            JavaClass c = buildClassFrom(br, split);
+            JavaClass c = buildClassFrom(lines, split);
             return c;
         }
         catch (Exception e) {
             if (!split && "Method code too large!".equals(e.getMessage()))
-                return buildClassFromString(in, true);
+                return buildClassFromString(lines, true);
             throw new RuntimeException(e);
         }
     }
     
-    public static void writeClassFromString(String in, String filename) {
-        JavaClass c = buildClassFromString(in, false);
+    public static void writeClassFromString(List<String> lines, String filename) {    
+        JavaClass c = buildClassFromString(lines, false);
         try {
             FileOutputStream fos = new FileOutputStream(filename);
             if (c.serialized == null) {
@@ -99,14 +102,17 @@ public class JASTToJVMBytecode {
         }
     }
     
-    private static JavaClass buildClassFrom(BufferedReader in, boolean split) throws Exception
+    private static JavaClass buildClassFrom(List<String> lines, boolean split) throws Exception
     {
         JavaClass c = new JavaClass();
         // Read in class name, superclass and any fields.
-        String curLine, className = null, superName = null, fileName = null;
+        String curLine = null, className = null, superName = null, fileName = null;
         byte[] serData = null;
         List<String> fieldLines = new ArrayList<String>();
-        while ((curLine = in.readLine()) != null) {
+        
+        Iterator<String> iter = lines.iterator();
+        while (iter.hasNext()) {
+            curLine = iter.next();
             if (curLine.startsWith("+ class ")) {
                 className = c.name = curLine.substring("+ class ".length());
             }
@@ -158,7 +164,7 @@ public class JASTToJVMBytecode {
         // Process all of the methods.
         if (!curLine.equals("+ method"))
             throw new Exception("Expected method after class configuration");
-        while (processMethod(c, in, cw, className, split))
+        while (processMethod(c, iter, cw, className, split))
             ;
         
         // Add empty constructor.
@@ -182,7 +188,7 @@ public class JASTToJVMBytecode {
         public boolean defined;
     }
 
-    private static boolean processMethod(JavaClass jcout, BufferedReader in, ClassWriter c, String className, boolean split) throws Exception {
+    private static boolean processMethod(JavaClass jcout, Iterator<String> in, ClassWriter c, String className, boolean split) throws Exception {
         String curLine, methodName = null, returnType = null, desc = null;
         String crName = null, crCuid = null;
         int crOuterIx = -2; // not coderef
@@ -205,7 +211,8 @@ public class JASTToJVMBytecode {
         MethodVisitor m = null;
         boolean contAfter = false;
         boolean inMethodHeader = true;
-        while ((curLine = in.readLine()) != null) {
+        while (in.hasNext()) {
+            curLine = in.next();
             // See if we need to move to the next method.
             if (curLine.equals("+ method")) {
                 if (inMethodHeader)
@@ -464,7 +471,7 @@ public class JASTToJVMBytecode {
         return sb.toString();
     }
 
-    private static void emitInstruction(BufferedReader in, MethodVisitor m,
+    private static void emitInstruction(Iterator<String> in, MethodVisitor m,
             Map<String, LabelInfo> labelMap,
             Map<String, VariableDef> localVariables,
             String curLine) throws Exception {
@@ -828,7 +835,7 @@ public class JASTToJVMBytecode {
                 Type.getMethodDescriptor(returnType, argumentTypes));
     }
 
-    private static void emitInvokeDynamic(BufferedReader in, MethodVisitor m, String callSpec) {
+    private static void emitInvokeDynamic(Iterator<String> in, MethodVisitor m, String callSpec) {
         String[] bits = callSpec.split("\\s");
         int numExtraArgs;
         if (bits.length == 4)
@@ -844,7 +851,7 @@ public class JASTToJVMBytecode {
         Object[] extraArgs = new Object[numExtraArgs];
         for (int i = 0; i < numExtraArgs; i++) {
             try {
-                String curLine = in.readLine();
+                String curLine = in.next();
                 if (curLine.startsWith(".push_ic ")) {
                     extraArgs[i] = Long.parseLong(curLine.substring(".push_ic ".length()));
                     bsmMT = bsmMT.appendParameterTypes(long.class);

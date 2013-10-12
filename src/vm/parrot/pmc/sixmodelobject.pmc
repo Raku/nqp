@@ -776,7 +776,7 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
     VTABLE INTVAL elements() {
         PMC *decont = DECONT(interp, SELF);
         if (REPR(decont)->elems)
-            REPR(decont)->elems(interp, STABLE(decont), OBJECT_BODY(decont));
+            return REPR(decont)->elems(interp, STABLE(decont), OBJECT_BODY(decont));
         else
             return SUPER();
     }

@@ -97,9 +97,9 @@ following order.
 * WHO (variant)
 * method_cache (VM hash)
 * vtable_length (native int)
-* [each of the items] (variant)
+* \[each of the items\] (variant)
 * type_check_cache_length (native int)
-* [each of the items in type_check_cache] (object reference)
+* \[each of the items in type_check_cache\] (object reference)
 * mode_flags (native int)   
 * boolification_spec (native int flag for if it exists; if true, then a native int
   for the mode and a ref for the method slot)

@@ -37,5 +37,8 @@ public class StorageSpec {
     /* The types that this one can box/unbox to. */
     public short can_box;
 
+    /* For ints, whether it's an unsigned value. */
+    public short is_unsigned;
+
     public static final StorageSpec BOXED = new StorageSpec();
 }

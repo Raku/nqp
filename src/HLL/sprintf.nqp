@@ -296,7 +296,9 @@ my module sprintf {
 
         method directive:sym<s>($/) {
             my $string := next_argument($/);
-            $string := nqp::substr($string, 0, $<precision>.ast) if nqp::chars($<precision>);
+            if nqp::chars($<precision>) && nqp::chars($string) > $<precision>.ast {
+                $string := nqp::substr($string, 0, $<precision>.ast);
+            }
             make $string
         }
         # XXX: Should we emulate an upper limit, like 2**64?

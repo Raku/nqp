@@ -32,4 +32,8 @@ public class SocketHandle extends SyncHandle {
             throw ExceptionHandling.dieInternal(tc, e);
         }
     }
+    
+    public void flush(ThreadContext tc) {
+        // Not provided.
+    }
 }

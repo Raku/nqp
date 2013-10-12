@@ -730,11 +730,11 @@ for <if unless> -> $op_name {
             
         # See if any immediate block wants to be passed the condition.
         my $im_then := nqp::istype($op[1], QAST::Block) && 
-                       $op[1].blocktype eq 'immediate' &&
+                       ($op[1].blocktype eq 'immediate' || $op[1].blocktype eq 'immediate_static') &&
                        $op[1].arity > 0;
         my $im_else := $operands == 3 &&
                        nqp::istype($op[2], QAST::Block) && 
-                       $op[2].blocktype eq 'immediate' &&
+                       ($op[2].blocktype eq 'immediate' || $op[2].blocktype eq 'immediate_static') &&
                        $op[2].arity > 0;
         
         # Create labels and a place to store the overall result.
@@ -1027,7 +1027,7 @@ for ('', 'repeat_') -> $repness {
             
             # See if there's an immediate block wanting to be passed the condition.
             my $has_im := nqp::istype(@operands[1], QAST::Block) && 
-                          @operands[1].blocktype eq 'immediate' &&
+                          (@operands[1].blocktype eq 'immediate' || @operands[1].blocktype eq 'immediate_static') &&
                           @operands[1].arity > 0;
             
             # Create labels.
@@ -1178,6 +1178,9 @@ QAST::OperationsJAST.add_core_op('for', -> $qastcomp, $op {
     }
     if @operands[1].blocktype eq 'immediate' {
         @operands[1].blocktype('declaration');
+    }
+    elsif @operands[1].blocktype eq 'immediate_static' {
+        @operands[1].blocktype('declaration_static');
     }
     
     # Create result temporary if we'll need one.
@@ -1895,10 +1898,12 @@ QAST::OperationsJAST.map_classlib_core_op('tellfh', $TYPE_OPS, 'tellfh', [$RT_OB
 QAST::OperationsJAST.map_classlib_core_op('readfh', $TYPE_OPS, 'readfh', [$RT_OBJ, $RT_OBJ, $RT_INT], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('writefh', $TYPE_OPS, 'writefh', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('printfh', $TYPE_OPS, 'printfh', [$RT_OBJ, $RT_STR], $RT_STR, :tc);
-QAST::OperationsJAST.map_classlib_core_op('sayfh', $TYPE_OPS, 'sayfh', [$RT_OBJ, $RT_STR], $RT_STR, :tc);
+QAST::OperationsJAST.map_classlib_core_op('sayfh', $TYPE_OPS, 'sayfh', [$RT_OBJ, $RT_STR], $RT_STR, :tc);QAST::OperationsJAST.map_classlib_core_op('sayfh', $TYPE_OPS, 'sayfh', [$RT_OBJ, $RT_STR], $RT_STR, :tc);
+QAST::OperationsJAST.map_classlib_core_op('flushfh', $TYPE_OPS, 'flushfh', [$RT_OBJ], $RT_OBJ, :tc);QAST::OperationsJAST.map_classlib_core_op('sayfh', $TYPE_OPS, 'sayfh', [$RT_OBJ, $RT_STR], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('readlinefh', $TYPE_OPS, 'readlinefh', [$RT_OBJ], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('readlineintfh', $TYPE_OPS, 'readlineintfh', [$RT_OBJ, $RT_STR], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('readallfh', $TYPE_OPS, 'readallfh', [$RT_OBJ], $RT_STR, :tc);
+QAST::OperationsJAST.map_classlib_core_op('getcfh', $TYPE_OPS, 'getcfh', [$RT_OBJ], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('eoffh', $TYPE_OPS, 'eoffh', [$RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('closefh', $TYPE_OPS, 'closefh', [$RT_OBJ], $RT_OBJ, :tc);
 
@@ -2447,8 +2452,8 @@ QAST::OperationsJAST.map_classlib_core_op('getpid', $TYPE_OPS, 'getpid', [], $RT
 QAST::OperationsJAST.map_classlib_core_op('jvmgetproperties', $TYPE_OPS, 'jvmgetproperties', [], $RT_OBJ, :tc);
 
 # JVM-specific ops for compilation unit handling
-QAST::OperationsJAST.map_classlib_core_op('compilejast', $TYPE_OPS, 'compilejast', [$RT_STR], $RT_OBJ, :tc);
-QAST::OperationsJAST.map_classlib_core_op('compilejasttofile', $TYPE_OPS, 'compilejasttofile', [$RT_STR, $RT_STR], $RT_STR, :tc);
+QAST::OperationsJAST.map_classlib_core_op('compilejastlines', $TYPE_OPS, 'compilejastlines', [$RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('compilejastlinestofile', $TYPE_OPS, 'compilejastlinestofile', [$RT_OBJ, $RT_STR], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('loadcompunit', $TYPE_OPS, 'loadcompunit', [$RT_OBJ, $RT_INT], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('iscompunit', $TYPE_OPS, 'iscompunit', [$RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('compunitmainline', $TYPE_OPS, 'compunitmainline', [$RT_OBJ], $RT_OBJ, :tc);
@@ -3561,10 +3566,10 @@ class QAST::CompilerJAST {
         # the top-level, where we need no result.
         if nqp::istype((try $*STACK), StackState) {
             my $blocktype := $node.blocktype;
-            if $blocktype eq '' || $blocktype eq 'declaration' {
+            if $blocktype eq '' || $blocktype eq 'declaration' || $blocktype eq 'declaration_static' {
                 return self.as_jast(QAST::BVal.new( :value($node) ));
             }
-            elsif $blocktype eq 'immediate' {
+            elsif $blocktype eq 'immediate' || $blocktype eq 'immediate_static' {
                 # Can emit a direct JVM level call. First, get self, TC,
                 # code ref, callsite descriptor and args (both empty) onto
                 # the stack.
@@ -4797,10 +4802,12 @@ class QAST::CompilerJAST {
             } 
         }
         
-        $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
-        $il.append($IVAL_ONE);
-        $il.append($LADD);
-        $il.append(JAST::Instruction.new( :op('lstore'), %*REG<pos> ));
+        unless $node.subtype eq 'zerowidth' {
+            $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
+            $il.append($IVAL_ONE);
+            $il.append($LADD);
+            $il.append(JAST::Instruction.new( :op('lstore'), %*REG<pos> ));
+        }
         
         $il
     }

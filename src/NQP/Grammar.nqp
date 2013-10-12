@@ -41,7 +41,7 @@ grammar NQP::Grammar is HLL::Grammar {
     token name { <identifier> ['::'<identifier>]* }
 
     token deflongname {
-        <identifier> <colonpair>**0..1
+        <identifier> <colonpair>?
     }
 
     token ENDSTMT {
@@ -87,8 +87,8 @@ grammar NQP::Grammar is HLL::Grammar {
             || .*? \n \h* '=' 'end' » \N*
             || <.panic: '=begin without matching =end'>
             ]
-        | <identifier>
-            .*? ^^ <?before \h* [ 
+        | <identifier> {}
+            .*? \n <?before \h* [ 
                 '='
                 [ 'cut' »
                   <.panic: 'Obsolete pod format, please use =begin/=end instead'> ]?
@@ -154,9 +154,9 @@ grammar NQP::Grammar is HLL::Grammar {
         | <EXPR> <.ws>
             [
             || <?MARKED('endstmt')>
-            || <statement_mod_cond> <statement_mod_loop>**0..1
+            || <statement_mod_cond> <statement_mod_loop>?
             || <statement_mod_loop>
-            ]**0..1
+            ]?
         ]
     }
 
@@ -222,7 +222,7 @@ grammar NQP::Grammar is HLL::Grammar {
         <sym> \s :s
         <xblock>
         [ 'elsif'\s <xblock> ]*
-        [ 'else'\s <else=.pblock> ]**0..1
+        [ 'else'\s <else=.pblock> ]?
     }
 
     token statement_control:sym<unless> {
@@ -304,6 +304,9 @@ grammar NQP::Grammar is HLL::Grammar {
     token term:sym<regex_declarator>   { <regex_declarator> }
     token term:sym<statement_prefix>   { <statement_prefix> }
     token term:sym<lambda>             { <?lambda> <pblock> }
+    token term:sym<last>               { <sym> <!identifier> { $*CONTROL_USED := 1 } }
+    token term:sym<next>               { <sym> <!identifier> { $*CONTROL_USED := 1 } }
+    token term:sym<redo>               { <sym> <!identifier> { $*CONTROL_USED := 1 } }
 
     token fatarrow {
         <key=.identifier> \h* '=>' <.ws> <val=.EXPR('i=')>
@@ -313,14 +316,14 @@ grammar NQP::Grammar is HLL::Grammar {
         ':'
         [
         | $<not>='!' <identifier>
-        | <identifier> <circumfix>**0..1
+        | <identifier> <circumfix>?
         | <circumfix>
         | <variable>
         ]
     }
 
     token variable {
-        | <sigil> <twigil>**0..1 <desigilname=.name>
+        | <sigil> <twigil>? <desigilname=.name>
         | <sigil> <?[<]> <postcircumfix>
         | <sigil> '(' ~ ')' <semilist>
         | $<sigil>=['$'] $<desigilname>=[<[/_!]>]
@@ -375,8 +378,8 @@ grammar NQP::Grammar is HLL::Grammar {
         
         <name>
         <.newpad>
-        [ <?{ $*PKGDECL eq 'role' }> '[' ~ ']' <role_params> ]**0..1
-        [ 'is' 'repr(' <repr=.quote_EXPR> ')' ]**0..1
+        [ <?{ $*PKGDECL eq 'role' }> '[' ~ ']' <role_params> ]?
+        [ 'is' 'repr(' <repr=.quote_EXPR> ')' ]?
         
         {
             # Construct meta-object for this package, adding it to the
@@ -384,7 +387,7 @@ grammar NQP::Grammar is HLL::Grammar {
             my %args;
             %args<name> := ~$<name>;
             if $<repr> {
-                %args<repr> := ~$<repr>[0]<quote_delimited><quote_atom>[0];
+                %args<repr> := ~$<repr><quote_delimited><quote_atom>[0];
             }
             my $how := %*HOW{$*PKGDECL};
             my $INNER := $*W.cur_lexpad();
@@ -418,8 +421,8 @@ grammar NQP::Grammar is HLL::Grammar {
             }
         }
         
-        [ $<export>=['is export'] ]**0..1
-        [ 'is' <parent=.name> ]**0..1
+        [ $<export>=['is export'] ]?
+        [ 'is' <parent=.name> ]?
         [ 'does' <role=.name> ]*
         [
         || ';' <statementlist> [ $ || <.panic: 'Confused'> ]
@@ -456,7 +459,7 @@ grammar NQP::Grammar is HLL::Grammar {
     }
 
     rule variable_declarator {
-        <typename>**0..1
+        <typename>?
         :my $*IN_DECL := 'variable';
         <variable>
         { $*IN_DECL := 0; }
@@ -469,7 +472,7 @@ grammar NQP::Grammar is HLL::Grammar {
 
     rule routine_def {
         :my $*RETURN_USED := 0;
-        [ $<sigil>=['&'?]<deflongname> ]**0..1
+        [ $<sigil>=['&'?]<deflongname> ]?
         <.newpad>
         [ '(' <signature> ')'
             || <.panic: 'Routine declaration requires a signature'> ]
@@ -485,7 +488,7 @@ grammar NQP::Grammar is HLL::Grammar {
         :my $*INVOCANT_OK := 1;
         [
         || '::(' <latename=variable> ')'
-        || $<private>=['!'?] <deflongname>**0..1
+        || $<private>=['!'?] <deflongname>?
         ]
         <.newpad>
         [ '(' <signature> ')'
@@ -522,8 +525,8 @@ grammar NQP::Grammar is HLL::Grammar {
     }
 
     token signature {
-        [ <?{ $*INVOCANT_OK }> <.ws><invocant=.parameter><.ws> ':' ]**0..1
-        [ [<.ws><parameter><.ws> [',' | <before \s* [')' | '{']>]]* ]**0..1
+        [ <?{ $*INVOCANT_OK }> <.ws><invocant=.parameter><.ws> ':' ]?
+        [ [<.ws><parameter><.ws> [',' | <before \s* [')' | '{']>]]* ]?
     }
 
     token parameter {
@@ -536,7 +539,7 @@ grammar NQP::Grammar is HLL::Grammar {
     }
 
     token param_var {
-        <sigil> <twigil>**0..1
+        <sigil> <twigil>?
         [ <name=.identifier> | $<name>=[<[/!]>] ]
     }
 
@@ -563,7 +566,7 @@ grammar NQP::Grammar is HLL::Grammar {
           || '{' '<...>' '}'<?ENDSTMT>
           || '{' '<*>' '}'<?ENDSTMT>
           || <.panic: "Proto regex body must be \{*\} (or <*> or <...>, which are deprecated)">
-          ]
+          ] :!s
         | $<sym>=[regex|token|rule] :s
           [
           || '::(' <latename=variable> ')'
@@ -590,7 +593,7 @@ grammar NQP::Grammar is HLL::Grammar {
         ]
 
         [
-        | <?[(]> <args>
+        | <args>
         | ':' \s <args=.arglist>
         ]**0..1
     }
@@ -598,11 +601,7 @@ grammar NQP::Grammar is HLL::Grammar {
     token term:sym<self> { <sym> » }
 
     token term:sym<identifier> {
-        <deflongname> <?[(]> <args>
-    }
-
-    token term:sym<name> {
-        <name> <args>**0..1
+        <deflongname> <args>
     }
 
     token term:sym<pir::op> {
@@ -624,6 +623,10 @@ grammar NQP::Grammar is HLL::Grammar {
     token term:sym<onlystar> {
         '{*}' <?ENDSTMT>
         [ <?{ $*MULTINESS eq 'proto' }> || <.panic: '{*} may only appear in proto'> ]
+    }
+    
+    token term:sym<name> {
+        <name> <args>**0..1
     }
 
     token args {
@@ -789,9 +792,6 @@ grammar NQP::Grammar is HLL::Grammar {
 
     token prefix:sym<return> { <sym> \s <O('%list_prefix')> { $*RETURN_USED := 1 } }
     token prefix:sym<make>   { <sym> \s <O('%list_prefix')> }
-    token term:sym<last>     { <sym> <!before <identifier> > { $*CONTROL_USED := 1 } }
-    token term:sym<next>     { <sym> <!before <identifier> > { $*CONTROL_USED := 1 } }
-    token term:sym<redo>     { <sym> <!before <identifier> > { $*CONTROL_USED := 1 } }
 
     method smartmatch($/) {
         # swap rhs into invocant position
@@ -820,17 +820,17 @@ grammar NQP::Regex is QRegex::P6Regex::Grammar {
         <?[{]> <codeblock>
     }
     
-    token assertion:sym<?> { '?' [ <?before '>' > | <!before '{'> <assertion> ] }
-    token assertion:sym<!> { '!' [ <?before '>' > | <!before '{'> <assertion> ] }
+    token assertion:sym<?> { '?' [ <?[>]> | <![{]> <assertion> ] }
+    token assertion:sym<!> { '!' [ <?[>]> | <![{]> <assertion> ] }
 
     token assertion:sym<?{ }> {
-        $<zw>=[ <[?!]> <?before '{'> ] <codeblock>
+        $<zw>=[ <[?!]> <?[{]> ] <codeblock>
     }
 
     token assertion:sym<name> {
         <longname=.identifier>
             [
-            | <?before '>'>
+            | <?[>]>
             | '=' <assertion>
             | ':' <arglist>
             | '(' <arglist=.LANG('MAIN','arglist')> ')'

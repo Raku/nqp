@@ -18,7 +18,7 @@ import org.perl6.nqp.sixmodel.reprs.MultiCache;
 
 public class SerializationWriter {
     /* The current version of the serialization format. */
-    private final int CURRENT_VERSION = 7;
+    private final int CURRENT_VERSION = 8;
     
     /* Various sizes (in bytes). */
     private final int HEADER_SIZE               = 4 * 16;

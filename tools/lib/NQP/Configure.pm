@@ -28,8 +28,8 @@ our @required_nqp_files = qw(
     @bindir@/nqp@exe@
 );
 
-our $nqp_git = 'git://github.com/perl6/nqp.git';
-our $par_git = 'git://github.com/parrot/parrot.git';
+our $nqp_git = 'http://github.com/perl6/nqp.git';
+our $par_git = 'http://github.com/parrot/parrot.git';
 
 our $nqp_push = 'git@github.com:perl6/nqp.git';
 our $par_push = 'git@github.com:parrot/parrot.git';

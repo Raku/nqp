@@ -3,10 +3,10 @@
 NQP's development release cycle is intimately tied to Rakudo's release
 cycle.  There is no separate, independent release cycle for NQP.
 
-Parrot releases the third Tuesday of each month; Rakudo will generally
-issue its own development release soon after the Parrot release (Usually
-within a few days).  To accomplish this, NQP must be tagged for release
-immediately prior to the Rakudo release.
+Parrot is scheduled to release the third Tuesday of each month; Rakudo
+will generally issue its own development release soon after the scheduled
+Parrot release (usually within a few days).  To accomplish this, NQP
+must be tagged for release immediately prior to the Rakudo release.
 
 =head2 Steps to create an NQP release
 

@@ -409,8 +409,8 @@ unmarshal_string(PARROT_INTERP, PMC *value, INTVAL type, INTVAL *free) {
         else {
             str = Parrot_str_to_encoded_cstring(interp,
                 REPR(value)->box_funcs->get_str(interp, STABLE(value), OBJECT_BODY(value)),
-                type & DYNCALL_ARG_TYPE_MASK == DYNCALL_ARG_ASCIISTR ? Parrot_ascii_encoding_ptr :
-                type & DYNCALL_ARG_TYPE_MASK == DYNCALL_ARG_UTF16STR ? Parrot_utf16_encoding_ptr :
+                (type & DYNCALL_ARG_TYPE_MASK) == DYNCALL_ARG_ASCIISTR ? Parrot_ascii_encoding_ptr :
+                (type & DYNCALL_ARG_TYPE_MASK) == DYNCALL_ARG_UTF16STR ? Parrot_utf16_encoding_ptr :
                                                             Parrot_utf8_encoding_ptr);
 
             if (free && type & DYNCALL_ARG_FREE_STR_MASK) {

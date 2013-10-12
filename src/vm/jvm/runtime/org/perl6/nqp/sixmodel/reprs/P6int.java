@@ -35,6 +35,10 @@ public class P6int extends REPR {
             SixModelObject bits = integerInfo.at_key_boxed(tc, "bits");
             if (bits != null)
                 ((StorageSpec)st.REPRData).bits = (short)bits.get_int(tc);
+
+            SixModelObject unsigned = integerInfo.at_key_boxed(tc, "unsigned");
+            if (unsigned != null)
+                ((StorageSpec)st.REPRData).is_unsigned = (short)unsigned.get_int(tc);
         }
     }
 
@@ -137,6 +141,7 @@ public class P6int extends REPR {
     public void serialize_repr_data(ThreadContext tc, STable st, SerializationWriter writer)
     {
         writer.writeInt(((StorageSpec)st.REPRData).bits);
+        writer.writeInt(((StorageSpec)st.REPRData).is_unsigned);
     }
     
     /**
@@ -152,6 +157,10 @@ public class P6int extends REPR {
             ss.bits = (short)reader.readLong();
         else
             ss.bits = 64;
+        if (reader.version >= 8)
+            ss.is_unsigned = (short)reader.readLong();
+        else
+            ss.is_unsigned = 0;
         ss.can_box = StorageSpec.CAN_BOX_INT;
         st.REPRData = ss;
     }

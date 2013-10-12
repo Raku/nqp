@@ -58,4 +58,8 @@ public class StandardWriteHandle implements IIOClosable, IIOSeekable, IIOEncodab
         print(tc, s);
         print(tc, System.lineSeparator());
     }
+    
+    public void flush(ThreadContext tc) {
+        ps.flush();
+    }
 }

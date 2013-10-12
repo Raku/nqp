@@ -106,7 +106,8 @@ class NQP::World is HLL::World {
                         :op('loadbytecode'),
                         QAST::VM.new(
                             :parrot(QAST::SVal.new( :value('ModuleLoader.pbc') )),
-                            :jvm(QAST::SVal.new( :value('ModuleLoader.class') ))
+                            :jvm(QAST::SVal.new( :value('ModuleLoader.class') )),
+                            :moar(QAST::SVal.new( :value('ModuleLoader.moarvm') ))
                         )),
                     $set_outer
                 )));
@@ -132,7 +133,8 @@ class NQP::World is HLL::World {
                     :op('loadbytecode'),
                     QAST::VM.new(
                         :parrot(QAST::SVal.new( :value('ModuleLoader.pbc') )),
-                        :jvm(QAST::SVal.new( :value('ModuleLoader.class') ))
+                        :jvm(QAST::SVal.new( :value('ModuleLoader.class') )),
+                        :moar(QAST::SVal.new( :value('ModuleLoader.moarvm') ))
                     )),
                 QAST::Op.new(
                    :op('callmethod'), :name('load_module'),
@@ -221,7 +223,7 @@ class NQP::World is HLL::World {
             my $compiler := nqp::getcomp('nqp');
             my $compiled := $compiler.compile(
                 QAST::CompUnit.new( :hll('nqp'), $past ),
-                :from<ast>, :compunit_ok(1),
+                :from<ast>, :compunit_ok(1), :lineposcache($*LINEPOSCACHE),
                 :bootstrap(%*COMPILING<%?OPTIONS><bootstrap> ?? 1 !! 0));
 
             # Fix up any code objects holding stubs with the real compiled thing.
@@ -459,13 +461,14 @@ class NQP::World is HLL::World {
             my %symbols := @!BLOCKS[$i].symtable();
             for %symbols {
                 if !%seen{$_.key} && nqp::existskey($_.value, 'value') {
-                    try {
+                    my $value := ($_.value)<value>;
+                    unless nqp::isnull(nqp::getobjsc($value)) {
                         $wrapper[0].push(QAST::Op.new(
                             :op('bind'),
-                            QAST::Var.new( :name($_.key), :scope('lexical'), :isdecl('var') ),
-                            QAST::WVal.new( :value(($_.value)<value>) )
+                            QAST::Var.new( :name($_.key), :scope('lexical'), :decl('var') ),
+                            QAST::WVal.new( :value($value) )
                         ));
-                    };
+                    }
                     %seen{$_.key} := 1;
                 }
             }
@@ -495,7 +498,9 @@ class NQP::World is HLL::World {
         }
         QAST::VM.new(
             loadlibs => @loadlibs,
-            jvm => QAST::Op.new( :op('null') ) );
+            jvm => QAST::Op.new( :op('null') ),
+            moar => QAST::Op.new( :op('null') )
+        );
     }
     
     # Adds some initial tasks.
@@ -510,7 +515,8 @@ class NQP::World is HLL::World {
                     QAST::VM.new( :pirop('get_class Ps'), QAST::SVal.new( :value('LexPad') ) ),
                     QAST::VM.new( :pirop('get_class Ps'), QAST::SVal.new( :value('NQPLexPad') ) )
                 ))),
-            :jvm(QAST::Op.new( :op('null') ))
+            :jvm(QAST::Op.new( :op('null') )),
+            :moar(QAST::Op.new( :op('null') ))
         )));
     }
     

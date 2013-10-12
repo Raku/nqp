@@ -5,7 +5,7 @@ PERL   = perl
 PROVE  = prove
 ASM    = 3rdparty/asm/
 
-PREFIX = @prefix@
+PREFIX = $(DESTDIR)@prefix@
 BIN_DIR = $(PREFIX)/bin
 NQP_LANG_DIR= $(PREFIX)/languages/nqp
 NQP_JAR_DIR = $(NQP_LANG_DIR)/runtime

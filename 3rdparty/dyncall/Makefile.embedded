@@ -1,20 +1,20 @@
 MAKEFILE = Makefile.embedded
-MAKE_CMD = ${MAKE} -f ${MAKEFILE} 
+MAKE_CMD = ${MAKE} -f ${MAKEFILE}
 all:
-	cd dynload ; ${MAKE_CMD}
-	cd dyncall ; ${MAKE_CMD}
-	cd dyncallback ; ${MAKE_CMD}
-tests: 
-	cd test ; ${MAKE_CMD} 
+	cd dynload && ${MAKE_CMD}
+	cd dyncall && ${MAKE_CMD}
+	cd dyncallback && ${MAKE_CMD}
+tests:
+	cd test && ${MAKE_CMD}
 clean:
-	cd dynload     ; ${MAKE_CMD} clean
-	cd dyncall     ; ${MAKE_CMD} clean
-	cd dyncallback ; ${MAKE_CMD} clean
-	cd test        ; ${MAKE_CMD} clean
+	cd dynload     && ${MAKE_CMD} clean
+	cd dyncall     && ${MAKE_CMD} clean
+	cd dyncallback && ${MAKE_CMD} clean
+	cd test        && ${MAKE_CMD} clean
 install:
-	cd dynload     ; ${MAKE_CMD} install
-	cd dyncall     ; ${MAKE_CMD} install
-	cd dyncallback ; ${MAKE_CMD} install
+	cd dynload     && ${MAKE_CMD} install
+	cd dyncall     && ${MAKE_CMD} install
+	cd dyncallback && ${MAKE_CMD} install
 bsd:
 	${MAKE_CMD} all
 linux:
@@ -22,8 +22,8 @@ linux:
 linux64:
 	CFLAGS="${CFLAGS} -m64" ASFLAGS="${ASFLAGS} -m64" ${MAKE_CMD} all
 minix-gcc:
-	cd dyncall	; CC=gcc CFLAGS= ${MAKE_CMD} 
-	cd dyncallback	; CC=gcc CFLAGS= ${MAKE_CMD} 
+	cd dyncall	&& CC=gcc CFLAGS= ${MAKE_CMD}
+	cd dyncallback	&& CC=gcc CFLAGS= ${MAKE_CMD}
 mingw32:
 	${MAKE_CMD} CC=gcc AS="gcc -c" all
 osx:

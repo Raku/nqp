@@ -347,9 +347,9 @@ class HLL::Compiler does HLL::Backend::Default {
         return 0;
     }
 
-    method compile($source, :$from, *%adverbs) {
+    method compile($source, :$from, :$lineposcache, *%adverbs) {
         my %*COMPILING<%?OPTIONS> := %adverbs;
-        my $*LINEPOSCACHE;
+        my $*LINEPOSCACHE := $lineposcache;
 
         my $target := nqp::lc(%adverbs<target>);
         my $result := $source;
@@ -413,7 +413,7 @@ class HLL::Compiler does HLL::Backend::Default {
         }
         my $grammar := self.parsegrammar;
         my $actions;
-        $actions    := self.parseactions unless %adverbs<target> eq 'parse';
+        $actions    := self.parseactions;
         $grammar.HOW.trace-on($grammar) if %adverbs<rxtrace>;
         my $match   := $grammar.parse($s, p => 0, actions => $actions);
         $grammar.HOW.trace-off($grammar) if %adverbs<rxtrace>;
@@ -589,6 +589,17 @@ class HLL::Compiler does HLL::Backend::Default {
     # command line options and arguments as provided by the user
     method cli-options()   { %!cli-options   }
     method cli-arguments() { @!cli-arguments }
+    
+    # set a recursion limit, if the backend supports it
+    method recursion_limit($limit) {
+        if nqp::can($!backend, 'recursion_limit') {
+            $!backend.recursion_limit($limit);
+            1;
+        }
+        else {
+            0;
+        }
+    }
 }
 
 my $compiler := HLL::Compiler.new();

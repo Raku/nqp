@@ -68,4 +68,12 @@ public class FileHandle extends SyncHandle implements IIOSeekable {
             throw ExceptionHandling.dieInternal(tc, e);
         }
     }
+    
+    public void flush(ThreadContext tc) {
+        try {
+            fc.force(false);
+        } catch (IOException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
+        }
+    }
 }

@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -78,6 +79,7 @@ import org.perl6.nqp.sixmodel.reprs.VMArrayInstance;
 import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_i16;
 import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_i32;
 import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_i8;
+import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_u8;
 import org.perl6.nqp.sixmodel.reprs.VMExceptionInstance;
 import org.perl6.nqp.sixmodel.reprs.VMHash;
 import org.perl6.nqp.sixmodel.reprs.VMHashInstance;
@@ -490,9 +492,18 @@ public final class Ops {
                     arr.slots = array;
 
                     return res;
+                } else if (res instanceof VMArrayInstance_u8) {
+                    VMArrayInstance_u8 arr = (VMArrayInstance_u8)res;
+
+                    byte[] array = ((IIOSyncReadable)h.handle).read(tc, (int)bytes);                    
+                    arr.elems = array.length;
+                    arr.start = 0;
+                    arr.slots = array;
+
+                    return res;
                 } else {
                     throw ExceptionHandling.dieInternal(tc,
-                        "readfh requires a buf with the VMArrayInstance_i8 REPR");
+                        "readfh requires a Buf[int8] or a Buf[uint8]");
                 }
             } else {
                 throw ExceptionHandling.dieInternal(tc,
@@ -508,8 +519,10 @@ public final class Ops {
         ByteBuffer bb = decode8(buf, tc);
         if (obj instanceof IOHandleInstance) {
             IOHandleInstance h = (IOHandleInstance)obj;
+            byte[] bytesToWrite = new byte[bb.limit()];
+            bb.get(bytesToWrite);
             if (h.handle instanceof IIOSyncWritable)
-                ((IIOSyncWritable)h.handle).write(tc, bb.array());
+                ((IIOSyncWritable)h.handle).write(tc, bytesToWrite);
             else
                 throw ExceptionHandling.dieInternal(tc,
                     "This handle does not support write");
@@ -551,6 +564,21 @@ public final class Ops {
                 "sayfh requires an object with the IOHandle REPR");
         }
         return data;
+    }
+    
+    public static SixModelObject flushfh(SixModelObject obj, ThreadContext tc) {
+        if (obj instanceof IOHandleInstance) {
+            IOHandleInstance h = (IOHandleInstance)obj;
+            if (h.handle instanceof IIOSyncWritable)
+                ((IIOSyncWritable)h.handle).flush(tc);
+            else
+                throw ExceptionHandling.dieInternal(tc,
+                    "This handle does not support flush");
+        }
+        else {
+            die_s("flushfh requires an object with the IOHandle REPR", tc);
+        }
+        return obj;
     }
     
     public static String readlinefh(SixModelObject obj, ThreadContext tc) {
@@ -598,6 +626,21 @@ public final class Ops {
         }
     }
     
+    public static String getcfh(SixModelObject obj, ThreadContext tc) {
+        if (obj instanceof IOHandleInstance) {
+            IOHandleInstance h = (IOHandleInstance)obj;
+            if (h.handle instanceof IIOSyncReadable)
+                return ((IIOSyncReadable)h.handle).getc(tc);
+            else
+                throw ExceptionHandling.dieInternal(tc,
+                    "This handle does not support getc");
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc,
+                "getcfh requires an object with the IOHandle REPR");
+        }
+    }
+    
     public static long eoffh(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
             IOHandleInstance h = (IOHandleInstance)obj;
@@ -629,6 +672,7 @@ public final class Ops {
         return obj;
     }
     
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public static SixModelObject linesasync(SixModelObject obj, SixModelObject resultType,
             long chomp, SixModelObject queue, SixModelObject done, SixModelObject error,
             ThreadContext tc) {
@@ -727,8 +771,12 @@ public final class Ops {
         
     public static long mkdir(String path, long mode, ThreadContext tc) {
         try {
-            Files.createDirectory(Paths.get(path),
-                        PosixFilePermissions.asFileAttribute(modeToPosixFilePermission(mode)));
+            String os = System.getProperty("os.name").toLowerCase();
+            if (os.indexOf("win") >= 0)
+                Files.createDirectory(Paths.get(path));
+            else
+                Files.createDirectory(Paths.get(path),
+                    PosixFilePermissions.asFileAttribute(modeToPosixFilePermission(mode)));
         }
         catch (Exception e) {
             die_s(IOExceptionMessages.message(e), tc);
@@ -1774,6 +1822,7 @@ public final class Ops {
     public static final CallSiteDescriptor storeCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ }, null);
     public static final CallSiteDescriptor findmethCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_STR }, null);
     public static final CallSiteDescriptor typeCheckCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ }, null);
+    public static final CallSiteDescriptor howObjCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ }, null);
     public static void invokeLexotic(SixModelObject invokee, CallSiteDescriptor csd, Object[] args, ThreadContext tc) {
         LexoticException throwee = tc.theLexotic;
         throwee.target = ((LexoticInstance)invokee).target;
@@ -1996,7 +2045,8 @@ public final class Ops {
         
         SixModelObject meth = invocant.st.MethodCache.get(name);
         if (meth == null)
-            throw ExceptionHandling.dieInternal(tc, "Method '" + name + "' not found"); 
+            throw ExceptionHandling.dieInternal(tc,
+                "Method '" + name + "' not found for invocant of class '" + typeName(invocant, tc) + "'");
         return meth;
     }
     public static SixModelObject findmethod(SixModelObject invocant, String name, ThreadContext tc) {
@@ -2021,6 +2071,12 @@ public final class Ops {
         invokeDirect(tc, find_method, findmethCallSite,
                 new Object[] { how, invocant, name });
         return result_o(tc.curFrame);
+    }
+    public static String typeName(SixModelObject invocant, ThreadContext tc) {
+        SixModelObject how = invocant.st.HOW;
+        SixModelObject nameMeth = findmethod(tc, how, "name");
+        invokeDirect(tc, nameMeth, howObjCallSite, new Object[] { how, invocant });
+        return result_s(tc.curFrame);
     }
     public static long can(SixModelObject invocant, String name, ThreadContext tc) {
         return findmethod(invocant, name, tc) == null ? 0 : 1;
@@ -2099,12 +2155,14 @@ public final class Ops {
         return obj instanceof CodeRef || obj.st.InvocationSpec != null ? 1 : 0;
     }
     public static long istype(SixModelObject obj, SixModelObject type, ThreadContext tc) {
+        return istype_nodecont(decont(obj, tc), decont(type, tc), tc);
+    }
+    public static long istype_nodecont(SixModelObject obj, SixModelObject type, ThreadContext tc) {
         /* Null always type checks false. */
         if (obj == null)
             return 0;
-        obj = decont(obj, tc);
-        type = decont(type, tc);
-
+        
+        /* Start by considering cache. */
         int typeCheckMode = type.st.ModeFlags & STable.TYPE_CHECK_CACHE_FLAG_MASK;
         SixModelObject[] cache = obj.st.TypeCheckCache;
         if (cache != null) {
@@ -2573,7 +2631,7 @@ public final class Ops {
         return obj;
     }
     public static long iscont(SixModelObject obj) {
-        return obj.st.ContainerSpec == null ? 0 : 1;
+        return obj == null || obj.st.ContainerSpec == null ? 0 : 1;
     }
     public static SixModelObject decont(SixModelObject obj, ThreadContext tc) {
         if (obj == null)
@@ -3188,6 +3246,12 @@ public final class Ops {
                 ? ByteBuffer.wrap(bufi8.slots, bufi8.start, bufi8.elems)
                 : ByteBuffer.allocate(0);
         }
+        else if (buf instanceof VMArrayInstance_u8) {
+            VMArrayInstance_u8 bufu8 = (VMArrayInstance_u8)buf;
+            bb = bufu8.slots != null
+                ? ByteBuffer.wrap(bufu8.slots, bufu8.start, bufu8.elems)
+                : ByteBuffer.allocate(0);
+        }
         else {
             int n = (int)buf.elems(tc);
             bb = ByteBuffer.allocate(n);
@@ -3195,6 +3259,7 @@ public final class Ops {
                 buf.at_pos_native(tc, i);
                 bb.put((byte)tc.native_i);
             }
+            bb.rewind();
         }
     	return bb;
     }
@@ -4051,8 +4116,18 @@ public final class Ops {
         SixModelObject res = hashType.st.REPR.allocate(tc, hashType.st);
         
         Properties env = System.getProperties();
-        for (String envName : env.stringPropertyNames())
-            res.bind_key_boxed(tc, envName, box_s(env.getProperty(envName), strType, tc));
+        for (String envName : env.stringPropertyNames()) {
+            String propVal = env.getProperty(envName);
+            if (envName.equals("os.name")) {
+                // Normalize OS name (some cases likely missing).
+                String pvlc = propVal.toLowerCase();
+                if (pvlc.indexOf("win") >= 0)
+                    propVal = "MSWin32";
+                else if (pvlc.indexOf("mac os x") >= 0)
+                    propVal = "darwin";
+            }
+            res.bind_key_boxed(tc, envName, box_s(propVal, strType, tc));
+        }
         
         return res;
     }
@@ -5050,14 +5125,34 @@ public final class Ops {
     }
     
     /* Evaluation of code; JVM-specific ops. */
-    public static SixModelObject compilejast(String dump, ThreadContext tc) {
-        EvalResult res = new EvalResult();
-        res.jc = JASTToJVMBytecode.buildClassFromString(dump, false);
-        return res;
+    public static SixModelObject compilejastlines(SixModelObject dump, ThreadContext tc) {
+        if (dump instanceof VMArrayInstance) {
+            VMArrayInstance array = (VMArrayInstance) dump;
+            List<String> lines = new ArrayList<String>(array.elems);
+            for (int index = 0; index < array.elems; index++) {
+                lines.add(array.at_pos_boxed(tc, index).get_str(tc));
+            }
+            EvalResult res = new EvalResult();
+            res.jc = JASTToJVMBytecode.buildClassFromString(lines, false);
+            return res;
+        } else {
+            throw ExceptionHandling.dieInternal(tc,
+                "compilejastlines requires an array with the VMArrayInstance REPR");
+        }
     }
-    public static String compilejasttofile(String dump, String filename, ThreadContext tc) {
-        JASTToJVMBytecode.writeClassFromString(dump, filename);
-        return dump;
+    public static SixModelObject compilejastlinestofile(SixModelObject dump, String filename, ThreadContext tc) {
+        if (dump instanceof VMArrayInstance) {
+            VMArrayInstance array = (VMArrayInstance) dump;
+            List<String> lines = new ArrayList<String>(array.elems);
+            for (int index = 0; index < array.elems; index++) {
+                lines.add(array.at_pos_boxed(tc, index).get_str(tc));
+            }
+            JASTToJVMBytecode.writeClassFromString(lines, filename);
+            return dump;
+        } else {
+            throw ExceptionHandling.dieInternal(tc,
+                "compilejastlines requires an array with the VMArrayInstance REPR");
+        }
     }
     public static SixModelObject loadcompunit(SixModelObject obj, long compileeHLL, ThreadContext tc) {
         try {

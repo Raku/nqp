@@ -73,8 +73,8 @@ grammar HLL::Grammar {
     }
 
     token dec_number {
-        | $<coeff>=[     '.' \d+ ] <escale>**0..1
-        | $<coeff>=[ \d+ '.' \d+ ] <escale>**0..1
+        | $<coeff>=[     '.' \d+ ] <escale>?
+        | $<coeff>=[ \d+ '.' \d+ ] <escale>?
         | $<coeff>=[ \d+         ] <escale>
     }
 
@@ -101,7 +101,7 @@ grammar HLL::Grammar {
     token quote_escape:sym<chr> { \\ c <?quotemod_check('b')> <charspec> }
     token quote_escape:sym<0> { \\ <sym> <?quotemod_check('b')> }
     token quote_escape:sym<misc> {
-        {} \\
+        \\ {}
         [
         || <?quotemod_check('b')>
              [
@@ -367,16 +367,16 @@ position C<pos>.
 
     method starter() {
         my $start := $*QUOTE_START;
-        nqp::isnull($start)
-            ?? self.'!cursor_start_cur'()
-            !! self.'!LITERAL'($start)
+        nqp::isconcrete($start)
+            ?? self.'!LITERAL'($start)
+            !! self.'!cursor_start_fail'()
     }
 
     method stopper() {
         my $stop := $*QUOTE_STOP;
-        nqp::isnull($stop)
-            ?? self.'!cursor_start_cur'()
-            !! self.'!LITERAL'($stop)
+        nqp::isconcrete($stop)
+            ?? self.'!LITERAL'($stop)
+            !! self.'!cursor_start_fail'()
     }
 
     our method split_words(str $words) {
@@ -602,9 +602,16 @@ An operator precedence parser.
         my %markhash := nqp::getattr(
             nqp::getattr(self, $cursor_class, '$!shared'),
             ParseShared, '%!marks');
-        my $cur := self."!cursor_start_cur"();
-        $cur."!cursor_pass"(self.pos());
-        nqp::bindkey(%markhash, $markname, $cur);
+        my $cur := nqp::atkey(%markhash, $markname);
+        if nqp::isnull($cur) {
+            $cur := self."!cursor_start_cur"();
+            $cur."!cursor_pass"(self.pos());
+            nqp::bindkey(%markhash, $markname, $cur);
+        }
+        else {
+            $cur."!cursor_pos"(self.pos());
+            $cur
+        }
     }
     
     method MARKED(str $markname) {
@@ -613,7 +620,7 @@ An operator precedence parser.
             ParseShared, '%!marks');
         my $cur := nqp::atkey(%markhash, $markname);
         unless nqp::istype($cur, NQPCursor) && $cur.pos() == self.pos() {
-            $cur := self."!cursor_start_cur"();
+            $cur := self.'!cursor_start_fail'();
         }
         $cur
     }
