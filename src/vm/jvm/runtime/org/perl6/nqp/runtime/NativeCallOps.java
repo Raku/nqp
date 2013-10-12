@@ -3,6 +3,8 @@ package org.perl6.nqp.runtime;
 import com.sun.jna.NativeLibrary;
 import com.sun.jna.Pointer;
 
+import org.perl6.nqp.sixmodel.REPR;
+import org.perl6.nqp.sixmodel.REPRRegistry;
 import org.perl6.nqp.sixmodel.SixModelObject;
 
 import org.perl6.nqp.sixmodel.reprs.CPointerInstance;
@@ -18,7 +20,7 @@ public final class NativeCallOps {
     }
 
     public static long build(SixModelObject target, String libname, String symbol, String convention, SixModelObject arguments, SixModelObject returns, ThreadContext tc) {
-        NativeCallBody call = getNativeCallBody(target);
+        NativeCallBody call = getNativeCallBody(tc, target);
 
         try {
             /* Load the library and locate the symbol. */
@@ -47,7 +49,7 @@ public final class NativeCallOps {
     }
 
     public static SixModelObject call(SixModelObject returns, SixModelObject callObject, SixModelObject arguments, ThreadContext tc) {
-        NativeCallBody call = getNativeCallBody(callObject);
+        NativeCallBody call = getNativeCallBody(tc, callObject);
 
         try {
             /* Convert arguments into array of appropriate objects. */
@@ -74,14 +76,18 @@ public final class NativeCallOps {
         return 1L;
     }
 
-    private static NativeCallBody getNativeCallBody(SixModelObject target) {
+    private static REPR ncrepr = REPRRegistry.getByName("NativeCall");
+    private static NativeCallBody getNativeCallBody(ThreadContext tc, SixModelObject target) {
         NativeCallBody call;
         if (target instanceof NativeCallInstance) {
             call = ((NativeCallInstance)target).body;
         }
         else {
-            /* TODO: Handle box target stuff here. */
-            call = null;
+            call = (NativeCallBody)target.get_boxing_of(tc, ncrepr.ID);
+            if (call == null) {
+                call = new NativeCallBody();
+                target.set_boxing_of(tc, ncrepr.ID, call);
+            }
         }
         return call;
     }

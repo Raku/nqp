@@ -76,8 +76,27 @@ public class NativeCall extends REPR {
         /* Not supported. */
     }
     
+    // XXX This is a hack as it fails to check the REPR ID, but the JVM will
+    // catch any screw-ups and keep us safe.
     public void generateBoxingMethods(ThreadContext tc, STable st, ClassWriter cw, String className, String prefix) {
-        /* We don't box/unbox as any of the native types. */
+        String nativeCallType = Type.getType(NativeCallBody.class).getDescriptor();
+        String nativeCallIN = Type.getType(NativeCallBody.class).getInternalName();
+        
+        String getDesc = "(Lorg/perl6/nqp/runtime/ThreadContext;J)Ljava/lang/Object;";
+        MethodVisitor getMeth = cw.visitMethod(Opcodes.ACC_PUBLIC, "get_boxing_of", getDesc, null, null);
+        getMeth.visitVarInsn(Opcodes.ALOAD, 0);
+        getMeth.visitFieldInsn(Opcodes.GETFIELD, className, prefix, nativeCallType);
+        getMeth.visitInsn(Opcodes.ARETURN);
+        getMeth.visitMaxs(0, 0);
+
+        String setDesc = "(Lorg/perl6/nqp/runtime/ThreadContext;JLjava/lang/Object;)V";
+        MethodVisitor setMeth = cw.visitMethod(Opcodes.ACC_PUBLIC, "set_boxing_of", setDesc, null, null);
+        setMeth.visitVarInsn(Opcodes.ALOAD, 0);
+        setMeth.visitVarInsn(Opcodes.ALOAD, 4);
+        setMeth.visitTypeInsn(Opcodes.CHECKCAST, nativeCallIN);
+        setMeth.visitFieldInsn(Opcodes.PUTFIELD, className, prefix, nativeCallType);
+        setMeth.visitInsn(Opcodes.RETURN);
+        setMeth.visitMaxs(0, 0);
     }
     
     // We don't depend on any details of the STable, so no description is needed
