@@ -19,42 +19,52 @@ public final class NativeCallOps {
     public static long build(SixModelObject target, String libname, String symbol, String convention, SixModelObject arguments, SixModelObject returns, ThreadContext tc) {
         NativeCallInstance call = getNativeCallInstance(target);
 
-        /* Load the library and locate the symbol. */
-        /* TODO: Error handling! */
-        NativeLibrary library = NativeLibrary.getInstance(libname);
-        call.entry_point = library.getFunction(symbol);
-
-        /* TODO: Set the calling convention. */
-
-        /* Set up the argument types. */
-        int n = (int) arguments.elems(tc);
-        call.arg_types = new ArgType[n];
-        for (int i = 0; i < n; i++) {
-            call.arg_types[i] = getArgType(tc, arguments.at_pos_boxed(tc, i), false);
+        try {
+            /* Load the library and locate the symbol. */
+            /* TODO: Error handling! */
+            NativeLibrary library = NativeLibrary.getInstance(libname);
+            call.entry_point = library.getFunction(symbol);
+    
+            /* TODO: Set the calling convention. */
+    
+            /* Set up the argument types. */
+            int n = (int) arguments.elems(tc);
+            call.arg_types = new ArgType[n];
+            for (int i = 0; i < n; i++) {
+                call.arg_types[i] = getArgType(tc, arguments.at_pos_boxed(tc, i), false);
+            }
+    
+            call.ret_type = getArgType(tc, returns, true);
+    
+            return 1L;
         }
-
-        call.ret_type = getArgType(tc, returns, true);
-
-        return 1L;
+        catch (Throwable t) {
+            throw ExceptionHandling.dieInternal(tc, t);
+        }
     }
 
     public static SixModelObject call(SixModelObject returns, SixModelObject callObject, SixModelObject arguments, ThreadContext tc) {
         NativeCallInstance call = getNativeCallInstance(callObject);
 
-        /* Convert arguments into array of appropriate objects. */
-        int n = (int) arguments.elems(tc);
-        /* TODO: Make sure n == call.arg_types.length? */
-        Object[] cArgs = new Object[n];
-        for (int i = 0; i < n; i++) {
-            /* TODO: Converting sixmodel objects to appropriate JNA types. */
-            cArgs[i] = toJNAType(tc, arguments.at_pos_boxed(tc, i), call.arg_types[i]);
+        try {
+            /* Convert arguments into array of appropriate objects. */
+            int n = (int) arguments.elems(tc);
+            /* TODO: Make sure n == call.arg_types.length? */
+            Object[] cArgs = new Object[n];
+            for (int i = 0; i < n; i++) {
+                /* TODO: Converting sixmodel objects to appropriate JNA types. */
+                cArgs[i] = toJNAType(tc, arguments.at_pos_boxed(tc, i), call.arg_types[i]);
+            }
+
+            /* The actual foreign function call. */
+            Object returned = call.entry_point.invoke(javaType(tc, call.ret_type), cArgs);
+
+            /* Wrap returned in the appropriate REPR type. */
+            return toNQPType(tc, call.ret_type, returns, returned);
         }
-
-        /* The actual foreign function call. */
-        Object returned = call.entry_point.invoke(javaType(tc, call.ret_type), cArgs);
-
-        /* Wrap returned in the appropriate REPR type. */
-        return toNQPType(tc, call.ret_type, returns, returned);
+        catch (Throwable t) {
+            throw ExceptionHandling.dieInternal(tc, t);
+        }
     }
 
     public static long refresh(SixModelObject obj) {
