@@ -574,7 +574,7 @@ class QAST::MASTRegexCompiler {
             }
             if $max > 1 {
                 my $maxreg := fresh_i();
-                nqp::push(@ins, op('const_i64', $maxreg, ival($max))) if $max > 1;
+                nqp::push(@ins, op('const_i64', $maxreg, ival($max)));
                 nqp::push(@ins, op('ge_i', $ireg, $rep, $maxreg));
                 nqp::push(@ins, op('if_i', $ireg, $donelabel));
                 release($maxreg, $MVM_reg_int64);
@@ -593,7 +593,7 @@ class QAST::MASTRegexCompiler {
                 nqp::push(@ins, op('inc_i', $rep));
                 if $max > 1 {
                     my $maxreg := fresh_i();
-                    nqp::push(@ins, op('const_i64', $maxreg, ival($max))) if $max > 1;
+                    nqp::push(@ins, op('const_i64', $maxreg, ival($max)));
                     nqp::push(@ins, op('ge_i', $ireg, $rep, $maxreg));
                     nqp::push(@ins, op('if_i', $ireg, $donelabel));
                     release($maxreg, $MVM_reg_int64);
