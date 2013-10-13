@@ -1163,6 +1163,16 @@ of the type indicated by the opcode suffix.
 
 # OO/SixModel Opcodes
 
+## bindattr
+* `bindattr(Mu $obj, Mu $typeobj, str $attributename, Mu $new_value)`
+* `bindattr_i(Mu $obj, Mu $typeobj, str $attributename, int $new_value)`
+* `bindattr_n(Mu $obj, Mu $typeobj, str $attributename, num $new_value)`
+* `bindattr_s(Mu $obj, Mu $typeobj, str $attributename, str $new_value)`
+
+Binds `$new_value` to the attribute of name `$attributename` of object `$obj`,
+where the attribute was declared in type `$typeobj`. The notes in the
+`getattr` documentation also apply to `bindattr`.
+
 ## can
 * `can(Any $obj, str $method)`
 
