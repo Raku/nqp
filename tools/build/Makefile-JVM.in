@@ -25,7 +25,7 @@ RUNTIME_JAVAS = \
 
 RUNTIME_JAR = nqp-runtime.jar
 
-THIRDPARTY_JARS = $(ASM)asm-4.1.jar@cpsep@$(ASM)asm-tree-4.1.jar@cpsep@3rdparty/jline/jline-1.0.jar
+THIRDPARTY_JARS = $(ASM)asm-4.1.jar@cpsep@$(ASM)asm-tree-4.1.jar@cpsep@3rdparty/jline/jline-1.0.jar@cpsep@3rdparty/jna/jna.jar
 STAGE0 = src/vm/jvm/stage0
 STAGE1 = src/stage1
 STAGE2 = src/stage2
@@ -163,6 +163,7 @@ install: all
 	$(CP) 3rdparty/asm/asm-4.1.jar $(NQP_JAR_DIR)
 	$(CP) 3rdparty/asm/asm-tree-4.1.jar $(NQP_JAR_DIR)
 	$(CP) 3rdparty/jline/jline-1.0.jar $(NQP_JAR_DIR)
+	$(CP) 3rdparty/jna/jna.jar $(NQP_JAR_DIR)
 	$(CP) $(RUNTIME_JAR) $(NQP_JAR_DIR)
 	$(CP) $(NQP_MO_JAR) $(NQP_LIB_DIR)
 	$(CP) $(MODULE_LOADER_JAR) $(NQP_LIB_DIR)
@@ -367,10 +368,10 @@ t/*/*.t: all
 	prove -r -v --exec .@slash@$(RUNNER) $@
 
 test: all
-	prove -r --exec .@slash@$(RUNNER) t/nqp t/qregex t/p5regex t/qast t/serialization t/jvm
+	prove -r --exec .@slash@$(RUNNER) t/nqp t/qregex t/p5regex t/qast t/serialization t/jvm t/nativecall
 
 test-loud: all
-	prove -r -v --exec .@slash@$(RUNNER) t/nqp t/qregex t/p5regex t/qast t/serialization t/jvm
+	prove -r -v --exec .@slash@$(RUNNER) t/nqp t/qregex t/p5regex t/qast t/serialization t/jvm t/nativecall
 
 core-test: $(RUNNER)
 	prove -r --exec .@slash@$(RUNNER) t/nqp

@@ -65,9 +65,14 @@ $arg_hash<free_str> := 1;
 $return_hash := nqp::hash();
 $return_hash<type> := 'cpointer';
 
-nqp::buildnativecall($strdup, '', 'strdup', '', [$arg_hash], $return_hash);
-my $dupped := nqp::nativecall(CPointer, $strdup, ["ok - passing cpointer"]);
-ok(1, "function returning cpointer");
+try {
+    nqp::buildnativecall($strdup, '', 'strdup', '', [$arg_hash], $return_hash);
+    CATCH {
+        nqp::buildnativecall($strdup, '', '_strdup', '', [$arg_hash], $return_hash);
+    }
+}
+my $dupped := nqp::nativecall(CPointer, $strdup, ["ok - passing cpointer\n"]);
+say("ok - function returning cpointer"); # want un-numbered
 
 my $ptrprint := nqp::create(Call);
 $arg_hash := nqp::hash();

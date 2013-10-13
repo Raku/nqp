@@ -7,12 +7,16 @@ import org.perl6.nqp.sixmodel.reprs.CallCapture;
 import org.perl6.nqp.sixmodel.reprs.CodeRefREPR;
 import org.perl6.nqp.sixmodel.reprs.ContextRef;
 import org.perl6.nqp.sixmodel.reprs.Continuation;
+import org.perl6.nqp.sixmodel.reprs.CArray;
+import org.perl6.nqp.sixmodel.reprs.CPointer;
+import org.perl6.nqp.sixmodel.reprs.CStr;
 import org.perl6.nqp.sixmodel.reprs.IOHandle;
 import org.perl6.nqp.sixmodel.reprs.JavaWrap;
 import org.perl6.nqp.sixmodel.reprs.KnowHOWAttribute;
 import org.perl6.nqp.sixmodel.reprs.KnowHOWREPR;
 import org.perl6.nqp.sixmodel.reprs.Lexotic;
 import org.perl6.nqp.sixmodel.reprs.MultiCache;
+import org.perl6.nqp.sixmodel.reprs.NativeCall;
 import org.perl6.nqp.sixmodel.reprs.NFA;
 import org.perl6.nqp.sixmodel.reprs.P6Opaque;
 import org.perl6.nqp.sixmodel.reprs.P6bigint;
@@ -74,5 +78,9 @@ public class REPRRegistry {
         addREPR("IOHandle", new IOHandle());
         addREPR("P6bigint", new P6bigint());
         addREPR("MultiCache", new MultiCache());
+        addREPR("NativeCall", new NativeCall());
+        addREPR("CPointer", new CPointer());
+        addREPR("CArray", new CArray());
+        addREPR("CStr", new CStr());
     }
 }

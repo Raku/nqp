@@ -66,6 +66,12 @@ public abstract class SixModelObject implements Cloneable {
     public String get_str(ThreadContext tc) {
         throw ExceptionHandling.dieInternal(tc, "This representation can not unbox to a native str");
     }
+    public void set_boxing_of(ThreadContext tc, long reprId, Object value) {
+        throw ExceptionHandling.dieInternal(tc, "This representation can not box another");
+    }
+    public Object get_boxing_of(ThreadContext tc, long reprId) {
+        throw ExceptionHandling.dieInternal(tc, "This representation can not unbox another");
+    }
     
     /**
      * Positional access functions.

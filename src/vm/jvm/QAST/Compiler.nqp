@@ -40,31 +40,32 @@ my $IVAL_MINUSONE := JAST::PushIVal.new( :value(-1) );
 my $NVAL_ZERO     := JAST::PushNVal.new( :value(0.0) );
 
 # Some common types we'll need.
-my $TYPE_TC        := 'Lorg/perl6/nqp/runtime/ThreadContext;';
-my $TYPE_CU        := 'Lorg/perl6/nqp/runtime/CompilationUnit;';
-my $TYPE_CR        := 'Lorg/perl6/nqp/runtime/CodeRef;';
-my $TYPE_CF        := 'Lorg/perl6/nqp/runtime/CallFrame;';
-my $TYPE_OPS       := 'Lorg/perl6/nqp/runtime/Ops;';
-my $TYPE_CSD       := 'Lorg/perl6/nqp/runtime/CallSiteDescriptor;';
-my $TYPE_SMO       := 'Lorg/perl6/nqp/sixmodel/SixModelObject;';
-my $TYPE_STR       := 'Ljava/lang/String;';
-my $TYPE_OBJ       := 'Ljava/lang/Object;';
-my $TYPE_MATH      := 'Ljava/lang/Math;';
-my $TYPE_MH        := 'Ljava/lang/invoke/MethodHandle;';
-my $TYPE_MT        := 'Ljava/lang/invoke/MethodType;';
-my $TYPE_MHS       := 'Ljava/lang/invoke/MethodHandles;';
-my $TYPE_MHL       := 'Ljava/lang/invoke/MethodHandles$Lookup;';
-my $TYPE_CLASS     := 'Ljava/lang/Class;';
-my $TYPE_LONG      := 'Ljava/lang/Long;';
-my $TYPE_DOUBLE    := 'Ljava/lang/Double;';
-my $TYPE_EH        := 'Lorg/perl6/nqp/runtime/ExceptionHandling;';
-my $TYPE_EX_LEX    := 'Lorg/perl6/nqp/runtime/LexoticException;';
-my $TYPE_EX_UNWIND := 'Lorg/perl6/nqp/runtime/UnwindException;';
-my $TYPE_EX_CONT   := 'Lorg/perl6/nqp/runtime/ControlException;';
-my $TYPE_EX_RT     := 'Ljava/lang/RuntimeException;';
-my $TYPE_EX_SAVE   := 'Lorg/perl6/nqp/runtime/SaveStackException;';
-my $TYPE_THROWABLE := 'Ljava/lang/Throwable;';
-my $TYPE_RESUME    := 'Lorg/perl6/nqp/runtime/ResumeStatus$Frame;';
+my $TYPE_TC         := 'Lorg/perl6/nqp/runtime/ThreadContext;';
+my $TYPE_CU         := 'Lorg/perl6/nqp/runtime/CompilationUnit;';
+my $TYPE_CR         := 'Lorg/perl6/nqp/runtime/CodeRef;';
+my $TYPE_CF         := 'Lorg/perl6/nqp/runtime/CallFrame;';
+my $TYPE_OPS        := 'Lorg/perl6/nqp/runtime/Ops;';
+my $TYPE_NATIVE_OPS := 'Lorg/perl6/nqp/runtime/NativeCallOps;';
+my $TYPE_CSD        := 'Lorg/perl6/nqp/runtime/CallSiteDescriptor;';
+my $TYPE_SMO        := 'Lorg/perl6/nqp/sixmodel/SixModelObject;';
+my $TYPE_STR        := 'Ljava/lang/String;';
+my $TYPE_OBJ        := 'Ljava/lang/Object;';
+my $TYPE_MATH       := 'Ljava/lang/Math;';
+my $TYPE_MH         := 'Ljava/lang/invoke/MethodHandle;';
+my $TYPE_MT         := 'Ljava/lang/invoke/MethodType;';
+my $TYPE_MHS        := 'Ljava/lang/invoke/MethodHandles;';
+my $TYPE_MHL        := 'Ljava/lang/invoke/MethodHandles$Lookup;';
+my $TYPE_CLASS      := 'Ljava/lang/Class;';
+my $TYPE_LONG       := 'Ljava/lang/Long;';
+my $TYPE_DOUBLE     := 'Ljava/lang/Double;';
+my $TYPE_EH         := 'Lorg/perl6/nqp/runtime/ExceptionHandling;';
+my $TYPE_EX_LEX     := 'Lorg/perl6/nqp/runtime/LexoticException;';
+my $TYPE_EX_UNWIND  := 'Lorg/perl6/nqp/runtime/UnwindException;';
+my $TYPE_EX_CONT    := 'Lorg/perl6/nqp/runtime/ControlException;';
+my $TYPE_EX_RT      := 'Ljava/lang/RuntimeException;';
+my $TYPE_EX_SAVE    := 'Lorg/perl6/nqp/runtime/SaveStackException;';
+my $TYPE_THROWABLE  := 'Ljava/lang/Throwable;';
+my $TYPE_RESUME     := 'Lorg/perl6/nqp/runtime/ResumeStatus$Frame;';
 
 # Exception handler categories.
 my $EX_CAT_CATCH   := 1;
@@ -2471,6 +2472,12 @@ QAST::OperationsJAST.map_classlib_core_op('jvmeqaddr', $TYPE_OPS, 'jvmeqaddr', [
 QAST::OperationsJAST.map_classlib_core_op('jvmisnull', $TYPE_OPS, 'jvmisnull', [$RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('jvmbootinterop', $TYPE_OPS, 'jvmbootinterop', [], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('jvmgetconfig', $TYPE_OPS, 'jvmgetconfig', [], $RT_OBJ, :tc);
+
+# Native call ops
+QAST::OperationsJAST.map_classlib_core_op('initnativecall', $TYPE_NATIVE_OPS, 'init', [], $RT_INT);
+QAST::OperationsJAST.map_classlib_core_op('buildnativecall', $TYPE_NATIVE_OPS, 'build', [$RT_OBJ, $RT_STR, $RT_STR, $RT_STR, $RT_OBJ, $RT_OBJ], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('nativecall', $TYPE_NATIVE_OPS, 'call', [$RT_OBJ, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('nativecallrefresh', $TYPE_NATIVE_OPS, 'refresh', [$RT_OBJ], $RT_INT);
 
 class QAST::CompilerJAST {
     # Responsible for handling issues around code references, building the

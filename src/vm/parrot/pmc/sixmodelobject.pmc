@@ -773,6 +773,62 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
         }
     }
     
+    VTABLE FLOATVAL get_number_keyed_int(INTVAL i) {
+        PMC *decont = DECONT(interp, SELF);
+        if (REPR(decont)->pos_funcs) {
+            NativeValue nv;
+            nv.type = NATIVE_VALUE_FLOAT;
+            REPR(decont)->pos_funcs->at_pos_native(interp, STABLE(decont),
+                OBJECT_BODY(decont), i, &nv);
+            return nv.value.floatval;
+        }
+        else {
+            return SUPER(i);
+        }
+    }
+    
+    VTABLE void set_number_keyed_int(INTVAL i, FLOATVAL value) {
+        PMC *decont = DECONT(interp, SELF);
+        if (REPR(decont)->pos_funcs) {
+            NativeValue nv;
+            nv.type = NATIVE_VALUE_FLOAT;
+            nv.value.floatval = value;
+            REPR(decont)->pos_funcs->bind_pos_native(interp, STABLE(decont),
+                OBJECT_BODY(decont), i, &nv);
+        }
+        else {
+            SUPER(i, value);
+        }
+    }
+    
+    VTABLE STRING * get_string_keyed_int(INTVAL i) {
+        PMC *decont = DECONT(interp, SELF);
+        if (REPR(decont)->pos_funcs) {
+            NativeValue nv;
+            nv.type = NATIVE_VALUE_STRING;
+            REPR(decont)->pos_funcs->at_pos_native(interp, STABLE(decont),
+                OBJECT_BODY(decont), i, &nv);
+            return nv.value.stringval;
+        }
+        else {
+            return SUPER(i);
+        }
+    }
+    
+    VTABLE void set_string_keyed_int(INTVAL i, STRING *value) {
+        PMC *decont = DECONT(interp, SELF);
+        if (REPR(decont)->pos_funcs) {
+            NativeValue nv;
+            nv.type = NATIVE_VALUE_STRING;
+            nv.value.stringval = value;
+            REPR(decont)->pos_funcs->bind_pos_native(interp, STABLE(decont),
+                OBJECT_BODY(decont), i, &nv);
+        }
+        else {
+            SUPER(i, value);
+        }
+    }
+    
     VTABLE INTVAL elements() {
         PMC *decont = DECONT(interp, SELF);
         if (REPR(decont)->elems)
