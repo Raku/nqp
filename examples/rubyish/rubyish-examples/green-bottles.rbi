@@ -15,15 +15,15 @@ puts '<?xml>'
         <h1>Green Bottles...</h1>
         <%n = 12      %>
         <%while n > 0 %>
-	    <blockquote>
-		<em>#{n}</em> green bottles standing on the wall,
-		<em>#{n}</em> green bottles standing on the wall
-		<br/>
-		and if one green bottle should accidently fall...
-		<br/>
-		<%n -= 1 %>
-		there'd be <em> #{if n then n else 'no' end} </em> green bottles standing on the wall
-	    </blockquote>
+            <blockquote>
+                <em>#{n}</em> green bottles standing on the wall,
+                <em>#{n}</em> green bottles standing on the wall
+                <br/>
+                and if one green bottle should accidently fall...
+                <br/>
+                <%n -= 1 %>
+                there'd be <em> #{if n then n else 'no' end} </em> green bottles standing on the wall
+            </blockquote>
         <%end%>
     </body>
 </html>
