@@ -1,6 +1,3 @@
-# Disable compilatin of deserialization stuff while still in development.
-my $ENABLE_SC_COMP := 1;
-
 # Mapping of QAST::Want type identifiers to return types.
 my %WANTMAP := nqp::hash(
     'v', $MVM_reg_void,
@@ -448,7 +445,7 @@ class QAST::MASTCompiler {
         if %*BLOCK_LEX_VALUES {
             nqp::push(@post_des, QAST::Op.new( :op('setup_blv'), %*BLOCK_LEX_VALUES ));
         }
-        if $ENABLE_SC_COMP && ($comp_mode || @pre_des || @post_des) {
+        if $comp_mode || @pre_des || @post_des {
             # Create a block into which we'll install all of the other
             # pieces.
             my $block := QAST::Block.new( :blocktype('raw') );
