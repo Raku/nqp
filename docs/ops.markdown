@@ -1186,6 +1186,36 @@ Returns 1 if the objects are the same object in the underlying VM,
 If the object has a method of the given name, return it. Otherwise,
 throw an exception.
 
+## getattr
+* `getattr(Mu $obj, Mu $typeobj, str $attributename)`
+* `getattr_i(Mu $obj, Mu $typeobj, str $attributename)`
+* `getattr_n(Mu $obj, Mu $typeobj, str $attributename)`
+* `getattr_s(Mu $obj, Mu $typeobj, str $attributename)`
+
+Returns the attribute of name `$attributename` of object `$obj`, where the
+object was declared in class `$typeobj`. The `_n`, `_i`, and `_s` variants are
+for natively typed attributes.
+
+The following example demonstrates why the type object needs to passed along,
+and cannot be infered from the object:
+
+    class A      { has str $!x }
+    class B is A { has str $!x }
+
+    my $obj := nqp::create(B);
+    nqp::bindattr_s($obj, A, '$!x', 'A.x');
+    nqp::bindattr_s($obj, B, '$!x', 'B.x');
+
+    nqp::say(nqp::getattr_s($obj, A, '$!x'));
+    nqp::say(nqp::getattr_s($obj, B, '$!x'));
+
+Throws an exception if there is no such attribute in the class, the attribute
+is of the wrong type, or the object doesn't conform to the type.
+
+Note that in languages that support a full-blown container model, you might
+need to decontainerize `$obj` before passing it to `getattr`, unless you
+actually want to access an attribute of the container.
+
 ## how
 * `how(Any $obj)`
 
