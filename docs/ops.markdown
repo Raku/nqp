@@ -867,13 +867,13 @@ Output the given object to the filehandle.
 
 # External command Opcodes
 
-# shell1
+## shell1
 _Deprecated: use shell3_
 * `shell1(str $cmd)`
 
 Same as `shell3`, using the current directory and an empty environment.
 
-# shell3
+## shell3
 * `shell3(str $cmd, str $path, %env)`
 
 Using $path as the working directory, execute the given command using the
@@ -881,7 +881,7 @@ specified environment variables. Returns a POSIX-style return value. Command
 is executed using an OS-appropriate shell (`sh -c` or `cmd /c`). Blocks
 until command is complete.
 
-# spawn
+## spawn
 * `spawn(@cmd, str $path, %env)`
 
 Using $path as the working directory, execute the given command  using the
