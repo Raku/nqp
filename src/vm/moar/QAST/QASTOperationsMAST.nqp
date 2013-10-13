@@ -1798,6 +1798,14 @@ QAST::MASTOperations.add_core_moarop_mapping('assignunchecked', 'assignunchecked
 QAST::MASTOperations.add_core_moarop_mapping('defined', 'isconcrete');
 
 # lexical related opcodes
+QAST::MASTOperations.add_core_moarop_mapping('getlex', 'getlex_no');
+QAST::MASTOperations.add_core_moarop_mapping('getlex_i', 'getlex_ni');
+QAST::MASTOperations.add_core_moarop_mapping('getlex_n', 'getlex_nn');
+QAST::MASTOperations.add_core_moarop_mapping('getlex_s', 'getlex_ns');
+QAST::MASTOperations.add_core_moarop_mapping('bindlex', 'bindlex_no', 1);
+QAST::MASTOperations.add_core_moarop_mapping('bindlex_i', 'bindlex_ni', 1);
+QAST::MASTOperations.add_core_moarop_mapping('bindlex_n', 'bindlex_nn', 1);
+QAST::MASTOperations.add_core_moarop_mapping('bindlex_s', 'bindlex_ns', 1);
 QAST::MASTOperations.add_core_moarop_mapping('getlexdyn', 'getdynlex');
 QAST::MASTOperations.add_core_moarop_mapping('bindlexdyn', 'binddynlex');
 QAST::MASTOperations.add_core_op('locallifetime', -> $qastcomp, $op {
