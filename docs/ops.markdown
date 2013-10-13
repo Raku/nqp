@@ -1173,6 +1173,20 @@ Binds `$new_value` to the attribute of name `$attributename` of object `$obj`,
 where the attribute was declared in type `$typeobj`. The notes in the
 `getattr` documentation also apply to `bindattr`.
 
+## callmethod
+* `callmethod(Mu $obj, str $methodname, *@pos, *%named)`
+
+Uses `findmethod` to locate method `$methodname` on object `$obj`, and `call`
+to invoke the method with positional arguments `*@pos` and named arguments
+`*%named`.
+
+Example:
+
+class A { method x($a, $b, :$c) { say("$a $b $c") } }
+
+    nqp::callmethod(A, 'x', '4', '2', c => 'foo');
+    # same as: A.x(4, 2, c => 'foo')
+
 ## can
 * `can(Any $obj, str $method)`
 
@@ -1359,6 +1373,14 @@ Gets hold of the argument capture passed to the current block.
 (a future usecapture may invalidate it)
 It's valid to implement this exactly the same way as savecapture if there's no performance benefit to be had in a split.
 Used by the multi-dispatcher.
+
+# Variable opcodes
+
+## bind
+* `bind(Mu $variable, Mu $value)`
+
+Binds `$value` to the `$variable`. Dies if `$variable` isn't actually a
+variable. Same as the `:=` operator in NQP.
 
 # Miscellaneous Opcodes
 
