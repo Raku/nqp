@@ -1,109 +1,110 @@
 #! nqp
 
-my @vms := nqp::list('parrot', 'jvm', 'moar');
-my %documented_ops := nqp::hash();
-for @vms -> $vm {
-    %documented_ops{$vm} := nqp::hash();
+my @*vms := nqp::list('parrot', 'jvm', 'moar');
+
+my %documented_ops := find_documented_opcodes();
+
+my %ops := hash_of_vms();
+
+%ops<jvm> := find_opcodes(
+    :file("src/vm/jvm/QAST/Compiler.nqp"),
+    :keywords(<map_classlib_core_op add_core_op map_jvm_core_op>)
+);
+
+%ops<parrot> := find_opcodes(
+    :file("src/vm/parrot/QAST/Operations.nqp"),
+    :keywords(<add_core_op add_core_pirop_mapping>)
+);
+
+%ops<moar> := find_opcodes(
+    :file("src/vm/moar/QAST/QASTOperationsMAST.nqp"),
+    :keywords(<add_core_op add_core_moarop_mapping>)
+);
+
+# Most backends programmatically add these ops - to keep our cheating simple,
+# add them to each of the backends manually
+for <if unless while until repeat_while repeat_until> -> $op_name {
+    for @*vms -> $vm {
+        %ops{$vm}{$op_name} := 1;
+    }
 }
 
-my @doc_lines := nqp::split("\n", nqp::readallfh(nqp::open("docs/ops.markdown","r")));
-my @opcode_vms := nqp::list();
-for @doc_lines -> $line {
-    my $match := $line ~~ /^ '##' \s* <[a..zA..Z0..9_]>+ \s* ('`' .* '`')? /;
-    if (?$match) {
-        if (!?$match[0]) {
-            @opcode_vms := nqp::clone(@vms);
+# Are ops that are implemented documented? Fail once per opcode
+my %combined_ops := nqp::hash();
+for @*vms -> $vm {
+    for %ops{$vm} -> $op {
+        if !%combined_ops{$op} {
+            %combined_ops{$op} := nqp::list($vm);
         } else {
-            @opcode_vms := nqp::list();
-            if $match[0] ~~ /jvm/ {
-                nqp::push(@opcode_vms,"jvm");
-            }
-            if $match[0] ~~ /parrot/ {
-                nqp::push(@opcode_vms,"parrot");
-            }
-            if $match[0] ~~ /moar/ {
-                nqp::push(@opcode_vms,"moar");
-            }
+            nqp::push(%combined_ops{$op}, $vm);
         }
     }
-    next unless $line ~~ / ^ '* ' .* '(' /;
-    $line := nqp::substr2($line, 3);
-    $line := nqp::split("(", $line)[0];
-    for @opcode_vms -> $vm {
-        %documented_ops{$vm}{$line} := 1 ;
+}
+
+for %combined_ops -> $opcode {
+    my $vms := nqp::join(";", %combined_ops{$opcode});
+    ok(%documented_ops<any>{$opcode}, "Opcode '$opcode' ($vms) is documented");
+}
+
+# Do documented opcodes actually exist? Fail once per vm if not.
+for @*vms -> $vm {
+    for %documented_ops{$vm} -> $doc_op {
+        ok(%ops{$vm}{$doc_op}, "documented op '$doc_op' exists in $vm");
     }
-
 }
 
-my %jvm_ops := nqp::hash();
-my @jvm_lines := nqp::split("\n", nqp::readallfh(nqp::open("src/vm/jvm/QAST/Compiler.nqp","r")));
-for @jvm_lines -> $line {
-    next unless $line ~~ / 'map_classlib_core_op' | 'add_core_op' | 'map_jvm_core_op' /;
-    $line := nqp::split("'", $line)[1];
-    next unless nqp::chars($line);
-    %jvm_ops{$line} := 1;
+sub find_opcodes(:$file, :@keywords) {
+    my %ops := nqp::hash();
+    my @lines := nqp::split("\n", nqp::readallfh(nqp::open($file,"r")));
+    for @lines -> $line {
+        next unless $line ~~ / @keywords /;
+        $line := nqp::split("'", $line)[1];
+        next unless nqp::chars($line);
+        %ops{$line} := 1;
+    }
+    return %ops;
 }
 
-# These are harder to tease out of the definitions in java, so add them manually
-for <if unless while until repeat_while repeat_until> -> $op_name {
-    %jvm_ops{$op_name} := 1;
+sub hash_of_vms() {
+    my %hash := nqp::hash();
+    for @*vms -> $vm {
+        %hash{$vm} := nqp::hash();
+    }
+    return %hash;
 }
 
-# All the jvm ops must be documented
+sub find_documented_opcodes() {
+    my %documented_ops := hash_of_vms();
+    %documented_ops<any> := nqp::hash();
 
-for %jvm_ops -> $jvm_op {
-    ok(%documented_ops<jvm>{$jvm_op}, "JVM op '$jvm_op' is documented");
-}
-
-for %documented_ops<jvm> -> $doc_op {
-    ok(%jvm_ops{$doc_op}, "documented op '$doc_op' exists in the JVM");
-}
-
-my %pvm_ops := nqp::hash();
-my @pvm_lines := nqp::split("\n", nqp::readallfh(nqp::open("src/vm/parrot/QAST/Operations.nqp","r")));
-for @pvm_lines -> $line {
-    next unless $line ~~ / 'add_core_op' | 'add_core_pirop_mapping' /;
-    $line := nqp::split("'", $line)[1];
-    next unless nqp::chars($line);
-    %pvm_ops{$line} := 1;
-}
-
-# These are harder to tease out of the definitions in java, so add them manually
-for <if unless while until repeat_while repeat_until> -> $op_name {
-    %pvm_ops{$op_name} := 1;
-}
-
-# All the pvm ops must be documented
-
-for %pvm_ops -> $pvm_op {
-    ok(%documented_ops<parrot>{$pvm_op}, "PVM op '$pvm_op' is documented");
-}
-
-for %documented_ops<parrot> -> $doc_op {
-    ok(%pvm_ops{$doc_op}, "documented op '$doc_op' exists in the PVM");
-}
-
-my %mvm_ops := nqp::hash();
-my @mvm_lines := nqp::split("\n", nqp::readallfh(nqp::open("src/vm/moar/QAST/QASTOperationsMAST.nqp","r")));
-for @mvm_lines -> $line {
-    next unless $line ~~ / 'add_core_op' | 'add_core_moarop_mapping' /;
-    $line := nqp::split("'", $line)[1];
-    next unless nqp::chars($line);
-    %mvm_ops{$line} := 1;
-}
-
-# These are harder to tease out of the definitions in moar, so add them manually
-for <if unless while until repeat_while repeat_until> -> $op_name {
-    %mvm_ops{$op_name} := 1;
-}
-
-
-# All the mvm ops must be documented
-
-for %mvm_ops -> $mvm_op {
-    ok(%documented_ops<moar>{$mvm_op}, "MOAR op '$mvm_op' is documented");
-}
-
-for %documented_ops<moar> -> $doc_op {
-    ok(%mvm_ops{$doc_op}, "documented op '$doc_op' exists in MOAR");
+    my @doc_lines := nqp::split("\n", nqp::readallfh(nqp::open("docs/ops.markdown","r")));
+    my @opcode_vms := nqp::list();
+    for @doc_lines -> $line {
+        my $match := $line ~~ /^ '##' \s* <[a..zA..Z0..9_]>+ \s* ('`' .* '`')? /;
+        if (?$match) {
+            if (!?$match[0]) {
+                @opcode_vms := nqp::clone(@*vms);
+            } else {
+                @opcode_vms := nqp::list();
+                if $match[0] ~~ /jvm/ {
+                    nqp::push(@opcode_vms,"jvm");
+                }
+                if $match[0] ~~ /parrot/ {
+                    nqp::push(@opcode_vms,"parrot");
+                }
+                if $match[0] ~~ /moar/ {
+                    nqp::push(@opcode_vms,"moar");
+                }
+            }
+        }
+        next unless $line ~~ / ^ '* ' .* '(' /;
+        $line := nqp::substr2($line, 3);
+        $line := nqp::split("(", $line)[0];
+        for @opcode_vms -> $vm {
+            %documented_ops{$vm}{$line} := 1 ;
+        }
+        %documented_ops<any>{$line} := 1 ;
+    
+    }
+    return %documented_ops;
 }
