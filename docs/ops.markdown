@@ -1176,13 +1176,17 @@ where the attribute was declared in type `$typeobj`. The notes in the
 ## can
 * `can(Any $obj, str $method)`
 
-If the object has a method of the given name, return it. Otherwise,
-throw an exception.
+If the object has a method of the given name, return 1. Otherwise, return 0.
 
 ## clone
 * `clone(Any $obj)`
 
 Return a clone of the passed in object.
+
+## create
+* `create(Mu $typeobj)`
+
+Returns a newly allocated instance of type `$typeobj`.
 
 ## eqaddr
 * `eqaddr(Any $l, Any $r)`
