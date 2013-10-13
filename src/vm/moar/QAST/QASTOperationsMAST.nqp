@@ -1526,6 +1526,7 @@ QAST::MASTOperations.add_core_moarop_mapping('floor_n', 'floor_n');
 QAST::MASTOperations.add_core_moarop_mapping('ln_n', 'log_n'); # looks like this one is never used
 QAST::MASTOperations.add_core_moarop_mapping('sqrt_n', 'sqrt_n');
 QAST::MASTOperations.add_core_moarop_mapping('base_I', 'base_I');
+QAST::MASTOperations.add_core_moarop_mapping('isbig_I', 'isbig_I');
 QAST::MASTOperations.add_core_moarop_mapping('radix', 'radix');
 QAST::MASTOperations.add_core_moarop_mapping('radix_I', 'radix_I');
 QAST::MASTOperations.add_core_moarop_mapping('log_n', 'log_n');
@@ -1674,6 +1675,7 @@ QAST::MASTOperations.add_core_moarop_mapping('isle_s', 'le_s');
 QAST::MASTOperations.add_core_moarop_mapping('isgt_s', 'gt_s');
 QAST::MASTOperations.add_core_moarop_mapping('isge_s', 'ge_s');
 
+QAST::MASTOperations.add_core_moarop_mapping('bool_I', 'bool_I');
 QAST::MASTOperations.add_core_moarop_mapping('cmp_I', 'cmp_I');
 QAST::MASTOperations.add_core_moarop_mapping('iseq_I', 'eq_I');
 QAST::MASTOperations.add_core_moarop_mapping('isne_I', 'ne_I');

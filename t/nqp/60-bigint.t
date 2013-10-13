@@ -121,3 +121,6 @@ ok(nqp::isprime_I(box(17), 1) == 1, 'is 17 prime');
 
 ok(nqp::iseq_I(nqp::gcd_I(box(18), box(12), $bi_type), box(6)), 'nqp::gcd_I');
 ok(nqp::iseq_I(nqp::lcm_I(box(18), box(12), $bi_type), box(36)), 'nqp::lcm_I');
+
+ok(nqp::bool_I(box(42)), 'bool_I(42)');
+ok(!nqp::bool_I(box(0)), 'bool_I(0)');
