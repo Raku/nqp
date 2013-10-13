@@ -482,6 +482,20 @@ Return a hash. The first argument is a key, the second its value, and so on.
 Be sure to pass an even number of arguments, a VM specific error may occur
 otherwise.
 
+## index
+* `index(str $haystack, str $needle)`
+* `index(str $haystack, str $needle, int $pos)`
+
+Return the position in `$haystack` at which `$needle` appears, or -1
+if `$needle` does not appear. Begin searching at position `$pos` if specified,
+or at 0, otherwise.
+
+## indexfrom
+* `indexfrom(str $haystack, str $needle, int $pos)`
+
+Return the position in `$haystack` at which `$needle` appears, or -1
+if `$needle` does not appear. Begin searching at position `$pos`.
+
 ## iscclass
 * `iscclass(int $class, str $str, int $i)`
 
@@ -542,6 +556,26 @@ The $flags is a bitmask that modifies the parse and/or result:
 
 Replace the the characters of `$str` starting at `$offset` for `$count`
 characters, with the `$replacement` string.
+
+## rindex
+* `rindex(str $haystack, str $needle)`
+* `rindex(str $haystack, str $needle, int $pos)`
+
+Searching backwards through the `$haystack`, return the position at which
+`$needle` appears, or -1 if it does not. Begin searching at `$pos` if
+specified, otherwise start from the last position.
+
+## rindexfrom
+* `rindexfrom(str $haystack, str $needle, int $pos)`
+
+Searching backwards through the `$haystack`, starting at `$pos` return the
+position at which `$needle` appears, or -1 if it does not.
+
+## rindexfromend
+* `rindexfromend(str $haystack, str $needle)`
+
+Searching backwards through the `$haystack`, return the position at which
+`$needle` appears, or -1 if it does not.
 
 ## uc
 * `uc(str $str)`
@@ -1127,7 +1161,7 @@ Convert Big Integer value to a native number.
 Given a Perl 6 object, return a native with the same value,
 of the type indicated by the opcode suffix.
 
-# OO Opcodes
+# OO/SixModel Opcodes
 
 ## can
 * `can(Any $obj, str $method)`
@@ -1151,6 +1185,41 @@ Returns 1 if the objects are the same object in the underlying VM,
 
 If the object has a method of the given name, return it. Otherwise,
 throw an exception.
+
+## how
+* `how(Any $obj)`
+
+NQP equivalent for Perl 6's `$obj.HOW`.
+
+## rebless
+* `rebless(Any $obj, Type $type)`
+
+Convert `$obj` to be an object of the new `$type`.
+
+## reprname
+* `reprname(Any $obj)`
+
+Return the name of the REPR for the given object.
+
+## setwho
+* `setwho(Any $obj, Any $who)`
+
+Replace `$obj`'s WHO. Return `$obj`.
+
+## who
+* `who(Any $obj)`
+
+NQP equivalent for Perl 6's `$obj.WHO`.
+
+## what
+* `what(Any $obj)`
+
+NQP equivalent for Perl 6's `$obj.WHAT`.
+
+## where
+* `where(Any $obj)`
+
+Return a unique ID for this `$obj`.
 
 # Bit Opcodes
 
