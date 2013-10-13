@@ -31,8 +31,8 @@ correspond directly to NQP types.
 * num       - native float
 * str       - native string
 * Int       - BigInt
-* Any       - an NQP or VM object
-* Type      - a type object, e.g. `Int`
+* Mu        - any NQP or VM object
+* Mu:T      - a type object, e.g. `Int`
 * Exception - an Exception object
 * Handle    - an I/O Handle object
 * Iterable  - something iterable
@@ -51,7 +51,7 @@ all nqp backends.
 ## abs
 * `abs_i(int $i)`
 * `abs_n(num $n)`
-* `abs_I(Int $i, Type $type)`
+* `abs_I(Int $i, Mu:T $type)`
 
 Return the absolute value of a number.
 `_I` variant returns an object of the given type.
@@ -59,7 +59,7 @@ Return the absolute value of a number.
 ## add
 * `add_i(int $l, int $r)`
 * `add_n(num $l, num $r)`
-* `add_I(Int $l, Int $r, Type $type)`
+* `add_I(Int $l, Int $r, Mu:T $type)`
 
 Add two numbers together, returning the result.
 `_I` variant returns an object of the given type.
@@ -67,7 +67,7 @@ Add two numbers together, returning the result.
 ## div
 * `div_i(int $l, int $r)`
 * `div_n(num $l, num $r)`
-* `div_I(Int $l, Int $r, Type $type)`
+* `div_I(Int $l, Int $r, Mu:T $type)`
 * `div_In(Int $l, Int $r)`
 
 Divide $l by $r, returning the result.
@@ -77,14 +77,14 @@ a native num, using a scale of 309, and a rounding mode equivalent to Java's
 
 ## gcd
 * `gcd_i(int $l, int $r)`
-* `gcd_I(Int $l, Int $r, Type $type)`
+* `gcd_I(Int $l, Int $r, Mu:T $type)`
 
 Return the greatest common multiple of two numbers. 
 `_I` variant returns an object of the given type.
 
 ## lcm
 * `lcm_i(int $l, int $r)`
-* `lcm_I(Int $l, Int $r, Type $type)`
+* `lcm_I(Int $l, Int $r, Mu:T $type)`
 
 Return the lowest common multiple of two numbers. 
 `_I` variant returns an object of the given type.
@@ -92,7 +92,7 @@ Return the lowest common multiple of two numbers.
 ## mod
 * `mod_i(int $l, int $r)`
 * `mod_n(num $l, num $r)`
-* `mod_I(Int $l, Int $r, Type $type)`
+* `mod_I(Int $l, Int $r, Mu:T $type)`
 
 Return the modulus of $l by $r.
 `_I` variant returns an object of the given type.
@@ -100,7 +100,7 @@ Return the modulus of $l by $r.
 ## mul
 * `mul_i(int $l, int $r)`
 * `mul_n(num $l, num $r)`
-* `mul_I(Int $l, Int $r, Type $type)`
+* `mul_I(Int $l, Int $r, Mu:T $type)`
 
 Multiple two numbers, returning the result.
 `_I` variant returns an object of the given type.
@@ -108,7 +108,7 @@ Multiple two numbers, returning the result.
 ## neg
 * `neg_i(int $i)`
 * `neg_n(num $n)`
-* `neg_I(Int $i, Type $type)`
+* `neg_I(Int $i, Mu:T $type)`
 
 Return the negative of a number.
 `_I` variant returns an object of the given type.
@@ -116,7 +116,7 @@ Return the negative of a number.
 ## sub
 * `sub_i(int $l, int $r)`
 * `sub_n(num $l, num $r)`
-* `sub_I(Int $l, Int $r, Type $type)`
+* `sub_I(Int $l, Int $r, Mu:T $type)`
 
 Subtract $r from $l, returning the result.
 `_I` variant returns an object of the given type.
@@ -159,7 +159,7 @@ Return the log base 10 of a number.
 Return the natural logarithm of a number.
 
 ## expmod
-* `expmod_I(Int $base, Int $exponent, Int $modulus, Type $type)`
+* `expmod_I(Int $base, Int $exponent, Int $modulus, Mu:T $type)`
 
 Return a bigint that is `$base` raised to `$exponent` modulus `$modulus`.
 `_I` variant returns an object of the given type.
@@ -176,7 +176,7 @@ Return negative infinity.
 
 ## pow
 * `pow_n(num $base, num $exponent)`
-* `pow_I(Int $base, Int $exponent, Type $type_num, Type $type_bigint)`
+* `pow_I(Int $base, Int $exponent, Mu:T $type_num, Mu:T $type_bigint)`
 
 Return the value of $base raised to $exponent;
 `_I` variant returns an object of `$type_num` for negative exponents,
@@ -184,7 +184,7 @@ and of type `$type_bigint` for positive exponents.
 
 ## rand
 * `rand_n(num $n)`
-* `rand_I(Int $i, Type $type)`
+* `rand_I(Int $i, Mu:T $type)`
 
 Returns a psuedo-random bigint up to the value of the
 given number. 
@@ -312,7 +312,7 @@ Return 1 if `$val` is 0, 1 otherwise.
 Return whatever is bound to @arr at position $i.
 
 ## bindpos
-* `bindpos(@arr, int $i, Any $v)`
+* `bindpos(@arr, int $i, Mu $v)`
 * `bindpos_i(@arr, int $i, int $v)`
 * `bindpos_n(@arr, int $i, num $v)`
 * `bindpos_s(@arr, int $i, str $v)`
@@ -343,7 +343,7 @@ an empty list is created. If a typed variant is used, the parameters
 are coerced to the appropriate type.
 
 ## push
-* `push(@arr, Any $v)`
+* `push(@arr, Mu $v)`
 * `push_i(Array int @arr, int $v)`
 * `push_n(Array num @arr, num $v)`
 * `push_s(Array str @arr, str $v)`
@@ -384,7 +384,7 @@ Remove the elements in `@arr` starting at `$offset`, for `$count` positions.
 Replace them with all the elements from `@from`.
 
 ## unshift
-* `unshift(@arr, Any $v)`
+* `unshift(@arr, Mu $v)`
 * `unshift_i(@arr, int $v)`
 * `unshift_n(@arr, num $v)`
 * `unshift_s(@arr, str $v)`
@@ -404,7 +404,7 @@ Return the number of elements of @arr on Parrot, $v on JVM.
 Return the value of %hash at key $key.
 
 ## bindkey
-* `bindkey(%hash, String $key, Any $v)`
+* `bindkey(%hash, String $key, Mu $v)`
 * `bindkey_i(%hash, String $key, int $v)`
 * `bindkey_n(%hash, String $key, num $v)`
 * `bindkey_s(%hash, String $key, str $v)`
@@ -532,7 +532,7 @@ Return the unicode codepoint of the th character in `$str`
 
 ## radix
 * `radix(int $radix, String $str, int $pos, int $flags)`
-* `radix_I(int $radix, String $str, int $pos, int $flags, Type $type)`
+* `radix_I(int $radix, String $str, int $pos, int $flags, Mu:T $type)`
 
 Convert string $str into a number starting at offset $pos and using radix $radix.
 The result of the conversion returns an array with
@@ -744,7 +744,7 @@ Sets the exception category (`nqp::const::CONTROL_*`)
 Sets the exception message.
 
 ## setpayload
-* `setpayload(Exception $ex, Any $obj)`
+* `setpayload(Exception $ex, Mu $obj)`
 
 Sets the exception payload.
 
@@ -861,7 +861,7 @@ Set the input line separator on the given file handle.
 Return current access position for an open handle.
 
 ## writefh
-* `writefh(Handle $fh, Any $str)`
+* `writefh(Handle $fh, Mu $str)`
 
 Output the given object to the filehandle.
 
@@ -1037,66 +1037,66 @@ Returns a VM specific type object that can box a native str.
 Returns a VM specific type object for a native array of str.
 
 ## box
-* `box_i(int $val, Type $type)`
-* `box_n(num $val, Type $type)`
-* `box_s(str $val, Type $type)`
+* `box_i(int $val, Mu:T $type)`
+* `box_n(num $val, Mu:T $type)`
+* `box_s(str $val, Mu:T $type)`
 
 Given a native value, return a perl 6 object of the given type
 with the same value.
 
 ## defined
-* `defined(Any $obj)`
+* `defined(Mu $obj)`
 
 Returns 1 if the object is not null and is not a Type object, 0 otherwise.
 
 ## fromnum
-* `fromnum_I(num $val, Type $type)`
+* `fromnum_I(num $val, Mu:T $type)`
 
 Convert float value to a Big Integer of the given type,
 discarding any decimal portion.
 
 ## fromstr
-* `fromstr_I(str $val, Type $type)`
+* `fromstr_I(str $val, Mu:T $type)`
 
 Convert string value to a Big Integer of the given type.
 
 ## isbig
-* `isbig_I(Any $obj)`
+* `isbig_I(Mu $obj)`
 
 Returns a 1 if the object's numerical representation requires a big int, 0 otherwise.
 
 ## isconcrete
-* `isconcrete(Any $obj)`
+* `isconcrete(Mu $obj)`
 
 Returns a 1 if the object is not a type object, 0 otherwise.
 
 ## iscont
-* `iscont(Any $obj)`
+* `iscont(Mu $obj)`
 
 Returns a 1 if the object is a container type, 0 otherwise.
 
 ## isfalse
-* `isfalse(Any $obj)`
+* `isfalse(Mu $obj)`
 
 Returns a 0 if the object has a truthy value, 1 otherwise.
 
 ## ishash
-* `ishash(Any $obj)`
+* `ishash(Mu $obj)`
 
 Returns a 1 if the object is a Hash, 0 otherwise.
 
 ## isint
-* `isint(Any $obj)`
+* `isint(Mu $obj)`
 
 Returns a 1 if the object is an int type, 0 otherwise.
 
 ## isinvokable
-* `isinvokable(Any $obj)`
+* `isinvokable(Mu $obj)`
 
 Returns a 1 if the object represents something executable, 0 otherwise.
 
 ## islist
-* `islist(Any $obj)`
+* `islist(Mu $obj)`
 
 Returns a 1 if the object is an Array, 0 otherwise.
 
@@ -1107,13 +1107,13 @@ Return truth value indicating if this number represents any of the special
 values, postive infinity, negative infinity, or NaN.
 
 ## isnull
-* `isnull(Any $obj)`
+* `isnull(Mu $obj)`
 * `isnull_s(str $obj)`
 
 Returns a 1 if the object is a null, 0 otherwise.
 
 ## isnum
-* `isnum(Any $obj)`
+* `isnum(Mu $obj)`
 
 Returns a 1 if the object is a float type, 0 otherwise.
 
@@ -1123,22 +1123,22 @@ Returns a 1 if the object is a float type, 0 otherwise.
 Returns a 1 if the integer value of the object is prime, 0 otherwise.
 
 ## isstr
-* `isstr(Any $obj)`
+* `isstr(Mu $obj)`
 
 Returns a 1 if the object is a str type, 0 otherwise.
 
 ## istrue
-* `istrue(Any $obj)`
+* `istrue(Mu $obj)`
 
 Returns a 1 if the object has a truthy value, 0 otherwise.
 
 ## istype
-* `istype(Any $obj, Type $obj)`
+* `istype(Mu $obj, Mu:T $obj)`
 
 Returns a 1 if the object is of the given type, 0 otherwise.
 
 ## jvmisnull `jvm`
-* `jvmisnull(Any $obj)`
+* `jvmisnull(Mu $obj)`
 
 Returns a 1 if the object is an NQP Type object *or*  the underlying 
 JVM object is null. Returns 0 otherwise.
@@ -1154,9 +1154,9 @@ Convert Big Integer value to a native string.
 Convert Big Integer value to a native number.
 
 ## unbox
-* `unbox_i(Any $val)`
-* `unbox_n(Any $val)`
-* `unbox_s(Any $val)`
+* `unbox_i(Mu $val)`
+* `unbox_n(Mu $val)`
+* `unbox_s(Mu $val)`
 
 Given a Perl 6 object, return a native with the same value,
 of the type indicated by the opcode suffix.
@@ -1164,13 +1164,13 @@ of the type indicated by the opcode suffix.
 # OO/SixModel Opcodes
 
 ## bindattr
-* `bindattr(Mu $obj, Mu $typeobj, str $attributename, Mu $new_value)`
-* `bindattr_i(Mu $obj, Mu $typeobj, str $attributename, int $new_value)`
-* `bindattr_n(Mu $obj, Mu $typeobj, str $attributename, num $new_value)`
-* `bindattr_s(Mu $obj, Mu $typeobj, str $attributename, str $new_value)`
+* `bindattr(Mu $obj, Mu:T $type, str $attributename, Mu $new_value)`
+* `bindattr_i(Mu $obj, Mu:T $type, str $attributename, int $new_value)`
+* `bindattr_n(Mu $obj, Mu:T $type, str $attributename, num $new_value)`
+* `bindattr_s(Mu $obj, Mu:T $type, str $attributename, str $new_value)`
 
 Binds `$new_value` to the attribute of name `$attributename` of object `$obj`,
-where the attribute was declared in type `$typeobj`. The notes in the
+where the attribute was declared in type `$type`. The notes in the
 `getattr` documentation also apply to `bindattr`.
 
 ## callmethod
@@ -1188,40 +1188,40 @@ class A { method x($a, $b, :$c) { say("$a $b $c") } }
     # same as: A.x(4, 2, c => 'foo')
 
 ## can
-* `can(Any $obj, str $method)`
+* `can(Mu $obj, str $method)`
 
 If the object has a method of the given name, return 1. Otherwise, return 0.
 
 ## clone
-* `clone(Any $obj)`
+* `clone(Mu $obj)`
 
 Return a clone of the passed in object.
 
 ## create
-* `create(Mu $typeobj)`
+* `create(Mu:T $type)`
 
-Returns a newly allocated instance of type `$typeobj`.
+Returns a newly allocated instance of type `$type`.
 
 ## eqaddr
-* `eqaddr(Any $l, Any $r)`
+* `eqaddr(Mu $l, Mu $r)`
 
 Returns 1 if the objects are the same object in the underlying VM,
 0 otherwise.
 
 ## findmethod
-* `findmethod(Any $obj, str $method)`
+* `findmethod(Mu $obj, str $method)`
 
 If the object has a method of the given name, return it. Otherwise,
 throw an exception.
 
 ## getattr
-* `getattr(Mu $obj, Mu $typeobj, str $attributename)`
-* `getattr_i(Mu $obj, Mu $typeobj, str $attributename)`
-* `getattr_n(Mu $obj, Mu $typeobj, str $attributename)`
-* `getattr_s(Mu $obj, Mu $typeobj, str $attributename)`
+* `getattr(Mu $obj, Mu:T $type, str $attributename)`
+* `getattr_i(Mu $obj, Mu:T $type, str $attributename)`
+* `getattr_n(Mu $obj, Mu:T $type, str $attributename)`
+* `getattr_s(Mu $obj, Mu:T $type, str $attributename)`
 
 Returns the attribute of name `$attributename` of object `$obj`, where the
-object was declared in class `$typeobj`. The `_n`, `_i`, and `_s` variants are
+object was declared in class `$type`. The `_n`, `_i`, and `_s` variants are
 for natively typed attributes.
 
 The following example demonstrates why the type object needs to passed along,
@@ -1245,37 +1245,37 @@ need to decontainerize `$obj` before passing it to `getattr`, unless you
 actually want to access an attribute of the container.
 
 ## how
-* `how(Any $obj)`
+* `how(Mu $obj)`
 
 NQP equivalent for Perl 6's `$obj.HOW`.
 
 ## rebless
-* `rebless(Any $obj, Type $type)`
+* `rebless(Mu $obj, Mu:T $type)`
 
 Convert `$obj` to be an object of the new `$type`.
 
 ## reprname
-* `reprname(Any $obj)`
+* `reprname(Mu $obj)`
 
 Return the name of the REPR for the given object.
 
 ## setwho
-* `setwho(Any $obj, Any $who)`
+* `setwho(Mu $obj, Mu $who)`
 
 Replace `$obj`'s WHO. Return `$obj`.
 
 ## who
-* `who(Any $obj)`
+* `who(Mu $obj)`
 
 NQP equivalent for Perl 6's `$obj.WHO`.
 
 ## what
-* `what(Any $obj)`
+* `what(Mu $obj)`
 
 NQP equivalent for Perl 6's `$obj.WHAT`.
 
 ## where
-* `where(Any $obj)`
+* `where(Mu $obj)`
 
 Return a unique ID for this `$obj`.
 
@@ -1284,14 +1284,14 @@ Return a unique ID for this `$obj`.
 ## bitand
 * `bitand_i(int $l, int $r)`
 * `bitand_s(str $l, str $r)`
-* `bitand_I(Any $l, Any $r, Type $type)`
+* `bitand_I(Mu $l, Mu $r, Mu:T $type)`
 
 AND the bits in `$l` and `$r`.
 `_I` variant returns an object of the given type.
 
 ## bitneg
 * `bitneg_i(int $bits)`
-* `bitneg_I(Any $bits, Type $type)`
+* `bitneg_I(Mu $bits, Mu:T $type)`
 
 Negate the bits in `$bits`.
 `_I` variant returns an object of the given type.
@@ -1299,21 +1299,21 @@ Negate the bits in `$bits`.
 ## bitor
 * `bitor_i(int $l, int $r)`
 * `bitor_s(str $l, str $r)`
-* `bitor_I(Any $l, Any $r, Type $type)`
+* `bitor_I(Mu $l, Mu $r, Mu:T $type)`
 
 OR the bits in `$l` and `$r`.
 `_I` variant returns an object of the given type.
 
 ## bitshiftl
 * `bitshiftl_i(int $bits, int $count)`
-* `bitshiftl_I(Any $bits, int $count, Type $type)`
+* `bitshiftl_I(Mu $bits, int $count, Mu:T $type)`
 
 Signed left shift of `$bits` by `$count`.
 `_I` variant returns an object of the given type.
 
 ## bitshiftr
 * `bitshiftr_i(int $bits, int $count)`
-* `bitshiftr_I(Any $bits, int $count, Type $type)`
+* `bitshiftr_I(Mu $bits, int $count, Mu:T $type)`
 
 Signed right shift of `$bits` by `$count`.
 `_I` variant returns an object of the given type.
@@ -1321,7 +1321,7 @@ Signed right shift of `$bits` by `$count`.
 ## bitxor
 * `bitxor_i(int $l, int $r)`
 * `bitxor_s(str $l, str $r)`
-* `bitxor_I(Any $l, Any $r, Type $type)`
+* `bitxor_I(Mu $l, Mu $r, Mu:T $type)`
 
 XOR the bits in `$l` and `$r`.
 `_I` variant returns an object of the given type.
@@ -1385,7 +1385,7 @@ variable. Same as the `:=` operator in NQP.
 # Miscellaneous Opcodes
 
 ## debugnoop
-* `debugnoop(Any $a)`
+* `debugnoop(Mu $a)`
 
 Returns `$a`. Does nothing, exists only to provide a breakpoint location
 for debugging.
