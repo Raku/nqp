@@ -29,23 +29,28 @@ grammar Rubyish::Grammar is HLL::Grammar {
         :my $*TOP_BLOCK   := $*CUR_BLOCK;
         :my $*CLASS_BLOCK := $*CUR_BLOCK;
         :my $*IN_TEMPLATE := 0;
+        :my $*LINE_SPAN   := 0;
         :my %*SYM         := self.sym-init();
         ^ ~ $ <stmtlist>
             || <.panic('Syntax error')>
     }
 
-    rule stmt-sep { \n | ';' }
+    rule separator { \n | ';' }
     token template { [<tmpl-unesc>|<tmpl-hdr>] <text=.template-content>* [<tmpl-esc>|$] }
     proto token template-content {*}
     token template-content:sym<interp>     { <interp> }
     token template-content:sym<plain-text> { [<!before [<tmpl-esc>|'#{'|$]> .]+ }
 
-    token tmpl-hdr   { '<%rbi>' \h* \n? <?{$*IN_TEMPLATE := 1}>}
-    token tmpl-esc   {\h* '<%'}
-    token tmpl-unesc { '%>' \h* \n? }
+    token tmpl-hdr   {'<%rbi>' \h* \n? <?{$*IN_TEMPLATE := 1}>}
+    token tmpl-esc   {\h* '<%'
+		     [<?{$*IN_TEMPLATE}>||<.panic('Template directive precedes "<%rbi>"')>]
+    }
+    token tmpl-unesc { '%>' \h* \n?
+		     [<?{$*IN_TEMPLATE}>|| <.panic('Template directive precedes "<%rbi>"')>]
+    }
 
     rule stmtlist {
-        [ <stmt=.stmtish>? ] *%% [<.stmt-sep>|<stmt=.template>]
+        [ <stmt=.stmtish>? ] *%% [<.separator>|<stmt=.template>]
     }
 
     token stmtish {
@@ -66,7 +71,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
 
     rule defbody {
         :my $*CUR_BLOCK := QAST::Block.new(QAST::Stmts.new());
-        <operation> <signature>? <stmt-sep>?
+        <operation> <signature>? <separator>?
         <stmtlist>
     }
 
@@ -91,7 +96,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
     rule classbody {
         :my $*CUR_BLOCK   := QAST::Block.new(QAST::Stmts.new());
         :my $*CLASS_BLOCK := $*CUR_BLOCK;
-        <ident> <stmt-sep>
+        <ident> <separator>
         <stmtlist>
     }
 
@@ -100,24 +105,25 @@ grammar Rubyish::Grammar is HLL::Grammar {
 
     token term:sym<call> {
         <!keyword>
-        <operation> ['(' ~ ')' <call-args>?
+        <operation> ['(' ~ ')' <call-args=.paren-args>?
                     | \h* <call-args>? <?{%*SYM{~$<operation>} eq 'def'}> ]
     }
 
     token term:sym<nqp-op> {
-        'nqp::'<ident> ['(' ~ ')' <call-args>? | <call-args>? ]
+        'nqp::'<ident> ['(' ~ ')' <call-args=.paren-args>? | <call-args>? ]
     }
 
     token term:sym<quote-words> {
         \% w <?before [.]> <quote_EXPR: ':q', ':w'>
     }
 
-    token call-args { :s <EXPR>+ % <comma> }
+    token call-args  { :s <EXPR>+ % <comma> }
+    token paren-args {:my $*LINE_SPAN := 1; <call-args> }
 
     token operation {<ident>[\!|\?]?}
 
     token term:sym<new> {
-        ['new' \h+ :s <ident> | <ident> '.' 'new'] ['(' ~ ')' <call-args>?]?
+        ['new' \h+ :s <ident> | <ident> '.' 'new'] ['(' ~ ')' <call-args=.paren-args>?]?
     }
 
     token var {
@@ -140,10 +146,16 @@ grammar Rubyish::Grammar is HLL::Grammar {
                                  | Q <?before [.]> <quote_EXPR: ':qq'>
                                  ]
                              }
+
+    token paren-list {
+         :my $*LINE_SPAN := 1;
+         <EXPR> *%% <comma>
+    }
+
     token value:sym<integer> { \+? \d+ }
     token value:sym<float>   { \+? \d+ '.' \d+ }
-    token value:sym<array>   { '[' ~ ']' [<EXPR> *%% <comma>] }
-    token value:sym<hash>    { '{' ~ '}' [<EXPR> *%% <comma>] }
+    token value:sym<array>   {'[' ~ ']' <paren-list> }
+    token value:sym<hash>    {'{' ~ '}' <paren-list> }
     token value:sym<nil>     { <sym> }
     token value:sym<true>    { <sym> }
     token value:sym<false>   { <sym> }
@@ -167,11 +179,9 @@ grammar Rubyish::Grammar is HLL::Grammar {
     }
 
     proto token comment {*}
-    token comment:sym<code> { '#' <?{!$*IN_TEMPLATE}> \N*}
-    # in a template directive: <%# .... %>
-    token comment:sym<templ> { '#' <?{ $*IN_TEMPLATE}> [<!before '%>'>\N]*}
+    token comment:sym<line>   { '#' [<?{!$*IN_TEMPLATE}> \N* || [<!before '%>'>\N]*] }
     token comment:sym<podish> {[^^'=begin'\n] ~ [^^'=end'\n ] .*?}
-    token ws { <!ww> \h* | \h+ | <.comment> }
+    token ws { <!ww>[\h | <.comment> | <?{$*LINE_SPAN}> \n]* }
 
     # Operator precedence levels
     INIT {
@@ -244,7 +254,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
 
     # Statement control
     rule xblock {
-        <EXPR> [ <stmt-sep> [:s 'then']? | 'then' | <?before <tmpl-unesc>>] <stmtlist>
+        <EXPR> [ <separator> [:s 'then']? | 'then' | <?before <tmpl-unesc>>] <stmtlist>
     }
 
     token stmt:sym<if> {
@@ -267,7 +277,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
         <sym> :s <ident> :s 'in' <EXPR> <do> <stmtlist> 'end'
     }
 
-    token do { <stmt-sep> [:s 'do']? | 'do' | <?before <tmpl-unesc>>}
+    token do { <separator> [:s 'do']? | 'do' | <?before <tmpl-unesc>>}
 
     token term:sym<code>  {
         'begin' ~ 'end' <stmtlist> 
@@ -376,6 +386,10 @@ class Rubyish::Actions is HLL::Actions {
         my $args := [];
         $args.push($_.ast) for $<EXPR>;
         make $args;
+    }
+
+    method paren-args($/) {
+	make $<call-args>.ast;
     }
 
     my $tmpsym := 0;
@@ -578,11 +592,17 @@ class Rubyish::Actions is HLL::Actions {
         make QAST::NVal.new( :value(+$/.Str) )
     }
 
+    method paren-list($/) {
+        my @list;
+        if $<EXPR> {
+            @list.push($_.ast) for $<EXPR>
+        }
+        make @list;
+    }
+
     method value:sym<array>($/) {
         my $array := QAST::Op.new( :op<list> );
-        if $<EXPR> {
-            $array.push($_.ast) for $<EXPR>
-        }
+	$array.push($_) for $<paren-list>.ast;
         make $array;
     }
 
@@ -590,11 +610,9 @@ class Rubyish::Actions is HLL::Actions {
         make $<quote_EXPR>.ast;
     }
 
-     method value:sym<hash>($/) {
+    method value:sym<hash>($/) {
         my $hash := QAST::Op.new( :op<hash> );
-        if $<EXPR> {
-            $hash.push($_.ast) for $<EXPR>
-        }
+	$hash.push($_) for $<paren-list>.ast;
         make $hash;
     }
     method value:sym<nil>($/) {

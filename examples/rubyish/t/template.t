@@ -20,7 +20,7 @@ nok 6 - if block (true)
 nok 7 - if block (false)
   <%elsif n == 20 %>
 nok 7 - if block (false)
-  <%else %>
+  <%else%>
 ok 7 - if block (false)
   <% end %>
   <%for test in [8, 9]  do %>
