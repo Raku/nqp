@@ -31,6 +31,11 @@ Features:
 
 Notes:
 
+Handy Options:
+
+    % nqp rubyish.nqp --target=parse -e'puts "Hello World!"'  # dump parse
+    % nqp rubyish.nqp --target=ast   -e'puts "Hello World!"'  # dump ast
+
 To run tests:
 ```
     % prove -v -e'nqp rubyish.nqp' t
