@@ -195,6 +195,7 @@ public final class NativeCallOps {
         case UTF16STR:
             /* TODO: Handle encodings. */
             nqpobj.set_str(tc, (String) o);
+            break;
         case CPOINTER: {
             CPointerInstance cpointer = (CPointerInstance) nqpobj;
             cpointer.pointer = (Pointer) o;
