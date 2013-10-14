@@ -168,7 +168,6 @@ grammar Rubyish::Grammar is HLL::Grammar {
     proto token comment {*}
     token comment:sym<single> { '#' \N*}
     token comment:sym<podish> {[^^'=begin'\n] ~ [^^'=end'\n ] .*?}
-    token comment:sym<block>  { '<%#' ~ '%>' .*? }
     token ws { <!ww> \h* | \h+ | <.comment> }
 
     # Operator precedence levels
