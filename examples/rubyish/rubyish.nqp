@@ -28,6 +28,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
         :my $*CUR_BLOCK   := QAST::Block.new(QAST::Stmts.new());
         :my $*TOP_BLOCK   := $*CUR_BLOCK;
         :my $*CLASS_BLOCK := $*CUR_BLOCK;
+        :my $*IN_TEMPLATE := 0;
         :my %*SYM         := self.sym-init();
         ^ ~ $ <stmtlist>
             || <.panic('Syntax error')>
@@ -39,7 +40,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
     token template-content:sym<interp>     { <interp> }
     token template-content:sym<plain-text> { [<!before [<tmpl-esc>|'#{'|$]> .]+ }
 
-    token tmpl-hdr   { '<%rbi>' \h* \n? }
+    token tmpl-hdr   { '<%rbi>' \h* \n? <?{$*IN_TEMPLATE := 1}>}
     token tmpl-esc   {\h* '<%'}
     token tmpl-unesc { '%>' \h* \n? }
 
@@ -166,7 +167,9 @@ grammar Rubyish::Grammar is HLL::Grammar {
     }
 
     proto token comment {*}
-    token comment:sym<single> { '#' \N*}
+    token comment:sym<code> { '#' <?{!$*IN_TEMPLATE}> \N*}
+    # in a template directive: <%# .... %>
+    token comment:sym<templ> { '#' <?{ $*IN_TEMPLATE}> [<!before '%>'>\N]*}
     token comment:sym<podish> {[^^'=begin'\n] ~ [^^'=end'\n ] .*?}
     token ws { <!ww> \h* | \h+ | <.comment> }
 

@@ -19,9 +19,8 @@ puts '<?xml>'
                 <em>#{n}</em> green bottles standing on the wall,
                 <em>#{n}</em> green bottles standing on the wall
                 <br/>
-                <%# -- gratuitous use of puts --
-                  puts %q{and if one green bottle should accidently fall...}
-                %>
+                <%# -- gratuitous use of puts ------------------------------ %>
+                <%puts %q{and if one green bottle should accidently fall...} %>
                 <br/>
                 <%n -= 1 %>
                 there'd be <em> #{if n then n else 'no' end} </em> green bottles standing on the wall

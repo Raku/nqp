@@ -26,4 +26,5 @@ ok 7 - if block (false)
   <%for test in [8, 9]  do %>
 ok #{test} - for loop test
   <%end%>
+<%#puts "nok 10 - commented out directive" %>
 ok 10 - final template text
