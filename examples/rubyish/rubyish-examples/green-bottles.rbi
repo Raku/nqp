@@ -1,15 +1,15 @@
 # eRubyish templating - see http://en.wikipedia.org/wiki/ERuby
 # There are only three directives:
-# <%rbi>    - Header; remainder of the source file is the template body
+# <?rbi?>    - Header; remainder of the source file is the template body
 # <% ... %> - rubyish statements
 # #{ ... }  - inserted content
 
 # Any arbritrary code can appear before the template. Output to stdout
 # is appended to the template, both before and within the template body
 
-puts '<?xml>'
+puts '<?xml version='1.0' encoding='utf-8'?>'
 
-<%rbi>
+<?rbi?>
 <html>
     <body>
         <h1>Green Bottles...</h1>

@@ -41,7 +41,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
     token template-content:sym<interp>     { <interp> }
     token template-content:sym<plain-text> { [<!before [<tmpl-esc>|'#{'|$]> .]+ }
 
-    token tmpl-hdr   {'<%rbi>' \h* \n? <?{$*IN_TEMPLATE := 1}>}
+    token tmpl-hdr   {'<?rbi?>' \h* \n? <?{$*IN_TEMPLATE := 1}>}
     token tmpl-esc   {\h* '<%'
 		     [<?{$*IN_TEMPLATE}> || <.panic('Template directive precedes "<%rbi>"')>]
     }
@@ -110,7 +110,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
     }
 
     token term:sym<nqp-op> {
-        'nqp::'<ident> ['(' ~ ')' <call-args=.paren-args>? | <call-args>? ]
+        'nqp:'':'?<ident> ['(' ~ ')' <call-args=.paren-args>? | <call-args>? ]
     }
 
     token term:sym<quote-words> {
