@@ -43,10 +43,10 @@ grammar Rubyish::Grammar is HLL::Grammar {
 
     token tmpl-hdr   {'<%rbi>' \h* \n? <?{$*IN_TEMPLATE := 1}>}
     token tmpl-esc   {\h* '<%'
-		     [<?{$*IN_TEMPLATE}>||<.panic('Template directive precedes "<%rbi>"')>]
+		     [<?{$*IN_TEMPLATE}> || <.panic('Template directive precedes "<%rbi>"')>]
     }
     token tmpl-unesc { '%>' \h* \n?
-		     [<?{$*IN_TEMPLATE}>|| <.panic('Template directive precedes "<%rbi>"')>]
+		     [<?{$*IN_TEMPLATE}> || <.panic('Template directive precedes "<%rbi>"')>]
     }
 
     rule stmtlist {
@@ -78,7 +78,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
     token comma { :s [','|'=>'] :s }
 
     rule signature {
-        '(' ~ ')' [<param>* %% <comma>]
+        '(' ~ ')' [:my $*LINE_SPAN := 1; <param>* %% <comma>]
     }
 
     token param { <ident> }
@@ -193,6 +193,8 @@ grammar Rubyish::Grammar is HLL::Grammar {
         Rubyish::Grammar.O(':prec<j=>, :assoc<right>', '%assignment');
         Rubyish::Grammar.O(':prec<l=>, :assoc<left>',  '%tight_and');
         Rubyish::Grammar.O(':prec<k=>, :assoc<left>',  '%tight_or');
+        Rubyish::Grammar.O(':prec<d=>, :assoc<left>',  '%loose_and');
+        Rubyish::Grammar.O(':prec<c=>, :assoc<left>',  '%loose_or');
     }
 
     # Operators - mostly stolen from NQP
@@ -226,12 +228,15 @@ grammar Rubyish::Grammar is HLL::Grammar {
     token infix:sym<||>   { <sym>  <O('%tight_or,   :op<unless>')> }
     token infix:sym<//>   { <sym>  <O('%tight_or,   :op<defor>')> }
 
+    token infix:sym<and>  { <sym>  <O('%loose_and,  :op<if>')> }
+    token infix:sym<or>   { <sym>  <O('%loose_or,   :op<unless>')> }
+ 
     # Parenthesis
     token circumfix:sym<( )> {'(' <.ws> <EXPR> ')' <O('%methodop')> }
 
     # Method call
     token postfix:sym<.>  {
-        '.' <ident> [ '(' ~ ')' <call-args>? ]?
+        '.' <ident> [ '(' ~ ')' <call-args=.paren-args>? ]?
         <O('%methodop')>
     }
 

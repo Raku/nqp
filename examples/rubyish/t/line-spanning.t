@@ -20,9 +20,14 @@ h = {"a" => 10,
 }
 puts "#{h<c>? 'ok' : 'nok'} 3 - hash spanning lines"
 
+def tricky(k,
+   n)
+    puts "#{k} - #{n} - multi-line signatures and calls"
+end
 
-puts(
+tricky(
+      "ok",
 
-"ok 4 - call args spanning lines"
+      4
 
-)
+     )

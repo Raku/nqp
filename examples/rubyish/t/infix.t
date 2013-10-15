@@ -1,4 +1,4 @@
-puts "1..17"
+puts "1..19"
 x=1
 
 puts "ok #{x} - assignment"
@@ -31,3 +31,6 @@ puts "#{(nil // 2) == 2? 'ok' : 'nok'} 15 - infix // arced"
 
 puts "ok #{2 **4} - exponentiation **"
 puts "ok #{37 % 20} - modulus %"
+
+puts "#{1&&0 or 1? 'ok' : 'nok'} 18 - loose 'or'"
+puts "#{1||0 and 0||1? 'ok' : 'nok'} 19 - loose 'and'"
