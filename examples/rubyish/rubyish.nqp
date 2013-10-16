@@ -35,7 +35,8 @@ grammar Rubyish::Grammar is HLL::Grammar {
             || <.panic('Syntax error')>
     }
 
-    rule separator { \n | ';' }
+    token continuation { \\ \n }
+    rule separator { ';' | \n <!after continuation> }
     token template { [<tmpl-unesc>|<tmpl-hdr>] <text=.template-content>* [<tmpl-esc>|$] }
     proto token template-content {*}
     token template-content:sym<interp>     { <interp> }
@@ -43,10 +44,10 @@ grammar Rubyish::Grammar is HLL::Grammar {
 
     token tmpl-hdr   {'<?rbi?>' \h* \n? <?{$*IN_TEMPLATE := 1}>}
     token tmpl-esc   {\h* '<%'
-		     [<?{$*IN_TEMPLATE}> || <.panic('Template directive precedes "<%rbi>"')>]
+		     [<?{$*IN_TEMPLATE}> || <.panic('Template directive precedes "<?rbi?>"')>]
     }
     token tmpl-unesc { '%>' \h* \n?
-		     [<?{$*IN_TEMPLATE}> || <.panic('Template directive precedes "<%rbi>"')>]
+		     [<?{$*IN_TEMPLATE}> || <.panic('Template directive precedes "<?rbi?>"')>]
     }
 
     rule stmtlist {
@@ -153,7 +154,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
     }
 
     token value:sym<integer> { \+? \d+ }
-    token value:sym<float>   { \+? \d+ '.' \d+ }
+    token value:sym<float>   { \+? \d* '.' \d+ }
     token value:sym<array>   {'[' ~ ']' <paren-list> }
     token value:sym<hash>    {'{' ~ '}' <paren-list> }
     token value:sym<nil>     { <sym> }
@@ -181,7 +182,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
     proto token comment {*}
     token comment:sym<line>   { '#' [<?{!$*IN_TEMPLATE}> \N* || [<!before '%>'>\N]*] }
     token comment:sym<podish> {[^^'=begin'\n] ~ [^^'=end'\n ] .*?}
-    token ws { <!ww>[\h | <.comment> | <?{$*LINE_SPAN}> \n]* }
+    token ws { <!ww>[\h | <.comment> | <.continuation> | <?{$*LINE_SPAN}> \n]* }
 
     # Operator precedence levels
     INIT {
