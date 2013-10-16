@@ -1,4 +1,4 @@
-puts "1..4"
+puts "1..5"
 
 a=[10,
    20]
@@ -22,7 +22,7 @@ puts "#{h<c>? 'ok' : 'nok'} 3 - hash spanning lines"
 
 def tricky(k,
    n)
-    puts "#{k} - #{n} - multi-line signatures and calls"
+    puts "#{k} #{n} - multi-line signatures and calls"
 end
 
 tricky(
@@ -31,3 +31,6 @@ tricky(
       4
 
      )
+
+puts \
+  "ok 5 - \\ line continuation"

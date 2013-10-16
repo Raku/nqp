@@ -24,6 +24,7 @@ class RubyishClassHOW {
 }
 
 grammar Rubyish::Grammar is HLL::Grammar {
+
     token TOP {
         :my $*CUR_BLOCK   := QAST::Block.new(QAST::Stmts.new());
         :my $*TOP_BLOCK   := $*CUR_BLOCK;
@@ -35,23 +36,23 @@ grammar Rubyish::Grammar is HLL::Grammar {
             || <.panic('Syntax error')>
     }
 
-    token continuation { \\ \n }
-    rule separator { ';' | \n <!after continuation> }
-    token template { [<tmpl-unesc>|<tmpl-hdr>] <text=.template-content>* [<tmpl-esc>|$] }
-    proto token template-content {*}
-    token template-content:sym<interp>     { <interp> }
-    token template-content:sym<plain-text> { [<!before [<tmpl-esc>|'#{'|$]> .]+ }
+    token continuation   { \\ \n }
+    rule separator       { ';' | \n <!after continuation> }
+    token template-chunk { [<tmpl-unesc>|<tmpl-hdr>] ~ [<tmpl-esc>|$] <template-nibble>* }
+    proto token template-nibble {*}
+    token template-nibble:sym<interp>     { <interp> }
+    token template-nibble:sym<plain-text> { [<!before [<tmpl-esc>|'#{'|$]> .]+ }
 
     token tmpl-hdr   {'<?rbi?>' \h* \n? <?{$*IN_TEMPLATE := 1}>}
     token tmpl-esc   {\h* '<%'
-		     [<?{$*IN_TEMPLATE}> || <.panic('Template directive precedes "<?rbi?>"')>]
+                     [<?{$*IN_TEMPLATE}> || <.panic('Template directive precedes "<?rbi?>"')>]
     }
     token tmpl-unesc { '%>' \h* \n?
-		     [<?{$*IN_TEMPLATE}> || <.panic('Template directive precedes "<?rbi?>"')>]
+                     [<?{$*IN_TEMPLATE}> || <.panic('Template directive precedes "<?rbi?>"')>]
     }
 
     rule stmtlist {
-        [ <stmt=.stmtish>? ] *%% [<.separator>|<stmt=.template>]
+        [ <stmt=.stmtish>? ] *%% [<.separator>|<stmt=.template-chunk>]
     }
 
     token stmtish {
@@ -180,7 +181,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
     }
 
     proto token comment {*}
-    token comment:sym<line>   { '#' [<?{!$*IN_TEMPLATE}> \N* || [<!before '%>'>\N]*] }
+    token comment:sym<line>   { '#' [<?{!$*IN_TEMPLATE}> \N* || [<!before <tmpl-unesc>>\N]*] }
     token comment:sym<podish> {[^^'=begin'\n] ~ [^^'=end'\n ] .*?}
     token ws { <!ww>[\h | <.comment> | <.continuation> | <?{$*LINE_SPAN}> \n]* }
 
@@ -264,11 +265,11 @@ grammar Rubyish::Grammar is HLL::Grammar {
     }
 
     token stmt:sym<if> {
-        if :s <xblock> [<else=.elsif>|<else>]? end
+        if ~ 'end' [ :s <xblock> [<else=.elsif>|<else>]? ]
     }
 
     token elsif {
-        'elsif' <xblock> [<else=.elsif>|<else>]?
+        'elsif' ~ [<else=.elsif>|<else>]? <xblock>
     }
 
     token else {
@@ -276,11 +277,11 @@ grammar Rubyish::Grammar is HLL::Grammar {
     }
 
     token stmt:sym<do> {
-        <modifier> :s <EXPR> :s <do> <stmtlist> 'end'
+        <modifier> :s <EXPR> :s <do> ~ 'end' <stmtlist>
     }
 
     token stmt:sym<for> {
-        <sym> :s <ident> :s 'in' <EXPR> <do> <stmtlist> 'end'
+        <sym> :s <ident> :s 'in' <EXPR> <do> ~ 'end' <stmtlist>
     }
 
     token do { <separator> [:s 'do']? | 'do' | <?before <tmpl-unesc>>}
@@ -315,6 +316,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
 }
 
 class Rubyish::Actions is HLL::Actions {
+
     method TOP($/) {
         $*CUR_BLOCK.push($<stmtlist>.ast);
         make $*CUR_BLOCK;
@@ -331,26 +333,27 @@ class Rubyish::Actions is HLL::Actions {
         make $stmts;
     }
 
-    method template($/) {
+    method template-chunk($/) {
         my $text := QAST::Stmts.new( :node($/) );
         $text.push( QAST::Op.new( :op<print>, $_.ast ) )
-            for $<text>;
+            for $<template-nibble>;
         
         make $text;
     }
 
-    method template-content:sym<interp>($/) {
+    method template-nibble:sym<interp>($/) {
         make $<interp>.ast
     }
 
-    method template-content:sym<plain-text>($/) {
+    method template-nibble:sym<plain-text>($/) {
         make QAST::SVal.new( :value(~$/) );
     }
 
     method stmtish($/) {
-        return make $<stmt>.ast unless ~$<modifier>;
-
-        make QAST::Op.new( $<EXPR>.ast, $<stmt>.ast, :op(~$<modifier>), :node($/) );
+        make $<modifier>
+            ?? QAST::Op.new( $<EXPR>.ast, $<stmt>.ast,
+                             :op(~$<modifier>), :node($/) )
+            !! $<stmt>.ast;
     }
 
     method term:sym<value>($/) { make $<value>.ast; }
@@ -359,10 +362,10 @@ class Rubyish::Actions is HLL::Actions {
     my %builtins;
 
     method term:sym<call>($/) {
-        my $name := ~$<operation>;
-        %builtins  := Rubyish::Grammar.builtin-init()
+        my $name  := ~$<operation>;
+        %builtins := Rubyish::Grammar.builtin-init()
             unless %builtins<puts>;
-        my $op   := %builtins{$name};
+        my $op    := %builtins{$name};
 
         my $call := $op
             ?? QAST::Op.new( :op($op) )
@@ -389,13 +392,13 @@ class Rubyish::Actions is HLL::Actions {
     }
 
     method call-args($/) {
-        my $args := [];
-        $args.push($_.ast) for $<EXPR>;
-        make $args;
+        my @args;
+        @args.push($_.ast) for $<EXPR>;
+        make @args;
     }
 
     method paren-args($/) {
-	make $<call-args>.ast;
+        make $<call-args>.ast;
     }
 
     my $tmpsym := 0;
@@ -578,12 +581,9 @@ class Rubyish::Actions is HLL::Actions {
     }
 
     method strings($/) {
-        if $<strings> {
-            make QAST::Op.new( :op('concat'), $<string>.ast, $<strings>.ast)
-        }
-        else {
-            make $<string>.ast;
-        }
+        make $<strings>
+            ?? QAST::Op.new( :op('concat'), $<string>.ast, $<strings>.ast)
+            !! $<string>.ast;
     }
 
     method string($/) {
@@ -608,7 +608,7 @@ class Rubyish::Actions is HLL::Actions {
 
     method value:sym<array>($/) {
         my $array := QAST::Op.new( :op<list> );
-	$array.push($_) for $<paren-list>.ast;
+        $array.push($_) for $<paren-list>.ast;
         make $array;
     }
 
@@ -618,7 +618,7 @@ class Rubyish::Actions is HLL::Actions {
 
     method value:sym<hash>($/) {
         my $hash := QAST::Op.new( :op<hash> );
-	$hash.push($_) for $<paren-list>.ast;
+        $hash.push($_) for $<paren-list>.ast;
         make $hash;
     }
     method value:sym<nil>($/) {

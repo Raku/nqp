@@ -6,9 +6,11 @@ puts "#{a[1] == 20? 'ok' : 'nok'} 2 - a[1]"
 puts "#{a['2'] == 30? 'ok' : 'nok'} 3 - a['2']"
 puts "#{a[1+2] == 40? 'ok' : 'nok'} 4 - a[1+2]"
 
+n=0
 for val in a do
-    puts "ok #{ val / 10  +  4 } - array iteration (#{val})"
+    idx = val / 10  +  4
+    n += 1
+    puts "ok #{idx} - array iteration #{n}"
 end
 
 puts "#{%w{nok ok nok}[1]} 9 - quote words"
-
