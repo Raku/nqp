@@ -1089,16 +1089,16 @@ $(OPS_DIR)/$(DYNCALL_OPS)$(LOAD_EXT): $(OPS_DIR)/$(DYNCALL_OPS_SOURCE) $(DYNCALL
 $(NQP_CONST_PIR):
 	perl tools/build/generate-constants.pl > $@
 
-bootstrap-files: $(STAGE2_PBCS) src/stage2/$(CORE_SETTING_NQP)
-	$(PERL) tools/build/gen-bootstrap.pl src/stage2/$(NQP_MO_PIR) >src/vm/parrot/stage0/NQPMO-s0.pir
-	$(PERL) tools/build/gen-bootstrap.pl src/stage2/gen/module_loader.pir >src/vm/parrot/stage0/ModuleLoader-s0.pir
-	$(PERL) tools/build/gen-bootstrap.pl src/stage2/$(CORE_SETTING_PIR) >src/vm/parrot/stage0/NQPCORE.setting-s0.pir
-	$(PERL) tools/build/gen-bootstrap.pl src/stage2/$(QASTNODE_PIR) >src/vm/parrot/stage0/QASTNode-s0.pir
-	$(PERL) tools/build/gen-bootstrap.pl src/stage2/$(QREGEX_PIR) >src/vm/parrot/stage0/QRegex-s0.pir
-	$(PERL) tools/build/gen-bootstrap.pl src/stage2/$(HLL_COMBINED_PIR) >src/vm/parrot/stage0/HLL-s0.pir
-	$(PERL) tools/build/gen-bootstrap.pl src/stage2/$(QAST_PIR) >src/vm/parrot/stage0/QAST-s0.pir
-	$(PERL) tools/build/gen-bootstrap.pl src/stage2/$(P6QREGEX_COMBINED_PIR) >src/vm/parrot/stage0/P6QRegex-s0.pir
-	$(PERL) tools/build/gen-bootstrap.pl src/stage2/$(NQP_COMBINED_PIR) >src/vm/parrot/stage0/NQP-s0.pir
+bootstrap-files: $(STAGE2_PBCS) $(STAGE2)/$(CORE_SETTING_NQP)
+	$(PERL) tools/build/gen-bootstrap.pl $(STAGE2)/$(NQP_MO_PIR) >src/vm/parrot/stage0/NQPMO-s0.pir
+	$(PERL) tools/build/gen-bootstrap.pl $(STAGE2)/gen/module_loader.pir >src/vm/parrot/stage0/ModuleLoader-s0.pir
+	$(PERL) tools/build/gen-bootstrap.pl $(STAGE2)/$(CORE_SETTING_PIR) >src/vm/parrot/stage0/NQPCORE.setting-s0.pir
+	$(PERL) tools/build/gen-bootstrap.pl $(STAGE2)/$(QASTNODE_PIR) >src/vm/parrot/stage0/QASTNode-s0.pir
+	$(PERL) tools/build/gen-bootstrap.pl $(STAGE2)/$(QREGEX_PIR) >src/vm/parrot/stage0/QRegex-s0.pir
+	$(PERL) tools/build/gen-bootstrap.pl $(STAGE2)/$(HLL_COMBINED_PIR) >src/vm/parrot/stage0/HLL-s0.pir
+	$(PERL) tools/build/gen-bootstrap.pl $(STAGE2)/$(QAST_PIR) >src/vm/parrot/stage0/QAST-s0.pir
+	$(PERL) tools/build/gen-bootstrap.pl $(STAGE2)/$(P6QREGEX_COMBINED_PIR) >src/vm/parrot/stage0/P6QRegex-s0.pir
+	$(PERL) tools/build/gen-bootstrap.pl $(STAGE2)/$(NQP_COMBINED_PIR) >src/vm/parrot/stage0/NQP-s0.pir
 
 ## testing
 
