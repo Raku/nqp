@@ -137,8 +137,8 @@ STAGE0_SOURCES = \
 	src/vm/parrot/stage0/NQP-s0.pir
 
 STAGE0 = src/vm/parrot/stage0
-STAGE1 = src/stage1
-STAGE2 = src/stage2
+STAGE1 = gen/parrot/stage1
+STAGE2 = gen/parrot/stage2
 
 MODULE_LOADER_PBC = ModuleLoader.pbc
 
