@@ -673,8 +673,8 @@ $(STAGE1)/$(P6QREGEX_PBC): $(STAGE0_PBCS) $(STAGE1)/$(HLL_PBC) $(STAGE1)/$(QREGE
 
 $(STAGE1)/$(NQP_PBC): $(STAGE0_PBCS) $(STAGE1)/$(CORE_SETTING_PBC) $(STAGE1)/$(P6QREGEX_PBC) $(NQP_SOURCES)
 	$(MKPATH) $(STAGE1)/gen
-	$(PERL) tools/build/gen-version.pl >src/gen/nqp-config.nqp
-	$(PERL) tools/build/gen-cat.pl parrot $(NQP_SOURCES) src/gen/nqp-config.nqp > $(STAGE1)/$(NQP_COMBINED)
+	$(PERL) tools/build/gen-version.pl >$(PARROT_BUILD_DIR)/nqp-config.nqp
+	$(PERL) tools/build/gen-cat.pl parrot $(NQP_SOURCES) $(PARROT_BUILD_DIR)/nqp-config.nqp > $(STAGE1)/$(NQP_COMBINED)
 	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE1)/$(NQP_COMBINED_PIR) \
 	    --module-path=$(STAGE1) --setting-path=$(STAGE1) $(STAGE1)/$(NQP_COMBINED)
@@ -751,8 +751,8 @@ $(STAGE2)/$(P6QREGEX_PBC): $(STAGE1_PBCS) $(STAGE2)/$(HLL_PBC) $(STAGE2)/$(QAST_
 
 $(STAGE2)/$(NQP_PBC): $(STAGE1_PBCS) $(STAGE2)/$(P6QREGEX_PBC) $(NQP_SOURCES)
 	$(MKPATH) $(STAGE2)/gen
-	$(PERL) tools/build/gen-version.pl >src/gen/nqp-config.nqp
-	$(PERL) tools/build/gen-cat.pl parrot $(NQP_SOURCES) src/gen/nqp-config.nqp > $(STAGE2)/$(NQP_COMBINED)
+	$(PERL) tools/build/gen-version.pl >$(PARROT_BUILD_DIR)/nqp-config.nqp
+	$(PERL) tools/build/gen-cat.pl parrot $(NQP_SOURCES) $(PARROT_BUILD_DIR)/nqp-config.nqp > $(STAGE2)/$(NQP_COMBINED)
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE2)/$(NQP_COMBINED_PIR) \
 	    --module-path=$(STAGE2) --setting-path=$(STAGE2) $(STAGE2)/$(NQP_COMBINED)
