@@ -1249,11 +1249,6 @@ actually want to access an attribute of the container.
 
 NQP equivalent for Perl 6's `$obj.HOW`.
 
-## makeclosure
-* `makeclosure(Block $innerblock)`
-
-Creates a lexical closure from the block's outer scope.
-
 ## rebless
 * `rebless(Mu $obj, Mu:T $type)`
 
@@ -1268,6 +1263,11 @@ Return the name of the REPR for the given object.
 * `setwho(Mu $obj, Mu $who)`
 
 Replace `$obj`'s WHO. Return `$obj`.
+
+## takeclosure
+* `takeclosure(Block $innerblock)`
+
+Creates a lexical closure from the block's outer scope.
 
 ## who
 * `who(Mu $obj)`
