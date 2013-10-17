@@ -142,6 +142,8 @@ MAIN: {
     }
 
     fill_template_file('tools/build/Makefile-Parrot.in', 'Makefile', %config);
+    fill_template_file('src/vm/parrot/nqp.sh', 'gen/parrot/nqp_launcher', %config);
+    chmod 0755, 'gen/parrot/nqp_launcher';
 
     {
         no warnings;

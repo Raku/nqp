@@ -14,6 +14,7 @@ PARROT_SRC_DIR     = @@srcdir@@$(PARROT_VERSION)
 PARROT_LIBRARY_DIR = $(PARROT_LIB_DIR)/library
 NQP_LANG_DIR       = $(PARROT_LIB_DIR)/languages/nqp
 HAS_ICU            = @has_icu@
+NQP_LAUNCHER	   = ./nqp
 
 PARROT_BUILD_DIR   = gen/parrot
 
@@ -769,6 +770,10 @@ $(ALL_PBCS): $(STAGE2_PBCS)
 	$(CP) $(STAGE2)/$(QAST_PBC)             $(PARROT_BUILD_DIR)
 	$(CP) $(STAGE2)/$(P6QREGEX_PBC)         $(PARROT_BUILD_DIR)
 	$(CP) $(STAGE2)/$(NQP_PBC)              $(PARROT_BUILD_DIR)
+
+$(NQP_LAUNCHER): $(PARROT_BUILD_DIR)/$(NQP_EXE) gen/parrot/nqp_launcher
+	$(CP) gen/parrot/nqp_launcher $(NQP_LAUNCHER)
+	$(CHMOD) 755 $(NQP_LAUNCHER)
 
 $(PARROT_BUILD_DIR)/$(NQP_EXE): $(PARROT_BUILD_DIR)/$(NQP_PBC) $(PARROT_DLL_COPY)
 	cd $(PARROT_BUILD_DIR) && $(PBC_TO_EXE) -o$(NQP_EXE) $(NQP_PBC)
