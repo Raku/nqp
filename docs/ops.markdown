@@ -1249,6 +1249,11 @@ actually want to access an attribute of the container.
 
 NQP equivalent for Perl 6's `$obj.HOW`.
 
+## makeclosure
+* `makeclosure(Block $innerblock)`
+
+Creates a lexical closure from the block's outer scope.
+
 ## rebless
 * `rebless(Mu $obj, Mu:T $type)`
 
