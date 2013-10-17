@@ -27,6 +27,9 @@ Features:
 - basic arrays and hashes
 - for loops on arrays: `for val in [10,20,30] do puts val end`
 - for loops on hash keys: `h = {'a'=>10, 'b'=>20}; for k in h do puts h{k} end`
+- lambda blocks: `def make_counter(n,incr) ; n-=incr; lambda { n += incr }; end`
+end
+
 - lightweight eRuby like templating, see [template.rbi](rubyish-examples/template.rbi)
 
 Notes:
@@ -53,7 +56,7 @@ curly brackets `puts fruit{'bannanas'}`
 
 - nqp op-codes can be called like regular functions. E.g.
 ```
-    puts nqp:if(2+2 == 4, 'yup', 'nope' )
+    puts nqp::if(2+2 == 4, 'yup', 'nope' )
 ```
 - this includes nqp control-flow functions:
 ```

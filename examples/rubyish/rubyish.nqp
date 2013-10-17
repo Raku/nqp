@@ -41,6 +41,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
     token template-chunk { [<tmpl-unesc>|<tmpl-hdr>] ~ [<tmpl-esc>|$] <template-nibble>* }
     proto token template-nibble {*}
     token template-nibble:sym<interp>     { <interp> }
+    token template-nibble:sym<stray-tag>  { [<.tmpl-unesc>|<.tmpl-hdr>] <.panic("Stray tag, e.g. '%>' or '<?rbi?>'")> }
     token template-nibble:sym<plain-text> { [<!before [<tmpl-esc>|'#{'|$]> .]+ }
 
     token tmpl-hdr   {'<?rbi?>' \h* \n? <?{$*IN_TEMPLATE := 1}>}
@@ -73,14 +74,14 @@ grammar Rubyish::Grammar is HLL::Grammar {
 
     rule defbody {
         :my $*CUR_BLOCK := QAST::Block.new(QAST::Stmts.new());
-        <operation> <signature>? <separator>?
+        <operation> ['(' ~ ')' <signature>]? <separator>?
         <stmtlist>
     }
 
     token comma { :s [','|'=>'] :s }
 
     rule signature {
-        '(' ~ ')' [:my $*LINE_SPAN := 1; <param>* %% <comma>]
+        :my $*LINE_SPAN := 1; <param>* %% <comma>
     }
 
     token param { <ident> }
@@ -126,6 +127,10 @@ grammar Rubyish::Grammar is HLL::Grammar {
 
     token term:sym<new> {
         ['new' \h+ :s <ident> | <ident> '.' 'new'] ['(' ~ ')' <call-args=.paren-args>?]?
+    }
+
+    token term:sym<lambda-call> {
+        <ident> '.' 'call' ['(' ~ ')' <call-args=.paren-args>?]?
     }
 
     token var {
@@ -183,7 +188,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
     proto token comment {*}
     token comment:sym<line>   { '#' [<?{!$*IN_TEMPLATE}> \N* || [<!before <tmpl-unesc>>\N]*] }
     token comment:sym<podish> {[^^'=begin'\n] ~ [^^'=end'\n ] .*?}
-    token ws { <!ww>[\h | <.comment> | <.continuation> | <?{$*LINE_SPAN}> \n]* }
+    token ws { <!ww> [\h | <.comment> | <.continuation> | <?{$*LINE_SPAN}> \n]* }
 
     # Operator precedence levels
     INIT {
@@ -288,7 +293,10 @@ grammar Rubyish::Grammar is HLL::Grammar {
 
     token term:sym<code>  {
         'begin' ~ 'end' <stmtlist> 
-        | '{' ~ '}' <stmtlist> 
+    }
+
+    token term:sym<lambda>  {
+        'lambda' :s ['{' ['|' ~ '|' <signature>]?]  ~ '}' <stmtlist> 
     }
 
     method builtin-init() {
@@ -442,6 +450,17 @@ class Rubyish::Actions is HLL::Actions {
             );
     }
 
+    method term:sym<lambda-call>($/) {
+        my $call := QAST::Op.new( :op<call>,
+                                  :name(~$<ident>),
+            );
+        if $<call-args> {
+            $call.push($_)
+                for $<call-args>.ast;
+        }
+        make $call;
+    }
+
     method var($/) {
         my $sigil := ~$<sigil>//'';
         my $name := $sigil ~ $<ident>;
@@ -507,6 +526,12 @@ class Rubyish::Actions is HLL::Actions {
 
     method defbody($/) {
         $*CUR_BLOCK.name(~$<operation>);
+        if $<signature> {
+            for $<signature>.ast {
+                $*CUR_BLOCK[0].push($_);
+                $*CUR_BLOCK.symbol($_.name, :declared(1));
+            }
+        }
         $*CUR_BLOCK.push($<stmtlist>.ast);
         if $*IN_CLASS {
             # it's a method, self will be automatically passed
@@ -520,12 +545,13 @@ class Rubyish::Actions is HLL::Actions {
     }
 
     method signature($/) {
+        my @params;
         for $<param> {
-            $*CUR_BLOCK[0].push(QAST::Var.new(
+              @params.push(QAST::Var.new(
                 :name(~$_), :scope('lexical'), :decl('param')
             ));
-            $*CUR_BLOCK.symbol(~$_, :declared(1));
         }
+        make @params;
     }
 
     method stmt:sym<class>($/) {
@@ -566,7 +592,6 @@ class Rubyish::Actions is HLL::Actions {
     method stmt:sym<EXPR>($/) { make $<EXPR>.ast; }
 
     method term:sym<assign>($/) { 
-        my $sym := ~$<OPER>;
         my $op := $<OPER><O><op>;
         make  QAST::Op.new( :op('bind'),
                             $<var>.ast,
@@ -621,6 +646,7 @@ class Rubyish::Actions is HLL::Actions {
         $hash.push($_) for $<paren-list>.ast;
         make $hash;
     }
+
     method value:sym<nil>($/) {
         make QAST::Op.new( :op<null> );
     }
@@ -630,7 +656,7 @@ class Rubyish::Actions is HLL::Actions {
     }
 
     method value:sym<false>($/) {
-        make QAST::IVal.new(0);
+        make QAST::IVal.new( :value<0> );
     }
 
     method  interp($/) { make $<stmt>.ast }
@@ -697,6 +723,21 @@ class Rubyish::Actions is HLL::Actions {
 
     method term:sym<code>($/) {
         make $<stmtlist>.ast;
+    }
+
+    method term:sym<lambda>($/) {
+        my $block := QAST::Block.new();
+        if $<signature> {
+            for $<signature>.ast {
+                $block.push($_);
+                $block.symbol($_.name, :declared(1));
+            }
+        }
+        $block.push($<stmtlist>.ast);
+
+        make  QAST::Op.new(:op<takeclosure>,
+                           $block,
+            );
     }
 
 }

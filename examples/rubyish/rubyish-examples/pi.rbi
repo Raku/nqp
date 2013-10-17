@@ -1,7 +1,7 @@
 # naive approximation: pi = 4 * (1 - /1/3 + 1/5 ...)
 
 limit = 2500000
-def time ; nqp:time_i() ; end
+def time ; nqp::time_i() ; end
 
 n = 1;
 pi_over_4 = 0.0

@@ -7,7 +7,7 @@
 # Any arbritrary code can appear before the template. Output to stdout
 # is appended to the template, both before and within the template body
 
-puts "<?xml version='1.0' encoding='utf-8'?>"
+puts %q{<?xml version='1.0' encoding='utf-8'?>}
 
 <?rbi?>
 <html>
