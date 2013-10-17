@@ -10,6 +10,7 @@ BIN_DIR = $(PREFIX)/bin
 NQP_LANG_DIR= $(PREFIX)/languages/nqp
 NQP_JAR_DIR = $(NQP_LANG_DIR)/runtime
 NQP_LIB_DIR = $(NQP_LANG_DIR)/lib
+JVM_BUILD_DIR = gen/jvm
 
 MKPATH = $(PERL) -MExtUtils::Command -e mkpath
 CP     = $(PERL) -MExtUtils::Command -e cp
@@ -27,14 +28,14 @@ RUNTIME_JAR = nqp-runtime.jar
 
 THIRDPARTY_JARS = $(ASM)asm-4.1.jar@cpsep@$(ASM)asm-tree-4.1.jar@cpsep@3rdparty/jline/jline-1.0.jar@cpsep@3rdparty/jna/jna.jar
 STAGE0 = src/vm/jvm/stage0
-STAGE1 = src/stage1
-STAGE2 = src/stage2
+STAGE1 = $(JVM_BUILD_DIR)/stage1
+STAGE2 = $(JVM_BUILD_DIR)/stage2
 
 STAGE0_NQP = $(JAVA) -cp $(STAGE0) -Xbootclasspath/a:$(STAGE0)@cpsep@nqp-runtime.jar@cpsep@$(THIRDPARTY_JARS)@cpsep@$(STAGE0)/nqp.jar nqp --bootstrap
 STAGE1_NQP = $(JAVA) -cp $(STAGE1) -Xbootclasspath/a:$(STAGE1)@cpsep@nqp-runtime.jar@cpsep@$(THIRDPARTY_JARS)@cpsep@$(STAGE1)/nqp.jar nqp --bootstrap
 
 NQP_MO_JAR      = nqpmo.jar
-NQP_MO_COMBINED = gen/nqpmo.nqp
+NQP_MO_COMBINED = nqpmo.nqp
 NQP_MO_SOURCES  = src/how/Archetypes.nqp src/how/RoleToRoleApplier.nqp \
                   src/how/NQPConcreteRoleHOW.nqp src/how/RoleToClassApplier.nqp \
                   src/how/NQPCurriedRoleHOW.nqp src/how/NQPParametricRoleHOW.nqp \
