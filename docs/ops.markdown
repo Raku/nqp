@@ -1358,6 +1358,8 @@ Given a context, return the outer context, or null.
 
 Given a lexpad and a name, return the name's primitive type.
 
+The primitive types are 1 for int, 2 for num and 3 for str. 0 is any object.
+
 ## savecapture
 * `savecapture()`
 
