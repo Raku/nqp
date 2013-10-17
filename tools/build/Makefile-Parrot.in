@@ -556,7 +556,7 @@ CLEANUPS = \
   src/vm/parrot/6model/reprs/*$(O) \
   src/vm/parrot/6model/reprs/*.pdb \
 
-all: $(PARROT_BUILD_DIR)/$(NQP_EXE) $(P5QREGEX_PBC)
+all: $(PARROT_BUILD_DIR)/$(NQP_EXE) $(P5QREGEX_PBC) $(NQP_LAUNCHER)
 
 install: all
 	$(MKPATH)                   $(DESTDIR)$(PARROT_LIBRARY_DIR)
@@ -1111,22 +1111,22 @@ t/*/*.t: all
 	prove -r -v --exec $(PARROT_BUILD_DIR)/$(NQP_EXE) $@
 
 test: all
-	prove -r --exec "$(PARROT_BUILD_DIR)/$(NQP_EXE) --vmlibs=nqp_dyncall_ops" t/nqp t/parrot t/hll t/qregex t/p5regex t/qast t/serialization t/nativecall
+	prove -r --exec "$(NQP_LAUNCHER) --vmlibs=nqp_dyncall_ops" t/nqp t/parrot t/hll t/qregex t/p5regex t/qast t/serialization t/nativecall
 
 test-loud: all
-	prove -r -v --exec "$(PARROT_BUILD_DIR)/$(NQP_EXE) --vmlibs=nqp_dyncall_ops" t/nqp t/parrot t/hll t/qregex t/p5regex t/qast t/serialization t/nativecall
+	prove -r -v --exec "$(NQP_LAUNCHER) --vmlibs=nqp_dyncall_ops" t/nqp t/parrot t/hll t/qregex t/p5regex t/qast t/serialization t/nativecall
 
-core-test: $(PARROT_BUILD_DIR)/$(NQP_EXE)
+core-test: $(NQP_LAUNCHER)
 	prove -r --exec $(PARROT_BUILD_DIR)/$(NQP_EXE) t/nqp t/parrot
 
-core-test-loud: $(PARROT_BUILD_DIR)/$(NQP_EXE)
-	prove -r -v --exec $(PARROT_BUILD_DIR)/$(NQP_EXE) t/nqp t/parrot
+core-test-loud: $(NQP_LAUNCHER)
+	prove -r -v --exec $(NQP_LAUNCHER) t/nqp t/parrot
 
-qregex-test: $(PARROT_BUILD_DIR)/$(NQP_EXE)
-	prove -r --exec $(PARROT_BUILD_DIR)/$(NQP_EXE) t/qregex
+qregex-test: $(NQP_LAUNCHER)
+	prove -r --exec $(NQP_LAUNCHER) t/qregex
 
-qregex-test-loud: $(PARROT_BUILD_DIR)/$(NQP_EXE)
-	prove -r -v --exec ./$(NQP_EXE) t/qregex
+qregex-test-loud: $(NQP_LAUNCHER)
+	prove -r -v --exec $(NQP_LAUNCHER) t/qregex
 
 ## cleaning
 
