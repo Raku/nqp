@@ -101,6 +101,7 @@ MAIN: {
     $config{'makefile-timing'} = $options{'makefile-timing'};
     $config{'stagestats'} = '--stagestats' if $options{'makefile-timing'};
     $config{'shell'} = $^O eq 'MSWin32' ? 'cmd' : 'sh';
+    $config{'bat'}   = $^O eq 'MSWin32' ? '.bat' : '';
     if ($^O eq 'MSWin32' or $^O eq 'cygwin') {
         $config{'dll'} = '$(PARROT_BIN_DIR)/$(PARROT_LIB_SHARED)';
         $config{'dllcopy'} = '$(PARROT_LIB_SHARED)';
