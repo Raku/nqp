@@ -550,6 +550,7 @@ CLEANUPS = \
   3rdparty/sha1/*$(O) \
   $(DYNEXT_DIR)/*$(LOAD_EXT) \
   $(NQP_CONST_PIR) \
+  $(PARROT_BUILD_DIR)/nqp-config.nqp \
   src/vm/parrot/guts/*$(O) \
   src/vm/parrot/guts/*.pdb \
   src/vm/parrot/6model/*$(O) \
