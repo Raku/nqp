@@ -1564,6 +1564,10 @@ class QAST::Compiler is HLL::Compiler {
         $ops.push_pirop('goto', $scanlabel);
         $ops.push($looplabel);
         $ops.push_pirop('inc', %*REG<pos>);
+        if nqp::elems($node.list) && $node.subtype ne 'ignorecase' {
+            $ops.push_pirop('index', %*REG<pos>, %*REG<tgt>, self.rxescape($node[0]), %*REG<pos>);
+            $ops.push_pirop('eq', %*REG<pos>, -1, %*REG<fail>);
+        }
         $ops.push_pirop('gt', %*REG<pos>, %*REG<eos>, %*REG<fail>);
         $ops.push_pirop('repr_bind_attr_int', %*REG<cur>, %*REG<curclass>, '"$!from"', %*REG<pos>);
         $ops.push($scanlabel);
