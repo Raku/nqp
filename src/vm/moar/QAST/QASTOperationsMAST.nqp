@@ -1857,6 +1857,7 @@ QAST::MASTOperations.add_core_moarop_mapping('setcodeobj', 'setcodeobj', 0);
 QAST::MASTOperations.add_core_moarop_mapping('getcodename', 'getcodename');
 QAST::MASTOperations.add_core_moarop_mapping('setcodename', 'setcodename', 0);
 QAST::MASTOperations.add_core_moarop_mapping('forceouterctx', 'forceouterctx', 0);
+QAST::MASTOperations.add_core_moarop_mapping('setdispatcher', 'setdispatcher', 0);
 QAST::MASTOperations.add_core_op('setup_blv', -> $qastcomp, $op {
     if +@($op) != 1 || !nqp::ishash($op[0]) {
         nqp::die('setup_blv requires one hash operand');
