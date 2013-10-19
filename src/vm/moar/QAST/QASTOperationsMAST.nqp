@@ -1818,6 +1818,7 @@ QAST::MASTOperations.add_core_moarop_mapping('setboolspec', 'setboolspec', 0);
 QAST::MASTOperations.add_core_moarop_mapping('setmethcache', 'setmethcache', 0);
 QAST::MASTOperations.add_core_moarop_mapping('setmethcacheauth', 'setmethcacheauth', 0);
 QAST::MASTOperations.add_core_moarop_mapping('settypecache', 'settypecache', 0);
+QAST::MASTOperations.add_core_moarop_mapping('settypecheckmode', 'settypecheckmode', 0);
 QAST::MASTOperations.add_core_moarop_mapping('isinvokable', 'isinvokable');
 QAST::MASTOperations.add_core_moarop_mapping('setinvokespec', 'setinvokespec', 0);
 QAST::MASTOperations.add_core_moarop_mapping('setcontspec', 'setcontspec', 0);
