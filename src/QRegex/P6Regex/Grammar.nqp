@@ -144,10 +144,10 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     token quantified_atom {
         <!rxstopper>
-        <atom> <sigspace>
+        <atom> <sigspace>**0..1
         [
             [
-            | <!rxstopper> <quantifier> <quantspace=.sigspace>
+            | <!rxstopper> <quantifier> <quantspace=.sigspace>**0..1
             | <?before ':'> <backmod> <!alpha>
             ]
             [ <separator> ]**0..1
@@ -166,7 +166,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         ]
     }
 
-    token sigspace { <normspace>? }
+    token sigspace { <?[\s#]> <normspace> }
 
     proto token quantifier { <...> }
     token quantifier:sym<*> { <sym> <backmod> }

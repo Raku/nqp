@@ -143,8 +143,12 @@ grammar NQP::Grammar is HLL::Grammar {
     }
 
     rule statementlist {
+        ''
+        [
         | $
-        | [<statement><.eat_terminator> ]*
+        | <?before <[\)\]\}]>>
+        | [ <statement> <.eat_terminator> ]*
+        ]
     }
 
     token statement {
@@ -264,15 +268,18 @@ grammar NQP::Grammar is HLL::Grammar {
 
     proto token statement_prefix { <...> }
     token statement_prefix:sym<BEGIN> { <sym> <blorst> }
-    token statement_prefix:sym<INIT> { <sym> <blorst> }
-
-    token statement_prefix:sym<try> {
-        <sym>
-        <blorst>
-    }
+    token statement_prefix:sym<INIT>  { <sym> <blorst> }
+    token statement_prefix:sym<try>   { <sym>{say('   try')} <blorst> }
 
     token blorst {
-        \s <.ws> [ <?[{]> <block> | <statement> ]
+        [
+        | <?before \s> <.ws>
+            [
+            | <?[{]> <block>
+            | <statement>
+            ]
+        | <.panic: "Whitespace required after keyword">
+        ]
     }
 
     ## Statement modifiers
@@ -333,41 +340,41 @@ grammar NQP::Grammar is HLL::Grammar {
 
     token twigil { <[*!?]> }
 
-    proto token package_declarator { <...> }
-    token package_declarator:sym<module> {
+    proto rule package_declarator { <...> }
+    rule package_declarator:sym<module> {
         :my $*OUTERPACKAGE := $*PACKAGE;
         :my $*PKGDECL := 'module';
         <sym> <package_def> 
     }
-    token package_declarator:sym<knowhow> {
+    rule package_declarator:sym<knowhow> {
         :my $*OUTERPACKAGE := $*PACKAGE;
         :my $*PKGDECL := 'knowhow';
         <sym> <package_def>
     }
-    token package_declarator:sym<class> {
+    rule package_declarator:sym<class> {
         :my $*OUTERPACKAGE := $*PACKAGE;
         :my $*PKGDECL := 'class';
         <sym> <package_def>
     }
-    token package_declarator:sym<grammar> {
+    rule package_declarator:sym<grammar> {
         :my $*OUTERPACKAGE := $*PACKAGE;
         :my $*PKGDECL := 'grammar';
         <sym> <package_def>
     }
-    token package_declarator:sym<role> {
+    rule package_declarator:sym<role> {
         :my $*OUTERPACKAGE := $*PACKAGE;
         :my $*PKGDECL := 'role';
         <sym> <package_def>
     }
-    token package_declarator:sym<native> {
+    rule package_declarator:sym<native> {
         :my $*OUTERPACKAGE := $*PACKAGE;
         :my $*PKGDECL := 'native';
         <sym> <package_def>
     }
-    token package_declarator:sym<stub> {
+    rule package_declarator:sym<stub> {
         :my $*OUTERPACKAGE := $*PACKAGE;
         :my $*PKGDECL := 'stub';
-        <sym> :s <name>
+        <sym> <name>
         'metaclass' <metaclass=.name>
         '{' '...' '}'
     }
@@ -434,7 +441,7 @@ grammar NQP::Grammar is HLL::Grammar {
     rule role_params {
         :my $*SCOPE   := 'my';
         :my $*IN_DECL := 'variable';
-        [ <variable> ]+ % [ ',' ]
+        <variable> +% ','
     }
 
     proto token scope_declarator { <...> }
@@ -442,7 +449,7 @@ grammar NQP::Grammar is HLL::Grammar {
     token scope_declarator:sym<our> { <sym> <scoped('our')> }
     token scope_declarator:sym<has> { <sym> <scoped('has')> }
 
-    rule scoped($*SCOPE) {
+    token scoped($*SCOPE) {
         | <declarator>
         | <multi_declarator>
         | <package_declarator>
@@ -466,9 +473,9 @@ grammar NQP::Grammar is HLL::Grammar {
         <trait>*
     }
 
-    proto token routine_declarator { <...> }
-    token routine_declarator:sym<sub>    { <sym> <routine_def> }
-    token routine_declarator:sym<method> { <sym> <method_def> }
+    proto rule routine_declarator { <...> }
+    rule routine_declarator:sym<sub>    { <sym> <routine_def> }
+    rule routine_declarator:sym<method> { <sym> <method_def>  }
 
     rule routine_def {
         :my $*RETURN_USED := 0;
@@ -554,7 +561,7 @@ grammar NQP::Grammar is HLL::Grammar {
     proto token trait_mod { <...> }
     token trait_mod:sym<is> { <sym>:s <longname=.deflongname><circumfix>**0..1 }
 
-    token regex_declarator {
+    rule regex_declarator {
         [
         | $<proto>=[proto] :s [regex|token|rule]
           [
@@ -567,7 +574,7 @@ grammar NQP::Grammar is HLL::Grammar {
           || '{' '<*>' '}'<?ENDSTMT>
           || <.panic: "Proto regex body must be \{*\} (or <*> or <...>, which are deprecated)">
           ] :!s
-        | $<sym>=[regex|token|rule] :s
+        | $<sym>=[regex|token|rule]
           [
           || '::(' <latename=variable> ')'
           || <deflongname>

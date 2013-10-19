@@ -72,7 +72,11 @@ class QRegex::P6Regex::Actions is HLL::Actions {
 
     method quantified_atom($/) {
         my $qast := $<atom>.ast;
-        QAST::Regex.new( :rxtype<concat>, $qast, $<sigspace>.ast ) if $<sigspace>;
+        if $<sigspace> {
+            my $sig := $<sigspace>[0].ast;
+            $sig.unshift($qast);
+            $qast := $sig;
+        }
         if $<quantifier> {
             $/.CURSOR.panic('Quantifier quantifies nothing')
                 unless $qast;
@@ -80,11 +84,14 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             $ast.unshift($qast);
             $qast := $ast;
             if $<quantspace> && !$<sigspace> {
-                QAST::Regex.new( :rxtype<concat>, $qast, $<quantspace>.ast );
+                my $qsig := $<quantspace>[0].ast;
+                $qsig.unshift($qast);
+                $qast := $qsig;
             }
         }
         if $<separator> {
-            unless $qast.rxtype eq 'quant' {
+            unless $qast.rxtype eq 'quant' ||
+                   $qast.rxtype eq 'concat' && $qast[0].rxtype eq 'quant' {
                 $/.CURSOR.panic("'" ~ $<separator>[0]<septype> ~
                     "' many only be used immediately following a quantifier")
             }
@@ -96,6 +103,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         }
         $qast.backtrack('r') if $qast && !$qast.backtrack &&
             (%*RX<r> || $<backmod> && ~$<backmod>[0] eq ':');
+        $qast.node($/);
         make $qast;
     }
     
@@ -115,9 +123,10 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     method sigspace($/) {
-        my $qast := $<normspace> && %*RX<s>
-                    ?? QAST::Regex.new(:rxtype<ws>, :subtype<method>, :node($/),
-                            QAST::Node.new(QAST::SVal.new( :value('ws') )))
+        my $qast := %*RX<s>
+                    ?? QAST::Regex.new(:rxtype<concat>,
+                            QAST::Regex.new(:rxtype<ws>, :subtype<method>, :node($/),
+                                QAST::Node.new(QAST::SVal.new( :value('ws') ))))
                     !! 0;
         make $qast;
     }
