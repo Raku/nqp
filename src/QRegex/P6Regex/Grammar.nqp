@@ -87,12 +87,15 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         {
             for $OLDRX { %*RX{$_.key} := $_.value; }
         }
-        [ <.ws> [
-                |  '||' { $*SEQ := 1; }
-                |  '|'
-                |  '&&'
-                |  '&'
-                ] ]?
+        <.ws>
+        [
+          [
+          |  '||' { $*SEQ := 1; }
+          |  '|'
+          |  '&&'
+          |  '&'
+          ] <.ws>
+        ]?
         <termaltseq> <.ws>
         [
         || <?infixstopper>
@@ -115,36 +118,39 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     token termaltseq {
         <termconjseq>
-        [ '||' [  { $*SEQ := 1; } <termconjseq> || <.throw_null_pattern> ] ]*
+        [ '||' <.ws> [  { $*SEQ := 1; } <termconjseq> || <.throw_null_pattern> ] ]*
     }
 
     token termconjseq {
         <termalt>
-        [ '&&' [ { $*SEQ := 0; } <termalt> || <.throw_null_pattern> ] ]*
+        [ '&&' <.ws> [ { $*SEQ := 0; } <termalt> || <.throw_null_pattern> ] ]*
     }
 
     token termalt {
         <termconj>
-        [ <!rxstopper> '|' <![|]> [ { $*SEQ := 0; } <termconj> || <.throw_null_pattern> ] ]*
+        [ <!rxstopper> '|' <![|]> <.ws> [ { $*SEQ := 0; } <termconj> || <.throw_null_pattern> ] ]*
     }
 
     token termconj {
         <termish>
-        [ <!rxstopper> '&' <![&]> [ { $*SEQ := 0; } <termish> || <.throw_null_pattern> ] ]*
+        [ <!rxstopper> '&' <![&]> <.ws> [ { $*SEQ := 0; } <termish> || <.throw_null_pattern> ] ]*
     }
 
     token termish {
         || <noun=.quantified_atom>+
         || <?before <stopper> | <[&|~]> > <.throw_null_pattern>
-        || (\W) { self.throw_unrecognized_metachar: ~$/[0] }
+#        || (\W) { self.throw_unrecognized_metachar: ~$/[0] }
     }
 
     token quantified_atom {
         <!rxstopper>
-        <atom>
+        <atom> <sigspace>
         [
-            <.ws> [ <!rxstopper> <quantifier> | <?before ':'> <backmod> <!alpha> ]
-            [ <.ws> <separator> ]**0..1
+            [
+            | <!rxstopper> <quantifier> <quantspace=.sigspace>
+            | <?before ':'> <backmod> <!alpha>
+            ]
+            [ <separator> ]**0..1
         ]**0..1
     }
 
@@ -159,6 +165,8 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         | <metachar>
         ]
     }
+
+    token sigspace { <normspace>? }
 
     proto token quantifier { <...> }
     token quantifier:sym<*> { <sym> <backmod> }
@@ -189,7 +197,6 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token backmod { ':'? [ '?' | '!' | <!before ':'> ] }
 
     proto token metachar { <...> }
-    token metachar:sym<ws> { <.normspace> }
     token metachar:sym<[ ]> { '[' <nibbler> ']' }
     token metachar:sym<( )> { '(' <nibbler> ')' }
     token metachar:sym<'> { <?[']> <quote_EXPR: ':q'> }

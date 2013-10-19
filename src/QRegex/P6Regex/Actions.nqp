@@ -72,12 +72,16 @@ class QRegex::P6Regex::Actions is HLL::Actions {
 
     method quantified_atom($/) {
         my $qast := $<atom>.ast;
+        QAST::Regex.new( :rxtype<concat>, $qast, $<sigspace>.ast ) if $<sigspace>;
         if $<quantifier> {
             $/.CURSOR.panic('Quantifier quantifies nothing')
                 unless $qast;
             my $ast := $<quantifier>[0].ast;
             $ast.unshift($qast);
             $qast := $ast;
+            if $<quantspace> && !$<sigspace> {
+                QAST::Regex.new( :rxtype<concat>, $qast, $<quantspace>.ast );
+            }
         }
         if $<separator> {
             unless $qast.rxtype eq 'quant' {
@@ -110,6 +114,14 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         }
     }
 
+    method sigspace($/) {
+        my $qast := $<normspace> && %*RX<s>
+                    ?? QAST::Regex.new(:rxtype<ws>, :subtype<method>, :node($/),
+                            QAST::Node.new(QAST::SVal.new( :value('ws') )))
+                    !! 0;
+        make $qast;
+    }
+
     method quantifier:sym<*>($/) {
         my $qast := QAST::Regex.new( :rxtype<quant>, :min(0), :max(-1), :node($/) );
         make backmod($qast, $<backmod>);
@@ -136,14 +148,6 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         }
         $qast := QAST::Regex.new( :rxtype<quant>, :min($min), :max($max), :node($/) );
         make backmod($qast, $<backmod>);
-    }
-
-    method metachar:sym<ws>($/) {
-        my $qast := %*RX<s>
-                    ?? QAST::Regex.new(:rxtype<ws>, :subtype<method>, :node($/),
-                            QAST::Node.new(QAST::SVal.new( :value('ws') )))
-                    !! 0;
-        make $qast;
     }
 
     method metachar:sym<[ ]>($/) {
