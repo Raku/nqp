@@ -82,17 +82,34 @@ class QAST::MASTOperations {
     my @kind_names := ['VOID','int8','int16','int32','int','num32','num','str','obj'];
     my @kind_types := [0,1,1,1,1,2,2,3,4];
 
-    my @operands_offsets := MAST::Ops.WHO<@offsets>;
-    my @operands_counts := MAST::Ops.WHO<@counts>;
-    my @operands_values := MAST::Ops.WHO<@values>;
-    my %op_codes := MAST::Ops.WHO<%codes>;
-    method compile_mastop($qastcomp, $op, @args, :$returnarg = -1, :$opname = 'none', :$want) {
-        #$op := $op.name if nqp::istype($op, QAST::Op);
-
-        my $op_num := %op_codes{$op};
+    my @core_operands_offsets := MAST::Ops.WHO<@offsets>;
+    my @core_operands_counts  := MAST::Ops.WHO<@counts>;
+    my @core_operands_values  := MAST::Ops.WHO<@values>;
+    my %core_op_codes         := MAST::Ops.WHO<%codes>;
+    method compile_mastop($qastcomp, $op, @args, :$returnarg = -1, :$want) {
+        # Resolve as either core op or ext op.
+        my int $num_operands;
+        my int $operands_offset;
+        my int $is_extop;
+        my @operands_values;
+        if nqp::existskey(%core_op_codes, $op) {
+            my int $op_num   := %core_op_codes{$op};
+            $num_operands    := nqp::atpos_i(@core_operands_counts, $op_num);
+            $operands_offset := nqp::atpos_i(@core_operands_offsets, $op_num);
+            @operands_values := @core_operands_values;
+            $is_extop := 0;
+        }
+        elsif MAST::ExtOpRegistry.extop_known($op) {
+            @operands_values := MAST::ExtOpRegistry.extop_signature($op);
+            $num_operands    := nqp::elems(@operands_values);
+            $operands_offset := 0;
+            $is_extop := 1;
+        }
+        else {
+            nqp::die("MoarVM op '$op' is unknown as a core or extension op");
+        }
+        
         my $num_args := +@args;
-        my $num_operands := nqp::atpos_i(@operands_counts, $op_num);
-        my $operands_offset := nqp::atpos_i(@operands_offsets, $op_num);
         my $operand_num := 0;
         my $result_kind := $MVM_reg_void;
         my $result_reg := MAST::VOID;
@@ -263,9 +280,23 @@ class QAST::MASTOperations {
         my $self := self;
 
         if $ret != -1 {
-            my $op_num := %op_codes{$moarop};
-            my $num_operands := nqp::atpos_i(@operands_counts, $op_num);
-            my $operands_offset := nqp::atpos_i(@operands_offsets, $op_num);
+            my int $num_operands;
+            my int $operands_offset;
+            my @operands_values;
+            if nqp::existskey(%core_op_codes, $moarop) {
+                my int $op_num   := %core_op_codes{$moarop};
+                $num_operands    := nqp::atpos_i(@core_operands_counts, $op_num);
+                $operands_offset := nqp::atpos_i(@core_operands_offsets, $op_num);
+                @operands_values := @core_operands_values;
+            }
+            elsif MAST::ExtOpRegistry.extop_known($moarop) {
+                @operands_values := MAST::ExtOpRegistry.extop_signature($moarop);
+                $num_operands    := nqp::elems(@operands_values);
+                $operands_offset := 0;
+            }
+            else {
+                nqp::die("MoarVM op '$moarop' is unknown as a core or extension op");
+            }
             nqp::die("moarop $moarop return arg index out of range")
                 if $ret < -1 || $ret >= $num_operands;
             nqp::die("moarop $moarop is not void")
@@ -274,8 +305,7 @@ class QAST::MASTOperations {
         }
 
         -> $qastcomp, $op_name, @op_args {
-            $self.compile_mastop($qastcomp, $moarop, @op_args,
-                :returnarg($ret), :opname($op_name))
+            $self.compile_mastop($qastcomp, $moarop, @op_args, :returnarg($ret))
         }
     }
 
