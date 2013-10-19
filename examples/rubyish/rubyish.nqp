@@ -129,10 +129,6 @@ grammar Rubyish::Grammar is HLL::Grammar {
         ['new' \h+ :s <ident> | <ident> '.' 'new'] ['(' ~ ')' <call-args=.paren-args>?]?
     }
 
-    token term:sym<lambda-call> {
-        <ident> '.' 'call' ['(' ~ ')' <call-args=.paren-args>?]?
-    }
-
     token var {
         :my $*MAYBE_DECL := 0;
         [$<sigil>=[\$|\@\@?]|<!keyword>]
@@ -195,8 +191,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
 	# see http://www.tutorialspoint.com/ruby/ruby_operators.htm
 	# x: **
         Rubyish::Grammar.O(':prec<x=>, :assoc<left>',  '%exponentiation');
-
-	# y: ! ~ + -
+	# y: ! ~ + - (unary)
         Rubyish::Grammar.O(':prec<y=>, :assoc<unary>', '%unary');
 	# w: * / %
         Rubyish::Grammar.O(':prec<w=>, :assoc<left>',  '%multiplicative');
@@ -210,7 +205,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
         Rubyish::Grammar.O(':prec<r=>, :assoc<left>',  '%bitor');
 	# q: <= < > >= le lt gt ge
         Rubyish::Grammar.O(':prec<q=>, :assoc<left>',  '%comparison');
-	# n: <=> == === != =~ !~
+	# n: <=> == === != =~ !~ eq ne cmp
         Rubyish::Grammar.O(':prec<n=>, :assoc<left>',  '%equality');
 	# l: &&
         Rubyish::Grammar.O(':prec<l=>, :assoc<left>',  '%logical_and');
@@ -220,7 +215,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
         Rubyish::Grammar.O(':prec<g=>, :assoc<right>', '%conditional');
 	# f: = %= { /= -= += |= &= >>= <<= *= &&= ||= **=
         Rubyish::Grammar.O(':prec<f=>, :assoc<right>', '%assignment');
-	# e: not
+	# e: not (unary)
         Rubyish::Grammar.O(':prec<e=>, :assoc<unary>', '%loose_not');
 	# c: or and
         Rubyish::Grammar.O(':prec<c=>, :assoc<left>',  '%loose_logical');
@@ -247,7 +242,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
     token infix:sym<|>  { <sym> <O('%bitor,  :op<bitor_i>')> }
     token infix:sym<^>  { <sym> <O('%bitor,  :op<bitxor_i>')> }
 
-    token infix:sym«<=»   { <sym>  <O('%comparison, :op<isle_n>')> }
+    token infix:sym«<=»   { <sym><![>]>  <O('%comparison, :op<isle_n>')> }
     token infix:sym«>=»   { <sym>  <O('%comparison, :op<isge_n>')> }
     token infix:sym«<»    { <sym>  <O('%comparison, :op<islt_n>')> }
     token infix:sym«>»    { <sym>  <O('%comparison, :op<isgt_n>')> }
@@ -258,8 +253,10 @@ grammar Rubyish::Grammar is HLL::Grammar {
 
     token infix:sym«==»   { <sym>  <O('%equality, :op<iseq_n>')> }
     token infix:sym«!=»   { <sym>  <O('%equality, :op<isne_n>')> }
+    token infix:sym«<=>»  { <sym>  <O('%equality, :op<cmp_n>')> }
     token infix:sym«eq»   { <sym>  <O('%equality, :op<iseq_s>')> }
     token infix:sym«ne»   { <sym>  <O('%equality, :op<isne_s>')> }
+    token infix:sym«cmp»  { <sym>  <O('%equality, :op<cmp_s>')> }
 
     token infix:sym<&&>   { <sym>  <O('%logical_and, :op<if>')> }
     token infix:sym<||>   { <sym>  <O('%logical_or,  :op<unless>')> }
@@ -280,7 +277,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
 
     # Method call
     token postfix:sym<.>  {
-        '.' <ident> [ '(' ~ ')' <call-args=.paren-args>? ]?
+        '.' <operation> [ '(' ~ ')' <call-args=.paren-args>? ]?
         <O('%methodop')>
     }
 
@@ -476,17 +473,6 @@ class Rubyish::Actions is HLL::Actions {
             # return the new object
             QAST::Var.new( :name($tmp-sym), :scope<lexical> ),
             );
-    }
-
-    method term:sym<lambda-call>($/) {
-        my $call := QAST::Op.new( :op<call>,
-                                  :name(~$<ident>),
-            );
-        if $<call-args> {
-            $call.push($_)
-                for $<call-args>.ast;
-        }
-        make $call;
     }
 
     method var($/) {
@@ -692,10 +678,16 @@ class Rubyish::Actions is HLL::Actions {
     method circumfix:sym<( )>($/) { make $<EXPR>.ast }
 
     method postfix:sym<.>($/) {
-        my $meth_call := QAST::Op.new( :op('callmethod'), :name(~$<ident>) );
+	my $op := ~$<operation>;
+
+	my $meth_call := $op eq 'call'
+	    ?? QAST::Op.new( :op('call') )
+	    !! QAST::Op.new( :op('callmethod'), :name(~$<operation>) );
+
         if $<call-args> {
             $meth_call.push($_) for $<call-args>.ast;
         }
+
         make $meth_call;
     }
 

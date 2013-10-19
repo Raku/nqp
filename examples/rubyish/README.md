@@ -28,8 +28,6 @@ Features:
 - for loops on arrays: `for val in [10,20,30] do puts val end`
 - for loops on hash keys: `h = {'a'=>10, 'b'=>20}; for k in h do puts h{k} end`
 - lambda blocks: `def make_counter(n,incr) ; n-=incr; lambda { n += incr }; end`
-end
-
 - lightweight eRuby like templating, see [template.rbi](rubyish-examples/template.rbi)
 
 Notes:
@@ -38,6 +36,8 @@ Handy Options:
 
     % nqp rubyish.nqp --target=parse -e'puts "Hello World!"'  # dump parse
     % nqp rubyish.nqp --target=ast   -e'puts "Hello World!"'  # dump ast
+    % nqp rubyish.nqp --target=ast    # REPL mode, dump ASTS
+    > puts 42
 
 To run tests:
 ```
@@ -52,7 +52,7 @@ Strings and truth values are Perlish rather than Rubyish:
 - `gt`, `eq`, `le` ... do string comparisions
 - 0, '0', '', nil  are false in a boolean context.
 - hash dereferencing is via angle braces: `price = fruit<apples>` or
-curly brackets `puts fruit{'bannanas'}`
+curlies `puts fruit{'bannanas'}`
 
 - nqp op-codes can be called like regular functions. E.g.
 ```
