@@ -229,9 +229,9 @@ class QAST::MASTOperations {
         }
 
         # Add operation node.
-        nqp::push(@all_ins, MAST::Op.new(
-            :op($op),
-            |@arg_regs));
+        nqp::push(@all_ins, $is_extop
+            ?? MAST::ExtOp.new( :op($op), :cu($*MAST_COMPUNIT), |@arg_regs )
+            !! MAST::Op.new( :op($op), |@arg_regs ));
 
         # Build instruction list.
         nqp::defined($want)
