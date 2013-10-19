@@ -1337,6 +1337,7 @@ class MASTBytecodeAssembler {
             'CompUnit',         MAST::CompUnit,
             'Frame',            MAST::Frame,
             'Op',               MAST::Op,
+            'ExtOp',            MAST::ExtOp,
             'SVal',             MAST::SVal,
             'IVal',             MAST::IVal,
             'NVal',             MAST::NVal,
