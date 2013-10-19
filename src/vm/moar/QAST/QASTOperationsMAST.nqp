@@ -1387,6 +1387,8 @@ QAST::MASTOperations.add_core_moarop_mapping('captureposarg_i', 'captureposarg_i
 QAST::MASTOperations.add_core_moarop_mapping('captureposarg_n', 'captureposarg_n');
 QAST::MASTOperations.add_core_moarop_mapping('captureposarg_s', 'captureposarg_s');
 QAST::MASTOperations.add_core_moarop_mapping('captureposprimspec', 'captureposprimspec');
+QAST::MASTOperations.add_core_moarop_mapping('captureexistsnamed', 'captureexistsnamed');
+QAST::MASTOperations.add_core_moarop_mapping('capturehasnameds', 'capturehasnameds');
 QAST::MASTOperations.add_core_moarop_mapping('objprimspec', 'objprimspec');
 
 # Multiple dispatch related.
