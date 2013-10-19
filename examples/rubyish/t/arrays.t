@@ -1,4 +1,4 @@
-puts "1..9"
+puts "1..10"
 a=[10,18+2 , 30]
 a[3] = 40
 puts "#{a[0] == 10? 'ok' : 'nok'} 1 - a[0]"
@@ -14,3 +14,4 @@ for val in a do
 end
 
 puts "#{%w{nok ok nok}[1]} 9 - quote words"
+puts "#{['nok',['nok','nok','ok']][1][2]} 10 - 2d array"

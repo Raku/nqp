@@ -30,7 +30,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
         :my $*TOP_BLOCK   := $*CUR_BLOCK;
         :my $*CLASS_BLOCK := $*CUR_BLOCK;
         :my $*IN_TEMPLATE := 0;
-        :my $*LINE_SPAN   := 0;
+        :my $*IN_PARENS   := 0;
         :my %*SYM         := self.sym-init();
         ^ ~ $ <stmtlist>
             || <.panic('Syntax error')>
@@ -81,7 +81,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
     token comma { :s [','|'=>'] :s }
 
     rule signature {
-        :my $*LINE_SPAN := 1; <param>* %% <comma>
+        :my $*IN_PARENS := 1; <param>* %% <comma>
     }
 
     token param { <ident> }
@@ -121,7 +121,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
     }
 
     token call-args  { :s <EXPR>+ % <comma> }
-    token paren-args {:my $*LINE_SPAN := 1; <call-args> }
+    token paren-args {:my $*IN_PARENS := 1; <call-args> }
 
     token operation {<ident>[\!|\?]?}
 
@@ -155,7 +155,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
                              }
 
     token paren-list {
-         :my $*LINE_SPAN := 1;
+         :my $*IN_PARENS := 1;
          <EXPR> *%% <comma>
     }
 
@@ -188,55 +188,92 @@ grammar Rubyish::Grammar is HLL::Grammar {
     proto token comment {*}
     token comment:sym<line>   { '#' [<?{!$*IN_TEMPLATE}> \N* || [<!before <tmpl-unesc>>\N]*] }
     token comment:sym<podish> {[^^'=begin'\n] ~ [^^'=end'\n ] .*?}
-    token ws { <!ww> [\h | <.comment> | <.continuation> | <?{$*LINE_SPAN}> \n]* }
+    token ws { <!ww> [\h | <.comment> | <.continuation> | <?{$*IN_PARENS}> \n]* }
 
-    # Operator precedence levels
     INIT {
+	# Operator precedence levels
+	# see http://www.tutorialspoint.com/ruby/ruby_operators.htm
+	# x: **
+        Rubyish::Grammar.O(':prec<x=>, :assoc<left>',  '%exponentiation');
+
+	# y: ! ~ + -
         Rubyish::Grammar.O(':prec<y=>, :assoc<unary>', '%unary');
-        Rubyish::Grammar.O(':prec<w=>, :assoc<left>',  '%exponentiation');
-        Rubyish::Grammar.O(':prec<u=>, :assoc<left>',  '%multiplicative');
-        Rubyish::Grammar.O(':prec<r=>, :assoc<left>',  '%concatenation');
-        Rubyish::Grammar.O(':prec<t=>, :assoc<left>',  '%additive');
-        Rubyish::Grammar.O(':prec<j=>, :assoc<right>', '%assignment');
-        Rubyish::Grammar.O(':prec<l=>, :assoc<left>',  '%tight_and');
-        Rubyish::Grammar.O(':prec<k=>, :assoc<left>',  '%tight_or');
-        Rubyish::Grammar.O(':prec<d=>, :assoc<left>',  '%loose_and');
-        Rubyish::Grammar.O(':prec<c=>, :assoc<left>',  '%loose_or');
+	# w: * / %
+        Rubyish::Grammar.O(':prec<w=>, :assoc<left>',  '%multiplicative');
+	# u: + -
+        Rubyish::Grammar.O(':prec<u=>, :assoc<left>',  '%additive');
+	# t: >> <<
+        Rubyish::Grammar.O(':prec<t=>, :assoc<left>',  '%bitshift');
+	# s: &
+        Rubyish::Grammar.O(':prec<s=>, :assoc<left>',  '%bitand');
+	# r: ^ |
+        Rubyish::Grammar.O(':prec<r=>, :assoc<left>',  '%bitor');
+	# q: <= < > >= le lt gt ge
+        Rubyish::Grammar.O(':prec<q=>, :assoc<left>',  '%comparison');
+	# n: <=> == === != =~ !~
+        Rubyish::Grammar.O(':prec<n=>, :assoc<left>',  '%equality');
+	# l: &&
+        Rubyish::Grammar.O(':prec<l=>, :assoc<left>',  '%logical_and');
+	# k: ||
+        Rubyish::Grammar.O(':prec<k=>, :assoc<left>',  '%logical_or');
+	# q: ?:
+        Rubyish::Grammar.O(':prec<g=>, :assoc<right>', '%conditional');
+	# f: = %= { /= -= += |= &= >>= <<= *= &&= ||= **=
+        Rubyish::Grammar.O(':prec<f=>, :assoc<right>', '%assignment');
+	# e: not
+        Rubyish::Grammar.O(':prec<e=>, :assoc<unary>', '%loose_not');
+	# c: or and
+        Rubyish::Grammar.O(':prec<c=>, :assoc<left>',  '%loose_logical');
     }
 
     # Operators - mostly stolen from NQP
-    token prefix:sym<-> { <sym>  <O('%unary, :op<neg_n>')> }
-
     token infix:sym<**> { <sym>  <O('%exponentiation, :op<pow_n>')> }
 
-    token infix:sym<~>  { <sym> <O('%concatenation , :op<concat>')> }
+    token prefix:sym<-> { <sym>  <O('%unary, :op<neg_n>')> }
+    token prefix:sym<!> { <sym>  <O('%unary, :op<not_i>')> }
+
     token infix:sym<*>  { <sym> <O('%multiplicative, :op<mul_n>')> }
     token infix:sym</>  { <sym> <O('%multiplicative, :op<div_n>')> }
     token infix:sym<%>  { <sym><![>]> <O('%multiplicative, :op<mod_n>')> }
 
     token infix:sym<+>  { <sym> <O('%additive, :op<add_n>')> }
     token infix:sym<->  { <sym> <O('%additive, :op<sub_n>')> }
+    token infix:sym<~>  { <sym> <O('%additive, :op<concat>')> }
+
+    token infix:sym«<<»   { <sym>  <O('%bitshift, :op<bitshiftl_i>')> }
+    token infix:sym«>>»   { <sym>  <O('%bitshift, :op<bitshiftr_i>')> }
+
+    token infix:sym<&>  { <sym> <O('%bitand, :op<bitand_i>')> }
+    token infix:sym<|>  { <sym> <O('%bitor,  :op<bitor_i>')> }
+    token infix:sym<^>  { <sym> <O('%bitor,  :op<bitxor_i>')> }
+
+    token infix:sym«<=»   { <sym>  <O('%comparison, :op<isle_n>')> }
+    token infix:sym«>=»   { <sym>  <O('%comparison, :op<isge_n>')> }
+    token infix:sym«<»    { <sym>  <O('%comparison, :op<islt_n>')> }
+    token infix:sym«>»    { <sym>  <O('%comparison, :op<isgt_n>')> }
+    token infix:sym«le»   { <sym>  <O('%comparison, :op<isle_s>')> }
+    token infix:sym«ge»   { <sym>  <O('%comparison, :op<isge_s>')> }
+    token infix:sym«lt»   { <sym>  <O('%comparison, :op<islt_s>')> }
+    token infix:sym«gt»   { <sym>  <O('%comparison, :op<isgt_s>')> }
+
+    token infix:sym«==»   { <sym>  <O('%equality, :op<iseq_n>')> }
+    token infix:sym«!=»   { <sym>  <O('%equality, :op<isne_n>')> }
+    token infix:sym«eq»   { <sym>  <O('%equality, :op<iseq_s>')> }
+    token infix:sym«ne»   { <sym>  <O('%equality, :op<isne_s>')> }
+
+    token infix:sym<&&>   { <sym>  <O('%logical_and, :op<if>')> }
+    token infix:sym<||>   { <sym>  <O('%logical_or,  :op<unless>')> }
+    token infix:sym<//>   { <sym>  <O('%logical_or,  :op<defor>')> }
+
+    token infix:sym<? :> { '?' :s <EXPR('i=')>
+			   ':' <O('%conditional, :reducecheck<ternary>, :op<if>')>
+    }
+
     token infix:sym<=>  { <sym><!before '>'> <O('%assignment, :op<bind>')> }
 
-    token infix:sym«==»   { <sym>  <O('%relational, :op<iseq_n>')> }
-    token infix:sym«!=»   { <sym>  <O('%relational, :op<isne_n>')> }
-    token infix:sym«<=»   { <sym>  <O('%relational, :op<isle_n>')> }
-    token infix:sym«>=»   { <sym>  <O('%relational, :op<isge_n>')> }
-    token infix:sym«<»    { <sym>  <O('%relational, :op<islt_n>')> }
-    token infix:sym«>»    { <sym>  <O('%relational, :op<isgt_n>')> }
-    token infix:sym«eq»   { <sym>  <O('%relational, :op<iseq_s>')> }
-    token infix:sym«ne»   { <sym>  <O('%relational, :op<isne_s>')> }
-    token infix:sym«le»   { <sym>  <O('%relational, :op<isle_s>')> }
-    token infix:sym«ge»   { <sym>  <O('%relational, :op<isge_s>')> }
-    token infix:sym«lt»   { <sym>  <O('%relational, :op<islt_s>')> }
-    token infix:sym«gt»   { <sym>  <O('%relational, :op<isgt_s>')> }
-
-    token infix:sym<&&>   { <sym>  <O('%tight_and,  :op<if>')> }
-    token infix:sym<||>   { <sym>  <O('%tight_or,   :op<unless>')> }
-    token infix:sym<//>   { <sym>  <O('%tight_or,   :op<defor>')> }
-
-    token infix:sym<and>  { <sym>  <O('%loose_and,  :op<if>')> }
-    token infix:sym<or>   { <sym>  <O('%loose_or,   :op<unless>')> }
+    token prefix:sym<not> { <sym>  <O('%loose_not,     :op<not_i>')> }
+    token infix:sym<and>  { <sym>  <O('%loose_logical, :op<if>')> }
+    token infix:sym<or>   { <sym>  <O('%loose_logical, :op<unless>')> }
  
     # Parenthesis
     token circumfix:sym<( )> {'(' <.ws> <EXPR> ')' <O('%methodop')> }
@@ -253,15 +290,6 @@ grammar Rubyish::Grammar is HLL::Grammar {
     token postcircumfix:sym<ang> {
         <?[<]> <quote_EXPR: ':q'>
         <O('%methodop')>
-    }
-
-    # Ternarys
-    token infix:sym<? :> {
-        '?'
-        :s
-        <EXPR('i=')>
-        ':'
-        <O('%conditional, :reducecheck<ternary>, :op<if>')>
     }
 
     # Statement control
@@ -291,12 +319,12 @@ grammar Rubyish::Grammar is HLL::Grammar {
 
     token do { <separator> [:s 'do']? | 'do' | <?before <tmpl-unesc>>}
 
-    token term:sym<code>  {
+    token term:sym<code> {
         'begin' ~ 'end' <stmtlist> 
     }
 
-    token term:sym<lambda>  {
-        'lambda' :s ['{' ['|' ~ '|' <signature>]?]  ~ '}' <stmtlist> 
+    token term:sym<lambda> {
+        'lambda' :s ['{' ['|' ~ '|' <signature>]? ]  ~ '}' <stmtlist> 
     }
 
     method builtin-init() {
@@ -683,7 +711,6 @@ class Rubyish::Actions is HLL::Actions {
         make QAST::Var.new( :scope('associative'), $<quote_EXPR>.ast );
     }
 
-    # borrowed from NQP::Actions
     method xblock($/) {
         make QAST::Op.new( $<EXPR>.ast, $<stmtlist>.ast, :op('if'), :node($/) );
     }
@@ -735,9 +762,7 @@ class Rubyish::Actions is HLL::Actions {
         }
         $block.push($<stmtlist>.ast);
 
-        make  QAST::Op.new(:op<takeclosure>,
-                           $block,
-            );
+        make  QAST::Op.new(:op<takeclosure>, $block );
     }
 
 }

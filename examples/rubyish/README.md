@@ -44,7 +44,7 @@ To run tests:
     % prove -v -e'nqp rubyish.nqp' t
 ```
 
-Expressions are Perlish rather than Rubyish:
+Strings and truth values are Perlish rather than Rubyish:
 
 - `+` always does addition (doesn't concatenate strings)
 - `~` has been introduced as the concatenation operator
