@@ -16,7 +16,7 @@ MAIN: {
         unshift @ARGV, shellwords(slurp('config.default'));
     }
 
-    my %config;
+    my %config = ( perl => $^X );
     $config{'nqp_config_status'} = join(' ', map { "\"$_\""} @ARGV);
 
     my %options;

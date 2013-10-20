@@ -1,7 +1,6 @@
 JAVA   = java
 JAVAC  = javac
 JAR    = jar
-PERL   = perl
 PROVE  = prove
 ASM    = 3rdparty/asm/
 

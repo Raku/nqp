@@ -29,7 +29,6 @@ LIBPARROT     = @inst_libparrot_ldflags@
 O             = @o@
 A             = @a@
 LOAD_EXT      = @load_ext@
-PERL          = @perl@
 MV            = @mv@
 RM_F          = @rm_f@
 TOM           = 3rdparty/libtommath/bn
@@ -103,7 +102,7 @@ P5QREGEX_COMBINED     = $(PARROT_BUILD_DIR)/NQPP5QRegex.nqp
 P5QREGEX_COMBINED_PIR = $(PARROT_BUILD_DIR)/NQPP5QRegex.pir
 
 NQP_COMBINED_PIR = NQP.pir
-NQP_SOURCES      = src/vm/parrot/NQP/Ops.nqp $(COMMON_NQP_SOURCES)
+P_NQP_SOURCES    = src/vm/parrot/NQP/Ops.nqp $(COMMON_NQP_SOURCES)
 NQP_PBC          = nqp.pbc
 NQP_EXE          = nqp-p$(EXE)
 
@@ -604,10 +603,10 @@ $(P_STAGE1)/$(P6QREGEX_PBC): $(STAGE0_PBCS) $(P_STAGE1)/$(HLL_PBC) $(P_STAGE1)/$
 	$(PARROT) --include=$(P_STAGE1) -o $(P_STAGE1)/$(P6QREGEX_PBC) \
 	    $(P_STAGE1)/$(P6QREGEX_COMBINED_PIR)
 
-$(P_STAGE1)/$(NQP_PBC): $(STAGE0_PBCS) $(P_STAGE1)/$(CORE_SETTING_PBC) $(P_STAGE1)/$(P6QREGEX_PBC) $(NQP_SOURCES)
+$(P_STAGE1)/$(NQP_PBC): $(STAGE0_PBCS) $(P_STAGE1)/$(CORE_SETTING_PBC) $(P_STAGE1)/$(P6QREGEX_PBC) $(P_NQP_SOURCES)
 	$(MKPATH) $(P_STAGE1)
 	$(PERL) tools/build/gen-version.pl >$(PARROT_BUILD_DIR)/nqp-config.nqp
-	$(PERL) tools/build/gen-cat.pl parrot $(NQP_SOURCES) $(PARROT_BUILD_DIR)/nqp-config.nqp > $(P_STAGE1)/$(NQP_COMBINED)
+	$(PERL) tools/build/gen-cat.pl parrot $(P_NQP_SOURCES) $(PARROT_BUILD_DIR)/nqp-config.nqp > $(P_STAGE1)/$(NQP_COMBINED)
 	$(PARROT) --library=$(P_STAGE0) $(P_STAGE0)/$(NQP_PBC) \
 	    --target=pir --output=$(P_STAGE1)/$(NQP_COMBINED_PIR) \
 	    --module-path=$(P_STAGE1) --setting-path=$(P_STAGE1) $(P_STAGE1)/$(NQP_COMBINED)
@@ -682,10 +681,10 @@ $(P_STAGE2)/$(P6QREGEX_PBC): $(STAGE1_PBCS) $(P_STAGE2)/$(HLL_PBC) $(P_STAGE2)/$
 	$(PARROT) --include=$(P_STAGE2) -o $(P_STAGE2)/$(P6QREGEX_PBC) \
 	    $(P_STAGE2)/$(P6QREGEX_COMBINED_PIR)
 
-$(P_STAGE2)/$(NQP_PBC): $(STAGE1_PBCS) $(P_STAGE2)/$(P6QREGEX_PBC) $(NQP_SOURCES)
+$(P_STAGE2)/$(NQP_PBC): $(STAGE1_PBCS) $(P_STAGE2)/$(P6QREGEX_PBC) $(P_NQP_SOURCES)
 	$(MKPATH) $(P_STAGE2)
 	$(PERL) tools/build/gen-version.pl >$(PARROT_BUILD_DIR)/nqp-config.nqp
-	$(PERL) tools/build/gen-cat.pl parrot $(NQP_SOURCES) $(PARROT_BUILD_DIR)/nqp-config.nqp > $(P_STAGE2)/$(NQP_COMBINED)
+	$(PERL) tools/build/gen-cat.pl parrot $(P_NQP_SOURCES) $(PARROT_BUILD_DIR)/nqp-config.nqp > $(P_STAGE2)/$(NQP_COMBINED)
 	$(PARROT) --library=$(P_STAGE1) $(P_STAGE1)/$(NQP_PBC) \
 	    --target=pir --output=$(P_STAGE2)/$(NQP_COMBINED_PIR) \
 	    --module-path=$(P_STAGE2) --setting-path=$(P_STAGE2) $(P_STAGE2)/$(NQP_COMBINED)

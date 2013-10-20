@@ -82,3 +82,4 @@ NQP_MO_SOURCES = src/how/Archetypes.nqp src/how/RoleToRoleApplier.nqp \
 MKPATH        = $(PERL) -MExtUtils::Command -e mkpath
 CHMOD         = $(PERL) -MExtUtils::Command -e chmod
 CP            = $(PERL) -MExtUtils::Command -e cp
+PERL          = @perl@
