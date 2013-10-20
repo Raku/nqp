@@ -1173,6 +1173,19 @@ Binds `$new_value` to the attribute of name `$attributename` of object `$obj`,
 where the attribute was declared in type `$type`. The notes in the
 `getattr` documentation also apply to `bindattr`.
 
+## bindcomp
+* `bindcomp(Str $base-class, Mu $compiler)
+
+Registers `$compiler` as the compiler for the language named `$base-class`, as in:
+
+    my $lang = My::Lang::Compiler.new();
+    nqp::bindcomp('My::Lang', $lang);
+
+In general, though, `$lang` will inherit from `HLL::Compiler`, and the above
+will be achieved via:
+
+    $lang.language('My::Lang');
+
 ## callmethod
 * `callmethod(Mu $obj, str $methodname, *@pos, *%named)`
 
@@ -1243,6 +1256,12 @@ is of the wrong type, or the object doesn't conform to the type.
 Note that in languages that support a full-blown container model, you might
 need to decontainerize `$obj` before passing it to `getattr`, unless you
 actually want to access an attribute of the container.
+
+## getcomp
+* `getcomp(Str $base-class)`
+
+Returns the compiler class registered for that `$base-class`.
+See `bindcomp` for more information.
 
 ## how
 * `how(Mu $obj)`
