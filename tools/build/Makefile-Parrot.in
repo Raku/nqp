@@ -108,7 +108,6 @@ NQP_EXE          = nqp-p$(EXE)
 
 NQP_MO_PBC      = nqpmo.pbc
 NQP_MO_PIR      = nqp-mo.pir
-NQP_MO_COMBINED = nqp-mo.nqp
 
 CORE_SETTING_PBC = NQPCORE.setting.pbc
 CORE_SETTING_PIR = NQPCORE.setting.pir

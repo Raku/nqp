@@ -78,6 +78,7 @@ NQP_MO_SOURCES = src/how/Archetypes.nqp src/how/RoleToRoleApplier.nqp \
                  src/how/NQPClassHOW.nqp src/how/NQPNativeHOW.nqp \
                  src/how/NQPAttribute.nqp src/how/NQPModuleHOW.nqp \
                  src/how/EXPORTHOW.nqp \
+NQP_MO_COMBINED = nqpmo.nqp
 
 MKPATH        = $(PERL) -MExtUtils::Command -e mkpath
 CHMOD         = $(PERL) -MExtUtils::Command -e chmod

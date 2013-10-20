@@ -30,7 +30,6 @@ STAGE0_NQP = $(JAVA) -cp $(STAGE0) -Xbootclasspath/a:$(STAGE0)@cpsep@nqp-runtime
 STAGE1_NQP = $(JAVA) -cp $(STAGE1) -Xbootclasspath/a:$(STAGE1)@cpsep@nqp-runtime.jar@cpsep@$(THIRDPARTY_JARS)@cpsep@$(STAGE1)/nqp.jar nqp --bootstrap
 
 NQP_MO_JAR      = nqpmo.jar
-NQP_MO_COMBINED = nqpmo.nqp
 
 MODULE_LOADER_JAR   = ModuleLoader.jar
 

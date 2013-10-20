@@ -15,7 +15,6 @@ STAGE0_NQP = $(MOAR) --libpath=$(STAGE0) $(STAGE0)/nqp.moarvm --bootstrap
 STAGE1_NQP = $(MOAR) --libpath=$(STAGE1) $(STAGE1)/nqp.moarvm --bootstrap
 
 NQP_MO_MOAR     = nqpmo.moarvm
-NQP_MO_COMBINED = nqpmo.nqp
 
 MODULE_LOADER_MOAR = ModuleLoader.moarvm
 
