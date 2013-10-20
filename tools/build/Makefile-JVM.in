@@ -56,7 +56,6 @@ QAST_SOURCES  = \
 P6QREGEX_JAR      = NQPP6QRegex.jar
 
 P5QREGEX_JAR      = NQPP5QRegex.jar
-P5QREGEX_COMBINED = NQPP5QRegex.nqp
 
 EVAL_CLIENT = tools/jvm/eval-client.pl
 

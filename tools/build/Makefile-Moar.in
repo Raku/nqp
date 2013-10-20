@@ -41,7 +41,6 @@ QAST_SOURCES  = \
 P6QREGEX_MOAR     = NQPP6QRegex.moarvm
 
 P5QREGEX_MOAR     = NQPP5QRegex.moarvm
-P5QREGEX_COMBINED = NQPP5QRegex.nqp
 
 NQP_MOAR     = nqp.moarvm
 M_NQP_SOURCES= src/vm/moar/NQP/Ops.nqp $(COMMON_NQP_SOURCES)
