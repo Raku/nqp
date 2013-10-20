@@ -7,11 +7,11 @@ Ruby subset extended from the `rubyish-4` example, as introduced in the Edument
 Example usage:
 ```
     % nqp rubyish.nqp -e'puts "Hello World!"'
-    % nqp rubyish.nqp rubyish-examples/template.rbi
+    % nqp rubyish.nqp examples-rubyish/template.rbi
     % nqp rubyish.nqp  # repl mode
     > puts 37 + 5
 ```
-Features:
+Implemented:
 - simple strings 'Hello World!' %q{...}
 - interpolating strings: "number #{37+5}" %Q{Hello #{planet}!}
 - quoted words: `%w[aa bb cc]` 
@@ -20,6 +20,7 @@ Features:
 - begin .. end blocks
 - nqp opcode calls: `nqp::sleep(5)`
 - a few built-ins: `abort`, `print`, `puts`, `sleep`
+- a couple of methods: `.call` and `.nil?`
 - infixish assigments: `+=` `-=` `*=` ...
 - very simple classes and objects with attributes. no inheritence yet
 - `while` and `until` loops
@@ -28,7 +29,7 @@ Features:
 - for loops on arrays: `for val in [10,20,30] do puts val end`
 - for loops on hash keys: `h = {'a'=>10, 'b'=>20}; for k in h do puts h{k} end`
 - lambda blocks: `def make_counter(n,incr) ; n-=incr; lambda { n += incr }; end`
-- lightweight eRuby like templating, see [template.rbi](rubyish-examples/template.rbi)
+- lightweight eRuby like templating, see [template.rbi](examples-rubyish/template.rbi)
 
 Notes:
 

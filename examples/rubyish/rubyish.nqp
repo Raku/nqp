@@ -133,7 +133,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
         :my $*MAYBE_DECL := 0;
         [$<sigil>=[\$|\@\@?]|<!keyword>]
         \+?<ident>
-        [ <?before \h* '=' [\w | \h+ || <EXPR>] { $*MAYBE_DECL := 1 }> || <?> ]
+        [ <?before \h* '=' [\w | \h+ || <.EXPR>] { $*MAYBE_DECL := 1 }> || <?> ]
     }
 
     token term:sym<var> { <var> }
@@ -187,37 +187,37 @@ grammar Rubyish::Grammar is HLL::Grammar {
     token ws { <!ww> [\h | <.comment> | <.continuation> | <?{$*IN_PARENS}> \n]* }
 
     INIT {
-	# Operator precedence levels
-	# see http://www.tutorialspoint.com/ruby/ruby_operators.htm
-	# x: **
+        # Operator precedence levels
+        # see http://www.tutorialspoint.com/ruby/ruby_operators.htm
+        # x: **
         Rubyish::Grammar.O(':prec<x=>, :assoc<left>',  '%exponentiation');
-	# y: ! ~ + - (unary)
+        # y: ! ~ + - (unary)
         Rubyish::Grammar.O(':prec<y=>, :assoc<unary>', '%unary');
-	# w: * / %
+        # w: * / %
         Rubyish::Grammar.O(':prec<w=>, :assoc<left>',  '%multiplicative');
-	# u: + -
+        # u: + -
         Rubyish::Grammar.O(':prec<u=>, :assoc<left>',  '%additive');
-	# t: >> <<
+        # t: >> <<
         Rubyish::Grammar.O(':prec<t=>, :assoc<left>',  '%bitshift');
-	# s: &
+        # s: &
         Rubyish::Grammar.O(':prec<s=>, :assoc<left>',  '%bitand');
-	# r: ^ |
+        # r: ^ |
         Rubyish::Grammar.O(':prec<r=>, :assoc<left>',  '%bitor');
-	# q: <= < > >= le lt gt ge
+        # q: <= < > >= le lt gt ge
         Rubyish::Grammar.O(':prec<q=>, :assoc<left>',  '%comparison');
-	# n: <=> == === != =~ !~ eq ne cmp
+        # n: <=> == === != =~ !~ eq ne cmp
         Rubyish::Grammar.O(':prec<n=>, :assoc<left>',  '%equality');
-	# l: &&
+        # l: &&
         Rubyish::Grammar.O(':prec<l=>, :assoc<left>',  '%logical_and');
-	# k: ||
+        # k: ||
         Rubyish::Grammar.O(':prec<k=>, :assoc<left>',  '%logical_or');
-	# q: ?:
+        # q: ?:
         Rubyish::Grammar.O(':prec<g=>, :assoc<right>', '%conditional');
-	# f: = %= { /= -= += |= &= >>= <<= *= &&= ||= **=
+        # f: = %= { /= -= += |= &= >>= <<= *= &&= ||= **=
         Rubyish::Grammar.O(':prec<f=>, :assoc<right>', '%assignment');
-	# e: not (unary)
+        # e: not (unary)
         Rubyish::Grammar.O(':prec<e=>, :assoc<unary>', '%loose_not');
-	# c: or and
+        # c: or and
         Rubyish::Grammar.O(':prec<c=>, :assoc<left>',  '%loose_logical');
     }
 
@@ -260,20 +260,19 @@ grammar Rubyish::Grammar is HLL::Grammar {
 
     token infix:sym<&&>   { <sym>  <O('%logical_and, :op<if>')> }
     token infix:sym<||>   { <sym>  <O('%logical_or,  :op<unless>')> }
-    token infix:sym<//>   { <sym>  <O('%logical_or,  :op<defor>')> }
 
     token infix:sym<? :> { '?' :s <EXPR('i=')>
-			   ':' <O('%conditional, :reducecheck<ternary>, :op<if>')>
+                           ':' <O('%conditional, :reducecheck<ternary>, :op<if>')>
     }
 
-    token infix:sym<=>  { <sym><!before '>'> <O('%assignment, :op<bind>')> }
+    token infix:sym<=>  { <sym><![>]> <O('%assignment, :op<bind>')> }
 
     token prefix:sym<not> { <sym>  <O('%loose_not,     :op<not_i>')> }
     token infix:sym<and>  { <sym>  <O('%loose_logical, :op<if>')> }
     token infix:sym<or>   { <sym>  <O('%loose_logical, :op<unless>')> }
  
     # Parenthesis
-    token circumfix:sym<( )> {'(' <.ws> <EXPR> ')' <O('%methodop')> }
+    token circumfix:sym<( )> {'(' <EXPR> ')' <O('%methodop')> }
 
     # Method call
     token postfix:sym<.>  {
@@ -306,15 +305,18 @@ grammar Rubyish::Grammar is HLL::Grammar {
          'else' <stmtlist>
     }
 
-    token stmt:sym<do> {
-        <modifier> :s <EXPR> :s <do> ~ 'end' <stmtlist>
+    token stmt:sym<loop> {
+        $<op>=[while|until] :s <EXPR> :s <do-block>
     }
 
     token stmt:sym<for> {
-        <sym> :s <ident> :s 'in' <EXPR> <do> ~ 'end' <stmtlist>
+        <sym> :s <ident> :s 'in' <EXPR> <do-block>
     }
 
-    token do { <separator> [:s 'do']? | 'do' | <?before <tmpl-unesc>>}
+    token do-block { <do> ~ 'end' <stmtlist> }
+
+    token do { <separator> [:s 'do']? | 'do' | <?before <tmpl-unesc>>
+    }
 
     token term:sym<code> {
         'begin' ~ 'end' <stmtlist> 
@@ -476,13 +478,13 @@ class Rubyish::Actions is HLL::Actions {
     }
 
     method var($/) {
-        my $sigil := ~$<sigil>//'';
+        my $sigil := ~$<sigil> // '';
         my $name := $sigil ~ $<ident>;
         my $block;
         my $decl := 'var';
 
         if $sigil eq '@' && $*IN_CLASS {
-            # instance variable
+            # instance variable, bound to self
             make QAST::Var.new( :scope('attribute'),
                                 QAST::Var.new( :name('self'), :scope('lexical')),
                                 QAST::SVal.new( :value($name) )
@@ -673,16 +675,25 @@ class Rubyish::Actions is HLL::Actions {
         make QAST::IVal.new( :value<0> );
     }
 
-    method  interp($/) { make $<stmt>.ast }
-    method  quote_escape:sym<#{ }>($/) { make $<interp>.ast }
+    method interp($/) { make $<stmt>.ast }
+    method quote_escape:sym<#{ }>($/) { make $<interp>.ast }
     method circumfix:sym<( )>($/) { make $<EXPR>.ast }
 
-    method postfix:sym<.>($/) {
-	my $op := ~$<operation>;
+    # todo: proper type objects
+    my %call-tab;
+    sub call-tab-init() {
+	%call-tab := nqp::hash(
+	    'call', 'call',
+	    'nil?', 'isnull'
+	)
+    }
 
-	my $meth_call := $op eq 'call'
-	    ?? QAST::Op.new( :op('call') )
-	    !! QAST::Op.new( :op('callmethod'), :name(~$<operation>) );
+    method postfix:sym<.>($/) {
+	call-tab-init() unless %call-tab<call>;
+	my $op := %call-tab{ ~$<operation> };
+        my $meth_call := $op
+            ?? QAST::Op.new( :op($op) )
+            !! QAST::Op.new( :op('callmethod'), :name(~$<operation>) );
 
         if $<call-args> {
             $meth_call.push($_) for $<call-args>.ast;
@@ -708,7 +719,7 @@ class Rubyish::Actions is HLL::Actions {
     }
 
     method stmt:sym<if>($/) {
-        my $ast :=  $<xblock>.ast;
+        my $ast := $<xblock>.ast;
         $ast.push( $<else>.ast )
             if $<else>;
  
@@ -716,7 +727,7 @@ class Rubyish::Actions is HLL::Actions {
     }
 
     method elsif($/) {
-        my $ast :=  $<xblock>.ast;
+        my $ast := $<xblock>.ast;
         $ast.push( $<else>.ast )
             if $<else>;
 
@@ -727,17 +738,22 @@ class Rubyish::Actions is HLL::Actions {
         make $<stmtlist>.ast
     }
 
-    method stmt:sym<do>($/) {
-        make QAST::Op.new( $<EXPR>.ast, $<stmtlist>.ast, :op(~$<modifier>), :node($/) );
+    method stmt:sym<loop>($/) {
+        make QAST::Op.new( $<EXPR>.ast, $<do-block>.ast, :op(~$<op>), :node($/) );
     }
 
     method stmt:sym<for>($/) {
 
         my $block := QAST::Block.new(
             QAST::Var.new( :name(~$<ident>), :scope('lexical'), :decl('param')),
-            $<stmtlist>.ast);
+            $<do-block>.ast,
+	    );
 
         make QAST::Op.new( $<EXPR>.ast, $block, :op('for'), :node($/) );
+    }
+
+    method do-block($/) {
+	make  $<stmtlist>.ast
     }
 
     method term:sym<code>($/) {
