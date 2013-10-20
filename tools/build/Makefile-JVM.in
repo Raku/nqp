@@ -38,7 +38,6 @@ CORE_SETTING_JAR      = NQPCORE.setting.jar
 QASTNODE_JAR      = QASTNode.jar
 
 QREGEX_JAR      = QRegex.jar
-QREGEX_COMBINED = QRegex.nqp
 
 HLL_JAR      = NQPHLL.jar
 HLL_SOURCES  = src/vm/jvm/HLL/Backend.nqp $(COMMON_HLL_SOURCES)

@@ -63,8 +63,6 @@ P_QAST_SOURCES = \
   src/vm/parrot/QAST/Operations.nqp \
   src/vm/parrot/QAST/Compiler.nqp \
 
-
-P_QREGEX_COMBINED = QRegex.nqp
 QREGEX_PIR = QRegex.pir
 QREGEX_PBC = QRegex.pbc
 
@@ -562,11 +560,11 @@ $(P_STAGE1)/$(QASTNODE_PBC): $(STAGE0_PBCS) $(P_STAGE1)/$(CORE_SETTING_PBC) $(QA
 
 $(P_STAGE1)/$(QREGEX_PBC): $(STAGE0_PBCS) $(P_STAGE1)/$(CORE_SETTING_PBC) $(P_STAGE1)/$(QASTNODE_PBC) $(QREGEX_SOURCES)
 	$(MKPATH) $(P_STAGE1)
-	$(PERL) tools/build/gen-cat.pl parrot $(QREGEX_SOURCES) > $(P_STAGE1)/$(P_QREGEX_COMBINED)
+	$(PERL) tools/build/gen-cat.pl parrot $(QREGEX_SOURCES) > $(P_STAGE1)/$(QREGEX_COMBINED)
 	$(PARROT) --library=$(P_STAGE0) $(P_STAGE0)/$(NQP_PBC) \
 	    --target=pir --output=$(P_STAGE1)/$(QREGEX_PIR) \
 	    --module-path=$(P_STAGE1) --setting-path=$(P_STAGE1) --no-regex-lib \
-        $(P_STAGE1)/$(P_QREGEX_COMBINED)
+        $(P_STAGE1)/$(QREGEX_COMBINED)
 	$(PARROT) -o $(P_STAGE1)/$(QREGEX_PBC) $(P_STAGE1)/$(QREGEX_PIR)
 
 $(P_STAGE1)/$(HLL_PBC): $(STAGE0_PBCS) $(P_STAGE1)/$(QREGEX_PBC) $(P_STAGE1)/$(QASTNODE_PBC) $(P_STAGE1)/$(CORE_SETTING_PBC) $(P_HLL_SOURCES)
@@ -644,10 +642,10 @@ $(P_STAGE2)/$(QASTNODE_PBC): $(STAGE1_PBCS) $(P_STAGE2)/$(CORE_SETTING_PBC) $(QA
 
 $(P_STAGE2)/$(QREGEX_PBC): $(STAGE1_PBCS) $(P_STAGE2)/$(CORE_SETTING_PBC) $(P_STAGE2)/$(QASTNODE_PBC) $(QREGEX_SOURCES)
 	$(MKPATH) $(P_STAGE2)
-	$(PERL) tools/build/gen-cat.pl parrot $(QREGEX_SOURCES) > $(P_STAGE2)/$(P_QREGEX_COMBINED)
+	$(PERL) tools/build/gen-cat.pl parrot $(QREGEX_SOURCES) > $(P_STAGE2)/$(QREGEX_COMBINED)
 	$(PARROT) --library=$(P_STAGE1) $(P_STAGE1)/$(NQP_PBC) \
 	    --target=pir --output=$(P_STAGE2)/$(QREGEX_PIR) --no-regex-lib \
-	    --module-path=$(P_STAGE2) --setting-path=$(P_STAGE2) $(P_STAGE2)/$(P_QREGEX_COMBINED)
+	    --module-path=$(P_STAGE2) --setting-path=$(P_STAGE2) $(P_STAGE2)/$(QREGEX_COMBINED)
 	$(PARROT) -o $(P_STAGE2)/$(QREGEX_PBC) $(P_STAGE2)/$(QREGEX_PIR)
 
 $(P_STAGE2)/$(HLL_PBC): $(STAGE1_PBCS) $(P_STAGE2)/$(CORE_SETTING_PBC) $(P_STAGE2)/$(QREGEX_PBC) $(P_STAGE2)/$(QASTNODE_PBC) $(P_HLL_SOURCES)

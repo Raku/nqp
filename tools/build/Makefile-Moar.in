@@ -23,7 +23,6 @@ CORE_SETTING_MOAR     = NQPCORE.setting.moarvm
 QASTNODE_MOAR     = QASTNode.moarvm
 
 QREGEX_MOAR     = QRegex.moarvm
-QREGEX_COMBINED = QRegex.nqp
 
 HLL_MOAR     = NQPHLL.moarvm
 HLL_SOURCES  = src/vm/moar/HLL/Backend.nqp $(COMMON_HLL_SOURCES)

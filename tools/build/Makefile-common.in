@@ -65,6 +65,8 @@ QREGEX_SOURCES = \
   src/QRegex/NFA.nqp \
   src/QRegex/Cursor.nqp \
 
+QREGEX_COMBINED = QRegex.nqp
+
 COMMON_NQP_SOURCES  = \
   src/NQP/World.nqp \
   src/NQP/Grammar.nqp \
