@@ -1,12 +1,12 @@
 MOAR         = $(BIN_DIR)/moar
 RUNNER       = @runner@
 
-STAGE0 = src/vm/moar/stage0
-STAGE1 = gen/moar/stage1
-STAGE2 = gen/moar/stage2
+M_STAGE0 = src/vm/moar/stage0
+M_STAGE1 = gen/moar/stage1
+M_STAGE2 = gen/moar/stage2
 
-STAGE0_NQP = $(MOAR) --libpath=$(STAGE0) $(STAGE0)/nqp.moarvm --bootstrap
-STAGE1_NQP = $(MOAR) --libpath=$(STAGE1) $(STAGE1)/nqp.moarvm --bootstrap
+M_STAGE0_NQP = $(MOAR) --libpath=$(M_STAGE0) $(M_STAGE0)/nqp.moarvm --bootstrap
+M_STAGE1_NQP = $(MOAR) --libpath=$(M_STAGE1) $(M_STAGE1)/nqp.moarvm --bootstrap
 
 NQP_MO_MOAR     = nqpmo.moarvm
 
@@ -18,8 +18,8 @@ QASTNODE_MOAR     = QASTNode.moarvm
 
 QREGEX_MOAR     = QRegex.moarvm
 
-HLL_MOAR     = NQPHLL.moarvm
-HLL_SOURCES  = src/vm/moar/HLL/Backend.nqp $(COMMON_HLL_SOURCES)
+HLL_MOAR       = NQPHLL.moarvm
+M_HLL_SOURCES  = src/vm/moar/HLL/Backend.nqp $(COMMON_HLL_SOURCES)
 
 MASTOPS_MOAR   = MASTOps.moarvm
 MASTNODES_MOAR = MASTNodes.moarvm
@@ -37,19 +37,19 @@ P5QREGEX_MOAR     = NQPP5QRegex.moarvm
 NQP_MOAR     = nqp.moarvm
 M_NQP_SOURCES= src/vm/moar/NQP/Ops.nqp $(COMMON_NQP_SOURCES)
 
-STAGE1_OUTPUT = $(STAGE1)/$(NQP_MO_MOAR) $(STAGE1)/$(MODULE_LOADER_MOAR) \
-                $(STAGE1)/$(CORE_SETTING_MOAR) $(STAGE1)/$(QASTNODE_MOAR) \
-                $(STAGE1)/$(QREGEX_MOAR) $(STAGE1)/$(HLL_MOAR) \
-                $(STAGE1)/$(MASTOPS_MOAR) $(STAGE1)/$(MASTNODES_MOAR) \
-                $(STAGE1)/$(QAST_MOAR) $(STAGE1)/$(P6QREGEX_MOAR) \
-                $(STAGE1)/$(NQP_MOAR)
+M_STAGE1_OUTPUT = $(M_STAGE1)/$(NQP_MO_MOAR) $(M_STAGE1)/$(MODULE_LOADER_MOAR) \
+                $(M_STAGE1)/$(CORE_SETTING_MOAR) $(M_STAGE1)/$(QASTNODE_MOAR) \
+                $(M_STAGE1)/$(QREGEX_MOAR) $(M_STAGE1)/$(HLL_MOAR) \
+                $(M_STAGE1)/$(MASTOPS_MOAR) $(M_STAGE1)/$(MASTNODES_MOAR) \
+                $(M_STAGE1)/$(QAST_MOAR) $(M_STAGE1)/$(P6QREGEX_MOAR) \
+                $(M_STAGE1)/$(NQP_MOAR)
 
-STAGE2_OUTPUT = $(STAGE2)/$(NQP_MO_MOAR) $(STAGE2)/$(MODULE_LOADER_MOAR) \
-                $(STAGE2)/$(CORE_SETTING_MOAR) $(STAGE2)/$(QASTNODE_MOAR) \
-                $(STAGE2)/$(QREGEX_MOAR) $(STAGE2)/$(HLL_MOAR) \
-                $(STAGE2)/$(MASTOPS_MOAR) $(STAGE2)/$(MASTNODES_MOAR) \
-                $(STAGE2)/$(QAST_MOAR) $(STAGE2)/$(P6QREGEX_MOAR) \
-                $(STAGE2)/$(NQP_MOAR)
+M_STAGE2_OUTPUT = $(M_STAGE2)/$(NQP_MO_MOAR) $(M_STAGE2)/$(MODULE_LOADER_MOAR) \
+                $(M_STAGE2)/$(CORE_SETTING_MOAR) $(M_STAGE2)/$(QASTNODE_MOAR) \
+                $(M_STAGE2)/$(QREGEX_MOAR) $(M_STAGE2)/$(HLL_MOAR) \
+                $(M_STAGE2)/$(MASTOPS_MOAR) $(M_STAGE2)/$(MASTNODES_MOAR) \
+                $(M_STAGE2)/$(QAST_MOAR) $(M_STAGE2)/$(P6QREGEX_MOAR) \
+                $(M_STAGE2)/$(NQP_MOAR)
 
 all: $(NQP_MOAR) $(RUNNER) $(P5QREGEX_MOAR)
 
@@ -73,169 +73,169 @@ install: all
 clean:
 	$(PERL) -MExtUtils::Command -e rm_rf *.moarvm src/stage1 src/stage2 nqp nqp.bat
 
-$(STAGE1): $(STAGE1_OUTPUT)
+$(M_STAGE1): $(M_STAGE1_OUTPUT)
 
-$(STAGE1)/$(NQP_MO_MOAR): $(STAGE0) $(NQP_MO_SOURCES)
-	$(MKPATH) $(STAGE1)/gen
-	$(PERL) tools/build/gen-cat.pl moar $(NQP_MO_SOURCES) > $(STAGE1)/$(NQP_MO_COMBINED)
-	$(STAGE0_NQP) --setting=NULL --no-regex-lib --target=mbc \
-	    --output=$(STAGE1)/$(NQP_MO_MOAR) $(STAGE1)/$(NQP_MO_COMBINED)
+$(M_STAGE1)/$(NQP_MO_MOAR): $(M_STAGE0) $(NQP_MO_SOURCES)
+	$(MKPATH) $(M_STAGE1)/gen
+	$(PERL) tools/build/gen-cat.pl moar $(NQP_MO_SOURCES) > $(M_STAGE1)/$(NQP_MO_COMBINED)
+	$(M_STAGE0_NQP) --setting=NULL --no-regex-lib --target=mbc \
+	    --output=$(M_STAGE1)/$(NQP_MO_MOAR) $(M_STAGE1)/$(NQP_MO_COMBINED)
 
-$(STAGE1)/$(MODULE_LOADER_MOAR): $(STAGE0) src/vm/moar/ModuleLoader.nqp
-	$(STAGE0_NQP) --setting=NULL --no-regex-lib --target=mbc \
-	    --output=$(STAGE1)/$(MODULE_LOADER_MOAR) src/vm/moar/ModuleLoader.nqp
+$(M_STAGE1)/$(MODULE_LOADER_MOAR): $(M_STAGE0) src/vm/moar/ModuleLoader.nqp
+	$(M_STAGE0_NQP) --setting=NULL --no-regex-lib --target=mbc \
+	    --output=$(M_STAGE1)/$(MODULE_LOADER_MOAR) src/vm/moar/ModuleLoader.nqp
 
-$(STAGE1)/$(CORE_SETTING_MOAR): $(STAGE0) $(CORE_SETTING_SOURCES) $(STAGE1)/$(NQP_MO_MOAR) $(STAGE1)/$(MODULE_LOADER_MOAR)
-	$(MKPATH) $(STAGE1)/gen
-	$(PERL) tools/build/gen-cat.pl moar $(CORE_SETTING_SOURCES) > $(STAGE1)/$(CORE_SETTING_COMBINED)
-	$(STAGE0_NQP) --module-path=$(STAGE1) --setting=NULL --no-regex-lib --target=mbc \
-	    --output=$(STAGE1)/$(CORE_SETTING_MOAR) $(STAGE1)/$(CORE_SETTING_COMBINED)
+$(M_STAGE1)/$(CORE_SETTING_MOAR): $(M_STAGE0) $(CORE_SETTING_SOURCES) $(M_STAGE1)/$(NQP_MO_MOAR) $(M_STAGE1)/$(MODULE_LOADER_MOAR)
+	$(MKPATH) $(M_STAGE1)/gen
+	$(PERL) tools/build/gen-cat.pl moar $(CORE_SETTING_SOURCES) > $(M_STAGE1)/$(CORE_SETTING_COMBINED)
+	$(M_STAGE0_NQP) --module-path=$(M_STAGE1) --setting=NULL --no-regex-lib --target=mbc \
+	    --output=$(M_STAGE1)/$(CORE_SETTING_MOAR) $(M_STAGE1)/$(CORE_SETTING_COMBINED)
 
-$(STAGE1)/$(QASTNODE_MOAR): $(STAGE0) $(QASTNODE_SOURCES) $(STAGE1)/$(CORE_SETTING_MOAR)
-	$(MKPATH) $(STAGE1)/gen
-	$(PERL) tools/build/gen-cat.pl moar $(QASTNODE_SOURCES) > $(STAGE1)/$(QASTNODE_COMBINED)
-	$(STAGE0_NQP) --module-path=$(STAGE1) --setting-path=$(STAGE1) \
+$(M_STAGE1)/$(QASTNODE_MOAR): $(M_STAGE0) $(QASTNODE_SOURCES) $(M_STAGE1)/$(CORE_SETTING_MOAR)
+	$(MKPATH) $(M_STAGE1)/gen
+	$(PERL) tools/build/gen-cat.pl moar $(QASTNODE_SOURCES) > $(M_STAGE1)/$(QASTNODE_COMBINED)
+	$(M_STAGE0_NQP) --module-path=$(M_STAGE1) --setting-path=$(M_STAGE1) \
 	    --setting=NQPCORE --no-regex-lib --target=mbc \
-	    --output=$(STAGE1)/$(QASTNODE_MOAR) $(STAGE1)/$(QASTNODE_COMBINED)
+	    --output=$(M_STAGE1)/$(QASTNODE_MOAR) $(M_STAGE1)/$(QASTNODE_COMBINED)
 
-$(STAGE1)/$(QREGEX_MOAR): $(STAGE0) $(QREGEX_SOURCES) $(STAGE1)/$(QASTNODE_MOAR)
-	$(MKPATH) $(STAGE1)/gen
-	$(PERL) tools/build/gen-cat.pl moar $(QREGEX_SOURCES) > $(STAGE1)/$(QREGEX_COMBINED)
-	$(STAGE0_NQP) --module-path=$(STAGE1) --setting-path=$(STAGE1) \
+$(M_STAGE1)/$(QREGEX_MOAR): $(M_STAGE0) $(QREGEX_SOURCES) $(M_STAGE1)/$(QASTNODE_MOAR)
+	$(MKPATH) $(M_STAGE1)/gen
+	$(PERL) tools/build/gen-cat.pl moar $(QREGEX_SOURCES) > $(M_STAGE1)/$(QREGEX_COMBINED)
+	$(M_STAGE0_NQP) --module-path=$(M_STAGE1) --setting-path=$(M_STAGE1) \
 	    --setting=NQPCORE --no-regex-lib --target=mbc \
-	    --output=$(STAGE1)/$(QREGEX_MOAR) $(STAGE1)/$(QREGEX_COMBINED)
+	    --output=$(M_STAGE1)/$(QREGEX_MOAR) $(M_STAGE1)/$(QREGEX_COMBINED)
 
-$(STAGE1)/$(HLL_MOAR): $(STAGE0) $(HLL_SOURCES) $(STAGE1)/$(QREGEX_MOAR)
-	$(MKPATH) $(STAGE1)/gen
-	$(PERL) tools/build/gen-cat.pl moar $(HLL_SOURCES) > $(STAGE1)/$(HLL_COMBINED)
-	$(STAGE0_NQP) --module-path=$(STAGE1) --setting-path=$(STAGE1) \
+$(M_STAGE1)/$(HLL_MOAR): $(M_STAGE0) $(M_HLL_SOURCES) $(M_STAGE1)/$(QREGEX_MOAR)
+	$(MKPATH) $(M_STAGE1)/gen
+	$(PERL) tools/build/gen-cat.pl moar $(M_HLL_SOURCES) > $(M_STAGE1)/$(HLL_COMBINED)
+	$(M_STAGE0_NQP) --module-path=$(M_STAGE1) --setting-path=$(M_STAGE1) \
 	    --setting=NQPCORE --no-regex-lib --target=mbc \
-	    --output=$(STAGE1)/$(HLL_MOAR) $(STAGE1)/$(HLL_COMBINED)
+	    --output=$(M_STAGE1)/$(HLL_MOAR) $(M_STAGE1)/$(HLL_COMBINED)
 
-$(STAGE1)/$(MASTOPS_MOAR): $(STAGE0) $(STAGE1)/$(CORE_SETTING_MOAR) $(PREFIX)/lib/MAST/Ops.nqp
-	$(STAGE0_NQP) --module-path=$(STAGE1) --setting-path=$(STAGE1) \
+$(M_STAGE1)/$(MASTOPS_MOAR): $(M_STAGE0) $(M_STAGE1)/$(CORE_SETTING_MOAR) $(PREFIX)/lib/MAST/Ops.nqp
+	$(M_STAGE0_NQP) --module-path=$(M_STAGE1) --setting-path=$(M_STAGE1) \
 	    --setting=NQPCORE --no-regex-lib --target=mbc \
-	    --output=$(STAGE1)/$(MASTOPS_MOAR) $(PREFIX)/lib/MAST/Ops.nqp
+	    --output=$(M_STAGE1)/$(MASTOPS_MOAR) $(PREFIX)/lib/MAST/Ops.nqp
 
-$(STAGE1)/$(MASTNODES_MOAR): $(STAGE0) $(STAGE1)/$(MASTOPS_MOAR) $(PREFIX)/lib/MAST/Nodes.nqp
-	$(STAGE0_NQP) --module-path=$(STAGE1) --setting-path=$(STAGE1) \
+$(M_STAGE1)/$(MASTNODES_MOAR): $(M_STAGE0) $(M_STAGE1)/$(MASTOPS_MOAR) $(PREFIX)/lib/MAST/Nodes.nqp
+	$(M_STAGE0_NQP) --module-path=$(M_STAGE1) --setting-path=$(M_STAGE1) \
 	    --setting=NQPCORE --no-regex-lib --target=mbc \
-	    --output=$(STAGE1)/$(MASTNODES_MOAR) $(PREFIX)/lib/MAST/Nodes.nqp
+	    --output=$(M_STAGE1)/$(MASTNODES_MOAR) $(PREFIX)/lib/MAST/Nodes.nqp
 
-$(STAGE1)/$(QAST_MOAR): $(STAGE0) $(M_QAST_SOURCES) $(STAGE1)/$(HLL_MOAR) $(STAGE1)/$(MASTNODES_MOAR)
-	$(MKPATH) $(STAGE1)/gen
-	$(PERL) tools/build/gen-cat.pl moar $(M_QAST_SOURCES) > $(STAGE1)/$(QAST_COMBINED)
-	$(STAGE0_NQP) --module-path=$(STAGE1) --setting-path=$(STAGE1) \
+$(M_STAGE1)/$(QAST_MOAR): $(M_STAGE0) $(M_QAST_SOURCES) $(M_STAGE1)/$(HLL_MOAR) $(M_STAGE1)/$(MASTNODES_MOAR)
+	$(MKPATH) $(M_STAGE1)/gen
+	$(PERL) tools/build/gen-cat.pl moar $(M_QAST_SOURCES) > $(M_STAGE1)/$(QAST_COMBINED)
+	$(M_STAGE0_NQP) --module-path=$(M_STAGE1) --setting-path=$(M_STAGE1) \
 	    --setting=NQPCORE --no-regex-lib --target=mbc \
-	    --output=$(STAGE1)/$(QAST_MOAR) $(STAGE1)/$(QAST_COMBINED)
+	    --output=$(M_STAGE1)/$(QAST_MOAR) $(M_STAGE1)/$(QAST_COMBINED)
 
-$(STAGE1)/$(P6QREGEX_MOAR): $(STAGE0) $(P6QREGEX_SOURCES) $(STAGE1)/$(QAST_MOAR)
-	$(MKPATH) $(STAGE1)/gen
-	$(PERL) tools/build/gen-cat.pl moar $(P6QREGEX_SOURCES) > $(STAGE1)/$(P6QREGEX_COMBINED)
-	$(STAGE0_NQP) --module-path=$(STAGE1) --setting-path=$(STAGE1) \
+$(M_STAGE1)/$(P6QREGEX_MOAR): $(M_STAGE0) $(P6QREGEX_SOURCES) $(M_STAGE1)/$(QAST_MOAR)
+	$(MKPATH) $(M_STAGE1)/gen
+	$(PERL) tools/build/gen-cat.pl moar $(P6QREGEX_SOURCES) > $(M_STAGE1)/$(P6QREGEX_COMBINED)
+	$(M_STAGE0_NQP) --module-path=$(M_STAGE1) --setting-path=$(M_STAGE1) \
 	    --setting=NQPCORE --no-regex-lib --target=mbc \
-	    --output=$(STAGE1)/$(P6QREGEX_MOAR) $(STAGE1)/$(P6QREGEX_COMBINED)
+	    --output=$(M_STAGE1)/$(P6QREGEX_MOAR) $(M_STAGE1)/$(P6QREGEX_COMBINED)
 
-$(STAGE1)/$(NQP_MOAR): $(STAGE0) $(M_NQP_SOURCES) $(STAGE1)/$(P6QREGEX_MOAR)
-	$(MKPATH) $(STAGE1)/gen
-	$(PERL) tools/build/gen-version.pl > $(STAGE1)/nqp-config.nqp
-	$(PERL) tools/build/gen-cat.pl moar $(M_NQP_SOURCES) $(STAGE1)/nqp-config.nqp > $(STAGE1)/$(NQP_COMBINED)
-	$(STAGE0_NQP) --module-path=$(STAGE1) --setting-path=$(STAGE1) \
+$(M_STAGE1)/$(NQP_MOAR): $(M_STAGE0) $(M_NQP_SOURCES) $(M_STAGE1)/$(P6QREGEX_MOAR)
+	$(MKPATH) $(M_STAGE1)/gen
+	$(PERL) tools/build/gen-version.pl > $(M_STAGE1)/nqp-config.nqp
+	$(PERL) tools/build/gen-cat.pl moar $(M_NQP_SOURCES) $(M_STAGE1)/nqp-config.nqp > $(M_STAGE1)/$(NQP_COMBINED)
+	$(M_STAGE0_NQP) --module-path=$(M_STAGE1) --setting-path=$(M_STAGE1) \
 	    --setting=NQPCORE --target=mbc --no-regex-lib \
-	    --output=$(STAGE1)/$(NQP_MOAR) $(STAGE1)/$(NQP_COMBINED)
+	    --output=$(M_STAGE1)/$(NQP_MOAR) $(M_STAGE1)/$(NQP_COMBINED)
 
-$(STAGE2): $(STAGE1_OUTPUT)
+$(M_STAGE2): $(M_STAGE1_OUTPUT)
 
-$(STAGE2)/$(NQP_MO_MOAR): $(STAGE1) $(NQP_MO_SOURCES)
-	$(MKPATH) $(STAGE2)/gen
-	$(PERL) tools/build/gen-cat.pl moar $(NQP_MO_SOURCES) > $(STAGE2)/$(NQP_MO_COMBINED)
-	$(STAGE1_NQP) --setting=NULL --no-regex-lib --target=mbc \
-	    --output=$(STAGE2)/$(NQP_MO_MOAR) $(STAGE2)/$(NQP_MO_COMBINED)
+$(M_STAGE2)/$(NQP_MO_MOAR): $(M_STAGE1) $(NQP_MO_SOURCES)
+	$(MKPATH) $(M_STAGE2)/gen
+	$(PERL) tools/build/gen-cat.pl moar $(NQP_MO_SOURCES) > $(M_STAGE2)/$(NQP_MO_COMBINED)
+	$(M_STAGE1_NQP) --setting=NULL --no-regex-lib --target=mbc \
+	    --output=$(M_STAGE2)/$(NQP_MO_MOAR) $(M_STAGE2)/$(NQP_MO_COMBINED)
 
-$(STAGE2)/$(MODULE_LOADER_MOAR): $(STAGE1) src/vm/moar/ModuleLoader.nqp
-	$(STAGE1_NQP) --setting=NULL --no-regex-lib --target=mbc \
-	    --output=$(STAGE2)/$(MODULE_LOADER_MOAR) src/vm/moar/ModuleLoader.nqp
+$(M_STAGE2)/$(MODULE_LOADER_MOAR): $(M_STAGE1) src/vm/moar/ModuleLoader.nqp
+	$(M_STAGE1_NQP) --setting=NULL --no-regex-lib --target=mbc \
+	    --output=$(M_STAGE2)/$(MODULE_LOADER_MOAR) src/vm/moar/ModuleLoader.nqp
 
-$(STAGE2)/$(CORE_SETTING_MOAR): $(STAGE1) $(CORE_SETTING_SOURCES) $(STAGE2)/$(NQP_MO_MOAR) $(STAGE2)/$(MODULE_LOADER_MOAR)
-	$(MKPATH) $(STAGE2)/gen
-	$(PERL) tools/build/gen-cat.pl moar $(CORE_SETTING_SOURCES) > $(STAGE2)/$(CORE_SETTING_COMBINED)
-	$(STAGE1_NQP) --module-path=$(STAGE2) --setting=NULL --no-regex-lib --target=mbc \
-	    --output=$(STAGE2)/$(CORE_SETTING_MOAR) $(STAGE2)/$(CORE_SETTING_COMBINED)
+$(M_STAGE2)/$(CORE_SETTING_MOAR): $(M_STAGE1) $(CORE_SETTING_SOURCES) $(M_STAGE2)/$(NQP_MO_MOAR) $(M_STAGE2)/$(MODULE_LOADER_MOAR)
+	$(MKPATH) $(M_STAGE2)/gen
+	$(PERL) tools/build/gen-cat.pl moar $(CORE_SETTING_SOURCES) > $(M_STAGE2)/$(CORE_SETTING_COMBINED)
+	$(M_STAGE1_NQP) --module-path=$(M_STAGE2) --setting=NULL --no-regex-lib --target=mbc \
+	    --output=$(M_STAGE2)/$(CORE_SETTING_MOAR) $(M_STAGE2)/$(CORE_SETTING_COMBINED)
 
-$(STAGE2)/$(QASTNODE_MOAR): $(STAGE1) $(QASTNODE_SOURCES) $(STAGE2)/$(CORE_SETTING_MOAR)
-	$(MKPATH) $(STAGE2)/gen
-	$(PERL) tools/build/gen-cat.pl moar $(QASTNODE_SOURCES) > $(STAGE2)/$(QASTNODE_COMBINED)
-	$(STAGE1_NQP) --module-path=$(STAGE2) --setting-path=$(STAGE2) \
+$(M_STAGE2)/$(QASTNODE_MOAR): $(M_STAGE1) $(QASTNODE_SOURCES) $(M_STAGE2)/$(CORE_SETTING_MOAR)
+	$(MKPATH) $(M_STAGE2)/gen
+	$(PERL) tools/build/gen-cat.pl moar $(QASTNODE_SOURCES) > $(M_STAGE2)/$(QASTNODE_COMBINED)
+	$(M_STAGE1_NQP) --module-path=$(M_STAGE2) --setting-path=$(M_STAGE2) \
 	    --setting=NQPCORE --no-regex-lib --target=mbc \
-	    --output=$(STAGE2)/$(QASTNODE_MOAR) $(STAGE2)/$(QASTNODE_COMBINED)
+	    --output=$(M_STAGE2)/$(QASTNODE_MOAR) $(M_STAGE2)/$(QASTNODE_COMBINED)
 
-$(STAGE2)/$(QREGEX_MOAR): $(STAGE1) $(QREGEX_SOURCES) $(STAGE2)/$(QASTNODE_MOAR)
-	$(MKPATH) $(STAGE2)/gen
-	$(PERL) tools/build/gen-cat.pl moar $(QREGEX_SOURCES) > $(STAGE2)/$(QREGEX_COMBINED)
-	$(STAGE1_NQP) --module-path=$(STAGE2) --setting-path=$(STAGE2) \
+$(M_STAGE2)/$(QREGEX_MOAR): $(M_STAGE1) $(QREGEX_SOURCES) $(M_STAGE2)/$(QASTNODE_MOAR)
+	$(MKPATH) $(M_STAGE2)/gen
+	$(PERL) tools/build/gen-cat.pl moar $(QREGEX_SOURCES) > $(M_STAGE2)/$(QREGEX_COMBINED)
+	$(M_STAGE1_NQP) --module-path=$(M_STAGE2) --setting-path=$(M_STAGE2) \
 	    --setting=NQPCORE --no-regex-lib --target=mbc \
-	    --output=$(STAGE2)/$(QREGEX_MOAR) $(STAGE2)/$(QREGEX_COMBINED)
+	    --output=$(M_STAGE2)/$(QREGEX_MOAR) $(M_STAGE2)/$(QREGEX_COMBINED)
 
-$(STAGE2)/$(HLL_MOAR): $(STAGE1) $(HLL_SOURCES) $(STAGE2)/$(QREGEX_MOAR)
-	$(MKPATH) $(STAGE2)/gen
-	$(PERL) tools/build/gen-cat.pl moar $(HLL_SOURCES) > $(STAGE2)/$(HLL_COMBINED)
-	$(STAGE1_NQP) --module-path=$(STAGE2) --setting-path=$(STAGE2) \
+$(M_STAGE2)/$(HLL_MOAR): $(M_STAGE1) $(M_HLL_SOURCES) $(M_STAGE2)/$(QREGEX_MOAR)
+	$(MKPATH) $(M_STAGE2)/gen
+	$(PERL) tools/build/gen-cat.pl moar $(M_HLL_SOURCES) > $(M_STAGE2)/$(HLL_COMBINED)
+	$(M_STAGE1_NQP) --module-path=$(M_STAGE2) --setting-path=$(M_STAGE2) \
 	    --setting=NQPCORE --no-regex-lib --target=mbc \
-	    --output=$(STAGE2)/$(HLL_MOAR) $(STAGE2)/$(HLL_COMBINED)
+	    --output=$(M_STAGE2)/$(HLL_MOAR) $(M_STAGE2)/$(HLL_COMBINED)
 
-$(STAGE2)/$(MASTOPS_MOAR): $(STAGE1) $(STAGE2)/$(CORE_SETTING_MOAR) $(PREFIX)/lib/MAST/Ops.nqp
-	$(STAGE1_NQP) --module-path=$(STAGE2) --setting-path=$(STAGE2) \
+$(M_STAGE2)/$(MASTOPS_MOAR): $(M_STAGE1) $(M_STAGE2)/$(CORE_SETTING_MOAR) $(PREFIX)/lib/MAST/Ops.nqp
+	$(M_STAGE1_NQP) --module-path=$(M_STAGE2) --setting-path=$(M_STAGE2) \
 	    --setting=NQPCORE --no-regex-lib --target=mbc \
-	    --output=$(STAGE2)/$(MASTOPS_MOAR) $(PREFIX)/lib/MAST/Ops.nqp
+	    --output=$(M_STAGE2)/$(MASTOPS_MOAR) $(PREFIX)/lib/MAST/Ops.nqp
 
-$(STAGE2)/$(MASTNODES_MOAR): $(STAGE1) $(STAGE2)/$(MASTOPS_MOAR) $(PREFIX)/lib/MAST/Nodes.nqp
-	$(STAGE1_NQP) --module-path=$(STAGE2) --setting-path=$(STAGE2) \
+$(M_STAGE2)/$(MASTNODES_MOAR): $(M_STAGE1) $(M_STAGE2)/$(MASTOPS_MOAR) $(PREFIX)/lib/MAST/Nodes.nqp
+	$(M_STAGE1_NQP) --module-path=$(M_STAGE2) --setting-path=$(M_STAGE2) \
 	    --setting=NQPCORE --no-regex-lib --target=mbc \
-	    --output=$(STAGE2)/$(MASTNODES_MOAR) $(PREFIX)/lib/MAST/Nodes.nqp
+	    --output=$(M_STAGE2)/$(MASTNODES_MOAR) $(PREFIX)/lib/MAST/Nodes.nqp
 
-$(STAGE2)/$(QAST_MOAR): $(STAGE1) $(M_QAST_SOURCES) $(STAGE2)/$(HLL_MOAR) $(STAGE2)/$(MASTNODES_MOAR)
-	$(MKPATH) $(STAGE2)/gen
-	$(PERL) tools/build/gen-cat.pl moar $(M_QAST_SOURCES) > $(STAGE2)/$(QAST_COMBINED)
-	$(STAGE1_NQP) --module-path=$(STAGE2) --setting-path=$(STAGE2) \
+$(M_STAGE2)/$(QAST_MOAR): $(M_STAGE1) $(M_QAST_SOURCES) $(M_STAGE2)/$(HLL_MOAR) $(M_STAGE2)/$(MASTNODES_MOAR)
+	$(MKPATH) $(M_STAGE2)/gen
+	$(PERL) tools/build/gen-cat.pl moar $(M_QAST_SOURCES) > $(M_STAGE2)/$(QAST_COMBINED)
+	$(M_STAGE1_NQP) --module-path=$(M_STAGE2) --setting-path=$(M_STAGE2) \
 	    --setting=NQPCORE --no-regex-lib --target=mbc \
-	    --output=$(STAGE2)/$(QAST_MOAR) $(STAGE2)/$(QAST_COMBINED)
+	    --output=$(M_STAGE2)/$(QAST_MOAR) $(M_STAGE2)/$(QAST_COMBINED)
 
-$(STAGE2)/$(P6QREGEX_MOAR): $(STAGE1) $(P6QREGEX_SOURCES) $(STAGE2)/$(QAST_MOAR)
-	$(MKPATH) $(STAGE2)/gen
-	$(PERL) tools/build/gen-cat.pl moar $(P6QREGEX_SOURCES) > $(STAGE2)/$(P6QREGEX_COMBINED)
-	$(STAGE1_NQP) --module-path=$(STAGE2) --setting-path=$(STAGE2) \
+$(M_STAGE2)/$(P6QREGEX_MOAR): $(M_STAGE1) $(P6QREGEX_SOURCES) $(M_STAGE2)/$(QAST_MOAR)
+	$(MKPATH) $(M_STAGE2)/gen
+	$(PERL) tools/build/gen-cat.pl moar $(P6QREGEX_SOURCES) > $(M_STAGE2)/$(P6QREGEX_COMBINED)
+	$(M_STAGE1_NQP) --module-path=$(M_STAGE2) --setting-path=$(M_STAGE2) \
 	    --setting=NQPCORE --no-regex-lib --target=mbc \
-	    --output=$(STAGE2)/$(P6QREGEX_MOAR) $(STAGE2)/$(P6QREGEX_COMBINED)
+	    --output=$(M_STAGE2)/$(P6QREGEX_MOAR) $(M_STAGE2)/$(P6QREGEX_COMBINED)
 
-$(STAGE2)/$(NQP_MOAR): $(STAGE1) $(M_NQP_SOURCES) $(STAGE2)/$(P6QREGEX_MOAR)
-	$(MKPATH) $(STAGE2)/gen
-	$(PERL) tools/build/gen-version.pl > $(STAGE2)/nqp-config.nqp
-	$(PERL) tools/build/gen-cat.pl moar $(M_NQP_SOURCES) $(STAGE2)/nqp-config.nqp > $(STAGE2)/$(NQP_COMBINED)
-	$(STAGE1_NQP) --module-path=$(STAGE2) --setting-path=$(STAGE2) \
+$(M_STAGE2)/$(NQP_MOAR): $(M_STAGE1) $(M_NQP_SOURCES) $(M_STAGE2)/$(P6QREGEX_MOAR)
+	$(MKPATH) $(M_STAGE2)/gen
+	$(PERL) tools/build/gen-version.pl > $(M_STAGE2)/nqp-config.nqp
+	$(PERL) tools/build/gen-cat.pl moar $(M_NQP_SOURCES) $(M_STAGE2)/nqp-config.nqp > $(M_STAGE2)/$(NQP_COMBINED)
+	$(M_STAGE1_NQP) --module-path=$(M_STAGE2) --setting-path=$(M_STAGE2) \
 	    --setting=NQPCORE --target=mbc --no-regex-lib \
-	    --output=$(STAGE2)/$(NQP_MOAR) $(STAGE2)/$(NQP_COMBINED)
+	    --output=$(M_STAGE2)/$(NQP_MOAR) $(M_STAGE2)/$(NQP_COMBINED)
 
-$(NQP_MOAR): $(STAGE2_OUTPUT)
-	$(CP) $(STAGE2)/$(NQP_MO_MOAR) .
-	$(CP) $(STAGE2)/$(MODULE_LOADER_MOAR) .
-	$(CP) $(STAGE2)/$(CORE_SETTING_MOAR) .
-	$(CP) $(STAGE2)/$(QASTNODE_MOAR) .
-	$(CP) $(STAGE2)/$(QREGEX_MOAR) .
-	$(CP) $(STAGE2)/$(HLL_MOAR) .
-	$(CP) $(STAGE2)/$(MASTOPS_MOAR) .
-	$(CP) $(STAGE2)/$(MASTNODES_MOAR) .
-	$(CP) $(STAGE2)/$(QAST_MOAR) .
-	$(CP) $(STAGE2)/$(P6QREGEX_MOAR) .
-	$(CP) $(STAGE2)/$(NQP_MOAR) .
+$(NQP_MOAR): $(M_STAGE2_OUTPUT)
+	$(CP) $(M_STAGE2)/$(NQP_MO_MOAR) .
+	$(CP) $(M_STAGE2)/$(MODULE_LOADER_MOAR) .
+	$(CP) $(M_STAGE2)/$(CORE_SETTING_MOAR) .
+	$(CP) $(M_STAGE2)/$(QASTNODE_MOAR) .
+	$(CP) $(M_STAGE2)/$(QREGEX_MOAR) .
+	$(CP) $(M_STAGE2)/$(HLL_MOAR) .
+	$(CP) $(M_STAGE2)/$(MASTOPS_MOAR) .
+	$(CP) $(M_STAGE2)/$(MASTNODES_MOAR) .
+	$(CP) $(M_STAGE2)/$(QAST_MOAR) .
+	$(CP) $(M_STAGE2)/$(P6QREGEX_MOAR) .
+	$(CP) $(M_STAGE2)/$(NQP_MOAR) .
 
 $(RUNNER): tools/build/gen-moar-runner.pl
 	$(PERL) tools/build/gen-moar-runner.pl "$(MOAR)"
 
 $(P5QREGEX_MOAR): $(P5QREGEX_SOURCES) $(NQP_MOAR) $(RUNNER)
-	$(MKPATH) $(STAGE2)/gen
-	$(PERL) tools/build/gen-cat.pl moar $(P5QREGEX_SOURCES) > $(STAGE2)/$(P5QREGEX_COMBINED)
+	$(MKPATH) $(M_STAGE2)/gen
+	$(PERL) tools/build/gen-cat.pl moar $(P5QREGEX_SOURCES) > $(M_STAGE2)/$(P5QREGEX_COMBINED)
 	.@slash@$(RUNNER) --target=mbc --output=$(P5QREGEX_MOAR) \
-	    $(STAGE2)/$(P5QREGEX_COMBINED)
+	    $(M_STAGE2)/$(P5QREGEX_COMBINED)
 
 ## testing
 
