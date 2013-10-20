@@ -200,6 +200,48 @@ MAIN: {
         );
 
     }
+    if ($backends{jvm}) {
+        my @errors;
+
+        my $got;
+        if (!@errors) {
+            my @jvm_info = `java -showversion 2>&1`;
+            my $jvm_found = 0;
+            my $jvm_ok = 0;
+            for (@jvm_info) {
+                if (/(?:java|jdk) version "(\d+)\.(\d+)/) {
+                    $jvm_found = 1;
+                    if ($1 > 1 || $1 == 1 && $2 >= 7) {
+                        $jvm_ok = 1;
+                    }
+                    $got = $_;
+                    last;
+                }
+            }
+            
+            if (!$jvm_found) {
+                push @errors,
+                    "No JVM (java executable) in path; cannot continue";
+            }
+            elsif (!$jvm_ok) {
+                push @errors,
+                    "Need at least JVM 1.7 (got $got)";
+            }
+        }
+
+        sorry(@errors) if @errors;
+
+        print "Using $got\n";
+
+        $config{'make'} = $^O eq 'MSWin32' ? 'nmake' : 'make';
+        $config{'runner'} = $^O eq 'MSWin32' ? 'nqp.bat' : 'nqp';
+
+        fill_template_file(
+            ['tools/build/Makefile-common.in', 'tools/build/Makefile-JVM.in'],
+            'Makefile',
+            %config,
+        );
+    }
 
     my $make = fill_template_text('@make@', %config);
     unless ($options{'no-clean'}) {
