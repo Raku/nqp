@@ -62,7 +62,7 @@ P5QREGEX_COMBINED = NQPP5QRegex.nqp
 EVAL_CLIENT = tools/jvm/eval-client.pl
 
 NQP_JAR      = nqp.jar
-NQP_SOURCES  = src/vm/jvm/NQP/Ops.nqp $(COMMON_NQP_SOURCES)
+J_NQP_SOURCES= src/vm/jvm/NQP/Ops.nqp $(COMMON_NQP_SOURCES)
 
 STAGE1_OUTPUT = $(STAGE1)/$(NQP_MO_JAR) $(STAGE1)/$(MODULE_LOADER_JAR) \
                 $(STAGE1)/$(CORE_SETTING_JAR) $(STAGE1)/$(QASTNODE_JAR) \
@@ -182,10 +182,10 @@ $(STAGE1)/$(P6QREGEX_JAR): $(STAGE0) $(P6QREGEX_SOURCES) $(STAGE1)/$(QAST_JAR)
          --setting=NQPCORE --no-regex-lib --target=jar \
 	    --output=$(STAGE1)/$(P6QREGEX_JAR) $(STAGE1)/$(P6QREGEX_COMBINED)
 
-$(STAGE1)/$(NQP_JAR): $(STAGE0) $(NQP_SOURCES) $(STAGE1)/$(P6QREGEX_JAR)
+$(STAGE1)/$(NQP_JAR): $(STAGE0) $(J_NQP_SOURCES) $(STAGE1)/$(P6QREGEX_JAR)
 	$(MKPATH) $(STAGE1)
 	$(PERL) tools/build/gen-version.pl > $(STAGE1)/nqp-config.nqp
-	$(PERL) tools/build/gen-cat.pl jvm $(NQP_SOURCES) $(STAGE1)/nqp-config.nqp > $(STAGE1)/$(NQP_COMBINED)
+	$(PERL) tools/build/gen-cat.pl jvm $(J_NQP_SOURCES) $(STAGE1)/nqp-config.nqp > $(STAGE1)/$(NQP_COMBINED)
 	$(STAGE0_NQP) --module-path=$(STAGE1) --setting-path=$(STAGE1) \
          --setting=NQPCORE --target=jar --no-regex-lib --javaclass=nqp \
 	    --output=$(STAGE1)/$(NQP_JAR) $(STAGE1)/$(NQP_COMBINED)
@@ -250,10 +250,10 @@ $(STAGE2)/$(P6QREGEX_JAR): $(STAGE1) $(P6QREGEX_SOURCES) $(STAGE2)/$(QAST_JAR)
          --setting=NQPCORE --no-regex-lib --target=jar \
 	    --output=$(STAGE2)/$(P6QREGEX_JAR) $(STAGE2)/$(P6QREGEX_COMBINED)
 
-$(STAGE2)/$(NQP_JAR): $(STAGE1) $(NQP_SOURCES) $(STAGE2)/$(P6QREGEX_JAR)
+$(STAGE2)/$(NQP_JAR): $(STAGE1) $(J_NQP_SOURCES) $(STAGE2)/$(P6QREGEX_JAR)
 	$(MKPATH) $(STAGE2)
 	$(PERL) tools/build/gen-version.pl > $(STAGE2)/nqp-config.nqp
-	$(PERL) tools/build/gen-cat.pl jvm $(NQP_SOURCES) $(STAGE2)/nqp-config.nqp > $(STAGE2)/$(NQP_COMBINED)
+	$(PERL) tools/build/gen-cat.pl jvm $(J_NQP_SOURCES) $(STAGE2)/nqp-config.nqp > $(STAGE2)/$(NQP_COMBINED)
 	$(STAGE1_NQP) --module-path=$(STAGE2) --setting-path=$(STAGE2) \
          --setting=NQPCORE --target=jar --no-regex-lib --javaclass=nqp \
 	    --output=$(STAGE2)/$(NQP_JAR) $(STAGE2)/$(NQP_COMBINED)

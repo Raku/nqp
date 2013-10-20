@@ -45,7 +45,7 @@ P5QREGEX_MOAR     = NQPP5QRegex.moarvm
 P5QREGEX_COMBINED = NQPP5QRegex.nqp
 
 NQP_MOAR     = nqp.moarvm
-NQP_SOURCES  = src/vm/moar/NQP/Ops.nqp $(COMMON_NQP_SOURCES)
+M_NQP_SOURCES= src/vm/moar/NQP/Ops.nqp $(COMMON_NQP_SOURCES)
 
 STAGE1_OUTPUT = $(STAGE1)/$(NQP_MO_MOAR) $(STAGE1)/$(MODULE_LOADER_MOAR) \
                 $(STAGE1)/$(CORE_SETTING_MOAR) $(STAGE1)/$(QASTNODE_MOAR) \
@@ -148,10 +148,10 @@ $(STAGE1)/$(P6QREGEX_MOAR): $(STAGE0) $(P6QREGEX_SOURCES) $(STAGE1)/$(QAST_MOAR)
 	    --setting=NQPCORE --no-regex-lib --target=mbc \
 	    --output=$(STAGE1)/$(P6QREGEX_MOAR) $(STAGE1)/$(P6QREGEX_COMBINED)
 
-$(STAGE1)/$(NQP_MOAR): $(STAGE0) $(NQP_SOURCES) $(STAGE1)/$(P6QREGEX_MOAR)
+$(STAGE1)/$(NQP_MOAR): $(STAGE0) $(M_NQP_SOURCES) $(STAGE1)/$(P6QREGEX_MOAR)
 	$(MKPATH) $(STAGE1)/gen
 	$(PERL) tools/build/gen-version.pl > $(STAGE1)/nqp-config.nqp
-	$(PERL) tools/build/gen-cat.pl moar $(NQP_SOURCES) $(STAGE1)/nqp-config.nqp > $(STAGE1)/$(NQP_COMBINED)
+	$(PERL) tools/build/gen-cat.pl moar $(M_NQP_SOURCES) $(STAGE1)/nqp-config.nqp > $(STAGE1)/$(NQP_COMBINED)
 	$(STAGE0_NQP) --module-path=$(STAGE1) --setting-path=$(STAGE1) \
 	    --setting=NQPCORE --target=mbc --no-regex-lib \
 	    --output=$(STAGE1)/$(NQP_MOAR) $(STAGE1)/$(NQP_COMBINED)
@@ -219,10 +219,10 @@ $(STAGE2)/$(P6QREGEX_MOAR): $(STAGE1) $(P6QREGEX_SOURCES) $(STAGE2)/$(QAST_MOAR)
 	    --setting=NQPCORE --no-regex-lib --target=mbc \
 	    --output=$(STAGE2)/$(P6QREGEX_MOAR) $(STAGE2)/$(P6QREGEX_COMBINED)
 
-$(STAGE2)/$(NQP_MOAR): $(STAGE1) $(NQP_SOURCES) $(STAGE2)/$(P6QREGEX_MOAR)
+$(STAGE2)/$(NQP_MOAR): $(STAGE1) $(M_NQP_SOURCES) $(STAGE2)/$(P6QREGEX_MOAR)
 	$(MKPATH) $(STAGE2)/gen
 	$(PERL) tools/build/gen-version.pl > $(STAGE2)/nqp-config.nqp
-	$(PERL) tools/build/gen-cat.pl moar $(NQP_SOURCES) $(STAGE2)/nqp-config.nqp > $(STAGE2)/$(NQP_COMBINED)
+	$(PERL) tools/build/gen-cat.pl moar $(M_NQP_SOURCES) $(STAGE2)/nqp-config.nqp > $(STAGE2)/$(NQP_COMBINED)
 	$(STAGE1_NQP) --module-path=$(STAGE2) --setting-path=$(STAGE2) \
 	    --setting=NQPCORE --target=mbc --no-regex-lib \
 	    --output=$(STAGE2)/$(NQP_MOAR) $(STAGE2)/$(NQP_COMBINED)
