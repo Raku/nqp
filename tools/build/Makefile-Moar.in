@@ -7,9 +7,6 @@ MOAR         = $(BIN_DIR)/moar
 NQP_LANG_DIR = $(PREFIX)/languages/nqp
 NQP_LIB_DIR  = $(NQP_LANG_DIR)/lib
 
-MKPATH = $(PERL) -MExtUtils::Command -e mkpath
-CP     = $(PERL) -MExtUtils::Command -e cp
-CHMOD  = $(PERL) -MExtUtils::Command -e chmod
 
 STAGE0 = src/vm/moar/stage0
 STAGE1 = gen/moar/stage1
@@ -27,33 +24,28 @@ CORE_SETTING_MOAR     = NQPCORE.setting.moarvm
 CORE_SETTING_COMBINED = NQPCORE.setting
 
 QASTNODE_MOAR     = QASTNode.moarvm
-QASTNODE_COMBINED = QASTNode.nqp
 
 QREGEX_MOAR     = QRegex.moarvm
 QREGEX_COMBINED = QRegex.nqp
 
 HLL_MOAR     = NQPHLL.moarvm
-HLL_COMBINED = NQPHLL.nqp
 HLL_SOURCES  = src/vm/moar/HLL/Backend.nqp $(COMMON_HLL_SOURCES)
 
 MASTOPS_MOAR   = MASTOps.moarvm
 MASTNODES_MOAR = MASTNodes.moarvm
 
 QAST_MOAR     = QAST.moarvm
-QAST_COMBINED = QAST.nqp
 QAST_SOURCES  = \
   src/vm/moar/QAST/QASTRegexCompilerMAST.nqp \
   src/vm/moar/QAST/QASTOperationsMAST.nqp \
   src/vm/moar/QAST/QASTCompilerMAST.nqp \
 
 P6QREGEX_MOAR     = NQPP6QRegex.moarvm
-P6QREGEX_COMBINED = NQPP6QRegex.nqp
 
 P5QREGEX_MOAR     = NQPP5QRegex.moarvm
 P5QREGEX_COMBINED = NQPP5QRegex.nqp
 
 NQP_MOAR     = nqp.moarvm
-NQP_COMBINED = NQP.nqp
 NQP_SOURCES  = src/vm/moar/NQP/Ops.nqp $(COMMON_NQP_SOURCES)
 
 STAGE1_OUTPUT = $(STAGE1)/$(NQP_MO_MOAR) $(STAGE1)/$(MODULE_LOADER_MOAR) \

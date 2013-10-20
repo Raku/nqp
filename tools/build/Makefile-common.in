@@ -8,6 +8,8 @@ COMMON_HLL_SOURCES = \
   src/HLL/World.nqp \
   src/HLL/sprintf.nqp \
 
+HLL_COMBINED = NQPHLL.nqp
+
 CORE_SETTING_SOURCES = \
   src/core/NativeTypes.nqp \
   src/core/NQPRoutine.nqp \
@@ -41,6 +43,8 @@ QASTNODE_SOURCES = \
   src/QAST/CompUnit.nqp \
   src/QAST/InlinePlaceholder.nqp \
 
+QASTNODE_COMBINED = QASTNode.nqp
+
 P5QREGEX_SOURCES = \
   src/QRegex/P5Regex/Grammar.nqp \
   src/QRegex/P5Regex/Actions.nqp \
@@ -50,6 +54,8 @@ P6QREGEX_SOURCES  = \
   src/QRegex/P6Regex/Grammar.nqp \
   src/QRegex/P6Regex/Actions.nqp \
   src/QRegex/P6Regex/Compiler.nqp \
+
+P6QREGEX_COMBINED = NQPP6QRegex.nqp
 
 QREGEX_SOURCES = \
   src/QRegex/NFA.nqp \
@@ -62,6 +68,10 @@ COMMON_NQP_SOURCES  = \
   src/NQP/Actions.nqp \
   src/NQP/Compiler.nqp \
 
+NQP_COMBINED = NQP.nqp
+
+QAST_COMBINED = QAST.nqp
+
 NQP_MO_SOURCES = src/how/Archetypes.nqp src/how/RoleToRoleApplier.nqp \
                  src/how/NQPConcreteRoleHOW.nqp src/how/RoleToClassApplier.nqp \
                  src/how/NQPCurriedRoleHOW.nqp src/how/NQPParametricRoleHOW.nqp \
@@ -69,3 +79,6 @@ NQP_MO_SOURCES = src/how/Archetypes.nqp src/how/RoleToRoleApplier.nqp \
                  src/how/NQPAttribute.nqp src/how/NQPModuleHOW.nqp \
                  src/how/EXPORTHOW.nqp \
 
+MKPATH        = $(PERL) -MExtUtils::Command -e mkpath
+CHMOD         = $(PERL) -MExtUtils::Command -e chmod
+CP            = $(PERL) -MExtUtils::Command -e cp

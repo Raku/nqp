@@ -30,11 +30,8 @@ O             = @o@
 A             = @a@
 LOAD_EXT      = @load_ext@
 PERL          = @perl@
-CP            = @cp@
 MV            = @mv@
 RM_F          = @rm_f@
-MKPATH        = $(PERL) -MExtUtils::Command -e mkpath
-CHMOD         = $(PERL) -MExtUtils::Command -e chmod
 TOM           = 3rdparty/libtommath/bn
 DYNCALLINC    =
 
@@ -57,12 +54,9 @@ DYNEXT_DIR       = dynext
 PMC_DIR          = src/vm/parrot/pmc
 OPS_DIR          = src/vm/parrot/ops
 
-
-QASTNODE_COMBINED = QASTNode.nqp
 QASTNODE_PIR = QASTNode.pir
 QASTNODE_PBC = QASTNode.pbc
 
-QAST_COMBINED = QAST.nqp
 QAST_PIR = QAST.pir
 QAST_PBC = QAST.pbc
 P_QAST_SOURCES = \
@@ -99,18 +93,15 @@ REGEX_PBC       = NQPRegex.pbc
 
 P_HLL_SOURCES      = src/vm/parrot/HLL/Backend.nqp $(COMMON_HLL_SOURCES)
 HLL_PBC          = NQPHLL.pbc
-HLL_COMBINED     = NQPHLL.nqp
 HLL_COMBINED_PIR = NQPHLL.pir
 
 P6QREGEX_PBC          = NQPP6QRegex.pbc
-P6QREGEX_COMBINED     = NQPP6QRegex.nqp
 P6QREGEX_COMBINED_PIR = NQPP6QRegex.pir
 
 P5QREGEX_PBC          = $(PARROT_BUILD_DIR)/NQPP5QRegex.pbc
 P5QREGEX_COMBINED     = $(PARROT_BUILD_DIR)/NQPP5QRegex.nqp
 P5QREGEX_COMBINED_PIR = $(PARROT_BUILD_DIR)/NQPP5QRegex.pir
 
-NQP_COMBINED     = NQP.nqp
 NQP_COMBINED_PIR = NQP.pir
 NQP_SOURCES      = src/vm/parrot/NQP/Ops.nqp $(COMMON_NQP_SOURCES)
 NQP_PBC          = nqp.pbc
