@@ -1174,7 +1174,7 @@ where the attribute was declared in type `$type`. The notes in the
 `getattr` documentation also apply to `bindattr`.
 
 ## bindcomp
-* `bindcomp(Str $base-class, Mu $compiler)
+* `bindcomp(Str $base-class, Mu $compiler)`
 
 Registers `$compiler` as the compiler for the language named `$base-class`, as in:
 
