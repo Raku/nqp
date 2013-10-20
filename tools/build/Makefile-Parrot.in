@@ -68,9 +68,6 @@ P_QREGEX_COMBINED = QRegex.nqp
 QREGEX_PIR = QRegex.pir
 QREGEX_PBC = QRegex.pbc
 
-
-CORE_SETTING_NQP = NQPCORE.setting
-
 P_STAGE0_SOURCES = \
 	src/vm/parrot/stage0/NQPMO-s0.pir \
 	src/vm/parrot/stage0/ModuleLoader-s0.pir \
@@ -547,11 +544,11 @@ $(P_STAGE1)/$(MODULE_LOADER_PBC): $(STAGE0_PBCS) src/vm/parrot/ModuleLoader.nqp
 
 $(P_STAGE1)/$(CORE_SETTING_PBC): $(STAGE0_PBCS) $(P_STAGE1)/$(NQP_MO_PBC) $(P_STAGE1)/$(MODULE_LOADER_PBC) $(CORE_SETTING_SOURCES)
 	$(MKPATH) $(P_STAGE1)
-	$(PERL) tools/build/gen-cat.pl parrot $(CORE_SETTING_SOURCES) > $(P_STAGE1)/$(CORE_SETTING_NQP)
+	$(PERL) tools/build/gen-cat.pl parrot $(CORE_SETTING_SOURCES) > $(P_STAGE1)/$(CORE_SETTING_COMBINED)
 	$(PARROT) --library=$(P_STAGE0) $(P_STAGE0)/$(NQP_PBC) \
 	    --target=pir --output=$(P_STAGE1)/$(CORE_SETTING_PIR) \
 	    --module-path=$(P_STAGE1) --setting=NULL --no-regex-lib \
-        $(P_STAGE1)/$(CORE_SETTING_NQP)
+        $(P_STAGE1)/$(CORE_SETTING_COMBINED)
 	$(PARROT) -o $(P_STAGE1)/$(CORE_SETTING_PBC) $(P_STAGE1)/$(CORE_SETTING_PIR)
 
 $(P_STAGE1)/$(QASTNODE_PBC): $(STAGE0_PBCS) $(P_STAGE1)/$(CORE_SETTING_PBC) $(QASTNODE_SOURCES)
@@ -631,10 +628,10 @@ $(P_STAGE2)/$(MODULE_LOADER_PBC): $(STAGE1_PBCS) src/vm/parrot/ModuleLoader.nqp
 
 $(P_STAGE2)/$(CORE_SETTING_PBC): $(STAGE1_PBCS) $(P_STAGE2)/$(NQP_MO_PBC) $(P_STAGE2)/$(MODULE_LOADER_PBC) $(CORE_SETTING_SOURCES)
 	$(MKPATH) $(P_STAGE2)
-	$(PERL) tools/build/gen-cat.pl parrot $(CORE_SETTING_SOURCES) > $(P_STAGE2)/$(CORE_SETTING_NQP)
+	$(PERL) tools/build/gen-cat.pl parrot $(CORE_SETTING_SOURCES) > $(P_STAGE2)/$(CORE_SETTING_COMBINED)
 	$(PARROT) --library=$(P_STAGE1) $(P_STAGE1)/$(NQP_PBC) \
 	    --target=pir --output=$(P_STAGE2)/$(CORE_SETTING_PIR) \
-	    --module-path=$(P_STAGE2) --setting=NULL $(P_STAGE2)/$(CORE_SETTING_NQP)
+	    --module-path=$(P_STAGE2) --setting=NULL $(P_STAGE2)/$(CORE_SETTING_COMBINED)
 	$(PARROT) -o $(P_STAGE2)/$(CORE_SETTING_PBC) $(P_STAGE2)/$(CORE_SETTING_PIR)
 
 $(P_STAGE2)/$(QASTNODE_PBC): $(STAGE1_PBCS) $(P_STAGE2)/$(CORE_SETTING_PBC) $(QASTNODE_SOURCES)
@@ -712,7 +709,7 @@ $(PARROT_BUILD_DIR)/$(P5QREGEX_PBC): $(PARROT_BUILD_DIR)/$(NQP_EXE) $(P5QREGEX_S
 	$(PARROT) --library=$(PARROT_BUILD_DIR) $(PARROT_BUILD_DIR)/$(NQP_PBC) \
 	    --module-path=$(PARROT_BUILD_DIR) --setting-path=$(PARROT_BUILD_DIR) \
 		--target=pir --output=$(P5QREGEX_COMBINED_PIR)  $(PARROT_BUILD_DIR)/$(P5QREGEX_COMBINED)
-	$(PARROT) --library=$(PARROT_BUILD_DIR) -o $(P5QREGEX_PBC) $(P5QREGEX_COMBINED_PIR)
+	$(PARROT) --library=$(PARROT_BUILD_DIR) -o $(PARROT_BUILD_DIR)/$(P5QREGEX_PBC) $(P5QREGEX_COMBINED_PIR)
 
 @make_dllcopy@
 

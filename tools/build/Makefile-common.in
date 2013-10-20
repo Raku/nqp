@@ -21,6 +21,8 @@ CORE_SETTING_SOURCES = \
   src/core/testing.nqp \
   src/core/YOUAREHERE.nqp \
 
+CORE_SETTING_COMBINED = NQPCORE.setting
+
 QASTNODE_SOURCES = \
   src/QAST/CompileTimeValue.nqp \
   src/QAST/SpecialArg.nqp \

@@ -19,7 +19,6 @@ NQP_MO_MOAR     = nqpmo.moarvm
 MODULE_LOADER_MOAR = ModuleLoader.moarvm
 
 CORE_SETTING_MOAR     = NQPCORE.setting.moarvm
-CORE_SETTING_COMBINED = NQPCORE.setting
 
 QASTNODE_MOAR     = QASTNode.moarvm
 
@@ -33,7 +32,7 @@ MASTOPS_MOAR   = MASTOps.moarvm
 MASTNODES_MOAR = MASTNodes.moarvm
 
 QAST_MOAR     = QAST.moarvm
-QAST_SOURCES  = \
+M_QAST_SOURCES  = \
   src/vm/moar/QAST/QASTRegexCompilerMAST.nqp \
   src/vm/moar/QAST/QASTOperationsMAST.nqp \
   src/vm/moar/QAST/QASTCompilerMAST.nqp \
@@ -132,9 +131,9 @@ $(STAGE1)/$(MASTNODES_MOAR): $(STAGE0) $(STAGE1)/$(MASTOPS_MOAR) $(PREFIX)/lib/M
 	    --setting=NQPCORE --no-regex-lib --target=mbc \
 	    --output=$(STAGE1)/$(MASTNODES_MOAR) $(PREFIX)/lib/MAST/Nodes.nqp
 
-$(STAGE1)/$(QAST_MOAR): $(STAGE0) $(QAST_SOURCES) $(STAGE1)/$(HLL_MOAR) $(STAGE1)/$(MASTNODES_MOAR)
+$(STAGE1)/$(QAST_MOAR): $(STAGE0) $(M_QAST_SOURCES) $(STAGE1)/$(HLL_MOAR) $(STAGE1)/$(MASTNODES_MOAR)
 	$(MKPATH) $(STAGE1)/gen
-	$(PERL) tools/build/gen-cat.pl moar $(QAST_SOURCES) > $(STAGE1)/$(QAST_COMBINED)
+	$(PERL) tools/build/gen-cat.pl moar $(M_QAST_SOURCES) > $(STAGE1)/$(QAST_COMBINED)
 	$(STAGE0_NQP) --module-path=$(STAGE1) --setting-path=$(STAGE1) \
 	    --setting=NQPCORE --no-regex-lib --target=mbc \
 	    --output=$(STAGE1)/$(QAST_MOAR) $(STAGE1)/$(QAST_COMBINED)
@@ -203,9 +202,9 @@ $(STAGE2)/$(MASTNODES_MOAR): $(STAGE1) $(STAGE2)/$(MASTOPS_MOAR) $(PREFIX)/lib/M
 	    --setting=NQPCORE --no-regex-lib --target=mbc \
 	    --output=$(STAGE2)/$(MASTNODES_MOAR) $(PREFIX)/lib/MAST/Nodes.nqp
 
-$(STAGE2)/$(QAST_MOAR): $(STAGE1) $(QAST_SOURCES) $(STAGE2)/$(HLL_MOAR) $(STAGE2)/$(MASTNODES_MOAR)
+$(STAGE2)/$(QAST_MOAR): $(STAGE1) $(M_QAST_SOURCES) $(STAGE2)/$(HLL_MOAR) $(STAGE2)/$(MASTNODES_MOAR)
 	$(MKPATH) $(STAGE2)/gen
-	$(PERL) tools/build/gen-cat.pl moar $(QAST_SOURCES) > $(STAGE2)/$(QAST_COMBINED)
+	$(PERL) tools/build/gen-cat.pl moar $(M_QAST_SOURCES) > $(STAGE2)/$(QAST_COMBINED)
 	$(STAGE1_NQP) --module-path=$(STAGE2) --setting-path=$(STAGE2) \
 	    --setting=NQPCORE --no-regex-lib --target=mbc \
 	    --output=$(STAGE2)/$(QAST_MOAR) $(STAGE2)/$(QAST_COMBINED)

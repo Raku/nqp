@@ -34,7 +34,6 @@ NQP_MO_JAR      = nqpmo.jar
 MODULE_LOADER_JAR   = ModuleLoader.jar
 
 CORE_SETTING_JAR      = NQPCORE.setting.jar
-CORE_SETTING_COMBINED = NQPCORE.setting
 
 QASTNODE_JAR      = QASTNode.jar
 
@@ -49,9 +48,8 @@ JASTNODES_COMBINED = JASTNodes.nqp
 JASTNODES_SOURCES  = \
   src/vm/jvm/QAST/JASTNodes.nqp \
 
-QAST_JAR      = QAST.jar
-QAST_SOURCES  = \
-  src/vm/jvm/QAST/Compiler.nqp \
+QAST_JAR       = QAST.jar
+J_QAST_SOURCES = src/vm/jvm/QAST/Compiler.nqp
 
 P6QREGEX_JAR      = NQPP6QRegex.jar
 
@@ -166,9 +164,9 @@ $(STAGE1)/$(JASTNODES_JAR): $(STAGE0) $(JASTNODES_SOURCES) $(STAGE1)/$(CORE_SETT
          --setting=NQPCORE --no-regex-lib --target=jar \
 	    --output=$(STAGE1)/$(JASTNODES_JAR) $(STAGE1)/$(JASTNODES_COMBINED)
 
-$(STAGE1)/$(QAST_JAR): $(STAGE0) $(QAST_SOURCES) $(STAGE1)/$(HLL_JAR) $(STAGE1)/$(JASTNODES_JAR)
+$(STAGE1)/$(QAST_JAR): $(STAGE0) $(J_QAST_SOURCES) $(STAGE1)/$(HLL_JAR) $(STAGE1)/$(JASTNODES_JAR)
 	$(MKPATH) $(STAGE1)
-	$(PERL) tools/build/gen-cat.pl jvm $(QAST_SOURCES) > $(STAGE1)/$(QAST_COMBINED)
+	$(PERL) tools/build/gen-cat.pl jvm $(J_QAST_SOURCES) > $(STAGE1)/$(QAST_COMBINED)
 	$(STAGE0_NQP) --module-path=$(STAGE1) --setting-path=$(STAGE1) \
          --setting=NQPCORE --no-regex-lib --target=jar \
 	    --output=$(STAGE1)/$(QAST_JAR) $(STAGE1)/$(QAST_COMBINED)
@@ -234,9 +232,9 @@ $(STAGE2)/$(JASTNODES_JAR): $(STAGE1) $(JASTNODES_SOURCES) $(STAGE2)/$(CORE_SETT
          --setting=NQPCORE --no-regex-lib --target=jar \
 	    --output=$(STAGE2)/$(JASTNODES_JAR) $(STAGE2)/$(JASTNODES_COMBINED)
 
-$(STAGE2)/$(QAST_JAR): $(STAGE1) $(QAST_SOURCES) $(STAGE2)/$(HLL_JAR) $(STAGE2)/$(JASTNODES_JAR)
+$(STAGE2)/$(QAST_JAR): $(STAGE1) $(J_QAST_SOURCES) $(STAGE2)/$(HLL_JAR) $(STAGE2)/$(JASTNODES_JAR)
 	$(MKPATH) $(STAGE2)
-	$(PERL) tools/build/gen-cat.pl jvm $(QAST_SOURCES) > $(STAGE2)/$(QAST_COMBINED)
+	$(PERL) tools/build/gen-cat.pl jvm $(J_QAST_SOURCES) > $(STAGE2)/$(QAST_COMBINED)
 	$(STAGE1_NQP) --module-path=$(STAGE2) --setting-path=$(STAGE2) \
          --setting=NQPCORE --no-regex-lib --target=jar \
 	    --output=$(STAGE2)/$(QAST_JAR) $(STAGE2)/$(QAST_COMBINED)
