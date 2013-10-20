@@ -87,10 +87,10 @@ NQP_MO_SOURCES = src/how/Archetypes.nqp src/how/RoleToRoleApplier.nqp \
 
 NQP_MO_COMBINED = nqpmo.nqp
 
+PERL          = @perl@
 MKPATH        = $(PERL) -MExtUtils::Command -e mkpath
 CHMOD         = $(PERL) -MExtUtils::Command -e chmod
 CP            = $(PERL) -MExtUtils::Command -e cp
-PERL          = @perl@
 
 PREFIX          = $(DESTDIR)@prefix@
 BIN_DIR         = $(PREFIX)/bin
