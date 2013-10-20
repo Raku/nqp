@@ -12,45 +12,45 @@ CP     = $(PERL) -MExtUtils::Command -e cp
 CHMOD  = $(PERL) -MExtUtils::Command -e chmod
 
 STAGE0 = src/vm/moar/stage0
-STAGE1 = src/stage1
-STAGE2 = src/stage2
+STAGE1 = gen/moar/stage1
+STAGE2 = gen/moar/stage2
 
 STAGE0_NQP = $(MOAR) --libpath=$(STAGE0) $(STAGE0)/nqp.moarvm --bootstrap
 STAGE1_NQP = $(MOAR) --libpath=$(STAGE1) $(STAGE1)/nqp.moarvm --bootstrap
 
 NQP_MO_MOAR     = nqpmo.moarvm
-NQP_MO_COMBINED = gen/nqpmo.nqp
+NQP_MO_COMBINED = nqpmo.nqp
 
 MODULE_LOADER_MOAR = ModuleLoader.moarvm
 
 CORE_SETTING_MOAR     = NQPCORE.setting.moarvm
-CORE_SETTING_COMBINED = gen/NQPCORE.setting
+CORE_SETTING_COMBINED = NQPCORE.setting
 
 QASTNODE_MOAR     = QASTNode.moarvm
-QASTNODE_COMBINED = gen/QASTNode.nqp
+QASTNODE_COMBINED = QASTNode.nqp
 
 QREGEX_MOAR     = QRegex.moarvm
-QREGEX_COMBINED = gen/QRegex.nqp
+QREGEX_COMBINED = QRegex.nqp
 
 HLL_MOAR     = NQPHLL.moarvm
-HLL_COMBINED = gen/NQPHLL.nqp
+HLL_COMBINED = NQPHLL.nqp
 HLL_SOURCES  = src/vm/moar/HLL/Backend.nqp $(COMMON_HLL_SOURCES)
 
 MASTOPS_MOAR   = MASTOps.moarvm
 MASTNODES_MOAR = MASTNodes.moarvm
 
 QAST_MOAR     = QAST.moarvm
-QAST_COMBINED = gen/QAST.nqp
+QAST_COMBINED = QAST.nqp
 QAST_SOURCES  = \
   src/vm/moar/QAST/QASTRegexCompilerMAST.nqp \
   src/vm/moar/QAST/QASTOperationsMAST.nqp \
   src/vm/moar/QAST/QASTCompilerMAST.nqp \
 
 P6QREGEX_MOAR     = NQPP6QRegex.moarvm
-P6QREGEX_COMBINED = gen/NQPP6QRegex.nqp
+P6QREGEX_COMBINED = NQPP6QRegex.nqp
 
 P5QREGEX_MOAR     = NQPP5QRegex.moarvm
-P5QREGEX_COMBINED = gen/NQPP5QRegex.nqp
+P5QREGEX_COMBINED = NQPP5QRegex.nqp
 
 NQP_MOAR     = nqp.moarvm
 NQP_COMBINED = gen/NQP.nqp
