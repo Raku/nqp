@@ -150,12 +150,17 @@ sub fill_template_file {
     my $infile = shift;
     my $outfile = shift;
     my %config = @_;
-    my $text = slurp( $infile );
-    $text = fill_template_text($text, %config);
-    print "\nCreating $outfile ...\n";
+
     open(my $OUT, '>', $outfile)
         or die "Unable to write $outfile\n";
-    print $OUT $text;
+    print "\nCreating $outfile ...\n";
+
+    my @infiles = ref($infile) ? @$infile : $infile;
+    for my $if (@infiles) {
+        my $text = slurp( $if );
+        $text = fill_template_text($text, %config);
+        print $OUT $text;
+    }
     close($OUT) or die $!;
 }
 

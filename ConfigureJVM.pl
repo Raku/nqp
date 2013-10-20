@@ -83,8 +83,12 @@ MAIN: {
     $config{'runner'} = $^O eq 'MSWin32' ? 'nqp.bat' : 'nqp';
     $config{'prefix'} = $prefix;
 
-    fill_template_file('tools/build/Makefile-JVM.in', 'Makefile', %config);
-    
+    fill_template_file(
+        ['tools/build/Makefile-common.in', 'tools/build/Makefile-JVM.in'],
+        'Makefile',
+        %config,
+    );
+
     my $make = $config{'make'};
     unless ($options{'no-clean'}) {
         no warnings;
