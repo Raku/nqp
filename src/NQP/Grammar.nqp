@@ -269,7 +269,7 @@ grammar NQP::Grammar is HLL::Grammar {
     proto token statement_prefix { <...> }
     token statement_prefix:sym<BEGIN> { <sym> <blorst> }
     token statement_prefix:sym<INIT>  { <sym> <blorst> }
-    token statement_prefix:sym<try>   { <sym>{say('   try')} <blorst> }
+    token statement_prefix:sym<try>   { <sym> <blorst> }
 
     token blorst {
         [
@@ -340,33 +340,33 @@ grammar NQP::Grammar is HLL::Grammar {
 
     token twigil { <[*!?]> }
 
-    proto rule package_declarator { <...> }
-    rule package_declarator:sym<module> {
+    proto token package_declarator { <...> }
+    token package_declarator:sym<module> {
         :my $*OUTERPACKAGE := $*PACKAGE;
         :my $*PKGDECL := 'module';
         <sym> <package_def> 
     }
-    rule package_declarator:sym<knowhow> {
+    token package_declarator:sym<knowhow> {
         :my $*OUTERPACKAGE := $*PACKAGE;
         :my $*PKGDECL := 'knowhow';
         <sym> <package_def>
     }
-    rule package_declarator:sym<class> {
+    token package_declarator:sym<class> {
         :my $*OUTERPACKAGE := $*PACKAGE;
         :my $*PKGDECL := 'class';
         <sym> <package_def>
     }
-    rule package_declarator:sym<grammar> {
+    token package_declarator:sym<grammar> {
         :my $*OUTERPACKAGE := $*PACKAGE;
         :my $*PKGDECL := 'grammar';
         <sym> <package_def>
     }
-    rule package_declarator:sym<role> {
+    token package_declarator:sym<role> {
         :my $*OUTERPACKAGE := $*PACKAGE;
         :my $*PKGDECL := 'role';
         <sym> <package_def>
     }
-    rule package_declarator:sym<native> {
+    token package_declarator:sym<native> {
         :my $*OUTERPACKAGE := $*PACKAGE;
         :my $*PKGDECL := 'native';
         <sym> <package_def>
@@ -382,7 +382,8 @@ grammar NQP::Grammar is HLL::Grammar {
     rule package_def {
         :my $*PACKAGE;     # The type object for this package.
         :my $OUTER := $*W.cur_lexpad();
-        
+        ''
+        [
         <name>
         <.newpad>
         [ <?{ $*PKGDECL eq 'role' }> '[' ~ ']' <role_params> ]?
@@ -436,6 +437,7 @@ grammar NQP::Grammar is HLL::Grammar {
         || <?[{]> <blockoid>
         || <.panic: 'Malformed package declaration'>
         ]
+        ]
     }
     
     rule role_params {
@@ -444,10 +446,10 @@ grammar NQP::Grammar is HLL::Grammar {
         <variable> +% ','
     }
 
-    proto token scope_declarator { <...> }
-    token scope_declarator:sym<my>  { <sym> <scoped('my')> }
-    token scope_declarator:sym<our> { <sym> <scoped('our')> }
-    token scope_declarator:sym<has> { <sym> <scoped('has')> }
+    proto rule scope_declarator { <...> }
+    rule scope_declarator:sym<my>  { <sym> <scoped('my')> }
+    rule scope_declarator:sym<our> { <sym> <scoped('our')> }
+    rule scope_declarator:sym<has> { <sym> <scoped('has')> }
 
     token scoped($*SCOPE) {
         | <declarator>
@@ -474,8 +476,8 @@ grammar NQP::Grammar is HLL::Grammar {
     }
 
     proto rule routine_declarator { <...> }
-    rule routine_declarator:sym<sub>    { <sym> <routine_def> }
-    rule routine_declarator:sym<method> { <sym> <method_def>  }
+    rule routine_declarator:sym<sub>    {<sym> <routine_def> }
+    rule routine_declarator:sym<method> {<sym> <method_def> }
 
     rule routine_def {
         :my $*RETURN_USED := 0;
@@ -563,7 +565,7 @@ grammar NQP::Grammar is HLL::Grammar {
 
     rule regex_declarator {
         [
-        | $<proto>=[proto] :s [regex|token|rule]
+        | $<proto>=[proto] [regex|token|rule]
           [
           || '::(' <latename=variable> ')'
           || <deflongname>
@@ -573,7 +575,7 @@ grammar NQP::Grammar is HLL::Grammar {
           || '{' '<...>' '}'<?ENDSTMT>
           || '{' '<*>' '}'<?ENDSTMT>
           || <.panic: "Proto regex body must be \{*\} (or <*> or <...>, which are deprecated)">
-          ] :!s
+          ]
         | $<sym>=[regex|token|rule]
           [
           || '::(' <latename=variable> ')'
@@ -820,7 +822,7 @@ grammar NQP::Regex is QRegex::P6Regex::Grammar {
     }
 
     token metachar:sym<nqpvar> {
-        <?before <sigil> [\W\w | \w]> <var=.LANG('MAIN', 'variable')>
+        <?before <sigil> [\W\w | \w]> <var=.LANG('MAIN', 'variable')> <.SIGOK>
     }
 
     token assertion:sym<{ }> {

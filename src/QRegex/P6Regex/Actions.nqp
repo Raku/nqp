@@ -73,24 +73,16 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     method quantified_atom($/) {
         my $qast := $<atom>.ast;
         my $sig  := $<sigmaybe>.ast;
-        if $sig {
-            $sig.unshift($qast);
-            $qast := $sig;
-        }
+        $qast := QAST::Regex.new(:rxtype<concat>, $qast, $sig) if $sig;
         if $<quantifier> {
             $/.CURSOR.panic('Quantifier quantifies nothing')
                 unless $qast;
             my $ast := $<quantifier>[0].ast;
             $ast.unshift($qast);
             $qast := $ast;
-            my $finalsig := $<sigfinal>.ast;
-            if $finalsig && !$sig {
-                $finalsig.unshift($qast);
-                $qast := $finalsig;
-            }
         }
         if $<separator> {
-            unless $qast.rxtype eq 'quant' || $<quantspace> {
+            unless $qast.rxtype eq 'quant' || $<sigfinal> {
                 $/.CURSOR.panic("'" ~ $<separator>[0]<septype> ~
                     "' many only be used immediately following a quantifier")
             }
@@ -100,9 +92,12 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                     QAST::Regex.new( :rxtype<quant>, :min(0), :max(1), $<separator>[0].ast ));
             }
         }
-        $qast.backtrack('r') if $qast && !$qast.backtrack &&
-            (%*RX<r> || $<backmod> && ~$<backmod>[0] eq ':');
-        $qast.node($/) if $qast;
+        if $qast {
+            my $finalsig := $<sigfinal>[0].ast if $<quantifier>;
+            $qast := QAST::Regex.new(:rxtype<concat>, $qast, $finalsig) if $finalsig && !$sig;
+            $qast.backtrack('r') if !$qast.backtrack && (%*RX<r> || $<backmod> && ~$<backmod>[0] eq ':');
+            $qast.node($/) if $qast;
+        }
         make $qast;
     }
     
@@ -121,18 +116,13 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         }
     }
 
-    method sigmaybe:sym<normspace>($/) { make 0 }
-    method sigmaybe:sym<nosp>($/)      { make 0 }
     method sigmaybe:sym<sigwhite>($/) {
         make QAST::Regex.new(
-                :rxtype<concat>,
-                QAST::Regex.new(
-                    :rxtype<subrule>,
-                    :subtype<method>,
-                    :node($/),
-                    :name<ws>,
-                    QAST::Node.new(QAST::SVal.new( :value('ws') ))
-                ));
+                :rxtype<subrule>,
+                :subtype<method>,
+                :node($/),
+                :name<ws>,
+                QAST::Node.new(QAST::SVal.new( :value('ws') )) );
     }
 
     method quantifier:sym<*>($/) {
@@ -653,7 +643,6 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                 $/.CURSOR.panic("Internal modifier strings must be literals");
             }
         }
-        else { make 0 }
     }
 
     sub backmod($ast, $backmod) {

@@ -69,7 +69,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         ]
     }
 
-    rule arglist { <arg> [ ',' <arg>]* }
+    rule arglist { '' <arg> +% [',' ] }
 
     my $cur_handle := 0;
     token TOP {
@@ -96,7 +96,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
           |  '&'
           ] <.ws>
         ]?
-        <termaltseq> <.ws>
+        <termaltseq>
         [
         || <?infixstopper>
         || $$ <.panic: "Regex not terminated">
@@ -141,7 +141,6 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         [
         || <noun=.quantified_atom>+
         || <?before <stopper> | <[&|~]> > <.throw_null_pattern>
-        || (\W) { self.throw_unrecognized_metachar: ~$/[0] }
         ]
     }
 
@@ -213,8 +212,8 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token backmod { ':'? [ '?' | '!' | <!before ':'> ] }
 
     proto token metachar { <...> }
-    token metachar:sym<[ ]> { '[' <nibbler> ']' <.SIGOK> }
-    token metachar:sym<( )> { '(' <nibbler> ')' <.SIGOK> }
+    token metachar:sym<[ ]> { '[' ~ ']' <nibbler> <.SIGOK> }
+    token metachar:sym<( )> { '(' ~ ')' <nibbler> <.SIGOK> }
     token metachar:sym<'> { <?[']> <quote_EXPR: ':q'>  <.SIGOK> }
     token metachar:sym<"> { <?["]> <quote_EXPR: ':qq'> <.SIGOK> }
     token metachar:sym<.> { <sym> <.SIGOK> }
@@ -258,6 +257,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         ]
 
         [ <.ws> '=' <.ws> <quantified_atom> ]**0..1
+        <.SIGOK>
     }
 
     proto token backslash { <...> }
