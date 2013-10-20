@@ -178,7 +178,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     token sigmaybe:sym<sigwhite> {
         <?{$*SIGOK}> <normspace>
-        { $*SIGOK := 0 }
+        { $*SIGOK := False }
     }
 
     token sigmaybe:sym<nosp> { <?[\S]> }
