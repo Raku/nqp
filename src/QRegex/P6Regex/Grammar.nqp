@@ -137,17 +137,22 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     }
 
     token termish {
+        :my $*SIGOK := 0;
+        [
         || <noun=.quantified_atom>+
         || <?before <stopper> | <[&|~]> > <.throw_null_pattern>
-#        || (\W) { self.throw_unrecognized_metachar: ~$/[0] }
+        || (\W) { self.throw_unrecognized_metachar: ~$/[0] }
+        ]
     }
+
+    method SIGOK() { $*SIGOK := %*RX<s>; self }
 
     token quantified_atom {
         <!rxstopper>
-        <atom> <sigspace>**0..1
+        <atom> <sigmaybe>
         [
             [
-            | <!rxstopper> <quantifier> <quantspace=.sigspace>**0..1
+            | <!rxstopper> <quantifier> <sigfinal=.sigmaybe>
             | <?before ':'> <backmod> <!alpha>
             ]
             [ <separator> ]**0..1
@@ -161,12 +166,23 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token atom {
         # :dba('regex atom')
         [
-        | \w [ \w+! <?before \w> ]?
+        | \w [ \w+! <?before \w> ]? <.SIGOK>
         | <metachar>
         ]
     }
 
-    token sigspace { <?[\s#]> <normspace> }
+    proto token sigmaybe { <...> }
+
+    token sigmaybe:sym<normspace> {
+        <!{$*SIGOK}> <normspace>
+    }
+
+    token sigmaybe:sym<sigwhite> {
+        <?{$*SIGOK}> <normspace>
+        { $*SIGOK := 0 }
+    }
+
+    token sigmaybe:sym<nosp> { <?[\S]> }
 
     proto token quantifier { <...> }
     token quantifier:sym<*> { <sym> <backmod> }
@@ -197,22 +213,22 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token backmod { ':'? [ '?' | '!' | <!before ':'> ] }
 
     proto token metachar { <...> }
-    token metachar:sym<[ ]> { '[' <nibbler> ']' }
-    token metachar:sym<( )> { '(' <nibbler> ')' }
-    token metachar:sym<'> { <?[']> <quote_EXPR: ':q'> }
-    token metachar:sym<"> { <?["]> <quote_EXPR: ':qq'> }
-    token metachar:sym<.> { <sym> }
-    token metachar:sym<^> { <sym> }
-    token metachar:sym<^^> { <sym> }
-    token metachar:sym<$> { <sym> }
-    token metachar:sym<$$> { <sym> }
+    token metachar:sym<[ ]> { '[' <nibbler> ']' <.SIGOK> }
+    token metachar:sym<( )> { '(' <nibbler> ')' <.SIGOK> }
+    token metachar:sym<'> { <?[']> <quote_EXPR: ':q'>  <.SIGOK> }
+    token metachar:sym<"> { <?["]> <quote_EXPR: ':qq'> <.SIGOK> }
+    token metachar:sym<.> { <sym> <.SIGOK> }
+    token metachar:sym<^> { <sym> <.SIGOK> }
+    token metachar:sym<^^> { <sym> <.SIGOK> }
+    token metachar:sym<$> { <sym> <.SIGOK> }
+    token metachar:sym<$$> { <sym> <.SIGOK> }
     token metachar:sym<:::> { <sym> <.panic: '::: not yet implemented'> }
     token metachar:sym<::> { <sym> <.panic: ':: not yet implemented'> }
-    token metachar:sym<lwb> { $<sym>=['<<'|'«'] }
-    token metachar:sym<rwb> { $<sym>=['>>'|'»'] }
-    token metachar:sym<from> { '<(' }
-    token metachar:sym<to>   { ')>' }
-    token metachar:sym<bs> { \\ <backslash> }
+    token metachar:sym<lwb> { $<sym>=['<<'|'«'] <.SIGOK> }
+    token metachar:sym<rwb> { $<sym>=['>>'|'»'] <.SIGOK> }
+    token metachar:sym<from> { '<(' <.SIGOK> }
+    token metachar:sym<to>   { ')>' <.SIGOK> }
+    token metachar:sym<bs> { \\ <backslash> <.SIGOK> }
     token metachar:sym<mod> { <mod_internal> }
     token metachar:sym<quantifier> {
         <!rxstopper> <quantifier> <.panic: 'Quantifier quantifies nothing'>
@@ -230,8 +246,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         [ \h* '#= ' \h* $<key>=[\S+ [\h+ \S+]*] ]**0..1
     }
     token metachar:sym<assert> {
-        '<' <assertion>
-        [ '>' || <.panic: 'regex assertion not terminated by angle bracket'> ]
+        '<' ~ '>' <assertion> <.SIGOK>
     }
 
     token sigil { <[$@%&]> }
@@ -335,6 +350,12 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
                 ')'
             ]**0..1
         ]
+        {
+            if !$<quote_EXPR> {
+                my $n := $<n>[0] gt '' ?? +$<n>[0] !! 1;
+                %*RX{ ~$<mod_ident><sym> } := $n;
+            }
+        }
     }
 
     proto token mod_ident { <...> }
