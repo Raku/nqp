@@ -142,12 +142,11 @@ grammar NQP::Grammar is HLL::Grammar {
         [ $ || <.panic: 'Confused'> ]
     }
 
-    rule statementlist {
-        ''
+    token statementlist {
+        <.ws>
         [
         | $
-        | <?before <[\)\]\}]>>
-        | [ <statement> <.eat_terminator> ]*
+        | [<statement><.ws><.eat_terminator><.ws>]*
         ]
     }
 
@@ -155,7 +154,7 @@ grammar NQP::Grammar is HLL::Grammar {
         <!before <[\])}]> | $ >
         [
         | <statement_control>
-        | <EXPR> <.ws>
+        | <EXPR>
             [
             || <?MARKED('endstmt')>
             || <statement_mod_cond> <statement_mod_loop>?
@@ -218,32 +217,30 @@ grammar NQP::Grammar is HLL::Grammar {
 
     proto token statement_control { <...> }
 
-    token statement_control:sym<use> {
-        <sym> \s :s <name>
-    }
+    token statement_control:sym<use> {<sym> <.ws> <name> }
 
     token statement_control:sym<if> {
-        <sym> \s :s
-        <xblock>
-        [ 'elsif'\s <xblock> ]*
-        [ 'else'\s <else=.pblock> ]?
+        <sym> \s <.ws>
+        <xblock> <.ws>
+        [ 'elsif'\s<.ws><xblock><.ws>]*
+        [ 'else'\s<.ws><else=.pblock><.ws>]?
     }
 
     token statement_control:sym<unless> {
-        <sym> \s :s
-        <xblock>
+        <sym> \s <.ws>
+        <xblock> <.ws>
         [ <!before 'else'> || <.panic: 'unless does not take "else", please rewrite using "if"'> ]
     }
 
     token statement_control:sym<while> {
         :my $*CONTROL_USED := 0;
-        $<sym>=[while|until] \s :s
-        <xblock>
+        $<sym>=[while|until] \s <.ws>
+        <xblock> <.ws>
     }
 
     token statement_control:sym<repeat> {
         :my $*CONTROL_USED := 0;
-        <sym> \s :s
+        <sym> \s <.ws>
         [
         | $<wu>=[while|until]\s <xblock>
         | <pblock> $<wu>=[while|until]\s <EXPR>
@@ -252,48 +249,42 @@ grammar NQP::Grammar is HLL::Grammar {
 
     token statement_control:sym<for> {
         :my $*CONTROL_USED := 0;
-        <sym> \s :s
+        <sym> \s <.ws>
         <xblock>
     }
 
     token statement_control:sym<CATCH> {
-        <sym> \s :s
+        <sym> \s <.ws>
         <block>
     }
 
     token statement_control:sym<CONTROL> {
-        <sym> \s :s
+        <sym> \s <.ws>
         <block>
     }
 
     proto token statement_prefix { <...> }
     token statement_prefix:sym<BEGIN> { <sym> <blorst> }
-    token statement_prefix:sym<INIT>  { <sym> <blorst> }
-    token statement_prefix:sym<try>   { <sym> <blorst> }
+    token statement_prefix:sym<INIT> { <sym> <blorst> }
+
+    token statement_prefix:sym<try> { <sym> <blorst> }
 
     token blorst {
-        [
-        | <?before \s> <.ws>
-            [
-            | <?[{]> <block>
-            | <statement>
-            ]
-        | <.panic: "Whitespace required after keyword">
-        ]
+        \s <.ws> [ <?[{]> <block> | <statement> ]
     }
 
     ## Statement modifiers
 
     proto token statement_mod_cond { <...> }
 
-    token statement_mod_cond:sym<if>     { <sym> :s <cond=.EXPR> }
-    token statement_mod_cond:sym<unless> { <sym> :s <cond=.EXPR> }
+    token statement_mod_cond:sym<if>     { <sym> <.ws> <cond=.EXPR> }
+    token statement_mod_cond:sym<unless> { <sym> <.ws> <cond=.EXPR> }
 
     proto token statement_mod_loop { <...> }
 
-    token statement_mod_loop:sym<while>     { <sym> :s <cond=.EXPR> }
-    token statement_mod_loop:sym<until>     { <sym> :s <cond=.EXPR> }
-    token statement_mod_loop:sym<for>       { <sym> :s <cond=.EXPR> }
+    token statement_mod_loop:sym<while>     { <sym> <.ws> <cond=.EXPR> }
+    token statement_mod_loop:sym<until>     { <sym> <.ws> <cond=.EXPR> }
+    token statement_mod_loop:sym<for>       { <sym> <.ws> <cond=.EXPR> }
 
     ## Terms
 
@@ -379,15 +370,14 @@ grammar NQP::Grammar is HLL::Grammar {
         '{' '...' '}'
     }
 
-    rule package_def {
+    token package_def {
         :my $*PACKAGE;     # The type object for this package.
         :my $OUTER := $*W.cur_lexpad();
-        ''
-        [
-        <name>
-        <.newpad>
-        [ <?{ $*PKGDECL eq 'role' }> '[' ~ ']' <role_params> ]?
-        [ 'is' 'repr(' <repr=.quote_EXPR> ')' ]?
+        <.ws>
+        <name><.ws>
+        <.newpad><.ws>
+        [ <?{ $*PKGDECL eq 'role' }> '[' ~ ']' [<.ws><role_params><.ws>] <.ws> ]?
+        [ 'is'<.ws>'repr('<.ws><repr=.quote_EXPR><.ws>')'<.ws>]?
         
         {
             # Construct meta-object for this package, adding it to the
@@ -429,27 +419,26 @@ grammar NQP::Grammar is HLL::Grammar {
             }
         }
         
-        [ $<export>=['is export'] ]?
-        [ 'is' <parent=.name> ]?
-        [ 'does' <role=.name> ]*
+        [ $<export>=[is <.ws> export]<.ws>]?
+        [ is <.ws> <parent=.name> <.ws> ]?
+        [ does <.ws> <role=.name> <.ws> ]*
         [
         || ';' <statementlist> [ $ || <.panic: 'Confused'> ]
         || <?[{]> <blockoid>
         || <.panic: 'Malformed package declaration'>
-        ]
         ]
     }
     
     rule role_params {
         :my $*SCOPE   := 'my';
         :my $*IN_DECL := 'variable';
-        <variable> +% ','
+        [ <variable> ]+ % [ ',' ]
     }
 
-    proto rule scope_declarator { <...> }
-    rule scope_declarator:sym<my>  { <sym> <scoped('my')> }
-    rule scope_declarator:sym<our> { <sym> <scoped('our')> }
-    rule scope_declarator:sym<has> { <sym> <scoped('has')> }
+    proto token scope_declarator { <...> }
+    token scope_declarator:sym<my>  { <sym> <.ws> <scoped('my')> }
+    token scope_declarator:sym<our> { <sym> <.ws> <scoped('our')> }
+    token scope_declarator:sym<has> { <sym> <.ws> <scoped('has')> }
 
     token scoped($*SCOPE) {
         | <declarator>
@@ -467,46 +456,47 @@ grammar NQP::Grammar is HLL::Grammar {
         | <routine_declarator>
     }
 
-    rule variable_declarator {
-        <typename>?
+    token variable_declarator {
+        <typename>? <.ws>
         :my $*IN_DECL := 'variable';
-        <variable>
+        <variable> <.ws>
         { $*IN_DECL := 0; }
-        <trait>*
+        <trait>* <.ws>
     }
 
-    proto rule routine_declarator { <...> }
-    rule routine_declarator:sym<sub>    {<sym> <routine_def> }
-    rule routine_declarator:sym<method> {<sym> <method_def> }
+    proto token routine_declarator { <...> }
+    token routine_declarator:sym<sub>    { <sym><.ws><routine_def> }
+    token routine_declarator:sym<method> { <sym><.ws><method_def> }
 
-    rule routine_def {
+    token routine_def {
         :my $*RETURN_USED := 0;
-        [ $<sigil>=['&'?]<deflongname> ]?
+        [ $<sigil>=['&'?]<deflongname><.ws>]?
         <.newpad>
-        [ '(' <signature> ')'
+        [ '('<.ws><signature><.ws>')'<.ws>
             || <.panic: 'Routine declaration requires a signature'> ]
-        <trait>*
+        <trait>* <.ws>
         [
-        | <onlystar>
-        | <blockoid>
+        | <onlystar><.ws>
+        | <blockoid><.ws>
         ]
     }
 
-    rule method_def {
+    token method_def {
         :my $*RETURN_USED := 0;
         :my $*INVOCANT_OK := 1;
+        <.ws>
         [
-        || '::(' <latename=variable> ')'
-        || $<private>=['!'?] <deflongname>?
+        || '::('<.ws> <latename=variable><.ws> ')'<.ws>
+        || $<private>=['!'?]<deflongname>?<.ws>
         ]
         <.newpad>
-        [ '(' <signature> ')'
+        [ '('<.ws><signature><.ws>')'<.ws>
             || <.panic: 'Routine declaration requires a signature'> ]
         { $*INVOCANT_OK := 0; }
-        <trait>*
+        <trait>*<.ws>
         [
-        | <onlystar>
-        | <blockoid>
+        | <onlystar><.ws>
+        | <blockoid><.ws>
         ]
     }
 
@@ -556,33 +546,33 @@ grammar NQP::Grammar is HLL::Grammar {
         ':' <param_var>
     }
 
-    rule default_value { '=' <EXPR('i=')> }
+    token default_value { <.ws>'='<.ws><EXPR('i=')><.ws> }
 
-    rule trait { <trait_mod> }
+    token trait { <.ws><trait_mod><.ws> }
 
     proto token trait_mod { <...> }
-    token trait_mod:sym<is> { <sym>:s <longname=.deflongname><circumfix>**0..1 }
+    token trait_mod:sym<is> { <sym><.ws><longname=.deflongname><circumfix>**0..1<.ws> }
 
-    rule regex_declarator {
+    token regex_declarator {
         [
-        | $<proto>=[proto] [regex|token|rule]
+        | $<proto>=[proto]<.ws> [regex|token|rule]<.ws>{}
           [
-          || '::(' <latename=variable> ')'
-          || <deflongname>
+          || '::('<.ws> <latename=variable><.ws> ')'<.ws>
+          || <deflongname><.ws>
           ]
           [ 
           || '{*}'<?ENDSTMT>
-          || '{' '<...>' '}'<?ENDSTMT>
-          || '{' '<*>' '}'<?ENDSTMT>
+          || '{'<.ws> '<...>'<.ws> '}'<?ENDSTMT>
+          || '{'<.ws> '<*>'<.ws> '}'<?ENDSTMT>
           || <.panic: "Proto regex body must be \{*\} (or <*> or <...>, which are deprecated)">
           ]
-        | $<sym>=[regex|token|rule]
+        | $<sym>=[regex|token|rule]<.ws>{}
           [
-          || '::(' <latename=variable> ')'
-          || <deflongname>
+          || '::('<.ws> <latename=variable><.ws> ')'<.ws>
+          || <deflongname><.ws>
           ]
           <.newpad>
-          [ '(' <signature> ')' ]**0..1
+          [ '('<.ws> <signature><.ws> ')'<.ws> ]**0..1
           :my %*RX;
           {   
               %*RX<s>    := $<sym> eq 'rule'; 
@@ -595,7 +585,7 @@ grammar NQP::Grammar is HLL::Grammar {
     }
 
     token dotty {
-        '.' 
+        '.'
         [ <longname=deflongname>
         | <?['"]> <quote> 
             [ <?[(]> || <.panic: "Quoted method name requires parenthesized arguments"> ]
@@ -688,7 +678,7 @@ grammar NQP::Grammar is HLL::Grammar {
     token circumfix:sym<« »> { <?[«]>  <quote_EXPR: ':qq', ':w'>  }
     token circumfix:sym<{ }> { <?[{]> <pblock> }
 
-    rule semilist { <statement> }
+    token semilist {<.ws><statement><.ws>}
 
     ## Operators
 
@@ -822,7 +812,7 @@ grammar NQP::Regex is QRegex::P6Regex::Grammar {
     }
 
     token metachar:sym<nqpvar> {
-        <?before <sigil> [\W\w | \w]> <var=.LANG('MAIN', 'variable')> <.SIGOK>
+        <?before <sigil> [\W\w | \w]> <var=.LANG('MAIN', 'variable')>
     }
 
     token assertion:sym<{ }> {
