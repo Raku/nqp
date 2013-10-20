@@ -1,11 +1,5 @@
-PROVE  = prove
-
-PREFIX       = @prefix@
-BIN_DIR      = $(PREFIX)/bin
 MOAR         = $(BIN_DIR)/moar
-NQP_LANG_DIR = $(PREFIX)/languages/nqp
-NQP_LIB_DIR  = $(NQP_LANG_DIR)/lib
-
+RUNNER       = @runner@
 
 STAGE0 = src/vm/moar/stage0
 STAGE1 = gen/moar/stage1
@@ -56,8 +50,6 @@ STAGE2_OUTPUT = $(STAGE2)/$(NQP_MO_MOAR) $(STAGE2)/$(MODULE_LOADER_MOAR) \
                 $(STAGE2)/$(MASTOPS_MOAR) $(STAGE2)/$(MASTNODES_MOAR) \
                 $(STAGE2)/$(QAST_MOAR) $(STAGE2)/$(P6QREGEX_MOAR) \
                 $(STAGE2)/$(NQP_MOAR)
-
-RUNNER = @runner@
 
 all: $(NQP_MOAR) $(RUNNER) $(P5QREGEX_MOAR)
 

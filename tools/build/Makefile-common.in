@@ -91,3 +91,10 @@ MKPATH        = $(PERL) -MExtUtils::Command -e mkpath
 CHMOD         = $(PERL) -MExtUtils::Command -e chmod
 CP            = $(PERL) -MExtUtils::Command -e cp
 PERL          = @perl@
+
+PREFIX          = $(DESTDIR)@prefix@
+BIN_DIR         = $(PREFIX)/bin
+NQP_LANG_DIR    = $(PREFIX)/languages/nqp
+NQP_LIB_DIR     = $(NQP_LANG_DIR)/lib
+PROVE           = prove
+

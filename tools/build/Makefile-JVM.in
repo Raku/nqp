@@ -1,14 +1,10 @@
 JAVA   = java
 JAVAC  = javac
 JAR    = jar
-PROVE  = prove
 ASM    = 3rdparty/asm/
+RUNNER = @runner@
 
-PREFIX = $(DESTDIR)@prefix@
-BIN_DIR = $(PREFIX)/bin
-NQP_LANG_DIR= $(PREFIX)/languages/nqp
 NQP_JAR_DIR = $(NQP_LANG_DIR)/runtime
-NQP_LIB_DIR = $(NQP_LANG_DIR)/lib
 JVM_BUILD_DIR = gen/jvm
 
 RUNTIME_JAVAS = \
@@ -76,8 +72,6 @@ ALL_OUTPUT = $(NQP_MO_JAR) $(MODULE_LOADER_JAR) \
              $(QREGEX_JAR) $(HLL_JAR) \
              $(JASTNODES_JAR) $(QAST_JAR) \
              $(P6QREGEX_JAR) $(NQP_JAR) \
-
-RUNNER = @runner@
 
 all: $(ALL_OUTPUT) $(RUNNER) $(P5QREGEX_JAR)
 
