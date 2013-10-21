@@ -1902,7 +1902,6 @@ QAST::Operations.add_core_pirop_mapping('bitand_s', 'bands', 'Sss', :inlinable(1
 # string opcodes
 QAST::Operations.add_core_pirop_mapping('chars', 'length', 'Is', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('concat', 'concat', 'Sss', :inlinable(1));
-QAST::Operations.add_core_pirop_mapping('concat_s', 'concat', 'Sss', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('join', 'join', 'SsP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('split', 'split', 'Pss', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('chr', 'chr', 'Si', :inlinable(1));
