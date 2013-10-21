@@ -73,7 +73,7 @@ m-install: m-all
 # FIXME:
 M_CLEANUPS: *.moarvm  gen/moar/*
 
-clean:
+m-clean:
 	$(PERL) -MExtUtils::Command -e $(M_CLEANUPS)
 
 $(M_STAGE1): $(M_STAGE1_OUTPUT)

@@ -108,7 +108,7 @@ $(RUNTIME_JAR): $(RUNTIME_JAVAS) tools/build/gen-jvm-properties.pl
 
 J_CLEANUPS = *.class *.jar src/stage1 src/stage2 bin nqp nqp.bat jvmconfig.properties
 
-clean:
+j-clean:
 	$(PERL) -MExtUtils::Command -e rm_rf $(J_CLEANUPS)
 
 $(J_STAGE0): $(RUNTIME_JAR)
@@ -271,7 +271,7 @@ $(P5QREGEX_JAR): $(ALL_OUTPUT) $(P5QREGEX_SOURCES)
 	.@slash@$(J_RUNNER) --target=jar --output=$(P5QREGEX_JAR) \
 	    $(J_STAGE2)/$(P5QREGEX_COMBINED)
 
-bootstrap-files: $(J_STAGE2_OUTPUT)
+j-bootstrap-files: $(J_STAGE2_OUTPUT)
 	$(CP) $(J_STAGE2)/$(NQP_MO_JAR) $(J_STAGE0)
 	$(CP) $(J_STAGE2)/$(MODULE_LOADER_JAR) $(J_STAGE0)
 	$(CP) $(J_STAGE2)/$(CORE_SETTING_JAR) $(J_STAGE0)

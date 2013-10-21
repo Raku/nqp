@@ -1018,7 +1018,7 @@ $(OPS_DIR)/$(DYNCALL_OPS)$(LOAD_EXT): $(OPS_DIR)/$(DYNCALL_OPS_SOURCE) $(DYNCALL
 $(NQP_CONST_PIR):
 	perl tools/build/generate-constants.pl > $@
 
-bootstrap-files: $(STAGE2_PBCS) $(P_STAGE2)/$(CORE_SETTING_NQP)
+p-bootstrap-files: $(STAGE2_PBCS) $(P_STAGE2)/$(CORE_SETTING_NQP)
 	$(PERL) tools/build/gen-bootstrap.pl $(P_STAGE2)/$(NQP_MO_PIR) >src/vm/parrot/stage0/NQPMO-s0.pir
 	$(PERL) tools/build/gen-bootstrap.pl $(P_STAGE2)/module_loader.pir >src/vm/parrot/stage0/ModuleLoader-s0.pir
 	$(PERL) tools/build/gen-bootstrap.pl $(P_STAGE2)/$(CORE_SETTING_PIR) >src/vm/parrot/stage0/NQPCORE.setting-s0.pir
@@ -1049,12 +1049,12 @@ p-core-test-loud: $(NQP_LAUNCHER)$(BAT)
 p-qregex-test: $(NQP_LAUNCHER)$(BAT)
 	prove -r --exec $(NQP_LAUNCHER) t/qregex
 
-qregex-test-loud: $(NQP_LAUNCHER)$(BAT)
+p-qregex-test-loud: $(NQP_LAUNCHER)$(BAT)
 	prove -r -v --exec $(NQP_LAUNCHER) t/qregex
 
 ## cleaning
 
-clean:
+p-clean:
 	$(RM_F) $(P_CLEANUPS)
 
 distclean: realclean
