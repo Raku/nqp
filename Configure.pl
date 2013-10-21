@@ -79,6 +79,15 @@ MAIN: {
     $config{'cpsep'} = $^O eq 'MSWin32' ? ';' : ':';
     $config{'slash'} = $slash;
 
+    open my $MAKEFILE, '>', 'Makefile'
+        or die "Cannot open 'Makefile' for writing: $!";
+
+    fill_template_file(
+        'tools/build/Makefile-common.in',
+        $MAKEFILE,
+        %config,
+    );
+
     if ($backends{parrot}) {
         my $with_parrot = $options{'with-parrot'};
         my $gen_parrot  = $options{'gen-parrot'};
@@ -169,7 +178,7 @@ MAIN: {
         }
 
         fill_template_file(
-            ['tools/build/Makefile-common.in', 'tools/build/Makefile-Parrot.in'], 'Makefile',
+            'tools/build/Makefile-Parrot.in', $MAKEFILE,
             %config,
         );
         fill_template_file('src/vm/parrot/nqp.sh', 'gen/parrot/nqp_launcher', %config);
@@ -194,12 +203,12 @@ MAIN: {
         $config{'make'}   = $^O eq 'MSWin32' ? 'nmake' : 'make';
         $config{'runner'} = $^O eq 'MSWin32' ? 'nqp.bat' : 'nqp';
         fill_template_file(
-            ['tools/build/Makefile-common.in', 'tools/build/Makefile-Moar.in'],
-            'Makefile',
+            'tools/build/Makefile-common.in',
+            $MAKEFILE,
             %config,
         );
-
     }
+
     if ($backends{jvm}) {
         my @errors;
 
@@ -237,11 +246,14 @@ MAIN: {
         $config{'runner'} = $^O eq 'MSWin32' ? 'nqp.bat' : 'nqp';
 
         fill_template_file(
-            ['tools/build/Makefile-common.in', 'tools/build/Makefile-JVM.in'],
-            'Makefile',
+            'tools/build/Makefile-JVM.in',
+            $MAKEFILE,
             %config,
         );
     }
+
+    close $MAKEFILE
+        or die "Error while writing to 'Makefile': $!";
 
     my $make = fill_template_text('@make@', %config);
     unless ($options{'no-clean'}) {

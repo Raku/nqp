@@ -151,9 +151,15 @@ sub fill_template_file {
     my $outfile = shift;
     my %config = @_;
 
-    open(my $OUT, '>', $outfile)
-        or die "Unable to write $outfile\n";
-    print "\nCreating $outfile ...\n";
+    my $OUT;
+    if (ref $outfile) {
+        $OUT = $outfile;
+    }
+    else {
+        print "\nCreating $outfile ...\n";
+        open($OUT, '>', $outfile)
+            or die "Unable to write $outfile\n";
+    }
 
     my @infiles = ref($infile) ? @$infile : $infile;
     for my $if (@infiles) {
@@ -161,7 +167,9 @@ sub fill_template_file {
         $text = fill_template_text($text, %config);
         print $OUT $text;
     }
-    close($OUT) or die $!;
+    unless (ref $outfile) {
+        close($OUT) or die "Error while writing '$outfile': $!";
+    }
 }
 
 
