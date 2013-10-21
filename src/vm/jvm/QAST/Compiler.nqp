@@ -1864,6 +1864,10 @@ my %const_map := nqp::hash(
     'STAT_PLATFORM_DEVTYPE',   -5,
     'STAT_PLATFORM_BLOCKSIZE', -6,
     'STAT_PLATFORM_BLOCKS',    -7,
+
+    'TYPE_CHECK_CACHE_DEFINITIVE',  0,
+    'TYPE_CHECK_CACHE_THEN_METHOD', 1,
+    'TYPE_CHECK_NEEDS_ACCEPTS',     2,
 );
 QAST::OperationsJAST.add_core_op('const', -> $qastcomp, $op {
     if nqp::existskey(%const_map, $op.name) {

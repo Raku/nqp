@@ -1168,7 +1168,11 @@ my %const_map := nqp::hash(
     'STAT_TYPE_DIRECTORY',     pir::const::STAT_TYPE_DIRECTORY,
     'STAT_TYPE_PIPE',          pir::const::STAT_TYPE_PIPE,
     'STAT_TYPE_LINK',          pir::const::STAT_TYPE_LINK,
-    'STAT_TYPE_DEVICE',        pir::const::STAT_TYPE_DEVICE
+    'STAT_TYPE_DEVICE',        pir::const::STAT_TYPE_DEVICE,
+
+    'TYPE_CHECK_CACHE_DEFINITIVE',  0,
+    'TYPE_CHECK_CACHE_THEN_METHOD', 1,
+    'TYPE_CHECK_NEEDS_ACCEPTS',     2,
 );
 QAST::Operations.add_core_op('const', -> $qastcomp, $op {
     if nqp::existskey(%const_map, $op.name) {
