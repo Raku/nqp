@@ -124,6 +124,7 @@ public final class NativeCallOps {
     }
 
     private static Object toJNAType(ThreadContext tc, SixModelObject o, ArgType target) {
+        o = Ops.decont(o, tc);
         switch (target) {
         case CHAR:
             return new Byte((byte) o.get_int(tc));
