@@ -1,4 +1,4 @@
-puts "1..19"
+puts "1..25"
 x=1
 
 puts "ok #{x} - assignment"
@@ -24,13 +24,27 @@ puts "ok #{z} - '/=' assignment"
 puts "#{1+1==2? 'ok' : 'nok'} 10 - ternary (true)"
 puts "#{1+1==3? 'nok' : 'ok'} 11 - ternary (false)"
 
-puts "#{(0 && 2)? 'nok' : 'ok'} 12 - infix &&"
-puts "#{(0 || 2) == 2? 'ok' : 'nok'} 13 - infix ||"
-puts "#{(0 // 2) == 0? 'ok' : 'nok'} 14 - infix // shorted"
-puts "#{(nil // 2) == 2? 'ok' : 'nok'} 15 - infix // arced"
+puts "#{(false && 2)? 'nok' : 'ok'} 12 - infix &&"
 
-puts "ok #{2 **4} - exponentiation **"
+xx = nil
+yy = 42
+puts "#{(false || 2) == 2? 'ok' : 'nok'} 13 - infix ||"
+puts "#{(xx.nil? == true)? 'ok' : 'nok'} 14 - .nil? when true"
+puts "#{(yy.nil? == false)? 'ok' : 'nok'} 15 - .nil? when false"
+
+puts "ok #{2 ** 4} - exponentiation **"
 puts "ok #{37 % 20} - modulus %"
 
-puts "#{1&&0 or 1? 'ok' : 'nok'} 18 - loose 'or'"
-puts "#{1||0 and 0||1? 'ok' : 'nok'} 19 - loose 'and'"
+puts "#{1&&false  or  1? 'ok' : 'nok'} 18 - loose 'or'"
+puts "#{1||false  and  false||1? 'ok' : 'nok'} 19 - loose 'and'"
+
+n = 22
+
+for tst in [[20, -1, 'less than'],
+            [22,  0, 'equal'],
+            [24,  1, 'greater than']
+           ] do
+   puts "#{ (tst[0] <=> n) == tst[1]? 'ok' :'nok'} #{tst[0]} - <=> #{tst[2]}"
+   puts "#{ ('x'~tst[0] cmp 'x'~n) == tst[1]? 'ok' :'nok'} #{tst[0]+1} - cmp #{tst[2]}"
+end
+

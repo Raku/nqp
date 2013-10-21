@@ -114,7 +114,12 @@ class HLL::Backend::Parrot {
 
     method evalpmc($source, *%adverbs) {
         my $compiler := nqp::getcomp('PIR');
-        $compiler($source)
+        my $pbc := $compiler($source);
+        unless $pbc.is_initialized('init') {
+            for $pbc.subs_by_tag('init') -> $sub { $sub() }
+            $pbc.mark_initialized('init');
+        }
+        $pbc
     }
     
     method is_compunit($cuish) {
@@ -122,11 +127,11 @@ class HLL::Backend::Parrot {
     }
     
     method compunit_mainline($cu) {
-        $cu[0]
+        $cu.all_subs()[0]
     }
     
     method compunit_coderefs($cu) {
-        $cu
+        $cu.all_subs();
     }
     
     method recursion_limit($limit) {

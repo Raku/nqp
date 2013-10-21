@@ -11,9 +11,9 @@ start_time = time()
 
 while n < limit do
 
-  m = 4.0*n - 1.0
-  pi_over_4 += 1/(m - 2) - 1/m
-  n += 1
+    m = 4.0*n - 1.0
+    pi_over_4 += 1/(m - 2) - 1/m
+    n += 1
 
 end
 

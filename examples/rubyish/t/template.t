@@ -10,11 +10,11 @@ ok 2 - initial template text
   <%end%>
 ok 5 - text between statements
   <%if n == 5 %>ok 6 - if block (true)
-  <%else      %>nok 6 - if block (true)
+  <%else      %>nok 6 - else block (true)
   <%end%>
-  <%if n == 1234  %>nok 7 - if block (false)
-  <%elsif n == 20 %>nok 7 - if block (false)
-  <%else          %>ok 7 - if block (false)
+  <%if    n == 1234 %>nok 7 - if block (false)
+  <%elsif n == 20   %>nok 7 - elsif block (false)
+  <%else            %>ok 7 - else block (false)
   <% end %>
   <%for test in [8, 9]  do %>ok #{test} - for loop test
   <%end%>

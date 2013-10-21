@@ -667,9 +667,21 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         self.store_regex_nfa($code_obj, $block, QRegex::NFA.new.addnode($qast));
         self.alt_nfas($code_obj, $block, $qast);
 
+        my $scan := QAST::Regex.new( :rxtype<scan> );
+        {
+            my $q := $qast;
+            if $q.rxtype eq 'concat' && $q[0] {
+                $q := $q[0]
+            }
+            if $q.rxtype eq 'literal' {
+                nqp::push($scan, $q[0]);
+                $scan.subtype($q.subtype);
+            }
+        }
+
         $block<orig_qast> := $qast;
         $qast := QAST::Regex.new( :rxtype<concat>,
-                     QAST::Regex.new( :rxtype<scan> ),
+                     $scan,
                      $qast,
                      ($anon
                           ?? QAST::Regex.new( :rxtype<pass> )
