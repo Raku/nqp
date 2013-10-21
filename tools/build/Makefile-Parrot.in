@@ -420,7 +420,7 @@ DYNCALL_OPS_SOURCE = nqp_dyncall.ops
 
 NQP_CONST_PIR = nqp_const.pir
 
-CLEANUPS = \
+P_CLEANUPS = \
   *.manifest \
   *.pdb \
   $(REGEX_PBC) \
@@ -1055,7 +1055,7 @@ qregex-test-loud: $(NQP_LAUNCHER)$(BAT)
 ## cleaning
 
 clean:
-	$(RM_F) $(CLEANUPS)
+	$(RM_F) $(P_CLEANUPS)
 
 distclean: realclean
 

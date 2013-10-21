@@ -106,8 +106,10 @@ $(RUNTIME_JAR): $(RUNTIME_JAVAS) tools/build/gen-jvm-properties.pl
 	$(PERL) tools/build/gen-jvm-properties.pl @prefix@ $(THIRDPARTY_JARS) > bin/jvmconfig.properties
 	$(JAR) cf0 nqp-runtime.jar -C bin/ .
 
+J_CLEANUPS = *.class *.jar src/stage1 src/stage2 bin nqp nqp.bat jvmconfig.properties
+
 clean:
-	$(PERL) -MExtUtils::Command -e rm_rf *.class *.jar src/stage1 src/stage2 bin nqp nqp.bat jvmconfig.properties
+	$(PERL) -MExtUtils::Command -e rm_rf $(J_CLEANUPS)
 
 $(J_STAGE0): $(RUNTIME_JAR)
 

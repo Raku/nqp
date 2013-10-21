@@ -70,8 +70,11 @@ m-install: m-all
 	$(CP) $(P5QREGEX_MOAR) $(NQP_LIB_DIR)
 	$(PERL) tools/build/install-moar-runner.pl $(PREFIX)
 
+# FIXME:
+M_CLEANUPS: *.moarvm  gen/moar/*
+
 clean:
-	$(PERL) -MExtUtils::Command -e rm_rf *.moarvm src/stage1 src/stage2 nqp nqp.bat
+	$(PERL) -MExtUtils::Command -e $(M_CLEANUPS)
 
 $(M_STAGE1): $(M_STAGE1_OUTPUT)
 
