@@ -658,14 +658,15 @@ public class P6Opaque extends REPR {
         // If there's a different number of attributes, need to set up delegate.
         // Note the condition below works because we don't make an entry in the
         // class handles list for a type with no attributes.
+        P6OpaqueBaseInstance instance = (P6OpaqueBaseInstance)obj;
         if (ourREPRData.classHandles.length != targetREPRData.classHandles.length) {
             // Create delegate.
             SixModelObject delegate = newType.st.REPR.allocate(tc, newType.st);
             
             // Find original object.
             SixModelObject orig;
-            if (((P6OpaqueBaseInstance)obj).delegate != null)
-                orig = ((P6OpaqueBaseInstance)obj).delegate;
+            if (instance.delegate != null)
+                orig = instance.delegate;
             else
                 orig = obj;
             
@@ -679,7 +680,13 @@ public class P6Opaque extends REPR {
             catch (IllegalAccessException e) { throw new RuntimeException(e); }
 
             // Install.
-            ((P6OpaqueBaseInstance)obj).delegate = delegate;
+            instance.delegate = delegate;
+        }
+        // If we don't have to create a new delegate, but there's a delegate
+        // in place already, the delegate needs a new STable as well.
+        // Otherwise, methods introduced in the new type won't be available.
+        else if(instance.delegate != null) {
+            instance.delegate.st = newType.st;
         }
         
         // Switch STable over to the new type.
