@@ -1,5 +1,5 @@
 MOAR         = $(BIN_DIR)/moar
-M_RUNNER     = @runner@
+M_RUNNER     = nqp-m$(BAT)
 
 M_STAGE0 = src/vm/moar/stage0
 M_STAGE1 = gen/moar/stage1

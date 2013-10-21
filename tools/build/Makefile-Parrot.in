@@ -15,7 +15,7 @@ PARROT_LIBRARY_DIR = $(PARROT_LIB_DIR)/library
 NQP_LANG_DIR       = $(PARROT_LIB_DIR)/languages/nqp
 HAS_ICU            = @has_icu@
 BAT                = @bat@
-NQP_LAUNCHER	   = ./nqp
+P_RUNNER	       = ./nqp-p
 
 PARROT_BUILD_DIR   = gen/parrot
 
@@ -474,7 +474,7 @@ P_CLEANUPS = \
   src/vm/parrot/6model/reprs/*$(O) \
   src/vm/parrot/6model/reprs/*.pdb \
 
-p-all: $(PARROT_BUILD_DIR)/$(NQP_EXE) $(P5QREGEX_PBC) $(NQP_LAUNCHER)$(BAT)
+p-all: $(PARROT_BUILD_DIR)/$(NQP_EXE) $(P5QREGEX_PBC) $(P_RUNNER)$(BAT)
 
 p-install: p-base-install p-exec-install
 
@@ -695,9 +695,9 @@ $(ALL_PBCS): $(STAGE2_PBCS)
 	$(CP) $(P_STAGE2)/$(P6QREGEX_PBC)         $(PARROT_BUILD_DIR)
 	$(CP) $(P_STAGE2)/$(NQP_PBC)              $(PARROT_BUILD_DIR)
 
-$(NQP_LAUNCHER)$(BAT): $(PARROT_BUILD_DIR)/$(NQP_EXE) gen/parrot/nqp_launcher
-	$(CP) gen/parrot/nqp_launcher $(NQP_LAUNCHER)$(BAT)
-	$(CHMOD) 755 $(NQP_LAUNCHER)$(BAT)
+$(P_RUNNER)$(BAT): $(PARROT_BUILD_DIR)/$(NQP_EXE) gen/parrot/nqp_launcher
+	$(CP) gen/parrot/nqp_launcher $(P_RUNNER)$(BAT)
+	$(CHMOD) 755 $(P_RUNNER)$(BAT)
 
 $(PARROT_BUILD_DIR)/$(NQP_EXE): $(PARROT_BUILD_DIR)/$(NQP_PBC) $(PARROT_DLL_COPY)
 	cd $(PARROT_BUILD_DIR) && $(PBC_TO_EXE) -o$(NQP_EXE) $(NQP_PBC)
@@ -1035,22 +1035,22 @@ t/*/*.t: p-all
 	prove -r -v --exec $(PARROT_BUILD_DIR)/$(NQP_EXE) $@
 
 p-test: p-all
-	prove -r --exec "$(NQP_LAUNCHER) --vmlibs=nqp_dyncall_ops" t/nqp t/parrot t/hll t/qregex t/p5regex t/qast t/serialization t/nativecall
+	prove -r --exec "$(P_RUNNER) --vmlibs=nqp_dyncall_ops" t/nqp t/parrot t/hll t/qregex t/p5regex t/qast t/serialization t/nativecall
 
 p-test-loud: p-all
-	prove -r -v --exec "$(NQP_LAUNCHER) --vmlibs=nqp_dyncall_ops" t/nqp t/parrot t/hll t/qregex t/p5regex t/qast t/serialization t/nativecall
+	prove -r -v --exec "$(P_RUNNER) --vmlibs=nqp_dyncall_ops" t/nqp t/parrot t/hll t/qregex t/p5regex t/qast t/serialization t/nativecall
 
-p-core-test: $(NQP_LAUNCHER)$(BAT)
+p-core-test: $(P_RUNNER)$(BAT)
 	prove -r --exec $(PARROT_BUILD_DIR)/$(NQP_EXE) t/nqp t/parrot
 
-p-core-test-loud: $(NQP_LAUNCHER)$(BAT)
-	prove -r -v --exec $(NQP_LAUNCHER) t/nqp t/parrot
+p-core-test-loud: $(P_RUNNER)$(BAT)
+	prove -r -v --exec $(P_RUNNER) t/nqp t/parrot
 
-p-qregex-test: $(NQP_LAUNCHER)$(BAT)
-	prove -r --exec $(NQP_LAUNCHER) t/qregex
+p-qregex-test: $(P_RUNNER)$(BAT)
+	prove -r --exec $(P_RUNNER) t/qregex
 
-p-qregex-test-loud: $(NQP_LAUNCHER)$(BAT)
-	prove -r -v --exec $(NQP_LAUNCHER) t/qregex
+p-qregex-test-loud: $(P_RUNNER)$(BAT)
+	prove -r -v --exec $(P_RUNNER) t/qregex
 
 ## cleaning
 

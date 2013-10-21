@@ -2,7 +2,7 @@ JAVA   = java
 JAVAC  = javac
 JAR    = jar
 ASM    = 3rdparty/asm/
-J_RUNNER = @runner@
+J_RUNNER = nqp-j$(BAT)
 
 NQP_JAR_DIR = $(NQP_LANG_DIR)/runtime
 JVM_BUILD_DIR = gen/jvm
