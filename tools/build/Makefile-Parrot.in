@@ -12,7 +12,7 @@ PARROT_INCLUDE_DIR = @@includedir@@$(PARROT_VERSION)
 PARROT_LIB_DIR     = @@libdir@@$(PARROT_VERSION)
 PARROT_SRC_DIR     = @@srcdir@@$(PARROT_VERSION)
 PARROT_LIBRARY_DIR = $(PARROT_LIB_DIR)/library
-NQP_LANG_DIR       = $(PARROT_LIB_DIR)/languages/nqp
+P_NQP_LANG_DIR     = $(PARROT_LIB_DIR)/languages/nqp
 HAS_ICU            = @has_icu@
 BAT                = @bat@
 P_RUNNER	       = ./nqp-p
@@ -483,16 +483,16 @@ p-base-install: p-all
 	$(MKPATH)                   $(DESTDIR)$(PARROT_LIB_DIR)/include
 	$(CP)  $(PARROT_BUILD_DIR)/$(MODULE_LOADER_PBC) $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(MODULE_LOADER_PBC)
 	$(CP)  $(NQP_CONST_PIR)     $(DESTDIR)$(PARROT_LIB_DIR)/include/$(NQP_CONST_PIR)
-	$(MKPATH)                   $(DESTDIR)$(NQP_LANG_DIR)/lib
-	$(CP)  $(PARROT_BUILD_DIR)/$(QAST_PBC)          $(DESTDIR)$(NQP_LANG_DIR)/lib/$(QAST_PBC)
-	$(CP)  $(PARROT_BUILD_DIR)/$(QASTNODE_PBC)      $(DESTDIR)$(NQP_LANG_DIR)/lib/$(QASTNODE_PBC)
-	$(CP)  $(PARROT_BUILD_DIR)/$(P6QREGEX_PBC)      $(DESTDIR)$(NQP_LANG_DIR)/lib/$(P6QREGEX_PBC)
-	$(CP)  $(P5QREGEX_PBC)                          $(DESTDIR)$(NQP_LANG_DIR)/lib/NQPP5QRegex.pbc
-	$(CP)  $(PARROT_BUILD_DIR)/$(HLL_PBC)           $(DESTDIR)$(NQP_LANG_DIR)/lib/$(HLL_PBC)
-	$(CP)  $(PARROT_BUILD_DIR)/$(CORE_SETTING_PBC)  $(DESTDIR)$(NQP_LANG_DIR)/lib/$(CORE_SETTING_PBC)
-	$(CP)  $(PARROT_BUILD_DIR)/$(NQP_MO_PBC)        $(DESTDIR)$(NQP_LANG_DIR)/lib/$(NQP_MO_PBC)
-	$(CP)  $(PARROT_BUILD_DIR)/$(NQP_PBC)           $(DESTDIR)$(NQP_LANG_DIR)/lib/$(NQP_PBC)
-	$(CP)  $(PARROT_BUILD_DIR)/$(QREGEX_PBC)        $(DESTDIR)$(NQP_LANG_DIR)/lib/$(QREGEX_PBC)
+	$(MKPATH)                   $(DESTDIR)$(P_NQP_LANG_DIR)/lib
+	$(CP)  $(PARROT_BUILD_DIR)/$(QAST_PBC)          $(DESTDIR)$(P_NQP_LANG_DIR)/lib/$(QAST_PBC)
+	$(CP)  $(PARROT_BUILD_DIR)/$(QASTNODE_PBC)      $(DESTDIR)$(P_NQP_LANG_DIR)/lib/$(QASTNODE_PBC)
+	$(CP)  $(PARROT_BUILD_DIR)/$(P6QREGEX_PBC)      $(DESTDIR)$(P_NQP_LANG_DIR)/lib/$(P6QREGEX_PBC)
+	$(CP)  $(P5QREGEX_PBC)                          $(DESTDIR)$(P_NQP_LANG_DIR)/lib/NQPP5QRegex.pbc
+	$(CP)  $(PARROT_BUILD_DIR)/$(HLL_PBC)           $(DESTDIR)$(P_NQP_LANG_DIR)/lib/$(HLL_PBC)
+	$(CP)  $(PARROT_BUILD_DIR)/$(CORE_SETTING_PBC)  $(DESTDIR)$(P_NQP_LANG_DIR)/lib/$(CORE_SETTING_PBC)
+	$(CP)  $(PARROT_BUILD_DIR)/$(NQP_MO_PBC)        $(DESTDIR)$(P_NQP_LANG_DIR)/lib/$(NQP_MO_PBC)
+	$(CP)  $(PARROT_BUILD_DIR)/$(NQP_PBC)           $(DESTDIR)$(P_NQP_LANG_DIR)/lib/$(NQP_PBC)
+	$(CP)  $(PARROT_BUILD_DIR)/$(QREGEX_PBC)        $(DESTDIR)$(P_NQP_LANG_DIR)/lib/$(QREGEX_PBC)
 	$(MKPATH)              $(DESTDIR)$(PARROT_BIN_DIR)
 	$(CP)  $(PARROT_BUILD_DIR)/$(NQP_EXE)      $(DESTDIR)$(PARROT_BIN_DIR)/$(NQP_EXE)
 	$(CHMOD)  755          $(DESTDIR)$(PARROT_BIN_DIR)/$(NQP_EXE)
