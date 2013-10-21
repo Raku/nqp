@@ -474,11 +474,11 @@ CLEANUPS = \
   src/vm/parrot/6model/reprs/*$(O) \
   src/vm/parrot/6model/reprs/*.pdb \
 
-all: $(PARROT_BUILD_DIR)/$(NQP_EXE) $(P5QREGEX_PBC) $(NQP_LAUNCHER)$(BAT)
+p-all: $(PARROT_BUILD_DIR)/$(NQP_EXE) $(P5QREGEX_PBC) $(NQP_LAUNCHER)$(BAT)
 
-install: base-install exec-install
+p-install: p-base-install p-exec-install
 
-base-install: all
+p-base-install: p-all
 	$(MKPATH)                   $(DESTDIR)$(PARROT_LIBRARY_DIR)
 	$(MKPATH)                   $(DESTDIR)$(PARROT_LIB_DIR)/include
 	$(CP)  $(PARROT_BUILD_DIR)/$(MODULE_LOADER_PBC) $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(MODULE_LOADER_PBC)
@@ -501,7 +501,7 @@ base-install: all
 	$(MKPATH)                     $(DESTDIR)$(PARROT_INCLUDE_DIR)/dynpmc
 	$(CP)       $(DYNPMC_HEADERS) $(DESTDIR)$(PARROT_INCLUDE_DIR)/dynpmc
 
-exec-install:
+p-exec-install:
 	$(CP)  $(PARROT_BUILD_DIR)/$(NQP_EXE)      $(DESTDIR)$(PARROT_BIN_DIR)/nqp$(EXE)
 	$(CHMOD)  755          $(DESTDIR)$(PARROT_BIN_DIR)/nqp$(EXE)
 
@@ -1031,22 +1031,22 @@ bootstrap-files: $(STAGE2_PBCS) $(P_STAGE2)/$(CORE_SETTING_NQP)
 
 ## testing
 
-t/*/*.t: all
+t/*/*.t: p-all
 	prove -r -v --exec $(PARROT_BUILD_DIR)/$(NQP_EXE) $@
 
-test: all
+p-test: p-all
 	prove -r --exec "$(NQP_LAUNCHER) --vmlibs=nqp_dyncall_ops" t/nqp t/parrot t/hll t/qregex t/p5regex t/qast t/serialization t/nativecall
 
-test-loud: all
+p-test-loud: p-all
 	prove -r -v --exec "$(NQP_LAUNCHER) --vmlibs=nqp_dyncall_ops" t/nqp t/parrot t/hll t/qregex t/p5regex t/qast t/serialization t/nativecall
 
-core-test: $(NQP_LAUNCHER)$(BAT)
+p-core-test: $(NQP_LAUNCHER)$(BAT)
 	prove -r --exec $(PARROT_BUILD_DIR)/$(NQP_EXE) t/nqp t/parrot
 
-core-test-loud: $(NQP_LAUNCHER)$(BAT)
+p-core-test-loud: $(NQP_LAUNCHER)$(BAT)
 	prove -r -v --exec $(NQP_LAUNCHER) t/nqp t/parrot
 
-qregex-test: $(NQP_LAUNCHER)$(BAT)
+p-qregex-test: $(NQP_LAUNCHER)$(BAT)
 	prove -r --exec $(NQP_LAUNCHER) t/qregex
 
 qregex-test-loud: $(NQP_LAUNCHER)$(BAT)

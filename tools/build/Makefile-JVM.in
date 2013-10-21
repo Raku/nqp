@@ -2,7 +2,7 @@ JAVA   = java
 JAVAC  = javac
 JAR    = jar
 ASM    = 3rdparty/asm/
-RUNNER = @runner@
+J_RUNNER = @runner@
 
 NQP_JAR_DIR = $(NQP_LANG_DIR)/runtime
 JVM_BUILD_DIR = gen/jvm
@@ -73,9 +73,9 @@ ALL_OUTPUT = $(NQP_MO_JAR) $(MODULE_LOADER_JAR) \
              $(JASTNODES_JAR) $(QAST_JAR) \
              $(P6QREGEX_JAR) $(NQP_JAR) \
 
-all: $(ALL_OUTPUT) $(RUNNER) $(P5QREGEX_JAR)
+j-all: $(ALL_OUTPUT) $(J_RUNNER) $(P5QREGEX_JAR)
 
-install: all
+j-install: j-all
 	$(MKPATH) $(BIN_DIR)
 	$(MKPATH) $(NQP_JAR_DIR)
 	$(MKPATH) $(NQP_LIB_DIR)
@@ -259,14 +259,14 @@ $(ALL_OUTPUT): $(J_STAGE2_OUTPUT)
 	$(CP) $(J_STAGE2)/$(P6QREGEX_JAR) .
 	$(CP) $(J_STAGE2)/$(NQP_JAR) .
 
-$(RUNNER): src/vm/jvm/runners/$(RUNNER)
-	$(CP) src/vm/jvm/runners/$(RUNNER) .
-	$(CHMOD) 755 $(RUNNER)
+$(J_RUNNER): src/vm/jvm/runners/$(J_RUNNER)
+	$(CP) src/vm/jvm/runners/$(J_RUNNER) .
+	$(CHMOD) 755 $(J_RUNNER)
 
 $(P5QREGEX_JAR): $(ALL_OUTPUT) $(P5QREGEX_SOURCES)
 	$(MKPATH) $(J_STAGE2)
 	$(PERL) tools/build/gen-cat.pl jvm $(P5QREGEX_SOURCES) > $(J_STAGE2)/$(P5QREGEX_COMBINED)
-	.@slash@$(RUNNER) --target=jar --output=$(P5QREGEX_JAR) \
+	.@slash@$(J_RUNNER) --target=jar --output=$(P5QREGEX_JAR) \
 	    $(J_STAGE2)/$(P5QREGEX_COMBINED)
 
 bootstrap-files: $(J_STAGE2_OUTPUT)
@@ -283,23 +283,23 @@ bootstrap-files: $(J_STAGE2_OUTPUT)
 
 ## testing
 
-t/*/*.t: all
-	prove -r -v --exec .@slash@$(RUNNER) $@
+t/*/*.t: j-all
+	prove -r -v --exec .@slash@$(J_RUNNER) $@
 
-test: all
-	prove -r --exec .@slash@$(RUNNER) t/nqp t/qregex t/p5regex t/qast t/serialization t/jvm t/nativecall
+j-test: j-all
+	prove -r --exec .@slash@$(J_RUNNER) t/nqp t/qregex t/p5regex t/qast t/serialization t/jvm t/nativecall
 
-test-loud: all
-	prove -r -v --exec .@slash@$(RUNNER) t/nqp t/qregex t/p5regex t/qast t/serialization t/jvm t/nativecall
+j-test-loud: j-all
+	prove -r -v --exec .@slash@$(J_RUNNER) t/nqp t/qregex t/p5regex t/qast t/serialization t/jvm t/nativecall
 
-core-test: $(RUNNER)
-	prove -r --exec .@slash@$(RUNNER) t/nqp
+j-core-test: $(J_RUNNER)
+	prove -r --exec .@slash@$(J_RUNNER) t/nqp
 
-core-test-loud: $(RUNNER)
-	prove -r -v --exec .@slash@$(RUNNER) t/nqp
+j-core-test-loud: $(J_RUNNER)
+	prove -r -v --exec .@slash@$(J_RUNNER) t/nqp
 
-qregex-test: $(RUNNER)
-	prove -r --exec .@slash@$(RUNNER) t/qregex
+j-qregex-test: $(J_RUNNER)
+	prove -r --exec .@slash@$(J_RUNNER) t/qregex
 
-qregex-test-loud: $(RUNNER)
-	prove -r -v --exec .@slash@$(RUNNER) t/qregex
+j-qregex-test-loud: $(J_RUNNER)
+	prove -r -v --exec .@slash@$(J_RUNNER) t/qregex
