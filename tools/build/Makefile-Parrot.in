@@ -476,9 +476,7 @@ P_CLEANUPS = \
 
 p-all: $(PARROT_BUILD_DIR)/$(NQP_EXE) $(P5QREGEX_PBC) $(P_RUNNER)$(BAT)
 
-p-install: p-base-install p-exec-install
-
-p-base-install: p-all
+p-install: p-all
 	$(MKPATH)                   $(DESTDIR)$(PARROT_LIBRARY_DIR)
 	$(MKPATH)                   $(DESTDIR)$(PARROT_LIB_DIR)/include
 	$(CP)  $(PARROT_BUILD_DIR)/$(MODULE_LOADER_PBC) $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(MODULE_LOADER_PBC)
@@ -501,9 +499,6 @@ p-base-install: p-all
 	$(MKPATH)                     $(DESTDIR)$(PARROT_INCLUDE_DIR)/dynpmc
 	$(CP)       $(DYNPMC_HEADERS) $(DESTDIR)$(PARROT_INCLUDE_DIR)/dynpmc
 
-p-exec-install:
-	$(CP)  $(PARROT_BUILD_DIR)/$(NQP_EXE)      $(DESTDIR)$(PARROT_BIN_DIR)/nqp$(EXE)
-	$(CHMOD)  755          $(DESTDIR)$(PARROT_BIN_DIR)/nqp$(EXE)
 
 stage0: $(P_STAGE0)
 stage1: $(P_STAGE1)
