@@ -129,22 +129,22 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     token termaltseq {
         <termconjseq>
-        [ '||' <.ws> { $*SEQ := 1; } <termconjseq> ]*
+        [ '||' <.ws> [  { $*SEQ := 1; } <termconjseq> || <.throw_null_pattern> ] ]*
     }
 
     token termconjseq {
         <termalt>
-        [ '&&' <.ws> { $*SEQ := 0; } <termalt> ]*
+        [ '&&' <.ws> [ { $*SEQ := 0; } <termalt> || <.throw_null_pattern> ] ]*
     }
 
     token termalt {
         <termconj>
-        [ '|' <![|]> <.ws> { $*SEQ := 0; } <termconj> ]*
+        [ '|' <![|]> <.ws> [ { $*SEQ := 0; } <termconj> || <.throw_null_pattern> ] ]*
     }
 
     token termconj {
         <termish>
-        [ '&' <![&]> <.ws> { $*SEQ := 0; } <termish> ]*
+        [ '&' <![&]> <.ws> [ { $*SEQ := 0; } <termish> || <.throw_null_pattern> ] ]*
     }
 
     token termish {
