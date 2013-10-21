@@ -16,8 +16,7 @@ Implemented:
 - interpolating strings: "number #{37+5}" %Q{Hello #{planet}!}
 - quoted words: `%w[aa bb cc]` 
 - scoping, including $globals, @class_instance and @@package variables
-- conditional blocks: `if ... then ... elsif ... else ... endif`
-- begin .. end blocks
+- conditional blocks: `if ... then ... elsif ... else ... endif`, `unless..end`
 - nqp opcode calls: `nqp::sleep(5)`
 - a few built-ins: `abort`, `print`, `puts`, `sleep`
 - a couple of methods: `.call` and `.nil?`

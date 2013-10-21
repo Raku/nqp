@@ -29,8 +29,8 @@ puts "#{(false && 2)? 'nok' : 'ok'} 12 - infix &&"
 xx = nil
 yy = 42
 puts "#{(false || 2) == 2? 'ok' : 'nok'} 13 - infix ||"
-puts "#{xx.nil? == true? 'ok' : 'nok'} 14 - .nil? when true"
-puts "#{yy.nil? == false? 'ok' : 'nok'} 15 - .nil? when false"
+puts "#{(xx.nil? == true)? 'ok' : 'nok'} 14 - .nil? when true"
+puts "#{(yy.nil? == false)? 'ok' : 'nok'} 15 - .nil? when false"
 
 puts "ok #{2 ** 4} - exponentiation **"
 puts "ok #{37 % 20} - modulus %"

@@ -293,8 +293,8 @@ grammar Rubyish::Grammar is HLL::Grammar {
         <EXPR> [ <separator> [:s 'then']? | 'then' | <?before <tmpl-unesc>>] <stmtlist>
     }
 
-    token stmt:sym<if> {
-        if ~ 'end' [ :s <xblock> [<else=.elsif>|<else>]? ]
+    token stmt:sym<cond> {
+        $<op>=[if|unless] ~ 'end' [ :s <xblock> [<else=.elsif>|<else>]? ]
     }
 
     token elsif {
@@ -715,11 +715,12 @@ class Rubyish::Actions is HLL::Actions {
     }
 
     method xblock($/) {
-        make QAST::Op.new( $<EXPR>.ast, $<stmtlist>.ast, :op('if'), :node($/) );
+        make QAST::Op.new( $<EXPR>.ast, $<stmtlist>.ast, :node($/) );
     }
 
-    method stmt:sym<if>($/) {
+    method stmt:sym<cond>($/) {
         my $ast := $<xblock>.ast;
+	$ast.op( ~$<op> );
         $ast.push( $<else>.ast )
             if $<else>;
  
@@ -728,6 +729,7 @@ class Rubyish::Actions is HLL::Actions {
 
     method elsif($/) {
         my $ast := $<xblock>.ast;
+	$ast.op( 'if' );
         $ast.push( $<else>.ast )
             if $<else>;
 
