@@ -75,17 +75,21 @@ class QRegex::P6Regex::Actions is HLL::Actions {
 
     method quantified_atom($/) {
         my $qast := $<atom>.ast;
-        my $sig  := $<sigmaybe>.ast;
-        $qast := QAST::Regex.new(:rxtype<concat>, $qast, $sig) if $sig;
-        if $<quantifier> {
+        my $quant := $<quantifier>;
+        if $quant {
             $/.CURSOR.panic('Quantifier quantifies nothing')
                 unless $qast;
-            my $ast := $<quantifier>[0].ast;
+
+            # Always capture sigspace before quantifier
+            my $sig  := $<sigmaybe>.ast if $<sigmaybe>;
+            $qast := QAST::Regex.new(:rxtype<concat>, $qast, $sig) if $sig;
+
+            my $ast := $quant[0].ast;
             $ast.unshift($qast);
             $qast := $ast;
         }
         if $<separator> {
-            unless $qast.rxtype eq 'quant' || $<sigfinal> {
+            unless $qast.rxtype eq 'quant' {
                 $/.CURSOR.panic("'" ~ $<separator>[0]<septype> ~
                     "' many only be used immediately following a quantifier")
             }
@@ -95,11 +99,19 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                     QAST::Regex.new( :rxtype<quant>, :min(0), :max(1), $<separator>[0].ast ));
             }
         }
+        # Don't capture trailing sigspace in a $<var> = binding
+        unless $*VARDEF {
+            my $sig;
+            if $quant {
+                $sig := $<sigfinal>[0].ast if $<sigfinal>;
+            } else {
+                $sig := $<sigmaybe>.ast if $<sigmaybe>;
+            }
+            $qast := QAST::Regex.new(:rxtype<concat>, $qast, $sig) if $sig && $qast;
+        }
         if $qast {
-            my $finalsig := $<sigfinal>[0].ast if $<quantifier>;
-            $qast := QAST::Regex.new(:rxtype<concat>, $qast, $finalsig) if $finalsig && !$sig;
             $qast.backtrack('r') if !$qast.backtrack && (%*RX<r> || $<backmod> && ~$<backmod>[0] eq ':');
-            $qast.node($/) if $qast;
+            $qast.node($/);
         }
         make $qast;
     }

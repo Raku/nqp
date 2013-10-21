@@ -101,7 +101,8 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         || <?infixstopper>
         || $$ <.panic: "Regex not terminated">
         || (\W) { self.throw_unrecognized_metachar: ~$/[0] }
-        || <.panic: "Regex not terminated">
+        || (\w) { self.panic("missed one, boss: '"~$/[0]~"'") }
+        || {self.panic('Regex no term bra "'~$/~'", matched '~$<termseq>~'.')} #<.panic: "Regex not terminated">
         ]
     }
     
@@ -148,7 +149,8 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     }
 
     token termish {
-        :my $*SIGOK := 0;
+        :my $*SIGOK  := False;
+        :my $*VARDEF := False;
         <noun=.quantified_atom>+
     }
 
@@ -156,10 +158,10 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     token quantified_atom {
         <!rxstopper>
-        <atom> <sigmaybe>
+        <atom> <sigmaybe>?
         [
             [
-            | <!rxstopper> <quantifier> <sigfinal=.sigmaybe>
+            | <!rxstopper> <quantifier> <.SIGOK> <sigfinal=.sigmaybe>?
             | <?[:]> <backmod> <!alpha>
             ]
             [ <separator> ]**0..1
@@ -188,8 +190,6 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         <?{$*SIGOK}> <normspace>
         { $*SIGOK := False }
     }
-
-    token sigmaybe:sym<nosp> { <?[\S]> }
 
     proto token quantifier { <...> }
     token quantifier:sym<*> { <sym> <backmod> }
@@ -264,7 +264,12 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         | '$' $<pos>=[\d+]
         ]
 
-        [ <.ws> '=' <.ws> <quantified_atom> ]**0..1
+        [
+            <.ws> '=' <.ws>
+            {$*VARDEF := True}
+            <quantified_atom>
+            {$*VARDEF := False}
+        ]**0..1
         <.SIGOK>
     }
 
