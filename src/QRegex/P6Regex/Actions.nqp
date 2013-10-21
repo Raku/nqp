@@ -11,8 +11,11 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         );
     }
 
-    method nibbler($/) { make $<termaltseq>.ast }
+    method nibbler($/) { make $<termseq>.ast }
 
+    method termseq($/) {
+        make $<termaltseq>.ast
+    }
     method termaltseq($/) {
         my $qast := $<termconjseq>[0].ast;
         if +$<termconjseq> > 1 {

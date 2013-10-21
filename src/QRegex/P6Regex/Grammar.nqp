@@ -96,7 +96,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
           |  '&'
           ] <.ws>
         ]?
-        <termaltseq>
+        <termseq>
         [
         || <?infixstopper>
         || $$ <.panic: "Regex not terminated">
@@ -116,32 +116,40 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     
     token rxstopper { $ }
 
+    # XXX Eventually squish termseq and termish and
+    # get < || && | & > infixes using by EXPR in nibbler
+    token termseq {
+        || <termaltseq>
+        || <?before <stopper> | <[&|~]> > <.throw_null_pattern>
+        || <?before <infixstopper> > <.throw_null_pattern> # XXX Check if unmatched bracket
+        || $$ <.panic: "Regex not terminated">
+        || (\W) { self.throw_unrecognized_metachar: ~$/[0] }
+        || <.panic: "Regex not terminated">
+    }
+
     token termaltseq {
         <termconjseq>
-        [ '||' <.ws> [  { $*SEQ := 1; } <termconjseq> || <.throw_null_pattern> ] ]*
+        [ '||' <.ws> { $*SEQ := 1; } <termconjseq> ]*
     }
 
     token termconjseq {
         <termalt>
-        [ '&&' <.ws> [ { $*SEQ := 0; } <termalt> || <.throw_null_pattern> ] ]*
+        [ '&&' <.ws> { $*SEQ := 0; } <termalt> ]*
     }
 
     token termalt {
         <termconj>
-        [ <!rxstopper> '|' <![|]> <.ws> [ { $*SEQ := 0; } <termconj> || <.throw_null_pattern> ] ]*
+        [ '|' <![|]> <.ws> { $*SEQ := 0; } <termconj> ]*
     }
 
     token termconj {
         <termish>
-        [ <!rxstopper> '&' <![&]> <.ws> [ { $*SEQ := 0; } <termish> || <.throw_null_pattern> ] ]*
+        [ '&' <![&]> <.ws> { $*SEQ := 0; } <termish> ]*
     }
 
     token termish {
         :my $*SIGOK := 0;
-        [
-        || <noun=.quantified_atom>+
-        || <?before <stopper> | <[&|~]> > <.throw_null_pattern>
-        ]
+        <noun=.quantified_atom>+
     }
 
     method SIGOK() { $*SIGOK := %*RX<s>; self }
@@ -152,7 +160,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         [
             [
             | <!rxstopper> <quantifier> <sigfinal=.sigmaybe>
-            | <?before ':'> <backmod> <!alpha>
+            | <?[:]> <backmod> <!alpha>
             ]
             [ <separator> ]**0..1
         ]**0..1
