@@ -101,8 +101,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         || <?infixstopper>
         || $$ <.panic: "Regex not terminated">
         || (\W) { self.throw_unrecognized_metachar: ~$/[0] }
-        || (\w) { self.panic("missed one, boss: '"~$/[0]~"'") }
-        || {self.panic('Regex no term bra "'~$/~'", matched '~$<termseq>~'.')} #<.panic: "Regex not terminated">
+        || <.panic: "Regex not terminated">
         ]
     }
     
