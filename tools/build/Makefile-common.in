@@ -91,6 +91,7 @@ PERL          = @perl@
 MKPATH        = $(PERL) -MExtUtils::Command -e mkpath
 CHMOD         = $(PERL) -MExtUtils::Command -e chmod
 CP            = $(PERL) -MExtUtils::Command -e cp
+RM_RF         = $(PERL) -MExtUtils::Command -e rm_rf
 
 PREFIX          = $(DESTDIR)@prefix@
 BIN_DIR         = $(PREFIX)/bin

@@ -203,7 +203,7 @@ MAIN: {
         $config{'make'}   = $^O eq 'MSWin32' ? 'nmake' : 'make';
         $config{'runner'} = $^O eq 'MSWin32' ? 'nqp.bat' : 'nqp';
         fill_template_file(
-            'tools/build/Makefile-common.in',
+            'tools/build/Makefile-Moar.in',
             $MAKEFILE,
             %config,
         );

@@ -74,7 +74,7 @@ m-install: m-all
 M_CLEANUPS: *.moarvm  gen/moar/*
 
 m-clean:
-	$(PERL) -MExtUtils::Command -e $(M_CLEANUPS)
+	$(RM_RF) $(M_CLEANUPS)
 
 $(M_STAGE1): $(M_STAGE1_OUTPUT)
 
