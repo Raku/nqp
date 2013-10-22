@@ -1,11 +1,13 @@
 # Backend class for the MoarVM.
 class HLL::Backend::MoarVM {
+    our %moar_config := nqp::backendconfig();
+
     method apply_transcodings($s, $transcode) {
         $s
     }
 
     method config() {
-        nqp::hash()
+        %moar_config
     }
 
     method force_gc() {
@@ -13,7 +15,7 @@ class HLL::Backend::MoarVM {
     }
 
     method name() {
-        'moar'
+        %moar_config<name>
     }
 
     method nqpevent($spec?) {
@@ -29,7 +31,8 @@ class HLL::Backend::MoarVM {
     }
 
     method version_string() {
-        "MoarVM"
+        my $rev := %moar_config<version> // '(unknown)';
+        return "MoarVM version $rev";
     }
 
     method stages() {
