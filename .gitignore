@@ -44,7 +44,11 @@ bin
 nqp-runtime.jar
 *.class
 *.jar
-/nqp.bat
-/nqp.sh
+/nqp-j
+/nqp-p
+/nqp-m
+/nqp-j.bat
+/nqp-p.bat
+/nqp-m.bat
 /jvmconfig.properties
 *.moarvm
