@@ -1,4 +1,4 @@
-puts "1..18"
+puts "1..17"
 
 if 1+1==3 then
     puts "nok 1"
@@ -69,5 +69,11 @@ puts "ok #{iffy 20} -  if [elsif] elsif  else"
 puts "ok #{iffy 30} -  if  elsif [elsif] else"
 puts "ok #{iffy 42} -  if  elsif  elsif [else]"
 
-puts "#{true? 'ok' : 'nok'}  17 - true"
-puts "#{false ? 'nok' : 'ok'}  18 - false"
+x=10
+unless x > 2
+  puts "nok 17 - unless"
+elsif x == 20
+  puts "nok 17 - unless (elsif)"
+else
+  puts "ok 17 - unless"
+end

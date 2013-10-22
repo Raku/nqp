@@ -631,11 +631,19 @@ class QAST::MASTRegexCompiler {
             op('goto', $scanlabel),
             $looplabel,
             op('inc_i', %*REG<pos>),
-            op('gt_i', $ireg0, %*REG<pos>, %*REG<eos>),
-            op('if_i', $ireg0, %*REG<fail>),
-            op('bindattr_i', %*REG<cur>, %*REG<curclass>, sval('$!from'), %*REG<pos>, ival(-1)),
-            $scanlabel
         ];
+        if $node.list && $node.subtype ne 'ignorecase' {
+            my $lit := fresh_s();
+            nqp::push(@ins, op('const_s', $lit, sval($node[0])));
+            nqp::push(@ins, op('index_s', %*REG<pos>, %*REG<tgt>, $lit, %*REG<pos>));
+            nqp::push(@ins, op('eq_i', $ireg0, %*REG<pos>, %*REG<negone>));
+        }
+        else {
+            nqp::push(@ins, op('gt_i', $ireg0, %*REG<pos>, %*REG<eos>));
+        }
+        nqp::push(@ins, op('if_i', $ireg0, %*REG<fail>));
+        nqp::push(@ins, op('bindattr_i', %*REG<cur>, %*REG<curclass>, sval('$!from'), %*REG<pos>, ival(-1)));
+        nqp::push(@ins, $scanlabel);
         self.regex_mark(@ins, $looplabel_index, %*REG<pos>, %*REG<zero>);
         nqp::push(@ins, $donelabel);
         @ins
