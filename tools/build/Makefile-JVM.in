@@ -265,6 +265,10 @@ $(J_RUNNER): src/vm/jvm/runners/$(J_RUNNER)
 	$(CP) src/vm/jvm/runners/$(J_RUNNER) .
 	$(CHMOD) 755 $(J_RUNNER)
 
+j-runner-default: j-all
+	$(CP) $(J_RUNNER) nqp$(BAT)
+	$(CHMOD) 755 nqp$(BAT)
+
 $(P5QREGEX_JAR): $(ALL_OUTPUT) $(P5QREGEX_SOURCES)
 	$(MKPATH) $(J_STAGE2)
 	$(PERL) tools/build/gen-cat.pl jvm $(P5QREGEX_SOURCES) > $(J_STAGE2)/$(P5QREGEX_COMBINED)
@@ -284,9 +288,6 @@ j-bootstrap-files: $(J_STAGE2_OUTPUT)
 	$(CP) $(J_STAGE2)/$(NQP_JAR) $(J_STAGE0)
 
 ## testing
-
-t/*/*.t: j-all
-	prove -r -v --exec .@slash@$(J_RUNNER) $@
 
 j-test: j-all
 	prove -r --exec .@slash@$(J_RUNNER) t/nqp t/qregex t/p5regex t/qast t/serialization t/jvm t/nativecall

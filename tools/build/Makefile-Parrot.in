@@ -697,6 +697,11 @@ $(P_RUNNER)$(BAT): $(PARROT_BUILD_DIR)/$(NQP_EXE) gen/parrot/nqp_launcher
 $(PARROT_BUILD_DIR)/$(NQP_EXE): $(PARROT_BUILD_DIR)/$(NQP_PBC) $(PARROT_DLL_COPY)
 	cd $(PARROT_BUILD_DIR) && $(PBC_TO_EXE) -o$(NQP_EXE) $(NQP_PBC)
 
+p-runner-default: p-all
+	$(CP) $(PARROT_BUILD_DIR)/$(NQP_EXE) nqp$(EXE)
+	$(CHMOD) 755 nqp$(EXE)
+	$(CP) $(PARROT_BUILD_DIR)/*.pbc .
+
 $(P5QREGEX_PBC): $(PARROT_BUILD_DIR)/$(NQP_EXE) $(P5QREGEX_SOURCES)
 	$(PERL) tools/build/gen-cat.pl parrot $(P5QREGEX_SOURCES) > $(PARROT_BUILD_DIR)/$(P5QREGEX_COMBINED)
 	$(PARROT) --library=$(PARROT_BUILD_DIR) $(PARROT_BUILD_DIR)/$(NQP_PBC) \
@@ -1025,9 +1030,6 @@ p-bootstrap-files: $(STAGE2_PBCS) $(P_STAGE2)/$(CORE_SETTING_NQP)
 	$(PERL) tools/build/gen-bootstrap.pl $(P_STAGE2)/$(NQP_COMBINED_PIR) >src/vm/parrot/stage0/NQP-s0.pir
 
 ## testing
-
-t/*/*.t: p-all
-	prove -r -v --exec $(PARROT_BUILD_DIR)/$(NQP_EXE) $@
 
 p-test: p-all
 	prove -r --exec "$(P_RUNNER) --vmlibs=nqp_dyncall_ops" t/nqp t/parrot t/hll t/qregex t/p5regex t/qast t/serialization t/nativecall

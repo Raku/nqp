@@ -234,6 +234,10 @@ $(NQP_MOAR): $(M_STAGE2_OUTPUT)
 $(M_RUNNER): tools/build/gen-moar-runner.pl
 	$(PERL) tools/build/gen-moar-runner.pl "$(MOAR)"
 
+m-runner-default: m-all
+	$(CP) $(M_RUNNER) nqp$(BAT)
+	$(CHMOD) 755 nqp$(BAT)
+
 $(P5QREGEX_MOAR): $(P5QREGEX_SOURCES) $(NQP_MOAR) $(M_RUNNER)
 	$(MKPATH) $(M_STAGE2)/gen
 	$(PERL) tools/build/gen-cat.pl moar $(P5QREGEX_SOURCES) > $(M_STAGE2)/$(P5QREGEX_COMBINED)
@@ -241,9 +245,6 @@ $(P5QREGEX_MOAR): $(P5QREGEX_SOURCES) $(NQP_MOAR) $(M_RUNNER)
 	    $(M_STAGE2)/$(P5QREGEX_COMBINED)
 
 ## testing
-
-t/*/*.t: m-all
-	prove -r -v --exec ".@slash@$(M_RUNNER)" $@
 
 m-test: m-all
 	prove -r --exec ".@slash@$(M_RUNNER)" t/nqp t/qregex t/p5regex t/qast t/serialization
