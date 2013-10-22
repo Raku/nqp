@@ -1137,6 +1137,14 @@ Returns a 1 if the object has a truthy value, 0 otherwise.
 
 Returns a 1 if the object is of the given type, 0 otherwise.
 
+## null
+* `null_s()`
+
+`null_s` returns a null string value that can be stored in a native str.
+
+The value returned by `null_s` is VM dependant. Notably, it may stringify
+differently depending on the backend.
+
 ## jvmisnull `jvm`
 * `jvmisnull(Mu $obj)`
 
