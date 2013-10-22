@@ -75,16 +75,14 @@ class QRegex::P6Regex::Actions is HLL::Actions {
 
     method quantified_atom($/) {
         my $qast := $<atom>.ast;
-        my $quant := $<quantifier>;
-        if $quant {
+
+        my $sigmaybe := $<sigmaybe>.ast if $<sigmaybe>;
+        $qast := QAST::Regex.new(:rxtype<concat>, $qast, $sigmaybe) if $sigmaybe;
+
+        if $<quantifier> {
             $/.CURSOR.panic('Quantifier quantifies nothing')
                 unless $qast;
-
-            # Always capture sigspace before quantifier
-            my $sig  := $<sigmaybe>.ast if $<sigmaybe>;
-            $qast := QAST::Regex.new(:rxtype<concat>, $qast, $sig) if $sig;
-
-            my $ast := $quant[0].ast;
+            my $ast := $<quantifier>.ast;
             $ast.unshift($qast);
             $qast := $ast;
         }
@@ -93,22 +91,16 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                 $/.CURSOR.panic("'" ~ $<separator>[0]<septype> ~
                     "' many only be used immediately following a quantifier")
             }
-            $qast.push($<separator>[0].ast);
-            if $<separator>[0]<septype> eq '%%' {
+            $qast.push($<separator>.ast);
+            if $<separator><septype> eq '%%' {
                 $qast := QAST::Regex.new( :rxtype<concat>, $qast,
-                    QAST::Regex.new( :rxtype<quant>, :min(0), :max(1), $<separator>[0].ast ));
+                    QAST::Regex.new( :rxtype<quant>, :min(0), :max(1), $<separator>.ast ));
             }
         }
-        # Don't capture trailing sigspace in a $<var> = binding
-        unless $*VARDEF {
-            my $sig;
-            if $quant {
-                $sig := $<sigfinal>[0].ast if $<sigfinal>;
-            } else {
-                $sig := $<sigmaybe>.ast if $<sigmaybe>;
-            }
-            $qast := QAST::Regex.new(:rxtype<concat>, $qast, $sig) if $sig && $qast;
-        }
+
+        my $sigfinal := $<sigfinal>.ast if $<sigfinal>;
+        $qast := QAST::Regex.new(:rxtype<concat>, $qast, $sigfinal) if $sigfinal;
+
         if $qast {
             $qast.backtrack('r') if !$qast.backtrack && (%*RX<r> || $<backmod> && ~$<backmod>[0] eq ':');
             $qast.node($/);

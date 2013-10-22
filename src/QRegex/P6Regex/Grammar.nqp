@@ -148,8 +148,8 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     }
 
     token termish {
-        :my $*SIGOK  := False;
-        :my $*VARDEF := False;
+        :my $*SIGOK  := 0;
+        :my $*VARDEF := 0;
         <noun=.quantified_atom>+
     }
 
@@ -157,18 +157,25 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     token quantified_atom {
         <!rxstopper>
-        <atom> <sigmaybe>?
+        <atom>
         [
+        ||  <sigmaybe>?
             [
-            | <!rxstopper> <quantifier> <.SIGOK> <sigfinal=.sigmaybe>?
+            | <!rxstopper> <quantifier>
             | <?[:]> <backmod> <!alpha>
             ]
-            [ <separator> ]**0..1
-        ]**0..1
+            [ <!{$*VARDEF}> <.SIGOK> <sigfinal=.sigmaybe> ]?
+            [ <.ws> <separator> ]?
+        ||  [ <!{$*VARDEF}> <sigfinal=.sigmaybe> ]?
+        ]
+        { $*SIGOK := 0 }
     }
 
-    token separator {
-        $<septype>=['%''%'?] <normspace>**0..1 <quantified_atom>
+    rule separator {
+        $<septype>=['%''%'?]
+        :my $*VARDEF := 0;
+        :my $*SIGOK  := 0;
+        <quantified_atom>
     }
     
     token atom {
@@ -187,7 +194,6 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     token sigmaybe:sym<sigwhite> {
         <?{$*SIGOK}> <normspace>
-        { $*SIGOK := False }
     }
 
     proto token quantifier { <...> }
@@ -265,9 +271,9 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
         [
             <.ws> '=' <.ws>
-            {$*VARDEF := True}
+            { $*VARDEF := 1 }
             <quantified_atom>
-            {$*VARDEF := False}
+            { $*VARDEF := 0 }
         ]**0..1
         <.SIGOK>
     }
