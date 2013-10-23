@@ -605,7 +605,7 @@ Return titlecase copy of string.
 ## x
 * `x(str $str, int $count)`
 
-Return a string containing `$count` copies of the string.
+Return a new string containing `$count` copies of `$str`.
 
 # Conditional Opcodes
 
