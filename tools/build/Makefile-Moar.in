@@ -71,7 +71,7 @@ m-install: m-all
 	$(PERL) tools/build/install-moar-runner.pl $(PREFIX)
 
 # FIXME:
-M_CLEANUPS: *.moarvm  gen/moar/*
+M_CLEANUPS = *.moarvm  gen/moar/* $(M_RUNNER)
 
 m-clean:
 	$(RM_RF) $(M_CLEANUPS)
