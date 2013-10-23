@@ -30,38 +30,28 @@ If you don't have git installed, you can get a tarball or zip
 of NQP from github by visiting http://github.com/perl6/nqp/tree/master
 and clicking "Download".  Then unpack the tarball or zip.
 
+NQP can run on three different backends: Parrot, MoarVM and the Java Virtual
+Machine (JVM). Decide on which backends you want it to run, and configure and
+build it as follows:
+
 Once you have a copy of NQP, build it as follows:
 
     $ cd nqp
-    $ perl Configure.pl --gen-parrot
+    $ perl Configure.pl --backends=moar,parrot,jvm
     $ make
 
-This will create a "nqp" or "nqp.exe" executable in the
+If you don't have parrot installed, you can have Configure.pl generate one for
+you by passing the C<--gen-parrot> option to it as well.
+
+The C<make> step will create a "nqp" or "nqp.exe" executable in the
 current directory.  Programs can then be run from the build 
 directory using a command like:
 
     $ ./nqp hello.nqp
 
-The C<--gen-parrot> option above tells Configure.pl to automatically
-download and build the most appropriate version of Parrot into a
-local "parrot/" subdirectory, install that Parrot into the
-"parrot_install/" subdirectory, and use that for building NQP.
-It's okay to use the C<--gen-parrot> option on later invocations
-of Configure.pl; the configure system will re-build Parrot only
-if a newer version is needed for whatever version of Rakudo you're
-working with.
-
-You can use C<--parrot-config=/path/to/parrot_config> instead
-of C<--gen-parrot> to use an already installed Parrot for building
-NQP.  This installed Parrot must include its development
-environment; typically this is done via Parrot's C<make install>
-target or by installing prebuilt C<parrot-devel> and/or C<libparrot-dev>
-packages.  The version of the already installed Parrot must satisfy a
-minimum specified by the NQP being built -- Configure.pl will
-verify this for you.  Released versions of NQP always build
-against the latest release of Parrot; checkouts of the HEAD revision
-from github often require a version of Parrot that is newer than
-the most recent Parrot monthly release.
+By default, NQP searches for the parrot executable and installs to the
+directory C<./install>. You can change that with the C<--prefix> option to
+Configure.pl.
 
 Once built, NQP's C<make install> target will install NQP
 and its libraries into the Parrot installation that was used to

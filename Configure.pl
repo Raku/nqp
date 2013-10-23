@@ -39,7 +39,7 @@ MAIN: {
     # Deprecated --parrot-config option
     if ($options{'parrot-config'}) {
         sorry "The --parrot-config option has been removed.",
-              "Use --with-parrot to specify the parrot executable to use."
+              "Use --prefix to specify a directory in which parrot is installed.";
     }
 
     my $default_backend;
