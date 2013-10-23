@@ -46,6 +46,12 @@ VM-specific opcodes are denoted with a `jvm`, e.g. on the same line
 as the header. No annotation indicates this opcode should be supported on
 all nqp backends.
 
+Some individual opcodes may be marked with _Internal_ or _Deprecated_.
+Both of these indicate the opcodes are not intended to be used. Deprecated
+opcodes will eventually be removed from NQP. Internal opcodes are typically
+used at compile time to replace opcodes that take a variable number of
+arguments.
+
 # Arithmetic Opcodes
 
 ## abs
@@ -490,11 +496,9 @@ Return the position in `$haystack` at which `$needle` appears, or -1
 if `$needle` does not appear. Begin searching at position `$pos` if specified,
 or at 0, otherwise.
 
-## indexfrom
-* `indexfrom(str $haystack, str $needle, int $pos)`
+* `indexfrom(str $haystack, str $needle, int $pos)` _Internal_
 
-Return the position in `$haystack` at which `$needle` appears, or -1
-if `$needle` does not appear. Begin searching at position `$pos`.
+`index` is converted to this internal opcode by the compiler.
 
 ## iscclass
 * `iscclass(int $class, str $str, int $i)`
@@ -520,15 +524,10 @@ Return lowercase copy of string.
 Return the unicode codepoint of the first character in `$str`, or
 at the `$i`th character, if it's specified.
 
-## ordat
-* `ordat(str $str, int $i)`
+* `ordat(str $str, int $i)` _Internal_
+* `ordfirst(str $str)` _Internal_
 
-Return the unicode codepoint of the `$i`th character in `$str`
-
-## ordfirst
-* `ordfirst(str $str, int $i)`
-
-Return the unicode codepoint of the th character in `$str`
+`ord` is converted to these internal opcodes by the compiler.
 
 ## radix
 * `radix(int $radix, String $str, int $pos, int $flags)`
@@ -565,17 +564,10 @@ Searching backwards through the `$haystack`, return the position at which
 `$needle` appears, or -1 if it does not. Begin searching at `$pos` if
 specified, otherwise start from the last position.
 
-## rindexfrom
-* `rindexfrom(str $haystack, str $needle, int $pos)`
+* `rindexfrom(str $haystack, str $needle, int $pos)` _Internal_
+* `rindexfromend(str $haystack, str $needle)` _Internal_
 
-Searching backwards through the `$haystack`, starting at `$pos` return the
-position at which `$needle` appears, or -1 if it does not.
-
-## rindexfromend
-* `rindexfromend(str $haystack, str $needle)`
-
-Searching backwards through the `$haystack`, return the position at which
-`$needle` appears, or -1 if it does not.
+`rindex` is converted to these internal opcodes by the compiler.
 
 ## uc
 * `uc(str $str)`
@@ -592,14 +584,18 @@ If the original string begins or ends with the delimiter, the resulting
 array will begin or end with an empty element.
 
 ## substr
-* `substr(...)`
-* `substr2(str $str, int $position)`
-* `substr3(str $str, int $position, int $length)`
+* `substr(str $str, int $position)`
+* `substr(str $str, int $position, int $length)`
 
 Return the portion of the string starting at the given position.
 If `$length` is specified, only return that many characters. The
 numbered variants required the args specified - the unnumbered
 version may use either signature.
+
+* `substr2(str $str, int $position)` _Internal_
+* `substr3(str $str, int $position, int $length)` _Internal_
+
+`substr` is converted to these internal opcodes by the compiler.
 
 ## tc
 * `tc(str $str)`
@@ -875,12 +871,14 @@ specified environment variables. Returns a POSIX-style return value. Command
 is executed using an OS-appropriate shell (`sh -c` or `cmd /c`). Blocks
 until command is complete.
 
-## shell
-* `shell(str $cmd)`
+* `shell(str $cmd)` _Deprecated: use the three argument version_
 
 Same as the three argument version of `shell`, using the current directory and an empty environment.
 
-_Deprecated: use the three argument version_
+* `shell1(str $cmd)` _Internal, Deprecated_
+* `shell3(str $cmd, str $path, %env)` _Internal_
+
+`shell` is converted to these internal opcodes by the compiler.
 
 ## spawn
 * `spawn(@cmd, str $path, %env)`
