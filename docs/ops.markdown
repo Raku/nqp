@@ -46,6 +46,12 @@ VM-specific opcodes are denoted with a `jvm`, e.g. on the same line
 as the header. No annotation indicates this opcode should be supported on
 all nqp backends.
 
+Some individual opcodes may be marked with _Internal_ or _Deprecated_.
+Both of these indicate the opcodes are not intended to be used. Deprecated
+opcodes will eventually be removed from NQP. Internal opcodes are typically
+used at compile time to replace opcodes that take a variable number of
+arguments.
+
 # Arithmetic Opcodes
 
 ## abs
@@ -490,11 +496,9 @@ Return the position in `$haystack` at which `$needle` appears, or -1
 if `$needle` does not appear. Begin searching at position `$pos` if specified,
 or at 0, otherwise.
 
-## indexfrom
-* `indexfrom(str $haystack, str $needle, int $pos)`
+* `indexfrom(str $haystack, str $needle, int $pos)` _Internal_
 
-Return the position in `$haystack` at which `$needle` appears, or -1
-if `$needle` does not appear. Begin searching at position `$pos`.
+`index` is converted to this internal opcode by the compiler.
 
 ## iscclass
 * `iscclass(int $class, str $str, int $i)`
@@ -520,15 +524,10 @@ Return lowercase copy of string.
 Return the unicode codepoint of the first character in `$str`, or
 at the `$i`th character, if it's specified.
 
-## ordat
-* `ordat(str $str, int $i)`
+* `ordat(str $str, int $i)` _Internal_
+* `ordfirst(str $str)` _Internal_
 
-Return the unicode codepoint of the `$i`th character in `$str`
-
-## ordfirst
-* `ordfirst(str $str, int $i)`
-
-Return the unicode codepoint of the th character in `$str`
+`ord` is converted to these internal opcodes by the compiler.
 
 ## radix
 * `radix(int $radix, String $str, int $pos, int $flags)`
@@ -565,17 +564,10 @@ Searching backwards through the `$haystack`, return the position at which
 `$needle` appears, or -1 if it does not. Begin searching at `$pos` if
 specified, otherwise start from the last position.
 
-## rindexfrom
-* `rindexfrom(str $haystack, str $needle, int $pos)`
+* `rindexfrom(str $haystack, str $needle, int $pos)` _Internal_
+* `rindexfromend(str $haystack, str $needle)` _Internal_
 
-Searching backwards through the `$haystack`, starting at `$pos` return the
-position at which `$needle` appears, or -1 if it does not.
-
-## rindexfromend
-* `rindexfromend(str $haystack, str $needle)`
-
-Searching backwards through the `$haystack`, return the position at which
-`$needle` appears, or -1 if it does not.
+`rindex` is converted to these internal opcodes by the compiler.
 
 ## uc
 * `uc(str $str)`
@@ -592,14 +584,18 @@ If the original string begins or ends with the delimiter, the resulting
 array will begin or end with an empty element.
 
 ## substr
-* `substr(...)`
-* `substr2(str $str, int $position)`
-* `substr3(str $str, int $position, int $length)`
+* `substr(str $str, int $position)`
+* `substr(str $str, int $position, int $length)`
 
 Return the portion of the string starting at the given position.
 If `$length` is specified, only return that many characters. The
 numbered variants required the args specified - the unnumbered
 version may use either signature.
+
+* `substr2(str $str, int $position)` _Internal_
+* `substr3(str $str, int $position, int $length)` _Internal_
+
+`substr` is converted to these internal opcodes by the compiler.
 
 ## tc
 * `tc(str $str)`
@@ -609,7 +605,7 @@ Return titlecase copy of string.
 ## x
 * `x(str $str, int $count)`
 
-Return a string containing `$count` copies of the string.
+Return a new string containing `$count` copies of `$str`.
 
 # Conditional Opcodes
 
@@ -867,19 +863,22 @@ Output the given object to the filehandle.
 
 # External command Opcodes
 
-## shell1
-_Deprecated: use shell3_
-* `shell1(str $cmd)`
-
-Same as `shell3`, using the current directory and an empty environment.
-
-## shell3
-* `shell3(str $cmd, str $path, %env)`
+## shell
+* `shell(str $cmd, str $path, %env)`
 
 Using $path as the working directory, execute the given command using the
 specified environment variables. Returns a POSIX-style return value. Command
 is executed using an OS-appropriate shell (`sh -c` or `cmd /c`). Blocks
 until command is complete.
+
+* `shell(str $cmd)` _Deprecated: use the three argument version_
+
+Same as the three argument version of `shell`, using the current directory and an empty environment.
+
+* `shell1(str $cmd)` _Internal, Deprecated_
+* `shell3(str $cmd, str $path, %env)` _Internal_
+
+`shell` is converted to these internal opcodes by the compiler.
 
 ## spawn
 * `spawn(@cmd, str $path, %env)`
@@ -1136,6 +1135,17 @@ Returns a 1 if the object has a truthy value, 0 otherwise.
 * `istype(Mu $obj, Mu:T $obj)`
 
 Returns a 1 if the object is of the given type, 0 otherwise.
+
+## null
+* `null()`
+* `null_s()`
+
+Generate a null value.
+
+`null_s` returns a null string value that can be stored in a native str.
+
+The value returned by `null_s` is VM dependant. Notably, it may stringify
+differently depending on the backend.
 
 ## jvmisnull `jvm`
 * `jvmisnull(Mu $obj)`
@@ -1410,6 +1420,68 @@ variable. Same as the `:=` operator in NQP.
 
 # Miscellaneous Opcodes
 
+## const
+* `const()`
+
+Not actually an opcode, but a collection of several constants. Each of the
+constants below can be used in nqp as (e.g.) `nqp::const::CCLASS_ANY`. 
+
+    * CCLASS\_ANY
+    * CCLASS\_UPPERCASE
+    * CCLASS\_LOWERCASE
+    * CCLASS\_ALPHABETIC
+    * CCLASS\_NUMERIC
+    * CCLASS\_HEXADECIMAL
+    * CCLASS\_WHITESPACE
+    * CCLASS\_PRINTING
+    * CCLASS\_BLANK
+    * CCLASS\_CONTROL
+    * CCLASS\_PUNCTUATION
+    * CCLASS\_ALPHANUMERIC
+    * CCLASS\_NEWLINE
+    * CCLASS\_WORD
+
+    * HLL\_ROLE\_NONE
+    * HLL\_ROLE\_INT
+    * HLL\_ROLE\_NUM
+    * HLL\_ROLE\_STR
+    * HLL\_ROLE\_ARRAY
+    * HLL\_ROLE\_HASH
+    * HLL\_ROLE\_CODE
+
+    * CONTROL\_TAKE
+    * CONTROL\_LAST
+    * CONTROL\_NEXT
+    * CONTROL\_REDO
+    * CONTROL\_SUCCEED
+    * CONTROL\_PROCEED
+    * CONTROL\_WARN
+
+    * STAT\_EXISTS
+    * STAT\_FILESIZE
+    * STAT\_ISDIR
+    * STAT\_ISREG
+    * STAT\_ISDEV
+    * STAT\_CREATETIME
+    * STAT\_ACCESSTIME
+    * STAT\_MODIFYTIME
+    * STAT\_CHANGETIME
+    * STAT\_BACKUPTIME
+    * STAT\_UID
+    * STAT\_GID
+    * STAT\_ISLNK
+    * STAT\_PLATFORM\_DEV
+    * STAT\_PLATFORM\_INODE
+    * STAT\_PLATFORM\_MODE
+    * STAT\_PLATFORM\_NLINKS
+    * STAT\_PLATFORM\_DEVTYPE
+    * STAT\_PLATFORM\_BLOCKSIZE
+    * STAT\_PLATFORM\_BLOCKS
+
+    * TYPE\_CHECK\_CACHE\_DEFINITIVE
+    * TYPE\_CHECK\_CACHE\_THEN\_METHOD
+    * TYPE\_CHECK\_NEEDS\_ACCEPTS
+
 ## debugnoop
 * `debugnoop(Mu $a)`
 
@@ -1454,3 +1526,10 @@ time sleeping is spent.) Returns the passed in number.
 
 Return the time in seconds since January 1, 1970 UTC. `_i` variant returns
 an integral number of seconds, `_n` returns a fractional amount.
+
+# Native Call / Interoperability Opcodes
+
+## x\_posixerrno
+* `x_posixerrno()`
+
+Returns an int that corresponds to the value of POSIX's errno.
