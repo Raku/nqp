@@ -62,6 +62,7 @@ MAIN: {
         $default_backend = 'parrot';
     }
 
+    mkdir($options{'prefix'}) if $options{'prefix'} && $^O =~ /Win32/ && !-d $options{'prefix'};
     my $prefix      = ($options{'prefix'} && abs_path($options{'prefix'})) || cwd().'/install';
     $config{prefix} = $prefix;
 
