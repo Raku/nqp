@@ -99,3 +99,6 @@ NQP_LANG_DIR    = $(PREFIX)/languages/nqp
 NQP_LIB_DIR     = $(NQP_LANG_DIR)/lib
 PROVE           = prove
 
+# nqp::makefile <-- tells NQP::Configure to treat this file as a makefile,
+#                   performing win32 slash and makefile conversions
+
