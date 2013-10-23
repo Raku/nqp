@@ -1,0 +1,104 @@
+# common definitions used by all backends
+
+COMMON_HLL_SOURCES = \
+  src/HLL/Grammar.nqp \
+  src/HLL/Actions.nqp \
+  src/HLL/Compiler.nqp \
+  src/HLL/CommandLine.nqp \
+  src/HLL/World.nqp \
+  src/HLL/sprintf.nqp \
+
+HLL_COMBINED = NQPHLL.nqp
+
+CORE_SETTING_SOURCES = \
+  src/core/NativeTypes.nqp \
+  src/core/NQPRoutine.nqp \
+  src/core/NQPMu.nqp \
+  src/core/NQPCapture.nqp \
+  src/core/IO.nqp \
+  src/core/Regex.nqp \
+  src/core/Hash.nqp \
+  src/core/testing.nqp \
+  src/core/YOUAREHERE.nqp \
+
+CORE_SETTING_COMBINED = NQPCORE.setting
+
+QASTNODE_SOURCES = \
+  src/QAST/CompileTimeValue.nqp \
+  src/QAST/SpecialArg.nqp \
+  src/QAST/Node.nqp \
+  src/QAST/Regex.nqp \
+  src/QAST/IVal.nqp \
+  src/QAST/NVal.nqp \
+  src/QAST/SVal.nqp \
+  src/QAST/BVal.nqp \
+  src/QAST/WVal.nqp \
+  src/QAST/Want.nqp \
+  src/QAST/Var.nqp \
+  src/QAST/VarWithFallback.nqp \
+  src/QAST/Op.nqp \
+  src/QAST/VM.nqp \
+  src/QAST/Stmts.nqp \
+  src/QAST/Stmt.nqp \
+  src/QAST/Block.nqp \
+  src/QAST/Unquote.nqp \
+  src/QAST/CompUnit.nqp \
+  src/QAST/InlinePlaceholder.nqp \
+
+QASTNODE_COMBINED = QASTNode.nqp
+
+P5QREGEX_SOURCES = \
+  src/QRegex/P5Regex/Grammar.nqp \
+  src/QRegex/P5Regex/Actions.nqp \
+  src/QRegex/P5Regex/Compiler.nqp \
+
+P5QREGEX_COMBINED = NQPP5QRegex.nqp
+
+P6QREGEX_SOURCES  = \
+  src/QRegex/P6Regex/Grammar.nqp \
+  src/QRegex/P6Regex/Actions.nqp \
+  src/QRegex/P6Regex/Compiler.nqp \
+
+P6QREGEX_COMBINED = NQPP6QRegex.nqp
+
+QREGEX_SOURCES = \
+  src/QRegex/NFA.nqp \
+  src/QRegex/Cursor.nqp \
+
+QREGEX_COMBINED = QRegex.nqp
+
+COMMON_NQP_SOURCES  = \
+  src/NQP/World.nqp \
+  src/NQP/Grammar.nqp \
+  src/NQP/Optimizer.nqp \
+  src/NQP/Actions.nqp \
+  src/NQP/Compiler.nqp \
+
+NQP_COMBINED = NQP.nqp
+
+QAST_COMBINED = QAST.nqp
+
+NQP_MO_SOURCES = src/how/Archetypes.nqp src/how/RoleToRoleApplier.nqp \
+                 src/how/NQPConcreteRoleHOW.nqp src/how/RoleToClassApplier.nqp \
+                 src/how/NQPCurriedRoleHOW.nqp src/how/NQPParametricRoleHOW.nqp \
+                 src/how/NQPClassHOW.nqp src/how/NQPNativeHOW.nqp \
+                 src/how/NQPAttribute.nqp src/how/NQPModuleHOW.nqp \
+                 src/how/EXPORTHOW.nqp \
+
+NQP_MO_COMBINED = nqpmo.nqp
+
+PERL          = @perl@
+MKPATH        = $(PERL) -MExtUtils::Command -e mkpath
+CHMOD         = $(PERL) -MExtUtils::Command -e chmod
+CP            = $(PERL) -MExtUtils::Command -e cp
+RM_RF         = $(PERL) -MExtUtils::Command -e rm_rf
+
+PREFIX          = $(DESTDIR)@prefix@
+BIN_DIR         = $(PREFIX)/bin
+NQP_LANG_DIR    = $(PREFIX)/languages/nqp
+NQP_LIB_DIR     = $(NQP_LANG_DIR)/lib
+PROVE           = prove
+
+# nqp::makefile <-- tells NQP::Configure to treat this file as a makefile,
+#                   performing win32 slash and makefile conversions
+

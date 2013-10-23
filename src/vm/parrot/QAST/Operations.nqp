@@ -1168,7 +1168,11 @@ my %const_map := nqp::hash(
     'STAT_TYPE_DIRECTORY',     pir::const::STAT_TYPE_DIRECTORY,
     'STAT_TYPE_PIPE',          pir::const::STAT_TYPE_PIPE,
     'STAT_TYPE_LINK',          pir::const::STAT_TYPE_LINK,
-    'STAT_TYPE_DEVICE',        pir::const::STAT_TYPE_DEVICE
+    'STAT_TYPE_DEVICE',        pir::const::STAT_TYPE_DEVICE,
+
+    'TYPE_CHECK_CACHE_DEFINITIVE',  0,
+    'TYPE_CHECK_CACHE_THEN_METHOD', 1,
+    'TYPE_CHECK_NEEDS_ACCEPTS',     2,
 );
 QAST::Operations.add_core_op('const', -> $qastcomp, $op {
     if nqp::existskey(%const_map, $op.name) {
@@ -1902,7 +1906,6 @@ QAST::Operations.add_core_pirop_mapping('bitand_s', 'bands', 'Sss', :inlinable(1
 # string opcodes
 QAST::Operations.add_core_pirop_mapping('chars', 'length', 'Is', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('concat', 'concat', 'Sss', :inlinable(1));
-QAST::Operations.add_core_pirop_mapping('concat_s', 'concat', 'Sss', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('join', 'join', 'SsP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('split', 'split', 'Pss', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('chr', 'chr', 'Si', :inlinable(1));
