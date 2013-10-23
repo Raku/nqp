@@ -1,3 +1,4 @@
+BAT          = @bat@
 MOAR         = $(BIN_DIR)/moar
 M_RUNNER     = nqp-m$(BAT)
 

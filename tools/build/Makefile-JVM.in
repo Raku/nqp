@@ -1,3 +1,4 @@
+BAT    = @bat@
 JAVA   = java
 JAVAC  = javac
 JAR    = jar
