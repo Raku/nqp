@@ -867,6 +867,11 @@ Output the given object to the filehandle.
 
 # External command Opcodes
 
+## shell
+* `shell(...)`
+
+Wrapper that dispatches to `shell1` or `shell3` as appropriate.
+
 ## shell1
 _Deprecated: use shell3_
 * `shell1(str $cmd)`
