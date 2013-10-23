@@ -1462,3 +1462,10 @@ time sleeping is spent.) Returns the passed in number.
 
 Return the time in seconds since January 1, 1970 UTC. `_i` variant returns
 an integral number of seconds, `_n` returns a fractional amount.
+
+# Native Call / Interoperability Opcodes
+
+## x\_posixerrno
+* `x_posixerrno()`
+
+Returns an int that corresponds to the value of POSIX's errno.
