@@ -868,23 +868,19 @@ Output the given object to the filehandle.
 # External command Opcodes
 
 ## shell
-* `shell(...)`
-
-Wrapper that dispatches to `shell1` or `shell3` as appropriate.
-
-## shell1
-_Deprecated: use shell3_
-* `shell1(str $cmd)`
-
-Same as `shell3`, using the current directory and an empty environment.
-
-## shell3
-* `shell3(str $cmd, str $path, %env)`
+* `shell(str $cmd, str $path, %env)`
 
 Using $path as the working directory, execute the given command using the
 specified environment variables. Returns a POSIX-style return value. Command
 is executed using an OS-appropriate shell (`sh -c` or `cmd /c`). Blocks
 until command is complete.
+
+## shell
+* `shell(str $cmd)`
+
+Same as the three argument version of `shell`, using the current directory and an empty environment.
+
+_Deprecated: use the three argument version_
 
 ## spawn
 * `spawn(@cmd, str $path, %env)`
