@@ -426,7 +426,6 @@ P_CLEANUPS = \
   nqp_group.h \
   $(P_RUNNER)$(BAT) \
   $(PARROT_BUILD_DIR)/$(P_RUNNER)$(BAT) \
-  $(PARROT_BUILD_DIR)/nqp_launcher \
   $(REGEX_PBC) \
   $(HLL_PBC) \
   $(NQP_MO_PBC) \
