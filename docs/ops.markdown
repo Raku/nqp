@@ -1420,6 +1420,68 @@ variable. Same as the `:=` operator in NQP.
 
 # Miscellaneous Opcodes
 
+## const
+* `const()`
+
+Not actually an opcode, but a collection of several constants. Each of the
+constants below can be used in nqp as (e.g.) `nqp::const::CCLASS_ANY`. 
+
+    * CCLASS\_ANY
+    * CCLASS\_UPPERCASE
+    * CCLASS\_LOWERCASE
+    * CCLASS\_ALPHABETIC
+    * CCLASS\_NUMERIC
+    * CCLASS\_HEXADECIMAL
+    * CCLASS\_WHITESPACE
+    * CCLASS\_PRINTING
+    * CCLASS\_BLANK
+    * CCLASS\_CONTROL
+    * CCLASS\_PUNCTUATION
+    * CCLASS\_ALPHANUMERIC
+    * CCLASS\_NEWLINE
+    * CCLASS\_WORD
+
+    * HLL\_ROLE\_NONE
+    * HLL\_ROLE\_INT
+    * HLL\_ROLE\_NUM
+    * HLL\_ROLE\_STR
+    * HLL\_ROLE\_ARRAY
+    * HLL\_ROLE\_HASH
+    * HLL\_ROLE\_CODE
+
+    * CONTROL\_TAKE
+    * CONTROL\_LAST
+    * CONTROL\_NEXT
+    * CONTROL\_REDO
+    * CONTROL\_SUCCEED
+    * CONTROL\_PROCEED
+    * CONTROL\_WARN
+
+    * STAT\_EXISTS
+    * STAT\_FILESIZE
+    * STAT\_ISDIR
+    * STAT\_ISREG
+    * STAT\_ISDEV
+    * STAT\_CREATETIME
+    * STAT\_ACCESSTIME
+    * STAT\_MODIFYTIME
+    * STAT\_CHANGETIME
+    * STAT\_BACKUPTIME
+    * STAT\_UID
+    * STAT\_GID
+    * STAT\_ISLNK
+    * STAT\_PLATFORM\_DEV
+    * STAT\_PLATFORM\_INODE
+    * STAT\_PLATFORM\_MODE
+    * STAT\_PLATFORM\_NLINKS
+    * STAT\_PLATFORM\_DEVTYPE
+    * STAT\_PLATFORM\_BLOCKSIZE
+    * STAT\_PLATFORM\_BLOCKS
+
+    * TYPE\_CHECK\_CACHE\_DEFINITIVE
+    * TYPE\_CHECK\_CACHE\_THEN\_METHOD
+    * TYPE\_CHECK\_NEEDS\_ACCEPTS
+
 ## debugnoop
 * `debugnoop(Mu $a)`
 
