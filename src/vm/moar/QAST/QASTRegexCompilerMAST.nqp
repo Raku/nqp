@@ -637,6 +637,7 @@ class QAST::MASTRegexCompiler {
             nqp::push(@ins, op('const_s', $lit, sval($node[0])));
             nqp::push(@ins, op('index_s', %*REG<pos>, %*REG<tgt>, $lit, %*REG<pos>));
             nqp::push(@ins, op('eq_i', $ireg0, %*REG<pos>, %*REG<negone>));
+            release($lit, $MVM_reg_str);
         }
         else {
             nqp::push(@ins, op('gt_i', $ireg0, %*REG<pos>, %*REG<eos>));
