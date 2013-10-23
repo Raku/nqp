@@ -1139,7 +1139,10 @@ Returns a 1 if the object has a truthy value, 0 otherwise.
 Returns a 1 if the object is of the given type, 0 otherwise.
 
 ## null
+* `null()`
 * `null_s()`
+
+Generate a null value.
 
 `null_s` returns a null string value that can be stored in a native str.
 
