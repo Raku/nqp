@@ -30,6 +30,7 @@ grammar NQP::Grammar is HLL::Grammar {
         my $*INVOCANT_OK  := 0;
         my $*RETURN_USED  := 0;
         my $*CONTROL_USED := 0;
+        my $*IN_REGEX_ASSERTION := 0;
         my %*HANDLERS;
         self.comp_unit;
     }
@@ -702,7 +703,10 @@ grammar NQP::Grammar is HLL::Grammar {
 
 
     token infixish { <!infixstopper> <OPER=infix> }
-    token infixstopper { <?lambda> }
+    token infixstopper {
+        | <?{ $*IN_REGEX_ASSERTION }> <?[>]>
+        | <?lambda>
+    }
 
     token postcircumfix:sym<[ ]> {
         '[' <.ws> <EXPR> ']'
@@ -826,13 +830,18 @@ grammar NQP::Regex is QRegex::P6Regex::Grammar {
         $<zw>=[ <[?!]> <?[{]> ] <codeblock>
     }
 
+    token arglist {
+        :my $*IN_REGEX_ASSERTION := 1;
+        <arglist=.LANG('MAIN', 'arglist')>
+    }
+
     token assertion:sym<name> {
         <longname=.identifier>
             [
             | <?[>]>
             | '=' <assertion>
             | ':' <arglist>
-            | '(' <arglist=.LANG('MAIN','arglist')> ')'
+            | '(' <arglist> ')'
             | <.normspace> <nibbler>
             ]**0..1
     }
