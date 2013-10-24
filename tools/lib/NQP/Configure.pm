@@ -389,7 +389,7 @@ sub gen_parrot {
     $prefix =~ s{\\}{/}g;
 
     print "\nConfiguring Parrot ...\n";
-    my @cmd = ($^X, "Configure.pl", @opts, "--prefix=\"$prefix\"");
+    my @cmd = ($^X, "Configure.pl", @opts, "--prefix=$prefix");
     print "@cmd\n";
     system_or_die(@cmd);
 
@@ -417,7 +417,7 @@ sub gen_moar {
     my $prefix     = $options{'prefix'} || cwd()."/install";
     my $gen_moar   = $options{'gen-moar'};
     my @opts       = @{ $options{'moar-option'} || [] };
-#    push @opts, "--optimize";
+    push @opts, "--optimize";
     my $startdir   = cwd();
 
     my $moar_exe   = "$prefix/bin/moar$exe";
@@ -447,7 +447,7 @@ sub gen_moar {
 
     $prefix =~ s{\\}{/}g;
     print "\nConfiguring and building MoarVM ...\n";
-    my @cmd = ($^X, "Configure.pl", @opts, "--prefix=\"$prefix\"", '--make-install');
+    my @cmd = ($^X, "Configure.pl", @opts, "--prefix=$prefix", '--make-install');
     print "@cmd\n";
     system_or_die(@cmd);
 
