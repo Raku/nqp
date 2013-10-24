@@ -124,6 +124,7 @@ public final class NativeCallOps {
     }
 
     private static Object toJNAType(ThreadContext tc, SixModelObject o, ArgType target) {
+        o = Ops.decont(o, tc);
         switch (target) {
         case CHAR:
             return new Byte((byte) o.get_int(tc));
@@ -194,7 +195,13 @@ public final class NativeCallOps {
         case UTF8STR:
         case UTF16STR:
             /* TODO: Handle encodings. */
-            nqpobj.set_str(tc, (String) o);
+            if (o != null) {
+                nqpobj.set_str(tc, (String) o);
+            }
+            else {
+                nqpobj = type;
+            }
+            break;
         case CPOINTER: {
             CPointerInstance cpointer = (CPointerInstance) nqpobj;
             cpointer.pointer = (Pointer) o;

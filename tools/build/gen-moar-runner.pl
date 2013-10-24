@@ -9,7 +9,7 @@ use File::Spec;
 my ($moar) = @ARGV;
 
 if ($^O eq 'MSWin32') {
-    my $install_to = 'nqp.bat';    
+    my $install_to = 'nqp-m.bat';    
     open my $fh, ">", $install_to
         or die "Could not open $install_to: $!";
     print $fh '@ "' . $moar . '" nqp.moarvm %*' . "\n";
@@ -17,7 +17,7 @@ if ($^O eq 'MSWin32') {
         or die "Could not close $install_to: $!";
 }
 else {
-    my $install_to = 'nqp';
+    my $install_to = 'nqp-m';
     open my $fh, ">", $install_to
         or die "Could not open $install_to: $!";
     print $fh "#!/bin/sh\n";

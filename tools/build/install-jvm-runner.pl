@@ -16,7 +16,7 @@ my $jar_dir = File::Spec->catfile($prefix, 'languages', 'nqp', 'runtime');
 my $lib_dir = File::Spec->catfile($prefix, 'languages', 'nqp', 'lib');
 
 if ($^O eq 'MSWin32') {
-    my $install_to = File::Spec->catfile($prefix, 'bin', 'nqp.bat');
+    my $install_to = File::Spec->catfile($prefix, 'bin', 'nqp-j.bat');
     open my $fh, ">", $install_to
         or die "Could not open $install_to: $!";
     print $fh '@java -Xmx512m -Xbootclasspath/a:' . $jar_dir . '\\nqp-runtime.jar;' .
@@ -25,7 +25,7 @@ if ($^O eq 'MSWin32') {
         or die "Could not close $install_to: $!";
 }
 else {
-    my $install_to = File::Spec->catfile($prefix, 'bin', 'nqp');
+    my $install_to = File::Spec->catfile($prefix, 'bin', 'nqp-j');
     open my $fh, ">", $install_to
         or die "Could not open $install_to: $!";
     print $fh "#!/bin/sh\n";

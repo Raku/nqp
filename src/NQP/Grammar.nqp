@@ -46,8 +46,7 @@ grammar NQP::Grammar is HLL::Grammar {
 
     token ENDSTMT {
         [ 
-        | \h* $$ <.ws> <?MARKER('endstmt')>
-        | <.unv>? $$ <.ws> <?MARKER('endstmt')>
+        <.unv>? $$ <.ws> <?MARKER('endstmt')>
         ]?
     }
 

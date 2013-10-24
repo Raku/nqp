@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
@@ -800,7 +801,7 @@ public final class Ops {
         Path before_o = Paths.get(before);
         Path after_o = Paths.get(after);
         try {
-            Files.copy(before_o, after_o);
+            Files.copy( before_o, after_o, StandardCopyOption.REPLACE_EXISTING);
         }
         catch (Exception e) {
             die_s(IOExceptionMessages.message(e), tc);
