@@ -1925,6 +1925,7 @@ QAST::MASTOperations.add_core_moarop_mapping('masttocu', 'masttocu');
 QAST::MASTOperations.add_core_moarop_mapping('iscompunit', 'iscompunit');
 QAST::MASTOperations.add_core_moarop_mapping('compunitmainline', 'compunitmainline');
 QAST::MASTOperations.add_core_moarop_mapping('compunitcodes', 'compunitcodes');
+QAST::MASTOperations.add_core_moarop_mapping('backendconfig', 'backendconfig');
 
 sub resolve_condition_op($kind, $negated) {
     return $negated ??
