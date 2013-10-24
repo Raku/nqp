@@ -52,3 +52,4 @@ nqp-runtime.jar
 /nqp-m.bat
 /jvmconfig.properties
 *.moarvm
+MoarVM
