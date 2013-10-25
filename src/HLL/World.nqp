@@ -43,16 +43,10 @@ class HLL::World {
     # or between compile time and run time.
     has @!fixup_tasks;
     
-    # Address => slot mapping, so we can quickly look up existing objects
-    # in the context.
-    # XXX LEGACY
-    has %!addr_to_slot;
-    
     method BUILD(:$handle!, :$description = '<unknown>') {
         # Initialize attributes.
         $!sc              := nqp::createsc($handle);
         $!handle          := $handle;
-        %!addr_to_slot    := nqp::hash();
         @!fixup_tasks     := nqp::list();
         @!load_dependency_tasks := nqp::list();
         $!precomp_mode    := %*COMPILING<%?OPTIONS><precomp>;
@@ -63,22 +57,12 @@ class HLL::World {
         # Add to currently compiling SC stack.
         nqp::pushcompsc($!sc);
     }
-    
-    # Gets the slot for a given object. Dies if it is not in the context.
-    method slot_for_object($obj) {
-        my $slot := %!addr_to_slot{nqp::where($obj)};
-        unless nqp::defined($slot) {
-            nqp::die('slot_for_object called on object not in context');
-        }
-        $slot
-    }
 
     # Adds an object to the root set, along with a mapping.
     method add_object($obj) {
         nqp::setobjsc($obj, $!sc);
         my $idx := nqp::scobjcount($!sc);
         nqp::scsetobj($!sc, $idx, $obj);
-        %!addr_to_slot{nqp::where($obj)} := $idx;
         $idx
     }
     
