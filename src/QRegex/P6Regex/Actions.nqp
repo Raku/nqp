@@ -11,8 +11,11 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         );
     }
 
-    method nibbler($/) { make $<termaltseq>.ast }
+    method nibbler($/) { make $<termseq>.ast }
 
+    method termseq($/) {
+        make $<termaltseq>.ast if $<termaltseq>
+    }
     method termaltseq($/) {
         my $qast := $<termconjseq>[0].ast;
         if +$<termconjseq> > 1 {
@@ -72,10 +75,14 @@ class QRegex::P6Regex::Actions is HLL::Actions {
 
     method quantified_atom($/) {
         my $qast := $<atom>.ast;
+
+        my $sigmaybe := $<sigmaybe>.ast if $<sigmaybe>;
+        $qast := QAST::Regex.new(:rxtype<concat>, $qast, $sigmaybe) if $sigmaybe;
+
         if $<quantifier> {
             $/.CURSOR.panic('Quantifier quantifies nothing')
                 unless $qast;
-            my $ast := $<quantifier>[0].ast;
+            my $ast := $<quantifier>.ast;
             $ast.unshift($qast);
             $qast := $ast;
         }
@@ -84,14 +91,20 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                 $/.CURSOR.panic("'" ~ $<separator>[0]<septype> ~
                     "' many only be used immediately following a quantifier")
             }
-            $qast.push($<separator>[0].ast);
-            if $<separator>[0]<septype> eq '%%' {
+            $qast.push($<separator>.ast);
+            if $<separator><septype> eq '%%' {
                 $qast := QAST::Regex.new( :rxtype<concat>, $qast,
-                    QAST::Regex.new( :rxtype<quant>, :min(0), :max(1), $<separator>[0].ast ));
+                    QAST::Regex.new( :rxtype<quant>, :min(0), :max(1), $<separator>.ast ));
             }
         }
-        $qast.backtrack('r') if $qast && !$qast.backtrack &&
-            (%*RX<r> || $<backmod> && ~$<backmod>[0] eq ':');
+
+        my $sigfinal := $<sigfinal>.ast if $<sigfinal>;
+        $qast := QAST::Regex.new(:rxtype<concat>, $qast, $sigfinal) if $sigfinal;
+
+        if $qast {
+            $qast.backtrack('r') if !$qast.backtrack && (%*RX<r> || $<backmod> && ~$<backmod> eq ':');
+            $qast.node($/);
+        }
         make $qast;
     }
     
@@ -108,6 +121,15 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             $qast.subtype('ignorecase') if %*RX<i>;
             make $qast;
         }
+    }
+
+    method sigmaybe:sym<sigwhite>($/) {
+        make QAST::Regex.new(
+                :rxtype<subrule>,
+                :subtype<method>,
+                :node($/),
+                :name<ws>,
+                QAST::Node.new(QAST::SVal.new( :value('ws') )) );
     }
 
     method quantifier:sym<*>($/) {
@@ -136,14 +158,6 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         }
         $qast := QAST::Regex.new( :rxtype<quant>, :min($min), :max($max), :node($/) );
         make backmod($qast, $<backmod>);
-    }
-
-    method metachar:sym<ws>($/) {
-        my $qast := %*RX<s>
-                    ?? QAST::Regex.new(:rxtype<ws>, :subtype<method>, :node($/),
-                            QAST::Node.new(QAST::SVal.new( :value('ws') )))
-                    !! 0;
-        make $qast;
     }
 
     method metachar:sym<[ ]>($/) {
@@ -635,11 +649,6 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             else {
                 $/.CURSOR.panic("Internal modifier strings must be literals");
             }
-        }
-        else {
-            my $n := $<n>[0] gt '' ?? +$<n>[0] !! 1;
-            %*RX{ ~$<mod_ident><sym> } := $n;
-            make 0;
         }
     }
 
