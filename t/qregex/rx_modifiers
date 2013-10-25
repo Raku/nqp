@@ -73,26 +73,26 @@ ab [:ignorecase cd ] ef		aBCDef	n	ignorecase, lexical (:ignorecase)
 :s bcd			a bcdef		y	sigspace (:s)
 # todo :pugs<feature>
 :s bcd			a bcd ef	y	sigspace (:s)
-:s bcd			abcdef		n	sigspace (:s)
-:s bcd			abcd ef		n	sigspace (:s)
+:s bcd			abcdef		y	sigspace (:s)
+:s bcd			abcd ef		y	sigspace (:s)
 :s bcd			ab cdef		n	sigspace (:s)
 # todo :pugs<feature>
 :s b c d		a b c d ef	y	sigspace (:s)
 # todo :pugs<feature>
 :s b c d		a b c def	y	sigspace (:s)
-:s b c d		ab c d ef	n	sigspace (:s)
+:s b c d		ab c d ef	y	sigspace (:s)
 :s b c d		a bcdef		n	sigspace (:s)
 :s b c d		abcdef		n	sigspace (:s)
 # todo :pugs<feature>
 :sigspace bcd		a bcdef		y	sigspace (:sigspace)
 # todo :pugs<feature>
 :sigspace bcd		a bcd ef	y	sigspace (:sigspace)
-:sigspace bcd		abcdef		n	sigspace (:sigspace)
+:sigspace bcd		abcdef		y	sigspace (:sigspace)
 # todo :pugs<feature>
 :sigspace b c d		a b c d ef	y	sigspace (:sigspace)
 # todo :pugs<feature>
 :sigspace b c d		a b c def	y	sigspace (:sigspace)
-:sigspace b c d		ab c d ef	n	sigspace (:sigspace)
+:sigspace b c d		ab c d ef	y	sigspace (:sigspace)
 # todo :pugs<feature>
 :s(1) b c [:s(0) d e f ]	a b c def	y	sigspace, lexical repetition (:s)
 :s b c [:!s d e f ]	a b c def	y	sigspace, lexical repetition (:s)
