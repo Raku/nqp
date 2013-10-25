@@ -16,7 +16,7 @@ my $lib_dir = File::Spec->catfile($prefix, 'languages', 'nqp', 'lib');
 my $nqp_mvm = File::Spec->catfile($prefix, 'languages', 'nqp', 'lib', 'nqp.moarvm');
 
 if ($^O eq 'MSWin32') {
-    my $install_to = File::Spec->catfile($prefix, 'bin', 'nqp.bat');
+    my $install_to = File::Spec->catfile($prefix, 'bin', 'nqp-m.bat');
     my $moar       = File::Spec->catfile($prefix, 'bin', 'moar.exe');
     open my $fh, ">", $install_to
         or die "Could not open $install_to: $!";
@@ -25,7 +25,7 @@ if ($^O eq 'MSWin32') {
         or die "Could not close $install_to: $!";
 }
 else {
-    my $install_to = File::Spec->catfile($prefix, 'bin', 'nqp');
+    my $install_to = File::Spec->catfile($prefix, 'bin', 'nqp-m');
     my $moar       = File::Spec->catfile($prefix, 'bin', 'moar');
     open my $fh, ">", $install_to
         or die "Could not open $install_to: $!";

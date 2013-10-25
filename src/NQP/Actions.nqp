@@ -1773,6 +1773,8 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
         }
         make $qast;
     }
+
+    method arglist($/) { make $<arglist>.ast }
     
     method arg($/) {
         make $<quote_EXPR>.ast;

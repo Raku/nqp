@@ -8,7 +8,7 @@ use Text::ParseWords;
 use Getopt::Long;
 use Cwd qw/abs_path cwd/;
 use lib "tools/lib";
-use NQP::Configure qw(cmp_rev read_parrot_config
+use NQP::Configure qw(cmp_rev read_parrot_config gen_moar
                       fill_template_file fill_template_text
                       slurp system_or_die verify_install sorry gen_parrot);
 
@@ -27,7 +27,7 @@ MAIN: {
     GetOptions(\%options, 'help!', 'prefix=s',
                'with-parrot=s', 'gen-parrot:s',
                'make-install!', 'makefile-timing!',
-               'backends=s',
+               'backends=s', 'gen-moar:s',
                'parrot-config=s', 'parrot-option=s@');
 
     # Print help if it's requested
@@ -56,7 +56,15 @@ MAIN: {
             $backends{$be} = 1;
         }
     }
-    else {
+    if (defined $options{'gen-parrot'}) {
+        $backends{parrot} = 1;
+        $default_backend ||= 'parrot';
+    }
+    if (defined $options{'gen-moar'}) {
+        $backends{moar} = 1;
+        $default_backend ||= 'moar';
+    }
+    unless (%backends) {
         # TODO: come up with more sensible defaults
         $backends{parrot} = 1;
         $default_backend = 'parrot';
@@ -197,22 +205,15 @@ MAIN: {
     }
     if ($backends{moar}) {
         my @errors;
-        my $moar_path = "$prefix${slash}bin${slash}moar" . ($^O =~ /MSWin32/ ? '.exe' : '');
-        my @moar_info = `$moar_path --help`;
-        my $moar_found = 0;
-        for (@moar_info) {
-            if (/USAGE: moar/) {
-                $moar_found = 1;
-                last;
-            }
-        }
-        if (!$moar_found) {
+        my ($moar_want) = split(' ', slurp('tools/build/MOAR_REVISION'));
+        my $moar_path = gen_moar($moar_want, %config, %options);
+        if (!$moar_path) {
             push @errors,
-                "No MoarVM (moar executable) found using the --prefix";
+                "No suitable MoarVM (moar executable) found using the --prefix";
         }
         sorry(@errors) if @errors;
         $config{'make'}   = $^O eq 'MSWin32' ? 'nmake' : 'make';
-        $config{'runner'} = $^O eq 'MSWin32' ? 'nqp.bat' : 'nqp';
+        $config{moar} = $moar_path;
         fill_template_file(
             'tools/build/Makefile-Moar.in',
             $MAKEFILE,

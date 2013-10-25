@@ -36,6 +36,7 @@ my @clo := $nqpcomp.commandline_options();
 $nqpcomp.addstage('classname', :after<start>);
 #?endif
 #?if moar
+@clo.push('vmlibs=s');
 @clo.push('bootstrap');
 #?endif
 

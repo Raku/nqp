@@ -489,6 +489,7 @@ class NQP::World is HLL::World {
     
     # Adds libraries that NQP code depends on.
     method libs() {
+#?if parrot
         # Need to load the NQP dynops/dympmcs, plus any extras requested.
         my @loadlibs := ['nqp_group', 'nqp_ops', 'nqp_bigint_ops', 'trans_ops', 'io_ops'];
         if %*COMPILING<%?OPTIONS><vmlibs> {
@@ -496,11 +497,30 @@ class NQP::World is HLL::World {
                 @loadlibs.push($_);
             }
         }
-        QAST::VM.new(
-            loadlibs => @loadlibs,
-            jvm => QAST::Op.new( :op('null') ),
-            moar => QAST::Op.new( :op('null') )
-        );
+        QAST::VM.new( :@loadlibs );
+#?endif
+#?if jvm
+        QAST::Op.new( :op('null') )
+#?endif
+#?if moar
+        my $libs := QAST::Stmts.new();
+        if %*COMPILING<%?OPTIONS><vmlibs> {
+            for nqp::split(',', %*COMPILING<%?OPTIONS><vmlibs>) {
+                my @bits := nqp::split('=', $_);
+                $libs.push(QAST::VM.new(
+                    :moarop('loadlib'),
+                    QAST::SVal.new( :value(@bits[0]) ),
+                    QAST::SVal.new( :value(@bits[0]) )
+                ));
+                $libs.push(QAST::VM.new(
+                    :moarop('loadext'),
+                    QAST::SVal.new( :value(@bits[0]) ),
+                    QAST::SVal.new( :value(@bits[1]) )
+                ));
+            }
+        }
+        $libs
+#?endif
     }
     
     # Adds some initial tasks.

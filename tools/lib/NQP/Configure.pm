@@ -10,10 +10,11 @@ our @EXPORT_OK = qw(sorry slurp system_or_die
                     read_parrot_config read_config
                     fill_template_file fill_template_text 
                     git_checkout
-                    verify_install
+                    verify_install gen_moar
                     gen_nqp gen_parrot);
 
 our $exe = $^O eq 'MSWin32' ? '.exe' : '';
+our $bat = $^O eq 'MSWin32' ? '.bat' : '';
 
 our @required_parrot_files = qw(
     @bindir@/parrot@exe@
@@ -25,14 +26,16 @@ our @required_parrot_files = qw(
 );
 
 our @required_nqp_files = qw(
-    @bindir@/nqp@exe@
+    @bindir@/nqp-p@exe@
 );
 
 our $nqp_git = 'http://github.com/perl6/nqp.git';
 our $par_git = 'http://github.com/parrot/parrot.git';
+our $moar_git= 'https://github.com/MoarVM/MoarVM.git';
 
 our $nqp_push = 'git@github.com:perl6/nqp.git';
 our $par_push = 'git@github.com:parrot/parrot.git';
+our $moar_push= 'git@github.com:MoarVM/MoarVM.git';
 
 sub sorry {
     my @msg = @_;
@@ -82,11 +85,12 @@ sub cmp_rev {
 sub read_config {
     my @config_src = @_;
     my %config = ();
+    local $_;
     for my $file (@config_src) {
         no warnings;
         if (open my $CONFIG, '-|', "$file --show-config") {
             while (<$CONFIG>) {
-                if (/^([\w:]+)=(.*)/) { $config{$1} = $2 }
+                if (/^([^\s=]+)=(.*)/) { $config{$1} = $2 }
             }
             close($CONFIG);
         }
@@ -264,61 +268,84 @@ sub gen_nqp {
     my $nqp_want = shift;
     my %options  = @_;
 
+    my $backends    = $options{'backends'};
     my $gen_nqp     = $options{'gen-nqp'};
-    my $with_parrot = $options{'with-parrot'};
     my $gen_parrot  = $options{'gen-parrot'};
     my $prefix      = $options{'prefix'} || cwd().'/install';
     my $startdir    = cwd();
 
     my $PARROT_REVISION = 'nqp/tools/build/PARROT_REVISION';
 
-    my %config;
-    my $nqp_exe;
-    if ($with_parrot) {
-        %config = read_parrot_config($with_parrot)
-            or die "Unable to read parrot configuration from $with_parrot\n";
-        $prefix  = $config{'parrot::prefix'};
-        $nqp_exe = fill_template_text('@bindir@/nqp@ext@', %config);
-        %config = read_config($nqp_exe);
+    my (%impls, %need);
+
+    if ($backends =~ /parrot/) {
+        my %c = read_parrot_config("$prefix/bin/parrot");
+
+        if (%c) {
+            my $bin = fill_template_text('@bindir@/nqp-p@ext@', %c);
+            $impls{parrot}{bin} = $bin;
+            %c  = read_config($bin);
+            my $nqp_have = $c{'nqp::version'};
+            my $nqp_ok   = $nqp_have && cmp_rev($nqp_have, $nqp_want) >= 0;
+            if ($nqp_ok) {
+                $impls{parrot}{config} = \%c;
+            }
+            else {
+                $need{parrot} = 1;
+            }
+        }
+        else {
+            $need{parrot} = 1;
+        }
     }
-    elsif ($prefix) {
-        $nqp_exe = "$prefix/bin/nqp$exe";
-        %config = read_config($nqp_exe);
+    for my $b (qw/jvm moar/) {
+        if ($backends =~ /$b/) {
+            my $postfix = substr $b, 0, 1;
+            my $bin = "$prefix/bin/nqp-$postfix$bat";
+            $impls{$b}{bin} = $bin;
+            my %c = read_config($bin);
+            my $nqp_have = $c{'nqp::version'} || '';
+            my $nqp_ok   = $nqp_have && cmp_rev($nqp_have, $nqp_want) >= 0;
+            if ($nqp_ok) {
+                $impls{$b}{config} = \%c;
+            }
+            else {
+                $need{$b} = 1;
+            }
+        }
     }
 
-    my $nqp_have = $config{'nqp::version'} || '';
-    my $nqp_ok   = $nqp_have && cmp_rev($nqp_have, $nqp_want) >= 0;
-    if ($gen_nqp) {
-        my $nqp_repo = git_checkout($nqp_git, 'nqp', $gen_nqp, $nqp_push);
-        $nqp_ok = $nqp_have eq $nqp_repo;
-    }
-    elsif (!$nqp_ok || defined $gen_parrot && !-f $PARROT_REVISION) {
+    return %impls unless %need;
+
+    if (defined $gen_nqp || defined $gen_parrot) {
         git_checkout($nqp_git, 'nqp', $nqp_want, $nqp_push);
     }
 
-    if (defined $gen_parrot) {
+    if ($need{parrot} && defined $gen_parrot) {
         my ($par_want) = split(' ', slurp($PARROT_REVISION));
-        $with_parrot = gen_parrot($par_want, %options, prefix => $prefix);
-        %config = read_parrot_config($with_parrot);
-    }
-    elsif (!%config) {
-        %config = read_parrot_config("$prefix/bin/parrot$exe", "parrot$exe");
-        $with_parrot = fill_template_text('@bindir@/parrot@exe@', %config);
+        my $parrot = gen_parrot($par_want, %options, prefix => $prefix);
+        my %c = read_parrot_config($parrot);
+        $impls{parrot}{bin} = fill_template_text('@bindir@/nqp-p@ext@', %c);
+        $impls{parrot}{config} = \%c;
     }
 
-    if ($nqp_ok && -M $nqp_exe < -M $with_parrot) {
-        print "$nqp_exe is NQP $nqp_have.\n";
-        return $nqp_exe;
-    }
+    return %impls unless defined($gen_nqp) || defined($gen_parrot);
 
-    my @cmd = ($^X, 'Configure.pl', "--with-parrot=\"$with_parrot\"",
-               "--make-install");
+    my $backends_to_build = join ',', sort keys %need;
+    my @cmd = ($^X, 'Configure.pl', "--prefix=$prefix",
+               "--backends=$backends", "--make-install");
     print "Building NQP ...\n";
     chdir("$startdir/nqp");
     print "@cmd\n";
     system_or_die(@cmd);
     chdir($startdir);
-    return fill_template_text('@bindir@/nqp@exe@', %config);
+
+    for my $k (keys %need) {
+        my %c = read_config($impls{$k}{bin});
+        %c = (%{ $impls{$k}{config} || {} }, %c);
+        $impls{$k}{config} = \%c;
+    }
+    return %impls;
 }
 
 
@@ -362,7 +389,7 @@ sub gen_parrot {
     $prefix =~ s{\\}{/}g;
 
     print "\nConfiguring Parrot ...\n";
-    my @cmd = ($^X, "Configure.pl", @opts, "--prefix=\"$prefix\"");
+    my @cmd = ($^X, "Configure.pl", @opts, "--prefix=$prefix");
     print "@cmd\n";
     system_or_die(@cmd);
 
@@ -381,6 +408,52 @@ sub gen_parrot {
 
     print "Parrot installed.\n";
     return fill_template_text('@bindir@/parrot@exe@', %config);
+}
+
+sub gen_moar {
+    my $moar_want = shift;
+    my %options  = @_;
+
+    my $prefix     = $options{'prefix'} || cwd()."/install";
+    my $gen_moar   = $options{'gen-moar'};
+    my @opts       = @{ $options{'moar-option'} || [] };
+    push @opts, "--optimize";
+    my $startdir   = cwd();
+
+    my $moar_exe   = "$prefix/bin/moar$exe";
+    my $moar_have  = qx{ $moar_exe --version };
+    if ($moar_have) {
+        $moar_have = $moar_have =~ /version (\S+)/ ? $1 : undef;
+    }
+
+    my $moar_ok   = $moar_have && cmp_rev($moar_have, $moar_want) >= 0;
+    if ($moar_ok) {
+        print "Found $moar_exe version $moar_have, which is new enough.\n";
+        return $moar_exe;
+    }
+    elsif ($moar_have) {
+        print "Found $moar_exe version $moar_have, which is too old.\n";
+    }
+
+    return unless defined $gen_moar;
+
+    my $moar_repo = git_checkout($moar_git, 'MoarVM', $gen_moar || $moar_want, $moar_push);
+
+    unless (cmp_rev($moar_repo, $moar_want) >= 0) {
+        die "You asked me to build $gen_moar, but $moar_repo is not new enough to satisfy version $moar_want\n";
+    }
+
+    chdir("$startdir/MoarVM") or die $!;
+
+    $prefix =~ s{\\}{/}g;
+    print "\nConfiguring and building MoarVM ...\n";
+    my @cmd = ($^X, "Configure.pl", @opts, "--prefix=$prefix", '--make-install');
+    print "@cmd\n";
+    system_or_die(@cmd);
+
+    chdir($startdir);
+
+    return $moar_exe;
 }
 
 

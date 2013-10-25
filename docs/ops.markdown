@@ -977,6 +977,89 @@ on failure.
 Delete the given directory $path. Returns 0 on success, -2 if the
 directory didn't exist. May throw an exception.
 
+## stat
+* `stat(str $path, int $code)`
+
+Given a path and a code, return an int describing that path. Any of
+these variants may throw an exception if the platform does not support
+them. (JVM does not support `STAT_PLATFORM_BLOCKSIZE` or
+`STAT_PLATFORM_BLOCKS`).
+
+    * `nqp::const::STAT_EXISTS` 
+
+Returns 1 if the path exists, 0 otherwise.
+
+    * `nqp::const::STAT_FILESIZE` 
+
+Returns the size of the file in bytes.
+
+    * `nqp::const::STAT_ISDIR`
+
+Returns 1 if the path is a directory, 0 otherwise, -1 if an exception occurred
+processing the request.
+
+    * `nqp::const::STAT_ISREG`
+
+Returns 1 if the path is a regular file, 0 otherwise, -1 if an exception
+occurred processing the request.
+
+    * `nqp::const::STAT_ISDEV`
+
+Returns 1 if the path is a special file, 0 otherwise, -1 if an exception
+occurred processing the request.
+
+    * `nqp::const::STAT_ISLNK`
+
+Returns 1 if the path is a symbol link, 0 otherwise, -1 if an exception occurred
+processing the request.
+
+    * `nqp::const::STAT_CREATETIME`
+    * `nqp::const::STAT_ACCESSTIME`
+    * `nqp::const::STAT_MODIFYTIME`
+    * `nqp::const::STAT_CHANGETIME`
+
+Returns respective time attribute in seconds since epoch, or -1 if
+an exception occurred.
+
+    * `nqp::const::STAT_BACKUPTIME`
+
+Returns -1. 
+
+    * `nqp::const::STAT_GID`
+    * `nqp::const::STAT_UID`
+
+Returns the user id and group id of the path, respectively. Returns -1 if
+an exception occurred.
+
+    * `nqp::const::STAT_PLATFORM_DEV`
+
+Returns the device number of filesystem associated with the path.
+Returns -1 if an exception occurred.
+
+    * `nqp::const::STAT_PLATFORM_INODE`
+
+Returns the inode. Returns -1 if an exception occurred.
+
+    * `nqp::const::STAT_PLATFORM_MODE`
+
+Returns unix style mode. Returns -1 if an exception occurred.
+
+    * `nqp::const::STAT_PLATFORM_NLINKS`
+
+Returns number of hard links to the path. Returns -1 if an exception occurred.
+
+    * `nqp::const::STAT_PLATFORM_NLINKS`
+
+Returns the device identifier.  Returns -1 if an exception occurred.
+
+    * `nqp::const::STAT_PLATFORM_BLOCKSIZE`
+
+Returns preferred I/O size in bytes for interacting with the file.
+
+    * `nqp::const::STAT_PLATFORM_BLOCKS`
+
+Returns number of system-specific blocks allocated on disk.
+
 ## symlink
 * `symlink(str $before, str $after)`
 
