@@ -14,7 +14,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     method nibbler($/) { make $<termseq>.ast }
 
     method termseq($/) {
-        make $<termaltseq>.ast
+        make $<termaltseq>.ast if $<termaltseq>
     }
     method termaltseq($/) {
         my $qast := $<termconjseq>[0].ast;
@@ -102,7 +102,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         $qast := QAST::Regex.new(:rxtype<concat>, $qast, $sigfinal) if $sigfinal;
 
         if $qast {
-            $qast.backtrack('r') if !$qast.backtrack && (%*RX<r> || $<backmod> && ~$<backmod>[0] eq ':');
+            $qast.backtrack('r') if !$qast.backtrack && (%*RX<r> || $<backmod> && ~$<backmod> eq ':');
             $qast.node($/);
         }
         make $qast;

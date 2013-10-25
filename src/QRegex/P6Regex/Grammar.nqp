@@ -89,6 +89,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         }
         <.ws>
         [
+          <!rxstopper>
           [
           |  '||' { $*SEQ := 1; }
           |  '|'
@@ -120,7 +121,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     # get < || && | & > infixes using by EXPR in nibbler
     token termseq {
         || <termaltseq>
-        || <?before <stopper> | <[&|~]> > <.throw_null_pattern>
+        || <?before <rxstopper> | <[&|~]> > <.throw_null_pattern>
         || <?before <infixstopper> > <.throw_null_pattern> # XXX Check if unmatched bracket
         || $$ <.panic: "Regex not terminated">
         || (\W) { self.throw_unrecognized_metachar: ~$/[0] }
@@ -129,22 +130,22 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     token termaltseq {
         <termconjseq>
-        [ '||' <.ws> [  { $*SEQ := 1; } <termconjseq> || <.throw_null_pattern> ] ]*
+        [ <!infixstopper> '||' <.ws> { $*SEQ := 1; } <termconjseq> ]*
     }
 
     token termconjseq {
         <termalt>
-        [ '&&' <.ws> [ { $*SEQ := 0; } <termalt> || <.throw_null_pattern> ] ]*
+        [ <!infixstopper> '&&' <.ws> { $*SEQ := 0; } <termalt> ]*
     }
 
     token termalt {
         <termconj>
-        [ '|' <![|]> <.ws> [ { $*SEQ := 0; } <termconj> || <.throw_null_pattern> ] ]*
+        [ <!infixstopper> '|' <![|]> <.ws> { $*SEQ := 0; } <termconj> ]*
     }
 
     token termconj {
         <termish>
-        [ '&' <![&]> <.ws> [ { $*SEQ := 0; } <termish> || <.throw_null_pattern> ] ]*
+        [ <!infixstopper> '&' <![&]> <.ws> { $*SEQ := 0; } <termish> ]*
     }
 
     token termish {
