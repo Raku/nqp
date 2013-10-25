@@ -98,7 +98,7 @@ j-install: j-all
 	$(CP) $(P5QREGEX_JAR) $(NQP_LIB_DIR)
 	$(CP) $(EVAL_CLIENT) $(BIN_DIR)
 	$(CHMOD) 0755 $(BIN_DIR)/eval-client.pl
-	$(PERL) tools/build/install-jvm-runner.pl $(PREFIX)
+	$(PERL) tools/build/install-jvm-runner.pl @prefix@
 
 $(RUNTIME_JAR): $(RUNTIME_JAVAS) tools/build/gen-jvm-properties.pl
 	$(PERL) -MExtUtils::Command -e mkpath bin
