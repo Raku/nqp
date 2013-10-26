@@ -1327,8 +1327,8 @@ class QAST::MASTCompiler {
 }
 
 # Register as the QAST compiler.
-if nqp::isnull(nqp::getcomp('qast')) {
-    nqp::bindcomp('qast', QAST::MASTCompiler);
+if nqp::isnull(nqp::getcomp('QAST')) {
+    nqp::bindcomp('QAST', QAST::MASTCompiler);
 }
 
 class MASTBytecodeAssembler {
