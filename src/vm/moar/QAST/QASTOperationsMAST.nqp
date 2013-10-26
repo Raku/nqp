@@ -1957,7 +1957,7 @@ QAST::MASTOperations.add_core_moarop_mapping('getenvhash', 'getenvhash');
 QAST::MASTOperations.add_core_moarop_mapping('shell', 'shell');
 QAST::MASTOperations.add_core_moarop_mapping('rand_i', 'rand_i');
 QAST::MASTOperations.add_core_moarop_mapping('rand_n', 'rand_n');
-QAST::MASTOperations.add_core_moarop_mapping('srand', 'srand');
+QAST::MASTOperations.add_core_moarop_mapping('srand', 'srand', 0);
 
 # MoarVM-specific compilation ops
 QAST::MASTOperations.add_core_moarop_mapping('masttofile', 'masttofile', 2);
