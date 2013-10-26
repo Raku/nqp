@@ -519,6 +519,7 @@ class NQP::World is HLL::World {
                 ));
             }
         }
+        self.add_fixup_task(:deserialize_past($libs), :fixup_past($libs));
         $libs
 #?endif
     }
