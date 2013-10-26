@@ -69,6 +69,10 @@ class QAST::MASTOperations {
     my %hll_box;
     my %hll_unbox;
 
+    # What we know about inlinability.
+    my %core_inlinability;
+    my %hll_inlinability;
+
     # Compiles an operation to MAST.
     method compile_op($qastcomp, $hll, $op) {
         my $name := $op.op;
@@ -248,6 +252,28 @@ class QAST::MASTOperations {
     method add_hll_op($hll, $op, $handler) {
         %hll_ops{$hll} := {} unless %hll_ops{$hll};
         %hll_ops{$hll}{$op} := $handler;
+    }
+
+    # Sets op inlinability at a core level.
+    method set_core_op_inlinability($op, $inlinable) {
+        %core_inlinability{$op} := $inlinable;
+    }
+
+    # Sets op inlinability at a HLL level. (Can override at HLL level whether
+    # or not the HLL overrides the op itself.)
+    method set_hll_op_inlinability($hll, $op, $inlinable) {
+        %hll_inlinability{$hll} := {} unless nqp::existskey(%hll_inlinability, $hll);
+        %hll_inlinability{$hll}{$op} := $inlinable;
+    }
+
+    # Checks if an op is considered inlinable.
+    method is_inlinable($hll, $op) {
+        if nqp::existskey(%hll_inlinability, $hll) {
+            if nqp::existskey(%hll_inlinability{$hll}, $op) {
+                return %hll_inlinability{$hll}{$op};
+            }
+        }
+        return %core_inlinability{$op} // 0;
     }
 
     # Adds a core op that maps to a Moar op.
