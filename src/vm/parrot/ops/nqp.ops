@@ -3539,6 +3539,12 @@ inline op nqp_delete_f(out INT, in STR) :base_core {
 #endif
 }
 
+inline op nqp_gethostname(out STR) {
+    char hostname[65];
+    gethostname(hostname, 65);
+    $1 = Parrot_str_new_init(interp, hostname, strlen(hostname), Parrot_utf8_encoding_ptr, 0);
+}
+
 inline op nqp_shell(out INT, in STR, in STR, in PMC) {
      STRING *command = $2;  
      STRING *dir = $3;  

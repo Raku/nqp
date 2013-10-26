@@ -34,6 +34,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.net.InetAddress;
 
 import org.perl6.nqp.io.AsyncFileHandle;
 import org.perl6.nqp.io.FileHandle;
@@ -841,6 +842,14 @@ public final class Ops {
         return h;
     }
 
+    public static String gethostname(){
+        try {
+            String hostname = InetAddress.getLocalHost().getHostName();
+            return hostname;
+        } catch (Exception e) {
+            return null;
+        }
+    }
 
     // To be removed once shell3 is adopted
     public static long shell1(String cmd, ThreadContext tc) {

@@ -1921,6 +1921,8 @@ QAST::OperationsJAST.map_classlib_core_op('rename', $TYPE_OPS, 'rename', [$RT_ST
 QAST::OperationsJAST.map_classlib_core_op('copy', $TYPE_OPS, 'copy', [$RT_STR, $RT_STR], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('link', $TYPE_OPS, 'link', [$RT_STR, $RT_STR], $RT_INT, :tc);
 
+QAST::OperationsJAST.map_classlib_core_op('gethostname', $TYPE_OPS, 'gethostname', [], $RT_STR);
+
 # Two variants of shell until we deprecate shell1
 QAST::OperationsJAST.map_classlib_core_op('shell1', $TYPE_OPS, 'shell1', [$RT_STR], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('shell3', $TYPE_OPS, 'shell3', [$RT_STR, $RT_STR, $RT_OBJ], $RT_INT, :tc);
