@@ -316,7 +316,7 @@ General Options:
                        Options to pass to parrot configuration for --gen-parrot
     --gen-moar         Download and build a copy of MoarVM to use
     --moar-option='--option=value'
-                       Options to pass to parrot configuration for --gen-moar
+                       Options to pass to MoarVM configuration for --gen-moar
 
 Configure.pl also reads options from 'config.default' in the current directory.
 END
