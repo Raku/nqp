@@ -1721,6 +1721,11 @@ QAST::MASTOperations.add_core_moarop_mapping('bitneg_I', 'bnot_I');
 QAST::MASTOperations.add_core_moarop_mapping('bitshiftl_I', 'blshift_I');
 QAST::MASTOperations.add_core_moarop_mapping('bitshiftr_I', 'brshift_I');
 
+# string bitwise ops
+QAST::MASTOperations.add_core_moarop_mapping('bitor_s', 'bitor_s');
+QAST::MASTOperations.add_core_moarop_mapping('bitxor_s', 'bitxor_s');
+QAST::MASTOperations.add_core_moarop_mapping('bitand_s', 'bitand_s');
+
 # relational opcodes
 QAST::MASTOperations.add_core_moarop_mapping('cmp_i', 'cmp_i');
 QAST::MASTOperations.add_core_moarop_mapping('iseq_i', 'eq_i');
