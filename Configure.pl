@@ -27,7 +27,7 @@ MAIN: {
     GetOptions(\%options, 'help!', 'prefix=s',
                'with-parrot=s', 'gen-parrot:s',
                'make-install!', 'makefile-timing!',
-               'backends=s', 'gen-moar:s',
+               'backends=s', 'gen-moar:s', 'moar-option=s@',
                'parrot-config=s', 'parrot-option=s@');
 
     # Print help if it's requested
@@ -315,6 +315,8 @@ General Options:
     --parrot-option='--option=value'
                        Options to pass to parrot configuration for --gen-parrot
     --gen-moar         Download and build a copy of MoarVM to use
+    --moar-option='--option=value'
+                       Options to pass to parrot configuration for --gen-moar
 
 Configure.pl also reads options from 'config.default' in the current directory.
 END
