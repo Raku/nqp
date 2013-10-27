@@ -1239,6 +1239,11 @@ class QAST::MASTCompiler {
         nqp::die("expected QAST constant; didn't get one");
     }
 
+    multi method as_mast(QAST::Want $node, :$want) {
+        # If we're not in a coercive context, take the default.
+        self.as_mast($node[0])
+    }
+
     multi method as_mast(QAST::IVal $iv, :$want) {
         my $reg := $*REGALLOC.fresh_i();
         MAST::InstructionList.new(
