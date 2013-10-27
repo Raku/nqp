@@ -1911,6 +1911,19 @@ QAST::MASTOperations.add_core_moarop_mapping('getcodename', 'getcodename');
 QAST::MASTOperations.add_core_moarop_mapping('setcodename', 'setcodename', 0);
 QAST::MASTOperations.add_core_moarop_mapping('forceouterctx', 'forceouterctx', 0);
 QAST::MASTOperations.add_core_moarop_mapping('setdispatcher', 'setdispatcher', 0);
+QAST::MASTOperations.add_core_op('takedispatcher', -> $qastcomp, $op {
+    unless nqp::istype($op[0], QAST::SVal) {
+        nqp::die("takedispatcher must have a single QAST::SVal child");
+    }
+    my @ops;
+    my $disp_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
+    push_op(@ops, 'takedispatcher', $disp_reg);
+    if $*BLOCK.lexical($op[0].value) -> $lex {
+        push_op(@ops, 'bindlex', $lex, $disp_reg);
+    }
+    $*REGALLOC.release_register($disp_reg, $MVM_reg_obj);
+    MAST::InstructionList.new(@ops, $MVM_reg_void, MAST::VOID)
+});
 QAST::MASTOperations.add_core_op('setup_blv', -> $qastcomp, $op {
     if +@($op) != 1 || !nqp::ishash($op[0]) {
         nqp::die('setup_blv requires one hash operand');
