@@ -240,6 +240,19 @@ class QAST::MASTCompiler {
         method cloned_inners() { %!cloned_inners }
     }
 
+    method source_for_node($node) {
+        my $source := $node.node
+                        ?? ~ nqp::escape($node.node.Str)
+                        !! '';
+        if nqp::chars($source) > 103 {
+            $source := nqp::substr($source, 0, 100) ~ '...';
+        }
+        if nqp::chars($source) {
+            $source := qq[ (source text: "$source")];
+        }
+        $source;
+    }
+
     our $serno := 0;
     method unique($prefix = '') { $prefix ~ $serno++ }
 
@@ -892,7 +905,18 @@ class QAST::MASTCompiler {
     }
 
     multi method as_mast(QAST::Op $node, :$want) {
-        QAST::MASTOperations.compile_op(self, $*HLL, $node)
+        my $result;
+        my $err;
+        try {
+            $result := QAST::MASTOperations.compile_op(self, $*HLL, $node);
+            CATCH { $err := $! }
+        }
+        if $err {
+            nqp::die($err) if nqp::index($err, "Error while compiling op ") == 0;
+            my $source := self.source_for_node($node);
+            nqp::die("Error while compiling op " ~ $node.op ~ "$source: $err");
+        }
+        $result
     }
 
     multi method as_mast(QAST::VM $node, :$want) {

@@ -2807,6 +2807,19 @@ class QAST::CompilerJAST {
 
     method new_temp_allocator() { StmtTempAlloc.new }
 
+    method source_for_node($node) {
+        my $source := $node.node
+                        ?? ~ nqp::escape($node.node.Str)
+                        !! '';
+        if nqp::chars($source) > 103 {
+            $source := nqp::substr($source, 0, 100) ~ '...';
+        }
+        if nqp::chars($source) {
+            $source := qq[ (source text: "$source")];
+        }
+        $source;
+    }
+
     method jast($source, :$classname!, *%adverbs) {
         # Wrap $source in a QAST::CompUnit if it's not already a viable root node.
         unless nqp::istype($source, QAST::CompUnit) {
@@ -3688,13 +3701,15 @@ class QAST::CompilerJAST {
         my $result;
         my $err;
         try $hll := $*HLL;
-        #try {
+        try {
             $result := QAST::OperationsJAST.compile_op(self, $hll, $node);
-        #    CATCH { $err := $! }
-        #}
-        #if $err {
-        #    nqp::die("Error while compiling op " ~ $node.op ~ ": $err");
-        #}
+            CATCH { $err := $! }
+        }
+        if $err {
+            nqp::die($err) if nqp::index($err, "Error while compiling op ") == 0;
+            my $source := self.source_for_node($node);
+            nqp::die("Error while compiling op " ~ $node.op ~ "$source: $err");
+        }
         $result
     }
     

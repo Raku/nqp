@@ -453,15 +453,7 @@ class QAST::Compiler is HLL::Compiler {
                 my $*HAVE_IMM_ARG := 0;
                 my $*QAST_BLOCK_NO_CLOSE := 0;
                 my $*WANT;
-                my $err;
-                try {
-                    $stmts := self.compile_all_the_stmts($node.list);
-                    CATCH { $err := $! }
-                }
-                if $err {
-                    my $source := self.source_for_node($node);
-                    nqp::die("Error while compiling block " ~ $node.name ~ "$source: $err");
-                }
+                $stmts := self.compile_all_the_stmts($node.list);
             }
             
             # Generate parameter handling code.
@@ -732,6 +724,7 @@ class QAST::Compiler is HLL::Compiler {
             CATCH { $err := $! }
         }
         if $err {
+            nqp::die($err) if nqp::index($err, "Error while compiling op ") == 0;
             my $source := self.source_for_node($node);
             nqp::die("Error while compiling op " ~ $node.op ~ "$source: $err");
         }
