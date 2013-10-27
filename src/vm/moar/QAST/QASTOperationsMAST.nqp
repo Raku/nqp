@@ -1890,6 +1890,7 @@ QAST::MASTOperations.add_core_moarop_mapping('bindlex_s', 'bindlex_ns', 1);
 QAST::MASTOperations.add_core_moarop_mapping('getlexdyn', 'getdynlex');
 QAST::MASTOperations.add_core_moarop_mapping('bindlexdyn', 'binddynlex');
 QAST::MASTOperations.add_core_moarop_mapping('getlexouter', 'getlexouter');
+QAST::MASTOperations.add_core_moarop_mapping('getlexrel', 'getlexrel');
 QAST::MASTOperations.add_core_op('locallifetime', -> $qastcomp, $op {
     # TODO: take advantage of this info for code-gen, if possible.
     $qastcomp.as_mast($op[0])
