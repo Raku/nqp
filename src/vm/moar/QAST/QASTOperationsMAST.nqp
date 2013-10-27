@@ -1603,7 +1603,10 @@ QAST::MASTOperations.add_core_moarop_mapping('radix', 'radix');
 QAST::MASTOperations.add_core_moarop_mapping('radix_I', 'radix_I');
 QAST::MASTOperations.add_core_moarop_mapping('log_n', 'log_n');
 QAST::MASTOperations.add_core_moarop_mapping('exp_n', 'exp_n');
-#QAST::MASTOperations.add_core_moarop_mapping('isnanorinf', 'is_inf_or_nan', 'In');
+QAST::MASTOperations.add_core_moarop_mapping('isnanorinf', 'isnanorinf');
+QAST::MASTOperations.add_core_moarop_mapping('inf', 'inf');
+QAST::MASTOperations.add_core_moarop_mapping('neginf', 'neginf');
+QAST::MASTOperations.add_core_moarop_mapping('nan', 'nan');
 QAST::MASTOperations.add_core_moarop_mapping('isprime_I', 'isprime_I');
 QAST::MASTOperations.add_core_moarop_mapping('rand_I', 'rand_I');
 
