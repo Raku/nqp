@@ -224,7 +224,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
     # Operators - mostly stolen from NQP
     token infix:sym<**> { <sym>  <O('%exponentiation, :op<pow_n>')> }
 
-    token prefix:sym<-> { <sym>  <O('%unary, :op<neg_n>')> }
+    token prefix:sym<-> { <sym><![>]>  <O('%unary, :op<neg_n>')> }
     token prefix:sym<!> { <sym>  <O('%unary, :op<not_i>')> }
 
     token infix:sym<*>  { <sym> <O('%multiplicative, :op<mul_n>')> }
@@ -324,6 +324,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
 
     token term:sym<lambda> {
         'lambda' :s ['{' ['|' ~ '|' <signature>]? ]  ~ '}' <stmtlist> 
+    |   '->' :s ['(' ~ ')' <signature> :s]? '{' ~ '}' <stmtlist>
     }
 
     method builtin-init() {
