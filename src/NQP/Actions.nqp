@@ -1559,8 +1559,9 @@ class NQP::Actions is HLL::Actions {
 
     method postfix:sym<.>($/) { make $<dotty>.ast; }
 
-    method prefix:sym<return>($/) {
-        make QAST::Op.new( :op('call'), :name('RETURN') );
+    method term:sym<return>($/) {
+        make QAST::Op.new( :op('call'), :name('RETURN'),
+            $<EXPR> ?? $<EXPR>.ast !!  QAST::WVal.new( :value($*W.find_sym(['NQPMu'])) ));
     }
 
     method prefix:sym<make>($/) {

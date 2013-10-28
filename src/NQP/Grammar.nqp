@@ -629,7 +629,7 @@ grammar NQP::Grammar is HLL::Grammar {
     }
     
     token term:sym<name> {
-        <name> <args>**0..1
+        <name> <?{ ~$<name> ne 'return' }> <args>**0..1
     }
 
     token args {
@@ -796,8 +796,8 @@ grammar NQP::Grammar is HLL::Grammar {
 
     token infix:sym<,>    { <sym>  <O('%comma, :op<list>')> }
 
-    token prefix:sym<return> { <sym> \s <O('%list_prefix')> { $*RETURN_USED := 1 } }
     token prefix:sym<make>   { <sym> \s <O('%list_prefix')> }
+    token term:sym<return> { <sym> [\s <EXPR>]? { $*RETURN_USED := 1 } }
 
     method smartmatch($/) {
         # swap rhs into invocant position
