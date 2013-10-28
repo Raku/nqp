@@ -1,16 +1,14 @@
 <?rbi?>
 <%#
   # Fractal tree rubyish example. Usage:
-  # % nqp rubyish.nqp examples-rubyish/fractal-tree.rbi > fractal.svg
+  # % nqp-p rubyish.nqp examples-rubyish/fractal-tree.rbi > fractal.svg
   #
 %>
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.1//EN'
 'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'>
-<svg width='100%' height='100%' version='1.1'
-xmlns='http://www.w3.org/2000/svg'>
+<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>
     <%#----------
-
     def cos(a); nqp::cos_n(a); end
     def sin(a); nqp::sin_n(a); end
 
