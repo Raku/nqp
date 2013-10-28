@@ -1,11 +1,13 @@
 # Backend class for the JVM.
 class HLL::Backend::JVM {
+    our %jvm_config := nqp::backendconfig();
+
     method apply_transcodings($s, $transcode) {
         $s
     }
     
     method config() {
-        nqp::jvmgetconfig()
+        %jvm_config
     }
     
     method force_gc() {

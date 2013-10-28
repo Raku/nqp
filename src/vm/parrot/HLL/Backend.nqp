@@ -1,6 +1,6 @@
 # Backend class for Parrot.
 class HLL::Backend::Parrot {
-    our %parrot_config := pir::getinterp__P()[pir::const::IGLOBALS_CONFIG_HASH];
+    our %parrot_config := nqp::backendconfig();
     
     method apply_transcodings($s, $transcode) {
         for nqp::split(' ', $transcode) {

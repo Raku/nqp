@@ -101,3 +101,14 @@ $ops.add_hll_op('nqp', 'falsey', -> $qastcomp, $op {
     }
     $ops
 });
+
+# pir::getinterp__P()[pir::const::IGLOBALS_CONFIG_HASH];
+$ops.add_hll_op('nqp', 'backendconfig', -> $qastcomp, $op {
+    $qastcomp.as_post(
+        QAST::VarWithFallback.new(
+            :scope('positional'), :fallback(QAST::Op.new( :op('list') )),
+            QAST::VM.new( :pirop('getinterp__P') ),
+            QAST::VM.new( :pirconst('IGLOBALS_CONFIG_HASH') )
+        )
+    )
+});

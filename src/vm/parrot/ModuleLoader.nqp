@@ -24,7 +24,7 @@ knowhow ModuleLoader {
         nqp::push(@search_paths, 'blib');
         
         # Add NQP langauge directory.
-        my %conf := pir::getinterp__P()[pir::const::IGLOBALS_CONFIG_HASH];
+        my %conf := nqp::backendconfig();
         nqp::push(@search_paths, %conf<libdir> ~ %conf<versiondir> ~
             '/languages/nqp/lib');
     
