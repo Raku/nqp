@@ -1493,6 +1493,23 @@ Gets hold of the argument capture passed to the current block.
 It's valid to implement this exactly the same way as savecapture if there's no performance benefit to be had in a split.
 Used by the multi-dispatcher.
 
+## getlex_n
+* `getlex_ni(str $name)`
+* `getlex_nn(str $name)`
+* `getlex_ns(str $name)`
+* `getlex_no(str $name)`
+
+Looks up the lexical with the specified name and the specified type. An error is thrown if it does not exist or if the
+type is incorrect.
+
+## bindlex_n
+* `bindlex_ni(str $name)`
+* `bindlex_nn(str $name)`
+* `bindlex_ns(str $name)`
+* `bindlex_no(str $name)`
+
+Binds to the lexical specified by name and type. An error is thrown if it does not exist or if the type is incorrect.
+
 # Variable opcodes
 
 ## bind
