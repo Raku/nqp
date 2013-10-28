@@ -302,7 +302,7 @@ role NQPCursorRole is export {
         my %protorx;
         for self.HOW.methods(self) -> $meth {
             my str $methname := $meth.name();
-            my int $sympos   := nqp::index($methname, ':sym<');
+            my int $sympos   := nqp::index($methname, ':');
             if $sympos > 0 {
                 my str $prefix := nqp::substr($methname, 0, $sympos);
                 %protorx{$prefix} := [] unless nqp::existskey(%protorx, $prefix);

@@ -489,13 +489,24 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             self.subrule_alias($qast, $name);
         }
         elsif $name eq 'sym' {
+            my $rxname := "";
             my $loc := nqp::index(%*RX<name>, ':sym<');
-            $loc := nqp::index(%*RX<name>, ':sym«')
-                if $loc < 0;
-            my $rxname := nqp::substr(%*RX<name>, $loc + 5);
-            $rxname := nqp::substr( $rxname, 0, nqp::chars($rxname) - 1);
-            $qast := QAST::Regex.new(:name('sym'), :rxtype<subcapture>, :node($/),
-                QAST::Regex.new(:rxtype<literal>, $rxname, :node($/)));
+            if $loc >= 0 {
+                $rxname := nqp::substr(%*RX<name>, $loc + 5 );
+                $rxname := nqp::substr( $rxname, 0, nqp::chars($rxname) - 1);
+            }
+            else {
+                $loc := nqp::index(%*RX<name>, ':');
+                my $angleloc := nqp::index(%*RX<name>, '<', $loc);
+                $rxname := nqp::substr(%*RX<name>, $loc + 1, $angleloc - $loc - 1) unless $loc < 0;
+            }
+            if $loc >= 0 {
+                $qast := QAST::Regex.new(:name('sym'), :rxtype<subcapture>, :node($/),
+                    QAST::Regex.new(:rxtype<literal>, $rxname, :node($/)));
+            }
+            else {
+                self.panic("<sym> is only valid in multiregexes");
+            }
         }
         else {
             $qast := QAST::Regex.new(:rxtype<subrule>, :subtype<capture>,
