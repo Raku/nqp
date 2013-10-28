@@ -56,15 +56,15 @@ grammar Rubyish::Grammar is HLL::Grammar {
         [ <stmt=.stmtish>? ] *%% [<.separator>|<stmt=.template-chunk>]
     }
 
-    token stmtish {
-        <stmt> [:s <modifier> :s <EXPR>]?
+    rule stmtish {
+        <stmt> [ <modifier> <EXPR>]?
     }
 
     token modifier {if|unless|while|until}
 
     proto token stmt {*}
 
-    token stmt:sym<def> {
+    token stmt:sym<def> {:s
         :my %sym-save := self.hcopy(%*SYM);
 
         'def' ~ 'end' <defbody>
@@ -78,7 +78,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
         <stmtlist>
     }
 
-    token comma { :s [','|'=>'] :s }
+    rule comma { [','|'=>'] }
 
     rule signature {
         :my $*IN_PARENS := 1; <param>* %% <comma>
@@ -104,12 +104,12 @@ grammar Rubyish::Grammar is HLL::Grammar {
     }
 
     token stmt:sym<EXPR> { <EXPR> }
-    token term:sym<assign> { <var> \h* <OPER=infix> '=' \h* <EXPR> }
+    token term:sym<assign> {:s<hs> <var> <OPER=infix> '=' <EXPR> }
 
     token term:sym<call> {
         <!keyword>
         <operation> ['(' ~ ')' <call-args=.paren-args>?
-                    | \h* <call-args>? <?{%*SYM{~$<operation>} eq 'def'}> ]
+                    |:s<hs> <call-args>? <?{%*SYM{~$<operation>} eq 'def'}> ]
     }
 
     token term:sym<nqp-op> {
@@ -120,13 +120,13 @@ grammar Rubyish::Grammar is HLL::Grammar {
         \% w <?before [.]> <quote_EXPR: ':q', ':w'>
     }
 
-    token call-args  { :s <EXPR>+ % <comma> }
+    token call-args  {:s<hs> <EXPR>+ % <comma> }
     token paren-args {:my $*IN_PARENS := 1; <call-args> }
 
     token operation {<ident>[\!|\?]?}
 
     token term:sym<new> {
-        ['new' \h+ :s <ident> | <ident> '.' 'new'] ['(' ~ ')' <call-args=.paren-args>?]?
+        ['new' \h+ <ident> | <ident> '.' 'new'] ['(' ~ ')' <call-args=.paren-args>?]?
     }
 
     token var {
@@ -142,7 +142,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
 
     proto token value {*}
     token value:sym<string>  {<strings>}
-    token strings            {<string> [\h*<strings>]?}
+    token strings            {:s<hs> <string> <strings>? }
     token string             { <?[']> <quote_EXPR: ':q'>
                              | <?["]> <quote_EXPR: ':qq'>
                              | \%[ q <?before [.]> <quote_EXPR: ':q'>
@@ -164,7 +164,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
     token value:sym<false>   { <sym> }
 
     # Interpolation
-    token interp      { '#{' ~ '}' [ :s <stmt> :s
+    token interp      { '#{' ~ '}' [:s<hs> [ <stmt> ]
                                   || <panic('string interpolation error')>]
                        }
     token quote_escape:sym<#{ }> { <interp>  }
@@ -184,7 +184,8 @@ grammar Rubyish::Grammar is HLL::Grammar {
     proto token comment {*}
     token comment:sym<line>   { '#' [<?{!$*IN_TEMPLATE}> \N* || [<!before <tmpl-unesc>>\N]*] }
     token comment:sym<podish> {[^^'=begin'\n] ~ [^^'=end'\n ] .*?}
-    token ws { <!ww> [\h | <.comment> | <.continuation> | <?{$*IN_PARENS}> \n]* }
+    token ws { <!ww> [\h | <.continuation> | <.comment> | <?{$*IN_PARENS}> \n]* }
+    token hs { <!ww> [\h | <.continuation> ]* }
 
     INIT {
         # Operator precedence levels
@@ -261,8 +262,8 @@ grammar Rubyish::Grammar is HLL::Grammar {
     token infix:sym<&&>   { <sym>  <O('%logical_and, :op<if>')> }
     token infix:sym<||>   { <sym>  <O('%logical_or,  :op<unless>')> }
 
-    token infix:sym<? :> { '?' :s <EXPR('i=')>
-                           ':' <O('%conditional, :reducecheck<ternary>, :op<if>')>
+    token infix:sym<? :> {:s '?' <EXPR('i=')>
+                             ':' <O('%conditional, :reducecheck<ternary>, :op<if>')>
     }
 
     token infix:sym<=>  { <sym><![>]> <O('%assignment, :op<bind>')> }
@@ -289,42 +290,43 @@ grammar Rubyish::Grammar is HLL::Grammar {
     }
 
     # Statement control
-    rule xblock {
-        <EXPR> [ <separator> [:s 'then']? | 'then' | <?before <tmpl-unesc>>] <stmtlist>
+    rule xblock {:s<hs>
+        <EXPR> [ <separator> 'then'? | 'then' | <?before <tmpl-unesc>>] <stmtlist>
     }
 
-    token stmt:sym<cond> {
-        $<op>=[if|unless] ~ 'end' [ :s <xblock> [<else=.elsif>|<else>]? ]
+    token stmt:sym<cond> {:s
+        $<op>=[if|unless] ~ 'end' [ <xblock> [<else=.elsif>|<else>]? ]
     }
 
-    token elsif {
+    token elsif {:s
         'elsif' ~ [<else=.elsif>|<else>]? <xblock>
     }
 
-    token else {
+    token else {:s
          'else' <stmtlist>
     }
 
-    token stmt:sym<loop> {
-        $<op>=[while|until] :s <EXPR> :s <do-block>
+    token stmt:sym<loop> {:s
+        $<op>=[while|until] <EXPR> :s <do-block>
     }
 
-    token stmt:sym<for> {
-        <sym> :s <ident> :s 'in' <EXPR> <do-block>
+    token stmt:sym<for> {:s
+        <sym> <ident> 'in' <EXPR> <do-block>
     }
 
     token do-block { <do> ~ 'end' <stmtlist> }
 
-    token do { <separator> [:s 'do']? | 'do' | <?before <tmpl-unesc>>
+    token do {:s<hs>
+	<separator> 'do'? | 'do' | <?before <tmpl-unesc>>
     }
 
     token term:sym<code> {
         'begin' ~ 'end' <stmtlist> 
     }
 
-    token term:sym<lambda> {
-        'lambda' :s ['{' ['|' ~ '|' <signature>]? ]  ~ '}' <stmtlist> 
-    |   '->' :s ['(' ~ ')' <signature> :s]? '{' ~ '}' <stmtlist>
+    token term:sym<lambda> {:s
+        'lambda' ['{' ['|' ~ '|' <signature>]? ]  ~ '}' <stmtlist> 
+    |   '->' ['(' ~ ')' <signature> ]? '{' ~ '}' <stmtlist>
     }
 
     method builtin-init() {
