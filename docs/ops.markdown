@@ -1499,16 +1499,52 @@ Used by the multi-dispatcher.
 * `getlex_n(str $name)`
 * `getlex_s(str $name)`
 
-Looks up the lexical with the specified name and the specified type. An error is thrown if it does not exist or if the
-type is incorrect.
+Looks up the lexical with the specified name and the specified type. Searching in the outer frames, starting at the current.
+An error is thrown if it does not exist or if the type is incorrect.
 
 ## bindlex
-* `bindlex(str $name)`
-* `bindlex_i(str $name)`
-* `bindlex_n(str $name)`
-* `bindlex_s(str $name)`
+* `bindlex(str $name, Mu $value)`
+* `bindlex_i(str $name, int $value)`
+* `bindlex_n(str $name, num $value)`
+* `bindlex_s(str $name, str $value)`
 
-Binds to the lexical specified by name and type. An error is thrown if it does not exist or if the type is incorrect.
+Binds $value to the lexical specified by name and type. Searching in the outer frames, starting at the current.
+An error is thrown if it does not exist or if the type is incorrect.
+
+## getlexdyn
+* `getlexdyn(str $name)`
+
+Looks up the contextual with the specified name in the caller chain, starting at the calling frame.
+
+## bindlexdyn
+* `bindlexdyn(str $name, Mu $value)`
+
+Binds $value to the contextual with the specified name, searching for it in the call-chain, starting at the calling frame.
+
+## getlexouter
+* `getlexouter(str $name)`
+
+Looks up the lexical with the specified name and the specified type. Searching in the outer frames, starting at outer.
+
+## getlexcaller
+* `getlexcaller(str $name)`
+
+Looks up the lexical with the specified name, starting at the calling frame. It checks all outer frames of the caller chain.
+
+## getlexrel
+* `getlexrel(Mu $context, str $name)`
+
+Looks up the lexical with the specified name and the specified type. Searching in the outer frames, starting at the given $context.
+
+## getlexreldyn
+* `getlexreldyn(Mu $context, str $name)`
+
+Looks up the contextual with the specified name in the caller chain, starting at the given $context.
+
+## getlexrelcaller
+* `getlexrelcaller(Mu $context, str $name)`
+
+Looks up the lexical with the specified name, starting at the given $context. It checks all outer frames of the caller chain.
 
 # Variable opcodes
 
