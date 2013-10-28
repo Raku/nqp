@@ -73,6 +73,10 @@ class QAST::MASTOperations {
     my %core_inlinability;
     my %hll_inlinability;
 
+    # What we know about op native results types.
+    my %core_result_type;
+    my %hll_result_type;
+
     # Compiles an operation to MAST.
     method compile_op($qastcomp, $hll, $op) {
         my $name := $op.op;
@@ -332,6 +336,48 @@ class QAST::MASTOperations {
 
         -> $qastcomp, $op_name, @op_args {
             $self.compile_mastop($qastcomp, $moarop, @op_args, :returnarg($ret))
+        }
+    }
+
+    # Sets op native result type at a core level.
+    method set_core_op_result_type($op, $type) {
+        if $type == $MVM_reg_int64 {
+            %core_result_type{$op} := int;
+        }
+        elsif $type == $MVM_reg_num64 {
+            %core_result_type{$op} := num;
+        }
+        elsif $type == $MVM_reg_str {
+            %core_result_type{$op} := str;
+        }
+    }
+    
+    # Sets op inlinability at a HLL level. (Can override at HLL level whether
+    # or not the HLL overrides the op itself.)
+    method set_hll_op_result_type($hll, $op, $type) {
+        %hll_result_type{$hll} := {} unless nqp::existskey(%hll_result_type, $hll);
+        if $type == $MVM_reg_int64 {
+            %hll_result_type{$hll}{$op} := int;
+        }
+        elsif $type == $MVM_reg_num64 {
+            %hll_result_type{$hll}{$op} := num;
+        }
+        elsif $type == $MVM_reg_str {
+            %hll_result_type{$hll}{$op} := str;
+        }
+    }
+
+    # Sets returns on an op node if we it has a native result type.
+    method attach_result_type($hll, $node) {
+        my $op := $node.op;
+        if nqp::existskey(%hll_result_type, $hll) {
+            if nqp::existskey(%hll_result_type{$hll}, $op) {
+                $node.returns(%hll_result_type{$hll}{$op});
+                return 1;
+            }
+        }
+        if nqp::existskey(%core_result_type, $op) {
+            $node.returns(%core_result_type{$op});
         }
     }
 
