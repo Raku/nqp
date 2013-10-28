@@ -372,6 +372,19 @@ class QAST::MASTCompiler {
         }
     }
 
+    my %want_char := nqp::hash($MVM_reg_int64, 'I', $MVM_reg_num64, 'N', $MVM_reg_str, 'S');
+    sub want($node, $type) {
+        my @possibles := nqp::clone($node.list);
+        my $best := @possibles.shift;
+        my $char := %want_char{$type};
+        for @possibles -> $sel, $ast {
+            if nqp::index($sel, $char) >= 0 {
+                $best := $ast;
+            }
+        }
+        $best
+    }
+
     my @return_opnames := [
         'return',
         'return_i',
