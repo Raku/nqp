@@ -56,8 +56,8 @@ grammar Rubyish::Grammar is HLL::Grammar {
         [ <stmt=.stmtish>? ] *%% [<.separator>|<stmt=.template-chunk>]
     }
 
-    rule stmtish {
-        <stmt> [ <modifier> <EXPR>]?
+    token stmtish {
+        <stmt> [:s<hs> <modifier> <EXPR>]?
     }
 
     token modifier {if|unless|while|until}
@@ -164,7 +164,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
     token value:sym<false>   { <sym> }
 
     # Interpolation
-    token interp      { '#{' ~ '}' [:s<hs> [ <stmt> ]
+    token interp      { '#{' ~ '}' [:s<hs> [ <stmtlist> ]
                                   || <panic('string interpolation error')>]
                        }
     token quote_escape:sym<#{ }> { <interp>  }
@@ -678,7 +678,7 @@ class Rubyish::Actions is HLL::Actions {
         make QAST::IVal.new( :value<0> );
     }
 
-    method interp($/) { make $<stmt>.ast }
+    method interp($/) { make $<stmtlist>.ast }
     method quote_escape:sym<#{ }>($/) { make $<interp>.ast }
     method circumfix:sym<( )>($/) { make $<EXPR>.ast }
 
