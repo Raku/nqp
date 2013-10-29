@@ -20,8 +20,10 @@ else {
     my $install_to = 'nqp-m';
     open my $fh, ">", $install_to
         or die "Could not open $install_to: $!";
-    print $fh "#!/bin/sh\n";
-    print $fh "exec $moar nqp.moarvm \"\$\@\"\n";
+    printf $fh <<'EOS', $moar;
+#!/bin/sh
+exec %s nqp.moarvm "$@"
+EOS
     close $fh
         or die "Could not close $install_to: $!";
     chmod 0755, $install_to;
