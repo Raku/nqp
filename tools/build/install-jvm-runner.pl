@@ -6,7 +6,8 @@ use warnings;
 use 5.008;
 use File::Spec;
 
-my ($prefix) = @ARGV;
+my ($destdir, $prefix) = @ARGV;
+my $realpath = $destdir.$prefix;
 
 unless (File::Spec->file_name_is_absolute($prefix)) {
     $prefix = File::Spec->rel2abs($prefix);
@@ -16,7 +17,7 @@ my $jar_dir = File::Spec->catfile($prefix, 'languages', 'nqp', 'runtime');
 my $lib_dir = File::Spec->catfile($prefix, 'languages', 'nqp', 'lib');
 
 if ($^O eq 'MSWin32') {
-    my $install_to = File::Spec->catfile($prefix, 'bin', 'nqp-j.bat');
+    my $install_to = File::Spec->catfile($realpath, 'bin', 'nqp-j.bat');
     open my $fh, ">", $install_to
         or die "Could not open $install_to: $!";
     print $fh '@java -Xmx512m -Xbootclasspath/a:' . $jar_dir . '\\nqp-runtime.jar;' .
@@ -25,7 +26,7 @@ if ($^O eq 'MSWin32') {
         or die "Could not close $install_to: $!";
 }
 else {
-    my $install_to = File::Spec->catfile($prefix, 'bin', 'nqp-j');
+    my $install_to = File::Spec->catfile($realpath, 'bin', 'nqp-j');
     open my $fh, ">", $install_to
         or die "Could not open $install_to: $!";
     print $fh "#!/bin/sh\n";
