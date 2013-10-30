@@ -668,124 +668,133 @@ class QAST::MASTCompiler {
                 push_op(@pre, 'takeclosure', $reg, $reg);
             }
 
-            # Analyze parameters to get count of required/optional and make sure
-            # all is in order.
-            my $param_index := 0;
-            my int $pos_required := 0;
-            my int $pos_optional := 0;
-            my int $pos_slurpy   := 0;
-            for $block.params {
-                if $_.named {
-                    # Don't count.
-                }
-                elsif $_.slurpy {
-                    if $pos_slurpy {
-                        nqp::die("Only one slurpy positional allowed");
-                    }
-                    $pos_slurpy := 1;
-                }
-                elsif $_.default {
-                    if $pos_slurpy {
-                        nqp::die("Optional positionals must come before all slurpy positionals");
-                    }
-                    $pos_optional++;
-                }
-                else {
-                    if $pos_optional {
-                        nqp::die("Required positionals must come before all optional positionals");
-                    }
-                    if $pos_slurpy {
-                        nqp::die("Required positionals must come before all slurpy positionals");
-                    }
-                    $pos_required++;
-                }
+            if $node.custom_args {
+                # The block does the arg processing by itself, so we accept any number
+                # of args here.
+                push_op(@pre, 'checkarity',
+                    MAST::IVal.new( :size(16), :value(0)),
+                    MAST::IVal.new( :size(16), :value(-1)));
             }
-
-            # check the arity
-            push_op(@pre, 'checkarity',
-                MAST::IVal.new( :size(16), :value($pos_required)),
-                MAST::IVal.new( :size(16), :value($pos_slurpy ?? -1 !! $pos_required + $pos_optional)));
-
-            # build up instructions to bind the params
-            for $block.params -> $var {
-
-                my $scope := $var.scope;
-                nqp::die("Param scope must be 'local' or 'lexical'")
-                    if $scope ne 'lexical' && $scope ne 'local';
-
-                my $param_kind := self.type_to_register_kind($var.returns);
-                my $opslot := @kind_to_op_slot[$param_kind];
-
-                my $opname_index := ($var.named ?? 8 !! 0) + ($var.default ?? 4 !! 0) + $opslot;
-                my $opname := @param_opnames[$opname_index];
-
-                # what will be put in the value register
-                my $val;
-
-                if $var.slurpy {
-                    if $var.named {
-                        $opname := "param_sn";
+            else {
+                # Analyze parameters to get count of required/optional and make sure
+                # all is in order.
+                my $param_index := 0;
+                my int $pos_required := 0;
+                my int $pos_optional := 0;
+                my int $pos_slurpy   := 0;
+                for $block.params {
+                    if $_.named {
+                        # Don't count.
+                    }
+                    elsif $_.slurpy {
+                        if $pos_slurpy {
+                            nqp::die("Only one slurpy positional allowed");
+                        }
+                        $pos_slurpy := 1;
+                    }
+                    elsif $_.default {
+                        if $pos_slurpy {
+                            nqp::die("Optional positionals must come before all slurpy positionals");
+                        }
+                        $pos_optional++;
                     }
                     else {
-                        $opname := "param_sp";
+                        if $pos_optional {
+                            nqp::die("Required positionals must come before all optional positionals");
+                        }
+                        if $pos_slurpy {
+                            nqp::die("Required positionals must come before all slurpy positionals");
+                        }
+                        $pos_required++;
                     }
                 }
-                elsif $var.named {
-                    $val := MAST::SVal.new( :value($var.named) );
-                }
-                else { # positional
-                    $val := MAST::IVal.new( :size(16), :value($param_index));
-                }
 
-                # the variable register
-                my $valreg := $scope eq 'lexical'
-                    ?? $block.lexical_param($var.name)
-                    !! $block.local($var.name);
+                # check the arity
+                push_op(@pre, 'checkarity',
+                    MAST::IVal.new( :size(16), :value($pos_required)),
+                    MAST::IVal.new( :size(16), :value($pos_slurpy ?? -1 !! $pos_required + $pos_optional)));
 
-                # NQP->QAST always provides a default value for optional NQP params
-                # even if no default initializer expression is provided.
-                if $var.default {
-                    # generate end label to skip initialization code
-                    my $endlbl := MAST::Label.new( :name(self.unique('param') ~ '_end') );
+                # build up instructions to bind the params
+                for $block.params -> $var {
 
-                    # generate default initialization code. Could also be
-                    # wrapped in another QAST::Block.
-                    my $default_mast := self.as_mast($var.default, :want($param_kind));
+                    my $scope := $var.scope;
+                    nqp::die("Param scope must be 'local' or 'lexical'")
+                        if $scope ne 'lexical' && $scope ne 'local';
 
-                #    nqp::die("default initialization result type doesn't match the param type")
-                #        unless $default_mast.result_kind == $param_kind;
+                    my $param_kind := self.type_to_register_kind($var.returns);
+                    my $opslot := @kind_to_op_slot[$param_kind];
 
-                    # emit param grabbing op
-                    push_op(@pre, $opname, $valreg, $val, $endlbl);
+                    my $opname_index := ($var.named ?? 8 !! 0) + ($var.default ?? 4 !! 0) + $opslot;
+                    my $opname := @param_opnames[$opname_index];
 
-                    # emit default initialization code
-                    push_ilist(@pre, $default_mast);
+                    # what will be put in the value register
+                    my $val;
 
-                    # put the initialization result in the variable register
-                    push_op(@pre, 'set', $valreg, $default_mast.result_reg);
-                    $*REGALLOC.release_register($default_mast.result_reg, $default_mast.result_kind);
+                    if $var.slurpy {
+                        if $var.named {
+                            $opname := "param_sn";
+                        }
+                        else {
+                            $opname := "param_sp";
+                        }
+                    }
+                    elsif $var.named {
+                        $val := MAST::SVal.new( :value($var.named) );
+                    }
+                    else { # positional
+                        $val := MAST::IVal.new( :size(16), :value($param_index));
+                    }
 
-                    # end label to skip initialization code
-                    nqp::push(@pre, $endlbl);
-                }
-                elsif $var.slurpy {
-                    if $var.named {
-                        push_op(@pre, $opname, $valreg);
+                    # the variable register
+                    my $valreg := $scope eq 'lexical'
+                        ?? $block.lexical_param($var.name)
+                        !! $block.local($var.name);
+
+                    # NQP->QAST always provides a default value for optional NQP params
+                    # even if no default initializer expression is provided.
+                    if $var.default {
+                        # generate end label to skip initialization code
+                        my $endlbl := MAST::Label.new( :name(self.unique('param') ~ '_end') );
+
+                        # generate default initialization code. Could also be
+                        # wrapped in another QAST::Block.
+                        my $default_mast := self.as_mast($var.default, :want($param_kind));
+
+                    #    nqp::die("default initialization result type doesn't match the param type")
+                    #        unless $default_mast.result_kind == $param_kind;
+
+                        # emit param grabbing op
+                        push_op(@pre, $opname, $valreg, $val, $endlbl);
+
+                        # emit default initialization code
+                        push_ilist(@pre, $default_mast);
+
+                        # put the initialization result in the variable register
+                        push_op(@pre, 'set', $valreg, $default_mast.result_reg);
+                        $*REGALLOC.release_register($default_mast.result_reg, $default_mast.result_kind);
+
+                        # end label to skip initialization code
+                        nqp::push(@pre, $endlbl);
+                    }
+                    elsif $var.slurpy {
+                        if $var.named {
+                            push_op(@pre, $opname, $valreg);
+                        }
+                        else {
+                            push_op(@pre, $opname, $valreg, MAST::IVal.new( :value($pos_required + $pos_optional) ));
+                        }
                     }
                     else {
-                        push_op(@pre, $opname, $valreg, MAST::IVal.new( :value($pos_required + $pos_optional) ));
+                        # emit param grabbing op
+                        push_op(@pre, $opname, $valreg, $val);
                     }
-                }
-                else {
-                    # emit param grabbing op
-                    push_op(@pre, $opname, $valreg, $val);
-                }
 
-                if $scope eq 'lexical' {
-                    # emit the op to bind the lexical to the result register
-                    push_op(@pre, 'bindlex', $block.lexical($var.name), $valreg);
+                    if $scope eq 'lexical' {
+                        # emit the op to bind the lexical to the result register
+                        push_op(@pre, 'bindlex', $block.lexical($var.name), $valreg);
+                    }
+                    $param_index++;
                 }
-                $param_index++;
             }
 
             nqp::splice($frame.instructions, @pre, 0, 0);
