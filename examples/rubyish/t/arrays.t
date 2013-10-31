@@ -16,12 +16,12 @@ end
 puts "#{%w{nok ok nok}[1]} 9 - quote words"
 puts "#{['nok',['nok','nok','ok']][1][2]} 10 - 2d array"
 
-def slurpy_arg_tests(x, *arg_arr)
+def test_array_args(x, *arg_arr)
     puts "ok #{x} - fixed arg"
     for t in arg_arr do
-       puts "ok #{t} - slurpy arg array"
+       puts "ok #{t} - array slurpy arg"
     end
 end
 
-slurpy_arg_tests(11, 12, 13)
+test_array_args(11, 12, 13)
 

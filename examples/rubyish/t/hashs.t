@@ -1,4 +1,4 @@
-puts "1..8"
+puts "1..11"
 h = {'a' =>10,'b' => 18+2 , 'c' => 30}
 h{'d'} = 100
 puts "#{h{'a'} == 10? 'ok' : 'nok'} 1 - h{'a'}"
@@ -15,3 +15,12 @@ end
 
 h<d> = ['nok','ok']
 puts "#{ h<d>[1] } 8 - HoA"
+
+def test_hash_args(x, h_args)
+    puts "ok #{ x } - fixed arg"
+    for k in h_args do
+       puts "ok #{ h_args{k} } - hash slurpy arg (#{k})"
+    end
+end
+
+test_hash_args 9, 'z' => 10, 'y' => 11

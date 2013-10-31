@@ -82,8 +82,8 @@ grammar Rubyish::Grammar is HLL::Grammar {
 
     rule signature {
         :my $*IN_PARENS := 1;
-	<param>* % <comma>
-	[ ',' '*' <slurpy=.param> ]?
+        <param>* % <comma>
+        [ ',' '*' <slurpy=.param> ]?
         ','?
     }
 
@@ -123,7 +123,11 @@ grammar Rubyish::Grammar is HLL::Grammar {
         \% w <?before [.]> <quote_EXPR: ':q', ':w'>
     }
 
-    token call-args  {:s<hs> <EXPR>+ % <comma> }
+    token call-args  {:s<hs> [<arg=.hash-args>||<arg=.EXPR>]+ % ',' }
+
+    token hash-args {:s <hash-arg>+ % ',' }
+    token hash-arg  {:s <EXPR> '=>' <EXPR> }
+
     token paren-args {:my $*IN_PARENS := 1; <call-args> }
 
     token operation {<ident>[\!|\?]?}
@@ -320,7 +324,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
     token do-block { <do> ~ 'end' <stmtlist> }
 
     token do {:s<hs>
-	<separator> 'do'? | 'do' | <?before <tmpl-unesc>>
+        <separator> 'do'? | 'do' | <?before <tmpl-unesc>>
     }
 
     token term:sym<code> {
@@ -434,8 +438,19 @@ class Rubyish::Actions is HLL::Actions {
 
     method call-args($/) {
         my @args;
-        @args.push($_.ast) for $<EXPR>;
+        @args.push($_.ast) for $<arg>;
         make @args;
+    }
+
+    method hash-args($/) {
+        my $args := QAST::Op.new( :op<hash> );
+
+        for $<hash-arg> {
+            $args.push( $_.ast )
+                for $_<EXPR>
+        }
+
+        make $args;
     }
 
     method paren-args($/) {
@@ -574,7 +589,7 @@ class Rubyish::Actions is HLL::Actions {
             ));
         }
 
-	@params.push(QAST::Var.new(
+        @params.push(QAST::Var.new(
                 :name(~$<slurpy>), :scope('lexical'), :decl('param'), :slurpy<1>
             )) if $<slurpy>;
 
@@ -693,15 +708,15 @@ class Rubyish::Actions is HLL::Actions {
     # todo: proper type objects
     my %call-tab;
     sub call-tab-init() {
-	%call-tab := nqp::hash(
-	    'call', 'call',
-	    'nil?', 'isnull'
-	)
+        %call-tab := nqp::hash(
+            'call', 'call',
+            'nil?', 'isnull'
+        )
     }
 
     method postfix:sym<.>($/) {
-	call-tab-init() unless %call-tab<call>;
-	my $op := %call-tab{ ~$<operation> };
+        call-tab-init() unless %call-tab<call>;
+        my $op := %call-tab{ ~$<operation> };
         my $meth_call := $op
             ?? QAST::Op.new( :op($op) )
             !! QAST::Op.new( :op('callmethod'), :name(~$<operation>) );
@@ -731,7 +746,7 @@ class Rubyish::Actions is HLL::Actions {
 
     method stmt:sym<cond>($/) {
         my $ast := $<xblock>.ast;
-	$ast.op( ~$<op> );
+        $ast.op( ~$<op> );
         $ast.push( $<else>.ast )
             if $<else>;
  
@@ -740,7 +755,7 @@ class Rubyish::Actions is HLL::Actions {
 
     method elsif($/) {
         my $ast := $<xblock>.ast;
-	$ast.op( 'if' );
+        $ast.op( 'if' );
         $ast.push( $<else>.ast )
             if $<else>;
 
@@ -760,13 +775,13 @@ class Rubyish::Actions is HLL::Actions {
         my $block := QAST::Block.new(
             QAST::Var.new( :name(~$<ident>), :scope('lexical'), :decl('param')),
             $<do-block>.ast,
-	    );
+            );
 
         make QAST::Op.new( $<EXPR>.ast, $block, :op('for'), :node($/) );
     }
 
     method do-block($/) {
-	make  $<stmtlist>.ast
+        make  $<stmtlist>.ast
     }
 
     method term:sym<code>($/) {
