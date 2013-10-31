@@ -1,4 +1,4 @@
-puts "1..10"
+puts "1..13"
 a=[10,18+2 , 30]
 a[3] = 40
 puts "#{a[0] == 10? 'ok' : 'nok'} 1 - a[0]"
@@ -15,3 +15,13 @@ end
 
 puts "#{%w{nok ok nok}[1]} 9 - quote words"
 puts "#{['nok',['nok','nok','ok']][1][2]} 10 - 2d array"
+
+def slurpy_arg_tests(x, *arg_arr)
+    puts "ok #{x} - fixed arg"
+    for t in arg_arr do
+       puts "ok #{t} - slurpy arg array"
+    end
+end
+
+slurpy_arg_tests(11, 12, 13)
+

@@ -81,7 +81,10 @@ grammar Rubyish::Grammar is HLL::Grammar {
     rule comma { [','|'=>'] }
 
     rule signature {
-        :my $*IN_PARENS := 1; <param>* %% <comma>
+        :my $*IN_PARENS := 1;
+	<param>* % <comma>
+	[ ',' '*' <slurpy=.param> ]?
+        ','?
     }
 
     token param { <ident> }
@@ -357,7 +360,7 @@ class Rubyish::Actions is HLL::Actions {
 
     method TOP($/) {
         $*CUR_BLOCK.push($<stmtlist>.ast);
-        make $*CUR_BLOCK;
+        make QAST::CompUnit.new( $*CUR_BLOCK );
     }
 
     method stmtlist($/) {
@@ -570,6 +573,11 @@ class Rubyish::Actions is HLL::Actions {
                 :name(~$_), :scope('lexical'), :decl('param')
             ));
         }
+
+	@params.push(QAST::Var.new(
+                :name(~$<slurpy>), :scope('lexical'), :decl('param'), :slurpy<1>
+            )) if $<slurpy>;
+
         make @params;
     }
 

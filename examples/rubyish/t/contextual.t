@@ -22,4 +22,4 @@ puts "ok #{three} - parameterless method"
 puts "ok #{three + 1} - parameterless method arithmetic"
 puts "ok #{three() +2} - parameterless method + paren arithmetic"
 
-puts "ok #{zz 2} - method with methods"
+puts "ok #{zz 2} - method with args"

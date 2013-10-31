@@ -31,7 +31,7 @@ tricky(
 
       5,
 
-      "multiline call"
+      "multi-line call"
 
      )
 
