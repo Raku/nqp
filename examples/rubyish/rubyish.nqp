@@ -125,8 +125,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
 
     token call-args  {:s<hs> [<arg=.hash-args>||<arg=.EXPR>]+ % ',' }
 
-    token hash-args {:s <hash-arg>+ % ',' }
-    token hash-arg  {:s <EXPR> '=>' <EXPR> }
+    token hash-args  {:s [ <EXPR> '=>' <EXPR> ]+ % ',' }
 
     token paren-args {:my $*IN_PARENS := 1; <call-args> }
 
@@ -190,7 +189,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
 
     proto token comment {*}
     token comment:sym<line>   { '#' [<?{!$*IN_TEMPLATE}> \N* || [<!before <tmpl-unesc>>\N]*] }
-    token comment:sym<podish> {[^^'=begin'\n] ~ [^^'=end'\n ] .*?}
+    token comment:sym<podish> {[^^'=begin'\n] [ .*? [^^'=end'\n] || <.panic('missing ^^=end at eof')>] }
     token ws { <!ww> [\h | <.continuation> | <.comment> | <?{$*IN_PARENS}> \n]* }
     token hs { <!ww> [\h | <.continuation> ]* }
 
@@ -314,7 +313,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
     }
 
     token stmt:sym<loop> {:s
-        $<op>=[while|until] <EXPR> :s <do-block>
+        $<op>=[while|until] <EXPR> <do-block>
     }
 
     token stmt:sym<for> {:s
@@ -445,10 +444,8 @@ class Rubyish::Actions is HLL::Actions {
     method hash-args($/) {
         my $args := QAST::Op.new( :op<hash> );
 
-        for $<hash-arg> {
-            $args.push( $_.ast )
-                for $_<EXPR>
-        }
+	$args.push( $_.ast )
+	    for $<EXPR>;
 
         make $args;
     }

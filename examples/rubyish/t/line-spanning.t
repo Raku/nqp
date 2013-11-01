@@ -5,6 +5,11 @@ a=[10,
 
 puts "#{a[1]? 'ok' : 'nok'} 1 - array spanning lines"
 
+=begin
+This is a multi-line comment and can span as many lines as you
+like. But =begin and =end should appear at the start of line only.
+#{exit 42}
+=end
 
 b = [30 # some comments
 ,
