@@ -12,6 +12,7 @@ use NQP::Configure qw(cmp_rev read_parrot_config gen_moar
                       fill_template_file fill_template_text
                       slurp system_or_die verify_install sorry gen_parrot);
 
+my %known_backends = (parrot => 1, jvm => 1, moar => 1);
 MAIN: {
     if (-r "config.default") {
         unshift @ARGV, shellwords(slurp('config.default'));
@@ -44,7 +45,6 @@ MAIN: {
 
     my $default_backend;
     my %backends;
-    my %known_backends = (parrot => 1, jvm => 1, moar => 1);
     if ($options{backends}) {
         for my $be (split /,/, $options{backends}) {
             $be = lc $be;
@@ -301,13 +301,14 @@ MAIN: {
 
 #  Print some help text.
 sub print_help {
-    print <<'END';
+    my $backends = join ',',keys %known_backends;
+    print <<"END";
 Configure.pl - NQP Configure
 
 General Options:
     --help             Show this text
     --prefix=dir       Install files in dir
-    --backends=list    Backends to use: parrot,jvm,moar
+    --backends=list    Backends to use: $backends
     --with-parrot=path/to/bin/parrot
                        Parrot executable to use to build NQP
     --gen-parrot[=branch]
