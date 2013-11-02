@@ -3,11 +3,14 @@ package org.perl6.nqp.runtime;
 import com.sun.jna.NativeLibrary;
 import com.sun.jna.Pointer;
 
+import static org.perl6.nqp.runtime.CallSiteDescriptor.*;
+
 import org.perl6.nqp.sixmodel.REPR;
 import org.perl6.nqp.sixmodel.REPRRegistry;
 import org.perl6.nqp.sixmodel.SixModelObject;
 
 import org.perl6.nqp.sixmodel.reprs.CPointerInstance;
+import org.perl6.nqp.sixmodel.reprs.CStrInstance;
 import org.perl6.nqp.sixmodel.reprs.NativeCallInstance;
 import org.perl6.nqp.sixmodel.reprs.NativeCallBody;
 import org.perl6.nqp.sixmodel.reprs.NativeCallBody.ArgType;
@@ -67,6 +70,7 @@ public final class NativeCallOps {
             /* Wrap returned in the appropriate REPR type. */
             return toNQPType(tc, call.ret_type, returns, returned);
         }
+        catch (ControlException e) { throw e; }
         catch (Throwable t) {
             throw ExceptionHandling.dieInternal(tc, t);
         }
@@ -140,9 +144,18 @@ public final class NativeCallOps {
             return new Double((double) o.get_num(tc));
         case ASCIISTR:
         case UTF8STR:
-        case UTF16STR:
+        case UTF16STR: {
             /* TODO: Handle encodings. */
-            return o.get_str(tc);
+            SixModelObject meth = Ops.findmethod(o, "cstr", tc);
+            if (meth != null) {
+                Ops.invokeDirect(tc, meth, new CallSiteDescriptor(new byte[] { ARG_OBJ }, null), new Object[] { o });
+                CStrInstance cstr = (CStrInstance) Ops.decont(Ops.result_o(tc.resultFrame()), tc);
+                return cstr.cstr;
+            }
+            else {
+                return o.get_str(tc);
+            }
+        }
         case CPOINTER:
             return ((CPointerInstance) o).pointer;
         default:
