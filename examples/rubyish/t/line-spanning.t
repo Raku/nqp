@@ -1,4 +1,4 @@
-puts "1..6"
+puts "1..11"
 
 a=[10,
    20]
@@ -23,7 +23,7 @@ h = {"a" => 10,
  , 20
 , "c" => 30
 }
-puts "#{h<c>? 'ok' : 'nok'} 3 - hash spanning lines"
+puts "#{h<c> == 30? 'ok' : 'nok'} 3 - hash spanning lines"
 
 def tricky(k,
    n, desc)
@@ -42,3 +42,25 @@ tricky(
 
 puts \
   "ok 6 - \\ line continuation"
+
+heredoc = <<EOF
+ok 7 - heredoc line 1
+ok 8 - heredoc line 2
+EOF
+puts heredoc
+
+heredoc2 = <<'EOF'
+ok 9 - heredoc2
+EOF
+puts heredoc2
+
+tst = 10
+
+theredoc = <<"THE_END"
+ok #{tst} - heredoc interpolating line 1
+ok #{tst += 1} - heredoc interpolating line 2
+THE_END
+puts theredoc
+
+
+

@@ -42,7 +42,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
     proto token template-nibble {*}
     token template-nibble:sym<interp>     { <interp> }
     token template-nibble:sym<stray-tag>  { [<.tmpl-unesc>|<.tmpl-hdr>] <.panic("Stray tag, e.g. '%>' or '<?rbi?>'")> }
-    token template-nibble:sym<plain-text> { [<!before [<tmpl-esc>|'#{'|$]> .]+ }
+    token template-nibble:sym<literal> { [<!before [<tmpl-esc>|'#{'|$]> .]+ }
 
     token tmpl-hdr   {'<?rbi?>' \h* \n? <?{$*IN_TEMPLATE := 1}>}
     token tmpl-esc   {\h* '<%'
@@ -82,9 +82,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
 
     rule signature {
         :my $*IN_PARENS := 1;
-        <param>* % <comma>
-        [ ',' '*' <slurpy=.param> ]?
-        ','?
+        [ <param> | '*' <slurpy=.param> <!before ','>]* % ','
     }
 
     token param { <ident> }
@@ -155,6 +153,20 @@ grammar Rubyish::Grammar is HLL::Grammar {
                                  | Q <?before [.]> <quote_EXPR: ':qq'>
                                  ]
                              }
+
+    token value:sym<heredoc> {'<<'<heredoc>}
+
+    proto token heredoc {*}
+    token heredoc:sym<literal>  {[$<marker>=<.ident> | \' $<marker>=<- [\' \n]>+? \' ]\n
+				     $<text>=.*?
+				 \n$<marker>$$
+    }
+
+    token chars    {\n? [<!before ['#{']> \N]+ | \n }
+    token heredoc:sym<interp> {\" $<marker>=<- [\" \n]>+? \"\n
+				   [<text=.interp> | <text=.chars> ]*?
+			       \n$<marker>$$
+    }
 
     token paren-list {
          :my $*IN_PARENS := 1;
@@ -389,7 +401,7 @@ class Rubyish::Actions is HLL::Actions {
         make $<interp>.ast
     }
 
-    method template-nibble:sym<plain-text>($/) {
+    method template-nibble:sym<literal>($/) {
         make QAST::SVal.new( :value(~$/) );
     }
 
@@ -580,15 +592,19 @@ class Rubyish::Actions is HLL::Actions {
 
     method signature($/) {
         my @params;
-        for $<param> {
-              @params.push(QAST::Var.new(
-                :name(~$_), :scope('lexical'), :decl('param')
-            ));
-        }
 
-        @params.push(QAST::Var.new(
-                :name(~$<slurpy>), :scope('lexical'), :decl('param'), :slurpy<1>
-            )) if $<slurpy>;
+	if $<param> {
+	    @params.push(QAST::Var.new(
+			     :name(~$_), :scope('lexical'), :decl('param')
+			 ))
+		for $<param>;
+	}
+
+	if $<slurpy> {
+	    @params.push(QAST::Var.new(
+			     :name(~$<slurpy>[0]), :scope('lexical'), :decl('param'), :slurpy<1>
+			 ));
+	}
 
         make @params;
     }
@@ -622,6 +638,7 @@ class Rubyish::Actions is HLL::Actions {
 
         make $class_stmts;
     }
+
     method classbody($/) {
         $*CUR_BLOCK.push($<stmtlist>.ast);
         $*CUR_BLOCK.blocktype('immediate');
@@ -652,6 +669,27 @@ class Rubyish::Actions is HLL::Actions {
 
     method string($/) {
         make $<quote_EXPR>.ast;
+    }
+
+    method value:sym<heredoc>($/) {
+	make $<heredoc>.ast
+    }
+
+    method heredoc:sym<literal>($/) {
+	make QAST::SVal.new( :value( ~$<text> ) );
+    }
+
+    method chars ($/) { make QAST::SVal.new( :value(~$/) ) }
+
+    method heredoc:sym<interp>($/) {
+	my $list := QAST::Op.new( :op<list> );
+
+	$list.push($_.ast)
+	    for $<text>;
+
+	make QAST::Op.new( :op<join>,
+			   QAST::SVal.new( :value('') ),
+			   $list );
     }
 
     method value:sym<integer>($/) {
@@ -792,8 +830,8 @@ class Rubyish::Actions is HLL::Actions {
                 $block.push($_);
                 $block.symbol($_.name, :declared(1));
             }
-        }
-        $block.push($<stmtlist>.ast);
+        } 
+       $block.push($<stmtlist>.ast);
 
         make  QAST::Op.new(:op<takeclosure>, $block );
     }

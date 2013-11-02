@@ -1,4 +1,4 @@
-puts "1..11"
+puts "1..12"
 
 $a = "ok 1"
 a = "ok 2"
@@ -13,27 +13,31 @@ end
 some_sub()
 
 class MyClass
-  def set_class(v); @@c = v; end
-  def get_class; @@c; end
+  @@final_test = 12
+  a = 'wtf'
 
-  def set_inst(v); @i = v; end
-  def get_inst; @i; end
+  def set_class(v); @@c = v; b = 'wtf'; end
+  def get_class; @@c;                   end
+  def set_inst(v); @i = v;              end
+  def get_inst; @i;                     end
+  def class_const; @@final_test ;       end
+
 end
 
 class OtherClass
   def set_class(v); @@c = v; end
-  def get_class; @@c; end
+  def get_class; @@c;        end
 end
+
+obj1 = MyClass.new;
+obj2 = MyClass.new;
+obj3 = OtherClass.new;
 
 puts "#{$a} - $a (global)"
 puts "#{a} - a (local)"
 puts "#{b} - b (local)"
 puts "#{$c} - $c (global)"
 puts "#{$d} - $d (global)"
-
-obj1 = MyClass.new;
-obj2 = MyClass.new;
-obj3 = OtherClass.new;
 
 @e=6
 puts "ok #{@e} - @gobal"
@@ -50,3 +54,4 @@ obj2.set_inst(11)
 
 puts "ok #{obj1.get_inst} - instance access"
 puts "ok #{obj2.get_inst} - instance access"
+puts "ok #{obj2.class_const} - class constant"
