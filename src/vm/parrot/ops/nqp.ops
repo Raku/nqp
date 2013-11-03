@@ -3704,8 +3704,8 @@ inline op nqp_getlexrelcaller(out PMC, in PMC, in STR) :base_core {
 }
 
 inline op nqp_delete_f(out INT, in STR) :base_core {
-#ifdef WIN32
     char* const filename = Parrot_str_to_platform_cstring(interp, $2);
+#ifdef WIN32
     DWORD attrs          = GetFileAttributesA(filename);
     INTVAL ret;
 
@@ -3724,7 +3724,6 @@ inline op nqp_delete_f(out INT, in STR) :base_core {
 
     $1 = ret;
 #else
-    char* const filename = Parrot_str_to_platform_cstring(interp, $2);
     $1 = unlink(filename);
 #endif
 }
@@ -3740,32 +3739,23 @@ inline op nqp_spawn(out INT, in PMC, in STR, in PMC) {
 }
 
 inline op nqp_shell(out INT, in STR, in STR, in PMC) {
-#ifdef WIN32
     STRING *dir = $3;  
     PMC *env = $4;
     STRING * const old_cwd = Parrot_file_getcwd(interp);
     PMC * command = Parrot_pmc_new(interp, enum_class_ResizableStringArray);
+#ifdef WIN32
     const STRING *comspec = Parrot_str_new(interp, "ComSpec", 0);
     VTABLE_push_string(interp, command, Parrot_getenv(interp, comspec));
     VTABLE_push_string(interp, command, Parrot_str_new_constant(interp, "/c"));
-    VTABLE_push_string(interp, command, $2);
-
-    Parrot_file_chdir(interp, dir);
-    $1 = Run_OS_Command(interp, command, env);
-    Parrot_file_chdir(interp, old_cwd);
 #else
-    STRING *dir = $3;  
-    PMC *env = $4;
-    STRING * const old_cwd = Parrot_file_getcwd(interp);
-    PMC * command = Parrot_pmc_new(interp, enum_class_ResizableStringArray);
     VTABLE_push_string(interp, command, Parrot_str_new_constant(interp, "sh"));
     VTABLE_push_string(interp, command, Parrot_str_new_constant(interp, "-c"));
+#endif
     VTABLE_push_string(interp, command, $2);
 
     Parrot_file_chdir(interp, dir);
     $1 = Run_OS_Command(interp, command, env);
     Parrot_file_chdir(interp, old_cwd);
-#endif
 }
 
 inline op nqp_getenvhash(out PMC) {
