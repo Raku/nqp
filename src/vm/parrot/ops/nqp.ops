@@ -361,13 +361,9 @@ static char **pack_arg_array(Parrot_Interp interp, PMC* array_pmc) {
 
     if (array_size > 0) {
         for (i = 0; i < array_size; i++) {
-            PMC *pmc          = VTABLE_get_pmc_keyed_int(interp, array_pmc, i);
-            STRING *str       = (STRING *)VTABLE_get_string(interp, pmc);
-#ifdef Win32
-            (char *)packed[i] = Parrot_str_to_cstring(interp, str);
-#else
-            packed[i] = Parrot_str_to_cstring(interp, str);
-#endif
+            PMC *pmc    = VTABLE_get_pmc_keyed_int(interp, array_pmc, i);
+            STRING *str = (STRING *)VTABLE_get_string(interp, pmc);
+            packed[i]   = Parrot_str_to_cstring(interp, str);
         }
     }
     packed[i] = NULL;
@@ -375,6 +371,7 @@ static char **pack_arg_array(Parrot_Interp interp, PMC* array_pmc) {
     return packed;
 }
 
+#ifdef WIN32
 static int is_space(unsigned char c) {
     return c == 0x09 || c == 0x0A || c == 0x0B
         || c == 0x0C || c == 0x0D || c == 0x20
@@ -432,7 +429,6 @@ static char *create_command_line(const char *const *args) {
      * always, making for the convolutions below :-(
      */
 
-#ifdef WIN32
     if (cname) {
         if (!clen)
             clen = strlen(cname);
@@ -463,12 +459,11 @@ static char *create_command_line(const char *const *args) {
             }
         }
     }
-#endif
 
     for (index = 0; (arg = (char*)args[index]) != NULL; ++index) {
         size_t curlen = strlen(arg);
         if (!(arg[0] == '"' && arg[curlen-1] == '"'))
-            len += 2;	/* assume quoting needed (worst case) */
+            len += 2;  /* assume quoting needed (worst case) */
         len += curlen + 1;
     }
 
@@ -525,7 +520,6 @@ static char *create_command_line(const char *const *args) {
         if (args[index+1])
             *ptr++ = ' ';
 
-#ifdef WIN32
         if (!extra_quotes
         && cmd_shell
         && curlen >= 2
@@ -544,7 +538,6 @@ static char *create_command_line(const char *const *args) {
                 }
             }
         }
-#endif
     }
 
     if (extra_quotes)
@@ -554,28 +547,22 @@ static char *create_command_line(const char *const *args) {
 
     return cmd;
 }
-#ifdef WIN32
-static INTVAL Run_OS_Command(PARROT_INTERP, STRING *command, PMC *env_hash)
+
+static INTVAL Run_OS_Command(PARROT_INTERP, PMC *command, PMC *env_hash)
 {
     DWORD status = 0;
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
-    const STRING *comspec = Parrot_str_new(interp, "ComSpec", 0);
-    char* const cmd       = (char *)mem_sys_allocate(command->strlen + 4);
-    char* const shell     = Parrot_str_to_cstring(interp, Parrot_getenv(interp, comspec));
-    char* const cmdin     = Parrot_str_to_cstring(interp, command);
-    char* const env = pack_env_hash(interp, env_hash);
-
-    strcpy(cmd, "/c ");
-    strcat(cmd, cmdin);
-    Parrot_str_free_cstring(cmdin);
+    const char *env         = pack_env_hash(interp, env_hash);
+    const char *const *argv = pack_arg_array(interp, command);
+    const char *cmd         = create_command_line(argv);
 
     memset(&si, 0, sizeof (si));
     si.cb = sizeof (si);
     memset(&pi, 0, sizeof (pi));
 
     /* Start the child process. */
-    if (!CreateProcess(shell, cmd, NULL, NULL, TRUE, 0, env, NULL, &si, &pi))
+    if (!CreateProcess(NULL, cmd, NULL, NULL, TRUE, 0, env, NULL, &si, &pi))
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_NOSPAWN,
             "Can't spawn child process");
 
@@ -587,7 +574,6 @@ static INTVAL Run_OS_Command(PARROT_INTERP, STRING *command, PMC *env_hash)
     }
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
-    Parrot_str_free_cstring(shell);
     Parrot_str_free_cstring(env);
     mem_sys_free(cmd);
 
@@ -619,7 +605,7 @@ static char ** pack_env_hash(Parrot_Interp interp, PMC* hash_pmc) {
     return packed;
 }
 
-static void free_packed_env(char **env) {
+static void free_packed(char **env) {
     INTVAL i = 0;
     while (env[i]) {
         Parrot_str_free_cstring(env[i]);
@@ -627,7 +613,7 @@ static void free_packed_env(char **env) {
     }
     mem_sys_free(env);
 }
-static INTVAL Run_OS_Command(PARROT_INTERP, STRING *command, PMC *env_hash)
+static INTVAL Run_OS_Command(PARROT_INTERP, PMC *command, PMC *env_hash)
 {
     pid_t child;
     child = fork();
@@ -645,12 +631,17 @@ static INTVAL Run_OS_Command(PARROT_INTERP, STRING *command, PMC *env_hash)
     }
     else {
         /* child */
-        char * const cmd    = Parrot_str_to_cstring(interp, command);
-        char **env = pack_env_hash(interp,env_hash);
-        const int    status = execle("/bin/sh", "sh", "-c", cmd, (void *)NULL, env); 
+        char **saved = environ;
+        char   **cmd = pack_arg_array(interp, command);
+        char   **env = pack_env_hash(interp, env_hash);
+        char   *prog = cmd[0];
+        int status;
+        environ = env;
+        status  = execvp(prog, cmd); 
         /* if we get here, something's horribly wrong, but free anyway... */
-        Parrot_str_free_cstring(cmd);
-        free_packed_env(env);
+        free_packed(env);
+        free_packed(cmd);
+        environ = saved;
 
         if (status)
             PARROT_FORCE_EXIT(status);
@@ -3741,27 +3732,40 @@ inline op nqp_delete_f(out INT, in STR) :base_core {
 inline op nqp_spawn(out INT, in PMC, in STR, in PMC) {
     STRING *dir            = $3;
     PMC *env               = $4;
-    char *const *argv      = pack_arg_array(interp, $2);
-    char *args             = create_command_line(argv);
-    STRING *command        = Parrot_str_new(interp, args, 0);
     STRING * const old_cwd = Parrot_file_getcwd(interp);
-    Parrot_str_free_cstring(args);
 
     Parrot_file_chdir(interp, dir);
-    $1 = Run_OS_Command(interp, command, env);
+    $1 = Run_OS_Command(interp, $2, env);
     Parrot_file_chdir(interp, old_cwd);
 }
 
 inline op nqp_shell(out INT, in STR, in STR, in PMC) {
-     STRING *command = $2;  
-     STRING *dir = $3;  
-     PMC *env = $4;
+#ifdef WIN32
+    STRING *dir = $3;  
+    PMC *env = $4;
+    STRING * const old_cwd = Parrot_file_getcwd(interp);
+    PMC * command = Parrot_pmc_new(interp, enum_class_ResizableStringArray);
+    const STRING *comspec = Parrot_str_new(interp, "ComSpec", 0);
+    VTABLE_push_string(interp, command, Parrot_getenv(interp, comspec));
+    VTABLE_push_string(interp, command, Parrot_str_new_constant(interp, "/c"));
+    VTABLE_push_string(interp, command, $2);
 
-     STRING * const old_cwd = Parrot_file_getcwd(interp);
+    Parrot_file_chdir(interp, dir);
+    $1 = Run_OS_Command(interp, command, env);
+    Parrot_file_chdir(interp, old_cwd);
+#else
+    STRING *dir = $3;  
+    PMC *env = $4;
+    STRING * const old_cwd = Parrot_file_getcwd(interp);
+    PMC * command = Parrot_pmc_new(interp, enum_class_ResizableStringArray);
+    VTABLE_push_string(interp, command, Parrot_str_new_constant(interp, "sh"));
+    VTABLE_push_string(interp, command, Parrot_str_new_constant(interp, "-c"));
+    VTABLE_push_string(interp, command, $2);
 
-     Parrot_file_chdir(interp, dir);
-     $1 = Run_OS_Command(interp, command, env);
-     Parrot_file_chdir(interp, old_cwd);
+    Parrot_file_chdir(interp, dir);
+    $1 = Run_OS_Command(interp, command, env);
+    Parrot_file_chdir(interp, old_cwd);
+#endif
 }
 
 inline op nqp_getenvhash(out PMC) {
