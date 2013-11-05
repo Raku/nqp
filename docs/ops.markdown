@@ -1635,6 +1635,12 @@ Exit nqp, using the given status as the compiler's exit value.
 Returns a hash containing the environment variables.
 Changing the hash doesn't affect the environment variables
 
+## backendconfig
+* `backendconfig()`
+
+Returns a hash containing backend-specific information, like backend-version,
+configure and build flags.
+
 ## getpid
 * `getpid()`
 
