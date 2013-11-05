@@ -642,7 +642,7 @@ the result of `$cond`.
 If the `$cond` evaluates to defined value, return it, otherwise, evaluate
 the `$body`.
 
-## repeat\_until
+## repeat_until
 * `repeat_until(Block $condition, Block $body)`
 * `repeat_until(Block $condition, Block $body, Block $post)`
 
@@ -651,7 +651,7 @@ only if the condition returns 0.
 
 If a `$post` block is present, run that at the end, regardless of `$condition`.
 
-## repeat\_while
+## repeat_while
 * `repeat_while(Block $condition, Block $body)`
 * `repeat_while(Block $condition, Block $body, Block $post)`
 
@@ -1562,61 +1562,61 @@ variable. Same as the `:=` operator in NQP.
 Not actually an opcode, but a collection of several constants. Each of the
 constants below can be used in nqp as (e.g.) `nqp::const::CCLASS_ANY`. 
 
-    * CCLASS\_ANY
-    * CCLASS\_UPPERCASE
-    * CCLASS\_LOWERCASE
-    * CCLASS\_ALPHABETIC
-    * CCLASS\_NUMERIC
-    * CCLASS\_HEXADECIMAL
-    * CCLASS\_WHITESPACE
-    * CCLASS\_PRINTING
-    * CCLASS\_BLANK
-    * CCLASS\_CONTROL
-    * CCLASS\_PUNCTUATION
-    * CCLASS\_ALPHANUMERIC
-    * CCLASS\_NEWLINE
-    * CCLASS\_WORD
+    * CCLASS_ANY
+    * CCLASS_UPPERCASE
+    * CCLASS_LOWERCASE
+    * CCLASS_ALPHABETIC
+    * CCLASS_NUMERIC
+    * CCLASS_HEXADECIMAL
+    * CCLASS_WHITESPACE
+    * CCLASS_PRINTING
+    * CCLASS_BLANK
+    * CCLASS_CONTROL
+    * CCLASS_PUNCTUATION
+    * CCLASS_ALPHANUMERIC
+    * CCLASS_NEWLINE
+    * CCLASS_WORD
 
-    * HLL\_ROLE\_NONE
-    * HLL\_ROLE\_INT
-    * HLL\_ROLE\_NUM
-    * HLL\_ROLE\_STR
-    * HLL\_ROLE\_ARRAY
-    * HLL\_ROLE\_HASH
-    * HLL\_ROLE\_CODE
+    * HLL_ROLE_NONE
+    * HLL_ROLE_INT
+    * HLL_ROLE_NUM
+    * HLL_ROLE_STR
+    * HLL_ROLE_ARRAY
+    * HLL_ROLE_HASH
+    * HLL_ROLE_CODE
 
-    * CONTROL\_TAKE
-    * CONTROL\_LAST
-    * CONTROL\_NEXT
-    * CONTROL\_REDO
-    * CONTROL\_SUCCEED
-    * CONTROL\_PROCEED
-    * CONTROL\_WARN
+    * CONTROL_TAKE
+    * CONTROL_LAST
+    * CONTROL_NEXT
+    * CONTROL_REDO
+    * CONTROL_SUCCEED
+    * CONTROL_PROCEED
+    * CONTROL_WARN
 
-    * STAT\_EXISTS
-    * STAT\_FILESIZE
-    * STAT\_ISDIR
-    * STAT\_ISREG
-    * STAT\_ISDEV
-    * STAT\_CREATETIME
-    * STAT\_ACCESSTIME
-    * STAT\_MODIFYTIME
-    * STAT\_CHANGETIME
-    * STAT\_BACKUPTIME
-    * STAT\_UID
-    * STAT\_GID
-    * STAT\_ISLNK
-    * STAT\_PLATFORM\_DEV
-    * STAT\_PLATFORM\_INODE
-    * STAT\_PLATFORM\_MODE
-    * STAT\_PLATFORM\_NLINKS
-    * STAT\_PLATFORM\_DEVTYPE
-    * STAT\_PLATFORM\_BLOCKSIZE
-    * STAT\_PLATFORM\_BLOCKS
+    * STAT_EXISTS
+    * STAT_FILESIZE
+    * STAT_ISDIR
+    * STAT_ISREG
+    * STAT_ISDEV
+    * STAT_CREATETIME
+    * STAT_ACCESSTIME
+    * STAT_MODIFYTIME
+    * STAT_CHANGETIME
+    * STAT_BACKUPTIME
+    * STAT_UID
+    * STAT_GID
+    * STAT_ISLNK
+    * STAT_PLATFORM_DEV
+    * STAT_PLATFORM_INODE
+    * STAT_PLATFORM_MODE
+    * STAT_PLATFORM_NLINKS
+    * STAT_PLATFORM_DEVTYPE
+    * STAT_PLATFORM_BLOCKSIZE
+    * STAT_PLATFORM_BLOCKS
 
-    * TYPE\_CHECK\_CACHE\_DEFINITIVE
-    * TYPE\_CHECK\_CACHE\_THEN\_METHOD
-    * TYPE\_CHECK\_NEEDS\_ACCEPTS
+    * TYPE_CHECK_CACHE_DEFINITIVE
+    * TYPE_CHECK_CACHE_THEN_METHOD
+    * TYPE_CHECK_NEEDS_ACCEPTS
 
 ## debugnoop
 * `debugnoop(Mu $a)`
@@ -1671,7 +1671,7 @@ an integral number of seconds, `_n` returns a fractional amount.
 
 # Native Call / Interoperability Opcodes
 
-## x\_posixerrno
+## x_posixerrno
 * `x_posixerrno()`
 
 Returns an int that corresponds to the value of POSIX's errno.
