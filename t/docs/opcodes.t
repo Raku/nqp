@@ -7,17 +7,20 @@ my %documented_ops := find_documented_opcodes();
 my %ops := hash_of_vms();
 
 %ops<jvm> := find_opcodes(
-    :file("src/vm/jvm/QAST/Compiler.nqp"),
+    :files(["src/vm/jvm/QAST/Compiler.nqp"]),
     :keywords(<map_classlib_core_op add_core_op map_jvm_core_op>)
 );
 
 %ops<parrot> := find_opcodes(
-    :file("src/vm/parrot/QAST/Operations.nqp"),
-    :keywords(<add_core_op add_core_pirop_mapping>)
+    :files([
+        "src/vm/parrot/QAST/Operations.nqp",
+        "src/vm/parrot/NQP/Ops.nqp"
+    ]),
+    :keywords(<add_core_op add_core_pirop_mapping add_hll_op>)
 );
 
 %ops<moar> := find_opcodes(
-    :file("src/vm/moar/QAST/QASTOperationsMAST.nqp"),
+    :files(["src/vm/moar/QAST/QASTOperationsMAST.nqp"]),
     :keywords(<add_core_op add_core_moarop_mapping>)
 );
 
@@ -53,14 +56,17 @@ for @*vms -> $vm {
     }
 }
 
-sub find_opcodes(:$file, :@keywords) {
+sub find_opcodes(:@files, :@keywords) {
     my %ops := nqp::hash();
-    my @lines := nqp::split("\n", nqp::readallfh(nqp::open($file,"r")));
-    for @lines -> $line {
-        next unless $line ~~ / @keywords /;
-        $line := nqp::split("'", $line)[1];
-        next unless nqp::chars($line);
-        %ops{$line} := 1;
+    for @files -> $file {
+        my @lines := nqp::split("\n", nqp::readallfh(nqp::open($file,"r")));
+        for @lines -> $line {
+            next unless $line ~~ / @keywords /;
+            my @pieces := nqp::split("'", $line);
+            $line := @pieces[1] eq 'nqp' ?? @pieces[3] !! @pieces[1];
+            next unless nqp::chars($line);
+            %ops{$line} := 1;
+        }
     }
     return %ops;
 }
