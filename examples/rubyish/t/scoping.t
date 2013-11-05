@@ -1,26 +1,26 @@
-puts "1..12"
+puts "1..13"
 
-$a = "ok 1"
-a = "ok 2"
-b = "ok 3"
+a = "ok 1"
+b = "ok 2"
+$a = "ok 3"
 $c = "nok 4"
 
 def some_sub 
-    b = "nok 3"
+    b = "nok 2"
     $c = "ok 4"
     $d = "ok 5"
 end
 some_sub()
 
 class MyClass
-  @@final_test = 12
-  a = 'wtf'
+  @@final_test = 13
 
   def set_class(v); @@c = v; b = 'wtf'; end
   def get_class; @@c;                   end
   def set_inst(v); @i = v;              end
   def get_inst; @i;                     end
   def class_const; @@final_test ;       end
+  def tickle_f(f); @f = f ;             end
 
 end
 
@@ -33,25 +33,28 @@ obj1 = MyClass.new;
 obj2 = MyClass.new;
 obj3 = OtherClass.new;
 
-puts "#{$a} - $a (global)"
-puts "#{a} - a (local)"
-puts "#{b} - b (local)"
-puts "#{$c} - $c (global)"
-puts "#{$d} - $d (global)"
+obj1.set_class(8)
+obj3.set_class(10)
+
+puts "#{a} - local: main"
+puts "#{b} - local: main, function"
+puts "#{$a} - $global: main"
+puts "#{$c} - $global: main, function"
+puts "#{$d} - $global: function"
 
 @e=6
-puts "ok #{@e} - @gobal"
+@f='ok'
+obj1.tickle_f('nok')
+puts "ok #{@e} - @instance: main"
+puts "#{@f} 7 - @instance: main, object"
 
-obj1.set_class(7)
-obj3.set_class(9)
+puts "ok #{obj1.get_class} - @@class access"
+puts "ok #{obj2.get_class() + 1} - @@class access"
+puts "ok #{obj3.get_class} - @@class variable"
 
-puts "ok #{obj1.get_class} - class access"
-puts "ok #{obj2.get_class() + 1} - class access"
-puts "ok #{obj3.get_class} - class variable"
+obj1.set_inst(11)
+obj2.set_inst(12)
 
-obj1.set_inst(10)
-obj2.set_inst(11)
-
-puts "ok #{obj1.get_inst} - instance access"
-puts "ok #{obj2.get_inst} - instance access"
-puts "ok #{obj2.class_const} - class constant"
+puts "ok #{obj1.get_inst} - @instance access"
+puts "ok #{obj2.get_inst} - @instance access"
+puts "ok #{obj2.class_const} - @@class constant"

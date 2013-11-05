@@ -1,4 +1,4 @@
-puts "1..11"
+puts "1..13"
 
 a=[10,
    20]
@@ -62,5 +62,6 @@ ok #{tst += 1} - heredoc interpolating line 2
 THE_END
 puts theredoc
 
-
-
+print "ok 12 - multi-line string line 1
+ok 13 - multi-line string line 2
+"
