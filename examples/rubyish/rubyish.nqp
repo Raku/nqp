@@ -85,7 +85,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
         [ <param> | '*' <slurpy=.param> <!before ','>]* % ','
     }
 
-    token param { <ident> }
+    token param { <ident> [:s<hs> '=' <EXPR>]?}
 
     token stmt:sym<class> {
         :my $*IN_CLASS := 1;
@@ -158,14 +158,14 @@ grammar Rubyish::Grammar is HLL::Grammar {
 
     proto token heredoc {*}
     token heredoc:sym<literal>  {[$<marker>=<.ident> | \' $<marker>=<- [\' \n]>+? \' ]\n
-				     $<text>=.*?
-				 \n$<marker>$$
+                                     $<text>=.*?
+                                 \n$<marker>$$
     }
 
     token chars    {\n? [<!before ['#{']> \N]+ | \n }
     token heredoc:sym<interp> {\" $<marker>=<- [\" \n]>+? \"\n
-				   [<text=.interp> | <text=.chars> ]*?
-			       \n$<marker>$$
+                                   [<text=.interp> | <text=.chars> ]*?
+                               \n$<marker>$$
     }
 
     token paren-list {
@@ -456,8 +456,8 @@ class Rubyish::Actions is HLL::Actions {
     method hash-args($/) {
         my $args := QAST::Op.new( :op<hash> );
 
-	$args.push( $_.ast )
-	    for $<EXPR>;
+        $args.push( $_.ast )
+            for $<EXPR>;
 
         make $args;
     }
@@ -590,21 +590,30 @@ class Rubyish::Actions is HLL::Actions {
         make $*CUR_BLOCK;
     }
 
+    method param($/) {
+       my $param := QAST::Var.new(
+           :name(~$<ident>), :scope('lexical'), :decl('param')
+          );
+
+       $param.default( $<EXPR>.ast )
+          if $<EXPR>;
+
+       make $param;
+    }
+
     method signature($/) {
         my @params;
 
-	if $<param> {
-	    @params.push(QAST::Var.new(
-			     :name(~$_), :scope('lexical'), :decl('param')
-			 ))
-		for $<param>;
-	}
+        if $<param> {
+            @params.push($_.ast)
+                for $<param>;
+        }
 
-	if $<slurpy> {
-	    @params.push(QAST::Var.new(
-			     :name(~$<slurpy>[0]), :scope('lexical'), :decl('param'), :slurpy<1>
-			 ));
-	}
+        if $<slurpy> {
+            @params.push(QAST::Var.new(
+                             :name(~$<slurpy>[0]), :scope('lexical'), :decl('param'), :slurpy<1>
+                         ));
+        }
 
         make @params;
     }
@@ -672,24 +681,24 @@ class Rubyish::Actions is HLL::Actions {
     }
 
     method value:sym<heredoc>($/) {
-	make $<heredoc>.ast
+        make $<heredoc>.ast
     }
 
     method heredoc:sym<literal>($/) {
-	make QAST::SVal.new( :value( ~$<text> ) );
+        make QAST::SVal.new( :value( ~$<text> ) );
     }
 
     method chars ($/) { make QAST::SVal.new( :value(~$/) ) }
 
     method heredoc:sym<interp>($/) {
-	my $list := QAST::Op.new( :op<list> );
+        my $list := QAST::Op.new( :op<list> );
 
-	$list.push($_.ast)
-	    for $<text>;
+        $list.push($_.ast)
+            for $<text>;
 
-	make QAST::Op.new( :op<join>,
-			   QAST::SVal.new( :value('') ),
-			   $list );
+        make QAST::Op.new( :op<join>,
+                           QAST::SVal.new( :value('') ),
+                           $list );
     }
 
     method value:sym<integer>($/) {

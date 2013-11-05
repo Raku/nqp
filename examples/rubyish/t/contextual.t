@@ -1,6 +1,6 @@
-puts"1..8"
+puts"1..9"
 # These tests explore context sensitive parsing of variables vs methods
-def xx(n) ; 2 - n; end
+def xx(n=-7) ; 2 - n; end
 def three ; 3; end
 
 def zz(m)
@@ -23,3 +23,5 @@ puts "ok #{three + 1} - parameterless method arithmetic"
 puts "ok #{three() +2} - parameterless method + paren arithmetic"
 
 puts "ok #{zz 2} - method with args"
+puts "ok #{xx} - parameter defaulting"
+
