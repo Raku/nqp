@@ -1707,7 +1707,7 @@ QAST::MASTOperations.add_core_moarop_mapping('split', 'split');
 QAST::MASTOperations.add_core_moarop_mapping('chr', 'chr');
 QAST::MASTOperations.add_core_moarop_mapping('ordfirst', 'ordfirst');
 QAST::MASTOperations.add_core_moarop_mapping('ordat', 'ordat');
-QAST::MASTOperations.add_core_moarop_mapping('index_s', 'index_s');
+QAST::MASTOperations.add_core_moarop_mapping('indexfrom', 'index_s');
 QAST::MASTOperations.add_core_moarop_mapping('rindexfrom', 'rindexfrom');
 QAST::MASTOperations.add_core_moarop_mapping('substr_s', 'substr_s');
 QAST::MASTOperations.add_core_moarop_mapping('codepointfromname', 'getcpbyname');
@@ -1730,8 +1730,8 @@ QAST::MASTOperations.add_core_op('ord',  -> $qastcomp, $op {
 QAST::MASTOperations.add_core_op('index',  -> $qastcomp, $op {
     my @operands := $op.list;
     $qastcomp.as_mast(+@operands == 2
-        ?? QAST::Op.new( :op('index_s'), |@operands, QAST::IVal.new( :value(0)) )
-        !! QAST::Op.new( :op('index_s'), |@operands ));
+        ?? QAST::Op.new( :op('indexfrom'), |@operands, QAST::IVal.new( :value(0)) )
+        !! QAST::Op.new( :op('indexfrom'), |@operands ));
 });
 
 QAST::MASTOperations.add_core_op('rindex',  -> $qastcomp, $op {
