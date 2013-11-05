@@ -7,8 +7,11 @@ my %documented_ops := find_documented_opcodes();
 my %ops := hash_of_vms();
 
 %ops<jvm> := find_opcodes(
-    :files(["src/vm/jvm/QAST/Compiler.nqp"]),
-    :keywords(<map_classlib_core_op add_core_op map_jvm_core_op>)
+    :files([
+        "src/vm/jvm/QAST/Compiler.nqp",
+        "src/vm/jvm/NQP/Ops.nqp"
+    ]),
+    :keywords(<map_classlib_core_op add_core_op map_jvm_core_op add_hll_op>)
 );
 
 %ops<parrot> := find_opcodes(
@@ -20,8 +23,11 @@ my %ops := hash_of_vms();
 );
 
 %ops<moar> := find_opcodes(
-    :files(["src/vm/moar/QAST/QASTOperationsMAST.nqp"]),
-    :keywords(<add_core_op add_core_moarop_mapping>)
+    :files([
+        "src/vm/moar/QAST/QASTOperationsMAST.nqp",
+        "src/vm/moar/NQP/Ops.nqp"
+    ]),
+    :keywords(<add_core_op add_core_moarop_mapping add_hll_op>)
 );
 
 # Most backends programmatically add these ops - to keep our cheating simple,
