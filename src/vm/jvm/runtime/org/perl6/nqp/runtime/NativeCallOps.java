@@ -9,6 +9,7 @@ import org.perl6.nqp.sixmodel.REPR;
 import org.perl6.nqp.sixmodel.REPRRegistry;
 import org.perl6.nqp.sixmodel.SixModelObject;
 
+import org.perl6.nqp.sixmodel.reprs.CArrayInstance;
 import org.perl6.nqp.sixmodel.reprs.CPointerInstance;
 import org.perl6.nqp.sixmodel.reprs.CStrInstance;
 import org.perl6.nqp.sixmodel.reprs.NativeCallInstance;
@@ -118,6 +119,7 @@ public final class NativeCallOps {
             /* TODO: Handle encodings. */
             return String.class;
         case CPOINTER:
+        case CARRAY:
             return Pointer.class;
         default:
             ExceptionHandling.dieInternal(tc, String.format("Don't know correct Java class for %s arguments yet", target));
@@ -158,6 +160,8 @@ public final class NativeCallOps {
         }
         case CPOINTER:
             return ((CPointerInstance) o).pointer;
+        case CARRAY:
+            return ((CArrayInstance) o).storage;
         default:
             ExceptionHandling.dieInternal(tc, String.format("Don't know how to convert %s arguments to JNA yet", target));
         }
@@ -218,6 +222,12 @@ public final class NativeCallOps {
         case CPOINTER: {
             CPointerInstance cpointer = (CPointerInstance) nqpobj;
             cpointer.pointer = (Pointer) o;
+            break;
+        }
+        case CARRAY: {
+            CArrayInstance carray = (CArrayInstance) nqpobj;
+            carray.storage = (Pointer) o;
+            carray.managed = false;
             break;
         }
         default:
