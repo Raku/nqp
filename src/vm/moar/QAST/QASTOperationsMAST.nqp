@@ -1572,6 +1572,9 @@ QAST::MASTOperations.add_core_moarop_mapping('rename', 'rename_f', 0);
 QAST::MASTOperations.add_core_moarop_mapping('copy', 'copy_f', 0);
 # QAST::MASTOperations.add_core_moarop_mapping('symlink', ?);
 # QAST::MASTOperations.add_core_moarop_mapping('link', ?);
+QAST::MASTOperations.add_core_moarop_mapping('opendir', 'open_dir');
+QAST::MASTOperations.add_core_moarop_mapping('nextfiledir', 'read_dir');
+QAST::MASTOperations.add_core_moarop_mapping('closedir', 'close_dir');
 QAST::MASTOperations.add_core_op('sprintf', -> $qastcomp, $op {
     my @operands := $op.list;
     $qastcomp.as_mast(
