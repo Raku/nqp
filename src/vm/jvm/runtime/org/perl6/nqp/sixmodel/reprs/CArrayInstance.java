@@ -76,36 +76,18 @@ public class CArrayInstance extends SixModelObject {
 
         /* TODO: Die if this is a NUMERIC/INTEGER CArray. */
 
-        if (managed) {
-            if (index >= elems)
-                return repr_data.elem_type;
+        if (managed && index >= elems)
+            return repr_data.elem_type;
+        else if (index >= allocated)
+            expand(tc, index+1);
 
-            if (child_objs[intidx] != null) {
-                return child_objs[intidx];
-            }
-            else {
-                SixModelObject obj = makeObject(tc, storage.getPointer(index*repr_data.jna_size));
-                child_objs[intidx] = obj;
-                return obj;
-            }
+        if (child_objs[intidx] != null) {
+            return child_objs[intidx];
         }
         else {
-            if (index >= allocated)
-                expand(tc, index+1);
-
-            if (child_objs[intidx] != null)
-                return child_objs[intidx];
-            else {
-                Pointer ptr = storage.getPointer(index*repr_data.jna_size);
-                if (ptr != null) {
-                    SixModelObject obj = makeObject(tc, ptr);
-                    child_objs[intidx] = obj;
-                    return obj;
-                }
-                else {
-                    return repr_data.elem_type;
-                }
-            }
+            SixModelObject obj = makeObject(tc, storage.getPointer(index*repr_data.jna_size));
+            child_objs[intidx] = obj;
+            return obj;
         }
     }
 
@@ -200,9 +182,16 @@ public class CArrayInstance extends SixModelObject {
     private SixModelObject makeObject(ThreadContext tc, Pointer ptr) {
         CArrayREPRData repr_data = (CArrayREPRData) st.REPRData;
 
+        if (ptr == null)
+            return repr_data.elem_type;
+
         switch (repr_data.elem_kind) {
         case STRING:
             return NativeCallOps.toNQPType(tc, ArgType.UTF8STR, repr_data.elem_type, ptr.getString(0));
+        case CARRAY:
+            return NativeCallOps.toNQPType(tc, ArgType.CARRAY, repr_data.elem_type, ptr);
+        case CPOINTER:
+            return NativeCallOps.toNQPType(tc, ArgType.CPOINTER, repr_data.elem_type, ptr);
         default:
             ExceptionHandling.dieInternal(tc, "CArray can only makeObject strings");
         }

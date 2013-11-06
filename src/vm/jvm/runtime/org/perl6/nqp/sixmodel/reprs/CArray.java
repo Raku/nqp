@@ -87,6 +87,10 @@ public class CArray extends REPR {
             data.jna_size = Native.POINTER_SIZE;
             data.elem_kind = ElemKind.STRING;
         }
+        else if (data.elem_type.st.REPR instanceof CPointer) {
+            data.jna_size = Native.POINTER_SIZE;
+            data.elem_kind = ElemKind.CPOINTER;
+        }
         else {
             /* TODO: Remaining cases. */
             ExceptionHandling.dieInternal(tc, "CArray only handles ints and nums so far.");
