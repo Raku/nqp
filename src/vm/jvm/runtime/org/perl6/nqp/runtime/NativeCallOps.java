@@ -129,7 +129,7 @@ public final class NativeCallOps {
         return null;
     }
 
-    private static Object toJNAType(ThreadContext tc, SixModelObject o, ArgType target) {
+    public static Object toJNAType(ThreadContext tc, SixModelObject o, ArgType target) {
         o = Ops.decont(o, tc);
         switch (target) {
         case CHAR:
@@ -170,7 +170,7 @@ public final class NativeCallOps {
         return null;
     }
 
-    private static SixModelObject toNQPType(ThreadContext tc, ArgType target, SixModelObject type, Object o) {
+    public static SixModelObject toNQPType(ThreadContext tc, ArgType target, SixModelObject type, Object o) {
         SixModelObject nqpobj = null;
         if (target != ArgType.VOID)
             nqpobj = type.st.REPR.allocate(tc, type.st);

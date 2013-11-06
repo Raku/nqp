@@ -83,6 +83,10 @@ public class CArray extends REPR {
             }
             data.elem_kind = ElemKind.NUMERIC;
         }
+        else if ((ss.can_box & StorageSpec.CAN_BOX_STR) != 0) {
+            data.jna_size = Native.POINTER_SIZE;
+            data.elem_kind = ElemKind.STRING;
+        }
         else {
             /* TODO: Remaining cases. */
             ExceptionHandling.dieInternal(tc, "CArray only handles ints and nums so far.");
