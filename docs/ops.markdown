@@ -613,6 +613,33 @@ Return titlecase copy of string.
 
 Return a new string containing `$count` copies of `$str`.
 
+## sprintf
+* `sprintf(str $pattern, @values)`
+
+Returns a string formatted by the printf conventions similar to Perl 5 / C. Machine sized numeric
+types, their limits and therefor overflows are not implemented though.
+
+## sprintfdirectives
+* `sprintfdirectives(str $pattern)`
+
+This takes the same pattern as `sprintf` does, and computes the needed value-count that `sprintf`
+would have to provide.
+
+## sprintfaddargumenthandler
+* `sprintfaddargumenthandler(Mu $handler)`
+
+Lets you register a handler-instance that supports the sprintf op when it has to numify
+custom types. This handler has to provide two methods, `mine` and `int`. `mine` gets the
+the value in question and returns true if this handler is in charge for this type, false otherwise.
+The method `int` does the conversion for patterns like %d.
+
+```perl
+my class MyHandler {
+    method mine($x) { $x ~~ MyType }
+    method int($x) { $x.Int }
+}
+```
+
 # Conditional Opcodes
 
 ## if
