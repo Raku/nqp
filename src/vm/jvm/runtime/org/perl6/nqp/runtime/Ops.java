@@ -2083,6 +2083,7 @@ public final class Ops {
         return result_o(tc.curFrame);
     }
     public static String typeName(SixModelObject invocant, ThreadContext tc) {
+        invocant = decont(invocant, tc);
         SixModelObject how = invocant.st.HOW;
         SixModelObject nameMeth = findmethod(tc, how, "name");
         invokeDirect(tc, nameMeth, howObjCallSite, new Object[] { how, invocant });
