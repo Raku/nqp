@@ -3095,6 +3095,23 @@ public final class Ops {
         return val.substring((int)offset, end);
     }
 
+    // does haystack have needle as a substring at offset?
+    public static long string_equal_at(String haystack, String needle, long offset) {
+        long haylen = haystack.length();
+        long needlelen = needle.length();
+
+        if (offset < 0) {
+            offset += haylen;
+            if (offset < 0) {
+                offset = 0;
+            }
+        }
+        if (haylen - offset < needlelen) {
+            return 0;
+        }
+        return haystack.regionMatches((int)offset, needle, 0, (int)needlelen) ? 1 : 0;
+    }
+
     public static long ordfirst(String str) {
         return str.codePointAt(0);
     }

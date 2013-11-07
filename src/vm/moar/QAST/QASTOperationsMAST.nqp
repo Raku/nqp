@@ -1717,6 +1717,9 @@ QAST::MASTOperations.add_core_moarop_mapping('codepointfromname', 'getcpbyname')
 QAST::MASTOperations.add_core_moarop_mapping('encode', 'encode');
 QAST::MASTOperations.add_core_moarop_mapping('decode', 'decode');
 
+
+QAST::MASTOperations.add_core_moarop_mapping('eqat', 'eqat_s');
+
 QAST::MASTOperations.add_core_op('substr', -> $qastcomp, $op {
     my @operands := $op.list;
     if +@operands == 2 { nqp::push(@operands, QAST::IVal.new( :value(-1) )) }
