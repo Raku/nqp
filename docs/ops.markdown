@@ -1,4 +1,4 @@
-f# NQP Opcodes
+# NQP Opcodes
 
 Opcodes (ops) are used both directly when writing NQP, and during code
 generation in QAST nodes.
