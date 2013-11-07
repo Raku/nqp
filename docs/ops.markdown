@@ -1,4 +1,4 @@
-# NQP Opcodes
+f# NQP Opcodes
 
 Opcodes (ops) are used both directly when writing NQP, and during code
 generation in QAST nodes.
@@ -806,7 +806,7 @@ Open the specified file in the given mode for async IO.
 See `open` for valid modes.
 
 ## print
-* `print(sstr $str)`
+* `print(str $str)`
 
 Output the given string to stdout.
 
