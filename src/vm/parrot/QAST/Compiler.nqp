@@ -1121,22 +1121,22 @@ class QAST::Compiler is HLL::Compiler {
     }
     
     method infer_type($inferee) {
-        if nqp::substr($inferee, 0, 1) eq '$' {
+        if nqp::eqat($inferee, '$', 0) {
             nqp::substr($inferee, 1, 1)
         }
         elsif $*BLOCK.reg_type($inferee) -> $type {
             nqp::lc($type)
         }
-        elsif nqp::substr($inferee, 0, 1) eq '"'
-              || nqp::substr($inferee, 0, 6) eq 'utf8:"'
-              || nqp::substr($inferee, 0, 6) eq 'ucs4:"'
-              || nqp::substr($inferee, 0, 9) eq 'unicode:"' {
+        elsif nqp::eqat($inferee, '"', 0)
+              || nqp::eqat($inferee, 'utf8:"', 0)
+              || nqp::eqat($inferee, 'ucs4:"', 0)
+              || nqp::eqat($inferee, 'unicode:"', 0) {
             "s"
         }
-        elsif nqp::substr($inferee, 0, 6) eq '.const' {
+        elsif nqp::eqat($inferee, '.const', 0) {
             "P"
         }
-        elsif nqp::substr($inferee, 0, 1) eq '.' {
+        elsif nqp::eqat($inferee, '.', 0) {
             "i"
         }
         elsif nqp::index($inferee, ".", 0) > 0 {
