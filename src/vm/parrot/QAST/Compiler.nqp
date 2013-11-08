@@ -1441,13 +1441,21 @@ class QAST::Compiler is HLL::Compiler {
             if $node.subtype eq 'ignorecase';
         my $litlen := nqp::chars($litconst);
         my $litpost := self.rxescape($litconst);
-        my $cmpop := $node.negate ?? 'eq' !! 'ne';
         $ops.push_pirop('add',    '$I11', %*REG<pos>, $litlen);
         $ops.push_pirop('gt',     '$I11', %*REG<eos>, %*REG<fail>);
-        $ops.push_pirop('substr', '$S10', %*REG<tgt>, %*REG<pos>, $litlen);
-        $ops.push_pirop('downcase', '$S10', '$S10')
-            if $node.subtype eq 'ignorecase';
-        $ops.push_pirop($cmpop,   '$S10', $litpost, %*REG<fail>);
+        if $node.subtype eq 'ignorecase' {
+            my $cmpop := $node.negate ?? 'eq' !! 'ne';
+            $ops.push_pirop('substr', '$S10', %*REG<tgt>, %*REG<pos>, $litlen);
+            $ops.push_pirop('downcase', '$S10', '$S10');
+            $ops.push_pirop($cmpop,   '$S10', $litpost, %*REG<fail>);
+        } else {
+            $ops.push_pirop('nqp_string_equal_at', '$I11', %*REG<tgt>, $litpost, %*REG<pos>);
+            if $node.negate {
+                $ops.push_pirop('eq', '$I11', 1, %*REG<fail>);
+            } else {
+                $ops.push_pirop('eq', '$I11', 0, %*REG<fail>);
+            }
+        }
         $ops.push_pirop('add',    %*REG<pos>, $litlen);
         $ops;
     }
