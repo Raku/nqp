@@ -205,7 +205,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         <.obs: '{N,M} as general quantifier', '** N..M (or ** N..*)'>
     }
     token quantifier:sym<**> {
-        <sym> <normspace>**0..1 <backmod> <normspace>**0..1
+        <sym> <.normspace>? <backmod> <.normspace>?
         [
         | <.decint> \s+ '..' <.panic: "Spaces not allowed in bare range">
         | <min=.decint>
