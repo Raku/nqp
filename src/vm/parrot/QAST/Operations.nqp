@@ -272,6 +272,10 @@ QAST::Operations.add_core_op('list', :inlinable(1), -> $qastcomp, $op {
     my $list_reg := $*REGALLOC.fresh_p();
     my $ops := PIRT::Ops.new(:result($list_reg));
     $ops.push_pirop('new', $list_reg, "'ResizablePMCArray'");
+    if +$op.list {
+        $ops.push_pirop('assign', $list_reg, +$op.list);
+        $ops.push_pirop('assign', $list_reg, 0);
+    }
 
     # Push all the things.
     for $op.list {
@@ -304,6 +308,10 @@ QAST::Operations.add_core_op('list_i', :inlinable(1), -> $qastcomp, $op {
     my $list_reg := $*REGALLOC.fresh_p();
     my $ops := PIRT::Ops.new(:result($list_reg));
     $ops.push_pirop('new', $list_reg, "'ResizableIntegerArray'");
+    if +$op.list {
+        $ops.push_pirop('assign', $list_reg, +$op.list);
+        $ops.push_pirop('assign', $list_reg, 0);
+    }
 
     # Push all the things.
     for $op.list {
@@ -320,6 +328,10 @@ QAST::Operations.add_core_op('list_s', :inlinable(1), -> $qastcomp, $op {
     my $list_reg := $*REGALLOC.fresh_p();
     my $ops := PIRT::Ops.new(:result($list_reg));
     $ops.push_pirop('new', $list_reg, "'ResizableStringArray'");
+    if +$op.list {
+        $ops.push_pirop('assign', $list_reg, +$op.list);
+        $ops.push_pirop('assign', $list_reg, 0);
+    }
 
     # Push all the things.
     for $op.list {
@@ -336,6 +348,10 @@ QAST::Operations.add_core_op('list_b', :inlinable(1), -> $qastcomp, $op {
     my $list_reg := $*REGALLOC.fresh_p();
     my $ops := PIRT::Ops.new(:result($list_reg));
     $ops.push_pirop('new', $list_reg, "'ResizablePMCArray'");
+    if +$op.list {
+        $ops.push_pirop('assign', $list_reg, +$op.list);
+        $ops.push_pirop('assign', $list_reg, 0);
+    }
 
     # Push all the things.
     my $block_reg := $*REGALLOC.fresh_p();
