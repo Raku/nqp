@@ -15,17 +15,17 @@ Implemented:
 - simple strings 'Hello World!' %q{...}
 - interpolating strings: "number #{37+5}" %Q{Hello #{planet}!}
 - quoted words: `%w[aa bb cc]` 
-- scoping, including $globals, @class_instance and @@package variables
+- basic scoping, including $globals, @class_instance and @@package variables
 - conditional blocks: `if ... then ... elsif ... else ... endif`, `unless..end`
 - nqp opcode calls: `nqp::sleep(5)`
 - a few built-ins: `abort`, `print`, `puts`, `sleep`
 - a couple of methods: `.call` and `.nil?`
 - infixish assigments: `+=` `-=` `*=` ...
-- very simple classes and objects with attributes. no inheritence yet
+- very simple classes and objects with attributes. no inheritence
 - `while` and `until` loops
 - statement modifiers `if` `unless`, `while`, `until` e.g.: `puts 42 if true`
 - basic arrays and hashes
-- for loops on arrays: `for val in [10,20,30] do puts val end`
+- for loops on arrays: `for val in [10, 20, 30] do puts val end`
 - for loops on hash keys: `h = {'a'=>10, 'b'=>20}; for k in h do puts h{k} end`
 - lambda blocks/closures: `def make_counter(n,incr) ; n-=incr; lambda { n += incr }; end`
 - lightweight eRuby like templating, see [template.rbi](examples-rubyish/template.rbi)

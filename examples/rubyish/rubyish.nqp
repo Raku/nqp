@@ -74,7 +74,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
 
     rule defbody {
         :my $*CUR_BLOCK := QAST::Block.new(QAST::Stmts.new());
-        <operation> ['(' ~ ')' <signature>]? <separator>?
+        <operation> ['(' ~ ')' <signature>?]? <separator>?
         <stmtlist>
     }
 
@@ -82,7 +82,9 @@ grammar Rubyish::Grammar is HLL::Grammar {
 
     rule signature {
         :my $*IN_PARENS := 1;
-        [ <param> | '*' <slurpy=.param> <!before ','>]* % ','
+        [ <param> ]+ % ','  [ ',' '*' <slurpy=.param> ]?
+	|
+        '*' <slurpy=.param>
     }
 
     token param { <ident> [:s<hs> '=' <EXPR>]?}
@@ -135,8 +137,9 @@ grammar Rubyish::Grammar is HLL::Grammar {
 
     token var {
         :my $*MAYBE_DECL := 0;
-        [$<sigil>=[\$|\@\@?]|<!keyword>]
-        \+?<ident>
+        \+?
+        $<sigil>=[ \$ | \@\@? | <!keyword> ]
+        <ident>
         [ <?before \h* '=' [\w | \h+ || <.EXPR>] { $*MAYBE_DECL := 1 }> || <?> ]
     }
 
@@ -208,10 +211,10 @@ grammar Rubyish::Grammar is HLL::Grammar {
     INIT {
         # Operator precedence levels
         # see http://www.tutorialspoint.com/ruby/ruby_operators.htm
-        # x: **
-        Rubyish::Grammar.O(':prec<x=>, :assoc<left>',  '%exponentiation');
-        # y: ! ~ + - (unary)
-        Rubyish::Grammar.O(':prec<y=>, :assoc<unary>', '%unary');
+        # y: **
+        Rubyish::Grammar.O(':prec<y=>, :assoc<left>',  '%exponentiation');
+        # x: ! ~ + - (unary)
+        Rubyish::Grammar.O(':prec<x=>, :assoc<unary>', '%unary');
         # w: * / %
         Rubyish::Grammar.O(':prec<w=>, :assoc<left>',  '%multiplicative');
         # u: + -
@@ -343,8 +346,8 @@ grammar Rubyish::Grammar is HLL::Grammar {
     }
 
     token term:sym<lambda> {:s
-        'lambda' ['{' ['|' ~ '|' <signature>]? ]  ~ '}' <stmtlist> 
-    |   '->' ['(' ~ ')' <signature> ]? '{' ~ '}' <stmtlist>
+        'lambda' ['{' ['|' ~ '|' <signature>?]? ]  ~ '}' <stmtlist> 
+    |   '->' ['(' ~ ')' <signature>? ]? '{' ~ '}' <stmtlist>
     }
 
     method builtin-init() {
@@ -510,8 +513,6 @@ class Rubyish::Actions is HLL::Actions {
     method var($/) {
         my $sigil := ~$<sigil> // '';
         my $name := $sigil ~ $<ident>;
-        my $block;
-        my $decl := 'var';
 
         if $sigil eq '@' && $*IN_CLASS {
             # instance variable, bound to self
@@ -523,8 +524,11 @@ class Rubyish::Actions is HLL::Actions {
         else {
             if $*MAYBE_DECL {
 
+                my $block;
+                my $decl := 'var';
+
                 if !$sigil {
-                    $block := $*CUR_BLOCK;
+		    $block := $*CUR_BLOCK;
                 }
                 elsif $sigil eq '$' {
                     $block := $*TOP_BLOCK;
@@ -534,7 +538,7 @@ class Rubyish::Actions is HLL::Actions {
                 }
                 elsif $sigil eq '@@' {
                     $block := $*CLASS_BLOCK;
-                    $decl  := 'static';                 
+                    $decl  := 'static';
                 }
                 else {
                     nqp::die("unhandled sigil: $sigil");
@@ -610,9 +614,8 @@ class Rubyish::Actions is HLL::Actions {
         }
 
         if $<slurpy> {
-            @params.push(QAST::Var.new(
-                             :name(~$<slurpy>[0]), :scope('lexical'), :decl('param'), :slurpy<1>
-                         ));
+            @params.push($<slurpy>.ast);
+	    @params[-1].slurpy(1);
         }
 
         make @params;
