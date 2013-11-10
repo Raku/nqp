@@ -4874,6 +4874,11 @@ class QAST::CompilerJAST {
         $il;
     }
     
+    method charrange($node) {
+        # TODO
+        self.enumcharlist($node);
+    }
+    
     method literal($node) {
         my $il := JAST::InstructionList.new();
         my $litconst := $node[0];
