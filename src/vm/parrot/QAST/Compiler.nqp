@@ -1434,6 +1434,19 @@ class QAST::Compiler is HLL::Compiler {
         $ops;
     }
 
+    method charrange($node) {
+        my $ops := self.post_new('Ops', :result(%*REG<cur>));
+        if $node.negate {
+            die("negated charrange NYI");
+        }
+        $ops.push_pirop('ge', %*REG<pos>, %*REG<eos>, %*REG<fail>);
+        $ops.push_pirop('ord', '$I11', %*REG<tgt>, %*REG<pos>);
+        $ops.push_pirop('lt', '$I11', $node[1].value, %*REG<fail>);
+        $ops.push_pirop('gt', '$I11', $node[2].value, %*REG<fail>);
+        $ops.push_pirop('inc', %*REG<pos>) unless $node.subtype eq 'zerowidth';
+        $ops;
+    }
+
     method literal($node) {
         my $ops := self.post_new('Ops');
         my $litconst := $node[0];

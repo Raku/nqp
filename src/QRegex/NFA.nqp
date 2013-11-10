@@ -124,6 +124,10 @@ class QRegex::NFA {
         }
     }
 
+    method charrange($node, $from, $to) {
+        self.enumcharlist($node, $from, $to);
+    }
+
     method literal($node, $from, $to) {
         my int $litlen   := nqp::chars($node[0]) - 1;
         my int $i        := 0;

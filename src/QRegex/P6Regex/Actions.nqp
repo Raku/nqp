@@ -581,6 +581,9 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         }
         else {
             my @alts;
+            my $lower;
+            my $upper;
+            my $use-range := 0;
             for $<charspec> {
                 if $_[1] {
                     my $node;
@@ -617,7 +620,10 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                         }
                     }
                     else {
+                        $lower := $ord0;
+                        $upper := $ord1;
                         $str := nqp::concat($str, nqp::chr($ord0++)) while $ord0 <= $ord1;
+                        $use-range := $use-range + 1;
                     }
                 }
                 elsif $_[0]<cclass_backslash> {
@@ -635,14 +641,26 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                     $str := $str ~ (%*RX<i> ?? nqp::lc($c) ~ nqp::uc($c) !! $c);
                 }
             }
+            #?if parrot
+            if nqp::elems(@alts) == 0 && $use-range == 1 && nqp::chars($str) && $<sign> ne '-' {
+                $qast := QAST::Regex.new(
+                                  $str,
+                                  QAST::IVal.new( :value($lower) ),
+                                  QAST::IVal.new( :value($upper) )
+                                  , :rxtype<charrange>, :node($/) );
+            } else {
+            #?endif
             @alts.push(QAST::Regex.new( $str, :rxtype<enumcharlist>, :node($/), :negate( $<sign> eq '-' ) ))
                 if nqp::chars($str);
             $qast := +@alts == 1 ?? @alts[0] !!
                 $<sign> eq '-' ??
                     QAST::Regex.new( :rxtype<concat>, :node($/), :negate(1),
-                        QAST::Regex.new( :rxtype<conj>, :subtype<zerowidth>, |@alts ), 
+                        QAST::Regex.new( :rxtype<conj>, :subtype<zerowidth>, |@alts ),
                         QAST::Regex.new( :rxtype<cclass>, :name<.> ) ) !!
                     QAST::Regex.new( :rxtype<altseq>, |@alts );
+            #?if parrot
+            }
+            #?endif
         }
         make $qast;
     }
