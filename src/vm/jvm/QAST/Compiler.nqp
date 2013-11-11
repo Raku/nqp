@@ -4873,10 +4873,48 @@ class QAST::CompilerJAST {
         
         $il;
     }
-    
+
     method charrange($node) {
-        # TODO
-        self.enumcharlist($node);
+        my $il := JAST::InstructionList.new();
+
+        if $node.negate {
+            die("negated charrange NYI");
+        }
+
+        my $succeed := JAST::Label.new(:name(self.unique('charrange_succeed_')));
+
+        $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
+        $il.append(JAST::Instruction.new( :op('lload'), %*REG<eos> ));
+        $il.append($LCMP);
+        $il.append(JAST::Instruction.new( :op('ifge'), %*REG<fail> ));
+
+        $il.append(JAST::Instruction.new( :op('aload'), %*REG<tgt> ));
+        $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
+        $il.append($L2I);
+        $il.append(JAST::Instruction.new( :op('invokevirtual'),
+            $TYPE_STR, 'codePointAt', 'Integer', 'Integer' ));
+        $il.append($I2L);
+        $il.append($DUP);
+        $il.append(JAST::PushIVal.new( :value($node[1].value) ));
+        $il.append($LCMP);
+        $il.append(JAST::Instruction.new( :op('ifge'), $succeed ));
+        $il.append($POP);
+        $il.append(JAST::Instruction.new( :op('goto'), %*REG<fail>));
+
+        $il.append($succeed);
+        $il.append(JAST::PushIVal.new( :value($node[2].value) ));
+        $il.append($LCMP);
+        $il.append(JAST::Instruction.new( :op('ifgt'), %*REG<fail> ));
+
+        unless $node.subtype eq 'zerowidth' {
+            $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
+            $il.append($IVAL_ONE);
+            $il.append($LADD);
+            $il.append(JAST::Instruction.new( :op('lstore'), %*REG<pos> ));
+        }
+
+        $il;
+        #self.enumcharlist($node);
     }
     
     method literal($node) {
