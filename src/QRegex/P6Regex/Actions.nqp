@@ -433,58 +433,11 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         make $qast;
     }
 
-    method simplify_assertion($qast) {
-        if $qast.rxtype eq 'subrule' && $qast.subtype eq 'zerowidth'
-                && nqp::istype($qast[0], QAST::Node) && nqp::istype($qast[0][0], QAST::SVal)
-                && $qast[0][0].value eq 'before' {
-            if nqp::istype($qast[0], QAST::Node) && nqp::istype($qast[0][1], QAST::Block)
-                    && nqp::istype((my $regex := $qast[0][1][2]), QAST::Regex)
-                    && $regex.rxtype eq 'concat' && $regex[0].rxtype eq 'scan' && $regex[2].rxtype eq 'pass' {
-                my $simple := $regex[1];
-                # a concat with a single child becomes the child itself
-                if nqp::istype($simple, QAST::Regex) && $simple.rxtype eq 'concat' && +@($simple) == 1 {
-                    $simple := $simple[0];
-                    # even though it's not worth terribly much, we can do this optimization
-                    # in any case, even if we're not going to do the optimization below:
-                    $qast[0][1][2][1] := $simple;
-                }
-                if $simple.rxtype eq 'literal' && $simple.rxtype ne 'ignorecase' {
-                    say("simplified a literal inside a before");
-                    say($qast.dump);
-                    return QAST::Regex.new(:rxtype<literal>, :subtype<zerowidth>, :node($simple.node),
-                        :negate($qast.negate),
-                        $simple[0]);
-                } elsif $simple.rxtype eq 'enumcharlist' && $simple.rxtype ne 'ignorecase' {
-                    say("simplified an enumcharlist inside a before");
-                    say($qast.dump);
-                    return QAST::Regex.new(:rxtype<enumcharlist>, :subtype<zerowidth>, :node($simple.node),
-                        :negate($qast.negate),
-                        $simple[0]);
-                } elsif $simple.rxtype eq 'charrange' && $simple.rxtype ne 'ignorecase' {
-                    say("simplified a charrange inside a before");
-                    say($qast.dump);
-                    return QAST::Regex.new(:rxtype<charrange>, :subtype<zerowidth>, :node($simple.node),
-                        :negate($qast.negate),
-                        $simple[0],
-                        $simple[1],
-                        $simple[2]);
-                } elsif $simple.rxtype eq 'cclass' && $simple.rxtype ne 'ignorecase' {
-                    say("simplified a cclass inside a before");
-                    say($qast.dump);
-                    return QAST::QRegex.new(:rxtype<cclass>, :subtype<zerowidth>, :node($simple.node),
-                        :negate($qast.negate), :name($simple.name));
-                }
-            }
-        }
-        $qast;
-    }
-
     method assertion:sym<?>($/) {
         my $qast;
         if $<assertion> {
             $qast := $<assertion>.ast;
             $qast.subtype('zerowidth');
-            $qast := self.simplify_assertion($qast);
         }
         else {
             $qast := QAST::Regex.new( :rxtype<anchor>, :subtype<pass>, :node($/) );
@@ -498,7 +451,6 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             $qast := $<assertion>.ast;
             $qast.negate( !$qast.negate );
             $qast.subtype('zerowidth');
-            $qast := self.simplify_assertion($qast);
         }
         else {
             $qast := QAST::Regex.new( :rxtype<anchor>, :subtype<fail>, :node($/) );
