@@ -1379,8 +1379,8 @@ class QAST::Compiler is HLL::Compiler {
             if $cclass eq '.CCLASS_NEWLINE' {
                 $ops.push_pirop('substr', '$S10', %*REG<tgt>, %*REG<pos>, 2);
                 $ops.push_pirop('iseq', '$I11', '$S10', '"\r\n"');
-                $ops.push_pirop('add', %*REG<pos>, '$I11');
-            } 
+                $ops.push_pirop('add', %*REG<pos>, '$I11') unless $node.subtype eq 'zerowidth';
+            }
         }
         $ops.push_pirop('add', %*REG<pos>, 1) unless $node.subtype eq 'zerowidth';
         $ops;
