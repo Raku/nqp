@@ -4895,16 +4895,30 @@ class QAST::CompilerJAST {
             $TYPE_STR, 'codePointAt', 'Integer', 'Integer' ));
         $il.append($I2L);
         $il.append($DUP);
+
         $il.append(JAST::PushIVal.new( :value($node[1].value) ));
         $il.append($LCMP);
-        $il.append(JAST::Instruction.new( :op('ifge'), $succeed ));
-        $il.append($POP);
-        $il.append(JAST::Instruction.new( :op('goto'), %*REG<fail>));
 
-        $il.append($succeed);
-        $il.append(JAST::PushIVal.new( :value($node[2].value) ));
-        $il.append($LCMP);
-        $il.append(JAST::Instruction.new( :op('ifgt'), %*REG<fail> ));
+        if $node.negate {
+            my $succeed_and_pop := JAST::Label.new(:name(self.unique('charrange_succeed_pop_')));
+            $il.append(JAST::Instruction.new( :op('iflt'), $succeed_and_pop ));
+            $il.append(JAST::PushIVal.new( :value($node[2].value) ));
+            $il.append($LCMP);
+            $il.append(JAST::Instruction.new( :op('ifge'), $succeed ));
+            $il.append(JAST::Instruction.new( :op('goto'), %*REG<fail> ));
+            $il.append($succeed_and_pop);
+            $il.append($POP);
+            $il.append($succeed);
+        } else {
+            $il.append(JAST::Instruction.new( :op('ifge'), $succeed ));
+            $il.append($POP);
+            $il.append(JAST::Instruction.new( :op('goto'), %*REG<fail>));
+
+            $il.append($succeed);
+            $il.append(JAST::PushIVal.new( :value($node[2].value) ));
+            $il.append($LCMP);
+            $il.append(JAST::Instruction.new( :op('ifgt'), %*REG<fail> ));
+        }
 
         unless $node.subtype eq 'zerowidth' {
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));

@@ -641,12 +641,13 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                     $str := $str ~ (%*RX<i> ?? nqp::lc($c) ~ nqp::uc($c) !! $c);
                 }
             }
-            if nqp::elems(@alts) == 0 && $use-range == 1 && nqp::chars($str) && $<sign> ne '-' {
+            if nqp::elems(@alts) == 0 && $use-range == 1 && nqp::chars($str) {
                 $qast := QAST::Regex.new(
                                   $str,
                                   QAST::IVal.new( :value($lower) ),
-                                  QAST::IVal.new( :value($upper) )
-                                  , :rxtype<charrange>, :node($/) );
+                                  QAST::IVal.new( :value($upper) ),
+                                  :negate( $<sign> eq '-' ),
+                                  :rxtype<charrange>, :node($/) );
             } else {
                 @alts.push(QAST::Regex.new( $str, :rxtype<enumcharlist>, :node($/), :negate( $<sign> eq '-' ) ))
                     if nqp::chars($str);
