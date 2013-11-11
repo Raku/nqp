@@ -373,7 +373,7 @@ class QAST::MASTRegexCompiler {
             nqp::push(@ins, op('iscclass', $i0, $i0, %*REG<tgt>, %*REG<pos>));
             nqp::push(@ins, op($testop, $i0, %*REG<fail>));
 
-            if $cclass == nqp::const::CCLASS_NEWLINE {
+            if $cclass == nqp::const::CCLASS_NEWLINE && $node.subtype ne 'zerowidth' {
                 my $s0 := fresh_s();
                 nqp::push(@ins, op('const_s', $s0, sval("\r\n")));
                 nqp::push(@ins, op('eqat_s', $i0, %*REG<tgt>, $s0, %*REG<pos>));
