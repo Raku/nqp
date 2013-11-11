@@ -4877,10 +4877,6 @@ class QAST::CompilerJAST {
     method charrange($node) {
         my $il := JAST::InstructionList.new();
 
-        if $node.negate {
-            die("negated charrange NYI");
-        }
-
         my $succeed := JAST::Label.new(:name(self.unique('charrange_succeed_')));
 
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
@@ -4894,7 +4890,7 @@ class QAST::CompilerJAST {
         $il.append(JAST::Instruction.new( :op('invokevirtual'),
             $TYPE_STR, 'codePointAt', 'Integer', 'Integer' ));
         $il.append($I2L);
-        $il.append($DUP);
+        $il.append($DUP2);
 
         $il.append(JAST::PushIVal.new( :value($node[1].value) ));
         $il.append($LCMP);
@@ -4907,11 +4903,11 @@ class QAST::CompilerJAST {
             $il.append(JAST::Instruction.new( :op('ifge'), $succeed ));
             $il.append(JAST::Instruction.new( :op('goto'), %*REG<fail> ));
             $il.append($succeed_and_pop);
-            $il.append($POP);
+            $il.append($POP2);
             $il.append($succeed);
         } else {
             $il.append(JAST::Instruction.new( :op('ifge'), $succeed ));
-            $il.append($POP);
+            $il.append($POP2);
             $il.append(JAST::Instruction.new( :op('goto'), %*REG<fail>));
 
             $il.append($succeed);
@@ -4928,7 +4924,6 @@ class QAST::CompilerJAST {
         }
 
         $il;
-        #self.enumcharlist($node);
     }
     
     method literal($node) {
