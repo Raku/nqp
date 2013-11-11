@@ -439,6 +439,11 @@ class QAST::MASTRegexCompiler {
         @ins
     }
 
+    method charrange($node) {
+        # TODO: implement charrange for moarvm.
+        self.enumcharlist($node);
+    }
+
     method literal($node) {
         my $litconst := $node[0];
         my $eq_op := $node.subtype eq 'ignorecase' ?? 'eqatic_s' !! 'eqat_s';
