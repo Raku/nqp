@@ -1116,6 +1116,7 @@ class NQP::Actions is HLL::Actions {
             $past.default( $<default_value>[0]<EXPR>.ast );
         }
         unless $past.default { $*W.cur_lexpad().arity( +$*W.cur_lexpad().arity + 1 ); }
+        { $*W.cur_lexpad().optarity( +$*W.cur_lexpad().optarity + 1 ); }
 
         # Set the type of the parameter.
         if $<typename> {
