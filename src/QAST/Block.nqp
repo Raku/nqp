@@ -4,6 +4,7 @@ class QAST::Block is QAST::Node {
     has int $!custom_args;
     has int $!has_exit_handler;
     has str $!cuid;
+    has int $!arity;
     has %!symbol;
     
     method name(*@value) {
@@ -16,6 +17,7 @@ class QAST::Block is QAST::Node {
     }
     method custom_args(*@value) { $!custom_args := @value[0] if @value; $!custom_args }
     method has_exit_handler(*@value) { $!has_exit_handler := @value[0] if @value; $!has_exit_handler }
+    method arity(*@value)      { $!arity := @value[0] if @value; $!arity }
     
     my $cur_cuid := 0;
     my $cuid_suffix := ~nqp::time_n();

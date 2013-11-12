@@ -7,7 +7,6 @@ class QAST::Node {
     
     has $!node;
     has $!returns;
-    has int $!arity;
 
     method new(*@children, *%options) {
         my $new := self.CREATE();
@@ -21,7 +20,6 @@ class QAST::Node {
 
     method node(*@value)       { $!node := @value[0] if @value; $!node }
     method returns(*@value)    { $!returns := @value[0] if @value; $!returns }
-    method arity(*@value)      { $!arity := @value[0] if @value; $!arity }
     
     method named(*@value) {
         if @value {

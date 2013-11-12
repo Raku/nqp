@@ -438,7 +438,7 @@ for <if unless> -> $op_name {
         my @op_types;
         my @im_args;
         for $op.list {
-            my $*HAVE_IMM_ARG := $_.arity > 0 && !($_ =:= $op[0]);
+            my $*HAVE_IMM_ARG := nqp::istype($_, QAST::Block) && $_.arity > 0 && !($_ =:= $op[0]);
             my $*IMM_ARG;
             my $comp := $qastcomp.as_post($_);
             @comp_ops.push($comp);
@@ -558,7 +558,7 @@ for ('', 'repeat_') -> $repness {
             for $op.list {
                 if $_.named eq 'nohandler' { $handler := 0; }
                 else {
-                    my $*HAVE_IMM_ARG := $_.arity > 0 && $_ =:= $op.list[1];
+                    my $*HAVE_IMM_ARG := nqp::istype($_, QAST::Block) && $_.arity > 0 && $_ =:= $op.list[1];
                     my $comp := $qastcomp.as_post($_);
                     @comp_ops.push($comp);
                     @comp_types.push($qastcomp.infer_type($comp.result));

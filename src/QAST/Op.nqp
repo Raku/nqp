@@ -2,6 +2,7 @@ class QAST::Op is QAST::Node {
     has str $!name;
     has str $!op;
     has str $!childorder;
+    has int $!arity;
     
     method name(*@value) {
         $!name := @value[0] if @value;
@@ -15,6 +16,7 @@ class QAST::Op is QAST::Node {
         $!childorder := @value[0] if @value;
         nqp::isnull_s($!childorder) ?? "" !! $!childorder
     }
+    method arity(*@value)      { $!arity := @value[0] if @value; $!arity }
     
     method substitute_inline_placeholders(@fillers) {
         my $result := self.shallow_clone();
