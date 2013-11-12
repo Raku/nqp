@@ -5166,8 +5166,8 @@ class QAST::CompilerJAST {
         $il.append($IVAL_ONE);
         $il.append($LADD);
         $il.append($DUP2);
+        $il.append(JAST::Instruction.new( :op('lstore'), %*REG<pos> ));
         if nqp::elems($node.list) && $node.subtype ne 'ignorecase' {
-            $il.append(JAST::Instruction.new( :op('lstore'), %*REG<pos> ));
             # shuffle the stack variables into place for indexfrom.
             $il.append(JAST::Instruction.new( :op('aload'), %*REG<tgt> ));
             $il.append(JAST::PushSVal.new( :value($node[0]) ));
@@ -5181,7 +5181,6 @@ class QAST::CompilerJAST {
             $il.append($LCMP);
             $il.append(JAST::Instruction.new( :op('ifeq'), %*REG<fail> ));
         } else {
-            $il.append(JAST::Instruction.new( :op('lstore'), %*REG<pos> ));
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<eos> ));
             $il.append($LCMP);
             $il.append(JAST::Instruction.new( :op('ifgt'), %*REG<fail> ));
