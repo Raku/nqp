@@ -1409,11 +1409,6 @@ Return the name of the REPR for the given object.
 
 Replace `$obj`'s WHO. Return `$obj`.
 
-## takeclosure
-* `takeclosure(Block $innerblock)`
-
-Creates a lexical closure from the block's outer scope.
-
 ## who
 * `who(Mu $obj)`
 
@@ -1694,6 +1689,11 @@ Given a UTF-8 string, return the SHA-1 digest for that string.
 
 Sleep for the given number of seconds (no guarantee is made how exact the
 time sleeping is spent.) Returns the passed in number.
+
+## takeclosure
+* `takeclosure(Block $innerblock)`
+
+Creates a lexical closure from the block's outer scope.
 
 ## time
 * `time_i()`
