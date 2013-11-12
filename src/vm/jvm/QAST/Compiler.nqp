@@ -16,6 +16,7 @@ my $POP2        := JAST::Instruction.new( :op('pop2') );
 my $DUP         := JAST::Instruction.new( :op('dup') );
 my $DUP_X2      := JAST::Instruction.new( :op('dup_x2') );
 my $DUP2        := JAST::Instruction.new( :op('dup2') );
+my $DUP2_X2     := JAST::Instruction.new( :op('dup2_x2') );
 my $SWAP        := JAST::Instruction.new( :op('swap') );
 my $IADD        := JAST::Instruction.new( :op('iadd') );
 my $LADD        := JAST::Instruction.new( :op('ladd') );
@@ -5165,10 +5166,26 @@ class QAST::CompilerJAST {
         $il.append($IVAL_ONE);
         $il.append($LADD);
         $il.append($DUP2);
-        $il.append(JAST::Instruction.new( :op('lstore'), %*REG<pos> ));
-        $il.append(JAST::Instruction.new( :op('lload'), %*REG<eos> ));
-        $il.append($LCMP);
-        $il.append(JAST::Instruction.new( :op('ifgt'), %*REG<fail> ));
+        if nqp::elems($node.list) && $node.subtype ne 'ignorecase' {
+            $il.append(JAST::Instruction.new( :op('lstore'), %*REG<pos> ));
+            # shuffle the stack variables into place for indexfrom.
+            $il.append(JAST::Instruction.new( :op('aload'), %*REG<tgt> ));
+            $il.append(JAST::PushSVal.new( :value($node[0]) ));
+            $il.append($DUP2_X2);
+            $il.append($POP2);
+            $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+                    "indexfrom", 'Long', $TYPE_STR, $TYPE_STR, 'Long'));
+            $il.append($DUP2);
+            $il.append(JAST::Instruction.new( :op('lstore'), %*REG<pos> ));
+            $il.append(JAST::PushIVal.new( :value(-1) ));
+            $il.append($LCMP);
+            $il.append(JAST::Instruction.new( :op('ifeq'), %*REG<fail> ));
+        } else {
+            $il.append(JAST::Instruction.new( :op('lstore'), %*REG<pos> ));
+            $il.append(JAST::Instruction.new( :op('lload'), %*REG<eos> ));
+            $il.append($LCMP);
+            $il.append(JAST::Instruction.new( :op('ifgt'), %*REG<fail> ));
+        }
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<cur> ));
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<curclass> ));
         $il.append(JAST::PushSVal.new( :value('$!from') ));
