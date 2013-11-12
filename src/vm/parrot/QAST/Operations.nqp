@@ -703,29 +703,46 @@ QAST::Operations.add_core_op('for', :inlinable(1), -> $qastcomp, $op {
     # Fetch values.
     my @valreg;
     my $arity := @operands[1].arity || 1;
-    my $optarity := (@operands[1].optarity || 1) - $arity;
-    while $arity > 0 {
+
+    # we always fetch the first value
+    {
         my $reg := $*REGALLOC.fresh_p();
         $ops.push_pirop('shift', $reg, $iter);
         nqp::push(@valreg, $reg);
         $arity := $arity - 1;
     }
-    if $optarity > 0 {
+
+    #if there are more than 1 arguments, we act like all but the first are optional.
+    if $arity > 0 {
         my @opt_regs;
         my @opt_labels;
         my @opt_labels_copy;
+        my @redo_labels;
+        my @redo_labels_copy;
+
+        {
+            my $redo_zero_label := PIRT::Label.new(:name('redo_0'));
+            nqp::push(@redo_labels, $redo_zero_label);
+            nqp::push(@redo_labels_copy, $redo_zero_label);
+        }
+        my $redo_branch_idx := 0;
+
+        my $redo_branch_reg := $*REGALLOC.fresh_i();
 
         my $lbl_done_call := PIRT::Label.new(:name('done_call'));
-        while $optarity > 0 {
+        while $arity > 0 {
             my $reg := $*REGALLOC.fresh_p();
             my $label := PIRT::Label.new(:name("only_{+@opt_regs}_optional_args"));
+            my $redolabel := PIRT::Label.new(:name("redo_{+@opt_regs+1}"));
             nqp::push(@opt_regs, $reg);
+            nqp::push(@redo_labels, $redolabel);
+            nqp::push(@redo_labels_copy, $redolabel);
             nqp::push(@opt_labels, $label);
             nqp::push(@opt_labels_copy, $label);
             nqp::push(@valreg, $reg);
-            $optarity := $optarity - 1;
+            $arity := $arity - 1;
         }
-        $optarity := (@operands[1].optarity || 1) - (@operands[1].arity || 1);
+        my $optarity := (@operands[1].arity || 1) - 1;
         while $optarity > 0 {
             my $reg := nqp::shift(@opt_regs);
             $ops.push_pirop('unless', $iter, nqp::pop(@opt_labels));
@@ -735,17 +752,32 @@ QAST::Operations.add_core_op('for', :inlinable(1), -> $qastcomp, $op {
 
         # Emit calls for all possible amounts of optional arguments.
         while +@opt_labels_copy > 0 {
+            $ops.push(nqp::shift(@redo_labels));
+            $ops.push_pirop('set', $redo_branch_reg, $redo_branch_idx++);
             $ops.push($blockpost);
             $ops.push_pirop('call', $blockpost, |@valreg, :result($res));
             nqp::pop(@valreg);
             $ops.push_pirop('goto', $lbl_done_call);
             $ops.push(nqp::pop(@opt_labels_copy));
         }
+        $ops.push(nqp::shift(@redo_labels));
+        $ops.push_pirop('set', $redo_branch_reg, $redo_branch_idx++);
         $ops.push($blockpost);
         $ops.push_pirop('call', $blockpost, |@valreg, :result($res));
+        $ops.push_pirop('goto', $lbl_done_call);
+        # our very own, shiny redo handler!
+        {
+            my $redo_counter_reg := $*REGALLOC.fresh_i();
+            $ops.push($lbl_redo);
+            $ops.push_pirop('set', $redo_counter_reg, '0');
+            while @redo_labels_copy {
+                $ops.push_pirop('eq', $redo_counter_reg, $redo_branch_reg, nqp::shift(@redo_labels_copy));
+                $ops.push_pirop('inc', $redo_counter_reg);
+            }
+        }
         $ops.push($lbl_done_call);
     } else {
-        # Emit call.
+        # Just emit call.
         $ops.push($lbl_redo);
         $ops.push($blockpost);
         $ops.push_pirop('call', $blockpost, |@valreg, :result($res));

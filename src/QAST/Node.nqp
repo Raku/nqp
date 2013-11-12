@@ -8,7 +8,6 @@ class QAST::Node {
     has $!node;
     has $!returns;
     has int $!arity;
-    has int $!optarity; # arity when counting optional parameters
 
     method new(*@children, *%options) {
         my $new := self.CREATE();
@@ -23,8 +22,7 @@ class QAST::Node {
     method node(*@value)       { $!node := @value[0] if @value; $!node }
     method returns(*@value)    { $!returns := @value[0] if @value; $!returns }
     method arity(*@value)      { $!arity := @value[0] if @value; $!arity }
-    method optarity(*@value)      { $!optarity := @value[0] if @value; $!optarity }
-    
+
     method named(*@value) {
         if @value {
             self.HOW.mixin(self, QAST::SpecialArg);
