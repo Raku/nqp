@@ -4815,7 +4815,7 @@ class QAST::CompilerJAST {
             $il.append($L2I);
             $il.append(JAST::Instruction.new( :op($node.negate ?? 'ifne' !! 'ifeq'), %*REG<fail> ));
             
-            if $cclass == nqp::const::CCLASS_NEWLINE && !$node.negate {
+            if $cclass == nqp::const::CCLASS_NEWLINE && !$node.negate && $node.subtype ne 'zerowidth' {
                 $il.append(JAST::Instruction.new( :op('aload'), %*REG<tgt> ));
                 $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
                 $il.append(JAST::Instruction.new( :op('lload'), %*REG<eos> ));

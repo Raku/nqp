@@ -1376,7 +1376,7 @@ class QAST::Compiler is HLL::Compiler {
             my $testop := $node.negate ?? 'if' !! 'unless';
             $ops.push_pirop('is_cclass', '$I11', $cclass, %*REG<tgt>, %*REG<pos>);
             $ops.push_pirop($testop, '$I11', %*REG<fail>); 
-            if $cclass eq '.CCLASS_NEWLINE' && $node.subtype ne 'zerowidth' {
+            if $cclass eq '.CCLASS_NEWLINE' && $node.subtype ne 'zerowidth' && !$node.negate {
                 $ops.push_pirop('nqp_string_equal_at', '$I11', %*REG<tgt>, '"\r\n"', %*REG<pos>);
                 $ops.push_pirop('add', %*REG<pos>, '$I11');
             }
