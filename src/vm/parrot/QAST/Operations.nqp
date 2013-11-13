@@ -292,16 +292,27 @@ QAST::Operations.add_core_op('list_i', :inlinable(1), -> $qastcomp, $op {
     my $list_reg := $*REGALLOC.fresh_p();
     my $ops := PIRT::Ops.new(:result($list_reg));
     $ops.push_pirop('new', $list_reg, "'ResizableIntegerArray'");
+
+    my $all-zeros := 1;
+    for $op.list {
+        if !nqp::istype($_, QAST::IVal) || $_.value != 0 {
+            $all-zeros := 0;
+            last;
+        }
+    }
+
     if +$op.list > 1 {
         $ops.push_pirop('assign', $list_reg, +$op.list);
-        $ops.push_pirop('assign', $list_reg, 0);
+        $ops.push_pirop('assign', $list_reg, 0) unless $all-zeros;
     }
 
     # Push all the things.
-    for $op.list {
-        my $post := $qastcomp.coerce($qastcomp.as_post($_), 'i');
-        $ops.push($post);
-        $ops.push_pirop('push', $list_reg, $post.result);
+    unless $all-zeros {
+        for $op.list {
+            my $post := $qastcomp.coerce($qastcomp.as_post($_), 'i');
+            $ops.push($post);
+            $ops.push_pirop('push', $list_reg, $post.result);
+        }
     }
 
     $ops
