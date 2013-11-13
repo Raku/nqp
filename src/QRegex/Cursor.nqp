@@ -744,10 +744,11 @@ class NQPMatch is NQPCapture {
 }
 
 class NQPCursor does NQPCursorRole {
+    my @EMPTY_LIST := [];
     method MATCH() {
         my $match := nqp::getattr(self, NQPCursor, '$!match');
         unless nqp::istype($match, NQPMatch) || nqp::ishash($match) {
-            my $list := nqp::list();
+            my $list;
             my $hash := nqp::hash();
             $match := nqp::create(NQPMatch);
             nqp::bindattr(self, NQPCursor, '$!match', $match);
@@ -762,19 +763,18 @@ class NQPCursor does NQPCursorRole {
             while $iter {
                 $curcap := nqp::shift($iter);
                 $key := nqp::iterkey_s($curcap);
-                if $key eq '$!from' || $key eq '$!to' {
-                    nqp::bindattr_i($match, NQPMatch, $key, nqp::iterval($curcap).from);
-                }
-                elsif nqp::iscclass(nqp::const::CCLASS_NUMERIC, $key, 0) {
+                if nqp::iscclass(nqp::const::CCLASS_NUMERIC, $key, 0) {
                     $list := nqp::list() unless $list;
                     nqp::bindpos($list, $key, nqp::iterval($curcap));
                 }
+                elsif $key && nqp::ordat($key, 0) == 36 && ($key eq '$!from' || $key eq '$!to') {
+                    nqp::bindattr_i($match, NQPMatch, $key, nqp::iterval($curcap).from);
+                }
                 else {
-                    $hash := nqp::hash() unless $hash;
                     nqp::bindkey($hash, $key, nqp::iterval($curcap));
                 }
             }
-            nqp::bindattr($match, NQPCapture, '@!array', $list);
+            nqp::bindattr($match, NQPCapture, '@!array', nqp::ifnull($list, @EMPTY_LIST));
             nqp::bindattr($match, NQPCapture, '%!hash', $hash);
         }
         $match
