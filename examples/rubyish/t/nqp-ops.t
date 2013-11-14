@@ -1,9 +1,9 @@
-puts "1..11"
+puts "1..12"
 nqp::say("ok 1 - nqp::say")
 nqp::print("ok 2 - nqp::print with new-line\n")
 puts nqp::concat("ok ", '3 - nqp::concat')
 puts nqp::substr("nok 4 - nqp::substr", 1)
-puts nqp::lc("OK 5 - nqp::lC")
+puts nqp::lc(nqp::flip("KO") ~ " 5 - nQp::fLIp and nqp::lC")
 nqp::print nqp::chr(nqp::ord('o')); puts 'k 6 - nqp::ord and nqp::chr'
 
 def ok(i,msg)
@@ -22,3 +22,5 @@ nqp::while n <= 11, begin
     ok(n, "nqp::while (#{n})")
     n += 1
 end
+
+puts nqp::sprintf("%s %d - %s", ['ok', 12, 'nqp::sprintf'])

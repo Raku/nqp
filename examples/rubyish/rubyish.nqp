@@ -83,7 +83,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
     rule signature {
         :my $*IN_PARENS := 1;
         [ <param> ]+ % ','  [ ',' '*' <slurpy=.param> ]?
-	|
+        |
         '*' <slurpy=.param>
     }
 
@@ -107,7 +107,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
     }
 
     token stmt:sym<EXPR> { <EXPR> }
-    token term:sym<assign> {:s<hs> <var> <OPER=infix> '=' <EXPR> }
+    token term:sym<infix=> {:s<hs> <var> <OPER=infix> '=' <EXPR> }
 
     token term:sym<call> {
         <!keyword>
@@ -116,7 +116,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
     }
 
     token term:sym<nqp-op> {
-        'nqp:'':'?<ident> ['(' ~ ')' <call-args=.paren-args>? | <call-args>? ]
+        'nqp::'<ident> ['(' ~ ')' <call-args=.paren-args>? | <call-args>? ]
     }
 
     token term:sym<quote-words> {
@@ -528,7 +528,7 @@ class Rubyish::Actions is HLL::Actions {
                 my $decl := 'var';
 
                 if !$sigil {
-		    $block := $*CUR_BLOCK;
+                    $block := $*CUR_BLOCK;
                 }
                 elsif $sigil eq '$' {
                     $block := $*TOP_BLOCK;
@@ -615,7 +615,7 @@ class Rubyish::Actions is HLL::Actions {
 
         if $<slurpy> {
             @params.push($<slurpy>.ast);
-	    @params[-1].slurpy(1);
+            @params[-1].slurpy(1);
         }
 
         make @params;
@@ -659,7 +659,7 @@ class Rubyish::Actions is HLL::Actions {
 
     method stmt:sym<EXPR>($/) { make $<EXPR>.ast; }
 
-    method term:sym<assign>($/) { 
+    method term:sym<infix=>($/) { 
         my $op := $<OPER><O><op>;
         make  QAST::Op.new( :op('bind'),
                             $<var>.ast,

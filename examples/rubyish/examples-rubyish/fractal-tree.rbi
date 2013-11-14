@@ -16,21 +16,22 @@
     @PI = 3.1415926535
     @eps = 2.0
 
-    def tree(x, y, len, angle)
-       if len >= @eps then
-            x2 = x + len * cos(angle)
-            y2 = y + len * sin(angle)
-            sw = len > 20? len / 10 : 2;
-            g = len < @eps*2? 210: 20;
-            puts "    <line x1='#{x}' y1='#{y}' x2='#{x2}' y2='#{y2}' style='stroke:rgb(130,#{g},80);stroke-width:#{sw}'/>" \
-	        if x >= 0.0 and y >= 0.0
-            tree(x2, y2, len*@scale, angle + 0.2*@PI);
-            tree(x2, y2, len*@scale, angle - 0.2*@PI);
-       end
+    def tree(x1, y1, len, angle = 1.5 * @PI)
+        x2 = x1 + len * cos(angle)
+        y2 = y1 + len * sin(angle)
+        sw = len > 20? len / 10 : 2;
+        g = len < @eps*2? 210: 20;
+        puts "    <line x1='#{x1}' y1='#{y1}' x2='#{x2}' y2='#{y2}' style='stroke:rgb(130,#{g},80); stroke-width:#{sw}'/>" \
+	    if x >= 0.0 and y >= 0.0
+
+        if (len *= @scale) >= @eps then
+            tree(x2, y2, len, angle + 0.2*@PI);
+            tree(x2, y2, len, angle - 0.2*@PI);
+        end
     end
 
     width  = 1000
     height = 850
-    tree(x=width/2, y=height, length=300, angle=1.5*@PI)
+    tree(x1=width/2, y1=height, length=300)
     #-----------%>
 </svg>

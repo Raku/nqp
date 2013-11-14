@@ -7,7 +7,7 @@ h_idx = 'c'
 puts "#{h{h_idx} == 30? 'ok' : 'nok'} 3 - h{c_idx}"
 puts "#{h{'d'} == 100? 'ok' : 'nok'} 4 - h{'d'}"
 
-nqp:deletekey(h, 'd')
+nqp::deletekey(h, 'd')
 
 for key in h do
     puts "ok #{ h{key} / 10  +  4 } - hash key iteration (#{key})"

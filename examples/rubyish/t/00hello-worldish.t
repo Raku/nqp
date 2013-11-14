@@ -19,4 +19,3 @@ hello = HelloWorld.new("worldish")
 puts "#{nqp::can(hello, 'sayHi')? 'ok' : 'nok'} 3 - can say Hi"
 puts "#{nqp::can(hello, 'sayBye')? 'nok' : 'ok'} 4 - can't say Bye"
 hello.sayHi
-

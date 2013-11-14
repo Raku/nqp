@@ -13,7 +13,7 @@ puts %q{<?xml version='1.0' encoding='utf-8'?>}
 <html>
     <body>
         <h1>Green Bottles...</h1>
-        <%n = 12      %>
+        <%n = 10      %>
         <%while n > 0 %>
             <blockquote>
                 <em>#{n}</em> green bottles standing on the wall,

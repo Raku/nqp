@@ -29,7 +29,7 @@ Implemented:
 - for loops on hash keys: `h = {'a'=>10, 'b'=>20}; for k in h do puts h{k} end`
 - lambda blocks/closures: `def make_counter(n,incr) ; n-=incr; lambda { n += incr }; end`
 - lightweight eRuby like templating, see [template.rbi](examples-rubyish/template.rbi)
-- heredocs literal `<<EOF ... EOF` and interpolating `<<"END" ... END`
+- heredocs, literal `<<EOF ... EOF` and interpolating `<<"END" ... END`
 
 Notes:
 
@@ -46,17 +46,17 @@ To run tests:
 ```
 
 Strings and truth values are Perlish rather than Rubyish:
-
 - `+` always does addition (doesn't concatenate strings)
 - `~` has been introduced as the concatenation operator
 - `>`, `==`, `<=` ... only do arithmetic comparisons
 - `gt`, `eq`, `le` ... do string comparisions
 - 0, '0', '', nil  are false in a boolean context.
-- hash dereferencing is via angle braces: `price = fruit<apples>` or
-curlies `puts fruit{'bannanas'}`
+- hash dereferencing is via angle braces: `puts fruit<apples>` or
+curlies `puts fruit{'bananas'}`
 
-- nqp op-codes can be called like regular functions. E.g.
+nqp op-codes can be called like regular functions. E.g.
 ```
+    puts nqp::sprintf("pid=%s time=%d", [nqp::getpid, nqp::time_i])'
     puts nqp::if(2+2 == 4, 'yup', 'nope' )
 ```
 - this includes nqp control-flow functions:
@@ -72,6 +72,7 @@ curlies `puts fruit{'bannanas'}`
         nqp::sleep 2
     end
 ```
+
 There's some context sensitive parsing to distinguish functions and
 expressions, E.g.
 ```
