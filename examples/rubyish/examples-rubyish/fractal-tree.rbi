@@ -21,8 +21,7 @@
         y2 = y1 + len * sin(angle)
         sw = len > 20? len / 10 : 2;
         g = len < @eps*2? 210: 20;
-        puts "    <line x1='#{x1}' y1='#{y1}' x2='#{x2}' y2='#{y2}' style='stroke:rgb(130,#{g},80); stroke-width:#{sw}'/>" \
-	    if x >= 0.0 and y >= 0.0
+        puts "    <line x1='#{x1}' y1='#{y1}' x2='#{x2}' y2='#{y2}' style='stroke:rgb(130,#{g},80); stroke-width:#{sw}'/>"
 
         if (len *= @scale) >= @eps then
             tree(x2, y2, len, angle + 0.2*@PI);
