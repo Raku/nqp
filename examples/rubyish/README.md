@@ -56,10 +56,11 @@ curlies `puts fruit{'bananas'}`
 
 nqp op-codes can be called like regular functions. E.g.
 ```
-    puts nqp::sprintf("pid=%s time=%d", [nqp::getpid, nqp::time_i])'
     puts nqp::if(2+2 == 4, 'yup', 'nope' )
+    def sprintf(fmt, *args) ; nqp::sprintf(fmt, args) ; end
+    puts sprintf("pid=%s time=%d", nqp::getpid, nqp::time_i)
 ```
-- this includes nqp control-flow functions:
+this includes nqp control-flow functions:
 ```
     n = 99
     nqp::while n > 0, begin
