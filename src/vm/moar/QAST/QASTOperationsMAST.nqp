@@ -767,7 +767,7 @@ for ('', 'repeat_') -> $repness {
             for $op.list {
                 if $_.named eq 'nohandler' { $handler := 0; }
                 else {
-                    my $*HAVE_IMM_ARG := $_.arity > 0 && $_ =:= $op.list[1];
+                    my $*HAVE_IMM_ARG := nqp::istype($_, QAST::Block) && $_.arity > 0 && $_ =:= $op.list[1];
                     my $comp := $qastcomp.as_mast($_);
                     @comp_ops.push($comp);
                     @comp_types.push($comp.result_kind);
