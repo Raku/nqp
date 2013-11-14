@@ -131,6 +131,7 @@ public class AsyncFileHandle implements IIOClosable, IIOEncodable, IIOAsyncReada
         ls.readBuffer = ByteBuffer.allocate(32768);
         ls.total = 0;
         ls.position = 0;
+        System.out.println("starting an async lines() call");
         
         final CompletionHandler<Integer, LinesState> ch = new CompletionHandler<Integer, LinesState>() {
             public void completed(Integer bytes, LinesState ss) {
@@ -139,6 +140,18 @@ public class AsyncFileHandle implements IIOClosable, IIOEncodable, IIOAsyncReada
                     
                     /* If we're read all, send done notification. */
                     if (bytes == -1) {
+                        System.out.println("the bytes are -1");
+                        System.out.println("the line chunks are");
+                        System.out.println(ss.lineChunks.size());
+                        /* we may have a bit of non-linebreak-terminated data to spit out */
+                        if (ss.lineChunks.size() > 0) {
+                            /* decode, box and enqueue. no need to chomp. */
+                            String decoded = ss.lineChunks.size() == 1
+                                ? dec.decode(ss.lineChunks.get(0)).toString()
+                                : decodeBuffers(ss.lineChunks, ss.total);
+                            /* Box and enqueue. */
+                            queue.put(Ops.box_s(decoded, Str, curTC));
+                        }
                         Ops.invokeDirect(curTC, done, linesDoneCSD, new Object[] { });
                         return;
                     }
