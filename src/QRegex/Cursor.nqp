@@ -764,7 +764,7 @@ class NQPCursor does NQPCursorRole {
                 $curcap := nqp::shift($iter);
                 $key := nqp::iterkey_s($curcap);
                 if nqp::iscclass(nqp::const::CCLASS_NUMERIC, $key, 0) {
-                    $list := nqp::list() unless $list;
+                    $list := nqp::list() unless nqp::isconcrete($list);
                     nqp::bindpos($list, $key, nqp::iterval($curcap));
                 }
                 elsif $key && nqp::ordat($key, 0) == 36 && ($key eq '$!from' || $key eq '$!to') {
@@ -774,7 +774,7 @@ class NQPCursor does NQPCursorRole {
                     nqp::bindkey($hash, $key, nqp::iterval($curcap));
                 }
             }
-            nqp::bindattr($match, NQPCapture, '@!array', nqp::ifnull($list, @EMPTY_LIST));
+            nqp::bindattr($match, NQPCapture, '@!array', nqp::isconcrete($list) ?? $list !! @EMPTY_LIST);
             nqp::bindattr($match, NQPCapture, '%!hash', $hash);
         }
         $match
