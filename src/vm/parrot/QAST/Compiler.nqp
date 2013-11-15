@@ -909,10 +909,13 @@ class QAST::Compiler is HLL::Compiler {
             my %sym := $*BLOCK.qast.symbol($name);
             if $*BLOCK.lexical_type($name) -> $type {
                 my $reg := $*BLOCK.lex_reg($name);
+                my $*LEXREG := $reg;
                 if $*BINDVAL {
                     my $valpost := self.as_post_clear_bindval($*BINDVAL, :want(nqp::lc($type)));
                     $ops.push($valpost);
-                    $ops.push_pirop('set', $reg, $valpost.result);
+                    if $valpost.result ne $reg {
+                        $ops.push_pirop('set', $reg, $valpost.result);
+                    }
                 }
                 $ops.result($reg);
             }
@@ -1064,7 +1067,14 @@ class QAST::Compiler is HLL::Compiler {
         my $sc     := nqp::getobjsc($val);
         my $handle := nqp::scgethandle($sc);
         my $idx    := nqp::scgetobjidx($sc, $val);
-        my $reg    := $*REGALLOC.fresh_p();
+        my $reg;
+        if nqp::defined($*LEXREG) && nqp::substr($*LEXREG, 0, 2) eq '$P' && nqp::defined($want) && $want eq 'p' {
+            #$reg    := $*REGALLOC.fresh_p();
+            $reg := $*LEXREG;
+            $*LEXREG := nqp::null();
+        } else {
+            $reg    := $*REGALLOC.fresh_p();
+        }
         my $ops    := PIRT::Ops.new(:result($reg));
         $ops.push_pirop('nqp_get_sc_object', $reg, self.escape($handle), ~$idx);
         $ops;
