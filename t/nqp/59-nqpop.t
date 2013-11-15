@@ -128,21 +128,6 @@ ok( nqp::shift($iter) == 3.0, 'nqp::iterator');
 ok( nqp::elems($list) == 3, "iterator doesn't modify list");
 ok( nqp::islist($list), "nqp::islist works");
 
-my $qlist := nqp::qlist(0, 'a', 'b', 3.0);
-ok( nqp::elems($qlist) == 4, 'nqp::elems');
-ok( nqp::atpos($qlist, 0) == 0, 'nqp::atpos');
-ok( nqp::atpos($qlist, 2) eq 'b', 'nqp::atpos');
-nqp::push($qlist, 'four');
-ok( nqp::elems($qlist) == 5, 'nqp::push');
-ok( nqp::shift($qlist) == 0, 'nqp::shift');
-ok( nqp::pop($qlist) eq 'four', 'nqp::pop');
-my $qiter := nqp::iterator($qlist);
-ok( nqp::shift($qiter) eq 'a', 'nqp::iterator');
-ok( nqp::shift($qiter) eq 'b', 'nqp::iterator');
-ok( nqp::shift($qiter) == 3.0, 'nqp::iterator');
-ok( nqp::elems($qlist) == 3, "iterator doesn't modify qlist");
-ok( nqp::islist($qlist), "nqp::islist works");
-
 my %hash;
 %hash<foo> := 1;
 ok( nqp::existskey(%hash,"foo"),"existskey with existing key");
