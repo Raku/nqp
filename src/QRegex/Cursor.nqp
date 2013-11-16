@@ -6,6 +6,7 @@ my class ParseShared is export {
     has @!highexpect;
     has %!marks;
     has $!fail_cursor;
+    has $!ACTIONS;
     
     # Follow is a little simple usage tracing infrastructure, used by the
     # !cursor_start_* methods when uncommented.
@@ -38,6 +39,8 @@ role NQPCursorRole is export {
     method target() { nqp::getattr_s($!shared, ParseShared, '$!target') }
     method from() { $!from }
     method pos() { $!pos }
+
+    method update_actions() { nqp::bindattr($!shared, ParseShared, '$!ACTIONS', $*ACTIONS) }
 
     my $NO_CAPS := nqp::hash();
     method CAPHASH() {
@@ -115,6 +118,7 @@ role NQPCursorRole is export {
             nqp::bindattr_i($new, $?CLASS, '$!pos', $p);
         }
         nqp::bindattr($shared, ParseShared, '$!fail_cursor', $new.'!cursor_start_cur'());
+        $new.update_actions();
         $new;
     }
     
@@ -243,13 +247,17 @@ role NQPCursorRole is export {
     }
 
     method !reduce(str $name) {
-        my $actions := nqp::getlexdyn('$*ACTIONS');
+        my $actions := nqp::getattr($!shared, ParseShared, '$!ACTIONS');
+        #my $actions := nqp::getlexdyn('$*ACTIONS');
+        nqp::die("the actions got desync'd in $name") unless $actions =:= $*ACTIONS;
         nqp::findmethod($actions, $name)($actions, self.MATCH)
             if !nqp::isnull($actions) && nqp::can($actions, $name);
     }
 
     method !reduce_with_match($name, $key, $match) {
-        my $actions := nqp::getlexdyn('$*ACTIONS');
+        my $actions := nqp::getattr($!shared, ParseShared, '$!ACTIONS');
+        nqp::die("the actions got desync'd in $name") unless $actions =:= $*ACTIONS;
+        #my $actions := nqp::getlexdyn('$*ACTIONS');
         nqp::findmethod($actions, $name)($actions, $match, $key)
             if !nqp::isnull($actions) && nqp::can($actions, $name);
     }
@@ -788,6 +796,7 @@ class NQPCursor does NQPCursorRole {
     method parse($target, :$rule = 'TOP', :$actions, *%options) {
         my $*ACTIONS := $actions;
         my $cur := self.'!cursor_init'($target, |%options);
+        nqp::bindattr(nqp::getattr($cur, NQPCursor, '$!shared'), ParseShared, '$!ACTIONS', $actions);
         nqp::isinvokable($rule) ??
             $rule($cur).MATCH() !!
             nqp::findmethod($cur, $rule)($cur).MATCH()
