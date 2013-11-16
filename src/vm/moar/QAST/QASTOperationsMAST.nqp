@@ -1189,8 +1189,11 @@ QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
 
     # push the op that finds the method based on either the provided name
     # or the provided name-producing expression.
+    my $decont_inv_reg := $*REGALLOC.fresh_o();
+    push_op(@ins, 'decont', $decont_inv_reg, $invocant.result_reg);
     push_op(@ins, ($op.name ?? 'findmeth' !! 'findmeth_s'),
-        $callee_reg, $invocant.result_reg, $method_name);
+        $callee_reg, $decont_inv_reg, $method_name);
+    $*REGALLOC.release_register($decont_inv_reg, $MVM_reg_obj);
 
     # release the method name register if we used one
     $*REGALLOC.release_register($method_name, $MVM_reg_str) unless $op.name;
