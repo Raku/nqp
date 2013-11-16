@@ -30,6 +30,7 @@ Implemented:
 - lambda blocks/closures: `def make_counter(n,incr) ; n-=incr; lambda { n += incr }; end`
 - lightweight eRuby like templating, see [template.rbi](examples-rubyish/template.rbi)
 - heredocs, literal `<<EOF ... EOF` and interpolating `<<"END" ... END`
+- code block arguments `even = grep(arr) {|n| n % 2 == 0}` -- see [functions.t](t/functions.t)
 
 Notes:
 

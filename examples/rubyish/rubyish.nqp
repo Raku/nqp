@@ -82,9 +82,9 @@ grammar Rubyish::Grammar is HLL::Grammar {
 
     rule signature {
         :my $*IN_PARENS := 1;
-        [ <param> ]+ % ','  [ ',' '*' <slurpy=.param> ]?
-        |
-        '*' <slurpy=.param>
+        [[ <param> ]+ % ','  [ ',' '*' <slurpy=.param> ]? [ ',' '&' <func=.param> ]?
+        | '*' <slurpy=.param>] [ ',' '&' <func=.param> ]?
+        | '&' <func=.param>
     }
 
     token param { <ident> [:s<hs> '=' <EXPR>]?}
@@ -109,9 +109,14 @@ grammar Rubyish::Grammar is HLL::Grammar {
     token stmt:sym<EXPR> { <EXPR> }
     token term:sym<infix=> {:s<hs> <var> <OPER=infix> '=' <EXPR> }
 
+    token code-block {:s<hs>
+        :my $*CUR_BLOCK := QAST::Block.new(QAST::Stmts.new());
+	<closure>
+    }
+
     token term:sym<call> {
         <!keyword>
-        <operation> ['(' ~ ')' <call-args=.paren-args>?
+        <operation> ['(' ~ ')' <call-args=.paren-args>? <code-block>?
                     |:s<hs> <call-args>? <?{%*SYM{~$<operation>} eq 'def'}> ]
     }
 
@@ -123,7 +128,12 @@ grammar Rubyish::Grammar is HLL::Grammar {
         \% w <?before [.]> <quote_EXPR: ':q', ':w'>
     }
 
-    token call-args  {:s<hs> [<arg=.hash-args>||<arg=.EXPR>]+ % ',' }
+    token call-args  {:s<hs>
+         [<arg=.hash-args>||<arg=.EXPR>]+ % ','  [ ',' <arg=.func-ref> ]?
+         | <arg=.func-ref>
+    }
+
+    token func-ref { '&' <arg=.EXPR> }
 
     token hash-args  {:s [ <EXPR> '=>' <EXPR> ]+ % ',' }
 
@@ -204,7 +214,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
 
     proto token comment {*}
     token comment:sym<line>   { '#' [<?{!$*IN_TEMPLATE}> \N* || [<!before <tmpl-unesc>>\N]*] }
-    token comment:sym<podish> {[^^'=begin'\n] [ .*? [^^'=end'\n] || <.panic('missing ^^=end at eof')>] }
+    token comment:sym<podish> {[^^'=begin'\n] [ .*? [^^'=end'[\n|$]] || <.panic('missing ^^=end at eof')>] }
     token ws { <!ww> [\h | <.continuation> | <.comment> | <?{$*IN_PARENS}> \n]* }
     token hs { <!ww> [\h | <.continuation> ]* }
 
@@ -294,7 +304,8 @@ grammar Rubyish::Grammar is HLL::Grammar {
     token infix:sym<or>   { <sym>  <O('%loose_logical, :op<unless>')> }
  
     # Parenthesis
-    token circumfix:sym<( )> {'(' <EXPR> ')' <O('%methodop')> }
+    token circumfix:sym<( )> { :my $*IN_PARENS := 1;
+                               '(' <EXPR> ')' <O('%methodop')> }
 
     # Method call
     token postfix:sym<.>  {
@@ -345,9 +356,14 @@ grammar Rubyish::Grammar is HLL::Grammar {
         'begin' ~ 'end' <stmtlist> 
     }
 
+    token closure  {:s ['{' ['|' ~ '|' <signature>?]? ]  ~ '}' <stmtlist> }
+    token closure2 {:s ['(' ~ ')' <signature>? ]? '{' ~ '}' <stmtlist> }
+
     token term:sym<lambda> {:s
-        'lambda' ['{' ['|' ~ '|' <signature>?]? ]  ~ '}' <stmtlist> 
-    |   '->' ['(' ~ ')' <signature>? ]? '{' ~ '}' <stmtlist>
+        :my $*CUR_BLOCK := QAST::Block.new(QAST::Stmts.new());
+        ['lambda' <closure> 
+	 | '->' <closure=.closure2>
+	]
     }
 
     method builtin-init() {
@@ -420,6 +436,8 @@ class Rubyish::Actions is HLL::Actions {
     # a few ops that map directly to Ruby built-ins
     my %builtins;
 
+    method code-block($/) { make $<closure>.ast }
+
     method term:sym<call>($/) {
         my $name  := ~$<operation>;
         %builtins := Rubyish::Grammar.builtin-init()
@@ -434,6 +452,9 @@ class Rubyish::Actions is HLL::Actions {
             $call.push($_)
                 for $<call-args>.ast;
         }
+
+        $call.push( $<code-block>.ast )
+            if $<code-block>;
 
         make $call;
     }
@@ -454,6 +475,10 @@ class Rubyish::Actions is HLL::Actions {
         my @args;
         @args.push($_.ast) for $<arg>;
         make @args;
+    }
+
+    method func-ref($/) {
+        make $<arg>.ast
     }
 
     method hash-args($/) {
@@ -576,12 +601,6 @@ class Rubyish::Actions is HLL::Actions {
 
     method defbody($/) {
         $*CUR_BLOCK.name(~$<operation>);
-        if $<signature> {
-            for $<signature>.ast {
-                $*CUR_BLOCK[0].push($_);
-                $*CUR_BLOCK.symbol($_.name, :declared(1));
-            }
-        }
         $*CUR_BLOCK.push($<stmtlist>.ast);
         if $*IN_CLASS {
             # it's a method, self will be automatically passed
@@ -595,14 +614,14 @@ class Rubyish::Actions is HLL::Actions {
     }
 
     method param($/) {
-       my $param := QAST::Var.new(
+       my $var := QAST::Var.new(
            :name(~$<ident>), :scope('lexical'), :decl('param')
           );
 
-       $param.default( $<EXPR>.ast )
+       $var.default( $<EXPR>.ast )
           if $<EXPR>;
 
-       make $param;
+       make $var;
     }
 
     method signature($/) {
@@ -618,7 +637,15 @@ class Rubyish::Actions is HLL::Actions {
             @params[-1].slurpy(1);
         }
 
-        make @params;
+        if $<func> {
+            @params.push($<func>[0].ast);
+            @params[-1].default(QAST::Op.new( :op<null> ));
+        }
+
+        for @params {
+	    $*CUR_BLOCK[0].push($_);
+	    $*CUR_BLOCK.symbol($_.name, :declared(1));
+ 	}
     }
 
     method stmt:sym<class>($/) {
@@ -835,18 +862,14 @@ class Rubyish::Actions is HLL::Actions {
         make $<stmtlist>.ast;
     }
 
-    method term:sym<lambda>($/) {
-        my $block := QAST::Block.new();
-        if $<signature> {
-            for $<signature>.ast {
-                $block.push($_);
-                $block.symbol($_.name, :declared(1));
-            }
-        } 
-       $block.push($<stmtlist>.ast);
-
-        make  QAST::Op.new(:op<takeclosure>, $block );
+    method closure($/) {
+        $*CUR_BLOCK.push($<stmtlist>.ast);
+        make QAST::Op.new(:op<takeclosure>, $*CUR_BLOCK );
     }
+
+    method closure2($/) { self.closure($/) }
+
+    method term:sym<lambda>($/) { make $<closure>.ast }
 
 }
 
