@@ -563,6 +563,59 @@ QAST::MASTOperations.add_core_op('hash', -> $qastcomp, $op {
     $hash
 });
 
+# Chaining.
+QAST::MASTOperations.add_core_op('chain', -> $qastcomp, $op {
+    # First, we build up the list of nodes in the chain
+    my @clist;
+    my $cqast := $op;
+    while $cqast ~~ QAST::Op && $cqast.op eq 'chain' {
+        nqp::push(@clist, $cqast);
+        $cqast := $cqast[0];
+    }
+
+    my @ops;
+    my $res_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
+    my $endlabel := MAST::Label.new( :name($qastcomp.unique('chain_end_')) );
+
+    $cqast := nqp::pop(@clist);
+    my $aqast := $cqast[0];
+    my $acomp := $qastcomp.as_mast($aqast, :want($MVM_reg_obj));
+    push_ilist(@ops, $acomp);
+
+    my $more := 1;
+    while $more {
+        my $bqast := $cqast[1];
+        my $bcomp := $qastcomp.as_mast($bqast, :want($MVM_reg_obj));
+        push_ilist(@ops, $bcomp);
+
+        my $callee := $qastcomp.as_mast(
+            QAST::Var.new( :name($cqast.name), :scope('lexical') ),
+            :want($MVM_reg_obj));
+        push_ilist(@ops, $callee);
+        nqp::push(@ops, MAST::Call.new(
+            :target($callee.result_reg),
+            :flags([$Arg::obj, $Arg::obj]),
+            :result($res_reg),
+            $acomp.result_reg, $bcomp.result_reg
+        ));
+
+        $*REGALLOC.release_register($callee.result_reg, $MVM_reg_obj);
+        $*REGALLOC.release_register($acomp.result_reg, $MVM_reg_obj);
+
+        if @clist {
+            push_op(@ops, 'unless_o', $res_reg, $endlabel);
+            $cqast := nqp::pop(@clist);
+            $acomp := $bcomp;
+        }
+        else {
+            $more := 0;
+        }
+    }
+
+    nqp::push(@ops, $endlabel);
+    MAST::InstructionList.new(@ops, $res_reg, $MVM_reg_obj)
+});
+
 # Conditionals.
 for <if unless> -> $op_name {
     QAST::MASTOperations.add_core_op($op_name, -> $qastcomp, $op {
