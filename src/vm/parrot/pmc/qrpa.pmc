@@ -25,7 +25,9 @@ COMPARE(PARROT_INTERP, ARGIN(void *_a), ARGIN(void *_b),
         ARGIN(PMC *cmp),
         ARGIN(const char * cmp_signature))
 {
+#ifdef ASSERT_ARGS_COMPARE
     ASSERT_ARGS(COMPARE)
+#endif
     INTVAL result = 0;
     if (PMC_IS_NULL(cmp))
         return VTABLE_cmp(interp, (PMC *)_a, (PMC *)_b);
@@ -44,7 +46,9 @@ Parrot_util_quicksort(PARROT_INTERP, ARGMOD(void **data), UINTVAL n,
         ARGIN(PMC *cmp),
         ARGIN(const char * cmp_signature))
 {
+#ifdef ASSERT_ARGS_Parrot_util_quicksort
     ASSERT_ARGS(Parrot_util_quicksort)
+#endif
     while (n > 1) {
         UINTVAL i, j, ln, rn;
         void *temp;
