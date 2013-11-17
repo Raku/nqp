@@ -1623,6 +1623,7 @@ QAST::MASTOperations.add_core_moarop_mapping('getstderr', 'getstderr');
 QAST::MASTOperations.add_core_moarop_mapping('setencoding', 'setencoding');
 QAST::MASTOperations.add_core_moarop_mapping('tellfh', 'tell_fh');
 QAST::MASTOperations.add_core_moarop_mapping('readfh', 'read_fhb', 1);
+QAST::MASTOperations.add_core_moarop_mapping('writefh', 'write_fhb', 1);
 QAST::MASTOperations.add_core_moarop_mapping('printfh', 'write_fhs');
 QAST::MASTOperations.add_core_moarop_mapping('sayfh', 'say_fhs');
 QAST::MASTOperations.add_core_moarop_mapping('readlinefh', 'readline_fh');
