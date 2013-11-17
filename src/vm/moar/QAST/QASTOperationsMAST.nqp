@@ -94,7 +94,7 @@ class QAST::MASTOperations {
     my @core_operands_counts  := MAST::Ops.WHO<@counts>;
     my @core_operands_values  := MAST::Ops.WHO<@values>;
     my %core_op_codes         := MAST::Ops.WHO<%codes>;
-    method compile_mastop($qastcomp, $op, @args, :$returnarg = -1, :$want) {
+    method compile_mastop($qastcomp, $op, @args, @deconts, :$returnarg = -1, :$want) {
         # Resolve as either core op or ext op.
         my int $num_operands;
         my int $operands_offset;
@@ -208,6 +208,9 @@ class QAST::MASTOperations {
             # put the arg exression's generation code in the instruction list
             nqp::splice(@all_ins, $arg.instructions, +@all_ins, 0)
                 unless $constant_operand;
+            if @deconts[$arg_num] {
+                nqp::push(@all_ins, MAST::Op.new( :op('decont'), $arg.result_reg, $arg.result_reg ));
+            }
             nqp::push(@arg_regs, $constant_operand
                 ?? $qastcomp.as_mast_constant($_)
                 !! $arg.result_reg);
@@ -281,20 +284,20 @@ class QAST::MASTOperations {
     }
 
     # Adds a core op that maps to a Moar op.
-    method add_core_moarop_mapping($op, $moarop, $ret = -1, :$mapper?) {
+    method add_core_moarop_mapping($op, $moarop, $ret = -1, :$mapper?, :$decont) {
         my $moarop_mapper := $mapper
             ?? $mapper(self, $moarop, $ret)
-            !! self.moarop_mapper($moarop, $ret);
+            !! self.moarop_mapper($moarop, $ret, $decont);
         %core_ops{$op} := -> $qastcomp, $op {
             $moarop_mapper($qastcomp, $op.op, $op.list)
         };
     }
 
     # Adds a HLL op that maps to a Moar op.
-    method add_hll_moarop_mapping($hll, $op, $moarop, $ret = -1, :$mapper?) {
+    method add_hll_moarop_mapping($hll, $op, $moarop, $ret = -1, :$mapper?, :$decont) {
         my $moarop_mapper := $mapper
             ?? $mapper(self, $moarop, $ret)
-            !! self.moarop_mapper($moarop, $ret);
+            !! self.moarop_mapper($moarop, $ret, $decont);
         %hll_ops{$hll} := {} unless %hll_ops{$hll};
         %hll_ops{$hll}{$op} := -> $qastcomp, $op {
             $moarop_mapper($qastcomp, $op.op, $op.list)
@@ -304,7 +307,7 @@ class QAST::MASTOperations {
     # Returns a mapper closure for turning an operation into a Moar op.
     # $ret is the 0-based index of which arg to use as the result when
     # the moarop is void.
-    method moarop_mapper($moarop, $ret) {
+    method moarop_mapper($moarop, $ret, $decont_in) {
         # do a little checking of input values
 
         my $self := self;
@@ -333,9 +336,17 @@ class QAST::MASTOperations {
                 if $num_operands && (nqp::atpos_i(@operands_values, $operands_offset) +& $MVM_operand_rw_mask) ==
                     $MVM_operand_write_reg;
         }
+        
+        my @deconts;
+        if nqp::islist($decont_in) {
+            for $decont_in { @deconts[$_] := 1; }
+        }
+        elsif nqp::defined($decont_in) {
+            @deconts[$decont_in] := 1;
+        }
 
         -> $qastcomp, $op_name, @op_args {
-            $self.compile_mastop($qastcomp, $moarop, @op_args, :returnarg($ret))
+            $self.compile_mastop($qastcomp, $moarop, @op_args, @deconts, :returnarg($ret))
         }
     }
 
@@ -1877,11 +1888,11 @@ QAST::MASTOperations.add_core_moarop_mapping('iterval', 'iterval');
 # object opcodes
 QAST::MASTOperations.add_core_moarop_mapping('null', 'null');
 QAST::MASTOperations.add_core_moarop_mapping('null_s', 'null_s');
-QAST::MASTOperations.add_core_moarop_mapping('what', 'getwhat');
-QAST::MASTOperations.add_core_moarop_mapping('how', 'gethow');
-QAST::MASTOperations.add_core_moarop_mapping('who', 'getwho');
-QAST::MASTOperations.add_core_moarop_mapping('where', 'getwhere');
-QAST::MASTOperations.add_core_moarop_mapping('findmethod', 'findmeth_s');
+QAST::MASTOperations.add_core_moarop_mapping('what', 'getwhat', :decont(0));
+QAST::MASTOperations.add_core_moarop_mapping('how', 'gethow', :decont(0));
+QAST::MASTOperations.add_core_moarop_mapping('who', 'getwho', :decont(0));
+QAST::MASTOperations.add_core_moarop_mapping('where', 'getwhere', :decont(0));
+QAST::MASTOperations.add_core_moarop_mapping('findmethod', 'findmeth_s', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('setwho', 'setwho');
 QAST::MASTOperations.add_core_moarop_mapping('rebless', 'rebless');
 QAST::MASTOperations.add_core_moarop_mapping('knowhow', 'knowhow');
@@ -1916,14 +1927,14 @@ QAST::MASTOperations.add_core_moarop_mapping('bindattr', 'bindattrs_o', 3);
 QAST::MASTOperations.add_core_moarop_mapping('bindattr_i', 'bindattrs_i', 3);
 QAST::MASTOperations.add_core_moarop_mapping('bindattr_n', 'bindattrs_n', 3);
 QAST::MASTOperations.add_core_moarop_mapping('bindattr_s', 'bindattrs_s', 3);
-QAST::MASTOperations.add_core_moarop_mapping('unbox_i', 'unbox_i');
-QAST::MASTOperations.add_core_moarop_mapping('unbox_n', 'unbox_n');
-QAST::MASTOperations.add_core_moarop_mapping('unbox_s', 'unbox_s');
+QAST::MASTOperations.add_core_moarop_mapping('unbox_i', 'unbox_i', :decont(0));
+QAST::MASTOperations.add_core_moarop_mapping('unbox_n', 'unbox_n', :decont(0));
+QAST::MASTOperations.add_core_moarop_mapping('unbox_s', 'unbox_s', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('box_i', 'box_i');
 QAST::MASTOperations.add_core_moarop_mapping('box_n', 'box_n');
 QAST::MASTOperations.add_core_moarop_mapping('box_s', 'box_s');
-QAST::MASTOperations.add_core_moarop_mapping('can', 'can_s');
-QAST::MASTOperations.add_core_moarop_mapping('reprname', 'reprname');
+QAST::MASTOperations.add_core_moarop_mapping('can', 'can_s', :decont(0));
+QAST::MASTOperations.add_core_moarop_mapping('reprname', 'reprname', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('newtype', 'newtype');
 QAST::MASTOperations.add_core_moarop_mapping('composetype', 'composetype');
 QAST::MASTOperations.add_core_moarop_mapping('setboolspec', 'setboolspec', 0);

@@ -949,8 +949,8 @@ class QAST::MASTCompiler {
         }
         elsif $node.supports('moarop') {
             return nqp::defined($want)
-                ?? QAST::MASTOperations.compile_mastop(self, $node.alternative('moarop'), $node.list, :$want)
-                !! QAST::MASTOperations.compile_mastop(self, $node.alternative('moarop'), $node.list);
+                ?? QAST::MASTOperations.compile_mastop(self, $node.alternative('moarop'), $node.list, [], :$want)
+                !! QAST::MASTOperations.compile_mastop(self, $node.alternative('moarop'), $node.list, []);
         }
         elsif $node.supports('mast') {
             return $node.alternative('mast');
