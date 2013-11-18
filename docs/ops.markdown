@@ -851,7 +851,7 @@ Return the contents of the open filehandle.
 * `readfh(Handle $fh, @arr, long $count)`
 
 Given a readable `$fh`, and an array of `Buf[int8]` or a `Buf[uint8]`, read
-in the next `$count` bytes from the filehandle and story them in the array.
+in the next `$count` bytes from the filehandle and store them in the array.
 
 ## readlinefh
 * `readlinefh(Handle $fh)`
