@@ -30,9 +30,10 @@ Implemented:
 - lambda blocks/closures: `def make_counter(n,incr) ; n-=incr; lambda { n += incr }; end`
 - lightweight eRuby like templating, see [template.rbi](examples-rubyish/template.rbi)
 - heredocs, literal `<<EOF ... EOF` and interpolating `<<"END" ... END`
-- code block arguments `even = grep(arr) {|n| n % 2 == 0}` -- see [functions.t](t/functions.t)
+- code block arguments `even = grep(arr) {|n| n % 2 == 0}` -- see [functional.t](t/functional.t)
 
 Notes:
+------
 
 Handy Options:
 
@@ -51,7 +52,7 @@ Strings and truth values are Perlish rather than Rubyish:
 - `~` has been introduced as the concatenation operator
 - `>`, `==`, `<=` ... only do arithmetic comparisons
 - `gt`, `eq`, `le` ... do string comparisions
-- 0, '0', '', nil  are false in a boolean context.
+- 0, '0', '' are false in a boolean context.
 - hash dereferencing is via angle braces: `puts fruit<apples>` or
 curlies `puts fruit{'bananas'}`
 

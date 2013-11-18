@@ -1,3 +1,4 @@
+# -*- coding: iso-8859-1 -*-
 use NQPHLL;
 
 # Ruby subset extended from the `rubyish` example, as introduced in the
@@ -356,13 +357,14 @@ grammar Rubyish::Grammar is HLL::Grammar {
         'begin' ~ 'end' <stmtlist> 
     }
 
-    token closure  {:s ['{' ['|' ~ '|' <signature>?]? ]  ~ '}' <stmtlist> }
+    token closure  {:s ['{'  ['|' ~ '|' <signature>?]? ]  ~ '}'   <stmtlist>
+                   |:s ['do' ['|' ~ '|' <signature>?]? ]  ~ 'end' <stmtlist> }
     token closure2 {:s ['(' ~ ')' <signature>? ]? '{' ~ '}' <stmtlist> }
 
     token term:sym<lambda> {:s
         :my $*CUR_BLOCK := QAST::Block.new(QAST::Stmts.new());
         ['lambda' <closure> 
-	 | '->' <closure=.closure2>
+	| '->' <closure=.closure2>
 	]
     }
 
