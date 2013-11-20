@@ -4901,7 +4901,7 @@ class QAST::CompilerJAST {
             $il.append(JAST::Instruction.new( :op('iflt'), $succeed_and_pop ));
             $il.append(JAST::PushIVal.new( :value($node[2].value) ));
             $il.append($LCMP);
-            $il.append(JAST::Instruction.new( :op('ifge'), $succeed ));
+            $il.append(JAST::Instruction.new( :op('ifgt'), $succeed ));
             $il.append(JAST::Instruction.new( :op('goto'), %*REG<fail> ));
             $il.append($succeed_and_pop);
             $il.append($POP2);
