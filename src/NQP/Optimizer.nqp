@@ -55,9 +55,11 @@ class NQP::RegexOptimizer {
                     $qast[0][1][2][1] := $simple;
                 }
                 my $result := 0;
-                if $simple.rxtype eq 'literal' && $simple.rxtype ne 'ignorecase' {
+                # FIXME something is causing trouble with literals here. segfault on parrot,
+                #       NQP tests failing, ...
+                if 0 && $simple.rxtype eq 'literal' && $simple.rxtype ne 'ignorecase' && !$qast.negate {
                     $result := QAST::Regex.new(:rxtype<literal>, :subtype<zerowidth>, :node($simple.node),
-                        :negate(nqp::bitxor_i($qast.negate, $simple.negate)),
+                        :negate($qast.negate),
                         $simple[0]);
                 } elsif $simple.rxtype eq 'enumcharlist' && $simple.rxtype ne 'ignorecase' {
                     $result := QAST::Regex.new(:rxtype<enumcharlist>, :subtype<zerowidth>, :node($simple.node),
