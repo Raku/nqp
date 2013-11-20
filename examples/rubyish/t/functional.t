@@ -1,5 +1,5 @@
 # implement and test functional primitives: map, grep and sort.
-puts '1..8'
+puts '1..9'
 
 test_counter = 0
 
@@ -7,23 +7,22 @@ def is(result, expected, description)
     test_num = (test_counter += 1)
     passed = result eq expected
     puts "#{passed ? 'ok' : 'nok'} #{test_num} - #{description}"
-    puts "# expected:'#{expected}' got:'#{result}'" unless passed
+    puts "# expected:'#{expected}' got:'#{result}'" \
+       unless passed
 end
 
 def dump(arr) ; nqp::join(',', arr); end
 
 # ------------
-def grep(array_inp, &filter)
+def grep(array_inp, &selector)
     array_out = []
     n = -1
+    selector = lambda {|elem| !elem.nil? && elem} \
+       if selector.nil?
 
     for elem in array_inp ;
-        keep = (filter.nil?
-                ? (!elem.nil? && elem)
-                : filter.call(elem))
-
         array_out[ n+=1 ] = elem \
-            if keep
+            if selector.call(elem)
     end
 
     array_out
@@ -108,7 +107,12 @@ is dump(num_sort), '0,1,2,4,5,10,13,18,27', 'sort [numeric]'
 # ------------
 # put it all together
 odd = lambda {|n| n % 2 == 1}
+
 combined = map(sort grep(arr,&odd)) {|str| nqp::flip(str)}
 is dump(combined), '1,31,72,5', 'combined map sort grep'
-is dump(arr), '0,2,10,1,13,27,5,4,18', 'array unscathed'
+
+splitter = lambda {|n| nqp::split('',n)}
+is dump( map(combined, &splitter) ), '1,3,1,7,2,5', 'map [flattening]'
+
+is dump(arr), '0,2,10,1,13,27,5,4,18', 'array readonly'
 

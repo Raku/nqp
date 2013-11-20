@@ -1,4 +1,3 @@
-# -*- coding: iso-8859-1 -*-
 use NQPHLL;
 
 # Ruby subset extended from the `rubyish` example, as introduced in the
@@ -45,7 +44,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
     token template-nibble:sym<stray-tag>  { [<.tmpl-unesc>|<.tmpl-hdr>] <.panic("Stray tag, e.g. '%>' or '<?rbi?>'")> }
     token template-nibble:sym<literal> { [<!before [<tmpl-esc>|'#{'|$]> .]+ }
 
-    token tmpl-hdr   {'<?rbi?>' \h* \n? <?{$*IN_TEMPLATE := 1}>}
+    token tmpl-hdr   {'<?rbi?>' \h* \n? {$*IN_TEMPLATE := 1} }
     token tmpl-esc   {\h* '<%'
                      [<?{$*IN_TEMPLATE}> || <.panic('Template directive precedes "<?rbi?>"')>]
     }
@@ -70,7 +69,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
 
         'def' ~ 'end' <defbody>
 
-        <?{%*SYM := self.hcopy(%sym-save);1}>
+        {%*SYM := self.hcopy(%sym-save)}
     }
 
     rule defbody {
@@ -97,13 +96,15 @@ grammar Rubyish::Grammar is HLL::Grammar {
 
         [<sym> \h+] ~ [\h* 'end'] <classbody>
 
-        <?{%*SYM := self.hcopy(%sym-save);1}>
+        {%*SYM := self.hcopy(%sym-save);1}
     }
 
     rule classbody {
         :my $*CUR_BLOCK   := QAST::Block.new(QAST::Stmts.new());
         :my $*CLASS_BLOCK := $*CUR_BLOCK;
-        <ident> <separator>
+
+        <ident> { $*CLASS_BLOCK.name(~$<ident>) }
+        <separator>
         <stmtlist>
     }
 
@@ -112,7 +113,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
 
     token code-block {:s<hs>
         :my $*CUR_BLOCK := QAST::Block.new(QAST::Stmts.new());
-	<closure>
+        <closure>
     }
 
     token term:sym<call> {
@@ -154,7 +155,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
         [ <?before \h* '=' [\w | \h+ || <.EXPR>] { $*MAYBE_DECL := 1 }> || <?> ]
     }
 
-    token term:sym<var> { <var> }
+    token term:sym<var>   { <var> }
 
     token term:sym<value> { \+? <value> }
 
@@ -187,8 +188,8 @@ grammar Rubyish::Grammar is HLL::Grammar {
          <EXPR> *%% <comma>
     }
 
-    token value:sym<integer> { \+? \d+ }
-    token value:sym<float>   { \+? \d* '.' \d+ }
+    token value:sym<integer> { \d+ }
+    token value:sym<float>   { \d* '.' \d+ }
     token value:sym<array>   {'[' ~ ']' <paren-list> }
     token value:sym<hash>    {'{' ~ '}' <paren-list> }
     token value:sym<nil>     { <sym> }
@@ -364,8 +365,8 @@ grammar Rubyish::Grammar is HLL::Grammar {
     token term:sym<lambda> {:s
         :my $*CUR_BLOCK := QAST::Block.new(QAST::Stmts.new());
         ['lambda' <closure> 
-	| '->' <closure=.closure2>
-	]
+        | '->' <closure=.closure2>
+        ]
     }
 
     method builtin-init() {
@@ -543,9 +544,10 @@ class Rubyish::Actions is HLL::Actions {
 
         if $sigil eq '@' && $*IN_CLASS {
             # instance variable, bound to self
-            make QAST::Var.new( :scope('attribute'),
+            my $package-name := $*CLASS_BLOCK.name;
+            make QAST::Var.new( :name($name), :scope('attribute'),
                                 QAST::Var.new( :name('self'), :scope('lexical')),
-                                QAST::SVal.new( :value($name) )
+                                QAST::SVal.new( :value($package-name) )
                 );
         }
         else {
@@ -645,9 +647,9 @@ class Rubyish::Actions is HLL::Actions {
         }
 
         for @params {
-	    $*CUR_BLOCK[0].push($_);
-	    $*CUR_BLOCK.symbol($_.name, :declared(1));
- 	}
+            $*CUR_BLOCK[0].push($_);
+            $*CUR_BLOCK.symbol($_.name, :declared(1));
+         }
     }
 
     method stmt:sym<class>($/) {
@@ -656,14 +658,18 @@ class Rubyish::Actions is HLL::Actions {
         # Generate code to create the class.
         my $class_stmts := QAST::Stmts.new( $body_block );
         my $ins_name    := '::' ~ $<classbody><ident>;
-        $class_stmts.push(QAST::Op.new(
-            :op('bind'),
-            QAST::Var.new( :name($ins_name), :scope('lexical'), :decl('var') ),
-            QAST::Op.new(
+
+        my $new_type :=  QAST::Op.new(
                 :op('callmethod'), :name('new_type'),
                 QAST::WVal.new( :value(RubyishClassHOW) ),
-                QAST::SVal.new( :value(~$<classbody><ident>), :named('name') ) )
-            ));
+                QAST::SVal.new( :value(~$<classbody><ident>), :named('name') ),
+          );
+
+        $class_stmts.push(QAST::Op.new(
+                              :op('bind'),
+                              QAST::Var.new( :name($ins_name), :scope('lexical'), :decl('var') ),
+                              $new_type,
+                          ));
 
         # Add methods.
         my $class_var := QAST::Var.new( :name($ins_name), :scope('lexical') );

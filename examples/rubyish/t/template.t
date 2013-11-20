@@ -16,7 +16,8 @@ ok 5 - text between statements
   <%elsif n == 20   %>nok 7 - elsif block (false)
   <%else            %>ok 7 - else block (false)
   <% end %>
-  <%for test in [8, 9]  do %>ok #{test} - for loop test
+  <%for test in [8, 9] do %>ok #{test} - for loop test
   <%end%>
-<%#puts "nok 10 - commented out directive" %>
-ok 10 - final template text
+  <%n = 9 %>
+<%#puts "nok #{n += 1} - commented out directive" %>
+ok #{n += 1} - final template text

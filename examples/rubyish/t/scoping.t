@@ -1,4 +1,4 @@
-puts "1..13"
+puts "1..17"
 
 a = "ok 1"
 b = "ok 2"
@@ -13,20 +13,24 @@ end
 some_sub()
 
 class MyClass
-  @@final_test = 13
+  @@final_test = 17
 
-  def set_class(v); @@c = v; b = 'wtf'; end
-  def get_class; @@c;                   end
-  def set_inst(v); @i = v;              end
-  def get_inst; @i;                     end
-  def class_const; @@final_test ;       end
-  def tickle_f(f); @f = f ;             end
+  def set_class(v); @@c = v; b = 'wtf';  end
+  def get_class; @@c;                    end
+  def set_inst(v1,v2); @i1 = v1; @i2= v2 end
+  def get_inst1; @i1;                    end
+  def get_inst2; @i2;                    end
+  def class_const; @@final_test ;        end
+  def tickle_f(f); @f = f ;              end
 
 end
 
 class OtherClass
   def set_class(v); @@c = v; end
   def get_class; @@c;        end
+  def set_inst(v1,v2); @i1 = v1; @i2= v2 end
+  def get_inst1; @i1;                    end
+  def get_inst2; @i2;                    end
 end
 
 obj1 = MyClass.new;
@@ -52,9 +56,14 @@ puts "ok #{obj1.get_class} - @@class access"
 puts "ok #{obj2.get_class() + 1} - @@class access"
 puts "ok #{obj3.get_class} - @@class variable"
 
-obj1.set_inst(11)
-obj2.set_inst(12)
+obj1.set_inst(11,12)
+obj2.set_inst(13,14)
+obj3.set_inst(15,16)
 
-puts "ok #{obj1.get_inst} - @instance access"
-puts "ok #{obj2.get_inst} - @instance access"
+puts "ok #{obj1.get_inst1} - @instance access"
+puts "ok #{obj1.get_inst2} - @instance access"
+puts "ok #{obj2.get_inst1} - @instance access"
+puts "ok #{obj2.get_inst2} - @instance access"
+puts "ok #{obj3.get_inst1} - @instance access"
+puts "ok #{obj3.get_inst2} - @instance access"
 puts "ok #{obj2.class_const} - @@class constant"

@@ -34,22 +34,11 @@ puts "ok 10"; end
 if 2 >= 1 && 1 <= 2 && "b" gt "a" && "a" lt "b" && (2 != 1) ; puts "ok 11"
 else puts "nok 11"; end
 
-def fact!(n)
-    if n <= 1 then
-       1
-    else
-       n * fact!(n - 1)
-    end
+def one_liner(i)
+   if i == 42 then 'nok' elsif i == 12 then 'ok' else 'nok' end
 end
 
-result = fact!(6)
-expected =  6*5*4*3*2
-
-if result == expected then
-    puts "ok 12 - recursion: 6! == #{expected}"
-else
-    puts "nok 12 - recursion: 6! == #{expected}"
-end
+puts "#{one_liner(12)} 12 - single line statement"
 
 def iffy(n)
    if n == 10
