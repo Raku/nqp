@@ -57,21 +57,21 @@ class NQP::RegexOptimizer {
                 my $result := 0;
                 if $simple.rxtype eq 'literal' && $simple.rxtype ne 'ignorecase' {
                     $result := QAST::Regex.new(:rxtype<literal>, :subtype<zerowidth>, :node($simple.node),
-                        :negate($qast.negate),
+                        :negate(nqp::bitxor_i($qast.negate, $simple.negate)),
                         $simple[0]);
                 } elsif $simple.rxtype eq 'enumcharlist' && $simple.rxtype ne 'ignorecase' {
                     $result := QAST::Regex.new(:rxtype<enumcharlist>, :subtype<zerowidth>, :node($simple.node),
-                        :negate($qast.negate),
+                        :negate(nqp::bitxor_i($qast.negate, $simple.negate)),
                         $simple[0]);
                 } elsif $simple.rxtype eq 'charrange' && $simple.rxtype ne 'ignorecase' {
                     $result := QAST::Regex.new(:rxtype<charrange>, :subtype<zerowidth>, :node($simple.node),
-                        :negate($qast.negate),
+                        :negate(nqp::bitxor_i($qast.negate, $simple.negate)),
                         $simple[0],
                         $simple[1],
                         $simple[2]);
                 } elsif $simple.rxtype eq 'cclass' && $simple.rxtype ne 'ignorecase' {
                     $result := QAST::Regex.new(:rxtype<cclass>, :subtype<zerowidth>, :node($simple.node),
-                        :negate($qast.negate), :name($simple.name));
+                        :negate(nqp::bitxor_i($qast.negate, $simple.negate)), :name($simple.name));
                 }
                 if $result {
                     self.stub_out_block($qast[0][1]);
