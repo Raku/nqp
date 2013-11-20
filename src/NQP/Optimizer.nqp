@@ -2,8 +2,6 @@ class NQP::RegexOptimizer {
     has @!outer;
 
     method optimize($node, $outer, *%adverbs) {
-        say("going to optimize this:");
-        say($node.dump);
         my @!outer := [$outer];
         self.visit_children($node);
     }
@@ -58,36 +56,26 @@ class NQP::RegexOptimizer {
                 }
                 my $result := 0;
                 if $simple.rxtype eq 'literal' && $simple.rxtype ne 'ignorecase' {
-                    say("simplified a literal inside a before");
-                    say($qast.dump);
                     $result := QAST::Regex.new(:rxtype<literal>, :subtype<zerowidth>, :node($simple.node),
                         :negate($qast.negate),
                         $simple[0]);
                 } elsif $simple.rxtype eq 'enumcharlist' && $simple.rxtype ne 'ignorecase' {
-                    say("simplified an enumcharlist inside a before");
-                    say($qast.dump);
                     $result := QAST::Regex.new(:rxtype<enumcharlist>, :subtype<zerowidth>, :node($simple.node),
                         :negate($qast.negate),
                         $simple[0]);
                 } elsif $simple.rxtype eq 'charrange' && $simple.rxtype ne 'ignorecase' {
-                    say("simplified a charrange inside a before");
-                    say($qast.dump);
                     $result := QAST::Regex.new(:rxtype<charrange>, :subtype<zerowidth>, :node($simple.node),
                         :negate($qast.negate),
                         $simple[0],
                         $simple[1],
                         $simple[2]);
                 } elsif $simple.rxtype eq 'cclass' && $simple.rxtype ne 'ignorecase' {
-                    say("simplified a cclass inside a before");
-                    say($qast.dump);
                     $result := QAST::Regex.new(:rxtype<cclass>, :subtype<zerowidth>, :node($simple.node),
                         :negate($qast.negate), :name($simple.name));
                 }
                 if $result {
                     self.stub_out_block($qast[0][1]);
                     $qast := $result;
-                    say("this is our result:");
-                    say($qast.dump);
                 }
             }
         }
