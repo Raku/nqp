@@ -1381,7 +1381,7 @@ class QAST::Compiler is HLL::Compiler {
                 $ops.push_pirop('add', %*REG<pos>, '$I11');
             }
         }
-        $ops.push_pirop('add', %*REG<pos>, 1) unless $node.subtype eq 'zerowidth';
+        $ops.push_pirop('inc', %*REG<pos>) unless $node.subtype eq 'zerowidth';
         $ops;
     }
 
@@ -1467,13 +1467,13 @@ class QAST::Compiler is HLL::Compiler {
             $ops.push_pirop('downcase', '$S10', '$S10');
             $ops.push_pirop($cmpop,   '$S10', $litpost, %*REG<fail>);
         } elsif $litlen == 1 {
-            $ops.push_pirop('ord', '$I11', %*REG<tgt>, %*REG<pos>);
-            $ops.push_pirop($cmpop,   '$I11', nqp::ord($litconst), %*REG<fail>);
+            $ops.push_pirop('ord', '$I12', %*REG<tgt>, %*REG<pos>);
+            $ops.push_pirop($cmpop,   '$I12', nqp::ord($litconst), %*REG<fail>);
         } else {
-            $ops.push_pirop('nqp_string_equal_at', '$I11', %*REG<tgt>, $litpost, %*REG<pos>);
-            $ops.push_pirop($cmpop,   '$I11', 1, %*REG<fail>);
+            $ops.push_pirop('nqp_string_equal_at', '$I12', %*REG<tgt>, $litpost, %*REG<pos>);
+            $ops.push_pirop($cmpop,   '$I12', 1, %*REG<fail>);
         }
-        $ops.push_pirop('add',    %*REG<pos>, $litlen);
+        $ops.push_pirop('set',    %*REG<pos>, '$I11');
         $ops;
     }
 
