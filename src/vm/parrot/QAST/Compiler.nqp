@@ -1473,7 +1473,7 @@ class QAST::Compiler is HLL::Compiler {
             $ops.push_pirop('nqp_string_equal_at', '$I11', %*REG<tgt>, $litpost, %*REG<pos>);
             $ops.push_pirop($cmpop,   '$I11', 1, %*REG<fail>);
         }
-        $ops.push_pirop('add',    %*REG<pos>, $litlen);
+        $ops.push_pirop('add',    %*REG<pos>, $litlen) unless $node.subtype eq 'zerowidth';
         $ops;
     }
 
