@@ -151,9 +151,15 @@ grammar NQP::Grammar is HLL::Grammar {
         ]
     }
 
+    token label {
+        :my $label;
+        <identifier> ':' <?[\s]> <.ws>
+    }
+
     token statement {
         <!before <[\])}]> | $ >
         [
+        | <label> <statement>
         | <statement_control>
         | <EXPR> <.ws>
             [

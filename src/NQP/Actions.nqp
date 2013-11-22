@@ -168,6 +168,7 @@ class NQP::Actions is HLL::Actions {
                 }
             }
         }
+        elsif $<statement> { $past := $<statement>.ast; }
         elsif $<statement_control> { $past := $<statement_control>.ast; }
         else { $past := 0; }
         make $past;
