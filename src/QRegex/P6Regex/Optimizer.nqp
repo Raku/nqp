@@ -26,14 +26,36 @@ class QRegex::Optimizer {
         return $res;
     }
 
+    method first_non_concat_child($node) {
+        while +@($node) >= 1 {
+            if nqp::istype($node, QAST::Regex) {
+                if $node.rxtype eq 'concat' {
+                    $node := $node[0];
+                } else {
+                    last;
+                }
+            } else {
+                last;
+            }
+        }
+        $node;
+    }
+
     method visit_concat($node) {
         # a single-child concat can become the child itself
         self.visit_children($node);
         if +@($node) == 1 {
             return $node[0];
-        } else {
-            $node;
+        } elsif nqp::istype($node[0], QAST::Regex) && +@($node) >= 2 {
+            # we may have a scan followed by a begin-of-string assertion.
+            # in that case we just shouldn't scan.
+            if $node[0].rxtype eq 'scan'
+                && nqp::istype((my $after_scan := self.first_non_concat_child($node[1])), QAST::Regex)
+                && $after_scan.rxtype eq 'anchor' && $after_scan.subtype eq 'bos' {
+                $node.shift();
+            }
         }
+        $node;
     }
 
     method stub_out_block($block) {
