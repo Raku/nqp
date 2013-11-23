@@ -3,7 +3,15 @@ class QRegex::Optimizer {
 
     method optimize($node, $outer, *%adverbs) {
         my @!outer := [$outer];
-        self.visit_children($node);
+        my $type := $node.rxtype;
+        if $type eq 'concat' {
+            return self.visit_concat($node);
+        } elsif $type eq 'subrule' {
+            return self.simplify_assertion($node);
+        } else {
+            self.visit_children($node);
+        }
+        $node
     }
 
     method all_subtypes($node, $type) {
