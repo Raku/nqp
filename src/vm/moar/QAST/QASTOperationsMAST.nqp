@@ -1466,6 +1466,7 @@ QAST::MASTOperations.add_hll_unbox('', $MVM_reg_int64, -> $qastcomp, $reg {
     my $il := nqp::list();
     my $a := $*REGALLOC.fresh_register($MVM_reg_num64);
     my $b := $*REGALLOC.fresh_register($MVM_reg_int64);
+    push_op($il, 'decont', $reg, $reg);
     push_op($il, 'smrt_numify', $a, $reg);
     push_op($il, 'coerce_ni', $b, $a);
     $*REGALLOC.release_register($a, $MVM_reg_num64);
@@ -1475,6 +1476,7 @@ QAST::MASTOperations.add_hll_unbox('', $MVM_reg_int64, -> $qastcomp, $reg {
 QAST::MASTOperations.add_hll_unbox('', $MVM_reg_num64, -> $qastcomp, $reg {
     my $il := nqp::list();
     my $res_reg := $*REGALLOC.fresh_register($MVM_reg_num64);
+    push_op($il, 'decont', $reg, $reg);
     push_op($il, 'smrt_numify', $res_reg, $reg);
     $*REGALLOC.release_register($reg, $MVM_reg_obj);
     MAST::InstructionList.new($il, $res_reg, $MVM_reg_num64)
@@ -1482,6 +1484,7 @@ QAST::MASTOperations.add_hll_unbox('', $MVM_reg_num64, -> $qastcomp, $reg {
 QAST::MASTOperations.add_hll_unbox('', $MVM_reg_str, -> $qastcomp, $reg {
     my $il := nqp::list();
     my $res_reg := $*REGALLOC.fresh_register($MVM_reg_str);
+    push_op($il, 'decont', $reg, $reg);
     push_op($il, 'smrt_strify', $res_reg, $reg);
     $*REGALLOC.release_register($reg, $MVM_reg_obj);
     MAST::InstructionList.new($il, $res_reg, $MVM_reg_str)
