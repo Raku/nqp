@@ -58,6 +58,7 @@ P6QREGEX_SOURCES  = \
   src/QRegex/P6Regex/Grammar.nqp \
   src/QRegex/P6Regex/Actions.nqp \
   src/QRegex/P6Regex/Compiler.nqp \
+  src/QRegex/P6Regex/Optimizer.nqp \
 
 P6QREGEX_COMBINED = NQPP6QRegex.nqp
 
