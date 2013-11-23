@@ -3944,8 +3944,8 @@ Check if the String in $2 has the string in $3 at its offset $4.
 
 */
 inline op nqp_string_equal_at(out INT, in STR, in STR, in INT) {
-    int32_t offset;
-    uint32_t cmp_index;
+    INTVAL offset;
+    INTVAL cmp_index;
     char done;
 
     String_iter hay_iter;
