@@ -3,12 +3,21 @@ use NQPHLL;
 # Ruby subset extended from the `rubyish` example, as introduced in the
 # Edument Rakudo and NQP internals course.
 
+my %CLASSES;
+
 class RubyishClassHOW {
     has $!name;
+    has $!isa;
     has %!methods;
 
-    method new_type(:$name!) {
-        nqp::newtype(self.new(:$name), 'HashAttrStore')
+    method new_type(:$name!, :$isa?) {
+	nqp::die("duplicate class definition: $name")
+	    if %CLASSES{ $name };
+
+	my $obj := self.new(:$name, :$isa);
+	%CLASSES{ $name } := [$obj];
+
+        nqp::newtype($obj, 'HashAttrStore');
     }
 
     method add_method($obj, $name, $code) {
@@ -19,7 +28,25 @@ class RubyishClassHOW {
     }
 
     method find_method($obj, $name) {
-        %!methods{$name} // nqp::null();
+
+	my $method;
+
+	if nqp::substr($name, 0, 1) eq '^' {
+	    # '^' prefix indicates a superclass lookup
+	    $name := nqp::substr($name, 1);
+	}
+	else {
+	   $method := %!methods{$name};
+	}
+
+	if !$method && $!isa {
+	    my $super := %CLASSES{ $!isa };
+	    nqp::die("unresolved super-class: " ~ $!isa)
+		unless $super;
+	    $method := $super[0].find_method( $obj, $name);
+	}
+
+	$method // nqp::null();
     }
 }
 
@@ -74,7 +101,9 @@ grammar Rubyish::Grammar is HLL::Grammar {
 
     rule defbody {
         :my $*CUR_BLOCK := QAST::Block.new(QAST::Stmts.new());
-        <operation> ['(' ~ ')' <signature>?]? <separator>?
+        :my $*DEF;
+        <operation> {$*DEF := ~$<operation>}
+        ['(' ~ ')' <signature>?]? <separator>?
         <stmtlist>
     }
 
@@ -96,7 +125,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
 
         [<sym> \h+] ~ [\h* 'end'] <classbody>
 
-        {%*SYM := self.hcopy(%sym-save);1}
+        {%*SYM := self.hcopy(%sym-save)}
     }
 
     rule classbody {
@@ -104,6 +133,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
         :my $*CLASS_BLOCK := $*CUR_BLOCK;
 
         <ident> { $*CLASS_BLOCK.name(~$<ident>) }
+        [ '<' <super=.ident> ]?
         <separator>
         <stmtlist>
     }
@@ -120,6 +150,11 @@ grammar Rubyish::Grammar is HLL::Grammar {
         <!keyword>
         <operation> ['(' ~ ')' <call-args=.paren-args>? <code-block>?
                     |:s<hs> <call-args>? <?{%*SYM{~$<operation>} eq 'def'}> ]
+    }
+
+    token term:sym<super> {
+        'super' ['(' ~ ')' <call-args=.paren-args>? <code-block>?
+                |:s <call-args>? ]
     }
 
     token term:sym<nqp-op> {
@@ -462,6 +497,25 @@ class Rubyish::Actions is HLL::Actions {
         make $call;
     }
 
+    method term:sym<super>($/) {
+        my $name  := ~$*DEF;
+
+        my $call := QAST::Op.new( :op('callmethod'),
+				  QAST::Var.new( :name('self'), :scope('lexical')),
+				  QAST::SVal.new( :value('^' ~ $name) ),
+	    );
+
+        if $<call-args> {
+            $call.push($_)
+                for $<call-args>.ast;
+        }
+
+        $call.push( $<code-block>.ast )
+            if $<code-block>;
+
+        make $call;
+    }
+
     method term:sym<nqp-op>($/) {
         my $op := ~$<ident>;
         my $call := QAST::Op.new( :op($op) );
@@ -526,12 +580,15 @@ class Rubyish::Actions is HLL::Actions {
             ),
 
             # call initialize method, if available
-            QAST::Op.new( :op<if>,
-                          QAST::Op.new( :op<can>,
-                                        QAST::Var.new( :name($tmp-sym), :scope<lexical> ),
-                                        QAST::SVal.new( :value<initialize> )),
-                          $init-call,
-            ),
+	    ($<call-args>
+	     ?? $init-call
+	     !! QAST::Op.new( :op<if>,
+			      QAST::Op.new( :op<can>,
+					    QAST::Var.new( :name($tmp-sym), :scope<lexical> ),
+					    QAST::SVal.new( :value<initialize> )),
+			      $init-call,
+	     )
+	    ),
 
             # return the new object
             QAST::Var.new( :name($tmp-sym), :scope<lexical> ),
@@ -665,6 +722,10 @@ class Rubyish::Actions is HLL::Actions {
                 QAST::SVal.new( :value(~$<classbody><ident>), :named('name') ),
           );
 
+	$new_type.push(
+	    QAST::SVal.new( :value(~$<classbody><super>), :named('isa') )
+	    ) if ~$<classbody><super>;
+
         $class_stmts.push(QAST::Op.new(
                               :op('bind'),
                               QAST::Var.new( :name($ins_name), :scope('lexical'), :decl('var') ),
@@ -675,12 +736,15 @@ class Rubyish::Actions is HLL::Actions {
         my $class_var := QAST::Var.new( :name($ins_name), :scope('lexical') );
 
         for @*METHODS {
+	    my $name := $_.name;
+
             $class_stmts.push(QAST::Op.new(
                 :op('callmethod'), :name('add_method'),
                 QAST::Op.new( :op('how'), $class_var ),
                 $class_var,
-                QAST::SVal.new( :value($_.name) ),
-                QAST::BVal.new( :value($_) )));
+                QAST::SVal.new( :value($name) ),
+                QAST::BVal.new( :value($_) ))
+	    );
         }
 
         make $class_stmts;

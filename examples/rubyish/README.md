@@ -21,7 +21,8 @@ Implemented:
 - a few built-ins: `abort`, `print`, `puts`, `sleep`
 - a couple of methods: `.call` and `.nil?`
 - infixish assigments: `+=` `-=` `*=` ...
-- very simple classes and objects with attributes. no inheritence
+- simple classes and objects with attributes.
+- inheritence (no mixins yet) - see [inheritance.t](t/inheritance.t)
 - `while` and `until` loops
 - statement modifiers `if` `unless`, `while`, `until` e.g.: `puts 42 if true`
 - basic arrays and hashes
