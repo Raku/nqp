@@ -70,26 +70,18 @@ class QRegex::Optimizer {
     }
 
     method simplify_assertion($qast) {
-        if $qast.rxtype eq 'subrule' && $qast.subtype eq 'zerowidth'
+        if $qast.subtype eq 'zerowidth'
                 && nqp::istype($qast[0], QAST::Node) && nqp::istype($qast[0][0], QAST::SVal)
                 && $qast[0][0].value eq 'before' {
             if nqp::istype($qast[0], QAST::Node) && nqp::istype($qast[0][1], QAST::Block)
                     && nqp::istype((my $regex := $qast[0][1][2]), QAST::Regex)
                     && $regex.rxtype eq 'concat' && $regex[0].rxtype eq 'scan' && $regex[2].rxtype eq 'pass' {
+                self.visit_children($regex);
                 my $simple := $regex[1];
-                # a concat with a single child becomes the child itself
-                if nqp::istype($simple, QAST::Regex) && $simple.rxtype eq 'concat' && +@($simple) == 1 {
-                    $simple := $simple[0];
-                    # even though it's not worth terribly much, we can do this optimization
-                    # in any case, even if we're not going to do the optimization below:
-                    $qast[0][1][2][1] := $simple;
-                }
                 my $result := 0;
-                # FIXME something is causing trouble with literals here. segfault on parrot,
-                #       NQP tests failing, ...
-                if 0 && $simple.rxtype eq 'literal' && $simple.rxtype ne 'ignorecase' && !$qast.negate {
+                if $simple.rxtype eq 'literal' && $simple.rxtype ne 'ignorecase' && !$qast.negate {
                     $result := QAST::Regex.new(:rxtype<literal>, :subtype<zerowidth>, :node($simple.node),
-                        :negate($qast.negate),
+                        :negate($simple.negate),
                         $simple[0]);
                 } elsif $simple.rxtype eq 'enumcharlist' && $simple.rxtype ne 'ignorecase' {
                     $result := QAST::Regex.new(:rxtype<enumcharlist>, :subtype<zerowidth>, :node($simple.node),
