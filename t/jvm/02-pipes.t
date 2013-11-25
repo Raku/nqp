@@ -17,6 +17,6 @@ my $q := nqp::openpipe('doesnotexist', nqp::cwd(), nqp::getenvhash(), '');
 ok( nqp::defined($q) == 1, 'nqp::openpipe nonexistent cmd');
 
 my $qstr := nqp::readallfh($q);
-ok( $qstr ~~ / 'command not found' | 'not recognized' /, 'nqp::readallfh with a pipe nonexistent command');
+ok( $qstr ~~ / 'not found' | 'not recognized' /, 'nqp::readallfh with a pipe nonexistent command');
 
 ok( nqp::closefh($q), 'nqp::closefh with a pipe nonexistent command');
