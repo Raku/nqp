@@ -199,35 +199,37 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
         }
     }
     
-    public void write(ThreadContext tc, byte[] array) {
+    public long write(ThreadContext tc, byte[] array) {
         ByteBuffer buffer = ByteBuffer.wrap(array);
-        write(tc, buffer);
+        return write(tc, buffer);
     }
      
-    protected void write(ThreadContext tc, ByteBuffer buffer) {
+    protected long write(ThreadContext tc, ByteBuffer buffer) {
         try {
             int toWrite = buffer.limit();
             int written = 0;
             while (written < toWrite) {
                 written += chan.write(buffer);
             }
+            return written;
         } catch (IOException e) {
             throw ExceptionHandling.dieInternal(tc, e);
         }       
     }
     
-    public void print(ThreadContext tc, String s) {
+    public long print(ThreadContext tc, String s) {
         try {
             ByteBuffer buffer = enc.encode(CharBuffer.wrap(s));
-            write(tc, buffer);
+            return write(tc, buffer);
         } catch (IOException e) {
             throw ExceptionHandling.dieInternal(tc, e);
         }
     }
     
-    public void say(ThreadContext tc, String s) {
-        print(tc, s);
-        print(tc, System.lineSeparator());
+    public long say(ThreadContext tc, String s) {
+        long bytes = print(tc, s);
+        bytes += print(tc, System.lineSeparator());
+        return bytes;
     }
 
     public void setInputLineSeparator(ThreadContext tc, String sep) {

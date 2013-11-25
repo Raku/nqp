@@ -40,23 +40,26 @@ public class StandardWriteHandle implements IIOClosable, IIOSeekable, IIOEncodab
         dec = cs.newDecoder();
     }
     
-    public void write(ThreadContext tc, byte[] bytes) {
+    public long write(ThreadContext tc, byte[] bytes) {
     	ps.write(bytes, 0, bytes.length);
+        return bytes.length;
     }
     
-    public void print(ThreadContext tc, String s) {
+    public long print(ThreadContext tc, String s) {
         try {
             ByteBuffer buffer = enc.encode(CharBuffer.wrap(s));
             byte[] bytes = buffer.array();
             ps.write(bytes, 0, buffer.limit());
+            return bytes.length;
         } catch (IOException e) {
             throw ExceptionHandling.dieInternal(tc, e);
         }
     }
     
-    public void say(ThreadContext tc, String s) {
-        print(tc, s);
-        print(tc, System.lineSeparator());
+    public long say(ThreadContext tc, String s) {
+        long bytes = print(tc, s);
+        bytes += print(tc, System.lineSeparator());
+        return bytes;
     }
     
     public void flush(ThreadContext tc) {
