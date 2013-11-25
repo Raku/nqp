@@ -1251,7 +1251,6 @@ class QAST::Compiler is HLL::Compiler {
         my $prefix   := self.unique('alt') ~ '_';
         my $endlabel := self.post_new('Label', :name($prefix ~ 'end'));
         my $label_list_ops := self.post_new('Ops', :result<$P11>);
-        $label_list_ops.push_pirop('new', '$P11', '"ResizableIntegerArray"');
         my $ops := self.post_new('Ops', :result(%*REG<cur>));
         $ops.push($label_list_ops);
         self.regex_mark($ops, $endlabel, -1, 0);
@@ -1271,6 +1270,9 @@ class QAST::Compiler is HLL::Compiler {
             $label_list_ops.push_pirop('nqp_push_label', $label_list_ops.result, $altlabel.result);
             $altcount++;
         }
+        $label_list_ops.unshift(['assign', $label_list_ops.result, 0]);
+        $label_list_ops.unshift(['assign', $label_list_ops.result, $altcount]);
+        $label_list_ops.unshift(['new', '$P11', '"ResizableIntegerArray"']);
         $ops.push($endlabel);
         self.regex_commit($ops, $endlabel) if $node.backtrack eq 'r';
         $ops;

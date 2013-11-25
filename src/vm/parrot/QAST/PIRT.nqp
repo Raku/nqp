@@ -261,7 +261,11 @@ class PIRT::Ops is PIRT::Node {
     method push($node) {
         nqp::push(@!children, $node)
     }
-    
+
+    method unshift($node) {
+        nqp::unshift(@!children, $node)
+    }
+
     method push_pirop(*@opbits, :$result) {
         if $result {
             nqp::push(@opbits, PIRT::CallResult.new($result));
