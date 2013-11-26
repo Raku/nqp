@@ -4,10 +4,10 @@ def xx(n=-7) ; 2 - n; end
 def three ; 3; end
 
 def zz(m)
-    def three(n) ; 3 + 2* n; end
-    def xx; 1; end
+    three = 3
+    xx = 1
     puts  "ok #{xx + m +3} - nested symbols"
-    puts  "ok #{three +m} - nested symbols"
+    puts  "ok #{three +m +2} - nested symbols"
     8
 end
 

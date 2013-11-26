@@ -19,15 +19,12 @@ class MethodRecursion
     def fibonacci(n)
         n <= 1  \
             ? n \
-            : self.fibonacci( n - 1 ) + self.fibonacci(n - 2 ) 
-## todo: -- dereferencing of self should be optional. both of the
-##       -- following recursive calls are valid Ruby
-##       self.fibonacci( n - 1 ) + fibonacci(n - 2 )
+            : self.fibonacci( n - 1 ) + fibonacci(n - 2 ) 
+## 2 styles:  ^^ explicit method call   ^^ implied method call
     end
 end
 
 fib = MethodRecursion.new.fibonacci(9)
 expected2 = 34
 
-puts "# todo - automatic passing of self"
 puts "#{fib == expected2 ? 'ok' : 'nok'} 2 - method recursion: (#{expected2})"

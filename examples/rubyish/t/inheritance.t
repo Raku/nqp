@@ -11,7 +11,7 @@ class Point
   def x; @x ; end
   def y; @y ; end
 
-  def theta; (@x * @x  +  @y * @y) ** 0.5; end
+  def theta; (x * @x  +  y * @y) ** 0.5; end
 end
 
 class Point3D < Point
@@ -23,7 +23,7 @@ class Point3D < Point
 
   def z; @z ; end
 
-  def theta; (@x * @x  +  @y * @y  +  @z * @z) ** 0.5; end
+  def theta; (x * @x  +  y * @y  +  z * @z) ** 0.5; end
 end
 
 obj_2d = Point.new(10, 20)

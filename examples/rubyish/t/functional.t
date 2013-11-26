@@ -9,6 +9,8 @@ def is(result, expected, description)
     puts "#{passed ? 'ok' : 'nok'} #{test_num} - #{description}"
     puts "# expected:'#{expected}' got:'#{result}'" \
        unless passed
+
+    passed
 end
 
 def dump(arr) ; nqp::join(',', arr); end
