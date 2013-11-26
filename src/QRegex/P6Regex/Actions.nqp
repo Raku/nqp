@@ -729,6 +729,9 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                                        ) 
                                    )
                               )));
+        if %*RX<r> {
+            $qast[2].backtrack('r');
+        }
         $block.push($qast);
         
         $block;

@@ -85,7 +85,15 @@ role NQPCursorRole is export {
                 }
                 $csi++;
             }
-        } 
+        }
+
+        # Once we've produced the captures, and if we know we're finished and
+        # will never be backtracked into, we can release cstack and regexsub.
+        unless nqp::defined($!bstack) {
+            $!cstack   := nqp::null();
+            $!regexsub := nqp::null();
+        }
+
         $caps;
     }
 
@@ -212,8 +220,10 @@ role NQPCursorRole is export {
     }
 
     method !cursor_fail() {
-        $!match  := nqp::null();
-        $!bstack := nqp::null();
+        $!match    := nqp::null();
+        $!bstack   := nqp::null();
+        $!cstack   := nqp::null();
+        $!regexsub := nqp::null();
         $!pos    := -3;
     }
     
