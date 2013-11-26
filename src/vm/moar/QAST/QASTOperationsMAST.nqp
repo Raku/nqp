@@ -1776,6 +1776,7 @@ QAST::MASTOperations.add_core_moarop_mapping('iscclass', 'iscclass');
 QAST::MASTOperations.add_core_moarop_mapping('findcclass', 'findcclass');
 QAST::MASTOperations.add_core_moarop_mapping('findnotcclass', 'findnotcclass');
 QAST::MASTOperations.add_core_moarop_mapping('escape', 'escape');
+QAST::MASTOperations.add_core_moarop_mapping('replace', 'replace');
 QAST::MASTOperations.add_core_moarop_mapping('flip', 'flip');
 QAST::MASTOperations.add_core_moarop_mapping('concat', 'concat_s');
 QAST::MASTOperations.add_core_moarop_mapping('join', 'join');
