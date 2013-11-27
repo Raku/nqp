@@ -784,6 +784,82 @@ QAST::MASTOperations.add_core_op('defor', -> $qastcomp, $op {
     $expr
 });
 
+QAST::MASTOperations.add_core_op('xor', -> $qastcomp, $op {
+    my @ops;
+    my $res_kind   := $MVM_reg_obj;
+    my $res_reg    := $*REGALLOC.fresh_o();
+    my $falselabel := MAST::Label.new(:name($qastcomp.unique('xor_false')));
+    my $endlabel   := MAST::Label.new(:name($qastcomp.unique('xor_end')));
+
+    my @comp_ops;
+    my $fpast;
+    for $op.list {
+        if $_.named eq 'false' {
+            $fpast := $qastcomp.as_mast($_, :want($MVM_reg_obj));
+        }
+        else {
+            nqp::push(@comp_ops, $qastcomp.as_mast($_, :want($MVM_reg_obj)));
+        }
+    }
+
+    my $t := $*REGALLOC.fresh_i();
+    my $u := $*REGALLOC.fresh_i();
+
+    my $apost := nqp::shift(@comp_ops);
+    push_ilist(@ops, $apost);
+    push_op(@ops, 'set', $res_reg, $apost.result_reg);
+    push_op(@ops, 'istrue', $t, $apost.result_reg);
+    $*REGALLOC.release_register($apost.result_reg, $MVM_reg_obj);
+
+    my $have_middle_child := 1;
+    my $bpost;
+    while $have_middle_child {
+        $bpost := nqp::shift(@comp_ops);
+        push_ilist(@ops, $bpost);
+        push_op(@ops, 'istrue', $u, $bpost.result_reg);
+
+        my $jumplabel := MAST::Label.new(:name($qastcomp.unique('xor_jump')));
+        push_op(@ops, 'unless_i', $t, $jumplabel);
+        push_op(@ops, 'unless_i', $u, $jumplabel);
+        push_op(@ops, 'goto', $falselabel);
+        nqp::push(@ops, $jumplabel);
+
+        if @comp_ops {
+            my $truelabel := MAST::Label.new(:name($qastcomp.unique('xor_true')));
+            push_op(@ops, 'if_i', $t, $truelabel);
+            push_op(@ops, 'set', $res_reg, $bpost.result_reg);
+            $*REGALLOC.release_register($bpost.result_reg, $MVM_reg_obj);
+            $*REGALLOC.release_register($t.result_reg, $MVM_reg_int64);
+            push_op(@ops, 'set', $t, $u.result_reg);
+            $*REGALLOC.release_register($u.result_reg, $MVM_reg_int64);
+            nqp::push(@ops, $truelabel);
+        }
+        else {
+            $have_middle_child := 0;
+        }
+    }
+
+    push_op(@ops, 'if_i', $t, $endlabel);
+    $*REGALLOC.release_register($t, $MVM_reg_int64);
+    push_op(@ops, 'set', $res_reg, $bpost.result_reg);
+    $*REGALLOC.release_register($bpost.result_reg, $MVM_reg_obj);
+    push_op(@ops, 'goto', $endlabel);
+    nqp::push(@ops, $falselabel);
+
+    if $fpast {
+        push_ilist(@ops, $fpast);
+        push_op(@ops, 'set', $res_reg, $fpast.result_reg);
+        $*REGALLOC.release_register($fpast.result_reg, $MVM_reg_obj);
+    }
+    else {
+        push_op(@ops, 'null', $res_reg);
+    }
+
+    nqp::push(@ops, $endlabel);
+
+    MAST::InstructionList.new(@ops, $res_reg, $res_kind)
+});
+
 QAST::MASTOperations.add_core_op('ifnull', -> $qastcomp, $op {
     if +$op.list != 2 {
         nqp::die("The 'ifnull' op expects two children");
