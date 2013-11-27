@@ -217,7 +217,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
     token var {
         :my $*MAYBE_DECL := 0;
         \+?
-        $<sigil>=[ \$ | \@\@? | <!keyword> ]
+        [$<sigil>=[ \$ | \@\@? ] | <pkg=.ident>'::'<?before <[A..Z]>> | <!keyword> ]
         <ident><!before [\!|\?|\h*\(]>
         [ <?before \h* '=' [\w | \h+ || <.EXPR>] { $*MAYBE_DECL := 1 }> || <?> ]
     }
@@ -511,7 +511,7 @@ class Rubyish::Actions is HLL::Actions {
         if $op {
             $call :=  QAST::Op.new( :op($op) )
         }
-        elsif %*SYM{$name} eq 'method' {
+        elsif %*SYM{$name} eq 'method' && $*DEF {
             $call := QAST::Op.new( :op('callmethod'),
                                    QAST::Var.new( :name('self'), :scope('lexical')),
                                    QAST::SVal.new( :value($name) ),
@@ -634,6 +634,19 @@ class Rubyish::Actions is HLL::Actions {
         my $sigil := ~$<sigil> // '';
         my $name := $sigil ~ $<ident>;
 
+        my $ns := '';
+        if $<pkg> {
+            $ns := ~$<pkg>;
+        }
+        elsif !$sigil && $*IN_CLASS {
+            # could be a package constant
+            my $c := nqp::substr($name, 0, 1);
+            $ns := $*CLASS_BLOCK.name
+                if $c ge 'A' && $c le 'Z';
+        }
+        $name := $ns ~ '::' ~ $name
+            if $ns;
+
         if $sigil eq '@' && $*IN_CLASS {
             # instance variable, bound to self
             my $package-name := $*CLASS_BLOCK.name;
@@ -648,11 +661,11 @@ class Rubyish::Actions is HLL::Actions {
                 my $block;
                 my $decl := 'var';
 
-                if !$sigil {
-                    $block := $*CUR_BLOCK;
-                }
-                elsif $sigil eq '$' {
+                if $sigil eq '$' || $ns {
                     $block := $*TOP_BLOCK;
+                }
+                elsif !$sigil {
+                    $block := $*CUR_BLOCK;
                 }
                 elsif $sigil eq '@' {
                     $block := $*CLASS_BLOCK;

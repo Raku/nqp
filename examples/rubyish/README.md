@@ -32,6 +32,7 @@ Implemented:
 - lightweight eRuby like templating, see [template.rbi](examples-rubyish/template.rbi)
 - heredocs, literal `<<EOF ... EOF` and interpolating `<<"END" ... END`
 - code block arguments `even = grep(arr) {|n| n % 2 == 0}` -- see [functional.t](t/functional.t)
+- package constants `Trig::PI = 3.1415926`
 
 Notes:
 ------
@@ -83,7 +84,7 @@ Rubyish does a limited amout of context sensitive parsing, E.g.
    puts yy -5   # parsed as an expression; output is 32
 
    def xx(n) ; 37 - n; end
-   puts xx -5   # parsed as a method call; output is 42
+   puts xx -5   # parsed as a function call; output is 42
 ```
 
 This only works only if the functions and methods have been previously declared.

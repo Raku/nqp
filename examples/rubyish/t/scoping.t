@@ -1,4 +1,4 @@
-puts "1..17"
+puts "1..21"
 
 a = "ok 1"
 b = "ok 2"
@@ -23,6 +23,15 @@ class MyClass
   def class_const; @@final_test ;        end
   def tickle_f(f); @f = f ;              end
 
+  Y = 18
+  def const_tests
+      puts "ok #{MyClass::Y} - package constant qualified"
+      puts "ok #{Y + 1} - package constant unqualified"
+  end
+
+  def putZ
+      puts "ok #{Z} - package constant unqualified"
+  end
 end
 
 class OtherClass
@@ -31,6 +40,12 @@ class OtherClass
   def set_inst(v1,v2); @i1 = v1; @i2= v2 end
   def get_inst1; @i1;                    end
   def get_inst2; @i2;                    end
+
+  def more_const_tests
+      puts "ok #{MyClass::Y + 2} - package constant cross reference"
+      puts "ok #{Y + 1} - package constant internal reference"
+  end
+
 end
 
 obj1 = MyClass.new;
@@ -67,3 +82,8 @@ puts "ok #{obj2.get_inst2} - @instance access"
 puts "ok #{obj3.get_inst1} - @instance access"
 puts "ok #{obj3.get_inst2} - @instance access"
 puts "ok #{obj2.class_const} - @@class constant"
+
+obj1.const_tests
+
+OtherClass::Y = 20
+obj3.more_const_tests
