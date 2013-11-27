@@ -118,7 +118,6 @@ if nqp::getcomp('nqp').backend.name eq 'parrot' {
 }
 else {
     $fh := nqp::open('t/nqp/19-readline.txt', 'r');
-    todo("NQP/JVM doesn't handle non-Unix lineendings properly", 5) if nqp::getcomp('nqp').backend.name eq 'jvm';
     ok(nqp::readlinefh($fh) eq "line1\r",   'reading a line till CR');
     ok(nqp::readlinefh($fh) eq "line2\r\n", 'reading a line till CRLF');
     ok(nqp::readlinefh($fh) eq "line3\n",   'reading a line till LF');

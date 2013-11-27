@@ -22,7 +22,7 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
     protected CharsetDecoder dec;
     protected boolean eof = false;
     protected ByteBuffer readBuffer;
-    protected byte[] linesep = { '\n' };
+    protected byte[] linesep = null;
     
     public void close(ThreadContext tc) {
         try {
@@ -87,17 +87,36 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
                 int start = readBuffer.position();
                 int end = start;
                 while (!foundLine && end < readBuffer.limit()) {
-                    int index = 0;
-                    while (index < linesep.length
-                            && end + index < readBuffer.limit()
-                            && readBuffer.get(end + index) == linesep[index])
-                        index++;
-                    
-                    if (index == linesep.length)
-                    {
-                        end += index;
-                        foundLine = true;
-                    } else {
+                    if (linesep != null) {
+                        int index = 0;
+                        while (index < linesep.length
+                                && end + index < readBuffer.limit()
+                                && readBuffer.get(end + index) == linesep[index])
+                            index++;
+
+                        if (index == linesep.length)
+                        {
+                            end += index;
+                            foundLine = true;
+                        } else {
+                            end++;
+                        }
+                    }
+                    else {
+                        byte cur = readBuffer.get(end);
+                        if (cur == '\n') {
+                            foundLine = true;
+                        }
+                        else if (cur == '\r') {
+                            foundLine = true;
+                            /* XXX: This could fail if the \r\n sequence is
+                             * split over two chunks, with the \r at the very
+                             * end of a chunk at the \n at the beginning of
+                             * the next one I think. */
+                            if (end+1 < readBuffer.limit() && readBuffer.get(end+1) == '\n') {
+                                end++;
+                            }
+                        }
                         end++;
                     }
                 }
