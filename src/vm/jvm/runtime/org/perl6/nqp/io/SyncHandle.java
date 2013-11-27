@@ -14,16 +14,16 @@ import java.util.ArrayList;
 import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.ThreadContext;
 
-public abstract class SyncHandle implements IIOClosable, IIOEncodable, 
+public abstract class SyncHandle implements IIOClosable, IIOEncodable,
         IIOSyncReadable, IIOSyncWritable, IIOLineSeparable {
-    
+
     protected ByteChannel chan;
     protected CharsetEncoder enc;
     protected CharsetDecoder dec;
     protected boolean eof = false;
     protected ByteBuffer readBuffer;
     protected byte[] linesep = null;
-    
+
     public void close(ThreadContext tc) {
         try {
             chan.close();
@@ -31,12 +31,12 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
             throw ExceptionHandling.dieInternal(tc, e);
         }
     }
-    
+
     public void setEncoding(ThreadContext tc, Charset cs) {
         enc = cs.newEncoder();
         dec = cs.newDecoder();
     }
-    
+
     public synchronized String slurp(ThreadContext tc) {
         try {
             // Read in file.
@@ -56,19 +56,19 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
                 total += read;
             }
             eof = true;
-            
+
             return decodeBuffers(buffers, total);
         } catch (IOException e) {
             throw ExceptionHandling.dieInternal(tc, e);
         }
     }
-    
+
     public synchronized String readline(ThreadContext tc) {
         try {
             boolean foundLine = false;
             ArrayList<ByteBuffer> lineChunks = new ArrayList<ByteBuffer>();
             int total = 0;
-            
+
             while (!foundLine) {
                 /* Ensure we have a buffer available. */
                 if (readBuffer == null) {
@@ -82,7 +82,7 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
                     }
                     readBuffer.flip();
                 }
-            
+
                 /* Look for a line end. */
                 int start = readBuffer.position();
                 int end = start;
@@ -120,18 +120,18 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
                         end++;
                     }
                 }
-                
+
                 /* Copy what we found into the results. */
                 byte[] lineBytes = new byte[end - start];
                 readBuffer.get(lineBytes);
                 lineChunks.add(ByteBuffer.wrap(lineBytes));
                 total += lineBytes.length;
-                
+
                 /* If we didn't find a line, will cross chunk boundary. */
                 if (!foundLine)
                     readBuffer = null;
             }
-            
+
             if (lineChunks.size() == 1)
                 return dec.decode(lineChunks.get(0)).toString();
             else
@@ -140,7 +140,7 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
             throw ExceptionHandling.dieInternal(tc, e);
         }
     }
-    
+
     private String decodeBuffers(ArrayList<ByteBuffer> buffers, int total) throws IOException {
         // Copy to a single buffer and decode (could be smarter, but need
         // to be wary as UTF-8 chars may span a buffer boundary).
@@ -153,7 +153,7 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
         allBytes.rewind();
         return dec.decode(allBytes).toString();
     }
-    
+
     public synchronized String getc(ThreadContext tc) {
         try {
             int maxBytes = (int)enc.maxBytesPerChar();
@@ -175,11 +175,11 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
                             toDecode.position(0);
                             dec.decode(toDecode, decoded, true).throwException();
                             return decoded.toString();
-                        }    
+                        }
                     }
                     readBuffer.flip();
                 }
-                
+
                 /* Get a character from the read buffer. */
                 toDecode.position(i);
                 toDecode.put(readBuffer.get());
@@ -200,11 +200,11 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
             throw ExceptionHandling.dieInternal(tc, e);
         }
     }
-    
+
     public boolean eof(ThreadContext tc) {
         return eof;
     }
-    
+
     public byte[] read(ThreadContext tc, int bytes) {
         try {
             ByteBuffer buffer = ByteBuffer.allocate(bytes);
@@ -217,12 +217,12 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
             throw ExceptionHandling.dieInternal(tc, e);
         }
     }
-    
+
     public long write(ThreadContext tc, byte[] array) {
         ByteBuffer buffer = ByteBuffer.wrap(array);
         return write(tc, buffer);
     }
-     
+
     protected long write(ThreadContext tc, ByteBuffer buffer) {
         try {
             int toWrite = buffer.limit();
@@ -233,9 +233,9 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
             return written;
         } catch (IOException e) {
             throw ExceptionHandling.dieInternal(tc, e);
-        }       
+        }
     }
-    
+
     public long print(ThreadContext tc, String s) {
         try {
             ByteBuffer buffer = enc.encode(CharBuffer.wrap(s));
@@ -244,7 +244,7 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
             throw ExceptionHandling.dieInternal(tc, e);
         }
     }
-    
+
     public long say(ThreadContext tc, String s) {
         long bytes = print(tc, s);
         bytes += print(tc, System.lineSeparator());
