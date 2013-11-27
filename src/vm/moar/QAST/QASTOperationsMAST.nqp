@@ -1428,7 +1428,7 @@ QAST::MASTOperations.add_core_moarop_mapping('getmessage', 'getexmessage');
 QAST::MASTOperations.add_core_moarop_mapping('setmessage', 'bindexmessage', 1);
 QAST::MASTOperations.add_core_moarop_mapping('newexception', 'newexception');
 QAST::MASTOperations.add_core_moarop_mapping('backtracestrings', 'backtracestrings');
-# XXX backtrace
+QAST::MASTOperations.add_core_moarop_mapping('backtrace', 'backtrace');
 QAST::MASTOperations.add_core_moarop_mapping('throw', 'throwdyn');
 QAST::MASTOperations.add_core_moarop_mapping('rethrow', 'rethrow');
 QAST::MASTOperations.add_core_moarop_mapping('resume', 'resume');
