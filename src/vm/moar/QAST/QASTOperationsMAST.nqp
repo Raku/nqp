@@ -1867,6 +1867,21 @@ QAST::MASTOperations.add_core_moarop_mapping('codepointfromname', 'getcpbyname')
 QAST::MASTOperations.add_core_moarop_mapping('encode', 'encode');
 QAST::MASTOperations.add_core_moarop_mapping('decode', 'decode');
 
+QAST::MASTOperations.add_core_op('tclc', -> $qastcomp, $op {
+    my @operands := $op.list;
+    unless +@operands == 1 {
+        nqp::die('tclc op requires one argument');
+    }
+    $qastcomp.as_mast(
+            QAST::Op.new( :op('concat'),
+                QAST::Op.new( :op('tc'),
+                    QAST::Op.new( :op('substr'),
+                        @operands[0], QAST::IVal.new( :value(0) ), QAST::IVal.new( :value(1) ))),
+                QAST::Op.new( :op('lc'),
+                    QAST::Op.new( :op('substr'),
+                        @operands[0], QAST::IVal.new( :value(1) ))),
+        ));
+});
 
 QAST::MASTOperations.add_core_moarop_mapping('eqat', 'eqat_s');
 
