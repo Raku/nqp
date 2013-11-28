@@ -948,7 +948,21 @@ class QAST::MASTRegexCompiler {
     }
 
     method uniprop($node) {
-        self.panic("method uniprop is NYI in QAST::MASTRegexCompiler")
+        my $pname := fresh_s();
+        my $pcode := fresh_i();
+        my $pvcode := fresh_i();
+        my $i0 := fresh_i();
+        my $testop := $node.negate ?? 'if_i' !! 'unless_i';
+        [
+            op('ge_i', $i0, %*REG<pos>, %*REG<eos>),
+            op('if_i', $i0, %*REG<fail>),
+            op('const_s', $pname, sval($node[0])),
+            op('unipropcode', $pcode, $pname),
+            op('unipvalcode', $pvcode, $pcode, $pname),
+            op('hasuniprop', $i0, %*REG<pos>, $pcode, $pvcode),
+            op($testop, $i0, %*REG<fail>),
+            op('inc_i', %*REG<pos>)
+        ];
     }
 
     method ws($node) { self.subrule($node) }
