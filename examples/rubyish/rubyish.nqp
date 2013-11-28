@@ -65,21 +65,8 @@ grammar Rubyish::Grammar is HLL::Grammar {
             || <.panic('Syntax error')>
     }
 
-    token continuation   { \\ \n }
     rule separator       { ';' | \n <!after continuation> }
-    token template-chunk { [<tmpl-unesc>|<tmpl-hdr>] ~ [<tmpl-esc>|$] <template-nibble>* }
-    proto token template-nibble {*}
-    token template-nibble:sym<interp>     { <interp> }
-    token template-nibble:sym<stray-tag>  { [<.tmpl-unesc>|<.tmpl-hdr>] <.panic("Stray tag, e.g. '%>' or '<?rbi?>'")> }
-    token template-nibble:sym<literal> { [<!before [<tmpl-esc>|'#{'|$]> .]+ }
-
-    token tmpl-hdr   {'<?rbi?>' \h* \n? {$*IN_TEMPLATE := 1} }
-    token tmpl-esc   {\h* '<%'
-                     [<?{$*IN_TEMPLATE}> || <.panic('Template directive precedes "<?rbi?>"')>]
-    }
-    token tmpl-unesc { '%>' \h* \n?
-                     [<?{$*IN_TEMPLATE}> || <.panic('Template directive precedes "<?rbi?>"')>]
-    }
+    token continuation   { \\ \n }
 
     rule stmtlist {
         [ <stmt=.stmtish>? ] *%% [<.separator>|<stmt=.template-chunk>]
@@ -282,12 +269,6 @@ grammar Rubyish::Grammar is HLL::Grammar {
         ] <!ww>
     }
 
-    proto token comment {*}
-    token comment:sym<line>   { '#' [<?{!$*IN_TEMPLATE}> \N* || [<!before <tmpl-unesc>>\N]*] }
-    token comment:sym<podish> {[^^'=begin'\n] [ .*? [^^'=end'[\n|$]] || <.panic('missing ^^=end at eof')>] }
-    token ws { <!ww> [\h | <.continuation> | <.comment> | <?{$*IN_PARENS}> \n]* }
-    token hs { <!ww> [\h | <.continuation> ]* }
-
     INIT {
         # Operator precedence levels
         # see http://www.tutorialspoint.com/ruby/ruby_operators.htm
@@ -440,6 +421,29 @@ grammar Rubyish::Grammar is HLL::Grammar {
         ]
     }
 
+    # Comments and whitespace
+    proto token comment {*}
+    token comment:sym<line>   { '#' [<?{!$*IN_TEMPLATE}> \N* || [<!before <tmpl-unesc>>\N]*] }
+    token comment:sym<podish> {[^^'=begin'\n] [ .*? [^^'=end'[\n|$]] || <.panic('missing ^^=end at eof')>] }
+    token ws { <!ww> [\h | <.continuation> | <.comment> | <?{$*IN_PARENS}> \n]* }
+    token hs { <!ww> [\h | <.continuation> ]* }
+
+    # Templates
+    token template-chunk { [<tmpl-unesc>|<tmpl-hdr>] ~ [<tmpl-esc>|$] <template-nibble>* }
+    proto token template-nibble {*}
+    token template-nibble:sym<interp>     { <interp> }
+    token template-nibble:sym<stray-tag>  { [<.tmpl-unesc>|<.tmpl-hdr>] <.panic("Stray tag, e.g. '%>' or '<?rbi?>'")> }
+    token template-nibble:sym<literal> { [<!before [<tmpl-esc>|'#{'|$]> .]+ }
+
+    token tmpl-hdr   {'<?rbi?>' \h* \n? {$*IN_TEMPLATE := 1} }
+    token tmpl-esc   {\h* '<%'
+                     [<?{$*IN_TEMPLATE}> || <.panic('Template directive precedes "<?rbi?>"')>]
+    }
+    token tmpl-unesc { '%>' \h* \n?
+                     [<?{$*IN_TEMPLATE}> || <.panic('Template directive precedes "<?rbi?>"')>]
+    }
+
+    # Builtin functions
     method builtin-init() {
         nqp::hash(
             'abort',  'die',
@@ -468,22 +472,6 @@ class Rubyish::Actions is HLL::Actions {
         }
 
         make $stmts;
-    }
-
-    method template-chunk($/) {
-        my $text := QAST::Stmts.new( :node($/) );
-        $text.push( QAST::Op.new( :op<print>, $_.ast ) )
-            for $<template-nibble>;
-        
-        make $text;
-    }
-
-    method template-nibble:sym<interp>($/) {
-        make $<interp>.ast
-    }
-
-    method template-nibble:sym<literal>($/) {
-        make QAST::SVal.new( :value(~$/) );
     }
 
     method stmtish($/) {
@@ -634,7 +622,7 @@ class Rubyish::Actions is HLL::Actions {
         my $sigil := ~$<sigil> // '';
         my $name := $sigil ~ $<ident>;
 
-        my $ns := '';
+        my $ns;
         if $<pkg> {
             $ns := ~$<pkg>;
         }
@@ -990,6 +978,22 @@ class Rubyish::Actions is HLL::Actions {
     method closure2($/) { self.closure($/) }
 
     method term:sym<lambda>($/) { make $<closure>.ast }
+
+    method template-chunk($/) {
+        my $text := QAST::Stmts.new( :node($/) );
+        $text.push( QAST::Op.new( :op<print>, $_.ast ) )
+            for $<template-nibble>;
+        
+        make $text;
+    }
+
+    method template-nibble:sym<interp>($/) {
+        make $<interp>.ast
+    }
+
+    method template-nibble:sym<literal>($/) {
+        make QAST::SVal.new( :value(~$/) );
+    }
 
 }
 
