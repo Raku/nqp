@@ -959,7 +959,7 @@ class QAST::MASTRegexCompiler {
             op('const_s', $pname, sval($node[0])),
             op('unipropcode', $pcode, $pname),
             op('unipvalcode', $pvcode, $pcode, $pname),
-            op('hasuniprop', $i0, %*REG<pos>, $pcode, $pvcode),
+            op('hasuniprop', $i0, %*REG<tgt>, %*REG<pos>, $pcode, $pvcode),
             op($testop, $i0, %*REG<fail>),
             op('inc_i', %*REG<pos>)
         ];
