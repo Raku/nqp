@@ -947,6 +947,10 @@ class QAST::MASTRegexCompiler {
         self."$rxtype"($node) # expects to return an nqp::list of instructions
     }
 
+    method uniprop($node) {
+        self.panic("method uniprop is NYI in QAST::MASTRegexCompiler")
+    }
+
     method ws($node) { self.subrule($node) }
 
     method dba($node) {
