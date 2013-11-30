@@ -28,10 +28,6 @@ class MyClass
       puts "ok #{MyClass::Y} - package constant qualified"
       puts "ok #{Y + 1} - package constant unqualified"
   end
-
-  def putZ
-      puts "ok #{Z} - package constant unqualified"
-  end
 end
 
 class OtherClass
@@ -43,7 +39,7 @@ class OtherClass
 
   def more_const_tests
       puts "ok #{MyClass::Y + 2} - package constant cross reference"
-      puts "ok #{Y + 1} - package constant internal reference"
+      puts "ok #{Y} - package constant internal reference"
   end
 
 end
@@ -85,5 +81,5 @@ puts "ok #{obj2.class_const} - @@class constant"
 
 obj1.const_tests
 
-OtherClass::Y = 20
+OtherClass::Y = 21
 obj3.more_const_tests

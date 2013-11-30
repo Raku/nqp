@@ -21,14 +21,13 @@ class RubyishClassHOW {
     }
 
     method add_method($obj, $name, $code) {
-        if nqp::existskey(%!methods, $name) {
-            nqp::die("This class already has a method named " ~ $name);
-        }
+	nqp::die("This class already has a method named " ~ $name)
+	    if nqp::existskey(%!methods, $name);
+
         %!methods{$name} := $code;
     }
 
     method find_method($obj, $name) {
-
         my $method;
 
         if nqp::substr($name, 0, 1) eq '^' {
@@ -81,7 +80,6 @@ grammar Rubyish::Grammar is HLL::Grammar {
     proto token stmt {*}
 
     token stmt:sym<def> {:s
-
         :my %sym-save := nqp::clone(%*SYM);
         :my $*DEF;
 
@@ -110,9 +108,10 @@ grammar Rubyish::Grammar is HLL::Grammar {
         | '&' <func=.param>
     }
 
-    token param { <ident> [:s<hs> '=' <EXPR>]? {
-        %*SYM{~$<ident>} := 'var'
-      }
+    token param {
+	<ident> [:s<hs> '=' <EXPR>]? {
+	    %*SYM{~$<ident>} := 'var'
+	}
     }
 
     token stmt:sym<class> {
@@ -137,13 +136,6 @@ grammar Rubyish::Grammar is HLL::Grammar {
         }
     }
 
-    sub inherit-syms($class) {
-        if my %syms := %*CLASS_SYMS{$class} {
-            %*SYM{$_} := %syms{$_}
-                for %syms;
-        }
-    }
-
     token stmt:sym<EXPR> { <EXPR> }
     token term:sym<infix=> {:s<hs> <var> <OPER=infix> '=' <EXPR> }
 
@@ -152,21 +144,21 @@ grammar Rubyish::Grammar is HLL::Grammar {
         <closure>
     }
 
-    my %builtins;
-
-    method callable($op) {
-       %builtins := self.builtin-init()
-           unless %builtins<puts>;
-
-       my $type := %*SYM{$op} || (%builtins{$op} && 'func');
-
-       $type && ($type eq 'func' || $type eq 'method');
+    our %builtins;
+    BEGIN {
+        %builtins := nqp::hash(
+            'abort',  'die',
+            'exit',   'exit',
+            'print',  'print',
+            'puts',   'say',
+            'sleep',  'sleep',
+            );
     }
 
     token term:sym<call> {
         <!keyword>
         <operation> ['(' ~ ')' <call-args=.paren-args>? <code-block>?
-                    |:s<hs> <call-args>? <?{self.callable(~$<operation>)}>
+                    |:s<hs> <call-args>? <?{callable(~$<operation>)}>
                     ]
     }
 
@@ -174,6 +166,10 @@ grammar Rubyish::Grammar is HLL::Grammar {
         'super' ['(' ~ ')' <call-args=.paren-args>? <code-block>?
                 |:s <call-args>?
                 ]
+        [
+          <?{$*IN_CLASS && $*DEF}>
+          || <.panic("'super' call outside of method")>
+        ]
     }
 
     token term:sym<nqp-op> {
@@ -181,7 +177,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
     }
 
     token term:sym<quote-words> {
-        \% w <?before [.]> <quote_EXPR: ':q', ':w'>
+        \%w <?before [.]> <quote_EXPR: ':q', ':w'>
     }
 
     token call-args  {:s<hs>
@@ -189,13 +185,13 @@ grammar Rubyish::Grammar is HLL::Grammar {
          | <arg=.func-ref>
     }
 
-    token func-ref { '&' <arg=.EXPR> }
+    token func-ref   { '&' <arg=.EXPR> }
 
     token hash-args  {:s [ <EXPR> '=>' <EXPR> ]+ % ',' }
 
     token paren-args {:my $*IN_PARENS := 1; <call-args> }
 
-    token operation {<ident>[\!|\?]?}
+    token operation  {<ident>[\!|\?]?}
 
     token term:sym<new> {
         ['new' \h+ <ident> | <ident> '.' 'new'] ['(' ~ ')' <call-args=.paren-args>?]?
@@ -252,7 +248,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
 
     # Interpolation
     token interp      { '#{' ~ '}' [:s<hs> [ <stmtlist> ]
-                                  || <panic('string interpolation error')>]
+				    || <panic('string interpolation error')>]
                        }
     token quote_escape:sym<#{ }> { <interp>  }
 
@@ -443,17 +439,19 @@ grammar Rubyish::Grammar is HLL::Grammar {
                      [<?{$*IN_TEMPLATE}> || <.panic('Template directive precedes "<?rbi?>"')>]
     }
 
-    # Builtin functions
-    method builtin-init() {
-        nqp::hash(
-            'abort',  'die',
-            'exit',   'exit',
-            'print',  'print',
-            'puts',   'say',
-            'sleep',  'sleep',
-            );
+    # Functions
+    sub callable($op) {
+       my $type := %*SYM{$op} || (%builtins{$op} && 'func');
+
+       $type && ($type eq 'func' || $type eq 'method');
     }
 
+    sub inherit-syms($class) {
+        if my %syms := %*CLASS_SYMS{$class} {
+            %*SYM{$_} := %syms{$_}
+                for %syms;
+        }
+    }
 }
 
 class Rubyish::Actions is HLL::Actions {
@@ -483,16 +481,11 @@ class Rubyish::Actions is HLL::Actions {
 
     method term:sym<value>($/) { make $<value>.ast; }
 
-    # a few ops that map directly to Ruby built-ins
-    my %builtins;
-
     method code-block($/) { make $<closure>.ast }
 
     method term:sym<call>($/) {
         my $name  := ~$<operation>;
-        %builtins := Rubyish::Grammar.builtin-init()
-            unless %builtins<puts>;
-        my $op    := %builtins{$name};
+        my $op    := %Rubyish::Grammar::builtins{$name};
 
         my $call;
 
@@ -622,20 +615,7 @@ class Rubyish::Actions is HLL::Actions {
         my $sigil := ~$<sigil> // '';
         my $name := $sigil ~ $<ident>;
 
-        my $ns;
-        if $<pkg> {
-            $ns := ~$<pkg>;
-        }
-        elsif !$sigil && $*IN_CLASS {
-            # could be a package constant
-            my $c := nqp::substr($name, 0, 1);
-            $ns := $*CLASS_BLOCK.name
-                if $c ge 'A' && $c le 'Z';
-        }
-        $name := $ns ~ '::' ~ $name
-            if $ns;
-
-        if $sigil eq '@' && $*IN_CLASS {
+        if $sigil eq '@' && $*IN_CLASS && $*DEF {
             # instance variable, bound to self
             my $package-name := $*CLASS_BLOCK.name;
             make QAST::Var.new( :name($name), :scope('attribute'),
@@ -644,6 +624,19 @@ class Rubyish::Actions is HLL::Actions {
                 );
         }
         else {
+	    my $ns;
+	    if $<pkg> {
+		$ns := ~$<pkg>;
+	    }
+	    elsif !$sigil && $*IN_CLASS {
+		# could be a package constant
+		my $c := nqp::substr($name, 0, 1);
+		$ns := $*CLASS_BLOCK.name
+		    if $c ge 'A' && $c le 'Z';
+	    }
+	    $name := $ns ~ '::' ~ $name
+		if $ns;
+
             if $*MAYBE_DECL {
 
                 my $block;
@@ -758,9 +751,9 @@ class Rubyish::Actions is HLL::Actions {
                 QAST::SVal.new( :value(~$<classbody><ident>), :named('name') ),
           );
 
-        $new_type.push(
-            QAST::SVal.new( :value(~$<classbody><super>), :named('isa') )
-            ) if $<classbody><super>;
+        $new_type.push( QAST::SVal.new( :value(~$<classbody><super>),
+					:named('isa') ) )
+	    if $<classbody><super>;
 
         $class_stmts.push(QAST::Op.new(
                               :op('bind'),
@@ -888,8 +881,8 @@ class Rubyish::Actions is HLL::Actions {
     method circumfix:sym<( )>($/) { make $<EXPR>.ast }
 
     # todo: proper type objects
-    my %call-tab;
-    sub call-tab-init() {
+    our %call-tab;
+    BEGIN {
         %call-tab := nqp::hash(
             'call', 'call',
             'nil?', 'isnull'
@@ -897,7 +890,6 @@ class Rubyish::Actions is HLL::Actions {
     }
 
     method postfix:sym<.>($/) {
-        call-tab-init() unless %call-tab<call>;
         my $op := %call-tab{ ~$<operation> };
         my $meth_call := $op
             ?? QAST::Op.new( :op($op) )
@@ -1005,5 +997,6 @@ sub MAIN(*@ARGS) {
     $comp.language('rubyish');
     $comp.parsegrammar(Rubyish::Grammar);
     $comp.parseactions(Rubyish::Actions);
-    $comp.command_line(@ARGS, :encoding('utf8'));
+say("arg:" ~ $_) for @ARGS;
+     $comp.command_line(@ARGS, :encoding('utf8'));
 }

@@ -11,7 +11,7 @@ end
 result = fact!(6)
 expected =  6*5*4*3*2
 
-puts "#{result == expected ? 'ok' : 'nok'} 1 - sub recursion: 6! == #{expected}"
+puts "#{result == expected ? 'ok' : 'nok'} 1 - sub recursion"
 
 # ----------
 
@@ -27,4 +27,4 @@ end
 fib = MethodRecursion.new.fibonacci(9)
 expected2 = 34
 
-puts "#{fib == expected2 ? 'ok' : 'nok'} 2 - method recursion: (#{expected2})"
+puts "#{fib == expected2 ? 'ok' : 'nok'} 2 - method recursion"
