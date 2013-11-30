@@ -997,6 +997,5 @@ sub MAIN(*@ARGS) {
     $comp.language('rubyish');
     $comp.parsegrammar(Rubyish::Grammar);
     $comp.parseactions(Rubyish::Actions);
-say("arg:" ~ $_) for @ARGS;
-     $comp.command_line(@ARGS, :encoding('utf8'));
+    $comp.command_line(@ARGS, :encoding('utf8'));
 }
