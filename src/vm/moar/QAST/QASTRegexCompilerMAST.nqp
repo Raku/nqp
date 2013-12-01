@@ -147,8 +147,8 @@ class QAST::MASTRegexCompiler {
             op('gt_i', $i0, $i0, $zero),
             op('unless_i', $i0, $donelabel),
             op('pop_i', $i19, $bstack),
-            op('isnull', $i0, $cstack),
-            op('if_i', $i0, $cstacklabel),
+            op('islist', $i0, $cstack),
+            op('unless_i', $i0, $cstacklabel),
             op('elems', $i0, $cstack),
             op('gt_i', $i0, $i0, $zero),
             op('unless_i', $i0, $cstacklabel),
@@ -167,6 +167,7 @@ class QAST::MASTRegexCompiler {
             # backtrack the cursor stack
             op('isnull', $i0, $cstack),
             op('if_i', $i0, $jumplabel),
+            op('unless_o', $cstack, $jumplabel),
             op('elems', $i18, $bstack),
             op('le_i', $i0, $i18, $zero),
             op('if_i', $i0, $cutlabel),
