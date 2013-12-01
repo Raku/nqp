@@ -2108,7 +2108,7 @@ QAST::MASTOperations.add_core_moarop_mapping('assign', 'assign', 0);
 QAST::MASTOperations.add_core_moarop_mapping('assignunchecked', 'assignunchecked', 0);
 
 # defined - overridden by HLL, but by default same as .DEFINITE.
-QAST::MASTOperations.add_core_moarop_mapping('defined', 'isconcrete');
+QAST::MASTOperations.add_core_moarop_mapping('defined', 'isconcrete', :decont(0));
 
 # lexical related opcodes
 QAST::MASTOperations.add_core_moarop_mapping('getlex', 'getlex_no');
