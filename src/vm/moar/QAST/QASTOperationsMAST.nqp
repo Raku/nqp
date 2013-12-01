@@ -701,6 +701,9 @@ for <if unless> -> $op_name {
         }
 
         # Emit the jump.
+        if @comp_ops[0].result_kind == $MVM_reg_obj {
+            push_op(@ins, 'decont', @comp_ops[0].result_reg, @comp_ops[0].result_reg);
+        }
         push_op(@ins,
             resolve_condition_op(@comp_ops[0].result_kind, $op_name eq 'if'),
             @comp_ops[0].result_reg,
@@ -953,6 +956,9 @@ for ('', 'repeat_') -> $repness {
             nqp::push(@loop_il, $test_lbl);
             push_ilist(@loop_il, $coerced);
             push_op(@loop_il, 'set', $res_reg, $coerced.result_reg);
+            if @comp_ops[0].result_kind == $MVM_reg_obj {
+                push_op(@loop_il, 'decont', @comp_ops[0].result_reg, @comp_ops[0].result_reg);
+            }
             push_op(@loop_il,
                 resolve_condition_op(@comp_ops[0].result_kind, $op_name eq 'while'),
                 @comp_ops[0].result_reg,
