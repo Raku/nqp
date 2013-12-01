@@ -2,6 +2,7 @@ class QRegex::Optimizer {
     has @!outer;
 
     method optimize($node, $outer, *%adverbs) {
+        my $*LEVEL := nqp::getlexdyn('$*LEVEL') // %adverbs<optimize> // 2;
         my @!outer := [$outer];
         my $type := $node.rxtype;
         if $type eq 'concat' {
@@ -62,9 +63,9 @@ class QRegex::Optimizer {
     method visit_concat($node) {
         # a single-child concat can become the child itself
         self.visit_children($node);
-        if +@($node) == 1 {
+        if +@($node) == 1 && $*LEVEL >= 1 {
             return $node[0];
-        } elsif nqp::istype($node[0], QAST::Regex) && +@($node) >= 2 {
+        } elsif nqp::istype($node[0], QAST::Regex) && +@($node) >= 2 && $*LEVEL >= 2 {
             # we may have a scan followed by a begin-of-string assertion.
             # in that case we just shouldn't scan.
             if $node[0].rxtype eq 'scan'
@@ -97,7 +98,7 @@ class QRegex::Optimizer {
             if !nqp::istype($regex, QAST::Regex) { return $qast }
             self.visit_children($regex);
             if $qast.subtype eq 'zerowidth'
-                    && $child_is_block
+                    && $child_is_block && $*LEVEL >= 2
                     && $qast[0][0].value eq 'before' {
                 if nqp::istype($qast[0], QAST::Node) && nqp::istype($qast[0][1], QAST::Block)
                         && $regex.rxtype eq 'concat' && $regex[0].rxtype eq 'scan' && $regex[2].rxtype eq 'pass' {
@@ -131,7 +132,7 @@ class QRegex::Optimizer {
                 }
             }
             # positional and named captures are implicitly anchored, so we can get rid of the scan there, too.
-            if $qast.subtype eq 'capture' && $child_is_block {
+            if $qast.subtype eq 'capture' && $child_is_block && $*LEVEL >= 1 {
                 self.dont_scan($regex);
             }
         }
