@@ -41,6 +41,24 @@ class QRegex::Optimizer {
         $node;
     }
 
+    method dont_scan($node) {
+        while +@($node) >= 1 {
+            if nqp::istype($node, QAST::Regex) {
+                if nqp::istype($node[0], QAST::Regex) && $node[0].rxtype eq 'scan' {
+                    $node.shift;
+                    last;
+                }
+                if $node.rxtype eq 'concat' {
+                    $node := $node[0];
+                } else {
+                    last;
+                }
+            } else {
+                last;
+            }
+        }
+    }
+
     method visit_concat($node) {
         # a single-child concat can become the child itself
         self.visit_children($node);
@@ -70,37 +88,51 @@ class QRegex::Optimizer {
     }
 
     method simplify_assertion($qast) {
-        if $qast.subtype eq 'zerowidth'
-                && nqp::istype($qast[0], QAST::Node) && nqp::istype($qast[0][0], QAST::SVal)
-                && $qast[0][0].value eq 'before' {
-            if nqp::istype($qast[0], QAST::Node) && nqp::istype($qast[0][1], QAST::Block)
-                    && nqp::istype((my $regex := $qast[0][1][2]), QAST::Regex)
-                    && $regex.rxtype eq 'concat' && $regex[0].rxtype eq 'scan' && $regex[2].rxtype eq 'pass' {
-                self.visit_children($regex);
-                my $simple := $regex[1];
-                my $result := 0;
-                if $simple.rxtype eq 'literal' && $simple.rxtype ne 'ignorecase' && !$qast.negate {
-                    $result := QAST::Regex.new(:rxtype<literal>, :subtype<zerowidth>, :node($simple.node),
-                        :negate($simple.negate),
-                        $simple[0]);
-                } elsif $simple.rxtype eq 'enumcharlist' && $simple.rxtype ne 'ignorecase' {
-                    $result := QAST::Regex.new(:rxtype<enumcharlist>, :subtype<zerowidth>, :node($simple.node),
-                        :negate(nqp::bitxor_i($qast.negate, $simple.negate)),
-                        $simple[0]);
-                } elsif $simple.rxtype eq 'charrange' && $simple.rxtype ne 'ignorecase' {
-                    $result := QAST::Regex.new(:rxtype<charrange>, :subtype<zerowidth>, :node($simple.node),
-                        :negate(nqp::bitxor_i($qast.negate, $simple.negate)),
-                        $simple[0],
-                        $simple[1],
-                        $simple[2]);
-                } elsif $simple.rxtype eq 'cclass' && $simple.rxtype ne 'ignorecase' {
-                    $result := QAST::Regex.new(:rxtype<cclass>, :subtype<zerowidth>, :node($simple.node),
-                        :negate(nqp::bitxor_i($qast.negate, $simple.negate)), :name($simple.name));
+        my $child_is_block := nqp::istype($qast[0], QAST::Node)
+            && (nqp::istype($qast[0][0], QAST::SVal) || nqp::istype($qast[0][0], QAST::Block));
+        if $child_is_block {
+            my $block := nqp::istype($qast[0][0], QAST::SVal) ?? $qast[0][1] !! $qast[0][0];
+            my $regex := $block[2];
+            # extra safety
+            if !nqp::istype($regex, QAST::Regex) { return $qast }
+            self.visit_children($regex);
+            if $qast.subtype eq 'zerowidth'
+                    && $child_is_block
+                    && $qast[0][0].value eq 'before' {
+                if nqp::istype($qast[0], QAST::Node) && nqp::istype($qast[0][1], QAST::Block)
+                        && $regex.rxtype eq 'concat' && $regex[0].rxtype eq 'scan' && $regex[2].rxtype eq 'pass' {
+                    my $simple := $regex[1];
+                    my $result := 0;
+                    if $simple.rxtype eq 'literal' && $simple.rxtype ne 'ignorecase' && !$qast.negate {
+                        $result := QAST::Regex.new(:rxtype<literal>, :subtype<zerowidth>, :node($simple.node),
+                            :negate($simple.negate),
+                            $simple[0]);
+                    } elsif $simple.rxtype eq 'enumcharlist' && $simple.rxtype ne 'ignorecase' {
+                        $result := QAST::Regex.new(:rxtype<enumcharlist>, :subtype<zerowidth>, :node($simple.node),
+                            :negate(nqp::bitxor_i($qast.negate, $simple.negate)),
+                            $simple[0]);
+                    } elsif $simple.rxtype eq 'charrange' && $simple.rxtype ne 'ignorecase' {
+                        $result := QAST::Regex.new(:rxtype<charrange>, :subtype<zerowidth>, :node($simple.node),
+                            :negate(nqp::bitxor_i($qast.negate, $simple.negate)),
+                            $simple[0],
+                            $simple[1],
+                            $simple[2]);
+                    } elsif $simple.rxtype eq 'cclass' && $simple.rxtype ne 'ignorecase' {
+                        $result := QAST::Regex.new(:rxtype<cclass>, :subtype<zerowidth>, :node($simple.node),
+                            :negate(nqp::bitxor_i($qast.negate, $simple.negate)), :name($simple.name));
+                    } else {
+                        # since before is implicitly anchored, we can remove the scan.
+                        self.dont_scan($regex);
+                    }
+                    if $result {
+                        self.stub_out_block($qast[0][1]);
+                        $qast := $result;
+                    }
                 }
-                if $result {
-                    self.stub_out_block($qast[0][1]);
-                    $qast := $result;
-                }
+            }
+            # positional and named captures are implicitly anchored, so we can get rid of the scan there, too.
+            if $qast.subtype eq 'capture' && $child_is_block {
+                self.dont_scan($regex);
             }
         }
         $qast;
