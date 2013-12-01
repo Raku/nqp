@@ -1248,6 +1248,9 @@ QAST::MASTOperations.add_core_op('call', sub ($qastcomp, $op) {
         handle_arg($_, $qastcomp, @ins, @arg_regs, @arg_flags, @arg_kinds);
     }
 
+    # Decontainerize the callee.
+    push_op(@ins, 'decont', $callee.result_reg, $callee.result_reg);
+
     # Release the callee's result register
     $*REGALLOC.release_register($callee.result_reg, $MVM_reg_obj);
 
