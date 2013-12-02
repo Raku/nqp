@@ -405,6 +405,24 @@ Replace them with all the elements from `@from`.
 Bind $v to @arr at index 0, move all other bindings of @arr to the index one above what they were previously bound to.
 Return the number of elements of @arr on Parrot, $v on JVM.
 
+## iterator
+* `iterator()`
+
+Returns an iterator object to iterate over a list's items.  For example:
+
+```perl
+
+my $list := nqp::list('a', 'b', 'c');
+my $iter := nqp::iterator($list);
+
+while $iter {
+    say(nqp::shift($iter));
+}
+
+```
+
+You can also use `nqp::iterator()` to iterate over a hash's key-value pairs.
+
 # Hash opcodes
 
 ## atkey
@@ -432,6 +450,25 @@ Return non-zero if %hash has key $key bound to something.
 * `deletekey(%hash, String $key)`
 
 Delete the given key from %hash.
+
+## iterkey
+* `iterkey_s($pair)`
+
+Returns the key associated with the given key-value pair.
+For example:
+
+```perl
+
+for %hash {
+    say(nqp::iterkey_s($_), ' => ', nqp::iterval($_));
+}
+
+```
+
+## iterval
+* `iterval($pair)`
+
+Returns the value associated with the given key-value pair.
 
 # String Opcodes
 
