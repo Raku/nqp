@@ -1781,6 +1781,7 @@ QAST::OperationsJAST.map_classlib_core_op('lexprimspec', $TYPE_OPS, 'lexprimspec
 # Argument capture processing, for writing things like multi-dispatchers in
 # high level languages.
 QAST::OperationsJAST.add_core_op('usecapture', :!inlinable, -> $qastcomp, $op {
+    $*NEED_ARGS_ARRAY := 1;
     my $il := JAST::InstructionList.new();
     $il.append($ALOAD_1);
     $il.append(JAST::Instruction.new( :op('aload'), 'csd' ));
@@ -1790,6 +1791,7 @@ QAST::OperationsJAST.add_core_op('usecapture', :!inlinable, -> $qastcomp, $op {
     result($il, $RT_OBJ)
 });
 QAST::OperationsJAST.add_core_op('savecapture', :!inlinable, -> $qastcomp, $op {
+    $*NEED_ARGS_ARRAY := 1;
     my $il := JAST::InstructionList.new();
     $il.append($ALOAD_1);
     $il.append(JAST::Instruction.new( :op('aload'), 'csd' ));
@@ -3273,6 +3275,7 @@ class QAST::CompilerJAST {
             # Compile method body.
             my $body;
             my $*STACK := StackState.new();
+            my $*NEED_ARGS_ARRAY := 0;
             {
                 my $*BLOCK := $block;
                 my $*WANT;
