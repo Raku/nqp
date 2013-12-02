@@ -234,6 +234,8 @@ public class JASTToJVMBytecode {
                     isStatic = true;
                     curArgIndex = 0; /* No invocant. */
                 }
+                else if (curLine.startsWith("++ args_expectation "))
+                    argsExpectation = Short.parseShort(curLine.substring("++ args_expectation ".length()));
                 else if (curLine.startsWith("++ local ") || curLine.startsWith("++ arg")) {
                     String[] bits = curLine.split("\\s", 4);
                     if (localVariables.containsKey(bits[2]))
@@ -273,8 +275,6 @@ public class JASTToJVMBytecode {
                 }
                 else if (curLine.startsWith("++ has_exit_handler"))
                     hasExitHandler = true;
-                else if (curLine.startsWith("++ args_expectation "))
-                    argsExpectation = Short.parseShort(curLine.substring("++ args_expectation ".length()));
                 else
                     throw new Exception("Cannot understand '" + curLine + "'");
                 continue;
