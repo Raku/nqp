@@ -114,6 +114,7 @@ class JAST::Method is JAST::Node {
     has @!cr_slex;
     has @!cr_handlers;
     has int $!has_exit_handler;
+    has int $!args_expectation;
     
     method BUILD(:$name!, :$returns!, :$static = 1) {
         $!name := $name;
@@ -161,7 +162,8 @@ class JAST::Method is JAST::Node {
     method cr_slex(*@value) { @value ?? (@!cr_slex := @value[0]) !! @!cr_slex }
     method cr_handlers(*@value) { @value ?? (@!cr_handlers := @value[0]) !! @!cr_handlers }
     method has_exit_handler(*@value) { $!has_exit_handler := @value[0] if @value; $!has_exit_handler }
-    
+    method args_expectation(*@value) { $!args_expectation := @value[0] if @value; $!args_expectation }
+
     method dump(@dumped) {
         nqp::push(@dumped, "+ method");
         nqp::push(@dumped, "++ name $!name");
@@ -185,6 +187,9 @@ class JAST::Method is JAST::Node {
         nqp::push(@dumped, "++ handlers " ~ join(' ', @!cr_handlers));
         if $!has_exit_handler {
             nqp::push(@dumped, "++ has_exit_handler");
+        }
+        if $!args_expectation {
+            nqp::push(@dumped, "++ args_expectation $!args_expectation");
         }
         for @!instructions {
             $_.dump(@dumped);

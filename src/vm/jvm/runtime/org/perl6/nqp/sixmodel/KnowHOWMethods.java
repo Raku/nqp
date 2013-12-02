@@ -325,29 +325,29 @@ public class KnowHOWMethods extends CompilationUnit {
         Lookup l = MethodHandles.lookup();
         try {
             refs[0] = new CodeRef(this, l.findVirtual(KnowHOWMethods.class, "new_type", mt).bindTo(this),
-                    "new_type", "new_type", snull, snull, snull, snull, hnull);
+                    "new_type", "new_type", snull, snull, snull, snull, hnull, (short)0);
             refs[1] = new CodeRef(this, l.findVirtual(KnowHOWMethods.class, "add_method", mt).bindTo(this),
-                    "add_method", "add_method", snull, snull, snull, snull, hnull);
+                    "add_method", "add_method", snull, snull, snull, snull, hnull, (short)0);
             refs[2] = new CodeRef(this, l.findVirtual(KnowHOWMethods.class, "add_attribute", mt).bindTo(this),
-                    "add_attribute", "add_attribute", snull, snull, snull, snull, hnull);
+                    "add_attribute", "add_attribute", snull, snull, snull, snull, hnull, (short)0);
             refs[3] = new CodeRef(this, l.findVirtual(KnowHOWMethods.class, "compose", mt).bindTo(this),
-                    "compose", "compose", snull, snull, snull, snull, hnull);
+                    "compose", "compose", snull, snull, snull, snull, hnull, (short)0);
             refs[4] = new CodeRef(this, l.findVirtual(KnowHOWMethods.class, "attributes", mt).bindTo(this),
-                    "attributes", "attributes", snull, snull, snull, snull, hnull);
+                    "attributes", "attributes", snull, snull, snull, snull, hnull, (short)0);
             refs[5] = new CodeRef(this, l.findVirtual(KnowHOWMethods.class, "methods", mt).bindTo(this),
-                    "methods", "methods", snull, snull, snull, snull, hnull);
+                    "methods", "methods", snull, snull, snull, snull, hnull, (short)0);
             refs[6] = new CodeRef(this, l.findVirtual(KnowHOWMethods.class, "name", mt).bindTo(this),
-                    "name", "name", snull, snull, snull, snull, hnull);
+                    "name", "name", snull, snull, snull, snull, hnull, (short)0);
             refs[7] = new CodeRef(this, l.findVirtual(KnowHOWMethods.class, "attr_new", mt).bindTo(this),
-                    "new", "attr_new", snull, snull, snull, snull, hnull);
+                    "new", "attr_new", snull, snull, snull, snull, hnull, (short)0);
             refs[8] = new CodeRef(this, l.findVirtual(KnowHOWMethods.class, "attr_compose", mt).bindTo(this),
-                    "compose", "attr_compose", snull, snull, snull, snull, hnull);
+                    "compose", "attr_compose", snull, snull, snull, snull, hnull, (short)0);
             refs[9] = new CodeRef(this, l.findVirtual(KnowHOWMethods.class, "attr_name", mt).bindTo(this),
-                    "name", "attr_name", snull, snull, snull, snull, hnull);
+                    "name", "attr_name", snull, snull, snull, snull, hnull, (short)0);
             refs[10] = new CodeRef(this, l.findVirtual(KnowHOWMethods.class, "attr_type", mt).bindTo(this),
-                    "type", "attr_type", snull, snull, snull, snull, hnull);
+                    "type", "attr_type", snull, snull, snull, snull, hnull, (short)0);
             refs[11] = new CodeRef(this, l.findVirtual(KnowHOWMethods.class, "attr_box_target", mt).bindTo(this),
-                    "box_target", "attr_box_target", snull, snull, snull, snull, hnull);
+                    "box_target", "attr_box_target", snull, snull, snull, snull, hnull, (short)0);
         }
         catch (Exception e) {
             throw new RuntimeException(e);

@@ -17,6 +17,11 @@ public class StaticCodeInfo implements Cloneable {
      * Method handle for the code ref.
      */
     MethodHandle mh;
+    
+    /**
+     * The expected arguments needed to invoke the method handle.
+     */
+    public short argsExpectation;
 
     /**
      * Curried method handle for resuming.
@@ -148,7 +153,8 @@ public class StaticCodeInfo implements Cloneable {
             String uniqueId,
             String[] oLexicalNames, String[] iLexicalNames,
             String[] nLexicalNames, String[] sLexicalNames,
-            long[][] handlers, SixModelObject staticCode) {
+            long[][] handlers, SixModelObject staticCode,
+            short argsExpectation) {
         this.compUnit = compUnit;
         this.mh = mh;
         this.uniqueId = uniqueId;
@@ -162,6 +168,7 @@ public class StaticCodeInfo implements Cloneable {
             this.oLexStatic = new SixModelObject[oLexicalNames.length];
             this.oLexStaticFlags = new byte[oLexicalNames.length];
         }
+        this.argsExpectation = argsExpectation;
         MethodType t = mh.type();
         if (t.parameterCount() == 5 && (t.parameterType(4) == ResumeStatus.Frame.class)) {
             /* Old way; goes away after bootstrap. */
@@ -170,7 +177,13 @@ public class StaticCodeInfo implements Cloneable {
         }
         else if (t.parameterCount() == 5 && (t.parameterType(3) == ResumeStatus.Frame.class)) {
             mhResume = MethodHandles.insertArguments(mh, 0, null, null, null);
-            mhResume = MethodHandles.insertArguments(mhResume, 1, (Object)null);
+            switch (argsExpectation) {
+            case ArgsExpectation.USE_BINDER:
+                mhResume = MethodHandles.insertArguments(mhResume, 1, (Object)null);
+                break;
+            default:
+                throw new RuntimeException("Unhandled ArgsExpectation in StaticCodeInfo");
+            }
             this.mh = MethodHandles.insertArguments(mh, 3, (Object)null);
         }
     }
