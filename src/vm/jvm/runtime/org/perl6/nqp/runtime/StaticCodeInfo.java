@@ -163,7 +163,7 @@ public class StaticCodeInfo implements Cloneable {
             this.oLexStaticFlags = new byte[oLexicalNames.length];
         }
         MethodType t = mh.type();
-        if (t.parameterCount() == 5 && (t.parameterType(4) == ResumeStatus.Frame.class || t.parameterType(4) == ResumeStatus.class)) { // the latter is wrong and obsolete
+        if (t.parameterCount() == 5 && (t.parameterType(4) == ResumeStatus.Frame.class)) {
             mhResume = MethodHandles.insertArguments(mh, 0, null, null, null, null);
             this.mh = MethodHandles.insertArguments(mh, 4, (Object)null);
         }
