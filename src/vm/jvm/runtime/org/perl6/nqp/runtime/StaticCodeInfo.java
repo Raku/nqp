@@ -175,7 +175,7 @@ public class StaticCodeInfo implements Cloneable {
             mhResume = MethodHandles.insertArguments(mh, 0, null, null, null, null);
             this.mh = MethodHandles.insertArguments(mh, 4, (Object)null);
         }
-        else if (t.parameterCount() == 5 && (t.parameterType(3) == ResumeStatus.Frame.class)) {
+        else if (t.parameterCount() >= 4 && (t.parameterType(3) == ResumeStatus.Frame.class)) {
             mhResume = MethodHandles.insertArguments(mh, 0, null, null, null);
             switch (argsExpectation) {
             case ArgsExpectation.USE_BINDER:
