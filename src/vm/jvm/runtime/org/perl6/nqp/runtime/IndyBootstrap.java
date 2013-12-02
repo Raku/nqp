@@ -197,7 +197,7 @@ public class IndyBootstrap {
         
         /* Make the sub call directly for this initial call. */
         try {
-            cr.staticInfo.mh.invokeExact(tc, (CodeRef)cr, csd, args);
+            ArgsExpectation.invokeByExpectation(tc, cr, csd, args);
         }
         catch (ControlException e) {
             throw e;
@@ -253,7 +253,7 @@ public class IndyBootstrap {
                 args = tc.flatArgs;
             }
         }
-        mh.invokeExact(tc, cr, csd, args);
+        ArgsExpectation.invokeByExpectation(tc, cr, csd, args);
     }
     
     public static CallSite indcall_noa(Lookup caller, String _, MethodType type) {
@@ -310,7 +310,7 @@ public class IndyBootstrap {
         
         /* Make the call. */
         try {
-            cr.staticInfo.mh.invokeExact(tc, cr, csd, args);
+            ArgsExpectation.invokeByExpectation(tc, cr, csd, args);
         }
         catch (ControlException e) {
             throw e;
