@@ -3260,13 +3260,13 @@ class QAST::CompilerJAST {
                 $*JMETH.cr_outer(-1); # marks as coderef
             }
             
-            # Always take ThreadContext and callsite descriptor as arguments.
+            # Various common arguments we always take; actual args are sorted
+            # out later after looking through the block for params.
             $*JMETH.add_argument('cu', $TYPE_CU);
             $*JMETH.add_argument('tc', $TYPE_TC);
             $*JMETH.add_argument('cr', $TYPE_CR);
             $*JMETH.add_argument('csd', $TYPE_CSD);
             $*JMETH.add_argument('resume', $TYPE_RESUME);
-            $*JMETH.add_argument('__args', "[$TYPE_OBJ");
             
             # Set up temporaries allocator.
             my $*BLOCK_TA := BlockTempAlloc.new();
@@ -3290,9 +3290,12 @@ class QAST::CompilerJAST {
             $*JMETH.cr_nlex(@lex_names[$RT_NUM]);
             $*JMETH.cr_slex(@lex_names[$RT_STR]);
             
-            # Unless we have custom args processing...
+            # If we have custom args processing, we always take an args array.
             my $il := JAST::InstructionList.new();
-            unless $node.custom_args {
+            if $node.custom_args {
+                $*JMETH.add_argument('__args', "[$TYPE_OBJ");
+            }
+            elsif !self.try_setup_args_expectation($*JMETH, $block) {
                 # Analyze parameters to get count of required/optional and make sure
                 # all is in order.
                 my int $pos_required := 0;
@@ -3322,7 +3325,8 @@ class QAST::CompilerJAST {
                     }
                 }
                 
-                # Emit arity check instruction.
+                # Take args array and emit arity check instruction.
+                $*JMETH.add_argument('__args', "[$TYPE_OBJ");
                 $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
                 $il.append(JAST::Instruction.new( :op('aload'), 'csd' ));
                 $il.append(JAST::Instruction.new( :op('aload'), '__args' ));
@@ -3595,8 +3599,9 @@ class QAST::CompilerJAST {
             }
             elsif $blocktype eq 'immediate' || $blocktype eq 'immediate_static' {
                 # Can emit a direct JVM level call. First, get self, TC,
-                # code ref, callsite descriptor and args (both empty) onto
-                # the stack.
+                # code ref, and callsite descriptor (empty) onto the stack.
+                # We know immediate blocks have no args, so simply don't
+                # pass any.
                 my $il := JAST::InstructionList.new();
                 $*STACK.spill_to_locals($il);
                 $il.append($ALOAD_0);
@@ -3608,14 +3613,12 @@ class QAST::CompilerJAST {
                 $il.append(JAST::Instruction.new( :op('getstatic'),
                     $TYPE_OPS, 'emptyCallSite', $TYPE_CSD ));
                 $il.append($ACONST_NULL);
-                $il.append(JAST::Instruction.new( :op('getstatic'),
-                    $TYPE_OPS, 'emptyArgList', "[$TYPE_OBJ" ));
                 
                 # Emit the virtual call.
                 $il.append(savesite(JAST::Instruction.new( :op('invokestatic'),
                     'L' ~ $*JCLASS.name ~ ';',
                     $*CODEREFS.cuid_to_jastmethname($node.cuid),
-                    'V', $TYPE_CU, $TYPE_TC, $TYPE_CR, $TYPE_CSD, $TYPE_RESUME, "[$TYPE_OBJ" )));
+                    'V', $TYPE_CU, $TYPE_TC, $TYPE_CR, $TYPE_CSD, $TYPE_RESUME )));
                 
                 # Load result onto the stack, unless in void context.
                 if $*WANT != $RT_VOID {
@@ -3634,6 +3637,26 @@ class QAST::CompilerJAST {
             else {
                 nqp::die("Unrecognized block type '$blocktype'");
             }
+        }
+    }
+    
+    my $ARG_EXP_USE_BINDER := 0;
+    my $ARG_EXP_NO_ARGS    := 1;
+    method try_setup_args_expectation($jmeth, $block) {
+        # Needing an args array forces the binder.
+        if $*NEED_ARGS_ARRAY {
+            return $ARG_EXP_USE_BINDER;
+        }
+        
+        # Otherwise, go by arity, then look at particular cases.
+        my $num_params := $block.params;
+        if $num_params == 0 {
+            # Easy; just don't add any extra args in.
+            $jmeth.args_expectation($ARG_EXP_NO_ARGS);
+            return $ARG_EXP_NO_ARGS;
+        }
+        else {
+            return $ARG_EXP_USE_BINDER;
         }
     }
     
