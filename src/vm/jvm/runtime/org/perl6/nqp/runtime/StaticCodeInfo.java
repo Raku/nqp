@@ -164,8 +164,14 @@ public class StaticCodeInfo implements Cloneable {
         }
         MethodType t = mh.type();
         if (t.parameterCount() == 5 && (t.parameterType(4) == ResumeStatus.Frame.class)) {
+            /* Old way; goes away after bootstrap. */
             mhResume = MethodHandles.insertArguments(mh, 0, null, null, null, null);
             this.mh = MethodHandles.insertArguments(mh, 4, (Object)null);
+        }
+        else if (t.parameterCount() == 5 && (t.parameterType(3) == ResumeStatus.Frame.class)) {
+            mhResume = MethodHandles.insertArguments(mh, 0, null, null, null);
+            mhResume = MethodHandles.insertArguments(mhResume, 1, (Object)null);
+            this.mh = MethodHandles.insertArguments(mh, 3, (Object)null);
         }
     }
     

@@ -3263,8 +3263,8 @@ class QAST::CompilerJAST {
             $*JMETH.add_argument('tc', $TYPE_TC);
             $*JMETH.add_argument('cr', $TYPE_CR);
             $*JMETH.add_argument('csd', $TYPE_CSD);
-            $*JMETH.add_argument('__args', "[$TYPE_OBJ");
             $*JMETH.add_argument('resume', $TYPE_RESUME);
+            $*JMETH.add_argument('__args', "[$TYPE_OBJ");
             
             # Set up temporaries allocator.
             my $*BLOCK_TA := BlockTempAlloc.new();
@@ -3604,15 +3604,15 @@ class QAST::CompilerJAST {
                     $TYPE_CU, 'lookupCodeRef', $TYPE_CR, 'I' ));
                 $il.append(JAST::Instruction.new( :op('getstatic'),
                     $TYPE_OPS, 'emptyCallSite', $TYPE_CSD ));
+                $il.append($ACONST_NULL);
                 $il.append(JAST::Instruction.new( :op('getstatic'),
                     $TYPE_OPS, 'emptyArgList', "[$TYPE_OBJ" ));
-                $il.append($ACONST_NULL);
                 
                 # Emit the virtual call.
                 $il.append(savesite(JAST::Instruction.new( :op('invokestatic'),
                     'L' ~ $*JCLASS.name ~ ';',
                     $*CODEREFS.cuid_to_jastmethname($node.cuid),
-                    'V', $TYPE_CU, $TYPE_TC, $TYPE_CR, $TYPE_CSD, "[$TYPE_OBJ", $TYPE_RESUME )));
+                    'V', $TYPE_CU, $TYPE_TC, $TYPE_CR, $TYPE_CSD, $TYPE_RESUME, "[$TYPE_OBJ" )));
                 
                 # Load result onto the stack, unless in void context.
                 if $*WANT != $RT_VOID {
