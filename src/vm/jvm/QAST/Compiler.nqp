@@ -3218,7 +3218,7 @@ class QAST::CompilerJAST {
     }
     
     multi method as_jast(QAST::Block $node, :$want) {
-        # Do block compilation in a tested block, so we can produce a result based on
+        # Do block compilation in a nested block, so we can produce a result based on
         # the containing block's stack.
         unless $*CODEREFS.know_cuid($node.cuid) {
             # Block gets fresh BlockInfo.
