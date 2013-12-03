@@ -161,6 +161,108 @@ public class IndyBootstrap {
         ArgsExpectation.invokeByExpectation(tc, cr, csd, args);
     }
     
+    public static CallSite subcallstatic_noa(Lookup caller, String _, MethodType type) {
+        try {
+            /* Look up subcall resolver method. */
+            MethodType resType = MethodType.methodType(void.class,
+                    Lookup.class, MutableCallSite.class, String.class,
+                    int.class, ThreadContext.class, Object[].class);
+            MethodHandle res = caller.findStatic(IndyBootstrap.class, "subcallstaticResolve_noa", resType);
+            
+            /* Create a mutable callsite, and curry the resolver with it and
+             * the sub name. */
+            MutableCallSite cs = new MutableCallSite(type);
+            cs.setTarget(MethodHandles
+                .insertArguments(res, 0, caller, cs)
+                .asCollector(Object[].class, type.parameterCount() - 3)
+                .asType(type));
+            
+            /* Produce callsite; it'll be updated with the resolved call upon the
+             * first invocation. */
+            return cs;
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    public static void subcallstaticResolve_noa(Lookup caller, MutableCallSite cs, String name, int csIdx, ThreadContext tc, Object... args) {
+        /* Locate the thing to call. */
+        SixModelObject invokee = Ops.getlex(name, tc);
+        
+        /* Don't update callsite in cases where it's not safe. */
+        boolean shared = tc.curFrame.codeRef.staticInfo.compUnit.shared;
+        if (invokee.st != null && invokee.st.ContainerSpec != null) {
+            invokee = Ops.decont(invokee, tc);
+            shared = true;
+        }
+        
+        /* Resolve callsite descriptor. */
+        CallSiteDescriptor csd = csIdx >= 0
+            ? tc.curFrame.codeRef.staticInfo.compUnit.callSites[csIdx]
+            : Ops.emptyCallSite;
+        CallSiteDescriptor csdOrig = csd;
+        
+        /* If it's lexotic, then resolve to something to do the throwing. */
+        if (invokee instanceof LexoticInstance)
+            throw setLexoticTarget(caller, cs, tc, invokee, csd, args, shared);
+        
+        /* Otherwise, get the code ref. */
+        CodeRef cr;
+        if (invokee instanceof CodeRef) {
+            cr = (CodeRef)invokee;
+        }
+        else {
+            InvocationSpec is = invokee.st.InvocationSpec;
+            if (is == null)
+                throw ExceptionHandling.dieInternal(tc, "Can not invoke this object");
+            if (is.ClassHandle != null)
+                cr = (CodeRef)invokee.get_attribute_boxed(tc, is.ClassHandle, is.AttrName, is.Hint);
+            else {
+                cr = (CodeRef)is.InvocationHandler;
+                csd = csd.injectInvokee(tc, args, invokee);
+                args = tc.flatArgs;
+                shared = true;
+            }
+        }
+        
+        /* Now need to adapt to the target callsite by binding the CodeRef
+         * and callsite with what they've been resolved to. Don't do it if
+         * it's a compiler stub, though. */
+        if (!cr.isCompilerStub && !shared) {
+            try {
+                MethodType invType = MethodType.methodType(void.class,
+                    MethodHandle.class, String.class, CallSiteDescriptor.class,
+                    CodeRef.class, ThreadContext.class, Object[].class);
+                MethodHandle inv = caller.findStatic(IndyBootstrap.class, "substaticInvoker", invType);
+                cs.setTarget(MethodHandles
+                    .dropArguments(
+                        MethodHandles.insertArguments(inv, 0, cr.staticInfo.mh, name, csdOrig, cr),
+                        0, String.class, int.class)
+                    .asVarargsCollector(Object[].class)
+                    .asType(cs.getTarget().type()));
+            }
+            catch (Throwable t) {
+                throw ExceptionHandling.dieInternal(tc, t);
+            }
+        }
+        
+        /* Make the sub call directly for this initial call. */
+        try {
+            ArgsExpectation.invokeByExpectation(tc, cr, csd, args);
+        }
+        catch (ControlException e) {
+            throw e;
+        }
+        catch (Throwable e) {
+            ExceptionHandling.dieInternal(tc, e);
+        }
+    }
+    
+    public static void substaticInvoker(MethodHandle mh, String name, CallSiteDescriptor csd, CodeRef cr, ThreadContext tc, Object[] args) throws Throwable { 
+        ArgsExpectation.invokeByExpectation(tc, cr, csd, args);
+    }
+    
     private static LexoticException setLexoticTarget(Lookup caller, MutableCallSite cs,
             ThreadContext tc, SixModelObject invokee, CallSiteDescriptor csd,
             Object[] args, boolean shared) {

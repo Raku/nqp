@@ -1380,7 +1380,7 @@ sub process_args_onto_stack($qastcomp, @children, $il, :$obj_first, :$inv_first,
     # Return callsite index (which may create it if needed).
     return [$*CODEREFS.get_callsite_idx(@callsite, @argnames), @arg_results, @arg_jtypes];
 }
-QAST::OperationsJAST.add_core_op('call', :!inlinable, sub ($qastcomp, $node) {
+my $call_codegen := sub ($qastcomp, $node) {
     my $il := JAST::InstructionList.new();
     
     # If it's a direct call, then use invokedynamic to resolve the name in
@@ -1400,9 +1400,10 @@ QAST::OperationsJAST.add_core_op('call', :!inlinable, sub ($qastcomp, $node) {
         $il.append(JAST::PushIndex.new( :value($cs_idx) ));
         $il.append($ALOAD_1);
         $*STACK.obtain($il, |@argstuff[1]) if @argstuff[1];
+        my $indy_meth := $node.op eq 'callstatic' ?? 'subcallstatic_noa' !! 'subcall_noa';
         $il.append(savesite(JAST::InvokeDynamic.new(
-            'subcall_noa', 'V', @argstuff[2],
-            'org/perl6/nqp/runtime/IndyBootstrap', 'subcall_noa'
+            $indy_meth, 'V', @argstuff[2],
+            'org/perl6/nqp/runtime/IndyBootstrap', $indy_meth
         )));
     }
     
@@ -1430,7 +1431,9 @@ QAST::OperationsJAST.add_core_op('call', :!inlinable, sub ($qastcomp, $node) {
     }
 
     result_from_cf($il, rttype_from_typeobj($node.returns));
-});
+}
+QAST::OperationsJAST.add_core_op('call', :!inlinable, $call_codegen);
+QAST::OperationsJAST.add_core_op('callstatic', :!inlinable, $call_codegen);
 QAST::OperationsJAST.add_core_op('callmethod', -> $qastcomp, $node {
     my $il := JAST::InstructionList.new();
     
