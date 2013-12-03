@@ -3218,10 +3218,61 @@ class QAST::CompilerJAST {
             )
         )
     }
-    
+
+    my $ARG_EXP_USE_BINDER := 0;
+    my $ARG_EXP_NO_ARGS    := 1;
+    my $ARG_EXP_OBJ        := 2;
+    method try_setup_args_expectation($jmeth, $block, $il) {
+        # Needing an args array forces the binder.
+        if $*NEED_ARGS_ARRAY {
+            return $ARG_EXP_USE_BINDER;
+        }
+        
+        # Otherwise, go by arity, then look at particular cases.
+        my int $num_params := +$block.params;
+        if $num_params == 0 {
+            # Easy; just don't add any extra args in.
+            $jmeth.args_expectation($ARG_EXP_NO_ARGS);
+            return $ARG_EXP_NO_ARGS;
+        }
+        elsif $num_params == 1 {
+            # Look for one required positional case. Methods with no params
+            # beyond the invocant are always this.
+            my $param := $block.params[0];
+            if !$param.named && !$param.slurpy && !$param.default {
+                if nqp::objprimspec($param.returns) == 0 {
+                    $jmeth.add_argument('__arg_0', $TYPE_SMO);
+                    $il.append(JAST::Instruction.new( :op('aload'), '__arg_0' ));
+                    if $param.scope eq 'local' {
+                        $il.append(JAST::Instruction.new( :op('astore'), $param.name ));
+                    }
+                    else {
+                        $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
+                        $il.append(JAST::PushIndex.new( :value($block.lexical_idx($param.name)) ));
+                        $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+                            'bindlex_o', $TYPE_SMO, $TYPE_SMO, $TYPE_CF, 'Integer' ));
+                        $il.append($POP);
+                    }
+                    $jmeth.args_expectation($ARG_EXP_OBJ);
+                    return $ARG_EXP_OBJ;
+                }
+                else {
+                    return $ARG_EXP_USE_BINDER;
+                }
+            }
+            else {
+                return $ARG_EXP_USE_BINDER;
+            }
+        }
+        else {
+            return $ARG_EXP_USE_BINDER;
+        }
+    }
+
     multi method as_jast(QAST::Block $node, :$want) {
         # Do block compilation in a nested block, so we can produce a result based on
         # the containing block's stack.
+        my int $args_expectation;
         unless $*CODEREFS.know_cuid($node.cuid) {
             # Block gets fresh BlockInfo.
             my $*BINDVAL  := 0;
@@ -3407,6 +3458,7 @@ class QAST::CompilerJAST {
                     $param_idx++;
                 }
             }
+            $args_expectation := $*JMETH.args_expectation();
             
             # Add all the locals.
             my @all_locals;
@@ -3600,8 +3652,7 @@ class QAST::CompilerJAST {
             elsif $blocktype eq 'immediate' || $blocktype eq 'immediate_static' {
                 # Can emit a direct JVM level call. First, get self, TC,
                 # code ref, and callsite descriptor (empty) onto the stack.
-                # We know immediate blocks have no args, so simply don't
-                # pass any.
+                # May or may not need args array.
                 my $il := JAST::InstructionList.new();
                 $*STACK.spill_to_locals($il);
                 $il.append($ALOAD_0);
@@ -3613,13 +3664,25 @@ class QAST::CompilerJAST {
                 $il.append(JAST::Instruction.new( :op('getstatic'),
                     $TYPE_OPS, 'emptyCallSite', $TYPE_CSD ));
                 $il.append($ACONST_NULL);
+                if $args_expectation != $ARG_EXP_NO_ARGS {
+                    $il.append(JAST::Instruction.new( :op('getstatic'),
+                        $TYPE_OPS, 'emptyArgList', "[$TYPE_OBJ" ));
+                }
                 
                 # Emit the virtual call.
-                $il.append(savesite(JAST::Instruction.new( :op('invokestatic'),
-                    'L' ~ $*JCLASS.name ~ ';',
-                    $*CODEREFS.cuid_to_jastmethname($node.cuid),
-                    'V', $TYPE_CU, $TYPE_TC, $TYPE_CR, $TYPE_CSD, $TYPE_RESUME )));
-                
+                if $args_expectation == $ARG_EXP_NO_ARGS {
+                    $il.append(savesite(JAST::Instruction.new( :op('invokestatic'),
+                        'L' ~ $*JCLASS.name ~ ';',
+                        $*CODEREFS.cuid_to_jastmethname($node.cuid),
+                        'V', $TYPE_CU, $TYPE_TC, $TYPE_CR, $TYPE_CSD, $TYPE_RESUME )));
+                }
+                else {
+                    $il.append(savesite(JAST::Instruction.new( :op('invokestatic'),
+                        'L' ~ $*JCLASS.name ~ ';',
+                        $*CODEREFS.cuid_to_jastmethname($node.cuid),
+                        'V', $TYPE_CU, $TYPE_TC, $TYPE_CR, $TYPE_CSD, $TYPE_RESUME, "[$TYPE_OBJ" )));
+                }
+
                 # Load result onto the stack, unless in void context.
                 if $*WANT != $RT_VOID {
                     $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
@@ -3637,56 +3700,6 @@ class QAST::CompilerJAST {
             else {
                 nqp::die("Unrecognized block type '$blocktype'");
             }
-        }
-    }
-    
-    my $ARG_EXP_USE_BINDER := 0;
-    my $ARG_EXP_NO_ARGS    := 1;
-    my $ARG_EXP_OBJ        := 2;
-    method try_setup_args_expectation($jmeth, $block, $il) {
-        # Needing an args array forces the binder.
-        if $*NEED_ARGS_ARRAY {
-            return $ARG_EXP_USE_BINDER;
-        }
-        
-        # Otherwise, go by arity, then look at particular cases.
-        my int $num_params := +$block.params;
-        if $num_params == 0 {
-            # Easy; just don't add any extra args in.
-            $jmeth.args_expectation($ARG_EXP_NO_ARGS);
-            return $ARG_EXP_NO_ARGS;
-        }
-        elsif $num_params == 1 {
-            # Look for one required positional case. Methods with no params
-            # beyond the invocant are always this.
-            my $param := $block.params[0];
-            if !$param.named && !$param.slurpy && !$param.default {
-                if nqp::objprimspec($param.returns) == 0 {
-                    $jmeth.add_argument('__arg_0', $TYPE_SMO);
-                    $il.append(JAST::Instruction.new( :op('aload'), '__arg_0' ));
-                    if $param.scope eq 'local' {
-                        $il.append(JAST::Instruction.new( :op('astore'), $param.name ));
-                    }
-                    else {
-                        $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
-                        $il.append(JAST::PushIndex.new( :value($block.lexical_idx($param.name)) ));
-                        $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
-                            'bindlex_o', $TYPE_SMO, $TYPE_SMO, $TYPE_CF, 'Integer' ));
-                        $il.append($POP);
-                    }
-                    $jmeth.args_expectation($ARG_EXP_OBJ);
-                    return $ARG_EXP_OBJ;
-                }
-                else {
-                    return $ARG_EXP_USE_BINDER;
-                }
-            }
-            else {
-                return $ARG_EXP_USE_BINDER;
-            }
-        }
-        else {
-            return $ARG_EXP_USE_BINDER;
         }
     }
     
