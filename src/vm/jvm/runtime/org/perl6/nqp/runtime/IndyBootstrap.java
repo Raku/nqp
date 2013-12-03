@@ -499,7 +499,7 @@ public class IndyBootstrap {
         boolean shared = tc.curFrame.codeRef.staticInfo.compUnit.shared;
 
         /* Try to resolve method to a coderef. */
-        SixModelObject invocant = Ops.decont((SixModelObject)args[0], tc);
+        SixModelObject invocant = (SixModelObject)args[0];
         SixModelObject invokee = Ops.findmethod(invocant, name, tc);
         if (invokee == null)
             throw ExceptionHandling.dieInternal(tc,
@@ -533,7 +533,8 @@ public class IndyBootstrap {
                     "methcallCacheMono_noa", resType);
                 cs.setTarget(MethodHandles
                     .dropArguments(
-                        MethodHandles.insertArguments(res, 1, csd, invocant.st, cr),
+                        MethodHandles.insertArguments(res, 1, csd,
+                            Ops.decont(invocant, tc).st, cr),
                         1, int.class)
                     .asCollector(Object[].class, cs.type().parameterCount() - 3)
                     .asType(cs.type()));
