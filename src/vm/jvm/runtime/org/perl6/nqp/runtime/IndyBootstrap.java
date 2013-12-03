@@ -231,16 +231,52 @@ public class IndyBootstrap {
          * it's a compiler stub, though. */
         if (!cr.isCompilerStub && !shared) {
             try {
-                MethodType invType = MethodType.methodType(void.class,
-                    MethodHandle.class, String.class, CallSiteDescriptor.class,
-                    CodeRef.class, ThreadContext.class, Object[].class);
-                MethodHandle inv = caller.findStatic(IndyBootstrap.class, "substaticInvoker", invType);
-                cs.setTarget(MethodHandles
-                    .dropArguments(
-                        MethodHandles.insertArguments(inv, 0, cr.staticInfo.mh, name, csdOrig, cr),
-                        0, String.class, int.class)
-                    .asVarargsCollector(Object[].class)
-                    .asType(cs.getTarget().type()));
+                boolean updated = false;
+                switch (cr.staticInfo.argsExpectation) {
+                case ArgsExpectation.NO_ARGS:
+                    if (csd.argFlags.length == 0) {
+                        cs.setTarget(MethodHandles
+                            .dropArguments(
+                                MethodHandles.insertArguments(cr.staticInfo.mh, 1, cr, csdOrig),
+                                0, String.class, int.class)
+                            .asType(cs.getTarget().type()));
+                        updated = true;
+                    }
+                    break;
+                case ArgsExpectation.OBJ:
+                    if (csd.argFlags.length == 1 && csd.argFlags[0] == CallSiteDescriptor.ARG_OBJ) {
+                        cs.setTarget(MethodHandles
+                            .dropArguments(
+                                MethodHandles.insertArguments(cr.staticInfo.mh, 1, cr, csdOrig),
+                                0, String.class, int.class)
+                            .asType(cs.getTarget().type()));
+                        updated = true;
+                    }
+                    break;
+                case ArgsExpectation.OBJ_OBJ:
+                    if (csd.argFlags.length == 2 && csd.argFlags[0] == CallSiteDescriptor.ARG_OBJ &&
+                            csd.argFlags[1] == CallSiteDescriptor.ARG_OBJ) {
+                        cs.setTarget(MethodHandles
+                            .dropArguments(
+                                MethodHandles.insertArguments(cr.staticInfo.mh, 1, cr, csdOrig),
+                                0, String.class, int.class)
+                            .asType(cs.getTarget().type()));
+                        updated = true;
+                    }
+                    break;
+                }
+                if (!updated) {
+                    MethodType invType = MethodType.methodType(void.class,
+                        CallSiteDescriptor.class, CodeRef.class, ThreadContext.class,
+                        Object[].class);
+                    MethodHandle inv = caller.findStatic(IndyBootstrap.class, "substaticInvoker", invType);
+                    cs.setTarget(MethodHandles
+                        .dropArguments(
+                            MethodHandles.insertArguments(inv, 0, csdOrig, cr),
+                            0, String.class, int.class)
+                        .asVarargsCollector(Object[].class)
+                        .asType(cs.getTarget().type()));
+                }
             }
             catch (Throwable t) {
                 throw ExceptionHandling.dieInternal(tc, t);
@@ -259,7 +295,7 @@ public class IndyBootstrap {
         }
     }
     
-    public static void substaticInvoker(MethodHandle mh, String name, CallSiteDescriptor csd, CodeRef cr, ThreadContext tc, Object[] args) throws Throwable { 
+    public static void substaticInvoker(CallSiteDescriptor csd, CodeRef cr, ThreadContext tc, Object[] args) throws Throwable { 
         ArgsExpectation.invokeByExpectation(tc, cr, csd, args);
     }
     
