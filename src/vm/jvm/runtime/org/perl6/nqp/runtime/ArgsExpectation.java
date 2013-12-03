@@ -12,6 +12,7 @@ public class ArgsExpectation {
     public static final short USE_BINDER = 0;
     public static final short NO_ARGS    = 1;
     public static final short OBJ        = 2;
+    public static final short OBJ_OBJ    = 3;
     
     public static void invokeByExpectation(ThreadContext tc, CodeRef cr,
             CallSiteDescriptor csd, Object[] args) throws Throwable {
@@ -68,6 +69,67 @@ public class ArgsExpectation {
                 else {
                     ExceptionHandling.dieInternal(tc,
                         "Wrong number of arguments passed; expected 1..1, but got " +
+                        csd.numPositionals);
+                }
+            }
+            break;
+        case ArgsExpectation.OBJ_OBJ:
+            if (csd.argFlags.length == 2 && csd.argFlags[0] == CallSiteDescriptor.ARG_OBJ
+                                         && csd.argFlags[1] == CallSiteDescriptor.ARG_OBJ) {
+                /* Simple, common case. */
+                cr.staticInfo.mh.invokeExact(tc, cr, csd,
+                    (SixModelObject)args[0], (SixModelObject)args[1]);
+            }
+            else {
+                /* Flatten if needed. */
+                if (csd.hasFlattening) {
+                    csd = csd.explodeFlattening(tc.curFrame, args);
+                    args = tc.flatArgs;
+                }
+                if (csd.argFlags.length == 2) {
+                    SixModelObject arg1 = null;
+                    SixModelObject arg2 = null;
+                    switch (csd.argFlags[0]) {
+                    case CallSiteDescriptor.ARG_OBJ:
+                        arg1 = (SixModelObject)args[0];
+                        break;
+                    case CallSiteDescriptor.ARG_INT:
+                        arg1 = Ops.box_i((long)args[0], cr.staticInfo.compUnit.hllConfig.intBoxType, tc);
+                        break;
+                    case CallSiteDescriptor.ARG_NUM:
+                        arg1 = Ops.box_n((double)args[0], cr.staticInfo.compUnit.hllConfig.numBoxType, tc);
+                        break;
+                    case CallSiteDescriptor.ARG_STR:
+                        arg1 = Ops.box_s((String)args[0], cr.staticInfo.compUnit.hllConfig.strBoxType, tc);
+                        break;
+                    default:
+                        ExceptionHandling.dieInternal(tc,
+                            "Wrong number of arguments passed; expected 2..2, but got " +
+                            csd.numPositionals);
+                    }
+                    switch (csd.argFlags[1]) {
+                    case CallSiteDescriptor.ARG_OBJ:
+                        arg2 = (SixModelObject)args[1];
+                        break;
+                    case CallSiteDescriptor.ARG_INT:
+                        arg2 = Ops.box_i((long)args[1], cr.staticInfo.compUnit.hllConfig.intBoxType, tc);
+                        break;
+                    case CallSiteDescriptor.ARG_NUM:
+                        arg2 = Ops.box_n((double)args[1], cr.staticInfo.compUnit.hllConfig.numBoxType, tc);
+                        break;
+                    case CallSiteDescriptor.ARG_STR:
+                        arg2 = Ops.box_s((String)args[1], cr.staticInfo.compUnit.hllConfig.strBoxType, tc);
+                        break;
+                    default:
+                        ExceptionHandling.dieInternal(tc,
+                            "Wrong number of arguments passed; expected 2..2, but got " +
+                            csd.numPositionals);
+                    }
+                    cr.staticInfo.mh.invokeExact(tc, cr, csd, arg1, arg2);
+                }
+                else {
+                    ExceptionHandling.dieInternal(tc,
+                        "Wrong number of arguments passed; expected 2..2, but got " +
                         csd.numPositionals);
                 }
             }

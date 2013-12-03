@@ -187,6 +187,10 @@ public class StaticCodeInfo implements Cloneable {
             case ArgsExpectation.OBJ:
                 mhResume = MethodHandles.insertArguments(mhResume, 1, (SixModelObject)null);
                 break;
+            case ArgsExpectation.OBJ_OBJ:
+                mhResume = MethodHandles.insertArguments(mhResume, 1,
+                    (SixModelObject)null, (SixModelObject)null);
+                break;
             default:
                 throw new RuntimeException("Unhandled ArgsExpectation in StaticCodeInfo");
             }

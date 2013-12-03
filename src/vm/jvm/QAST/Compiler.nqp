@@ -3222,6 +3222,7 @@ class QAST::CompilerJAST {
     my $ARG_EXP_USE_BINDER := 0;
     my $ARG_EXP_NO_ARGS    := 1;
     my $ARG_EXP_OBJ        := 2;
+    my $ARG_EXP_OBJ_OBJ    := 3;
     method try_setup_args_expectation($jmeth, $block, $il) {
         # Needing an args array forces the binder.
         if $*NEED_ARGS_ARRAY {
@@ -3259,6 +3260,38 @@ class QAST::CompilerJAST {
                 else {
                     return $ARG_EXP_USE_BINDER;
                 }
+            }
+            else {
+                return $ARG_EXP_USE_BINDER;
+            }
+        }
+        elsif $num_params == 2 {
+            my $is_obj_obj := 1;
+            for $block.params {
+                if $_.named || $_.slurpy || $_.default || nqp::objprimspec($_.returns) != 0 {
+                    $is_obj_obj := 0;
+                    last;
+                }
+            }
+            if $is_obj_obj {
+                my int $i := 0;
+                for $block.params {
+                    $jmeth.add_argument("__arg_$i", $TYPE_SMO);
+                    $il.append(JAST::Instruction.new( :op('aload'), "__arg_$i" ));
+                    if $_.scope eq 'local' {
+                        $il.append(JAST::Instruction.new( :op('astore'), $_.name ));
+                    }
+                    else {
+                        $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
+                        $il.append(JAST::PushIndex.new( :value($block.lexical_idx($_.name)) ));
+                        $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+                            'bindlex_o', $TYPE_SMO, $TYPE_SMO, $TYPE_CF, 'Integer' ));
+                        $il.append($POP);
+                    }
+                    $i++;
+                }
+                $jmeth.args_expectation($ARG_EXP_OBJ_OBJ);
+                return $ARG_EXP_OBJ_OBJ;
             }
             else {
                 return $ARG_EXP_USE_BINDER;
