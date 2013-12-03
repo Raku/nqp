@@ -408,7 +408,7 @@ public class IndyBootstrap {
         
         /* Make the call directly for this initial call. */
         try {
-            cr.staticInfo.mh.invokeExact(tc, cr, csd, args);
+            ArgsExpectation.invokeByExpectation(tc, cr, csd, args);
         }
         catch (ControlException e) {
             throw e;
@@ -482,7 +482,7 @@ public class IndyBootstrap {
 
         /* Make the call. */
         try {
-            cr.staticInfo.mh.invokeExact(tc, cr, csd, args);
+            ArgsExpectation.invokeByExpectation(tc, cr, csd, args);
         }
         catch (ControlException e) {
             throw e;

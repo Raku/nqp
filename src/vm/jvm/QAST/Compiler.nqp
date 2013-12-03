@@ -3295,7 +3295,7 @@ class QAST::CompilerJAST {
             if $node.custom_args {
                 $*JMETH.add_argument('__args', "[$TYPE_OBJ");
             }
-            elsif !self.try_setup_args_expectation($*JMETH, $block) {
+            elsif !self.try_setup_args_expectation($*JMETH, $block, $il) {
                 # Analyze parameters to get count of required/optional and make sure
                 # all is in order.
                 my int $pos_required := 0;
@@ -3642,18 +3642,48 @@ class QAST::CompilerJAST {
     
     my $ARG_EXP_USE_BINDER := 0;
     my $ARG_EXP_NO_ARGS    := 1;
-    method try_setup_args_expectation($jmeth, $block) {
+    my $ARG_EXP_OBJ        := 2;
+    method try_setup_args_expectation($jmeth, $block, $il) {
         # Needing an args array forces the binder.
         if $*NEED_ARGS_ARRAY {
             return $ARG_EXP_USE_BINDER;
         }
         
         # Otherwise, go by arity, then look at particular cases.
-        my $num_params := $block.params;
+        my int $num_params := +$block.params;
         if $num_params == 0 {
             # Easy; just don't add any extra args in.
             $jmeth.args_expectation($ARG_EXP_NO_ARGS);
             return $ARG_EXP_NO_ARGS;
+        }
+        elsif $num_params == 1 {
+            # Look for one required positional case. Methods with no params
+            # beyond the invocant are always this.
+            my $param := $block.params[0];
+            if !$param.named && !$param.slurpy && !$param.default {
+                if nqp::objprimspec($param.returns) == 0 {
+                    $jmeth.add_argument('__arg_0', $TYPE_SMO);
+                    $il.append(JAST::Instruction.new( :op('aload'), '__arg_0' ));
+                    if $param.scope eq 'local' {
+                        $il.append(JAST::Instruction.new( :op('astore'), $param.name ));
+                    }
+                    else {
+                        $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
+                        $il.append(JAST::PushIndex.new( :value($block.lexical_idx($param.name)) ));
+                        $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+                            'bindlex_o', $TYPE_SMO, $TYPE_SMO, $TYPE_CF, 'Integer' ));
+                        $il.append($POP);
+                    }
+                    $jmeth.args_expectation($ARG_EXP_OBJ);
+                    return $ARG_EXP_OBJ;
+                }
+                else {
+                    return $ARG_EXP_USE_BINDER;
+                }
+            }
+            else {
+                return $ARG_EXP_USE_BINDER;
+            }
         }
         else {
             return $ARG_EXP_USE_BINDER;
