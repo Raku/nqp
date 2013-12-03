@@ -494,9 +494,12 @@ public class IndyBootstrap {
         CallSiteDescriptor csd = csIdx >= 0
             ? tc.curFrame.codeRef.staticInfo.compUnit.callSites[csIdx]
             : Ops.emptyCallSite;
-        
+
+        /* Don't update callsite in cases where it's not safe. */
+        boolean shared = tc.curFrame.codeRef.staticInfo.compUnit.shared;
+
         /* Try to resolve method to a coderef. */
-        SixModelObject invocant = (SixModelObject)args[0];
+        SixModelObject invocant = Ops.decont((SixModelObject)args[0], tc);
         SixModelObject invokee = Ops.findmethod(invocant, name, tc);
         if (invokee == null)
             throw ExceptionHandling.dieInternal(tc,
@@ -515,6 +518,28 @@ public class IndyBootstrap {
                 cr = (CodeRef)is.InvocationHandler;
                 csd = csd.injectInvokee(tc, args, invokee);
                 args = tc.flatArgs;
+                shared = true;
+            }
+        }
+        
+        /* If not shared, then we'll optimize on the assumption that most
+         * method callsites are monomorphic. */
+        if (!cr.isCompilerStub && !shared) {
+            try {
+                MethodType resType = MethodType.methodType(void.class,
+                        String.class, CallSiteDescriptor.class, STable.class,
+                        CodeRef.class, ThreadContext.class, Object[].class);
+                MethodHandle res = caller.findStatic(IndyBootstrap.class,
+                    "methcallCacheMono_noa", resType);
+                cs.setTarget(MethodHandles
+                    .dropArguments(
+                        MethodHandles.insertArguments(res, 1, csd, invocant.st, cr),
+                        1, int.class)
+                    .asCollector(Object[].class, cs.type().parameterCount() - 3)
+                    .asType(cs.type()));
+            }
+            catch (Throwable e) {
+                ExceptionHandling.dieInternal(tc, e);
             }
         }
 
@@ -530,12 +555,47 @@ public class IndyBootstrap {
         }
     }
     
-    public static boolean stGuard(STable expected, ThreadContext _, SixModelObject obj) {
-        return obj.st == expected;
-    }
-    
-    public static boolean stGuardCont(STable expected, ThreadContext tc, SixModelObject obj) {
-        return Ops.decont(obj, tc).st == expected;
+    public static void methcallCacheMono_noa(String name, CallSiteDescriptor csd,
+            STable assumedST, CodeRef assumedCR, ThreadContext tc, Object... args) {
+        /* Try to resolve method to a coderef. */
+        SixModelObject invocant = Ops.decont((SixModelObject)args[0], tc);
+        CodeRef cr;
+        if (invocant.st == assumedST) {
+            cr = assumedCR;
+        }
+        else {
+            SixModelObject invokee = Ops.findmethod(invocant, name, tc);
+            if (invokee == null)
+                throw ExceptionHandling.dieInternal(tc,
+                    "Method '" + name + "' not found for invocant of class '" + Ops.typeName(invocant, tc) + "'"); 
+            
+            if (invokee instanceof CodeRef) {
+                cr = (CodeRef)invokee;
+            }
+            else {
+                InvocationSpec is = invokee.st.InvocationSpec;
+                if (is == null)
+                    throw ExceptionHandling.dieInternal(tc, "Can not invoke this object");
+                if (is.ClassHandle != null)
+                    cr = (CodeRef)invokee.get_attribute_boxed(tc, is.ClassHandle, is.AttrName, is.Hint);
+                else {
+                    cr = (CodeRef)is.InvocationHandler;
+                    csd = csd.injectInvokee(tc, args, invokee);
+                    args = tc.flatArgs;
+                }
+            }
+        }
+
+        /* Make the call directly for this initial call. */
+        try {
+            ArgsExpectation.invokeByExpectation(tc, cr, csd, args);
+        }
+        catch (ControlException e) {
+            throw e;
+        }
+        catch (Throwable e) {
+            ExceptionHandling.dieInternal(tc, e);
+        }
     }
     
     public static CallSite indmethcall_noa(Lookup caller, String _, MethodType type) {
