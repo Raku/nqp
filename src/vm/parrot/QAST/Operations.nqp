@@ -884,7 +884,7 @@ sub handle_arg($arg, $qastcomp, $ops, @pos_arg_results, @named_arg_results, :$co
     }
 }
 
-QAST::Operations.add_core_op('call', -> $qastcomp, $op {
+my $call_gen := -> $qastcomp, $op {
     # Work out what callee is.
     my $callee;
     my @args := nqp::clone($op.list);
@@ -919,7 +919,9 @@ QAST::Operations.add_core_op('call', -> $qastcomp, $op {
         $ops.result($res_reg);
     }
     $ops
-});
+};
+QAST::Operations.add_core_op('call', $call_gen);
+QAST::Operations.add_core_op('callstatic', $call_gen);
 QAST::Operations.add_core_op('callmethod', :inlinable(1), -> $qastcomp, $op {
     # Ensure we at least have an invocant.
     my @args := nqp::clone($op.list);
