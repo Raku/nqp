@@ -37,7 +37,7 @@ class NQP::Optimizer {
         elsif $opname eq 'call' && $op.name {
             my %sym := self.find_lex($op.name);
             if %sym {
-                if nqp::existskey(%sym, 'value') {
+                if %sym<declared> {
                     # It's known at compile time, and so fixed, so we can do a more
                     # optimal call.
                     $op.op('callstatic');

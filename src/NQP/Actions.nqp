@@ -873,7 +873,7 @@ class NQP::Actions is HLL::Actions {
                         QAST::Var.new( :name('&' ~ $name), :scope('lexical'), :decl('var') ),
                         $past
                     ));
-                    $BLOCK.symbol('&' ~ $name, :scope('lexical'), :proto(1), :value($code) );
+                    $BLOCK.symbol('&' ~ $name, :scope('lexical'), :proto(1), :value($code), :declared(1) );
                     
                     # Also stash the current lexical dispatcher and capture, for the {*}
                     # to resolve.
@@ -895,7 +895,7 @@ class NQP::Actions is HLL::Actions {
                         QAST::Var.new( :name('&' ~ $name), :scope('lexical'), :decl('var') ),
                         $past
                     ));
-                    $BLOCK.symbol('&' ~ $name, :scope('lexical'));
+                    $BLOCK.symbol('&' ~ $name, :scope('lexical'), :declared(1));
                     if $*SCOPE eq 'our' {
                         # Need to install it at loadinit time but also re-bind
                         # it per invocation.
