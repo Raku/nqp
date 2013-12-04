@@ -4143,16 +4143,17 @@ class QAST::CompilerJAST {
         result(JAST::PushNVal.new( :value($node.value) ), $RT_NUM)
     }
     
+    my int $split_point := 21845;
     multi method as_jast(QAST::SVal $node, :$want) {
-        if nqp::chars($node.value) <= 65535 {
+        if nqp::chars($node.value) <= $split_point {
             result(JAST::PushSVal.new( :value($node.value) ), $RT_STR)
         }
         else {
             my @chunks;
             my $value := $node.value;
-            while nqp::chars($value) > 65535 {
-                nqp::push(@chunks, nqp::substr($value, 0, 65535));
-                $value := nqp::substr($value, 65535);
+            while nqp::chars($value) > $split_point {
+                nqp::push(@chunks, nqp::substr($value, 0, $split_point));
+                $value := nqp::substr($value, $split_point);
             }
             nqp::push(@chunks, $value);
             my $il := JAST::InstructionList.new();
