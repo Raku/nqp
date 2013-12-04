@@ -9,11 +9,14 @@ class QAST::Node {
     has $!returns;
 
     method new(*@children, *%options) {
-        my $new := self.CREATE();
+        my $new := nqp::create(self);
         nqp::bindattr($new, QAST::Node, '@!array', @children);
         nqp::bindattr($new, QAST::Node, '%!hash', nqp::hash());
-        for %options {
-            nqp::findmethod($new, $_.key)($new, $_.value);
+        my $it := nqp::iterator(%options);
+        my $cur;
+        while $it {
+            $cur := nqp::shift($it);
+            nqp::findmethod($new, nqp::iterkey_s($cur))($new, nqp::iterval($cur))
         }
         $new;
     }
