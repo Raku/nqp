@@ -167,6 +167,13 @@ class NQP::Actions is HLL::Actions {
                     $past := QAST::Op.new($ml<cond>.ast, $past, :op(~$ml<sym>), :node($/) );
                 }
             }
+            if $past<var_initialized> {
+                # Variable declared and unconditionally initialized; can strip
+                # the added just-to-be-safe initialization of the lexical and
+                # just have the var decl.
+                my $decls := $*W.cur_lexpad()[0];
+                $decls.push($decls.pop()[0]); # First child of bind node is var decl
+            }
         }
         elsif $<statement> { $past := $<statement>.ast; }
         elsif $<statement_control> { $past := $<statement_control>.ast; }
@@ -718,6 +725,11 @@ class NQP::Actions is HLL::Actions {
             $/.CURSOR.panic("Redeclaration of symbol ", $name);
         }
         if $*SCOPE eq 'has' {
+            # Initializer not allowed.
+            if $<initializer> {
+                $/.CURSOR.panic('Initiailizers not supported on has-scoped variables');
+            }
+            
             # Locate the type of meta-attribute we need.
             unless nqp::existskey(%*HOW, $*PKGDECL ~ '-attr') {
                 $/.CURSOR.panic("$*PKGDECL packages do not support attributes");
@@ -755,6 +767,9 @@ class NQP::Actions is HLL::Actions {
             $name := ~$<variable>;
             $past := lexical_package_lookup([$name], $/);
             $BLOCK.symbol($name, :scope('package') );
+            if $<initializer> {
+                $past := QAST::Op.new( :op('bind'), $past, $<initializer>.ast );
+            }
         }
         else {
             my $type;
@@ -779,6 +794,10 @@ class NQP::Actions is HLL::Actions {
                 QAST::Var.new( :name($name), :scope('lexical'), :decl('var'), :returns($type) ),
                 $default
             ));
+            if $<initializer> {
+                $past := QAST::Op.new( :op('bind'), :node($/), $past, $<initializer>.ast );
+                $past<var_initialized> := 1;
+            }
             $BLOCK.symbol($name, :scope('lexical'), :type($type) );
         }
 
@@ -788,6 +807,10 @@ class NQP::Actions is HLL::Actions {
         }
 
         make $past;
+    }
+
+    method initializer($/) {
+        make $<EXPR>.ast;
     }
 
     method routine_declarator:sym<sub>($/) { make $<routine_def>.ast; }
