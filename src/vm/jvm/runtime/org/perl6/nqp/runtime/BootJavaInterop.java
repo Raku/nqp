@@ -390,6 +390,8 @@ public class BootJavaInterop {
                 // get the arity of the capture we got passed
                 mv.visitVarInsn(Opcodes.ALOAD, 3); // csd
                 mv.visitFieldInsn(Opcodes.GETFIELD, TYPE_CSD.getInternalName(), "numPositionals", "I");
+                emitInteger(mc, 1); // arity
+                mv.visitInsn(Opcodes.ISUB);
 
                 for (Iterator<Map.Entry<Integer, List<String>>> in_it = descriptors_by_arity.entrySet().iterator(); in_it.hasNext(); ) {
                     Map.Entry<Integer, List<String>> in_ent = in_it.next();
@@ -510,7 +512,7 @@ public class BootJavaInterop {
         c.arities.get(name).get(arity).add(desc);
         // stash the method away for later generation of shorthand methods.
         c.methods.put(desc, tobind);
-        MethodContext cc = startCallout(c, ptype.length + 1, "method/" + tobind.getName() + "/" + desc);
+        MethodContext cc = startCallout(c, arity + 1, "method/" + tobind.getName() + "/" + desc);
 
         int parix = 1;
         preMarshalIn(cc, tobind.getReturnType(), 0);
@@ -868,13 +870,11 @@ public class BootJavaInterop {
         Label handler = new Label();
         Label notcontrol = new Label();
 
-        System.out.println("making the endTry piece");
         mv.visitLabel(endTry);
         mv.visitVarInsn(Opcodes.ALOAD, 5); //cf
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_CF.getInternalName(), "leave", "()V");
         mv.visitInsn(Opcodes.RETURN);
 
-        System.out.println("making the handler piece");
         mv.visitLabel(handler);
         mv.visitInsn(Opcodes.DUP);
         mv.visitTypeInsn(Opcodes.INSTANCEOF, "org/perl6/nqp/runtime/ControlException");
@@ -883,7 +883,6 @@ public class BootJavaInterop {
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_CF.getInternalName(), "leave", "()V");
         mv.visitInsn(Opcodes.ATHROW);
 
-        System.out.println("making the notcontrol piece");
         mv.visitLabel(notcontrol);
         mv.visitVarInsn(Opcodes.ALOAD, 1); // tc
         mv.visitInsn(Opcodes.SWAP);
@@ -891,11 +890,8 @@ public class BootJavaInterop {
                 Type.getMethodDescriptor(Type.getType(RuntimeException.class), TYPE_TC, Type.getType(Throwable.class)));
         mv.visitInsn(Opcodes.ATHROW);
 
-        System.out.println("making the trycatch block");
         c.mv.visitTryCatchBlock(c.tryStart, endTry, handler, null);
-        System.out.println("visiting Maxs");
         c.mv.visitMaxs(0,0);
-        System.out.println("visiting End");
         c.mv.visitEnd();
     }
 
