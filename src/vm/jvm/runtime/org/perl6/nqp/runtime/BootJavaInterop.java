@@ -13,6 +13,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -254,25 +255,49 @@ public class BootJavaInterop {
         SixModelObject hash = gc.BOOTHash.st.REPR.allocate(tc, gc.BOOTHash.st);
 
         HashMap<String, SixModelObject> names = new HashMap< >();
+        HashSet<String> dispatchers = new HashSet< >();
 
         for (int i = 0; i < adaptor.descriptors.size(); i++) {
             String desc = adaptor.descriptors.get(i);
             SixModelObject cr = adaptorUnit.lookupCodeRef(i);
 
-            int s1 = desc.indexOf('/');
-            int s2 = desc.indexOf('/', s1+1);
+            if (desc.startsWith("callout_dispatcher")) {
+                int s1 = desc.lastIndexOf(' ');
+                String shorten = desc.substring(s1 + 1);
+                dispatchers.add(shorten);
+                if (names.containsKey(shorten)) {
+                    names.remove(shorten);
+                }
+                names.put(shorten, cr);
+                System.out.println(cr);
+                System.out.println("put a callout dispatcher named " + shorten);
+            } else if (desc.indexOf('/') != -1) {
+                names.put(desc, cr);
+                System.out.println("put a normal method named " + desc);
+                int s1 = desc.indexOf('/');
+                int s2 = desc.indexOf('/', s1+1);
 
-            String shorten = desc.substring(s1+1, s2);
-            names.put(shorten, names.containsKey(shorten) ? null : cr);
-            names.put(desc, cr);
+                String shorten = desc.substring(s1+1, s2);
+                if (!dispatchers.contains(shorten))
+                    names.put(shorten, names.containsKey(shorten) ? null : cr);
+            } else {
+                System.out.println("confused by " + desc + " not containing a /.");
+            }
         }
+
 
         for (Iterator<Map.Entry<String, SixModelObject>> it = names.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry<String, SixModelObject> ent = it.next();
             if (ent.getValue() != null)
+            {
+                System.out.println("bound " + ent.getKey());
                 hash.bind_key_boxed(tc, ent.getKey(), ent.getValue());
+            }
             else
+            {
+                System.out.println("removed " + ent.getKey());
                 it.remove();
+            }
         }
 
         STable protoSt = gc.BOOTJava.st;
@@ -309,9 +334,136 @@ public class BootJavaInterop {
         for (Constructor<?> c : target.getConstructors()) createAdaptorConstructor(cc, c);
         createAdaptorSpecials(cc);
         compunitMethods(cc);
+        createShorthandDispatchers(cc);
 
         finishClass(cc);
         return cc;
+    }
+
+    protected void createShorthandDispatchers(ClassContext c) {
+        for (Iterator<Map.Entry<String, HashMap<Integer, List<String>>>> it = c.arities.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<String, HashMap<Integer, List<String>>> ent = it.next();
+            String shortname = ent.getKey();
+            HashMap<Integer, List<String>> descriptors_by_arity = ent.getValue();
+            boolean super_simple_access = false;
+            if (descriptors_by_arity.size() == 1) {
+                List<String> matching_descriptors = descriptors_by_arity.values().iterator().next();
+                if (matching_descriptors.size() == 1) {
+                    super_simple_access = true;
+                }
+            }
+            if (super_simple_access) {
+                System.out.println("super simple call for " + shortname);
+            } else {
+                System.out.println("going to generate a dispatcher for " + shortname);
+                ClassVisitor cw = c.cv;
+
+                MethodContext mc = new MethodContext();
+                mc.cc = c;
+                MethodVisitor mv = mc.mv = c.cv.visitMethod(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, "qb_" + (c.nextCallout++),
+                        Type.getMethodDescriptor(Type.VOID_TYPE, TYPE_CU, TYPE_TC, TYPE_CR, TYPE_CSD, TYPE_AOBJ),
+                        null, null);
+                AnnotationVisitor av = mv.visitAnnotation("Lorg/perl6/nqp/runtime/CodeRefAnnotation;", true);
+                av.visit("name", "callout_dispatcher " + c.target.getName() + " " + shortname);
+                System.out.println("this is our name: callout_dispatcher " + c.target.getName() + " " + shortname);
+                av.visitEnd();
+                mv.visitCode();
+                c.descriptors.add("callout_dispatcher " + c.target.getName() + " " + shortname);
+
+                mc.argsLoc = 4;
+                mc.csdLoc = 3;
+                mc.cfLoc = 5;
+                mc.tcLoc = 1;
+
+                mv.visitTypeInsn(Opcodes.NEW, "org/perl6/nqp/runtime/CallFrame");
+                mv.visitInsn(Opcodes.DUP);
+                mv.visitVarInsn(Opcodes.ALOAD, 1); // tc
+                mv.visitVarInsn(Opcodes.ALOAD, 2); // cr
+                mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "org/perl6/nqp/runtime/CallFrame", "<init>", Type.getMethodDescriptor(Type.VOID_TYPE, TYPE_TC, TYPE_CR));
+                mv.visitVarInsn(Opcodes.ASTORE, 5); // cf;
+
+                mv.visitLabel(mc.tryStart = new Label());
+
+                Label dispatcher = new Label(), finish = new Label();
+                //List<Label> skiplabels = new ArrayList<Label>(descriptors_by_arity.size());
+
+                // get the arity of the capture we got passed
+                mv.visitVarInsn(Opcodes.ALOAD, 3); // csd
+                mv.visitFieldInsn(Opcodes.GETFIELD, TYPE_CSD.getInternalName(), "numPositionals", "I");
+
+                for (Iterator<Map.Entry<Integer, List<String>>> in_it = descriptors_by_arity.entrySet().iterator(); in_it.hasNext(); ) {
+                    Map.Entry<Integer, List<String>> in_ent = in_it.next();
+                    Label skip_check_label = new Label();
+                    //skiplabels.add(skip_check_label);
+
+                    mv.visitInsn(Opcodes.DUP);
+                    emitInteger(mc, in_ent.getKey()); // arity
+                    mv.visitJumpInsn(Opcodes.IF_ICMPNE, skip_check_label);
+
+                    if (in_ent.getValue().size() == 1) {
+                        String desc = in_ent.getValue().iterator().next();
+                        Method tobind = c.methods.get(desc);
+
+                        Class<?>[] ptype = tobind.getParameterTypes();
+                        boolean isStatic = Modifier.isStatic(tobind.getModifiers());
+
+                        int parix = 1;
+                        preMarshalIn(mc, tobind.getReturnType(), 0);
+                        if (!isStatic) marshalOut(mc, tobind.getDeclaringClass(), 0);
+                        for (Class<?> pt : ptype) marshalOut(mc, pt, parix++);
+                        mv.visitMethodInsn(isStatic ? Opcodes.INVOKESTATIC : Opcodes.INVOKEVIRTUAL, Type.getInternalName(tobind.getDeclaringClass()), tobind.getName(), desc);
+                        marshalIn(mc, tobind.getReturnType(), 0);
+
+                        mv.visitJumpInsn(Opcodes.GOTO, finish);
+
+                        System.out.println("for arity " + in_ent.getKey() + " there is only one candidate: " + in_ent.getValue().get(0));
+                    } else {
+                        mv.visitVarInsn(Opcodes.ALOAD, 1); // tc
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("The call to ");
+                        sb.append(c.target.getName());
+                        sb.append(".");
+                        sb.append(shortname);
+                        sb.append(" is ambiguous. Please specify any of the following instead:\n");
+                        boolean first = true;
+                        for (String descr : in_ent.getValue()) {
+                            if (first)
+                                first = false;
+                            else
+                                sb.append(", ");
+                            sb.append("method/");
+                            sb.append(shortname);
+                            sb.append("/");
+                            sb.append(descr);
+                        }
+                        mv.visitLdcInsn(sb.toString());
+                        System.out.println(sb.toString());
+                        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/ExceptionHandling", "dieInternal",
+                                Type.getMethodDescriptor(Type.getType(RuntimeException.class), TYPE_TC, Type.getType(String.class)));
+                        mv.visitInsn(Opcodes.ATHROW);
+                        System.out.println("for arity " + in_ent.getKey() + " there is " + in_ent.getValue().size() + " candidates");
+                    }
+                    mv.visitLabel(skip_check_label);
+                }
+
+                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "toString", Type.getMethodDescriptor(Type.getType(String.class), Type.INT_TYPE));
+                mv.visitLdcInsn( "The call to " + c.target.getName() + "." + shortname + " doesn't support the given arity: ");
+                mv.visitInsn(Opcodes.SWAP);
+                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/String", "concat", Type.getMethodDescriptor(Type.getType(String.class), Type.getType(String.class)));
+                mv.visitVarInsn(Opcodes.ALOAD, 1); // tc
+                mv.visitInsn(Opcodes.SWAP);
+                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/ExceptionHandling", "dieInternal",
+                        Type.getMethodDescriptor(Type.getType(RuntimeException.class), TYPE_TC, Type.getType(String.class)));
+                mv.visitInsn(Opcodes.ATHROW);
+
+                mv.visitLabel(finish);
+
+                System.out.println("going to endCallout.");
+                mv.visitInsn(Opcodes.POP);
+                endCallout(mc);
+                System.out.println("done.");
+            }
+        }
     }
 
     protected void compunitMethods(ClassContext c) {
@@ -345,7 +497,19 @@ public class BootJavaInterop {
         Class<?>[] ptype = tobind.getParameterTypes();
         boolean isStatic = Modifier.isStatic(tobind.getModifiers());
 
+        String name = tobind.getName();
+        Integer arity = ptype.length;
+
         String desc = Type.getMethodDescriptor(tobind);
+        if (!c.arities.containsKey(name)) {
+            c.arities.put(name, new HashMap<Integer, List<String>>());
+        }
+        if (!c.arities.get(name).containsKey(arity)) {
+            c.arities.get(name).put(arity, new ArrayList<String>());
+        }
+        c.arities.get(name).get(arity).add(desc);
+        // stash the method away for later generation of shorthand methods.
+        c.methods.put(desc, tobind);
         MethodContext cc = startCallout(c, ptype.length + 1, "method/" + tobind.getName() + "/" + desc);
 
         int parix = 1;
@@ -648,6 +812,10 @@ public class BootJavaInterop {
         public Class<?> constructed;
         /** Adaptor names, in the same order as the qb_NNN indexes, for adaptors only. */
         public List<String> descriptors = new ArrayList< >();
+        /** Method name to arities to descriptors */
+        public HashMap<String, HashMap<Integer, List<String>>> arities = new HashMap< >();
+        /** Method descriptor to Method object */
+        public HashMap<String, Method> methods = new HashMap< >();
         /** The next qb_NNN index to use. */
         public int nextCallout;
     }
@@ -700,11 +868,13 @@ public class BootJavaInterop {
         Label handler = new Label();
         Label notcontrol = new Label();
 
+        System.out.println("making the endTry piece");
         mv.visitLabel(endTry);
         mv.visitVarInsn(Opcodes.ALOAD, 5); //cf
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_CF.getInternalName(), "leave", "()V");
         mv.visitInsn(Opcodes.RETURN);
 
+        System.out.println("making the handler piece");
         mv.visitLabel(handler);
         mv.visitInsn(Opcodes.DUP);
         mv.visitTypeInsn(Opcodes.INSTANCEOF, "org/perl6/nqp/runtime/ControlException");
@@ -713,6 +883,7 @@ public class BootJavaInterop {
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_CF.getInternalName(), "leave", "()V");
         mv.visitInsn(Opcodes.ATHROW);
 
+        System.out.println("making the notcontrol piece");
         mv.visitLabel(notcontrol);
         mv.visitVarInsn(Opcodes.ALOAD, 1); // tc
         mv.visitInsn(Opcodes.SWAP);
@@ -720,8 +891,11 @@ public class BootJavaInterop {
                 Type.getMethodDescriptor(Type.getType(RuntimeException.class), TYPE_TC, Type.getType(Throwable.class)));
         mv.visitInsn(Opcodes.ATHROW);
 
+        System.out.println("making the trycatch block");
         c.mv.visitTryCatchBlock(c.tryStart, endTry, handler, null);
+        System.out.println("visiting Maxs");
         c.mv.visitMaxs(0,0);
+        System.out.println("visiting End");
         c.mv.visitEnd();
     }
 
