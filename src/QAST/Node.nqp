@@ -18,25 +18,25 @@ class QAST::Node {
         $new;
     }
 
-    method node(*@value)       { $!node := @value[0] if @value; $!node }
-    method returns(*@value)    { $!returns := @value[0] if @value; $!returns }
+    method node($value = NO_VALUE)       { $!node := $value unless $value =:= NO_VALUE; $!node }
+    method returns($value = NO_VALUE)    { $!returns := $value unless $value =:= NO_VALUE; $!returns }
     
-    method named(*@value) {
-        if @value {
-            self.HOW.mixin(self, QAST::SpecialArg);
-            self.named(@value[0]);
-        }
-        else {
+    method named($value = NO_VALUE) {
+        if $value =:= NO_VALUE {
             ""
         }
-    }
-    method flat(*@value) {
-        if @value {
+        else {
             self.HOW.mixin(self, QAST::SpecialArg);
-            self.flat(@value[0]);
+            self.named($value);
+        }
+    }
+    method flat($value = NO_VALUE) {
+        if $value =:= NO_VALUE {
+            0
         }
         else {
-            0
+            self.HOW.mixin(self, QAST::SpecialArg);
+            self.flat($value);
         }
     }
     

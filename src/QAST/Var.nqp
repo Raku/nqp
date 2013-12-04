@@ -5,21 +5,21 @@ class QAST::Var is QAST::Node {
     has int $!slurpy;
     has $!default_or_value;
     
-    method name(*@value) {
-        $!name := @value[0] if @value;
+    method name($value = NO_VALUE) {
+        $!name := $value unless $value =:= NO_VALUE;
         !nqp::isnull_s($!name) ?? $!name !! ""
     }
-    method scope(*@value) {
-        $!scope := @value[0] if @value;
+    method scope($value = NO_VALUE) {
+        $!scope := $value unless $value =:= NO_VALUE;
         !nqp::isnull_s($!scope) ?? $!scope !! ""
     }
-    method decl(*@value) {
-        $!decl := @value[0] if @value;
+    method decl($value = NO_VALUE) {
+        $!decl := $value unless $value =:= NO_VALUE;
         !nqp::isnull_s($!decl) ?? $!decl !! ""
     }
-    method slurpy(*@value)  { $!slurpy := @value[0] if @value; $!slurpy }
-    method default(*@value) { $!default_or_value := @value[0] if @value; $!default_or_value }
-    method value(*@value) { $!default_or_value := @value[0] if @value; $!default_or_value }
+    method slurpy($value = NO_VALUE)  { $!slurpy := $value unless $value =:= NO_VALUE; $!slurpy }
+    method default($value = NO_VALUE) { $!default_or_value := $value unless $value =:= NO_VALUE; $!default_or_value }
+    method value($value = NO_VALUE)   { $!default_or_value := $value unless $value =:= NO_VALUE; $!default_or_value }
     
     method substitute_inline_placeholders(@fillers) {
         self

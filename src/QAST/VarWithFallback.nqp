@@ -1,4 +1,4 @@
 class QAST::VarWithFallback is QAST::Var {
     has $!fallback;
-    method fallback(*@value) { $!fallback := @value[0] if @value; $!fallback }
+    method fallback($value = NO_VALUE) { $!fallback := $value unless $value =:= NO_VALUE; $!fallback }
 }
