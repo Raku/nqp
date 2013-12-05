@@ -1086,7 +1086,11 @@ class QAST::MASTCompiler {
             my $outer := 0;
             my $block := $*BLOCK;
             # find the block where the lexical was declared, if any
-            while !($lex := $block.lexical($name)) && ($block := $block.outer) ~~ BlockInfo {
+            while nqp::istype($block, BlockInfo) {
+                last if $block.qast<DYN_COMP_WRAPPER>;
+                $lex := $block.lexical($name);
+                last if $lex;
+                $block := $block.outer;
                 $outer++;
             }
             if $lex {
@@ -1120,17 +1124,15 @@ class QAST::MASTCompiler {
                 }
             }
             else {
+                $res_kind := self.type_to_register_kind($node.returns);
                 if $*BINDVAL {
-                    my $valmast := $node.returns
-                        ?? self.as_mast_clear_bindval($*BINDVAL, :want(self.type_to_register_kind($node.returns)))
-                        !! self.as_mast_clear_bindval($*BINDVAL);
+                    my $valmast := self.as_mast_clear_bindval($*BINDVAL, :want($res_kind));
                     $res_reg := $valmast.result_reg;
                     push_ilist(@ins, $valmast);
                     push_op(@ins, "bind"~@lex_n_opnames[@kind_to_op_slot[$res_kind]], MAST::SVal.new( :value($name) ), $res_reg);
                     $res_kind := $valmast.result_kind;
                 }
                 else {
-                    $res_kind := $node.returns ?? self.type_to_register_kind($node.returns) !!  $MVM_reg_obj;
                     $res_reg := $*REGALLOC.fresh_register($res_kind);
                     push_op(@ins, "get"~@lex_n_opnames[@kind_to_op_slot[$res_kind]],
                         $res_reg, MAST::SVal.new( :value($name) ));
