@@ -21,8 +21,15 @@ class QAST::Node {
         $new;
     }
 
-    method node($value = NO_VALUE)       { $!node := $value unless $value =:= NO_VALUE; $!node }
-    method returns($value = NO_VALUE)    { $!returns := $value unless $value =:= NO_VALUE; $!returns }
+    method node($value = NO_VALUE) {
+        $!node := $value unless $value =:= NO_VALUE;
+        $!node := NQPMu if nqp::isnull($value);
+        $!node
+    }
+    method returns($value = NO_VALUE) {
+        $!returns := $value unless $value =:= NO_VALUE;
+        $!returns
+    }
     
     method named($value = NO_VALUE) {
         if $value =:= NO_VALUE {
