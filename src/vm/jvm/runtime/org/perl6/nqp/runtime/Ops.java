@@ -1912,8 +1912,7 @@ public final class Ops {
         }
         
         try {
-            // Do the invocation.
-            cr.staticInfo.mh.invokeExact(tc, cr, csd, args);
+            ArgsExpectation.invokeByExpectation(tc, cr, csd, args);
         }
         catch (ControlException e) {
             if (barrier && (e instanceof SaveStackException))

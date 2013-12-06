@@ -473,6 +473,11 @@ grammar NQP::Grammar is HLL::Grammar {
         <variable>
         { $*IN_DECL := 0; }
         <trait>*
+        <initializer>?
+    }
+    
+    token initializer {
+        ':=' <.ws> [ <EXPR('f=')> || <.panic: "Malformed binding"> ]
     }
 
     proto rule routine_declarator { <...> }

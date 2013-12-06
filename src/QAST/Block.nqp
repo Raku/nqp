@@ -7,25 +7,25 @@ class QAST::Block is QAST::Node {
     has int $!arity;
     has %!symbol;
     
-    method name(*@value) {
-        $!name := @value[0] if @value;
+    method name($value = NO_VALUE) {
+        $!name := $value unless $value =:= NO_VALUE;
         nqp::isnull_s($!name) ?? "" !! $!name
     }
-    method blocktype(*@value) {
-        $!blocktype := @value[0] if @value;
+    method blocktype($value = NO_VALUE) {
+        $!blocktype := $value unless $value =:= NO_VALUE;
         nqp::isnull_s($!blocktype) ?? "" !! $!blocktype
     }
-    method custom_args(*@value) { $!custom_args := @value[0] if @value; $!custom_args }
-    method has_exit_handler(*@value) { $!has_exit_handler := @value[0] if @value; $!has_exit_handler }
-    method arity(*@value)      { $!arity := @value[0] if @value; $!arity }
+    method custom_args($value = NO_VALUE) { $!custom_args := $value unless $value =:= NO_VALUE; $!custom_args }
+    method has_exit_handler($value = NO_VALUE) { $!has_exit_handler := $value unless $value =:= NO_VALUE; $!has_exit_handler }
+    method arity($value = NO_VALUE)      { $!arity := $value unless $value =:= NO_VALUE; $!arity }
     
     my $cur_cuid := 0;
     my $cuid_suffix := ~nqp::time_n();
     
-    method cuid(*@value) {
-        if @value {
+    method cuid($value = NO_VALUE) {
+        if !($value =:= NO_VALUE) {
             # Set ID if we are provided one.
-            $!cuid := @value[0];
+            $!cuid := $value;
         }
         elsif $!cuid {
             # If we already have an ID, return it.

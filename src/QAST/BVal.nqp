@@ -1,6 +1,6 @@
 class QAST::BVal is QAST::Node {
     has $!value;
-    method value(*@value) { $!value := @value[0] if @value; $!value }
+    method value($value = NO_VALUE) { $!value := $value unless $value =:= NO_VALUE; $!value }
 
     method evaluate_unquotes(@unquotes) {
         self

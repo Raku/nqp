@@ -94,7 +94,7 @@ public abstract class CompilationUnit {
                 ann.iLexicalNames().length == 0 ? null : ann.iLexicalNames(),
                 ann.nLexicalNames().length == 0 ? null : ann.nLexicalNames(),
                 ann.sLexicalNames().length == 0 ? null : ann.sLexicalNames(),
-                m.handlers);
+                m.handlers, ann.argsExpectation());
             cr.staticInfo.methodName = m.methodName;
             cr.staticInfo.hasExitHandler = ann.hasExitHandler();
             cr.st = BOOTCodeSTable;

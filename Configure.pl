@@ -200,7 +200,12 @@ MAIN: {
             'tools/build/Makefile-Parrot.in', $MAKEFILE,
             %config,
         );
-        fill_template_file('src/vm/parrot/nqp.sh', 'gen/parrot/nqp_launcher', %config);
+        if ($^O eq 'MSWin32') {
+            fill_template_file('src/vm/parrot/nqp.bat', 'gen/parrot/nqp_launcher', %config);
+        }
+        else {
+            fill_template_file('src/vm/parrot/nqp.sh', 'gen/parrot/nqp_launcher', %config);
+        }
         chmod 0755, 'gen/parrot/nqp_launcher';
     }
     if ($backends{moar}) {

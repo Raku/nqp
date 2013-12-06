@@ -5,7 +5,7 @@ class QAST::NVal is QAST::Node {
         nqp::bindattr(self, QAST::Node, '$!returns', num);
     }
 
-    method value(*@value) { $!value := @value[0] if @value; $!value }
+    method value($value = NO_VALUE) { $!value := $value unless $value =:= NO_VALUE; $!value }
 
     method substitute_inline_placeholders(@fillers) {
         self

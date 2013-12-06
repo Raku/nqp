@@ -207,6 +207,7 @@ public class JASTToJVMBytecode {
         long[] crHandlers = null;
         int curArgIndex = 1;
         boolean hasExitHandler = false;
+        short argsExpectation = 0;
         
         MethodVisitor m = null;
         boolean contAfter = false;
@@ -233,6 +234,8 @@ public class JASTToJVMBytecode {
                     isStatic = true;
                     curArgIndex = 0; /* No invocant. */
                 }
+                else if (curLine.startsWith("++ args_expectation "))
+                    argsExpectation = Short.parseShort(curLine.substring("++ args_expectation ".length()));
                 else if (curLine.startsWith("++ local ") || curLine.startsWith("++ arg")) {
                     String[] bits = curLine.split("\\s", 4);
                     if (localVariables.containsKey(bits[2]))
@@ -327,6 +330,7 @@ public class JASTToJVMBytecode {
 
                     if (crHandlers.length != 1 || crHandlers[0] != 0) av.visit("handlers", crHandlers);
                     if (hasExitHandler) av.visit("hasExitHandler", hasExitHandler);
+                    if (argsExpectation > 0) av.visit("argsExpectation", argsExpectation);
                     av.visitEnd();
                  }
 

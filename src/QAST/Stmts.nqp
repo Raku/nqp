@@ -1,7 +1,7 @@
 class QAST::Stmts is QAST::Node {
     has $!resultchild;
 
-    method resultchild(*@value) { $!resultchild := @value[0] if @value; $!resultchild }
+    method resultchild($value = NO_VALUE) { $!resultchild := $value unless $value =:= NO_VALUE; $!resultchild }
     
     method substitute_inline_placeholders(@fillers) {
         my $result := self.shallow_clone();

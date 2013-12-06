@@ -29,26 +29,26 @@ class QAST::CompUnit is QAST::Node {
     # What to run if this is the main entry point.
     has $!main;
     
-    method sc(*@value)       { $!sc := @value[0] if @value; $!sc }
-    method hll(*@value)      { $!hll := @value[0] if @value; $!hll }
-    method load(*@value)     { $!load := @value[0] if @value; $!load }
-    method main(*@value)     { $!main := @value[0] if @value; $!main }
+    method sc($value = NO_VALUE)       { $!sc := $value unless $value =:= NO_VALUE; $!sc }
+    method hll($value = NO_VALUE)      { $!hll := $value unless $value =:= NO_VALUE; $!hll }
+    method load($value = NO_VALUE)     { $!load := $value unless $value =:= NO_VALUE; $!load }
+    method main($value = NO_VALUE)     { $!main := $value unless $value =:= NO_VALUE; $!main }
     
-    method compilation_mode(*@value) {
-        $!compilation_mode := @value[0] if @value; $!compilation_mode
+    method compilation_mode($value = NO_VALUE) {
+        $!compilation_mode := $value unless $value =:= NO_VALUE; $!compilation_mode
     }
-    method pre_deserialize(*@value) {
-        @!pre_deserialize := @value[0] if @value;
+    method pre_deserialize($value = NO_VALUE) {
+        @!pre_deserialize := $value unless $value =:= NO_VALUE;
         nqp::isnull(@!pre_deserialize) ?? [] !! @!pre_deserialize
     }
-    method post_deserialize(*@value) {
-        @!post_deserialize := @value[0] if @value;
+    method post_deserialize($value = NO_VALUE) {
+        @!post_deserialize := $value unless $value =:= NO_VALUE;
         nqp::isnull(@!post_deserialize) ?? [] !! @!post_deserialize
     }
-    method repo_conflict_resolver(*@value) {
-        @value ?? ($!repo_conflict_resolver := @value[0]) !! $!repo_conflict_resolver
+    method repo_conflict_resolver($value = NO_VALUE) {
+        $value =:= NO_VALUE ?? $!repo_conflict_resolver !! ($!repo_conflict_resolver := $value)
     }
-    method code_ref_blocks(*@value) {
-        $!code_ref_blocks := @value[0] if @value; $!code_ref_blocks
+    method code_ref_blocks($value = NO_VALUE) {
+        $!code_ref_blocks := $value unless $value =:= NO_VALUE; $!code_ref_blocks
     }
 }
