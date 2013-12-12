@@ -618,6 +618,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                             my $c := nqp::chr($ord0++);
                             $str := nqp::concat($str, nqp::lc($c) ~ nqp::uc($c));
                         }
+                        $use-range := $use-range + 9000;
                     }
                     else {
                         $lower := $ord0;
@@ -630,6 +631,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                     my $bs := $_[0]<cclass_backslash>.ast;
                     if $bs.rxtype eq 'enumcharlist' && !$bs.negate || $bs.rxtype eq 'literal' {
                         $str := $str ~ $bs[0];
+                        $use-range := $use-range + 9000;
                     }
                     else {
                         $bs.negate(!$bs.negate) if $<sign> eq '-';
@@ -639,6 +641,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                 else {
                     my $c := ~$_[0];
                     $str := $str ~ (%*RX<i> ?? nqp::lc($c) ~ nqp::uc($c) !! $c);
+                    $use-range := $use-range + 9000;
                 }
             }
             if nqp::elems(@alts) == 0 && $use-range == 1 && nqp::chars($str) {
