@@ -41,6 +41,7 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     my $cur_handle := 0;
     token TOP {
         :my %*RX;
+        :my $*INTERPOLATE := 1;
         :my $handle := '__QREGEX_P5REGEX__' ~ $cur_handle++;
         :my $*W := QRegex::P5Regex::World.new(:$handle);
         <nibbler>
@@ -138,6 +139,8 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     token p5backslash:sym<x> { <sym> <hexint> }
     token p5backslash:sym<z> { <sym> }
     token p5backslash:sym<Z> { <sym> }
+    token p5backslash:sym<Q> { <sym> <!!{ $*INTERPOLATE := 0; 1 }> }
+    token p5backslash:sym<E> { <sym> <!!{ $*INTERPOLATE := 1; 1 }> }
     token p5backslash:sym<misc> { $<litchar>=(\W) | $<number>=(\d+) }
     token p5backslash:sym<oops> { <.panic: "Unrecognized Perl 5 regex backslash sequence"> }
 
