@@ -25,7 +25,7 @@ class QAST::Regex is QAST::Node {
     method max($value = NO_VALUE)       { $!max := $value unless $value =:= NO_VALUE; $!max }
     
     method dump_extra_node_info() {
-        ":rxtype($!rxtype)" ~ (!nqp::isnull_s($!subtype) ?? " :subtype($!subtype)" !! "")
+        ":rxtype($!rxtype)" ~ (!nqp::isnull_s($!subtype) ?? " :subtype($!subtype)" !! "") ~ ($!negate ?? ' (negated)' !! '') ~ (nqp::defined($!name) ?? " :name($!name)" !! '')
     }
 }
 

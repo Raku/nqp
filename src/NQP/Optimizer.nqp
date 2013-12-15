@@ -1,7 +1,11 @@
+use NQPP6QRegex;
+
 class NQP::Optimizer {
     has @!block_stack;
+    has %!adverbs;
 
     method optimize($ast, *%adverbs) {
+        %!adverbs := %adverbs;
         @!block_stack := [$ast[0]];
         self.visit_children($ast);
         $ast;
@@ -119,6 +123,8 @@ class NQP::Optimizer {
                         $node[$i] := self.visit_block($visit)
                     } elsif nqp::istype($visit, QAST::Want) {
                         self.visit_children($visit, :skip_selectors)
+                    } elsif nqp::istype($visit, QAST::Regex) {
+                        QRegex::Optimizer.new().optimize($visit, @!block_stack[+@!block_stack - 1], |%!adverbs);
                     } else {
                         self.visit_children($visit);
                     }

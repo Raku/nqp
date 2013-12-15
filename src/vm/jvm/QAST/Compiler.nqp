@@ -5057,10 +5057,12 @@ class QAST::CompilerJAST {
             $TYPE_STR, 'regionMatches', 'Z', 'Z', 'Integer', $TYPE_STR, 'Integer', 'Integer' ));
         $il.append(JAST::Instruction.new( :op($node.negate ?? 'ifne' !! 'ifeq'), %*REG<fail> ));
         
-        $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
-        $il.append(JAST::PushIVal.new( :value($litlen) ));
-        $il.append($LADD);
-        $il.append(JAST::Instruction.new( :op('lstore'), %*REG<pos> ));
+        unless $node.subtype eq 'zerowidth' {
+            $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
+            $il.append(JAST::PushIVal.new( :value($litlen) ));
+            $il.append($LADD);
+            $il.append(JAST::Instruction.new( :op('lstore'), %*REG<pos> ));
+        }
         
         $il;
     }
