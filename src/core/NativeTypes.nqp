@@ -6,6 +6,7 @@ use nqpmo;
 # for any program using it. OTOH, there's not a good way to factor
 # this just yet.)
 my module EXPORTHOW {
+    nqp::scwbdisable();
     ($?PACKAGE.WHO)<module>       := NQPModuleHOW;
     ($?PACKAGE.WHO)<class>        := NQPClassHOW;
     ($?PACKAGE.WHO)<class-attr>   := NQPAttribute;
@@ -14,6 +15,7 @@ my module EXPORTHOW {
     ($?PACKAGE.WHO)<role>         := NQPParametricRoleHOW;
     ($?PACKAGE.WHO)<role-attr>    := NQPAttribute;
     ($?PACKAGE.WHO)<native>       := NQPNativeHOW;
+    nqp::scwbenable();
 }
 
 my native int is repr('P6int') { }

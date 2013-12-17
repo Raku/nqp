@@ -253,7 +253,7 @@ class QAST::MASTCompiler {
         $source;
     }
 
-    our $serno := 0;
+    my $serno := 0;
     method unique($prefix = '') { $prefix ~ $serno++ }
 
     method to_mast($qast) {
