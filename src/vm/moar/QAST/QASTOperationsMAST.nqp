@@ -1485,7 +1485,7 @@ QAST::MASTOperations.add_core_op('handle', sub ($qastcomp, $op) {
         unless nqp::existskey(%handler_names, $type) {
             nqp::die("Invalid handler type '$type'");
         }
-        my $cat_mask := %handler_names{$type};
+        my $cat_mask := $type eq 'CONTROL' ?? 0xFFE !! %handler_names{$type};
 
         # Chain in this handler.
         my $check := QAST::Op.new(
