@@ -1651,13 +1651,13 @@ my %const_map := nqp::hash(
     'HLL_ROLE_HASH',        5,
     'HLL_ROLE_CODE',        6,
 
-    'CONTROL_TAKE',         32,
-    'CONTROL_LAST',         16,
     'CONTROL_NEXT',         4,
     'CONTROL_REDO',         8,
-    'CONTROL_SUCCEED',      128,
-    'CONTROL_PROCEED',      256,
-    'CONTROL_WARN',         64,
+    'CONTROL_LAST',         16,
+    'CONTROL_TAKE',         128,
+    'CONTROL_WARN',         256,
+    'CONTROL_SUCCEED',      512,
+    'CONTROL_PROCEED',      1024,
 
     'STAT_EXISTS',             0,
     'STAT_FILESIZE',           1,
