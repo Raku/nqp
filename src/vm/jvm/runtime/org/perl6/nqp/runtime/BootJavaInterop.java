@@ -8,6 +8,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.AccessibleObject;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -398,17 +399,31 @@ public class BootJavaInterop {
 
                     if (in_ent.getValue().size() == 1) {
                         String desc = in_ent.getValue().iterator().next();
-                        Method tobind = c.methods.get(shortname + "/" + desc);
 
-                        Class<?>[] ptype = tobind.getParameterTypes();
-                        boolean isStatic = Modifier.isStatic(tobind.getModifiers());
+                        try {
+                            // is it a method or a constructor?
+                            Method tobind = (Method)c.methods.get(shortname + "/" + desc);
+                            Class<?>[] ptype = tobind.getParameterTypes();
+                            boolean isStatic = Modifier.isStatic(tobind.getModifiers());
 
-                        int parix = 1;
-                        preMarshalIn(mc, tobind.getReturnType(), 0);
-                        if (!isStatic) marshalOut(mc, tobind.getDeclaringClass(), 0);
-                        for (Class<?> pt : ptype) marshalOut(mc, pt, parix++);
-                        mv.visitMethodInsn(isStatic ? Opcodes.INVOKESTATIC : Opcodes.INVOKEVIRTUAL, Type.getInternalName(tobind.getDeclaringClass()), tobind.getName(), desc);
-                        marshalIn(mc, tobind.getReturnType(), 0);
+                            int parix = 1;
+                            preMarshalIn(mc, tobind.getReturnType(), 0);
+                            if (!isStatic) marshalOut(mc, tobind.getDeclaringClass(), 0);
+                            for (Class<?> pt : ptype) marshalOut(mc, pt, parix++);
+                            mv.visitMethodInsn(isStatic ? Opcodes.INVOKESTATIC : Opcodes.INVOKEVIRTUAL, Type.getInternalName(tobind.getDeclaringClass()), tobind.getName(), desc);
+                            marshalIn(mc, tobind.getReturnType(), 0);
+                        }
+                        catch(ClassCastException ex) {
+                            Constructor tobind = (Constructor)c.methods.get(shortname + "/" + desc);
+                            Class<?>[] ptypes = tobind.getParameterTypes();
+                            int parix = 1;
+                            preMarshalIn(mc, tobind.getDeclaringClass(), 0);
+                            mv.visitTypeInsn(Opcodes.NEW, Type.getInternalName(tobind.getDeclaringClass()));
+                            mv.visitInsn(Opcodes.DUP);
+                            for (Class<?> p : ptypes) marshalOut(mc, p, parix++);
+                            mv.visitMethodInsn(Opcodes.INVOKESPECIAL, Type.getInternalName(tobind.getDeclaringClass()), "<init>", desc);
+                            marshalIn(mc, tobind.getDeclaringClass(), 0);
+                        }
 
                         mv.visitJumpInsn(Opcodes.GOTO, finish);
                     } else {
@@ -539,6 +554,18 @@ public class BootJavaInterop {
     protected void createAdaptorConstructor(ClassContext c, Constructor<?> k) {
         Class<?>[] ptypes = k.getParameterTypes();
         String desc = Type.getConstructorDescriptor(k);
+        Integer arity = ptypes.length;
+        String name = "new";
+
+        if (!c.arities.containsKey(name)) {
+            c.arities.put(name, new HashMap<Integer, List<String>>());
+        }
+        if (!c.arities.get(name).containsKey(arity)) {
+            c.arities.get(name).put(arity, new ArrayList<String>());
+        }
+        c.arities.get(name).get(arity).add(desc);
+        // stash the method away for later generation of shorthand methods.
+        c.methods.put(name + "/" + desc, k);
         MethodContext cc = startCallout(c, ptypes.length + 1, "constructor/new/"+desc);
         int parix = 1;
         preMarshalIn(cc, k.getDeclaringClass(), 0);
@@ -805,7 +832,7 @@ public class BootJavaInterop {
         /** Method name to arities to descriptors */
         public HashMap<String, HashMap<Integer, List<String>>> arities = new HashMap< >();
         /** Method descriptor to Method object */
-        public HashMap<String, Method> methods = new HashMap< >();
+        public HashMap<String, AccessibleObject> methods = new HashMap< >();
         /** The next qb_NNN index to use. */
         public int nextCallout;
     }
