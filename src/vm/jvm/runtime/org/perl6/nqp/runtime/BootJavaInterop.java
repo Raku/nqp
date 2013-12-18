@@ -404,7 +404,7 @@ public class BootJavaInterop {
 
                     if (in_ent.getValue().size() == 1) {
                         String desc = in_ent.getValue().iterator().next();
-                        Method tobind = c.methods.get(desc);
+                        Method tobind = c.methods.get(shortname + "/" + desc);
 
                         Class<?>[] ptype = tobind.getParameterTypes();
                         boolean isStatic = Modifier.isStatic(tobind.getModifiers());
@@ -511,7 +511,7 @@ public class BootJavaInterop {
         }
         c.arities.get(name).get(arity).add(desc);
         // stash the method away for later generation of shorthand methods.
-        c.methods.put(desc, tobind);
+        c.methods.put(name + "/" + desc, tobind);
         MethodContext cc = startCallout(c, arity + 1, "method/" + tobind.getName() + "/" + desc);
 
         int parix = 1;
