@@ -269,11 +269,8 @@ public class BootJavaInterop {
                     names.remove(shorten);
                 }
                 names.put(shorten, cr);
-                System.out.println(cr);
-                System.out.println("put a callout dispatcher named " + shorten);
             } else if (desc.indexOf('/') != -1) {
                 names.put(desc, cr);
-                System.out.println("put a normal method named " + desc);
                 int s1 = desc.indexOf('/');
                 int s2 = desc.indexOf('/', s1+1);
 
@@ -281,7 +278,7 @@ public class BootJavaInterop {
                 if (!dispatchers.contains(shorten))
                     names.put(shorten, names.containsKey(shorten) ? null : cr);
             } else {
-                System.out.println("confused by " + desc + " not containing a /.");
+                System.err.println("confused by " + desc + " not containing a /.");
             }
         }
 
@@ -290,12 +287,10 @@ public class BootJavaInterop {
             Map.Entry<String, SixModelObject> ent = it.next();
             if (ent.getValue() != null)
             {
-                System.out.println("bound " + ent.getKey());
                 hash.bind_key_boxed(tc, ent.getKey(), ent.getValue());
             }
             else
             {
-                System.out.println("removed " + ent.getKey());
                 it.remove();
             }
         }
@@ -352,10 +347,7 @@ public class BootJavaInterop {
                     super_simple_access = true;
                 }
             }
-            if (super_simple_access) {
-                System.out.println("super simple call for " + shortname);
-            } else {
-                System.out.println("going to generate a dispatcher for " + shortname);
+            if (!super_simple_access) {
                 ClassVisitor cw = c.cv;
 
                 MethodContext mc = new MethodContext();
@@ -365,7 +357,6 @@ public class BootJavaInterop {
                         null, null);
                 AnnotationVisitor av = mv.visitAnnotation("Lorg/perl6/nqp/runtime/CodeRefAnnotation;", true);
                 av.visit("name", "callout_dispatcher " + c.target.getName() + " " + shortname);
-                System.out.println("this is our name: callout_dispatcher " + c.target.getName() + " " + shortname);
                 av.visitEnd();
                 mv.visitCode();
                 c.descriptors.add("callout_dispatcher " + c.target.getName() + " " + shortname);
@@ -390,8 +381,11 @@ public class BootJavaInterop {
                 // get the arity of the capture we got passed
                 mv.visitVarInsn(Opcodes.ALOAD, 3); // csd
                 mv.visitFieldInsn(Opcodes.GETFIELD, TYPE_CSD.getInternalName(), "numPositionals", "I");
+
+
                 emitInteger(mc, 1); // arity
                 mv.visitInsn(Opcodes.ISUB);
+
 
                 for (Iterator<Map.Entry<Integer, List<String>>> in_it = descriptors_by_arity.entrySet().iterator(); in_it.hasNext(); ) {
                     Map.Entry<Integer, List<String>> in_ent = in_it.next();
@@ -417,8 +411,6 @@ public class BootJavaInterop {
                         marshalIn(mc, tobind.getReturnType(), 0);
 
                         mv.visitJumpInsn(Opcodes.GOTO, finish);
-
-                        System.out.println("for arity " + in_ent.getKey() + " there is only one candidate: " + in_ent.getValue().get(0));
                     } else {
                         mv.visitVarInsn(Opcodes.ALOAD, 1); // tc
                         StringBuilder sb = new StringBuilder();
@@ -439,11 +431,9 @@ public class BootJavaInterop {
                             sb.append(descr);
                         }
                         mv.visitLdcInsn(sb.toString());
-                        System.out.println(sb.toString());
                         mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/ExceptionHandling", "dieInternal",
                                 Type.getMethodDescriptor(Type.getType(RuntimeException.class), TYPE_TC, Type.getType(String.class)));
                         mv.visitInsn(Opcodes.ATHROW);
-                        System.out.println("for arity " + in_ent.getKey() + " there is " + in_ent.getValue().size() + " candidates");
                     }
                     mv.visitLabel(skip_check_label);
                 }
@@ -460,10 +450,8 @@ public class BootJavaInterop {
 
                 mv.visitLabel(finish);
 
-                System.out.println("going to endCallout.");
                 mv.visitInsn(Opcodes.POP);
                 endCallout(mc);
-                System.out.println("done.");
             }
         }
     }
