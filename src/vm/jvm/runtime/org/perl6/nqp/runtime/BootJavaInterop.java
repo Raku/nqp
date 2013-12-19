@@ -74,6 +74,14 @@ public class BootJavaInterop {
         }
     };
 
+    private int getInheritanceDepth(Class<?> klass) {
+        if (klass.getName() == "java.lang.Object") {
+            return 1
+        } else {
+            return 1 + getInheritanceDepth(klass.getSuperclass());
+        }
+    }
+
     /**
      * Override this to define per-class STables.
      */
@@ -325,6 +333,8 @@ public class BootJavaInterop {
         cc.className = className;
         cc.target = target;
 
+        for (method m : target.getMethods()) analyzeMethodHiding(cc, m);
+        
         for (Method m : target.getMethods()) createAdaptorMethod(cc, m);
         for (Field f : target.getFields()) createAdaptorField(cc, f);
         for (Constructor<?> c : target.getConstructors()) createAdaptorConstructor(cc, c);
@@ -334,6 +344,31 @@ public class BootJavaInterop {
 
         finishClass(cc);
         return cc;
+    }
+    
+    protected void analyzeMethodHiding(ClassContext cc, Method m) {
+        String desc = m.getName();
+
+        int s2 = desc.indexOf(')');
+        String fragment = desc.substring(s2);
+
+        Integer derivationDepth = getInheritanceDepth(m);
+
+        if (cc.inheritanceHiding.containsKey(fragment)) {
+            ClassContext.HidingInformation info = cc.inheritanceHiding.get(fragment);
+
+            if (derivationDepth > info.inheritanceDepth) {
+                info.inheritanceDepth = derivationDepth;
+                info.mostSpecificSignature = desc;
+            }
+        } else {
+            ClassContext.HidingInformation info = new ClassContext.HidingInformation;
+            
+            info.inheritanceDepth = derivationDepth;
+            info.mostSpecificSignature = desc;
+
+            cc.inheritanceHiding.put(fragment, info);
+        }
     }
 
     protected void createShorthandDispatchers(ClassContext c) {
@@ -817,6 +852,12 @@ public class BootJavaInterop {
 
     /** Stores working information while building a class. */
     protected static class ClassContext {
+        protected class HidingInformation {
+            /** How far away from java.lang.object are we? */
+            public Integer inheritanceDepth;
+            /** Which signature has been the most derived version so far? */
+            public String mostSpecificSignature;
+        }
         /** The ASM class writer. */
         public ClassWriter cv;
         /** The new class' internal name. */
@@ -835,6 +876,9 @@ public class BootJavaInterop {
         public HashMap<String, AccessibleObject> methods = new HashMap< >();
         /** The next qb_NNN index to use. */
         public int nextCallout;
+        /** The signature of the method with the return type cut off points
+         *  to a record stating which specific override is the real one */
+        public HashMap<String, HidingInformation> inheritanceHiding;
     }
 
     /** Start an adaptor method and generate standard prologue. */
