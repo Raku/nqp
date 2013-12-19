@@ -74,14 +74,6 @@ public class BootJavaInterop {
         }
     };
 
-    private int getInheritanceDepth(Class<?> klass) {
-        if (klass.getName().equals("java.lang.Object")) {
-            return 1;
-        } else {
-            return 1 + getInheritanceDepth(klass.getSuperclass());
-        }
-    }
-
     /**
      * Override this to define per-class STables.
      */
@@ -332,9 +324,6 @@ public class BootJavaInterop {
         cc.cv = cw;
         cc.className = className;
         cc.target = target;
-        cc.inheritanceHiding = new HashMap<String, HidingInformation>();
-
-        for (Method m : target.getMethods()) analyzeMethodHiding(cc, m);
 
         for (Method m : target.getMethods()) createAdaptorMethod(cc, m);
         for (Field f : target.getFields()) createAdaptorField(cc, f);
@@ -347,32 +336,6 @@ public class BootJavaInterop {
         return cc;
     }
     
-    protected void analyzeMethodHiding(ClassContext cc, Method m) {
-        String desc = Type.getMethodDescriptor(m);
-        String name = m.getName();
-
-        int s2 = desc.indexOf(')');
-        String fragment = name + "/" + desc.substring(0, s2);
-
-        Integer derivationDepth = getInheritanceDepth(m.getDeclaringClass());
-
-        if (cc.inheritanceHiding.containsKey(fragment)) {
-            HidingInformation info = cc.inheritanceHiding.get(fragment);
-
-            if (derivationDepth > info.inheritanceDepth) {
-                info.inheritanceDepth = derivationDepth;
-                info.mostSpecificSignature = desc;
-            }
-        } else {
-            HidingInformation info = new HidingInformation();
-
-            info.inheritanceDepth = derivationDepth;
-            info.mostSpecificSignature = desc;
-
-            cc.inheritanceHiding.put(fragment, info);
-        }
-    }
-
     protected void createShorthandDispatchers(ClassContext c) {
         for (Iterator<Map.Entry<String, HashMap<Integer, List<String>>>> it = c.arities.entrySet().iterator(); it.hasNext();) {
             Map.Entry<String, HashMap<Integer, List<String>>> ent = it.next();
@@ -543,15 +506,15 @@ public class BootJavaInterop {
         String name = tobind.getName();
         Integer arity = ptype.length;
 
-        int returnPos = desc.indexOf(')');
-        String fragment = name + "/" + desc.substring(0, returnPos);
-
-        if (c.inheritanceHiding.containsKey(fragment)) {
-            if (!c.inheritanceHiding.get(fragment).equals(desc)) {
-                // this method is actually hidden by a more derived class
-                System.out.println("hiding the method " + name + " " + desc + " from the fragment " + fragment);
+        try {
+            if (!c.target.getMethod(name, ptype).equals(tobind)) {
+                System.out.println("hiding the method " + name + " " + desc);
                 return;
             }
+        }
+        catch (NoSuchMethodException ex) {
+            System.err.println("WTF, the method " + name + " magically disappeared?!");
+            return;
         }
 
         if (!c.arities.containsKey(name)) {
@@ -563,7 +526,7 @@ public class BootJavaInterop {
         c.arities.get(name).get(arity).add(desc);
         // stash the method away for later generation of shorthand methods.
         c.methods.put(name + "/" + desc, tobind);
-        MethodContext cc = startCallout(c, arity + 1, "method/" + tobind.getName() + "/" + desc);
+        MethodContext cc = startCallout(c, arity + 1, "method/" + name + "/" + desc);
 
         int parix = 1;
         preMarshalIn(cc, tobind.getReturnType(), 0);
@@ -863,13 +826,6 @@ public class BootJavaInterop {
     /** Type name of {@link ThreadContext}. */
     protected static final Type TYPE_TC = Type.getType(ThreadContext.class);
 
-    /** Store information needed to figure out which methods are hidden */
-    protected class HidingInformation {
-        /** How far away from java.lang.object are we? */
-        public Integer inheritanceDepth;
-        /** Which signature has been the most derived version so far? */
-        public String mostSpecificSignature;
-    }
     /** Stores working information while building a class. */
     protected static class ClassContext {
         /** The ASM class writer. */
@@ -890,9 +846,6 @@ public class BootJavaInterop {
         public HashMap<String, AccessibleObject> methods = new HashMap< >();
         /** The next qb_NNN index to use. */
         public int nextCallout;
-        /** The signature of the method with the return type cut off points
-         *  to a record stating which specific override is the real one */
-        public HashMap<String, HidingInformation> inheritanceHiding;
     }
 
     /** Start an adaptor method and generate standard prologue. */
