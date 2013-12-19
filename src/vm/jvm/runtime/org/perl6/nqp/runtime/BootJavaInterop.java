@@ -332,6 +332,7 @@ public class BootJavaInterop {
         cc.cv = cw;
         cc.className = className;
         cc.target = target;
+        cc.inheritanceHiding = new HashMap<String, HidingInformation>();
 
         for (Method m : target.getMethods()) analyzeMethodHiding(cc, m);
 
@@ -348,9 +349,10 @@ public class BootJavaInterop {
     
     protected void analyzeMethodHiding(ClassContext cc, Method m) {
         String desc = Type.getMethodDescriptor(m);
+        String name = m.getName();
 
         int s2 = desc.indexOf(')');
-        String fragment = desc.substring(s2);
+        String fragment = name + "/" + desc.substring(0, s2);
 
         Integer derivationDepth = getInheritanceDepth(m.getDeclaringClass());
 
@@ -542,11 +544,12 @@ public class BootJavaInterop {
         Integer arity = ptype.length;
 
         int returnPos = desc.indexOf(')');
-        String fragment = desc.substring(returnPos);
+        String fragment = name + "/" + desc.substring(0, returnPos);
 
         if (c.inheritanceHiding.containsKey(fragment)) {
             if (!c.inheritanceHiding.get(fragment).equals(desc)) {
                 // this method is actually hidden by a more derived class
+                System.out.println("hiding the method " + name + " " + desc + " from the fragment " + fragment);
                 return;
             }
         }
