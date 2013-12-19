@@ -75,7 +75,7 @@ public class BootJavaInterop {
     };
 
     private int getInheritanceDepth(Class<?> klass) {
-        if (klass.getName() == "java.lang.Object") {
+        if (klass.getName().equals("java.lang.Object")) {
             return 1
         } else {
             return 1 + getInheritanceDepth(klass.getSuperclass());
@@ -334,7 +334,7 @@ public class BootJavaInterop {
         cc.target = target;
 
         for (method m : target.getMethods()) analyzeMethodHiding(cc, m);
-        
+
         for (Method m : target.getMethods()) createAdaptorMethod(cc, m);
         for (Field f : target.getFields()) createAdaptorField(cc, f);
         for (Constructor<?> c : target.getConstructors()) createAdaptorConstructor(cc, c);
@@ -347,7 +347,7 @@ public class BootJavaInterop {
     }
     
     protected void analyzeMethodHiding(ClassContext cc, Method m) {
-        String desc = m.getName();
+        String desc = type.getMethodDescriptor(m);
 
         int s2 = desc.indexOf(')');
         String fragment = desc.substring(s2);
@@ -363,7 +363,7 @@ public class BootJavaInterop {
             }
         } else {
             ClassContext.HidingInformation info = new ClassContext.HidingInformation;
-            
+
             info.inheritanceDepth = derivationDepth;
             info.mostSpecificSignature = desc;
 
@@ -537,10 +537,19 @@ public class BootJavaInterop {
         Class<?>[] ptype = tobind.getParameterTypes();
         boolean isStatic = Modifier.isStatic(tobind.getModifiers());
 
-        String name = tobind.getName();
+        String desc = Type.getMethodDescriptor(tobind);
         Integer arity = ptype.length;
 
-        String desc = Type.getMethodDescriptor(tobind);
+        int returnPos = desc.indexOf(')');
+        String fragment = desc.substring(returnPos);
+
+        if (c.inheritanceHiding.containsKey(fragment)) {
+            if (!c.inheritanceHiding.get(fragment).equals(desc)) {
+                // this method is actually hidden by a more derived class
+                return;
+            }
+        }
+
         if (!c.arities.containsKey(name)) {
             c.arities.put(name, new HashMap<Integer, List<String>>());
         }
