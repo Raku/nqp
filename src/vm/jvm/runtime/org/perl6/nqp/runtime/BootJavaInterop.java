@@ -76,7 +76,7 @@ public class BootJavaInterop {
 
     private int getInheritanceDepth(Class<?> klass) {
         if (klass.getName().equals("java.lang.Object")) {
-            return 1
+            return 1;
         } else {
             return 1 + getInheritanceDepth(klass.getSuperclass());
         }
@@ -333,7 +333,7 @@ public class BootJavaInterop {
         cc.className = className;
         cc.target = target;
 
-        for (method m : target.getMethods()) analyzeMethodHiding(cc, m);
+        for (Method m : target.getMethods()) analyzeMethodHiding(cc, m);
 
         for (Method m : target.getMethods()) createAdaptorMethod(cc, m);
         for (Field f : target.getFields()) createAdaptorField(cc, f);
@@ -347,22 +347,22 @@ public class BootJavaInterop {
     }
     
     protected void analyzeMethodHiding(ClassContext cc, Method m) {
-        String desc = type.getMethodDescriptor(m);
+        String desc = Type.getMethodDescriptor(m);
 
         int s2 = desc.indexOf(')');
         String fragment = desc.substring(s2);
 
-        Integer derivationDepth = getInheritanceDepth(m);
+        Integer derivationDepth = getInheritanceDepth(m.getDeclaringClass());
 
         if (cc.inheritanceHiding.containsKey(fragment)) {
-            ClassContext.HidingInformation info = cc.inheritanceHiding.get(fragment);
+            HidingInformation info = cc.inheritanceHiding.get(fragment);
 
             if (derivationDepth > info.inheritanceDepth) {
                 info.inheritanceDepth = derivationDepth;
                 info.mostSpecificSignature = desc;
             }
         } else {
-            ClassContext.HidingInformation info = new ClassContext.HidingInformation;
+            HidingInformation info = new HidingInformation();
 
             info.inheritanceDepth = derivationDepth;
             info.mostSpecificSignature = desc;
@@ -538,6 +538,7 @@ public class BootJavaInterop {
         boolean isStatic = Modifier.isStatic(tobind.getModifiers());
 
         String desc = Type.getMethodDescriptor(tobind);
+        String name = tobind.getName();
         Integer arity = ptype.length;
 
         int returnPos = desc.indexOf(')');
@@ -859,14 +860,15 @@ public class BootJavaInterop {
     /** Type name of {@link ThreadContext}. */
     protected static final Type TYPE_TC = Type.getType(ThreadContext.class);
 
+    /** Store information needed to figure out which methods are hidden */
+    protected class HidingInformation {
+        /** How far away from java.lang.object are we? */
+        public Integer inheritanceDepth;
+        /** Which signature has been the most derived version so far? */
+        public String mostSpecificSignature;
+    }
     /** Stores working information while building a class. */
     protected static class ClassContext {
-        protected class HidingInformation {
-            /** How far away from java.lang.object are we? */
-            public Integer inheritanceDepth;
-            /** Which signature has been the most derived version so far? */
-            public String mostSpecificSignature;
-        }
         /** The ASM class writer. */
         public ClassWriter cv;
         /** The new class' internal name. */
