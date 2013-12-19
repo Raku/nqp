@@ -14,6 +14,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.ThreadContext;
+import org.perl6.nqp.sixmodel.ByteClassLoader;
 import org.perl6.nqp.sixmodel.REPR;
 import org.perl6.nqp.sixmodel.STable;
 import org.perl6.nqp.sixmodel.SerializationReader;
@@ -717,18 +718,6 @@ public class P6Opaque extends REPR {
             }
         }
         return STable.NO_HINT;
-    }
-    
-    private class ByteClassLoader extends ClassLoader {
-        private byte[] bytes;
-        
-        public ByteClassLoader(byte[] bytes) {
-            this.bytes = bytes;
-        }
-        
-        public Class<?> findClass(String name) {
-            return defineClass(name, this.bytes, 0, this.bytes.length);
-        }
     }
     
     @SuppressWarnings("unchecked")
