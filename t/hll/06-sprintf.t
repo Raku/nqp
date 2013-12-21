@@ -184,8 +184,8 @@ is(nqp::sprintf('<%7.3f>', [3.1415e20]), '<314150000000000000000.000>', '%f hand
 is(nqp::sprintf('<%7.3f>', [-3.1415e20]), '<-314150000000000000000.000>', '%f handles big negative numbers');
 is(nqp::sprintf('<%7.3f>', [3.1415e-2]), '<  0.031>', '%f handles small numbers');
 is(nqp::sprintf('<%7.3f>', [-3.1415e-2]), '< -0.031>', '%f handles small negative numbers');
-is(nqp::sprintf("%.0f", [1.969]), "2",     '%.0f of 1.969 should be 2');
-is(nqp::sprintf("%.1f", [1.969]), "2.0",   '%.1f of 1.969 should be 2.0');
+is(nqp::sprintf("%.0f", [1.969]), "2",     '%.0f of 1.969 should be 2 # TODO on nqp-p');
+is(nqp::sprintf("%.1f", [1.969]), "2.0",   '%.1f of 1.969 should be 2.0 # TODO on nqp-p');
 is(nqp::sprintf("%.2f", [1.969]), "1.97",  '%.2f of 1.969 should be 1.97');
 is(nqp::sprintf("%.3f", [1.969]), "1.969", '%.3f of 1.969 should be 1.969');
 
