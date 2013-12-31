@@ -16,6 +16,10 @@ knowhow ModuleLoader {
         nqp::push(@search_paths, '.');
         nqp::push(@search_paths, 'blib');
 
+        # Add NQP language directory.
+        my %conf := nqp::backendconfig();
+        nqp::push(@search_paths, %conf<prefix> ~ '/languages/nqp/lib');
+
         @search_paths
     }
 
