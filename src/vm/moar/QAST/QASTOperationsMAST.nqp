@@ -832,9 +832,9 @@ QAST::MASTOperations.add_core_op('xor', -> $qastcomp, $op {
             push_op(@ops, 'if_i', $t, $truelabel);
             push_op(@ops, 'set', $res_reg, $bpost.result_reg);
             $*REGALLOC.release_register($bpost.result_reg, $MVM_reg_obj);
-            $*REGALLOC.release_register($t.result_reg, $MVM_reg_int64);
-            push_op(@ops, 'set', $t, $u.result_reg);
-            $*REGALLOC.release_register($u.result_reg, $MVM_reg_int64);
+            $*REGALLOC.release_register($t, $MVM_reg_int64);
+            push_op(@ops, 'set', $t, $u);
+            $*REGALLOC.release_register($u, $MVM_reg_int64);
             nqp::push(@ops, $truelabel);
         }
         else {
