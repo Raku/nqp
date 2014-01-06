@@ -1854,7 +1854,6 @@ QAST::Operations.add_core_pirop_mapping('lcm_I', 'nqp_bigint_lcm', 'PPPP', :inli
 
 QAST::Operations.add_core_pirop_mapping('ceil_n', 'ceil', 'Nn', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('floor_n', 'floor', 'NN', :inlinable(1));
-QAST::Operations.add_core_pirop_mapping('ln_n', 'ln', 'Nn', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('sqrt_n', 'sqrt', 'Nn', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('radix', 'nqp_radix', 'Pisii', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('radix_I', 'nqp_bigint_radix', 'PisiiP', :inlinable(1));

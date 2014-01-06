@@ -1813,7 +1813,6 @@ QAST::MASTOperations.add_core_moarop_mapping('abs_I', 'abs_I');
 QAST::MASTOperations.add_core_moarop_mapping('abs_n', 'abs_n');
 QAST::MASTOperations.add_core_moarop_mapping('ceil_n', 'ceil_n');
 QAST::MASTOperations.add_core_moarop_mapping('floor_n', 'floor_n');
-QAST::MASTOperations.add_core_moarop_mapping('ln_n', 'log_n'); # looks like this one is never used
 QAST::MASTOperations.add_core_moarop_mapping('sqrt_n', 'sqrt_n');
 QAST::MASTOperations.add_core_moarop_mapping('base_I', 'base_I');
 QAST::MASTOperations.add_core_moarop_mapping('isbig_I', 'isbig_I');
