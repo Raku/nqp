@@ -2154,12 +2154,18 @@ QAST::MASTOperations.add_core_op('takedispatcher', -> $qastcomp, $op {
         nqp::die("takedispatcher must have a single QAST::SVal child");
     }
     my @ops;
-    my $disp_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
+    my $disp_reg   := $*REGALLOC.fresh_register($MVM_reg_obj);
+    my $isnull_reg := $*REGALLOC.fresh_register($MVM_reg_int64);
+    my $done_lbl   := MAST::Label.new(:name($op.unique('takedisp')));
     push_op(@ops, 'takedispatcher', $disp_reg);
+    push_op(@ops, 'isnull', $isnull_reg, $disp_reg);
+    push_op(@ops, 'if_i', $isnull_reg, $done_lbl);
     if $*BLOCK.lexical($op[0].value) -> $lex {
         push_op(@ops, 'bindlex', $lex, $disp_reg);
     }
+    nqp::push(@ops, $done_lbl);
     $*REGALLOC.release_register($disp_reg, $MVM_reg_obj);
+    $*REGALLOC.release_register($isnull_reg, $MVM_reg_int64);
     MAST::InstructionList.new(@ops, $MVM_reg_void, MAST::VOID)
 });
 QAST::MASTOperations.add_core_op('setup_blv', -> $qastcomp, $op {
