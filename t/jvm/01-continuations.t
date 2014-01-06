@@ -29,7 +29,7 @@ plan(22);
     #     nqp::continuationcontrol(0, nqp::null(), { $run++ });
     #     CATCH { $ex := $! }
     # }
-    # ok( $ex ~~ /'no matching'/, 'shift dies with no reset' );
+    # ok( $ex ~~ /'no matching'/, 'control dies with no reset' );
     # ok( $run == 0, '...without running argument' );
 
     # $ex := '';
@@ -59,12 +59,12 @@ plan(22);
     ok( $log eq '123', 'control returns from reset' );
     ok( $savecont, 'got a continuation' );
 
-    ok( $reset_returned == 10, 'shift argument return value is reset return value' );
+    ok( $reset_returned == 10, 'control argument return value is reset return value' );
 
     $log := '';
     $reset_returned := nqp::continuationinvoke($savecont, { $log := $log ~ '5'; 15 });
     ok( $log eq '54', 'continuation invoke "returns" from control');
-    ok( $shift_returned == 15, 'continuation invoke argument is shift return value' );
+    ok( $shift_returned == 15, 'continuation invoke argument is control return value' );
     ok( $reset_returned == 30, 'reset block return value is continuation invoke return value' );
 
     ok( nqp::continuationinvoke($savecont, {25}) == 50, 'continuation can be used more than once' );
@@ -94,7 +94,7 @@ plan(22);
             nqp::continuationcontrol(0, nqp::null(), -> $c { 42 });
             10;
         }) * 3;
-    }) == 126, 'null shift matches innermost level');
+    }) == 126, 'null control matches innermost level');
 
     my $cont := nqp::continuationreset($A, {
         nqp::continuationreset($B, {
