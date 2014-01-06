@@ -1710,7 +1710,7 @@ QAST::MASTOperations.add_core_moarop_mapping('flushfh', 'sync_fh');
 QAST::MASTOperations.add_core_moarop_mapping('getstdin', 'getstdin');
 QAST::MASTOperations.add_core_moarop_mapping('getstdout', 'getstdout');
 QAST::MASTOperations.add_core_moarop_mapping('getstderr', 'getstderr');
-QAST::MASTOperations.add_core_moarop_mapping('setencoding', 'setencoding');
+QAST::MASTOperations.add_core_moarop_mapping('setencoding', 'setencoding', 1);
 QAST::MASTOperations.add_core_moarop_mapping('tellfh', 'tell_fh');
 QAST::MASTOperations.add_core_moarop_mapping('readfh', 'read_fhb', 1);
 QAST::MASTOperations.add_core_moarop_mapping('writefh', 'write_fhb', 1);
