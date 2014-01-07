@@ -340,6 +340,8 @@ class QAST::MASTRegexCompiler {
         }
         elsif $subtype eq 'pass' || $subtype eq '' {
             # Nothing to do.
+        } elsif $subtype eq 'zerowidth' {
+            # Nothing to do either. This gets generated for <???>, for example
         }
         else {
             nqp::die("Unknown anchor subtype $subtype");
