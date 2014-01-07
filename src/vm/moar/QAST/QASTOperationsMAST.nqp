@@ -2251,6 +2251,12 @@ QAST::MASTOperations.add_core_moarop_mapping('compunitmainline', 'compunitmainli
 QAST::MASTOperations.add_core_moarop_mapping('compunitcodes', 'compunitcodes');
 QAST::MASTOperations.add_core_moarop_mapping('backendconfig', 'backendconfig');
 
+# MoarVM-specific (though matching NQP JVM API) continuation ops.
+QAST::MASTOperations.add_core_moarop_mapping('continuationclone', 'continuationclone');
+QAST::MASTOperations.add_core_moarop_mapping('continuationreset', 'continuationreset');
+QAST::MASTOperations.add_core_moarop_mapping('continuationcontrol', 'continuationcontrol');
+QAST::MASTOperations.add_core_moarop_mapping('continuationinvoke', 'continuationinvoke');
+
 sub resolve_condition_op($kind, $negated) {
     return $negated ??
         $kind == $MVM_reg_int64 ?? 'unless_i' !!
