@@ -617,6 +617,10 @@ QAST::MASTOperations.add_core_op('chain', -> $qastcomp, $op {
 });
 
 # Conditionals.
+sub needs_cond_passed($n) {
+    nqp::istype($n, QAST::Block) && $n.arity > 0 &&
+        ($n.blocktype eq 'immediate' || $n.blocktype eq 'immediate_static')
+}
 for <if unless> -> $op_name {
     QAST::MASTOperations.add_core_op($op_name, -> $qastcomp, $op {
         # Check operand count.
@@ -632,10 +636,6 @@ for <if unless> -> $op_name {
         # Compile each of the children, handling any that want the conditional
         # value to be passed.
         my @comp_ops;
-        sub needs_cond_passed($n) {
-            nqp::istype($n, QAST::Block) && $n.arity > 0 &&
-                ($n.blocktype eq 'immediate' || $n.blocktype eq 'immediate_static')
-        }
         my $cond_temp_lbl := needs_cond_passed($op[1]) || needs_cond_passed($op[2])
             ?? $qastcomp.unique('__im_cond_')
             !! '';
@@ -901,23 +901,35 @@ for ('', 'repeat_') -> $repness {
             my $redo_lbl := MAST::Label.new(:name($while_id ~ '_redo'));
             my $done_lbl := MAST::Label.new(:name($while_id ~ '_done'));
 
+            # Pick out applicable children; detect no handler case and munge
+            # immediate arg case.
+            my @children;
+            my $handler := 1;
+            for $op.list {
+                if $_.named eq 'nohandler' { $handler := 0; }
+                else { nqp::push(@children, $_) }
+            }
+            if needs_cond_passed(@children[1]) {
+                my $cond_temp := $qastcomp.unique('__im_cond_');
+                @children[0] := QAST::Op.new(
+                    :op('bind'),
+                    QAST::Var.new( :name($cond_temp), :scope('local'), :decl('var') ),
+                    @children[0]);
+                @children[1].blocktype('declaration');
+                @children[1] := QAST::Op.new(
+                    :op('call'),
+                    @children[1],
+                    QAST::Var.new( :name($cond_temp), :scope('local') ));
+            }
+
             # Compile each of the children; we'll need to look at the result
             # types and pick an overall result type if in non-void context.
             my @comp_ops;
             my @comp_types;
-            my $handler := 1;
-            my $*IMM_ARG;
-            for $op.list {
-                if $_.named eq 'nohandler' { $handler := 0; }
-                else {
-                    my $*HAVE_IMM_ARG := nqp::istype($_, QAST::Block) && $_.arity > 0 && $_ =:= $op.list[1];
-                    my $comp := $qastcomp.as_mast($_);
-                    @comp_ops.push($comp);
-                    @comp_types.push($comp.result_kind);
-                    if $*HAVE_IMM_ARG && !$*IMM_ARG {
-                        nqp::die("$op_name block expects an argument, but there's no immediate block to take it");
-                    }
-                }
+            for @children {
+                my $comp := $qastcomp.as_mast($_);
+                @comp_ops.push($comp);
+                @comp_types.push($comp.result_kind);
             }
             my $res_kind := @comp_types[0] == @comp_types[1]
                 ?? @comp_types[0]
