@@ -617,6 +617,11 @@ class QAST::MASTCompiler {
         $frame.set_outer($outer_frame)
             if $outer_frame && $outer_frame ~~ MAST::Frame;
 
+        # Set exit handler flag if needed.
+        if $node.has_exit_handler {
+            $frame.has_exit_handler(1);
+        }
+
         # Compile all the substatements.
         my $ins;
         {
