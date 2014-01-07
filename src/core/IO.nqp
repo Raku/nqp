@@ -11,7 +11,7 @@ Open file.
 sub open($filename, :$r, :$w, :$a, :$bin) {
     my $mode := $w ?? 'w' !! ($a ?? 'wa' !! 'r');
     my $handle := nqp::open($filename, $mode);
-    nqp::setencoding($handle, $bin ?? 'binary' !! 'utf8');
+    nqp::setencoding($handle, 'utf8') unless $bin;
     $handle;
 }
 

@@ -430,8 +430,6 @@ public final class Ops {
                 cs = Charset.forName("UTF-8");
             else if (encoding.equals("utf16"))
                 cs = Charset.forName("UTF-16");
-            else if (encoding.equals("binary"))
-                cs = Charset.forName("ISO-8859-1"); /* Byte oriented... */
             else
                 throw ExceptionHandling.dieInternal(tc,
                     "Unsupported encoding " + encoding);
