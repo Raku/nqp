@@ -870,7 +870,8 @@ class QAST::MASTCompiler {
             $result := self.compile_all_the_stmts(@($node), $resultchild);
         }
         for %stmt_temps -> $temp_key {
-            if !nqp::existskey(%*STMTTEMPS, $temp_key) {
+            if !nqp::existskey(%*STMTTEMPS, $temp_key) &&
+                    !nqp::eqaddr($*BLOCK.local($temp_key), $result.result_reg) {
                 $*BLOCK.release_temp($temp_key);
             }
         }
