@@ -1,0 +1,104 @@
+# This is the JS Makefile
+
+JS_BUILD_DIR   = gen/js
+JS_STAGE1 = $(JS_BUILD_DIR)/stage1
+
+$(JS_STAGE1)/$(QASTNODE_COMBINED): $(QASTNODE_SOURCES) 
+	$(MKPATH) $(JS_STAGE1)/gen
+	$(PERL) tools/build/gen-cat.pl js $(QASTNODE_SOURCES) > $(JS_STAGE1)/$(QASTNODE_COMBINED)
+
+js-all: $(JS_STAGE1)/$(QASTNODE_COMBINED) cross_compiler
+
+js-runner-default: js-all
+
+# TODO use a stage0 nqp-p rather than the installed one
+
+NQP        = nqp-p
+PARROT     = parrot
+PBC_TO_EXE = pbc_to_exe
+
+PERL6_QCJ   = src/vm/js/QAST/Compiler.nqp
+PERL6_QCJ_PIR       = $(JS_STAGE1)/qast-compiler.pir
+PERL6_QCJ_PBC   = $(JS_STAGE1)/QAST/Compiler.pbc
+
+$(PERL6_QCJ_PBC):  $(PERL6_QCJ)
+	$(NQP) --target=pir --output=$(PERL6_QCJ_PIR) --encoding=utf8 $(PERL6_QCJ)
+	$(PARROT)  -o $(PERL6_QCJ_PBC) $(PERL6_QCJ_PIR)
+
+js-clean:
+	$(RM_RF) $(PERL6_QCJ_PBC)
+
+cross_compiler=$(PERL6_QCJ_PBC)
+
+cross_compiler: $(cross_compiler)
+
+### 
+### 
+### 
+### js-blib/QAST/Compiler/JavaScript.pir: src/QAST/Compiler/JavaScript.nqp setting.setting.pbc blib/HLL/Backend/JavaScript.pbc $(PERL6_QCJ_PBC) js-blib/nqpmo.pbc
+### 	nqp-p  bin/compile-setting.nqp src/QAST/Compiler/JavaScript.nqp node_modules/QAST/Compiler/JavaScript js-blib/QAST/Compiler/JavaScript.pir setting 0
+### 
+### js-blib/QAST/Compiler/JavaScript.pbc: js-blib/QAST/Compiler/JavaScript.pir
+### 	parrot -o js-blib/QAST/Compiler/JavaScript.pbc js-blib/QAST/Compiler/JavaScript.pir
+### 
+### #### Old NQP Makefile
+### #    blib/HLL/Backend/JavaScript.pbc js-blib/nqpmo.pbc setting.setting.pbc helper.pbc js-blib/QASTNode.pbc js-blib/QRegex.pbc 
+### 
+### 
+### nqpjs: nqp-compiler.js
+### nqp-compiler.js: $(cross_compiler) js-blib/QAST/Compiler/JavaScript.pbc  nqp-compiler.nqp
+### 	nqp-p bin/nqp-js.nqp --target=js nqp-compiler.nqp > nqp-compiler.js
+### 
+### 
+### #ModuleLoader.js js-blib/ModuleLoader.pir: nqp-src/ModuleLoader.nqp setting.setting.pbc blib/HLL/Backend/JavaScript.pbc $(PERL6_QCJ_PBC) js-blib/nqpmo.pbc
+### #	nqp  bin/compile-setting.nqp nqp-src/ModuleLoader.nqp ModuleLoader.js js-blib/ModuleLoader.pir
+### 
+### 
+### 
+### t/gen/qregex.t: bin/process-qregex-tests
+### 	nqp-p bin/process-qregex-tests > t/gen/qregex.t
+### 
+### helper.pbc: t/helper.nqp $(PERL6_QCJ_PBC)
+### 	nqp-p --target=pir --output=helper.pir t/helper.nqp
+### 	parrot -o helper.pbc helper.pir
+### 
+### js-blib/nqpmo.pbc: nqp-src/nqpmo.pm $(PERL6_QCJ_PBC) blib/HLL/Backend/JavaScript.pbc
+### 	nqp-p  bin/compile-setting.nqp nqp-src/nqpmo.pm node_modules/nqpmo js-blib/nqpmo.pir
+### 	parrot -o js-blib/nqpmo.pbc js-blib/nqpmo.pir 
+### 
+### setting.setting.pir: nqp-src/NQPCORE.setting blib/HLL/Backend/JavaScript.pbc $(PERL6_QCJ_PBC) js-blib/nqpmo.pbc
+### 	nqp-p  bin/compile-setting.nqp nqp-src/NQPCORE.setting node_modules/setting.setting setting.setting.pir
+### 
+### 
+### js-blib/QASTNode.pir: nqp-src/QASTNode.nqp setting.setting.pbc blib/HLL/Backend/JavaScript.pbc $(PERL6_QCJ_PBC) js-blib/nqpmo.pbc
+### 	nqp-p  bin/compile-setting.nqp nqp-src/QASTNode.nqp node_modules/QASTNode js-blib/QASTNode.pir setting
+### 
+### js-blib/QRegex.pir: nqp-src/QRegex.nqp setting.setting.pbc blib/HLL/Backend/JavaScript.pbc $(PERL6_QCJ_PBC) js-blib/nqpmo.pbc
+### 	nqp-p  bin/compile-setting.nqp nqp-src/QRegex.nqp node_modules/QRegex js-blib/QRegex.pir setting 
+### 
+### 
+### setting.setting.pbc: setting.setting.pir
+### 	parrot -o setting.setting.pbc setting.setting.pir
+### 
+### js-blib/QASTNode.pbc: js-blib/QASTNode.pir
+### 	parrot -o js-blib/QASTNode.pbc js-blib/QASTNode.pir
+### 
+### js-blib/QRegex.pbc: js-blib/QRegex.pir
+### 	parrot -o js-blib/QRegex.pbc js-blib/QRegex.pir
+### 
+### 
+### blib/HLL/Backend/JavaScript.pbc:  src/HLL/Backend/JavaScript.pm $(PERL6_QCJ_PIR)
+### 	perl wrap_nqp --target=pir --output=src/gen/hll-backend-javascript.pir --encoding=utf8 src/HLL/Backend/JavaScript.pm
+### 	$(PARROT)  -o blib/HLL/Backend/JavaScript.pbc src/gen/hll-backend-javascript.pir
+### 
+### perl6-js.pbc: bin/perl6-js.nqp $(PERL6_QCJ_PBC)
+### 	$(NQP) --vmlibs=perl6_group,perl6_ops --target=pir --output=perl6-js.pir bin/perl6-js.nqp
+### 	$(PARROT) -o perl6-js.pbc perl6-js.pir
+### 
+### perl6-js.exe: perl6-js.pbc
+### 	$(PBC_TO_EXE) perl6-js.pbc
+### 
+### test: t/gen/qregex.t all
+### 	./run_tests
+### lint:
+### 	gjslint --strict --nojsdoc nqp-runtime-core/*.js
