@@ -2240,7 +2240,7 @@ QAST::MASTOperations.add_core_moarop_mapping('spawn', 'spawn');
 QAST::MASTOperations.add_core_moarop_mapping('gethostname', 'gethostname');
 QAST::MASTOperations.add_core_moarop_mapping('openpipe', 'openpipe');
 QAST::MASTOperations.add_core_moarop_mapping('rand_i', 'rand_i');
-QAST::MASTOperations.add_core_moarop_mapping('rand_n', 'rand_n');
+QAST::MASTOperations.add_core_moarop_mapping('rand_n', 'randscale_n');
 QAST::MASTOperations.add_core_moarop_mapping('srand', 'srand', 0);
 
 # MoarVM-specific compilation ops
