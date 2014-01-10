@@ -807,11 +807,13 @@ QAST::MASTOperations.add_core_op('xor', -> $qastcomp, $op {
 
     my $t := $*REGALLOC.fresh_i();
     my $u := $*REGALLOC.fresh_i();
+    my $d := $*REGALLOC.fresh_o();
 
     my $apost := nqp::shift(@comp_ops);
     push_ilist(@ops, $apost);
     push_op(@ops, 'set', $res_reg, $apost.result_reg);
-    push_op(@ops, 'istrue', $t, $apost.result_reg);
+    push_op(@ops, 'decont', $d, $apost.result_reg);
+    push_op(@ops, 'istrue', $t, $d);
     $*REGALLOC.release_register($apost.result_reg, $MVM_reg_obj);
 
     my $have_middle_child := 1;
@@ -819,7 +821,8 @@ QAST::MASTOperations.add_core_op('xor', -> $qastcomp, $op {
     while $have_middle_child {
         $bpost := nqp::shift(@comp_ops);
         push_ilist(@ops, $bpost);
-        push_op(@ops, 'istrue', $u, $bpost.result_reg);
+        push_op(@ops, 'decont', $d, $bpost.result_reg);
+        push_op(@ops, 'istrue', $u, $d);
 
         my $jumplabel := MAST::Label.new(:name($qastcomp.unique('xor_jump')));
         push_op(@ops, 'unless_i', $t, $jumplabel);
@@ -859,6 +862,8 @@ QAST::MASTOperations.add_core_op('xor', -> $qastcomp, $op {
     }
 
     nqp::push(@ops, $endlabel);
+
+    $*REGALLOC.release_register($d, $MVM_reg_obj);
 
     MAST::InstructionList.new(@ops, $res_reg, $res_kind)
 });
