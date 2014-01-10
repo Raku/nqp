@@ -91,13 +91,6 @@ cross_compiler: $(cross_compiler)
 ### 	perl wrap_nqp --target=pir --output=src/gen/hll-backend-javascript.pir --encoding=utf8 src/HLL/Backend/JavaScript.pm
 ### 	$(PARROT)  -o blib/HLL/Backend/JavaScript.pbc src/gen/hll-backend-javascript.pir
 ### 
-### perl6-js.pbc: bin/perl6-js.nqp $(PERL6_QCJ_PBC)
-### 	$(NQP) --vmlibs=perl6_group,perl6_ops --target=pir --output=perl6-js.pir bin/perl6-js.nqp
-### 	$(PARROT) -o perl6-js.pbc perl6-js.pir
-### 
-### perl6-js.exe: perl6-js.pbc
-### 	$(PBC_TO_EXE) perl6-js.pbc
-### 
 ### test: t/gen/qregex.t all
 ### 	./run_tests
 ### lint:
