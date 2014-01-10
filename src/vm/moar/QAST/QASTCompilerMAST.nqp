@@ -372,7 +372,7 @@ class QAST::MASTCompiler {
         }
     }
 
-    my %want_char := nqp::hash($MVM_reg_int64, 'I', $MVM_reg_num64, 'N', $MVM_reg_str, 'S');
+    my %want_char := nqp::hash($MVM_reg_int64, 'I', $MVM_reg_num64, 'N', $MVM_reg_str, 'S', $MVM_reg_void, 'v');
     sub want($node, $type) {
         my @possibles := nqp::clone($node.list);
         my $best := @possibles.shift;
@@ -641,6 +641,7 @@ class QAST::MASTCompiler {
             my $*BLOCK := $block;
             my $*MAST_FRAME := $frame;
 
+            my $*WANT;
             $ins := self.compile_all_the_stmts(@($node));
 
             # Add to instructions list for this block.
@@ -888,21 +889,23 @@ class QAST::MASTCompiler {
         my $result_count := 0;
         $resultchild := $resultchild // -1;
         my $final_stmt_idx := +@stmts - 1;
+        my $WANT := $*WANT;
+        my $all_void := nqp::defined($WANT) && $WANT == $MVM_reg_void;
         for @stmts {
             my $use_result := 0;
             # Compile this child to MAST, and add its instructions to the end
             # of our instruction list. Also track the last statement.
             # if this is the statement we've been asked to make the result
-            if $result_count == $resultchild
+            if !$all_void && ($result_count == $resultchild
             # or if we weren't given a particular result statement and we're on
             # the last statement,
-                    || $resultchild == -1 && $result_count == $final_stmt_idx {
+                    || $resultchild == -1 && $result_count == $final_stmt_idx) {
                 # compile $_ with an explicit $want, either what's given or obj
                 $last_stmt := self.as_mast($_, :want($want // $MVM_reg_obj));
                 $use_result := 1;
             }
             else {
-                $last_stmt := self.as_mast($_);
+                $last_stmt := self.as_mast($_, :want($MVM_reg_void));
             }
 
             # Annotate with line number if we have one.
