@@ -537,7 +537,7 @@ class QAST::MASTCompiler {
     method deserialization_code($sc, @code_ref_blocks, $repo_conf_res) {
         # Serialize it.
         my $sh := nqp::list_s();
-        my $serialized := nqp::serialize($sc, $sh);
+        my str $serialized := nqp::serialize($sc, $sh);
 
         # Now it's serialized, pop this SC off the compiling SC stack.
         nqp::popcompsc();
@@ -586,7 +586,9 @@ class QAST::MASTCompiler {
             ),
             QAST::Op.new(
                 :op('deserialize'),
-                QAST::SVal.new( :value($serialized) ),
+                nqp::isnull_s($serialized)
+                    ?? QAST::Op.new( :op('null_s') )
+                    !! QAST::SVal.new( :value($serialized) ),
                 QAST::Var.new( :name('cur_sc'), :scope('local') ),
                 $sh_ast,
                 QAST::Block.new( :blocktype('immediate'), $cr_past ),
