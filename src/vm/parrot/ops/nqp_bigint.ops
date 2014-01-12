@@ -202,6 +202,8 @@ inline op nqp_bigint_mul(out PMC, invar PMC, invar PMC, invar PMC) :base_core {
     mp_mul(a, b, get_bigint(interp, $1));
 }
 
+/* see below for the floordiv op which is what nqp and rakudo use to
+/* actually implement integer division */
 inline op nqp_bigint_div(out PMC, invar PMC, invar PMC, invar PMC) :base_core {
     mp_int *a = get_bigint(interp, $2);
     mp_int *b = get_bigint(interp, $3);
@@ -212,6 +214,43 @@ inline op nqp_bigint_div(out PMC, invar PMC, invar PMC, invar PMC) :base_core {
     if (result == MP_VAL)
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Divide by zero");
+}
+
+inline op nqp_bigint_floordiv(out PMC, invar PMC, invar PMC, invar PMC) :base_core {
+    mp_int *a = get_bigint(interp, $2);
+    mp_int *b = get_bigint(interp, $3);
+    int cmp_a = mp_cmp_d(a, 0);
+    int cmp_b = mp_cmp_d(b, 0);
+
+    mp_int remainder;
+    mp_int intermediate;
+    int result;
+
+    $1 = REPR($4)->allocate(interp, STABLE($4));
+    REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
+    if ((cmp_a == MP_LT) ^ (cmp_b == MP_LT)) {
+        mp_init(&remainder);
+        mp_init(&intermediate);
+        result = mp_div(a, b, &intermediate, &remainder);
+        if (result == MP_VAL) {
+            mp_clear(&remainder);
+            mp_clear(&intermediate);
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Divide by zero");
+        }
+        if (mp_iszero(&remainder) == 0) {
+            mp_sub_d(&intermediate, 1, get_bigint(interp, $1));
+        } else {
+            mp_copy(&intermediate, get_bigint(interp, $1));
+        }
+        mp_clear(&remainder);
+        mp_clear(&intermediate);
+    } else {
+        result = mp_div(a, b, get_bigint(interp, $1), NULL);
+        if (result == MP_VAL)
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Divide by zero");
+    }
 }
 
 inline op nqp_bigint_mod(out PMC, invar PMC, invar PMC, invar PMC) :base_core {

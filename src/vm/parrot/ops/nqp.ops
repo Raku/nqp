@@ -1938,6 +1938,26 @@ inline op repr_box_num(out PMC, in NUM, invar PMC) :base_core {
             "Can only use repr_box_num with a SixModelObject as the box target");
 }
 
+/*
+
+=item floordiv()
+
+Do an integer division and make sure the result is rounded towards -Inf
+
+=cut
+
+*/
+inline op floordiv(out INT, in INT, in INT) {
+    if (($2 < 0) ^ ($3 < 0)) {
+        if ($2 % $3 != 0) {
+            $1 = $2 / $3 - 1;
+        } else {
+            $1 = $2 / $3;
+        }
+    } else {
+        $1 = $2 / $3;
+    }
+}
 
 /*
 
