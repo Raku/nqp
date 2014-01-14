@@ -12,9 +12,9 @@ import org.perl6.nqp.sixmodel.SixModelObject;
 import org.perl6.nqp.sixmodel.reprs.CArrayInstance;
 import org.perl6.nqp.sixmodel.reprs.CPointerInstance;
 import org.perl6.nqp.sixmodel.reprs.CStrInstance;
+import org.perl6.nqp.sixmodel.reprs.NativeCall.ArgType;
 import org.perl6.nqp.sixmodel.reprs.NativeCallInstance;
 import org.perl6.nqp.sixmodel.reprs.NativeCallBody;
-import org.perl6.nqp.sixmodel.reprs.NativeCallBody.ArgType;
 
 public final class NativeCallOps {
     public static long init() {

@@ -14,7 +14,7 @@ import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.SixModelObject;
 
 import org.perl6.nqp.sixmodel.reprs.CArrayREPRData.ElemKind;
-import org.perl6.nqp.sixmodel.reprs.NativeCallBody.ArgType;
+import org.perl6.nqp.sixmodel.reprs.NativeCall.ArgType;
 
 public class CArrayInstance extends SixModelObject {
     public Pointer storage;

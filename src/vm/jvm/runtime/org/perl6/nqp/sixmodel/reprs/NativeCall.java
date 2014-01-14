@@ -16,6 +16,25 @@ import org.perl6.nqp.runtime.ThreadContext;
 
 
 public class NativeCall extends REPR {
+    /* The available native call argument types. */
+    public enum ArgType {
+        VOID,
+        CHAR,
+        SHORT,
+        INT,
+        LONG,
+        LONGLONG,
+        FLOAT,
+        DOUBLE,
+        ASCIISTR,
+        UTF8STR,
+        UTF16STR,
+        CSTRUCT,
+        CARRAY,
+        CALLBACK,
+        CPOINTER;
+    }
+
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
         STable st = new STable(this, HOW);
         st.REPRData = null; /* No REPR data needed. */
