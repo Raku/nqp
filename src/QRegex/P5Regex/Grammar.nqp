@@ -140,7 +140,7 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
         <sym>
         [
         |           $<hexint>=[ <[ 0..9 a..f A..F ]>**0..2 ]
-        | '{' ~ '}' $<hexint>=[ <[ 0..9 a..f A..F ]>**0..2 ]
+        | '{' ~ '}' $<hexint>=[ <[ 0..9 a..f A..F ]>* ]
         ]
     }
     token p5backslash:sym<z> { <sym> }
