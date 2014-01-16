@@ -229,7 +229,9 @@ class QRegex::P5Regex::Actions is HLL::Actions {
     }
 
     method p5backslash:sym<x>($/) {
-        my $hexlit := HLL::Actions.ints_to_string( $<hexint> );
+        my $hexlit := nqp::chars($<hexint>)
+            ?? nqp::chr( self.string_to_int($<hexint>, 16) )
+            !! nqp::chr(0);
         make QAST::Regex.new( $hexlit, :rxtype('literal'), :node($/) );
     }
 

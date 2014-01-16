@@ -136,7 +136,13 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     token p5backslash:sym<R> { <sym> }
     token p5backslash:sym<s> { $<sym>=[<[dDnNsSwW]>] }
     token p5backslash:sym<t> { <sym> }
-    token p5backslash:sym<x> { <sym> <hexint> }
+    token p5backslash:sym<x> {
+        <sym>
+        [
+        |           $<hexint>=[ <[ 0..9 a..f A..F ]>**0..2 ]
+        | '{' ~ '}' $<hexint>=[ <[ 0..9 a..f A..F ]>**0..2 ]
+        ]
+    }
     token p5backslash:sym<z> { <sym> }
     token p5backslash:sym<Z> { <sym> }
     token p5backslash:sym<Q> { <sym> <!!{ $*INTERPOLATE := 0; 1 }> }
