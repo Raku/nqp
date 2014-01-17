@@ -554,7 +554,7 @@ class QAST::MASTRegexCompiler {
         my $needmark  := $needrep || $backtrack eq 'r';
         my $rep       := %*REG<rep>;
         my $pos       := %*REG<pos>;
-        my $ireg      := fresh_i();
+        my $ireg      := $*REGALLOC.fresh_i(:new); # Must be regex-unique
 
         if $backtrack eq 'f' {
             my $seplabel := label($prefix ~ '_sep');
@@ -621,7 +621,6 @@ class QAST::MASTRegexCompiler {
                 release($minreg, $MVM_reg_int64);
             }
         }
-        release($ireg, $MVM_reg_int64);
         @ins
     }
 
