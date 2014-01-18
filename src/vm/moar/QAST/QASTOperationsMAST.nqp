@@ -209,11 +209,17 @@ class QAST::MASTOperations {
             nqp::splice(@all_ins, $arg.instructions, +@all_ins, 0)
                 unless $constant_operand;
             if @deconts[$arg_num] {
-                nqp::push(@all_ins, MAST::Op.new( :op('decont'), $arg.result_reg, $arg.result_reg ));
+                my $dc_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
+                nqp::push(@all_ins, MAST::Op.new( :op('decont'), $dc_reg, $arg.result_reg ));
+                nqp::push(@arg_regs, $dc_reg);
+                nqp::push(@release_regs, $dc_reg);
+                nqp::push(@release_kinds, $MVM_reg_obj);
             }
-            nqp::push(@arg_regs, $constant_operand
-                ?? $qastcomp.as_mast_constant($_)
-                !! $arg.result_reg);
+            else {
+                nqp::push(@arg_regs, $constant_operand
+                    ?? $qastcomp.as_mast_constant($_)
+                    !! $arg.result_reg);
+            }
 
             $arg_num++;
         }

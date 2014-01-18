@@ -739,7 +739,6 @@ class QAST::MASTCompiler {
 
                     # build up instructions to bind the params
                     for $block.params -> $var {
-
                         my $scope := $var.scope;
                         nqp::die("Param scope must be 'local' or 'lexical'")
                             if $scope ne 'lexical' && $scope ne 'local';
@@ -783,9 +782,6 @@ class QAST::MASTCompiler {
                             # wrapped in another QAST::Block.
                             my $default_mast := self.as_mast($var.default, :want($param_kind));
 
-                        #    nqp::die("default initialization result type doesn't match the param type")
-                        #        unless $default_mast.result_kind == $param_kind;
-
                             # emit param grabbing op
                             push_op(@pre, $opname, $valreg, $val, $endlbl);
 
@@ -816,6 +812,20 @@ class QAST::MASTCompiler {
                             # emit the op to bind the lexical to the result register
                             push_op(@pre, 'bindlex', $block.lexical($var.name), $valreg);
                         }
+
+                        # Emit any additional tasks and typechecks.
+                        for $var.list {
+                            if nqp::istype($_, QAST::ParamTypeCheck) {
+                                my $tc_mast := self.as_mast($_[0], :want($MVM_reg_int64));
+                                push_ilist(@pre, $tc_mast);
+                                push_op(@pre, 'assertparamcheck', $tc_mast.result_reg);
+                                $*REGALLOC.release_register($tc_mast.result_reg, $MVM_reg_int64);
+                            }
+                            else {
+                                push_ilist(@pre, self.as_mast($_, :want($MVM_reg_void)));
+                            }
+                        }
+
                         $param_index++;
                     }
                 }
