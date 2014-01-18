@@ -936,15 +936,19 @@ class QAST::MASTCompiler {
                 $last_stmt := self.as_mast($_, :want($MVM_reg_void));
             }
 
-            # Annotate with line number if we have one.
-            if $_.node {
-                my $node := $_.node;
-                my $line := HLL::Compiler.lineof($node.orig(), $node.from(), :cache(1));
-                nqp::push(@all_ins, MAST::Annotated.new(
-                    :$*file, :$line, :instructions($last_stmt.instructions) ));
-            }
-            else {
-                nqp::splice(@all_ins, $last_stmt.instructions, +@all_ins, 0);
+            # Don't emit variable lookups in void context; must emit the
+            # fallback ones, as they have side-effects.
+            unless !$use_result && $_.WHAT =:= QAST::Var {
+                # Annotate with line number if we have one.
+                if $_.node {
+                    my $node := $_.node;
+                    my $line := HLL::Compiler.lineof($node.orig(), $node.from(), :cache(1));
+                    nqp::push(@all_ins, MAST::Annotated.new(
+                        :$*file, :$line, :instructions($last_stmt.instructions) ));
+                }
+                else {
+                    nqp::splice(@all_ins, $last_stmt.instructions, +@all_ins, 0);
+                }
             }
 
             if $use_result {
@@ -1364,6 +1368,9 @@ class QAST::MASTCompiler {
     }
 
     multi method as_mast(QAST::WVal $node, :$want) {
+        if $want == $MVM_reg_void {
+            MAST::InstructionList.new([], MAST::VOID, $MVM_reg_void)
+        }
         my $val    := $node.value;
         my $sc     := nqp::getobjsc($val);
         if nqp::isnull($sc) {
