@@ -641,6 +641,8 @@ for <if unless> -> $op_name {
 
         # Compile each of the children, handling any that want the conditional
         # value to be passed.
+        my $is_void := nqp::defined($*WANT) && $*WANT == $MVM_reg_void;
+        my $wanted  := $is_void ?? $MVM_reg_void !! NQPMu;
         my @comp_ops;
         my $cond_temp_lbl := needs_cond_passed($op[1]) || needs_cond_passed($op[2])
             ?? $qastcomp.unique('__im_cond_')
@@ -658,20 +660,22 @@ for <if unless> -> $op_name {
             @comp_ops[1] := $qastcomp.as_mast(QAST::Op.new(
                 :op('call'),
                 $op[1],
-                QAST::Var.new( :name($cond_temp_lbl), :scope('local') )));
+                QAST::Var.new( :name($cond_temp_lbl), :scope('local') )),
+                :want($wanted));
         }
         else {
-            @comp_ops[1] := $qastcomp.as_mast($op[1]);
+            @comp_ops[1] := $qastcomp.as_mast($op[1], :want($wanted));
         }
         if needs_cond_passed($op[2]) {
             $op[2].blocktype('declaration');
             @comp_ops[2] := $qastcomp.as_mast(QAST::Op.new(
                 :op('call'),
                 $op[2],
-                QAST::Var.new( :name($cond_temp_lbl), :scope('local') )));
+                QAST::Var.new( :name($cond_temp_lbl), :scope('local') )),
+                :want($wanted));
         }
         elsif $op[2] {
-            @comp_ops[2] := $qastcomp.as_mast($op[2]);
+            @comp_ops[2] := $qastcomp.as_mast($op[2], :want($wanted));
         }
 
         if (@comp_ops[0].result_kind == $MVM_reg_void) {
@@ -680,7 +684,6 @@ for <if unless> -> $op_name {
 
         my $res_kind;
         my $res_reg;
-        my $is_void := nqp::defined($*WANT) && $*WANT == $MVM_reg_void;
         if $is_void {
             $res_reg := MAST::VOID;
         }
@@ -2155,7 +2158,7 @@ QAST::MASTOperations.add_core_moarop_mapping('getlexrelcaller', 'getlexrelcaller
 QAST::MASTOperations.add_core_moarop_mapping('getlexcaller', 'getlexcaller');
 QAST::MASTOperations.add_core_op('locallifetime', -> $qastcomp, $op {
     # TODO: take advantage of this info for code-gen, if possible.
-    $qastcomp.as_mast($op[0])
+    $qastcomp.as_mast($op[0], :want($*WANT))
 });
 
 # code object related opcodes
