@@ -5273,7 +5273,17 @@ public final class Ops {
                 } else if (cont != null) {
                     invokeDirect(tc, run, invocantCallSite, false, new Object[] { cont });
                 } else {
-                    invokeDirect(tc, run, emptyCallSite, false, emptyArgList);
+                    if (run instanceof ResumeStatus) {
+                        /* Got a continuation to invoke immediately (done by
+                         * Rakudo cope with lack of tail calls). */
+                        ResumeStatus.Frame root = ((ResumeStatus)run).top;
+                        fixupContinuation(tc, root, null);
+                        root.resume();
+                    }
+                    else {
+                        /* Code a normal code ref to invoke. */
+                        invokeDirect(tc, run, emptyCallSite, false, emptyArgList);
+                    }
                 }
                 // If we get here, the reset argument or something placed using control returned normally
                 // so we should just return.
@@ -5330,20 +5340,20 @@ public final class Ops {
     public static void continuationinvoke(SixModelObject cont, SixModelObject arg, ThreadContext tc) throws Throwable {
         if (!(cont instanceof ResumeStatus))
             ExceptionHandling.dieInternal(tc, "applied continuationinvoke to non-continuation");
-
         ResumeStatus.Frame root = ((ResumeStatus)cont).top;
-
+        fixupContinuation(tc, root, arg);
+        root.resume();
+    }
+    private static void fixupContinuation(ThreadContext tc, ResumeStatus.Frame csr, SixModelObject arg) {
         // fixups: safe to do more than once, but not concurrently
         // these are why continuationclone is needed...
-        ResumeStatus.Frame csr = root;
         while (csr != null) {
             csr.tc = tc; // csr.callFrame.{csr,tc} will be set on resume
             if (csr.next == null) csr.thunk = arg;
             csr = csr.next;
         }
-
-        root.resume();
     }
+
     /* noop, exists only so you can set a breakpoint in it */
     public static SixModelObject debugnoop(SixModelObject in, ThreadContext tc) {
         return in;
