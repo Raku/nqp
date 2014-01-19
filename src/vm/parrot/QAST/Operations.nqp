@@ -2226,7 +2226,6 @@ QAST::Operations.add_core_op('bindattr_i', :inlinable(1), -> $qastcomp, $op {
     }
 });
 QAST::Operations.add_core_pirop_mapping('bindattr_n', 'repr_bind_attr_num', '3PPsn', :inlinable(1));
-QAST::Operations.add_core_pirop_mapping('bindattr_s', 'repr_bind_attr_str', '3PPss', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('bindattr_s_nh', 'repr_bind_attr_str', '3PPss', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('bindattr_s_h', 'repr_bind_attr_str', '3PPsis', :inlinable(1));
 QAST::Operations.add_core_op('bindattr_s', :inlinable(1), -> $qastcomp, $op {
