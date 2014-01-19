@@ -2107,16 +2107,71 @@ QAST::MASTOperations.add_core_moarop_mapping('istrue', 'istrue', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('isfalse', 'isfalse', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('istype', 'istype', :decont(0, 1));
 QAST::MASTOperations.add_core_moarop_mapping('eqaddr', 'eqaddr');
-QAST::MASTOperations.add_core_moarop_mapping('getattr', 'getattrs_o', :decont(1));
-QAST::MASTOperations.add_core_moarop_mapping('getattr_i', 'getattrs_i', :decont(1));
-QAST::MASTOperations.add_core_moarop_mapping('getattr_n', 'getattrs_n', :decont(1));
-QAST::MASTOperations.add_core_moarop_mapping('getattr_s', 'getattrs_s', :decont(1));
+
+sub str_from_want_or_sval($node) {
+    if nqp::istype($node, QAST::Want) && $node[1] eq 'S' {
+        $node := $node[2];
+    }
+    if nqp::istype($node, QAST::SVal) {
+        return $node.value;
+    }
+    return NQPMu;
+}
+
+sub add_attribute_op($name_nqp) {
+    my $is_get := ?($name_nqp ~~ /^get/);
+    my $needed_args := $is_get ?? 3 !! 4;
+
+    QAST::MASTOperations.add_core_op($name_nqp, -> $qastcomp, $op {
+        unless +@($op) == $needed_args {
+            nqp::die("$name_nqp takes exactly $needed_args arguments");
+        }
+        say("compiling a $name_nqp");
+        my @oplist := $op.list;
+        my int $hint := -1;
+        say("looking for the type and if it has a constant attrname");
+        if nqp::istype($op[1], QAST::WVal) && (my $attrname := str_from_want_or_sval($op[2])) {
+            say("the attrname is $attrname");
+            # maybe we can get a hint for this attribute
+            $hint := nqp::hintfor($op[1].value, $attrname);
+            say("the hint is $hint now");
+            if $hint != -1 {
+                @oplist[2] := QAST::SVal.new( :value($attrname) );
+                nqp::push(@oplist, MAST::IVal.new( :value($hint), :size(16) ));
+            }
+        }
+        $qastcomp.as_mast(
+                QAST::Op.new( :op($name_nqp ~ ($hint == -1 ?? '_nh' !! '_h')), |@oplist )
+            );
+    });
+}
+
+{
+    my @attribute_ops := nqp::list_s('getattr', 'getattr_i', 'getattr_n', 'getattr_s',
+                    'bindattr','bindattr_i','bindattr_n','bindattr_s');
+    for @attribute_ops {
+        add_attribute_op($_);
+    }
+}
+
+QAST::MASTOperations.add_core_moarop_mapping('getattr_nh', 'getattrs_o', :decont(1));
+QAST::MASTOperations.add_core_moarop_mapping('getattr_i_nh', 'getattrs_i', :decont(1));
+QAST::MASTOperations.add_core_moarop_mapping('getattr_n_nh', 'getattrs_n', :decont(1));
+QAST::MASTOperations.add_core_moarop_mapping('getattr_s_nh', 'getattrs_s', :decont(1));
+QAST::MASTOperations.add_core_moarop_mapping('bindattr_nh', 'bindattrs_o', 3, :decont(1));
+QAST::MASTOperations.add_core_moarop_mapping('bindattr_i_nh', 'bindattrs_i', 3, :decont(1));
+QAST::MASTOperations.add_core_moarop_mapping('bindattr_n_nh', 'bindattrs_n', 3, :decont(1));
+QAST::MASTOperations.add_core_moarop_mapping('bindattr_s_nh', 'bindattrs_s', 3, :decont(1));
+QAST::MASTOperations.add_core_moarop_mapping('getattr_h', 'getattr_o', :decont(1));
+QAST::MASTOperations.add_core_moarop_mapping('getattr_i_h', 'getattr_i', :decont(1));
+QAST::MASTOperations.add_core_moarop_mapping('getattr_n_h', 'getattr_n', :decont(1));
+QAST::MASTOperations.add_core_moarop_mapping('getattr_s_h', 'getattr_s', :decont(1));
+QAST::MASTOperations.add_core_moarop_mapping('bindattr_h', 'bindattr_o', 3, :decont(1));
+QAST::MASTOperations.add_core_moarop_mapping('bindattr_i_h', 'bindattr_i', 3, :decont(1));
+QAST::MASTOperations.add_core_moarop_mapping('bindattr_n_h', 'bindattr_n', 3, :decont(1));
+QAST::MASTOperations.add_core_moarop_mapping('bindattr_s_h', 'bindattr_s', 3, :decont(1));
 QAST::MASTOperations.add_core_moarop_mapping('attrinited', 'attrinited', :decont(1));
 QAST::MASTOperations.add_core_moarop_mapping('hintfor', 'hintfor');
-QAST::MASTOperations.add_core_moarop_mapping('bindattr', 'bindattrs_o', 3, :decont(1));
-QAST::MASTOperations.add_core_moarop_mapping('bindattr_i', 'bindattrs_i', 3, :decont(1));
-QAST::MASTOperations.add_core_moarop_mapping('bindattr_n', 'bindattrs_n', 3, :decont(1));
-QAST::MASTOperations.add_core_moarop_mapping('bindattr_s', 'bindattrs_s', 3, :decont(1));
 QAST::MASTOperations.add_core_moarop_mapping('unbox_i', 'unbox_i', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('unbox_n', 'unbox_n', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('unbox_s', 'unbox_s', :decont(0));
