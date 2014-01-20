@@ -136,13 +136,10 @@ public class AsyncFileHandle implements IIOClosable, IIOEncodable, IIOAsyncReada
             SpurtState ss = new SpurtState();
             ss.bb = enc.encode(s_buf);
             ss.expected = ss.bb.remaining();
-            System.out.println("There is " + s_data + " in the buffer and it has " + ss.bb.remaining() + " remaining");
             ss.bb.rewind();
-            System.out.println("After the rewind: " + ss.bb.remaining() + " remaining");
 
             final CompletionHandler<Integer, SpurtState> ch = new CompletionHandler<Integer, SpurtState>() {
                 public void completed(Integer bytes, SpurtState ss) {
-                    System.out.println("The position is " + ss.bb.position() + " and i've expected it to be " + ss.expected);
                     if (ss.bb.position() == ss.expected) {
                         /* Done. Call done handler. */
                         ThreadContext curTC = tc.gc.getCurrentThreadContext();
