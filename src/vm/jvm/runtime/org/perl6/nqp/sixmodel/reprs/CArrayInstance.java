@@ -193,7 +193,7 @@ public class CArrayInstance extends SixModelObject {
         case CPOINTER:
             return NativeCallOps.toNQPType(tc, ArgType.CPOINTER, repr_data.elem_type, ptr);
         default:
-            ExceptionHandling.dieInternal(tc, "CArray can only makeObject strings");
+            ExceptionHandling.dieInternal(tc, "CArray can only makeObject strings, arrays and pointers");
         }
 
         /* And a dummy return statement to placate Java's flow analysis. */
