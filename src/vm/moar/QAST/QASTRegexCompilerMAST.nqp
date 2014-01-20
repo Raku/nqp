@@ -988,8 +988,8 @@ class QAST::MASTRegexCompiler {
             op('hasuniprop', $i0, %*REG<tgt>, %*REG<pos>, $pcode, $pvcode),
             $succeed,
             op($testop, $i0, %*REG<fail>),
-            op('inc_i', %*REG<pos>)
         ]);
+        nqp::push(@ins, op('inc_i', %*REG<pos>)) unless $node.subtype eq 'zerowidth';
         @ins
     }
 
