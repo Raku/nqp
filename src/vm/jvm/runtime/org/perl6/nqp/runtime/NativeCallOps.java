@@ -8,10 +8,15 @@ import static org.perl6.nqp.runtime.CallSiteDescriptor.*;
 import org.perl6.nqp.sixmodel.REPR;
 import org.perl6.nqp.sixmodel.REPRRegistry;
 import org.perl6.nqp.sixmodel.SixModelObject;
+import org.perl6.nqp.sixmodel.StorageSpec;
 
+import org.perl6.nqp.sixmodel.reprs.CArray;
 import org.perl6.nqp.sixmodel.reprs.CArrayInstance;
+import org.perl6.nqp.sixmodel.reprs.CPointer;
 import org.perl6.nqp.sixmodel.reprs.CPointerInstance;
 import org.perl6.nqp.sixmodel.reprs.CStrInstance;
+import org.perl6.nqp.sixmodel.reprs.CStruct;
+import org.perl6.nqp.sixmodel.reprs.CStructInstance;
 import org.perl6.nqp.sixmodel.reprs.NativeCall.ArgType;
 import org.perl6.nqp.sixmodel.reprs.NativeCallInstance;
 import org.perl6.nqp.sixmodel.reprs.NativeCallBody;
@@ -66,7 +71,7 @@ public final class NativeCallOps {
             }
 
             /* The actual foreign function call. */
-            Object returned = call.entry_point.invoke(javaType(tc, call.ret_type), cArgs);
+            Object returned = call.entry_point.invoke(javaType(tc, call.ret_type, returns), cArgs);
 
             /* Wrap returned in the appropriate REPR type. */
             return toNQPType(tc, call.ret_type, returns, returned);
@@ -97,7 +102,7 @@ public final class NativeCallOps {
         return call;
     }
 
-    private static Class javaType(ThreadContext tc, ArgType target) {
+    private static Class javaType(ThreadContext tc, ArgType target, SixModelObject smoType) {
         switch (target) {
         case VOID:
             return Void.class;
@@ -121,6 +126,10 @@ public final class NativeCallOps {
         case CPOINTER:
         case CARRAY:
             return Pointer.class;
+        case CSTRUCT:
+            /* TODO: Extract the necessary information from smoType and return
+             * it.*/
+            return null;
         default:
             ExceptionHandling.dieInternal(tc, String.format("Don't know correct Java class for %s arguments yet", target));
         }
@@ -162,6 +171,8 @@ public final class NativeCallOps {
             return ((CPointerInstance) o).pointer;
         case CARRAY:
             return ((CArrayInstance) o).storage;
+        case CSTRUCT:
+            return ((CStructInstance) o).storage;
         default:
             ExceptionHandling.dieInternal(tc, String.format("Don't know how to convert %s arguments to JNA yet", target));
         }
@@ -228,6 +239,11 @@ public final class NativeCallOps {
             CArrayInstance carray = (CArrayInstance) nqpobj;
             carray.storage = (Pointer) o;
             carray.managed = false;
+            break;
+        }
+        case CSTRUCT: {
+            CStructInstance cstruct = (CStructInstance) nqpobj;
+            cstruct.storage.getPointer();
             break;
         }
         default:
