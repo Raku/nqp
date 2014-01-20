@@ -39,6 +39,7 @@ import java.net.InetAddress;
 import org.perl6.nqp.io.AsyncFileHandle;
 import org.perl6.nqp.io.FileHandle;
 import org.perl6.nqp.io.IIOAsyncReadable;
+import org.perl6.nqp.io.IIOAsyncWritable;
 import org.perl6.nqp.io.IIOClosable;
 import org.perl6.nqp.io.IIOEncodable;
 import org.perl6.nqp.io.IIOInteractive;
@@ -674,7 +675,23 @@ public final class Ops {
         }
         return obj;
     }
-    
+
+    public static SixModelObject spurtasync(SixModelObject obj, SixModelObject resultType, SixModelObject data,
+            SixModelObject done, SixModelObject error, ThreadContext tc) {
+        if (obj instanceof IOHandleInstance) {
+            IOHandleInstance h = (IOHandleInstance)obj;
+            if (h.handle instanceof IIOAsyncWritable)
+                ((IIOAsyncWritable)h.handle).spurt(tc, resultType, data, done, error);
+            else
+                throw ExceptionHandling.dieInternal(tc,
+                    "This handle does not support async spurt");
+        }
+        else {
+            die_s("spurtasync requires an object with the IOHandle REPR", tc);
+        }
+        return obj;
+    }
+
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static SixModelObject linesasync(SixModelObject obj, SixModelObject resultType,
             long chomp, SixModelObject queue, SixModelObject done, SixModelObject error,
