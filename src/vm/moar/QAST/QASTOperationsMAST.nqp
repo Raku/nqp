@@ -292,17 +292,18 @@ class QAST::MASTOperations {
     }
 
     # Adds a core op that maps to a Moar op.
-    method add_core_moarop_mapping($op, $moarop, $ret = -1, :$mapper?, :$decont) {
+    method add_core_moarop_mapping($op, $moarop, $ret = -1, :$mapper?, :$decont, :$inlinable = 1) {
         my $moarop_mapper := $mapper
             ?? $mapper(self, $moarop, $ret)
             !! self.moarop_mapper($moarop, $ret, $decont);
         %core_ops{$op} := -> $qastcomp, $op {
             $moarop_mapper($qastcomp, $op.op, $op.list)
         };
+        self.set_core_op_inlinability($op, $inlinable);
     }
 
     # Adds a HLL op that maps to a Moar op.
-    method add_hll_moarop_mapping($hll, $op, $moarop, $ret = -1, :$mapper?, :$decont) {
+    method add_hll_moarop_mapping($hll, $op, $moarop, $ret = -1, :$mapper?, :$decont, :$inlinable = 1) {
         my $moarop_mapper := $mapper
             ?? $mapper(self, $moarop, $ret)
             !! self.moarop_mapper($moarop, $ret, $decont);
@@ -310,6 +311,7 @@ class QAST::MASTOperations {
         %hll_ops{$hll}{$op} := -> $qastcomp, $op {
             $moarop_mapper($qastcomp, $op.op, $op.list)
         };
+        self.set_hll_op_inlinability($hll, $op, $inlinable);
     }
 
     # Returns a mapper closure for turning an operation into a Moar op.
