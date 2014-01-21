@@ -9,6 +9,7 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 
 import org.perl6.nqp.sixmodel.ByteClassLoader;
 import org.perl6.nqp.sixmodel.REPR;
@@ -218,9 +219,8 @@ public class CStruct extends REPR {
             return "Lcom/sun/jna/Pointer;";
         }
         else if (repr instanceof CStruct) {
-            // XXX: Return more specific subclass of Structure?
             info.argType = ArgType.CSTRUCT;
-            return "Lcom/sun/jna/Structure;";
+            return Type.getDescriptor(((CStructREPRData) info.type.st.REPRData).structureClass);
         }
         else {
             ExceptionHandling.dieInternal(tc, "CStruct representation only handles int, num, CArray, CPointer and CStruct");

@@ -2,6 +2,7 @@ package org.perl6.nqp.runtime;
 
 import com.sun.jna.NativeLibrary;
 import com.sun.jna.Pointer;
+import com.sun.jna.Structure;
 
 import static org.perl6.nqp.runtime.CallSiteDescriptor.*;
 
@@ -17,6 +18,7 @@ import org.perl6.nqp.sixmodel.reprs.CPointerInstance;
 import org.perl6.nqp.sixmodel.reprs.CStrInstance;
 import org.perl6.nqp.sixmodel.reprs.CStruct;
 import org.perl6.nqp.sixmodel.reprs.CStructInstance;
+import org.perl6.nqp.sixmodel.reprs.CStructREPRData;
 import org.perl6.nqp.sixmodel.reprs.NativeCall.ArgType;
 import org.perl6.nqp.sixmodel.reprs.NativeCallInstance;
 import org.perl6.nqp.sixmodel.reprs.NativeCallBody;
@@ -127,9 +129,7 @@ public final class NativeCallOps {
         case CARRAY:
             return Pointer.class;
         case CSTRUCT:
-            /* TODO: Extract the necessary information from smoType and return
-             * it.*/
-            return null;
+            return ((CStructREPRData) smoType.st.REPRData).structureClass;
         default:
             ExceptionHandling.dieInternal(tc, String.format("Don't know correct Java class for %s arguments yet", target));
         }
@@ -243,7 +243,7 @@ public final class NativeCallOps {
         }
         case CSTRUCT: {
             CStructInstance cstruct = (CStructInstance) nqpobj;
-            cstruct.storage.getPointer();
+            cstruct.storage = (Structure) o;
             break;
         }
         default:

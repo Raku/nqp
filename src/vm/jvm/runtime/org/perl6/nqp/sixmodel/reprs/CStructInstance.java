@@ -1,5 +1,8 @@
 package org.perl6.nqp.sixmodel.reprs;
 
+import java.util.HashMap;
+
+import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 
 import org.perl6.nqp.runtime.ExceptionHandling;
@@ -13,11 +16,16 @@ import org.perl6.nqp.sixmodel.reprs.NativeCall.ArgType;
 
 public class CStructInstance extends SixModelObject {
     public Structure storage;
+    /* XXX: Using a hash to store members is probably not an optimal solution.
+     * Dynamically generating subclasses that have the appropriate members and
+     * such is probably better, but that's harder to implement. */
+    public HashMap<String, SixModelObject> memberCache = new HashMap<String, SixModelObject>();
 
     public void bind_attribute_boxed(ThreadContext tc, SixModelObject class_handle, String name, long hint, SixModelObject value) {
         CStructREPRData data = (CStructREPRData) class_handle.st.REPRData;
         AttrInfo info = data.fieldTypes.get(name);
         storage.writeField(name, NativeCallOps.toJNAType(tc, value, info.argType));
+        memberCache.put(name, value);
     }
 
     public void bind_attribute_native(ThreadContext tc, SixModelObject class_handle, String name, long hint) {
@@ -57,9 +65,21 @@ public class CStructInstance extends SixModelObject {
     }
 
     public SixModelObject get_attribute_boxed(ThreadContext tc, SixModelObject class_handle, String name, long hint) {
+        SixModelObject member = memberCache.get(name);
+        if (member != null) return member;
+
         CStructREPRData data = (CStructREPRData) class_handle.st.REPRData;
         AttrInfo info = data.fieldTypes.get(name);
-        return makeObject(tc, info.type, info.argType, storage.readField(name));
+        Object o = storage.readField(name);
+        if (info.argType == ArgType.UTF8STR ||
+            info.argType == ArgType.UTF16STR ||
+            info.argType == ArgType.ASCIISTR) {
+            o = ((Pointer) o).getString(0);
+        }
+
+        member = NativeCallOps.toNQPType(tc, info.argType, info.type, o);
+        memberCache.put(name, member);
+        return member;
     }
 
     public void get_attribute_native(ThreadContext tc, SixModelObject class_handle, String name, long hint) {
@@ -95,10 +115,5 @@ public class CStructInstance extends SixModelObject {
         default:
             ExceptionHandling.dieInternal(tc, String.format("CStruct.get_attribute_native: Can't handle %s", info.argType));
         }
-    }
-
-    private SixModelObject makeObject(ThreadContext tc, SixModelObject type, ArgType argType, Object o) {
-        ExceptionHandling.dieInternal(tc, "CStruct.makeObject NYI");
-        return null;
     }
 }
