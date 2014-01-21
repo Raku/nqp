@@ -238,27 +238,17 @@ c \c[ 33, 33] d		abc!!def	y	hex (\c[])
 c \c[ 33 , 33 ] d	abc!!def	y	hex (\c[])
 a \c[33]+ f		abcdef		n	hex (\c[])
 b \c[33] c		abc!def		n	hex (\c[])
-# todo :pge<\C33>
 \C33			a		y	not hex (\C)
-# todo :pge<\C33>
 a \C33 c		abc		y	not hex (\C)
 \C33			''		n	not hex (\C)
-# todo :pge<\C33>
 c \C33 d		abc!def		n	not hex (\C)
-# todo :pge<\C33>
 c \C33+ d		abc!!def	n	not hex (\C)
-# todo :pge<\C33>
 a \C33+ f		abcdef		y	not hex (\C)
-# todo :pge<\C33>
 \C[33]			a		y	not hex (\C[])
-# todo :pge<\C33>
 a \C[33] c		abc		y	not hex (\C[])
 \C[33]			''		n	not hex (\C[])
-# todo :pge<\C33>
 c \C[33] d		abc!def		n	not hex (\C[])
-# todo :pge<\C33>
 c \C[33]+ d		abc!!def	n	not hex (\C[])
-# todo :pge<\C33>
 a \C[33]+ f		abcdef		y	not hex (\C[])
 c \o041 d		abc!def		y	octal (\o)
 c \o41+ d		abc!!def	y	octal (\o)
