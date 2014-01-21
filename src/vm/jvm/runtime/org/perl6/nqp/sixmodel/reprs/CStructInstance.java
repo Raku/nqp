@@ -70,14 +70,7 @@ public class CStructInstance extends SixModelObject {
 
         CStructREPRData data = (CStructREPRData) class_handle.st.REPRData;
         AttrInfo info = data.fieldTypes.get(name);
-        Object o = storage.readField(name);
-        if (info.argType == ArgType.UTF8STR ||
-            info.argType == ArgType.UTF16STR ||
-            info.argType == ArgType.ASCIISTR) {
-            o = ((Pointer) o).getString(0);
-        }
-
-        member = NativeCallOps.toNQPType(tc, info.argType, info.type, o);
+        member = NativeCallOps.toNQPType(tc, info.argType, info.type, storage.readField(name));
         memberCache.put(name, member);
         return member;
     }
