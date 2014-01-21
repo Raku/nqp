@@ -350,7 +350,8 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     method backslash:sym<c>($/) {
-        make QAST::Regex.new( $<charspec>.ast, :rxtype('literal'), :node($/) );
+        make QAST::Regex.new( $<charspec>.ast, :rxtype('enumcharlist'),
+                              :negate($<sym> eq 'C'), :node($/) );
     }
 
     method backslash:sym<misc>($/) {
