@@ -705,9 +705,11 @@ class QAST::MASTCompiler {
                     my int $pos_required := 0;
                     my int $pos_optional := 0;
                     my int $pos_slurpy   := 0;
+                    my int $named_slurpy := 0;
                     for $block.params {
                         if $_.named {
-                            # Don't count.
+                            # Don't count towards arity or count.
+                            if $_.slurpy { $named_slurpy := 1 }
                         }
                         elsif $_.slurpy {
                             if $pos_slurpy {
@@ -828,6 +830,10 @@ class QAST::MASTCompiler {
 
                         $param_index++;
                     }
+
+                    # If we didn't slurp all the names, check there are no
+                    # unexpected ones.
+                    push_op(@pre, 'paramnamesused') unless $named_slurpy;
                 }
 
                 nqp::splice($frame.instructions, @pre, 0, 0);
