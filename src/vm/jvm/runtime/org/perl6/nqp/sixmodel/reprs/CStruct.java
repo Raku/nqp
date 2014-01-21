@@ -111,7 +111,7 @@ public class CStruct extends REPR {
 
         // public $className extends com.sun.jna.Structure { ... }
         cw.visit(Opcodes.V1_7, Opcodes.ACC_PUBLIC | Opcodes.ACC_SUPER, className, null,
-                "com/sun/jna/Structure", null);
+                "com/sun/jna/Structure", new String[]{"com/sun/jna/Structure$ByReference"});
 
         //     private static List<String> fieldOrder;
         FieldVisitor fv = cw.visitField(Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC, "fieldOrder", "Ljava/util/List;",
