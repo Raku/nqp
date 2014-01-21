@@ -366,7 +366,7 @@ class QAST::MASTCompiler {
         if nqp::defined($want) {
             $*WANT := %WANTMAP{$want} // $want;
             if nqp::istype($qast, QAST::Want) {
-                self.coerce(self.as_mast(want($qast, $*WANT), :$*WANT), $*WANT)
+                self.coerce(self.as_mast(want($qast, $*WANT), :want($*WANT)), $*WANT)
             }
             else {
                 self.coerce({*}, $*WANT)

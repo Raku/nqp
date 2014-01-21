@@ -257,12 +257,12 @@ class QAST::MASTOperations {
     }
 
     # Adds a core op handler.
-    method add_core_op($op, $handler) {
+    method add_core_op($op, $handler, :$inlinable) {
         %core_ops{$op} := $handler;
     }
 
     # Adds a HLL op handler.
-    method add_hll_op($hll, $op, $handler) {
+    method add_hll_op($hll, $op, $handler, :$inlinable) {
         %hll_ops{$hll} := {} unless %hll_ops{$hll};
         %hll_ops{$hll}{$op} := $handler;
     }
