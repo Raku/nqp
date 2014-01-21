@@ -114,8 +114,7 @@ grammar HLL::Grammar {
 
     token charname {
         || <integer>
-        || <[a..z A..Z]> <-[ \] , # ]>*? <[a..z A..Z ) ]>
-           <?before \s* <[ \] , # ]> >
+        || <.alpha> .*? <?before \s* <[ \] , # ]> >
     }
     token charnames { [<.ws><charname><.ws>]+ % ',' }
     token charspec {
