@@ -554,7 +554,7 @@ class QAST::MASTRegexCompiler {
         my $needmark  := $needrep || $backtrack eq 'r';
         my $rep       := %*REG<rep>;
         my $pos       := %*REG<pos>;
-        my $ireg      := $*REGALLOC.fresh_i(:new); # Must be regex-unique
+        my $ireg      := $*REGALLOC.fresh_register($MVM_reg_int64, 1); # Must be regex-unique
 
         if $backtrack eq 'f' {
             my $seplabel := label($prefix ~ '_sep');
