@@ -11,7 +11,6 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
-import org.perl6.nqp.sixmodel.ByteClassLoader;
 import org.perl6.nqp.sixmodel.REPR;
 import org.perl6.nqp.sixmodel.SerializationReader;
 import org.perl6.nqp.sixmodel.SixModelObject;
@@ -103,7 +102,6 @@ public class CStruct extends REPR {
     }
 
     private static long typeId = 0;
-    private static ByteClassLoader loader = new ByteClassLoader();
     private void generateStructClass(ThreadContext tc, STable st, List<AttrInfo> fields) {
         CStructREPRData reprData = (CStructREPRData) st.REPRData;
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
@@ -164,7 +162,7 @@ public class CStruct extends REPR {
 
         cw.visitEnd();
         byte[] compiled = cw.toByteArray();
-        reprData.structureClass = loader.defineClass(className, compiled);
+        reprData.structureClass = tc.gc.byteClassLoader.defineClass(className, compiled);
     }
 
     private String typeDescriptor(ThreadContext tc, AttrInfo info) {

@@ -5202,8 +5202,8 @@ public final class Ops {
     public static SixModelObject loadcompunit(SixModelObject obj, long compileeHLL, ThreadContext tc) {
         try {
             EvalResult res = (EvalResult)obj;
-            ByteClassLoader cl = new ByteClassLoader(res.jc.bytes);
-            res.cu = (CompilationUnit)cl.findClass(res.jc.name).newInstance();
+            Class<?> cuClass = tc.gc.byteClassLoader.defineClass(res.jc.name, res.jc.bytes);
+            res.cu = (CompilationUnit) cuClass.newInstance();
             if (compileeHLL != 0)
                 usecompileehllconfig(tc);
             res.cu.initializeCompilationUnit(tc);

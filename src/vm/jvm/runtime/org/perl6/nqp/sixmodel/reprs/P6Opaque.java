@@ -14,7 +14,6 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.ThreadContext;
-import org.perl6.nqp.sixmodel.ByteClassLoader;
 import org.perl6.nqp.sixmodel.REPR;
 import org.perl6.nqp.sixmodel.STable;
 import org.perl6.nqp.sixmodel.SerializationReader;
@@ -25,7 +24,6 @@ import org.perl6.nqp.sixmodel.TypeObject;
 
 public class P6Opaque extends REPR {
     private static long typeId = 0;
-    private static ByteClassLoader loader = new ByteClassLoader();
     
     private static class AttrInfo {
         public STable st;
@@ -625,7 +623,7 @@ public class P6Opaque extends REPR {
 //            fos.close();
 //        } catch (IOException e) {
 //        }
-        return loader.defineClass(className, classCompiled);
+        return tc.gc.byteClassLoader.defineClass(className, classCompiled);
     }
 
     private void generateDelegateMethod(ThreadContext tc, ClassWriter cw, String className, String field, String methodName) {

@@ -168,6 +168,12 @@ public class GlobalContext {
      */
     public boolean noisyExceptions;
 
+    /**
+     * The global ByteClassLoader instance, used to load classes generated at
+     * runtime.
+     */
+    public ByteClassLoader byteClassLoader;
+
     /** Redirected output for eval-server. */
     public PrintStream out = System.out;
     /** Redirected error for eval-server. */
@@ -231,6 +237,8 @@ public class GlobalContext {
 
         hllGlobalAll = new HashMap<ContextKey<?,?>, Object>();
         hllGlobalAllLock = new Object();
+
+        byteClassLoader = new ByteClassLoader();
     }
     
     /**
