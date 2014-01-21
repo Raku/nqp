@@ -103,6 +103,7 @@ public class CStruct extends REPR {
     }
 
     private static long typeId = 0;
+    private static ByteClassLoader loader = new ByteClassLoader();
     private void generateStructClass(ThreadContext tc, STable st, List<AttrInfo> fields) {
         CStructREPRData reprData = (CStructREPRData) st.REPRData;
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
@@ -163,7 +164,7 @@ public class CStruct extends REPR {
 
         cw.visitEnd();
         byte[] compiled = cw.toByteArray();
-        reprData.structureClass = new ByteClassLoader(compiled).findClass(className);
+        reprData.structureClass = loader.defineClass(className, compiled);
     }
 
     private String typeDescriptor(ThreadContext tc, AttrInfo info) {

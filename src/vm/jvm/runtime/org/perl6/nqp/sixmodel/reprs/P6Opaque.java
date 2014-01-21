@@ -25,6 +25,7 @@ import org.perl6.nqp.sixmodel.TypeObject;
 
 public class P6Opaque extends REPR {
     private static long typeId = 0;
+    private static ByteClassLoader loader = new ByteClassLoader();
     
     private static class AttrInfo {
         public STable st;
@@ -624,7 +625,7 @@ public class P6Opaque extends REPR {
 //            fos.close();
 //        } catch (IOException e) {
 //        }
-        return new ByteClassLoader(classCompiled).findClass(className);
+        return loader.defineClass(className, classCompiled);
     }
 
     private void generateDelegateMethod(ThreadContext tc, ClassWriter cw, String className, String field, String methodName) {
