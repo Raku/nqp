@@ -915,7 +915,7 @@ class QAST::MASTCompiler {
 
     # This takes any node that is a statement list of some kind and compiles
     # all of the statements within it.
-    method compile_all_the_stmts(@stmts, $resultchild?, :$want) {
+    method compile_all_the_stmts(@stmts, $resultchild?) {
         my @all_ins;
         # the most recent statement mast
         my $last_stmt;
@@ -935,7 +935,7 @@ class QAST::MASTCompiler {
             # the last statement,
                     || $resultchild == -1 && $result_count == $final_stmt_idx) {
                 # compile $_ with an explicit $want, either what's given or obj
-                $last_stmt := self.as_mast($_, :want($want // $MVM_reg_obj));
+                $last_stmt := self.as_mast($_, :want($WANT // $MVM_reg_obj));
                 $use_result := 1;
             }
             else {

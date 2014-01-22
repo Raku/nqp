@@ -1421,7 +1421,8 @@ QAST::MASTOperations.add_core_op('lexotic', -> $qastcomp, $op {
 
     # Emit the body, and go to the end of the lexotic code; the body's result
     # is what we want.
-    my $body := $qastcomp.compile_all_the_stmts($op.list, :want($MVM_reg_obj));
+    my $*WANT := $MVM_reg_obj;
+    my $body  := $qastcomp.compile_all_the_stmts($op.list);
     nqp::push(@ins, MAST::HandlerScope.new(
         :instructions($body.instructions),
         :category_mask($HandlerCategory::return),
