@@ -2124,8 +2124,8 @@ sub add_bindattr_op($nqpop, $hintedop, $namedop, $want) {
         my $type_mast := $qastcomp.as_mast( :want($MVM_reg_obj), $op[1] );
         my int $hint := -1;
         my @ins;
-        push_ilist(@ins, $obj_mast);
         push_ilist(@ins, $val_mast);
+        push_ilist(@ins, $obj_mast);
         push_ilist(@ins, $type_mast);
         push_op(@ins, 'decont', $type_mast.result_reg, $type_mast.result_reg);
         if nqp::istype($op[2], QAST::SVal) {
