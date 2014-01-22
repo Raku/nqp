@@ -1,12 +1,3 @@
-# Mapping of QAST::Want type identifiers to return types.
-my %WANTMAP := nqp::hash(
-    'v', $MVM_reg_void,
-    'I', $MVM_reg_int64, 'i', $MVM_reg_int64,
-    'N', $MVM_reg_num64, 'n', $MVM_reg_num64,
-    'S', $MVM_reg_str, 's', $MVM_reg_str,
-    'P', $MVM_reg_obj, 'p', $MVM_reg_obj
-);
-
 class QAST::MASTCompiler {
     # This uses a very simple scheme. Write registers are assumed
     # to be write-once, read-once.  Therefore, if a QAST control
@@ -364,12 +355,12 @@ class QAST::MASTCompiler {
     proto method as_mast($qast, :$want) {
         my $*WANT;
         if nqp::defined($want) {
-            $*WANT := %WANTMAP{$want} // $want;
+            $*WANT := $want;
             if nqp::istype($qast, QAST::Want) {
-                self.coerce(self.as_mast(want($qast, $*WANT), :want($*WANT)), $*WANT)
+                self.coerce(self.as_mast(want($qast, $want), :$want), $want)
             }
             else {
-                self.coerce({*}, $*WANT)
+                self.coerce({*}, $want)
             }
         }
         else {
@@ -377,14 +368,23 @@ class QAST::MASTCompiler {
         }
     }
 
-    my %want_char := nqp::hash($MVM_reg_int64, 'I', $MVM_reg_num64, 'N', $MVM_reg_str, 'S', $MVM_reg_void, 'v');
     sub want($node, $type) {
-        my @possibles := nqp::clone($node.list);
-        my $best := @possibles.shift;
-        my $char := %want_char{$type};
-        for @possibles -> $sel, $ast {
-            if nqp::index($sel, $char) >= 0 {
-                $best := $ast;
+        my @possibles := $node.list;
+        my $best      := nqp::atpos(@possibles, 0);
+        if $type != $MVM_reg_obj {
+            my $char := $type == $MVM_reg_void  ?? 'v' !!
+                        $type == $MVM_reg_int64 ?? 'I' !!
+                        $type == $MVM_reg_num64 ?? 'N' !!
+                        $type == $MVM_reg_str   ?? 'S' !!
+                                                   'X';
+            my int $i := 1;
+            my int $n := nqp::elems(@possibles);
+            while $i < $n {
+                if nqp::index(nqp::atpos(@possibles, $i), $char) >= 0 {
+                    $best := nqp::atpos(@possibles, $i + 1);
+                    last;
+                }
+                $i := $i + 2;
             }
         }
         $best
