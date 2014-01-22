@@ -2111,10 +2111,6 @@ QAST::MASTOperations.add_core_moarop_mapping('istrue', 'istrue', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('isfalse', 'isfalse', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('istype', 'istype', :decont(0, 1));
 QAST::MASTOperations.add_core_moarop_mapping('eqaddr', 'eqaddr');
-QAST::MASTOperations.add_core_moarop_mapping('getattr', 'getattrs_o', :decont(1));
-QAST::MASTOperations.add_core_moarop_mapping('getattr_i', 'getattrs_i', :decont(1));
-QAST::MASTOperations.add_core_moarop_mapping('getattr_n', 'getattrs_n', :decont(1));
-QAST::MASTOperations.add_core_moarop_mapping('getattr_s', 'getattrs_s', :decont(1));
 QAST::MASTOperations.add_core_moarop_mapping('attrinited', 'attrinited', :decont(1));
 
 sub add_bindattr_op($nqpop, $hintedop, $namedop, $want) {
@@ -2152,6 +2148,40 @@ add_bindattr_op('bindattr',   'bindattr_o', 'bindattrs_o', $MVM_reg_obj);
 add_bindattr_op('bindattr_i', 'bindattr_i', 'bindattrs_i', $MVM_reg_int64);
 add_bindattr_op('bindattr_n', 'bindattr_n', 'bindattrs_n', $MVM_reg_num64);
 add_bindattr_op('bindattr_s', 'bindattr_s', 'bindattrs_s', $MVM_reg_str);
+
+sub add_getattr_op($nqpop, $hintedop, $namedop, $want) {
+    QAST::MASTOperations.add_core_op($nqpop, -> $qastcomp, $op {
+        my $obj_mast := $qastcomp.as_mast( :want($MVM_reg_obj), $op[0] );
+        my $type_mast := $qastcomp.as_mast( :want($MVM_reg_obj), $op[1] );
+        my int $hint := -1;
+        my @ins;
+        push_ilist(@ins, $obj_mast);
+        push_ilist(@ins, $type_mast);
+        my $res_reg := $*REGALLOC.fresh_register($want);
+        push_op(@ins, 'decont', $type_mast.result_reg, $type_mast.result_reg);
+        if nqp::istype($op[2], QAST::SVal) {
+            if nqp::istype($op[1], QAST::WVal) {
+                $hint := nqp::hintfor($op[1].value, $op[2].value);
+            }
+            push_op(@ins, $hintedop, $res_reg, $obj_mast.result_reg, $type_mast.result_reg,
+                MAST::SVal.new( :value($op[2].value) ), MAST::IVal.new( :value($hint) ));
+        } else {
+            my $name_mast := $qastcomp.as_mast( :want($MVM_reg_str), $op[2] );
+            push_ilist(@ins, $name_mast);
+            push_op(@ins, $namedop, $res_reg, $obj_mast.result_reg, $type_mast.result_reg,
+                $name_mast.result_reg);
+            $*REGALLOC.release_register($name_mast.result_reg, $MVM_reg_str);
+        }
+        $*REGALLOC.release_register($obj_mast.result_reg, $MVM_reg_obj);
+        $*REGALLOC.release_register($type_mast.result_reg, $MVM_reg_obj);
+        MAST::InstructionList.new(@ins, $res_reg, $want)
+    })
+}
+
+add_getattr_op('getattr',   'getattr_o', 'getattrs_o', $MVM_reg_obj);
+add_getattr_op('getattr_i', 'getattr_i', 'getattrs_i', $MVM_reg_int64);
+add_getattr_op('getattr_n', 'getattr_n', 'getattrs_n', $MVM_reg_num64);
+add_getattr_op('getattr_s', 'getattr_s', 'getattrs_s', $MVM_reg_str);
 
 QAST::MASTOperations.add_core_moarop_mapping('hintfor', 'hintfor');
 QAST::MASTOperations.add_core_moarop_mapping('unbox_i', 'unbox_i', :decont(0));
