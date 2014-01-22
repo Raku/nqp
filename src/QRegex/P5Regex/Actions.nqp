@@ -601,8 +601,14 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         my $name := ~$<longname>;
         my $qast;
         if $<assertion> {
-            $qast := $<assertion>[0].ast;
-            self.subrule_alias($qast, $name);
+            $qast := $<assertion>.ast;
+            if $qast.rxtype eq 'subrule' {
+                self.subrule_alias($qast, $name);
+            }
+            else {
+                $qast := QAST::Regex.new( $qast, :name($name), 
+                                          :rxtype<subcapture>, :node($/) );
+            }
         }
         elsif $name eq 'sym' {
             my $loc := nqp::index(%*RX<name>, ':sym<');
@@ -618,12 +624,12 @@ class QRegex::P5Regex::Actions is HLL::Actions {
                                      :node($/), :name($name),
                                      QAST::Node.new(QAST::SVal.new( :value($name) )));
             if $<arglist> {
-                for $<arglist>[0].ast.list { $qast[0].push( $_ ) }
+                for $<arglist>.ast.list { $qast[0].push( $_ ) }
             }
             elsif $<nibbler> {
                 $name eq 'after' ??
-                    $qast[0].push(self.qbuildsub(self.flip_ast($<nibbler>[0].ast), :anon(1), :addself(1))) !!
-                    $qast[0].push(self.qbuildsub($<nibbler>[0].ast, :anon(1), :addself(1)));
+                    $qast[0].push(self.qbuildsub(self.flip_ast($<nibbler>.ast), :anon(1), :addself(1))) !!
+                    $qast[0].push(self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1)));
             }
         }
         make $qast;

@@ -252,6 +252,6 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
             | ':' <arglist>
             | '(' <arglist> ')'
             | <.normspace> <nibbler>
-            ]**0..1
+            ]?
     }
 }

@@ -333,7 +333,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
             | ':' <arglist>
             | '(' <arglist> ')'
             | <.normspace> <nibbler>
-            ]**0..1
+            ]?
     }
 
     token assertion:sym<[> { <?before '['|'+'|'-'|':'> <cclass_elem>+ }

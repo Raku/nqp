@@ -857,7 +857,7 @@ grammar NQP::Regex is QRegex::P6Regex::Grammar {
             | ':' <arglist>
             | '(' <arglist> ')'
             | <.normspace> <nibbler>
-            ]**0..1
+            ]?
     }
 
     token assertion:sym<var> {
