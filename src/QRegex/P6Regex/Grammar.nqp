@@ -120,12 +120,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     # XXX Eventually squish termseq and termish and
     # get < || && | & > infixes using by EXPR in nibbler
     token termseq {
-        || <termaltseq>
-        || <?before <rxstopper> | <[&|~]> > <.throw_null_pattern>
-        || <?before <infixstopper> > <.throw_null_pattern> # XXX Check if unmatched bracket
-        || $$ <.panic: "Regex not terminated">
-        || (\W) { self.throw_unrecognized_metachar: ~$/[0] }
-        || <.panic: "Regex not terminated">
+        <termaltseq>
     }
 
     token termaltseq {
@@ -151,7 +146,14 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token termish {
         :my $*SIGOK  := 0;
         :my $*VARDEF := 0;
-        <noun=.quantified_atom>+
+        [
+        || <noun=.quantified_atom>+
+        || <?before <rxstopper> | <[&|~]> > <.throw_null_pattern>
+        || <?before <infixstopper> > <.throw_null_pattern> # XXX Check if unmatched bracket
+        || $$ <.panic: "Regex not terminated">
+        || (\W) { self.throw_unrecognized_metachar: ~$/[0] }
+        || <.panic: "Regex not terminated">
+        ]
     }
 
     method SIGOK() { $*SIGOK := %*RX<s>; self }
