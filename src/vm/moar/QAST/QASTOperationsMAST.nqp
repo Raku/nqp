@@ -2116,11 +2116,44 @@ QAST::MASTOperations.add_core_moarop_mapping('getattr_i', 'getattrs_i', :decont(
 QAST::MASTOperations.add_core_moarop_mapping('getattr_n', 'getattrs_n', :decont(1));
 QAST::MASTOperations.add_core_moarop_mapping('getattr_s', 'getattrs_s', :decont(1));
 QAST::MASTOperations.add_core_moarop_mapping('attrinited', 'attrinited', :decont(1));
+
+sub add_bindattr_op($nqpop, $hintedop, $namedop, $want) {
+    QAST::MASTOperations.add_core_op($nqpop, -> $qastcomp, $op {
+        my $val_mast := $qastcomp.as_mast( :$want, $op[3] );
+        my $obj_mast := $qastcomp.as_mast( :want($MVM_reg_obj), $op[0] );
+        my $type_mast := $qastcomp.as_mast( :want($MVM_reg_obj), $op[1] );
+        my int $hint := -1;
+        my @ins;
+        push_ilist(@ins, $obj_mast);
+        push_ilist(@ins, $val_mast);
+        push_ilist(@ins, $type_mast);
+        push_op(@ins, 'decont', $type_mast.result_reg, $type_mast.result_reg);
+        if nqp::istype($op[2], QAST::SVal) {
+            if nqp::istype($op[1], QAST::WVal) {
+                $hint := nqp::hintfor($op[1].value, $op[2].value);
+            }
+            push_op(@ins, $hintedop, $obj_mast.result_reg, $type_mast.result_reg,
+                MAST::SVal.new( :value($op[2].value) ),
+                $val_mast.result_reg, MAST::IVal.new( :value($hint) ));
+        } else {
+            my $name_mast := $qastcomp.as_mast( :want($MVM_reg_str), $op[2] );
+            push_ilist(@ins, $name_mast);
+            push_op(@ins, $namedop, $obj_mast.result_reg, $type_mast.result_reg,
+                $name_mast.result_reg, $val_mast.result_reg);
+            $*REGALLOC.release_register($name_mast.result_reg, $MVM_reg_str);
+        }
+        $*REGALLOC.release_register($obj_mast.result_reg, $MVM_reg_obj);
+        $*REGALLOC.release_register($type_mast.result_reg, $MVM_reg_obj);
+        MAST::InstructionList.new(@ins, $val_mast.result_reg, $want)
+    })
+}
+
+add_bindattr_op('bindattr',   'bindattr_o', 'bindattrs_o', $MVM_reg_obj);
+add_bindattr_op('bindattr_i', 'bindattr_i', 'bindattrs_i', $MVM_reg_int64);
+add_bindattr_op('bindattr_n', 'bindattr_n', 'bindattrs_n', $MVM_reg_num64);
+add_bindattr_op('bindattr_s', 'bindattr_s', 'bindattrs_s', $MVM_reg_str);
+
 QAST::MASTOperations.add_core_moarop_mapping('hintfor', 'hintfor');
-QAST::MASTOperations.add_core_moarop_mapping('bindattr', 'bindattrs_o', 3, :decont(1));
-QAST::MASTOperations.add_core_moarop_mapping('bindattr_i', 'bindattrs_i', 3, :decont(1));
-QAST::MASTOperations.add_core_moarop_mapping('bindattr_n', 'bindattrs_n', 3, :decont(1));
-QAST::MASTOperations.add_core_moarop_mapping('bindattr_s', 'bindattrs_s', 3, :decont(1));
 QAST::MASTOperations.add_core_moarop_mapping('unbox_i', 'unbox_i', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('unbox_n', 'unbox_n', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('unbox_s', 'unbox_s', :decont(0));
