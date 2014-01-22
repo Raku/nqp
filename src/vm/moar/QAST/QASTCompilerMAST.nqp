@@ -1242,6 +1242,12 @@ class QAST::MASTCompiler {
             push_ilist(@ins, $obj);
             push_ilist(@ins, $han);
 
+            my int $hint := -1;
+
+            if nqp::istype(@args[1], QAST::WVal) {
+                $hint := nqp::hintfor(@args[1].value, $name);
+            }
+
             # Go by whether it's a bind or lookup.
             my $kind := self.type_to_register_kind($node.returns);
             if $*BINDVAL {
@@ -1250,7 +1256,7 @@ class QAST::MASTCompiler {
                 push_ilist(@ins, $valmast);
                 push_op(@ins, 'bind' ~ @attr_opnames[$kind], $obj.result_reg,
                     $han.result_reg, MAST::SVal.new( :value($name) ), $valmast.result_reg,
-                        MAST::IVal.new( :value(-1) ) );
+                        MAST::IVal.new( :value($hint) ) );
                 $res_reg := $valmast.result_reg;
                 $res_kind := $valmast.result_kind;
             }
@@ -1260,7 +1266,7 @@ class QAST::MASTCompiler {
                 $res_kind := $kind;
                 push_op(@ins, 'get' ~ @attr_opnames[$kind], $res_reg, $obj.result_reg,
                     $han.result_reg, MAST::SVal.new( :value($name) ),
-                        MAST::IVal.new( :value(-1) ) );
+                        MAST::IVal.new( :value($hint) ) );
             }
             $*REGALLOC.release_register($obj.result_reg, $MVM_reg_obj);
             $*REGALLOC.release_register($han.result_reg, $MVM_reg_obj);
