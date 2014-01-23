@@ -116,6 +116,9 @@ else {
 if nqp::getcomp('nqp').backend.name eq 'parrot' {
     ok(1, "ok $_ # Skipped: readlinefh is broken on parrot") for (36, 37, 38, 39, 40);
 }
+elsif nqp::getcomp('nqp').backend.name eq 'moar' {
+    ok(1, "ok $_ # Skipped: readlinefh won't match \\r on Moar") for (36, 37, 38, 39, 40);
+}
 else {
     $fh := nqp::open('t/nqp/19-readline.txt', 'r');
     ok(nqp::readlinefh($fh) eq "line1\r",   'reading a line till CR');
