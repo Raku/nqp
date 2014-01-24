@@ -120,7 +120,7 @@ class QAST::Node {
             else {
                 nqp::push(@onto, nqp::x(' ', $indent));
                 nqp::push(@onto, '- ');
-                nqp::push(@onto, ~$_);
+                nqp::push(@onto, nqp::istype($_, NQPMu) ?? '(NQPMu)' !! ~$_);
                 nqp::push(@onto, "\n");
             }
         }
