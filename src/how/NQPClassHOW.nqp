@@ -742,7 +742,9 @@ knowhow NQPClassHOW {
     }
     
     method flush_cache($obj) {
-        %!caches := {} unless nqp::isnull(%!caches)
+        nqp::scwbdisable();
+        %!caches := {} unless nqp::isnull(%!caches);
+        nqp::scwbenable();
     }
     
     ##
