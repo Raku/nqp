@@ -486,12 +486,17 @@ class QAST::MASTRegexCompiler {
         my @flags := [$Arg::obj, $Arg::int];
         my $op;
         my $meth := fresh_o();
-        release($meth, $MVM_reg_obj);
         nqp::push(@ins, op('findmeth', $meth, %*REG<cur>, sval('!cursor_pass')));
         if $node.name {
             my $sname := fresh_s();
             nqp::push(@ins, op('const_s', $sname, sval($node.name)));
             nqp::push(@args, $sname);
+            nqp::push(@flags, $Arg::str);
+        }
+        elsif +@($node) == 1 {
+            my $name := $*QASTCOMPILER.as_mast($node[0], :want($MVM_reg_str));
+            merge_ins(@ins, $name.instructions);
+            nqp::push(@args, $name.result_reg);
             nqp::push(@flags, $Arg::str);
         }
         if $node.backtrack ne 'r' {
@@ -500,6 +505,7 @@ class QAST::MASTRegexCompiler {
             nqp::push(@flags, $Arg::named +| $Arg::int);
         }
         nqp::push(@ins, call($meth, @flags, :result($meth), |@args));
+        release($meth, $MVM_reg_obj);
         nqp::push(@ins, op('return_o', %*REG<cur>));
         @ins
     }
