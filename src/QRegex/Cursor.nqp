@@ -1,5 +1,6 @@
 # Some things that all cursors involved in a given parse share.
 my class ParseShared is export {
+    has $!CUR_CLASS;
     has $!orig;
     has str $!target;
     has int $!highwater;
@@ -101,6 +102,7 @@ role NQPCursorRole is export {
         my $new := self.CREATE();
         unless $shared {
             $shared := nqp::create(ParseShared);
+            nqp::bindattr($shared, ParseShared, '$!CUR_CLASS', $?CLASS);
             nqp::bindattr($shared, ParseShared, '$!orig', $orig);
             nqp::bindattr_s($shared, ParseShared, '$!target',
 #?if parrot
@@ -158,6 +160,32 @@ role NQPCursorRole is export {
             nqp::bindpos(@start_result, 4, nqp::bindattr($new, $?CLASS, '$!bstack', nqp::list_i()));
             nqp::bindpos(@start_result, 5, $NO_RESTART);
             @start_result
+        }
+    }
+    
+    # Starts a new Cursor or restarts an existing one. Returns the newly
+    # created Cursor.
+    method !cursor_start() {
+        my $new := nqp::create(self);
+        my $sub := nqp::callercode();
+        # Uncomment following to log cursor creation.
+        #$!shared.log_cc(nqp::getcodename($sub));
+        nqp::bindattr($new, $?CLASS, '$!shared', $!shared);
+        nqp::bindattr($new, $?CLASS, '$!regexsub', nqp::ifnull(nqp::getcodeobj($sub), $sub));
+        if nqp::defined($!restart) {
+            nqp::bindattr_i($new, $?CLASS, '$!pos', $!pos);
+            nqp::bindattr($new, $?CLASS, '$!cstack', nqp::clone($!cstack)) if $!cstack;
+            nqp::getattr_s($!shared, ParseShared, '$!target');
+            nqp::bindattr_i($new, $?CLASS, '$!from', $!from);
+            nqp::bindattr($new, $?CLASS, '$!bstack', nqp::clone($!bstack));
+            $new
+        }
+        else {
+            nqp::bindattr_i($new, $?CLASS, '$!pos', -3);
+            nqp::getattr_s($!shared, ParseShared, '$!target');
+            nqp::bindattr_i($new, $?CLASS, '$!from', $!pos);
+            nqp::bindattr($new, $?CLASS, '$!bstack', nqp::list_i());
+            $new
         }
     }
     

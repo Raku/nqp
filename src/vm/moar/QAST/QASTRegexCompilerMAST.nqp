@@ -49,7 +49,6 @@ class QAST::MASTRegexCompiler {
         my $two      := fresh_i();
         my $three    := fresh_i();
         my $four     := fresh_i();
-        my $five     := fresh_i();
         my $P11      := fresh_o();
         my $method   := fresh_o();
         my $tmp      := fresh_o();
@@ -96,7 +95,8 @@ class QAST::MASTRegexCompiler {
 
         my @*RXJUMPS := nqp::list($donelabel);
 
-        my $cstart := fresh_o();
+        my $shared := fresh_o();
+        my $sharedclass := fresh_o();
         my $i19 := fresh_i(); # yes, I know, inheriting the name from ancestor method
         my $i0 := fresh_i();
 
@@ -107,21 +107,20 @@ class QAST::MASTRegexCompiler {
             op('const_i64', $two, ival(2)),
             op('const_i64', $three, ival(3)),
             op('const_i64', $four, ival(4)),
-            op('const_i64', $five, ival(5)),
             op('const_i64', $cclass_word, ival(nqp::const::CCLASS_WORD)),
             op('const_i64', $cclass_newline, ival(nqp::const::CCLASS_NEWLINE)),
-            op('findmeth', $method, $self, sval('!cursor_start_all')),
-            call($method, [ $Arg::obj ], :result($cstart), $self ),
-            op('atpos_o', $cur, $cstart, $zero),
-            op('atpos_o', $tmp, $cstart, $one),
-            op('unbox_s', $tgt, $tmp),
+            op('findmeth', $method, $self, sval('!cursor_start')),
+            call($method, [ $Arg::obj ], :result($cur), $self ),
+            op('findmeth', $shared, $self, sval('!shared')),
+            call($shared, [ $Arg::obj ], :result($shared), $self ),
+            op('getwhat', $sharedclass, $shared),
+            op('getattr_o', $curclass, $shared, $sharedclass, sval('$!CUR_CLASS'), ival(-1)),
+            op('getattr_s', $tgt, $shared, $sharedclass, sval('$!target'), ival(-1)),
             op('flattenropes', $tgt),
-            op('atpos_o', $tmp, $cstart, $two),
-            op('unbox_i', $pos, $tmp),
-            op('atpos_o', $curclass, $cstart, $three),
-            op('atpos_o', $bstack, $cstart, $four),
-            op('atpos_o', $tmp, $cstart, $five),
-            op('unbox_i', $i19, $tmp),
+            op('getattr_i', $pos, $cur, $curclass, sval('$!from'), ival(-1)),
+            op('getattr_o', $bstack, $cur, $curclass, sval('$!bstack'), ival(-1)),
+            op('getattr_o', $tmp, $self, $curclass, sval('$!restart'), ival(-1)),
+            op('isconcrete', $i19, $tmp),
             op('bindlex', $*BLOCK.resolve_lexical('$¢'), $cur),
             op('graphs_s', $eos, $tgt),
             op('eq_i', $i0, $one, $i19),
