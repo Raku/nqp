@@ -744,6 +744,10 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             $qast[2].backtrack('r');
         }
         $block.push($qast);
+
+        if nqp::existskey(%rest, 'cursor_type') {
+            $qast.cursor_type(%rest<cursor_type>);
+        }
         
         $block;
     }

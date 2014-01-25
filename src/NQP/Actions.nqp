@@ -1279,7 +1279,8 @@ class NQP::Actions is HLL::Actions {
             $block.symbol('$¢', :scope<lexical>);
             $block.symbol('$/', :scope<lexical>);
             my $code  := %*RX<code>;
-            my $regex := %*LANG<Regex-actions>.qbuildsub($<p6regex>.ast, $block, code_obj => $code);
+            my $regex := %*LANG<Regex-actions>.qbuildsub($<p6regex>.ast, $block,
+                code_obj => $code, cursor_type => $*W.find_sym(['NQPCursor']));
             $regex.name($name);
             
             if $*PKGDECL && nqp::can($*PACKAGE.HOW, 'add_method') {

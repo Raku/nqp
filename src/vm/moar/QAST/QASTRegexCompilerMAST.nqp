@@ -2,6 +2,7 @@ use QASTNode;
 use NQPHLL;
 use MASTNodes;
 use MASTOps;
+use QRegex;
 
 my $MVM_reg_void            := 0; # not really a register; just a result/return kind marker
 my $MVM_reg_int8            := 1;
@@ -110,16 +111,41 @@ class QAST::MASTRegexCompiler {
             op('const_i64', $cclass_word, ival(nqp::const::CCLASS_WORD)),
             op('const_i64', $cclass_newline, ival(nqp::const::CCLASS_NEWLINE)),
             op('findmeth', $method, $self, sval('!cursor_start')),
-            call($method, [ $Arg::obj ], :result($cur), $self ),
-            op('findmeth', $shared, $self, sval('!shared')),
-            call($shared, [ $Arg::obj ], :result($shared), $self ),
-            op('getwhat', $sharedclass, $shared),
-            op('getattr_o', $curclass, $shared, $sharedclass, sval('$!CUR_CLASS'), ival(-1)),
-            op('getattr_s', $tgt, $shared, $sharedclass, sval('$!target'), ival(-1)),
+            call($method, [ $Arg::obj ], :result($cur), $self )
+        ];
+
+        my int $has_cursor_type := $node.has_cursor_type();
+        my $cursor_type;
+        if $has_cursor_type {
+            $cursor_type := $node.cursor_type();
+            my $wval := $*QASTCOMPILER.as_mast(QAST::WVal.new( :value($cursor_type) ));
+            merge_ins(@ins, $wval.instructions);
+            merge_ins(@ins, [
+                op('set', $curclass, $wval.result_reg),
+                op('getattr_o', $shared, $self, $curclass, sval('$!shared'),
+                    ival(nqp::hintfor($cursor_type, '$!shared')))
+            ]);
+            release($wval.result_reg, $MVM_reg_obj);
+        }
+        else {
+            merge_ins(@ins, [
+                op('findmeth', $shared, $self, sval('!shared')),
+                call($shared, [ $Arg::obj ], :result($shared), $self ),
+                op('getwhat', $sharedclass, $shared),
+                op('getattr_o', $curclass, $shared, $sharedclass, sval('$!CUR_CLASS'), ival(-1))
+            ]);
+        }
+        
+        merge_ins(@ins, [
+            op('getattr_s', $tgt, $shared, $sharedclass, sval('$!target'),
+                ival(nqp::hintfor(ParseShared, '$!target'))),
             op('flattenropes', $tgt),
-            op('getattr_i', $pos, $cur, $curclass, sval('$!from'), ival(-1)),
-            op('getattr_o', $bstack, $cur, $curclass, sval('$!bstack'), ival(-1)),
-            op('getattr_o', $tmp, $self, $curclass, sval('$!restart'), ival(-1)),
+            op('getattr_i', $pos, $cur, $curclass, sval('$!from'),
+                ival(nqp::hintfor($cursor_type, '$!from'))),
+            op('getattr_o', $bstack, $cur, $curclass, sval('$!bstack'),
+                ival(nqp::hintfor($cursor_type, '$!bstack'))),
+            op('getattr_o', $tmp, $self, $curclass, sval('$!restart'),
+                ival(nqp::hintfor($cursor_type, '$!restart'))),
             op('isconcrete', $i19, $tmp),
             op('bindlex', $*BLOCK.resolve_lexical('$¢'), $cur),
             op('graphs_s', $eos, $tgt),
@@ -127,7 +153,7 @@ class QAST::MASTRegexCompiler {
             op('if_i', $i0, $restartlabel),
             op('gt_i', $i0, $pos, $eos),
             op('if_i', $i0, $faillabel)
-        ];
+        ]);
         release($i0, $MVM_reg_int64);
         release($i19, $MVM_reg_int64);
 
