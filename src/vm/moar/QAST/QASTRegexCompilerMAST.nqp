@@ -115,15 +115,15 @@ class QAST::MASTRegexCompiler {
         ];
 
         my int $has_cursor_type := $node.has_cursor_type();
-        my $cursor_type;
+        my $*cursor_type;
         if $has_cursor_type {
-            $cursor_type := $node.cursor_type();
-            my $wval := $*QASTCOMPILER.as_mast(QAST::WVal.new( :value($cursor_type) ));
+            $*cursor_type := $node.cursor_type();
+            my $wval := $*QASTCOMPILER.as_mast(QAST::WVal.new( :value($*cursor_type) ));
             merge_ins(@ins, $wval.instructions);
             merge_ins(@ins, [
                 op('set', $curclass, $wval.result_reg),
                 op('getattr_o', $shared, $self, $curclass, sval('$!shared'),
-                    ival(nqp::hintfor($cursor_type, '$!shared')))
+                    ival(nqp::hintfor($*cursor_type, '$!shared')))
             ]);
             release($wval.result_reg, $MVM_reg_obj);
         }
@@ -141,11 +141,11 @@ class QAST::MASTRegexCompiler {
                 ival(nqp::hintfor(ParseShared, '$!target'))),
             op('flattenropes', $tgt),
             op('getattr_i', $pos, $cur, $curclass, sval('$!from'),
-                ival(nqp::hintfor($cursor_type, '$!from'))),
+                ival(nqp::hintfor($*cursor_type, '$!from'))),
             op('getattr_o', $bstack, $cur, $curclass, sval('$!bstack'),
-                ival(nqp::hintfor($cursor_type, '$!bstack'))),
+                ival(nqp::hintfor($*cursor_type, '$!bstack'))),
             op('getattr_o', $tmp, $self, $curclass, sval('$!restart'),
-                ival(nqp::hintfor($cursor_type, '$!restart'))),
+                ival(nqp::hintfor($*cursor_type, '$!restart'))),
             op('isconcrete', $i19, $tmp),
             op('bindlex', $*BLOCK.resolve_lexical('$¢'), $cur),
             op('graphs_s', $eos, $tgt),
@@ -164,7 +164,8 @@ class QAST::MASTRegexCompiler {
         my $i18 := fresh_i();
         merge_ins(@ins, [
             $restartlabel,
-            op('getattr_o', $cstack, $cur, $curclass, sval('$!cstack'), ival(-1)),
+            op('getattr_o', $cstack, $cur, $curclass, sval('$!cstack'),
+                ival(nqp::hintfor($*cursor_type, '$!cstack'))),
             $faillabel,
             op('isnull', $i0, $bstack),
             op('if_i', $i0, $donelabel),
@@ -663,7 +664,8 @@ class QAST::MASTRegexCompiler {
         my $donelabel := label($prefix ~ '_done');
         my $ireg0 := fresh_i();
         my @ins := [
-            op('getattr_i', $ireg0, %*REG<self>, %*REG<curclass>, sval('$!from'), ival(-1)),
+            op('getattr_i', $ireg0, %*REG<self>, %*REG<curclass>, sval('$!from'),
+                ival(nqp::hintfor($*cursor_type, '$!from'))),
             op('ne_i', $ireg0, $ireg0, %*REG<negone>),
             op('if_i', $ireg0, $donelabel),
             op('goto', $scanlabel),
@@ -776,7 +778,8 @@ class QAST::MASTRegexCompiler {
             ]);
         }
         merge_ins(@ins, [
-            op('getattr_i', $i11, $p11, %*REG<curclass>, sval('$!pos'), ival(-1)),
+            op('getattr_i', $i11, $p11, %*REG<curclass>, sval('$!pos'),
+                ival(nqp::hintfor($*cursor_type, '$!pos'))),
             op($testop, $i11, $i11, %*REG<zero>),
             op('if_i', $i11, %*REG<fail>)
         ]);
@@ -800,7 +803,8 @@ class QAST::MASTRegexCompiler {
                     # %*REG<P11> ($p11 here) is magically set just before the jump at the backtracker
                     op('findmeth', %*REG<method>, $p11, sval('!cursor_next')),
                     call(%*REG<method>, [$Arg::obj], $p11, :result($p11)),
-                    op('getattr_i', $i11, $p11, %*REG<curclass>, sval('$!pos'), ival(-1)),
+                    op('getattr_i', $i11, $p11, %*REG<curclass>, sval('$!pos'),
+                        ival(nqp::hintfor($*cursor_type, '$!pos'))),
                     op($testop, $i11, $i11, %*REG<zero>),
                     op('if_i', $i11, %*REG<fail>),
                     $passlabel
@@ -846,7 +850,8 @@ class QAST::MASTRegexCompiler {
         }
 
         nqp::push(@ins, op('getattr_i', %*REG<pos>, $p11, %*REG<curclass>,
-            sval('$!pos'), ival(-1))) unless $subtype eq 'zerowidth';
+            sval('$!pos'), ival(nqp::hintfor($*cursor_type, '$!pos'))))
+                unless $subtype eq 'zerowidth';
 
         release($i11, $MVM_reg_int64);
 
