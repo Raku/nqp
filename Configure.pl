@@ -29,6 +29,7 @@ MAIN: {
                'with-parrot=s', 'gen-parrot:s',
                'make-install!', 'makefile-timing!',
                'backends=s', 'gen-moar:s', 'moar-option=s@',
+               'git-protocol=s',
                'parrot-config=s', 'parrot-option=s@');
 
     # Print help if it's requested
@@ -323,6 +324,8 @@ General Options:
     --gen-moar         Download and build a copy of MoarVM to use
     --moar-option='--option=value'
                        Options to pass to MoarVM configuration for --gen-moar
+    --git-protocol={ssh,https,git}
+                       Protocol to use for git clone. Default: https
 
 Configure.pl also reads options from 'config.default' in the current directory.
 END
