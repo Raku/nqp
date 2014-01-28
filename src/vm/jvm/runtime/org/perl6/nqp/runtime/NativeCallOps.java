@@ -131,11 +131,8 @@ public final class NativeCallOps {
         case CSTRUCT:
             return ((CStructREPRData) smoType.st.REPRData).structureClass;
         default:
-            ExceptionHandling.dieInternal(tc, String.format("Don't know correct Java class for %s arguments yet", target));
+            throw ExceptionHandling.dieInternal(tc, String.format("Don't know correct Java class for %s arguments yet", target));
         }
-
-        /* And a dummy return to placate the Java flow analysis. */
-        return null;
     }
 
     public static Object toJNAType(ThreadContext tc, SixModelObject o, ArgType target) {
@@ -174,11 +171,8 @@ public final class NativeCallOps {
         case CSTRUCT:
             return ((CStructInstance) o).storage;
         default:
-            ExceptionHandling.dieInternal(tc, String.format("Don't know how to convert %s arguments to JNA yet", target));
+            throw ExceptionHandling.dieInternal(tc, String.format("Don't know how to convert %s arguments to JNA yet", target));
         }
-
-        /* And a dummy return to placate the Java flow analysis. */
-        return null;
     }
 
     public static SixModelObject toNQPType(ThreadContext tc, ArgType target, SixModelObject type, Object o) {
@@ -247,7 +241,7 @@ public final class NativeCallOps {
             break;
         }
         default:
-            ExceptionHandling.dieInternal(tc, String.format("Don't know how to convert %s arguments to NQP yet", target));
+            throw ExceptionHandling.dieInternal(tc, String.format("Don't know how to convert %s arguments to NQP yet", target));
         }
 
         return nqpobj;
