@@ -35,7 +35,7 @@ class NQP::Optimizer {
             ?? nqp::substr($opname, nqp::chars($opname) - 2, 2)
             !! "";
         my int $und := nqp::index($opname, '_');
-        my str $asm := $und ?? nqp::substr($opname, 0, $und) !! '';
+        my str $asm := $und > 0 ?? nqp::substr($opname, 0, $und) !! '';
         if $typeinfo eq '_n' && nqp::existskey(%opt_n_i, $asm) {
             self.num_to_int($op, $asm);
         }
