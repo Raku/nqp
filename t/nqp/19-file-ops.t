@@ -143,17 +143,29 @@ nqp::unlink($test-file ~ '-linked');
 
 # symlink
 
-nqp::unlink($test-file ~ '-symlink') if nqp::stat($test-file ~ '-symlink', nqp::const::STAT_EXISTS);
-$fh := nqp::open($test-file, 'w');
-nqp::printfh($fh, 'Hello');
-nqp::closefh($fh);
-nqp::symlink($test-file, $test-file ~ '-symlink');
-ok(nqp::stat($test-file ~ '-symlink', nqp::const::STAT_EXISTS), 'the symbolic link should exist');
-if nqp::getcomp('nqp').backend.name eq 'parrot' {
-    ok(1, 'ok 45 # Skipped: stat + STAT_ISLNK is broken on parrot');
+my $tmp_file := "tmp";
+my $env := nqp::getenvhash();
+$env<NQP_SHELL_TEST_ENV_VAR> := "123foo";
+nqp::shell("echo %NQP_SHELL_TEST_ENV_VAR% > $tmp_file",nqp::cwd(),$env);
+my $output := slurp($tmp_file);
+my $is-windows := $output ne "%NQP_SHELL_TEST_ENV_VAR%\n";
+
+if $is-windows {
+    ok(1, "ok $_ # Skipped: symlink not tested on Windows") for (44, 45);
 }
 else {
-    ok(nqp::stat($test-file ~ '-symlink', nqp::const::STAT_ISLNK), 'the symbolic link should actually *be* a symbolic link');
+    nqp::unlink($test-file ~ '-symlink') if nqp::stat($test-file ~ '-symlink', nqp::const::STAT_EXISTS);
+    $fh := nqp::open($test-file, 'w');
+    nqp::printfh($fh, 'Hello');
+    nqp::closefh($fh);
+    nqp::symlink($test-file, $test-file ~ '-symlink');
+    ok(nqp::stat($test-file ~ '-symlink', nqp::const::STAT_EXISTS), 'the symbolic link should exist');
+    if nqp::getcomp('nqp').backend.name eq 'parrot' {
+        ok(1, 'ok 45 # Skipped: stat + STAT_ISLNK is broken on parrot');
+    }
+    else {
+        ok(nqp::stat($test-file ~ '-symlink', nqp::const::STAT_ISLNK), 'the symbolic link should actually *be* a symbolic link');
+    }
+    nqp::unlink($test-file);
+    nqp::unlink($test-file ~ '-symlink');
 }
-nqp::unlink($test-file);
-nqp::unlink($test-file ~ '-symlink');
