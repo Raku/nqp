@@ -832,7 +832,7 @@ public final class Ops {
         Path before_o = Paths.get(before);
         Path after_o = Paths.get(after);
         try {
-            Files.createLink(before_o, after_o);
+            Files.createLink(after_o, before_o);
         }
         catch (Exception e) {
             die_s(IOExceptionMessages.message(e), tc);
