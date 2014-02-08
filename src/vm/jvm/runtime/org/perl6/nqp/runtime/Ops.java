@@ -1685,6 +1685,11 @@ public final class Ops {
         
         return result;
     }
+
+    /* Bind error reporting. */
+    public static void paramcheckassertfail(ThreadContext tc) {
+        throw ExceptionHandling.dieInternal(tc, "Parameter check assert failed; error generation NYI");
+    }
     
     /* Return value setting. */
     public static void return_o(SixModelObject v, CallFrame cf) {

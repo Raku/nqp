@@ -3229,7 +3229,7 @@ class QAST::CompilerJAST {
             # Look for one required positional case. Methods with no params
             # beyond the invocant are always this.
             my $param := $block.params[0];
-            if !$param.named && !$param.slurpy && !$param.default {
+            if !$param.named && !$param.slurpy && !$param.default && !$param.list {
                 if nqp::objprimspec($param.returns) == 0 {
                     $jmeth.add_argument('__arg_0', $TYPE_SMO);
                     $il.append(JAST::Instruction.new( :op('aload'), '__arg_0' ));
@@ -3257,7 +3257,7 @@ class QAST::CompilerJAST {
         elsif $num_params == 2 {
             my $is_obj_obj := 1;
             for $block.params {
-                if $_.named || $_.slurpy || $_.default || nqp::objprimspec($_.returns) != 0 {
+                if $_.named || $_.slurpy || $_.default || nqp::objprimspec($_.returns) != 0 || $_.list {
                     $is_obj_obj := 0;
                     last;
                 }
@@ -3477,6 +3477,29 @@ class QAST::CompilerJAST {
                             'bindlex_' ~ typechar($type), $jtype, $jtype, $TYPE_CF, 'Integer' ));
                         $il.append(pop_ins($type));
                     }
+
+                    # Emit any additional tasks and typechecks.
+                    for $_.list {
+                        my $*BLOCK := $block;
+                        if nqp::istype($_, QAST::ParamTypeCheck) {
+                            my $lbl := JAST::Label.new( :name(self.unique("tc_ok")) );
+                            my $tc := self.as_jast($_[0], :want($RT_INT));
+                            $il.append($tc.jast);
+                            $*STACK.obtain($il, $tc);
+                            $il.append($L2I);
+                            $il.append(JAST::Instruction.new( :op('ifne'), $lbl ));
+                            $il.append(JAST::Instruction.new( :op('aload'), 'tc' ));
+                            $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+                                "paramcheckassertfail", 'V', $TYPE_TC ));
+                            $il.append($lbl);
+                        }
+                        else {
+                            my $task := self.as_jast($_, :want($RT_VOID));
+                            $il.append($task.jast);
+                            $*STACK.obtain($il, $task);
+                        }
+                    }
+
                     $param_idx++;
                 }
             }
