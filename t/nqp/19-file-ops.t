@@ -2,7 +2,7 @@
 
 # Test nqp::op file operations.
 
-plan(43);
+plan(45);
 
 ok( nqp::stat('CREDITS', nqp::const::STAT_EXISTS) == 1, 'nqp::stat exists');
 ok( nqp::stat('AARDVARKS', nqp::const::STAT_EXISTS) == 0, 'nqp::stat not exists');
@@ -140,3 +140,15 @@ ok(nqp::stat($test-file, nqp::const::STAT_PLATFORM_DEV) == nqp::stat($test-file 
 ok(nqp::stat($test-file, nqp::const::STAT_PLATFORM_INODE) == nqp::stat($test-file ~ '-linked', nqp::const::STAT_PLATFORM_INODE), "a hard link should share the original's inode number");
 nqp::unlink($test-file);
 nqp::unlink($test-file ~ '-linked');
+
+# symlink
+
+nqp::unlink($test-file ~ '-symlink') if nqp::stat($test-file ~ '-symlink', nqp::const::STAT_EXISTS);
+$fh := nqp::open($test-file, 'w');
+nqp::printfh($fh, 'Hello');
+nqp::closefh($fh);
+nqp::symlink($test-file, $test-file ~ '-symlink');
+ok(nqp::stat($test-file ~ '-symlink', nqp::const::STAT_EXISTS), 'the symbolic link should exist');
+ok(nqp::stat($test-file ~ '-symlink', nqp::const::STAT_ISLNK), 'the symbolic link should actually *be* a symbolic link');
+nqp::unlink($test-file);
+nqp::unlink($test-file ~ '-symlink');
