@@ -1072,16 +1072,10 @@ for ('', 'repeat_') -> $repness {
                 $testil.append(dup_ins($cond_res.type));
                 $testil.append(JAST::Instruction.new( :op(store_ins($cond_res.type)), $im_local ));
             }
-            
-            # Compile loop body, then do any analysis of result type if
-            # in non-void context.
-            my $body_res := $qastcomp.as_jast_in_handler(@operands[1], $nr_handler_id || $*HANDLER_IDX);
             my $res;
             my $res_type;
             if $*WANT != $RT_VOID {
-                $res_type := $cond_res.type == $body_res.type
-                    ?? $cond_res.type
-                    !! $RT_OBJ;
+                $res_type := $cond_res.type;
                 $res := $*TA."fresh_{typechar($res_type)}"();
             }
             
@@ -1099,18 +1093,13 @@ for ('', 'repeat_') -> $repness {
                 :op($op_name eq 'while' ?? 'ifeq' !! 'ifne')));
 
             # Emit the loop body; stash the result if needed.
+            my $body_res := $qastcomp.as_jast_in_handler(@operands[1], $nr_handler_id || $*HANDLER_IDX);
             my $il := JAST::InstructionList.new();
             $il.append($redo_lbl);
             my $body_il := JAST::InstructionList.new();
             $body_il.append($body_res.jast);
             $*STACK.obtain($body_il, $body_res);
-            if $res {
-                $body_il.append($qastcomp.coercion($body_res, $res_type));
-                $body_il.append(JAST::Instruction.new( :op(store_ins($res_type)), $res ));
-            }
-            else {
-                $body_il.append(pop_ins($body_res.type));
-            }
+            $body_il.append(pop_ins($body_res.type));
             
             # Add redo and next handler if needed.
             if $handler {
