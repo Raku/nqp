@@ -140,4 +140,3 @@ ok(nqp::stat($test-file, nqp::const::STAT_PLATFORM_DEV) == nqp::stat($test-file 
 ok(nqp::stat($test-file, nqp::const::STAT_PLATFORM_INODE) == nqp::stat($test-file ~ '-linked', nqp::const::STAT_PLATFORM_INODE), "a hard link should share the original's inode number");
 nqp::unlink($test-file);
 nqp::unlink($test-file ~ '-linked');
-# XXX shares inode
