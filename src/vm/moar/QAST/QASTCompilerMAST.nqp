@@ -659,6 +659,9 @@ class QAST::MASTCompiler {
                 my $*MAST_FRAME := $frame;
 
                 my $*WANT;
+                if $node.blocktype eq 'immediate' || $node.blocktype eq 'immediate_static' {
+                    $*WANT := $want;
+                }
                 $ins := self.compile_all_the_stmts(@($node));
 
                 # Add to instructions list for this block.
@@ -841,27 +844,39 @@ class QAST::MASTCompiler {
         }
 
         if $node.blocktype eq 'raw' || !nqp::istype($outer, BlockInfo) {
-            return MAST::InstructionList.new(nqp::list(), MAST::VOID, $MVM_reg_void);
+            MAST::InstructionList.new(nqp::list(), MAST::VOID, $MVM_reg_void);
         }
         elsif $node.blocktype eq 'immediate' {
             my $clone_reg := $*BLOCK.clone_inner($node);
-            my $res_reg   := $*REGALLOC.fresh_register($block.return_kind);
-            my @ins;
-            nqp::push(@ins, MAST::Call.new(
-                :target($clone_reg), :flags([]), :result($res_reg)
-            ));
-            MAST::InstructionList.new(@ins, $res_reg, $block.return_kind)
+            if nqp::defined($want) && $want == $MVM_reg_void {
+                my @ins;
+                nqp::push(@ins, MAST::Call.new( :target($clone_reg), :flags([]) ));
+                MAST::InstructionList.new(@ins, MAST::VOID, $MVM_reg_void);
+            }
+            else {
+                my $res_reg   := $*REGALLOC.fresh_register($block.return_kind);
+                my @ins;
+                nqp::push(@ins, MAST::Call.new(
+                    :target($clone_reg), :flags([]), :result($res_reg)
+                ));
+                MAST::InstructionList.new(@ins, $res_reg, $block.return_kind)
+            }
         }
         elsif $node.blocktype eq 'immediate_static' {
             $*BLOCK.capture_inner($node);
             my $code_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
-            my $res_reg  := $*REGALLOC.fresh_register($block.return_kind);
             my @ins;
             push_op(@ins, 'getcode', $code_reg, %*MAST_FRAMES{$node.cuid});
-            nqp::push(@ins, MAST::Call.new(
-                :target($code_reg), :flags([]), :result($res_reg)
-            ));
-            MAST::InstructionList.new(@ins, $res_reg, $block.return_kind)
+            if nqp::defined($want) && $want == $MVM_reg_void {
+                nqp::push(@ins, MAST::Call.new( :target($code_reg), :flags([]) ));
+                MAST::InstructionList.new(@ins, MAST::VOID, $MVM_reg_void);
+            } else {
+                my $res_reg  := $*REGALLOC.fresh_register($block.return_kind);
+                nqp::push(@ins, MAST::Call.new(
+                    :target($code_reg), :flags([]), :result($res_reg)
+                ));
+                MAST::InstructionList.new(@ins, $res_reg, $block.return_kind)
+            }
         }
         elsif $node.blocktype eq '' || $node.blocktype eq 'declaration' {
             my $clone_reg := $*BLOCK.clone_inner($node);
@@ -935,7 +950,12 @@ class QAST::MASTCompiler {
             # the last statement,
                     || $resultchild == -1 && $result_count == $final_stmt_idx) {
                 # compile $_ with an explicit $want, either what's given or obj
-                $last_stmt := self.as_mast($_, :want($WANT // $MVM_reg_obj));
+                $last_stmt := nqp::defined($WANT)
+                    ?? self.as_mast($_, :want($WANT))
+                    !! self.as_mast($_);
+                if $last_stmt.result_kind == $MVM_reg_void {
+                    $last_stmt := self.coerce($last_stmt, $MVM_reg_obj);
+                }
                 $use_result := 1;
             }
             else {
