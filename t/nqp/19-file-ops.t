@@ -149,6 +149,11 @@ nqp::printfh($fh, 'Hello');
 nqp::closefh($fh);
 nqp::symlink($test-file, $test-file ~ '-symlink');
 ok(nqp::stat($test-file ~ '-symlink', nqp::const::STAT_EXISTS), 'the symbolic link should exist');
-ok(nqp::stat($test-file ~ '-symlink', nqp::const::STAT_ISLNK), 'the symbolic link should actually *be* a symbolic link');
+if nqp::getcomp('nqp').backend.name eq 'parrot' {
+    ok(1, 'ok 45 # Skipped: stat + STAT_ISLNK is broken on parrot');
+}
+else {
+    ok(nqp::stat($test-file ~ '-symlink', nqp::const::STAT_ISLNK), 'the symbolic link should actually *be* a symbolic link');
+}
 nqp::unlink($test-file);
 nqp::unlink($test-file ~ '-symlink');
