@@ -1264,13 +1264,10 @@ QAST::OperationsJAST.add_core_op('for', -> $qastcomp, $op {
     for @val_temps {
         $inv_ast.push(QAST::Var.new( :name($_), :scope('local') ));
     }
-    my $inv_res := $qastcomp.as_jast($inv_ast, :want($res ?? $RT_OBJ !! $RT_VOID));
+    my $inv_res := $qastcomp.as_jast($inv_ast, :want($RT_VOID));
     my $inv_il := JAST::InstructionList.new();
     $inv_il.append($inv_res.jast);
     $*STACK.obtain($inv_il, $inv_res);
-    if $res {
-        $inv_il.append(JAST::Instruction.new( :op('astore'), $res ));
-    }
 
     # Wrap block invocation in redo handler if needed.
     if $handler {
