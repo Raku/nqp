@@ -2,7 +2,7 @@
 
 # Test nqp::op file operations.
 
-plan(40);
+plan(43);
 
 ok( nqp::stat('CREDITS', nqp::const::STAT_EXISTS) == 1, 'nqp::stat exists');
 ok( nqp::stat('AARDVARKS', nqp::const::STAT_EXISTS) == 0, 'nqp::stat not exists');
@@ -128,3 +128,16 @@ else {
     ok(nqp::readlinefh($fh) eq "line4",     'reading a line till EOF');
     nqp::closefh($fh);
 }
+
+# link
+nqp::unlink($test-file ~ '-linked') if nqp::stat($test-file ~ '-linked', nqp::const::STAT_EXISTS);
+$fh := nqp::open($test-file, 'w');
+nqp::printfh($fh, 'Hello');
+nqp::closefh($fh);
+nqp::link($test-file, $test-file ~ '-linked');
+ok(nqp::stat($test-file ~ '-linked', nqp::const::STAT_EXISTS), 'the hard link should exist');
+ok(nqp::stat($test-file, nqp::const::STAT_PLATFORM_DEV) == nqp::stat($test-file ~ '-linked', nqp::const::STAT_PLATFORM_DEV), "a hard link should share the original's device number");
+ok(nqp::stat($test-file, nqp::const::STAT_PLATFORM_INODE) == nqp::stat($test-file ~ '-linked', nqp::const::STAT_PLATFORM_INODE), "a hard link should share the original's inode number");
+nqp::unlink($test-file);
+nqp::unlink($test-file ~ '-linked');
+# XXX shares inode
