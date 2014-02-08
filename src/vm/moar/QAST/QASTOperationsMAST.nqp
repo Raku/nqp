@@ -940,18 +940,17 @@ for ('', 'repeat_') -> $repness {
                     QAST::Var.new( :name($cond_temp), :scope('local') ));
             }
 
-            # Compile each of the children; we'll need to look at the result
-            # types and pick an overall result type if in non-void context.
+            # Compile each of the children.
             my @comp_ops;
             my @comp_types;
             for @children {
-                my $comp := $qastcomp.as_mast($_);
+                my $comp := nqp::elems(@comp_ops) == 0
+                    ?? $qastcomp.as_mast($_)
+                    !! $qastcomp.as_mast($_, :want($MVM_reg_void));
                 @comp_ops.push($comp);
                 @comp_types.push($comp.result_kind);
             }
-            my $res_kind := @comp_types[0] == @comp_types[1]
-                ?? @comp_types[0]
-                !! $MVM_reg_obj;
+            my $res_kind := @comp_types[0];
             my $res_reg := $*REGALLOC.fresh_register($res_kind);
 
             # Check operand count.
@@ -962,7 +961,6 @@ for ('', 'repeat_') -> $repness {
             # Test the condition and jump to the loop end if it's
             # not met.
             my @loop_il;
-            my $coerced := $qastcomp.coerce(@comp_ops[0], $res_kind);
             if $repness {
                 # It's a repeat_ variant, need to go straight into the
                 # loop body unconditionally. Be sure to set the register
@@ -984,8 +982,8 @@ for ('', 'repeat_') -> $repness {
                 push_op(@loop_il, 'goto', $redo_lbl);
             }
             nqp::push(@loop_il, $test_lbl);
-            push_ilist(@loop_il, $coerced);
-            push_op(@loop_il, 'set', $res_reg, $coerced.result_reg);
+            push_ilist(@loop_il, @comp_ops[0]);
+            push_op(@loop_il, 'set', $res_reg, @comp_ops[0].result_reg);
             if @comp_ops[0].result_kind == $MVM_reg_obj {
                 push_op(@loop_il, 'decont', @comp_ops[0].result_reg, @comp_ops[0].result_reg);
             }
@@ -1004,7 +1002,6 @@ for ('', 'repeat_') -> $repness {
             my $body := $qastcomp.coerce(@comp_ops[1], $res_kind);
             nqp::push(@loop_il, $redo_lbl);
             push_ilist(@loop_il, $body);
-            push_op(@loop_il, 'set', $res_reg, $body.result_reg);
 
             # If there's a third child, evaluate it as part of the
             # "next".
