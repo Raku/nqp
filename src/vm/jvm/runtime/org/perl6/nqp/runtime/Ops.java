@@ -956,7 +956,7 @@ public final class Ops {
         Path before_o = Paths.get(before);
         Path after_o = Paths.get(after);
         try {
-            Files.createSymbolicLink(before_o, after_o);
+            Files.createSymbolicLink(after_o, before_o);
         }
         catch (Exception e) {
             die_s(IOExceptionMessages.message(e), tc);
