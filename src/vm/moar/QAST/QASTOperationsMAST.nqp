@@ -1072,17 +1072,11 @@ QAST::MASTOperations.add_core_op('for', -> $qastcomp, $op {
         @operands[1].blocktype('declaration_static');
     }
 
-    # Create result temporary if we'll need one.
-    my $res := $*WANT == $MVM_reg_void ?? 0 !! $*REGALLOC.fresh_o();
-
     # Evaluate the thing we'll iterate over, get the iterator and
     # store it in a temporary.
     my $il := [];
     my $list_il := $qastcomp.as_mast(@operands[0], :want($MVM_reg_obj));
     push_ilist($il, $list_il);
-    if $res {
-        push_op($il, 'set', $res, $list_il.result_reg);
-    }
     my $iter_tmp := $*REGALLOC.fresh_o();
     push_op($il, 'iter', $iter_tmp, $list_il.result_reg);
 
@@ -1119,18 +1113,11 @@ QAST::MASTOperations.add_core_op('for', -> $qastcomp, $op {
     $val_il := MAST::InstructionList.new($val_il, MAST::VOID, $MVM_reg_void);
 
     # Now do block invocation.
-    my $inv_il := $res
-        ?? MAST::Call.new(
-            :target($block_res.result_reg),
-            :flags(@arg_flags),
-            |@val_temps,
-            :result($res)
-        )
-        !! MAST::Call.new(
-            :target($block_res.result_reg),
-            :flags(@arg_flags),
-            |@val_temps
-        );
+    my $inv_il := MAST::Call.new(
+        :target($block_res.result_reg),
+        :flags(@arg_flags),
+        |@val_temps
+    );
     $inv_il := MAST::InstructionList.new([$inv_il], MAST::VOID, $MVM_reg_void);
     push_ilist($val_il.instructions, $inv_il);
 
@@ -1165,13 +1152,18 @@ QAST::MASTOperations.add_core_op('for', -> $qastcomp, $op {
     }
     nqp::push($il, $lbl_done);
 
-    # Result, as needed.
-    my $result := $res ?? MAST::InstructionList.new($il, $res, $*WANT) !! MAST::InstructionList.new($il, MAST::VOID, $MVM_reg_void);
-    $*REGALLOC.release_register($list_il.result_reg, $list_il.result_kind);
+    # Result; probably void, though evaluate to the input list if we must
+    # give a value.
     $*REGALLOC.release_register($block_res.result_reg, $block_res.result_kind);
     for @val_temps { $*REGALLOC.release_register($_, $MVM_reg_obj) }
     $*REGALLOC.release_register($inv_il.result_reg, $inv_il.result_kind);
-    $result
+    if $*WANT == $MVM_reg_void {
+        $*REGALLOC.release_register($list_il.result_reg, $list_il.result_kind);
+        MAST::InstructionList.new($il, MAST::VOID, $MVM_reg_void)
+    }
+    else {
+        MAST::InstructionList.new($il, $list_il.result_reg, $list_il.result_kind)
+    }
 });
 
 # Calling
