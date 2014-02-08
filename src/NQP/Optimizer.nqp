@@ -18,6 +18,8 @@ class NQP::Optimizer {
         $block;
     }
 
+    my %opt_n_i := nqp::hash('add', 1, 'sub', 1, 'mul', 1, 'iseq', 1, 'isne', 1,
+                             'islt', 1, 'isle', 1, 'isgt', 1, 'isge', 1, 'cmp', 1);
     method visit_op($op) {
         # Handle op needs special handling.
         my str $opname := $op.op;
@@ -32,8 +34,9 @@ class NQP::Optimizer {
         my $typeinfo := nqp::chars($opname) > 2
             ?? nqp::substr($opname, nqp::chars($opname) - 2, 2)
             !! "";
-        my $asm := nqp::substr($opname, 0, 3);
-        if $typeinfo eq '_n' && ($asm eq 'add' || $asm eq 'sub' || $asm eq 'mul') {
+        my int $und := nqp::index($opname, '_');
+        my str $asm := $und ?? nqp::substr($opname, 0, $und) !! '';
+        if $typeinfo eq '_n' && nqp::existskey(%opt_n_i, $asm) {
             self.num_to_int($op, $asm);
         }
         
