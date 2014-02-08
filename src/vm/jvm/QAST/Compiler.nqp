@@ -3366,7 +3366,19 @@ class QAST::CompilerJAST {
             # If we have custom args processing, we always take an args array.
             my $il := JAST::InstructionList.new();
             if $node.custom_args {
+                # The block does args processing itself, we accept any number of args.
                 $*JMETH.add_argument('__args', "[$TYPE_OBJ");
+                $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
+                $il.append(JAST::Instruction.new( :op('aload'), 'csd' ));
+                $il.append(JAST::Instruction.new( :op('aload'), '__args' ));
+                $il.append(JAST::PushIndex.new( :value(0) ));
+                $il.append(JAST::PushIndex.new( :value(-1) ));
+                $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+                    "checkarity", $TYPE_CSD, $TYPE_CF, $TYPE_CSD, "[$TYPE_OBJ", 'Integer', 'Integer' ));
+                $il.append(JAST::Instruction.new( :op('astore'), 'csd' ));
+                $il.append($ALOAD_1);
+                $il.append(JAST::Instruction.new( :op('getfield'), $TYPE_TC, 'flatArgs', "[$TYPE_OBJ" ));
+                $il.append(JAST::Instruction.new( :op('astore'), '__args' ));
             }
             elsif !self.try_setup_args_expectation($*JMETH, $block, $il) {
                 # Analyze parameters to get count of required/optional and make sure
