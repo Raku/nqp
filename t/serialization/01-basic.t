@@ -1,6 +1,6 @@
 #! nqp
 
-plan(1355);
+plan(1421);
 
 sub add_to_sc($sc, $idx, $obj) {
     nqp::scsetobj($sc, $idx, $obj);
@@ -469,4 +469,15 @@ sub round_trip_int_array($seq, $desc, @a) {
     }
 
     round_trip_int_array(70, 'special case integers', @a);
+}
+
+{
+    my @a;
+    my $i := 0;
+    while ($i < 64) {
+        nqp::push(@a, nqp::bitxor_i(-1, nqp::bitshiftl_i(1, $i)));
+        ++$i;
+    }
+
+    round_trip_int_array(71, 'integers with one zero bit', @a);
 }
