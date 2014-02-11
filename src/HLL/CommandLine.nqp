@@ -186,8 +186,8 @@ class HLL::CommandLine::Parser {
     }
 
     method parse(@args) {
-        my $i := 0;
-        my $arg-count := +@args;
+        my int $i := 0;
+        my int $arg-count := nqp::elems(@args);
 
         my $result := HLL::CommandLine::Result.new();
         $result.init();

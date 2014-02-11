@@ -542,8 +542,8 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                                      QAST::Regex.new( :rxtype<cclass>, :name<.> ));
         }
         
-        my $i := 1;
-        my $n := +$clist;
+        my int $i := 1;
+        my int $n := nqp::elems($clist);
         while $i < $n {
             my $ast := $clist[$i].ast;
             if $ast.negate || $ast.rxtype eq 'cclass' && ~$ast.node le 'Z' {

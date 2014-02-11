@@ -16,7 +16,7 @@ class QRegex::Optimizer {
     }
 
     method all_subtypes($node, $type) {
-        my $res := 0;
+        my int $res := 0;
         for $node {
             if $node.rxtype eq $type {
                 $res++

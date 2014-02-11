@@ -73,7 +73,7 @@ my module sprintf {
 
         sub infix_x($s, $n) {
             my @strings;
-            my $i := 0;
+            my int $i := 0;
             @strings.push($s) while $i++ < $n;
             nqp::join('', @strings);
         }

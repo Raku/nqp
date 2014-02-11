@@ -73,9 +73,9 @@ my knowhow NQPRoutine {
             }
 
             # Analyse each parameter in the two candidates.
-            my $i := 0;
-            my $narrower := 0;
-            my $tied := 0;
+            my int $i := 0;
+            my int $narrower := 0;
+            my int $tied := 0;
             while $i < $types_to_check {
                 my $type_obj_a := %a<types>[$i];
                 my $type_obj_b := %b<types>[$i];
@@ -108,8 +108,8 @@ my knowhow NQPRoutine {
 
         # Create a node for each candidate in the graph.
         my @graph;
-        my $num_candidates := nqp::elems($!dispatchees);
-        my $i := 0;
+        my int $num_candidates := nqp::elems($!dispatchees);
+        my int $i := 0;
         while $i < $num_candidates {
             # Get hold of signature, types and definednesses.
             my $candidate := $!dispatchees[$i];
@@ -128,7 +128,7 @@ my knowhow NQPRoutine {
                 'num_types',     0
             );
             my %significant_param := 0;
-            my $j := 0;
+            my int $j := 0;
             while $j < $sig_elems {
                 # XXX TODO: Worry about optional and slurpy later.
                 %info<max_arity>++;
@@ -157,7 +157,7 @@ my knowhow NQPRoutine {
         # and create the edges.
         $i := 0;
         while $i < $num_candidates {
-            my $j := 0;
+            my int $j := 0;
             while $j < $num_candidates {
                 if ($i != $j) {
                     if is_narrower(@graph[$i]<info>, @graph[$j]<info>) {
@@ -179,7 +179,7 @@ my knowhow NQPRoutine {
 
             # Find any nodes that have no incoming edges and add them to
             # results.
-            my $i := 0;
+            my int $i := 0;
             while $i < $num_candidates {
                 if @graph[$i]<edges_in> == 0 {
                     # Add to results.
@@ -235,10 +235,10 @@ my knowhow NQPRoutine {
         my @possibles;
 
         # Go thorugh candidates.
-        my $type_mismatch;
-        my $type_check_count;
-        my $i;
-        my $cur_idx := 0;
+        my int $type_mismatch;
+        my int $type_check_count;
+        my int $i;
+        my int $cur_idx := 0;
         my $cur_candidate;
         while 1 {
             $cur_candidate := @candidates[$cur_idx];
