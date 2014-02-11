@@ -1,6 +1,6 @@
 #! nqp
 
-plan(1341);
+plan(1355);
 
 sub add_to_sc($sc, $idx, $obj) {
     nqp::scsetobj($sc, $idx, $obj);
@@ -441,4 +441,32 @@ sub round_trip_int_array($seq, $desc, @a) {
         ++$i;
         $b := nqp::add_i($b, $b);
     }
+}
+
+{
+    # values around 2 ** 63, and interesting bit patterns.
+    # Need to do these as BigInts parsing strings due to a bug in nqp::radix
+    my @s := (
+               '9223372036854775805', # 0x7FFFFFFFFFFFFFFD
+               '9223372036854775806', # 0x7FFFFFFFFFFFFFFE
+               '9223372036854775807', # 0x7FFFFFFFFFFFFFFF
+              '-9223372036854775808', # 0x8000000000000000
+              '-9223372036854775807', # 0x8000000000000001
+              '-9223372036854775806', # 0x8000000000000002
+                '-81985529216486896', # 0xFEDCBA9876543210
+               '1147797409030816545', # 0x0FEDCBA987654321
+              '-6148914691236517206', # 0xAAAAAAAAAAAAAAAA
+               '6148914691236517205', # 0x5555555555555555
+              '-6510615555426900571', # 0xA5A5A5A5A5A5A5A5
+               '6510615555426900570', # 0x5A5A5A5A5A5A5A5A
+             );
+    my $bi_type := nqp::knowhow().new_type(:name("TestBigInt"), :repr("P6bigint"));
+    $bi_type.HOW.compose($bi_type);
+    my @a;
+    for (@s) {
+        my $bi := nqp::fromstr_I($_, $bi_type);
+        nqp::push(@a, nqp::unbox_i($bi));
+    }
+
+    round_trip_int_array(70, 'special case integers', @a);
 }
