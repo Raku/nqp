@@ -1,6 +1,6 @@
 #! nqp
 
-plan(66);
+plan(585);
 
 sub add_to_sc($sc, $idx, $obj) {
     nqp::scsetobj($sc, $idx, $obj);
@@ -379,4 +379,42 @@ sub add_to_sc($sc, $idx, $obj) {
     ok(nqp::atpos_s(nqp::scgetobj($dsc, 0).a, 0) eq 'cow',   'string array first element is correct');
     ok(nqp::atpos_s(nqp::scgetobj($dsc, 0).a, 1) eq 'sheep', 'string array second element is correct');
     ok(nqp::atpos_s(nqp::scgetobj($dsc, 0).a, 2) eq 'pig',   'string array third element is correct');
+}
+
+# integers
+{
+    my @a;
+
+    my int $i := -258;
+    while ($i <= 258) {
+        nqp::push(@a, $i);
+        $i := $i + 1;
+    }
+    my $elems := nqp::elems(@a);
+
+    my $sc := nqp::createsc('TEST_SC_13_IN');
+    my $sh := nqp::list_s();
+
+    class T12 {
+        has $!a;
+        method set_a(@a) { $!a := @a }
+        method get_a() { $!a }
+    }
+    my $v := T12.new();
+    $v.set_a(@a);
+    add_to_sc($sc, 0, $v);
+
+    my $serialized := nqp::serialize($sc, $sh);
+
+    my $dsc := nqp::createsc('TEST_SC_13_OUT');
+    nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
+
+    ok(nqp::istype(nqp::scgetobj($dsc, 0), Array), 'deserialized object has correct type');
+    my $j := 0;
+    my @b := nqp::scgetobj($dsc, 0).get_a();
+    ok(nqp::elems(@b) == $elems, 'array came back with correct element count');
+    while ($j < $elems) {
+        ok(@b[$j] == @a[$j], 'integer ' ~ @a[$j] ~ ' serialization round trip (' ~ $j ~ ')');
+        ++$j;
+    }
 }
