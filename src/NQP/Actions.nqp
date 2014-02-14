@@ -37,12 +37,12 @@ class NQP::Actions is HLL::Actions {
                       QAST::SVal.new( :value('') )
     }
 
-    method TOP($/) { make $<comp_unit>.ast; }
+    method TOP($/) { make $<comp_unit>.made; }
 
     method deflongname($/) {
         make $<colonpair>
-             ?? ~$<identifier> ~ ':' ~ $<colonpair>.ast.named 
-                    ~ '<' ~ colonpair_str($<colonpair>.ast) ~ '>'
+             ?? ~$<identifier> ~ ':' ~ $<colonpair>.made.named 
+                    ~ '<' ~ colonpair_str($<colonpair>.made) ~ '>'
              !! ~$/;
     }
 

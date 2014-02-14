@@ -57,7 +57,7 @@ my module sprintf {
         my $zero    := nqp::box_i(0, $knowhow);
         method TOP($/) {
             my @statements;
-            @statements.push( $_.ast ) for $<statement>;
+            @statements.push( $_.made ) for $<statement>;
 
             if $assert_used_args && $*ARGS_USED < +@*ARGS_HAVE {
                 nqp::die("Too few directives: found $*ARGS_USED,"
@@ -81,7 +81,7 @@ my module sprintf {
         sub next_argument($/) {
             if $<idx> {
                 $assert_used_args := 0;
-                @*ARGS_HAVE[$<idx>.ast]
+                @*ARGS_HAVE[$<idx>.made]
             }
             else {
                 @*ARGS_HAVE[$*ARGS_USED++]
@@ -135,10 +135,10 @@ my module sprintf {
             elsif $<escape> { $st := $<escape> }
             else { $st := $<literal> }
             my @pieces;
-            @pieces.push: infix_x(padding_char($st), $st<size>.ast - nqp::chars($st.ast)) if $st<size>;
+            @pieces.push: infix_x(padding_char($st), $st<size>.made - nqp::chars($st.made)) if $st<size>;
             has_flag($st, 'minus')
-                ?? @pieces.unshift: $st.ast
-                !! @pieces.push:    $st.ast;
+                ?? @pieces.unshift: $st.made
+                !! @pieces.push:    $st.made;
             make join('', @pieces)
         }
 
@@ -147,8 +147,8 @@ my module sprintf {
             $int := nqp::base_I($int, 2);
             my $pre := ($<sym> eq 'b' ?? '0b' !! '0B') if $int && has_flag($/, 'hash');
             if nqp::chars($<precision>) {
-                $int := '' if $<precision>.ast == 0 && $int == 0;
-                $int := $pre ~ infix_x('0', $<precision>.ast - nqp::chars($int)) ~ $int;
+                $int := '' if $<precision>.made == 0 && $int == 0;
+                $int := $pre ~ infix_x('0', $<precision>.made - nqp::chars($int)) ~ $int;
             }
             else {
                 $int := $pre ~ $int
@@ -166,9 +166,9 @@ my module sprintf {
                 !! has_flag($/, 'plus')
                     ?? '+' !! '';
             $int := nqp::tostr_I(nqp::abs_I($int, $knowhow));
-            $int := nqp::substr($int, 0, $<precision>.ast) if nqp::chars($<precision>);
+            $int := nqp::substr($int, 0, $<precision>.made) if nqp::chars($<precision>);
             if $pad ne ' ' && $<size> {
-                $int := $sign ~ infix_x($pad, $<size>.ast - nqp::chars($int) - 1) ~ $int;
+                $int := $sign ~ infix_x($pad, $<size>.made - nqp::chars($int) - 1) ~ $int;
             }
             else {
                 $int := $sign ~ $int;
@@ -261,23 +261,23 @@ my module sprintf {
 
         method directive:sym<e>($/) {
             my $float := next_argument($/);
-            my $precision := $<precision> ?? $<precision>.ast !! 6;
+            my $precision := $<precision> ?? $<precision>.made !! 6;
             my $pad := padding_char($/);
-            my $size := $<size> ?? $<size>.ast !! 0;
+            my $size := $<size> ?? $<size>.made !! 0;
             make scientific($float, $<sym>, $precision, $size, $pad);
         }
         method directive:sym<f>($/) {
             my $int := next_argument($/);
-            my $precision := $<precision> ?? $<precision>.ast !! 6;
+            my $precision := $<precision> ?? $<precision>.made !! 6;
             my $pad := padding_char($/);
-            my $size := $<size> ?? $<size>.ast !! 0;
+            my $size := $<size> ?? $<size>.made !! 0;
             make fixed-point($int, $precision, $size, $pad);
         }
         method directive:sym<g>($/) {
             my $float := next_argument($/);
-            my $precision := $<precision> ?? $<precision>.ast !! 6;
+            my $precision := $<precision> ?? $<precision>.made !! 6;
             my $pad := padding_char($/);
-            my $size := $<size> ?? $<size>.ast !! 0;
+            my $size := $<size> ?? $<size>.made !! 0;
             make shortest($float, $<sym> eq 'G' ?? 'E' !! 'e', $precision, $size, $pad);
         }
         method directive:sym<o>($/) {
@@ -285,8 +285,8 @@ my module sprintf {
             $int := nqp::base_I($int, 8);
             my $pre := '0' if $int && has_flag($/, 'hash');
             if nqp::chars($<precision>) {
-                $int := '' if $<precision>.ast == 0 && $int == 0;
-                $int := $pre ~ infix_x('0', intify($<precision>.ast) - nqp::chars($int)) ~ $int;
+                $int := '' if $<precision>.made == 0 && $int == 0;
+                $int := $pre ~ infix_x('0', intify($<precision>.made) - nqp::chars($int)) ~ $int;
             }
             else {
                 $int := $pre ~ $int
@@ -296,8 +296,8 @@ my module sprintf {
 
         method directive:sym<s>($/) {
             my $string := next_argument($/);
-            if nqp::chars($<precision>) && nqp::chars($string) > $<precision>.ast {
-                $string := nqp::substr($string, 0, $<precision>.ast);
+            if nqp::chars($<precision>) && nqp::chars($string) > $<precision>.made {
+                $string := nqp::substr($string, 0, $<precision>.made);
             }
             make $string
         }
@@ -321,8 +321,8 @@ my module sprintf {
             $int := nqp::base_I($int, 16);
             my $pre := '0X' if $int && has_flag($/, 'hash');
             if nqp::chars($<precision>) {
-                $int := '' if $<precision>.ast == 0 && $int == 0;
-                $int := $pre ~ infix_x('0', $<precision>.ast - nqp::chars($int)) ~ $int;
+                $int := '' if $<precision>.made == 0 && $int == 0;
+                $int := $pre ~ infix_x('0', $<precision>.made - nqp::chars($int)) ~ $int;
             }
             else {
                 $int := $pre ~ $int
@@ -354,7 +354,7 @@ my module sprintf {
     sub sprintf($format, @arguments) {
         my @*ARGS_HAVE := @arguments;
         $assert_used_args := 1;
-        return Syntax.parse( $format, :actions($actions) ).ast;
+        return Syntax.parse( $format, :actions($actions) ).made;
     }
 
     nqp::bindcurhllsym('sprintf', &sprintf);
@@ -362,7 +362,7 @@ my module sprintf {
     class Directives {
         method TOP($/) {
             my $count := 0;
-            $count := nqp::add_i($count, $_.ast) for $<statement>;
+            $count := nqp::add_i($count, $_.made) for $<statement>;
             make $count
         }
 
@@ -374,7 +374,7 @@ my module sprintf {
     my $directives := Directives.new();
     
     sub sprintfdirectives($format) {
-        return Syntax.parse( $format, :actions($directives) ).ast;
+        return Syntax.parse( $format, :actions($directives) ).made;
     }
 
     nqp::bindcurhllsym('sprintfdirectives', &sprintfdirectives);

@@ -10,11 +10,11 @@ class HLL::Actions {
         if nqp::islist($ints) {
             my $result := '';
             for $ints {
-                $result := $result ~ nqp::chr($_.ast);
+                $result := $result ~ nqp::chr($_.made);
             }
             $result;
         } else {
-            nqp::chr($ints.ast);
+            nqp::chr($ints.made);
         }
     }
     
@@ -98,13 +98,13 @@ class HLL::Actions {
         make $past;
     }
 
-    method term:sym<circumfix>($/) { make $<circumfix>.ast }
+    method term:sym<circumfix>($/) { make $<circumfix>.made }
 
-    method termish($/) { make $<term>.ast; }
+    method termish($/) { make $<term>.made; }
     method nullterm($/) { make NQPMu; }
-    method nullterm_alt($/) { make $<term>.ast; }
+    method nullterm_alt($/) { make $<term>.made; }
 
-    method integer($/) { make $<VALUE>.ast; }
+    method integer($/) { make $<VALUE>.made; }
 
     method dec_number($/) { make +$/; }
 
@@ -163,7 +163,7 @@ class HLL::Actions {
     }
 
     method quote_atom($/) {
-        make $<quote_escape> ?? $<quote_escape>.ast !! ~$/;
+        make $<quote_escape> ?? $<quote_escape>.made !! ~$/;
     }
 
     method quote_escape:sym<backslash>($/) { make "\\"; }
@@ -185,7 +185,7 @@ class HLL::Actions {
     }
 
     method quote_escape:sym<chr>($/) {
-        make $<charspec>.ast;
+        make $<charspec>.made;
     }
 
     method quote_escape:sym<0>($/) {
@@ -198,7 +198,7 @@ class HLL::Actions {
 
     method charname($/) {
         my $codepoint := $<integer>
-                         ?? $<integer>.ast
+                         ?? $<integer>.made
                          !! nqp::codepointfromname(~$/);
         $/.CURSOR.panic("Unrecognized character name $/") if $codepoint < 0;
         make nqp::chr($codepoint);
@@ -206,11 +206,11 @@ class HLL::Actions {
 
     method charnames($/) {
         my $str := '';
-        for $<charname> { $str := $str ~ $_.ast; }
+        for $<charname> { $str := $str ~ $_.made; }
         make $str;
     }
 
     method charspec($/) {
-        make $<charnames> ?? $<charnames>.ast !! nqp::chr(self.string_to_int( $/, 10 ));
+        make $<charnames> ?? $<charnames>.made !! nqp::chr(self.string_to_int( $/, 10 ));
     }
 }
