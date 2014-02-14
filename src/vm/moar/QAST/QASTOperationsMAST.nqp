@@ -808,10 +808,10 @@ QAST::MASTOperations.add_core_op('xor', -> $qastcomp, $op {
     my $endlabel   := MAST::Label.new(:name($qastcomp.unique('xor_end')));
 
     my @comp_ops;
-    my $fpast;
+    my $f_ast;
     for $op.list {
         if $_.named eq 'false' {
-            $fpast := $qastcomp.as_mast($_, :want($MVM_reg_obj));
+            $f_ast := $qastcomp.as_mast($_, :want($MVM_reg_obj));
         }
         else {
             nqp::push(@comp_ops, $qastcomp.as_mast($_, :want($MVM_reg_obj)));
@@ -865,10 +865,10 @@ QAST::MASTOperations.add_core_op('xor', -> $qastcomp, $op {
     push_op(@ops, 'goto', $endlabel);
     nqp::push(@ops, $falselabel);
 
-    if $fpast {
-        push_ilist(@ops, $fpast);
-        push_op(@ops, 'set', $res_reg, $fpast.result_reg);
-        $*REGALLOC.release_register($fpast.result_reg, $MVM_reg_obj);
+    if $f_ast {
+        push_ilist(@ops, $f_ast);
+        push_op(@ops, 'set', $res_reg, $f_ast.result_reg);
+        $*REGALLOC.release_register($f_ast.result_reg, $MVM_reg_obj);
     }
     else {
         push_op(@ops, 'null', $res_reg);

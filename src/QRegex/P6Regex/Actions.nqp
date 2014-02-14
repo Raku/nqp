@@ -165,10 +165,10 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     method metachar:sym<( )>($/) {
-        my $subpast := QAST::Node.new(self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1)));
-        my $qast := QAST::Regex.new( $subpast, $<nibbler>.ast, :rxtype('subrule'),
+        my $sub_ast := QAST::Node.new(self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1)));
+        my $ast := QAST::Regex.new( $sub_ast, $<nibbler>.ast, :rxtype('subrule'),
                                      :subtype('capture'), :node($/) );
-        make $qast;
+        make $ast;
     }
 
     method metachar:sym<'>($/) {
@@ -567,9 +567,9 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     method arglist($/) {
-        my $past := QAST::Op.new( :op('list') );
-        for $<arg> { $past.push( $_.ast ); }
-        make $past;
+        my $ast := QAST::Op.new( :op('list') );
+        for $<arg> { $ast.push( $_.ast ); }
+        make $ast;
     }
 
     method cclass_elem($/) {

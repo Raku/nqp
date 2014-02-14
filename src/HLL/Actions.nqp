@@ -76,26 +76,26 @@ class HLL::Actions {
 
     method EXPR($/, $key?) {
         unless $key { return 0; }
-        my $past := $/.ast // $<OPER>.ast;
-        unless $past {
-            $past := QAST::Op.new( :node($/) );
+        my $ast := $/.ast // $<OPER>.ast;
+        unless $ast {
+            $ast := QAST::Op.new( :node($/) );
             if $<OPER><O><op> {
-                $past.op( ~$<OPER><O><op> );
+                $ast.op( ~$<OPER><O><op> );
             }
             if $key eq 'LIST' { $key := 'infix'; }
             my $name := nqp::lc($key) ~ ':<' ~ $<OPER><sym> ~ '>';
-            $past.name('&' ~ $name);
-            unless $past.op {
-                $past.op('call');
+            $ast.name('&' ~ $name);
+            unless $ast.op {
+                $ast.op('call');
             }
         }
         if $key eq 'POSTFIX' {
-            $past.unshift($/[0].ast);
+            $ast.unshift($/[0].ast);
         }
         else {
-            for $/.list { if nqp::defined($_.ast) { $past.push($_.ast); } }
+            for $/.list { if nqp::defined($_.ast) { $ast.push($_.ast); } }
         }
-        make $past;
+        make $ast;
     }
 
     method term:sym<circumfix>($/) { make $<circumfix>.made }
@@ -114,23 +114,23 @@ class HLL::Actions {
     method binint($/) { make self.string_to_int( $/, 2 ); }
 
     method quote_EXPR($/) {
-        my $past := $<quote_delimited>.ast;
+        my $ast := $<quote_delimited>.ast;
         if %*QUOTEMOD<w> {
-            if nqp::istype($past, QAST::SVal) {
-                my @words := HLL::Grammar::split_words($/, $past.value);
+            if nqp::istype($ast, QAST::SVal) {
+                my @words := HLL::Grammar::split_words($/, $ast.value);
                 if +@words != 1 {
-                    $past := QAST::Op.new( :op('list'), :node($/) );
-                    for @words { $past.push(QAST::SVal.new( :value($_) )); }
+                    $ast := QAST::Op.new( :op('list'), :node($/) );
+                    for @words { $ast.push(QAST::SVal.new( :value($_) )); }
                 }
                 else {
-                    $past := QAST::SVal.new( :value(~@words[0]) );
+                    $ast := QAST::SVal.new( :value(~@words[0]) );
                 }
             }
             else {            
                 $/.CURSOR.panic("Can't form :w list from non-constant strings (yet)");
             }
         }
-        make $past;
+        make $ast;
     }
 
     method quote_delimited($/) {
@@ -155,11 +155,11 @@ class HLL::Actions {
             }
         }
         if $lastlit gt '' { @parts.push(QAST::SVal.new( :value($lastlit) )); }
-        my $past := @parts ?? @parts.shift !! QAST::SVal.new( :value('') );
+        my $ast := @parts ?? @parts.shift !! QAST::SVal.new( :value('') );
         while @parts {
-            $past := QAST::Op.new( $past, @parts.shift, :op('concat') );
+            $ast := QAST::Op.new( $ast, @parts.shift, :op('concat') );
         }
-        make $past;
+        make $ast;
     }
 
     method quote_atom($/) {

@@ -554,7 +554,7 @@ class QAST::MASTCompiler {
         }
 
         # Code references.
-        my $cr_past := QAST::Op.new( :op('list_b'), |@code_ref_blocks );
+        my $cr_ast := QAST::Op.new( :op('list_b'), |@code_ref_blocks );
 
         # Handle repossession conflict resolution code, if any.
         if $repo_conf_res {
@@ -591,7 +591,7 @@ class QAST::MASTCompiler {
                     !! QAST::SVal.new( :value($serialized) ),
                 QAST::Var.new( :name('cur_sc'), :scope('local') ),
                 $sh_ast,
-                QAST::Block.new( :blocktype('immediate'), $cr_past ),
+                QAST::Block.new( :blocktype('immediate'), $cr_ast ),
                 QAST::Var.new( :name('conflicts'), :scope('local') )
             ),
             QAST::Op.new(

@@ -67,10 +67,10 @@ class HLL::World {
     }
     
     # Adds a code reference to the root set of code refs.
-    method add_root_code_ref($code_ref, $past_block) {
+    method add_root_code_ref($code_ref, $ast_block) {
         my $code_ref_idx := $!num_code_refs;
         $!num_code_refs := $!num_code_refs + 1;
-        $!code_ref_blocks.push($past_block);
+        $!code_ref_blocks.push($ast_block);
         nqp::scsetcode($!sc, $code_ref_idx, $code_ref);
         $code_ref_idx
     }
@@ -87,23 +87,23 @@ class HLL::World {
     
     # Add an event that we want to run before deserialization or before any
     # other fixup.
-    method add_load_dependency_task(:$deserialize_past, :$fixup_past) {
+    method add_load_dependency_task(:$deserialize_ast, :$fixup_ast) {
         if $!precomp_mode {
-            @!load_dependency_tasks.push($deserialize_past) if $deserialize_past;
+            @!load_dependency_tasks.push($deserialize_ast) if $deserialize_ast;
         }
         else {
-            @!load_dependency_tasks.push($fixup_past) if $fixup_past;
+            @!load_dependency_tasks.push($fixup_ast) if $fixup_ast;
         }
     }
     
     # Add an event that we need to run at fixup time (after deserialization of
     # between compilation and runtime).
-    method add_fixup_task(:$deserialize_past, :$fixup_past) {
+    method add_fixup_task(:$deserialize_ast, :$fixup_ast) {
         if $!precomp_mode {
-            @!fixup_tasks.push($deserialize_past) if $deserialize_past;
+            @!fixup_tasks.push($deserialize_ast) if $deserialize_ast;
         }
         else {
-            @!fixup_tasks.push($fixup_past) if $fixup_past;
+            @!fixup_tasks.push($fixup_ast) if $fixup_ast;
         }
     }
     

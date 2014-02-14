@@ -1,10 +1,10 @@
 use QRegex;
 
 class NQP::Compiler is HLL::Compiler {
-    method optimize($past, *%adverbs) {
+    method optimize($ast, *%adverbs) {
         %adverbs<optimize> eq 'off'
-            ?? $past
-            !! NQP::Optimizer.new.optimize($past, |%adverbs)
+            ?? $ast
+            !! NQP::Optimizer.new.optimize($ast, |%adverbs)
     }
 }
 
