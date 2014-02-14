@@ -215,7 +215,8 @@ MAIN: {
         my $moar_path = gen_moar($moar_want, %config, %options);
         if (!$moar_path) {
             push @errors,
-                "No suitable MoarVM (moar executable) found using the --prefix";
+                "No suitable MoarVM (moar executable) found using the --prefix\n" .
+                "(You can get a MoarVM built automatically with --gen-moar.)";
         }
         sorry(@errors) if @errors;
         $config{'make'}   = $^O eq 'MSWin32' ? 'nmake' : 'make';
