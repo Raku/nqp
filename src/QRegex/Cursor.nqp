@@ -678,7 +678,7 @@ class NQPMatch is NQPCapture {
     has $!orig;
     has int $!from;
     has int $!to;
-    has $!ast;
+    has $!made;
     has $!cursor;
 
     method from() { $!from }
@@ -698,8 +698,9 @@ class NQPMatch is NQPCapture {
     method Bool() { $!to >= $!from }
     method chars() { $!to >= $!from ?? $!to - $!from !! 0 }
     
-    method !make($ast) { $!ast := $ast }
-    method ast()       { $!ast }
+    method !make($made) { $!made := $made }
+    method made()      { $!made }
+    method ast()       { $!made }  # for historical reasons
     
     method dump($indent?) {
         unless nqp::defined($indent) {
