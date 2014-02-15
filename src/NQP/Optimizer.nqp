@@ -271,6 +271,7 @@ class NQP::Optimizer {
                     } elsif nqp::istype($visit, QAST::Want) {
                         self.visit_children($visit, :skip_selectors)
                     } elsif nqp::istype($visit, QAST::Regex) {
+                        $!no_grasp_on_lexicals := 1;
                         QRegex::Optimizer.new().optimize($visit, @!block_stack[+@!block_stack - 1], |%!adverbs);
                     } else {
                         self.visit_children($visit);
