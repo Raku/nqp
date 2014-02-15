@@ -63,7 +63,14 @@ class NQP::Optimizer {
         if !($!no_grasp_on_lexicals) {
             for %*shallow_var_usages {
                 my $name := $_.key;
-                my $newname := $block.unique('lex_to_loc_' ~ +@!block_stack);
+                my $first_char := nqp::findcclass(nqp::const::CCLASS_WORD, $name, 0, 4);
+                my $last_valid := nqp::index($name, '-', $first_char);
+                my $newname;
+                if $last_valid == -1 {
+                    $newname := $block.unique('ltol_' ~ nqp::substr($name, $first_char) ~ +@!block_stack);
+                } else {
+                    $newname := $block.unique('ltol_' ~ nqp::substr($name, $first_char, $last_valid - $first_char) ~ +@!block_stack);
+                }
                 my @usages := $_.value;
                 #say("found " ~ +@usages ~ " usages for $name");
                 for @usages -> $var {
