@@ -106,9 +106,9 @@ class NQP::Optimizer {
         if $d >= 0 {
             my $block := @!block_stack[$d];
             my %sym := $block.symbol($name);
-            return %sym;
+            %sym;
         } else {
-            nqp::hash();
+            NQPMu;
         }
     }
 
@@ -136,7 +136,7 @@ class NQP::Optimizer {
         # Calls to fixed names that are compile-time known can be simplified.
         elsif $opname eq 'call' && $op.name {
             my %sym := self.find_lex($op.name);
-            if %sym {
+            if !(%sym =:= NQPMu) {
                 if %sym<declared> {
                     # It's known at compile time, and so fixed, so we can do a more
                     # optimal call.
@@ -235,7 +235,7 @@ class NQP::Optimizer {
                 return 1
             } elsif nqp::istype($node, QAST::Var) && $node.scope eq 'lexical' {
                 my %sym := self.find_lex($node.name);
-                if nqp::existskey(%sym, 'type') && nqp::objprimspec(%sym<type>) == 1 {
+                if !(%sym =:= NQPMu) && nqp::existskey(%sym, 'type') && nqp::objprimspec(%sym<type>) == 1 {
                     return 1
                 }
             }
@@ -279,18 +279,6 @@ class NQP::Optimizer {
                 $i := $i + 1;
             }
         }
-    }
-
-    method find_lex($name) {
-        my int $i := +@!block_stack;
-        while $i > 0 {
-            $i := $i - 1;
-            my %sym := @!block_stack[$i].symbol($name);
-            if +%sym {
-                return %sym;
-            }
-        }
-        NQPMu;
     }
 
     method find_sym($name) {
