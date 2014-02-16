@@ -1749,6 +1749,7 @@ QAST::MASTOperations.add_core_moarop_mapping('connect', 'connect_sk', 0);
 QAST::MASTOperations.add_core_moarop_mapping('bindsock', 'bind_sk', 0);
 QAST::MASTOperations.add_core_moarop_mapping('accept', 'accept_sk');
 QAST::MASTOperations.add_core_moarop_mapping('readcharsfh', 'read_fhs');
+QAST::MASTOperations.add_core_moarop_mapping('setinputlinesep', 'setinputlinesep_fh', 0);
 
 QAST::MASTOperations.add_core_moarop_mapping('chmod', 'chmod_f', 0);
 QAST::MASTOperations.add_core_moarop_mapping('unlink', 'delete_f', 0);
