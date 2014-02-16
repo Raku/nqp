@@ -1,8 +1,19 @@
 package org.perl6.nqp.runtime;
 
+import java.lang.reflect.Constructor;
+
+import java.util.Arrays;
+import java.util.HashMap;
+
+import com.sun.jna.Callback;
 import com.sun.jna.NativeLibrary;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
+
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 
 import static org.perl6.nqp.runtime.CallSiteDescriptor.*;
 
@@ -46,8 +57,13 @@ public final class NativeCallOps {
             /* Set up the argument types. */
             int n = (int) arguments.elems(tc);
             call.arg_types = new ArgType[n];
+            call.arg_info  = new SixModelObject[n];
             for (int i = 0; i < n; i++) {
-                call.arg_types[i] = getArgType(tc, arguments.at_pos_boxed(tc, i), false);
+                SixModelObject info = arguments.at_pos_boxed(tc, i);
+                call.arg_types[i] = getArgType(tc, info, false);
+
+                if (call.arg_types[i] == ArgType.CALLBACK)
+                    call.arg_info[i] = info.at_key_boxed(tc, "callback_args");
             }
     
             call.ret_type = getArgType(tc, returns, true);
@@ -69,7 +85,7 @@ public final class NativeCallOps {
             Object[] cArgs = new Object[n];
             for (int i = 0; i < n; i++) {
                 /* TODO: Converting sixmodel objects to appropriate JNA types. */
-                cArgs[i] = toJNAType(tc, arguments.at_pos_boxed(tc, i), call.arg_types[i]);
+                cArgs[i] = toJNAType(tc, arguments.at_pos_boxed(tc, i), call.arg_types[i], call.arg_info[i]);
             }
 
             /* The actual foreign function call. */
@@ -135,7 +151,7 @@ public final class NativeCallOps {
         }
     }
 
-    public static Object toJNAType(ThreadContext tc, SixModelObject o, ArgType target) {
+    public static Object toJNAType(ThreadContext tc, SixModelObject o, ArgType target, SixModelObject info) {
         o = Ops.decont(o, tc);
         switch (target) {
         case CHAR:
@@ -170,6 +186,8 @@ public final class NativeCallOps {
             return ((CArrayInstance) o).storage;
         case CSTRUCT:
             return ((CStructInstance) o).storage;
+        case CALLBACK:
+            return callbackHandlerFor(o, info, tc);
         default:
             throw ExceptionHandling.dieInternal(tc, String.format("Don't know how to convert %s arguments to JNA yet", target));
         }
@@ -255,13 +273,213 @@ public final class NativeCallOps {
             type = ArgType.valueOf(ArgType.class, type_name.toUpperCase());
         }
         catch (IllegalArgumentException e) {
-            ExceptionHandling.dieInternal(tc, String.format("Unknown type '%s' used for native call", type_name));
+            throw ExceptionHandling.dieInternal(tc, String.format("Unknown type '%s' used for native call", type_name));
         }
 
         if (!isReturn && type == ArgType.VOID) {
-            ExceptionHandling.dieInternal(tc, "Can only use 'void' type on native call return values");
+            throw ExceptionHandling.dieInternal(tc, "Can only use 'void' type on native call return values");
         }
 
         return type;
+    }
+
+    static int typeId = 0;
+    static String handlerName = Type.getInternalName(CallbackHandler.class);
+    static private HashMap<SixModelObject, CallbackHandler> callbackHandlers = new HashMap<SixModelObject, CallbackHandler>();
+    static private HashMap<String, Class<CallbackHandler>> callbackClasses = new HashMap<String, Class<CallbackHandler>>();
+    @SuppressWarnings("unchecked")
+    private static CallbackHandler callbackHandlerFor(SixModelObject function, SixModelObject infos, ThreadContext tc) {
+        CallbackHandler handler = callbackHandlers.get(function);
+        if (handler != null) return handler;
+
+        /* Extract the information we need from the list of infos. The first
+         * element of the list is the return type and any following items are
+         * the argument types. We process the arguments first, since a JVM
+         * method signature has the form "($arguments)$returns".
+         *
+         * At the same time, we collect the data needed for the callback when
+         * it's time to call back into NQP: type objects for argument and
+         * return types, and the ArgTypes for all of them.
+         */
+        int num_info = (int) infos.elems(tc);
+        SixModelObject[] argumentTypes = new SixModelObject[num_info-1];
+        ArgType[] argumentInfo = new ArgType[num_info-1];
+        boolean isVoid = infos.at_pos_boxed(tc, 0).at_key_boxed(tc, "type").get_str(tc).equals("void");
+        StringBuilder sb = new StringBuilder("(");
+        for(int i = 1; i < num_info; i++) {
+            SixModelObject info = infos.at_pos_boxed(tc, i);
+            SixModelObject type = info.at_key_boxed(tc, "typeobj");
+            sb.append(Type.getDescriptor(javaType(tc, getArgType(tc, info, false), type)));
+            argumentTypes[i-1] = type;
+            argumentInfo[i-1] = getArgType(tc, info, false);
+        }
+        sb.append(")");
+
+        SixModelObject info = infos.at_pos_boxed(tc, 0);
+        SixModelObject returnType = info.at_key_boxed(tc, "typeobj");
+        ArgType returnInfo = getArgType(tc, info, true);
+        Class<?> javaReturn = null;
+        if (!isVoid) javaReturn = javaType(tc, getArgType(tc, info, true), returnType);
+        sb.append(isVoid? "V": Type.getDescriptor(javaReturn));
+        String sig = sb.toString();
+        Class<CallbackHandler> handlerClass = callbackClasses.get(sig);
+
+        if (handlerClass == null) {
+            int typeNo = typeId++;
+
+            /* We need to generate two separate pieces two work with callbacks
+             * in JNA: an interface, which specifies which method to call and
+             * its signature, and a class implementing that interface that
+             * does the actual work.
+             *
+             * To keep codegen to a minimum, we'll only ever have a single
+             * class implementing each interface (one for each type signature
+             * used), with the classes delegating to the correct NQP function.
+             */
+
+            ClassWriter ifaceWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+            String ifaceName = "__CallbackInterface__" + typeNo;
+
+            // public interface $interfaceName extends com.sun.jna.Callback { ... }
+            ifaceWriter.visit(Opcodes.V1_7, Opcodes.ACC_PUBLIC | Opcodes.ACC_ABSTRACT | Opcodes.ACC_INTERFACE,
+                    ifaceName, null, "java/lang/Object", new String[] { Type.getInternalName(Callback.class) });
+            // public $sig[0] callback($sig[1..*]);
+            MethodVisitor ifaceMeth = ifaceWriter.visitMethod(Opcodes.ACC_PUBLIC | Opcodes.ACC_ABSTRACT, "callback", sig, null, null);
+            ifaceMeth.visitEnd();
+
+            ifaceWriter.visitEnd();
+            byte[] ifaceCompiled = ifaceWriter.toByteArray();
+            Class<?> iface = tc.gc.byteClassLoader.defineClass(ifaceName, ifaceCompiled);
+
+            ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+            String className = "__CallbackHandler__" + typeNo;
+
+            // public class $className extends CallbackHandler implements $ifaceName { ... }
+            classWriter.visit(Opcodes.V1_7, Opcodes.ACC_PUBLIC | Opcodes.ACC_SUPER, className, null,
+                    handlerName, new String[] { Type.getInternalName(iface) });
+
+            // public $className(GlobalContext gc, SixModelObject function) { super(gc, function); }
+            //String ctorSig = "(Lorg/perl6/nqp/runtime/GlobalContext;Lorg/perl6/nqp/sixmodel/SixModelObject;)V";
+            String ctorSig = String.format("(%s%s%s%s%s)V",
+                    Type.getDescriptor(GlobalContext.class), Type.getDescriptor(SixModelObject.class),
+                    Type.getDescriptor(ArgType.class),
+                    Type.getDescriptor(SixModelObject[].class), Type.getDescriptor(ArgType[].class));
+            MethodVisitor constructor = classWriter.visitMethod(Opcodes.ACC_PUBLIC, "<init>", ctorSig, null, null);
+            constructor.visitCode();
+            constructor.visitVarInsn(Opcodes.ALOAD, 0);
+            constructor.visitVarInsn(Opcodes.ALOAD, 1);
+            constructor.visitVarInsn(Opcodes.ALOAD, 2);
+            constructor.visitVarInsn(Opcodes.ALOAD, 3);
+            constructor.visitVarInsn(Opcodes.ALOAD, 4);
+            constructor.visitVarInsn(Opcodes.ALOAD, 5);
+            constructor.visitMethodInsn(Opcodes.INVOKESPECIAL, handlerName, "<init>", ctorSig);
+            constructor.visitInsn(Opcodes.RETURN);
+            constructor.visitMaxs(6, 6);
+            constructor.visitEnd();
+
+            // public $sig[0] callback($sig[1..*]) { ... }
+            MethodVisitor callback = classWriter.visitMethod(Opcodes.ACC_PUBLIC, "callback", sig, null, null);
+            //   Object[] args = new Object[$argCount];
+            callback.visitLdcInsn(num_info-1);
+            callback.visitTypeInsn(Opcodes.ANEWARRAY, "java/lang/Object");
+
+            //  args[$i] = $sig[$i+1];
+            for (int i = 0; i < num_info-1; i++) {
+                callback.visitInsn(Opcodes.DUP); // Dup the array, since we'll store to it
+                callback.visitLdcInsn(i);
+                callback.visitVarInsn(Opcodes.ALOAD, i+1);
+                callback.visitInsn(Opcodes.AASTORE);
+            }
+
+            //  callFunction(args);
+            callback.visitVarInsn(Opcodes.ALOAD, 0);
+            callback.visitInsn(Opcodes.SWAP);
+            callback.visitMethodInsn(Opcodes.INVOKEVIRTUAL, className, "callFunction", "([Ljava/lang/Object;)Ljava/lang/Object;");
+
+            if (isVoid) {
+                callback.visitInsn(Opcodes.POP);
+                callback.visitInsn(Opcodes.RETURN);
+            }
+            else {
+                callback.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(javaReturn));
+                callback.visitInsn(Opcodes.ARETURN);
+            }
+
+            callback.visitMaxs(4, num_info);
+            callback.visitEnd();
+
+            classWriter.visitEnd();
+            byte[] classCompiled = classWriter.toByteArray();
+            /* Uncomment to dump generated class to file:
+            try {
+                java.io.FileOutputStream fos = new java.io.FileOutputStream(new java.io.File(className + ".class"));
+                fos.write(classCompiled);
+                fos.close();
+            } catch (java.io.IOException e) {
+            }
+            */
+            handlerClass = (Class<CallbackHandler>) tc.gc.byteClassLoader.defineClass(className, classCompiled);
+            callbackClasses.put(sig, handlerClass);
+        }
+
+        try {
+            Constructor<CallbackHandler> ctor = handlerClass.getConstructor(GlobalContext.class, SixModelObject.class,
+                    ArgType.class,
+                    SixModelObject[].class, ArgType[].class);
+            handler = ctor.newInstance(tc.gc, function,
+                    returnInfo,
+                    argumentTypes, argumentInfo);
+        }
+        catch (Exception e) {
+            throw ExceptionHandling.dieInternal(tc, e);
+        }
+        callbackHandlers.put(function, handler);
+        return handler;
+    }
+
+    public static abstract class CallbackHandler implements Callback {
+        public GlobalContext gc;
+        public SixModelObject function;
+
+        public ArgType returnInfo;
+
+        public SixModelObject[] argumentTypes;
+        public ArgType[] argumentInfo;
+
+        public CallSiteDescriptor callsite;
+
+        protected CallbackHandler(GlobalContext gc, SixModelObject function,
+                ArgType returnInfo,
+                SixModelObject[] argumentTypes, ArgType[] argumentInfo) {
+            this.gc = gc;
+            this.function = function;
+
+            this.returnInfo = returnInfo;
+
+            this.argumentTypes = argumentTypes;
+            this.argumentInfo = argumentInfo;
+
+            byte[] desc = new byte[argumentTypes.length];
+            Arrays.fill(desc, ARG_OBJ);
+            this.callsite = new CallSiteDescriptor(desc, null);
+        }
+
+        protected Object callFunction(Object... args) {
+            ThreadContext tc = gc.getCurrentThreadContext();
+
+            /* TODO: Make sure args.length == argumentTypes.length */
+
+            for (int i = 0; i < args.length; i++) {
+                args[i] = toNQPType(tc, argumentInfo[i], argumentTypes[i], args[i]);
+            }
+            Ops.invokeDirect(tc, function, callsite, args);
+
+            if (returnInfo == ArgType.VOID) {
+                return null;
+            }
+            else {
+                return toJNAType(tc, Ops.decont(Ops.result_o(tc.resultFrame()), tc), returnInfo, null);
+            }
+        }
     }
 }

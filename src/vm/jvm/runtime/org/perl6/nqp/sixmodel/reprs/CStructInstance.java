@@ -24,7 +24,10 @@ public class CStructInstance extends SixModelObject {
     public void bind_attribute_boxed(ThreadContext tc, SixModelObject class_handle, String name, long hint, SixModelObject value) {
         CStructREPRData data = (CStructREPRData) class_handle.st.REPRData;
         AttrInfo info = data.fieldTypes.get(name);
-        storage.writeField(name, NativeCallOps.toJNAType(tc, value, info.argType));
+        /* XXX: This'll break if we try to set a callback member. OTOH, it's
+         * broken on Parrot too, so it's not a NativeCall regression as
+         * such... */
+        storage.writeField(name, NativeCallOps.toJNAType(tc, value, info.argType, null));
         memberCache.put(name, value);
     }
 
