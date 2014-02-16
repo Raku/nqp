@@ -5,6 +5,7 @@ import java.util.Arrays;
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
+import com.sun.jna.Structure;
 
 import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.NativeCallOps;
@@ -130,6 +131,7 @@ public class CArrayInstance extends SixModelObject {
     public void bind_pos_boxed(ThreadContext tc, long index, SixModelObject value) {
         CArrayREPRData repr_data = (CArrayREPRData) st.REPRData;
         int intidx = (int) index;
+        value = Ops.decont(value, tc);
 
         /* TODO: Die if this is a NUMERIC/INTEGER CArray. */
         if (index >= allocated)
@@ -142,6 +144,15 @@ public class CArrayInstance extends SixModelObject {
                 byte[] bytes = Native.toByteArray(value.get_str(tc));
                 ptr = new Memory(bytes.length);
                 ptr.write(0, bytes, 0, bytes.length);
+                break;
+            case CARRAY:
+                ptr = ((CArrayInstance) value).storage;
+                break;
+            case CSTRUCT:
+                ptr = ((CStructInstance) value).storage.getPointer();
+                break;
+            case CPOINTER:
+                ptr = ((CPointerInstance) value).pointer;
                 break;
             default:
                 ExceptionHandling.dieInternal(tc, "CArray.bind_pos_boxed reached its default case. This should never happen.");
@@ -192,8 +203,11 @@ public class CArrayInstance extends SixModelObject {
             return NativeCallOps.toNQPType(tc, ArgType.CARRAY, repr_data.elem_type, ptr);
         case CPOINTER:
             return NativeCallOps.toNQPType(tc, ArgType.CPOINTER, repr_data.elem_type, ptr);
+        case CSTRUCT:
+            Class<?> structClass = ((CStructREPRData) repr_data.elem_type.st.REPRData).structureClass;
+            return NativeCallOps.toNQPType(tc, ArgType.CSTRUCT, repr_data.elem_type, Structure.newInstance(structClass, ptr));
         default:
-            ExceptionHandling.dieInternal(tc, "CArray can only makeObject strings, arrays and pointers");
+            ExceptionHandling.dieInternal(tc, "CArray can only makeObject strings, arrays, structs and pointers");
         }
 
         /* And a dummy return statement to placate Java's flow analysis. */
