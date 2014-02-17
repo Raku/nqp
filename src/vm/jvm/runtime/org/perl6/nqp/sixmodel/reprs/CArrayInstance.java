@@ -17,7 +17,7 @@ import org.perl6.nqp.sixmodel.SixModelObject;
 import org.perl6.nqp.sixmodel.reprs.CArrayREPRData.ElemKind;
 import org.perl6.nqp.sixmodel.reprs.NativeCall.ArgType;
 
-public class CArrayInstance extends SixModelObject {
+public class CArrayInstance extends SixModelObject implements Refreshable {
     public Pointer storage;
     public SixModelObject[] child_objs;
     public boolean managed;
@@ -212,5 +212,56 @@ public class CArrayInstance extends SixModelObject {
 
         /* And a dummy return statement to placate Java's flow analysis. */
         return null;
+    }
+
+    public void refresh(ThreadContext tc) {
+        CArrayREPRData repr_data = (CArrayREPRData) st.REPRData;
+
+        // No need to refresh if we don't have any cached children.
+        if (child_objs == null) return;
+
+        if (repr_data.elem_kind == ElemKind.CARRAY || repr_data.elem_kind == ElemKind.CSTRUCT) {
+            refreshComplex(tc);
+        }
+        else {
+            refreshSimple(tc);
+        }
+    }
+
+    /**
+     * Refresh logic for CArray of complex (CArray or CStruct) types.
+     */
+    private void refreshComplex(ThreadContext tc) {
+        for (int i = 0; i < child_objs.length; i++) {
+            SixModelObject child = child_objs[i];
+
+            // No cache for this element? Go to next.
+            if (child == null) continue;
+
+            /* Invalidate cache and recursively refresh child too. Future
+             * versions here should only invalidate the cache if C memory has
+             * a different pointer than the cached object.
+             */
+            child_objs[i] = null;
+            NativeCallOps.refresh(child, tc);
+        }
+    }
+
+    /**
+     * Refresh logic for CArray of simple (CPointer) types.
+     */
+    private void refreshSimple(ThreadContext tc) {
+        for (int i = 0; i < child_objs.length; i++) {
+            SixModelObject child = child_objs[i];
+
+            // No cache for this element? Go to next.
+            if (child == null) continue;
+
+            /* Invalidate cache. Future versions here should only invalidate
+             * the cache if C memory has a different pointer than the cached
+             * object.
+             */
+            child_objs[i] = null;
+        }
     }
 }
