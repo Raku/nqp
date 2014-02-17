@@ -560,6 +560,8 @@ class QAST::MASTRegexCompiler {
         release($cmast.result_reg, $cmast.result_kind);
         my $cndop := resolve_condition_op($cmast.result_kind, !$node.negate);
         if $node.subtype eq 'zerowidth' && $cndop ne '' {
+            nqp::push(@ins, op('decont', $cmast.result_reg, $cmast.result_reg))
+                if $cmast.result_kind == $MVM_reg_obj;
             nqp::push(@ins, op($cndop, $cmast.result_reg, %*REG<fail>));
         }
         @ins
