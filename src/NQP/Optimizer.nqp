@@ -17,6 +17,9 @@ class NQP::Optimizer {
         my %*shallow_var_usages := nqp::hash();
         @!local_var_stack.push(%*shallow_var_usages);
 
+        my $has_params;
+        my $has_definitions;
+
         # Push all the lexically declared variables into our shallow vars hash.
         # Currently we limit ourselves to natives, because they are guaranteed
         # not to have some weird setup that we have to be careful about.
@@ -29,8 +32,6 @@ class NQP::Optimizer {
                 $stmts := $block[1];
             }
             my int $idx := 0;
-            # before the $_ come the arguments. we must not turn these into locals,
-            # otherwise our signature binding will explode.
             #say("THE BLOCK:::::::::::::::::::::::::::::::::::::::::::::::");
             #say($block.dump);
             #say(":::::::::::::::::::::::::::::::::::::::::::::::THE BLOCK");
@@ -40,21 +41,28 @@ class NQP::Optimizer {
                     # variables are initialised on the spot in nqp.
                     $var := $var[0]
                 }
-                if nqp::istype($var, QAST::Var) && $var.scope eq 'lexical' && $var.decl eq 'var' {
-                    # also make sure we don't turn dynamic vars into locals
-                    my $twigil := nqp::substr($var.name, 1, 1);
-                    my $sigil := nqp::substr($var.name, 0, 1);
-                    if $sigil eq '$'  && $twigil ne '*' && $twigil ne '?'
-                            && $var.name ne '$_' && $var.name ne '$/' && $var.name ne '$!' && $var.name ne '$¢' {
-                        %*shallow_var_usages{$var.name} := nqp::list($var);
+                if nqp::istype($var, QAST::Var) && $var.scope eq 'lexical' {
+                    if $var.decl eq 'var' {
+                        # also make sure we don't turn dynamic vars into locals
+                        my $twigil := nqp::substr($var.name, 1, 1);
+                        my $sigil := nqp::substr($var.name, 0, 1);
+                        if $sigil eq '$'  && $twigil ne '*' && $twigil ne '?'
+                                && $var.name ne '$_' && $var.name ne '$/' && $var.name ne '$!' && $var.name ne '$¢' {
+                            %*shallow_var_usages{$var.name} := nqp::list($var);
+                        }
+                    } elsif $var.decl eq 'param' {
+                        $has_params++;
                     }
                 } elsif nqp::istype($var, QAST::Op) && $var.op eq 'bind' {
                     if nqp::existskey(%*shallow_var_usages, $var[0].name) {
                         nqp::push(%*shallow_var_usages{$var[0].name}, $var[0]);
                     }
                 }
+                $has_definitions++;
                 $idx := $idx + 1;
             }
+        } else {
+            $has_params := -1;
         }
 
         self.visit_children($block);
@@ -80,9 +88,19 @@ class NQP::Optimizer {
                     #if $var.decl eq 'var' {
                         #$var.decl('static');
                     #}
-                    $succ := 1;
                 }
+                $succ++;
                 #say("turned $name into a local ($newname), yippie");
+            }
+            if $succ == $has_definitions && !$has_params && ($block.blocktype eq 'immediate' ||  $block.blocktype eq 'immediate_static') {
+                say($block.dump);
+                say("^ could turn this into an in-lined block!");
+                say($block.blocktype);
+                my $newblock := QAST::Stmts.new();
+                for @($block) {
+                    $newblock.push($_);
+                }
+                $block := $newblock;
             }
         }
         #if $succ {
