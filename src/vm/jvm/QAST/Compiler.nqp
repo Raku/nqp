@@ -443,19 +443,19 @@ sub savesite($il) {
 QAST::OperationsJAST.add_core_op('chain', -> $qastcomp, $op {
     # First, we build up the list of nodes in the chain
     my @clist;
-    my $cpast := $op;
-    while nqp::istype($cpast, QAST::Op) && $cpast.op eq 'chain' {
-        nqp::push(@clist, $cpast);
-        $cpast := $cpast[0];
+    my $c_ast := $op;
+    while nqp::istype($c_ast, QAST::Op) && $c_ast.op eq 'chain' {
+        nqp::push(@clist, $c_ast);
+        $c_ast := $c_ast[0];
     }
 
     my $il       := JAST::InstructionList.new();
     my $result   := $*TA.fresh_o();
     my $endlabel := JAST::Label.new(:name($qastcomp.unique('chain_end_')));
 
-    $cpast := nqp::pop(@clist);
-    my $apast := $cpast[0];
-    my $ares  := $qastcomp.as_jast($apast, :want($RT_OBJ));
+    $c_ast := nqp::pop(@clist);
+    my $a_ast := $c_ast[0];
+    my $ares  := $qastcomp.as_jast($a_ast, :want($RT_OBJ));
     my $atmp  := $*TA.fresh_o();
     $il.append($ares.jast);
     $*STACK.obtain($il, $ares);
@@ -463,8 +463,8 @@ QAST::OperationsJAST.add_core_op('chain', -> $qastcomp, $op {
 
     my $more := 1;
     while $more {
-        my $bpast := $cpast[1];
-        my $bres  := $qastcomp.as_jast($bpast, :want($RT_OBJ));
+        my $b_ast := $c_ast[1];
+        my $bres  := $qastcomp.as_jast($b_ast, :want($RT_OBJ));
         my $btmp  := $*TA.fresh_o();
         $il.append($bres.jast);
         $*STACK.obtain($il, $bres);
@@ -472,7 +472,7 @@ QAST::OperationsJAST.add_core_op('chain', -> $qastcomp, $op {
 
         $*STACK.spill_to_locals($il);
         my $cs_idx := $*CODEREFS.get_callsite_idx([$ARG_OBJ, $ARG_OBJ], []);
-        $il.append(JAST::PushSVal.new( :value($cpast.name) )),
+        $il.append(JAST::PushSVal.new( :value($c_ast.name) )),
         $il.append(JAST::PushIndex.new( :value($cs_idx) )),
         $il.append($ALOAD_1);
         $il.append(JAST::Instruction.new( :op('aload'), $atmp ));
@@ -494,7 +494,7 @@ QAST::OperationsJAST.add_core_op('chain', -> $qastcomp, $op {
             $il.append($IVAL_ZERO);
             $il.append($LCMP);
             $il.append(JAST::Instruction.new( :op('ifeq'), $endlabel ));
-            $cpast := nqp::pop(@clist);
+            $c_ast := nqp::pop(@clist);
             $atmp := $btmp;
         }
         else {
@@ -896,10 +896,10 @@ QAST::OperationsJAST.add_core_op('xor', -> $qastcomp, $op {
     my $endlabel   := JAST::Label.new(:name($prefix ~ '_end'));
 
     my @childlist;
-    my $fpast;
+    my $f_ast;
     for $op.list {
         if $_.named eq 'false' {
-            $fpast := $_;
+            $f_ast := $_;
         }
         else {
             nqp::push(@childlist, $_);
@@ -913,8 +913,8 @@ QAST::OperationsJAST.add_core_op('xor', -> $qastcomp, $op {
     my $u := $*TA.fresh_i();
 
     my $il    := JAST::InstructionList.new();
-    my $apast := nqp::shift(@childlist);
-    my $ares := $qastcomp.as_jast($apast, :want($RT_OBJ));
+    my $a_ast := nqp::shift(@childlist);
+    my $ares := $qastcomp.as_jast($a_ast, :want($RT_OBJ));
     $il.append($ares.jast);
     $*STACK.obtain($il, $ares);
     $il.append($DUP);
@@ -927,8 +927,8 @@ QAST::OperationsJAST.add_core_op('xor', -> $qastcomp, $op {
     my $have_middle_child := 1;
     my $bres;
     while $have_middle_child {
-        my $bpast := nqp::shift(@childlist);
-        $bres := $qastcomp.as_jast($bpast, :want($RT_OBJ));
+        my $b_ast := nqp::shift(@childlist);
+        $bres := $qastcomp.as_jast($b_ast, :want($RT_OBJ));
         $il.append($bres.jast);
         $*STACK.obtain($il, $bres);
         $il.append($DUP);
@@ -968,8 +968,8 @@ QAST::OperationsJAST.add_core_op('xor', -> $qastcomp, $op {
     $il.append(JAST::Instruction.new( :op('goto'), $endlabel ));
     $il.append($falselabel);
 
-    if $fpast {
-        my $fres := $qastcomp.as_jast($fpast, :want($RT_OBJ));
+    if $f_ast {
+        my $fres := $qastcomp.as_jast($f_ast, :want($RT_OBJ));
         $il.append($fres.jast);
         $*STACK.obtain($il, $fres);
         $il.append(JAST::Instruction.new( :op('astore'), $r ));

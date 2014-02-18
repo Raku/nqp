@@ -640,9 +640,9 @@ class QRegex::P5Regex::Actions is HLL::Actions {
     }
 
     method arglist($/) {
-        my $past := QAST::Op.new( :op('list') );
-        for $<arg> { $past.push( $_.ast ); }
-        make $past;
+        my $ast := QAST::Op.new( :op('list') );
+        for $<arg> { $ast.push( $_.ast ); }
+        make $ast;
     }
 
     method subrule_alias($ast, $name) {

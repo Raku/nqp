@@ -3,14 +3,14 @@ use NQPHLL;
 use QAST;
 
 class QRegex::P5Regex::World is HLL::World {
-    method create_code($past, $name) {
+    method create_code($ast, $name) {
         # Create a fresh stub code, and set its name.
         my $dummy := nqp::freshcoderef(-> { nqp::die("Uncompiled code executed") });
         nqp::setcodename($dummy, $name);
 
         # Tag it as a static code ref and add it to the root code refs set.
         nqp::markcodestatic($dummy);
-        self.add_root_code_ref($dummy, $past);
+        self.add_root_code_ref($dummy, $ast);
         
         # Create code object.
         my $code_obj := nqp::create(NQPRegex);
@@ -24,14 +24,14 @@ class QRegex::P5Regex::World is HLL::World {
             QAST::WVal.new( :value($code_obj) ),
             QAST::WVal.new( :value(NQPRegex) ),
             QAST::SVal.new( :value('$!do') ),
-            QAST::BVal.new( :value($past) )
+            QAST::BVal.new( :value($ast) )
         ));
         $fixups.push(QAST::Op.new(
             :op('setcodeobj'),
-            QAST::BVal.new( :value($past) ),
+            QAST::BVal.new( :value($ast) ),
             QAST::WVal.new( :value($code_obj) )
         ));
-        self.add_fixup_task(:fixup_past($fixups));
+        self.add_fixup_task(:fixup_ast($fixups));
 
         $code_obj
     }
@@ -111,17 +111,17 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     token p5metachar:sym<[ ]> { <?before '['> <cclass> }
     
     token cclass {
-        :my $pastfirst := 0;
+        :my $astfirst := 0;
         '['
         $<sign>=['^'|<?>]
         [
         || $<charspec>=(
-               ( '\\' <backslash=p5backslash> || (<?{ $pastfirst == 0 }> <-[\\]> || <-[\]\\]>) )
+               ( '\\' <backslash=p5backslash> || (<?{ $astfirst == 0 }> <-[\\]> || <-[\]\\]>) )
                [
                    \s* '-' \s*
                    ( '\\' <backslash=p5backslash> || (<-[\]\\]>) )
                ]**0..1
-               { $pastfirst++ }
+               { $astfirst++ }
            )+
            ']'
         || <.panic: "failed to parse character class; unescaped ']'?">

@@ -109,7 +109,7 @@ public class CStruct extends REPR {
 
         int attributes = fields.size();
 
-        // public $className extends com.sun.jna.Structure { ... }
+        // public $className extends com.sun.jna.Structure implements com.sun.jna.Structure.ByReference { ... }
         cw.visit(Opcodes.V1_7, Opcodes.ACC_PUBLIC | Opcodes.ACC_SUPER, className, null,
                 "com/sun/jna/Structure", new String[]{"com/sun/jna/Structure$ByReference"});
 

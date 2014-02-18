@@ -808,10 +808,10 @@ QAST::MASTOperations.add_core_op('xor', -> $qastcomp, $op {
     my $endlabel   := MAST::Label.new(:name($qastcomp.unique('xor_end')));
 
     my @comp_ops;
-    my $fpast;
+    my $f_ast;
     for $op.list {
         if $_.named eq 'false' {
-            $fpast := $qastcomp.as_mast($_, :want($MVM_reg_obj));
+            $f_ast := $qastcomp.as_mast($_, :want($MVM_reg_obj));
         }
         else {
             nqp::push(@comp_ops, $qastcomp.as_mast($_, :want($MVM_reg_obj)));
@@ -865,10 +865,10 @@ QAST::MASTOperations.add_core_op('xor', -> $qastcomp, $op {
     push_op(@ops, 'goto', $endlabel);
     nqp::push(@ops, $falselabel);
 
-    if $fpast {
-        push_ilist(@ops, $fpast);
-        push_op(@ops, 'set', $res_reg, $fpast.result_reg);
-        $*REGALLOC.release_register($fpast.result_reg, $MVM_reg_obj);
+    if $f_ast {
+        push_ilist(@ops, $f_ast);
+        push_op(@ops, 'set', $res_reg, $f_ast.result_reg);
+        $*REGALLOC.release_register($f_ast.result_reg, $MVM_reg_obj);
     }
     else {
         push_op(@ops, 'null', $res_reg);
@@ -1744,6 +1744,12 @@ QAST::MASTOperations.add_core_op('getcfh', -> $qastcomp, $op {
 });
 QAST::MASTOperations.add_core_moarop_mapping('eoffh', 'eof_fh');
 QAST::MASTOperations.add_core_moarop_mapping('closefh', 'close_fh', 0);
+QAST::MASTOperations.add_core_moarop_mapping('socket', 'socket');
+QAST::MASTOperations.add_core_moarop_mapping('connect', 'connect_sk', 0);
+QAST::MASTOperations.add_core_moarop_mapping('bindsock', 'bind_sk', 0);
+QAST::MASTOperations.add_core_moarop_mapping('accept', 'accept_sk');
+QAST::MASTOperations.add_core_moarop_mapping('readcharsfh', 'read_fhs');
+QAST::MASTOperations.add_core_moarop_mapping('setinputlinesep', 'setinputlinesep_fh', 0);
 
 QAST::MASTOperations.add_core_moarop_mapping('chmod', 'chmod_f', 0);
 QAST::MASTOperations.add_core_moarop_mapping('unlink', 'delete_f', 0);
@@ -2184,14 +2190,14 @@ QAST::MASTOperations.add_core_moarop_mapping('can', 'can_s', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('reprname', 'reprname', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('newtype', 'newtype', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('composetype', 'composetype');
-QAST::MASTOperations.add_core_moarop_mapping('setboolspec', 'setboolspec', 0);
-QAST::MASTOperations.add_core_moarop_mapping('setmethcache', 'setmethcache', 0);
-QAST::MASTOperations.add_core_moarop_mapping('setmethcacheauth', 'setmethcacheauth', 0);
-QAST::MASTOperations.add_core_moarop_mapping('settypecache', 'settypecache', 0);
-QAST::MASTOperations.add_core_moarop_mapping('settypecheckmode', 'settypecheckmode', 0);
+QAST::MASTOperations.add_core_moarop_mapping('setboolspec', 'setboolspec', 0, :decont(0));
+QAST::MASTOperations.add_core_moarop_mapping('setmethcache', 'setmethcache', 0, :decont(0));
+QAST::MASTOperations.add_core_moarop_mapping('setmethcacheauth', 'setmethcacheauth', 0, :decont(0));
+QAST::MASTOperations.add_core_moarop_mapping('settypecache', 'settypecache', 0, :decont(0));
+QAST::MASTOperations.add_core_moarop_mapping('settypecheckmode', 'settypecheckmode', 0, :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('isinvokable', 'isinvokable');
-QAST::MASTOperations.add_core_moarop_mapping('setinvokespec', 'setinvokespec', 0);
-QAST::MASTOperations.add_core_moarop_mapping('setcontspec', 'setcontspec', 0);
+QAST::MASTOperations.add_core_moarop_mapping('setinvokespec', 'setinvokespec', 0, :decont(0));
+QAST::MASTOperations.add_core_moarop_mapping('setcontspec', 'setcontspec', 0, :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('assign', 'assign', 0, :decont(1));
 QAST::MASTOperations.add_core_moarop_mapping('assignunchecked', 'assignunchecked', 0, :decont(1));
 
