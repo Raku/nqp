@@ -12,13 +12,20 @@ class NQP::Optimizer {
         $ast;
     }
 
-    method visit_block($block) {
+    method visit_block($block, :$is_for?) {
         @!block_stack.push($block);
         my %*shallow_var_usages := nqp::hash();
         @!local_var_stack.push(%*shallow_var_usages);
 
-        my $has_params;
         my $has_definitions;
+        my $can_transform := 1;
+
+        # if we already know this is not a block we can turn into a Stmt, or if
+        # we're looking at the second argument to a for op, we can bail out
+        # a bit earlier.
+        if $block.blocktype ne 'immediate' && $block.blocktype ne 'immediate_static' || $is_for {
+            $can_transform := 0;
+        }
 
         # Push all the lexically declared variables into our shallow vars hash.
         # Currently we limit ourselves to natives, because they are guaranteed
@@ -42,7 +49,7 @@ class NQP::Optimizer {
                     $var := $var[0]
                 }
                 if nqp::istype($var, QAST::Var) && $var.scope eq 'lexical' {
-                    if $var.decl eq 'var' {
+                    if $var.decl eq 'var' || $var.decl eq 'param' {
                         # also make sure we don't turn dynamic vars into locals
                         my $twigil := nqp::substr($var.name, 1, 1);
                         my $sigil := nqp::substr($var.name, 0, 1);
@@ -50,8 +57,6 @@ class NQP::Optimizer {
                                 && $var.name ne '$_' && $var.name ne '$/' && $var.name ne '$!' && $var.name ne '$¢' {
                             %*shallow_var_usages{$var.name} := nqp::list($var);
                         }
-                    } elsif $var.decl eq 'param' {
-                        $has_params++;
                     }
                 } elsif nqp::istype($var, QAST::Op) && $var.op eq 'bind' {
                     if nqp::existskey(%*shallow_var_usages, $var[0].name) {
@@ -61,10 +66,7 @@ class NQP::Optimizer {
                 $has_definitions++;
                 $idx := $idx + 1;
             }
-        } else {
-            $has_params := -1;
         }
-
         self.visit_children($block);
 
         my $succ;
@@ -92,11 +94,10 @@ class NQP::Optimizer {
                 $succ++;
                 #say("turned $name into a local ($newname), yippie");
             }
-            if $succ == $has_definitions && !$has_params && ($block.blocktype eq 'immediate' ||  $block.blocktype eq 'immediate_static') {
+            if $succ == $has_definitions && $can_transform {
                 say($block.dump);
                 say("^ could turn this into an in-lined block!");
-                say($block.blocktype);
-                my $newblock := QAST::Stmts.new();
+                my $newblock := QAST::Stmt.new();
                 for @($block) {
                     $newblock.push($_);
                 }
@@ -141,12 +142,17 @@ class NQP::Optimizer {
                              'islt', 1, 'isle', 1, 'isgt', 1, 'isge', 1, 'cmp', 1);
     method visit_op($op) {
         # Handle op needs special handling.
+        # for op needs to ensure the second arg to it doesn't get
+        # transformed into a Stmt.
         my str $opname := $op.op;
         if $opname eq 'handle' {
             return self.visit_handle($op);
+        } elsif $opname eq 'for' {
+            self.visit_children($op, :skip_for(1));
+        } else {
+            # Visit children first.
+            self.visit_children($op);
         }
-        # Visit children first.
-        self.visit_children($op);
 
         # Consider numeric ops we can simplify.
         my $typeinfo := nqp::chars($opname) > 2
@@ -281,7 +287,7 @@ class NQP::Optimizer {
         $handle;
     }
 
-    method visit_children($node, :$skip_selectors) {
+    method visit_children($node, :$skip_selectors, :$skip_for=-1) {
         my int $i := 0;
         unless nqp::isstr($node) {
             while $i < +@($node) {
@@ -290,7 +296,11 @@ class NQP::Optimizer {
                     if nqp::istype($visit, QAST::Op) {
                         $node[$i] := self.visit_op($visit)
                     } elsif nqp::istype($visit, QAST::Block) {
-                        $node[$i] := self.visit_block($visit)
+                        if $skip_for == $i {
+                            $node[$i] := self.visit_block($visit, :is_for(1))
+                        } else {
+                            $node[$i] := self.visit_block($visit)
+                        }
                     } elsif nqp::istype($visit, QAST::Var) {
                         $node[$i] := self.visit_var($visit);
                     } elsif nqp::istype($visit, QAST::Want) {
