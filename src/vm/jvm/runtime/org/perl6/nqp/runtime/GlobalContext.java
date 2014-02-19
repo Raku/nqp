@@ -85,6 +85,11 @@ public class GlobalContext {
      */
     public SixModelObject CallCapture;
     
+     /**
+     * Thread type; a basic, method-less type with the Thread REPR.
+     */
+    public SixModelObject Thread;
+
     /**
      * BOOTException type; a basic, method-less type with the VMException REPR. 
      */
@@ -310,7 +315,7 @@ public class GlobalContext {
         if (tcRef != null) return tcRef.get();
 
         ThreadContext tc = new ThreadContext(this);
-        synchronized(this) { allThreads.put(Thread.currentThread(), tc); }
+        synchronized(this) { allThreads.put(java.lang.Thread.currentThread(), tc); }
         currentThreadCtxRef.set(new WeakReference< >(tc));
         return tc;
     }

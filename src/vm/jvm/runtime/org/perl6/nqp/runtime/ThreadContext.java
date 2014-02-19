@@ -94,6 +94,12 @@ public class ThreadContext {
      */
     public CallFrame dummyCaller;
 
+    /**
+     * Object with VMThread REPR used to represent this thread. May be null if we
+     * never got around to setting it up yet.
+     */
+    public SixModelObject VMThread;
+
     Object hllThreadData;
     ContextKey<?,?> hllThreadKey;
     HashMap<ContextKey<?,?>, Object> hllThreadAll;

@@ -87,6 +87,7 @@ import org.perl6.nqp.sixmodel.reprs.VMExceptionInstance;
 import org.perl6.nqp.sixmodel.reprs.VMHash;
 import org.perl6.nqp.sixmodel.reprs.VMHashInstance;
 import org.perl6.nqp.sixmodel.reprs.VMIterInstance;
+import org.perl6.nqp.sixmodel.reprs.VMThreadInstance;
 
 /**
  * Contains complex operations that are more involved that the simple ops that the
@@ -4177,6 +4178,75 @@ public final class Ops {
         return res;
     }
     
+    /* Thread related. */
+    static class CodeRunnable implements Runnable {
+        private GlobalContext gc;
+        private SixModelObject vmthread;
+        private SixModelObject code;
+
+        public CodeRunnable(GlobalContext gc, SixModelObject vmthread, SixModelObject code) {
+            this.gc = gc;
+            this.vmthread = vmthread;
+            this.code = code;
+        }
+        
+        public void run() {
+            ThreadContext tc = gc.getCurrentThreadContext();
+            tc.VMThread = vmthread;
+            invokeArgless(tc, code);
+        }
+    }
+    public static SixModelObject newthread(SixModelObject code, long appLifetime, ThreadContext tc) {
+        SixModelObject thread = tc.gc.Thread.st.REPR.allocate(tc, tc.gc.Thread.st);
+        ((VMThreadInstance)thread).thread = new Thread(new CodeRunnable(tc.gc, thread, code));
+        return thread;
+    }
+
+    public static SixModelObject threadrun(SixModelObject thread, ThreadContext tc) {
+        if (thread instanceof VMThreadInstance)
+            ((VMThreadInstance)thread).thread.start();
+        else
+            throw ExceptionHandling.dieInternal(tc, "threadrun requires an operand with REPR VMThread");
+        return thread;
+    }
+
+    public static SixModelObject threadjoin(SixModelObject thread, ThreadContext tc) {
+        if (thread instanceof VMThreadInstance) {
+            try {
+                ((VMThreadInstance)thread).thread.join();
+            }
+            catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc, "threadjoin requires an operand with REPR VMThread");
+        }
+        return thread;
+    }
+
+    public static long threadid(SixModelObject thread, ThreadContext tc) {
+        if (thread instanceof VMThreadInstance)
+            return ((VMThreadInstance)thread).thread.getId();
+        else
+            throw ExceptionHandling.dieInternal(tc, "threadid requires an operand with REPR VMThread");
+    }
+
+    public static long threadyield(ThreadContext tc) {
+        Thread.yield();
+        return 0;
+    }
+
+    public static SixModelObject currentthread(ThreadContext tc) {
+        SixModelObject thread = tc.VMThread;
+        if (thread == null) {
+            thread = tc.gc.Thread.st.REPR.allocate(tc, tc.gc.Thread.st);
+            ((VMThreadInstance)thread).thread = Thread.currentThread();
+            tc.VMThread = thread;
+        }
+        return thread;
+    }
+
     /* Exception related. */
     public static void die_s_c(String msg, ThreadContext tc) {
         // Construct exception object.
