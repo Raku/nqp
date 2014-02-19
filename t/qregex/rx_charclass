@@ -91,4 +91,27 @@
 # todo :pge<regression>
 abc <![d]>		abc		y	negated charclass at end of string (issue 9)
 
+<[abc]-[a]>		abc		<b>		character class substraction 1
+<[abc]-[a]>+	abc		<bc>	character class substraction 2
+<[abc]-[\w]>	abc		n		character class substraction 3
+<[abc]-[a\w]>	abc		n		character class substraction 4
+<[abc]-[\W]>	abc		<a>		character class substraction 5
+<[abc]-[\W]>+	abc		<abc>	character class substraction 6
+<[abc]-[a\W]>	abc		<b>		character class substraction 7
+<[abc]-[a\W]>+	abc		<bc>	character class substraction 8
+<[abc]-[ab\Wc]>	abc		n		character class substraction 9
+<[ab1]-[\w\d]>	ab1		n		character class substraction 10
+<[ab1]-[\w1]>	ab1		n		character class substraction 11
+<[ab1]-[ab1]>	ab1		n		character class substraction 12
+<[ab1]-[a\d]>	ab1		<b>		character class substraction 13
+<[ab1]-[a\d]>+	ab1		<b>		character class substraction 14
+<[abc]-[a\d]>	ab123c	<b>		character class substraction 15
+<[abc]-[a\d]>+	ab123c	<b>		character class substraction 16
+<[\w]-[\d]>		a		<b>		character class substraction 17
+<[\w]-[\d]>+	ab		<b>		character class substraction 18
+<[\w]-[\D]>		1		<b>		character class substraction 19
+<[\w]-[\D]>+	123		<b>		character class substraction 20
+
+<[\ ]>			a b		y		space in character class escaped with backslash
+
 ## vim: noexpandtab tabstop=4 shiftwidth=4

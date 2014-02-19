@@ -80,8 +80,8 @@ class QRegex::P5Regex::Actions is HLL::Actions {
     
     method p5metachar:sym<.>($/) {
         make %*RX<s>
-            ?? QAST::Regex.new( :rxtype<cclass>, :subtype<.>, :node($/) )
-            !! QAST::Regex.new( :rxtype<cclass>, :subtype<nl>, :negate(1), :node($/) );
+            ?? QAST::Regex.new( :rxtype<cclass>, :name<.>, :node($/) )
+            !! QAST::Regex.new( :rxtype<cclass>, :name<n>, :negate(1), :node($/) );
     }
 
     method p5metachar:sym<^>($/) {
@@ -99,8 +99,20 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         );
     }
     
-    method p5metachar:sym<(? )>($/) {
-        make $<assertion>.ast;
+    method p5metachar:sym<(? )>($/) { # like P6's $<name>=[ ... ]
+        my $qast;
+        if $<nibbler> {
+            $qast := QAST::Regex.new( :rxtype<subcapture>, :name(~$<name>),
+                $<nibbler>.ast, :node($/) );
+        }
+        else {
+            $qast := $<assertion>.ast;
+        }
+        make $qast;
+    }
+    
+    method p5metachar:sym<(?: )>($/) {
+        make $<nibbler>.ast;
     }
     
     method p5metachar:sym<( )>($/) {
@@ -172,20 +184,13 @@ class QRegex::P5Regex::Actions is HLL::Actions {
             $<sign> eq '^' ??
                 QAST::Regex.new( :rxtype<concat>, :node($/),
                     QAST::Regex.new( :rxtype<conj>, :subtype<zerowidth>, |@alts ), 
-                    QAST::Regex.new( :rxtype<cclass>, :subtype<.> ) ) !!
+                    QAST::Regex.new( :rxtype<cclass>, :name<.> ) ) !!
                 QAST::Regex.new( :rxtype<altseq>, |@alts );
         make $qast;
     }
 
     method p5backslash:sym<A>($/) {
-                make QAST::Regex.new( :rxtype<anchor>, :subtype<bos>, :node($/) );
-
-    }
-    
-    method p5backslash:sym<s>($/) {
-        make QAST::Regex.new(:rxtype<cclass>, '.CCLASS_WHITESPACE', 
-                             :subtype($<sym> eq 'n' ?? 'nl' !! ~$<sym>),
-                             :negate($<sym> le 'Z'), :node($/));
+        make QAST::Regex.new( :rxtype<anchor>, :subtype<bos>, :node($/) );
     }
 
     method p5backslash:sym<b>($/) {
@@ -193,7 +198,43 @@ class QRegex::P5Regex::Actions is HLL::Actions {
                              :node($/), :negate($<sym> eq 'B'), :name(''),
                              QAST::Node.new( QAST::SVal.new( :value('wb') ) ));
     }
-    
+
+    method p5backslash:sym<h>($/) {
+        make QAST::Regex.new( "\x[09,20,a0,1680,180e,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,200a,202f,205f,3000]", :rxtype('enumcharlist'),
+                        :negate($<sym> eq 'H'), :node($/) );
+    }
+
+    method p5backslash:sym<r>($/) {
+        make QAST::Regex.new( "\r", :rxtype('enumcharlist'), :node($/) );
+    }
+
+    method p5backslash:sym<R>($/) {
+        make QAST::Regex.new( :rxtype<cclass>, :name( 'n' ), :node($/) );
+    }
+
+    method p5backslash:sym<s>($/) {
+        make QAST::Regex.new(:rxtype<cclass>, :name( nqp::lc(~$<sym>) ),
+                             :negate($<sym> le 'Z'), :node($/));
+    }
+
+    method p5backslash:sym<t>($/) {
+        make QAST::Regex.new( "\t", :rxtype('enumcharlist'),
+                        :negate($<sym> eq 'T'), :node($/) );
+    }
+
+    method p5backslash:sym<v>($/) {
+        make QAST::Regex.new( "\x[0a,0b,0c,0d,85,2028,2029]",
+                        :rxtype('enumcharlist'),
+                        :negate($<sym> eq 'V'), :node($/) );
+    }
+
+    method p5backslash:sym<x>($/) {
+        my $hexlit := nqp::chars($<hexint>)
+            ?? nqp::chr( self.string_to_int($<hexint>, 16) )
+            !! nqp::chr(0);
+        make QAST::Regex.new( $hexlit, :rxtype('literal'), :node($/) );
+    }
+
     method p5backslash:sym<z>($/) {
         make QAST::Regex.new( :rxtype<anchor>, :subtype<eos>, :node($/) );
     }
@@ -397,7 +438,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
     method flip_ast($qast) {
         return $qast unless nqp::istype($qast, QAST::Regex);
         if $qast.rxtype eq 'literal' {
-            $qast[0] := $qast[0].reverse();
+            $qast[0] := nqp::flip($qast[0]);
         }
         elsif $qast.rxtype eq 'concat' {
             my @tmp;
@@ -560,8 +601,14 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         my $name := ~$<longname>;
         my $qast;
         if $<assertion> {
-            $qast := $<assertion>[0].ast;
-            self.subrule_alias($qast, $name);
+            $qast := $<assertion>.ast;
+            if $qast.rxtype eq 'subrule' {
+                self.subrule_alias($qast, $name);
+            }
+            else {
+                $qast := QAST::Regex.new( $qast, :name($name), 
+                                          :rxtype<subcapture>, :node($/) );
+            }
         }
         elsif $name eq 'sym' {
             my $loc := nqp::index(%*RX<name>, ':sym<');
@@ -577,12 +624,12 @@ class QRegex::P5Regex::Actions is HLL::Actions {
                                      :node($/), :name($name),
                                      QAST::Node.new(QAST::SVal.new( :value($name) )));
             if $<arglist> {
-                for $<arglist>[0].ast.list { $qast[0].push( $_ ) }
+                for $<arglist>.ast.list { $qast[0].push( $_ ) }
             }
             elsif $<nibbler> {
                 $name eq 'after' ??
-                    $qast[0].push(self.qbuildsub(self.flip_ast($<nibbler>[0].ast), :anon(1), :addself(1))) !!
-                    $qast[0].push(self.qbuildsub($<nibbler>[0].ast, :anon(1), :addself(1)));
+                    $qast[0].push(self.qbuildsub(self.flip_ast($<nibbler>.ast), :anon(1), :addself(1))) !!
+                    $qast[0].push(self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1)));
             }
         }
         make $qast;
@@ -593,9 +640,9 @@ class QRegex::P5Regex::Actions is HLL::Actions {
     }
 
     method arglist($/) {
-        my $past := QAST::Op.new( :op('list') );
-        for $<arg> { $past.push( $_.ast ); }
-        make $past;
+        my $ast := QAST::Op.new( :op('list') );
+        for $<arg> { $ast.push( $_.ast ); }
+        make $ast;
     }
 
     method subrule_alias($ast, $name) {

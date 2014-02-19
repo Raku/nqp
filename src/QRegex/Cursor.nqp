@@ -1,10 +1,27 @@
 # Some things that all cursors involved in a given parse share.
 my class ParseShared is export {
+    has $!CUR_CLASS;
     has $!orig;
     has str $!target;
     has int $!highwater;
     has @!highexpect;
     has %!marks;
+    has $!fail_cursor;
+    
+    # Follow is a little simple usage tracing infrastructure, used by the
+    # !cursor_start_* methods when uncommented.
+    my %cursors_created;
+    my $cursors_total;
+    method log_cc($name) {
+        %cursors_created{$name}++;
+        $cursors_total++;
+    }
+    method log_dump() {
+        for %cursors_created {
+            say($_.value ~ "\t" ~ $_.key);
+        }
+        say("TOTAL: " ~ $cursors_total);
+    }
 }
 
 role NQPCursorRole is export {
@@ -69,7 +86,15 @@ role NQPCursorRole is export {
                 }
                 $csi++;
             }
-        } 
+        }
+
+        # Once we've produced the captures, and if we know we're finished and
+        # will never be backtracked into, we can release cstack and regexsub.
+        unless nqp::defined($!bstack) {
+            $!cstack   := nqp::null();
+            $!regexsub := nqp::null();
+        }
+
         $caps;
     }
 
@@ -77,11 +102,17 @@ role NQPCursorRole is export {
         my $new := self.CREATE();
         unless $shared {
             $shared := nqp::create(ParseShared);
+            nqp::bindattr($shared, ParseShared, '$!CUR_CLASS', $?CLASS);
             nqp::bindattr($shared, ParseShared, '$!orig', $orig);
             nqp::bindattr_s($shared, ParseShared, '$!target',
+#?if parrot
                 pir::trans_encoding__Ssi($orig, pir::find_encoding__Is('ucs4')));
+#?endif
+#?if !parrot
+                $orig);
+#?endif
             nqp::bindattr_i($shared, ParseShared, '$!highwater', 0);
-            nqp::bindattr($shared, ParseShared, '@!highexpect', nqp::list());
+            nqp::bindattr($shared, ParseShared, '@!highexpect', nqp::list_s());
             nqp::bindattr($shared, ParseShared, '%!marks', nqp::hash());
         }
         nqp::bindattr($new, $?CLASS, '$!shared', $shared);
@@ -93,6 +124,7 @@ role NQPCursorRole is export {
             nqp::bindattr_i($new, $?CLASS, '$!from', $p);
             nqp::bindattr_i($new, $?CLASS, '$!pos', $p);
         }
+        nqp::bindattr($shared, ParseShared, '$!fail_cursor', $new.'!cursor_start_cur'());
         $new;
     }
     
@@ -100,10 +132,12 @@ role NQPCursorRole is export {
     # The array is valid until the next call to !cursor_start_all.
     my $NO_RESTART := 0;
     my $RESTART := 1;
-    my @start_result;
     method !cursor_start_all() {
+        my @start_result;
         my $new := nqp::create(self);
         my $sub := nqp::callercode();
+        # Uncomment following to log cursor creation.
+        #$!shared.log_cc(nqp::getcodename($sub));
         nqp::bindattr($new, $?CLASS, '$!shared', $!shared);
         nqp::bindattr($new, $?CLASS, '$!regexsub', nqp::ifnull(nqp::getcodeobj($sub), $sub));
         if nqp::defined($!restart) {
@@ -129,10 +163,38 @@ role NQPCursorRole is export {
         }
     }
     
+    # Starts a new Cursor or restarts an existing one. Returns the newly
+    # created Cursor.
+    method !cursor_start() {
+        my $new := nqp::create(self);
+        my $sub := nqp::callercode();
+        # Uncomment following to log cursor creation.
+        #$!shared.log_cc(nqp::getcodename($sub));
+        nqp::bindattr($new, $?CLASS, '$!shared', $!shared);
+        nqp::bindattr($new, $?CLASS, '$!regexsub', nqp::ifnull(nqp::getcodeobj($sub), $sub));
+        if nqp::defined($!restart) {
+            nqp::bindattr_i($new, $?CLASS, '$!pos', $!pos);
+            nqp::bindattr($new, $?CLASS, '$!cstack', nqp::clone($!cstack)) if $!cstack;
+            nqp::getattr_s($!shared, ParseShared, '$!target');
+            nqp::bindattr_i($new, $?CLASS, '$!from', $!from);
+            nqp::bindattr($new, $?CLASS, '$!bstack', nqp::clone($!bstack));
+            $new
+        }
+        else {
+            nqp::bindattr_i($new, $?CLASS, '$!pos', -3);
+            nqp::getattr_s($!shared, ParseShared, '$!target');
+            nqp::bindattr_i($new, $?CLASS, '$!from', $!pos);
+            nqp::bindattr($new, $?CLASS, '$!bstack', nqp::list_i());
+            $new
+        }
+    }
+    
     # Starts a new cursor, returning nothing but the cursor.
     method !cursor_start_cur() {
         my $new := nqp::create(self);
         my $sub := nqp::callercode();
+        # Uncomment following to log cursor creation.
+        #$!shared.log_cc(nqp::getcodename($sub));
         nqp::bindattr($new, $?CLASS, '$!shared', $!shared);
         nqp::bindattr($new, $?CLASS, '$!regexsub', nqp::ifnull(nqp::getcodeobj($sub), $sub));
         if nqp::defined($!restart) {
@@ -142,6 +204,10 @@ role NQPCursorRole is export {
         nqp::bindattr_i($new, $?CLASS, '$!from', $!pos);
         nqp::bindattr($new, $?CLASS, '$!bstack', nqp::list_i());
         $new
+    }
+    
+    method !cursor_start_fail() {
+        nqp::getattr($!shared, ParseShared, '$!fail_cursor');
     }
 
     method !cursor_start_subcapture($from) {
@@ -182,8 +248,10 @@ role NQPCursorRole is export {
     }
 
     method !cursor_fail() {
-        $!match  := nqp::null();
-        $!bstack := nqp::null();
+        $!match    := nqp::null();
+        $!bstack   := nqp::null();
+        $!cstack   := nqp::null();
+        $!regexsub := nqp::null();
         $!pos    := -3;
     }
     
@@ -249,7 +317,7 @@ role NQPCursorRole is export {
             $cur := self."$rxname"();
             @fates := @EMPTY if nqp::getattr_i($cur, $?CLASS, '$!pos') >= 0;
         }
-        $cur // self."!cursor_start_cur"();
+        $cur // nqp::getattr($shared, ParseShared, '$!fail_cursor');
     }
 
     method !protoregex_nfa($name) {
@@ -272,7 +340,7 @@ role NQPCursorRole is export {
         my %protorx;
         for self.HOW.methods(self) -> $meth {
             my str $methname := $meth.name();
-            my int $sympos   := nqp::index($methname, ':sym<');
+            my int $sympos   := nqp::index($methname, ':');
             if $sympos > 0 {
                 my str $prefix := nqp::substr($methname, 0, $sympos);
                 %protorx{$prefix} := [] unless nqp::existskey(%protorx, $prefix);
@@ -319,7 +387,7 @@ role NQPCursorRole is export {
         sub precomp_alt_nfas($meth) {
             if nqp::can($meth, 'ALT_NFAS') {
                 for $meth.ALT_NFAS -> $name {
-                    self.HOW.cache(self, $name, { self.'!alt_nfa'($meth, $name) });
+                    self.HOW.cache(self, $name, { self.'!alt_nfa'($meth, $name.key) });
                 }
             }
         }
@@ -340,7 +408,7 @@ role NQPCursorRole is export {
         if $pos >= $highwater {
             $highexpect := nqp::getattr($shared, ParseShared, '@!highexpect');
             if $pos > $highwater {
-                pir::assign__0Pi($highexpect, 0);
+                nqp::setelems($highexpect, 0);
                 nqp::bindattr_i($shared, ParseShared, '$!highwater', $pos);
             }
             nqp::push_s($highexpect, $dba);
@@ -357,7 +425,7 @@ role NQPCursorRole is export {
     
     method !fresh_highexpect() {
         my @old := nqp::getattr($!shared, ParseShared, '@!highexpect');
-        nqp::bindattr($!shared, ParseShared, '@!highexpect', []);
+        nqp::bindattr($!shared, ParseShared, '@!highexpect', nqp::list_s());
         @old
     }
     
@@ -367,7 +435,7 @@ role NQPCursorRole is export {
     
     method !clear_highwater() {
         my $highexpect := nqp::getattr($!shared, ParseShared, '@!highexpect');
-        pir::assign__0Pi($highexpect, 0);
+        nqp::setelems($highexpect, 0);
         nqp::bindattr_i($!shared, ParseShared, '$!highwater', -1)
     }
 
@@ -388,13 +456,18 @@ role NQPCursorRole is export {
     }
 
     method !LITERAL(str $str, int $i = 0) {
-        my $cur := self."!cursor_start_cur"();
+        my $cur;
         my int $litlen := nqp::chars($str);
         my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
-        $cur."!cursor_pass"($!pos + $litlen)
-          if $litlen < 1 
-              ||  ($i ?? nqp::lc(nqp::substr($target, $!pos, $litlen)) eq nqp::lc($str)
-                      !! nqp::substr($target, $!pos, $litlen) eq $str);
+        if $litlen < 1 ||
+            ($i ?? nqp::lc(nqp::substr($target, $!pos, $litlen)) eq nqp::lc($str)
+                !! nqp::substr($target, $!pos, $litlen) eq $str) {
+            $cur := self."!cursor_start_cur"();
+            $cur."!cursor_pass"($!pos + $litlen);
+        }
+        else {
+            $cur := nqp::getattr($!shared, ParseShared, '$!fail_cursor');
+        }
         $cur;
     }
 
@@ -407,7 +480,7 @@ role NQPCursorRole is export {
     method before($regex) {
         my int $orig_highwater := nqp::getattr_i($!shared, ParseShared, '$!highwater');
         my $orig_highexpect := nqp::getattr($!shared, ParseShared, '@!highexpect');
-        nqp::bindattr($!shared, ParseShared, '@!highexpect', []);
+        nqp::bindattr($!shared, ParseShared, '@!highexpect', nqp::list_s());
         my $cur := self."!cursor_start_cur"();
         nqp::bindattr_i($cur, $?CLASS, '$!pos', $!pos);
         nqp::getattr_i($regex($cur), $?CLASS, '$!pos') >= 0 ??
@@ -423,11 +496,11 @@ role NQPCursorRole is export {
     method after($regex) {
         my int $orig_highwater := nqp::getattr_i($!shared, ParseShared, '$!highwater');
         my $orig_highexpect := nqp::getattr($!shared, ParseShared, '@!highexpect');
-        nqp::bindattr($!shared, ParseShared, '@!highexpect', []);
+        nqp::bindattr($!shared, ParseShared, '@!highexpect', nqp::list_s());
         my $cur := self."!cursor_start_cur"();
         my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
         my $shared := nqp::clone($!shared);
-        nqp::bindattr_s($shared, ParseShared, '$!target', $target.reverse());
+        nqp::bindattr_s($shared, ParseShared, '$!target', nqp::flip($target));
         nqp::bindattr($cur, $?CLASS, '$!shared', $shared);
         nqp::bindattr_i($cur, $?CLASS, '$!from', nqp::chars($target) - $!pos);
         nqp::bindattr_i($cur, $?CLASS, '$!pos', nqp::chars($target) - $!pos);
@@ -456,13 +529,17 @@ role NQPCursorRole is export {
     }
     
     method ww() {
-        my $cur := self."!cursor_start_cur"();
+        my $cur;
         my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
-        $cur."!cursor_pass"($!pos, "ww")
-            if $!pos > 0
-            && $!pos != nqp::chars($target)
-            && nqp::iscclass(nqp::const::CCLASS_WORD, $target, $!pos)
-            && nqp::iscclass(nqp::const::CCLASS_WORD, $target, $!pos-1);
+        if $!pos > 0 && $!pos != nqp::chars($target)
+                && nqp::iscclass(nqp::const::CCLASS_WORD, $target, $!pos)
+                && nqp::iscclass(nqp::const::CCLASS_WORD, $target, $!pos-1) {
+            $cur := self."!cursor_start_cur"();
+            $cur."!cursor_pass"($!pos, "ww");
+        }
+        else {
+            $cur := nqp::getattr($!shared, ParseShared, '$!fail_cursor');
+        }
         $cur;
     }
 
@@ -479,15 +556,20 @@ role NQPCursorRole is export {
     }
 
     method ident() {
-        my $cur := self."!cursor_start_cur"();
+        my $cur;
         my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
-        $cur."!cursor_pass"(
+        if $!pos < nqp::chars($target) &&
+                (nqp::ord($target, $!pos) == 95
+                 || nqp::iscclass(nqp::const::CCLASS_ALPHABETIC, $target, $!pos)) {
+            $cur := self."!cursor_start_cur"();
+            $cur."!cursor_pass"(
                 nqp::findnotcclass(
                     nqp::const::CCLASS_WORD,
-                    $target, $!pos, nqp::chars($target)))
-            if $!pos < nqp::chars($target) &&
-                (nqp::ord($target, $!pos) == 95
-                 || nqp::iscclass(nqp::const::CCLASS_ALPHABETIC, $target, $!pos));
+                    $target, $!pos, nqp::chars($target)));
+        }
+        else {
+            $cur := nqp::getattr($!shared, ParseShared, '$!fail_cursor');
+        }
         $cur;
     }
 
@@ -596,49 +678,117 @@ class NQPMatch is NQPCapture {
     has $!orig;
     has int $!from;
     has int $!to;
-    has $!ast;
+    has $!made;
     has $!cursor;
 
     method from() { $!from }
     method orig() { $!orig }
     method to()   { $!to }
     method CURSOR() { $!cursor }
+#?if parrot
     method Str() is parrot_vtable('get_string')  { nqp::substr($!orig, $!from, $!to-$!from) }
     method Int() is parrot_vtable('get_integer') { +self.Str() }
     method Num() is parrot_vtable('get_number')  { +self.Str() }
+#?endif
+#?if !parrot
+    method Str() { nqp::substr($!orig, $!from, $!to-$!from) }
+    method Int() { +self.Str() }
+    method Num() { +self.Str() }
+#?endif
     method Bool() { $!to >= $!from }
     method chars() { $!to >= $!from ?? $!to - $!from !! 0 }
     
-    method !make($ast) { $!ast := $ast }
-    method ast()       { $!ast }
-
+    method !make($made) { $!made := $made }
+    method made()      { $!made }
+    method ast()       { $!made }  # for historical reasons
+    
+    method dump($indent?) {
+        unless nqp::defined($indent) {
+            $indent := 0;
+        }
+        if self.Bool() {
+            my @chunks;
+            
+            my sub dump_match(@chunks, $indent, $key, $value) {
+                nqp::push(@chunks, nqp::x(' ', $indent));
+                nqp::push(@chunks, '- ');
+                nqp::push(@chunks, $key);
+                nqp::push(@chunks, ': ');
+                if nqp::can($value, 'Str') {
+                    nqp::push(@chunks, $value.Str());
+                }
+                else {
+                    nqp::push(@chunks, '<object>');
+                }
+                nqp::push(@chunks, "\n");
+                if nqp::can($value, 'dump') {
+                    nqp::push(@chunks, $value.dump($indent + 2));
+                }
+            }
+            
+            my sub dump_match_array(@chunks, $indent, $key, @matches) {
+                nqp::push(@chunks, nqp::x(' ', $indent));
+                nqp::push(@chunks, '- ');
+                nqp::push(@chunks, $key);
+                nqp::push(@chunks, ': ');
+                nqp::push(@chunks, ~+@matches);
+                nqp::push(@chunks, " matches\n");
+                for @matches {
+                    nqp::push(@chunks, $_.dump($indent + 2));
+                }
+            }
+            
+            my int $i := 0;
+            for self.list() {
+                if $_ {
+                    nqp::islist($_)
+                        ?? dump_match_array(@chunks, $indent, $i, $_)
+                        !! dump_match(@chunks, $indent, $i, $_);
+                }
+                $i := $i + 1;
+            }
+            for self.hash() {
+                if $_.value {
+                    nqp::islist($_.value)
+                        ?? dump_match_array(@chunks, $indent, $_.key, $_.value)
+                        !! dump_match(@chunks, $indent, $_.key, $_.value);
+                }
+            }
+            return join('', @chunks);
+        }
+        else {
+            return nqp::x(' ', $indent) ~ "- NO MATCH\n";
+        }
+    }
+    
     method !dump_str($key) {
         sub dump_array($key, $item) {
             my $str := '';
-            if $item ~~ NQPCapture {
+            if nqp::istype($item, NQPCapture) {
                 $str := $str ~ $item."!dump_str"($key)
             }
-            elsif !nqp::isnull($item) {
-                my $n := 0;
+            elsif nqp::islist($item) {
+                $str := $str ~ "$key: list\n";
+                my int $n := 0;
                 for $item { $str := $str ~ dump_array($key ~ "[$n]", $_); $n++ }
             }
             $str;
         }
         my $str := $key ~ ': ' ~ nqp::escape(self.Str) ~ ' @ ' ~ self.from ~ "\n";
-        $str := $str ~ dump_array($key, self.list);
+        my int $n := 0;
+        for self.list { $str := $str ~ dump_array($key ~ '[' ~ $n ~ ']', $_); $n++ }
         for self.hash { $str := $str ~ dump_array($key ~ '<' ~ $_.key ~ '>', $_.value); }
         $str;
     }
 }
 
 class NQPCursor does NQPCursorRole {
-    my $EMPTY_MATCH_LIST := nqp::list();
-    my $EMPTY_MATCH_HASH := nqp::hash();
+    my @EMPTY_LIST := [];
     method MATCH() {
         my $match := nqp::getattr(self, NQPCursor, '$!match');
         unless nqp::istype($match, NQPMatch) || nqp::ishash($match) {
-            my $list := $EMPTY_MATCH_LIST;
-            my $hash := $EMPTY_MATCH_HASH;
+            my $list;
+            my $hash := nqp::hash();
             $match := nqp::create(NQPMatch);
             nqp::bindattr(self, NQPCursor, '$!match', $match);
             nqp::bindattr($match, NQPMatch, '$!cursor', self);
@@ -652,19 +802,18 @@ class NQPCursor does NQPCursorRole {
             while $iter {
                 $curcap := nqp::shift($iter);
                 $key := nqp::iterkey_s($curcap);
-                if $key eq '$!from' || $key eq '$!to' {
-                    nqp::bindattr_i($match, NQPMatch, $key, nqp::iterval($curcap).from);
-                }
-                elsif nqp::iscclass(nqp::const::CCLASS_NUMERIC, $key, 0) {
-                    $list := nqp::list() unless $list;
+                if nqp::iscclass(nqp::const::CCLASS_NUMERIC, $key, 0) {
+                    $list := nqp::list() unless nqp::isconcrete($list);
                     nqp::bindpos($list, $key, nqp::iterval($curcap));
                 }
+                elsif $key && nqp::ordat($key, 0) == 36 && ($key eq '$!from' || $key eq '$!to') {
+                    nqp::bindattr_i($match, NQPMatch, $key, nqp::iterval($curcap).from);
+                }
                 else {
-                    $hash := nqp::hash() unless $hash;
                     nqp::bindkey($hash, $key, nqp::iterval($curcap));
                 }
             }
-            nqp::bindattr($match, NQPCapture, '@!array', $list);
+            nqp::bindattr($match, NQPCapture, '@!array', nqp::isconcrete($list) ?? $list !! @EMPTY_LIST);
             nqp::bindattr($match, NQPCapture, '%!hash', $hash);
         }
         $match
@@ -748,17 +897,20 @@ class NQPRegexMethod {
     method new($code) {
         self.bless(:code($code));
     }
-    method ACCEPTS($target) {
+    multi method ACCEPTS(NQPRegexMethod:D $self: $target) {
         NQPCursor.parse($target, :rule(self))
     }
-    method Str() is parrot_vtable('get_string') {
+    method name() {
         nqp::getcodename($!code)
+    }
+    method Str() {
+        self.name()
     }
 }
 nqp::setinvokespec(NQPRegexMethod, NQPRegexMethod, '$!code', nqp::null);
 
 class NQPRegex is NQPRegexMethod {
-    method ACCEPTS($target) {
+    multi method ACCEPTS(NQPRegex:D $self: $target) {
         NQPCursor.parse($target, :rule(self), :c(0))
     }
 }

@@ -131,8 +131,7 @@ following.
         
         method new_type() {
             my $meta-object := self.new();
-            return pir::repr_type_object_for__PPs(
-                $meta-object, 'HashAttrStore');
+            return nqp::newtype($meta-object, 'HashAttrStore');
         }
         
         method add_method($type, $name, $code) {

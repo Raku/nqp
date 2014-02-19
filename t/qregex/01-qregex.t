@@ -5,6 +5,7 @@ use QRegex;
 
 my @files := [
     'rx_captures',
+    'rx_qcaps',
     'rx_basic',
     'rx_quantifiers',
     'rx_metachars',
@@ -25,7 +26,7 @@ my %expansions;
 %expansions<f> := "\f";
 sub unescape($s) {
     $s := subst($s, /\\(<[nretf]>)/, -> $m { %expansions{$m[0]} }, :global);
-    subst($s, /\\x(<[a..fA..F0..9]>**4)/, -> $m { nqp::chr(HLL::Actions::string_to_int(~$m[0], 16)) }, :global);
+    subst($s, /\\x(<[a..fA..F0..9]>**4)/, -> $m { nqp::chr(HLL::Actions.string_to_int(~$m[0], 16)) }, :global);
 }
 
 
@@ -40,10 +41,10 @@ sub test_line($line) {
     $target := unescape($target);
 
     my $expect_substr := nqp::substr($expect, 0, 1) eq '<'
-                           ?? pir::chopn__Ssi(nqp::substr($expect, 1), 1)
+                           ?? nqp::substr($expect, 1, nqp::chars($expect) - 2)
                            !! '';
 
-    my $rxcomp := pir::compreg__Ps('QRegex::P6Regex');
+    my $rxcomp := nqp::getcomp('QRegex::P6Regex');
     try {
         my $rxsub  := $rxcomp.compile($regex);
         my $cursor := NQPCursor."!cursor_init"($target, :c(0));
@@ -84,7 +85,7 @@ for @files -> $fn {
             todo($m[0], 1);
         }
         else {
-            next if $l ~~ /^\s*\# | ^\s*$ /;
+            next if $l ~~ /^ \s* '#' | ^ \s* $ /;
             test_line($l);
             $tests := $tests + 1;
         }

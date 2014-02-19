@@ -11,8 +11,11 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         );
     }
 
-    method nibbler($/) { make $<termaltseq>.ast }
+    method nibbler($/) { make $<termseq>.ast }
 
+    method termseq($/) {
+        make $<termaltseq>.ast if $<termaltseq>
+    }
     method termaltseq($/) {
         my $qast := $<termconjseq>[0].ast;
         if +$<termconjseq> > 1 {
@@ -72,8 +75,14 @@ class QRegex::P6Regex::Actions is HLL::Actions {
 
     method quantified_atom($/) {
         my $qast := $<atom>.ast;
+
+        my $sigmaybe := $<sigmaybe>.ast if $<sigmaybe>;
+        $qast := QAST::Regex.new(:rxtype<concat>, $qast, $sigmaybe) if $sigmaybe;
+
         if $<quantifier> {
-            my $ast := $<quantifier>[0].ast;
+            $/.CURSOR.panic('Quantifier quantifies nothing')
+                unless $qast;
+            my $ast := $<quantifier>.ast;
             $ast.unshift($qast);
             $qast := $ast;
         }
@@ -82,14 +91,20 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                 $/.CURSOR.panic("'" ~ $<separator>[0]<septype> ~
                     "' many only be used immediately following a quantifier")
             }
-            $qast.push($<separator>[0].ast);
-            if $<separator>[0]<septype> eq '%%' {
+            $qast.push($<separator>.ast);
+            if $<separator><septype> eq '%%' {
                 $qast := QAST::Regex.new( :rxtype<concat>, $qast,
-                    QAST::Regex.new( :rxtype<quant>, :min(0), :max(1), $<separator>[0].ast ));
+                    QAST::Regex.new( :rxtype<quant>, :min(0), :max(1), $<separator>.ast ));
             }
         }
-        $qast.backtrack('r') if $qast && !$qast.backtrack &&
-            (%*RX<r> || $<backmod> && ~$<backmod>[0] eq ':');
+
+        my $sigfinal := $<sigfinal>.ast if $<sigfinal>;
+        $qast := QAST::Regex.new(:rxtype<concat>, $qast, $sigfinal) if $sigfinal;
+
+        if $qast {
+            $qast.backtrack('r') if !$qast.backtrack && (%*RX<r> || $<backmod> && ~$<backmod> eq ':');
+            $qast.node($/);
+        }
         make $qast;
     }
     
@@ -108,6 +123,15 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         }
     }
 
+    method sigmaybe:sym<sigwhite>($/) {
+        make QAST::Regex.new(
+                :rxtype<subrule>,
+                :subtype<method>,
+                :node($/),
+                :name<ws>,
+                QAST::Node.new(QAST::SVal.new( :value('ws') )) );
+    }
+
     method quantifier:sym<*>($/) {
         my $qast := QAST::Regex.new( :rxtype<quant>, :min(0), :max(-1), :node($/) );
         make backmod($qast, $<backmod>);
@@ -119,24 +143,21 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     method quantifier:sym<?>($/) {
-        my $qast := QAST::Regex.new( :rxtype<quant>, :min(0), :max(1), :node($/) );
+        my $qast := QAST::Regex.new( :rxtype<quant>, :subtype<item>, :min(0), :max(1), :node($/) );
         make backmod($qast, $<backmod>);
     }
 
     method quantifier:sym<**>($/) {
         my $qast;
-        $qast := QAST::Regex.new( :rxtype<quant>, :min(+$<min>), :max(-1), :node($/) );
-        if ! $<max> { $qast.max(+$<min>) }
-        elsif $<max>[0] ne '*' { $qast.max(+$<max>[0]); }
+        my $min := $<min>.ast;
+        my $max := -1;
+        if ! $<max> { $max := $min }
+        elsif $<max> ne '*' {
+            $max := $<max>.ast;
+            $/.CURSOR.panic("Empty range") if $min > $max;
+        }
+        $qast := QAST::Regex.new( :rxtype<quant>, :min($min), :max($max), :node($/) );
         make backmod($qast, $<backmod>);
-    }
-
-    method metachar:sym<ws>($/) {
-        my $qast := %*RX<s>
-                    ?? QAST::Regex.new(:rxtype<ws>, :subtype<method>, :node($/),
-                            QAST::Node.new(QAST::SVal.new( :value('ws') )))
-                    !! 0;
-        make $qast;
     }
 
     method metachar:sym<[ ]>($/) {
@@ -144,10 +165,10 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     method metachar:sym<( )>($/) {
-        my $subpast := QAST::Node.new(self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1)));
-        my $qast := QAST::Regex.new( $subpast, $<nibbler>.ast, :rxtype('subrule'),
+        my $sub_ast := QAST::Node.new(self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1)));
+        my $ast := QAST::Regex.new( $sub_ast, $<nibbler>.ast, :rxtype('subrule'),
                                      :subtype('capture'), :node($/) );
-        make $qast;
+        make $ast;
     }
 
     method metachar:sym<'>($/) {
@@ -167,7 +188,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     method metachar:sym<.>($/) {
-        make QAST::Regex.new( :rxtype<cclass>, :subtype<.>, :node($/) );
+        make QAST::Regex.new( :rxtype<cclass>, :name<.>, :node($/) );
     }
 
     method metachar:sym<^>($/) {
@@ -263,8 +284,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     method metachar:sym<mod>($/) { make $<mod_internal>.ast; }
 
     method backslash:sym<s>($/) {
-        make QAST::Regex.new(:rxtype<cclass>, '.CCLASS_WHITESPACE', 
-                             :subtype($<sym> eq 'n' ?? 'nl' !! ~$<sym>), 
+        make QAST::Regex.new(:rxtype<cclass>, :name( nqp::lc(~$<sym>) ),
                              :negate($<sym> le 'Z'), :node($/));
     }
 
@@ -330,10 +350,87 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     method backslash:sym<c>($/) {
-        make QAST::Regex.new( $<charspec>.ast, :rxtype('literal'), :node($/) );
+        make $<sym> eq 'C' ??
+            QAST::Regex.new( $<charspec>.ast, :rxtype('enumcharlist'), :negate(1), :node($/) ) !!
+            QAST::Regex.new( $<charspec>.ast, :rxtype('literal'), :node($/) )
     }
 
     method backslash:sym<misc>($/) {
+        my $qast := QAST::Regex.new( ~$/ , :rxtype('enumcharlist'), :node($/) );
+        make $qast;
+    }
+
+    method cclass_backslash:sym<s>($/) {
+        make QAST::Regex.new(:rxtype<cclass>, :name( nqp::lc(~$<sym>) ),
+                             :negate($<sym> le 'Z'), :node($/));
+    }
+
+    method cclass_backslash:sym<b>($/) {
+        my $qast := QAST::Regex.new( "\b", :rxtype('enumcharlist'),
+                        :negate($<sym> eq 'B'), :node($/) );
+        make $qast;
+    }
+
+    method cclass_backslash:sym<e>($/) {
+        my $qast := QAST::Regex.new( "\c[27]", :rxtype('enumcharlist'),
+                        :negate($<sym> eq 'E'), :node($/) );
+        make $qast;
+    }
+
+    method cclass_backslash:sym<f>($/) {
+        my $qast := QAST::Regex.new( "\c[12]", :rxtype('enumcharlist'),
+                        :negate($<sym> eq 'F'), :node($/) );
+        make $qast;
+    }
+
+    method cclass_backslash:sym<h>($/) {
+        my $qast := QAST::Regex.new( "\x[09,20,a0,1680,180e,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,200a,202f,205f,3000]", :rxtype('enumcharlist'),
+                        :negate($<sym> eq 'H'), :node($/) );
+        make $qast;
+    }
+
+    method cclass_backslash:sym<r>($/) {
+        my $qast := QAST::Regex.new( "\r", :rxtype('enumcharlist'),
+                        :negate($<sym> eq 'R'), :node($/) );
+        make $qast;
+    }
+
+    method cclass_backslash:sym<t>($/) {
+        my $qast := QAST::Regex.new( "\t", :rxtype('enumcharlist'),
+                        :negate($<sym> eq 'T'), :node($/) );
+        make $qast;
+    }
+
+    method cclass_backslash:sym<v>($/) {
+        my $qast := QAST::Regex.new( "\x[0a,0b,0c,0d,85,2028,2029]",
+                        :rxtype('enumcharlist'),
+                        :negate($<sym> eq 'V'), :node($/) );
+        make $qast;
+    }
+
+    method cclass_backslash:sym<o>($/) {
+        my $octlit :=
+            HLL::Actions.ints_to_string( $<octint> || $<octints><octint> );
+        make $<sym> eq 'O'
+             ?? QAST::Regex.new( $octlit, :rxtype('enumcharlist'),
+                                  :negate(1), :node($/) )
+             !! QAST::Regex.new( $octlit, :rxtype('literal'), :node($/) );
+    }
+
+    method cclass_backslash:sym<x>($/) {
+        my $hexlit :=
+            HLL::Actions.ints_to_string( $<hexint> || $<hexints><hexint> );
+        make $<sym> eq 'X'
+             ?? QAST::Regex.new( $hexlit, :rxtype('enumcharlist'),
+                                  :negate(1), :node($/) )
+             !! QAST::Regex.new( $hexlit, :rxtype('literal'), :node($/) );
+    }
+
+    method cclass_backslash:sym<c>($/) {
+        make QAST::Regex.new( $<charspec>.ast, :rxtype('literal'), :node($/) );
+    }
+
+    method cclass_backslash:sym<any>($/) {
         my $qast := QAST::Regex.new( ~$/ , :rxtype('literal'), :node($/) );
         make $qast;
     }
@@ -390,29 +487,46 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         my $name := ~$<longname>;
         my $qast;
         if $<assertion> {
-            $qast := $<assertion>[0].ast;
-            self.subrule_alias($qast, $name);
+            $qast := $<assertion>.ast;
+            if $qast.rxtype eq 'subrule' {
+                self.subrule_alias($qast, $name);
+            }
+            else {
+                $qast := QAST::Regex.new( $qast, :name($name), 
+                                          :rxtype<subcapture>, :node($/) );
+            }
         }
         elsif $name eq 'sym' {
+            my $rxname := "";
             my $loc := nqp::index(%*RX<name>, ':sym<');
-            $loc := nqp::index(%*RX<name>, ':sym«')
-                if $loc < 0;
-            my $rxname := nqp::substr(%*RX<name>, $loc + 5);
-            $rxname := nqp::substr( $rxname, 0, nqp::chars($rxname) - 1);
-            $qast := QAST::Regex.new(:name('sym'), :rxtype<subcapture>, :node($/),
-                QAST::Regex.new(:rxtype<literal>, $rxname, :node($/)));
+            if $loc >= 0 {
+                $rxname := nqp::substr(%*RX<name>, $loc + 5 );
+                $rxname := nqp::substr( $rxname, 0, nqp::chars($rxname) - 1);
+            }
+            else {
+                $loc := nqp::index(%*RX<name>, ':');
+                my $angleloc := nqp::index(%*RX<name>, '<', $loc);
+                $rxname := nqp::substr(%*RX<name>, $loc + 1, $angleloc - $loc - 1) unless $loc < 0;
+            }
+            if $loc >= 0 {
+                $qast := QAST::Regex.new(:name('sym'), :rxtype<subcapture>, :node($/),
+                    QAST::Regex.new(:rxtype<literal>, $rxname, :node($/)));
+            }
+            else {
+                self.panic("<sym> is only valid in multiregexes");
+            }
         }
         else {
             $qast := QAST::Regex.new(:rxtype<subrule>, :subtype<capture>,
                                      :node($/), :name($name),
                                      QAST::Node.new(QAST::SVal.new( :value($name) )));
             if $<arglist> {
-                for $<arglist>[0].ast.list { $qast[0].push( $_ ) }
+                for $<arglist>.ast.list { $qast[0].push( $_ ) }
             }
             elsif $<nibbler> {
                 $name eq 'after' ??
-                    $qast[0].push(self.qbuildsub(self.flip_ast($<nibbler>[0].ast), :anon(1), :addself(1))) !!
-                    $qast[0].push(self.qbuildsub($<nibbler>[0].ast, :anon(1), :addself(1)));
+                    $qast[0].push(self.qbuildsub(self.flip_ast($<nibbler>.ast), :anon(1), :addself(1))) !!
+                    $qast[0].push(self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1)));
             }
         }
         make $qast;
@@ -425,15 +539,18 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             $qast.subtype('zerowidth');
             $qast := QAST::Regex.new(:rxtype<concat>, :node($/),
                                      $qast, 
-                                     QAST::Regex.new( :rxtype<cclass>, :subtype<.> ));
+                                     QAST::Regex.new( :rxtype<cclass>, :name<.> ));
         }
-        my $i := 1;
-        my $n := +$clist;
+        
+        my int $i := 1;
+        my int $n := nqp::elems($clist);
         while $i < $n {
             my $ast := $clist[$i].ast;
-            if $ast.negate {
+            if $ast.negate || $ast.rxtype eq 'cclass' && ~$ast.node le 'Z' {
                 $ast.subtype('zerowidth');
-                $qast := QAST::Regex.new( $ast, $qast, :rxtype<concat>, :node($/));
+                $qast := QAST::Regex.new( :rxtype<concat>, :node($/), :subtype<zerowidth>, :negate(1),
+                        QAST::Regex.new( :rxtype<conj>, :subtype<zerowidth>, $ast ), 
+                        $qast );
             }
             else {
                 $qast := QAST::Regex.new( $qast, $ast, :rxtype<altseq>, :node($/));
@@ -450,9 +567,9 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     method arglist($/) {
-        my $past := QAST::Op.new( :op('list') );
-        for $<arg> { $past.push( $_.ast ); }
-        make $past;
+        my $ast := QAST::Op.new( :op('list') );
+        for $<arg> { $ast.push( $_.ast ); }
+        make $ast;
     }
 
     method cclass_elem($/) {
@@ -472,13 +589,16 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         }
         else {
             my @alts;
+            my $lower;
+            my $upper;
+            my $use-range := 0;
             for $<charspec> {
                 if $_[1] {
                     my $node;
                     my $lhs;
                     my $rhs;
-                    if $_[0]<backslash> {
-                        $node := $_[0]<backslash>.ast;
+                    if $_[0]<cclass_backslash> {
+                        $node := $_[0]<cclass_backslash>.ast;
                         $/.CURSOR.panic("Illegal range endpoint in regex: " ~ ~$_)
                             if $node.rxtype ne 'literal' && $node.rxtype ne 'enumcharlist'
                                 || $node.negate || nqp::chars($node[0]) != 1;
@@ -487,8 +607,8 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                     else {
                         $lhs := ~$_[0][0];
                     }
-                    if $_[1][0]<backslash> {
-                        $node := $_[1][0]<backslash>.ast;
+                    if $_[1][0]<cclass_backslash> {
+                        $node := $_[1][0]<cclass_backslash>.ast;
                         $/.CURSOR.panic("Illegal range endpoint in regex: " ~ ~$_)
                             if $node.rxtype ne 'literal' && $node.rxtype ne 'enumcharlist'
                                 || $node.negate || nqp::chars($node[0]) != 1;
@@ -501,25 +621,55 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                     my $ord1 := nqp::ord($rhs);
                     $/.CURSOR.panic("Illegal reversed character range in regex: " ~ ~$_)
                         if $ord0 > $ord1;
-                    $str := nqp::concat($str, nqp::chr($ord0++)) while $ord0 <= $ord1;
+                    if %*RX<i> {
+                        while $ord0 <= $ord1 {
+                            my $c := nqp::chr($ord0++);
+                            $str := nqp::concat($str, nqp::lc($c) ~ nqp::uc($c));
+                        }
+                        $use-range := $use-range + 9000;
+                    }
+                    else {
+                        $lower := $ord0;
+                        $upper := $ord1;
+                        $str := nqp::concat($str, nqp::chr($ord0++)) while $ord0 <= $ord1;
+                        $use-range := $use-range + 1;
+                    }
                 }
-                elsif $_[0]<backslash> {
-                    my $bs := $_[0]<backslash>.ast;
-                    $bs.negate(!$bs.negate) if $<sign> eq '-';
-                    @alts.push($bs);
+                elsif $_[0]<cclass_backslash> {
+                    my $bs := $_[0]<cclass_backslash>.ast;
+                    if $bs.rxtype eq 'enumcharlist' && !$bs.negate || $bs.rxtype eq 'literal' {
+                        $str := $str ~ $bs[0];
+                        $use-range := $use-range + 9000;
+                    }
+                    else {
+                        $bs.negate(!$bs.negate) if $<sign> eq '-';
+                        @alts.push($bs);
+                    }
                 }
-                else { $str := $str ~ ~$_[0]; }
+                else {
+                    my $c := ~$_[0];
+                    $str := $str ~ (%*RX<i> ?? nqp::lc($c) ~ nqp::uc($c) !! $c);
+                    $use-range := $use-range + 9000;
+                }
             }
-            @alts.push(QAST::Regex.new( $str, :rxtype<enumcharlist>, :node($/), :negate( $<sign> eq '-' ) ))
-                if nqp::chars($str);
-            $qast := +@alts == 1 ?? @alts[0] !!
-                $<sign> eq '-' ??
-                    QAST::Regex.new( :rxtype<concat>, :node($/),
-                        QAST::Regex.new( :rxtype<conj>, :subtype<zerowidth>, |@alts ), 
-                        QAST::Regex.new( :rxtype<cclass>, :subtype<.> ) ) !!
-                    QAST::Regex.new( :rxtype<altseq>, |@alts );
+            if nqp::elems(@alts) == 0 && $use-range == 1 && nqp::chars($str) {
+                $qast := QAST::Regex.new(
+                                  $str,
+                                  QAST::IVal.new( :value($lower) ),
+                                  QAST::IVal.new( :value($upper) ),
+                                  :negate( $<sign> eq '-' ),
+                                  :rxtype<charrange>, :node($/) );
+            } else {
+                @alts.push(QAST::Regex.new( $str, :rxtype<enumcharlist>, :node($/), :negate( $<sign> eq '-' ) ))
+                    if nqp::chars($str);
+                $qast := +@alts == 1 ?? @alts[0] !!
+                    $<sign> eq '-' ??
+                        QAST::Regex.new( :rxtype<concat>, :node($/), :negate(1),
+                            QAST::Regex.new( :rxtype<conj>, :subtype<zerowidth>, |@alts ),
+                            QAST::Regex.new( :rxtype<cclass>, :name<.> ) ) !!
+                        QAST::Regex.new( :rxtype<altseq>, |@alts );
+            }
         }
-        #$qast.negate( $<sign> eq '-' );
         make $qast;
     }
 
@@ -536,11 +686,6 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             else {
                 $/.CURSOR.panic("Internal modifier strings must be literals");
             }
-        }
-        else {
-            my $n := $<n>[0] gt '' ?? +$<n>[0] !! 1;
-            %*RX{ ~$<mod_ident><sym> } := $n;
-            make 0;
         }
     }
 
@@ -568,9 +713,21 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         self.store_regex_nfa($code_obj, $block, QRegex::NFA.new.addnode($qast));
         self.alt_nfas($code_obj, $block, $qast);
 
+        my $scan := QAST::Regex.new( :rxtype<scan> );
+        {
+            my $q := $qast;
+            if $q.rxtype eq 'concat' && $q[0] {
+                $q := $q[0]
+            }
+            if $q.rxtype eq 'literal' {
+                nqp::push($scan, $q[0]);
+                $scan.subtype($q.subtype);
+            }
+        }
+
         $block<orig_qast> := $qast;
         $qast := QAST::Regex.new( :rxtype<concat>,
-                     QAST::Regex.new( :rxtype<scan> ),
+                     $scan,
                      $qast,
                      ($anon
                           ?? QAST::Regex.new( :rxtype<pass> )
@@ -583,7 +740,14 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                                        ) 
                                    )
                               )));
+        if %*RX<r> {
+            $qast[2].backtrack('r');
+        }
         $block.push($qast);
+
+        if nqp::existskey(%rest, 'cursor_type') {
+            $qast.cursor_type(%rest<cursor_type>);
+        }
         
         $block;
     }
@@ -628,9 +792,16 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             $count := %x{''};
         }
         elsif $rxtype eq 'quant' {
+            my $ilist := ($ast.subtype eq 'item');
             my %astcap := capnames($ast[0], $count);
-            for %astcap { %capnames{$_} := 2 }
+            for %astcap { %capnames{$_.key} := $ilist ?? $_.value !! 2 }
             $count := %astcap{''};
+            if $ast[1] {
+                # handle any separator quantification
+                my %astcap := capnames($ast[1], $count);
+                for %astcap { %capnames{$_.key} := $ilist ?? $_.value !! 2 }
+                $count := %astcap{''};
+            }
         }
         %capnames{''} := $count;
         nqp::deletekey(%capnames, '$!from');
@@ -666,7 +837,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     method flip_ast($qast) {
         return $qast unless nqp::istype($qast, QAST::Regex);
         if $qast.rxtype eq 'literal' {
-            $qast[0] := $qast[0].reverse();
+            $qast[0] := nqp::flip($qast[0]);
         }
         elsif $qast.rxtype eq 'concat' {
             my @tmp;

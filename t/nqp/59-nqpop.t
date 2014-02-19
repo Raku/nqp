@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(123);
+plan(102);
 
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
@@ -24,6 +24,7 @@ ok( nqp::chr(120) eq 'x', 'nqp::chr');
 ok( nqp::ord('xyz') eq 120, 'nqp::ord');
 ok( nqp::lc('Hello World') eq 'hello world', 'nqp::downcase');
 ok( nqp::uc("Don't Panic") eq "DON'T PANIC", 'nqp::upcase');
+ok( nqp::flip("foo") eq "oof", "nqp::flip");
 
 my @items := nqp::split(' ', 'a little lamb');
 ok( nqp::elems(@items) == 3 && @items[0] eq 'a' && @items[1] eq 'little' && @items[2] eq 'lamb', 'nqp::split');
@@ -94,6 +95,10 @@ ok( nqp::not_i(0) == 1, 'nqp::not_i');
 ok( nqp::not_i(1) == 0, 'nqp::not_i');
 ok( nqp::not_i(-1) == 0, 'nqp::not_i');
 
+ok(nqp::escape("\b \n \r \f \t \" \\ \e foo") eq '\\b \\n \\r \\f \\t \\" \\\\ \e foo','nqp::escape');
+my $var := 'foo';
+ok(nqp::escape($var) eq 'foo','nqp::escape works with literal');
+
 ok( nqp::isnull(nqp::null()) == 1, 'nqp::isnull/nqp::null' );
 ok( nqp::isnull("hello") == 0, '!nqp::isnull(string)' );
 ok( nqp::isnull(13232) == 0, 'nqp::isnull(number)' );
@@ -105,6 +110,8 @@ ok( nqp::istrue('0') == 0, 'nqp::istrue');
 ok( nqp::istrue('no') == 1, 'nqp::istrue');
 ok( nqp::istrue(0.0) == 0, 'nqp::istrue');
 ok( nqp::istrue(0.1) == 1, 'nqp::istrue');
+ok( nqp::istrue(nqp::list()) == 0, 'nqp::istrue on empty list');
+ok( nqp::istrue(nqp::list(1,2,3)) == 1, 'nqp::istrue on nonempty list');
 
 my $list := nqp::list(0, 'a', 'b', 3.0);
 ok( nqp::elems($list) == 4, 'nqp::elems');
@@ -121,21 +128,6 @@ ok( nqp::shift($iter) == 3.0, 'nqp::iterator');
 ok( nqp::elems($list) == 3, "iterator doesn't modify list");
 ok( nqp::islist($list), "nqp::islist works");
 
-my $qlist := nqp::qlist(0, 'a', 'b', 3.0);
-ok( nqp::elems($qlist) == 4, 'nqp::elems');
-ok( nqp::atpos($qlist, 0) == 0, 'nqp::atpos');
-ok( nqp::atpos($qlist, 2) eq 'b', 'nqp::atpos');
-nqp::push($qlist, 'four');
-ok( nqp::elems($qlist) == 5, 'nqp::push');
-ok( nqp::shift($qlist) == 0, 'nqp::shift');
-ok( nqp::pop($qlist) eq 'four', 'nqp::pop');
-my $qiter := nqp::iterator($qlist);
-ok( nqp::shift($qiter) eq 'a', 'nqp::iterator');
-ok( nqp::shift($qiter) eq 'b', 'nqp::iterator');
-ok( nqp::shift($qiter) == 3.0, 'nqp::iterator');
-ok( nqp::elems($qlist) == 3, "iterator doesn't modify qlist");
-ok( nqp::islist($qlist), "nqp::islist works");
-
 my %hash;
 %hash<foo> := 1;
 ok( nqp::existskey(%hash,"foo"),"existskey with existing key");
@@ -151,28 +143,3 @@ ok(!nqp::existspos(@arr, -2), 'existspos with missing pos');
 ok(!nqp::existspos(@arr, -100), 'existspos with absurd values');
 @arr[1] := NQPMu;
 ok(nqp::existspos(@arr, 1), 'existspos with still existing pos');
-
-# for deletepos
-my @arr2;
-@arr2[1] := 1;
-@arr2[3] := 1;
-ok(nqp::elems(@arr2) == 4, 'right number of elements');
-ok(!nqp::existspos(@arr2, 0), 'existspos with missing pos');
-ok(nqp::existspos(@arr2, 1), 'existspos with existing pos');
-ok(!nqp::existspos(@arr2, 2), 'existspos with missing pos');
-ok(nqp::existspos(@arr2, 3), 'existspos with existing pos');
-ok(!nqp::existspos(@arr2, 4), 'existspos with missing pos');
-
-nqp::deletepos(@arr2, 1);
-ok(nqp::elems(@arr2) == 3, 'right number of elements');
-ok(!nqp::existspos(@arr2, 0), 'existspos with existing pos');
-ok(!nqp::existspos(@arr2, 1), 'existspos with missing pos');
-ok(nqp::existspos(@arr2, 2), 'existspos with existing pos');
-ok(!nqp::existspos(@arr2, 3), 'existspos with missing pos');
-
-nqp::deletepos(@arr2, 0);
-
-ok(nqp::elems(@arr2) == 2, 'right number of elements');
-ok(!nqp::existspos(@arr2, 0), 'existspos with existing pos');
-ok(nqp::existspos(@arr2, 1), 'existspos with missing pos');
-ok(!nqp::existspos(@arr2, 2), 'existspos with existing pos');

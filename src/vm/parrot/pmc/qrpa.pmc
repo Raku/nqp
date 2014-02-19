@@ -1,0 +1,681 @@
+/* QRPA is a replacment for Parrot's ResizablePMCArray (RPA) class.
+ * The key distinguishing feature of QRPA is that it's much
+ * more efficient for shift and unshift, providing a O(1)
+ * algorithm instead of the O(n) version that RPA has.
+ * It also means that splice can be performed a lot more
+ * efficiently in many common cases. */
+ 
+typedef struct Parrot_NCI_attributes {
+    PMC       * signature;
+    void      * func;
+    PMC       * fb_info;
+    void      * orig_func;
+    STRING    * pcc_params_signature;
+    STRING    * pcc_return_signature;
+    INTVAL arity;
+    STRING    * long_signature;
+    PMC       * multi_sig;
+} Parrot_NCI_attributes;
+
+#define PARROT_NCI(o) ((Parrot_NCI_attributes *) PMC_data(o))
+typedef INTVAL (*sort_func_t)(PARROT_INTERP, void *, void *);
+
+static INTVAL
+COMPARE(PARROT_INTERP, ARGIN(void *_a), ARGIN(void *_b),
+        ARGIN(PMC *cmp),
+        ARGIN(const char * cmp_signature))
+{
+#ifdef ASSERT_ARGS_COMPARE
+    ASSERT_ARGS(COMPARE)
+#endif
+    INTVAL result = 0;
+    if (PMC_IS_NULL(cmp))
+        return VTABLE_cmp(interp, (PMC *)_a, (PMC *)_b);
+
+    if (cmp->vtable->base_type == enum_class_NCI) {
+        const sort_func_t f = (sort_func_t)D2FPTR(PARROT_NCI(cmp)->func);
+        return f(interp, _a, _b);
+    }
+
+    Parrot_ext_call(interp, cmp, cmp_signature, _a, _b, &result);
+    return result;
+}
+
+void
+Parrot_util_quicksort(PARROT_INTERP, ARGMOD(void **data), UINTVAL n,
+        ARGIN(PMC *cmp),
+        ARGIN(const char * cmp_signature))
+{
+#ifdef ASSERT_ARGS_Parrot_util_quicksort
+    ASSERT_ARGS(Parrot_util_quicksort)
+#endif
+    while (n > 1) {
+        UINTVAL i, j, ln, rn;
+        void *temp;
+
+        /* Swap */
+        temp      = data[0];
+        data[0]   = data[n/2];
+        data[n/2] = temp;
+
+        for (i = 0, j = n; ;) {
+            do
+                --j;
+            while (j > 0 && COMPARE(interp, data[j], data[0], cmp, cmp_signature) > 0);
+
+            do
+                ++i;
+            while (i < j && COMPARE(interp, data[i], data[0], cmp, cmp_signature) < 0);
+
+            if (i >= j)
+                break;
+
+            /* Swap */
+            temp    = data[i];
+            data[i] = data[j];
+            data[j] = temp;
+        }
+
+        /* Swap */
+        temp    = data[j];
+        data[j] = data[0];
+        data[0] = temp;
+
+        ln = j;
+        rn = n - ++j;
+
+        if (ln < rn) {
+            Parrot_util_quicksort(interp, data, ln, cmp, cmp_signature);
+            data += j;
+            n = rn;
+        }
+        else {
+            Parrot_util_quicksort(interp, data + j, rn, cmp, cmp_signature);
+            n = ln;
+        }
+    }
+}
+
+pmclass QRPA 
+    provides array 
+    auto_attrs 
+    dynpmc 
+    group nqp
+    hll nqp
+{
+    ATTR INTVAL   elems;        /* number of elements */
+    ATTR INTVAL   start;        /* slot index of first element */
+    ATTR INTVAL   ssize;        /* size of slots array */
+    ATTR PMC    **slots;        /* array of PMC slots */
+
+
+    VTABLE void destroy() {
+        Parrot_QRPA_attributes * const qrpa = PARROT_QRPA(SELF);
+        if (qrpa->slots) {
+            mem_gc_free(INTERP, qrpa->slots);
+            qrpa->slots = 0;
+        }
+    }
+
+
+    VTABLE void mark() {
+        Parrot_QRPA_attributes * const qrpa = PARROT_QRPA(SELF);
+        INTVAL elems = qrpa->elems;
+        INTVAL start = qrpa->start;
+        PMC **slots  = qrpa->slots;
+
+        slots += start;
+        for (elems--; elems >= 0; elems--) {
+            Parrot_gc_mark_PMC_alive(INTERP, slots[elems]);
+        }
+    }
+
+
+    VTABLE PMC * clone() {
+        PMC * const dest = Parrot_pmc_new(INTERP, SELF->vtable->base_type);
+        Parrot_QRPA_attributes * const qrpa0 = PARROT_QRPA(SELF);
+        Parrot_QRPA_attributes * const qrpa1 = PARROT_QRPA(dest);
+        INTVAL elems = qrpa0->elems;
+
+        if (elems > 0) {
+            qrpa1->slots = mem_gc_allocate_n_typed(INTERP, elems, PMC *);
+            qrpa1->elems = elems;
+            qrpa1->ssize = elems;
+            mem_copy_n_typed(qrpa1->slots, qrpa0->slots + qrpa0->start,
+                elems, PMC *);
+            PObj_custom_mark_destroy_SETALL(dest);
+        }
+
+        return dest;
+    }
+
+
+/*
+
+=item C<void set_integer_native(INTVAL n)>
+
+Resizes the array to C<n> elements.
+
+=cut
+
+*/
+
+    VTABLE void set_integer_native(INTVAL n) {
+        Parrot_QRPA_attributes * const qrpa = PARROT_QRPA(SELF);
+        INTVAL   elems = qrpa->elems;
+        INTVAL   start = qrpa->start;
+        INTVAL   ssize = qrpa->ssize;
+        PMC    **slots = qrpa->slots;
+
+        if (n < 0)
+            Parrot_ex_throw_from_c_args(INTERP, NULL, EXCEPTION_OUT_OF_BOUNDS,
+                    "QRPA: Can't resize to negative elements");
+
+        if (n == elems) { return; }
+
+        /* if there aren't enough slots at the end, shift off empty slots 
+         * from the beginning first */
+        if (start > 0 && n + start > ssize) {
+            if (elems > 0) 
+                memmove(slots, slots + start, elems * sizeof (PMC *));
+            qrpa->start = 0;
+            /* fill out any unused slots with PMCNULL pointers */
+            while (elems < ssize) {
+                slots[elems] = PMCNULL;
+                elems++;
+            }
+        }
+
+        qrpa->elems = n;
+        if (n <= ssize) { 
+            /* we already have n slots available, we can just return */
+            return;
+        }
+
+        /* We need more slots.  If the current slot size is less
+         * than 8K, use the larger of twice the current slot size
+         * or the actual number of elements needed.  Otherwise,
+         * grow the slots to the next multiple of 4096 (0x1000). */
+        if (ssize < 8192) {
+            ssize *= 2;
+            if (n > ssize) ssize = n;
+            if (ssize < 8) ssize = 8;
+        }
+        else {
+            ssize = (n + 0x1000) & ~0xfff;
+        }
+
+        /* now allocate the new slot buffer */
+        slots = (slots)
+                ? mem_gc_realloc_n_typed(INTERP, slots, ssize, PMC *)
+                : mem_gc_allocate_n_typed(INTERP, ssize, PMC *);
+
+        /* fill out any unused slots with PMCNULL pointers */
+        while (elems < ssize) {
+            slots[elems] = PMCNULL;
+            elems++;
+        }
+
+        qrpa->ssize = ssize;
+        qrpa->slots = slots;
+        PObj_custom_mark_destroy_SETALL(SELF);
+    }
+
+
+    VTABLE INTVAL defined_keyed_int(INTVAL pos) {
+        Parrot_QRPA_attributes * const qrpa = PARROT_QRPA(SELF);
+        PMC    *value;
+
+        if (pos < 0)
+            pos += qrpa->elems;
+
+        if (pos < 0 || pos >= qrpa->elems)
+            return 0;
+
+        value = qrpa->slots[qrpa->start + pos];
+        return !PMC_IS_NULL(value) && VTABLE_defined(INTERP, value);
+    }
+
+
+    VTABLE INTVAL elements() {
+        Parrot_QRPA_attributes * const qrpa = PARROT_QRPA(SELF);
+        UNUSED(INTERP);
+        return qrpa->elems;
+    }
+
+
+    VTABLE INTVAL exists_keyed_int(INTVAL pos) {
+        Parrot_QRPA_attributes * const qrpa = PARROT_QRPA(SELF);
+        PMC    *value;
+        UNUSED(INTERP);
+
+        if (pos < 0)
+            pos += qrpa->elems;
+
+        if (pos < 0 || pos >= qrpa->elems)
+            return 0;
+
+        return !PMC_IS_NULL(qrpa->slots[qrpa->start + pos]);
+    }
+
+
+    VTABLE INTVAL exists_keyed(PMC *key) {
+        INTVAL pos = VTABLE_get_integer(INTERP, key);
+        return SELF.exists_keyed_int(pos);
+    }    
+
+
+    VTABLE INTVAL get_bool() {
+        const INTVAL elems = SELF.elements();
+        return (INTVAL)(elems != 0);
+    }
+
+ 
+    VTABLE INTVAL get_integer() {
+        return SELF.elements();
+    }
+
+    VTABLE STRING *get_string() {
+        return Parrot_str_from_int(INTERP, SELF.elements());
+    }
+
+    VTABLE PMC * get_iter() {
+        return Parrot_pmc_new_init(INTERP, enum_class_ArrayIterator, SELF);
+    }
+
+
+    VTABLE FLOATVAL get_number() {
+        const INTVAL e = SELF.elements();
+        return (FLOATVAL)e;
+    }
+
+
+    VTABLE PMC * get_pmc_keyed_int(INTVAL pos) {
+        Parrot_QRPA_attributes * const qrpa = PARROT_QRPA(SELF);
+
+        if (pos < 0) {
+            pos += qrpa->elems;
+            if (pos < 0)
+                Parrot_ex_throw_from_c_args(INTERP, NULL, EXCEPTION_OUT_OF_BOUNDS,
+                        "QRPA: index out of bounds");
+        }
+        else if (pos >= qrpa->elems)
+            return PMCNULL;
+
+        return qrpa->slots[qrpa->start + pos];
+    }
+
+
+    VTABLE PMC *get_pmc_keyed(PMC *key) {
+        const INTVAL pos = VTABLE_get_integer(INTERP, key);
+        PMC * const nextkey = Parrot_key_next(INTERP, key);
+        PMC * box;
+
+        if (!nextkey) 
+            return SELF.get_pmc_keyed_int(pos);
+
+        box = SELF.get_pmc_keyed_int(pos);
+        if (PMC_IS_NULL(box))
+            return PMCNULL;
+
+        return VTABLE_get_pmc_keyed(INTERP, box, nextkey);
+    }
+
+
+    VTABLE void set_pmc_keyed_int(INTVAL pos, PMC *value) {
+        Parrot_QRPA_attributes * const qrpa = PARROT_QRPA(SELF);
+
+        if (pos < 0) {
+            pos += qrpa->elems;
+            if (pos < 0)
+                Parrot_ex_throw_from_c_args(INTERP, NULL, 
+                        EXCEPTION_OUT_OF_BOUNDS, "QRPA: index out of bounds");
+        }
+        else if (pos >= qrpa->elems) 
+            SELF.set_integer_native(pos + 1);
+
+        qrpa->slots[qrpa->start + pos] = value;
+    }
+
+
+    VTABLE void set_pmc_keyed(PMC *key, PMC *value) {
+        const INTVAL pos = VTABLE_get_integer(INTERP, key);
+        PMC * const nextkey = Parrot_key_next(INTERP, key);
+
+        if (!nextkey) {
+            SELF.set_pmc_keyed_int(pos, value);
+        }
+        else {
+            PMC * const box = SELF.get_pmc_keyed_int(pos);
+            if (PMC_IS_NULL(box)) {
+                Parrot_ex_throw_from_c_args(interp, NULL,
+                        EXCEPTION_INVALID_OPERATION,
+                        "Cannot autovivify nested arrays");
+            }
+            VTABLE_set_pmc_keyed(INTERP, box, nextkey, value);
+        }
+    }
+
+
+    VTABLE PMC * pop_pmc() {
+        Parrot_QRPA_attributes * const qrpa = PARROT_QRPA(SELF);
+
+        if (qrpa->elems < 1) {
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_OUT_OF_BOUNDS,
+                    "QRPA: Can't pop from an empty array!");
+        }
+
+        qrpa->elems--;
+        return qrpa->slots[qrpa->start + qrpa->elems];
+    }
+
+
+    VTABLE void push_pmc(PMC *value) {
+        Parrot_QRPA_attributes * const qrpa = PARROT_QRPA(SELF);
+
+        SELF.set_integer_native(qrpa->elems + 1);
+        qrpa->slots[qrpa->start + qrpa->elems - 1] = value;
+    }
+
+
+    VTABLE PMC * shift_pmc() {
+        Parrot_QRPA_attributes * const qrpa = PARROT_QRPA(SELF);
+        PMC    *value;
+
+        if (qrpa->elems < 1) {
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_OUT_OF_BOUNDS,
+                    "QRPA: Can't shift from an empty array!");
+        }
+
+        value = qrpa->slots[qrpa->start];
+        qrpa->start++;
+        qrpa->elems--;
+        return value;
+    }
+
+
+    VTABLE void unshift_pmc(PMC *value) {
+        Parrot_QRPA_attributes * const qrpa = PARROT_QRPA(SELF);
+
+        /* If we don't have room at the beginning of the slots,
+         * make some room (8 slots) for unshifting */
+        if (qrpa->start < 1) {
+            INTVAL n = 8;
+            INTVAL elems = qrpa->elems;
+            INTVAL i;
+
+            /* grow the array */
+            SELF.set_integer_native(elems + n);
+            /* move elements and set start */
+            memmove(qrpa->slots + n, qrpa->slots, elems * sizeof (PMC *));
+            qrpa->start = n;
+            qrpa->elems = elems;
+            /* clear out beginning elements */
+            for (i = 0; i < n; i++)
+                qrpa->slots[i] = PMCNULL;
+        }
+
+        /* Now do the unshift */
+        qrpa->start--;
+        qrpa->slots[qrpa->start] = value;
+        qrpa->elems++;
+    }
+
+    VTABLE void splice(PMC *from, INTVAL offset, INTVAL count) {
+        /* TODO: use qrpa->foo instead of GET_ATTR_* */
+        INTVAL elems0 = VTABLE_elements(INTERP, SELF);
+        INTVAL elems1 = VTABLE_elements(INTERP, from);
+        PMC **slots = 0;
+        INTVAL start;
+        INTVAL tail;
+
+        /* start from end? */
+        if (offset < 0)
+            offset += elems0;
+
+        if (offset < 0)
+            Parrot_ex_throw_from_c_args(INTERP, NULL, EXCEPTION_OUT_OF_BOUNDS,
+                "QRPA: illegal splice offset\n");
+
+        /* When offset == 0, then we may be able to reduce the memmove
+         * calls and reallocs by adjusting SELF's start, elems0, and 
+         * count to better match the incoming splice.  In particular, 
+         * we're seeking to adjust C<count> to as close to C<elems1> 
+         * as we can. */
+        if (offset == 0) {
+            INTVAL n = elems1 - count;
+            GET_ATTR_start(INTERP, SELF, start);
+            if (n > start) n = start;
+            if (n <= -elems0) {
+                elems0 = 0;
+                count = 0;
+                SET_ATTR_start(INTERP, SELF, 0);
+                SET_ATTR_elems(INTERP, SELF, elems0);
+            }
+            else if (n != 0) {
+                elems0 += n;
+                count += n;
+                SET_ATTR_start(INTERP, SELF, start - n);
+                SET_ATTR_elems(INTERP, SELF, elems0);
+            }
+        }
+
+        /* if count == 0 and elems1 == 0, there's nothing left
+         * to copy or remove, so the splice is done! */
+        if (count == 0 && elems1 == 0)
+            return;
+
+        /* number of elements to right of splice (the "tail") */
+        tail = elems0 - offset - count;
+        if (tail < 0) tail = 0;
+
+        if (tail > 0 && count > elems1) {
+            /* We're shrinking the array, so first move the tail left */
+            GET_ATTR_slots(INTERP, SELF, slots);
+            GET_ATTR_start(INTERP, SELF, start);
+            memmove(slots + start + offset + elems1,
+                    slots + start + offset + count,
+                    tail * sizeof (PMC *));
+        }
+
+        /* now resize the array */
+        SELF.set_integer_native(offset + elems1 + tail);
+
+        GET_ATTR_slots(INTERP, SELF, slots);
+        GET_ATTR_start(INTERP, SELF, start);
+        if (tail > 0 && count < elems1) {
+            /* The array grew, so move the tail to the right */
+            memmove(slots + start + offset + elems1,
+                    slots + start + offset + count,
+                    tail * sizeof (PMC *));
+        }
+
+        /* now copy C<from>'s elements into SELF */
+        if (elems1 > 0) {
+            PMC *iter = VTABLE_get_iter(INTERP, from);
+            INTVAL i;         
+            for (i = 0; i < elems1; i++)
+                slots[start + offset + i] = VTABLE_shift_pmc(INTERP, iter);
+        }
+    }
+
+    METHOD sort(PMC *cmp_func :optional) {
+        const INTVAL n = SELF.elements();
+        Parrot_QRPA_attributes * const qrpa = PARROT_QRPA(SELF);
+
+        if (n > 1) {
+            /* XXX Workaround for TT #218 */
+            /*if (PObj_is_object_TEST(SELF)) {*/
+                /*PMC * const parent = SELF.get_attr_str(CONST_STRING(INTERP, "proxy"));*/
+                /*Parrot_pcc_invoke_method_from_c_args(INTERP, parent, CONST_STRING(INTERP, "sort"), "P->", cmp_func);*/
+            /*}*/
+            /*else*/
+                Parrot_util_quicksort(INTERP, (void **)qrpa->slots, n, cmp_func, "PP->I");
+        }
+        RETURN(PMC *SELF);
+    }
+
+
+    VTABLE INTVAL get_integer_keyed(PMC *key) {
+        PMC * const val = SELF.get_pmc_keyed(key);
+        return VTABLE_get_integer(INTERP, val);
+    }
+
+
+    VTABLE void set_integer_keyed(PMC *key, INTVAL value) {
+        PMC * const val = Parrot_pmc_new(INTERP, Parrot_hll_get_ctx_HLL_type(INTERP, enum_class_Integer));
+        VTABLE_set_integer_native(INTERP, val, value);
+        SELF.set_pmc_keyed(key, val);
+    }
+
+
+    VTABLE void set_integer_keyed_int(INTVAL pos, INTVAL value) {
+        PMC * const val = Parrot_pmc_new(INTERP, Parrot_hll_get_ctx_HLL_type(INTERP, enum_class_Integer));
+        VTABLE_set_integer_native(INTERP, val, value);
+        SELF.set_pmc_keyed_int(pos, val);
+    }
+
+
+    VTABLE INTVAL pop_integer() {
+        PMC * const val = SELF.pop_pmc();
+        return VTABLE_get_integer(INTERP, val);
+    }
+
+
+    VTABLE void push_integer(INTVAL value) {
+        INTVAL elems;
+        GET_ATTR_elems(INTERP, SELF, elems);
+        SELF.set_integer_keyed_int(elems, value);
+    }
+
+
+    VTABLE INTVAL shift_integer() {
+        PMC * const val = SELF.shift_pmc();
+        return VTABLE_get_integer(INTERP, val);
+    }
+
+    VTABLE void unshift_integer(INTVAL value) {
+        PMC * const val = Parrot_pmc_new(INTERP, Parrot_hll_get_ctx_HLL_type(INTERP, enum_class_Integer));
+        VTABLE_set_integer_native(INTERP, val, value);
+        SELF.unshift_pmc(val);
+    }
+
+
+
+    VTABLE FLOATVAL get_number_keyed(PMC *key) {
+        PMC * const val = SELF.get_pmc_keyed(key);
+        return VTABLE_get_number(INTERP, val);
+    }
+
+
+    VTABLE void set_number_keyed(PMC *key, FLOATVAL value) {
+        PMC * const val = Parrot_pmc_new(INTERP, Parrot_hll_get_ctx_HLL_type(INTERP, enum_class_Float));
+        VTABLE_set_number_native(INTERP, val, value);
+        SELF.set_pmc_keyed(key, val);
+    }
+
+
+    VTABLE void set_number_keyed_int(INTVAL pos, FLOATVAL value) {
+        PMC * const val = Parrot_pmc_new(INTERP, Parrot_hll_get_ctx_HLL_type(INTERP, enum_class_Float));
+        VTABLE_set_number_native(INTERP, val, value);
+        SELF.set_pmc_keyed_int(pos, val);
+    }
+
+
+    VTABLE FLOATVAL pop_float() {
+        PMC * const val = SELF.pop_pmc();
+        return VTABLE_get_number(INTERP, val);
+    }
+
+
+    VTABLE void push_float(FLOATVAL value) {
+        INTVAL elems;
+        GET_ATTR_elems(INTERP, SELF, elems);
+        SELF.set_number_keyed_int(elems, value);
+    }
+
+
+    VTABLE FLOATVAL shift_float() {
+        PMC * const val = SELF.shift_pmc();
+        return VTABLE_get_number(INTERP, val);
+    }
+
+
+    VTABLE void unshift_float(FLOATVAL value) {
+        PMC * const val = Parrot_pmc_new(INTERP, Parrot_hll_get_ctx_HLL_type(INTERP, enum_class_Float));
+        VTABLE_set_number_native(INTERP, val, value);
+        SELF.unshift_pmc(val);
+    }
+
+
+    VTABLE STRING * get_string_keyed(PMC *key) {
+        PMC * const val = SELF.get_pmc_keyed(key);
+        return VTABLE_get_string(INTERP, val);
+    }
+
+
+    VTABLE void set_string_keyed(PMC *key, STRING *value) {
+        PMC * const val = Parrot_pmc_new(INTERP, Parrot_hll_get_ctx_HLL_type(INTERP, enum_class_String));
+        VTABLE_set_string_native(INTERP, val, value);
+        SELF.set_pmc_keyed(key, val);
+    }
+
+
+    VTABLE void set_string_keyed_int(INTVAL key, STRING *value) {
+        PMC * const val = Parrot_pmc_new(INTERP, Parrot_hll_get_ctx_HLL_type(INTERP, enum_class_String));
+        VTABLE_set_string_native(INTERP, val, value);
+        SELF.set_pmc_keyed_int(key, val);
+    }
+
+
+    VTABLE STRING * pop_string() {
+        PMC * const val = SELF.pop_pmc();
+        return VTABLE_get_string(INTERP, val);
+    }
+
+
+    VTABLE void push_string(STRING *value) {
+        INTVAL elems;
+        GET_ATTR_elems(INTERP, SELF, elems);
+        SELF.set_string_keyed_int(elems, value);
+    }
+
+
+    VTABLE STRING * shift_string() {
+        PMC * const val = SELF.shift_pmc();
+        return VTABLE_get_string(INTERP, val);
+    }
+
+
+    VTABLE void unshift_string(STRING *value) {
+        PMC * const val = Parrot_pmc_new(INTERP, Parrot_hll_get_ctx_HLL_type(INTERP, enum_class_String));
+        VTABLE_set_string_native(INTERP, val, value);
+        SELF.unshift_pmc(val);
+    }
+
+    METHOD shift() {
+        PMC * const value = VTABLE_shift_pmc(INTERP, SELF);
+        RETURN(PMC *value);
+    }
+
+    METHOD pop() {
+        PMC * const value = VTABLE_pop_pmc(INTERP, SELF);
+        RETURN(PMC *value);
+    }
+
+    METHOD unshift(PMC* value) {
+        VTABLE_unshift_pmc(INTERP, SELF, value);
+    }
+
+    METHOD push(PMC* value) {
+        VTABLE_push_pmc(INTERP, SELF, value);
+    }
+}
+
+/*
+
+=back
+
+=cut
+
+*/

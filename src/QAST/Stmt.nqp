@@ -1,7 +1,7 @@
 class QAST::Stmt is QAST::Node {
     has $!resultchild;
 
-    method resultchild(*@value) { $!resultchild := @value[0] if @value; $!resultchild }
+    method resultchild($value = NO_VALUE) { $!resultchild := $value unless $value =:= NO_VALUE; $!resultchild }
     
     method substitute_inline_placeholders(@fillers) {
         my $result := self.shallow_clone();
@@ -24,6 +24,7 @@ class QAST::Stmt is QAST::Node {
         }
         $result
     }
+    
     method dump_extra_node_info() {
         nqp::defined($!resultchild) ?? ":resultchild($!resultchild))" !! ''
     }

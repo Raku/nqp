@@ -3,14 +3,14 @@ use NQPHLL;
 use QAST;
 
 class QRegex::P6Regex::World is HLL::World {
-    method create_code($past, $name) {
+    method create_code($ast, $name) {
         # Create a fresh stub code, and set its name.
-        my $dummy := pir::nqp_fresh_stub__PP(-> { nqp::die("Uncompiled code executed") });
+        my $dummy := nqp::freshcoderef(-> { nqp::die("Uncompiled code executed") });
         nqp::setcodename($dummy, $name);
 
         # Tag it as a static code ref and add it to the root code refs set.
-        pir::setprop__vPsP($dummy, 'STATIC_CODE_REF', $dummy);
-        self.add_root_code_ref($dummy, $past);
+        nqp::markcodestatic($dummy);
+        self.add_root_code_ref($dummy, $ast);
         
         # Create code object.
         my $code_obj := nqp::create(NQPRegex);
@@ -24,14 +24,14 @@ class QRegex::P6Regex::World is HLL::World {
             QAST::WVal.new( :value($code_obj) ),
             QAST::WVal.new( :value(NQPRegex) ),
             QAST::SVal.new( :value('$!do') ),
-            QAST::BVal.new( :value($past) )
+            QAST::BVal.new( :value($ast) )
         ));
         $fixups.push(QAST::Op.new(
             :op('setcodeobj'),
-            QAST::BVal.new( :value($past) ),
+            QAST::BVal.new( :value($ast) ),
             QAST::WVal.new( :value($code_obj) )
         ));
-        self.add_fixup_task(:fixup_past($fixups));
+        self.add_fixup_task(:fixup_ast($fixups));
 
         $code_obj
     }
@@ -57,7 +57,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     token ws { [ \s+ | '#' \N* ]* }
 
-    token normspace { <?before \s | '#' > <.ws> }
+    token normspace { <?[\s#]> <.ws> }
 
     token identifier { <.ident> [ <[\-']> <.ident> ]* }
 
@@ -69,11 +69,13 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         ]
     }
 
-    rule arglist { <arg> [ ',' <arg>]* }
+    rule arglist { '' <arg> +% [',' ] }
 
+    my $cur_handle := 0;
     token TOP {
         :my %*RX;
-        :my $*W := QRegex::P6Regex::World.new(:handle(nqp::sha1(self.target)));
+        :my $handle := '__QREGEX_P6REGEX__' ~ $cur_handle++;
+        :my $*W := QRegex::P6Regex::World.new(:$handle);
         <nibbler>
         [ $ || <.panic: 'Confused'> ]
     }
@@ -85,13 +87,17 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         {
             for $OLDRX { %*RX{$_.key} := $_.value; }
         }
-        [ <.ws> [
-                |  '||' { $*SEQ := 1; }
-                |  '|'
-                |  '&&'
-                |  '&'
-                ] ]?
-        <termaltseq> <.ws>
+        <.ws>
+        [
+          <!rxstopper>
+          [
+          |  '||' { $*SEQ := 1; }
+          |  '|'
+          |  '&&'
+          |  '&'
+          ] <.ws>
+        ]?
+        <termseq>
         [
         || <?infixstopper>
         || $$ <.panic: "Regex not terminated">
@@ -105,56 +111,92 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         [
         | <?before <[\) \} \]]> >
         | <?before '>' <-[>]> >
-        | <?before <rxstopper> >
+        | <?rxstopper>
         ]
     }
     
     token rxstopper { $ }
 
+    # XXX Eventually squish termseq and termish and
+    # get < || && | & > infixes using by EXPR in nibbler
+    token termseq {
+        <termaltseq>
+    }
+
     token termaltseq {
         <termconjseq>
-        [ '||' [  { $*SEQ := 1; } <termconjseq> || <.throw_null_pattern> ] ]*
+        [ <!infixstopper> '||' <.ws> { $*SEQ := 1; } <termconjseq> ]*
     }
 
     token termconjseq {
         <termalt>
-        [ '&&' [ { $*SEQ := 0; } <termalt> || <.throw_null_pattern> ] ]*
+        [ <!infixstopper> '&&' <.ws> { $*SEQ := 0; } <termalt> ]*
     }
 
     token termalt {
         <termconj>
-        [ '|' <![|]> [ { $*SEQ := 0; } <termconj> || <.throw_null_pattern> ] ]*
+        [ <!infixstopper> '|' <![|]> <.ws> { $*SEQ := 0; } <termconj> ]*
     }
 
     token termconj {
         <termish>
-        [ '&' <![&]> [ { $*SEQ := 0; } <termish> || <.throw_null_pattern> ] ]*
+        [ <!infixstopper> '&' <![&]> <.ws> { $*SEQ := 0; } <termish> ]*
     }
 
     token termish {
+        :my $*SIGOK  := 0;
+        :my $*VARDEF := 0;
+        [
         || <noun=.quantified_atom>+
-        || <?before <stopper> | <[&|~]> > <.throw_null_pattern>
+        || <?before <rxstopper> | <[&|~]> > <.throw_null_pattern>
+        || <?before <infixstopper> > <.throw_null_pattern> # XXX Check if unmatched bracket
+        || $$ <.panic: "Regex not terminated">
         || (\W) { self.throw_unrecognized_metachar: ~$/[0] }
+        || <.panic: "Regex not terminated">
+        ]
     }
+
+    method SIGOK() { $*SIGOK := %*RX<s>; self }
 
     token quantified_atom {
+        <!rxstopper>
         <atom>
         [
-            <.ws> [ <quantifier> | <?before ':'> <backmod> <!alpha> ]
+        ||  <sigmaybe>?
+            [
+            | <!rxstopper> <quantifier>
+            | <?[:]> <backmod> <!alpha>
+            ]
+            [ <!{$*VARDEF}> <.SIGOK> <sigfinal=.sigmaybe> ]?
             [ <.ws> <separator> ]?
-        ]?
+        ||  [ <!{$*VARDEF}> <sigfinal=.sigmaybe> ]?
+        ]
+        { $*SIGOK := 0 }
     }
 
-    token separator {
-        $<septype>=['%''%'?] <normspace>? <quantified_atom>
+    rule separator {
+        $<septype>=['%''%'?]
+        :my $*VARDEF := 0;
+        :my $*SIGOK  := 0;
+        <quantified_atom>
     }
     
     token atom {
         # :dba('regex atom')
         [
-        | \w [ \w+! <?before \w> ]?
+        | \w [ \w+! <?before \w> ]? <.SIGOK>
         | <metachar>
         ]
+    }
+
+    proto token sigmaybe { <...> }
+
+    token sigmaybe:sym<normspace> {
+        <!{$*SIGOK}> <normspace>
+    }
+
+    token sigmaybe:sym<sigwhite> {
+        <?{$*SIGOK}> <normspace>
     }
 
     proto token quantifier { <...> }
@@ -165,42 +207,46 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         <.obs: '{N,M} as general quantifier', '** N..M (or ** N..*)'>
     }
     token quantifier:sym<**> {
-        <sym> <normspace>? <backmod> <normspace>?
+        <sym> <.normspace>? <backmod> <.normspace>?
         [
-        ||  $<min>=[\d+] 
-            [   '..' 
-                $<max>=[ 
-                       || \d+ 
-                       || '*' 
-                       || <.panic: "Only integers or '*' allowed as range quantifier endpoint"> 
-                       ] 
-            ]?
+        | <.decint> \s+ '..' <.panic: "Spaces not allowed in bare range">
+        | <min=.decint>
+          [ '..'
+            [
+            | <max=.decint> {
+                $/.CURSOR.panic("Negative numbers are not allowed as quantifiers") if $<max>.Str < 0;
+              }
+            | $<max>=['*']
+            | <.panic: "Malformed range">
+            ]
+          ]?
+          { $/.CURSOR.panic("Negative numbers are not allowed as quantifiers") if $<min>.Str < 0 }
+        | <?[{]> { $/.CURSOR.panic("Block case of ** quantifier not yet implemented") }
         ]
     }
 
     token backmod { ':'? [ '?' | '!' | <!before ':'> ] }
 
     proto token metachar { <...> }
-    token metachar:sym<ws> { <.normspace> }
-    token metachar:sym<[ ]> { '[' <nibbler> ']' }
-    token metachar:sym<( )> { '(' <nibbler> ')' }
-    token metachar:sym<'> { <?[']> <quote_EXPR: ':q'> }
-    token metachar:sym<"> { <?["]> <quote_EXPR: ':qq'> }
-    token metachar:sym<.> { <sym> }
-    token metachar:sym<^> { <sym> }
-    token metachar:sym<^^> { <sym> }
-    token metachar:sym<$> { <sym> }
-    token metachar:sym<$$> { <sym> }
+    token metachar:sym<[ ]> { '[' ~ ']' <nibbler> <.SIGOK> }
+    token metachar:sym<( )> { '(' ~ ')' <nibbler> <.SIGOK> }
+    token metachar:sym<'> { <?[']> <quote_EXPR: ':q'>  <.SIGOK> }
+    token metachar:sym<"> { <?["]> <quote_EXPR: ':qq'> <.SIGOK> }
+    token metachar:sym<.> { <sym> <.SIGOK> }
+    token metachar:sym<^> { <sym> <.SIGOK> }
+    token metachar:sym<^^> { <sym> <.SIGOK> }
+    token metachar:sym<$> { <sym> <.SIGOK> }
+    token metachar:sym<$$> { <sym> <.SIGOK> }
     token metachar:sym<:::> { <sym> <.panic: '::: not yet implemented'> }
     token metachar:sym<::> { <sym> <.panic: ':: not yet implemented'> }
-    token metachar:sym<lwb> { $<sym>=['<<'|'«'] }
-    token metachar:sym<rwb> { $<sym>=['>>'|'»'] }
-    token metachar:sym<from> { '<(' }
-    token metachar:sym<to>   { ')>' }
-    token metachar:sym<bs> { \\ <backslash> }
+    token metachar:sym<lwb> { $<sym>=['<<'|'«'] <.SIGOK> }
+    token metachar:sym<rwb> { $<sym>=['>>'|'»'] <.SIGOK> }
+    token metachar:sym<from> { '<(' <.SIGOK> }
+    token metachar:sym<to>   { ')>' <.SIGOK> }
+    token metachar:sym<bs> { \\ <backslash> <.SIGOK> }
     token metachar:sym<mod> { <mod_internal> }
     token metachar:sym<quantifier> {
-        <quantifier> <.panic: 'Quantifier quantifies nothing'>
+        <!rxstopper> <quantifier> <.panic: 'Quantifier quantifies nothing'>
     }
 
     ## we cheat here, really should be regex_infix:sym<~>
@@ -212,11 +258,10 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     token metachar:sym<{*}> {
         <sym>
-        [ \h* '#= ' \h* $<key>=[\S+ [\h+ \S+]*] ]?
+        [ \h* '#= ' \h* $<key>=[\S+ [\h+ \S+]*] ]**0..1
     }
     token metachar:sym<assert> {
-        '<' <assertion>
-        [ '>' || <.panic: 'regex assertion not terminated by angle bracket'> ]
+        '<' ~ '>' <assertion> <.SIGOK>
     }
 
     token sigil { <[$@%&]> }
@@ -227,7 +272,13 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         | '$' $<pos>=[\d+]
         ]
 
-        [ <.ws> '=' <.ws> <quantified_atom> ]?
+        [
+            <.ws> '=' <.ws>
+            { $*VARDEF := 1 }
+            <quantified_atom>
+            { $*VARDEF := 0 }
+        ]**0..1
+        <.SIGOK>
     }
 
     proto token backslash { <...> }
@@ -247,7 +298,22 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token backslash:sym<Z> { 'Z' <.obs: '\\Z as end-of-string matcher', '\\n?$'> }
     token backslash:sym<Q> { 'Q' <.obs: '\\Q as quotemeta', 'quotes or literal variable match'> }
     token backslash:sym<unrec> { {} (\w) { self.throw_unrecog_backslash_seq: $/[0].Str } }
+    token backslash:sym<unsp> { [\s|'#'] <.panic: 'Unspace not allowed in regex'> }
     token backslash:sym<misc> { \W }
+
+    proto token cclass_backslash { <...> }
+    token cclass_backslash:sym<s> { $<sym>=[<[dDnNsSwW]>] }
+    token cclass_backslash:sym<b> { $<sym>=[<[bB]>] }
+    token cclass_backslash:sym<e> { $<sym>=[<[eE]>] }
+    token cclass_backslash:sym<f> { $<sym>=[<[fF]>] }
+    token cclass_backslash:sym<h> { $<sym>=[<[hH]>] }
+    token cclass_backslash:sym<r> { $<sym>=[<[rR]>] }
+    token cclass_backslash:sym<t> { $<sym>=[<[tT]>] }
+    token cclass_backslash:sym<v> { $<sym>=[<[vV]>] }
+    token cclass_backslash:sym<o> { $<sym>=[<[oO]>] [ <octint> | '[' <octints> ']' ] }
+    token cclass_backslash:sym<x> { $<sym>=[<[xX]>] [ <hexint> | '[' <hexints> ']' ] }
+    token cclass_backslash:sym<c> { $<sym>=[<[cC]>] <charspec> }
+    token cclass_backslash:sym<any> { . }
 
     proto token assertion { <...> }
 
@@ -278,11 +344,11 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         [
         | '[' $<charspec>=(
                   || \s* '-' <!before \s* ']'> <.obs: '- as character range','.. for range, for explicit - in character class, escape it or place as last thing'>
-                  || \s* ( '\\' <backslash> || (<-[\]\\]>) )
+                  || \s* ( '\\' <cclass_backslash> || (<-[\]\\]>) )
                      [
                          \s* '..' \s*
-                         ( '\\' <backslash> || (<-[\]\\]>) )
-                     ]?
+                         ( '\\' <cclass_backslash> || (<-[\]\\]>) )
+                     ]**0..1
               )*
           \s* ']'
         | $<name>=[\w+]
@@ -303,8 +369,14 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
                 | <?["]> <quote_EXPR: ':qq'>
                 ]
                 ')'
-            ]?
+            ]**0..1
         ]
+        {
+            if !$<quote_EXPR> {
+                my $n := $<n>[0] gt '' ?? +$<n>[0] !! 1;
+                %*RX{ ~$<mod_ident><sym> } := $n;
+            }
+        }
     }
 
     proto token mod_ident { <...> }

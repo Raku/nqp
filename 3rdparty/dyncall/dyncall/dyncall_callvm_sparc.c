@@ -32,8 +32,7 @@
 /* the six output registers %o0-%o5 are always loaded, thus we need to ensure the argument buffer has space for at least 24 bytes. */
 static DCCallVM* dc_callvm_new_sparc(DCCallVM_vt* vt, DCsize size)
 {
-  size=DC_MAX(size,sizeof(void*)*(6+1));
-  DCCallVM_sparc* self = (DCCallVM_sparc*) dcAllocMem(sizeof(DCCallVM_sparc)+size);
+  DCCallVM_sparc* self = (DCCallVM_sparc*) dcAllocMem(sizeof(DCCallVM_sparc)+DC_MAX(size,sizeof(void*)*(6+1)));
   dc_callvm_base_init(&self->mInterface, vt);
   dcVecInit(&self->mVecHead,size);
   return (DCCallVM*)self;

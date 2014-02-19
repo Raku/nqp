@@ -1,7 +1,12 @@
 class QAST::IVal is QAST::Node {
     has int $!value;
-    method value(*@value) { $!value := @value[0] if @value; $!value }
-    
+
+    method BUILD() {
+        nqp::bindattr(self, QAST::Node, '$!returns', int);
+    }
+
+    method value($value = NO_VALUE) { $!value := $value unless $value =:= NO_VALUE; $!value }
+
     method substitute_inline_placeholders(@fillers) {
         self
     }

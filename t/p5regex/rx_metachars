@@ -54,3 +54,5 @@ a\Z				a\nb	n	basic \Z - (2)
 a\z				a		y	basic \z +
 a\z				a\n		n	basic \z - (1)
 a\z				a\nb	n	basic \z - (2)
+a\x6565				ae65	y	\x
+a\x{65}				ae	y	\x{}

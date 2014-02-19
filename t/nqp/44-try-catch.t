@@ -2,7 +2,7 @@
 
 # Tests for try and catch
 
-plan(8);
+plan(9);
 
 sub oops($msg = "oops!") { # throw an exception
     nqp::die($msg);
@@ -36,7 +36,7 @@ ok(nqp::istype((try oops()), NQPMu), "statement prefix form of try works");
 $ok := 1;
 sub bar() {
     CATCH { $ok := 0; }
-    return;
+    return 1;
 }
 bar();
 ok($ok, "CATCH blocks ignore control exceptions");
@@ -63,7 +63,19 @@ $ok := 1;
         $ok := $ok * 2;
         oops();
     }
-    CATCH { my &c := $!<resume>; &c(); }
+    CATCH { nqp::resume($!); }
 }
 
 ok($ok == 16, "resuming from resumable exceptions works");
+
+$ok := "";
+{
+  try {
+    oops();
+    CATCH {
+      $ok := $_;
+    }
+  }
+}
+
+ok($ok eq "oops!", "combination of both try and CATCH");

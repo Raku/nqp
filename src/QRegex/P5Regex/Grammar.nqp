@@ -3,14 +3,14 @@ use NQPHLL;
 use QAST;
 
 class QRegex::P5Regex::World is HLL::World {
-    method create_code($past, $name) {
+    method create_code($ast, $name) {
         # Create a fresh stub code, and set its name.
-        my $dummy := pir::nqp_fresh_stub__PP(-> { nqp::die("Uncompiled code executed") });
+        my $dummy := nqp::freshcoderef(-> { nqp::die("Uncompiled code executed") });
         nqp::setcodename($dummy, $name);
 
         # Tag it as a static code ref and add it to the root code refs set.
-        pir::setprop__vPsP($dummy, 'STATIC_CODE_REF', $dummy);
-        self.add_root_code_ref($dummy, $past);
+        nqp::markcodestatic($dummy);
+        self.add_root_code_ref($dummy, $ast);
         
         # Create code object.
         my $code_obj := nqp::create(NQPRegex);
@@ -24,23 +24,26 @@ class QRegex::P5Regex::World is HLL::World {
             QAST::WVal.new( :value($code_obj) ),
             QAST::WVal.new( :value(NQPRegex) ),
             QAST::SVal.new( :value('$!do') ),
-            QAST::BVal.new( :value($past) )
+            QAST::BVal.new( :value($ast) )
         ));
         $fixups.push(QAST::Op.new(
             :op('setcodeobj'),
-            QAST::BVal.new( :value($past) ),
+            QAST::BVal.new( :value($ast) ),
             QAST::WVal.new( :value($code_obj) )
         ));
-        self.add_fixup_task(:fixup_past($fixups));
+        self.add_fixup_task(:fixup_ast($fixups));
 
         $code_obj
     }
 }
 
 grammar QRegex::P5Regex::Grammar is HLL::Grammar {
+    my $cur_handle := 0;
     token TOP {
         :my %*RX;
-        :my $*W := QRegex::P5Regex::World.new(:handle(nqp::sha1(self.target)));
+        :my $*INTERPOLATE := 1;
+        :my $handle := '__QREGEX_P5REGEX__' ~ $cur_handle++;
+        :my $*W := QRegex::P5Regex::World.new(:$handle);
         <nibbler>
         [ $ || <.panic: 'Confused'> ]
     }
@@ -69,7 +72,7 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
         <![|)]>
         <!rxstopper>
         <atom>
-        [ <.ws> <quantifier=p5quantifier> ]?
+        [ <.ws> <!before <rxstopper> > <quantifier=p5quantifier> ]**0..1
         <.ws>
     }
     
@@ -84,6 +87,7 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     proto token p5metachar { <...> }
     
     token p5metachar:sym<quant> {
+        <![(?]>
         <quantifier=p5quantifier>
         <.panic: "quantifier quantifies nothing">
     }
@@ -94,26 +98,32 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
         '$' <?before \W | $>
     }
     token p5metachar:sym<(? )> {
-        '(?' {} <assertion=p5assertion>
-        [ ')' || <.panic: "Perl 5 regex assertion not terminated by parenthesis"> ]
+        '(?' <![?]>
+            [
+            | <?[<]> '<' $<name>=[<-[>]>+] '>' {} <nibbler>
+            | <?[']> "'" $<name>=[<-[']>+] "'" {} <nibbler>
+            | <assertion=p5assertion>
+            ]
+        [ ')' || <.panic: "Perl 5 named capture group not terminated by parenthesis"> ]
     }
+    token p5metachar:sym<(?: )> { '(?:' {} <nibbler> ')' }
     token p5metachar:sym<( )> { '(' {} <nibbler> ')' }
     token p5metachar:sym<[ ]> { <?before '['> <cclass> }
     
     token cclass {
-        :my $pastfirst := 0;
+        :my $astfirst := 0;
         '['
         $<sign>=['^'|<?>]
         [
         || $<charspec>=(
-               \s* ( '\\' <backslash=p5backslash> || (<?{ $pastfirst == 0 }> <-[\\]> || <-[\]\\]>) )
+               ( '\\' <backslash=p5backslash> || (<?{ $astfirst == 0 }> <-[\\]> || <-[\]\\]>) )
                [
                    \s* '-' \s*
                    ( '\\' <backslash=p5backslash> || (<-[\]\\]>) )
-               ]?
-               { $pastfirst++ }
+               ]**0..1
+               { $astfirst++ }
            )+
-           \s* ']'
+           ']'
         || <.panic: "failed to parse character class; unescaped ']'?">
         ]
     }
@@ -121,10 +131,22 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     proto token p5backslash { <...> }
     
     token p5backslash:sym<A> { <sym> }
+    token p5backslash:sym<b> { $<sym>=[<[bB]>] }
+    token p5backslash:sym<r> { <sym> }
+    token p5backslash:sym<R> { <sym> }
+    token p5backslash:sym<s> { $<sym>=[<[dDnNsSwW]>] }
+    token p5backslash:sym<t> { <sym> }
+    token p5backslash:sym<x> {
+        <sym>
+        [
+        |           $<hexint>=[ <[ 0..9 a..f A..F ]>**0..2 ]
+        | '{' ~ '}' $<hexint>=[ <[ 0..9 a..f A..F ]>* ]
+        ]
+    }
     token p5backslash:sym<z> { <sym> }
     token p5backslash:sym<Z> { <sym> }
-    token p5backslash:sym<b> { $<sym>=[<[bB]>] }
-    token p5backslash:sym<s> { $<sym>=[<[dDnNsSwW]>] }
+    token p5backslash:sym<Q> { <sym> <!!{ $*INTERPOLATE := 0; 1 }> }
+    token p5backslash:sym<E> { <sym> <!!{ $*INTERPOLATE := 1; 1 }> }
     token p5backslash:sym<misc> { $<litchar>=(\W) | $<number>=(\d+) }
     token p5backslash:sym<oops> { <.panic: "Unrecognized Perl 5 regex backslash sequence"> }
 
@@ -135,7 +157,7 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     token p5assertion:sym<!> { <sym> [ <?before ')'> | <nibbler> ] }
     
     token p5mod  { <[imsox]>* }
-    token p5mods { <on=p5mod> [ '-' <off=p5mod> ]? }
+    token p5mods { <on=p5mod> [ '-' <off=p5mod> ]**0..1 }
     token p5assertion:sym<mod> {
         :my %*OLDRX := nqp::getlexdyn('%*RX');
         :my %*RX;
@@ -144,7 +166,7 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
         }
         <mods=p5mods>
         [
-        | ':' <nibbler>?
+        | ':' <nibbler>**0..1
         | <?before ')' >
         ]
     }
@@ -157,7 +179,7 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     token p5quantifier:sym<{ }> {
         '{' 
         $<start>=[\d+] 
-        [ $<comma>=',' $<end>=[\d*] ]?
+        [ $<comma>=',' $<end>=[\d*] ]**0..1
         '}' <quantmod>
     }
     
@@ -201,7 +223,7 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
         | '$' $<pos>=[\d+]
         ]
 
-        [ <.ws> '=' <.ws> <quantified_atom> ]?
+        [ <.ws> '=' <.ws> <quantified_atom> ]**0..1
     }
 
     proto token backslash { <...> }

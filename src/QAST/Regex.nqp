@@ -1,3 +1,12 @@
+role QAST::RegexCursorType {
+    has $!cursor_type;
+    method has_cursor_type() { 1 }
+    method cursor_type($value = NO_VALUE) {
+        $!cursor_type := $value unless $value =:= NO_VALUE;
+        $!cursor_type
+    }
+}
+
 class QAST::Regex is QAST::Node {
     has $!name;
     has str $!rxtype;
@@ -7,12 +16,31 @@ class QAST::Regex is QAST::Node {
     has int $!min;
     has int $!max;
 
-    method name(*@value)      { $!name := @value[0] if @value; $!name }
-    method rxtype(*@value)    { $!rxtype := @value[0] if @value; $!rxtype || "" }
-    method subtype(*@value)   { $!subtype := @value[0] if @value; $!subtype || "" }
-    method backtrack(*@value) { $!backtrack := @value[0] if @value; $!backtrack || "" }
-    method negate(*@value)    { $!negate := @value[0] if @value; $!negate }
-    method min(*@value)       { $!min := @value[0] if @value; $!min }
-    method max(*@value)       { $!max := @value[0] if @value; $!max }
+    method name($value = NO_VALUE)      { $!name := $value unless $value =:= NO_VALUE; $!name }
+    method rxtype($value = NO_VALUE)    {
+        $!rxtype := $value unless $value =:= NO_VALUE;
+        !nqp::isnull_s($!rxtype) ?? $!rxtype !! ""
+    }
+    method subtype($value = NO_VALUE)   {
+        $!subtype := $value unless $value =:= NO_VALUE;
+        !nqp::isnull_s($!subtype) ?? $!subtype !! "" 
+    }
+    method backtrack($value = NO_VALUE) {
+        $!backtrack := $value unless $value =:= NO_VALUE;
+        !nqp::isnull_s($!backtrack) ?? $!backtrack !! ""
+    }
+    method negate($value = NO_VALUE)    { $!negate := $value unless $value =:= NO_VALUE; $!negate }
+    method min($value = NO_VALUE)       { $!min := $value unless $value =:= NO_VALUE; $!min }
+    method max($value = NO_VALUE)       { $!max := $value unless $value =:= NO_VALUE; $!max }
+    
+    method dump_extra_node_info() {
+        ":rxtype($!rxtype)" ~ (!nqp::isnull_s($!subtype) ?? " :subtype($!subtype)" !! "") ~ ($!negate ?? ' (negated)' !! '') ~ (nqp::defined($!name) ?? " :name($!name)" !! '')
+    }
+    
+    method has_cursor_type() { 0 }
+    method cursor_type($type) {
+        self.HOW.mixin(self, QAST::RegexCursorType);
+        self.cursor_type($type);
+    }
 }
 

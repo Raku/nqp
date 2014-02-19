@@ -318,14 +318,41 @@ For example, the following block takes two positional parameters.
         ...
     )
 
+Parameter declarations can also be given:
+
+* :default(...) - a QAST tree that produces a default value for the parameter
+  if it is not passed. This makes it optional.
+* :slurpy(1) - specifies that the parameter is slurpy. Use :named(1) also for
+  a named slurpy parameter.
+
+Finally, there are a couple of other values of decl that work with lexicals.
+
+* static - means that the lexical should be given the value specified in the
+  :value(...) argument. Useful for things that wish to install symbols in the
+  lexical scope with the intention they'll not be mutated (for example, a type
+  declaration may be installed using this). No attempt is made to ensure you
+  do not re-bind such a symbol, but do not do this; runtimes are free to turn
+  lookups of static lexical symbols into direct references to the symbol.
+* contvar - means that the lexical should be initialized to a clone of the
+  :value(...) argument. Presumably, this represents some kind of container
+  type. There are no restrictions on re-binding.
+* statevar - same as for contvar, except the container created will be used
+  for all given closure clones. To be clear, cloning a code ref doesn't bring
+  state variables along. On the initial call, containers are formed in the way
+  that contvar forms them: by cloning the :value(...) argument.
+
 ## QAST::VarWithFallback
 
+In the context of a bind, or with native types, this is exactly the same as a
+QAST::Var. For fetches of object types, if a null is produced, the QAST tree
+in :fallback(...) will be run and the value that it evaluates to produced
+instead.
 
 ## QAST::BVal
 A QAST::Block can only appear once in the QAST tree. So what if you want to
 refer to a block from elsewhere? The answer is to use a QAST::BVal.
 
-    QAST::BVal.new( :block($some_block) )
+    QAST::BVal.new( :value($some_block) )
 
 The $some_block should be a QAST::Block. Note that this only works if the
 block is in the same compilation unit as the one where the BVal is used

@@ -1,6 +1,6 @@
 #! nqp
 
-say("1..0 skip design changes (EXPORT now lexical), need re-work");
+say("1..0 # Skipped: design changes (EXPORT now lexical), need re-work");
 
 #plan(8);
 #
@@ -13,7 +13,7 @@ say("1..0 skip design changes (EXPORT now lexical), need re-work");
 #&ABC::EXPORT::DEFAULT::alpha := &ABC::alpha;
 #$ABC::EXPORT::DEFAULT::gamma := $ABC::gamma;
 #
-#my $parrot-comp := pir::compreg__Ps('nqp');
+#my $parrot-comp := nqp::getcomp('nqp');
 #
 #my $module := $parrot-comp.get_module('ABC');
 #my %exports := $parrot-comp.get_exports($module);

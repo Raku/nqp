@@ -7,38 +7,46 @@ class QAST::Node {
     
     has $!node;
     has $!returns;
-    has int $!arity;
 
     method new(*@children, *%options) {
-        my $new := self.CREATE();
+        my $new := nqp::create(self);
         nqp::bindattr($new, QAST::Node, '@!array', @children);
         nqp::bindattr($new, QAST::Node, '%!hash', nqp::hash());
-        for %options {
-            nqp::findmethod($new, $_.key)($new, $_.value);
+        my $it := nqp::iterator(%options);
+        my $cur;
+        while $it {
+            $cur := nqp::shift($it);
+            nqp::findmethod($new, nqp::iterkey_s($cur))($new, nqp::iterval($cur))
         }
         $new;
     }
 
-    method node(*@value)       { $!node := @value[0] if @value; $!node }
-    method returns(*@value)    { $!returns := @value[0] if @value; $!returns }
-    method arity(*@value)      { $!arity := @value[0] if @value; $!arity }
+    method node($value = NO_VALUE) {
+        $!node := $value unless $value =:= NO_VALUE;
+        $!node := NQPMu if nqp::isnull($value);
+        $!node
+    }
+    method returns($value = NO_VALUE) {
+        $!returns := $value unless $value =:= NO_VALUE;
+        $!returns
+    }
     
-    method named(*@value) {
-        if @value {
-            self.HOW.mixin(self, QAST::SpecialArg);
-            self.named(@value[0]);
-        }
-        else {
+    method named($value = NO_VALUE) {
+        if $value =:= NO_VALUE {
             ""
         }
-    }
-    method flat(*@value) {
-        if @value {
+        else {
             self.HOW.mixin(self, QAST::SpecialArg);
-            self.flat(@value[0]);
+            self.named($value);
+        }
+    }
+    method flat($value = NO_VALUE) {
+        if $value =:= NO_VALUE {
+            0
         }
         else {
-            0
+            self.HOW.mixin(self, QAST::SpecialArg);
+            self.flat($value);
         }
     }
     
@@ -93,11 +101,15 @@ class QAST::Node {
         }
         if (self.node) {
             nqp::push(@chunks, ' ');
-            nqp::push(@chunks, nqp::escape(self.node));
+            my $escaped_node := nqp::escape(self.node);
+            nqp::push(@chunks, nqp::substr($escaped_node, 0, 50));
+            if (nqp::chars($escaped_node) > 50) {
+                nqp::push(@chunks, "...");
+            }
         }
         nqp::push(@chunks, "\n");
         self.dump_children($indent + 2, @chunks);
-        return nqp::join('', @chunks);
+        return join('', @chunks);
     }
 
     method dump_children(int $indent, @onto) {
@@ -108,7 +120,7 @@ class QAST::Node {
             else {
                 nqp::push(@onto, nqp::x(' ', $indent));
                 nqp::push(@onto, '- ');
-                nqp::push(@onto, ~$_);
+                nqp::push(@onto, nqp::istype($_, NQPMu) ?? '(NQPMu)' !! ~$_);
                 nqp::push(@onto, "\n");
             }
         }

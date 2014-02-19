@@ -44,7 +44,7 @@ class QRegex::NFA {
         $id;
     }
 
-    method addedge(int $from, int $to, $action, $value, :$newedge = 1) {
+    method addedge($from, $to, $action, $value, :$newedge = 1) {
         $!edges := 1 if $newedge;
         $to := self.addstate() if $to < 0;
         my $st := $!states[$from];
@@ -61,18 +61,18 @@ class QRegex::NFA {
         self;
     }
 
-    method regex_nfa($node, int $from, int $to) {
+    method regex_nfa($node, $from, $to) {
         my $method := ($node.rxtype // 'concat');
         self.HOW.can(self, $method) 
          ?? self."$method"($node, $from, $to)
          !! self.fate($node, $from, $to);
     }
 
-    method fate($node, int $from, int $to) { 
+    method fate($node, $from, $to) { 
         self.addedge($from, 0, $EDGE_FATE, 0, :newedge(0)) 
     }
 
-    method alt($node, int $from, int $to) {
+    method alt($node, $from, $to) {
         for $node.list {
             my int $st := self.regex_nfa($_, $from, $to);
             $to := $st if $to < 0 && $st > 0;
@@ -80,11 +80,11 @@ class QRegex::NFA {
         $to;
     }
 
-    method anchor($node, int $from, int $to) { 
+    method anchor($node, $from, $to) { 
         self.addedge($from, $to, $EDGE_EPSILON, 0);
     }
     
-    method dba($node, int $from, int $to) { 
+    method dba($node, $from, $to) { 
         self.addedge($from, $to, $EDGE_EPSILON, 0);
     }
 
@@ -98,12 +98,12 @@ class QRegex::NFA {
         %cclass_code<nl> := nqp::const::CCLASS_NEWLINE;
     }
 
-    method cclass($node, int $from, int $to) {
+    method cclass($node, $from, $to) {
         self.addedge($from, $to, $EDGE_CHARCLASS + ?$node.negate,
-                     %cclass_code{nqp::lc($node.subtype)});
+                     %cclass_code{ $node.name });
     }
 
-    method concat($node, int $from, int $to) {
+    method concat($node, $from, $to) {
         my int $i := 0;
         my int $n := +$node.list - 1;
         while $from > 0 && $i < $n {
@@ -113,7 +113,7 @@ class QRegex::NFA {
         $from > 0 && $n >= 0 ?? self.regex_nfa($node[$i], $from, $to) !! $to;
     }
 
-    method enumcharlist($node, int $from, int $to) {
+    method enumcharlist($node, $from, $to) {
         my $charlist := $node[0];
         if $node.subtype eq 'zerowidth' {
             $from := self.addedge($from, -1, $EDGE_CHARLIST + ?$node.negate, $charlist);
@@ -124,7 +124,11 @@ class QRegex::NFA {
         }
     }
 
-    method literal($node, int $from, int $to) {
+    method charrange($node, $from, $to) {
+        self.enumcharlist($node, $from, $to);
+    }
+
+    method literal($node, $from, $to) {
         my int $litlen   := nqp::chars($node[0]) - 1;
         my int $i        := 0;
         if $litlen >= 0 {
@@ -153,7 +157,7 @@ class QRegex::NFA {
         }
     }
 
-    method subrule($node, int $from, int $to) {
+    method subrule($node, $from, $to) {
         my $subtype := $node.subtype;
         if $node.name eq 'before' && !$node.negate {
             my int $end := self.addstate();
@@ -167,6 +171,24 @@ class QRegex::NFA {
             $to := self.addedge($from, $to, $EDGE_CHARCLASS + $node.negate,
                 nqp::const::CCLASS_ALPHABETIC);
             self.addedge($from, $to, $EDGE_CODEPOINT + $node.negate, 95);
+        }
+        elsif !$node.negate && $subtype ne 'zerowidth' &&
+                ($node.name eq 'ident' ||
+                    $subtype eq 'method' &&
+                    ($node[0][0] ~~ QAST::SVal ?? $node[0][0].value !! $node[0][0]) eq 'ident') {
+            my int $beginstate := self.addstate();
+            self.addedge($from, $beginstate, $EDGE_EPSILON, 0);
+
+            my int $midstate := self.addstate();
+            self.addedge($beginstate, $midstate, $EDGE_CHARCLASS, nqp::const::CCLASS_ALPHABETIC);
+            self.addedge($beginstate, $midstate, $EDGE_CODEPOINT, 95);
+
+            my int $second := self.addstate();
+
+            self.addedge($midstate, $second, $EDGE_CHARCLASS, nqp::const::CCLASS_WORD);
+            self.addedge($second, $midstate, $EDGE_EPSILON, 0);
+            $to := self.addedge($midstate, $to, $EDGE_EPSILON, 0);
+            $to;
         }
         elsif $subtype eq 'zerowidth' {
             if $node.negate {
@@ -191,7 +213,7 @@ class QRegex::NFA {
         }
     }
     
-    method quant($node, int $from, int $to) {
+    method quant($node, $from, $to) {
         my int $min := 0 + ($node.min // 0);
         my int $max := 0 + ($node.max // -1); # -1 means Inf
         
@@ -269,13 +291,13 @@ class QRegex::NFA {
         }
     }
     
-    method qastnode($node, int $from, int $to) {
+    method qastnode($node, $from, $to) {
         $node.subtype eq 'zerowidth' || $node.subtype eq 'declarative' ??
             self.addedge($from, $to, $EDGE_EPSILON, 0) !!
             self.fate($node, $from, $to);
     }
     
-    method subcapture($node, int $from, int $to) {
+    method subcapture($node, $from, $to) {
         self.regex_nfa($node[0], $from, $to);
     }
     
@@ -287,7 +309,7 @@ class QRegex::NFA {
         $!states
     }
 
-    method mergesubrule(int $start, int $to, $fate, $cursor, str $name, %caller_seen?) {
+    method mergesubrule($start, $to, $fate, $cursor, str $name, %caller_seen?) {
         #nqp::say("adding $name");
         my %seen := nqp::clone(%caller_seen);
         my @substates;
@@ -361,67 +383,19 @@ class QRegex::NFA {
     my knowhow NFAType is repr('NFA') { }
 
     method run(str $target, int $offset) {
-        # This does what the NQP below says, but these days an op is used since
-        # it's hugely faster.
-        #my $eos := nqp::chars($target);
-        #my @fates;
-        #my @nextst := [1];
-        #my $gen := 1;
-        #my @done;
-        #while @nextst && $offset <= $eos {
-        #    my @curst := @nextst;
-        #    @nextst := [];
-        #    while @curst {
-        #        my $st := nqp::pop(@curst);
-        #        next if @done[$st] == $gen;
-        #        @done[$st] := $gen;
-        #        for $!states[$st] -> $act, $arg, $to {
-        #            if $act == $EDGE_FATE {
-        #                @fates.push($arg);
-        #            }
-        #            elsif $act == $EDGE_EPSILON && @done[$to] != $gen {
-        #                nqp::push(@curst, $to);
-        #            }
-        #            elsif $offset >= $eos { }
-        #            elsif $act == $EDGE_CODEPOINT {
-        #                nqp::push(@nextst, $to) if nqp::ord($target, $offset) == $arg;
-        #            }
-        #            elsif $act == $EDGE_CODEPOINT_NEG {
-        #                nqp::push(@nextst, $to) unless nqp::ord($target, $offset) == $arg;
-        #            }
-        #            elsif $act == $EDGE_CHARCLASS {
-        #                nqp::push(@nextst, $to) if nqp::iscclass($arg, $target, $offset);
-        #            }
-        #            elsif $act == $EDGE_CHARCLASS_NEG {
-        #                nqp::push(@nextst, $to) unless nqp::iscclass($arg, $target, $offset);
-        #            }
-        #            elsif $act == $EDGE_CHARLIST {
-        #                nqp::push(@nextst, $to) if nqp::index($arg, nqp::substr($target, $offset, 1)) >= 0;
-        #            }
-        #            elsif $act == $EDGE_CHARLIST_NEG {
-        #                nqp::push(@nextst, $to) unless nqp::index($arg, nqp::substr($target, $offset, 1)) >= 0;
-        #            }
-        #        }
-        #    }
-        #    $offset := $offset + 1;
-        #    $gen := $gen + 1;
-        #}
-        #@fates;
         unless nqp::isconcrete($!nfa_object) {
-            pir::nqp_disable_sc_write_barrier__v();
+            nqp::scwbdisable();
             $!nfa_object := nqp::nfafromstatelist($!states, NFAType);
-            pir::nqp_enable_sc_write_barrier__v();
-            1;
+            nqp::scwbenable();
         }
         nqp::nfarunproto($!nfa_object, $target, $offset)
     }
     
     method run_alt(str $target, int $offset, $bstack, $cstack, @labels) {
         unless nqp::isconcrete($!nfa_object) {
-            pir::nqp_disable_sc_write_barrier__v();
+            nqp::scwbdisable();
             $!nfa_object := nqp::nfafromstatelist($!states, NFAType);
-            pir::nqp_enable_sc_write_barrier__v();
-            1;
+            nqp::scwbenable();
         }
         nqp::nfarunalt($!nfa_object, $target, $offset, $bstack, $cstack, @labels)
     }

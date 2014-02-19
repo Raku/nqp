@@ -1,0 +1,161 @@
+=head1 Continuations in NQP
+
+This document describes a somewhat experimental and JVM-only NQP feature: the
+ability to freeze and thaw stack frames for implementing unusual control flow.
+
+=head2 Interface
+
+I think that the best abstraction to what I'm trying to build here is the
+B<delimited continuation> (L<https://en.wikipedia.org/wiki/Delimited_continuation>).
+
+=over 4
+
+=item nqp::continuationreset($tag, { ... })
+
+Executes the argument, marking the stack for a subsequent C<nqp::continuationshift>
+operation within the dynamic scope.  The C<$tag> is an object which can be used
+later by C<nqp::continuationshift> to find a specific reset frame.
+
+=item nqp::continuationcontrol($protect, $tag, -> $cont { ... })
+
+Slices off the part of the evaluation stack between the current call frame and
+the innermost enclosing C<nqp::continuationreset>.  If C<$tag> is not null,
+only resets with the same tag are considered; otherwise the innermost reset
+will be taken regardless of tag.  If there is no such reset, or if there is a
+non-saveable frame (aka continuation barrier) between the current position and
+the matching reset, an error occurs.  The sliced-off part of the stack is
+wrapped in an NQP object and passed to the callback function; it is removed
+from the stack, so B<if the callback returns without using the continuation,
+the effect is to cause C<nqp::continuationreset> to return immediately with the
+returned value>.
+
+C<$protect> is an integer.  If it is 1, the reset will be retained on the stack
+while the handler is being executed; if it is 0, the reset will be removed.
+Other values are undefined.  In no case will the matched reset be included in
+the captured continuation object (although an unmatched reset which is skipped
+over would be).  Thus, C<control(1, ...)> corresponds to the standard C<control>
+operator, while C<control(0, ...)> corresponds to the standard C<control0>
+operator.  To simulate C<shift> and C<shift0>, manually add the reset before
+invoking the continuation.
+
+=item nqp::continuationinvoke($cont, $inject)
+
+Pastes the saved call frames onto the current stack, such that
+C<nqp::continuationshift> calls C<$inject> within the restored dynamic scope
+and returns its return value.  Control returns to the caller when the callback
+to C<nqp::continuationreset> returns, with the same value.  This can be used
+multiple times on the same continuation.  (Actually, delimited continuations
+are traditionally represented as functions, so this operator is implicit and
+unnamed.  But sixmodel makes that slightly tricky.)
+
+=item nqp::continuationclone($cont)
+
+Produces a shallow clone of the passed continuation.  This is presently
+necessary in situations where a continuation must be active twice at the same
+time.  At present, lexical variables will remain shared but locals will not.
+B<Details here are subject greatly to change.>
+
+    # should be 3 * 3 * 10 = 90
+    # will infinite loop if the clones are removed
+    my $cont := nqp::continuationreset(nqp::null(), {
+        3 * nqp::continuationcontrol(0, nqp::null(), -> $k { $k });
+    });
+    my $val := nqp::continuationinvoke(nqp::continuationclone($cont),
+        { nqp::continuationinvoke(nqp::continuationclone($cont), { 10 }) });
+
+=back
+
+By way of example, here is Scheme's call/cc implemented using NQP delimited
+continuations:
+
+    # for proper R5RS semantics, run this once wrapping your main function
+    sub run_main($f) {
+        nqp::continuationreset(nqp::null(), $f);
+    }
+
+    sub callcc($f) {
+        # first get the current continuation
+        nqp::continuationcontrol(1, nqp::null(), -> $dcont {
+            my $scheme_cont := -> $val {
+                # when the scheme continuation is invoked, we need to *replace*
+                # the current continuation with this one
+                nqp::continuationcontrol(1, nqp::null(), -> $c {
+                    nqp::continuationinvoke($dcont, { $val })
+                });
+            };
+            nqp::continuationinvoke($dcont, { $f($scheme_cont) });
+        });
+    }
+
+And here is something resembling gather/take:
+
+    my $SENTINEL := [];
+    sub yield($value) {
+        nqp::continuationcontrol(0, nqp::null(), -> $dcont {
+            [$value, { nqp::continuationinvoke($dcont, {0}) }]
+        });
+    }
+
+    sub start_iter($body) {
+        my $state := { $body(); yield($SENTINEL) };
+        -> {
+            my $pkt := nqp::continuationreset(nqp::null(), $state);
+            $state := $pkt[1];
+            $pkt[0];
+        }
+    }
+
+Complete examples may be found in t/jvm/01-continuations.t in the source distribution.
+
+=head1 Conjectures
+
+=head2 Lazy recursive reinstate optimization
+
+Consider the following (Perl 6):
+
+    my $N = 10000;
+
+    sub flatten($x) {
+        multi go(@k) { go($_) for @k }
+        multi go($k) { take $k }
+
+        gather go($x);
+    }
+
+    my $list = [^$N];
+    $list = [$list] for ^$N;
+    say flatten($list).perl;
+
+This takes O(N^2) time on the current implementation.  Why?  Because each time
+take is invoked, we are N frames deep, so each take does O(N) work, and there
+are N calls to take.  We can improve this to O(N) by doing the continuation
+operations B<lazily>.  That is, when reinstating a continuation only reinstate
+the top frame(s) that will be executed, and skip the work of reinstating the
+non-top frames only to resave them later.  The design of this is a bit
+handwavey at the moment.
+
+=head2 Multiple callers
+
+There are two sensible ways to define the caller of a call frame.  Either the
+frame which caused this frame to exist (henceforth, the static caller) or the
+frame which caused this frame to be active (henceforth, the dynamic caller).
+They are the same for most frames, but differ in the case of the top frame of a
+gather.  The static caller of such a frame is the frame containing C<gather>;
+the dynamic caller is the frame corresponding to C<GatherIter.reify>.  We need
+both: contextuals use the static caller (TimToady has said so quite
+explicitly), while exceptions and control flow ought to use the dynamic caller
+(people expect lazy exceptions to show up and backtrace at the point where the
+list is used).  So we might need to B<add a dynamicCaller field to CallFrame
+and come up with updating logic>.  Niecza does precisely this, and I think
+parrot is doing something similar.
+
+=head2 Saner cloning
+
+C<nqp::continuationclone> is bad because it exposes details of what the JVM
+implementation can do without warning and what requires warnings.  It would be
+better to expliclty declare exactly what you intend to do with the continuation
+as a bit flag passed to control and/or invoke, and let the op set figure out
+itself when cloning is needed.  Flags could include "I don't intend to call
+this at all" (control used as an escape operator), "I intend to call this
+exactly once" (coroutines), "I may use this more than once, but only on one
+thread", "I want to use this on several threads".

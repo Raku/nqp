@@ -1,0 +1,4009 @@
+BEGIN_OPS_PREAMBLE
+
+#include <errno.h>
+
+/* Parroty includes. */
+#include "parrot/parrot.h"
+#include "parrot/extend.h"
+#include "parrot/dynext.h"
+
+/* 6modely includes. */
+#include "../6model/sixmodelobject.h"
+#include "../6model/repr_registry.h"
+#include "../6model/reprs/NFA.h"
+#include "../6model/serialization_context.h"
+#include "../6model/containers.h"
+#include "../guts/multi_dispatch.h"
+#include "../pmc/pmc_nqplexinfo.h"
+#include "pmc_sub.h"
+
+/* SHA1 algorithm. */
+#include "../../../../3rdparty/sha1/sha1.h"
+
+#if PARROT_HAS_ICU
+#  include <unicode/uchar.h>
+#endif
+
+/* Did we do the dynop setup yet?
+ * XXX Relies on this happening once in a single thread at startup. */
+static INTVAL initialized = 0;
+
+/* Cached type IDs. */
+static INTVAL stable_id = 0;
+static INTVAL smo_id    = 0;
+static INTVAL disp_id   = 0;
+static INTVAL qrpa_id   = 0;
+static INTVAL ohash_id  = 0;
+
+/* Built-in meta-objects. */
+static PMC *KnowHOW = NULL;
+static PMC *KnowHOWAttribute = NULL;
+
+/* FileHandle PMC for nqpevent */
+static PMC *nqpevent_fh = NULL;
+static INTVAL nqpdebflags_i = 0;
+
+/* Serialization context upside-down stack (element 0 is the latest, new entries
+ * unshifted). Tracks the SC (if any) that we are currently in; stack because we
+ * may have multiple on the go due to compiling nested module dependencies. */
+PMC *compiling_scs = NULL;
+
+/* Disables the SC write barrier temporarily. Zero is enabled, otherwise it's the
+ * number of nested enable/disable we are in. */
+INTVAL sc_write_barrier_off_depth = 0;
+
+/* Empty hash, used in deconstruct op. */
+static PMC *empty_hash = NULL;
+
+/* SC write barrier for objects. */
+static void SC_write_barrier_obj(PARROT_INTERP, PMC *obj) {
+    if (!sc_write_barrier_off_depth && VTABLE_get_bool(interp, compiling_scs)) {
+        PMC *comp_sc = VTABLE_get_pmc_keyed_int(interp, compiling_scs, 0);
+        if (SC_PMC(obj) != comp_sc) {
+            SC_repossess_object(interp, comp_sc, SC_PMC(obj), obj);
+            SC_PMC(obj) = comp_sc;
+            /*printf("SC OBJECT WRITE BARRIER HIT (%s)\n",
+                Parrot_str_cstring(interp, VTABLE_name(interp, obj)));*/
+        }
+    }
+}
+
+/* SC write barrier for STables. */
+static void SC_write_barrier_st(PARROT_INTERP, STable *st) {
+    if (!sc_write_barrier_off_depth && VTABLE_get_bool(interp, compiling_scs)) {
+        PMC *comp_sc = VTABLE_get_pmc_keyed_int(interp, compiling_scs, 0);
+        if (st->sc != comp_sc) {
+            SC_repossess_stable(interp, comp_sc, st->sc, st->stable_pmc);
+            st->sc = comp_sc;
+            /*printf("SC STABLE WRITE BARRIER HIT (%s)\n",
+                Parrot_str_cstring(interp, VTABLE_name(interp, st->WHAT)));*/
+        }
+    }
+}
+
+/* Test for something being a list (RPA or QRPA).  */
+static INTVAL
+nqp_islist(PMC *pmc) {
+    INTVAL type = pmc->vtable->base_type;
+    return (INTVAL)(type == qrpa_id || type == enum_class_ResizablePMCArray
+                                    || type == enum_class_ResizableStringArray);
+}
+
+/* Test for something being a hash.  */
+static INTVAL
+nqp_ishash(PMC *pmc) {
+    INTVAL type = pmc->vtable->base_type;
+    return (INTVAL)(type == enum_class_Hash || type == ohash_id);
+}
+
+/* This public-domain C quick sort implementation by Darel Rex Finley. */
+static INTVAL
+quicksort(INTVAL *arr, INTVAL elements) {
+    #define MAX_LEVELS 100
+    INTVAL piv, beg[MAX_LEVELS], end[MAX_LEVELS], i = 0, L, R ;
+    beg[0] = 0;
+    end[0] = elements;
+    while (i >= 0) {
+        L = beg[i];
+        R = end[i] - 1;
+        if (L < R) {
+            piv = arr[L];
+            if (i == MAX_LEVELS - 1)
+                return 0;
+            while (L < R) {
+                while (arr[R] >= piv && L < R)
+                    R--;
+                if (L < R)
+                    arr[L++] = arr[R];
+                while (arr[L] <= piv && L < R)
+                    L++;
+                if (L < R)
+                    arr[R--]  =arr[L]; 
+            }
+            arr[L] = piv;
+            beg[i+1] = L + 1;
+            end[i+1] = end[i];
+            end[i++] = L;
+        }
+        else {
+            i--; 
+        }
+    }
+    return 1;
+}
+
+/* Does a run of the NFA. Produces a list of integers indicating the
+ * chosen ordering. */
+static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL offset, INTVAL *total_fates_out) {
+    INTVAL  eos     = Parrot_str_length(interp, target);
+    INTVAL  gen     = 1;
+    INTVAL  numcur  = 0;
+    INTVAL  numnext = 0;
+    INTVAL *done, *fates, *curst, *nextst;
+    INTVAL  i, fate_arr_len, num_states, total_fates, prev_fates;
+    
+    /* Allocate "done states", "current states" and "next states" arrays. */
+    num_states = nfa->num_states;
+    done   = (INTVAL *)mem_sys_allocate_zeroed((num_states + 1) * sizeof(INTVAL));
+    curst  = (INTVAL *)mem_sys_allocate_zeroed((num_states + 1) * sizeof(INTVAL));
+    nextst = (INTVAL *)mem_sys_allocate_zeroed((num_states + 1) * sizeof(INTVAL));
+    
+    /* Allocate fates array. */
+    fate_arr_len = 1 + VTABLE_elements(interp, nfa->fates);
+    fates = (INTVAL *)mem_sys_allocate(sizeof(INTVAL) * fate_arr_len);
+    total_fates = 0;
+    
+    nextst[numnext++] = 1;
+    while (numnext && offset <= eos) {
+        /* Swap next and current */
+        INTVAL *temp = curst;
+        curst   = nextst;
+        nextst  = temp;
+        numcur  = numnext;
+        numnext = 0;
+        
+        /* Save how many fates we have before this position is considered. */
+        prev_fates = total_fates;
+        
+        while (numcur) {
+            NFAStateInfo *edge_info;
+            INTVAL        edge_info_elems;
+            
+            INTVAL st = curst[--numcur];
+            if (st <= num_states) {
+                if (done[st] == gen)
+                    continue;
+                done[st] = gen;
+            }
+            
+            edge_info = nfa->states[st - 1];
+            edge_info_elems = nfa->num_state_edges[st - 1];
+            for (i = 0; i < edge_info_elems; i++) {
+                INTVAL act = edge_info[i].act;
+                INTVAL to  = edge_info[i].to;
+                
+                if (act == EDGE_FATE) {
+                    /* Crossed a fate edge. Check if we already saw this, and
+                     * if so bump the entry we already saw. */
+                    INTVAL arg = edge_info[i].arg.i;
+                    INTVAL j;
+                    INTVAL found_fate = 0;
+                    for (j = 0; j < total_fates; j++) {
+                        if (found_fate)
+                            fates[j - 1] = fates[j];
+                        if (fates[j] == arg) {
+                            found_fate = 1;
+                            if (j < prev_fates)
+                                prev_fates--;
+                        }
+                    }
+                    if (found_fate) {
+                        fates[total_fates - 1] = arg;
+                    }
+                    else {
+                        if (total_fates >= fate_arr_len) {
+                            fate_arr_len = total_fates + 1;
+                            fates = (INTVAL *)mem_sys_realloc(fates,
+                                sizeof(INTVAL) * fate_arr_len);
+                        }
+                        fates[total_fates++] = arg;
+                    }
+                }
+                else if (act == EDGE_EPSILON && to <= num_states && done[to] != gen) {
+                    curst[numcur++] = to;
+                }
+                else if (offset >= eos) {
+                    /* Can't match, so drop state. */
+                }
+                else if (act == EDGE_CODEPOINT) {
+                    UINTVAL arg = edge_info[i].arg.i;
+                    if (STRING_ord(interp, target, offset) == arg)
+                        nextst[numnext++] = to;
+                }
+                else if (act == EDGE_CODEPOINT_NEG) {
+                    UINTVAL arg = edge_info[i].arg.i;
+                    if (STRING_ord(interp, target, offset) != arg)
+                        nextst[numnext++] = to;
+                }
+                else if (act == EDGE_CHARCLASS) {
+                    INTVAL arg = edge_info[i].arg.i;
+                    if (Parrot_str_is_cclass(interp, arg, target, offset))
+                        nextst[numnext++] = to;
+                }
+                else if (act == EDGE_CHARCLASS_NEG) {
+                    INTVAL arg = edge_info[i].arg.i;
+                    if (!Parrot_str_is_cclass(interp, arg, target, offset))
+                        nextst[numnext++] = to;
+                }
+                else if (act == EDGE_CHARLIST) {
+                    STRING *arg = edge_info[i].arg.s;
+                    STRING *chr = STRING_substr(interp, target, offset, 1);
+                    if (STRING_index(interp, arg, chr, 0) >= 0)
+                        nextst[numnext++] = to;
+                }
+                else if (act == EDGE_CHARLIST_NEG) {
+                    STRING *arg = edge_info[i].arg.s;
+                    STRING *chr = STRING_substr(interp, target, offset, 1);
+                    if (STRING_index(interp, arg, chr, 0) < 0)
+                        nextst[numnext++] = to;
+                }
+                else if (act == EDGE_CODEPOINT_I) {
+                    UINTVAL  uc_arg = edge_info[i].arg.uclc.uc;
+                    UINTVAL  lc_arg = edge_info[i].arg.uclc.lc;
+                    UINTVAL  ord    = STRING_ord(interp, target, offset);
+                    if (ord == lc_arg || ord == uc_arg)
+                        nextst[numnext++] = to;
+                }
+                else if (act == EDGE_CODEPOINT_I_NEG) {
+                    UINTVAL  uc_arg = edge_info[i].arg.uclc.uc;
+                    UINTVAL  lc_arg = edge_info[i].arg.uclc.lc;
+                    UINTVAL  ord    = STRING_ord(interp, target, offset);
+                    if (ord != lc_arg && ord != uc_arg)
+                        nextst[numnext++] = to;
+                }
+            }
+        }
+        
+        /* Move to next character and generation. */
+        offset++;
+        gen++;
+        
+        /* If we got multiple fates at this offset, sort them by the
+         * declaration order (represented by the fate number). In the
+         * future, we'll want to factor in longest literal prefix too. */
+        if (total_fates - prev_fates > 1) {
+            INTVAL char_fates = total_fates - prev_fates;
+            for (i = total_fates - char_fates; i < total_fates; i++)
+                fates[i] = -fates[i];
+            quicksort(&fates[total_fates - char_fates], char_fates);
+            for (i = total_fates - char_fates; i < total_fates; i++)
+                fates[i] = -fates[i];
+        }
+    }
+    mem_sys_free(done);
+    mem_sys_free(curst);
+    mem_sys_free(nextst);
+    
+    *total_fates_out = total_fates;
+    return fates;
+}
+
+/* Constants for values the type field above may have. */
+#define BIND_VAL_INT 1
+#define BIND_VAL_NUM 2
+#define BIND_VAL_STR 3
+#define BIND_VAL_OBJ 4
+
+/* The current dispatcher, for the next thing that wants one to take.
+ * Note, should really be per thread. */
+static PMC *current_dispatcher = NULL;
+
+PARROT_CAN_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
+static PMC* sub_find_pad(PARROT_INTERP, ARGIN(STRING *lex_name), ARGIN(PMC *ctx))
+{
+    ASSERT_ARGS(Parrot_sub_find_pad)
+    while (1) {
+        PMC * const lex_pad = Parrot_pcc_get_lex_pad(interp, ctx);
+        PMC * outer = Parrot_pcc_get_outer_ctx(interp, ctx);
+
+        if (PMC_IS_NULL(outer))
+            return lex_pad;
+
+        PARROT_ASSERT(outer->vtable->base_type == enum_class_CallContext);
+
+        if (!PMC_IS_NULL(lex_pad))
+            if (VTABLE_exists_keyed_str(interp, lex_pad, lex_name))
+                return lex_pad;
+
+        ctx = outer;
+    }
+}
+
+/* the Parrot env variables abstraction doesn't support traversing through all the env variables so we need this ifdef*/
+
+#ifndef WIN32
+#  ifdef __APPLE_CC__
+#    include <crt_externs.h>
+#    define environ (*_NSGetEnviron())
+#  else /* !__APPLE_CC__ */
+extern char **environ;
+#  endif /* __APPLE_CC__ */
+#endif /* !WIN32 */
+
+/* we have our own Run_OS_Command as the parrot one doesn't support passing env variables */
+
+#ifdef WIN32
+#include <windows.h>
+#include <process.h>
+static char * pack_env_hash(Parrot_Interp interp, PMC* hash_pmc) {
+    Hash *hash = (Hash *)VTABLE_get_pointer(interp, hash_pmc);
+    STRING *equal = Parrot_str_new_constant(interp, "=");
+    STRING *key, *value, *env_var, *env_var_with_null;
+    STRING *packed = Parrot_str_new_constant(interp, "");
+    STRING *null = Parrot_str_new(interp, "\0", 1);
+
+    /* Parrot_hash_value_to_string is not exported*/
+    parrot_hash_iterate(hash,
+        key = (STRING *)_bucket->key;
+        value = VTABLE_get_string_keyed_str(interp, hash_pmc, key);
+        env_var = Parrot_str_concat(interp, key, Parrot_str_concat(interp, equal, value));
+        env_var_with_null = Parrot_str_concat(interp, env_var, null);
+        packed = Parrot_str_concat(interp, packed, env_var_with_null);
+    );
+    return Parrot_str_to_cstring(interp, packed);
+}
+#endif
+static char **pack_arg_array(Parrot_Interp interp, PMC* array_pmc) {
+    INTVAL array_size = VTABLE_elements(interp, array_pmc);
+    char **packed     = (char **)mem_sys_allocate((array_size + 1) * sizeof(char *));
+    INTVAL i = 0;
+
+    if (array_size > 0) {
+        for (i = 0; i < array_size; i++) {
+            PMC *pmc    = VTABLE_get_pmc_keyed_int(interp, array_pmc, i);
+            STRING *str = (STRING *)VTABLE_get_string(interp, pmc);
+            packed[i]   = Parrot_str_to_cstring(interp, str);
+        }
+    }
+    packed[i] = NULL;
+
+    return packed;
+}
+
+#ifdef WIN32
+static int is_space(unsigned char c) {
+    return c == 0x09 || c == 0x0A || c == 0x0B
+        || c == 0x0C || c == 0x0D || c == 0x20
+        || c == 0x85;
+}
+
+static char *find_next_space(const char *s) {
+    short in_quotes = 0;
+    while (*s) {
+    /* ignore doubled backslashes, or backslash+quote */
+    if (*s == '\\' && (s[1] == '\\' || s[1] == '"')) {
+        s += 2;
+    }
+    /* keep track of when we're within quotes */
+    else if (*s == '"') {
+        s++;
+        in_quotes = !in_quotes;
+    }
+    /* break it up only at spaces that aren't in quotes */
+    else if (!in_quotes && is_space(*s))
+        return (char*)s;
+    else
+        s++;
+    }
+    return (char*)s;
+}
+
+/* Autoquoting command-line arguments for nqp::spawn. */
+static char *create_command_line(const char *const *args) {
+    int index, argc;
+    char *cmd, *ptr;
+    const char *arg;
+    size_t len = 0;
+    short bat_file = 0;
+    short cmd_shell = 0;
+    short dumb_shell = 0;
+    short extra_quotes = 0;
+    short quote_next = 0;
+    char *cname = (char*)args[0];
+    size_t clen = strlen(cname);
+
+    /* The NT cmd.exe shell has the following peculiarity that needs to be
+     * worked around. It strips a leading and trailing dquote when any
+     * of the following is true:
+     * 1. the /S switch was used
+     * 2. there are more than two dquotes
+     * 3. there is a special character from this set: &<>()@^|
+     * 4. no whitespace characters within the two dquotes
+     * 5. string between two dquotes isn't an executable file
+     * To work around this, we always add a leading and trailing dquote
+     * to the string, if the first argument is either "cmd.exe" or "cmd",
+     * and there were at least two or more arguments passed to cmd.exe
+     * (not including switches).
+     * XXX the above rules (from "cmd /?") don't seem to be applied
+     * always, making for the convolutions below :-(
+     */
+
+    if (cname) {
+        if (!clen)
+            clen = strlen(cname);
+
+        if (clen > 4
+        && (stricmp(&cname[clen-4], ".bat") == 0
+        || (stricmp(&cname[clen-4], ".cmd") == 0))) {
+            bat_file = 1;
+            len     += 3;
+        }
+        else {
+            char *exe = strrchr(cname, '/');
+            char *exe2 = strrchr(cname, '\\');
+            if (exe2 > exe)
+                exe = exe2;
+            if (exe)
+                ++exe;
+            else
+                exe = cname;
+
+            if (stricmp(exe, "cmd.exe") == 0 || stricmp(exe, "cmd") == 0) {
+                cmd_shell = 1;
+                len      += 3;
+            }
+            else if (stricmp(exe, "command.com") == 0
+            || stricmp(exe, "command") == 0) {
+                dumb_shell = 1;
+            }
+        }
+    }
+
+    for (index = 0; (arg = (char*)args[index]) != NULL; ++index) {
+        size_t curlen = strlen(arg);
+        if (!(arg[0] == '"' && arg[curlen-1] == '"'))
+            len += 2;  /* assume quoting needed (worst case) */
+        len += curlen + 1;
+    }
+
+    argc = index;
+    cmd  = (char *)mem_sys_allocate(len * sizeof(char));
+    ptr  = cmd;
+
+    if (bat_file) {
+        *ptr++       = '"';
+        extra_quotes = 1;
+    }
+
+    for (index = 0; (arg = (char*)args[index]) != NULL; ++index) {
+        short do_quote = 0;
+        size_t curlen  = strlen(arg);
+
+        /* we want to protect empty arguments and ones with spaces with
+         * dquotes, but only if they aren't already there */
+        if (!dumb_shell) {
+            if (!curlen) {
+                do_quote = 1;
+            }
+            else if (quote_next) {
+                /* see if it really is multiple arguments pretending to
+                 * be one and force a set of quotes around it */
+                if (*find_next_space(arg))
+                    do_quote = 1;
+            }
+            else if (!(arg[0] == '"' && curlen > 1 && arg[curlen-1] == '"')) {
+                size_t i = 0;
+                while (i < curlen) {
+                    /* is space */
+                    if (is_space(arg[i])) {
+                        do_quote = 1;
+                    }
+                    else if (arg[i] == '"') {
+                        do_quote = 0;
+                        break;
+                    }
+                    i++;
+                }
+            }
+        }
+
+        if (do_quote)
+            *ptr++ = '"';
+
+        strcpy(ptr, arg);
+        ptr += curlen;
+
+        if (do_quote)
+            *ptr++ = '"';
+
+        if (args[index+1])
+            *ptr++ = ' ';
+
+        if (!extra_quotes
+        && cmd_shell
+        && curlen >= 2
+        && *arg == '/' /* see if arg is "/c", "/x/c", "/x/d/c" etc. */
+        && stricmp(arg+curlen-2, "/c") == 0) {
+            /* is there a next argument? */
+            if (args[index+1]) {
+                /* are there two or more next arguments? */
+                if (args[index+2]) {
+                    *ptr++ = '"';
+                    extra_quotes = 1;
+                }
+                else {
+                    /* single argument, force quoting if it has spaces */
+                    quote_next = 1;
+                }
+            }
+        }
+    }
+
+    if (extra_quotes)
+        *ptr++ = '"';
+
+    *ptr = '\0';
+
+    return cmd;
+}
+
+static INTVAL Run_OS_Command(PARROT_INTERP, PMC *command, PMC *env_hash)
+{
+    DWORD status = 0;
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+    const char *env         = pack_env_hash(interp, env_hash);
+    const char *const *argv = pack_arg_array(interp, command);
+    const char *cmd         = create_command_line(argv);
+
+    memset(&si, 0, sizeof (si));
+    si.cb = sizeof (si);
+    memset(&pi, 0, sizeof (pi));
+
+    /* Start the child process. */
+    if (!CreateProcess(NULL, cmd, NULL, NULL, TRUE, 0, env, NULL, &si, &pi))
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_NOSPAWN,
+            "Can't spawn child process");
+
+    WaitForSingleObject(pi.hProcess, INFINITE);
+
+    if (!GetExitCodeProcess(pi.hProcess, &status)) {
+        Parrot_warn(interp, PARROT_WARNINGS_PLATFORM_FLAG,
+            "Process completed: Failed to get exit code.");
+    }
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+    Parrot_str_free_cstring(env);
+    mem_sys_free(cmd);
+
+    /* Return exit code left shifted by 8 for POSIX emulation. */
+    return status << 8;
+}
+#else
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
+static char ** pack_env_hash(Parrot_Interp interp, PMC* hash_pmc) {
+    Hash *hash = (Hash *)VTABLE_get_pointer(interp, hash_pmc);
+    STRING *equal = Parrot_str_new_constant(interp, "=");
+    STRING *key, *value, *env_var;
+    INTVAL hash_size = Parrot_hash_size(interp, hash);
+    char** packed = (char **)mem_sys_allocate_zeroed(sizeof(char*) * (hash_size+1));
+    INTVAL i = 0;
+
+    
+    /* Parrot_hash_value_to_string is not exported*/
+    parrot_hash_iterate(hash,
+        key = (STRING *)_bucket->key;
+        value = VTABLE_get_string_keyed_str(interp, hash_pmc,key);
+        env_var = Parrot_str_concat(interp, key, Parrot_str_concat(interp,equal,value));
+        packed[i++] = Parrot_str_to_cstring(interp, env_var);
+    );
+    packed[hash_size] = NULL;
+    return packed;
+}
+
+static void free_packed(char **env) {
+    INTVAL i = 0;
+    while (env[i]) {
+        Parrot_str_free_cstring(env[i]);
+        i++;
+    }
+    mem_sys_free(env);
+}
+static INTVAL Run_OS_Command(PARROT_INTERP, PMC *command, PMC *env_hash)
+{
+    pid_t child;
+    child = fork();
+    /* Did we fail? */
+    if (-1 == child)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_NOSPAWN,
+            "Can't spawn child process");
+
+    /* Are we the parent or child? */
+    if (child) {
+        /* parent */
+        int   status;
+        waitpid(child, &status, 0);
+        return status;
+    }
+    else {
+        /* child */
+        char **saved = environ;
+        char   **cmd = pack_arg_array(interp, command);
+        char   **env = pack_env_hash(interp, env_hash);
+        char   *prog = cmd[0];
+        int status;
+        environ = env;
+        status  = execvp(prog, cmd); 
+        /* if we get here, something's horribly wrong, but free anyway... */
+        free_packed(env);
+        free_packed(cmd);
+        environ = saved;
+
+        if (status)
+            PARROT_FORCE_EXIT(status);
+        
+        _exit(0);
+    }
+
+    /* make gcc happy */
+    return 1;
+}
+#endif
+
+/*
+    printf("key: %s\n", Parrot_str_to_cstring(interp,key));
+    printf("value: %s\n", Parrot_str_to_cstring(interp,value));
+    printf("env_var: %s\n", Parrot_str_to_cstring(interp,env_var));
+*/
+
+
+END_OPS_PREAMBLE
+
+/*
+
+=item nqp_dynop_setup()
+
+Does various setup tasks for the benefit of the other dynops.
+
+=cut
+
+*/
+inline op nqp_dynop_setup() :base_core {
+    if (!initialized) {
+        PMC *obj_sc_barrier, *st_sc_barrier, *global_context;
+
+        /* Look up and cache some type IDs. */
+        stable_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "STable", 0));
+        smo_id    = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
+        qrpa_id   = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "QRPA", 0));
+        ohash_id  = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "OwnedHash", 0));
+
+        /* Initialize the object model. */
+        SixModelObject_initialize(interp, &KnowHOW, &KnowHOWAttribute);
+        
+        /* Initialize the container system. */
+        SixModelObject_containers_setup(interp);
+        
+        /* Initialize compiling SCs list. */
+        compiling_scs = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
+        Parrot_pmc_gc_register(interp, compiling_scs);
+        
+        /* Set up write barrier functions. */
+        /* XXX Really want a better, cheaper place to put them... */
+        obj_sc_barrier = Parrot_pmc_new(interp, enum_class_Pointer);
+        VTABLE_set_pointer(interp, obj_sc_barrier, SC_write_barrier_obj);
+        VTABLE_set_pmc_keyed_str(interp, interp->root_namespace,
+            Parrot_str_new_constant(interp, "_OBJ_SC_BARRIER"), obj_sc_barrier);
+        st_sc_barrier = Parrot_pmc_new(interp, enum_class_Pointer);
+        VTABLE_set_pointer(interp, st_sc_barrier, SC_write_barrier_st);
+        VTABLE_set_pmc_keyed_str(interp, interp->root_namespace,
+            Parrot_str_new_constant(interp, "_ST_SC_BARRIER"), st_sc_barrier);
+        
+        /* Create and anchor empty hash. */
+        empty_hash = Parrot_pmc_new(interp, enum_class_Hash);
+        Parrot_pmc_gc_register(interp, empty_hash);
+        
+        /* Save the global context to the Parrot root namespace and store all the
+         * things we just created in it. */
+        global_context = Parrot_pmc_new(interp, enum_class_Hash);
+        VTABLE_set_pmc_keyed_str(interp, interp->root_namespace,
+            Parrot_str_new_constant(interp, "_GLOBAL_CONTEXT"), global_context);
+        VTABLE_set_pmc_keyed_str(interp, global_context,
+            Parrot_str_new_constant(interp, "hllConfig"), Parrot_pmc_new(interp, enum_class_Hash));
+        
+        /* Mark initialized. */
+        initialized = 1;
+    }
+}
+
+
+/*
+
+=item get_knowhow()
+
+Returns the 6model core meta-object, KnowHOW.
+
+=cut
+
+*/
+inline op get_knowhow(out PMC) :base_core {
+    if (KnowHOW)
+        $1 = KnowHOW;
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "6model not yet initialized; cannot use get_knowhow");
+}
+
+
+/*
+
+=item get_knowhow_attribute()
+
+Returns the 6model core meta-attribute, KnowHOWAttribute.
+
+=cut
+
+*/
+inline op get_knowhow_attribute(out PMC) :base_core {
+    if (KnowHOWAttribute)
+        $1 = KnowHOWAttribute;
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "6model not yet initialized; cannot use get_knowhow_attribute");
+}
+
+
+/*
+
+=item get_how(obj)
+
+Gets the HOW for a 6model Object.
+
+=cut
+
+*/
+inline op get_how(out PMC, invar PMC) :base_core {
+    PMC *var = decontainerize(interp, $2);
+    if (var->vtable->base_type == smo_id)
+        $1 = STABLE(var)->HOW;
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use get_how on a SixModelObject");
+}
+
+/*
+
+=item get_what(obj)
+
+Gets the WHAT for a 6model Object.
+
+=cut
+
+*/
+inline op get_what(out PMC, invar PMC) :base_core {
+    PMC *var = decontainerize(interp, $2);
+    if (var->vtable->base_type == smo_id)
+        $1 = STABLE(var)->WHAT;
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use get_what on a SixModelObject");
+}
+
+/*
+
+=item what_or_null(obj)
+
+Gets the WHAT for a 6model Object, returns PMCNULL otherwise.
+
+=cut
+
+*/
+inline op what_or_null(out PMC, invar PMC) :base_core {
+    PMC *var = decontainerize(interp, $2);
+    if (var->vtable->base_type == smo_id)
+        $1 = STABLE(var)->WHAT;
+    else
+        $1 = PMCNULL;
+}
+
+
+/*
+
+=item get_who(obj)
+
+Gets the WHO for a 6model Object.
+
+=cut
+
+*/
+inline op get_who(out PMC, invar PMC) :base_core {
+    PMC *var = decontainerize(interp, $2);
+    if (var->vtable->base_type == smo_id)
+        $1 = STABLE(var)->WHO;
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use get_who on a SixModelObject");
+}
+
+/*
+
+=item set_who(obj)
+
+Sets the WHO for a 6model Object.
+
+=cut
+
+*/
+inline op set_who(invar PMC, invar PMC) :base_core {
+    PMC *var = decontainerize(interp, $1);
+    if (var->vtable->base_type == smo_id) {
+        STABLE(var)->WHO = $2;
+        PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC(var));
+        ST_SC_WRITE_BARRIER(STABLE(var));
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use set_who on a SixModelObject");
+}
+
+/*
+
+=item repr_type_object_for(how, repr_name)
+
+Creates a type object associated with the given HOW and of the given
+representation.
+
+=cut
+
+*/
+inline op repr_type_object_for(out PMC, invar PMC, in STR) :base_core {
+    REPROps *REPR = REPR_get_by_name(interp, $3);
+    $1 = REPR->type_object_for(interp, decontainerize(interp, $2));
+}
+
+/*
+
+=item repr_compose(type_obj, repr_info)
+
+Triggers representation composition type for the specified type, passing the
+specified information for it to compose by.
+
+=cut
+
+*/
+inline op repr_compose(invar PMC, invar PMC) :base_core {
+    REPR($1)->compose(interp, STABLE($1), $2);
+}
+
+/*
+
+=item repr_instance_of()
+
+Instantiates a new object based on the given WHAT.
+
+=cut
+
+*/
+inline op repr_instance_of(out PMC, invar PMC) :base_core {
+    if ($2->vtable->base_type == smo_id) {
+        $1 = REPR($2)->allocate(interp, STABLE($2));
+        REPR($1)->initialize(interp, STABLE($2), OBJECT_BODY($1));
+        PARROT_GC_WRITE_BARRIER(interp, $1);
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_instance_of on a SixModelObject");
+    }
+}
+
+/*
+
+=item repr_clone()
+
+Clones an object. If it's a 6model object, uses repr_clone. If not, falls back to
+Parrot's clone vtable.
+
+=cut
+
+*/
+inline op repr_clone(out PMC, invar PMC) :base_core {
+    PMC *var = decontainerize(interp, $2);
+    if (var->vtable->base_type == smo_id) {
+        $1 = REPR(var)->allocate(interp, STABLE(var));
+        if (IS_CONCRETE(var))
+            REPR(var)->copy_to(interp, STABLE(var), OBJECT_BODY(var), OBJECT_BODY($1));
+        else
+            MARK_AS_TYPE_OBJECT($1);
+        PARROT_GC_WRITE_BARRIER(interp, $1);
+    }
+    else {
+        $1 = VTABLE_clone(interp, var);
+    }
+}
+
+
+/*
+
+=item repr_defined()
+
+Checks the REPRs idea of definedness.
+
+=cut
+
+*/
+inline op repr_defined(out INT, invar PMC) :base_core {
+    PMC *var = decontainerize(interp, $2);
+    if (var->vtable->base_type == smo_id)
+        $1 = IS_CONCRETE(var);
+    else
+        $1 = PMC_IS_NULL(var) ? 0 : 1; /* Because other PMCs have no concept of type-object. */
+}
+
+/*
+
+=item repr_get_attr_obj()
+
+Gets the specified object attribute. Note that the attribute must be stored as
+an object - the repr is not obligated to do boxing/unboxing for you.
+
+=cut
+
+*/
+inline op repr_get_attr_obj(out PMC, invar PMC, invar PMC, in STR) :base_core {
+    PMC *ch = decontainerize(interp, $3);
+    if ($2->vtable->base_type == smo_id) {
+        if (IS_CONCRETE($2))
+            $1 = REPR($2)->attr_funcs->get_attribute_boxed(interp, STABLE($2), OBJECT_BODY($2), ch, $4, NO_HINT);
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot look up attributes in a type object");
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_get_attr_obj on a SixModelObject");
+    }
+    PARROT_GC_WRITE_BARRIER(interp, $2);
+}
+
+/*
+
+=item repr_get_attr_int()
+
+Gets the specified int attribute. Note that the attribute must be stored as
+a native int - the repr is not obligated to do boxing/unboxing for you.
+
+=cut
+
+*/
+inline op repr_get_attr_int(out INT, invar PMC, invar PMC, in STR) :base_core {
+    PMC *obj = decontainerize(interp, $2);
+    PMC *ch = decontainerize(interp, $3);
+    STRING *name = $4;
+    if (obj->vtable->base_type == smo_id) {
+        if (IS_CONCRETE(obj)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_INT;
+            REPR(obj)->attr_funcs->get_attribute_native(interp, STABLE(obj), OBJECT_BODY(obj), ch, name, NO_HINT, &value);
+            $1 = value.value.intval;
+        }
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot look up attributes in a type object");
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_get_attr_int on a SixModelObject");
+}
+
+/*
+
+=item repr_get_attr_num()
+
+Gets the specified num attribute. Note that the attribute must be stored as
+a native num - the repr is not obligated to do boxing/unboxing for you.
+
+=cut
+
+*/
+inline op repr_get_attr_num(out NUM, invar PMC, invar PMC, in STR) :base_core {
+    PMC *obj = decontainerize(interp, $2);
+    PMC *ch = decontainerize(interp, $3);
+    STRING *name = $4;
+    if (obj->vtable->base_type == smo_id) {
+        if (IS_CONCRETE(obj)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_FLOAT;
+            REPR(obj)->attr_funcs->get_attribute_native(interp, STABLE(obj), OBJECT_BODY(obj), ch, name, NO_HINT, &value);
+            $1 = value.value.floatval;
+        }
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot look up attributes in a type object");
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_get_attr_num on a SixModelObject");
+    }
+}
+
+/*
+
+=item repr_get_attr_str()
+
+Gets the specified str attribute. Note that the attribute must be stored as
+a native str - the repr is not obligated to do boxing/unboxing for you.
+
+=cut
+
+*/
+inline op repr_get_attr_str(out STR, invar PMC, invar PMC, in STR) :base_core {
+    PMC *ch = decontainerize(interp, $3);
+    if ($2->vtable->base_type == smo_id) {
+        if (IS_CONCRETE($2)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_STRING;
+            REPR($2)->attr_funcs->get_attribute_native(interp, STABLE($2), OBJECT_BODY($2), ch, $4, NO_HINT, &value);
+            $1 = value.value.stringval;
+        }
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot look up attributes in a type object");
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_get_attr_str on a SixModelObject");
+    }
+    PARROT_GC_WRITE_BARRIER(interp, $2);
+}
+
+/*
+
+=item repr_bind_attr_obj()
+
+Binds the specified object attribute. Note that the attribute must be stored as
+an object - the repr is not obligated to do boxing/unboxing for you.
+
+=cut
+
+*/
+inline op repr_bind_attr_obj(invar PMC, invar PMC, in STR, invar PMC) :base_core {
+    PMC *ch = decontainerize(interp, $2);
+    if ($1->vtable->base_type == smo_id) {
+        if (IS_CONCRETE($1))
+            REPR($1)->attr_funcs->bind_attribute_boxed(interp, STABLE($1), OBJECT_BODY($1), ch, $3, NO_HINT, $4);
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot bind to attributes in a type object");
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_bind_attr_obj on a SixModelObject");
+    }
+    PARROT_GC_WRITE_BARRIER(interp, $1);
+    OBJ_SC_WRITE_BARRIER($1);
+}
+
+/*
+
+=item repr_bind_attr_int()
+
+Binds the specified int attribute. Note that the attribute must be stored as
+a native int - the repr is not obligated to do boxing/unboxing for you.
+
+=cut
+
+*/
+inline op repr_bind_attr_int(invar PMC, invar PMC, in STR, in INT) :base_core {
+    PMC *ch = decontainerize(interp, $2);
+    if ($1->vtable->base_type == smo_id) {
+        if (IS_CONCRETE($1)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_INT;
+            value.value.intval = $4;
+            REPR($1)->attr_funcs->bind_attribute_native(interp, STABLE($1), OBJECT_BODY($1), ch, $3, NO_HINT, &value);
+        }
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot bind to attributes in a type object");
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_bind_attr_int on a SixModelObject");
+    }
+    OBJ_SC_WRITE_BARRIER($1);
+}
+
+/*
+
+=item repr_bind_attr_num()
+
+Binds the specified num attribute. Note that the attribute must be stored as
+a native num - the repr is not obligated to do boxing/unboxing for you.
+
+=cut
+
+*/
+inline op repr_bind_attr_num(invar PMC, invar PMC, in STR, in NUM) :base_core {
+    PMC *ch = decontainerize(interp, $2);
+    if ($1->vtable->base_type == smo_id) {
+        if (IS_CONCRETE($1)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_FLOAT;
+            value.value.floatval = $4;
+            REPR($1)->attr_funcs->bind_attribute_native(interp, STABLE($1), OBJECT_BODY($1), ch, $3, NO_HINT, &value);
+        }
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot bind to attributes in a type object");
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_bind_attr_num on a SixModelObject");
+    }
+    OBJ_SC_WRITE_BARRIER($1);
+}
+
+/*
+
+=item repr_bind_attr_str()
+
+Binds the specified str attribute. Note that the attribute must be stored as
+a native str - the repr is not obligated to do boxing/unboxing for you.
+
+=cut
+
+*/
+inline op repr_bind_attr_str(invar PMC, invar PMC, in STR, in STR) :base_core {
+    PMC *ch = decontainerize(interp, $2);
+    if ($1->vtable->base_type == smo_id) {
+        if (IS_CONCRETE($1)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_STRING;
+            value.value.stringval = $4;
+            REPR($1)->attr_funcs->bind_attribute_native(interp, STABLE($1), OBJECT_BODY($1), ch, $3, NO_HINT, &value);
+        }
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot bind to attributes in a type object");
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_bind_attr_str on a SixModelObject");
+    PARROT_GC_WRITE_BARRIER(interp, $1);
+    OBJ_SC_WRITE_BARRIER($1);
+}
+
+/*
+
+=item repr_get_attr_obj()
+
+Gets the specified object attribute. Note that the attribute must be stored as
+an object - the repr is not obligated to do boxing/unboxing for you.
+
+=cut
+
+*/
+inline op repr_get_attr_obj(out PMC, invar PMC, invar PMC, in STR, in INT) :base_core {
+    PMC *ch = decontainerize(interp, $3);
+    if ($2->vtable->base_type == smo_id) {
+        if (IS_CONCRETE($2))
+            $1 = REPR($2)->attr_funcs->get_attribute_boxed(interp, STABLE($2), OBJECT_BODY($2), ch, $4, $5);
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot look up attributes in a type object");
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_get_attr_obj on a SixModelObject");
+    }
+    PARROT_GC_WRITE_BARRIER(interp, $2);
+}
+
+/*
+
+=item repr_get_attr_int()
+
+Gets the specified int attribute. Note that the attribute must be stored as
+a native int - the repr is not obligated to do boxing/unboxing for you.
+
+=cut
+
+*/
+inline op repr_get_attr_int(out INT, invar PMC, invar PMC, in STR, in INT) :base_core {
+    PMC *obj = decontainerize(interp, $2);
+    PMC *ch = decontainerize(interp, $3);
+    STRING *name = $4;
+    if (obj->vtable->base_type == smo_id) {
+        if (IS_CONCRETE(obj)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_INT;
+            REPR(obj)->attr_funcs->get_attribute_native(interp, STABLE(obj), OBJECT_BODY(obj), ch, name, $5, &value);
+            $1 = value.value.intval;
+        }
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot look up attributes in a type object");
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_get_attr_int on a SixModelObject");
+    }
+}
+
+/*
+
+=item repr_get_attr_num()
+
+Gets the specified num attribute. Note that the attribute must be stored as
+a native num - the repr is not obligated to do boxing/unboxing for you.
+
+=cut
+
+*/
+inline op repr_get_attr_num(out NUM, invar PMC, invar PMC, in STR, in INT) :base_core {
+    PMC *obj = decontainerize(interp, $2);
+    PMC *ch = decontainerize(interp, $3);
+    STRING *name = $4;
+    if (obj->vtable->base_type == smo_id) {
+        if (IS_CONCRETE(obj)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_FLOAT;
+            REPR(obj)->attr_funcs->get_attribute_native(interp, STABLE(obj), OBJECT_BODY(obj), ch, name, $5, &value);
+            $1 = value.value.floatval;
+        }
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot look up attributes in a type object");
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_get_attr_num on a SixModelObject");
+    }
+}
+
+/*
+
+=item repr_get_attr_str()
+
+Gets the specified str attribute. Note that the attribute must be stored as
+a native str - the repr is not obligated to do boxing/unboxing for you.
+
+=cut
+
+*/
+inline op repr_get_attr_str(out STR, invar PMC, invar PMC, in STR, in INT) :base_core {
+    PMC *ch = decontainerize(interp, $3);
+    if ($2->vtable->base_type == smo_id) {
+        if (IS_CONCRETE($2)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_STRING;
+            REPR($2)->attr_funcs->get_attribute_native(interp, STABLE($2), OBJECT_BODY($2), ch, $4, $5, &value);
+            $1 = value.value.stringval;
+        }
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot look up attributes in a type object");
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_get_attr_str on a SixModelObject");
+    }
+    PARROT_GC_WRITE_BARRIER(interp, $2);
+}
+
+/*
+
+=item repr_bind_attr_obj()
+
+Binds the specified object attribute. Note that the attribute must be stored as
+an object - the repr is not obligated to do boxing/unboxing for you.
+
+=cut
+
+*/
+inline op repr_bind_attr_obj(invar PMC, invar PMC, in STR, in INT, invar PMC) :base_core {
+    PMC *ch = decontainerize(interp, $2);
+    if ($1->vtable->base_type == smo_id) {
+        if (IS_CONCRETE($1))
+            REPR($1)->attr_funcs->bind_attribute_boxed(interp, STABLE($1), OBJECT_BODY($1), ch, $3, $4, $5);
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot bind to attributes in a type object");
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_bind_attr_obj on a SixModelObject");
+    }
+    PARROT_GC_WRITE_BARRIER(interp, $1);
+    OBJ_SC_WRITE_BARRIER($1);
+}
+
+/*
+
+=item repr_bind_attr_int()
+
+Binds the specified int attribute. Note that the attribute must be stored as
+a native int - the repr is not obligated to do boxing/unboxing for you.
+
+=cut
+
+*/
+inline op repr_bind_attr_int(invar PMC, invar PMC, in STR, in INT, in INT) :base_core {
+    PMC *ch = decontainerize(interp, $2);
+    if ($1->vtable->base_type == smo_id) {
+        if (IS_CONCRETE($1)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_INT;
+            value.value.intval = $5;
+            REPR($1)->attr_funcs->bind_attribute_native(interp, STABLE($1), OBJECT_BODY($1), ch, $3, $4, &value);
+        }
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot bind to attributes in a type object");
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_bind_attr_int on a SixModelObject");
+    }
+    OBJ_SC_WRITE_BARRIER($1);
+}
+
+/*
+
+=item repr_bind_attr_num()
+
+Binds the specified num attribute. Note that the attribute must be stored as
+a native num - the repr is not obligated to do boxing/unboxing for you.
+
+=cut
+
+*/
+inline op repr_bind_attr_num(invar PMC, invar PMC, in STR, in INT, in NUM) :base_core {
+    PMC *ch = decontainerize(interp, $2);
+    if ($1->vtable->base_type == smo_id) {
+        if (IS_CONCRETE($1)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_FLOAT;
+            value.value.floatval = $5;
+            REPR($1)->attr_funcs->bind_attribute_native(interp, STABLE($1), OBJECT_BODY($1), ch, $3, $4, &value);
+        }
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot bind to attributes in a type object");
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_bind_attr_num on a SixModelObject");
+    }
+    OBJ_SC_WRITE_BARRIER($1);
+}
+
+/*
+
+=item repr_bind_attr_str()
+
+Binds the specified str attribute. Note that the attribute must be stored as
+a native str - the repr is not obligated to do boxing/unboxing for you.
+
+=cut
+
+*/
+inline op repr_bind_attr_str(invar PMC, invar PMC, in STR, in INT, in STR) :base_core {
+    PMC *ch = decontainerize(interp, $2);
+    if ($1->vtable->base_type == smo_id) {
+        if (IS_CONCRETE($1)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_STRING;
+            value.value.stringval = $5;
+            REPR($1)->attr_funcs->bind_attribute_native(interp, STABLE($1), OBJECT_BODY($1), ch, $3, $4, &value);
+        }
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot bind to attributes in a type object");
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_bind_attr_str on a SixModelObject");
+    }
+    PARROT_GC_WRITE_BARRIER(interp, $1);
+    OBJ_SC_WRITE_BARRIER($1);
+}
+
+/*
+
+=item repr_is_attr_initialized()
+
+Checks if an attribute has been initialized. Puts a non-zero value
+in $1 if so.
+
+=cut
+
+*/
+inline op repr_is_attr_initialized(out INT, invar PMC, invar PMC, in STR) :base_core {
+    PMC *ch = decontainerize(interp, $3);
+    if ($2->vtable->base_type == smo_id) {
+        if (IS_CONCRETE($2))
+            $1 = REPR($2)->attr_funcs->is_attribute_initialized(interp, STABLE($2), OBJECT_BODY($2), ch, $4, NO_HINT);
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot check initializedness of attributes in a type object");
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_is_attr_initialized on a SixModelObject");
+    }
+}
+
+
+/*
+
+=item repr_change_type()
+
+Tries to change the type of the object in $1 to the type $2. This
+delegates to the REPR to do the work, so it is ultimately up to the
+REPR to decide what changes it will or won't allow.
+
+=cut
+
+*/
+inline op repr_change_type(invar PMC, invar PMC) :base_core {
+    PMC *obj      = decontainerize(interp, $1);
+    PMC *new_type = decontainerize(interp, $2);
+    if (obj->vtable->base_type == smo_id && new_type->vtable->base_type == smo_id) {
+        /* Don't rebless without need. */
+        if (STABLE(obj)->WHAT != new_type) {
+            if (REPR(obj)->change_type)
+                REPR(obj)->change_type(interp, obj, new_type);
+            else
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "Representation does not implement change_type");
+        }
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_change_type on SixModelObjects");
+    }
+    OBJ_SC_WRITE_BARRIER($1);
+}
+
+
+/*
+
+=item repr_name
+
+Takes an object and returns a string containing the name of its representation.
+
+=cut
+
+*/
+inline op repr_name(out STR, invar PMC) :base_core {
+    PMC *val = decontainerize(interp, $2);
+    if (val->vtable->base_type == smo_id) {
+        $1 = REPR(val)->name;
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_name with a SixModelObject");
+    }
+}
+
+
+/*
+
+=item repr_at_pos_obj()
+
+Gets an element from the specified position, as an object.
+
+=cut
+
+*/
+inline op repr_at_pos_obj(out PMC, invar PMC, in INT) :base_core {
+    PMC *obj = decontainerize(interp, $2);
+    if (obj->vtable->base_type == smo_id) {
+        if (IS_CONCRETE(obj))
+            $1 = REPR(obj)->pos_funcs->at_pos_boxed(interp, STABLE(obj), OBJECT_BODY(obj), $3);
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot do at_pos on a type object");
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_at_pos_obj on a SixModelObject");
+
+    PARROT_GC_WRITE_BARRIER(interp, obj);
+}
+
+
+/*
+
+=item repr_at_pos_int()
+
+Gets an element from the specified position, as an integer.
+
+=cut
+
+*/
+inline op repr_at_pos_int(out INT, invar PMC, in INT) :base_core {
+    PMC *obj = decontainerize(interp, $2);
+    if (obj->vtable->base_type == smo_id) {
+        STable *elem_st = REPR(obj)->pos_funcs->get_elem_stable(interp, STABLE(obj));
+        if (IS_CONCRETE(obj)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_INT;
+            REPR(obj)->pos_funcs->at_pos_native(interp, STABLE(obj), OBJECT_BODY(obj), $3, &value);
+            $1 = value.value.intval;
+        }
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot do at_pos on a type object");
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_at_pos_int on a SixModelObject");
+}
+
+
+/*
+
+=item repr_at_pos_num()
+
+Gets an element from the specified position, as an floating point number.
+
+=cut
+
+*/
+inline op repr_at_pos_num(out NUM, invar PMC, in INT) :base_core {
+    PMC *obj = decontainerize(interp, $2);
+    if (obj->vtable->base_type == smo_id) {
+        STable *elem_st = REPR(obj)->pos_funcs->get_elem_stable(interp, STABLE(obj));
+        if (IS_CONCRETE(obj)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_FLOAT;
+            REPR(obj)->pos_funcs->at_pos_native(interp, STABLE(obj), OBJECT_BODY(obj), $3, &value);
+            $1 = value.value.floatval;
+        }
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot do at_pos on a type object");
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_at_pos_num on a SixModelObject");
+}
+
+
+/*
+
+=item repr_bind_pos_obj()
+
+Sets the element at the specified position to an object.
+
+=cut
+
+*/
+inline op repr_bind_pos_obj(invar PMC, in INT, invar PMC) :base_core {
+    PMC *obj = decontainerize(interp, $1);
+    if (obj->vtable->base_type == smo_id) {
+        if (IS_CONCRETE(obj))
+            REPR(obj)->pos_funcs->bind_pos_boxed(interp, STABLE(obj), OBJECT_BODY(obj), $2, $3);
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot do bind_pos on a type object");
+        PARROT_GC_WRITE_BARRIER(interp, obj);
+        OBJ_SC_WRITE_BARRIER($1);
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_bind_pos_obj on a SixModelObject");
+}
+
+
+/*
+
+=item repr_bind_pos_int()
+
+Sets the element at the specified position to an integer.
+
+=cut
+
+*/
+inline op repr_bind_pos_int(invar PMC, in INT, in INT) :base_core {
+    PMC *obj = decontainerize(interp, $1);
+    if (obj->vtable->base_type == smo_id) {
+        if (IS_CONCRETE(obj)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_INT;
+            value.value.intval = $3;
+            REPR(obj)->pos_funcs->bind_pos_native(interp, STABLE(obj), OBJECT_BODY(obj), $2, &value);
+        }
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot do bind_pos on a type object");
+        OBJ_SC_WRITE_BARRIER($1);
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_bind_pos_int on a SixModelObject");
+}
+
+
+/*
+
+=item repr_bind_pos_num()
+
+Sets the element at the specified position to a floating point number.
+
+=cut
+
+*/
+inline op repr_bind_pos_num(invar PMC, in INT, in NUM) :base_core {
+    PMC *obj = decontainerize(interp, $1);
+    if (obj->vtable->base_type == smo_id) {
+        if (IS_CONCRETE(obj)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_FLOAT;
+            value.value.floatval = $3;
+            REPR(obj)->pos_funcs->bind_pos_native(interp, STABLE(obj), OBJECT_BODY(obj), $2, &value);
+        }
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot do bind_pos on a type object");
+        OBJ_SC_WRITE_BARRIER($1);
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_bind_pos_num on a SixModelObject");
+}
+
+/*
+
+=item repr_elems()
+
+Returns the number of elements, as determined by the REPR (not the VTABLE)
+
+=cut
+
+*/
+
+inline op repr_elems(out INT, invar PMC) :base_core {
+    PMC *obj = decontainerize(interp, $2);
+    if (obj->vtable->base_type == smo_id) {
+        if (IS_CONCRETE(obj))
+            $1 = REPR(obj)->elems(interp, STABLE(obj), OBJECT_BODY(obj));
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot do repr_elems on a type object");
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_elems on a SixModelObject");
+}
+
+
+/*
+
+=item type_check(obj, wanted_type)
+
+Checks if the given object's type accepts the checked type, using the
+type check cache if one was published. Note, assumes that $3 is a type
+object. If you're not sure that's what you have, call C<get_what> to
+make sure.
+
+=cut
+
+*/
+inline op type_check(out INT, invar PMC, invar PMC) :base_core {
+    PMC *val = decontainerize(interp, $2);
+    PMC *type = decontainerize(interp, $3);
+    if (val->vtable->base_type == smo_id && type->vtable->base_type == smo_id)
+        $1 = STABLE(val)->type_check(interp, val, type);
+    else
+        $1 = 0;
+}
+
+
+/*
+
+=item publish_type_check_cache(WHAT, type_list)
+
+Publishes a type check cache, to be stored in the S-Table.
+
+=cut
+
+*/
+inline op publish_type_check_cache(invar PMC, invar PMC) :base_core {
+    PMC *target = decontainerize(interp, $1);
+    if (target->vtable->base_type == smo_id) {
+        STable *target_st = STABLE(target);
+        INTVAL items      = VTABLE_elements(interp, $2);
+        if (items > 0) {
+            PMC ** cache = (PMC **) mem_sys_allocate(sizeof(PMC *) * items);
+            INTVAL i;
+            for (i = 0; i < items; i++)
+                cache[i] = decontainerize(interp, VTABLE_get_pmc_keyed_int(interp, $2, i));
+            target_st->type_check_cache = cache;
+            target_st->type_check_cache_length = items;
+        }
+        else {
+            target_st->type_check_cache = NULL;
+            target_st->type_check_cache_length = 0;
+        }
+        PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC(target));
+        ST_SC_WRITE_BARRIER(target_st);
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "First argument to publish_type_check_cache must be a SixModelObject");
+    }
+}
+
+
+/*
+
+=item publish_method_cache(WHAT, method_cache_hash)
+
+Publishes a method dispatch cache - essentially, a set of name to code object
+mappings.
+
+=cut
+
+*/
+inline op publish_method_cache(invar PMC, invar PMC) :base_core {
+    PMC *target = decontainerize(interp, $1);
+    if (target->vtable->base_type == smo_id) {
+        /* We copy the cache items to a Parrot hash to avoid making
+         * calls into the language's own hash implementation every
+         * time, which may be far more costly. */
+        STable *target_st = STABLE(target);
+        PMC    *cache     = Parrot_pmc_new(interp, enum_class_Hash);
+        PMC    *iter      = VTABLE_get_iter(interp, $2);
+        while (VTABLE_get_bool(interp, iter)) {
+            STRING *name = VTABLE_shift_string(interp, iter);
+            PMC    *meth = VTABLE_get_pmc_keyed_str(interp, $2, name);
+            VTABLE_set_pmc_keyed_str(interp, cache, name, meth);
+        }
+        target_st->method_cache = cache;
+        PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC(target));
+        ST_SC_WRITE_BARRIER(target_st);
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "First argument to publish_method_cache must be a SixModelObject");
+    }
+}
+
+
+/*
+
+=item set_method_cache_authoritativeness()
+
+If $2 is non-zero, indicates that the method cache can be considered
+authoritative. Otherwise, it is marked as not being.
+
+=cut
+
+*/
+inline op set_method_cache_authoritativeness(invar PMC, in INT) :base_core {
+    PMC *target = decontainerize(interp, $1);
+    if (target->vtable->base_type == smo_id) {
+        INTVAL new_flags = STABLE(target)->mode_flags & (~METHOD_CACHE_AUTHORITATIVE);
+        if ($2)
+            new_flags = new_flags | METHOD_CACHE_AUTHORITATIVE;
+        STABLE(target)->mode_flags = new_flags;
+        ST_SC_WRITE_BARRIER(STABLE(target));
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use set_method_cache_authoritativeness with a SixModelObject");
+}
+
+
+/*
+
+=item repr_unbox_str()
+
+Tries to unbox a native string using the REPR API.
+
+=cut
+
+*/
+inline op repr_unbox_str(out STR, invar PMC) :base_core {
+    PMC *var = decontainerize(interp, $2);
+    if (var->vtable->base_type == smo_id) {
+        if (IS_CONCRETE(var))
+            $1 = REPR(var)->box_funcs->get_str(interp, STABLE(var), OBJECT_BODY(var));
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot unbox a type object as a native str");
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_unbox_str on a SixModelObject");
+    }
+}
+
+/*
+
+=item repr_unbox_int()
+
+Tries to unbox a native integer using the REPR API.
+
+=cut
+
+*/
+inline op repr_unbox_int(out INT, invar PMC) :base_core {
+    PMC *var = decontainerize(interp, $2);
+    if (var->vtable->base_type == smo_id) {
+        if (IS_CONCRETE(var))
+            $1 = REPR(var)->box_funcs->get_int(interp, STABLE(var), OBJECT_BODY(var));
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot unbox a type object as a native int");
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_unbox_int on a SixModelObject");
+    }
+}
+
+/*
+
+=item repr_unbox_num()
+
+Tries to unbox a native floating pint number using the REPR API.
+
+=cut
+
+*/
+inline op repr_unbox_num(out NUM, invar PMC) :base_core {
+    PMC *var = decontainerize(interp, $2);
+    if (var->vtable->base_type == smo_id) {
+        if (IS_CONCRETE(var))
+            $1 = REPR(var)->box_funcs->get_num(interp, STABLE(var), OBJECT_BODY(var));
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot unbox a type object as a native num");
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_unbox_num on a SixModelObject");
+    }
+}
+
+/*
+
+=item repr_box_str()
+
+Box a native string to an instance of the specified type.
+
+=cut
+
+*/
+inline op repr_box_str(out PMC, in STR, invar PMC) :base_core {
+    PMC *type = decontainerize(interp, $3);
+    if (type->vtable->base_type == smo_id) {
+        $1 = REPR(type)->allocate(interp, STABLE(type));
+        REPR($1)->initialize(interp, STABLE(type), OBJECT_BODY($1));
+        REPR($1)->box_funcs->set_str(interp, STABLE($1), OBJECT_BODY($1), $2);
+        PARROT_GC_WRITE_BARRIER(interp, $1);
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_box_str with a SixModelObject as the box target");
+}
+
+/*
+
+=item repr_box_int()
+
+Box a native int to an instance of the specified type.
+
+=cut
+
+*/
+inline op repr_box_int(out PMC, in INT, invar PMC) :base_core {
+    PMC *type = decontainerize(interp, $3);
+    if (type->vtable->base_type == smo_id) {
+        $1 = REPR(type)->allocate(interp, STABLE(type));
+        REPR($1)->initialize(interp, STABLE(type), OBJECT_BODY($1));
+        REPR($1)->box_funcs->set_int(interp, STABLE($1), OBJECT_BODY($1), $2);
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_box_int with a SixModelObject as the box target");
+}
+
+/*
+
+=item repr_box_num()
+
+Box a native floating point number to an instance of the specified type.
+
+=cut
+
+*/
+inline op repr_box_num(out PMC, in NUM, invar PMC) :base_core {
+    PMC *type = decontainerize(interp, $3);
+    if (type->vtable->base_type == smo_id) {
+        $1 = REPR(type)->allocate(interp, STABLE(type));
+        REPR($1)->initialize(interp, STABLE(type), OBJECT_BODY($1));
+        REPR($1)->box_funcs->set_num(interp, STABLE($1), OBJECT_BODY($1), $2);
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_box_num with a SixModelObject as the box target");
+}
+
+/*
+
+=item floordiv()
+
+Do an integer division and make sure the result is rounded towards -Inf
+
+=cut
+
+*/
+inline op floordiv(out INT, in INT, in INT) {
+    if (($2 < 0) ^ ($3 < 0)) {
+        if ($2 % $3 != 0) {
+            $1 = $2 / $3 - 1;
+        } else {
+            $1 = $2 / $3;
+        }
+    } else {
+        $1 = $2 / $3;
+    }
+}
+
+/*
+
+=item invoke_with_capture()
+
+Invokes the specified target with the specified capture.
+
+=cut
+
+*/
+inline op invoke_with_capture(out PMC, in PMC, in PMC) :base_core {
+    PMC *arg_copy = VTABLE_clone(interp, $3);
+    PMC *result;
+    /*PMC *prev_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));*/
+    Parrot_pcc_invoke_from_sig_object(interp, $2, arg_copy);
+    result = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    /*Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), prev_ctx);*/
+    $1 = VTABLE_get_pmc_keyed_int(interp, result, 0);
+}
+
+
+/*
+
+=item deconstruct_capture()
+
+Puts something that will flatten to the position part of the capture in $1
+into $2, and soemthing that will flatten to the named part into $3.
+
+=cut
+
+*/
+inline op deconstruct_capture(invar PMC, out PMC, out PMC) :base_core {
+    PMC *capture = $1;
+    if (capture->vtable->base_type == enum_class_CallContext) {
+        Hash *nameds;
+        INTVAL has_nameds;
+        
+        /* The call context itself will do for the positionals. */
+        $2 = capture;
+        
+        /* See if there are any nameds */
+        GETATTR_CallContext_hash(interp, capture, nameds);
+        has_nameds = nameds && Parrot_hash_size(interp, nameds) ? 1 : 0;
+        
+        /* If there's a named part, create a hash with the values. */
+        if (has_nameds) {
+            PMC *result = Parrot_pmc_new(interp, enum_class_Hash);
+            PMC *named_names = VTABLE_get_attr_str(interp, capture,
+                Parrot_str_new_constant(interp, "named"));
+            INTVAL n = VTABLE_elements(interp, named_names);
+            INTVAL i;
+            for (i = 0; i < n; i++) {
+                STRING *name = VTABLE_get_string_keyed_int(interp, named_names, i);
+                VTABLE_set_pmc_keyed_str(interp, result, name,
+                    VTABLE_get_pmc_keyed_str(interp, capture, name));
+            }
+            $3 = result;
+        }
+        
+        /* Otherwise, use empty hash. */
+        else {
+            $3 = empty_hash;
+        }
+    }
+    else {
+        $2 = $1;
+        $3 = empty_hash;
+    }
+}
+
+
+/*
+
+=item multi_cache_add()
+
+Adds a candidate to the multi-dispatch cache.
+
+=cut
+
+*/
+inline op multi_cache_add(out PMC, in PMC, in PMC, in PMC) :base_core {
+    PMC *cache_ptr = $2;
+    if (cache_ptr->vtable->base_type != enum_class_Pointer) {
+        NQP_md_cache *c = mem_sys_allocate_zeroed(sizeof(NQP_md_cache));
+        cache_ptr = Parrot_pmc_new(interp, enum_class_Pointer);
+        VTABLE_set_pointer(interp, cache_ptr, c);
+    }
+    add_to_cache(interp, (NQP_md_cache *)VTABLE_get_pointer(interp, cache_ptr),
+        $3, VTABLE_elements(interp, $3), $4);
+    $1 = cache_ptr;
+}
+
+
+/*
+
+=item multi_cache_find()
+
+Tries to find a candidate in the multi-dispatch cache. Returns PMCNULL if none found.
+
+=cut
+
+*/
+inline op multi_cache_find(out PMC, in PMC, in PMC) :base_core {
+    PMC *cache_ptr = $2;
+    if (cache_ptr->vtable->base_type == enum_class_Pointer) {
+        PMC *result = find_in_cache(interp, (NQP_md_cache *)VTABLE_get_pointer(interp, cache_ptr),
+            $3, VTABLE_elements(interp, $3));
+        $1 = result ? result : PMCNULL;
+    }
+    else {
+        $1 = PMCNULL;
+    }
+}
+
+
+/*
+
+=item set_sub_code_object()
+
+Associates a high level code object with a Parrot sub. $1 is the sub, $2 is the
+code object.
+
+=cut
+
+*/
+inline op set_sub_code_object(in PMC, invar PMC) :base_core {
+    if ($1->vtable->base_type == enum_class_Sub
+            || $1->vtable->base_type == enum_class_Coroutine) {
+        SETATTR_Sub_multi_signature(interp, $1, $2);
+        PARROT_GC_WRITE_BARRIER(interp, $1);
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use set_sub_code_object if first operand is a Sub.");
+}
+
+
+/*
+
+=item get_sub_code_object()
+
+Gets the high level code associated with the Parrot sub in $2, and places it
+into $1.
+
+=cut
+
+*/
+inline op get_sub_code_object(out PMC, invar PMC) :base_core {
+    if ($2->vtable->base_type == enum_class_Sub) {
+        PMC *obj;
+        GETATTR_Sub_multi_signature(interp, $2, obj);
+        $1 = obj ? obj : PMCNULL;
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use get_sub_code_object if second operand is a Sub.");
+    }
+}
+
+
+/*
+
+=item stable_set_type_check_mode()
+
+Sets the type check mode flags.
+
+=cut
+
+*/
+inline op stable_set_type_check_mode(invar PMC, in INT) :base_core {
+    PMC *target = decontainerize(interp, $1);
+    if (target->vtable->base_type == smo_id)
+        STABLE(target)->mode_flags = $2 |
+            (STABLE(target)->mode_flags & (~TYPE_CHECK_CACHE_FLAG_MASK));
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use stable_set_type_check_mode with a SixModelObject");
+    ST_SC_WRITE_BARRIER(STABLE(target));
+}
+
+
+/*
+
+=item stable_publish_vtable_mapping()
+
+Publishes a Parrot v-table mapping, which will be hung off the s-table.
+It's stored as an array, so lookups will be speedy.
+
+=cut
+
+*/
+inline op stable_publish_vtable_mapping(invar PMC, invar PMC) :base_core {
+    PMC *target = decontainerize(interp, $1);
+    if (target->vtable->base_type == smo_id) {
+        INTVAL i;
+
+        /* Get s-table and iterator over the mapping. */
+        STable *st = STABLE(target);
+        PMC    *it = VTABLE_get_iter(interp, $2);
+
+        /* Toss any exist mapping array; allocate new one. */
+        if (st->parrot_vtable_mapping)
+            mem_sys_free(st->parrot_vtable_mapping);
+        st->parrot_vtable_mapping = mem_allocate_n_zeroed_typed(NUM_VTABLE_FUNCTIONS + PARROT_VTABLE_LOW, PMC *);
+
+        /* Go through the various mapped names and insert them into the
+         * mapping table. */
+        while (VTABLE_get_bool(interp, it)) {
+            STRING *name   = VTABLE_shift_string(interp, it);
+            char   *c_name = Parrot_str_to_cstring(interp, name);
+            PMC    *meth   = VTABLE_get_pmc_keyed_str(interp, $2, name);
+            INTVAL  idx    = -1;
+            for (i = PARROT_VTABLE_LOW; i < NUM_VTABLE_FUNCTIONS + PARROT_VTABLE_LOW; i++) {
+                if (strcmp(Parrot_vtable_slot_names[i], c_name) == 0) {
+                    idx = i;
+                    break;
+                }
+            }
+            if (idx >= 0)
+                st->parrot_vtable_mapping[idx] = meth;
+            else
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "No such Parrot v-table '%Ss'", name);
+        }
+        
+        PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC(target));
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use stable_publish_vtable_mapping with a SixModelObject");
+}
+
+/*
+=item publish_vtable_handler_mapping()
+
+Publishes a Parrot v-table handler mapping, which will be hung off the s-table.
+It's stored as an array, so lookups will be speedy.
+
+=cut
+
+*/
+inline op stable_publish_vtable_handler_mapping(invar PMC, invar PMC) :base_core {
+    PMC *target = decontainerize(interp, $1);
+    if (target->vtable->base_type == smo_id) {
+        INTVAL i;
+
+        /* Get s-table and iterator over the mapping. */
+        STable *st = STABLE(target);
+        PMC    *it = VTABLE_get_iter(interp, $2);
+
+        /* Toss any exist mapping array; allocate new one. */
+        if (st->parrot_vtable_handler_mapping)
+            mem_sys_free(st->parrot_vtable_handler_mapping);
+        st->parrot_vtable_handler_mapping = mem_allocate_n_zeroed_typed(NUM_VTABLE_FUNCTIONS + PARROT_VTABLE_LOW, AttributeIdentifier);
+
+        /* Go through the various mapped names and insert them into the
+         * mapping table. */
+        while (VTABLE_get_bool(interp, it)) {
+            STRING *name   = VTABLE_shift_string(interp, it);
+            char   *c_name = Parrot_str_to_cstring(interp, name);
+            PMC    *slot   = VTABLE_get_pmc_keyed_str(interp, $2, name);
+            INTVAL  idx    = -1;
+            for (i = PARROT_VTABLE_LOW; i < NUM_VTABLE_FUNCTIONS + PARROT_VTABLE_LOW; i++) {
+                if (strcmp(Parrot_vtable_slot_names[i], c_name) == 0) {
+                    idx = i;
+                    break;
+                }
+            }
+            if (idx >= 0) {
+                PMC *class_handle = VTABLE_get_pmc_keyed_int(interp, slot, 0);
+                STRING *attr_name = VTABLE_get_string_keyed_int(interp, slot, 1);
+                st->parrot_vtable_handler_mapping[idx].class_handle = class_handle;
+                st->parrot_vtable_handler_mapping[idx].attr_name = attr_name;
+                st->parrot_vtable_handler_mapping[idx].hint =
+                    REPR(class_handle)->attr_funcs->hint_for(interp, st, class_handle, attr_name);
+            }
+			else
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "No such Parrot v-table '%Ss'", name);
+        }
+
+        PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC(target));
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use stable_publish_vtable_handler_mapping with a SixModelObject");
+}
+
+/*
+
+=item nqp_get_sc_object()
+
+Fetches an object from the serialization context keyed by handle and index.
+
+=cut
+
+*/
+inline op nqp_get_sc_object(out PMC, in STR, in INT) :base_core {
+    PMC *sc = SC_get_sc(interp, $2);
+    if (!PMC_IS_NULL(sc))
+        $1 = VTABLE_get_pmc_keyed_int(interp, sc, $3);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Cannot fetch object from non-existent serialization context %Ss",
+            $2);
+}
+
+
+/*
+
+=item nqp_get_sc_code_ref()
+
+Fetches the code ref from the serialization context keyed by handle and index.
+
+=cut
+
+*/
+inline op nqp_get_sc_code_ref(out PMC, in STR, in INT) :base_core {
+    PMC *sc = SC_get_sc(interp, $2);
+    if (!PMC_IS_NULL(sc))
+        $1 = SC_get_code(interp, sc, $3);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Cannot fetch code ref from non-existent serialization context %Ss",
+            $2);
+}
+
+
+/*
+
+=item nqp_get_sc()
+
+Gets the serialization context with the specified handle. Returns
+NULL if it does not exist.
+
+=cut
+
+*/
+inline op nqp_get_sc(out PMC, in STR) {
+    $1 = SC_get_sc(interp, $2);
+}
+
+/*
+
+=item nqp_create_sc()
+
+Creates a serialization context with the specified handle, adds it
+to the registry and returns it.
+
+=cut
+
+*/
+inline op nqp_create_sc(out PMC, in STR) {
+    $1 = Parrot_pmc_new(interp, Parrot_pmc_get_type_str(interp,
+        Parrot_str_new(interp, "SerializationContext", 0)));
+    VTABLE_set_string_native(interp, $1, $2);
+    SC_set_sc(interp, $2, $1);
+}
+
+
+/*
+
+=item nqp_add_code_ref_to_sc
+
+Adds a code ref $3 to slot $2 of the serialization context in $1 and marks
+it as being in the context.
+
+=cut
+
+*/
+inline op nqp_add_code_ref_to_sc(invar PMC, in INT, invar PMC) :base_core {
+    if ($3->vtable->base_type == enum_class_Sub) {
+        SC_set_code(interp, $1, $2, $3);
+        Parrot_pmc_setprop(interp, $3, Parrot_str_new_constant(interp, "SC"), $1);
+        PARROT_GC_WRITE_BARRIER(interp, $3);
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use nqp_code_ref_to_sc to add a Sub");
+}
+
+
+/*
+
+=item nqp_set_sc_object()
+
+Stores an object in the serialization context keyed by handle and index.
+
+=cut
+
+*/
+inline op nqp_set_sc_object(in STR, in INT, invar PMC) :base_core {
+    PMC *sc = SC_get_sc(interp, $1);
+    if (!PMC_IS_NULL(sc)) {
+        VTABLE_set_pmc_keyed_int(interp, sc, $2, $3);
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Cannot fetch object from non-existent serialization context %Ss",
+            $1);
+}
+
+/*
+
+=item nqp_set_sc_for_object()
+
+Sets an object's serialization context.
+
+=cut
+
+*/
+inline op nqp_set_sc_for_object(invar PMC, invar PMC) :base_core {
+    if ($1->vtable->base_type == smo_id) {
+        SC_PMC($1) = $2;
+        PARROT_GC_WRITE_BARRIER(interp, $1);
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use nqp_set_sc_for_object with a SixModelObject");
+}
+
+/*
+
+=item nqp_get_sc_for_object()
+
+Gets an object's serialization context. Returns NULL if there
+is none.
+
+=cut
+
+*/
+inline op nqp_get_sc_for_object(out PMC, invar PMC) :base_core {
+    if ($2->vtable->base_type == smo_id) {
+        PMC *result = SC_PMC($2);
+        $1 = result ? result : PMCNULL;
+    }
+    else {
+        $1 = PMCNULL;
+    }
+}
+
+
+/*
+
+=item nqp_push_compiling_sc()
+
+Pushes an SC on to the stack of those currently being compiled.
+
+=cut
+
+*/
+inline op nqp_push_compiling_sc(invar PMC) :base_core {
+    VTABLE_unshift_pmc(interp, compiling_scs, $1);
+}
+
+
+/*
+
+=item nqp_pop_compiling_sc()
+
+Pops an SC off the stack of those currently being compiled.
+
+=cut
+
+*/
+inline op nqp_pop_compiling_sc() :base_core {
+    VTABLE_shift_pmc(interp, compiling_scs);
+}
+
+
+/*
+
+=item nqp_disable_sc_write_barrier
+
+Disables the SC write barrier.
+
+=item nqp_enable_sc_write_barrier
+
+Enables the SC write barrier.
+
+=cut
+
+*/
+inline op nqp_disable_sc_write_barrier() :base_core {
+    sc_write_barrier_off_depth++;
+}
+
+inline op nqp_enable_sc_write_barrier() :base_core {
+    sc_write_barrier_off_depth--;
+}
+
+/*
+
+=item nqp_get_package_through_who
+
+Takes a type object and uses its associated symbol table (in .WHO)
+to look for a package within it. It will auto-vivify the package if
+non exists.
+
+=cut
+
+*/
+inline op nqp_get_package_through_who(out PMC, invar PMC, in STR) :base_core {
+    if ($2->vtable->base_type == smo_id) {
+        PMC *who = STABLE($2)->WHO;
+        PMC *pkg = VTABLE_get_pmc_keyed_str(interp, who, $3);
+        if (PMC_IS_NULL(pkg)) {
+            /* Create the package object. This is just like a call:
+             * pkg = KnowHOW.new_type(:name($3))
+             * XXX For now just create a KnowHOW; we can switch to a lighter
+             * package temp type later. */
+            PMC *how;
+            PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+            PMC *meth    = VTABLE_find_method(interp, KnowHOW, Parrot_str_new(interp, "new_type", 0));
+            PMC *cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
+            VTABLE_push_pmc(interp, cappy, KnowHOW);
+            VTABLE_set_string_keyed_str(interp, cappy, Parrot_str_new(interp, "name", 0), $3);
+            Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
+            cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+            Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
+            pkg = VTABLE_get_pmc_keyed_int(interp, cappy, 0);
+            
+            /* Compose the package. */
+            how = STABLE(pkg)->HOW;
+            old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+            meth = VTABLE_find_method(interp, how, Parrot_str_new(interp, "compose", 0));
+            cappy = Parrot_pmc_new(interp, enum_class_CallContext);
+            VTABLE_push_pmc(interp, cappy, how);
+            VTABLE_push_pmc(interp, cappy, pkg);
+            Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
+            cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+            Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
+            
+            /* Install it in the outer package's .WHO. */
+            VTABLE_set_pmc_keyed_str(interp, who, $3, pkg);
+        }
+        $1 = pkg;
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use nqp_get_package_through_who with a SixModelObject");
+    }
+}
+
+/*
+
+=item is_invokable
+
+Checks if we have something that overrides the Parrot invoke v-table or
+is not a 6model object must is otherwise marked invokable.
+
+=cut
+
+*/
+inline op is_invokable(out INT, in PMC) :base_core {
+    if ($2->vtable->base_type == smo_id) {
+        PMC **vt = STABLE($2)->parrot_vtable_mapping;
+        AttributeIdentifier *vth = STABLE($2)->parrot_vtable_handler_mapping;
+        $1 = (vt && !PMC_IS_NULL(vt[PARROT_VTABLE_SLOT_INVOKE])) ||
+             (vth && !PMC_IS_NULL(vth[PARROT_VTABLE_SLOT_INVOKE].class_handle)) ||
+             STABLE($2)->invocation_spec;
+    }
+    else {
+        $1 = VTABLE_does(interp, $2, Parrot_str_new(interp, "invokable", 0));
+    }
+}
+
+/*
+
+=item repr_get_primitive_type_spec
+
+If the representation represents a primitive type that we can store access
+unboxed, this will return what sort of primitive type it is.
+
+=cut
+
+*/
+inline op repr_get_primitive_type_spec(out INT, invar PMC) :base_core {
+    PMC *var = decontainerize(interp, $2);
+    if (var->vtable->base_type == smo_id) {
+        storage_spec ss = REPR(var)->get_storage_spec(interp, STABLE(var));
+        $1 = ss.inlineable ? ss.boxed_primitive : STORAGE_SPEC_BP_NONE;
+    }
+    else if (var->vtable->base_type == enum_class_Integer) {
+        $1 = STORAGE_SPEC_BP_INT;
+    }
+    else if (var->vtable->base_type == enum_class_Float) {
+        $1 = STORAGE_SPEC_BP_NUM;
+    }
+    else if (var->vtable->base_type == enum_class_String) {
+        $1 = STORAGE_SPEC_BP_STR;
+    }
+    else {
+        $1 = STORAGE_SPEC_BP_NONE;
+    }
+}
+
+/*
+
+=item repr_hint_for
+
+Gets lookup hint for an attribute.
+
+=cut
+
+*/
+inline op repr_hint_for(out INT, invar PMC, in STR) :base_core {
+    PMC *ch = decontainerize(interp, $2);
+    if ($2->vtable->base_type == smo_id)
+        $1 = REPR($2)->attr_funcs->hint_for(interp, STABLE($2), ch, $3);
+    else
+        $1 = NO_HINT;
+}
+
+/*
+
+=item nqp_islist
+
+Checks if the type of thing in $2 is a nqp list (either QRPA or RPA).
+
+=cut
+
+*/
+inline op nqp_islist(out INT, invar PMC) :base_core {
+    $1 = nqp_islist($2);
+}
+
+/*
+
+=item nqp_ishash
+
+Checks if the type of thing in $2 is a nqp hash.
+
+=cut
+
+*/
+inline op nqp_ishash(out INT, invar PMC) :base_core {
+    $1 = nqp_ishash($2);
+}
+
+/*
+
+=item is_container
+
+Checks if the type of thing in $2 is a container or not. Puts a non-zero
+value in $1 if it is a container and 0 otherwise. Any non-6model type is
+considered not to be a container.
+
+=cut
+
+*/
+inline op is_container(out INT, invar PMC) :base_core {
+    if ($2->vtable->base_type == smo_id)
+        $1 = STABLE($2)->container_spec != NULL;
+    else
+        $1 = 0;
+}
+
+/*
+
+=item nqp_decontainerize
+
+If the thing in $2 is a container, does a decontainerizing operation
+and puts the contained value in $1.
+
+=cut
+
+*/
+inline op nqp_decontainerize(out PMC, invar PMC) :base_core {
+    $1 = decontainerize(interp, $2);
+}
+
+
+/*
+
+=item nqp_assign
+
+If the thing in $2 is a container, does a decontainerizing operation
+and puts the contained value in $1.
+
+=cut
+
+*/
+inline op nqp_assign(invar PMC, invar PMC) :base_core {
+    PMC *cont  = $1;
+    PMC *value = decontainerize(interp, $2);
+    INTVAL ok  = 0;
+    if (cont->vtable->base_type == smo_id) {
+        ContainerSpec *spec = STABLE(cont)->container_spec;
+        if (spec) {
+            spec->store(interp, cont, value);
+            ok = 1;
+        }
+    }
+    if (!ok)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Cannot assign to an immutable value");
+}
+
+
+/*
+
+=item nqp_assignunchecked
+
+If the thing in $2 is a container, does a decontainerizing operation
+and puts the contained value in $1. Indicates that the type checking of
+the assignment was already done at compile time, so no checks are needed
+here.
+
+=cut
+
+*/
+inline op nqp_assignunchecked(invar PMC, invar PMC) :base_core {
+    PMC *cont  = $1;
+    PMC *value = decontainerize(interp, $2);
+    INTVAL ok  = 0;
+    if (cont->vtable->base_type == smo_id) {
+        ContainerSpec *spec = STABLE(cont)->container_spec;
+        if (spec) {
+            spec->store_unchecked(interp, cont, value);
+            ok = 1;
+        }
+    }
+    if (!ok)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Cannot assign to an immutable value");
+}
+
+
+/*
+
+=item set_container_spec
+
+Sets the container spec for the type in $1. $2 is the name of the container
+specification to put in place. $2 is (possibly optional) configuration for
+the container specification selected.
+
+=cut
+
+*/
+inline op set_container_spec(in PMC, in STR, in PMC) :base_core {
+    if ($1->vtable->base_type == smo_id) {
+        STable *st = STABLE($1);
+        ContainerConfigurer *cc = SixModelObject_get_container_config(interp, $2);
+        
+        if (st->container_spec)
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot change a type's container specification");
+
+        cc->set_container_spec(interp, st);
+        cc->configure_container_spec(interp, st, $3);
+        
+        PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC($1));
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use set_container_spec with a SixModelObject");
+    }
+}
+
+
+/*
+
+=item set_invocation_spec
+
+Sets the invocation spec for the type in $1 (it actaully sets it on
+the s-table, so the type object or any instance of the type will do).
+
+Either set $2 and $3 to a class handle and an attribute name (which
+should contain a code ref when looked up), or set $4 to a code ref
+that will handle the invocation. $2/$3 take precedence over $4.
+
+=cut
+
+*/
+inline op set_invocation_spec(invar PMC, invar PMC, in STR, invar PMC) :base_core {
+    if ($1->vtable->base_type == smo_id) {
+        STable *st = STABLE($1);
+        
+        /* Allocate and populate new invocation spec. */
+        InvocationSpec *new_spec = mem_allocate_zeroed_typed(InvocationSpec);
+        new_spec->value_slot.class_handle = $2;
+        new_spec->value_slot.attr_name    = $3;
+        new_spec->value_slot.hint    = NO_HINT;
+        new_spec->invocation_handler      = $4;
+
+        /* Free any existing spec and put the new one in place. */
+        if (st->invocation_spec)
+            mem_sys_free(st->invocation_spec);
+        st->invocation_spec = new_spec;
+        PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC($1));
+        /*ST_SC_WRITE_BARRIER(st);*/
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use set_invocation_spec with a SixModelObject");
+    }
+}
+
+
+/*
+
+=item set_boolification_spec
+
+Sets the boolification spec for the type in $1 (it actaully sets it on
+the s-table, so the type object or any instance of the type will do).
+
+The first operand specifies the boolification mode. The second specifies
+the method to call, and is only applicable with boolification mode that
+will call it.
+
+=cut
+
+*/
+inline op set_boolification_spec(invar PMC, in INT, invar PMC) :base_core {
+    PMC *target = decontainerize(interp, $1);
+    if ($2 == BOOL_MODE_CALL_METHOD && PMC_IS_NULL($3)) {
+        Parrot_ex_throw_from_c_args(interp, NULL, 1,
+            "Boolification mode for type is set to 'call method', but method not specified");
+    }
+    if (target->vtable->base_type == smo_id) {
+        STable *st = STABLE(target);
+        
+        /* Allocate and populate new boolification spec. */
+        BoolificationSpec *new_spec = mem_allocate_zeroed_typed(BoolificationSpec);
+        new_spec->mode = $2;
+        new_spec->method = $3;
+
+        /* Free any existing spec and put the new one in place. */
+        if (st->boolification_spec)
+            mem_sys_free(st->boolification_spec);
+        st->boolification_spec = new_spec;
+        PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC($1));
+        /*ST_SC_WRITE_BARRIER(st);*/
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use set_boolification_spec with a SixModelObject");
+    }
+}
+
+
+/*
+
+=item nqpevent_fh
+
+Sets nqpevent logging to use the PMC filehandle in $2 for logging, PMCNULL
+disables logging altogether.  Returns the previous event filehandle in $1.
+
+=item nqpevent
+
+Logs an event.
+
+=cut
+
+*/
+inline op nqpevent_fh(out PMC, invar PMC) :base_core {
+    $1 = nqpevent_fh ? nqpevent_fh : PMCNULL;
+    nqpevent_fh = $2;
+}
+inline op nqpevent(in STR) :base_core {
+    if (!PMC_IS_NULL(nqpevent_fh)) {
+        STRING *str = $1;
+        INTVAL pos = STRING_index(interp, str, Parrot_str_new(interp, "%sub%", 0), 0);
+        if (pos >= 0) {
+            PMC *called_ctx_pmc = CURRENT_CONTEXT(interp);
+            Parrot_Context *called_ctx =
+                PMC_data_typed(called_ctx_pmc, Parrot_Context *);
+            STRING *called_name;
+            STRING *called_subid;
+            STRING *repl;
+            GETATTR_Sub_name(interp, called_ctx->current_sub, called_name);
+            GETATTR_Sub_subid(interp, called_ctx->current_sub, called_subid);
+            repl = Parrot_str_format_data(interp, "%Ss (%Ss)", called_name, called_subid);
+            str = Parrot_str_replace(interp, str, pos, 5, repl);
+        }
+        pos = STRING_index(interp, str, Parrot_str_new(interp, "%caller%", 0), 0);
+        if (pos >= 0) {
+            PMC *called_ctx_pmc = CURRENT_CONTEXT(interp);
+            PMC *caller_ctx_pmc = Parrot_pcc_get_caller_ctx(interp, called_ctx_pmc);
+            Parrot_Context *caller_ctx = PMC_data_typed(caller_ctx_pmc, Parrot_Context *);
+            STRING *caller_name;
+            STRING *caller_subid;
+            STRING *repl;
+            GETATTR_Sub_name(interp, caller_ctx->current_sub, caller_name);
+            GETATTR_Sub_subid(interp, caller_ctx->current_sub, caller_subid);
+            repl = Parrot_str_format_data(interp, "%Ss (%Ss)", caller_name, caller_subid);
+            str = Parrot_str_replace(interp, str, pos, 8, repl);
+        }
+        Parrot_io_fprintf(interp, nqpevent_fh, "%Ss\n", str);
+    }
+}
+
+/*
+
+=item nqpdebflags
+
+Set the global debug flags to $2, return the previous flag setting in $1.
+
+=item nqpdebskip(in INT, in LABEL)
+
+Test $1 against the global debug flags, if debugging is not enabled for the flags
+set in $1, then jump to the label at $2.
+
+=cut
+
+*/
+inline op nqpdebflags(out INT, in INT) :base_core {
+    $1 = nqpdebflags_i;
+    nqpdebflags_i = $2;
+}
+
+inline op nqpdebskip(in INT, in LABEL) :base_core {
+    INTVAL flags = $1;
+    if (((flags & 0x0fffffff & nqpdebflags_i) == 0) 
+            || (flags & 0x30000000) > (nqpdebflags_i & 0x30000000))
+        goto OFFSET($2);
+}
+
+
+/*
+
+=item nqp_rxmark(stack, label, pos, rep)
+
+Push a new backtracking mark onto $1 with label $2, position $3, and count $4
+
+=item nqp_rxpeek(ptr, stack, label)
+
+Set $1 to be the index of latest mark frame $3 in stack $2.
+
+=item nqp_rxcommit(stack, label)
+
+Commit all captures and backtracking on stack $1 up to mark frame $2.
+
+=cut
+
+=item nqp_push_label(list, label)
+
+Pushes a label onto a list.
+
+=cut
+
+=item nqp_nfa_run_proto(fatepos, nfa, target, offset)
+
+Takes an NFA in $2, a target string in $3 and an offset in $4.
+Runs the NFA and puts the order to try the fates into $1.
+
+=cut
+
+=item nqp_nfa_run_alt(nfa, target, offset, bstack, cstack)
+
+Takes an NFA in $1, a target string in $2 and an offset in $3.
+Updates the bstack in $4 with backtracking points to try the alternation
+branches in the correct order. The current capture stack should be passed
+in $5.
+
+=cut
+
+*/
+inline op nqp_rxmark(invar PMC, in LABEL, in INT, in INT) :base_core {
+    PMC *bstack = $1;
+    INTVAL mark = PTR2INTVAL(CUR_OPCODE + $2);
+    INTVAL elems = VTABLE_elements(interp, bstack);
+    INTVAL caps = (elems > 0)
+                    ? VTABLE_get_integer_keyed_int(interp, bstack, elems - 1)
+                    : 0;
+                  
+    VTABLE_push_integer(interp, bstack, mark);
+    VTABLE_push_integer(interp, bstack, $3);
+    VTABLE_push_integer(interp, bstack, $4);
+    VTABLE_push_integer(interp, bstack, caps);
+}
+
+inline op nqp_rxpeek(out INT, invar PMC, in LABEL) :base_core {
+    PMC *bstack = $2;
+    INTVAL mark = PTR2INTVAL(CUR_OPCODE + $3);
+    INTVAL ptr  = VTABLE_elements(interp, bstack);
+    while (ptr >= 0 && VTABLE_get_integer_keyed_int(interp, bstack, ptr) != mark) { 
+        ptr -= 4;
+    }
+    $1 = ptr;
+}
+
+inline op nqp_rxcommit(invar PMC, in LABEL) :base_core {
+    PMC *bstack = $1;
+    INTVAL mark = PTR2INTVAL(CUR_OPCODE + $2);
+    INTVAL ptr  = VTABLE_elements(interp, bstack);
+    INTVAL caps = (ptr > 0)
+                    ? VTABLE_get_integer_keyed_int(interp, bstack, ptr-1)
+                    : 0;
+    while (ptr >= 0 && VTABLE_get_integer_keyed_int(interp, bstack, ptr) != mark) { 
+        ptr -= 4;
+    }
+    VTABLE_set_integer_native(interp, bstack, ptr);
+    if (caps > 0) {
+        if (ptr > 0 && VTABLE_get_integer_keyed_int(interp, bstack, ptr-3) < 0) {
+            /* top mark frame is an autofail frame, reuse it to hold captures */
+            VTABLE_set_integer_keyed_int(interp, bstack, ptr-1, caps);
+        }
+        else {
+            /* push a new autofail frame onto bstack to hold the captures */
+            VTABLE_push_integer(interp, bstack, 0);
+            VTABLE_push_integer(interp, bstack, -1);
+            VTABLE_push_integer(interp, bstack, 0);
+            VTABLE_push_integer(interp, bstack, caps);
+        }
+    }
+}
+
+inline op nqp_push_label(invar PMC, in LABEL) :base_core {
+    VTABLE_push_integer(interp, $1, PTR2INTVAL(CUR_OPCODE + $2));
+}
+
+inline op nqp_nfa_run_proto(out PMC, invar PMC, in STR, in INT) :base_core {
+    /* Run the NFA. */
+    INTVAL  total_fates, i;
+    INTVAL *fates = nqp_nfa_run(interp, OBJECT_BODY($2), $3, $4, &total_fates);
+    
+    /* Copy results into an RIA. */
+    PMC *fatepmc = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
+    for (i = 0; i < total_fates; i++)
+        VTABLE_set_integer_keyed_int(interp, fatepmc, i, fates[i]);
+    free(fates);
+    
+    $1 = fatepmc;
+}
+
+inline op nqp_nfa_run_alt(invar PMC, in STR, in INT, invar PMC, invar PMC, invar PMC) :base_core {
+    PMC    *nfa    = $1;
+    STRING *target = $2;
+    INTVAL  offset = $3;
+    PMC    *bstack = $4;
+    PMC    *cstack = $5;
+    PMC    *labels = $6;
+    
+    /* Run the NFA. */
+    INTVAL  total_fates, i;
+    INTVAL *fates = nqp_nfa_run(interp, OBJECT_BODY(nfa), target, offset, &total_fates);
+    
+    /* Push the results onto the bstack. */
+    INTVAL  caps   = VTABLE_defined(interp, cstack) ? VTABLE_elements(interp, cstack) : 0;
+    for (i = 0; i < total_fates; i++) {
+        VTABLE_push_integer(interp, bstack,
+            VTABLE_get_integer_keyed_int(interp, labels, fates[i]));
+        VTABLE_push_integer(interp, bstack, offset);
+        VTABLE_push_integer(interp, bstack, 0);
+        VTABLE_push_integer(interp, bstack, caps);
+    }
+    free(fates);
+}
+
+/*
+
+=item nqp_nfa_from_statelist
+
+Converts a state list RPA into an NFA object.
+
+=item nqp_nfa_to_statelist
+
+Converts an NFA object into an RPA state list.
+
+=cut
+
+*/
+
+inline op nqp_nfa_from_statelist(out PMC, invar PMC, invar PMC) :base_core {
+    PMC     *states   = $2;
+    PMC     *nfa_type = $3;
+    PMC     *nfa_obj;
+    NFABody *nfa;
+    INTVAL   i, j, num_states;
+    
+    /* Create NFA object. */
+    nfa_obj = REPR(nfa_type)->allocate(interp, STABLE(nfa_type));
+    REPR(nfa_obj)->initialize(interp, STABLE(nfa_obj), OBJECT_BODY(nfa_obj));
+    nfa = (NFABody *)OBJECT_BODY(nfa_obj);
+    
+    /* The first state entry is the fates list. */
+    nfa->fates = VTABLE_get_pmc_keyed_int(interp, states, 0);
+    
+    /* Go over the rest and convert to the NFA. */
+    num_states = VTABLE_elements(interp, states) - 1;
+    nfa->num_states = num_states;
+    if (num_states > 0) {
+        nfa->num_state_edges = mem_sys_allocate_zeroed(num_states * sizeof(INTVAL));
+        nfa->states = mem_sys_allocate_zeroed(num_states * sizeof(NFAStateInfo *));
+    }
+    for (i = 0; i < num_states; i++) {
+        PMC    *edge_info = VTABLE_get_pmc_keyed_int(interp, states, i + 1);
+        INTVAL  elems     = VTABLE_elements(interp, edge_info);
+        INTVAL  edges     = elems / 3;
+        INTVAL  cur_edge  = 0;
+
+        nfa->num_state_edges[i] = edges;
+        if (edges > 0)
+            nfa->states[i] = mem_sys_allocate_zeroed(edges * sizeof(NFAStateInfo));
+        
+        for (j = 0; j < elems; j += 3) {
+            INTVAL act = VTABLE_get_integer_keyed_int(interp, edge_info, j);
+            INTVAL to  = VTABLE_get_integer_keyed_int(interp, edge_info, j + 2);
+            
+            nfa->states[i][cur_edge].act = act;
+            nfa->states[i][cur_edge].to = to;
+            
+            switch (act) {
+            case EDGE_FATE:
+            case EDGE_CODEPOINT:
+            case EDGE_CODEPOINT_NEG:
+            case EDGE_CHARCLASS:
+            case EDGE_CHARCLASS_NEG:
+                nfa->states[i][cur_edge].arg.i = VTABLE_get_integer_keyed_int(interp, edge_info, j + 1);
+                break;
+            case EDGE_CHARLIST:
+            case EDGE_CHARLIST_NEG:
+                nfa->states[i][cur_edge].arg.s = VTABLE_get_string_keyed_int(interp, edge_info, j + 1);
+                break;
+            case EDGE_CODEPOINT_I:
+            case EDGE_CODEPOINT_I_NEG: {
+                PMC *arg = VTABLE_get_pmc_keyed_int(interp, edge_info, j + 1);
+                nfa->states[i][cur_edge].arg.uclc.lc = VTABLE_get_integer_keyed_int(interp, arg, 0);
+                nfa->states[i][cur_edge].arg.uclc.uc = VTABLE_get_integer_keyed_int(interp, arg, 1);
+                break;
+            }
+            }
+            
+            cur_edge++;
+        }
+    }
+    
+    PARROT_GC_WRITE_BARRIER(interp, nfa_obj);
+    $1 = nfa_obj;
+}
+
+inline op nqp_nfa_to_statelist(out PMC, invar PMC) :base_core {
+}
+
+
+/*
+
+=item nqp_radix(out, radix, str, pos, flag)
+
+Convert string $3 into a number starting at offset $4 and using radix $2.
+The result of the conversion returns a FixedIntegerArray PMC with
+    out[0] = converted value
+    out[1] = radix ** (number of digits converted)
+    out[2] = offset after consuming digits, -1 if no digits consumed
+The opcode skips single underscores between pairs of digits, per the Perl 6
+specification.
+
+The $5 flags is a bitmask that modifies the parse and/or result:
+    0x01: negate the result (useful if you've already parsed a minus)
+    0x02: parse a leading +/- and negate the result on -
+    0x04: parse trailing zeroes but do not include in result
+          (for parsing values after a decimal point)
+
+=cut
+
+*/
+
+inline op nqp_radix(out PMC, in INT, in STR, in INT, in INT) :base_core {
+    PMC    *out;
+    INTVAL   radix  = $2;
+    STRING   *str   = $3;
+    INTVAL   zpos   = $4;
+    INTVAL   flags  = $5;
+    FLOATVAL zvalue = 0.0;
+    FLOATVAL zbase  = 1.0;
+    INTVAL   chars  = Parrot_str_length(interp, str);
+    INTVAL value  = zvalue;
+    INTVAL base   = zbase;
+    INTVAL   pos    = -1;
+    INTVAL   ch;
+    int      neg    = 0;
+
+    if (radix > 36) {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Cannot convert radix of %d (max 36)", radix);
+    }
+
+    ch = (zpos < chars) ? STRING_ord(interp, str, zpos) : 0;
+    if ((flags & 0x02) && (ch == '+' || ch == '-')) {
+        neg = (ch == '-');
+        zpos++;
+        ch = (zpos < chars) ? STRING_ord(interp, str, zpos) : 0;
+    }
+    while (zpos < chars) {
+        if (ch >= '0' && ch <= '9') ch = ch - '0';
+        else if (ch >= 'a' && ch <= 'z') ch = ch - 'a' + 10;
+        else if (ch >= 'A' && ch <= 'Z') ch = ch - 'A' + 10;
+        else break;
+        if (ch >= radix) break;
+        zvalue = zvalue * radix + ch;
+        zbase = zbase * radix;
+        zpos++; pos = zpos;
+        if (ch != 0 || !(flags & 0x04)) { value=zvalue; base=zbase; }
+        if (zpos >= chars) break;
+        ch = STRING_ord(interp, str, zpos);
+        if (ch != '_') continue;
+        zpos++;
+        if (zpos >= chars) break;
+        ch = STRING_ord(interp, str, zpos);
+    }
+
+    if (neg || flags & 0x01) { value = -value; }
+    out = Parrot_pmc_new(interp, enum_class_FixedIntegerArray);
+    VTABLE_set_integer_native(interp, out, 3);
+    VTABLE_set_integer_keyed_int(interp, out, 0, value);
+    VTABLE_set_integer_keyed_int(interp, out, 1, base);
+    VTABLE_set_integer_keyed_int(interp, out, 2, pos);
+    $1 = out;
+}
+
+/*
+
+=item inline op is_uprop(out INT, in STR, in STR, in INT)
+
+Sets a true value in $1 if character $4 in string $3 has the unicode property
+named $2.
+
+=cut
+
+*/
+inline op is_uprop(out INT, in STR, in STR, in INT) :base_core {
+#if PARROT_HAS_ICU
+    char     *cstr;
+    INTVAL    ord;
+    int32_t   strwhich, ordwhich;
+    UProperty strprop;
+    opcode_t  *handler;
+
+    if ($4 > 0 && (UINTVAL)$4 == ($3->strlen)) {
+        $1 = 0;
+        goto NEXT();
+    }
+
+    ord = Parrot_str_indexed(interp, $3, $4);
+    cstr = Parrot_str_to_cstring(interp, $2);
+
+    /* try block tests */
+    if (strncmp(cstr, "In", 2) == 0) {
+        strwhich = u_getPropertyValueEnum(UCHAR_BLOCK, cstr+2);
+        ordwhich = u_getIntPropertyValue(ord, UCHAR_BLOCK);
+        if (strwhich != UCHAR_INVALID_CODE) {
+            $1 = (strwhich == ordwhich);
+            Parrot_str_free_cstring(cstr);
+            goto NEXT();
+        }
+    }
+
+    /* try bidi tests */
+    if (strncmp(cstr, "Bidi", 4) == 0) {
+        strwhich = u_getPropertyValueEnum(UCHAR_BIDI_CLASS, cstr+4);
+        ordwhich = u_getIntPropertyValue(ord, UCHAR_BIDI_CLASS);
+        if (strwhich != UCHAR_INVALID_CODE) {
+            $1 = (strwhich == ordwhich);
+            Parrot_str_free_cstring(cstr);
+            goto NEXT();
+        }
+    }
+
+    /* try property value aliases */
+    strwhich = u_getPropertyValueEnum(UCHAR_GENERAL_CATEGORY_MASK, cstr);
+    if (strwhich != UCHAR_INVALID_CODE) {
+        ordwhich = u_getIntPropertyValue(ord, UCHAR_GENERAL_CATEGORY_MASK);
+        $1 = ((strwhich & ordwhich) != 0);
+        Parrot_str_free_cstring(cstr);
+        goto NEXT();
+    }
+
+    /* try property */
+    strprop = u_getPropertyEnum(cstr);
+    if (strprop != UCHAR_INVALID_CODE) {
+        $1 = (u_hasBinaryProperty(ord, strprop) != 0);
+        Parrot_str_free_cstring(cstr);
+        goto NEXT();
+    }
+
+    /* try script aliases */
+    strwhich = u_getPropertyValueEnum(UCHAR_SCRIPT, cstr);
+    if (strwhich != UCHAR_INVALID_CODE) {
+        ordwhich = u_getIntPropertyValue(ord, UCHAR_SCRIPT);
+        $1 = (strwhich == ordwhich);
+        Parrot_str_free_cstring(cstr);
+        goto NEXT();
+    }
+
+    /* unrecognized property name */
+    Parrot_str_free_cstring(cstr);
+    handler =  Parrot_ex_throw_from_op_args(interp, NULL,
+            EXCEPTION_ICU_ERROR,
+            "Unicode property '%Ss' not found", $2);
+    goto ADDRESS(handler);
+#else
+    opcode_t * const handler = Parrot_ex_throw_from_op_args(interp, NULL,
+            EXCEPTION_ICU_ERROR,
+            "ICU not loaded", $2);
+    goto ADDRESS(handler);
+#endif
+}
+/*
+
+=item nqp_serialize_sc
+
+Serializes the Serialization Context located in $2. Places any required strings
+into the string heap in $3. Returns a string containing the serialized data in $1.
+
+=cut
+
+*/
+inline op nqp_serialize_sc(out STR, invar PMC, invar PMC) :base_core {
+    $1 = Serialization_serialize(interp, $2, $3);
+}
+
+
+/*
+
+=item nqp_deserialize_sc
+
+Deserializes the data in $1, populating the serialization context located in $2.
+Expects to find any required strings in the string heap, passed in $3, and any of
+the compilation unit's static code refs in the list in $4.
+
+=cut
+
+*/
+inline op nqp_deserialize_sc(in STR, invar PMC, invar PMC, invar PMC) :base_core {
+    PMC *conlist_throwaway = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
+    Serialization_deserialize(interp, $2, $3, $4, conlist_throwaway, $1);
+}
+
+/*
+
+=item nqp_deserialize_sc
+
+Deserializes the data in $1, populating the serialization context located in $2.
+Expects to find any required strings in the string heap, passed in $3, and any of
+the compilation unit's static code refs in the list in $4. $5 should be a list that
+will be populated with the object repossession conflict list.
+
+=cut
+
+*/
+inline op nqp_deserialize_sc(in STR, invar PMC, invar PMC, invar PMC, invar PMC) :base_core {
+    Serialization_deserialize(interp, $2, $3, $4, $5, $1);
+}
+
+/*
+
+=item nqp_sha1
+
+Computes the SHA-1 hash of $2 and puts the result in $1.
+
+=cut
+
+*/
+inline op nqp_sha1(out STR, in STR) :base_core {
+    /* Grab the Parrot string as a C string. */
+    char *cstr = Parrot_str_to_encoded_cstring(interp, $2, Parrot_utf8_encoding_ptr);
+
+    /* Compute its SHA-1 and encode it. */
+    SHA1_CTX      context;
+    unsigned char digest[20];
+    char          output[80];
+    SHA1_Init(&context);
+    SHA1_Update(&context, (unsigned char*)cstr, strlen(cstr));
+    SHA1_Final(&context, digest);
+    SHA1_DigestToHex(digest, output);
+
+    /* Free the C-string and put result into a new string. */
+    Parrot_str_free_cstring(cstr);
+    $1 = Parrot_str_new_init(interp, output, 40, Parrot_utf8_encoding_ptr, 0);
+}
+
+
+/*
+
+=item nqp_fresh_stub
+
+Takes the Parrot Sub in $2 and makes a clone of it along with a fresh NQPLexInfo.
+(This is used for closure to static resolution).
+
+=cut
+
+*/
+inline op nqp_fresh_stub(out PMC, invar PMC) :base_core {
+    if ($2->vtable->base_type == enum_class_Sub) {
+        $1 = VTABLE_clone(interp, $2);
+        PARROT_SUB($1)->lex_info = VTABLE_clone(interp, PARROT_SUB($2)->lex_info);
+        PARROT_NQPLEXINFO(PARROT_SUB($1)->lex_info)->static_code = $1;
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "nqp_fresh_sub can only operate on a Parrot Sub");
+    }
+}
+
+/*
+
+=item nqp_posixerrno
+
+Returns the value of errno.
+
+=cut
+
+*/
+inline op nqp_posixerrno(out INT) :base_core {
+    $1 = errno;
+}
+
+/*
+
+=item captureposprimspec
+
+Takes a CallContext in $2 and an index in $3, and returns the primitive
+type specification for the specified positional argument (is it an object
+or one of the native types).
+
+=cut
+
+*/
+inline op captureposprimspec(out INT, invar PMC, in INT) :base_core {
+    PMC *cc = $2;
+    if (cc->vtable->base_type == enum_class_CallContext) {
+        INTVAL i = $3;
+        struct Pcc_cell * pc_positionals;
+        GETATTR_CallContext_positionals(interp, cc, pc_positionals);
+        switch (pc_positionals[i].type) {
+            case BIND_VAL_INT:
+                $1 = STORAGE_SPEC_BP_INT;
+                break;
+            case BIND_VAL_NUM:
+                $1 = STORAGE_SPEC_BP_NUM;
+                break;
+            case BIND_VAL_STR:
+                $1 = STORAGE_SPEC_BP_STR;
+                break;
+            default:
+                $1 = STORAGE_SPEC_BP_NONE;
+                break;
+        }
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "captureposprimspec can only operate on a CallContext");
+    }
+}
+
+inline op nqp_sethllconfig(out PMC, in STR, invar PMC) {
+    PMC *config = get_hll_config(interp, $2);
+
+    if (VTABLE_exists_keyed_str(interp, $3, Parrot_str_new_constant(interp, "list"))) {
+        VTABLE_set_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "listType"),
+            VTABLE_get_pmc_keyed_str(interp, $3, Parrot_str_new_constant(interp, "list")));
+    }
+    
+    if (VTABLE_exists_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_type_int"))) {
+        VTABLE_set_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_type_int"),
+            VTABLE_get_pmc_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_type_int")));
+    }
+    if (VTABLE_exists_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_type_num"))) {
+        VTABLE_set_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_type_num"),
+            VTABLE_get_pmc_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_type_num")));
+    }
+    if (VTABLE_exists_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_type_str"))) {
+        VTABLE_set_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_type_str"),
+            VTABLE_get_pmc_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_type_str")));
+    }
+    
+    if (VTABLE_exists_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_transform_int"))) {
+        VTABLE_set_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_int"),
+            VTABLE_get_pmc_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_transform_int")));
+    }
+    if (VTABLE_exists_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_transform_num"))) {
+        VTABLE_set_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_num"),
+            VTABLE_get_pmc_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_transform_num")));
+    }
+    if (VTABLE_exists_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_transform_str"))) {
+        VTABLE_set_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_str"),
+            VTABLE_get_pmc_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_transform_str")));
+    }
+    if (VTABLE_exists_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_transform_array"))) {
+        VTABLE_set_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_array"),
+            VTABLE_get_pmc_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_transform_array")));
+    }
+    if (VTABLE_exists_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_transform_hash"))) {
+        VTABLE_set_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_hash"),
+            VTABLE_get_pmc_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_transform_hash")));
+    }
+    if (VTABLE_exists_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_transform_code"))) {
+        VTABLE_set_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_code"),
+            VTABLE_get_pmc_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_transform_code")));
+    }
+    if (VTABLE_exists_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_transform_any"))) {
+        VTABLE_set_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_any"),
+            VTABLE_get_pmc_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_transform_any")));
+    }
+    
+    if (VTABLE_exists_keyed_str(interp, $3, Parrot_str_new_constant(interp, "null_value"))) {
+        VTABLE_set_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "null_value"),
+            VTABLE_get_pmc_keyed_str(interp, $3, Parrot_str_new_constant(interp, "null_value")));
+    }
+
+    $1 = config;
+}
+
+inline op nqp_settypehll(invar PMC, in STR) {
+    INTVAL hll_id = Parrot_hll_register_HLL(interp, $2);
+    STABLE($1)->hll_owner = hll_id;
+}
+
+inline op nqp_settypehllrole(invar PMC, in INT) {
+    STABLE($1)->hll_role = $2;
+}
+
+inline op nqp_hllize(out PMC, invar PMC) {
+    INTVAL obj_hll = $2->vtable->base_type == smo_id
+        ? STABLE($2)->hll_owner
+        : 0;
+    PMC *  cur_sub = Parrot_pcc_get_sub(interp, CURRENT_CONTEXT(interp));
+    INTVAL cur_hll;
+    GETATTR_Sub_HLL_id(interp, cur_sub, cur_hll);
+    if (obj_hll == cur_hll)
+        $1 = $2;
+    else
+        $1 = hllize(interp, $2, cur_hll);
+}
+
+inline op nqp_hllizefor(out PMC, invar PMC, in STR) {
+    INTVAL obj_hll = $2->vtable->base_type == smo_id
+        ? STABLE($2)->hll_owner
+        : 0;
+    INTVAL tgt_hll = Parrot_hll_register_HLL(interp, $3);
+    if (obj_hll == tgt_hll)
+        $1 = $2;
+    else
+        $1 = hllize(interp, $2, tgt_hll);
+}
+
+/*
+
+=item nqp_isint
+
+Checks if the type of thing in $2 is unboxable to an int.
+
+=cut
+
+*/
+inline op nqp_isint(out INT, invar PMC) :base_core {
+    PMC *var = decontainerize(interp, $2);
+    if (var->vtable->base_type == smo_id) {
+        storage_spec ss = REPR(var)->get_storage_spec(interp, STABLE(var));
+        $1 = ss.boxed_primitive == STORAGE_SPEC_BP_INT ? 1 : 0;
+    }
+    else {
+        $1 = var->vtable->base_type == enum_class_Integer ? 1 : 0;
+    }
+}
+
+/*
+
+=item nqp_isnum
+
+Checks if the type of thing in $2 is unboxable to a num.
+
+=cut
+
+*/
+inline op nqp_isnum(out INT, invar PMC) :base_core {
+    PMC *var = decontainerize(interp, $2);
+    if (var->vtable->base_type == smo_id) {
+        storage_spec ss = REPR(var)->get_storage_spec(interp, STABLE(var));
+        $1 = ss.boxed_primitive == STORAGE_SPEC_BP_NUM ? 1 : 0;
+    }
+    else {
+        $1 = var->vtable->base_type == enum_class_Float ? 1 : 0;
+    }
+}
+
+/*
+
+=item nqp_isstr
+
+Checks if the type of thing in $2 is unboxable to a str.
+
+=cut
+
+*/
+inline op nqp_isstr(out INT, invar PMC) :base_core {
+    PMC *var = decontainerize(interp, $2);
+    if (var->vtable->base_type == smo_id) {
+        storage_spec ss = REPR(var)->get_storage_spec(interp, STABLE(var));
+        $1 = ss.boxed_primitive == STORAGE_SPEC_BP_STR ? 1 : 0;
+    }
+    else {
+        $1 = var->vtable->base_type == enum_class_String ? 1 : 0;
+    }
+}
+
+/*
+
+=item nqp_setdispatcher(in PMC)
+
+Sets the dispatcher that the next thing we call that is interested
+in one will take.
+
+=cut
+
+*/
+inline op nqp_setdispatcher(invar PMC) :base_core {
+    current_dispatcher = $1;
+}
+
+/*
+
+=item nqp_takedispatcher(in STR)
+
+If a disptcher was set, places it into the lexical in the current frame
+with the specified name.
+
+=cut
+
+*/
+inline op nqp_takedispatcher(in STR) :base_core {
+    if (current_dispatcher) {
+        PMC *lexpad = Parrot_pcc_get_lex_pad(interp, CURRENT_CONTEXT(interp));
+        VTABLE_set_pmc_keyed_str(interp, lexpad, $1, current_dispatcher);
+        current_dispatcher = NULL;
+    }
+}
+
+/*
+
+=item nqp_capturehasnameds(out INT, invar PMC)
+
+Checks if the specified capture has any named arguments.
+
+=cut
+
+*/
+inline op nqp_capturehasnameds(out INT, invar PMC) :base_core {
+    PMC *capture = $2;
+    if (capture->vtable->base_type == enum_class_CallContext) {
+        Hash *nameds;
+        GETATTR_CallContext_hash(interp, capture, nameds);
+        $1 = nameds && Parrot_hash_size(interp, nameds) ? 1 : 0;
+    }
+    else {
+        $1 = 0;
+    }
+}
+
+
+/*
+
+=item nqp_getlexouter(out PMC, in STR)
+
+Finds the lexical named $2 and returns it. However, unlike nqp::getlex this op
+skips the current scope and starts looking immediately at its outers.
+
+=cut
+
+*/
+inline op nqp_getlexouter(out PMC, in STR) :base_core {
+    PMC *ctx = CURRENT_CONTEXT(interp);
+    $1 = PMCNULL;
+
+    while (Parrot_pcc_get_outer_ctx(interp, ctx)) {
+        PMC   * const outer   = Parrot_pcc_get_outer_ctx(interp, ctx);
+        PMC   * const lex_pad = Parrot_pcc_get_lex_pad(interp, outer);
+
+        if (!PMC_IS_NULL(lex_pad) && VTABLE_exists_keyed_str(interp, lex_pad, $2)) {
+            $1 = VTABLE_get_pmc_keyed_str(interp, lex_pad, $2);
+            break;
+        }
+
+        ctx = outer;
+    }
+}
+
+
+/*
+
+=item nqp_getlexrel(out PMC, in PMC, in STR)
+
+Finds the lexical named $3 relative to scope $2, following the outer
+chain. Places it in $1. Places a NULL PMC in $1 if it is not found.
+
+=cut
+
+*/
+inline op nqp_getlexrel(out PMC, in PMC, in STR) :base_core {
+    PMC *ctx = $2;
+    $1 = PMCNULL;
+
+    while (!PMC_IS_NULL(ctx)) {
+        PMC   * const lex_pad = Parrot_pcc_get_lex_pad(interp, ctx);
+        PMC   * const outer   = Parrot_pcc_get_outer_ctx(interp, ctx);
+
+        if (!PMC_IS_NULL(lex_pad) && VTABLE_exists_keyed_str(interp, lex_pad, $3)) {
+            $1 = VTABLE_get_pmc_keyed_str(interp, lex_pad, $3);
+            break;
+        }
+
+        ctx = outer;
+    }
+}
+
+/*
+
+=item nqp_getlexreldyn(out PMC, in PMC, in STR)
+
+Finds the lexical named $3 relative to scope $2, following the caller
+chain. Places it in $1. Places a NULL PMC in $1 if it is not found.
+
+=cut
+
+*/
+inline op nqp_getlexreldyn(out PMC, in PMC, in STR) :base_core {
+    PMC *ctx = $2;
+    $1 = PMCNULL;
+
+    while (!PMC_IS_NULL(ctx)) {
+        PMC   * const lex_pad = Parrot_pcc_get_lex_pad(interp, ctx);
+        PMC   * const caller  = Parrot_pcc_get_caller_ctx(interp, ctx);
+
+        if (!PMC_IS_NULL(lex_pad) && VTABLE_exists_keyed_str(interp, lex_pad, $3)) {
+            $1 = VTABLE_get_pmc_keyed_str(interp, lex_pad, $3);
+            break;
+        }
+
+        ctx = caller;
+    }
+}
+
+/*
+
+=item nqp_getlexrelcaller(out PMC, in PMC, in STR)
+
+Finds the lexical named $3 relative to scope $2, following the caller
+chain but also seraching the outer chain for each caller. Places it in $1.
+Places a NULL PMC in $1 if it is not found.
+
+=cut
+
+*/
+inline op nqp_getlexrelcaller(out PMC, in PMC, in STR) :base_core {
+    STRING  * const lex_name = $3;
+    PMC     * ctx            = $2;
+    PMC     * result         = PMCNULL;
+
+    for (; !PMC_IS_NULL(ctx) && PMC_IS_NULL(result);
+           ctx = Parrot_pcc_get_caller_ctx(interp, ctx))
+    {
+        PMC * const lex_pad = sub_find_pad(interp, lex_name, ctx);
+        if (!PMC_IS_NULL(lex_pad)) {
+            result = VTABLE_get_pmc_keyed_str(interp, lex_pad, lex_name);
+        }
+        if (!result)
+            result = PMCNULL;
+    }
+    $1 = result;
+}
+
+inline op nqp_delete_f(out INT, in STR) :base_core {
+    char* const filename = Parrot_str_to_platform_cstring(interp, $2);
+#ifdef WIN32
+    DWORD attrs          = GetFileAttributesA(filename);
+    INTVAL ret;
+
+    if (attrs == 0xFFFFFFFF) {
+        errno = ENOENT;
+        ret = -1;
+    }
+    else if (attrs & FILE_ATTRIBUTE_READONLY) {
+        (void)SetFileAttributesA(filename, attrs & ~FILE_ATTRIBUTE_READONLY);
+        ret = unlink(filename);
+        if (ret == -1)
+            (void)SetFileAttributesA(filename, attrs);
+    }
+    else
+        ret = unlink(filename);
+
+    $1 = ret;
+#else
+    $1 = unlink(filename);
+#endif
+}
+
+inline op nqp_spawn(out INT, in PMC, in STR, in PMC) {
+    STRING *dir            = $3;
+    PMC *env               = $4;
+    STRING * const old_cwd = Parrot_file_getcwd(interp);
+
+    Parrot_file_chdir(interp, dir);
+    $1 = Run_OS_Command(interp, $2, env);
+    Parrot_file_chdir(interp, old_cwd);
+}
+
+inline op nqp_shell(out INT, in STR, in STR, in PMC) {
+    STRING *dir = $3;  
+    PMC *env = $4;
+    STRING * const old_cwd = Parrot_file_getcwd(interp);
+    PMC * command = Parrot_pmc_new(interp, enum_class_ResizableStringArray);
+#ifdef WIN32
+    const STRING *comspec = Parrot_str_new(interp, "ComSpec", 0);
+    VTABLE_push_string(interp, command, Parrot_getenv(interp, comspec));
+    VTABLE_push_string(interp, command, Parrot_str_new_constant(interp, "/c"));
+#else
+    VTABLE_push_string(interp, command, Parrot_str_new_constant(interp, "sh"));
+    VTABLE_push_string(interp, command, Parrot_str_new_constant(interp, "-c"));
+#endif
+    VTABLE_push_string(interp, command, $2);
+
+    Parrot_file_chdir(interp, dir);
+    $1 = Run_OS_Command(interp, command, env);
+    Parrot_file_chdir(interp, old_cwd);
+}
+
+inline op nqp_getenvhash(out PMC) {
+    PMC * const hash = Parrot_pmc_new(interp, enum_class_Hash);
+    INTVAL rv = 0;
+    $1 = hash;
+
+    while (environ[rv] != NULL) {
+        STRING * const envp  = Parrot_str_from_platform_cstring(interp, environ[rv]);
+        const INTVAL   delim = STRING_index(interp, envp, Parrot_str_new_constant(interp, "="), 0);
+        STRING* key = STRING_substr(interp, envp, 0, delim);
+        STRING * const value = Parrot_getenv(interp, key);
+        if (!STRING_IS_NULL(value)) {
+            PMC * const value_pmc = Parrot_pmc_new(interp, enum_class_String);
+            VTABLE_set_string_native(interp, value_pmc, value);
+            VTABLE_set_pmc_keyed_str(interp, hash, key, value_pmc);
+        }
+        rv++;
+    }
+}
+
+inline op nqp_gethostname(out STR) {
+    char hostname[65];
+    gethostname(hostname, 65);
+    $1 = Parrot_str_new_init(interp, hostname, strlen(hostname), Parrot_utf8_encoding_ptr, 0);
+}
+
+/*
+
+=item nqp_encode
+
+Encodes the specified string with the specified encoding into the provided
+empty buffer.
+
+=cut
+
+*/
+inline op nqp_encode(out PMC, in STR, in STR, invar PMC) {
+    PMC *res = $4;
+    STRING *enc;
+    STable *res_elem_st;
+    storage_spec res_elem_ss;
+    const char *buffer_data;
+    INTVAL bytes, i;
+    NativeValue nv;
+    
+    /* Transform string to the requested encoding (Parrot considers
+     * everything as encoded strings rather than having a Buf/Str
+     * split). */
+    enc = Parrot_str_change_encoding(interp, $2,
+        Parrot_encoding_number(interp, $3));
+
+    /* Obtain underlying C string, whose contents will be used to
+     * assemble the buffer, and put it into the buffer. */
+    buffer_data = Parrot_str_cstring(interp, enc);
+    bytes = Parrot_str_byte_length(interp, enc);
+    res_elem_st = REPR(res)->pos_funcs->get_elem_stable(interp, STABLE(res));
+    res_elem_ss = res_elem_st->REPR->get_storage_spec(interp, res_elem_st);
+    if (res_elem_ss.boxed_primitive != STORAGE_SPEC_BP_INT)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "nqp_encode requires an integer buffer type");
+    nv.type = NATIVE_VALUE_INT;
+    switch (res_elem_ss.bits) {
+        case 8: {
+            for (i = 0; i < bytes; i++) {
+                nv.value.intval = buffer_data[i];
+                REPR(res)->pos_funcs->bind_pos_native(interp, STABLE(res),
+                    OBJECT_BODY(res), i, &nv);
+            }
+            break;
+        }
+        case 16: {
+            short *sbuffer_data = (short *)buffer_data;
+            short shorts = bytes / 2;
+            for (i = 0; i < shorts; i++) {
+                nv.value.intval = sbuffer_data[i];
+                REPR(res)->pos_funcs->bind_pos_native(interp, STABLE(res),
+                    OBJECT_BODY(res), i, &nv);
+            }
+            break;
+        }
+        case 32: {
+            int *ibuffer_data = (int *)buffer_data;
+            int ints = bytes / 4;
+            for (i = 0; i < ints; i++) {
+                nv.value.intval = ibuffer_data[i];
+                REPR(res)->pos_funcs->bind_pos_native(interp, STABLE(res),
+                    OBJECT_BODY(res), i, &nv);
+            }
+            break;
+        }
+        default:
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "nqp_encode got unexpected buffer element size (expected 8, 16 or 32)");
+    }
+    
+    $1 = res;
+}
+
+/*
+
+=item nqp_decode
+
+Decodes the specified buffer into a string.
+
+=cut
+
+*/
+inline op nqp_decode(out STR, invar PMC, in STR) {
+    PMC *buf = $2;
+    char *cbuffer;
+    INTVAL cbuflen, i, elems;
+    NativeValue nv;
+    
+    /* Ensure we have some kind of integer array to decode from. */
+    STable *buf_elem_st;
+    storage_spec buf_elem_ss;
+    buf_elem_st = REPR(buf)->pos_funcs->get_elem_stable(interp, STABLE(buf));
+    buf_elem_ss = buf_elem_st->REPR->get_storage_spec(interp, buf_elem_st);
+    if (buf_elem_ss.boxed_primitive != STORAGE_SPEC_BP_INT)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "nqp_decode requires an integer buffer type");
+
+    /* Assemble a memory buffer of the pieces. */
+    nv.type = NATIVE_VALUE_INT;
+    elems = REPR(buf)->elems(interp, STABLE(buf), OBJECT_BODY(buf));
+    if (elems > 0) {
+        switch (buf_elem_ss.bits) {
+            case 8: {
+                cbuflen = elems;
+                cbuffer = mem_sys_allocate(cbuflen);
+                for (i = 0; i < cbuflen; i++) {
+                    REPR(buf)->pos_funcs->at_pos_native(interp, STABLE(buf),
+                        OBJECT_BODY(buf), i, &nv);
+                    cbuffer[i] = nv.value.intval;
+                }
+                break;
+            }
+            case 16: {
+                short *sview;
+                cbuflen = elems * 2;
+                cbuffer = mem_sys_allocate(cbuflen);
+                sview = (short *)cbuffer;
+                for (i = 0; i < elems; i++) {
+                    REPR(buf)->pos_funcs->at_pos_native(interp, STABLE(buf),
+                        OBJECT_BODY(buf), i, &nv);
+                    sview[i] = nv.value.intval;
+                }
+                break;
+            }
+            case 32: {
+                int *iview;
+                cbuflen = elems * 4;
+                cbuffer = mem_sys_allocate(cbuflen);
+                iview = (int *)cbuffer;
+                for (i = 0; i < elems; i++) {
+                    REPR(buf)->pos_funcs->at_pos_native(interp, STABLE(buf),
+                        OBJECT_BODY(buf), i, &nv);
+                    iview[i] = nv.value.intval;
+                }
+                break;
+            }
+            default:
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "nqp_encode got unexpected buffer element size (expected 8, 16 or 32)");
+        }
+    }
+    else {
+        cbuffer = "";
+        cbuflen = 0;
+    }
+
+    /* Create a string from the the buffer. */
+    $1 = Parrot_str_new_init(interp, cbuffer, cbuflen,
+        Parrot_find_encoding_by_string(interp, $3), 0);
+
+    if (elems > 0)
+        free(cbuffer);
+}
+
+/*
+
+=item nqp_string_equal_at
+
+Check if the String in $2 has the string in $3 at its offset $4.
+
+=cut
+
+*/
+inline op nqp_string_equal_at(out INT, in STR, in STR, in INT) {
+    INTVAL offset;
+    INTVAL cmp_index;
+    char done;
+
+    String_iter hay_iter;
+    String_iter needle_iter;
+
+    offset = (INTVAL)($4);
+
+    if (offset < 0) {
+        offset += ($2)->strlen;
+        if (offset < 0) {
+            offset = 0;
+        }
+    }
+
+    if (($2)->strlen - offset < ($3)->strlen || offset > ($2)->strlen) {
+        $1 = 0;
+    } else if (($3)->strlen == 1) {
+        $1 = (STRING_ord(interp, $3, 0) == STRING_ord(interp, $2, offset));
+    } else {
+        if (($2)->encoding == ($3)->encoding) {
+            STRING_ITER_INIT(interp, &hay_iter);
+            STRING_iter_skip(interp, $2, &hay_iter, offset);
+            $1 = memcmp($2->strstart + hay_iter.bytepos, $3->strstart, STRING_byte_length($3)) == 0;
+        } else {
+            done = 0;
+            $1 = 1;
+
+            STRING_ITER_INIT(interp, &hay_iter);
+            STRING_iter_skip(interp, $2, &hay_iter, offset);
+            STRING_ITER_INIT(interp, &needle_iter);
+
+            for (cmp_index = 0; cmp_index < $3->strlen && !done; cmp_index++) {
+                if (STRING_iter_get_and_advance(interp, $2, &hay_iter)
+                        != STRING_iter_get_and_advance(interp, $3, &needle_iter)) {
+                    $1 = 0;
+                    done = 1;
+                }
+            }
+        }
+    }
+}

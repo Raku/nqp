@@ -1,9 +1,9 @@
 #! nqp
 use nqpmo;
 
-plan(36);
+plan(47);
 
-my $knowhow := pir::get_knowhow__P();
+my $knowhow := nqp::knowhow();
 my $bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
 $bi_type.HOW.compose($bi_type);
 sub str($x) { nqp::tostr_I($x) };
@@ -107,3 +107,20 @@ my $n := nqp::div_In(
     nqp::pow_I(box(200), box(200), $bi_type, $bi_type),
 );
 ok(nqp::abs_n($n - 19.6430286394751) < 1e-10, 'div_In with big numbers');
+
+my $maxRand := nqp::fromstr_I('10000000000000000000000000000000000000000', $bi_type);
+my $rand := nqp::rand_I($maxRand, $bi_type); 
+ok(nqp::isle_I(box(0), $rand) && nqp::islt_I($rand, $maxRand), 'nqp::rand_I');
+
+ok(nqp::isprime_I(box(-4), 1) == 0, 'is -4 prime');
+ok(nqp::isprime_I(box(0), 1) == 0, 'is 0 prime');
+ok(nqp::isprime_I(box(1), 1) == 0, 'is 1 prime');
+ok(nqp::isprime_I(box(2), 1) == 1, 'is 2 prime');
+ok(nqp::isprime_I(box(4), 1) == 0, 'is 4 prime');
+ok(nqp::isprime_I(box(17), 1) == 1, 'is 17 prime');
+
+ok(nqp::iseq_I(nqp::gcd_I(box(18), box(12), $bi_type), box(6)), 'nqp::gcd_I');
+ok(nqp::iseq_I(nqp::lcm_I(box(18), box(12), $bi_type), box(36)), 'nqp::lcm_I');
+
+ok(nqp::bool_I(box(42)), 'bool_I(42)');
+ok(!nqp::bool_I(box(0)), 'bool_I(0)');

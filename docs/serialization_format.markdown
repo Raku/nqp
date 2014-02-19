@@ -80,6 +80,13 @@ contains the following items.
     | the data for this STable has been serialized            |
     |    32-bit integer                                       |
     +---------------------------------------------------------+
+    | Offset from the start of the STable data chunk where    |
+    | the REPR data for this STable has been serialized (you  |
+    | can get there by reading everything from the previous   |
+    | offset, but it may not be efficient if you want to get  |
+    | an idea of the object size first)                       |
+    |    32-bit integer                                       |
+    +---------------------------------------------------------+
 
 ## STables Data
 The STable is serialized just by a sequence of primitives, in the
@@ -90,14 +97,16 @@ following order.
 * WHO (variant)
 * method_cache (VM hash)
 * vtable_length (native int)
-* [each of the items] (variant)
+* \[each of the items\] (variant)
 * type_check_cache_length (native int)
-* [each of the items in type_check_cache] (object reference)
+* \[each of the items in type_check_cache\] (object reference)
 * mode_flags (native int)   
 * boolification_spec (native int flag for if it exists; if true, then a native int
   for the mode and a ref for the method slot)
 * container_spec (native int flag for if it exists; if true, then ref/string/int for
   the attribute and ref for the fetch method)
+* invocation_spec (native int flag for if it exists; if true, then ref for class handle,
+  str for attr name, int for hint and ref for invocation handler)
 
 After this, the REPR data is serialized (which is specific to the REPR in question).
 
@@ -226,6 +235,7 @@ reference to do so. The reason being that
     9 = VM Array of Integers
     10 = VM Hash of Variant References with String Keys
     11 = VM Static Code Reference
+    12 = VM Cloned Code Reference (a serialized closure)
 
 ### Object references
 These are stored as a 32-bit SC index (base 1 into the dependencies
