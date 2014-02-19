@@ -2321,6 +2321,14 @@ QAST::MASTOperations.add_core_moarop_mapping('rand_i', 'rand_i');
 QAST::MASTOperations.add_core_moarop_mapping('rand_n', 'randscale_n');
 QAST::MASTOperations.add_core_moarop_mapping('srand', 'srand', 0);
 
+# thread related opcodes
+QAST::MASTOperations.add_core_moarop_mapping('newthread', 'newthread');
+QAST::MASTOperations.add_core_moarop_mapping('threadrun', 'threadrun', 0);
+QAST::MASTOperations.add_core_moarop_mapping('threadjoin', 'threadjoin', 0);
+QAST::MASTOperations.add_core_moarop_mapping('threadid', 'threadid');
+QAST::MASTOperations.add_core_moarop_mapping('threadyield', 'threadyield');
+QAST::MASTOperations.add_core_moarop_mapping('currentthread', 'currentthread');
+
 # MoarVM-specific compilation ops
 QAST::MASTOperations.add_core_moarop_mapping('masttofile', 'masttofile', 2);
 QAST::MASTOperations.add_core_moarop_mapping('masttocu', 'masttocu');
