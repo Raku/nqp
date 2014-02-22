@@ -4277,17 +4277,14 @@ public final class Ops {
         return sem;
     }
 
-    public static SixModelObject semtryacquire(SixModelObject sem, ThreadContext tc) {
+    public static long semtryacquire(SixModelObject sem, ThreadContext tc) {
         boolean result;
         if (sem instanceof SemaphoreInstance)
             result = ((SemaphoreInstance)sem).sem.tryAcquire();
         else
             throw ExceptionHandling.dieInternal(tc, "semtryacquire requires an operand with REPR Semaphore");
 
-        SixModelObject type = bootint(tc);
-        SixModelObject res = type.st.REPR.allocate(tc, type.st);
-        res.set_int(tc, result ? 1 : 0);
-        return sem;
+        return result ? 1 : 0;
     }
 
     public static SixModelObject semrelease(SixModelObject sem, ThreadContext tc) {
