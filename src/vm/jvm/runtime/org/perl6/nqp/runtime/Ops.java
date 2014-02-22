@@ -88,6 +88,7 @@ import org.perl6.nqp.sixmodel.reprs.VMHash;
 import org.perl6.nqp.sixmodel.reprs.VMHashInstance;
 import org.perl6.nqp.sixmodel.reprs.VMIterInstance;
 import org.perl6.nqp.sixmodel.reprs.VMThreadInstance;
+import org.perl6.nqp.sixmodel.reprs.ReentrantMutexInstance;
 
 /**
  * Contains complex operations that are more involved that the simple ops that the
@@ -4245,6 +4246,22 @@ public final class Ops {
             tc.VMThread = thread;
         }
         return thread;
+    }
+
+    public static SixModelObject lock(SixModelObject lock, ThreadContext tc) {
+        if (lock instanceof ReentrantMutexInstance)
+            ((ReentrantMutexInstance)lock).lock.lock();
+        else
+            throw ExceptionHandling.dieInternal(tc, "lock requires an operand with REPR ReentrantMutex");
+        return lock;
+    }
+
+    public static SixModelObject unlock(SixModelObject lock, ThreadContext tc) {
+        if (lock instanceof ReentrantMutexInstance)
+            ((ReentrantMutexInstance)lock).lock.unlock();
+        else
+            throw ExceptionHandling.dieInternal(tc, "unlock requires an operand with REPR ReentrantMutex");
+        return lock;
     }
 
     /* Exception related. */

@@ -2457,6 +2457,8 @@ QAST::OperationsJAST.map_classlib_core_op('threadjoin', $TYPE_OPS, 'threadjoin',
 QAST::OperationsJAST.map_classlib_core_op('threadid', $TYPE_OPS, 'threadid', [$RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('threadyield', $TYPE_OPS, 'threadyield', [], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('currentthread', $TYPE_OPS, 'currentthread', [], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('lock', $TYPE_OPS, 'lock', [$RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('unlock', $TYPE_OPS, 'unlock', [$RT_OBJ], $RT_OBJ, :tc);
 
 # JVM-specific ops for compilation unit handling
 QAST::OperationsJAST.map_classlib_core_op('compilejastlines', $TYPE_OPS, 'compilejastlines', [$RT_OBJ], $RT_OBJ, :tc);

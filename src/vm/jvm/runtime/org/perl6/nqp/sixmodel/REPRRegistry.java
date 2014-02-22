@@ -31,6 +31,7 @@ import org.perl6.nqp.sixmodel.reprs.VMException;
 import org.perl6.nqp.sixmodel.reprs.VMHash;
 import org.perl6.nqp.sixmodel.reprs.VMIter;
 import org.perl6.nqp.sixmodel.reprs.VMThread;
+import org.perl6.nqp.sixmodel.reprs.ReentrantMutex;
 
 public class REPRRegistry {
     private static HashMap<String, Integer> reprIdMap = new HashMap<String, Integer>();
@@ -86,5 +87,6 @@ public class REPRRegistry {
         addREPR("CStr", new CStr());
         addREPR("CStruct", new CStruct());
         addREPR("VMThread", new VMThread());
+        addREPR("ReentrantMutex", new ReentrantMutex());
     }
 }
