@@ -89,6 +89,7 @@ import org.perl6.nqp.sixmodel.reprs.VMHashInstance;
 import org.perl6.nqp.sixmodel.reprs.VMIterInstance;
 import org.perl6.nqp.sixmodel.reprs.VMThreadInstance;
 import org.perl6.nqp.sixmodel.reprs.ReentrantMutexInstance;
+import org.perl6.nqp.sixmodel.reprs.SemaphoreInstance;
 
 /**
  * Contains complex operations that are more involved that the simple ops that the
@@ -4262,6 +4263,39 @@ public final class Ops {
         else
             throw ExceptionHandling.dieInternal(tc, "unlock requires an operand with REPR ReentrantMutex");
         return lock;
+    }
+
+    public static SixModelObject semacquire(SixModelObject sem, ThreadContext tc) {
+        try {
+            if (sem instanceof SemaphoreInstance)
+                ((SemaphoreInstance)sem).sem.acquire();
+            else
+                throw ExceptionHandling.dieInternal(tc, "semacquire requires an operand with REPR Semaphore");
+        } catch (InterruptedException e) {
+            throw ExceptionHandling.dieInternal(tc, "semacquire was interrupted");
+        }
+        return sem;
+    }
+
+    public static SixModelObject semtryacquire(SixModelObject sem, ThreadContext tc) {
+        boolean result;
+        if (sem instanceof SemaphoreInstance)
+            result = ((SemaphoreInstance)sem).sem.tryAcquire();
+        else
+            throw ExceptionHandling.dieInternal(tc, "semtryacquire requires an operand with REPR Semaphore");
+
+        SixModelObject type = bootint(tc);
+        SixModelObject res = type.st.REPR.allocate(tc, type.st);
+        res.set_int(tc, result ? 1 : 0);
+        return sem;
+    }
+
+    public static SixModelObject semrelease(SixModelObject sem, ThreadContext tc) {
+        if (sem instanceof SemaphoreInstance)
+            ((SemaphoreInstance)sem).sem.release();
+        else
+            throw ExceptionHandling.dieInternal(tc, "semrelease requires an operand with REPR Semaphore");
+        return sem;
     }
 
     /* Exception related. */
