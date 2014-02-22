@@ -2328,6 +2328,8 @@ QAST::MASTOperations.add_core_moarop_mapping('threadjoin', 'threadjoin', 0);
 QAST::MASTOperations.add_core_moarop_mapping('threadid', 'threadid');
 QAST::MASTOperations.add_core_moarop_mapping('threadyield', 'threadyield');
 QAST::MASTOperations.add_core_moarop_mapping('currentthread', 'currentthread');
+QAST::MASTOperations.add_core_moarop_mapping('lock', 'lock', 0);
+QAST::MASTOperations.add_core_moarop_mapping('unlock', 'unlock', 0);
 
 # MoarVM-specific compilation ops
 QAST::MASTOperations.add_core_moarop_mapping('masttofile', 'masttofile', 2);
