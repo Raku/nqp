@@ -2330,6 +2330,9 @@ QAST::MASTOperations.add_core_moarop_mapping('threadyield', 'threadyield');
 QAST::MASTOperations.add_core_moarop_mapping('currentthread', 'currentthread');
 QAST::MASTOperations.add_core_moarop_mapping('lock', 'lock', 0);
 QAST::MASTOperations.add_core_moarop_mapping('unlock', 'unlock', 0);
+QAST::MASTOperations.add_core_moarop_mapping('semacquire', 'semacquire');
+QAST::MASTOperations.add_core_moarop_mapping('semtryacquire', 'semtryacquire');
+QAST::MASTOperations.add_core_moarop_mapping('semrelease', 'semrelease');
 
 # MoarVM-specific compilation ops
 QAST::MASTOperations.add_core_moarop_mapping('masttofile', 'masttofile', 2);
