@@ -90,6 +90,7 @@ import org.perl6.nqp.sixmodel.reprs.VMIterInstance;
 import org.perl6.nqp.sixmodel.reprs.VMThreadInstance;
 import org.perl6.nqp.sixmodel.reprs.ReentrantMutexInstance;
 import org.perl6.nqp.sixmodel.reprs.SemaphoreInstance;
+import org.perl6.nqp.sixmodel.reprs.ConcBlockingQueueInstance;
 
 /**
  * Contains complex operations that are more involved that the simple ops that the
@@ -4293,6 +4294,13 @@ public final class Ops {
         else
             throw ExceptionHandling.dieInternal(tc, "semrelease requires an operand with REPR Semaphore");
         return sem;
+    }
+
+    public static SixModelObject queuepoll(SixModelObject queue, ThreadContext tc) {
+        if (queue instanceof ConcBlockingQueueInstance)
+            return ((ConcBlockingQueueInstance)queue).queue.poll();
+        else
+            throw ExceptionHandling.dieInternal(tc, "queuepoll requires an operand with REPR ConcBlockingQueue");
     }
 
     /* Exception related. */
