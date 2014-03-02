@@ -47,6 +47,7 @@ MAIN: {
     my $default_backend;
     my %backends;
     if ($options{backends}) {
+        $options{backends} = 'parrot,jvm,moar' if lc($options{backends}) eq 'all';
         for my $be (split /,/, $options{backends}) {
             $be = lc $be;
             unless ($known_backends{$be}) {
