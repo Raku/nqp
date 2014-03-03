@@ -677,6 +677,30 @@ my class MyHandler {
 }
 ```
 
+# Unicode Property Opcodes
+
+## getuniname
+* `getuniname(int $codepoint)`
+
+Translate a codepoint to its Unicode name.
+
+## unipropcode
+* `unipropcode(str $propname)`
+
+Translates a property name to the property category it's in.
+
+## unipvalcode
+* `unipvalcode(int $propcode, str $propname)`
+
+Looks up a property name in its property category, and returns which
+table within that category to use.
+
+## getuniprop
+* `getuniprop(int $codepoint, int $propcode, int $pvalcode)`
+
+Uses the table found by the previous two opcodes to look up the property value
+for a given codepoint.
+
 # Conditional Opcodes
 
 ## if
