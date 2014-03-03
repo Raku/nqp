@@ -1951,6 +1951,13 @@ QAST::MASTOperations.add_core_op('rindex',  -> $qastcomp, $op {
         !! QAST::Op.new( :op('rindexfrom'), |@operands ));
 });
 
+# unicode properties
+QAST::MASTOperations.add_core_moarop_mapping('unipropcode', 'unipropcode');
+QAST::MASTOperations.add_core_moarop_mapping('unipvalcode', 'unipvalcode');
+QAST::MASTOperations.add_core_moarop_mapping('getuniprop', 'getuniprop');
+QAST::MASTOperations.add_core_moarop_mapping('getuniname', 'getuniname');
+
+
 # serialization context opcodes
 QAST::MASTOperations.add_core_moarop_mapping('sha1', 'sha1');
 QAST::MASTOperations.add_core_moarop_mapping('createsc', 'createsc');
