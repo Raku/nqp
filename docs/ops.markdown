@@ -695,11 +695,16 @@ Translates a property name to the property category it's in.
 Looks up a property name in its property category, and returns which
 table within that category to use.
 
-## getuniprop
-* `getuniprop(int $codepoint, int $propcode, int $pvalcode)`
+## getuniprop_int
+* `getuniprop_int(int $codepoint, int $propcode, int $pvalcode)`
 
-Uses the table found by the previous two opcodes to look up the property value
+Uses the table found by the previous two opcodes to look up an integer property value
 for a given codepoint.
+
+## getuniprop_str
+* `getuniprop_str(int $codepoint, int $propcode, int $pvalcode)`
+
+Same thing, but fetches a string property value.
 
 # Conditional Opcodes
 
