@@ -32,13 +32,18 @@ $(PERL6_QCJ_PBC):  $(PERL6_QCJ)
 js-clean:
 	$(RM_RF) $(PERL6_QCJ_PBC)
 
-cross_compiler=$(PERL6_QCJ_PBC) $(HLL_PBC)
+cross_compiler=$(PERL6_QCJ_PBC) $(HLL_PBC) $(J_STAGE1)/$(CORE_SETTING_COMBINED)
 
 cross_compiler: $(cross_compiler)
 
 $(HLL_PBC) :  $(HLL_BACKEND) $(PERL6_QCJ_PIR)
 	$(NQP) --target=pir --module-path=gen/js/stage1 --output=$(HLL_PIR) --encoding=utf8 $(HLL_BACKEND)
 	$(PARROT)  -o $(HLL_PBC) $(HLL_PIR)
+
+$(J_STAGE1)/$(CORE_SETTING_COMBINED): $(CORE_SETTING_SOURCES)
+	$(MKPATH) $(J_STAGE1)
+	$(PERL) tools/build/gen-cat.pl js $(CORE_SETTING_SOURCES) > $(J_STAGE1)/$(CORE_SETTING_COMBINED)
+
 
 ### 
 ### 
