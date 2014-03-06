@@ -100,3 +100,14 @@ whereas NQP also runs on the JVM and MoarVM and is designed to be
 portable to more.
 
     [2] http://github.com/perl6/nqp-rx
+
+=head2 JavaScript backend
+
+Building the JavaScript backend currently requires an installed nqp-p.
+
+    $ npm install src/vm/js/nqp-runtime-core src/vm/js/nqp-runtime-node src/vm/js/nqp-runtime
+
+
+Currently it needs to be run like:
+
+    $ nqp-p --module-path gen/js/stage1/ src/vm/js/bin/nqp-js.nqp -e 'nqp::say("Hello World")' | node

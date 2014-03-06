@@ -1,0 +1,16 @@
+{
+  "name": "nqp-runtime-core",
+  "version": "0.1.0",
+  "description": "the platform independent part of the nodejs runtime",
+  "bugs": {"url:":"https://github.com/pmurias/rakudo-js/issues","email":"pawelmurias@gmail.com"},
+  "licenses":[{"type":"Artistic 2","url":"http://opensource.org/licenses/Artistic-2.0"}],
+  "repository":"http://github.com/pmurias/rakudo-js/",
+  "main":"runtime.js",
+  "ender": {
+    "internal": ["null.js"]
+  },
+  "dependencies":{
+      "sha1": "*",
+      "node-int64": "*"
+  }
+}
