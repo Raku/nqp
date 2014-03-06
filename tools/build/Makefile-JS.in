@@ -21,6 +21,10 @@ PERL6_QCJ   = src/vm/js/QAST/Compiler.nqp
 PERL6_QCJ_PIR       = $(JS_STAGE1)/qast-compiler.pir
 PERL6_QCJ_PBC   = $(JS_STAGE1)/QAST/Compiler.pbc
 
+HLL_BACKEND       = src/vm/js/HLL/Backend.nqp
+HLL_PIR   = $(JS_STAGE1)/hll-backend.pir
+HLL_PBC   = $(JS_STAGE1)/HLL/Backend.pbc
+
 $(PERL6_QCJ_PBC):  $(PERL6_QCJ)
 	$(NQP) --target=pir --output=$(PERL6_QCJ_PIR) --encoding=utf8 $(PERL6_QCJ)
 	$(PARROT)  -o $(PERL6_QCJ_PBC) $(PERL6_QCJ_PIR)
@@ -28,9 +32,13 @@ $(PERL6_QCJ_PBC):  $(PERL6_QCJ)
 js-clean:
 	$(RM_RF) $(PERL6_QCJ_PBC)
 
-cross_compiler=$(PERL6_QCJ_PBC)
+cross_compiler=$(PERL6_QCJ_PBC) $(HLL_PBC)
 
 cross_compiler: $(cross_compiler)
+
+$(HLL_PBC) :  $(HLL_BACKEND) $(PERL6_QCJ_PIR)
+	$(NQP) --target=pir --module-path=gen/js/stage1 --output=$(HLL_PIR) --encoding=utf8 $(HLL_BACKEND)
+	$(PARROT)  -o $(HLL_PBC) $(HLL_PIR)
 
 ### 
 ### 
@@ -87,9 +95,6 @@ cross_compiler: $(cross_compiler)
 ### 	parrot -o js-blib/QRegex.pbc js-blib/QRegex.pir
 ### 
 ### 
-### blib/HLL/Backend/JavaScript.pbc:  src/HLL/Backend/JavaScript.pm $(PERL6_QCJ_PIR)
-### 	perl wrap_nqp --target=pir --output=src/gen/hll-backend-javascript.pir --encoding=utf8 src/HLL/Backend/JavaScript.pm
-### 	$(PARROT)  -o blib/HLL/Backend/JavaScript.pbc src/gen/hll-backend-javascript.pir
 ### 
 ### test: t/gen/qregex.t all
 ### 	./run_tests

@@ -42,7 +42,7 @@ role SerializeOnce {
     }
 }
 
-class QAST::Compiler does SerializeOnce {
+class QAST::CompilerJS does SerializeOnce {
 
     #= create a QAST node which compiles to $code
     method js($code) {
