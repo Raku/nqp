@@ -2346,6 +2346,7 @@ QAST::MASTOperations.add_core_moarop_mapping('condsignalall', 'condsignalall', 0
 QAST::MASTOperations.add_core_moarop_mapping('semacquire', 'semacquire');
 QAST::MASTOperations.add_core_moarop_mapping('semtryacquire', 'semtryacquire');
 QAST::MASTOperations.add_core_moarop_mapping('semrelease', 'semrelease');
+QAST::MASTOperations.add_core_moarop_mapping('queuepoll', 'queuepoll');
 
 # MoarVM-specific compilation ops
 QAST::MASTOperations.add_core_moarop_mapping('masttofile', 'masttofile', 2);
