@@ -64,7 +64,7 @@ class HLLBackend::JavaScript {
         }
 
         spew($module ~ "/main.js", $js);
-        my $package_json := '{ "main": "main.js" }';
+        my $package_json := '{ "main": "main.js", "version": "0.0.0", "name": "placeholder" }';
         spew($module ~ '/package.json', $package_json);
     }
     
