@@ -91,6 +91,8 @@ import org.perl6.nqp.sixmodel.reprs.VMThreadInstance;
 import org.perl6.nqp.sixmodel.reprs.ReentrantMutexInstance;
 import org.perl6.nqp.sixmodel.reprs.SemaphoreInstance;
 import org.perl6.nqp.sixmodel.reprs.ConcBlockingQueueInstance;
+import org.perl6.nqp.sixmodel.reprs.ConditionVariable;
+import org.perl6.nqp.sixmodel.reprs.ConditionVariableInstance;
 
 /**
  * Contains complex operations that are more involved that the simple ops that the
@@ -4264,6 +4266,41 @@ public final class Ops {
         else
             throw ExceptionHandling.dieInternal(tc, "unlock requires an operand with REPR ReentrantMutex");
         return lock;
+    }
+
+    public static SixModelObject getlockcondvar(SixModelObject lock, SixModelObject type, ThreadContext tc) {
+        if (!(lock instanceof ReentrantMutexInstance))
+            throw ExceptionHandling.dieInternal(tc, "getlockcondvar requires an operand with REPR ReentrantMutex");
+        if (!(type.st.REPR instanceof ConditionVariable))
+            throw ExceptionHandling.dieInternal(tc, "getlockcondvar requires a result type with REPR ConditionVariable");
+        ConditionVariableInstance result = new ConditionVariableInstance();
+        result.st = type.st;
+        result.condvar = ((ReentrantMutexInstance)lock).lock.newCondition();
+        return result;
+    }
+
+    public static SixModelObject condwait(SixModelObject cv, ThreadContext tc) throws InterruptedException {
+        if (cv instanceof ConditionVariableInstance)
+            ((ConditionVariableInstance)cv).condvar.await();
+        else
+            throw ExceptionHandling.dieInternal(tc, "condwait requires an operand with REPR ConditionVariable");
+        return cv;
+    }
+
+    public static SixModelObject condsignalone(SixModelObject cv, ThreadContext tc) {
+        if (cv instanceof ConditionVariableInstance)
+            ((ConditionVariableInstance)cv).condvar.signal();
+        else
+            throw ExceptionHandling.dieInternal(tc, "condsignalone requires an operand with REPR ConditionVariable");
+        return cv;
+    }
+
+    public static SixModelObject condsignalall(SixModelObject cv, ThreadContext tc) {
+        if (cv instanceof ConditionVariableInstance)
+            ((ConditionVariableInstance)cv).condvar.signalAll();
+        else
+            throw ExceptionHandling.dieInternal(tc, "condsignalall requires an operand with REPR ConditionVariable");
+        return cv;
     }
 
     public static SixModelObject semacquire(SixModelObject sem, ThreadContext tc) {

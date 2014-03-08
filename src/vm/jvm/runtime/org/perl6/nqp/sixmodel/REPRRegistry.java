@@ -34,6 +34,7 @@ import org.perl6.nqp.sixmodel.reprs.VMThread;
 import org.perl6.nqp.sixmodel.reprs.ReentrantMutex;
 import org.perl6.nqp.sixmodel.reprs.Semaphore;
 import org.perl6.nqp.sixmodel.reprs.ConcBlockingQueue;
+import org.perl6.nqp.sixmodel.reprs.ConditionVariable;
 
 public class REPRRegistry {
     private static HashMap<String, Integer> reprIdMap = new HashMap<String, Integer>();
@@ -92,5 +93,6 @@ public class REPRRegistry {
         addREPR("ReentrantMutex", new ReentrantMutex());
         addREPR("Semaphore", new Semaphore());
         addREPR("ConcBlockingQueue", new ConcBlockingQueue());
+        addREPR("ConditionVariable", new ConditionVariable());
     }
 }
