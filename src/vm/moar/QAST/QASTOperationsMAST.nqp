@@ -2317,6 +2317,12 @@ QAST::MASTOperations.add_core_moarop_mapping('nfafromstatelist', 'nfafromstateli
 QAST::MASTOperations.add_core_moarop_mapping('nfarunproto', 'nfarunproto');
 QAST::MASTOperations.add_core_moarop_mapping('nfarunalt', 'nfarunalt', 0);
 
+# native call ops
+QAST::MASTOperations.add_core_moarop_mapping('initnativecall', 'no_op');
+QAST::MASTOperations.add_core_moarop_mapping('buildnativecall', 'nativecallbuild', 0);
+QAST::MASTOperations.add_core_moarop_mapping('nativecall', 'nativecallinvoke');
+QAST::MASTOperations.add_core_moarop_mapping('nativecallrefresh', 'nativecallrefresh', 0);
+
 # process related opcodes
 QAST::MASTOperations.add_core_moarop_mapping('exit', 'exit', 0);
 QAST::MASTOperations.add_core_moarop_mapping('sleep', 'sleep', 0);
