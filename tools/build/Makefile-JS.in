@@ -15,7 +15,13 @@ JS_STAGE2 = $(JS_BUILD_DIR)/stage2
 #  src/core/YOUAREHERE.nqp \
 
 CORE_JS_SETTING_SOURCES = \
+  src/core/NativeTypes.nqp \
+  src/core/NQPRoutine.nqp \
+  src/core/NQPMu.nqp \
+  src/core/NQPCapture.nqp \
   src/core/IO.nqp \
+  src/core/Hash.nqp \
+  src/core/testing.nqp \
   src/core/YOUAREHERE.nqp \
 
 NQPCORE_PBC = NQPCORE.setting.pbc
