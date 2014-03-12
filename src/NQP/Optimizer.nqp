@@ -1,21 +1,18 @@
 class NQP::Optimizer {
     has @!block_stack;
     has %!adverbs;
-    has @!local_var_stack;
     has $!no_grasp_on_lexicals;
 
     method optimize($ast, *%adverbs) {
         %!adverbs := %adverbs;
         @!block_stack := [$ast[0]];
-        @!local_var_stack := nqp::list();
         self.visit_children($ast);
         $ast;
     }
 
     method visit_block($block, :$is_for?) {
         @!block_stack.push($block);
-        my %*shallow_var_usages := nqp::hash();
-        @!local_var_stack.push(%*shallow_var_usages);
+        my @defined_var_names := nqp::list_s();
 
         my $has_definitions;
         my $can_transform := 1;
@@ -23,10 +20,11 @@ class NQP::Optimizer {
         # if we already know this is not a block we can turn into a Stmt, or if
         # we're looking at the second argument to a for op, we can bail out
         # a bit earlier.
-        if $block.blocktype ne 'immediate' && $block.blocktype ne 'immediate_static' || $is_for {
+        if ($block.blocktype ne 'immediate' && $block.blocktype ne 'immediate_static') || $is_for {
             $can_transform := 0;
         }
 
+        my %usages;
         # Push all the lexically declared variables into our shallow vars hash.
         # Currently we limit ourselves to natives, because they are guaranteed
         # not to have some weird setup that we have to be careful about.
@@ -55,12 +53,10 @@ class NQP::Optimizer {
                         my $sigil := nqp::substr($var.name, 0, 1);
                         if $sigil eq '$'  && $twigil ne '*' && $twigil ne '?'
                                 && $var.name ne '$_' && $var.name ne '$/' && $var.name ne '$!' && $var.name ne '$¢' {
-                            %*shallow_var_usages{$var.name} := nqp::list($var);
+
+                            nqp::push_s(@defined_var_names, $var.name);
+                            %usages{$var.name} := nqp::list($var);
                         }
-                    }
-                } elsif nqp::istype($var, QAST::Op) && $var.op eq 'bind' {
-                    if nqp::existskey(%*shallow_var_usages, $var[0].name) {
-                        nqp::push(%*shallow_var_usages{$var[0].name}, $var[0]);
                     }
                 }
                 $has_definitions++;
@@ -69,49 +65,116 @@ class NQP::Optimizer {
         }
         self.visit_children($block);
 
-        my $succ;
-        if !($!no_grasp_on_lexicals) {
-            for %*shallow_var_usages {
-                my $name := $_.key;
-                my $first_char := nqp::findcclass(nqp::const::CCLASS_WORD, $name, 0, 4);
-                my $last_valid := nqp::index($name, '-', $first_char);
-                my $newname;
-                if $last_valid == -1 {
-                    $newname := $block.unique('ltol_' ~ nqp::substr($name, $first_char) ~ +@!block_stack);
-                } else {
-                    $newname := $block.unique('ltol_' ~ nqp::substr($name, $first_char, $last_valid - $first_char) ~ +@!block_stack);
-                }
-                my @usages := $_.value;
-                #say("found " ~ +@usages ~ " usages for $name");
-                for @usages -> $var {
-                    #say($var.scope ~ ": " ~ $var.name ~ " <- old");
-                    $var.scope('local');
-                    $var.name($newname);
-                    #if $var.decl eq 'var' {
-                        #$var.decl('static');
-                    #}
-                }
-                $succ++;
-                #say("turned $name into a local ($newname), yippie");
+        # when we reach this spot, we're near the leaf nodes first, so we
+        # can now cascade var-searching outwards and perhaps inline our
+        # block. That way, when the next outer block reaches this piece of
+        # code, the inner block will already have been inlined and it can
+        # properly look for vars again.
+
+        my $do_transform := 0;
+        my %filter := nqp::hash();
+        if $has_definitions > 0 {
+            for @defined_var_names {
+                %filter{$_} := 1
             }
-            if $succ == $has_definitions && $can_transform {
-                say($block.dump);
-                say("^ could turn this into an in-lined block!");
-                my $newblock := QAST::Stmt.new();
-                for @($block) {
-                    $newblock.push($_);
+            if self.collect_vars($block[1], 0, %filter, %usages) {
+                $do_transform := 1;
+            }
+        } elsif $has_definitions == 0 && $can_transform {
+            $do_transform := 1
+        }
+
+        my $succ := -1;
+        if !($!no_grasp_on_lexicals) {
+            for %usages {
+                my $name := $_.key;
+                if %filter{$name} == 0 {
+                    my $first_char := nqp::findcclass(nqp::const::CCLASS_WORD, $name, 0, 4);
+                    my $last_valid := nqp::index($name, '-', $first_char);
+                    my $newname;
+                    if $last_valid == -1 {
+                        $newname := $block.unique('ltol_' ~ nqp::substr($name, $first_char) ~ +@!block_stack);
+                    } else {
+                        $newname := $block.unique('ltol_' ~ nqp::substr($name, $first_char, $last_valid - $first_char) ~ +@!block_stack);
+                    }
+                    my @usages := $_.value;
+                    #say("found " ~ +@usages ~ " usages for $name");
+                    for @usages -> $var {
+                        #say($var.scope ~ ": " ~ $var.name ~ " <- old");
+                        $var.scope('local');
+                        $var.name($newname);
+                        #if $var.decl eq 'var' {
+                            #$var.decl('static');
+                        #}
+                    }
+                    $succ++;
+                    say("turned $name into a local ($newname), yippie");
                 }
-                $block := $newblock;
             }
         }
         #if $succ {
             #say($block.dump);
         #}
 
+        if $do_transform && $succ == $has_definitions {
+            my $newblock := QAST::Stmt.new();
+            for @($block) {
+                $newblock.push($_);
+            }
+            $block := $newblock;
+            say("turned a block into an stmt!");
+        }
+
         @!block_stack.pop();
-        @!local_var_stack.pop();
 
         $block;
+    }
+
+    # the filter tells us, in which lexicals we're interested,
+    # the antifilter handles shadowed variables
+    # it will return 1 if none of the filtered variables have been found in
+    # nested blocks, 0 otherwise. It will short-circuit.
+    my $EMPTY_LIST := nqp::list();
+    method collect_vars($node, $depth, %filter, %usages, %antifilter = nqp::hash()) {
+        my %new-antifilter := %antifilter;
+        if nqp::istype($node, QAST::Node) {
+            if nqp::istype($node, QAST::Block) {
+                $depth++;
+                %new-antifilter := nqp::clone(%antifilter);
+                if nqp::istype($node[0], QAST::Stmts) {
+                    for @($node[0]) -> $var {
+                        if nqp::istype($var, QAST::Op) && $var.op eq 'bind' {
+                            $var := $var[0];
+                        }
+                        if nqp::istype($var, QAST::Var) {
+                            %new-antifilter{$var.name} := 1;
+                        }
+                    }
+                    $node := $node[1]; # when collecting vars, skip the Stmts with
+                                       # all the declarations
+               }
+            } elsif nqp::istype($node, QAST::Regex) {
+                $depth++;
+            } elsif nqp::istype($node, QAST::Var) {
+                if $node.scope eq 'lexical' && nqp::existskey(%filter, $node.name) {
+                    if !nqp::existskey(%antifilter, $node.name) {
+                        %filter{$node.name} := $depth if $depth > %filter{$node.name};
+                        if $depth > 0 {
+                            %usages{$node.name} := $EMPTY_LIST;
+                        } else {
+                            if !nqp::existskey(%usages, $node.name) {
+                                %usages{$node.name} := nqp::list();
+                            }
+                            nqp::push(%usages{$node.name}, $node);
+                        }
+                    }
+                }
+            }
+
+            for @($node) {
+                self.collect_vars($_, $depth, %filter, %usages, %new-antifilter);
+            }
+        }
     }
 
     method lexical_depth($name) {
@@ -211,36 +274,6 @@ class NQP::Optimizer {
     }
 
     method visit_var($var) {
-        if !($!no_grasp_on_lexicals) {
-            if $var.scope eq 'lexical' {
-                my int $lexdepth := self.lexical_depth($var.name);
-                my int $vardepth := +@!block_stack - 1 - $lexdepth;
-                if $lexdepth != -1 {
-                    if $vardepth == 0 {
-                        if nqp::existskey(%*shallow_var_usages, $var.name) {
-                            #say("found a usage for " ~ $var.name);
-                            nqp::push(%*shallow_var_usages{$var.name}, $var);
-                            #say($var.dump);
-                        }
-                    } else {
-                        #say("poisoned " ~ $var.name);
-                        #say($var.dump);
-                        #say("my local var stack is " ~ +@!local_var_stack ~ " deep, my lexdepth is $lexdepth");
-                        #say(nqp::existskey(@!local_var_stack[$lexdepth-1], $var.name));
-                        try {
-                            nqp::deletekey(@!local_var_stack[$lexdepth-1], $var.name);
-                        }
-                    }
-                }
-            } elsif $var.scope eq 'contextual' {
-                my int $lexdepth := self.lexical_depth($var.name);
-                try {
-                    nqp::deletekey(@!local_var_stack[$lexdepth-1], $var.name);
-                    #say("poisoned " ~ $var.name ~ " due to contextual.");
-                }
-            }
-        }
-
         if nqp::istype($var, QAST::VarWithFallback) {
             self.visit_children($var);
         }
