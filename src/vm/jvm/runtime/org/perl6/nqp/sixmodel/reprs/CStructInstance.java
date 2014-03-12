@@ -1,6 +1,7 @@
 package org.perl6.nqp.sixmodel.reprs;
 
 import java.util.HashMap;
+import java.util.Map.Entry;
 
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
@@ -14,7 +15,7 @@ import org.perl6.nqp.sixmodel.SixModelObject;
 import org.perl6.nqp.sixmodel.reprs.CStructREPRData.AttrInfo;
 import org.perl6.nqp.sixmodel.reprs.NativeCall.ArgType;
 
-public class CStructInstance extends SixModelObject {
+public class CStructInstance extends SixModelObject implements Refreshable {
     public Structure storage;
     /* XXX: Using a hash to store members is probably not an optimal solution.
      * Dynamically generating subclasses that have the appropriate members and
@@ -111,5 +112,25 @@ public class CStructInstance extends SixModelObject {
         default:
             ExceptionHandling.dieInternal(tc, String.format("CStruct.get_attribute_native: Can't handle %s", info.argType));
         }
+    }
+
+    public void refresh(ThreadContext tc) {
+        CStructREPRData repr_data = (CStructREPRData) st.REPRData;
+
+        // Recursively refresh our members.
+        for (Entry<String, SixModelObject> entry: memberCache.entrySet()) {
+            ArgType argType = repr_data.fieldTypes.get(entry.getKey()).argType;
+            SixModelObject child = entry.getValue();
+            if (argType == ArgType.CARRAY || argType == ArgType.CSTRUCT) {
+                NativeCallOps.refresh(child, tc);
+            }
+        }
+
+        /* This is the take a hammer to it approach. Just dump the entire
+         * cache and rebuild everything on next read. Future versions should
+         * compare the pointer in C memory and the one in the object in the
+         * loop above and only dump the entries where the two are different.
+         */
+        memberCache.clear();
     }
 }

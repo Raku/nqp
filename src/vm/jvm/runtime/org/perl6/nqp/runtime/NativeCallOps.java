@@ -33,6 +33,7 @@ import org.perl6.nqp.sixmodel.reprs.CStructREPRData;
 import org.perl6.nqp.sixmodel.reprs.NativeCall.ArgType;
 import org.perl6.nqp.sixmodel.reprs.NativeCallInstance;
 import org.perl6.nqp.sixmodel.reprs.NativeCallBody;
+import org.perl6.nqp.sixmodel.reprs.Refreshable;
 
 public final class NativeCallOps {
     public static long init() {
@@ -91,6 +92,10 @@ public final class NativeCallOps {
             /* The actual foreign function call. */
             Object returned = call.entry_point.invoke(javaType(tc, call.ret_type, returns), cArgs);
 
+            for (int i = 0; i < arguments.elems(tc); i++) {
+                refresh(arguments.at_pos_boxed(tc, i), tc);
+            }
+
             /* Wrap returned in the appropriate REPR type. */
             return toNQPType(tc, call.ret_type, returns, returned);
         }
@@ -100,7 +105,12 @@ public final class NativeCallOps {
         }
     }
 
-    public static long refresh(SixModelObject obj) {
+    public static long refresh(SixModelObject obj, ThreadContext tc) {
+        obj = Ops.decont(obj, tc);
+        if(!(obj instanceof Refreshable)) return 1L;
+
+        ((Refreshable) obj).refresh(tc);
+
         return 1L;
     }
 

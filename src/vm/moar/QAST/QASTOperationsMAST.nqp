@@ -1951,6 +1951,15 @@ QAST::MASTOperations.add_core_op('rindex',  -> $qastcomp, $op {
         !! QAST::Op.new( :op('rindexfrom'), |@operands ));
 });
 
+# unicode properties
+QAST::MASTOperations.add_core_moarop_mapping('unipropcode', 'unipropcode');
+QAST::MASTOperations.add_core_moarop_mapping('unipvalcode', 'unipvalcode');
+QAST::MASTOperations.add_core_moarop_mapping('getuniname', 'getuniname');
+QAST::MASTOperations.add_core_moarop_mapping('getuniprop_str', 'getuniprop_str');
+QAST::MASTOperations.add_core_moarop_mapping('getuniprop_bool', 'getuniprop_bool');
+QAST::MASTOperations.add_core_moarop_mapping('getuniprop_int', 'getuniprop_int');
+QAST::MASTOperations.add_core_moarop_mapping('matchuniprop', 'matchuniprop');
+
 # serialization context opcodes
 QAST::MASTOperations.add_core_moarop_mapping('sha1', 'sha1');
 QAST::MASTOperations.add_core_moarop_mapping('createsc', 'createsc');
@@ -2307,6 +2316,12 @@ QAST::MASTOperations.add_core_moarop_mapping('hllizefor', 'hllizefor');
 QAST::MASTOperations.add_core_moarop_mapping('nfafromstatelist', 'nfafromstatelist');
 QAST::MASTOperations.add_core_moarop_mapping('nfarunproto', 'nfarunproto');
 QAST::MASTOperations.add_core_moarop_mapping('nfarunalt', 'nfarunalt', 0);
+
+# native call ops
+QAST::MASTOperations.add_core_moarop_mapping('initnativecall', 'no_op');
+QAST::MASTOperations.add_core_moarop_mapping('buildnativecall', 'nativecallbuild', 0);
+QAST::MASTOperations.add_core_moarop_mapping('nativecall', 'nativecallinvoke');
+QAST::MASTOperations.add_core_moarop_mapping('nativecallrefresh', 'nativecallrefresh', 0);
 
 # process related opcodes
 QAST::MASTOperations.add_core_moarop_mapping('exit', 'exit', 0);
