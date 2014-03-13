@@ -2321,6 +2321,25 @@ QAST::MASTOperations.add_core_moarop_mapping('nfarunalt', 'nfarunalt', 0);
 QAST::MASTOperations.add_core_moarop_mapping('initnativecall', 'no_op');
 QAST::MASTOperations.add_core_moarop_mapping('buildnativecall', 'nativecallbuild', 0);
 QAST::MASTOperations.add_core_moarop_mapping('nativecall', 'nativecallinvoke');
+QAST::MASTOperations.add_core_op('nativecall', -> $qastcomp, $op {
+    proto decont_all(@args) {
+        my int $i := 0;
+        my int $n := nqp::elems(@args);
+        while $i < $n {
+            nqp::bindpos(@args, $i, nqp::decont(nqp::atpos(@args, $i)));
+            $i++;
+        }
+        @args
+    }
+    $qastcomp.as_mast(QAST::VM.new(
+        :moarop('nativecallinvoke'),
+        $op[0], $op[1],
+        QAST::Op.new(
+            :op('call'),
+            QAST::WVal.new( :value(nqp::getcodeobj(&decont_all)) ),
+            $op[2]
+        )));
+});
 QAST::MASTOperations.add_core_moarop_mapping('nativecallrefresh', 'nativecallrefresh', 0);
 
 # process related opcodes
