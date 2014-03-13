@@ -110,6 +110,7 @@ guess_os()
        [ "$OS" = "CYGWIN_NT-5.2" ] ||
        [ "$OS" = "CYGWIN_NT-6.0" ] ||
        [ "$OS" = "CYGWIN_NT-6.1" ] ||
+       [ "$OS" = "CYGWIN_NT-6.2" ] ||
        [ "$OS" = "CYGWIN_NT-6.1-WOW64" ]; then
     CONFIG_OS="cygwin"
   elif [ "$OS" = "MINGW32_NT-5.0" ] ||
