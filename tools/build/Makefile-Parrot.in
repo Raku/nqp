@@ -508,7 +508,7 @@ p-install: p-all
 	$(CP)     $(DYNPMC) $(DYNOPS) $(OPS_DIR)/$(BIGINT_OPS)$(LOAD_EXT) $(OPS_DIR)/$(DYNCALL_OPS)$(LOAD_EXT) $(DESTDIR)$(PARROT_LIB_DIR)/dynext
 	$(MKPATH)                     $(DESTDIR)$(PARROT_INCLUDE_DIR)/dynpmc
 	$(CP)       $(DYNPMC_HEADERS) $(DESTDIR)$(PARROT_INCLUDE_DIR)/dynpmc
-
+	$(CHMOD) +x $(DESTDIR)$(PARROT_LIB_DIR)/dynext/*.$(LOAD_EXT)
 
 stage0: $(P_STAGE0)
 stage1: $(P_STAGE1)
@@ -1084,3 +1084,7 @@ release: manifest
 
 # nqp::makefile <-- tells Configure.pm to convert / to \ in the above
 #                   template for Win32 systems
+# Local variables:
+#   mode: makefile
+# End:
+# vim: ft=make:
