@@ -2,6 +2,7 @@
 #include "parrot/parrot.h"
 #include "parrot/extend.h"
 #include "sixmodelobject.h"
+#include "containers.h"
 
 /* ***************************************************************************
  * CodePair container configuration: container with FETCH/STORE code refs
