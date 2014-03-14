@@ -266,7 +266,7 @@ sub gen_nqp {
     my $gen_parrot  = $options{'gen-parrot'};
     my $prefix      = $options{'prefix'} || cwd().'/install';
     my $startdir    = cwd();
-    my $git_protocol = $options{'git-protocol'} // 'https';
+    my $git_protocol = $options{'git-protocol'} || 'https';
 
     my $PARROT_REVISION = 'nqp/tools/build/PARROT_REVISION';
 
