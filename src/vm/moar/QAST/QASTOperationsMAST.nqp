@@ -2325,8 +2325,12 @@ QAST::MASTOperations.add_core_op('nativecall', -> $qastcomp, $op {
     proto decont_all(@args) {
         my int $i := 0;
         my int $n := nqp::elems(@args);
+        my $obj;
         while $i < $n {
-            nqp::bindpos(@args, $i, nqp::decont(nqp::atpos(@args, $i)));
+            $obj := nqp::decont(nqp::atpos(@args, $i));
+            nqp::bindpos(@args, $i, nqp::can($obj, 'cstr')
+                ?? nqp::decont($obj.cstr())
+                !! $obj);
             $i++;
         }
         @args
