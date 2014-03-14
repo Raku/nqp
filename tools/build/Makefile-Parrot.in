@@ -1012,7 +1012,10 @@ $(OPS_DIR)/$(BIGINT_OPS)$(LOAD_EXT): $(OPS_DIR)/$(BIGINT_OPS_SOURCE) $(LIBTOMMAT
 	cd src/vm/parrot/6model/reprs && $(CC) -c @cc_o_out@P6bigint$(O) -I../../../../../$(PMC_DIR) -I../../../../../3rdparty/libtommath $(CINCLUDES) $(CFLAGS) P6bigint.c
 	cd $(OPS_DIR) && $(LD) @ld_out@$(BIGINT_OPS)$(LOAD_EXT) $(BIGINT_OPS)$(O) ../../../../3rdparty/libtommath/*$(O) ../6model/reprs/P6bigint$(O) $(LINKARGS)
 
-$(DYNCALL_BIN):
+$(DYNCALL_BIN): dyncall-build
+
+.PHONY: dyncall-build
+dyncall-build:
 	@dyncall_build@
 
 $(OPS_DIR)/$(DYNCALL_OPS)$(LOAD_EXT): $(OPS_DIR)/$(DYNCALL_OPS_SOURCE) $(DYNCALL_BIN) src/vm/parrot/6model/reprs/NativeCall.c src/vm/parrot/6model/reprs/NativeCall.h src/vm/parrot/6model/reprs/CStruct.c src/vm/parrot/6model/reprs/CStruct.h src/vm/parrot/6model/reprs/CPointer.c src/vm/parrot/6model/reprs/CPointer.h src/vm/parrot/6model/reprs/CArray.c src/vm/parrot/6model/reprs/CArray.h src/vm/parrot/6model/reprs/CStr.c src/vm/parrot/6model/reprs/CStr.h $(OPS_DIR)/$(OPS)$(LOAD_EXT)

@@ -193,7 +193,7 @@ MAIN: {
                 if ($^O eq 'netbsd') {
                     $config{'dyncall_build'} = "cd 3rdparty/dyncall && BUILD_DIR=. $make -f BSDmakefile";
                 } else {
-                    $config{'dyncall_build'} = "cd 3rdparty/dyncall && BUILD_DIR=. $make";
+                    $config{'dyncall_build'} = '$(MAKE) -C 3rdparty/dyncall BUILD_DIR=.';
                 }
             }
         }

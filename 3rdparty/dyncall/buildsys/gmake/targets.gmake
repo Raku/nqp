@@ -76,13 +76,13 @@ endif
 dirs: $(DIRS)
 ifdef DIRS
 $(DIRS): 
-	$(MAKE_COMMAND) -C $@ $(MAKECMDGOALS)
+	$(MAKE) -C $@ $(MAKECMDGOALS)
 endif
 
 extra-dirs: $(EXTRA_DIRS)
 ifdef EXTRA_DIRS
 $(EXTRA_DIRS):
-	$(MAKE_COMMAND) -C $@ $(MAKECMDGOALS)
+	$(MAKE) -C $@ $(MAKECMDGOALS)
 endif
 
 # --- clean -------------------------------------------------------------------
