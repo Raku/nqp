@@ -14,8 +14,9 @@ class NQP::Optimizer {
         @!block_stack.push($block);
         my @defined_var_names := nqp::list_s();
 
-        my $has_definitions;
+        my $has_definitions := 0;
         my $can_transform := 1;
+        my $scared_off_by_twigils;
 
         # if we already know this is not a block we can turn into a Stmt, or if
         # we're looking at the second argument to a for op, we can bail out
@@ -51,6 +52,9 @@ class NQP::Optimizer {
                         # also make sure we don't turn dynamic vars into locals
                         my $twigil := nqp::substr($var.name, 1, 1);
                         my $sigil := nqp::substr($var.name, 0, 1);
+                        if $twigil eq '?' {
+                            $scared_off_by_twigils := 1
+                        }
                         if $sigil eq '$'  && $twigil ne '*' && $twigil ne '?'
                                 && $var.name ne '$_' && $var.name ne '$/' && $var.name ne '$!' && $var.name ne '$¢' {
 
@@ -73,22 +77,23 @@ class NQP::Optimizer {
 
         my $do_transform := 0;
         my %filter := nqp::hash();
-        if $has_definitions > 0 {
+        if $has_definitions > 0 && !$scared_off_by_twigils {
             for @defined_var_names {
                 %filter{$_} := 1
             }
-            if self.collect_vars($block[1], 0, %filter, %usages) {
+            if self.collect_vars($block[1], 1, %filter, %usages) {
                 $do_transform := 1;
             }
         } elsif $has_definitions == 0 && $can_transform {
             $do_transform := 1
         }
 
-        my $succ := -1;
-        if !($!no_grasp_on_lexicals) {
+        my $succ := 0;
+        if !($!no_grasp_on_lexicals) || +@!block_stack == 1 {
             for %usages {
                 my $name := $_.key;
-                if %filter{$name} == 0 {
+                say("usage of $name");
+                if %filter{$name} == 1 {
                     my $first_char := nqp::findcclass(nqp::const::CCLASS_WORD, $name, 0, 4);
                     my $last_valid := nqp::index($name, '-', $first_char);
                     my $newname;
@@ -116,7 +121,10 @@ class NQP::Optimizer {
             #say($block.dump);
         #}
 
-        if $do_transform && $succ == $has_definitions {
+        say("$succ is succ, $has_definitions is has_definitions.");
+        say($block.dump);
+        say("----");
+        if $do_transform && $succ == $has_definitions && +@!block_stack > 1 {
             my $newblock := QAST::Stmt.new();
             for @($block) {
                 $newblock.push($_);
@@ -150,8 +158,6 @@ class NQP::Optimizer {
                             %new-antifilter{$var.name} := 1;
                         }
                     }
-                    $node := $node[1]; # when collecting vars, skip the Stmts with
-                                       # all the declarations
                }
             } elsif nqp::istype($node, QAST::Regex) {
                 $depth++;
@@ -159,7 +165,7 @@ class NQP::Optimizer {
                 if $node.scope eq 'lexical' && nqp::existskey(%filter, $node.name) {
                     if !nqp::existskey(%antifilter, $node.name) {
                         %filter{$node.name} := $depth if $depth > %filter{$node.name};
-                        if $depth > 0 {
+                        if $depth > 1 {
                             %usages{$node.name} := $EMPTY_LIST;
                         } else {
                             if !nqp::existskey(%usages, $node.name) {
@@ -339,7 +345,6 @@ class NQP::Optimizer {
                     } elsif nqp::istype($visit, QAST::Want) {
                         self.visit_children($visit, :skip_selectors)
                     } elsif nqp::istype($visit, QAST::Regex) {
-                        $!no_grasp_on_lexicals := 1;
                         QRegex::Optimizer.new().optimize($visit, @!block_stack[+@!block_stack - 1], |%!adverbs);
                     } else {
                         self.visit_children($visit);
