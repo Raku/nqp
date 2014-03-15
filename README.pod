@@ -1,6 +1,6 @@
 =head1 NQP - Not Quite Perl (6)
 
-NQP is Copyright (C) 2009-2013 by The Perl Foundation.  See F<LICENSE>
+NQP is Copyright (C) 2009-2014 by The Perl Foundation.  See F<LICENSE>
 for licensing details.
 
 This is "Not Quite Perl" -- a lightweight Perl 6-like environment
@@ -41,7 +41,9 @@ Once you have a copy of NQP, build it as follows:
     $ make
 
 If you don't have parrot installed, you can have Configure.pl generate one for
-you by passing the C<--gen-parrot> option to it as well.
+you by passing the C<--gen-parrot> option to it as well.  If you don't have
+MoarVM installed, you can have Configure.pl generate one for you by passing
+teh C<--gen-moar> option to it as well.
 
 The C<make> step will create a "nqp" or "nqp.exe" executable in the
 current directory.  Programs can then be run from the build 

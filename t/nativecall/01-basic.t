@@ -47,7 +47,6 @@ BEGIN {
 class Call     is repr('NativeCall') { }
 class CPointer is repr('CPointer')   { }
 
-#my $printf := nqp::create(Call);
 my $printf := Call.new;
 $arg_hash := nqp::hash();
 $arg_hash<type> := 'utf8str';
@@ -55,7 +54,12 @@ $arg_hash<free_str> := 1;
 $return_hash := nqp::hash();
 $return_hash<type> := 'void';
 
-nqp::buildnativecall($printf, '', 'printf', '', [$arg_hash], $return_hash);
+try {
+    nqp::buildnativecall($printf, '', 'printf', '', [$arg_hash], $return_hash);
+    CATCH {
+        nqp::buildnativecall($printf, 'msvcrt.dll', 'printf', '', [$arg_hash], $return_hash);
+    }
+}
 nqp::nativecall(nqp::null(), $printf, ["ok - printf\n"]);
 
 my $strdup := nqp::create(Call);
@@ -68,7 +72,7 @@ $return_hash<type> := 'cpointer';
 try {
     nqp::buildnativecall($strdup, '', 'strdup', '', [$arg_hash], $return_hash);
     CATCH {
-        nqp::buildnativecall($strdup, '', '_strdup', '', [$arg_hash], $return_hash);
+        nqp::buildnativecall($strdup, 'msvcrt.dll', '_strdup', '', [$arg_hash], $return_hash);
     }
 }
 my $dupped := nqp::nativecall(CPointer, $strdup, ["ok - passing cpointer\n"]);
@@ -80,7 +84,12 @@ $arg_hash<type> := 'cpointer';
 $return_hash := nqp::hash();
 $return_hash<type> := 'void';
 
-nqp::buildnativecall($printf, '', 'printf', '', [$arg_hash], $return_hash);
+try {
+    nqp::buildnativecall($printf, '', 'printf', '', [$arg_hash], $return_hash);
+    CATCH {
+        nqp::buildnativecall($printf, 'msvcrt.dll', 'printf', '', [$arg_hash], $return_hash);
+    }
+}
 nqp::nativecall(nqp::null(), $printf, [$dupped]);
 
 # vim: ft=perl6
