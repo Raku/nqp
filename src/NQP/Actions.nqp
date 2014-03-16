@@ -291,6 +291,7 @@ class NQP::Actions is HLL::Actions {
     method statement_control:sym<unless>($/) {
         my $ast := xblock_immediate( $<xblock>.ast );
         $ast.op('unless');
+        $/.prune();
         make $ast;
     }
 
@@ -300,6 +301,7 @@ class NQP::Actions is HLL::Actions {
         unless $*CONTROL_USED {
             $ast.push(QAST::IVal.new( :value(1), :named('nohandler') ));
         }
+        $/.prune();
         make $ast;
     }
 
@@ -317,6 +319,7 @@ class NQP::Actions is HLL::Actions {
         unless $*CONTROL_USED {
             $ast.push(QAST::IVal.new( :value(1), :named('nohandler') ));
         }
+        $/.prune();
         make $ast;
     }
 
@@ -333,18 +336,21 @@ class NQP::Actions is HLL::Actions {
         unless $*CONTROL_USED {
             $ast.push(QAST::IVal.new( :value(1), :named('nohandler') ));
         }
+        $/.prune();
         make $ast;
     }
 
     method statement_control:sym<CATCH>($/) {
         my $block := $<block>.ast;
         set_block_handler($/, $block, 'CATCH');
+        $/.prune();
         make default_for('$');
     }
 
     method statement_control:sym<CONTROL>($/) {
         my $block := $<block>.ast;
         set_block_handler($/, $block, 'CONTROL');
+        $/.prune();
         make default_for('$');
     }
 
@@ -385,11 +391,13 @@ class NQP::Actions is HLL::Actions {
 	
 	method statement_prefix:sym<BEGIN>($/) {
         make $*W.run_begin_block($<blorst>.ast);
+        $/.prune();
     }
 
     method statement_prefix:sym<INIT>($/) {
         $*W.cur_lexpad().push($<blorst>.ast);
         make QAST::Stmts.new();
+        $/.prune();
     }
 
     method statement_prefix:sym<try>($/) {
@@ -420,12 +428,14 @@ class NQP::Actions is HLL::Actions {
                 ),
                 default_for('$')
             ));
+        $/.prune();
     }
 
     method blorst($/) {
         make $<block>
              ?? block_immediate($<block>.ast)
              !! $<statement>.ast;
+        $/.prune();
     }
 
     # Statement modifiers
@@ -454,6 +464,7 @@ class NQP::Actions is HLL::Actions {
         my $ast := $<val>.ast;
         $ast.named( $<key>.Str );
         make $ast;
+        $/.prune;
     }
 
     method colonpair($/) {
@@ -467,6 +478,7 @@ class NQP::Actions is HLL::Actions {
             $ast.named( ~$<identifier> );
             make $ast;
         }
+        $/.prune;
     }
 
     method variable($/) {
@@ -589,6 +601,7 @@ class NQP::Actions is HLL::Actions {
         }
         
         make QAST::Stmts.new();
+        $/.prune;
     }
 
     method package_def($/) {
@@ -683,6 +696,7 @@ class NQP::Actions is HLL::Actions {
         }
 
         make $ast;
+        $/.prune;
     }
     
     method role_params($/) {
@@ -694,14 +708,15 @@ class NQP::Actions is HLL::Actions {
         }
     }
 
-    method scope_declarator:sym<my>($/)  { make $<scoped>.ast; }
-    method scope_declarator:sym<our>($/) { make $<scoped>.ast; }
-    method scope_declarator:sym<has>($/) { make $<scoped>.ast; }
+    method scope_declarator:sym<my>($/)  { make $<scoped>.ast; $/.prune }
+    method scope_declarator:sym<our>($/) { make $<scoped>.ast; $/.prune }
+    method scope_declarator:sym<has>($/) { make $<scoped>.ast; $/.prune }
 
     method scoped($/) {
         make $<declarator>       ?? $<declarator>.ast !!
              $<multi_declarator> ?? $<multi_declarator>.ast !!
                                     $<package_declarator>.ast;
+        $/.prune;
     }
 
     method declarator($/) {
@@ -710,9 +725,9 @@ class NQP::Actions is HLL::Actions {
              !! $<variable_declarator>.ast;
     }
 
-    method multi_declarator:sym<multi>($/) { make $<declarator> ?? $<declarator>.ast !! $<routine_def>.ast }
-    method multi_declarator:sym<proto>($/) { make $<declarator> ?? $<declarator>.ast !! $<routine_def>.ast }
-    method multi_declarator:sym<null>($/)  { make $<declarator>.ast }
+    method multi_declarator:sym<multi>($/) { make $<declarator> ?? $<declarator>.ast !! $<routine_def>.ast; $/.prune }
+    method multi_declarator:sym<proto>($/) { make $<declarator> ?? $<declarator>.ast !! $<routine_def>.ast; $/.prune }
+    method multi_declarator:sym<null>($/)  { make $<declarator>.ast; $/.prune }
 
 
     method variable_declarator($/) {
@@ -807,14 +822,17 @@ class NQP::Actions is HLL::Actions {
         }
 
         make $ast;
+        $/.prune;
+        $/.prune;
     }
 
     method initializer($/) {
         make $<EXPR>.ast;
+        $/.prune;
     }
 
-    method routine_declarator:sym<sub>($/) { make $<routine_def>.ast; }
-    method routine_declarator:sym<method>($/) { make $<method_def>.ast; }
+    method routine_declarator:sym<sub>($/) { make $<routine_def>.ast; $/.prune }
+    method routine_declarator:sym<method>($/) { make $<method_def>.ast; $/.prune }
 
     method routine_def($/) {
         # If it's just got * as a body, make a multi-dispatch enterer.
@@ -964,6 +982,7 @@ class NQP::Actions is HLL::Actions {
         if $<trait> {
             for $<trait> { $_.ast()($/); }
         }
+        $/.prune;
     }
     
     method method_def($/) {
@@ -1043,6 +1062,7 @@ class NQP::Actions is HLL::Actions {
         if $<trait> {
             for $<trait> { $_.ast()($/); }
         }
+        $/.prune;
     }
 
     sub only_star_block() {
@@ -1109,6 +1129,7 @@ class NQP::Actions is HLL::Actions {
         if $<parameter> {
             for $<parameter> { $BLOCKINIT.push($_.ast); }
         }
+        $/.prune;
     }
 
     method parameter($/) {
@@ -1159,6 +1180,7 @@ class NQP::Actions is HLL::Actions {
         }
 
         make $ast;
+        $/.prune();
     }
 
     method param_var($/) {
@@ -1189,10 +1211,12 @@ class NQP::Actions is HLL::Actions {
         unless $found {
             $/.CURSOR.panic("Use of undeclared type '" ~ ~$/ ~ "'");
         }
+        $/.prune;
     }
 
     method trait($/) {
         make $<trait_mod>.ast;
+        $/.prune;
     }
 
     method trait_mod:sym<is>($/) {
@@ -1238,6 +1262,7 @@ class NQP::Actions is HLL::Actions {
         else {
             $/.CURSOR.panic("Trait '$<longname>' not implemented");
         }
+        $/.prune;
     }
 
     method regex_declarator($/, $key?) {
@@ -1334,6 +1359,7 @@ class NQP::Actions is HLL::Actions {
             $ast.op('callmethod');
         }
         make $ast;
+        $/.prune;
     }
 
     ## Terms
@@ -1347,6 +1373,7 @@ class NQP::Actions is HLL::Actions {
         my $ast := $<args>.ast;
         $ast.name('&' ~ ~$<deflongname>);
         make $ast;
+        $/.prune;
     }
 
     method term:sym<name>($/) {
@@ -1387,6 +1414,7 @@ class NQP::Actions is HLL::Actions {
             $ast.unshift($var);
         }
         make $ast;
+        $/.prune;
     }
 
     method term:sym<pir::op>($/) {
@@ -1394,10 +1422,12 @@ class NQP::Actions is HLL::Actions {
         my $pirop := ~$<op>;
         $pirop := join(' ', nqp::split('__', $pirop));
         make QAST::VM.new( :pirop($pirop), :node($/), |@args );
+        $/.prune;
     }
 
     method term:sym<pir::const>($/) {
         make QAST::VM.new( :pirconst(~$<const>) );
+        $/.prune;
     }
 
     method term:sym<nqp::op>($/) {
@@ -1405,10 +1435,12 @@ class NQP::Actions is HLL::Actions {
         my @args  := $<args> ?? $<args>[0].ast.list !! [];
         my $ast  := QAST::Op.new( :op($op), |@args, :node($/) );
         make $ast;
+        $/.prune;
     }
 
     method term:sym<nqp::const>($/) {
         make QAST::Op.new( :op('const'), :name(~$<const>) );
+        $/.prune;
     }
 
     method term:sym<onlystar>($/) {
@@ -1441,6 +1473,7 @@ class NQP::Actions is HLL::Actions {
                 QAST::Var.new( :name($dc_name), :scope('local') )
             ));
         make QAST::Op.new( :op('locallifetime'), $stmts, $dc_name );
+        $/.prune;
     }
 
     method args($/) { make $<arglist>.ast; }
