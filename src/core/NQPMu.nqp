@@ -106,6 +106,20 @@ my class NQPMu {
     method isa($type) {
         self.HOW.isa(self, $type)
     }
+
+#ifdef js
+    # HACKs
+    method to_n() {
+        0;
+    }
+    method to_s() {
+        "";
+    }
+    method Bool() {
+        nqp::isconcrete(self);
+    }
+#endif
+
 }
 
 #?if !parrot
