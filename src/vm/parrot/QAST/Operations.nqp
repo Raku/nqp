@@ -1826,8 +1826,8 @@ QAST::Operations.add_core_pirop_mapping('sub_n', 'sub', 'Nnn', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('mul_i', 'mul', 'Iii', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('mul_I', 'nqp_bigint_mul', 'PPPP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('mul_n', 'mul', 'Nnn', :inlinable(1));
-QAST::Operations.add_core_pirop_mapping('div_i', 'div', 'Iii', :inlinable(1));
-QAST::Operations.add_core_pirop_mapping('div_I', 'nqp_bigint_div', 'PPPP', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('div_i', 'floordiv', 'Iii', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('div_I', 'nqp_bigint_floordiv', 'PPPP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('div_In', 'nqp_bigint_div_num', 'NPP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('div_n', 'div', 'Nnn', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('mod_i', 'mod', 'Iii', :inlinable(1));
@@ -1854,7 +1854,6 @@ QAST::Operations.add_core_pirop_mapping('lcm_I', 'nqp_bigint_lcm', 'PPPP', :inli
 
 QAST::Operations.add_core_pirop_mapping('ceil_n', 'ceil', 'Nn', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('floor_n', 'floor', 'NN', :inlinable(1));
-QAST::Operations.add_core_pirop_mapping('ln_n', 'ln', 'Nn', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('sqrt_n', 'sqrt', 'Nn', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('radix', 'nqp_radix', 'Pisii', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('radix_I', 'nqp_bigint_radix', 'PisiiP', :inlinable(1));
@@ -2227,7 +2226,6 @@ QAST::Operations.add_core_op('bindattr_i', :inlinable(1), -> $qastcomp, $op {
     }
 });
 QAST::Operations.add_core_pirop_mapping('bindattr_n', 'repr_bind_attr_num', '3PPsn', :inlinable(1));
-QAST::Operations.add_core_pirop_mapping('bindattr_s', 'repr_bind_attr_str', '3PPss', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('bindattr_s_nh', 'repr_bind_attr_str', '3PPss', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('bindattr_s_h', 'repr_bind_attr_str', '3PPsis', :inlinable(1));
 QAST::Operations.add_core_op('bindattr_s', :inlinable(1), -> $qastcomp, $op {

@@ -165,10 +165,10 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     method metachar:sym<( )>($/) {
-        my $subpast := QAST::Node.new(self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1)));
-        my $qast := QAST::Regex.new( $subpast, $<nibbler>.ast, :rxtype('subrule'),
+        my $sub_ast := QAST::Node.new(self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1)));
+        my $ast := QAST::Regex.new( $sub_ast, $<nibbler>.ast, :rxtype('subrule'),
                                      :subtype('capture'), :node($/) );
-        make $qast;
+        make $ast;
     }
 
     method metachar:sym<'>($/) {
@@ -350,7 +350,9 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     method backslash:sym<c>($/) {
-        make QAST::Regex.new( $<charspec>.ast, :rxtype('literal'), :node($/) );
+        make $<sym> eq 'C' ??
+            QAST::Regex.new( $<charspec>.ast, :rxtype('enumcharlist'), :negate(1), :node($/) ) !!
+            QAST::Regex.new( $<charspec>.ast, :rxtype('literal'), :node($/) )
     }
 
     method backslash:sym<misc>($/) {
@@ -485,8 +487,14 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         my $name := ~$<longname>;
         my $qast;
         if $<assertion> {
-            $qast := $<assertion>[0].ast;
-            self.subrule_alias($qast, $name);
+            $qast := $<assertion>.ast;
+            if $qast.rxtype eq 'subrule' {
+                self.subrule_alias($qast, $name);
+            }
+            else {
+                $qast := QAST::Regex.new( $qast, :name($name), 
+                                          :rxtype<subcapture>, :node($/) );
+            }
         }
         elsif $name eq 'sym' {
             my $rxname := "";
@@ -513,12 +521,12 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                                      :node($/), :name($name),
                                      QAST::Node.new(QAST::SVal.new( :value($name) )));
             if $<arglist> {
-                for $<arglist>[0].ast.list { $qast[0].push( $_ ) }
+                for $<arglist>.ast.list { $qast[0].push( $_ ) }
             }
             elsif $<nibbler> {
                 $name eq 'after' ??
-                    $qast[0].push(self.qbuildsub(self.flip_ast($<nibbler>[0].ast), :anon(1), :addself(1))) !!
-                    $qast[0].push(self.qbuildsub($<nibbler>[0].ast, :anon(1), :addself(1)));
+                    $qast[0].push(self.qbuildsub(self.flip_ast($<nibbler>.ast), :anon(1), :addself(1))) !!
+                    $qast[0].push(self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1)));
             }
         }
         make $qast;
@@ -534,8 +542,8 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                                      QAST::Regex.new( :rxtype<cclass>, :name<.> ));
         }
         
-        my $i := 1;
-        my $n := +$clist;
+        my int $i := 1;
+        my int $n := nqp::elems($clist);
         while $i < $n {
             my $ast := $clist[$i].ast;
             if $ast.negate || $ast.rxtype eq 'cclass' && ~$ast.node le 'Z' {
@@ -559,9 +567,9 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     method arglist($/) {
-        my $past := QAST::Op.new( :op('list') );
-        for $<arg> { $past.push( $_.ast ); }
-        make $past;
+        my $ast := QAST::Op.new( :op('list') );
+        for $<arg> { $ast.push( $_.ast ); }
+        make $ast;
     }
 
     method cclass_elem($/) {
@@ -736,6 +744,10 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             $qast[2].backtrack('r');
         }
         $block.push($qast);
+
+        if nqp::existskey(%rest, 'cursor_type') {
+            $qast.cursor_type(%rest<cursor_type>);
+        }
         
         $block;
     }

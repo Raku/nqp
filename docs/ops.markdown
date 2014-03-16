@@ -677,6 +677,50 @@ my class MyHandler {
 }
 ```
 
+# Unicode Property Opcodes
+
+## getuniname
+* `getuniname(int $codepoint)`
+
+Translate a codepoint to its Unicode name.
+
+## unipropcode
+* `unipropcode(str $propname)`
+
+Translates a property name to the property category it's in.
+
+## unipvalcode
+* `unipvalcode(int $propcode, str $propname)`
+
+Looks up a property name in its property category, and returns which
+table within that category to use.
+
+## getuniprop_int
+* `getuniprop_int(int $codepoint, int $propcode)`
+
+Uses the table found by unipropcode to look up an integer property value
+for a given codepoint.  Note that many properties that are officially
+numeric are really stored as strings, and if you try to use this op
+on such a property, you'll get a meaningless position in an enum table
+instead of the value you want.
+
+## getuniprop_str
+* `getuniprop_str(int $codepoint, int $propcode)`
+
+Same thing, but fetches a string property value.
+
+## getuniprop_bool
+* `getuniprop_bool(int $codepoint, int $propcode)`
+
+Same thing, but fetches a boolean property value.
+
+## matchuniprop
+* `matchuniprop(int $codepoint, int $propcode, int $pvalcode)`
+
+Looks up a codepoint property and return 1 if it matches the pval, 0 otherwise.
+The propcode and pvalcode may be looked up with the opcodes above.  (Note that
+you can use the property value name (e.g. Nd) for both lookups.)
+
 # Conditional Opcodes
 
 ## if

@@ -22,7 +22,7 @@ Implemented:
 - a couple of methods: `.call` and `.nil?`
 - infixish assignments: `+=` `-=` `*=` ...
 - simple classes and objects with attributes.
-- inheritance (no mixins yet) - see [inheritance.t](t/inheritance.t)
+- method inheritance (no mixins yet) - see [inheritance.t](t/inheritance.t)
 - `while` and `until` loops
 - statement modifiers `if` `unless`, `while`, `until` e.g.: `puts 42 if true`
 - basic arrays and hashes
@@ -32,7 +32,8 @@ Implemented:
 - lightweight eRuby like templating, see [template.rbi](examples-rubyish/template.rbi)
 - heredocs, literal `<<EOF ... EOF` and interpolating `<<"END" ... END`
 - code block arguments `even = grep(arr) {|n| n % 2 == 0}` -- see [functional.t](t/functional.t)
-- package constants `Trig::PI = 3.1415926`
+- package constants `Trig::PI = 3.1415926` (no inheritance yet)
+- ruby 2.x named parameters: def foo(bar:42, baz:) ; bar ^ baz; end
 
 Notes:
 ------

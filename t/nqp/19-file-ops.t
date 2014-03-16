@@ -2,7 +2,7 @@
 
 # Test nqp::op file operations.
 
-plan(40);
+plan(45);
 
 ok( nqp::stat('CREDITS', nqp::const::STAT_EXISTS) == 1, 'nqp::stat exists');
 ok( nqp::stat('AARDVARKS', nqp::const::STAT_EXISTS) == 0, 'nqp::stat not exists');
@@ -116,6 +116,9 @@ else {
 if nqp::getcomp('nqp').backend.name eq 'parrot' {
     ok(1, "ok $_ # Skipped: readlinefh is broken on parrot") for (36, 37, 38, 39, 40);
 }
+elsif nqp::getcomp('nqp').backend.name eq 'moar' {
+    ok(1, "ok $_ # Skipped: readlinefh won't match \\r on Moar") for (36, 37, 38, 39, 40);
+}
 else {
     $fh := nqp::open('t/nqp/19-readline.txt', 'r');
     ok(nqp::readlinefh($fh) eq "line1\r",   'reading a line till CR');
@@ -124,4 +127,45 @@ else {
     ok(nqp::readlinefh($fh) eq "\n",          'reading an empty line');
     ok(nqp::readlinefh($fh) eq "line4",     'reading a line till EOF');
     nqp::closefh($fh);
+}
+
+# link
+nqp::unlink($test-file ~ '-linked') if nqp::stat($test-file ~ '-linked', nqp::const::STAT_EXISTS);
+$fh := nqp::open($test-file, 'w');
+nqp::printfh($fh, 'Hello');
+nqp::closefh($fh);
+nqp::link($test-file, $test-file ~ '-linked');
+ok(nqp::stat($test-file ~ '-linked', nqp::const::STAT_EXISTS), 'the hard link should exist');
+ok(nqp::stat($test-file, nqp::const::STAT_PLATFORM_DEV) == nqp::stat($test-file ~ '-linked', nqp::const::STAT_PLATFORM_DEV), "a hard link should share the original's device number");
+ok(nqp::stat($test-file, nqp::const::STAT_PLATFORM_INODE) == nqp::stat($test-file ~ '-linked', nqp::const::STAT_PLATFORM_INODE), "a hard link should share the original's inode number");
+nqp::unlink($test-file);
+nqp::unlink($test-file ~ '-linked');
+
+# symlink
+
+my $tmp_file := "tmp";
+my $env := nqp::getenvhash();
+$env<NQP_SHELL_TEST_ENV_VAR> := "123foo";
+nqp::shell("echo %NQP_SHELL_TEST_ENV_VAR% > $tmp_file",nqp::cwd(),$env);
+my $output := slurp($tmp_file);
+my $is-windows := $output ne "%NQP_SHELL_TEST_ENV_VAR%\n";
+
+if $is-windows {
+    ok(1, "ok $_ # Skipped: symlink not tested on Windows") for (44, 45);
+}
+else {
+    nqp::unlink($test-file ~ '-symlink') if nqp::stat($test-file ~ '-symlink', nqp::const::STAT_EXISTS);
+    $fh := nqp::open($test-file, 'w');
+    nqp::printfh($fh, 'Hello');
+    nqp::closefh($fh);
+    nqp::symlink($test-file, $test-file ~ '-symlink');
+    ok(nqp::stat($test-file ~ '-symlink', nqp::const::STAT_EXISTS), 'the symbolic link should exist');
+    if nqp::getcomp('nqp').backend.name eq 'parrot' {
+        ok(1, 'ok 45 # Skipped: stat + STAT_ISLNK is broken on parrot');
+    }
+    else {
+        ok(nqp::stat($test-file ~ '-symlink', nqp::const::STAT_ISLNK), 'the symbolic link should actually *be* a symbolic link');
+    }
+    nqp::unlink($test-file);
+    nqp::unlink($test-file ~ '-symlink');
 }

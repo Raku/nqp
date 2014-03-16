@@ -114,8 +114,7 @@ grammar HLL::Grammar {
 
     token charname {
         || <integer>
-        || <[a..z A..Z]> <-[ \] , # ]>*? <[a..z A..Z ) ]>
-           <?before \s* <[ \] , # ]> >
+        || <.alpha> .*? <?before \s* <[ \] , # ]> >
     }
     token charnames { [<.ws><charname><.ws>]+ % ',' }
     token charspec {
@@ -304,7 +303,8 @@ position C<pos>.
             self.panic('Alphanumeric character is not allowed as a delimiter');
         }
         if nqp::iscclass(nqp::const::CCLASS_WHITESPACE, $start, 0) {
-            self.panic('Whitespace character is not allowed as a delimiter');
+            my $code := nqp::sprintf('%X', [nqp::ord($start)]);
+            self.panic('Whitespace character (0x' ~ $code ~ ') is not allowed as a delimiter');
         }
 
         # assume stop delim is same as start, for the moment

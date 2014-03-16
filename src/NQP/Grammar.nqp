@@ -592,7 +592,7 @@ grammar NQP::Grammar is HLL::Grammar {
           {   
               %*RX<s>    := $<sym> eq 'rule';
               %*RX<r>    := $<sym> eq 'token' || $<sym> eq 'rule';
-              %*RX<name> := $<deflongname> ?? $<deflongname>.ast !! "!!LATENAME!!" ~ ~$<latename>;
+              %*RX<name> := $<deflongname> ?? $<deflongname>.made !! "!!LATENAME!!" ~ ~$<latename>;
               %*RX<code> := $*W.create_code($*W.cur_lexpad(), %*RX<name>, 0, :code_type_name<NQPRegex>);
           }
           '{'<p6regex=.LANG('Regex','nibbler')>'}'<?ENDSTMT>
@@ -857,7 +857,7 @@ grammar NQP::Regex is QRegex::P6Regex::Grammar {
             | ':' <arglist>
             | '(' <arglist> ')'
             | <.normspace> <nibbler>
-            ]**0..1
+            ]?
     }
 
     token assertion:sym<var> {

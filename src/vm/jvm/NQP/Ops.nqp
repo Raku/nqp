@@ -18,7 +18,7 @@ $ops.add_hll_op('nqp', 'preinc', -> $qastcomp, $op {
         :op('bind'),
         $var,
         QAST::Op.new(
-            :op('add_n'),
+            :op('add_i'),
             $var,
             QAST::IVal.new( :value(1) )
         )));
@@ -33,7 +33,7 @@ $ops.add_hll_op('nqp', 'predec', -> $qastcomp, $op {
         :op('bind'),
         $var,
         QAST::Op.new(
-            :op('sub_n'),
+            :op('sub_i'),
             $var,
             QAST::IVal.new( :value(1) )
         )));
@@ -58,7 +58,7 @@ $ops.add_hll_op('nqp', 'postinc', -> $qastcomp, $op {
                 :op('bind'),
                 $var,
                 QAST::Op.new(
-                    :op('add_n'),
+                    :op('add_i'),
                     QAST::Var.new( :name($tmp), :scope('local'), :returns($var.returns)  ),
                     QAST::IVal.new( :value(1) )
                 )
@@ -85,7 +85,7 @@ $ops.add_hll_op('nqp', 'postdec', -> $qastcomp, $op {
                 :op('bind'),
                 $var,
                 QAST::Op.new(
-                    :op('sub_n'),
+                    :op('sub_i'),
                     QAST::Var.new( :name($tmp), :scope('local') ),
                     QAST::IVal.new( :value(1) )
                 )

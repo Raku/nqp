@@ -39,6 +39,7 @@ import java.net.InetAddress;
 import org.perl6.nqp.io.AsyncFileHandle;
 import org.perl6.nqp.io.FileHandle;
 import org.perl6.nqp.io.IIOAsyncReadable;
+import org.perl6.nqp.io.IIOAsyncWritable;
 import org.perl6.nqp.io.IIOClosable;
 import org.perl6.nqp.io.IIOEncodable;
 import org.perl6.nqp.io.IIOInteractive;
@@ -430,8 +431,6 @@ public final class Ops {
                 cs = Charset.forName("UTF-8");
             else if (encoding.equals("utf16"))
                 cs = Charset.forName("UTF-16");
-            else if (encoding.equals("binary"))
-                cs = Charset.forName("ISO-8859-1"); /* Byte oriented... */
             else
                 throw ExceptionHandling.dieInternal(tc,
                     "Unsupported encoding " + encoding);
@@ -676,7 +675,23 @@ public final class Ops {
         }
         return obj;
     }
-    
+
+    public static SixModelObject spurtasync(SixModelObject obj, SixModelObject resultType, SixModelObject data,
+            SixModelObject done, SixModelObject error, ThreadContext tc) {
+        if (obj instanceof IOHandleInstance) {
+            IOHandleInstance h = (IOHandleInstance)obj;
+            if (h.handle instanceof IIOAsyncWritable)
+                ((IIOAsyncWritable)h.handle).spurt(tc, resultType, data, done, error);
+            else
+                throw ExceptionHandling.dieInternal(tc,
+                    "This handle does not support async spurt");
+        }
+        else {
+            die_s("spurtasync requires an object with the IOHandle REPR", tc);
+        }
+        return obj;
+    }
+
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static SixModelObject linesasync(SixModelObject obj, SixModelObject resultType,
             long chomp, SixModelObject queue, SixModelObject done, SixModelObject error,
@@ -817,7 +832,7 @@ public final class Ops {
         Path before_o = Paths.get(before);
         Path after_o = Paths.get(after);
         try {
-            Files.createLink(before_o, after_o);
+            Files.createLink(after_o, before_o);
         }
         catch (Exception e) {
             die_s(IOExceptionMessages.message(e), tc);
@@ -941,7 +956,7 @@ public final class Ops {
         Path before_o = Paths.get(before);
         Path after_o = Paths.get(after);
         try {
-            Files.createSymbolicLink(before_o, after_o);
+            Files.createSymbolicLink(after_o, before_o);
         }
         catch (Exception e) {
             die_s(IOExceptionMessages.message(e), tc);
@@ -2992,18 +3007,21 @@ public final class Ops {
         return valA + valB;
     }
 
-    public static String chr(long val, ThreadContext tc) {
+    public static String chr(long ord, ThreadContext tc) {
         // http://en.wikipedia.org/wiki/Mapping_of_Unicode_characters 
-        if ((val >= 0xfdd0
-            && (val <= 0xfdef                     // non character
-                || ((val & 0xfffe) == 0xfffe)     // non character
-                || val > 0x10ffff)                // out of range
+        if ((ord >= 0xfdd0
+            && (ord <= 0xfdef                     // non character
+                || ((ord & 0xfffe) == 0xfffe)     // non character
+                || ord > 0x10ffff)                // out of range
             )
-        || (val >= 0xd800 && val <= 0xdfff)       // surrogate
+        || (ord >= 0xd800 && ord <= 0xdfff)       // surrogate
         ) {
-            throw ExceptionHandling.dieInternal(tc, "Invalid code-point U+" + String.format("%05X", val));
+            throw ExceptionHandling.dieInternal(tc, "Invalid code-point U+" + String.format("%05X", ord));
         }
-        return (new StringBuffer()).append(Character.toChars((int)val)).toString();
+	if (ord < 0)
+	    throw ExceptionHandling.dieInternal(tc, "chr codepoint cannot be negative");
+
+        return (new StringBuffer()).append(Character.toChars((int)ord)).toString();
     }
    
     public static String join(String delimiter, SixModelObject arr, ThreadContext tc) {
@@ -5187,8 +5205,8 @@ public final class Ops {
     public static SixModelObject loadcompunit(SixModelObject obj, long compileeHLL, ThreadContext tc) {
         try {
             EvalResult res = (EvalResult)obj;
-            ByteClassLoader cl = new ByteClassLoader(res.jc.bytes);
-            res.cu = (CompilationUnit)cl.findClass(res.jc.name).newInstance();
+            Class<?> cuClass = tc.gc.byteClassLoader.defineClass(res.jc.name, res.jc.bytes);
+            res.cu = (CompilationUnit) cuClass.newInstance();
             if (compileeHLL != 0)
                 usecompileehllconfig(tc);
             res.cu.initializeCompilationUnit(tc);
@@ -5275,7 +5293,17 @@ public final class Ops {
                 } else if (cont != null) {
                     invokeDirect(tc, run, invocantCallSite, false, new Object[] { cont });
                 } else {
-                    invokeDirect(tc, run, emptyCallSite, false, emptyArgList);
+                    if (run instanceof ResumeStatus) {
+                        /* Got a continuation to invoke immediately (done by
+                         * Rakudo cope with lack of tail calls). */
+                        ResumeStatus.Frame root = ((ResumeStatus)run).top;
+                        fixupContinuation(tc, root, null);
+                        root.resume();
+                    }
+                    else {
+                        /* Code a normal code ref to invoke. */
+                        invokeDirect(tc, run, emptyCallSite, false, emptyArgList);
+                    }
                 }
                 // If we get here, the reset argument or something placed using control returned normally
                 // so we should just return.
@@ -5332,20 +5360,20 @@ public final class Ops {
     public static void continuationinvoke(SixModelObject cont, SixModelObject arg, ThreadContext tc) throws Throwable {
         if (!(cont instanceof ResumeStatus))
             ExceptionHandling.dieInternal(tc, "applied continuationinvoke to non-continuation");
-
         ResumeStatus.Frame root = ((ResumeStatus)cont).top;
-
+        fixupContinuation(tc, root, arg);
+        root.resume();
+    }
+    private static void fixupContinuation(ThreadContext tc, ResumeStatus.Frame csr, SixModelObject arg) {
         // fixups: safe to do more than once, but not concurrently
         // these are why continuationclone is needed...
-        ResumeStatus.Frame csr = root;
         while (csr != null) {
             csr.tc = tc; // csr.callFrame.{csr,tc} will be set on resume
             if (csr.next == null) csr.thunk = arg;
             csr = csr.next;
         }
-
-        root.resume();
     }
+
     /* noop, exists only so you can set a breakpoint in it */
     public static SixModelObject debugnoop(SixModelObject in, ThreadContext tc) {
         return in;

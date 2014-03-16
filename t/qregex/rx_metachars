@@ -155,7 +155,7 @@ a|&b			a|&b		<rule error>	alternation and conjunction (|&) - parse error
 ^ \h+ $			\x000a\x000b\x000c\x000d\x0085	n	0-255 horizontal whitespace (\h)
 ^ \v+ $			\x0009\x0020\x00a0	n	0-255 vertical whitespace (\v)
 # todo :pugs<feature>
-^ \s+ $			\x1680\x180e\x2000\x2001\x2002\x2003\x2004\x2005\x2006\x2007\x2008\x2008\x2009\x200a\x202f\x205f\x3000	y	unicode whitespace (\s)
+^ \s+ $			\x1680\x2000\x2001\x2002\x2003\x2004\x2005\x2006\x2007\x2008\x2008\x2009\x200a\x202f\x205f\x3000	y	unicode whitespace (\s)
 # todo :pugs<feature>
 ^ \h+ $			\x1680\x180e\x2000\x2001\x2002\x2003\x2004\x2005\x2006\x2007\x2008\x2008\x2009\x200a\x202f\x205f\x3000	y	unicode whitespace (\h)
 ^ \V+ $			\x1680\x180e\x2000\x2001\x2002\x2003\x2004\x2005\x2006\x2007\x2008\x2008\x2009\x200a\x202f\x205f\x3000	y	unicode whitespace (\V)
@@ -238,27 +238,17 @@ c \c[ 33, 33] d		abc!!def	y	hex (\c[])
 c \c[ 33 , 33 ] d	abc!!def	y	hex (\c[])
 a \c[33]+ f		abcdef		n	hex (\c[])
 b \c[33] c		abc!def		n	hex (\c[])
-# todo :pge<\C33>
 \C33			a		y	not hex (\C)
-# todo :pge<\C33>
 a \C33 c		abc		y	not hex (\C)
 \C33			''		n	not hex (\C)
-# todo :pge<\C33>
 c \C33 d		abc!def		n	not hex (\C)
-# todo :pge<\C33>
 c \C33+ d		abc!!def	n	not hex (\C)
-# todo :pge<\C33>
 a \C33+ f		abcdef		y	not hex (\C)
-# todo :pge<\C33>
 \C[33]			a		y	not hex (\C[])
-# todo :pge<\C33>
 a \C[33] c		abc		y	not hex (\C[])
 \C[33]			''		n	not hex (\C[])
-# todo :pge<\C33>
 c \C[33] d		abc!def		n	not hex (\C[])
-# todo :pge<\C33>
 c \C[33]+ d		abc!!def	n	not hex (\C[])
-# todo :pge<\C33>
 a \C[33]+ f		abcdef		y	not hex (\C[])
 c \o041 d		abc!def		y	octal (\o)
 c \o41+ d		abc!!def	y	octal (\o)

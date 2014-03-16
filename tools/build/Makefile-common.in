@@ -36,6 +36,7 @@ QASTNODE_SOURCES = \
   src/QAST/Want.nqp \
   src/QAST/Var.nqp \
   src/QAST/VarWithFallback.nqp \
+  src/QAST/ParamTypeCheck.nqp \
   src/QAST/Op.nqp \
   src/QAST/VM.nqp \
   src/QAST/Stmts.nqp \

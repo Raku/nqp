@@ -1,7 +1,7 @@
-# Copyright (C) 2006-2013, The Perl Foundation.
-# $Id$
+# Copyright (C) 2006-2014, The Perl Foundation.
 
 SHELL            = @shell@
+# should use -O2 since parrot-6.1.0
 PARROT_ARGS      = -L. -X.
 
 # values from parrot_config
@@ -15,7 +15,7 @@ PARROT_LIBRARY_DIR = $(PARROT_LIB_DIR)/library
 P_NQP_LANG_DIR     = $(PARROT_LIB_DIR)/languages/nqp
 HAS_ICU            = @has_icu@
 BAT                = @bat@
-P_RUNNER	       = ./nqp-p
+P_RUNNER           = ./nqp-p
 
 PARROT_BUILD_DIR   = gen/parrot
 
@@ -508,7 +508,7 @@ p-install: p-all
 	$(CP)     $(DYNPMC) $(DYNOPS) $(OPS_DIR)/$(BIGINT_OPS)$(LOAD_EXT) $(OPS_DIR)/$(DYNCALL_OPS)$(LOAD_EXT) $(DESTDIR)$(PARROT_LIB_DIR)/dynext
 	$(MKPATH)                     $(DESTDIR)$(PARROT_INCLUDE_DIR)/dynpmc
 	$(CP)       $(DYNPMC_HEADERS) $(DESTDIR)$(PARROT_INCLUDE_DIR)/dynpmc
-
+	$(CHMOD) 755 $(DESTDIR)$(PARROT_LIB_DIR)/dynext/*$(LOAD_EXT)
 
 stage0: $(P_STAGE0)
 stage1: $(P_STAGE1)
@@ -727,7 +727,7 @@ $(DYNEXT_TARGET): $(DYNPMC) $(DYNOPS) $(OPS_DIR)/$(BIGINT_OPS)$(LOAD_EXT) $(OPS_
 	$(CP) $(OPS_DIR)/$(BIGINT_OPS)$(LOAD_EXT) $(DYNEXT_DIR)
 	$(CP) $(OPS_DIR)/$(DYNCALL_OPS)$(LOAD_EXT) $(DYNEXT_DIR)
 	$(CHMOD) 755 $(DYNEXT_TARGET)
-	$(CHMOD) 755 $(DYNEXT_DIR)/$(OPS)$(LOAD_EXT)
+	$(CHMOD) 755 $(DYNEXT_DIR)/*$(LOAD_EXT)
 
 $(DYNPMC): $(PMC_SOURCES) $(METAMODEL_SOURCE)
 	$(PMC2C) --no-lines --dump $(PMC2C_INCLUDES) $(PMC_SOURCES)
@@ -1009,7 +1009,7 @@ $(OPS_DIR)/$(OPS)$(LOAD_EXT): $(OPS_DIR)/$(OPS_SOURCE) $(DYNPMC)
 $(OPS_DIR)/$(BIGINT_OPS)$(LOAD_EXT): $(OPS_DIR)/$(BIGINT_OPS_SOURCE) $(LIBTOMMATH_BIN) $(LIBTOMMATH_H) src/vm/parrot/6model/reprs/P6bigint.h src/vm/parrot/6model/reprs/P6bigint.c
 	cd $(OPS_DIR) && $(OPS2C) C --dynamic $(BIGINT_OPS_SOURCE)
 	cd $(OPS_DIR) && $(CC) -c @cc_o_out@$(BIGINT_OPS)$(O) $(CINCLUDES) -I../../../../3rdparty/libtommath $(CFLAGS) $(BIGINT_OPS).c
-	cd src/vm/parrot/6model/reprs && $(CC) -c @cc_o_out@P6bigint$(O) -I../../../../../../$(PMC_DIR) -I../../../../../3rdparty/libtommath $(CINCLUDES) $(CFLAGS) P6bigint.c
+	cd src/vm/parrot/6model/reprs && $(CC) -c @cc_o_out@P6bigint$(O) -I../../../../../$(PMC_DIR) -I../../../../../3rdparty/libtommath $(CINCLUDES) $(CFLAGS) P6bigint.c
 	cd $(OPS_DIR) && $(LD) @ld_out@$(BIGINT_OPS)$(LOAD_EXT) $(BIGINT_OPS)$(O) ../../../../3rdparty/libtommath/*$(O) ../6model/reprs/P6bigint$(O) $(LINKARGS)
 
 $(DYNCALL_BIN):
@@ -1018,11 +1018,11 @@ $(DYNCALL_BIN):
 $(OPS_DIR)/$(DYNCALL_OPS)$(LOAD_EXT): $(OPS_DIR)/$(DYNCALL_OPS_SOURCE) $(DYNCALL_BIN) src/vm/parrot/6model/reprs/NativeCall.c src/vm/parrot/6model/reprs/NativeCall.h src/vm/parrot/6model/reprs/CStruct.c src/vm/parrot/6model/reprs/CStruct.h src/vm/parrot/6model/reprs/CPointer.c src/vm/parrot/6model/reprs/CPointer.h src/vm/parrot/6model/reprs/CArray.c src/vm/parrot/6model/reprs/CArray.h src/vm/parrot/6model/reprs/CStr.c src/vm/parrot/6model/reprs/CStr.h $(OPS_DIR)/$(OPS)$(LOAD_EXT)
 	cd $(OPS_DIR) && $(OPS2C) C --dynamic $(DYNCALL_OPS_SOURCE)
 	cd $(OPS_DIR) && $(CC) -c @cc_o_out@$(DYNCALL_OPS)$(O) $(CINCLUDES) -I../../../../3rdparty/dyncall/dyncall -I../../../../3rdparty/dyncall/dyncallback -I../../../../3rdparty/dyncall/dynload $(CFLAGS) $(DYNCALL_OPS).c
-	cd src/vm/parrot/6model/reprs && $(CC) -c @cc_o_out@NativeCall$(O) -I../../../../../../../$(PMC_DIR) -I../../../../../3rdparty/dyncall/dyncall -I../../../../../3rdparty/dyncall/dyncallback -I../../../../../3rdparty/dyncall/dynload $(CINCLUDES) $(CFLAGS) NativeCall.c
-	cd src/vm/parrot/6model/reprs && $(CC) -c @cc_o_out@CStruct$(O) -I../../../../../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) CStruct.c
-	cd src/vm/parrot/6model/reprs && $(CC) -c @cc_o_out@CPointer$(O) -I../../../../../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) CPointer.c
-	cd src/vm/parrot/6model/reprs && $(CC) -c @cc_o_out@CArray$(O) -I../../../../../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) CArray.c
-	cd src/vm/parrot/6model/reprs && $(CC) -c @cc_o_out@CStr$(O) -I../../../../../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) CStr.c
+	cd src/vm/parrot/6model/reprs && $(CC) -c @cc_o_out@NativeCall$(O) -I../../../../../$(PMC_DIR) -I../../../../../3rdparty/dyncall/dyncall -I../../../../../3rdparty/dyncall/dyncallback  -I../../../../../3rdparty/dyncall/dynload $(CINCLUDES) $(CFLAGS) NativeCall.c
+	cd src/vm/parrot/6model/reprs && $(CC) -c @cc_o_out@CStruct$(O) -I../../../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) CStruct.c
+	cd src/vm/parrot/6model/reprs && $(CC) -c @cc_o_out@CPointer$(O) -I../../../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) CPointer.c
+	cd src/vm/parrot/6model/reprs && $(CC) -c @cc_o_out@CArray$(O) -I../../../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) CArray.c
+	cd src/vm/parrot/6model/reprs && $(CC) -c @cc_o_out@CStr$(O) -I../../../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) CStr.c
 	cd $(OPS_DIR) && $(LD) @ld_out@$(DYNCALL_OPS)$(LOAD_EXT) $(DYNCALL_OPS)$(O) ../6model/reprs/NativeCall$(O) ../6model/reprs/CStruct$(O) ../6model/reprs/CPointer$(O) ../6model/reprs/CArray$(O) ../6model/reprs/CStr$(O) ../../../../3rdparty/dyncall/dyncall/libdyncall_s$(A) ../../../../3rdparty/dyncall/dyncallback/libdyncallback_s$(A) ../../../../3rdparty/dyncall/dynload/libdynload_s$(A) $(LINKARGS)
 
 $(NQP_CONST_PIR):
@@ -1084,3 +1084,7 @@ release: manifest
 
 # nqp::makefile <-- tells Configure.pm to convert / to \ in the above
 #                   template for Win32 systems
+# Local variables:
+#   mode: makefile
+# End:
+# vim: ft=make:

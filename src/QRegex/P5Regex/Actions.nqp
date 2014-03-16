@@ -229,7 +229,9 @@ class QRegex::P5Regex::Actions is HLL::Actions {
     }
 
     method p5backslash:sym<x>($/) {
-        my $hexlit := HLL::Actions.ints_to_string( $<hexint> );
+        my $hexlit := nqp::chars($<hexint>)
+            ?? nqp::chr( self.string_to_int($<hexint>, 16) )
+            !! nqp::chr(0);
         make QAST::Regex.new( $hexlit, :rxtype('literal'), :node($/) );
     }
 
@@ -599,8 +601,14 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         my $name := ~$<longname>;
         my $qast;
         if $<assertion> {
-            $qast := $<assertion>[0].ast;
-            self.subrule_alias($qast, $name);
+            $qast := $<assertion>.ast;
+            if $qast.rxtype eq 'subrule' {
+                self.subrule_alias($qast, $name);
+            }
+            else {
+                $qast := QAST::Regex.new( $qast, :name($name), 
+                                          :rxtype<subcapture>, :node($/) );
+            }
         }
         elsif $name eq 'sym' {
             my $loc := nqp::index(%*RX<name>, ':sym<');
@@ -616,12 +624,12 @@ class QRegex::P5Regex::Actions is HLL::Actions {
                                      :node($/), :name($name),
                                      QAST::Node.new(QAST::SVal.new( :value($name) )));
             if $<arglist> {
-                for $<arglist>[0].ast.list { $qast[0].push( $_ ) }
+                for $<arglist>.ast.list { $qast[0].push( $_ ) }
             }
             elsif $<nibbler> {
                 $name eq 'after' ??
-                    $qast[0].push(self.qbuildsub(self.flip_ast($<nibbler>[0].ast), :anon(1), :addself(1))) !!
-                    $qast[0].push(self.qbuildsub($<nibbler>[0].ast, :anon(1), :addself(1)));
+                    $qast[0].push(self.qbuildsub(self.flip_ast($<nibbler>.ast), :anon(1), :addself(1))) !!
+                    $qast[0].push(self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1)));
             }
         }
         make $qast;
@@ -632,9 +640,9 @@ class QRegex::P5Regex::Actions is HLL::Actions {
     }
 
     method arglist($/) {
-        my $past := QAST::Op.new( :op('list') );
-        for $<arg> { $past.push( $_.ast ); }
-        make $past;
+        my $ast := QAST::Op.new( :op('list') );
+        for $<arg> { $ast.push( $_.ast ); }
+        make $ast;
     }
 
     method subrule_alias($ast, $name) {

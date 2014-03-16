@@ -1938,6 +1938,26 @@ inline op repr_box_num(out PMC, in NUM, invar PMC) :base_core {
             "Can only use repr_box_num with a SixModelObject as the box target");
 }
 
+/*
+
+=item floordiv()
+
+Do an integer division and make sure the result is rounded towards -Inf
+
+=cut
+
+*/
+inline op floordiv(out INT, in INT, in INT) {
+    if (($2 < 0) ^ ($3 < 0)) {
+        if ($2 % $3 != 0) {
+            $1 = $2 / $3 - 1;
+        } else {
+            $1 = $2 / $3;
+        }
+    } else {
+        $1 = $2 / $3;
+    }
+}
 
 /*
 
@@ -3080,7 +3100,7 @@ inline op nqp_nfa_to_statelist(out PMC, invar PMC) :base_core {
 =item nqp_radix(out, radix, str, pos, flag)
 
 Convert string $3 into a number starting at offset $4 and using radix $2.
-The result of the conversion returns a FixedFloatArray PMC with
+The result of the conversion returns a FixedIntegerArray PMC with
     out[0] = converted value
     out[1] = radix ** (number of digits converted)
     out[2] = offset after consuming digits, -1 if no digits consumed
@@ -3106,8 +3126,8 @@ inline op nqp_radix(out PMC, in INT, in STR, in INT, in INT) :base_core {
     FLOATVAL zvalue = 0.0;
     FLOATVAL zbase  = 1.0;
     INTVAL   chars  = Parrot_str_length(interp, str);
-    FLOATVAL value  = zvalue;
-    FLOATVAL base   = zbase;
+    INTVAL value  = zvalue;
+    INTVAL base   = zbase;
     INTVAL   pos    = -1;
     INTVAL   ch;
     int      neg    = 0;
@@ -3142,10 +3162,10 @@ inline op nqp_radix(out PMC, in INT, in STR, in INT, in INT) :base_core {
     }
 
     if (neg || flags & 0x01) { value = -value; }
-    out = Parrot_pmc_new(interp, enum_class_FixedFloatArray);
+    out = Parrot_pmc_new(interp, enum_class_FixedIntegerArray);
     VTABLE_set_integer_native(interp, out, 3);
-    VTABLE_set_number_keyed_int(interp, out, 0, value);
-    VTABLE_set_number_keyed_int(interp, out, 1, base);
+    VTABLE_set_integer_keyed_int(interp, out, 0, value);
+    VTABLE_set_integer_keyed_int(interp, out, 1, base);
     VTABLE_set_integer_keyed_int(interp, out, 2, pos);
     $1 = out;
 }

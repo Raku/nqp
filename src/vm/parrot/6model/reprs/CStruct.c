@@ -224,7 +224,7 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *repr_info, CStructRE
                 }
                 else {
                     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                        "CStruct representation only implements native int and float members so far");
+                        "CStruct representation only handles int, num, CArray, CPointer and CStruct");
                 }
             }
             else {

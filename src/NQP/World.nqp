@@ -101,7 +101,7 @@ class NQP::World is HLL::World {
                     QAST::SVal.new( :value($setting_name) )
                 ));
             if self.is_precompilation_mode() {
-                self.add_load_dependency_task(:deserialize_past(QAST::Stmts.new(
+                self.add_load_dependency_task(:deserialize_ast(QAST::Stmts.new(
                     QAST::Op.new(
                         :op('loadbytecode'),
                         QAST::VM.new(
@@ -113,7 +113,7 @@ class NQP::World is HLL::World {
                 )));
             }
             else {
-                self.add_fixup_task(:fixup_past($set_outer));
+                self.add_fixup_task(:fixup_ast($set_outer));
             }
             
             return nqp::ctxlexpad($setting);
@@ -128,7 +128,7 @@ class NQP::World is HLL::World {
         
         # Make sure we do the loading during deserialization.
         if self.is_precompilation_mode() {
-            self.add_load_dependency_task(:deserialize_past(QAST::Stmts.new(
+            self.add_load_dependency_task(:deserialize_ast(QAST::Stmts.new(
                 QAST::Op.new(
                     :op('loadbytecode'),
                     QAST::VM.new(
@@ -192,19 +192,19 @@ class NQP::World is HLL::World {
     
     # Adds a fixup to install a specified QAST::Block in a package under the
     # specified name.
-    method install_package_routine($package, $name, $past_block) {
+    method install_package_routine($package, $name, $ast_block) {
         my $fixup := QAST::Op.new(
             :op('bindkey'),
             QAST::Op.new( :op('who'), QAST::WVal.new( :value($package) ) ),
             QAST::SVal.new( :value(~$name) ),
-            QAST::BVal.new( :value($past_block) )
+            QAST::BVal.new( :value($ast_block) )
         );
-        self.add_fixup_task(:deserialize_past($fixup), :fixup_past($fixup));
+        self.add_fixup_task(:deserialize_ast($fixup), :fixup_ast($fixup));
     }
     
     # Registers a code object, and gives it a dynamic compilation thunk.
     # Makes a real code object if it's a dispatcher.
-    method create_code($past, $name, $is_dispatcher, :$code_type_name = 'NQPRoutine') {
+    method create_code($ast, $name, $is_dispatcher, :$code_type_name = 'NQPRoutine') {
         # See if NQPRoutine is available to wrap this up in.
         my $code_type;
         my $have_code_type := 0;
@@ -219,10 +219,10 @@ class NQP::World is HLL::World {
         # XXX Lexical environment.
         my $stub_code := sub (*@args, *%named) {
             # Do the compilation.
-            $past.unshift(self.libs());
+            $ast.unshift(self.libs());
             my $compiler := nqp::getcomp('nqp');
             my $compiled := $compiler.compile(
-                QAST::CompUnit.new( :hll('nqp'), $past ),
+                QAST::CompUnit.new( :hll('nqp'), $ast ),
                 :from<ast>, :compunit_ok(1), :lineposcache($*LINEPOSCACHE),
                 :bootstrap(%*COMPILING<%?OPTIONS><bootstrap> ?? 1 !! 0));
 
@@ -267,8 +267,8 @@ class NQP::World is HLL::World {
         my $fixups := QAST::Stmts.new();
         my $dummy;
         my $code_ref_idx;
-        if nqp::defined($past<compile_time_dummy>) {
-            $dummy := $past<compile_time_dummy>;
+        if nqp::defined($ast<compile_time_dummy>) {
+            $dummy := $ast<compile_time_dummy>;
         }
         else {
             # Create a fresh stub code, and set its name.
@@ -278,18 +278,18 @@ class NQP::World is HLL::World {
             # Tag it as a static code ref and add it to the root code refs set.
             nqp::markcodestatic($dummy);
             nqp::markcodestub($dummy);
-            $code_ref_idx := self.add_root_code_ref($dummy, $past);
-            %!code_stub_sc_idx{$past.cuid()} := $code_ref_idx;
-            $past<compile_time_dummy> := $dummy;
+            $code_ref_idx := self.add_root_code_ref($dummy, $ast);
+            %!code_stub_sc_idx{$ast.cuid()} := $code_ref_idx;
+            $ast<compile_time_dummy> := $dummy;
             
             # Things with code objects may be methods in roles or multi-dispatch
             # routines. We need to handle their cloning and maintain the fixup
             # list.
             if $have_code_type {
-                %!code_object_fixup_list{$past.cuid()} := $fixups;
+                %!code_object_fixup_list{$ast.cuid()} := $fixups;
                 if self.is_precompilation_mode() {
                     my $cb := sub ($orig, $clone, $code_obj) {
-                        %!code_objects_to_fix_up{$past.cuid()}.push($code_obj);
+                        %!code_objects_to_fix_up{$ast.cuid()}.push($code_obj);
                         nqp::bindattr($code_obj, $code_type, '$!clone_callback', nqp::null());
                         my $do := nqp::getattr($code_obj, $code_type, '$!do');
                         nqp::markcodestub($do);
@@ -310,13 +310,13 @@ class NQP::World is HLL::World {
                                 QAST::WVal.new( :value($code_obj) ),
                                 QAST::WVal.new( :value($code_type) ),
                                 QAST::SVal.new( :value('$!do') ),
-                                QAST::Op.new( :op('clone'), QAST::BVal.new( :value($past) ) )
+                                QAST::Op.new( :op('clone'), QAST::BVal.new( :value($ast) ) )
                             ),
                             QAST::WVal.new( :value($code_obj) )
                         ));
                             
                         # Add to dynamic compilation fixup list.
-                        %!code_objects_to_fix_up{$past.cuid()}.push($code_obj);
+                        %!code_objects_to_fix_up{$ast.cuid()}.push($code_obj);
                     };
                     nqp::bindattr($code_obj, $code_type, '$!clone_callback', $cb);
                     nqp::push(@!clearup_tasks, sub () {
@@ -327,7 +327,7 @@ class NQP::World is HLL::World {
         }
         
         # Add fixups task node; it'll get populated or cleared during the compile.
-        self.add_fixup_task(:fixup_past($fixups));
+        self.add_fixup_task(:fixup_ast($fixups));
         
         # Provided we have the code type, now wrap what we have up in a
         # code object.
@@ -340,9 +340,9 @@ class NQP::World is HLL::World {
 
             # Add deserialization fixup task.
             self.add_fixup_task(
-                :deserialize_past(QAST::Op.new(
+                :deserialize_ast(QAST::Op.new(
                     :op('setcodeobj'),
-                    QAST::BVal.new( :value($past) ),
+                    QAST::BVal.new( :value($ast) ),
                     QAST::WVal.new( :value($code_obj) )
                 )));
             
@@ -352,17 +352,17 @@ class NQP::World is HLL::World {
                 QAST::WVal.new( :value($code_obj) ),
                 QAST::WVal.new( :value($code_type) ),
                 QAST::SVal.new( :value('$!do') ),
-                QAST::BVal.new( :value($past) )
+                QAST::BVal.new( :value($ast) )
             ));
             $fixups.push(QAST::Op.new(
                 :op('setcodeobj'),
-                QAST::BVal.new( :value($past) ),
+                QAST::BVal.new( :value($ast) ),
                 QAST::WVal.new( :value($code_obj) )
             ));
             
             # Add it to the dynamic compilation fixup todo list.
-            %!code_objects_to_fix_up{$past.cuid()} := [$code_obj];
-            %!code_object_types{$past.cuid()} := $code_type;
+            %!code_objects_to_fix_up{$ast.cuid()} := [$code_obj];
+            %!code_object_types{$ast.cuid()} := $code_type;
             
             $code_obj
         }
@@ -376,7 +376,7 @@ class NQP::World is HLL::World {
                     QAST::SVal.new( :value(self.handle()) ),
                     QAST::IVal.new( :value($code_ref_idx) )
                 ),
-                QAST::BVal.new( :value($past) )
+                QAST::BVal.new( :value($ast) )
             ));
             return $dummy;
         }
@@ -425,9 +425,9 @@ class NQP::World is HLL::World {
     }
     
     # This handles associating the role body with a role declaration.
-    method pkg_set_body_block($obj, $body_past) {
+    method pkg_set_body_block($obj, $body_ast) {
         # Get a code object for the body block.
-        my $body_code_obj := self.create_code($body_past, $body_past.name, 0);
+        my $body_code_obj := self.create_code($body_ast, $body_ast.name, 0);
         
         # Set it as the body block.
         $obj.HOW.set_body_block($obj, $body_code_obj);
@@ -448,11 +448,11 @@ class NQP::World is HLL::World {
     }
     
     # Runs a block at BEGIN time.
-    method run_begin_block($past) {
+    method run_begin_block($ast) {
         # Create a wrapper that makes all outer symbols visible.
         my $wrapper := QAST::Block.new(
             QAST::Stmts.new(),
-            $past
+            $ast
         );
         my %seen;
         my $i := +@!BLOCKS;
@@ -519,14 +519,14 @@ class NQP::World is HLL::World {
                 ));
             }
         }
-        self.add_fixup_task(:deserialize_past($libs), :fixup_past($libs));
+        self.add_fixup_task(:deserialize_ast($libs), :fixup_ast($libs));
         $libs
 #?endif
     }
     
     # Adds some initial tasks.
     method add_initializations() {
-        self.add_load_dependency_task(:deserialize_past(QAST::VM.new(
+        self.add_load_dependency_task(:deserialize_ast(QAST::VM.new(
             :parrot(QAST::Stmts.new(
                 QAST::VM.new( :pirop('nqp_dynop_setup v') ),
                 QAST::VM.new( :pirop('nqp_bigint_setup v') ),

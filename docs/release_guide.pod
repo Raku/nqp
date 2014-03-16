@@ -19,7 +19,7 @@ I<Note: This step has changed starting in 2012.07.>
 Check to see if F<tools/build/PARROT_REVISION> needs to be
 bumped to a later Parrot release.  If PARROT_REVISION already
 contains a Parrot release tag (e.g., C<RELEASE_3_9_0>) then
-it does not need to be changed.  If PARROT_REVISION refers to 
+it does not need to be changed.  If PARROT_REVISION refers to
 an interim commit, as in C<RELEASE_4_6_0-27-gda9adfa>, then
 update PARROT_REVISION to contain the tag corresponding to
 Parrot's monthly release.
@@ -27,9 +27,15 @@ Parrot's monthly release.
 To see a list of Parrot release tags, use C<git tag> on an
 up-to-date Parrot repository.
 
-Once F<tools/build/PARROT_REVISION> has been set to a Parrot 
+Once F<tools/build/PARROT_REVISION> has been set to a Parrot
 release, it must not be changed (except to another Parrot
 release) until after the Rakudo release.
+
+MoarVM tries to have a synchronised release schedule with NQP
+and rakudo, so there's most probably a release tag for MoarVM
+that you can bump F<tools/build/MOAR_REVISION> to. Release tags
+for MoarVM have the format C<2014.02>. Find all of the tags with
+C<git tag> in an up-to-date MoarVM checkout.
 
 =item 2.
 
@@ -41,16 +47,16 @@ Change the C<VERSION> file in nqp:
 
 =item 3.
 
-Make sure everything compiles and runs from a known clean state.
-This step is especially important if PARROT_REVISION was changed
-in step 1 above.
+Make sure everything compiles and runs from a known clean state. This step
+is especially important if C<PARROT_REVISION> and/or C<MOAR_REVISION> were
+changed in step 1 above. Don't forget to build the JVM backend, as well.
 
   $ make realclean
-  $ perl Configure.pl --gen-parrot
+  $ perl Configure.pl --gen-parrot --gen-moar --backend=parrot,moar,jvm
   $ make
   $ make test
 
-Resolve any problems that may still exist.  
+Resolve any problems that may still exist.
 
 =item 4.
 

@@ -3,6 +3,7 @@ package org.perl6.nqp.io;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.channels.AsynchronousFileChannel;
 import java.nio.channels.CompletionHandler;
 import java.nio.charset.Charset;
@@ -13,13 +14,15 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import java.nio.charset.CharacterCodingException;
+
 import org.perl6.nqp.runtime.CallSiteDescriptor;
 import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.Ops;
 import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.SixModelObject;
 
-public class AsyncFileHandle implements IIOClosable, IIOEncodable, IIOAsyncReadable {
+public class AsyncFileHandle implements IIOClosable, IIOEncodable, IIOAsyncReadable, IIOAsyncWritable {
     private AsynchronousFileChannel chan;
     private CharsetEncoder enc;
     private CharsetDecoder dec;
@@ -113,6 +116,57 @@ public class AsyncFileHandle implements IIOClosable, IIOEncodable, IIOAsyncReada
         }
     }
     
+    private class SpurtState {
+        public ByteBuffer bb;
+        public long expected;
+        public int position;
+    }
+    private static final CallSiteDescriptor spurtResultCSD = new CallSiteDescriptor(
+        new byte[] { }, null);
+    private static final CallSiteDescriptor spurtErrorCSD = new CallSiteDescriptor(
+        new byte[] { CallSiteDescriptor.ARG_OBJ }, null);
+    public void spurt(final ThreadContext tc, final SixModelObject Str, final SixModelObject data,
+                      final SixModelObject done, final SixModelObject error) {
+        try {
+            String s_data = Ops.unbox_s(data, tc);
+            CharBuffer s_buf = CharBuffer.allocate(s_data.length());
+            s_buf.put(s_data);
+            s_buf.rewind();
+
+            SpurtState ss = new SpurtState();
+            ss.bb = enc.encode(s_buf);
+            ss.expected = ss.bb.remaining();
+            ss.bb.rewind();
+
+            final CompletionHandler<Integer, SpurtState> ch = new CompletionHandler<Integer, SpurtState>() {
+                public void completed(Integer bytes, SpurtState ss) {
+                    if (ss.bb.position() == ss.expected) {
+                        /* Done. Call done handler. */
+                        ThreadContext curTC = tc.gc.getCurrentThreadContext();
+                        Ops.invokeDirect(curTC, done, spurtResultCSD, new Object[] { });
+                    }
+                    else {
+                        /* Need to write some more. */
+                        chan.write(ss.bb, ss.bb.position(), ss, this);
+                    }
+                }
+
+                public void failed(Throwable exc, SpurtState ss) {
+                    /* Box error. */
+                    ThreadContext curTC = tc.gc.getCurrentThreadContext();
+                    SixModelObject boxed = Ops.box_s(exc.toString(), Str, curTC);
+
+                    /* Call error handler. */
+                    Ops.invokeDirect(curTC, error, spurtErrorCSD, new Object[] { boxed });
+                }
+            };
+
+            chan.write(ss.bb, 0, ss, ch);
+        } catch (CharacterCodingException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
+        }
+    }
+
     private static final CallSiteDescriptor linesDoneCSD = new CallSiteDescriptor(
         new byte[] { }, null);
     private static final CallSiteDescriptor linesErrorCSD = new CallSiteDescriptor(

@@ -3,14 +3,14 @@ use NQPHLL;
 use QAST;
 
 class QRegex::P6Regex::World is HLL::World {
-    method create_code($past, $name) {
+    method create_code($ast, $name) {
         # Create a fresh stub code, and set its name.
         my $dummy := nqp::freshcoderef(-> { nqp::die("Uncompiled code executed") });
         nqp::setcodename($dummy, $name);
 
         # Tag it as a static code ref and add it to the root code refs set.
         nqp::markcodestatic($dummy);
-        self.add_root_code_ref($dummy, $past);
+        self.add_root_code_ref($dummy, $ast);
         
         # Create code object.
         my $code_obj := nqp::create(NQPRegex);
@@ -24,14 +24,14 @@ class QRegex::P6Regex::World is HLL::World {
             QAST::WVal.new( :value($code_obj) ),
             QAST::WVal.new( :value(NQPRegex) ),
             QAST::SVal.new( :value('$!do') ),
-            QAST::BVal.new( :value($past) )
+            QAST::BVal.new( :value($ast) )
         ));
         $fixups.push(QAST::Op.new(
             :op('setcodeobj'),
-            QAST::BVal.new( :value($past) ),
+            QAST::BVal.new( :value($ast) ),
             QAST::WVal.new( :value($code_obj) )
         ));
-        self.add_fixup_task(:fixup_past($fixups));
+        self.add_fixup_task(:fixup_ast($fixups));
 
         $code_obj
     }
@@ -120,12 +120,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     # XXX Eventually squish termseq and termish and
     # get < || && | & > infixes using by EXPR in nibbler
     token termseq {
-        || <termaltseq>
-        || <?before <rxstopper> | <[&|~]> > <.throw_null_pattern>
-        || <?before <infixstopper> > <.throw_null_pattern> # XXX Check if unmatched bracket
-        || $$ <.panic: "Regex not terminated">
-        || (\W) { self.throw_unrecognized_metachar: ~$/[0] }
-        || <.panic: "Regex not terminated">
+        <termaltseq>
     }
 
     token termaltseq {
@@ -151,7 +146,14 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token termish {
         :my $*SIGOK  := 0;
         :my $*VARDEF := 0;
-        <noun=.quantified_atom>+
+        [
+        || <noun=.quantified_atom>+
+        || <?before <rxstopper> | <[&|~]> > <.throw_null_pattern>
+        || <?before <infixstopper> > <.throw_null_pattern> # XXX Check if unmatched bracket
+        || $$ <.panic: "Regex not terminated">
+        || (\W) { self.throw_unrecognized_metachar: ~$/[0] }
+        || <.panic: "Regex not terminated">
+        ]
     }
 
     method SIGOK() { $*SIGOK := %*RX<s>; self }
@@ -296,7 +298,11 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token backslash:sym<Z> { 'Z' <.obs: '\\Z as end-of-string matcher', '\\n?$'> }
     token backslash:sym<Q> { 'Q' <.obs: '\\Q as quotemeta', 'quotes or literal variable match'> }
     token backslash:sym<unrec> { {} (\w) { self.throw_unrecog_backslash_seq: $/[0].Str } }
-    token backslash:sym<unsp> { [\s|'#'] <.panic: 'Unspace not allowed in regex'> }
+    token backslash:sym<unsp> {
+        [\s|'#'] {}
+        <.panic: "No unspace allowed in regex; if you meant to match the literal character, please enclose in single quotes ('"
+          ~ $/ ~ "') or use a backslashed form like \\x" ~ nqp::sprintf('%02x', [nqp::ord(~$/)])>
+    }
     token backslash:sym<misc> { \W }
 
     proto token cclass_backslash { <...> }
@@ -331,7 +337,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
             | ':' <arglist>
             | '(' <arglist> ')'
             | <.normspace> <nibbler>
-            ]**0..1
+            ]?
     }
 
     token assertion:sym<[> { <?before '['|'+'|'-'|':'> <cclass_elem>+ }

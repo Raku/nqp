@@ -29,6 +29,7 @@ MAIN: {
                'with-parrot=s', 'gen-parrot:s',
                'make-install!', 'makefile-timing!',
                'backends=s', 'gen-moar:s', 'moar-option=s@',
+               'git-protocol=s',
                'parrot-config=s', 'parrot-option=s@');
 
     # Print help if it's requested
@@ -46,6 +47,7 @@ MAIN: {
     my $default_backend;
     my %backends;
     if ($options{backends}) {
+        $options{backends} = 'parrot,jvm,moar' if lc($options{backends}) eq 'all';
         for my $be (split /,/, $options{backends}) {
             $be = lc $be;
             unless ($known_backends{$be}) {
@@ -214,7 +216,8 @@ MAIN: {
         my $moar_path = gen_moar($moar_want, %config, %options);
         if (!$moar_path) {
             push @errors,
-                "No suitable MoarVM (moar executable) found using the --prefix";
+                "No suitable MoarVM (moar executable) found using the --prefix\n" .
+                "(You can get a MoarVM built automatically with --gen-moar.)";
         }
         sorry(@errors) if @errors;
         $config{'make'}   = $^O eq 'MSWin32' ? 'nmake' : 'make';
@@ -323,6 +326,8 @@ General Options:
     --gen-moar         Download and build a copy of MoarVM to use
     --moar-option='--option=value'
                        Options to pass to MoarVM configuration for --gen-moar
+    --git-protocol={ssh,https,git}
+                       Protocol to use for git clone. Default: https
 
 Configure.pl also reads options from 'config.default' in the current directory.
 END

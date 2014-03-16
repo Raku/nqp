@@ -21,8 +21,8 @@ class RubyishClassHOW {
     }
 
     method add_method($obj, $name, $code) {
-	nqp::die("This class already has a method named " ~ $name)
-	    if nqp::existskey(%!methods, $name);
+        nqp::die("This class already has a method named " ~ $name)
+            if nqp::existskey(%!methods, $name);
 
         %!methods{$name} := $code;
     }
@@ -103,15 +103,13 @@ grammar Rubyish::Grammar is HLL::Grammar {
 
     rule signature {
         :my $*IN_PARENS := 1;
-        [[ <param> ]+ % ','  [ ',' '*' <slurpy=.param> ]? [ ',' '&' <func=.param> ]?
-        | '*' <slurpy=.param>] [ ',' '&' <func=.param> ]?
-        | '&' <func=.param>
+        [ <param> | '*' <slurpy=.param> | '&' <func=.param> ] +% ','
     }
 
-    token param {
-	<ident> [:s<hs> '=' <EXPR>]? {
-	    %*SYM{~$<ident>} := 'var'
-	}
+    token param {:s<hs>
+        <ident> [ $<named>=':' <EXPR>? | '=' <EXPR> ]? {
+            %*SYM{~$<ident>} := 'var'
+        }
     }
 
     token stmt:sym<class> {
@@ -158,7 +156,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
     token term:sym<call> {
         <!keyword>
         <operation> ['(' ~ ')' <call-args=.paren-args>? <code-block>?
-                    |:s<hs> <call-args>? <?{callable(~$<operation>)}>
+                    |:s<hs> <?{callable(~$<operation>)}> <call-args>?
                     ]
     }
 
@@ -181,13 +179,15 @@ grammar Rubyish::Grammar is HLL::Grammar {
     }
 
     token call-args  {:s<hs>
-         [ <arg=.hash-args>||<arg=.EXPR>]+ % ','  [ ',' <arg=.func-ref> ]?
-         | <arg=.func-ref>
+         [ <arg> ] +% ','
     }
 
-    token func-ref   { '&' <arg=.EXPR> }
+    proto token arg {*}
 
-    token hash-args  {:s [ <EXPR> '=>' <EXPR> ]+ % ',' }
+    token arg:sym<expr>  {:s <EXPR> <!before ['=>'|':']> }
+    token arg:sym<func>  { '&' <EXPR> }
+    token arg:sym<keyw>  { <ident> ':' <EXPR> }
+    token arg:sym<hash>  {:s [ <EXPR> '=>' <EXPR> ]+ % ',' }
 
     token paren-args {:my $*IN_PARENS := 1; <call-args> }
 
@@ -201,8 +201,8 @@ grammar Rubyish::Grammar is HLL::Grammar {
         :my $*MAYBE_DECL := 0;
         \+?
         [$<sigil>=[ \$ | \@\@? ] | <pkg=.ident>'::'<?before <[A..Z]>> | <!keyword> ]
-        <ident><!before [\!|\?|\h*\(]>
-        [ <?before \h* '=' [\w | \h+ || <.EXPR>] { $*MAYBE_DECL := 1 }> || <?> ]
+        <ident><!before [\!|\?|<hs>\(]>
+        [ <?before <hs> <bind-op> { $*MAYBE_DECL := 1 }> || <?> ]
     }
 
     token term:sym<var>   { <var> }
@@ -248,7 +248,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
 
     # Interpolation
     token interp      { '#{' ~ '}' [:s<hs> [ <stmtlist> ]
-				    || <panic('string interpolation error')>]
+                                    || <panic('string interpolation error')>]
                        }
     token quote_escape:sym<#{ }> { <interp>  }
 
@@ -344,7 +344,8 @@ grammar Rubyish::Grammar is HLL::Grammar {
                              ':' <O('%conditional, :reducecheck<ternary>, :op<if>')>
     }
 
-    token infix:sym<=>  { <sym><![>]> <O('%assignment, :op<bind>')> }
+    token bind-op     {'='<![>]>}
+    token infix:sym<=>  { <.bind-op> <O('%assignment, :op<bind>')> }
 
     token prefix:sym<not> { <sym>  <O('%loose_not,     :op<not_i>')> }
     token infix:sym<and>  { <sym>  <O('%loose_logical, :op<if>')> }
@@ -352,7 +353,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
  
     # Parenthesis
     token circumfix:sym<( )> { :my $*IN_PARENS := 1;
-                               '(' <EXPR> ')' <O('%methodop')> }
+                               '(' ~ ')' <EXPR> <O('%methodop')> }
 
     # Method call
     token postfix:sym<.>  {
@@ -490,7 +491,7 @@ class Rubyish::Actions is HLL::Actions {
         my $call;
 
         if $op {
-            $call :=  QAST::Op.new( :op($op) )
+            $call := QAST::Op.new( :op($op) )
         }
         elsif %*SYM{$name} eq 'method' && $*DEF {
             $call := QAST::Op.new( :op('callmethod'),
@@ -550,11 +551,21 @@ class Rubyish::Actions is HLL::Actions {
         make @args;
     }
 
-    method func-ref($/) {
-        make $<arg>.ast
+    method arg:sym<expr>($/) {
+        make $<EXPR>.ast
     }
 
-    method hash-args($/) {
+    method arg:sym<func>($/) {
+        make $<EXPR>.ast
+    }
+
+    method arg:sym<keyw>($/) {
+        my $arg := $<EXPR>.ast;
+        $arg.named( ~$<ident> );
+        make $arg;
+    }
+
+    method arg:sym<hash>($/) {
         my $args := QAST::Op.new( :op<hash> );
 
         $args.push( $_.ast )
@@ -624,18 +635,18 @@ class Rubyish::Actions is HLL::Actions {
                 );
         }
         else {
-	    my $ns;
-	    if $<pkg> {
-		$ns := ~$<pkg>;
-	    }
-	    elsif !$sigil && $*IN_CLASS {
-		# could be a package constant
-		my $c := nqp::substr($name, 0, 1);
-		$ns := $*CLASS_BLOCK.name
-		    if $c ge 'A' && $c le 'Z';
-	    }
-	    $name := $ns ~ '::' ~ $name
-		if $ns;
+            my $ns;
+            if $<pkg> {
+                $ns := ~$<pkg>;
+            }
+            elsif !$sigil && $*IN_CLASS {
+                # could be a package constant
+                my $c := nqp::substr($name, 0, 1);
+                $ns := $*CLASS_BLOCK.name
+                    if $c ge 'A' && $c le 'Z';
+            }
+            $name := $ns ~ '::' ~ $name
+                if $ns;
 
             if $*MAYBE_DECL {
 
@@ -706,6 +717,9 @@ class Rubyish::Actions is HLL::Actions {
        my $var := QAST::Var.new(
            :name(~$<ident>), :scope('lexical'), :decl('param')
           );
+       $var.named(~$<ident>)
+           if $<named>;
+
        $*CUR_BLOCK.symbol('self', :declared(1));
 
        $var.default( $<EXPR>.ast )
@@ -723,7 +737,7 @@ class Rubyish::Actions is HLL::Actions {
         }
 
         if $<slurpy> {
-            @params.push($<slurpy>.ast);
+            @params.push($<slurpy>[0].ast);
             @params[-1].slurpy(1);
         }
 
@@ -752,8 +766,8 @@ class Rubyish::Actions is HLL::Actions {
           );
 
         $new_type.push( QAST::SVal.new( :value(~$<classbody><super>),
-					:named('isa') ) )
-	    if $<classbody><super>;
+                                        :named('isa') ) )
+            if $<classbody><super>;
 
         $class_stmts.push(QAST::Op.new(
                               :op('bind'),

@@ -224,10 +224,13 @@ public class BootJavaInterop {
         //} catch (java.io.IOException e) {
         //    e.printStackTrace();
         //}
-        cc.constructed = (cc.target == null
-                ? new ByteClassLoader(bits)
-                : new ByteClassLoader(bits, cc.target.getClassLoader())
-            ).findClass(cc.className.replace('/','.'));
+        // XXX: The condition here can probably cut down a few more
+        // allocations if we check if the target's class loader isn't in the
+        // chain of loaders above gc.byteClassLoader.
+        ByteClassLoader loader = cc.target == null
+                ? gc.byteClassLoader
+                : new ByteClassLoader(cc.target.getClassLoader());
+        cc.constructed = loader.defineClass(cc.className.replace('/','.'), bits);
         try {
             cc.constructed.getField("constants").set(null, cc.constants.toArray(new Object[0]));
         } catch (ReflectiveOperationException roe) {

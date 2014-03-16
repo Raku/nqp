@@ -54,3 +54,5 @@ nqp-runtime.jar
 *.moarvm
 MoarVM
 MANIFEST
+
+/nqp.bat

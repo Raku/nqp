@@ -1,3 +1,12 @@
+role QAST::RegexCursorType {
+    has $!cursor_type;
+    method has_cursor_type() { 1 }
+    method cursor_type($value = NO_VALUE) {
+        $!cursor_type := $value unless $value =:= NO_VALUE;
+        $!cursor_type
+    }
+}
+
 class QAST::Regex is QAST::Node {
     has $!name;
     has str $!rxtype;
@@ -26,6 +35,12 @@ class QAST::Regex is QAST::Node {
     
     method dump_extra_node_info() {
         ":rxtype($!rxtype)" ~ (!nqp::isnull_s($!subtype) ?? " :subtype($!subtype)" !! "") ~ ($!negate ?? ' (negated)' !! '') ~ (nqp::defined($!name) ?? " :name($!name)" !! '')
+    }
+    
+    method has_cursor_type() { 0 }
+    method cursor_type($type) {
+        self.HOW.mixin(self, QAST::RegexCursorType);
+        self.cursor_type($type);
     }
 }
 

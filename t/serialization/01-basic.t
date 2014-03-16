@@ -1,6 +1,6 @@
 #! nqp
 
-plan(66);
+plan(1355);
 
 sub add_to_sc($sc, $idx, $obj) {
     nqp::scsetobj($sc, $idx, $obj);
@@ -379,4 +379,94 @@ sub add_to_sc($sc, $idx, $obj) {
     ok(nqp::atpos_s(nqp::scgetobj($dsc, 0).a, 0) eq 'cow',   'string array first element is correct');
     ok(nqp::atpos_s(nqp::scgetobj($dsc, 0).a, 1) eq 'sheep', 'string array second element is correct');
     ok(nqp::atpos_s(nqp::scgetobj($dsc, 0).a, 2) eq 'pig',   'string array third element is correct');
+}
+
+# integers
+sub round_trip_int_array($seq, $desc, @a) {
+    $seq := 'TEST_SC_' ~ $seq;
+    $desc := 'for ' ~ $desc ~ ', ';
+    my $elems := nqp::elems(@a);
+
+    my $sc := nqp::createsc($seq ~ '_IN');
+    my $sh := nqp::list_s();
+
+    class T12 {
+        has $!a;
+        method set_a(@a) { $!a := @a }
+        method get_a() { $!a }
+    }
+    my $v := T12.new();
+    $v.set_a(@a);
+    add_to_sc($sc, 0, $v);
+
+    my $serialized := nqp::serialize($sc, $sh);
+
+    my $dsc := nqp::createsc($seq ~ '_OUT');
+    nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
+
+    ok(nqp::istype(nqp::scgetobj($dsc, 0), Array), $desc ~ 'deserialized object has correct type');
+    my $j := 0;
+    my @b := nqp::scgetobj($dsc, 0).get_a();
+    ok(nqp::elems(@b) == $elems, $desc ~ 'array came back with correct element count');
+    while ($j < $elems) {
+        ok(nqp::iseq_i(@b[$j], @a[$j]), $desc ~ 'integer ' ~ @a[$j] ~ ' serialization round trip (' ~ $j ~ ')');
+        ++$j;
+    }
+}
+
+{
+    my @a;
+
+    my int $i := -258;
+    while ($i <= 258) {
+        nqp::push(@a, $i);
+        $i := $i + 1;
+    }
+    round_trip_int_array(13, 'small integers', @a);
+}
+
+{
+    my $i := 9;
+    my int $b := 512;
+
+    while ($i < 63) {
+        my @a;
+        my int $j := nqp::sub_i($b, 4);
+        while (nqp::islt_i($j, nqp::add_i($b, 2))) {
+            nqp::push(@a, $j);
+            nqp::push(@a, nqp::neg_i($j));
+            $j := nqp::add_i($j, 1);
+        }
+        round_trip_int_array($i + 7, 'integers around 2 ** ' ~ $i, @a);
+        ++$i;
+        $b := nqp::add_i($b, $b);
+    }
+}
+
+{
+    # values around 2 ** 63, and interesting bit patterns.
+    # Need to do these as BigInts parsing strings due to a bug in nqp::radix
+    my @s := (
+               '9223372036854775805', # 0x7FFFFFFFFFFFFFFD
+               '9223372036854775806', # 0x7FFFFFFFFFFFFFFE
+               '9223372036854775807', # 0x7FFFFFFFFFFFFFFF
+              '-9223372036854775808', # 0x8000000000000000
+              '-9223372036854775807', # 0x8000000000000001
+              '-9223372036854775806', # 0x8000000000000002
+                '-81985529216486896', # 0xFEDCBA9876543210
+               '1147797409030816545', # 0x0FEDCBA987654321
+              '-6148914691236517206', # 0xAAAAAAAAAAAAAAAA
+               '6148914691236517205', # 0x5555555555555555
+              '-6510615555426900571', # 0xA5A5A5A5A5A5A5A5
+               '6510615555426900570', # 0x5A5A5A5A5A5A5A5A
+             );
+    my $bi_type := nqp::knowhow().new_type(:name("TestBigInt"), :repr("P6bigint"));
+    $bi_type.HOW.compose($bi_type);
+    my @a;
+    for (@s) {
+        my $bi := nqp::fromstr_I($_, $bi_type);
+        nqp::push(@a, nqp::unbox_i($bi));
+    }
+
+    round_trip_int_array(70, 'special case integers', @a);
 }

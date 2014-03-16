@@ -623,7 +623,7 @@ public class P6Opaque extends REPR {
 //            fos.close();
 //        } catch (IOException e) {
 //        }
-        return new ByteClassLoader(classCompiled).findClass(className);
+        return tc.gc.byteClassLoader.defineClass(className, classCompiled);
     }
 
     private void generateDelegateMethod(ThreadContext tc, ClassWriter cw, String className, String field, String methodName) {
@@ -717,18 +717,6 @@ public class P6Opaque extends REPR {
             }
         }
         return STable.NO_HINT;
-    }
-    
-    private class ByteClassLoader extends ClassLoader {
-        private byte[] bytes;
-        
-        public ByteClassLoader(byte[] bytes) {
-            this.bytes = bytes;
-        }
-        
-        public Class<?> findClass(String name) {
-            return defineClass(name, this.bytes, 0, this.bytes.length);
-        }
     }
     
     @SuppressWarnings("unchecked")
