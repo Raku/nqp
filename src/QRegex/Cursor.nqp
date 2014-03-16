@@ -40,6 +40,13 @@ role NQPCursorRole is export {
     method from() { $!from }
     method pos() { $!pos }
 
+    method prune() {
+        $!match    := NQPMu;
+        $!bstack   := NQPMu;
+        $!cstack   := NQPMu;
+        $!regexsub := NQPMu;
+    }
+
     my $NO_CAPS := nqp::hash();
     method CAPHASH() {
         my $caps    := nqp::hash();
@@ -697,6 +704,14 @@ class NQPMatch is NQPCapture {
 #?endif
     method Bool() { $!to >= $!from }
     method chars() { $!to >= $!from ?? $!to - $!from !! 0 }
+
+    method prune() {
+        self.capture_prune();
+        if nqp::defined($!cursor) {
+            $!cursor.prune();
+            $!cursor := NQPMu;
+        }
+    }
     
     method !make($made) { $!made := $made }
     method made()      { $!made }
