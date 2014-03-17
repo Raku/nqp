@@ -425,6 +425,8 @@ op.ord = function(ctx, str, index) {
   index = index || 0;
   return str.to_s(ctx).charCodeAt(index);
 };
+op.ordfirst = op.ord;
+op.ordat = op.ord;
 op.lc = function(ctx, str) {
   return str.to_s().toLowerCase();
 };
