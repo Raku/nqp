@@ -11,7 +11,7 @@ $(JS_STAGE1)/$(QASTNODE_COMBINED): $(QASTNODE_SOURCES)
 	$(MKPATH) $(JS_STAGE1)/gen
 	$(PERL) tools/build/gen-cat.pl js $(QASTNODE_SOURCES) > $(JS_STAGE1)/$(QASTNODE_COMBINED)
 
-js-all: $(JS_STAGE1)/$(QASTNODE_COMBINED) cross_compiler
+js-all: $(JS_STAGE1)/$(QASTNODE_COMBINED) cross_compiler js-install-modules
 
 js-runner-default: js-all
 
@@ -59,22 +59,23 @@ $(JS_STAGE2)/$(NQP_MO_COMBINED): $(NQP_MO_SOURCES)
 	$(PERL) tools/build/gen-cat.pl js $(NQP_MO_SOURCES) > $(JS_STAGE2)/$(NQP_MO_COMBINED)
 
 $(JS_STAGE2)/nqpmo.pbc : $(JS_STAGE2)/$(NQP_MO_COMBINED)
-	nqp-p --module-path $(JS_STAGE1) src/vm/js/bin/compile-setting.nqp  $(JS_STAGE2)/$(NQP_MO_COMBINED) $(JS_STAGE2)/nqpmo $(JS_STAGE2)/nqpmo.pir
+	nqp-p --module-path $(JS_STAGE1) src/vm/js/bin/cross-compile.nqp  $(JS_STAGE2)/$(NQP_MO_COMBINED) $(JS_STAGE2) nqpmo NULL 1
+
 	$(PARROT)  -o  $(JS_STAGE2)/nqpmo.pbc $(JS_STAGE2)/nqpmo.pir
 
 $(JS_STAGE2)/$(NQPCORE_PBC) : $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp $(JS_STAGE2)/nqpmo.pbc
-	nqp-p --module-path $(JS_STAGE1) src/vm/js/bin/compile-setting.nqp  $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp $(JS_STAGE2)/NQPCORE.setting $(JS_STAGE2)/NQPCORE.setting.pir
+	nqp-p --module-path $(JS_STAGE1) src/vm/js/bin/cross-compile.nqp  $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp $(JS_STAGE2) NQPCORE.setting NULL 1
 	$(PARROT)  -o  $(JS_STAGE2)/$(NQPCORE_PBC) $(JS_STAGE2)/NQPCORE.setting.pir
 
 $(JS_STAGE2)/QASTNode.pbc: $(QASTNODE_SOURCES) $(stage2_core) $(core_compiler)
 	$(PERL) tools/build/gen-cat.pl js $(QASTNODE_SOURCES) > $(JS_STAGE2)/$(QASTNODE_COMBINED)
-	nqp-p --module-path $(JS_STAGE1) src/vm/js/bin/compile-setting.nqp $(JS_STAGE2)/$(QASTNODE_COMBINED) $(JS_STAGE2)/QASTNode $(JS_STAGE2)/QASTNode.pir NQPCORE
+	nqp-p --module-path $(JS_STAGE1) src/vm/js/bin/cross-compile.nqp $(JS_STAGE2)/$(QASTNODE_COMBINED) $(JS_STAGE2) QASTNode NQPCORE 1
 	$(PARROT)  -o  $(JS_STAGE2)/QASTNode.pbc $(JS_STAGE2)/QASTNode.pir
 
 $(JS_STAGE2)/QRegex.pbc: $(QREGEX_SOURCES) $(JS_STAGE2)/QASTNode.pbc
 	$(MKPATH) $(JS_STAGE2)/gen
 	$(PERL) tools/build/gen-cat.pl js $(QREGEX_SOURCES) > $(JS_STAGE2)/$(QREGEX_COMBINED)
-	nqp-p --module-path $(JS_STAGE1) src/vm/js/bin/compile-setting.nqp $(JS_STAGE2)/$(QREGEX_COMBINED) $(JS_STAGE2)/QRegex $(JS_STAGE2)/QRegex.pir NQPCORE
+	nqp-p --module-path $(JS_STAGE1) src/vm/js/bin/cross-compile.nqp $(JS_STAGE2)/$(QREGEX_COMBINED) $(JS_STAGE2) QRegex NQPCORE 1
 	$(PARROT)  -o  $(JS_STAGE2)/QRegex.pbc $(JS_STAGE2)/QRegex.pir
 
 
@@ -85,7 +86,11 @@ $(JS_STAGE2)/QRegex.pbc: $(QREGEX_SOURCES) $(JS_STAGE2)/QASTNode.pbc
 #	$(PARROT)  -o  $(JS_STAGE2)/NQPP6QRegex.pbc $(JS_STAGE2)/NQPP6QRegex.pir
 
 js-test: js-all
-	prove -e  './nqp-js' t/*.t t/nqp/{01..29}*.t t/nqp/{31..48}* t/nqp/{50,51,53}* t/nqp/{55..81}* t/nqp/83* t/serialization/*.t 
+	src/vm/js/bin/run_tests
+#	prove -e  './nqp-js' t/*.t t/nqp/{01..29}*.t t/nqp/{31..48}* t/nqp/{50,51,53}* t/nqp/{55..81}* t/nqp/83* t/serialization/*.t 
+
+js-install-modules:
+	npm install src/vm/js/nqp-runtime-core src/vm/js/nqp-runtime-node src/vm/js/nqp-runtime gen/js/stage2/NQPCORE.setting gen/js/stage2/QRegex gen/js/stage2/nqpmo gen/js/stage2/QASTNode
 
 ### 
 ### 
