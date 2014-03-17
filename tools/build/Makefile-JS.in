@@ -56,7 +56,7 @@ $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp: $(CORE_SETTING_SOURCES)
 
 $(JS_STAGE2)/$(NQP_MO_COMBINED): $(NQP_MO_SOURCES)
 	$(MKPATH) $(JS_STAGE2)
-	$(PERL) tools/build/gen-cat.pl moar $(NQP_MO_SOURCES) > $(JS_STAGE2)/$(NQP_MO_COMBINED)
+	$(PERL) tools/build/gen-cat.pl js $(NQP_MO_SOURCES) > $(JS_STAGE2)/$(NQP_MO_COMBINED)
 
 $(JS_STAGE2)/nqpmo.pbc : $(JS_STAGE2)/$(NQP_MO_COMBINED)
 	nqp-p --module-path $(JS_STAGE1) src/vm/js/bin/compile-setting.nqp  $(JS_STAGE2)/$(NQP_MO_COMBINED) $(JS_STAGE2)/nqpmo $(JS_STAGE2)/nqpmo.pir
@@ -67,7 +67,7 @@ $(JS_STAGE2)/$(NQPCORE_PBC) : $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp $(JS_STA
 	$(PARROT)  -o  $(JS_STAGE2)/$(NQPCORE_PBC) $(JS_STAGE2)/NQPCORE.setting.pir
 
 $(JS_STAGE2)/QASTNode.pbc: $(QASTNODE_SOURCES) $(stage2_core) $(core_compiler)
-	$(PERL) tools/build/gen-cat.pl moar $(QASTNODE_SOURCES) > $(JS_STAGE2)/$(QASTNODE_COMBINED)
+	$(PERL) tools/build/gen-cat.pl js $(QASTNODE_SOURCES) > $(JS_STAGE2)/$(QASTNODE_COMBINED)
 	nqp-p --module-path $(JS_STAGE1) src/vm/js/bin/compile-setting.nqp $(JS_STAGE2)/$(QASTNODE_COMBINED) $(JS_STAGE2)/QASTNode $(JS_STAGE2)/QASTNode.pir NQPCORE
 	$(PARROT)  -o  $(JS_STAGE2)/QASTNode.pbc $(JS_STAGE2)/QASTNode.pir
 
@@ -80,7 +80,7 @@ $(JS_STAGE2)/QRegex.pbc: $(QREGEX_SOURCES) $(JS_STAGE2)/QASTNode.pbc
 
 #$(JS_STAGE2)/NQPP6QRegex.pbc: $(P6QREGEX_SOURCES) $(JS_STAGE2)/QRegex.pbc
 #	$(MKPATH) $(JS_STAGE2)/gen
-#	$(PERL) tools/build/gen-cat.pl moar $(P6QREGEX_SOURCES) > $(JS_STAGE2)/$(P6QREGEX_COMBINED)
+#	$(PERL) tools/build/gen-cat.pl js $(P6QREGEX_SOURCES) > $(JS_STAGE2)/$(P6QREGEX_COMBINED)
 #	nqp-p --module-path $(JS_STAGE1) src/vm/js/bin/compile-setting.nqp $(JS_STAGE2)/$(P6QREGEX_COMBINED) node_modules/NQPP6QRegex $(JS_STAGE2)/NQPP6QRegex.pbc NQPCORE
 #	$(PARROT)  -o  $(JS_STAGE2)/NQPP6QRegex.pbc $(JS_STAGE2)/NQPP6QRegex.pir
 
