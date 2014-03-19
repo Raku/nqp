@@ -146,7 +146,7 @@ $(J_STAGE1)/$(QREGEX_JAR): $(J_STAGE0) $(QREGEX_SOURCES) $(J_STAGE1)/$(QASTNODE_
          --setting=NQPCORE --no-regex-lib --target=jar \
 	    --output=$(J_STAGE1)/$(QREGEX_JAR) $(J_STAGE1)/$(QREGEX_COMBINED)
 
-$(J_STAGE1)/$(HLL_JAR): $(J_STAGE0) $(J_HLL_SOURCES) $(J_STAGE1)/$(QREGEX_JAR)
+$(J_STAGE1)/$(HLL_JAR): $(J_STAGE0) $(J_HLL_SOURCES) $(J_STAGE1)/$(QREGEX_JAR) $(J_STAGE1)/$(JASTNODES_JAR)
 	$(MKPATH) $(J_STAGE1)
 	$(PERL) tools/build/gen-cat.pl jvm $(J_HLL_SOURCES) > $(J_STAGE1)/$(HLL_COMBINED)
 	$(J_STAGE0_NQP) --module-path=$(J_STAGE1) --setting-path=$(J_STAGE1) \
@@ -214,7 +214,7 @@ $(J_STAGE2)/$(QREGEX_JAR): $(J_STAGE1) $(QREGEX_SOURCES) $(J_STAGE2)/$(QASTNODE_
          --setting=NQPCORE --no-regex-lib --target=jar \
 	    --output=$(J_STAGE2)/$(QREGEX_JAR) $(J_STAGE2)/$(QREGEX_COMBINED)
 
-$(J_STAGE2)/$(HLL_JAR): $(J_STAGE1) $(J_HLL_SOURCES) $(J_STAGE2)/$(QREGEX_JAR)
+$(J_STAGE2)/$(HLL_JAR): $(J_STAGE1) $(J_HLL_SOURCES) $(J_STAGE2)/$(QREGEX_JAR) $(J_STAGE2)/$(JASTNODES_JAR)
 	$(MKPATH) $(J_STAGE2)/gen
 	$(PERL) tools/build/gen-cat.pl jvm $(J_HLL_SOURCES) > $(J_STAGE2)/$(HLL_COMBINED)
 	$(J_STAGE1_NQP) --module-path=$(J_STAGE2) --setting-path=$(J_STAGE2) \

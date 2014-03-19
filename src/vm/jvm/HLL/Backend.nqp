@@ -1,4 +1,6 @@
 # Backend class for the JVM.
+use JASTNodes;
+
 class HLL::Backend::JVM {
     our %jvm_config := nqp::backendconfig();
 
@@ -60,14 +62,30 @@ class HLL::Backend::JVM {
         my $classname := %*COMPILING<%?OPTIONS><javaclass> || nqp::sha1('eval-at-' ~ nqp::time_n());
         nqp::getcomp('QAST').jast($qast, :$classname);
     }
-    
+
     method classfile($jast, *%adverbs) {
+        # TODO: Direct compile ops have to take a hash of name-to-typeobj
+        my %jastnodes := hash();
+        %jastnodes<JAST::Class>  := JAST::Class;
+        %jastnodes<JAST::Field>  := JAST::Field;
+        %jastnodes<JAST::Method> := JAST::Method;
+        %jastnodes<JAST::Label> := JAST::Label;
+        %jastnodes<JAST::Instruction> := JAST::Instruction;
+        %jastnodes<JAST::InvokeDynamic> := JAST::InvokeDynamic;
+        %jastnodes<JAST::InstructionList> := JAST::InstructionList;
+        %jastnodes<JAST::PushIVal> := JAST::PushIVal;
+        %jastnodes<JAST::PushNVal> := JAST::PushNVal;
+        %jastnodes<JAST::PushSVal> := JAST::PushSVal;
+        %jastnodes<JAST::PushCVal> := JAST::PushCVal;
+        %jastnodes<JAST::PushIndex> := JAST::PushIndex;
+        %jastnodes<JAST::TryCatch> := JAST::TryCatch;
+        %jastnodes<JAST::Annotation> := JAST::Annotation;
         if (%adverbs<target> eq 'classfile' || %adverbs<target> eq 'jar') && %adverbs<output> {
-            nqp::compilejastlinestofile($jast.dump(), %adverbs<output>);
+            nqp::compilejasttofile($jast, %jastnodes, %adverbs<output>);
             nqp::null()
         }
         else {
-            nqp::compilejastlines($jast.dump());
+            nqp::compilejast($jast, %jastnodes);
         }
     }
 

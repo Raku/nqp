@@ -52,6 +52,7 @@ import org.perl6.nqp.io.ServerSocketHandle;
 import org.perl6.nqp.io.SocketHandle;
 import org.perl6.nqp.io.StandardReadHandle;
 import org.perl6.nqp.io.StandardWriteHandle;
+import org.perl6.nqp.jast2bc.JASTCompiler;
 import org.perl6.nqp.jast2bc.JASTToJVMBytecode;
 import org.perl6.nqp.sixmodel.BoolificationSpec;
 import org.perl6.nqp.sixmodel.ContainerConfigurer;
@@ -5201,6 +5202,15 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc,
                 "compilejastlines requires an array with the VMArrayInstance REPR");
         }
+    }
+    public static SixModelObject compilejast(SixModelObject jast, SixModelObject jastNodes, ThreadContext tc) {
+        EvalResult res = new EvalResult();
+        res.jc = JASTCompiler.buildClass(jast, jastNodes, false, tc);
+        return res;
+    }
+    public static SixModelObject compilejasttofile(SixModelObject jast, SixModelObject jastNodes, String filename, ThreadContext tc) {
+        JASTCompiler.writeClass(jast, jastNodes, filename, tc);
+        return jast;
     }
     public static SixModelObject loadcompunit(SixModelObject obj, long compileeHLL, ThreadContext tc) {
         try {
