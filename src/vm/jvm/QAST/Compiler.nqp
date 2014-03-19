@@ -1043,7 +1043,7 @@ for ('', 'repeat_') -> $repness {
             my $nr_handler_id;
             if $handler {
                 $l_handler_id  := &*REGISTER_UNWIND_HANDLER($*HANDLER_IDX, $EX_CAT_LAST);
-                $nr_handler_id := &*REGISTER_UNWIND_HANDLER($l_handler_id, $EX_CAT_NEXT + $EX_CAT_REDO)
+                $nr_handler_id := &*REGISTER_UNWIND_HANDLER($l_handler_id, $EX_CAT_NEXT +| $EX_CAT_REDO);
             }
             
             # Emit loop prelude, evaluating condition. 
@@ -2680,7 +2680,7 @@ class QAST::CompilerJAST {
                 nqp::die("Lexical '$name' already declared");
             }
             %!lexical_types{$name} := $type;
-            %!lexical_idxs{$name} := +@!lexical_names[$type];
+            %!lexical_idxs{$name} := nqp::elems(@!lexical_names[$type]);
             nqp::push(@!lexical_names[$type], $name);
         }
         
