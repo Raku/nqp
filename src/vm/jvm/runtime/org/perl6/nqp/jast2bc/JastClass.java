@@ -9,7 +9,6 @@ import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.SixModelObject;
 
 public class JastClass {
-    private static SixModelObject jastClass;
     private static long nameHint, superHint, filenameHint, serializedHint, methodsHint, fieldsHint;
 
     public String className;
@@ -19,7 +18,7 @@ public class JastClass {
     public SixModelObject methods;
     public SixModelObject fields;
 
-    public JastClass(SixModelObject jast, ThreadContext tc) throws Exception {
+    public JastClass(SixModelObject jast, SixModelObject jastClass, ThreadContext tc) throws Exception {
         if (istype(jast, jastClass, tc) == 0)
             throw new Exception("JAST node isn't a JAST::Class");
 
@@ -43,7 +42,6 @@ public class JastClass {
     }
 
     static public void setup(SixModelObject jastClass, ThreadContext tc) {
-        JastClass.jastClass = jastClass;
         nameHint       = jastClass.st.REPR.hint_for(tc, jastClass.st, jastClass, "$!name");
         superHint      = jastClass.st.REPR.hint_for(tc, jastClass.st, jastClass, "$!super");
         filenameHint   = jastClass.st.REPR.hint_for(tc, jastClass.st, jastClass, "$!filename");

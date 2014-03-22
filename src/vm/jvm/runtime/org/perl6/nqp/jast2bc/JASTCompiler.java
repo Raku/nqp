@@ -31,7 +31,8 @@ import org.perl6.nqp.sixmodel.SixModelObject;
 public class JASTCompiler {
     public static JavaClass buildClass(SixModelObject jast, SixModelObject jastNodes, boolean split, ThreadContext tc) {
         try {
-            JavaClass c = compileJast(jast, jastNodes, split, tc);
+            JASTCompiler compiler = new JASTCompiler(jastNodes, tc);
+            JavaClass c = compiler.compileJast(jast, jastNodes, split, tc);
             return c;
         }
         catch (Exception e) {
@@ -72,10 +73,30 @@ public class JASTCompiler {
         }
     }
 
-    private static JavaClass compileJast(SixModelObject jast, SixModelObject jastNodes, boolean split, ThreadContext tc) throws Exception {
+    private JASTCompiler(SixModelObject jastNodes, ThreadContext tc) {
         if (!setup) setup(jastNodes, tc);
 
-        JastClass jastClass = new JastClass(jast, tc);
+        jastLabel = jastNodes.at_key_boxed(tc, "JAST::Label");
+        jastInstruction = jastNodes.at_key_boxed(tc, "JAST::Instruction");
+        jastIndy = jastNodes.at_key_boxed(tc, "JAST::InvokeDynamic");
+        jastInstructionList = jastNodes.at_key_boxed(tc, "JAST::InstructionList");
+        jastPushI = jastNodes.at_key_boxed(tc, "JAST::PushIVal");
+        jastPushN = jastNodes.at_key_boxed(tc, "JAST::PushNVal");
+        jastPushS = jastNodes.at_key_boxed(tc, "JAST::PushSVal");
+        jastPushC = jastNodes.at_key_boxed(tc, "JAST::PushCVal");
+        jastPushIdx = jastNodes.at_key_boxed(tc, "JAST::PushIndex");
+        jastTryCatch = jastNodes.at_key_boxed(tc, "JAST::TryCatch");
+        jastAnnotation = jastNodes.at_key_boxed(tc, "JAST::Annotation");
+
+    }
+
+    private JavaClass compileJast(SixModelObject jast, SixModelObject jastNodes, boolean split, ThreadContext tc) throws Exception {
+
+        SixModelObject jastClassObj = jastNodes.at_key_boxed(tc, "JAST::Class");
+        SixModelObject jastField = jastNodes.at_key_boxed(tc, "JAST::Field");
+        SixModelObject jastMethod = jastNodes.at_key_boxed(tc, "JAST::Method");
+
+        JastClass jastClass = new JastClass(jast, jastClassObj, tc);
         JavaClass c = new JavaClass();
 
         c.name = jastClass.className;
@@ -91,7 +112,7 @@ public class JASTCompiler {
 
         SixModelObject iter = iter(jastClass.fields, tc);
         while (istrue(iter, tc) != 0) {
-            JastField field = new JastField(iter.shift_boxed(tc), tc);
+            JastField field = new JastField(iter.shift_boxed(tc), jastField, tc);
             String descriptor = null;
 
             cw.visitField(
@@ -103,7 +124,7 @@ public class JASTCompiler {
 
         iter = iter(jastClass.methods, tc);
         while (istrue(iter, tc) != 0) {
-            JastMethod method = new JastMethod(iter.shift_boxed(tc), tc);
+            JastMethod method = new JastMethod(iter.shift_boxed(tc), jastMethod, tc);
             compileMethod(c, method, cw, className, split, tc);
         }
 
@@ -123,7 +144,7 @@ public class JASTCompiler {
         return c;
     }
 
-    private static void compileMethod(JavaClass jcout, JastMethod method, ClassWriter c, String className, boolean split, ThreadContext tc) throws Exception {
+    private void compileMethod(JavaClass jcout, JastMethod method, ClassWriter c, String className, boolean split, ThreadContext tc) throws Exception {
         String desc = Type.getMethodDescriptor(method.returns, method.arguments.toArray(new Type[0]));
         int modifiers = method.isStatic? Opcodes.ACC_STATIC | Opcodes.ACC_PUBLIC: Opcodes.ACC_PUBLIC;
         MethodVisitor m = split ? new AutosplitMethodWriter(c, className, modifiers, method.name, desc, null, null) :
@@ -197,7 +218,7 @@ public class JASTCompiler {
         m.visitEnd();
     }
 
-    private static void compileInstruction(SixModelObject insn, JastMethod method, MethodVisitor m, ThreadContext tc) throws Exception {
+    private void compileInstruction(SixModelObject insn, JastMethod method, MethodVisitor m, ThreadContext tc) throws Exception {
         if (istype(insn, jastLabel, tc) != 0) {
             String labelName = getattr_s(insn, jastLabel, "$!name", 0, tc);
             if (!method.labels.containsKey(labelName))
@@ -278,7 +299,7 @@ public class JASTCompiler {
         }
     }
 
-    private static void emitInstruction(SixModelObject insn, JastMethod method, MethodVisitor m, ThreadContext tc) throws Exception {
+    private void emitInstruction(SixModelObject insn, JastMethod method, MethodVisitor m, ThreadContext tc) throws Exception {
         int instruction = (int) getattr_i(insn, jastInstruction, "$!op", 0, tc);
         SixModelObject args = getattr(insn, jastInstruction, "@!args", 1, tc);
 
@@ -617,13 +638,13 @@ public class JASTCompiler {
         }
     }
 
-    private static void emitBranchInstruction(JastMethod method, MethodVisitor m, String label, int icode) {
+    private void emitBranchInstruction(JastMethod method, MethodVisitor m, String label, int icode) {
         if (!method.labels.containsKey(label))
             method.labels.put(label, new LabelInfo());
         m.visitJumpInsn(icode, method.labels.get(label).label);
     }
 
-    private static void emitTableSwitchInstruction(JastMethod method, MethodVisitor m, SixModelObject args, ThreadContext tc) {
+    private void emitTableSwitchInstruction(JastMethod method, MethodVisitor m, SixModelObject args, ThreadContext tc) {
         int numKeys = (int) args.elems(tc);
         Label[] labels = new Label[numKeys - 1];
         Label defaultLabel = null;
@@ -642,14 +663,14 @@ public class JASTCompiler {
         m.visitTableSwitchInsn(0, labels.length - 1, defaultLabel, labels);
     }
 
-    private static void emitFieldAccess(MethodVisitor m, SixModelObject args, int accessType, ThreadContext tc) {
+    private void emitFieldAccess(MethodVisitor m, SixModelObject args, int accessType, ThreadContext tc) {
         Type classType = processType(atpos(args, 0, tc).get_str(tc));
         String fieldName = atpos(args, 1, tc).get_str(tc);
         Type fieldType = processType(atpos(args, 2, tc).get_str(tc));
         m.visitFieldInsn(accessType, classType.getInternalName(), fieldName, fieldType.getDescriptor());
     }
 
-    private static void emitCall(MethodVisitor m, SixModelObject args, int callType, ThreadContext tc) {
+    private void emitCall(MethodVisitor m, SixModelObject args, int callType, ThreadContext tc) {
         int argLen = (int) args.elems(tc);
         Type targetType = processType(atpos(args, 0, tc).get_str(tc));
         String methodName = atpos(args, 1, tc).get_str(tc);
@@ -661,7 +682,7 @@ public class JASTCompiler {
                 Type.getMethodDescriptor(returnType, argumentTypes));
     }
 
-    private static void emitInvokeDynamic(SixModelObject insn, MethodVisitor m, ThreadContext tc) {
+    private void emitInvokeDynamic(SixModelObject insn, MethodVisitor m, ThreadContext tc) {
         String name = getattr(insn, jastIndy, "$!name", 0, tc).get_str(tc);
         SixModelObject argTypesSmo = getattr(insn, jastIndy, "@!arg_types", 1, tc);
         Type retType = processType(getattr(insn, jastIndy, "$!ret_type", 2, tc).get_str(tc));
@@ -708,8 +729,8 @@ public class JASTCompiler {
     }
 
     private static boolean setup = false;
-    private static SixModelObject jastLabel, jastInstruction, jastInstructionList, jastIndy,
-            jastPushI, jastPushIdx, jastPushN, jastPushS, jastPushC,
+    private SixModelObject jastLabel, jastInstruction, jastInstructionList,
+            jastIndy, jastPushI, jastPushIdx, jastPushN, jastPushS, jastPushC,
             jastTryCatch, jastAnnotation;
     private static void setup(SixModelObject jastNodes, ThreadContext tc) {
         setup = true;
@@ -717,18 +738,6 @@ public class JASTCompiler {
         JastClass.setup(jastNodes.at_key_boxed(tc, "JAST::Class"), tc);
         JastField.setup(jastNodes.at_key_boxed(tc, "JAST::Field"), tc);
         JastMethod.setup(jastNodes.at_key_boxed(tc, "JAST::Method"), tc);
-
-        jastLabel = jastNodes.at_key_boxed(tc, "JAST::Label");
-        jastInstruction = jastNodes.at_key_boxed(tc, "JAST::Instruction");
-        jastIndy = jastNodes.at_key_boxed(tc, "JAST::InvokeDynamic");
-        jastInstructionList = jastNodes.at_key_boxed(tc, "JAST::InstructionList");
-        jastPushI = jastNodes.at_key_boxed(tc, "JAST::PushIVal");
-        jastPushN = jastNodes.at_key_boxed(tc, "JAST::PushNVal");
-        jastPushS = jastNodes.at_key_boxed(tc, "JAST::PushSVal");
-        jastPushC = jastNodes.at_key_boxed(tc, "JAST::PushCVal");
-        jastPushIdx = jastNodes.at_key_boxed(tc, "JAST::PushIndex");
-        jastTryCatch = jastNodes.at_key_boxed(tc, "JAST::TryCatch");
-        jastAnnotation = jastNodes.at_key_boxed(tc, "JAST::Annotation");
     }
 
     public static Type processType(String typeName) {

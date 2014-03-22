@@ -38,7 +38,7 @@ public class JastMethod {
     Label beginAll, endAll;
     Map<String, LabelInfo> labels = new HashMap<String, LabelInfo>();
 
-    public JastMethod(SixModelObject jast, ThreadContext tc) throws Exception {
+    public JastMethod(SixModelObject jast, SixModelObject jastMethod, ThreadContext tc) throws Exception {
         if (istype(jast, jastMethod, tc) == 0)
             throw new Exception("JAST node isn't a JAST::Method");
 
@@ -105,13 +105,11 @@ public class JastMethod {
         }
     }
 
-    private static SixModelObject jastMethod;
     private static long nameHint, staticHint, returnsHint, argumentsHint,
             localsHint, instructionsHint, crNameHint, crCuidHint, crOuterHint,
             crOlexHint, crIlexHint, crNlexHint, crSlexHint, crHandlersHint,
             hasExitHandlerHint, argsExpectationHint;
     public static void setup(SixModelObject jastMethod, ThreadContext tc) {
-        JastMethod.jastMethod = jastMethod;
         nameHint            = jastMethod.st.REPR.hint_for(tc, jastMethod.st, jastMethod, "$!name");
         staticHint          = jastMethod.st.REPR.hint_for(tc, jastMethod.st, jastMethod, "$!static");
         returnsHint         = jastMethod.st.REPR.hint_for(tc, jastMethod.st, jastMethod, "$!returns");
