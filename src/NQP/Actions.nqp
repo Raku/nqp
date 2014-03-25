@@ -1501,14 +1501,15 @@ class NQP::Actions is HLL::Actions {
         make $ast;
     }
 
-    method term:sym<multi_declarator>($/) { make $<multi_declarator>.ast; }
+    method term:sym<multi_declarator>($/) { make $<multi_declarator>.ast; $/.prune; }
 
-    method term:sym<value>($/) { make $<value>.ast; }
+    method term:sym<value>($/) { make $<value>.ast; $/.prune; }
 
     method circumfix:sym<( )>($/) {
         make $<EXPR>
              ?? $<EXPR>[0].ast
              !! QAST::Op.new( :op('list'), :node($/) );
+        $/.prune;
     }
 
     method circumfix:sym<[ ]>($/) {
@@ -1524,10 +1525,11 @@ class NQP::Actions is HLL::Actions {
         }
         $ast.name('&circumfix:<[ ]>');
         make $ast;
+        $/.prune;
     }
 
-    method circumfix:sym<ang>($/) { make $<quote_EXPR>.ast; }
-    method circumfix:sym<« »>($/) { make $<quote_EXPR>.ast; }
+    method circumfix:sym<ang>($/) { make $<quote_EXPR>.ast; $/.prune }
+    method circumfix:sym<« »>($/) { make $<quote_EXPR>.ast; $/.prune }
 
     method circumfix:sym<{ }>($/) {
         if +$<pblock><blockoid><statementlist><statement> > 0 {
@@ -1541,9 +1543,10 @@ class NQP::Actions is HLL::Actions {
         else {
             make default_for('%');
         }
+        $/.prune;
     }
 
-    method semilist($/) { make $<statement>.ast }
+    method semilist($/) { make $<statement>.ast; $/.prune; }
 
     method postcircumfix:sym<[ ]>($/) {
         make QAST::VarWithFallback.new( :scope('positional'), $<EXPR>.ast, :fallback(default_for('$')) );
@@ -1563,6 +1566,7 @@ class NQP::Actions is HLL::Actions {
 
     method value($/) {
         make $<quote> ?? $<quote>.ast !! $<number>.ast;
+        $/.prune;
     }
 
     method number($/) {
@@ -1571,6 +1575,7 @@ class NQP::Actions is HLL::Actions {
         make $<dec_number> ??
             QAST::NVal.new( :value($value) ) !!
             QAST::IVal.new( :value($value) );
+        $/.prune;
     }
 
     method quote:sym<apos>($/) { make $<quote_EXPR>.ast; }
