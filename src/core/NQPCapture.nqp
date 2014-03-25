@@ -17,4 +17,9 @@ my class NQPCapture {
 
     method hash() { %!hash }
 
+    method capture_prune() {
+        @!array := nqp::list();
+        %!hash := nqp::hash();
+    }
+
 }
