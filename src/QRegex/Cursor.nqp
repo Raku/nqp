@@ -707,10 +707,7 @@ class NQPMatch is NQPCapture {
 
     method prune() {
         self.capture_prune();
-#        if nqp::defined($!cursor) {
-#            $!cursor.prune();
-            $!cursor := NQPMu;
-#        }
+        $!cursor := NQPMu;
     }
     
     method !make($made) { $!made := $made }
