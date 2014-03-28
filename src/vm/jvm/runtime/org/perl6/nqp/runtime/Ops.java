@@ -87,6 +87,12 @@ import org.perl6.nqp.sixmodel.reprs.VMExceptionInstance;
 import org.perl6.nqp.sixmodel.reprs.VMHash;
 import org.perl6.nqp.sixmodel.reprs.VMHashInstance;
 import org.perl6.nqp.sixmodel.reprs.VMIterInstance;
+import org.perl6.nqp.sixmodel.reprs.VMThreadInstance;
+import org.perl6.nqp.sixmodel.reprs.ReentrantMutexInstance;
+import org.perl6.nqp.sixmodel.reprs.SemaphoreInstance;
+import org.perl6.nqp.sixmodel.reprs.ConcBlockingQueueInstance;
+import org.perl6.nqp.sixmodel.reprs.ConditionVariable;
+import org.perl6.nqp.sixmodel.reprs.ConditionVariableInstance;
 
 /**
  * Contains complex operations that are more involved that the simple ops that the
@@ -4170,6 +4176,163 @@ public final class Ops {
         return res;
     }
     
+    /* Thread related. */
+    static class CodeRunnable implements Runnable {
+        private GlobalContext gc;
+        private SixModelObject vmthread;
+        private SixModelObject code;
+
+        public CodeRunnable(GlobalContext gc, SixModelObject vmthread, SixModelObject code) {
+            this.gc = gc;
+            this.vmthread = vmthread;
+            this.code = code;
+        }
+        
+        public void run() {
+            ThreadContext tc = gc.getCurrentThreadContext();
+            tc.VMThread = vmthread;
+            invokeArgless(tc, code);
+        }
+    }
+    public static SixModelObject newthread(SixModelObject code, long appLifetime, ThreadContext tc) {
+        SixModelObject thread = tc.gc.Thread.st.REPR.allocate(tc, tc.gc.Thread.st);
+        ((VMThreadInstance)thread).thread = new Thread(new CodeRunnable(tc.gc, thread, code));
+        return thread;
+    }
+
+    public static SixModelObject threadrun(SixModelObject thread, ThreadContext tc) {
+        if (thread instanceof VMThreadInstance)
+            ((VMThreadInstance)thread).thread.start();
+        else
+            throw ExceptionHandling.dieInternal(tc, "threadrun requires an operand with REPR VMThread");
+        return thread;
+    }
+
+    public static SixModelObject threadjoin(SixModelObject thread, ThreadContext tc) {
+        if (thread instanceof VMThreadInstance) {
+            try {
+                ((VMThreadInstance)thread).thread.join();
+            }
+            catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc, "threadjoin requires an operand with REPR VMThread");
+        }
+        return thread;
+    }
+
+    public static long threadid(SixModelObject thread, ThreadContext tc) {
+        if (thread instanceof VMThreadInstance)
+            return ((VMThreadInstance)thread).thread.getId();
+        else
+            throw ExceptionHandling.dieInternal(tc, "threadid requires an operand with REPR VMThread");
+    }
+
+    public static long threadyield(ThreadContext tc) {
+        Thread.yield();
+        return 0;
+    }
+
+    public static SixModelObject currentthread(ThreadContext tc) {
+        SixModelObject thread = tc.VMThread;
+        if (thread == null) {
+            thread = tc.gc.Thread.st.REPR.allocate(tc, tc.gc.Thread.st);
+            ((VMThreadInstance)thread).thread = Thread.currentThread();
+            tc.VMThread = thread;
+        }
+        return thread;
+    }
+
+    public static SixModelObject lock(SixModelObject lock, ThreadContext tc) {
+        if (lock instanceof ReentrantMutexInstance)
+            ((ReentrantMutexInstance)lock).lock.lock();
+        else
+            throw ExceptionHandling.dieInternal(tc, "lock requires an operand with REPR ReentrantMutex");
+        return lock;
+    }
+
+    public static SixModelObject unlock(SixModelObject lock, ThreadContext tc) {
+        if (lock instanceof ReentrantMutexInstance)
+            ((ReentrantMutexInstance)lock).lock.unlock();
+        else
+            throw ExceptionHandling.dieInternal(tc, "unlock requires an operand with REPR ReentrantMutex");
+        return lock;
+    }
+
+    public static SixModelObject getlockcondvar(SixModelObject lock, SixModelObject type, ThreadContext tc) {
+        if (!(lock instanceof ReentrantMutexInstance))
+            throw ExceptionHandling.dieInternal(tc, "getlockcondvar requires an operand with REPR ReentrantMutex");
+        if (!(type.st.REPR instanceof ConditionVariable))
+            throw ExceptionHandling.dieInternal(tc, "getlockcondvar requires a result type with REPR ConditionVariable");
+        ConditionVariableInstance result = new ConditionVariableInstance();
+        result.st = type.st;
+        result.condvar = ((ReentrantMutexInstance)lock).lock.newCondition();
+        return result;
+    }
+
+    public static SixModelObject condwait(SixModelObject cv, ThreadContext tc) throws InterruptedException {
+        if (cv instanceof ConditionVariableInstance)
+            ((ConditionVariableInstance)cv).condvar.await();
+        else
+            throw ExceptionHandling.dieInternal(tc, "condwait requires an operand with REPR ConditionVariable");
+        return cv;
+    }
+
+    public static SixModelObject condsignalone(SixModelObject cv, ThreadContext tc) {
+        if (cv instanceof ConditionVariableInstance)
+            ((ConditionVariableInstance)cv).condvar.signal();
+        else
+            throw ExceptionHandling.dieInternal(tc, "condsignalone requires an operand with REPR ConditionVariable");
+        return cv;
+    }
+
+    public static SixModelObject condsignalall(SixModelObject cv, ThreadContext tc) {
+        if (cv instanceof ConditionVariableInstance)
+            ((ConditionVariableInstance)cv).condvar.signalAll();
+        else
+            throw ExceptionHandling.dieInternal(tc, "condsignalall requires an operand with REPR ConditionVariable");
+        return cv;
+    }
+
+    public static SixModelObject semacquire(SixModelObject sem, ThreadContext tc) {
+        try {
+            if (sem instanceof SemaphoreInstance)
+                ((SemaphoreInstance)sem).sem.acquire();
+            else
+                throw ExceptionHandling.dieInternal(tc, "semacquire requires an operand with REPR Semaphore");
+        } catch (InterruptedException e) {
+            throw ExceptionHandling.dieInternal(tc, "semacquire was interrupted");
+        }
+        return sem;
+    }
+
+    public static long semtryacquire(SixModelObject sem, ThreadContext tc) {
+        boolean result;
+        if (sem instanceof SemaphoreInstance)
+            result = ((SemaphoreInstance)sem).sem.tryAcquire();
+        else
+            throw ExceptionHandling.dieInternal(tc, "semtryacquire requires an operand with REPR Semaphore");
+
+        return result ? 1 : 0;
+    }
+
+    public static SixModelObject semrelease(SixModelObject sem, ThreadContext tc) {
+        if (sem instanceof SemaphoreInstance)
+            ((SemaphoreInstance)sem).sem.release();
+        else
+            throw ExceptionHandling.dieInternal(tc, "semrelease requires an operand with REPR Semaphore");
+        return sem;
+    }
+
+    public static SixModelObject queuepoll(SixModelObject queue, ThreadContext tc) {
+        if (queue instanceof ConcBlockingQueueInstance)
+            return ((ConcBlockingQueueInstance)queue).queue.poll();
+        else
+            throw ExceptionHandling.dieInternal(tc, "queuepoll requires an operand with REPR ConcBlockingQueue");
+    }
+
     /* Exception related. */
     public static void die_s_c(String msg, ThreadContext tc) {
         // Construct exception object.

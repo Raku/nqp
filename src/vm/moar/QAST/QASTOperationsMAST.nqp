@@ -2359,6 +2359,24 @@ QAST::MASTOperations.add_core_moarop_mapping('rand_i', 'rand_i');
 QAST::MASTOperations.add_core_moarop_mapping('rand_n', 'randscale_n');
 QAST::MASTOperations.add_core_moarop_mapping('srand', 'srand', 0);
 
+# thread related opcodes
+QAST::MASTOperations.add_core_moarop_mapping('newthread', 'newthread');
+QAST::MASTOperations.add_core_moarop_mapping('threadrun', 'threadrun', 0);
+QAST::MASTOperations.add_core_moarop_mapping('threadjoin', 'threadjoin', 0);
+QAST::MASTOperations.add_core_moarop_mapping('threadid', 'threadid');
+QAST::MASTOperations.add_core_moarop_mapping('threadyield', 'threadyield');
+QAST::MASTOperations.add_core_moarop_mapping('currentthread', 'currentthread');
+QAST::MASTOperations.add_core_moarop_mapping('lock', 'lock', 0);
+QAST::MASTOperations.add_core_moarop_mapping('unlock', 'unlock', 0);
+QAST::MASTOperations.add_core_moarop_mapping('getlockcondvar', 'getlockcondvar');
+QAST::MASTOperations.add_core_moarop_mapping('condwait', 'condwait', 0);
+QAST::MASTOperations.add_core_moarop_mapping('condsignalone', 'condsignalone', 0);
+QAST::MASTOperations.add_core_moarop_mapping('condsignalall', 'condsignalall', 0);
+QAST::MASTOperations.add_core_moarop_mapping('semacquire', 'semacquire');
+QAST::MASTOperations.add_core_moarop_mapping('semtryacquire', 'semtryacquire');
+QAST::MASTOperations.add_core_moarop_mapping('semrelease', 'semrelease');
+QAST::MASTOperations.add_core_moarop_mapping('queuepoll', 'queuepoll');
+
 # MoarVM-specific compilation ops
 QAST::MASTOperations.add_core_moarop_mapping('masttofile', 'masttofile', 2);
 QAST::MASTOperations.add_core_moarop_mapping('masttocu', 'masttocu');
