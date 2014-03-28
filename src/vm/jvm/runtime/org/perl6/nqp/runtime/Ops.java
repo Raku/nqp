@@ -3008,16 +3008,6 @@ public final class Ops {
     }
 
     public static String chr(long ord, ThreadContext tc) {
-        // http://en.wikipedia.org/wiki/Mapping_of_Unicode_characters 
-        if ((ord >= 0xfdd0
-            && (ord <= 0xfdef                     // non character
-                || ((ord & 0xfffe) == 0xfffe)     // non character
-                || ord > 0x10ffff)                // out of range
-            )
-        || (ord >= 0xd800 && ord <= 0xdfff)       // surrogate
-        ) {
-            throw ExceptionHandling.dieInternal(tc, "Invalid code-point U+" + String.format("%05X", ord));
-        }
 	if (ord < 0)
 	    throw ExceptionHandling.dieInternal(tc, "chr codepoint cannot be negative");
 
