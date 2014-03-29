@@ -116,7 +116,7 @@ class NQP::Optimizer {
 
     method visit_children($node, :$skip_selectors) {
         my int $i := 0;
-        unless nqp::isstr($node) {
+        unless nqp::isstr($node) || !nqp::defined($node) {
             while $i < +@($node) {
                 unless $skip_selectors && $i % 2 {
                     my $visit := $node[$i];

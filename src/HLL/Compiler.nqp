@@ -84,9 +84,9 @@ class HLL::Compiler does HLL::Backend::Default {
                     $output := self.eval($code, :outer_ctx($save_ctx), |%adverbs);
                     CATCH {
                         self.interactive_exception($!);
-                        next;
                     }
                 };
+                next unless nqp::defined($output);
                 if nqp::defined($*MAIN_CTX) {
                     $save_ctx := $*MAIN_CTX;
                 }
