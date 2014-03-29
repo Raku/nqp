@@ -92,7 +92,7 @@ public class NativeCall extends REPR {
     }
     
     public void inlineDeserialize(ThreadContext tc, STable st, MethodVisitor mv, String className, String prefix) {
-        /* Not supported. */
+        /* Assume it'll be re-configured each time, so just allow it. */
     }
     
     // XXX This is a hack as it fails to check the REPR ID, but the JVM will
@@ -127,17 +127,18 @@ public class NativeCall extends REPR {
     }
 
     public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
-        /* This REPR can't be serialized. */
-        ExceptionHandling.dieInternal(tc, "Can't deserialize_stub a NativeCall object.");
-        return null;
+        /* Assume it'll be re-configured each time, so just allow it. */
+        NativeCallInstance stub = new NativeCallInstance();
+        stub.st = st;
+        return stub;
     }
 
     public void deserialize_finish(ThreadContext tc, STable st, SerializationReader reader, SixModelObject obj) {
-        ExceptionHandling.dieInternal(tc, "Can't deserialize_finish a NativeCall object.");
+        /* Assume it'll be re-configured each time, so just allow it. */
     }
     
     public void serialize_inlined(ThreadContext tc, STable st, SerializationWriter writer,
             String prefix, SixModelObject obj) {
-        throw ExceptionHandling.dieInternal(tc, "Can't deserialize_stub a NativeCall object.");
+        /* Assume it'll be re-configured each time, so just allow it. */
     }
 }
