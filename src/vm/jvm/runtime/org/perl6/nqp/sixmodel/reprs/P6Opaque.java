@@ -129,6 +129,9 @@ public class P6Opaque extends REPR {
                         case StorageSpec.BP_STR:
                             ((P6OpaqueREPRData)st.REPRData).unboxStrSlot = curAttr;
                             break;
+                        default:
+                            ((P6OpaqueREPRData)st.REPRData).unboxObjSlot = curAttr;
+                            break;
                         }
                     }
                     if (info.posDelegate)
@@ -750,13 +753,9 @@ public class P6Opaque extends REPR {
         REPRData.unboxNumSlot = (int)reader.readLong();
         REPRData.unboxStrSlot = (int)reader.readLong();
         
-        // Read unbox type map.
+        // Read unbox object slot, if there is one.
         if (reader.readLong() != 0) {
-            // Don't actually support this yet.
-            for (int i = 0; i < numAttributes; i++) {
-                reader.readLong();
-                reader.readLong();
-            }
+            REPRData.unboxObjSlot = (int)reader.readLong();
         }
         
         // Read in the name to index mapping.
@@ -799,7 +798,7 @@ public class P6Opaque extends REPR {
             else
                 info.st = tc.gc.KnowHOW.st; // Any reference type will do
             info.boxTarget = i == REPRData.unboxIntSlot || i == REPRData.unboxNumSlot ||
-                    i == REPRData.unboxStrSlot;
+                    i == REPRData.unboxStrSlot || i == REPRData.unboxObjSlot;
             info.posDelegate = i == REPRData.posDelSlot;
             info.assDelegate = i == REPRData.assDelSlot;
             info.hasAutoVivContainer = REPRData.autoVivContainers[i] != null;
@@ -846,8 +845,14 @@ public class P6Opaque extends REPR {
         writer.writeInt(REPRData.unboxNumSlot);
         writer.writeInt(REPRData.unboxStrSlot);
         
-        // TODO: Unbox slots
-        writer.writeInt(0);
+        // Unbox slots
+        if (REPRData.unboxObjSlot != -1) {
+            writer.writeInt(1);
+            writer.writeInt(REPRData.unboxObjSlot);
+        }
+        else {
+            writer.writeInt(0);
+        }
         
         int numClasses = REPRData.classHandles.length;
         writer.writeInt(numClasses);

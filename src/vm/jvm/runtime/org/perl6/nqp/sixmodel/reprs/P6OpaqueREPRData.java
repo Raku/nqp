@@ -48,6 +48,7 @@ public class P6OpaqueREPRData {
     public int unboxIntSlot = -1;
     public int unboxNumSlot = -1;
     public int unboxStrSlot = -1;
+    public int unboxObjSlot = -1;
     public int posDelSlot = -1;
     public int assDelSlot = -1;
 }
