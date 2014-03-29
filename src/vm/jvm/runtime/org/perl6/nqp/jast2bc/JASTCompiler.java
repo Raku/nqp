@@ -280,7 +280,10 @@ public class JASTCompiler {
             m.visitLabel(afterCatch);
         }
         else if (istype(insn, jastAnnotation, tc) != 0) {
-            long line = getattr_i(insn, jastAnnotation, "$!line", 0, tc);
+            int line = (int) getattr_i(insn, jastAnnotation, "$!line", 0, tc);
+            Label l = new Label();
+            m.visitLabel(l);
+            m.visitLineNumber(line, l);
         }
         else if (istype(insn, jastInstruction, tc) != 0) {
             emitInstruction(insn, method, m, tc);
