@@ -50,4 +50,5 @@ nativecall.ldout=$ldout
 nativecall.ldflags=$Config{ldflags}
 nativecall.lddlflags=$Config{lddlflags}
 nativecall.libs=$Config{libs}
+nativecall.perllibs=$Config{perllibs}
 END
