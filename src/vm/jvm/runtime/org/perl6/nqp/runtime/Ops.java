@@ -53,7 +53,6 @@ import org.perl6.nqp.io.SocketHandle;
 import org.perl6.nqp.io.StandardReadHandle;
 import org.perl6.nqp.io.StandardWriteHandle;
 import org.perl6.nqp.jast2bc.JASTCompiler;
-import org.perl6.nqp.jast2bc.JASTToJVMBytecode;
 import org.perl6.nqp.sixmodel.BoolificationSpec;
 import org.perl6.nqp.sixmodel.ContainerConfigurer;
 import org.perl6.nqp.sixmodel.ContainerSpec;
@@ -5327,35 +5326,6 @@ public final class Ops {
     }
     
     /* Evaluation of code; JVM-specific ops. */
-    public static SixModelObject compilejastlines(SixModelObject dump, ThreadContext tc) {
-        if (dump instanceof VMArrayInstance) {
-            VMArrayInstance array = (VMArrayInstance) dump;
-            List<String> lines = new ArrayList<String>(array.elems);
-            for (int index = 0; index < array.elems; index++) {
-                lines.add(array.at_pos_boxed(tc, index).get_str(tc));
-            }
-            EvalResult res = new EvalResult();
-            res.jc = JASTToJVMBytecode.buildClassFromString(lines, false);
-            return res;
-        } else {
-            throw ExceptionHandling.dieInternal(tc,
-                "compilejastlines requires an array with the VMArrayInstance REPR");
-        }
-    }
-    public static SixModelObject compilejastlinestofile(SixModelObject dump, String filename, ThreadContext tc) {
-        if (dump instanceof VMArrayInstance) {
-            VMArrayInstance array = (VMArrayInstance) dump;
-            List<String> lines = new ArrayList<String>(array.elems);
-            for (int index = 0; index < array.elems; index++) {
-                lines.add(array.at_pos_boxed(tc, index).get_str(tc));
-            }
-            JASTToJVMBytecode.writeClassFromString(lines, filename);
-            return dump;
-        } else {
-            throw ExceptionHandling.dieInternal(tc,
-                "compilejastlines requires an array with the VMArrayInstance REPR");
-        }
-    }
     public static SixModelObject compilejast(SixModelObject jast, SixModelObject jastNodes, ThreadContext tc) {
         EvalResult res = new EvalResult();
         res.jc = JASTCompiler.buildClass(jast, jastNodes, false, tc);
