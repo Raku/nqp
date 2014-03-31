@@ -165,91 +165,13 @@ C< :!pair >, and C<< :pair<strval> >>.
 
 =end
     
-    # This lexical holds the hash cache. Right now we have one
-    # cache for all grammars; eventually we may need a way to
-    # separate them out by cursor type.
-    my %ohash;
-    
-    method O(str $spec, $save?) {
-        # See if we've already created a Hash for the current
-        # specification string -- if so, use that.
-        my %hash := %ohash{$spec};
-        unless %hash {
-            # Otherwise, we need to build a new one.
-            %hash       := nqp::hash();
-            my int $eos := nqp::chars($spec);
-            my int $pos := 0;
-            while ($pos := nqp::findnotcclass(nqp::const::CCLASS_WHITESPACE,
-                                              $spec, $pos, $eos)) < $eos
-            {
-                my int $lpos;
-                my str $s := nqp::substr($spec, $pos, 1);
-                if $s eq ',' { # Ignore commas between elements for now.
-                    $pos++;
-                }
-                elsif $s eq ':' { # Parse whatever comes next like a pair.
-                    $pos++;
-                  
-                    # If the pair is of the form :!name, then reverse the value
-                    # and skip the exclamation mark.
-                    my $value := 1;
-                    if nqp::substr($spec, $pos, 1) eq '!' {
-                        $pos++;
-                        $value := 0;
-                    }
-
-                    # Get the name of the pair.
-                    $lpos    := nqp::findnotcclass(nqp::const::CCLASS_WORD,
-                                                   $spec, $pos, $eos);
-                    my $name := nqp::substr($spec, $pos, $lpos - $pos);
-                    $pos     := $lpos;
-
-                    # Look for a <...> that follows.
-                    if nqp::substr($spec, $pos, 1) eq '<' {
-                        $pos   := $pos + 1;
-                        $lpos  := nqp::index($spec, '>', $pos);
-                        $value := nqp::substr($spec, $pos, $lpos - $pos);
-                        $pos   := $lpos + 1;
-                    }
-                    # Done processing the pair, store it in the hash.
-                    %hash{$name} := $value;
-                }
-                else {
-                    # If whatever we found doesn't start with a colon, treat it
-                    # as a lookup of a previously saved hash to be merged in.
-                    # Find the first whitespace or comma
-                    $lpos      := nqp::findcclass(nqp::const::CCLASS_WHITESPACE,
-                                                  $spec, $pos, $eos);
-                    my $index  := nqp::index($spec, ',', $pos);
-                    $lpos      := $index unless $index < 0 || $index >= $lpos;
-                    my $lookup := nqp::substr($spec, $pos, $lpos - $pos);
-                    my %lhash  := %ohash{$lookup};
-                    self.'panic'('Unknown operator precedence specification "',
-                                 $lookup, '"') unless %lhash;
-                    my $lhash_it := nqp::iterator(%lhash);
-                    while $lhash_it {
-                        $s := nqp::shift($lhash_it);
-                        %hash{$s} := %lhash{$s};
-                    }
-                    $pos := $lpos;
-                }
-            }
-            # Done processing the spec string, cache the hash for later.
-            %ohash{$spec} := %hash;
-        }
-
-        if $save {
-            %ohash{$save} := %hash;
-            self;
-        }
-        else {
-            # If we've been called as a subrule, then build a pass-cursor
-            # to indicate success and set the hash as the subrule's match object.
-            my $cur := self.'!cursor_start_cur'();
-            $cur.'!cursor_pass'(nqp::getattr_i($cur, $cursor_class, '$!from'));
-            nqp::bindattr($cur, $cursor_class, '$!match', %hash);
-            $cur;
-        }
+    method O(*%hash) {
+        # Build a pass-cursor to indicate success and set the hash as the
+        # subrule's match object.
+        my $cur := self.'!cursor_start_cur'();
+        $cur.'!cursor_pass'(nqp::getattr_i($cur, $cursor_class, '$!from'));
+        nqp::bindattr($cur, $cursor_class, '$!match', %hash);
+        $cur;
     }
 
 

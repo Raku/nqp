@@ -1,4 +1,20 @@
 grammar NQP::Grammar is HLL::Grammar {
+    my %methodop :=       nqp::hash('prec', 'y=', 'assoc', 'unary');
+    my %autoincrement :=  nqp::hash('prec', 'x=', 'assoc', 'unary');
+    my %exponentiation := nqp::hash('prec', 'w=', 'assoc', 'left');
+    my %symbolic_unary := nqp::hash('prec', 'v=', 'assoc', 'unary');
+    my %multiplicative := nqp::hash('prec', 'u=', 'assoc', 'left');
+    my %additive :=       nqp::hash('prec', 't=', 'assoc', 'left');
+    my %concatenation :=  nqp::hash('prec', 'r=', 'assoc', 'left');
+    my %relational :=     nqp::hash('prec', 'm=', 'assoc', 'non');
+    my %tight_and :=      nqp::hash('prec', 'l=', 'assoc', 'left');
+    my %tight_or :=       nqp::hash('prec', 'k=', 'assoc', 'left');
+    my %conditional :=    nqp::hash('prec', 'j=', 'assoc', 'right');
+    my %assignment :=     nqp::hash('prec', 'i=', 'assoc', 'right');
+    my %comma :=          nqp::hash('prec', 'g=', 'assoc', 'list', 'nextterm', 'nulltermish');
+    my %list_infix :=     nqp::hash('prec', 'f=', 'assoc', 'list');
+    my %list_prefix :=    nqp::hash('prec', 'e=', 'assoc', 'unary');
+
     method TOP() {
         # Language braids.
         my %*LANG;
@@ -696,26 +712,6 @@ grammar NQP::Grammar is HLL::Grammar {
     token semilist { <.ws> <statement> <.ws> }
 
     ## Operators
-
-    INIT {
-        NQP::Grammar.O(':prec<y=>, :assoc<unary>', '%methodop');
-        NQP::Grammar.O(':prec<x=>, :assoc<unary>', '%autoincrement');
-        NQP::Grammar.O(':prec<w=>, :assoc<left>',  '%exponentiation');
-        NQP::Grammar.O(':prec<v=>, :assoc<unary>', '%symbolic_unary');
-        NQP::Grammar.O(':prec<u=>, :assoc<left>',  '%multiplicative');
-        NQP::Grammar.O(':prec<t=>, :assoc<left>',  '%additive');
-        NQP::Grammar.O(':prec<r=>, :assoc<left>',  '%concatenation');
-        NQP::Grammar.O(':prec<m=>, :assoc<non>',   '%relational');
-        NQP::Grammar.O(':prec<l=>, :assoc<left>',  '%tight_and');
-        NQP::Grammar.O(':prec<k=>, :assoc<left>',  '%tight_or');
-        NQP::Grammar.O(':prec<j=>, :assoc<right>', '%conditional');
-        NQP::Grammar.O(':prec<i=>, :assoc<right>', '%assignment');
-        NQP::Grammar.O(':prec<g=>, :assoc<list>, :nextterm<nulltermish>',  '%comma');
-        NQP::Grammar.O(':prec<f=>, :assoc<list>',  '%list_infix');
-        NQP::Grammar.O(':prec<e=>, :assoc<unary>', '%list_prefix');
-    }
-
-
     token infixish { <!infixstopper> <OPER=infix> }
     token infixstopper {
         | <?{ $*IN_REGEX_ASSERTION }> <?[>]>
@@ -724,90 +720,90 @@ grammar NQP::Grammar is HLL::Grammar {
 
     token postcircumfix:sym<[ ]> {
         '[' <.ws> <EXPR> ']'
-        <O('%methodop')>
+        <O(|%methodop)>
     }
 
     token postcircumfix:sym<{ }> {
         '{' <.ws> <EXPR> '}'
-        <O('%methodop')>
+        <O(|%methodop)>
     }
 
     token postcircumfix:sym<ang> {
         <?[<]> <quote_EXPR: ':q'>
-        <O('%methodop')>
+        <O(|%methodop)>
     }
 
     token postcircumfix:sym<( )> {
         '(' <.ws> <arglist> ')'
-        <O('%methodop')>
+        <O(|%methodop)>
     }
 
-    token postfix:sym<.>  { <dotty> <O('%methodop')> }
+    token postfix:sym<.>  { <dotty> <O(|%methodop)> }
 
-    token prefix:sym<++>  { <sym>  <O('%autoincrement, :op<preinc>')> }
-    token prefix:sym<-->  { <sym>  <O('%autoincrement, :op<predec>')> }
+    token prefix:sym<++>  { <sym>  <O(|%autoincrement, :op<preinc>)> }
+    token prefix:sym<-->  { <sym>  <O(|%autoincrement, :op<predec>)> }
 
-    token postfix:sym<++> { <sym>  <O('%autoincrement, :op<postinc>')> }
-    token postfix:sym<--> { <sym>  <O('%autoincrement, :op<postdec>')> }
+    token postfix:sym<++> { <sym>  <O(|%autoincrement, :op<postinc>)> }
+    token postfix:sym<--> { <sym>  <O(|%autoincrement, :op<postdec>)> }
 
-    token infix:sym<**>   { <sym>  <O('%exponentiation, :op<pow_n>')> }
+    token infix:sym<**>   { <sym>  <O(|%exponentiation, :op<pow_n>)> }
 
-    token prefix:sym<+>   { <sym>  <O('%symbolic_unary, :op<numify>')> }
-    token prefix:sym<~>   { <sym>  <O('%symbolic_unary, :op<stringify>')> }
-    token prefix:sym<->   { <sym>  <![>]> <!number> <O('%symbolic_unary, :op<neg_n>')> }
-    token prefix:sym<?>   { <sym>  <O('%symbolic_unary, :op<istrue>')> }
-    token prefix:sym<!>   { <sym>  <O('%symbolic_unary, :op<falsey>')> }
-    token prefix:sym<|>   { <sym>  <O('%symbolic_unary')> }
+    token prefix:sym<+>   { <sym>  <O(|%symbolic_unary, :op<numify>)> }
+    token prefix:sym<~>   { <sym>  <O(|%symbolic_unary, :op<stringify>)> }
+    token prefix:sym<->   { <sym>  <![>]> <!number> <O(|%symbolic_unary, :op<neg_n>)> }
+    token prefix:sym<?>   { <sym>  <O(|%symbolic_unary, :op<istrue>)> }
+    token prefix:sym<!>   { <sym>  <O(|%symbolic_unary, :op<falsey>)> }
+    token prefix:sym<|>   { <sym>  <O(|%symbolic_unary)> }
 
-    token infix:sym<*>    { <sym>  <O('%multiplicative, :op<mul_n>')> }
-    token infix:sym</>    { <sym>  <O('%multiplicative, :op<div_n>')> }
-    token infix:sym<%>    { <sym>  <O('%multiplicative, :op<mod_n>')> }
-    token infix:sym<+&>   { <sym>  <O('%multiplicative, :op<bitand_i>')> }
+    token infix:sym<*>    { <sym>  <O(|%multiplicative, :op<mul_n>)> }
+    token infix:sym</>    { <sym>  <O(|%multiplicative, :op<div_n>)> }
+    token infix:sym<%>    { <sym>  <O(|%multiplicative, :op<mod_n>)> }
+    token infix:sym<+&>   { <sym>  <O(|%multiplicative, :op<bitand_i>)> }
 
-    token infix:sym<+>    { <sym>  <O('%additive, :op<add_n>')> }
-    token infix:sym<->    { <sym>  <O('%additive, :op<sub_n>')> }
-    token infix:sym<+|>   { <sym>  <O('%additive, :op<bitor_i>')> }
-    token infix:sym<+^>   { <sym>  <O('%additive, :op<bitxor_i>')> }
+    token infix:sym<+>    { <sym>  <O(|%additive, :op<add_n>)> }
+    token infix:sym<->    { <sym>  <O(|%additive, :op<sub_n>)> }
+    token infix:sym<+|>   { <sym>  <O(|%additive, :op<bitor_i>)> }
+    token infix:sym<+^>   { <sym>  <O(|%additive, :op<bitxor_i>)> }
 
-    token infix:sym<~>    { <sym>  <O('%concatenation , :op<concat>')> }
+    token infix:sym<~>    { <sym>  <O(|%concatenation , :op<concat>)> }
 
-    token infix:sym«==»   { <sym>  <O('%relational, :op<iseq_n>')> }
-    token infix:sym«!=»   { <sym>  <O('%relational, :op<isne_n>')> }
-    token infix:sym«<=»   { <sym>  <O('%relational, :op<isle_n>')> }
-    token infix:sym«>=»   { <sym>  <O('%relational, :op<isge_n>')> }
-    token infix:sym«<»    { <sym>  <O('%relational, :op<islt_n>')> }
-    token infix:sym«>»    { <sym>  <O('%relational, :op<isgt_n>')> }
-    token infix:sym«eq»   { <sym>  <O('%relational, :op<iseq_s>')> }
-    token infix:sym«ne»   { <sym>  <O('%relational, :op<isne_s>')> }
-    token infix:sym«le»   { <sym>  <O('%relational, :op<isle_s>')> }
-    token infix:sym«ge»   { <sym>  <O('%relational, :op<isge_s>')> }
-    token infix:sym«lt»   { <sym>  <O('%relational, :op<islt_s>')> }
-    token infix:sym«gt»   { <sym>  <O('%relational, :op<isgt_s>')> }
-    token infix:sym«=:=»  { <sym>  <O('%relational, :op<eqaddr>')> }
-    token infix:sym<~~>   { <sym>  <O('%relational, :reducecheck<smartmatch>')> }
+    token infix:sym«==»   { <sym>  <O(|%relational, :op<iseq_n>)> }
+    token infix:sym«!=»   { <sym>  <O(|%relational, :op<isne_n>)> }
+    token infix:sym«<=»   { <sym>  <O(|%relational, :op<isle_n>)> }
+    token infix:sym«>=»   { <sym>  <O(|%relational, :op<isge_n>)> }
+    token infix:sym«<»    { <sym>  <O(|%relational, :op<islt_n>)> }
+    token infix:sym«>»    { <sym>  <O(|%relational, :op<isgt_n>)> }
+    token infix:sym«eq»   { <sym>  <O(|%relational, :op<iseq_s>)> }
+    token infix:sym«ne»   { <sym>  <O(|%relational, :op<isne_s>)> }
+    token infix:sym«le»   { <sym>  <O(|%relational, :op<isle_s>)> }
+    token infix:sym«ge»   { <sym>  <O(|%relational, :op<isge_s>)> }
+    token infix:sym«lt»   { <sym>  <O(|%relational, :op<islt_s>)> }
+    token infix:sym«gt»   { <sym>  <O(|%relational, :op<isgt_s>)> }
+    token infix:sym«=:=»  { <sym>  <O(|%relational, :op<eqaddr>)> }
+    token infix:sym<~~>   { <sym>  <O(|%relational, :reducecheck<smartmatch>)> }
 
-    token infix:sym<&&>   { <sym>  <O('%tight_and, :op<if>')> }
+    token infix:sym<&&>   { <sym>  <O(|%tight_and, :op<if>)> }
 
-    token infix:sym<||>   { <sym>  <O('%tight_or, :op<unless>')> }
-    token infix:sym<//>   { <sym>  <O('%tight_or, :op<defor>')> }
+    token infix:sym<||>   { <sym>  <O(|%tight_or, :op<unless>)> }
+    token infix:sym<//>   { <sym>  <O(|%tight_or, :op<defor>)> }
 
     token infix:sym<?? !!> {
         '??'
         <.ws>
         <EXPR('i=')>
         '!!'
-        <O('%conditional, :reducecheck<ternary>, :op<if>')>
+        <O(|%conditional, :reducecheck<ternary>, :op<if>)>
     }
 
     token infix:sym<=>    {
         <sym> <.panic: 'Assignment ("=") not supported in NQP, use ":=" instead'>
     }
-    token infix:sym<:=>   { <sym>  <O('%assignment, :op<bind>')> }
-    token infix:sym<::=>  { <sym>  <O('%assignment, :op<bind>')> }
+    token infix:sym<:=>   { <sym>  <O(|%assignment, :op<bind>)> }
+    token infix:sym<::=>  { <sym>  <O(|%assignment, :op<bind>)> }
 
-    token infix:sym<,>    { <sym>  <O('%comma, :op<list>')> }
+    token infix:sym<,>    { <sym>  <O(|%comma, :op<list>)> }
 
-    token prefix:sym<make>   { <sym> \s <O('%list_prefix')> }
+    token prefix:sym<make>   { <sym> \s <O(|%list_prefix)> }
     token term:sym<return> { <sym> [\s <EXPR>]? { $*RETURN_USED := 1 } }
 
     method smartmatch($/) {
