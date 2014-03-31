@@ -4197,6 +4197,7 @@ public final class Ops {
     public static SixModelObject newthread(SixModelObject code, long appLifetime, ThreadContext tc) {
         SixModelObject thread = tc.gc.Thread.st.REPR.allocate(tc, tc.gc.Thread.st);
         ((VMThreadInstance)thread).thread = new Thread(new CodeRunnable(tc.gc, thread, code));
+        ((VMThreadInstance)thread).thread.setDaemon(appLifetime != 0);
         return thread;
     }
 
