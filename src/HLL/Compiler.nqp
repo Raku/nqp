@@ -369,6 +369,7 @@ class HLL::Compiler does HLL::Backend::Default {
                 }
                 next;
             }
+            nqp::printfh($stderr, nqp::sprintf("Stage %-11s: ", [$_])) if nqp::defined($stagestats);
             my $timestamp := nqp::time_n();
             if nqp::can(self, $_) {
                 $result := self."$_"($result, |%adverbs);
@@ -381,7 +382,7 @@ class HLL::Compiler does HLL::Backend::Default {
             }
             my $diff := nqp::time_n() - $timestamp;
             if nqp::defined($stagestats) {
-                nqp::printfh($stderr, nqp::sprintf("Stage %-11s: %7.3f", [$_, $diff]));
+                nqp::printfh($stderr, nqp::sprintf("%7.3f", [$diff]));
                 $!backend.force_gc() if nqp::bitand_i($stagestats, 0x4);
                 nqp::printfh($stderr, $!backend.vmstat())
                     if nqp::bitand_i($stagestats, 0x2);
