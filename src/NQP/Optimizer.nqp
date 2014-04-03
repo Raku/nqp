@@ -1,20 +1,52 @@
 use NQPP6QRegex;
 
 class NQP::Optimizer {
+    # Variable declarations and usages within a block.
+    my class BlockVars {
+        # Hash mapping variable names declared in the block to the QAST::Var
+        # of its declaration.
+        has %!decls;
+
+        # Usages of variables in this block, or unioned in from an inlined
+        # immediate block.
+        has %!usages_flat;
+
+        # Usages of variables in this block, or unioned in from a non-inlined
+        # immediate block or a declaration block.
+        has %!usages_inner;
+
+        method add_decl($var) {
+            %!decls{$var.name} := $var;
+        }
+
+        method add_usage($var) {
+            my @usages := %!usages_flat{$var.name};
+            unless @usages {
+                @usages := [];
+                %!usages_flat{$var.name} := @usages;
+            }
+            nqp::push(@usages, $var);
+        }
+    }
+
     has @!block_stack;
+    has @!block_var_stack;
     has %!adverbs;
 
     method optimize($ast, *%adverbs) {
         %!adverbs := %adverbs;
         @!block_stack := [$ast[0]];
+        @!block_var_stack := [BlockVars.new];
         self.visit_children($ast);
         $ast;
     }
 
     method visit_block($block) {
         @!block_stack.push($block);
+        @!block_var_stack.push(BlockVars.new);
         self.visit_children($block);
         @!block_stack.pop();
+        @!block_var_stack.pop();
         $block;
     }
 
@@ -114,6 +146,16 @@ class NQP::Optimizer {
         $handle;
     }
 
+    method visit_var($var) {
+        my int $top := nqp::elems(@!block_var_stack) - 1;
+        if $var.decl {
+            @!block_var_stack[$top].add_decl($var);
+        }
+        else {
+            @!block_var_stack[$top].add_usage($var);
+        }
+    }
+
     method visit_children($node, :$skip_selectors) {
         my int $i := 0;
         unless nqp::isstr($node) || !nqp::defined($node) {
@@ -122,6 +164,8 @@ class NQP::Optimizer {
                     my $visit := $node[$i];
                     if nqp::istype($visit, QAST::Op) {
                         $node[$i] := self.visit_op($visit)
+                    } elsif nqp::istype($visit, QAST::Var) {
+                        self.visit_var($visit);
                     } elsif nqp::istype($visit, QAST::Block) {
                         $node[$i] := self.visit_block($visit)
                     } elsif nqp::istype($visit, QAST::Want) {
