@@ -15,7 +15,7 @@ class NQP::Optimizer {
         # immediate block or a declaration block.
         has %!usages_inner;
 
-        # If lowering is, for some reason, poisened.
+        # If lowering is, for some reason, poisoned.
         has $!poisoned;
 
         method add_decl($var) {
