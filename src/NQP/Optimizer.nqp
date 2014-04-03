@@ -15,17 +15,98 @@ class NQP::Optimizer {
         # immediate block or a declaration block.
         has %!usages_inner;
 
+        # If lowering is, for some reason, poisened.
+        has $!poisoned;
+
         method add_decl($var) {
             %!decls{$var.name} := $var;
         }
 
         method add_usage($var) {
-            my @usages := %!usages_flat{$var.name};
+            my $name   := $var.name;
+            my @usages := %!usages_flat{$name};
             unless @usages {
                 @usages := [];
-                %!usages_flat{$var.name} := @usages;
+                %!usages_flat{$name} := @usages;
             }
             nqp::push(@usages, $var);
+        }
+
+        method poison_lowering() { $!poisoned := 1; }
+
+        method get_decls() { %!decls }
+
+        method get_usages_flat() { %!usages_flat }
+
+        method get_usages_inner() { %!usages_inner }
+
+        method is_flattenable() {
+            for %!decls {
+                return 0 if $_.value.scope eq 'lexical';
+                return 0 if $_.value.decl eq 'param';
+            }
+            1
+        }
+
+        method incorporate_inner($vars_info, $flattened) {
+            # We'll exclude anything that the inner or flattened thing has as
+            # a declaration, since those are its own.
+            my %decls := $vars_info.get_decls;
+
+            # Inner ones always go into our inners set.
+            add_to_set(%!usages_inner, $vars_info.get_usages_inner, %decls);
+
+            # Flat ones depend on if we flattened this block into ourself.
+            add_to_set($flattened ?? %!usages_flat !! %!usages_inner,
+                $vars_info.get_usages_flat, %decls);
+
+            sub add_to_set(%set, %to_add, %exclude) {
+                for %to_add {
+                    my $name := $_.key;
+                    next if nqp::existskey(%exclude, $name);
+                    my @existing := %set{$name};
+                    if @existing {
+                        for $_.value { nqp::push(@existing, $_) }
+                        #nqp::splice(@existing, $_.value, 0, 0);
+                    }
+                    else {
+                        %set{$name} := $_.value;
+                    }
+                }
+            }
+        }
+
+        method lexicals_to_locals() {
+            return 0 if $!poisoned;
+            for %!decls {
+                # We're looking for lexical var or param decls.
+                my $qast := $_.value;
+                my str $scope := $qast.scope;
+                next unless $scope eq 'lexical';
+                my str $decl := $qast.decl;
+                next unless $decl eq 'param' || $decl eq 'var';
+
+                # Consider name. Can't lower if it's used by any nested blocks.
+                my str $name := $_.key;
+                unless nqp::existskey(%!usages_inner, $name) {
+                    # Lowerable if it's a normal variable.
+                    next if nqp::chars($name) < 2;
+                    my str $sigil := nqp::substr($name, 0, 1);
+                    next unless $sigil eq '$' || $sigil eq '@' || $sigil eq '%';
+                    next unless nqp::iscclass(nqp::const::CCLASS_ALPHABETIC, $name, 1);
+
+                    # Seems good; lower it.
+                    my $new_name := $qast.unique('__lowered_lex');
+                    $qast.scope('local');
+                    $qast.name($new_name);
+                    if %!usages_flat{$name} {
+                        for %!usages_flat{$name} {
+                            $_.scope('local');
+                            $_.name($new_name);
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -42,11 +123,39 @@ class NQP::Optimizer {
     }
 
     method visit_block($block) {
+        # Push block and a new block vars tracking block.
         @!block_stack.push($block);
         @!block_var_stack.push(BlockVars.new);
+
+        # Visit all children, which includes nested blocks.
         self.visit_children($block);
+
+        # Methods with late-bound names poison lowering.
+        if nqp::substr($block.name, 0, 12) eq '!!LATENAME!!' {
+            self.poison_lowering();
+        }
+
+        # Pop the block and the vars info.
         @!block_stack.pop();
-        @!block_var_stack.pop();
+        my $vars_info := @!block_var_stack.pop();
+
+        # Lower any declarations we can.
+        $vars_info.lexicals_to_locals();
+
+        # If the block has no lexical declarations remaining, and it was an
+        # immediate block, then flatten it in.
+        my int $flattened := 0;
+        if $block.blocktype eq 'immediate' || $block.blocktype eq 'immediate_static' {
+            if $vars_info.is_flattenable {
+                my @innards := $block.list;
+                $block := QAST::Stmts.new( |@innards );
+                $flattened := 1;
+            }
+        }
+
+        # Incorporate this block's info into outer block's info.
+        @!block_var_stack[nqp::elems(@!block_var_stack) - 1].incorporate_inner($vars_info, $flattened);
+
         $block;
     }
 
@@ -59,8 +168,22 @@ class NQP::Optimizer {
             return self.visit_handle($op);
         }
 
-        # Visit children first.
-        self.visit_children($op);
+        # A for loop must have its block treated as a declaration; besides
+        # that, visit children as normal.
+        if $opname eq 'for' {
+            my $orig := $op[1].blocktype;
+            $op[1].blocktype('declaration');
+            self.visit_children($op);
+            $op[1].blocktype($orig);
+        }
+        else {
+            self.visit_children($op);
+        }
+
+        # nqp::ctx and nqp::curlexpad capture the current context and so poisons lowering
+        if $opname eq 'ctx' || $opname eq 'curlexpad' {
+            self.poison_lowering();
+        }
 
         # Consider numeric ops we can simplify.
         my $typeinfo := nqp::chars($opname) > 2
@@ -147,12 +270,17 @@ class NQP::Optimizer {
     }
 
     method visit_var($var) {
-        my int $top := nqp::elems(@!block_var_stack) - 1;
-        if $var.decl {
-            @!block_var_stack[$top].add_decl($var);
-        }
-        else {
-            @!block_var_stack[$top].add_usage($var);
+        my str $scope := $var.scope;
+        if $scope eq 'positional' || $scope eq 'associative' {
+            self.visit_children($var);
+        } else {
+            my int $top := nqp::elems(@!block_var_stack) - 1;
+            if $var.decl {
+                @!block_var_stack[$top].add_decl($var);
+            }
+            else {
+                @!block_var_stack[$top].add_usage($var);
+            }
         }
     }
 
@@ -171,6 +299,7 @@ class NQP::Optimizer {
                     } elsif nqp::istype($visit, QAST::Want) {
                         self.visit_children($visit, :skip_selectors)
                     } elsif nqp::istype($visit, QAST::Regex) {
+                        self.poison_lowering();
                         QRegex::Optimizer.new().optimize($visit, @!block_stack[+@!block_stack - 1], |%!adverbs);
                     } else {
                         self.visit_children($visit);
@@ -200,6 +329,12 @@ class NQP::Optimizer {
         }
         else {
             nqp::die("No compile-time value for $name");
+        }
+    }
+
+    method poison_lowering() {
+        for @!block_var_stack {
+            $_.poison_lowering();
         }
     }
 }
