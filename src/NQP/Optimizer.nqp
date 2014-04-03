@@ -91,9 +91,11 @@ class NQP::Optimizer {
                 unless nqp::existskey(%!usages_inner, $name) {
                     # Lowerable if it's a normal variable.
                     next if nqp::chars($name) < 2;
-                    my str $sigil := nqp::substr($name, 0, 1);
-                    next unless $sigil eq '$' || $sigil eq '@' || $sigil eq '%';
-                    next unless nqp::iscclass(nqp::const::CCLASS_ALPHABETIC, $name, 1);
+                    if $name ne 'self' && $name ne '$/' {
+                        my str $sigil := nqp::substr($name, 0, 1);
+                        next unless $sigil eq '$' || $sigil eq '@' || $sigil eq '%';
+                        next unless nqp::iscclass(nqp::const::CCLASS_ALPHABETIC, $name, 1);
+                    }
 
                     # Seems good; lower it.
                     my $new_name := $qast.unique('__lowered_lex');
@@ -271,7 +273,7 @@ class NQP::Optimizer {
 
     method visit_var($var) {
         my str $scope := $var.scope;
-        if $scope eq 'positional' || $scope eq 'associative' {
+        if $scope eq 'attribute' || $scope eq 'positional' || $scope eq 'associative' {
             self.visit_children($var);
         } else {
             my int $top := nqp::elems(@!block_var_stack) - 1;
