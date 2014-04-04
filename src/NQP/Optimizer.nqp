@@ -277,8 +277,14 @@ class NQP::Optimizer {
             self.visit_children($var);
         } else {
             my int $top := nqp::elems(@!block_var_stack) - 1;
-            if $var.decl {
+            my $decl    := $var.decl;
+            if $decl {
                 @!block_var_stack[$top].add_decl($var);
+                if $decl eq 'param' && $var.default -> $default {
+                    my $stmts_def := QAST::Stmts.new( $default );
+                    self.visit_children($stmts_def);
+                    $var.default($stmts_def[0]);
+                }
             }
             else {
                 @!block_var_stack[$top].add_usage($var);
