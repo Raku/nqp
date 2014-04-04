@@ -27,6 +27,7 @@ src/vm/parrot/pmc/pmc_*.h
 src/vm/parrot/pmc/*.c
 /nqp
 nqp.c
+nqp-m.c
 nqp_group.c
 nqp_group.h
 src/gen/*.pir
