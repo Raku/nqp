@@ -8,7 +8,15 @@ knowhow ModuleLoader {
         # Put any explicitly specified path on the start of the list.
         my $explicit;
         if !nqp::isnull($explicit_path) {
-            try { my $hack; $explicit := %*COMPILING<%?OPTIONS>{$explicit_path}; }
+            try {
+                my $compiling := %*COMPILING;
+                unless nqp::isnull(%*COMPILING) {
+                    my $options := $compiling<%?OPTIONS>;
+                    unless nqp::isnull($options) {
+                        $explicit := $options{$explicit_path};
+                    }
+                }
+            }
         }
         if !nqp::isnull($explicit) && nqp::defined($explicit) {
             nqp::push(@search_paths, $explicit);
@@ -55,7 +63,15 @@ knowhow ModuleLoader {
             my $*CTXSAVE := self;
             my $*MAIN_CTX := ModuleLoader;
             my $boot_mode;
-            try { my $hack; $boot_mode := %*COMPILING<%?OPTIONS><bootstrap>; }
+            try {
+                my $compiling := %*COMPILING;
+                unless nqp::isnull(%*COMPILING) {
+                    my $options := $compiling<%?OPTIONS>;
+                    unless nqp::isnull($options) {
+                        $boot_mode := $options<bootstrap>;
+                    }
+                }
+            }
             $boot_mode := !nqp::isnull($boot_mode) && $boot_mode;
             my $preserve_global := nqp::getcurhllsym('GLOBAL');
             nqp::usecompileehllconfig() if $boot_mode;
@@ -166,7 +182,15 @@ knowhow ModuleLoader {
                 my $*CTXSAVE := self;
                 my $*MAIN_CTX := ModuleLoader;
                 my $boot_mode;
-                try { my $hack; $boot_mode := %*COMPILING<%?OPTIONS><bootstrap>; }
+                try {
+                    my $compiling := %*COMPILING;
+                    unless nqp::isnull(%*COMPILING) {
+                        my $options := $compiling<%?OPTIONS>;
+                        unless nqp::isnull($options) {
+                            $boot_mode := $options<bootstrap>;
+                        }
+                    }
+                }
                 $boot_mode := !nqp::isnull($boot_mode) && $boot_mode;
                 my $preserve_global := nqp::getcurhllsym('GLOBAL');
                 nqp::usecompileehllconfig() if $boot_mode;
