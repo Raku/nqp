@@ -69,7 +69,7 @@ m-install: m-all
 	$(CP) $(P6QREGEX_MOAR) $(DESTDIR)$(NQP_LIB_DIR)
 	$(CP) $(NQP_MOAR) $(DESTDIR)$(NQP_LIB_DIR)
 	$(CP) $(P5QREGEX_MOAR) $(DESTDIR)$(NQP_LIB_DIR)
-	$(PERL) tools/build/install-moar-runner.pl "$(DESTDIR)" $(PREFIX)
+	$(PERL) $(PREFIX)/bin/gen-moar-runner.pl "$(DESTDIR)$(BIN_DIR)/nqp-m" "$(PREFIX)" "$(DESTDIR)$(NQP_LIB_DIR)/nqp.moarvm" "$(DESTDIR)$(NQP_LIB_DIR)"
 
 # FIXME:
 M_CLEANUPS = *.moarvm  gen/moar/* $(M_RUNNER)
@@ -232,8 +232,8 @@ $(NQP_MOAR): $(M_STAGE2_OUTPUT)
 	$(CP) $(M_STAGE2)/$(P6QREGEX_MOAR) .
 	$(CP) $(M_STAGE2)/$(NQP_MOAR) .
 
-$(M_RUNNER): tools/build/gen-moar-runner.pl
-	$(PERL) tools/build/gen-moar-runner.pl "$(MOAR)"
+$(M_RUNNER): $(PREFIX)/bin/gen-moar-runner.pl
+	$(PERL) $(PREFIX)/bin/gen-moar-runner.pl "nqp-m" "$(PREFIX)" "nqp.moarvm"
 
 m-runner-default: m-all
 	$(CP) $(M_RUNNER) nqp$(BAT)
