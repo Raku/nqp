@@ -19,17 +19,21 @@ class NQP::Optimizer {
         has $!poisoned;
 
         method add_decl($var) {
-            %!decls{$var.name} := $var;
+            if $var.scope eq 'lexical' {
+                %!decls{$var.name} := $var;
+            }
         }
 
         method add_usage($var) {
-            my $name   := $var.name;
-            my @usages := %!usages_flat{$name};
-            unless @usages {
-                @usages := [];
-                %!usages_flat{$name} := @usages;
+            if $var.scope eq 'lexical' {
+                my $name   := $var.name;
+                my @usages := %!usages_flat{$name};
+                unless @usages {
+                    @usages := [];
+                    %!usages_flat{$name} := @usages;
+                }
+                nqp::push(@usages, $var);
             }
-            nqp::push(@usages, $var);
         }
 
         method poison_lowering() { $!poisoned := 1; }
