@@ -1629,7 +1629,7 @@ class NQP::Actions is HLL::Actions {
 
     method prefix:sym<make>($/) {
         make QAST::Op.new(
-                 QAST::Var.new( :name('$/'), :scope('contextual') ),
+                 QAST::Var.new( :name('$/'), :scope('lexical') ),
                  :op('callmethod'),
                  :name('!make'),
                  :node($/)
@@ -1794,9 +1794,9 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
             QAST::Stmts.new(
                 QAST::Op.new(
                     :op('bind'),
-                    QAST::Var.new( :name('$/'), :scope('contextual') ),
+                    QAST::Var.new( :name('$/'), :scope('lexical') ),
                     QAST::Op.new(
-                        QAST::Var.new( :name('$¢'), :scope('contextual') ),
+                        QAST::Var.new( :name('$¢'), :scope('lexical') ),
                         :name('MATCH'),
                         :op('callmethod')
                     )
