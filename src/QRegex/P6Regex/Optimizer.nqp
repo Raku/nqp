@@ -1,10 +1,13 @@
 class QRegex::Optimizer {
     has @!outer;
+    has $!level;
+    has $!main_opt;
 
     method optimize($node, $outer, *%adverbs) {
-        my $*LEVEL := nqp::getlexdyn('$*LEVEL') // %adverbs<optimize> // 2;
-        my @!outer := [$outer];
-        my $type := $node.rxtype;
+        $!level    := nqp::getlexdyn('$*LEVEL') // %adverbs<optimize> // 2;
+        $!main_opt := %adverbs<main_lang_optimizer>;
+        @!outer    := [$outer];
+        my $type   := $node.rxtype;
         if $type eq 'concat' {
             return self.visit_concat($node);
         } elsif $type eq 'subrule' {
@@ -63,9 +66,9 @@ class QRegex::Optimizer {
     method visit_concat($node) {
         # a single-child concat can become the child itself
         self.visit_children($node);
-        if +@($node) == 1 && $*LEVEL >= 1 {
+        if +@($node) == 1 && $!level >= 1 {
             return $node[0];
-        } elsif nqp::istype($node[0], QAST::Regex) && +@($node) >= 2 && $*LEVEL >= 2 {
+        } elsif nqp::istype($node[0], QAST::Regex) && +@($node) >= 2 && $!level >= 2 {
             # we may have a scan followed by a begin-of-string assertion.
             # in that case we just shouldn't scan.
             if $node[0].rxtype eq 'scan'
@@ -89,16 +92,21 @@ class QRegex::Optimizer {
     }
 
     method simplify_assertion($qast) {
+        if $qast.subtype eq 'method' {
+            return $!main_opt
+                ?? $!main_opt($qast)
+                !! $qast;
+        }
         my $child_is_block := nqp::istype($qast[0], QAST::Node)
             && (nqp::istype($qast[0][0], QAST::SVal) || nqp::istype($qast[0][0], QAST::Block));
         if $child_is_block {
             my $block := nqp::istype($qast[0][0], QAST::SVal) ?? $qast[0][1] !! $qast[0][0];
             my $regex := $block[2];
             # extra safety
-            if !nqp::istype($regex, QAST::Regex) { return $qast }
+            if !nqp::istype($regex, QAST::Regex) { return $qast; }
             self.visit_children($regex);
             if $qast.subtype eq 'zerowidth'
-                    && $child_is_block && $*LEVEL >= 2
+                    && $child_is_block && $!level >= 2
                     && $qast[0][0].value eq 'before' {
                 if nqp::istype($qast[0], QAST::Node) && nqp::istype($qast[0][1], QAST::Block)
                         && $regex.rxtype eq 'concat' && $regex[0].rxtype eq 'scan' && $regex[2].rxtype eq 'pass' {
@@ -132,7 +140,7 @@ class QRegex::Optimizer {
                 }
             }
             # positional and named captures are implicitly anchored, so we can get rid of the scan there, too.
-            if $qast.subtype eq 'capture' && $child_is_block && $*LEVEL >= 1 {
+            if $qast.subtype eq 'capture' && $child_is_block && $!level >= 1 {
                 self.dont_scan($regex);
             }
         }
@@ -142,37 +150,41 @@ class QRegex::Optimizer {
     method visit_children($node) {
         my int $i := 0;
         unless nqp::isstr($node) {
-            while $i < +@($node) {
+            my int $n := nqp::elems(@($node));
+            while $i < $n {
                 my $visit := $node[$i];
-                my $type;
                 if nqp::istype($visit, QAST::Regex) {
-                    $type := $visit.rxtype;
+                    my $type := $visit.rxtype;
+                    if $type eq 'concat' {
+                        $node[$i] := self.visit_concat($visit);
+                    } elsif $type eq 'literal' {
+                    } elsif $type eq 'quant' {
+                        self.visit_children($visit);
+                    } elsif $type eq 'subrule' {
+                        $node[$i] := self.simplify_assertion($visit);
+                    } elsif $type eq 'qastnode' {
+                        if $!main_opt {
+                            $node[$i] := $!main_opt($node[$i]);
+                        }
+                    } elsif $type eq 'anchor' {
+                    } elsif $type eq 'enumcharlist' {
+                    } elsif $type eq 'cclass' {
+                    } elsif $type eq 'scan' {
+                    } elsif $type eq 'charrange' {
+                    } elsif $type eq 'pass' || $type eq 'fail' {
+                    } else {
+                        # alt, altseq, conjseq, conj, quant
+                        self.visit_children($visit);
+                    }
                 } elsif nqp::istype($visit, QAST::Block) {
-                    $type := "block";
                     @!outer.push($visit);
-                }
-                if $type eq 'scan' {
-                } elsif $type eq 'literal' {
-                } elsif $type eq 'quant' {
                     self.visit_children($visit);
-                } elsif $type eq 'subrule' {
-                    $node[$i] := self.simplify_assertion($visit);
-                } elsif $type eq 'anchor' {
-                } elsif $type eq 'subcapture' {
-                } elsif $type eq 'enumcharlist' {
-                } elsif $type eq 'cclass' {
-                } elsif $type eq 'charrange' {
-                } elsif $type eq 'concat' {
-                    $node[$i] := self.visit_concat($visit);
-                } elsif $type eq 'pass' || $type eq 'fail' {
-                } else {
-                    # alt, altseq, conjseq, conj, quant
+                    @!outer.pop();
+                }
+                else {
                     self.visit_children($visit);
                 }
                 $i := $i + 1;
-                if $type eq 'block' {
-                    @!outer.pop();
-                }
             }
         }
     }

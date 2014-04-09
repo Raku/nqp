@@ -311,8 +311,14 @@ class NQP::Optimizer {
                     } elsif nqp::istype($visit, QAST::Want) {
                         self.visit_children($visit, :skip_selectors)
                     } elsif nqp::istype($visit, QAST::Regex) {
-                        self.poison_lowering();
-                        QRegex::Optimizer.new().optimize($visit, @!block_stack[+@!block_stack - 1], |%!adverbs);
+                        QRegex::Optimizer.new().optimize($visit,
+                            @!block_stack[+@!block_stack - 1],
+                            :main_lang_optimizer(-> $node {
+                                # Poison lowering if we re-enter, for now.
+                                self.poison_lowering();
+                                $node
+                            }),
+                            |%!adverbs);
                     } else {
                         self.visit_children($visit);
                     }
