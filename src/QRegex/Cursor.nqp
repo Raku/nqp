@@ -244,7 +244,7 @@ role NQPCursorRole is export {
     }
 
     my $pass_mark := 1; # NQP has no constant table yet
-    method !cursor_pass(int $pos, $name?, :$backtrack) {
+    method !cursor_pass(int $pos, str $name = '', :$backtrack) {
         $!match := $pass_mark;
         $!pos := $pos;
         $!restart := $!regexsub
@@ -293,7 +293,7 @@ role NQPCursorRole is export {
             if !nqp::isnull($actions) && nqp::can($actions, $name);
     }
 
-    method !reduce_with_match($name, $key, $match) {
+    method !reduce_with_match(str $name, str $key, $match) {
         my $actions := nqp::getlexdyn('$*ACTIONS');
         nqp::findmethod($actions, $name)($actions, $match, $key)
             if !nqp::isnull($actions) && nqp::can($actions, $name);
