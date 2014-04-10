@@ -86,10 +86,10 @@ class HLL::Compiler does HLL::Backend::Default {
                         self.interactive_exception($!);
                     }
                 };
-                next unless nqp::defined($output);
                 if nqp::defined($*MAIN_CTX) {
                     $save_ctx := $*MAIN_CTX;
                 }
+                next unless nqp::defined($output);
                 next if nqp::isnull($output);
 
                 if !$target {
