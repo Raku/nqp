@@ -630,13 +630,16 @@ class QAST::MASTCompiler {
             # by this block can find it.
             %*MAST_FRAMES{$cuid} := $frame;
 
-            # set the outer if it exists
+            # Set the outer if it exists
             $frame.set_outer($outer_frame)
                 if $outer_frame && $outer_frame ~~ MAST::Frame;
 
-            # Set exit handler flag if needed.
+            # Set exit handler and thunk flags if needed.
             if $node.has_exit_handler {
                 $frame.has_exit_handler(1);
+            }
+            if $node.is_thunk {
+                $frame.is_thunk(1);
             }
 
             # Compile all the substatements.
