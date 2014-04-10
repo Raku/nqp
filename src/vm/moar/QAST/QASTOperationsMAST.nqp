@@ -1620,6 +1620,8 @@ QAST::MASTOperations.add_hll_box('', $MVM_reg_void, -> $qastcomp, $reg {
 QAST::MASTOperations.add_core_moarop_mapping('ctx', 'ctx');
 QAST::MASTOperations.add_core_moarop_mapping('ctxouter', 'ctxouter');
 QAST::MASTOperations.add_core_moarop_mapping('ctxcaller', 'ctxcaller');
+QAST::MASTOperations.add_core_moarop_mapping('ctxouterskipthunks', 'ctxouterskipthunks');
+QAST::MASTOperations.add_core_moarop_mapping('ctxcallerskipthunks', 'ctxcallerskipthunks');
 QAST::MASTOperations.add_core_moarop_mapping('curcode', 'curcode');
 QAST::MASTOperations.add_core_moarop_mapping('callercode', 'callercode');
 QAST::MASTOperations.add_core_moarop_mapping('ctxlexpad', 'ctxlexpad');
