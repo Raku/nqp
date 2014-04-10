@@ -283,6 +283,9 @@ class QAST::Compiler is HLL::Compiler {
         # are 0 = static lex, 1 = container, 2 = state container.
         my %*BLOCK_LEX_VALUES;
 
+        # Blocks that are thunks.
+        my @*THUNK_BLOCKS;
+
         # Compile the block.
         my $*QAST_BLOCK_NO_CLOSE := 1;
         my $block_post := self.as_post($cu[0]);
@@ -294,6 +297,7 @@ class QAST::Compiler is HLL::Compiler {
         my @pre_des   := $cu.pre_deserialize;
         my @post_des  := $cu.post_deserialize;
         self.block_lex_values_to_post_des(@post_des, %*BLOCK_LEX_VALUES);
+        self.thunks_to_post_des(@post_des, @*THUNK_BLOCKS);
         if $comp_mode || @pre_des || @post_des {
             # Create a block into which we'll install all of the other
             # pieces.
@@ -430,6 +434,38 @@ class QAST::Compiler is HLL::Compiler {
                 ),
                 $names, $values, $flags
             ));
+        }
+    }
+
+    method thunks_to_post_des(@post_des, @thunk_blocks) {
+        return 1 unless @thunk_blocks;
+        nqp::push(@post_des, QAST::Op.new(
+            :op('bind'),
+            QAST::Var.new( :name('thunk_blocks'), :scope('local'), :decl('var') ),
+            QAST::Op.new(
+                :op('gethllsym'),
+                QAST::SVal.new( :value('nqp') ),
+                QAST::SVal.new( :value('thunk_blocks') )
+            )));
+        nqp::push(@post_des, QAST::Op.new(
+            :op('ifnull'),
+            QAST::Var.new( :name('thunk_blocks'), :scope('local') ),
+            QAST::Op.new(
+                :op('bindhllsym'),
+                QAST::SVal.new( :value('nqp') ),
+                QAST::SVal.new( :value('thunk_blocks') ),
+                QAST::Op.new(
+                    :op('bind'),
+                    QAST::Var.new( :name('thunk_blocks'), :scope('local') ),
+                    QAST::Op.new( :op('hash') )
+                ))));
+        for @thunk_blocks {
+            my $cuid := $_.cuid;
+            nqp::push(@post_des, QAST::Op.new(
+                :op('bindkey'),
+                QAST::Var.new( :name('thunk_blocks'), :scope('local') ),
+                QAST::SVal.new( :value($cuid) ),
+                QAST::Var.new( :name('thunk_blocks'), :scope('local') )));
         }
     }
 
@@ -601,6 +637,11 @@ class QAST::Compiler is HLL::Compiler {
             # Set loadlibs if applicable.
             my @loadlibs := $block.loadlibs();
             $sub.loadlibs(@loadlibs) if @loadlibs;
+
+            # Add it to "mark as thunk" list if needed.
+            if $node.is_thunk {
+                @*THUNK_BLOCKS.push($node);
+            }
             
             # Close it to further modifications.
             unless $*QAST_BLOCK_NO_CLOSE {
