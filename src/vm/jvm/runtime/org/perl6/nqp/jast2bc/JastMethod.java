@@ -34,6 +34,7 @@ public class JastMethod {
     public long[] crHandlers;
     public boolean hasExitHandler = false;
     public short argsExpectation = 0;
+    public boolean isThunk = false;
 
     Label beginAll, endAll;
     Map<String, LabelInfo> labels = new HashMap<String, LabelInfo>();
@@ -95,6 +96,11 @@ public class JastMethod {
         }
         hasExitHandler = getattr_i(jast, jastMethod, "$!has_exit_handler", hasExitHandlerHint, tc) != 0;
         argsExpectation = (short) getattr_i(jast, jastMethod, "$!args_expectation", argsExpectationHint, tc);
+        try {
+            isThunk = getattr_i(jast, jastMethod, "$!is_thunk", isThunkHint, tc) != 0;
+        } catch (Throwable t) {
+            /* Most likely a version of the node without the field. */
+        }
     }
 
     private void fillList(List<String> list, SixModelObject smoList, ThreadContext tc) {
@@ -108,7 +114,7 @@ public class JastMethod {
     private static long nameHint, staticHint, returnsHint, argumentsHint,
             localsHint, instructionsHint, crNameHint, crCuidHint, crOuterHint,
             crOlexHint, crIlexHint, crNlexHint, crSlexHint, crHandlersHint,
-            hasExitHandlerHint, argsExpectationHint;
+            hasExitHandlerHint, argsExpectationHint, isThunkHint;
     public static void setup(SixModelObject jastMethod, ThreadContext tc) {
         nameHint            = jastMethod.st.REPR.hint_for(tc, jastMethod.st, jastMethod, "$!name");
         staticHint          = jastMethod.st.REPR.hint_for(tc, jastMethod.st, jastMethod, "$!static");
@@ -126,5 +132,6 @@ public class JastMethod {
         crHandlersHint      = jastMethod.st.REPR.hint_for(tc, jastMethod.st, jastMethod, "@!cr_handlers");
         hasExitHandlerHint  = jastMethod.st.REPR.hint_for(tc, jastMethod.st, jastMethod, "$!has_exit_handler");
         argsExpectationHint = jastMethod.st.REPR.hint_for(tc, jastMethod.st, jastMethod, "$!args_expectation");
+        isThunkHint         = jastMethod.st.REPR.hint_for(tc, jastMethod.st, jastMethod, "$!is_thunk");
     }
 }

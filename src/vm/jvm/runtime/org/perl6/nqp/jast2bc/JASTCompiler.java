@@ -188,6 +188,7 @@ public class JASTCompiler {
             if (method.crHandlers.length != 1 || method.crHandlers[0] != 0) av.visit("handlers", method.crHandlers);
             if (method.hasExitHandler) av.visit("hasExitHandler", method.hasExitHandler);
             if (method.argsExpectation > 0) av.visit("argsExpectation", method.argsExpectation);
+            if (method.isThunk) av.visit("isThunk", method.isThunk);
             av.visitEnd();
         }
 

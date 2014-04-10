@@ -1761,6 +1761,8 @@ QAST::OperationsJAST.add_hll_unbox('', $RT_STR, -> $qastcomp {
 QAST::OperationsJAST.map_classlib_core_op('ctx', $TYPE_OPS, 'ctx', [], $RT_OBJ, :tc, :!inlinable);
 QAST::OperationsJAST.map_classlib_core_op('ctxouter', $TYPE_OPS, 'ctxouter', [$RT_OBJ], $RT_OBJ, :tc, :!inlinable);
 QAST::OperationsJAST.map_classlib_core_op('ctxcaller', $TYPE_OPS, 'ctxcaller', [$RT_OBJ], $RT_OBJ, :tc, :!inlinable);
+QAST::OperationsJAST.map_classlib_core_op('ctxouterskipthunks', $TYPE_OPS, 'ctxouterskipthunks', [$RT_OBJ], $RT_OBJ, :tc, :!inlinable);
+QAST::OperationsJAST.map_classlib_core_op('ctxcallerskipthunks', $TYPE_OPS, 'ctxcallerskipthunks', [$RT_OBJ], $RT_OBJ, :tc, :!inlinable);
 QAST::OperationsJAST.map_classlib_core_op('curcode', $TYPE_OPS, 'curcode', [], $RT_OBJ, :tc, :!inlinable);
 QAST::OperationsJAST.map_classlib_core_op('callercode', $TYPE_OPS, 'callercode', [], $RT_OBJ, :tc, :!inlinable);
 QAST::OperationsJAST.map_classlib_core_op('ctxlexpad', $TYPE_OPS, 'ctxlexpad', [$RT_OBJ], $RT_OBJ, :tc, :!inlinable);
@@ -3673,9 +3675,12 @@ class QAST::CompilerJAST {
                 $*JMETH.append($resume);
             }
             
-            # Set exit handler flag if needed.
+            # Set exit handler and thunk flags if needed.
             if $node.has_exit_handler {
                 $*JMETH.has_exit_handler(1);
+            }
+            if $node.is_thunk {
+                $*JMETH.is_thunk(1);
             }
             
             # Finalize method and add it to the class.

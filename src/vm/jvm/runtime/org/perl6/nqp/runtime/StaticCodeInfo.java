@@ -90,6 +90,11 @@ public class StaticCodeInfo implements Cloneable {
      */
     public boolean hasExitHandler;
     
+    /**
+     * Is this code object marked as a thunk?
+     */
+    public boolean isThunk;
+    
     public Integer oTryGetLexicalIdx(String name) {
         if (oLexicalNames != null) {
             if (oLexicalMap == null) {

@@ -97,6 +97,7 @@ public abstract class CompilationUnit {
                 m.handlers, ann.argsExpectation());
             cr.staticInfo.methodName = m.methodName;
             cr.staticInfo.hasExitHandler = ann.hasExitHandler();
+            cr.staticInfo.isThunk = ann.isThunk();
             cr.st = BOOTCodeSTable;
             codeRefList.add(cr);
 

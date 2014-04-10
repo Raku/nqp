@@ -1305,6 +1305,40 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc, "ctxcaller requires an operand with REPR ContextRef");
         }
     }
+    public static SixModelObject ctxouterskipthunks(SixModelObject ctx, ThreadContext tc) {
+        if (ctx instanceof ContextRefInstance) {
+            CallFrame outer = ((ContextRefInstance)ctx).context.outer;
+            while (outer != null && outer.codeRef.staticInfo.isThunk)
+                outer = outer.outer;
+            if (outer == null)
+                return null;
+
+            SixModelObject ContextRef = tc.gc.ContextRef;
+            SixModelObject wrap = ContextRef.st.REPR.allocate(tc, ContextRef.st);
+            ((ContextRefInstance)wrap).context = outer;
+            return wrap;
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc, "ctxouter requires an operand with REPR ContextRef");
+        }
+    }
+    public static SixModelObject ctxcallerskipthunks(SixModelObject ctx, ThreadContext tc) {
+        if (ctx instanceof ContextRefInstance) {
+            CallFrame caller = ((ContextRefInstance)ctx).context.caller;
+            while (caller != null && caller.codeRef.staticInfo.isThunk)
+                caller = caller.caller;
+            if (caller == null)
+                return null;
+            
+            SixModelObject ContextRef = tc.gc.ContextRef;
+            SixModelObject wrap = ContextRef.st.REPR.allocate(tc, ContextRef.st);
+            ((ContextRefInstance)wrap).context = caller;
+            return wrap;
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc, "ctxcaller requires an operand with REPR ContextRef");
+        }
+    }
     public static SixModelObject ctxlexpad(SixModelObject ctx, ThreadContext tc) {
         if (ctx instanceof ContextRefInstance) {
             // The context serves happily enough as the lexpad also (provides
@@ -4432,6 +4466,8 @@ public final class Ops {
             SixModelObject result = Array.st.REPR.allocate(tc, Array.st);
 
             for (ExceptionHandling.TraceElement te : ExceptionHandling.backtrace(((VMExceptionInstance)obj))) {
+                if (te.frame.codeRef.staticInfo.isThunk)
+                    continue;
                 SixModelObject annots = Hash.st.REPR.allocate(tc, Hash.st);
                 if (te.file != null) annots.bind_key_boxed(tc, "file", box_s(te.file, Str, tc));
                 if (te.line >= 0) annots.bind_key_boxed(tc, "line", box_i(te.line, Int, tc));

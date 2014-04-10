@@ -115,6 +115,7 @@ class JAST::Method is JAST::Node {
     has @!cr_handlers;
     has int $!has_exit_handler;
     has int $!args_expectation;
+    has int $!is_thunk;
     
     method BUILD(:$name!, :$returns!, :$static = 1) {
         $!name := $name;
@@ -163,6 +164,7 @@ class JAST::Method is JAST::Node {
     method cr_handlers(*@value) { @value ?? (@!cr_handlers := @value[0]) !! @!cr_handlers }
     method has_exit_handler(*@value) { $!has_exit_handler := @value[0] if @value; $!has_exit_handler }
     method args_expectation(*@value) { $!args_expectation := @value[0] if @value; $!args_expectation }
+    method is_thunk(*@value) { $!is_thunk := @value[0] if @value; $!is_thunk }
 
     method dump(@dumped) {
         nqp::push(@dumped, "+ method");

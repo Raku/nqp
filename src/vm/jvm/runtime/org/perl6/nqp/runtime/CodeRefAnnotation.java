@@ -16,4 +16,5 @@ public @interface CodeRefAnnotation
     long[] handlers() default {0};
     boolean hasExitHandler() default false;
     short argsExpectation() default 0;
+    boolean isThunk() default false;
 }
