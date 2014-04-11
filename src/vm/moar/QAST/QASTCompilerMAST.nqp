@@ -86,6 +86,7 @@ class QAST::MASTCompiler {
         has $!return_kind;          # Kind of return, tracked while emitting
         has @!captured_inners;      # List of CUIDs of blocks we statically capture
         has %!cloned_inners;        # Mapping of CUIDs of blocks we clone to register with the clone
+        has @!contvar_locals;       # Locals with a contvar that needs allocating.
 
         method new($qast, $outer, $compiler) {
             my $obj := nqp::create(self);
@@ -106,6 +107,7 @@ class QAST::MASTCompiler {
             @!params := nqp::list();
             @!captured_inners := nqp::list();
             %!cloned_inners := nqp::hash();
+            @!contvar_locals := nqp::list();
         }
 
         method add_param($var) {
@@ -150,7 +152,7 @@ class QAST::MASTCompiler {
             $lex;
         }
 
-        method register_local($var) {
+        method register_local($var, :$is_cont) {
             my $name := $var.name;
             my $temporary := ?$*INSTMT;
             if nqp::existskey(%!locals, $name) ||
@@ -165,6 +167,9 @@ class QAST::MASTCompiler {
             %!local_names_by_index{$local.index} := $name;
             if $temporary {
                 %*STMTTEMPS{$name} := $local;
+            }
+            if $is_cont {
+                nqp::push(@!contvar_locals, $var);
             }
             $local;
         }
@@ -234,6 +239,8 @@ class QAST::MASTCompiler {
         }
         method captured_inners() { @!captured_inners }
         method cloned_inners() { %!cloned_inners }
+
+        method contvar_locals() { @!contvar_locals }
     }
 
     method source_for_node($node) {
@@ -697,6 +704,15 @@ class QAST::MASTCompiler {
                     push_op(@pre, 'takeclosure', $reg, $reg);
                 }
 
+                # Set up for any contvar locals.
+                for $block.contvar_locals() {
+                    my $value_mast := self.as_mast(
+                        QAST::WVal.new( :value($_.value) ),
+                        :want($MVM_reg_obj));
+                    push_ilist(@pre, $value_mast);
+                    push_op(@pre, 'clone', $block.local($_.name), $value_mast.result_reg);
+                }
+
                 if $node.custom_args {
                     # The block does the arg processing by itself, so we accept any number
                     # of args here.
@@ -1116,10 +1132,15 @@ class QAST::MASTCompiler {
                 $*BLOCK.add_lexical($node, :is_static);
             }
             elsif $decl eq 'contvar' {
-                if $scope ne 'lexical' {
+                if $scope eq 'local' {
+                    $*BLOCK.register_local($node, :is_cont);
+                }
+                elsif $scope eq 'lexical' {
+                    $*BLOCK.add_lexical($node, :is_cont);
+                }
+                else {
                     nqp::die("Can only use 'contvar' decl with scope 'lexical'");
                 }
-                $*BLOCK.add_lexical($node, :is_cont);
             }
             elsif $decl eq 'statevar' {
                 if $scope ne 'lexical' {
