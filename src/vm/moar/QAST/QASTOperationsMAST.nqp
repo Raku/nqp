@@ -660,23 +660,27 @@ for <if unless> -> $op_name {
             @comp_ops[0] := $qastcomp.as_mast($op[0]);
         }
         if needs_cond_passed($op[1]) {
+            my $orig_type := $op[1].blocktype;
             $op[1].blocktype('declaration');
             @comp_ops[1] := $qastcomp.as_mast(QAST::Op.new(
                 :op('call'),
                 $op[1],
                 QAST::Var.new( :name($cond_temp_lbl), :scope('local') )),
                 :want($wanted));
+            $op[1].blocktype($orig_type);
         }
         else {
             @comp_ops[1] := $qastcomp.as_mast($op[1], :want($wanted));
         }
         if needs_cond_passed($op[2]) {
+            my $orig_type := $op[2].blocktype;
             $op[2].blocktype('declaration');
             @comp_ops[2] := $qastcomp.as_mast(QAST::Op.new(
                 :op('call'),
                 $op[2],
                 QAST::Var.new( :name($cond_temp_lbl), :scope('local') )),
                 :want($wanted));
+            $op[2].blocktype($orig_type);
         }
         elsif $op[2] {
             @comp_ops[2] := $qastcomp.as_mast($op[2], :want($wanted));
@@ -923,6 +927,7 @@ for ('', 'repeat_') -> $repness {
             # immediate arg case.
             my @children;
             my $handler := 1;
+            my $orig_type;
             for $op.list {
                 if $_.named eq 'nohandler' { $handler := 0; }
                 else { nqp::push(@children, $_) }
@@ -933,6 +938,7 @@ for ('', 'repeat_') -> $repness {
                     :op('bind'),
                     QAST::Var.new( :name($cond_temp), :scope('local'), :decl('var') ),
                     @children[0]);
+                $orig_type := @children[1].blocktype;
                 @children[1].blocktype('declaration');
                 @children[1] := QAST::Op.new(
                     :op('call'),
@@ -952,6 +958,9 @@ for ('', 'repeat_') -> $repness {
             }
             my $res_kind := @comp_types[0];
             my $res_reg := $*REGALLOC.fresh_register($res_kind);
+            if $orig_type {
+                @children[1][0].blocktype($orig_type);
+            }
 
             # Check operand count.
             my $operands := +@comp_ops;
