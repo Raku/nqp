@@ -6,7 +6,6 @@ import java.lang.invoke.CallSite;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import java.util.jar.Attributes;
@@ -22,7 +21,6 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
-import org.perl6.nqp.runtime.ExceptionHandling;
 import static org.perl6.nqp.runtime.Ops.*;
 import org.perl6.nqp.runtime.ThreadContext;
 

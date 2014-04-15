@@ -1,6 +1,5 @@
 package org.perl6.nqp.sixmodel.reprs;
 
-import com.sun.jna.Memory;
 import com.sun.jna.Native;
 
 import org.perl6.nqp.runtime.CallSiteDescriptor;

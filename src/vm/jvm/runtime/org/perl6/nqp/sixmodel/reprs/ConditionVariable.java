@@ -1,7 +1,5 @@
 package org.perl6.nqp.sixmodel.reprs;
 
-import java.util.concurrent.locks.ReentrantLock;
-
 import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.REPR;
