@@ -498,7 +498,6 @@ public class BootJavaInterop {
      * change this if you want to make char or boolean come in as objects.
      */
     protected int storageForType(Class<?> what) {
-        int ty;
         if (what == String.class || what == char.class)
             return StorageSpec.BP_STR;
         else if (what == float.class || what == double.class)
@@ -960,7 +959,6 @@ public class BootJavaInterop {
         cc.cv = cw;
 
         String superclass;
-        List<String> ifaces = new ArrayList< >();
         if (Modifier.isInterface(iface.getModifiers())) {
             cw.visit(Opcodes.V1_7, Opcodes.ACC_PUBLIC | Opcodes.ACC_SUPER, className, null,
                     "java/lang/Object", new String[] { Type.getInternalName(iface) });

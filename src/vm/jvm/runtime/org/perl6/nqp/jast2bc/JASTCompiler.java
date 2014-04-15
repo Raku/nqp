@@ -111,7 +111,6 @@ public class JASTCompiler {
         SixModelObject iter = iter(jastClass.fields, tc);
         while (istrue(iter, tc) != 0) {
             JastField field = new JastField(iter.shift_boxed(tc), jastField, tc);
-            String descriptor = null;
 
             cw.visitField(
                     field.isStatic

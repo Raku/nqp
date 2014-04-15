@@ -196,8 +196,6 @@ class AutosplitMethodWriter extends MethodNode {
                         TableSwitchInsnNode lsl = new TableSwitchInsnNode(lsi.min, cutoff-1, lsi.dflt);
                         TableSwitchInsnNode lsr = new TableSwitchInsnNode(cutoff, lsi.max, lsi.dflt);
 
-                        int lsisz = lsi.labels.size();
-
                         lsl.labels.addAll(lsi.labels.subList(0, cutoff - lsi.min));
                         lsr.labels.addAll(lsi.labels.subList(cutoff - lsi.min, lsi.max + 1 - lsi.min));
                         left = lsl;
@@ -1499,7 +1497,6 @@ class AutosplitMethodWriter extends MethodNode {
     private void localEntryCode(MethodVisitor v, int loc, String desc) {
         char c0 = desc.charAt(0);
         if (c0 == 'T') return; // not loaded
-        int sz;
         switch (c0) {
             case '0':
             case 'U':
