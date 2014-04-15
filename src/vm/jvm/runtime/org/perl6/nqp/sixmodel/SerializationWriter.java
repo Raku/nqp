@@ -568,8 +568,7 @@ public class SerializationWriter {
         {
             if (fatal)
                 throw ExceptionHandling.dieInternal(tc,
-                    "Serialization Error: missing static code ref for closure " +
-                    ((CodeRef)staticCode).name);
+                    "Serialization Error: missing static code ref for closure");
             else
                 return null;
         }
