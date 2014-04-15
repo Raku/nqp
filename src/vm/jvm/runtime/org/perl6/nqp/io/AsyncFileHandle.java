@@ -67,7 +67,6 @@ public class AsyncFileHandle implements IIOClosable, IIOEncodable, IIOAsyncReada
     private class SlurpState {
         public ByteBuffer bb;
         public long expected;
-        public int position;
     }
     private static final CallSiteDescriptor slurpResultCSD = new CallSiteDescriptor(
         new byte[] { CallSiteDescriptor.ARG_OBJ }, null);
@@ -119,7 +118,6 @@ public class AsyncFileHandle implements IIOClosable, IIOEncodable, IIOAsyncReada
     private class SpurtState {
         public ByteBuffer bb;
         public long expected;
-        public int position;
     }
     private static final CallSiteDescriptor spurtResultCSD = new CallSiteDescriptor(
         new byte[] { }, null);

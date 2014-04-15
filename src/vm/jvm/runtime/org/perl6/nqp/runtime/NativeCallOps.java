@@ -20,14 +20,9 @@ import static org.perl6.nqp.runtime.CallSiteDescriptor.*;
 import org.perl6.nqp.sixmodel.REPR;
 import org.perl6.nqp.sixmodel.REPRRegistry;
 import org.perl6.nqp.sixmodel.SixModelObject;
-import org.perl6.nqp.sixmodel.StorageSpec;
-
-import org.perl6.nqp.sixmodel.reprs.CArray;
 import org.perl6.nqp.sixmodel.reprs.CArrayInstance;
-import org.perl6.nqp.sixmodel.reprs.CPointer;
 import org.perl6.nqp.sixmodel.reprs.CPointerInstance;
 import org.perl6.nqp.sixmodel.reprs.CStrInstance;
-import org.perl6.nqp.sixmodel.reprs.CStruct;
 import org.perl6.nqp.sixmodel.reprs.CStructInstance;
 import org.perl6.nqp.sixmodel.reprs.CStructREPRData;
 import org.perl6.nqp.sixmodel.reprs.NativeCall.ArgType;
@@ -130,7 +125,7 @@ public final class NativeCallOps {
         return call;
     }
 
-    private static Class javaType(ThreadContext tc, ArgType target, SixModelObject smoType) {
+    private static Class<?> javaType(ThreadContext tc, ArgType target, SixModelObject smoType) {
         switch (target) {
         case VOID:
             return Void.class;

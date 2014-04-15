@@ -11,7 +11,6 @@ import org.perl6.nqp.sixmodel.SixModelObject;
 import org.perl6.nqp.sixmodel.STable;
 import org.perl6.nqp.sixmodel.StorageSpec;
 import org.perl6.nqp.sixmodel.TypeObject;
-import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.ThreadContext;
 
 

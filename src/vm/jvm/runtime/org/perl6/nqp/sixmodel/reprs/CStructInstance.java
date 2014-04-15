@@ -3,7 +3,6 @@ package org.perl6.nqp.sixmodel.reprs;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
-import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 
 import org.perl6.nqp.runtime.ExceptionHandling;

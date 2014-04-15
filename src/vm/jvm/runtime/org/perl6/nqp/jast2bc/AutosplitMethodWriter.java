@@ -55,7 +55,6 @@ class AutosplitMethodWriter extends MethodNode {
     /** Array of (source, target) pairs.  Filled out by {@link getControlFlow()}.  -1 means from-outside. */
     private ControlEdge[] controlEdges;
     private ControlEdge[][] successors;
-    private int[] depth;
     private int[] baselineSize;
     private Frame[] types;
 
@@ -69,7 +68,7 @@ class AutosplitMethodWriter extends MethodNode {
         public ControlEdge(int f, int t, String e) { from = f; to = t; exn = e; }
     }
 
-    private int nstack, nlocal;
+    private int nlocal;
 
     private final ClassVisitor target;
     private final String tgtype;
@@ -195,8 +194,6 @@ class AutosplitMethodWriter extends MethodNode {
                         cutoff = (lsi.min + lsi.max) / 2;
                         TableSwitchInsnNode lsl = new TableSwitchInsnNode(lsi.min, cutoff-1, lsi.dflt);
                         TableSwitchInsnNode lsr = new TableSwitchInsnNode(cutoff, lsi.max, lsi.dflt);
-
-                        int lsisz = lsi.labels.size();
 
                         lsl.labels.addAll(lsi.labels.subList(0, cutoff - lsi.min));
                         lsr.labels.addAll(lsi.labels.subList(cutoff - lsi.min, lsi.max + 1 - lsi.min));
@@ -784,6 +781,7 @@ class AutosplitMethodWriter extends MethodNode {
             return n;
         }
 
+        @SuppressWarnings("unused")
         public void merge(int index, Frame f) {
             Frame slot = frames[index];
             if (slot == null) {
@@ -862,6 +860,7 @@ class AutosplitMethodWriter extends MethodNode {
         }
     }
 
+    @SuppressWarnings("unused")
     private void getTypes() {
         // first, establish a locals size so that we can merge locals and stacks
         nlocal = Type.getArgumentsAndReturnSizes(desc) >> 2;
@@ -1499,7 +1498,6 @@ class AutosplitMethodWriter extends MethodNode {
     private void localEntryCode(MethodVisitor v, int loc, String desc) {
         char c0 = desc.charAt(0);
         if (c0 == 'T') return; // not loaded
-        int sz;
         switch (c0) {
             case '0':
             case 'U':
