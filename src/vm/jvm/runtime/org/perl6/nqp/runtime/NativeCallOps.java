@@ -125,7 +125,7 @@ public final class NativeCallOps {
         return call;
     }
 
-    private static Class javaType(ThreadContext tc, ArgType target, SixModelObject smoType) {
+    private static Class<?> javaType(ThreadContext tc, ArgType target, SixModelObject smoType) {
         switch (target) {
         case VOID:
             return Void.class;
