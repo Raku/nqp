@@ -781,6 +781,7 @@ class AutosplitMethodWriter extends MethodNode {
             return n;
         }
 
+        @SuppressWarnings("unused")
         public void merge(int index, Frame f) {
             Frame slot = frames[index];
             if (slot == null) {
@@ -859,6 +860,7 @@ class AutosplitMethodWriter extends MethodNode {
         }
     }
 
+    @SuppressWarnings("unused")
     private void getTypes() {
         // first, establish a locals size so that we can merge locals and stacks
         nlocal = Type.getArgumentsAndReturnSizes(desc) >> 2;

@@ -1,11 +1,13 @@
 package org.perl6.nqp.sixmodel;
 
 import java.util.Map;
+
 import org.perl6.nqp.runtime.HLLConfig;
 
 /**
  * An STable (Shared Table) represents a given HOW/REPR pairing, and thus a type.
  */
+@SuppressWarnings("unused")
 public class STable {
     /**
      * Controls the way that type checks are performed. By default, if there is
