@@ -55,7 +55,6 @@ class AutosplitMethodWriter extends MethodNode {
     /** Array of (source, target) pairs.  Filled out by {@link getControlFlow()}.  -1 means from-outside. */
     private ControlEdge[] controlEdges;
     private ControlEdge[][] successors;
-    private int[] depth;
     private int[] baselineSize;
     private Frame[] types;
 
@@ -69,7 +68,7 @@ class AutosplitMethodWriter extends MethodNode {
         public ControlEdge(int f, int t, String e) { from = f; to = t; exn = e; }
     }
 
-    private int nstack, nlocal;
+    private int nlocal;
 
     private final ClassVisitor target;
     private final String tgtype;
