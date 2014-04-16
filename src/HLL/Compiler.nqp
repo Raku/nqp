@@ -62,14 +62,27 @@ class HLL::Compiler does HLL::Backend::Default {
 
         my $target := nqp::lc(%adverbs<target>);
         my $save_ctx;
+        my $prompt := self.interactive_prompt // '> ';
+        my $code;
         while 1 {
             last if nqp::eoffh($stdin);
 
-            my $prompt := self.interactive_prompt // '> ';
-            my $code := nqp::readlineintfh($stdin, ~$prompt);
-            if nqp::isnull($code) || !nqp::defined($code) {
+            my $newcode := nqp::readlineintfh($stdin, ~$prompt);
+            if nqp::isnull($newcode) || !nqp::defined($newcode) {
                 nqp::print("\n");
                 last;
+            }
+            if $newcode {
+                $code := $code ~ $newcode;
+            }
+
+            if $newcode && nqp::substr($newcode, nqp::chars($newcode) - 1) eq "\\" {
+                # Need to get more code before we execute
+                $code := nqp::substr($code, 0, nqp::chars($code) - 1); # strip the \
+                if $code {
+                    $prompt := '* ';
+                }
+                next;
             }
 
             # Set the current position of stdout for autoprinting control
@@ -89,6 +102,10 @@ class HLL::Compiler does HLL::Backend::Default {
                 if nqp::defined($*MAIN_CTX) {
                     $save_ctx := $*MAIN_CTX;
                 }
+
+                $code := "";
+                $prompt := self.interactive_prompt // '> ';
+
                 next unless nqp::defined($output);
                 next if nqp::isnull($output);
 
