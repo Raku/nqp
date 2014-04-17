@@ -79,7 +79,9 @@ import org.perl6.nqp.sixmodel.reprs.SCRefInstance;
 import org.perl6.nqp.sixmodel.reprs.VMArray;
 import org.perl6.nqp.sixmodel.reprs.VMArrayInstance;
 import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_i16;
+import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_u16;
 import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_i32;
+import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_u32;
 import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_i8;
 import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_u8;
 import org.perl6.nqp.sixmodel.reprs.VMExceptionInstance;
@@ -3356,21 +3358,40 @@ public final class Ops {
         else if (encoding.equals("iso-8859-1")) {
             return decode8(buf, "ISO-8859-1", tc);
         }
-        else if (encoding.equals("utf16")) {
+        else if (encoding.equals("utf16") || encoding.equals("utf32")) {
             int n = (int)buf.elems(tc);
             StringBuilder sb = new StringBuilder(n);
-            for (int i = 0; i < n; i++) {
-                buf.at_pos_native(tc, i);
-                sb.append((char)tc.native_i);
+            if (buf instanceof VMArrayInstance_u8 || buf instanceof VMArrayInstance_i8) {
+                if (encoding.equals("utf16") && n % 2 == 1) {
+                    throw ExceptionHandling.dieInternal(tc, "Malformed UTF-16; odd number of bytes");
+                }
+                if (encoding.equals("utf32") && n % 4 > 0) {
+                    throw ExceptionHandling.dieInternal(tc, "Malformed UTF-32; number of bytes must be factor of four");
+                }
+                for (int i = 0; i < n;) {
+                    buf.at_pos_native(tc, i++);
+                    int a = (int)tc.native_i;
+                    buf.at_pos_native(tc, i++);
+                    int b = (int)tc.native_i;
+                    sb.appendCodePoint(a + (b << 8));
+                }
             }
-            return sb.toString();
-        }
-        else if (encoding.equals("utf32")) {
-            int n = (int)buf.elems(tc);
-            StringBuilder sb = new StringBuilder(n);
-            for (int i = 0; i < n; i++) {
-                buf.at_pos_native(tc, i);
-                sb.appendCodePoint((int)tc.native_i);
+            else if (buf instanceof VMArrayInstance_i16 || buf instanceof VMArrayInstance_u16) {
+                for (int i = 0; i < n; i++) {
+                    buf.at_pos_native(tc, i);
+                    sb.appendCodePoint((int)tc.native_i);
+                }
+            }
+            else if (buf instanceof VMArrayInstance_i32 || buf instanceof VMArrayInstance_u32) {
+                for (int i = 0; i < n; i++) {
+                    buf.at_pos_native(tc, i);
+                    int a = (int)tc.native_i;
+                    sb.appendCodePoint(a & 0xFFFF);
+                    sb.appendCodePoint(a >> 16);
+                }
+            }
+            else {
+                throw ExceptionHandling.dieInternal(tc, "Unknown buf type: " + buf.getClass() + "/" + Ops.typeName(buf, tc));
             }
             return sb.toString();
         }
