@@ -5,6 +5,7 @@ import java.io.PrintStream;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Timer;
 import java.util.WeakHashMap;
 
 import org.perl6.nqp.sixmodel.CodePairContainerConfigurer;
@@ -123,6 +124,11 @@ public class GlobalContext {
     public ThreadContext mainThread;
     
     /**
+     * Timer object, used by nqp::timer.
+     */
+    public Timer timer;
+
+    /**
      * Active HLL configuration (maps HLL name to the configuration).
      */
     private HashMap<String, HLLConfig> hllConfiguration;
@@ -231,6 +237,7 @@ public class GlobalContext {
         allThreads = new WeakHashMap< >();
 
         mainThread = getCurrentThreadContext();
+        timer = new Timer(true);
         KnowHOWBootstrapper.bootstrap(mainThread);
         bootInterop = new BootJavaInterop(this);
         

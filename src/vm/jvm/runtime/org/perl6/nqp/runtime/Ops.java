@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TimerTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.net.InetAddress;
@@ -4386,6 +4387,34 @@ public final class Ops {
             return ((ConcBlockingQueueInstance)queue).queue.poll();
         else
             throw ExceptionHandling.dieInternal(tc, "queuepoll requires an operand with REPR ConcBlockingQueue");
+    }
+
+    /* Asynchronousy operations. */
+
+    private static class AddToQueueTimerTask extends TimerTask {
+        private LinkedBlockingQueue<SixModelObject> queue;
+        private SixModelObject schedulee;
+
+        public AddToQueueTimerTask(LinkedBlockingQueue<SixModelObject> queue, SixModelObject schedulee) {
+            this.queue = queue;
+            this.schedulee = schedulee;
+        }
+
+        public void run() {
+            queue.add(schedulee);
+        }
+    }
+    public static SixModelObject timer(SixModelObject queue, SixModelObject schedulee,
+            long timeout, long repeat, SixModelObject handle_type, ThreadContext tc) {
+        if (!(queue instanceof ConcBlockingQueueInstance))
+            throw ExceptionHandling.dieInternal(tc, "timer's first argument should have REPR ConcBlockingQueue");
+        AddToQueueTimerTask tt = new AddToQueueTimerTask(((ConcBlockingQueueInstance)queue).queue, schedulee);
+        if (repeat > 0)
+            tc.gc.timer.scheduleAtFixedRate(tt, timeout, repeat);
+        else
+            tc.gc.timer.schedule(tt, timeout);
+        /* XXX TODO: cancellation handle. */
+        return null;
     }
 
     /* Exception related. */
