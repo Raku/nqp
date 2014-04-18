@@ -2390,6 +2390,9 @@ QAST::MASTOperations.add_core_moarop_mapping('semtryacquire', 'semtryacquire');
 QAST::MASTOperations.add_core_moarop_mapping('semrelease', 'semrelease');
 QAST::MASTOperations.add_core_moarop_mapping('queuepoll', 'queuepoll');
 
+# asynchrony related ops
+QAST::MASTOperations.add_core_moarop_mapping('timer', 'timer');
+
 # MoarVM-specific compilation ops
 QAST::MASTOperations.add_core_moarop_mapping('masttofile', 'masttofile', 2);
 QAST::MASTOperations.add_core_moarop_mapping('masttocu', 'masttocu');
