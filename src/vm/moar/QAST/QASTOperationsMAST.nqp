@@ -2392,6 +2392,15 @@ QAST::MASTOperations.add_core_moarop_mapping('queuepoll', 'queuepoll');
 
 # asynchrony related ops
 QAST::MASTOperations.add_core_moarop_mapping('timer', 'timer');
+QAST::MASTOperations.add_core_moarop_mapping('cancel', 'cancel', 0);
+QAST::MASTOperations.add_core_moarop_mapping('signal', 'signal');
+QAST::MASTOperations.add_core_moarop_mapping('watchfile', 'watchfile');
+QAST::MASTOperations.add_core_moarop_mapping('asyncconnect', 'asyncconnect');
+QAST::MASTOperations.add_core_moarop_mapping('asynclisten', 'asynclisten');
+QAST::MASTOperations.add_core_moarop_mapping('asyncwritestr', 'asyncwritestr');
+QAST::MASTOperations.add_core_moarop_mapping('asyncwritebytes', 'asyncwritebytes');
+QAST::MASTOperations.add_core_moarop_mapping('asyncreadchars', 'asyncreadchars');
+QAST::MASTOperations.add_core_moarop_mapping('asyncreadbytes', 'asyncreadbytes');
 
 # MoarVM-specific compilation ops
 QAST::MASTOperations.add_core_moarop_mapping('masttofile', 'masttofile', 2);
