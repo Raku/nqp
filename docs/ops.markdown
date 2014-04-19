@@ -1789,3 +1789,93 @@ an integral number of seconds, `_n` returns a fractional amount.
 * `x_posixerrno()`
 
 Returns an int that corresponds to the value of POSIX's errno.
+
+# Asynchronous operations
+
+The various asynchronous operations, such as timers and asynchronous I/O, take
+a concurrent queue to push a work item into at an appropriate time. This may
+be a code object to be invoked, or it may be an array of a code item and some
+arguments to supply to it. Asynchronous operations are represented by some
+object with the AsyncTask REPR, the exact details of which are highly
+specific to a given backend. The type to use for that is given as $handle_type.
+
+[As of 2014.04, these are very new and subject to revision and additions.]
+
+## cancel
+* `cancel(AsyncTask $handle)`
+
+Takes something with the AsyncTask REPR and tries to cancel it, if it
+is possible to do so. If it is somehow not possible (for example, the
+operation already completed anyway), then nothing will happen. This is to
+avoid race conditions.
+
+## timer
+* `($queue, $schedulee, int $timeout, int $repeat, $handle_type)`
+
+Starts a timer. If timeout is zero, the $schedulee is immediately pushed to
+the queue. Otherwise, it is pushed after the timeout period. If repeat is
+non-zero, after the initial timeout period it will then be pushed again at
+the repeat interval. Returns an object of type $handle_type, which has a
+AsyncTask REPR. Cancellation stops the timer ever repeating again.
+
+## signal
+* `signal($queue, $schedulee, int [nqp::cosnt::SIG_], $handle_type)`
+
+Sets up a signal handler for the given signal. Whenever it occurs, the
+specified schedulee is pushed to the queue. Cancel to stop handling it.
+
+## watchfile
+* `watchfile($queue, $schedulee, str $filename, $handle_type)`
+
+Watches an individual file for changes. Pushes the schedulee to the queue
+if a change is detected. Cancel to stop watching.
+
+## asyncconnect
+* `asyncconnect($queue, $schedulee, str $host, int $port, $handle_type)`
+
+Creates an asynchronous client socket and commences a connection operation.
+Upon connection, the queue will be passed an array consisting of the
+schedulee, a handle if the connection was successful (a type object if not)
+and an error string (empty string if no error). Returns an AsyncTask
+representing the connection attempt.
+
+## asynclisten
+* `asynclisten($queue, $schedulee, str $host, int $port, $handle_type)`
+
+Creates an asynchronous server socket listening on the specified host and port.
+Each time a connection arrives, the queue will be passed an array consisting of
+the schedulee and the newly created asynchronous socket, for communicating with
+the connecting client. Returns an AsyncTask that can be cancelled to stop
+listening, or throws an exception if there is an error starting to listen.
+
+## asyncwritestr
+* `asyncwritestr($queue, $schedulee, $handle, str $to_write, $handle_type)`
+
+Writes a string to some handle capable of asynchronous operations. Once the write
+is complete, the queue will be passed an array consisting of the schedulee, an
+integer containing the number of bytes written or -1 if there was an error, and
+a string containing an error or the empty string if none.
+
+## asyncwritebytes
+* `asyncwritebytes($queue, $schedulee, $handle, $to_write, $handle_type)`
+
+Writes a byte array to some handle capable of asynchronous operations. Once the write
+is complete, the queue will be passed an array consisting of the schedulee, an
+integer containing the number of bytes written or -1 if there was an error, and
+a string containing an error or the empty string if none.
+
+## asyncreadchars
+* `asyncreadchars($queue, $schedulee, $handle, $handle_type)`
+
+Starts reading chars from the handle. When a packet is received and decoded, an
+array will be pushed to the queue containing the schedulee, a squence number that
+starts at 0, the string if anything was decoded (empty on error) and an error
+string (non-empty on error). Cancel to stop reading.
+
+## asyncreadbytes
+* `asyncreadbytes($queue, $schedulee, $handle, $buf_type, $handle_type)`
+
+Starts reading bytes from the handle. When a packet is received, a $buf_type will be
+constructed and point to the received memory. An array will be pushed to the queue
+containing the schedulee, a sequence number that starts at 0, the buffer or just its
+type object on error, and an error string (non-empty on error). Cancel to stop reading.
