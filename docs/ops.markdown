@@ -1837,7 +1837,7 @@ if a change is detected. Cancel to stop watching.
 Creates an asynchronous client socket and commences a connection operation.
 Upon connection, the queue will be passed an array consisting of the
 schedulee, a handle if the connection was successful (a type object if not)
-and an error string (empty string if no error). Returns an AsyncTask
+and an error string (some type object if no error). Returns an AsyncTask
 representing the connection attempt.
 
 ## asynclisten
@@ -1850,33 +1850,35 @@ the connecting client. Returns an AsyncTask that can be cancelled to stop
 listening, or throws an exception if there is an error starting to listen.
 
 ## asyncwritestr
-* `asyncwritestr($queue, $schedulee, $handle, str $to_write, $handle_type)`
+* `asyncwritestr($handle, $queue, $schedulee, str $to_write, $handle_type)`
 
 Writes a string to some handle capable of asynchronous operations. Once the write
 is complete, the queue will be passed an array consisting of the schedulee, an
-integer containing the number of bytes written or -1 if there was an error, and
-a string containing an error or the empty string if none.
+integer containing the number of bytes written or a type object if there was an
+error, and a string containing an error or some type object if none.
 
 ## asyncwritebytes
-* `asyncwritebytes($queue, $schedulee, $handle, $to_write, $handle_type)`
+* `asyncwritebytes($handle, $queue, $schedulee, $to_write, $handle_type)`
 
 Writes a byte array to some handle capable of asynchronous operations. Once the write
 is complete, the queue will be passed an array consisting of the schedulee, an
-integer containing the number of bytes written or -1 if there was an error, and
-a string containing an error or the empty string if none.
+integer containing the number of bytes written or a type object if there was an error,
+and a string containing an error or some type object if none.
 
 ## asyncreadchars
-* `asyncreadchars($queue, $schedulee, $handle, $handle_type)`
+* `asyncreadchars($handle, $queue, $schedulee, $handle_type)`
 
 Starts reading chars from the handle. When a packet is received and decoded, an
 array will be pushed to the queue containing the schedulee, a squence number that
-starts at 0, the string if anything was decoded (empty on error) and an error
-string (non-empty on error). Cancel to stop reading.
+starts at 0, the string if anything was decoded (type object on error) and an error
+string (some type object if no error). If EOF is reached, a sequence number of -1
+is sent. Cancel to stop reading.
 
 ## asyncreadbytes
-* `asyncreadbytes($queue, $schedulee, $handle, $buf_type, $handle_type)`
+* `asyncreadbytes($handle, $queue, $schedulee, $buf_type, $handle_type)`
 
 Starts reading bytes from the handle. When a packet is received, a $buf_type will be
 constructed and point to the received memory. An array will be pushed to the queue
 containing the schedulee, a sequence number that starts at 0, the buffer or just its
-type object on error, and an error string (non-empty on error). Cancel to stop reading.
+type object on error, and an error string (type object if no error). If EOF is reached,
+a sequence number of -1 is sent. Cancel to stop reading.
