@@ -1710,6 +1710,11 @@ my %const_map := nqp::hash(
     'STAT_PLATFORM_DEVTYPE',   -5,
     'STAT_PLATFORM_BLOCKSIZE', -6,
     'STAT_PLATFORM_BLOCKS',    -7,
+
+    'SIG_INT',                  1,
+    'SIG_BREAK',                2,
+    'SIG_HUP',                  3,
+    'SIG_WINCH',                4,
 );
 QAST::MASTOperations.add_core_op('const', -> $qastcomp, $op {
     if nqp::existskey(%const_map, $op.name) {
