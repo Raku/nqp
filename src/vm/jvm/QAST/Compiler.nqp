@@ -751,6 +751,8 @@ for <if unless> -> $op_name {
         my $cond := $qastcomp.as_jast($op[0]);
         $il.append($cond.jast);
         $*STACK.obtain($il, $cond);
+        my $orig_type_op1;
+        my $orig_type_op2;
         if $im_then || $im_else {
             my $im_local := QAST::Node.unique('__IM_');
             $*BLOCK.add_local(QAST::Var.new(
@@ -758,6 +760,7 @@ for <if unless> -> $op_name {
                 :returns(typeobj_from_rttype($cond.type))
             ));
             if $im_then {
+                $orig_type_op1 := $op[1].blocktype;
                 $op[1].blocktype('declaration');
                 $op[1] := QAST::Op.new(
                     :op('call'), $op[1],
@@ -765,6 +768,7 @@ for <if unless> -> $op_name {
                 );
             }
             if $im_else {
+                $orig_type_op2 := $op[2].blocktype;
                 $op[2].blocktype('declaration');
                 $op[2] := QAST::Op.new(
                     :op('call'), $op[2],
@@ -788,6 +792,7 @@ for <if unless> -> $op_name {
         
         # Compile the "then".
         my $then := $qastcomp.as_jast($op[1]);
+        $op[1][0].blocktype($orig_type_op1) if $orig_type_op1;
         $il.append($then.jast);
         
         # What comes next depends on whether there's an else.
@@ -799,6 +804,7 @@ for <if unless> -> $op_name {
             # until later.
             $*STACK.obtain($il, $then);
             my $else := $qastcomp.as_jast($op[2]);
+            $op[2][0].blocktype($orig_type_op2) if $orig_type_op2;
             if $*WANT == $RT_VOID {
                 $il.append(pop_ins($then.type));
             }
@@ -1018,6 +1024,7 @@ for ('', 'repeat_') -> $repness {
             # Check if we need a handler and operand count.
             my $handler := 1;
             my @operands;
+            my $orig_type;
             for $op.list {
                 if $_.named eq 'nohandler' { $handler := 0; }
                 else { @operands.push($_) }
@@ -1064,6 +1071,7 @@ for ('', 'repeat_') -> $repness {
                     :name($im_local),
                     :returns(typeobj_from_rttype($cond_res.type))
                 ));
+                $orig_type := @operands[1].blocktype;
                 @operands[1].blocktype('declaration');
                 @operands[1] := QAST::Op.new(
                     :op('call'), @operands[1],
@@ -1094,6 +1102,7 @@ for ('', 'repeat_') -> $repness {
 
             # Emit the loop body; stash the result if needed.
             my $body_res := $qastcomp.as_jast_in_handler(@operands[1], $nr_handler_id || $*HANDLER_IDX);
+            @operands[1][0].blocktype($orig_type) if $orig_type;
             my $il := JAST::InstructionList.new();
             $il.append($redo_lbl);
             my $body_il := JAST::InstructionList.new();
