@@ -1821,8 +1821,9 @@ AsyncTask REPR. Cancellation stops the timer ever repeating again.
 ## signal
 * `signal($queue, $schedulee, int [nqp::cosnt::SIG_], $handle_type)`
 
-Sets up a signal handler for the given signal. Whenever it occurs, the
-specified schedulee is pushed to the queue. Cancel to stop handling it.
+Sets up a signal handler for the given signal. Whenever it occurs, an
+array is pushed to the queue containg the schedulee and the signal number.
+Cancel to stop handling it.
 
 ## watchfile
 * `watchfile($queue, $schedulee, str $filename, $handle_type)`
