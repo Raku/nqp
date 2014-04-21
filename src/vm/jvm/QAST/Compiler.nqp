@@ -751,6 +751,8 @@ for <if unless> -> $op_name {
         my $cond := $qastcomp.as_jast($op[0]);
         $il.append($cond.jast);
         $*STACK.obtain($il, $cond);
+        my $comp_ops1;
+        my $comp_ops2;
         my $orig_type_op1;
         my $orig_type_op2;
         if $im_then || $im_else {
@@ -762,7 +764,7 @@ for <if unless> -> $op_name {
             if $im_then {
                 $orig_type_op1 := $op[1].blocktype;
                 $op[1].blocktype('declaration');
-                $op[1] := QAST::Op.new(
+                $comp_ops1 := QAST::Op.new(
                     :op('call'), $op[1],
                     QAST::Var.new( :name($im_local), :scope('local') )
                 );
@@ -770,7 +772,7 @@ for <if unless> -> $op_name {
             if $im_else {
                 $orig_type_op2 := $op[2].blocktype;
                 $op[2].blocktype('declaration');
-                $op[2] := QAST::Op.new(
+                $comp_ops2 := QAST::Op.new(
                     :op('call'), $op[2],
                     QAST::Var.new( :name($im_local), :scope('local') )
                 );
@@ -791,8 +793,14 @@ for <if unless> -> $op_name {
             :op($op_name eq 'if' ?? 'ifeq' !! 'ifne')));
         
         # Compile the "then".
-        my $then := $qastcomp.as_jast($op[1]);
-        $op[1][0].blocktype($orig_type_op1) if $orig_type_op1;
+        my $then;
+        if $im_then {
+            $then := $qastcomp.as_jast($comp_ops1);
+            $op[1].blocktype($orig_type_op1);
+        }
+        else {
+            $then := $qastcomp.as_jast($op[1]);
+        }
         $il.append($then.jast);
         
         # What comes next depends on whether there's an else.
@@ -803,8 +811,14 @@ for <if unless> -> $op_name {
             # is needed. It's fine as we don't append the else JAST
             # until later.
             $*STACK.obtain($il, $then);
-            my $else := $qastcomp.as_jast($op[2]);
-            $op[2][0].blocktype($orig_type_op2) if $orig_type_op2;
+            my $else;
+            if $im_else {
+                $else := $qastcomp.as_jast($comp_ops2);
+                $op[2].blocktype($orig_type_op2);
+            }
+            else {
+                $else := $qastcomp.as_jast($op[2]);
+            }
             if $*WANT == $RT_VOID {
                 $il.append(pop_ins($then.type));
             }
