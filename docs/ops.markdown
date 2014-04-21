@@ -1828,8 +1828,10 @@ Cancel to stop handling it.
 ## watchfile
 * `watchfile($queue, $schedulee, str $filename, $handle_type)`
 
-Watches an individual file for changes. Pushes the schedulee to the queue
-if a change is detected. Cancel to stop watching.
+Watches an individual file for changes. Pushes the an array to the queue
+when a change is detected, consisting of the schedulee, the filename that
+changed if provided by the underlying watcher mechanism, a 0 if the file
+changed, and a 1 if it was renamed. Cancel to stop watching.
 
 ## asyncconnect
 * `asyncconnect($queue, $schedulee, str $host, int $port, $handle_type)`
