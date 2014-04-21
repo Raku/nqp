@@ -4414,7 +4414,11 @@ public final class Ops {
         else
             tc.gc.timer.schedule(tt, timeout);
         /* XXX TODO: cancellation handle. */
-        return null;
+        return handle_type;
+    }
+    public static SixModelObject cancel(SixModelObject handle, ThreadContext tc) {
+        /* XXX TODO: support cancellation. */
+        return handle;
     }
 
     /* Exception related. */
