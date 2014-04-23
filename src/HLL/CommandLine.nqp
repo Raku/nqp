@@ -257,9 +257,10 @@ class HLL::CommandLine::Parser {
                             if %!options{$o} {
                                 if self.wants-value($o) {
                                     if $i + 1 == $len {
-                                        nqp::die("Option '$o' in grouped options '-$opt' needs a value, but does not have one");
+                                        $result.add-option($o, get-value("-$o"));
+                                    } else {
+                                        $result.add-option($o, nqp::substr($opt, $i + 1));
                                     }
-                                    $result.add-option($o, nqp::substr($opt, $i + 1));
                                     last;
                                 }
                                 else {
