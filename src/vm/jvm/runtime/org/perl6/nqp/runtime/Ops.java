@@ -10,6 +10,7 @@ import java.lang.invoke.MethodType;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.file.DirectoryStream;
@@ -34,12 +35,12 @@ import java.util.Set;
 import java.util.TimerTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.net.InetAddress;
 
 import org.perl6.nqp.io.AsyncFileHandle;
 import org.perl6.nqp.io.FileHandle;
 import org.perl6.nqp.io.IIOAsyncReadable;
 import org.perl6.nqp.io.IIOAsyncWritable;
+import org.perl6.nqp.io.IIOBindable;
 import org.perl6.nqp.io.IIOClosable;
 import org.perl6.nqp.io.IIOEncodable;
 import org.perl6.nqp.io.IIOInteractive;
@@ -66,6 +67,9 @@ import org.perl6.nqp.sixmodel.SixModelObject;
 import org.perl6.nqp.sixmodel.StorageSpec;
 import org.perl6.nqp.sixmodel.TypeObject;
 import org.perl6.nqp.sixmodel.reprs.CallCaptureInstance;
+import org.perl6.nqp.sixmodel.reprs.ConcBlockingQueueInstance;
+import org.perl6.nqp.sixmodel.reprs.ConditionVariable;
+import org.perl6.nqp.sixmodel.reprs.ConditionVariableInstance;
 import org.perl6.nqp.sixmodel.reprs.ContextRef;
 import org.perl6.nqp.sixmodel.reprs.ContextRefInstance;
 import org.perl6.nqp.sixmodel.reprs.IOHandleInstance;
@@ -76,25 +80,22 @@ import org.perl6.nqp.sixmodel.reprs.NFA;
 import org.perl6.nqp.sixmodel.reprs.NFAInstance;
 import org.perl6.nqp.sixmodel.reprs.NFAStateInfo;
 import org.perl6.nqp.sixmodel.reprs.P6bigintInstance;
+import org.perl6.nqp.sixmodel.reprs.ReentrantMutexInstance;
 import org.perl6.nqp.sixmodel.reprs.SCRefInstance;
+import org.perl6.nqp.sixmodel.reprs.SemaphoreInstance;
 import org.perl6.nqp.sixmodel.reprs.VMArray;
 import org.perl6.nqp.sixmodel.reprs.VMArrayInstance;
 import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_i16;
-import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_u16;
 import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_i32;
-import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_u32;
 import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_i8;
+import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_u16;
+import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_u32;
 import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_u8;
 import org.perl6.nqp.sixmodel.reprs.VMExceptionInstance;
 import org.perl6.nqp.sixmodel.reprs.VMHash;
 import org.perl6.nqp.sixmodel.reprs.VMHashInstance;
 import org.perl6.nqp.sixmodel.reprs.VMIterInstance;
 import org.perl6.nqp.sixmodel.reprs.VMThreadInstance;
-import org.perl6.nqp.sixmodel.reprs.ReentrantMutexInstance;
-import org.perl6.nqp.sixmodel.reprs.SemaphoreInstance;
-import org.perl6.nqp.sixmodel.reprs.ConcBlockingQueueInstance;
-import org.perl6.nqp.sixmodel.reprs.ConditionVariable;
-import org.perl6.nqp.sixmodel.reprs.ConditionVariableInstance;
 
 /**
  * Contains complex operations that are more involved that the simple ops that the
@@ -323,10 +324,10 @@ public final class Ops {
 
     public static SixModelObject bindsock(SixModelObject obj, String host, long port, ThreadContext tc) {
         IOHandleInstance h = (IOHandleInstance)obj;
-        if (h.handle instanceof ServerSocketHandle) {
-            ((ServerSocketHandle)h.handle).bind(tc, host, (int) port);            
+        if (h.handle instanceof IIOBindable) {
+            ((IIOBindable)h.handle).bind(tc, host, (int) port);
         } else {
-            ExceptionHandling.dieInternal(tc, 
+            ExceptionHandling.dieInternal(tc,
                 "This handle does not support bind");
         }
         return obj;
