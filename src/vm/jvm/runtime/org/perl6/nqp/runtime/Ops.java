@@ -41,6 +41,7 @@ import org.perl6.nqp.io.FileHandle;
 import org.perl6.nqp.io.IIOAsyncReadable;
 import org.perl6.nqp.io.IIOAsyncWritable;
 import org.perl6.nqp.io.IIOBindable;
+import org.perl6.nqp.io.IIOCancelable;
 import org.perl6.nqp.io.IIOClosable;
 import org.perl6.nqp.io.IIOEncodable;
 import org.perl6.nqp.io.IIOInteractive;
@@ -66,6 +67,7 @@ import org.perl6.nqp.sixmodel.SerializationWriter;
 import org.perl6.nqp.sixmodel.SixModelObject;
 import org.perl6.nqp.sixmodel.StorageSpec;
 import org.perl6.nqp.sixmodel.TypeObject;
+import org.perl6.nqp.sixmodel.reprs.AsyncTaskInstance;
 import org.perl6.nqp.sixmodel.reprs.CallCaptureInstance;
 import org.perl6.nqp.sixmodel.reprs.ConcBlockingQueueInstance;
 import org.perl6.nqp.sixmodel.reprs.ConditionVariable;
@@ -4392,7 +4394,7 @@ public final class Ops {
 
     /* Asynchronousy operations. */
 
-    private static class AddToQueueTimerTask extends TimerTask {
+    private static class AddToQueueTimerTask extends TimerTask implements IIOCancelable {
         private LinkedBlockingQueue<SixModelObject> queue;
         private SixModelObject schedulee;
 
@@ -4403,6 +4405,10 @@ public final class Ops {
 
         public void run() {
             queue.add(schedulee);
+        }
+
+        public void cancelIt() {
+            cancel();
         }
     }
     public static SixModelObject timer(SixModelObject queue, SixModelObject schedulee,
@@ -4415,10 +4421,17 @@ public final class Ops {
         else
             tc.gc.timer.schedule(tt, timeout);
         /* XXX TODO: cancellation handle. */
-        return handle_type;
+        AsyncTaskInstance handle = (AsyncTaskInstance) handle_type.st.REPR.allocate(tc, handle_type.st);
+        handle.handle = tt;
+        return handle;
     }
     public static SixModelObject cancel(SixModelObject handle, ThreadContext tc) {
-        /* XXX TODO: support cancellation. */
+        AsyncTaskInstance task = (AsyncTaskInstance) handle;
+        if (task.handle instanceof IIOCancelable) {
+            ((IIOCancelable)task.handle).cancelIt();
+        } else {
+            throw ExceptionHandling.dieInternal(tc, "This handle does not support cancel");
+        }
         return handle;
     }
 
