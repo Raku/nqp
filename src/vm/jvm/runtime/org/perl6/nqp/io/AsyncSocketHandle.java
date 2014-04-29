@@ -9,8 +9,10 @@ import java.nio.channels.CompletionHandler;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
+import java.nio.charset.CoderResult;
 
 import org.perl6.nqp.runtime.ExceptionHandling;
+import org.perl6.nqp.runtime.HLLConfig;
 import org.perl6.nqp.runtime.Ops;
 import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.SixModelObject;
@@ -119,41 +121,65 @@ public class AsyncSocketHandle implements IIOClosable, IIOEncodable {
         final ByteBuffer readBuffer = ByteBuffer.allocate(32768);
         final CharBuffer decodedBuffer = CharBuffer.allocate(32768);
 
+        HLLConfig hllConfig = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig;
+        final SixModelObject Array = hllConfig.listType;
+        final SixModelObject Int = hllConfig.intBoxType;
+        final SixModelObject Str = hllConfig.strBoxType;
+        final SixModelObject Null = hllConfig.nullValue;
+
         CompletionHandler<Integer, AsyncTaskInstance> handler
         = new CompletionHandler<Integer, AsyncTaskInstance>() {
 
             @Override
             public void completed(Integer numRead, AsyncTaskInstance task) {
-                SixModelObject Array = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.listType;
-                SixModelObject Int = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intBoxType;
-                SixModelObject Str = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strBoxType;
-                SixModelObject Null = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.nullValue;
-
                 ThreadContext curTC = tc.gc.getCurrentThreadContext();
 
-                SixModelObject result = Array.st.REPR.allocate(curTC, Array.st);
-                result.push_boxed(curTC, task.schedulee);
+                try {
+                    if (numRead == -1) {
+                        task.seq = -1;
+                        callback(curTC, task, -1, Str, Null);
+                    } else {
+                        readBuffer.flip();
+                        CoderResult coderResult = dec.decode(readBuffer, decodedBuffer, numRead == 0 ? true : false);
+                        if (coderResult.isError()) {
+                            coderResult.throwException();
+                        }
+                        readBuffer.compact(); 
 
-                if (numRead == -1) {
-                    task.seq = -1;
-                    result.push_boxed(curTC, Ops.box_i(-1, Int, curTC));
-                    result.push_boxed(curTC, Str);
-                } else {
-                    result.push_boxed(curTC, Ops.box_i(task.seq++, Int, curTC));
-                    dec.decode(readBuffer, decodedBuffer, numRead == 0 ? true : false);
-                    result.push_boxed(curTC, Ops.box_s(decodedBuffer.toString(), Str, curTC));
+                        decodedBuffer.flip();
+                        String decoded = decodedBuffer.toString();
+                        decodedBuffer.clear();
+
+                        callback(curTC, task, task.seq++, Ops.box_s(decoded, Str, curTC), Null);
+
+                        channel.read(readBuffer, task, this);
+                    }
+                } catch (Throwable t) {
+                    failed(t, task);
                 }
-                result.push_boxed(curTC, Null);
-
-                ((ConcBlockingQueueInstance) task.queue).push_boxed(curTC, result);
             }
 
             @Override
-            public void failed(Throwable exc, AsyncTaskInstance task) {
-                // TODO Auto-generated method stub
+            public void failed(Throwable t, AsyncTaskInstance task) {
+                ThreadContext curTC = tc.gc.getCurrentThreadContext();
+                callback(curTC, task, -1, Str, Ops.box_s(t.getMessage(),  Str, tc));
+            }
+
+            protected void callback(ThreadContext tc, AsyncTaskInstance task, long seq, SixModelObject str, SixModelObject err) {
+                SixModelObject result = Array.st.REPR.allocate(tc, Array.st);
+                result.push_boxed(tc, task.schedulee);
+                result.push_boxed(tc, Ops.box_i(seq, Int, tc));
+                result.push_boxed(tc, str);
+                result.push_boxed(tc, err);
+                ((ConcBlockingQueueInstance) task.queue).push_boxed(tc, result);
             }
         };
-        channel.read(readBuffer, task, handler);
+
+        try {
+            channel.read(readBuffer, task, handler);
+        } catch (Throwable t) {
+            handler.failed(t, task);
+        }
     }
 
     public void readBytes(final ThreadContext tc, final AsyncTaskInstance task, SixModelObject bufType) {
@@ -174,5 +200,4 @@ public class AsyncSocketHandle implements IIOClosable, IIOEncodable {
         enc = cs.newEncoder();
         dec = cs.newDecoder();
     }
-
 }
