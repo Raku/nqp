@@ -86,10 +86,22 @@ public class AsyncSocketHandle implements IIOClosable, IIOEncodable {
         }
     }
 
-    public void writeStr(final ThreadContext tc, final AsyncTaskInstance task, String toWrite) {
+    public void writeStr(ThreadContext tc, AsyncTaskInstance task, String toWrite) {
         try {
             ByteBuffer buffer = enc.encode(CharBuffer.wrap(toWrite));
+            writeByteBuffer(tc, task, buffer);
+        } catch (Throwable e) {
+            throw ExceptionHandling.dieInternal(tc, e);
+        }
+    }
 
+    public void writeBytes(ThreadContext tc, AsyncTaskInstance task, SixModelObject toWrite) {
+        ByteBuffer buffer = Ops.decode8(toWrite, tc);
+        writeByteBuffer(tc, task, buffer);
+    }
+
+    protected void writeByteBuffer(final ThreadContext tc, final AsyncTaskInstance task, ByteBuffer buffer) {
+        try {
             HLLConfig hllConfig = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig;
             final SixModelObject Array = hllConfig.listType;
             final SixModelObject Int = hllConfig.intBoxType;
@@ -97,7 +109,7 @@ public class AsyncSocketHandle implements IIOClosable, IIOEncodable {
             final SixModelObject Str = hllConfig.strBoxType;
 
             CompletionHandler<Integer, AsyncTaskInstance> handler
-            = new CompletionHandler<Integer, AsyncTaskInstance>() {
+                = new CompletionHandler<Integer, AsyncTaskInstance>() {
 
                 @Override
                 public void completed(Integer bytesWritten, AsyncTaskInstance task) {
@@ -124,10 +136,6 @@ public class AsyncSocketHandle implements IIOClosable, IIOEncodable {
         } catch (Throwable e) {
             throw ExceptionHandling.dieInternal(tc, e);
         }
-    }
-
-    public void writeBytes(final ThreadContext tc, final AsyncTaskInstance task, SixModelObject toWrite) {
-
     }
 
     public void readChars(final ThreadContext tc, final AsyncTaskInstance task) {

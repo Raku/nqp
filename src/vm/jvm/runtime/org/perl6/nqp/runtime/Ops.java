@@ -3321,7 +3321,7 @@ public final class Ops {
         }
     }
     
-    protected static ByteBuffer decode8(SixModelObject buf, ThreadContext tc) {
+    public static ByteBuffer decode8(SixModelObject buf, ThreadContext tc) {
         ByteBuffer bb;
         if (buf instanceof VMArrayInstance_i8) {
             VMArrayInstance_i8 bufi8 = (VMArrayInstance_i8)buf;
