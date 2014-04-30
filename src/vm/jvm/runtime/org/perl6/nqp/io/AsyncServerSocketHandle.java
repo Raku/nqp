@@ -8,6 +8,7 @@ import java.nio.channels.CompletionHandler;
 import java.nio.channels.NotYetBoundException;
 
 import org.perl6.nqp.runtime.ExceptionHandling;
+import org.perl6.nqp.runtime.HLLConfig;
 import org.perl6.nqp.runtime.Ops;
 import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.SixModelObject;
@@ -42,15 +43,17 @@ public class AsyncServerSocketHandle implements IIOBindable {
         final CompletionHandler<AsynchronousSocketChannel, AsyncTaskInstance> handler
             = new CompletionHandler<AsynchronousSocketChannel, AsyncTaskInstance>() {
 
+            HLLConfig hllConfig = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig;
+            final SixModelObject IOType = hllConfig.ioType;
+            final SixModelObject Array = hllConfig.listType;
+            final SixModelObject Null = hllConfig.nullValue;
+            final SixModelObject Str = hllConfig.strBoxType;
+
             @Override
             public void completed(AsynchronousSocketChannel channel, AsyncTaskInstance task) {
                 listenChan.accept(task, this);
-
-                SixModelObject Array = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.listType;
-                SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType;
-                SixModelObject Null = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.nullValue;
-
                 ThreadContext curTC = tc.gc.getCurrentThreadContext();
+
                 AsyncSocketHandle handle = new AsyncSocketHandle(curTC, channel);
                 IOHandleInstance ioHandle = (IOHandleInstance) IOType.st.REPR.allocate(curTC,
                         IOType.st);
@@ -66,12 +69,7 @@ public class AsyncServerSocketHandle implements IIOBindable {
 
             @Override
             public void failed(Throwable exc, AsyncTaskInstance task) {
-
-                SixModelObject Array = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.listType;
-                SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType;
-                SixModelObject Str = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strBoxType;
                 ThreadContext curTC = tc.gc.getCurrentThreadContext();
-
                 SixModelObject result = Array.st.REPR.allocate(curTC, Array.st);
                 result.push_boxed(curTC, task.schedulee);
                 result.push_boxed(curTC, IOType);
@@ -85,5 +83,4 @@ public class AsyncServerSocketHandle implements IIOBindable {
             throw ExceptionHandling.dieInternal(tc, e);
         }
     }
-
 }

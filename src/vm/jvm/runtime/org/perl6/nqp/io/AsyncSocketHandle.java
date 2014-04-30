@@ -10,6 +10,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
+import java.nio.charset.CodingErrorAction;
 
 import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.HLLConfig;
@@ -47,26 +48,33 @@ public class AsyncSocketHandle implements IIOClosable, IIOEncodable {
         final CompletionHandler<Void, AsyncTaskInstance> handler
             = new CompletionHandler<Void, AsyncTaskInstance>() {
 
+            HLLConfig hllConfig = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig;
+            final SixModelObject IOType = hllConfig.ioType;
+            final SixModelObject Array = hllConfig.listType;
+            final SixModelObject Str = hllConfig.strBoxType;
+
             @Override
             public void completed(Void v, AsyncTaskInstance task) {
                 ThreadContext curTC = tc.gc.getCurrentThreadContext();
 
-                SixModelObject IOType = curTC.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType;
                 IOHandleInstance ioHandle = (IOHandleInstance) IOType.st.REPR.allocate(curTC,
                         IOType.st);
                 ioHandle.handle = task.handle;
-
-                SixModelObject Array = curTC.curFrame.codeRef.staticInfo.compUnit.hllConfig.listType;
-                SixModelObject result = Array.st.REPR.allocate(curTC, Array.st);
-                result.push_boxed(curTC, task.schedulee);
-                result.push_boxed(curTC, ioHandle);
-
-                ((ConcBlockingQueueInstance) task.queue).push_boxed(curTC, result);
+                callback(curTC, task, ioHandle, Str);
             }
 
             @Override
-            public void failed(Throwable exc, AsyncTaskInstance task) {
+            public void failed(Throwable t, AsyncTaskInstance task) {
+                ThreadContext curTC = tc.gc.getCurrentThreadContext();
+                callback(curTC, task, IOType, Ops.box_s(t.toString(), Str, curTC));
+            }
 
+            protected void callback(ThreadContext tc, AsyncTaskInstance task, SixModelObject ioHandle, SixModelObject err) {
+                SixModelObject result = Array.st.REPR.allocate(tc, Array.st);
+                result.push_boxed(tc, task.schedulee);
+                result.push_boxed(tc, ioHandle);
+                result.push_boxed(tc, err);
+                ((ConcBlockingQueueInstance) task.queue).push_boxed(tc, result);
             }
         };
 
@@ -82,28 +90,33 @@ public class AsyncSocketHandle implements IIOClosable, IIOEncodable {
         try {
             ByteBuffer buffer = enc.encode(CharBuffer.wrap(toWrite));
 
+            HLLConfig hllConfig = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig;
+            final SixModelObject Array = hllConfig.listType;
+            final SixModelObject Int = hllConfig.intBoxType;
+            final SixModelObject Null = hllConfig.nullValue;
+            final SixModelObject Str = hllConfig.strBoxType;
+
             CompletionHandler<Integer, AsyncTaskInstance> handler
             = new CompletionHandler<Integer, AsyncTaskInstance>() {
 
                 @Override
-                public void completed(Integer bytesWritten, AsyncTaskInstance attachment) {
-                    SixModelObject Array = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.listType;
-                    SixModelObject Int = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intBoxType;
-                    SixModelObject Null = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.nullValue;
-
+                public void completed(Integer bytesWritten, AsyncTaskInstance task) {
                     ThreadContext curTC = tc.gc.getCurrentThreadContext();
-
-                    SixModelObject result = Array.st.REPR.allocate(curTC, Array.st);
-                    result.push_boxed(curTC, task.schedulee);
-                    result.push_boxed(curTC, Ops.box_i(bytesWritten, Int, curTC));
-                    result.push_boxed(curTC, Null);
-
-                    ((ConcBlockingQueueInstance) task.queue).push_boxed(curTC, result);
+                    callback(curTC, task, Ops.box_i(bytesWritten, Int, curTC), Null);
                 }
 
                 @Override
-                public void failed(Throwable exc, AsyncTaskInstance attachment) {
-                    // TODO Auto-generated method stub
+                public void failed(Throwable t, AsyncTaskInstance attachment) {
+                    ThreadContext curTC = tc.gc.getCurrentThreadContext();
+                    callback(curTC, task, Str, Ops.box_s(t.toString(), Str, curTC));
+                }
+
+                protected void callback(ThreadContext tc, AsyncTaskInstance task, SixModelObject bytesWritten, SixModelObject err) {
+                    SixModelObject result = Array.st.REPR.allocate(tc, Array.st);
+                    result.push_boxed(tc, task.schedulee);
+                    result.push_boxed(tc, bytesWritten);
+                    result.push_boxed(tc, err);
+                    ((ConcBlockingQueueInstance) task.queue).push_boxed(tc, result);
                 }
             };
 
@@ -162,7 +175,7 @@ public class AsyncSocketHandle implements IIOClosable, IIOEncodable {
             @Override
             public void failed(Throwable t, AsyncTaskInstance task) {
                 ThreadContext curTC = tc.gc.getCurrentThreadContext();
-                callback(curTC, task, -1, Str, Ops.box_s(t.getMessage(),  Str, tc));
+                callback(curTC, task, -1, Str, Ops.box_s(t.toString(),  Str, tc));
             }
 
             protected void callback(ThreadContext tc, AsyncTaskInstance task, long seq, SixModelObject str, SixModelObject err) {
