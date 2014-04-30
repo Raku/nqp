@@ -4,13 +4,13 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
+import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
-import java.nio.charset.CodingErrorAction;
 
 import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.HLLConfig;
@@ -175,7 +175,9 @@ public class AsyncSocketHandle implements IIOClosable, IIOEncodable {
             @Override
             public void failed(Throwable t, AsyncTaskInstance task) {
                 ThreadContext curTC = tc.gc.getCurrentThreadContext();
-                callback(curTC, task, -1, Str, Ops.box_s(t.toString(),  Str, tc));
+                SixModelObject err = (t instanceof AsynchronousCloseException) 
+                        ? Str : Ops.box_s(t.toString(), Str, curTC);
+                callback(curTC, task, -1, Str, err);
             }
 
             protected void callback(ThreadContext tc, AsyncTaskInstance task, long seq, SixModelObject str, SixModelObject err) {
