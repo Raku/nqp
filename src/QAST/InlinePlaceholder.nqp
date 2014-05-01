@@ -6,7 +6,11 @@ class QAST::InlinePlaceholder is QAST::Node {
     method position(*@value) {
         @value ?? ($!position := @value[0]) !! $!position
     }
-    
+
+    method count_inline_placeholder_usages(@usages) {
+        @usages[$!position]++;
+    }
+
     method substitute_inline_placeholders(@fillers) {
         if $!position < +@fillers {
             my $result := @fillers[$!position];

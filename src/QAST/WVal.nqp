@@ -4,7 +4,9 @@ class QAST::WVal is QAST::Node does QAST::CompileTimeValue {
             ?? self.compile_time_value()
             !! self.set_compile_time_value($value)
     }
-    
+
+    method count_inline_placeholder_usages(@usages) { }
+
     method substitute_inline_placeholders(@fillers) {
         self
     }
