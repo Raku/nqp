@@ -80,6 +80,10 @@ class QAST::Node {
         $clone
     }
     
+    method count_inline_placeholder_usages(@usages) {
+        nqp::die(self.HOW.name(self) ~ " does not support inlining");
+    }
+
     method substitute_inline_placeholders(@fillers) {
         nqp::die(self.HOW.name(self) ~ " does not support inlining");
     }

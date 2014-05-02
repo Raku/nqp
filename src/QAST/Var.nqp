@@ -20,7 +20,9 @@ class QAST::Var is QAST::Node {
     method slurpy($value = NO_VALUE)  { $!slurpy := $value unless $value =:= NO_VALUE; $!slurpy }
     method default($value = NO_VALUE) { $!default_or_value := $value unless $value =:= NO_VALUE; $!default_or_value }
     method value($value = NO_VALUE)   { $!default_or_value := $value unless $value =:= NO_VALUE; $!default_or_value }
-    
+
+    method count_inline_placeholder_usages(@usages) { }
+
     method substitute_inline_placeholders(@fillers) {
         self
     }

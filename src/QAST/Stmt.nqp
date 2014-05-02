@@ -2,14 +2,23 @@ class QAST::Stmt is QAST::Node {
     has $!resultchild;
 
     method resultchild($value = NO_VALUE) { $!resultchild := $value unless $value =:= NO_VALUE; $!resultchild }
-    
+
+    method count_inline_placeholder_usages(@usages) {
+        my int $i := 0;
+        my int $elems := +@(self);
+        while $i < $elems {
+            self[$i].count_inline_placeholder_usages(@usages);
+            $i++;
+        }
+    }
+
     method substitute_inline_placeholders(@fillers) {
         my $result := self.shallow_clone();
-        my $i := 0;
-        my $elems := +@(self);
+        my int $i := 0;
+        my int $elems := +@(self);
         while $i < $elems {
             $result[$i] := self[$i].substitute_inline_placeholders(@fillers);
-            $i := $i + 1;
+            $i++;
         }
         $result
     }
