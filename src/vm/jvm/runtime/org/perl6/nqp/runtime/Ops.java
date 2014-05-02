@@ -10,6 +10,7 @@ import java.lang.invoke.MethodType;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.file.DirectoryStream;
@@ -34,12 +35,13 @@ import java.util.Set;
 import java.util.TimerTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.net.InetAddress;
 
 import org.perl6.nqp.io.AsyncFileHandle;
 import org.perl6.nqp.io.FileHandle;
 import org.perl6.nqp.io.IIOAsyncReadable;
 import org.perl6.nqp.io.IIOAsyncWritable;
+import org.perl6.nqp.io.IIOBindable;
+import org.perl6.nqp.io.IIOCancelable;
 import org.perl6.nqp.io.IIOClosable;
 import org.perl6.nqp.io.IIOEncodable;
 import org.perl6.nqp.io.IIOInteractive;
@@ -65,7 +67,11 @@ import org.perl6.nqp.sixmodel.SerializationWriter;
 import org.perl6.nqp.sixmodel.SixModelObject;
 import org.perl6.nqp.sixmodel.StorageSpec;
 import org.perl6.nqp.sixmodel.TypeObject;
+import org.perl6.nqp.sixmodel.reprs.AsyncTaskInstance;
 import org.perl6.nqp.sixmodel.reprs.CallCaptureInstance;
+import org.perl6.nqp.sixmodel.reprs.ConcBlockingQueueInstance;
+import org.perl6.nqp.sixmodel.reprs.ConditionVariable;
+import org.perl6.nqp.sixmodel.reprs.ConditionVariableInstance;
 import org.perl6.nqp.sixmodel.reprs.ContextRef;
 import org.perl6.nqp.sixmodel.reprs.ContextRefInstance;
 import org.perl6.nqp.sixmodel.reprs.IOHandleInstance;
@@ -76,25 +82,22 @@ import org.perl6.nqp.sixmodel.reprs.NFA;
 import org.perl6.nqp.sixmodel.reprs.NFAInstance;
 import org.perl6.nqp.sixmodel.reprs.NFAStateInfo;
 import org.perl6.nqp.sixmodel.reprs.P6bigintInstance;
+import org.perl6.nqp.sixmodel.reprs.ReentrantMutexInstance;
 import org.perl6.nqp.sixmodel.reprs.SCRefInstance;
+import org.perl6.nqp.sixmodel.reprs.SemaphoreInstance;
 import org.perl6.nqp.sixmodel.reprs.VMArray;
 import org.perl6.nqp.sixmodel.reprs.VMArrayInstance;
 import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_i16;
-import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_u16;
 import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_i32;
-import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_u32;
 import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_i8;
+import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_u16;
+import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_u32;
 import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_u8;
 import org.perl6.nqp.sixmodel.reprs.VMExceptionInstance;
 import org.perl6.nqp.sixmodel.reprs.VMHash;
 import org.perl6.nqp.sixmodel.reprs.VMHashInstance;
 import org.perl6.nqp.sixmodel.reprs.VMIterInstance;
 import org.perl6.nqp.sixmodel.reprs.VMThreadInstance;
-import org.perl6.nqp.sixmodel.reprs.ReentrantMutexInstance;
-import org.perl6.nqp.sixmodel.reprs.SemaphoreInstance;
-import org.perl6.nqp.sixmodel.reprs.ConcBlockingQueueInstance;
-import org.perl6.nqp.sixmodel.reprs.ConditionVariable;
-import org.perl6.nqp.sixmodel.reprs.ConditionVariableInstance;
 
 /**
  * Contains complex operations that are more involved that the simple ops that the
@@ -323,10 +326,10 @@ public final class Ops {
 
     public static SixModelObject bindsock(SixModelObject obj, String host, long port, ThreadContext tc) {
         IOHandleInstance h = (IOHandleInstance)obj;
-        if (h.handle instanceof ServerSocketHandle) {
-            ((ServerSocketHandle)h.handle).bind(tc, host, (int) port);            
+        if (h.handle instanceof IIOBindable) {
+            ((IIOBindable)h.handle).bind(tc, host, (int) port);
         } else {
-            ExceptionHandling.dieInternal(tc, 
+            ExceptionHandling.dieInternal(tc,
                 "This handle does not support bind");
         }
         return obj;
@@ -525,7 +528,7 @@ public final class Ops {
     }
     
     public static long writefh(SixModelObject obj, SixModelObject buf, ThreadContext tc) {
-        ByteBuffer bb = decode8(buf, tc);
+        ByteBuffer bb = Buffers.unstashBytes(buf, tc);
         long written;
         if (obj instanceof IOHandleInstance) {
             IOHandleInstance h = (IOHandleInstance)obj;
@@ -3242,31 +3245,16 @@ public final class Ops {
         return found == null ? -1 : found;
     }
     
-    private static void stashBytes(ThreadContext tc, SixModelObject res, byte[] bytes) {
-        if (res instanceof VMArrayInstance_i8) {
-            VMArrayInstance_i8 arr = (VMArrayInstance_i8)res;
-            arr.elems = bytes.length;
-            arr.start = 0;
-            arr.slots = bytes;
-        }
-        else {
-            res.set_elems(tc, bytes.length);
-            for (int i = 0; i < bytes.length; i++) {
-                tc.native_i = bytes[i];
-                res.bind_pos_native(tc, i);
-            }
-        }
-    }
     public static SixModelObject encode(String str, String encoding, SixModelObject res, ThreadContext tc) {
         try {
             if (encoding.equals("utf8")) {
-                stashBytes(tc, res, str.getBytes("UTF-8"));
+                Buffers.stashBytes(tc, res, str.getBytes("UTF-8"));
             }
             else if (encoding.equals("ascii")) {
-                stashBytes(tc, res, str.getBytes("US-ASCII"));
+                Buffers.stashBytes(tc, res, str.getBytes("US-ASCII"));
             }
             else if (encoding.equals("iso-8859-1")) {
-                stashBytes(tc, res, str.getBytes("ISO-8859-1"));
+                Buffers.stashBytes(tc, res, str.getBytes("ISO-8859-1"));
             }
             else if (encoding.equals("utf16")) {
                 short[] buffer = new short[str.length()];
@@ -3318,34 +3306,8 @@ public final class Ops {
         }
     }
     
-    protected static ByteBuffer decode8(SixModelObject buf, ThreadContext tc) {
-        ByteBuffer bb;
-        if (buf instanceof VMArrayInstance_i8) {
-            VMArrayInstance_i8 bufi8 = (VMArrayInstance_i8)buf;
-            bb = bufi8.slots != null
-                ? ByteBuffer.wrap(bufi8.slots, bufi8.start, bufi8.elems)
-                : ByteBuffer.allocate(0);
-        }
-        else if (buf instanceof VMArrayInstance_u8) {
-            VMArrayInstance_u8 bufu8 = (VMArrayInstance_u8)buf;
-            bb = bufu8.slots != null
-                ? ByteBuffer.wrap(bufu8.slots, bufu8.start, bufu8.elems)
-                : ByteBuffer.allocate(0);
-        }
-        else {
-            int n = (int)buf.elems(tc);
-            bb = ByteBuffer.allocate(n);
-            for (int i = 0; i < n; i++) {
-                buf.at_pos_native(tc, i);
-                bb.put((byte)tc.native_i);
-            }
-            bb.rewind();
-        }
-    	return bb;
-    }
-    
     public static String decode8(SixModelObject buf, String csName, ThreadContext tc) {
-        ByteBuffer bb = decode8(buf, tc);
+        ByteBuffer bb = Buffers.unstashBytes(buf, tc);
         return Charset.forName(csName).decode(bb).toString();
     }
     
@@ -4391,7 +4353,7 @@ public final class Ops {
 
     /* Asynchronousy operations. */
 
-    private static class AddToQueueTimerTask extends TimerTask {
+    private static class AddToQueueTimerTask extends TimerTask implements IIOCancelable {
         private LinkedBlockingQueue<SixModelObject> queue;
         private SixModelObject schedulee;
 
@@ -4402,6 +4364,10 @@ public final class Ops {
 
         public void run() {
             queue.add(schedulee);
+        }
+
+        public void cancelIt() {
+            cancel();
         }
     }
     public static SixModelObject timer(SixModelObject queue, SixModelObject schedulee,
@@ -4414,10 +4380,17 @@ public final class Ops {
         else
             tc.gc.timer.schedule(tt, timeout);
         /* XXX TODO: cancellation handle. */
-        return handle_type;
+        AsyncTaskInstance handle = (AsyncTaskInstance) handle_type.st.REPR.allocate(tc, handle_type.st);
+        handle.handle = tt;
+        return handle;
     }
     public static SixModelObject cancel(SixModelObject handle, ThreadContext tc) {
-        /* XXX TODO: support cancellation. */
+        AsyncTaskInstance task = (AsyncTaskInstance) handle;
+        if (task.handle instanceof IIOCancelable) {
+            ((IIOCancelable)task.handle).cancelIt();
+        } else {
+            throw ExceptionHandling.dieInternal(tc, "This handle does not support cancel");
+        }
         return handle;
     }
 
