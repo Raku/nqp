@@ -528,7 +528,7 @@ public final class Ops {
     }
     
     public static long writefh(SixModelObject obj, SixModelObject buf, ThreadContext tc) {
-        ByteBuffer bb = decode8(buf, tc);
+        ByteBuffer bb = Buffers.unstashBytes(buf, tc);
         long written;
         if (obj instanceof IOHandleInstance) {
             IOHandleInstance h = (IOHandleInstance)obj;
@@ -3245,31 +3245,16 @@ public final class Ops {
         return found == null ? -1 : found;
     }
     
-    private static void stashBytes(ThreadContext tc, SixModelObject res, byte[] bytes) {
-        if (res instanceof VMArrayInstance_i8) {
-            VMArrayInstance_i8 arr = (VMArrayInstance_i8)res;
-            arr.elems = bytes.length;
-            arr.start = 0;
-            arr.slots = bytes;
-        }
-        else {
-            res.set_elems(tc, bytes.length);
-            for (int i = 0; i < bytes.length; i++) {
-                tc.native_i = bytes[i];
-                res.bind_pos_native(tc, i);
-            }
-        }
-    }
     public static SixModelObject encode(String str, String encoding, SixModelObject res, ThreadContext tc) {
         try {
             if (encoding.equals("utf8")) {
-                stashBytes(tc, res, str.getBytes("UTF-8"));
+                Buffers.stashBytes(tc, res, str.getBytes("UTF-8"));
             }
             else if (encoding.equals("ascii")) {
-                stashBytes(tc, res, str.getBytes("US-ASCII"));
+                Buffers.stashBytes(tc, res, str.getBytes("US-ASCII"));
             }
             else if (encoding.equals("iso-8859-1")) {
-                stashBytes(tc, res, str.getBytes("ISO-8859-1"));
+                Buffers.stashBytes(tc, res, str.getBytes("ISO-8859-1"));
             }
             else if (encoding.equals("utf16")) {
                 short[] buffer = new short[str.length()];
@@ -3321,34 +3306,8 @@ public final class Ops {
         }
     }
     
-    public static ByteBuffer decode8(SixModelObject buf, ThreadContext tc) {
-        ByteBuffer bb;
-        if (buf instanceof VMArrayInstance_i8) {
-            VMArrayInstance_i8 bufi8 = (VMArrayInstance_i8)buf;
-            bb = bufi8.slots != null
-                ? ByteBuffer.wrap(bufi8.slots, bufi8.start, bufi8.elems)
-                : ByteBuffer.allocate(0);
-        }
-        else if (buf instanceof VMArrayInstance_u8) {
-            VMArrayInstance_u8 bufu8 = (VMArrayInstance_u8)buf;
-            bb = bufu8.slots != null
-                ? ByteBuffer.wrap(bufu8.slots, bufu8.start, bufu8.elems)
-                : ByteBuffer.allocate(0);
-        }
-        else {
-            int n = (int)buf.elems(tc);
-            bb = ByteBuffer.allocate(n);
-            for (int i = 0; i < n; i++) {
-                buf.at_pos_native(tc, i);
-                bb.put((byte)tc.native_i);
-            }
-            bb.rewind();
-        }
-    	return bb;
-    }
-    
     public static String decode8(SixModelObject buf, String csName, ThreadContext tc) {
-        ByteBuffer bb = decode8(buf, tc);
+        ByteBuffer bb = Buffers.unstashBytes(buf, tc);
         return Charset.forName(csName).decode(bb).toString();
     }
     
