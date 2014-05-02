@@ -164,7 +164,9 @@ public class AsyncSocketHandle implements IIOClosable, IIOEncodable {
             public SixModelObject decode(ThreadContext tc, ByteBuffer source, Integer numRead)
                     throws Exception {
                 SixModelObject res = bufType.st.REPR.allocate(tc, bufType.st);
-                Buffers.stashBytes(tc, res, source.slice().array());
+                byte[] bytes = new byte[source.remaining()];
+                source.get(bytes);
+                Buffers.stashBytes(tc, res, bytes);
                 return res;
             }
         });
