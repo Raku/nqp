@@ -300,6 +300,7 @@ class QAST::MASTOperations {
             $moarop_mapper($qastcomp, $op.op, $op.list)
         };
         self.set_core_op_inlinability($op, $inlinable);
+        self.set_core_op_result_type($op, moarop_return_type($moarop));
     }
 
     # Adds a HLL op that maps to a Moar op.
@@ -312,6 +313,7 @@ class QAST::MASTOperations {
             $moarop_mapper($qastcomp, $op.op, $op.list)
         };
         self.set_hll_op_inlinability($hll, $op, $inlinable);
+        self.set_hll_op_result_type($hll, $op, moarop_return_type($moarop));
     }
 
     # Returns a mapper closure for turning an operation into a Moar op.
@@ -358,6 +360,34 @@ class QAST::MASTOperations {
         -> $qastcomp, $op_name, @op_args {
             $self.compile_mastop($qastcomp, $moarop, @op_args, @deconts, :returnarg($ret))
         }
+    }
+
+    # Gets the return type of a MoarVM op, if any.
+    sub moarop_return_type($moarop) {
+        if nqp::existskey(%core_op_codes, $moarop) {
+            my int $op_num       := %core_op_codes{$moarop};
+            my int $num_operands := nqp::atpos_i(@core_operands_counts, $op_num);
+            if $num_operands {
+                my int $operands_offset := nqp::atpos_i(@core_operands_offsets, $op_num);
+                my int $ret_sig         := nqp::atpos_i(@core_operands_values, $operands_offset);
+                if ($ret_sig +& $MVM_operand_rw_mask) == $MVM_operand_write_reg {
+                    return nqp::bitshiftr_i($ret_sig, 3);
+                }
+            }
+        }
+        elsif MAST::ExtOpRegistry.extop_known($moarop) {
+            my @operands_values := MAST::ExtOpRegistry.extop_signature($moarop);
+            if @operands_values {
+                my int $ret_sig := nqp::atpos_i(@operands_values, 0);
+                if ($ret_sig +& $MVM_operand_rw_mask) == $MVM_operand_write_reg {
+                    return nqp::bitshiftr_i($ret_sig, 3);
+                }
+            }
+        }
+        else {
+            nqp::die("MoarVM op '$moarop' is unknown as a core or extension op");
+        }
+        0
     }
 
     # Sets op native result type at a core level.
