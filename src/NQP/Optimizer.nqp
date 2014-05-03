@@ -203,11 +203,11 @@ class NQP::Optimizer {
         
         # Calls to fixed names that are compile-time known can be simplified.
         elsif $opname eq 'call' && $op.name {
-            my %sym := self.find_lex($op.name);
-            if %sym {
-                if %sym<declared> {
-                    # It's known at compile time, and so fixed, so we can do a more
-                    # optimal call.
+            my @sym := self.find_lex_scope_level($op.name);
+            if @sym {
+                if @sym[0]<declared> && @sym[1] <= 1 {
+                    # It's known at compile time and not closure-ish, so we can
+                    # use a more optimal call op.
                     $op.op('callstatic');
                 }
             }
@@ -335,6 +335,18 @@ class NQP::Optimizer {
             my %sym := @!block_stack[$i].symbol($name);
             if +%sym {
                 return %sym;
+            }
+        }
+        NQPMu;
+    }
+
+    method find_lex_scope_level($name) {
+        my int $i := +@!block_stack;
+        while $i > 0 {
+            $i := $i - 1;
+            my %sym := @!block_stack[$i].symbol($name);
+            if +%sym {
+                return [%sym, $i];
             }
         }
         NQPMu;
