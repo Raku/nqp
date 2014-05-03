@@ -1272,7 +1272,9 @@ my $call_gen := sub ($qastcomp, $op) {
     my $callee;
     my @args := $op.list;
     if $op.name {
-        $callee := $qastcomp.as_mast(QAST::Var.new( :name($op.name), :scope('lexical') ));
+        $callee := $qastcomp.as_mast($op.op eq 'callstatic'
+            ?? QAST::VM.new( :moarop('getlexstatic_o'), QAST::SVal.new( :value($op.name) ) )
+            !! QAST::Var.new( :name($op.name), :scope('lexical') ));
     }
     elsif +@args {
         @args := nqp::clone(@args);
