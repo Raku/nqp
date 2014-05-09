@@ -667,13 +667,89 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
 /* Serializes the REPR data. */
 static void serialize_repr_data(PARROT_INTERP, STable *st, SerializationWriter *writer) {
     CStructREPRData *repr_data = (CStructREPRData *)st->REPR_data;
-    /* Could do this, but can also re-compute it each time for now. */
+    INTVAL i, num_classes, num_slots;
+
+    writer->write_int(interp, writer, repr_data->struct_size);
+    writer->write_int(interp, writer, repr_data->num_attributes);
+    writer->write_int(interp, writer, repr_data->num_child_objs);
+    writer->write_int(interp, writer, repr_data->num_child_strs);
+    for(i = 0; i < repr_data->num_attributes; i++){
+        writer->write_int(interp, writer, repr_data->attribute_locations[i]);
+        writer->write_int(interp, writer, repr_data->struct_offsets[i]);
+
+        writer->write_int(interp, writer, repr_data->flattened_stables[i] != NULL);
+        if (repr_data->flattened_stables[i])
+            writer->write_stable_ref(interp, writer, repr_data->flattened_stables[i]);
+
+        writer->write_ref(interp, writer, repr_data->member_types[i]);
+    }
+
+    i=0;
+    while (repr_data->name_to_index_mapping[i].class_key)
+        i++;
+    num_classes = i;
+    writer->write_int(interp, writer, num_classes);
+    for(i = 0; i < num_classes; i++){
+        writer->write_ref(interp, writer, repr_data->name_to_index_mapping[i].class_key);
+        writer->write_ref(interp, writer, repr_data->name_to_index_mapping[i].name_map);
+    }
+
+    i=0;
+    while(repr_data->initialize_slots && repr_data->initialize_slots[i] != -1)
+        i++;
+    num_slots = i;
+    writer->write_int(interp, writer, num_slots);
+    for(i = 0; i < num_slots; i++){
+        writer->write_int(interp, writer, repr_data->initialize_slots[i]);
+    }
 }
 
 /* Deserializes the REPR data. */
 static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader *reader) {
-    /* Just allocating it will do for now. */
-    st->REPR_data = mem_sys_allocate_zeroed(sizeof(CStructREPRData));
+    CStructREPRData *repr_data = (CStructREPRData *) mem_sys_allocate(sizeof(CStructREPRData));
+    INTVAL i, num_classes, num_slots;
+
+    repr_data->struct_size = reader->read_int(interp, reader);
+    repr_data->num_attributes = reader->read_int(interp, reader);
+    repr_data->num_child_objs = reader->read_int(interp, reader);
+    repr_data->num_child_strs = reader->read_int(interp, reader);
+
+    repr_data->attribute_locations = (INTVAL *)mem_sys_allocate(sizeof(INTVAL) * repr_data->num_attributes);
+    repr_data->struct_offsets      = (INTVAL *)mem_sys_allocate(sizeof(INTVAL) * repr_data->num_attributes);
+    repr_data->flattened_stables   = (STable **)mem_sys_allocate(repr_data->num_attributes * sizeof(STable *));
+    repr_data->member_types        = (PMC **)mem_sys_allocate(repr_data->num_attributes * sizeof(PMC *));
+
+    for(i = 0; i < repr_data->num_attributes; i++) {
+        repr_data->attribute_locations[i] = reader->read_int(interp, reader);
+        repr_data->struct_offsets[i] = reader->read_int(interp, reader);
+
+        if(reader->read_int(interp, reader)){
+            repr_data->flattened_stables[i] = reader->read_stable_ref(interp, reader);
+        }
+        else {
+            repr_data->flattened_stables[i] = NULL;
+        }
+
+        repr_data->member_types[i] = reader->read_ref(interp, reader);
+    }
+
+    num_classes = reader->read_int(interp, reader);
+    repr_data->name_to_index_mapping = (CStructNameMap *)mem_sys_allocate(sizeof(CStructNameMap) * (1 + num_classes));
+    for(i = 0; i < num_classes; i++){
+        repr_data->name_to_index_mapping[i].class_key = reader->read_ref(interp, reader);
+        repr_data->name_to_index_mapping[i].name_map = reader->read_ref(interp, reader);
+    }
+    repr_data->name_to_index_mapping[i].class_key = NULL;
+    repr_data->name_to_index_mapping[i].name_map = NULL;
+
+    num_slots = reader->read_int(interp, reader);
+    repr_data->initialize_slots = (INTVAL *)mem_sys_allocate(sizeof(INTVAL) * (1 + num_slots));
+    for(i = 0; i < num_slots; i++){
+        repr_data->initialize_slots[i] = reader->read_int(interp, reader);
+    }
+    repr_data->initialize_slots[i] = -1;
+
+    st->REPR_data = repr_data;
 }
 
 /* Initializes the CStruct representation. */
