@@ -2503,6 +2503,8 @@ public final class Ops {
     }
     public static SixModelObject push(SixModelObject arr, SixModelObject value, ThreadContext tc) {
         arr.push_boxed(tc, value);
+        if (arr.sc != null)
+            scwbObject(tc, arr);
         return value;
     }
     public static long push_i(SixModelObject arr, long value, ThreadContext tc) {
@@ -2510,6 +2512,8 @@ public final class Ops {
         arr.push_native(tc);
         if (tc.native_type != ThreadContext.NATIVE_INT)
             throw ExceptionHandling.dieInternal(tc, "This is not a native int array");
+        if (arr.sc != null)
+            scwbObject(tc, arr);
         return value;
     }
     public static double push_n(SixModelObject arr, double value, ThreadContext tc) {
@@ -2517,6 +2521,8 @@ public final class Ops {
         arr.push_native(tc);
         if (tc.native_type != ThreadContext.NATIVE_NUM)
             throw ExceptionHandling.dieInternal(tc, "This is not a native num array");
+        if (arr.sc != null)
+            scwbObject(tc, arr);
         return value;
     }
     public static String push_s(SixModelObject arr, String value, ThreadContext tc) {
@@ -2524,6 +2530,8 @@ public final class Ops {
         arr.push_native(tc);
         if (tc.native_type != ThreadContext.NATIVE_STR)
             throw ExceptionHandling.dieInternal(tc, "This is not a native str array");
+        if (arr.sc != null)
+            scwbObject(tc, arr);
         return value;
     }
     public static SixModelObject pop(SixModelObject arr, ThreadContext tc) {
