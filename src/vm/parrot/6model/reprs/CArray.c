@@ -362,11 +362,12 @@ static void bind_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index,
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
     CArrayBody     *body      = (CArrayBody *)data;
     STable         *type_st   = STABLE(repr_data->elem_type);
-    void           *ptr       = ((char *)body->storage) + index * repr_data->elem_size;
+    void           *ptr;
     if (body->managed && index >= body->allocated)
         expand(interp, repr_data, body, index + 1);
     if (index >= body->elems)
         body->elems = index + 1;
+    ptr = ((char *)body->storage) + index * repr_data->elem_size;
     switch (repr_data->elem_kind) {
         case CARRAY_ELEM_KIND_NUMERIC:
             switch (value->type) {
@@ -392,7 +393,7 @@ static void bind_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index,
 static void bind_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index, PMC *obj) {
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
     CArrayBody     *body      = (CArrayBody *)data;
-    void **storage = (void **) body->storage;
+    void **storage;
     void *cptr; /* Pointer to C data. */
 
     /* Enlarge child_objs if needed. */
@@ -400,6 +401,8 @@ static void bind_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index, 
         expand(interp, repr_data, body, index+1);
     if (index >= body->elems)
         body->elems = index + 1;
+
+    storage = (void **) body->storage;
 
     /* Make sure the type isn't something we can't handle. */
     switch (repr_data->elem_kind) {

@@ -2408,6 +2408,7 @@ QAST::MASTOperations.add_core_moarop_mapping('openpipe', 'openpipe');
 QAST::MASTOperations.add_core_moarop_mapping('rand_i', 'rand_i');
 QAST::MASTOperations.add_core_moarop_mapping('rand_n', 'randscale_n');
 QAST::MASTOperations.add_core_moarop_mapping('srand', 'srand', 0);
+QAST::MASTOperations.add_core_moarop_mapping('execname', 'execname');
 
 # thread related opcodes
 QAST::MASTOperations.add_core_moarop_mapping('newthread', 'newthread');

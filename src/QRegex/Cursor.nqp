@@ -751,19 +751,23 @@ class NQPMatch is NQPCapture {
             }
             
             my int $i := 0;
-            for self.list() {
-                if $_ {
-                    nqp::islist($_)
-                        ?? dump_match_array(@chunks, $indent, $i, $_)
-                        !! dump_match(@chunks, $indent, $i, $_);
-                }
-                $i := $i + 1;
+            if self.list() {
+                for self.list() {
+                    if $_ {
+                        nqp::islist($_)
+                            ?? dump_match_array(@chunks, $indent, $i, $_)
+                            !! dump_match(@chunks, $indent, $i, $_);
+                    }
+                    $i := $i + 1;
+                } 
             }
-            for self.hash() {
-                if $_.value {
-                    nqp::islist($_.value)
-                        ?? dump_match_array(@chunks, $indent, $_.key, $_.value)
-                        !! dump_match(@chunks, $indent, $_.key, $_.value);
+            if self.hash() {
+                for self.hash() {
+                    if $_.value {
+                        nqp::islist($_.value)
+                            ?? dump_match_array(@chunks, $indent, $_.key, $_.value)
+                            !! dump_match(@chunks, $indent, $_.key, $_.value);
+                    }
                 }
             }
             return join('', @chunks);
