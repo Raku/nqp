@@ -1660,6 +1660,15 @@ QAST::Operations.add_core_op('setencoding', -> $qastcomp, $op {
         $op[0], $op[1]
     ))
 });
+QAST::Operations.add_core_op('seekfh', -> $qastcomp, $op {
+    if +@($op) != 3 {
+        nqp::die('seekfh requires 3 operands');
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'), :name('seek'),
+        $op[0], $op[2], $op[1]
+    ))
+});
 QAST::Operations.add_core_op('tellfh', -> $qastcomp, $op {
     if +$op.list != 1 {
         nqp::die("The 'tellfh' op expects one operand");
@@ -1745,6 +1754,18 @@ QAST::Operations.add_core_op('closefh', -> $qastcomp, $op {
     $qastcomp.as_post(QAST::Op.new(
         :op('callmethod'), :name('close'),
         $op[0]
+    ))
+});
+QAST::Operations.add_core_op('readfh', -> $qastcomp, $op {
+    if +@($op) != 3 {
+        nqp::die('readfh requires 3 operands');
+    }
+    $qastcomp.as_post(QAST::VM.new(:pirop('nqp_encode__PssP'),
+        QAST::Op.new(:op('callmethod'), :name('get_string'), :returns(str),
+            QAST::Op.new(:op('callmethod'), :name('read_bytes'), $op[0], $op[2]),
+            QAST::SVal.new(:value('binary')) ),
+        QAST::SVal.new(:value('binary')),
+        $op[1]
     ))
 });
 
