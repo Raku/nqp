@@ -476,6 +476,23 @@ public final class Ops {
         return obj;
     }
     
+    public static SixModelObject seekfh(SixModelObject obj, long offset, long whence, ThreadContext tc) {
+        if (obj instanceof IOHandleInstance) {
+            IOHandleInstance h = (IOHandleInstance)obj;
+            if (h.handle instanceof IIOSeekable) {
+                ((IIOSeekable)h.handle).seek(tc, offset, whence);
+                return obj;
+            }
+            else
+                throw ExceptionHandling.dieInternal(tc,
+                    "This handle does not support seek");
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc,
+                "seekfh requires an object with the IOHandle REPR");
+        }
+    }
+
     public static long tellfh(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
             IOHandleInstance h = (IOHandleInstance)obj;

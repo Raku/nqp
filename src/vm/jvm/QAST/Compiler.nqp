@@ -1916,6 +1916,7 @@ QAST::OperationsJAST.map_classlib_core_op('getstdout', $TYPE_OPS, 'getstdout', [
 QAST::OperationsJAST.map_classlib_core_op('getstderr', $TYPE_OPS, 'getstderr', [], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('setencoding', $TYPE_OPS, 'setencoding', [$RT_OBJ, $RT_STR], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('setinputlinesep', $TYPE_OPS, 'setinputlinesep', [$RT_OBJ, $RT_STR], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('seekfh', $TYPE_OPS, 'seekfh', [$RT_OBJ, $RT_INT, $RT_INT], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('tellfh', $TYPE_OPS, 'tellfh', [$RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('readfh', $TYPE_OPS, 'readfh', [$RT_OBJ, $RT_OBJ, $RT_INT], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('writefh', $TYPE_OPS, 'writefh', [$RT_OBJ, $RT_OBJ], $RT_INT, :tc);
