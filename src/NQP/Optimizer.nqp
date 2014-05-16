@@ -95,7 +95,7 @@ class NQP::Optimizer {
                 unless nqp::existskey(%!usages_inner, $name) {
                     # Lowerable if it's a normal variable.
                     next if nqp::chars($name) < 2;
-                    if $name ne 'self' && $name ne '$/' {
+                    if $name ne 'self' && $name ne '$/' && $name ne '$_' {
                         my str $sigil := nqp::substr($name, 0, 1);
                         next unless $sigil eq '$' || $sigil eq '@' || $sigil eq '%';
                         next unless nqp::iscclass(nqp::const::CCLASS_ALPHABETIC, $name, 1);
