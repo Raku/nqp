@@ -112,6 +112,9 @@ public class P6OpaqueBaseInstance extends SixModelObject {
         throw new RuntimeException("This type does not support associative operations");
     }
     
+    public long elems(ThreadContext tc) {
+        return posDelegate().elems(tc);
+    }
     public SixModelObject at_pos_boxed(ThreadContext tc, long index) {
         return posDelegate().at_pos_boxed(tc, index);
     }
