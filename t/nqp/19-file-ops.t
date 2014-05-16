@@ -2,7 +2,7 @@
 
 # Test nqp::op file operations.
 
-plan(45);
+plan(53);
 
 ok( nqp::stat('CREDITS', nqp::const::STAT_EXISTS) == 1, 'nqp::stat exists');
 ok( nqp::stat('AARDVARKS', nqp::const::STAT_EXISTS) == 0, 'nqp::stat not exists');
@@ -57,6 +57,27 @@ nqp::closefh($fh);
 $fh := nqp::open($test-file, 'r');
 ok(nqp::readallfh($fh) eq "awesome thing!\n", 'test file contains the strings');
 ok(nqp::tellfh($fh) == 15, 'tellfh gives correct position');
+nqp::closefh($fh);
+
+my $size := nqp::stat($test-file, nqp::const::STAT_FILESIZE);
+$fh := nqp::open($test-file, 'r');
+nqp::seekfh($fh, 0, 2);
+ok(nqp::tellfh($fh) == $size, 'seekfh to end gives correct position');
+nqp::seekfh($fh, 8, 0);
+ok(nqp::tellfh($fh) == 8, 'seekfh relative to start gives correct position');
+ok(nqp::readallfh($fh) eq "thing!\n", 'seekfh relative to start gives correct content');
+nqp::seekfh($fh, -7, 2);
+ok(nqp::tellfh($fh) == 8, 'seekfh relative to end gives correct position');
+ok(nqp::readallfh($fh) eq "thing!\n", 'seekfh relative to end gives correct content');
+nqp::seekfh($fh, -8, 1);
+ok(nqp::tellfh($fh) == 7, 'seekfh relative to current pos gives correct position');
+ok(nqp::readallfh($fh) eq " thing!\n", 'seekfh relative to current pos gives correct content');
+my $ok := 1;
+try { nqp::seekfh($fh, -5, 0); $ok := 0; 1 }
+ok($ok, 'seekfh before start of file fails');
+$ok := 1;
+try { nqp::seekfh($fh, 0, 3); $ok := 0; 1 }
+ok($ok, 'seekfh with invalid whence fails');
 nqp::closefh($fh);
 
 $fh := nqp::open($test-file, 'w');
