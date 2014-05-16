@@ -174,13 +174,71 @@ class NQP::Optimizer {
             return self.visit_handle($op);
         }
 
-        # A for loop must have its block treated as a declaration; besides
-        # that, visit children as normal.
+        # A for loop may be something we can simplify.
         if $opname eq 'for' {
+            my $handled := 0;
             my $orig := $op[1].blocktype;
-            $op[1].blocktype('declaration');
-            self.visit_children($op);
-            $op[1].blocktype($orig);
+            if $op[1].arity == 1 && $orig eq 'immediate' {
+                # Find the iteration parameter.
+                my $stmts := $op[1][0];
+                my int $i := 0;
+                my int $n := nqp::elems($stmts);
+                my $itvar;
+                while $i < $n {
+                    my $item := $stmts[$i];
+                    if nqp::istype($item, QAST::Var) && $item.decl eq 'param' {
+                        $itvar := $item;
+                        last;
+                    }
+                    $i++;
+                }
+
+                # Provided we found it, turn it from param to decl, so it will
+                # not prevent inlining. Then visit the children.
+                if $itvar {
+                    $itvar.decl('var');
+                    self.visit_children($op);
+                    if nqp::istype($op[1], QAST::Stmts) {
+                        # Inlined. Replace iteration var declaration with a lookup of itself.
+                        $stmts[$i] := QAST::Var.new( :name($itvar.name), :scope($itvar.scope) );
+
+                        # Produce a while loop that iterates.
+                        my $it_name := QAST::Node.unique('lowered_for_it_');
+                        return QAST::Stmts.new(
+                            QAST::Op.new(
+                                :op('bind'),
+                                QAST::Var.new( :name($it_name), :scope('local'), :decl('var') ),
+                                QAST::Op.new(
+                                    :op('iterator'),
+                                    $op[0]
+                                )
+                            ),
+                            QAST::Op.new(
+                                :op('while'),
+                                QAST::Var.new( :name($it_name), :scope('local') ),
+                                QAST::Stmts.new(
+                                    QAST::Op.new(
+                                        :op('bind'),
+                                        $itvar,
+                                        QAST::Op.new(
+                                            :op('shift'),
+                                            QAST::Var.new( :name($it_name), :scope('local') )
+                                        )),
+                                    $op[1]
+                                )));
+                    }
+                    else {
+                        # Restore parameter nature of the thing; no inline happened.
+                        $itvar.decl('param');
+                    }
+                    $handled := 1;
+                }
+            }
+            unless $handled {
+                $op[1].blocktype('declaration');
+                self.visit_children($op);
+                $op[1].blocktype($orig);
+            }
         }
         else {
             self.visit_children($op);
