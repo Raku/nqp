@@ -205,7 +205,7 @@ class NQP::Optimizer {
         elsif $opname eq 'call' && $op.name {
             my @sym := self.find_lex_scope_level($op.name);
             if @sym {
-                if @sym[0]<declared> && @sym[1] <= 1 {
+                if (@sym[0]<declared> || nqp::existskey(@sym[0], 'value')) && @sym[1] <= 1 {
                     # It's known at compile time and not closure-ish, so we can
                     # use a more optimal call op.
                     $op.op('callstatic');
