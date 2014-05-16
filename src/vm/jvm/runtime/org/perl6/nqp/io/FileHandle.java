@@ -50,12 +50,14 @@ public class FileHandle extends SyncHandle implements IIOSeekable {
                 fc.position(fc.position() + offset);
                 break;
             case 2:
-                fc.position(fc.size());
+                fc.position(fc.size() + offset);
                 break;
             default:
                 throw ExceptionHandling.dieInternal(tc, "Invalid seek mode");
             }
         } catch (IOException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
+        } catch (IllegalArgumentException e) {
             throw ExceptionHandling.dieInternal(tc, e);
         }
     }
