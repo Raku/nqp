@@ -29,9 +29,7 @@
 <[ - ]>			ab-def		y	unescaped hyphen, the only thing w spaces
 <[x-]>			ab-def		y	unescaped hyphen, at the end
 <[x - ]>		ab-def		y	unescaped hyphen, at the end w spaces
-# todo :pge<feature>
 <[-x]>			ab-def		y	unescaped hyphen, at the beginning
-# todo :pge<feature>
 <[ -x]>			ab-def		y	unescaped hyphen, at the beginning w spaces
 <[\-]>			ab-def		y	escaped hyphen
 <[\-]>			abcdef		n	escaped hyphen

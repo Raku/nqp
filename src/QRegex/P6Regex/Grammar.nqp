@@ -347,7 +347,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         <.normspace>?
         [
         | '[' $<charspec>=(
-                  || \s* '-' <!before \s* ']'> <.obs: '- as character range','.. for range, for explicit - in character class, escape it or place as last thing'>
+                  || [ <!after '[' > \s* '-' <!before \s* ']'> ] <.obs: '- as character range','.. for range, for explicit - in character class, escape it or place it as the first or last thing'>
                   || \s* ( '\\' <cclass_backslash> || (<-[\]\\]>) )
                      [
                          \s* '..' \s*
