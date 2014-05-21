@@ -76,7 +76,7 @@ my $ok := 1;
 try { nqp::seekfh($fh, -5, 0); $ok := 0; 1 }
 ok($ok, 'seekfh before start of file fails');
 $ok := 1;
-try { nqp::seekfh($fh, 0, 3); $ok := 0; 1 }
+try { nqp::seekfh($fh, 0, 5); $ok := 0; 1 }
 ok($ok, 'seekfh with invalid whence fails');
 nqp::closefh($fh);
 
