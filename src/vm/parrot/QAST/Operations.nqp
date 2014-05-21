@@ -548,6 +548,19 @@ QAST::Operations.add_core_op('ifnull', :inlinable(1), -> $qastcomp, $op {
     $ops
 });
 
+# Control exception throwing.
+my %control_map := nqp::hash(
+    'next', '.CONTROL_LOOP_NEXT',
+    'last', '.CONTROL_LOOP_LAST',
+    'redo', '.CONTROL_LOOP_REDO',
+    'next_label', 512,
+    'redo_label', 513,
+    'last_label', 514
+);
+
+my $loop_exception_handler := '[.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]';
+my $labeled_loop_exception_handler := '[.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST;512;513;514]';
+
 # Loops.
 for ('', 'repeat_') -> $repness {
     for <while until> -> $op_name {
@@ -566,8 +579,10 @@ for ('', 'repeat_') -> $repness {
             my @comp_types;
             my $handler := 1;
             my $*IMM_ARG;
+            my $label;
             for $op.list {
                 if $_.named eq 'nohandler' { $handler := 0; }
+                elsif $_.named eq 'label' { $label := $_ }
                 else {
                     my $*HAVE_IMM_ARG := nqp::istype($_, QAST::Block) && $_.arity > 0 && $_ =:= $op.list[1];
                     my $comp := $qastcomp.as_post($_);
@@ -578,6 +593,7 @@ for ('', 'repeat_') -> $repness {
                     }
                 }
             }
+
             my $res_type := @comp_types[0] eq @comp_types[1] ?? nqp::lc(@comp_types[0]) !! 'p';
             my $res_reg  := $*REGALLOC."fresh_$res_type"();
 
@@ -594,7 +610,9 @@ for ('', 'repeat_') -> $repness {
             if $handler {
                 $exc_reg := $*REGALLOC.fresh_p();
                 $ops.push_pirop('new', $exc_reg, "'ExceptionHandler'",
-                    '[.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]');
+                    $label  ?? $labeled_loop_exception_handler
+                            !! $loop_exception_handler
+                );
                 $ops.push_pirop('set_label', $exc_reg, $hand_lbl);
                 $ops.push_pirop('push_eh', $exc_reg);
             }
@@ -644,12 +662,32 @@ for ('', 'repeat_') -> $repness {
             # Emit postlude, with exception handlers.
             if $handler {
                 $ops.push($hand_lbl);
+                my $type_reg := $*REGALLOC.fresh_p();
                 $ops.push_pirop('.get_results', '(' ~ $exc_reg ~ ')');
                 $ops.push_pirop('pop_upto_eh', $exc_reg);
-                $ops.push_pirop('getattribute', $exc_reg, $exc_reg, "'type'");
-                $ops.push_pirop('eq', $exc_reg, '.CONTROL_LOOP_NEXT',
+                $ops.push_pirop('getattribute', $type_reg, $exc_reg, "'type'");
+                $ops.push_pirop('eq', $type_reg, '.CONTROL_LOOP_NEXT',
                     $operands == 3 ?? $next_lbl !! $test_lbl);
-                $ops.push_pirop('eq', $exc_reg, '.CONTROL_LOOP_REDO', $redo_lbl);
+                $ops.push_pirop('eq', $type_reg, '.CONTROL_LOOP_REDO', $redo_lbl);
+                
+                if $label {
+                    my $l := $qastcomp.coerce($qastcomp.as_post($label), 'P');
+                    my $pay_reg := $*REGALLOC.fresh_p();
+                    my $id1_reg := $*REGALLOC.fresh_i();
+                    my $id2_reg := $*REGALLOC.fresh_i();
+                    my $rethrow_lbl := PIRT::Label.new(:name($while_id ~ '_rethrow'));
+                    $ops.push($l);
+                    $ops.push_pirop('getattribute', $pay_reg, $exc_reg, "'payload'");
+                    $ops.push_pirop('get_id', $id1_reg, $pay_reg);
+                    $ops.push_pirop('get_id', $id2_reg, $l);
+                    $ops.push_pirop('ne', $id1_reg, $id2_reg, $rethrow_lbl);
+                    $ops.push_pirop('eq', $type_reg, %control_map<next_label>, $operands == 3 ?? $next_lbl !! $test_lbl);
+                    $ops.push_pirop('eq', $type_reg, %control_map<redo_label>, $redo_lbl);
+                    $ops.push_pirop('eq', $type_reg, %control_map<last_label>, $done_lbl);
+                    $ops.push($rethrow_lbl);
+                    $ops.push_pirop('rethrow', $exc_reg);
+                }
+
                 $ops.push($done_lbl);
                 $ops.push_pirop('pop_eh');
             }
@@ -665,8 +703,10 @@ for ('', 'repeat_') -> $repness {
 QAST::Operations.add_core_op('for', :inlinable(1), -> $qastcomp, $op {
     my $handler := 1;
     my @operands;
+    my $label;
     for $op.list {
         if $_.named eq 'nohandler' { $handler := 0; }
+        elsif $_.named eq 'label' { $label := $_ }
         else { @operands.push($_) }
     }
 
@@ -703,7 +743,9 @@ QAST::Operations.add_core_op('for', :inlinable(1), -> $qastcomp, $op {
         $exc_reg  := $*REGALLOC.fresh_p();
         $hand_lbl := PIRT::Label.new(:name('for_handlers'));
         $ops.push_pirop('new', $exc_reg, "'ExceptionHandler'",
-            '[.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]');
+            $label  ?? $labeled_loop_exception_handler
+                    !! $loop_exception_handler
+        );
         $ops.push_pirop('set_label', $exc_reg, $hand_lbl);
         $ops.push_pirop('push_eh', $exc_reg);
     }
@@ -736,11 +778,31 @@ QAST::Operations.add_core_op('for', :inlinable(1), -> $qastcomp, $op {
     # Handlers.
     if $handler {
         $ops.push($hand_lbl);
+        my $type_reg := $*REGALLOC.fresh_p();
         $ops.push_pirop('.get_results', '(' ~ $exc_reg ~ ')');
         $ops.push_pirop('pop_upto_eh', $exc_reg);
-        $ops.push_pirop('getattribute', $exc_reg, $exc_reg, "'type'");
-        $ops.push_pirop('eq', $exc_reg, '.CONTROL_LOOP_NEXT', $lbl_next);
-        $ops.push_pirop('eq', $exc_reg, '.CONTROL_LOOP_REDO', $lbl_redo);
+        $ops.push_pirop('getattribute', $type_reg, $exc_reg, "'type'");
+        $ops.push_pirop('eq', $type_reg, '.CONTROL_LOOP_NEXT', $lbl_next);
+        $ops.push_pirop('eq', $type_reg, '.CONTROL_LOOP_REDO', $lbl_redo);
+
+        if $label {
+            my $l := $qastcomp.coerce($qastcomp.as_post($label), 'P');
+            my $pay_reg := $*REGALLOC.fresh_p();
+            my $id1_reg := $*REGALLOC.fresh_i();
+            my $id2_reg := $*REGALLOC.fresh_i();
+            my $rethrow_lbl := PIRT::Label.new(:name('for_rethrow'));
+            $ops.push($l);
+            $ops.push_pirop('getattribute', $pay_reg, $exc_reg, "'payload'");
+            $ops.push_pirop('get_id', $id1_reg, $pay_reg);
+            $ops.push_pirop('get_id', $id2_reg, $l);
+            $ops.push_pirop('ne', $id1_reg, $id2_reg, $rethrow_lbl);
+            $ops.push_pirop('eq', $type_reg, %control_map<next_label>, $lbl_next);
+            $ops.push_pirop('eq', $type_reg, %control_map<redo_label>, $lbl_redo);
+            $ops.push_pirop('eq', $type_reg, %control_map<last_label>, $lbl_done);
+            $ops.push($rethrow_lbl);
+            $ops.push_pirop('rethrow', $exc_reg);
+        }
+
         $ops.push($lbl_done);
         $ops.push_pirop('pop_eh');
     }
@@ -1529,17 +1591,31 @@ QAST::Operations.add_core_op('resume', -> $qastcomp, $op {
         )))
 });
 
-# Control exception throwing.
-my %control_map := nqp::hash(
-    'next', '.CONTROL_LOOP_NEXT',
-    'last', '.CONTROL_LOOP_LAST',
-    'redo', '.CONTROL_LOOP_REDO'
-);
 QAST::Operations.add_core_op('control', -> $qastcomp, $op {
     my $name := $op.name;
     if nqp::existskey(%control_map, $name) {
+        my $label;
+        for $op.list {
+            $label := $_ if $_.named eq 'label';
+        }
+        
         my $ops := PIRT::Ops.new(:result('0'));
-        $ops.push_pirop('die', '0', %control_map{$name});
+        
+        if $label {
+            unless %control_map{$name ~ '_label'} {
+                nqp::die("Unexpencted control name '$name', must be 'next', 'redo' or 'last'");
+            }
+            my $l  := $qastcomp.coerce($qastcomp.as_post($label), 'P');
+            my $ex := $*REGALLOC.fresh_p();
+            $ops.push($l);
+            $ops.push_pirop('new', $ex, "'Exception'");
+            $ops.push_pirop('set', "$ex\['type']", %control_map{$name ~ '_label'});
+            $ops.push_pirop('set', "$ex\['payload']", $l);
+            $ops.push_pirop('throw', $ex);
+        }
+        else {
+            $ops.push_pirop('die', '0', %control_map{$name});
+        }
         $ops
     }
     else {

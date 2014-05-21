@@ -298,7 +298,10 @@ class NQP::Actions is HLL::Actions {
     method statement_control:sym<while>($/) {
         my $ast := xblock_immediate( $<xblock>.ast );
         $ast.op(~$<sym>);
-        unless $*CONTROL_USED {
+        if $*LABEL {
+            $ast.push(QAST::WVal.new( :value($*W.find_sym([$*LABEL])), :named('label') ));
+        }
+        elsif !$*CONTROL_USED {
             $ast.push(QAST::IVal.new( :value(1), :named('nohandler') ));
         }
         $/.prune();
@@ -316,7 +319,10 @@ class NQP::Actions is HLL::Actions {
             $ast := QAST::Op.new( $<EXPR>.ast, block_immediate( $<pblock>.ast ),
                                    :op($op), :node($/) );
         }
-        unless $*CONTROL_USED {
+        if $*LABEL {
+            $ast.push(QAST::WVal.new( :value($*W.find_sym([$*LABEL])), :named('label') ));
+        }
+        elsif !$*CONTROL_USED {
             $ast.push(QAST::IVal.new( :value(1), :named('nohandler') ));
         }
         $/.prune();
@@ -333,7 +339,10 @@ class NQP::Actions is HLL::Actions {
             $block.arity(1);
         }
         $block.blocktype('immediate');
-        unless $*CONTROL_USED {
+        if $*LABEL {
+            $ast.push(QAST::WVal.new( :value($*W.find_sym([$*LABEL])), :named('label') ));
+        }
+        elsif !$*CONTROL_USED {
             $ast.push(QAST::IVal.new( :value(1), :named('nohandler') ));
         }
         $/.prune();
@@ -1636,9 +1645,33 @@ class NQP::Actions is HLL::Actions {
         );
     }
     
-    method term:sym<next>($/) { make QAST::Op.new( :op('control'), :name('next') ) }
-    method term:sym<last>($/) { make QAST::Op.new( :op('control'), :name('last') ) }
-    method term:sym<redo>($/) { make QAST::Op.new( :op('control'), :name('redo') ) }
+    method term:sym<next>($/) {
+        my $ast := QAST::Op.new( :op('control'), :name('next') );
+        
+        if $<identifier> {
+            $ast.push(QAST::WVal.new( :value($*W.find_sym([$<identifier>])), :named('label') ));
+        }
+        
+        make $ast
+    }
+    method term:sym<last>($/) {
+        my $ast := QAST::Op.new( :op('control'), :name('last') );
+        
+        if $<identifier> {
+            $ast.push(QAST::WVal.new( :value($*W.find_sym([$<identifier>])), :named('label') ));
+        }
+        
+        make $ast
+    }
+    method term:sym<redo>($/) {
+        my $ast := QAST::Op.new( :op('control'), :name('redo') );
+        
+        if $<identifier> {
+            $ast.push(QAST::WVal.new( :value($*W.find_sym([$<identifier>])), :named('label') ));
+        }
+        
+        make $ast
+    }
 
     method infix:sym<~~>($/) {
         make QAST::Op.new( :op<callmethod>, :name<ACCEPTS>, :node($/) );

@@ -18,4 +18,8 @@ public class UnwindException extends ControlException {
      * produced.
      */
     public SixModelObject result;
+
+    /* When we transform a VMException into an UnwindException, we need
+     * to keep the payload, for example when it is about a loop label. */
+    public SixModelObject payload;
 }

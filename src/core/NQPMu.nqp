@@ -134,3 +134,5 @@ nqp::sethllconfig('nqp', nqp::hash(
     'hash_iter', NQPHashIter
 ));
 #?endif
+
+my class NQPLabel { }

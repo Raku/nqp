@@ -152,14 +152,19 @@ grammar NQP::Grammar is HLL::Grammar {
     }
 
     token label {
-        :my $label;
         <identifier> ':' <?[\s]> <.ws>
+        {
+            $*LABEL := ~$<identifier>;
+            my $label := $*W.find_sym(['NQPLabel']).new();
+            $*W.add_object($label);
+            $*W.install_lexical_symbol($*W.cur_lexpad(), $*LABEL, $label);
+        }
     }
 
-    token statement {
+    token statement($*LABEL = '') {
         <!before <[\])}]> | $ >
         [
-        | <label> <statement>
+        | <label> <statement($*LABEL)> { $*LABEL := '' if $*LABEL }
         | <statement_control>
         | <EXPR> <.ws>
             [
@@ -311,9 +316,9 @@ grammar NQP::Grammar is HLL::Grammar {
     token term:sym<regex_declarator>   { <regex_declarator> }
     token term:sym<statement_prefix>   { <statement_prefix> }
     token term:sym<lambda>             { <?lambda> <pblock> }
-    token term:sym<last>               { <sym> <!identifier> { $*CONTROL_USED := 1 } }
-    token term:sym<next>               { <sym> <!identifier> { $*CONTROL_USED := 1 } }
-    token term:sym<redo>               { <sym> <!identifier> { $*CONTROL_USED := 1 } }
+    token term:sym<last>               { <sym> [<.ws> <identifier> <?{ $*W.is_lexical(~$<identifier>) }>]? { $*CONTROL_USED := 1 } }
+    token term:sym<next>               { <sym> [<.ws> <identifier> <?{ $*W.is_lexical(~$<identifier>) }>]? { $*CONTROL_USED := 1 } }
+    token term:sym<redo>               { <sym> [<.ws> <identifier> <?{ $*W.is_lexical(~$<identifier>) }>]? { $*CONTROL_USED := 1 } }
 
     token fatarrow {
         <key=.identifier> \h* '=>' <.ws> <val=.EXPR('i=')>
