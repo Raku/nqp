@@ -1,12 +1,12 @@
 my class NO_VALUE { }
 
 role QAST::SpecialArg {
-    has str $!named;
+    has $!named;
     has int $!flat;
     
     method named($value = NO_VALUE) {
         $!named := $value unless $value =:= NO_VALUE;
-        !nqp::isnull_s($!named) ?? $!named !! ""
+        $!named
     }
 
     method flat($value = NO_VALUE) {

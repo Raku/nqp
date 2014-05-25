@@ -445,7 +445,15 @@ class QAST::MASTCompiler {
         'param_on_i',
         'param_on_n',
         'param_on_s',
-        'param_on_o'
+        'param_on_o',
+        'param_rn2_i',
+        'param_rn2_n',
+        'param_rn2_s',
+        'param_rn2_o',
+        'param_on2_i',
+        'param_on2_n',
+        'param_on2_s',
+        'param_on2_o'
     ];
 
     my @return_types := [ NQPMu, int, int, int, int, num, num, str, NQPMu ];
@@ -770,11 +778,15 @@ class QAST::MASTCompiler {
                         my $param_kind := self.type_to_register_kind($var.returns);
                         my $opslot := @kind_to_op_slot[$param_kind];
 
-                        my $opname_index := ($var.named ?? 8 !! 0) + ($var.default ?? 4 !! 0) + $opslot;
+                        my $opname_index := ($var.named
+                                ?? (nqp::islist($var.named) ?? 16 !! 8)
+                                !! 0)
+                            + ($var.default ?? 4 !! 0) + $opslot;
                         my $opname := @param_opnames[$opname_index];
 
                         # what will be put in the value register
                         my $val;
+                        my $val2;
 
                         if $var.slurpy {
                             if $var.named {
@@ -784,8 +796,17 @@ class QAST::MASTCompiler {
                                 $opname := "param_sp";
                             }
                         }
-                        elsif $var.named {
-                            $val := MAST::SVal.new( :value($var.named) );
+                        elsif $var.named -> $name {
+                            if nqp::islist($name) {
+                                unless nqp::elems($name) == 2 {
+                                    nqp::die("Can only support a single fallback name for a named parameter");
+                                }
+                                $val := MAST::SVal.new( :value($name[0]) );
+                                $val2 := MAST::SVal.new( :value($name[1]) );
+                            }
+                            else {
+                                $val := MAST::SVal.new( :value($name) );
+                            }
                         }
                         else { # positional
                             $val := MAST::IVal.new( :size(16), :value($param_index));
@@ -807,7 +828,9 @@ class QAST::MASTCompiler {
                             my $default_mast := self.as_mast($var.default, :want($param_kind));
 
                             # emit param grabbing op
-                            push_op(@pre, $opname, $valreg, $val, $endlbl);
+                            $val2
+                                ?? push_op(@pre, $opname, $valreg, $val, $val2, $endlbl)
+                                !! push_op(@pre, $opname, $valreg, $val, $endlbl);
 
                             # emit default initialization code
                             push_ilist(@pre, $default_mast);
@@ -829,7 +852,9 @@ class QAST::MASTCompiler {
                         }
                         else {
                             # emit param grabbing op
-                            push_op(@pre, $opname, $valreg, $val);
+                            $val2
+                                ?? push_op(@pre, $opname, $valreg, $val, $val2)
+                                !! push_op(@pre, $opname, $valreg, $val);
                         }
 
                         if $scope eq 'lexical' {
