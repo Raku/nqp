@@ -1750,7 +1750,7 @@ QAST::Operations.add_core_op('tellfh', -> $qastcomp, $op {
         nqp::die("The 'tellfh' op expects one operand");
     }
     $qastcomp.as_post(QAST::Op.new(
-        :op('callmethod'), :name('tell'),
+        :op('callmethod'), :name('tell'), :returns(int),
         $op[0]
     ))
 });
