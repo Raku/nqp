@@ -1754,6 +1754,28 @@ QAST::Operations.add_core_op('tellfh', -> $qastcomp, $op {
         $op[0]
     ))
 });
+
+QAST::Operations.add_core_op('writefh', -> $qastcomp, $op {
+    if +$op.list != 2 {
+        nqp::die("The 'writefh' op expects two operands");
+    }
+    $qastcomp.as_post(QAST::Stmts.new(
+        QAST::Op.new(:op('bind'),
+            QAST::Var.new( :name('encoding'), :scope('local'), :decl('var'), :returns(str) ),
+            QAST::Op.new(:op('callmethod'), :name('encoding'), $op[0])),
+        QAST::Op.new(:op('callmethod'), :name('encoding'),
+            $op[0], QAST::SVal.new(:value('binary')) ),
+        QAST::Op.new(:op('callmethod'), :name('print'),
+            $op[0],
+            QAST::VM.new(:pirop('nqp_decode__SPs'),
+                $op[1],
+                QAST::SVal.new(:value('binary')) ) ),
+        QAST::Op.new(:op('callmethod'), :name('encoding'),
+            $op[0],
+            QAST::Var.new(:name('encoding'), :scope('local')))
+    ))
+});
+
 QAST::Operations.add_core_op('printfh', -> $qastcomp, $op {
     if +$op.list != 2 {
         nqp::die("The 'printfh' op expects two operands");
