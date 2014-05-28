@@ -1873,11 +1873,15 @@ QAST::Operations.add_core_op('cwd', -> $qastcomp, $op {
     if +$op.list != 0 {
         nqp::die("The 'cwd' op expects no operands");
     }
-    $qastcomp.as_post(QAST::Op.new(
-        :op('callmethod'),
-        :name('cwd'),
-        QAST::VM.new( :pirop('new__Ps'),
-                      QAST::SVal.new( :value('OS') ) ) ) );
+    $qastcomp.as_post(QAST::VM.new( :pirop('trans_encoding__Ssi'),
+        QAST::Op.new(
+            :op('callmethod'),
+            :name('cwd'),
+            QAST::VM.new( :pirop('new__Ps'),
+                          QAST::SVal.new( :value('OS') ) ) ),
+        QAST::VM.new( :pirop('find_encoding__Is'),
+                      QAST::SVal.new( :value('utf8') ) )
+    ));
 });
 QAST::Operations.add_core_op('chdir', -> $qastcomp, $op {
     if +$op.list != 1 {
