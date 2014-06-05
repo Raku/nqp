@@ -6,6 +6,7 @@ import java.nio.channels.AsynchronousServerSocketChannel;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 import java.nio.channels.NotYetBoundException;
+import java.nio.channels.UnresolvedAddressException;
 
 import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.HLLConfig;
@@ -33,6 +34,8 @@ public class AsyncServerSocketHandle implements IIOBindable {
         try {
             InetSocketAddress addr = new InetSocketAddress(host, port);
             listenChan.bind(addr);
+        } catch (UnresolvedAddressException uae) {
+            ExceptionHandling.dieInternal(tc, "Failed to resolve host name");
         } catch (IOException e) {
             throw ExceptionHandling.dieInternal(tc, e);
         }
