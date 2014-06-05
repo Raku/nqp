@@ -17,7 +17,7 @@ import org.perl6.nqp.sixmodel.reprs.AsyncTaskInstance;
 import org.perl6.nqp.sixmodel.reprs.ConcBlockingQueueInstance;
 import org.perl6.nqp.sixmodel.reprs.IOHandleInstance;
 
-public class AsyncServerSocketHandle implements IIOBindable {
+public class AsyncServerSocketHandle implements IIOBindable, IIOCancelable {
 
     AsynchronousServerSocketChannel listenChan;
 
@@ -83,6 +83,15 @@ public class AsyncServerSocketHandle implements IIOBindable {
         try {
             listenChan.accept(task, handler);
         } catch (NotYetBoundException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
+        }
+    }
+
+    @Override
+    public void cancel(ThreadContext tc) {
+        try {
+            listenChan.close();
+        } catch (IOException e) {
             throw ExceptionHandling.dieInternal(tc, e);
         }
     }

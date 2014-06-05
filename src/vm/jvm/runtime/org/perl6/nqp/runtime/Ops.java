@@ -4391,7 +4391,7 @@ public final class Ops {
             queue.add(schedulee);
         }
 
-        public void cancelIt() {
+        public void cancel(ThreadContext tc) {
             cancel();
         }
     }
@@ -4412,7 +4412,7 @@ public final class Ops {
     public static SixModelObject cancel(SixModelObject handle, ThreadContext tc) {
         AsyncTaskInstance task = (AsyncTaskInstance) handle;
         if (task.handle instanceof IIOCancelable) {
-            ((IIOCancelable)task.handle).cancelIt();
+            ((IIOCancelable)task.handle).cancel(tc);
         } else {
             throw ExceptionHandling.dieInternal(tc, "This handle does not support cancel");
         }
