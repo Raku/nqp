@@ -168,27 +168,17 @@ MAIN: {
         my $make = fill_template_text('@make@', %config);
 
         if ($make eq 'nmake') {
-            system_or_die('cd 3rdparty\dyncall && Configure.bat' .
-                ($config{'parrot::archname'} =~ /x64/ ? ' /target-x64' : ''));
+            system_or_die('cd 3rdparty\dyncall && Configure.bat');
             $config{'dyncall_build'} = 'cd 3rdparty\dyncall && nmake Nmakefile';
         }
         else {
             if ($^O eq 'MSWin32') {
-                my $configure_args =
-                    $config{'parrot::archname'} =~ /x86/ ? ' /target-x86' : ' /target-x64';
-
-                $configure_args   .= $config{'parrot::cc'} eq 'gcc' ? ' /tool-gcc' : '';
+                my $configure_args = $config{'parrot::cc'} eq 'gcc' ? ' /tool-gcc' : '';
 
                 system_or_die('cd 3rdparty\dyncall && Configure.bat' . $configure_args);
                 $config{'dyncall_build'} = "cd 3rdparty/dyncall && $make BUILD_DIR=. -f Makefile.embedded mingw32";
             } else {
-                my $target_args = '';
-                # heuristic according to
-                # https://github.com/perl6/nqp/issues/100#issuecomment-18523608
-                if ($^O eq 'darwin' && qx/ld 2>&1/ =~ /inferred architecture x86_64/) {
-                    $target_args = " --target-x64";
-                }
-                system_or_die('cd 3rdparty/dyncall && sh configure' . $target_args);
+                system_or_die('cd 3rdparty/dyncall && sh configure');
 
                 if ($^O eq 'netbsd') {
                     $config{'dyncall_build'} = "cd 3rdparty/dyncall && BUILD_DIR=. $make -f BSDmakefile";
