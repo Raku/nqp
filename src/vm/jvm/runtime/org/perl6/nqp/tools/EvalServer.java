@@ -38,6 +38,10 @@ public class EvalServer {
     private Path tokenPath;
 
     public static void main(String[] args) throws Exception {
+        String executableName = System.getProperty("perl6.execname");
+        if (executableName != null) {
+            System.setProperty("perl6.execname", executableName.replace("eval-server", "j"));
+        }
         EvalServer e = new EvalServer();
         e.parseArgs(args);
         e.run();
