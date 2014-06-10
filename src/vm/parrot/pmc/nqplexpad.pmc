@@ -240,7 +240,7 @@ Return the LexInfo PMC, if any or a Null PMC.
         return CTX_REG_PMC(interp, ctx, reg);
     }
 
-    VTABLE INTVAL get_integer_keyed_str(STRING *name) {
+    VTABLE INTVAL get_integer_keyed_str(STRING *name) :no_wb {
         Hash *hash;
         INTVAL  reg;
         PMC    *ctx;
@@ -253,7 +253,7 @@ Return the LexInfo PMC, if any or a Null PMC.
         return CTX_REG_INT(interp, ctx, reg);
     }
     
-    VTABLE FLOATVAL get_number_keyed_str(STRING *name) {
+    VTABLE FLOATVAL get_number_keyed_str(STRING *name) :no_wb {
         Hash *hash;
         INTVAL  reg;
         PMC    *ctx;
@@ -266,7 +266,7 @@ Return the LexInfo PMC, if any or a Null PMC.
         return CTX_REG_NUM(interp, ctx, reg);
     }
     
-    VTABLE STRING *get_string_keyed_str(STRING *name) {
+    VTABLE STRING *get_string_keyed_str(STRING *name) :no_wb {
         Hash *hash;
         INTVAL  reg;
         PMC    *ctx;
@@ -279,22 +279,22 @@ Return the LexInfo PMC, if any or a Null PMC.
         return CTX_REG_STR(interp, ctx, reg);
     }
 
-    VTABLE PMC *get_pmc_keyed(PMC *name) {
+    VTABLE PMC *get_pmc_keyed(PMC *name) :no_wb {
         STRING * const s = VTABLE_get_string(INTERP, name);
         return SELF.get_pmc_keyed_str(s);
     }
 
-    VTABLE INTVAL get_integer_keyed(PMC *name) {
+    VTABLE INTVAL get_integer_keyed(PMC *name) :no_wb {
         STRING * const s = VTABLE_get_string(INTERP, name);
         return SELF.get_integer_keyed_str(s);
     }
     
-    VTABLE FLOATVAL get_number_keyed(PMC *name) {
+    VTABLE FLOATVAL get_number_keyed(PMC *name) :no_wb {
         STRING * const s = VTABLE_get_string(INTERP, name);
         return SELF.get_number_keyed_str(s);
     }
 
-    VTABLE STRING *get_string_keyed(PMC *name) {
+    VTABLE STRING *get_string_keyed(PMC *name) :no_wb {
         STRING * const s = VTABLE_get_string(INTERP, name);
         return SELF.get_string_keyed_str(s);
     }
@@ -345,33 +345,33 @@ Return the LexInfo PMC, if any or a Null PMC.
         PARROT_GC_WRITE_BARRIER(INTERP, ctx);
     }
 
-    VTABLE void set_pmc_keyed(PMC *name, PMC *value) {
+    VTABLE void set_pmc_keyed(PMC *name, PMC *value) :manual_wb {
         STRING * const s = VTABLE_get_string(INTERP, name);
         SELF.set_pmc_keyed_str(s, value);
     }
 
-    VTABLE void set_integer_keyed(PMC *name, INTVAL value) {
+    VTABLE void set_integer_keyed(PMC *name, INTVAL value) :manual_wb {
         STRING * const s = VTABLE_get_string(INTERP, name);
         SELF.set_integer_keyed_str(s, value);
     }
 
-    VTABLE void set_number_keyed(PMC *name, FLOATVAL value) {
+    VTABLE void set_number_keyed(PMC *name, FLOATVAL value) :manual_wb {
         STRING * const s = VTABLE_get_string(INTERP, name);
         SELF.set_number_keyed_str(s, value);
     }
 
-    VTABLE void set_string_keyed(PMC *name, STRING *value) {
+    VTABLE void set_string_keyed(PMC *name, STRING *value) :manual_wb {
         STRING * const s = VTABLE_get_string(INTERP, name);
         SELF.set_string_keyed_str(s, value);
     }
 
-    METHOD get_lexinfo() {
+    METHOD get_lexinfo() :no_wb {
         PMC *lexinfo;
         GET_ATTR_lexinfo(INTERP, SELF, lexinfo);
         RETURN(PMC *lexinfo);
     }
     
-    METHOD get_lex_type(STRING *name) {
+    METHOD get_lex_type(STRING *name) :no_wb {
         Hash *hash;
         HashBucket *b;
         INTVAL spec;
@@ -398,7 +398,7 @@ Get iterator for declared lexicals.
 =cut
 
 */
-    VTABLE PMC *get_iter() {
+    VTABLE PMC *get_iter() :no_wb {
         PMC *lexinfo;
         GET_ATTR_lexinfo(INTERP, SELF, lexinfo);
         return VTABLE_get_iter(INTERP, lexinfo);

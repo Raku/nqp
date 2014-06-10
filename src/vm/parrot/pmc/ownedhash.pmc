@@ -7,43 +7,21 @@ pmclass OwnedHash extends Hash provides hash auto_attrs dynpmc group nqp {
     /* The object that owns this hash. */
     ATTR PMC *owner;
     
-    VTABLE void set_integer_keyed(PMC* key, INTVAL value) {
+    VTABLE void set_integer_keyed(PMC* key, INTVAL value) :manual_wb {
         PMC *owner;
         GET_ATTR_owner(interp, SELF, owner);
         if (!PMC_IS_NULL(owner))
             OBJ_SC_WRITE_BARRIER(owner);
         SUPER(key, value);
     }
-    VTABLE void set_integer_keyed_int(INTVAL key, INTVAL value) {
+    VTABLE void set_integer_keyed_int(INTVAL key, INTVAL value) :manual_wb {
         PMC *owner;
         GET_ATTR_owner(interp, SELF, owner);
         if (!PMC_IS_NULL(owner))
             OBJ_SC_WRITE_BARRIER(owner);
         SUPER(key, value);
     }
-    VTABLE void set_integer_keyed_str(STRING* key, INTVAL value) {
-        PMC *owner;
-        GET_ATTR_owner(interp, SELF, owner);
-        if (!PMC_IS_NULL(owner))
-            OBJ_SC_WRITE_BARRIER(owner);
-        SUPER(key, value);
-    }
-
-    VTABLE void set_number_keyed(PMC* key, FLOATVAL value) {
-        PMC *owner;
-        GET_ATTR_owner(interp, SELF, owner);
-        if (!PMC_IS_NULL(owner))
-            OBJ_SC_WRITE_BARRIER(owner);
-        SUPER(key, value);
-    }
-    VTABLE void set_number_keyed_int(INTVAL key, FLOATVAL value) {
-        PMC *owner;
-        GET_ATTR_owner(interp, SELF, owner);
-        if (!PMC_IS_NULL(owner))
-            OBJ_SC_WRITE_BARRIER(owner);
-        SUPER(key, value);
-    }
-    VTABLE void set_number_keyed_str(STRING* key, FLOATVAL value) {
+    VTABLE void set_integer_keyed_str(STRING* key, INTVAL value) :manual_wb {
         PMC *owner;
         GET_ATTR_owner(interp, SELF, owner);
         if (!PMC_IS_NULL(owner))
@@ -51,21 +29,43 @@ pmclass OwnedHash extends Hash provides hash auto_attrs dynpmc group nqp {
         SUPER(key, value);
     }
 
-    VTABLE void set_string_keyed(PMC* key, STRING* value) {
+    VTABLE void set_number_keyed(PMC* key, FLOATVAL value) :manual_wb {
         PMC *owner;
         GET_ATTR_owner(interp, SELF, owner);
         if (!PMC_IS_NULL(owner))
             OBJ_SC_WRITE_BARRIER(owner);
         SUPER(key, value);
     }
-    VTABLE void set_string_keyed_int(INTVAL key, STRING* value) {
+    VTABLE void set_number_keyed_int(INTVAL key, FLOATVAL value) :manual_wb {
         PMC *owner;
         GET_ATTR_owner(interp, SELF, owner);
         if (!PMC_IS_NULL(owner))
             OBJ_SC_WRITE_BARRIER(owner);
         SUPER(key, value);
     }
-    VTABLE void set_string_keyed_str(STRING* key, STRING* value) {
+    VTABLE void set_number_keyed_str(STRING* key, FLOATVAL value) :manual_wb {
+        PMC *owner;
+        GET_ATTR_owner(interp, SELF, owner);
+        if (!PMC_IS_NULL(owner))
+            OBJ_SC_WRITE_BARRIER(owner);
+        SUPER(key, value);
+    }
+
+    VTABLE void set_string_keyed(PMC* key, STRING* value) :manual_wb {
+        PMC *owner;
+        GET_ATTR_owner(interp, SELF, owner);
+        if (!PMC_IS_NULL(owner))
+            OBJ_SC_WRITE_BARRIER(owner);
+        SUPER(key, value);
+    }
+    VTABLE void set_string_keyed_int(INTVAL key, STRING* value) :manual_wb {
+        PMC *owner;
+        GET_ATTR_owner(interp, SELF, owner);
+        if (!PMC_IS_NULL(owner))
+            OBJ_SC_WRITE_BARRIER(owner);
+        SUPER(key, value);
+    }
+    VTABLE void set_string_keyed_str(STRING* key, STRING* value) :manual_wb {
         PMC *owner;
         GET_ATTR_owner(interp, SELF, owner);
         if (!PMC_IS_NULL(owner))
@@ -73,21 +73,21 @@ pmclass OwnedHash extends Hash provides hash auto_attrs dynpmc group nqp {
         SUPER(key, value);
     }
     
-    VTABLE void set_pmc_keyed(PMC* key, PMC* value) {
+    VTABLE void set_pmc_keyed(PMC* key, PMC* value) :manual_wb {
         PMC *owner;
         GET_ATTR_owner(interp, SELF, owner);
         if (!PMC_IS_NULL(owner))
             OBJ_SC_WRITE_BARRIER(owner);
         SUPER(key, value);
     }
-    VTABLE void set_pmc_keyed_int(INTVAL key, PMC* value) {
+    VTABLE void set_pmc_keyed_int(INTVAL key, PMC* value) :manual_wb {
         PMC *owner;
         GET_ATTR_owner(interp, SELF, owner);
         if (!PMC_IS_NULL(owner))
             OBJ_SC_WRITE_BARRIER(owner);
         SUPER(key, value);
     }
-    VTABLE void set_pmc_keyed_str(STRING* key, PMC* value) {
+    VTABLE void set_pmc_keyed_str(STRING* key, PMC* value) :manual_wb {
         PMC *owner;
         GET_ATTR_owner(interp, SELF, owner);
         if (!PMC_IS_NULL(owner))
@@ -95,7 +95,7 @@ pmclass OwnedHash extends Hash provides hash auto_attrs dynpmc group nqp {
         SUPER(key, value);
     }
     
-    VTABLE void mark() {
+    VTABLE void mark() :manual_wb {
         PMC *owner;
         GET_ATTR_owner(interp, SELF, owner);
         Parrot_gc_mark_PMC_alive(INTERP, owner);

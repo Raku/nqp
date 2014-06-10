@@ -47,7 +47,7 @@ pmclass SerializationContext auto_attrs dynpmc group nqp {
         SET_ATTR_handle(interp, SELF, handle);
     }
 
-    VTABLE void mark() {
+    VTABLE void mark() :no_wb {
         PMC    *root_objects, *root_stables, *root_codes, *rep_indexes, *rep_scs;
         STRING *handle, *description;
         GET_ATTR_root_objects(interp, SELF, root_objects);
@@ -94,7 +94,7 @@ pmclass SerializationContext auto_attrs dynpmc group nqp {
         }
     }
     
-    VTABLE void set_pmc_keyed(PMC *idx, PMC *value) {
+    VTABLE void set_pmc_keyed(PMC *idx, PMC *value) :manual_wb {
         PMC    *root_objects;
         GET_ATTR_root_objects(interp, SELF, root_objects);
         VTABLE_set_pmc_keyed(interp, root_objects, idx, value);
@@ -106,7 +106,7 @@ pmclass SerializationContext auto_attrs dynpmc group nqp {
         return VTABLE_elements(interp, root_objects);
     }
     
-    METHOD INTVAL elems() {
+    METHOD INTVAL elems() :no_wb {
         PMC    *root_objects;
         INTVAL elems;
         GET_ATTR_root_objects(interp, SELF, root_objects);
@@ -114,7 +114,7 @@ pmclass SerializationContext auto_attrs dynpmc group nqp {
         RETURN (INTVAL elems);
     }
     
-    METHOD STRING* handle() {
+    METHOD STRING* handle() :no_wb {
         STRING *handle;
         GET_ATTR_handle(interp, SELF, handle);
         RETURN (STRING* handle);
@@ -125,13 +125,13 @@ pmclass SerializationContext auto_attrs dynpmc group nqp {
         RETURN (STRING* description);
     }
     
-    METHOD STRING* description() {
+    METHOD STRING* description() :no_wb {
         STRING *description;
         GET_ATTR_description(interp, SELF, description);
         RETURN (STRING* description);
     }
     
-    METHOD INTVAL slot_index_for(PMC *obj) {
+    METHOD INTVAL slot_index_for(PMC *obj) :no_wb {
         /* This is kinda stupid, but it'll do for now. */
         PMC    *root_objects;
         INTVAL  i, count;
