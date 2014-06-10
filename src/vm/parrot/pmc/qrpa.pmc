@@ -131,7 +131,7 @@ pmclass QRPA
     }
 
 
-    VTABLE PMC * clone() {
+    VTABLE PMC * clone() :no_wb {
         PMC * const dest = Parrot_pmc_new(INTERP, SELF->vtable->base_type);
         Parrot_QRPA_attributes * const qrpa0 = PARROT_QRPA(SELF);
         Parrot_QRPA_attributes * const qrpa1 = PARROT_QRPA(dest);
@@ -338,7 +338,7 @@ Resizes the array to C<n> elements.
     }
 
 
-    VTABLE void set_pmc_keyed(PMC *key, PMC *value) {
+    VTABLE void set_pmc_keyed(PMC *key, PMC *value) :manual_wb {
         const INTVAL pos = VTABLE_get_integer(INTERP, key);
         PMC * const nextkey = Parrot_key_next(INTERP, key);
 
@@ -421,7 +421,7 @@ Resizes the array to C<n> elements.
         qrpa->elems++;
     }
 
-    VTABLE void splice(PMC *from, INTVAL offset, INTVAL count) {
+    VTABLE void splice(PMC *from, INTVAL offset, INTVAL count) :manual_wb {
         /* TODO: use qrpa->foo instead of GET_ATTR_* */
         INTVAL elems0 = VTABLE_elements(INTERP, SELF);
         INTVAL elems1 = VTABLE_elements(INTERP, from);
@@ -462,8 +462,10 @@ Resizes the array to C<n> elements.
 
         /* if count == 0 and elems1 == 0, there's nothing left
          * to copy or remove, so the splice is done! */
-        if (count == 0 && elems1 == 0)
+        if (count == 0 && elems1 == 0) {
+            PARROT_GC_WRITE_BARRIER(INTERP, SELF);
             return;
+        }
 
         /* number of elements to right of splice (the "tail") */
         tail = elems0 - offset - count;
@@ -497,6 +499,9 @@ Resizes the array to C<n> elements.
             for (i = 0; i < elems1; i++)
                 slots[start + offset + i] = VTABLE_shift_pmc(INTERP, iter);
         }
+
+        PARROT_GC_WRITE_BARRIER(INTERP, SELF);
+        return;
     }
 
     METHOD sort(PMC *cmp_func :optional) {
@@ -516,45 +521,45 @@ Resizes the array to C<n> elements.
     }
 
 
-    VTABLE INTVAL get_integer_keyed(PMC *key) {
+    VTABLE INTVAL get_integer_keyed(PMC *key) :no_wb {
         PMC * const val = SELF.get_pmc_keyed(key);
         return VTABLE_get_integer(INTERP, val);
     }
 
 
-    VTABLE void set_integer_keyed(PMC *key, INTVAL value) {
+    VTABLE void set_integer_keyed(PMC *key, INTVAL value) :manual_wb {
         PMC * const val = Parrot_pmc_new(INTERP, Parrot_hll_get_ctx_HLL_type(INTERP, enum_class_Integer));
         VTABLE_set_integer_native(INTERP, val, value);
         SELF.set_pmc_keyed(key, val);
     }
 
 
-    VTABLE void set_integer_keyed_int(INTVAL pos, INTVAL value) {
+    VTABLE void set_integer_keyed_int(INTVAL pos, INTVAL value) :manual_wb {
         PMC * const val = Parrot_pmc_new(INTERP, Parrot_hll_get_ctx_HLL_type(INTERP, enum_class_Integer));
         VTABLE_set_integer_native(INTERP, val, value);
         SELF.set_pmc_keyed_int(pos, val);
     }
 
 
-    VTABLE INTVAL pop_integer() {
+    VTABLE INTVAL pop_integer() :manual_wb {
         PMC * const val = SELF.pop_pmc();
         return VTABLE_get_integer(INTERP, val);
     }
 
 
-    VTABLE void push_integer(INTVAL value) {
+    VTABLE void push_integer(INTVAL value) :manual_wb {
         INTVAL elems;
         GET_ATTR_elems(INTERP, SELF, elems);
         SELF.set_integer_keyed_int(elems, value);
     }
 
 
-    VTABLE INTVAL shift_integer() {
+    VTABLE INTVAL shift_integer() :manual_wb {
         PMC * const val = SELF.shift_pmc();
         return VTABLE_get_integer(INTERP, val);
     }
 
-    VTABLE void unshift_integer(INTVAL value) {
+    VTABLE void unshift_integer(INTVAL value) :manual_wb {
         PMC * const val = Parrot_pmc_new(INTERP, Parrot_hll_get_ctx_HLL_type(INTERP, enum_class_Integer));
         VTABLE_set_integer_native(INTERP, val, value);
         SELF.unshift_pmc(val);
@@ -562,40 +567,40 @@ Resizes the array to C<n> elements.
 
 
 
-    VTABLE FLOATVAL get_number_keyed(PMC *key) {
+    VTABLE FLOATVAL get_number_keyed(PMC *key) :no_wb {
         PMC * const val = SELF.get_pmc_keyed(key);
         return VTABLE_get_number(INTERP, val);
     }
 
 
-    VTABLE void set_number_keyed(PMC *key, FLOATVAL value) {
+    VTABLE void set_number_keyed(PMC *key, FLOATVAL value) :manual_wb {
         PMC * const val = Parrot_pmc_new(INTERP, Parrot_hll_get_ctx_HLL_type(INTERP, enum_class_Float));
         VTABLE_set_number_native(INTERP, val, value);
         SELF.set_pmc_keyed(key, val);
     }
 
 
-    VTABLE void set_number_keyed_int(INTVAL pos, FLOATVAL value) {
+    VTABLE void set_number_keyed_int(INTVAL pos, FLOATVAL value) :manual_wb {
         PMC * const val = Parrot_pmc_new(INTERP, Parrot_hll_get_ctx_HLL_type(INTERP, enum_class_Float));
         VTABLE_set_number_native(INTERP, val, value);
         SELF.set_pmc_keyed_int(pos, val);
     }
 
 
-    VTABLE FLOATVAL pop_float() {
+    VTABLE FLOATVAL pop_float() :manual_wb {
         PMC * const val = SELF.pop_pmc();
         return VTABLE_get_number(INTERP, val);
     }
 
 
-    VTABLE void push_float(FLOATVAL value) {
+    VTABLE void push_float(FLOATVAL value) :manual_wb {
         INTVAL elems;
         GET_ATTR_elems(INTERP, SELF, elems);
         SELF.set_number_keyed_int(elems, value);
     }
 
 
-    VTABLE FLOATVAL shift_float() {
+    VTABLE FLOATVAL shift_float() :manual_wb {
         PMC * const val = SELF.shift_pmc();
         return VTABLE_get_number(INTERP, val);
     }
