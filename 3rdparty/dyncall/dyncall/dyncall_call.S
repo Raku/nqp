@@ -43,19 +43,27 @@
 #  elif defined(DC__Arch_AMD64)
 #    include "dyncall_call_x64-att.S"
 #  elif defined(DC__Arch_ARM_ARM)
-#    include "dyncall_call_arm32_arm.S"
+#    if defined(DC__ABI_ARM_HF)
+#      include "dyncall_call_arm32_arm_armhf.S"
+#    else
+#      include "dyncall_call_arm32_arm.S"
+#    endif
 #  elif defined(DC__Arch_ARM_THUMB)
 #    if defined(DC__OS_Darwin)
 #      include "dyncall_call_arm32_thumb_apple.s"
 #    else
-#      include "dyncall_call_arm32_thumb_gas.s"
+#      if defined(DC__ABI_ARM_HF)
+#        include "dyncall_call_arm32_thumb_armhf.S"
+#      else
+#        include "dyncall_call_arm32_thumb_gas.s"
+#      endif
 #    endif
 #  elif defined(DC__Arch_PowerPC)
 #    include "dyncall_call_ppc32.S"
 #  elif defined(DC__Arch_MIPS) || defined(DC__Arch_MIPS64)
 #    include "dyncall_call_mips_gas.S"
 #  elif defined(DC__Arch_Sparcv9)
-#    include "dyncall_call_sparc64.S"
+#    include "dyncall_call_sparc_v9.S"
 #  elif defined(DC__Arch_Sparc)
 #    include "dyncall_call_sparc.S"
 #  else

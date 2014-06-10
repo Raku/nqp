@@ -31,11 +31,11 @@ TOP = .
 
 DIRS = dyncall dynload dyncallback
 
-test: dummy 
-	!echo Building tests ... && cd $@ && $(MAKE) /NOLOGO /F Nmakefile && cd ..
+tests: dummy 
+	!echo Building tests ... && cd test && $(MAKE) /NOLOGO /F Nmakefile && cd ..
 
 doc: dummy 
-	!echo Building documentation ... && cd $@ && $(MAKE) /NOLOGO /F Nmakefile && cd ..
+	!echo Building documentation ... && cd $@/manual && $(MAKE) /NOLOGO /F Nmakefile && cd ..
 
 # Pseudo-targets are always out of date...
 dummy:

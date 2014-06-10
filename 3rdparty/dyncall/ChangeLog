@@ -1,5 +1,34 @@
 This file lists big/noteworthy changes, only...
 
+Version 0.8 (upcoming)
+buildsys:
+  o big simplification make-based build system, no more distinct GNU and BSD makefiles anymore
+  o new, much simpler ./configure for new make-based build-system
+  o support for in-source and out-of-source builds for make-based build systems
+  o made configure.bat guess x64 as target arch for x64 windows hosts
+  o based more sources on portasm generation
+dyncall:
+  o fix for ARMv7 Thumb-2 code (tested on iPhone 4 CDMA / iOS 6.0.1)
+  o bugfixes for -O2 builds for SPARC-v9 and SPARC-v7 
+  o new optimized call kernel for SPARC-v9 without conditionals
+  o bigger refactoring and optimization of mips o32
+  o x64 optimizations
+dyncallback:
+  o added callback support for plan9
+  o big cleanup, removal of duplicate files after introduction of portasm
+doc:
+  o cleanup of manual and corrections
+  o added info about newly supported and/or tested platforms (e.g. FreeBSD on ARM)
+  o restructured folder layout for documentation
+  o added API doc for dyncallback and dynload
+  o added manpages for dyncallback and dynload
+tests:
+  o added arm/thumb interwork test suite
+bindings:
+  o godc: added bindings for Go
+  o rbdc: fixed and extended ruby bindings
+  o shdc: renamed shell binding to shdc and added feature to list shared-objects' symbols
+
 Version 0.7
 architecture:
   o added subproject: portasm - portable (GNU AS,+Apple and MASM) assembly framework  
@@ -25,6 +54,7 @@ dyncallback updates:
   o uses portasm for x86,x64
   o added Solaris/x86/sunpro port (stable)
   o added Minix port (unstable)
+  o callback support for Darwin/ppc32
   o updates source, uses relative includes
 dynload updates:
   o fixes for missing includes (dyncall_alloc.h)
@@ -90,45 +120,46 @@ tests:
   o callbacksuite: added multiple configuration support for callback_suite
 
 Version 0.5
-o renamed arm9 stuff to arm32
-o added non-EABI ABI for arm32 (before, EABI was the default implementation)
-o added dyncallback support for x64/windows (thanks Olivier), x64/darwin, arm32/arm, arm32/thumb
-o synced documentation again with current state of the source (lots of small changes)
-o updated ruby binding to current state of signature string (still some features missing, though)
-o added a couple of new options to configure scripts (e.g. prefix-bd, new targets, etc.)
-o darwin universal binary support
-o added new tests callback_plain and calback_suite
-o added Haiku/BeOS support
+  o renamed arm9 stuff to arm32
+  o added non-EABI ABI for arm32 (before, EABI was the default implementation)
+  o added dyncallback support for x64/windows (thanks Olivier), x64/darwin, arm32/arm, arm32/thumb
+  o synced documentation again with current state of the source (lots of small changes)
+  o updated ruby binding to current state of signature string (still some features missing, though)
+  o added a couple of new options to configure scripts (e.g. prefix-bd, new targets, etc.)
+  o darwin universal binary support
+  o added new tests callback_plain and calback_suite
+  o added Haiku/BeOS support
 
 Version 0.4
-o added 'doc' makefile target for coherency and ease of use
-o fixed nmake buildfiles and configure.bat (were out of date and wrong)
-o test suite clean up (GNUmake, BSDmake):
-  target "config" modified, phony without dependencies to other builds
-o bugfix: GNU fastcall calling convention for float and double arguments
-  was wrong. no skip of register.
-o update: x86win32* suite tests are built on cygwin now, added total result output
-o signature types change:
-  C Strings: 'S' -> 'Z'
-  long: 'l' -> 'j'
-  long long: 'L' -> 'l'
-  added unsigned integer type signature characters: upper case encoding  
-o added: callbacks component (support only for some platforms ATM)
-o added: test cases for alloc_wx, thunk
-o updated Documentation
+  o added 'doc' makefile target for coherency and ease of use
+  o fixed nmake buildfiles and configure.bat (were out of date and wrong)
+  o test suite clean up (GNUmake, BSDmake):
+    target "config" modified, phony without dependencies to other builds
+  o bugfix: GNU fastcall calling convention for float and double arguments
+    was wrong. no skip of register.
+  o update: x86win32* suite tests are built on cygwin now, added total result output
+  o signature types change:
+    C Strings: 'S' -> 'Z'
+    long: 'l' -> 'j'
+    long long: 'L' -> 'l'
+    added unsigned integer type signature characters: upper case encoding  
+  o added: callbacks component (support only for some platforms ATM)
+  o added: test cases for alloc_wx, thunk
+  o updated Documentation
 
 Version 0.3
-o added Linux PPC32 support
-o added ARM THUMB mode support
-o cosmetic changes, documentation updated
-o bugfix: on cygwin exported C symbols in GNU as are prefixed with '_' now.
-o removed scons build support
+  o added Linux PPC32 support
+  o added ARM THUMB mode support
+  o cosmetic changes, documentation updated
+  o bugfix: on cygwin exported C symbols in GNU as are prefixed with '_' now.
+  o removed scons build support
 
 Version 0.2
-o added scons build support
-o configure variables all prefix CONFIG_* now
-o configure variable INSTALL_DIR changed to INSTALL_PREFIX
-o configure (shell version) option "--prefix" changed to "--prefix=<path>"
+  o added scons build support
+  o configure variables all prefix CONFIG_* now
+  o configure variable INSTALL_DIR changed to INSTALL_PREFIX
+  o configure (shell version) option "--prefix" changed to "--prefix=<path>"
 
 Version 0.1:
-o initial release
+  o initial release
+

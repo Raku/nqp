@@ -25,7 +25,6 @@
 
 #include "dyncall_callback.h"
 #include "dyncall_callback_ppc32.h"
-#include "dyncall_alloc_wx.h"
 
 void dcbInitCallback(DCCallback* pcb, const char* signature, DCCallbackHandler* handler, void* userdata)
 {
@@ -55,3 +54,7 @@ void dcbFreeCallback(DCCallback* pcb)
   dcFreeWX(pcb, sizeof(DCCallback));
 }
 
+void* dcbGetUserData(DCCallback* pcb)
+{
+  return pcb->userdata;
+}

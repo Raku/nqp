@@ -28,7 +28,7 @@
 .code 32	/* ARM mode */
 
 .globl _dcCallbackThunkEntry
-
+.align 4
 /* sizes */
 .set DCThunk_size   ,   8
 .set DCArgs_size    ,  24

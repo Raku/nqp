@@ -1,6 +1,0 @@
-LDFLAGS=-lm
-export LDFLAGS
-# using SunPro:
-CXX=CC
-export CXX
-

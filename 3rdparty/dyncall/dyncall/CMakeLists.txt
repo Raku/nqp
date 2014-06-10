@@ -26,6 +26,7 @@ if(MSVC)
   endif()
 else()
   set(ASM_SRC dyncall_call.S)
+  set_source_files_properties(${ASM_SRC} PROPERTIES LANGUAGE "C")
 endif()
 
 add_library(dyncall_s STATIC ${ASM_SRC} 

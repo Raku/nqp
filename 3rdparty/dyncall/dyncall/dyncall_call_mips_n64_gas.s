@@ -34,9 +34,9 @@ dcCall_mips_n64:
 
 	/* Stack-frame prolog */
 
-	.frame	$fp,64,$31		/* vars=16, regs=3/0, args=0, extra=16 */
-	.mask	0xd0000000,-8
-	.fmask	0x00000000,0
+	# .frame	$fp,64,$31		/* vars=16, regs=3/0, args=0, extra=16 */
+	# .mask	0xd0000000,-8
+	# .fmask	0x00000000,0
 	dsubu	$sp,$sp,64
 	sd	$31,48($sp)	/* save return address register (ra) */
 	sd	$30,40($sp)	/* save frame pointer register (fp) */
@@ -72,7 +72,7 @@ dcCall_mips_n64:
 
 .next:
 	beq	$6, $0, .skip
-	nop
+	# nop
 	daddiu	$6, $6, -8
 	ld	$2, 0($12)
 	sd	$2, 0($14)
@@ -182,11 +182,11 @@ dcCall_mips_n64:
 
 	/* Stack-frame epilog */	
 	move	$sp,$fp 
-	ld	$31,48($sp)	/* restore ra register */
+	ld	$ra,48($sp)	/* restore ra register */
 	ld	$fp,40($sp)	/* restore fp register */
-	ld	$28,32($sp)	/* restore gp register */
+	ld	$gp,32($sp)	/* restore gp register */
 	daddu	$sp,$sp,64
-	j	$31
+	j	$ra
 	.end	dcCall_mips_n64
 	.size	dcCall_mips_n64, .-dcCall_mips_n64
 

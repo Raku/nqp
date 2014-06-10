@@ -17,4 +17,4 @@ install: all
 	gzip -c dyncall.3 >${DESTDIR}${PREFIX}/man/man3/dyncall.3.gz
 .PHONY: all clean install
 osx-universal:
-	CFLAGS="${CFLAGS} -arch i386 -arch x86_64 -arch ppc" ASFLAGS="${ASFLAGS} -arch i386 -arch x86_64 -arch ppc" AR="/usr/bin/libtool" ARFLAGS="-static -o" ${MAKE_CMD} all
+	CFLAGS="${CFLAGS} -arch i386 -arch x86_64 -arch ppc" ASFLAGS="${ASFLAGS} -arch i386 -arch x86_64 -arch ppc" AR="libtool" ARFLAGS="-static -o" ${MAKE_CMD} all

@@ -75,6 +75,7 @@
 GLOBAL_C(dcCall_ppc32_darwin)
 ENTRY_C(dcCall_ppc32_darwin)
 
+
 	mflr r0			/* r0 = return address */
 	stw  r0,8(r1)		/* store return address in caller link-area */
 
@@ -98,15 +99,16 @@ ENTRY_C(dcCall_ppc32_darwin)
 	srwi r5,r5,2		/* r5 = size in words */
 
 	cmpi cr0,r5,0		/* if stacksize != 0 .. */
-	beq  cr0,.done
+	beq  cr0,.osx_done
 
 	mtctr r5		/* copy loop */
 
-.next:	lwzu r0, 4(r6)		
+.osx_next:	
+	lwzu r0, 4(r6)		
 	stwu r0, 4(r7)
-	bdnz .next
+	bdnz .osx_next
 
-.done:
+.osx_done:
 
 	mr    r12, r3		/* r12 = target function */
 	mtctr r12		/* control register = target function */
@@ -148,7 +150,7 @@ ENTRY_C(dcCall_ppc32_darwin)
 	lwz  r1, 0(r1)		/* restore stack */
 	lwz  r0, 8(r1)		/* r0 = return address */
 	mtlr r0			/* setup link register */
-	blr			/* store */
+	blr			/* return */
 
 /* ----------------------------------------------------------------------------
 
@@ -188,35 +190,19 @@ ENTRY_C(dcCall_ppc32_darwin)
 	.align 2
 GLOBAL_C(dcCall_ppc32_sysv)
 ENTRY_C(dcCall_ppc32_sysv)
-	/* prolog */
+	mflr r0			/* r0 = return address */
+	stw  r0,4(r1)		/* store r0 to link-area */
 
-	/* save link register */
-
-	mflr r0
-	stw  r0,4(r1)
-
-	/* allocate stack frame */
+	/* compute aligned stack-size */
 	
-	/* add 8 bytes (back link and return address) and align to 16 boundary */
-
+	/* add link area (+8) and align to 16 byte (+15) */
 	
-	/* r0 = stacksize + frame parameter(back-chain link, this callee's call return address */
-	addi r0,r5,8+15
-	
-	srwi r0,r0,4
-	slwi r0,r0,4
+	/* r0 = stacksize + frame parameter(back-chain link, this callee's call return address) */
+	addi r0,r5,8+15		/* r0 = r5 + 8 + 15 */
+	rlwinm r0,r0,0,0,27  	/* r0 = r0 and -15 */
+	neg r0,r0 		/* r0 = -r0 */
+	stwux r1,r1,r0 		/* store r1 and decrement */
 
-	/* r0 = r0 and -15 */
-	/* rlwinm %r0,%r0,0,0,27  */
-	
-	/* r0 = -stacksize */
-	neg r0,r0 
-	/* r1 = r1 - stacksize */
-	stwux r1,r1,r0 
-
-
-	/* copy stack parameters */
-	
 	/* copy stack data */
 
 	subi r6,r6,4		/* r6 = 4 bytes before source stack ptr */
@@ -227,24 +213,24 @@ ENTRY_C(dcCall_ppc32_sysv)
 	srwi r5,r5,2		/* r5 = size in words */
 
 	cmpi cr0,r5,0		/* if stacksize != 0 .. */
-	beq  cr0,sysv_done
+	beq  cr0,.sysv_done
 
 	mtctr r5		/* copy loop */
 
-sysv_next:	
+.sysv_next:	
 	lwzu r0, 4(r6)		
 	stwu r0, 4(r7)
-	bdnz sysv_next
+	bdnz .sysv_next
 
-sysv_done:
+.sysv_done:
 
 	/* this call support using ctr branch register */
 
-	mr    r12, r3
-	
-	mr   r11 , r4
+	mr    r12, r3		/* r12 = target function */
+	mtctr r12		/* control register = r12 */
+	mr    r11, r4		/* r11 = reg data */
 
-	/* load integer registers from integer data */
+	/* load 8 integer registers */
 	
 	lwz  r3 , 0(r11)
 	lwz  r4 , 4(r11)
@@ -255,7 +241,7 @@ sysv_done:
 	lwz  r9 ,24(r11)
 	lwz  r10,28(r11)
 
-	/* load float (double precision) registers from double data */
+	/* load 8 float registers */
 	
 	lfd  f1 ,32(r11)
 	lfd  f2 ,40(r11)
@@ -266,21 +252,15 @@ sysv_done:
 	lfd  f7 ,80(r11)
 	lfd  f8 ,88(r11)
 	
+	creqv 6,6,6		/* used for ellipsis calls */
 	
-	/* used for ellipsis calls */
-	creqv 6,6,6	
-
-
-	/* branch with this call support */
-	mtctr r12
-	bctrl 
+	bctrl 			/* branch with this call support */
 
 	/* epilog */
 
-	lwz  r1, 0(r1)	/* restore stack */
-	lwz  r0, 4(r1)	/* r0 = return address */
-	mtlr r0		/* setup link register */
-
+	lwz  r1, 0(r1)		/* restore stack */
+	lwz  r0, 4(r1)		/* r0 = return address */
+	mtlr r0			/* setup link register */
 	blr			/* return */
 
 

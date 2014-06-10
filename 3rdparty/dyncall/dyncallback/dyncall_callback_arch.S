@@ -6,7 +6,7 @@
  Description: Callback Thunk - Implementation Back-end selector
  License:
 
-   Copyright (c) 2007-2011 Daniel Adler <dadler@uni-goettingen.de>,
+   Copyright (c) 2007-2013 Daniel Adler <dadler@uni-goettingen.de>,
                            Tassilo Philipp <tphilipp@potion-studios.com>
 
    Permission to use, copy, modify, and distribute this software for any
@@ -33,32 +33,39 @@
 #  elif defined(DC__OS_Win64)
 #    include "dyncall_callback_x64_masm.asm"
 #  endif
-#else
+#elif defined(DC__OS_Plan9)
 #  if defined(DC__Arch_Intel_x86)
-#    include "dyncall_callback_arch_x86.S"
-#  elif defined(DC__Arch_AMD64)
-#    include "dyncall_callback_arch_x64.S"
+#    include "dyncall_callback_x86_8a.s"
 #  else
-#    if defined(DC__OS_Darwin)
-#      if defined(DC__Arch_PowerPC)
-#        include "dyncall_callback_ppc32_apple.s"
-#      elif defined(DC__Arch_ARM_ARM)
-#        include "dyncall_callback_arm32_arm_apple.s"
-#      endif
-#    else 
-     /* other than Darwin.. */
-#      if defined(DC__Arch_PowerPC)
-#        include "dyncall_callback_ppc32.S"
-#      elif defined(DC__Arch_ARM_ARM)
-#        include "dyncall_callback_arm32_arm_gas.s"
-#      elif defined(DC__Arch_ARM_THUMB)
-#        include "dyncall_callback_arm32_thumb_gas.s"
-#      elif defined(DC__Arch_Sparc)
-#        include "dyncall_callback_sparc32.s"
-#      elif defined(DC__Arch_Sparcv9)
-#        include "dyncall_callback_sparc64.s"
-#      endif
-#    endif
+#    error Unsupported Architecture on Plan9.
+#  endif
+#elif defined(DC__OS_Darwin)
+#  if defined(DC__Arch_PowerPC)
+#    include "dyncall_callback_ppc32_apple.s"
+#  elif defined(DC__Arch_ARM_ARM)
+#    include "dyncall_callback_arm32_arm_apple.s"
+#  elif defined(DC__Arch_ARM_THUMB)
+#    include "dyncall_callback_arm32_thumb_apple.s"
+#  elif defined(DC__Arch_AMD64)
+#    include "dyncall_callback_x64.S"
+#  elif defined(DC__Arch_Intel_x86)
+#    include "dyncall_callback_x86.S"
+#  endif
+#else 
+#  if defined(DC__Arch_Intel_x86)
+#    include "dyncall_callback_x86.S"
+#  elif defined(DC__Arch_AMD64)
+#    include "dyncall_callback_x64.S"
+#  elif defined(DC__Arch_PowerPC)
+#    include "dyncall_callback_ppc32.S"
+#  elif defined(DC__Arch_ARM_ARM)
+#    include "dyncall_callback_arm32_arm_gas.s"
+#  elif defined(DC__Arch_ARM_THUMB)
+#    include "dyncall_callback_arm32_thumb_gas.s"
+#  elif defined(DC__Arch_Sparc)
+#    include "dyncall_callback_sparc32.s"
+#  elif defined(DC__Arch_Sparcv9)
+#    include "dyncall_callback_sparc64.s"
 #  endif
 #endif
 

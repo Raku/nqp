@@ -40,7 +40,7 @@
 
 DLLib* dlLoadLibrary(const char* libPath)
 {
-  return (DLLib*)dlopen(libPath,RTLD_NOW);
+  return (DLLib*)dlopen(libPath,RTLD_NOW|RTLD_GLOBAL);
 }
 
 

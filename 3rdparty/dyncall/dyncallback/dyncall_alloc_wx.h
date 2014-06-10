@@ -42,5 +42,5 @@ void    dcFreeWX (void* p, DCsize size);
 #endif
 
 
-#endif // DYNCALL_ALLOC_WX_HPP
+#endif /* DYNCALL_ALLOC_WX_HPP */
 

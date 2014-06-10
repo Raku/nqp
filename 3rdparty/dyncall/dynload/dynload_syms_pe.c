@@ -70,8 +70,10 @@ DLSyms* dlSymsInit(const char* libPath)
 
 void dlSymsCleanup(DLSyms* pSyms)
 {
-  dlFreeLibrary(pSyms->pLib);
-  dlFreeMem(pSyms);
+  if(pSyms) {
+    dlFreeLibrary(pSyms->pLib);
+    dlFreeMem(pSyms);
+  }
 }
 
 

@@ -1,0 +1,19 @@
+APP = nm
+OBJS = nm.o
+
+TOP = ../..
+CFLAGS  += -I${TOP}/dynload
+LDLIBS   = -L${TOP}/dynload -ldynload_s ${LDFLAGS}
+# Works on: Darwin, NetBSD.
+# Linux: add '-ldl'
+
+all: ${APP}
+
+.PHONY: all clean
+
+${APP}: ${OBJS} 
+	${CC} ${OBJS} ${LDLIBS} -o $@
+
+clean:
+	rm -f ${APP} ${OBJS}
+

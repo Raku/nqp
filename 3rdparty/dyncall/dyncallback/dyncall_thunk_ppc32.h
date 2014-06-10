@@ -36,5 +36,5 @@ struct DCThunk_
 
 #define DCTHUNK_SIZE_PPC32 24
 
-#endif // DYNCALL_THUNK_PPC32_H
+#endif /* DYNCALL_THUNK_PPC32_H */
 

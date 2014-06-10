@@ -1,0 +1,30 @@
+Building DynCall on Mac OS X
+============================
+
+
+The build system supports universal binaries (including static libraries).
+In addition, the desired SDK can be choosen.
+
+Configure switches related to Mac OS X:
+  
+  Operating System:
+    --target=MacOSX (auto-detect)
+  
+  SDK:
+    --sdk=<version> (auto-detect)
+  
+  Architecture:
+    not specified, builds universal binaries depending on SDK version
+  
+
+Configure and build for host platform:
+
+  ./configure
+  make
+  sudo make install
+
+
+Compile for Mac OS X 10.4u:
+
+  configure --target=MacOSX --sdk=10.4u
+

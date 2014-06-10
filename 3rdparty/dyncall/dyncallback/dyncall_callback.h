@@ -41,9 +41,11 @@ extern "C" {
 DCCallback* dcbNewCallback(const char* signature, DCCallbackHandler* funcptr, void* userdata);
 void        dcbInitCallback(DCCallback* pcb, const char* signature, DCCallbackHandler* handler, void* userdata);
 void        dcbFreeCallback(DCCallback* pcb);
+void*       dcbGetUserData (DCCallback* pcb);
+
 
 #ifdef __cplusplus
 }
 #endif 
 
-#endif // DYNCALL_CALLBACK_H
+#endif /* DYNCALL_CALLBACK_H */

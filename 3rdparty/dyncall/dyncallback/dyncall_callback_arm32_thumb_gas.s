@@ -6,7 +6,7 @@
  Description: Callback Thunk - Implementation for ARM32 (THUMB mode)
  License:
 
-   Copyright (c) 2007-2011 Daniel Adler <dadler@uni-goettingen.de>,
+   Copyright (c) 2007-2013 Daniel Adler <dadler@uni-goettingen.de>,
                            Tassilo Philipp <tphilipp@potion-studios.com>
 
    Permission to use, copy, modify, and distribute this software for any
@@ -25,7 +25,7 @@
 
 
 /* We can use the ARM mode callback code here, because the thunk switches  */
-/* into ARM mode, the parameters passed use the same registers/stack spase */
+/* into ARM mode, the parameters passed use the same registers/stack space */
 /* as the ARM mode, and the bx instruction switches back to THUMB mode, if */
 /* the function to be called has a "THUMB function address" (=address+1).  */
 .include "dyncall_callback_arm32_arm_gas.s"

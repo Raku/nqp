@@ -62,10 +62,7 @@ BEGIN_PROC(dcCall_x64_sysv)
 
 	sub	RSP, RDI		/* Setup stack frame by subtracting the size of the arguments. */
 
-	mov	RAX, RDI		/* Align stack. */
-	add	RAX, 8
-	and	RAX, 15
-	sub	RSP, RAX
+	and     RSP, -32		/* Align stack to 32-byte border. */
 
 	mov	RCX, RDI		/* Store number of bytes to copy to stack in RCX (for rep movsb). */
 	mov	RDI, RSP		/* Store pointer to beginning of stack arguments in RDI (for rep movsb). */
@@ -88,7 +85,7 @@ BEGIN_PROC(dcCall_x64_sysv)
 	pop	RBP						/* Pseudo-epilog. */
 
 	ret
-END_PROC(dcCALl_x64_sysv)
+END_PROC(dcCall_x64_sysv)
 
 /*---------------------------------------------------------------------------
 

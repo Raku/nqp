@@ -137,7 +137,13 @@ static void dc_callvm_argFloat_mips_o32(DCCallVM* in_self, DCfloat x)
 
   dcVecAppend(&self->mVecHead, &x, sizeof(DCfloat) );
   if (self->mArgCount < 2) {
-/*
+#if defined(__MIPSEL__)
+    self->mRegData.u[self->mArgCount].f[0] = x;
+#else
+    self->mRegData.u[self->mArgCount].f[1] = x;
+#endif
+#if 0
+    self->mRegData.u[self->mArgCount].f[1] = x;
    call kernel
         
         mips:
@@ -151,13 +157,13 @@ static void dc_callvm_argFloat_mips_o32(DCCallVM* in_self, DCfloat x)
 	lwc1	$f14, 8($5)      <--- byte offset 12 
 	lwc1	$f15, 12($5)
 
-*/
 #if defined(__MIPSEL__)
     /* index 0 and 2 */
     self->mRegData.floats[self->mArgCount*2] = x;
 #else
     /* index 1 and 3 */
     self->mRegData.floats[self->mArgCount*2+1] = x;
+#endif
 #endif
   }
   self->mArgCount++;
@@ -170,7 +176,7 @@ static void dc_callvm_argDouble_mips_o32(DCCallVM* in_self, DCdouble x)
   dcVecSkip(&self->mVecHead, dcVecSize(&self->mVecHead) & 4);
   dcVecAppend(&self->mVecHead, &x, sizeof(DCdouble) );
   if (self->mArgCount < 2)
-    self->mRegData.doubles[self->mArgCount] = x;
+    self->mRegData.u[self->mArgCount].d = x;
   self->mArgCount++;
 }
 

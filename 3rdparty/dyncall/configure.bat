@@ -25,10 +25,16 @@ REM Set default values.
 SET PACKAGE=dyncall
 SET CONFIG_HOST=windows
 SET CONFIG_OS=windows
-SET CONFIG_ARCH=x86
 SET CONFIG_TOOL=msvc
 SET CONFIG_ASM=ml
 SET CONFIG_CONFIG=release
+IF [%PROCESSOR_ARCHITECTURE%] == [AMD64] (
+	SET CONFIG_ARCH=x64
+) ELSE IF [%PROCESSOR_ARCHITEW6432%] == [AMD64] (
+	SET CONFIG_ARCH=x64
+) ELSE (
+	SET CONFIG_ARCH=x86
+)
 
 REM Scan arguments.
 :MAIN_LOOP
@@ -127,8 +133,6 @@ ECHO CONFIG_ASM=%CONFIG_ASM%#>>ConfigVars
 ECHO CONFIG_CONFIG=%CONFIG_CONFIG%#>>ConfigVars
 ECHO CONFIG_PREFIX=%CONFIG_PREFIX%#>>ConfigVars
 ECHO CONFIG_BUILDPREFIX=%CONFIG_BUILDPREFIX%#>>ConfigVars
-ECHO RM=del#>>ConfigVars
-ECHO SLASH=\\#>>ConfigVars
 
 ECHO Writing following configuration to ConfigVars:
 ECHO.
@@ -144,12 +148,10 @@ ECHO Build prefix:        %CONFIG_BUILDPREFIX%
 
 REM We have to transform some pathes for the nds/devkitPro build.
 IF [%CONFIG_OS%]==[nds] (
-
-REM Check if DEVKITPRO is set.
-IF [%DEVKITPRO%]==[] (
-	ECHO ERROR: Environment variable DEVKITPRO must be set to absolute devkitPro path.
-) ELSE (
-	conf-nds.bat
-)
-
+	REM Check if DEVKITPRO is set.
+	IF [%DEVKITPRO%]==[] (
+		ECHO ERROR: Environment variable DEVKITPRO must be set to absolute devkitPro path.
+	) ELSE (
+		buildsys\scripts\conf-nds.bat
+	)
 )

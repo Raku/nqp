@@ -174,14 +174,12 @@
 # define DC__Arch_PowerPC
 #elif defined(__ppc64__) || defined(_ARCH_PPC64) || defined(__power64__)
 # define DC__Arch_PPC64
-#elif defined(__mips64__)
+#elif defined(__mips64__) || defined(__mips64)
 # define DC__Arch_MIPS64
 #elif defined(_M_MRX000) || defined(__mips__) || defined(__mips) || defined(_mips)
 # define DC__Arch_MIPS
-#elif defined(__arm__) && !defined(__thumb__)
-# define DC__Arch_ARM_ARM
-#elif defined(__arm__) && defined(__thumb__)
-# define DC__Arch_ARM_THUMB
+#elif defined(__arm__) 
+# define DC__Arch_ARM
 #elif defined(__sh__)
 # define DC__Arch_SuperH
 #elif defined(__sparcv9) || defined(__sparc64__) || ( defined(__sparc) && defined(__arch64__) ) 
@@ -197,6 +195,8 @@
 
 #if defined(DC__OS_Win32) || defined(DC__OS_Win64)
 # define DC_WINDOWS
+#elif defined(DC__OS_Plan9)
+# define DC_PLAN9
 #elif defined(DC__OS_NDS) || defined(DC__OS_PSP)
 # define DC_OTHER
 #else
@@ -207,11 +207,21 @@
 
 /* Misc machine-dependent quirks. */
 
+#if defined(__arm__) && !defined(__thumb__)
+# define DC__Arch_ARM_ARM
+#elif defined(__arm__) && defined(__thumb__)
+# define DC__Arch_ARM_THUMB
+#endif
+
 #if defined(DC__Arch_ARM_ARM) || defined(DC__Arch_ARM_THUMB)
 # if defined(__ARM_EABI__) || defined(DC__OS_NDS)
-#  define DC__ABI_ARM_EABI
+#  if defined (__ARM_PCS_VFP) && (__ARM_PCS_VFP == 1)
+#    define DC__ABI_ARM_HF
+#  else
+#    define DC__ABI_ARM_EABI
+#  endif
 # elif defined(__APCS_32__)
-#  define DC__ABI_ARM_APCS32
+#  define DC__ABI_ARM_OABI
 # endif
 #endif /* ARM */
 

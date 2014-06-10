@@ -167,13 +167,13 @@ dcCall_sparc:
 
 	/* Copy on stack? */
 	sub	%i1,  REGSIZE*6, %i1   		/* i1 = decrement copy size by 6 regs (=6 regs x 4 bytes = 24 bytes total). */
-	cmp     %i1, 0
-        ble	.do_call
-	 nop
+	cmp %i1, 0
+    ble .do_call
+	nop
 
 	/* Copy loop: */
-	add     %i2,  REGSIZE*6, %i2		/* i2 = address of 7th word of args buffer. */
-	or	%g0, %g0, %l0			/* l0 = offset initialized to 0. */
+	add     %i2,  REGSIZE*6, %i2	/* i2 = address of 7th word of args buffer. */
+	or      %g0, %g0, %l0			/* l0 = offset initialized to 0. */
 	add     %sp,  (16+1+6)*REGSIZE, %l2	/* l2 = argument area on stack space (7th word). (64+4+6*4 = byte offset 92). */
 .next:
 	ld      [%i2+%l0],%l1			/* Read from arg buffer(%i2) to %l1. */
@@ -181,11 +181,12 @@ dcCall_sparc:
 	add     %l0, REGSIZE, %l0		/* Increment offset. */
 	sub     %i1, REGSIZE, %i1		/* Decrement copy size. */
 	cmp     %i1, 0
-        bgt     .next
-	 nop
+	bgt     .next
+	nop
 .do_call:
-	call	%i0				/* Call target. */
-	 nop
-        jmpl %i7 + 8, %g0			/* Return from proc. */
-	 nop
-	
+	call    %i0						/* Call target. */
+	nop
+    	or     %o0, %g0, %i0
+    	or     %o1, %g0, %i1
+	jmpl	%i7 + 8, %g0
+	restore

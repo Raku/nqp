@@ -25,8 +25,8 @@
 
 
 .text
-.code 16	/* THUMB mode */
-
+.thumb
+.code 16 
 .globl _dcCall_arm32_thumb
 
 /* Main dyncall call. */
@@ -62,8 +62,8 @@ _dcCall_arm32_thumb:
 	mov		r2, #0		/* Init byte counter to 0. */
 .thumb_func
 pushArgs:
-	ldrb	r3, [r1, r2]		/* Load a byte into r3. */
-	strb	r3, [r0, r2]		/* Push byte onto stack. */
+	ldrb		r3, [r1, r2]		/* Load a byte into r3. */
+	strb		r3, [r0, r2]		/* Push byte onto stack. */
 	add		r2, r2, #1	/* Increment byte counter. */
 	cmp		r2, r6
 	bne		pushArgs
@@ -72,28 +72,9 @@ call:
 	ldmia	r5!, {r0-r3}		/* Load first 4 arguments for new call into r0-r3. */
 					
 					/* 'blx %r4' workaround for ARMv4t in THUMB: */
-	mov		r6,  r15	/* Load PC+2 instructions from here */
-	add		r6,  #5	/* Increment by 2 instructions (Address of 'Epilog') and set bit 0 (THUMB) */
-	mov		r14, r6	/* Store in link register. */
-	bx		r4		/* Branch and force THUMB-mode return (LR bit 0 set). */
+	blx		r4		/* Branch and force THUMB-mode return (LR bit 0 set). */
 
 	/* Epilog. */
-	mov		r13, r7	/* Reset stack ptr. */
+	mov		r13, r7		/* Reset stack ptr. */
 	pop		{r4-r7, r15}	/* Restore permanent registers and program counter. (Force a stay in THUMB in ARMv4, whether ARMv5 can return in ARM or THUMB depending on the bit 0. */
-
-
-
-/* Internally used to avoid compiler overwriting r0 and r1 in call stub */
-.globl _dcCall_arm32_thumb_word
-
-.thumb_func
-_dcCall_arm32_thumb_word:
-	b	dcCall_arm32_thumb
-
-
-.globl _dcCall_arm32_thumb_dword
-
-.thumb_func
-_dcCall_arm32_thumb_dword:
-	b	dcCall_arm32_thumb
 

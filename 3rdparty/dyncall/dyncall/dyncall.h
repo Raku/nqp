@@ -48,8 +48,8 @@ typedef struct DCstruct_    DCstruct;
 /* Supported Calling Convention Modes */
 
 #define DC_CALL_C_DEFAULT               0
-#define DC_CALL_C_ELLIPSIS		100
-#define DC_CALL_C_ELLIPSIS_VARARGS      101
+#define DC_CALL_C_ELLIPSIS            100
+#define DC_CALL_C_ELLIPSIS_VARARGS    101
 #define DC_CALL_C_X86_CDECL             1
 #define DC_CALL_C_X86_WIN32_STD         2
 #define DC_CALL_C_X86_WIN32_FAST_MS     3
@@ -59,13 +59,14 @@ typedef struct DCstruct_    DCstruct;
 #define DC_CALL_C_X64_WIN64             7
 #define DC_CALL_C_X64_SYSV              8
 #define DC_CALL_C_PPC32_DARWIN          9
-#define DC_CALL_C_PPC32_OSX             9 /* alias for DC_CALL_C_PPC32_DARWIN */
+#define DC_CALL_C_PPC32_OSX            DC_CALL_C_PPC32_DARWIN /* alias */
 #define DC_CALL_C_ARM_ARM_EABI         10
 #define DC_CALL_C_ARM_THUMB_EABI       11
+#define DC_CALL_C_ARM_ARMHF            30
 #define DC_CALL_C_MIPS32_EABI          12
-#define DC_CALL_C_MIPS32_PSPSDK        DC_CALL_C_MIPS_EABI /* deprecated. */
+#define DC_CALL_C_MIPS32_PSPSDK        DC_CALL_C_MIPS32_EABI /* alias - deprecated. */
 #define DC_CALL_C_PPC32_SYSV           13
-#define DC_CALL_C_PPC32_LINUX          13 /* alias for DC_CALL_C_PPC32_SYSV */
+#define DC_CALL_C_PPC32_LINUX          DC_CALL_C_PPC32_SYSV /* alias */
 #define DC_CALL_C_ARM_ARM              14
 #define DC_CALL_C_ARM_THUMB            15
 #define DC_CALL_C_MIPS32_O32           16
@@ -79,9 +80,8 @@ typedef struct DCstruct_    DCstruct;
 #define DC_CALL_SYS_X86_INT80H_BSD    202
 /* Error codes. */
 
-#define DC_ERROR_NONE 		     0
+#define DC_ERROR_NONE                0
 #define DC_ERROR_UNSUPPORTED_MODE   -1
-
 
 DC_API DCCallVM*  dcNewCallVM     (DCsize size);
 DC_API void       dcFree          (DCCallVM* vm);

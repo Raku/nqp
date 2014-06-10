@@ -36,7 +36,7 @@
 # define ARCH_PPC
 #elif defined(__ppc64__) || defined(_ARCH_PPC64) || defined(__power64__)
 # define ARCH_PPC64
-#elif defined(__mips64__)
+#elif defined(__mips64__) || defined(__mips64)
 # define ARCH_MIPS64
 #elif defined(_M_MRX000) || defined(__mips__)
 # define ARCH_MIPS

@@ -32,13 +32,11 @@
 typedef struct DCCallVM_sparc64_ DCCallVM_sparc64;
 struct DCCallVM_sparc64_
 {
-  DCCallVM  mInterface;	/* 12:8 -> 16 */
-  int       mIntRegs;	 /* 16 */
-  int       mFloatRegs;  /* 20 */
-  int       mSingleRegs; /* 24 */
-  unsigned int mUseSingleFlags; /* 32 */
-  DCVecHead mVecHead;   /* 36:16, 32 */
-                        /* 40 */
+  DCCallVM     mInterface;	/* 12:8 -> 16 */
+  int          mIntRegs;	/* 16 */
+  int          mFloatRegs;      /* 20 */
+  unsigned int mUseSingleFlags; /* 24 */
+  DCVecHead    mVecHead;        /* 36:16, 28 => 40 */
 };
 
 DCCallVM* dcNewCallVM_sparc64(DCsize size);

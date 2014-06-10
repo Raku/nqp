@@ -40,7 +40,7 @@ static DCCallVM* dc_callvm_new_x64(DCCallVM_vt* vt, DCsize size)
 
   /* Since we store register parameters in DCCallVM_x64 directly, adjust the stack size. */
   size -= sizeof(DCRegData_x64);
-  size = size < 0 ? 0 : size;
+  size = (((signed long)size) < 0) ? 0 : size;
 
 
   self->mRegCount.i = self->mRegCount.f =  0;

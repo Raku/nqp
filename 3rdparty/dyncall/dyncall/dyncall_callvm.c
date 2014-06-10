@@ -47,13 +47,21 @@
 #    error Unknown MIPS ABI.
 #  endif /* DC__Arch_MIPS || DC__Arch_MIPS64 */
 #elif defined(DC__Arch_ARM_ARM)
-#  include "dyncall_callvm_arm32_arm.c"
+#  if defined(DC__ABI_ARM_HF)
+#    include "dyncall_callvm_arm32_arm_armhf.c"
+#  else
+#    include "dyncall_callvm_arm32_arm.c"
+#  endif
 #elif defined(DC__Arch_ARM_THUMB)
-#  include "dyncall_callvm_arm32_thumb.c"
+#  if defined(DC__ABI_ARM_HF)
+#    include "dyncall_callvm_arm32_arm_armhf.c"
+#  else
+#    include "dyncall_callvm_arm32_thumb.c"
+#  endif
 #elif defined(DC__Arch_Sparc)
 #  include "dyncall_callvm_sparc.c"
 #elif defined(DC__Arch_Sparcv9)
-#  include "dyncall_callvm_sparc64.c"
+#  include "dyncall_callvm_sparc_v9.c"
 #else
 #  error unsupported platform
 #endif

@@ -48,7 +48,7 @@
 #if defined(__GLIBC__)
 #  define _GNU_SOURCE
 #  define __USE_GNU
-#endif /* defined(__GLIBC__) */
+#endif
 
 #include "dynload_alloc.h"
 
@@ -175,9 +175,11 @@ DLSyms* dlSymsInit(const char* libPath)
 
 void dlSymsCleanup(DLSyms* pSyms)
 {
-  munmap( (void*) pSyms->pElf_Ehdr, pSyms->fileSize);
-  close(pSyms->file);
-  dlFreeMem(pSyms);
+  if(pSyms) {
+    munmap((void*) pSyms->pElf_Ehdr, pSyms->fileSize);
+    close(pSyms->file);
+    dlFreeMem(pSyms);
+  }
 }
 
 

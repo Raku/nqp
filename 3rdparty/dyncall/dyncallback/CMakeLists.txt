@@ -28,6 +28,7 @@ if(MSVC)
   endif()
 else()
   set(ASM_SRC dyncall_callback_arch.S)
+  set_source_files_properties(${ASM_SRC} PROPERTIES LANGUAGE "C")
 endif()
 
 add_library(dyncallback_s STATIC ${ASM_SRC}

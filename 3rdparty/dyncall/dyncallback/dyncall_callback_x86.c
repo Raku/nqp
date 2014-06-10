@@ -228,6 +228,26 @@ void dcbInitCallback(DCCallback* pcb, const char* signature, DCCallbackHandler* 
       pcb->stack_cleanup = dcbCleanupSize_x86_fast_gnu(ptr);
       break;
   }
+
+#if defined(DC_PLAN9)
+  /* HACK for Plan9 - 'reuse' pcb->stack_cleanup as a flag
+     to indicate if return value is 64bit. The field is not
+     used anyways as the caller is responsible to clean up
+     the stack in Plan9. If set to '1' the callback kernel
+     takes into account an extra stack-parameter (pointer
+     to 64bit return value).
+     I thought of introducing a new field, but for one single
+     x86 calling convention out of many, it seemed overkill
+     to change the struct for everybody else. Maybe renaming
+     would be a good idea, though. ~ Tassilo
+  */
+  while(*ptr) {
+    if(*ptr++ == DC_SIGCHAR_ENDARG) {
+      pcb->stack_cleanup = (*ptr == DC_SIGCHAR_LONGLONG) || (*ptr == DC_SIGCHAR_ULONGLONG);
+      break;
+    }
+  }
+#endif
 }
 
 /*
@@ -255,3 +275,7 @@ void dcbFreeCallback(DCCallback* pcb)
   dcFreeWX(pcb, sizeof(DCCallback));
 }
 
+void* dcbGetUserData(DCCallback* pcb)
+{
+  return pcb->userdata;
+}

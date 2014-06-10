@@ -169,6 +169,12 @@ DCsize dcStructSize(DCstruct* s)
 	return s->size;
 }
 
+DCsize dcStructAlignment(DCstruct* s)
+{
+	assert(!s->pCurrentStruct && "Struct was not closed");
+	return s->alignment;
+}
+
 
 void dcArgStructUnroll(DCCallVM* vm, DCstruct* s, DCpointer  value)
 {

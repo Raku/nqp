@@ -39,7 +39,7 @@
 
 .text
 .code 32	/* ARM mode */
-
+.align 4
 GLOBAL_C(dcCall_arm32_arm)
 ENTRY_C(dcCall_arm32_arm)
 	/* Prolog. This function never needs to spill inside its prolog, so just store the permanent registers. */

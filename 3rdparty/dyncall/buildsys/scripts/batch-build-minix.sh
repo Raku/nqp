@@ -1,18 +1,11 @@
-# DynCall build script using Makefile.generic on Minix 3.1.8
-# ----------------------------------------------------------
+#!/bin/sh
 
-# build dyncall, clear CFLAGS (so that '-fPIC' removed, coz not supported)
+# ---------------------------------------------------------- #
+# DynCall build script using Makefile.generic on Minix 3.1.8 #
+# ---------------------------------------------------------- #
 
-( cd dyncall ; CC=gcc make -f Makefile.generic clean all CFLAGS= )
+# build libs and tests, but exclude dynload
 
-
-# build dyncallback, clear CFLAGS and set explicit link to dyncall include.
-
-( cd dyncallback ; CC=gcc make -f Makefile.generic clean all CFLAGS=-I../dyncall )
-
-
-# build tests, skip dynload tests.
-
-( cd test ; CC=gcc CFLAGS= CXX=g++ make -f Makefile.generic clean all-dyncall all-dyncallback )
-
+./configure
+make libdyncall libdyncallback tests-libdyncallback tests-libdyncall
 

@@ -1,0 +1,19 @@
+APP = syscall
+OBJS = syscall.o
+
+SRCTOP   = ../..
+BLDTOP   = ../..
+CFLAGS  += -I${SRCTOP}/dyncall
+LDFLAGS += -L${BLDTOP}/dyncall -ldyncall_s
+LINK = ${CC}
+
+all: ${APP}
+
+.PHONY: all clean 
+
+${APP}: ${OBJS} 
+	${CC} ${OBJS} ${LDFLAGS} -o ${APP} 
+
+clean:
+	rm -f ${APP} ${OBJS}
+

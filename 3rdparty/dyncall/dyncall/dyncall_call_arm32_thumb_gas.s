@@ -25,7 +25,9 @@
 
 
 .text
+#if !defined(__thumb2__)
 .code 16	/* THUMB mode */
+#endif
 
 .globl dcCall_arm32_thumb
 
