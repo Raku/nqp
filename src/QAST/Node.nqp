@@ -60,6 +60,10 @@ class QAST::Node {
         0
     }
 
+    method has_ann($key) {
+        0
+    }
+
     method ann($key, $value = NO_VALUE) {
         if $value =:= NO_VALUE {
             return NQPMu
