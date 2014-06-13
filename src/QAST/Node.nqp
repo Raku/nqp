@@ -2,16 +2,12 @@ class QAST::Node {
     # For children.
     has @!array is positional_delegate;
 
-    # For annotations.
-    has %!hash is associative_delegate;
-    
     has $!node;
     has $!returns;
 
     method new(*@children, *%options) {
         my $new := nqp::create(self);
         nqp::bindattr($new, QAST::Node, '@!array', @children);
-        nqp::bindattr($new, QAST::Node, '%!hash', nqp::hash());
         my $it := nqp::iterator(%options);
         my $cur;
         while $it {
@@ -59,7 +55,21 @@ class QAST::Node {
         self.set_compile_time_value($value);
     }
     
-    method hash()          { %!hash }
+
+    method is_annotated() {
+        0
+    }
+
+    method ann($key, $value = NO_VALUE) {
+        if $value =:= NO_VALUE {
+            return NQPMu
+        }
+        self.HOW.mixin(self, QAST::Annotated);
+        self.initialize_annotations();
+        self.ann($key, $value);
+    }
+
+    #method hash()          { %!hash }
     method list()          { @!array }
     method pop()           { nqp::pop(@!array) }
     method push($value)    { nqp::push(@!array, $value) }

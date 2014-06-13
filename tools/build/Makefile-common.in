@@ -25,6 +25,7 @@ CORE_SETTING_COMBINED = NQPCORE.setting
 
 QASTNODE_SOURCES = \
   src/QAST/CompileTimeValue.nqp \
+  src/QAST/Annotated.nqp \
   src/QAST/SpecialArg.nqp \
   src/QAST/Node.nqp \
   src/QAST/Regex.nqp \

@@ -49,7 +49,7 @@ class NQP::World is HLL::World {
         # Create pad, link to outer and add to stack.
         my $pad := QAST::Block.new( QAST::Stmts.new(), :node($/) );
         if +@!BLOCKS {
-            $pad<outer> := @!BLOCKS[+@!BLOCKS - 1];
+            $pad.ann('outer', @!BLOCKS[+@!BLOCKS - 1]);
         }
         @!BLOCKS[+@!BLOCKS] := $pad;
         $pad
@@ -267,8 +267,8 @@ class NQP::World is HLL::World {
         my $fixups := QAST::Stmts.new();
         my $dummy;
         my $code_ref_idx;
-        if nqp::defined($ast<compile_time_dummy>) {
-            $dummy := $ast<compile_time_dummy>;
+        if nqp::defined($ast.ann('compile_time_dummy')) {
+            $dummy := $ast.ann('compile_time_dummy');
         }
         else {
             # Create a fresh stub code, and set its name.
@@ -280,7 +280,7 @@ class NQP::World is HLL::World {
             nqp::markcodestub($dummy);
             $code_ref_idx := self.add_root_code_ref($dummy, $ast);
             %!code_stub_sc_idx{$ast.cuid()} := $code_ref_idx;
-            $ast<compile_time_dummy> := $dummy;
+            $ast.ann('compile_time_dummy', $dummy);
             
             # Things with code objects may be methods in roles or multi-dispatch
             # routines. We need to handle their cloning and maintain the fixup

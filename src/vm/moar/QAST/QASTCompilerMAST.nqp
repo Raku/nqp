@@ -1203,7 +1203,7 @@ class QAST::MASTCompiler {
             my $block := $*BLOCK;
             # find the block where the lexical was declared, if any
             while nqp::istype($block, BlockInfo) {
-                last if $block.qast<DYN_COMP_WRAPPER>;
+                last if $block.qast.ann('DYN_COMP_WRAPPER');
                 $lex := $block.lexical($name);
                 last if $lex;
                 $block := $block.outer;

@@ -725,7 +725,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             }
         }
 
-        $block<orig_qast> := $qast;
+        $block.ann('orig_qast', $qast);
         $qast := QAST::Regex.new( :rxtype<concat>,
                      $scan,
                      $qast,
