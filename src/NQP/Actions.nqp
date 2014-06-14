@@ -133,7 +133,7 @@ class NQP::Actions is HLL::Actions {
         if $<statement> {
             for $<statement> {
                 my $ast := $_.ast;
-                $ast := $ast.ann('sink') if nqp::defined($ast.ann('sink'));
+                $ast := $ast.ann('sink') if $ast.has_ann('sink');
                 if $ast.ann('bareblock') { $ast := block_immediate($ast[0]); }
                 $ast := QAST::Stmts.new($ast) if nqp::istype($ast, QAST::Node);
                 $ast_list.push( $ast );
