@@ -1793,7 +1793,7 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
     }
 
     method metachar:sym<nqpvar>($/) {
-        make QAST::Regex.new( QAST::Node.new(
+        make QAST::Regex.new( QAST::NodeList.new(
                                   QAST::SVal.new( :value('!INTERPOLATE') ),
                                   $<var>.ast,
                                   QAST::IVal.new( :value($*SEQ ?? 1 !! 0) ) ),
@@ -1801,7 +1801,7 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
     }
 
     method assertion:sym<{ }>($/) { 
-        make QAST::Regex.new( QAST::Node.new(
+        make QAST::Regex.new( QAST::NodeList.new(
                                   QAST::SVal.new( :value('!INTERPOLATE_REGEX') ),
                                   $<codeblock>.ast),
                               :rxtype<subrule>, :subtype<method>, :node($/));
@@ -1814,7 +1814,7 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
     }
 
     method assertion:sym<var>($/) {
-        make QAST::Regex.new( QAST::Node.new(
+        make QAST::Regex.new( QAST::NodeList.new(
                                   QAST::SVal.new( :value('!INTERPOLATE_REGEX') ),
                                   $<var>.ast), 
                               :rxtype<subrule>, :subtype<method>, :node($/));
@@ -1876,7 +1876,7 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
         else {
             $qast := QAST::Regex.new(:rxtype<subrule>, :subtype<capture>,
                                      :node($/), :name($name),
-                                     QAST::Node.new( QAST::SVal.new( :value($name) ) ) );
+                                     QAST::NodeList.new( QAST::SVal.new( :value($name) ) ) );
             if $<arglist> {
                 for $<arglist>.ast.list { $qast[0].push( $_ ) }
             }
