@@ -1,7 +1,4 @@
-class QAST::Node {
-    # For children.
-    has @!array is positional_delegate;
-
+class QAST::Node does QAST::Children {
     # For annotations.
     has %!hash is associative_delegate;
     
@@ -60,11 +57,6 @@ class QAST::Node {
     }
     
     method hash()          { %!hash }
-    method list()          { @!array }
-    method pop()           { nqp::pop(@!array) }
-    method push($value)    { nqp::push(@!array, $value) }
-    method shift()         { nqp::shift(@!array) }
-    method unshift($value) { nqp::unshift(@!array, $value) }
     
     my %uniques;
     method unique($prefix) {
@@ -76,7 +68,8 @@ class QAST::Node {
     
     method shallow_clone() {
         my $clone := nqp::clone(self);
-        nqp::bindattr($clone, QAST::Node, '@!array', nqp::clone(@!array));
+        nqp::bindattr($clone, QAST::Node, '@!array', nqp::clone(self.list))
+            if nqp::istype(self, QAST::Children);
         $clone
     }
     
@@ -117,7 +110,7 @@ class QAST::Node {
     }
 
     method dump_children(int $indent, @onto) {
-        for @!array {
+        for self.list {
             if nqp::istype($_, QAST::Node) {
                 nqp::push(@onto, $_.dump($indent));
             }
