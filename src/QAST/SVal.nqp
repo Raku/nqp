@@ -1,5 +1,14 @@
 class QAST::SVal is QAST::Node {
     has str $!value;
+
+    method new(:$value!, *%options) {
+        my $new := nqp::create(self);
+        nqp::bindattr($new, QAST::Node, '%!hash', nqp::hash());
+        nqp::bindattr_s($new, QAST::SVal, '$!value', $value);
+        $new.set_options(%options) if %options;
+        $new
+    }
+
     method value($value = NO_VALUE) { $!value := $value unless $value =:= NO_VALUE; $!value }
     
     method count_inline_placeholder_usages(@usages) { }

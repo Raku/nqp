@@ -1,21 +1,25 @@
-class QAST::Node does QAST::Children {
+class QAST::Node {
     # For annotations.
     has %!hash is associative_delegate;
     
     has $!node;
     has $!returns;
 
-    method new(*@children, *%options) {
+    method new(*%options) {
         my $new := nqp::create(self);
-        nqp::bindattr($new, QAST::Node, '@!array', @children);
         nqp::bindattr($new, QAST::Node, '%!hash', nqp::hash());
+        $new.set_options(%options);
+        $new;
+    }
+
+    method set_options(%options) {
         my $it := nqp::iterator(%options);
         my $cur;
         while $it {
             $cur := nqp::shift($it);
-            nqp::findmethod($new, nqp::iterkey_s($cur))($new, nqp::iterval($cur))
+            nqp::findmethod(self, nqp::iterkey_s($cur))(self, nqp::iterval($cur))
         }
-        $new;
+        self
     }
 
     method node($value = NO_VALUE) {
@@ -55,8 +59,9 @@ class QAST::Node does QAST::Children {
         self.HOW.mixin(self, QAST::CompileTimeValue);
         self.set_compile_time_value($value);
     }
-    
-    method hash()          { %!hash }
+
+    method list() { [] }
+    method hash() { %!hash }
     
     my %uniques;
     method unique($prefix) {
@@ -68,7 +73,7 @@ class QAST::Node does QAST::Children {
     
     method shallow_clone() {
         my $clone := nqp::clone(self);
-        nqp::bindattr($clone, QAST::Node, '@!array', nqp::clone(self.list))
+        $clone.set_children(nqp::clone(self.list))
             if nqp::istype(self, QAST::Children);
         $clone
     }
@@ -110,15 +115,17 @@ class QAST::Node does QAST::Children {
     }
 
     method dump_children(int $indent, @onto) {
-        for self.list {
-            if nqp::istype($_, QAST::Node) {
-                nqp::push(@onto, $_.dump($indent));
-            }
-            else {
-                nqp::push(@onto, nqp::x(' ', $indent));
-                nqp::push(@onto, '- ');
-                nqp::push(@onto, nqp::istype($_, NQPMu) ?? '(NQPMu)' !! ~$_);
-                nqp::push(@onto, "\n");
+        if nqp::istype(self, QAST::Children) {
+            for self.list {
+                if nqp::istype($_, QAST::Node) {
+                    nqp::push(@onto, $_.dump($indent));
+                }
+                else {
+                    nqp::push(@onto, nqp::x(' ', $indent));
+                    nqp::push(@onto, '- ');
+                    nqp::push(@onto, nqp::istype($_, NQPMu) ?? '(NQPMu)' !! ~$_);
+                    nqp::push(@onto, "\n");
+                }
             }
         }
     }

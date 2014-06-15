@@ -7,7 +7,7 @@ role QAST::RegexCursorType {
     }
 }
 
-class QAST::Regex is QAST::Node {
+class QAST::Regex is QAST::Node does QAST::Children {
     has $!name;
     has str $!rxtype;
     has str $!subtype;
@@ -15,6 +15,29 @@ class QAST::Regex is QAST::Node {
     has int $!negate;
     has int $!min;
     has int $!max;
+
+    method new(:$name, :$rxtype, :$subtype, :$backtrack, :$negate,
+               :$min, :$max, *@children, *%options) {
+        my $new := nqp::create(self);
+        $new.set_children(@children);
+        nqp::bindattr($new, QAST::Node, '%!hash', nqp::hash());
+        nqp::bindattr($new, QAST::Regex, '$!name', $name)
+            if nqp::isconcrete($name);
+        nqp::bindattr_s($new, QAST::Regex, '$!rxtype', $rxtype)
+            if nqp::isconcrete($rxtype);
+        nqp::bindattr_s($new, QAST::Regex, '$!subtype', $subtype)
+            if nqp::isconcrete($subtype);
+        nqp::bindattr_s($new, QAST::Regex, '$!backtrack', $backtrack)
+            if nqp::isconcrete($backtrack);
+        nqp::bindattr_i($new, QAST::Regex, '$!negate', $negate)
+            if nqp::isconcrete($negate);
+        nqp::bindattr_i($new, QAST::Regex, '$!min', $min)
+            if nqp::isconcrete($min);
+        nqp::bindattr_i($new, QAST::Regex, '$!max', $max)
+            if nqp::isconcrete($max);
+        $new.set_options(%options) if %options;
+        $new
+    }
 
     method name($value = NO_VALUE)      { $!name := $value unless $value =:= NO_VALUE; $!name }
     method rxtype($value = NO_VALUE)    {

@@ -1,4 +1,4 @@
-class QAST::CompUnit is QAST::Node {
+class QAST::CompUnit is QAST::Node does QAST::Children {
     # The serialization context for the compilation unit.
     has $!sc;
     
@@ -28,7 +28,15 @@ class QAST::CompUnit is QAST::Node {
     
     # What to run if this is the main entry point.
     has $!main;
-    
+
+    method new(*@children, *%options) {
+        my $new := nqp::create(self);
+        $new.set_children(@children);
+        nqp::bindattr($new, QAST::Node, '%!hash', nqp::hash());
+        $new.set_options(%options) if %options;
+        $new;
+    }
+
     method sc($value = NO_VALUE)       { $!sc := $value unless $value =:= NO_VALUE; $!sc }
     method hll($value = NO_VALUE)      { $!hll := $value unless $value =:= NO_VALUE; $!hll }
     method load($value = NO_VALUE)     { $!load := $value unless $value =:= NO_VALUE; $!load }

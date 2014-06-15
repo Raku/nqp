@@ -1,5 +1,14 @@
-class QAST::Stmts is QAST::Node {
+class QAST::Stmts is QAST::Node does QAST::Children {
     has $!resultchild;
+
+    method new(*@children, *%options) {
+        my $new := nqp::create(self);
+        $new.set_children(@children);
+        nqp::bindattr($new, QAST::Node, '%!hash', nqp::hash());
+        $new.set_options(%options) if %options;
+        $new;
+    }
+
 
     method resultchild($value = NO_VALUE) { $!resultchild := $value unless $value =:= NO_VALUE; $!resultchild }
     
