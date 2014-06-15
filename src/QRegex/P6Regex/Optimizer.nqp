@@ -101,7 +101,7 @@ class QRegex::Optimizer {
             && (nqp::istype($qast[0][0], QAST::SVal) || nqp::istype($qast[0][0], QAST::Block));
         if $child_is_block {
             my $block := nqp::istype($qast[0][0], QAST::SVal) ?? $qast[0][1] !! $qast[0][0];
-            my $regex := $block[2];
+            my $regex := try $block[2];
             # extra safety
             if !nqp::istype($regex, QAST::Regex) { return $qast; }
             self.visit_children($regex);
