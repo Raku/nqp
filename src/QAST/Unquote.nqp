@@ -4,7 +4,7 @@ class QAST::Unquote is QAST::Node {
     method new(:$position!, *%options) {
         my $new := nqp::create(self);
         nqp::bindattr($new, QAST::Node, '%!hash', nqp::hash());
-        nqp::bindattr_i($new, QAST::InlinePlaceholder, '$!position', $position);
+        nqp::bindattr_i($new, QAST::Unquote, '$!position', $position);
         $new.set_options(%options) if %options;
         $new
     }
