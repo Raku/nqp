@@ -27,7 +27,8 @@ USAGE
 my $info = scalar read_file shift @ARGV;
 my ($port, $cookie) = $info =~ /(\d+) (\S+)$/m or die "cannot parse cookie file";
 
-my $sock = IO::Socket::INET->new( PeerAddr => '127.0.0.1', PeerPort => $port, Proto => 'tcp' );
+my $sock = IO::Socket::INET->new( PeerAddr => '127.0.0.1', PeerPort => $port, Proto => 'tcp' )
+  or die "cannot connect to eval server: $!\n";
 
 $sock->syswrite( Encode::encode_utf8(join("\0", $cookie, @ARGV, "")) ) or die "syswrite: $!\n";
 $sock->shutdown(1) or die "shutdown: $!\n"; # perldoc -f shutdown
