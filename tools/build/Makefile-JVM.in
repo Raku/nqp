@@ -23,8 +23,8 @@ J_STAGE0 = src/vm/jvm/stage0
 J_STAGE1 = $(JVM_BUILD_DIR)/stage1
 J_STAGE2 = $(JVM_BUILD_DIR)/stage2
 
-J_STAGE0_NQP = $(JAVA) -cp $(J_STAGE0) -Xbootclasspath/a:$(J_STAGE0)@cpsep@nqp-runtime.jar@cpsep@$(THIRDPARTY_JARS)@cpsep@$(J_STAGE0)/nqp.jar nqp --bootstrap
-J_STAGE1_NQP = $(JAVA) -cp $(J_STAGE1) -Xbootclasspath/a:$(J_STAGE1)@cpsep@nqp-runtime.jar@cpsep@$(THIRDPARTY_JARS)@cpsep@$(J_STAGE1)/nqp.jar nqp --bootstrap
+J_STAGE0_NQP = $(JAVA) -cp $(J_STAGE0)@cpsep@nqp-runtime.jar@cpsep@$(THIRDPARTY_JARS)@cpsep@$(J_STAGE0)/nqp.jar nqp --bootstrap
+J_STAGE1_NQP = $(JAVA) -cp $(J_STAGE1)@cpsep@nqp-runtime.jar@cpsep@$(THIRDPARTY_JARS)@cpsep@$(J_STAGE1)/nqp.jar nqp --bootstrap
 
 NQP_MO_JAR      = nqpmo.jar
 
