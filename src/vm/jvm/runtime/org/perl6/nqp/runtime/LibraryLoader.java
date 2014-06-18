@@ -21,25 +21,7 @@ public class LibraryLoader {
 
         try {
             // Read in class data.
-            String filename = origFilename;
-            File file = new File(filename);
-            if (!file.exists() && filename.equals("ModuleLoader.class")) {
-                /* We special case the initial ModuleLoader loading. */
-                String[] cps = System.getProperty("java.class.path").split("[:;]");
-                for (int i = 0; i < cps.length; i++) {
-                    file = new File(cps[i] + "/" + filename);
-                    if (file.exists()) {
-                        filename = cps[i] + "/" + filename;
-                        break;
-                    }
-                    file = new File(cps[i] + "/ModuleLoader.jar");
-                    if (file.exists()) {
-                        filename = cps[i] + "/ModuleLoader.jar";
-                        break;
-                    }
-                }
-            }
-
+            String filename = findFile(origFilename);
             Class<?> c = loadFile(filename, tc.gc.sharingHint);
 
             // Load the class.
@@ -57,6 +39,37 @@ public class LibraryLoader {
         catch (Throwable e) {
             throw ExceptionHandling.dieInternal(tc, e.toString());
         }
+    }
+
+    protected String findFile(String origFilename) {
+        String filename = origFilename;
+        File file = new File(filename);
+        if (!file.exists() && filename.equals("ModuleLoader.class")) {
+            /* We special case the initial ModuleLoader loading. */
+            String perl6Prefix = System.getProperty("perl6.prefix");
+            if (perl6Prefix != null) {
+                file = new File(perl6Prefix + "/languages/nqp/lib/ModuleLoader.jar");
+                if (file.exists()) {
+                    filename = file.getAbsolutePath();
+                    return filename;
+                }
+            }
+
+            String[] cps = System.getProperty("java.class.path").split("[:;]");
+            for (int i = 0; i < cps.length; i++) {
+                file = new File(cps[i] + "/" + filename);
+                if (file.exists()) {
+                    filename = cps[i] + "/" + filename;
+                    break;
+                }
+                file = new File(cps[i] + "/ModuleLoader.jar");
+                if (file.exists()) {
+                    filename = cps[i] + "/ModuleLoader.jar";
+                    break;
+                }
+            }
+        }
+        return filename;
     }
 
     public static Class<?> loadFile(String cf, boolean shared) throws Exception {
@@ -114,6 +127,7 @@ public class LibraryLoader {
         private byte[] serial;
         
         public IgnoreNameClassLoader(byte[] bytes, byte[] serial) {
+            super(LibraryLoader.class.getClassLoader());
             this.bytes = bytes;
             this.serial = serial;
         }
