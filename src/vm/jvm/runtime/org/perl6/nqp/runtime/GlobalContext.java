@@ -250,7 +250,7 @@ public class GlobalContext {
         hllGlobalAll = new HashMap<ContextKey<?,?>, Object>();
         hllGlobalAllLock = new Object();
 
-        byteClassLoader = new ByteClassLoader();
+        byteClassLoader = new ByteClassLoader(GlobalContext.class.getClassLoader());
     }
     
     /**
