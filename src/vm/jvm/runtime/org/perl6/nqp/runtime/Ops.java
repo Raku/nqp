@@ -5496,6 +5496,12 @@ public final class Ops {
         SixModelObject Array = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.listType;
         SixModelObject Str = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strBoxType;
         SixModelObject result = Array.st.REPR.allocate(tc, Array.st);
+        String perl6Prefix = System.getProperty("perl6.prefix");
+        if (perl6Prefix != null) {
+            result.push_boxed(tc, box_s(perl6Prefix + "/languages/nqp/lib", Str, tc));
+            result.push_boxed(tc, box_s(perl6Prefix + "/languages/perl6/lib", Str, tc));
+            result.push_boxed(tc, box_s(perl6Prefix + "/languages/perl6/runtime", Str, tc));
+        }
         String cpStr = System.getProperty("java.class.path");
         String[] cps = cpStr.split("[:;]");
         for (int i = 0; i < cps.length; i++)
