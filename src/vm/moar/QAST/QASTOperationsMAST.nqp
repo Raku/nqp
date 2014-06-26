@@ -1042,6 +1042,7 @@ for ('', 'repeat_') -> $repness {
             # Emit the loop body; stash the result.
             my $body := $qastcomp.coerce(@comp_ops[1], $res_kind);
             nqp::push(@loop_il, $redo_lbl);
+            push_op(@loop_il, 'osrpoint');
             push_ilist(@loop_il, $body);
 
             # If there's a third child, evaluate it as part of the
@@ -1169,6 +1170,7 @@ QAST::MASTOperations.add_core_op('for', -> $qastcomp, $op {
         $arity := $arity - 1;
     }
     nqp::push($val_il, $lbl_redo);
+    push_op($val_il, 'osrpoint');
     $val_il := MAST::InstructionList.new($val_il, MAST::VOID, $MVM_reg_void);
 
     # Now do block invocation.
