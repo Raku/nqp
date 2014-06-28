@@ -2740,7 +2740,7 @@ public final class Ops {
     public static SixModelObject assign(SixModelObject cont, SixModelObject value, ThreadContext tc) {
         ContainerSpec cs = cont.st.ContainerSpec;
         if (cs != null)
-            cs.store(tc, cont, value);
+            cs.store(tc, cont, decont(value, tc));
         else
             ExceptionHandling.dieInternal(tc, "Cannot assign to an immutable value");
         return cont;
@@ -2748,7 +2748,7 @@ public final class Ops {
     public static SixModelObject assignunchecked(SixModelObject cont, SixModelObject value, ThreadContext tc) {
         ContainerSpec cs = cont.st.ContainerSpec;
         if (cs != null)
-            cs.storeUnchecked(tc, cont, value);
+            cs.storeUnchecked(tc, cont, decont(value, tc));
         else
             ExceptionHandling.dieInternal(tc, "Cannot assign to an immutable value");
         return cont;
