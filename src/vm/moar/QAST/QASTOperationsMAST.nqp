@@ -959,13 +959,14 @@ for ('', 'repeat_') -> $repness {
             my $handler := 1;
             my $orig_type;
             my $label_wval;
+            my $cond_temp;
             for $op.list {
                 if $_.named eq 'nohandler' { $handler := 0; }
                 elsif $_.named eq 'label' { $label_wval := $_; }
                 else { nqp::push(@children, $_) }
             }
             if needs_cond_passed(@children[1]) {
-                my $cond_temp := $qastcomp.unique('__im_cond_');
+                $cond_temp := $qastcomp.unique('__im_cond_');
                 @children[0] := QAST::Op.new(
                     :op('bind'),
                     QAST::Var.new( :name($cond_temp), :scope('local'), :decl('var') ),
@@ -1019,6 +1020,9 @@ for ('', 'repeat_') -> $repness {
                 else {
                     push_op(@loop_il, 'const_i64', $res_reg,
                         MAST::IVal.new( :value(0) ));
+                }
+                if $cond_temp {
+                    push_op(@loop_il, 'null', $*BLOCK.local($cond_temp));
                 }
                 push_op(@loop_il, 'goto', $redo_lbl);
             }
