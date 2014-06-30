@@ -944,7 +944,7 @@ class QAST::Compiler is HLL::Compiler {
                 nqp::die("Cannot reference undeclared local '$name'");
             }
         }
-        elsif $scope eq 'lexical' || $scope eq 'contextual' {
+        elsif $scope eq 'lexical' || $scope eq 'typevar' || $scope eq 'contextual' {
             # If the lexical is directly declared in this block, we use the
             # register directly.
             my %sym := $*BLOCK.qast.symbol($name);
@@ -976,7 +976,7 @@ class QAST::Compiler is HLL::Compiler {
                 }
                 
                 # Emit the lookup or bind.
-                if $scope eq 'lexical' {
+                if $scope eq 'lexical' || $scope eq 'typevar' {
                     if $*BINDVAL {
                         my $valpost := self.as_post_clear_bindval($*BINDVAL, :want(nqp::lc($type)));
                         $ops.push($valpost);
