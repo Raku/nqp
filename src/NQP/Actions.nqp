@@ -523,7 +523,7 @@ class NQP::Actions is HLL::Actions {
                 my $name := ~@name.pop;
                 my $ch;
                 if $*PKGDECL eq 'role' {
-                    $ch := QAST::Var.new( :name('$?CLASS'), :scope('lexical') );
+                    $ch := QAST::Var.new( :name('$?CLASS'), :scope('typevar') );
                     $ch.set_compile_time_value($*PACKAGE);
                 }
                 else {
