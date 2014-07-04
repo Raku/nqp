@@ -19,6 +19,7 @@ import static org.perl6.nqp.runtime.CallSiteDescriptor.*;
 
 import org.perl6.nqp.sixmodel.REPR;
 import org.perl6.nqp.sixmodel.REPRRegistry;
+import org.perl6.nqp.sixmodel.StorageSpec;
 import org.perl6.nqp.sixmodel.SixModelObject;
 import org.perl6.nqp.sixmodel.reprs.CArrayInstance;
 import org.perl6.nqp.sixmodel.reprs.CPointerInstance;
@@ -107,6 +108,98 @@ public final class NativeCallOps {
         ((Refreshable) obj).refresh(tc);
 
         return 1L;
+    }
+
+    public static SixModelObject nativecallcast(SixModelObject target_type, SixModelObject source, ThreadContext tc) {
+        ArgType target = ArgType.INT;
+        Pointer o = null;
+
+        if (source instanceof CPointerInstance) { // TODO Care about CPointer type object
+            o = ((CPointerInstance)source).pointer;
+            if (o == null)
+                return target_type;
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc,
+                "Native call expected object with CPointer representation, but got something else");
+        }
+
+        SixModelObject nqpobj = target_type.st.REPR.allocate(tc, target_type.st);
+        StorageSpec        ss = target_type.st.REPR.get_storage_spec(tc, target_type.st);
+
+        switch (ss.boxed_primitive) {
+            case StorageSpec.BP_INT:
+                switch (ss.bits) {
+                    case 8:
+                        nqpobj.set_int(tc, o.getByte(0));
+                        break;
+                    case 16:
+                        nqpobj.set_int(tc, o.getShort(0));
+                        break;
+                    case 32:
+                        nqpobj.set_int(tc, o.getInt(0));
+                        break;
+                    case 64:
+                        nqpobj.set_int(tc, o.getLong(0));
+                        break;
+                    default:
+                        throw ExceptionHandling.dieInternal(tc,
+                            String.format("Cannot cast to %d bits integer", ss.bits));
+                }
+                break;
+            case StorageSpec.BP_NUM:
+                switch (ss.bits) {
+                    case 32:
+                        nqpobj.set_num(tc, o.getFloat(0));
+                        break;
+                    case 64:
+                        nqpobj.set_num(tc, o.getDouble(0));
+                        break;
+                    default:
+                        throw ExceptionHandling.dieInternal(tc,
+                            String.format("Cannot cast to %d bits number", ss.bits));
+                }
+                break;
+            case StorageSpec.BP_STR:
+                /* TODO: Handle encodings. */
+                if (o != null) {
+                    nqpobj.set_str(tc, o.getString(0));
+                }
+                else {
+                    nqpobj = target_type;
+                }
+                break;
+            default:
+                if (target_type instanceof org.perl6.nqp.sixmodel.reprs.CStrInstance) {
+                    /* TODO: Handle encodings. */
+                    if (o != null) {
+                        nqpobj.set_str(tc, o.getString(0));
+                    }
+                    else {
+                        nqpobj = target_type;
+                    }
+                }
+                else if (nqpobj instanceof org.perl6.nqp.sixmodel.reprs.CPointerInstance) {
+                    CPointerInstance cpointer = (CPointerInstance) nqpobj;
+                    cpointer.pointer          = o;
+                }
+                else if (nqpobj instanceof org.perl6.nqp.sixmodel.reprs.CArrayInstance) {
+                    CArrayInstance carray = (CArrayInstance) nqpobj;
+                    carray.storage        = o;
+                    carray.managed        = false;
+                }
+                else if (nqpobj instanceof org.perl6.nqp.sixmodel.reprs.CStructInstance) {
+                    Class<?>    structClass = ((CStructREPRData)target_type.st.REPRData).structureClass;
+                    CStructInstance cstruct = (CStructInstance)nqpobj;
+                    cstruct.storage         = Structure.newInstance(structClass, o);
+                }
+                else {
+                    throw ExceptionHandling.dieInternal(tc,
+                        String.format("Don't know how to cast to %s", nqpobj));
+                }
+        }
+
+        return nqpobj;
     }
 
     private static REPR ncrepr = REPRRegistry.getByName("NativeCall");
