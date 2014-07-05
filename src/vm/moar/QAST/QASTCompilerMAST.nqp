@@ -1255,6 +1255,17 @@ class QAST::MASTCompiler {
                 }
             }
         }
+        elsif $scope eq 'typevar' {
+            if $*BINDVAL {
+                nqp::die('Cannot bind to QAST::Var with scope typevar');
+            }
+            my $name_reg := $*REGALLOC.fresh_s();
+            $res_reg     := $*REGALLOC.fresh_o();
+            $res_kind    := $MVM_reg_obj;
+            push_op(@ins, 'const_s', $name_reg, MAST::SVal.new( :value($name) ));
+            push_op(@ins, 'getlexperinvtype_o', $res_reg, $name_reg);
+            $*REGALLOC.release_register($name_reg, $MVM_reg_str);
+        }
         elsif $scope eq 'contextual' {
             my $name_const := const_s($name);
             my $lex := $*BLOCK.lexical($name);

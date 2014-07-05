@@ -4085,7 +4085,7 @@ class QAST::CompilerJAST {
                 nqp::die("Cannot reference undeclared local '$name'");
             }
         }
-        elsif $scope eq 'lexical' || $scope eq 'contextual' {
+        elsif $scope eq 'lexical' || $scope eq 'typevar' || $scope eq 'contextual' {
             # See if it's declared in the local scope.
             my int $local  := 0;
             my int $scopes := 0;
@@ -4095,7 +4095,7 @@ class QAST::CompilerJAST {
                 # It is. Nothing more to do.
                 $local := 1;
             }
-            elsif $scope eq 'lexical' {
+            elsif $scope eq 'lexical' || $scope eq 'typevar' {
                 # Try to find it in an outer scope.
                 my int $i := 1;
                 my $cur_block := $*BLOCK.outer();
@@ -4122,7 +4122,7 @@ class QAST::CompilerJAST {
             # lexical. Take the type from .returns and rewrite to a more dynamic
             # lookup.
             unless $local || $scopes {
-                if $scope eq 'lexical' {
+                if $scope eq 'lexical' || $scope eq 'typevar' {
                     $type := rttype_from_typeobj($node.returns);
                     my $char := $type == $RT_OBJ ?? '' !! '_' ~ typechar($type);
                     my $name_sval := QAST::SVal.new( :value($name) );

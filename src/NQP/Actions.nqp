@@ -523,7 +523,7 @@ class NQP::Actions is HLL::Actions {
                 my $name := ~@name.pop;
                 my $ch;
                 if $*PKGDECL eq 'role' {
-                    $ch := QAST::Var.new( :name('$?CLASS'), :scope('lexical') );
+                    $ch := QAST::Var.new( :name('$?CLASS'), :scope('typevar') );
                     $ch.set_compile_time_value($*PACKAGE);
                 }
                 else {
@@ -569,7 +569,8 @@ class NQP::Actions is HLL::Actions {
                 my $name := ~@name.pop;
                 if $*IN_DECL eq 'variable' || $name eq '$_' || $name eq '$/'
                 || $name eq '$!' || $<twigil> eq '?' || $*W.is_lexical($name) {
-                    $ast := QAST::Var.new( :name($name), :scope('lexical') );
+                    $ast := QAST::Var.new( :name($name),
+                        :scope($name eq '$?CLASS' ?? 'typevar' !! 'lexical') );
                 }
                 else {
                     $/.CURSOR.panic("Use of undeclared variable '$name'");
