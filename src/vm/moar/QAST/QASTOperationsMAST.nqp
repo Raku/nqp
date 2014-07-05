@@ -2402,6 +2402,7 @@ QAST::MASTOperations.add_core_op('takedispatcher', -> $qastcomp, $op {
     $*REGALLOC.release_register($isnull_reg, $MVM_reg_int64);
     MAST::InstructionList.new(@ops, $MVM_reg_void, MAST::VOID)
 });
+QAST::MASTOperations.add_core_moarop_mapping('cleardispatcher', 'takedispatcher');
 QAST::MASTOperations.add_core_op('setup_blv', -> $qastcomp, $op {
     if +@($op) != 1 || !nqp::ishash($op[0]) {
         nqp::die('setup_blv requires one hash operand');

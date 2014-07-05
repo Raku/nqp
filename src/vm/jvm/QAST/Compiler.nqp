@@ -2499,6 +2499,17 @@ QAST::OperationsJAST.add_core_op('takedispatcher', -> $qastcomp, $op {
         $TYPE_OPS, 'takedispatcher', 'V', 'I', $TYPE_TC ));
     result($il, $RT_VOID);
 });
+QAST::OperationsJAST.add_core_op('cleardispatcher', -> $qastcomp, $op {
+    if +@($op) != 0 {
+        nqp::die('cleardispatcher accepts no operands');
+    }
+    my $il := JAST::InstructionList.new();
+    $il.append($ALOAD_1);
+    $il.append($ACONST_NULL);
+    $il.append(JAST::Instruction.new( :op('putfield'), $TYPE_TC, 'currentDispatcher', $TYPE_SMO ));
+    $il.append($ACONST_NULL);
+    result($il, $RT_OBJ);
+});
 QAST::OperationsJAST.add_core_op('setup_blv', -> $qastcomp, $op {
     if +@($op) != 1 || !nqp::ishash($op[0]) {
         nqp::die('setup_blv requires one hash operand');

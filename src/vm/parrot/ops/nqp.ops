@@ -3590,6 +3590,20 @@ inline op nqp_takedispatcher(in STR) :base_core {
 
 /*
 
+=item nqp_cleardispatcher(in STR)
+
+Clears the current dispatcher.
+
+=cut
+
+*/
+inline op nqp_cleardispatcher(out PMC) :base_core {
+    current_dispatcher = NULL;
+    $1 = PMCNULL;
+}
+
+/*
+
 =item nqp_capturehasnameds(out INT, invar PMC)
 
 Checks if the specified capture has any named arguments.

@@ -2614,6 +2614,7 @@ QAST::Operations.add_core_op('getstaticcode', -> $qastcomp, $op {
 });
 QAST::Operations.add_core_pirop_mapping('setdispatcher', 'nqp_setdispatcher', '0P');
 QAST::Operations.add_core_pirop_mapping('takedispatcher', 'nqp_takedispatcher', '0s');
+QAST::Operations.add_core_pirop_mapping('cleardispatcher', 'nqp_cleardispatcher', 'P');
 
 # serialization context related opcodes
 QAST::Operations.add_core_pirop_mapping('sha1', 'nqp_sha1', 'Ss');
