@@ -110,7 +110,7 @@ public final class NativeCallOps {
         return 1L;
     }
 
-    public static SixModelObject nativecallcast(SixModelObject target_type, SixModelObject source, ThreadContext tc) {
+    public static SixModelObject nativecallcast(SixModelObject target_spec, SixModelObject target_type, SixModelObject source, ThreadContext tc) {
         ArgType target = ArgType.INT;
         Pointer o = null;
 
@@ -125,7 +125,7 @@ public final class NativeCallOps {
         }
 
         SixModelObject nqpobj = target_type.st.REPR.allocate(tc, target_type.st);
-        StorageSpec        ss = target_type.st.REPR.get_storage_spec(tc, target_type.st);
+        StorageSpec        ss = target_spec.st.REPR.get_storage_spec(tc, target_spec.st);
 
         switch (ss.boxed_primitive) {
             case StorageSpec.BP_INT:
