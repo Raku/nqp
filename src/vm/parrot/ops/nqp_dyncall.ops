@@ -1051,22 +1051,24 @@ inline op nqp_native_call(out PMC, invar PMC, invar PMC, invar PMC) :base_core {
     $1 = result;
 }
 
-inline op nqp_native_call_cast(out PMC, invar PMC, invar PMC) :base_core {
+inline op nqp_native_call_cast(out PMC, invar PMC, invar PMC, invar PMC) :base_core {
     PMC         *result = PMCNULL;
-    PMC    *target_type = $2;
-    PMC         *source = $3;
+    PMC    *target_spec = $2;
+    PMC    *target_type = $3;
+    PMC         *source = $4;
     void *cpointer_body = unmarshal_cpointer(interp, source);
 
     if (!source)
         result = target_type;
     else if (target_type->vtable->base_type == smo_id) {
-        storage_spec ss = REPR(target_type)->get_storage_spec(interp, STABLE(target_type));
+        storage_spec ss = REPR(target_spec)->get_storage_spec(interp, STABLE(target_spec));
         if(ss.boxed_primitive == STORAGE_SPEC_BP_INT
         || REPR(target_type)->ID == p6int_repr_id) {
             Parrot_Int8 value;
             switch(ss.bits) {
                 case 8:
                     value = *(Parrot_Int1 *)cpointer_body;
+                    break;
                 case 16:
                     value = *(Parrot_Int2 *)cpointer_body;
                     break;
