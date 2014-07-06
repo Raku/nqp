@@ -9,6 +9,9 @@ BEGIN_OPS_PREAMBLE
 #include "../6model/reprs/CPointer.h"
 #include "../6model/reprs/CArray.h"
 #include "../6model/reprs/CStr.h"
+#include "../6model/reprs/P6int.h"
+#include "../6model/reprs/P6num.h"
+#include "../6model/reprs/P6str.h"
 #include "../6model/reprs/dyncall_reprs.h"
 
 /* This library contains just three operations: one to initialize it,
@@ -90,6 +93,9 @@ static INTVAL cs_repr_id = 0;
 static INTVAL cp_repr_id = 0;
 static INTVAL ca_repr_id = 0;
 static INTVAL cstr_repr_id = 0;
+static INTVAL p6int_repr_id = 0;
+static INTVAL p6num_repr_id = 0;
+static INTVAL p6str_repr_id = 0;
 static INTVAL smo_id = 0;
 
 PMC *callback_cache = NULL;
@@ -800,6 +806,12 @@ inline op nqp_native_call_setup() :base_core {
         cstr_repr_id = REGISTER_DYNAMIC_REPR(interp,
             Parrot_str_new_constant(interp, "CStr"),
             CStr_initialize);
+    if (!p6int_repr_id)
+        p6int_repr_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "P6int", 0));
+    if (!p6num_repr_id)
+        p6num_repr_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "P6num", 0));
+    if (!p6str_repr_id)
+        p6str_repr_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "P6str", 0));
     if (!smo_id)
         smo_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
 }
@@ -1036,6 +1048,87 @@ inline op nqp_native_call(out PMC, invar PMC, invar PMC, invar PMC) :base_core {
     /* Finally, free call VM. */
     dcFree(vm);
     
+    $1 = result;
+}
+
+inline op nqp_native_call_cast(out PMC, invar PMC, invar PMC) :base_core {
+    PMC         *result = PMCNULL;
+    PMC    *target_type = $2;
+    PMC         *source = $3;
+    void *cpointer_body = unmarshal_cpointer(interp, source);
+
+    if (!source)
+        result = target_type;
+    else if (target_type->vtable->base_type == smo_id) {
+        storage_spec ss = REPR(target_type)->get_storage_spec(interp, STABLE(target_type));
+        if(ss.boxed_primitive == STORAGE_SPEC_BP_INT
+        || REPR(target_type)->ID == p6int_repr_id) {
+            Parrot_Int8 value;
+            switch(ss.bits) {
+                case 8:
+                    value = *(Parrot_Int1 *)cpointer_body;
+                case 16:
+                    value = *(Parrot_Int2 *)cpointer_body;
+                    break;
+                case 32:
+                    value = *(Parrot_Int4 *)cpointer_body;
+                    break;
+                case 64:
+                default:
+                    value = *(Parrot_Int8 *)cpointer_body;
+            }
+            result = make_int_result(interp, target_type, value);
+        }
+        else if(ss.boxed_primitive == STORAGE_SPEC_BP_NUM
+             || REPR(target_type)->ID == p6num_repr_id) {
+            Parrot_Float8 value;
+            switch(ss.bits) {
+                case 32:
+                    value = *(Parrot_Float4 *)cpointer_body;
+                    break;
+                case 64:
+                default:
+                    value = *(Parrot_Float8 *)cpointer_body;
+            }
+            result = make_num_result(interp, target_type, value);
+        }
+        else if(ss.boxed_primitive == STORAGE_SPEC_BP_STR
+             || REPR(target_type)->ID == cstr_repr_id
+             || REPR(target_type)->ID == p6str_repr_id) {
+            result = make_str_result(interp, target_type, DYNCALL_ARG_UTF8STR,
+            (char *)cpointer_body);
+        }
+        else if (REPR(target_type)->ID == cs_repr_id) {
+            result = make_cstruct_result(interp, target_type, (void *)cpointer_body);
+        }
+        else if (REPR(target_type)->ID == cp_repr_id) {
+            result = make_cpointer_result(interp, target_type, (void *)cpointer_body);
+        }
+        else if (REPR(target_type)->ID == ca_repr_id) {
+            result = make_carray_result(interp, target_type, (void *)cpointer_body);
+        }
+        else {
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Internal error: unhandled target type");
+        }
+    }
+    else if (target_type->vtable->base_type == enum_class_Integer) {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Internal error: unhandled target type (Parrot int)");
+    }
+    else if (target_type->vtable->base_type == enum_class_Float) {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Internal error: unhandled target type (Parrot float)");
+    }
+    else if (target_type->vtable->base_type == enum_class_String) {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Internal error: unhandled target type (Parrot string)");
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Internal error: unhandled target type (not a SixModelObject)");
+    }
+
     $1 = result;
 }
 
