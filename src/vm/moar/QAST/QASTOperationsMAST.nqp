@@ -749,13 +749,22 @@ for <if unless> -> $op_name {
 
         # Emit the jump.
         if @comp_ops[0].result_kind == $MVM_reg_obj {
-            push_op(@ins, 'decont', @comp_ops[0].result_reg, @comp_ops[0].result_reg);
+            my $decont_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
+            push_op(@ins, 'decont', $decont_reg, @comp_ops[0].result_reg);
+            push_op(@ins,
+                resolve_condition_op(@comp_ops[0].result_kind, $op_name eq 'if'),
+                $decont_reg,
+                ($operands == 3 ?? $else_lbl !! $end_lbl)
+            );
+            $*REGALLOC.release_register($decont_reg, $MVM_reg_obj);
         }
-        push_op(@ins,
-            resolve_condition_op(@comp_ops[0].result_kind, $op_name eq 'if'),
-            @comp_ops[0].result_reg,
-            ($operands == 3 ?? $else_lbl !! $end_lbl)
-        );
+        else {
+            push_op(@ins,
+                resolve_condition_op(@comp_ops[0].result_kind, $op_name eq 'if'),
+                @comp_ops[0].result_reg,
+                ($operands == 3 ?? $else_lbl !! $end_lbl)
+            );
+        }
 
         # Emit the then, stash the result
         push_ilist(@ins, @comp_ops[1]);
@@ -1030,13 +1039,22 @@ for ('', 'repeat_') -> $repness {
             push_ilist(@loop_il, @comp_ops[0]);
             push_op(@loop_il, 'set', $res_reg, @comp_ops[0].result_reg);
             if @comp_ops[0].result_kind == $MVM_reg_obj {
-                push_op(@loop_il, 'decont', @comp_ops[0].result_reg, @comp_ops[0].result_reg);
+                my $decont_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
+                push_op(@loop_il, 'decont', $decont_reg, @comp_ops[0].result_reg);
+                push_op(@loop_il,
+                    resolve_condition_op(@comp_ops[0].result_kind, $op_name eq 'while'),
+                    $decont_reg,
+                    $done_lbl
+                );
+                $*REGALLOC.release_register($decont_reg, $MVM_reg_obj);
             }
-            push_op(@loop_il,
-                resolve_condition_op(@comp_ops[0].result_kind, $op_name eq 'while'),
-                @comp_ops[0].result_reg,
-                $done_lbl
-            );
+            else {
+                push_op(@loop_il,
+                    resolve_condition_op(@comp_ops[0].result_kind, $op_name eq 'while'),
+                    @comp_ops[0].result_reg,
+                    $done_lbl
+                );
+            }
 
             # Handle immediate blocks wanting the value as an arg.
             if $*IMM_ARG {
