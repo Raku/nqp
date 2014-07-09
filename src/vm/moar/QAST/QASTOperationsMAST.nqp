@@ -1374,10 +1374,12 @@ my $call_gen := sub ($qastcomp, $op) {
     }
 
     # Decontainerize the callee.
-    push_op(@ins, 'decont', $callee.result_reg, $callee.result_reg);
+    my $decont_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
+    push_op(@ins, 'decont', $decont_reg, $callee.result_reg);
 
-    # Release the callee's result register
+    # Release the callee's result register and the decont register.
     $*REGALLOC.release_register($callee.result_reg, $MVM_reg_obj);
+    $*REGALLOC.release_register($decont_reg, $MVM_reg_obj);
 
     # Release each arg's result register
     my $arg_num := 0;
@@ -1396,7 +1398,7 @@ my $call_gen := sub ($qastcomp, $op) {
 
     # Generate call.
     nqp::push(@ins, MAST::Call.new(
-        :target($callee.result_reg),
+        :target($decont_reg),
         :flags(@arg_flags),
         |@arg_regs,
         :result($res_reg)
