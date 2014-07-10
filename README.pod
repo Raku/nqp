@@ -76,7 +76,7 @@ which aimed to have almost no runtime component whatsoever, this new
 version of NQP accepts that a minimal Perl 6 object metamodel,
 multidispatcher, and regular expression engine are needed on top of
 the underlying virtual machine.  Also, nqp-rx only ran on Parrot,
-whereas NQP also runs on the JVM and is designed to be portable to
-more.
+whereas NQP also runs on the JVM and MoarVM and is designed to be
+portable to more.
 
     [2] http://github.com/perl6/nqp-rx
