@@ -3699,7 +3699,7 @@ public final class Ops {
     }
     public static SixModelObject createsc(String handle, ThreadContext tc) {
         if (tc.gc.scs.containsKey(handle))
-            throw ExceptionHandling.dieInternal(tc, "SC with handle " + handle + " already exists");
+            return tc.gc.scRefs.get(handle);
         
         SerializationContext sc = new SerializationContext(handle);
         tc.gc.scs.put(handle, sc);
