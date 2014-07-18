@@ -483,23 +483,23 @@ class QAST::MASTRegexCompiler {
         if $node.subtype eq 'ignorecase' {
             my $s0      := fresh_s();
             my $s1      := fresh_s();
-            my $one     := fresh_i();
+            my $i2      := fresh_i();
             my $succeed := label($*QASTCOMPILER.unique($*RXPREFIX ~ '_charrange_ic'));
             my $goal    := $node.negate ?? %*REG<fail> !! $succeed;
             merge_ins(@ins, [
-                op('const_i64', $one, ival(1)),
-                op('substr_s', $s0, %*REG<tgt>, %*REG<pos>, $one),
+                op('const_i64', $i2, ival(1)),
+                op('substr_s', $s0, %*REG<tgt>, %*REG<pos>, $i2),
                 op('lc', $s1, $s0),
                 op('ordfirst', $i0, $s1),
                 op('ge_i', $i1, $i0, $lower),
-                op('le_i', $i1, $i0, $upper),
-                op('bitand_i', $i1, $i1, $i0),
+                op('le_i', $i2, $i0, $upper),
+                op('bitand_i', $i1, $i1, $i2),
                 op('if_i', $i1, $goal),
                 op('uc', $s1, $s0),
                 op('ordfirst', $i0, $s1),
                 op('ge_i', $i1, $i0, $lower),
-                op('le_i', $i1, $i0, $upper),
-                op('bitand_i', $i1, $i1, $i0),
+                op('le_i', $i2, $i0, $upper),
+                op('bitand_i', $i1, $i1, $i2),
                 op('if_i', $i1, $goal),
             ]);
             unless $node.negate {
