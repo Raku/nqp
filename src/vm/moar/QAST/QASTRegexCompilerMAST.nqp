@@ -470,28 +470,57 @@ class QAST::MASTRegexCompiler {
 
     method charrange($node) {
         my @ins;
-        my $i0 := fresh_i();
-        my $i1 := fresh_i();
+        my $i0    := fresh_i();
+        my $i1    := fresh_i();
         my $lower := fresh_i();
         my $upper := fresh_i();
-        nqp::push(@ins, op('ge_i', $i0, %*REG<pos>, %*REG<eos>));
-        nqp::push(@ins, op('if_i', $i0, %*REG<fail>));
-        nqp::push(@ins, op('const_i64', $lower, ival($node[1].value)));
-        nqp::push(@ins, op('const_i64', $upper, ival($node[2].value)));
-        nqp::push(@ins, op('ordat', $i0, %*REG<tgt>, %*REG<pos>));
-        if $node.negate {
+        merge_ins(@ins, [
+            op('ge_i', $i0, %*REG<pos>, %*REG<eos>),
+            op('if_i', $i0, %*REG<fail>),
+            op('const_i64', $lower, ival($node[1].value)),
+            op('const_i64', $upper, ival($node[2].value)),
+        ]);
+        if $node.subtype eq 'ignorecase' {
+            my $s0      := fresh_s();
+            my $s1      := fresh_s();
+            my $one     := fresh_i();
+            my $succeed := label($*QASTCOMPILER.unique($*RXPREFIX ~ '_charrange_ic'));
+            my $goal    := $node.negate ?? %*REG<fail> !! $succeed;
+            merge_ins(@ins, [
+                op('const_i64', $one, ival(1)),
+                op('substr_s', $s0, %*REG<tgt>, %*REG<pos>, $one),
+                op('lc', $s1, $s0),
+                op('ordfirst', $i0, $s1),
+                op('ge_i', $i1, $i0, $lower),
+                op('le_i', $i1, $i0, $upper),
+                op('bitand_i', $i1, $i1, $i0),
+                op('if_i', $i1, $goal),
+                op('uc', $s1, $s0),
+                op('ordfirst', $i0, $s1),
+                op('ge_i', $i1, $i0, $lower),
+                op('le_i', $i1, $i0, $upper),
+                op('bitand_i', $i1, $i1, $i0),
+                op('if_i', $i1, $goal),
+            ]);
+            unless $node.negate {
+                nqp::push(@ins, op('goto', %*REG<fail>));
+                nqp::push(@ins, $succeed);
+            }
+        }
+        else {
             my $succeed := label($*QASTCOMPILER.unique($*RXPREFIX ~ '_charrange'));
-            nqp::push(@ins, op('gt_i', $i1, $i0, $upper));
-            nqp::push(@ins, op('if_i', $i1, $succeed));
-            nqp::push(@ins, op('lt_i', $i1, $i0, $lower));
-            nqp::push(@ins, op('if_i', $i1, $succeed));
-            nqp::push(@ins, op('goto', %*REG<fail>));
-            nqp::push(@ins, $succeed);
-        } else {
-            nqp::push(@ins, op('lt_i', $i1, $i0, $lower));
-            nqp::push(@ins, op('if_i', $i1, %*REG<fail>));
-            nqp::push(@ins, op('gt_i', $i1, $i0, $upper));
-            nqp::push(@ins, op('if_i', $i1, %*REG<fail>));
+            my $goal    := $node.negate ?? $succeed !! %*REG<fail>;
+            merge_ins(@ins, [
+                op('ordat', $i0, %*REG<tgt>, %*REG<pos>),
+                op('gt_i', $i1, $i0, $upper),
+                op('if_i', $i1, $goal),
+                op('lt_i', $i1, $i0, $lower),
+                op('if_i', $i1, $goal),
+            ]);
+            if $node.negate {
+                nqp::push(@ins, op('goto', %*REG<fail>));
+                nqp::push(@ins, $succeed);
+            }
         }
         nqp::push(@ins, op('inc_i', %*REG<pos>)) unless $node.subtype eq 'zerowidth';
         release($i0,    $MVM_reg_int64);
