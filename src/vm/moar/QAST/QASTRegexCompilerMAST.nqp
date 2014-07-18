@@ -469,8 +469,36 @@ class QAST::MASTRegexCompiler {
     }
 
     method charrange($node) {
-        # TODO: implement charrange for moarvm.
-        self.enumcharlist($node);
+        my @ins;
+        my $i0 := fresh_i();
+        my $i1 := fresh_i();
+        my $lower := fresh_i();
+        my $upper := fresh_i();
+        nqp::push(@ins, op('ge_i', $i0, %*REG<pos>, %*REG<eos>));
+        nqp::push(@ins, op('if_i', $i0, %*REG<fail>));
+        nqp::push(@ins, op('const_i64', $lower, ival($node[1].value)));
+        nqp::push(@ins, op('const_i64', $upper, ival($node[2].value)));
+        nqp::push(@ins, op('ordat', $i0, %*REG<tgt>, %*REG<pos>));
+        if $node.negate {
+            my $succeed := label($*QASTCOMPILER.unique($*RXPREFIX ~ '_charrange'));
+            nqp::push(@ins, op('gt_i', $i1, $i0, $upper));
+            nqp::push(@ins, op('if_i', $i1, $succeed));
+            nqp::push(@ins, op('lt_i', $i1, $i0, $lower));
+            nqp::push(@ins, op('if_i', $i1, $succeed));
+            nqp::push(@ins, op('goto', %*REG<fail>));
+            nqp::push(@ins, $succeed);
+        } else {
+            nqp::push(@ins, op('lt_i', $i1, $i0, $lower));
+            nqp::push(@ins, op('if_i', $i1, %*REG<fail>));
+            nqp::push(@ins, op('gt_i', $i1, $i0, $upper));
+            nqp::push(@ins, op('if_i', $i1, %*REG<fail>));
+        }
+        nqp::push(@ins, op('inc_i', %*REG<pos>)) unless $node.subtype eq 'zerowidth';
+        release($i0,    $MVM_reg_int64);
+        release($i1,    $MVM_reg_int64);
+        release($lower, $MVM_reg_int64);
+        release($upper, $MVM_reg_int64);
+        @ins
     }
 
     method literal($node) {
