@@ -589,9 +589,6 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         }
         else {
             my @alts;
-            my $lower;
-            my $upper;
-            my $use-range := 0;
             for $<charspec> {
                 if $_[1] {
                     my $node;
@@ -626,20 +623,20 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                             my $c := nqp::chr($ord0++);
                             $str := nqp::concat($str, nqp::lc($c) ~ nqp::uc($c));
                         }
-                        $use-range := $use-range + 9000;
                     }
                     else {
-                        $lower := $ord0;
-                        $upper := $ord1;
-                        $str := nqp::concat($str, nqp::chr($ord0++)) while $ord0 <= $ord1;
-                        $use-range := $use-range + 1;
+                        @alts.push(QAST::Regex.new(
+                            '', :node($/),
+                            QAST::IVal.new( :value($ord0) ),
+                            QAST::IVal.new( :value($ord1) ),
+                            :negate( $<sign> eq '-' ),
+                            :rxtype<charrange> ));
                     }
                 }
                 elsif $_[0]<cclass_backslash> {
                     my $bs := $_[0]<cclass_backslash>.ast;
                     if $bs.rxtype eq 'enumcharlist' && !$bs.negate || $bs.rxtype eq 'literal' {
                         $str := $str ~ $bs[0];
-                        $use-range := $use-range + 9000;
                     }
                     else {
                         $bs.negate(!$bs.negate) if $<sign> eq '-';
@@ -649,26 +646,16 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                 else {
                     my $c := ~$_[0];
                     $str := $str ~ (%*RX<i> ?? nqp::lc($c) ~ nqp::uc($c) !! $c);
-                    $use-range := $use-range + 9000;
                 }
             }
-            if nqp::elems(@alts) == 0 && $use-range == 1 && nqp::chars($str) {
-                $qast := QAST::Regex.new(
-                                  $str,
-                                  QAST::IVal.new( :value($lower) ),
-                                  QAST::IVal.new( :value($upper) ),
-                                  :negate( $<sign> eq '-' ),
-                                  :rxtype<charrange>, :node($/) );
-            } else {
-                @alts.push(QAST::Regex.new( $str, :rxtype<enumcharlist>, :node($/), :negate( $<sign> eq '-' ) ))
-                    if nqp::chars($str);
-                $qast := +@alts == 1 ?? @alts[0] !!
-                    $<sign> eq '-' ??
-                        QAST::Regex.new( :rxtype<concat>, :node($/), :negate(1),
-                            QAST::Regex.new( :rxtype<conj>, :subtype<zerowidth>, |@alts ),
-                            QAST::Regex.new( :rxtype<cclass>, :name<.> ) ) !!
-                        QAST::Regex.new( :rxtype<altseq>, |@alts );
-            }
+            @alts.push(QAST::Regex.new( $str, :rxtype<enumcharlist>, :node($/), :negate( $<sign> eq '-' ) ))
+                if nqp::chars($str);
+            $qast := +@alts == 1 ?? @alts[0] !!
+                $<sign> eq '-' ??
+                    QAST::Regex.new( :rxtype<concat>, :node($/), :negate(1),
+                        QAST::Regex.new( :rxtype<conj>, :subtype<zerowidth>, |@alts ),
+                        QAST::Regex.new( :rxtype<cclass>, :name<.> ) ) !!
+                    QAST::Regex.new( :rxtype<altseq>, |@alts );
         }
         make $qast;
     }
