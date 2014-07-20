@@ -261,6 +261,20 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
                     if (ord != lc_arg && ord != uc_arg)
                         nextst[numnext++] = to;
                 }
+                else if (act == EDGE_CHARRANGE) {
+                    UINTVAL  uc_arg = edge_info[i].arg.uclc.uc;
+                    UINTVAL  lc_arg = edge_info[i].arg.uclc.lc;
+                    UINTVAL  ord    = STRING_ord(interp, target, offset);
+                    if (ord >= lc_arg && ord <= uc_arg)
+                        nextst[numnext++] = to;
+                }
+                else if (act == EDGE_CHARRANGE_NEG) {
+                    UINTVAL  uc_arg = edge_info[i].arg.uclc.uc;
+                    UINTVAL  lc_arg = edge_info[i].arg.uclc.lc;
+                    UINTVAL  ord    = STRING_ord(interp, target, offset);
+                    if (ord < lc_arg || ord > uc_arg)
+                        nextst[numnext++] = to;
+                }
             }
         }
         
@@ -3075,7 +3089,9 @@ inline op nqp_nfa_from_statelist(out PMC, invar PMC, invar PMC) :base_core {
                 nfa->states[i][cur_edge].arg.s = VTABLE_get_string_keyed_int(interp, edge_info, j + 1);
                 break;
             case EDGE_CODEPOINT_I:
-            case EDGE_CODEPOINT_I_NEG: {
+            case EDGE_CODEPOINT_I_NEG:
+            case EDGE_CHARRANGE:
+            case EDGE_CHARRANGE_NEG: {
                 PMC *arg = VTABLE_get_pmc_keyed_int(interp, edge_info, j + 1);
                 nfa->states[i][cur_edge].arg.uclc.lc = VTABLE_get_integer_keyed_int(interp, arg, 0);
                 nfa->states[i][cur_edge].arg.uclc.uc = VTABLE_get_integer_keyed_int(interp, arg, 1);

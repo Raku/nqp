@@ -4850,7 +4850,9 @@ public final class Ops {
                     nfa.states[i][curEdge].arg_s = edgeInfo.at_pos_boxed(tc, j + 1).get_str(tc);
                     break;
                 case NFA.EDGE_CODEPOINT_I:
-                case NFA.EDGE_CODEPOINT_I_NEG: {
+                case NFA.EDGE_CODEPOINT_I_NEG:
+                case NFA.EDGE_CHARRANGE:
+                case NFA.EDGE_CHARRANGE_NEG: {
                     SixModelObject arg = edgeInfo.at_pos_boxed(tc, j + 1);
                     nfa.states[i][curEdge].arg_lc = (char)smart_numify(arg.at_pos_boxed(tc, 0), tc);
                     nfa.states[i][curEdge].arg_uc = (char)smart_numify(arg.at_pos_boxed(tc, 1), tc);
@@ -5013,6 +5015,20 @@ public final class Ops {
                         char lc_arg = edgeInfo[i].arg_lc;
                         char ord = target.charAt((int)pos);
                         if (ord != lc_arg && ord != uc_arg)
+                            nextst.add(to);
+                    }
+                    else if (act == NFA.EDGE_CHARRANGE) {
+                        char uc_arg = edgeInfo[i].arg_uc;
+                        char lc_arg = edgeInfo[i].arg_lc;
+                        char ord = target.charAt((int)pos);
+                        if (ord >= lc_arg && ord <= uc_arg)
+                            nextst.add(to);
+                    }
+                    else if (act == NFA.EDGE_CHARRANGE_NEG) {
+                        char uc_arg = edgeInfo[i].arg_uc;
+                        char lc_arg = edgeInfo[i].arg_lc;
+                        char ord = target.charAt((int)pos);
+                        if (ord < lc_arg || ord > uc_arg)
                             nextst.add(to);
                     }
                 }

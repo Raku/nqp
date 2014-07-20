@@ -145,7 +145,9 @@ static void serialize(PARROT_INTERP, STable *st, void *data, SerializationWriter
                 writer->write_str(interp, writer, body->states[i][j].arg.s);
                 break;
             case EDGE_CODEPOINT_I:
-            case EDGE_CODEPOINT_I_NEG: {
+            case EDGE_CODEPOINT_I_NEG:
+            case EDGE_CHARRANGE:
+            case EDGE_CHARRANGE_NEG: {
                 writer->write_int(interp, writer, body->states[i][j].arg.uclc.lc);
                 writer->write_int(interp, writer, body->states[i][j].arg.uclc.uc);
                 break;
@@ -194,7 +196,9 @@ static void deserialize(PARROT_INTERP, STable *st, void *data, SerializationRead
                     body->states[i][j].arg.s = reader->read_str(interp, reader);
                     break;
                 case EDGE_CODEPOINT_I:
-                case EDGE_CODEPOINT_I_NEG: {
+                case EDGE_CODEPOINT_I_NEG:
+                case EDGE_CHARRANGE:
+                case EDGE_CHARRANGE_NEG: {
                     body->states[i][j].arg.uclc.lc = reader->read_int(interp, reader);
                     body->states[i][j].arg.uclc.uc = reader->read_int(interp, reader);
                     break;

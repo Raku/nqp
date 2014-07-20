@@ -20,6 +20,9 @@ public class NFA extends REPR {
     public static final int EDGE_CHARLIST_NEG     = 7;
     public static final int EDGE_CODEPOINT_I      = 9;
     public static final int EDGE_CODEPOINT_I_NEG  = 10;
+    public static final int EDGE_GENERIC_VAR      = 11;
+    public static final int EDGE_CHARRANGE        = 12;
+    public static final int EDGE_CHARRANGE_NEG    = 13;
     
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
         STable st = new STable(this, HOW);
@@ -79,7 +82,9 @@ public class NFA extends REPR {
                         body.states[i][j].arg_s = reader.readStr();
                         break;
                     case EDGE_CODEPOINT_I:
-                    case EDGE_CODEPOINT_I_NEG: {
+                    case EDGE_CODEPOINT_I_NEG:
+                    case EDGE_CHARRANGE:
+                    case EDGE_CHARRANGE_NEG: {
                         body.states[i][j].arg_lc = (char)reader.readLong();
                         body.states[i][j].arg_uc = (char)reader.readLong();
                         break;
@@ -121,7 +126,9 @@ public class NFA extends REPR {
                     writer.writeStr(body.states[i][j].arg_s);
                     break;
                 case EDGE_CODEPOINT_I:
-                case EDGE_CODEPOINT_I_NEG: {
+                case EDGE_CODEPOINT_I_NEG:
+                case EDGE_CHARRANGE:
+                case EDGE_CHARRANGE_NEG: {
                     writer.writeInt(body.states[i][j].arg_lc);
                     writer.writeInt(body.states[i][j].arg_uc);
                     break;

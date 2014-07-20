@@ -13,6 +13,8 @@ class QRegex::NFA {
     my $EDGE_CODEPOINT_I     := 9;
     my $EDGE_CODEPOINT_I_NEG := 10;
     my $EDGE_GENERIC_VAR     := 11;
+    my $EDGE_CHARRANGE       := 12;
+    my $EDGE_CHARRANGE_NEG   := 13;
 
     # The build-time set of states, with element zero being the fate name
     # list.
@@ -125,7 +127,15 @@ class QRegex::NFA {
     }
 
     method charrange($node, $from, $to) {
-        self.enumcharlist($node, $from, $to);
+        if $node.subtype eq 'zerowidth' {
+            $from := self.addedge($from, -1, $EDGE_CHARRANGE + ?$node.negate,
+                [$node[1].value, $node[2].value]);
+            self.addedge($from, 0, $EDGE_FATE, 0);
+        }
+        else {
+            self.addedge($from, $to, $EDGE_CHARRANGE + ?$node.negate,
+                [$node[1].value, $node[2].value]);
+        }
     }
 
     method literal($node, $from, $to) {

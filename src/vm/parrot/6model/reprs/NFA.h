@@ -12,6 +12,9 @@
 #define EDGE_CHARLIST_NEG      7
 #define EDGE_CODEPOINT_I       9
 #define EDGE_CODEPOINT_I_NEG   10
+#define EDGE_GENERIC_VAR       11
+#define EDGE_CHARRANGE         12
+#define EDGE_CHARRANGE_NEG     13
 
 /* State entry. */
 typedef struct {
