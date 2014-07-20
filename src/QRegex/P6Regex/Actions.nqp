@@ -427,7 +427,9 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     method cclass_backslash:sym<c>($/) {
-        make QAST::Regex.new( $<charspec>.ast, :rxtype('literal'), :node($/) );
+        make $<sym> eq 'C' ??
+            QAST::Regex.new( $<charspec>.ast, :rxtype('enumcharlist'), :negate(1), :node($/) ) !!
+            QAST::Regex.new( $<charspec>.ast, :rxtype('literal'), :node($/) )
     }
 
     method cclass_backslash:sym<any>($/) {
