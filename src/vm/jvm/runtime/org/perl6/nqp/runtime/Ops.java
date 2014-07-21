@@ -3264,6 +3264,10 @@ public final class Ops {
             for (char i = 0; i < Character.MAX_VALUE; i++)
                 if (Character.isValidCodePoint(i))
                     names.put(Character.getName(i), i);
+            names.put("LF",  (char)10);
+            names.put("FF",  (char)12);
+            names.put("CR",  (char)13);
+            names.put("NEL", (char)133);
             cpNameMap = names;
         }
         Character found = names.get(name);
