@@ -55,6 +55,10 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         self.panic('Null regex not allowed');
     }
 
+    method worry(*@args) {
+        nqp::sayfh(nqp::getstderr(), nqp::join('', @args));
+    }
+
     token ws { [ \s+ | '#' \N* ]* }
 
     token normspace { <?[\s#]> <.ws> }
@@ -354,6 +358,17 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
                          ( '\\' <cclass_backslash> || (<-[\]\\]>) )
                      ]**0..1
               )*
+              {
+                  my %seen;
+                  for $<charspec> {
+                      %seen{$_[0][0]} := (%seen{$_[0][0]} // 0) + 1 if nqp::defined($_[0][0]);
+                      %seen{$_[1][0]} := (%seen{$_[1][0]} // 0) + 1 if nqp::defined($_[1][0]);
+                  }
+                  for %seen {
+                      next if $_.value < 2;
+                      self.worry("Repeated character (" ~ $_.key ~ ") unexpectedly found in character class");
+                  }
+              }
           \s* ']'
         | $<name>=[\w+]
         | ':' $<invert>=['!'|<?>] $<uniprop>=[\w+]
