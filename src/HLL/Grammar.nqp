@@ -379,13 +379,23 @@ position C<pos>.
             !! self.'!cursor_start_fail'()
     }
 
+    my %nbsp := nqp::hash(
+        "\x00A0", 1,
+        "\x2007", 1,
+        "\x202F", 1,
+        "\xFEFF", 1,
+    );
     our method split_words(str $words) {
         my @result;
         my int $pos := 0;
         my int $eos := nqp::chars($words);
         my int $ws;
         while ($pos := nqp::findnotcclass(nqp::const::CCLASS_WHITESPACE, $words, $pos, $eos)) < $eos {
-            $ws := nqp::findcclass(nqp::const::CCLASS_WHITESPACE, $words, $pos, $eos);
+            # Search for another white space character as long as we hit non-breakable spaces.
+            $ws := $pos;
+            while %nbsp{nqp::substr($words, $ws := nqp::findcclass(nqp::const::CCLASS_WHITESPACE, $words, $ws, $eos), 1)} {
+                $ws := $ws + 1
+            }
             nqp::push(@result, nqp::substr($words, $pos, $ws - $pos));
             $pos := $ws;
         }
