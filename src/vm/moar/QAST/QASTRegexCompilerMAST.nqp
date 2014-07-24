@@ -624,6 +624,160 @@ class QAST::MASTRegexCompiler {
         @ins
     }
 
+    method dynquant($node) {
+        my @ins := nqp::list();
+
+        my $backtrack  := $node.backtrack || 'g';
+        my $sep        := $node[2];
+        my $prefix     := self.unique($*RXPREFIX ~ '_rxdynquant_' ~ $backtrack);
+        my $looplabel_index := rxjump($prefix ~ '_loop');
+        my $looplabel  := @*RXJUMPS[$looplabel_index];
+        my $donelabel_index := rxjump($prefix ~ '_done');
+        my $donelabel  := @*RXJUMPS[$donelabel_index];
+        my $skip0label := label($prefix ~ '_skip0');
+        my $skip1label := label($prefix ~ '_skip1');
+        my $skip2label := label($prefix ~ '_skip2');
+        my $skip3label := label($prefix ~ '_skip3');
+        my $skip4label := label($prefix ~ '_skip4');
+        my $skip5label := label($prefix ~ '_skip5');
+        my $skip6label := label($prefix ~ '_skip6');
+        my $skip7label := label($prefix ~ '_skip7');
+        my $skip8label := label($prefix ~ '_skip8');
+        my $needrep    := fresh_i();
+        my $needmark   := fresh_i();
+        my $rep        := %*REG<rep>;
+        my $pos        := %*REG<pos>;
+        my $ireg       := fresh_i();
+
+        my $minmax     := $node[1];
+        my $minmax_reg := fresh_o();
+        my $min_reg    := fresh_i();
+        my $max_reg    := fresh_i();
+        my $zero       := fresh_i();
+        my $one        := fresh_i();
+
+        my $minmax_mast := $*QASTCOMPILER.as_mast($minmax, :want($MVM_reg_obj));
+        my $res_reg     := $minmax_mast.result_reg;
+        merge_ins(@ins, $minmax_mast.instructions);
+        merge_ins(@ins, [
+            op('const_i64', $zero, ival(0)),
+            op('const_i64', $one,  ival(1)),
+            op('atpos_i', $min_reg, $res_reg, $zero),
+            op('atpos_i', $max_reg, $res_reg, $one),
+        ]);
+
+        # return if $min == 0 && $max == 0;
+        merge_ins(@ins, [
+            op('if_i', $min_reg, $skip8label),
+            op('unless_i', $max_reg, $skip7label),
+            $skip8label
+        ]);
+
+        # $needrep := $min > 1 || $max > 1;
+        merge_ins(@ins, [
+            op('gt_i', $needrep, $min_reg, $one),
+            op('if_i', $needrep, $skip0label),
+            op('gt_i', $needrep, $max_reg, $one),
+            $skip0label
+        ]);
+
+        # $needmark := $needrep || $backtrack eq 'r';
+        if $backtrack eq 'r' {
+            nqp::push(@ins, op('set', $needmark, $one));
+        }
+        else {
+            nqp::push(@ins, op('set', $needmark, $needrep));
+        }
+
+        if $backtrack eq 'f' {
+            my $seplabel := label($prefix ~ '_sep');
+            nqp::push(@ins, op('set', $rep, %*REG<zero>));
+
+            nqp::push(@ins, op('ge_i', $ireg, $min_reg, $one)); # if $min < 1 {
+            nqp::push(@ins, op('if_i', $ireg, $skip1label));
+            self.regex_mark(@ins, $looplabel_index, $pos, $rep);
+            nqp::push(@ins, op('goto', $donelabel));
+            nqp::push(@ins, $skip1label);                       # }
+
+            nqp::push(@ins, op('goto', $seplabel)) if $sep;
+            nqp::push(@ins, $looplabel);
+            nqp::push(@ins, op('set', $ireg, $rep));
+            if $sep {
+                merge_ins(@ins, self.regex_mast($sep));
+                nqp::push(@ins, $seplabel);
+            }
+            merge_ins(@ins, self.regex_mast($node[0]));
+            merge_ins(@ins, [
+                op('set', $rep, $ireg),
+                op('inc_i', $rep),
+
+                op('le_i', $ireg, $min_reg, $one), # if $min > 1 {
+                op('if_i', $ireg, $skip2label),
+                op('lt_i', $ireg, $rep, $min_reg),
+                op('if_i', $ireg, $looplabel),
+                $skip2label,                       # }
+
+                op('le_i', $ireg, $max_reg, $one), # if $max > 1 {
+                op('if_i', $ireg, $skip3label),
+                op('ge_i', $ireg, $rep, $max_reg),
+                op('if_i', $ireg, $donelabel),
+                $skip3label,                       # }
+
+                op('eq_i', $ireg, $max_reg, $one), # unless $max == 1 {
+                op('if_i', $ireg, $skip4label),
+            ]);
+            self.regex_mark(@ins, $looplabel_index, $pos, $rep);
+            nqp::push(@ins, $skip4label);          # }
+
+            nqp::push(@ins, $donelabel);
+        }
+        else {
+            nqp::push(@ins, op('if_i', $min_reg, $skip1label));     # if $min == 0 {
+            self.regex_mark(@ins, $donelabel_index, $pos, %*REG<zero>);
+            nqp::push(@ins, $skip1label);                           # }
+
+            nqp::push(@ins, op('unless_i', $min_reg, $skip2label)); # elsif $needmark {
+            nqp::push(@ins, op('unless_i', $needmark, $skip2label));
+            self.regex_mark(@ins, $donelabel_index, %*REG<negone>, %*REG<zero>);
+            nqp::push(@ins, $skip2label);                           # }
+
+            nqp::push(@ins, $looplabel);
+            merge_ins(@ins, self.regex_mast($node[0]));
+
+            nqp::push(@ins, op('unless_i', $needmark, $skip3label)); # if $needmark {
+            self.regex_peek(@ins, $donelabel_index, MAST::Local.new(:index(-1)), $rep);
+            self.regex_commit(@ins, $donelabel_index) if $backtrack eq 'r';
+            merge_ins(@ins, [
+                op('inc_i', $rep),
+
+                op('le_i', $ireg, $max_reg, $one), # if $max > 1 {
+                op('if_i', $ireg, $skip4label),
+                op('ge_i', $ireg, $rep, $max_reg),
+                op('if_i', $ireg, $donelabel),
+                $skip4label,                       # }
+                $skip3label,                                        # }
+
+                op('eq_i', $ireg, $max_reg, $one), # unless $max == 1 {
+                op('if_i', $ireg, $skip5label),
+            ]);
+            self.regex_mark(@ins, $donelabel_index, $pos, $rep);
+            merge_ins(@ins, self.regex_mast($sep)) if $sep;
+            merge_ins(@ins, [
+                op('goto', $looplabel),
+                $skip5label,                       # }
+                $donelabel,
+
+                op('le_i', $ireg, $min_reg, $one), # if $min > 1 {
+                op('if_i', $ireg, $skip6label),
+                op('lt_i', $ireg, $rep, $min_reg),
+                op('if_i', $ireg, %*REG<fail>),
+                $skip6label,                       # }
+            ]);
+        }
+        nqp::push(@ins, $skip7label);
+        @ins
+    }
+
     method quant($node) {
         my @ins := nqp::list();
         my $min := $node.min;

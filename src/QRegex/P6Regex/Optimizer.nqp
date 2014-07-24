@@ -171,6 +171,10 @@ class QRegex::Optimizer {
                     } elsif $type eq 'cclass' {
                     } elsif $type eq 'scan' {
                     } elsif $type eq 'charrange' {
+                    } elsif $type eq 'dynquant' {
+                        if $!main_opt {
+                            $node[$i] := $!main_opt($node[$i]);
+                        }
                     } elsif $type eq 'pass' || $type eq 'fail' {
                     } else {
                         # alt, altseq, conjseq, conj, quant

@@ -149,15 +149,44 @@ class QRegex::P6Regex::Actions is HLL::Actions {
 
     method quantifier:sym<**>($/) {
         my $qast;
-        my $min := $<min>.ast;
-        my $max := -1;
-        if ! $<max> { $max := $min }
-        elsif $<max> ne '*' {
-            $max := $<max>.ast;
-            $/.CURSOR.panic("Empty range") if $min > $max;
+        if $<codeblock> {
+            $qast := QAST::Regex.new( :rxtype<dynquant>, :node($/),
+                QAST::Op.new( :op('callmethod'), :name('!DYNQUANT_LIMITS'),
+                    QAST::Var.new( :name('$¢'), :scope('lexical') ),
+                    $<codeblock>.ast
+                ),
+            );
         }
-        $qast := QAST::Regex.new( :rxtype<quant>, :min($min), :max($max), :node($/) );
+        else {
+            my $min := $<min>.ast;
+            my $max := -1;
+            if ! $<max> { $max := $min }
+            elsif $<max> ne '*' {
+                $max := $<max>.ast;
+                $/.CURSOR.panic("Empty range") if $min > $max;
+            }
+            $qast := QAST::Regex.new( :rxtype<quant>, :min($min), :max($max), :node($/) );
+        }
         make backmod($qast, $<backmod>);
+    }
+
+    method codeblock($/) {
+        my $block := $<block>.ast;
+        $block.blocktype('immediate');
+        my $ast :=
+            QAST::Stmts.new(
+                QAST::Op.new(
+                    :op('bind'),
+                    QAST::Var.new( :name('$/'), :scope('lexical') ),
+                    QAST::Op.new(
+                        QAST::Var.new( :name('$¢'), :scope('lexical') ),
+                        :name('MATCH'),
+                        :op('callmethod')
+                    )
+                ),
+                $block
+            );
+        make $ast;
     }
 
     method metachar:sym<[ ]>($/) {

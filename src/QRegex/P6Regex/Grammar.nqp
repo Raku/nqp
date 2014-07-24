@@ -225,8 +225,12 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
             ]
           ]?
           { $/.CURSOR.panic("Negative numbers are not allowed as quantifiers") if $<min>.Str < 0 }
-        | <?[{]> { $/.CURSOR.panic("Block case of ** quantifier not yet implemented") }
+        | <?[{]> <codeblock>
         ]
+    }
+
+    token codeblock {
+        <block=.LANG('MAIN','pblock')>
     }
 
     token backmod { ':'? [ '?' | '!' | <!before ':'> ] }

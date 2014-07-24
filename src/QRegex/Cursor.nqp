@@ -478,6 +478,15 @@ role NQPCursorRole is export {
         $cur;
     }
 
+    method !DYNQUANT_LIMITS($mm) {
+        if nqp::islist($mm) {
+            +$mm > 1 ?? nqp::list_i($mm[0], $mm[1]) !! nqp::list_i($mm[0], $mm[0])
+        }
+        else {
+            nqp::list_i($mm, $mm)
+        }
+    }
+
     method at($pos) {
         my $cur := self."!cursor_start_cur"();
         $cur."!cursor_pass"($!pos) if +$pos == $!pos;
