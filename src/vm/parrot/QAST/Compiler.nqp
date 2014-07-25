@@ -1552,6 +1552,130 @@ class QAST::Compiler is HLL::Compiler {
         $ops;
     }
 
+    method dynquant($node) {
+        my $ops := self.post_new('Ops', :result(%*REG<cur>));
+
+        my $backtrack  := $node.backtrack || 'g';
+        my $sep        := $node[2];
+        my $prefix     := self.unique($*RXPREFIX ~ '_rxdynquant_' ~ $backtrack);
+        my $looplabel  := self.post_new('Label', :name($prefix ~ '_loop'));
+        my $donelabel  := self.post_new('Label', :name($prefix ~ '_done'));
+        my $skip0label := self.post_new('Label', :name($prefix ~ '_skip0'));
+        my $skip1label := self.post_new('Label', :name($prefix ~ '_skip1'));
+        my $skip2label := self.post_new('Label', :name($prefix ~ '_skip2'));
+        my $skip3label := self.post_new('Label', :name($prefix ~ '_skip3'));
+        my $skip4label := self.post_new('Label', :name($prefix ~ '_skip4'));
+        my $skip5label := self.post_new('Label', :name($prefix ~ '_skip5'));
+        my $skip6label := self.post_new('Label', :name($prefix ~ '_skip6'));
+        my $skip7label := self.post_new('Label', :name($prefix ~ '_skip7'));
+        my $skip8label := self.post_new('Label', :name($prefix ~ '_skip8'));
+        my $skip9label := self.post_new('Label', :name($prefix ~ '_skip9'));
+        my $needrep    := $*REGALLOC.fresh_i();
+        my $needmark   := $*REGALLOC.fresh_i();
+        my $ireg       := $*REGALLOC.fresh_i();
+
+        my $minmax     := $node[1];
+        my $min_reg    := $*REGALLOC.fresh_i();
+        my $max_reg    := $*REGALLOC.fresh_i();
+
+        my $res_reg := self.coerce(self.as_post($minmax), 'P');
+        $ops.push($res_reg);
+        $ops.push_pirop('set', $min_reg, $res_reg ~ '[0]');
+        $ops.push_pirop('set', $max_reg, $res_reg ~ '[1]');
+
+        # return if $min == 0 && $max == 0;
+        $ops.push_pirop('if', $min_reg, $skip0label);
+        $ops.push_pirop('unless', $max_reg, $skip1label);
+        $ops.push($skip0label);
+
+        # $needrep := $min > 1 || $max > 1;
+        $ops.push_pirop('lt', $min_reg, 1, $skip2label);
+        $ops.push_pirop('set', $needrep, 1);
+        $ops.push($skip2label);
+        $ops.push_pirop('lt', $max_reg, 1, $skip3label);
+        $ops.push_pirop('set', $needrep, 1);
+        $ops.push($skip3label);
+
+        # $needmark := $needrep || $backtrack eq 'r';
+        if $backtrack eq 'r' {
+            $ops.push_pirop('set', $needmark, 1);
+        }
+        else {
+            $ops.push_pirop('set', $needmark, $needrep);
+        }
+
+        if $backtrack eq 'f' {
+            my $seplabel := self.post_new('Label', :name($prefix ~ '_sep'));
+            $ops.push_pirop('set', %*REG<rep>, 0);
+
+            $ops.push_pirop('ge', $min_reg, 1, $skip4label); # if $min < 1 {
+            self.regex_mark($ops, $looplabel, %*REG<pos>, %*REG<rep>);
+            $ops.push_pirop('goto', $donelabel);
+            $ops.push($skip4label);                          # }
+
+            $ops.push_pirop('goto', $seplabel) if $sep;
+            $ops.push($looplabel);
+            $ops.push_pirop('set', $ireg, %*REG<rep>);
+            if $sep {
+                $ops.push(self.regex_post($sep));
+                $ops.push($seplabel);
+            }
+            $ops.push(self.regex_post($node[0]));
+            $ops.push_pirop('set', %*REG<rep>, $ireg);
+            $ops.push_pirop('inc', %*REG<rep>);
+
+            $ops.push_pirop('le', $min_reg, 1, $skip5label); # if $min > 1 {
+            $ops.push_pirop('lt', %*REG<rep>, $min_reg, $looplabel);
+            $ops.push($skip5label);                          # }
+
+            $ops.push_pirop('le', $max_reg, 1, $skip6label); # if $max > 1 {
+            $ops.push_pirop('ge', %*REG<rep>, $max_reg, $donelabel),
+            $ops.push($skip6label);                          # }
+
+            $ops.push_pirop('eq', $max_reg, 1, $skip7label); # unless $max == 1 {
+            self.regex_mark($ops, $looplabel, %*REG<pos>, %*REG<rep>);
+            $ops.push($skip7label);                          # }
+
+            $ops.push($donelabel);
+        }
+        else {
+            $ops.push_pirop('if', $min_reg, $skip4label);     # if $min == 0 {
+            self.regex_mark($ops, $donelabel, %*REG<pos>, 0);
+            $ops.push($skip4label);                           # }
+
+            $ops.push_pirop('unless', $min_reg, $skip5label); # elsif $needmark {
+            $ops.push_pirop('unless', $needmark, $skip5label);
+            self.regex_mark($ops, $donelabel, -1, 0);
+            $ops.push($skip5label);                           # }
+
+            $ops.push($looplabel);
+            $ops.push(self.regex_post($node[0]));
+
+            $ops.push_pirop('unless', $needmark, $skip6label); # if $needmark {
+            self.regex_peek($ops, $donelabel, '*', %*REG<rep>);
+            self.regex_commit($ops, $donelabel) if $backtrack eq 'r';
+            $ops.push_pirop('inc', %*REG<rep>);
+
+            $ops.push_pirop('le', $max_reg, 1, $skip7label);       # if $max > 1 {
+            $ops.push_pirop('ge', %*REG<rep>, $max_reg, $donelabel);
+            $ops.push($skip7label);                                # }
+            $ops.push($skip6label);                            # }
+
+            $ops.push_pirop('eq', $max_reg, 1, $skip8label); # unless $max == 1 {
+            self.regex_mark($ops, $donelabel, %*REG<pos>, %*REG<rep>);
+            $ops.push(self.regex_post($sep)) if $sep;
+            $ops.push_pirop('goto', $looplabel);
+            $ops.push($skip8label);                          # }
+            $ops.push($donelabel);
+
+            $ops.push_pirop('le', $min_reg, 1, $skip9label); # if $min > 1 {
+            $ops.push_pirop('lt', %*REG<rep>, $min_reg, %*REG<fail>);
+            $ops.push($skip9label);                          # }
+        }
+        $ops.push($skip1label);
+        $ops
+    }
+
     method quant($node) {
         my $ops := self.post_new('Ops', :result(%*REG<cur>));
         my $backtrack := $node.backtrack || 'g';
