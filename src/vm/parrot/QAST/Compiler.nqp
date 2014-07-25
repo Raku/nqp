@@ -1557,7 +1557,7 @@ class QAST::Compiler is HLL::Compiler {
 
         my $backtrack  := $node.backtrack || 'g';
         my $sep        := $node[2];
-        my $prefix     := self.unique($*RXPREFIX ~ '_rxdynquant_' ~ $backtrack);
+        my $prefix     := self.unique('rxdynquant_' ~ $backtrack);
         my $looplabel  := self.post_new('Label', :name($prefix ~ '_loop'));
         my $donelabel  := self.post_new('Label', :name($prefix ~ '_done'));
         my $skip0label := self.post_new('Label', :name($prefix ~ '_skip0'));
