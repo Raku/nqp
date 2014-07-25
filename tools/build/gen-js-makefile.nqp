@@ -1,3 +1,4 @@
+# vi: filetype=perl6:
 sub comment($comment) {
     say("# $comment");
 }
@@ -26,13 +27,40 @@ sub rule($target, $source, *@actions) {
 
 sub nqp($prefix, $file, $stage) {
     my $source := $prefix ~ '/' ~ $file ~ '.nqp';
-    my $pbc := stage_path($stage) ~ $file ~ '.pbc';
-    my $pir := stage_path($stage) ~ $file ~ '.pir';
+    my $path := stage_path($stage);
+    my $pbc := $path ~ $file ~ '.pbc';
+    my $pir := $path ~ $file ~ '.pir';
     rule($pbc, $source,
         make_parents($pbc),
-        "\$(JS_NQP) --target=pir --output=$pir --encoding=utf8 $source",
+        "\$(JS_NQP) --target=pir --output=$pir --encoding=utf8 --module-path=$path $source",
         "\$(JS_PARROT) -o $pbc $pir"
     );
+}
+
+sub deps($target, *@deps) {
+    say("$target : {nqp::join(' ',@deps)}");
+}
+
+sub combine(:$sources, :$stage, :$file) {
+    my $target := stage_path($stage) ~ $file;
+    rule($target, $sources, make_parents($target), "\$(PERL) tools/build/gen-cat.pl js $sources > $target"); 
+}
+
+sub cross-compile(:$stage, :$source, :$target, :$setting, :$no-regex-lib, :$deps = []) {
+    my $path := stage_path($stage);
+    my $pir := $path ~ $target ~ '.pir';
+    my $pbc := $path ~ $target ~ '.pbc';
+    # todo dependency on compiler
+    
+    nqp::unshift($deps, $source);
+    nqp::unshift($deps, '$(JS_STAGE1_COMPILER)');
+
+    rule($pbc, nqp::join(' ', $deps), 
+        make_parents($pbc),
+	"nqp-p --module-path \$(JS_STAGE1) src/vm/js/bin/cross-compile.nqp $source $path $target $setting $no-regex-lib",
+        "\$(JS_PARROT)  -o $pbc $pir");
+
+
 }
 
 
@@ -44,21 +72,35 @@ constant('JS_STAGE2','$(JS_BUILD_DIR)/stage2');
 constant('JS_NQP','nqp-p');
 constant('JS_PARROT','parrot');
 
-# HACK
 say('js-runner-default: js-all');
 
 my $stage1-qast-compiler-pbc := nqp('src/vm/js','QAST/Compiler',1);
+my $stage1-hll-backend-pbc := nqp('src/vm/js','HLL/Backend',1);
 
-say("js-all: $stage1-qast-compiler-pbc");
+constant('JS_STAGE1_COMPILER',"$stage1-qast-compiler-pbc $stage1-hll-backend-pbc");
 
-#
-#
-#JS_NQPCORE_PBC = NQPCORE.setting.pbc
-#
-#$(JS_STAGE1)/$(QASTNODE_COMBINED): $(QASTNODE_SOURCES) 
-#	$(MKPATH) $(JS_STAGE1)/gen
-#	$(PERL) tools/build/gen-cat.pl js $(QASTNODE_SOURCES) > $(JS_STAGE1)/$(QASTNODE_COMBINED)
-#
-#js-all: $(JS_STAGE1)/$(QASTNODE_COMBINED) js-cross_compiler js-install-modules
-#
-#js-runner-default: js-all
+
+my $nqp-mo-combined := combine(:stage(2), :sources('$(NQP_MO_SOURCES)'), :file('$(NQP_MO_COMBINED)'));
+my $nqp-mo-pbc := cross-compile(:stage(2), :source($nqp-mo-combined), :target('nqpmo'), :setting('NULL'), :no-regex-lib(1));
+
+my $nqpcore-combined := combine(:stage(2), :sources('$(CORE_SETTING_SOURCES)'), :file('$(CORE_SETTING_COMBINED).nqp'));
+my $nqpcore-pbc := cross-compile(:stage(2), :source($nqpcore-combined), :target('NQPCORE.setting'), :setting('NULL'), :no-regex-lib(1), :deps([$nqp-mo-pbc]));
+
+my $QASTNode-combined := combine(:stage(2), :sources('$(QASTNODE_SOURCES)'), :file('$(QASTNODE_COMBINED)'));
+my $QASTNode-pbc := cross-compile(:stage(2), :source($QASTNode-combined), :target('QASTNode'), :setting('NQPCORE'), :no-regex-lib(1), :deps([$nqpcore-pbc]));
+
+my $QRegex-combined := combine(:stage(2), :sources('$(QREGEX_SOURCES)'), :file('$(QREGEX_COMBINED)'));
+my $QRegex-pbc := cross-compile(:stage(2), :source($QRegex-combined), :target('QRegex'), :setting('NQPCORE'), :no-regex-lib(1), :deps([$nqpcore-pbc, $QASTNode-pbc]));
+
+
+deps('js-stage1-compiler', '$(JS_STAGE1_COMPILER)');
+deps("js-all", 'js-stage1-compiler', $nqpcore-pbc, $QASTNode-pbc, $QRegex-pbc);
+
+# we don't have a proper runner yet but the Makefile structure requires that
+deps('js-runner-default', 'js-all');
+
+say('js-test: js-all
+	src/vm/js/bin/run_tests');
+
+say('js-install-modules:
+	npm install src/vm/js/nqp-runtime-core src/vm/js/nqp-runtime-node src/vm/js/nqp-runtime gen/js/stage2/NQPCORE.setting gen/js/stage2/QRegex gen/js/stage2/nqpmo gen/js/stage2/QASTNode');
