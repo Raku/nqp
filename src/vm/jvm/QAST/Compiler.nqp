@@ -5279,6 +5279,229 @@ class QAST::CompilerJAST {
         $il;
     }
 
+    method dynquant($node) {
+        my $il         := JAST::InstructionList.new();
+
+        my $backtrack  := $node.backtrack || 'g';
+        my $sep        := $node[2];
+        my $prefix     := self.unique('rxdynquant' ~ $backtrack);
+        my $looplabel  := JAST::Label.new( :name($prefix ~ '_loop') );
+        my $donelabel  := JAST::Label.new( :name($prefix ~ '_done') );
+        my $skip0label := JAST::Label.new( :name($prefix ~ '_skip0'));
+        my $skip1label := JAST::Label.new( :name($prefix ~ '_skip1'));
+        my $skip2label := JAST::Label.new( :name($prefix ~ '_skip2'));
+        my $skip3label := JAST::Label.new( :name($prefix ~ '_skip3'));
+        my $skip4label := JAST::Label.new( :name($prefix ~ '_skip4'));
+        my $skip5label := JAST::Label.new( :name($prefix ~ '_skip5'));
+        my $skip6label := JAST::Label.new( :name($prefix ~ '_skip6'));
+        my $skip7label := JAST::Label.new( :name($prefix ~ '_skip7'));
+        my $skip8label := JAST::Label.new( :name($prefix ~ '_skip8'));
+        my $skip9label := JAST::Label.new( :name($prefix ~ '_skip9'));
+        my $needrep    := $*TA.fresh_i();
+        my $needmark   := $*TA.fresh_i();
+
+        my $minmax     := $node[1];
+        my $min_reg    := $*TA.fresh_i();
+        my $max_reg    := $*TA.fresh_i();
+
+        my $res_reg := self.as_jast($minmax, :want($RT_OBJ));
+        $il.append($res_reg.jast);
+        $*STACK.obtain($il, $res_reg);
+        $il.append($DUP);
+        $il.append($IVAL_ZERO);
+        $il.append($ALOAD_1);
+        $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+            "atpos_i", 'Long', $TYPE_SMO, 'Long', $TYPE_TC ));
+        $il.append(JAST::Instruction.new( :op('lstore'), $min_reg ));
+        $il.append($IVAL_ONE);
+        $il.append($ALOAD_1);
+        $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+            "atpos_i", 'Long', $TYPE_SMO, 'Long', $TYPE_TC ));
+        $il.append(JAST::Instruction.new( :op('lstore'), $max_reg ));
+
+        # return if $min == 0 && $max == 0;
+        $il.append(JAST::Instruction.new( :op('lload'), $min_reg ));
+        $il.append($IVAL_ZERO);
+        $il.append($LCMP);
+        $il.append(JAST::Instruction.new( :op('ifne'), $skip0label ));
+        $il.append(JAST::Instruction.new( :op('lload'), $max_reg ));
+        $il.append($IVAL_ZERO);
+        $il.append($LCMP);
+        $il.append(JAST::Instruction.new( :op('ifeq'), $skip1label ));
+        $il.append($skip0label);
+
+        # $needrep := $min > 1 || $max > 1;
+        $il.append(JAST::Instruction.new( :op('lload'), $min_reg ));
+        $il.append($IVAL_ONE);
+        $il.append($LCMP);
+        $il.append(JAST::Instruction.new( :op('iflt'), $skip2label ));
+        $il.append($IVAL_ONE);
+        $il.append(JAST::Instruction.new( :op('lstore'), $needrep ));
+        $il.append($skip2label);
+        $il.append(JAST::Instruction.new( :op('lload'), $max_reg ));
+        $il.append($IVAL_ONE);
+        $il.append($LCMP);
+        $il.append(JAST::Instruction.new( :op('iflt'), $skip3label ));
+        $il.append($IVAL_ONE);
+        $il.append(JAST::Instruction.new( :op('lstore'), $needrep ));
+        $il.append($skip3label);
+
+        # $needmark := $needrep || $backtrack eq 'r';
+        if $backtrack eq 'r' {
+            $il.append($IVAL_ONE);
+            $il.append(JAST::Instruction.new( :op('lstore'), $needmark ));
+        }
+        else {
+            $il.append(JAST::Instruction.new( :op('lload'), $needrep ));
+            $il.append(JAST::Instruction.new( :op('lstore'), $needmark ));
+        }
+
+        if $backtrack eq 'f' {
+            my $seplabel := JAST::Label.new( :name($prefix ~ '_sep'));
+            my $mark     := &*REGISTER_MARK($looplabel);
+            $il.append($IVAL_ZERO);
+            $il.append(JAST::Instruction.new( :op('lstore'), %*REG<rep> ));
+
+            $il.append(JAST::Instruction.new( :op('lload'), $min_reg )); # if $min < 1 {
+            $il.append($IVAL_ONE);
+            $il.append($LCMP);
+            $il.append(JAST::Instruction.new( :op('ifge'), $skip4label ));
+            self.regex_mark($il, $mark,
+                JAST::Instruction.new( :op('lload'), %*REG<pos> ),
+                JAST::Instruction.new( :op('lload'), %*REG<rep> ));
+            $il.append(JAST::Instruction.new( :op('goto'), $donelabel ));
+            $il.append($skip4label);                                     # }
+
+            $il.append(JAST::Instruction.new( :op('goto'), $seplabel )) if $sep;
+            $il.append($looplabel);
+            $il.append(JAST::Instruction.new( :op('lload'), %*REG<rep> ));
+            $il.append(JAST::Instruction.new( :op('lstore'), %*REG<itemp> ));
+            if $sep {
+                $il.append(self.regex_jast($sep));
+                $il.append($seplabel);
+            }
+            $il.append(self.regex_jast($node[0]));
+            $il.append(JAST::Instruction.new( :op('lload'), %*REG<itemp> ));
+            $il.append($IVAL_ONE);
+            $il.append($LADD);
+            $il.append(JAST::Instruction.new( :op('lstore'), %*REG<rep> ));
+
+            $il.append(JAST::Instruction.new( :op('lload'), $min_reg )); # if $min > 1 {
+            $il.append($IVAL_ONE);
+            $il.append($LCMP);
+            $il.append(JAST::Instruction.new( :op('ifle'), $skip5label ));
+            $il.append(JAST::Instruction.new( :op('lload'), %*REG<rep> ));
+            $il.append(JAST::Instruction.new( :op('lload'), $min_reg ));
+            $il.append($LCMP);
+            $il.append(JAST::Instruction.new( :op('iflt'), $looplabel ));
+            $il.append($skip5label);                                     # }
+
+            $il.append(JAST::Instruction.new( :op('lload'), $max_reg )); # if $max > 1 {
+            $il.append($IVAL_ONE);
+            $il.append($LCMP);
+            $il.append(JAST::Instruction.new( :op('ifle'), $skip6label ));
+            $il.append(JAST::Instruction.new( :op('lload'), %*REG<rep> ));
+            $il.append(JAST::Instruction.new( :op('lload'), $max_reg ));
+            $il.append($LCMP);
+            $il.append(JAST::Instruction.new( :op('ifge'), $donelabel ));
+            $il.append($skip6label);                                     # }
+
+            $il.append(JAST::Instruction.new( :op('lload'), $max_reg )); # if $max != 1 {
+            $il.append($IVAL_ONE);
+            $il.append($LCMP);
+            $il.append(JAST::Instruction.new( :op('ifeq'), $skip7label ));
+            self.regex_mark($il, $mark,
+                JAST::Instruction.new( :op('lload'), %*REG<pos> ),
+                JAST::Instruction.new( :op('lload'), %*REG<rep> ));
+            $il.append($skip7label);                                     # }
+
+            $il.append($donelabel);
+        }
+        else {
+            my $mark := &*REGISTER_MARK($donelabel);
+
+            $il.append(JAST::Instruction.new( :op('lload'), $min_reg )); # if $min == 0 {
+            $il.append($IVAL_ZERO);
+            $il.append($LCMP);
+            $il.append(JAST::Instruction.new( :op('ifne'), $skip4label ));
+            self.regex_mark($il, $mark,
+                JAST::Instruction.new( :op('lload'), %*REG<pos> ),
+                $IVAL_ZERO);
+            $il.append($skip4label);                                     # }
+
+            $il.append(JAST::Instruction.new( :op('lload'), $min_reg )); # elsif $needmark {
+            $il.append($IVAL_ZERO);
+            $il.append($LCMP);
+            $il.append(JAST::Instruction.new( :op('ifeq'), $skip5label ));
+            $il.append(JAST::Instruction.new( :op('lload'), $needmark ));
+            $il.append($IVAL_ZERO);
+            $il.append($LCMP);
+            $il.append(JAST::Instruction.new( :op('ifeq'), $skip5label ));
+            self.regex_mark($il, $mark, $IVAL_MINUSONE, $IVAL_ZERO);
+            $il.append($skip5label);                                     # }
+
+            $il.append($looplabel);
+            $il.append(self.regex_jast($node[0]));
+
+            $il.append(JAST::Instruction.new( :op('lload'), $needmark )); # if $needmark {
+            $il.append($IVAL_ZERO);
+            $il.append($LCMP);
+            $il.append(JAST::Instruction.new( :op('ifeq'), $skip6label ));
+            $il.append(JAST::Instruction.new( :op('aload'), %*REG<bstack> ));
+            $il.append($DUP);
+            $il.append(JAST::PushIVal.new( :value($mark) ));
+            $il.append($ALOAD_1);
+            $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+                "rxpeek", 'Long', $TYPE_SMO, 'Long', $TYPE_TC ));
+            $il.append(JAST::PushIVal.new( :value(2) ));
+            $il.append($LADD);
+            $il.append($ALOAD_1);
+            $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+                "atpos_i", 'Long', $TYPE_SMO, 'Long', $TYPE_TC ));
+            $il.append(JAST::Instruction.new( :op('lstore'), %*REG<rep> ));
+            self.regex_commit($il, $mark) if $backtrack eq 'r';
+            $il.append(JAST::Instruction.new( :op('lload'), %*REG<rep> ));
+            $il.append($IVAL_ONE);
+            $il.append($LADD);
+            $il.append(JAST::Instruction.new( :op('lstore'), %*REG<rep> ));
+
+            $il.append(JAST::Instruction.new( :op('lload'), $max_reg ));      # if $max > 1 
+            $il.append($IVAL_ONE);
+            $il.append($LCMP);
+            $il.append(JAST::Instruction.new( :op('ifle'), $skip7label ));
+            $il.append(JAST::Instruction.new( :op('lload'), %*REG<rep> ));
+            $il.append(JAST::Instruction.new( :op('lload'), $max_reg ));
+            $il.append($LCMP);
+            $il.append(JAST::Instruction.new( :op('ifge'), $donelabel ));
+            $il.append($skip7label);                                          # }
+            $il.append($skip6label);                                      # }
+
+            $il.append(JAST::Instruction.new( :op('lload'), $max_reg )); # unless $max == 1 {
+            $il.append($IVAL_ONE);
+            $il.append($LCMP);
+            $il.append(JAST::Instruction.new( :op('ifeq'), $skip8label ));
+            self.regex_mark($il, $mark,
+                JAST::Instruction.new( :op('lload'), %*REG<pos> ),
+                JAST::Instruction.new( :op('lload'), %*REG<rep> ));
+            $il.append(self.regex_jast($sep)) if $sep;
+            $il.append(JAST::Instruction.new( :op('goto'), $looplabel ));
+            $il.append($skip8label);                                     # }
+            $il.append($donelabel);
+
+            $il.append(JAST::Instruction.new( :op('lload'), $min_reg )); # if $min > 1 {
+            $il.append($IVAL_ONE);
+            $il.append($LCMP);
+            $il.append(JAST::Instruction.new( :op('iflt'), $skip9label ));
+            $il.append(JAST::Instruction.new( :op('lload'), %*REG<rep> ));
+            $il.append(JAST::Instruction.new( :op('lload'), $min_reg ));
+            $il.append($LCMP);
+            $il.append(JAST::Instruction.new( :op('iflt'), %*REG<fail> ));
+            $il.append($skip9label);                                     # }
+        }
+        $il.append($skip1label);
+        $il
+    }
+
     method quant($node) {
         my $il        := JAST::InstructionList.new();
         my $backtrack := $node.backtrack || 'g';
