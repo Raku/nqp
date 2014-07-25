@@ -1000,7 +1000,7 @@ class QAST::CompilerJS does SerializeOnce {
             ~ self.regex_case($scan)
             ~ self.regex_mark($loop,'pos',0)
             ~ self.regex_case($done);
-        } elsif $node.rxtype eq 'enumcharlist' {
+        } elsif $node.rxtype eq 'enumcharlist' || $node.rxtype eq 'charrange' {
             my $charlist := self.quote_string($node[0]);
             my $testop := $node.negate ?? '>=' !! '<';
 
