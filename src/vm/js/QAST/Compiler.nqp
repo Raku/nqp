@@ -1,3 +1,4 @@
+use QASTNode;
 # vi: filetype=perl6:
 # we handle CTXSAVE completely differently from rakudo-parrot as we don't have such control over lexical scopes
 class CTXSAVE {

@@ -72,3 +72,8 @@ class HLLBackend::JavaScript {
         !pir::isa__IPs($cuish, 'String')
     }
 }
+
+# Role specifying the default backend for this build.
+role HLL::Backend::Default {
+    method default_backend() { HLLBackend::JavaScript }
+}

@@ -25,12 +25,15 @@ sub rule($target, $source, *@actions) {
     $target;
 }
 
-sub nqp($prefix, $file, $stage) {
+sub nqp($prefix, $file, $stage, :$deps=[]) {
     my $source := $prefix ~ '/' ~ $file ~ '.nqp';
     my $path := stage_path($stage);
     my $pbc := $path ~ $file ~ '.pbc';
     my $pir := $path ~ $file ~ '.pir';
-    rule($pbc, $source,
+
+    nqp::unshift($deps, $source);
+
+    rule($pbc, nqp::join(' ', $deps),
         make_parents($pbc),
         "\$(JS_NQP) --target=pir --output=$pir --encoding=utf8 --module-path=$path $source",
         "\$(JS_PARROT) -o $pbc $pir"
@@ -75,7 +78,7 @@ constant('JS_PARROT','parrot');
 say('js-runner-default: js-all');
 
 my $stage1-qast-compiler-pbc := nqp('src/vm/js','QAST/Compiler',1);
-my $stage1-hll-backend-pbc := nqp('src/vm/js','HLL/Backend',1);
+my $stage1-hll-backend-pbc := nqp('src/vm/js','HLL/Backend',1,:deps([$stage1-qast-compiler-pbc]));
 
 constant('JS_STAGE1_COMPILER',"$stage1-qast-compiler-pbc $stage1-hll-backend-pbc");
 
@@ -92,9 +95,18 @@ my $QASTNode-pbc := cross-compile(:stage(2), :source($QASTNode-combined), :targe
 my $QRegex-combined := combine(:stage(2), :sources('$(QREGEX_SOURCES)'), :file('$(QREGEX_COMBINED)'));
 my $QRegex-pbc := cross-compile(:stage(2), :source($QRegex-combined), :target('QRegex'), :setting('NQPCORE'), :no-regex-lib(1), :deps([$nqpcore-pbc, $QASTNode-pbc]));
 
+my $QAST-Compiler-pbc := cross-compile(:stage(2), :source('src/vm/js/QAST/Compiler.nqp'), :target('QAST/Compiler'), :setting('NQPCORE'), :no-regex-lib(1), :deps([$nqpcore-pbc, $QASTNode-pbc]));
+
+my $NQPHLL-combined := combine(:stage(2), :sources('src/vm/js/HLL/Backend.nqp $(COMMON_HLL_SOURCES)'), :file('$(HLL_COMBINED)')); 
+my $NQPHLL-pbc := cross-compile(:stage(2), :source($NQPHLL-combined), :target('NQPHLL'), :setting('NQPCORE'), :no-regex-lib(1), :deps([$nqpcore-pbc, $QAST-Compiler-pbc]));
+
+my $QAST-pbc := cross-compile(:stage(2), :source('src/vm/js/QAST.nqp'), :target('QAST'), :setting('NQPCORE'), :no-regex-lib(1), :deps([$nqpcore-pbc, $QASTNode-pbc]));
+
+my $NQPP6QRegex-combined := combine(:stage(2), :sources('$(P6QREGEX_SOURCES)'), :file('$(P6QREGEX_COMBINED)')); 
+my $NQPP6QRegex-pbc := cross-compile(:stage(2), :source($NQPP6QRegex-combined), :target('NQPP6QRegex'), :setting('NQPCORE'), :no-regex-lib(1), :deps([$nqpcore-pbc, $QRegex-pbc, $NQPHLL-pbc, $QAST-pbc]));
 
 deps('js-stage1-compiler', '$(JS_STAGE1_COMPILER)');
-deps("js-all", 'js-stage1-compiler', $nqpcore-pbc, $QASTNode-pbc, $QRegex-pbc);
+deps("js-all", 'js-stage1-compiler', $nqpcore-pbc, $QASTNode-pbc, $QRegex-pbc, $NQPP6QRegex-pbc);
 
 # we don't have a proper runner yet but the Makefile structure requires that
 deps('js-runner-default', 'js-all');
