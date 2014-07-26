@@ -428,10 +428,10 @@ op.ord = function(ctx, str, index) {
 op.ordfirst = op.ord;
 op.ordat = op.ord;
 op.lc = function(ctx, str) {
-  return str.to_s().toLowerCase();
+  return str.to_s(ctx).toLowerCase();
 };
 op.uc = function(ctx, str) {
-  return str.to_s().toUpperCase();
+  return str.to_s(ctx).toUpperCase();
 };
 op.cmp_i = function(ctx, a, b) {
   if (a == b) {
