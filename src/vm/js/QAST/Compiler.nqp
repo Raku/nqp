@@ -924,7 +924,8 @@ class QAST::CompilerJS does SerializeOnce {
                     $code := $code ~ "if (target.substr(pos,2) == \"\\r\\n\") \{pos++\}\n";
                 } 
             }
-            $code ~ "pos++;\n" unless $node.subtype eq 'zerowidth';
+            $code := $code ~ "pos++;\n" unless $node.subtype eq 'zerowidth';
+            $code;
         } elsif $node.rxtype eq 'subrule' || $node.rxtype eq 'ws' {
             my $captured := 0;
             my $name := QAST::SVal.new(:value(nqp::defined($node.name) ?? $node.name !! ''));
