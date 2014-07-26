@@ -1,0 +1,7 @@
+General stuff that helps all backends
+    Write tests (to avoid implementing stuff in crazy ways)
+    - nqp::eoffh
+    - nqp::isstr
+    - nqp::getmessage
+
+
