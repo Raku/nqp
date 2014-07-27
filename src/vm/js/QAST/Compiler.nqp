@@ -687,21 +687,45 @@ class QAST::CompilerJS does SerializeOnce {
     multi method as_js(QAST::NVal $ival) {
         '('~$ival.value()~')';
     }
+
     method quote_string($str) {
+        # We can not use regexes here as the regex-lib is not yet available at that point
+
+        my $out := '';
         my $quoted := nqp::escape($str);
-        $quoted := subst($quoted,/\\(x) \{ (.*?) \} || \\(.) /,-> $match {
-            if $match[0] eq 'e' {
-              '\\x1b';
-            } elsif $match[0] eq 'a' {
-              '\\x07';
-            } elsif $match[0] eq 'x' {
-              '\u'~nqp::x("0",4-nqp::chars($match[1]))~$match[1];
+
+        # We use a lot of variables to keep track of the state as we can only iterate the chars sequentialy
+        # nqp::escape on nqp-p returns \x{..} on parrot which we have to transform 
+        my $backslash := 0;
+        my $x := 0;
+        my $curly := 0;
+
+        my $escape := '';
+
+        for nqp::split('',$quoted~'') -> $c {
+            if $backslash && $c eq 'e' {
+                $out := $out ~ 'x1b';
+            } elsif $backslash && $c eq 'a' {
+                $out := $out ~ 'x07';
+            } elsif $backslash && $c eq 'x' {
+                $x := 1;
+            } elsif $x && $c eq '{' {
+                $x := 0;
+                $curly := 1;
+            } elsif $curly && $c eq '}' {
+               $out := $out ~ 'u'~nqp::x("0",4-nqp::chars($escape))~$escape;
+               $escape := '';
+               $curly := 0;
+            } elsif $curly {
+                $escape := $escape ~ $c;
             } else {
-              $match.Str;
+                $out := $out ~ $c;
             }
-        },:global);
-        "\""~$quoted~"\"";
+            $backslash := $c eq '\\';
+        }
+        "\""~$out~"\"";
     }
+
     multi method as_js(QAST::SVal $sval) {
         self.quote_string($sval.value());
     }
