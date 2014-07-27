@@ -1301,15 +1301,24 @@ class QAST::CompilerJS does SerializeOnce {
     %mangle<`> := 'BACKTICK';
     %mangle<$> := 'DOLAR';
     %mangle<\\> := 'BACKSLASH';
+
     method mangle_name($name) {
         if self.is_reserved_word($name) {$name := "_$name"}
-        my $mangled := subst($name,/(\W)/,-> $match {
-            if nqp::existskey(%mangle, $match[0]) {
-                '_'~%mangle{$match[0]}~'_';
+
+        my $mangled := '';
+
+        for nqp::split('',$name) -> $char {
+            if nqp::iscclass(nqp::const::CCLASS_ALPHANUMERIC, $char, 0) {
+                $mangled := $mangled ~ $char;
             } else {
-                '_'~nqp::ord($match[0])~'_';
+                if nqp::existskey(%mangle, $char) {
+                    $mangled := $mangled ~ '_' ~ %mangle{$char} ~ '_';
+                } else {
+                    $mangled := $mangled ~ '_' ~ nqp::ord($char) ~ '_';
+                }
             }
-        },:global);
+        }
+
         $mangled;
     }
 
