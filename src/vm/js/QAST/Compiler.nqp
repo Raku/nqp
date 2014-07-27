@@ -721,7 +721,7 @@ class QAST::CompilerJS does SerializeOnce {
             } else {
                 $out := $out ~ $c;
             }
-            $backslash := $c eq '\\';
+            $backslash := !$backslash && $c eq '\\';
         }
         "\""~$out~"\"";
     }
