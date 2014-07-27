@@ -372,8 +372,17 @@ class QAST::CompilerJS does SerializeOnce {
         }
     }
 
+    # we can't use subst
+    method dot_to_underscore($string) {
+        my $ret := '';
+        for nqp::split('',$string) -> $c {
+            $ret := $ret ~ ($c eq '.' ?? '_' !! $c); 
+        }
+        $ret;
+    }
+
     method cuid($node) {
-        my $cuid := subst($node.cuid(),/\./,"_");
+        my $cuid := self.dot_to_underscore($node.cuid());
         %!cuids{$cuid} := 1;
         $cuid;
     }
