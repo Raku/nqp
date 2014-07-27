@@ -19,7 +19,9 @@ sub make_parents($path) {
 sub rule($target, $source, *@actions) {
     my $rule := "$target: $source\n";
     for @actions -> $action {
-        $rule := $rule ~ "\t$action\n";
+        if $rule ne '' {
+            $rule := $rule ~ "\t$action\n";
+        }
     }
     say($rule);
     $target;
@@ -44,9 +46,16 @@ sub deps($target, *@deps) {
     say("$target : {nqp::join(' ',@deps)}");
 }
 
-sub combine(:$sources, :$stage, :$file) {
+sub combine(:$sources, :$stage, :$file, :$gen-version = 0) {
+
     my $target := stage_path($stage) ~ $file;
-    rule($target, $sources, make_parents($target), "\$(PERL) tools/build/gen-cat.pl js $sources > $target"); 
+    my $version := stage_path($stage) ~ 'nqp-config.nqp';
+
+    rule($target, $sources,
+        make_parents($target),
+        $gen-version ?? "\$(PERL) tools/build/gen-version.pl > $version" !! '',
+        "\$(PERL) tools/build/gen-cat.pl js $sources {$gen-version ?? $version !! ''} > $target"
+    ); 
 }
 
 sub cross-compile(:$stage, :$source, :$target, :$setting, :$no-regex-lib, :$deps = []) {
@@ -105,8 +114,11 @@ my $QAST-pbc := cross-compile(:stage(2), :source('src/vm/js/QAST.nqp'), :target(
 my $NQPP6QRegex-combined := combine(:stage(2), :sources('$(P6QREGEX_SOURCES)'), :file('$(P6QREGEX_COMBINED)')); 
 my $NQPP6QRegex-pbc := cross-compile(:stage(2), :source($NQPP6QRegex-combined), :target('NQPP6QRegex'), :setting('NQPCORE'), :no-regex-lib(1), :deps([$nqpcore-pbc, $QRegex-pbc, $NQPHLL-pbc, $QAST-pbc]));
 
+
+my $NQP-combined := combine(:stage(2), :sources('$(COMMON_NQP_SOURCES)'), :file('$(NQP_COMBINED)'), :gen-version(1));
+
 deps('js-stage1-compiler', '$(JS_STAGE1_COMPILER)');
-deps("js-all", 'js-stage1-compiler', $nqpcore-pbc, $QASTNode-pbc, $QRegex-pbc, $NQPP6QRegex-pbc);
+deps("js-all", 'js-stage1-compiler', $nqpcore-pbc, $QASTNode-pbc, $QRegex-pbc, $NQPP6QRegex-pbc, $NQP-combined);
 
 # we don't have a proper runner yet but the Makefile structure requires that
 deps('js-runner-default', 'js-all');
@@ -115,4 +127,4 @@ say('js-test: js-all
 	src/vm/js/bin/run_tests');
 
 say('js-install-modules:
-	npm install src/vm/js/nqp-runtime-core src/vm/js/nqp-runtime-node src/vm/js/nqp-runtime gen/js/stage2/NQPCORE.setting gen/js/stage2/QRegex gen/js/stage2/nqpmo gen/js/stage2/QASTNode');
+	npm install src/vm/js/nqp-runtime-core src/vm/js/nqp-runtime-node src/vm/js/nqp-runtime gen/js/stage2/NQPCORE.setting gen/js/stage2/QRegex gen/js/stage2/nqpmo gen/js/stage2/QASTNode gen/js/stage2/QAST gen/js/stage2/NQPP6QRegex gen/js/stage2/NQPHLL');

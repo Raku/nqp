@@ -18,7 +18,8 @@ $(JS_STAGE1)/HLL/Backend.pbc: src/vm/js/HLL/Backend.nqp $(JS_STAGE1)/QAST/Compil
 JS_STAGE1_COMPILER = $(JS_STAGE1)/QAST/Compiler.pbc $(JS_STAGE1)/HLL/Backend.pbc
 $(JS_STAGE2)/$(NQP_MO_COMBINED): $(NQP_MO_SOURCES)
 	mkdir -p $(JS_STAGE2)
-	$(PERL) tools/build/gen-cat.pl js $(NQP_MO_SOURCES) > $(JS_STAGE2)/$(NQP_MO_COMBINED)
+	
+	$(PERL) tools/build/gen-cat.pl js $(NQP_MO_SOURCES)  > $(JS_STAGE2)/$(NQP_MO_COMBINED)
 
 $(JS_STAGE2)/nqpmo.pbc: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(NQP_MO_COMBINED)
 	mkdir -p $(JS_STAGE2)
@@ -27,7 +28,8 @@ $(JS_STAGE2)/nqpmo.pbc: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(NQP_MO_COMBINED)
 
 $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp: $(CORE_SETTING_SOURCES)
 	mkdir -p $(JS_STAGE2)
-	$(PERL) tools/build/gen-cat.pl js $(CORE_SETTING_SOURCES) > $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp
+	
+	$(PERL) tools/build/gen-cat.pl js $(CORE_SETTING_SOURCES)  > $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp
 
 $(JS_STAGE2)/NQPCORE.setting.pbc: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp $(JS_STAGE2)/nqpmo.pbc
 	mkdir -p $(JS_STAGE2)
@@ -36,7 +38,8 @@ $(JS_STAGE2)/NQPCORE.setting.pbc: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(CORE_SETT
 
 $(JS_STAGE2)/$(QASTNODE_COMBINED): $(QASTNODE_SOURCES)
 	mkdir -p $(JS_STAGE2)
-	$(PERL) tools/build/gen-cat.pl js $(QASTNODE_SOURCES) > $(JS_STAGE2)/$(QASTNODE_COMBINED)
+	
+	$(PERL) tools/build/gen-cat.pl js $(QASTNODE_SOURCES)  > $(JS_STAGE2)/$(QASTNODE_COMBINED)
 
 $(JS_STAGE2)/QASTNode.pbc: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(QASTNODE_COMBINED) $(JS_STAGE2)/NQPCORE.setting.pbc
 	mkdir -p $(JS_STAGE2)
@@ -45,7 +48,8 @@ $(JS_STAGE2)/QASTNode.pbc: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(QASTNODE_COMBINE
 
 $(JS_STAGE2)/$(QREGEX_COMBINED): $(QREGEX_SOURCES)
 	mkdir -p $(JS_STAGE2)
-	$(PERL) tools/build/gen-cat.pl js $(QREGEX_SOURCES) > $(JS_STAGE2)/$(QREGEX_COMBINED)
+	
+	$(PERL) tools/build/gen-cat.pl js $(QREGEX_SOURCES)  > $(JS_STAGE2)/$(QREGEX_COMBINED)
 
 $(JS_STAGE2)/QRegex.pbc: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(QREGEX_COMBINED) $(JS_STAGE2)/NQPCORE.setting.pbc $(JS_STAGE2)/QASTNode.pbc
 	mkdir -p $(JS_STAGE2)
@@ -59,7 +63,8 @@ $(JS_STAGE2)/QAST/Compiler.pbc: $(JS_STAGE1_COMPILER) src/vm/js/QAST/Compiler.nq
 
 $(JS_STAGE2)/$(HLL_COMBINED): src/vm/js/HLL/Backend.nqp $(COMMON_HLL_SOURCES)
 	mkdir -p $(JS_STAGE2)
-	$(PERL) tools/build/gen-cat.pl js src/vm/js/HLL/Backend.nqp $(COMMON_HLL_SOURCES) > $(JS_STAGE2)/$(HLL_COMBINED)
+	
+	$(PERL) tools/build/gen-cat.pl js src/vm/js/HLL/Backend.nqp $(COMMON_HLL_SOURCES)  > $(JS_STAGE2)/$(HLL_COMBINED)
 
 $(JS_STAGE2)/NQPHLL.pbc: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(HLL_COMBINED) $(JS_STAGE2)/NQPCORE.setting.pbc $(JS_STAGE2)/QAST/Compiler.pbc
 	mkdir -p $(JS_STAGE2)
@@ -73,17 +78,23 @@ $(JS_STAGE2)/QAST.pbc: $(JS_STAGE1_COMPILER) src/vm/js/QAST.nqp $(JS_STAGE2)/NQP
 
 $(JS_STAGE2)/$(P6QREGEX_COMBINED): $(P6QREGEX_SOURCES)
 	mkdir -p $(JS_STAGE2)
-	$(PERL) tools/build/gen-cat.pl js $(P6QREGEX_SOURCES) > $(JS_STAGE2)/$(P6QREGEX_COMBINED)
+	
+	$(PERL) tools/build/gen-cat.pl js $(P6QREGEX_SOURCES)  > $(JS_STAGE2)/$(P6QREGEX_COMBINED)
 
 $(JS_STAGE2)/NQPP6QRegex.pbc: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(P6QREGEX_COMBINED) $(JS_STAGE2)/NQPCORE.setting.pbc $(JS_STAGE2)/QRegex.pbc $(JS_STAGE2)/NQPHLL.pbc $(JS_STAGE2)/QAST.pbc
 	mkdir -p $(JS_STAGE2)
 	nqp-p --module-path $(JS_STAGE1) src/vm/js/bin/cross-compile.nqp $(JS_STAGE2)/$(P6QREGEX_COMBINED) $(JS_STAGE2)/ NQPP6QRegex NQPCORE 1
 	$(JS_PARROT)  -o $(JS_STAGE2)/NQPP6QRegex.pbc $(JS_STAGE2)/NQPP6QRegex.pir
 
+$(JS_STAGE2)/$(NQP_COMBINED): $(COMMON_NQP_SOURCES)
+	mkdir -p $(JS_STAGE2)
+	$(PERL) tools/build/gen-version.pl > $(JS_STAGE2)/nqp-config.nqp
+	$(PERL) tools/build/gen-cat.pl js $(COMMON_NQP_SOURCES) $(JS_STAGE2)/nqp-config.nqp > $(JS_STAGE2)/$(NQP_COMBINED)
+
 js-stage1-compiler : $(JS_STAGE1_COMPILER)
-js-all : js-stage1-compiler $(JS_STAGE2)/NQPCORE.setting.pbc $(JS_STAGE2)/QASTNode.pbc $(JS_STAGE2)/QRegex.pbc $(JS_STAGE2)/NQPP6QRegex.pbc
+js-all : js-stage1-compiler $(JS_STAGE2)/NQPCORE.setting.pbc $(JS_STAGE2)/QASTNode.pbc $(JS_STAGE2)/QRegex.pbc $(JS_STAGE2)/NQPP6QRegex.pbc $(JS_STAGE2)/$(NQP_COMBINED)
 js-runner-default : js-all
 js-test: js-all
 	src/vm/js/bin/run_tests
 js-install-modules:
-	npm install src/vm/js/nqp-runtime-core src/vm/js/nqp-runtime-node src/vm/js/nqp-runtime gen/js/stage2/NQPCORE.setting gen/js/stage2/QRegex gen/js/stage2/nqpmo gen/js/stage2/QASTNode
+	npm install src/vm/js/nqp-runtime-core src/vm/js/nqp-runtime-node src/vm/js/nqp-runtime gen/js/stage2/NQPCORE.setting gen/js/stage2/QRegex gen/js/stage2/nqpmo gen/js/stage2/QASTNode gen/js/stage2/QAST gen/js/stage2/NQPP6QRegex gen/js/stage2/NQPHLL
