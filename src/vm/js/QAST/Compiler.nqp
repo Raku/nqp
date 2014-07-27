@@ -1866,8 +1866,4 @@ class QAST::CompilerJS does SerializeOnce {
         }
         self.decorate('set_code_refs',"nqp.set_code_refs(code_refs,[{nqp::join(',',@blocks)}]);\n")
     }
-    method emit_with_setting($ast,$setting) {
-        my $code := self.as_js_with_cuids($ast);
-        self.strict~$code[0]~subst($setting,/'(1) /*CTXSAVE*/'/,$code[1]);
-    }
 }
