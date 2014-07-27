@@ -257,32 +257,32 @@ class QAST::MASTOperations {
     }
 
     # Adds a core op handler.
-    method add_core_op($op, $handler, :$inlinable = 1) {
+    method add_core_op(str $op, $handler, :$inlinable = 1) {
         %core_ops{$op} := $handler;
         self.set_core_op_inlinability($op, $inlinable);
     }
 
     # Adds a HLL op handler.
-    method add_hll_op($hll, $op, $handler, :$inlinable = 1) {
+    method add_hll_op(str $hll, str $op, $handler, :$inlinable = 1) {
         %hll_ops{$hll} := {} unless %hll_ops{$hll};
         %hll_ops{$hll}{$op} := $handler;
         self.set_hll_op_inlinability($hll, $op, $inlinable);
     }
 
     # Sets op inlinability at a core level.
-    method set_core_op_inlinability($op, $inlinable) {
+    method set_core_op_inlinability(str $op, $inlinable) {
         %core_inlinability{$op} := $inlinable;
     }
 
     # Sets op inlinability at a HLL level. (Can override at HLL level whether
     # or not the HLL overrides the op itself.)
-    method set_hll_op_inlinability($hll, $op, $inlinable) {
+    method set_hll_op_inlinability(str $hll, str $op, $inlinable) {
         %hll_inlinability{$hll} := {} unless nqp::existskey(%hll_inlinability, $hll);
         %hll_inlinability{$hll}{$op} := $inlinable;
     }
 
     # Checks if an op is considered inlinable.
-    method is_inlinable($hll, $op) {
+    method is_inlinable(str $hll, str $op) {
         if nqp::existskey(%hll_inlinability, $hll) {
             if nqp::existskey(%hll_inlinability{$hll}, $op) {
                 return %hll_inlinability{$hll}{$op};
@@ -292,7 +292,7 @@ class QAST::MASTOperations {
     }
 
     # Adds a core op that maps to a Moar op.
-    method add_core_moarop_mapping($op, $moarop, $ret = -1, :$mapper?, :$decont, :$inlinable = 1) {
+    method add_core_moarop_mapping(str $op, str $moarop, $ret = -1, :$mapper?, :$decont, :$inlinable = 1) {
         my $moarop_mapper := $mapper
             ?? $mapper(self, $moarop, $ret)
             !! self.moarop_mapper($moarop, $ret, $decont);
@@ -304,7 +304,7 @@ class QAST::MASTOperations {
     }
 
     # Adds a HLL op that maps to a Moar op.
-    method add_hll_moarop_mapping($hll, $op, $moarop, $ret = -1, :$mapper?, :$decont, :$inlinable = 1) {
+    method add_hll_moarop_mapping(str $hll, str $op, str $moarop, $ret = -1, :$mapper?, :$decont, :$inlinable = 1) {
         my $moarop_mapper := $mapper
             ?? $mapper(self, $moarop, $ret)
             !! self.moarop_mapper($moarop, $ret, $decont);
@@ -319,7 +319,7 @@ class QAST::MASTOperations {
     # Returns a mapper closure for turning an operation into a Moar op.
     # $ret is the 0-based index of which arg to use as the result when
     # the moarop is void.
-    method moarop_mapper($moarop, $ret, $decont_in) {
+    method moarop_mapper(str $moarop, $ret, $decont_in) {
         # do a little checking of input values
 
         my $self := self;
@@ -363,7 +363,7 @@ class QAST::MASTOperations {
     }
 
     # Gets the return type of a MoarVM op, if any.
-    sub moarop_return_type($moarop) {
+    sub moarop_return_type(str $moarop) {
         if nqp::existskey(%core_op_codes, $moarop) {
             my int $op_num       := %core_op_codes{$moarop};
             my int $num_operands := nqp::atpos_i(@core_operands_counts, $op_num);
@@ -391,7 +391,7 @@ class QAST::MASTOperations {
     }
 
     # Sets op native result type at a core level.
-    method set_core_op_result_type($op, $type) {
+    method set_core_op_result_type(str $op, $type) {
         if $type == $MVM_reg_int64 {
             %core_result_type{$op} := int;
         }
@@ -405,7 +405,7 @@ class QAST::MASTOperations {
     
     # Sets op inlinability at a HLL level. (Can override at HLL level whether
     # or not the HLL overrides the op itself.)
-    method set_hll_op_result_type($hll, $op, $type) {
+    method set_hll_op_result_type(str $hll, str $op, $type) {
         %hll_result_type{$hll} := {} unless nqp::existskey(%hll_result_type, $hll);
         if $type == $MVM_reg_int64 {
             %hll_result_type{$hll}{$op} := int;
@@ -419,7 +419,7 @@ class QAST::MASTOperations {
     }
 
     # Sets returns on an op node if we it has a native result type.
-    method attach_result_type($hll, $node) {
+    method attach_result_type(str $hll, $node) {
         my $op := $node.op;
         if nqp::existskey(%hll_result_type, $hll) {
             if nqp::existskey(%hll_result_type{$hll}, $op) {
@@ -433,7 +433,7 @@ class QAST::MASTOperations {
     }
 
     # Adds a HLL box handler.
-    method add_hll_box($hll, $type, $handler) {
+    method add_hll_box(str $hll, $type, $handler) {
         unless $type == $MVM_reg_int64 || $type == $MVM_reg_num64 || $type == $MVM_reg_str || $type == $MVM_reg_void {
             nqp::die("Unknown box type '$type'");
         }
@@ -442,7 +442,7 @@ class QAST::MASTOperations {
     }
 
     # Adds a HLL unbox handler.
-    method add_hll_unbox($hll, $type, $handler) {
+    method add_hll_unbox(str $hll, $type, $handler) {
         unless $type == $MVM_reg_int64 || $type == $MVM_reg_num64 || $type == $MVM_reg_str {
             nqp::die("Unknown unbox type '$type'");
         }
@@ -451,12 +451,12 @@ class QAST::MASTOperations {
     }
 
     # Generates instructions to box the result in reg.
-    method box($qastcomp, $hll, $type, $reg) {
+    method box($qastcomp, str $hll, $type, $reg) {
         (%hll_box{$hll}{$type} // %hll_box{''}{$type})($qastcomp, $reg)
     }
 
     # Generates instructions to unbox the result in reg.
-    method unbox($qastcomp, $hll, $type, $reg) {
+    method unbox($qastcomp, str $hll, $type, $reg) {
         (%hll_unbox{$hll}{$type} // %hll_unbox{''}{$type})($qastcomp, $reg)
     }
 }
