@@ -1497,9 +1497,10 @@ my class MASTCompilerInstance {
     }
 
     multi method compile_node(QAST::Regex $node, :$want) {
+        my $rxcomp := QAST::MASTRegexCompiler.new(:qastcomp(self), :regalloc($*REGALLOC));
         nqp::defined($want)
-            ?? QAST::MASTRegexCompiler.new(:qastcomp(self)).as_mast($node, :want($want))
-            !! QAST::MASTRegexCompiler.new(:qastcomp(self)).as_mast($node)
+            ?? $rxcomp.as_mast($node, :want($want))
+            !! $rxcomp.as_mast($node)
     }
 
     multi method compile_node($unknown, :$want) {
