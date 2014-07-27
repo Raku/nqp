@@ -48,7 +48,8 @@ class HLLBackend::JavaScript {
     }
     
     method is_textual_stage($stage) {
-        1
+        # stage '' is the last stage (js)
+        $stage eq 'js' || $stage eq '';
     }
     
     
