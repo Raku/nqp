@@ -247,8 +247,8 @@ class QAST::MASTOperations {
 
         # Add operation node.
         nqp::push(@all_ins, $is_extop
-            ?? MAST::ExtOp.new( :op($op), :cu($*MAST_COMPUNIT), |@arg_regs )
-            !! MAST::Op.new( :op($op), |@arg_regs ));
+            ?? MAST::ExtOp.new_with_operand_array( :op($op), :cu($qastcomp.mast_compunit), @arg_regs )
+            !! MAST::Op.new_with_operand_array( :op($op), @arg_regs ));
 
         # Build instruction list.
         nqp::defined($want)
@@ -564,7 +564,7 @@ QAST::MASTOperations.add_core_op('list_b', -> $qastcomp, $op {
             nqp::die("list_b must have a list of blocks")
                 unless nqp::istype($_, QAST::Block);
             my $cuid  := $_.cuid();
-            my $frame := %*MAST_FRAMES{$cuid};
+            my $frame := $qastcomp.mast_frames{$cuid};
             my $item_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
             push_op($arr.instructions, 'getcode', $item_reg, $frame);
             push_op($arr.instructions, 'push_o', $arr_reg, $item_reg);
@@ -2430,7 +2430,7 @@ QAST::MASTOperations.add_core_op('setup_blv', -> $qastcomp, $op {
 
     my @ops;
     for $op[0] {
-        my $frame     := %*MAST_FRAMES{$_.key};
+        my $frame     := $qastcomp.mast_frames{$_.key};
         my $block_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
         push_op(@ops, 'getcode', $block_reg, $frame);
         for $_.value -> @lex {
@@ -2575,12 +2575,8 @@ sub resolve_condition_op($kind, $negated) {
         nqp::die("unhandled kind $kind")
 }
 
-sub push_op(@dest, $op, *@args) {
-    #$op := $op.name if nqp::istype($op, QAST::Op);
-    nqp::push(@dest, MAST::Op.new(
-        :op($op),
-        |@args
-    ));
+sub push_op(@dest, str $op, *@args) {
+    nqp::push(@dest, MAST::Op.new_with_operand_array( :$op, @args ));
 }
 
 sub push_ilist(@dest, $src) is export {

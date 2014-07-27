@@ -124,14 +124,6 @@ $ops.add_hll_op('nqp', 'falsey', -> $qastcomp, $op {
     }
 });
 
-# NQP object unbox, which also must somewhat handle coercion.
-
-# XXX TODO
-
-sub push_op(@dest, $op, *@args) {
-    #$op := $op.name if nqp::istype($op, QAST::Op);
-    nqp::push(@dest, MAST::Op.new(
-        :op($op),
-        |@args
-    ));
+sub push_op(@dest, str $op, *@args) {
+    nqp::push(@dest, MAST::Op.new_with_operand_array( :$op, @args ));
 }
