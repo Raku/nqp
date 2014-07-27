@@ -1,7 +1,8 @@
 General stuff that helps all backends
     Write tests (to avoid implementing stuff in crazy ways)
-    - nqp::eoffh
+    - nqp::eoffh - EASY
     - nqp::isstr
     - nqp::getmessage
+    - nqp::split("",...)  - EASY
 
 
