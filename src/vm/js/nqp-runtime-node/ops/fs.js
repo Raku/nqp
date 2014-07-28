@@ -4,11 +4,24 @@ var sleep = require('sleep');
 var iconv = require('iconv-lite');
 var Hash = require('nqp-runtime-core/hash.js');
 
+function FileHandleStream(stream) {
+  this.stream = stream;
+}
+
+//TODO return value
+FileHandleStream.prototype.printfh = function(ctx, arg) {
+  this.stream.write(arg.to_s(ctx));
+};
+
 function FileHandle(fd) {
   this.fd = fd;
 }
 FileHandle.prototype.Bool = function(ctx) {
   return 1;
+};
+FileHandle.prototype.printfh = function(ctx, content) {
+  var buffer = new Buffer(content,this.encoding);
+  return fs.writeSync(this.fd,buffer,0,buffer.length,0);
 };
 
 op.open = function(ctx,name,mode) {
@@ -76,8 +89,7 @@ op.mkdir = function(ctx,dir,mode) {
 };
 
 op.printfh = function(ctx,fh,content) {
-  var buffer = new Buffer(content,fh.encoding);
-  return fs.writeSync(fh.fd,buffer,0,buffer.length,0);
+  return fh.printfh(ctx,content);
 }
 op.closefh = function(ctx,fh) {
   fs.closeSync(fh.fd);
@@ -87,10 +99,10 @@ op.getstdin = function(ctx) {
   return new FileHandle(process.stdin.fd);
 };
 op.getstdout = function(ctx) {
-  return new FileHandle(process.stdout.fd);
+  return new FileHandleStream(process.stdout);
 };
 op.getstderr = function(ctx) {
-  return new FileHandle(process.stderr.fd);
+  return new FileHandleStream(process.stderr);
 };
 op.unlink = function(ctx,filename) {
   fs.unlinkSync(filename);
