@@ -259,7 +259,8 @@ class HLL::Compiler does HLL::Backend::Default {
                         !! nqp::open($output, 'w');
                 self.panic("Cannot write to $output") unless $fh;
                 nqp::printfh($fh, $result);
-                nqp::closefh($fh);
+                nqp::flushfh($fh);
+                nqp::closefh($fh) unless ($output eq '' || $output eq '-');
             }
             CATCH {
                 $has_error := 1;
@@ -448,7 +449,9 @@ class HLL::Compiler does HLL::Backend::Default {
 
     method dumper($obj, $name, *%options) {
         if nqp::can($obj, 'dump') {
-            nqp::print($obj.dump());
+            my $out := nqp::getstdout();
+            nqp::printfh($out, $obj.dump());
+            nqp::flushfh($out);
         }
         else {
             nqp::die("Cannot dump this object; no dump method");
