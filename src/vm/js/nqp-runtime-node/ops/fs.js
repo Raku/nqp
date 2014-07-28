@@ -13,12 +13,25 @@ FileHandleStream.prototype.printfh = function(ctx, arg) {
   this.stream.write(arg.to_s(ctx));
 };
 
+FileHandleStream.prototype.Bool = function(ctx) {
+  return 1;
+};
+FileHandleStream.prototype.closefh = function() {
+  fs.closeSync(this.stream.fd);
+};
+
 function FileHandle(fd) {
   this.fd = fd;
 }
+
 FileHandle.prototype.Bool = function(ctx) {
   return 1;
 };
+
+FileHandle.prototype.closefh = function() {
+  fs.closeSync(this.fd);
+};
+
 FileHandle.prototype.printfh = function(ctx, content) {
   var buffer = new Buffer(content,this.encoding);
   return fs.writeSync(this.fd,buffer,0,buffer.length,0);
@@ -92,7 +105,7 @@ op.printfh = function(ctx,fh,content) {
   return fh.printfh(ctx,content);
 }
 op.closefh = function(ctx,fh) {
-  fs.closeSync(fh.fd);
+  fh.closefh();
   return fh;
 };
 op.getstdin = function(ctx) {
