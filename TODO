@@ -4,5 +4,6 @@ General stuff that helps all backends
     - nqp::isstr
     - nqp::getmessage
     - nqp::split("",...)  - EASY
+    - nqp::printfh in combination with nqp::getstdout(),nqp::getstderr()
 
 
