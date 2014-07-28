@@ -117,6 +117,10 @@ my $NQPP6QRegex-pbc := cross-compile(:stage(2), :source($NQPP6QRegex-combined), 
 
 my $NQP-combined := combine(:stage(2), :sources('$(COMMON_NQP_SOURCES)'), :file('$(NQP_COMBINED)'), :gen-version(1));
 
+say("nqp-js.js: $nqpcore-pbc $QASTNode-pbc $QRegex-pbc $NQPP6QRegex-pbc $NQP-combined
+	./nqp-js-compile gen/js/stage2/NQP.nqp > nqp-js.js
+");
+
 deps('js-stage1-compiler', '$(JS_STAGE1_COMPILER)');
 deps("js-all", 'js-stage1-compiler', $nqpcore-pbc, $QASTNode-pbc, $QRegex-pbc, $NQPP6QRegex-pbc, $NQP-combined);
 

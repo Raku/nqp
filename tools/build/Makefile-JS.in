@@ -91,6 +91,9 @@ $(JS_STAGE2)/$(NQP_COMBINED): $(COMMON_NQP_SOURCES)
 	$(PERL) tools/build/gen-version.pl > $(JS_STAGE2)/nqp-config.nqp
 	$(PERL) tools/build/gen-cat.pl js $(COMMON_NQP_SOURCES) $(JS_STAGE2)/nqp-config.nqp > $(JS_STAGE2)/$(NQP_COMBINED)
 
+nqp-js.js: $(JS_STAGE2)/NQPCORE.setting.pbc $(JS_STAGE2)/QASTNode.pbc $(JS_STAGE2)/QRegex.pbc $(JS_STAGE2)/NQPP6QRegex.pbc $(JS_STAGE2)/$(NQP_COMBINED)
+	./nqp-js-compile gen/js/stage2/NQP.nqp > nqp-js.js
+
 js-stage1-compiler : $(JS_STAGE1_COMPILER)
 js-all : js-stage1-compiler $(JS_STAGE2)/NQPCORE.setting.pbc $(JS_STAGE2)/QASTNode.pbc $(JS_STAGE2)/QRegex.pbc $(JS_STAGE2)/NQPP6QRegex.pbc $(JS_STAGE2)/$(NQP_COMBINED)
 js-runner-default : js-all
