@@ -168,6 +168,7 @@ a**2			baabaa		y	two "a" characters
 a**0..4			bbbbbbb		y	no "a" characters
 a**2..4			bababab		n	not two consecutive "a" characters
 a**2..4			baabbbb		y	two "a" characters
+a**0b10..0b100		baabbbb		y	two "a" characters (using binary representation)
 a**2..4			baaabbb		y	three "a" characters
 a**2..4			baaaabb		y	four "a" characters
 a**2..4			baaaaaa		y	four "a" characters

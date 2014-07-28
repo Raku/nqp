@@ -213,11 +213,11 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token quantifier:sym<**> {
         <sym> <.normspace>? <backmod> <.normspace>?
         [
-        | <.decint> \s+ '..' <.panic: "Spaces not allowed in bare range">
-        | <min=.decint>
+        | <.integer> \s+ '..' <.panic: "Spaces not allowed in bare range">
+        | <min=.integer>
           [ '..'
             [
-            | <max=.decint> {
+            | <max=.integer> {
                 $/.CURSOR.panic("Negative numbers are not allowed as quantifiers") if $<max>.Str < 0;
               }
             | $<max>=['*']
