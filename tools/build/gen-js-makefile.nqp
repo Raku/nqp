@@ -127,7 +127,9 @@ say("nqp-js.js: $nqpcore-pbc $QASTNode-pbc $QRegex-pbc $NQPP6QRegex-pbc $NQP-com
 ");
 
 deps('js-stage1-compiler', '$(JS_STAGE1_COMPILER)');
-deps("js-all", 'p-all', 'js-stage1-compiler', $nqpcore-pbc, $QASTNode-pbc, $QRegex-pbc, $NQPP6QRegex-pbc, $NQP-combined);
+constant('JS_ALL',"js-stage1-compiler $nqpcore-pbc $QASTNode-pbc $QRegex-pbc $NQPP6QRegex-pbc $NQP-combined");
+
+deps("js-all", 'p-all', '$(JS_ALL)','node_modules/installed');
 
 # we don't have a proper runner yet but the Makefile structure requires that
 deps('js-runner-default', 'js-all');
@@ -135,5 +137,6 @@ deps('js-runner-default', 'js-all');
 say('js-test: js-all
 	src/vm/js/bin/run_tests');
 
-say('js-install-modules:
-	npm install src/vm/js/nqp-runtime-core src/vm/js/nqp-runtime-node src/vm/js/nqp-runtime gen/js/stage2/NQPCORE.setting gen/js/stage2/QRegex gen/js/stage2/nqpmo gen/js/stage2/QASTNode gen/js/stage2/QAST gen/js/stage2/NQPP6QRegex gen/js/stage2/NQPHLL');
+say('node_modules/installed: $(JS_ALL)
+	npm install src/vm/js/nqp-runtime-core src/vm/js/nqp-runtime-node src/vm/js/nqp-runtime gen/js/stage2/NQPCORE.setting gen/js/stage2/QRegex gen/js/stage2/nqpmo gen/js/stage2/QASTNode gen/js/stage2/QAST gen/js/stage2/NQPP6QRegex gen/js/stage2/NQPHLL
+	touch node_modules/installed');
