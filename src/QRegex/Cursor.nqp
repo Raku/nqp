@@ -7,6 +7,7 @@ my class ParseShared is export {
     has @!highexpect;
     has %!marks;
     has $!fail_cursor;
+    has str $!target_flipped;
     
     # Follow is a little simple usage tracing infrastructure, used by the
     # !cursor_start_* methods when uncommented.
@@ -514,12 +515,16 @@ role NQPCursorRole is export {
         my $orig_highexpect := nqp::getattr($!shared, ParseShared, '@!highexpect');
         nqp::bindattr($!shared, ParseShared, '@!highexpect', nqp::list_s());
         my $cur := self."!cursor_start_cur"();
-        my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
+        my str $target_flipped := nqp::getattr_s($!shared, ParseShared, '$!target_flipped');
+        if nqp::isnull_s($target_flipped) {
+            $target_flipped := nqp::flip(nqp::getattr_s($!shared, ParseShared, '$!target'));
+            nqp::bindattr_s($!shared, ParseShared, '$!target_flipped', $target_flipped);
+        }
         my $shared := nqp::clone($!shared);
-        nqp::bindattr_s($shared, ParseShared, '$!target', nqp::flip($target));
+        nqp::bindattr_s($shared, ParseShared, '$!target', $target_flipped);
         nqp::bindattr($cur, $?CLASS, '$!shared', $shared);
-        nqp::bindattr_i($cur, $?CLASS, '$!from', nqp::chars($target) - $!pos);
-        nqp::bindattr_i($cur, $?CLASS, '$!pos', nqp::chars($target) - $!pos);
+        nqp::bindattr_i($cur, $?CLASS, '$!from', nqp::chars($target_flipped) - $!pos);
+        nqp::bindattr_i($cur, $?CLASS, '$!pos', nqp::chars($target_flipped) - $!pos);
         nqp::getattr_i($regex($cur), $?CLASS, '$!pos') >= 0 ??
             $cur."!cursor_pass"($!pos, 'after') !!
             nqp::bindattr_i($cur, $?CLASS, '$!pos', -3);
