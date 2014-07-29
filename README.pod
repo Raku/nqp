@@ -103,11 +103,11 @@ portable to more.
 
 =head2 JavaScript backend
 
-Building the JavaScript backend currently requires an installed nqp-p.
+Building the JavaScript backend currently requires building the parrot backend.
 
-    $ npm install src/vm/js/nqp-runtime-core src/vm/js/nqp-runtime-node src/vm/js/nqp-runtime
-
+perl Configure.pl --backends=parrot,js
+make
 
 Currently it needs to be run like:
 
-    $ nqp-p --module-path gen/js/stage1/ src/vm/js/bin/nqp-js.nqp -e 'nqp::say("Hello World")' | node
+    ./nqp-js file.nqp
