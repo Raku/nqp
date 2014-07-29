@@ -19,6 +19,9 @@ my class MASTCompilerInstance {
     # are 0 = static lex, 1 = container, 2 = state container.
     has %!block_lex_values;
 
+    # The serialization context of the code we're compiling, if we have one.
+    has $!sc;
+
     # This uses a very simple scheme. Write registers are assumed
     # to be write-once, read-once.  Therefore, if a QAST control
     # structure wants to reuse the intermediate result of an
@@ -282,6 +285,7 @@ my class MASTCompilerInstance {
     method mast_compunit() { $!mast_compunit }
     method mast_frames() { %!mast_frames }
     method block_lex_values() { %!block_lex_values }
+    method sc() { $!sc }
 
     method to_mast($qast) {
         # Set up compilation state.
@@ -290,6 +294,7 @@ my class MASTCompilerInstance {
         %!mast_frames := nqp::hash();
         $!file := nqp::ifnull(nqp::getlexdyn('$?FILES'), "<unknown file>");
         %!block_lex_values := nqp::hash();
+        $!sc := NQPMu;
 
         # Compile, and evaluate to compilation unit.
         self.as_mast($qast);
@@ -480,15 +485,18 @@ my class MASTCompilerInstance {
     proto method compile_node($node, :$want) { * }
     
     multi method compile_node(QAST::CompUnit $cu, :$want) {
-        # Set HLL.
+        # Should have a single child which is the outer block.
+        if +@($cu) != 1 || !nqp::istype($cu[0], QAST::Block) {
+            nqp::die("QAST::CompUnit should have one child that is a QAST::Block");
+        }
+
+        # Set HLL and serialization context.
         if $cu.hll {
             $!hll := $cu.hll;
             $!mast_compunit.hll($!hll);
         }
-
-        # Should have a single child which is the outer block.
-        if +@($cu) != 1 || !nqp::istype($cu[0], QAST::Block) {
-            nqp::die("QAST::CompUnit should have one child that is a QAST::Block");
+        if $cu.sc {
+            $!sc := $cu.sc;
         }
 
         # Blocks we've seen while compiling.

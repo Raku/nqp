@@ -251,15 +251,38 @@ class QAST::MASTRegexCompiler {
             return self.altseq($node);
         }
 
+        # See if we can stash the labels array in an SC or if we'll have
+        # to actually emit code for it.
+        my @label_ins   := nqp::list();
+        my @label_arr   := nqp::list_i();
+        my int $have_sc := 0;
+        if $!qastcomp.sc -> $sc {
+            # Add labels array to SC.
+            my $obj_idx := nqp::scobjcount($sc);
+            nqp::setobjsc(@label_arr, $sc);
+            nqp::scsetobj($sc, $obj_idx, @label_arr);
+
+            # Emit wval instruction to look it up.
+            my $sc_idx := $!qastcomp.mast_compunit.sc_idx($sc);
+            nqp::push(@label_ins, op(
+                $obj_idx < 32768 ?? 'wval' !! 'wval_wide',
+                %!reg<P11>,
+                MAST::IVal.new( :value($sc_idx) ),
+                MAST::IVal.new( :value($obj_idx) )
+            ));
+            $have_sc := 1;
+        }
+        else {
+            nqp::push(@label_ins, op('bootintarray', %!reg<P11>));
+            nqp::push(@label_ins, op('create', %!reg<P11>, %!reg<P11>));
+        }
+
         # Calculate all the branches to try, which populates the bstack
         # with the options. Then immediately fail to start iterating it.
         my $prefix := $!qastcomp.unique($!rxprefix ~ '_alt');
         my $endlabel_index := self.rxjump($prefix ~ '_end');
         my $endlabel := @!rxjumps[$endlabel_index];
         my @ins := nqp::list();
-        my @label_ins := nqp::list();
-        nqp::push(@label_ins, op('bootintarray', %!reg<P11>));
-        nqp::push(@label_ins, op('create', %!reg<P11>, %!reg<P11>));
         self.regex_mark(@ins, $endlabel_index, %!reg<negone>, %!reg<zero>);
         nqp::push(@ins, op('findmeth', %!reg<method>, %!reg<cur>, sval('!alt')));
         my $name := $!regalloc.fresh_s();
@@ -280,15 +303,20 @@ class QAST::MASTRegexCompiler {
             nqp::push(@ins, $altlabel);
             merge_ins(@ins, @amast);
             nqp::push(@ins, op('goto', $endlabel));
-            nqp::push(@label_ins, op('const_i64', $itmp, ival($altlabel_index)));
-            nqp::push(@label_ins, op('push_i', %!reg<P11>, $itmp));
+            if $have_sc {
+                nqp::push_i(@label_arr, $altlabel_index);
+            }
+            else {
+                nqp::push(@label_ins, op('const_i64', $itmp, ival($altlabel_index)));
+                nqp::push(@label_ins, op('push_i', %!reg<P11>, $itmp));
+            }
             $altcount++;
         }
         $!regalloc.release_register($itmp, $MVM_reg_int64);
         nqp::push(@ins, $endlabel);
         self.regex_commit(@ins, $endlabel_index) if $node.backtrack eq 'r';
         merge_ins(@label_ins, @ins);
-        @label_ins # so the label array creation happens first
+        @label_ins # so the label array creation or lookup happens first
     }
 
     method altseq($node) {
