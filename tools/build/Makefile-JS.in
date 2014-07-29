@@ -99,8 +99,8 @@ nqp-js.js: $(JS_STAGE2)/NQPCORE.setting.pbc $(JS_STAGE2)/QASTNode.pbc $(JS_STAGE
 	./nqp-js-compile gen/js/stage2/NQP.nqp > nqp-js.js
 
 js-stage1-compiler : $(JS_STAGE1_COMPILER)
-JS_ALL = js-stage1-compiler $(JS_STAGE2)/NQPCORE.setting.pbc $(JS_STAGE2)/QASTNode.pbc $(JS_STAGE2)/QRegex.pbc $(JS_STAGE2)/NQPP6QRegex.pbc $(JS_STAGE2)/$(NQP_COMBINED)
-js-all : p-all $(JS_ALL) node_modules/installed
+JS_ALL =  $(JS_STAGE2)/NQPCORE.setting.pbc $(JS_STAGE2)/QASTNode.pbc $(JS_STAGE2)/QRegex.pbc $(JS_STAGE2)/NQPP6QRegex.pbc $(JS_STAGE2)/$(NQP_COMBINED)
+js-all : p-all js-stage1-compiler $(JS_ALL) node_modules/installed
 js-runner-default : js-all
 js-test: js-all
 	src/vm/js/bin/run_tests
