@@ -734,6 +734,7 @@ knowhow NQPClassHOW {
     ##
     ## Cache-related
     ##
+
     method cache($obj, $key, $value_generator) {
         %!caches := nqp::hash() unless nqp::ishash(%!caches);
         nqp::existskey(%!caches, $key) ??
@@ -746,7 +747,17 @@ knowhow NQPClassHOW {
         %!caches := {} unless nqp::isnull(%!caches);
         nqp::scwbenable();
     }
-    
+
+    method cache_get($obj, $key) {
+        my %caches := %!caches;
+        nqp::ishash(%caches) ?? nqp::atkey(%caches, $key) !! nqp::null()
+    }
+
+    method cache_add($obj, $key, $value) {
+        %!caches := nqp::hash() unless nqp::ishash(%!caches);
+        %!caches{$key} := $value;
+    }
+
     ##
     ## Mix-ins
     ## 

@@ -306,7 +306,11 @@ role NQPCursorRole is export {
     method !protoregex($name) {
         # Obtain and run NFA.
         my $shared := $!shared;
-        my $nfa := self.HOW.cache(self, $name, { self.'!protoregex_nfa'($name) });
+        my $nfa    := self.HOW.cache_get(self, $name);
+        if nqp::isnull($nfa) {
+            $nfa := self.'!protoregex_nfa'($name);
+            self.HOW.cache_add(self, $name, $nfa);
+        }
         my @fates := $nfa.run(nqp::getattr_s($shared, ParseShared, '$!target'), $!pos);
         
         # Update highwater mark.
@@ -367,7 +371,11 @@ role NQPCursorRole is export {
         }
         
         # Evaluate the alternation.
-        my $nfa := self.HOW.cache(self, $name, { self.'!alt_nfa'($!regexsub, $name) });
+        my $nfa := self.HOW.cache_get(self, $name);
+        if nqp::isnull($nfa) {
+            $nfa := self.'!alt_nfa'($!regexsub, $name);
+            self.HOW.cache_add(self, $name, $nfa);
+        }
         $nfa.run_alt(nqp::getattr_s($shared, ParseShared, '$!target'), $pos, $!bstack, $!cstack, @labels);
     }
 
@@ -395,7 +403,7 @@ role NQPCursorRole is export {
         sub precomp_alt_nfas($meth) {
             if nqp::can($meth, 'ALT_NFAS') {
                 for $meth.ALT_NFAS -> $name {
-                    self.HOW.cache(self, $name, { self.'!alt_nfa'($meth, $name.key) });
+                    self.HOW.cache(self, ~$name, { self.'!alt_nfa'($meth, $name.key) });
                 }
             }
         }
