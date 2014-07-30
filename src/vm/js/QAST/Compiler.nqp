@@ -1669,7 +1669,7 @@ class QAST::CompilerJS does SerializeOnce {
                 }
             }
             
-        } elsif $var.scope eq 'lexical' || $var.scope eq 'local' {
+        } elsif $var.scope eq 'lexical' || $var.scope eq 'local' || $var.scope eq 'typevar' {
             if $*BINDVAL {
                 '('~self.mangle_name($var.name)~' = ('~self.as_js_clear_bindval($*BINDVAL)~'))';
             } else {
