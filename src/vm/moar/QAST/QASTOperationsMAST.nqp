@@ -1423,7 +1423,7 @@ my $call_gen := sub ($qastcomp, $op) {
 QAST::MASTOperations.add_core_op('call', $call_gen, :!inlinable);
 QAST::MASTOperations.add_core_op('callstatic', $call_gen, :!inlinable);
 
-QAST::MASTOperations.add_core_op('callmethod', :!inlinable, -> $qastcomp, $op {
+QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
     my @args := nqp::clone($op.list);
     if +@args == 0 {
         nqp::die('Method call node requires at least one child');
@@ -1520,7 +1520,7 @@ QAST::MASTOperations.add_core_op('callmethod', :!inlinable, -> $qastcomp, $op {
     MAST::InstructionList.new(@ins, $res_reg, $res_kind)
 });
 
-QAST::MASTOperations.add_core_op('lexotic', -> $qastcomp, $op {
+QAST::MASTOperations.add_core_op('lexotic', :!inlinable, -> $qastcomp, $op {
     my $lex_label := MAST::Label.new( :name($qastcomp.unique('lexotic_')) );
     my $end_label := MAST::Label.new( :name($qastcomp.unique('lexotic_end_')) );
 
@@ -1598,7 +1598,7 @@ my %handler_names := nqp::hash(
     'PROCEED', $HandlerCategory::proceed,
     'SUCCEED', $HandlerCategory::succeed,
 );
-QAST::MASTOperations.add_core_op('handle', sub ($qastcomp, $op) {
+QAST::MASTOperations.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
     my @children := nqp::clone($op.list());
     if @children == 0 {
         nqp::die("The 'handle' op requires at least one child");
@@ -1784,10 +1784,10 @@ QAST::MASTOperations.add_hll_box('', $MVM_reg_void, -> $qastcomp, $reg {
 
 # Context introspection
 QAST::MASTOperations.add_core_moarop_mapping('ctx', 'ctx', :!inlinable);
-QAST::MASTOperations.add_core_moarop_mapping('ctxouter', 'ctxouter');
-QAST::MASTOperations.add_core_moarop_mapping('ctxcaller', 'ctxcaller');
-QAST::MASTOperations.add_core_moarop_mapping('ctxouterskipthunks', 'ctxouterskipthunks');
-QAST::MASTOperations.add_core_moarop_mapping('ctxcallerskipthunks', 'ctxcallerskipthunks');
+QAST::MASTOperations.add_core_moarop_mapping('ctxouter', 'ctxouter', :!inlinable);
+QAST::MASTOperations.add_core_moarop_mapping('ctxcaller', 'ctxcaller', :!inlinable);
+QAST::MASTOperations.add_core_moarop_mapping('ctxouterskipthunks', 'ctxouterskipthunks', :!inlinable);
+QAST::MASTOperations.add_core_moarop_mapping('ctxcallerskipthunks', 'ctxcallerskipthunks', :!inlinable);
 QAST::MASTOperations.add_core_moarop_mapping('curcode', 'curcode', :!inlinable);
 QAST::MASTOperations.add_core_moarop_mapping('callercode', 'callercode', :!inlinable);
 QAST::MASTOperations.add_core_moarop_mapping('ctxlexpad', 'ctxlexpad', :!inlinable);
@@ -1796,8 +1796,8 @@ QAST::MASTOperations.add_core_moarop_mapping('lexprimspec', 'lexprimspec');
 
 # Argument capture processing, for writing things like multi-dispatchers in
 # high level languages.
-QAST::MASTOperations.add_core_moarop_mapping('usecapture', 'usecapture');
-QAST::MASTOperations.add_core_moarop_mapping('savecapture', 'savecapture');
+QAST::MASTOperations.add_core_moarop_mapping('usecapture', 'usecapture', :!inlinable);
+QAST::MASTOperations.add_core_moarop_mapping('savecapture', 'savecapture', :!inlinable);
 QAST::MASTOperations.add_core_moarop_mapping('captureposelems', 'captureposelems');
 QAST::MASTOperations.add_core_moarop_mapping('captureposarg', 'captureposarg');
 QAST::MASTOperations.add_core_moarop_mapping('captureposarg_i', 'captureposarg_i');
