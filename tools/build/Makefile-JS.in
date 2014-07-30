@@ -62,7 +62,7 @@ $(JS_STAGE2)/QRegex.pbc: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(QREGEX_COMBINED) $
 
 $(JS_STAGE2)/QAST/Compiler.pbc: $(JS_STAGE1_COMPILER) src/vm/js/QAST/Compiler.nqp $(JS_STAGE2)/NQPCORE.setting.pbc $(JS_STAGE2)/QASTNode.pbc
 	mkdir -p $(JS_STAGE2)/QAST
-	$(JS_NQP) src/vm/js/bin/cross-compile.nqp src/vm/js/QAST/Compiler.nqp $(JS_STAGE2)/ QAST/Compiler NQPCORE 1
+	$(JS_NQP) src/vm/js/bin/cross-compile.nqp src/vm/js/QAST/Compiler.nqp $(JS_STAGE2)/ QAST/Compiler NQPCORE 0
 	$(JS_PARROT)  -o $(JS_STAGE2)/QAST/Compiler.pbc $(JS_STAGE2)/QAST/Compiler.pir
 
 $(JS_STAGE2)/$(HLL_COMBINED): src/vm/js/HLL/Backend.nqp $(COMMON_HLL_SOURCES)

@@ -109,7 +109,7 @@ my $QASTNode-pbc := cross-compile(:stage(2), :source($QASTNode-combined), :targe
 my $QRegex-combined := combine(:stage(2), :sources('$(QREGEX_SOURCES)'), :file('$(QREGEX_COMBINED)'));
 my $QRegex-pbc := cross-compile(:stage(2), :source($QRegex-combined), :target('QRegex'), :setting('NQPCORE'), :no-regex-lib(1), :deps([$nqpcore-pbc, $QASTNode-pbc]));
 
-my $QAST-Compiler-pbc := cross-compile(:stage(2), :source('src/vm/js/QAST/Compiler.nqp'), :target('QAST/Compiler'), :setting('NQPCORE'), :no-regex-lib(1), :deps([$nqpcore-pbc, $QASTNode-pbc]));
+my $QAST-Compiler-pbc := cross-compile(:stage(2), :source('src/vm/js/QAST/Compiler.nqp'), :target('QAST/Compiler'), :setting('NQPCORE'), :no-regex-lib(0), :deps([$nqpcore-pbc, $QASTNode-pbc]));
 
 my $NQPHLL-combined := combine(:stage(2), :sources('src/vm/js/HLL/Backend.nqp $(COMMON_HLL_SOURCES)'), :file('$(HLL_COMBINED)')); 
 my $NQPHLL-pbc := cross-compile(:stage(2), :source($NQPHLL-combined), :target('NQPHLL'), :setting('NQPCORE'), :no-regex-lib(1), :deps([$nqpcore-pbc, $QAST-Compiler-pbc]));
