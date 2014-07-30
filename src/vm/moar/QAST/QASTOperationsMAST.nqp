@@ -1420,10 +1420,10 @@ my $call_gen := sub ($qastcomp, $op) {
 
     MAST::InstructionList.new(@ins, $res_reg, $res_kind)
 };
-QAST::MASTOperations.add_core_op('call', $call_gen);
-QAST::MASTOperations.add_core_op('callstatic', $call_gen);
+QAST::MASTOperations.add_core_op('call', $call_gen, :!inlinable);
+QAST::MASTOperations.add_core_op('callstatic', $call_gen, :!inlinable);
 
-QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
+QAST::MASTOperations.add_core_op('callmethod', :!inlinable, -> $qastcomp, $op {
     my @args := nqp::clone($op.list);
     if +@args == 0 {
         nqp::die('Method call node requires at least one child');
@@ -1783,15 +1783,15 @@ QAST::MASTOperations.add_hll_box('', $MVM_reg_void, -> $qastcomp, $reg {
 });
 
 # Context introspection
-QAST::MASTOperations.add_core_moarop_mapping('ctx', 'ctx');
+QAST::MASTOperations.add_core_moarop_mapping('ctx', 'ctx', :!inlinable);
 QAST::MASTOperations.add_core_moarop_mapping('ctxouter', 'ctxouter');
 QAST::MASTOperations.add_core_moarop_mapping('ctxcaller', 'ctxcaller');
 QAST::MASTOperations.add_core_moarop_mapping('ctxouterskipthunks', 'ctxouterskipthunks');
 QAST::MASTOperations.add_core_moarop_mapping('ctxcallerskipthunks', 'ctxcallerskipthunks');
-QAST::MASTOperations.add_core_moarop_mapping('curcode', 'curcode');
-QAST::MASTOperations.add_core_moarop_mapping('callercode', 'callercode');
-QAST::MASTOperations.add_core_moarop_mapping('ctxlexpad', 'ctxlexpad');
-QAST::MASTOperations.add_core_moarop_mapping('curlexpad', 'ctx');
+QAST::MASTOperations.add_core_moarop_mapping('curcode', 'curcode', :!inlinable);
+QAST::MASTOperations.add_core_moarop_mapping('callercode', 'callercode', :!inlinable);
+QAST::MASTOperations.add_core_moarop_mapping('ctxlexpad', 'ctxlexpad', :!inlinable);
+QAST::MASTOperations.add_core_moarop_mapping('curlexpad', 'ctx', :!inlinable);
 QAST::MASTOperations.add_core_moarop_mapping('lexprimspec', 'lexprimspec');
 
 # Argument capture processing, for writing things like multi-dispatchers in
