@@ -140,3 +140,5 @@ say('js-test: js-all
 say('node_modules/installed: $(JS_ALL)
 	npm install src/vm/js/nqp-runtime-core src/vm/js/nqp-runtime-node src/vm/js/nqp-runtime gen/js/stage2/NQPCORE.setting gen/js/stage2/QRegex gen/js/stage2/nqpmo gen/js/stage2/QASTNode gen/js/stage2/QAST gen/js/stage2/NQPP6QRegex gen/js/stage2/NQPHLL
 	touch node_modules/installed');
+
+say("\n\njs-clean:");
