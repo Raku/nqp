@@ -163,8 +163,9 @@ my module sprintf {
             my $int := intify(next_argument($/));
             my $pad := padding_char($/);
             my $sign := nqp::islt_I($int, $zero) ?? '-'
-                !! has_flag($/, 'plus')
-                    ?? '+' !! '';
+                     !! has_flag($/, 'plus') ?? '+' 
+                     !! has_flag($/, 'space') ?? ' ' 
+                     !! '';
             $int := nqp::tostr_I(nqp::abs_I($int, $knowhow));
             $int := nqp::substr($int, 0, $<precision>.made) if nqp::chars($<precision>);
             if $pad ne ' ' && $<size> {
@@ -215,13 +216,19 @@ my module sprintf {
             $float
 #?endif
         }
-        sub fixed-point($float, $precision, $size, $pad) {
-            my $sign := $float < 0 ?? '-' !! '';
+        sub fixed-point($float, $precision, $size, $pad, $/) {
+            my $sign := $float < 0 ?? '-' 
+                     !! has_flag($/, 'plus') ?? '+' 
+                     !! has_flag($/, 'space') ?? ' ' 
+                     !! '';
             $float := stringify-to-precision(nqp::abs_n($float), $precision);
             pad-with-sign($sign, $float, $size, $pad);
         }
-        sub scientific($float, $e, $precision, $size, $pad) {
-            my $sign := $float < 0 ?? '-' !! '';
+        sub scientific($float, $e, $precision, $size, $pad, $/) {
+            my $sign := $float < 0 ?? '-' 
+                     !! has_flag($/, 'plus') ?? '+' 
+                     !! has_flag($/, 'space') ?? ' ' 
+                     !! '';
             $float := nqp::abs_n($float);
             my $exp := $float == 0.0 ?? 0 !! nqp::floor_n(nqp::log_n($float) / nqp::log_n(10));
             $float := $float / nqp::pow_n(10, $exp);
@@ -234,8 +241,11 @@ my module sprintf {
             }
             pad-with-sign($sign, $float, $size, $pad);
         }
-        sub shortest($float, $e, $precision, $size, $pad) {
-            my $sign := $float < 0 ?? '-' !! '';
+        sub shortest($float, $e, $precision, $size, $pad, $/) {
+            my $sign := $float < 0 ?? '-' 
+                     !! has_flag($/, 'plus') ?? '+' 
+                     !! has_flag($/, 'space') ?? ' ' 
+                     !! '';
             $float := nqp::abs_n($float);
 
             my $exp := $float == 0.0 ?? 0 !! nqp::floor_n(nqp::log_n($float) / nqp::log_n(10));
@@ -264,21 +274,21 @@ my module sprintf {
             my $precision := $<precision> ?? $<precision>.made !! 6;
             my $pad := padding_char($/);
             my $size := $<size> ?? $<size>.made !! 0;
-            make scientific($float, $<sym>, $precision, $size, $pad);
+            make scientific($float, $<sym>, $precision, $size, $pad, $/);
         }
         method directive:sym<f>($/) {
             my $int := next_argument($/);
             my $precision := $<precision> ?? $<precision>.made !! 6;
             my $pad := padding_char($/);
             my $size := $<size> ?? $<size>.made !! 0;
-            make fixed-point($int, $precision, $size, $pad);
+            make fixed-point($int, $precision, $size, $pad, $/);
         }
         method directive:sym<g>($/) {
             my $float := next_argument($/);
             my $precision := $<precision> ?? $<precision>.made !! 6;
             my $pad := padding_char($/);
             my $size := $<size> ?? $<size>.made !! 0;
-            make shortest($float, $<sym> eq 'G' ?? 'E' !! 'e', $precision, $size, $pad);
+            make shortest($float, $<sym> eq 'G' ?? 'E' !! 'e', $precision, $size, $pad, $/);
         }
         method directive:sym<o>($/) {
             my $int := intify(next_argument($/));
