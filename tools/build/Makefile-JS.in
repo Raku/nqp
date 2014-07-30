@@ -110,3 +110,5 @@ node_modules/installed: $(JS_ALL)
 
 
 js-clean:
+	$(RM_RF) gen/js/stage1 gen/js/stage2 gen/parrot/QAST gen/parrot/HLL
+
