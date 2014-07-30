@@ -27,6 +27,7 @@ MAIN: {
     my %options;
     GetOptions(\%options, 'help!', 'prefix=s',
                'backends=s',
+               'no-clean=s',
                'with-parrot=s', 'gen-parrot:s', 'parrot-config=s', 'parrot-option=s@',
                'with-moar=s', 'gen-moar:s', 'moar-option=s@',
                'make-install!', 'makefile-timing!',
@@ -302,6 +303,7 @@ General Options:
     --help             Show this text
     --prefix=dir       Install files in dir
     --backends=list    Backends to use: $backends
+    --no-clean         Do not run make clean  
     --with-parrot=path/to/bin/parrot
                        Parrot executable to use to build NQP
     --gen-parrot[=branch]
