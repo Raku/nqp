@@ -18,6 +18,7 @@ class JSFragment is QAST::Node {
     }
 }
 
+# It only makes sense to serialize a serialization context once, so when cross compiling we cache the result
 role SerializeOnce {
     method serialize_sc_without_caching($sc) {
         # Serialize it.
