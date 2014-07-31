@@ -13,7 +13,7 @@ sub stage_path($stage) {
 sub make_parents($path) {
     my $parts := nqp::split("/",$path);
     nqp::pop($parts);
-    'mkdir -p ' ~ nqp::join('/',$parts);
+    '$(MKPATH) ' ~ nqp::join('/',$parts);
 }
 
 sub rule($target, $source, *@actions) {

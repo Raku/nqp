@@ -6,92 +6,92 @@ JS_NQP = $(P_RUNNER)$(BAT)
 JS_PARROT = $(PARROT_BIN_DIR)/parrot$(EXE) $(PARROT_ARGS)
 js-runner-default: js-all
 $(JS_STAGE1)/QAST/Compiler.pbc: src/vm/js/QAST/Compiler.nqp
-	mkdir -p $(JS_STAGE1)/QAST
+	$(MKPATH) $(JS_STAGE1)/QAST
 	$(JS_NQP) --target=pir --output=$(JS_STAGE1)/QAST/Compiler.pir --encoding=utf8 src/vm/js/QAST/Compiler.nqp
 	$(JS_PARROT) -o $(JS_STAGE1)/QAST/Compiler.pbc $(JS_STAGE1)/QAST/Compiler.pir
-	mkdir -p gen/parrot/QAST
+	$(MKPATH) gen/parrot/QAST
 	$(CP) $(JS_STAGE1)/QAST/Compiler.pbc gen/parrot/QAST/Compiler.pbc
 
 $(JS_STAGE1)/HLL/Backend.pbc: src/vm/js/HLL/Backend.nqp $(JS_STAGE1)/QAST/Compiler.pbc
-	mkdir -p $(JS_STAGE1)/HLL
+	$(MKPATH) $(JS_STAGE1)/HLL
 	$(JS_NQP) --target=pir --output=$(JS_STAGE1)/HLL/Backend.pir --encoding=utf8 src/vm/js/HLL/Backend.nqp
 	$(JS_PARROT) -o $(JS_STAGE1)/HLL/Backend.pbc $(JS_STAGE1)/HLL/Backend.pir
-	mkdir -p gen/parrot/HLL
+	$(MKPATH) gen/parrot/HLL
 	$(CP) $(JS_STAGE1)/HLL/Backend.pbc gen/parrot/HLL/Backend.pbc
 
 JS_STAGE1_COMPILER = $(JS_STAGE1)/QAST/Compiler.pbc $(JS_STAGE1)/HLL/Backend.pbc
 $(JS_STAGE2)/$(NQP_MO_COMBINED): $(NQP_MO_SOURCES)
-	mkdir -p $(JS_STAGE2)
+	$(MKPATH) $(JS_STAGE2)
 	
 	$(PERL) tools/build/gen-cat.pl js $(NQP_MO_SOURCES)  > $(JS_STAGE2)/$(NQP_MO_COMBINED)
 
 $(JS_STAGE2)/nqpmo.pbc: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(NQP_MO_COMBINED)
-	mkdir -p $(JS_STAGE2)
+	$(MKPATH) $(JS_STAGE2)
 	$(JS_NQP) src/vm/js/bin/cross-compile.nqp $(JS_STAGE2)/$(NQP_MO_COMBINED) $(JS_STAGE2)/ nqpmo NULL 1
 	$(JS_PARROT)  -o $(JS_STAGE2)/nqpmo.pbc $(JS_STAGE2)/nqpmo.pir
 
 $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp: $(CORE_SETTING_SOURCES)
-	mkdir -p $(JS_STAGE2)
+	$(MKPATH) $(JS_STAGE2)
 	
 	$(PERL) tools/build/gen-cat.pl js $(CORE_SETTING_SOURCES)  > $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp
 
 $(JS_STAGE2)/NQPCORE.setting.pbc: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp $(JS_STAGE2)/nqpmo.pbc
-	mkdir -p $(JS_STAGE2)
+	$(MKPATH) $(JS_STAGE2)
 	$(JS_NQP) src/vm/js/bin/cross-compile.nqp $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp $(JS_STAGE2)/ NQPCORE.setting NULL 1
 	$(JS_PARROT)  -o $(JS_STAGE2)/NQPCORE.setting.pbc $(JS_STAGE2)/NQPCORE.setting.pir
 
 $(JS_STAGE2)/$(QASTNODE_COMBINED): $(QASTNODE_SOURCES)
-	mkdir -p $(JS_STAGE2)
+	$(MKPATH) $(JS_STAGE2)
 	
 	$(PERL) tools/build/gen-cat.pl js $(QASTNODE_SOURCES)  > $(JS_STAGE2)/$(QASTNODE_COMBINED)
 
 $(JS_STAGE2)/QASTNode.pbc: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(QASTNODE_COMBINED) $(JS_STAGE2)/NQPCORE.setting.pbc
-	mkdir -p $(JS_STAGE2)
+	$(MKPATH) $(JS_STAGE2)
 	$(JS_NQP) src/vm/js/bin/cross-compile.nqp $(JS_STAGE2)/$(QASTNODE_COMBINED) $(JS_STAGE2)/ QASTNode NQPCORE 1
 	$(JS_PARROT)  -o $(JS_STAGE2)/QASTNode.pbc $(JS_STAGE2)/QASTNode.pir
 
 $(JS_STAGE2)/$(QREGEX_COMBINED): $(QREGEX_SOURCES)
-	mkdir -p $(JS_STAGE2)
+	$(MKPATH) $(JS_STAGE2)
 	
 	$(PERL) tools/build/gen-cat.pl js $(QREGEX_SOURCES)  > $(JS_STAGE2)/$(QREGEX_COMBINED)
 
 $(JS_STAGE2)/QRegex.pbc: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(QREGEX_COMBINED) $(JS_STAGE2)/NQPCORE.setting.pbc $(JS_STAGE2)/QASTNode.pbc
-	mkdir -p $(JS_STAGE2)
+	$(MKPATH) $(JS_STAGE2)
 	$(JS_NQP) src/vm/js/bin/cross-compile.nqp $(JS_STAGE2)/$(QREGEX_COMBINED) $(JS_STAGE2)/ QRegex NQPCORE 1
 	$(JS_PARROT)  -o $(JS_STAGE2)/QRegex.pbc $(JS_STAGE2)/QRegex.pir
 
 $(JS_STAGE2)/QAST/Compiler.pbc: $(JS_STAGE1_COMPILER) src/vm/js/QAST/Compiler.nqp $(JS_STAGE2)/NQPCORE.setting.pbc $(JS_STAGE2)/QASTNode.pbc
-	mkdir -p $(JS_STAGE2)/QAST
+	$(MKPATH) $(JS_STAGE2)/QAST
 	$(JS_NQP) src/vm/js/bin/cross-compile.nqp src/vm/js/QAST/Compiler.nqp $(JS_STAGE2)/ QAST/Compiler NQPCORE 0
 	$(JS_PARROT)  -o $(JS_STAGE2)/QAST/Compiler.pbc $(JS_STAGE2)/QAST/Compiler.pir
 
 $(JS_STAGE2)/$(HLL_COMBINED): src/vm/js/HLL/Backend.nqp $(COMMON_HLL_SOURCES)
-	mkdir -p $(JS_STAGE2)
+	$(MKPATH) $(JS_STAGE2)
 	
 	$(PERL) tools/build/gen-cat.pl js src/vm/js/HLL/Backend.nqp $(COMMON_HLL_SOURCES)  > $(JS_STAGE2)/$(HLL_COMBINED)
 
 $(JS_STAGE2)/NQPHLL.pbc: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(HLL_COMBINED) $(JS_STAGE2)/NQPCORE.setting.pbc $(JS_STAGE2)/QAST/Compiler.pbc
-	mkdir -p $(JS_STAGE2)
+	$(MKPATH) $(JS_STAGE2)
 	$(JS_NQP) src/vm/js/bin/cross-compile.nqp $(JS_STAGE2)/$(HLL_COMBINED) $(JS_STAGE2)/ NQPHLL NQPCORE 1
 	$(JS_PARROT)  -o $(JS_STAGE2)/NQPHLL.pbc $(JS_STAGE2)/NQPHLL.pir
 
 $(JS_STAGE2)/QAST.pbc: $(JS_STAGE1_COMPILER) src/vm/js/QAST.nqp $(JS_STAGE2)/NQPCORE.setting.pbc $(JS_STAGE2)/QASTNode.pbc
-	mkdir -p $(JS_STAGE2)
+	$(MKPATH) $(JS_STAGE2)
 	$(JS_NQP) src/vm/js/bin/cross-compile.nqp src/vm/js/QAST.nqp $(JS_STAGE2)/ QAST NQPCORE 1
 	$(JS_PARROT)  -o $(JS_STAGE2)/QAST.pbc $(JS_STAGE2)/QAST.pir
 
 $(JS_STAGE2)/$(P6QREGEX_COMBINED): $(P6QREGEX_SOURCES)
-	mkdir -p $(JS_STAGE2)
+	$(MKPATH) $(JS_STAGE2)
 	
 	$(PERL) tools/build/gen-cat.pl js $(P6QREGEX_SOURCES)  > $(JS_STAGE2)/$(P6QREGEX_COMBINED)
 
 $(JS_STAGE2)/NQPP6QRegex.pbc: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(P6QREGEX_COMBINED) $(JS_STAGE2)/NQPCORE.setting.pbc $(JS_STAGE2)/QRegex.pbc $(JS_STAGE2)/NQPHLL.pbc $(JS_STAGE2)/QAST.pbc
-	mkdir -p $(JS_STAGE2)
+	$(MKPATH) $(JS_STAGE2)
 	$(JS_NQP) src/vm/js/bin/cross-compile.nqp $(JS_STAGE2)/$(P6QREGEX_COMBINED) $(JS_STAGE2)/ NQPP6QRegex NQPCORE 1
 	$(JS_PARROT)  -o $(JS_STAGE2)/NQPP6QRegex.pbc $(JS_STAGE2)/NQPP6QRegex.pir
 
 $(JS_STAGE2)/$(NQP_COMBINED): $(COMMON_NQP_SOURCES)
-	mkdir -p $(JS_STAGE2)
+	$(MKPATH) $(JS_STAGE2)
 	$(PERL) tools/build/gen-version.pl > $(JS_STAGE2)/nqp-config.nqp
 	$(PERL) tools/build/gen-cat.pl js $(COMMON_NQP_SOURCES) $(JS_STAGE2)/nqp-config.nqp > $(JS_STAGE2)/$(NQP_COMBINED)
 
