@@ -19,3 +19,6 @@ Ease of development
 Build system
     - make install should install a nqp-js runner.
 
+Portability
+    - Get the build system to work on windows (haven't tried that yet)
+
