@@ -371,10 +371,29 @@ class NQP::Optimizer {
                     } elsif nqp::istype($visit, QAST::Regex) {
                         QRegex::Optimizer.new().optimize($visit,
                             @!block_stack[+@!block_stack - 1],
-                            :main_lang_optimizer(-> $node {
-                                # Poison lowering if we re-enter, for now.
+                            :main_lang_optimizer(sub ($node) {
+                                if nqp::istype($node, QAST::Regex) {
+                                    if $node.rxtype eq 'subrule' {
+                                        # Visit subrule args.
+                                        if nqp::istype($node[0], QAST::Node) {
+                                            self.visit_children($node[0]);
+                                            return $node;
+                                        }
+                                    }
+                                    elsif $node.rxtype eq 'qastnode' {
+                                        # QAST node, and probably with statements.
+                                        my $child := $node[0];
+                                        if nqp::istype($child, QAST::Stmts) ||
+                                                nqp::istype($child, QAST::Stmt) {
+                                            self.visit_children($child);
+                                            return $node;
+                                        }
+                                    }
+                                }
+
+                                # If we reach here, unknown. Poision.
                                 self.poison_lowering();
-                                $node
+                                return $node;
                             }),
                             |%!adverbs);
                     } else {

@@ -11,6 +11,7 @@ class QRegex::Optimizer {
         if $type eq 'concat' {
             return self.visit_concat($node);
         } elsif $type eq 'subrule' {
+            $node := $!main_opt($node) if $!main_opt;
             return self.simplify_assertion($node);
         } else {
             self.visit_children($node);
@@ -92,11 +93,7 @@ class QRegex::Optimizer {
     }
 
     method simplify_assertion($qast) {
-        if $qast.subtype eq 'method' {
-            return $!main_opt
-                ?? $!main_opt($qast)
-                !! $qast;
-        }
+        return $qast if $qast.subtype eq 'method';
         my $child_is_block := nqp::istype($qast[0], QAST::Node)
             && (nqp::istype($qast[0][0], QAST::SVal) || nqp::istype($qast[0][0], QAST::Block));
         if $child_is_block {
@@ -161,20 +158,17 @@ class QRegex::Optimizer {
                     } elsif $type eq 'quant' {
                         self.visit_children($visit);
                     } elsif $type eq 'subrule' {
+                        $node[$i] := $!main_opt($node[$i]) if $!main_opt;
                         $node[$i] := self.simplify_assertion($visit);
                     } elsif $type eq 'qastnode' {
-                        if $!main_opt {
-                            $node[$i] := $!main_opt($node[$i]);
-                        }
+                        $node[$i] := $!main_opt($node[$i]) if $!main_opt;
                     } elsif $type eq 'anchor' {
                     } elsif $type eq 'enumcharlist' {
                     } elsif $type eq 'cclass' {
                     } elsif $type eq 'scan' {
                     } elsif $type eq 'charrange' {
                     } elsif $type eq 'dynquant' {
-                        if $!main_opt {
-                            $node[$i] := $!main_opt($node[$i]);
-                        }
+                        $node[$i] := $!main_opt($node[$i]) if $!main_opt;
                     } elsif $type eq 'pass' || $type eq 'fail' {
                     } else {
                         # alt, altseq, conjseq, conj, quant
