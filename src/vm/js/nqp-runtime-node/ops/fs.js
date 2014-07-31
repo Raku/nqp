@@ -78,6 +78,21 @@ op.readlinefh = function(ctx,fh) {
   return line;
 };
 
+op.seekfh = function(ctx, fh, offset, whence) {
+  try {
+    fs.seekSync(fh.fd, offset.to_i(ctx), whence.to_i(ctx));
+  } catch (e) {
+    ctx.die('problem with seekfh:'+e);
+  }
+};
+
+op.link = function(ctx, srcpath, dstpath) {
+  fs.linkSync(srcpath.to_s(ctx), dstpath.to_s(ctx));
+};
+op.symlink = function(ctx, srcpath, dstpath) {
+  fs.symlinkSync(srcpath.to_s(ctx), dstpath.to_s(ctx));
+};
+
 op.readallfh = function(ctx,fh) {
   var all = new Buffer(0);
   var buffer = new Buffer(10);
