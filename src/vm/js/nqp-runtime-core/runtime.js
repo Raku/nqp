@@ -36,7 +36,7 @@ String.prototype.to_n = function() {
   return isNaN(n) ? 0 : n;
 };
 String.prototype.to_i = function() {
-  return parseInt(this);
+  return parseInt(this) | 0;
 };
 String.prototype.to_s = function() {
   return this.valueOf();
@@ -54,7 +54,7 @@ Number.prototype.to_s = function() {
   return this.toString();
 };
 Number.prototype.to_i = function() {
-  return Math.floor(this);
+  return this | 0;
 };
 Number.prototype.vtable_defined = function() {
   return 1;
@@ -184,7 +184,7 @@ op.add_n = function(ctx, a, b) {
   return a.to_n(ctx) + b.to_n(ctx);
 };
 op.add_i = function(ctx, a, b) {
-  return a.to_i(ctx) + b.to_i(ctx);
+  return (a.to_i(ctx) + b.to_i(ctx)) | 0;
 };
 op.mul_i = function(ctx, a, b) {
   return a.to_i(ctx) * b.to_i(ctx);
@@ -235,7 +235,7 @@ op.sub_n = function(ctx, a, b) {
   return a.to_n(ctx) - b.to_n(ctx);
 };
 op.sub_i = function(ctx, a, b) {
-  return a.to_i(ctx) - b.to_i(ctx);
+  return (a.to_i(ctx) - b.to_i(ctx)) | 0;
 };
 op.isne_n = function(ctx, a, b) {
   return nqp_bool(a.to_n(ctx) != b.to_n(ctx));
