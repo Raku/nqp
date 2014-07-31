@@ -1300,7 +1300,7 @@ class QAST::CompilerJS does SerializeOnce {
     %mangle<.> := 'DOT';
     %mangle<|> := 'PIPE';
     %mangle<`> := 'BACKTICK';
-    %mangle<$> := 'DOLAR';
+    %mangle<$> := 'DOLLAR';
     %mangle<\\> := 'BACKSLASH';
 
     method mangle_name($name) {
