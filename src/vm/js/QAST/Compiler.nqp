@@ -1649,7 +1649,7 @@ class QAST::CompilerJS does SerializeOnce {
             }
 
         # TODO optimize the lookup when we are not deserializing a closure, and we can't access the outer ctx directly
-        } elsif $var.scope eq 'lexical' && self.is_dynamic_var($var) {
+        } elsif $var.scope eq 'lexical' && self.is_dynamic_var($var) || $var.scope eq 'typevar' {
             my $name := self.quote_string($var.name);
             my $ctx := self.find_var_ctx($var);
             if $*BINDVAL {
@@ -1670,7 +1670,7 @@ class QAST::CompilerJS does SerializeOnce {
                 }
             }
             
-        } elsif $var.scope eq 'lexical' || $var.scope eq 'local' || $var.scope eq 'typevar' {
+        } elsif $var.scope eq 'lexical' || $var.scope eq 'local' {
             if $*BINDVAL {
                 '('~self.mangle_name($var.name)~' = ('~self.as_js_clear_bindval($*BINDVAL)~'))';
             } else {
