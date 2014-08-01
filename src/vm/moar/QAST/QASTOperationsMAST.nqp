@@ -861,6 +861,9 @@ QAST::MASTOperations.add_core_op('xor', -> $qastcomp, $op {
     my @ops;
     my $res_kind   := $MVM_reg_obj;
     my $res_reg    := $*REGALLOC.fresh_o();
+    my $t          := $*REGALLOC.fresh_i();
+    my $u          := $*REGALLOC.fresh_i();
+    my $d          := $*REGALLOC.fresh_o();
     my $falselabel := MAST::Label.new(:name($qastcomp.unique('xor_false')));
     my $endlabel   := MAST::Label.new(:name($qastcomp.unique('xor_end')));
 
@@ -874,10 +877,6 @@ QAST::MASTOperations.add_core_op('xor', -> $qastcomp, $op {
             nqp::push(@comp_ops, $qastcomp.as_mast($_, :want($MVM_reg_obj)));
         }
     }
-
-    my $t := $*REGALLOC.fresh_i();
-    my $u := $*REGALLOC.fresh_i();
-    my $d := $*REGALLOC.fresh_o();
 
     my $apost := nqp::shift(@comp_ops);
     push_ilist(@ops, $apost);
@@ -905,15 +904,14 @@ QAST::MASTOperations.add_core_op('xor', -> $qastcomp, $op {
             push_op(@ops, 'if_i', $t, $truelabel);
             push_op(@ops, 'set', $res_reg, $bpost.result_reg);
             $*REGALLOC.release_register($bpost.result_reg, $MVM_reg_obj);
-            $*REGALLOC.release_register($t, $MVM_reg_int64);
             push_op(@ops, 'set', $t, $u);
-            $*REGALLOC.release_register($u, $MVM_reg_int64);
             nqp::push(@ops, $truelabel);
         }
         else {
             $have_middle_child := 0;
         }
     }
+    $*REGALLOC.release_register($u, $MVM_reg_int64);
 
     push_op(@ops, 'if_i', $t, $endlabel);
     $*REGALLOC.release_register($t, $MVM_reg_int64);
