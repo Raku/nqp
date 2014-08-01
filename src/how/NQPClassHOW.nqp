@@ -717,18 +717,22 @@ knowhow NQPClassHOW {
             my %meths := $_.HOW.method_table($obj);
             if nqp::existskey(%meths, $name) {
                 my $found := %meths{$name};
-                return $!trace && !$no_trace && self.should_trace($obj, $name) ??
-                    -> *@pos, *%named { 
-                        nqp::say(nqp::x('  ', $!trace_depth) ~ "Calling $name");
-                        $!trace_depth := $!trace_depth + 1;
-                        my $result := $found(|@pos, |%named);
-                        $!trace_depth := $!trace_depth - 1;
-                        $result
-                    } !!
-                    $found;
+                return $!trace && !$no_trace && self.should_trace($obj, $name)
+                    ?? self.make_tracer($name, $found)
+                    !! $found;
             }
         }
         nqp::null()
+    }
+
+    method make_tracer($name, $found) {
+        -> *@pos, *%named { 
+            nqp::say(nqp::x('  ', $!trace_depth) ~ "Calling $name");
+            $!trace_depth := $!trace_depth + 1;
+            my $result := $found(|@pos, |%named);
+            $!trace_depth := $!trace_depth - 1;
+            $result
+        }
     }
 
     ##
