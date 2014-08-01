@@ -2449,29 +2449,6 @@ QAST::MASTOperations.add_core_op('takedispatcher', -> $qastcomp, $op {
     MAST::InstructionList.new(@ops, $MVM_reg_void, MAST::VOID)
 });
 QAST::MASTOperations.add_core_moarop_mapping('cleardispatcher', 'takedispatcher');
-QAST::MASTOperations.add_core_op('setup_blv', -> $qastcomp, $op {
-    if +@($op) != 1 || !nqp::ishash($op[0]) {
-        nqp::die('setup_blv requires one hash operand');
-    }
-
-    my $regalloc := $*REGALLOC;
-    my @ops;
-    for $op[0] {
-        my $frame     := $qastcomp.mast_frames{$_.key};
-        my $block_reg := $regalloc.fresh_register($MVM_reg_obj);
-        push_op(@ops, 'getcode', $block_reg, $frame);
-        for $_.value -> @lex {
-            my $valres := $qastcomp.as_mast(QAST::WVal.new( :value(@lex[1]) ));
-            push_ilist(@ops, $valres);
-            push_op(@ops, 'setlexvalue', $block_reg, MAST::SVal.new( :value(@lex[0]) ),
-                $valres.result_reg, MAST::IVal.new( :value(@lex[2]) ));
-            $regalloc.release_register($valres.result_reg, $MVM_reg_obj);
-        }
-        $regalloc.release_register($block_reg, $MVM_reg_obj);
-    }
-
-    MAST::InstructionList.new(@ops, $regalloc.fresh_o(), $MVM_reg_obj)
-});
 QAST::MASTOperations.add_core_moarop_mapping('freshcoderef', 'freshcoderef');
 QAST::MASTOperations.add_core_moarop_mapping('iscoderef', 'iscoderef');
 QAST::MASTOperations.add_core_moarop_mapping('markcodestatic', 'markcodestatic');

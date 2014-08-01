@@ -14,11 +14,6 @@ my class MASTCompilerInstance {
     # The filename we're compiling.
     has $!file;
 
-    # Hash mapping blocks with static lexicals to an array of arrays. Each
-    # of the sub-arrays has the form [$name, $value, $flags], where flags
-    # are 0 = static lex, 1 = container, 2 = state container.
-    has %!block_lex_values;
-
     # The serialization context of the code we're compiling, if we have one.
     has $!sc;
 
@@ -150,18 +145,23 @@ my class MASTCompilerInstance {
         }
 
         method add_lexical($var, :$is_static, :$is_cont, :$is_state) {
-            my $type := $var.returns;
-            my $kind := $!compiler.type_to_register_kind($type);
-            my $index := $*MAST_FRAME.add_lexical($type, $var.name);
+            my $mf    := $*MAST_FRAME;
+            my $type  := $var.returns;
+            my $kind  := $!compiler.type_to_register_kind($type);
+            my $index := $mf.add_lexical($type, $var.name);
             self.register_lexical($var, $index, 0, $kind);
             if $is_static || $is_cont || $is_state {
-                my %blv := $!compiler.block_lex_values;
-                unless nqp::existskey(%blv, $!qast.cuid) {
-                    %blv{$!qast.cuid} := [];
+                my int $flags := $is_static ?? 0 !!
+                                 $is_cont   ?? 1 !! 2;
+                my $val       := $var.value;
+                my $sc        := nqp::getobjsc($val);
+                if nqp::isnull($sc) {
+                    nqp::die("Object of type " ~ $val.HOW.name($val) ~
+                        " in QAST::Var value, but not in SC");
                 }
-                my $flags := $is_static ?? 0 !!
-                             $is_cont   ?? 1 !! 2;
-                nqp::push(%blv{$!qast.cuid}, [$var.name, $var.value, $flags]);
+                my int $idx    := nqp::scgetobjidx($sc, $val);
+                my int $sc_idx := $!compiler.mast_compunit.sc_idx($sc);
+                $mf.add_static_lex_value($index, $flags, $sc_idx, $idx);
             }
             $kind;
         }
@@ -288,7 +288,6 @@ my class MASTCompilerInstance {
 
     method mast_compunit() { $!mast_compunit }
     method mast_frames() { %!mast_frames }
-    method block_lex_values() { %!block_lex_values }
     method sc() { $!sc }
 
     method to_mast($qast) {
@@ -297,7 +296,6 @@ my class MASTCompilerInstance {
         $!mast_compunit := MAST::CompUnit.new();
         %!mast_frames := nqp::hash();
         $!file := nqp::ifnull(nqp::getlexdyn('$?FILES'), "<unknown file>");
-        %!block_lex_values := nqp::hash();
         $!sc := NQPMu;
 
         # Compile, and evaluate to compilation unit.
@@ -522,9 +520,6 @@ my class MASTCompilerInstance {
         my $comp_mode := $cu.compilation_mode;
         my @pre_des   := $cu.pre_deserialize;
         my @post_des  := $cu.post_deserialize;
-        if %!block_lex_values {
-            nqp::push(@post_des, QAST::Op.new( :op('setup_blv'), %!block_lex_values ));
-        }
         if $comp_mode || @pre_des || @post_des {
             # Create a block into which we'll install all of the other
             # pieces.
