@@ -40,15 +40,22 @@ class QAST::Block is QAST::Node {
         }
     }
 
+    my %NOSYMS := nqp::hash();
     method symbol($name, *%attrs) {
         %!symbol := nqp::hash() if nqp::isnull(%!symbol);
         if %attrs {
-            %!symbol{$name} := %!symbol{$name} // {};
-            for %attrs {
-                %!symbol{$name}{$_.key} := $_.value;
+            my %syms := %!symbol{$name};
+            unless nqp::ishash(%syms) {
+                %!symbol{$name} := %syms := nqp::hash();
             }
+            for %attrs {
+                %syms{$_.key} := $_.value;
+            }
+            %syms
         }
-        %!symbol{$name}
+        else {
+            nqp::ifnull(nqp::atkey(%!symbol, $name), %NOSYMS)
+        }
     }
     
     method symtable() {
