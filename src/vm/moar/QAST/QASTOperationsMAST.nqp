@@ -79,12 +79,16 @@ class QAST::MASTOperations {
 
     # Compiles an operation to MAST.
     method compile_op($qastcomp, $hll, $op) {
-        my $name := $op.op;
-        if ($hll && %hll_ops{$hll} && %hll_ops{$hll}{$name})
-                || %core_ops{$name} -> $mapper {
-            return $mapper($qastcomp, $op);
+        my str $name := $op.op;
+        my $mapper;
+        if $hll {
+            my %ops := %hll_ops{$hll};
+            $mapper := %ops{$name} if %ops;
         }
-        nqp::die("No registered operation handler for '$name'");
+        $mapper := %core_ops{$name} unless $mapper;
+        $mapper
+            ?? $mapper($qastcomp, $op)
+            !! nqp::die("No registered operation handler for '$name'");
     }
 
     my @kind_names := ['VOID','int8','int16','int32','int','num32','num','str','obj'];

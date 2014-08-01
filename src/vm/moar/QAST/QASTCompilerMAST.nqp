@@ -22,6 +22,9 @@ my class MASTCompilerInstance {
     # The serialization context of the code we're compiling, if we have one.
     has $!sc;
 
+    # The most recent op we tried to compile, for error reporting.
+    has $!last_op;
+
     # This uses a very simple scheme. Write registers are assumed
     # to be write-once, read-once.  Therefore, if a QAST control
     # structure wants to reuse the intermediate result of an
@@ -249,8 +252,9 @@ my class MASTCompilerInstance {
             nqp::push(@!captured_inners, $block.cuid)
         }
         method clone_inner($block) {
-            my $cuid := $block.cuid;
-            if %!cloned_inners{$cuid} -> $already {
+            my $cuid    := $block.cuid;
+            my $already := %!cloned_inners{$cuid};
+            if $already {
                 $already
             }
             else {
@@ -298,6 +302,12 @@ my class MASTCompilerInstance {
 
         # Compile, and evaluate to compilation unit.
         self.as_mast($qast);
+        CATCH {
+            my $err    := $!;
+            my $source := self.source_for_node($!last_op);
+            nqp::die("QAST -> MAST failed while compiling op " ~ $!last_op.op ~ "$source: $err");
+        }
+
         $!mast_compunit
     }
 
@@ -973,17 +983,8 @@ my class MASTCompilerInstance {
     }
 
     multi method compile_node(QAST::Stmt $node, :$want) {
-        my $resultchild := $node.resultchild;
         my %stmt_temps := nqp::clone(%*STMTTEMPS); # guaranteed to be initialized
-        my $result;
-        {
-            my %*STMTTEMPS := %stmt_temps;
-            my $*INSTMT := 1;
-
-            nqp::die("resultchild out of range")
-                if (nqp::defined($resultchild) && $resultchild >= +@($node));
-            $result := self.compile_all_the_stmts(@($node), $resultchild);
-        }
+        my $result     := self.compile_with_stmt_temps($node, %stmt_temps);
         for %stmt_temps -> $temp_key {
             if !nqp::existskey(%*STMTTEMPS, $temp_key) &&
                     !nqp::eqaddr($*BLOCK.local($temp_key), $result.result_reg) {
@@ -991,6 +992,14 @@ my class MASTCompilerInstance {
             }
         }
         $result
+    }
+    method compile_with_stmt_temps($node, %stmt_temps) {
+        my %*STMTTEMPS  := %stmt_temps;
+        my $*INSTMT     := 1;
+        my $resultchild := $node.resultchild;
+        nqp::die("resultchild out of range")
+            if (nqp::defined($resultchild) && $resultchild >= +@($node));
+        self.compile_all_the_stmts(@($node), $resultchild);
     }
 
     # This takes any node that is a statement list of some kind and compiles
@@ -1059,18 +1068,8 @@ my class MASTCompilerInstance {
     }
 
     multi method compile_node(QAST::Op $node, :$want) {
-        my $result;
-        my $err;
-        try {
-            $result := QAST::MASTOperations.compile_op(self, $!hll, $node);
-            CATCH { $err := $! }
-        }
-        if $err {
-            nqp::die($err) if nqp::index($err, "Error while compiling op ") == 0;
-            my $source := self.source_for_node($node);
-            nqp::die("Error while compiling op " ~ $node.op ~ "$source: $err");
-        }
-        $result
+        $!last_op := $node;
+        QAST::MASTOperations.compile_op(self, $!hll, $node)
     }
 
     multi method compile_node(QAST::VM $node, :$want) {
@@ -1203,11 +1202,11 @@ my class MASTCompilerInstance {
         my $name := $node.name;
         my @ins;
         if $scope eq 'local' {
-            if $*BLOCK.local($name) -> $local {
+            my $local := $*BLOCK.local($name);
+            if $local {
                 $res_kind := $*BLOCK.local_kind($name);
                 if $*BINDVAL {
                     my $valmast := self.as_mast_clear_bindval($*BINDVAL, :want($res_kind));
-                #    check_kinds($valmast.result_kind, $res_kind);
                     push_ilist(@ins, $valmast);
                     push_op(@ins, 'set', $local, $valmast.result_reg);
                     $*REGALLOC.release_register($valmast.result_reg, $res_kind);
@@ -1238,12 +1237,9 @@ my class MASTCompilerInstance {
                 }
                 if $*BINDVAL {
                     my $valmast := self.as_mast_clear_bindval($*BINDVAL, :want($res_kind));
-                #    check_kinds($valmast.result_kind, $res_kind);
                     $res_reg := $valmast.result_reg;
                     push_ilist(@ins, $valmast);
                     push_op(@ins, 'bindlex', $lex, $res_reg);
-                    # do NOT release your own result register.  ergh.
-                    #$*REGALLOC.release_register($res_reg, $valmast.result_kind);
                 }
                 elsif $decl ne 'param' {
                     $res_reg := $*REGALLOC.fresh_register($res_kind);
@@ -1313,13 +1309,10 @@ my class MASTCompilerInstance {
                 # Need lookup.
                 if $*BINDVAL {
                     my $valmast := self.as_mast_clear_bindval($*BINDVAL, :want($MVM_reg_obj));
-                #    check_kinds($valmast.result_kind, $MVM_reg_obj);
                     $res_reg := $valmast.result_reg;
                     push_ilist(@ins, $valmast);
                     push_ilist(@ins, $name_const);
                     push_op(@ins, 'binddynlex', $name_const.result_reg, $res_reg);
-                    # do NOT release your own result register.  ergh.
-                    #$*REGALLOC.release_register($res_reg, $valmast.result_kind);
                 }
                 else {
                     push_ilist(@ins, $name_const);
@@ -1353,7 +1346,6 @@ my class MASTCompilerInstance {
             my $kind := self.type_to_register_kind($node.returns);
             if $*BINDVAL {
                 my $valmast := self.as_mast_clear_bindval($*BINDVAL, :want($kind));
-
                 push_ilist(@ins, $valmast);
                 push_op(@ins, 'bind' ~ @attr_opnames[$kind], $obj.result_reg,
                     $han.result_reg, MAST::SVal.new( :value($name) ), $valmast.result_reg,
@@ -1362,7 +1354,6 @@ my class MASTCompilerInstance {
                 $res_kind := $valmast.result_kind;
             }
             else {
-
                 $res_reg := $*REGALLOC.fresh_register($kind);
                 $res_kind := $kind;
                 push_op(@ins, 'get' ~ @attr_opnames[$kind], $res_reg, $obj.result_reg,
@@ -1513,11 +1504,6 @@ my class MASTCompilerInstance {
 
     multi method compile_node($unknown, :$want) {
         nqp::die("Unknown QAST node type " ~ $unknown.HOW.name($unknown));
-
-        #my $name := 'null';
-        #try $name := nqp::isnull($unknown) || nqp::isnull($unknown.HOW) ?? nqp::die('fail') !! $unknown.HOW.name($unknown);
-        #$name := pir::typeof__SP($unknown) unless nqp::isnull($unknown) || $name ne 'null';
-        #nqp::die("Unknown QAST node type $name");
     }
 
     method annotated($ilist, $file, $line) {
