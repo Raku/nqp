@@ -21,9 +21,6 @@ class QAST::MASTRegexCompiler {
     # The current register allocator.
     has $!regalloc;
 
-    # Current regex prefix.
-    has str $!rxprefix;
-
     # Cursor type, if any.
     has $!cursor_type;
 
@@ -42,7 +39,6 @@ class QAST::MASTRegexCompiler {
     method BUILD($qastcomp, $regalloc) {
         $!qastcomp    := $qastcomp;
         $!regalloc    := $regalloc;
-        $!rxprefix    := $qastcomp.unique('rx') ~ '_';
         $!cursor_type := NQPMu;
     }
 
@@ -51,9 +47,6 @@ class QAST::MASTRegexCompiler {
     }
 
     method as_mast($node, :$want) {
-        # Prefix for the regexes code pieces.
-        my str $prefix := $!rxprefix;
-
         # Build the list of (unique) registers we need
         my $tgt      := $!regalloc.fresh_s();
         my $pos      := $!regalloc.fresh_i();
@@ -79,13 +72,13 @@ class QAST::MASTRegexCompiler {
         my $cclass_newline  := $!regalloc.fresh_i();
 
         # create our labels
-        my $startlabel   := label($prefix ~ 'start');
-        my $donelabel    := label($prefix ~ 'done');
-        my $restartlabel := label($prefix ~ 'restart');
-        my $faillabel    := label($prefix ~ 'fail');
-        my $jumplabel    := label($prefix ~ 'jump');
-        my $cutlabel     := label($prefix ~ 'cut');
-        my $cstacklabel  := label($prefix ~ 'cstack_done');
+        my $startlabel   := label();
+        my $donelabel    := label();
+        my $restartlabel := label();
+        my $faillabel    := label();
+        my $jumplabel    := label();
+        my $cutlabel     := label();
+        my $cstacklabel  := label();
 
         my $self := $*BLOCK.local('self');
 
@@ -279,8 +272,7 @@ class QAST::MASTRegexCompiler {
 
         # Calculate all the branches to try, which populates the bstack
         # with the options. Then immediately fail to start iterating it.
-        my $prefix := $!qastcomp.unique($!rxprefix ~ '_alt');
-        my $endlabel_index := self.rxjump($prefix ~ '_end');
+        my $endlabel_index := self.rxjump();
         my $endlabel := @!rxjumps[$endlabel_index];
         my @ins := nqp::list();
         self.regex_mark(@ins, $endlabel_index, %!reg<negone>, %!reg<zero>);
@@ -297,7 +289,7 @@ class QAST::MASTRegexCompiler {
         my $iter     := nqp::iterator($node.list);
         my $itmp     := $!regalloc.fresh_i();
         while $iter {
-            my $altlabel_index := self.rxjump($prefix ~ $altcount);
+            my $altlabel_index := self.rxjump();
             my $altlabel := @!rxjumps[$altlabel_index];
             my @amast    := self.regex_mast(nqp::shift($iter));
             nqp::push(@ins, $altlabel);
@@ -321,18 +313,17 @@ class QAST::MASTRegexCompiler {
 
     method altseq($node) {
         my @ins := nqp::list();
-        my $prefix := $!qastcomp.unique($!rxprefix ~ '_altseq');
         my $altcount := 0;
         my $iter := nqp::iterator($node.list);
-        my $endlabel_index := self.rxjump($prefix ~ '_end');
+        my $endlabel_index := self.rxjump();
         my $endlabel := @!rxjumps[$endlabel_index];
-        my $altlabel_index := self.rxjump($prefix ~ $altcount);
+        my $altlabel_index := self.rxjump();
         my $altlabel := @!rxjumps[$altlabel_index];
         my @amast    := self.regex_mast(nqp::shift($iter));
         while $iter {
             nqp::push(@ins, $altlabel);
             $altcount++;
-            $altlabel_index := self.rxjump($prefix ~ $altcount);
+            $altlabel_index := self.rxjump();
             $altlabel := @!rxjumps[$altlabel_index];
             self.regex_mark(@ins, $altlabel_index, %!reg<pos>, %!reg<zero>);
             merge_ins(@ins, @amast);
@@ -348,7 +339,7 @@ class QAST::MASTRegexCompiler {
     method anchor($node) {
         my @ins := nqp::list();
         my $subtype := $node.subtype;
-        my $donelabel := label(self.unique($!rxprefix ~ '_rxanchor') ~ '_done');
+        my $donelabel := label();
         my $i11 := $!regalloc.fresh_i();
         my $pos := %!reg<pos>;
         my $fail := %!reg<fail>;
@@ -472,10 +463,9 @@ class QAST::MASTRegexCompiler {
     method conj($node) { self.conjseq($node) }
 
     method conjseq($node) {
-        my $prefix := $!qastcomp.unique($!rxprefix ~ '_rxconj');
-        my $conjlabel_index := self.rxjump($prefix ~ '_fail');
+        my $conjlabel_index := self.rxjump();
         my $conjlabel := @!rxjumps[$conjlabel_index];
-        my $firstlabel := label($prefix ~ '_first');
+        my $firstlabel := label();
         my $iter := nqp::iterator($node.list);
         my @ins := [
             op('goto', $firstlabel),
@@ -531,7 +521,7 @@ class QAST::MASTRegexCompiler {
             my $s0      := $!regalloc.fresh_s();
             my $s1      := $!regalloc.fresh_s();
             my $i2      := $!regalloc.fresh_i();
-            my $succeed := label($!qastcomp.unique($!rxprefix ~ '_charrange_ic'));
+            my $succeed := label();
             my $goal    := $node.negate ?? %!reg<fail> !! $succeed;
             merge_ins(@ins, [
                 op('const_i64', $i2, ival(1)),
@@ -555,7 +545,7 @@ class QAST::MASTRegexCompiler {
             }
         }
         else {
-            my $succeed := label($!qastcomp.unique($!rxprefix ~ '_charrange'));
+            my $succeed := label();
             my $goal    := $node.negate ?? $succeed !! %!reg<fail>;
             merge_ins(@ins, [
                 op('ordat', $i0, %!reg<tgt>, %!reg<pos>),
@@ -676,20 +666,19 @@ class QAST::MASTRegexCompiler {
 
         my $backtrack  := $node.backtrack || 'g';
         my $sep        := $node[2];
-        my $prefix     := self.unique($!rxprefix ~ '_rxdynquant_' ~ $backtrack);
-        my $looplabel_index := self.rxjump($prefix ~ '_loop');
+        my $looplabel_index := self.rxjump();
         my $looplabel  := @!rxjumps[$looplabel_index];
-        my $donelabel_index := self.rxjump($prefix ~ '_done');
+        my $donelabel_index := self.rxjump();
         my $donelabel  := @!rxjumps[$donelabel_index];
-        my $skip0label := label($prefix ~ '_skip0');
-        my $skip1label := label($prefix ~ '_skip1');
-        my $skip2label := label($prefix ~ '_skip2');
-        my $skip3label := label($prefix ~ '_skip3');
-        my $skip4label := label($prefix ~ '_skip4');
-        my $skip5label := label($prefix ~ '_skip5');
-        my $skip6label := label($prefix ~ '_skip6');
-        my $skip7label := label($prefix ~ '_skip7');
-        my $skip8label := label($prefix ~ '_skip8');
+        my $skip0label := label();
+        my $skip1label := label();
+        my $skip2label := label();
+        my $skip3label := label();
+        my $skip4label := label();
+        my $skip5label := label();
+        my $skip6label := label();
+        my $skip7label := label();
+        my $skip8label := label();
         my $needrep    := $!regalloc.fresh_i();
         my $needmark   := $!regalloc.fresh_i();
         my $rep        := %!reg<rep>;
@@ -732,7 +721,7 @@ class QAST::MASTRegexCompiler {
         }
 
         if $backtrack eq 'f' {
-            my $seplabel := label($prefix ~ '_sep');
+            my $seplabel := label();
             nqp::push(@ins, op('set', $rep, %!reg<zero>));
 
             nqp::push(@ins, op('ge_i', $ireg, $min_reg, %!reg<one>)); # if $min < 1 {
@@ -832,10 +821,9 @@ class QAST::MASTRegexCompiler {
 
         my $backtrack := $node.backtrack || 'g';
         my $sep       := $node[1];
-        my $prefix    := self.unique($!rxprefix ~ '_rxquant_' ~ $backtrack);
-        my $looplabel_index := self.rxjump($prefix ~ '_loop');
+        my $looplabel_index := self.rxjump();
         my $looplabel := @!rxjumps[$looplabel_index];
-        my $donelabel_index := self.rxjump($prefix ~ '_done');
+        my $donelabel_index := self.rxjump();
         my $donelabel := @!rxjumps[$donelabel_index];
         my $needrep   := $min > 1 || $max > 1;
         my $needmark  := $needrep || $backtrack eq 'r';
@@ -844,7 +832,7 @@ class QAST::MASTRegexCompiler {
         my $ireg      := $!regalloc.fresh_register($MVM_reg_int64, 1); # Must be regex-unique
 
         if $backtrack eq 'f' {
-            my $seplabel := label($prefix ~ '_sep');
+            my $seplabel := label();
             nqp::push(@ins, op('set', $rep, %!reg<zero>));
             if $min < 1 {
                 self.regex_mark(@ins, $looplabel_index, $pos, $rep);
@@ -912,11 +900,10 @@ class QAST::MASTRegexCompiler {
     }
 
     method scan($node) {
-        my $prefix := self.unique($!rxprefix ~ '_rxscan');
-        my $looplabel_index := self.rxjump($prefix ~ '_loop');
+        my $looplabel_index := self.rxjump();
         my $looplabel := @!rxjumps[$looplabel_index];
-        my $scanlabel := label($prefix ~ '_scan');
-        my $donelabel := label($prefix ~ '_done');
+        my $scanlabel := label();
+        my $donelabel := label();
         my $ireg0 := $!regalloc.fresh_i();
         my @ins := [
             op('getattr_i', $ireg0, %!reg<self>, %!reg<curclass>, sval('$!from'),
@@ -947,9 +934,8 @@ class QAST::MASTRegexCompiler {
 
     method subcapture($node) {
         my @ins := nqp::list();
-        my $prefix := self.unique($!rxprefix ~ '_rxcap');
-        my $donelabel := label($prefix ~ '_done');
-        my $faillabel_index := self.rxjump($prefix ~ '_fail');
+        my $donelabel := label();
+        my $faillabel_index := self.rxjump();
         my $faillabel := @!rxjumps[$faillabel_index];
         my $i11 := $!regalloc.fresh_i();
         my $p11 := $!regalloc.fresh_o();
@@ -1040,8 +1026,7 @@ class QAST::MASTRegexCompiler {
         ]);
 
         if $subtype ne 'zerowidth' {
-            my $rxname := self.unique($!rxprefix ~ '_rxsubrule');
-            my $passlabel_index := self.rxjump($rxname ~ '_pass');
+            my $passlabel_index := self.rxjump();
             my $passlabel := @!rxjumps[$passlabel_index];
             if $node.backtrack eq 'r' {
                 unless $subtype eq 'method' {
@@ -1050,7 +1035,7 @@ class QAST::MASTRegexCompiler {
                 nqp::push(@ins, $passlabel);
             }
             else {
-                my $backlabel_index := self.rxjump($rxname ~ '_back');
+                my $backlabel_index := self.rxjump();
                 my $backlabel := @!rxjumps[$backlabel_index];
                 merge_ins(@ins, [
                     op('goto', $passlabel),
@@ -1118,9 +1103,8 @@ class QAST::MASTRegexCompiler {
         my $mark := $!regalloc.fresh_i();
         my $elems := $!regalloc.fresh_i();
         my $caps := $!regalloc.fresh_i();
-        my $prefix := $!qastcomp.unique($!rxprefix ~ '_rxmark');
-        my $haselemslabel := label($prefix ~ '_haselems');
-        my $haselemsendlabel := label($prefix ~ '_haselemsend');
+        my $haselemslabel := label();
+        my $haselemsendlabel := label();
         merge_ins(@ins, [
             op('const_i64', $mark, ival($label_index)),
             op('elems', $elems, $bstack),
@@ -1147,9 +1131,8 @@ class QAST::MASTRegexCompiler {
         my $mark := $!regalloc.fresh_i();
         my $ptr := $!regalloc.fresh_i();
         my $i0 := $!regalloc.fresh_i();
-        my $prefix := $!qastcomp.unique($!rxprefix ~ '_rxpeek');
-        my $haselemsendlabel := label($prefix ~ '_haselemsend');
-        my $backupendlabel := label($prefix ~ '_backupend');
+        my $haselemsendlabel := label();
+        my $backupendlabel := label();
         merge_ins(@ins, [
             op('const_i64', $mark, ival($label_index)),
             op('elems', $ptr, $bstack),
@@ -1178,12 +1161,11 @@ class QAST::MASTRegexCompiler {
         my $ptr := $!regalloc.fresh_i();
         my $caps := $!regalloc.fresh_i();
         my $i0 := $!regalloc.fresh_i();
-        my $prefix := $!qastcomp.unique($!rxprefix ~ '_rxcommit');
-        my $haselemslabel := label($prefix ~ '_haselems');
-        my $haselemsendlabel := label($prefix ~ '_haselemsend');
-        my $backupendlabel := label($prefix ~ '_backupend');
-        my $nocapslabel := label($prefix ~ '_nocaps');
-        my $makemarklabel := label($prefix ~ '_makemark');
+        my $haselemslabel := label();
+        my $haselemsendlabel := label();
+        my $backupendlabel := label();
+        my $nocapslabel := label();
+        my $makemarklabel := label();
         merge_ins(@ins, [
             op('const_i64', $mark, ival($label_index)),
             op('elems', $ptr, $bstack),
@@ -1247,10 +1229,9 @@ class QAST::MASTRegexCompiler {
         my $pprop := $!regalloc.fresh_s();
         my $i0 := $!regalloc.fresh_i();
         my $testop := $node.negate ?? 'if_i' !! 'unless_i';
-        my $prefix := $!qastcomp.unique($!rxprefix ~ '_uniprop');
-        my $hasvalcode := label($prefix ~ '_haselems');
-        my $endblock   := label($prefix ~ '_endblock');
-        my $succeed    := label($prefix ~ '_succeed');
+        my $hasvalcode := label();
+        my $endblock   := label();
+        my $succeed    := label();
         my @ins := [
             op('ge_i', $i0, %!reg<pos>, %!reg<eos>),
             op('if_i', $i0, %!reg<fail>),
@@ -1298,9 +1279,9 @@ class QAST::MASTRegexCompiler {
         @ins
     }
 
-    method rxjump($name) {
+    method rxjump() {
         my $index := +@!rxjumps;
-        @!rxjumps[$index] :=  MAST::Label.new( :name($name) );
+        @!rxjumps[$index] := MAST::Label.new();
         $index
     }
 
@@ -1322,7 +1303,7 @@ class QAST::MASTRegexCompiler {
         )
     }
 
-    sub label($name) { MAST::Label.new( :name($name) ) }
+    sub label()    { MAST::Label.new() }
     sub ival($val) { MAST::IVal.new( :value($val) ) }
     sub nval($val) { MAST::NVal.new( :value($val) ) }
     sub sval($val) { MAST::SVal.new( :value($val) ) }

@@ -627,7 +627,7 @@ QAST::MASTOperations.add_core_op('chain', -> $qastcomp, $op {
     my @ops;
     my $regalloc := $*REGALLOC;
     my $res_reg  := $regalloc.fresh_register($MVM_reg_obj);
-    my $endlabel := MAST::Label.new( :name($qastcomp.unique('chain_end_')) );
+    my $endlabel := MAST::Label.new();
 
     $cqast := nqp::pop(@clist);
     my $aqast := $cqast[0];
@@ -682,8 +682,8 @@ for <if unless> -> $op_name {
 
         # Create labels.
         my $if_id    := $qastcomp.unique($op_name);
-        my $else_lbl := MAST::Label.new(:name($if_id ~ '_else'));
-        my $end_lbl  := MAST::Label.new(:name($if_id ~ '_end'));
+        my $else_lbl := MAST::Label.new();
+        my $end_lbl  := MAST::Label.new();
 
         # Compile each of the children, handling any that want the conditional
         # value to be passed.
@@ -838,7 +838,7 @@ QAST::MASTOperations.add_core_op('defor', -> $qastcomp, $op {
 
     # Emit defined check.
     my $def_reg := $regalloc.fresh_i();
-    my $lbl := MAST::Label.new(:name($qastcomp.unique('defor')));
+    my $lbl := MAST::Label.new();
     push_op($expr.instructions, 'set', $res_reg, $expr.result_reg);
     push_op($expr.instructions, 'isconcrete', $def_reg, $res_reg);
     push_op($expr.instructions, 'if_i', $def_reg, $lbl);
@@ -864,8 +864,8 @@ QAST::MASTOperations.add_core_op('xor', -> $qastcomp, $op {
     my $t          := $*REGALLOC.fresh_i();
     my $u          := $*REGALLOC.fresh_i();
     my $d          := $*REGALLOC.fresh_o();
-    my $falselabel := MAST::Label.new(:name($qastcomp.unique('xor_false')));
-    my $endlabel   := MAST::Label.new(:name($qastcomp.unique('xor_end')));
+    my $falselabel := MAST::Label.new();
+    my $endlabel   := MAST::Label.new();
 
     my @comp_ops;
     my $f_ast;
@@ -893,14 +893,14 @@ QAST::MASTOperations.add_core_op('xor', -> $qastcomp, $op {
         push_op(@ops, 'decont', $d, $bpost.result_reg);
         push_op(@ops, 'istrue', $u, $d);
 
-        my $jumplabel := MAST::Label.new(:name($qastcomp.unique('xor_jump')));
+        my $jumplabel := MAST::Label.new();
         push_op(@ops, 'unless_i', $t, $jumplabel);
         push_op(@ops, 'unless_i', $u, $jumplabel);
         push_op(@ops, 'goto', $falselabel);
         nqp::push(@ops, $jumplabel);
 
         if @comp_ops {
-            my $truelabel := MAST::Label.new(:name($qastcomp.unique('xor_true')));
+            my $truelabel := MAST::Label.new();
             push_op(@ops, 'if_i', $t, $truelabel);
             push_op(@ops, 'set', $res_reg, $bpost.result_reg);
             $*REGALLOC.release_register($bpost.result_reg, $MVM_reg_obj);
@@ -947,7 +947,7 @@ QAST::MASTOperations.add_core_op('ifnull', -> $qastcomp, $op {
     my $expr := $qastcomp.as_mast($op[0], :want($MVM_reg_obj));
 
     # Emit null check.
-    my $lbl := MAST::Label.new(:name($qastcomp.unique('ifnull')));
+    my $lbl := MAST::Label.new();
     push_op($expr.instructions, 'set', $res_reg, $expr.result_reg);
     push_op($expr.instructions, 'ifnonnull', $expr.result_reg, $lbl);
 
@@ -970,10 +970,10 @@ for ('', 'repeat_') -> $repness {
         QAST::MASTOperations.add_core_op("$repness$op_name", -> $qastcomp, $op {
             # Create labels.
             my $while_id := $qastcomp.unique($op_name);
-            my $test_lbl := MAST::Label.new(:name($while_id ~ '_test'));
-            my $next_lbl := MAST::Label.new(:name($while_id ~ '_next'));
-            my $redo_lbl := MAST::Label.new(:name($while_id ~ '_redo'));
-            my $done_lbl := MAST::Label.new(:name($while_id ~ '_done'));
+            my $test_lbl := MAST::Label.new();
+            my $next_lbl := MAST::Label.new();
+            my $redo_lbl := MAST::Label.new();
+            my $done_lbl := MAST::Label.new();
 
             # Pick out applicable children; detect no handler case and munge
             # immediate arg case.
@@ -1183,9 +1183,9 @@ QAST::MASTOperations.add_core_op('for', -> $qastcomp, $op {
 
     # Some labels we'll need.
     my $for_id := $qastcomp.unique('for');
-    my $lbl_next := MAST::Label.new( :name($for_id ~ 'next') );
-    my $lbl_redo := MAST::Label.new( :name($for_id ~ 'redo') );
-    my $lbl_done := MAST::Label.new( :name($for_id ~ 'done') );
+    my $lbl_next := MAST::Label.new();
+    my $lbl_redo := MAST::Label.new();
+    my $lbl_done := MAST::Label.new();
 
     # Emit loop test.
     my $loop_il := ();
@@ -1523,8 +1523,8 @@ QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
 });
 
 QAST::MASTOperations.add_core_op('lexotic', :!inlinable, -> $qastcomp, $op {
-    my $lex_label := MAST::Label.new( :name($qastcomp.unique('lexotic_')) );
-    my $end_label := MAST::Label.new( :name($qastcomp.unique('lexotic_end_')) );
+    my $lex_label := MAST::Label.new();
+    my $end_label := MAST::Label.new();
 
     # Create new lexotic and install it lexically.
     my @ins;
@@ -1674,8 +1674,8 @@ QAST::MASTOperations.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
     # Wrap instructions to try up in a handler and evaluate to the result
     # of the protected code of the exception handler.
     my $protil := $qastcomp.as_mast($protected, :want($MVM_reg_obj));
-    my $uwlbl  := MAST::Label.new( :name($qastcomp.unique('handle_unwind_')) );
-    my $endlbl := MAST::Label.new( :name($qastcomp.unique('handle_end_')) );
+    my $uwlbl  := MAST::Label.new();
+    my $endlbl := MAST::Label.new();
     push_op($protil.instructions, 'goto', $endlbl);
     nqp::push($il, MAST::HandlerScope.new(
         :instructions($protil.instructions), :goto($uwlbl), :block($hblocal),
@@ -2436,7 +2436,7 @@ QAST::MASTOperations.add_core_op('takedispatcher', -> $qastcomp, $op {
     my @ops;
     my $disp_reg   := $regalloc.fresh_register($MVM_reg_obj);
     my $isnull_reg := $regalloc.fresh_register($MVM_reg_int64);
-    my $done_lbl   := MAST::Label.new(:name($op.unique('takedisp')));
+    my $done_lbl   := MAST::Label.new();
     push_op(@ops, 'takedispatcher', $disp_reg);
     push_op(@ops, 'isnull', $isnull_reg, $disp_reg);
     push_op(@ops, 'if_i', $isnull_reg, $done_lbl);

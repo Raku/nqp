@@ -847,7 +847,7 @@ my class MASTCompilerInstance {
                         # even if no default initializer expression is provided.
                         if $var.default {
                             # generate end label to skip initialization code
-                            my $endlbl := MAST::Label.new( :name(self.unique('param') ~ '_end') );
+                            my $endlbl := MAST::Label.new();
 
                             # generate default initialization code. Could also be
                             # wrapped in another QAST::Block.
@@ -1110,8 +1110,8 @@ my class MASTCompilerInstance {
             my $il := nqp::list();
             push_ilist($il, $var_res);
 
-            my $fallback_if_nonnull := MAST::Label.new(:name($node.unique('fallback_if_nonnull')));
-            my $fallback_end := MAST::Label.new(:name($node.unique('fallback_end')));
+            my $fallback_if_nonnull := MAST::Label.new();
+            my $fallback_end := MAST::Label.new();
             my $res_reg := $*REGALLOC.fresh_o();
             push_op($il, 'ifnonnull', $var_res.result_reg, $fallback_if_nonnull);
 
