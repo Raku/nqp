@@ -581,11 +581,24 @@ class NQP::World is HLL::World {
         while $i > 0 {
             $i := $i - 1;
             my %sym := @!BLOCKS[$i].symbol($name);
-            if +%sym {
+            if %sym {
                 return %sym<scope> eq $wanted_scope;
             }
         }
         0;
+    }
+
+    # Gets the type of a lexical.
+    method lexical_type($name) {
+        my $i := +@!BLOCKS;
+        while $i > 0 {
+            $i := $i - 1;
+            my %sym := @!BLOCKS[$i].symbol($name);
+            if %sym {
+                return %sym<type>;
+            }
+        }
+        nqp::die("Lexical $name type could not be found");
     }
     
     # Checks if the symbol is known.
@@ -613,7 +626,7 @@ class NQP::World is HLL::World {
             while $i > 0 {
                 $i := $i - 1;
                 my %sym := @!BLOCKS[$i].symbol($final_name);
-                if +%sym {
+                if %sym {
                     if nqp::existskey(%sym, 'value') {
                         return %sym<value>;
                     }
