@@ -4112,7 +4112,7 @@ class QAST::CompilerJAST {
                 my int $i := 1;
                 my $cur_block := $*BLOCK.outer();
                 while nqp::istype($cur_block, BlockInfo) {
-                    if $cur_block.qast<DYN_COMP_WRAPPER> {
+                    if $cur_block.qast.ann('DYN_COMP_WRAPPER') {
                         $cur_block := NQPMu;
                     }
                     else {

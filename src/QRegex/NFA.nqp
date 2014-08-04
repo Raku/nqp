@@ -171,7 +171,7 @@ class QRegex::NFA {
         my $subtype := $node.subtype;
         if $node.name eq 'before' && !$node.negate {
             my int $end := self.addstate();
-            self.regex_nfa($node[0][1]<orig_qast>, $from, $end);
+            self.regex_nfa($node[0][1].ann('orig_qast'), $from, $end);
             self.fate($node, $end, $to);
         }
         elsif $subtype ne 'zerowidth' &&

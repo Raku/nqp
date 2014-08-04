@@ -3,7 +3,7 @@ class QAST::Node {
     has @!array is positional_delegate;
 
     # For annotations.
-    has %!hash is associative_delegate;
+    has %!annotations;
     
     has $!node;
     has $!returns;
@@ -11,7 +11,6 @@ class QAST::Node {
     method new(*@children, *%options) {
         my $new := nqp::create(self);
         nqp::bindattr($new, QAST::Node, '@!array', @children);
-        nqp::bindattr($new, QAST::Node, '%!hash', nqp::hash());
         my $it := nqp::iterator(%options);
         my $cur;
         while $it {
@@ -58,14 +57,28 @@ class QAST::Node {
         self.HOW.mixin(self, QAST::CompileTimeValue);
         self.set_compile_time_value($value);
     }
-    
-    method hash()          { %!hash }
+
     method list()          { @!array }
     method pop()           { nqp::pop(@!array) }
     method push($value)    { nqp::push(@!array, $value) }
     method shift()         { nqp::shift(@!array) }
     method unshift($value) { nqp::unshift(@!array, $value) }
-    
+
+    method annotate(str $key, $value) {
+        %!annotations := nqp::hash() unless nqp::ishash(%!annotations);
+        %!annotations{$key} := $value;
+    }
+
+    method ann(str $key) {
+        nqp::ishash(%!annotations)
+            ?? %!annotations{$key}
+            !! NQPMu
+    }
+
+    method has_ann(str $key) {
+        nqp::ishash(%!annotations) && nqp::existskey(%!annotations, $key)
+    }
+
     my %uniques;
     method unique($prefix) {
         my $id := nqp::existskey(%uniques, $prefix) ??

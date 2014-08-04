@@ -373,7 +373,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         self.store_regex_caps($code_obj, $block, capnames($qast, 0));
         self.store_regex_nfa($code_obj, $block, QRegex::NFA.new.addnode($qast));
 
-        $block<orig_qast> := $qast;
+        $block.annotate('orig_qast', $qast);
         $qast := QAST::Regex.new( :rxtype<concat>,
                      QAST::Regex.new( :rxtype<scan> ),
                      $qast,

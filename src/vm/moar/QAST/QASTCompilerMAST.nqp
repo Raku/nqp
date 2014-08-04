@@ -300,11 +300,11 @@ my class MASTCompilerInstance {
 
         # Compile, and evaluate to compilation unit.
         self.as_mast($qast);
-        CATCH {
-            my $err    := $!;
-            my $source := self.source_for_node($!last_op);
-            nqp::die("QAST -> MAST failed while compiling op " ~ $!last_op.op ~ "$source: $err");
-        }
+        #CATCH {
+        #    my $err    := $!;
+        #    my $source := self.source_for_node($!last_op);
+        #    nqp::die("QAST -> MAST failed while compiling op " ~ $!last_op.op ~ "$source: $err");
+        #}
 
         $!mast_compunit
     }
@@ -1218,7 +1218,7 @@ my class MASTCompilerInstance {
             my $block := $*BLOCK;
             # find the block where the lexical was declared, if any
             while nqp::istype($block, BlockInfo) {
-                last if $block.qast<DYN_COMP_WRAPPER>;
+                last if $block.qast.ann('DYN_COMP_WRAPPER');
                 $lex := $block.lexical($name);
                 last if $lex;
                 $block := $block.outer;

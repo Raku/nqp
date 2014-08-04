@@ -133,8 +133,9 @@ class NQP::Actions is HLL::Actions {
         if $<statement> {
             for $<statement> {
                 my $ast := $_.ast;
-                $ast := $ast<sink> if nqp::defined($ast<sink>);
-                if $ast<bareblock> { $ast := block_immediate($ast[0]); }
+                my $sunk := $ast.ann('sink');
+                $ast := $sunk if nqp::defined($sunk);
+                if $ast.ann('bareblock') { $ast := block_immediate($ast[0]); }
                 $ast := QAST::Stmts.new($ast) if nqp::istype($ast, QAST::Node);
                 $ast_list.push( $ast );
             }
@@ -167,7 +168,7 @@ class NQP::Actions is HLL::Actions {
                     $ast := QAST::Op.new($ml<cond>.ast, $ast, :op(~$ml<sym>), :node($/) );
                 }
             }
-            if $ast<var_initialized> {
+            if $ast.ann('var_initialized') {
                 # Variable declared and unconditionally initialized; can strip
                 # the added just-to-be-safe initialization of the lexical and
                 # just have the var decl.
@@ -206,7 +207,7 @@ class NQP::Actions is HLL::Actions {
             }
             $BLOCK.push($ast);
             $BLOCK.node($/);
-            $BLOCK<handlers> := %*HANDLERS if %*HANDLERS;
+            $BLOCK.annotate('handlers', %*HANDLERS) if %*HANDLERS;
             make $BLOCK;
         }
         else {
@@ -412,7 +413,8 @@ class NQP::Actions is HLL::Actions {
     method statement_prefix:sym<try>($/) {
         my $ast := $<blorst>.ast;
         if nqp::istype($ast, QAST::Block) {
-            if $ast<handlers> && nqp::existskey($ast<handlers>, 'CATCH') {
+            my $handlers := $ast.ann('handlers');
+            if $handlers && nqp::existskey($handlers, 'CATCH') {
                 make $ast;
                 return 1;
             }
@@ -823,7 +825,7 @@ class NQP::Actions is HLL::Actions {
             ));
             if $<initializer> {
                 $ast := QAST::Op.new( :op('bind'), :node($/), $ast, $<initializer>.ast );
-                $ast<var_initialized> := 1;
+                $ast.annotate('var_initialized', 1);
             }
             $BLOCK.symbol($name, :scope('lexical'), :type($type) );
         }
@@ -986,8 +988,8 @@ class NQP::Actions is HLL::Actions {
         }
 
         my $lex_ast := QAST::Op.new( :op('takeclosure'), $ast );
-        $lex_ast<sink> := $ast;
-        $lex_ast<block_ast> := $block;
+        $lex_ast.annotate('sink', $ast);
+        $lex_ast.annotate('block_ast', $block);
         make $lex_ast;
 
         # Apply traits.        
@@ -1013,7 +1015,7 @@ class NQP::Actions is HLL::Actions {
         $ast.blocktype('declaration_static');
 
         # Always need an invocant.
-        unless $ast<signature_has_invocant> {
+        unless $ast.ann('signature_has_invocant') {
             $ast[0].unshift(QAST::Var.new(
                 :name('self'), :scope('lexical'), :decl('param'),
                 :returns($*PACKAGE)
@@ -1042,7 +1044,7 @@ class NQP::Actions is HLL::Actions {
             my $code := $*W.create_code($ast, $name, $is_dispatcher);
             if $*MULTINESS eq 'multi' { attach_multi_signature($code, $ast); }
             $*W.pkg_add_method($*PACKAGE, $meta_meth, $name, $code);
-            $ast<code_obj> := $code;
+            $ast.annotate('code_obj', $code);
             
             # Install it in the package also if needed.
             if $*SCOPE eq 'our' {
@@ -1067,9 +1069,9 @@ class NQP::Actions is HLL::Actions {
 
         # Install AST node in match object, then apply traits.
         my $lex_ast := QAST::Op.new( :op('takeclosure'), $ast );
-        $lex_ast<sink> := $ast;
-        $lex_ast<block_ast> := $ast;
-        $lex_ast<code_obj> := $ast<code_obj>;
+        $lex_ast.annotate('sink', $ast);
+        $lex_ast.annotate('block_ast', $ast);
+        $lex_ast.annotate('code_obj', $ast.ann('code_obj'));
         make $lex_ast;
         if $<trait> {
             for $<trait> { $_.ast()($/); }
@@ -1111,8 +1113,9 @@ class NQP::Actions is HLL::Actions {
                 $types.push($_.returns =:= NQPMu
                     ?? nqp::null()
                     !! $_.returns);
-                $definednesses.push($_<definedness> eq 'D' ?? 1 !!
-                                    $_<definedness> eq 'U' ?? 2 !! 0);
+                my $defann := $_.ann('definedness');
+                $definednesses.push($defann eq 'D' ?? 1 !!
+                                    $defann eq 'U' ?? 2 !! 0);
             }
         }
         $*W.set_routine_signature($code_obj, $types, $definednesses);
@@ -1136,7 +1139,7 @@ class NQP::Actions is HLL::Actions {
                 QAST::Var.new( :name('self'), :scope('lexical'), :decl('var') ),
                 QAST::Var.new( :scope('lexical'), :name($inv.name) )
             ));
-            $BLOCK<signature_has_invocant> := 1
+            $BLOCK.annotate('signature_has_invocant', 1);
         }
         if $<parameter> {
             for $<parameter> { $BLOCKINIT.push($_.ast); }
@@ -1188,7 +1191,7 @@ class NQP::Actions is HLL::Actions {
 
         # Set definedness flag (XXX want a better way to do this).
         if $<definedness> {
-            $ast<definedness> := ~$<definedness>[0];
+            $ast.annotate('definedness', ~$<definedness>[0]);
         }
 
         make $ast;
@@ -1242,8 +1245,8 @@ class NQP::Actions is HLL::Actions {
             my $is_dispatcher := $*SCOPE eq 'proto';
             make -> $match {
                 $*W.pkg_add_method($package, 'add_parrot_vtable_mapping', $name, 
-                    $match.ast<code_obj> //
-                        $*W.create_code($match.ast<block_ast>, $name, $is_dispatcher));
+                    $match.ast.ann('code_obj') //
+                        $*W.create_code($match.ast.ann('block_ast'), $name, $is_dispatcher));
             };
         }
         elsif $<longname> eq 'parrot_vtable_handler' {
@@ -1266,9 +1269,9 @@ class NQP::Actions is HLL::Actions {
         elsif $<longname> eq 'export' {
             make -> $match {
                 my $ast  := $match.ast;
-                my $name := $ast<block_ast>.name;
-                $*EXPORT.WHO<DEFAULT>.WHO{'&' ~ $name} := $ast<code_obj> //
-                    $*W.create_code($ast<block_ast>, $name, 0);
+                my $name := $ast.ann('block_ast').name;
+                $*EXPORT.WHO<DEFAULT>.WHO{'&' ~ $name} := $ast.ann('code_obj') //
+                    $*W.create_code($ast.ann('block_ast'), $name, 0);
             };
         }
         else {
@@ -1342,7 +1345,7 @@ class NQP::Actions is HLL::Actions {
                 :op<callmethod>, :name<new>,
                 lexical_package_lookup(['NQPRegexMethod'], $/),
                 $regex);
-            $ast<sink> := $regex;
+            $ast.annotate('sink', $regex);
         }
         make $ast;
     }
@@ -1546,7 +1549,7 @@ class NQP::Actions is HLL::Actions {
     method circumfix:sym<{ }>($/) {
         if +$<pblock><blockoid><statementlist><statement> > 0 {
             my $ast := QAST::Op.new( :op('takeclosure'), $<pblock>.ast );
-            $ast<bareblock> := 1;
+            $ast.annotate('bareblock', 1);
             make $ast;
         }
         elsif $<pblock><blockoid><you_are_here> {
@@ -1618,7 +1621,7 @@ class NQP::Actions is HLL::Actions {
             $regex);
 
         # In sink context, we don't need the Regex::Regex object.
-        $ast<sink> := $regex;
+        $ast.annotate('sink', $regex);
         make $ast;
     }
 
