@@ -22,8 +22,27 @@ class HLL::Backend::MoarVM {
         # Doesn't do anything just yet
     }
 
+    my $prof_start_sub;
+    my $prof_end_sub;
+    method ensure_prof_routines() {
+        unless $prof_start_sub {
+            $prof_start_sub := self.compunit_mainline(self.mbc(self.mast(QAST::CompUnit.new(
+                QAST::Block.new(
+                    QAST::Op.new( :op('mvmstartprofile'),
+                        QAST::Var.new( :name('config'), :scope('local'), :decl('param') ) )
+                )))));
+            $prof_end_sub := self.compunit_mainline(self.mbc(self.mast(QAST::CompUnit.new(
+                QAST::Block.new(
+                    QAST::Op.new( :op('mvmendprofile') )
+                )))));
+        }
+    }
     method run_profiled($what) {
-        nqp::die("No profiling support");
+        self.ensure_prof_routines();
+        $prof_start_sub(nqp::hash());
+        my $res  := $what();
+        my $data := $prof_end_sub();
+        $res;
     }
 
     method run_traced($level, $what) {
