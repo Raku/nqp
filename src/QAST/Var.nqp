@@ -1,9 +1,19 @@
-class QAST::Var is QAST::Node {
+class QAST::Var is QAST::Node does QAST::Children {
     has str $!name;
     has str $!scope;
     has str $!decl;
     has int $!slurpy;
     has $!default_or_value;
+
+    method new(:$name, str :$scope, str :$decl, *@children, *%options) {
+        my $node := nqp::create(self);
+        nqp::bindattr($node, QAST::Var, '@!children', @children);
+        nqp::bindattr_s($node, QAST::Var, '$!name', $name);
+        nqp::bindattr_s($node, QAST::Var, '$!scope', $scope);
+        nqp::bindattr_s($node, QAST::Var, '$!decl', $decl);
+        $node.set(%options) if %options;
+        $node
+    }
     
     method name($value = NO_VALUE) {
         $!name := $value unless $value =:= NO_VALUE;

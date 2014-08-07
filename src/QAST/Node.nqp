@@ -1,30 +1,29 @@
 class QAST::Node {
-    # For children.
-    has @!array is positional_delegate;
-
-    # For annotations.
     has %!annotations;
-    
     has $!node;
     has $!returns;
 
     method new(*@children, *%options) {
-        my $new := nqp::create(self);
-        nqp::bindattr($new, QAST::Node, '@!array', @children);
-        my $it := nqp::iterator(%options);
-        my $cur;
-        while $it {
-            $cur := nqp::shift($it);
-            nqp::findmethod($new, nqp::iterkey_s($cur))($new, nqp::iterval($cur))
-        }
-        $new;
+        nqp::die('Can not instantiate QAST::Node; please use a subclass');
     }
+
+    method set(%options) {
+        my $it := nqp::iterator(%options);
+        while $it {
+            my $cur := nqp::shift($it);
+            nqp::findmethod(self, nqp::iterkey_s($cur))(self, nqp::iterval($cur))
+        }
+        self
+    }
+
+    method list() { [] }
 
     method node($value = NO_VALUE) {
         $!node := $value unless $value =:= NO_VALUE;
         $!node := NQPMu if nqp::isnull($value);
         $!node
     }
+
     method returns($value = NO_VALUE) {
         $!returns := $value unless $value =:= NO_VALUE;
         $!returns
@@ -39,6 +38,7 @@ class QAST::Node {
             self.named($value);
         }
     }
+
     method flat($value = NO_VALUE) {
         if $value =:= NO_VALUE {
             0
@@ -57,12 +57,6 @@ class QAST::Node {
         self.HOW.mixin(self, QAST::CompileTimeValue);
         self.set_compile_time_value($value);
     }
-
-    method list()          { @!array }
-    method pop()           { nqp::pop(@!array) }
-    method push($value)    { nqp::push(@!array, $value) }
-    method shift()         { nqp::shift(@!array) }
-    method unshift($value) { nqp::unshift(@!array, $value) }
 
     method annotate(str $key, $value) {
         %!annotations := nqp::hash() unless nqp::ishash(%!annotations);
@@ -88,9 +82,7 @@ class QAST::Node {
     }
     
     method shallow_clone() {
-        my $clone := nqp::clone(self);
-        nqp::bindattr($clone, QAST::Node, '@!array', nqp::clone(@!array));
-        $clone
+        nqp::clone(self)
     }
     
     method count_inline_placeholder_usages(@usages) {
@@ -129,19 +121,7 @@ class QAST::Node {
         return join('', @chunks);
     }
 
-    method dump_children(int $indent, @onto) {
-        for @!array {
-            if nqp::istype($_, QAST::Node) {
-                nqp::push(@onto, $_.dump($indent));
-            }
-            else {
-                nqp::push(@onto, nqp::x(' ', $indent));
-                nqp::push(@onto, '- ');
-                nqp::push(@onto, nqp::istype($_, NQPMu) ?? '(NQPMu)' !! ~$_);
-                nqp::push(@onto, "\n");
-            }
-        }
-    }
+    method dump_children(int $indent, @onto) { }
 
     method dump_extra_node_info() { '' }
 }

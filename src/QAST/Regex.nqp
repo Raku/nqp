@@ -7,7 +7,7 @@ role QAST::RegexCursorType {
     }
 }
 
-class QAST::Regex is QAST::Node {
+class QAST::Regex is QAST::Node does QAST::Children {
     has $!name;
     has str $!rxtype;
     has str $!subtype;
@@ -15,6 +15,15 @@ class QAST::Regex is QAST::Node {
     has int $!negate;
     has int $!min;
     has int $!max;
+    
+    method new(str :$rxtype, str :$subtype, *@children, *%options) {
+        my $node := nqp::create(self);
+        nqp::bindattr($node, QAST::Regex, '@!children', @children);
+        nqp::bindattr_s($node, QAST::Regex, '$!rxtype', $rxtype);
+        nqp::bindattr_s($node, QAST::Regex, '$!subtype', $subtype);
+        $node.set(%options) if %options;
+        $node
+    }
 
     method name($value = NO_VALUE)      { $!name := $value unless $value =:= NO_VALUE; $!name }
     method rxtype($value = NO_VALUE)    {
