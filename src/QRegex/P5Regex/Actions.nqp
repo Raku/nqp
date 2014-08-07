@@ -196,7 +196,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
     method p5backslash:sym<b>($/) {
         make QAST::Regex.new(:rxtype<subrule>, :subtype<zerowidth>,
                              :node($/), :negate($<sym> eq 'B'), :name(''),
-                             QAST::Node.new( QAST::SVal.new( :value('wb') ) ));
+                             QAST::NodeList.new( QAST::SVal.new( :value('wb') ) ));
     }
 
     method p5backslash:sym<h>($/) {
@@ -256,7 +256,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         }
         else {
             make QAST::Regex.new( :rxtype<subrule>, :subtype<method>, :node($/),
-                QAST::Node.new(
+                QAST::NodeList.new(
                     QAST::SVal.new( :value('!BACKREF') ),
                     QAST::SVal.new( :value(~$<number> - 1) ) ) );
         }
@@ -266,7 +266,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         if $<nibbler> {
             make QAST::Regex.new(
                 :rxtype<subrule>, :subtype<zerowidth>, :negate($<neg> eq '!'), :node($/),
-                QAST::Node.new(
+                QAST::NodeList.new(
                     QAST::SVal.new( :value('after') ),
                     self.qbuildsub(self.flip_ast($<nibbler>.ast), :anon(1), :addself(1))
                 ));
@@ -280,7 +280,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         if $<nibbler> {
             make QAST::Regex.new(
                 :rxtype<subrule>, :subtype<zerowidth>, :node($/),
-                QAST::Node.new(
+                QAST::NodeList.new(
                     QAST::SVal.new( :value('before') ),
                     self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1))
                 ));
@@ -294,7 +294,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         if $<nibbler> {
             make QAST::Regex.new(
                 :rxtype<subrule>, :subtype<zerowidth>, :negate(1), :node($/),
-                QAST::Node.new(
+                QAST::NodeList.new(
                     QAST::SVal.new( :value('before') ),
                     self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1))
                 ));
@@ -496,7 +496,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
     method metachar:sym<from>($/) {
         make QAST::Regex.new( :rxtype<subrule>, :subtype<capture>,
             :backtrack<r>, :name<$!from>, :node($/),
-            QAST::Node.new(
+            QAST::NodeList.new(
                 QAST::SVal.new( :value('!LITERAL') ),
                 QAST::SVal.new( :value('') ) ) );
     }
@@ -504,7 +504,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
     method metachar:sym<to>($/) {
         make QAST::Regex.new( :rxtype<subrule>, :subtype<capture>,
             :backtrack<r>, :name<$!to>, :node($/),
-            QAST::Node.new(
+            QAST::NodeList.new(
                 QAST::SVal.new( :value('!LITERAL') ),
                 QAST::SVal.new( :value('') ) ) );
     }
@@ -531,7 +531,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         }
         else {
             $qast := QAST::Regex.new( :rxtype<subrule>, :subtype<method>, :node($/),
-                QAST::Node.new(
+                QAST::NodeList.new(
                     QAST::SVal.new( :value('!BACKREF') ),
                     QAST::SVal.new( :value($name) ) ) );
         }
@@ -622,7 +622,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         else {
             $qast := QAST::Regex.new(:rxtype<subrule>, :subtype<capture>,
                                      :node($/), :name($name),
-                                     QAST::Node.new(QAST::SVal.new( :value($name) )));
+                                     QAST::NodeList.new(QAST::SVal.new( :value($name) )));
             if $<arglist> {
                 for $<arglist>.ast.list { $qast[0].push( $_ ) }
             }

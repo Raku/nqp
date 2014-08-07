@@ -27,6 +27,7 @@ QASTNODE_SOURCES = \
   src/QAST/CompileTimeValue.nqp \
   src/QAST/SpecialArg.nqp \
   src/QAST/Node.nqp \
+  src/QAST/NodeList.nqp \
   src/QAST/Regex.nqp \
   src/QAST/IVal.nqp \
   src/QAST/NVal.nqp \
