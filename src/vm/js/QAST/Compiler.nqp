@@ -65,6 +65,11 @@ class QAST::OperationsJS {
         Chunk.new($T_VOID, "" , [$arg, "nqp.op.say({$arg.expr});\n"], :$node);
     });
 
+    QAST::OperationsJS.add_op('print', sub ($comp, $node, :$want) {
+        my $arg := $comp.as_js($node[0], :want($T_STR));
+        Chunk.new($T_VOID, "" , [$arg, "nqp.op.print({$arg.expr});\n"], :$node);
+    });
+
     method compile_op($comp, $op, :$want) {
         my str $name := $op.op;
         if nqp::existskey(%ops, $name) {
