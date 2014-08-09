@@ -88,7 +88,7 @@ class QAST::CompilerJS {
                     return Chunk.new($T_STR, $chunk.expr ~ '.toString()', [$chunk]);
                 }
             }
-            return Chunk.new($desired, "coercion($got, $desired)", []) #TODO
+            return Chunk.new($desired, "coercion($got, $desired, {$chunk.expr})", []) #TODO
         }
         $chunk;
     }
@@ -124,7 +124,7 @@ class QAST::CompilerJS {
             my $chunk := self.as_js($_);
             nqp::push(@setup, $chunk);
         }
-        Chunk.new('0', $T_INT, @setup);
+        Chunk.new('?', $T_INT, @setup);
     }
 
     multi method as_js(QAST::Block $node, :$want) {
@@ -158,7 +158,7 @@ class QAST::CompilerJS {
     }
 
     multi method as_js($unknown, :$want) {
-        Chunk.new("v",'',["//Unknown QAST node type " ~ $unknown.HOW.name($unknown) ~ "\n"]);
+        Chunk.new($T_VOID,"{$unknown.HOW.name($unknown)}?",["//Unknown QAST node type " ~ $unknown.HOW.name($unknown) ~ "\n"]);
 #        nqp::die("Unknown QAST node type " ~ $unknown.HOW.name($unknown));
     }
 
