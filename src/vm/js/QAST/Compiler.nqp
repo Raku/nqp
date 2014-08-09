@@ -64,7 +64,7 @@ class Chunk {
         @!setup := @setup;
         $!node := $node if nqp::defined($node);
     }
-    
+
     method join() {
         my $js := ''; 
         for @!setup -> $part {
@@ -158,6 +158,12 @@ class QAST::CompilerJS {
     }
 
 
+    # It's more usefull for me during this development to emit partial code instead of quiting
+    method NYI($msg) {
+        Chunk.new($T_VOID,"",["// NYI: $msg\n"]);
+        #nqp::die("NYI: $msg");
+    }
+
     # turn a string into a javascript literal
 
     sub want($node, $desired) {
@@ -167,7 +173,7 @@ class QAST::CompilerJS {
     proto method as_js($node, :$want) {
         if nqp::defined($want) {
             if nqp::istype($node, QAST::Want) {
-                "// TODO: QAST::Want\n"
+                self.NYI("QAST::Want");
 #                self.coerce(self.as_jast(want($node, $*WANT)), $*WANT)
             }
             else {
@@ -221,7 +227,7 @@ class QAST::CompilerJS {
 
     multi method as_js(QAST::Stmts $node, :$want) {
         if self.is_ctxsave($node) {
-            Chunk.new($T_VOID,"",["//TODO handle CTXSAVE\n"]);
+            self.NYI("handle CTXSAVE");
         } else {
             self.compile_all_the_statements($node, $want);
         }
@@ -249,8 +255,7 @@ class QAST::CompilerJS {
     }
 
     multi method as_js($unknown, :$want) {
-        Chunk.new($T_VOID,"{$unknown.HOW.name($unknown)}?",["//Unknown QAST node type " ~ $unknown.HOW.name($unknown) ~ "\n"]);
-#        nqp::die("Unknown QAST node type " ~ $unknown.HOW.name($unknown));
+        self.NYI("Unimplemented QAST node type: " ~ $unknown.HOW.name($unknown));
     }
 
 
