@@ -42,7 +42,67 @@ class HLL::Backend::MoarVM {
         $prof_start_sub(nqp::hash());
         my $res  := $what();
         my $data := $prof_end_sub();
+        self.dump_profile_data($data);
         $res;
+    }
+    method dump_profile_data($data) {
+        my @pieces;
+
+        sub to_json($obj) {
+            if nqp::islist($obj) {
+                nqp::push(@pieces, '[');
+                my $first := 1;
+                for $obj {
+                    if $first {
+                        $first := 0;
+                    }
+                    else {
+                        nqp::push(@pieces, ',');
+                    }
+                    to_json($_);
+                }
+                nqp::push(@pieces, ']');
+            }
+            elsif nqp::ishash($obj) {
+                nqp::push(@pieces, '{');
+                my $first := 1;
+                for $obj {
+                    if $first {
+                        $first := 0;
+                    }
+                    else {
+                        nqp::push(@pieces, ',');
+                    }
+                    nqp::push(@pieces, '"');
+                    nqp::push(@pieces, $_.key);
+                    nqp::push(@pieces, '":');
+                    to_json($_.value);
+                }
+                nqp::push(@pieces, '}');
+            }
+            elsif nqp::isstr($obj) {
+                nqp::push(@pieces, '"');
+                nqp::push(@pieces, $obj);
+                nqp::push(@pieces, '"');
+            }
+            elsif nqp::isint($obj) || nqp::isnum($obj) {
+                nqp::push(@pieces, ~$obj);
+            }
+            else {
+                nqp::die("Don't know how to dump a " ~ $obj.HOW.name($obj));
+            }
+        }
+
+        # JSONify the data.
+        to_json($data);
+        my $json := nqp::join('', @pieces);
+
+        # Insert it into a template and write it.
+        my $template := slurp('src/vm/moar/profiler/template.html');
+        my $results  := subst($template, /'{{{PROFIELR_OUTPUT}}}'/, $json);
+        my $filename := 'profile-' ~ nqp::time_n() ~ '.html';
+        spew($filename, $results);
+        nqp::sayfh(nqp::getstderr(), "Wrote profiler output to $filename");
     }
 
     method run_traced($level, $what) {
