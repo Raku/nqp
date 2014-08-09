@@ -2,6 +2,7 @@ package org.perl6.nqp.runtime;
 
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -186,9 +187,9 @@ public class GlobalContext {
     public ByteClassLoader byteClassLoader;
 
     /** Redirected output for eval-server. */
-    public PrintStream out = System.out;
+    public PrintStream out;
     /** Redirected error for eval-server. */
-    public PrintStream err = System.err;
+    public PrintStream err;
     /** Redirected input for eval-server. */
     public InputStream in = System.in;
     /** Whether to disallow exit. */
@@ -217,6 +218,14 @@ public class GlobalContext {
      */
     public GlobalContext()
     {
+        try {
+            out = new PrintStream(System.out, true, "UTF-8");
+            err = new PrintStream(System.err, true, "UTF-8");
+        }
+        catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+
         compileeHLLConfiguration = new HashMap<String, HLLConfig>();
         hllConfiguration = compileeHLLConfiguration;
         getHLLConfigFor("");
