@@ -186,6 +186,11 @@ class QAST::CompilerJS {
         self.compile_all_the_statements($node, $want);
     }
 
+    multi method as_js(QAST::VM $node, :$want) {
+        # We ignore QAST::VM as we don't support a js specific one, and the ones nqp generate contain parrot specific stuff we don't care about.
+        Chunk.new($T_VOID,'',[]);
+    }
+
     multi method as_js(QAST::Op $node, :$want) {
         QAST::OperationsJS.compile_op(self, $node, :$want);
     }
