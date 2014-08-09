@@ -1,27 +1,31 @@
 use QASTNode;
 
-# The different types of js objects a QAST::Node returns
+# The different types of js things a Chunk expr can be
 my $T_OBJ  := 0; 
 my $T_INT  := 1; # We use a javascript number but always treat it as a 32bit integer
 my $T_NUM  := 2; # We use a javascript number for that
 my $T_STR  := 3; # We use a javascript str for that
-my $T_VOID := -1;
-
+my $T_VOID := -1; # Value of this type shouldn't exist, we use a "" as the expr
 
 class Chunk {
-    has int $!type;
-    has str $!expr;
-    has @!setup;
+    has int $!type; # the js type of $!expr
+    has str $!expr; # a javascript expression without side effects
+    has $!node; # a QAST::Node that contains info for source maps
+    has @!setup; # stuff that needs to be executed before the value of $!expr can be used, this contains strings and Chunks.
+
     method new($type, $expr, @setup, :$node) {
         my $obj := nqp::create(self);
         $obj.BUILD($type, $expr, @setup, :$node);
         $obj
     }
+
     method BUILD($type, $expr, @setup, :$node) {
         $!type := $type;
         $!expr := $expr;
         @!setup := @setup;
+        $!node := $node if nqp::defined($node);
     }
+    
     method join() {
         my $js := ''; 
         for @!setup -> $part {
@@ -33,16 +37,60 @@ class Chunk {
         }
         $js;
     }
+
+    method type() {
+        $!type;
+    }
+
+    method expr() {
+        $!expr;
+    }
+}
+
+class QAST::OperationsJS {
+    my %ops;
+
+    method add_op($op, $cb) {
+        %ops{$op} := $cb;
+    }
+
+    QAST::OperationsJS.add_op('add_n', sub ($comp, $node, :$want) {
+        my $a := $comp.as_js($node[0], :want($T_NUM));
+        my $b := $comp.as_js($node[1], :want($T_NUM));
+        Chunk.new($T_NUM, "({$a.expr} + {$b.expr})", [$a, $b], :$node);
+    });
+
+    QAST::OperationsJS.add_op('say', sub ($comp, $node, :$want) {
+        my $arg := $comp.as_js($node[0], :want($T_STR));
+        Chunk.new($T_VOID, "" , [$arg, "nqp.op.say({$arg.expr});\n"], :$node);
+    });
+
+    method compile_op($comp, $op, :$want) {
+        my str $name := $op.op;
+        if nqp::existskey(%ops, $name) {
+            %ops{$name}($comp, $op, :$want);
+        } else {
+            Chunk.new($T_VOID, "", ["//QAST::Op {$op.op}\n"]);
+        }
+    }
 }
 
 class QAST::CompilerJS {
-
     method coerce($chunk, $desired) {
         my $got := $chunk.type;
         if $got != $desired {
-            'coercion(...)' #TODO
+            if $got == $T_INT && $desired == $T_NUM {
+                # we store both as a javascript number, and 32bit integers fit into doubles
+                return $chunk;
+            }
+            if $desired == $T_STR {
+                if $got == $T_INT || $got == $T_NUM {
+                    return Chunk.new($T_STR, $chunk.expr ~ '.toString()', [$chunk]);
+                }
+            }
+            return Chunk.new($desired, "coercion($got, $desired)", []) #TODO
         }
-        $got;
+        $chunk;
     }
 
     sub want($node, $desired) {
@@ -85,8 +133,16 @@ class QAST::CompilerJS {
         $stmts;
     }
 
+    multi method as_js(QAST::IVal $node, :$want) {
+        Chunk.new($T_INT,'('~$node.value()~')',[],:$node);
+    }
+
     multi method as_js(QAST::Stmts $node, :$want) {
         self.compile_all_the_statements($node, $want);
+    }
+
+    multi method as_js(QAST::Op $node, :$want) {
+        QAST::OperationsJS.compile_op(self, $node, :$want);
     }
 
     multi method as_js(QAST::CompUnit $node, :$want) {
@@ -105,7 +161,6 @@ class QAST::CompilerJS {
         Chunk.new("v",'',["//Unknown QAST node type " ~ $unknown.HOW.name($unknown) ~ "\n"]);
 #        nqp::die("Unknown QAST node type " ~ $unknown.HOW.name($unknown));
     }
-
 
     method emit($ast) {
        "var nqp = require('nqp-runtime');\n"
