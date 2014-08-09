@@ -55,7 +55,11 @@ class HLLBackend::JavaScript {
     
     method js($qast, *%adverbs) {
         my $backend := QAST::CompilerJS.new;
-        $backend.emit($qast);
+        if %adverbs<source-map> {
+            $backend.emit_with_source_map($qast);
+        } else {
+            $backend.emit($qast);
+        }
     }
 
     method node_module($js,*%adverbs) {

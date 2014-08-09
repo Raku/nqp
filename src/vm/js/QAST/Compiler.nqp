@@ -7,6 +7,45 @@ my $T_NUM  := 2; # We use a javascript number for that
 my $T_STR  := 3; # We use a javascript str for that
 my $T_VOID := -1; # Value of this type shouldn't exist, we use a "" as the expr
 
+
+sub quote_string($str) {
+    # This could be simplified a lot when running on none-parrot nqps, as most of the complexity is required to transform \x{...}  which is parrot nqp::escape specific
+
+    my $out := '';
+    my $quoted := nqp::escape($str);
+
+    # We use a lot of variables to keep track of the state as we can only iterate the chars sequentialy
+    # nqp::escape on nqp-p returns \x{..} on parrot which we have to transform 
+    my $backslash := 0;
+    my $x := 0;
+    my $curly := 0;
+
+    my $escape := '';
+
+    for nqp::split('',$quoted~'') -> $c {
+        if $backslash && $c eq 'e' {
+            $out := $out ~ 'x1b';
+        } elsif $backslash && $c eq 'a' {
+            $out := $out ~ 'x07';
+        } elsif $backslash && $c eq 'x' {
+            $x := 1;
+        } elsif $x && $c eq '{' {
+            $x := 0;
+            $curly := 1;
+        } elsif $curly && $c eq '}' {
+           $out := $out ~ 'u'~nqp::x("0",4-nqp::chars($escape))~$escape;
+           $escape := '';
+           $curly := 0;
+        } elsif $curly {
+            $escape := $escape ~ $c;
+        } else {
+            $out := $out ~ $c;
+        }
+        $backslash := !$backslash && $c eq '\\';
+    }
+    "\""~$out~"\"";
+}
+
 class Chunk {
     has int $!type; # the js type of $!expr
     has str $!expr; # a javascript expression without side effects
@@ -36,6 +75,25 @@ class Chunk {
            }
         }
         $js;
+    }
+    
+    method with_source_map_info() {
+        my @parts;
+        for @!setup -> $part {
+            if nqp::isstr($part) {
+                nqp::push(@parts,quote_string($part));
+            } else {
+                nqp::push(@parts,$part.with_source_map_info);
+            }
+        }
+        my $parts := '[' ~ nqp::join(',', @parts) ~ ']';
+        if nqp::defined($!node) && $!node.node {
+            my $node := $!node.node;
+            my $line := HLL::Compiler.lineof($node.orig(), $node.from(), :cache(1));
+            "\{\"line\": $line, \"parts\": $parts\}";
+        } else {
+            $parts;
+        }
     }
 
     method type() {
@@ -100,43 +158,6 @@ class QAST::CompilerJS {
 
 
     # turn a string into a javascript literal
-    method quote_string($str) {
-        # This could be simplified a lot when running on none-parrot nqps, as most of the complexity is required to transform \x{...}  which is parrot nqp::escape specific
-
-        my $out := '';
-        my $quoted := nqp::escape($str);
-
-        # We use a lot of variables to keep track of the state as we can only iterate the chars sequentialy
-        # nqp::escape on nqp-p returns \x{..} on parrot which we have to transform 
-        my $backslash := 0;
-        my $x := 0;
-        my $curly := 0;
-
-        my $escape := '';
-
-        for nqp::split('',$quoted~'') -> $c {
-            if $backslash && $c eq 'e' {
-                $out := $out ~ 'x1b';
-            } elsif $backslash && $c eq 'a' {
-                $out := $out ~ 'x07';
-            } elsif $backslash && $c eq 'x' {
-                $x := 1;
-            } elsif $x && $c eq '{' {
-                $x := 0;
-                $curly := 1;
-            } elsif $curly && $c eq '}' {
-               $out := $out ~ 'u'~nqp::x("0",4-nqp::chars($escape))~$escape;
-               $escape := '';
-               $curly := 0;
-            } elsif $curly {
-                $escape := $escape ~ $c;
-            } else {
-                $out := $out ~ $c;
-            }
-            $backslash := !$backslash && $c eq '\\';
-        }
-        "\""~$out~"\"";
-    }
 
     sub want($node, $desired) {
         # TODO
@@ -184,7 +205,7 @@ class QAST::CompilerJS {
     }
 
     multi method as_js(QAST::SVal $node, :$want) {
-        Chunk.new($T_STR,self.quote_string($node.value()),[],:$node);
+        Chunk.new($T_STR,quote_string($node.value()),[],:$node);
     }
 
     multi method as_js(QAST::Stmts $node, :$want) {
@@ -217,9 +238,21 @@ class QAST::CompilerJS {
 #        nqp::die("Unknown QAST node type " ~ $unknown.HOW.name($unknown));
     }
 
+
+    method as_js_with_prelude($ast) {
+        Chunk.new($T_VOID,"",[
+            "var nqp = require('nqp-runtime');\n",
+            "\nvar top_ctx = nqp.top_context();\n",
+            self.as_js($ast)
+        ]);
+    }
+
     method emit($ast) {
-       "var nqp = require('nqp-runtime');\n"
-       ~ "\nvar top_ctx = nqp.top_context();\n"
-       ~ self.as_js($ast).join
+       self.as_js_with_prelude($ast).join
+    }
+
+    # return a json datastructure we later process into a source map
+    method emit_with_source_map($ast) {
+       self.as_js_with_prelude($ast).with_source_map_info
     }
 }

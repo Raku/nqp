@@ -11,6 +11,9 @@ sub MAIN(*@ARGS) {
     
     #:custom-regex-lib('QRegex')
 
+    my @clo := $nqpcomp-cc.commandline_options();
+    @clo.push('source-map');
+
     $nqpcomp-cc.command_line(@ARGS, :stable-sc(1),:module-path('gen/js/stage2'),
         :setting-path('gen/js/stage2'),
         :custom-regex-lib('QRegex'),

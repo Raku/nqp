@@ -1,2 +1,2 @@
 #!/bin/sh
-./nqp-p src/vm/js/bin/nqp-js.nqp $1 
+./nqp-p src/vm/js/bin/nqp-js.nqp "$@" 
