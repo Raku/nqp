@@ -8,6 +8,7 @@ my $T_STR  := 3; # We use a javascript str for that
 my $T_VOID := -1; # Value of this type shouldn't exist, we use a "" as the expr
 
 
+# turn a string into a javascript literal
 sub quote_string($str) {
     # This could be simplified a lot when running on none-parrot nqps, as most of the complexity is required to transform \x{...}  which is parrot nqp::escape specific
 
@@ -164,7 +165,6 @@ class QAST::CompilerJS {
         #nqp::die("NYI: $msg");
     }
 
-    # turn a string into a javascript literal
 
     sub want($node, $desired) {
         # TODO
