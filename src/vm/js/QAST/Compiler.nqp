@@ -93,6 +93,46 @@ class QAST::CompilerJS {
         $chunk;
     }
 
+
+    # turn a string into a javascript literal
+    method quote_string($str) {
+        # This could be simplified a lot when running on none-parrot nqps, as most of the complexity is required to transform \x{...}  which is parrot nqp::escape specific
+
+        my $out := '';
+        my $quoted := nqp::escape($str);
+
+        # We use a lot of variables to keep track of the state as we can only iterate the chars sequentialy
+        # nqp::escape on nqp-p returns \x{..} on parrot which we have to transform 
+        my $backslash := 0;
+        my $x := 0;
+        my $curly := 0;
+
+        my $escape := '';
+
+        for nqp::split('',$quoted~'') -> $c {
+            if $backslash && $c eq 'e' {
+                $out := $out ~ 'x1b';
+            } elsif $backslash && $c eq 'a' {
+                $out := $out ~ 'x07';
+            } elsif $backslash && $c eq 'x' {
+                $x := 1;
+            } elsif $x && $c eq '{' {
+                $x := 0;
+                $curly := 1;
+            } elsif $curly && $c eq '}' {
+               $out := $out ~ 'u'~nqp::x("0",4-nqp::chars($escape))~$escape;
+               $escape := '';
+               $curly := 0;
+            } elsif $curly {
+                $escape := $escape ~ $c;
+            } else {
+                $out := $out ~ $c;
+            }
+            $backslash := !$backslash && $c eq '\\';
+        }
+        "\""~$out~"\"";
+    }
+
     sub want($node, $desired) {
         # TODO
     }
@@ -111,6 +151,7 @@ class QAST::CompilerJS {
             {*}
         }
     }
+
 
     method compile_all_the_statements(QAST::Stmts $node, $want) {
         my @setup;
@@ -135,6 +176,10 @@ class QAST::CompilerJS {
 
     multi method as_js(QAST::IVal $node, :$want) {
         Chunk.new($T_INT,'('~$node.value()~')',[],:$node);
+    }
+
+    multi method as_js(QAST::SVal $node, :$want) {
+        Chunk.new($T_STR,self.quote_string($node.value()),[],:$node);
     }
 
     multi method as_js(QAST::Stmts $node, :$want) {
