@@ -1,4 +1,11 @@
-class QAST::Want is QAST::Node {
+class QAST::Want is QAST::Node does QAST::Children {
+    method new(*@children, *%options) {
+        my $node := nqp::create(self);
+        nqp::bindattr($node, QAST::Want, '@!children', @children);
+        $node.set(%options) if %options;
+        $node
+    }
+
     method has_compile_time_value() {
         nqp::istype(self[0], QAST::Node)
             ?? self[0].has_compile_time_value()

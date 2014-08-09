@@ -1,8 +1,12 @@
 class QAST::IVal is QAST::Node {
     has int $!value;
 
-    method BUILD() {
-        nqp::bindattr(self, QAST::Node, '$!returns', int);
+    method new(:$value, *%options) {
+        my $node := nqp::create(self);
+        nqp::bindattr_i($node, QAST::IVal, '$!value', $value);
+        nqp::bindattr($node, QAST::Node, '$!returns', int);
+        $node.set(%options) if %options;
+        $node
     }
 
     method value($value = NO_VALUE) { $!value := $value unless $value =:= NO_VALUE; $!value }

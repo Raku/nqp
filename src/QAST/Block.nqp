@@ -1,4 +1,4 @@
-class QAST::Block is QAST::Node {
+class QAST::Block is QAST::Node does QAST::Children {
     has str $!name;
     has str $!blocktype;
     has int $!custom_args;
@@ -7,6 +7,15 @@ class QAST::Block is QAST::Node {
     has str $!cuid;
     has int $!arity;
     has %!symbol;
+
+    method new(str :$name, str :$blocktype, *@children, *%options) {
+        my $node := nqp::create(self);
+        nqp::bindattr($node, QAST::Block, '@!children', @children);
+        nqp::bindattr_s($node, QAST::Block, '$!name', $name);
+        nqp::bindattr_s($node, QAST::Block, '$!blocktype', $blocktype);
+        $node.set(%options) if %options;
+        $node
+    }
     
     method name($value = NO_VALUE) {
         $!name := $value unless $value =:= NO_VALUE;

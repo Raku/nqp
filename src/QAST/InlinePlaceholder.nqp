@@ -2,7 +2,14 @@
 # inlining where one of the arguments to the inlined routine was used.
 class QAST::InlinePlaceholder is QAST::Node {
     has int $!position;
-    
+
+    method new(:$position, *%options) {
+        my $node := nqp::create(self);
+        nqp::bindattr_i($node, QAST::InlinePlaceholder, '$!position', $position);
+        $node.set(%options) if %options;
+        $node
+    }
+
     method position(*@value) {
         @value ?? ($!position := @value[0]) !! $!position
     }

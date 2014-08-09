@@ -1,8 +1,12 @@
 class QAST::NVal is QAST::Node {
     has num $!value;
 
-    method BUILD() {
-        nqp::bindattr(self, QAST::Node, '$!returns', num);
+    method new(:$value, *%options) {
+        my $node := nqp::create(self);
+        nqp::bindattr_n($node, QAST::NVal, '$!value', $value);
+        nqp::bindattr($node, QAST::Node, '$!returns', num);
+        $node.set(%options) if %options;
+        $node
     }
 
     method value($value = NO_VALUE) { $!value := $value unless $value =:= NO_VALUE; $!value }
@@ -16,5 +20,6 @@ class QAST::NVal is QAST::Node {
     method evaluate_unquotes(@unquotes) {
         self
     }
+
     method dump_extra_node_info() { ~$!value }
 }

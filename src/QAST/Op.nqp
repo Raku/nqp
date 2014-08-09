@@ -1,9 +1,18 @@
-class QAST::Op is QAST::Node {
+class QAST::Op is QAST::Node does QAST::Children {
     has str $!name;
     has str $!op;
     has str $!childorder;
     has int $!arity;
-    
+
+    method new(str :$name, str :$op, *@children, *%options) {
+        my $node := nqp::create(self);
+        nqp::bindattr($node, QAST::Op, '@!children', @children);
+        nqp::bindattr_s($node, QAST::Op, '$!name', $name);
+        nqp::bindattr_s($node, QAST::Op, '$!op', $op);
+        $node.set(%options) if %options;
+        $node
+    }
+
     method name($value = NO_VALUE) {
         $!name := $value unless $value =:= NO_VALUE;
         nqp::isnull_s($!name) ?? "" !! $!name
