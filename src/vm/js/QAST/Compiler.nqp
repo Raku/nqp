@@ -139,6 +139,7 @@ class QAST::OperationsJS {
 }
 
 class QAST::CompilerJS {
+
     method coerce($chunk, $desired) {
         my $got := $chunk.type;
         if $got != $desired {
@@ -179,6 +180,16 @@ class QAST::CompilerJS {
     }
 
 
+    # detect the result of HLL::Compiler.CTXSAVE, we need to handle this specially as for performance reasons we store some lexicals as actual javascript lexicals instead of on the context
+    method is_ctxsave($node) {
+        +$node.list == 2
+        && nqp::istype($node[0], QAST::Op)
+        && $node[0].op eq 'bind'
+        && +$node[0].list == 2
+        && nqp::istype($node[0][0], QAST::Var)
+        && $node[0][0].name eq 'ctxsave';
+    }
+
     method compile_all_the_statements(QAST::Stmts $node, $want) {
         my @setup;
         my @stmts := $node.list;
@@ -209,7 +220,11 @@ class QAST::CompilerJS {
     }
 
     multi method as_js(QAST::Stmts $node, :$want) {
-        self.compile_all_the_statements($node, $want);
+        if self.is_ctxsave($node) {
+           Chunk.new($T_VOID,"",["//TODO handle CTXSAVE\n"]);
+        } else {
+            self.compile_all_the_statements($node, $want);
+        }
     }
 
     multi method as_js(QAST::VM $node, :$want) {
