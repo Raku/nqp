@@ -520,7 +520,7 @@ my class MASTCompilerInstance {
         my $comp_mode := $cu.compilation_mode;
         my @pre_des   := $cu.pre_deserialize;
         my @post_des  := $cu.post_deserialize;
-        if $comp_mode || @pre_des || @post_des || need_set_code_object($cu) {
+        if $comp_mode || @pre_des || @post_des {
             # Create a block into which we'll install all of the other
             # pieces.
             my $block := QAST::Block.new( :blocktype('raw') );
@@ -534,20 +534,6 @@ my class MASTCompilerInstance {
             if $comp_mode {
                 $block.push(self.deserialization_code($cu.sc(), $cu.code_ref_blocks(),
                     $cu.repo_conflict_resolver()));
-            }
-
-            # Add code object fixups.
-            if $cu.code_ref_blocks() {
-                for $cu.code_ref_blocks() {
-                    my $code_obj := $_.code_object;
-                    if nqp::isconcrete($code_obj) {
-                        $block.push(QAST::Op.new(
-                            :op('setcodeobj'),
-                            QAST::BVal.new( :value($_) ),
-                            QAST::WVal.new( :value($code_obj) )
-                        ));
-                    }
-                }
             }
 
             # Add post-deserialization tasks.
@@ -587,15 +573,6 @@ my class MASTCompilerInstance {
             self.as_mast($main_block);
             $!mast_compunit.main_frame(%!mast_frames{$main_block.cuid});
         }
-    }
-
-    sub need_set_code_object($cu) {
-        if $cu.code_ref_blocks() {
-            for $cu.code_ref_blocks() {
-                return 1 if nqp::isconcrete($_.code_object);
-            }
-        }
-        return 0;
     }
 
     method deserialization_code($sc, @code_ref_blocks, $repo_conf_res) {
@@ -704,6 +681,19 @@ my class MASTCompilerInstance {
             }
             if $node.is_thunk {
                 $frame.is_thunk(1);
+            }
+
+            # Set code object, if any.
+            my $code_obj := $node.code_object;
+            if nqp::isconcrete($code_obj) {
+                my $sc := nqp::getobjsc($code_obj);
+                if nqp::isnull($sc) {
+                    nqp::die("Object of type " ~ $code_obj.HOW.name($code_obj) ~
+                        " is QAST::Block code object, but not in SC");
+                }
+                my int $idx    := nqp::scgetobjidx($sc, $code_obj);
+                my int $sc_idx := $!mast_compunit.sc_idx($sc);
+                $frame.set_code_object_idxs($sc_idx, $idx);
             }
 
             # Compile all the substatements.
