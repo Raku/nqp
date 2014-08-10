@@ -3185,7 +3185,7 @@ class QAST::CompilerJAST {
                 QAST::Op.new( :op('setup_blv'), %*BLOCK_LEX_VALUES )
             ));
         }
-        if $*COMP_MODE || @pre_des || @post_des {
+        if $*COMP_MODE || @pre_des || @post_des || need_set_code_object($cu) {
             # Create a block into which we'll install all of the other
             # pieces.
             my $block := QAST::Block.new( :blocktype('raw') );
@@ -3200,7 +3200,30 @@ class QAST::CompilerJAST {
                 $block.push(self.deserialization_code($cu.sc(), $cu.code_ref_blocks(),
                     $cu.repo_conflict_resolver()));
             }
-            
+
+            # Add code object fixups.
+            if $cu.code_ref_blocks() {
+                my $cur_pd_block := QAST::Block.new( :blocktype('immediate') );
+                my $i := 0;
+                for $cu.code_ref_blocks() {
+                    my $code_obj := $_.code_object;
+                    if nqp::isconcrete($code_obj) {
+                        $cur_pd_block.push(QAST::Op.new(
+                            :op('setcodeobj'),
+                            QAST::BVal.new( :value($_) ),
+                            QAST::WVal.new( :value($code_obj) )
+                        ));
+                        $i++;
+                        if $i == 2000 {
+                            $block.push($cur_pd_block);
+                            $cur_pd_block := QAST::Block.new( :blocktype('immediate') );
+                            $i := 0;
+                        }
+                    }
+                }
+                $block.push($cur_pd_block);
+            }
+
             # Add post-deserialization tasks.
             my $cur_pd_block := QAST::Block.new( :blocktype('immediate') );
             my $i := 0;
@@ -3277,7 +3300,16 @@ class QAST::CompilerJAST {
         
         return $*JCLASS;
     }
-    
+
+    sub need_set_code_object($cu) {
+        if $cu.code_ref_blocks() {
+            for $cu.code_ref_blocks() {
+                return 1 if nqp::isconcrete($_.code_object);
+            }
+        }
+        return 0;
+    }
+
     method deserialization_code($sc, @code_ref_blocks, $repo_conf_res) {
         # Serialize it.
         my $sh := nqp::list_s();

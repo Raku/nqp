@@ -298,7 +298,7 @@ class QAST::Compiler is HLL::Compiler {
         my @post_des  := $cu.post_deserialize;
         self.block_lex_values_to_post_des(@post_des, %*BLOCK_LEX_VALUES);
         self.thunks_to_post_des(@post_des, @*THUNK_BLOCKS);
-        if $comp_mode || @pre_des || @post_des {
+        if $comp_mode || @pre_des || @post_des || need_set_code_object($cu) {
             # Create a block into which we'll install all of the other
             # pieces.
             my $block := QAST::Block.new( :blocktype('raw') );
@@ -312,6 +312,20 @@ class QAST::Compiler is HLL::Compiler {
             if $comp_mode {
                 $block.push(self.deserialization_code($cu.sc(), $cu.code_ref_blocks(),
                     $cu.repo_conflict_resolver()));
+            }
+
+            # Add code object fixups.
+            if $cu.code_ref_blocks() {
+                for $cu.code_ref_blocks() {
+                    my $code_obj := $_.code_object;
+                    if nqp::isconcrete($code_obj) {
+                        $block.push(QAST::Op.new(
+                            :op('setcodeobj'),
+                            QAST::BVal.new( :value($_) ),
+                            QAST::WVal.new( :value($code_obj) )
+                        ));
+                    }
+                }
             }
             
             # Add post-deserialization tasks.
@@ -341,7 +355,16 @@ class QAST::Compiler is HLL::Compiler {
 
         $block_post
     }
-    
+
+    sub need_set_code_object($cu) {
+        if $cu.code_ref_blocks() {
+            for $cu.code_ref_blocks() {
+                return 1 if nqp::isconcrete($_.code_object);
+            }
+        }
+        return 0;
+    }
+
     method serialize_sc($sc) {
         # Serialize it.
         my $sh := nqp::list_s();
