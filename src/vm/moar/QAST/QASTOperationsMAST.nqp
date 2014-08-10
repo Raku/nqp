@@ -2261,7 +2261,18 @@ QAST::MASTOperations.add_core_moarop_mapping('iterkey_s', 'iterkey_s');
 QAST::MASTOperations.add_core_moarop_mapping('iterval', 'iterval');
 
 # object opcodes
-QAST::MASTOperations.add_core_moarop_mapping('null', 'null');
+QAST::MASTOperations.add_core_op('null', -> $qastcomp, $op {
+    my $want := $*WANT;
+    if nqp::isconcrete($want) && $want == $MVM_reg_void {
+        MAST::InstructionList.new(nqp::list(), MAST::VOID, $MVM_reg_void);
+    }
+    else {
+        my $il := nqp::list();
+        my $res_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
+        push_op($il, 'null', $res_reg);
+        MAST::InstructionList.new($il, $res_reg, $MVM_reg_obj)
+    }
+});
 QAST::MASTOperations.add_core_moarop_mapping('null_s', 'null_s');
 QAST::MASTOperations.add_core_moarop_mapping('what', 'getwhat', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('how', 'gethow', :decont(0));
