@@ -1023,7 +1023,7 @@ my class MASTCompilerInstance {
         my $WANT := $*WANT;
         my $all_void := nqp::defined($WANT) && $WANT == $MVM_reg_void;
         for @stmts {
-            my $use_result := 0;
+            my int $use_result := 0;
             # Compile this child to MAST, and add its instructions to the end
             # of our instruction list. Also track the last statement.
             # if this is the statement we've been asked to make the result
