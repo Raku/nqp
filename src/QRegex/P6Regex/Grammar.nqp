@@ -51,6 +51,30 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         self.panic('Unrecognized regex metacharacter ' ~ $char ~ ' (must be quoted to match literally)');
     }
 
+    method throw_malformed_range() {
+        self.panic('Malformed range.');
+    }
+
+    method throw_confused() {
+        self.panic('Confused.');
+    }
+
+    method throw_unspace($char) {
+        self.panic: "No unspace allowed in regex; " ~ 
+            " if you meant to match the literal character," ~ 
+            " please enclose in single quotes ('" 
+            ~ $char ~ "') or use a backslashed form like \\x" 
+            ~ nqp::sprintf('%02x', [nqp::ord($char)]);
+    }
+
+    method throw_regex_not_terminated() {
+        self.panic('Regex not terminated.');
+    }
+
+    method throw_spaces_in_bare_range() {
+        self.panic('Spaces not allowed in bare range.');
+    }
+
     method throw_null_pattern() {
         self.panic('Null regex not allowed');
     }
@@ -81,7 +105,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         :my $handle := '__QREGEX_P6REGEX__' ~ $cur_handle++;
         :my $*W := QRegex::P6Regex::World.new(:$handle);
         <nibbler>
-        [ $ || <.panic: 'Confused'> ]
+        [ $ || <.throw_confused> ]
     }
 
     token nibbler {
@@ -104,9 +128,9 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         <termseq>
         [
         || <?infixstopper>
-        || $$ <.panic: "Regex not terminated">
+        || $$ <.throw_regex_not_terminated>
         || (\W) { self.throw_unrecognized_metachar: ~$/[0] }
-        || <.panic: "Regex not terminated">
+        || <.throw_regex_not_terminated>
         ]
     }
     
@@ -154,9 +178,9 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         || <noun=.quantified_atom>+
         || <?before <rxstopper> | <[&|~]> > <.throw_null_pattern>
         || <?before <infixstopper> > <.throw_null_pattern> # XXX Check if unmatched bracket
-        || $$ <.panic: "Regex not terminated">
+        || $$ <.throw_regex_not_terminated>
         || (\W) { self.throw_unrecognized_metachar: ~$/[0] }
-        || <.panic: "Regex not terminated">
+        || <.throw_regex_not_terminated>
         ]
     }
 
@@ -213,7 +237,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token quantifier:sym<**> {
         <sym> <.normspace>? <backmod> <.normspace>?
         [
-        | <.integer> \s+ '..' <.panic: "Spaces not allowed in bare range">
+        | <.integer> \s+ '..' <.throw_spaces_in_bare_range>
         | <min=.integer>
           [ '..'
             [
@@ -221,7 +245,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
                 $/.CURSOR.panic("Negative numbers are not allowed as quantifiers") if $<max>.Str < 0;
               }
             | $<max>=['*']
-            | <.panic: "Malformed range">
+            | <.throw_malformed_range>
             ]
           ]?
           { $/.CURSOR.panic("Negative numbers are not allowed as quantifiers") if $<min>.Str < 0 }
@@ -308,8 +332,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token backslash:sym<unrec> { {} (\w) { self.throw_unrecog_backslash_seq: $/[0].Str } }
     token backslash:sym<unsp> {
         [\s|'#'] {}
-        <.panic: "No unspace allowed in regex; if you meant to match the literal character, please enclose in single quotes ('"
-          ~ $/ ~ "') or use a backslashed form like \\x" ~ nqp::sprintf('%02x', [nqp::ord(~$/)])>
+        <.throw_unspace(~$/)>
     }
     token backslash:sym<misc> { \W }
 
