@@ -1482,27 +1482,29 @@ my class MASTCompilerInstance {
     }
 
     multi method compile_node(QAST::WVal $node, :$want) {
-        if $want == $MVM_reg_void {
-            MAST::InstructionList.new([], MAST::VOID, $MVM_reg_void)
+        if nqp::isconcrete($want) && $want == $MVM_reg_void {
+            MAST::InstructionList.new([], MAST::VOID, $MVM_reg_void);
         }
-        my $val    := $node.value;
-        my $sc     := nqp::getobjsc($val);
-        if nqp::isnull($sc) {
-            nqp::die("Object of type " ~ $val.HOW.name($val) ~ " in QAST::WVal, but not in SC");
-        }
-        my $idx    := nqp::scgetobjidx($sc, $val);
-        my $sc_idx := $!mast_compunit.sc_idx($sc);
-        my $reg    := $*REGALLOC.fresh_o();
-        my $op     := $idx < 32768 ?? 'wval' !! 'wval_wide';
-        MAST::InstructionList.new(
-            [MAST::Op.new(
-                :op($op),
+        else {
+            my $val    := $node.value;
+            my $sc     := nqp::getobjsc($val);
+            if nqp::isnull($sc) {
+                nqp::die("Object of type " ~ $val.HOW.name($val) ~ " in QAST::WVal, but not in SC");
+            }
+            my $idx    := nqp::scgetobjidx($sc, $val);
+            my $sc_idx := $!mast_compunit.sc_idx($sc);
+            my $reg    := $*REGALLOC.fresh_o();
+            my $op     := $idx < 32768 ?? 'wval' !! 'wval_wide';
+            MAST::InstructionList.new(
+                [MAST::Op.new(
+                    :op($op),
+                    $reg,
+                    MAST::IVal.new( :value($sc_idx) ),
+                    MAST::IVal.new( :value($idx) )
+                )],
                 $reg,
-                MAST::IVal.new( :value($sc_idx) ),
-                MAST::IVal.new( :value($idx) )
-            )],
-            $reg,
-            $MVM_reg_obj)
+                $MVM_reg_obj)
+        }
     }
 
     multi method compile_node(QAST::Regex $node, :$want) {
