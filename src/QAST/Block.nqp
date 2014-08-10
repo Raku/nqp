@@ -6,6 +6,7 @@ class QAST::Block is QAST::Node does QAST::Children {
     has int $!is_thunk;
     has str $!cuid;
     has int $!arity;
+    has $!code_object;
     has %!symbol;
 
     method new(str :$name, str :$blocktype, *@children, *%options) {
@@ -29,7 +30,12 @@ class QAST::Block is QAST::Node does QAST::Children {
     method has_exit_handler($value = NO_VALUE) { $!has_exit_handler := $value unless $value =:= NO_VALUE; $!has_exit_handler }
     method is_thunk($value = NO_VALUE)         { $!is_thunk := $value unless $value =:= NO_VALUE; $!is_thunk }
     method arity($value = NO_VALUE)            { $!arity := $value unless $value =:= NO_VALUE; $!arity }
-    
+
+    method code_object($value = NO_VALUE) {
+        $!code_object := $value unless $value =:= NO_VALUE;
+        $!code_object
+    }
+
     my $cur_cuid := 0;
     my $cuid_suffix := ~nqp::time_n();
     
