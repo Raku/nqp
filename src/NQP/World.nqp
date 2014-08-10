@@ -332,14 +332,10 @@ class NQP::World is HLL::World {
                 if $is_dispatcher;
             my $slot := self.add_object($code_obj);
 
-            # Add deserialization fixup task.
-            self.add_fixup_task(
-                :deserialize_ast(QAST::Op.new(
-                    :op('setcodeobj'),
-                    QAST::BVal.new( :value($ast) ),
-                    QAST::WVal.new( :value($code_obj) )
-                )));
-            
+            # Associate QAST block with code object, which will ensure it is
+            # fixed up as needed.
+            $ast.code_object($code_obj);
+
             # Add fixup of the code object and the $!do attribute.
             $fixups.push(QAST::Op.new(
                 :op('bindattr'),
@@ -347,11 +343,6 @@ class NQP::World is HLL::World {
                 QAST::WVal.new( :value($code_type) ),
                 QAST::SVal.new( :value('$!do') ),
                 QAST::BVal.new( :value($ast) )
-            ));
-            $fixups.push(QAST::Op.new(
-                :op('setcodeobj'),
-                QAST::BVal.new( :value($ast) ),
-                QAST::WVal.new( :value($code_obj) )
             ));
             
             # Add it to the dynamic compilation fixup todo list.
