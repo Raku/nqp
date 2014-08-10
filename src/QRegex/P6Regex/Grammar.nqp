@@ -237,7 +237,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token quantifier:sym<**> {
         <sym> <.normspace>? <backmod> <.normspace>?
         [
-        | <.integer> \s+ '..' <.throw_spaces_in_bare_range>
+        | <min=.integer> \s+ '..' <.throw_spaces_in_bare_range>
         | <min=.integer>
           [ '..'
             [
