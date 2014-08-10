@@ -1111,11 +1111,11 @@ my class MASTCompilerInstance {
     ];
 
     multi method compile_node(QAST::Var $node, :$want) {
-        self.compile_var($node)
+        self.compile_var($node, :$want)
     }
 
     multi method compile_node(QAST::VarWithFallback $node, :$want) {
-        my $var_res := self.compile_var($node);
+        my $var_res := self.compile_var($node, :$want);
         if $*BINDVAL || $var_res.result_kind != $MVM_reg_obj {
             $var_res
         }
