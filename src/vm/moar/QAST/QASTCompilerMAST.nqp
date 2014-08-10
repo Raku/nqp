@@ -397,7 +397,7 @@ my class MASTCompilerInstance {
                 self.coerce(self.compile_node(want($qast, $want), :$want), $want)
             }
             else {
-                self.coerce(self.compile_node($qast), $want)
+                self.coerce(self.compile_node($qast, :$want), $want)
             }
         }
         else {
