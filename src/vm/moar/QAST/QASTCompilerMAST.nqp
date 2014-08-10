@@ -1206,6 +1206,11 @@ my class MASTCompilerInstance {
             }
         }
 
+        # Declaration in void context need generate no code.
+        if nqp::isconcrete($want) && $want == $MVM_reg_void {
+            return MAST::InstructionList.new([], MAST::VOID, $MVM_reg_void);
+        }
+
         # Now go by scope.
         my $name := $node.name;
         my @ins;
