@@ -326,22 +326,24 @@ class QRegex::NFA {
         if nqp::can($cursor, $name) {
             if !nqp::existskey(%seen, $name) {
                 my $meth := $cursor.HOW.find_method($cursor, $name, :no_trace(1));
-                @substates := $meth.NFA() if nqp::can($meth, 'NFA');
-                @substates := [] if nqp::isnull(@substates);
-            }
-            if !@substates && !nqp::existskey(%seen, $name) {
-                # Maybe it's a protoregex, in which case states are an alternation
-                # of all of the possible rules.
-                my %protorx      := $cursor.HOW.cache($cursor, "!protoregex_table", { $cursor."!protoregex_table"() });
-                my $nfa          := QRegex::NFA.new;
-                my int $gotmatch := 0;
-                if nqp::existskey(%protorx, $name) {
-                    for %protorx{$name} -> $rxname {
-                        $nfa.addedge(1, 0, $EDGE_SUBRULE, $rxname);
-                        $gotmatch := 1;
-                    }
+                if nqp::can($meth, 'NFA') {
+                    @substates := $meth.NFA();
+                    @substates := [] if nqp::isnull(@substates);
                 }
-                @substates := $nfa.states() if $gotmatch;
+                if !@substates {
+                    # Maybe it's a protoregex, in which case states are an alternation
+                    # of all of the possible rules.
+                    my %protorx      := $cursor.HOW.cache($cursor, "!protoregex_table", { $cursor."!protoregex_table"() });
+                    my $nfa          := QRegex::NFA.new;
+                    my int $gotmatch := 0;
+                    if nqp::existskey(%protorx, $name) {
+                        for %protorx{$name} -> $rxname {
+                            $nfa.addedge(1, 0, $EDGE_SUBRULE, $rxname);
+                            $gotmatch := 1;
+                        }
+                    }
+                    @substates := $nfa.states() if $gotmatch;
+                }
             }
         }
         %seen{$name} := 1;
