@@ -1,15 +1,142 @@
-<html>
+<!DOCTYPE html>
+<html lang="en" ng-app="moarProfApp" ng-controller="NavigationController">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MoarVM Profiler Results</title>
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+    <style>
+    body {
+      min-height: 500px;
+      padding-top: 70px;
+    }
+    </style>
+  </head>
+  <body >
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand">MoarVM Profiler Results</a>
+        </div>
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#overview" ng-click="Tab = 'Overview'">Overview</a></li>
+            <li><a href="#routines" ng-click="Tab = 'Routines'">Routines</a></li>
+            <li><a href="#callgraph" ng-click="Tab = 'Call Graph'">Call Graph</a></li>
+            <li><a href="#allocations" ng-click="Tab = 'Allocations'">Allocations</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
 
-<head>
-  <title>MoarVM Profiler Results</title>
-</head>
+    <div class="container" ng-show="Tab == 'Overview'">
+      <h1>Overview</h1>
 
-<body>
+    </div>
+  
+    <div class="container" ng-show="Tab == 'Routines'">
+      <h1>Routines</h1>
 
-<script>
-var rawData = {{{PROFIELR_OUTPUT}}};
-</script>
+      <div ng-controller="RoutinesController">
+      <table class="table table-striped">
+        <thead>
+          <th>
+            <a href="" ng-click="reverse = predicate == 'Name' ? !reverse : false; predicate = 'Name';">Name</a>
+            <input ng-model="NameFilter">
+          </th>
+          <th><a href="" ng-click="reverse = predicate == 'Entries' ? !reverse : true; predicate = 'Entries';">Entries</a></th>
+          <th><a href="" ng-click="reverse = predicate == 'InclusiveTimePercent' ? !reverse : true; predicate = 'InclusiveTimePercent';">Inclusive Time</a></th>
+          <th><a href="" ng-click="reverse = predicate == 'ExclusiveTimePercent' ? !reverse : true; predicate = 'ExclusiveTimePercent';">Exclusive Time</a></th>
+        </thead>
+        <tbody>
+          <tr ng-repeat="routine in Routines | filter:NameFilter | orderBy:predicate:reverse">
+            <td>{{routine.Name}}</td>
+            <td>{{routine.Entries}}</td>
+            <td>{{routine.InclusiveTime}}ms ({{routine.InclusiveTimePercent}}%)</td>
+            <td>{{routine.ExclusiveTime}}ms ({{routine.ExclusiveTimePercent}}%)</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
 
-</body>
+    <div class="container" ng-show="Tab == 'Call Graph'">
+      <h1>Call Graph</h1>
 
+    </div>
+
+    <div class="container" ng-show="Tab == 'Allocations'">
+      <h1>Allocations</h1>
+
+    </div>
+
+    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.21/angular.min.js"></script>
+    <script>
+    var rawData = {{{PROFIELR_OUTPUT}}};
+
+    var moarProfApp = angular.module('moarProfApp', []);
+
+    moarProfApp.controller('NavigationController', function ($scope) {
+        $scope.Tab = 'Overview';
+    });
+
+    moarProfApp.controller('RoutinesController', function ($scope) {
+        // Walk call graph to build data.
+        var idToName       = {};
+        var idToEntries    = {};
+        var idToExclusive  = {};
+        var idToInclusive  = {};
+        var idRecDepth     = {};
+        var totalExclusive = 0;
+        var totalInclusive = rawData[0].call_graph.inclusive_time;
+        function walkCallGraphNode(node) {
+            if (!idToName[node.id]) {
+                idToName[node.id]      = node.name == "" ? "<anon>" : node.name;
+                idToEntries[node.id]   = 0;
+                idToExclusive[node.id] = 0;
+                idToInclusive[node.id] = 0;
+                idRecDepth[node.id]    = 0;
+            }
+            idToEntries[node.id]   += node.entries;
+            idToExclusive[node.id] += node.exclusive_time;
+            totalExclusive         += node.exclusive_time;
+            if (idRecDepth[node.id] == 0)
+                idToInclusive[node.id] += node.inclusive_time;
+            if (node.callees) {
+                idRecDepth[node.id]++;
+                node.callees.map(walkCallGraphNode);
+                idRecDepth[node.id]--;
+            }
+        }
+        walkCallGraphNode(rawData[0].call_graph);
+
+        // Build object list per routine.
+        var routineList = [];
+        for (id in idToName) {
+            var entry = {
+                Name:                 idToName[id],
+                Entries:              idToEntries[id],
+                InclusiveTime:        +(idToInclusive[id] / 1000000).toFixed(2),
+                InclusiveTimePercent: +(100 * idToInclusive[id] / totalInclusive).toFixed(2),
+                ExclusiveTime:        +(idToExclusive[id] / 1000000).toFixed(2),
+                ExclusiveTimePercent: +(100 * idToExclusive[id] / totalExclusive).toFixed(2)
+            };
+            routineList.push(entry);
+        }
+        $scope.Routines  = routineList;
+        $scope.predicate = "-InclusiveTimePercent";
+        $scope.reverse   = false;
+    });
+    </script>
+  </body>
 </html>
