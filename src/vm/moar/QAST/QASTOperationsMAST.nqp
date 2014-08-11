@@ -2567,6 +2567,8 @@ QAST::MASTOperations.add_core_moarop_mapping('asyncwritestr', 'asyncwritestr');
 QAST::MASTOperations.add_core_moarop_mapping('asyncwritebytes', 'asyncwritebytes');
 QAST::MASTOperations.add_core_moarop_mapping('asyncreadchars', 'asyncreadchars');
 QAST::MASTOperations.add_core_moarop_mapping('asyncreadbytes', 'asyncreadbytes');
+QAST::MASTOperations.add_core_moarop_mapping('spawnprocasync', 'spawnprocasync');
+QAST::MASTOperations.add_core_moarop_mapping('killprocasync', 'killprocasync', 1);
 
 # MoarVM-specific compilation ops
 QAST::MASTOperations.add_core_moarop_mapping('masttofile', 'masttofile', 2);
