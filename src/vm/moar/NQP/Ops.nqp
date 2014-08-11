@@ -100,21 +100,25 @@ $ops.add_hll_op('nqp', 'falsey', -> $qastcomp, $op {
     unless $op.list == 1 {
         nqp::die('falsey op requires one child');
     }
-    my $val := $qastcomp.as_mast($op[0]);
+    my $val      := $qastcomp.as_mast($op[0]);
+    my $regalloc := $*REGALLOC;
     if $val.result_kind == $MVM_reg_int64 {
-        my $not_reg := $*REGALLOC.fresh_register($MVM_reg_int64);
+        my $not_reg := $regalloc.fresh_register($MVM_reg_int64);
         my @ins := $val.instructions;
         push_op(@ins, 'not_i', $not_reg, $val.result_reg);
         MAST::InstructionList.new(@ins, $not_reg, $MVM_reg_int64)
     }
     elsif $val.result_kind == $MVM_reg_obj {
-        my $not_reg := $*REGALLOC.fresh_register($MVM_reg_int64);
+        my $not_reg := $regalloc.fresh_register($MVM_reg_int64);
+        my $dc := $regalloc.fresh_register($MVM_reg_obj);
         my @ins := $val.instructions;
-        push_op(@ins, 'isfalse', $not_reg, $val.result_reg);
+        push_op(@ins, 'decont', $dc, $val.result_reg);
+        push_op(@ins, 'isfalse', $not_reg, $dc);
+        $regalloc.release_register($dc, $MVM_reg_obj);
         MAST::InstructionList.new(@ins, $not_reg, $MVM_reg_int64)
     }
     elsif $val.result_kind == $MVM_reg_str {
-        my $not_reg := $*REGALLOC.fresh_register($MVM_reg_int64);
+        my $not_reg := $regalloc.fresh_register($MVM_reg_int64);
         my @ins := $val.instructions;
         push_op(@ins, 'isfalse_s', $not_reg, $val.result_reg);
         MAST::InstructionList.new(@ins, $not_reg, $MVM_reg_int64)
