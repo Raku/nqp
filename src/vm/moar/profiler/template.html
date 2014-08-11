@@ -28,10 +28,10 @@
         </div>
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
-            <li class="active"><a href="#overview" ng-click="Tab = 'Overview'">Overview</a></li>
-            <li><a href="#routines" ng-click="Tab = 'Routines'">Routines</a></li>
-            <li><a href="#callgraph" ng-click="Tab = 'Call Graph'">Call Graph</a></li>
-            <li><a href="#allocations" ng-click="Tab = 'Allocations'">Allocations</a></li>
+            <li ng-class="Tab == 'Overview' ? 'active' : ''"><a href="#overview" ng-click="Tab = 'Overview'">Overview</a></li>
+            <li ng-class="Tab == 'Routines' ? 'active' : ''"><a href="#routines" ng-click="Tab = 'Routines'">Routines</a></li>
+            <li ng-class="Tab == 'Call Graph' ? 'active' : ''"><a href="#callgraph" ng-click="Tab = 'Call Graph'">Call Graph</a></li>
+            <li ng-class="Tab == 'Allocations' ? 'active' : ''"><a href="#allocations" ng-click="Tab = 'Allocations'">Allocations</a></li>
           </ul>
         </div>
       </div>
