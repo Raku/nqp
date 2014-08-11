@@ -82,7 +82,7 @@
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.21/angular.min.js"></script>
     <script>
-    var rawData = {{{PROFIELR_OUTPUT}}};
+    var rawData = JSON.parse('{{{PROFIELR_OUTPUT}}}');
 
     var moarProfApp = angular.module('moarProfApp', []);
 
