@@ -38,15 +38,12 @@
     </div>
 
     <div class="container" ng-show="Tab == 'Overview'">
-      <h1>Overview</h1>
 
     </div>
   
     <div class="container" ng-show="Tab == 'Routines'">
-      <h1>Routines</h1>
-
       <div ng-controller="RoutinesController">
-      <table class="table table-striped table-condensed">
+      <table class="table table-striped table-condensed table-bordered">
         <thead>
           <th>
             <a href="" ng-click="reverse = predicate == 'Name' ? !reverse : false; predicate = 'Name';">Name</a>
@@ -91,12 +88,59 @@
     </div>
 
     <div class="container" ng-show="Tab == 'Call Graph'">
-      <h1>Call Graph</h1>
+      <div ng-controller="CallGraphController">
 
+        <ol class="breadcrumb">
+          <li><strong>Callers:</strong></li>
+          <li ng-show="RecentCallers.length == 0"><em>None</em></li>
+          <li ng-repeat="caller in RecentCallers">
+            <a href="" ng-click="toCaller(caller)">
+              {{caller.name == '' ? '&lt;anon&gt;' : caller.name}}
+            </a>
+          </li>
+        </ol>
+
+        <h3>{{Current.name == '' ? '&lt;anon&gt;' : Current.name}}</h3>
+          
+        <div class="panel panel-default">
+          <div class="panel-heading">Callees</div>
+          <table class="table table-striped table-condensed table-bordered" ng-show="Callees.length > 0">
+            <thead>
+              <th>
+                <a href="" ng-click="reverse = predicate == 'Name' ? !reverse : false; predicate = 'Name';">Name</a>
+                <input ng-model="NameFilter">
+              </th>
+              <th><a href="" ng-click="reverse = predicate == 'Calls' ? !reverse : true; predicate = 'Calls';">Calls</a></th>
+              <th><a href="" ng-click="reverse = predicate == 'TimePercent' ? !reverse : true; predicate = 'TimePercent';">Time In Callee</a></th>
+            </thead>
+            <tbody>
+              <tr ng-repeat="callee in Callees | filter:NameFilter | orderBy:predicate:reverse">
+                <td><strong><a href="" ng-click="toCallee(callee.Node)">{{callee.Name}}</a></strong></td>
+                <td>{{callee.Calls}}</td>
+                <td>
+                  <div class="pull-left" style="width: 70px">
+                    <div class="progress" style="width: 60px">
+                      <div class="progress-bar" role="progressbar" style="width: {{callee.TimePercent}}%;">
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <strong>{{callee.TimePercent}}%</strong>
+                   ({{callee.Time}}ms)
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="panel-body" ng-show="Callees.length == 0">
+            This code has no callees.
+          </div>
+        </div>
+
+      </div>
     </div>
 
     <div class="container" ng-show="Tab == 'Allocations'">
-      <h1>Allocations</h1>
 
     </div>
 
@@ -158,6 +202,68 @@
         $scope.Routines  = routineList;
         $scope.predicate = "InclusiveTimePercent";
         $scope.reverse   = true;
+    });
+    
+    moarProfApp.controller('CallGraphController', function ($scope) {
+        $scope.Current       = rawData[0].call_graph;
+        $scope.SuchCallers   = false;
+        $scope.RecentCallers = [];
+        $scope.Callees       = calleesOf($scope.Current);
+        $scope.predicate     = "TimePercent";
+        $scope.reverse       = true;
+        var all_callers      = [];
+
+        $scope.toCallee = function (callee) {
+            // Update caller history.
+            all_callers.push($scope.Current);
+            $scope.RecentCallers.push($scope.Current);
+            if ($scope.RecentCallers.length > 5)
+                $scope.RecentCallers.shift();
+
+            // Update current node and callees.
+            $scope.Current = callee;
+            $scope.Callees = calleesOf(callee);
+        };
+
+        $scope.toCaller = function (caller) {
+            // Update caller history.
+            while (all_callers.length > 0) {
+                var removed = all_callers.pop();
+                if ($scope.RecentCallers.length > 0)
+                    $scope.RecentCallers.pop();
+                if (removed == caller)
+                    break;
+            }
+            if (all_callers.length > $scope.RecentCallers.length) {
+                var ptr = all_callers.length - $scope.RecentCallers.length;
+                while (ptr >= 0 && $scope.RecentCallers.length < 5) {
+                    $scope.RecentCallers.unshift(all_callers[ptr]);
+                    ptr--;
+                }
+            }
+
+            // Update current node and callees.
+            $scope.Current = caller;
+            $scope.Callees = calleesOf(caller);
+        }
+
+        function calleesOf(node) {
+            if (!node.callees)
+                return [];
+
+            var totalExclusive = 0.0;
+            node.callees.map(function (c) { totalExclusive += c.exclusive_time / 1000; });
+
+            return node.callees.map(function (c) {
+                return {
+                    Name:        c.name == "" ? "<anon>" : c.name,
+                    Calls:       c.entries,
+                    Time:        +(c.inclusive_time / 1000).toFixed(2),
+                    TimePercent: +(100 * c.inclusive_time / node.inclusive_time).toFixed(2),
+                    Node:        c
+                };
+            });
+        }
     });
     </script>
   </body>
