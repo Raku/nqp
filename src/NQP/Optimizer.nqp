@@ -165,7 +165,7 @@ class NQP::Optimizer {
         $block;
     }
 
-    my %opt_n_i := nqp::hash('add', 1, 'sub', 1, 'mul', 1, 'iseq', 1, 'isne', 1,
+    my %opt_n_i := nqp::hash('add', 1, 'sub', 1, 'mul', 1, 'mod', 1, 'neg', 1, 'abs', 1, 'iseq', 1, 'isne', 1,
                              'islt', 1, 'isle', 1, 'isgt', 1, 'isge', 1, 'cmp', 1);
     method visit_op($op) {
         # Handle op needs special handling.
@@ -319,7 +319,7 @@ class NQP::Optimizer {
             return 0;
         }
 
-        if returns_int($op[0]) && returns_int($op[1]) {
+        if returns_int($op[0]) && (nqp::elems($op) == 1 || returns_int($op[1])) {
             my $newopn := $asm ~ "_i";
             $op.op($newopn);
             $op.returns(int);
