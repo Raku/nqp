@@ -407,7 +407,7 @@ class QAST::CompilerJS does DWIMYNameMangling {
                 self.declare_js_vars($*BLOCK.tmps),
                 self.declare_js_vars($*BLOCK.js_lexicals),
                 $stmts,
-                "\}\n"];
+                "\};\n"];
         }
 
         if $node.blocktype eq 'immediate' {
