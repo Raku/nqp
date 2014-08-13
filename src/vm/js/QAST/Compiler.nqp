@@ -106,8 +106,78 @@ class Chunk {
     }
 }
 
+
+# TODO think if we should be using such a complicated name mangling scheme
+# It's separated into a role so we may replace it with an different scheme when we won't to reduce the output size
+role DWIMYNameMangling {
+    # List taken from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Reserved_Words
+    my %reserved_words;
+    for nqp::split(" ",'break case catch continue debugger default delete do else finally for function if in instanceof new return switch this throw try typeof var void while with implements interface let package private protected public static yield class enum export extends import super') {
+        %reserved_words{$_} := 1;
+    }
+    method is_reserved_word($identifier) {
+        nqp::existskey(%reserved_words, $identifier);
+    }
+
+    my %mangle;
+    %mangle<_> := 'UNDERSCORE';
+    %mangle<&> := 'AMPERSAND';
+    %mangle<:> := 'COLON';
+    %mangle<;> := 'SEMI';
+    %mangle<<> := 'LESS';
+    %mangle<>> := 'MORE';
+    %mangle<{> := 'CURLY_OPEN';
+    %mangle<}> := 'CURLY_CLOSE';
+    %mangle<[> := 'BRACKET_OPEN';
+    %mangle<]> := 'BRACKET_CLOSE';
+    %mangle<(> := 'PAREN_OPEN';
+    %mangle<)> := 'PAREN_CLOSE';
+    %mangle<~> := 'TILDE';
+    %mangle<+> := 'PLUS';
+    %mangle<=> := 'EQUAL';
+    %mangle<?> := 'QUESTION';
+    %mangle<!> := 'BANG';
+    %mangle</> := 'SLASH';
+    %mangle<*> := 'STAR';
+    %mangle<-> := 'MINUS';
+    %mangle<@> := 'AT';
+    %mangle<,> := 'COMMA';
+    %mangle<%> := 'PERCENT';
+    %mangle<¢> := 'CENT';
+    %mangle< > := 'SPACE';
+    %mangle<'> := 'SINGLE';
+    %mangle<"> := 'QUOTE';
+    %mangle<^> := 'CARET';
+    %mangle<.> := 'DOT';
+    %mangle<|> := 'PIPE';
+    %mangle<`> := 'BACKTICK';
+    %mangle<$> := 'DOLLAR';
+    %mangle<\\> := 'BACKSLASH';
+
+    method mangle_name($name) {
+        if self.is_reserved_word($name) {$name := "_$name"}
+
+        my $mangled := '';
+
+        for nqp::split('',$name) -> $char {
+            if nqp::iscclass(nqp::const::CCLASS_ALPHANUMERIC, $char, 0) {
+                $mangled := $mangled ~ $char;
+            } else {
+                if nqp::existskey(%mangle, $char) {
+                    $mangled := $mangled ~ '_' ~ %mangle{$char} ~ '_';
+                } else {
+                    $mangled := $mangled ~ '_' ~ nqp::ord($char) ~ '_';
+                }
+            }
+        }
+
+        $mangled;
+    }
+}
+
 class QAST::OperationsJS {
     my %ops;
+
 
     method add_op($op, $cb) {
         %ops{$op} := $cb;
@@ -129,6 +199,25 @@ class QAST::OperationsJS {
         Chunk.new($T_VOID, "" , [$arg, "nqp.op.print({$arg.expr});\n"], :$node);
     });
 
+    QAST::OperationsJS.add_op('bind', sub ($comp, $node, :$want) {
+        my @children := $node.list;
+        if +@children != 2 {
+            nqp::die("A 'bind' op must have exactly two children");
+        }
+        unless nqp::istype(@children[0], QAST::Var) {
+            nqp::die("First child of a 'bind' op must be a QAST::Var");
+        }
+
+        my $*BINDVAL := @children[1];
+        $comp.as_js(@children[0])
+    });
+
+    QAST::OperationsJS.add_op('call', sub ($comp, $node, :$want) {
+        my $tmp := $*BLOCK.add_tmp();
+        my $callee := $comp.as_js($node[0], :want($T_OBJ));
+        Chunk.new($T_OBJ, $tmp , [$callee, "$tmp = " ~ $callee.expr ~ "();\n"], :$node);
+    });
+
     method compile_op($comp, $op, :$want) {
         my str $name := $op.op;
         if nqp::existskey(%ops, $name) {
@@ -139,7 +228,52 @@ class QAST::OperationsJS {
     }
 }
 
-class QAST::CompilerJS {
+class QAST::CompilerJS does DWIMYNameMangling {
+
+    # Holds information about the QAST::Block we're currently compiling.
+    # The currently compiled block is stored in $*BLOCK
+    my class BlockInfo {
+        has $!qast;             # The QAST::Block
+        has $!outer;            # Outer block's BlockInfo
+        has @!js_lexicals;      # javascript variables we need to declare for the block
+        has $!tmp;              # We use a bunch of TMP{$n} to store intermediate javascript results
+
+        method new($qast, $outer) {
+            my $obj := nqp::create(self);
+            $obj.BUILD($qast, $outer);
+            $obj
+        }
+
+        method BUILD($qast, $outer) {
+            $!qast := $qast;
+            $!outer := $outer;
+            @!js_lexicals := nqp::list();
+            $!tmp := 0;
+        }
+
+        method add_js_lexical($name) {
+            @!js_lexicals.push($name);
+        }
+
+        method add_tmp() {
+            $!tmp := $!tmp + 1;
+            'TMP'~$!tmp;
+        }
+
+        method tmps() {
+            my @tmps;
+            my $i := 1;
+            while $i <= $!tmp {
+                @tmps.push('TMP'~$i);
+                $i := $i+1;
+            }
+            @tmps;
+        }
+
+        method js_lexicals() { @!js_lexicals }
+        method outer() { $!outer }
+        method qast() { $!qast }
+     }
 
     method coerce($chunk, $desired) {
         my $got := $chunk.type;
@@ -148,10 +282,21 @@ class QAST::CompilerJS {
                 # we store both as a javascript number, and 32bit integers fit into doubles
                 return $chunk;
             }
+            if $got == $T_OBJ {
+                my %convert;
+                %convert{$T_STR} := 'to_str';
+                %convert{$T_NUM} := 'to_num';
+                %convert{$T_INT} := 'to_int';
+                return Chunk.new($desired, 'nqp.' ~ %convert{$desired} ~ '(' ~ $chunk.expr ~ ')', [$chunk]);
+            }
+
             if $desired == $T_STR {
                 if $got == $T_INT || $got == $T_NUM {
                     return Chunk.new($T_STR, $chunk.expr ~ '.toString()', [$chunk]);
                 }
+            }
+            if $desired == $T_OBJ {
+                return $chunk;
             }
             return Chunk.new($desired, "coercion($got, $desired, {$chunk.expr})", []) #TODO
         }
@@ -161,10 +306,18 @@ class QAST::CompilerJS {
 
     # It's more usefull for me during this development to emit partial code instead of quiting
     method NYI($msg) {
-        Chunk.new($T_VOID,"",["// NYI: $msg\n"]);
+        Chunk.new($T_VOID,"NYI($msg)",["// NYI: $msg\n"]);
         #nqp::die("NYI: $msg");
     }
 
+
+    method declare_js_vars(@vars) {
+        if +@vars {
+            'var '~nqp::join(",\n",@vars)~";\n";
+        } else {
+            '';
+        }
+    }
 
     sub want($node, $desired) {
         # TODO
@@ -212,9 +365,56 @@ class QAST::CompilerJS {
     }
 
     multi method as_js(QAST::Block $node, :$want) {
-        # TODO wrap the statements in a block
-        my $stmts := self.compile_all_the_statements($node, $want);
-        $stmts;
+        my $outer     := try $*BLOCK;
+        self.compile_block($node, $outer, :$want);
+    }
+
+    method mangled_cuid($node) {
+        my $ret := '';
+        for nqp::split('',$node.cuid) -> $c {
+            $ret := $ret ~ ($c eq '.' ?? '_' !! $c); 
+        }
+        $ret;
+    }
+
+    has %!cuids;
+
+    method register_cuid($node) {
+        %!cuids{$node.cuid} := 1;
+    }
+
+    method is_known_cuid($node) {
+        nqp::existskey(%!cuids, $node.cuid);
+    }
+
+    method compile_block(QAST::Block $node, $outer, :$want) {
+        my $cuid := self.mangled_cuid($node);
+
+        my $setup;
+
+        if self.is_known_cuid($node) {
+            $setup := [];
+        } else {
+            self.register_cuid($node);
+            my $*BINDVAL := 0;
+            my $*BLOCK := BlockInfo.new($node, (nqp::defined($outer) ?? $outer !! NQPMu));
+
+            # TODO proper want handling
+
+            my $stmts := self.compile_all_the_statements($node, $want);
+            $setup := [
+                "$cuid = function() \{",
+                self.declare_js_vars($*BLOCK.tmps),
+                self.declare_js_vars($*BLOCK.js_lexicals),
+                $stmts,
+                "\}\n"];
+        }
+
+        if $node.blocktype eq 'immediate' {
+            self.NYI("immediate blocks");
+        } else {
+            Chunk.new($T_OBJ, $cuid, $setup);
+        }
     }
 
     multi method as_js(QAST::IVal $node, :$want) {
@@ -223,6 +423,10 @@ class QAST::CompilerJS {
 
     multi method as_js(QAST::SVal $node, :$want) {
         Chunk.new($T_STR,quote_string($node.value()),[],:$node);
+    }
+
+    multi method as_js(QAST::BVal $node, :$want) {
+        self.as_js($node.value, :$want);
     }
 
     multi method as_js(QAST::Stmts $node, :$want) {
@@ -251,7 +455,59 @@ class QAST::CompilerJS {
         # Compile the block.
         my $block_js := self.as_js($node[0]);
 
-        $block_js;
+        if nqp::defined($node.main) {
+            my $main_block := QAST::Block.new($node.main);
+
+            my $main := self.as_js($main_block);
+
+            Chunk.new($T_VOID, "", [$block_js, $main, self.mangled_cuid($main_block) ~ "();\n"]);
+            
+        } else {
+            $block_js;
+        }
+    }
+
+    method declare_var(QAST::Var $var) {
+        # TODO vars more complex the non-dynamic lexicals
+        if $var.decl eq 'var' {
+            $*BLOCK.add_js_lexical(self.mangle_name($var.name));
+        }
+    }
+
+    multi method as_js(QAST::Var $node, :$want) {
+        self.declare_var($node);
+        self.compile_var($node);
+    }
+    
+    method var_is_lexicalish(QAST::Var $var) {
+        $var.scope eq 'lexical' || $var.scope eq 'typevar';
+    }
+
+    method as_js_clear_bindval($node) {
+        my $*BINDVAL := 0;
+        self.as_js($node);
+    }
+
+    method is_dynamic_var($var) {
+        # TODO
+        0;
+    }
+
+    method compile_var(QAST::Var $var) {
+        if self.var_is_lexicalish($var) && self.is_dynamic_var($var) {
+            self.TODO("dynamic variables");
+        } elsif self.var_is_lexicalish($var) || $var.scope eq 'local' {
+            my $type := $T_OBJ;
+            my $mangled := self.mangle_name($var.name);
+            if $*BINDVAL {
+                # TODO better source mapping
+                my $bindval := self.as_js_clear_bindval($*BINDVAL);
+                Chunk.new($type,$mangled, [$bindval,'('~$mangled~' = ('~ $bindval.expr ~ "));\n"]);
+            } else {
+                # TODO get the proper type 
+                Chunk.new($type, $mangled, [], :node($var));
+            }
+        }
     }
 
     multi method as_js($unknown, :$want) {
