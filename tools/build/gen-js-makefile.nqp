@@ -147,3 +147,5 @@ say('node_modules/installed: src/vm/js/nqp-runtime/runtime.js
 say("\n\njs-clean:
 	\$(RM_RF) gen/js/stage1 gen/js/stage2 gen/parrot/QAST gen/parrot/HLL
 ");
+say("js-lint:
+	gjslint --strict --nojsdoc src/vm/js/nqp-runtime/*.js");
