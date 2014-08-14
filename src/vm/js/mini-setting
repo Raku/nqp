@@ -1,0 +1,6 @@
+sub print($arg) {
+    nqp::print($arg);
+}
+sub say($arg) {
+    nqp::say($arg);
+}
