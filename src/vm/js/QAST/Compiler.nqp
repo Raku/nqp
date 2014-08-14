@@ -370,6 +370,56 @@ class QAST::CompilerJS does DWIMYNameMangling {
         @js_args;
     }
 
+    method compile_sig(@params) {
+        my $slurpy_named; # *%foo
+        my $slurpy;       # *@foo
+        my @named;        # :$foo
+        my @pos;          # $foo
+
+        my $bind_named := '';
+        for @params {
+            if $_.slurpy {
+                say("//NYI: slurpy params {$_.name}");
+                if $_.named {
+                    $slurpy_named := $_; 
+                } else {
+                    $slurpy := $_;
+                }
+            } elsif $_.named {
+                say("//NYI: named params");
+                unless self.is_dynamic_var($_) {
+                    @named.push(self.mangle_name($_.name));
+                }
+                my $quoted := self.quote_string($_.named);
+                my $value := "_NAMED[$quoted]";
+                if $_.default {
+                    $value := "(_NAMED.hasOwnProperty($quoted) ? $value : {self.as_js($_.default)})";
+                }
+
+                $bind_named := $bind_named ~ self.bind_var($_,self.js($value),1) ~ ";\n";
+            } else {
+                my $default := '';
+                if $_.default {
+                    say("//NYI: default");
+                    $default := self.as_js($_.default);
+                }
+                @pos.push([$_,$default]);
+            }
+        }
+
+#        if $slurpy_named {
+#            $bind_named := $bind_named ~ self.bind_var($slurpy_named,self.js('_NAMED'),1) ~ ";\n";
+#        }
+
+        my @sig := ['_NAMED','caller_ctx'];
+
+        for @pos -> $pos {
+            @sig.push(self.mangle_name($pos[0].name));
+        }
+
+        nqp::join(',', @sig);
+    }
+
     method coerce($chunk, $desired) {
         my $got := $chunk.type;
         if $got != $desired {
@@ -499,8 +549,11 @@ class QAST::CompilerJS does DWIMYNameMangling {
             # TODO proper want handling
 
             my $stmts := self.compile_all_the_statements($node, $want);
+
+            my $sig := self.compile_sig($*BLOCK.params);
+
             $setup := [
-                "$cuid = function() \{",
+                "$cuid = function($sig) \{",
                 self.declare_js_vars($*BLOCK.tmps),
                 self.declare_js_vars($*BLOCK.js_lexicals),
                 $create_ctx,
