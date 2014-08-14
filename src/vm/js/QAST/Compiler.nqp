@@ -224,7 +224,14 @@ class QAST::OperationsJS {
         my $compiled_args := $comp.args($args);
 
         if nqp::islist($compiled_args) {
-            $comp.NYI("more complex sub args: "~nqp::join(", ",$compiled_args));
+            my @exprs;
+            my @setup := [$callee];
+            for $compiled_args -> $group {
+                @exprs.push($group.expr);
+                @setup.push($group);
+            }
+            @setup.push("$tmp = {$callee.expr}({@exprs.shift ~ '.concat(' ~ nqp::join(',', @exprs)}));\n");
+            Chunk.new($T_OBJ, $tmp , @setup, :$node);
         } else {
             Chunk.new($T_OBJ, $tmp , [$callee, $compiled_args, "$tmp = {$callee.expr}({$compiled_args.expr});\n"], :$node);
         }
@@ -300,7 +307,7 @@ class QAST::CompilerJS does DWIMYNameMangling {
         my @args;
         my @named;
         my @flat_named;
-        my @chunks := [[]];
+        my @groups := [[]];
         for $args -> $arg {
             if nqp::istype($arg,QAST::SpecialArg) {
                 if $arg.flat {
@@ -308,9 +315,8 @@ class QAST::CompilerJS does DWIMYNameMangling {
                         # TODO - think about chunks
                         @flat_named.push(self.as_js($arg));
                     } else {
-                        # TODO - think about chunks
-                        @chunks.push(self.as_js($arg));
-                        @chunks.push([]);
+                        @groups.push(self.as_js($arg));
+                        @groups.push([]);
                     }
                 }
                 elsif $arg.named {
@@ -318,29 +324,40 @@ class QAST::CompilerJS does DWIMYNameMangling {
                     @named.push(self.quote_string($arg.named)~":"~self.as_js($arg))
                 }
                 else {
-                    my $compiled_arg := self.as_js($arg);
-                    @setup.push($compiled_arg);
-                    @chunks[@chunks-1].push($compiled_arg.expr);
+                    @groups[@groups-1].push(self.as_js($arg));
                 }
             } else {
-                my $compiled_arg := self.as_js($arg);
-                @setup.push($compiled_arg);
-                @chunks[@chunks-1].push($compiled_arg.expr);
+                @groups[@groups-1].push(self.as_js($arg));
             }
         }
         @flat_named.unshift('{'~nqp::join(',',@named)~'}');
-        @chunks[0].unshift("nqp.named({nqp::join(',',@flat_named)})");
-        @chunks[0].unshift($*BLOCK.ctx);
-        if +@chunks == 1 {
-            return Chunk.new($T_NONVAL, nqp::join(',',@chunks[0]), @setup);
+        @groups[0].unshift("nqp.named({nqp::join(',',@flat_named)})");
+        @groups[0].unshift($*BLOCK.ctx);
+
+        my sub chunkify(@group, $pre = '', $post = '') {
+            my @exprs;
+            my @setup;
+            for @group -> $arg {
+                if nqp::isstr($arg) {
+                    @exprs.push($arg);
+                } else {
+                    @exprs.push($arg.expr);
+                    @setup.push($arg);
+                }
+            }
+            Chunk.new($T_NONVAL, $pre ~ nqp::join(',', @exprs) ~ $post, @setup);
+        } 
+
+        if +@groups == 1 {
+            return chunkify(@groups[0]);
         }
 
         my @js_args;
-        for @chunks -> $chunk {
-            if nqp::islist($chunk) {
-                @js_args.push('['~nqp::join(',',$chunk)~']') if +$chunk
+        for @groups -> $group {
+            if nqp::islist($group) {
+                @js_args.push(chunkify($group, '[', ']')) if +$group
             } else {
-                @js_args.push($chunk);
+                @js_args.push($group);
             }
         }
         @js_args;
@@ -611,6 +628,8 @@ class QAST::CompilerJS does DWIMYNameMangling {
         Chunk.new($T_VOID,"",[
             "var nqp = require('nqp-runtime');\n",
             "\nvar top_ctx = nqp.top_context();\n",
+            # temporary HACK
+            "var ARGS = process.argv;\n",
             self.as_js($ast)
         ]);
     }
