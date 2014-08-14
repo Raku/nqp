@@ -25,17 +25,17 @@ public abstract class CompilationUnit {
      * Mapping of local integer IDs to matching code reference.
      */
     public CodeRef[] qbidToCodeRef;
-    
+
     /**
      * Array of all code references.
      */
     public CodeRef[] codeRefs;
-    
+
     /**
      * Call site descriptors used in this compilation unit.
      */
     public CallSiteDescriptor[] callSites;
-    
+
     /**
      * HLL configuration for this compilation unit.
      */
@@ -45,7 +45,7 @@ public abstract class CompilationUnit {
      * If true, the class corresponding to this CompilationUnit is shared between GlobalContexts.
      */
     public boolean shared;
-    
+
     /**
      * When a compilation unit is serving as the main entry point, its main
      * method will just delegate to here. Thus this needs to trigger some
@@ -57,9 +57,9 @@ public abstract class CompilationUnit {
         CompilationUnit cu = setupCompilationUnit(tc, cuType, false);
         Ops.invokeMain(tc, cu.qbidToCodeRef[entryCodeRefIdx], cuType.getName(), argv);
     }
-    
+
     /**
-     * Takes the class object for some compilation unit and sets it up. 
+     * Takes the class object for some compilation unit and sets it up.
      */
     public static CompilationUnit setupCompilationUnit(ThreadContext tc, Class<?> cuType, boolean shared)
             throws InstantiationException, IllegalAccessException {
@@ -68,7 +68,7 @@ public abstract class CompilationUnit {
         cu.initializeCompilationUnit(tc);
         return cu;
     }
-    
+
     /**
      * Does initialization work for the compilation unit.
      */
@@ -87,7 +87,7 @@ public abstract class CompilationUnit {
 
             String cuid = ann.cuid();
             CodeRef cr = new CodeRef(this, m.mh.bindTo(this), ann.name(), cuid,
-                ann.oLexicalNames().length == 0 ? null : ann.oLexicalNames(), 
+                ann.oLexicalNames().length == 0 ? null : ann.oLexicalNames(),
                 ann.iLexicalNames().length == 0 ? null : ann.iLexicalNames(),
                 ann.nLexicalNames().length == 0 ? null : ann.nLexicalNames(),
                 ann.sLexicalNames().length == 0 ? null : ann.sLexicalNames(),
@@ -124,13 +124,13 @@ public abstract class CompilationUnit {
                 cuidToCodeRef.put(c.staticInfo.uniqueId, c);
             }
         }
-        
+
         /* Build callsite descriptors. */
         callSites = getCallSites();
-        
+
         /* Get HLL configuration object. */
         hllConfig = tc.gc.getHLLConfigFor(this.hllName());
-        
+
         /* Run any deserialization code. */
         CodeRef desCodeRef = null;
         if (deserializeQbid() >= 0)
@@ -223,7 +223,7 @@ public abstract class CompilationUnit {
                 throw ExceptionHandling.dieInternal(tc, e.toString());
             }
     }
-    
+
     /**
      * Turns a compilation unit unique ID into the matching code-ref.
      */
@@ -237,7 +237,7 @@ public abstract class CompilationUnit {
     public CodeRef lookupCodeRef(int localId) {
         return qbidToCodeRef[localId];
     }
-    
+
     /**
      * Parses a bunch of info on static lexical values for a block and
      * installs each of them. TODO: lazify so we don't do it for blocks we
@@ -257,42 +257,42 @@ public abstract class CompilationUnit {
             Integer idx = cr.staticInfo.oTryGetLexicalIdx(lexName);
             if (idx == null)
                 new RuntimeException("Invalid lexical name '" + lexName + "' in static lexical installation");
-            cr.staticInfo.oLexStatic[idx] = tc.gc.scs.get(handle).root_objects.get(scIdx);
+            cr.staticInfo.oLexStatic[idx] = tc.gc.scs.get(handle).getObject(scIdx);
             cr.staticInfo.oLexStaticFlags[idx] = (byte)flags;
         }
      }
-    
+
     /**
      * Code generation emits this to build up the various CodeRef related
      * data structures.
      */
     public CodeRef[] getCodeRefs() { return null; }
-    
+
     /**
      * Code generation emits this to build up all the callsite descriptors
      * that are used by this compilation unit.
      */
     public abstract CallSiteDescriptor[] getCallSites();
-    
+
     /**
      * Code generation emits this to supply the HLL name from QAST::CompUnit.
      */
     public abstract String hllName();
-    
+
     /**
      * Code generation overrides this if there's an SC to deserialize.
      */
     public int deserializeQbid() {
         return -1;
     }
-    
+
     /**
      * Code generation overrides this if there's an SC to deserialize.
      */
     public int loadQbid() {
         return -1;
     }
-    
+
     /**
      * Code generation overrides this with the mainline blcok.
      */

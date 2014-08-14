@@ -96,13 +96,13 @@ public class KnowHOWBootstrapper {
          * context. */
         SerializationContext sc = new SerializationContext("__6MODEL_CORE__");
         tc.gc.scs.put("__6MODEL_CORE__", sc);
-        sc.root_objects.add(knowhow);
+        sc.addObject(knowhow);
         knowhow.sc = sc;
-        sc.root_objects.add(knowhow_how);
+        sc.addObject(knowhow_how);
         knowhow_how.sc = sc;
-        sc.root_stables.add(knowhow.st);
+        sc.addSTable(knowhow.st);
         knowhow.st.sc = sc;
-        sc.root_stables.add(knowhow_how.st);
+        sc.addSTable(knowhow_how.st);
         knowhow_how.st.sc = sc;
 
         /* Stash the created KnowHOW. */
@@ -135,9 +135,9 @@ public class KnowHOWBootstrapper {
         /* Associate the created object with the intial core serialization
          * context. */
         SerializationContext sc =  tc.gc.scs.get("__6MODEL_CORE__");
-        sc.root_objects.add(type_obj);
+        sc.addObject(type_obj);
         type_obj.sc = sc;
-        sc.root_stables.add(type_obj.st);
+        sc.addSTable(type_obj.st);
         type_obj.st.sc = sc;
         
         /* Stash the created type object. */
@@ -154,11 +154,11 @@ public class KnowHOWBootstrapper {
         type_obj.st.ModeFlags = STable.METHOD_CACHE_AUTHORITATIVE;
         
         SerializationContext sc = tc.gc.scs.get("__6MODEL_CORE__");
-        sc.root_objects.add(type_obj);
+        sc.addObject(type_obj);
         type_obj.sc = sc;
-        sc.root_objects.add(type_obj.st.HOW);
+        sc.addObject(type_obj.st.HOW);
         type_obj.st.HOW.sc = sc;
-        sc.root_stables.add(type_obj.st);
+        sc.addSTable(type_obj.st);
         type_obj.st.sc = sc;
         
         return type_obj;

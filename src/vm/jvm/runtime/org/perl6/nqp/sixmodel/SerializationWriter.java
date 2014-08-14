@@ -19,7 +19,7 @@ import org.perl6.nqp.sixmodel.reprs.MultiCache;
 public class SerializationWriter {
     /* The current version of the serialization format. */
     private final int CURRENT_VERSION = 8;
-    
+
     /* Various sizes (in bytes). */
     private final int HEADER_SIZE               = 4 * 16;
     private final int STABLES_TABLE_ENTRY_SIZE  = 12;
@@ -27,7 +27,7 @@ public class SerializationWriter {
     private final int CLOSURES_TABLE_ENTRY_SIZE = 24;
     private final int CONTEXTS_TABLE_ENTRY_SIZE = 16;
     private final int REPOS_TABLE_ENTRY_SIZE    = 16;
-    
+
     /* Possible reference types we can serialize. */
     private final short REFVAR_NULL               = 1;
     private final short REFVAR_OBJECT             = 2;
@@ -41,15 +41,15 @@ public class SerializationWriter {
     private final short REFVAR_VM_HASH_STR_VAR    = 10;
     private final short REFVAR_STATIC_CODEREF     = 11;
     private final short REFVAR_CLONED_CODEREF     = 12;
-    
+
     private ThreadContext tc;
     private SerializationContext sc;
     private ArrayList<String> sh;
     private HashMap<String, Integer> stringMap;
-    
+
     private ArrayList<SerializationContext> dependentSCs;
     private ArrayList<CallFrame> contexts;
-    
+
     private static final int DEPS = 0;
     private static final int STABLES = 1;
     private static final int STABLE_DATA = 2;
@@ -61,12 +61,12 @@ public class SerializationWriter {
     private static final int REPOS = 8;
     private ByteBuffer[] outputs;
     private int currentBuffer;
-    
+
     private int numClosures;
     private int sTablesListPos;
     private int objectsListPos;
     private int contextsListPos;
-    
+
     public SerializationWriter(ThreadContext tc, SerializationContext sc, ArrayList<String> sh) {
         this.tc = tc;
         this.sc = sc;
@@ -110,18 +110,18 @@ public class SerializationWriter {
         /* Build a single result string out of the serialized data. */
         return concatenateOutputs();
     }
-    
+
     private int addStringToHeap(String s) {
         /* We ensured that the first entry in the heap represents the null string,
          * so can just hand back 0 here. */
         if (s == null)
             return 0;
-        
+
         /* Did we already see it? */
         Integer idx = stringMap.get(s);
         if (idx != null)
             return idx;
-        
+
         /* Otherwise, need to add it to the heap. */
         int newIdx = sh.size();
         sh.add(s);
@@ -136,7 +136,7 @@ public class SerializationWriter {
         /* Easy if it's in the current SC. */
         if (sc == this.sc)
             return 0;
-        
+
         /* If not, try to find it in our dependencies list. */
         int found = dependentSCs.indexOf(sc);
         if (found >= 0)
@@ -149,7 +149,7 @@ public class SerializationWriter {
         outputs[DEPS].putInt(addStringToHeap(sc.description));
         return dependentSCs.size(); /* Deliberately index + 1. */
     }
-    
+
     /* Takes an STable. If it's already in an SC, returns information on how
      * to reference it. Otherwise, adds it to the current SC, effectively
      * placing it onto the work list. */
@@ -157,22 +157,22 @@ public class SerializationWriter {
         /* Add to this SC if needed. */
         if (st.sc == null) {
             st.sc = this.sc;
-            this.sc.root_stables.add(st);
+            this.sc.addSTable(st);
         }
-        
+
         /* Work out SC reference. */
         int[] result = new int[2];
         result[0] = getSCId(st.sc);
-        result[1] = st.sc.root_stables.indexOf(st);
+        result[1] = st.sc.getSTableIndex(st);
         return result;
     }
-    
+
     /* Writing function for native integers. */
     public void writeInt(long value) {
         this.growToHold(currentBuffer, 8);
         outputs[currentBuffer].putLong(value);
     }
-    
+
     /* Writing function for 32-bit native integers. */
     public void writeInt32(int value) {
         this.growToHold(currentBuffer, 4);
@@ -198,15 +198,15 @@ public class SerializationWriter {
             /* This object doesn't belong to an SC yet, so it must be serialized as part of
              * this compilation unit. Add it to the work list. */
             ref.sc = this.sc;
-            this.sc.root_objects.add(ref);
+            this.sc.addObject(ref);
         }
-        
+
         /* Write SC index, then object index. */
         this.growToHold(currentBuffer, 8);
         outputs[currentBuffer].putInt(getSCId(ref.sc));
-        outputs[currentBuffer].putInt(ref.sc.root_objects.indexOf(ref));
+        outputs[currentBuffer].putInt(ref.sc.getObjectIndex(ref));
     }
-    
+
     public void writeList(List<SixModelObject> list) {
         growToHold(currentBuffer, 6);
         outputs[currentBuffer].putShort(REFVAR_VM_ARR_VAR);
@@ -214,7 +214,7 @@ public class SerializationWriter {
         for (SixModelObject item : list)
             writeRef(item);
     }
-    
+
     public void writeHash(Map<String, SixModelObject> hash) {
         growToHold(currentBuffer, 6);
         outputs[currentBuffer].putShort(REFVAR_VM_HASH_STR_VAR);
@@ -240,12 +240,45 @@ public class SerializationWriter {
     private void writeCodeRef(SixModelObject ref) {
         SerializationContext codeSC = ref.sc;
         int scId = getSCId(codeSC);
-        int idx = codeSC.root_codes.indexOf(ref);
+        int idx = codeSC.getCodeIndex(ref);
         growToHold(currentBuffer, 8);
         outputs[currentBuffer].putInt(scId);
         outputs[currentBuffer].putInt(idx);
     }
-    
+
+    static class Accumulator {
+        static Map<String, Accumulator> all = new HashMap<String, Accumulator>();
+        long totalTime = 0;
+        long count = 0;
+        long startTime = 0;
+
+        public static Accumulator start(String name) {
+                Accumulator a = all.get(name);
+                if (a == null) {
+                        a = new Accumulator();
+                        all.put(name, a);
+                }
+                a.count++;
+                a.startTime = System.currentTimeMillis();
+                return a;
+        }
+        public void stop() {
+                totalTime += (System.currentTimeMillis() - startTime);
+        }
+    }
+
+    {
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+                public void run() {
+                        for (Map.Entry<String, Accumulator> e : Accumulator.all.entrySet()) {
+                                String name = e.getKey();
+                                Accumulator a = e.getValue();
+                                System.err.println(name + ": " + a.totalTime + " ms (" + a.count + " calls)");
+                        }
+                }
+        });
+    }
+
     /* Writing function for references to things. */
     public void writeRef(SixModelObject ref) {
         /* Work out what kind of thing we have and determine the discriminator. */
@@ -312,7 +345,7 @@ public class SerializationWriter {
         /* Write the discriminator. */
         growToHold(currentBuffer, 2);
         outputs[currentBuffer].putShort(discrim);
-        
+
         /* Now take appropriate action. */
         switch (discrim) {
             case REFVAR_NULL:
@@ -354,12 +387,12 @@ public class SerializationWriter {
         outputs[currentBuffer].putInt(idxs[0]);
         outputs[currentBuffer].putInt(idxs[1]);
     }
-    
+
     /* Concatenates the various output segments into a single binary string. */
     private String concatenateOutputs() {
         int output_size = 0;
         int offset      = 0;
-        
+
         /* Calculate total size. */
         output_size += HEADER_SIZE;
         output_size += outputs[DEPS].position();
@@ -371,52 +404,52 @@ public class SerializationWriter {
         output_size += outputs[CONTEXTS].position();
         output_size += outputs[CONTEXT_DATA].position();
         output_size += outputs[REPOS].position();
-        
+
         /* Allocate a buffer that size. */
         ByteBuffer output = ByteBuffer.allocate(output_size);
         output.order(ByteOrder.LITTLE_ENDIAN);
-        
+
         /* Write version into header. */
         output.putInt(CURRENT_VERSION);
         offset += HEADER_SIZE;
-        
+
         /* Put dependencies table in place and set location/rows in header. */
         output.putInt(offset);
         output.putInt(this.dependentSCs.size());
         output.position(offset);
         output.put(usedBytes(outputs[DEPS]));
         offset += outputs[DEPS].position();
-        
+
         /* Put STables table in place, and set location/rows in header. */
         output.position(12);
         output.putInt(offset);
-        output.putInt(this.sc.root_stables.size());
+        output.putInt(this.sc.stableCount());
         output.position(offset);
         output.put(usedBytes(outputs[STABLES]));
         offset += outputs[STABLES].position();
-        
+
         /* Put STables data in place. */
         output.position(20);
         output.putInt(offset);
         output.position(offset);
         output.put(usedBytes(outputs[STABLE_DATA]));
         offset += outputs[STABLE_DATA].position();
-        
+
         /* Put objects table in place, and set location/rows in header. */
         output.position(24);
         output.putInt(offset);
-        output.putInt(this.sc.root_objects.size());
+        output.putInt(this.sc.objectCount());
         output.position(offset);
         output.put(usedBytes(outputs[OBJECTS]));
         offset += outputs[OBJECTS].position();
-        
+
         /* Put objects data in place. */
         output.position(32);
         output.putInt(offset);
         output.position(offset);
         output.put(usedBytes(outputs[OBJECT_DATA]));
         offset += outputs[OBJECT_DATA].position();
-        
+
         /* Put closures table in place, and set location/rows in header. */
         output.position(36);
         output.putInt(offset);
@@ -432,14 +465,14 @@ public class SerializationWriter {
         output.position(offset);
         output.put(usedBytes(outputs[CONTEXTS]));
         offset += outputs[CONTEXTS].position();
-        
+
         /* Put contexts data in place. */
         output.position(52);
         output.putInt(offset);
         output.position(offset);
         output.put(usedBytes(outputs[CONTEXT_DATA]));
         offset += outputs[CONTEXT_DATA].position();
-        
+
         /* Put repossessions table in place, and set location/rows in header. */
         output.position(56);
         output.putInt(offset);
@@ -447,15 +480,15 @@ public class SerializationWriter {
         output.position(offset);
         output.put(usedBytes(outputs[REPOS]));
         offset += outputs[REPOS].position();
-        
+
         /* Sanity check. */
         if (offset != output_size)
             throw new RuntimeException("Serialization sanity check failed: offset != output_size");
-        
+
         /* Base 64 encode and return. */
         return Base64.encode(output);
     }
-    
+
     /* Grabs an array of the bytes actually populated in the specified buffer. */
     private byte[] usedBytes(ByteBuffer bb) {
         byte[] result = new byte[bb.position()];
@@ -464,7 +497,7 @@ public class SerializationWriter {
         bb.position(result.length);
         return result;
     }
-    
+
     /* This handles the serialization of an object, which largely involves a
      * delegation to its representation. */
     private void serializeObject(SixModelObject obj) {
@@ -472,19 +505,19 @@ public class SerializationWriter {
         int[] ref = getSTableRefInfo(obj.st);
         int sc = ref[0];
         int sc_idx = ref[1];
-        
+
         /* Ensure there's space in the objects table; grow if not. */
         growToHold(OBJECTS, OBJECTS_TABLE_ENTRY_SIZE);
-        
+
         /* Make objects table entry. */
         outputs[OBJECTS].putInt(sc);
         outputs[OBJECTS].putInt(sc_idx);
         outputs[OBJECTS].putInt(outputs[OBJECT_DATA].position());
         outputs[OBJECTS].putInt(obj instanceof TypeObject ? 0 : 1);
-        
+
         /* Make sure we're going to write to the correct place. */
         currentBuffer = OBJECT_DATA;
-        
+
         /* Delegate to its serialization REPR function. */
         if (!(obj instanceof TypeObject))
             obj.st.REPR.serialize(tc, this, obj);
@@ -493,14 +526,14 @@ public class SerializationWriter {
     private void serializeStable(STable st) {
         /* Ensure there's space in the STables table. */
         growToHold(STABLES, STABLES_TABLE_ENTRY_SIZE);
-        
+
         /* Make STables table entry. */
         outputs[STABLES].putInt(addStringToHeap(st.REPR.name));
         outputs[STABLES].putInt(outputs[STABLE_DATA].position());
-        
+
         /* Make sure we're going to write to the correct place. */
         currentBuffer = STABLE_DATA;
-        
+
         /* Write HOW, WHAT and WHO. */
         writeObjRef(st.HOW);
         writeObjRef(st.WHAT);
@@ -518,30 +551,30 @@ public class SerializationWriter {
         writeInt(vtl);
         for (int i = 0; i < vtl; i++)
             writeRef(st.VTable[i]);
-        
+
         /* Type check cache. */
         int tcl = st.TypeCheckCache == null ? 0 : st.TypeCheckCache.length;
         writeInt(tcl);
         for (int i = 0; i < tcl; i++)
             writeRef(st.TypeCheckCache[i]);
-        
+
         /* Mode flags. */
         writeInt(st.ModeFlags);
-        
+
         /* Boolification spec. */
         writeInt(st.BoolificationSpec == null ? 0 : 1);
         if (st.BoolificationSpec != null) {
             writeInt(st.BoolificationSpec.Mode);
             writeRef(st.BoolificationSpec.Method);
         }
-        
+
         /* Container spec. */
         writeInt(st.ContainerSpec == null ? 0 : 1);
         if (st.ContainerSpec != null) {
             writeStr(st.ContainerSpec.name());
             st.ContainerSpec.serialize(tc, st, this);
         }
-        
+
         /* Invocation spec. */
         writeInt(st.InvocationSpec == null ? 0 : 1);
         if (st.InvocationSpec != null) {
@@ -550,18 +583,18 @@ public class SerializationWriter {
             writeInt(st.InvocationSpec.Hint);
             writeRef(st.InvocationSpec.InvocationHandler);
         }
-        
+
         /* HLL info. */
         writeStr(st.hllOwner == null ? "" : st.hllOwner.name);
         writeInt(st.hllRole);
-        
+
         /* Location of REPR data. */
         outputs[STABLES].putInt(outputs[STABLE_DATA].position());
-        
+
         /* If the REPR has a function to serialize representation data, call it. */
         st.REPR.serialize_repr_data(tc, st, this);
     }
-    
+
     private SixModelObject closureToStaticCodeRef(CodeRef closure, boolean fatal) {
         SixModelObject staticCode = ((CodeRef)closure).staticInfo.staticCode;
         if (staticCode == null)
@@ -590,39 +623,39 @@ public class SerializationWriter {
 
         /* Ensure there's space in the closures table; grow if not. */
         growToHold(CLOSURES, CLOSURES_TABLE_ENTRY_SIZE);
-        
+
         /* Get the index of the context (which will add it to the todo list if
          * needed). */
         int contextIdx = getSerializedOuterContextIdx(closure);
-        
+
         /* Add an entry to the closures table. */
         int staticSCId = getSCId(staticCodeSC);
-        int staticIdx = staticCodeSC.root_codes.indexOf(staticCodeRef);
+        int staticIdx = staticCodeSC.getCodeIndex(staticCodeRef);
         outputs[CLOSURES].putInt(staticSCId);
         outputs[CLOSURES].putInt(staticIdx);
         outputs[CLOSURES].putInt(contextIdx);
-        
+
         /* Check if it has a static code object. */
         if (closure.codeObject != null) {
             outputs[CLOSURES].putInt(1);
             if (closure.codeObject.sc == null) {
                 closure.codeObject.sc = this.sc;
-                this.sc.root_objects.add(closure.codeObject);
+                this.sc.addObject(closure.codeObject);
             }
             outputs[CLOSURES].putInt(getSCId(closure.codeObject.sc));
-            outputs[CLOSURES].putInt(closure.codeObject.sc.root_objects.indexOf(closure.codeObject));
+            outputs[CLOSURES].putInt(closure.codeObject.sc.getObjectIndex(closure.codeObject));
         }
         else {
             outputs[CLOSURES].putInt(0);
             outputs[CLOSURES].putInt(0); // pad
             outputs[CLOSURES].putInt(0); // pad
         }
-        
+
         /* Increment count of closures in the table. */
         numClosures++;
 
         /* Add the closure to this SC, and mark it as as being in it. */
-        this.sc.root_codes.add((CodeRef)closure);
+        this.sc.addCodeRef((CodeRef)closure);
         closure.sc = this.sc;
     }
 
@@ -652,7 +685,7 @@ public class SerializationWriter {
                     "Serialization Error: reference to context outside of SC");
             int idx = contexts.indexOf(cf);
             if (idx < 0)
-                ExceptionHandling.dieInternal(tc, 
+                ExceptionHandling.dieInternal(tc,
                     "Serialization Error: could not locate outer context in current SC");
             return idx + 1;
         }
@@ -666,23 +699,23 @@ public class SerializationWriter {
             ExceptionHandling.dieInternal(tc,
                 "Serialization Error: closure outer is a code object not in an SC");
         int staticSCId = getSCId(staticCodeSC);
-        int staticIdx = staticCodeSC.root_codes.indexOf(staticCodeRef);
+        int staticIdx = staticCodeSC.getCodeIndex(staticCodeRef);
 
         /* Ensure there's space in the contexts table; grow if not. */
         growToHold(CONTEXTS, CONTEXTS_TABLE_ENTRY_SIZE);
-        
+
         /* Make contexts table entry. */
         outputs[CONTEXTS].putInt(staticSCId);
         outputs[CONTEXTS].putInt(staticIdx);
         outputs[CONTEXTS].putInt(outputs[CONTEXT_DATA].position());
-        
+
         /* See if there's any relevant outer context, and if so set it up to
          * be serialized. */
         if (cf.outer != null)
             outputs[CONTEXTS].putInt(getSerializedContextIdx(cf.outer));
         else
             outputs[CONTEXTS].putInt(0);
-        
+
         /* Set up writer. */
         currentBuffer = CONTEXT_DATA;
 
@@ -737,7 +770,7 @@ public class SerializationWriter {
             this.outputs[idx] = replacement;
         }
     }
-    
+
     /* Goes through the list of repossessions and serializes them all. */
     private void serializeRepossessions() {
         /* Allocate table space, provided we've actually something to do. */
@@ -745,7 +778,7 @@ public class SerializationWriter {
         if (numRepos == 0)
             return;
         growToHold(REPOS, numRepos * REPOS_TABLE_ENTRY_SIZE);
-        
+
         /* Make entries. */
         for (int i = 0; i < numRepos; i++) {
             int objIdx = sc.rep_indexes.get(i) >> 1;
@@ -755,15 +788,15 @@ public class SerializationWriter {
             /* Work out original object's SC location. */
             int origSCIdx = getSCId(origSC);
             int origIdx = isST != 0
-                ? origSC.root_stables.indexOf(sc.root_stables.get(objIdx))
-                : origSC.root_objects.indexOf(sc.root_objects.get(objIdx));
+                ? origSC.getSTableIndex(sc.getSTable(objIdx))
+                : origSC.getObjectIndex(sc.getObject(objIdx));
             if (origIdx < 0)
                 throw new RuntimeException(
                     "Could not find object when writing repossessions; " +
                     (isST != 0
                         ? "STable"
-                        : "REPR = " + sc.root_objects.get(objIdx).st.REPR.name));
-            
+                        : "REPR = " + sc.getObject(objIdx).st.REPR.name));
+
             /* Write table row. */
             outputs[REPOS].putInt(isST);
             outputs[REPOS].putInt(objIdx);
@@ -771,7 +804,7 @@ public class SerializationWriter {
             outputs[REPOS].putInt(origIdx);
         }
     }
-    
+
     /* This is the overall serialization loop. It keeps an index into the list of
      * STables and objects in the SC. As we discover new ones, they get added. We
      * finished when we've serialized everything. */
@@ -779,28 +812,28 @@ public class SerializationWriter {
         boolean workTodo = true;
         while (workTodo) {
             /* Current work list sizes. */
-            int sTablesTodo = sc.root_stables.size();
-            int objectsTodo = sc.root_objects.size();
+            int sTablesTodo = sc.stableCount();
+            int objectsTodo = sc.objectCount();
             int contextsTodo = contexts.size();
-            
+
             /* Reset todo flag - if we do some work we'll go round again as it
              * may have generated more. */
             workTodo = false;
-            
+
             /* Serialize any STables on the todo list. */
             while (sTablesListPos < sTablesTodo) {
-                serializeStable(sc.root_stables.get(sTablesListPos));
+                serializeStable(sc.getSTable(sTablesListPos));
                 sTablesListPos++;
                 workTodo = true;
             }
-            
+
             /* Serialize any objects on the todo list. */
             while (objectsListPos < objectsTodo) {
-                serializeObject(sc.root_objects.get(objectsListPos));
+                serializeObject(sc.getObject(objectsListPos));
                 objectsListPos++;
                 workTodo = true;
             }
-            
+
             /* Serialize any contexts on the todo list. */
              while (contextsListPos < contextsTodo) {
                 serializeContext(contexts.get(contextsListPos));
@@ -808,7 +841,7 @@ public class SerializationWriter {
                 workTodo = true;
             }
         }
-        
+
         /* Finally, serialize repossessions table (this can't make any more
          * work, so is done as a separate step here at the end). */
         serializeRepossessions();
