@@ -52,6 +52,11 @@
           <th><a href="" ng-click="reverse = predicate == 'Entries' ? !reverse : true; predicate = 'Entries';">Entries</a></th>
           <th><a href="" ng-click="reverse = predicate == 'InclusiveTimePercent' ? !reverse : true; predicate = 'InclusiveTimePercent';">Inclusive Time</a></th>
           <th><a href="" ng-click="reverse = predicate == 'ExclusiveTimePercent' ? !reverse : true; predicate = 'ExclusiveTimePercent';">Exclusive Time</a></th>
+          <th>
+            <span class="text-danger" data-toggle="tooltip" data-placement="bottom" title="Unoptimized interpreted code">Interp</span> /
+            <span class="text-warning" data-toggle="tooltip" data-placement="bottom" title="Type-specialized interpreted code">Spesh</span> /
+            <span class="text-success" data-toggle="tooltip" data-placement="bottom" title="Type-specialized, JIT-compiled code">JIT</span>
+          </th>
         </thead>
         <tbody>
           <tr ng-repeat="routine in Routines | filter:NameFilter | orderBy:predicate:reverse">
@@ -79,6 +84,16 @@
               <div>
                 <strong>{{routine.ExclusiveTimePercent}}%</strong>
                ({{routine.ExclusiveTime}}ms)
+              </div>
+            </td>
+            <td>
+              <div class="progress" style="width: 100px">
+                <div class="progress-bar progress-bar-danger" style="width: {{routine.InterpEntriesPercent}}%">
+                </div>
+                <div class="progress-bar progress-bar-warning" style="width: {{routine.SpeshEntriesPercent}}%">
+                </div>
+                <div class="progress-bar progress-bar-success" style="width: {{routine.JITEntriesPercent}}%">
+                </div>
               </div>
             </td>
           </tr>
@@ -112,6 +127,14 @@
               </th>
               <th><a href="" ng-click="reverse = predicate == 'Calls' ? !reverse : true; predicate = 'Calls';">Calls</a></th>
               <th><a href="" ng-click="reverse = predicate == 'TimePercent' ? !reverse : true; predicate = 'TimePercent';">Time In Callee</a></th>
+              <th>
+                <span class="text-danger" data-toggle="tooltip" data-placement="bottom" title="Unoptimized interpreted code">Interp</span> /
+                <span class="text-warning" data-toggle="tooltip" data-placement="bottom" title="Type-specialized interpreted code">Spesh</span> /
+                <span class="text-success" data-toggle="tooltip" data-placement="bottom" title="Type-specialized, JIT-compiled code">JIT</span>
+              </th>
+              <th>
+                <span data-toggle="tooltip" data-placement="bottom" title="Code from this callee was flattened into the routine by the optimizer">Inlined</span>
+              </th>
             </thead>
             <tbody>
               <tr ng-repeat="callee in Callees | filter:NameFilter | orderBy:predicate:reverse">
@@ -127,6 +150,30 @@
                   <div>
                     <strong>{{callee.TimePercent}}%</strong>
                    ({{callee.Time}}ms)
+                  </div>
+                </td>
+                <td>
+                  <div class="progress" style="width: 100px">
+                    <div class="progress-bar progress-bar-danger" style="width: {{callee.InterpCallsPercent}}%">
+                    </div>
+                    <div class="progress-bar progress-bar-warning" style="width: {{callee.SpeshCallsPercent}}%">
+                    </div>
+                    <div class="progress-bar progress-bar-success" style="width: {{callee.JITCallsPercent}}%">
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div ng-show="callee.VeryInline">
+                    <span class="text-success">
+                      <span class="glyphicon glyphicon-star"></span>
+                    </span>
+                    {{callee.InlinedPercent}}%
+                  </div>
+                  <div ng-show="callee.SometimesInline">
+                    <span class="text-muted">
+                      <span class="glyphicon glyphicon-star-empty"></span>
+                    </span>
+                    {{callee.InlinedPercent}}%
                   </div>
                 </td>
               </tr>
@@ -158,24 +205,30 @@
     
     moarProfApp.controller('RoutinesController', function ($scope) {
         // Walk call graph to build data.        
-        var idToName       = {};
-        var idToEntries    = {};
-        var idToExclusive  = {};
-        var idToInclusive  = {};
-        var idRecDepth     = {};
-        var totalExclusive = 0;
-        var totalInclusive = rawData[0].call_graph.inclusive_time / 1000;
+        var idToName         = {};
+        var idToEntries      = {};
+        var idToSpeshEntries = {};
+        var idToJITEntries   = {};
+        var idToExclusive    = {};
+        var idToInclusive    = {};
+        var idRecDepth       = {};
+        var totalExclusive   = 0;
+        var totalInclusive   = rawData[0].call_graph.inclusive_time / 1000;
         function walkCallGraphNode(node) {
             if (!idToName[node.id]) {
-                idToName[node.id]      = node.name == "" ? "<anon>" : node.name;
-                idToEntries[node.id]   = 0;
-                idToExclusive[node.id] = 0;
-                idToInclusive[node.id] = 0;
-                idRecDepth[node.id]    = 0;
+                idToName[node.id]         = node.name == "" ? "<anon>" : node.name;
+                idToEntries[node.id]      = 0;
+                idToSpeshEntries[node.id] = 0;
+                idToJITEntries[node.id]   = 0;
+                idToExclusive[node.id]    = 0;
+                idToInclusive[node.id]    = 0;
+                idRecDepth[node.id]       = 0;
             }
-            idToEntries[node.id]   += node.entries;
-            idToExclusive[node.id] += node.exclusive_time / 1000;
-            totalExclusive         += node.exclusive_time / 1000;
+            idToEntries[node.id]      += node.entries;
+            idToSpeshEntries[node.id] += node.spesh_entries;
+            idToJITEntries[node.id]   += node.jit_entries;
+            idToExclusive[node.id]    += node.exclusive_time / 1000;
+            totalExclusive            += node.exclusive_time / 1000;
             if (idRecDepth[node.id] == 0)
                 idToInclusive[node.id] += node.inclusive_time / 1000;
             if (node.callees) {
@@ -189,9 +242,15 @@
         // Build object list per routine.
         var routineList = [];
         for (id in idToName) {
+            var speshEntriesPercent  = +(100 * idToSpeshEntries[id] / idToEntries[id]).toFixed(2);
+            var jitEntriesPercent    = +(100 * idToJITEntries[id] / idToEntries[id]).toFixed(2);
+            var interpEntriesPercent = 100 - (speshEntriesPercent + jitEntriesPercent);
             var entry = {
                 Name:                 idToName[id],
                 Entries:              idToEntries[id],
+                InterpEntriesPercent: interpEntriesPercent,
+                SpeshEntriesPercent:  speshEntriesPercent,
+                JITEntriesPercent:    jitEntriesPercent,
                 InclusiveTime:        +(idToInclusive[id] / 1000).toFixed(2),
                 InclusiveTimePercent: +(100 * idToInclusive[id] / totalInclusive).toFixed(2),
                 ExclusiveTime:        +(idToExclusive[id] / 1000).toFixed(2),
@@ -255,15 +314,29 @@
             node.callees.map(function (c) { totalExclusive += c.exclusive_time / 1000; });
 
             return node.callees.map(function (c) {
+                var speshCallsPercent  = +(100 * c.spesh_entries / c.entries).toFixed(2);
+                var jitCallsPercent    = +(100 * c.jit_entries / c.entries).toFixed(2);
+                var interpCallsPercent = 100 - (speshCallsPercent + jitCallsPercent);
+                var inlinedPercent     = +(100 * c.inlined_entries / c.entries).toFixed(2);
                 return {
-                    Name:        c.name == "" ? "<anon>" : c.name,
-                    Calls:       c.entries,
-                    Time:        +(c.inclusive_time / 1000).toFixed(2),
-                    TimePercent: +(100 * c.inclusive_time / node.inclusive_time).toFixed(2),
-                    Node:        c
+                    Name:               c.name == "" ? "<anon>" : c.name,
+                    Calls:              c.entries,
+                    Time:               +(c.inclusive_time / 1000).toFixed(2),
+                    TimePercent:        +(100 * c.inclusive_time / node.inclusive_time).toFixed(2),
+                    InterpCallsPercent: interpCallsPercent,
+                    SpeshCallsPercent:  speshCallsPercent,
+                    JITCallsPercent:    jitCallsPercent,
+                    InlinedPercent:     inlinedPercent,
+                    VeryInline:         inlinedPercent >= 95,
+                    SometimesInline:    inlinedPercent < 95 && inlinedPercent > 10,
+                    Node:               c
                 };
             });
         }
+    });
+
+    $(function () {
+        $("[data-toggle='tooltip']").tooltip();
     });
     </script>
   </body>
