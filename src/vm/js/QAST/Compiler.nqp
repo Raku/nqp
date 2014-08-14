@@ -256,7 +256,8 @@ class QAST::CompilerJS does DWIMYNameMangling {
         has $!outer;            # Outer block's BlockInfo
         has @!js_lexicals;      # javascript variables we need to declare for the block
         has $!tmp;              # We use a bunch of TMP{$n} to store intermediate javascript results
-        has $!ctx; # The object we keep dynamic variables and exception handlers in
+        has $!ctx;              # The object we keep dynamic variables and exception handlers in
+        has @!params;           # the parameters the block takes
 
         method new($qast, $outer) {
             my $obj := nqp::create(self);
@@ -268,6 +269,7 @@ class QAST::CompilerJS does DWIMYNameMangling {
             $!qast := $qast;
             $!outer := $outer;
             @!js_lexicals := nqp::list();
+            @!params := nqp::list();
             $!tmp := 0;
         }
 
@@ -278,6 +280,10 @@ class QAST::CompilerJS does DWIMYNameMangling {
         method add_tmp() {
             $!tmp := $!tmp + 1;
             'TMP'~$!tmp;
+        }
+
+        method add_param($param) {
+            @!params.push($param);
         }
 
         method tmps() {
@@ -294,6 +300,7 @@ class QAST::CompilerJS does DWIMYNameMangling {
         method outer() { $!outer }
         method qast() { $!qast }
         method ctx(*@value) { $!ctx := @value[0] if @value;$!ctx}
+        method params() { @!params }
     }
 
 
@@ -576,10 +583,16 @@ class QAST::CompilerJS does DWIMYNameMangling {
         }
     }
 
-    method declare_var(QAST::Var $var) {
+    method declare_var(QAST::Var $node) {
         # TODO vars more complex the non-dynamic lexicals
-        if $var.decl eq 'var' {
-            $*BLOCK.add_js_lexical(self.mangle_name($var.name));
+        if $node.decl eq 'var' {
+            $*BLOCK.add_js_lexical(self.mangle_name($node.name));
+        } elsif $node.decl eq 'param' {
+            if $node.scope eq 'local' || $node.scope eq 'lexical' {
+                $*BLOCK.add_param($node);
+            } else {
+                nqp::die("Parameter cannot have scope '{$node.scope}'; use 'local' or 'lexical'");
+            }
         }
     }
 
