@@ -6,7 +6,7 @@ my $T_INT  := 1; # We use a javascript number but always treat it as a 32bit int
 my $T_NUM  := 2; # We use a javascript number for that
 my $T_STR  := 3; # We use a javascript str for that
 my $T_VOID := -1; # Value of this type shouldn't exist, we use a "" as the expr
-
+my $T_NONVAL := -2; # something that is not a nqp value
 
 # turn a string into a javascript literal
 sub quote_string($str) {
@@ -214,8 +214,20 @@ class QAST::OperationsJS {
 
     QAST::OperationsJS.add_op('call', sub ($comp, $node, :$want) {
         my $tmp := $*BLOCK.add_tmp();
-        my $callee := $comp.as_js($node[0], :want($T_OBJ));
-        Chunk.new($T_OBJ, $tmp , [$callee, "$tmp = " ~ $callee.expr ~ "();\n"], :$node);
+
+        my $args := nqp::clone($node.list);
+
+        my $callee := $node.name
+            ?? $comp.as_js(QAST::Var.new(:name($node.name),:scope('lexical')))
+            !! $comp.as_js(nqp::shift($args), :want($T_OBJ));
+
+        my $compiled_args := $comp.args($args);
+
+        if nqp::islist($compiled_args) {
+            $comp.NYI("more complex sub args: "~nqp::join(", ",$compiled_args));
+        } else {
+            Chunk.new($T_OBJ, $tmp , [$callee, $compiled_args, "$tmp = {$callee.expr}({$compiled_args.expr});\n"], :$node);
+        }
     });
 
     method compile_op($comp, $op, :$want) {
@@ -237,6 +249,7 @@ class QAST::CompilerJS does DWIMYNameMangling {
         has $!outer;            # Outer block's BlockInfo
         has @!js_lexicals;      # javascript variables we need to declare for the block
         has $!tmp;              # We use a bunch of TMP{$n} to store intermediate javascript results
+        has $!ctx; # The object we keep dynamic variables and exception handlers in
 
         method new($qast, $outer) {
             my $obj := nqp::create(self);
@@ -273,7 +286,65 @@ class QAST::CompilerJS does DWIMYNameMangling {
         method js_lexicals() { @!js_lexicals }
         method outer() { $!outer }
         method qast() { $!qast }
-     }
+        method ctx(*@value) { $!ctx := @value[0] if @value;$!ctx}
+    }
+
+
+    # TODO improve comments
+    # turns a list of arguments for a call into a js code according to our most generall calling convention
+    # $args is the list of QAST::Node arguments
+    # returns either a js code string which contains the arguments, or a list of js code strings that when executed create arrays of arguments (suitable for concatenating and passing into Function.apply) 
+
+    method args($args) {
+        my @setup;
+        my @args;
+        my @named;
+        my @flat_named;
+        my @chunks := [[]];
+        for $args -> $arg {
+            if nqp::istype($arg,QAST::SpecialArg) {
+                if $arg.flat {
+                    if $arg.named {
+                        # TODO - think about chunks
+                        @flat_named.push(self.as_js($arg));
+                    } else {
+                        # TODO - think about chunks
+                        @chunks.push(self.as_js($arg));
+                        @chunks.push([]);
+                    }
+                }
+                elsif $arg.named {
+                    # TODO - think about chunks
+                    @named.push(self.quote_string($arg.named)~":"~self.as_js($arg))
+                }
+                else {
+                    my $compiled_arg := self.as_js($arg);
+                    @setup.push($compiled_arg);
+                    @chunks[@chunks-1].push($compiled_arg.expr);
+                }
+            } else {
+                my $compiled_arg := self.as_js($arg);
+                @setup.push($compiled_arg);
+                @chunks[@chunks-1].push($compiled_arg.expr);
+            }
+        }
+        @flat_named.unshift('{'~nqp::join(',',@named)~'}');
+        @chunks[0].unshift("nqp.named({nqp::join(',',@flat_named)})");
+        @chunks[0].unshift($*BLOCK.ctx);
+        if +@chunks == 1 {
+            return Chunk.new($T_NONVAL, nqp::join(',',@chunks[0]), @setup);
+        }
+
+        my @js_args;
+        for @chunks -> $chunk {
+            if nqp::islist($chunk) {
+                @js_args.push('['~nqp::join(',',$chunk)~']') if +$chunk
+            } else {
+                @js_args.push($chunk);
+            }
+        }
+        @js_args;
+    }
 
     method coerce($chunk, $desired) {
         my $got := $chunk.type;
@@ -399,6 +470,8 @@ class QAST::CompilerJS does DWIMYNameMangling {
             my $*BINDVAL := 0;
             my $*BLOCK := BlockInfo.new($node, (nqp::defined($outer) ?? $outer !! NQPMu));
 
+            my $create_ctx := self.create_fresh_ctx();
+
             # TODO proper want handling
 
             my $stmts := self.compile_all_the_statements($node, $want);
@@ -406,6 +479,7 @@ class QAST::CompilerJS does DWIMYNameMangling {
                 "$cuid = function() \{",
                 self.declare_js_vars($*BLOCK.tmps),
                 self.declare_js_vars($*BLOCK.js_lexicals),
+                $create_ctx,
                 $stmts,
                 "\};\n"];
         }
@@ -415,6 +489,24 @@ class QAST::CompilerJS does DWIMYNameMangling {
         } else {
             Chunk.new($T_OBJ, $cuid, $setup);
         }
+    }
+
+    has $!unique_vars;
+
+    method unique_var($prefix) {
+        $!unique_vars := $!unique_vars + 1;
+        $prefix~$!unique_vars;
+    }
+
+    method create_fresh_ctx() {
+        $*BLOCK.ctx(self.unique_var('ctx'));
+        self.create_ctx($*BLOCK.ctx);
+    }
+
+    method create_ctx($name) {
+        # TODO think about contexts
+        #"var $name = new nqp.Ctx(caller_ctx,{self.outer_ctx},'$name');\n";
+        "var $name = null;\n";
     }
 
     multi method as_js(QAST::IVal $node, :$want) {
