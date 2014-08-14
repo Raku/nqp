@@ -19,7 +19,11 @@ exports.to_str = function(arg) {
   }
 };
 
+exports.named = function(named) {
+  return named;
+}
+
 // Placeholder
 exports.top_context = function() {
-    return null;
+  return null;
 }
