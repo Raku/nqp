@@ -431,8 +431,11 @@ class NQP::Optimizer {
 
     method find_sym($name) {
         my %sym := self.find_lex($name);
-        if !(%sym =:= NQPMu) && nqp::existskey(%sym, 'value') {
-            return %sym<value>;
+        if nqp::ishash(%sym) && nqp::existskey(%sym, 'value') {
+            %sym<value>;
+        }
+        elsif nqp::ishash(%sym) && nqp::existskey(%sym, 'lazy_value_from') {
+            %sym<value> := nqp::atkey(nqp::atkey(%sym, 'lazy_value_from'), $name)
         }
         else {
             nqp::die("No compile-time value for $name");

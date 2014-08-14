@@ -55,7 +55,7 @@ class HLL::Actions {
                         unless $block.symbol($key) {
                             my $lextype := nqp::lexprimspec($pad, $key);
                             if $lextype == 0 {
-                                $block.symbol($key, :scope<lexical>, :value(nqp::atkey($pad, $key)));
+                                $block.symbol($key, :scope<lexical>, :lazy_value_from($pad));
                             }
                             elsif $lextype == 1 {
                                 $block.symbol($key, :scope<lexical>, :value(nqp::atkey_i($pad, $key)), :type(int));

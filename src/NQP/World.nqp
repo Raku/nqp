@@ -445,8 +445,8 @@ class NQP::World is HLL::World {
             $i := $i - 1;
             my %symbols := @!BLOCKS[$i].symtable();
             for %symbols {
-                if !%seen{$_.key} && nqp::existskey($_.value, 'value') {
-                    my $value := ($_.value)<value>;
+                if !%seen{$_.key} && nqp::existskey($_.value, 'value') || nqp::existskey($_.value, 'lazy_value_from') {
+                    my $value := self.force_value($_.value, $_.key, 0);
                     unless nqp::isnull(nqp::getobjsc($value)) {
                         $wrapper[0].push(QAST::Op.new(
                             :op('bind'),
@@ -612,12 +612,7 @@ class NQP::World is HLL::World {
                 $i := $i - 1;
                 my %sym := @!BLOCKS[$i].symbol($final_name);
                 if %sym {
-                    if nqp::existskey(%sym, 'value') {
-                        return %sym<value>;
-                    }
-                    else {
-                        nqp::die("No compile-time value for $final_name");
-                    }
+                    return self.force_value(%sym, $final_name, 1);
                 }
             }
         }
@@ -633,14 +628,9 @@ class NQP::World is HLL::World {
                 $i := $i - 1;
                 my %sym := @!BLOCKS[$i].symbol($first);
                 if +%sym {
-                    if nqp::existskey(%sym, 'value') {
-                        $result := %sym<value>;
-                        @name.shift();
-                        $i := 0;
-                    }
-                    else {
-                        nqp::die("No compile-time value for $first");
-                    }                    
+                    $result := self.force_value(%sym, $first, 1);
+                    @name.shift();
+                    $i := 0;
                 }
             }
         }
@@ -657,5 +647,17 @@ class NQP::World is HLL::World {
         }
         
         $result;
+    }
+
+    method force_value(%sym, $key, int $die) {
+        if nqp::existskey(%sym, 'value') {
+            %sym<value>
+        }
+        elsif nqp::existskey(%sym, 'lazy_value_from') {
+            %sym<value> := nqp::atkey(nqp::atkey(%sym, 'lazy_value_from'), $key)
+        }
+        else {
+            $die ?? nqp::die("No compile-time value for $key") !! NQPMu
+        }
     }
 }
