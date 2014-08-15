@@ -185,23 +185,35 @@ my module sprintf {
             }
         }
         sub stringify-to-precision($float, $precision) {
-            $float := nqp::abs_n($float);
-            my $lhs := nqp::floor_n($float);
-            my $rhs := $float - $lhs;
+            my @number := nqp::split('.', $float);
+            my $lhs_s := @number[0];
+            my $rhs_s := @number[1];
 
-            my $int := nqp::fromnum_I($lhs, $knowhow);
-            $lhs := nqp::tostr_I($int);
+            my $d := nqp::chars($rhs_s);      # digits after decimal
 
-            $float := $rhs + 1;
-            $float := $float * nqp::pow_n(10, $precision);
-            $float := ~nqp::floor_n($float + 0.5);
-            $float := $float - nqp::pow_n(10, $precision);
+            my $zeroes := infix_x("0", 1 + ($precision > $d ?? $precision - $d  !! 0));
 
-            $rhs := infix_x('0', $precision - nqp::chars($float)) ~ $float;
-            $rhs := nqp::substr($rhs, nqp::chars($rhs) - $precision);
+            $lhs_s := nqp::substr($lhs_s, 1) if nqp::substr($lhs_s, 0, 1) eq '-';
+            my $lhs_I := nqp::fromstr_I($lhs_s, $knowhow);
+            my $rhs_I := nqp::fromstr_I("1" ~ $rhs_s ~ $zeroes, $knowhow);      # to preserve leading zeroes
+            my $cc := nqp::chars(nqp::tostr_I($rhs_I));
 
-            $lhs ~ '.' ~ $rhs;
+            my $e := nqp::fromnum_I($d > $precision ?? $d - $precision !! 0, $knowhow);
+            my $pot := nqp::pow_I(nqp::fromnum_I(10, $knowhow), $e, $knowhow, $knowhow);   # power of ten
+            my $rounder := nqp::mul_I(nqp::fromnum_I(5, $knowhow), $pot, $knowhow);          
+
+            $rhs_I := nqp::add_I($rhs_I, $rounder, $knowhow);
+            $rhs_s := nqp::tostr_I($rhs_I);
+
+            $lhs_I := nqp::add_I($lhs_I, nqp::fromnum_I(1,$knowhow), $knowhow) 
+                if nqp::substr($rhs_s,0,1) ne '1';          # we had a carry
+
+            $lhs_s := nqp::tostr_I($lhs_I);
+            $rhs_s := nqp::substr($rhs_s,1,$precision);     # skip the leading char we added.
+
+            $lhs_s ~ '.' ~ $rhs_s;
         }
+
         sub stringify-to-precision2($float, $precision) {
             my $exp := $float == 0.0 ?? 0 !! nqp::floor_n(nqp::log_n($float) / nqp::log_n(10));
             $float := nqp::abs_n($float) * nqp::pow_n(10, $precision - ($exp + 1)) + 0.5;
@@ -221,7 +233,7 @@ my module sprintf {
                      !! has_flag($/, 'plus') ?? '+' 
                      !! has_flag($/, 'space') ?? ' ' 
                      !! '';
-            $float := stringify-to-precision(nqp::abs_n($float), $precision);
+            $float := stringify-to-precision($float, $precision);
             pad-with-sign($sign, $float, $size, $pad);
         }
         sub scientific($float, $e, $precision, $size, $pad, $/) {
