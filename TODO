@@ -5,11 +5,9 @@ General stuff that helps all backends
     - nqp::getmessage
     - nqp::split("",...)  - EASY
     - nqp::printfh in combination with nqp::getstdout(),nqp::getstderr()
+    - a test for if cond() -> $value-of-cond {...}
 
 Improving the code quality (which currently is a bit atrocious) 
-    - Make sure that the JavaScript code conforms to the Google JavaScript Style Guide
-        (http://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml)
-        gjslint --strict --nojsdoc checks that - EASY, BORING
     - Write a nqptidy (or a p6tidy) to make sure the nqp code has a consistent style
 
 Ease of development
@@ -22,3 +20,4 @@ Build system
 Portability
     - Get the build system to work on windows (haven't tried that yet)
 
+Write a HACKING file.
