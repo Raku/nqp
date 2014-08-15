@@ -32,6 +32,7 @@
             <li ng-class="Tab == 'Routines' ? 'active' : ''"><a href="#routines" ng-click="Tab = 'Routines'">Routines</a></li>
             <li ng-class="Tab == 'Call Graph' ? 'active' : ''"><a href="#callgraph" ng-click="Tab = 'Call Graph'">Call Graph</a></li>
             <li ng-class="Tab == 'Allocations' ? 'active' : ''"><a href="#allocations" ng-click="Tab = 'Allocations'">Allocations</a></li>
+            <li ng-class="Tab == 'GC' ? 'active' : ''"><a href="#gc" ng-click="Tab = 'GC'">GC</a></li>
           </ul>
         </div>
       </div>
@@ -209,6 +210,66 @@
               </div>
               <div>
                 {{alloc.Allocations}}
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+    
+    <div class="container" ng-show="Tab == 'GC'">
+      <div ng-controller="GCController">
+      <table class="table table-striped table-condensed table-bordered">
+        <thead>
+          <th>
+            <a href="" ng-click="reverse = predicate == 'Run' ? !reverse : false; predicate = 'Run';">Run</a>
+          </th>
+          <th>Full</th>
+          <th>
+            <a href="" ng-click="reverse = predicate == 'Time' ? !reverse : false; predicate = 'Time';">Time</a>
+          </th>
+          <th>
+            Nursery:
+            <span class="text-danger" data-toggle="tooltip" data-placement="bottom" title="Bytes retained in the nursery">Retained</span> /
+            <span class="text-warning" data-toggle="tooltip" data-placement="bottom" title="Bytes promoted to gen2 and now available in nursery">Promoted</span> /
+            <span class="text-success" data-toggle="tooltip" data-placement="bottom" title="Bytes released and now availabe in nursery">Freed</span>
+          </th>
+        </thead>
+        <tbody>
+          <tr ng-repeat="gc in GCs | orderBy:predicate:reverse">
+            <td><strong>{{gc.Run}}</strong></td>
+            <td>
+              <span class="text-success" ng-show="gc.Full">
+                <span class="glyphicon glyphicon-star"></span>
+              </span>
+            </td>
+            <td>
+              <div class="pull-left" style="width: 210px">
+                <div class="progress" style="width: 200px">
+                  <div class="progress-bar" role="progressbar" style="width: {{gc.TimePercent}}%;">
+                  </div>
+                </div>
+              </div>
+              <div>
+                {{gc.Time}}ms
+              </div>
+            </td>
+            <td>
+              <div class="pull-left" style="width: 210px">
+                <div class="progress" style="width: 200px">
+                  <div class="progress-bar progress-bar-danger" style="width: {{gc.RetainedPercent}}%">
+                  </div>
+                  <div class="progress-bar progress-bar-warning" style="width: {{gc.PromotedPercent}}%">
+                  </div>
+                  <div class="progress-bar progress-bar-success" style="width: {{gc.ClearedPercent}}%">
+                  </div>
+                </div>
+              </div>
+              <div>
+                {{gc.RetainedKilobytes}}KB /
+                {{gc.PromotedKilobytes}}KB /
+                {{gc.ClearedKilobytes}}KB
               </div>
             </td>
           </tr>
@@ -395,6 +456,35 @@
         $scope.AllocationSummary = allocationSummary;
         $scope.predicate         = "Allocations";
         $scope.reverse           = true;
+    });
+
+    moarProfApp.controller('GCController', function ($scope) {
+        // Find longest GC run.
+        var longestGC = 0;
+        rawData[0].gcs.map(function (gc) {
+            if (gc.time > longestGC)
+                longestGC = gc.time;
+        });
+
+        // Produce something nice to render.
+        var run = 0;
+        $scope.GCs = rawData[0].gcs.map(function (gc) {
+            var totalBytes = gc.cleared_bytes + gc.retained_bytes + gc.promoted_bytes;
+            return {
+                Run:               ++run,
+                Time:              +(gc.time / 1000000).toFixed(2),
+                Full:              (gc.full != 0),
+                TimePercent:       +(100 * gc.time / longestGC).toFixed(2),
+                RetainedKilobytes: Math.round(gc.retained_bytes / 1024),
+                PromotedKilobytes: Math.round(gc.promoted_bytes / 1024),
+                ClearedKilobytes:  Math.round(gc.cleared_bytes / 1024),
+                RetainedPercent:   +(100 * gc.retained_bytes / totalBytes).toFixed(2),
+                PromotedPercent:   +(100 * gc.promoted_bytes / totalBytes).toFixed(2),
+                ClearedPercent:    +(100 * gc.cleared_bytes / totalBytes).toFixed(2)
+            };
+        });
+        $scope.predicate = 'Run';
+        $scope.reverse = false;
     });
 
     $(function () {
