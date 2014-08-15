@@ -5,6 +5,7 @@ my $T_OBJ  := 0;
 my $T_INT  := 1; # We use a javascript number but always treat it as a 32bit integer
 my $T_NUM  := 2; # We use a javascript number for that
 my $T_STR  := 3; # We use a javascript str for that
+my $T_BOOL := 4; # Something that can be used in boolean context in javascript. To the user it should be presented as a 0 or 1
 my $T_VOID := -1; # Value of this type shouldn't exist, we use a "" as the expr
 my $T_NONVAL := -2; # something that is not a nqp value
 
@@ -192,6 +193,16 @@ class QAST::OperationsJS {
         my $b := $comp.as_js($node[1], :want($T_NUM));
         Chunk.new($T_NUM, "({$a.expr} + {$b.expr})", [$a, $b], :$node);
     });
+    QAST::OperationsJS.add_op('concat', sub ($comp, $node, :$want) {
+        my $a := $comp.as_js($node[0], :want($T_STR));
+        my $b := $comp.as_js($node[1], :want($T_STR));
+        Chunk.new($T_STR, "({$a.expr} + {$b.expr})", [$a, $b], :$node);
+    });
+    QAST::OperationsJS.add_op('isle_n', sub ($comp, $node, :$want) {
+        my $a := $comp.as_js($node[0], :want($T_NUM));
+        my $b := $comp.as_js($node[1], :want($T_NUM));
+        Chunk.new($T_BOOL, "({$a.expr} <= {$b.expr})", [$a, $b], :$node);
+    });
 
     QAST::OperationsJS.add_op('say', sub ($comp, $node, :$want) {
         my $arg := $comp.as_js($node[0], :want($T_STR));
@@ -203,6 +214,15 @@ class QAST::OperationsJS {
         Chunk.new($T_VOID, "" , [$arg, "nqp.op.print({$arg.expr});\n"], :$node);
     });
 
+    QAST::OperationsJS.add_op('istrue', sub ($comp, $node, :$want) {
+        $comp.coerce($comp.as_js($node[0]), $T_BOOL);
+    });
+
+    QAST::OperationsJS.add_op('falsey', sub ($comp, $node, :$want) {
+        my $boolified := $comp.coerce($comp.as_js($node[0]), $T_BOOL);
+        Chunk.new($T_BOOL, "(!{$boolified.expr})", [$boolified]);
+    });
+
     QAST::OperationsJS.add_op('bind', sub ($comp, $node, :$want) {
         my @children := $node.list;
         if +@children != 2 {
@@ -212,8 +232,9 @@ class QAST::OperationsJS {
             nqp::die("First child of a 'bind' op must be a QAST::Var");
         }
 
+        # TODO take the type of variable into account
         my $*BINDVAL := @children[1];
-        $comp.as_js(@children[0])
+        $comp.as_js(@children[0], :want($T_OBJ));
     });
 
     QAST::OperationsJS.add_op('call', sub ($comp, $node, :$want) {
@@ -268,7 +289,7 @@ class QAST::OperationsJS {
 
             # TODO if cond() -> $var {...}
 
-            my $boolify := $comp.boolify($cond);
+            my $boolifed_cond := $comp.coerce($cond, $T_BOOL);
 
 
             if $node.op eq 'if' {
@@ -290,9 +311,8 @@ class QAST::OperationsJS {
 
 
             Chunk.new($want, $result, [
-                $cond, 
-                $boolify,
-                "if ({$boolify.expr}) \{",
+                $boolifed_cond,
+                "if ({$boolifed_cond.expr}) \{",
                 $then,
                 $want != $T_VOID ?? "$result = {$then.expr}" !! '',
                 "\} else \{",
@@ -397,10 +417,10 @@ class QAST::CompilerJS does DWIMYNameMangling {
                     @named.push(self.quote_string($arg.named)~":"~self.as_js($arg))
                 }
                 else {
-                    @groups[@groups-1].push(self.as_js($arg));
+                    @groups[@groups-1].push(self.as_js($arg, :want($T_OBJ)));
                 }
             } else {
-                @groups[@groups-1].push(self.as_js($arg));
+                @groups[@groups-1].push(self.as_js($arg, :want($T_OBJ)));
             }
         }
         @flat_named.unshift('{'~nqp::join(',',@named)~'}');
@@ -486,13 +506,6 @@ class QAST::CompilerJS does DWIMYNameMangling {
         nqp::join(',', @sig);
     }
 
-    method boolify(Chunk $chunk) {
-        if $chunk.type == $T_INT {
-            $chunk;
-        } else {
-          self.NYI("unimplemented boolification of {$chunk.type}");
-        }
-    }
 
     method coerce($chunk, $desired) {
         my $got := $chunk.type;
@@ -506,6 +519,7 @@ class QAST::CompilerJS does DWIMYNameMangling {
                 %convert{$T_STR} := 'to_str';
                 %convert{$T_NUM} := 'to_num';
                 %convert{$T_INT} := 'to_int';
+                %convert{$T_BOOL} := 'to_bool';
                 return Chunk.new($desired, 'nqp.' ~ %convert{$desired} ~ '(' ~ $chunk.expr ~ ')', [$chunk]);
             }
 
@@ -516,7 +530,19 @@ class QAST::CompilerJS does DWIMYNameMangling {
             }
 
             if $desired == $T_OBJ {
-                return $chunk;
+                if $got == $T_INT || $got == $T_NUM || $got == $T_STR {
+                    return $chunk;
+                } elsif $got == $T_BOOL {
+                    return Chunk.new($T_OBJ, "({$chunk.expr} ? 1 : 0)", [$chunk]);
+                }
+            }
+
+            if $desired == $T_BOOL {
+                if $got == $T_INT {
+                    return Chunk.new($T_BOOL, $chunk.expr, [$chunk]);
+                } elsif $got == $T_STR {
+                    return Chunk.new($T_BOOL, "({$chunk.expr} != '0' && {$chunk.expr})", [$chunk]);
+                }
             }
 
             if $desired == $T_VOID {

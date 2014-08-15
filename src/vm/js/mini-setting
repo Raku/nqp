@@ -4,3 +4,29 @@ sub print($arg) {
 sub say($arg) {
     nqp::say($arg);
 }
+
+my $test_counter       := 0;
+my $todo_upto_test_num := 0;
+my $todo_reason        := '';
+
+sub plan($quantity) {
+    say("1..$quantity");
+}
+
+sub ok($condition, $desc?) {
+    $test_counter := $test_counter + 1;
+
+    unless $condition {
+        print("not ");
+    }
+    print("ok $test_counter");
+    if $desc {
+        print(" - $desc");
+    }
+    if $test_counter <= $todo_upto_test_num {
+        print($todo_reason);
+    }
+    print("\n");
+    
+    $condition ?? 1 !! 0
+}
