@@ -104,6 +104,10 @@ class Chunk {
     method expr() {
         $!expr;
     }
+
+    method setup() {
+        @!setup;
+    }
 }
 
 
@@ -236,6 +240,68 @@ class QAST::OperationsJS {
             Chunk.new($T_OBJ, $tmp , [$callee, $compiled_args, "$tmp = {$callee.expr}({$compiled_args.expr});\n"], :$node);
         }
     });
+
+    for <if unless> -> $op_name {
+        QAST::OperationsJS.add_op($op_name, sub ($comp, $node, :$want) {
+            my $operands := +$node.list;
+            nqp::die("Operation '"~$node.op~"' needs either 2 or 3 operands")
+                if $operands < 2 || $operands > 3;
+
+            my $cond := $comp.as_js($node[0]);
+            my $then;
+            my $else;
+
+            my $result;
+
+            if $want != $T_VOID {
+                $result := $*BLOCK.add_tmp();
+            }
+
+            # See if any immediate block wants to be passed the condition.
+            my $im_then := (nqp::istype($node[1], QAST::Block) && 
+                           $node[1].blocktype eq 'immediate' &&
+                           $node[1].arity > 0) ?? 1 !! 0;
+            my $im_else := ($operands == 3 &&
+                           nqp::istype($node[2], QAST::Block) && 
+                           $node[2].blocktype eq 'immediate' &&
+                           $node[2].arity > 0) ?? 1 !! 0;
+
+            # TODO if cond() -> $var {...}
+
+            my $boolify := $comp.boolify($cond);
+
+
+            if $node.op eq 'if' {
+                $then := $comp.as_js($node[1], :$want);
+
+                if $operands == 3 {
+                    $else := $comp.as_js($node[2], :$want);
+                } else {
+                    $else := $comp.coerce($cond, $want);
+                }
+            } else {
+                if $operands == 3 {
+                    $then := $comp.as_js($node[2], :$want);
+                } else {
+                    $then := $comp.coerce($cond, $want);
+                }
+                $else := $comp.as_js($node[1], :$want);
+            }
+
+
+            Chunk.new($want, $result, [
+                $cond, 
+                $boolify,
+                "if ({$boolify.expr}) \{",
+                $then,
+                $want != $T_VOID ?? "$result = {$then.expr}" !! '',
+                "\} else \{",
+                $else,
+                $want != $T_VOID ?? "$result = {$else.expr}" !! '',
+                "\}"
+            ], :node($node));
+        });
+    }
 
     method compile_op($comp, $op, :$want) {
         my str $name := $op.op;
@@ -420,6 +486,14 @@ class QAST::CompilerJS does DWIMYNameMangling {
         nqp::join(',', @sig);
     }
 
+    method boolify(Chunk $chunk) {
+        if $chunk.type == $T_INT {
+            $chunk;
+        } else {
+          self.NYI("unimplemented boolification of {$chunk.type}");
+        }
+    }
+
     method coerce($chunk, $desired) {
         my $got := $chunk.type;
         if $got != $desired {
@@ -440,9 +514,15 @@ class QAST::CompilerJS does DWIMYNameMangling {
                     return Chunk.new($T_STR, $chunk.expr ~ '.toString()', [$chunk]);
                 }
             }
+
             if $desired == $T_OBJ {
                 return $chunk;
             }
+
+            if $desired == $T_VOID {
+                return Chunk.new($T_VOID, "", $chunk.setup);
+            }
+
             return Chunk.new($desired, "coercion($got, $desired, {$chunk.expr})", []) #TODO
         }
         $chunk;
@@ -494,6 +574,7 @@ class QAST::CompilerJS does DWIMYNameMangling {
         && $node[0][0].name eq 'ctxsave';
     }
 
+    # TODO save the value of the last statement
     method compile_all_the_statements(QAST::Stmts $node, $want) {
         my @setup;
         my @stmts := $node.list;
@@ -503,10 +584,10 @@ class QAST::CompilerJS does DWIMYNameMangling {
 
         my int $i := 0;
         for @stmts {
-            my $chunk := self.as_js($_);
+            my $chunk := self.as_js($_, :want($T_VOID));
             nqp::push(@setup, $chunk);
         }
-        Chunk.new('?', $T_INT, @setup);
+        Chunk.new($T_VOID, "", @setup);
     }
 
     multi method as_js(QAST::Block $node, :$want) {
