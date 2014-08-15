@@ -188,7 +188,33 @@
     </div>
 
     <div class="container" ng-show="Tab == 'Allocations'">
-
+      <div ng-controller="AllocationsController">
+      <table class="table table-striped table-condensed table-bordered">
+        <thead>
+          <th>
+            <a href="" ng-click="reverse = predicate == 'Name' ? !reverse : false; predicate = 'Name';">Name</a>
+            <input ng-model="NameFilter">
+          </th>
+          <th><a href="" ng-click="reverse = predicate == 'Allocations' ? !reverse : true; predicate = 'Allocations';">Allocations</a></th>
+        </thead>
+        <tbody>
+          <tr ng-repeat="alloc in AllocationSummary | filter:NameFilter | orderBy:predicate:reverse">
+            <td><strong>{{alloc.Name}}</strong></td>
+            <td>
+              <div class="pull-left" style="width: 210px">
+                <div class="progress" style="width: 200px">
+                  <div class="progress-bar" role="progressbar" style="width: {{alloc.AllocationsPercent}}%;">
+                  </div>
+                </div>
+              </div>
+              <div>
+                {{alloc.Allocations}}
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
     </div>
 
     <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
@@ -333,6 +359,42 @@
                 };
             });
         }
+    });
+
+    moarProfApp.controller('AllocationsController', function ($scope) {
+        // Traverse all call nodes, counting up the allocations.
+        var typeIdToName        = {};
+        var typeIdToAllocations = {};
+        var maxAllocations      = 1;
+        function walkCallGraphNode(node) {
+            node.allocations.map(function (alloc) {
+                if (!typeIdToName[alloc.id]) {
+                    typeIdToName[alloc.id]        = alloc.type == "" ? "<anon>" : alloc.type;
+                    typeIdToAllocations[alloc.id] = 0;
+                }
+                typeIdToAllocations[alloc.id] += alloc.count;
+                if (typeIdToAllocations[alloc.id] > maxAllocations)
+                    maxAllocations = typeIdToAllocations[alloc.id];
+            });
+            if (node.callees) {
+                node.callees.map(walkCallGraphNode);
+            }
+        }
+        walkCallGraphNode(rawData[0].call_graph);
+
+        // Build allocation summary.
+        var allocationSummary = [];
+        for (id in typeIdToName) {
+            var entry = {
+                Name:                 typeIdToName[id],
+                Allocations:          typeIdToAllocations[id],
+                AllocationsPercent:   +(100 * typeIdToAllocations[id] / maxAllocations).toFixed(2)
+            };
+            allocationSummary.push(entry);
+        }
+        $scope.AllocationSummary = allocationSummary;
+        $scope.predicate         = "Allocations";
+        $scope.reverse           = true;
     });
 
     $(function () {

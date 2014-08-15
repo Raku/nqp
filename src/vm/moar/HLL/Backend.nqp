@@ -48,6 +48,18 @@ class HLL::Backend::MoarVM {
     method dump_profile_data($data) {
         my @pieces;
 
+        sub post_process_call_graph_node($node) {
+            for $node<allocations> -> %alloc_info {
+                my $type := %alloc_info<type>;
+                %alloc_info<type> := $type.HOW.name($type);
+            }
+            if $node<callees> {
+                for $node<callees> {
+                    post_process_call_graph_node($_);
+                }
+            }
+        }
+
         sub to_json($obj) {
             if nqp::islist($obj) {
                 nqp::push(@pieces, '[');
@@ -97,6 +109,11 @@ class HLL::Backend::MoarVM {
             else {
                 nqp::die("Don't know how to dump a " ~ $obj.HOW.name($obj));
             }
+        }
+
+        # Post-process the call data, turning objects into flat data.
+        for $data {
+            post_process_call_graph_node($_<call_graph>);
         }
 
         # JSONify the data.
