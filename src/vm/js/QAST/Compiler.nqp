@@ -213,6 +213,57 @@ class QAST::OperationsJS {
 
     QAST::OperationsJS.add_infix_op('eqaddr', $T_OBJ, '===', $T_OBJ, $T_BOOL);
 
+    QAST::OperationsJS.add_op('chars', sub ($comp, $node, :$want) {
+        my $arg := $comp.as_js($node[0], :want($T_STR));
+        Chunk.new($T_INT, "{$arg.expr}.length" , [$arg], :$node);
+    });
+
+    QAST::OperationsJS.add_op('join', sub ($comp, $node, :$want) {
+        my $delim := $comp.as_js($node[0], :want($T_STR));
+        my $list := $comp.as_js($node[1], :want($T_OBJ));
+        Chunk.new($T_STR, "{$list.expr}.join({$delim.expr})" , [$delim, $list], :$node);
+    });
+
+    QAST::OperationsJS.add_op('index', sub ($comp, $node, :$want) {
+        my $string := $comp.as_js($node[0], :want($T_STR));
+        my $pattern := $comp.as_js($node[1], :want($T_STR));
+        if +$node.list == 2 {
+            Chunk.new($T_INT, "{$string.expr}.indexOf({$pattern.expr})" , [$string, $pattern], :$node);
+        } else {
+            my $starting := $comp.as_js($node[2], :want($T_INT));
+            Chunk.new($T_INT, "{$string.expr}.indexOf({$pattern.expr},{$starting.expr})" , [$string, $pattern, $starting], :$node);
+        }
+    });
+
+    QAST::OperationsJS.add_op('chr', sub ($comp, $node, :$want) {
+        my $code := $comp.as_js($node[0], :want($T_INT));
+        Chunk.new($T_STR, "String.fromCharCode({$code.expr})" , [$code], :$node);
+    });
+
+    QAST::OperationsJS.add_op('lc', sub ($comp, $node, :$want) {
+        my $string := $comp.as_js($node[0], :want($T_STR));
+        Chunk.new($T_STR, "{$string.expr}.toLowerCase()" , [$string], :$node);
+    });
+    QAST::OperationsJS.add_op('uc', sub ($comp, $node, :$want) {
+        my $string := $comp.as_js($node[0], :want($T_STR));
+        Chunk.new($T_STR, "{$string.expr}.toUpperCase()" , [$string], :$node);
+    });
+
+    QAST::OperationsJS.add_op('flip', sub ($comp, $node, :$want) {
+        my $string := $comp.as_js($node[0], :want($T_STR));
+        Chunk.new($T_STR, "{$string.expr}.split('').reverse().join('')" , [$string], :$node);
+    });
+
+    QAST::OperationsJS.add_op('ord', sub ($comp, $node, :$want) {
+        my $string := $comp.as_js($node[0], :want($T_STR));
+        if +$node.list == 1 {
+            Chunk.new($T_INT, "{$string.expr}.charCodeAt(0)" , [$string], :$node);
+        } else {
+            my $pos := $comp.as_js($node[1], :want($T_INT));
+            Chunk.new($T_INT, "{$string.expr}.charCodeAt({$pos.expr})" , [$string, $pos], :$node);
+        }
+    });
+
     QAST::OperationsJS.add_op('null', sub ($comp, $node, :$want) {
         Chunk.new($T_OBJ, "null" , [], :$node);
     });
