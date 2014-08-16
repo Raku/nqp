@@ -577,6 +577,9 @@ class QAST::CompilerJS does DWIMYNameMangling {
                     return $chunk;
                 } elsif $got == $T_BOOL {
                     return Chunk.new($T_OBJ, "({$chunk.expr} ? 1 : 0)", [$chunk]);
+                } elsif $got == $T_VOID {
+                    # TODO think what's the correct thing here
+                    return Chunk.new($T_OBJ, "null", [$chunk]);
                 }
             }
 
@@ -644,19 +647,27 @@ class QAST::CompilerJS does DWIMYNameMangling {
     }
 
     # TODO save the value of the last statement
-    method compile_all_the_statements(QAST::Stmts $node, $want) {
+    method compile_all_the_statements(QAST::Stmts $node, $want, :$resultchild) {
         my @setup;
         my @stmts := $node.list;
         my int $n := +@stmts;
 
 #        my $all_void := $*WANT == $T_VOID;
 
+        unless nqp::defined($resultchild) {
+            $resultchild := $n - 1;
+        }
+
+        my $result := "";
+
         my int $i := 0;
         for @stmts {
-            my $chunk := self.as_js($_, :want($T_VOID));
+            my $chunk := self.as_js($_, :want($i == $resultchild ?? $want !! T_VOID));
+            $result := $chunk.expr if $i == $resultchild;
             nqp::push(@setup, $chunk);
+            $i := $i + 1;
         }
-        Chunk.new($T_VOID, "", @setup);
+        Chunk.new($want, $result, @setup);
     }
 
     multi method as_js(QAST::Block $node, :$want) {
@@ -698,7 +709,9 @@ class QAST::CompilerJS does DWIMYNameMangling {
 
             # TODO proper want handling
 
-            my $stmts := self.compile_all_the_statements($node, $want);
+            my $body_want := $T_OBJ;
+
+            my $stmts := self.compile_all_the_statements($node, $body_want);
 
             my $sig := self.compile_sig($*BLOCK.params);
 
@@ -708,6 +721,7 @@ class QAST::CompilerJS does DWIMYNameMangling {
                 self.declare_js_vars($*BLOCK.js_lexicals),
                 $create_ctx,
                 $stmts,
+                "return {$stmts.expr};\n",
                 "\};\n"];
         }
 

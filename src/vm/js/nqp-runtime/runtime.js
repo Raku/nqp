@@ -9,6 +9,10 @@ op.say = function(arg) {
   process.stdout.write('\n');
 };
 
+op.isinvokable = function(obj) {
+  return (typeof obj == 'function' ? 1 : 0);
+};
+
 exports.to_str = function(arg) {
   if (typeof arg == 'number') {
     return arg.toString();
@@ -40,6 +44,7 @@ exports.to_bool = function(arg) {
 exports.named = function(named) {
   return named;
 };
+
 
 // Placeholder
 exports.top_context = function() {
