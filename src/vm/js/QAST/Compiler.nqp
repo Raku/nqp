@@ -202,6 +202,11 @@ class QAST::OperationsJS {
     # TODO - think about divide by zero
     QAST::OperationsJS.add_infix_op('div_n', $T_NUM, '/', $T_NUM, $T_NUM);
 
+    QAST::OperationsJS.add_op('neg_n', sub ($comp, $node, :$want) {
+        my $num := $comp.as_js($node[0], :want($T_NUM));
+        Chunk.new($T_INT, "(-{$num.expr})" , [$num], :$node);
+    });
+
     QAST::OperationsJS.add_infix_op('concat', $T_STR, '+', $T_STR, $T_STR);
 
     QAST::OperationsJS.add_infix_op('isle_n', $T_NUM, '<=', $T_NUM, $T_BOOL);
