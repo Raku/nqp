@@ -378,6 +378,11 @@ class QAST::OperationsJS {
         Chunk.new($T_INT, "({$list.expr}.length)" , [$list], :$node);
     });
 
+    QAST::OperationsJS.add_op('islist', sub ($comp, $node, :$want) {
+        my $obj := $comp.as_js($node[0], :want($T_OBJ));
+        Chunk.new($T_BOOL, "({$obj.expr} instanceof Array)" , [$obj], :$node);
+    });
+
     for <ceil floor abs> -> $func {
         QAST::OperationsJS.add_op($func ~ '_n', sub ($comp, $node, :$want) {
             my $arg := $comp.as_js($node[0], :want($T_NUM));

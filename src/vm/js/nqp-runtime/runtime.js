@@ -39,9 +39,13 @@ exports.to_num = function(arg) {
 exports.to_bool = function(arg) {
   if (typeof arg == 'number') {
     return arg ? 1 : 0;
-  }
-  if (typeof arg == 'string') {
+  } else if (typeof arg == 'string') {
     return arg == "" || arg == "0" ? 0 : 1;
+  } else if (arg instanceof Array) {
+    return arg.length == 0 ? 0 : 1;
+  } else {
+    console.log(arg);
+    throw "Can't decide if arg is true";
   }
 };
 
