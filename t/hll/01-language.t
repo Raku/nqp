@@ -1,10 +1,11 @@
 #! nqp
 
-use NQPHLL;
+say("1..0 # Skipped: design changes, need re-work");
 
-plan(2);
-
-ok( nqp::getcomp('parrot') ~~ HLL::Compiler, 'compreg for Parrot returns a HLL::Compiler' );
-
-ok( nqp::getcomp('parrot').language eq 'parrot', '.language gives "parrot"' );
+#use NQPHLL;
+#
+#plan(2);
+#
+#ok( nqp::getcomp('parrot') ~~ HLL::Compiler, 'compreg for Parrot returns a HLL::Compiler' );
+#ok( nqp::getcomp('parrot').language eq 'parrot', '.language gives "parrot"' );
 
