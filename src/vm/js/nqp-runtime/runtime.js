@@ -5,8 +5,12 @@ op.print = function(arg) {
   process.stdout.write(arg);
 };
 op.say = function(arg) {
-  process.stdout.write(arg);
-  process.stdout.write('\n');
+  if (process.stdout) {
+    process.stdout.write(arg);
+    process.stdout.write('\n');
+  } else {
+    console.log(arg);
+  }
 };
 
 op.isinvokable = function(obj) {

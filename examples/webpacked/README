@@ -1,0 +1,9 @@
+You need to install webpack.
+And then using npm install src/vm/js/nqp-loader and src/vm/js/nqp-runtime.
+
+Afterwards
+
+$ webpack
+
+Should bundle up example.nqp into bundle.js, which is loaded by index.html.
+
