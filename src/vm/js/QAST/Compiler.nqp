@@ -210,6 +210,10 @@ class QAST::OperationsJS {
 
     QAST::OperationsJS.add_infix_op('eqaddr', $T_OBJ, '===', $T_OBJ, $T_BOOL);
 
+    QAST::OperationsJS.add_op('null', sub ($comp, $node, :$want) {
+        Chunk.new($T_OBJ, "null" , [], :$node);
+    });
+
     QAST::OperationsJS.add_op('say', sub ($comp, $node, :$want) {
         my $arg := $comp.as_js($node[0], :want($T_STR));
         Chunk.new($T_VOID, "" , [$arg, "nqp.op.say({$arg.expr});\n"], :$node);
