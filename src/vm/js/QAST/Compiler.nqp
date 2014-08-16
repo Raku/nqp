@@ -378,6 +378,13 @@ class QAST::OperationsJS {
         Chunk.new($T_INT, "({$list.expr}.length)" , [$list], :$node);
     });
 
+    for <ceil floor abs> -> $func {
+        QAST::OperationsJS.add_op($func ~ '_n', sub ($comp, $node, :$want) {
+            my $arg := $comp.as_js($node[0], :want($T_NUM));
+            Chunk.new($T_NUM, "Math.$func({$arg.expr})" , [$arg], :$node);
+        });
+    }
+
     for <if unless> -> $op_name {
         QAST::OperationsJS.add_op($op_name, sub ($comp, $node, :$want) {
             say("//entering if <$want>");
