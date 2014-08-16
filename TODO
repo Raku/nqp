@@ -5,7 +5,8 @@ General stuff that helps all backends
     - nqp::getmessage
     - nqp::split("",...)  - EASY
     - nqp::printfh in combination with nqp::getstdout(),nqp::getstderr()
-    - a test for if cond() -> $value-of-cond {...}
+    - add a test for nqp::index with three arguments to t/nqp/59-nqpop.t - EASY
+    - a test for if cond() -> $value-of-cond {...} - EASY
 
 Improving the code quality (which currently is a bit atrocious) 
     - Write a nqptidy (or a p6tidy) to make sure the nqp code has a consistent style
