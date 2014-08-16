@@ -346,7 +346,7 @@
         var idToInclusive    = {};
         var idRecDepth       = {};
         var totalExclusive   = 0;
-        var totalInclusive   = rawData[0].call_graph.inclusive_time / 1000;
+        var totalInclusive   = rawData[0].call_graph.inclusive_time;
         function walkCallGraphNode(node) {
             if (!idToName[node.id]) {
                 idToName[node.id]         = node.name == "" ? "<anon>" : node.name;
@@ -360,10 +360,10 @@
             idToEntries[node.id]      += node.entries;
             idToSpeshEntries[node.id] += node.spesh_entries;
             idToJITEntries[node.id]   += node.jit_entries;
-            idToExclusive[node.id]    += node.exclusive_time / 1000;
-            totalExclusive            += node.exclusive_time / 1000;
+            idToExclusive[node.id]    += node.exclusive_time;
+            totalExclusive            += node.exclusive_time;
             if (idRecDepth[node.id] == 0)
-                idToInclusive[node.id] += node.inclusive_time / 1000;
+                idToInclusive[node.id] += node.inclusive_time;
             if (node.callees) {
                 idRecDepth[node.id]++;
                 node.callees.map(walkCallGraphNode);
@@ -444,7 +444,7 @@
                 return [];
 
             var totalExclusive = 0.0;
-            node.callees.map(function (c) { totalExclusive += c.exclusive_time / 1000; });
+            node.callees.map(function (c) { totalExclusive += c.exclusive_time; });
 
             return node.callees.map(function (c) {
                 var speshCallsPercent  = +(100 * c.spesh_entries / c.entries).toFixed(2);
@@ -549,7 +549,7 @@
             var totalBytes = gc.cleared_bytes + gc.retained_bytes + gc.promoted_bytes;
             return {
                 Run:               ++run,
-                Time:              +(gc.time / 1000000).toFixed(2),
+                Time:              +(gc.time / 1000).toFixed(2),
                 Full:              (gc.full != 0),
                 TimePercent:       +(100 * gc.time / longestGC).toFixed(2),
                 RetainedKilobytes: Math.round(gc.retained_bytes / 1024),
