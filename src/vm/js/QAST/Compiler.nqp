@@ -188,21 +188,17 @@ class QAST::OperationsJS {
         %ops{$op} := $cb;
     }
 
-    QAST::OperationsJS.add_op('add_n', sub ($comp, $node, :$want) {
-        my $a := $comp.as_js($node[0], :want($T_NUM));
-        my $b := $comp.as_js($node[1], :want($T_NUM));
-        Chunk.new($T_NUM, "({$a.expr} + {$b.expr})", [$a, $b], :$node);
-    });
-    QAST::OperationsJS.add_op('concat', sub ($comp, $node, :$want) {
-        my $a := $comp.as_js($node[0], :want($T_STR));
-        my $b := $comp.as_js($node[1], :want($T_STR));
-        Chunk.new($T_STR, "({$a.expr} + {$b.expr})", [$a, $b], :$node);
-    });
-    QAST::OperationsJS.add_op('isle_n', sub ($comp, $node, :$want) {
-        my $a := $comp.as_js($node[0], :want($T_NUM));
-        my $b := $comp.as_js($node[1], :want($T_NUM));
-        Chunk.new($T_BOOL, "({$a.expr} <= {$b.expr})", [$a, $b], :$node);
-    });
+    method add_infix_op($op, $left_type, $syntax, $right_type, $return_type) {
+        %ops{$op} := sub ($comp, $node, :$want) {
+            my $left  := $comp.as_js($node[0], :want($left_type));
+            my $right := $comp.as_js($node[1], :want($right_type));
+            Chunk.new($return_type, "({$left.expr} $syntax {$right.expr})", [$left, $right], :$node);
+        };
+    }
+
+    QAST::OperationsJS.add_infix_op('add_n', $T_NUM, '+', $T_NUM, $T_NUM);
+    QAST::OperationsJS.add_infix_op('concat', $T_STR, '+', $T_STR, $T_STR);
+    QAST::OperationsJS.add_infix_op('isle_n', $T_NUM, '<=', $T_NUM, $T_BOOL);
 
     QAST::OperationsJS.add_op('say', sub ($comp, $node, :$want) {
         my $arg := $comp.as_js($node[0], :want($T_STR));
