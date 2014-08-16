@@ -291,10 +291,10 @@ j-bootstrap-files: $(J_STAGE2_OUTPUT)
 ## testing
 
 j-test: j-all
-	prove -r --exec .@slash@$(J_RUNNER) t/nqp t/qregex t/p5regex t/qast t/serialization t/jvm t/nativecall
+	prove -r --exec .@slash@$(J_RUNNER) t/nqp t/hll t/qregex t/p5regex t/qast t/serialization t/jvm t/nativecall
 
 j-test-loud: j-all
-	prove -r -v --exec .@slash@$(J_RUNNER) t/nqp t/qregex t/p5regex t/qast t/serialization t/jvm t/nativecall
+	prove -r -v --exec .@slash@$(J_RUNNER) t/nqp t/hll t/qregex t/p5regex t/qast t/serialization t/jvm t/nativecall
 
 j-core-test: $(J_RUNNER)
 	prove -r --exec .@slash@$(J_RUNNER) t/nqp

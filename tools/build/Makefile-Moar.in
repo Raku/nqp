@@ -261,10 +261,10 @@ m-bootstrap-files: $(M_STAGE2_OUTPUT)
 ## testing
 
 m-test: m-all
-	prove -r --exec ".@slash@$(M_RUNNER)" t/nqp t/qregex t/p5regex t/qast t/moar t/serialization t/nativecall
+	prove -r --exec ".@slash@$(M_RUNNER)" t/nqp t/hll t/qregex t/p5regex t/qast t/moar t/serialization t/nativecall
 
 m-test-loud: m-all
-	prove -r -v --exec ".@slash@$(M_RUNNER)" t/nqp t/qregex t/p5regex t/qast t/moar t/serialization t/nativecall
+	prove -r -v --exec ".@slash@$(M_RUNNER)" t/nqp t/hll t/qregex t/p5regex t/qast t/moar t/serialization t/nativecall
 
 m-core-test: $(M_RUNNER)
 	prove -r --exec ".@slash@$(M_RUNNER)" t/nqp
