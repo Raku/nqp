@@ -46,7 +46,7 @@ class HLL::Backend::MoarVM {
         $res;
     }
     method dump_profile_data($data) {
-        my @pieces;
+        my @pieces := nqp::list_s();
 
         sub post_process_call_graph_node($node) {
             for $node<allocations> -> %alloc_info {
@@ -62,52 +62,56 @@ class HLL::Backend::MoarVM {
 
         sub to_json($obj) {
             if nqp::islist($obj) {
-                nqp::push(@pieces, '[');
+                nqp::push_s(@pieces, '[');
                 my $first := 1;
                 for $obj {
                     if $first {
                         $first := 0;
                     }
                     else {
-                        nqp::push(@pieces, ',');
+                        nqp::push_s(@pieces, ',');
                     }
                     to_json($_);
                 }
-                nqp::push(@pieces, ']');
+                nqp::push_s(@pieces, ']');
             }
             elsif nqp::ishash($obj) {
-                nqp::push(@pieces, '{');
+                nqp::push_s(@pieces, '{');
                 my $first := 1;
                 for $obj {
                     if $first {
                         $first := 0;
                     }
                     else {
-                        nqp::push(@pieces, ',');
+                        nqp::push_s(@pieces, ',');
                     }
-                    nqp::push(@pieces, '"');
-                    nqp::push(@pieces, $_.key);
-                    nqp::push(@pieces, '":');
+                    nqp::push_s(@pieces, '"');
+                    nqp::push_s(@pieces, $_.key);
+                    nqp::push_s(@pieces, '":');
                     to_json($_.value);
                 }
-                nqp::push(@pieces, '}');
+                nqp::push_s(@pieces, '}');
             }
             elsif nqp::isstr($obj) {
-                nqp::push(@pieces, '"');
+                nqp::push_s(@pieces, '"');
                 if nqp::index($obj, '"') {
                     $obj := subst($obj, /'"'/, '\\\\"', :global);
                 }
                 if nqp::index($obj, "'") {
                     $obj := subst($obj, /"'"/, '\\\'', :global);
                 }
-                nqp::push(@pieces, $obj);
-                nqp::push(@pieces, '"');
+                nqp::push_s(@pieces, $obj);
+                nqp::push_s(@pieces, '"');
             }
             elsif nqp::isint($obj) || nqp::isnum($obj) {
-                nqp::push(@pieces, ~$obj);
+                nqp::push_s(@pieces, ~$obj);
             }
             else {
                 nqp::die("Don't know how to dump a " ~ $obj.HOW.name($obj));
+            }
+            if nqp::elems(@pieces) > 4096 {
+                nqp::bindpos_s(@pieces, 0, nqp::join('', @pieces));
+                nqp::setelems(@pieces, 1);
             }
         }
 
