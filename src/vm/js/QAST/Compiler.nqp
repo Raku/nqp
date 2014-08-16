@@ -301,17 +301,17 @@ class QAST::OperationsJS {
     });
 
     QAST::OperationsJS.add_op('istrue', sub ($comp, $node, :$want) {
-        $comp.coerce($comp.as_js($node[0]), $T_BOOL);
+        $comp.as_js($node[0], :want($T_BOOL));
     });
     QAST::OperationsJS.add_op('stringify', sub ($comp, $node, :$want) {
-        $comp.coerce($comp.as_js($node[0]), $T_STR);
+        $comp.as_js($node[0], :want($T_STR));
     });
     QAST::OperationsJS.add_op('numify', sub ($comp, $node, :$want) {
-        $comp.coerce($comp.as_js($node[0]), $T_NUM);
+        $comp.as_js($node[0], :want($T_NUM));
     });
 
     QAST::OperationsJS.add_op('falsey', sub ($comp, $node, :$want) {
-        my $boolified := $comp.coerce($comp.as_js($node[0]), $T_BOOL);
+        my $boolified := $comp.as_js($node[0], :want($T_BOOL));
         Chunk.new($T_BOOL, "(!{$boolified.expr})", [$boolified]);
     });
 
@@ -348,7 +348,7 @@ class QAST::OperationsJS {
         my $args := nqp::clone($node.list);
 
         my $callee := $node.name
-            ?? $comp.as_js(QAST::Var.new(:name($node.name),:scope('lexical')))
+            ?? $comp.as_js(QAST::Var.new(:name($node.name),:scope('lexical')), :want($T_OBJ))
             !! $comp.as_js(nqp::shift($args), :want($T_OBJ));
 
         my $compiled_args := $comp.args($args);
@@ -367,13 +367,31 @@ class QAST::OperationsJS {
         }
     });
 
+    QAST::OperationsJS.add_op('split', sub ($comp, $node, :$want) {
+        my $separator := $comp.as_js($node[0], :want($T_STR));
+        my $string := $comp.as_js($node[1], :want($T_STR));
+        Chunk.new($T_OBJ, "({$string.expr} == '' ? [] : {$string.expr}.split({$separator.expr}))" , [$string, $separator], :$node);
+    });
+
+    QAST::OperationsJS.add_op('elems', sub ($comp, $node, :$want) {
+        my $list := $comp.as_js($node[0], :want($T_OBJ));
+        Chunk.new($T_INT, "({$list.expr}.length)" , [$list], :$node);
+    });
+
     for <if unless> -> $op_name {
         QAST::OperationsJS.add_op($op_name, sub ($comp, $node, :$want) {
+            say("//entering if <$want>");
+
+            unless nqp::defined($want) {
+                nqp::die("Unknown want");
+            }
+
             my $operands := +$node.list;
             nqp::die("Operation '"~$node.op~"' needs either 2 or 3 operands")
                 if $operands < 2 || $operands > 3;
 
-            my $cond := $comp.as_js($node[0]);
+            # The 2 operand form of if in a non-void context also uses the cond as the return value
+            my $cond := $comp.as_js($node[0], :want( ($operands == 3 || $want == $T_VOID) ?? $T_BOOL !! $want));
             my $then;
             my $else;
 
@@ -401,8 +419,10 @@ class QAST::OperationsJS {
                 $then := $comp.as_js($node[1], :$want);
 
                 if $operands == 3 {
+                    say("// 3 argument if");
                     $else := $comp.as_js($node[2], :$want);
                 } else {
+                    say("// 2 argument version of if, coercing {$cond.expr} from {$cond.type} to $want");
                     $else := $comp.coerce($cond, $want);
                 }
             } else {
@@ -415,7 +435,7 @@ class QAST::OperationsJS {
             }
 
 
-            Chunk.new($want, $result, [
+            my $ret := Chunk.new($want, $result, [
                 $boolifed_cond,
                 "if ({$boolifed_cond.expr}) \{",
                 $then,
@@ -425,6 +445,8 @@ class QAST::OperationsJS {
                 $want != $T_VOID ?? "$result = {$else.expr}" !! '',
                 "\}"
             ], :node($node));
+            say("// compiling if - <$want>, return type {$ret.type}, then type: {$then.expr}|{$then.type}, else type: {$else.expr}|{$else.type}");
+            $ret;
         });
     }
 
@@ -513,7 +535,7 @@ class QAST::CompilerJS does DWIMYNameMangling {
                         # TODO - think about chunks
                         @flat_named.push(self.as_js($arg));
                     } else {
-                        @groups.push(self.as_js($arg));
+                        @groups.push(self.as_js($arg, :want($T_OBJ)));
                         @groups.push([]);
                     }
                 }
@@ -592,7 +614,7 @@ class QAST::CompilerJS does DWIMYNameMangling {
                 my $default := '';
                 if $_.default {
                     say("//NYI: default");
-                    $default := self.as_js($_.default);
+                    $default := self.as_js($_.default, :want($T_OBJ));
                 }
                 @pos.push([$_,$default]);
             }
@@ -697,6 +719,10 @@ class QAST::CompilerJS does DWIMYNameMangling {
     }
 
     proto method as_js($node, :$want) {
+        unless nqp::defined($want) {
+            nqp::die("Unknown want");
+        }
+
         if nqp::defined($want) {
             if nqp::istype($node, QAST::Want) {
                 self.NYI("QAST::Want");
@@ -738,7 +764,7 @@ class QAST::CompilerJS does DWIMYNameMangling {
 
         my int $i := 0;
         for @stmts {
-            my $chunk := self.as_js($_, :want($i == $resultchild ?? $want !! T_VOID));
+            my $chunk := self.as_js($_, :want($i == $resultchild ?? $want !! $T_VOID));
             $result := $chunk.expr if $i == $resultchild;
             nqp::push(@setup, $chunk);
             $i := $i + 1;
@@ -866,12 +892,12 @@ class QAST::CompilerJS does DWIMYNameMangling {
         }
 
         # Compile the block.
-        my $block_js := self.as_js($node[0]);
+        my $block_js := self.as_js($node[0], :want($T_VOID));
 
         if nqp::defined($node.main) {
             my $main_block := QAST::Block.new($node.main);
 
-            my $main := self.as_js($main_block);
+            my $main := self.as_js($main_block, :want($T_VOID));
 
             Chunk.new($T_VOID, "", [$block_js, $main, self.mangled_cuid($main_block) ~ "();\n"]);
             
@@ -902,9 +928,9 @@ class QAST::CompilerJS does DWIMYNameMangling {
         $var.scope eq 'lexical' || $var.scope eq 'typevar';
     }
 
-    method as_js_clear_bindval($node) {
+    method as_js_clear_bindval($node, :$want) {
         my $*BINDVAL := 0;
-        self.as_js($node);
+        self.as_js($node, :$want);
     }
 
     method is_dynamic_var($var) {
@@ -920,12 +946,28 @@ class QAST::CompilerJS does DWIMYNameMangling {
             my $mangled := self.mangle_name($var.name);
             if $*BINDVAL {
                 # TODO better source mapping
-                my $bindval := self.as_js_clear_bindval($*BINDVAL);
+                # TODO use the proper type 
+                my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ));
                 Chunk.new($type,$mangled, [$bindval,'('~$mangled~' = ('~ $bindval.expr ~ "));\n"]);
             } else {
                 # TODO get the proper type 
                 Chunk.new($type, $mangled, [], :node($var));
             }
+        } elsif ($var.scope eq 'positional') {
+            # TODO work on things other than nqp lists
+            # TODO think about nulls and missing elements
+            if $*BINDVAL {
+                my $array := self.as_js($var[0], :want($T_OBJ));
+                my $index := self.as_js($var[1], :want($T_INT));
+                my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ));
+                Chunk.new($T_OBJ, $bindval.expr, [$array, $index, $bindval, "({$array.expr}[{$index.expr}] = $bindval)"], :node($var));
+            } else {
+                my $array := self.as_js($var[0], :want($T_OBJ));
+                my $index := self.as_js($var[1], :want($T_INT));
+                Chunk.new($T_OBJ, "{$array.expr}[{$index.expr}]", [$array, $index], :node($var));
+            }
+        } else {
+            self.NYI("Unimplemented QAST::Var scope: " ~ $var.scope);
         }
     }
 
@@ -940,7 +982,7 @@ class QAST::CompilerJS does DWIMYNameMangling {
             "\nvar top_ctx = nqp.top_context();\n",
             # temporary HACK
             "var ARGS = process.argv;\n",
-            self.as_js($ast)
+            self.as_js($ast, :want($T_VOID))
         ]);
     }
 
