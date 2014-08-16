@@ -221,6 +221,12 @@ class QAST::OperationsJS {
     QAST::OperationsJS.add_op('istrue', sub ($comp, $node, :$want) {
         $comp.coerce($comp.as_js($node[0]), $T_BOOL);
     });
+    QAST::OperationsJS.add_op('stringify', sub ($comp, $node, :$want) {
+        $comp.coerce($comp.as_js($node[0]), $T_STR);
+    });
+    QAST::OperationsJS.add_op('numify', sub ($comp, $node, :$want) {
+        $comp.coerce($comp.as_js($node[0]), $T_NUM);
+    });
 
     QAST::OperationsJS.add_op('falsey', sub ($comp, $node, :$want) {
         my $boolified := $comp.coerce($comp.as_js($node[0]), $T_BOOL);
@@ -239,6 +245,19 @@ class QAST::OperationsJS {
         # TODO take the type of variable into account
         my $*BINDVAL := @children[1];
         $comp.as_js(@children[0], :want($T_OBJ));
+    });
+
+    QAST::OperationsJS.add_op('list', sub ($comp, $node, :$want) {
+       my @setup;
+       my @exprs;
+
+       for $node.list -> $elem {
+           my $chunk := $comp.as_js($elem, :want($T_OBJ));
+           @setup.push($chunk);
+           @exprs.push($chunk.expr);
+       }
+
+       Chunk.new($T_OBJ, '[' ~ nqp::join(',', @exprs) ~ ']' , @setup, :$node);
     });
 
     QAST::OperationsJS.add_op('call', sub ($comp, $node, :$want) {
@@ -332,7 +351,7 @@ class QAST::OperationsJS {
         if nqp::existskey(%ops, $name) {
             %ops{$name}($comp, $op, :$want);
         } else {
-            Chunk.new($T_VOID, "", ["//QAST::Op {$op.op}\n"]);
+            $comp.NYI("unimplemented QAST::Op {$op.op}");
         }
     }
 }
@@ -514,10 +533,18 @@ class QAST::CompilerJS does DWIMYNameMangling {
     method coerce($chunk, $desired) {
         my $got := $chunk.type;
         if $got != $desired {
-            if $got == $T_INT && $desired == $T_NUM {
-                # we store both as a javascript number, and 32bit integers fit into doubles
-                return $chunk;
+            if $desired == $T_NUM {
+                if $got == $T_INT {
+                    # we store both as a javascript number, and 32bit integers fit into doubles
+                    return Chunk.new($T_NUM, $chunk.expr, [$chunk]);
+                }
+                if $got == $T_STR {
+                    my $tmp := $*BLOCK.add_tmp();
+                    return Chunk.new($T_NUM, "(isNaN($tmp) ? 0 : $tmp)", [$chunk,"$tmp = parseFloat({$chunk.expr});\n"]);
+                    return Chunk.new($T_NUM, $chunk.expr, [$chunk]);
+                }
             }
+
             if $got == $T_OBJ {
                 my %convert;
                 %convert{$T_STR} := 'to_str';
