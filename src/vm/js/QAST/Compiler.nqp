@@ -285,6 +285,12 @@ class QAST::OperationsJS {
         Chunk.new($T_OBJ, "null" , [], :$node);
     });
 
+    QAST::OperationsJS.add_op('getcomp', sub ($comp, $node, :$want) {
+        my $arg := $comp.as_js($node[0], :want($T_STR));
+        my $tmp := $*BLOCK.add_tmp();
+        Chunk.new($T_OBJ, $tmp , [$arg, "$tmp = nqp.op.getcomp({$arg.expr});\n"], :$node);
+    });
+
     QAST::OperationsJS.add_op('say', sub ($comp, $node, :$want) {
         my $arg := $comp.as_js($node[0], :want($T_STR));
         Chunk.new($T_VOID, "" , [$arg, "nqp.op.say({$arg.expr});\n"], :$node);

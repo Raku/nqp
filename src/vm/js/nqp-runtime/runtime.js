@@ -13,6 +13,14 @@ op.say = function(arg) {
   }
 };
 
+op.getcomp = function(lang) {
+  if (lang == 'JavaScript') {
+    return function(ctx, named, code) {
+      return eval(code);
+    };
+  }
+};
+
 op.isinvokable = function(obj) {
   return (typeof obj == 'function' ? 1 : 0);
 };
