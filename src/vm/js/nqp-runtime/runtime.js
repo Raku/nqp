@@ -51,8 +51,9 @@ exports.to_bool = function(arg) {
     return arg == "" || arg == "0" ? 0 : 1;
   } else if (arg instanceof Array) {
     return arg.length == 0 ? 0 : 1;
+  } else if (arg === undefined) {
+    return 0;
   } else {
-    console.log(arg);
     throw "Can't decide if arg is true";
   }
 };
