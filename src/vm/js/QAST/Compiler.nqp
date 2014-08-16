@@ -198,6 +198,9 @@ class QAST::OperationsJS {
 
     QAST::OperationsJS.add_infix_op('add_n', $T_NUM, '+', $T_NUM, $T_NUM);
     QAST::OperationsJS.add_infix_op('sub_n', $T_NUM, '-', $T_NUM, $T_NUM);
+    QAST::OperationsJS.add_infix_op('mul_n', $T_NUM, '*', $T_NUM, $T_NUM);
+    # TODO - think about divide by zero
+    QAST::OperationsJS.add_infix_op('div_n', $T_NUM, '/', $T_NUM, $T_NUM);
 
     QAST::OperationsJS.add_infix_op('concat', $T_STR, '+', $T_STR, $T_STR);
 
@@ -756,6 +759,10 @@ class QAST::CompilerJS does DWIMYNameMangling {
 
     multi method as_js(QAST::IVal $node, :$want) {
         Chunk.new($T_INT,'('~$node.value()~')',[],:$node);
+    }
+
+    multi method as_js(QAST::NVal $node, :$want) {
+        Chunk.new($T_NUM,'('~$node.value()~')',[],:$node);
     }
 
     multi method as_js(QAST::SVal $node, :$want) {
