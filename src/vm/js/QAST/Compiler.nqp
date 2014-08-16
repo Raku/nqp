@@ -387,8 +387,6 @@ class QAST::OperationsJS {
 
     for <if unless> -> $op_name {
         QAST::OperationsJS.add_op($op_name, sub ($comp, $node, :$want) {
-            say("//entering if <$want>");
-
             unless nqp::defined($want) {
                 nqp::die("Unknown want");
             }
@@ -426,10 +424,8 @@ class QAST::OperationsJS {
                 $then := $comp.as_js($node[1], :$want);
 
                 if $operands == 3 {
-                    say("// 3 argument if");
                     $else := $comp.as_js($node[2], :$want);
                 } else {
-                    say("// 2 argument version of if, coercing {$cond.expr} from {$cond.type} to $want");
                     $else := $comp.coerce($cond, $want);
                 }
             } else {
@@ -442,7 +438,7 @@ class QAST::OperationsJS {
             }
 
 
-            my $ret := Chunk.new($want, $result, [
+            Chunk.new($want, $result, [
                 $boolifed_cond,
                 "if ({$boolifed_cond.expr}) \{",
                 $then,
@@ -452,8 +448,6 @@ class QAST::OperationsJS {
                 $want != $T_VOID ?? "$result = {$else.expr}" !! '',
                 "\}"
             ], :node($node));
-            say("// compiling if - <$want>, return type {$ret.type}, then type: {$then.expr}|{$then.type}, else type: {$else.expr}|{$else.type}");
-            $ret;
         });
     }
 
