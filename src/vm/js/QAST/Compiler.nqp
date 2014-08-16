@@ -620,6 +620,9 @@ class QAST::CompilerJS does DWIMYNameMangling {
                     # we store both as a javascript number, and 32bit integers fit into doubles
                     return Chunk.new($T_NUM, $chunk.expr, [$chunk]);
                 }
+                if $got == $T_BOOL {
+                    return Chunk.new($T_NUM, "({$chunk.expr} ? 1 : 0)", [$chunk]);
+                }
                 if $got == $T_STR {
                     my $tmp := $*BLOCK.add_tmp();
                     return Chunk.new($T_NUM, "(isNaN($tmp) ? 0 : $tmp)", [$chunk,"$tmp = parseFloat({$chunk.expr});\n"]);
@@ -640,6 +643,9 @@ class QAST::CompilerJS does DWIMYNameMangling {
                 if $got == $T_INT || $got == $T_NUM {
                     return Chunk.new($T_STR, $chunk.expr ~ '.toString()', [$chunk]);
                 }
+                if $got == $T_BOOL {
+                    return Chunk.new($T_STR, "({$chunk.expr} ? '1' : '0')", [$chunk]);
+                }
             }
 
             if $desired == $T_OBJ {
@@ -654,7 +660,7 @@ class QAST::CompilerJS does DWIMYNameMangling {
             }
 
             if $desired == $T_BOOL {
-                if $got == $T_INT {
+                if $got == $T_INT || $got == $T_NUM {
                     return Chunk.new($T_BOOL, $chunk.expr, [$chunk]);
                 } elsif $got == $T_STR {
                     return Chunk.new($T_BOOL, "({$chunk.expr} != '0' && {$chunk.expr})", [$chunk]);
