@@ -211,7 +211,9 @@ my module sprintf {
             $lhs_s := nqp::tostr_I($lhs_I);
             $rhs_s := nqp::substr($rhs_s,1,$precision);     # skip the leading char we added.
 
-            $lhs_s ~ '.' ~ $rhs_s;
+            my $return := $lhs_s;
+            $return := $return ~ "." ~ $rhs_s if $rhs_s ne "";
+            $return;
         }
 
         sub stringify-to-precision2($float, $precision) {
