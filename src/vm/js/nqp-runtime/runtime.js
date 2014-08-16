@@ -15,6 +15,7 @@ exports.to_str = function(arg) {
   } else if (typeof arg == 'string') {
     return arg;
   } else {
+    console.log(arg);
     throw "Can't convert to str";
   }
 };

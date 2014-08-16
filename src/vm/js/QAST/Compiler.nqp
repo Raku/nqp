@@ -197,6 +197,8 @@ class QAST::OperationsJS {
     }
 
     QAST::OperationsJS.add_infix_op('add_n', $T_NUM, '+', $T_NUM, $T_NUM);
+    QAST::OperationsJS.add_infix_op('sub_n', $T_NUM, '-', $T_NUM, $T_NUM);
+
     QAST::OperationsJS.add_infix_op('concat', $T_STR, '+', $T_STR, $T_STR);
 
     QAST::OperationsJS.add_infix_op('isle_n', $T_NUM, '<=', $T_NUM, $T_BOOL);
@@ -216,6 +218,16 @@ class QAST::OperationsJS {
     QAST::OperationsJS.add_op('print', sub ($comp, $node, :$want) {
         my $arg := $comp.as_js($node[0], :want($T_STR));
         Chunk.new($T_VOID, "" , [$arg, "nqp.op.print({$arg.expr});\n"], :$node);
+    });
+
+    QAST::OperationsJS.add_op('isinvokable', sub ($comp, $node, :$want) {
+        my $arg := $comp.as_js($node[0], :want($T_OBJ));
+        Chunk.new($T_INT, "nqp.op.isinvokable({$arg.expr})" , [$arg], :$node);
+    });
+
+    # TODO - think if it's the correct thing to do
+    QAST::OperationsJS.add_op('takeclosure', sub ($comp, $node, :$want) {
+        $comp.as_js($node[0], :want($T_OBJ));
     });
 
     QAST::OperationsJS.add_op('istrue', sub ($comp, $node, :$want) {
