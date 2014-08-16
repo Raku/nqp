@@ -198,7 +198,15 @@ class QAST::OperationsJS {
 
     QAST::OperationsJS.add_infix_op('add_n', $T_NUM, '+', $T_NUM, $T_NUM);
     QAST::OperationsJS.add_infix_op('concat', $T_STR, '+', $T_STR, $T_STR);
+
     QAST::OperationsJS.add_infix_op('isle_n', $T_NUM, '<=', $T_NUM, $T_BOOL);
+    QAST::OperationsJS.add_infix_op('iseq_n', $T_NUM, '==', $T_NUM, $T_BOOL);
+    QAST::OperationsJS.add_infix_op('isne_n', $T_NUM, '!=', $T_NUM, $T_BOOL);
+
+    QAST::OperationsJS.add_infix_op('iseq_s', $T_STR, '==', $T_STR, $T_BOOL);
+    QAST::OperationsJS.add_infix_op('isne_s', $T_STR, '!=', $T_STR, $T_BOOL);
+
+    QAST::OperationsJS.add_infix_op('eqaddr', $T_OBJ, '===', $T_OBJ, $T_BOOL);
 
     QAST::OperationsJS.add_op('say', sub ($comp, $node, :$want) {
         my $arg := $comp.as_js($node[0], :want($T_STR));
