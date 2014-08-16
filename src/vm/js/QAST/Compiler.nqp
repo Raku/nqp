@@ -213,6 +213,18 @@ class QAST::OperationsJS {
 
     QAST::OperationsJS.add_infix_op('eqaddr', $T_OBJ, '===', $T_OBJ, $T_BOOL);
 
+    method add_cmp_op($op, $type) {
+        %ops{$op} := sub ($comp, $node, :$want) {
+            my $a  := $comp.as_js($node[0], :want($type));
+            my $b := $comp.as_js($node[1], :want($type));
+            Chunk.new($T_INT, "({$a.expr} < {$b.expr} ? -1 : ({$a.expr} == {$b.expr} ? 0 : 1))", [$a, $b], :$node);
+        };
+    }
+
+    QAST::OperationsJS.add_cmp_op('cmp_i', $T_INT);
+    QAST::OperationsJS.add_cmp_op('cmp_n', $T_NUM);
+    QAST::OperationsJS.add_cmp_op('cmp_s', $T_STR);
+
     QAST::OperationsJS.add_op('chars', sub ($comp, $node, :$want) {
         my $arg := $comp.as_js($node[0], :want($T_STR));
         Chunk.new($T_INT, "{$arg.expr}.length" , [$arg], :$node);
