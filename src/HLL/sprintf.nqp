@@ -184,7 +184,36 @@ my module sprintf {
                 $sign ~ $num;
             }
         }
+
+        sub normalize($float) {
+            my @parts := nqp::split('e', nqp::lc($float));
+            my $sign := '';
+            if nqp::substr(@parts[0],0,1) eq '-' {
+                $sign := '-';
+                @parts[0] := nqp::substr(@parts[0], 1);
+            }
+
+            my @num := nqp::split('.', @parts[0]);
+            my $radix-point := nqp::chars(@num[0]);
+
+            my $new-radix-point := $radix-point + @parts[1];
+
+            my $num := @num[0] ~ @num[1];
+            my $n := nqp::chars($num);
+            if $new-radix-point > $n {
+                $num := $num ~ infix_x('0', $new-radix-point - $n);
+            } elsif $new-radix-point < 0 {
+                $num := "0." ~ infix_x('0', nqp::abs_n($new-radix-point)) ~ $num;
+            } else {
+                $num := nqp::substr($num,0,$new-radix-point) ~ '.' ~ nqp::substr($num,$new-radix-point);
+            }
+            $sign ~ $num;
+        }
+
         sub stringify-to-precision($float, $precision) {
+            $float := normalize($float)
+                if nqp::index($float, "e") || nqp::index($float, "E");
+
             my @number := nqp::split('.', $float);
             my $lhs_s := @number[0];
             my $rhs_s := @number[1];
@@ -195,7 +224,7 @@ my module sprintf {
 
             $lhs_s := nqp::substr($lhs_s, 1) if nqp::substr($lhs_s, 0, 1) eq '-';
             my $lhs_I := nqp::fromstr_I($lhs_s, $knowhow);
-            my $rhs_I := nqp::fromstr_I("1" ~ $rhs_s ~ $zeroes, $knowhow);      # to preserve leading zeroes
+            my $rhs_I := nqp::fromstr_I("1" ~ $rhs_s ~ $zeroes, $knowhow);      # The leading 1 is to preserve leading zeroes
             my $cc := nqp::chars(nqp::tostr_I($rhs_I));
 
             my $e := nqp::fromnum_I($d > $precision ?? $d - $precision !! 0, $knowhow);
@@ -235,6 +264,7 @@ my module sprintf {
                      !! has_flag($/, 'plus') ?? '+' 
                      !! has_flag($/, 'space') ?? ' ' 
                      !! '';
+            $float := nqp::abs_n($float);
             $float := stringify-to-precision($float, $precision);
             pad-with-sign($sign, $float, $size, $pad);
         }
