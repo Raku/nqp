@@ -193,8 +193,8 @@ class QAST::OperationsJS {
             my @exprs;
             my @setup;
             my $i := 0;
-            for @argument_types -> $type {
-                my $chunk := $comp.as_js($node[$i], :want($type));
+            for $node.list -> $arg {
+                my $chunk := $comp.as_js($arg, :want(@argument_types[$i]));
                 @exprs.push($chunk.expr);
                 @setup.push($chunk);
                 $i := $i + 1;
@@ -244,16 +244,10 @@ class QAST::OperationsJS {
 
     add_simple_op('join', $T_STR, [$T_STR, $T_OBJ], sub ($delim, $list) {"$list.join($delim)"});
 
-    add_op('index', sub ($comp, $node, :$want) {
-        my $string := $comp.as_js($node[0], :want($T_STR));
-        my $pattern := $comp.as_js($node[1], :want($T_STR));
-        if +$node.list == 2 {
-            Chunk.new($T_INT, "{$string.expr}.indexOf({$pattern.expr})" , [$string, $pattern], :$node);
-        } else {
-            my $starting := $comp.as_js($node[2], :want($T_INT));
-            Chunk.new($T_INT, "{$string.expr}.indexOf({$pattern.expr},{$starting.expr})" , [$string, $pattern, $starting], :$node);
-        }
+    add_simple_op('index', $T_INT, [$T_STR, $T_STR, $T_INT], sub ($string, $pattern, $from?) {
+        nqp::defined($from) ?? "$string.indexOf($pattern,$from)" !! "$string.indexOf($pattern)";
     });
+
 
     add_simple_op('chr', $T_STR, [$T_INT], sub ($code) {"String.fromCharCode($code)"});
 
@@ -262,15 +256,7 @@ class QAST::OperationsJS {
 
     add_simple_op('flip', $T_STR, [$T_STR], sub ($string) {"$string.split('').reverse().join('')"});
 
-    add_op('ord', sub ($comp, $node, :$want) {
-        my $string := $comp.as_js($node[0], :want($T_STR));
-        if +$node.list == 1 {
-            Chunk.new($T_INT, "{$string.expr}.charCodeAt(0)" , [$string], :$node);
-        } else {
-            my $pos := $comp.as_js($node[1], :want($T_INT));
-            Chunk.new($T_INT, "{$string.expr}.charCodeAt({$pos.expr})" , [$string, $pos], :$node);
-        }
-    });
+    add_simple_op('ord', $T_INT, [$T_STR, $T_INT], sub ($string, $pos='0') {"$string.charCodeAt($pos)"});
 
     add_simple_op('null', $T_OBJ, [], sub () {"null"});
 
