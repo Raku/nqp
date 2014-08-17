@@ -94,6 +94,9 @@ class HLL::Backend::MoarVM {
             }
             elsif nqp::isstr($obj) {
                 nqp::push_s(@pieces, '"');
+                if nqp::index($obj, '\\') {
+                    $obj := subst($obj, /'\\'/, '\\\\\\\\', :global);
+                }
                 if nqp::index($obj, '"') {
                     $obj := subst($obj, /'"'/, '\\\\"', :global);
                 }
