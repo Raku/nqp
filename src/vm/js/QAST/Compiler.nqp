@@ -290,10 +290,7 @@ class QAST::OperationsJS {
         Chunk.new($T_VOID, "" , [$arg, "nqp.op.print({$arg.expr});\n"], :$node);
     });
 
-    add_op('isinvokable', sub ($comp, $node, :$want) {
-        my $arg := $comp.as_js($node[0], :want($T_OBJ));
-        Chunk.new($T_INT, "nqp.op.isinvokable({$arg.expr})" , [$arg], :$node);
-    });
+    add_simple_op('isinvokable', $T_INT, [$T_OBJ], sub ($arg) {"nqp.op.isinvokable($arg)"});
 
     # TODO - think if it's the correct thing to do
     add_op('takeclosure', sub ($comp, $node, :$want) {
