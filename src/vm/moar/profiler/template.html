@@ -279,7 +279,80 @@
           </li>
         </ol>
 
-        <h3>{{Current.name == '' ? '&lt;anon&gt;' : Current.name}}</h3>
+        <p>
+          <span class="lead">{{Current.name == '' ? '&lt;anon&gt;' : Current.name}}</span><br />
+          <span class="text-muted">{{File}}:{{Line}}</span>
+        </p>
+
+        <table class="table table-striped table-condensed table-bordered">
+          <tbody>
+            <tr>
+              <td><strong>Calls <span class="text-success">(Inlined)</span></strong></td>
+              <td>
+                <div class="pull-left" style="width: 310px">
+                  <div class="progress" style="width: 300px">
+                    <div class="progress-bar" role="progressbar" style="width: {{Percent}}%;">
+                    </div>
+                    <div class="progress-bar progress-bar-success" role="progressbar" style="width: {{InlinePercent}}%;">
+                    </div>
+                  </div>
+                </div>
+                <div ng-show="InlinePercent == 0">
+                  {{Entries}}
+                </div>
+                <div ng-show="InlinePercent != 0">
+                  {{Entries}} +
+                  <span class="text-success">{{InlineEntries}} ({{InlinePercent}}%)</span>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Interpreted Calls</strong></td>
+              <td>
+                <div class="pull-left" style="width: 310px">
+                  <div class="progress" style="width: 300px">
+                    <div class="progress-bar progress-bar-danger" role="progressbar" style="width: {{InterpPercent}}%;">
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  {{InterpPercent}}%
+                  ({{InterpEntries}})
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Specialized Calls</strong></td>
+              <td>
+                <div class="pull-left" style="width: 310px">
+                  <div class="progress" style="width: 300px">
+                    <div class="progress-bar progress-bar-warning" role="progressbar" style="width: {{SpeshPercent}}%;">
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  {{SpeshPercent}}%
+                  ({{SpeshEntries}})
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>JIT-Compiled Calls</strong></td>
+              <td>
+                <div class="pull-left" style="width: 310px">
+                  <div class="progress" style="width: 300px">
+                    <div class="progress-bar progress-bar-success" role="progressbar" style="width: {{JITPercent}}%;">
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  {{JITPercent}}%
+                  ({{JITEntries}})
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
           
         <div class="panel panel-default">
           <div class="panel-heading">Callees</div>
@@ -782,10 +855,10 @@
         $scope.Current       = rawData[0].call_graph;
         $scope.SuchCallers   = false;
         $scope.RecentCallers = [];
-        $scope.Callees       = calleesOf($scope.Current);
         $scope.predicate     = "TimePercent";
         $scope.reverse       = true;
         var all_callers      = [];
+        updateCurrentData();
 
         $scope.toCallee = function (callee) {
             // Update caller history.
@@ -796,7 +869,7 @@
 
             // Update current node and callees.
             $scope.Current = callee;
-            $scope.Callees = calleesOf(callee);
+            updateCurrentData();
         };
 
         $scope.toCaller = function (caller) {
@@ -818,7 +891,31 @@
 
             // Update current node and callees.
             $scope.Current = caller;
-            $scope.Callees = calleesOf(caller);
+            updateCurrentData();
+        }
+
+        function updateCurrentData() {
+            // Line and file.
+            var current = $scope.Current;
+            $scope.Line = current.line;
+            $scope.File = current.file;
+
+            // Entry statistics.
+            var interpEntries    = current.entries - (current.spesh_entries + current.jit_entries);
+            var nonInlineEntries = current.entries - current.inlined_entries;
+            $scope.Entries       = nonInlineEntries;
+            $scope.Percent       = (100 * nonInlineEntries / current.entries).toFixed(2);
+            $scope.InlineEntries = current.inlined_entries;
+            $scope.InlinePercent = (100 * current.inlined_entries / current.entries).toFixed(2);
+            $scope.InterpEntries = interpEntries;
+            $scope.InterpPercent = (100 * interpEntries / current.entries).toFixed(2);
+            $scope.SpeshEntries  = current.spesh_entries;
+            $scope.SpeshPercent  = (100 * current.spesh_entries / current.entries).toFixed(2);
+            $scope.JITEntries    = current.jit_entries;
+            $scope.JITPercent    = (100 * current.jit_entries / current.entries).toFixed(2);
+
+            // Callees.
+            $scope.Callees = calleesOf(current);
         }
 
         function calleesOf(node) {
