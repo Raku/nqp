@@ -62,7 +62,10 @@
         </thead>
         <tbody>
           <tr ng-repeat="routine in Routines | filter:NameFilter | orderBy:predicate:reverse">
-            <td><strong>{{routine.Name}}</strong></td>
+            <td>
+              <strong>{{routine.Name}}</strong><br />
+              <span class="text-muted">{{routine.File}}:{{routine.Line}}</span>
+            </td>
             <td>{{routine.Entries}}</td>
             <td>
               <div class="pull-left" style="width: 70px">
@@ -145,7 +148,10 @@
             </thead>
             <tbody>
               <tr ng-repeat="callee in Callees | filter:NameFilter | orderBy:predicate:reverse">
-                <td><strong><a href="" ng-click="toCallee(callee.Node)">{{callee.Name}}</a></strong></td>
+                <td>
+                  <strong><a href="" ng-click="toCallee(callee.Node)">{{callee.Name}}</a></strong><br />
+                  <span class="text-muted">{{callee.File}}:{{callee.Line}}</span>
+                </td>
                 <td>{{callee.Calls}}</td>
                 <td>
                   <div class="pull-left" style="width: 70px">
@@ -245,7 +251,10 @@
                 </thead>
                 <tbody>
                   <tr ng-repeat="routine in CurrentAllocatingRoutineStats | filter:RoutineNameFilter | orderBy:routinePredicate:routineReverse">
-                    <td><strong>{{routine.Name}}</strong></td>
+                    <td>
+                      <strong>{{routine.Name}}</strong><br />
+                      <span class="text-muted">{{routine.File}}:{{routine.Line}}</span>
+                    </td>
                     <td>
                       <div class="pull-left" style="width: 210px">
                         <div class="progress" style="width: 200px">
@@ -345,7 +354,10 @@
           </thead>
           <tbody>
             <tr ng-repeat="osr in OSRs | orderBy:predicate:reverse">
-              <td><strong>{{osr.Name}}</strong></td>
+              <td>
+                <strong>{{osr.Name}}</strong><br />
+                <span class="text-muted">{{osr.File}}:{{osr.Line}}</span>
+              </td>
               <td>
                 <div class="pull-left" style="width: 310px">
                   <div class="progress" style="width: 300px">
@@ -377,7 +389,10 @@
           </thead>
           <tbody>
             <tr ng-repeat="deopt in DeoptOnes | orderBy:predicate:reverse">
-              <td><strong>{{deopt.Name}}</strong></td>
+              <td>
+                <strong>{{deopt.Name}}</strong><br />
+                <span class="text-muted">{{deopt.File}}:{{deopt.Line}}</span>
+              </td>
               <td>
                 <div class="pull-left" style="width: 310px">
                   <div class="progress" style="width: 300px">
@@ -410,7 +425,10 @@
           </thead>
           <tbody>
             <tr ng-repeat="deopt in DeoptAlls | orderBy:predicate:reverse">
-              <td><strong>{{deopt.Name}}</strong></td>
+              <td>
+                <strong>{{deopt.Name}}</strong><br />
+                <span class="text-muted">{{deopt.File}}:{{deopt.Line}}</span>
+              </td>
               <td>
                 <div class="pull-left" style="width: 310px">
                   <div class="progress" style="width: 300px">
@@ -438,6 +456,24 @@
     <script>
     var rawData = JSON.parse('{{{PROFIELR_OUTPUT}}}');
 
+    // Extract some common things out of the raw data.
+    var nodeIdToName = {};
+    var nodeIdToFile = {};
+    var nodeIdToLine = {};
+    (function () {
+        function walkCallGraphNode(node) {
+            if (!nodeIdToName[node.id]) {
+                nodeIdToName[node.id] = node.name == "" ? "<anon>"    : node.name;
+                nodeIdToLine[node.id] = node.line < 1   ? "<unknown>" : node.line;
+                nodeIdToFile[node.id] = node.file == "" ? "<unknown>" : node.file;
+            }
+            if (node.callees)
+                node.callees.map(walkCallGraphNode);
+        }
+        walkCallGraphNode(rawData[0].call_graph);
+    }());
+
+    // Register application and add controllers.
     var moarProfApp = angular.module('moarProfApp', []);
 
     moarProfApp.controller('NavigationController', function ($scope) {
@@ -446,7 +482,6 @@
     
     moarProfApp.controller('RoutinesController', function ($scope) {
         // Walk call graph to build data.
-        var idToName         = {};
         var idToEntries      = {};
         var idToSpeshEntries = {};
         var idToJITEntries   = {};
@@ -457,8 +492,7 @@
         var totalExclusive   = 0;
         var totalInclusive   = rawData[0].call_graph.inclusive_time;
         function walkCallGraphNode(node) {
-            if (!idToName[node.id]) {
-                idToName[node.id]         = node.name == "" ? "<anon>" : node.name;
+            if (!idToEntries[node.id]) {
                 idToEntries[node.id]      = 0;
                 idToSpeshEntries[node.id] = 0;
                 idToJITEntries[node.id]   = 0;
@@ -486,12 +520,14 @@
     
         // Build object list per routine.
         var routineList = [];
-        for (id in idToName) {
+        for (id in idToEntries) {
             var speshEntriesPercent  = +(100 * idToSpeshEntries[id] / idToEntries[id]).toFixed(2);
             var jitEntriesPercent    = +(100 * idToJITEntries[id] / idToEntries[id]).toFixed(2);
             var interpEntriesPercent = 100 - (speshEntriesPercent + jitEntriesPercent);
             var entry = {
-                Name:                 idToName[id],
+                Name:                 nodeIdToName[id],
+                Line:                 nodeIdToLine[id],
+                File:                 nodeIdToFile[id],
                 Entries:              idToEntries[id],
                 InterpEntriesPercent: interpEntriesPercent,
                 SpeshEntriesPercent:  speshEntriesPercent,
@@ -565,7 +601,9 @@
                 var interpCallsPercent = 100 - (speshCallsPercent + jitCallsPercent);
                 var inlinedPercent     = +(100 * c.inlined_entries / c.entries).toFixed(2);
                 return {
-                    Name:               c.name == "" ? "<anon>" : c.name,
+                    Name:               nodeIdToName[c.id],
+                    Line:               nodeIdToLine[c.id],
+                    File:               nodeIdToFile[c.id],
                     Calls:              c.entries,
                     Time:               +(c.inclusive_time / 1000).toFixed(2),
                     TimePercent:        +(100 * c.inclusive_time / node.inclusive_time).toFixed(2),
@@ -586,11 +624,8 @@
         var typeIdToName         = {};
         var typeIdToAllocations  = {};
         var typeIdToRoutineStats = {};
-        var nodeIdToName         = {};
         var maxAllocations       = 1;
         function walkCallGraphNode(node) {
-            if (!nodeIdToName[node.id])
-                nodeIdToName[node.id] = node.name == "" ? "<anon>" : node.name;
             node.allocations.map(function (alloc) {
                 if (!typeIdToName[alloc.id]) {
                     typeIdToName[alloc.id]         = alloc.type == "" ? "<anon>" : alloc.type;
@@ -622,6 +657,8 @@
             for (var rid in typeIdToRoutineStats[id])
                 routineStats.push({
                     Name:               nodeIdToName[rid],
+                    Line:               nodeIdToLine[rid],
+                    File:               nodeIdToFile[rid],
                     Allocations:        typeIdToRoutineStats[id][rid],
                     AllocationsPercent: (100 * typeIdToRoutineStats[id][rid] / maxAllocationByRoutine)
                 });
@@ -678,8 +715,7 @@
     });
 
     moarProfApp.controller('OSRDeoptController', function ($scope) {
-        // Walk call graph to build data.        
-        var idToName         = {};
+        // Walk call graph to build data.
         var idToOSR          = {};
         var idToDeoptOne     = {};
         var idToDeoptAll     = {};
@@ -687,8 +723,7 @@
         var maxDeoptOne      = 1;
         var maxDeoptAll      = 1;
         function walkCallGraphNode(node) {
-            if (!idToName[node.id]) {
-                idToName[node.id]     = node.name == "" ? "<anon>" : node.name;
+            if (!idToOSR[node.id]) {
                 idToOSR[node.id]      = 0;
                 idToDeoptOne[node.id] = 0;
                 idToDeoptAll[node.id] = 0;
@@ -711,24 +746,30 @@
         var osrs      = [];
         var deoptOnes = [];
         var deoptAlls = [];
-        for (id in idToName) {
+        for (id in idToOSR) {
             if (idToOSR[id] > 0) {
                 osrs.push({
-                    Name:    idToName[id],
+                    Name:    nodeIdToName[id],
+                    Line:    nodeIdToLine[id],
+                    File:    nodeIdToFile[id],
                     Count:   idToOSR[id],
                     Percent: Math.round(100 * idToOSR[id] / maxOSR)
                 });
             }
             if (idToDeoptOne[id] > 0) {
                 deoptOnes.push({
-                    Name:    idToName[id],
+                    Name:    nodeIdToName[id],
+                    Line:    nodeIdToLine[id],
+                    File:    nodeIdToFile[id],
                     Count:   idToDeoptOne[id],
                     Percent: Math.round(100 * idToDeoptOne[id] / maxDeoptOne)
                 });
             }
             if (idToDeoptAll[id] > 0) {
                 deoptAlls.push({
-                    Name:    idToName[id],
+                    Name:    nodeIdToName[id],
+                    Line:    nodeIdToLine[id],
+                    File:    nodeIdToFile[id],
                     Count:   idToDeoptAll[id],
                     Percent: Math.round(100 * idToDeoptAll[id] / maxDeoptAll)
                 });
