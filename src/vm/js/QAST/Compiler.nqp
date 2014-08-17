@@ -188,6 +188,21 @@ class QAST::OperationsJS {
         %ops{$op} := $cb;
     }
 
+    sub add_simple_op($op, $return_type, @argument_types, $cb) {
+        %ops{$op} := sub ($comp, $node, :$want) {
+            my @exprs;
+            my @setup;
+            my $i := 0;
+            for @argument_types -> $type {
+                my $chunk := $comp.as_js($node[$i], :want($type));
+                @exprs.push($chunk.expr);
+                @setup.push($chunk);
+                $i := $i + 1;
+            }
+            Chunk.new($return_type, $cb(|@exprs), @setup, :$node);
+        };
+    }
+
     sub add_infix_op($op, $left_type, $syntax, $right_type, $return_type) {
         %ops{$op} := sub ($comp, $node, :$want) {
             my $left  := $comp.as_js($node[0], :want($left_type));
@@ -202,10 +217,7 @@ class QAST::OperationsJS {
     # TODO - think about divide by zero
     add_infix_op('div_n', $T_NUM, '/', $T_NUM, $T_NUM);
 
-    add_op('neg_n', sub ($comp, $node, :$want) {
-        my $num := $comp.as_js($node[0], :want($T_NUM));
-        Chunk.new($T_INT, "(-{$num.expr})" , [$num], :$node);
-    });
+    add_simple_op('neg_n', $T_NUM, [$T_NUM], sub ($num) {"(-$num)"});
 
     add_infix_op('concat', $T_STR, '+', $T_STR, $T_STR);
 
@@ -219,27 +231,18 @@ class QAST::OperationsJS {
     add_infix_op('eqaddr', $T_OBJ, '===', $T_OBJ, $T_BOOL);
 
     sub add_cmp_op($op, $type) {
-        %ops{$op} := sub ($comp, $node, :$want) {
-            my $a  := $comp.as_js($node[0], :want($type));
-            my $b := $comp.as_js($node[1], :want($type));
-            Chunk.new($T_INT, "({$a.expr} < {$b.expr} ? -1 : ({$a.expr} == {$b.expr} ? 0 : 1))", [$a, $b], :$node);
-        };
+        add_simple_op($op, $T_INT, [$type, $type], sub ($a, $b) {
+            "($a < $b ? -1 : ($a == $b ? 0 : 1))"
+        });
     }
 
     add_cmp_op('cmp_i', $T_INT);
     add_cmp_op('cmp_n', $T_NUM);
     add_cmp_op('cmp_s', $T_STR);
 
-    add_op('chars', sub ($comp, $node, :$want) {
-        my $arg := $comp.as_js($node[0], :want($T_STR));
-        Chunk.new($T_INT, "{$arg.expr}.length" , [$arg], :$node);
-    });
+    add_simple_op('chars', $T_INT, [$T_STR], sub ($string) {"$string.length"});
 
-    add_op('join', sub ($comp, $node, :$want) {
-        my $delim := $comp.as_js($node[0], :want($T_STR));
-        my $list := $comp.as_js($node[1], :want($T_OBJ));
-        Chunk.new($T_STR, "{$list.expr}.join({$delim.expr})" , [$delim, $list], :$node);
-    });
+    add_simple_op('join', $T_STR, [$T_STR, $T_OBJ], sub ($delim, $list) {"$list.join($delim)"});
 
     add_op('index', sub ($comp, $node, :$want) {
         my $string := $comp.as_js($node[0], :want($T_STR));
@@ -252,24 +255,12 @@ class QAST::OperationsJS {
         }
     });
 
-    add_op('chr', sub ($comp, $node, :$want) {
-        my $code := $comp.as_js($node[0], :want($T_INT));
-        Chunk.new($T_STR, "String.fromCharCode({$code.expr})" , [$code], :$node);
-    });
+    add_simple_op('chr', $T_STR, [$T_INT], sub ($code) {"String.fromCharCode($code)"});
 
-    add_op('lc', sub ($comp, $node, :$want) {
-        my $string := $comp.as_js($node[0], :want($T_STR));
-        Chunk.new($T_STR, "{$string.expr}.toLowerCase()" , [$string], :$node);
-    });
-    add_op('uc', sub ($comp, $node, :$want) {
-        my $string := $comp.as_js($node[0], :want($T_STR));
-        Chunk.new($T_STR, "{$string.expr}.toUpperCase()" , [$string], :$node);
-    });
+    add_simple_op('lc', $T_STR, [$T_STR], sub ($string) {"$string.toLowerCase()"});
+    add_simple_op('uc', $T_STR, [$T_STR], sub ($string) {"$string.toUpperCase()"});
 
-    add_op('flip', sub ($comp, $node, :$want) {
-        my $string := $comp.as_js($node[0], :want($T_STR));
-        Chunk.new($T_STR, "{$string.expr}.split('').reverse().join('')" , [$string], :$node);
-    });
+    add_simple_op('flip', $T_STR, [$T_STR], sub ($string) {"$string.split('').reverse().join('')"});
 
     add_op('ord', sub ($comp, $node, :$want) {
         my $string := $comp.as_js($node[0], :want($T_STR));
@@ -281,9 +272,7 @@ class QAST::OperationsJS {
         }
     });
 
-    add_op('null', sub ($comp, $node, :$want) {
-        Chunk.new($T_OBJ, "null" , [], :$node);
-    });
+    add_simple_op('null', $T_OBJ, [], sub () {"null"});
 
     add_op('getcomp', sub ($comp, $node, :$want) {
         my $arg := $comp.as_js($node[0], :want($T_STR));
@@ -321,10 +310,7 @@ class QAST::OperationsJS {
         $comp.as_js($node[0], :want($T_NUM));
     });
 
-    add_op('falsey', sub ($comp, $node, :$want) {
-        my $boolified := $comp.as_js($node[0], :want($T_BOOL));
-        Chunk.new($T_BOOL, "(!{$boolified.expr})", [$boolified]);
-    });
+    add_simple_op('falsey', $T_BOOL, [$T_BOOL], sub ($boolified) {"(!$boolified)"});
 
     add_op('bind', sub ($comp, $node, :$want) {
         my @children := $node.list;
@@ -378,27 +364,16 @@ class QAST::OperationsJS {
         }
     });
 
-    add_op('split', sub ($comp, $node, :$want) {
-        my $separator := $comp.as_js($node[0], :want($T_STR));
-        my $string := $comp.as_js($node[1], :want($T_STR));
-        Chunk.new($T_OBJ, "({$string.expr} == '' ? [] : {$string.expr}.split({$separator.expr}))" , [$string, $separator], :$node);
+    add_simple_op('split', $T_OBJ, [$T_STR, $T_STR], sub ($separator, $string) {
+        "({$string} == '' ? [] : {$string}.split({$separator}))"
     });
 
-    add_op('elems', sub ($comp, $node, :$want) {
-        my $list := $comp.as_js($node[0], :want($T_OBJ));
-        Chunk.new($T_INT, "({$list.expr}.length)" , [$list], :$node);
-    });
+    add_simple_op('elems', $T_INT, [$T_OBJ], sub ($list) {"($list.length)"});
 
-    add_op('islist', sub ($comp, $node, :$want) {
-        my $obj := $comp.as_js($node[0], :want($T_OBJ));
-        Chunk.new($T_BOOL, "({$obj.expr} instanceof Array)" , [$obj], :$node);
-    });
+    add_simple_op('islist', $T_BOOL, [$T_OBJ], sub ($obj) {"($obj instanceof Array)"});
 
     for <ceil floor abs> -> $func {
-        add_op($func ~ '_n', sub ($comp, $node, :$want) {
-            my $arg := $comp.as_js($node[0], :want($T_NUM));
-            Chunk.new($T_NUM, "Math.$func({$arg.expr})" , [$arg], :$node);
-        });
+        add_simple_op($func ~ '_n', $T_NUM, [$T_NUM], sub ($arg) {"Math.$func($arg)"});
     }
 
     for <if unless> -> $op_name {
