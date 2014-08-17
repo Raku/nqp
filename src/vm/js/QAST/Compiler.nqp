@@ -184,11 +184,11 @@ class QAST::OperationsJS {
     my %ops;
 
 
-    method add_op($op, $cb) {
+    sub add_op($op, $cb) {
         %ops{$op} := $cb;
     }
 
-    method add_infix_op($op, $left_type, $syntax, $right_type, $return_type) {
+    sub add_infix_op($op, $left_type, $syntax, $right_type, $return_type) {
         %ops{$op} := sub ($comp, $node, :$want) {
             my $left  := $comp.as_js($node[0], :want($left_type));
             my $right := $comp.as_js($node[1], :want($right_type));
@@ -196,29 +196,29 @@ class QAST::OperationsJS {
         };
     }
 
-    QAST::OperationsJS.add_infix_op('add_n', $T_NUM, '+', $T_NUM, $T_NUM);
-    QAST::OperationsJS.add_infix_op('sub_n', $T_NUM, '-', $T_NUM, $T_NUM);
-    QAST::OperationsJS.add_infix_op('mul_n', $T_NUM, '*', $T_NUM, $T_NUM);
+    add_infix_op('add_n', $T_NUM, '+', $T_NUM, $T_NUM);
+    add_infix_op('sub_n', $T_NUM, '-', $T_NUM, $T_NUM);
+    add_infix_op('mul_n', $T_NUM, '*', $T_NUM, $T_NUM);
     # TODO - think about divide by zero
-    QAST::OperationsJS.add_infix_op('div_n', $T_NUM, '/', $T_NUM, $T_NUM);
+    add_infix_op('div_n', $T_NUM, '/', $T_NUM, $T_NUM);
 
-    QAST::OperationsJS.add_op('neg_n', sub ($comp, $node, :$want) {
+    add_op('neg_n', sub ($comp, $node, :$want) {
         my $num := $comp.as_js($node[0], :want($T_NUM));
         Chunk.new($T_INT, "(-{$num.expr})" , [$num], :$node);
     });
 
-    QAST::OperationsJS.add_infix_op('concat', $T_STR, '+', $T_STR, $T_STR);
+    add_infix_op('concat', $T_STR, '+', $T_STR, $T_STR);
 
-    QAST::OperationsJS.add_infix_op('isle_n', $T_NUM, '<=', $T_NUM, $T_BOOL);
-    QAST::OperationsJS.add_infix_op('iseq_n', $T_NUM, '==', $T_NUM, $T_BOOL);
-    QAST::OperationsJS.add_infix_op('isne_n', $T_NUM, '!=', $T_NUM, $T_BOOL);
+    add_infix_op('isle_n', $T_NUM, '<=', $T_NUM, $T_BOOL);
+    add_infix_op('iseq_n', $T_NUM, '==', $T_NUM, $T_BOOL);
+    add_infix_op('isne_n', $T_NUM, '!=', $T_NUM, $T_BOOL);
 
-    QAST::OperationsJS.add_infix_op('iseq_s', $T_STR, '==', $T_STR, $T_BOOL);
-    QAST::OperationsJS.add_infix_op('isne_s', $T_STR, '!=', $T_STR, $T_BOOL);
+    add_infix_op('iseq_s', $T_STR, '==', $T_STR, $T_BOOL);
+    add_infix_op('isne_s', $T_STR, '!=', $T_STR, $T_BOOL);
 
-    QAST::OperationsJS.add_infix_op('eqaddr', $T_OBJ, '===', $T_OBJ, $T_BOOL);
+    add_infix_op('eqaddr', $T_OBJ, '===', $T_OBJ, $T_BOOL);
 
-    method add_cmp_op($op, $type) {
+    sub add_cmp_op($op, $type) {
         %ops{$op} := sub ($comp, $node, :$want) {
             my $a  := $comp.as_js($node[0], :want($type));
             my $b := $comp.as_js($node[1], :want($type));
@@ -226,22 +226,22 @@ class QAST::OperationsJS {
         };
     }
 
-    QAST::OperationsJS.add_cmp_op('cmp_i', $T_INT);
-    QAST::OperationsJS.add_cmp_op('cmp_n', $T_NUM);
-    QAST::OperationsJS.add_cmp_op('cmp_s', $T_STR);
+    add_cmp_op('cmp_i', $T_INT);
+    add_cmp_op('cmp_n', $T_NUM);
+    add_cmp_op('cmp_s', $T_STR);
 
-    QAST::OperationsJS.add_op('chars', sub ($comp, $node, :$want) {
+    add_op('chars', sub ($comp, $node, :$want) {
         my $arg := $comp.as_js($node[0], :want($T_STR));
         Chunk.new($T_INT, "{$arg.expr}.length" , [$arg], :$node);
     });
 
-    QAST::OperationsJS.add_op('join', sub ($comp, $node, :$want) {
+    add_op('join', sub ($comp, $node, :$want) {
         my $delim := $comp.as_js($node[0], :want($T_STR));
         my $list := $comp.as_js($node[1], :want($T_OBJ));
         Chunk.new($T_STR, "{$list.expr}.join({$delim.expr})" , [$delim, $list], :$node);
     });
 
-    QAST::OperationsJS.add_op('index', sub ($comp, $node, :$want) {
+    add_op('index', sub ($comp, $node, :$want) {
         my $string := $comp.as_js($node[0], :want($T_STR));
         my $pattern := $comp.as_js($node[1], :want($T_STR));
         if +$node.list == 2 {
@@ -252,26 +252,26 @@ class QAST::OperationsJS {
         }
     });
 
-    QAST::OperationsJS.add_op('chr', sub ($comp, $node, :$want) {
+    add_op('chr', sub ($comp, $node, :$want) {
         my $code := $comp.as_js($node[0], :want($T_INT));
         Chunk.new($T_STR, "String.fromCharCode({$code.expr})" , [$code], :$node);
     });
 
-    QAST::OperationsJS.add_op('lc', sub ($comp, $node, :$want) {
+    add_op('lc', sub ($comp, $node, :$want) {
         my $string := $comp.as_js($node[0], :want($T_STR));
         Chunk.new($T_STR, "{$string.expr}.toLowerCase()" , [$string], :$node);
     });
-    QAST::OperationsJS.add_op('uc', sub ($comp, $node, :$want) {
+    add_op('uc', sub ($comp, $node, :$want) {
         my $string := $comp.as_js($node[0], :want($T_STR));
         Chunk.new($T_STR, "{$string.expr}.toUpperCase()" , [$string], :$node);
     });
 
-    QAST::OperationsJS.add_op('flip', sub ($comp, $node, :$want) {
+    add_op('flip', sub ($comp, $node, :$want) {
         my $string := $comp.as_js($node[0], :want($T_STR));
         Chunk.new($T_STR, "{$string.expr}.split('').reverse().join('')" , [$string], :$node);
     });
 
-    QAST::OperationsJS.add_op('ord', sub ($comp, $node, :$want) {
+    add_op('ord', sub ($comp, $node, :$want) {
         my $string := $comp.as_js($node[0], :want($T_STR));
         if +$node.list == 1 {
             Chunk.new($T_INT, "{$string.expr}.charCodeAt(0)" , [$string], :$node);
@@ -281,52 +281,52 @@ class QAST::OperationsJS {
         }
     });
 
-    QAST::OperationsJS.add_op('null', sub ($comp, $node, :$want) {
+    add_op('null', sub ($comp, $node, :$want) {
         Chunk.new($T_OBJ, "null" , [], :$node);
     });
 
-    QAST::OperationsJS.add_op('getcomp', sub ($comp, $node, :$want) {
+    add_op('getcomp', sub ($comp, $node, :$want) {
         my $arg := $comp.as_js($node[0], :want($T_STR));
         my $tmp := $*BLOCK.add_tmp();
         Chunk.new($T_OBJ, $tmp , [$arg, "$tmp = nqp.op.getcomp({$arg.expr});\n"], :$node);
     });
 
-    QAST::OperationsJS.add_op('say', sub ($comp, $node, :$want) {
+    add_op('say', sub ($comp, $node, :$want) {
         my $arg := $comp.as_js($node[0], :want($T_STR));
         Chunk.new($T_VOID, "" , [$arg, "nqp.op.say({$arg.expr});\n"], :$node);
     });
 
-    QAST::OperationsJS.add_op('print', sub ($comp, $node, :$want) {
+    add_op('print', sub ($comp, $node, :$want) {
         my $arg := $comp.as_js($node[0], :want($T_STR));
         Chunk.new($T_VOID, "" , [$arg, "nqp.op.print({$arg.expr});\n"], :$node);
     });
 
-    QAST::OperationsJS.add_op('isinvokable', sub ($comp, $node, :$want) {
+    add_op('isinvokable', sub ($comp, $node, :$want) {
         my $arg := $comp.as_js($node[0], :want($T_OBJ));
         Chunk.new($T_INT, "nqp.op.isinvokable({$arg.expr})" , [$arg], :$node);
     });
 
     # TODO - think if it's the correct thing to do
-    QAST::OperationsJS.add_op('takeclosure', sub ($comp, $node, :$want) {
+    add_op('takeclosure', sub ($comp, $node, :$want) {
         $comp.as_js($node[0], :want($T_OBJ));
     });
 
-    QAST::OperationsJS.add_op('istrue', sub ($comp, $node, :$want) {
+    add_op('istrue', sub ($comp, $node, :$want) {
         $comp.as_js($node[0], :want($T_BOOL));
     });
-    QAST::OperationsJS.add_op('stringify', sub ($comp, $node, :$want) {
+    add_op('stringify', sub ($comp, $node, :$want) {
         $comp.as_js($node[0], :want($T_STR));
     });
-    QAST::OperationsJS.add_op('numify', sub ($comp, $node, :$want) {
+    add_op('numify', sub ($comp, $node, :$want) {
         $comp.as_js($node[0], :want($T_NUM));
     });
 
-    QAST::OperationsJS.add_op('falsey', sub ($comp, $node, :$want) {
+    add_op('falsey', sub ($comp, $node, :$want) {
         my $boolified := $comp.as_js($node[0], :want($T_BOOL));
         Chunk.new($T_BOOL, "(!{$boolified.expr})", [$boolified]);
     });
 
-    QAST::OperationsJS.add_op('bind', sub ($comp, $node, :$want) {
+    add_op('bind', sub ($comp, $node, :$want) {
         my @children := $node.list;
         if +@children != 2 {
             nqp::die("A 'bind' op must have exactly two children");
@@ -340,7 +340,7 @@ class QAST::OperationsJS {
         $comp.as_js(@children[0], :want($T_OBJ));
     });
 
-    QAST::OperationsJS.add_op('list', sub ($comp, $node, :$want) {
+    add_op('list', sub ($comp, $node, :$want) {
        my @setup;
        my @exprs;
 
@@ -353,7 +353,7 @@ class QAST::OperationsJS {
        Chunk.new($T_OBJ, '[' ~ nqp::join(',', @exprs) ~ ']' , @setup, :$node);
     });
 
-    QAST::OperationsJS.add_op('call', sub ($comp, $node, :$want) {
+    add_op('call', sub ($comp, $node, :$want) {
         my $tmp := $*BLOCK.add_tmp();
 
         my $args := nqp::clone($node.list);
@@ -378,31 +378,31 @@ class QAST::OperationsJS {
         }
     });
 
-    QAST::OperationsJS.add_op('split', sub ($comp, $node, :$want) {
+    add_op('split', sub ($comp, $node, :$want) {
         my $separator := $comp.as_js($node[0], :want($T_STR));
         my $string := $comp.as_js($node[1], :want($T_STR));
         Chunk.new($T_OBJ, "({$string.expr} == '' ? [] : {$string.expr}.split({$separator.expr}))" , [$string, $separator], :$node);
     });
 
-    QAST::OperationsJS.add_op('elems', sub ($comp, $node, :$want) {
+    add_op('elems', sub ($comp, $node, :$want) {
         my $list := $comp.as_js($node[0], :want($T_OBJ));
         Chunk.new($T_INT, "({$list.expr}.length)" , [$list], :$node);
     });
 
-    QAST::OperationsJS.add_op('islist', sub ($comp, $node, :$want) {
+    add_op('islist', sub ($comp, $node, :$want) {
         my $obj := $comp.as_js($node[0], :want($T_OBJ));
         Chunk.new($T_BOOL, "({$obj.expr} instanceof Array)" , [$obj], :$node);
     });
 
     for <ceil floor abs> -> $func {
-        QAST::OperationsJS.add_op($func ~ '_n', sub ($comp, $node, :$want) {
+        add_op($func ~ '_n', sub ($comp, $node, :$want) {
             my $arg := $comp.as_js($node[0], :want($T_NUM));
             Chunk.new($T_NUM, "Math.$func({$arg.expr})" , [$arg], :$node);
         });
     }
 
     for <if unless> -> $op_name {
-        QAST::OperationsJS.add_op($op_name, sub ($comp, $node, :$want) {
+        add_op($op_name, sub ($comp, $node, :$want) {
             unless nqp::defined($want) {
                 nqp::die("Unknown want");
             }
