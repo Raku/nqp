@@ -33,6 +33,7 @@
             <li ng-class="Tab == 'Call Graph' ? 'active' : ''"><a href="#callgraph" ng-click="Tab = 'Call Graph'">Call Graph</a></li>
             <li ng-class="Tab == 'Allocations' ? 'active' : ''"><a href="#allocations" ng-click="Tab = 'Allocations'">Allocations</a></li>
             <li ng-class="Tab == 'GC' ? 'active' : ''"><a href="#gc" ng-click="Tab = 'GC'">GC</a></li>
+            <li ng-class="Tab == 'OSR/Deopt' ? 'active' : ''"><a href="#osrdeopt" ng-click="Tab = 'OSR/Deopt'">OSR/Deopt</a></li>
           </ul>
         </div>
       </div>
@@ -88,13 +89,18 @@
               </div>
             </td>
             <td>
-              <div class="progress" style="width: 100px">
-                <div class="progress-bar progress-bar-danger" style="width: {{routine.InterpEntriesPercent}}%">
+              <div class="pull-left" style="width: 110px">
+                <div class="progress" style="width: 100px">
+                  <div class="progress-bar progress-bar-danger" style="width: {{routine.InterpEntriesPercent}}%">
+                  </div>
+                  <div class="progress-bar progress-bar-warning" style="width: {{routine.SpeshEntriesPercent}}%">
+                  </div>
+                  <div class="progress-bar progress-bar-success" style="width: {{routine.JITEntriesPercent}}%">
+                  </div>
                 </div>
-                <div class="progress-bar progress-bar-warning" style="width: {{routine.SpeshEntriesPercent}}%">
-                </div>
-                <div class="progress-bar progress-bar-success" style="width: {{routine.JITEntriesPercent}}%">
-                </div>
+              </div>
+              <div>
+                <span class="label label-default" ng-show="routine.OSR">OSR</span>
               </div>
             </td>
           </tr>
@@ -323,6 +329,108 @@
       </table>
       </div>
     </div>
+    
+    <div class="container" ng-show="Tab == 'OSR/Deopt'">
+      <div ng-controller="OSRDeoptController">
+        <h3>OSR</h3>
+        <p>On Stack Replacement detects routines containing hot loops that are
+          being interpreted, and replaces them with specialized or JIT-compiled
+          code.</p>
+        <table class="table table-striped table-condensed table-bordered" ng-show="OSRs.length > 0">
+          <thead>
+            <th>
+              Routine
+            </th>
+            <th>On Stack Replacements</th>
+          </thead>
+          <tbody>
+            <tr ng-repeat="osr in OSRs | orderBy:predicate:reverse">
+              <td><strong>{{osr.Name}}</strong></td>
+              <td>
+                <div class="pull-left" style="width: 310px">
+                  <div class="progress" style="width: 300px">
+                    <div class="progress-bar" role="progressbar" style="width: {{osr.Percent}}%;">
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  {{osr.Count}}
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p ng-show="OSRs.length == 0">
+          <em>No OSR was performed during this profile.</em>
+        </p>
+
+        <h3>Local Deoptimization</h3>
+        <p>Local deoptimization happens when a guard in specialized or JIT-compiled
+          code fails. Since the code was produced assuming the guard would hold, 
+          the VM falls back to running the safe, but slower, interpreted code.</p>
+        <table class="table table-striped table-condensed table-bordered" ng-show="DeoptOnes.length > 0">
+          <thead>
+            <th>
+              Routine
+            </th>
+            <th>Deoptimizations</th>
+          </thead>
+          <tbody>
+            <tr ng-repeat="deopt in DeoptOnes | orderBy:predicate:reverse">
+              <td><strong>{{deopt.Name}}</strong></td>
+              <td>
+                <div class="pull-left" style="width: 310px">
+                  <div class="progress" style="width: 300px">
+                    <div class="progress-bar" role="progressbar" style="width: {{deopt.Percent}}%;">
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  {{deopt.Count}}
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p ng-show="DeoptOnes.length == 0">
+          <em>No local deoptimizations occurred during this profile.</em>
+        </p>
+
+        <h3>Global Deoptimization</h3>
+        <p>Global deoptimization happens when an event occurs that renders
+          all currently type-specialized or JIT-compiled code on the call
+          stack potentially invalid. Mixins - changing the type of an object
+          in place - are a common reason.</p>
+        <table class="table table-striped table-condensed table-bordered" ng-show="DeoptAlls.length > 0">
+          <thead>
+            <th>
+              Routine
+            </th>
+            <th>Deoptimizations</th>
+          </thead>
+          <tbody>
+            <tr ng-repeat="deopt in DeoptAlls | orderBy:predicate:reverse">
+              <td><strong>{{deopt.Name}}</strong></td>
+              <td>
+                <div class="pull-left" style="width: 310px">
+                  <div class="progress" style="width: 300px">
+                    <div class="progress-bar" role="progressbar" style="width: {{deopt.Percent}}%;">
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  {{deopt.Count}}
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p ng-show="DeoptAlls.length == 0">
+          <em>No global deoptimizations occurred during this profile.</em>
+        </p>
+
+      </div>
+    </div>
 
     <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
@@ -337,13 +445,14 @@
     });
     
     moarProfApp.controller('RoutinesController', function ($scope) {
-        // Walk call graph to build data.        
+        // Walk call graph to build data.
         var idToName         = {};
         var idToEntries      = {};
         var idToSpeshEntries = {};
         var idToJITEntries   = {};
         var idToExclusive    = {};
         var idToInclusive    = {};
+        var idToOSR          = {};
         var idRecDepth       = {};
         var totalExclusive   = 0;
         var totalInclusive   = rawData[0].call_graph.inclusive_time;
@@ -355,6 +464,7 @@
                 idToJITEntries[node.id]   = 0;
                 idToExclusive[node.id]    = 0;
                 idToInclusive[node.id]    = 0;
+                idToOSR[node.id]          = false;
                 idRecDepth[node.id]       = 0;
             }
             idToEntries[node.id]      += node.entries;
@@ -362,6 +472,8 @@
             idToJITEntries[node.id]   += node.jit_entries;
             idToExclusive[node.id]    += node.exclusive_time;
             totalExclusive            += node.exclusive_time;
+            if (node.osr > 0)
+                idToOSR[node.id] = true;
             if (idRecDepth[node.id] == 0)
                 idToInclusive[node.id] += node.inclusive_time;
             if (node.callees) {
@@ -387,7 +499,8 @@
                 InclusiveTime:        +(idToInclusive[id] / 1000).toFixed(2),
                 InclusiveTimePercent: +(100 * idToInclusive[id] / totalInclusive).toFixed(2),
                 ExclusiveTime:        +(idToExclusive[id] / 1000).toFixed(2),
-                ExclusiveTimePercent: +(100 * idToExclusive[id] / totalExclusive).toFixed(2)
+                ExclusiveTimePercent: +(100 * idToExclusive[id] / totalExclusive).toFixed(2),
+                OSR:                  idToOSR[id]
             };
             routineList.push(entry);
         }
@@ -562,6 +675,70 @@
         });
         $scope.predicate = 'Run';
         $scope.reverse = false;
+    });
+
+    moarProfApp.controller('OSRDeoptController', function ($scope) {
+        // Walk call graph to build data.        
+        var idToName         = {};
+        var idToOSR          = {};
+        var idToDeoptOne     = {};
+        var idToDeoptAll     = {};
+        var maxOSR           = 1;
+        var maxDeoptOne      = 1;
+        var maxDeoptAll      = 1;
+        function walkCallGraphNode(node) {
+            if (!idToName[node.id]) {
+                idToName[node.id]     = node.name == "" ? "<anon>" : node.name;
+                idToOSR[node.id]      = 0;
+                idToDeoptOne[node.id] = 0;
+                idToDeoptAll[node.id] = 0;
+            }
+            idToOSR[node.id]      += node.osr;
+            idToDeoptOne[node.id] += node.deopt_one;
+            idToDeoptAll[node.id] += node.deopt_all;
+            if (idToOSR[node.id] > maxOSR)
+                maxOSR = idToOSR[node.id];
+            if (idToDeoptOne[node.id] > maxDeoptOne)
+                maxDeoptOne = idToDeoptOne[node.id];
+            if (idToDeoptAll[node.id] > maxDeoptAll)
+                maxDeoptAll = idToDeoptAll[node.id];
+            if (node.callees)
+                node.callees.map(walkCallGraphNode);
+        }
+        walkCallGraphNode(rawData[0].call_graph);
+
+        // Build up OSR, deopt one, and deopt all tables.
+        var osrs      = [];
+        var deoptOnes = [];
+        var deoptAlls = [];
+        for (id in idToName) {
+            if (idToOSR[id] > 0) {
+                osrs.push({
+                    Name:    idToName[id],
+                    Count:   idToOSR[id],
+                    Percent: Math.round(100 * idToOSR[id] / maxOSR)
+                });
+            }
+            if (idToDeoptOne[id] > 0) {
+                deoptOnes.push({
+                    Name:    idToName[id],
+                    Count:   idToDeoptOne[id],
+                    Percent: Math.round(100 * idToDeoptOne[id] / maxDeoptOne)
+                });
+            }
+            if (idToDeoptAll[id] > 0) {
+                deoptOnes.push({
+                    Name:    idToName[id],
+                    Count:   idToDeoptAll[id],
+                    Percent: Math.round(100 * idToDeoptAll[id] / maxDeoptAll)
+                });
+            }
+        }
+        $scope.OSRs      = osrs;
+        $scope.DeoptOnes = deoptOnes;
+        $scope.DeoptAlls = deoptAlls;
+        $scope.predicate = 'Count';
+        $scope.reverse   = true;
     });
 
     $(function () {
