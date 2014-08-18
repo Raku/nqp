@@ -567,14 +567,14 @@ class QAST::CompilerJS does DWIMYNameMangling {
         my $bind_named := '';
         for @params {
             if $_.slurpy {
-                say("//NYI: slurpy params {$_.name}");
+                #say("//NYI: slurpy params {$_.name}");
                 if $_.named {
                     $slurpy_named := $_; 
                 } else {
                     $slurpy := $_;
                 }
             } elsif $_.named {
-                say("//NYI: named params");
+                #say("//NYI: named params");
                 unless self.is_dynamic_var($_) {
                     @named.push(self.mangle_name($_.name));
                 }
