@@ -4037,3 +4037,33 @@ inline op nqp_string_equal_at(out INT, in STR, in STR, in INT) {
         }
     }
 }
+
+/*
+
+=item nqp_opendir
+=item nqp_nextfiledir
+=item nqp_closedir
+
+parrot supports only readdir to return the list of files in the directory.
+
+Mimic opendir and nextfiledir via an iterator on readdir.
+
+=cut
+
+*/
+inline op nqp_opendir(out PMC, in STR) {
+    STRING *path = $2;
+
+    if ($2) {
+      PMC *str_list = Parrot_file_readdir(interp, path);
+      VTABLE_init_pmc(interp, $1, str_list);
+    }
+}
+
+inline op nqp_nextfiledir(out STR, in PMC) {
+    PMC *array_iter = $2;
+    $1 = VTABLE_shift_string(interp, array_iter);
+}
+
+inline op nqp_closedir(in PMC) {
+}

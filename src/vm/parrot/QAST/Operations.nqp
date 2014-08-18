@@ -1976,6 +1976,9 @@ QAST::Operations.add_core_op('link', -> $qastcomp, $op {
         $op[0],
         $op[1]) );
 });
+QAST::Operations.add_core_pirop_mapping('opendir', 'nqp_opendir', 'Ps', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('nextfiledir', 'nqp_nextfiledir', 'sP', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('closedir', 'nqp_closedir', 'P', :inlinable(1));
 
 # terms
 QAST::Operations.add_core_pirop_mapping('time_i', 'time', 'I', :inlinable(1));
