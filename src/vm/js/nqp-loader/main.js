@@ -2,6 +2,7 @@ var sh = require('execSync');
 var temp = require('temp');
 var fs = require('fs');
 var map = require('source-map');
+var loaderUtils = require("loader-utils");
 
 var SourceNode = map.SourceNode;
 var p6source;
@@ -22,7 +23,9 @@ function toNode(chunk) {
 module.exports = function(source) {
   var path = this.options.nqpRepo;
 
-  console.log("loader", this);
+  var nqpRequest = loaderUtils.getRemainingRequest(this);
+  var jsRequest = loaderUtils.getCurrentRequest(this);
+  var query = loaderUtils.parseQuery(this.query);
 
   // Write our source code to a file
   var tmp = temp.openSync();
@@ -35,9 +38,11 @@ module.exports = function(source) {
 
   var data = JSON.parse(result.stdout);
 
-  p6source = "example.nqp";
+  p6source = nqpRequest;
   var node = new SourceNode(1,0, p6source, toNode(data));
-  var sourceAndMap = node.toStringWithSourceMap({file: "bundle.js"});
-
-  return sourceAndMap.code;
+  var sourceAndMap = node.toStringWithSourceMap({file: jsRequest});
+  
+  var map = JSON.parse(sourceAndMap.map.toString());
+  map.sourcesContent = [source];
+  this.callback(null, sourceAndMap.code, map);
 };

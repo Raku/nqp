@@ -5,7 +5,8 @@ module.exports = {
 //  plugins: [new ReloadPlugin("localhost")],
   output: {
     path: __dirname,
-    filename: "bundle.js"
+    filename: "bundle.js",
+    sourceMapFilename: "bundle.js.map"
   },
   module: {
     loaders: [

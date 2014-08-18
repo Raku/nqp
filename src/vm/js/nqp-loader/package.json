@@ -9,6 +9,7 @@
   "dependencies":{
       "temp": "*",
       "execSync": "*",
-      "source-map": "*"
+      "source-map": "*",
+      "loader-utils": "0.2.x"
   }
 }

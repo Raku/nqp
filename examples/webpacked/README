@@ -11,7 +11,7 @@ Should bundle up example.nqp into bundle.js, which is loaded by index.html.
 
 If you run:
 
-$ webpack-dev-server --progress --colors
+$ webpack-dev-server --progress --colors -d
 
 A webserver will startup at localhost:8080 and example.nqp will be automatically reloaded and recompiled when you change it.
 
