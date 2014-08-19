@@ -359,6 +359,8 @@ class QAST::OperationsJS {
         add_simple_op($func ~ '_n', $T_NUM, [$T_NUM], sub ($arg) {"Math.$func($arg)"});
     }
 
+    add_simple_op('pow_n', $T_NUM, [$T_NUM, $T_NUM], sub ($base, $exponent) {"Math.pow($base, $exponent)"});
+
     for <if unless> -> $op_name {
         add_op($op_name, sub ($comp, $node, :$want) {
             unless nqp::defined($want) {
