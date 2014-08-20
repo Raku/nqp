@@ -8,8 +8,9 @@ General stuff that helps all backends
     - add a test for nqp::index with three arguments to t/nqp/59-nqpop.t - EASY
     - a test for if cond() -> $value-of-cond {...} - EASY
 
-Improving the code quality (which currently is a bit atrocious) 
+Improving the code quality (which is a bit less atrocious then before ) 
     - Write a nqptidy (or a p6tidy) to make sure the nqp code has a consistent style
+    - Tricky and/or confusing bits of code should be identified so that they get commented
 
 Ease of development
     - support cross-compiling on moarvm, which is assumed to be much faster then parrot
