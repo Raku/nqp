@@ -222,6 +222,8 @@ class QAST::OperationsJS {
     add_infix_op('concat', $T_STR, '+', $T_STR, $T_STR);
 
     add_infix_op('isle_n', $T_NUM, '<=', $T_NUM, $T_BOOL);
+    add_infix_op('islt_n', $T_NUM, '<', $T_NUM, $T_BOOL);
+    add_infix_op('isgt_n', $T_NUM, '>', $T_NUM, $T_BOOL);
     add_infix_op('iseq_n', $T_NUM, '==', $T_NUM, $T_BOOL);
     add_infix_op('isne_n', $T_NUM, '!=', $T_NUM, $T_BOOL);
 
@@ -229,6 +231,10 @@ class QAST::OperationsJS {
     add_infix_op('isne_s', $T_STR, '!=', $T_STR, $T_BOOL);
 
     add_infix_op('eqaddr', $T_OBJ, '===', $T_OBJ, $T_BOOL);
+
+    # Integer arithmetic
+    add_simple_op('add_i', $T_INT, [$T_INT, $T_INT], sub ($a, $b) {"(($a + $b) | 0)"});
+    add_simple_op('sub_i', $T_INT, [$T_INT, $T_INT], sub ($a, $b) {"(($a - $b) | 0)"});
 
     sub add_cmp_op($op, $type) {
         add_simple_op($op, $T_INT, [$type, $type], sub ($a, $b) {
@@ -239,6 +245,37 @@ class QAST::OperationsJS {
     add_cmp_op('cmp_i', $T_INT);
     add_cmp_op('cmp_n', $T_NUM);
     add_cmp_op('cmp_s', $T_STR);
+
+    for <preinc predec> -> $op {
+        add_op($op, sub ($comp, $node, :$want) {
+            my $action := $op eq 'preinc' ?? 'add_i' !! 'sub_i';
+            $comp.as_js(
+                QAST::Op.new(
+                    :op('bind'),
+                    $node[0],
+                    QAST::Op.new(:op($action),$node[0],QAST::IVal.new(:value(1)))
+                ),
+                :$want
+            );
+        });
+    }
+
+    for <postinc postdec> -> $op {
+        add_op($op, sub ($comp, $node, :$want) {
+            my $tmp := $*BLOCK.add_tmp();
+            my $var := $comp.as_js($node[0], :want($T_INT));
+            my $action := $op eq 'postinc' ?? 'add_i' !! 'sub_i';
+            my $do_action := $comp.as_js(
+                QAST::Op.new(
+                    :op('bind'),
+                    $node[0],
+                    QAST::Op.new(:op($action),$node[0],QAST::IVal.new(:value(1)))
+                ),
+                :want($T_VOID)
+            );
+            Chunk.new($T_INT, $tmp, [$var, "$tmp = {$var.expr};\n", $do_action]);
+       });
+    }
 
     add_simple_op('chars', $T_INT, [$T_STR], sub ($string) {"$string.length"});
 
@@ -424,6 +461,45 @@ class QAST::OperationsJS {
                 $want != $T_VOID ?? "$result = {$else.expr}" !! '',
                 "\}"
             ], :node($node));
+        });
+    }
+
+    for <while until repeat_while repeat_until> -> $op {
+        add_op($op, sub ($comp, $node, :$want) {
+            my $label;
+            my $handler := 1;
+            my @operands;
+            for $node.list {
+                if $_.named eq 'nohandler' { $handler := 0; }
+                elsif $_.named eq 'label' { $label := $_; }
+                else { @operands.push($_) }
+            }
+
+            return $comp.NYI("3 argument $op") if +@operands == 3;
+            # TODO - return value
+            # TODO while ... -> $cond {} 
+
+            my $cond := $comp.as_js(@operands[0], :want($T_BOOL));
+            my $body := $comp.as_js(@operands[1], :want($T_VOID));
+
+            if $op eq 'while' || $op eq 'until' {
+                my $neg := $op eq 'while' ?? '!' !! '';
+                Chunk.new($T_VOID, '', [
+                    "for (;;) \{\n",
+                    $cond,
+                    "if ($neg {$cond.expr}) \{break;\}\n",
+                    $body,
+                    "\}"
+                ]);
+            } else {
+                my $neg := $op eq 'repeat_while' ?? '' !! '!';
+                Chunk.new($T_VOID, '', [
+                    "do \{\n",
+                    $body,
+                    $cond,
+                    "\} while ($neg {$cond.expr});"
+                ]);
+            }
         });
     }
 

@@ -44,6 +44,14 @@ exports.to_num = function(arg) {
   }
 };
 
+exports.to_int = function(arg) {
+  if (typeof arg == 'number') {
+    return arg | 0;
+  } else {
+    throw "Can't convert to int";
+  }
+};
+
 exports.to_bool = function(arg) {
   if (typeof arg == 'number') {
     return arg ? 1 : 0;
