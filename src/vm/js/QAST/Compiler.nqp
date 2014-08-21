@@ -293,6 +293,10 @@ class QAST::OperationsJS {
         nqp::defined($from) ?? "$string.indexOf($pattern,$from)" !! "$string.indexOf($pattern)";
     });
 
+    add_simple_op('substr', $T_STR, [$T_STR, $T_INT, $T_INT], sub ($string, $start, $length?) {
+        nqp::defined($length) ?? "$string.substr($start,$length)" !! "$string.substr($start)";
+    });
+
 
     add_simple_op('chr', $T_STR, [$T_INT], sub ($code) {"String.fromCharCode($code)"});
 
