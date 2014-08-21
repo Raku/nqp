@@ -216,6 +216,7 @@ class QAST::OperationsJS {
     add_infix_op('mul_n', $T_NUM, '*', $T_NUM, $T_NUM);
     # TODO - think about divide by zero
     add_infix_op('div_n', $T_NUM, '/', $T_NUM, $T_NUM);
+    add_infix_op('mod_n', $T_NUM, '%', $T_NUM, $T_NUM);
 
     add_simple_op('neg_n', $T_NUM, [$T_NUM], sub ($num) {"(-$num)"});
 
@@ -224,11 +225,16 @@ class QAST::OperationsJS {
     add_infix_op('isle_n', $T_NUM, '<=', $T_NUM, $T_BOOL);
     add_infix_op('islt_n', $T_NUM, '<', $T_NUM, $T_BOOL);
     add_infix_op('isgt_n', $T_NUM, '>', $T_NUM, $T_BOOL);
+    add_infix_op('isge_n', $T_NUM, '>=', $T_NUM, $T_BOOL);
     add_infix_op('iseq_n', $T_NUM, '==', $T_NUM, $T_BOOL);
     add_infix_op('isne_n', $T_NUM, '!=', $T_NUM, $T_BOOL);
 
     add_infix_op('iseq_s', $T_STR, '==', $T_STR, $T_BOOL);
     add_infix_op('isne_s', $T_STR, '!=', $T_STR, $T_BOOL);
+
+    add_infix_op('bitor_i', $T_INT, '|', $T_INT, $T_INT);
+    add_infix_op('bitand_i', $T_INT, '&', $T_INT, $T_INT);
+    add_infix_op('bitxor_i', $T_INT, '^', $T_INT, $T_INT);
 
     add_infix_op('eqaddr', $T_OBJ, '===', $T_OBJ, $T_BOOL);
 
