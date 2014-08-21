@@ -25,6 +25,18 @@ op.isinvokable = function(obj) {
   return (typeof obj == 'function' ? 1 : 0);
 };
 
+op.escape = function(str) {
+  return str
+    .replace(/\\/g, '\\\\')
+    .replace(/\x1B/g, '\\e')
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r')
+    .replace(/\t/g, '\\t')
+    .replace(/\f/g, '\\f')
+    .replace(/[\b]/g, '\\b')
+    .replace(/"/g, '\\"');
+};
+
 exports.to_str = function(arg) {
   if (typeof arg == 'number') {
     return arg.toString();

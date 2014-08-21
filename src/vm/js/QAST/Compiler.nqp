@@ -310,6 +310,8 @@ class QAST::OperationsJS {
 
     add_simple_op('null', $T_OBJ, [], sub () {"null"});
 
+    add_simple_op('escape', $T_STR, [$T_STR], sub ($string) {"nqp.op.escape($string)"});
+
     add_op('getcomp', sub ($comp, $node, :$want) {
         my $arg := $comp.as_js($node[0], :want($T_STR));
         my $tmp := $*BLOCK.add_tmp();
