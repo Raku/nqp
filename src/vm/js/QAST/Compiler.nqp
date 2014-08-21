@@ -344,6 +344,8 @@ class QAST::OperationsJS {
 
     add_simple_op('falsey', $T_BOOL, [$T_BOOL], sub ($boolified) {"(!$boolified)"});
 
+    add_simple_op('not_i', $T_BOOL, [$T_INT], sub ($int) {"(!$int)"});
+
     add_op('bind', sub ($comp, $node, :$want) {
         my @children := $node.list;
         if +@children != 2 {
