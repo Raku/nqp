@@ -309,8 +309,10 @@ class QAST::OperationsJS {
     add_simple_op('ord', $T_INT, [$T_STR, $T_INT], sub ($string, $pos='0') {"$string.charCodeAt($pos)"});
 
     add_simple_op('null', $T_OBJ, [], sub () {"null"});
+    add_simple_op('isnull', $T_BOOL, [$T_OBJ], sub ($obj) {"($obj === null)"});
 
     add_simple_op('escape', $T_STR, [$T_STR], sub ($string) {"nqp.op.escape($string)"});
+    add_simple_op('x', $T_STR, [$T_STR, $T_INT], sub ($string, $times) {"nqp.op.x($string,$times)"});
 
     add_op('getcomp', sub ($comp, $node, :$want) {
         my $arg := $comp.as_js($node[0], :want($T_STR));

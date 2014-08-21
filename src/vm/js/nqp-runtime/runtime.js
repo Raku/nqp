@@ -37,6 +37,13 @@ op.escape = function(str) {
     .replace(/"/g, '\\"');
 };
 
+op.x = function(str, times) {
+  if (!times) return '';
+  var ret = str;
+  while (--times) ret += str;
+  return ret;
+};
+
 exports.to_str = function(arg) {
   if (typeof arg == 'number') {
     return arg.toString();
