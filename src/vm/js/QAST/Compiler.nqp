@@ -219,6 +219,7 @@ class QAST::OperationsJS {
     add_infix_op('mod_n', $T_NUM, '%', $T_NUM, $T_NUM);
 
     add_simple_op('neg_n', $T_NUM, [$T_NUM], sub ($num) {"(-$num)"});
+    add_simple_op('neg_i', $T_INT, [$T_INT], sub ($num) {"(-$num)"});
 
     add_infix_op('concat', $T_STR, '+', $T_STR, $T_STR);
 
@@ -241,6 +242,7 @@ class QAST::OperationsJS {
     # Integer arithmetic
     add_simple_op('add_i', $T_INT, [$T_INT, $T_INT], sub ($a, $b) {"(($a + $b) | 0)"});
     add_simple_op('sub_i', $T_INT, [$T_INT, $T_INT], sub ($a, $b) {"(($a - $b) | 0)"});
+    add_simple_op('div_i', $T_INT, [$T_INT, $T_INT], sub ($a, $b) {"(($a / $b) | 0)"});
 
     sub add_cmp_op($op, $type) {
         add_simple_op($op, $T_INT, [$type, $type], sub ($a, $b) {
