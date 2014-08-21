@@ -230,6 +230,7 @@ class QAST::OperationsJS {
     add_infix_op('iseq_n', $T_NUM, '==', $T_NUM, $T_BOOL);
     add_infix_op('isne_n', $T_NUM, '!=', $T_NUM, $T_BOOL);
 
+    add_infix_op('iseq_i', $T_INT, '==', $T_INT, $T_BOOL);
     add_infix_op('iseq_s', $T_STR, '==', $T_STR, $T_BOOL);
     add_infix_op('isne_s', $T_STR, '!=', $T_STR, $T_BOOL);
 
