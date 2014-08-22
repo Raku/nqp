@@ -59,6 +59,7 @@ class NQP::Actions is HLL::Actions {
     method comp_unit($/) {
         my $mainline := $<statementlist>.ast;
         my $unit     := $*W.pop_lexpad();
+        $unit.name('<mainline>');
 
         # If our caller wants to know the mainline ctx, provide it here.
         # (CTXSAVE is inherited from HLL::Actions.) Don't do this when

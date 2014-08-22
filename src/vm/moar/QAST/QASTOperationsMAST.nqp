@@ -2584,6 +2584,10 @@ QAST::MASTOperations.add_core_moarop_mapping('continuationreset', 'continuationr
 QAST::MASTOperations.add_core_moarop_mapping('continuationcontrol', 'continuationcontrol');
 QAST::MASTOperations.add_core_moarop_mapping('continuationinvoke', 'continuationinvoke');
 
+# MoarVM-specific profiling ops.
+QAST::MASTOperations.add_core_moarop_mapping('mvmstartprofile', 'startprofile', 0);
+QAST::MASTOperations.add_core_moarop_mapping('mvmendprofile', 'endprofile');
+
 sub resolve_condition_op($kind, $negated) {
     return $negated ??
         $kind == $MVM_reg_int64 ?? 'unless_i' !!

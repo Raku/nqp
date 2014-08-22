@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="moarProfApp" ng-controller="NavigationController">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MoarVM Profiler Results</title>
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+    <style>
+    body {
+      min-height: 500px;
+      padding-top: 70px;
+    }
+    </style>
+  </head>
+  <body >
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand">MoarVM Profiler Results</a>
+        </div>
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li ng-class="Tab == 'Overview' ? 'active' : ''"><a href="#overview" ng-click="Tab = 'Overview'">Overview</a></li>
+            <li ng-class="Tab == 'Routines' ? 'active' : ''"><a href="#routines" ng-click="Tab = 'Routines'">Routines</a></li>
+            <li ng-class="Tab == 'Call Graph' ? 'active' : ''"><a href="#callgraph" ng-click="Tab = 'Call Graph'">Call Graph</a></li>
+            <li ng-class="Tab == 'Allocations' ? 'active' : ''"><a href="#allocations" ng-click="Tab = 'Allocations'">Allocations</a></li>
+            <li ng-class="Tab == 'GC' ? 'active' : ''"><a href="#gc" ng-click="Tab = 'GC'">GC</a></li>
+            <li ng-class="Tab == 'OSR/Deopt' ? 'active' : ''"><a href="#osrdeopt" ng-click="Tab = 'OSR/Deopt'">OSR / Deopt</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container" ng-show="Tab == 'Overview'">
+      <div ng-controller="OverviewController">
+        <h3>Time Spent</h3>
+        <p>The profiled code ran for <strong>{{TotalTime}}ms</strong>. Of this,
+          <strong>{{OverheadTime}}ms</strong> were spent on garbage collection
+          and dynamic optimization (that's <strong>{{OverheadTimePercent}}%</strong>).
+        </p>
+        <table class="table table-striped table-condensed table-bordered">
+          <tbody>
+            <tr>
+              <td><strong>Executing Code</strong></td>
+              <td>
+                <div class="pull-left" style="width: 310px">
+                  <div class="progress" style="width: 300px">
+                    <div class="progress-bar progress-bar-success" role="progressbar" style="width: {{ExecutingTimePercent}}%;">
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  {{ExecutingTimePercent}}%
+                  ({{ExecutingTime}}ms)
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Garbage Collection</strong></td>
+              <td>
+                <div class="pull-left" style="width: 310px">
+                  <div class="progress" style="width: 300px">
+                    <div class="progress-bar progress-bar-warning" role="progressbar" style="width: {{GCTimePercent}}%;">
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  {{GCTimePercent}}%
+                  ({{GCTime}}ms)
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Dynamic Optimization</strong></td>
+              <td>
+                <div class="pull-left" style="width: 310px">
+                  <div class="progress" style="width: 300px">
+                    <div class="progress-bar progress-bar-warning" role="progressbar" style="width: {{SpeshTimePercent}}%;">
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  {{SpeshTimePercent}}%
+                  ({{SpeshTime}}ms)
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <h3>Call Frames</h3>
+        <p>In total, <strong>{{EntriesWithoutInline}} call frames</strong> were
+          entered and exited by the profiled code. Inlining elminated the need
+          to create <strong>{{EntriesInline}} call frames</strong> (that's
+          <strong>{{InlinePercent}}%</strong>).
+        </p>
+        <table class="table table-striped table-condensed table-bordered">
+          <tbody>
+            <tr>
+              <td><strong>Interpreted Frames</strong></td>
+              <td>
+                <div class="pull-left" style="width: 310px">
+                  <div class="progress" style="width: 300px">
+                    <div class="progress-bar progress-bar-danger" role="progressbar" style="width: {{InterpFramesPercent}}%;">
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  {{InterpFramesPercent}}%
+                  ({{InterpFrames}})
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Specialized Frames</strong></td>
+              <td>
+                <div class="pull-left" style="width: 310px">
+                  <div class="progress" style="width: 300px">
+                    <div class="progress-bar progress-bar-warning" role="progressbar" style="width: {{SpeshFramesPercent}}%;">
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  {{SpeshFramesPercent}}%
+                  ({{SpeshFrames}})
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>JIT-Compiled Frames</strong></td>
+              <td>
+                <div class="pull-left" style="width: 310px">
+                  <div class="progress" style="width: 300px">
+                    <div class="progress-bar progress-bar-success" role="progressbar" style="width: {{JITFramesPercent}}%;">
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  {{JITFramesPercent}}%
+                  ({{JITFrames}})
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Garbage Collection</h3>
+        <p>The profiled code did <strong>{{GCRuns}} garbage collections</strong>.
+          There were <strong>{{FullGCRuns}} full collections</strong> involving
+          the entire heap.
+        </p>
+        <p ng-show="{{GCRuns > 0}}">
+          The average nursery collection time was <strong>{{NurseryAverage}}ms</strong>.
+          <span ng-show="{{FullGCRuns > 0}}">
+            The average full collection time was <strong>{{FullAverage}}ms</strong>.
+          </span>
+        </p>
+
+        <h3>Dynamic Optimization</h3>
+        <p>Of {{OptimizedFrames}} specialized or JIT-compiled frames, there were
+          <strong>{{DeoptOnes}} deoptimizations</strong> (that's <strong>
+          {{DeoptOnePercent}}%</strong> of all optimized frames).
+        </p>
+        <p ng-show="DeoptAlls == 0">
+          There was <strong>no global deoptimization</strong> triggered by the
+          profiled code.
+        </p>
+        <p ng-show="DeoptAlls == 1">
+          There was <strong>one global deoptimization</strong> triggered by the
+          profiled code.
+        </p>
+        <p ng-show="DeoptAlls > 1">
+          There were <strong>{{DeoptAlls}} global deoptimization</strong> triggered
+          by the profiled code.
+        </p>
+        <p ng-show="OSRs == 0">
+          There was <strong>no On Stack Replacement</strong> performed while
+          executing the profiled code (normal if the code lacks long-running
+          loops with many iterations).
+        </p>
+        <p ng-show="OSRs == 1">
+            There was <strong>one On Stack Replacement</strong> performed while
+            executing the profiled code.
+        </p>
+        <p ng-show="OSRs > 1">
+            There were <strong>{{OSRs}} On Stack Replacements</strong> performed
+            while executing the profiled code.
+        </p>
+      </div>
+    </div>
+  
+    <div class="container" ng-show="Tab == 'Routines'">
+      <div ng-controller="RoutinesController">
+      <table class="table table-striped table-condensed table-bordered">
+        <thead>
+          <th>
+            <a href="" ng-click="reverse = predicate == 'Name' ? !reverse : false; predicate = 'Name';">Name</a>
+            <input ng-model="NameFilter">
+          </th>
+          <th><a href="" ng-click="reverse = predicate == 'Entries' ? !reverse : true; predicate = 'Entries';">Entries</a></th>
+          <th><a href="" ng-click="reverse = predicate == 'InclusiveTimePercent' ? !reverse : true; predicate = 'InclusiveTimePercent';">Inclusive Time</a></th>
+          <th><a href="" ng-click="reverse = predicate == 'ExclusiveTimePercent' ? !reverse : true; predicate = 'ExclusiveTimePercent';">Exclusive Time</a></th>
+          <th>
+            <span class="text-danger" data-toggle="tooltip" data-placement="bottom" title="Unoptimized interpreted code">Interp</span> /
+            <span class="text-warning" data-toggle="tooltip" data-placement="bottom" title="Type-specialized interpreted code">Spesh</span> /
+            <span class="text-success" data-toggle="tooltip" data-placement="bottom" title="Type-specialized, JIT-compiled code">JIT</span>
+          </th>
+        </thead>
+        <tbody>
+          <tr ng-repeat="routine in Routines | filter:NameFilter | orderBy:predicate:reverse">
+            <td>
+              <strong>{{routine.Name}}</strong><br />
+              <span class="text-muted">{{routine.File}}:{{routine.Line}}</span>
+            </td>
+            <td>{{routine.Entries}}</td>
+            <td>
+              <div class="pull-left" style="width: 70px">
+                <div class="progress" style="width: 60px">
+                  <div class="progress-bar" role="progressbar" style="width: {{routine.InclusiveTimePercent}}%;">
+                  </div>
+                </div>
+              </div>
+              <div>
+                <strong>{{routine.InclusiveTimePercent}}%</strong>
+               ({{routine.InclusiveTime}}ms)
+              </div>
+            </td>
+            <td>
+              <div class="pull-left" style="width: 70px">
+                <div class="progress" style="width: 60px">
+                  <div class="progress-bar" role="progressbar" style="width: {{routine.ExclusiveTimePercent}}%;">
+                  </div>
+                </div>
+              </div>
+              <div>
+                <strong>{{routine.ExclusiveTimePercent}}%</strong>
+               ({{routine.ExclusiveTime}}ms)
+              </div>
+            </td>
+            <td>
+              <div class="pull-left" style="width: 110px">
+                <div class="progress" style="width: 100px">
+                  <div class="progress-bar progress-bar-danger" style="width: {{routine.InterpEntriesPercent}}%">
+                  </div>
+                  <div class="progress-bar progress-bar-warning" style="width: {{routine.SpeshEntriesPercent}}%">
+                  </div>
+                  <div class="progress-bar progress-bar-success" style="width: {{routine.JITEntriesPercent}}%">
+                  </div>
+                </div>
+              </div>
+              <div>
+                <span class="label label-default" ng-show="routine.OSR">OSR</span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+
+    <div class="container" ng-show="Tab == 'Call Graph'">
+      <div ng-controller="CallGraphController">
+
+        <ol class="breadcrumb">
+          <li><strong>Callers:</strong></li>
+          <li ng-show="RecentCallers.length == 0"><em>None</em></li>
+          <li ng-repeat="caller in RecentCallers">
+            <a href="" ng-click="toCaller(caller)">
+              {{caller.name == '' ? '&lt;anon&gt;' : caller.name}}
+            </a>
+          </li>
+        </ol>
+
+        <p>
+          <span class="lead">{{Current.name == '' ? '&lt;anon&gt;' : Current.name}}</span><br />
+          <span class="text-muted">{{File}}:{{Line}}</span>
+        </p>
+
+        <table class="table table-striped table-condensed table-bordered">
+          <tbody>
+            <tr>
+              <td><strong>Calls <span class="text-success">(Inlined)</span></strong></td>
+              <td>
+                <div class="pull-left" style="width: 310px">
+                  <div class="progress" style="width: 300px">
+                    <div class="progress-bar" role="progressbar" style="width: {{Percent}}%;">
+                    </div>
+                    <div class="progress-bar progress-bar-success" role="progressbar" style="width: {{InlinePercent}}%;">
+                    </div>
+                  </div>
+                </div>
+                <div ng-show="InlinePercent == 0">
+                  {{Entries}}
+                </div>
+                <div ng-show="InlinePercent != 0">
+                  {{Entries}} +
+                  <span class="text-success">{{InlineEntries}} ({{InlinePercent}}%)</span>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Interpreted Calls</strong></td>
+              <td>
+                <div class="pull-left" style="width: 310px">
+                  <div class="progress" style="width: 300px">
+                    <div class="progress-bar progress-bar-danger" role="progressbar" style="width: {{InterpPercent}}%;">
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  {{InterpPercent}}%
+                  ({{InterpEntries}})
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Specialized Calls</strong></td>
+              <td>
+                <div class="pull-left" style="width: 310px">
+                  <div class="progress" style="width: 300px">
+                    <div class="progress-bar progress-bar-warning" role="progressbar" style="width: {{SpeshPercent}}%;">
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  {{SpeshPercent}}%
+                  ({{SpeshEntries}})
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>JIT-Compiled Calls</strong></td>
+              <td>
+                <div class="pull-left" style="width: 310px">
+                  <div class="progress" style="width: 300px">
+                    <div class="progress-bar progress-bar-success" role="progressbar" style="width: {{JITPercent}}%;">
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  {{JITPercent}}%
+                  ({{JITEntries}})
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+          
+        <div class="panel panel-default">
+          <div class="panel-heading">Callees</div>
+          <table class="table table-striped table-condensed table-bordered" ng-show="Callees.length > 0">
+            <thead>
+              <th>
+                <a href="" ng-click="reverse = predicate == 'Name' ? !reverse : false; predicate = 'Name';">Name</a>
+                <input ng-model="NameFilter">
+              </th>
+              <th><a href="" ng-click="reverse = predicate == 'Calls' ? !reverse : true; predicate = 'Calls';">Calls</a></th>
+              <th><a href="" ng-click="reverse = predicate == 'TimePercent' ? !reverse : true; predicate = 'TimePercent';">Time In Callee</a></th>
+              <th>
+                <span class="text-danger" data-toggle="tooltip" data-placement="bottom" title="Unoptimized interpreted code">Interp</span> /
+                <span class="text-warning" data-toggle="tooltip" data-placement="bottom" title="Type-specialized interpreted code">Spesh</span> /
+                <span class="text-success" data-toggle="tooltip" data-placement="bottom" title="Type-specialized, JIT-compiled code">JIT</span>
+              </th>
+              <th>
+                <span data-toggle="tooltip" data-placement="bottom" title="Code from this callee was flattened into the routine by the optimizer">Inlined</span>
+              </th>
+            </thead>
+            <tbody>
+              <tr ng-repeat="callee in Callees | filter:NameFilter | orderBy:predicate:reverse">
+                <td>
+                  <strong><a href="" ng-click="toCallee(callee.Node)">{{callee.Name}}</a></strong><br />
+                  <span class="text-muted">{{callee.File}}:{{callee.Line}}</span>
+                </td>
+                <td>{{callee.Calls}}</td>
+                <td>
+                  <div class="pull-left" style="width: 70px">
+                    <div class="progress" style="width: 60px">
+                      <div class="progress-bar" role="progressbar" style="width: {{callee.TimePercent}}%;">
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <strong>{{callee.TimePercent}}%</strong>
+                   ({{callee.Time}}ms)
+                  </div>
+                </td>
+                <td>
+                  <div class="progress" style="width: 100px">
+                    <div class="progress-bar progress-bar-danger" style="width: {{callee.InterpCallsPercent}}%">
+                    </div>
+                    <div class="progress-bar progress-bar-warning" style="width: {{callee.SpeshCallsPercent}}%">
+                    </div>
+                    <div class="progress-bar progress-bar-success" style="width: {{callee.JITCallsPercent}}%">
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div ng-show="callee.VeryInline">
+                    <span class="text-success">
+                      <span class="glyphicon glyphicon-star"></span>
+                    </span>
+                    {{callee.InlinedPercent}}%
+                  </div>
+                  <div ng-show="callee.SometimesInline">
+                    <span class="text-muted">
+                      <span class="glyphicon glyphicon-star-empty"></span>
+                    </span>
+                    {{callee.InlinedPercent}}%
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="panel-body" ng-show="Callees.length == 0">
+            This code has no callees.
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="container" ng-show="Tab == 'Allocations'">
+      <div ng-controller="AllocationsController">
+      <table class="table table-striped table-condensed table-bordered">
+        <thead>
+          <th>
+            <a href="" ng-click="reverse = predicate == 'Name' ? !reverse : false; predicate = 'Name';">Name</a>
+            <input ng-model="NameFilter">
+          </th>
+          <th><a href="" ng-click="reverse = predicate == 'Allocations' ? !reverse : true; predicate = 'Allocations';">Allocations</a></th>
+          <th>Allocating Routines</th>
+        </thead>
+        <tbody>
+          <tr ng-repeat="alloc in AllocationSummary | filter:NameFilter | orderBy:predicate:reverse">
+            <td><strong>{{alloc.Name}}</strong></td>
+            <td>
+              <div class="pull-left" style="width: 210px">
+                <div class="progress" style="width: 200px">
+                  <div class="progress-bar" role="progressbar" style="width: {{alloc.AllocationsPercent}}%;">
+                  </div>
+                </div>
+              </div>
+              <div>
+                {{alloc.Allocations}}
+              </div>
+            </td>
+            <td>
+              <a href="" ng-click="showAllocatingRoutines(alloc)">View</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="modal fade" id="allocatingRoutinesModal" tabindex="-1" role="dialog" aria-labelledby="allocatingRoutinesModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+              <h4 class="modal-title" id="allocatingRoutinesModalLabel">
+                Routines Allocating {{CurrentAllocatingRoutine}}
+              </h4>
+            </div>
+            <div class="modal-body">
+              <table class="table table-striped table-condensed table-bordered">
+                <thead>
+                  <th>
+                    <a href="" ng-click="routineReverse = routinePredicate == 'Name' ? !routineReverse : false; routinePredicate = 'Name';">Name</a>
+                    <input ng-model="RoutineNameFilter">
+                  </th>
+                  <th><a href="" ng-click="routineReverse = routinePredicate == 'Allocations' ? !routineReverse : true; routinePredicate = 'Allocations';">Allocations</a></th>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="routine in CurrentAllocatingRoutineStats | filter:RoutineNameFilter | orderBy:routinePredicate:routineReverse">
+                    <td>
+                      <strong>{{routine.Name}}</strong><br />
+                      <span class="text-muted">{{routine.File}}:{{routine.Line}}</span>
+                    </td>
+                    <td>
+                      <div class="pull-left" style="width: 210px">
+                        <div class="progress" style="width: 200px">
+                          <div class="progress-bar" role="progressbar" style="width: {{routine.AllocationsPercent}}%;">
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        {{routine.Allocations}}
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+    
+    <div class="container" ng-show="Tab == 'GC'">
+      <div ng-controller="GCController">
+      <table class="table table-striped table-condensed table-bordered">
+        <thead>
+          <th>
+            <a href="" ng-click="reverse = predicate == 'Run' ? !reverse : false; predicate = 'Run';">Run</a>
+          </th>
+          <th>Full</th>
+          <th>
+            <a href="" ng-click="reverse = predicate == 'Time' ? !reverse : false; predicate = 'Time';">Time</a>
+          </th>
+          <th>
+            Nursery:
+            <span class="text-danger" data-toggle="tooltip" data-placement="bottom" title="Bytes retained in the nursery">Retained</span> /
+            <span class="text-warning" data-toggle="tooltip" data-placement="bottom" title="Bytes promoted to gen2 and now available in nursery">Promoted</span> /
+            <span class="text-success" data-toggle="tooltip" data-placement="bottom" title="Bytes released and now availabe in nursery">Freed</span>
+          </th>
+        </thead>
+        <tbody>
+          <tr ng-repeat="gc in GCs | orderBy:predicate:reverse">
+            <td><strong>{{gc.Run}}</strong></td>
+            <td>
+              <span class="text-success" ng-show="gc.Full">
+                <span class="glyphicon glyphicon-star"></span>
+              </span>
+            </td>
+            <td>
+              <div class="pull-left" style="width: 210px">
+                <div class="progress" style="width: 200px">
+                  <div class="progress-bar" role="progressbar" style="width: {{gc.TimePercent}}%;">
+                  </div>
+                </div>
+              </div>
+              <div>
+                {{gc.Time}}ms
+              </div>
+            </td>
+            <td>
+              <div class="pull-left" style="width: 210px">
+                <div class="progress" style="width: 200px">
+                  <div class="progress-bar progress-bar-danger" style="width: {{gc.RetainedPercent}}%">
+                  </div>
+                  <div class="progress-bar progress-bar-warning" style="width: {{gc.PromotedPercent}}%">
+                  </div>
+                  <div class="progress-bar progress-bar-success" style="width: {{gc.ClearedPercent}}%">
+                  </div>
+                </div>
+              </div>
+              <div>
+                {{gc.RetainedKilobytes}}KB /
+                {{gc.PromotedKilobytes}}KB /
+                {{gc.ClearedKilobytes}}KB
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+    
+    <div class="container" ng-show="Tab == 'OSR/Deopt'">
+      <div ng-controller="OSRDeoptController">
+        <h3>OSR</h3>
+        <p>On Stack Replacement detects routines containing hot loops that are
+          being interpreted, and replaces them with specialized or JIT-compiled
+          code.</p>
+        <table class="table table-striped table-condensed table-bordered" ng-show="OSRs.length > 0">
+          <thead>
+            <th>
+              Routine
+            </th>
+            <th>On Stack Replacements</th>
+          </thead>
+          <tbody>
+            <tr ng-repeat="osr in OSRs | orderBy:predicate:reverse">
+              <td>
+                <strong>{{osr.Name}}</strong><br />
+                <span class="text-muted">{{osr.File}}:{{osr.Line}}</span>
+              </td>
+              <td>
+                <div class="pull-left" style="width: 310px">
+                  <div class="progress" style="width: 300px">
+                    <div class="progress-bar" role="progressbar" style="width: {{osr.Percent}}%;">
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  {{osr.Count}}
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p ng-show="OSRs.length == 0">
+          <em>No OSR was performed during this profile.</em>
+        </p>
+
+        <h3>Local Deoptimization</h3>
+        <p>Local deoptimization happens when a guard in specialized or JIT-compiled
+          code fails. Since the code was produced assuming the guard would hold, 
+          the VM falls back to running the safe, but slower, interpreted code.</p>
+        <table class="table table-striped table-condensed table-bordered" ng-show="DeoptOnes.length > 0">
+          <thead>
+            <th>
+              Routine
+            </th>
+            <th>Deoptimizations</th>
+          </thead>
+          <tbody>
+            <tr ng-repeat="deopt in DeoptOnes | orderBy:predicate:reverse">
+              <td>
+                <strong>{{deopt.Name}}</strong><br />
+                <span class="text-muted">{{deopt.File}}:{{deopt.Line}}</span>
+              </td>
+              <td>
+                <div class="pull-left" style="width: 310px">
+                  <div class="progress" style="width: 300px">
+                    <div class="progress-bar" role="progressbar" style="width: {{deopt.Percent}}%;">
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  {{deopt.Count}}
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p ng-show="DeoptOnes.length == 0">
+          <em>No local deoptimizations occurred during this profile.</em>
+        </p>
+
+        <h3>Global Deoptimization</h3>
+        <p>Global deoptimization happens when an event occurs that renders
+          all currently type-specialized or JIT-compiled code on the call
+          stack potentially invalid. Mixins - changing the type of an object
+          in place - are a common reason.</p>
+        <table class="table table-striped table-condensed table-bordered" ng-show="DeoptAlls.length > 0">
+          <thead>
+            <th>
+              Routine
+            </th>
+            <th>Deoptimizations</th>
+          </thead>
+          <tbody>
+            <tr ng-repeat="deopt in DeoptAlls | orderBy:predicate:reverse">
+              <td>
+                <strong>{{deopt.Name}}</strong><br />
+                <span class="text-muted">{{deopt.File}}:{{deopt.Line}}</span>
+              </td>
+              <td>
+                <div class="pull-left" style="width: 310px">
+                  <div class="progress" style="width: 300px">
+                    <div class="progress-bar" role="progressbar" style="width: {{deopt.Percent}}%;">
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  {{deopt.Count}}
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p ng-show="DeoptAlls.length == 0">
+          <em>No global deoptimizations occurred during this profile.</em>
+        </p>
+
+      </div>
+    </div>
+
+    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.21/angular.min.js"></script>
+    <script>
+    var rawData = JSON.parse('{{{PROFIELR_OUTPUT}}}');
+
+    // Extract some common things out of the raw data.
+    var nodeIdToName = {};
+    var nodeIdToFile = {};
+    var nodeIdToLine = {};
+    (function () {
+        function walkCallGraphNode(node) {
+            if (!nodeIdToName[node.id]) {
+                nodeIdToName[node.id] = node.name == "" ? "<anon>"    : node.name;
+                nodeIdToLine[node.id] = node.line < 1   ? "<unknown>" : node.line;
+                nodeIdToFile[node.id] = node.file == "" ? "<unknown>" : node.file;
+            }
+            if (node.callees)
+                node.callees.map(walkCallGraphNode);
+        }
+        walkCallGraphNode(rawData[0].call_graph);
+    }());
+
+    // Register application and add controllers.
+    var moarProfApp = angular.module('moarProfApp', []);
+
+    moarProfApp.controller('NavigationController', function ($scope) {
+        $scope.Tab = 'Overview';
+    });
+
+    moarProfApp.controller('OverviewController', function ($scope) {
+        var totalTime     = rawData[0].total_time;
+        var speshTime     = rawData[0].spesh_time;
+        var gcTime        = 0;
+        var gcNursery     = 0;
+        var gcFull        = 0;
+        var gcNurseryTime = 0;
+        var gcFullTime    = 0;
+        var totalEntries  = 0;
+        var inlineEntries = 0;
+        var jitEntries    = 0;
+        var speshEntries  = 0;
+        var deoptOnes     = 0;
+        var deoptAlls     = 0;
+        var osrs          = 0;
+        rawData[0].gcs.map(function (gc) {
+            gcTime += gc.time;
+            if (gc.full) {
+                gcFull++;
+                gcFullTime += gc.time;
+            }
+            else {
+                gcNursery++;
+                gcNurseryTime += gc.time;
+            }
+        });
+        function walkCallGraphNode(node) {
+            totalEntries  += node.entries;
+            inlineEntries += node.inlined_entries;
+            speshEntries  += node.spesh_entries;
+            jitEntries    += node.jit_entries;
+            deoptOnes     += node.deopt_one;
+            deoptAlls     += node.deopt_all;
+            osrs          += node.osr;
+            if (node.callees)
+                node.callees.map(walkCallGraphNode);
+        }
+        walkCallGraphNode(rawData[0].call_graph);
+        
+        // Time spent
+        var overheadTime            = speshTime + gcTime;
+        var executingTime           = totalTime - overheadTime;
+        $scope.TotalTime            = +(totalTime / 1000).toFixed(2);
+        $scope.OverheadTime         = +(overheadTime / 1000).toFixed(2);
+        $scope.OverheadTimePercent  = +(100 * overheadTime / totalTime).toFixed(2);
+        $scope.ExecutingTime        = +(executingTime / 1000).toFixed(2);
+        $scope.ExecutingTimePercent = +(100 * executingTime / totalTime).toFixed(2);
+        $scope.GCTime               = +(gcTime / 1000).toFixed(2);
+        $scope.GCTimePercent        = +(100 * gcTime / totalTime).toFixed(2);
+        $scope.SpeshTime            = +(speshTime / 1000).toFixed(2);
+        $scope.SpeshTimePercent     = +(100 * speshTime / totalTime).toFixed(2);
+
+        // Routines
+        var interpEntries           = totalEntries - (jitEntries + speshEntries);
+        $scope.EntriesWithoutInline = totalEntries - inlineEntries;
+        $scope.EntriesInline        = inlineEntries;
+        $scope.InlinePercent        = +(100 * inlineEntries / totalEntries).toFixed(2);
+        $scope.InterpFrames         = interpEntries;
+        $scope.InterpFramesPercent  = +(100 * interpEntries / totalEntries).toFixed(2);
+        $scope.SpeshFrames          = speshEntries;
+        $scope.SpeshFramesPercent   = +(100 * speshEntries / totalEntries).toFixed(2);
+        $scope.JITFrames            = jitEntries;
+        $scope.JITFramesPercent     = +(100 * jitEntries / totalEntries).toFixed(2);
+
+        // Garbage collection
+        $scope.GCRuns         = gcNursery + gcFull;
+        $scope.FullGCRuns     = gcFull;
+        $scope.NurseryAverage = +((gcNurseryTime / 1000) / gcNursery).toFixed(2);
+        $scope.FullAverage    = +((gcFullTime / 1000) / gcFull).toFixed(2);
+
+        // Dynamic optimization
+        var optimizedFrames    = speshEntries + jitEntries;
+        $scope.OptimizedFrames = optimizedFrames;
+        $scope.DeoptOnes       = deoptOnes; 
+        $scope.DeoptOnePercent = +(100 * deoptOnes / (optimizedFrames || 1)).toFixed(2);
+        $scope.DeoptAlls       = deoptAlls;
+        $scope.OSRs            = osrs;
+    });
+
+    moarProfApp.controller('RoutinesController', function ($scope) {
+        // Walk call graph to build data.
+        var idToEntries      = {};
+        var idToSpeshEntries = {};
+        var idToJITEntries   = {};
+        var idToExclusive    = {};
+        var idToInclusive    = {};
+        var idToOSR          = {};
+        var idRecDepth       = {};
+        var totalExclusive   = 0;
+        var totalInclusive   = rawData[0].call_graph.inclusive_time;
+        function walkCallGraphNode(node) {
+            if (!idToEntries[node.id]) {
+                idToEntries[node.id]      = 0;
+                idToSpeshEntries[node.id] = 0;
+                idToJITEntries[node.id]   = 0;
+                idToExclusive[node.id]    = 0;
+                idToInclusive[node.id]    = 0;
+                idToOSR[node.id]          = false;
+                idRecDepth[node.id]       = 0;
+            }
+            idToEntries[node.id]      += node.entries;
+            idToSpeshEntries[node.id] += node.spesh_entries;
+            idToJITEntries[node.id]   += node.jit_entries;
+            idToExclusive[node.id]    += node.exclusive_time;
+            totalExclusive            += node.exclusive_time;
+            if (node.osr > 0)
+                idToOSR[node.id] = true;
+            if (idRecDepth[node.id] == 0)
+                idToInclusive[node.id] += node.inclusive_time;
+            if (node.callees) {
+                idRecDepth[node.id]++;
+                node.callees.map(walkCallGraphNode);
+                idRecDepth[node.id]--;
+            }
+        }
+        walkCallGraphNode(rawData[0].call_graph);
+    
+        // Build object list per routine.
+        var routineList = [];
+        for (id in idToEntries) {
+            var speshEntriesPercent  = +(100 * idToSpeshEntries[id] / idToEntries[id]).toFixed(2);
+            var jitEntriesPercent    = +(100 * idToJITEntries[id] / idToEntries[id]).toFixed(2);
+            var interpEntriesPercent = 100 - (speshEntriesPercent + jitEntriesPercent);
+            var entry = {
+                Name:                 nodeIdToName[id],
+                Line:                 nodeIdToLine[id],
+                File:                 nodeIdToFile[id],
+                Entries:              idToEntries[id],
+                InterpEntriesPercent: interpEntriesPercent,
+                SpeshEntriesPercent:  speshEntriesPercent,
+                JITEntriesPercent:    jitEntriesPercent,
+                InclusiveTime:        +(idToInclusive[id] / 1000).toFixed(2),
+                InclusiveTimePercent: +(100 * idToInclusive[id] / totalInclusive).toFixed(2),
+                ExclusiveTime:        +(idToExclusive[id] / 1000).toFixed(2),
+                ExclusiveTimePercent: +(100 * idToExclusive[id] / totalExclusive).toFixed(2),
+                OSR:                  idToOSR[id]
+            };
+            routineList.push(entry);
+        }
+        $scope.Routines  = routineList;
+        $scope.predicate = "InclusiveTimePercent";
+        $scope.reverse   = true;
+    });
+    
+    moarProfApp.controller('CallGraphController', function ($scope) {
+        $scope.Current       = rawData[0].call_graph;
+        $scope.SuchCallers   = false;
+        $scope.RecentCallers = [];
+        $scope.predicate     = "TimePercent";
+        $scope.reverse       = true;
+        var all_callers      = [];
+        updateCurrentData();
+
+        $scope.toCallee = function (callee) {
+            // Update caller history.
+            all_callers.push($scope.Current);
+            $scope.RecentCallers.push($scope.Current);
+            if ($scope.RecentCallers.length > 5)
+                $scope.RecentCallers.shift();
+
+            // Update current node and callees.
+            $scope.Current = callee;
+            updateCurrentData();
+        };
+
+        $scope.toCaller = function (caller) {
+            // Update caller history.
+            while (all_callers.length > 0) {
+                var removed = all_callers.pop();
+                if ($scope.RecentCallers.length > 0)
+                    $scope.RecentCallers.pop();
+                if (removed == caller)
+                    break;
+            }
+            if (all_callers.length > $scope.RecentCallers.length) {
+                var ptr = all_callers.length - $scope.RecentCallers.length;
+                while (ptr >= 0 && $scope.RecentCallers.length < 5) {
+                    $scope.RecentCallers.unshift(all_callers[ptr]);
+                    ptr--;
+                }
+            }
+
+            // Update current node and callees.
+            $scope.Current = caller;
+            updateCurrentData();
+        }
+
+        function updateCurrentData() {
+            // Line and file.
+            var current = $scope.Current;
+            $scope.Line = current.line;
+            $scope.File = current.file;
+
+            // Entry statistics.
+            var interpEntries    = current.entries - (current.spesh_entries + current.jit_entries);
+            var nonInlineEntries = current.entries - current.inlined_entries;
+            $scope.Entries       = nonInlineEntries;
+            $scope.Percent       = (100 * nonInlineEntries / current.entries).toFixed(2);
+            $scope.InlineEntries = current.inlined_entries;
+            $scope.InlinePercent = (100 * current.inlined_entries / current.entries).toFixed(2);
+            $scope.InterpEntries = interpEntries;
+            $scope.InterpPercent = (100 * interpEntries / current.entries).toFixed(2);
+            $scope.SpeshEntries  = current.spesh_entries;
+            $scope.SpeshPercent  = (100 * current.spesh_entries / current.entries).toFixed(2);
+            $scope.JITEntries    = current.jit_entries;
+            $scope.JITPercent    = (100 * current.jit_entries / current.entries).toFixed(2);
+
+            // Callees.
+            $scope.Callees = calleesOf(current);
+        }
+
+        function calleesOf(node) {
+            if (!node.callees)
+                return [];
+
+            var totalExclusive = 0.0;
+            node.callees.map(function (c) { totalExclusive += c.exclusive_time; });
+
+            return node.callees.map(function (c) {
+                var speshCallsPercent  = +(100 * c.spesh_entries / c.entries).toFixed(2);
+                var jitCallsPercent    = +(100 * c.jit_entries / c.entries).toFixed(2);
+                var interpCallsPercent = 100 - (speshCallsPercent + jitCallsPercent);
+                var inlinedPercent     = +(100 * c.inlined_entries / c.entries).toFixed(2);
+                return {
+                    Name:               nodeIdToName[c.id],
+                    Line:               nodeIdToLine[c.id],
+                    File:               nodeIdToFile[c.id],
+                    Calls:              c.entries,
+                    Time:               +(c.inclusive_time / 1000).toFixed(2),
+                    TimePercent:        +(100 * c.inclusive_time / node.inclusive_time).toFixed(2),
+                    InterpCallsPercent: interpCallsPercent,
+                    SpeshCallsPercent:  speshCallsPercent,
+                    JITCallsPercent:    jitCallsPercent,
+                    InlinedPercent:     inlinedPercent,
+                    VeryInline:         inlinedPercent >= 95,
+                    SometimesInline:    inlinedPercent < 95 && inlinedPercent > 10,
+                    Node:               c
+                };
+            });
+        }
+    });
+
+    moarProfApp.controller('AllocationsController', function ($scope) {
+        // Traverse all call nodes, counting up the allocations.
+        var typeIdToName         = {};
+        var typeIdToAllocations  = {};
+        var typeIdToRoutineStats = {};
+        var maxAllocations       = 1;
+        function walkCallGraphNode(node) {
+            node.allocations.map(function (alloc) {
+                if (!typeIdToName[alloc.id]) {
+                    typeIdToName[alloc.id]         = alloc.type == "" ? "<anon>" : alloc.type;
+                    typeIdToAllocations[alloc.id]  = 0;
+                    typeIdToRoutineStats[alloc.id] = {};
+                }
+                typeIdToAllocations[alloc.id] += alloc.count;
+                if (typeIdToAllocations[alloc.id] > maxAllocations)
+                    maxAllocations = typeIdToAllocations[alloc.id];
+                if (typeIdToRoutineStats[alloc.id][node.id])
+                    typeIdToRoutineStats[alloc.id][node.id] += alloc.count;
+                else
+                    typeIdToRoutineStats[alloc.id][node.id] = alloc.count;
+            });
+            if (node.callees) {
+                node.callees.map(walkCallGraphNode);
+            }
+        }
+        walkCallGraphNode(rawData[0].call_graph);
+
+        // Build allocation summary.
+        var allocationSummary = [];
+        for (id in typeIdToName) {
+            var maxAllocationByRoutine = 1;
+            for (var rid in typeIdToRoutineStats[id])
+                if (typeIdToRoutineStats[id][rid] > maxAllocationByRoutine)
+                    maxAllocationByRoutine = typeIdToRoutineStats[id][rid];
+            var routineStats = [];
+            for (var rid in typeIdToRoutineStats[id])
+                routineStats.push({
+                    Name:               nodeIdToName[rid],
+                    Line:               nodeIdToLine[rid],
+                    File:               nodeIdToFile[rid],
+                    Allocations:        typeIdToRoutineStats[id][rid],
+                    AllocationsPercent: (100 * typeIdToRoutineStats[id][rid] / maxAllocationByRoutine)
+                });
+            var entry = {
+                Name:                 typeIdToName[id],
+                Allocations:          typeIdToAllocations[id],
+                AllocationsPercent:   +(100 * typeIdToAllocations[id] / maxAllocations).toFixed(2),
+                RoutineStats:         routineStats
+            };
+            allocationSummary.push(entry);
+        }
+        $scope.AllocationSummary = allocationSummary;
+        $scope.predicate         = "Allocations";
+        $scope.reverse           = true;
+        $scope.routinePredicate  = "Allocations";
+        $scope.routineReverse    = true;
+
+        // Allocating routines handlng.
+        $scope.showAllocatingRoutines = function (alloc) {
+            // Show modal dialog with data.
+            $scope.CurrentAllocatingRoutine      = alloc.Name;
+            $scope.CurrentAllocatingRoutineStats = alloc.RoutineStats;
+            $('#allocatingRoutinesModal').modal();
+        }
+    });
+
+    moarProfApp.controller('GCController', function ($scope) {
+        // Find longest GC run.
+        var longestGC = 0;
+        rawData[0].gcs.map(function (gc) {
+            if (gc.time > longestGC)
+                longestGC = gc.time;
+        });
+
+        // Produce something nice to render.
+        var run = 0;
+        $scope.GCs = rawData[0].gcs.map(function (gc) {
+            var totalBytes = gc.cleared_bytes + gc.retained_bytes + gc.promoted_bytes;
+            return {
+                Run:               ++run,
+                Time:              +(gc.time / 1000).toFixed(2),
+                Full:              (gc.full != 0),
+                TimePercent:       +(100 * gc.time / longestGC).toFixed(2),
+                RetainedKilobytes: Math.round(gc.retained_bytes / 1024),
+                PromotedKilobytes: Math.round(gc.promoted_bytes / 1024),
+                ClearedKilobytes:  Math.round(gc.cleared_bytes / 1024),
+                RetainedPercent:   +(100 * gc.retained_bytes / totalBytes).toFixed(2),
+                PromotedPercent:   +(100 * gc.promoted_bytes / totalBytes).toFixed(2),
+                ClearedPercent:    +(100 * gc.cleared_bytes / totalBytes).toFixed(2)
+            };
+        });
+        $scope.predicate = 'Run';
+        $scope.reverse = false;
+    });
+
+    moarProfApp.controller('OSRDeoptController', function ($scope) {
+        // Walk call graph to build data.
+        var idToOSR          = {};
+        var idToDeoptOne     = {};
+        var idToDeoptAll     = {};
+        var maxOSR           = 1;
+        var maxDeoptOne      = 1;
+        var maxDeoptAll      = 1;
+        function walkCallGraphNode(node) {
+            if (!idToOSR[node.id]) {
+                idToOSR[node.id]      = 0;
+                idToDeoptOne[node.id] = 0;
+                idToDeoptAll[node.id] = 0;
+            }
+            idToOSR[node.id]      += node.osr;
+            idToDeoptOne[node.id] += node.deopt_one;
+            idToDeoptAll[node.id] += node.deopt_all;
+            if (idToOSR[node.id] > maxOSR)
+                maxOSR = idToOSR[node.id];
+            if (idToDeoptOne[node.id] > maxDeoptOne)
+                maxDeoptOne = idToDeoptOne[node.id];
+            if (idToDeoptAll[node.id] > maxDeoptAll)
+                maxDeoptAll = idToDeoptAll[node.id];
+            if (node.callees)
+                node.callees.map(walkCallGraphNode);
+        }
+        walkCallGraphNode(rawData[0].call_graph);
+
+        // Build up OSR, deopt one, and deopt all tables.
+        var osrs      = [];
+        var deoptOnes = [];
+        var deoptAlls = [];
+        for (id in idToOSR) {
+            if (idToOSR[id] > 0) {
+                osrs.push({
+                    Name:    nodeIdToName[id],
+                    Line:    nodeIdToLine[id],
+                    File:    nodeIdToFile[id],
+                    Count:   idToOSR[id],
+                    Percent: Math.round(100 * idToOSR[id] / maxOSR)
+                });
+            }
+            if (idToDeoptOne[id] > 0) {
+                deoptOnes.push({
+                    Name:    nodeIdToName[id],
+                    Line:    nodeIdToLine[id],
+                    File:    nodeIdToFile[id],
+                    Count:   idToDeoptOne[id],
+                    Percent: Math.round(100 * idToDeoptOne[id] / maxDeoptOne)
+                });
+            }
+            if (idToDeoptAll[id] > 0) {
+                deoptAlls.push({
+                    Name:    nodeIdToName[id],
+                    Line:    nodeIdToLine[id],
+                    File:    nodeIdToFile[id],
+                    Count:   idToDeoptAll[id],
+                    Percent: Math.round(100 * idToDeoptAll[id] / maxDeoptAll)
+                });
+            }
+        }
+        $scope.OSRs      = osrs;
+        $scope.DeoptOnes = deoptOnes;
+        $scope.DeoptAlls = deoptAlls;
+        $scope.predicate = 'Count';
+        $scope.reverse   = true;
+    });
+
+    $(function () {
+        $("[data-toggle='tooltip']").tooltip();
+    });
+    </script>
+  </body>
+</html>

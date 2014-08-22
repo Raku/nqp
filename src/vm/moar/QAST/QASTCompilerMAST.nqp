@@ -523,7 +523,7 @@ my class MASTCompilerInstance {
         if $comp_mode || @pre_des || @post_des {
             # Create a block into which we'll install all of the other
             # pieces.
-            my $block := QAST::Block.new( :blocktype('raw') );
+            my $block := QAST::Block.new( :blocktype('raw'), :name('<dependencies+deserialize>') );
 
             # Add pre-deserialization tasks, each as a QAST::Stmt.
             for @pre_des {
@@ -550,7 +550,7 @@ my class MASTCompilerInstance {
         # Compile and include load-time logic, if any.
         if nqp::defined($cu.load) {
             my $load_block := QAST::Block.new(
-                :blocktype('raw'),
+                :blocktype('raw'), :name('<load>'),
                 $cu.load
             );
             self.as_mast($load_block);
@@ -561,11 +561,11 @@ my class MASTCompilerInstance {
         # pass command line arguments.
         if nqp::defined($cu.main) {
             my $main_block := QAST::Block.new(
-                :blocktype('raw'),
+                :blocktype('raw'), :name('<entry>'),
                 QAST::Op.new(
                     :op('call'),
                     QAST::Block.new(
-                        :blocktype('declaration'),
+                        :blocktype('declaration'), :name('<main>'),
                         $cu.main
                     ),
                     QAST::VM.new( :moarop('clargs'), :flat(1) )
