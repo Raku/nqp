@@ -433,6 +433,8 @@ class QAST::OperationsJS {
     add_sideffect_op('pop', $T_OBJ, [$T_OBJ], sub ($array) {"$array.pop()"});
     add_sideffect_op('push', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($array, $elem) {"$array.push($elem)"});
 
+    add_simple_op('iterator', $T_OBJ, [$T_OBJ], sub ($array) {"nqp.op.iterator($array)"});
+
 
     for <ceil floor abs> -> $func {
         add_simple_op($func ~ '_n', $T_NUM, [$T_NUM], sub ($arg) {"Math.$func($arg)"});

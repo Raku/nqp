@@ -44,6 +44,19 @@ op.x = function(str, times) {
   return ret;
 };
 
+function Iter(array) {
+  this.array = array;
+  this.idx = -1;
+}
+
+Iter.prototype.shift = function() {
+  return this.array[++this.idx];
+};
+
+op.iterator = function(array) {
+  return new Iter(array); 
+};
+
 exports.to_str = function(arg) {
   if (typeof arg == 'number') {
     return arg.toString();
