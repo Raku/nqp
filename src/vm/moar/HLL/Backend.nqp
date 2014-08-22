@@ -128,7 +128,10 @@ class HLL::Backend::MoarVM {
         my $json := nqp::join('', @pieces);
 
         # Insert it into a template and write it.
-        my $template := slurp('src/vm/moar/profiler/template.html');
+        my $template := try slurp('src/vm/moar/profiler/template.html');
+        unless $template {
+            $template := slurp(nqp::backendconfig()<prefix> ~ '/languages/nqp/lib/profiler/template.html');
+        }
         my $results  := subst($template, /'{{{PROFIELR_OUTPUT}}}'/, $json);
         my $filename := 'profile-' ~ nqp::time_n() ~ '.html';
         spew($filename, $results);

@@ -57,6 +57,7 @@ m-all: $(NQP_MOAR) $(M_RUNNER) $(P5QREGEX_MOAR)
 m-install: m-all
 	$(MKPATH) $(DESTDIR)$(BIN_DIR)
 	$(MKPATH) $(DESTDIR)$(NQP_LIB_DIR)
+	$(MKPATH) $(DESTDIR)$(NQP_LIB_DIR)/profiler
 	$(CP) $(NQP_MO_MOAR) $(DESTDIR)$(NQP_LIB_DIR)
 	$(CP) $(MODULE_LOADER_MOAR) $(DESTDIR)$(NQP_LIB_DIR)
 	$(CP) $(CORE_SETTING_MOAR) $(DESTDIR)$(NQP_LIB_DIR)
@@ -69,6 +70,7 @@ m-install: m-all
 	$(CP) $(P6QREGEX_MOAR) $(DESTDIR)$(NQP_LIB_DIR)
 	$(CP) $(NQP_MOAR) $(DESTDIR)$(NQP_LIB_DIR)
 	$(CP) $(P5QREGEX_MOAR) $(DESTDIR)$(NQP_LIB_DIR)
+	$(CP) src/vm/moar/profiler/template.html $(DESTDIR)$(NQP_LIB_DIR)/profiler/template.html
 	$(PERL) tools/build/install-moar-runner.pl "$(DESTDIR)" $(PREFIX)
 
 # FIXME:
