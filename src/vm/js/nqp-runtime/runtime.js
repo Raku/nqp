@@ -46,11 +46,11 @@ op.x = function(str, times) {
 
 function Iter(array) {
   this.array = array;
-  this.idx = -1;
+  this.idx = 0;
 }
 
 Iter.prototype.shift = function() {
-  return this.array[++this.idx];
+  return this.array[this.idx++];
 };
 
 op.iterator = function(array) {
@@ -91,6 +91,8 @@ exports.to_bool = function(arg) {
     return arg == '' || arg == '0' ? 0 : 1;
   } else if (arg instanceof Array) {
     return arg.length == 0 ? 0 : 1;
+  } else if (arg instanceof Iter) {
+    return arg.idx < arg.array.length;
   } else if (arg === undefined) {
     return 0;
   } else {
