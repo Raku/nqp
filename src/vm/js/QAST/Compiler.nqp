@@ -188,18 +188,33 @@ class QAST::OperationsJS {
         %ops{$op} := $cb;
     }
 
+    sub op_template($comp, $node, $return_type, @argument_types, $cb) {
+        my @exprs;
+        my @setup;
+        my $i := 0;
+        for $node.list -> $arg {
+            my $chunk := $comp.as_js($arg, :want(@argument_types[$i]));
+            @exprs.push($chunk.expr);
+            @setup.push($chunk);
+            $i := $i + 1;
+        }
+        Chunk.new($return_type, $cb(|@exprs), @setup, :$node);
+    }
     sub add_simple_op($op, $return_type, @argument_types, $cb) {
         %ops{$op} := sub ($comp, $node, :$want) {
-            my @exprs;
-            my @setup;
-            my $i := 0;
-            for $node.list -> $arg {
-                my $chunk := $comp.as_js($arg, :want(@argument_types[$i]));
-                @exprs.push($chunk.expr);
-                @setup.push($chunk);
-                $i := $i + 1;
+            op_template($comp, $node, $return_type, @argument_types, $cb);
+        };
+    }
+
+    sub add_sideffect_op($op, $return_type, @argument_types, $cb) {
+        %ops{$op} := sub ($comp, $node, :$want) {
+            my $template := op_template($comp, $node, $return_type, @argument_types, $cb);
+            if $want == $T_VOID {
+                Chunk.new($T_VOID, "", [$template, $template.expr~";\n"]);
+            } else {
+                my $tmp := $*BLOCK.add_tmp();
+                Chunk.new($return_type, $tmp, [$template, "$tmp = {$template.expr};\n"]);
             }
-            Chunk.new($return_type, $cb(|@exprs), @setup, :$node);
         };
     }
 
@@ -410,6 +425,13 @@ class QAST::OperationsJS {
     add_simple_op('elems', $T_INT, [$T_OBJ], sub ($list) {"($list.length)"});
 
     add_simple_op('islist', $T_BOOL, [$T_OBJ], sub ($obj) {"($obj instanceof Array)"});
+
+    add_simple_op('atpos', $T_OBJ, [$T_OBJ, $T_INT], sub ($array, $index) {"$array[$index]"});
+
+    add_sideffect_op('shift', $T_OBJ, [$T_OBJ], sub ($array) {"$array.shift()"});
+    add_sideffect_op('pop', $T_OBJ, [$T_OBJ], sub ($array) {"$array.pop()"});
+    add_sideffect_op('push', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($array, $elem) {"$array.push($elem)"});
+
 
     for <ceil floor abs> -> $func {
         add_simple_op($func ~ '_n', $T_NUM, [$T_NUM], sub ($arg) {"Math.$func($arg)"});
