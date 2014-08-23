@@ -1,8 +1,13 @@
-sub print($arg) {
-    nqp::print($arg);
+sub print(*@args) {
+    for @args {
+        nqp::print($_);
+    }
+    1;
 }
-sub say($arg) {
-    nqp::say($arg);
+
+sub say(*@args) {
+    print(|@args);
+    print("\n");
 }
 
 my $test_counter       := 0;

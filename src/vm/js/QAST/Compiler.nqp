@@ -406,7 +406,7 @@ class QAST::OperationsJS {
                 @exprs.push($group.expr);
                 @setup.push($group);
             }
-            @setup.push("$tmp = {$callee.expr}({@exprs.shift ~ '.concat(' ~ nqp::join(',', @exprs)}));\n");
+            @setup.push("$tmp = {$callee.expr}.apply(undefined,{@exprs.shift ~ '.concat(' ~ nqp::join(',', @exprs)}));\n");
             Chunk.new($T_OBJ, $tmp , @setup, :$node);
         } else {
             Chunk.new($T_OBJ, $tmp , [$callee, $compiled_args, "$tmp = {$callee.expr}({$compiled_args.expr});\n"], :$node);
@@ -722,29 +722,29 @@ class QAST::CompilerJS does DWIMYNameMangling {
         my $bind_named := '';
         for @params {
             if $_.slurpy {
-                #say("//NYI: slurpy params {$_.name}");
                 if $_.named {
+                    # TODO
                     $slurpy_named := $_; 
                 } else {
                     $slurpy := $_;
                 }
             } elsif $_.named {
-                #say("//NYI: named params");
-                unless self.is_dynamic_var($_) {
-                    @named.push(self.mangle_name($_.name));
-                }
-                my $quoted := self.quote_string($_.named);
-                my $value := "_NAMED[$quoted]";
-                if $_.default {
-                    $value := "(_NAMED.hasOwnProperty($quoted) ? $value : {self.as_js($_.default)})";
-                }
-
-                $bind_named := $bind_named ~ self.bind_var($_,self.js($value),1) ~ ";\n";
+                # TODO
+#                unless self.is_dynamic_var($_) {
+#                    @named.push(self.mangle_name($_.name));
+#                }
+#                my $quoted := self.quote_string($_.named);
+#                my $value := "_NAMED[$quoted]";
+#                if $_.default {
+#                    $value := "(_NAMED.hasOwnProperty($quoted) ? $value : {self.as_js($_.default)})";
+#                }
+#
+#                $bind_named := $bind_named ~ self.bind_var($_,self.js($value),1) ~ ";\n";
             } else {
                 my $default := '';
                 if $_.default {
-                    say("//NYI: default");
-                    $default := self.as_js($_.default, :want($T_OBJ));
+                    # TODO
+                    #$default := self.as_js($_.default, :want($T_OBJ));
                 }
                 @pos.push([$_,$default]);
             }
@@ -760,7 +760,18 @@ class QAST::CompilerJS does DWIMYNameMangling {
             @sig.push(self.mangle_name($pos[0].name));
         }
 
-        nqp::join(',', @sig);
+        my %ret;
+
+        %ret<setup> := '';
+
+        if $slurpy {
+            %ret<setup> := %ret<setup> ~
+                "{self.mangle_name($slurpy.name)} = Array.prototype.slice.call(arguments,{2+@pos});\n";
+        }
+
+        %ret<sig> := nqp::join(',', @sig);
+
+        %ret;
     }
 
 
@@ -928,7 +939,7 @@ class QAST::CompilerJS does DWIMYNameMangling {
 
     method stored_result($chunk) {
         if $chunk.type == $T_VOID {
-            Chunk.new($T_VOID, '', [$chunk, $chunk.expr]);
+            Chunk.new($T_VOID, '', [$chunk, $chunk.expr~";\n"]);
         } else {
             my $tmp := $*BLOCK.add_tmp();
             Chunk.new($chunk.type, $chunk.expr, [$chunk, "$tmp = {$chunk.expr};\n"]);
@@ -956,9 +967,10 @@ class QAST::CompilerJS does DWIMYNameMangling {
             my $sig := self.compile_sig($*BLOCK.params);
 
             $setup := [
-                "$cuid = function($sig) \{",
+                "$cuid = function({$sig<sig>}) \{",
                 self.declare_js_vars($*BLOCK.tmps),
                 self.declare_js_vars($*BLOCK.js_lexicals),
+                $sig<setup>,
                 $create_ctx,
                 $stmts,
                 "return {$stmts.expr};\n",
@@ -966,7 +978,8 @@ class QAST::CompilerJS does DWIMYNameMangling {
         }
 
         if $node.blocktype eq 'immediate' {
-            self.stored_result(Chunk.new($want, $cuid~"({$outer.ctx},nqp.named({}),$arg)", $setup, :$node));
+            my $extra_args := $arg ?? ",$arg" !! '';
+            self.stored_result(Chunk.new($want, $cuid~"({$outer.ctx},nqp.named({})$extra_args)", $setup, :$node));
         } else {
             Chunk.new($T_OBJ, $cuid, $setup);
         }
@@ -1095,10 +1108,10 @@ class QAST::CompilerJS does DWIMYNameMangling {
             # TODO work on things other than nqp lists
             # TODO think about nulls and missing elements
             if $*BINDVAL {
-                my $array := self.as_js($var[0], :want($T_OBJ));
-                my $index := self.as_js($var[1], :want($T_INT));
+                my $array := self.as_js_clear_bindval($var[0], :want($T_OBJ));
+                my $index := self.as_js_clear_bindval($var[1], :want($T_INT));
                 my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ));
-                Chunk.new($T_OBJ, $bindval.expr, [$array, $index, $bindval, "({$array.expr}[{$index.expr}] = $bindval)"], :node($var));
+                Chunk.new($T_OBJ, $bindval.expr, [$array, $index, $bindval, "({$array.expr}[{$index.expr}] = {$bindval.expr});\n"], :node($var));
             } else {
                 my $array := self.as_js($var[0], :want($T_OBJ));
                 my $index := self.as_js($var[1], :want($T_INT));
