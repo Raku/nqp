@@ -208,13 +208,7 @@ class QAST::OperationsJS {
 
     sub add_sideffect_op($op, $return_type, @argument_types, $cb) {
         %ops{$op} := sub ($comp, $node, :$want) {
-            my $template := op_template($comp, $node, $return_type, @argument_types, $cb);
-            if $want == $T_VOID {
-                Chunk.new($T_VOID, "", [$template, $template.expr~";\n"]);
-            } else {
-                my $tmp := $*BLOCK.add_tmp();
-                Chunk.new($return_type, $tmp, [$template, "$tmp = {$template.expr};\n"]);
-            }
+            $comp.stored_result(op_template($comp, $node, $return_type, @argument_types, $cb));
         };
     }
 
@@ -509,6 +503,44 @@ class QAST::OperationsJS {
         });
     }
 
+    add_op('for', sub ($comp, $node, :$want) {
+        my $handler := 1;
+        my @operands;
+        my $label;
+        for $node.list {
+            if $_.named eq 'nohandler' { $handler := 0; }
+            elsif $_.named eq 'label' { $label := $_; }
+            else { @operands.push($_) }
+        }
+        
+        if +@operands != 2 {
+            nqp::die("Operation 'for' needs 2 operands");
+        }
+        unless nqp::istype(@operands[1], QAST::Block) {
+            nqp::die("Operation 'for' expects a block as its second operand");
+        }
+
+        my $iterator := $*BLOCK.add_tmp();
+        my $iterval := $*BLOCK.add_tmp();
+
+        my $list := $comp.as_js(@operands[0], :want($T_OBJ));
+
+        # TODO think if creating the block once, and the calling it multiple times would be faster
+
+        my $outer     := try $*BLOCK;
+        my $body := $comp.compile_block(@operands[1], $outer, :want($T_VOID), :arg($iterval));
+
+
+        Chunk.new($T_VOID, '', [
+            $list,
+            "$iterator = nqp.op.iterator({$list.expr});\n",
+            "while ($iterator.idx < $iterator.target) \{\n",
+            "$iterval = $iterator.shift();\n",
+            $body,
+            "\}\n"
+        ], :node($node));
+    });
+
     for <while until repeat_while repeat_until> -> $op {
         add_op($op, sub ($comp, $node, :$want) {
             my $label;
@@ -735,6 +767,10 @@ class QAST::CompilerJS does DWIMYNameMangling {
     method coerce($chunk, $desired) {
         my $got := $chunk.type;
         if $got != $desired {
+            if $desired == $T_VOID {
+                return Chunk.new($T_VOID, "", $chunk.setup);
+            }
+
             if $desired == $T_NUM {
                 if $got == $T_INT {
                     # we store both as a javascript number, and 32bit integers fit into doubles
@@ -787,9 +823,6 @@ class QAST::CompilerJS does DWIMYNameMangling {
                 }
             }
 
-            if $desired == $T_VOID {
-                return Chunk.new($T_VOID, "", $chunk.setup);
-            }
 
             return Chunk.new($desired, "coercion($got, $desired, {$chunk.expr})", []) #TODO
         }
@@ -893,7 +926,16 @@ class QAST::CompilerJS does DWIMYNameMangling {
         nqp::existskey(%!cuids, $node.cuid);
     }
 
-    method compile_block(QAST::Block $node, $outer, :$want) {
+    method stored_result($chunk) {
+        if $chunk.type == $T_VOID {
+            Chunk.new($T_VOID, '', [$chunk, $chunk.expr]);
+        } else {
+            my $tmp := $*BLOCK.add_tmp();
+            Chunk.new($chunk.type, $chunk.expr, [$chunk, "$tmp = {$chunk.expr};\n"]);
+        }
+    }
+
+    method compile_block(QAST::Block $node, $outer, :$want, :$arg='') {
         my $cuid := self.mangled_cuid($node);
 
         my $setup;
@@ -907,9 +949,7 @@ class QAST::CompilerJS does DWIMYNameMangling {
 
             my $create_ctx := self.create_fresh_ctx();
 
-            # TODO proper want handling
-
-            my $body_want := $T_OBJ;
+            my $body_want := $node.blocktype eq 'immediate' ?? $want !! $T_OBJ;
 
             my $stmts := self.compile_all_the_statements($node, $body_want);
 
@@ -926,7 +966,7 @@ class QAST::CompilerJS does DWIMYNameMangling {
         }
 
         if $node.blocktype eq 'immediate' {
-            self.NYI("immediate blocks");
+            self.stored_result(Chunk.new($want, $cuid~"({$outer.ctx},nqp.named({}),$arg)", $setup, :$node));
         } else {
             Chunk.new($T_OBJ, $cuid, $setup);
         }

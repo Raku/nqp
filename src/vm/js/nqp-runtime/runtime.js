@@ -46,6 +46,7 @@ op.x = function(str, times) {
 
 function Iter(array) {
   this.array = array;
+  this.target = array.length;
   this.idx = 0;
 }
 
@@ -92,7 +93,7 @@ exports.to_bool = function(arg) {
   } else if (arg instanceof Array) {
     return arg.length == 0 ? 0 : 1;
   } else if (arg instanceof Iter) {
-    return arg.idx < arg.array.length;
+    return arg.idx < arg.target;
   } else if (arg === undefined) {
     return 0;
   } else {
