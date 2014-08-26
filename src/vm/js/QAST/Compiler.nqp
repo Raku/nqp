@@ -389,6 +389,11 @@ class QAST::OperationsJS {
     });
 
     add_op('call', sub ($comp, $node, :$want) {
+        if $*BLOCK.is_local_lexotic($node.name) {
+            my $value := $comp.as_js($node[0], :want($T_OBJ));
+            return Chunk.new($want, '', [$value, "return {$value.expr};\n"]);
+        }
+
         my $tmp := $*BLOCK.add_tmp();
 
         my $args := nqp::clone($node.list);
@@ -580,6 +585,13 @@ class QAST::OperationsJS {
         });
     }
 
+    # TODO consider/handle if lexotic is not the topmost thing in a block
+    # TODO implement returning from nested block
+    add_op('lexotic', sub ($comp, $node, :$want) {
+       $*BLOCK.register_lexotic($node.name);
+       $comp.as_js($node[0], :$want);
+    });
+
     method compile_op($comp, $op, :$want) {
         my str $name := $op.op;
         if nqp::existskey(%ops, $name) {
@@ -600,6 +612,7 @@ class QAST::CompilerJS does DWIMYNameMangling {
         has @!js_lexicals;      # javascript variables we need to declare for the block
         has $!tmp;              # We use a bunch of TMP{$n} to store intermediate javascript results
         has $!ctx;              # The object we keep dynamic variables and exception handlers in
+        has %!lexotic;           # the parameters the block takes
         has @!params;           # the parameters the block takes
 
         method new($qast, $outer) {
@@ -614,10 +627,18 @@ class QAST::CompilerJS does DWIMYNameMangling {
             @!js_lexicals := nqp::list();
             @!params := nqp::list();
             $!tmp := 0;
+            %!lexotic := nqp::hash();
         }
 
         method add_js_lexical($name) {
             @!js_lexicals.push($name);
+        }
+
+        method register_lexotic($name) {
+            %!lexotic{$name} := 1;
+        }
+        method is_local_lexotic($name) {
+            nqp::existskey(%!lexotic, $name);
         }
 
         method add_tmp() {
