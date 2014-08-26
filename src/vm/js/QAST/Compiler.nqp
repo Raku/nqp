@@ -435,7 +435,7 @@ class QAST::OperationsJS {
     add_simple_op('iterator', $T_OBJ, [$T_OBJ], sub ($array) {"nqp.op.iterator($array)"});
 
 
-    for <ceil floor abs> -> $func {
+    for <ceil floor abs log> -> $func {
         add_simple_op($func ~ '_n', $T_NUM, [$T_NUM], sub ($arg) {"Math.$func($arg)"});
     }
 
