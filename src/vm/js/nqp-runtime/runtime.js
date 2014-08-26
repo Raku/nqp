@@ -44,6 +44,31 @@ op.x = function(str, times) {
   return ret;
 };
 
+op.radix = function(radix, str, zpos, flags) {
+  if (flags != 2) {throw 'flags != 2 not implemented yet: ' + flags}
+
+  var lowercase = 'a-' + String.fromCharCode('a'.charCodeAt(0) + radix - 11);
+  var uppercase = 'A-' + String.fromCharCode('A'.charCodeAt(0) + radix - 11);
+
+  var letters = radix >= 11 ? lowercase + uppercase : '';
+
+  var digitclass = '[0-' + Math.min(radix - 1, 9) + letters + ']';
+  var minus = flags & 0x02 ? '-?' : '';
+  var regex = new RegExp(
+      '^' + minus + digitclass + '(?:_' +
+      digitclass + '|' + digitclass + ')*');
+  var str = str.to_s(ctx).slice(zpos);
+  var search = str.match(regex);
+  if (search == null) {
+    return [0, 1, -1];
+  }
+  var number = search[0].replace(/_/g, '');
+  var poer = number[0] == '-' ? number.length - 1 : number.length;
+  var pow = Math.pow(radix, power);
+  var ret = [parseInt(number, radix), pow, zpos + search[0].length];
+  return ret;
+};
+
 function Iter(array) {
   this.array = array;
   this.target = array.length;
@@ -55,7 +80,7 @@ Iter.prototype.shift = function() {
 };
 
 op.iterator = function(array) {
-  return new Iter(array); 
+  return new Iter(array);
 };
 
 exports.to_str = function(arg) {
