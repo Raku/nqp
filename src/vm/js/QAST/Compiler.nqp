@@ -818,6 +818,15 @@ class QAST::CompilerJS does DWIMYNameMangling {
                 }
             }
 
+            if $desired == $T_INT {
+                if $got == $T_STR {
+                    return Chunk.new($T_INT, "parseInt({$chunk.expr})", [$chunk]);
+                }
+                if $got == $T_NUM {
+                    return Chunk.new($T_INT, "({$chunk.expr}|0)", [$chunk]);
+                }
+            }
+
             if $got == $T_OBJ {
                 my %convert;
                 %convert{$T_STR} := 'to_str';
