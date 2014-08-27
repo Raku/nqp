@@ -678,7 +678,10 @@ class QAST::CompilerJS does DWIMYNameMangling {
     method args($args) {
         my @setup;
         my @args;
+
         my @named;
+        my @named_exprs;
+
         my @flat_named;
         my @groups := [[]];
         for $args -> $arg {
@@ -694,7 +697,10 @@ class QAST::CompilerJS does DWIMYNameMangling {
                 }
                 elsif $arg.named {
                     # TODO - think about chunks
-                    @named.push(self.quote_string($arg.named)~":"~self.as_js($arg))
+                    my $compiled_arg := self.as_js($arg, :want($T_OBJ));
+                    @named.push($compiled_arg);
+                    @named_exprs.push(quote_string($arg.named) ~ ":" ~ $compiled_arg.expr);
+
                 }
                 else {
                     @groups[@groups-1].push(self.as_js($arg, :want($T_OBJ)));
@@ -703,8 +709,7 @@ class QAST::CompilerJS does DWIMYNameMangling {
                 @groups[@groups-1].push(self.as_js($arg, :want($T_OBJ)));
             }
         }
-        @flat_named.unshift('{'~nqp::join(',',@named)~'}');
-        @groups[0].unshift("nqp.named({nqp::join(',',@flat_named)})");
+        @groups[0].unshift(Chunk.new($T_OBJ, "nqp.named(\{{nqp::join(',',@named_exprs)}\})", @named));
         @groups[0].unshift($*BLOCK.ctx);
 
         my sub chunkify(@group, $pre = '', $post = '') {
