@@ -744,8 +744,9 @@ class QAST::CompilerJS does DWIMYNameMangling {
     method compile_sig(@params) {
         my $slurpy_named; # *%foo
         my $slurpy;       # *@foo
-        my @named;        # :$foo
+
         my @pos;          # $foo
+        my @setup;
 
         my $bind_named := '';
         for @params {
@@ -757,17 +758,19 @@ class QAST::CompilerJS does DWIMYNameMangling {
                     $slurpy := $_;
                 }
             } elsif $_.named {
-                # TODO
-#                unless self.is_dynamic_var($_) {
-#                    @named.push(self.mangle_name($_.name));
-#                }
-#                my $quoted := self.quote_string($_.named);
-#                my $value := "_NAMED[$quoted]";
-#                if $_.default {
-#                    $value := "(_NAMED.hasOwnProperty($quoted) ? $value : {self.as_js($_.default)})";
-#                }
-#
-#                $bind_named := $bind_named ~ self.bind_var($_,self.js($value),1) ~ ";\n";
+                $*BLOCK.add_js_lexical(self.mangle_name($_.name));
+                my $quoted := quote_string($_.named);
+                my $value := "_NAMED[$quoted]";
+                if $_.default {
+                    # TODO types
+
+                    my $default := self.as_js($_.default, :want($T_OBJ));
+                    @setup.push($default);
+                    $value := "(_NAMED.hasOwnProperty($quoted) ? $value : {$default.expr})";
+                }
+                # TODO required named arguments and defaultless optional ones
+
+                @setup.push("{self.mangle_name($_.name)} = $value;\n");
             } else {
                 my $default := '';
                 if $_.default {
@@ -782,24 +785,17 @@ class QAST::CompilerJS does DWIMYNameMangling {
 #            $bind_named := $bind_named ~ self.bind_var($slurpy_named,self.js('_NAMED'),1) ~ ";\n";
 #        }
 
-        my @sig := ['_NAMED','caller_ctx'];
+        my @sig := ['caller_ctx','_NAMED'];
 
         for @pos -> $pos {
             @sig.push(self.mangle_name($pos[0].name));
         }
 
-        my %ret;
-
-        %ret<setup> := '';
-
         if $slurpy {
-            %ret<setup> := %ret<setup> ~
-                "{self.mangle_name($slurpy.name)} = Array.prototype.slice.call(arguments,{2+@pos});\n";
+            @setup.push("{self.mangle_name($slurpy.name)} = Array.prototype.slice.call(arguments,{2+@pos});\n");
         }
 
-        %ret<sig> := nqp::join(',', @sig);
-
-        %ret;
+        Chunk.new($T_NONVAL, nqp::join(',', @sig), @setup);
     }
 
 
@@ -1004,10 +1000,10 @@ class QAST::CompilerJS does DWIMYNameMangling {
             my $sig := self.compile_sig($*BLOCK.params);
 
             $setup := [
-                "$cuid = function({$sig<sig>}) \{",
+                "$cuid = function({$sig.expr}) \{",
                 self.declare_js_vars($*BLOCK.tmps),
                 self.declare_js_vars($*BLOCK.js_lexicals),
-                $sig<setup>,
+                $sig,
                 $create_ctx,
                 $stmts,
                 "return {$stmts.expr};\n",
