@@ -97,6 +97,8 @@ exports.to_str = function(arg) {
 exports.to_num = function(arg) {
   if (typeof arg == 'number') {
     return arg;
+  } else if (typeof arg == 'string') {
+    return parseFloat(arg);
   } else {
     throw "Can't convert to num";
   }
