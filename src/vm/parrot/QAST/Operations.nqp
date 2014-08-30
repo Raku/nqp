@@ -2498,6 +2498,7 @@ QAST::Operations.add_core_pirop_mapping('what', 'get_what', 'PP', :inlinable(1))
 QAST::Operations.add_core_pirop_mapping('how', 'get_how', 'PP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('who', 'get_who', 'PP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('where', 'get_id', 'IP', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('objectid', 'get_id', 'IP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('findmethod', 'find_method', 'PPs', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('defined', 'defined', 'IP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('can', 'can', 'IPs', :inlinable(1));
