@@ -200,7 +200,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
     token var {
         :my $*MAYBE_DECL := 0;
         \+?
-        [$<sigil>=[ \$ | \@\@? ] | <pkg=.ident>'::'<?before <[A..Z]>> | <!keyword> ]
+        [$<sigil>=[ \$ | \@ ] | <pkg=.ident>'::'<?before <[A..Z]>> | <!keyword> ]
         <ident><!before [\!|\?|<hs>\(]>
         [ <?before <hs> <bind-op> { $*MAYBE_DECL := 1 }> || <?> ]
     }
@@ -661,10 +661,6 @@ class Rubyish::Actions is HLL::Actions {
                 }
                 elsif $sigil eq '@' {
                     $block := $*CLASS_BLOCK;
-                }
-                elsif $sigil eq '@@' {
-                    $block := $*CLASS_BLOCK;
-                    $decl  := 'static';
                 }
                 else {
                     nqp::die("unhandled sigil: $sigil");

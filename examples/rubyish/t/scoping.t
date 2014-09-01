@@ -1,9 +1,47 @@
-puts "1..21"
+puts "1..19"
+
+class BaseClass
+  Y = 16;
+
+  def set_inst1(v); @i1 = v;             end
+  def set_inst2(v); @i2 = v;             end
+  def get_inst1; @i1;                    end
+  def get_inst2; @i2;                    end
+  def tickle_f(f); @f = f ;              end
+
+  def const_tests
+      puts "ok #{BaseClass::Y} - package constant qualified"
+      puts "ok #{Y + 1} - package constant unqualified"
+  end
+end
+
+class DerivedClass < BaseClass
+  def set_inst1_child(v); @i1 = v; end
+  def get_inst1_child;    @i1;     end
+end
+
+class DisjointClass
+  def set_inst1(v); @i1 = v;             end
+  def set_inst2(v); @i2 = v;             end
+  def get_inst1; @i1;                    end
+  def get_inst2; @i2;                    end
+
+  def more_const_tests
+      puts "ok #{BaseClass::Y + 2} - package constant cross reference"
+      puts "ok #{Y} - package constant internal reference"
+  end
+
+end
 
 a = "ok 1"
 b = "ok 2"
 $a = "ok 3"
 $c = "nok 4"
+
+base_obj = BaseClass.new;
+sibling_obj = BaseClass.new;
+disjoint_obj = DisjointClass.new;
+child_obj = DerivedClass.new;
 
 def some_sub 
     b = "nok 2"
@@ -11,45 +49,6 @@ def some_sub
     $d = "ok 5"
 end
 some_sub()
-
-class MyClass
-  @@final_test = 17
-
-  def set_class(v); @@c = v; b = 'wtf';  end
-  def get_class; @@c;                    end
-  def set_inst(v1,v2); @i1 = v1; @i2= v2 end
-  def get_inst1; @i1;                    end
-  def get_inst2; @i2;                    end
-  def class_const; @@final_test ;        end
-  def tickle_f(f); @f = f ;              end
-
-  Y = 18
-  def const_tests
-      puts "ok #{MyClass::Y} - package constant qualified"
-      puts "ok #{Y + 1} - package constant unqualified"
-  end
-end
-
-class OtherClass
-  def set_class(v); @@c = v; end
-  def get_class; @@c;        end
-  def set_inst(v1,v2); @i1 = v1; @i2= v2 end
-  def get_inst1; @i1;                    end
-  def get_inst2; @i2;                    end
-
-  def more_const_tests
-      puts "ok #{MyClass::Y + 2} - package constant cross reference"
-      puts "ok #{Y} - package constant internal reference"
-  end
-
-end
-
-obj1 = MyClass.new;
-obj2 = MyClass.new;
-obj3 = OtherClass.new;
-
-obj1.set_class(8)
-obj3.set_class(10)
 
 puts "#{a} - local: main"
 puts "#{b} - local: main, function"
@@ -59,27 +58,29 @@ puts "#{$d} - $global: function"
 
 @e=6
 @f='ok'
-obj1.tickle_f('nok')
+base_obj.tickle_f('nok')
 puts "ok #{@e} - @instance: main"
 puts "#{@f} 7 - @instance: main, object"
 
-puts "ok #{obj1.get_class} - @@class access"
-puts "ok #{obj2.get_class() + 1} - @@class access"
-puts "ok #{obj3.get_class} - @@class variable"
+t = 7
+base_obj.set_inst1(t+=1)
+base_obj.set_inst2(t+=1)
+sibling_obj.set_inst1(t+=1)
+sibling_obj.set_inst2(t+=1)
+disjoint_obj.set_inst1(t+=1)
+disjoint_obj.set_inst2(t+=1)
+child_obj.set_inst1(t+=1)
 
-obj1.set_inst(11,12)
-obj2.set_inst(13,14)
-obj3.set_inst(15,16)
+puts "ok #{base_obj.get_inst1} - @instance access (base)"
+puts "ok #{base_obj.get_inst2} - @instance access (base)"
+puts "ok #{sibling_obj.get_inst1} - @instance access (sibling)"
+puts "ok #{sibling_obj.get_inst2} - @instance access (sibling)"
+puts "ok #{disjoint_obj.get_inst1} - @instance access (disjoint)"
+puts "ok #{disjoint_obj.get_inst2} - @instance access (disjoint)"
+puts "ok #{child_obj.get_inst1} - @instance access (child)"
+puts "ok #{child_obj.get_inst1_child+1} - @instance access (child)"
 
-puts "ok #{obj1.get_inst1} - @instance access"
-puts "ok #{obj1.get_inst2} - @instance access"
-puts "ok #{obj2.get_inst1} - @instance access"
-puts "ok #{obj2.get_inst2} - @instance access"
-puts "ok #{obj3.get_inst1} - @instance access"
-puts "ok #{obj3.get_inst2} - @instance access"
-puts "ok #{obj2.class_const} - @@class constant"
+base_obj.const_tests
 
-obj1.const_tests
-
-OtherClass::Y = 21
-obj3.more_const_tests
+DisjointClass::Y = t+5
+disjoint_obj.more_const_tests

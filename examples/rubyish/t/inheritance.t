@@ -1,9 +1,10 @@
 puts "1..10"
 
+$tst = -1
+
 class Point
-  @@tst = -1
   def initialize(x, y)
-    puts "ok #{ @@tst = @@tst + 2 } - Point.initialize called"
+    puts "ok #{ $tst = $tst + 2 } - Point.initialize called"
     @x = x
     @y = y
   end
