@@ -1004,6 +1004,22 @@ class Rubyish::Actions is HLL::Actions {
 }
 
 class Rubyish::Compiler is HLL::Compiler {
+
+    method eval($code, *@_args, *%adverbs) {
+        my $output := self.compile($code, :compunit_ok(1), |%adverbs);
+
+        if %adverbs<target> eq '' {
+            my $outer_ctx := %adverbs<outer_ctx>;
+            $output := self.backend.compunit_mainline($output);
+            if nqp::defined($outer_ctx) {
+                nqp::forceouterctx($output, $outer_ctx);
+            }
+
+            $output := $output();
+        }
+
+        $output;
+    }
 }
 
 sub MAIN(*@ARGS) {
