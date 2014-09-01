@@ -843,7 +843,7 @@ class NQPCursor does NQPCursorRole {
             my $rxsub   := nqp::getattr(self, NQPCursor, '$!regexsub');
             if !nqp::isnull($rxsub) && nqp::defined($rxsub) {
                 %caplist := nqp::can($rxsub, 'CAPS') ?? $rxsub.CAPS() !! nqp::null();
-                if !nqp::isnull(%caplist) && %caplist {
+                if !nqp::isnull(%caplist) && nqp::istrue(%caplist) {
                     my $iter := nqp::iterator(%caplist);
                     while $iter {
                         my $curcap := nqp::shift($iter);
@@ -861,15 +861,15 @@ class NQPCursor does NQPCursorRole {
 
             # Walk the Cursor stack and populate the Cursor.
             my $cs := nqp::getattr(self, NQPCursor, '$!cstack');
-            if !nqp::isnull($cs) && $cs {
+            if !nqp::isnull($cs) && nqp::istrue($cs) {
                 my int $cselems := nqp::elems($cs);
                 my int $csi;
                 while $csi < $cselems {
                     my $subcur   := nqp::atpos($cs, $csi);
                     my $submatch := $subcur.MATCH;
-                    my str $name := nqp::getattr($subcur, $?CLASS, '$!name');
+                    my $name := nqp::getattr($subcur, $?CLASS, '$!name');
                     if !nqp::isnull($name) && nqp::defined($name) {
-                        if $name && nqp::ordat($name, 0) == 36 && ($name eq '$!from' || $name eq '$!to') {
+                        if $name ne '' && nqp::ordat($name, 0) == 36 && ($name eq '$!from' || $name eq '$!to') {
                             nqp::bindattr_i($match, NQPMatch, $name, $submatch.from);
                         }
                         elsif nqp::index($name, '=') < 0 {
