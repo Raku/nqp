@@ -253,6 +253,7 @@ role NQPCursorRole is export {
         $!bstack := nqp::null()
             unless $backtrack;
         self.'!reduce'($name) if $name;
+        self
     }
 
     method !cursor_fail() {
