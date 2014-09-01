@@ -293,6 +293,7 @@ role NQPCursorRole is export {
         my $actions := nqp::getlexdyn('$*ACTIONS');
         nqp::findmethod($actions, $name)($actions, self.MATCH)
             if !nqp::isnull($actions) && nqp::can($actions, $name);
+        self;
     }
 
     method !reduce_with_match(str $name, str $key, $match) {
