@@ -71,8 +71,8 @@ grammar Rubyish::Grammar is HLL::Grammar {
         [ <stmt=.stmtish>? ] *%% [<.separator>|<stmt=.template-chunk>]
     }
 
-    token stmtish {
-        <stmt> [:s<hs> <modifier> <EXPR>]?
+    token stmtish {:s<hs>
+        <stmt> [ <modifier> <EXPR>]?
     }
 
     token modifier {if|unless|while|until}
@@ -147,6 +147,9 @@ grammar Rubyish::Grammar is HLL::Grammar {
         %builtins := nqp::hash(
             'abort',  'die',
             'exit',   'exit',
+            'key',    'iterkey_s',
+            'delete', 'deletekey',
+            'value',  'iterval',
             'print',  'print',
             'puts',   'say',
             'sleep',  'sleep',

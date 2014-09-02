@@ -27,7 +27,7 @@ Implemented:
 - statement modifiers `if` `unless`, `while`, `until` e.g.: `puts 42 if true`
 - basic arrays and hashes
 - for loops on arrays: `for val in [10, 20, 30] do puts val end`
-- for loops on hash keys: `h = {'a'=>10, 'b'=>20}; for k in h do puts h{k} end`
+- for loops on hash pairs: `h = {'a'=>10, 'b'=>20}; for kv in h do puts value k end`
 - lambda blocks/closures: `def make_counter(n,incr) ; n-=incr; lambda { n += incr }; end`
 - lightweight eRuby like templating, see [template.rbi](examples-rubyish/template.rbi)
 - heredocs, literal `<<EOF ... EOF` and interpolating `<<"END" ... END`
@@ -58,6 +58,13 @@ Strings and truth values are Perlish rather than Rubyish:
 - 0, '0', '' are false in a boolean context.
 - hash dereferencing is via angle braces: `puts fruit<apples>` or
 curlies `puts fruit{'bananas'}`
+
+hash iteration is by pairs. The `key` and `value` built-ins are used for dereferencing
+```
+    for item in {"apples" => 20, "bananas" => 35, "potatos" => 12}
+        puts" #{key item} are #{value item} cents per Kg"
+    end
+```
 
 nqp op-codes can be called like regular functions. E.g.
 ```

@@ -7,10 +7,10 @@ h_idx = 'c'
 puts "#{h{h_idx} == 30? 'ok' : 'nok'} 3 - h{c_idx}"
 puts "#{h{'d'} == 100? 'ok' : 'nok'} 4 - h{'d'}"
 
-nqp::deletekey(h, 'd')
+delete(h, 'd')
 
-for key in h do
-    puts "ok #{ h{key} / 10  +  4 } - hash key iteration (#{key})"
+for kv in h do
+    puts "ok #{value(kv) / 10  +  4 } - hash key iteration (#{key kv})"
 end
 
 h<d> = ['nok','ok']
@@ -18,8 +18,8 @@ puts "#{ h<d>[1] } 8 - HoA"
 
 def test_hash_args(x, h_args)
     puts "ok #{ x } - fixed arg"
-    for k in h_args do
-       puts "ok #{ h_args{k} } - hash slurpy arg (#{k})"
+    for kv in h_args do
+       puts "ok #{ value kv } - hash slurpy arg (#{key kv})"
     end
 end
 
