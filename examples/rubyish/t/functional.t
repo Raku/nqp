@@ -13,7 +13,9 @@ def is(result, expected, description)
     passed
 end
 
-def dump(arr) ; nqp::join(',', arr); end
+def dump(arr, idx = 1)
+    arr[idx-1] ~ (idx < arr ? ',' ~ dump(arr, idx+1) : '')
+end
 
 # ------------
 def grep(array_inp, &selector)

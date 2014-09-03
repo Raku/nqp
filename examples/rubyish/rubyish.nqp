@@ -250,10 +250,10 @@ grammar Rubyish::Grammar is HLL::Grammar {
     token value:sym<false>   { <sym> }
 
     # Interpolation
-    token interp      { '#{' ~ '}' [:s<hs> [ <stmtlist> ]
-                                    || <panic('string interpolation error')>]
+    token interp      { '#{' ~ '}' [ [:s<hs> <stmtlist> ]
+                                    || <panic('string interpolation error')> ]
                        }
-    token quote_escape:sym<#{ }> { <interp>  }
+    token quote_escape:sym<#{ }> { <?quotemod_check('s')> <interp>  }
 
     # Reserved words.
     token keyword {
@@ -835,14 +835,12 @@ class Rubyish::Actions is HLL::Actions {
     method heredoc-line($/) { make QAST::SVal.new( :value(~$/) ) }
 
     method heredoc:sym<interp>($/) {
-        my $list := QAST::Op.new( :op<list> );
+        my $value := QAST::SVal.new( :value('') );
 
-        $list.push($_.ast)
+        $value := QAST::Op.new( :op<concat>, $value, $_.ast)
             for $<text>;
 
-        make QAST::Op.new( :op<join>,
-                           QAST::SVal.new( :value('') ),
-                           $list );
+        make $value;
     }
 
     method value:sym<integer>($/) {
