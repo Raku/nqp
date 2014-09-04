@@ -596,8 +596,8 @@ The $flags is a bitmask that modifies the parse and/or result:
 ## replace
 * `replace(str $str, int $offset, int $count, str $replacement)`
 
-Replace the the characters of `$str` starting at `$offset` for `$count`
-characters, with the `$replacement` string.
+Return a copy of `$str` where the characters starting at `$offset` for `$count`
+characters have been replaced with the `$replacement` string.
 
 ## rindex
 * `rindex(str $haystack, str $needle)`
