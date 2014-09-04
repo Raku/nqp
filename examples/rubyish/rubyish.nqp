@@ -468,10 +468,8 @@ class Rubyish::Actions is HLL::Actions {
     method stmtlist($/) {
         my $stmts := QAST::Stmts.new( :node($/) );
 
-        if $<stmt> {
-            $stmts.push($_.ast)
-                for $<stmt>;
-        }
+        $stmts.push($_.ast)
+            for @<stmt>;
 
         make $stmts;
     }
@@ -730,10 +728,8 @@ class Rubyish::Actions is HLL::Actions {
     method signature($/) {
         my @params;
 
-        if $<param> {
-            @params.push($_.ast)
-                for $<param>;
-        }
+        @params.push($_.ast)
+            for @<param>;
 
         if $<slurpy> {
             @params.push($<slurpy>[0].ast);
@@ -746,8 +742,13 @@ class Rubyish::Actions is HLL::Actions {
         }
 
         for @params {
-            $*CUR_BLOCK[0].push($_);
+            $*CUR_BLOCK[0].push($_) unless $_.named;
             $*CUR_BLOCK.symbol($_.name, :declared(1));
+         }
+
+         # nqp #179 named arguments need to follow positional parameters
+         for @params {
+            $*CUR_BLOCK[0].push($_) if $_.named;
          }
     }
 
