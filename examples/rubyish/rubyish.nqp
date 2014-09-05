@@ -583,12 +583,11 @@ class Rubyish::Actions is HLL::Actions {
 
     method term:sym<new>($/) {
 
-        # seems a bit hacky
-        my $tmp-sym := '$new' ~ (++$tmpsym) ~ '$';
+        my $tmp-obj := '$new-obj$';
 
         my $init-call := QAST::Op.new( :op<callmethod>,
                                        :name<initialize>,
-                                       QAST::Var.new( :name($tmp-sym), :scope<lexical> )
+                                       QAST::Var.new( :name($tmp-obj), :scope<lexical> )
             );
 
         if $<call-args> {
@@ -596,11 +595,25 @@ class Rubyish::Actions is HLL::Actions {
                 for $<call-args>.ast;
         }
 
-        make QAST::Stmt.new(
+        my $init-block := QAST::Block.new( QAST::Stmts.new(
+
+            # pseudo-code:
+            #
+            # def new(*call-args)
+            #     $new-obj$ = Class.new;
+            #     if call-args then
+            #        # always try to call initialize, when new has arguments
+            #        $new-obj$.initialize(call-args)
+            #     else
+            #        $new-obj$.initialize() \
+            #           if $new-obj$.can('initialize')
+            #     end
+            #     return $new-obj$
+            # end
 
             # create the new object
             QAST::Op.new( :op('bind'),
-                          QAST::Var.new( :name($tmp-sym), :scope<lexical>, :decl<var>),
+                          QAST::Var.new( :name($tmp-obj), :scope<lexical>, :decl<var>),
                           QAST::Op.new(
                               :op('create'),
                               QAST::Var.new( :name('::' ~ ~$<ident>), :scope('lexical') )
@@ -612,15 +625,18 @@ class Rubyish::Actions is HLL::Actions {
              ?? $init-call
              !! QAST::Op.new( :op<if>,
                               QAST::Op.new( :op<can>,
-                                            QAST::Var.new( :name($tmp-sym), :scope<lexical> ),
+                                            QAST::Var.new( :name($tmp-obj), :scope<lexical> ),
                                             QAST::SVal.new( :value<initialize> )),
                               $init-call,
              )
             ),
 
             # return the new object
-            QAST::Var.new( :name($tmp-sym), :scope<lexical> ),
-            );
+            QAST::Var.new( :name($tmp-obj), :scope<lexical> ),
+        ));
+
+        $init-block.blocktype('immediate');
+        make $init-block;
     }
 
     method var($/) {
