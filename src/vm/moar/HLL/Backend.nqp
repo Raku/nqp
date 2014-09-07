@@ -11,7 +11,7 @@ class HLL::Backend::MoarVM {
     }
 
     method force_gc() {
-        nqp::die("Cannot force GC on Moar backend yet");
+        nqp::force_gc();
     }
 
     method name() {
