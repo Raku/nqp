@@ -201,7 +201,7 @@ given number.
 
 # Trigonometric Opcodes
 
-Each opcode corresponds directly to the trigonmetric function of the same
+Each opcode corresponds directly to the trigonometric function of the same
 name. `h` indicates a hyperbolic variant.
 
 ## asec
