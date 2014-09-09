@@ -3,7 +3,7 @@ perl:
     - "5.10"
 install: "echo"
 
-script: "perl Configure.pl --backends=moar $NQP_OPTIONS; make test
+script: "perl Configure.pl --backends=moar $NQP_OPTIONS; make test"
 
 branches:
    only:
