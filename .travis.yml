@@ -1,0 +1,19 @@
+language: "perl"
+perl:
+    - "5.10"
+install: "echo"
+
+script: "perl Configure.pl --backends=moar $NQP_OPTIONS; make test
+
+branches:
+   only:
+     - master
+     - /smoke-me/
+
+notifications:
+  irc: "irc.freenode.net#perl6"
+
+env:
+  matrix:
+    - NQP_OPTIONS="--gen-moar"
+    - NQP_OPTIONS="--gen-moar=master"
