@@ -11,7 +11,11 @@ branches:
      - /smoke-me/
 
 notifications:
-  irc: "irc.freenode.net#perl6"
+  irc:
+    channels:
+    - "irc.freenode.net#perl6"
+    on_success: change
+    on_failure: change
 
 env:
   matrix:
