@@ -428,7 +428,7 @@ sub gen_moar {
     my $startdir   = cwd();
     my $git_protocol = $options{'git-protocol'} || 'https';
 
-    my $moar_exe   = "$prefix/bin/moar$exe";
+    my $moar_exe   = $options{'with-moar'} || "$prefix/bin/moar$exe";
     my $moar_have  = qx{ $moar_exe --version };
     if ($moar_have) {
         $moar_have = $moar_have =~ /version (\S+)/ ? $1 : undef;

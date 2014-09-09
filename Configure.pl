@@ -26,11 +26,11 @@ MAIN: {
 
     my %options;
     GetOptions(\%options, 'help!', 'prefix=s',
-               'with-parrot=s', 'gen-parrot:s',
+               'backends=s',
+               'with-parrot=s', 'gen-parrot:s', 'parrot-config=s', 'parrot-option=s@',
+               'with-moar=s', 'gen-moar:s', 'moar-option=s@',
                'make-install!', 'makefile-timing!',
-               'backends=s', 'gen-moar:s', 'moar-option=s@',
-               'git-protocol=s',
-               'parrot-config=s', 'parrot-option=s@');
+               'git-protocol=s');
 
     # Print help if it's requested
     if ($options{'help'}) {
@@ -313,11 +313,14 @@ General Options:
                        Download and build a copy of Parrot to use
     --parrot-option='--option=value'
                        Options to pass to parrot configuration for --gen-parrot
+    --with-moar=path/to/bin/moar
+                       MoarVM executable to use to build NQP
     --gen-moar         Download and build a copy of MoarVM to use
     --moar-option='--option=value'
                        Options to pass to MoarVM configuration for --gen-moar
     --git-protocol={ssh,https,git}
                        Protocol to use for git clone. Default: https
+    --make-install     Immediately run `MAKE install` after configuring
 
 Configure.pl also reads options from 'config.default' in the current directory.
 END
