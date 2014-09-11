@@ -21,6 +21,7 @@ class DerivedClass < BaseClass
 end
 
 class DisjointClass
+  Y = 42;
   def set_inst1(v); @i1 = v;             end
   def set_inst2(v); @i2 = v;             end
   def get_inst1; @i1;                    end
