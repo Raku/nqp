@@ -210,11 +210,13 @@ grammar Rubyish::Grammar is HLL::Grammar {
     token var {
         :my $*MAYBE_DECL := 0;
         \+?
-        $<var>=[[$<sigil>=[ \$ | \@ ] | <pkg=.ident>'::'<?before <[A..Z]>> | <!keyword> ] <ident>]
-        <!before [\!|\?|<hs>\(]>
+        $<var>=[  $<sigil>=[ \$ | \@ ] <ident>
+               |  [ <pkg=.ident>? '::' ]? <?before <[A..Z]>> <const=ident>
+               || <!keyword> <ident> <!before [ \! | \? | <hs>\( ]>
+               ]
         [  <?before <hs> <bind-op> { $*MAYBE_DECL := 1 }>
         || <?{ variable(~$<var>) || ~$<sigil> eq '@' }>
-        || <!{ callable(~$<var>) }> <.panic("undeclared variable: $<var>")>
+        || <!{ callable(~$<var>) }> <.panic("unknown variable or method: $<var>")>
         ]
     }
 
@@ -655,7 +657,7 @@ class Rubyish::Actions is HLL::Actions {
 
     method var($/) {
         my $sigil := ~$<sigil> // '';
-        my $name := $sigil ~ $<ident>;
+        my $name  := ~$<var>;
 
         if $sigil eq '@' && $*IN_CLASS && $*DEF {
             # instance variable, bound to self
@@ -666,38 +668,27 @@ class Rubyish::Actions is HLL::Actions {
                 );
         }
         else {
-            my $ns;
-            if $<pkg> {
-                $ns := ~$<pkg>;
+            if $<const> {
+                my $ns := $<pkg> ?? ~$<pkg> !! $*CLASS_BLOCK.name;
+                $name := $ns ~ '::' ~ $<ident>;
             }
-            elsif !$sigil && $*IN_CLASS {
-                # could be a package constant
-                my $c := nqp::substr($name, 0, 1);
-                $ns := $*CLASS_BLOCK.name
-                    if $c ge 'A' && $c le 'Z';
-            }
-            $name := $ns ~ '::' ~ $name
-                if $ns;
 
             if $*MAYBE_DECL {
 
                 my $block;
                 my $decl := 'var';
 
-                if $sigil eq '$' || $ns {
+                if $sigil eq '$' || $<const> {
                     $block := $*TOP_BLOCK;
                     %*SYM-GBL{$name} := 'var';
                     %*SYM{~$<ident>} := 'var'
-                        if $ns;
-                }
-                elsif !$sigil {
-                    $block := $*CUR_BLOCK;
+                        if $<const>;
                 }
                 elsif $sigil eq '@' {
                     $block := $*CLASS_BLOCK;
                 }
                 else {
-                    nqp::die("unhandled sigil: $sigil");
+                    $block := $*CUR_BLOCK;
                 }
 
                 my %sym  := $block.symbol($name);
