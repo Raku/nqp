@@ -18,6 +18,8 @@ engine for the virtual machine.
 
 =head2 Building from source
 
+=for HTML <a href="https://travis-ci.org/perl6/nqp"><img src="https://travis-ci.org/perl6/nqp.svg?branch=master"></a>
+
 To build NQP from source, you'll just need a C<make> utility
 and Perl 5.8 or newer.  To automatically obtain and build Parrot
 you may also need a git client.
