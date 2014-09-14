@@ -1884,3 +1884,7 @@ constructed and point to the received memory. An array will be pushed to the que
 containing the schedulee, a sequence number that starts at 0, the buffer or just its
 type object on error, and an error string (type object if no error). If EOF is reached,
 a sequence number of -1 is sent. Cancel to stop reading.
+
+## spawnprocasync
+* `spawnprocasync($queue, $args, $cwd, %env, $callbacks)`
+
