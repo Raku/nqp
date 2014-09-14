@@ -1,2 +1,2 @@
 #!/bin/sh
-./nqp-p src/vm/js/bin/nqp-js.nqp "$@" 
+./nqp-m --module-path gen/js/stage1/ src/vm/js/bin/nqp-js.nqp "$@"

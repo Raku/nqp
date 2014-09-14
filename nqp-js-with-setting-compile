@@ -1,0 +1,3 @@
+#!/bin/sh
+cat src/vm/js/mini-setting $1 > tmp
+./nqp-js-compile tmp

@@ -106,9 +106,9 @@ portable to more.
 The JavaScript backend is currently undergoing a refactor/rewrite of parts to generate decently performing javascript, add source maps and remove some old hack as well as clean up the code. 
 As a result of that it's in a really rough state so the best thing before playing with it/hacking on it is to contact pmurias via irc at #perl6 on irc.freenode.org.
 
-Building the JavaScript backend currently requires building the parrot backend.
+Building the JavaScript backend currently requires building the moar backend.
 
-perl Configure.pl --backends=parrot,js
+perl Configure.pl --backends=moar,js
 make
 
 To install the runtime into node_modules:

@@ -74,7 +74,7 @@ class HLLBackend::JavaScript {
     }
     
     method is_compunit($cuish) {
-        !pir::isa__IPs($cuish, 'String')
+        0;
     }
 }
 
