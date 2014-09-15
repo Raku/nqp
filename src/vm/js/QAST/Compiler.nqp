@@ -1045,7 +1045,7 @@ class QAST::CompilerJS does DWIMYNameMangling {
             Chunk.new($T_VOID, '', [$chunk, $chunk.expr~";\n"]);
         } else {
             my $tmp := $*BLOCK.add_tmp();
-            Chunk.new($chunk.type, $chunk.expr, [$chunk, "$tmp = {$chunk.expr};\n"]);
+            Chunk.new($chunk.type, $tmp, [$chunk, "$tmp = {$chunk.expr};\n"]);
         }
     }
 
