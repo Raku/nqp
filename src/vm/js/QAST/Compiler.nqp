@@ -749,6 +749,14 @@ class QAST::CompilerJS does DWIMYNameMangling {
     # $args is the list of QAST::Node arguments
     # returns either a js code string which contains the arguments, or a list of js code strings that when executed create arrays of arguments (suitable for concatenating and passing into Function.apply) 
 
+    sub join_exprs($delim, @chunks) {
+        my @exprs;
+        for @chunks -> $chunk {
+            @exprs.push($chunk.expr);
+        }
+        nqp::join($delim, @exprs);
+    }
+
     method args($args) {
         my @setup;
         my @args;
@@ -756,14 +764,14 @@ class QAST::CompilerJS does DWIMYNameMangling {
         my @named;
         my @named_exprs;
 
-        my @flat_named;
+        my @named_groups;
+
         my @groups := [[]];
         for $args -> $arg {
             if nqp::istype($arg,QAST::SpecialArg) {
                 if $arg.flat {
                     if $arg.named {
-                        # TODO - think about chunks
-                        @flat_named.push(self.as_js($arg));
+                        @named_groups.push(self.as_js($arg, :want($T_OBJ)));
                     } else {
                         @groups.push(self.as_js($arg, :want($T_OBJ)));
                         @groups.push([]);
@@ -782,7 +790,18 @@ class QAST::CompilerJS does DWIMYNameMangling {
                 @groups[@groups-1].push(self.as_js($arg, :want($T_OBJ)));
             }
         }
-        @groups[0].unshift(Chunk.new($T_OBJ, "nqp.named(\{{nqp::join(',',@named_exprs)}\})", @named));
+
+        # We want to always have at leat 1 thing to pass as the named argument
+        if @named || @named_groups == 0 {
+            @named_groups.push(Chunk.new($T_OBJ,'{' ~ nqp::join(',',@named_exprs) ~ '}', @named));
+        }
+
+        if +@named_groups > 1 {
+            @groups[0].unshift(Chunk.new($T_NONVAL, 'nqp.named([' ~ join_exprs(',', @named_groups) ~ '])', @named_groups));
+        } else {
+            @groups[0].unshift(@named_groups[0]);
+        }
+
         @groups[0].unshift($*BLOCK.ctx);
 
         my sub chunkify(@group, $pre = '', $post = '') {
@@ -1085,7 +1104,7 @@ class QAST::CompilerJS does DWIMYNameMangling {
 
         if $node.blocktype eq 'immediate' {
             my $extra_args := $arg ?? ",$arg" !! '';
-            self.stored_result(Chunk.new($want, $cuid~"({$outer.ctx},nqp.named({})$extra_args)", $setup, :$node));
+            self.stored_result(Chunk.new($want, $cuid~"({$outer.ctx},\{\}$extra_args)", $setup, :$node));
         } else {
             Chunk.new($T_OBJ, $cuid, $setup);
         }

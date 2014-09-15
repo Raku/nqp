@@ -131,10 +131,6 @@ exports.to_bool = function(arg) {
   }
 };
 
-exports.named = function(named) {
-  return named;
-};
-
 if (!Math.imul) {
   /* Polyfill from:
   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/imul
