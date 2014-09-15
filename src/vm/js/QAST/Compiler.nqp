@@ -388,6 +388,11 @@ class QAST::OperationsJS {
        Chunk.new($T_OBJ, '[' ~ nqp::join(',', @exprs) ~ ']' , @setup, :$node);
     });
 
+    add_op('hash', sub ($comp, $node, :$want) {
+       my @setup;
+       Chunk.new($T_OBJ, 'nqp.hash()', @setup , :$node);
+    });
+
     add_op('call', sub ($comp, $node, :$want) {
         if $*BLOCK.is_local_lexotic($node.name) {
             my $value := $comp.as_js($node[0], :want($T_OBJ));
@@ -1149,6 +1154,19 @@ class QAST::CompilerJS does DWIMYNameMangling {
                 my $array := self.as_js($var[0], :want($T_OBJ));
                 my $index := self.as_js($var[1], :want($T_INT));
                 Chunk.new($T_OBJ, "{$array.expr}[{$index.expr}]", [$array, $index], :node($var));
+            }
+        } elsif ($var.scope eq 'associative') {
+            # TODO work on things other than nqp lists
+            # TODO think about nulls and missing elements
+            if $*BINDVAL {
+                my $hash := self.as_js_clear_bindval($var[0], :want($T_OBJ));
+                my $key := self.as_js_clear_bindval($var[1], :want($T_STR));
+                my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ));
+                Chunk.new($T_OBJ, $bindval.expr, [$hash, $key, $bindval, "({$hash.expr}[{$key.expr}] = {$bindval.expr});\n"], :node($var));
+            } else {
+                my $hash := self.as_js($var[0], :want($T_OBJ));
+                my $key := self.as_js($var[1], :want($T_STR));
+                Chunk.new($T_OBJ, "{$hash.expr}[{$key.expr}]", [$hash, $key], :node($var));
             }
         } else {
             self.NYI("Unimplemented QAST::Var scope: " ~ $var.scope);

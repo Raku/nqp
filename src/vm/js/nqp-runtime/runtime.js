@@ -148,6 +148,14 @@ if (!Math.imul) {
 }
 
 
+function Hash() {
+}
+
+exports.hash = function() {
+  return new Hash();
+};
+
+
 // Placeholder
 exports.top_context = function() {
   return null;
