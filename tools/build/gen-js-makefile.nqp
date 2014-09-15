@@ -139,8 +139,7 @@ say("\n\njs-clean:
 	\$(RM_RF) gen/js/stage1 gen/js/stage2
 ");
 
-deps("js-all", 'm-all', 'js-stage1-compiler');
-# 'node_modules/installed');
+deps("js-all", 'm-all', 'js-stage1-compiler', 'node_modules/installed');
 
 # Enforce the google coding standards
 say("js-lint:

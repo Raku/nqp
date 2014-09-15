@@ -25,7 +25,7 @@ js-test: js-all
 js-clean:
 	$(RM_RF) gen/js/stage1 gen/js/stage2
 
-js-all : m-all js-stage1-compiler
+js-all : m-all js-stage1-compiler node_modules/installed
 js-lint:
 	gjslint --strict --nojsdoc src/vm/js/nqp-runtime/*.js
 node_modules/installed: src/vm/js/nqp-runtime/runtime.js
