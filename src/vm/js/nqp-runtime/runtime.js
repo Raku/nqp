@@ -57,13 +57,13 @@ op.radix = function(radix, str, zpos, flags) {
   var regex = new RegExp(
       '^' + minus + digitclass + '(?:_' +
       digitclass + '|' + digitclass + ')*');
-  var str = str.to_s(ctx).slice(zpos);
+  var str = str.slice(zpos);
   var search = str.match(regex);
   if (search == null) {
     return [0, 1, -1];
   }
   var number = search[0].replace(/_/g, '');
-  var poer = number[0] == '-' ? number.length - 1 : number.length;
+  var power = number[0] == '-' ? number.length - 1 : number.length;
   var pow = Math.pow(radix, power);
   var ret = [parseInt(number, radix), pow, zpos + search[0].length];
   return ret;

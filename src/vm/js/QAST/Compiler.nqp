@@ -450,7 +450,7 @@ class QAST::OperationsJS {
     add_simple_op('abs_i', $T_INT, [$T_INT], sub ($arg) {"Math.abs($arg)"});
     add_simple_op('pow_n', $T_NUM, [$T_NUM, $T_NUM], sub ($base, $exponent) {"Math.pow($base, $exponent)"});
 
-    add_simple_op('radix', $T_OBJ, [$T_STR, $T_INT, $T_INT], sub ($str, $pos, $flags) {"nqp.op.radix($str,$pos,$flags)"});
+    add_simple_op('radix', $T_OBJ, [$T_INT, $T_STR, $T_INT, $T_INT], sub ($radix, $str, $pos, $flags) {"nqp.op.radix($radix,$str,$pos,$flags)"});
 
     add_simple_op('stat', $T_INT, [$T_STR, $T_INT], sub ($path, $flag) {"nqp.op.stat($path,$flag)"});
 

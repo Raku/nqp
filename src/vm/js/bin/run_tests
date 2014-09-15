@@ -1,5 +1,5 @@
 #!/bin/bash
 # 19 and 30 where moved out as they were parrot specific, 52,54 is missing, we can't pass 49 till we are bootstraped
 #echo 'No tests pass as we are in the early stages of a rewrite/refactor'
-prove -e  './nqp-js-with-setting' t/nqp/{01..08}* t/nqp/{10,11,13,14,15,16,17,20,23,42,48,83}* t/js/getcomp-js.t
+prove -e  './nqp-js-with-setting' t/nqp/{01..08}* t/nqp/{10,11,13,14,15,16,17,20,23,42,48,81,83}* t/js/getcomp-js.t
 #prove -e  './nqp-js' t/nqp/{01..29}*.t t/nqp/{31..48}* t/nqp/{50,51,53}* t/nqp/{55..81}* t/nqp/83* t/serialization/0{2,3}*.t
