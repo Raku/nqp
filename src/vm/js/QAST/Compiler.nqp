@@ -441,6 +441,8 @@ class QAST::OperationsJS {
 
     add_simple_op('existskey', $T_BOOL, [$T_OBJ, $T_STR], sub ($hash, $key) {"$hash.hasOwnProperty($key)"});
 
+    add_simple_op('existspos', $T_BOOL, [$T_OBJ, $T_INT], sub ($array, $index) {"nqp.op.existspos($array,$index)"});
+
     for <ceil floor abs log> -> $func {
         add_simple_op($func ~ '_n', $T_NUM, [$T_NUM], sub ($arg) {"Math.$func($arg)"});
     }

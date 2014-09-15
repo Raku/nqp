@@ -161,6 +161,12 @@ exports.top_context = function() {
   return null;
 };
 
+
+op.existspos = function(array, idx) {
+  if (idx < 0) idx += array.length;
+  return boolish(array.hasOwnProperty(idx));
+};
+
 // Filesystem handling
 // TODO - perhaps move it to a seperate file/module
 
@@ -220,3 +226,4 @@ op.stat = function(file, code) {
     case PLATFORM_BLOCKS: return stats.blocks;
   }
 };
+
