@@ -770,7 +770,6 @@ class QAST::CompilerJS does DWIMYNameMangling {
                     }
                 }
                 elsif $arg.named {
-                    # TODO - think about chunks
                     my $compiled_arg := self.as_js($arg, :want($T_OBJ));
                     @named.push($compiled_arg);
                     @named_exprs.push(quote_string($arg.named) ~ ":" ~ $compiled_arg.expr);
