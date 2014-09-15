@@ -175,7 +175,7 @@ var sleep = require('sleep');
 var iconv = require('iconv-lite');
 
 function boolish(bool) {
-    return bool ? 1 : 0;
+  return bool ? 1 : 0;
 }
 
 op.stat = function(file, code) {
