@@ -392,6 +392,7 @@ class QAST::OperationsJS {
        my @setup;
        Chunk.new($T_OBJ, 'nqp.hash()', @setup , :$node);
     });
+    add_simple_op('ishash', $T_INT, [$T_OBJ], sub ($obj) {"nqp.op.ishash($obj)"});
 
     add_op('call', sub ($comp, $node, :$want) {
         if $*BLOCK.is_local_lexotic($node.name) {

@@ -98,7 +98,10 @@ exports.to_num = function(arg) {
   if (typeof arg == 'number') {
     return arg;
   } else if (typeof arg == 'string') {
-    return parseFloat(arg);
+    var ret = parseFloat(arg);
+    return isNaN(ret) ? 0 : ret;
+  } else if (arg instanceof Array) {
+    return arg.length;
   } else {
     throw "Can't convert to num";
   }
@@ -154,6 +157,9 @@ function Hash() {
 exports.hash = function() {
   return new Hash();
 };
+exports.op.ishash = function(obj) {
+  return obj instanceof Hash ? 1 : 0;
+};
 
 
 // Placeholder
@@ -175,7 +181,7 @@ var sleep = require('sleep');
 var iconv = require('iconv-lite');
 
 function boolish(bool) {
-  return bool ? 1 : 0;
+    return bool ? 1 : 0;
 }
 
 op.stat = function(file, code) {
