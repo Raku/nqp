@@ -145,6 +145,6 @@ deps("js-all", 'm-all', 'js-stage1-compiler', 'node_modules/installed');
 say("js-lint:
 	gjslint --strict --nojsdoc src/vm/js/nqp-runtime/*.js");
 
-say('node_modules/installed: src/vm/js/nqp-runtime/runtime.js
+say('node_modules/installed: src/vm/js/nqp-runtime/runtime.js src/vm/js/nqp-runtime/package.json
 	npm install src/vm/js/nqp-runtime
 	touch node_modules/installed');
