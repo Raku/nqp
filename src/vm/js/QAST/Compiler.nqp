@@ -438,7 +438,10 @@ class QAST::OperationsJS {
     add_sideffect_op('pop', $T_OBJ, [$T_OBJ], sub ($array) {"$array.pop()"});
     add_sideffect_op('push', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($array, $elem) {"$array.push($elem)"});
 
-    add_simple_op('iterator', $T_OBJ, [$T_OBJ], sub ($array) {"nqp.op.iterator($array)"});
+    add_sideffect_op('iterator', $T_OBJ, [$T_OBJ], sub ($array) {"nqp.op.iterator($array)"});
+
+    add_simple_op('iterval', $T_OBJ, [$T_OBJ], sub ($iter) {"$iter.iterval()"});
+    add_simple_op('iterkey_s', $T_STR, [$T_OBJ], sub ($iter) {"$iter.iterkey_s()"});
 
     add_simple_op('existskey', $T_BOOL, [$T_OBJ, $T_STR], sub ($hash, $key) {"$hash.hasOwnProperty($key)"});
 

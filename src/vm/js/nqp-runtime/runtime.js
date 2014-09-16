@@ -79,8 +79,39 @@ Iter.prototype.shift = function() {
   return this.array[this.idx++];
 };
 
-op.iterator = function(array) {
-  return new Iter(array);
+function HashIter(hash) {
+  this.hash = hash;
+  this.keys = Object.keys(hash);
+  this.target = this.keys.length;
+  this.idx = 0;
+}
+
+HashIter.prototype.shift = function() {
+  return new IterPair(this.hash,this.keys[this.idx++]);
+};
+
+function IterPair(hash, key) {
+  this.key = key;
+  this.hash = hash;
+}
+
+IterPair.prototype.iterval = function() {
+  return this.hash[this.key];
+};
+IterPair.prototype.iterkey_s = function() {
+  return this.key;
+};
+
+
+op.iterator = function(obj) {
+  if (obj instanceof Array) {
+    return new Iter(obj);
+  } else if (obj instanceof Hash) {
+    console.log(obj);
+    return new HashIter(obj);
+  } else {
+    throw "unsupported thing to iterate over";
+  }
 };
 
 exports.to_str = function(arg) {
@@ -103,6 +134,7 @@ exports.to_num = function(arg) {
   } else if (arg instanceof Array) {
     return arg.length;
   } else {
+    console.log(arg);
     throw "Can't convert to num";
   }
 };
@@ -122,7 +154,7 @@ exports.to_bool = function(arg) {
     return arg == '' || arg == '0' ? 0 : 1;
   } else if (arg instanceof Array) {
     return arg.length == 0 ? 0 : 1;
-  } else if (arg instanceof Iter) {
+  } else if (arg instanceof Iter || arg instanceof HashIter) {
     return arg.idx < arg.target;
   } else if (arg === undefined) {
     return 0;
