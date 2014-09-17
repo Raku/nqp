@@ -736,10 +736,6 @@ class QAST::CompilerJS does DWIMYNameMangling {
     }
 
 
-    # TODO improve comments
-    # turns a list of arguments for a call into a js code according to our most generall calling convention
-    # $args is the list of QAST::Node arguments
-    # returns either a js code string which contains the arguments, or a list of js code strings that when executed create arrays of arguments (suitable for concatenating and passing into Function.apply) 
 
     sub join_exprs($delim, @chunks) {
         my @exprs;
@@ -748,6 +744,11 @@ class QAST::CompilerJS does DWIMYNameMangling {
         }
         nqp::join($delim, @exprs);
     }
+
+    # TODO improve comments
+    # turns a list of arguments for a call into a js code according to our most generall calling convention
+    # $args is the list of QAST::Node arguments
+    # returns either a js code string which contains the arguments, or a list of js code strings that when executed create arrays of arguments (suitable for concatenating and passing into Function.apply) 
 
     method args($args) {
         my @setup;
