@@ -91,15 +91,22 @@ HashIter.prototype.shift = function() {
 };
 
 function IterPair(hash, key) {
-  this.key = key;
-  this.hash = hash;
+  this._key = key;
+  this._hash = hash;
 }
 
 IterPair.prototype.iterval = function() {
-  return this.hash[this.key];
+  return this._hash[this._key];
 };
 IterPair.prototype.iterkey_s = function() {
-  return this.key;
+  return this._key;
+};
+
+IterPair.prototype.key = function(ctx, named) {
+  return this._key;
+};
+IterPair.prototype.value = function(ctx, named) {
+  return this._hash[this._key];
 };
 
 
@@ -107,7 +114,6 @@ op.iterator = function(obj) {
   if (obj instanceof Array) {
     return new Iter(obj);
   } else if (obj instanceof Hash) {
-    console.log(obj);
     return new HashIter(obj);
   } else {
     throw "unsupported thing to iterate over";
