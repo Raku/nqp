@@ -13,6 +13,7 @@ import org.perl6.nqp.runtime.ThreadContext;
 public class FileHandle extends SyncHandle implements IIOSeekable {
     
     FileChannel fc;
+    protected boolean eof = false;
     
     public FileHandle(ThreadContext tc, String filename, String mode) {
         try {
@@ -76,6 +77,26 @@ public class FileHandle extends SyncHandle implements IIOSeekable {
             fc.force(false);
         } catch (IOException e) {
             throw ExceptionHandling.dieInternal(tc, e);
+        }
+    }
+
+    public boolean eof(ThreadContext tc) {
+        if (eof)
+            return true;
+        else if (readBuffer != null && readBuffer.remaining() > 0)
+            return false;
+        else {
+            try {
+                long position = fc.position();
+                getc(tc);
+                fc.position(position);
+                readBuffer = null;
+                return false;
+            }
+            catch (Exception e) {
+                eof = true;
+                return true;
+            }
         }
     }
 }
