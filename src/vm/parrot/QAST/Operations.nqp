@@ -1843,7 +1843,22 @@ QAST::Operations.add_core_op('eoffh', -> $qastcomp, $op {
     if +$op.list != 1 {
         nqp::die("The 'eoffh' op expects one operand");
     }
-    $qastcomp.as_post(QAST::Op.new( :op('isfalse'), $op[0] ))
+    $qastcomp.as_post(
+        QAST::Op.new( :op('if'),
+            QAST::Op.new( :op('istrue'),
+                QAST::Op.new( :op('callmethod'), :name('read'),
+                    $op[0], QAST::IVal.new( :value(1) )
+                )
+            ),
+            QAST::Stmts.new(
+                QAST::Op.new( :op('callmethod'), :name('seek'),
+                    $op[0], QAST::IVal.new( :value(1) ), QAST::IVal.new( :value(-1) )
+                ),
+                QAST::IVal.new( :value(0) )
+            ),
+            QAST::IVal.new( :value(1) )
+        )
+    )
 });
 QAST::Operations.add_core_op('closefh', -> $qastcomp, $op {
     if +$op.list != 1 {
