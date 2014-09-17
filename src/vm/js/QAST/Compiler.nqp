@@ -424,6 +424,45 @@ class QAST::OperationsJS {
             Chunk.new($T_OBJ, $callee.expr ~ $call ~ $compiled_args.expr ~ ')' , [$callee, $compiled_args], :$node), :$want);
     });
 
+
+    add_op('callmethod', sub ($comp, $node, :$want) {
+
+        my @args := nqp::clone($node.list);
+
+        my $invocant := $comp.as_js(@args.shift, :want($T_OBJ));
+
+        my @setup := [$invocant];
+
+        my $method;
+        if $node.name {
+            if $comp.is_valid_js_identifier($node.name) {
+                $method := '.' ~ $node.name;
+            } else {
+                $method := '[' ~ quote_string($node.name) ~ ']';
+            }
+        } else {
+            my $method := $comp.as_js(@args.shift, :want($T_STR));
+            my $tmp := $*BLOCK.add_tmp();
+            @setup.push($method);
+            @setup.push("$tmp := {$method.expr};\n");
+            $method := "[$tmp]";
+        }
+
+        my $compiled_args := $comp.args(@args);
+
+        my $call;
+        if nqp::islist($compiled_args) {
+            $compiled_args := merge_arg_groups($compiled_args);
+            $call := ".apply({$invocant.expr},";
+        } else {
+            $call := '(';
+        }
+
+        $comp.stored_result(
+            Chunk.new($T_OBJ, $invocant.expr ~ $method ~ $call ~ $compiled_args.expr ~ ')' , [$invocant, $compiled_args], :$node), :$want);
+
+    });
+
     add_simple_op('split', $T_OBJ, [$T_STR, $T_STR], sub ($separator, $string) {
         "({$string} == '' ? [] : {$string}.split({$separator}))"
     });
@@ -747,6 +786,10 @@ class QAST::CompilerJS does DWIMYNameMangling {
     }
 
 
+    method is_valid_js_identifier($identifier) {
+        # TODO - implement a simplified version of https://mathiasbynens.be/notes/javascript-identifiers
+        0;
+    }
 
     sub join_exprs($delim, @chunks) {
         my @exprs;
