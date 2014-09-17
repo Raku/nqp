@@ -513,13 +513,13 @@ class QAST::OperationsJS {
 
             Chunk.new($want, $result, [
                 $boolifed_cond,
-                "if ({$boolifed_cond.expr}) \{",
+                "if ({$boolifed_cond.expr}) \{\n",
                 $then,
-                $want != $T_VOID ?? "$result = {$then.expr}" !! '',
-                "\} else \{",
+                $want != $T_VOID ?? "$result = {$then.expr};\n" !! '',
+                "\} else \{\n",
                 $else,
-                $want != $T_VOID ?? "$result = {$else.expr}" !! '',
-                "\}"
+                $want != $T_VOID ?? "$result = {$else.expr};\n" !! '',
+                "\}\n"
             ], :node($node));
         });
     }
