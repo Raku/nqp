@@ -208,7 +208,7 @@ class QAST::OperationsJS {
 
     sub add_sideffect_op($op, $return_type, @argument_types, $cb) {
         %ops{$op} := sub ($comp, $node, :$want) {
-            $comp.stored_result(op_template($comp, $node, $return_type, @argument_types, $cb));
+            $comp.stored_result(op_template($comp, $node, $return_type, @argument_types, $cb), :$want);
         };
     }
 
@@ -417,10 +417,10 @@ class QAST::OperationsJS {
                 @setup.push($group);
             }
             $comp.stored_result(
-                Chunk.new($T_OBJ, "{$callee.expr}.apply(undefined,{@exprs.shift ~ '.concat(' ~ nqp::join(',', @exprs)}));\n" , @setup, :$node));
+                Chunk.new($T_OBJ, "{$callee.expr}.apply(undefined,{@exprs.shift ~ '.concat(' ~ nqp::join(',', @exprs)}))" , @setup, :$node), :$want);
         } else {
             $comp.stored_result(
-                Chunk.new($T_OBJ, "{$callee.expr}({$compiled_args.expr});\n" , [$callee, $compiled_args], :$node));
+                Chunk.new($T_OBJ, "{$callee.expr}({$compiled_args.expr})" , [$callee, $compiled_args], :$node), :$want);
         }
     });
 
@@ -1065,8 +1065,8 @@ class QAST::CompilerJS does DWIMYNameMangling {
         nqp::existskey(%!cuids, $node.cuid);
     }
 
-    method stored_result($chunk) {
-        if $chunk.type == $T_VOID {
+    method stored_result($chunk, :$want) {
+        if $chunk.type == $T_VOID || $want == $T_VOID {
             Chunk.new($T_VOID, '', [$chunk, $chunk.expr~";\n"]);
         } else {
             my $tmp := $*BLOCK.add_tmp();
@@ -1107,7 +1107,7 @@ class QAST::CompilerJS does DWIMYNameMangling {
 
         if $node.blocktype eq 'immediate' {
             my $extra_args := $arg ?? ",$arg" !! '';
-            self.stored_result(Chunk.new($want, $cuid~"({$outer.ctx},\{\}$extra_args)", $setup, :$node));
+            self.stored_result(Chunk.new($want, $cuid~"({$outer.ctx},\{\}$extra_args)", $setup, :$node), :$want);
         } else {
             Chunk.new($T_OBJ, $cuid, $setup);
         }
