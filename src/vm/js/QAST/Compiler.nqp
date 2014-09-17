@@ -324,21 +324,10 @@ class QAST::OperationsJS {
     add_simple_op('escape', $T_STR, [$T_STR], sub ($string) {"nqp.op.escape($string)"});
     add_simple_op('x', $T_STR, [$T_STR, $T_INT], sub ($string, $times) {"nqp.op.x($string,$times)"});
 
-    add_op('getcomp', sub ($comp, $node, :$want) {
-        my $arg := $comp.as_js($node[0], :want($T_STR));
-        my $tmp := $*BLOCK.add_tmp();
-        Chunk.new($T_OBJ, $tmp , [$arg, "$tmp = nqp.op.getcomp({$arg.expr});\n"], :$node);
-    });
+    add_sideffect_op('getcomp', $T_OBJ, [$T_STR], sub ($lang) {"nqp.op.getcomp($lang)"});
 
-    add_op('say', sub ($comp, $node, :$want) {
-        my $arg := $comp.as_js($node[0], :want($T_STR));
-        Chunk.new($T_VOID, "" , [$arg, "nqp.op.say({$arg.expr});\n"], :$node);
-    });
-
-    add_op('print', sub ($comp, $node, :$want) {
-        my $arg := $comp.as_js($node[0], :want($T_STR));
-        Chunk.new($T_VOID, "" , [$arg, "nqp.op.print({$arg.expr});\n"], :$node);
-    });
+    add_sideffect_op('say', $T_VOID, [$T_STR], sub ($arg) {"nqp.op.say({$arg})"});
+    add_sideffect_op('print', $T_VOID, [$T_STR], sub ($arg) {"nqp.op.print({$arg})"});
 
     add_simple_op('isinvokable', $T_INT, [$T_OBJ], sub ($arg) {"nqp.op.isinvokable($arg)"});
 
