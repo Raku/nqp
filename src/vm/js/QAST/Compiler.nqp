@@ -400,8 +400,6 @@ class QAST::OperationsJS {
             return Chunk.new($want, '', [$value, "return {$value.expr};\n"]);
         }
 
-        my $tmp := $*BLOCK.add_tmp();
-
         my $args := nqp::clone($node.list);
 
         my $callee := $node.name
@@ -410,6 +408,7 @@ class QAST::OperationsJS {
 
         my $compiled_args := $comp.args($args);
 
+        my $call;
         if nqp::islist($compiled_args) {
             my @exprs;
             my @setup := [$callee];
@@ -417,10 +416,11 @@ class QAST::OperationsJS {
                 @exprs.push($group.expr);
                 @setup.push($group);
             }
-            @setup.push("$tmp = {$callee.expr}.apply(undefined,{@exprs.shift ~ '.concat(' ~ nqp::join(',', @exprs)}));\n");
-            Chunk.new($T_OBJ, $tmp , @setup, :$node);
+            $comp.stored_result(
+                Chunk.new($T_OBJ, "{$callee.expr}.apply(undefined,{@exprs.shift ~ '.concat(' ~ nqp::join(',', @exprs)}));\n" , @setup, :$node));
         } else {
-            Chunk.new($T_OBJ, $tmp , [$callee, $compiled_args, "$tmp = {$callee.expr}({$compiled_args.expr});\n"], :$node);
+            $comp.stored_result(
+                Chunk.new($T_OBJ, "{$callee.expr}({$compiled_args.expr});\n" , [$callee, $compiled_args], :$node));
         }
     });
 
