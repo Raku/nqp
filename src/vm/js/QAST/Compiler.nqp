@@ -414,13 +414,14 @@ class QAST::OperationsJS {
 
         my $call;
         if nqp::islist($compiled_args) {
-            my $merged_args := merge_arg_groups($compiled_args);
-            $comp.stored_result(
-                Chunk.new($T_OBJ, "{$callee.expr}.apply(undefined,{$merged_args.expr})" , [$callee, $merged_args], :$node), :$want);
+            $compiled_args := merge_arg_groups($compiled_args);
+            $call := '.apply(undefined,';
         } else {
-            $comp.stored_result(
-                Chunk.new($T_OBJ, "{$callee.expr}({$compiled_args.expr})" , [$callee, $compiled_args], :$node), :$want);
+            $call := '(';
         }
+
+        $comp.stored_result(
+            Chunk.new($T_OBJ, $callee.expr ~ $call ~ $compiled_args.expr ~ ')' , [$callee, $compiled_args], :$node), :$want);
     });
 
     add_simple_op('split', $T_OBJ, [$T_STR, $T_STR], sub ($separator, $string) {
