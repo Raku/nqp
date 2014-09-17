@@ -912,7 +912,6 @@ class QAST::CompilerJS does DWIMYNameMangling {
                 if $got == $T_STR {
                     my $tmp := $*BLOCK.add_tmp();
                     return Chunk.new($T_NUM, "(isNaN($tmp) ? 0 : $tmp)", [$chunk,"$tmp = parseFloat({$chunk.expr});\n"]);
-                    return Chunk.new($T_NUM, $chunk.expr, [$chunk]);
                 }
             }
 
