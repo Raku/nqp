@@ -383,6 +383,21 @@ class QAST::OperationsJS {
     });
     add_simple_op('ishash', $T_INT, [$T_OBJ], sub ($obj) {"nqp.op.ishash($obj)"});
 
+    sub merge_arg_groups($groups) {
+        if nqp::islist($groups) {
+            my @exprs;
+
+            my @setup := [];
+
+            for $groups -> $group {
+                @exprs.push($group.expr);
+                @setup.push($group);
+            }
+
+            Chunk.new($T_NONVAL, @exprs.shift ~ '.concat(' ~ nqp::join(',', @exprs) ~ ')', $groups);
+        }
+    }
+
     add_op('call', sub ($comp, $node, :$want) {
         if $*BLOCK.is_local_lexotic($node.name) {
             my $value := $comp.as_js($node[0], :want($T_OBJ));
@@ -399,14 +414,9 @@ class QAST::OperationsJS {
 
         my $call;
         if nqp::islist($compiled_args) {
-            my @exprs;
-            my @setup := [$callee];
-            for $compiled_args -> $group {
-                @exprs.push($group.expr);
-                @setup.push($group);
-            }
+            my $merged_args := merge_arg_groups($compiled_args);
             $comp.stored_result(
-                Chunk.new($T_OBJ, "{$callee.expr}.apply(undefined,{@exprs.shift ~ '.concat(' ~ nqp::join(',', @exprs)}))" , @setup, :$node), :$want);
+                Chunk.new($T_OBJ, "{$callee.expr}.apply(undefined,{$merged_args.expr})" , [$callee, $merged_args], :$node), :$want);
         } else {
             $comp.stored_result(
                 Chunk.new($T_OBJ, "{$callee.expr}({$compiled_args.expr})" , [$callee, $compiled_args], :$node), :$want);
