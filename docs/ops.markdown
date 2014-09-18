@@ -1888,3 +1888,5 @@ a sequence number of -1 is sent. Cancel to stop reading.
 ## spawnprocasync
 * `spawnprocasync($queue, $args, $cwd, %env, $callbacks)`
 
+## killprocasync
+* `nqp::killprocasync($handle, $signal)`
