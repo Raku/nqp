@@ -51,6 +51,9 @@ case ${TARGET:=`uname`} in
     printf "LDFLAGS=-lm\n" >>$C
     ;;
   FreeBSD)
+    if [ -z "${CFLAGS}" ]; then
+      printf "CFLAGS=-fPIC\n" >>$C
+    fi
     printf "LDFLAGS=-lm\n" >>$C
     printf "RM=rm -f\n" >>$C
     ;;
