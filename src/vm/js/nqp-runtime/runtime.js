@@ -1,6 +1,7 @@
 var op = {};
 exports.op = op;
 
+
 op.print = function(arg) {
   process.stdout.write(arg);
 };
@@ -205,6 +206,17 @@ exports.top_context = function() {
 op.existspos = function(array, idx) {
   if (idx < 0) idx += array.length;
   return boolish(array.hasOwnProperty(idx));
+};
+
+// Serialization stubs
+
+op.deserialize = function(blob, scRef, sh, cr, conflict) {
+};
+
+op.createsc = function(handle) {
+};
+
+op.scsetdesc = function(sc, desc) {
 };
 
 // Filesystem handling

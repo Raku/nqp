@@ -111,6 +111,43 @@ class Chunk {
     }
 }
 
+# It only makes sense to serialize a serialization context once, so when cross compiling we cache the result
+role SerializeOnce {
+    method serialize_sc_without_caching($sc) {
+        # Serialize it.
+
+        # HACK - we are avoiding an  MoarVM specific optimalization
+        # On MoarVM if an sc is on top of the compiling_scs stackthread the serialized data is stored on the thread context
+        # We have no way of accessing it, so we try to avoid that
+        # If we put a fake sc on top of the stack it won't be cached
+        # we avoid anything that creates a write barrier while it's on top
+        my $fake_stack_top_sc := nqp::createsc('JS_HACK');
+        nqp::pushcompsc($fake_stack_top_sc);
+
+        my $sh := nqp::list_s();
+        my $serialized := nqp::serialize($sc, $sh);
+
+        # HACK - now we pop our fake sc
+        nqp::popcompsc();
+
+        # Now it's serialized, pop this SC off the compiling SC stack.
+        nqp::popcompsc();
+        [$serialized,$sh];
+    }
+
+    method serialize_sc($sc) {
+        if %*SC_CACHE<enabled> {
+            my $handle := nqp::scgethandle($sc);
+            if nqp::existskey(%*SC_CACHE,$handle) {
+              %*SC_CACHE{$handle};
+            } else {
+              %*SC_CACHE{$handle}  := self.serialize_sc_without_caching($sc);
+            }
+        } else {
+          self.serialize_sc_without_caching($sc);
+        }
+    }
+}
 
 # TODO think if we should be using such a complicated name mangling scheme
 # It's separated into a role so we may replace it with an different scheme when we won't to reduce the output size
@@ -720,7 +757,7 @@ class QAST::OperationsJS {
     }
 }
 
-class QAST::CompilerJS does DWIMYNameMangling {
+class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     # Holds information about the QAST::Block we're currently compiling.
     # The currently compiled block is stored in $*BLOCK
@@ -1207,6 +1244,33 @@ class QAST::CompilerJS does DWIMYNameMangling {
         QAST::OperationsJS.compile_op(self, $node, :$want);
     }
 
+    method create_sc($ast) {
+        my @sh;
+        my $sc := $ast.sc;
+
+        my $sc_tuple := self.serialize_sc($sc);
+        my $sc_data := $sc_tuple[0];
+        my $sc_sh := $sc_tuple[1];
+
+
+        my $i := 0;
+        while $i < nqp::elems($sc_sh) {
+            say(nqp::elems($sc_sh));
+            my $s := nqp::atpos_s($sc_sh,$i);
+            my $got := nqp::isnull_s($s) ?? 'null' !! quote_string($s);
+            @sh.push($got);
+            $i := $i + 1;
+        }
+
+        my $quoted_data := nqp::isnull_s($sc_data) ?? 'null' !! quote_string($sc_data);
+
+        "var sh=[{nqp::join(',',@sh)}];\n"
+        ~ "var sc = nqp.op.createsc({quote_string(nqp::scgethandle($sc))});\n"
+        ~ "var code_refs = [];\n" # TODO
+        ~ "nqp.op.deserialize($quoted_data,sc,sh,code_refs,null);\n"
+        ~ "nqp.op.scsetdesc(sc,{quote_string(nqp::scgetdesc($sc))});\n"
+    }
+
     multi method as_js(QAST::CompUnit $node, :$want) {
         # Should have a single child which is the outer block.
         if +@($node) != 1 || !nqp::istype($node[0], QAST::Block) {
@@ -1216,16 +1280,21 @@ class QAST::CompilerJS does DWIMYNameMangling {
         # Compile the block.
         my $block_js := self.as_js($node[0], :want($T_VOID));
 
+        my $body;
+
         if nqp::defined($node.main) {
             my $main_block := QAST::Block.new($node.main);
 
             my $main := self.as_js($main_block, :want($T_VOID));
 
-            Chunk.new($T_VOID, "", [$block_js, $main, self.mangled_cuid($main_block) ~ "();\n"]);
+            $body := Chunk.new($T_VOID, "", [$block_js, $main, self.mangled_cuid($main_block) ~ "();\n"]);
             
         } else {
-            $block_js;
+            $body := $block_js;
         }
+        
+        Chunk.new($T_VOID, "", [self.create_sc($node), $body]);
+
     }
 
     method declare_var(QAST::Var $node) {
