@@ -47,7 +47,13 @@ case ${TARGET:=`uname`} in
     fi
     printf "LDFLAGS=-lm -ldl\n" >>$C
     ;;
-  OpenBSD|NetBSD)
+  OpenBSD)
+    printf "LDFLAGS=-lm\n" >>$C
+    ;;
+  NetBSD)
+    if [ -z "${CFLAGS}" ]; then
+      printf "CFLAGS=-fPIC\n" >>$C
+    fi
     printf "LDFLAGS=-lm\n" >>$C
     ;;
   FreeBSD)
