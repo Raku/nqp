@@ -68,7 +68,7 @@ Iter.prototype.shift = function() {
 };
 
 Iter.prototype.$$to_bool = function() {
-   return arg.idx < arg.target;
+  return arg.idx < arg.target;
 };
 
 function HashIter(hash) {
@@ -83,7 +83,7 @@ HashIter.prototype.shift = function() {
 };
 
 HashIter.prototype.$$to_bool = function() {
-   return arg.idx < arg.target;
+  return arg.idx < arg.target;
 };
 
 function IterPair(hash, key) {
