@@ -88,7 +88,7 @@ function HashIter(hash) {
 }
 
 HashIter.prototype.shift = function() {
-  return new IterPair(this.hash,this.keys[this.idx++]);
+  return new IterPair(this.hash, this.keys[this.idx++]);
 };
 
 function IterPair(hash, key) {
@@ -117,7 +117,7 @@ op.iterator = function(obj) {
   } else if (obj instanceof Hash) {
     return new HashIter(obj);
   } else {
-    throw "unsupported thing to iterate over";
+    throw 'unsupported thing to iterate over';
   }
 };
 
@@ -227,7 +227,7 @@ var sleep = require('sleep');
 var iconv = require('iconv-lite');
 
 function boolish(bool) {
-    return bool ? 1 : 0;
+  return bool ? 1 : 0;
 }
 
 op.stat = function(file, code) {
