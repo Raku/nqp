@@ -947,6 +947,9 @@ Return the next line of the open filehandle.
 
 Prompt the user with `$prompt`, then return the next line of the open filehandle.
 
+## readcharsfh
+* `nqp::readcharsfh(Handle $fh, $chars)`
+
 ## say
 * `say(str $str)`
 
