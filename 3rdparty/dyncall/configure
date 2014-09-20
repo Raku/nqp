@@ -50,6 +50,11 @@ case ${TARGET:=`uname`} in
   OpenBSD)
     printf "LDFLAGS=-lm\n" >>$C
     ;;
+  DragonFly)
+    if [ -z "${CFLAGS}" ]; then
+      printf "CFLAGS=-fPIC\n" >>$C
+    fi
+    ;;
   NetBSD)
     if [ -z "${CFLAGS}" ]; then
       printf "CFLAGS=-fPIC\n" >>$C
