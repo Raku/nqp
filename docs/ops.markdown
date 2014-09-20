@@ -494,6 +494,9 @@ match was found.
 
 Return a string that is the concatenation of the two passed in strings.
 
+## encode
+* `encode(str, 'encoding', buffer)`
+
 ## escape
 * `escape(str $str)`
 
