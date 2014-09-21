@@ -366,6 +366,14 @@ class QAST::OperationsJS {
     add_sideffect_op('say', $T_VOID, [$T_STR], sub ($arg) {"nqp.op.say({$arg})"});
     add_sideffect_op('print', $T_VOID, [$T_STR], sub ($arg) {"nqp.op.print({$arg})"});
 
+    add_sideffect_op('open', $T_OBJ, [$T_STR, $T_STR], sub ($file, $mode) {"nqp.op.open($file,$mode)"});
+
+    add_sideffect_op('tellfh', $T_INT, [$T_OBJ], sub ($fh) {"nqp.op.tellfh($fh)"});
+    add_sideffect_op('readlinefh', $T_STR, [$T_OBJ], sub ($fh) {"nqp.op.readlinefh($fh)"});
+    add_sideffect_op('readallfh', $T_STR, [$T_OBJ], sub ($fh) {"nqp.op.readallfh($fh)"});
+    add_sideffect_op('printfh', $T_OBJ, [$T_OBJ, $T_STR], sub ($fh, $content) {"nqp.op.printfh($fh,$content)"});
+    add_sideffect_op('closefh', $T_OBJ, [$T_OBJ], sub ($fh) {"nqp.op.closefh($fh)"});
+
     add_simple_op('isinvokable', $T_INT, [$T_OBJ], sub ($arg) {"nqp.op.isinvokable($arg)"});
 
     # TODO - think if it's the correct thing to do

@@ -52,7 +52,8 @@ op.tellfh = function(ctx,fh) {
 op.setencoding = function(ctx,fh,encoding) {
   fh.encoding = encoding;
 };
-op.readlinefh = function(ctx,fh) {
+
+op.readlinefh = function(fh) {
   var line = "";
   var buffer = new Buffer(16);
   var position = fs.seekSync(fh.fd, 0, 1);

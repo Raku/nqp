@@ -56,7 +56,7 @@ exports.to_bool = function(arg) {
     return arg == '' || arg == '0' ? 0 : 1;
   } else if (arg instanceof Array) {
     return arg.length == 0 ? 0 : 1;
-  } else if (arg === undefined) {
+  } else if (arg === undefined || arg == null) {
     return 0;
   } else if (arg.$$to_bool) {
     return arg.$$to_bool();

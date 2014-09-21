@@ -70,3 +70,91 @@ op.stat = function(file, code) {
     case PLATFORM_BLOCKS: return stats.blocks;
   }
 };
+
+function FileHandle(fd) {
+  this.fd = fd;
+}
+
+FileHandle.prototype.to_bool = function() {
+  return 1;
+};
+
+FileHandle.prototype.closefh = function() {
+  fs.closeSync(this.fd);
+};
+
+FileHandle.prototype.printfh = function(content) {
+  var buffer = new Buffer(content, this.encoding);
+  return fs.writeSync(this.fd, buffer, 0, buffer.length, 0);
+};
+
+FileHandle.prototype.$$to_bool = function() {
+  return 1;
+};
+
+op.open = function(name, mode) {
+  var modes = {r: 'r', w: 'w', wa: 'a'};
+  if (!modes[mode]) { throw 'unknown mode to open: ' + mode }
+  var fh = new FileHandle(fs.openSync(name, modes[mode]));
+  fh.encoding = 'utf8';
+  return fh;
+};
+
+op.tellfh = function(fh) {
+  return fs.seekSync(fh.fd, 0, 1);
+};
+
+op.setencoding = function(fh, encoding) {
+  fh.encoding = encoding;
+};
+
+op.readlinefh = function(fh) {
+  var line = '';
+  var buffer = new Buffer(16);
+  var position = fs.seekSync(fh.fd, 0, 1);
+  var bytesRead;
+  READ_LINE:
+  while ((bytesRead =
+              fs.readSync(fh.fd, buffer, 0, buffer.length, position)) != 0) {
+    var string = buffer.slice(0, bytesRead).toString(fh.encoding);
+    var cr = string.indexOf('\r');
+    var nl = string.indexOf('\n');
+    var newline = (cr != -1 ? (cr < nl ? (cr + 1 == nl ? nl : cr) : nl) : nl);
+
+    if (newline != -1) {
+      var up_to_newline = string.slice(0, newline + 1);
+      line += up_to_newline;
+      // THINK ABOUT decoding and encoding might give a different offset
+      fs.seekSync(fh.fd,
+          Buffer.byteLength(up_to_newline, fh.encoding) + position, 0);
+      return line;
+    } else {
+      line += string;
+    }
+    position += bytesRead;
+  }
+  fs.seekSync(fh.fd, position, 0);
+  return line;
+};
+
+
+op.readallfh = function(fh) {
+  var all = new Buffer(0);
+  var buf = new Buffer(10);
+  var total = 0;
+  var bytesRead;
+  while ((bytesRead = fs.readSync(fh.fd, buf, 0, buf.length, null)) != 0) {
+    total += bytesRead;
+    var all = Buffer.concat([all, buf], total);
+  }
+  return iconv.decode(all, fh.encoding);
+};
+
+op.closefh = function(fh) {
+  fh.closefh();
+  return fh;
+};
+
+op.printfh = function(fh, content) {
+  return fh.printfh(content);
+};
