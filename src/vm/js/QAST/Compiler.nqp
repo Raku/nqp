@@ -237,6 +237,7 @@ class QAST::OperationsJS {
         }
         Chunk.new($return_type, $cb(|@exprs), @setup, :$node);
     }
+
     sub add_simple_op($op, $return_type, @argument_types, $cb, :$sideffects) {
         %ops{$op} := sub ($comp, $node, :$want) {
             my $chunk := op_template($comp, $node, $return_type, @argument_types, $cb);
