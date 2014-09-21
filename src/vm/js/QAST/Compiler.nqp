@@ -376,6 +376,11 @@ class QAST::OperationsJS {
     add_simple_op('printfh', $T_OBJ, [$T_OBJ, $T_STR], :sideffects);
     add_simple_op('closefh', $T_OBJ, [$T_OBJ], :sideffects);
 
+    add_simple_op('symlink', $T_VOID, [$T_STR, $T_STR], :sideffects);
+    add_simple_op('link', $T_VOID, [$T_STR, $T_STR], :sideffects);
+    add_simple_op('unlink', $T_VOID, [$T_STR], :sideffects);
+    add_simple_op('setencoding', $T_VOID, [$T_OBJ, $T_STR], :sideffects);
+
     add_simple_op('isinvokable', $T_INT, [$T_OBJ]);
 
     # TODO - think if it's the correct thing to do

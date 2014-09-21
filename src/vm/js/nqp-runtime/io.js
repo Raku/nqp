@@ -43,11 +43,20 @@ op.stat = function(file, code) {
   var PLATFORM_DEVTYPE = -5;
   var PLATFORM_BLOCKSIZE = -6;
   var PLATFORM_BLOCKS = -7;
-  if (code == EXISTS) {
-    return boolish(fs.existsSync(file));
+
+  // we can't use fs.existsSync(file) as it follows symlinks
+  try {
+    var stats = fs.lstatSync(file);
+  } catch (err) {
+    if (code == EXISTS && err.code === 'ENOENT') {
+      return 0;
+    } else {
+      throw err;
+    }
   }
-  var stats = fs.lstatSync(file);
+
   switch (code) {
+    case EXISTS: return 1;
     case FILESIZE: return stats.size;
     case ISDIR: return boolish(stats.isDirectory());
     case ISREG: return boolish(stats.isFile());
@@ -157,4 +166,16 @@ op.closefh = function(fh) {
 
 op.printfh = function(fh, content) {
   return fh.printfh(content);
+};
+
+op.unlink = function(filename) {
+  fs.unlinkSync(filename);
+};
+
+op.link = function(srcpath, dstpath) {
+  fs.linkSync(srcpath, dstpath);
+};
+
+op.symlink = function(srcpath, dstpath) {
+  fs.symlinkSync(srcpath, dstpath);
 };
