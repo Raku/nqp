@@ -237,15 +237,10 @@ class QAST::OperationsJS {
         }
         Chunk.new($return_type, $cb(|@exprs), @setup, :$node);
     }
-    sub add_simple_op($op, $return_type, @argument_types, $cb) {
+    sub add_simple_op($op, $return_type, @argument_types, $cb, :$sideffects) {
         %ops{$op} := sub ($comp, $node, :$want) {
-            op_template($comp, $node, $return_type, @argument_types, $cb);
-        };
-    }
-
-    sub add_sideffect_op($op, $return_type, @argument_types, $cb) {
-        %ops{$op} := sub ($comp, $node, :$want) {
-            $comp.stored_result(op_template($comp, $node, $return_type, @argument_types, $cb), :$want);
+            my $chunk := op_template($comp, $node, $return_type, @argument_types, $cb);
+            $sideffects ?? $comp.stored_result($chunk) !! $chunk;
         };
     }
 
@@ -361,18 +356,18 @@ class QAST::OperationsJS {
     add_simple_op('escape', $T_STR, [$T_STR], sub ($string) {"nqp.op.escape($string)"});
     add_simple_op('x', $T_STR, [$T_STR, $T_INT], sub ($string, $times) {"nqp.op.x($string,$times)"});
 
-    add_sideffect_op('getcomp', $T_OBJ, [$T_STR], sub ($lang) {"nqp.op.getcomp($lang)"});
+    add_simple_op('getcomp', $T_OBJ, [$T_STR], sub ($lang) {"nqp.op.getcomp($lang)"}, :sideffects);
 
-    add_sideffect_op('say', $T_VOID, [$T_STR], sub ($arg) {"nqp.op.say({$arg})"});
-    add_sideffect_op('print', $T_VOID, [$T_STR], sub ($arg) {"nqp.op.print({$arg})"});
+    add_simple_op('say', $T_VOID, [$T_STR], sub ($arg) {"nqp.op.say({$arg})"}, :sideffects);
+    add_simple_op('print', $T_VOID, [$T_STR], sub ($arg) {"nqp.op.print({$arg})"}, :sideffects);
 
-    add_sideffect_op('open', $T_OBJ, [$T_STR, $T_STR], sub ($file, $mode) {"nqp.op.open($file,$mode)"});
+    add_simple_op('open', $T_OBJ, [$T_STR, $T_STR], sub ($file, $mode) {"nqp.op.open($file,$mode)"}, :sideffects);
 
-    add_sideffect_op('tellfh', $T_INT, [$T_OBJ], sub ($fh) {"nqp.op.tellfh($fh)"});
-    add_sideffect_op('readlinefh', $T_STR, [$T_OBJ], sub ($fh) {"nqp.op.readlinefh($fh)"});
-    add_sideffect_op('readallfh', $T_STR, [$T_OBJ], sub ($fh) {"nqp.op.readallfh($fh)"});
-    add_sideffect_op('printfh', $T_OBJ, [$T_OBJ, $T_STR], sub ($fh, $content) {"nqp.op.printfh($fh,$content)"});
-    add_sideffect_op('closefh', $T_OBJ, [$T_OBJ], sub ($fh) {"nqp.op.closefh($fh)"});
+    add_simple_op('tellfh', $T_INT, [$T_OBJ], sub ($fh) {"nqp.op.tellfh($fh)"}, :sideffects);
+    add_simple_op('readlinefh', $T_STR, [$T_OBJ], sub ($fh) {"nqp.op.readlinefh($fh)"}, :sideffects);
+    add_simple_op('readallfh', $T_STR, [$T_OBJ], sub ($fh) {"nqp.op.readallfh($fh)"}, :sideffects);
+    add_simple_op('printfh', $T_OBJ, [$T_OBJ, $T_STR], sub ($fh, $content) {"nqp.op.printfh($fh,$content)"}, :sideffects);
+    add_simple_op('closefh', $T_OBJ, [$T_OBJ], sub ($fh) {"nqp.op.closefh($fh)"}, :sideffects);
 
     add_simple_op('isinvokable', $T_INT, [$T_OBJ], sub ($arg) {"nqp.op.isinvokable($arg)"});
 
@@ -518,11 +513,11 @@ class QAST::OperationsJS {
 
     add_simple_op('atpos', $T_OBJ, [$T_OBJ, $T_INT], sub ($array, $index) {"$array[$index]"});
 
-    add_sideffect_op('shift', $T_OBJ, [$T_OBJ], sub ($array) {"$array.shift()"});
-    add_sideffect_op('pop', $T_OBJ, [$T_OBJ], sub ($array) {"$array.pop()"});
-    add_sideffect_op('push', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($array, $elem) {"$array.push($elem)"});
+    add_simple_op('shift', $T_OBJ, [$T_OBJ], sub ($array) {"$array.shift()"}, :sideffects);
+    add_simple_op('pop', $T_OBJ, [$T_OBJ], sub ($array) {"$array.pop()"}, :sideffects);
+    add_simple_op('push', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($array, $elem) {"$array.push($elem)"}, :sideffects);
 
-    add_sideffect_op('iterator', $T_OBJ, [$T_OBJ], sub ($array) {"nqp.op.iterator($array)"});
+    add_simple_op('iterator', $T_OBJ, [$T_OBJ], sub ($array) {"nqp.op.iterator($array)"}, :sideffects);
 
     add_simple_op('iterval', $T_OBJ, [$T_OBJ], sub ($iter) {"$iter.iterval()"});
     add_simple_op('iterkey_s', $T_STR, [$T_OBJ], sub ($iter) {"$iter.iterkey_s()"});
