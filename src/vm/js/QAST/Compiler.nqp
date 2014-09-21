@@ -238,7 +238,13 @@ class QAST::OperationsJS {
         Chunk.new($return_type, $cb(|@exprs), @setup, :$node);
     }
 
-    sub add_simple_op($op, $return_type, @argument_types, $cb, :$sideffects) {
+    sub runtime_op($op) {
+        sub (*@args) {
+            "nqp.op.$op({nqp::join(',', @args)})";
+        }
+    }
+
+    sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op), :$sideffects) {
         %ops{$op} := sub ($comp, $node, :$want) {
             my $chunk := op_template($comp, $node, $return_type, @argument_types, $cb);
             $sideffects ?? $comp.stored_result($chunk) !! $chunk;
@@ -354,23 +360,23 @@ class QAST::OperationsJS {
     add_simple_op('null', $T_OBJ, [], sub () {"null"});
     add_simple_op('isnull', $T_BOOL, [$T_OBJ], sub ($obj) {"($obj === null)"});
 
-    add_simple_op('escape', $T_STR, [$T_STR], sub ($string) {"nqp.op.escape($string)"});
-    add_simple_op('x', $T_STR, [$T_STR, $T_INT], sub ($string, $times) {"nqp.op.x($string,$times)"});
+    add_simple_op('escape', $T_STR, [$T_STR]);
+    add_simple_op('x', $T_STR, [$T_STR, $T_INT]);
 
-    add_simple_op('getcomp', $T_OBJ, [$T_STR], sub ($lang) {"nqp.op.getcomp($lang)"}, :sideffects);
+    add_simple_op('getcomp', $T_OBJ, [$T_STR], :sideffects);
 
-    add_simple_op('say', $T_VOID, [$T_STR], sub ($arg) {"nqp.op.say({$arg})"}, :sideffects);
-    add_simple_op('print', $T_VOID, [$T_STR], sub ($arg) {"nqp.op.print({$arg})"}, :sideffects);
+    add_simple_op('say', $T_VOID, [$T_STR], :sideffects);
+    add_simple_op('print', $T_VOID, [$T_STR], :sideffects);
 
-    add_simple_op('open', $T_OBJ, [$T_STR, $T_STR], sub ($file, $mode) {"nqp.op.open($file,$mode)"}, :sideffects);
+    add_simple_op('open', $T_OBJ, [$T_STR, $T_STR], :sideffects);
 
-    add_simple_op('tellfh', $T_INT, [$T_OBJ], sub ($fh) {"nqp.op.tellfh($fh)"}, :sideffects);
-    add_simple_op('readlinefh', $T_STR, [$T_OBJ], sub ($fh) {"nqp.op.readlinefh($fh)"}, :sideffects);
-    add_simple_op('readallfh', $T_STR, [$T_OBJ], sub ($fh) {"nqp.op.readallfh($fh)"}, :sideffects);
-    add_simple_op('printfh', $T_OBJ, [$T_OBJ, $T_STR], sub ($fh, $content) {"nqp.op.printfh($fh,$content)"}, :sideffects);
-    add_simple_op('closefh', $T_OBJ, [$T_OBJ], sub ($fh) {"nqp.op.closefh($fh)"}, :sideffects);
+    add_simple_op('tellfh', $T_INT, [$T_OBJ], :sideffects);
+    add_simple_op('readlinefh', $T_STR, [$T_OBJ], :sideffects);
+    add_simple_op('readallfh', $T_STR, [$T_OBJ], :sideffects);
+    add_simple_op('printfh', $T_OBJ, [$T_OBJ, $T_STR], :sideffects);
+    add_simple_op('closefh', $T_OBJ, [$T_OBJ], :sideffects);
 
-    add_simple_op('isinvokable', $T_INT, [$T_OBJ], sub ($arg) {"nqp.op.isinvokable($arg)"});
+    add_simple_op('isinvokable', $T_INT, [$T_OBJ]);
 
     # TODO - think if it's the correct thing to do
     add_op('takeclosure', sub ($comp, $node, :$want) {
@@ -422,7 +428,7 @@ class QAST::OperationsJS {
        my @setup;
        Chunk.new($T_OBJ, 'nqp.hash()', @setup , :$node);
     });
-    add_simple_op('ishash', $T_INT, [$T_OBJ], sub ($obj) {"nqp.op.ishash($obj)"});
+    add_simple_op('ishash', $T_INT, [$T_OBJ]);
 
     sub merge_arg_groups($groups) {
         if nqp::islist($groups) {
@@ -518,14 +524,14 @@ class QAST::OperationsJS {
     add_simple_op('pop', $T_OBJ, [$T_OBJ], sub ($array) {"$array.pop()"}, :sideffects);
     add_simple_op('push', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($array, $elem) {"$array.push($elem)"}, :sideffects);
 
-    add_simple_op('iterator', $T_OBJ, [$T_OBJ], sub ($array) {"nqp.op.iterator($array)"}, :sideffects);
+    add_simple_op('iterator', $T_OBJ, [$T_OBJ], :sideffects);
 
     add_simple_op('iterval', $T_OBJ, [$T_OBJ], sub ($iter) {"$iter.iterval()"});
     add_simple_op('iterkey_s', $T_STR, [$T_OBJ], sub ($iter) {"$iter.iterkey_s()"});
 
     add_simple_op('existskey', $T_BOOL, [$T_OBJ, $T_STR], sub ($hash, $key) {"$hash.hasOwnProperty($key)"});
 
-    add_simple_op('existspos', $T_BOOL, [$T_OBJ, $T_INT], sub ($array, $index) {"nqp.op.existspos($array,$index)"});
+    add_simple_op('existspos', $T_BOOL, [$T_OBJ, $T_INT]);
 
     for <ceil floor abs log> -> $func {
         add_simple_op($func ~ '_n', $T_NUM, [$T_NUM], sub ($arg) {"Math.$func($arg)"});
@@ -534,9 +540,9 @@ class QAST::OperationsJS {
     add_simple_op('abs_i', $T_INT, [$T_INT], sub ($arg) {"Math.abs($arg)"});
     add_simple_op('pow_n', $T_NUM, [$T_NUM, $T_NUM], sub ($base, $exponent) {"Math.pow($base, $exponent)"});
 
-    add_simple_op('radix', $T_OBJ, [$T_INT, $T_STR, $T_INT, $T_INT], sub ($radix, $str, $pos, $flags) {"nqp.op.radix($radix,$str,$pos,$flags)"});
+    add_simple_op('radix', $T_OBJ, [$T_INT, $T_STR, $T_INT, $T_INT]);
 
-    add_simple_op('stat', $T_INT, [$T_STR, $T_INT], sub ($path, $flag) {"nqp.op.stat($path,$flag)"});
+    add_simple_op('stat', $T_INT, [$T_STR, $T_INT]);
 
     for <if unless> -> $op_name {
         add_op($op_name, sub ($comp, $node, :$want) {
