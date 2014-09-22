@@ -3,7 +3,7 @@ var sleep = require('sleep');
 var iconv = require('iconv-lite');
 var execSync = require('execSync');
 
-var Hash = require('Hash');
+var Hash = require('./hash.js');
 
 function boolish(bool) {
   return bool ? 1 : 0;
