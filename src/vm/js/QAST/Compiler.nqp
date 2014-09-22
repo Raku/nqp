@@ -999,6 +999,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         if $slurpy {
             @setup.push("{self.mangle_name($slurpy.name)} = Array.prototype.slice.call(arguments,{2+@pos});\n");
         }
+        if $slurpy_named {
+            @setup.push("{self.mangle_name($slurpy_named.name)} = nqp.slurpy_named(_NAMED);\n");
+        }
 
         Chunk.new($T_NONVAL, nqp::join(',', @sig), @setup);
     }

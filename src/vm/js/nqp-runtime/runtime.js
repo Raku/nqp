@@ -10,6 +10,7 @@ function load_ops(module) {
 var core = require('./core');
 load_ops(core);
 exports.hash = core.hash;
+exports.slurpy_named = core.slurpy_named;
 
 var io = require('./io.js');
 load_ops(io);

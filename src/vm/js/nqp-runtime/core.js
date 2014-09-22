@@ -132,6 +132,15 @@ op.iterator = function(obj) {
 exports.hash = function() {
   return new Hash();
 };
+
+exports.slurpy_named = function(named) {
+  var hash = new Hash();
+  for (key in named) {
+    hash[key] = named[key];
+  }
+  return hash;
+};
+
 exports.op.ishash = function(obj) {
   return obj instanceof Hash ? 1 : 0;
 };
