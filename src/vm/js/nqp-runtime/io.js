@@ -179,3 +179,15 @@ op.link = function(srcpath, dstpath) {
 op.symlink = function(srcpath, dstpath) {
   fs.symlinkSync(srcpath, dstpath);
 };
+
+op.chdir = function(dir) {
+  process.chdir(dir);
+};
+
+op.rmdir = function(dir) {
+  fs.rmdirSync(dir);
+};
+
+op.mkdir = function(dir, mode) {
+  fs.mkdirSync(dir, mode);
+};

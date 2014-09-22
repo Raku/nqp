@@ -229,6 +229,9 @@ class QAST::OperationsJS {
         my @exprs;
         my @setup;
         my $i := 0;
+        if $node.list > @argument_types {
+            nqp::die("{+$node.list} arguments for {$node.op}, the maximum is {+@argument_types}");
+        } 
         for $node.list -> $arg {
             my $chunk := $comp.as_js($arg, :want(@argument_types[$i]));
             @exprs.push($chunk.expr);
@@ -238,14 +241,15 @@ class QAST::OperationsJS {
         Chunk.new($return_type, $cb(|@exprs), @setup, :$node);
     }
 
-    sub runtime_op($op) {
+    sub runtime_op($op, @argument_types) {
         sub (*@args) {
             "nqp.op.$op({nqp::join(',', @args)})";
         }
     }
 
-    sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op), :$sideffects) {
+    sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op, @argument_types), :$sideffects) {
         %ops{$op} := sub ($comp, $node, :$want) {
+            say("//in op $op");
             my $chunk := op_template($comp, $node, $return_type, @argument_types, $cb);
             $sideffects ?? $comp.stored_result($chunk) !! $chunk;
         };
@@ -380,6 +384,10 @@ class QAST::OperationsJS {
     add_simple_op('link', $T_VOID, [$T_STR, $T_STR], :sideffects);
     add_simple_op('unlink', $T_VOID, [$T_STR], :sideffects);
     add_simple_op('setencoding', $T_VOID, [$T_OBJ, $T_STR], :sideffects);
+
+    add_simple_op('chdir', $T_VOID, [$T_STR], :sideffects);
+    add_simple_op('rmdir', $T_VOID, [$T_STR], :sideffects);
+    add_simple_op('mkdir', $T_VOID, [$T_STR, $T_INT], :sideffects);
 
     add_simple_op('isinvokable', $T_INT, [$T_OBJ]);
 
