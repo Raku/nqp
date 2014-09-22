@@ -249,7 +249,6 @@ class QAST::OperationsJS {
 
     sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op, @argument_types), :$sideffects) {
         %ops{$op} := sub ($comp, $node, :$want) {
-            say("//in op $op");
             my $chunk := op_template($comp, $node, $return_type, @argument_types, $cb);
             $sideffects ?? $comp.stored_result($chunk) !! $chunk;
         };
@@ -1287,7 +1286,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my $i := 0;
         while $i < nqp::elems($sc_sh) {
-            say(nqp::elems($sc_sh));
             my $s := nqp::atpos_s($sc_sh,$i);
             my $got := nqp::isnull_s($s) ?? 'null' !! quote_string($s);
             @sh.push($got);
