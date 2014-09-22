@@ -6,6 +6,16 @@ op.getcomp = function(lang) {
     return function(ctx, named, code) {
       return eval(code);
     };
+  } else if (lang == 'nqp') {
+    return {
+      backend: function(ctx, named) {
+        return {
+          name: function(ctx, named) {
+            return 'js';
+          }
+        };
+      }
+    };
   }
 };
 
