@@ -1,6 +1,8 @@
 var op = {};
 exports.op = op;
 
+var Hash = require('./hash.js');
+
 op.getcomp = function(lang) {
   if (lang == 'JavaScript') {
     return function(ctx, named, code) {
@@ -126,8 +128,6 @@ op.iterator = function(obj) {
   }
 };
 
-function Hash() {
-}
 
 exports.hash = function() {
   return new Hash();

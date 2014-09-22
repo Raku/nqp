@@ -10,6 +10,30 @@ sub say(*@args) {
     print("\n");
 }
 
+sub open($filename, :$r, :$w, :$a, :$bin) {
+    my $mode := $w ?? 'w' !! ($a ?? 'wa' !! 'r');
+    my $handle := nqp::open($filename, $mode);
+    nqp::setencoding($handle, 'utf8') unless $bin;
+    $handle;
+}
+
+sub close($handle) {
+    nqp::closefh($handle);
+}
+
+sub slurp ($filename) {
+    my $handle := open($filename, :r);
+    my $contents := nqp::readallfh($handle);
+    nqp::closefh($handle);
+    $contents;
+}
+
+sub spew($filename, $contents) {
+    my $handle := open($filename, :w);
+    nqp::printfh($handle, $contents);
+    nqp::closefh($handle);
+}
+
 my $test_counter       := 0;
 my $todo_upto_test_num := 0;
 my $todo_reason        := '';

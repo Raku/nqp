@@ -389,6 +389,12 @@ class QAST::OperationsJS {
     add_simple_op('rmdir', $T_VOID, [$T_STR], :sideffects);
     add_simple_op('mkdir', $T_VOID, [$T_STR, $T_INT], :sideffects);
 
+    add_simple_op('getenvhash', $T_OBJ, [], :sideffects);
+    add_simple_op('cwd', $T_STR, [], :sideffects);
+
+    add_simple_op('shell', $T_VOID, [$T_STR, $T_STR, $T_OBJ], :sideffects);
+
+
     add_simple_op('isinvokable', $T_INT, [$T_OBJ]);
 
     # TODO - think if it's the correct thing to do

@@ -1,6 +1,9 @@
 var fs = require('fs-ext');
 var sleep = require('sleep');
 var iconv = require('iconv-lite');
+var execSync = require('execSync');
+
+var Hash = require('Hash');
 
 function boolish(bool) {
   return bool ? 1 : 0;
@@ -190,4 +193,38 @@ op.rmdir = function(dir) {
 
 op.mkdir = function(dir, mode) {
   fs.mkdirSync(dir, mode);
+};
+
+op.shell = function(command, dir, env) {
+  var oldEnv = {};
+  for (var v in process.env) {
+    oldEnv[v] = process.env[v];
+  }
+  var oldCwd = process.cwd();
+  for (var v in env) {
+    process.env[v] = env[v];
+  }
+  process.chdir(dir);
+  execSync.run(command);
+  process.chdir(oldCwd);
+
+  // restore the contents of object in process.env
+  for (var v in process.env) {
+    delete process.env[v];
+  }
+  for (var v in oldEnv) {
+    process.env[v] = oldEnv[v];
+  }
+};
+
+op.cwd = function() {
+  return process.cwd();
+};
+
+op.getenvhash = function() {
+  var hash = new Hash();
+  for (var key in process.env) {
+    hash[key] = process.env[key];
+  }
+  return hash;
 };

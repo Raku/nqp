@@ -9,6 +9,7 @@
   "dependencies":{
       "fs-ext": "*",
       "sleep": "*",
-      "iconv-lite": "*"
+      "iconv-lite": "*",
+      "execSync": "*"
   }
 }
