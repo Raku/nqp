@@ -110,20 +110,44 @@ public final class NativeCallOps {
         return 1L;
     }
 
+    public static SixModelObject nativecallglobal(String libname, String symbol, SixModelObject target_spec, SixModelObject target_type, ThreadContext tc) {
+        try {
+            /* Load the library and locate the symbol. */
+            /* TODO: Error handling! */
+            NativeLibrary library = libname == null || libname.equals("")
+                ? NativeLibrary.getProcess()
+                : NativeLibrary.getInstance(libname);
+            Pointer entry_point = library.getGlobalVariableAddress(symbol);
+
+            StorageSpec ss = target_spec.st.REPR.get_storage_spec(tc, target_spec.st);
+            if (ss.boxed_primitive == StorageSpec.BP_STR)
+                entry_point = entry_point.getPointer(0);
+
+            return castNativeCall(tc, target_spec, target_type, entry_point);
+        }
+        catch (Throwable t) {
+            throw ExceptionHandling.dieInternal(tc, t);
+        }
+    }
+
     public static SixModelObject nativecallcast(SixModelObject target_spec, SixModelObject target_type, SixModelObject source, ThreadContext tc) {
-        ArgType target = ArgType.INT;
         Pointer o = null;
 
         if (source instanceof CPointerInstance) { // TODO Care about CPointer type object
             o = ((CPointerInstance)source).pointer;
-            if (o == null)
-                return target_type;
         }
         else {
             throw ExceptionHandling.dieInternal(tc,
                 "Native call expected object with CPointer representation, but got something else");
         }
 
+        return castNativeCall(tc, target_spec, target_type, o);
+    }
+    public static SixModelObject castNativeCall(ThreadContext tc, SixModelObject target_spec, SixModelObject target_type, Pointer o) {
+        if (o == null)
+            return target_type;
+
+        ArgType target        = ArgType.INT;
         SixModelObject nqpobj = target_type.st.REPR.allocate(tc, target_type.st);
         StorageSpec        ss = target_spec.st.REPR.get_storage_spec(tc, target_spec.st);
 
@@ -162,22 +186,12 @@ public final class NativeCallOps {
                 break;
             case StorageSpec.BP_STR:
                 /* TODO: Handle encodings. */
-                if (o != null) {
-                    nqpobj.set_str(tc, o.getString(0));
-                }
-                else {
-                    nqpobj = target_type;
-                }
+                nqpobj.set_str(tc, o.getString(0));
                 break;
             default:
                 if (target_type instanceof org.perl6.nqp.sixmodel.reprs.CStrInstance) {
                     /* TODO: Handle encodings. */
-                    if (o != null) {
-                        nqpobj.set_str(tc, o.getString(0));
-                    }
-                    else {
-                        nqpobj = target_type;
-                    }
+                    nqpobj.set_str(tc, o.getString(0));
                 }
                 else if (nqpobj instanceof org.perl6.nqp.sixmodel.reprs.CPointerInstance) {
                     CPointerInstance cpointer = (CPointerInstance) nqpobj;
