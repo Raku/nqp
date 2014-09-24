@@ -2310,6 +2310,7 @@ QAST::Operations.add_core_pirop_mapping('buildnativecall', 'nqp_native_call_buil
 QAST::Operations.add_core_pirop_mapping('nativecall', 'nqp_native_call', 'PPPP');
 QAST::Operations.add_core_pirop_mapping('nativecallrefresh', 'nqp_native_call_wb', 'vP');
 QAST::Operations.add_core_pirop_mapping('nativecallcast', 'nqp_native_call_cast', 'PPPP');
+QAST::Operations.add_core_pirop_mapping('nativecallglobal', 'nqp_native_call_global', 'PssPP');
 QAST::Operations.add_core_pirop_mapping('x_posixerrno', 'nqp_posixerrno', 'I');
 
 # boolean opcodes

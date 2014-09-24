@@ -556,6 +556,82 @@ PMC * decontainerize(PARROT_INTERP, PMC *var) {
     return var;
 }
 
+static PMC * native_call_cast(PARROT_INTERP, PMC *target_spec, PMC *target_type, void *cpointer_body) {
+    PMC *result = PMCNULL;
+    if (target_type->vtable->base_type == smo_id) {
+        storage_spec ss = REPR(target_spec)->get_storage_spec(interp, STABLE(target_spec));
+        if(ss.boxed_primitive == STORAGE_SPEC_BP_INT
+        || REPR(target_type)->ID == p6int_repr_id) {
+            Parrot_Int8 value;
+            switch(ss.bits) {
+                case 8:
+                    value = *(Parrot_Int1 *)cpointer_body;
+                    break;
+                case 16:
+                    value = *(Parrot_Int2 *)cpointer_body;
+                    break;
+                case 32:
+                    value = *(Parrot_Int4 *)cpointer_body;
+                    break;
+                case 64:
+                default:
+                    value = *(Parrot_Int8 *)cpointer_body;
+            }
+            result = make_int_result(interp, target_type, value);
+        }
+        else if(ss.boxed_primitive == STORAGE_SPEC_BP_NUM
+             || REPR(target_type)->ID == p6num_repr_id) {
+            Parrot_Float8 value;
+            switch(ss.bits) {
+                case 32:
+                    value = *(Parrot_Float4 *)cpointer_body;
+                    break;
+                case 64:
+                default:
+                    value = *(Parrot_Float8 *)cpointer_body;
+            }
+            result = make_num_result(interp, target_type, value);
+        }
+        else if(ss.boxed_primitive == STORAGE_SPEC_BP_STR
+             || REPR(target_type)->ID == cstr_repr_id
+             || REPR(target_type)->ID == p6str_repr_id) {
+            result = make_str_result(interp, target_type, DYNCALL_ARG_UTF8STR,
+            (char *)cpointer_body);
+        }
+        else if (REPR(target_type)->ID == cs_repr_id) {
+            result = make_cstruct_result(interp, target_type, (void *)cpointer_body);
+        }
+        else if (REPR(target_type)->ID == cp_repr_id) {
+            result = make_cpointer_result(interp, target_type, (void *)cpointer_body);
+        }
+        else if (REPR(target_type)->ID == ca_repr_id) {
+            result = make_carray_result(interp, target_type, (void *)cpointer_body);
+        }
+        else {
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Internal error: unhandled target type");
+        }
+    }
+    else if (target_type->vtable->base_type == enum_class_Integer) {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Internal error: unhandled target type (Parrot int)");
+    }
+    else if (target_type->vtable->base_type == enum_class_Float) {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Internal error: unhandled target type (Parrot float)");
+    }
+    else if (target_type->vtable->base_type == enum_class_String) {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Internal error: unhandled target type (Parrot string)");
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Internal error: unhandled target type (not a SixModelObject)");
+    }
+
+    return result;
+}
+
 static void dyncall_wb_ca(PARROT_INTERP, PMC *obj) {
     CArrayBody      *body      = (CArrayBody *) OBJECT_BODY(obj);
     CArrayREPRData  *repr_data = (CArrayREPRData *) STABLE(obj)->REPR_data;
@@ -1051,87 +1127,54 @@ inline op nqp_native_call(out PMC, invar PMC, invar PMC, invar PMC) :base_core {
     $1 = result;
 }
 
+inline op nqp_native_call_global(out PMC, invar STR, invar STR, invar PMC, invar PMC) {
+    char *lib_name   = Parrot_str_to_cstring(interp, $2);
+    char *sym_name   = Parrot_str_to_cstring(interp, $3);
+    PMC *target_spec = $4;
+    PMC *target_type = $5;
+
+    DLLib *lib_handle;
+    void *entry_point;
+    PMC *ret = PMCNULL;
+
+    /* Try to load the library. */
+    lib_handle = dlLoadLibrary(strlen(lib_name) ? lib_name : NULL);
+    if (!lib_handle) {
+        Parrot_str_free_cstring(sym_name);
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Cannot locate native library '%s'", lib_name);
+    }
+
+    /* Try to locate the symbol. */
+    entry_point = dlFindSymbol(lib_handle, sym_name);
+    if (!entry_point)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Cannot locate symbol '%s' in native library '%s'", sym_name, lib_name);
+    Parrot_str_free_cstring(sym_name);
+    Parrot_str_free_cstring(lib_name);
+
+    if (target_type->vtable->base_type == smo_id) {
+        storage_spec ss = REPR(target_spec)->get_storage_spec(interp, STABLE(target_spec));
+        if(ss.boxed_primitive == STORAGE_SPEC_BP_STR
+        || REPR(target_type)->ID == cstr_repr_id
+        || REPR(target_type)->ID == p6str_repr_id) {
+            entry_point = *(void **)entry_point;
+        }
+    }
+
+    ret = native_call_cast(interp, target_spec, target_type, entry_point);
+    dlFreeLibrary(lib_handle);
+    $1 = ret;
+}
+
 inline op nqp_native_call_cast(out PMC, invar PMC, invar PMC, invar PMC) :base_core {
-    PMC         *result = PMCNULL;
     PMC    *target_spec = $2;
     PMC    *target_type = $3;
     PMC         *source = $4;
-    void *cpointer_body = unmarshal_cpointer(interp, source);
-
     if (!source)
-        result = target_type;
-    else if (target_type->vtable->base_type == smo_id) {
-        storage_spec ss = REPR(target_spec)->get_storage_spec(interp, STABLE(target_spec));
-        if(ss.boxed_primitive == STORAGE_SPEC_BP_INT
-        || REPR(target_type)->ID == p6int_repr_id) {
-            Parrot_Int8 value;
-            switch(ss.bits) {
-                case 8:
-                    value = *(Parrot_Int1 *)cpointer_body;
-                    break;
-                case 16:
-                    value = *(Parrot_Int2 *)cpointer_body;
-                    break;
-                case 32:
-                    value = *(Parrot_Int4 *)cpointer_body;
-                    break;
-                case 64:
-                default:
-                    value = *(Parrot_Int8 *)cpointer_body;
-            }
-            result = make_int_result(interp, target_type, value);
-        }
-        else if(ss.boxed_primitive == STORAGE_SPEC_BP_NUM
-             || REPR(target_type)->ID == p6num_repr_id) {
-            Parrot_Float8 value;
-            switch(ss.bits) {
-                case 32:
-                    value = *(Parrot_Float4 *)cpointer_body;
-                    break;
-                case 64:
-                default:
-                    value = *(Parrot_Float8 *)cpointer_body;
-            }
-            result = make_num_result(interp, target_type, value);
-        }
-        else if(ss.boxed_primitive == STORAGE_SPEC_BP_STR
-             || REPR(target_type)->ID == cstr_repr_id
-             || REPR(target_type)->ID == p6str_repr_id) {
-            result = make_str_result(interp, target_type, DYNCALL_ARG_UTF8STR,
-            (char *)cpointer_body);
-        }
-        else if (REPR(target_type)->ID == cs_repr_id) {
-            result = make_cstruct_result(interp, target_type, (void *)cpointer_body);
-        }
-        else if (REPR(target_type)->ID == cp_repr_id) {
-            result = make_cpointer_result(interp, target_type, (void *)cpointer_body);
-        }
-        else if (REPR(target_type)->ID == ca_repr_id) {
-            result = make_carray_result(interp, target_type, (void *)cpointer_body);
-        }
-        else {
-            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Internal error: unhandled target type");
-        }
-    }
-    else if (target_type->vtable->base_type == enum_class_Integer) {
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "Internal error: unhandled target type (Parrot int)");
-    }
-    else if (target_type->vtable->base_type == enum_class_Float) {
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "Internal error: unhandled target type (Parrot float)");
-    }
-    else if (target_type->vtable->base_type == enum_class_String) {
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "Internal error: unhandled target type (Parrot string)");
-    }
-    else {
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "Internal error: unhandled target type (not a SixModelObject)");
-    }
-
-    $1 = result;
+        $1 = target_type;
+    else
+        $1 = native_call_cast(interp, target_spec, target_type, unmarshal_cpointer(interp, source));
 }
 
 /* Write-barrier a dyncall object so that delayed changes to the C-side of
