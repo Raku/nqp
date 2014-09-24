@@ -15,6 +15,8 @@ exports.slurpy_named = core.slurpy_named;
 var io = require('./io.js');
 load_ops(io);
 
+var deserialization = require('./deserialization.js');
+load_ops(deserialization);
 
 
 exports.to_str = function(arg) {
@@ -85,16 +87,3 @@ if (!Math.imul) {
 exports.top_context = function() {
   return null;
 };
-
-
-// Serialization stubs
-
-op.deserialize = function(blob, scRef, sh, cr, conflict) {
-};
-
-op.createsc = function(handle) {
-};
-
-op.scsetdesc = function(sc, desc) {
-};
-
