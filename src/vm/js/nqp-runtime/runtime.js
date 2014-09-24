@@ -16,6 +16,7 @@ var io = require('./io.js');
 load_ops(io);
 
 var deserialization = require('./deserialization.js');
+exports.wval = deserialization.wval;
 load_ops(deserialization);
 
 

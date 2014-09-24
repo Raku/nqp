@@ -1344,6 +1344,14 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         self.declare_var($node);
         self.compile_var($node);
     }
+
+    multi method as_js(QAST::WVal $node, :$want) {
+        my $value := $node.value;
+        my $sc     := nqp::getobjsc($value);
+        my $handle := nqp::scgethandle($sc);
+        my $idx    := nqp::scgetobjidx($sc, $value);
+        Chunk.new($T_OBJ, "nqp.wval({quote_string($handle)},$idx)", []);
+    }
     
     method var_is_lexicalish(QAST::Var $var) {
         $var.scope eq 'lexical' || $var.scope eq 'typevar';
