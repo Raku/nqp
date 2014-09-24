@@ -10,6 +10,7 @@
       "fs-ext": "*",
       "sleep": "*",
       "iconv-lite": "*",
-      "execSync": "*"
+      "execSync": "*",
+      "node-int64": "*"
   }
 }

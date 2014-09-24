@@ -7,6 +7,7 @@ var sixmodel = require('./sixmodel.js');
 var SerializationContext = require('./serialization-context');
 var __6MODEL_CORE__ = require('./bootstrap.js').core;
 var Hash = require('./hash.js');
+var Int64 = require('node-int64');
 
 
 /** All the loaded serialization contexts using their unique IDs as keys */
@@ -39,17 +40,26 @@ function BinaryCursor(buffer, offset, sh, sc) {
   this.buffer = buffer;
   this.offset = offset;
   this.sh = sh;
+  this.sc = sc;
 }
 
 
 /** Clone the cursor */
 BinaryCursor.prototype.clone = function() {
+  if (!this.sc) {
+    console.trace("at", this.sc);
+    process.exit();
+  }
   return new BinaryCursor(this.buffer, this.offset, this.sh, this.sc);
 };
 
 
 /** Return a copy of a cursor at given offset */
 BinaryCursor.prototype.at = function(offset) {
+  if (!this.sc) {
+    console.trace("at", this.sc);
+    process.exit();
+  }
   return new BinaryCursor(this.buffer, offset, this.sh, this.sc);
 };
 
@@ -73,6 +83,11 @@ BinaryCursor.prototype.array = function(readElem) {
   return array;
 };
 
+function StubedCodeRef(sc, id) {
+  this.sc = sc;
+  this.id = id;
+}
+
 function SerializedObjRef(sc, id) {
   this.sc = sc;
   this.id = id;
@@ -89,7 +104,7 @@ BinaryCursor.prototype.objectEntry = function(objectsData) {
 
 /**  */
 BinaryCursor.prototype.objRef = function() {
-  return sc.deps[this.I32()].root_objects[this.I32()];
+  return this.sc.deps[this.I32()].root_objects[this.I32()];
 };
 
 /** Read a hash of variants */
@@ -118,7 +133,7 @@ BinaryCursor.prototype.variant = function() {
       //FIXME: negative
       var low = this.I32();
       var high = this.I32();
-      return this.low + this.high * Math.pow(2, 32);
+      return int64(high, low);
     case 5:
       return this.double();
     case 6:
@@ -132,9 +147,9 @@ BinaryCursor.prototype.variant = function() {
     case 10:
       return this.hashOfVariants(this);
     case 11:
-      return new SerializedCodeRef(this.I32(), this.I32());
+      return new StubedCodeRef(this.I32(), this.I32());
     case 12:
-      return new SerializedCodeRef(this.I32(), this.I32());
+      return new StubedCodeRef(this.I32(), this.I32());
     default:
       console.trace('unknown variant');
       throw 'unknown variant: ' + type;
@@ -147,12 +162,54 @@ BinaryCursor.prototype.STable = function(STable) {
   var STable = {};
   STable.HOW = this.objRef();
   STable.WHAT = this.objRef();
-  console.log(STable);
   STable.WHO = this.variant();
+
+  var method_cache = this.variant();
+
+//  console.log("method_cache", method_cache);
+
+  //TODO: maybe we should just get rid of the vtable
+  var vtable = [];
+  var vtable_len = this.I64();
+  if (vtable_len != 0) {
+    console.log("obsolete vtable leftovers", vtable_len);
+    process.exit();
+  }
+
+  var type_check_cache = [];
+  var type_check_cache_len = this.I64();
+  for (var i = 0; i < type_check_cache_len; i++) {
+    type_check_cache.push(this.variant());
+  }
+
+  STable.mode_flags = this.I64();
+
+  var boolification_flag = this.flag64();
+  if (boolification_flag) {
+    STable.boolification_mode = this.I64();
+    STable.boolification_method = this.variant();
+  }
+  var container_flag = this.flag64();
+  if (container_flag) {
+    STable.container_class_handle = this.variant();
+    STable.container_attr_name = this.str();
+    STable.container_hint = this.I64();
+    STable.container_fetch_method = this.variant();
+  }
+
+  var invocation_spec = this.flag64();
+  if (invocation_spec) {
+    STable.invocation_class_handle = this.variant();
+    STable.invocation_attr_name = this.str();
+    STable.invocation_hint = this.I64();
+    STable.invocation_handler = this.variant();
+  }
 }
 
 /** Read a whole serialization context */
 BinaryCursor.prototype.deserialize = function(sc) {
+
+
   var version = this.I32();
 
   this.sc = sc;
@@ -169,6 +226,8 @@ BinaryCursor.prototype.deserialize = function(sc) {
       function(cursor) { return [cursor.str(), cursor.str()]; });
 
   var deps = [sc];
+  this.sc.deps = deps;
+
   for (var i in dependencies) {
     var dep = serialization_contexts[dependencies[i][0]];
     if (!dep) {
@@ -181,7 +240,6 @@ BinaryCursor.prototype.deserialize = function(sc) {
     }
     deps.push(dep);
   }
-  this.sc.deps = deps;
 
 
   var STables_offset = this.I32();
@@ -260,13 +318,16 @@ BinaryCursor.prototype.I32 = function() {
 };
 
 
+function int64(high, low) {
+  return new Int64(high, low).toNumber();
+}
+
 /** Read a 64bit integer */
 BinaryCursor.prototype.I64 = function() {
   var low = this.buffer.readUInt32LE(this.offset);
   var high = this.buffer.readUInt32LE(this.offset + 4);
-  var i = new Int64(high, low);
   this.offset += 8;
-  return i.toNumber();
+  return int64(high, low);
 };
 
 
