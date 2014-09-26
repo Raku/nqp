@@ -17,8 +17,9 @@ module.exports.wval = function(handle, idx) {
   return serialization_contexts[handle].root_objects[idx];
 };
 
-op.deserialize = function(blob, sc, sh, cr, conflict) {
+op.deserialize = function(blob, sc, sh, code_refs, conflict) {
   var buffer = new Buffer(blob, 'base64');
+  sc.code_refs = code_refs;
   var cursor = new BinaryCursor(buffer, 0, sh, sc);
 
   cursor.deserialize(sc);
@@ -147,9 +148,8 @@ BinaryCursor.prototype.variant = function() {
     case 10:
       return this.hashOfVariants(this);
     case 11:
-      return new StubedCodeRef(this.I32(), this.I32());
     case 12:
-      return new StubedCodeRef(this.I32(), this.I32());
+      return this.sc.deps[this.I32()].code_refs[this.I32()];
     default:
       console.trace('unknown variant');
       throw 'unknown variant: ' + type;
@@ -159,7 +159,6 @@ BinaryCursor.prototype.variant = function() {
 
 /** Read an entry from the STable table */
 BinaryCursor.prototype.STable = function(STable) {
-  var STable = {};
   STable.HOW = this.objRef();
   STable.WHAT = this.objRef();
   STable.WHO = this.variant();
@@ -167,6 +166,7 @@ BinaryCursor.prototype.STable = function(STable) {
   var method_cache = this.variant();
 
   //console.log("method_cache", method_cache);
+  STable.setMethodCache(method_cache);
 
   //TODO: maybe we should just get rid of the vtable
   var vtable = [];
