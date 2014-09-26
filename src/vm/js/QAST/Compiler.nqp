@@ -398,8 +398,10 @@ class QAST::OperationsJS {
 
     # TODO - think if it's the correct thing to do
     add_op('takeclosure', sub ($comp, $node, :$want) {
-        $comp.as_js($node[0], :want($T_OBJ));
+        $comp.as_js($node[0], :want($T_OBJ))~'.takeclosure()';
     });
+
+    add_simple_op('takeclosure', $T_OBJ, [$T_OBJ], sub ($closure) {"$closure.takeclosure()"});
 
     add_op('istrue', sub ($comp, $node, :$want) {
         $comp.as_js($node[0], :want($T_BOOL));
@@ -482,7 +484,7 @@ class QAST::OperationsJS {
             $compiled_args := merge_arg_groups($compiled_args);
             $call := '.apply(undefined,';
         } else {
-            $call := '(';
+            $call := '.$call(';
         }
 
         $comp.stored_result(
@@ -1158,13 +1160,14 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         self.compile_block($node, $outer, :$want);
     }
 
-    method mangled_cuid($node) {
+    method mangled_cuid($cuid) {
         my $ret := '';
-        for nqp::split('',$node.cuid) -> $c {
+        for nqp::split('',$cuid) -> $c {
             $ret := $ret ~ ($c eq '.' ?? '_' !! $c); 
         }
         $ret;
     }
+
 
     has %!cuids;
 
@@ -1174,6 +1177,14 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     method is_known_cuid($node) {
         nqp::existskey(%!cuids, $node.cuid);
+    }
+
+    method setup_cuids() {
+        my @cuids;
+        for %!cuids {
+            @cuids.push("{self.mangled_cuid($_.key)} = new nqp.CodeRef()");
+        }
+        self.declare_js_vars(@cuids);
     }
 
     method stored_result($chunk, :$want) {
@@ -1186,7 +1197,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     method compile_block(QAST::Block $node, $outer, :$want, :$arg='') {
-        my $cuid := self.mangled_cuid($node);
+        my $cuid := self.mangled_cuid($node.cuid);
 
         my $setup;
 
@@ -1206,19 +1217,19 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             my $sig := self.compile_sig($*BLOCK.params);
 
             $setup := [
-                "$cuid = function({$sig.expr}) \{",
+                "$cuid.block(function({$sig.expr}) \{",
                 self.declare_js_vars($*BLOCK.tmps),
                 self.declare_js_vars($*BLOCK.js_lexicals),
                 $sig,
                 $create_ctx,
                 $stmts,
                 "return {$stmts.expr};\n",
-                "\};\n"];
+                "\});\n"];
         }
 
         if $node.blocktype eq 'immediate' {
             my $extra_args := $arg ?? ",$arg" !! '';
-            self.stored_result(Chunk.new($want, $cuid~"({$outer.ctx},\{\}$extra_args)", $setup, :$node), :$want);
+            self.stored_result(Chunk.new($want, $cuid~".\$call({$outer.ctx},\{\}$extra_args)", $setup, :$node), :$want);
         } else {
             Chunk.new($T_OBJ, $cuid, $setup);
         }
@@ -1294,9 +1305,16 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my $quoted_data := nqp::isnull_s($sc_data) ?? 'null' !! quote_string($sc_data);
 
+        my $code_ref_blocks := $ast.code_ref_blocks();
+
+        my @blocks;
+        for $code_ref_blocks -> $block {
+            @blocks.push(self.mangled_cuid($block.cuid));
+        }
+
         "var sh=[{nqp::join(',',@sh)}];\n"
         ~ "var sc = nqp.op.createsc({quote_string(nqp::scgethandle($sc))});\n"
-        ~ "var code_refs = [];\n" # TODO
+        ~ "var code_refs = [{nqp::join(',',@blocks)}];\n" # TODO
         ~ "nqp.op.deserialize($quoted_data,sc,sh,code_refs,null);\n"
         ~ "nqp.op.scsetdesc(sc,{quote_string(nqp::scgetdesc($sc))});\n"
     }
@@ -1317,13 +1335,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             my $main := self.as_js($main_block, :want($T_VOID));
 
-            $body := Chunk.new($T_VOID, "", [$block_js, $main, self.mangled_cuid($main_block) ~ "();\n"]);
+            $body := Chunk.new($T_VOID, "", [$block_js, $main, self.mangled_cuid($main_block.cuid) ~ ".\$call();\n"]);
             
         } else {
             $body := $block_js;
         }
         
-        Chunk.new($T_VOID, "", [self.create_sc($node), $body]);
+        Chunk.new($T_VOID, "", [self.setup_cuids(), self.create_sc($node), $body]);
 
     }
 

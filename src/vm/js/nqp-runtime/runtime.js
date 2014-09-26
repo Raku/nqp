@@ -19,6 +19,7 @@ var deserialization = require('./deserialization.js');
 exports.wval = deserialization.wval;
 load_ops(deserialization);
 
+exports.CodeRef = require('./code-ref.js');
 
 exports.to_str = function(arg) {
   if (typeof arg == 'number') {
@@ -88,3 +89,4 @@ if (!Math.imul) {
 exports.top_context = function() {
   return null;
 };
+

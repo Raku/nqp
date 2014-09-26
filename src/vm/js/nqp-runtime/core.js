@@ -2,11 +2,16 @@ var op = {};
 exports.op = op;
 
 var Hash = require('./hash.js');
+var CodeRef = require('./code-ref.js');
+
+exports.CodeRef = CodeRef;
 
 op.getcomp = function(lang) {
   if (lang == 'JavaScript') {
-    return function(ctx, named, code) {
-      return eval(code);
+    return {
+      eval: function(ctx, named, code) {
+        return eval(code);
+      }
     };
   } else if (lang == 'nqp') {
     return {
@@ -22,7 +27,7 @@ op.getcomp = function(lang) {
 };
 
 op.isinvokable = function(obj) {
-  return (typeof obj == 'function' ? 1 : 0);
+  return (obj instanceof CodeRef ? 1 : 0);
 };
 
 op.escape = function(str) {

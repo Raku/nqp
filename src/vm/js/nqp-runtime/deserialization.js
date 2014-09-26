@@ -166,7 +166,7 @@ BinaryCursor.prototype.STable = function(STable) {
 
   var method_cache = this.variant();
 
-//  console.log("method_cache", method_cache);
+  //console.log("method_cache", method_cache);
 
   //TODO: maybe we should just get rid of the vtable
   var vtable = [];
