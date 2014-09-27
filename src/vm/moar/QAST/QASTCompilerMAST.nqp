@@ -575,13 +575,21 @@ my class MASTCompilerInstance {
         }
     }
 
-    method deserialization_code($sc, @code_ref_blocks, $repo_conf_res) {
+    method serialize_sc($sc) {
         # Serialize it.
         my $sh := nqp::list_s();
         my str $serialized := nqp::serialize($sc, $sh);
-
+        
         # Now it's serialized, pop this SC off the compiling SC stack.
         nqp::popcompsc();
+
+        [$serialized,$sh];
+    }
+
+    method deserialization_code($sc, @code_ref_blocks, $repo_conf_res) {
+        my $sc_tuple := self.serialize_sc($sc);
+        my str $serialized := $sc_tuple[0];
+        my $sh := $sc_tuple[1];
 
         # String heap QAST.
         my $sh_ast := QAST::Op.new( :op('list_s') );
