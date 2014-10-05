@@ -132,7 +132,7 @@ class HLL::Compiler does HLL::Backend::Default {
         my $output;
 
         if nqp::islist($code) {
-            $code := nqp::join('', $code);
+            $code := nqp::join("\n", $code);
         }
 
         if (%adverbs<profile-compile>) {
