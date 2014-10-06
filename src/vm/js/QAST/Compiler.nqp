@@ -797,7 +797,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         has @!js_lexicals;      # javascript variables we need to declare for the block
         has $!tmp;              # We use a bunch of TMP{$n} to store intermediate javascript results
         has $!ctx;              # The object we keep dynamic variables and exception handlers in
-        has %!lexotic;           # the parameters the block takes
+        has %!lexotic;          
         has @!params;           # the parameters the block takes
 
         method new($qast, $outer) {
