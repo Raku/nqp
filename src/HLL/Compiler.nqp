@@ -131,6 +131,10 @@ class HLL::Compiler does HLL::Backend::Default {
     method eval($code, *@args, *%adverbs) {
         my $output;
 
+        if nqp::islist($code) {
+            $code := nqp::join("\n", $code);
+        }
+
         if (%adverbs<profile-compile>) {
             $output := $!backend.run_profiled({
                 self.compile($code, :compunit_ok(1), |%adverbs);
@@ -220,6 +224,13 @@ class HLL::Compiler does HLL::Backend::Default {
             %adverbs{$_.key} := $_.value;
         }
         self.usage($program-name) if %adverbs<help>  || %adverbs<h>;
+        for <target optimize encoding output> -> $adverb {
+            if nqp::islist(%adverbs{$adverb}) {
+                nqp::say("===SORRY!===");
+                nqp::say("Can only have one --$adverb.");
+                nqp::exit(0);
+            }
+        }
         
         if $!backend.is_precomp_stage(%adverbs<target>) {
             %adverbs<precomp> := 1;
