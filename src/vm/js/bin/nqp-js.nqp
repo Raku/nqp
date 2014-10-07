@@ -17,6 +17,6 @@ sub MAIN(*@ARGS) {
     $nqpcomp-cc.command_line(@ARGS, :stable-sc(1),:module-path('gen/js/stage2'),
         :setting-path('gen/js/stage2'),
         :custom-regex-lib('QRegex'),
-        :setting('NULL'), :no-regex-lib(1),
+        :setting('mini-setting'), :no-regex-lib(1),
         :encoding('utf8'), :transcode('ascii iso-8859-1'));
 }

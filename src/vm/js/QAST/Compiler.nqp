@@ -799,6 +799,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         has $!ctx;              # The object we keep dynamic variables and exception handlers in
         has %!lexotic;          
         has @!params;           # the parameters the block takes
+        has @!variables;        # the variables declared in this block
 
         method new($qast, $outer) {
             my $obj := nqp::create(self);
@@ -811,12 +812,17 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             $!outer := $outer;
             @!js_lexicals := nqp::list();
             @!params := nqp::list();
+            @!variables := nqp::list();
             $!tmp := 0;
             %!lexotic := nqp::hash();
         }
 
         method add_js_lexical($name) {
             @!js_lexicals.push($name);
+        }
+
+        method add_variable($var) {
+            @!variables.push($var);
         }
 
         method register_lexotic($name) {
@@ -850,6 +856,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         method qast() { $!qast }
         method ctx(*@value) { $!ctx := @value[0] if @value;$!ctx}
         method params() { @!params }
+        method variables() { @!variables }
     }
 
 
@@ -1196,6 +1203,21 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
     }
 
+    # We try to use native js lexpads as much as we can to have a chance of decent programs
+    # Instead of implementing forceouterctx we use this hack to support settings.
+    method setup_setting($node) {
+        if nqp::eqaddr($node, $*SETTING_TARGET) {
+            my @imported;
+            for $node.symtable -> $symbol {
+                @imported.push("{self.mangle_name($symbol.key)} = setting[{quote_string($symbol.key)}]");
+            }
+            "var setting = nqp.load_setting({quote_string($*SETTING_NAME)});\n"
+            ~ self.declare_js_vars(@imported);
+        } else {
+            '';
+        }
+    }
+
     method compile_block(QAST::Block $node, $outer, :$want, :$arg='') {
         my $cuid := self.mangled_cuid($node.cuid);
 
@@ -1217,7 +1239,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             my $sig := self.compile_sig($*BLOCK.params);
 
             $setup := [
-                "$cuid.block(function({$sig.expr}) \{",
+                "$cuid.block(function({$sig.expr}) \{\n",
+                self.setup_setting($node),
                 self.declare_js_vars($*BLOCK.tmps),
                 self.declare_js_vars($*BLOCK.js_lexicals),
                 $sig,
@@ -1270,8 +1293,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     multi method as_js(QAST::Stmts $node, :$want) {
+        # for performance purposes we use the native js lexicals as much as possible, that means we need hacks for things that other backends can do easily with all the various ctx ops
         if self.is_ctxsave($node) {
-            self.NYI("handle CTXSAVE");
+            my @lexicals;
+            for $*BLOCK.variables -> $var {
+                @lexicals.push(quote_string($var.name) ~ ': ' ~ self.mangle_name($var.name));
+            }
+            Chunk.new($T_VOID,'',["nqp.ctxsave(\{{nqp::join(',', @lexicals)}\});\n"]);
         } else {
             self.compile_all_the_statements($node, $want);
         }
@@ -1325,6 +1353,21 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             nqp::die("QAST::CompUnit should have one child that is a QAST::Block");
         }
 
+
+        my $*SETTING_NAME;
+        my $*SETTING_TARGET;
+
+        for $node.pre_deserialize -> $obj {
+            if nqp::istype($obj, QAST::Stmts) {
+                for $obj.list -> $op {
+                    if nqp::istype($op, QAST::Op) && $op.op eq 'forceouterctx' {
+                        $*SETTING_NAME := $op[1][1].value;
+                        $*SETTING_TARGET := $op[0].value;
+                    }
+                }
+            }
+        }
+
         # Compile the block.
         my $block_js := self.as_js($node[0], :want($T_VOID));
 
@@ -1340,14 +1383,14 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         } else {
             $body := $block_js;
         }
-        
-        Chunk.new($T_VOID, "", [self.setup_cuids(), self.create_sc($node), $body]);
 
+        Chunk.new($T_VOID, "", [self.setup_cuids(), self.create_sc($node), $body]);
     }
 
     method declare_var(QAST::Var $node) {
         # TODO vars more complex the non-dynamic lexicals
         if $node.decl eq 'var' {
+            $*BLOCK.add_variable($node);
             $*BLOCK.add_js_lexical(self.mangle_name($node.name));
         } elsif $node.decl eq 'param' {
             if $node.scope eq 'local' || $node.scope eq 'lexical' {

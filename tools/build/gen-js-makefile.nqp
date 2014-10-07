@@ -132,6 +132,10 @@ deps('js-stage1-compiler', '$(JS_STAGE1_COMPILER)');
 ## we don't have a proper runner yet but the Makefile structure requires that
 #deps('js-runner-default', 'js-all');
 #
+
+say('node_modules/mini-setting.setting.js: js-stage1-compiler src/vm/js/mini-setting
+	./nqp-m --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NULL --target=mbc --output gen/js/stage2/mini-setting.setting.moarvm src/vm/js/mini-setting > node_modules/mini-setting.setting.js');
+
 say('js-test: js-all
 	src/vm/js/bin/run_tests');
 
@@ -139,7 +143,7 @@ say("\n\njs-clean:
 	\$(RM_RF) gen/js/stage1 gen/js/stage2
 ");
 
-deps("js-all", 'm-all', 'js-stage1-compiler', 'node_modules/installed');
+deps("js-all", 'm-all', 'js-stage1-compiler', 'node_modules/installed','node_modules/mini-setting.setting.js');
 
 # Enforce the google coding standards
 say("js-lint:

@@ -21,6 +21,17 @@ load_ops(deserialization);
 
 exports.CodeRef = require('./code-ref.js');
 
+exports.load_setting = function(settingName) {
+  require(settingName+".setting");
+  return savedCtx;
+};
+
+var savedCtx;
+
+exports.ctxsave = function(ctx) {
+    savedCtx = ctx;
+};
+
 exports.to_str = function(arg) {
   if (typeof arg == 'number') {
     return arg.toString();
