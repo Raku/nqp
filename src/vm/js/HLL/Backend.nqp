@@ -39,7 +39,7 @@ class HLLBackend::JavaScript {
     }
     
     method stages() {
-        'js'
+        'js node'
     }
     
     method is_precomp_stage($stage) {
@@ -60,6 +60,19 @@ class HLLBackend::JavaScript {
         } else {
             $backend.emit($qast);
         }
+    }
+    
+    method node($js) {
+        # TODO source map support
+        # TODO a better temporary file name
+        my $tmp_file := 'tmp.js';
+        my $code := nqp::open($tmp_file, 'w');
+        nqp::printfh($code, $js);
+        nqp::closefh($code);
+
+        my $env := nqp::getenvhash();
+        nqp::shell("node $tmp_file",nqp::cwd(),nqp::getenvhash());
+        '';
     }
 
     method node_module($js,*%adverbs) {
