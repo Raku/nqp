@@ -10,14 +10,29 @@ function basic_type_object_for(HOW) {
   return obj;
 }
 
+function basic_allocate(STable) {
+  return new STable.obj_constructor()
+}
+
 function P6opaque() {
 }
+
+P6opaque.prototype.allocate = basic_allocate;
+
 module.exports.P6opaque = P6opaque;
 
 function KnowHOWREPR() {
 }
 
 KnowHOWREPR.prototype.type_object_for = basic_type_object_for;
-
+KnowHOWREPR.prototype.allocate = basic_allocate;
 module.exports.KnowHOWREPR = KnowHOWREPR;
+
+function KnowHOWAttribute() {
+}
+
+KnowHOWAttribute.prototype.type_object_for = basic_type_object_for;
+KnowHOWAttribute.prototype.allocate = basic_allocate;
+module.exports.KnowHOWAttribute = KnowHOWAttribute;
+
 

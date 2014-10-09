@@ -276,10 +276,11 @@ BinaryCursor.prototype.deserialize = function(sc) {
 
   /* Stub objects */
   for (var i = 0; i < objects.length; i++) {
-    //console.log(objects[i]);
-    //console.log(objects[i].STable);
     var STable_for_obj =
         deps[objects[i].STable[0]].root_stables[objects[i].STable[1]];
+    if (!STable_for_obj) {
+      console.log('Missing stable',objects[i].STable[0],objects[i].STable[1],deps[objects[i].STable[0]].root_stables);
+    }
     sc.root_objects[i] = new (STable_for_obj.obj_constructor)();
     sc.root_objects[i]._SC = sc;
   }

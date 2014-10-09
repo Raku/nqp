@@ -777,6 +777,11 @@ class QAST::OperationsJS {
        $comp.as_js($node[0], :$want);
     });
 
+    add_simple_op('create', $T_OBJ, [$T_OBJ], :sideffects);
+
+    # TODO work on containers
+    add_simple_op('decont', $T_OBJ, [$T_OBJ], sub ($obj) {$obj});
+
     method compile_op($comp, $op, :$want) {
         my str $name := $op.op;
         if nqp::existskey(%ops, $name) {
@@ -1468,6 +1473,17 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 my $hash := self.as_js($var[0], :want($T_OBJ));
                 my $key := self.as_js($var[1], :want($T_STR));
                 Chunk.new($T_OBJ, "{$hash.expr}[{$key.expr}]", [$hash, $key], :node($var));
+            }
+        } elsif ($var.scope eq 'attribute') {
+            # TODO take second argument into account
+            # TODO types
+            my $self := self.as_js_clear_bindval($var[0], :want($T_OBJ));
+            my $attr := Chunk.new($T_OBJ, "{$self.expr}[{quote_string($var.name)}]", [$self]);
+            if $*BINDVAL {
+                my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ));
+                Chunk.new($T_OBJ, $bindval.expr, [$attr, $bindval, "{$attr.expr} = {$bindval.expr};\n"]);
+            } else {
+                $attr;
             }
         } else {
             self.NYI("Unimplemented QAST::Var scope: " ~ $var.scope);

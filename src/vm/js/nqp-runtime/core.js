@@ -154,3 +154,7 @@ op.existspos = function(array, idx) {
   if (idx < 0) idx += array.length;
   return boolish(array.hasOwnProperty(idx));
 };
+
+op.create = function(obj) {
+  return obj._STable.REPR.allocate(obj._STable);
+};
