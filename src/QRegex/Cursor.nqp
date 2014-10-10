@@ -183,14 +183,12 @@ role NQPCursorRole is export {
         if nqp::defined($!restart) {
             nqp::bindattr_i($new, $?CLASS, '$!pos', $!pos);
             nqp::bindattr($new, $?CLASS, '$!cstack', nqp::clone($!cstack)) if $!cstack;
-            nqp::getattr_s($!shared, ParseShared, '$!target');
             nqp::bindattr_i($new, $?CLASS, '$!from', $!from);
             nqp::bindattr($new, $?CLASS, '$!bstack', nqp::clone($!bstack));
             $new
         }
         else {
             nqp::bindattr_i($new, $?CLASS, '$!pos', -3);
-            nqp::getattr_s($!shared, ParseShared, '$!target');
             nqp::bindattr_i($new, $?CLASS, '$!from', $!pos);
             nqp::bindattr($new, $?CLASS, '$!bstack', nqp::list_i());
             $new
