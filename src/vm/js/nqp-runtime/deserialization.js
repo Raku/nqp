@@ -289,6 +289,16 @@ BinaryCursor.prototype.deserialize = function(sc) {
     STables[i][1].STable(sc.root_stables[i]);
   }
 
+  /* Finish up objects */
+  for (var i = 0; i < objects.length; i++) {
+    if (objects[i].is_concrete) {
+      var repr = sc.root_objects[i]._STable.REPR;
+      if (repr.deserialize_finish) {
+        repr.deserialize_finish(sc.root_objects[i], objects[i].data);
+      }
+    }
+  }
+
   /*
   var closures_offset = this.I32();
   var closures_number = this.I32();

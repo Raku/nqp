@@ -39,6 +39,22 @@ var KnowHOW_HOW = repr.allocate(st);
 
 add_to_sc_with_st(KnowHOW_HOW);
 
+KnowHOW_HOW.id = "KnowHOW_HOW";
+KnowHOW._STable.id = "KnowHOW";
+KnowHOW._STable.HOW = KnowHOW_HOW;
+
+function add_knowhow_how_method(name, method) {
+  /* TODO - think if setting the object cache would be better */
+  KnowHOW_HOW._STable.obj_constructor.prototype[name] = method;
+  KnowHOW._STable.obj_constructor.prototype[name] = method;
+}
+
+add_knowhow_how_method("name", function() {
+  return this.__name;
+});
+
+
+
 /* KnowHOW.HOW */
 //add_to_sc_with_st(STABLE(tc->instance->KnowHOW)->HOW);
 

@@ -782,6 +782,8 @@ class QAST::OperationsJS {
     # TODO work on containers
     add_simple_op('decont', $T_OBJ, [$T_OBJ], sub ($obj) {$obj});
 
+    add_simple_op('how', $T_OBJ, [$T_OBJ], sub ($obj) {"$obj._STable.HOW"});
+
     method compile_op($comp, $op, :$want) {
         my str $name := $op.op;
         if nqp::existskey(%ops, $name) {

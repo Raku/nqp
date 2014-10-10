@@ -24,6 +24,12 @@ module.exports.P6opaque = P6opaque;
 function KnowHOWREPR() {
 }
 
+KnowHOWREPR.prototype.deserialize_finish = function(object, data) {
+  object.__name = data.str();
+  object.__attributes = data.variant();
+  object.__methods = data.variant();
+};
+
 KnowHOWREPR.prototype.type_object_for = basic_type_object_for;
 KnowHOWREPR.prototype.allocate = basic_allocate;
 module.exports.KnowHOWREPR = KnowHOWREPR;
