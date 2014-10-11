@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(111);
+plan(113);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -137,6 +137,9 @@ ok( nqp::shift($iter) eq 'b', 'nqp::iterator');
 ok( nqp::shift($iter) == 3.0, 'nqp::iterator');
 ok( nqp::elems($list) == 3, "iterator doesn't modify list");
 ok( nqp::islist($list), "nqp::islist works");
+nqp::unshift($list,'zero');
+ok( nqp::elems($list) == 4, 'nqp::unshift adds 1 element');
+ok( nqp::atpos($list,0) == 'zero', 'nqp::unshift the correct element');
 
 my %hash;
 %hash<foo> := 1;
