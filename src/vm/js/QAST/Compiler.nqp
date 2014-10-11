@@ -784,6 +784,8 @@ class QAST::OperationsJS {
     add_simple_op('decont', $T_OBJ, [$T_OBJ], sub ($obj) {$obj});
 
     add_simple_op('how', $T_OBJ, [$T_OBJ], sub ($obj) {"$obj._STable.HOW"});
+    add_simple_op('who', $T_OBJ, [$T_OBJ], sub ($obj) {"$obj._STable.WHO"});
+
     add_simple_op('knowhowattr', $T_OBJ, [], sub () {"nqp.knowhowattr"});
 
     method compile_op($comp, $op, :$want) {
@@ -1398,15 +1400,19 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     method declare_var(QAST::Var $node) {
         # TODO vars more complex the non-dynamic lexicals
-        if $node.decl eq 'var' {
+        if $node.decl eq 'var' || $node.decl eq 'static' {
             $*BLOCK.add_variable($node);
-            $*BLOCK.add_js_lexical(self.mangle_name($node.name));
+            my $static := $node.decl eq 'static' ?? " = {self.value_as_js($node.value)}" !! '';
+            $*BLOCK.add_js_lexical(self.mangle_name($node.name) ~ $static);
         } elsif $node.decl eq 'param' {
             if $node.scope eq 'local' || $node.scope eq 'lexical' {
                 $*BLOCK.add_param($node);
             } else {
                 nqp::die("Parameter cannot have scope '{$node.scope}'; use 'local' or 'lexical'");
             }
+        } elsif $node.decl eq '' {
+        } else {
+            nqp::die("Unimplemented var declaration type {$node.decl}");
         }
     }
 
@@ -1415,12 +1421,15 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         self.compile_var($node);
     }
 
-    multi method as_js(QAST::WVal $node, :$want) {
-        my $value := $node.value;
+    method value_as_js($value) {
         my $sc     := nqp::getobjsc($value);
         my $handle := nqp::scgethandle($sc);
         my $idx    := nqp::scgetobjidx($sc, $value);
-        Chunk.new($T_OBJ, "nqp.wval({quote_string($handle)},$idx)", []);
+        "nqp.wval({quote_string($handle)},$idx)";
+    }
+
+    multi method as_js(QAST::WVal $node, :$want) {
+        Chunk.new($T_OBJ, self.value_as_js($node.value), []);
     }
     
     method var_is_lexicalish(QAST::Var $var) {
