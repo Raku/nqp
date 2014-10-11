@@ -543,6 +543,7 @@ class QAST::OperationsJS {
     add_simple_op('shift', $T_OBJ, [$T_OBJ], sub ($array) {"$array.shift()"}, :sideffects);
     add_simple_op('pop', $T_OBJ, [$T_OBJ], sub ($array) {"$array.pop()"}, :sideffects);
     add_simple_op('push', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($array, $elem) {"$array.push($elem)"}, :sideffects);
+    add_simple_op('unshift', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($array, $elem) {"$array.unshift($elem)"}, :sideffects);
 
     add_simple_op('iterator', $T_OBJ, [$T_OBJ], :sideffects);
 
