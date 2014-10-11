@@ -2,7 +2,7 @@
 
 # Test nqp::op file operations.
 
-plan(54);
+plan(57);
 
 ok( nqp::stat('CREDITS', nqp::const::STAT_EXISTS) == 1, 'nqp::stat exists');
 ok( nqp::stat('AARDVARKS', nqp::const::STAT_EXISTS) == 0, 'nqp::stat not exists');
@@ -16,11 +16,14 @@ ok( nqp::stat('t', nqp::const::STAT_ISREG) == 0, 'nqp::stat not regular file');
 my $credits := nqp::open('CREDITS', 'r');
 ok( $credits, 'nqp::open for read');
 ok( nqp::tellfh($credits) == 0, 'nqp::tellfh start of file');
+ok( !nqp::eoffh($credits), 'Not at EOF after open');
 my $line := nqp::readlinefh($credits);
+ok( !nqp::eoffh($credits), 'Not at EOF after first line read');
 ok( nqp::chars($line) == 5 || nqp::chars($line) == 6, 'nqp::readlinefh line to read'); # =pod\r?\n
 ok( nqp::tellfh($credits) == 5 || nqp::tellfh($credits) == 6, 'nqp::tellfh line two');
 my $rest := nqp::readallfh($credits);
 ok( nqp::chars($rest) > 100, 'nqp::readallfh lines to read');
+ok( nqp::eoffh($credits), 'handle now at EOF');
 ok( nqp::tellfh($credits) == nqp::chars($line) + nqp::chars($rest), 'nqp::tellfh end of file');
 
 ok( nqp::chars(nqp::readlinefh($credits)) == 0, 'nqp::readlinefh end of file');
