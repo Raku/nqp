@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(102);
+plan(103);
 
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
@@ -34,6 +34,8 @@ ok( nqp::elems(nqp::split('\\s', 'Mary had a little lamb')) == 1, 'nqp::split no
 ok( nqp::elems(@items) == 12, 'nqp::split zero length delimiter');
 @items := nqp::split('a', 'a man a plan a canal panama');
 ok( nqp::elems(@items) == 11 && @items[0] eq '' && @items[10] eq '', 'nqp::split delimiter at ends');
+@items := nqp::split('', 'a little lamb');
+ok( nqp::join('|', @items) eq 'a| |l|i|t|t|l|e| |l|a|m|b', 'nqp::split("", ...)');
 
 ok( nqp::iseq_i(2, 2) == 1, 'nqp::iseq_i');
 
