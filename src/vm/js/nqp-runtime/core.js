@@ -158,3 +158,11 @@ op.existspos = function(array, idx) {
 op.create = function(obj) {
   return obj._STable.REPR.allocate(obj._STable);
 };
+
+op.defined = function(obj) {
+  // TODO - handle more things that aren't defined
+  if (obj === undefined || obj === null) {
+    return 0;
+  }
+  return 1;
+};

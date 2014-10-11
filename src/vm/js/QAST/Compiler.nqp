@@ -565,6 +565,31 @@ class QAST::OperationsJS {
 
     add_simple_op('stat', $T_INT, [$T_STR, $T_INT]);
 
+    add_simple_op('defined', $T_INT, [$T_OBJ]);
+
+    # TODO avoid copy & paste - move it into code shared between backends
+    add_op('defor', sub ($comp, $node, :$want) {
+        if +$node.list != 2 {
+            nqp::die("Operation 'defor' needs 2 operands");
+        }
+        my $tmp := $node.unique('defined');
+        $comp.as_js(QAST::Stmts.new(
+            QAST::Op.new(
+                :op('bind'),
+                QAST::Var.new( :name($tmp), :scope('local'), :decl('var') ),
+                $node[0]
+            ),
+            QAST::Op.new(
+                :op('if'),
+                QAST::Op.new(
+                    :op('defined'),
+                    QAST::Var.new( :name($tmp), :scope('local') )
+                ),
+                QAST::Var.new( :name($tmp), :scope('local') ),
+                $node[1]
+            )), :$want)
+    });
+
     for <if unless> -> $op_name {
         add_op($op_name, sub ($comp, $node, :$want) {
             unless nqp::defined($want) {
