@@ -24,6 +24,25 @@ function create_KnowHOWAttribute() {
 
   var r = new reprs.KnowHOWAttribute();
   var type_obj = r.type_object_for(meta_obj);
+
+  var methods = {};
+  methods.name = function() {
+    return this.__name;
+  };
+  methods['new'] = function(ctx, _NAMED) {
+    var attr = r.allocate(this._STable);
+    //TODO convert to string
+    attr.__name = _NAMED.name;
+    attr.__type = _NAMED.type;
+    //TODO convert to int
+    attr.__box_target = _NAMED.box_target ? _NAMED.box_target : 0;
+    return attr;
+  };
+
+  for (var method in methods) {
+    type_obj._STable.obj_constructor.prototype[method] = methods[method];
+  }
+
   return type_obj;
 }
 
@@ -53,12 +72,22 @@ add_knowhow_how_method("name", function() {
   return this.__name;
 });
 
+add_knowhow_how_method("attributes", function() {
+  return this.__attributes;
+});
+
+add_knowhow_how_method("methods", function() {
+  return this.__methods;
+});
+
+
 
 
 /* KnowHOW.HOW */
 //add_to_sc_with_st(STABLE(tc->instance->KnowHOW)->HOW);
 
 var KnowHOWAttribute = create_KnowHOWAttribute();
+module.exports.knowhowattr = KnowHOWAttribute;
 /* KnowHOWAttribute */
 add_to_sc_with_st(KnowHOWAttribute);
 

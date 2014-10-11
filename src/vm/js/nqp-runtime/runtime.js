@@ -21,6 +21,8 @@ load_ops(deserialization);
 
 exports.CodeRef = require('./code-ref.js');
 
+module.exports.knowhowattr = require('./bootstrap.js').knowhowattr;
+
 exports.load_setting = function(settingName) {
   require(settingName+".setting");
   return savedCtx;

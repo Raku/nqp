@@ -36,6 +36,9 @@ module.exports.KnowHOWREPR = KnowHOWREPR;
 
 function KnowHOWAttribute() {
 }
+KnowHOWAttribute.prototype.deserialize_finish = function(object, data) {
+  object.__name = data.str();
+};
 
 KnowHOWAttribute.prototype.type_object_for = basic_type_object_for;
 KnowHOWAttribute.prototype.allocate = basic_allocate;
