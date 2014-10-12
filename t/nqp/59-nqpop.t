@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(103);
+plan(109);
 
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
@@ -18,8 +18,16 @@ ok( nqp::div_n(5,2) == 2.5e0, 'nqp::div_n');
 ok( nqp::chars('hello') == 5, 'nqp::chars');
 ok( nqp::concat('hello ', 'world') eq 'hello world', 'nqp::concat');
 ok( nqp::join(' ', ('abc', 'def', 'ghi')) eq 'abc def ghi', 'nqp::join');
+
 ok( nqp::index('rakudo', 'do') == 4, 'nqp::index found');
 ok( nqp::index('rakudo', 'dont') == -1, 'nqp::index not found');
+ok( nqp::index('rakudo', 'do', 3) == 4, 'nqp::index with third argument');
+ok( nqp::index('rakudo', 'do', 5) == -1, 'nqp::index with third argument not found');
+ok( nqp::index('Hello World', 'l', 0) == 2, 'nqp::index with third argument, first match (1)');
+ok( nqp::index('Hello World', 'l', 2) == 2, 'nqp::index with third argument, first match (2)');
+ok( nqp::index('Hello World', 'l', 3) == 3, 'nqp::index with third argument, second match');
+ok( nqp::index('Hello World', 'l', 4) == 9, 'nqp::index with third argument, third match');
+
 ok( nqp::chr(120) eq 'x', 'nqp::chr');
 ok( nqp::ord('xyz') eq 120, 'nqp::ord');
 ok( nqp::lc('Hello World') eq 'hello world', 'nqp::downcase');
