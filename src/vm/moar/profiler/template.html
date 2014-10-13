@@ -278,8 +278,8 @@
     </div>
 
     <script type="text/ng-template" id="icycle_graph_callee_renderer.html">
-        <a href="#" class="call" style="background-color: {{backgroundColor()}};" ng-click="toCallee(callee.Node)">{{callee.name}}</a>
-        <div class="child" style="width: {{callee.inclusive_time * 100 / total_time}}%;" ng-repeat="callee in callee.callees" title="{{callee.name}}" ng-include="'icycle_graph_callee_renderer.html'"></div>
+        <a href="#" class="call" style="background-color: {{backgroundColor()}};" ng-click="toCallee(callee)">{{callee.name}}</a>
+        <div class="child" style="width: {{callee.inclusive_time * 100 / Current.inclusive_time}}%;" ng-repeat="callee in callee.callees" title="{{callee.name}}" ng-include="'icycle_graph_callee_renderer.html'"></div>
     </script>
 
     <div class="container" ng-show="Tab == 'Call Graph'">
