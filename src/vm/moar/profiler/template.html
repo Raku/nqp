@@ -12,6 +12,14 @@
       min-height: 500px;
       padding-top: 70px;
     }
+    .icyclegraph .call {
+      display: block;
+      border: 1px solid black;
+      overflow: hidden;
+    }
+    .icyclegraph .child {
+      float: left;
+    }
     </style>
   </head>
   <body >
@@ -266,6 +274,11 @@
       </div>
     </div>
 
+    <script type="text/ng-template" id="icycle_graph_callee_renderer.html">
+        <a href="#" class="call" style="background-color: {{backgroundColor()}};" ng-click="toCallee(callee.Node)">{{callee.name}}</a>
+        <div class="child" style="width: {{callee.inclusive_time * 100 / total_time}}%;" ng-repeat="callee in callee.callees" ng-include="'icycle_graph_callee_renderer.html'"></div>
+    </script>
+
     <div class="container" ng-show="Tab == 'Call Graph'">
       <div ng-controller="CallGraphController">
 
@@ -283,6 +296,10 @@
           <span class="lead">{{Current.name == '' ? '&lt;anon&gt;' : Current.name}}</span><br />
           <span class="text-muted">{{File}}:{{Line}}</span>
         </p>
+
+        <div class="icyclegraph">
+          <div class="child" style="width: 100%" ng-repeat="callee in Current.callees" ng-include="'icycle_graph_callee_renderer.html'"></div>
+        </div>
 
         <table class="table table-striped table-condensed table-bordered">
           <tbody>
@@ -850,9 +867,10 @@
         $scope.predicate = "InclusiveTimePercent";
         $scope.reverse   = true;
     });
-    
+
     moarProfApp.controller('CallGraphController', function ($scope) {
         $scope.Current       = rawData[0].call_graph;
+        $scope.total_time = rawData[0].total_time;
         $scope.SuchCallers   = false;
         $scope.RecentCallers = [];
         $scope.predicate     = "TimePercent";
@@ -892,6 +910,13 @@
             // Update current node and callees.
             $scope.Current = caller;
             updateCurrentData();
+        }
+
+        $scope.backgroundColor = function () {
+          var component = Math.floor(128 + Math.random()*127).toString(16);
+          if (component.length == 1)
+            component = '0' + component;
+          return '#' + component + component + 'ff';
         }
 
         function updateCurrentData() {
