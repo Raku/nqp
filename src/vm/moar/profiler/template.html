@@ -301,7 +301,7 @@
         </p>
 
         <div class="icyclegraph">
-          <div class="child" style="width: 100%" ng-repeat="callee in Current.callees" ng-include="'icycle_graph_callee_renderer.html'"></div>
+          <div class="child" ng-repeat="callee in [Current]" ng-include="'icycle_graph_callee_renderer.html'"></div>
         </div>
 
         <table class="table table-striped table-condensed table-bordered">
@@ -873,7 +873,7 @@
 
     moarProfApp.controller('CallGraphController', function ($scope) {
         $scope.Current       = rawData[0].call_graph;
-        $scope.total_time = rawData[0].total_time;
+        $scope.total_time    = rawData[0].total_time;
         $scope.SuchCallers   = false;
         $scope.RecentCallers = [];
         $scope.predicate     = "TimePercent";
