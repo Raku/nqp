@@ -14,6 +14,7 @@ ok( nqp::stat('CREDITS', nqp::const::STAT_ISREG) == 1, 'nqp::stat is regular fil
 ok( nqp::stat('t', nqp::const::STAT_ISREG) == 0, 'nqp::stat not regular file');
 
 my $credits := nqp::open('CREDITS', 'r');
+nqp::setinputlinesep($credits, "\n");
 ok( $credits, 'nqp::open for read');
 ok( nqp::tellfh($credits) == 0, 'nqp::tellfh start of file');
 ok( !nqp::eoffh($credits), 'Not at EOF after open');

@@ -1854,6 +1854,16 @@ QAST::Operations.add_core_op('closefh', -> $qastcomp, $op {
         $op[0]
     ))
 });
+QAST::Operations.add_core_op('setinputlinesep', -> $qastcomp, $op {
+    if +$op.list != 2 {
+        nqp::die("The 'setinputlinesep' op expects two operands");
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'), :name('record_separator'),
+        $op[0],
+        $op[1]
+    ))
+});
 QAST::Operations.add_core_op('readfh', -> $qastcomp, $op {
     if +@($op) != 3 {
         nqp::die('readfh requires 3 operands');
