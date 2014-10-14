@@ -825,6 +825,16 @@ class QAST::OperationsJS {
 
 class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
+    #= If the env var NQPJS_LOG is set log to nqpjs.log
+    method log(*@msgs) {
+        my %env := nqp::getenvhash();
+        if %env<NQPJS_LOG> {
+            my $log := nqp::open('nqpjs.log', 'wa');
+            nqp::printfh($log, nqp::join(',', @msgs));
+            nqp::closefh($log);
+        }
+    }
+
     # Holds information about the QAST::Block we're currently compiling.
     # The currently compiled block is stored in $*BLOCK
     my class BlockInfo {
