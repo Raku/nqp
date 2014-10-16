@@ -31,7 +31,8 @@ MAIN: {
                'with-parrot=s', 'gen-parrot:s', 'parrot-config=s', 'parrot-option=s@',
                'with-moar=s', 'gen-moar:s', 'moar-option=s@',
                'make-install!', 'makefile-timing!',
-               'git-protocol=s');
+               'git-protocol=s',
+               'git-depth=s',);
 
     # Print help if it's requested
     if ($options{'help'}) {
@@ -318,6 +319,8 @@ General Options:
     --git-protocol={ssh,https,git}
                        Protocol to use for git clone. Default: https
     --make-install     Immediately run `MAKE install` after configuring
+    --git-depth=<number>
+                       Use the --depth option for git clone with parameter number
 
 Configure.pl also reads options from 'config.default' in the current directory.
 END
