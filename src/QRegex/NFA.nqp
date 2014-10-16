@@ -367,16 +367,24 @@ class QRegex::NFA {
             #    append any subrules
             my int $subend := nqp::elems($!states);
             my int $i      := $substart;
+	    my int $lits   := 0;
+	    my int $nlits  := 0;
             while $i < $subend {
                 my $substate := $!states[$i];
                 my int $j := 0;
                 my int $k := nqp::elems($substate);
                 while $j < $k {
                     $substate[$j+2] := $substate[$j+2] + $substart;
-                    $substate[$j+1] := $fate 
+                    $substate[$j+1] := $fate			# XXX add in $lits +< 32 after rebootstrap
                         if $substate[$j] == $EDGE_FATE;
                     self.mergesubrule($i, $substate[$j+2], $fate, $cursor, $substate[$j+1], %seen)
                         if $substate[$j] == $EDGE_SUBRULE;
+		    if $substate[$j] == $EDGE_CODEPOINT || $substate[$j] == $EDGE_CODEPOINT_I {
+			$lits := $lits + 1 unless $nlits;
+		    }
+		    else {
+			$nlits := $nlits + 1;
+		    }
                     $j := $j + 3;
                 }
                 $i := $i + 1;
@@ -384,7 +392,7 @@ class QRegex::NFA {
             self.addedge($start, $substart+1, $EDGE_EPSILON, 0);
             $to > 0
               ?? self.addedge($substart, $to, $EDGE_EPSILON, 0)
-              !! self.addedge($substart, 0, $EDGE_FATE, $fate)
+              !! self.addedge($substart, 0, $EDGE_FATE, $fate)	# XXX add in $lits +< 32 after rebootstrap
         }
         else {
             self.addedge($start, 0, $EDGE_FATE, $fate);
