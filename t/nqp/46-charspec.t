@@ -2,7 +2,7 @@
 
 # check literals
 
-plan(4);
+plan(3);
 
 ok("\c111\c107 \c49" eq 'ok 1', '\c###');
 ok("\c[111,107,32,50]" eq 'ok 2', '\c[##,##,##]');
