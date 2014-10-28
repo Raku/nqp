@@ -1927,7 +1927,7 @@ QAST::MASTOperations.add_core_op('getcfh', -> $qastcomp, $op {
 });
 QAST::MASTOperations.add_core_moarop_mapping('eoffh', 'eof_fh');
 QAST::MASTOperations.add_core_moarop_mapping('closefh', 'close_fh', 0);
-QAST::MASTOperations.add_core_moarop_mapping('closefhi', 'close_fhi');
+QAST::MASTOperations.add_core_moarop_mapping('closefh_i', 'close_fhi');
 QAST::MASTOperations.add_core_moarop_mapping('socket', 'socket');
 QAST::MASTOperations.add_core_moarop_mapping('connect', 'connect_sk', 0);
 QAST::MASTOperations.add_core_moarop_mapping('bindsock', 'bind_sk', 0);

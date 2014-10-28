@@ -1854,9 +1854,9 @@ QAST::Operations.add_core_op('closefh', -> $qastcomp, $op {
         $op[0]
     ))
 });
-QAST::Operations.add_core_op('closefhi', -> $qastcomp, $op {
+QAST::Operations.add_core_op('closefh_i', -> $qastcomp, $op {
     if +$op.list != 1 {
-        nqp::die("The 'closefhi' op expects one operand");
+        nqp::die("The 'closefh_i' op expects one operand");
     }
     $qastcomp.as_post(QAST::Stmts.new(
         QAST::Op.new(:op('callmethod'), :name('close'), $op[0]),
