@@ -1854,6 +1854,15 @@ QAST::Operations.add_core_op('closefh', -> $qastcomp, $op {
         $op[0]
     ))
 });
+QAST::Operations.add_core_op('closefhi', -> $qastcomp, $op {
+    if +$op.list != 1 {
+        nqp::die("The 'closefhi' op expects one operand");
+    }
+    $qastcomp.as_post(QAST::Stmts.new(
+        QAST::Op.new(:op('callmethod'), :name('close'), $op[0]),
+        QAST::Op.new(:op('callmethod'), :name('exit_status'), :returns(int), $op[0]),
+    ))
+});
 QAST::Operations.add_core_op('setinputlinesep', -> $qastcomp, $op {
     if +$op.list != 2 {
         nqp::die("The 'setinputlinesep' op expects two operands");
