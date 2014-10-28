@@ -15,7 +15,7 @@ import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.ThreadContext;
 
 public abstract class SyncHandle implements IIOClosable, IIOEncodable,
-        IIOSyncReadable, IIOSyncWritable, IIOLineSeparable {
+        IIOSyncReadable, IIOSyncWritable, IIOLineSeparable, IIOExitable {
 
     protected ByteChannel chan;
     protected CharsetEncoder enc;
@@ -28,6 +28,19 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
         try {
             chan.close();
         } catch (IOException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
+        }
+    }
+
+    public int exitValue(ThreadContext tc) throws IllegalThreadStateException {
+        try {
+            if (chan instanceof ProcessChannel) {
+                return ((ProcessChannel)chan).exitValue();
+            }
+            else
+                throw ExceptionHandling.dieInternal(tc,
+                    "This channel does not support exitValue");
+        } catch (IllegalThreadStateException e) {
             throw ExceptionHandling.dieInternal(tc, e);
         }
     }

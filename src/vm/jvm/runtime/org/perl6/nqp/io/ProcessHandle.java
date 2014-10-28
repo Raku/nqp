@@ -37,7 +37,7 @@ public class ProcessHandle extends SyncHandle {
         
         try {
             process = pb.start();
-            chan = new ProcessChannel(process.getOutputStream(), process.getInputStream());
+            chan = new ProcessChannel(process, process.getOutputStream(), process.getInputStream());
             setEncoding(tc, Charset.forName("UTF-8"));
         } catch (IOException e) {
             throw ExceptionHandling.dieInternal(tc, e);
@@ -46,32 +46,5 @@ public class ProcessHandle extends SyncHandle {
     
     public void flush(ThreadContext tc) {
         // Not provided.
-    }
-    
-    static class ProcessChannel implements ByteChannel {
-        protected WritableByteChannel stdin;
-        protected ReadableByteChannel stdout;
-        
-        public ProcessChannel(OutputStream stdin, InputStream stdout) {
-            this.stdin = Channels.newChannel(stdin);
-            this.stdout = Channels.newChannel(stdout);
-        }
-
-        public int read(ByteBuffer dst) throws IOException {
-            return stdout.read(dst);
-        }
-
-        public boolean isOpen() {
-            return stdin.isOpen();
-        }
-
-        public void close() throws IOException {
-            stdin.close();
-            stdout.close();
-        }
-
-        public int write(ByteBuffer src) throws IOException {
-            return stdin.write(src);
-        }
     }
 }

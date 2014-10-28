@@ -44,12 +44,14 @@ import org.perl6.nqp.io.IIOBindable;
 import org.perl6.nqp.io.IIOCancelable;
 import org.perl6.nqp.io.IIOClosable;
 import org.perl6.nqp.io.IIOEncodable;
+import org.perl6.nqp.io.IIOExitable;
 import org.perl6.nqp.io.IIOInteractive;
 import org.perl6.nqp.io.IIOLineSeparable;
 import org.perl6.nqp.io.IIOSeekable;
 import org.perl6.nqp.io.IIOSyncReadable;
 import org.perl6.nqp.io.IIOSyncWritable;
 import org.perl6.nqp.io.ProcessHandle;
+import org.perl6.nqp.io.ProcessChannel;
 import org.perl6.nqp.io.ServerSocketHandle;
 import org.perl6.nqp.io.SocketHandle;
 import org.perl6.nqp.io.StandardReadHandle;
@@ -753,6 +755,24 @@ public final class Ops {
             die_s("closefh requires an object with the IOHandle REPR", tc);
         }
         return obj;
+    }
+
+    public static long closefhi(SixModelObject obj, ThreadContext tc) {
+        if (obj instanceof IOHandleInstance) {
+            IOHandleInstance h = (IOHandleInstance)obj;
+            if (h.handle instanceof IIOClosable
+             && h.handle instanceof IIOExitable) {
+                ((IIOClosable)h.handle).close(tc);
+                return (long)((IIOExitable)h.handle).exitValue(tc);
+            }
+            else
+                throw ExceptionHandling.dieInternal(tc,
+                    "This handle does not support close or exitValue");
+        }
+        else {
+            die_s("closefhi requires an object with the IOHandle REPR", tc);
+        }
+        return -1;
     }
 
     public static Set<PosixFilePermission> modeToPosixFilePermission(long mode) {
