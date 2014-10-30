@@ -75,6 +75,10 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         self.panic('Spaces not allowed in bare range.');
     }
 
+    method throw_solitary_quantifier() {
+        self.panic('Quantifier quantifies nothing.');
+    }
+
     method throw_null_pattern() {
         self.panic('Null regex not allowed');
     }
@@ -278,7 +282,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token metachar:sym<bs> { \\ <backslash> <.SIGOK> }
     token metachar:sym<mod> { <mod_internal> }
     token metachar:sym<quantifier> {
-        <!rxstopper> <quantifier> <.panic: 'Quantifier quantifies nothing'>
+        <!rxstopper> <quantifier> <.throw_solitary_quantifier>
     }
 
     ## we cheat here, really should be regex_infix:sym<~>
