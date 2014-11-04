@@ -112,4 +112,6 @@ abc <![d]>		abc		y	negated charclass at end of string (issue 9)
 
 <[\ ]>			a b		y		space in character class escaped with backslash
 
+<[\«]>			«		y		test for regression introduced with parrot 6.9.0
+
 ## vim: noexpandtab tabstop=4 shiftwidth=4
