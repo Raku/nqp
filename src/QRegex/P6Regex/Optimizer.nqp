@@ -35,7 +35,12 @@ class QRegex::Optimizer {
         while +@($node) >= 1 {
             if nqp::istype($node, QAST::Regex) {
                 if $node.rxtype eq 'concat' {
-                    $node := $node[0];
+                    if $node[0].rxtype eq 'qastnode' && $node[0].subtype eq 'declarative' {
+                        # the debugger puts these all over our code; we should pretend we never saw them.
+                        $node := $node[1];
+                    } else {
+                        $node := $node[0];
+                    }
                 } else {
                     last;
                 }
