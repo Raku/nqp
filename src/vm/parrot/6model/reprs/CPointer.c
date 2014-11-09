@@ -34,6 +34,9 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
 
 /* Composes the representation. */
 static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
+    UNUSED(interp);
+    UNUSED(st);
+    UNUSED(repr_info);
     /* Nothing to do. */
 }
 
@@ -46,6 +49,9 @@ static PMC * allocate(PARROT_INTERP, STable *st) {
 
 /* Initialize a new instance. */
 static void initialize(PARROT_INTERP, STable *st, void *data) {
+    UNUSED(interp);
+    UNUSED(st);
+    UNUSED(data);
     /* Nothing to do here. */
 }
 
@@ -53,24 +59,33 @@ static void initialize(PARROT_INTERP, STable *st, void *data) {
 static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
     CPointerBody *src_body = (CPointerBody *)src;
     CPointerBody *dest_body = (CPointerBody *)dest;
+    UNUSED(interp);
+    UNUSED(st);
     dest_body->ptr = src_body->ptr;
 }
 
 /* Used with boxing. Sets an integer value, for representations that can hold
  * one. */
 static void set_int(PARROT_INTERP, STable *st, void *data, INTVAL value) {
+    UNUSED(interp);
+    UNUSED(st);
     ((CPointerBody *)data)->ptr = (void *)value;
 }
 
 /* Used with boxing. Gets an integer value, for representations that can
  * hold one. */
 static INTVAL get_int(PARROT_INTERP, STable *st, void *data) {
+    UNUSED(interp);
+    UNUSED(st);
     return (Parrot_Int8)((CPointerBody *)data)->ptr;
 }
 
 /* Used with boxing. Sets a floating point value, for representations that can
  * hold one. */
 static void set_num(PARROT_INTERP, STable *st, void *data, FLOATVAL value) {
+    UNUSED(st);
+    UNUSED(data);
+    UNUSED(value);
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "CPointer cannot box a native num");
 }
@@ -78,6 +93,8 @@ static void set_num(PARROT_INTERP, STable *st, void *data, FLOATVAL value) {
 /* Used with boxing. Gets a floating point value, for representations that can
  * hold one. */
 static FLOATVAL get_num(PARROT_INTERP, STable *st, void *data) {
+    UNUSED(st);
+    UNUSED(data);
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "CPointer cannot unbox to a native num");
 }
@@ -85,6 +102,9 @@ static FLOATVAL get_num(PARROT_INTERP, STable *st, void *data) {
 /* Used with boxing. Sets a string value, for representations that can hold
  * one. */
 static void set_str(PARROT_INTERP, STable *st, void *data, STRING *value) {
+    UNUSED(st);
+    UNUSED(data);
+    UNUSED(value);
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "CPointer cannot box a native string");
 }
@@ -92,6 +112,8 @@ static void set_str(PARROT_INTERP, STable *st, void *data, STRING *value) {
 /* Used with boxing. Gets a string value, for representations that can hold
  * one. */
 static STRING * get_str(PARROT_INTERP, STable *st, void *data) {
+    UNUSED(st);
+    UNUSED(data);
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "CPointer cannot unbox to a native string");
 }
@@ -100,31 +122,36 @@ static STRING * get_str(PARROT_INTERP, STable *st, void *data) {
  * gets the reference to such things, using the representation ID to distinguish
  * them. */
 static void * get_boxed_ref(PARROT_INTERP, STable *st, void *data, INTVAL repr_id) {
+    UNUSED(st);
+    UNUSED(data);
+    UNUSED(repr_id);
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "CPointer cannot box other types");
 }
 
 /* This Parrot-specific addition to the API is used to free an object. */
 static void gc_free(PARROT_INTERP, PMC *obj) {
+    UNUSED(interp);
     mem_sys_free(PMC_data(obj));
     PMC_data(obj) = NULL;
 }
 
 /* Gets the storage specification for this representation. */
-static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
-    storage_spec spec;
-    spec.inlineable = STORAGE_SPEC_REFERENCE;
-    spec.boxed_primitive = STORAGE_SPEC_BP_NONE;
-    spec.can_box = 0;
-    spec.bits = sizeof(void *) * 8;
-    spec.align = ALIGNOF1(void *);
-    return spec;
+static void get_storage_spec(PARROT_INTERP, STable *st, storage_spec *spec) {
+    UNUSED(interp);
+    UNUSED(st);
+    spec->inlineable      = STORAGE_SPEC_REFERENCE;
+    spec->boxed_primitive = STORAGE_SPEC_BP_NONE;
+    spec->can_box         = 0;
+    spec->bits            = sizeof(void *) * 8;
+    spec->align           = ALIGNOF1(void *);
 }
 
 /* Initializes the CPointer representation. */
 REPROps * CPointer_initialize(PARROT_INTERP,
         wrap_object_t wrap_object_func_ptr,
         create_stable_t create_stable_func_ptr) {
+    UNUSED(interp);
     /* Stash away functions passed wrapping functions. */
     wrap_object_func = wrap_object_func_ptr;
     create_stable_func = create_stable_func_ptr;

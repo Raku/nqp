@@ -187,6 +187,7 @@ static void get_stable_ref_info(PARROT_INTERP, SerializationWriter *writer,
 
 /* Expands current target storage as needed. */
 static void expand_storage_if_needed(PARROT_INTERP, SerializationWriter *writer, INTVAL need) {
+    UNUSED(interp);
     if (*(writer->cur_write_offset) + need > *(writer->cur_write_limit)) {
         *(writer->cur_write_limit) *= 2;
         *(writer->cur_write_buffer) = (char *)mem_sys_realloc(*(writer->cur_write_buffer),

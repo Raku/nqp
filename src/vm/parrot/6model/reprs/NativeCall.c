@@ -34,6 +34,9 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
 
 /* Composes the representation. */
 static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
+    UNUSED(interp);
+    UNUSED(st);
+    UNUSED(repr_info);
     /* Nothing to do. */
 }
 
@@ -46,6 +49,9 @@ static PMC * allocate(PARROT_INTERP, STable *st) {
 
 /* Initialize a new instance. */
 static void initialize(PARROT_INTERP, STable *st, void *data) {
+    UNUSED(interp);
+    UNUSED(st);
+    UNUSED(data);
     /* Nothing to do here. */
 }
 
@@ -53,7 +59,9 @@ static void initialize(PARROT_INTERP, STable *st, void *data) {
 static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
     NativeCallBody *src_body = (NativeCallBody *)src;
     NativeCallBody *dest_body = (NativeCallBody *)dest;
-    
+    UNUSED(interp);
+    UNUSED(st);
+
     /* Need a fresh handle for resource management purposes. */
     if (src_body->lib_name) {
         dest_body->lib_name = (char *) mem_sys_allocate(strlen(src_body->lib_name) + 1);
@@ -76,6 +84,8 @@ static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
  * embedded inside another one. Never called on a top-level object. */
 static void gc_cleanup(PARROT_INTERP, STable *st, void *data) {
     NativeCallBody *body = (NativeCallBody *)data;
+    UNUSED(interp);
+    UNUSED(st);
     if (body->lib_name)
         Parrot_str_free_cstring(body->lib_name);
     if (body->lib_handle)
@@ -95,6 +105,7 @@ static void gc_free(PARROT_INTERP, PMC *obj) {
 
 static void gc_mark(PARROT_INTERP, STable *st, void *data) {
     NativeCallBody *body = (NativeCallBody *)data;
+    UNUSED(st);
 
     if (body->arg_info) {
         INTVAL i;
@@ -106,28 +117,37 @@ static void gc_mark(PARROT_INTERP, STable *st, void *data) {
 }
 
 /* Gets the storage specification for this representation. */
-static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
-    storage_spec spec;
-    spec.inlineable = STORAGE_SPEC_INLINED;
-    spec.bits = sizeof(NativeCallBody) * 8;
-    spec.align = ALIGNOF1(void *);
-    spec.boxed_primitive = STORAGE_SPEC_BP_NONE;
-    spec.can_box = 0;
-    return spec;
+static void get_storage_spec(PARROT_INTERP, STable *st, storage_spec *spec) {
+    UNUSED(interp);
+    UNUSED(st);
+    spec->inlineable      = STORAGE_SPEC_INLINED;
+    spec->bits            = sizeof(NativeCallBody) * 8;
+    spec->align           = ALIGNOF1(void *);
+    spec->boxed_primitive = STORAGE_SPEC_BP_NONE;
+    spec->can_box         = 0;
 }
 
 /* We can't actually serialize the handle, but since this REPR gets inlined
  * we just do nothing here since it may well have never been opened. Various
  * more involved approaches are possible... */
 static void serialize(PARROT_INTERP, STable *st, void *data, SerializationWriter *writer) {
+    UNUSED(interp);
+    UNUSED(st);
+    UNUSED(data);
+    UNUSED(writer);
 }
 static void deserialize(PARROT_INTERP, STable *st, void *data, SerializationReader *reader) {
+    UNUSED(interp);
+    UNUSED(st);
+    UNUSED(data);
+    UNUSED(reader);
 }
 
 /* Initializes the NativeCall representation. */
 REPROps * NativeCall_initialize(PARROT_INTERP,
         wrap_object_t wrap_object_func_ptr,
         create_stable_t create_stable_func_ptr) {
+    UNUSED(interp);
     /* Stash away functions passed wrapping functions. */
     wrap_object_func = wrap_object_func_ptr;
     create_stable_func = create_stable_func_ptr;

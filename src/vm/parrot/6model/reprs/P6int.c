@@ -148,6 +148,9 @@ static INTVAL get_int(PARROT_INTERP, STable *st, void *data) {
 /* Used with boxing. Sets a floating point value, for representations that can
  * hold one. */
 static void set_num(PARROT_INTERP, STable *st, void *data, FLOATVAL value) {
+    UNUSED(st);
+    UNUSED(data);
+    UNUSED(value);
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6int cannot box a native num");
 }
@@ -155,6 +158,8 @@ static void set_num(PARROT_INTERP, STable *st, void *data, FLOATVAL value) {
 /* Used with boxing. Gets a floating point value, for representations that can
  * hold one. */
 static FLOATVAL get_num(PARROT_INTERP, STable *st, void *data) {
+    UNUSED(st);
+    UNUSED(data);
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6int cannot unbox to a native num");
 }
@@ -162,6 +167,9 @@ static FLOATVAL get_num(PARROT_INTERP, STable *st, void *data) {
 /* Used with boxing. Sets a string value, for representations that can hold
  * one. */
 static void set_str(PARROT_INTERP, STable *st, void *data, STRING *value) {
+    UNUSED(st);
+    UNUSED(data);
+    UNUSED(value);
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6int cannot box a native string");
 }
@@ -169,6 +177,8 @@ static void set_str(PARROT_INTERP, STable *st, void *data, STRING *value) {
 /* Used with boxing. Gets a string value, for representations that can hold
  * one. */
 static STRING * get_str(PARROT_INTERP, STable *st, void *data) {
+    UNUSED(st);
+    UNUSED(data);
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6int cannot unbox to a native string");
 }
@@ -177,65 +187,68 @@ static STRING * get_str(PARROT_INTERP, STable *st, void *data) {
  * gets the reference to such things, using the representation ID to distinguish
  * them. */
 static void * get_boxed_ref(PARROT_INTERP, STable *st, void *data, INTVAL repr_id) {
+    UNUSED(st);
+    UNUSED(data);
+    UNUSED(repr_id);
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6int cannot box other types");
 }
 
 /* This Parrot-specific addition to the API is used to free an object. */
 static void gc_free(PARROT_INTERP, PMC *obj) {
+    UNUSED(interp);
     mem_sys_free(PMC_data(obj));
     PMC_data(obj) = NULL;
 }
 
 /* Gets the storage specification for this representation. */
-static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
+static void get_storage_spec(PARROT_INTERP, STable *st, storage_spec *spec) {
     P6intREPRData *repr_data = (P6intREPRData *) st->REPR_data;
-    storage_spec spec;
-    spec.inlineable = STORAGE_SPEC_INLINED;
-    spec.boxed_primitive = STORAGE_SPEC_BP_INT;
-    spec.can_box = STORAGE_SPEC_CAN_BOX_INT;
+    spec->inlineable         = STORAGE_SPEC_INLINED;
+    spec->boxed_primitive    = STORAGE_SPEC_BP_INT;
+    spec->can_box            = STORAGE_SPEC_CAN_BOX_INT;
 
     if (repr_data && repr_data->bits) {
-        spec.bits = repr_data->bits;
+        spec->bits = repr_data->bits;
     }
     else {
-        spec.bits = sizeof(INTVAL)*8;
+        spec->bits = sizeof(INTVAL) * 8;
     }
 
-    switch (spec.bits) {
+    switch (spec->bits) {
     /* XXX: Setting align to that of a byte for widths less than 1 byte might
      * not be entirely the best choice. */
     case 1:
     case 2:
     case 4:
     case 8:
-        spec.align = ALIGNOF1(Parrot_Int1);
+        spec->align = ALIGNOF1(Parrot_Int1);
         break;
     case 16:
-        spec.align = ALIGNOF1(Parrot_Int2);
+        spec->align = ALIGNOF1(Parrot_Int2);
         break;
     case 32:
-        spec.align = ALIGNOF1(Parrot_Int4);
+        spec->align = ALIGNOF1(Parrot_Int4);
         break;
     case 64:
-        spec.align = ALIGNOF1(Parrot_Int8);
+        spec->align = ALIGNOF1(Parrot_Int8);
         break;
     default:
         die_bad_bits(interp);
     }
-    
-    spec.is_unsigned = repr_data->is_unsigned;
 
-    return spec;
+    spec->is_unsigned = repr_data->is_unsigned;
 }
 
 /* Serializes the data. */
 static void serialize(PARROT_INTERP, STable *st, void *data, SerializationWriter *writer) {
+    UNUSED(st);
     writer->write_int(interp, writer, ((P6intBody *)data)->value);
 }
 
 /* Deserializes the data. */
 static void deserialize(PARROT_INTERP, STable *st, void *data, SerializationReader *reader) {
+    UNUSED(st);
     ((P6intBody *)data)->value = reader->read_int(interp, reader);
 }
 
@@ -274,6 +287,7 @@ static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader
 
 /* Initializes the P6int representation. */
 REPROps * P6int_initialize(PARROT_INTERP) {
+    UNUSED(interp);
     /* Allocate and populate the representation function table. */
     this_repr = mem_allocate_zeroed_typed(REPROps);
     this_repr->type_object_for = type_object_for;

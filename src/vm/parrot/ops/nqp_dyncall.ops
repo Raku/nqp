@@ -559,7 +559,8 @@ PMC * decontainerize(PARROT_INTERP, PMC *var) {
 static PMC * native_call_cast(PARROT_INTERP, PMC *target_spec, PMC *target_type, void *cpointer_body) {
     PMC *result = PMCNULL;
     if (target_type->vtable->base_type == smo_id) {
-        storage_spec ss = REPR(target_spec)->get_storage_spec(interp, STABLE(target_spec));
+        storage_spec ss;
+        REPR(target_spec)->get_storage_spec(interp, STABLE(target_spec), &ss);
         if(ss.boxed_primitive == STORAGE_SPEC_BP_INT
         || REPR(target_type)->ID == p6int_repr_id) {
             Parrot_Int8 value;
@@ -744,6 +745,7 @@ callback_handler(DCCallback *cb, DCArgs *args, DCValue *result, CallbackData *da
     PMC *cappy = Parrot_pmc_new(data->interp, enum_class_CallContext);
     PMC *retval;
     INTVAL i;
+    UNUSED(cb);
 
     /* Unpack args into Parrot data structures. */
     for (i = 1; i < data->length; i++) {
@@ -1154,7 +1156,8 @@ inline op nqp_native_call_global(out PMC, invar STR, invar STR, invar PMC, invar
     Parrot_str_free_cstring(lib_name);
 
     if (target_type->vtable->base_type == smo_id) {
-        storage_spec ss = REPR(target_spec)->get_storage_spec(interp, STABLE(target_spec));
+        storage_spec ss;
+        REPR(target_spec)->get_storage_spec(interp, STABLE(target_spec), &ss);
         if(ss.boxed_primitive == STORAGE_SPEC_BP_STR
         || REPR(target_type)->ID == cstr_repr_id
         || REPR(target_type)->ID == p6str_repr_id) {

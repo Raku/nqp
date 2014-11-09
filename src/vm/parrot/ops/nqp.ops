@@ -2055,7 +2055,7 @@ Adds a candidate to the multi-dispatch cache.
 inline op multi_cache_add(out PMC, in PMC, in PMC, in PMC) :base_core {
     PMC *cache_ptr = $2;
     if (cache_ptr->vtable->base_type != enum_class_Pointer) {
-        NQP_md_cache *c = mem_sys_allocate_zeroed(sizeof(NQP_md_cache));
+        NQP_md_cache *c = (NQP_md_cache *)mem_sys_allocate_zeroed(sizeof(NQP_md_cache));
         cache_ptr = Parrot_pmc_new(interp, enum_class_Pointer);
         VTABLE_set_pointer(interp, cache_ptr, c);
     }
@@ -2456,10 +2456,12 @@ Enables the SC write barrier.
 
 */
 inline op nqp_disable_sc_write_barrier() :base_core {
+    UNUSED(interp);
     sc_write_barrier_off_depth++;
 }
 
 inline op nqp_enable_sc_write_barrier() :base_core {
+    UNUSED(interp);
     sc_write_barrier_off_depth--;
 }
 
@@ -2552,7 +2554,8 @@ unboxed, this will return what sort of primitive type it is.
 inline op repr_get_primitive_type_spec(out INT, invar PMC) :base_core {
     PMC *var = decontainerize(interp, $2);
     if (var->vtable->base_type == smo_id) {
-        storage_spec ss = REPR(var)->get_storage_spec(interp, STABLE(var));
+        storage_spec ss;
+        REPR(var)->get_storage_spec(interp, STABLE(var), &ss);
         $1 = ss.inlineable ? ss.boxed_primitive : STORAGE_SPEC_BP_NONE;
     }
     else if (var->vtable->base_type == enum_class_Integer) {
@@ -2880,12 +2883,14 @@ set in $1, then jump to the label at $2.
 
 */
 inline op nqpdebflags(out INT, in INT) :base_core {
+    UNUSED(interp);
     $1 = nqpdebflags_i;
     nqpdebflags_i = $2;
 }
 
 inline op nqpdebskip(in INT, in LABEL) :base_core {
     INTVAL flags = $1;
+    UNUSED(interp);
     if (((flags & 0x0fffffff & nqpdebflags_i) == 0) 
             || (flags & 0x30000000) > (nqpdebflags_i & 0x30000000))
         goto OFFSET($2);
@@ -3056,8 +3061,8 @@ inline op nqp_nfa_from_statelist(out PMC, invar PMC, invar PMC) :base_core {
     num_states = VTABLE_elements(interp, states) - 1;
     nfa->num_states = num_states;
     if (num_states > 0) {
-        nfa->num_state_edges = mem_sys_allocate_zeroed(num_states * sizeof(INTVAL));
-        nfa->states = mem_sys_allocate_zeroed(num_states * sizeof(NFAStateInfo *));
+        nfa->num_state_edges = (INTVAL *)mem_sys_allocate_zeroed(num_states * sizeof(INTVAL));
+        nfa->states = (NFAStateInfo **)mem_sys_allocate_zeroed(num_states * sizeof(NFAStateInfo *));
     }
     for (i = 0; i < num_states; i++) {
         PMC    *edge_info = VTABLE_get_pmc_keyed_int(interp, states, i + 1);
@@ -3067,7 +3072,7 @@ inline op nqp_nfa_from_statelist(out PMC, invar PMC, invar PMC) :base_core {
 
         nfa->num_state_edges[i] = edges;
         if (edges > 0)
-            nfa->states[i] = mem_sys_allocate_zeroed(edges * sizeof(NFAStateInfo));
+            nfa->states[i] = (NFAStateInfo *)mem_sys_allocate_zeroed(edges * sizeof(NFAStateInfo));
         
         for (j = 0; j < elems; j += 3) {
             INTVAL act = VTABLE_get_integer_keyed_int(interp, edge_info, j);
@@ -3097,6 +3102,8 @@ inline op nqp_nfa_from_statelist(out PMC, invar PMC, invar PMC) :base_core {
                 nfa->states[i][cur_edge].arg.uclc.uc = VTABLE_get_integer_keyed_int(interp, arg, 1);
                 break;
             }
+            default:
+                break;
             }
             
             cur_edge++;
@@ -3524,7 +3531,8 @@ Checks if the type of thing in $2 is unboxable to an int.
 inline op nqp_isint(out INT, invar PMC) :base_core {
     PMC *var = decontainerize(interp, $2);
     if (var->vtable->base_type == smo_id) {
-        storage_spec ss = REPR(var)->get_storage_spec(interp, STABLE(var));
+        storage_spec ss;
+        REPR(var)->get_storage_spec(interp, STABLE(var), &ss);
         $1 = ss.boxed_primitive == STORAGE_SPEC_BP_INT ? 1 : 0;
     }
     else {
@@ -3544,7 +3552,8 @@ Checks if the type of thing in $2 is unboxable to a num.
 inline op nqp_isnum(out INT, invar PMC) :base_core {
     PMC *var = decontainerize(interp, $2);
     if (var->vtable->base_type == smo_id) {
-        storage_spec ss = REPR(var)->get_storage_spec(interp, STABLE(var));
+        storage_spec ss;
+        REPR(var)->get_storage_spec(interp, STABLE(var), &ss);
         $1 = ss.boxed_primitive == STORAGE_SPEC_BP_NUM ? 1 : 0;
     }
     else {
@@ -3564,7 +3573,8 @@ Checks if the type of thing in $2 is unboxable to a str.
 inline op nqp_isstr(out INT, invar PMC) :base_core {
     PMC *var = decontainerize(interp, $2);
     if (var->vtable->base_type == smo_id) {
-        storage_spec ss = REPR(var)->get_storage_spec(interp, STABLE(var));
+        storage_spec ss;
+        REPR(var)->get_storage_spec(interp, STABLE(var), &ss);
         $1 = ss.boxed_primitive == STORAGE_SPEC_BP_STR ? 1 : 0;
     }
     else {
@@ -3861,7 +3871,7 @@ inline op nqp_encode(out PMC, in STR, in STR, invar PMC) {
     buffer_data = Parrot_str_cstring(interp, enc);
     bytes = Parrot_str_byte_length(interp, enc);
     res_elem_st = REPR(res)->pos_funcs->get_elem_stable(interp, STABLE(res));
-    res_elem_ss = res_elem_st->REPR->get_storage_spec(interp, res_elem_st);
+    res_elem_st->REPR->get_storage_spec(interp, res_elem_st, &res_elem_ss);
     if (res_elem_ss.boxed_primitive != STORAGE_SPEC_BP_INT)
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "nqp_encode requires an integer buffer type");
@@ -3876,7 +3886,7 @@ inline op nqp_encode(out PMC, in STR, in STR, invar PMC) {
             break;
         }
         case 16: {
-            short *sbuffer_data = (short *)buffer_data;
+            const short *sbuffer_data = (const short *)buffer_data;
             short shorts = bytes / 2;
             for (i = 0; i < shorts; i++) {
                 nv.value.intval = sbuffer_data[i];
@@ -3886,7 +3896,7 @@ inline op nqp_encode(out PMC, in STR, in STR, invar PMC) {
             break;
         }
         case 32: {
-            int *ibuffer_data = (int *)buffer_data;
+            const int *ibuffer_data = (const int *)buffer_data;
             int ints = bytes / 4;
             for (i = 0; i < ints; i++) {
                 nv.value.intval = ibuffer_data[i];
@@ -3922,7 +3932,7 @@ inline op nqp_decode(out STR, invar PMC, in STR) {
     STable *buf_elem_st;
     storage_spec buf_elem_ss;
     buf_elem_st = REPR(buf)->pos_funcs->get_elem_stable(interp, STABLE(buf));
-    buf_elem_ss = buf_elem_st->REPR->get_storage_spec(interp, buf_elem_st);
+    buf_elem_st->REPR->get_storage_spec(interp, buf_elem_st, &buf_elem_ss);
     if (buf_elem_ss.boxed_primitive != STORAGE_SPEC_BP_INT)
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "nqp_decode requires an integer buffer type");
@@ -3934,7 +3944,7 @@ inline op nqp_decode(out STR, invar PMC, in STR) {
         switch (buf_elem_ss.bits) {
             case 8: {
                 cbuflen = elems;
-                cbuffer = mem_sys_allocate(cbuflen);
+                cbuffer = (char *)mem_sys_allocate(cbuflen);
                 for (i = 0; i < cbuflen; i++) {
                     REPR(buf)->pos_funcs->at_pos_native(interp, STABLE(buf),
                         OBJECT_BODY(buf), i, &nv);
@@ -3945,7 +3955,7 @@ inline op nqp_decode(out STR, invar PMC, in STR) {
             case 16: {
                 short *sview;
                 cbuflen = elems * 2;
-                cbuffer = mem_sys_allocate(cbuflen);
+                cbuffer = (char *)mem_sys_allocate(cbuflen);
                 sview = (short *)cbuffer;
                 for (i = 0; i < elems; i++) {
                     REPR(buf)->pos_funcs->at_pos_native(interp, STABLE(buf),
@@ -3957,7 +3967,7 @@ inline op nqp_decode(out STR, invar PMC, in STR) {
             case 32: {
                 int *iview;
                 cbuflen = elems * 4;
-                cbuffer = mem_sys_allocate(cbuflen);
+                cbuffer = (char *)mem_sys_allocate(cbuflen);
                 iview = (int *)cbuffer;
                 for (i = 0; i < elems; i++) {
                     REPR(buf)->pos_funcs->at_pos_native(interp, STABLE(buf),
@@ -3972,7 +3982,7 @@ inline op nqp_decode(out STR, invar PMC, in STR) {
         }
     }
     else {
-        cbuffer = "";
+        cbuffer = NULL;
         cbuflen = 0;
     }
 
@@ -3995,7 +4005,7 @@ Check if the String in $2 has the string in $3 at its offset $4.
 */
 inline op nqp_string_equal_at(out INT, in STR, in STR, in INT) {
     INTVAL offset;
-    INTVAL cmp_index;
+    UINTVAL cmp_index;
     char done;
 
     String_iter hay_iter;
@@ -4010,7 +4020,7 @@ inline op nqp_string_equal_at(out INT, in STR, in STR, in INT) {
         }
     }
 
-    if (($2)->strlen - offset < ($3)->strlen || offset > ($2)->strlen) {
+    if (($2)->strlen - offset < ($3)->strlen || offset > (INTVAL)($2)->strlen) {
         $1 = 0;
     } else if (($3)->strlen == 1) {
         $1 = (STRING_ord(interp, $3, 0) == STRING_ord(interp, $2, offset));

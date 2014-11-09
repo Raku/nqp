@@ -196,7 +196,8 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *repr_info, P6opaqueR
 
             if (!PMC_IS_NULL(type)) {
                 /* Get the storage spec of the type and see what it wants. */
-                storage_spec spec = REPR(type)->get_storage_spec(interp, STABLE(type));
+                storage_spec spec;
+                REPR(type)->get_storage_spec(interp, STABLE(type), &spec);
                 if (spec.inlineable == STORAGE_SPEC_INLINED) {
                     /* Yes, it's something we'll flatten. */
                     unboxed_type = spec.boxed_primitive;
@@ -623,6 +624,7 @@ static void bind_attribute_native(PARROT_INTERP, STable *st, void *data, PMC *cl
 static INTVAL is_attribute_initialized(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     INTVAL slot = try_get_slot(interp, repr_data, class_handle, name);
+    UNUSED(hint);
     if (slot >= 0)
         return NULL != get_pmc_at_offset(data, repr_data->attribute_offsets[slot]);
     else
@@ -749,6 +751,9 @@ static void die_no_pos_del(PARROT_INTERP) {
 }
 static void at_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index, NativeValue *value) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    UNUSED(data);
+    UNUSED(index);
+    UNUSED(value);
     if (repr_data->pos_del_slot == -1)
         die_no_pos_del(interp);
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -764,6 +769,9 @@ static PMC * at_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index) {
 }
 static void bind_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index, NativeValue *value) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    UNUSED(data);
+    UNUSED(index);
+    UNUSED(value);
     if (repr_data->pos_del_slot == -1)
         die_no_pos_del(interp);
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -933,6 +941,7 @@ static void gc_mark_repr_data(PARROT_INTERP, STable *st) {
 /* This Parrot-specific addition to the API is used to free a repr instance. */
 static void gc_free_repr_data(PARROT_INTERP, STable *st) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    UNUSED(interp);
     if (repr_data->name_to_index_mapping)
         mem_sys_free(repr_data->name_to_index_mapping);
     if (repr_data->gc_pmc_mark_offsets)
@@ -950,21 +959,20 @@ static void gc_free_repr_data(PARROT_INTERP, STable *st) {
 }
 
 /* Gets the storage specification for this representation. */
-static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
+static void get_storage_spec(PARROT_INTERP, STable *st, storage_spec *spec) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
-    storage_spec spec;
-    spec.inlineable = STORAGE_SPEC_REFERENCE;
-    spec.boxed_primitive = STORAGE_SPEC_BP_NONE;
-    spec.can_box = 0;
-    spec.bits = sizeof(void *);
-    spec.align = ALIGNOF1(void *);
+    UNUSED(interp);
+    spec->inlineable            = STORAGE_SPEC_REFERENCE;
+    spec->boxed_primitive       = STORAGE_SPEC_BP_NONE;
+    spec->can_box               = 0;
+    spec->bits                  = sizeof(void *);
+    spec->align                 = ALIGNOF1(void *);
     if (repr_data->unbox_int_slot >= 0)
-        spec.can_box += STORAGE_SPEC_CAN_BOX_INT;
+        spec->can_box += STORAGE_SPEC_CAN_BOX_INT;
     if (repr_data->unbox_num_slot >= 0)
-        spec.can_box += STORAGE_SPEC_CAN_BOX_NUM;
+        spec->can_box += STORAGE_SPEC_CAN_BOX_NUM;
     if (repr_data->unbox_str_slot >= 0)
-        spec.can_box += STORAGE_SPEC_CAN_BOX_STR;
-    return spec;
+        spec->can_box += STORAGE_SPEC_CAN_BOX_STR;
 }
 
 /* Performs a change of type, where possible. */
@@ -1213,7 +1221,10 @@ static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader
         else {
             /* Align and store position. */
             STable *cur_st = repr_data->flattened_stables[i];
-            INTVAL align = cur_st->REPR->get_storage_spec(interp, cur_st).align;
+            storage_spec spec;
+            INTVAL align;
+            cur_st->REPR->get_storage_spec(interp, cur_st, &spec);
+            align = spec.align;
             if (cur_offset % align) {
                 cur_offset += align - cur_offset % align;
             }
@@ -1228,7 +1239,7 @@ static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader
                 repr_data->gc_cleanup_slots[cur_gc_cleanup_slot++] = i;
             
             /* Increment by size reported by representation. */
-            cur_offset += cur_st->REPR->get_storage_spec(interp, cur_st).bits / 8;
+            cur_offset += spec.bits / 8;
         }
     }
     repr_data->initialize_slots[cur_initialize_slot] = -1;

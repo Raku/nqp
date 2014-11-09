@@ -35,6 +35,9 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
 
 /* Composes the representation. */
 static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
+    UNUSED(interp);
+    UNUSED(st);
+    UNUSED(repr_info);
     /* Nothing to do. */
 }
 
@@ -48,6 +51,7 @@ static PMC * allocate(PARROT_INTERP, STable *st) {
 
 /* Initialize a new instance. */
 static void initialize(PARROT_INTERP, STable *st, void *data) {
+    UNUSED(st);
     ((HashAttrStoreBody *)data)->store = Parrot_pmc_new(interp, enum_class_Hash);
 }
 
@@ -55,19 +59,33 @@ static void initialize(PARROT_INTERP, STable *st, void *data) {
 static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
     HashAttrStoreBody *src_body = (HashAttrStoreBody *)src;
     HashAttrStoreBody *dest_body = (HashAttrStoreBody *)dest;
+    UNUSED(st);
     dest_body->store = VTABLE_clone(interp, src_body->store);
 }
 
 /* Gets the current value for an attribute. */
 static PMC * get_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
     HashAttrStoreBody *body = (HashAttrStoreBody *)data;
+    UNUSED(st);
+    UNUSED(class_handle);
+    UNUSED(hint);
     return VTABLE_get_pmc_keyed_str(interp, body->store, name);
 }
 static void get_attribute_native(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, NativeValue *value) {
+    UNUSED(st);
+    UNUSED(data);
+    UNUSED(class_handle);
+    UNUSED(name);
+    UNUSED(hint);
+    UNUSED(value);
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "HashAttrStore representation does not support value type attributes");
 }
 static STable *get_attribute_stable(PARROT_INTERP, STable *st, PMC *class_handle, STRING *name, INTVAL hint) {
+    UNUSED(st);
+    UNUSED(class_handle);
+    UNUSED(name);
+    UNUSED(hint);
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "HashAttrStore representation does not support value type attributes");
 }
@@ -75,9 +93,18 @@ static STable *get_attribute_stable(PARROT_INTERP, STable *st, PMC *class_handle
 /* Binds the given value to the specified attribute. */
 static void bind_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, PMC *value) {
     HashAttrStoreBody *body = (HashAttrStoreBody *)data;
+    UNUSED(st);
+    UNUSED(class_handle);
+    UNUSED(hint);
     VTABLE_set_pmc_keyed_str(interp, body->store, name, value);
 }
 static void bind_attribute_native(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, NativeValue *value) {
+    UNUSED(st);
+    UNUSED(data);
+    UNUSED(class_handle);
+    UNUSED(name);
+    UNUSED(hint);
+    UNUSED(value);
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "HashAttrStore representation does not support native attribute storage");
 }
@@ -85,17 +112,25 @@ static void bind_attribute_native(PARROT_INTERP, STable *st, void *data, PMC *cl
 /* Checks if an attribute has been initialized. */
 static INTVAL is_attribute_initialized(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
     HashAttrStoreBody *body = (HashAttrStoreBody *)data;
+    UNUSED(st);
+    UNUSED(class_handle);
+    UNUSED(hint);
     return VTABLE_exists_keyed_str(interp, body->store, name);
 }
 
 /* Gets the hint for the given attribute ID. */
 static INTVAL hint_for(PARROT_INTERP, STable *st, PMC *class_handle, STRING *name) {
+    UNUSED(interp);
+    UNUSED(st);
+    UNUSED(class_handle);
+    UNUSED(name);
     return NO_HINT;
 }
 
 /* This Parrot-specific addition to the API is used to mark an object. */
 static void gc_mark(PARROT_INTERP, STable *st, void *data) {
     HashAttrStoreBody *body = (HashAttrStoreBody *)data;
+    UNUSED(st);
     if (!PMC_IS_NULL(body->store))
         Parrot_gc_mark_PMC_alive(interp, body->store);
 }
@@ -107,18 +142,19 @@ static void gc_free(PARROT_INTERP, PMC *obj) {
 }
 
 /* Gets the storage specification for this representation. */
-static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
-    storage_spec spec;
-    spec.inlineable = STORAGE_SPEC_REFERENCE;
-    spec.boxed_primitive = STORAGE_SPEC_BP_NONE;
-    spec.can_box = 0;
-    spec.bits = sizeof(void *);
-    spec.align = ALIGNOF1(void *);
-    return spec;
+static void get_storage_spec(PARROT_INTERP, STable *st, storage_spec *spec) {
+    UNUSED(interp);
+    UNUSED(st);
+    spec->inlineable      = STORAGE_SPEC_REFERENCE;
+    spec->boxed_primitive = STORAGE_SPEC_BP_NONE;
+    spec->can_box         = 0;
+    spec->bits            = sizeof(void *);
+    spec->align           = ALIGNOF1(void *);
 }
 
 /* Initializes the HashAttrStore representation. */
 REPROps * HashAttrStore_initialize(PARROT_INTERP) {
+    UNUSED(interp);
     /* Allocate and populate the representation function table. */
     this_repr = mem_allocate_zeroed_typed(REPROps);
     this_repr->type_object_for = type_object_for;

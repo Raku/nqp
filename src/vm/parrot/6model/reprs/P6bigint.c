@@ -37,6 +37,9 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
 
 /* Composes the representation. */
 static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
+    UNUSED(interp);
+    UNUSED(st);
+    UNUSED(repr_info);
     /* Nothing to do. */
 }
 
@@ -50,6 +53,8 @@ static PMC * allocate(PARROT_INTERP, STable *st) {
 /* Initialize a new instance. */
 static void initialize(PARROT_INTERP, STable *st, void *data) {
     P6bigintBody *body = (P6bigintBody *)data;
+    UNUSED(interp);
+    UNUSED(st);
     mp_init(&body->i);
     mp_zero(&body->i);
 }
@@ -58,6 +63,8 @@ static void initialize(PARROT_INTERP, STable *st, void *data) {
 static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
     P6bigintBody *src_body = (P6bigintBody *)src;
     P6bigintBody *dest_body = (P6bigintBody *)dest;
+    UNUSED(interp);
+    UNUSED(st);
     mp_init_copy(&dest_body->i, &src_body->i);
 }
 
@@ -65,6 +72,8 @@ static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
  * one. */
 static void set_int(PARROT_INTERP, STable *st, void *data, INTVAL value) {
     mp_int *i = &((P6bigintBody *)data)->i;
+    UNUSED(interp);
+    UNUSED(st);
     if (value >= 0) {
         mp_set_long(i, value);
     }
@@ -79,6 +88,8 @@ static void set_int(PARROT_INTERP, STable *st, void *data, INTVAL value) {
 static INTVAL get_int(PARROT_INTERP, STable *st, void *data) {
     INTVAL ret;
     mp_int *i = &((P6bigintBody *)data)->i;
+    UNUSED(interp);
+    UNUSED(st);
     if (MP_LT == mp_cmp_d(i, 0)) {
         mp_neg(i, i);
         ret = mp_get_long(i);
@@ -93,6 +104,9 @@ static INTVAL get_int(PARROT_INTERP, STable *st, void *data) {
 /* Used with boxing. Sets a floating point value, for representations that can
  * hold one. */
 static void set_num(PARROT_INTERP, STable *st, void *data, FLOATVAL value) {
+    UNUSED(st);
+    UNUSED(data);
+    UNUSED(value);
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6bigint cannot box a native num");
 }
@@ -100,6 +114,8 @@ static void set_num(PARROT_INTERP, STable *st, void *data, FLOATVAL value) {
 /* Used with boxing. Gets a floating point value, for representations that can
  * hold one. */
 static FLOATVAL get_num(PARROT_INTERP, STable *st, void *data) {
+    UNUSED(st);
+    UNUSED(data);
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6bigint cannot unbox to a native num");
 }
@@ -107,6 +123,9 @@ static FLOATVAL get_num(PARROT_INTERP, STable *st, void *data) {
 /* Used with boxing. Sets a string value, for representations that can hold
  * one. */
 static void set_str(PARROT_INTERP, STable *st, void *data, STRING *value) {
+    UNUSED(st);
+    UNUSED(data);
+    UNUSED(value);
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6bigint cannot box a native string");
 }
@@ -114,6 +133,8 @@ static void set_str(PARROT_INTERP, STable *st, void *data, STRING *value) {
 /* Used with boxing. Gets a string value, for representations that can hold
  * one. */
 static STRING * get_str(PARROT_INTERP, STable *st, void *data) {
+    UNUSED(st);
+    UNUSED(data);
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6bigint cannot unbox to a native string");
 }
@@ -122,12 +143,16 @@ static STRING * get_str(PARROT_INTERP, STable *st, void *data) {
  * gets the reference to such things, using the representation ID to distinguish
  * them. */
 static void * get_boxed_ref(PARROT_INTERP, STable *st, void *data, INTVAL repr_id) {
+    UNUSED(st);
+    UNUSED(data);
+    UNUSED(repr_id);
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6bigint cannot box other types");
 }
 
 /* This Parrot-specific addition to the API is used to free an object. */
 static void gc_free(PARROT_INTERP, PMC *obj) {
+    UNUSED(interp);
     mp_clear(&((P6bigintInstance *)PMC_data(obj))->body.i);
     mem_sys_free(PMC_data(obj));
     PMC_data(obj) = NULL;
@@ -136,18 +161,20 @@ static void gc_free(PARROT_INTERP, PMC *obj) {
 /* This is called to do any cleanup of resources when an object gets
  * embedded inside another one. Never called on a top-level object. */
 static void gc_cleanup(PARROT_INTERP, STable *st, void *data) {
+    UNUSED(interp);
+    UNUSED(st);
     mp_clear(&((P6bigintBody *)data)->i);
 }
 
 /* Gets the storage specification for this representation. */
-static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
-    storage_spec spec;
-    spec.inlineable = STORAGE_SPEC_INLINED;
-    spec.bits = sizeof(mp_int) * 8;
-    spec.align = ALIGNOF1(mp_int);
-    spec.boxed_primitive = STORAGE_SPEC_BP_INT;
-    spec.can_box = STORAGE_SPEC_CAN_BOX_INT;
-    return spec;
+static void get_storage_spec(PARROT_INTERP, STable *st, storage_spec *spec) {
+    UNUSED(interp);
+    UNUSED(st);
+    spec->inlineable      = STORAGE_SPEC_INLINED;
+    spec->bits            = sizeof(mp_int) * 8;
+    spec->align           = ALIGNOF1(mp_int);
+    spec->boxed_primitive = STORAGE_SPEC_BP_INT;
+    spec->can_box         = STORAGE_SPEC_CAN_BOX_INT;
 }
 
 /* Serializes the data. */
@@ -155,6 +182,7 @@ static void serialize(PARROT_INTERP, STable *st, void *data, SerializationWriter
     mp_int *i = &((P6bigintBody *)data)->i;
     int len;
     char *buf;
+    UNUSED(st);
     mp_radix_size(i, 10, &len);
     buf = (char *) mem_sys_allocate(len);
     mp_toradix_n(i, buf, 10, len);
@@ -167,6 +195,7 @@ static void serialize(PARROT_INTERP, STable *st, void *data, SerializationWriter
 static void deserialize(PARROT_INTERP, STable *st, void *data, SerializationReader *reader) {
     P6bigintBody *body = (P6bigintBody *)data;
     const char *buf = Parrot_str_cstring(interp, reader->read_str(interp, reader));
+    UNUSED(st);
     mp_init(&body->i);
     mp_read_radix(&body->i, buf, 10);
 }
@@ -175,6 +204,7 @@ static void deserialize(PARROT_INTERP, STable *st, void *data, SerializationRead
 REPROps * P6bigint_initialize(PARROT_INTERP,
         wrap_object_t wrap_object_func_ptr,
         create_stable_t create_stable_func_ptr) {
+    UNUSED(interp);
     /* Stash away functions passed wrapping functions. */
     wrap_object_func = wrap_object_func_ptr;
     create_stable_func = create_stable_func_ptr;
