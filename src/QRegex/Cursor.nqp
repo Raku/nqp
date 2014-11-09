@@ -429,6 +429,7 @@ role NQPCursorRole is export {
             }
             nqp::push_s($highexpect, $dba);
         }
+        NQPMu;
     }
     
     method !highwater() {
