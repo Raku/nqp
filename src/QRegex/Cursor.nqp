@@ -793,10 +793,10 @@ class NQPMatch is NQPCapture {
                     }
                 }
             }
-            return join('', @chunks);
+            join('', @chunks);
         }
         else {
-            return nqp::x(' ', $indent) ~ "- NO MATCH\n";
+            nqp::x(' ', $indent) ~ "- NO MATCH\n";
         }
     }
     
@@ -955,7 +955,7 @@ class NQPCursor does NQPCursorRole {
                 last if $s && $maxlen > -1;
             }
             $cur.'!cursor_pass'($pos + $maxlen, '') if $maxlen >= 0;
-            return $cur;
+            $cur;
         }
         else {
             return $var(self) if nqp::isinvokable($var);
@@ -967,7 +967,7 @@ class NQPCursor does NQPCursorRole {
             return $cur if $adv > nqp::chars($tgt)
                 || nqp::substr($tgt, $pos, $len) ne $var;
             $cur.'!cursor_pass'($adv, '');
-            return $cur;
+            $cur;
         }
     }
 
@@ -987,7 +987,7 @@ class NQPCursor does NQPCursorRole {
                 $var := $rxcompiler.compile($var);
             }
         }
-        return self.'!INTERPOLATE'($var);
+        self.'!INTERPOLATE'($var);
     }
 }
 
