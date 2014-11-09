@@ -6,6 +6,7 @@ BEGIN_OPS_PREAMBLE
 #include "parrot/parrot.h"
 #include "parrot/extend.h"
 #include "parrot/dynext.h"
+#include "pmc/pmc_filehandle.h"
 
 /* 6modely includes. */
 #include "../6model/sixmodelobject.h"
@@ -665,6 +666,162 @@ static INTVAL Run_OS_Command(PARROT_INTERP, PMC *command, PMC *env_hash)
 
     /* make gcc happy */
     return 1;
+}
+static PIOHANDLE Run_OS_Command_Piped(PARROT_INTERP, PMC *command, PMC *env_hash, INTVAL flags, INTVAL *pid) {
+    char **saved = environ;
+    char   **cmd = pack_arg_array(interp, command);
+    char   **env = pack_env_hash(interp, env_hash);
+    char   *prog = cmd[0];
+    PIOHANDLE handles[3];
+    int in_fds[2];
+    int out_fds[2];
+    int err_fds[2];
+    int status;
+
+    //~ status  = execvp(prog, cmd);
+
+    //~ *pid = Parrot_proc_exec(interp, command, PARROT_EXEC_STDOUT, handles);
+    if (flags & PARROT_EXEC_STDIN
+    &&  pipe(in_fds) < 0)
+        goto error_pipe_in;
+
+    if (flags & PARROT_EXEC_STDOUT
+    &&  pipe(out_fds) < 0)
+        goto error_pipe_out;
+
+    if (flags & PARROT_EXEC_STDERR
+    &&  pipe(err_fds) < 0)
+        goto error_pipe_err;
+
+    *pid = fork();
+
+    if (*pid < 0)
+        goto error_fork;
+
+    if (*pid > 0) {
+        printf("%s:%d pid > 0 (%p)\n", __FILE__, __LINE__, pid);
+        if (flags & PARROT_EXEC_STDIN) {
+            /* close fd for reading */
+            close(in_fds[0]);
+            handles[0] = in_fds[1];
+        }
+
+        if (flags & PARROT_EXEC_STDOUT) {
+            /* close fd for writing */
+            close(out_fds[1]);
+            handles[1] = out_fds[0];
+        }
+
+        if (flags & PARROT_EXEC_STDERR) {
+            /* close fd for writing */
+            close(err_fds[1]);
+            handles[2] = err_fds[0];
+        }
+    }
+    else /* (pid == 0) */ {
+        /* Child - exec process */
+        //~ char * argv[4];
+        /* C strings for the execv call defined without const to avoid
+         * const problems without copying them.
+         * Please don't change this without testing with a c++ compiler.
+         */
+        //~ static char auxarg0[] = "/bin/sh";
+        //~ static char auxarg1[] = "-c";
+        fprintf(stderr, "%s:%d child before anything\n", __FILE__, __LINE__);
+
+        if (flags & PARROT_EXEC_STDIN) {
+            /* redirect stdin to pipe */
+            close(in_fds[1]);
+            close(STDIN_FILENO);
+
+            if (dup(in_fds[0]) != STDIN_FILENO)
+                PARROT_FORCE_EXIT(EXIT_FAILURE);
+        }
+
+        fprintf(stderr, "%s:%d child before anything 2\n", __FILE__, __LINE__);
+        if (flags & PARROT_EXEC_STDOUT) {
+            fprintf(stderr, "%s:%d child before anything 2.1\n", __FILE__, __LINE__);
+            /* redirect stdout to pipe */
+            close(out_fds[0]);
+            fprintf(stderr, "%s:%d child before anything 2.2\n", __FILE__, __LINE__);
+            close(STDOUT_FILENO);
+            fprintf(stderr, "%s:%d child before anything 2.3\n", __FILE__, __LINE__);
+
+            if (dup(out_fds[1]) != STDOUT_FILENO) {
+            fprintf(stderr, "%s:%d child before anything 2.4\n", __FILE__, __LINE__);
+                PARROT_FORCE_EXIT(EXIT_FAILURE);
+            fprintf(stderr, "%s:%d child before anything 2.5\n", __FILE__, __LINE__);
+            }
+
+            if (!(flags & PARROT_EXEC_STDERR)) {
+            fprintf(stderr, "%s:%d child before anything 2.6\n", __FILE__, __LINE__);
+                //~ close(STDERR_FILENO);
+            fprintf(stderr, "%s:%d child before anything 2.7\n", __FILE__, __LINE__);
+
+                if (dup(out_fds[1]) != STDERR_FILENO) {
+            fprintf(stderr, "%s:%d child before anything 2.8\n", __FILE__, __LINE__);
+                    //~ PARROT_FORCE_EXIT(EXIT_FAILURE);
+            fprintf(stderr, "%s:%d child before anything 2.9\n", __FILE__, __LINE__);
+                }
+            }
+        }
+
+        fprintf(stderr, "%s:%d child before anything 3\n", __FILE__, __LINE__);
+        if (flags & PARROT_EXEC_STDERR) {
+            /* redirect stderr to pipe */
+            close(err_fds[0]);
+            close(STDERR_FILENO);
+
+            if (dup(err_fds[1]) != STDERR_FILENO)
+                PARROT_FORCE_EXIT(EXIT_FAILURE);
+        }
+
+        fprintf(stderr, "%s:%d child before anything 4\n", __FILE__, __LINE__);
+        environ = env;
+
+        fprintf(stderr, "%s:%d child before execvp, '%s'\n", __FILE__, __LINE__, prog);
+        //~ argv [0] = auxarg0;
+        //~ argv [1] = auxarg1;
+        //~ argv [2] = Parrot_str_to_cstring(interp, command);
+        //~ argv [3] = NULL;
+        //~ execv(argv [0], argv);
+        status = execvp(prog, cmd);
+        fprintf(stderr, "%s:%d child after execvp (status=%d)\n", __FILE__, __LINE__, status);
+
+        /* if we get here, something's horribly wrong, but free anyway... */
+        free_packed(env);
+        free_packed(cmd);
+        environ = saved;
+
+        /* Will never reach this unless exec fails.
+         * No need to clean up, we're just going to exit */
+        perror("execvp");
+        PARROT_FORCE_EXIT(EXIT_FAILURE);
+    }
+
+    return handles[1];
+
+  error_fork:
+    if (flags & PARROT_EXEC_STDERR) {
+        close(err_fds[0]);
+        close(err_fds[1]);
+    }
+
+  error_pipe_err:
+    if (flags & PARROT_EXEC_STDOUT) {
+        close(out_fds[0]);
+        close(out_fds[1]);
+    }
+
+  error_pipe_out:
+    if (flags & PARROT_EXEC_STDIN) {
+        close(in_fds[0]);
+        close(in_fds[1]);
+    }
+
+  error_pipe_in:
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_PIO_ERROR,
+        "Error executing process: %s", strerror(errno));
 }
 #endif
 
@@ -3774,6 +3931,63 @@ inline op nqp_delete_f(out INT, in STR) :base_core {
 #else
     $1 = unlink(filename);
 #endif
+}
+
+inline op nqp_openpipe(out PMC, in STR, in STR, in PMC, in STR) {
+    STRING *dir            = $3;
+    PMC *env               = $4;
+    STRING * const old_cwd = Parrot_file_getcwd(interp);
+    INTVAL    pid;
+    PIOHANDLE os_handle;
+    const INTVAL typenum     = Parrot_hll_get_ctx_HLL_type(interp, enum_class_FileHandle);
+    PMC *handle              = Parrot_pmc_new(interp, typenum);
+    const IO_VTABLE * vtable = IO_GET_VTABLE(interp, handle);
+    IO_BUFFER * read_buffer  = IO_GET_READ_BUFFER(interp, handle);
+    PMC * command            = Parrot_pmc_new(interp, enum_class_ResizableStringArray);
+#ifdef WIN32
+    const STRING *comspec = Parrot_str_new(interp, "ComSpec", 0);
+    VTABLE_push_string(interp, command, Parrot_getenv(interp, comspec));
+    VTABLE_push_string(interp, command, Parrot_str_new_constant(interp, "/c"));
+#else
+    VTABLE_push_string(interp, command, Parrot_str_new_constant(interp, "sh"));
+    VTABLE_push_string(interp, command, Parrot_str_new_constant(interp, "-c"));
+#endif
+    VTABLE_push_string(interp, command, $2);
+
+    printf("%s:%d nqp_openpipe (buffer1=%p)\n", __FILE__, __LINE__, read_buffer);
+    Parrot_file_chdir(interp, dir);
+    os_handle = Run_OS_Command_Piped(interp, command, env, PARROT_EXEC_STDOUT, &pid);
+    Parrot_file_chdir(interp, old_cwd);
+
+    printf("%s:%d nqp_openpipe (%p)\n", __FILE__, __LINE__, pid);
+    /* Save the pid of the child, we'll wait for it when closing */
+    VTABLE_set_integer_keyed_int(interp, handle, 0, pid);
+
+    SETATTR_FileHandle_os_handle(interp, handle, os_handle);
+    SETATTR_FileHandle_flags(interp, handle, PIO_F_READ);
+    SETATTR_FileHandle_filename(interp, handle, Parrot_str_cstring(interp, $2));
+    SETATTR_FileHandle_mode(interp, handle, Parrot_str_new_constant(interp, "rp"));
+    SETATTR_FileHandle_file_pos(interp, handle, 0);
+
+    /* If this type uses buffers by default, set them up, and if we're
+       in an acceptable mode, set up buffers. */
+    if (!read_buffer) {
+        read_buffer               = (IO_BUFFER *)Parrot_gc_allocate_fixed_size_storage(interp,
+                                        sizeof(IO_BUFFER));
+        read_buffer->encoding     = NULL;
+        read_buffer->buffer_size  = 2048; /* PIO_BUFFER_MIN_SIZE */
+        read_buffer->buffer_ptr   = (char *)mem_sys_allocate(2048);
+        read_buffer->buffer_start = read_buffer->buffer_ptr;
+        read_buffer->buffer_end   = read_buffer->buffer_ptr;
+        PARROT_ASSERT(BUFFER_IS_EMPTY(read_buffer));
+        read_buffer->raw_reads    = 0;
+        read_buffer->flags       |= PIO_BF_MALLOC;
+        printf("%s:%d nqp_openpipe (buffer2=%p)\n", __FILE__, __LINE__, read_buffer);
+
+        VTABLE_set_pointer_keyed_int(interp, handle, IO_PTR_IDX_READ_BUFFER, read_buffer);
+    }
+
+    $1 = handle;
 }
 
 inline op nqp_spawn(out INT, in PMC, in STR, in PMC) {
