@@ -6,6 +6,7 @@ BEGIN_OPS_PREAMBLE
 #include "parrot/parrot.h"
 #include "parrot/extend.h"
 #include "parrot/dynext.h"
+#include "parrot/io.h"
 #include "pmc/pmc_filehandle.h"
 
 /* 6modely includes. */
@@ -667,7 +668,8 @@ static INTVAL Run_OS_Command(PARROT_INTERP, PMC *command, PMC *env_hash)
     /* make gcc happy */
     return 1;
 }
-static PIOHANDLE Run_OS_Command_Piped(PARROT_INTERP, PMC *command, PMC *env_hash, INTVAL flags, INTVAL *pid) {
+static PIOHANDLE Run_OS_Command_Piped(PARROT_INTERP, PMC *command, PMC *env_hash, INTVAL flags,
+    INTVAL *pid, INTVAL *status) {
     char **saved = environ;
     char   **cmd = pack_arg_array(interp, command);
     char   **env = pack_env_hash(interp, env_hash);
@@ -676,11 +678,7 @@ static PIOHANDLE Run_OS_Command_Piped(PARROT_INTERP, PMC *command, PMC *env_hash
     int in_fds[2];
     int out_fds[2];
     int err_fds[2];
-    int status;
 
-    //~ status  = execvp(prog, cmd);
-
-    //~ *pid = Parrot_proc_exec(interp, command, PARROT_EXEC_STDOUT, handles);
     if (flags & PARROT_EXEC_STDIN
     &&  pipe(in_fds) < 0)
         goto error_pipe_in;
@@ -699,7 +697,6 @@ static PIOHANDLE Run_OS_Command_Piped(PARROT_INTERP, PMC *command, PMC *env_hash
         goto error_fork;
 
     if (*pid > 0) {
-        printf("%s:%d pid > 0 (%p)\n", __FILE__, __LINE__, pid);
         if (flags & PARROT_EXEC_STDIN) {
             /* close fd for reading */
             close(in_fds[0]);
@@ -720,14 +717,6 @@ static PIOHANDLE Run_OS_Command_Piped(PARROT_INTERP, PMC *command, PMC *env_hash
     }
     else /* (pid == 0) */ {
         /* Child - exec process */
-        //~ char * argv[4];
-        /* C strings for the execv call defined without const to avoid
-         * const problems without copying them.
-         * Please don't change this without testing with a c++ compiler.
-         */
-        //~ static char auxarg0[] = "/bin/sh";
-        //~ static char auxarg1[] = "-c";
-        fprintf(stderr, "%s:%d child before anything\n", __FILE__, __LINE__);
 
         if (flags & PARROT_EXEC_STDIN) {
             /* redirect stdin to pipe */
@@ -738,35 +727,22 @@ static PIOHANDLE Run_OS_Command_Piped(PARROT_INTERP, PMC *command, PMC *env_hash
                 PARROT_FORCE_EXIT(EXIT_FAILURE);
         }
 
-        fprintf(stderr, "%s:%d child before anything 2\n", __FILE__, __LINE__);
         if (flags & PARROT_EXEC_STDOUT) {
-            fprintf(stderr, "%s:%d child before anything 2.1\n", __FILE__, __LINE__);
             /* redirect stdout to pipe */
             close(out_fds[0]);
-            fprintf(stderr, "%s:%d child before anything 2.2\n", __FILE__, __LINE__);
             close(STDOUT_FILENO);
-            fprintf(stderr, "%s:%d child before anything 2.3\n", __FILE__, __LINE__);
 
-            if (dup(out_fds[1]) != STDOUT_FILENO) {
-            fprintf(stderr, "%s:%d child before anything 2.4\n", __FILE__, __LINE__);
+            if (dup(out_fds[1]) != STDOUT_FILENO)
                 PARROT_FORCE_EXIT(EXIT_FAILURE);
-            fprintf(stderr, "%s:%d child before anything 2.5\n", __FILE__, __LINE__);
-            }
 
             if (!(flags & PARROT_EXEC_STDERR)) {
-            fprintf(stderr, "%s:%d child before anything 2.6\n", __FILE__, __LINE__);
-                //~ close(STDERR_FILENO);
-            fprintf(stderr, "%s:%d child before anything 2.7\n", __FILE__, __LINE__);
+                close(STDERR_FILENO);
 
-                if (dup(out_fds[1]) != STDERR_FILENO) {
-            fprintf(stderr, "%s:%d child before anything 2.8\n", __FILE__, __LINE__);
-                    //~ PARROT_FORCE_EXIT(EXIT_FAILURE);
-            fprintf(stderr, "%s:%d child before anything 2.9\n", __FILE__, __LINE__);
-                }
+                if (dup(out_fds[1]) != STDERR_FILENO)
+                    PARROT_FORCE_EXIT(EXIT_FAILURE);
             }
         }
 
-        fprintf(stderr, "%s:%d child before anything 3\n", __FILE__, __LINE__);
         if (flags & PARROT_EXEC_STDERR) {
             /* redirect stderr to pipe */
             close(err_fds[0]);
@@ -776,17 +752,9 @@ static PIOHANDLE Run_OS_Command_Piped(PARROT_INTERP, PMC *command, PMC *env_hash
                 PARROT_FORCE_EXIT(EXIT_FAILURE);
         }
 
-        fprintf(stderr, "%s:%d child before anything 4\n", __FILE__, __LINE__);
         environ = env;
 
-        fprintf(stderr, "%s:%d child before execvp, '%s'\n", __FILE__, __LINE__, prog);
-        //~ argv [0] = auxarg0;
-        //~ argv [1] = auxarg1;
-        //~ argv [2] = Parrot_str_to_cstring(interp, command);
-        //~ argv [3] = NULL;
-        //~ execv(argv [0], argv);
-        status = execvp(prog, cmd);
-        fprintf(stderr, "%s:%d child after execvp (status=%d)\n", __FILE__, __LINE__, status);
+        *status = execvp(prog, cmd);
 
         /* if we get here, something's horribly wrong, but free anyway... */
         free_packed(env);
@@ -3944,16 +3912,17 @@ inline op nqp_delete_f(out INT, in STR) :base_core {
 }
 
 inline op nqp_openpipe(out PMC, in STR, in STR, in PMC, in STR) {
-    STRING *dir            = $3;
-    PMC *env               = $4;
-    STRING * const old_cwd = Parrot_file_getcwd(interp);
-    INTVAL    pid;
+    STRING *dir             = $3;
+    PMC *env                = $4;
+    STRING * const old_cwd  = Parrot_file_getcwd(interp);
+    INTVAL status           = 0;
+    const INTVAL typenum    = Parrot_hll_get_ctx_HLL_type(interp, enum_class_FileHandle);
+    PMC *handle             = Parrot_pmc_new(interp, typenum);
+    IO_BUFFER * read_buffer = IO_GET_READ_BUFFER(interp, handle);
+    PMC * command           = Parrot_pmc_new(interp, enum_class_ResizableStringArray);
+    const VTABLE * vtable   = Parrot_io_get_vtable(interp, IO_VTABLE_PIPE, NULL);
     PIOHANDLE os_handle;
-    const INTVAL typenum     = Parrot_hll_get_ctx_HLL_type(interp, enum_class_FileHandle);
-    PMC *handle              = Parrot_pmc_new(interp, typenum);
-    const IO_VTABLE * vtable = IO_GET_VTABLE(interp, handle);
-    IO_BUFFER * read_buffer  = IO_GET_READ_BUFFER(interp, handle);
-    PMC * command            = Parrot_pmc_new(interp, enum_class_ResizableStringArray);
+    INTVAL pid;
 #ifdef WIN32
     const STRING *comspec = Parrot_str_new(interp, "ComSpec", 0);
     VTABLE_push_string(interp, command, Parrot_getenv(interp, comspec));
@@ -3964,23 +3933,18 @@ inline op nqp_openpipe(out PMC, in STR, in STR, in PMC, in STR) {
 #endif
     VTABLE_push_string(interp, command, $2);
 
-    printf("%s:%d nqp_openpipe (buffer1=%p)\n", __FILE__, __LINE__, read_buffer);
     Parrot_file_chdir(interp, dir);
-    os_handle = Run_OS_Command_Piped(interp, command, env, PARROT_EXEC_STDOUT, &pid);
+    os_handle = Run_OS_Command_Piped(interp, command, env, PARROT_EXEC_STDOUT, &pid, &status);
     Parrot_file_chdir(interp, old_cwd);
 
-    printf("%s:%d nqp_openpipe (%p)\n", __FILE__, __LINE__, pid);
-    /* Save the pid of the child, we'll wait for it when closing */
-    VTABLE_set_integer_keyed_int(interp, handle, 0, pid);
-
+    SETATTR_FileHandle_io_vtable(interp, handle, vtable);
+    SETATTR_FileHandle_process_id(interp, handle, pid);
+    SETATTR_FileHandle_exit_status(interp, handle, status);
     SETATTR_FileHandle_os_handle(interp, handle, os_handle);
-    SETATTR_FileHandle_flags(interp, handle, PIO_F_READ);
-    SETATTR_FileHandle_filename(interp, handle, Parrot_str_cstring(interp, $2));
+    SETATTR_FileHandle_flags(interp, handle, PIO_F_PIPE | PIO_F_READ);
     SETATTR_FileHandle_mode(interp, handle, Parrot_str_new_constant(interp, "rp"));
     SETATTR_FileHandle_file_pos(interp, handle, 0);
 
-    /* If this type uses buffers by default, set them up, and if we're
-       in an acceptable mode, set up buffers. */
     if (!read_buffer) {
         read_buffer               = (IO_BUFFER *)Parrot_gc_allocate_fixed_size_storage(interp,
                                         sizeof(IO_BUFFER));
@@ -3992,9 +3956,8 @@ inline op nqp_openpipe(out PMC, in STR, in STR, in PMC, in STR) {
         PARROT_ASSERT(BUFFER_IS_EMPTY(read_buffer));
         read_buffer->raw_reads    = 0;
         read_buffer->flags       |= PIO_BF_MALLOC;
-        printf("%s:%d nqp_openpipe (buffer2=%p)\n", __FILE__, __LINE__, read_buffer);
 
-        VTABLE_set_pointer_keyed_int(interp, handle, IO_PTR_IDX_READ_BUFFER, read_buffer);
+        SETATTR_FileHandle_read_buffer(interp, handle, read_buffer);
     }
 
     $1 = handle;
