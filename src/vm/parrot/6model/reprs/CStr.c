@@ -125,6 +125,9 @@ static PMC *type_object_for(PARROT_INTERP, PMC *HOW) {
 
 /* Composes the representation. */
 static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
+    UNUSED(interp);
+    UNUSED(st);
+    UNUSED(repr_info);
     /* TODO: move encoding stuff into here */
 }
 
@@ -138,29 +141,35 @@ static PMC *allocate(PARROT_INTERP, STable *st) {
     return wrap_object_func(interp, obj);
 }
 
-static void initialize(PARROT_INTERP, STable *st, void *data) { }
+static void initialize(PARROT_INTERP, STable *st, void *data) {
+    UNUSED(interp);
+    UNUSED(st);
+    UNUSED(data);
+}
 
 static void gc_free(PARROT_INTERP, PMC *obj) {
     CStrBody *body = (CStrBody *) OBJECT_BODY(obj);
+    UNUSED(interp);
 
     if(IS_CONCRETE(obj) && body->cstr)
         mem_sys_free(body->cstr);
 }
 
 /* Gets the storage specification for this representation. */
-static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
-    storage_spec spec;
-    spec.inlineable = STORAGE_SPEC_REFERENCE;
-    spec.boxed_primitive = STORAGE_SPEC_BP_STR;
-    spec.can_box = STORAGE_SPEC_CAN_BOX_STR;
-    spec.bits = sizeof(void *) * 8;;
-    spec.align = ALIGNOF1(void *);
-    return spec;
+static void get_storage_spec(PARROT_INTERP, STable *st, storage_spec *spec) {
+    UNUSED(interp);
+    UNUSED(st);
+    spec->inlineable      = STORAGE_SPEC_REFERENCE;
+    spec->boxed_primitive = STORAGE_SPEC_BP_STR;
+    spec->can_box         = STORAGE_SPEC_CAN_BOX_STR;
+    spec->bits            = sizeof(void *) * 8;
+    spec->align           = ALIGNOF1(void *);
 }
 
 REPROps *CStr_initialize(PARROT_INTERP,
         wrap_object_t wrap_object_func_ptr,
         create_stable_t create_stable_func_ptr) {
+    UNUSED(interp);
     /* Stash away functions passed wrapping functions. */
     wrap_object_func = wrap_object_func_ptr;
     create_stable_func = create_stable_func_ptr;

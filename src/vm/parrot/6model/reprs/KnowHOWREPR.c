@@ -34,6 +34,9 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
 
 /* Composes the representation. */
 static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
+    UNUSED(interp);
+    UNUSED(st);
+    UNUSED(repr_info);
     /* Nothing to do. */
 }
 
@@ -48,6 +51,7 @@ static PMC * allocate(PARROT_INTERP, STable *st) {
 /* Initialize a new instance. */
 static void initialize(PARROT_INTERP, STable *st, void *data) {
     KnowHOWREPRBody *body = (KnowHOWREPRBody *)data;
+    UNUSED(st);
     body->methods        = Parrot_pmc_new(interp, enum_class_Hash);
     body->attributes     = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
 }
@@ -56,6 +60,7 @@ static void initialize(PARROT_INTERP, STable *st, void *data) {
 static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
     KnowHOWREPRBody *src_body = (KnowHOWREPRBody *)src;
     KnowHOWREPRBody *dest_body = (KnowHOWREPRBody *)dest;
+    UNUSED(st);
     dest_body->name = src_body->name;
     dest_body->methods = VTABLE_clone(interp, src_body->methods);
     dest_body->attributes = VTABLE_clone(interp, src_body->attributes);
@@ -64,6 +69,7 @@ static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
 /* This Parrot-specific addition to the API is used to mark an object. */
 static void gc_mark(PARROT_INTERP, STable *st, void *data) {
     KnowHOWREPRBody *body = (KnowHOWREPRBody *)data;
+    UNUSED(st);
     if (!STRING_IS_NULL(body->name))
         Parrot_gc_mark_STRING_alive(interp, body->name);
     if (!PMC_IS_NULL(body->methods))
@@ -74,24 +80,26 @@ static void gc_mark(PARROT_INTERP, STable *st, void *data) {
 
 /* This Parrot-specific addition to the API is used to free an object. */
 static void gc_free(PARROT_INTERP, PMC *obj) {
+    UNUSED(interp);
     mem_sys_free(PMC_data(obj));
     PMC_data(obj) = NULL;
 }
 
 /* Gets the storage specification for this representation. */
-static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
-    storage_spec spec;
-    spec.inlineable = STORAGE_SPEC_REFERENCE;
-    spec.boxed_primitive = STORAGE_SPEC_BP_NONE;
-    spec.can_box = 0;
-    spec.bits = sizeof(void *);
-    spec.align = ALIGNOF1(void *);
-    return spec;
+static void get_storage_spec(PARROT_INTERP, STable *st, storage_spec *spec) {
+    UNUSED(interp);
+    UNUSED(st);
+    spec->inlineable      = STORAGE_SPEC_REFERENCE;
+    spec->boxed_primitive = STORAGE_SPEC_BP_NONE;
+    spec->can_box         = 0;
+    spec->bits            = sizeof(void *);
+    spec->align           = ALIGNOF1(void *);
 }
 
 /* Serializes the data. */
 static void serialize(PARROT_INTERP, STable *st, void *data, SerializationWriter *writer) {
     KnowHOWREPRBody *body = (KnowHOWREPRBody *)data;
+    UNUSED(st);
     writer->write_str(interp, writer, body->name);
     writer->write_ref(interp, writer, body->attributes);
     writer->write_ref(interp, writer, body->methods);
@@ -100,6 +108,7 @@ static void serialize(PARROT_INTERP, STable *st, void *data, SerializationWriter
 /* Deserializes the data. */
 static void deserialize(PARROT_INTERP, STable *st, void *data, SerializationReader *reader) {
     KnowHOWREPRBody *body = (KnowHOWREPRBody *)data;
+    UNUSED(st);
     body->name       = reader->read_str(interp, reader);
     body->attributes = reader->read_ref(interp, reader);
     body->methods    = reader->read_ref(interp, reader);
@@ -107,6 +116,7 @@ static void deserialize(PARROT_INTERP, STable *st, void *data, SerializationRead
 
 /* Initializes the KnowHOWREPR representation. */
 REPROps * KnowHOWREPR_initialize(PARROT_INTERP) {
+    UNUSED(interp);
     /* Allocate and populate the representation function table. */
     this_repr = mem_allocate_zeroed_typed(REPROps);
     this_repr->type_object_for = type_object_for;

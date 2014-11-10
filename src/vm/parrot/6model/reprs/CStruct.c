@@ -172,7 +172,8 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *repr_info, CStructRE
             INTVAL  align        = ALIGNOF1(void *);
             if (!PMC_IS_NULL(type)) {
                 /* See if it's a type that we know how to handle in a C struct. */
-                storage_spec spec = REPR(type)->get_storage_spec(interp, STABLE(type));
+                storage_spec spec;
+                REPR(type)->get_storage_spec(interp, STABLE(type), &spec);
                 if (spec.inlineable == STORAGE_SPEC_INLINED &&
                         (spec.boxed_primitive == STORAGE_SPEC_BP_INT ||
                          spec.boxed_primitive == STORAGE_SPEC_BP_NUM)) {
@@ -388,6 +389,7 @@ static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
     CStructREPRData * repr_data = (CStructREPRData *) st->REPR_data;
     CStructBody *src_body = (CStructBody *)src;
     CStructBody *dest_body = (CStructBody *)dest;
+    UNUSED(interp);
     /* XXX todo */
     /* XXX also need to shallow copy the obj array */
 }
@@ -602,11 +604,20 @@ static void bind_attribute_native(PARROT_INTERP, STable *st, void *data, PMC *cl
 
 /* Checks if an attribute has been initialized. */
 static INTVAL is_attribute_initialized(PARROT_INTERP, STable *st, void *data, PMC *ClassHandle, STRING *Name, INTVAL Hint) {
+    UNUSED(st);
+    UNUSED(data);
+    UNUSED(ClassHandle);
+    UNUSED(Name);
+    UNUSED(Hint);
     die_no_attrs(interp);
 }
 
 /* Gets the hint for the given attribute ID. */
 static INTVAL hint_for(PARROT_INTERP, STable *st, PMC *class_handle, STRING *name) {
+    UNUSED(interp);
+    UNUSED(st);
+    UNUSED(class_handle);
+    UNUSED(name);
     return NO_HINT;
 }
 
@@ -636,6 +647,8 @@ static void gc_mark_repr_data(PARROT_INTERP, STable *st) {
  * embedded inside another one. Never called on a top-level object. */
 static void gc_cleanup(PARROT_INTERP, STable *st, void *data) {
     CStructBody *body = (CStructBody *)data;
+    UNUSED(interp);
+    UNUSED(st);
     if (body->child_objs)
         mem_sys_free(body->child_objs);
     if (body->cstruct)
@@ -654,14 +667,14 @@ static void gc_free(PARROT_INTERP, PMC *obj) {
 }
 
 /* Gets the storage specification for this representation. */
-static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
-    storage_spec spec;
-    spec.inlineable = STORAGE_SPEC_REFERENCE;
-    spec.boxed_primitive = STORAGE_SPEC_BP_NONE;
-    spec.can_box = 0;
-    spec.bits = sizeof(void *) * 8;
-    spec.align = ALIGNOF1(void *);
-    return spec;
+static void get_storage_spec(PARROT_INTERP, STable *st, storage_spec *spec) {
+    UNUSED(interp);
+    UNUSED(st);
+    spec->inlineable      = STORAGE_SPEC_REFERENCE;
+    spec->boxed_primitive = STORAGE_SPEC_BP_NONE;
+    spec->can_box         = 0;
+    spec->bits            = sizeof(void *) * 8;
+    spec->align           = ALIGNOF1(void *);
 }
 
 /* Serializes the REPR data. */
@@ -756,6 +769,7 @@ static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader
 REPROps * CStruct_initialize(PARROT_INTERP,
         wrap_object_t wrap_object_func_ptr,
         create_stable_t create_stable_func_ptr) {
+    UNUSED(interp);
     /* Stash away functions passed wrapping functions. */
     wrap_object_func = wrap_object_func_ptr;
     create_stable_func = create_stable_func_ptr;

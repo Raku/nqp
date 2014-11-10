@@ -30,6 +30,9 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
 
 /* Composes the representation. */
 static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
+    UNUSED(interp);
+    UNUSED(st);
+    UNUSED(repr_info);
     /* Nothing to do yet, but should handle type in the future. */
 }
 
@@ -42,6 +45,9 @@ static PMC * allocate(PARROT_INTERP, STable *st) {
 
 /* Initialize a new instance. */
 static void initialize(PARROT_INTERP, STable *st, void *data) {
+    UNUSED(interp);
+    UNUSED(st);
+    UNUSED(data);
     /* Nothing to do here. */
 }
 
@@ -49,28 +55,32 @@ static void initialize(PARROT_INTERP, STable *st, void *data) {
 static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
     VMIterBody *src_body = (VMIterBody *)src;
     VMIterBody *dest_body = (VMIterBody *)dest;
+    UNUSED(interp);
+    UNUSED(st);
     /* Nothing to do yet. */
 }
 
 /* This Parrot-specific addition to the API is used to free an object. */
 static void gc_free(PARROT_INTERP, PMC *obj) {
+    UNUSED(interp);
     mem_sys_free(PMC_data(obj));
     PMC_data(obj) = NULL;
 }
 
 /* Gets the storage specification for this representation. */
-static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
-    storage_spec spec;
-    spec.inlineable = STORAGE_SPEC_REFERENCE;
-    spec.boxed_primitive = STORAGE_SPEC_BP_NONE;
-    spec.can_box = 0;
-    spec.bits = sizeof(void *) * 8;
-    spec.align = ALIGNOF1(void *);
-    return spec;
+static void get_storage_spec(PARROT_INTERP, STable *st, storage_spec *spec) {
+    UNUSED(interp);
+    UNUSED(st);
+    spec->inlineable      = STORAGE_SPEC_REFERENCE;
+    spec->boxed_primitive = STORAGE_SPEC_BP_NONE;
+    spec->can_box         = 0;
+    spec->bits            = sizeof(void *) * 8;
+    spec->align           = ALIGNOF1(void *);
 }
 
 /* Initializes the VMIter representation. */
 REPROps * VMIter_initialize(PARROT_INTERP) {
+    UNUSED(interp);
     /* Allocate and populate the representation function table. */
     this_repr = mem_allocate_zeroed_typed(REPROps);
     this_repr->type_object_for = type_object_for;

@@ -44,7 +44,7 @@ static void fill_repr_data(PARROT_INTERP, STable *st) {
             "CArray representation expects an 'of' method, specifying the element type");
 
     /* What we do next depends on what kind of type we have. */
-    ss = REPR(repr_data->elem_type)->get_storage_spec(interp, STABLE(repr_data->elem_type));
+    REPR(repr_data->elem_type)->get_storage_spec(interp, STABLE(repr_data->elem_type), &ss);
     type_id = REPR(repr_data->elem_type)->ID;
     if (ss.boxed_primitive == STORAGE_SPEC_BP_INT) {
         if (ss.bits == 8 || ss.bits == 16 || ss.bits == 32 || ss.bits == 64)
@@ -110,6 +110,9 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
 
 /* Composes the representation. */
 static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
+    UNUSED(interp);
+    UNUSED(st);
+    UNUSED(repr_info);
     /* TODO */
 }
 
@@ -129,6 +132,7 @@ static void initialize(PARROT_INTERP, STable *st, void *data) {
      * managing the memory in this array ourself. */
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
     CArrayBody *body = (CArrayBody *)data;
+    UNUSED(interp);
     body->storage = mem_sys_allocate(4 * repr_data->elem_size);
     body->managed = 1;
     /* Don't need child_objs for numerics or strings. */
@@ -145,6 +149,7 @@ static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
     CArrayBody     *src_body  = (CArrayBody *)src;
     CArrayBody     *dest_body = (CArrayBody *)dest;
+    UNUSED(interp);
     if (src_body->managed) {
         INTVAL alsize = src_body->allocated * repr_data->elem_size;
         dest_body->storage = mem_sys_allocate(alsize);
@@ -162,6 +167,8 @@ static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
  * embedded inside another one. Never called on a top-level object. */
 static void gc_cleanup(PARROT_INTERP, STable *st, void *data) {
     CArrayBody *body = (CArrayBody *)data;
+    UNUSED(interp);
+    UNUSED(st);
     if (body->managed) {
         mem_sys_free(body->storage);
         if (body->child_objs)
@@ -190,14 +197,14 @@ static void gc_mark(PARROT_INTERP, STable *st, void *data) {
 }
 
 /* Gets the storage specification for this representation. */
-static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
-    storage_spec spec;
-    spec.inlineable = STORAGE_SPEC_REFERENCE;
-    spec.boxed_primitive = STORAGE_SPEC_BP_NONE;
-    spec.can_box = 0;
-    spec.bits = sizeof(void *) * 8;
-    spec.align = ALIGNOF1(void *);
-    return spec;
+static void get_storage_spec(PARROT_INTERP, STable *st, storage_spec *spec) {
+    UNUSED(interp);
+    UNUSED(st);
+    spec->inlineable      = STORAGE_SPEC_REFERENCE;
+    spec->boxed_primitive = STORAGE_SPEC_BP_NONE;
+    spec->can_box         = 0;
+    spec->bits            = sizeof(void *) * 8;
+    spec->align           = ALIGNOF1(void *);
 }
 
 PARROT_DOES_NOT_RETURN
@@ -208,6 +215,7 @@ static void die_pos_nyi(PARROT_INTERP) {
 static void expand(PARROT_INTERP, CArrayREPRData *repr_data, CArrayBody *body, INTVAL min_size) {
     INTVAL is_complex = 0;
     INTVAL next_size = body->allocated? 2 * body->allocated: 4;
+    UNUSED(interp);
     if (min_size > next_size)
         next_size = min_size;
     if (body->managed)
@@ -447,22 +455,34 @@ static void bind_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index, 
 }
 static STable * get_elem_stable(PARROT_INTERP, STable *st) {
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
+    UNUSED(interp);
     return STABLE(repr_data->elem_type);
 }
 static void push_boxed(PARROT_INTERP, STable *st, void *data, PMC *obj) {
+    UNUSED(st);
+    UNUSED(data);
+    UNUSED(obj);
     die_pos_nyi(interp);
 }
 static PMC * pop_boxed(PARROT_INTERP, STable *st, void *data) {
+    UNUSED(st);
+    UNUSED(data);
     die_pos_nyi(interp);
 }
 static void unshift_boxed(PARROT_INTERP, STable *st, void *data, PMC *obj) {
+    UNUSED(st);
+    UNUSED(data);
+    UNUSED(obj);
     die_pos_nyi(interp);
 }
 static PMC * shift_boxed(PARROT_INTERP, STable *st, void *data) {
+    UNUSED(st);
+    UNUSED(data);
     die_pos_nyi(interp);
 }
 static INTVAL elems(PARROT_INTERP, STable *st, void *data) {
     CArrayBody     *body      = (CArrayBody *)data;
+    UNUSED(st);
     if (body->managed)
         return body->elems;
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -472,6 +492,7 @@ static INTVAL elems(PARROT_INTERP, STable *st, void *data) {
 /* Serializes the REPR data. */
 static void serialize_repr_data(PARROT_INTERP, STable *st, SerializationWriter *writer) {
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
+    UNUSED(interp);
     writer->write_int(interp, writer, repr_data->elem_size);
     writer->write_ref(interp, writer, repr_data->elem_type);
     writer->write_int(interp, writer, repr_data->elem_kind);
@@ -480,6 +501,7 @@ static void serialize_repr_data(PARROT_INTERP, STable *st, SerializationWriter *
 /* Deserializes the REPR data. */
 static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader *reader) {
     CArrayREPRData *repr_data = (CArrayREPRData *) mem_sys_allocate_zeroed(sizeof(CArrayREPRData));
+    UNUSED(interp);
     st->REPR_data = (CArrayREPRData *) repr_data;
     repr_data->elem_size = reader->read_int(interp, reader);
     repr_data->elem_type = reader->read_ref(interp, reader);
@@ -490,6 +512,7 @@ static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader
 REPROps * CArray_initialize(PARROT_INTERP,
         wrap_object_t wrap_object_func_ptr,
         create_stable_t create_stable_func_ptr) {
+    UNUSED(interp);
     /* Stash away functions passed wrapping functions. */
     wrap_object_func = wrap_object_func_ptr;
     create_stable_func = create_stable_func_ptr;

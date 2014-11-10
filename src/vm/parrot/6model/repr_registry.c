@@ -35,48 +35,86 @@ static void die_no_attrs(PARROT_INTERP, STRING *repr_name) {
             "%Ss representation does not support attribute storage", repr_name);
 }
 static PMC * default_get_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
+    UNUSED(data);
+    UNUSED(class_handle);
+    UNUSED(name);
+    UNUSED(hint);
     die_no_attrs(interp, st->REPR->name);
 }
 static void default_get_attribute_native(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, NativeValue *value) {
+    UNUSED(data);
+    UNUSED(class_handle);
+    UNUSED(name);
+    UNUSED(hint);
+    UNUSED(value);
     die_no_attrs(interp, st->REPR->name);
 }
 static void default_bind_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, PMC *value) {
+    UNUSED(data);
+    UNUSED(class_handle);
+    UNUSED(name);
+    UNUSED(hint);
+    UNUSED(value);
     die_no_attrs(interp, st->REPR->name);
 }
 static void default_bind_attribute_native(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, NativeValue *value) {
+    UNUSED(data);
+    UNUSED(class_handle);
+    UNUSED(name);
+    UNUSED(hint);
+    UNUSED(value);
     die_no_attrs(interp, st->REPR->name);
 }
 static INTVAL default_is_attribute_initialized(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
+    UNUSED(data);
+    UNUSED(class_handle);
+    UNUSED(name);
+    UNUSED(hint);
     die_no_attrs(interp, st->REPR->name);
 }
 static INTVAL default_hint_for(PARROT_INTERP, STable *st, PMC *class_handle, STRING *name) {
+    UNUSED(interp);
+    UNUSED(st);
+    UNUSED(class_handle);
+    UNUSED(name);
     return NO_HINT;
 }
 static void default_set_int(PARROT_INTERP, STable *st, void *data, INTVAL value) {
+    UNUSED(data);
+    UNUSED(value);
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "%Ss cannot box a native int", st->REPR->name);
 }
 static INTVAL default_get_int(PARROT_INTERP, STable *st, void *data) {
+    UNUSED(data);
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "%Ss cannot unbox to a native int", st->REPR->name);
 }
 static void default_set_num(PARROT_INTERP, STable *st, void *data, FLOATVAL value) {
+    UNUSED(data);
+    UNUSED(value);
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "%Ss cannot box a native num", st->REPR->name);
 }
 static FLOATVAL default_get_num(PARROT_INTERP, STable *st, void *data) {
+    UNUSED(data);
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "%Ss cannot unbox to a native num", st->REPR->name);
 }
 static void default_set_str(PARROT_INTERP, STable *st, void *data, STRING *value) {
+    UNUSED(data);
+    UNUSED(value);
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "%Ss cannot box a native string", st->REPR->name);
 }
 static STRING * default_get_str(PARROT_INTERP, STable *st, void *data) {
+    UNUSED(data);
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "%Ss cannot unbox to a native string", st->REPR->name);
 }
 static void * default_get_boxed_ref(PARROT_INTERP, STable *st, void *data, INTVAL repr_id) {
+    UNUSED(data);
+    UNUSED(repr_id);
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "%Ss cannot box other types", st->REPR->name);
 }
@@ -86,27 +124,44 @@ static void die_no_pos(PARROT_INTERP, STRING *repr_name) {
             "%Ss representation does not support positional storage", repr_name);
 }
 static void default_at_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index, NativeValue *value) {
+    UNUSED(data);
+    UNUSED(index);
+    UNUSED(value);
     die_no_pos(interp, st->REPR->name);
 }
 static PMC * default_at_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index) {
+    UNUSED(data);
+    UNUSED(index);
     die_no_pos(interp, st->REPR->name);
 }
 static void default_bind_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index, NativeValue *value) {
+    UNUSED(data);
+    UNUSED(index);
+    UNUSED(value);
     die_no_pos(interp, st->REPR->name);
 }
 static void default_bind_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index, PMC *obj) {
+    UNUSED(data);
+    UNUSED(index);
+    UNUSED(obj);
     die_no_pos(interp, st->REPR->name);
 }
 static void default_push_boxed(PARROT_INTERP, STable *st, void *data, PMC *obj) {
+    UNUSED(data);
+    UNUSED(obj);
     die_no_pos(interp, st->REPR->name);
 }
 static PMC * default_pop_boxed(PARROT_INTERP, STable *st, void *data) {
+    UNUSED(data);
     die_no_pos(interp, st->REPR->name);
 }
 static void default_unshift_boxed(PARROT_INTERP, STable *st, void *data, PMC *obj) {
+    UNUSED(data);
+    UNUSED(obj);
     die_no_pos(interp, st->REPR->name);
 }
 static PMC * default_shift_boxed(PARROT_INTERP, STable *st, void *data) {
+    UNUSED(data);
     die_no_pos(interp, st->REPR->name);
 }
 static STable * default_get_elem_stable(PARROT_INTERP, STable *st) {
@@ -118,24 +173,35 @@ static void die_no_ass(PARROT_INTERP, STRING *repr_name) {
             "%Ss representation does not support associative storage", repr_name);
 }
 static PMC * default_at_key_boxed(PARROT_INTERP, STable *st, void *data, STRING *key) {
+    UNUSED(data);
+    UNUSED(key);
     die_no_ass(interp, st->REPR->name);
 }
 static void default_bind_key_boxed(PARROT_INTERP, STable *st, void *data, STRING *key, PMC *value) {
+    UNUSED(data);
+    UNUSED(key);
+    UNUSED(value);
     die_no_ass(interp, st->REPR->name);
 }
 static INTVAL default_exists_key(PARROT_INTERP, STable *st, void *data, STRING *key) {
+    UNUSED(data);
+    UNUSED(key);
     die_no_ass(interp, st->REPR->name);
 }
 static void default_delete_key(PARROT_INTERP, STable *st, void *data, STRING *key) {
+    UNUSED(data);
+    UNUSED(key);
     die_no_ass(interp, st->REPR->name);
 }
 static INTVAL default_elems(PARROT_INTERP, STable *st, void *data) {
+    UNUSED(data);
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
         "%Ss representation does not support elems", st->REPR->name);
 }
 
 /* Set default attribute functions on a REPR that lacks them. */
 static void add_default_attr_funcs(PARROT_INTERP, REPROps *repr) {
+    UNUSED(interp);
     repr->attr_funcs = mem_allocate_typed(REPROps_Attribute);
     repr->attr_funcs->get_attribute_boxed = default_get_attribute_boxed;
     repr->attr_funcs->get_attribute_native = default_get_attribute_native;
@@ -147,6 +213,7 @@ static void add_default_attr_funcs(PARROT_INTERP, REPROps *repr) {
 
 /* Set default boxing functions on a REPR that lacks them. */
 static void add_default_box_funcs(PARROT_INTERP, REPROps *repr) {
+    UNUSED(interp);
     repr->box_funcs = mem_allocate_typed(REPROps_Boxing);
     repr->box_funcs->set_int = default_set_int;
     repr->box_funcs->get_int = default_get_int;
@@ -159,6 +226,7 @@ static void add_default_box_funcs(PARROT_INTERP, REPROps *repr) {
 
 /* Set default positional functions on a REPR that lacks them. */
 static void add_default_pos_funcs(PARROT_INTERP, REPROps *repr) {
+    UNUSED(interp);
     repr->pos_funcs = mem_allocate_typed(REPROps_Positional);
     repr->pos_funcs->at_pos_native = default_at_pos_native;
     repr->pos_funcs->at_pos_boxed = default_at_pos_boxed;
@@ -173,6 +241,7 @@ static void add_default_pos_funcs(PARROT_INTERP, REPROps *repr) {
 
 /* Set default associative functions on a REPR that lacks them. */
 static void add_default_ass_funcs(PARROT_INTERP, REPROps *repr) {
+    UNUSED(interp);
     repr->ass_funcs = mem_allocate_typed(REPROps_Associative);
     repr->ass_funcs->at_key_boxed = default_at_key_boxed;
     repr->ass_funcs->bind_key_boxed = default_bind_key_boxed;

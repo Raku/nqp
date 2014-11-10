@@ -793,6 +793,15 @@ Enter a loop, running the `$body` only if the condition returns a non-0 value.
 
 If a `$post` block is present, run that at the end, regardless of `$condition`.
 
+## control
+* `QAST::Op.new(:op<control>, :name<next>);`
+* `QAST::Op.new(:op<control>, :name<last>);`
+* `QAST::Op.new(:op<control>, :name<redo>);`
+
+Not callable directly from NQP, but used in languages via QAST to perform loop
+control. The specific kind of loop control desired is specified via the
+`:name` atttribute; either `next`, `last`, or `redo`.
+
 # Exceptional Opcodes
 
 ## backtrace

@@ -41,6 +41,7 @@ static void code_pair_gc_mark_data(PARROT_INTERP, STable *st) {
 }
 
 static void code_pair_gc_free_data(PARROT_INTERP, STable *st) {
+    UNUSED(interp);
     if (st->container_data) {
         mem_sys_free(st->container_data);
         st->container_data = NULL;
@@ -62,7 +63,8 @@ static void code_pair_deserialize(PARROT_INTERP, STable *st, SerializationReader
 static ContainerSpec *code_pair_spec = NULL;
 
 static void code_pair_set_container_spec(PARROT_INTERP, STable *st) {
-    CodePairContData *data = mem_sys_allocate(sizeof(CodePairContData));
+    CodePairContData *data = (CodePairContData *)mem_sys_allocate(sizeof(CodePairContData));
+    UNUSED(interp);
     data->fetch_code = PMCNULL;
     data->store_code = PMCNULL;
     st->container_data = data;
@@ -84,9 +86,9 @@ static void code_pair_configure_container_spec(PARROT_INTERP, STable *st, PMC *c
 }
 
 static ContainerConfigurer * initialize_code_pair_spec(PARROT_INTERP) {
-    ContainerConfigurer *cc = mem_sys_allocate(sizeof(ContainerConfigurer));
-    
-    code_pair_spec = mem_sys_allocate(sizeof(ContainerSpec));
+    ContainerConfigurer *cc = (ContainerConfigurer *)mem_sys_allocate(sizeof(ContainerConfigurer));
+
+    code_pair_spec = (ContainerSpec *)mem_sys_allocate(sizeof(ContainerSpec));
     code_pair_spec->name = Parrot_str_new_constant(interp, "code_pair");
     code_pair_spec->fetch = code_pair_fetch;
     code_pair_spec->store = code_pair_store;

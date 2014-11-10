@@ -40,6 +40,9 @@ static void new_type(PARROT_INTERP, PMC *nci) {
     STRING *name = VTABLE_exists_keyed_str(interp, capture, name_str) ?
         VTABLE_get_string_keyed_str(interp, capture, name_str) :
         empty_str;
+
+    UNUSED(nci);
+
     REPR(HOW)->initialize(interp, STABLE(HOW), OBJECT_BODY(HOW));
     ((KnowHOWREPRInstance *)PMC_data(HOW))->body.name = name;
     PARROT_GC_WRITE_BARRIER(interp, HOW);
@@ -64,6 +67,8 @@ static void add_method(PARROT_INTERP, PMC *nci) {
     STRING *name   = VTABLE_get_string_keyed_int(interp, capture, 2);
     PMC    *method = VTABLE_get_pmc_keyed_int(interp, capture, 3);
 
+    UNUSED(nci);
+
     /* Add it, and return added method as result. */
     VTABLE_set_pmc_keyed_str(interp, methods, name, method);
     unused = Parrot_pcc_build_call_from_c_args(interp, capture, "P", method);
@@ -79,6 +84,9 @@ static void add_attribute(PARROT_INTERP, PMC *nci) {
 
     /* Add meta-attribute to it. */
     PMC *meta_attr = VTABLE_get_pmc_keyed_int(interp, capture, 2);
+
+    UNUSED(nci);
+
     VTABLE_push_pmc(interp, attrs, meta_attr);
     unused = Parrot_pcc_build_call_from_c_args(interp, capture, "P", meta_attr);
 }
@@ -93,6 +101,8 @@ static void find_method(PARROT_INTERP, PMC *nci) {
     STRING *name    = VTABLE_get_string_keyed_int(interp, capture, 2);
     PMC    *method  = VTABLE_get_pmc_keyed_str(interp, methods, name);
 
+    UNUSED(nci);
+
     /* Put into capture to act as return value. */
     unused = Parrot_pcc_build_call_from_c_args(interp, capture, "P", method);
 }
@@ -103,7 +113,9 @@ static void compose(PARROT_INTERP, PMC *nci) {
     PMC *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
     PMC *obj     = VTABLE_get_pmc_keyed_int(interp, capture, 1);
-    
+
+    UNUSED(nci);
+
     /* Do REPR composition. */
     repr_info = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
     type_info = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
@@ -140,6 +152,9 @@ static void parents(PARROT_INTERP, PMC *nci) {
     PMC * unused;
     PMC *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC *empty   = Parrot_pmc_new(interp, enum_class_FixedPMCArray);
+
+    UNUSED(nci);
+
     unused = Parrot_pcc_build_call_from_c_args(interp, capture, "P", empty);
 }
 
@@ -149,6 +164,9 @@ static void attributes(PARROT_INTERP, PMC *nci) {
     PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC    *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
     PMC    *attrs   = ((KnowHOWREPRInstance *)PMC_data(self))->body.attributes;
+
+    UNUSED(nci);
+
     unused = Parrot_pcc_build_call_from_c_args(interp, capture, "P", attrs);
 }
 
@@ -158,6 +176,9 @@ static void methods(PARROT_INTERP, PMC *nci) {
     PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC    *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
     PMC    *meths   = ((KnowHOWREPRInstance *)PMC_data(self))->body.methods;
+
+    UNUSED(nci);
+
     unused = Parrot_pcc_build_call_from_c_args(interp, capture, "P", meths);
 }
 
@@ -167,6 +188,9 @@ static void mro(PARROT_INTERP, PMC *nci) {
     PMC *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC *obj     = VTABLE_get_pmc_keyed_int(interp, capture, 1);
     PMC *mro     = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
+
+    UNUSED(nci);
+
     VTABLE_push_pmc(interp, mro, STABLE(obj)->WHAT);
     unused = Parrot_pcc_build_call_from_c_args(interp, capture, "P", mro);
 }
@@ -177,6 +201,9 @@ static void name(PARROT_INTERP, PMC *nci) {
     PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC    *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
     STRING *name    = ((KnowHOWREPRInstance *)PMC_data(self))->body.name;
+
+    UNUSED(nci);
+
     unused = Parrot_pcc_build_call_from_c_args(interp, capture, "S", name);
 }
 
@@ -190,6 +217,7 @@ static PMC * wrap_c(PARROT_INTERP, void *func) {
 /* This is the find_method where things eventually bottom out. */
 static PMC * bottom_find_method(PARROT_INTERP, PMC *obj, STRING *name, INTVAL hint) {
     PMC *methods = ((KnowHOWREPRInstance *)PMC_data(obj))->body.methods;
+    UNUSED(hint);
     return VTABLE_get_pmc_keyed_str(interp, methods, name);
 }
 
@@ -289,6 +317,9 @@ static void attr_new(PARROT_INTERP, PMC *nci) {
     PMC    *type    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
     STRING *name    = VTABLE_get_string_keyed_str(interp, capture, name_str);
     PMC    *self    = REPR(type)->allocate(interp, STABLE(type));
+
+    UNUSED(nci);
+
     REPR(self)->box_funcs->set_str(interp, STABLE(self), OBJECT_BODY(self), name);
     unused = Parrot_pcc_build_call_from_c_args(interp, capture, "P", self);
 }
@@ -299,6 +330,9 @@ static void attr_name(PARROT_INTERP, PMC *nci) {
     PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC    *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
     STRING *name    = REPR(self)->box_funcs->get_str(interp, STABLE(self), OBJECT_BODY(self));
+
+    UNUSED(nci);
+
     unused = Parrot_pcc_build_call_from_c_args(interp, capture, "S", name);
 }
 

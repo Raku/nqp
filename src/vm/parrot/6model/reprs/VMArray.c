@@ -224,7 +224,8 @@ static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
     if(!PMC_IS_NULL(array)) {
         PMC *type = VTABLE_get_pmc_keyed_str(interp, array,
             Parrot_str_new_constant(interp, "type"));
-        storage_spec spec = REPR(type)->get_storage_spec(interp, STABLE(type));
+        storage_spec spec;
+        REPR(type)->get_storage_spec(interp, STABLE(type), &spec);
         repr_data->elem_type = type;
 
         if(spec.inlineable == STORAGE_SPEC_INLINED &&
@@ -247,6 +248,9 @@ static PMC * allocate(PARROT_INTERP, STable *st) {
 
 /* Initialize a new instance. */
 static void initialize(PARROT_INTERP, STable *st, void *data) {
+    UNUSED(interp);
+    UNUSED(st);
+    UNUSED(data);
     /* Nothing to do here. */
 }
 
@@ -254,6 +258,8 @@ static void initialize(PARROT_INTERP, STable *st, void *data) {
 static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
     VMArrayBody *src_body = (VMArrayBody *)src;
     VMArrayBody *dest_body = (VMArrayBody *)dest;
+    UNUSED(interp);
+    UNUSED(st);
     /* Nothing to do yet. */
 }
 
@@ -311,7 +317,8 @@ static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader
 
     repr_data->elem_type = type;
     if(!PMC_IS_NULL(type)) {
-        storage_spec spec = REPR(type)->get_storage_spec(interp, STABLE(type));
+        storage_spec spec;
+        REPR(type)->get_storage_spec(interp, STABLE(type), &spec);
         if(spec.inlineable == STORAGE_SPEC_INLINED &&
                 (spec.boxed_primitive == STORAGE_SPEC_BP_INT ||
                  spec.boxed_primitive == STORAGE_SPEC_BP_NUM)) {
@@ -326,14 +333,14 @@ static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader
 }
 
 /* Gets the storage specification for this representation. */
-static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
-    storage_spec spec;
-    spec.inlineable = STORAGE_SPEC_REFERENCE;
-    spec.boxed_primitive = STORAGE_SPEC_BP_NONE;
-    spec.can_box = 0;
-    spec.bits = sizeof(void *) * 8;
-    spec.align = ALIGNOF1(void *);
-    return spec;
+static void get_storage_spec(PARROT_INTERP, STable *st, storage_spec *spec) {
+    UNUSED(interp);
+    UNUSED(st);
+    spec->inlineable      = STORAGE_SPEC_REFERENCE;
+    spec->boxed_primitive = STORAGE_SPEC_BP_NONE;
+    spec->can_box         = 0;
+    spec->bits            = sizeof(void *) * 8;
+    spec->align           = ALIGNOF1(void *);
 }
 
 PARROT_DOES_NOT_RETURN static void die_no_native(PARROT_INTERP, const char *operation) {
@@ -368,6 +375,7 @@ static void gc_mark(PARROT_INTERP, STable *st, void *data) {
 static void gc_free(PARROT_INTERP, PMC *obj) {
     VMArrayInstance *instance = (VMArrayInstance *) PMC_data(obj);
     PMC_data(obj) = NULL;
+    UNUSED(interp);
     if(instance->body.slots)
         mem_sys_free(instance->body.slots);
     mem_sys_free(instance);
@@ -383,6 +391,7 @@ static void gc_mark_repr_data(PARROT_INTERP, STable *st) {
 
 /* This Parrot-specific addition to the API is used to free a repr instance. */
 static void gc_free_repr_data(PARROT_INTERP, STable *st) {
+    UNUSED(interp);
     if (st->REPR_data) {
         free(st->REPR_data);
         st->REPR_data = NULL;
@@ -569,16 +578,20 @@ static PMC *shift_boxed(PARROT_INTERP, STable *st, void *data) {
 
 static STable * get_elem_stable(PARROT_INTERP, STable *st) {
     VMArrayREPRData *repr_data = (VMArrayREPRData *)st->REPR_data;
+    UNUSED(interp);
     return STABLE(repr_data->elem_type);
 }
 
 static INTVAL elems(PARROT_INTERP, STable *st, void *data) {
     VMArrayBody *body = (VMArrayBody *) data;
+    UNUSED(interp);
+    UNUSED(st);
     return body->elems;
 }
 
 /* Initializes the VMArray representation. */
 REPROps * VMArray_initialize(PARROT_INTERP) {
+    UNUSED(interp);
     /* Allocate and populate the representation function table. */
     this_repr = mem_allocate_zeroed_typed(REPROps);
     this_repr->type_object_for = type_object_for;

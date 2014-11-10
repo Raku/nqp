@@ -33,6 +33,9 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
 
 /* Composes the representation. */
 static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
+    UNUSED(interp);
+    UNUSED(st);
+    UNUSED(repr_info);
     /* Nothing to do. */
 }
 
@@ -45,11 +48,15 @@ static PMC * allocate(PARROT_INTERP, STable *st) {
 
 /* Initialize a new instance. */
 static void initialize(PARROT_INTERP, STable *st, void *data) {
+    UNUSED(interp);
+    UNUSED(st);
     ((P6strBody *)data)->value = STRINGNULL;
 }
 
 /* Copies to the body of one object to another. */
 static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
+    UNUSED(interp);
+    UNUSED(st);
     /* Strings are immutable, so this is safe. */
     *((STRING **)dest) = *((STRING **)src);
 }
@@ -57,6 +64,9 @@ static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
 /* Used with boxing. Sets an integer value, for representations that can hold
  * one. */
 static void set_int(PARROT_INTERP, STable *st, void *data, INTVAL value) {
+    UNUSED(st);
+    UNUSED(data);
+    UNUSED(value);
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6str cannot box a native int");
 }
@@ -64,6 +74,8 @@ static void set_int(PARROT_INTERP, STable *st, void *data, INTVAL value) {
 /* Used with boxing. Gets an integer value, for representations that can
  * hold one. */
 static INTVAL get_int(PARROT_INTERP, STable *st, void *data) {
+    UNUSED(st);
+    UNUSED(data);
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6str cannot unbox to a native int");
 }
@@ -71,6 +83,9 @@ static INTVAL get_int(PARROT_INTERP, STable *st, void *data) {
 /* Used with boxing. Sets a floating point value, for representations that can
  * hold one. */
 static void set_num(PARROT_INTERP, STable *st, void *data, FLOATVAL value) {
+    UNUSED(st);
+    UNUSED(data);
+    UNUSED(value);
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6str cannot box a native num");
 }
@@ -78,6 +93,8 @@ static void set_num(PARROT_INTERP, STable *st, void *data, FLOATVAL value) {
 /* Used with boxing. Gets a floating point value, for representations that can
  * hold one. */
 static FLOATVAL get_num(PARROT_INTERP, STable *st, void *data) {
+    UNUSED(st);
+    UNUSED(data);
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6str cannot unbox to a native num");
 }
@@ -85,12 +102,16 @@ static FLOATVAL get_num(PARROT_INTERP, STable *st, void *data) {
 /* Used with boxing. Sets a string value, for representations that can hold
  * one. */
 static void set_str(PARROT_INTERP, STable *st, void *data, STRING *value) {
+    UNUSED(interp);
+    UNUSED(st);
     ((P6strBody *)data)->value = value;
 }
 
 /* Used with boxing. Gets a string value, for representations that can hold
  * one. */
 static STRING * get_str(PARROT_INTERP, STable *st, void *data) {
+    UNUSED(interp);
+    UNUSED(st);
     return ((P6strBody *)data)->value;
 }
 
@@ -98,6 +119,9 @@ static STRING * get_str(PARROT_INTERP, STable *st, void *data) {
  * gets the reference to such things, using the representation ID to distinguish
  * them. */
 static void * get_boxed_ref(PARROT_INTERP, STable *st, void *data, INTVAL repr_id) {
+    UNUSED(st);
+    UNUSED(data);
+    UNUSED(repr_id);
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6str cannot box other types");
 }
@@ -105,39 +129,44 @@ static void * get_boxed_ref(PARROT_INTERP, STable *st, void *data, INTVAL repr_i
 /* This Parrot-specific addition to the API is used to mark an object. */
 static void gc_mark(PARROT_INTERP, STable *st, void *data) {
     P6strBody *body = (P6strBody *)data;
+    UNUSED(st);
     if (!STRING_IS_NULL(body->value))
         Parrot_gc_mark_STRING_alive(interp, body->value);
 }
 
 /* This Parrot-specific addition to the API is used to free an object. */
 static void gc_free(PARROT_INTERP, PMC *obj) {
+    UNUSED(interp);
     mem_sys_free(PMC_data(obj));
     PMC_data(obj) = NULL;
 }
 
 /* Gets the storage specification for this representation. */
-static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
-    storage_spec spec;
-    spec.inlineable = STORAGE_SPEC_INLINED;
-    spec.bits = sizeof(STRING *) * 8;
-    spec.align = ALIGNOF1(void *);
-    spec.boxed_primitive = STORAGE_SPEC_BP_STR;
-    spec.can_box = STORAGE_SPEC_CAN_BOX_STR;
-    return spec;
+static void get_storage_spec(PARROT_INTERP, STable *st, storage_spec *spec) {
+    UNUSED(interp);
+    UNUSED(st);
+    spec->inlineable      = STORAGE_SPEC_INLINED;
+    spec->bits            = sizeof(STRING *) * 8;
+    spec->align           = ALIGNOF1(void *);
+    spec->boxed_primitive = STORAGE_SPEC_BP_STR;
+    spec->can_box         = STORAGE_SPEC_CAN_BOX_STR;
 }
 
 /* Serializes the data. */
 static void serialize(PARROT_INTERP, STable *st, void *data, SerializationWriter *writer) {
+    UNUSED(st);
     writer->write_str(interp, writer, ((P6strBody *)data)->value);
 }
 
 /* Deserializes the data. */
 static void deserialize(PARROT_INTERP, STable *st, void *data, SerializationReader *reader) {
+    UNUSED(st);
     ((P6strBody *)data)->value = reader->read_str(interp, reader);
 }
 
 /* Initializes the P6str representation. */
 REPROps * P6str_initialize(PARROT_INTERP) {
+    UNUSED(interp);
     /* Allocate and populate the representation function table. */
     this_repr = mem_allocate_zeroed_typed(REPROps);
     this_repr->type_object_for = type_object_for;

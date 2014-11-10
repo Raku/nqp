@@ -30,6 +30,9 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
 
 /* Composes the representation. */
 static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
+    UNUSED(interp);
+    UNUSED(st);
+    UNUSED(repr_info);
     /* Nothing to do. */
 }
 
@@ -42,6 +45,9 @@ static PMC * allocate(PARROT_INTERP, STable *st) {
 
 /* Initialize a new instance. */
 static void initialize(PARROT_INTERP, STable *st, void *data) {
+    UNUSED(interp);
+    UNUSED(st);
+    UNUSED(data);
     /* Nothing to do here. */
 }
 
@@ -50,20 +56,22 @@ static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
     NFABody *src_body = (NFABody *)src;
     NFABody *dest_body = (NFABody *)dest;
     INTVAL i;
+    UNUSED(interp);
+    UNUSED(st);
 
     dest_body->fates = src_body->fates;
     dest_body->num_states = src_body->num_states;
     
-    if (dest_body->num_state_edges > 0)
-        dest_body->num_state_edges = mem_sys_allocate(dest_body->num_states * sizeof(INTVAL));
+    if (dest_body->num_states > 0)
+        dest_body->num_state_edges = (INTVAL *)mem_sys_allocate(dest_body->num_states * sizeof(INTVAL));
     for (i = 0; i < dest_body->num_states; i++)
         dest_body->num_state_edges[i] = src_body->num_state_edges[i];
 
-    dest_body->states = mem_sys_allocate(dest_body->num_states * sizeof(NFAStateInfo *));
+    dest_body->states = (NFAStateInfo **)mem_sys_allocate(dest_body->num_states * sizeof(NFAStateInfo *));
     for (i = 0; i < dest_body->num_states; i++) {
         INTVAL size = dest_body->num_state_edges[i] * sizeof(NFAStateInfo);
         if (size > 0) {
-            dest_body->states[i] = mem_sys_allocate(size);
+            dest_body->states[i] = (NFAStateInfo *)mem_sys_allocate(size);
             memcpy(dest_body->states[i], src_body->states[i], size);
         }
     }
@@ -73,6 +81,7 @@ static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
 static void gc_mark(PARROT_INTERP, STable *st, void *data) {
     NFABody *body = (NFABody *)data;
     INTVAL i, j;
+    UNUSED(st);
     
     if (!PMC_IS_NULL(body->fates))
         Parrot_gc_mark_PMC_alive(interp, body->fates);
@@ -84,6 +93,8 @@ static void gc_mark(PARROT_INTERP, STable *st, void *data) {
                 case EDGE_CHARLIST:
                 case EDGE_CHARLIST_NEG:
                     Parrot_gc_mark_STRING_alive(interp, body->states[i][j].arg.s);
+                default:
+                    break;
             }
         }
     }
@@ -93,6 +104,7 @@ static void gc_mark(PARROT_INTERP, STable *st, void *data) {
 static void gc_free(PARROT_INTERP, PMC *obj) {
     NFAInstance *nfa = (NFAInstance *)PMC_data(obj);
     INTVAL i;
+    UNUSED(interp);
     for (i = 0; i < nfa->body.num_states; i++)
         if (nfa->body.states[i])
             mem_sys_free(nfa->body.states[i]);
@@ -102,20 +114,21 @@ static void gc_free(PARROT_INTERP, PMC *obj) {
 }
 
 /* Gets the storage specification for this representation. */
-static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
-    storage_spec spec;
-    spec.inlineable = STORAGE_SPEC_REFERENCE;
-    spec.boxed_primitive = STORAGE_SPEC_BP_NONE;
-    spec.can_box = 0;
-    spec.bits = sizeof(void *) * 8;
-    spec.align = ALIGNOF1(void *);
-    return spec;
+static void get_storage_spec(PARROT_INTERP, STable *st, storage_spec *spec) {
+    UNUSED(interp);
+    UNUSED(st);
+    spec->inlineable      = STORAGE_SPEC_REFERENCE;
+    spec->boxed_primitive = STORAGE_SPEC_BP_NONE;
+    spec->can_box         = 0;
+    spec->bits            = sizeof(void *) * 8;
+    spec->align           = ALIGNOF1(void *);
 }
 
 /* Serializes the data. */
 static void serialize(PARROT_INTERP, STable *st, void *data, SerializationWriter *writer) {
     NFABody *body = (NFABody *)data;
     INTVAL i, j;
+    UNUSED(st);
     
     /* Write fates. */
     writer->write_ref(interp, writer, body->fates);
@@ -152,6 +165,8 @@ static void serialize(PARROT_INTERP, STable *st, void *data, SerializationWriter
                 writer->write_int(interp, writer, body->states[i][j].arg.uclc.uc);
                 break;
             }
+            default:
+                break;
             }
         }
     }
@@ -161,7 +176,8 @@ static void serialize(PARROT_INTERP, STable *st, void *data, SerializationWriter
 static void deserialize(PARROT_INTERP, STable *st, void *data, SerializationReader *reader) {
     NFABody *body = (NFABody *)data;
     INTVAL i, j;
-    
+    UNUSED(st);
+
     /* Read fates. */
     body->fates = reader->read_ref(interp, reader);
     
@@ -170,16 +186,16 @@ static void deserialize(PARROT_INTERP, STable *st, void *data, SerializationRead
     
     if (body->num_states > 0) {
         /* Read state edge list counts. */
-        body->num_state_edges = mem_sys_allocate(body->num_states * sizeof(INTVAL));
+        body->num_state_edges = (INTVAL *)mem_sys_allocate(body->num_states * sizeof(INTVAL));
         for (i = 0; i < body->num_states; i++)
             body->num_state_edges[i] = reader->read_int(interp, reader);
             
         /* Read state graph. */
-        body->states = mem_sys_allocate(body->num_states * sizeof(NFAStateInfo *));
+        body->states = (NFAStateInfo **)mem_sys_allocate(body->num_states * sizeof(NFAStateInfo *));
         for (i = 0; i < body->num_states; i++) {
             INTVAL edges = body->num_state_edges[i];
             if (edges > 0)
-                body->states[i] = mem_sys_allocate(edges * sizeof(NFAStateInfo));
+                body->states[i] = (NFAStateInfo *)mem_sys_allocate(edges * sizeof(NFAStateInfo));
             for (j = 0; j < edges; j++) {
                 body->states[i][j].act = reader->read_int(interp, reader);
                 body->states[i][j].to = reader->read_int(interp, reader);
@@ -203,6 +219,8 @@ static void deserialize(PARROT_INTERP, STable *st, void *data, SerializationRead
                     body->states[i][j].arg.uclc.uc = reader->read_int(interp, reader);
                     break;
                 }
+                default:
+                    break;
                 }
             }
         }
@@ -211,6 +229,7 @@ static void deserialize(PARROT_INTERP, STable *st, void *data, SerializationRead
 
 /* Initializes the NFA representation. */
 REPROps * NFA_initialize(PARROT_INTERP) {
+    UNUSED(interp);
     /* Allocate and populate the representation function table. */
     this_repr = mem_allocate_zeroed_typed(REPROps);
     this_repr->type_object_for = type_object_for;
