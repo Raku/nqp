@@ -184,10 +184,11 @@ else {
     nqp::closefh($fh);
     nqp::symlink($test-file, $test-file ~ '-symlink');
     ok(nqp::stat($test-file ~ '-symlink', nqp::const::STAT_EXISTS), 'the symbolic link should exist');
-    if nqp::getcomp('nqp').backend.name eq 'parrot' {
-        ok(1, 'ok 45 # Skipped: stat + STAT_ISLNK is broken on parrot');
+    if nqp::getcomp('nqp').backend.name eq 'parrot' { # see parrot #1129
+        ok(nqp::lstat($test-file ~ '-symlink', nqp::const::STAT_ISLNK), 'the symbolic link should actually *be* a symbolic link');
     }
     else {
+        # moar and jvm use non-POSIX semantics
         ok(nqp::stat($test-file ~ '-symlink', nqp::const::STAT_ISLNK), 'the symbolic link should actually *be* a symbolic link');
     }
     nqp::unlink($test-file);

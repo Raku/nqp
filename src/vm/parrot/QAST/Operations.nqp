@@ -1653,6 +1653,7 @@ QAST::Operations.add_core_pirop_mapping('associative_bind', 'set', '1QsP', :inli
 QAST::Operations.add_core_pirop_mapping('print', 'print', '0s', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('say', 'say', '0s', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('stat', 'stat', 'Isi', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('lstat', 'lstat', 'Isi', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('open', 'open', 'Pss', :inlinable(1));
 
 QAST::Operations.add_core_op('filereadable', -> $qastcomp, $op {
