@@ -1647,7 +1647,7 @@ class NQP::Actions is HLL::Actions {
         make QAST::Op.new(
                  QAST::Var.new( :name('$/'), :scope('lexical') ),
                  :op('callmethod'),
-                 :name('!make'),
+                 :name('make'),
                  :node($/)
         );
     }

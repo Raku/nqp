@@ -733,7 +733,8 @@ class NQPMatch is NQPCapture {
         $!cursor := NQPMu;
     }
     
-    method !make($made) { $!made := $made }
+    method !make($made) { $!made := $made } # remove after rebootstrap
+    method make($made) { $!made := $made }
     method made()      { $!made }
     method ast()       { $!made }  # for historical reasons
     
