@@ -108,7 +108,7 @@ Return the modulus of $l by $r.
 * `mul_n(num $l, num $r)`
 * `mul_I(Int $l, Int $r, Mu:T $type)`
 
-Multiple two numbers, returning the result.
+Multiply two numbers, returning the result.
 `_I` variant returns an object of the given type.
 
 ## neg
@@ -142,7 +142,7 @@ Return the ceiling of a number.
 ## exp
 * `exp_n(num $exponent)`
 
-Return the value of `e` raised to $exponent;
+Return the value of `e` raised to $exponent.
 
 ## floor
 * `floor_n(num $n)`
@@ -274,7 +274,7 @@ Return non-zero if the two parameters are equal.
 * `isgt_s(str $l, str $r)`
 * `isgt_I(Int $l, Int $r)`
 
-Return non-zero if $l is greater than two $r.
+Return non-zero if $l is greater than $r.
 
 ## isge
 * `isge_i(int $l, int $r)`
@@ -282,7 +282,7 @@ Return non-zero if $l is greater than two $r.
 * `isge_s(str $l, str $r)`
 * `isge_I(Int $l, Int $r)`
 
-Return non-zero if $l is greater than or equal two $r.
+Return non-zero if $l is greater than or equal to $r.
 
 ## islt
 * `islt_i(int $l, int $r)`
@@ -290,7 +290,7 @@ Return non-zero if $l is greater than or equal two $r.
 * `islt_s(str $l, str $r)`
 * `islt_I(Int $l, Int $r)`
 
-Return non-zero if $l is less than two $r.
+Return non-zero if $l is less than $r.
 
 ## isle
 * `isle_i(int $l, int $r)`
@@ -298,7 +298,7 @@ Return non-zero if $l is less than two $r.
 * `isle_s(str $l, str $r)`
 * `isle_I(Int $l, Int $r)`
 
-Return non-zero if $l is less than or equal two $r.
+Return non-zero if $l is less than or equal to $r.
 
 ## isne
 * `isne_i(int $l, int $r)`
