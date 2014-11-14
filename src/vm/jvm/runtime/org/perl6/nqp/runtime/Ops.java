@@ -5066,9 +5066,10 @@ public final class Ops {
             }
         }
 
+	/* strip any literal lengths, leaving only fates */
         int[] result = new int[fates.size()];
         for (int i = 0; i < fates.size(); i++)
-                result[i] = fates.get(i);
+                result[i] = fates.get(i) & 0xffffff;
         return result;
     }
 
