@@ -100,7 +100,7 @@ nqp_ishash(PMC *pmc) {
 
 /* This public-domain C quick sort implementation by Darel Rex Finley. */
 static INTVAL
-quicksort(INTVAL *arr, INTVAL elements) {
+revquicksort(INTVAL *arr, INTVAL elements) {
     #define MAX_LEVELS 100
     INTVAL piv, beg[MAX_LEVELS], end[MAX_LEVELS], i = 0, L, R ;
     beg[0] = 0;
@@ -113,11 +113,11 @@ quicksort(INTVAL *arr, INTVAL elements) {
             if (i == MAX_LEVELS - 1)
                 return 0;
             while (L < R) {
-                while (arr[R] >= piv && L < R)
+                while (arr[R] <= piv && L < R)
                     R--;
                 if (L < R)
                     arr[L++] = arr[R];
-                while (arr[L] <= piv && L < R)
+                while (arr[L] >= piv && L < R)
                     L++;
                 if (L < R)
                     arr[R--]  =arr[L]; 
@@ -285,21 +285,22 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
         gen++;
         
         /* If we got multiple fates at this offset, sort them by the
-         * declaration order (represented by the fate number). In the
-         * future, we'll want to factor in longest literal prefix too. */
+         * literal length and declaration order (both encoded in fate number).
+         * The high 40 bits of the fate encodes literal length, while the low
+         * 24 bits encode fate. Both want to be descending order. */
         if (total_fates - prev_fates > 1) {
             INTVAL char_fates = total_fates - prev_fates;
-            for (i = total_fates - char_fates; i < total_fates; i++)
-                fates[i] = -fates[i];
-            quicksort(&fates[total_fates - char_fates], char_fates);
-            for (i = total_fates - char_fates; i < total_fates; i++)
-                fates[i] = -fates[i];
+            revquicksort(&fates[total_fates - char_fates], char_fates);
         }
     }
     mem_sys_free(done);
     mem_sys_free(curst);
     mem_sys_free(nextst);
-    
+
+    /* strip any literal lengths, leaving only fates */
+    for (i = 0; i < total_fates; i++)
+        fates[i] &= 0xffffff;
+
     *total_fates_out = total_fates;
     return fates;
 }

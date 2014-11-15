@@ -375,7 +375,7 @@ class QRegex::NFA {
                 my int $k := nqp::elems($substate);
                 while $j < $k {
                     $substate[$j+2] := $substate[$j+2] + $substart;
-                    $substate[$j+1] := $fate                    # XXX add in $lits +< 32 after rebootstrap
+                    $substate[$j+1] := $fate                    # XXX add in $lits +< 24 after rebootstrap
                         if $substate[$j] == $EDGE_FATE;
                     self.mergesubrule($i, $substate[$j+2], $fate, $cursor, $substate[$j+1], %seen)
                         if $substate[$j] == $EDGE_SUBRULE;
@@ -392,7 +392,7 @@ class QRegex::NFA {
             self.addedge($start, $substart+1, $EDGE_EPSILON, 0);
             $to > 0
               ?? self.addedge($substart, $to, $EDGE_EPSILON, 0)
-              !! self.addedge($substart, 0, $EDGE_FATE, $fate)  # XXX add in $lits +< 32 after rebootstrap
+              !! self.addedge($substart, 0, $EDGE_FATE, $fate)  # XXX add in $lits +< 24 after rebootstrap
         }
         else {
             self.addedge($start, 0, $EDGE_FATE, $fate);
