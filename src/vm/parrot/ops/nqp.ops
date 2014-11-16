@@ -565,6 +565,97 @@ static char *create_command_line(const char *const *args) {
     return cmd;
 }
 
+static PIOHANDLE Run_OS_Command_Piped(PARROT_INTERP, PMC *command, PMC *env_hash, INTVAL flags,
+    INTVAL *pid, INTVAL *status) {
+    HANDLE current = GetCurrentProcess();
+    HANDLE hnull = INVALID_HANDLE_VALUE;
+    HANDLE hread = INVALID_HANDLE_VALUE;
+    HANDLE hwrite = INVALID_HANDLE_VALUE;
+    HANDLE hchild = INVALID_HANDLE_VALUE;
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+    SECURITY_ATTRIBUTES sec;
+    const char *env         = pack_env_hash(interp, env_hash);
+    const char *const *argv = pack_arg_array(interp, command);
+    const char *cmd         = create_command_line(argv);
+    PIOHANDLE os_handle;
+
+    pi.hThread = INVALID_HANDLE_VALUE;
+    pi.hProcess = INVALID_HANDLE_VALUE;
+    sec.nLength = sizeof sec;
+    sec.lpSecurityDescriptor = NULL;
+    sec.bInheritHandle = TRUE;
+
+    si.cb = sizeof si;
+    GetStartupInfo(&si);
+    si.dwFlags = STARTF_USESTDHANDLES;
+    if (CreatePipe(&hread, &hwrite, NULL, 0) == 0)
+        goto fail;
+    if (DuplicateHandle(current, flags & PARROT_EXEC_STDOUT ? hwrite : hread,
+            current, &hchild,
+            0, TRUE,
+            DUPLICATE_CLOSE_SOURCE | DUPLICATE_SAME_ACCESS)
+            == 0)
+        goto fail;
+    if (hchild == INVALID_HANDLE_VALUE)
+        goto fail;
+
+    if (flags & PARROT_EXEC_STDOUT) {
+        /* Redirect input to NULL. This is to avoid
+         * interferences in case both the child and
+         * the parent tries to read from stdin.
+         * May be unnecessary or even interfere
+         * with valid usages, need more feedback. */
+        hnull = CreateFile("NUL", GENERIC_READ|GENERIC_WRITE,
+                0, &sec, OPEN_EXISTING,
+                FILE_ATTRIBUTE_NORMAL, NULL);
+        if (hnull == INVALID_HANDLE_VALUE)
+            goto fail;
+        si.hStdInput  = hnull;
+        si.hStdOutput = hchild;
+        si.hStdError  = hchild;
+    }
+    else {
+        si.hStdInput = hchild;
+    }
+
+    if (CreateProcess(NULL, cmd, NULL, NULL, TRUE, 0, env, NULL, &si, &pi) == 0)
+        goto fail;
+
+    if (flags & PARROT_EXEC_STDOUT) {
+        os_handle = hread;
+        CloseHandle(hwrite);
+    }
+    else {
+        os_handle = hwrite;
+        CloseHandle(hread);
+    }
+
+    Parrot_str_free_cstring(cmd);
+    CloseHandle(pi.hThread);
+
+    *pid = (INTVAL)pi.hProcess;
+
+    return os_handle;
+
+  fail:
+    if (cmd != NULL)
+        Parrot_str_free_cstring(cmd);
+    if (hnull != INVALID_HANDLE_VALUE)
+        CloseHandle(hnull);
+    if (hread != INVALID_HANDLE_VALUE)
+        CloseHandle(hread);
+    if (hwrite != INVALID_HANDLE_VALUE)
+        CloseHandle(hwrite);
+    if (hchild != INVALID_HANDLE_VALUE)
+        CloseHandle(hchild);
+    if (pi.hThread != INVALID_HANDLE_VALUE)
+        CloseHandle(pi.hThread);
+    if (pi.hProcess != INVALID_HANDLE_VALUE)
+        CloseHandle(pi.hProcess);
+    Parrot_ex_throw_from_c_noargs(interp, EXCEPTION_UNIMPLEMENTED,
+        "pipe open error");
+}
 static INTVAL Run_OS_Command(PARROT_INTERP, PMC *command, PMC *env_hash)
 {
     DWORD status = 0;
