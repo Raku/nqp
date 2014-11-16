@@ -319,38 +319,51 @@ class QRegex::NFA {
         $!states
     }
 
-    method mergesubrule($start, $to, $fate, $cursor, str $name, %caller_seen?) {
-        #nqp::say("adding $name");
+    method mergesubrule($start, $to, $fate, $cursor, $name, %caller_seen?, $numlits = 0, $endlits = 0) {
         my %seen := nqp::clone(%caller_seen);
         my @substates;
-        if nqp::can($cursor, $name) {
+	my $meth;
+	if nqp::istype($name,QAST::Var) {
+	    $meth := $name.ann('coderef');
+	    my $n := $meth.name;
+	    # nqp::say("adding $n start $start to $to fate $fate numlits $numlits endlits $endlits");
+	    if nqp::can($meth, 'NFA') {
+		@substates := $meth.NFA();
+		@substates := [] if nqp::isnull(@substates);
+	    }
+	}
+        elsif nqp::can($cursor, $name) {
+	    # nqp::say("adding $name start $start to $to fate $fate numlits $numlits endlits $endlits");
             if !nqp::existskey(%seen, $name) {
-                my $meth := $cursor.HOW.find_method($cursor, $name, :no_trace(1));
-                if nqp::can($meth, 'NFA') {
-                    @substates := $meth.NFA();
-                    @substates := [] if nqp::isnull(@substates);
-                }
-                if !@substates {
-                    # Maybe it's a protoregex, in which case states are an alternation
-                    # of all of the possible rules.
-                    my %protorx      := $cursor.HOW.cache($cursor, "!protoregex_table", { $cursor."!protoregex_table"() });
-                    my $nfa          := QRegex::NFA.new;
-                    my int $gotmatch := 0;
-                    if nqp::existskey(%protorx, $name) {
-                        for %protorx{$name} -> $rxname {
-                            $nfa.addedge(1, 0, $EDGE_SUBRULE, $rxname);
-                            $gotmatch := 1;
-                        }
-                    }
-                    @substates := $nfa.states() if $gotmatch;
-                }
-            }
-        }
-        %seen{$name} := 1;
-        self.mergesubstates($start, $to, $fate, @substates, $cursor, %seen);
+                $meth := $cursor.HOW.find_method($cursor, $name, :no_trace(1));
+		if nqp::can($meth, 'NFA') {
+		    @substates := $meth.NFA();
+		    @substates := [] if nqp::isnull(@substates);
+		}
+		if !@substates {
+		    # Maybe it's a protoregex, in which case states are an alternation
+		    # of all of the possible rules.
+		    my %protorx      := $cursor.HOW.cache($cursor, "!protoregex_table", { $cursor."!protoregex_table"() });
+		    my $nfa          := QRegex::NFA.new;
+		    my int $gotmatch := 0;
+		    if nqp::existskey(%protorx, $name) {
+			for %protorx{$name} -> $rxname {
+			    $nfa.addedge(1, 0, $EDGE_SUBRULE, $rxname);
+			    $gotmatch := 1;
+			}
+		    }
+		    @substates := $nfa.states() if $gotmatch;
+		}
+	    }
+	    %seen{$name} := 1;
+	}
+        self.mergesubstates($start, $to, $fate, @substates, $cursor, %seen, $numlits, $endlits);
     }
     
-    method mergesubstates($start, $to, $fate, @substates, $cursor, %seen?) {
+    method mergesubstates($start, $to, $fate, @substates, $cursor, %seen?, $numlits = 0, $endlits = 0) {
+        # nqp::say("substates start $start to $to fate $fate numlits $numlits endlits $endlits");
+	my int $nlits  := $numlits;
+	my int $elits  := $endlits;
         if @substates {
             # create an empty end state for the subrule's NFA
             my int $substart := self.addstate();
@@ -367,36 +380,45 @@ class QRegex::NFA {
             #    append any subrules
             my int $subend := nqp::elems($!states);
             my int $i      := $substart;
-            my int $lits   := 0;
-            my int $nlits  := 0;
             while $i < $subend {
                 my $substate := $!states[$i];
                 my int $j := 0;
                 my int $k := nqp::elems($substate);
                 while $j < $k {
                     $substate[$j+2] := $substate[$j+2] + $substart;
-                    $substate[$j+1] := $fate                    # XXX add in $lits +< 24 after rebootstrap
-                        if $substate[$j] == $EDGE_FATE;
-                    self.mergesubrule($i, $substate[$j+2], $fate, $cursor, $substate[$j+1], %seen)
-                        if $substate[$j] == $EDGE_SUBRULE;
+		    if $substate[$j] == $EDGE_FATE {
+			# say("refate:");
+			# my $v1 := $substate[$j+1] + 0;
+			# say($v1);
+			$substate[$j+1] := $fate + (-$nlits * 16777216);
+			# my $v2 := $substate[$j+1] + 0;
+			# say($v2);
+		    }
+		    if $substate[$j] == $EDGE_SUBRULE {
+			my $r := self.mergesubrule($i, $substate[$j+2], $fate, $cursor, $substate[$j+1], %seen, $nlits, $elits);
+			$nlits := $r[0];
+			$elits := $r[1];
+		    }
                     if $substate[$j] == $EDGE_CODEPOINT || $substate[$j] == $EDGE_CODEPOINT_I {
-                        $lits := $lits + 1 unless $nlits;
+                        $nlits := $nlits + 1 unless $elits;
                     }
                     else {
-                        $nlits := $nlits + 1;
+                        $elits := $elits + 1;
                     }
                     $j := $j + 3;
                 }
                 $i := $i + 1;
             }
             self.addedge($start, $substart+1, $EDGE_EPSILON, 0);
+	    # say("nlits $nlits elits $elits");
             $to > 0
               ?? self.addedge($substart, $to, $EDGE_EPSILON, 0)
-              !! self.addedge($substart, 0, $EDGE_FATE, $fate)  # XXX add in $lits +< 24 after rebootstrap
+              !! self.addedge($substart, 0, $EDGE_FATE, $fate + (-$nlits * 16777216))
         }
         else {
-            self.addedge($start, 0, $EDGE_FATE, $fate);
+            self.addedge($start, 0, $EDGE_FATE, $fate + (-$numlits * 16777216));
         }
+	[$nlits, $elits];
     }
     
     # NFA type.
