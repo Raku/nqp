@@ -2749,6 +2749,7 @@ QAST::Operations.add_core_pirop_mapping('sleep', 'sleep', '0n', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('gethostname', 'nqp_gethostname', 'S');
 QAST::Operations.add_core_pirop_mapping('spawn', 'nqp_spawn', 'IPsP');
 QAST::Operations.add_core_pirop_mapping('shell', 'nqp_shell', 'IssP');
+QAST::Operations.add_core_pirop_mapping('openpipe', 'nqp_openpipe', 'PssPs');
 QAST::Operations.add_core_pirop_mapping('getenvhash', 'nqp_getenvhash', 'P');
 
 QAST::Operations.add_core_op('getpid', -> $qastcomp, $op {
