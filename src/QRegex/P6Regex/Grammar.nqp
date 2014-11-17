@@ -408,9 +408,11 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     }
 
     token mod_internal {
+	':'
         [
-        | ':' $<n>=('!' | \d+)**1  <mod_ident> »
-        | ':' <mod_ident>
+        | <?before '!'> $<n>=('!')**1  <mod_ident> »
+        | <?before \d>  $<n>=(\d+)**1  <mod_ident> »
+        | <mod_ident>
             [
             '('
                 [
@@ -434,5 +436,5 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token mod_ident:sym<ratchet>    { $<sym>=[r] 'atchet'? » }
     token mod_ident:sym<sigspace>   { $<sym>=[s] 'igspace'? » }
     token mod_ident:sym<dba>        { <sym> » }
-    token mod_ident:sym<oops>       { {} (\w+) { $/.CURSOR.panic('Unrecognized regex modifier :' ~ $/[0].Str) } }
+    token mod_ident:sym<oops>       { {} (\D+) { $/.CURSOR.panic('Unrecognized regex modifier :' ~ $/[0].Str) } }
 }

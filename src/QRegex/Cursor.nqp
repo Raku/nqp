@@ -325,7 +325,7 @@ role NQPCursorRole is export {
         my $rxname;
         while @fates {
             $rxname := nqp::atpos(@rxfate, nqp::pop_i(@fates));
-            #nqp::say("invoking $rxname");
+            # nqp::printfh(nqp::getstderr(), "invoking $rxname\n");
             $cur := self."$rxname"();
             @fates := @EMPTY if nqp::getattr_i($cur, $?CLASS, '$!pos') >= 0;
         }
