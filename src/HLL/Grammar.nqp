@@ -529,12 +529,17 @@ An operator precedence parser.
                 $inassoc := nqp::atkey(%inO, 'assoc');
                 if $inassoc eq 'non' {
                     self.EXPR_nonassoc($infixcur,
-                        @opstack[nqp::elems(@opstack)-1]<OPER><sym>,
+                        @opstack[nqp::elems(@opstack)-1]<OPER>.Str,
                         $infix.Str());
                 }
-                if $inassoc eq 'left' {
+                elsif $inassoc eq 'left' {
                     # left associative, reduce immediately
                     self.EXPR_reduce(@termstack, @opstack);
+                }
+                elsif $inassoc eq 'list' {
+                    my $op1 := @opstack[nqp::elems(@opstack)-1]<OPER>.Str;
+                    my $op2 := $infix.Str();
+                    self.EXPR_nonassoc($infixcur, $op1, $op2) if $op1 ne $op2 && $op1 ne ':';
                 }
             }
             
