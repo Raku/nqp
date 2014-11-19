@@ -118,15 +118,15 @@ $(M_STAGE1)/$(HLL_MOAR): $(M_STAGE0) $(M_HLL_SOURCES) $(M_STAGE1)/$(QREGEX_MOAR)
 	    --setting=NQPCORE --no-regex-lib --target=mbc \
 	    --output=$(M_STAGE1)/$(HLL_MOAR) $(M_STAGE1)/$(HLL_COMBINED)
 
-$(M_STAGE1)/$(MASTOPS_MOAR): $(M_STAGE0) $(M_STAGE1)/$(CORE_SETTING_MOAR) @prefix@/lib/MAST/Ops.nqp
+$(M_STAGE1)/$(MASTOPS_MOAR): $(M_STAGE0) $(M_STAGE1)/$(CORE_SETTING_MOAR) @prefix@/share/nqp/lib/MAST/Ops.nqp
 	$(M_STAGE0_NQP) --module-path=$(M_STAGE1) --setting-path=$(M_STAGE1) \
 	    --setting=NQPCORE --no-regex-lib --target=mbc \
-	    --output=$(M_STAGE1)/$(MASTOPS_MOAR) @prefix@/lib/MAST/Ops.nqp
+	    --output=$(M_STAGE1)/$(MASTOPS_MOAR) @prefix@/share/nqp/lib/MAST/Ops.nqp
 
-$(M_STAGE1)/$(MASTNODES_MOAR): $(M_STAGE0) $(M_STAGE1)/$(MASTOPS_MOAR) @prefix@/lib/MAST/Nodes.nqp
+$(M_STAGE1)/$(MASTNODES_MOAR): $(M_STAGE0) $(M_STAGE1)/$(MASTOPS_MOAR) @prefix@/share/nqp/lib/MAST/Nodes.nqp
 	$(M_STAGE0_NQP) --module-path=$(M_STAGE1) --setting-path=$(M_STAGE1) \
 	    --setting=NQPCORE --no-regex-lib --target=mbc \
-	    --output=$(M_STAGE1)/$(MASTNODES_MOAR) @prefix@/lib/MAST/Nodes.nqp
+	    --output=$(M_STAGE1)/$(MASTNODES_MOAR) @prefix@/share/nqp/lib/MAST/Nodes.nqp
 
 $(M_STAGE1)/$(QAST_MOAR): $(M_STAGE0) $(M_QAST_SOURCES) $(M_STAGE1)/$(HLL_MOAR) $(M_STAGE1)/$(MASTNODES_MOAR)
 	$(MKPATH) $(M_STAGE1)/gen
@@ -189,15 +189,15 @@ $(M_STAGE2)/$(HLL_MOAR): $(M_STAGE1) $(M_HLL_SOURCES) $(M_STAGE2)/$(QREGEX_MOAR)
 	    --setting=NQPCORE --no-regex-lib --target=mbc \
 	    --output=$(M_STAGE2)/$(HLL_MOAR) $(M_STAGE2)/$(HLL_COMBINED)
 
-$(M_STAGE2)/$(MASTOPS_MOAR): $(M_STAGE1) $(M_STAGE2)/$(CORE_SETTING_MOAR) @prefix@/lib/MAST/Ops.nqp
+$(M_STAGE2)/$(MASTOPS_MOAR): $(M_STAGE1) $(M_STAGE2)/$(CORE_SETTING_MOAR) @prefix@/share/nqp/lib/MAST/Ops.nqp
 	$(M_STAGE1_NQP) --module-path=$(M_STAGE2) --setting-path=$(M_STAGE2) \
 	    --setting=NQPCORE --no-regex-lib --target=mbc \
-	    --output=$(M_STAGE2)/$(MASTOPS_MOAR) @prefix@/lib/MAST/Ops.nqp
+	    --output=$(M_STAGE2)/$(MASTOPS_MOAR) @prefix@/share/nqp/lib/MAST/Ops.nqp
 
-$(M_STAGE2)/$(MASTNODES_MOAR): $(M_STAGE1) $(M_STAGE2)/$(MASTOPS_MOAR) @prefix@/lib/MAST/Nodes.nqp
+$(M_STAGE2)/$(MASTNODES_MOAR): $(M_STAGE1) $(M_STAGE2)/$(MASTOPS_MOAR) @prefix@/share/nqp/lib/MAST/Nodes.nqp
 	$(M_STAGE1_NQP) --module-path=$(M_STAGE2) --setting-path=$(M_STAGE2) \
 	    --setting=NQPCORE --no-regex-lib --target=mbc \
-	    --output=$(M_STAGE2)/$(MASTNODES_MOAR) @prefix@/lib/MAST/Nodes.nqp
+	    --output=$(M_STAGE2)/$(MASTNODES_MOAR) @prefix@/share/nqp/lib/MAST/Nodes.nqp
 
 $(M_STAGE2)/$(QAST_MOAR): $(M_STAGE1) $(M_QAST_SOURCES) $(M_STAGE2)/$(HLL_MOAR) $(M_STAGE2)/$(MASTNODES_MOAR)
 	$(MKPATH) $(M_STAGE2)/gen
