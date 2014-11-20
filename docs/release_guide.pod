@@ -65,7 +65,8 @@ time.
 Create a release tarball (needed for the Rakudo Star release)
 by entering C<make release VERSION=YYYY.MM>, where YYYY.MM is
 the month for which the release is being made.  This will
-create a tarball file named C<nqp-YYYY.MM.tar.gz>.
+create a tarball file named C<nqp-YYYY.MM.tar.gz>.  Note: for some reason,
+this functionality only exists in the parrot Makefile.
 
 =item 5.
 
