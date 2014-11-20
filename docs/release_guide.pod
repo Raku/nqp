@@ -56,7 +56,9 @@ changed in step 1 above. Don't forget to build the JVM backend, as well.
   $ make
   $ make test
 
-Resolve any problems that may still exist.
+Resolve any problems that may still exist.  You may want to try building
+each backend seperately if a problem occurs building all backends at the same
+time.
 
 =item 4.
 
