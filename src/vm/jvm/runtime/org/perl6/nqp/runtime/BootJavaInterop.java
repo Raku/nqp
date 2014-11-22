@@ -47,7 +47,7 @@ public class BootJavaInterop {
     protected GlobalContext gc;
     
     /** If we need to load stuff from a JAR, the class loader for doing so. */
-    private HashMap<String, URLClassLoader> jarClassLoaders;
+    protected HashMap<String, URLClassLoader> jarClassLoaders;
 
     /** Create a new interop object for a context. */
     public BootJavaInterop(GlobalContext gc) {
@@ -97,7 +97,35 @@ public class BootJavaInterop {
         try {
             return getSTableForClass(Class.forName(name)).WHAT;
         } catch (ClassNotFoundException e) {
-            throw ExceptionHandling.dieInternal(gc.getCurrentThreadContext(), e);
+            try {
+                String cfname = name.replace(".", "/");
+                String cpStr = System.getProperty("java.class.path");
+                String[] cps = cpStr.split("[;:]");
+                String cfpath = null;
+                File cf = null;
+                for(int i = 0; i < cps.length; i++) {
+                    cf = new File(cps[i] + "/" + cfname + ".class");
+                    if(cf.exists()) {
+                        cfpath = cf.toString().replace(cfname + ".class",  "");
+                        break;
+                    }
+                    cf = null;
+                }
+                if(cfpath != null) {
+                    try {
+                        URL url = new URL("file://" + cfpath + "/");
+                        URLClassLoader cl = new URLClassLoader(new URL[] { url });
+                        jarClassLoaders.put(cfname, cl);
+                        return getSTableForClass(cl.loadClass(name)).WHAT;
+                    } catch (MalformedURLException mue) {
+                        throw mue;
+                    }
+                } else {
+                    throw e;
+                }
+            } catch (ClassNotFoundException|MalformedURLException ine) {
+                throw ExceptionHandling.dieInternal(gc.getCurrentThreadContext(), ine);
+            }
         }
     }
     public SixModelObject typeForNameFromJAR(String name, String JAR) {
