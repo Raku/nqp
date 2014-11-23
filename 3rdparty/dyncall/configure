@@ -69,7 +69,8 @@ case ${TARGET:=`uname`} in
     printf "RM=rm -f\n" >>$C
     ;;
   MacOSX|Darwin)
-    printf "AR=libtool\n" >>$C
+    # MacPorts libtool cannot do -static, use the system libtool
+    printf "AR=/usr/bin/libtool\n" >>$C
     printf "ARFLAGS=-static -o\n" >>$C
     if [ `uname -n` = 'iPhone' ]; then # building on iPhone itself, uname yields Darwin (gcc setup for current/correct arch)
       printf "CC=gcc\n" >>$C
