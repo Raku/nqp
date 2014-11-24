@@ -15,6 +15,9 @@ class QRegex::NFA {
     my $EDGE_GENERIC_VAR     := 11;
     my $EDGE_CHARRANGE       := 12;
     my $EDGE_CHARRANGE_NEG   := 13;
+    my $EDGE_CODEPOINT_LL    := 14;
+    my $EDGE_CODEPOINT_I_LL  := 15;
+
     my $ACTIONS;
     my $nfadeb;
     my $ind;
@@ -33,8 +36,11 @@ class QRegex::NFA {
     # The NFA we will actually run (with NFA REPR).
     has $!nfa_object;
 
+    # Are we finished looking for a longest literal prefix?
+    has $!LITEND;
+
     method new() {
-        my $new := self.bless(:states(nqp::list()), :edges(0));
+        my $new := self.bless(:states(nqp::list()), :edges(0), :LITEND(0));
         $new.addstate();
         $new.addstate();
         $new;
@@ -51,12 +57,14 @@ class QRegex::NFA {
     }
 
     method addedge($from, $to, $action, $value, :$newedge = 1) {
-        say("$indent addedge $from -> $to {$ACTIONS[$action] // 'unk'}") if $nfadeb;
+	my $v := nqp::istype($value, QAST::SVal) ?? $value.value !! $value;
+	my $vv := $action == $EDGE_SUBRULE ?? "" !! $v;
+        say("$indent addedge $from -> $to {$ACTIONS[nqp::bitand_i($action,0xff)] // 'unk'}") if $nfadeb;
         $!edges := 1 if $newedge;
         $to := self.addstate() if $to < 0;
         my $st := $!states[$from];
         nqp::push($st, $action);
-        nqp::push($st, nqp::istype($value, QAST::SVal) ?? $value.value !! $value);
+        nqp::push($st, $v);
         nqp::push($st, $to);
         $to;
     }
@@ -65,20 +73,31 @@ class QRegex::NFA {
 
     method addnode($node, :$*vars_as_generic) {
         say("addnode") if $nfadeb;
+	# nqp::die("HERE") if $nfadeb && $nfadeb++ == 2;
         self.regex_nfa($node, 1, 0);
+	$!LITEND := 0;
         self;
     }
 
     method regex_nfa($node, $from, $to) {
         my $method := ($node.rxtype // 'concat');
-        say("$indent regex_nfa $from -> $to $method") if $nfadeb;
-        $ind := $ind + 2;
-        $indent := nqp::x(' ',$ind);
+
+	if $nfadeb {
+	    say("$indent regex_nfa $from -> $to $method") if $nfadeb;
+	    $ind := $ind + 2;
+	    $indent := nqp::x(' ',$ind);
+	}
+	$!LITEND := 1 unless $method eq 'literal' || $method eq 'concat' || $method eq 'alt';
+
         my $result := self.HOW.can(self, $method) 
          ?? self."$method"($node, $from, $to)
          !! self.fate($node, $from, $to);
-        $ind := $ind - 2;
-        $indent := nqp::x(' ',$ind);
+
+	if $nfadeb {
+	    $ind := $ind - 2;
+	    $indent := nqp::x(' ',$ind);
+	}
+
         $result;
     }
 
@@ -89,11 +108,20 @@ class QRegex::NFA {
 
     method alt($node, $from, $to) {
         say($node.dump) if $nfadeb;
+	my $litendfront := $!LITEND;
+	my $litendback;
         for $node.list {
-            say("$indent alternative" ~ ($_.name // '')) if $nfadeb;
+            say("$indent alternative") if $nfadeb;
+	    $!LITEND := $litendfront;
+
             my int $st := self.regex_nfa($_, $from, $to);
+
+	    $litendback := 1 if $!LITEND;
+
             $to := $st if $to < 0 && $st > 0;
         }
+	# stop litlen at recombination unless all alts are pure literal
+	$!LITEND := $litendback;
         $to;
     }
 
@@ -114,7 +142,7 @@ class QRegex::NFA {
         %cclass_code<n>  := nqp::const::CCLASS_NEWLINE;
         %cclass_code<nl> := nqp::const::CCLASS_NEWLINE;
         $nfadeb := nqp::existskey(nqp::getenvhash(),'MVM_NFA_DEB');
-        $ACTIONS := ['FATE','EPSILON','CODEPOINT','CODEPOINT_NEG','CHARCLASS','CHARCLASS_NEG','CHARLIST','CHARLIST_NEG','SUBRULE','CODEPOINT_I','CODEPOINT_I_NEG','GENERIC_VAR','CHARRANGE','CHARRANGE_NEG'];
+        $ACTIONS := ['FATE','EPSILON','CODEPOINT','CODEPOINT_NEG','CHARCLASS','CHARCLASS_NEG','CHARLIST','CHARLIST_NEG','SUBRULE','CODEPOINT_I','CODEPOINT_I_NEG','GENERIC_VAR','CHARRANGE','CHARRANGE_NEG','CODEPOINT_LL','CODEPOINT_I_LL'];
         $ind := 0;
         $indent := '';
     }
@@ -132,7 +160,8 @@ class QRegex::NFA {
             $from := self.regex_nfa($node[$i], $from, -1);
             $i := $i + 1;
         }
-        $from > 0 && $n >= 0 ?? self.regex_nfa($node[$i], $from, $to) !! $to;
+        my $result := $from > 0 && $n >= 0 ?? self.regex_nfa($node[$i], $from, $to) !! $to;
+	$result;
     }
 
     method enumcharlist($node, $from, $to) {
@@ -172,7 +201,7 @@ class QRegex::NFA {
                         [nqp::ord($litconst_lc, $i), nqp::ord($litconst_uc, $i)]);
                     $i := $i + 1;
                 }
-                self.addedge($from, $to, $EDGE_CODEPOINT_I,
+                self.addedge($from, $to, $!LITEND ?? $EDGE_CODEPOINT_I !! $EDGE_CODEPOINT_I_LL,
                     [nqp::ord($litconst_lc, $i), nqp::ord($litconst_uc, $i)]);
             }
             else {
@@ -181,7 +210,7 @@ class QRegex::NFA {
                     $from := self.addedge($from, -1, $EDGE_CODEPOINT, nqp::ord($litconst, $i));
                     $i := $i + 1;
                 }
-                self.addedge($from, $to, $EDGE_CODEPOINT, nqp::ord($litconst, $i));
+                self.addedge($from, $to, $!LITEND ?? $EDGE_CODEPOINT !! $EDGE_CODEPOINT_LL, nqp::ord($litconst, $i));
             }
         }
         else {
@@ -347,14 +376,14 @@ class QRegex::NFA {
         $!states
     }
 
-    method mergesubrule($start, $to, $fate, $cursor, $name, %caller_seen?, $numlits = 0, $endlits = 0) {
+    method mergesubrule($start, $to, $fate, $cursor, $name, %caller_seen?) {
         my %seen := nqp::clone(%caller_seen);
         my @substates;
         my $meth;
         if nqp::istype($name,QAST::Var) {
             $meth := $name.ann('coderef');
             my $n := $meth.name;
-            nqp::say("mergesubrule $n start $start to $to fate $fate numlits $numlits endlits $endlits") if $nfadeb;
+            nqp::say("mergesubrule $n start $start to $to fate $fate") if $nfadeb;
             if !nqp::existskey(%seen, $n) {
                 if nqp::can($meth, 'NFA') {
                     @substates := $meth.NFA();
@@ -364,7 +393,7 @@ class QRegex::NFA {
             }
         }
         elsif nqp::can($cursor, $name) {
-            nqp::say("mergesubrule $name start $start to $to fate $fate numlits $numlits endlits $endlits") if $nfadeb;
+            nqp::say("mergesubrule $name start $start to $to fate $fate") if $nfadeb;
             if !nqp::existskey(%seen, $name) {
                 $meth := $cursor.HOW.find_method($cursor, $name, :no_trace(1));
                 if nqp::can($meth, 'NFA') {
@@ -388,13 +417,11 @@ class QRegex::NFA {
                 %seen{$name} := 1;
             }
         }
-        self.mergesubstates($start, $to, $fate, @substates, $cursor, %seen, $numlits, $endlits);
+        self.mergesubstates($start, $to, $fate, @substates, $cursor, %seen);
     }
     
-    method mergesubstates($start, $to, $fate, @substates, $cursor, %seen?, $numlits = 0, $endlits = 0) {
-        nqp::say("mergesubstates start $start to $to fate $fate numlits $numlits endlits $endlits") if $nfadeb;
-        my int $nlits  := $numlits;
-        my int $elits  := $endlits;
+    method mergesubstates($start, $to, $fate, @substates, $cursor, %seen?) {
+        nqp::say("mergesubstates start $start to $to fate $fate") if $nfadeb;
         if @substates {
             # create an empty end state for the subrule's NFA
             my int $substart := self.addstate();
@@ -418,45 +445,29 @@ class QRegex::NFA {
                 while $j < $k {
                     $substate[$j+2] := $substate[$j+2] + $substart;
                     if $substate[$j] == $EDGE_FATE {
-                        if $nfadeb {
-                            say("refate:");
-                            my $v1 := $substate[$j+1] + 0;
-                            say($v1);
-                        }
-                        $substate[$j+1] := $fate + (-$nlits * 16777216);
-                        if $nfadeb {
-                            my $v2 := $substate[$j+1] + 0;
-                            say($v2);
-                        }
-                        $nlits := $numlits; # reset for next alternative
-                        $elits := $endlits;
+                        $substate[$j+1] := $fate;
                     }
-                    if $substate[$j] == $EDGE_SUBRULE {
-                        my $r := self.mergesubrule($i, $substate[$j+2], $fate, $cursor, $substate[$j+1], %seen, $nlits, $elits);
-                        $nlits := $r[0];
-                        $elits := $r[1];
+                    elsif $substate[$j] == $EDGE_SUBRULE {
+                        self.mergesubrule($i, $substate[$j+2], $fate, $cursor, $substate[$j+1], %seen);
                     }
-                    if $substate[$j] == $EDGE_CODEPOINT || $substate[$j] == $EDGE_CODEPOINT_I {
-                        $nlits := $nlits + 1 unless $elits;
-                        say("codepoint {nqp::chr($substate[$j+1])} nlits $nlits elits $elits") if $nfadeb;
-                    }
-                    else {
-                        $elits := $elits + 1;
-                    }
+		    elsif $substate[$j] == $EDGE_CODEPOINT_LL || $substate[$j] == $EDGE_CODEPOINT_I_LL {
+			# Added to act because there's no more room arg for two case insensitive chars.
+			# The NFA engine notices a negative act and redispatches to correct spot.
+			# The act and fate are both encoded positively, and we ignore the negative bits.
+			$substate[$j] := $substate[$j] + 256 * $fate - 0x100000000;
+		    }
                     $j := $j + 3;
                 }
                 $i := $i + 1;
             }
             self.addedge($start, $substart+1, $EDGE_EPSILON, 0);
-            say("nlits $nlits elits $elits") if $nfadeb;
             $to > 0
               ?? self.addedge($substart, $to, $EDGE_EPSILON, 0)
-              !! self.addedge($substart, 0, $EDGE_FATE, $fate + (-$nlits * 16777216))
+              !! self.addedge($substart, 0, $EDGE_FATE, $fate)
         }
         else {
-            self.addedge($start, 0, $EDGE_FATE, $fate + (-$numlits * 16777216));
+            self.addedge($start, 0, $EDGE_FATE, $fate);
         }
-        [$nlits, $elits];
     }
     
     # NFA type.
