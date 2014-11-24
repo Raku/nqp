@@ -57,8 +57,8 @@ class QRegex::NFA {
     }
 
     method addedge($from, $to, $action, $value, :$newedge = 1) {
-	my $v := nqp::istype($value, QAST::SVal) ?? $value.value !! $value;
-	my $vv := $action == $EDGE_SUBRULE ?? "" !! $v;
+        my $v := nqp::istype($value, QAST::SVal) ?? $value.value !! $value;
+        my $vv := $action == $EDGE_SUBRULE ?? "" !! $v;
         say("$indent addedge $from -> $to {$ACTIONS[nqp::bitand_i($action,0xff)] // 'unk'}") if $nfadeb;
         $!edges := 1 if $newedge;
         $to := self.addstate() if $to < 0;
@@ -73,30 +73,30 @@ class QRegex::NFA {
 
     method addnode($node, :$*vars_as_generic) {
         say("addnode") if $nfadeb;
-	# nqp::die("HERE") if $nfadeb && $nfadeb++ == 2;
+        # nqp::die("HERE") if $nfadeb && $nfadeb++ == 2;
         self.regex_nfa($node, 1, 0);
-	$!LITEND := 0;
+        $!LITEND := 0;
         self;
     }
 
     method regex_nfa($node, $from, $to) {
         my $method := ($node.rxtype // 'concat');
 
-	if $nfadeb {
-	    say("$indent regex_nfa $from -> $to $method") if $nfadeb;
-	    $ind := $ind + 2;
-	    $indent := nqp::x(' ',$ind);
-	}
-	$!LITEND := 1 unless $method eq 'literal' || $method eq 'concat' || $method eq 'alt';
+        if $nfadeb {
+            say("$indent regex_nfa $from -> $to $method") if $nfadeb;
+            $ind := $ind + 2;
+            $indent := nqp::x(' ',$ind);
+        }
+        $!LITEND := 1 unless $method eq 'literal' || $method eq 'concat' || $method eq 'alt';
 
         my $result := self.HOW.can(self, $method) 
          ?? self."$method"($node, $from, $to)
          !! self.fate($node, $from, $to);
 
-	if $nfadeb {
-	    $ind := $ind - 2;
-	    $indent := nqp::x(' ',$ind);
-	}
+        if $nfadeb {
+            $ind := $ind - 2;
+            $indent := nqp::x(' ',$ind);
+        }
 
         $result;
     }
@@ -108,20 +108,20 @@ class QRegex::NFA {
 
     method alt($node, $from, $to) {
         say($node.dump) if $nfadeb;
-	my $litendfront := $!LITEND;
-	my $litendback;
+        my $litendfront := $!LITEND;
+        my $litendback;
         for $node.list {
             say("$indent alternative") if $nfadeb;
-	    $!LITEND := $litendfront;
+            $!LITEND := $litendfront;
 
             my int $st := self.regex_nfa($_, $from, $to);
 
-	    $litendback := 1 if $!LITEND;
+            $litendback := 1 if $!LITEND;
 
             $to := $st if $to < 0 && $st > 0;
         }
-	# stop litlen at recombination unless all alts are pure literal
-	$!LITEND := $litendback;
+        # stop litlen at recombination unless all alts are pure literal
+        $!LITEND := $litendback;
         $to;
     }
 
@@ -161,7 +161,7 @@ class QRegex::NFA {
             $i := $i + 1;
         }
         my $result := $from > 0 && $n >= 0 ?? self.regex_nfa($node[$i], $from, $to) !! $to;
-	$result;
+        $result;
     }
 
     method enumcharlist($node, $from, $to) {
@@ -450,12 +450,12 @@ class QRegex::NFA {
                     elsif $substate[$j] == $EDGE_SUBRULE {
                         self.mergesubrule($i, $substate[$j+2], $fate, $cursor, $substate[$j+1], %seen);
                     }
-		    elsif $substate[$j] == $EDGE_CODEPOINT_LL || $substate[$j] == $EDGE_CODEPOINT_I_LL {
-			# Added to act because there's no more room arg for two case insensitive chars.
-			# The NFA engine notices a negative act and redispatches to correct spot.
-			# The act and fate are both encoded positively, and we ignore the negative bits.
-			$substate[$j] := $substate[$j] + 256 * $fate - 0x100000000;
-		    }
+                    elsif $substate[$j] == $EDGE_CODEPOINT_LL || $substate[$j] == $EDGE_CODEPOINT_I_LL {
+                        # Added to act because there's no more room arg for two case insensitive chars.
+                        # The NFA engine notices a negative act and redispatches to correct spot.
+                        # The act and fate are both encoded positively, and we ignore the negative bits.
+                        $substate[$j] := $substate[$j] + 256 * $fate - 0x100000000;
+                    }
                     $j := $j + 3;
                 }
                 $i := $i + 1;
