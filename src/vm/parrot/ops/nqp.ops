@@ -142,7 +142,7 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
     INTVAL  numcur  = 0;
     INTVAL  numnext = 0;
     INTVAL *done, *fates, *curst, *nextst, *longlit;
-    INTVAL  i, fate_arr_len, num_states, total_fates, prev_fates;
+    INTVAL  i, fate_arr_len, num_states, total_fates, prev_fates, usedlonglit;
     INTVAL  orig_offset = offset;
 
     /* Allocate "done states", "current states" and "next states" arrays. */
@@ -157,8 +157,7 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
     total_fates = 0;
 
     longlit = (INTVAL *)mem_sys_allocate(sizeof(INTVAL) * fate_arr_len);
-    for (i = 0; i < fate_arr_len; i++)
-	longlit[i] = 0;
+    usedlonglit = 0;
 
     /* fprintf(stderr, "nqp_nfa_run offset %d fates %d\n", offset, fate_arr_len); */
     
@@ -202,7 +201,7 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
                     INTVAL arg = edge_info[i].arg.i;
                     INTVAL j;
                     INTVAL found_fate = 0;
-		    arg &= 0xffffff;
+		    arg &= 0xffffff;   /* remove after rebootstrap */
 
                     for (j = 0; j < total_fates; j++) {
                         if (found_fate)
@@ -213,7 +212,8 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
                                 prev_fates--;
                         }
                     }
-		    arg -= longlit[arg] << 24;
+		    if (arg < usedlonglit)
+			arg -= longlit[arg] << 24;
 		    /* fprintf(stderr, "fate edge %llx\n", (long long unsigned int)act); */
                     if (found_fate) {
                         fates[total_fates - 1] = arg;
@@ -244,10 +244,12 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
 		    }
                 }
                 else if (act == EDGE_CODEPOINT_LL) {
-                    INTVAL fate = (edge_info[i].act >> 8) & 0xfffff;
                     UINTVAL arg = edge_info[i].arg.i;
                     if (STRING_ord(interp, target, offset) == arg) {
+			INTVAL fate = (edge_info[i].act >> 8) & 0xfffff;
                         nextst[numnext++] = to;
+			while (usedlonglit <= fate)
+			    longlit[usedlonglit++] = 0;
 			longlit[fate] = offset - orig_offset;
 			/* fprintf(stderr, "codepoint_ll %c fate %d\n", arg, fate); */
 		    }
@@ -287,12 +289,14 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
                         nextst[numnext++] = to;
                 }
                 else if (act == EDGE_CODEPOINT_I_LL) {
-                    INTVAL fate = (edge_info[i].act >> 8) & 0xfffff;
                     UINTVAL  uc_arg = edge_info[i].arg.uclc.uc;
                     UINTVAL  lc_arg = edge_info[i].arg.uclc.lc;
                     UINTVAL  ord    = STRING_ord(interp, target, offset);
                     if (ord == lc_arg || ord == uc_arg) {
+			INTVAL fate = (edge_info[i].act >> 8) & 0xfffff;
                         nextst[numnext++] = to;
+			while (usedlonglit <= fate)
+			    longlit[usedlonglit++] = 0;
 			longlit[fate] = offset - orig_offset;
 		    }
                 }
@@ -338,10 +342,12 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
     mem_sys_free(nextst);
 
     /* strip any literal lengths, leaving only fates */
-    /* fprintf(stderr, "Final\n"); */
-    for (i = 0; i < total_fates; i++) {
-	/* fprintf(stderr, "\t%llx\n", (long long unsigned int)fates[i]); */
-        fates[i] &= 0xffffff;
+    if (usedlonglit) {
+	/* fprintf(stderr, "Final\n"); */
+	for (i = 0; i < total_fates; i++) {
+	    /* fprintf(stderr, "\t%llx\n", (long long unsigned int)fates[i]); */
+	    fates[i] &= 0xffffff;
+	}
     }
 
     *total_fates_out = total_fates;

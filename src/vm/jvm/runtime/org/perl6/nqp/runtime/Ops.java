@@ -4944,8 +4944,7 @@ public final class Ops {
 
 	/* XXX needs to be cached, but tc breaks stage0 when I try */
 	long[] longlit = new long[200];  // also needs proper sizing to # of alternatives
-	for (int i = 0; i < 200; i++)
-	    longlit[i] = 0;
+	int usedlonglit = 0;	// lazy initialization highwater
 
         nextst.add(1);
         while (!nextst.isEmpty() && pos <= eos) {
@@ -4984,7 +4983,7 @@ public final class Ops {
                          * if so bump the entry we already saw. */
                         int arg = edgeInfo[i].arg_i;
                         boolean foundFate = false;
-                        arg &= 0xffffff;
+                        arg &= 0xffffff;   // can go away after reboostrap?
                         for (int j = 0; j < fates.size(); j++) {
                             if (foundFate)
                                 fates.set(j - 1, fates.get(j));
@@ -4994,7 +4993,8 @@ public final class Ops {
                                     prevFates--;
                             }
                         }
-                        arg -= longlit[arg] << 24;
+			if (arg < usedlonglit)
+			    arg -= longlit[arg] << 24;
                         if (foundFate)
                             fates.set(fates.size() - 1, arg);
                         else
@@ -5015,10 +5015,12 @@ public final class Ops {
                             nextst.add(to);
                     }
                     else if (act == NFA.EDGE_CODEPOINT_LL) {
-                        int fate = (edgeInfo[i].act >> 8) & 0xfffff;  /* act is probably signed 32 bits */
                         char arg = (char)edgeInfo[i].arg_i;
                         if (target.charAt((int)pos) == arg) {
+			    int fate = (edgeInfo[i].act >> 8) & 0xfffff;  /* act is probably signed 32 bits */
                             nextst.add(to);
+			    while (usedlonglit <= fate)
+				longlit[usedlonglit++] = 0;
                             longlit[fate] = pos - orig_pos;
                         }
                     }
@@ -5053,12 +5055,14 @@ public final class Ops {
                             nextst.add(to);
                     }
                     else if (act == NFA.EDGE_CODEPOINT_I_LL) {
-                        int fate = (edgeInfo[i].act >> 8) & 0xfffff;  /* act is probably signed 32 bits */
                         char uc_arg = edgeInfo[i].arg_uc;
                         char lc_arg = edgeInfo[i].arg_lc;
                         char ord = target.charAt((int)pos);
                         if (ord == lc_arg || ord == uc_arg) {
+			    int fate = (edgeInfo[i].act >> 8) & 0xfffff;  /* act is probably signed 32 bits */
                             nextst.add(to);
+			    while (usedlonglit <= fate)
+				longlit[usedlonglit++] = 0;
                             longlit[fate] = pos - orig_pos;
                         }
                     }
@@ -5102,8 +5106,14 @@ public final class Ops {
 
         /* strip any literal lengths, leaving only fates */
         int[] result = new int[fates.size()];
-        for (int i = 0; i < fates.size(); i++)
-                result[i] = fates.get(i) & 0xffffff;
+	if (usedlonglit > 0) {
+	    for (int i = 0; i < fates.size(); i++)
+		result[i] = fates.get(i) & 0xffffff;
+	}
+	else {
+	    for (int i = 0; i < fates.size(); i++)
+		result[i] = fates.get(i);
+	}
         return result;
     }
 
