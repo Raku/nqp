@@ -23,6 +23,8 @@ public class NFA extends REPR {
     public static final int EDGE_GENERIC_VAR      = 11;
     public static final int EDGE_CHARRANGE        = 12;
     public static final int EDGE_CHARRANGE_NEG    = 13;
+    public static final int EDGE_CODEPOINT_LL     = 14;
+    public static final int EDGE_CODEPOINT_I_LL   = 15;
     
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
         STable st = new STable(this, HOW);
@@ -69,8 +71,9 @@ public class NFA extends REPR {
                     body.states[i][j] = new NFAStateInfo();
                     body.states[i][j].act = (int)reader.readLong();
                     body.states[i][j].to = (int)reader.readLong();
-                    switch (body.states[i][j].act) {
+                    switch (body.states[i][j].act & 0xff) {
                     case EDGE_FATE:
+                    case EDGE_CODEPOINT_LL:
                     case EDGE_CODEPOINT:
                     case EDGE_CODEPOINT_NEG:
                     case EDGE_CHARCLASS:
@@ -81,6 +84,7 @@ public class NFA extends REPR {
                     case EDGE_CHARLIST_NEG:
                         body.states[i][j].arg_s = reader.readStr();
                         break;
+                    case EDGE_CODEPOINT_I_LL:
                     case EDGE_CODEPOINT_I:
                     case EDGE_CODEPOINT_I_NEG:
                     case EDGE_CHARRANGE:
@@ -113,8 +117,9 @@ public class NFA extends REPR {
             for (int j = 0; j < body.states[i].length; j++) {
                 writer.writeInt(body.states[i][j].act);
                 writer.writeInt(body.states[i][j].to);
-                switch (body.states[i][j].act) {
+                switch (body.states[i][j].act & 0xff) {
                 case EDGE_FATE:
+                case EDGE_CODEPOINT_LL:
                 case EDGE_CODEPOINT:
                 case EDGE_CODEPOINT_NEG:
                 case EDGE_CHARCLASS:
@@ -125,6 +130,7 @@ public class NFA extends REPR {
                 case EDGE_CHARLIST_NEG:
                     writer.writeStr(body.states[i][j].arg_s);
                     break;
+                case EDGE_CODEPOINT_I_LL:
                 case EDGE_CODEPOINT_I:
                 case EDGE_CODEPOINT_I_NEG:
                 case EDGE_CHARRANGE:

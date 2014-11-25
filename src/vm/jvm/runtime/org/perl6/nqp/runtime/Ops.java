@@ -833,8 +833,8 @@ public final class Ops {
     }
 
     public static String chdir(String path, ThreadContext tc) {
-    	die_s("chdir is not available on JVM", tc);
-    	return null;
+        die_s("chdir is not available on JVM", tc);
+        return null;
     }
 
     public static long mkdir(String path, long mode, ThreadContext tc) {
@@ -919,7 +919,7 @@ public final class Ops {
 
     // To be removed once shell3 is adopted
     public static long shell1(String cmd, ThreadContext tc) {
-    	return shell3(cmd, cwd(), getenvhash(tc), tc);
+        return shell3(cmd, cwd(), getenvhash(tc), tc);
     }
 
     public static long shell3(String cmd, String dir, SixModelObject envObj, ThreadContext tc) {
@@ -3098,8 +3098,8 @@ public final class Ops {
     }
 
     public static String chr(long ord, ThreadContext tc) {
-	if (ord < 0)
-	    throw ExceptionHandling.dieInternal(tc, "chr codepoint cannot be negative");
+        if (ord < 0)
+            throw ExceptionHandling.dieInternal(tc, "chr codepoint cannot be negative");
 
         return (new StringBuffer()).append(Character.toChars((int)ord)).toString();
     }
@@ -4855,8 +4855,9 @@ public final class Ops {
                 nfa.states[i][curEdge].act = act;
                 nfa.states[i][curEdge].to = to;
 
-                switch (act) {
+                switch (act & 0xff) {
                 case NFA.EDGE_FATE:
+                case NFA.EDGE_CODEPOINT_LL:
                 case NFA.EDGE_CODEPOINT:
                 case NFA.EDGE_CODEPOINT_NEG:
                 case NFA.EDGE_CHARCLASS:
@@ -4867,6 +4868,7 @@ public final class Ops {
                 case NFA.EDGE_CHARLIST_NEG:
                     nfa.states[i][curEdge].arg_s = edgeInfo.at_pos_boxed(tc, j + 1).get_str(tc);
                     break;
+                case NFA.EDGE_CODEPOINT_I_LL:
                 case NFA.EDGE_CODEPOINT_I:
                 case NFA.EDGE_CODEPOINT_I_NEG:
                 case NFA.EDGE_CHARRANGE:
@@ -4930,6 +4932,7 @@ public final class Ops {
         /* Allocate a "done states" array. */
         int numStates = nfa.numStates;
         int[] done = new int[numStates + 1];
+        long orig_pos = pos;
 
         /* Clear out other re-used arrays. */
         ArrayList<Integer> fates = tc.fates;
@@ -4938,6 +4941,11 @@ public final class Ops {
         curst.clear();
         nextst.clear();
         fates.clear();
+
+	/* XXX needs to be cached, but tc breaks stage0 when I try */
+	long[] longlit = new long[200];  // also needs proper sizing to # of alternatives
+	for (int i = 0; i < 200; i++)
+	    longlit[i] = 0;
 
         nextst.add(1);
         while (!nextst.isEmpty() && pos <= eos) {
@@ -4968,11 +4976,15 @@ public final class Ops {
                     int act = edgeInfo[i].act;
                     int to  = edgeInfo[i].to;
 
-                    if (act == NFA.EDGE_FATE) {
+                    if (act < 0) {
+                        act &= 0xff;
+                    }
+                    else if (act == NFA.EDGE_FATE) {
                         /* Crossed a fate edge. Check if we already saw this, and
                          * if so bump the entry we already saw. */
                         int arg = edgeInfo[i].arg_i;
                         boolean foundFate = false;
+                        arg &= 0xffffff;
                         for (int j = 0; j < fates.size(); j++) {
                             if (foundFate)
                                 fates.set(j - 1, fates.get(j));
@@ -4982,21 +4994,33 @@ public final class Ops {
                                     prevFates--;
                             }
                         }
+                        arg -= longlit[arg] << 24;
                         if (foundFate)
                             fates.set(fates.size() - 1, arg);
                         else
                             fates.add(arg);
+                        continue;
                     }
                     else if (act == NFA.EDGE_EPSILON && to <= numStates && done[to] != gen) {
                         curst.add(to);
+                        continue;
                     }
-                    else if (pos >= eos) {
+
+                    if (pos >= eos) {
                         /* Can't match, so drop state. */
                     }
                     else if (act == NFA.EDGE_CODEPOINT) {
                         char arg = (char)edgeInfo[i].arg_i;
                         if (target.charAt((int)pos) == arg)
                             nextst.add(to);
+                    }
+                    else if (act == NFA.EDGE_CODEPOINT_LL) {
+                        int fate = (edgeInfo[i].act >> 8) & 0xfffff;  /* act is probably signed 32 bits */
+                        char arg = (char)edgeInfo[i].arg_i;
+                        if (target.charAt((int)pos) == arg) {
+                            nextst.add(to);
+                            longlit[fate] = pos - orig_pos;
+                        }
                     }
                     else if (act == NFA.EDGE_CODEPOINT_NEG) {
                         char arg = (char)edgeInfo[i].arg_i;
@@ -5027,6 +5051,16 @@ public final class Ops {
                         char ord = target.charAt((int)pos);
                         if (ord == lc_arg || ord == uc_arg)
                             nextst.add(to);
+                    }
+                    else if (act == NFA.EDGE_CODEPOINT_I_LL) {
+                        int fate = (edgeInfo[i].act >> 8) & 0xfffff;  /* act is probably signed 32 bits */
+                        char uc_arg = edgeInfo[i].arg_uc;
+                        char lc_arg = edgeInfo[i].arg_lc;
+                        char ord = target.charAt((int)pos);
+                        if (ord == lc_arg || ord == uc_arg) {
+                            nextst.add(to);
+                            longlit[fate] = pos - orig_pos;
+                        }
                     }
                     else if (act == NFA.EDGE_CODEPOINT_I_NEG) {
                         char uc_arg = edgeInfo[i].arg_uc;
@@ -5066,7 +5100,7 @@ public final class Ops {
             }
         }
 
-	/* strip any literal lengths, leaving only fates */
+        /* strip any literal lengths, leaving only fates */
         int[] result = new int[fates.size()];
         for (int i = 0; i < fates.size(); i++)
                 result[i] = fates.get(i) & 0xffffff;
@@ -5332,7 +5366,7 @@ public final class Ops {
         BigInteger bi = getBI(tc, a);
         if (bi.compareTo(BigInteger.valueOf(1)) <= 0) {
             return 0;
-    	}
+        }
         return bi.isProbablePrime((int)certainty) ? 1 : 0;
     }
 
@@ -5695,14 +5729,14 @@ public final class Ops {
         SixModelObject res = hashType.st.REPR.allocate(tc, hashType.st);
 
         try {
-			InputStream is = Ops.class.getResourceAsStream("/jvmconfig.properties");
-			Properties config = new Properties();
-			config.load(is);
-			for (String name : config.stringPropertyNames())
-			    res.bind_key_boxed(tc, name, box_s(config.getProperty(name), strType, tc));
-		} catch (Throwable e) {
-			die_s("Failed to load config.properties", tc);
-		}
+                        InputStream is = Ops.class.getResourceAsStream("/jvmconfig.properties");
+                        Properties config = new Properties();
+                        config.load(is);
+                        for (String name : config.stringPropertyNames())
+                            res.bind_key_boxed(tc, name, box_s(config.getProperty(name), strType, tc));
+                } catch (Throwable e) {
+                        die_s("Failed to load config.properties", tc);
+                }
 
         return res;
     }
