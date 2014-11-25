@@ -205,7 +205,10 @@ class QRegex::NFA {
 #?if moar
 		$EDGE_CODEPOINT_I_LL,
 #?endif
-#?if !moar
+#?if parrot
+		$EDGE_CODEPOINT_I_LL,
+#?endif
+#?if jvm
 		$EDGE_CODEPOINT_I,
 #?endif
 		[nqp::ord($litconst_lc, $i), nqp::ord($litconst_uc, $i)]);
@@ -220,7 +223,10 @@ class QRegex::NFA {
 #?if moar
 		$EDGE_CODEPOINT_LL,
 #?endif
-#?if !moar
+#?if parrot
+		$EDGE_CODEPOINT_LL,
+#?endif
+#?if jvm
 		$EDGE_CODEPOINT,
 #?endif
 		nqp::ord($litconst, $i));
