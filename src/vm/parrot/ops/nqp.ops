@@ -141,9 +141,10 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
     INTVAL  gen     = 1;
     INTVAL  numcur  = 0;
     INTVAL  numnext = 0;
-    INTVAL *done, *fates, *curst, *nextst;
+    INTVAL *done, *fates, *curst, *nextst, *longlit;
     INTVAL  i, fate_arr_len, num_states, total_fates, prev_fates;
-    
+    INTVAL  orig_offset = offset;
+
     /* Allocate "done states", "current states" and "next states" arrays. */
     num_states = nfa->num_states;
     done   = (INTVAL *)mem_sys_allocate_zeroed((num_states + 1) * sizeof(INTVAL));
@@ -154,6 +155,12 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
     fate_arr_len = 1 + VTABLE_elements(interp, nfa->fates);
     fates = (INTVAL *)mem_sys_allocate(sizeof(INTVAL) * fate_arr_len);
     total_fates = 0;
+
+    longlit = (INTVAL *)mem_sys_allocate(sizeof(INTVAL) * fate_arr_len);
+    for (i = 0; i < fate_arr_len; i++)
+	longlit[i] = 0;
+
+    /* fprintf(stderr, "nqp_nfa_run offset %d fates %d\n", offset, fate_arr_len); */
     
     nextst[numnext++] = 1;
     while (numnext && offset <= eos) {
@@ -184,12 +191,19 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
                 INTVAL act = edge_info[i].act;
                 INTVAL to  = edge_info[i].to;
                 
+		if (act < 0 || act > 0xff) {
+		    /* fprintf(stderr, "neg act %d\n", act); */
+		    act &= 0xff;
+		}
+
                 if (act == EDGE_FATE) {
                     /* Crossed a fate edge. Check if we already saw this, and
                      * if so bump the entry we already saw. */
                     INTVAL arg = edge_info[i].arg.i;
                     INTVAL j;
                     INTVAL found_fate = 0;
+		    arg &= 0xffffff;
+
                     for (j = 0; j < total_fates; j++) {
                         if (found_fate)
                             fates[j - 1] = fates[j];
@@ -199,6 +213,8 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
                                 prev_fates--;
                         }
                     }
+		    arg -= longlit[arg] << 24;
+		    /* fprintf(stderr, "fate edge %llx\n", (long long unsigned int)act); */
                     if (found_fate) {
                         fates[total_fates - 1] = arg;
                     }
@@ -210,17 +226,31 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
                         }
                         fates[total_fates++] = arg;
                     }
+		    continue;
                 }
                 else if (act == EDGE_EPSILON && to <= num_states && done[to] != gen) {
                     curst[numcur++] = to;
+		    continue;
                 }
-                else if (offset >= eos) {
+
+                if (offset >= eos) {
                     /* Can't match, so drop state. */
                 }
                 else if (act == EDGE_CODEPOINT) {
                     UINTVAL arg = edge_info[i].arg.i;
-                    if (STRING_ord(interp, target, offset) == arg)
+                    if (STRING_ord(interp, target, offset) == arg) {
                         nextst[numnext++] = to;
+			/* fprintf(stderr, "codepoint %c\n", arg); */
+		    }
+                }
+                else if (act == EDGE_CODEPOINT_LL) {
+                    INTVAL fate = (edge_info[i].act >> 8) & 0xffffff;
+                    UINTVAL arg = edge_info[i].arg.i;
+                    if (STRING_ord(interp, target, offset) == arg) {
+                        nextst[numnext++] = to;
+			longlit[fate] = offset - orig_offset;
+			/* fprintf(stderr, "codepoint_ll %c fate %d\n", arg, fate); */
+		    }
                 }
                 else if (act == EDGE_CODEPOINT_NEG) {
                     UINTVAL arg = edge_info[i].arg.i;
@@ -255,6 +285,16 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
                     UINTVAL  ord    = STRING_ord(interp, target, offset);
                     if (ord == lc_arg || ord == uc_arg)
                         nextst[numnext++] = to;
+                }
+                else if (act == EDGE_CODEPOINT_I_LL) {
+                    INTVAL fate = (edge_info[i].act >> 8) & 0xffffff;
+                    UINTVAL  uc_arg = edge_info[i].arg.uclc.uc;
+                    UINTVAL  lc_arg = edge_info[i].arg.uclc.lc;
+                    UINTVAL  ord    = STRING_ord(interp, target, offset);
+                    if (ord == lc_arg || ord == uc_arg) {
+                        nextst[numnext++] = to;
+			longlit[fate] = offset - orig_offset;
+		    }
                 }
                 else if (act == EDGE_CODEPOINT_I_NEG) {
                     UINTVAL  uc_arg = edge_info[i].arg.uclc.uc;
@@ -298,8 +338,11 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
     mem_sys_free(nextst);
 
     /* strip any literal lengths, leaving only fates */
-    for (i = 0; i < total_fates; i++)
+    /* fprintf(stderr, "Final\n"); */
+    for (i = 0; i < total_fates; i++) {
+	/* fprintf(stderr, "\t%llx\n", (long long unsigned int)fates[i]); */
         fates[i] &= 0xffffff;
+    }
 
     *total_fates_out = total_fates;
     return fates;
@@ -3298,8 +3341,9 @@ inline op nqp_nfa_from_statelist(out PMC, invar PMC, invar PMC) :base_core {
             nfa->states[i][cur_edge].act = act;
             nfa->states[i][cur_edge].to = to;
             
-            switch (act) {
+            switch (act & 0xff) {
             case EDGE_FATE:
+            case EDGE_CODEPOINT_LL:
             case EDGE_CODEPOINT:
             case EDGE_CODEPOINT_NEG:
             case EDGE_CHARCLASS:
@@ -3310,6 +3354,7 @@ inline op nqp_nfa_from_statelist(out PMC, invar PMC, invar PMC) :base_core {
             case EDGE_CHARLIST_NEG:
                 nfa->states[i][cur_edge].arg.s = VTABLE_get_string_keyed_int(interp, edge_info, j + 1);
                 break;
+            case EDGE_CODEPOINT_I_LL:
             case EDGE_CODEPOINT_I:
             case EDGE_CODEPOINT_I_NEG:
             case EDGE_CHARRANGE:
