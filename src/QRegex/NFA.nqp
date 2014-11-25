@@ -201,17 +201,8 @@ class QRegex::NFA {
                         [nqp::ord($litconst_lc, $i), nqp::ord($litconst_uc, $i)]);
                     $i := $i + 1;
                 }
-                self.addedge($from, $to, $!LITEND ?? $EDGE_CODEPOINT_I !!
-#?if moar
-		$EDGE_CODEPOINT_I_LL,
-#?endif
-#?if parrot
-		$EDGE_CODEPOINT_I_LL,
-#?endif
-#?if jvm
-		$EDGE_CODEPOINT_I,
-#?endif
-		[nqp::ord($litconst_lc, $i), nqp::ord($litconst_uc, $i)]);
+                self.addedge($from, $to, $!LITEND ?? $EDGE_CODEPOINT_I !!  $EDGE_CODEPOINT_I_LL,
+                    [nqp::ord($litconst_lc, $i), nqp::ord($litconst_uc, $i)]);
             }
             else {
                 my str $litconst := $node[0];
@@ -219,17 +210,7 @@ class QRegex::NFA {
                     $from := self.addedge($from, -1, $EDGE_CODEPOINT, nqp::ord($litconst, $i));
                     $i := $i + 1;
                 }
-                self.addedge($from, $to, $!LITEND ?? $EDGE_CODEPOINT !!
-#?if moar
-		$EDGE_CODEPOINT_LL,
-#?endif
-#?if parrot
-		$EDGE_CODEPOINT_LL,
-#?endif
-#?if jvm
-		$EDGE_CODEPOINT,
-#?endif
-		nqp::ord($litconst, $i));
+                self.addedge($from, $to, $!LITEND ?? $EDGE_CODEPOINT !!  $EDGE_CODEPOINT_LL, nqp::ord($litconst, $i));
             }
         }
         else {
@@ -473,7 +454,7 @@ class QRegex::NFA {
                         # Added to act because there's no more room arg for two case insensitive chars.
                         # The NFA engine notices a negative act and redispatches to correct spot.
                         # The act and fate are both encoded positively, and we ignore the negative bits.
-                        $substate[$j] := $substate[$j] + 256 * $fate - 0x100000000;
+                        $substate[$j] := $substate[$j] + 256 * $fate - 0x40000000;
                     }
                     $j := $j + 3;
                 }
