@@ -244,7 +244,7 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
 		    }
                 }
                 else if (act == EDGE_CODEPOINT_LL) {
-                    INTVAL fate = (edge_info[i].act >> 8) & 0xffffff;
+                    INTVAL fate = (edge_info[i].act >> 8) & 0xfffff;
                     UINTVAL arg = edge_info[i].arg.i;
                     if (STRING_ord(interp, target, offset) == arg) {
                         nextst[numnext++] = to;
@@ -287,7 +287,7 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
                         nextst[numnext++] = to;
                 }
                 else if (act == EDGE_CODEPOINT_I_LL) {
-                    INTVAL fate = (edge_info[i].act >> 8) & 0xffffff;
+                    INTVAL fate = (edge_info[i].act >> 8) & 0xfffff;
                     UINTVAL  uc_arg = edge_info[i].arg.uclc.uc;
                     UINTVAL  lc_arg = edge_info[i].arg.uclc.lc;
                     UINTVAL  ord    = STRING_ord(interp, target, offset);
