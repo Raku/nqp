@@ -4942,9 +4942,9 @@ public final class Ops {
         nextst.clear();
         fates.clear();
 
-	/* XXX needs to be cached, but tc breaks stage0 when I try */
-	long[] longlit = new long[200];  // also needs proper sizing to # of alternatives
-	int usedlonglit = 0;	// lazy initialization highwater
+        /* XXX needs to be cached, but tc breaks stage0 when I try */
+        long[] longlit = new long[200];  // also needs proper sizing to # of alternatives
+        int usedlonglit = 0;    // lazy initialization highwater
 
         nextst.add(1);
         while (!nextst.isEmpty() && pos <= eos) {
@@ -4975,117 +4975,135 @@ public final class Ops {
                     int act = edgeInfo[i].act;
                     int to  = edgeInfo[i].to;
 
-                    if (act < 0) {
-                        act &= 0xff;
-                    }
-                    else if (act == NFA.EDGE_FATE) {
-                        /* Crossed a fate edge. Check if we already saw this, and
-                         * if so bump the entry we already saw. */
-                        int arg = edgeInfo[i].arg_i;
-                        boolean foundFate = false;
-                        arg &= 0xffffff;   // can go away after reboostrap?
-                        for (int j = 0; j < fates.size(); j++) {
-                            if (foundFate)
-                                fates.set(j - 1, fates.get(j));
-                            if (fates.get(j )== arg) {
-                                foundFate = true;
-                                if (j < prevFates)
-                                    prevFates--;
-                            }
+                    if (act <= NFA.EDGE_EPSILON) {
+                        if (act < 0) {
+                            act &= 0xff;
                         }
-			if (arg < usedlonglit)
-			    arg -= longlit[arg] << 24;
-                        if (foundFate)
-                            fates.set(fates.size() - 1, arg);
-                        else
-                            fates.add(arg);
-                        continue;
-                    }
-                    else if (act == NFA.EDGE_EPSILON && to <= numStates && done[to] != gen) {
-                        curst.add(to);
-                        continue;
+                        else if (act == NFA.EDGE_FATE) {
+                            /* Crossed a fate edge. Check if we already saw this, and
+                             * if so bump the entry we already saw. */
+                            int arg = edgeInfo[i].arg_i;
+                            boolean foundFate = false;
+                            arg &= 0xffffff;   // can go away after reboostrap?
+                            for (int j = 0; j < fates.size(); j++) {
+                                if (foundFate)
+                                    fates.set(j - 1, fates.get(j));
+                                if (fates.get(j )== arg) {
+                                    foundFate = true;
+                                    if (j < prevFates)
+                                        prevFates--;
+                                }
+                            }
+                            if (arg < usedlonglit)
+                                arg -= longlit[arg] << 24;
+                            if (foundFate)
+                                fates.set(fates.size() - 1, arg);
+                            else
+                                fates.add(arg);
+                            continue;
+                        }
+                        else if (act == NFA.EDGE_EPSILON && to <= numStates && done[to] != gen) {
+                            curst.add(to);
+                            continue;
+                        }
                     }
 
                     if (pos >= eos) {
                         /* Can't match, so drop state. */
+                        continue;
                     }
-                    else if (act == NFA.EDGE_CODEPOINT) {
-                        char arg = (char)edgeInfo[i].arg_i;
-                        if (target.charAt((int)pos) == arg)
-                            nextst.add(to);
-                    }
-                    else if (act == NFA.EDGE_CODEPOINT_LL) {
-                        char arg = (char)edgeInfo[i].arg_i;
-                        if (target.charAt((int)pos) == arg) {
-			    int fate = (edgeInfo[i].act >> 8) & 0xfffff;  /* act is probably signed 32 bits */
-                            nextst.add(to);
-			    while (usedlonglit <= fate)
-				longlit[usedlonglit++] = 0;
-                            longlit[fate] = pos - orig_pos;
+
+                    switch (act) {
+                        case NFA.EDGE_CODEPOINT: {
+                            char arg = (char)edgeInfo[i].arg_i;
+                            if (target.charAt((int)pos) == arg)
+                                nextst.add(to);
+                            continue;
                         }
-                    }
-                    else if (act == NFA.EDGE_CODEPOINT_NEG) {
-                        char arg = (char)edgeInfo[i].arg_i;
-                        if (target.charAt((int)pos) != arg)
-                            nextst.add(to);
-                    }
-                    else if (act == NFA.EDGE_CHARCLASS) {
-                        if (iscclass(edgeInfo[i].arg_i, target, pos) != 0)
-                            nextst.add(to);
-                    }
-                    else if (act == NFA.EDGE_CHARCLASS_NEG) {
-                        if (iscclass(edgeInfo[i].arg_i, target, pos) == 0)
-                            nextst.add(to);
-                    }
-                    else if (act == NFA.EDGE_CHARLIST) {
-                        String arg = edgeInfo[i].arg_s;
-                        if (arg.indexOf(target.charAt((int)pos)) >= 0)
-                            nextst.add(to);
-                    }
-                    else if (act == NFA.EDGE_CHARLIST_NEG) {
-                        String arg = edgeInfo[i].arg_s;
-                        if (arg.indexOf(target.charAt((int)pos)) < 0)
-                            nextst.add(to);
-                    }
-                    else if (act == NFA.EDGE_CODEPOINT_I) {
-                        char uc_arg = edgeInfo[i].arg_uc;
-                        char lc_arg = edgeInfo[i].arg_lc;
-                        char ord = target.charAt((int)pos);
-                        if (ord == lc_arg || ord == uc_arg)
-                            nextst.add(to);
-                    }
-                    else if (act == NFA.EDGE_CODEPOINT_I_LL) {
-                        char uc_arg = edgeInfo[i].arg_uc;
-                        char lc_arg = edgeInfo[i].arg_lc;
-                        char ord = target.charAt((int)pos);
-                        if (ord == lc_arg || ord == uc_arg) {
-			    int fate = (edgeInfo[i].act >> 8) & 0xfffff;  /* act is probably signed 32 bits */
-                            nextst.add(to);
-			    while (usedlonglit <= fate)
-				longlit[usedlonglit++] = 0;
-                            longlit[fate] = pos - orig_pos;
+                        case NFA.EDGE_CODEPOINT_LL: {
+                            char arg = (char)edgeInfo[i].arg_i;
+                            if (target.charAt((int)pos) == arg) {
+                                int fate = (edgeInfo[i].act >> 8) & 0xfffff;  /* act is probably signed 32 bits */
+                                nextst.add(to);
+                                while (usedlonglit <= fate)
+                                    longlit[usedlonglit++] = 0;
+                                longlit[fate] = pos - orig_pos;
+                            }
+                            continue;
                         }
-                    }
-                    else if (act == NFA.EDGE_CODEPOINT_I_NEG) {
-                        char uc_arg = edgeInfo[i].arg_uc;
-                        char lc_arg = edgeInfo[i].arg_lc;
-                        char ord = target.charAt((int)pos);
-                        if (ord != lc_arg && ord != uc_arg)
-                            nextst.add(to);
-                    }
-                    else if (act == NFA.EDGE_CHARRANGE) {
-                        char uc_arg = edgeInfo[i].arg_uc;
-                        char lc_arg = edgeInfo[i].arg_lc;
-                        char ord = target.charAt((int)pos);
-                        if (ord >= lc_arg && ord <= uc_arg)
-                            nextst.add(to);
-                    }
-                    else if (act == NFA.EDGE_CHARRANGE_NEG) {
-                        char uc_arg = edgeInfo[i].arg_uc;
-                        char lc_arg = edgeInfo[i].arg_lc;
-                        char ord = target.charAt((int)pos);
-                        if (ord < lc_arg || ord > uc_arg)
-                            nextst.add(to);
+                        case NFA.EDGE_CODEPOINT_NEG: {
+                            char arg = (char)edgeInfo[i].arg_i;
+                            if (target.charAt((int)pos) != arg)
+                                nextst.add(to);
+                            continue;
+                        }
+                        case NFA.EDGE_CHARCLASS: {
+                            if (iscclass(edgeInfo[i].arg_i, target, pos) != 0)
+                                nextst.add(to);
+                            continue;
+                        }
+                        case NFA.EDGE_CHARCLASS_NEG: {
+                            if (iscclass(edgeInfo[i].arg_i, target, pos) == 0)
+                                nextst.add(to);
+                            continue;
+                        }
+                        case NFA.EDGE_CHARLIST: {
+                            String arg = edgeInfo[i].arg_s;
+                            if (arg.indexOf(target.charAt((int)pos)) >= 0)
+                                nextst.add(to);
+                            continue;
+                        }
+                        case NFA.EDGE_CHARLIST_NEG: {
+                            String arg = edgeInfo[i].arg_s;
+                            if (arg.indexOf(target.charAt((int)pos)) < 0)
+                                nextst.add(to);
+                            continue;
+                        }
+                        case NFA.EDGE_CODEPOINT_I: {
+                            char uc_arg = edgeInfo[i].arg_uc;
+                            char lc_arg = edgeInfo[i].arg_lc;
+                            char ord = target.charAt((int)pos);
+                            if (ord == lc_arg || ord == uc_arg)
+                                nextst.add(to);
+                            continue;
+                        }
+                        case NFA.EDGE_CODEPOINT_I_LL: {
+                            char uc_arg = edgeInfo[i].arg_uc;
+                            char lc_arg = edgeInfo[i].arg_lc;
+                            char ord = target.charAt((int)pos);
+                            if (ord == lc_arg || ord == uc_arg) {
+                                int fate = (edgeInfo[i].act >> 8) & 0xfffff;  /* act is probably signed 32 bits */
+                                nextst.add(to);
+                                while (usedlonglit <= fate)
+                                    longlit[usedlonglit++] = 0;
+                                longlit[fate] = pos - orig_pos;
+                            }
+                            continue;
+                        }
+                        case NFA.EDGE_CODEPOINT_I_NEG: {
+                            char uc_arg = edgeInfo[i].arg_uc;
+                            char lc_arg = edgeInfo[i].arg_lc;
+                            char ord = target.charAt((int)pos);
+                            if (ord != lc_arg && ord != uc_arg)
+                                nextst.add(to);
+                            continue;
+                        }
+                        case NFA.EDGE_CHARRANGE: {
+                            char uc_arg = edgeInfo[i].arg_uc;
+                            char lc_arg = edgeInfo[i].arg_lc;
+                            char ord = target.charAt((int)pos);
+                            if (ord >= lc_arg && ord <= uc_arg)
+                                nextst.add(to);
+                            continue;
+                        }
+                        case NFA.EDGE_CHARRANGE_NEG: {
+                            char uc_arg = edgeInfo[i].arg_uc;
+                            char lc_arg = edgeInfo[i].arg_lc;
+                            char ord = target.charAt((int)pos);
+                            if (ord < lc_arg || ord > uc_arg)
+                                nextst.add(to);
+                            continue;
+                        }
                     }
                 }
             }
@@ -5106,14 +5124,14 @@ public final class Ops {
 
         /* strip any literal lengths, leaving only fates */
         int[] result = new int[fates.size()];
-	if (usedlonglit > 0) {
-	    for (int i = 0; i < fates.size(); i++)
-		result[i] = fates.get(i) & 0xffffff;
-	}
-	else {
-	    for (int i = 0; i < fates.size(); i++)
-		result[i] = fates.get(i);
-	}
+        if (usedlonglit > 0) {
+            for (int i = 0; i < fates.size(); i++)
+                result[i] = fates.get(i) & 0xffffff;
+        }
+        else {
+            for (int i = 0; i < fates.size(); i++)
+                result[i] = fates.get(i);
+        }
         return result;
     }
 
