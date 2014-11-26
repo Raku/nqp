@@ -464,7 +464,11 @@
             <td>
               <div class="pull-left" style="width: 210px">
                 <div class="progress" style="width: 200px">
-                  <div class="progress-bar" role="progressbar" style="width: {{alloc.AllocationsPercent}}%;">
+                  <div class="progress-bar progress-bar-danger" role="progressbar" style="width: {{alloc.AllocationsInterpPercent}}%;">
+                  </div>
+                  <div class="progress-bar progress-bar-warning" role="progressbar" style="width: {{alloc.AllocationsSpeshPercent}}%;">
+                  </div>
+                  <div class="progress-bar progress-bar-success" role="progressbar" style="width: {{alloc.AllocationsJitPercent}}%;">
                   </div>
                 </div>
               </div>
@@ -505,12 +509,16 @@
                     <td>
                       <div class="pull-left" style="width: 210px">
                         <div class="progress" style="width: 200px">
-                          <div class="progress-bar" role="progressbar" style="width: {{routine.AllocationsPercent}}%;">
+                          <div class="progress-bar progress-bar-danger" style="width: {{routine.AllocationsInterpPercent}}%;">
+                          </div>
+                          <div class="progress-bar progress-bar-warning" style="width: {{routine.AllocationsSpeshPercent}}%;">
+                          </div>
+                          <div class="progress-bar progress-bar-success" style="width: {{routine.AllocationsJitPercent}}%;">
                           </div>
                         </div>
                       </div>
                       <div>
-                        {{routine.Allocations}}
+                          {{routine.Allocations}}
                       </div>
                     </td>
                   </tr>
@@ -981,6 +989,7 @@
         // Traverse all call nodes, counting up the allocations.
         var typeIdToName         = {};
         var typeIdToAllocations  = {};
+        var typeIdToAllocationsByType  = {};
         var typeIdToRoutineStats = {};
         var maxAllocations       = 1;
         function walkCallGraphNode(node) {
@@ -988,15 +997,26 @@
                 if (!typeIdToName[alloc.id]) {
                     typeIdToName[alloc.id]         = alloc.type == "" ? "<anon>" : alloc.type;
                     typeIdToAllocations[alloc.id]  = 0;
+                    typeIdToAllocationsByType[alloc.id] = [0, 0, 0];
                     typeIdToRoutineStats[alloc.id] = {};
                 }
                 typeIdToAllocations[alloc.id] += alloc.count;
+                typeIdToAllocationsByType[alloc.id][0] += alloc.count - alloc.spesh - alloc.jit;
+                typeIdToAllocationsByType[alloc.id][1] += alloc.spesh;
+                typeIdToAllocationsByType[alloc.id][2] += alloc.jit;
                 if (typeIdToAllocations[alloc.id] > maxAllocations)
                     maxAllocations = typeIdToAllocations[alloc.id];
-                if (typeIdToRoutineStats[alloc.id][node.id])
-                    typeIdToRoutineStats[alloc.id][node.id] += alloc.count;
-                else
-                    typeIdToRoutineStats[alloc.id][node.id] = alloc.count;
+                if (typeIdToRoutineStats[alloc.id][node.id]) {
+                    typeIdToRoutineStats[alloc.id][node.id]['count'] += alloc.count;
+                    typeIdToRoutineStats[alloc.id][node.id]['spesh'] += alloc.spesh;
+                    typeIdToRoutineStats[alloc.id][node.id]['jit'] += alloc.jit;
+                } else {
+                    typeIdToRoutineStats[alloc.id][node.id] = {
+                        count: alloc.count,
+                        spesh: alloc.spesh,
+                        jit: alloc.jit
+                        };
+                }
             });
             if (node.callees) {
                 node.callees.map(walkCallGraphNode);
@@ -1009,21 +1029,29 @@
         for (id in typeIdToName) {
             var maxAllocationByRoutine = 1;
             for (var rid in typeIdToRoutineStats[id])
-                if (typeIdToRoutineStats[id][rid] > maxAllocationByRoutine)
-                    maxAllocationByRoutine = typeIdToRoutineStats[id][rid];
+                if (typeIdToRoutineStats[id][rid]['count'] > maxAllocationByRoutine)
+                    maxAllocationByRoutine = typeIdToRoutineStats[id][rid]['count'];
             var routineStats = [];
             for (var rid in typeIdToRoutineStats[id])
                 routineStats.push({
                     Name:               nodeIdToName[rid],
                     Line:               nodeIdToLine[rid],
                     File:               nodeIdToFile[rid],
-                    Allocations:        typeIdToRoutineStats[id][rid],
-                    AllocationsPercent: (100 * typeIdToRoutineStats[id][rid] / maxAllocationByRoutine)
+                    Allocations:        typeIdToRoutineStats[id][rid]['count'],
+                    AllocationsSpesh:   typeIdToRoutineStats[id][rid]['spesh'],
+                    AllocationsJit:     typeIdToRoutineStats[id][rid]['jit'],
+                    AllocationsPercent: (100 * typeIdToRoutineStats[id][rid]['count'] / maxAllocationByRoutine),
+                    AllocationsInterpPercent: (100 * (typeIdToRoutineStats[id][rid]['count'] - typeIdToRoutineStats[id][rid]['jit'] - typeIdToRoutineStats[id][rid]['spesh'])  / maxAllocationByRoutine),
+                    AllocationsSpeshPercent:  (100 * typeIdToRoutineStats[id][rid]['spesh'] / maxAllocationByRoutine),
+                    AllocationsJitPercent:    (100 * typeIdToRoutineStats[id][rid]['jit'] / maxAllocationByRoutine)
                 });
             var entry = {
                 Name:                 typeIdToName[id],
                 Allocations:          typeIdToAllocations[id],
                 AllocationsPercent:   +(100 * typeIdToAllocations[id] / maxAllocations).toFixed(2),
+                AllocationsInterpPercent: +(100 * typeIdToAllocationsByType[id][0] / maxAllocations).toFixed(2),
+                AllocationsSpeshPercent:  +(100 * typeIdToAllocationsByType[id][1] / maxAllocations).toFixed(2),
+                AllocationsJitPercent:    +(100 * typeIdToAllocationsByType[id][2] / maxAllocations).toFixed(2),
                 RoutineStats:         routineStats
             };
             allocationSummary.push(entry);
