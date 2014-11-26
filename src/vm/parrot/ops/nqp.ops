@@ -190,136 +190,154 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
                 INTVAL act = edge_info[i].act;
                 INTVAL to  = edge_info[i].to;
                 
-		if (act < 0 || act > 0xff) {
-		    /* fprintf(stderr, "neg act %d\n", act); */
-		    act &= 0xff;
-		}
+                if (act <= EDGE_EPSILON) {
+                    if (act < 0) {
+                        /* fprintf(stderr, "neg act %d\n", act); */
+                        act &= 0xff;
+                    }
 
-                if (act == EDGE_FATE) {
-                    /* Crossed a fate edge. Check if we already saw this, and
-                     * if so bump the entry we already saw. */
-                    INTVAL arg = edge_info[i].arg.i;
-                    INTVAL j;
-                    INTVAL found_fate = 0;
-		    arg &= 0xffffff;   /* remove after rebootstrap */
+                    if (act == EDGE_FATE) {
+                        /* Crossed a fate edge. Check if we already saw this, and
+                         * if so bump the entry we already saw. */
+                        INTVAL arg = edge_info[i].arg.i;
+                        INTVAL j;
+                        INTVAL found_fate = 0;
+                        arg &= 0xffffff;   /* remove after rebootstrap */
 
-                    for (j = 0; j < total_fates; j++) {
-                        if (found_fate)
-                            fates[j - 1] = fates[j];
-                        if (fates[j] == arg) {
-                            found_fate = 1;
-                            if (j < prev_fates)
-                                prev_fates--;
+                        for (j = 0; j < total_fates; j++) {
+                            if (found_fate)
+                                fates[j - 1] = fates[j];
+                            if (fates[j] == arg) {
+                                found_fate = 1;
+                                if (j < prev_fates)
+                                    prev_fates--;
+                            }
                         }
-                    }
-		    if (arg < usedlonglit)
-			arg -= longlit[arg] << 24;
-		    /* fprintf(stderr, "fate edge %llx\n", (long long unsigned int)act); */
-                    if (found_fate) {
-                        fates[total_fates - 1] = arg;
-                    }
-                    else {
-                        if (total_fates >= fate_arr_len) {
-                            fate_arr_len = total_fates + 1;
-                            fates = (INTVAL *)mem_sys_realloc(fates,
-                                sizeof(INTVAL) * fate_arr_len);
+                        if (arg < usedlonglit)
+                            arg -= longlit[arg] << 24;
+                        /* fprintf(stderr, "fate edge %llx\n", (long long unsigned int)act); */
+                        if (found_fate) {
+                            fates[total_fates - 1] = arg;
                         }
-                        fates[total_fates++] = arg;
+                        else {
+                            if (total_fates >= fate_arr_len) {
+                                fate_arr_len = total_fates + 1;
+                                fates = (INTVAL *)mem_sys_realloc(fates,
+                                    sizeof(INTVAL) * fate_arr_len);
+                            }
+                            fates[total_fates++] = arg;
+                        }
+                        continue;
                     }
-		    continue;
-                }
-                else if (act == EDGE_EPSILON && to <= num_states && done[to] != gen) {
-                    curst[numcur++] = to;
-		    continue;
+                    else if (act == EDGE_EPSILON && to <= num_states && done[to] != gen) {
+                        curst[numcur++] = to;
+                        continue;
+                    }
                 }
 
                 if (offset >= eos) {
                     /* Can't match, so drop state. */
+                    continue;
                 }
-                else if (act == EDGE_CODEPOINT) {
-                    UINTVAL arg = edge_info[i].arg.i;
-                    if (STRING_ord(interp, target, offset) == arg) {
-                        nextst[numnext++] = to;
-			/* fprintf(stderr, "codepoint %c\n", arg); */
-		    }
-                }
-                else if (act == EDGE_CODEPOINT_LL) {
-                    UINTVAL arg = edge_info[i].arg.i;
-                    if (STRING_ord(interp, target, offset) == arg) {
-			INTVAL fate = (edge_info[i].act >> 8) & 0xfffff;
-                        nextst[numnext++] = to;
-			while (usedlonglit <= fate)
-			    longlit[usedlonglit++] = 0;
-			longlit[fate] = offset - orig_offset;
-			/* fprintf(stderr, "codepoint_ll %c fate %d\n", arg, fate); */
-		    }
-                }
-                else if (act == EDGE_CODEPOINT_NEG) {
-                    UINTVAL arg = edge_info[i].arg.i;
-                    if (STRING_ord(interp, target, offset) != arg)
-                        nextst[numnext++] = to;
-                }
-                else if (act == EDGE_CHARCLASS) {
-                    INTVAL arg = edge_info[i].arg.i;
-                    if (Parrot_str_is_cclass(interp, arg, target, offset))
-                        nextst[numnext++] = to;
-                }
-                else if (act == EDGE_CHARCLASS_NEG) {
-                    INTVAL arg = edge_info[i].arg.i;
-                    if (!Parrot_str_is_cclass(interp, arg, target, offset))
-                        nextst[numnext++] = to;
-                }
-                else if (act == EDGE_CHARLIST) {
-                    STRING *arg = edge_info[i].arg.s;
-                    STRING *chr = STRING_substr(interp, target, offset, 1);
-                    if (STRING_index(interp, arg, chr, 0) >= 0)
-                        nextst[numnext++] = to;
-                }
-                else if (act == EDGE_CHARLIST_NEG) {
-                    STRING *arg = edge_info[i].arg.s;
-                    STRING *chr = STRING_substr(interp, target, offset, 1);
-                    if (STRING_index(interp, arg, chr, 0) < 0)
-                        nextst[numnext++] = to;
-                }
-                else if (act == EDGE_CODEPOINT_I) {
-                    UINTVAL  uc_arg = edge_info[i].arg.uclc.uc;
-                    UINTVAL  lc_arg = edge_info[i].arg.uclc.lc;
-                    UINTVAL  ord    = STRING_ord(interp, target, offset);
-                    if (ord == lc_arg || ord == uc_arg)
-                        nextst[numnext++] = to;
-                }
-                else if (act == EDGE_CODEPOINT_I_LL) {
-                    UINTVAL  uc_arg = edge_info[i].arg.uclc.uc;
-                    UINTVAL  lc_arg = edge_info[i].arg.uclc.lc;
-                    UINTVAL  ord    = STRING_ord(interp, target, offset);
-                    if (ord == lc_arg || ord == uc_arg) {
-			INTVAL fate = (edge_info[i].act >> 8) & 0xfffff;
-                        nextst[numnext++] = to;
-			while (usedlonglit <= fate)
-			    longlit[usedlonglit++] = 0;
-			longlit[fate] = offset - orig_offset;
-		    }
-                }
-                else if (act == EDGE_CODEPOINT_I_NEG) {
-                    UINTVAL  uc_arg = edge_info[i].arg.uclc.uc;
-                    UINTVAL  lc_arg = edge_info[i].arg.uclc.lc;
-                    UINTVAL  ord    = STRING_ord(interp, target, offset);
-                    if (ord != lc_arg && ord != uc_arg)
-                        nextst[numnext++] = to;
-                }
-                else if (act == EDGE_CHARRANGE) {
-                    UINTVAL  uc_arg = edge_info[i].arg.uclc.uc;
-                    UINTVAL  lc_arg = edge_info[i].arg.uclc.lc;
-                    UINTVAL  ord    = STRING_ord(interp, target, offset);
-                    if (ord >= lc_arg && ord <= uc_arg)
-                        nextst[numnext++] = to;
-                }
-                else if (act == EDGE_CHARRANGE_NEG) {
-                    UINTVAL  uc_arg = edge_info[i].arg.uclc.uc;
-                    UINTVAL  lc_arg = edge_info[i].arg.uclc.lc;
-                    UINTVAL  ord    = STRING_ord(interp, target, offset);
-                    if (ord < lc_arg || ord > uc_arg)
-                        nextst[numnext++] = to;
+
+                switch (act) {
+                    case EDGE_CODEPOINT: {
+                        UINTVAL arg = edge_info[i].arg.i;
+                        if (STRING_ord(interp, target, offset) == arg) {
+                            nextst[numnext++] = to;
+                            /* fprintf(stderr, "codepoint %c\n", arg); */
+                        }
+                        continue;
+                    }
+                    case EDGE_CODEPOINT_LL: {
+                        UINTVAL arg = edge_info[i].arg.i;
+                        if (STRING_ord(interp, target, offset) == arg) {
+                            INTVAL fate = (edge_info[i].act >> 8) & 0xfffff;
+                            nextst[numnext++] = to;
+                            while (usedlonglit <= fate)
+                                longlit[usedlonglit++] = 0;
+                            longlit[fate] = offset - orig_offset;
+                            /* fprintf(stderr, "codepoint_ll %c fate %d\n", arg, fate); */
+                        }
+                        continue;
+                    }
+                    case EDGE_CODEPOINT_NEG: {
+                        UINTVAL arg = edge_info[i].arg.i;
+                        if (STRING_ord(interp, target, offset) != arg)
+                            nextst[numnext++] = to;
+                        continue;
+                    }
+                    case EDGE_CHARCLASS: {
+                        INTVAL arg = edge_info[i].arg.i;
+                        if (Parrot_str_is_cclass(interp, arg, target, offset))
+                            nextst[numnext++] = to;
+                        continue;
+                    }
+                    case EDGE_CHARCLASS_NEG: {
+                        INTVAL arg = edge_info[i].arg.i;
+                        if (!Parrot_str_is_cclass(interp, arg, target, offset))
+                            nextst[numnext++] = to;
+                        continue;
+                    }
+                    case EDGE_CHARLIST: {
+                        STRING *arg = edge_info[i].arg.s;
+                        STRING *chr = STRING_substr(interp, target, offset, 1);
+                        if (STRING_index(interp, arg, chr, 0) >= 0)
+                            nextst[numnext++] = to;
+                        continue;
+                    }
+                    case EDGE_CHARLIST_NEG: {
+                        STRING *arg = edge_info[i].arg.s;
+                        STRING *chr = STRING_substr(interp, target, offset, 1);
+                        if (STRING_index(interp, arg, chr, 0) < 0)
+                            nextst[numnext++] = to;
+                        continue;
+                    }
+                    case EDGE_CODEPOINT_I: {
+                        UINTVAL  uc_arg = edge_info[i].arg.uclc.uc;
+                        UINTVAL  lc_arg = edge_info[i].arg.uclc.lc;
+                        UINTVAL  ord    = STRING_ord(interp, target, offset);
+                        if (ord == lc_arg || ord == uc_arg)
+                            nextst[numnext++] = to;
+                        continue;
+                    }
+                    case EDGE_CODEPOINT_I_LL: {
+                        UINTVAL  uc_arg = edge_info[i].arg.uclc.uc;
+                        UINTVAL  lc_arg = edge_info[i].arg.uclc.lc;
+                        UINTVAL  ord    = STRING_ord(interp, target, offset);
+                        if (ord == lc_arg || ord == uc_arg) {
+                            INTVAL fate = (edge_info[i].act >> 8) & 0xfffff;
+                            nextst[numnext++] = to;
+                            while (usedlonglit <= fate)
+                                longlit[usedlonglit++] = 0;
+                            longlit[fate] = offset - orig_offset;
+                        }
+                        continue;
+                    }
+                    case EDGE_CODEPOINT_I_NEG: {
+                        UINTVAL  uc_arg = edge_info[i].arg.uclc.uc;
+                        UINTVAL  lc_arg = edge_info[i].arg.uclc.lc;
+                        UINTVAL  ord    = STRING_ord(interp, target, offset);
+                        if (ord != lc_arg && ord != uc_arg)
+                            nextst[numnext++] = to;
+                        continue;
+                    }
+                    case EDGE_CHARRANGE: {
+                        UINTVAL  uc_arg = edge_info[i].arg.uclc.uc;
+                        UINTVAL  lc_arg = edge_info[i].arg.uclc.lc;
+                        UINTVAL  ord    = STRING_ord(interp, target, offset);
+                        if (ord >= lc_arg && ord <= uc_arg)
+                            nextst[numnext++] = to;
+                        continue;
+                    }
+                    case EDGE_CHARRANGE_NEG: {
+                        UINTVAL  uc_arg = edge_info[i].arg.uclc.uc;
+                        UINTVAL  lc_arg = edge_info[i].arg.uclc.lc;
+                        UINTVAL  ord    = STRING_ord(interp, target, offset);
+                        if (ord < lc_arg || ord > uc_arg)
+                            nextst[numnext++] = to;
+                        continue;
+                    }
                 }
             }
         }
@@ -343,11 +361,11 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
 
     /* strip any literal lengths, leaving only fates */
     if (usedlonglit) {
-	/* fprintf(stderr, "Final\n"); */
-	for (i = 0; i < total_fates; i++) {
-	    /* fprintf(stderr, "\t%llx\n", (long long unsigned int)fates[i]); */
-	    fates[i] &= 0xffffff;
-	}
+        /* fprintf(stderr, "Final\n"); */
+        for (i = 0; i < total_fates; i++) {
+            /* fprintf(stderr, "\t%llx\n", (long long unsigned int)fates[i]); */
+            fates[i] &= 0xffffff;
+        }
     }
 
     *total_fates_out = total_fates;
@@ -2514,7 +2532,7 @@ inline op stable_publish_vtable_handler_mapping(invar PMC, invar PMC) :base_core
                 st->parrot_vtable_handler_mapping[idx].hint =
                     REPR(class_handle)->attr_funcs->hint_for(interp, st, class_handle, attr_name);
             }
-			else
+                        else
                 Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                     "No such Parrot v-table '%Ss'", name);
         }
