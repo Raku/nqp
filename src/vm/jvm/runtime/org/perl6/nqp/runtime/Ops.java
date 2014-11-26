@@ -4942,9 +4942,8 @@ public final class Ops {
         nextst.clear();
         fates.clear();
 
-        /* XXX needs to be cached, but tc breaks stage0 when I try */
-        long[] longlit = new long[200];  // also needs proper sizing to # of alternatives
-        int usedlonglit = 0;    // lazy initialization highwater
+        long[] longlit = tc.curlonglit;  // needs proper sizing to # of alternatives
+        int usedlonglit = 0;             // lazy initialization highwater
 
         nextst.add(1);
         while (!nextst.isEmpty() && pos <= eos) {
