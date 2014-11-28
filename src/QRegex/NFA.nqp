@@ -1,5 +1,9 @@
 use QASTNode;
 
+our $nfatime;
+our $lastnfatime;
+our $etctime;
+
 class QRegex::NFA {
     my $EDGE_FATE            := 0;
     my $EDGE_EPSILON         := 1;
@@ -145,6 +149,9 @@ class QRegex::NFA {
         # $ACTIONS := ['FATE','EPSILON','CODEPOINT','CODEPOINT_NEG','CHARCLASS','CHARCLASS_NEG','CHARLIST','CHARLIST_NEG','SUBRULE','CODEPOINT_I','CODEPOINT_I_NEG','GENERIC_VAR','CHARRANGE','CHARRANGE_NEG','CODEPOINT_LL','CODEPOINT_I_LL'];
         # $ind := 0;
         # $indent := '';
+        $nfatime := 0;
+        $etctime := 0;
+        $lastnfatime := nqp::time_n();
     }
 
     method cclass($node, $from, $to) {
@@ -479,7 +486,16 @@ class QRegex::NFA {
             $!nfa_object := nqp::nfafromstatelist($!states, NFAType);
             nqp::scwbenable();
         }
-        nqp::nfarunproto($!nfa_object, $target, $offset)
+#        my $t0 := nqp::time_n();
+#        $etctime := $etctime + $t0 - $lastnfatime;
+        my $result := nqp::nfarunproto($!nfa_object, $target, $offset);
+#        my $t1 := nqp::time_n();
+#        $nfatime := $nfatime + $t1 - $t0;
+#        if nqp::chars($target) == $offset {
+#            nqp::printfh(nqp::getstderr(), "EOS in proto at $offset nfa " ~ $nfatime ~ " etc " ~ $etctime ~ "\n");
+#        }
+#        $lastnfatime := $t1;
+        $result;
     }
     
     method run_alt(str $target, int $offset, $bstack, $cstack, @labels) {
@@ -488,7 +504,16 @@ class QRegex::NFA {
             $!nfa_object := nqp::nfafromstatelist($!states, NFAType);
             nqp::scwbenable();
         }
-        nqp::nfarunalt($!nfa_object, $target, $offset, $bstack, $cstack, @labels)
+#        my $t0 := nqp::time_n();
+#        $etctime := $etctime + $t0 - $lastnfatime;
+        my $result := nqp::nfarunalt($!nfa_object, $target, $offset, $bstack, $cstack, @labels);
+#        my $t1 := nqp::time_n();
+#        $nfatime := $nfatime + $t1 - $t0;
+#        if nqp::chars($target) == $offset {
+#            nqp::printfh(nqp::getstderr(), "EOS in alt at $offset nfa " ~ $nfatime ~ " etc " ~ $etctime ~ "\n");
+#        }
+#        $lastnfatime := $t1;
+        $result;
     }
     
     method generic() {
