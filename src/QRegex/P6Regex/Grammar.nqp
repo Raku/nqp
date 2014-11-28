@@ -232,6 +232,11 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     }
 
     proto token quantifier { <...> }
+    token quantifier:sym<%> {
+	('%''%'?) {
+	    $/.CURSOR.panic("Missing quantifier on the left argument of " ~ $/[0]);
+	}
+    }
     token quantifier:sym<*> { <sym> <backmod> }
     token quantifier:sym<+> { <sym> <backmod> }
     token quantifier:sym<?> { <sym> <backmod> }
