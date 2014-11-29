@@ -341,8 +341,8 @@ role NQPCursorRole is export {
         if nqp::existskey(%protorx, $name) {
             for %protorx{$name} -> $rxname {
                 $fate := $fate + 1;
-                @fates[$fate] := $rxname;
                 $nfa.mergesubrule($start, 0, $fate, self, $rxname);
+                @fates[$fate] := $rxname;  # override default fate #
             }
         }
         $nfa;
@@ -381,11 +381,9 @@ role NQPCursorRole is export {
 
     method !alt_nfa($regex, str $name) {
         my $nfa := QRegex::NFA.new;
-        my @fates := $nfa.states[0];
         my int $start := 1;
         my int $fate := 0;
         for $regex.ALT_NFA($name) {
-            @fates[$fate] := $fate;
             $nfa.mergesubstates($start, 0, $fate, $_, self);
             $fate++;
         }

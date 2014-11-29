@@ -429,6 +429,7 @@ class QRegex::NFA {
     
     method mergesubstates($start, $to, $fate, @substates, $cursor, %seen?) {
         # nqp::say("mergesubstates start $start to $to fate $fate") if $nfadeb;
+        $!states[0][$fate] := $fate;  # overridden by !protoregex_nfa
         if @substates {
             # create an empty end state for the subrule's NFA
             my int $substart := self.addstate();
@@ -492,7 +493,7 @@ class QRegex::NFA {
 #        my $t1 := nqp::time_n();
 #        $nfatime := $nfatime + $t1 - $t0;
 #        if nqp::chars($target) == $offset {
-#            nqp::printfh(nqp::getstderr(), "EOS in proto at $offset nfa " ~ $nfatime ~ " etc " ~ $etctime ~ "\n");
+#            nqp::printfh(nqp::getstderr(), "EOS in proto at $offset " ~ $nfatime ~ " / " ~ $etctime ~ " " ~ ($nfatime / ($etctime + $nfatime)) ~ "\n");
 #        }
 #        $lastnfatime := $t1;
         $result;
@@ -510,7 +511,7 @@ class QRegex::NFA {
 #        my $t1 := nqp::time_n();
 #        $nfatime := $nfatime + $t1 - $t0;
 #        if nqp::chars($target) == $offset {
-#            nqp::printfh(nqp::getstderr(), "EOS in alt at $offset nfa " ~ $nfatime ~ " etc " ~ $etctime ~ "\n");
+#            nqp::printfh(nqp::getstderr(), "EOS in alt at $offset " ~ $nfatime ~ " / " ~ $etctime ~ " " ~ ($nfatime / ($etctime + $nfatime)) ~ "\n");
 #        }
 #        $lastnfatime := $t1;
         $result;
