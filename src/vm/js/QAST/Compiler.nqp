@@ -396,6 +396,11 @@ class QAST::OperationsJS {
 
     add_simple_op('isinvokable', $T_INT, [$T_OBJ]);
 
+    # Stubs
+    add_simple_op('where', $T_INT, [$T_OBJ]);
+    add_simple_op('can', $T_INT, [$T_OBJ, $T_STR]);
+    add_simple_op('isconcrete', $T_INT, [$T_OBJ]);
+
     # TODO - think if it's the correct thing to do
     add_op('takeclosure', sub ($comp, $node, :$want) {
         $comp.as_js($node[0], :want($T_OBJ))~'.takeclosure()';
@@ -416,6 +421,10 @@ class QAST::OperationsJS {
     add_simple_op('falsey', $T_BOOL, [$T_BOOL], sub ($boolified) {"(!$boolified)"});
 
     add_simple_op('not_i', $T_BOOL, [$T_INT], sub ($int) {"(!$int)"});
+
+    add_op('locallifetime', sub ($comp, $node, :$want) {
+        $comp.as_js($node[0], :want($want));
+    });
 
     add_op('bind', sub ($comp, $node, :$want) {
         my @children := $node.list;
@@ -566,6 +575,10 @@ class QAST::OperationsJS {
     add_simple_op('stat', $T_INT, [$T_STR, $T_INT]);
 
     add_simple_op('defined', $T_INT, [$T_OBJ]);
+
+    # TODO - those are stubs until we have serialization support
+    add_simple_op('scwbenable', $T_VOID, [], -> {''});
+    add_simple_op('scwbdisable', $T_VOID, [], -> {''});
 
     # TODO avoid copy & paste - move it into code shared between backends
     add_op('defor', sub ($comp, $node, :$want) {
@@ -813,6 +826,8 @@ class QAST::OperationsJS {
 
     add_simple_op('knowhowattr', $T_OBJ, [], sub () {"nqp.knowhowattr"});
 
+    add_simple_op('atkey', $T_OBJ, [$T_OBJ, $T_STR], sub ($hash, $key) {"$hash[$key]"});
+
     method compile_op($comp, $op, :$want) {
         my str $name := $op.op;
         if nqp::existskey(%ops, $name) {
@@ -830,7 +845,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my %env := nqp::getenvhash();
         if %env<NQPJS_LOG> {
             my $log := nqp::open('nqpjs.log', 'wa');
-            nqp::printfh($log, nqp::join(',', @msgs));
+            nqp::printfh($log, nqp::join(',', @msgs) ~ "\n");
             nqp::closefh($log);
         }
     }
@@ -1257,7 +1272,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             for $node.symtable -> $symbol {
                 @imported.push("{self.mangle_name($symbol.key)} = setting[{quote_string($symbol.key)}]");
             }
-            "var setting = nqp.load_setting({quote_string($*SETTING_NAME)});\n"
+            "var setting = nqp.setup_setting({quote_string($*SETTING_NAME)});\n"
             ~ self.declare_js_vars(@imported);
         } else {
             '';
@@ -1403,12 +1418,21 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my $*SETTING_NAME;
         my $*SETTING_TARGET;
 
+        my $pre := '';
+
         for $node.pre_deserialize -> $obj {
             if nqp::istype($obj, QAST::Stmts) {
                 for $obj.list -> $op {
                     if nqp::istype($op, QAST::Op) && $op.op eq 'forceouterctx' {
                         $*SETTING_NAME := $op[1][1].value;
                         $*SETTING_TARGET := $op[0].value;
+                        $pre := $pre ~ "nqp.load_setting({quote_string($*SETTING_NAME)});\n";
+                    } elsif nqp::istype($op, QAST::Op)
+                        && $op.op eq 'callmethod'
+                        && $op.name eq 'load_module' {
+                        $pre := $pre ~ "nqp.load_module({quote_string($op[1].value)});\n";
+                    } else {
+#                        self.log($op.dump);
                     }
                 }
             }
@@ -1430,7 +1454,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             $body := $block_js;
         }
 
-        Chunk.new($T_VOID, "", [self.setup_cuids(), self.create_sc($node), $body]);
+        Chunk.new($T_VOID, "", [self.setup_cuids(), $pre , self.create_sc($node), $body]);
     }
 
     method declare_var(QAST::Var $node) {

@@ -1548,6 +1548,10 @@ class QAST::MASTCompiler {
     method operations() {
         QAST::MASTOperations
     }
+
+    method instance() {
+        MASTCompilerInstance
+    }
 }
 
 # Register as the QAST compiler.

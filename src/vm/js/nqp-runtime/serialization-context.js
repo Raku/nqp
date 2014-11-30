@@ -19,6 +19,7 @@
 function SerializationContext(handle) {
   this.description = '???';
   this.handle = handle;
+  SerializationContext.contexts[handle] = this;
   this.root_objects = [];
   this.root_stables = [];
   this.root_codes = [];
@@ -31,4 +32,5 @@ function SerializationContext(handle) {
    * be repossessed in the case a write barrier is hit. */
   //  this.owned_objects = new HashMap<SixModelObject, SixModelObject>();
 }
+SerializationContext.contexts = {};
 module.exports = SerializationContext;

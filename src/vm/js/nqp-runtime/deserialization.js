@@ -11,7 +11,7 @@ var Int64 = require('node-int64');
 
 
 /** All the loaded serialization contexts using their unique IDs as keys */
-var serialization_contexts = {'__6MODEL_CORE__': __6MODEL_CORE__};
+var serialization_contexts = SerializationContext.contexts;
 
 module.exports.wval = function(handle, idx) {
   return serialization_contexts[handle].root_objects[idx];

@@ -26,12 +26,15 @@ sub MAIN(*@ARGS, *%ARGS) {
     my $nqpcomp-cc   := nqp::clone($nqpcomp-orig);
     $nqpcomp-cc.language('nqp-cc');
 
-    
+    my %*SC_CACHE;
+    %*SC_CACHE<enabled> := 1;  
+
     # avoid serializing twice when we are running two backends
     my $q := nqp::getcomp('QAST');
-#nqp::bindcomp('QAST',$q.HOW.mixin($q,SerializeOnce));
 
-    my %*SC_CACHE;
+
+    my $instance := $q.instance.new.HOW.mixin($q,SerializeOnce);
+    nqp::bindcomp('QAST', $instance);
 
     my $moar := $nqpcomp-cc.backend;
     my $js := HLLBackend::JavaScript.new();
@@ -44,7 +47,7 @@ sub MAIN(*@ARGS, *%ARGS) {
     $nqpcomp-cc.backend($combined);
 
 
-    $nqpcomp-cc.command_line(@ARGS,|%ARGS, :encoding('utf8'), :transcode('ascii iso-8859-1'), :no-regex-lib(1));
+    $nqpcomp-cc.command_line(@ARGS,|%ARGS, :encoding('utf8'), :transcode('ascii iso-8859-1'), :no-regex-lib(1), :precomp(1), :bootstrap(1));
 
 #    old options - might be useful
 #    $nqpcomp-cc.command_line(:target('pir'), :stable-sc(0), :no-regex-lib($no-regex-lib),

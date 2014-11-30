@@ -133,9 +133,13 @@ deps('js-stage1-compiler', '$(JS_STAGE1_COMPILER)');
 #deps('js-runner-default', 'js-all');
 #
 
-say('node_modules/mini-setting.setting.js: js-stage1-compiler src/vm/js/mini-setting
+say('node_modules/mininqpmo.js: js-stage1-compiler src/vm/js/mini-nqpmo
 	$(MKPATH) gen/js/stage2
-	./nqp-m --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NULL --target=mbc --output gen/js/stage2/mini-setting.setting.moarvm src/vm/js/mini-setting > node_modules/mini-setting.setting.js');
+	./nqp-m --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NULL --target=mbc --output gen/js/stage2/mininqpmo.moarvm src/vm/js/mini-nqpmo > node_modules/mininqpmo.js');
+
+say('node_modules/mini-setting.setting.js: js-stage1-compiler src/vm/js/mini-setting node_modules/mininqpmo.js
+	$(MKPATH) gen/js/stage2
+	./nqp-m --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --module-path gen/js/stage2 --setting=NULL --target=mbc --output gen/js/stage2/mini-setting.setting.moarvm src/vm/js/mini-setting > node_modules/mini-setting.setting.js');
 
 say('js-test: js-all
 	src/vm/js/bin/run_tests');

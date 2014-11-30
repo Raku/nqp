@@ -44,4 +44,9 @@ KnowHOWAttribute.prototype.type_object_for = basic_type_object_for;
 KnowHOWAttribute.prototype.allocate = basic_allocate;
 module.exports.KnowHOWAttribute = KnowHOWAttribute;
 
+function Uninstantiable() {
+}
+Uninstantiable.prototype.type_object_for = basic_type_object_for;
+module.exports.Uninstantiable = Uninstantiable;
+
 

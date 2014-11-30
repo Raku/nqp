@@ -23,15 +23,25 @@ exports.CodeRef = require('./code-ref.js');
 
 module.exports.knowhowattr = require('./bootstrap.js').knowhowattr;
 
+var currentSetting;
+var savedCtxs = {};
+
 exports.load_setting = function(settingName) {
+  currentSetting = settingName;
+
   require(settingName+".setting");
-  return savedCtx;
 };
 
-var savedCtx;
+exports.load_module = function(module) {
+  require(module);
+};
+
+exports.setup_setting = function(settingName) {
+  return savedCtxs[currentSetting];
+};
 
 exports.ctxsave = function(ctx) {
-    savedCtx = ctx;
+    savedCtxs[currentSetting] = ctx;
 };
 
 exports.to_str = function(arg) {
