@@ -146,7 +146,7 @@ class QRegex::NFA {
         %cclass_code<n>  := nqp::const::CCLASS_NEWLINE;
         %cclass_code<nl> := nqp::const::CCLASS_NEWLINE;
         # $nfadeb := nqp::existskey(nqp::getenvhash(),'MVM_NFA_DEB');
-        # $ACTIONS := ['FATE','EPSILON','CODEPOINT','CODEPOINT_NEG','CHARCLASS','CHARCLASS_NEG','CHARLIST','CHARLIST_NEG','SUBRULE','CODEPOINT_I','CODEPOINT_I_NEG','GENERIC_VAR','CHARRANGE','CHARRANGE_NEG','CODEPOINT_LL','CODEPOINT_I_LL'];
+        $ACTIONS := ['FATE','EPSILON','CODEPOINT','CODEPOINT_NEG','CHARCLASS','CHARCLASS_NEG','CHARLIST','CHARLIST_NEG','SUBRULE','CODEPOINT_I','CODEPOINT_I_NEG','GENERIC_VAR','CHARRANGE','CHARRANGE_NEG','CODEPOINT_LL','CODEPOINT_I_LL'];
         # $ind := 0;
         # $indent := '';
         $nfatime := 0;
@@ -456,7 +456,12 @@ class QRegex::NFA {
                         $substate[$j+1] := $fate;
                     }
                     elsif $substate[$j] == $EDGE_SUBRULE {
-                        self.mergesubrule($i, $substate[$j+2], $fate, $cursor, $substate[$j+1], %seen);
+                        my $j2 := $substate[$j+2];
+                        my $j1 := $substate[$j+1];
+                        nqp::splice($substate,[], $j, 3);
+                        self.mergesubrule($i, $j2, $fate, $cursor, $j1, %seen);
+                        $j := $j - 3;
+                        $k := $k - 3;
                     }
                     elsif $substate[$j] == $EDGE_CODEPOINT_LL || $substate[$j] == $EDGE_CODEPOINT_I_LL {
                         # Added to act because there's no more room arg for two case insensitive chars.
@@ -483,6 +488,7 @@ class QRegex::NFA {
 
     method run(str $target, int $offset) {
         unless nqp::isconcrete($!nfa_object) {
+#            self.mydump();
             nqp::scwbdisable();
             $!nfa_object := nqp::nfafromstatelist($!states, NFAType);
             nqp::scwbenable();
@@ -501,6 +507,7 @@ class QRegex::NFA {
     
     method run_alt(str $target, int $offset, $bstack, $cstack, @labels) {
         unless nqp::isconcrete($!nfa_object) {
+#            self.mydump();
             nqp::scwbdisable();
             $!nfa_object := nqp::nfafromstatelist($!states, NFAType);
             nqp::scwbenable();
@@ -575,6 +582,47 @@ class QRegex::NFA {
         }
         $dumper.deleteIndent();
         print("\n", $dumper.indent, ']');
+    }
+
+    method mydump() {
+        my int $send := nqp::elems($!states);
+        if $send > 1 {
+            my $err := nqp::getstderr();
+            nqp::printfh($err, "==========================================\n   $send states\n");
+            nqp::printfh($err, "Fates:\n");
+            for $!states[0] -> $f {
+                nqp::printfh($err, "\t$f\n");
+            }
+            nqp::printfh($err, "\n");
+            my int $s := 1;
+            while $s < $send {
+                nqp::printfh($err, "$s:");
+                for $!states[$s] -> $a, $v, $t {
+                    my $act := nqp::bitand_i($a,0xff);
+                    my $action := $ACTIONS[$act];
+                    if $act == $EDGE_CODEPOINT || $act == $EDGE_CODEPOINT_LL {
+                        nqp::printfh($err, "\t$t $action " ~ nqp::chr($v) ~ "\n");
+                    }
+                    elsif $act == $EDGE_FATE {
+                        nqp::printfh($err, "\t$t $action " ~ $v ~ "\n");
+                    }
+                    elsif $act == $EDGE_CHARCLASS || $act == $EDGE_CHARCLASS_NEG {
+                        nqp::printfh($err, "\t$t $action " ~ $v ~ "\n");
+                    }
+                    elsif $act == $EDGE_CHARLIST || $act == $EDGE_CHARLIST_NEG {
+                        nqp::printfh($err, "\t$t $action " ~ $v ~ "\n");
+                    }
+                    elsif $act == $EDGE_SUBRULE && nqp::istype($v,BOOTStr) {
+                        nqp::printfh($err, "\t$t $action " ~ $v ~ "\n");
+                    }
+                    else {
+                        nqp::printfh($err, "\t$t $action\n");
+                    }
+                }
+                nqp::printfh($err, "\n");
+                $s := $s + 1;
+            }
+        }
     }
 }
 
