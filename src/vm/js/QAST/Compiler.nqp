@@ -517,11 +517,9 @@ class QAST::OperationsJS {
                 $method := '[' ~ quote_string($node.name) ~ ']';
             }
         } else {
-            my $method := $comp.as_js(@args.shift, :want($T_STR));
-            my $tmp := $*BLOCK.add_tmp();
-            @setup.push($method);
-            @setup.push("$tmp := {$method.expr};\n");
-            $method := "[$tmp]";
+            my $method_name := $comp.as_js(@args.shift, :want($T_STR));
+            @setup.push($method_name);
+            $method := "[{$method_name.expr}]";
         }
 
         my $compiled_args := $comp.args(@args);
