@@ -63,17 +63,23 @@ sub combine(:$sources, :$stage, :$file, :$gen-version = 0) {
 
 sub cross-compile(:$stage, :$source, :$target, :$setting, :$no-regex-lib, :$deps = []) {
     my $path := stage_path($stage);
-    my $pir := $path ~ $target ~ '.pir';
-    my $pbc := $path ~ $target ~ '.pbc';
+    my $moarvm := $path ~ $target ~ '.moarvm';
     # todo dependency on compiler
     
     nqp::unshift($deps, $source);
     nqp::unshift($deps, '$(JS_STAGE1_COMPILER)');
 
-    rule($pbc, nqp::join(' ', $deps), 
-        make_parents($pbc),
-	"\$(JS_NQP) src/vm/js/bin/cross-compile.nqp $source $path $target $setting $no-regex-lib",
-        "\$(JS_PARROT)  -o $pbc $pir");
+    rule($moarvm, nqp::join(' ', $deps), 
+        make_parents($moarvm),
+
+	"./nqp-m --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NULL --target=mbc --output gen/js/stage2/mininqpmo.moarvm $source > node_modules/mininqpmo.js"
+
+#	"\$(JS_NQP) src/vm/js/bin/cross-compile.nqp $source $path $target $setting $no-regex-lib",
+# "\$(JS_PARROT)  -o $pbc $pir"
+        );
+
+
+#	./nqp-m --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NULL --target=mbc --output gen/js/stage2/mininqpmo.moarvm src/vm/js/mini-nqpmo > node_modules/mininqpmo.js');
 
 
 }
@@ -95,8 +101,10 @@ my $stage1-hll-backend-moar := nqp('src/vm/js','HLL/Backend',1,:deps([$stage1-qa
 constant('JS_STAGE1_COMPILER',"$stage1-qast-compiler-moar $stage1-hll-backend-moar");
 
 
-#my $nqp-mo-combined := combine(:stage(2), :sources('$(NQP_MO_SOURCES)'), :file('$(NQP_MO_COMBINED)'));
-#my $nqp-mo-pbc := cross-compile(:stage(2), :source($nqp-mo-combined), :target('nqpmo'), :setting('NULL'), :no-regex-lib(1));
+my $nqp-mo-combined := combine(:stage(2), :sources('$(NQP_MO_SOURCES)'), :file('$(NQP_MO_COMBINED)'));
+
+my $nqp-mo-moarvm := cross-compile(:stage(2), :source($nqp-mo-combined), :target('mininqpmo'), :setting('NULL'), :no-regex-lib(1));
+
 #
 #my $nqpcore-combined := combine(:stage(2), :sources('$(CORE_SETTING_SOURCES)'), :file('$(CORE_SETTING_COMBINED).nqp'));
 #my $nqpcore-pbc := cross-compile(:stage(2), :source($nqpcore-combined), :target('NQPCORE.setting'), :setting('NULL'), :no-regex-lib(1), :deps([$nqp-mo-pbc]));
@@ -133,13 +141,9 @@ deps('js-stage1-compiler', '$(JS_STAGE1_COMPILER)');
 #deps('js-runner-default', 'js-all');
 #
 
-say('node_modules/mininqpmo.js: js-stage1-compiler src/vm/js/mini-nqpmo
-	$(MKPATH) gen/js/stage2
-	./nqp-m --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NULL --target=mbc --output gen/js/stage2/mininqpmo.moarvm src/vm/js/mini-nqpmo > node_modules/mininqpmo.js');
-
-say('node_modules/mini-setting.setting.js: js-stage1-compiler src/vm/js/mini-setting node_modules/mininqpmo.js
-	$(MKPATH) gen/js/stage2
-	./nqp-m --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --module-path gen/js/stage2 --setting=NULL --target=mbc --output gen/js/stage2/mini-setting.setting.moarvm src/vm/js/mini-setting > node_modules/mini-setting.setting.js');
+say("node_modules/mini-setting.setting.js: js-stage1-compiler src/vm/js/mini-setting $nqp-mo-moarvm
+	\$(MKPATH) gen/js/stage2
+	./nqp-m --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --module-path gen/js/stage2 --setting=NULL --target=mbc --output gen/js/stage2/mini-setting.setting.moarvm src/vm/js/mini-setting > node_modules/mini-setting.setting.js");
 
 say('js-test: js-all
 	src/vm/js/bin/run_tests');
