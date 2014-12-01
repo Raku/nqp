@@ -11,6 +11,7 @@ var core = require('./core');
 load_ops(core);
 exports.hash = core.hash;
 exports.slurpy_named = core.slurpy_named;
+exports.named = core.named;
 
 var io = require('./io.js');
 load_ops(io);

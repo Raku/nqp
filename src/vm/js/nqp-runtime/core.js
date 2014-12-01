@@ -146,6 +146,16 @@ exports.slurpy_named = function(named) {
   return hash;
 };
 
+exports.named = function(parts) {
+  var all = {};
+  for (var i=0; i < parts.length; i++) {
+    for (var key in parts[i]) {
+      all[key] = parts[i][key];
+    }
+  }
+  return all;
+};
+
 exports.op.ishash = function(obj) {
   return obj instanceof Hash ? 1 : 0;
 };
