@@ -49,6 +49,29 @@ sub spew($filename, $contents) {
     nqp::closefh($handle);
 }
 
+my class NQPMu {
+    method CREATE() {
+        nqp::create(self)
+    }
+
+    method bless(NQPMu:U $self: *%attributes) {
+        my $instance := self.CREATE();
+        $instance
+    }
+
+    method new(*%attributes) {
+        self.bless(|%attributes);
+    }
+
+    method defined() {
+        nqp::isconcrete(self)
+    }
+
+    method isa($type) {
+        self.HOW.isa(self, $type)
+    }
+}
+
 my $test_counter       := 0;
 my $todo_upto_test_num := 0;
 my $todo_reason        := '';
