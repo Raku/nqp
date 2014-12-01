@@ -50,6 +50,8 @@ exports.to_str = function(arg) {
     return arg.toString();
   } else if (typeof arg == 'string') {
     return arg;
+  } else if (arg.type_object_) {
+    return "";
   } else {
     console.log(arg);
     throw "Can't convert to str";

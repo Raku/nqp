@@ -162,7 +162,7 @@ exports.op.ishash = function(obj) {
 
 op.existspos = function(array, idx) {
   if (idx < 0) idx += array.length;
-  return boolish(array.hasOwnProperty(idx));
+  return array.hasOwnProperty(idx) ? 1 : 0;
 };
 
 op.create = function(obj) {
