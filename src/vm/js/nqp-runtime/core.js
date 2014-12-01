@@ -161,7 +161,7 @@ op.create = function(obj) {
 
 op.defined = function(obj) {
   // TODO - handle more things that aren't defined
-  if (obj === undefined || obj === null) {
+  if (obj === undefined || obj === null || obj.type_object_) {
     return 0;
   }
   return 1;

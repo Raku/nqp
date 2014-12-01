@@ -63,6 +63,9 @@ exports.to_num = function(arg) {
     return isNaN(ret) ? 0 : ret;
   } else if (arg instanceof Array) {
     return arg.length;
+  } else if (arg.type_object_) {
+    // TODO - is that a correct way to do that?
+    return 0;
   } else {
     console.log(arg);
     throw "Can't convert to num";
@@ -88,6 +91,8 @@ exports.to_bool = function(arg) {
     return 0;
   } else if (arg.$$to_bool) {
     return arg.$$to_bool();
+  } else if (arg.type_object_) {
+    return false;
   } else {
     throw "Can't decide if arg is true";
   }
