@@ -97,7 +97,7 @@ constant('JS_STAGE1_COMPILER',"$stage1-qast-compiler-moar $stage1-hll-backend-mo
 
 my $nqp-mo-combined := combine(:stage(2), :sources('$(NQP_MO_SOURCES)'), :file('$(NQP_MO_COMBINED)'));
 
-my $nqp-mo-moarvm := cross-compile(:stage(2), :source($nqp-mo-combined), :target('mininqpmo'), :setting('NULL'), :no-regex-lib(1));
+my $nqp-mo-moarvm := cross-compile(:stage(2), :source($nqp-mo-combined), :target('nqpmo'), :setting('NULL'), :no-regex-lib(1));
 
 #
 #my $nqpcore-combined := combine(:stage(2), :sources('$(CORE_SETTING_SOURCES)'), :file('$(CORE_SETTING_COMBINED).nqp'));

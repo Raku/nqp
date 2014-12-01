@@ -1,4 +1,4 @@
-use mininqpmo;
+use nqpmo;
 
 # We'll re-export all of the HOWs that we import from the meta-objects
 # library. (Questionable whether we should need to do this - maybe the
