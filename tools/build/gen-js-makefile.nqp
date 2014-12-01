@@ -72,16 +72,10 @@ sub cross-compile(:$stage, :$source, :$target, :$setting, :$no-regex-lib, :$deps
     rule($moarvm, nqp::join(' ', $deps), 
         make_parents($moarvm),
 
-	"./nqp-m --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NULL --target=mbc --output gen/js/stage2/mininqpmo.moarvm $source > node_modules/mininqpmo.js"
+	"\$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NULL --target=mbc --output $moarvm $source > node_modules/$target.js"
 
 #	"\$(JS_NQP) src/vm/js/bin/cross-compile.nqp $source $path $target $setting $no-regex-lib",
-# "\$(JS_PARROT)  -o $pbc $pir"
         );
-
-
-#	./nqp-m --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NULL --target=mbc --output gen/js/stage2/mininqpmo.moarvm src/vm/js/mini-nqpmo > node_modules/mininqpmo.js');
-
-
 }
 
 
