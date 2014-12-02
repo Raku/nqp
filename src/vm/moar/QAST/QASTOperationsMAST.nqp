@@ -475,6 +475,9 @@ my sub pre-size-array($qastcomp, $instructionlist, $array_reg, $size) {
     my $int_reg := $*REGALLOC.fresh_i();
     push_op($instructionlist.instructions, 'const_i64', $int_reg, MAST::IVal.new( :value($size) ));
     push_op($instructionlist.instructions, 'setelemspos', $array_reg, $int_reg);
+    # reset the number of elements to 0 so that we don't push to the end
+    # since our lists don't shrink by themselves (or by setting elems), we'll
+    # end up with enough storage to hold all elements exactly
     push_op($instructionlist.instructions, 'const_i64', $int_reg, MAST::IVal.new( :value(0) ));
     push_op($instructionlist.instructions, 'setelemspos', $array_reg, $int_reg);
     $*REGALLOC.release_register($int_reg, $MVM_reg_int64);
