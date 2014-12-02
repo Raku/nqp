@@ -1,6 +1,6 @@
 #! nqp
 
-plan(10);
+plan(14);
 
 # Counter to make sure parameterization interning works right.
 my int $num_parameterizations := 0;
@@ -70,3 +70,11 @@ try {
     CATCH { $failed := 1 }
 }
 ok($failed, 'Cannot get type parameters on the unparameterized coercion type');
+
+my $ct2 := $coercion_types.HOW.parameterize($coercion_types, A, B);
+ok($num_parameterizations == 1, 'Coercions are interned by type');
+ok(nqp::eqaddr($ct1, $ct2), 'Really got back same coercion type');
+
+my $ct3 := $coercion_types.HOW.parameterize($coercion_types, A, C);
+ok($num_parameterizations == 2, 'Interning actually pays attention to types');
+ok(!nqp::eqaddr($ct1, $ct3), 'Got back a different coercion type');
