@@ -499,8 +499,8 @@ QAST::MASTOperations.add_core_op('list', -> $qastcomp, $op {
             push_op($arr.instructions, 'push_o', $arr_reg, $item_reg);
             $regalloc.release_register($item_reg, $MVM_reg_obj);
         }
-        my $newer := MAST::InstructionList.new(nqp::list(), $arr_reg, $MVM_reg_obj);
-        $arr.append($newer);
+        my $ensure_return_register := MAST::InstructionList.new(nqp::list(), $arr_reg, $MVM_reg_obj);
+        $arr.append($ensure_return_register);
     }
     $arr
 });
@@ -522,8 +522,8 @@ QAST::MASTOperations.add_core_op('list_i', -> $qastcomp, $op {
             push_op($arr.instructions, 'push_i', $arr_reg, $item_reg);
             $regalloc.release_register($item_reg, $MVM_reg_int64);
         }
-        my $newer := MAST::InstructionList.new(nqp::list(), $arr_reg, $MVM_reg_obj);
-        $arr.append($newer);
+        my $ensure_return_register := MAST::InstructionList.new(nqp::list(), $arr_reg, $MVM_reg_obj);
+        $arr.append($ensure_return_register);
     }
     $arr
 });
@@ -545,8 +545,8 @@ QAST::MASTOperations.add_core_op('list_n', -> $qastcomp, $op {
             push_op($arr.instructions, 'push_n', $arr_reg, $item_reg);
             $regalloc.release_register($item_reg, $MVM_reg_num64);
         }
-        my $newer := MAST::InstructionList.new(nqp::list(), $arr_reg, $MVM_reg_obj);
-        $arr.append($newer);
+        my $ensure_return_register := MAST::InstructionList.new(nqp::list(), $arr_reg, $MVM_reg_obj);
+        $arr.append($ensure_return_register);
     }
     $arr
 });
@@ -568,8 +568,8 @@ QAST::MASTOperations.add_core_op('list_s', -> $qastcomp, $op {
             push_op($arr.instructions, 'push_s', $arr_reg, $item_reg);
             $regalloc.release_register($item_reg, $MVM_reg_str);
         }
-        my $newer := MAST::InstructionList.new(nqp::list(), $arr_reg, $MVM_reg_obj);
-        $arr.append($newer);
+        my $ensure_return_register := MAST::InstructionList.new(nqp::list(), $arr_reg, $MVM_reg_obj);
+        $arr.append($ensure_return_register);
     }
     $arr
 });
@@ -594,8 +594,8 @@ QAST::MASTOperations.add_core_op('list_b', -> $qastcomp, $op {
             push_op($arr.instructions, 'push_o', $arr_reg, $item_reg);
         }
         $regalloc.release_register($item_reg, $MVM_reg_obj);
-        my $newer := MAST::InstructionList.new(nqp::list(), $arr_reg, $MVM_reg_obj);
-        $arr.append($newer);
+        my $ensure_return_register := MAST::InstructionList.new(nqp::list(), $arr_reg, $MVM_reg_obj);
+        $arr.append($ensure_return_register);
     }
     $arr
 });
@@ -622,8 +622,8 @@ QAST::MASTOperations.add_core_op('hash', -> $qastcomp, $op {
             $regalloc.release_register($key_reg, $MVM_reg_str);
             $regalloc.release_register($val_reg, $MVM_reg_obj);
         }
-        my $newer := MAST::InstructionList.new(nqp::list(), $hash_reg, $MVM_reg_obj);
-        $hash.append($newer);
+        my $ensure_return_register := MAST::InstructionList.new(nqp::list(), $hash_reg, $MVM_reg_obj);
+        $hash.append($ensure_return_register);
     }
     $hash
 });
