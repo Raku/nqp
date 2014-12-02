@@ -23,7 +23,7 @@ class QRegex::NFA {
     my $EDGE_CODEPOINT_I_LL  := 15;
 
     my $ACTIONS;
-    my $nfadeb := 0;
+    my $nfadeb;
     my $ind;
 
     sub dentin() {
@@ -170,7 +170,7 @@ class QRegex::NFA {
         %cclass_code<w>  := nqp::const::CCLASS_WORD;
         %cclass_code<n>  := nqp::const::CCLASS_NEWLINE;
         %cclass_code<nl> := nqp::const::CCLASS_NEWLINE;
-        # $nfadeb := nqp::existskey(nqp::getenvhash(),'MVM_NFA_DEB');
+        $nfadeb := nqp::existskey(nqp::getenvhash(),'MVM_NFA_DEB');
         $ACTIONS := ['FATE','EPSILON','CODEPOINT','CODEPOINT_NEG','CHARCLASS','CHARCLASS_NEG','CHARLIST','CHARLIST_NEG','SUBRULE','CODEPOINT_I','CODEPOINT_I_NEG','GENERIC_VAR','CHARRANGE','CHARRANGE_NEG','CODEPOINT_LL','CODEPOINT_I_LL'];
         # $ind := 0;
         # $indent := '';
@@ -335,6 +335,7 @@ class QRegex::NFA {
             while $count < $max || $count < $min {
                 if $count >= $min {
                     my int $f := self.addedge($from, $to, $EDGE_EPSILON, 0);
+                    nqp::printfh(nqp::getstderr(),"$indent ...quant f = $f\n") if $nfadeb;
                     $st := $st || $f;
                 }
                 if $has_sep && $count > 0 {
@@ -343,7 +344,7 @@ class QRegex::NFA {
                 $from := self.regex_nfa($node[0], $from, -1);
                 $count := $count + 1;
             }
-            self.addedge($from, $to, $EDGE_EPSILON, 0);
+            $st := self.addedge($from, $to, $EDGE_EPSILON, 0);
             if $max == -1 { # actually I think this is currently unreachable
                 my int $start := self.addstate();
                 self.addedge($from, $start, $EDGE_EPSILON, 0);
@@ -357,6 +358,7 @@ class QRegex::NFA {
                 self.regex_nfa($node[0], $from, $looper);
             }
             $to := $st if $to < 0 && $st > 0;
+            nqp::printfh(nqp::getstderr(),"$indent ...quant returns $to with st = $st\n") if $nfadeb;
             return dentout($to);
         }
         if $max == -1 {
@@ -368,7 +370,7 @@ class QRegex::NFA {
                     nqp::printfh(nqp::getstderr(),"$indent ...in quant *%, start = $start, looper = $looper\n") if $nfadeb;
                     my int $st := self.regex_nfa($node[0], $start, $looper);
                     self.regex_nfa($node[1], $looper, $start);
-                    self.addedge($looper, $to, $EDGE_EPSILON, 0);
+                    self.addedge($looper, $to, $EDGE_EPSILON, 0) unless $to < 0;
                     $st := self.addedge($from, $to, $EDGE_EPSILON, 0);
                     $to := $st if $to < 0 && $st > 0;
                 }
@@ -401,8 +403,10 @@ class QRegex::NFA {
             $to := $st if $to < 0 && $st > 0;
             $st := self.addedge($from, $to, $EDGE_EPSILON, 0);
             $to := $st if $to < 0 && $st > 0;
+            nqp::printfh(nqp::getstderr(),"$indent ...quant returns $to\n") if $nfadeb;
             dentout($to);
         } else {
+            nqp::printfh(nqp::getstderr(),"$indent ...quant returns fate\n") if $nfadeb;
             dentout(self.fate($node, $from, $to))
         }
     }
