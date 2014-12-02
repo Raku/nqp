@@ -230,7 +230,8 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
                         continue;
                     }
                     else if (act == EDGE_EPSILON && to <= num_states && done[to] != gen) {
-                        curst[numcur++] = to;
+			if (to)
+			    curst[numcur++] = to;
                         continue;
                     }
                 }

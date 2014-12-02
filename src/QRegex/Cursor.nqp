@@ -345,6 +345,7 @@ role NQPCursorRole is export {
                 @fates[$fate] := $rxname;  # override default fate #
             }
         }
+        $nfa.optimize();
         $nfa;
     }
 
@@ -387,6 +388,7 @@ role NQPCursorRole is export {
             $nfa.mergesubstates($start, 0, $fate, $_, self);
             $fate++;
         }
+        $nfa.optimize();
         $nfa
     }
 

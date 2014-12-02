@@ -5002,7 +5002,8 @@ public final class Ops {
                             continue;
                         }
                         else if (act == NFA.EDGE_EPSILON && to <= numStates && done[to] != gen) {
-                            curst.add(to);
+			    if (to != 0)
+				curst.add(to);
                             continue;
                         }
                     }
