@@ -471,6 +471,15 @@ QAST::MASTOperations.add_core_op('stmts', -> $qastcomp, $op {
     $qastcomp.as_mast(QAST::Stmts.new( |@($op) ))
 });
 
+my sub pre-size-array($qastcomp, $instructionlist, $array_reg, $size) {
+    my $int_reg := $*REGALLOC.fresh_i();
+    push_op($instructionlist.instructions, 'const_i64', $int_reg, MAST::IVal.new( :value($size) ));
+    push_op($instructionlist.instructions, 'setelemspos', $array_reg, $int_reg);
+    push_op($instructionlist.instructions, 'const_i64', $int_reg, MAST::IVal.new( :value(0) ));
+    push_op($instructionlist.instructions, 'setelemspos', $array_reg, $int_reg);
+    $*REGALLOC.release_register($int_reg, $MVM_reg_int64);
+}
+
 # Data structures
 QAST::MASTOperations.add_core_op('list', -> $qastcomp, $op {
     # Just desugar to create the empty list.
@@ -481,6 +490,7 @@ QAST::MASTOperations.add_core_op('list', -> $qastcomp, $op {
     ));
     if +$op.list {
         my $arr_reg := $arr.result_reg;
+        pre-size-array($qastcomp, $arr, $arr_reg, +$op.list);
         # Push things to the list.
         for $op.list {
             my $item := $qastcomp.as_mast($_, :want($MVM_reg_obj));
@@ -503,6 +513,7 @@ QAST::MASTOperations.add_core_op('list_i', -> $qastcomp, $op {
     ));
     if +$op.list {
         my $arr_reg := $arr.result_reg;
+        pre-size-array($qastcomp, $arr, $arr_reg, +$op.list);
         # Push things to the list.
         for $op.list {
             my $item := $qastcomp.as_mast($_, :want($MVM_reg_int64));
@@ -525,6 +536,7 @@ QAST::MASTOperations.add_core_op('list_n', -> $qastcomp, $op {
     ));
     if +$op.list {
         my $arr_reg := $arr.result_reg;
+        pre-size-array($qastcomp, $arr, $arr_reg, +$op.list);
         # Push things to the list.
         for $op.list {
             my $item := $qastcomp.as_mast($_, :want($MVM_reg_num64));
@@ -547,6 +559,7 @@ QAST::MASTOperations.add_core_op('list_s', -> $qastcomp, $op {
     ));
     if +$op.list {
         my $arr_reg := $arr.result_reg;
+        pre-size-array($qastcomp, $arr, $arr_reg, +$op.list);
         # Push things to the list.
         for $op.list {
             my $item := $qastcomp.as_mast($_, :want($MVM_reg_str));
@@ -569,6 +582,7 @@ QAST::MASTOperations.add_core_op('list_b', -> $qastcomp, $op {
     ));
     if +$op.list {
         my $arr_reg := $arr.result_reg;
+        pre-size-array($qastcomp, $arr, $arr_reg, +$op.list);
         # Push things to the list.
         my $item_reg := $regalloc.fresh_register($MVM_reg_obj);
         for $op.list {
