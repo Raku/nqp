@@ -670,6 +670,8 @@ class QAST::OperationsJS {
     }
 
     add_op('for', sub ($comp, $node, :$want) {
+        # TODO redo etc.
+
         my $handler := 1;
         my @operands;
         my $label;
@@ -687,21 +689,27 @@ class QAST::OperationsJS {
         }
 
         my $iterator := $*BLOCK.add_tmp();
-        my $iterval := $*BLOCK.add_tmp();
 
         my $list := $comp.as_js(@operands[0], :want($T_OBJ));
 
         # TODO think if creating the block once, and the calling it multiple times would be faster
 
+        my @body_args;
+        my $arity := @operands[1].arity || 1;
+        while $arity > 0 {
+            my $iterval := $*BLOCK.add_tmp();
+            @body_args.push(Chunk.new($T_OBJ, $iterval, ["$iterval = $iterator.shift();\n"]));
+            $arity := $arity - 1;
+        }
+
         my $outer     := try $*BLOCK;
-        my $body := $comp.compile_block(@operands[1], $outer, :want($T_VOID), :arg($iterval));
+        my $body := $comp.compile_block(@operands[1], $outer, :want($T_VOID), :extra_args(@body_args));
 
 
         Chunk.new($T_VOID, '', [
             $list,
             "$iterator = nqp.op.iterator({$list.expr});\n",
             "while ($iterator.idx < $iterator.target) \{\n",
-            "$iterval = $iterator.shift();\n",
             $body,
             "\}\n"
         ], :node($node));
@@ -1287,7 +1295,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
     }
 
-    method compile_block(QAST::Block $node, $outer, :$want, :$arg='') {
+    method compile_block(QAST::Block $node, $outer, :$want, :@extra_args=[]) {
         my $cuid := self.mangled_cuid($node.cuid);
 
         my $setup;
@@ -1320,8 +1328,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
 
         if $node.blocktype eq 'immediate' {
-            my $extra_args := $arg ?? ",$arg" !! '';
-            self.stored_result(Chunk.new($want, $cuid~".\$call({$outer.ctx},\{\}$extra_args)", $setup, :$node), :$want);
+            my @args := [$outer.ctx,'{}'];
+            for @extra_args -> $arg {
+                @args.push($arg.expr);
+                $setup.push($arg);
+            }
+            self.stored_result(Chunk.new($want, $cuid~".\$call({nqp::join(',', @args)})", $setup, :$node), :$want);
         } else {
             Chunk.new($T_OBJ, $cuid, $setup);
         }
