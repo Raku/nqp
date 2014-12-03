@@ -116,6 +116,14 @@ op.tellfh = function(fh) {
   return fs.seekSync(fh.fd, 0, 1);
 };
 
+op.eoffh = function(fh) {
+  // I haven't found a way to implement this directly in node.js
+  var current = fs.seekSync(fh.fd, 0, 1);
+  var end = fs.seekSync(fh.fd, 0, 2);
+  fs.seekSync(fh.fd, 0, current);
+  return current == end ? 1 : 0;
+};
+
 op.setencoding = function(fh, encoding) {
   fh.encoding = encoding;
 };
