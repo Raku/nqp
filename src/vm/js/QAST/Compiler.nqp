@@ -1019,7 +1019,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my $slurpy_named; # *%foo
         my $slurpy;       # *@foo
 
-        my @pos;          # $foo
+        my @sig := ['caller_ctx','_NAMED'];
         my @setup;
 
         my $bind_named := '';
@@ -1047,11 +1047,23 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 @setup.push("{self.mangle_name($_.name)} = $value;\n");
             } else {
                 my $default := '';
+                my $name := self.mangle_name($_.name);
                 if $_.default {
-                    # TODO
-                    #$default := self.as_js($_.default, :want($T_OBJ));
+                    # Overwriting a parameter makes the v8 optimizer bail out so to avoid that we introduce a new variable
+                    my $tmp := self.unique_var($name~'_');
+
+                    $*BLOCK.add_js_lexical($name);
+                    @sig.push($tmp);
+                    my $default_value := self.as_js($_.default, :want($T_OBJ));
+                    @setup.push(Chunk.new($T_VOID, "", [
+                        "if (arguments.length < {+@sig}) \{\n",
+                         $default_value,
+                         "$name = {$default_value.expr};\n\} else \{\n$name = $tmp;\n\}\n"
+                    ]));
+
+                } else {
+                    @sig.push($name);
                 }
-                @pos.push([$_,$default]);
             }
         }
 
@@ -1059,14 +1071,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 #            $bind_named := $bind_named ~ self.bind_var($slurpy_named,self.js('_NAMED'),1) ~ ";\n";
 #        }
 
-        my @sig := ['caller_ctx','_NAMED'];
 
-        for @pos -> $pos {
-            @sig.push(self.mangle_name($pos[0].name));
-        }
 
         if $slurpy {
-            @setup.push("{self.mangle_name($slurpy.name)} = Array.prototype.slice.call(arguments,{2+@pos});\n");
+            @setup.push("{self.mangle_name($slurpy.name)} = Array.prototype.slice.call(arguments,{+@sig});\n");
         }
         if $slurpy_named {
             @setup.push("{self.mangle_name($slurpy_named.name)} = nqp.slurpy_named(_NAMED);\n");
@@ -1321,6 +1329,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     has $!unique_vars;
 
+    # TODO avoid accidental name collisions 
     method unique_var($prefix) {
         $!unique_vars := $!unique_vars + 1;
         $prefix~$!unique_vars;
