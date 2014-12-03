@@ -120,7 +120,7 @@ op.eoffh = function(fh) {
   // I haven't found a way to implement this directly in node.js
   var current = fs.seekSync(fh.fd, 0, 1);
   var end = fs.seekSync(fh.fd, 0, 2);
-  fs.seekSync(fh.fd, 0, current);
+  fs.seekSync(fh.fd, current, 0);
   return current == end ? 1 : 0;
 };
 
@@ -168,6 +168,10 @@ op.readallfh = function(fh) {
     var all = Buffer.concat([all, buf], total);
   }
   return iconv.decode(all, fh.encoding);
+};
+
+op.seekfh = function(fh, offset, whence) {
+  fs.seekSync(fh.fd, offset, whence);
 };
 
 op.closefh = function(fh) {
