@@ -859,17 +859,19 @@ class QRegex::NFA {
                             # a small O(N^2) dup remover
                             $e := 3;
                             while $e < $eend {
-                                my $f := 0;
-                                while $f < $e {
-                                    # in order of likelihood of differences, hopefully
-                                    if $edges[$e] != $EDGE_CHARLIST && $edges[$e] != $EDGE_CHARLIST_NEG && $edges[$e+2] == $edges[$f+2] && $edges[$e] == $edges[$f] && $edges[$e+1] == $edges[$f+1] {
-                                        nqp::printfh($err, "Deleting dup edge at $s $e/$f\n") if $nfadeb;
-                                        $f := $e;
-                                        nqp::splice($edges,[],$e,3);
-                                        $e := $e - 3;
-                                        $eend := $eend - 3;
+                                my int $act := nqp::bitand_i($edges[$e], 0xff);
+                                if $act < $EDGE_CHARLIST {
+                                    my $f := 0;
+                                    while $f < $e {
+                                        if $act == $edges[$f] && $edges[$e+2] == $edges[$f+2] && $edges[$e+1] == $edges[$f+1] {
+                                            nqp::printfh($err, "Deleting dup edge at $s $e/$f\n") if $nfadeb;
+                                            $f := $e;
+                                            nqp::splice($edges,[],$e,3);
+                                            $e := $e - 3;
+                                            $eend := $eend - 3;
+                                        }
+                                        $f := $f + 3;
                                     }
-                                    $f := $f + 3;
                                 }
                                 $e := $e + 3;
                             }
