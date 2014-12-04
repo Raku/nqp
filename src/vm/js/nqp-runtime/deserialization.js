@@ -119,6 +119,46 @@ BinaryCursor.prototype.hashOfVariants = function() {
   return hash;
 };
 
+/** Read a int of variable length */
+/* TODO - make it work correctly for values bigger then 32bit integers*/
+BinaryCursor.prototype.varint = function() {
+    var inner_offset = 0;
+    var shift_amount = 0;
+    var negation_mask = 0;
+
+    var read_on = !!(this.buffer.readInt8(this.offset) & 0x80) + 1;
+
+    var value = 0;
+
+    while (read_on && inner_offset != 8) {
+        value = value | ((this.buffer.readInt8(this.offset + inner_offset) & 0x7f) << shift_amount);
+        negation_mask = negation_mask | (0x7F << shift_amount);
+
+        if (read_on == 1 && this.buffer.readInt8(this.offset + inner_offset) & 0x80) {
+            read_on = 2;
+        }
+        read_on--;
+        inner_offset++;
+        shift_amount += 7;
+    }
+    // our last byte will be a full byte, so that we reach the full 64 bits
+    // TODO handle the last full byte
+    /*
+    if (read_on && inner_offset == 8) {
+        *value = *value | ((int64_t)buffer[offset + inner_offset] << shift_amount);
+        negation_mask = negation_mask | ((int64_t)0xFF << shift_amount);
+        ++inner_offset;
+    }*/
+    negation_mask = negation_mask >> 1;
+    // do we have a negative number so far?
+    if (value & ~negation_mask) {
+        // we have to fill it up with ones all the way to the left.
+        value = value | ~negation_mask;
+    }
+    this.offset += inner_offset;
+    return value;
+}
+
 /** Read a variant reference */
 BinaryCursor.prototype.variant = function() {
   var type = this.buffer.readUInt16LE(this.offset);
