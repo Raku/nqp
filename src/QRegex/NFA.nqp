@@ -563,7 +563,7 @@ class QRegex::NFA {
                             $substate[$j+1] := $fate;
                         }
                         else {  # adding our own fate later, so don't need this one
-                            $substate[$j] := $EDGE_EPSILON unless $to > 0;
+                            $substate[$j] := $EDGE_EPSILON;
                         }
                     }
                     elsif $substate[$j] == $EDGE_SUBRULE {
