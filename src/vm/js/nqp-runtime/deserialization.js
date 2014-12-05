@@ -44,6 +44,8 @@ function BinaryCursor(buffer, offset, sh, sc) {
   this.sc = sc;
 }
 
+/* Export for unit testing*/
+exports.BinaryCursor = BinaryCursor;
 
 /** Clone the cursor */
 BinaryCursor.prototype.clone = function() {
@@ -170,11 +172,8 @@ BinaryCursor.prototype.variant = function() {
     case 3:
       return null;
     case 4:
-      //TODO: think about that
-      //FIXME: negative
-      var low = this.I32();
-      var high = this.I32();
-      return int64(high, low);
+      // TODO deserialize bigger integers then can fit into a 32bit number
+      return this.varint();
     case 5:
       return this.double();
     case 6:
@@ -183,8 +182,9 @@ BinaryCursor.prototype.variant = function() {
       return this.array(function(cursor) {return cursor.variant()});
     case 8:
       return this.array(function(cursor) {return cursor.str()});
-    case 9:
-      return this.array(function(cursor) {return cursor.I64()});
+      /* TODO varints */
+/*    case 9:
+      return this.array(function(cursor) {return cursor.I64()});*/
     case 10:
       return this.hashOfVariants(this);
     case 11:
@@ -244,6 +244,14 @@ BinaryCursor.prototype.STable = function(STable) {
     STable.invocation_hint = this.I64();
     STable.invocation_handler = this.variant();
   }
+
+  STable.hll_owner = this.str();
+
+  if (STable.REPR.deserialize_repr_data) {
+    STable.REPR.deserialize_repr_data(this.clone());
+  }
+
+
 }
 
 /** Read a whole serialization context */
