@@ -831,10 +831,12 @@ class QAST::OperationsJS {
 
     add_simple_op('how', $T_OBJ, [$T_OBJ], sub ($obj) {"$obj._STable.HOW"});
     add_simple_op('who', $T_OBJ, [$T_OBJ], sub ($obj) {"$obj._STable.WHO"});
+    add_simple_op('what', $T_OBJ, [$T_OBJ], sub ($obj) {"$obj._STable.WHAT"});
 
     add_simple_op('knowhowattr', $T_OBJ, [], sub () {"nqp.knowhowattr"});
 
     add_simple_op('atkey', $T_OBJ, [$T_OBJ, $T_STR], sub ($hash, $key) {"$hash[$key]"});
+
 
     method compile_op($comp, $op, :$want) {
         my str $name := $op.op;
