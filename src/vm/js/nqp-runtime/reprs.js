@@ -17,7 +17,16 @@ function basic_allocate(STable) {
 function P6opaque() {
 }
 
-P6opaque.prototype.allocate = basic_allocate;
+P6opaque.prototype.allocate = function(STable) {
+  var obj = new STable.obj_constructor();
+  if (this.autovived) {
+    for (var attr in this.autovived) {
+      obj[attr] = this.autovived[attr];
+    }
+  }
+
+  return obj;
+};
 
 
 P6opaque.prototype.deserialize_repr_data = function(cursor) {
@@ -66,6 +75,27 @@ P6opaque.prototype.deserialize_repr_data = function(cursor) {
           this.name_to_index_mapping[i].names[j] = cursor.str();
           this.name_to_index_mapping[i].slots[j] = cursor.varint();
       }
+  }
+
+  var autovived = {};
+  for (var i in this.name_to_index_mapping) {
+    for (var j in this.name_to_index_mapping[i].slots) {
+        var name = this.name_to_index_mapping[i].names[j];
+        var slot = this.name_to_index_mapping[i].slots[j];
+        if (this.auto_viv_values[slot]) {
+            if (!this.auto_viv_values[slot].type_object_) {
+                console.log('autoviv', name, slot, this.auto_viv_values[slot]);
+                throw "We currently only implement autoviv with type object values";
+            }
+            /* TODO autoviving things that aren't typeobjects */
+            /* TODO we need to store attributes better */
+            autovived[name] = this.auto_viv_values[slot];
+        }
+    }
+  }
+  
+  if (Object.keys(autovived).length != 0) {
+    this.autovived = autovived;
   }
 
   /* TODO make possitional and associative delegates work */

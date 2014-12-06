@@ -297,6 +297,20 @@ class QAST::OperationsJS {
     add_simple_op('div_i', $T_INT, [$T_INT, $T_INT], sub ($a, $b) {"(($a / $b) | 0)"});
     add_simple_op('mul_i', $T_INT, [$T_INT, $T_INT], sub ($a, $b) {"Math.imul($a,$b)"});
 
+    # TODO handle attributes properly
+    add_simple_op('bindattr', $T_OBJ, [$T_OBJ, $T_OBJ, $T_STR, $T_OBJ], :sideffects,
+        sub ($obj, $type, $attr, $value) {
+            # TODO take second argument into account
+            "($obj[$attr] = $value)";
+        }
+    );
+    add_simple_op('attrinited', $T_BOOL, [$T_OBJ, $T_OBJ, $T_STR],
+        sub ($obj, $type, $attr) {
+            # TODO take second argument into account
+            "$obj.hasOwnProperty($attr)";
+        }
+    );
+
     sub add_cmp_op($op, $type) {
         add_simple_op($op, $T_INT, [$type, $type], sub ($a, $b) {
             "($a < $b ? -1 : ($a == $b ? 0 : 1))"
@@ -1544,6 +1558,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         0;
     }
 
+
     method compile_var(QAST::Var $var) {
         if self.var_is_lexicalish($var) && self.is_dynamic_var($var) {
             self.TODO("dynamic variables");
@@ -1587,6 +1602,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
         } elsif ($var.scope eq 'attribute') {
             # TODO take second argument into account
+            # TODO figure out if the second argument can be always assumed to be a WVal 
             # TODO types
             my $self := self.as_js_clear_bindval($var[0], :want($T_OBJ));
             my $attr := Chunk.new($T_OBJ, "{$self.expr}[{quote_string($var.name)}]", [$self]);
