@@ -585,7 +585,8 @@
               <div>
                 {{gc.RetainedKilobytes}}KB /
                 {{gc.PromotedKilobytes}}KB /
-                {{gc.ClearedKilobytes}}KB
+                {{gc.ClearedKilobytes}}KB ...
+                <small>{{gc.Gen2Roots}} gen2 roots</small>
               </div>
             </td>
           </tr>
@@ -1093,7 +1094,8 @@
                 ClearedKilobytes:  Math.round(gc.cleared_bytes / 1024),
                 RetainedPercent:   +(100 * gc.retained_bytes / totalBytes).toFixed(2),
                 PromotedPercent:   +(100 * gc.promoted_bytes / totalBytes).toFixed(2),
-                ClearedPercent:    +(100 * gc.cleared_bytes / totalBytes).toFixed(2)
+                ClearedPercent:    +(100 * gc.cleared_bytes / totalBytes).toFixed(2),
+                Gen2Roots:         'gen2_roots' in gc ? gc.gen2_roots : 0
             };
         });
         $scope.predicate = 'Run';
