@@ -666,6 +666,7 @@ public class BootJavaInterop {
 
     /** Stores working information while building a class. */
     protected static class ClassContext {
+        public ClassContext() {}
         /** The ASM class writer. */
         public ClassWriter cv;
         /** The new class' internal name. */
@@ -825,6 +826,7 @@ public class BootJavaInterop {
 
     /** Working information for a method under construction. */
     protected static class MethodContext {
+        public MethodContext() { }
         /** The owning incomplete class. */
         public ClassContext cc;
         /** The ASM method writer. */
