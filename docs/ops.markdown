@@ -1825,7 +1825,7 @@ operation already completed anyway), then nothing will happen. This is to
 avoid race conditions.
 
 ## timer
-* `($queue, $schedulee, int $timeout, int $repeat, $handle_type)`
+* `timer($queue, $schedulee, int $timeout, int $repeat, $handle_type)`
 
 Starts a timer. If timeout is zero, the $schedulee is immediately pushed to
 the queue. Otherwise, it is pushed after the timeout period. If repeat is
