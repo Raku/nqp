@@ -111,10 +111,6 @@ Building the JavaScript backend currently requires building the moar backend.
 perl Configure.pl --backends=moar,js
 make
 
-To install the runtime into node_modules:
-
-npm install src/vm/js/nqp-runtime
-
 Currently it needs to be run like:
 
     ./nqp-js file.nqp
