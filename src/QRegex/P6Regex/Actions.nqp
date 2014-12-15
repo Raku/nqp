@@ -418,6 +418,12 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         make $qast;
     }
 
+    method cclass_backslash:sym<n>($/) {
+        my $qast := QAST::Regex.new( "\n", :rxtype('enumcharlist'),
+                        :negate($<sym> eq 'N'), :node($/) );
+        make $qast;
+    }
+
     method cclass_backslash:sym<r>($/) {
         my $qast := QAST::Regex.new( "\r", :rxtype('enumcharlist'),
                         :negate($<sym> eq 'R'), :node($/) );
@@ -584,7 +590,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                         $qast );
             }
             else {
-                $qast := QAST::Regex.new( $qast, $ast, :rxtype<altseq>, :node($/));
+                $qast := QAST::Regex.new( $qast, $ast, :rxtype<alt>, :node($/));
             }
             $i++;
         }
@@ -678,7 +684,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                     QAST::Regex.new( :rxtype<concat>, :node($/), :negate(1),
                         QAST::Regex.new( :rxtype<conj>, :subtype<zerowidth>, |@alts ),
                         QAST::Regex.new( :rxtype<cclass>, :name<.> ) ) !!
-                    QAST::Regex.new( :rxtype<altseq>, |@alts );
+                    QAST::Regex.new( :rxtype<alt>, |@alts );
         }
         make $qast;
     }

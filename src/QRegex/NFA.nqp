@@ -202,6 +202,7 @@ class QRegex::NFA {
 
     method enumcharlist($node, $from, $to) {
         my $indent := dentin();
+        nqp::printfh(nqp::getstderr(),"$indent enumcharlist $from -> $to\n") if $nfadeb;
         my $charlist := $node[0];
         if $node.subtype eq 'zerowidth' {
             $from := self.addedge($from, -1, $EDGE_CHARLIST + ?$node.negate, $charlist);
@@ -453,6 +454,9 @@ class QRegex::NFA {
                 }
                 %seen{$n} := 1;
             }
+            else {
+                nqp::printfh($err, "$indent ...skipping $n to avoid left recursion\n") if $nfadeb;
+            }
         }
         elsif nqp::can($cursor, $name) {
             nqp::printfh(nqp::getstderr(),"$indent mergesubrule $name start $start to $to fate $fate\n") if $nfadeb;
@@ -478,6 +482,9 @@ class QRegex::NFA {
                     @substates := $nfa.states() if $gotmatch;
                 }
                 %seen{$name} := 1;
+            }
+            else {
+                nqp::printfh($err, "$indent ...skipping $name to avoid left recursion\n") if $nfadeb;
             }
         }
         if $nfadeb {

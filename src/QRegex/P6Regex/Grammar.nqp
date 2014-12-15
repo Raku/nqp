@@ -351,6 +351,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token cclass_backslash:sym<e> { $<sym>=[<[eE]>] }
     token cclass_backslash:sym<f> { $<sym>=[<[fF]>] }
     token cclass_backslash:sym<h> { $<sym>=[<[hH]>] }
+    token cclass_backslash:sym<n> { $<sym>=[<[nN]>] }
     token cclass_backslash:sym<r> { $<sym>=[<[rR]>] }
     token cclass_backslash:sym<t> { $<sym>=[<[tT]>] }
     token cclass_backslash:sym<v> { $<sym>=[<[vV]>] }
