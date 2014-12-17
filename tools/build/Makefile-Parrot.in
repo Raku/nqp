@@ -738,7 +738,7 @@ $(DYNPMC): $(PMC_SOURCES) $(METAMODEL_SOURCE)
 	$(LD) @ld_out@$(DYNPMC) $(GROUP)$(O) src/vm/parrot/pmc/*$(O) $(LINKARGS)
 
 $(OPS_DIR)/$(OPS)$(LOAD_EXT): $(OPS_DIR)/$(OPS_SOURCE) $(DYNPMC)
-	cd $(OPS_DIR) && $(OPS2C) C --dynamic $(OPS_SOURCE)
+	$(OPS2C) --dynamic $(OPS_DIR)/$(OPS_SOURCE)
 	cd $(OPS_DIR) && $(CC) -c @cc_o_out@$(OPS)$(O) $(CINCLUDES) $(CFLAGS) $(OPS).c
 	cd src/vm/parrot/6model && $(CC) -c @cc_o_out@sixmodelobject$(O) -I../../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) sixmodelobject.c
 	cd src/vm/parrot/6model && $(CC) -c @cc_o_out@repr_registry$(O) -I../../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) repr_registry.c
@@ -1007,7 +1007,7 @@ $(OPS_DIR)/$(OPS)$(LOAD_EXT): $(OPS_DIR)/$(OPS_SOURCE) $(DYNPMC)
 	cd 3rdparty/libtommath && $(CC) -c @cc_o_out@bn_s_mp_sub$(O) -I. $(CFLAGS) bn_s_mp_sub.c
 
 $(OPS_DIR)/$(BIGINT_OPS)$(LOAD_EXT): $(OPS_DIR)/$(BIGINT_OPS_SOURCE) $(LIBTOMMATH_BIN) $(LIBTOMMATH_H) src/vm/parrot/6model/reprs/P6bigint.h src/vm/parrot/6model/reprs/P6bigint.c
-	cd $(OPS_DIR) && $(OPS2C) C --dynamic $(BIGINT_OPS_SOURCE)
+	$(OPS2C) --dynamic $(OPS_DIR)/$(BIGINT_OPS_SOURCE)
 	cd $(OPS_DIR) && $(CC) -c @cc_o_out@$(BIGINT_OPS)$(O) $(CINCLUDES) -I../../../../3rdparty/libtommath $(CFLAGS) $(BIGINT_OPS).c
 	cd src/vm/parrot/6model/reprs && $(CC) -c @cc_o_out@P6bigint$(O) -I../../../../../$(PMC_DIR) -I../../../../../3rdparty/libtommath $(CINCLUDES) $(CFLAGS) P6bigint.c
 	cd $(OPS_DIR) && $(LD) @ld_out@$(BIGINT_OPS)$(LOAD_EXT) $(BIGINT_OPS)$(O) ../../../../3rdparty/libtommath/*$(O) ../6model/reprs/P6bigint$(O) $(LINKARGS)
@@ -1016,7 +1016,7 @@ $(DYNCALL_BIN):
 	@dyncall_build@
 
 $(OPS_DIR)/$(DYNCALL_OPS)$(LOAD_EXT): $(OPS_DIR)/$(DYNCALL_OPS_SOURCE) $(DYNCALL_BIN) src/vm/parrot/6model/reprs/NativeCall.c src/vm/parrot/6model/reprs/NativeCall.h src/vm/parrot/6model/reprs/CStruct.c src/vm/parrot/6model/reprs/CStruct.h src/vm/parrot/6model/reprs/CPointer.c src/vm/parrot/6model/reprs/CPointer.h src/vm/parrot/6model/reprs/CArray.c src/vm/parrot/6model/reprs/CArray.h src/vm/parrot/6model/reprs/CStr.c src/vm/parrot/6model/reprs/CStr.h $(OPS_DIR)/$(OPS)$(LOAD_EXT)
-	cd $(OPS_DIR) && $(OPS2C) C --dynamic $(DYNCALL_OPS_SOURCE)
+	$(OPS2C) --dynamic $(OPS_DIR)/$(DYNCALL_OPS_SOURCE)
 	cd $(OPS_DIR) && $(CC) -c @cc_o_out@$(DYNCALL_OPS)$(O) $(CINCLUDES) -I../../../../3rdparty/dyncall/dyncall -I../../../../3rdparty/dyncall/dyncallback -I../../../../3rdparty/dyncall/dynload $(CFLAGS) $(DYNCALL_OPS).c
 	cd src/vm/parrot/6model/reprs && $(CC) -c @cc_o_out@NativeCall$(O) -I../../../../../$(PMC_DIR) -I../../../../../3rdparty/dyncall/dyncall -I../../../../../3rdparty/dyncall/dyncallback  -I../../../../../3rdparty/dyncall/dynload $(CINCLUDES) $(CFLAGS) NativeCall.c
 	cd src/vm/parrot/6model/reprs && $(CC) -c @cc_o_out@CStruct$(O) -I../../../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) CStruct.c
