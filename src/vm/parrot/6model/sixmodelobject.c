@@ -11,7 +11,6 @@ static INTVAL stable_id    = 0;
 static INTVAL smo_id       = 0;
 static INTVAL sc_id        = 0;
 static INTVAL ownedrpa_id  = 0;
-static INTVAL qrpa_id      = 0;
 static INTVAL ownedhash_id = 0;
 
 /* Cached strings. */
@@ -309,8 +308,6 @@ PMC * hllize(PARROT_INTERP, PMC *obj, INTVAL hll_id) {
     /* Otherwise, it's a Parrot type. */
     if (ownedrpa_id == 0)
         ownedrpa_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "OwnedResizablePMCArray", 0));
-    if (qrpa_id == 0)
-        qrpa_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "QRPA", 0));
     if (ownedhash_id == 0)
         ownedhash_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "OwnedHash", 0));
     if (obj->vtable->base_type == enum_class_String) {
@@ -368,9 +365,8 @@ PMC * hllize(PARROT_INTERP, PMC *obj, INTVAL hll_id) {
             return obj;
         }
     }
-    else if (obj->vtable->base_type == enum_class_ResizablePMCArray
-         ||  obj->vtable->base_type == ownedrpa_id
-         ||  obj->vtable->base_type == qrpa_id) {
+    else if (obj->vtable->base_type == enum_class_ResizablePMCArray /* XXX ResizableStringArray? */
+         ||  obj->vtable->base_type == ownedrpa_id) {
         if (VTABLE_exists_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_array"))) {
             PMC *result;
             PMC *code = VTABLE_get_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_array"));

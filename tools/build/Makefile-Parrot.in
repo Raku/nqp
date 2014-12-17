@@ -120,12 +120,12 @@ DYNOPS          = $(OPS_DIR)/$(OPS)$(LOAD_EXT)
 PMC_SOURCES     = $(PMC_DIR)/stable.pmc $(PMC_DIR)/sixmodelobject.pmc \
                   $(PMC_DIR)/nqplexinfo.pmc $(PMC_DIR)/nqplexpad.pmc \
                   $(PMC_DIR)/serializationcontext.pmc $(PMC_DIR)/ownedhash.pmc \
-                  $(PMC_DIR)/ownedresizablepmcarray.pmc $(PMC_DIR)/qrpa.pmc
+                  $(PMC_DIR)/ownedresizablepmcarray.pmc
 
 DYNPMC_HEADERS  = $(PMC_DIR)/pmc_stable.h $(PMC_DIR)/pmc_sixmodelobject.h \
                   $(PMC_DIR)/pmc_nqplexinfo.h $(PMC_DIR)/pmc_nqplexpad.h \
                   $(PMC_DIR)/pmc_serializationcontext.h $(PMC_DIR)/pmc_ownedhash.h \
-                  $(PMC_DIR)/pmc_ownedresizablepmcarray.h $(PMC_DIR)/pmc_qrpa.h
+                  $(PMC_DIR)/pmc_ownedresizablepmcarray.h
 
 OPS_SOURCE      = nqp.ops
 

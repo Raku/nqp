@@ -271,7 +271,7 @@ QAST::Operations.add_core_op('list', :inlinable(1), -> $qastcomp, $op {
     # Create register for the resulting list and make an empty one.
     my $list_reg := $*REGALLOC.fresh_p();
     my $ops := PIRT::Ops.new(:result($list_reg));
-    $ops.push_pirop('new', $list_reg, "'QRPA'");
+    $ops.push_pirop('new', $list_reg, "'ResizablePMCArray'");
     if +$op.list > 1 {
         $ops.push_pirop('assign', $list_reg, +$op.list);
         $ops.push_pirop('assign', $list_reg, 0);

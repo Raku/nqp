@@ -34,7 +34,6 @@ static INTVAL initialized = 0;
 static INTVAL stable_id = 0;
 static INTVAL smo_id    = 0;
 static INTVAL disp_id   = 0;
-static INTVAL qrpa_id   = 0;
 static INTVAL ohash_id  = 0;
 
 /* Built-in meta-objects. */
@@ -60,7 +59,7 @@ static PMC *empty_hash = NULL;
 /* SC write barrier for objects. */
 static void SC_write_barrier_obj(PARROT_INTERP, PMC *obj) {
     if (!sc_write_barrier_off_depth && VTABLE_get_bool(interp, compiling_scs)) {
-        PMC *comp_sc = VTABLE_get_pmc_keyed_int(interp, compiling_scs, 0);
+        const PMC *comp_sc = VTABLE_get_pmc_keyed_int(interp, compiling_scs, 0);
         if (SC_PMC(obj) != comp_sc) {
             SC_repossess_object(interp, comp_sc, SC_PMC(obj), obj);
             SC_PMC(obj) = comp_sc;
@@ -73,7 +72,7 @@ static void SC_write_barrier_obj(PARROT_INTERP, PMC *obj) {
 /* SC write barrier for STables. */
 static void SC_write_barrier_st(PARROT_INTERP, STable *st) {
     if (!sc_write_barrier_off_depth && VTABLE_get_bool(interp, compiling_scs)) {
-        PMC *comp_sc = VTABLE_get_pmc_keyed_int(interp, compiling_scs, 0);
+        const PMC *comp_sc = VTABLE_get_pmc_keyed_int(interp, compiling_scs, 0);
         if (st->sc != comp_sc) {
             SC_repossess_stable(interp, comp_sc, st->sc, st->stable_pmc);
             st->sc = comp_sc;
@@ -83,18 +82,18 @@ static void SC_write_barrier_st(PARROT_INTERP, STable *st) {
     }
 }
 
-/* Test for something being a list (RPA or QRPA).  */
+/* Test for something being a list (ResizablePMCArray or ResizableStringArray).  */
 static INTVAL
 nqp_islist(PMC *pmc) {
-    INTVAL type = pmc->vtable->base_type;
-    return (INTVAL)(type == qrpa_id || type == enum_class_ResizablePMCArray
-                                    || type == enum_class_ResizableStringArray);
+    const INTVAL type = pmc->vtable->base_type;
+    return (INTVAL)(type == enum_class_ResizablePMCArray
+                 || type == enum_class_ResizableStringArray);
 }
 
 /* Test for something being a hash.  */
 static INTVAL
 nqp_ishash(PMC *pmc) {
-    INTVAL type = pmc->vtable->base_type;
+    const INTVAL type = pmc->vtable->base_type;
     return (INTVAL)(type == enum_class_Hash || type == ohash_id);
 }
 
@@ -136,14 +135,14 @@ revquicksort(INTVAL *arr, INTVAL elements) {
 
 /* Does a run of the NFA. Produces a list of integers indicating the
  * chosen ordering. */
-static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL offset, INTVAL *total_fates_out) {
-    INTVAL  eos     = Parrot_str_length(interp, target);
+static const INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL offset, INTVAL *total_fates_out) {
+    const INTVAL  eos = Parrot_str_length(interp, target);
     INTVAL  gen     = 1;
     INTVAL  numcur  = 0;
     INTVAL  numnext = 0;
     INTVAL *done, *fates, *curst, *nextst, *longlit;
     INTVAL  i, fate_arr_len, num_states, total_fates, prev_fates, usedlonglit;
-    INTVAL  orig_offset = offset;
+    const INTVAL  orig_offset = offset;
 
     /* Allocate "done states", "current states" and "next states" arrays. */
     num_states = nfa->num_states;
@@ -978,7 +977,6 @@ inline op nqp_dynop_setup() :base_core {
         /* Look up and cache some type IDs. */
         stable_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "STable", 0));
         smo_id    = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
-        qrpa_id   = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "QRPA", 0));
         ohash_id  = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "OwnedHash", 0));
 
         /* Initialize the object model. */
@@ -2878,7 +2876,7 @@ inline op repr_hint_for(out INT, invar PMC, in STR) :base_core {
 
 =item nqp_islist
 
-Checks if the type of thing in $2 is a nqp list (either QRPA or RPA).
+Checks if the type of thing in $2 is a nqp list (either ResizablePMCArray or ResizableStringArray).
 
 =cut
 
@@ -3278,7 +3276,7 @@ inline op nqp_push_label(invar PMC, in LABEL) :base_core {
 inline op nqp_nfa_run_proto(out PMC, invar PMC, in STR, in INT) :base_core {
     /* Run the NFA. */
     INTVAL  total_fates, i;
-    INTVAL *fates = nqp_nfa_run(interp, OBJECT_BODY($2), $3, $4, &total_fates);
+    const INTVAL *fates = nqp_nfa_run(interp, (NFABody *)OBJECT_BODY($2), $3, $4, &total_fates);
     
     /* Copy results into an RIA. */
     PMC *fatepmc = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
@@ -3299,7 +3297,7 @@ inline op nqp_nfa_run_alt(invar PMC, in STR, in INT, invar PMC, invar PMC, invar
     
     /* Run the NFA. */
     INTVAL  total_fates, i;
-    INTVAL *fates = nqp_nfa_run(interp, OBJECT_BODY(nfa), target, offset, &total_fates);
+    const INTVAL *fates = nqp_nfa_run(interp, (NFABody *)OBJECT_BODY(nfa), target, offset, &total_fates);
     
     /* Push the results onto the bstack. */
     INTVAL  caps   = VTABLE_defined(interp, cstack) ? VTABLE_elements(interp, cstack) : 0;

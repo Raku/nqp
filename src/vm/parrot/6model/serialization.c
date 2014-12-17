@@ -61,7 +61,6 @@ static INTVAL perl6_lexpad_id = 0;
 static INTVAL ctmthunk_id = 0;
 static INTVAL ownedhash_id = 0;
 static INTVAL ownedrpa_id = 0;
-static INTVAL qrpa_id = 0;
 
 /* Endian translation (file format is little endian, so on big endian we need
  * to twiddle. */
@@ -492,9 +491,6 @@ void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
         discrim = REFVAR_VM_ARR_VAR;
     }
     else if (ref->vtable->base_type == ownedrpa_id) {
-        discrim = REFVAR_VM_ARR_VAR;
-    }
-    else if (ref->vtable->base_type == qrpa_id) {
         discrim = REFVAR_VM_ARR_VAR;
     }
     else if (ref->vtable->base_type == enum_class_ResizableIntegerArray) {
@@ -1041,7 +1037,6 @@ STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap)
     ctmthunk_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "CTMThunk", 0));
     ownedhash_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "OwnedHash", 0));
     ownedrpa_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "OwnedResizablePMCArray", 0));
-    qrpa_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "QRPA", 0));
     
     /* Initialize string heap so first entry is the NULL string. */
     VTABLE_push_string(interp, empty_string_heap, STRINGNULL);
