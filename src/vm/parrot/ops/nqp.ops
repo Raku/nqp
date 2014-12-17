@@ -191,8 +191,11 @@ static const INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, I
                 
                 if (act <= EDGE_EPSILON) {
                     if (act < 0) {
-                        /* fprintf(stderr, "neg act %d\n", act); */
-                        act &= 0xff;
+                        const int new_act = act & 0xff;
+                        if (new_act != EDGE_CODEPOINT_LL && new_act != EDGE_CODEPOINT_I_LL)
+                            fprintf(stderr, "nqp_nfa_run: invalid neg act 0x%x => %d\n",
+                                            act, new_act);
+                        act = new_act;
                     }
 
                     if (act == EDGE_FATE) {
@@ -214,7 +217,7 @@ static const INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, I
                         }
                         if (arg < usedlonglit)
                             arg -= longlit[arg] << 24;
-                        /* fprintf(stderr, "fate edge %llx\n", (long long unsigned int)act); */
+                        /* fprintf(stderr, "fate edge %llx\n", (long long unsigned int)act);*/
                         if (found_fate) {
                             fates[total_fates - 1] = arg;
                         }
@@ -338,6 +341,13 @@ static const INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, I
                             nextst[numnext++] = to;
                         continue;
                     }
+                    case EDGE_SUBRULE:
+                    case EDGE_EPSILON:
+                        /* kosher? */
+                        continue;
+                    default:
+                        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                            "nqp_nfa_run: unexpected edge type "INTVAL_FMT, act);
                 }
             }
         }

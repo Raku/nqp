@@ -10,6 +10,7 @@
 #define EDGE_CHARCLASS_NEG     5
 #define EDGE_CHARLIST          6
 #define EDGE_CHARLIST_NEG      7
+#define EDGE_SUBRULE           8
 #define EDGE_CODEPOINT_I       9
 #define EDGE_CODEPOINT_I_NEG   10
 #define EDGE_GENERIC_VAR       11
