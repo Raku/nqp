@@ -89,7 +89,7 @@ Upload the release tarball to L<http://rakudo.org/downloads/rakudo>:
   $ scp nqp-2013.12.tar.gz rakudo@rakudo.org:public_html/downloads/nqp/
 
 If you do not have permissions for that, ask one of (pmichaud, jnthn, FROGGS,
-masak, tadzik, moritz, PerlJam, [Coke], lizmat, timotimo, FROGGS, fsergot) on #perl6 to do it for you.
+masak, tadzik, moritz, PerlJam, [Coke], lizmat, timotimo, fsergot) on #perl6 to do it for you.
 
 =item 8.
 
