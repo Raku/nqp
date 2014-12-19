@@ -85,7 +85,7 @@ typedef struct {
 static void dyncall_wb_ca(PARROT_INTERP, PMC *);
 static void dyncall_wb_cs(PARROT_INTERP, PMC *);
 
-static char callback_handler(DCCallback *cb, DCArgs *args, DCValue *result, CallbackData *data);
+static char callback_handler(DCCallback *cb, DCArgs *args, DCValue *result, void *data);
 
 /* The ID of the NativeCall, CPointer and CStruct REPRs. */
 static INTVAL nc_repr_id = 0;
@@ -740,7 +740,8 @@ static void dyncall_wb_cs(PARROT_INTERP, PMC *obj) {
 
 /* Handle callback from C code. */
 static char
-callback_handler(DCCallback *cb, DCArgs *args, DCValue *result, CallbackData *data) {
+callback_handler(DCCallback *cb, DCArgs *args, DCValue *result, void *userdata) {
+    CallbackData *data = (CallbackData *)userdata;
     PMC *old_ctx = Parrot_pcc_get_signature(data->interp, CURRENT_CONTEXT(data->interp));
     PMC *cappy = Parrot_pmc_new(data->interp, enum_class_CallContext);
     PMC *retval;
