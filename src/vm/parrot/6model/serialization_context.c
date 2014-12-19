@@ -124,7 +124,7 @@ void SC_set_code(PARROT_INTERP, PMC *sc, INTVAL idx, PMC *code) {
 }
 
 /* Takes an object and adds it to this SC's root set, and installs a
- * reposession entry. */
+ * repossession entry. */
 void SC_repossess_object(PARROT_INTERP, PMC *target_sc, PMC *orig_sc, PMC *object) {
     PMC *rep_indexes, *rep_scs;
     

@@ -8,6 +8,10 @@ BEGIN_OPS_PREAMBLE
 #include "parrot/dynext.h"
 #include "parrot/io.h"
 #include "pmc/pmc_filehandle.h"
+#include "pmc/pmc_sub.h"
+#ifndef BUFFER_IS_EMPTY
+#  define BUFFER_IS_EMPTY(b) ((b)->buffer_start >= (b)->buffer_end)
+#endif
 
 /* 6modely includes. */
 #include "../6model/sixmodelobject.h"
@@ -17,7 +21,6 @@ BEGIN_OPS_PREAMBLE
 #include "../6model/containers.h"
 #include "../guts/multi_dispatch.h"
 #include "../pmc/pmc_nqplexinfo.h"
-#include "pmc_sub.h"
 
 /* SHA1 algorithm. */
 #include "../../../../3rdparty/sha1/sha1.h"
@@ -59,7 +62,7 @@ static PMC *empty_hash = NULL;
 /* SC write barrier for objects. */
 static void SC_write_barrier_obj(PARROT_INTERP, PMC *obj) {
     if (!sc_write_barrier_off_depth && VTABLE_get_bool(interp, compiling_scs)) {
-        const PMC *comp_sc = VTABLE_get_pmc_keyed_int(interp, compiling_scs, 0);
+        PMC *comp_sc = VTABLE_get_pmc_keyed_int(interp, compiling_scs, 0);
         if (SC_PMC(obj) != comp_sc) {
             SC_repossess_object(interp, comp_sc, SC_PMC(obj), obj);
             SC_PMC(obj) = comp_sc;
@@ -72,7 +75,7 @@ static void SC_write_barrier_obj(PARROT_INTERP, PMC *obj) {
 /* SC write barrier for STables. */
 static void SC_write_barrier_st(PARROT_INTERP, STable *st) {
     if (!sc_write_barrier_off_depth && VTABLE_get_bool(interp, compiling_scs)) {
-        const PMC *comp_sc = VTABLE_get_pmc_keyed_int(interp, compiling_scs, 0);
+        PMC *comp_sc = VTABLE_get_pmc_keyed_int(interp, compiling_scs, 0);
         if (st->sc != comp_sc) {
             SC_repossess_stable(interp, comp_sc, st->sc, st->stable_pmc);
             st->sc = comp_sc;
@@ -135,7 +138,7 @@ revquicksort(INTVAL *arr, INTVAL elements) {
 
 /* Does a run of the NFA. Produces a list of integers indicating the
  * chosen ordering. */
-static const INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL offset, INTVAL *total_fates_out) {
+static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL offset, INTVAL *total_fates_out) {
     const INTVAL  eos = Parrot_str_length(interp, target);
     INTVAL  gen     = 1;
     INTVAL  numcur  = 0;
@@ -194,7 +197,7 @@ static const INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, I
                         const int new_act = act & 0xff;
                         if (new_act != EDGE_CODEPOINT_LL && new_act != EDGE_CODEPOINT_I_LL)
                             fprintf(stderr, "nqp_nfa_run: invalid neg act 0x%x => %d\n",
-                                            act, new_act);
+                                            (unsigned int)act, new_act);
                         act = new_act;
                     }
 
@@ -3285,14 +3288,14 @@ inline op nqp_push_label(invar PMC, in LABEL) :base_core {
 
 inline op nqp_nfa_run_proto(out PMC, invar PMC, in STR, in INT) :base_core {
     /* Run the NFA. */
-    INTVAL  total_fates, i;
-    const INTVAL *fates = nqp_nfa_run(interp, (NFABody *)OBJECT_BODY($2), $3, $4, &total_fates);
+    INTVAL total_fates, i;
+    INTVAL *fates = nqp_nfa_run(interp, (NFABody *)OBJECT_BODY($2), $3, $4, &total_fates);
     
     /* Copy results into an RIA. */
     PMC *fatepmc = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
     for (i = 0; i < total_fates; i++)
         VTABLE_set_integer_keyed_int(interp, fatepmc, i, fates[i]);
-    free(fates);
+    mem_sys_free(fates);
     
     $1 = fatepmc;
 }
@@ -3307,7 +3310,7 @@ inline op nqp_nfa_run_alt(invar PMC, in STR, in INT, invar PMC, invar PMC, invar
     
     /* Run the NFA. */
     INTVAL  total_fates, i;
-    const INTVAL *fates = nqp_nfa_run(interp, (NFABody *)OBJECT_BODY(nfa), target, offset, &total_fates);
+    INTVAL *fates = nqp_nfa_run(interp, (NFABody *)OBJECT_BODY(nfa), target, offset, &total_fates);
     
     /* Push the results onto the bstack. */
     INTVAL  caps   = VTABLE_defined(interp, cstack) ? VTABLE_elements(interp, cstack) : 0;
@@ -3318,7 +3321,7 @@ inline op nqp_nfa_run_alt(invar PMC, in STR, in INT, invar PMC, invar PMC, invar
         VTABLE_push_integer(interp, bstack, 0);
         VTABLE_push_integer(interp, bstack, caps);
     }
-    free(fates);
+    mem_sys_free(fates);
 }
 
 /*
@@ -4090,7 +4093,7 @@ inline op nqp_openpipe(out PMC, in STR, in STR, in PMC, in STR) {
     PMC *handle             = Parrot_pmc_new(interp, typenum);
     IO_BUFFER * read_buffer = IO_GET_READ_BUFFER(interp, handle);
     PMC * command           = Parrot_pmc_new(interp, enum_class_ResizableStringArray);
-    const VTABLE * vtable   = Parrot_io_get_vtable(interp, IO_VTABLE_PIPE, NULL);
+    const IO_VTABLE * vtable  = Parrot_io_get_vtable(interp, IO_VTABLE_PIPE, NULL);
     PIOHANDLE os_handle;
     INTVAL pid;
 #ifdef WIN32
@@ -4107,7 +4110,7 @@ inline op nqp_openpipe(out PMC, in STR, in STR, in PMC, in STR) {
     os_handle = Run_OS_Command_Piped(interp, command, env, PARROT_EXEC_STDOUT, &pid, &status);
     Parrot_file_chdir(interp, old_cwd);
 
-    SETATTR_FileHandle_io_vtable(interp, handle, vtable);
+    SETATTR_FileHandle_io_vtable(interp, handle, (IO_VTABLE *)PTR2INTVAL(vtable));
     SETATTR_FileHandle_process_id(interp, handle, pid);
     SETATTR_FileHandle_exit_status(interp, handle, status);
     SETATTR_FileHandle_os_handle(interp, handle, os_handle);
