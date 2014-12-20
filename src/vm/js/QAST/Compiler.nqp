@@ -1368,10 +1368,14 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         self.create_ctx($*BLOCK.ctx);
     }
 
+    method outer_ctx() {
+        $*BLOCK.outer ?? $*BLOCK.outer.ctx !! 'null';
+    }
+
     method create_ctx($name) {
         # TODO think about contexts
         #"var $name = new nqp.Ctx(caller_ctx,{self.outer_ctx},'$name');\n";
-        "var $name = null;\n";
+        "var $name = new nqp.Ctx(caller_ctx, {self.outer_ctx});\n";
     }
 
     multi method as_js(QAST::IVal $node, :$want) {
@@ -1554,14 +1558,36 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     method is_dynamic_var($var) {
-        # TODO
-        0;
+        # HACK due to a nqp misdesign we need a HACK
+        # TODO Make nqp mark dynamic variables explicitly
+        my $name := $var.name;
+        if nqp::chars($name) > 2 {
+            my str $sigil := nqp::substr($name, 0, 1);
+            my str $twigil := nqp::substr($name, 1, 1);
+            if $twigil eq '*' {
+              return 1;
+            }
+        }
+        return 0;
     }
 
 
     method compile_var(QAST::Var $var) {
         if self.var_is_lexicalish($var) && self.is_dynamic_var($var) {
-            self.TODO("dynamic variables");
+            if $*BINDVAL {
+                my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ));
+                if $var.decl eq 'var' {
+                    self.stored_result(Chunk.new($T_OBJ, "({$*BLOCK.ctx}[{quote_string($var.name)}] = {$bindval.expr})",  [$bindval]));
+                } else {
+                    self.stored_result(Chunk.new($T_OBJ, "{$*BLOCK.ctx}.bind({quote_string($var.name)}, {$bindval.expr})",  [$bindval]));
+                }
+            } else {
+                if $var.decl eq 'var' {
+                    self.stored_result(Chunk.new($T_OBJ, "({$*BLOCK.ctx}[{quote_string($var.name)}] = null)",  []));
+                } else {
+                    Chunk.new($T_OBJ, "{$*BLOCK.ctx}.lookup({quote_string($var.name)})", [], :node($var));
+                }
+            }
         } elsif self.var_is_lexicalish($var) || $var.scope eq 'local' {
             my $type := $T_OBJ;
             my $mangled := self.mangle_name($var.name);
@@ -1611,6 +1637,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 Chunk.new($T_OBJ, $bindval.expr, [$attr, $bindval, "{$attr.expr} = {$bindval.expr};\n"]);
             } else {
                 $attr;
+            }
+        } elsif ($var.scope eq 'contextual') {
+            if $*BINDVAL {
+                my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ));
+                self.stored_result(Chunk.new($T_OBJ, "{$*BLOCK.ctx}.bind_dynamic({quote_string($var.name)},{$bindval.expr})", [$bindval]));
+            } else {
+                Chunk.new($T_OBJ, "{$*BLOCK.ctx}.lookup_dynamic({quote_string($var.name)})", []);
             }
         } else {
             self.NYI("Unimplemented QAST::Var scope: " ~ $var.scope);

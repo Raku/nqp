@@ -101,6 +101,50 @@ exports.to_bool = function(arg) {
   }
 };
 
+function Ctx(caller_ctx, outer_ctx) {
+  this.caller = caller_ctx;
+  this.outer = outer_ctx;
+};
+
+Ctx.prototype.lookup_dynamic = function(name) {
+  var ctx = this;
+  while (ctx) {
+    if (ctx.hasOwnProperty(name)) {
+      return ctx[name];
+    }
+    ctx = ctx.caller;
+  }
+  return null;
+  /* Looking up of a contextual is allowed to fail,
+     nqp code usually fallbacks to looking up of global */
+};
+
+Ctx.prototype.bind = function(name, value) {
+  var ctx = this;
+  while (ctx) {
+    if (ctx.hasOwnProperty(name)) {
+      ctx[name] = value;
+      return ctx[name];
+    }
+    ctx = ctx.outer;
+  }
+  throw "Can't bind: " + name;
+};
+
+Ctx.prototype.bind_dynamic = function(name, value) {
+  var ctx = this;
+  while (ctx) {
+    if (ctx.hasOwnProperty(name)) {
+      ctx[name] = value;
+      return ctx[name];
+    }
+    ctx = ctx.caller;
+  }
+  throw "Can't bind dynamic: " + name;
+};
+
+exports.Ctx = Ctx;
+
 if (!Math.imul) {
   /* Polyfill from:
   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/imul
