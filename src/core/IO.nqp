@@ -59,6 +59,14 @@ sub say(*@args) {
     print(|@args, "\n");
 }
 
+sub note(*@args) {
+    my $err := nqp::getstderr();
+    for @args {
+        nqp::printfh($err, $_);
+    }
+    nqp::printfh($err, "\n");
+}
+
 sub join($delim, @things) {
     my @strs;
     for @things { nqp::push(@strs, ~$_) }
