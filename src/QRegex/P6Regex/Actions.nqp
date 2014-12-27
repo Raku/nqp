@@ -384,6 +384,10 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             QAST::Regex.new( $<charspec>.ast, :rxtype('literal'), :node($/) )
     }
 
+    method backslash:sym<0>($/) {
+	make QAST::Regex.new( "\0", :rxtype('literal'), :node($/) );
+    }
+
     method backslash:sym<misc>($/) {
         my $qast := QAST::Regex.new( ~$/ , :rxtype('enumcharlist'), :node($/) );
         make $qast;

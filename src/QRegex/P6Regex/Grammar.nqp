@@ -334,6 +334,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token backslash:sym<o> { $<sym>=[<[oO]>] [ <octint> | '[' <octints> ']' ] }
     token backslash:sym<x> { $<sym>=[<[xX]>] [ <hexint> | '[' <hexints> ']' ] }
     token backslash:sym<c> { $<sym>=[<[cC]>] <charspec> }
+    token backslash:sym<0> { $<sym>=['0'] }
     token backslash:sym<A> { 'A' <.obs: '\\A as beginning-of-string matcher', '^'> }
     token backslash:sym<z> { 'z' <.obs: '\\z as end-of-string matcher', '$'> }
     token backslash:sym<Z> { 'Z' <.obs: '\\Z as end-of-string matcher', '\\n?$'> }
