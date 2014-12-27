@@ -121,7 +121,7 @@ grammar HLL::Grammar {
         [
         | '[' <charnames> ']' 
         | \d+ [ _ \d+]*
-        | <[ ?..Z ]>
+        | <control=[ ?..Z ]>
         | <.panic: 'Unrecognized \\c character'>
         ]
     }

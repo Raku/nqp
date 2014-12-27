@@ -211,6 +211,11 @@ class HLL::Actions {
     }
 
     method charspec($/) {
-        make $<charnames> ?? $<charnames>.made !! nqp::chr(self.string_to_int( $/, 10 ));
+        make $<charnames>
+             ?? $<charnames>.made
+             !! nqp::chr($<control>
+                         ?? nqp::ord($<control>) +^ 64
+                         !! self.string_to_int( $/, 10 )
+                        );
     }
 }
