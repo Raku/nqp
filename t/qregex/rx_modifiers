@@ -25,6 +25,7 @@
 # todo :pugs<feature>
 :1i bcd			aBCDef	y	ignorecase, repetition (:1i)
 :1i bcd			aBxDef	n	ignorecase, repetition (:1i)
+A :i B			Ab		y	ignorecase in the middle, literals on both sides
 ab [:i cd ] ef		abcdef	y	ignorecase, lexical (:i)
 ab [:i cd ] ef		abCdef	y	ignorecase, lexical (:i)
 ab [:i cd ] ef		abcDef	y	ignorecase, lexical (:i)

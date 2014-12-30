@@ -59,7 +59,8 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             my $ast := $_.ast;
             if $ast {
                 if $lastlit && $ast.rxtype eq 'literal'
-                        && !QAST::Node.ACCEPTS($ast[0]) {
+                        && !QAST::Node.ACCEPTS($ast[0])
+                        && $lastlit.subtype eq $ast.subtype {
                     $lastlit[0] := $lastlit[0] ~ $ast[0];
                 }
                 else {
