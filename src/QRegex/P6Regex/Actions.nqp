@@ -385,7 +385,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     method backslash:sym<0>($/) {
-	make QAST::Regex.new( "\0", :rxtype('literal'), :node($/) );
+        make QAST::Regex.new( "\0", :rxtype('literal'), :node($/) );
     }
 
     method backslash:sym<misc>($/) {
