@@ -32,7 +32,7 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
         }
     }
 
-    public int exitValue(ThreadContext tc) throws IllegalThreadStateException {
+    public int exitValue(ThreadContext tc) {
         try {
             if (chan instanceof ProcessChannel) {
                 return ((ProcessChannel)chan).exitValue();
@@ -40,7 +40,7 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
             else
                 throw ExceptionHandling.dieInternal(tc,
                     "This channel does not support exitValue");
-        } catch (IllegalThreadStateException e) {
+        } catch (InterruptedException e) {
             throw ExceptionHandling.dieInternal(tc, e);
         }
     }

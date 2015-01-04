@@ -39,8 +39,8 @@ public class ProcessChannel implements ByteChannel {
         stdout.close();
     }
 
-    public int exitValue() throws IllegalThreadStateException {
-        return process.exitValue();
+    public int exitValue() throws InterruptedException {
+        return process.waitFor();
     }
 
     public int write(ByteBuffer src) throws IOException {
