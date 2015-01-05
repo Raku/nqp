@@ -123,6 +123,14 @@ $ops.add_hll_op('nqp', 'falsey', -> $qastcomp, $op {
         push_op(@ins, 'isfalse_s', $not_reg, $val.result_reg);
         MAST::InstructionList.new(@ins, $not_reg, $MVM_reg_int64)
     }
+    elsif $val.result_kind == $MVM_reg_num64 {
+        my $tmp_reg := $regalloc.fresh_register($MVM_reg_num64);
+        my $res_reg := $regalloc.fresh_register($MVM_reg_int64);
+        my @ins := $val.instructions;
+        push_op(@ins, 'const_n64', $tmp_reg, MAST::NVal.new( :value(0.0) ));
+        push_op(@ins, 'eq_n', $res_reg, $val.result_reg, $tmp_reg);
+        MAST::InstructionList.new(@ins, $res_reg, $MVM_reg_int64)
+    }
     else {
         nqp::die("This case of nqp falsey op NYI");
     }
