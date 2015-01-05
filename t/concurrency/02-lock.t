@@ -7,7 +7,7 @@ BEGIN {
     }
 }
 
-plan(11);
+plan(15);
 
 my class Lock    is repr('ReentrantMutex')    { }
 my class CondVar is repr('ConditionVariable') { }
@@ -115,6 +115,7 @@ my class CondVar is repr('ConditionVariable') { }
         nqp::push(@log, 'ale');
         nqp::condwait($c);
         nqp::push(@log, 'stout');
+        nqp::condsignalall($c);
         $now1 := nqp::time_n();
         nqp::unlock($l);
     }, 0);
@@ -131,6 +132,8 @@ my class CondVar is repr('ConditionVariable') { }
         nqp::lock($l);
         nqp::push(@log, 'porter');
         nqp::condsignalone($c);
+        nqp::condwait($c);
+        nqp::push(@log, 'lager');
         nqp::unlock($l);
     }, 0);
     nqp::threadrun($t2);
@@ -139,10 +142,81 @@ my class CondVar is repr('ConditionVariable') { }
     $now2 := nqp::time_n();
     nqp::threadjoin($t2);
 
-    my $ok := nqp::join(',', @log) eq 'ale,porter,stout';
+    my $ok := nqp::join(',', @log) eq 'ale,porter,stout,lager';
     ok($ok, 'Condition variable worked');
 
     say("# log = {@log}{ $now1 > $now2 ?? ', thread was running *after* join' !! ''}") if !$ok;
 }
 
-# XXXX: Test nqp::condsignalall -- not tested in Perl 6 spectests
+# 4 tests
+{
+    my $l  := Lock.new;
+    my $c1 := nqp::getlockcondvar($l, CondVar);
+    my $c2 := nqp::getlockcondvar($l, CondVar);
+    ok(nqp::defined($c1) && nqp::defined($c2),
+       'Can create more than one condvar from same lock');
+    ok(nqp::where($c1) != nqp::where($c2),
+       'Multiple condvars from same lock are different');
+
+    my $count_one := 0;
+    my $count_all := 0;
+
+    my $t1 := nqp::newthread({
+        nqp::lock($l);
+        nqp::condsignalone($c1);
+        nqp::condsignalall($c2);
+        nqp::unlock($l);
+    }, 0);
+
+    my $t2 := nqp::newthread({
+        nqp::lock($l);
+        nqp::condwait($c1);
+        $count_one++;
+        nqp::unlock($l);
+    }, 0);
+
+    my $t3 := nqp::newthread({
+        nqp::lock($l);
+        nqp::condwait($c1);
+        $count_one++;
+        nqp::unlock($l);
+    }, 0);
+
+    my $t4 := nqp::newthread({
+        nqp::lock($l);
+        nqp::condwait($c2);
+        $count_all++;
+        nqp::unlock($l);
+    }, 0);
+
+    my $t5 := nqp::newthread({
+        nqp::lock($l);
+        nqp::condwait($c2);
+        $count_all++;
+        nqp::unlock($l);
+    }, 0);
+
+    # Start all waiting threads
+    nqp::threadrun($t2);
+    nqp::threadrun($t3);
+    nqp::threadrun($t4);
+    nqp::threadrun($t5);
+
+    # Start signaling thread
+    nqp::threadrun($t1);
+
+    # Check for condsignalone result, then signal it again to unblock
+    nqp::sleep(2.0);
+    my $c1_snap := $count_one;
+    nqp::condsignalone($c1);
+
+    # Join 'em up
+    nqp::threadjoin($t2);
+    nqp::threadjoin($t3);
+    nqp::threadjoin($t4);
+    nqp::threadjoin($t5);
+    nqp::threadjoin($t1);
+
+    ok($c1_snap   == 1, 'condsignalone signaled exactly one waiting thread');
+    ok($count_all == 2, 'condsignalall signaled both waiting threads');
+}
