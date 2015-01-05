@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(109);
+plan(110);
 
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
@@ -153,3 +153,10 @@ ok(!nqp::existspos(@arr, -2), 'existspos with missing pos');
 ok(!nqp::existspos(@arr, -100), 'existspos with absurd values');
 @arr[1] := NQPMu;
 ok(nqp::existspos(@arr, 1), 'existspos with still existing pos');
+
+sub test_splice_with_return() {
+    my @children := [1, 2, 3];
+    if 1 { return nqp::splice(@children, [], 1, 1); }
+    @children
+}
+ok(nqp::elems(test_splice_with_return()) == 2, 'splice works as a return value');
