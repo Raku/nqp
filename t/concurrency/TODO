@@ -1,12 +1,9 @@
 * repr's:
-** Semaphore
 ** ConcBlockingQueue
 ** AsyncTask
 ** Uninstantiable
 * nqp::op's:
 ** Threads:    	  threadyield
-** CondVars:   	  condsignalall
-** Semaphores: 	  semacquire, semtryacquire, semrelease
 ** ConcQueues:    queuepoll
 ** Timers:     	  timer
 ** Cancellations: cancel
@@ -18,3 +15,4 @@
 * Situations:
 ** Serialization / precompilation
 ** Signal interaction with locks/condvars/semaphores/timers/etc.
+** Stress testing
