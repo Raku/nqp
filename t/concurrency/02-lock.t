@@ -217,6 +217,8 @@ my class CondVar is repr('ConditionVariable') { }
     nqp::threadjoin($t5);
     nqp::threadjoin($t1);
 
+    # XXXX: nqp-j crashes here with: java.lang.IllegalMonitorStateException
+    #       (nqp-m works fine)
     ok($c1_snap   == 1, 'condsignalone signaled exactly one waiting thread');
     ok($count_all == 2, 'condsignalall signaled both waiting threads');
 }
