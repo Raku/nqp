@@ -341,7 +341,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token backslash:sym<Q> { 'Q' <.obs: '\\Q as quotemeta', 'quotes or literal variable match'> }
     token backslash:sym<unrec> { {} (\w) { self.throw_unrecog_backslash_seq: $/[0].Str } }
     token backslash:sym<unsp> {
-        [\s|'#'] {}
+        \s {}
         <.throw_unspace(~$/)>
     }
     token backslash:sym<misc> { \W }
