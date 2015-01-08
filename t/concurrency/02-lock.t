@@ -208,7 +208,12 @@ my class CondVar is repr('ConditionVariable') { }
     # Check for condsignalone result, then signal it again to unblock
     nqp::sleep(2.0);
     my $c1_snap := $count_one;
+    # XXXX: Without locking around this condsignalone(), nqp-j will crash
+    #       with java.lang.IllegalMonitorStateException (nqp-m works fine).
+    #       I'm interpreting this as a LTA error.
+    nqp::lock($l);
     nqp::condsignalone($c1);
+    nqp::unlock($l);
 
     # Join 'em up
     nqp::threadjoin($t2);
@@ -217,8 +222,6 @@ my class CondVar is repr('ConditionVariable') { }
     nqp::threadjoin($t5);
     nqp::threadjoin($t1);
 
-    # XXXX: nqp-j crashes here with: java.lang.IllegalMonitorStateException
-    #       (nqp-m works fine)
     ok($c1_snap   == 1, 'condsignalone signaled exactly one waiting thread');
     ok($count_all == 2, 'condsignalall signaled both waiting threads');
 }
