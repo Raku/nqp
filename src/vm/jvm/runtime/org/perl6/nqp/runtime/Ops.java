@@ -4355,7 +4355,11 @@ public final class Ops {
 
     public static SixModelObject condsignalall(SixModelObject cv, ThreadContext tc) {
         if (cv instanceof ConditionVariableInstance)
-            ((ConditionVariableInstance)cv).condvar.signalAll();
+            try {
+                ((ConditionVariableInstance)cv).condvar.signalAll();
+            } catch (IllegalMonitorStateException imse) {
+                throw ExceptionHandling.dieInternal(tc, "condsignalall requires the lock corresponding to the condition variable to be locked");
+            }
         else
             throw ExceptionHandling.dieInternal(tc, "condsignalall requires an operand with REPR ConditionVariable");
         return cv;
