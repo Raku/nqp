@@ -48,10 +48,9 @@ plan(20);
     ok($pid, 'Parent thread has a non-zero ID');
 
     my $tid := 0;
+    my $cid := 0;
     my $t   := nqp::newthread({
-        my $cid := nqp::threadid(nqp::currentthread());
-        ok($cid, 'Child thread knows its own thread ID');
-        ok($cid == $tid, 'Parent sees same ID for child as child does');
+        $cid := nqp::threadid(nqp::currentthread());
     }, 0);
     ok(nqp::defined($t), 'Can create another new thread after previous joins');
 
@@ -65,6 +64,9 @@ plan(20);
 
     nqp::threadjoin($t);
     ok($tid == nqp::threadid($t), 'Thread keeps same ID after threadjoin()');
+
+    ok($cid, 'Child thread knew its own thread ID');
+    ok($cid == $tid, 'Parent saw same ID for child as child did');
 
     ok($pid == nqp::threadid(nqp::currentthread()),
        'Parent thread still has the same ID');
