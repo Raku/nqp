@@ -328,7 +328,12 @@ class HLL::Compiler does HLL::Backend::Default {
             my $err := 0;
             my $in-handle;
             try {
-                $in-handle := nqp::open($filename, 'r');
+                if $filename eq '-' {
+                    $in-handle := nqp::getstdin();
+                }
+                else {
+                    $in-handle := nqp::open($filename, 'r');
+                }
                 CATCH {
                     nqp::say("Could not open $filename. $_");
                     $err := 1;
