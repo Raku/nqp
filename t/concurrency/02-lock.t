@@ -208,9 +208,6 @@ my class CondVar is repr('ConditionVariable') { }
     # Check for condsignalone result, then signal it again to unblock
     nqp::sleep(2.0);
     my $c1_snap := $count_one;
-    # XXXX: Without locking around this condsignalone(), nqp-j will crash
-    #       with java.lang.IllegalMonitorStateException (nqp-m works fine).
-    #       I'm interpreting this as a LTA error.
     nqp::lock($l);
     nqp::condsignalone($c1);
     nqp::unlock($l);
