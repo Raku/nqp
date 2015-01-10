@@ -3,7 +3,7 @@
 ** AsyncTask
 ** Uninstantiable
 * nqp::op's:
-** Threads:    	  threadyield
+** Threads:    	  threadyield (current tests are flaky)
 ** ConcQueues:    queuepoll
 ** Timers:     	  timer
 ** Cancellations: cancel

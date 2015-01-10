@@ -7,7 +7,7 @@ BEGIN {
     }
 }
 
-plan(20);
+plan(24);
 
 # 2 tests
 {
@@ -92,5 +92,83 @@ plan(20);
     ok($b == 42, 'Second child thread also ran');
 }
 
-# XXXX: Tests for nqp::threadyield() -- not tested in Perl 6 spectests either
+# 2 tests
+# Parent-child case for threadyield()
+# This test intentionally does not use proper synchronization primitives,
+# so that threadyield can be tested independently of locks/condvars/etc.
+{
+    my @a;
+    my $t := nqp::newthread({
+        nqp::threadyield() until @a;
+        nqp::push(@a, '1');
+        nqp::threadyield();
+        nqp::push(@a, '2');
+    }, 0);
+
+    # Make sure child thread is at least *runnable* (if not actually running)
+    # before running parent thread's code.
+    nqp::threadrun($t);
+
+    {
+        nqp::push(@a, 'a');
+        nqp::threadyield();
+        nqp::push(@a, 'b');
+        nqp::threadyield();
+        nqp::push(@a, 'c');
+    }
+
+    nqp::threadjoin($t);
+
+    ok(@a[0] eq 'a',
+       'Looped threadyield() can force parent thread to act first');
+
+    # XXXX: This test goes wrong on nqp-j, always giving a,b,c,1,2;
+    #       It appears the threadyield() ops get ignored.
+    my $order := nqp::join(',', @a);
+    my $ok    := $order eq 'a,1,b,2,c';
+    ok($ok, 'threadyield() properly interleaved parent and child threads');
+    say("# execution order = $order (expected a,1,b,2,c)") if !$ok;
+}
+
+# 2 tests
+# Sibling child threads case for threadyield()
+# This test intentionally does not use proper synchronization primitives,
+# so that threadyield can be tested independently of locks/condvars/etc.
+{
+    my @a;
+    my $t1 := nqp::newthread({
+        nqp::push(@a, 'a');
+        nqp::threadyield();
+        nqp::push(@a, 'b');
+        nqp::threadyield();
+        nqp::push(@a, 'c');
+    }, 0);
+    my $t2 := nqp::newthread({
+        nqp::threadyield() until @a;
+        nqp::push(@a, '1');
+        nqp::threadyield();
+        nqp::push(@a, '2');
+    }, 0);
+
+    # Make sure $t2 is at least *runnable* (if not actually running)
+    # before $t1 becomes runnable.
+    nqp::threadrun($t2);
+    nqp::threadrun($t1);
+
+    # Join in either order should work here.
+    nqp::threadjoin($t1);
+    nqp::threadjoin($t2);
+
+    ok(@a[0] eq 'a',
+       'Looped threadyield() can force other thread to act first');
+
+    # XXXX: This test is flaky on nqp-j, often giving a,1,2,b,c
+    #       or more rarely a,1,b,c,2; in either case, one of the
+    #       threadyield() ops get ignored.
+    my $order := nqp::join(',', @a);
+    my $ok    := $order eq 'a,1,b,2,c';
+    ok($ok, 'threadyield() properly interleaved two child threads');
+    say("# execution order = $order (expected a,1,b,2,c)") if !$ok;
+}
+
 # XXXX: Stress tests -- Perl 6 spectests starting at S17-lowlevel/thread.t:100
