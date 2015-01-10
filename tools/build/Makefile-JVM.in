@@ -102,7 +102,7 @@ j-install: j-all
 
 $(RUNTIME_JAR): $(RUNTIME_JAVAS) tools/build/gen-jvm-properties.pl
 	$(PERL) -MExtUtils::Command -e mkpath bin
-	$(JAVAC) -source 1.7 -cp $(THIRDPARTY_JARS) -g -d bin $(RUNTIME_JAVAS)
+	$(JAVAC) -source 1.7 -cp $(THIRDPARTY_JARS) -g -d bin -encoding UTF8 $(RUNTIME_JAVAS)
 	$(PERL) tools/build/gen-jvm-properties.pl . $(THIRDPARTY_JARS) > jvmconfig.properties
 	$(PERL) tools/build/gen-jvm-properties.pl @prefix@ $(THIRDPARTY_JARS) > bin/jvmconfig.properties
 	$(JAR) cf0 nqp-runtime.jar -C bin/ .
