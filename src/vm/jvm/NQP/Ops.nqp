@@ -118,10 +118,14 @@ $ops.add_hll_op('nqp', 'falsey', -> $qastcomp, $op {
         $il.append(JAST::Instruction.new( :op('invokestatic'),
             $TYPE_OPS, 'isfalse_s', 'Long', $TYPE_STR ));
     }
-    else {
+    elsif $res.type == $RT_INT || $res.type == $RT_NUM {
         my $false := JAST::Label.new( :name($op.unique('not_false')) );
         my $done  := JAST::Label.new( :name($op.unique('not_done')) );
-        $il.append(JAST::PushIVal.new( :value(0) ));
+        $il.append(
+            $res.type == $RT_INT
+            ?? JAST::PushIVal.new( :value(0) )
+            !! JAST::PushNVal.new( :value(0.0) )
+        );
         $il.append(JAST::Instruction.new( :op($res.type == $RT_INT ?? 'lcmp' !! 'dcmpl') ));
         $il.append(JAST::Instruction.new( :op('ifne'), $false ));
         $il.append(JAST::PushIVal.new( :value(1) ));
@@ -129,6 +133,9 @@ $ops.add_hll_op('nqp', 'falsey', -> $qastcomp, $op {
         $il.append($false);
         $il.append(JAST::PushIVal.new( :value(0) ));
         $il.append($done);
+    }
+    else {
+        nqp::die("This case of nqp falsey op NYI");
     }
 
     $qastcomp.result($il, $RT_INT)
