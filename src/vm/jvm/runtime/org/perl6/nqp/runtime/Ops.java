@@ -24,6 +24,7 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -2764,7 +2765,29 @@ public final class Ops {
         if (!(st.parametricity instanceof ParametricType))
             ExceptionHandling.dieInternal(tc, "This type is not parametric");
 
-        /* XXX TODO: Lookup. */
+        /* Do a lookup in the parameterizations array. */
+        List<Map.Entry<SixModelObject, SixModelObject>> lookup = ((ParametricType)st.parametricity).lookup;
+        int numLookups = lookup.size();
+        long paramsElems = params.elems(tc);
+        for (int i = 0; i < numLookups; i++) {
+            Map.Entry<SixModelObject, SixModelObject> entry = lookup.get(i);
+            SixModelObject compare = entry.getKey();
+            long comapreElems = compare.elems(tc);
+            if (paramsElems == comapreElems) {
+                boolean match = true;
+                for (long j = 0; j < paramsElems; j++) {
+                    SixModelObject want = params.at_pos_boxed(tc, j);
+                    SixModelObject got = compare.at_pos_boxed(tc, j);
+                    /* XXX More cases to consider here. */
+                    if (want != got) {
+                        match = false;
+                        break;
+                    }
+                }
+                if (match)
+                    return entry.getValue();
+            }
+        }
 
         /* It wasn't found; run parameterizer. */
         invokeDirect(tc, ((ParametricType)st.parametricity).parameterizer,
@@ -2777,6 +2800,10 @@ public final class Ops {
         pt.parametricType = type;
         pt.parameters = params;
         newSTable.parametricity = pt;
+
+        /* Add to lookup table. */
+        /* XXX handle possible race. */
+        lookup.add(new AbstractMap.SimpleEntry<>(params, result));
 
         return result;
     }
