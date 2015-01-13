@@ -84,6 +84,9 @@ import org.perl6.nqp.sixmodel.reprs.NFA;
 import org.perl6.nqp.sixmodel.reprs.NFAInstance;
 import org.perl6.nqp.sixmodel.reprs.NFAStateInfo;
 import org.perl6.nqp.sixmodel.reprs.P6bigintInstance;
+import org.perl6.nqp.sixmodel.reprs.P6int;
+import org.perl6.nqp.sixmodel.reprs.P6str;
+import org.perl6.nqp.sixmodel.reprs.P6num;
 import org.perl6.nqp.sixmodel.reprs.ReentrantMutexInstance;
 import org.perl6.nqp.sixmodel.reprs.SCRefInstance;
 import org.perl6.nqp.sixmodel.reprs.SemaphoreInstance;
@@ -2348,16 +2351,13 @@ public final class Ops {
         return decont(obj, tc).get_str(tc);
     }
     public static long isint(SixModelObject obj, ThreadContext tc) {
-        StorageSpec ss = decont(obj, tc).st.REPR.get_storage_spec(tc, obj.st);
-        return (ss.can_box & StorageSpec.CAN_BOX_INT) == 0 ? 0 : 1;
+        return decont(obj, tc).st.REPR.getClass().equals(P6int.class) ? 1 : 0;
     }
     public static long isnum(SixModelObject obj, ThreadContext tc) {
-        StorageSpec ss = decont(obj, tc).st.REPR.get_storage_spec(tc, obj.st);
-        return (ss.can_box & StorageSpec.CAN_BOX_NUM) == 0 ? 0 : 1;
+        return decont(obj, tc).st.REPR.getClass().equals(P6num.class) ? 1 : 0;
     }
     public static long isstr(SixModelObject obj, ThreadContext tc) {
-        StorageSpec ss = decont(obj, tc).st.REPR.get_storage_spec(tc, obj.st);
-        return (ss.can_box & StorageSpec.CAN_BOX_STR) == 0 ? 0 : 1;
+        return decont(obj, tc).st.REPR.getClass().equals(P6str.class) ? 1 : 0;
     }
 
     /* Attribute operations. */
