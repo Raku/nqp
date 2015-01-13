@@ -71,6 +71,11 @@ public class STable {
      * The type-object.
      */
     public SixModelObject WHAT;
+
+    /**
+     * Info for types that are parametric or parameterized.
+     */
+    public AbstractParametricity parametricity;
     
     /**
      * By-name method dispatch cache.
