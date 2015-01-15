@@ -89,6 +89,9 @@ my module sprintf {
         }
 
         sub intify($number_representation) {
+            if $number_representation =:= NQPMu {
+                return $zero;   ## missing argument is handled in method TOP
+            }
             for @handlers -> $handler {
                 if $handler.mine($number_representation) {
                     return $handler.int($number_representation);
