@@ -43,7 +43,7 @@ public class IndyBootstrap {
         return res;
     }
 
-    public static CallSite subcall_noa(Lookup caller, String _, MethodType type) {
+    public static CallSite subcall_noa(Lookup caller, String s, MethodType type) {
         try {
             /* Look up subcall resolver method. */
             MethodType resType = MethodType.methodType(void.class,
@@ -161,7 +161,7 @@ public class IndyBootstrap {
         ArgsExpectation.invokeByExpectation(tc, cr, csd, args);
     }
 
-    public static CallSite subcallstatic_noa(Lookup caller, String _, MethodType type) {
+    public static CallSite subcallstatic_noa(Lookup caller, String s, MethodType type) {
         try {
             /* Look up subcall resolver method. */
             MethodType resType = MethodType.methodType(void.class,
@@ -371,35 +371,35 @@ public class IndyBootstrap {
         return throwee;
     }
 
-    public static void lexotic_o_noa(long target, String _, int __, ThreadContext tc, SixModelObject arg) {
+    public static void lexotic_o_noa(long target, String s, int i, ThreadContext tc, SixModelObject arg) {
         LexoticException throwee = tc.theLexotic;
         throwee.target = target;
         throwee.payload = arg;
         throw throwee;
     }
 
-    public static void lexotic_i_noa(long target, SixModelObject boxType, String _, int __, ThreadContext tc, long arg) {
+    public static void lexotic_i_noa(long target, SixModelObject boxType, String s, int i, ThreadContext tc, long arg) {
         LexoticException throwee = tc.theLexotic;
         throwee.target = target;
         throwee.payload = Ops.box_i(arg, boxType, tc);
         throw throwee;
     }
 
-    public static void lexotic_n_noa(long target, SixModelObject boxType, String _, int __, ThreadContext tc, double arg) {
+    public static void lexotic_n_noa(long target, SixModelObject boxType, String s, int i, ThreadContext tc, double arg) {
         LexoticException throwee = tc.theLexotic;
         throwee.target = target;
         throwee.payload = Ops.box_n(arg, boxType, tc);
         throw throwee;
     }
 
-    public static void lexotic_s_noa(long target, SixModelObject boxType, String _, int __, ThreadContext tc, String arg) {
+    public static void lexotic_s_noa(long target, SixModelObject boxType, String s, int i, ThreadContext tc, String arg) {
         LexoticException throwee = tc.theLexotic;
         throwee.target = target;
         throwee.payload = Ops.box_s(arg, boxType, tc);
         throw throwee;
     }
 
-    public static CallSite indcall_noa(Lookup caller, String _, MethodType type) {
+    public static CallSite indcall_noa(Lookup caller, String s, MethodType type) {
         try {
             /* Look up indirect call invoker method. */
             MethodType resType = MethodType.methodType(void.class,
@@ -463,7 +463,7 @@ public class IndyBootstrap {
         }
     }
 
-    public static CallSite methcall_noa(Lookup caller, String _, MethodType type) {
+    public static CallSite methcall_noa(Lookup caller, String s, MethodType type) {
         try {
             /* Look up methcall resolver method. */
             MethodType resType = MethodType.methodType(void.class,
@@ -599,7 +599,7 @@ public class IndyBootstrap {
         }
     }
 
-    public static CallSite indmethcall_noa(Lookup caller, String _, MethodType type) {
+    public static CallSite indmethcall_noa(Lookup caller, String s, MethodType type) {
         try {
             /* Look up methcall invoker method. */
             MethodType resType = MethodType.methodType(void.class,
