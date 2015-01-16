@@ -503,10 +503,10 @@ class HLL::Compiler does HLL::Backend::Default {
     }
 
     method removestage($stagename) {
-        my @new_stages := nqp::list_s();
+        my @new_stages := nqp::list();
         for @!stages {
             if $_ ne $stagename {
-                @new_stages.push($_);
+                nqp::push(@new_stages, $_);
             }
         }
         @!stages := @new_stages;
