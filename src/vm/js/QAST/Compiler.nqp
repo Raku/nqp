@@ -619,6 +619,23 @@ class QAST::OperationsJS {
             )), :$want)
     });
 
+    add_op('ifnull', sub ($comp, $node, :$want) {
+        if +$node.list != 2 {
+            nqp::die("Operation 'ifnull' needs 2 operands");
+        }
+
+        my $result := $*BLOCK.add_tmp();
+        my $expr := $comp.as_js($node[0], :want($T_OBJ));
+        my $then := $comp.as_js($node[1], :want($T_OBJ));
+        Chunk.new($T_OBJ, $result, [
+            $expr,
+            "$result = {$expr.expr};\n",
+            "if ($result === null) \{\n",
+            $then,
+            "$result = {$then.expr};\n",
+            "\}\n"], :node($node));
+    });
+
     for <if unless> -> $op_name {
         add_op($op_name, sub ($comp, $node, :$want) {
             unless nqp::defined($want) {
