@@ -2,12 +2,15 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(113);
+plan(115);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
 ok( nqp::mul_i(5,2) == 10, 'nqp::mul_i');
 ok( nqp::div_i(5,2) == 2, 'nqp::div_i');
+
+ok(nqp::bitshiftl_i(1, 30) == 1073741824, 'nqp::bitshiftl_i');
+ok(nqp::bitshiftl_i(131, 3) == 1048, 'nqp::bitshiftl_i');
 
 ok( nqp::add_n(5,2) == 7, 'nqp::add_n');
 ok( nqp::sub_n(5,2) == 3, 'nqp::sub_n');
