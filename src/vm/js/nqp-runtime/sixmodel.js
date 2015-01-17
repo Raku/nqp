@@ -9,6 +9,17 @@ function STable(REPR, HOW) {
   }
 }
 
+
+STable.prototype.setinvokespec = function(classHandle, attrName, invocationHandler) {
+  // TODO take classHandle into account
+  this.obj_constructor.prototype.$call = function() {
+    return this[attrName].$call.apply(this, arguments);
+  };
+  this.obj_constructor.prototype.apply = function() {
+    return this[attrName].apply.apply(this, arguments);
+  };
+};
+
 function injectMethod(proto, name, method) {
   proto[name] = function() {
 //    console.log("calling method:",name,method);

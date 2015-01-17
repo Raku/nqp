@@ -311,6 +311,8 @@ class QAST::OperationsJS {
         }
     );
 
+    add_simple_op('setinvokespec', $T_OBJ, [$T_OBJ, $T_OBJ, $T_STR, $T_OBJ], :sideffects);
+
     sub add_cmp_op($op, $type) {
         add_simple_op($op, $T_INT, [$type, $type], sub ($a, $b) {
             "($a < $b ? -1 : ($a == $b ? 0 : 1))"
