@@ -11,16 +11,10 @@ my $T_NONVAL := -2; # something that is not a nqp value
 
 # turn a string into a javascript literal
 sub quote_string($str) {
-    # This could be simplified a lot when running on none-parrot nqps, as most of the complexity is required to transform \x{...}  which is parrot nqp::escape specific
-
     my $out := '';
     my $quoted := nqp::escape($str);
 
-    # We use a lot of variables to keep track of the state as we can only iterate the chars sequentialy
-    # nqp::escape on nqp-p returns \x{..} on parrot which we have to transform 
     my $backslash := 0;
-    my $x := 0;
-    my $curly := 0;
 
     my $escape := '';
 
@@ -29,17 +23,6 @@ sub quote_string($str) {
             $out := $out ~ 'x1b';
         } elsif $backslash && $c eq 'a' {
             $out := $out ~ 'x07';
-        } elsif $backslash && $c eq 'x' {
-            $x := 1;
-        } elsif $x && $c eq '{' {
-            $x := 0;
-            $curly := 1;
-        } elsif $curly && $c eq '}' {
-           $out := $out ~ 'u'~nqp::x("0",4-nqp::chars($escape))~$escape;
-           $escape := '';
-           $curly := 0;
-        } elsif $curly {
-            $escape := $escape ~ $c;
         } else {
             $out := $out ~ $c;
         }
