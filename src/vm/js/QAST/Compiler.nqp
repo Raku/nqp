@@ -883,6 +883,13 @@ class QAST::OperationsJS {
         "$invokee.apply(undefined,[{$*BLOCK.ctx}].concat($capture.named, $capture.pos))"
     }, :sideffects);
 
+
+    # TODO implement the multi method cache for better performance
+    add_simple_op('multicachefind', $T_INT, [$T_OBJ, $T_OBJ], sub ($cache, $capture) {"null"});
+    add_simple_op('multicacheadd', $T_INT, [$T_OBJ, $T_OBJ, $T_OBJ], sub ($cache, $capture, $result) {
+        $cache;
+    });
+
     method compile_op($comp, $op, :$want) {
         my str $name := $op.op;
         if nqp::existskey(%ops, $name) {
