@@ -871,6 +871,17 @@ class QAST::OperationsJS {
 
     add_simple_op('atkey', $T_OBJ, [$T_OBJ, $T_STR], sub ($hash, $key) {"$hash[$key]"});
 
+    for <savecapture usecapture> -> $op {
+        add_simple_op($op, $T_OBJ, [], sub () {
+            "nqp.op.savecapture(Array.prototype.slice.call(arguments))"
+        } , :sideffects);
+    }
+
+    add_simple_op('captureposelems', $T_INT, [$T_OBJ]);
+    add_simple_op('captureposarg', $T_OBJ, [$T_OBJ, $T_INT]);
+    add_simple_op('invokewithcapture', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($invokee, $capture) {
+        "$invokee.apply(undefined,[{$*BLOCK.ctx}].concat($capture.named, $capture.pos))"
+    }, :sideffects);
 
     method compile_op($comp, $op, :$want) {
         my str $name := $op.op;

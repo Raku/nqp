@@ -185,3 +185,17 @@ op.setinvokespec = function(obj, classHandle, attrName, invocationHandler) {
     obj._STable.setinvokespec(classHandle, attrName, invocationHandler);
     return obj;
 };
+
+function Capture(named,pos) {
+  this.pos = pos;
+}
+
+op.savecapture = function(args) {
+  return new Capture(args[1], Array.prototype.slice.call(args, 2));
+};
+op.captureposelems = function(capture) {
+  return capture.pos.length;
+};
+op.captureposarg = function(capture, i) {
+  return capture.pos[i];
+};
