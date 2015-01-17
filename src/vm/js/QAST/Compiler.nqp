@@ -1186,7 +1186,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     # It's more usefull for me during this development to emit partial code instead of quiting
     method NYI($msg) {
-        Chunk.new($T_VOID,"NYI($msg)",["// NYI: $msg\n"]);
+        Chunk.new($T_VOID,"NYI($msg)",["console.trace(\"NYI: \"+{quote_string($msg)});\n"]);
         #nqp::die("NYI: $msg");
     }
 
