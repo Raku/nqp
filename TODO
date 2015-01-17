@@ -7,6 +7,7 @@ General stuff that helps all backends
     - nqp::printfh in combination with nqp::getstdout(),nqp::getstderr()
     - add a test for nqp::index with three arguments to t/nqp/59-nqpop.t - EASY
     - a test for if cond() -> $value-of-cond {...} - EASY
+    - nqp::ifnull
 
 Improving the code quality (which is a bit less atrocious then before ) 
     - Write a nqptidy (or a p6tidy) to make sure the nqp code has a consistent style
