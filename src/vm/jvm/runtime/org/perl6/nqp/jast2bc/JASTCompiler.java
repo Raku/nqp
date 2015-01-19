@@ -228,7 +228,13 @@ public class JASTCompiler {
         }
         else if (istype(insn, jastPushI, tc) != 0) {
             long value = getattr_i(insn, jastPushI, "$!value", 0, tc);
-            m.visitLdcInsn(value);
+            if (value == 0) {
+                m.visitInsn(Opcodes.LCONST_0);
+            } else if (value == 1) {
+                m.visitInsn(Opcodes.LCONST_1);
+            } else {
+                m.visitLdcInsn(value);
+            }
         }
         else if (istype(insn, jastPushN, tc) != 0) {
             double value = getattr_n(insn, jastPushN, "$!value", 0, tc);
@@ -244,7 +250,10 @@ public class JASTCompiler {
         }
         else if (istype(insn, jastPushIdx, tc) != 0) {
             int value = (int) getattr_i(insn, jastPushIdx, "$!value", 0, tc);
-            if (value >= Byte.MIN_VALUE && value <= Byte.MAX_VALUE) {
+            if (value >= 0 && value <= 5) {
+                m.visitInsn(Opcodes.ICONST_0 + value);
+            }
+            else if (value >= Byte.MIN_VALUE && value <= Byte.MAX_VALUE) {
                 m.visitIntInsn(Opcodes.BIPUSH, value);
             }
             else if (value >= Short.MIN_VALUE && value <= Short.MAX_VALUE) {
