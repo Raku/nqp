@@ -73,6 +73,10 @@ class QAST::Node {
         nqp::ishash(%!annotations) && nqp::existskey(%!annotations, $key)
     }
 
+    method clear_annotations() {
+        %!annotations := nqp::null();
+    }
+
     my %uniques;
     method unique($prefix) {
         my $id := nqp::existskey(%uniques, $prefix) ??
