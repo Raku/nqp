@@ -3105,25 +3105,44 @@ public final class Ops {
     }
 
     public static String join(String delimiter, SixModelObject arr, ThreadContext tc) {
-        final StringBuilder sb = new StringBuilder();
-        int prim = arr.st.REPR.get_value_storage_spec(tc, arr.st).boxed_primitive;
+        final int prim = arr.st.REPR.get_value_storage_spec(tc, arr.st).boxed_primitive;
         if (prim != StorageSpec.BP_NONE && prim != StorageSpec.BP_STR)
             ExceptionHandling.dieInternal(tc, "Unsupported native array type in join");
 
         final int numElems = (int) arr.elems(tc);
-        for (int i = 0; i < numElems; i++) {
-            if (i > 0) {
-                sb.append(delimiter);
-            }
-            if (prim == StorageSpec.BP_STR) {
+        if (numElems == 0)
+            return "";
+
+        String[] strings = new String[numElems];
+        int totalLength = delimiter.length() * (numElems - 1);
+
+        if (prim == StorageSpec.BP_STR) {
+            for (int i = 0; i < numElems; ++i) {
                 arr.at_pos_native(tc, i);
-                sb.append(tc.native_s);
-            } else {
-                sb.append(arr.at_pos_boxed(tc, i).get_str(tc));
+                strings[i] = tc.native_s;
+                totalLength += tc.native_s.length();
+            }
+        } else {
+            for (int i = 0; i < numElems; ++i) {
+                String s = arr.at_pos_boxed(tc, i).get_str(tc);
+                strings[i] = s;
+                totalLength += s.length();
             }
         }
 
-        return sb.toString();
+        char[] chars = new char[totalLength];
+        strings[0].getChars(0, strings[0].length(), chars, 0);
+
+        int pos = strings[0].length();
+        for(int i = 1; i < strings.length; ++i) {
+            delimiter.getChars(0, delimiter.length(), chars, pos);
+            pos += delimiter.length();
+
+            strings[i].getChars(0, strings[i].length(), chars, pos);
+            pos += strings[i].length();
+        }
+
+        return new String(chars);
     }
 
     public static SixModelObject split(String delimiter, String string, ThreadContext tc) {
