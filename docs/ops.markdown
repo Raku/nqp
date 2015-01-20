@@ -311,7 +311,7 @@ Return non-zero if the two parameters are not equal.
 ## not
 * `not_i(int $val)`
 
-Return 1 if `$val` is 0, 1 otherwise.
+Return 1 if `$val` is 0, 0 otherwise.
 
 # Array opcodes
 
@@ -362,7 +362,8 @@ are coerced to the appropriate type.
 
 "Push $v onto the end of @arr."
 Bind $v to @arr at the position at the end of @arr, i.e., the position that is just after the last position of @arr that has been bound to.
-Return the number of elements of @arr on Parrot, $v on JVM.
+
+Return value is not currently defined.
 
 ## pop
 * `pop(@arr)`
