@@ -199,3 +199,16 @@ op.captureposelems = function(capture) {
 op.captureposarg = function(capture, i) {
   return capture.pos[i];
 };
+
+op.setcodeobj = function(codeRef, codeObj) {
+  codeRef.codeObj = codeObj;
+  return codeRef;
+};
+op.getcodeobj = function(codeRef) {
+  return codeRef.codeObj ;
+};
+
+op.curcode = function() {
+  var current = arguments.callee.caller;
+  return current.codeRef;
+};

@@ -3,6 +3,7 @@ function CodeRef() {
 
 CodeRef.prototype.block = function(func) {
   this.$call = func;
+  func.codeRef = this;
 };
 
 CodeRef.prototype.apply = function(thisArg, argsArray) {

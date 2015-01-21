@@ -873,6 +873,10 @@ class QAST::OperationsJS {
         $cache;
     });
 
+    add_simple_op('getcodeobj', $T_OBJ, [$T_OBJ]);
+    add_simple_op('setcodeobj', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
+    add_simple_op('curcode', $T_OBJ, []);
+
     method compile_op($comp, $op, :$want) {
         my str $name := $op.op;
         if nqp::existskey(%ops, $name) {
