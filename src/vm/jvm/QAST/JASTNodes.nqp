@@ -1,3 +1,4 @@
+
 class JAST::Node {
 }
 
@@ -116,6 +117,7 @@ class JAST::Method is JAST::Node {
     has int $!has_exit_handler;
     has int $!args_expectation;
     has int $!is_thunk;
+    has @!block_lexical_values;
     
     method BUILD(:$name!, :$returns!, :$static = 1) {
         $!name := $name;
@@ -132,6 +134,7 @@ class JAST::Method is JAST::Node {
         @!cr_nlex := [];
         @!cr_slex := [];
         @!cr_handlers := [];
+        @!block_lexical_values := [];
     }
     
     method add_argument($name, $type) {
@@ -165,6 +168,7 @@ class JAST::Method is JAST::Node {
     method has_exit_handler(*@value) { $!has_exit_handler := @value[0] if @value; $!has_exit_handler }
     method args_expectation(*@value) { $!args_expectation := @value[0] if @value; $!args_expectation }
     method is_thunk(*@value) { $!is_thunk := @value[0] if @value; $!is_thunk }
+    method block_lexical_values(*@value) { @value ?? (@!block_lexical_values := @value[0]) !! @!block_lexical_values }
 
     method dump(@dumped) {
         nqp::push(@dumped, "+ method");

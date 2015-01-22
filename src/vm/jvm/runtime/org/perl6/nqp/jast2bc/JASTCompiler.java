@@ -186,6 +186,15 @@ public class JASTCompiler {
             if (method.hasExitHandler) av.visit("hasExitHandler", method.hasExitHandler);
             if (method.argsExpectation > 0) av.visit("argsExpectation", method.argsExpectation);
             if (method.isThunk) av.visit("isThunk", method.isThunk);
+
+            if (method.blv.size() > 0) {
+                avLex = av.visitArray("blockLexValues");
+                for (String s : method.blv) {
+                    avLex.visit(null,  s);
+                }
+                avLex.visitEnd();
+            }
+
             av.visitEnd();
         }
 

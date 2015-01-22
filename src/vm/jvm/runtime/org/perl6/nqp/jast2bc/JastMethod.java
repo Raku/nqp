@@ -35,6 +35,7 @@ public class JastMethod {
     public boolean hasExitHandler = false;
     public short argsExpectation = 0;
     public boolean isThunk = false;
+    public List<String> blv = new ArrayList<String>();
 
     Label beginAll, endAll;
     Map<String, LabelInfo> labels = new HashMap<String, LabelInfo>();
@@ -101,6 +102,8 @@ public class JastMethod {
         } catch (Throwable t) {
             /* Most likely a version of the node without the field. */
         }
+
+        fillList(blv, getattr(jast, jastMethod,"@!block_lexical_values", blvHint, tc), tc);
     }
 
     private void fillList(List<String> list, SixModelObject smoList, ThreadContext tc) {
@@ -114,7 +117,7 @@ public class JastMethod {
     private static long nameHint, staticHint, returnsHint, argumentsHint,
             localsHint, instructionsHint, crNameHint, crCuidHint, crOuterHint,
             crOlexHint, crIlexHint, crNlexHint, crSlexHint, crHandlersHint,
-            hasExitHandlerHint, argsExpectationHint, isThunkHint;
+            hasExitHandlerHint, argsExpectationHint, isThunkHint,blvHint;
     public static void setup(SixModelObject jastMethod, ThreadContext tc) {
         nameHint            = jastMethod.st.REPR.hint_for(tc, jastMethod.st, jastMethod, "$!name");
         staticHint          = jastMethod.st.REPR.hint_for(tc, jastMethod.st, jastMethod, "$!static");
@@ -133,5 +136,6 @@ public class JastMethod {
         hasExitHandlerHint  = jastMethod.st.REPR.hint_for(tc, jastMethod.st, jastMethod, "$!has_exit_handler");
         argsExpectationHint = jastMethod.st.REPR.hint_for(tc, jastMethod.st, jastMethod, "$!args_expectation");
         isThunkHint         = jastMethod.st.REPR.hint_for(tc, jastMethod.st, jastMethod, "$!is_thunk");
+        blvHint             = jastMethod.st.REPR.hint_for(tc, jastMethod.st, jastMethod, "@!block_lexical_values");
     }
 }

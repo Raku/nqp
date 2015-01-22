@@ -2755,6 +2755,7 @@ class QAST::CompilerJAST {
         has @!lexical_names;    # List by type of lexial name lists
         has int $!num_save_sites;   # Count of points where a SaveStackException handler is needed
         has %!local2temp;       # Maps local names to temporarization info
+        has @!blv;
         
         method new($qast, $outer) {
             my $obj := nqp::create(self);
@@ -2773,6 +2774,7 @@ class QAST::CompilerJAST {
             %!lexical_idxs := nqp::hash();
             %!local2temp := nqp::hash();
             @!lexical_names := nqp::list([],[],[],[]);
+            @!blv := [];
         }
         
         method add_param($var) {
@@ -2795,6 +2797,7 @@ class QAST::CompilerJAST {
                 my $flags := $is_static ?? 0 !!
                              $is_cont   ?? 1 !! 2;
                 nqp::push(%blv{$!qast.cuid}, [$var.name, $var.value, $flags]);
+                nqp::push(@!blv, [$var.name, $var.value, $flags]);
             }
             @!lexicals[+@!lexicals] := $var;
         }
@@ -2868,6 +2871,7 @@ class QAST::CompilerJAST {
         method lexical_type($name) { %!lexical_types{$name} }
         method lexical_idx($name) { %!lexical_idxs{$name} }
         method lexical_names_by_type() { @!lexical_names }
+        method block_lexical_values() { @!blv }
     }
     
     my class BlockTempAlloc {
@@ -2992,7 +2996,21 @@ class QAST::CompilerJAST {
         # Now compile $source. By the end of this, the various data structures
         # set up above will be fully populated.
         self.as_jast($source);
-        
+
+        # Now fixup all the block lexical values to reference the serialization ids.
+        # The array of arrays will end up being a flat array of tuples.
+        for $*JCLASS.methods() -> $method {
+            my @bits := [];
+            for $method.block_lexical_values -> $lex {
+                nqp::push(@bits, $lex[0]);
+	            my $sc := nqp::getobjsc($lex[1]);
+                nqp::push(@bits, nqp::scgethandle($sc));
+                nqp::push(@bits, ~nqp::scgetobjidx($sc, $lex[1]));
+                nqp::push(@bits, ~$lex[2]);
+            }
+            $method.block_lexical_values(@bits);
+        }
+
         # Make various code-ref/dispatch related things.
         $*CODEREFS.jastify();
         
@@ -3849,7 +3867,9 @@ class QAST::CompilerJAST {
             if $node.is_thunk {
                 $*JMETH.is_thunk(1);
             }
-            
+
+            $*JMETH.block_lexical_values($block.block_lexical_values);
+
             # Finalize method and add it to the class.
             $*JCLASS.add_method($*JMETH);
         }
