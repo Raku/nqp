@@ -18,7 +18,7 @@ import org.perl6.nqp.sixmodel.reprs.MultiCache;
 
 public class SerializationWriter {
     /* The current version of the serialization format. */
-    private final int CURRENT_VERSION = 8;
+    private final int CURRENT_VERSION = 9;
 
     /* Various sizes (in bytes). */
     private final int HEADER_SIZE               = 4 * 16;
@@ -587,6 +587,15 @@ public class SerializationWriter {
         /* HLL info. */
         writeStr(st.hllOwner == null ? "" : st.hllOwner.name);
         writeInt(st.hllRole);
+
+        /* If it's a parametric type, save parameterizer. */
+        if (st.parametricity instanceof ParametricType) {
+            writeInt(1);
+            writeRef(((ParametricType)st.parametricity).parameterizer);
+        }
+        else {
+            writeInt(0);
+        }
 
         /* Location of REPR data. */
         outputs[STABLES].putInt(outputs[STABLE_DATA].position());
