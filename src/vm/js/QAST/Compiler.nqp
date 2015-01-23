@@ -456,8 +456,17 @@ class QAST::OperationsJS {
     });
 
     add_op('hash', sub ($comp, $node, :$want) {
-       my @setup;
-       Chunk.new($T_OBJ, 'nqp.hash()', @setup , :$node);
+        my $hash := $*BLOCK.add_tmp();
+        my @setup;
+        @setup.push("$hash = nqp.hash();\n");
+        for $node.list -> $key, $val {
+            my $key_chunk := $comp.as_js($key, :want($T_STR));
+            my $val_chunk := $comp.as_js($val, :want($T_OBJ));
+            @setup.push($key_chunk);
+            @setup.push($val_chunk);
+            @setup.push("$hash[{$key_chunk.expr}] = {$val_chunk.expr};\n");
+         }
+         Chunk.new($T_OBJ, $hash , @setup , :$node);
     });
     add_simple_op('ishash', $T_INT, [$T_OBJ]);
 
