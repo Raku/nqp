@@ -20,7 +20,7 @@
 
 /* Version of the serialization format that we are currently at and lowest
  * version we support. */
-#define CURRENT_VERSION 6
+#define CURRENT_VERSION 7
 #define MIN_VERSION 1
 
 /* Various sizes (in bytes). */
@@ -773,6 +773,10 @@ static void serialize_stable(PARROT_INTERP, SerializationWriter *writer, PMC *st
             write_ref_func(interp, writer, st->invocation_spec->invocation_handler);
         }
     }
+
+    /* If it's a parametric type, save parameterizer. */
+    if (st->mode_flags & SM_PARAMETRIC_TYPE)
+        write_ref_func(interp, writer, st->paramet.ric.parameterizer);
     
     /* Store offset we save REPR data at. */
     write_int32(writer->root.stables_table, offset + 8, writer->stables_data_offset);
@@ -1666,6 +1670,17 @@ static void deserialize_stable(PARROT_INTERP, SerializationReader *reader, INTVA
             st->invocation_spec->value_slot.attr_name = read_str_func(interp, reader);
             st->invocation_spec->value_slot.hint = read_int_func(interp, reader);
             st->invocation_spec->invocation_handler = read_ref_func(interp, reader);
+        }
+    }
+
+    /* If it's a parametric type... */
+    if (reader->root.version >= 7) {
+        if (st->mode_flags & SM_PARAMETRIC_TYPE) {
+            /* Create empty lookup table. */
+            st->paramet.ric.lookup = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
+
+            /* Deserialize parameterizer. */
+            st->paramet.ric.parameterizer = read_ref_func(interp, reader);
         }
     }
 
