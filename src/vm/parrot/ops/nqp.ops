@@ -4464,13 +4464,46 @@ inline op nqp_parameterizetype(out PMC, invar PMC, invar PMC) {
 }
 
 inline op nqp_typeparameterized(out PMC, invar PMC) {
-    $1 = PMCNULL;
+    PMC *type = decontainerize(interp, $2);
+    if (type->vtable->base_type == smo_id) {
+        STable *st = STABLE(type);
+        if (st->mode_flags & SM_PARAMETERIZED_TYPE)
+            $1 = st->paramet.erized.parametric_type;
+        else
+            $1 = PMCNULL;
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use typeparameterized on a SixModelObject");
+    }
 }
 
 inline op nqp_typeparameters(out PMC, invar PMC) {
-    $1 = PMCNULL;
+    PMC *type = decontainerize(interp, $2);
+    if (type->vtable->base_type == smo_id) {
+        STable *st = STABLE(type);
+        if (!(st->mode_flags & SM_PARAMETERIZED_TYPE))
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "This type is not parameterized");
+        $1 = st->paramet.erized.parameters;
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use typeparameters on a SixModelObject");
+    }
 }
 
 inline op nqp_typeparameterat(out PMC, invar PMC, in INT) {
-    $1 = PMCNULL;
+    PMC *type = decontainerize(interp, $2);
+    if (type->vtable->base_type == smo_id) {
+        STable *st = STABLE(type);
+        if (!(st->mode_flags & SM_PARAMETERIZED_TYPE))
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "This type is not parameterized");
+        $1 = VTABLE_get_pmc_keyed_int(interp, st->paramet.erized.parameters, $3);
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use typeparameters on a SixModelObject");
+    }
 }
