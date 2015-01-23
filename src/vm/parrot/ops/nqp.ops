@@ -4386,3 +4386,22 @@ inline op nqp_string_equal_at(out INT, in STR, in STR, in INT) {
         }
     }
 }
+
+inline op nqp_setparameterizer(invar PMC, invar PMC) {
+}
+
+inline op nqp_parameterizetype(out PMC, invar PMC, invar PMC) {
+    $1 = PMCNULL;
+}
+
+inline op nqp_typeparameterized(out PMC, invar PMC) {
+    $1 = PMCNULL;
+}
+
+inline op nqp_typeparameters(out PMC, invar PMC) {
+    $1 = PMCNULL;
+}
+
+inline op nqp_typeparameterat(out PMC, invar PMC, in INT) {
+    $1 = PMCNULL;
+}
