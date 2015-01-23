@@ -31,7 +31,7 @@ function injectMethod(proto, name, method) {
       for (var i = 2; i < arguments.length; i++) {
         args.push(arguments[i]);
       }
-      return method.$call.apply(this, args);
+      return method.$call.apply(method, args);
     }
   };
 }
