@@ -24,6 +24,7 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -61,6 +62,8 @@ import org.perl6.nqp.sixmodel.BoolificationSpec;
 import org.perl6.nqp.sixmodel.ContainerConfigurer;
 import org.perl6.nqp.sixmodel.ContainerSpec;
 import org.perl6.nqp.sixmodel.InvocationSpec;
+import org.perl6.nqp.sixmodel.ParameterizedType;
+import org.perl6.nqp.sixmodel.ParametricType;
 import org.perl6.nqp.sixmodel.REPRRegistry;
 import org.perl6.nqp.sixmodel.STable;
 import org.perl6.nqp.sixmodel.SerializationContext;
@@ -1936,6 +1939,7 @@ public final class Ops {
     public static final CallSiteDescriptor findmethCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_STR }, null);
     public static final CallSiteDescriptor typeCheckCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ }, null);
     public static final CallSiteDescriptor howObjCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ }, null);
+    public static final CallSiteDescriptor parameterizeCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ }, null);
     public static void invokeLexotic(SixModelObject invokee, CallSiteDescriptor csd, Object[] args, ThreadContext tc) {
         LexoticException throwee = tc.theLexotic;
         throwee.target = ((LexoticInstance)invokee).target;
@@ -2733,6 +2737,90 @@ public final class Ops {
     }
     public static long ishash(SixModelObject obj, ThreadContext tc) {
         return obj != null && obj.st.REPR instanceof VMHash ? 1 : 0;
+    }
+
+    /* Parametricity operations. */
+    public static SixModelObject setparameterizer(SixModelObject type, SixModelObject parameterizer, ThreadContext tc) {
+        STable st = type.st;
+
+        /* Ensure that the type is not already parametric or parameterized. */
+        if (st.parametricity != null) {
+            if (st.parametricity instanceof ParametricType)
+                ExceptionHandling.dieInternal(tc, "This type is already parametric");
+            if (st.parametricity instanceof ParameterizedType)
+                ExceptionHandling.dieInternal(tc, "Cannot make a parameterized type also be parametric");
+        }
+
+        /* Set up the type as parameterized. */
+        ParametricType pt = new ParametricType();
+        pt.parameterizer = parameterizer;
+        pt.lookup = new ArrayList<Map.Entry<SixModelObject, SixModelObject>>();
+        st.parametricity = pt;
+
+        return type;
+    }
+    public static SixModelObject parameterizetype(SixModelObject type, SixModelObject params, ThreadContext tc) {
+        /* Ensure we have a parametric type. */
+        STable st = type.st;
+        if (!(st.parametricity instanceof ParametricType))
+            ExceptionHandling.dieInternal(tc, "This type is not parametric");
+
+        /* Do a lookup in the parameterizations array. */
+        List<Map.Entry<SixModelObject, SixModelObject>> lookup = ((ParametricType)st.parametricity).lookup;
+        int numLookups = lookup.size();
+        long paramsElems = params.elems(tc);
+        for (int i = 0; i < numLookups; i++) {
+            Map.Entry<SixModelObject, SixModelObject> entry = lookup.get(i);
+            SixModelObject compare = entry.getKey();
+            long comapreElems = compare.elems(tc);
+            if (paramsElems == comapreElems) {
+                boolean match = true;
+                for (long j = 0; j < paramsElems; j++) {
+                    SixModelObject want = params.at_pos_boxed(tc, j);
+                    SixModelObject got = compare.at_pos_boxed(tc, j);
+                    /* XXX More cases to consider here. */
+                    if (want != got) {
+                        match = false;
+                        break;
+                    }
+                }
+                if (match)
+                    return entry.getValue();
+            }
+        }
+
+        /* It wasn't found; run parameterizer. */
+        invokeDirect(tc, ((ParametricType)st.parametricity).parameterizer,
+            parameterizeCallSite, new Object[] { st.WHAT, params });
+        SixModelObject result = result_o(tc.curFrame);
+
+        /* Mark parametric and stash required data. */
+        STable newSTable = result.st;
+        ParameterizedType pt = new ParameterizedType();
+        pt.parametricType = type;
+        pt.parameters = params;
+        newSTable.parametricity = pt;
+
+        /* Add to lookup table. */
+        /* XXX handle possible race. */
+        lookup.add(new AbstractMap.SimpleEntry<>(params, result));
+
+        return result;
+    }
+    public static SixModelObject typeparameterized(SixModelObject type, ThreadContext tc) {
+        STable st = type.st;
+        return st.parametricity instanceof ParameterizedType
+             ? ((ParameterizedType)st.parametricity).parametricType
+             : null;
+    }
+    public static SixModelObject typeparameters(SixModelObject type, ThreadContext tc) {
+        STable st = type.st;
+        if (!(st.parametricity instanceof ParameterizedType))
+            ExceptionHandling.dieInternal(tc, "This type is not parameterized");
+        return ((ParameterizedType)st.parametricity).parameters;
+    }
+    public static SixModelObject typeparameterat(SixModelObject type, long idx, ThreadContext tc) {
+        return typeparameters(type, tc).at_pos_boxed(tc, idx);
     }
 
     /* Container operations. */

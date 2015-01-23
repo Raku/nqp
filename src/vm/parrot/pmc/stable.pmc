@@ -86,6 +86,20 @@ pmclass STable manual_attrs dynpmc group nqp {
             for (i = PARROT_VTABLE_LOW; i < NUM_VTABLE_FUNCTIONS + PARROT_VTABLE_LOW; i++)
                 if (!PMC_IS_NULL(st->parrot_vtable_mapping[i]))
                     Parrot_gc_mark_PMC_alive(interp, st->parrot_vtable_mapping[i]);
+
+        /* If it's parametric of parameterized, mark the appropriate bits. */
+        if (st->mode_flags & SM_PARAMETRIC_TYPE) {
+            if (!PMC_IS_NULL(st->paramet.ric.parameterizer))
+                Parrot_gc_mark_PMC_alive(interp, st->paramet.ric.parameterizer);
+            if (!PMC_IS_NULL(st->paramet.ric.lookup))
+                Parrot_gc_mark_PMC_alive(interp, st->paramet.ric.lookup);
+        }
+        else if (st->mode_flags & SM_PARAMETERIZED_TYPE) {
+            if (!PMC_IS_NULL(st->paramet.erized.parametric_type))
+                Parrot_gc_mark_PMC_alive(interp, st->paramet.erized.parametric_type);
+            if (!PMC_IS_NULL(st->paramet.erized.parameters))
+                Parrot_gc_mark_PMC_alive(interp, st->paramet.erized.parameters);
+        }
     }
 
     VTABLE void destroy() {

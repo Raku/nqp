@@ -2540,6 +2540,11 @@ QAST::Operations.add_core_op('settypefinalize', -> $qastcomp, $op {
 });
 QAST::Operations.add_core_pirop_mapping('objprimspec', 'repr_get_primitive_type_spec', 'IP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('setinvokespec', 'set_invocation_spec', '0PPsP', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('setparameterizer', 'nqp_setparameterizer', '0PP', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('parameterizetype', 'nqp_parameterizetype', 'PPP', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('typeparameterized', 'nqp_typeparameterized', 'PP', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('typeparameters', 'nqp_typeparameters', 'PP', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('typeparameterat', 'nqp_typeparameterat', 'PPi', :inlinable(1));
 
 # container related
 QAST::Operations.add_core_pirop_mapping('setcontspec', 'set_container_spec', '0PsP', :inlinable(1));

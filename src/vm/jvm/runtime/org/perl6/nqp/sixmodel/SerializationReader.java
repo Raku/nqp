@@ -2,6 +2,8 @@ package org.perl6.nqp.sixmodel;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.Map;
 
 import org.perl6.nqp.runtime.CallFrame;
 import org.perl6.nqp.runtime.CodeRef;
@@ -11,7 +13,7 @@ import org.perl6.nqp.sixmodel.reprs.VMHashInstance;
 
 public class SerializationReader {
     /* The current version of the serialization format. */
-    private final int CURRENT_VERSION = 8;
+    private final int CURRENT_VERSION = 9;
 
     /* The minimum version of the serialization format. */
     private final int MIN_VERSION = 4;
@@ -413,6 +415,21 @@ public class SerializationReader {
             if (version >= 6) {
                 st.hllOwner = tc.gc.getHLLConfigFor(readStr());
                 st.hllRole = orig.getLong();
+            }
+
+            /* Type parametricity. */
+            if (version >= 9) {
+                long paraFlag = orig.getLong();
+                /* If it's a parametric type... */
+                if (paraFlag == 1) {
+                    ParametricType pt = new ParametricType();
+                    pt.parameterizer = readRef();
+                    pt.lookup = new ArrayList<Map.Entry<SixModelObject, SixModelObject>>();
+                    st.parametricity = pt;
+                }
+                else if (paraFlag != 0) {
+                    throw new RuntimeException("Unknown STable parametricity flag");
+                }
             }
 
             /* If the REPR has a function to deserialize representation data, call it. */
