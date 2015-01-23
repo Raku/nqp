@@ -4388,10 +4388,79 @@ inline op nqp_string_equal_at(out INT, in STR, in STR, in INT) {
 }
 
 inline op nqp_setparameterizer(invar PMC, invar PMC) {
+    PMC *type          = decontainerize(interp, $1);
+    PMC *parameterizer = decontainerize(interp, $2);
+    if (type->vtable->base_type == smo_id) {
+        STable *st = STABLE(type);
+
+        /* Ensure that the type is not already parametric or parameterized. */
+        if (st->mode_flags & SM_PARAMETRIC_TYPE)
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "This type is already parametric");
+        if (st->mode_flags & SM_PARAMETERIZED_TYPE)
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot make a parameterized type also be parametric");
+
+        /* Store the parameterizer. */
+        st->paramet.ric.parameterizer = parameterizer;
+
+        /* For now, we use a simple pairwise array, with parameters and the type
+         * that is based on those parameters interleaved. It does make resolution
+         * O(n), so we might like to do some hash in the future. */
+        st->paramet.ric.lookup = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
+        PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC(type));
+
+        /* Mark the type as parameterized. */
+        st->mode_flags |= SM_PARAMETRIC_TYPE;
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use setparameterizer on a SixModelObject");
+    }
 }
 
 inline op nqp_parameterizetype(out PMC, invar PMC, invar PMC) {
-    $1 = PMCNULL;
+    PMC *type   = decontainerize(interp, $2);
+    PMC *params = decontainerize(interp, $3);
+    if (type->vtable->base_type == smo_id) {
+        PMC    *old_ctx, *cappy, *result;
+        STable *new_stable;
+
+        /* Ensure we have a parametric type. */
+        STable *st = STABLE(type);
+        if (!(st->mode_flags & SM_PARAMETRIC_TYPE))
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "This type is not parametric");
+
+        /* Do a lookup in the parameterizations array. */
+        /* XXX TODO */
+
+        /* It wasn't found; run parameterizer. */
+        old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+        cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
+        VTABLE_push_pmc(interp, cappy, st->WHAT);
+        VTABLE_push_pmc(interp, cappy, params);
+        Parrot_pcc_invoke_from_sig_object(interp, st->paramet.ric.parameterizer, cappy);
+        cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+        Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
+        result = VTABLE_get_pmc_keyed_int(interp, cappy, 0);
+
+        /* Mark parametric and stash required data. */
+        new_stable = STABLE(result);
+        new_stable->paramet.erized.parametric_type = st->WHAT;
+        new_stable->paramet.erized.parameters = params;
+        new_stable->mode_flags |= SM_PARAMETERIZED_TYPE;
+        PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC(result));
+
+        /* Add to lookup table. */
+        /* XXX TODO */
+
+        $1 = result;
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use parameterizetype on a SixModelObject");
+    }
 }
 
 inline op nqp_typeparameterized(out PMC, invar PMC) {
