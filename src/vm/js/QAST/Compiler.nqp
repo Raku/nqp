@@ -200,6 +200,21 @@ role DWIMYNameMangling {
     }
 }
 
+# Holds information about the javascript loop we are emitting code inside of.
+# The currently emitted loop is stored in $*LOOP.
+my class LoopInfo {
+    has $!redo;
+    method redo() {
+        unless nqp::defined($!redo) {
+            $!redo := $*BLOCK.add_tmp();
+        }
+        $!redo;
+    }
+    method has_redo() {
+        nqp::defined($!redo);
+    }
+}
+
 class QAST::OperationsJS {
     my %ops;
 
@@ -757,6 +772,8 @@ class QAST::OperationsJS {
             # TODO - return value
             # TODO while ... -> $cond {} 
 
+            my $*LOOP := LoopInfo.new();
+
             my $cond := $comp.as_js(@operands[0], :want($T_BOOL));
             my $body := $comp.as_js(@operands[1], :want($T_VOID));
 
@@ -764,12 +781,19 @@ class QAST::OperationsJS {
                 my $neg := $op eq 'while' ?? '!' !! '';
                 Chunk.new($T_VOID, '', [
                     "for (;;) \{\n",
+                    ($*LOOP.has_redo
+                        ?? "if ({$*LOOP.redo}) \{;\n"
+                            ~ "{$*LOOP.redo} = false;\n"
+                            ~  "\} else \{\n"
+                        !! ''), 
                     $cond,
                     "if ($neg {$cond.expr}) \{break;\}\n",
+                    ($*LOOP.has_redo ?? "\}\n" !! ''),
                     $body,
                     "\}"
                 ]);
             } else {
+                # TODO redo
                 my $neg := $op eq 'repeat_while' ?? '' !! '!';
                 Chunk.new($T_VOID, '', [
                     "do \{\n",
@@ -840,7 +864,7 @@ class QAST::OperationsJS {
         if nqp::existskey(%const_map, $node.name) {
             $comp.as_js(QAST::IVal.new( :value(%const_map{$node.name})), :$want);
         } else {
-            self.nyi("Constant "~$node.name);
+            $comp.NYI("Constant "~$node.name);
         }
     });
 
@@ -849,6 +873,34 @@ class QAST::OperationsJS {
     add_op('lexotic', sub ($comp, $node, :$want) {
        $*BLOCK.register_lexotic($node.name);
        $comp.as_js($node[0], :$want);
+    });
+
+
+    add_op('control', sub ($comp, $node, :$want) {
+        return $comp.NYI("Labels to control") if $node[0];
+        if $node.name eq 'last' {
+            if nqp::defined($*LOOP) {
+                Chunk.new($T_VOID, '', ["break;\n"]);
+            } else {
+                $comp.NYI("indirect last");
+            }
+        } elsif $node.name eq 'next' {
+            if nqp::defined($*LOOP) {
+                Chunk.new($T_VOID, '', ["continue;\n"]);
+            } else {
+                $comp.NYI("indirect next");
+            }
+        } elsif $node.name eq 'redo' {
+            if nqp::defined($*LOOP) {
+                Chunk.new($T_VOID, '', ["{$*LOOP.redo} = 1;\n;continue;\n"]);
+            } else {
+                $comp.NYI("indirect redo");
+            }
+            
+
+        } else {
+            $comp.NYI("control with name: "~$node.name);
+        }
     });
 
     add_simple_op('create', $T_OBJ, [$T_OBJ], :sideffects);
@@ -978,6 +1030,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         method params() { @!params }
         method variables() { @!variables }
     }
+
 
 
     method is_valid_js_identifier($identifier) {
@@ -1357,6 +1410,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             self.register_cuid($node);
             my $*BINDVAL := 0;
             my $*BLOCK := BlockInfo.new($node, (nqp::defined($outer) ?? $outer !! NQPMu));
+            my $*LOOP;
 
             my $create_ctx := self.create_fresh_ctx();
 
