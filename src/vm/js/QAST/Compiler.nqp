@@ -953,7 +953,10 @@ class QAST::OperationsJS {
 
     add_simple_op('how', $T_OBJ, [$T_OBJ], sub ($obj) {"$obj._STable.HOW"});
     add_simple_op('who', $T_OBJ, [$T_OBJ], sub ($obj) {"$obj._STable.WHO"});
-    add_simple_op('what', $T_OBJ, [$T_OBJ], sub ($obj) {"$obj._STable.WHAT"});
+
+    # HACK
+    # TODO think what we should return on 1.WHAT and "foo".WHAT
+    add_simple_op('what', $T_OBJ, [$T_OBJ], sub ($obj) {"($obj._STable ? $obj._STable.WHAT : null)"});
 
     add_simple_op('knowhowattr', $T_OBJ, [], sub () {"nqp.knowhowattr"});
 
