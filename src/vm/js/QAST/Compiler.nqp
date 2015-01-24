@@ -203,7 +203,10 @@ role DWIMYNameMangling {
 # Holds information about the javascript loop we are emitting code inside of.
 # The currently emitted loop is stored in $*LOOP.
 my class LoopInfo {
+    has $!outer;
     has $!redo;
+    has $!handle_last;
+
     method redo() {
         unless nqp::defined($!redo) {
             $!redo := $*BLOCK.add_tmp();
@@ -213,6 +216,32 @@ my class LoopInfo {
     method has_redo() {
         nqp::defined($!redo);
     }
+    method new($outer) {
+        my $obj := nqp::create(self);
+        $obj.BUILD($outer);
+        $obj
+    }
+    method BUILD($outer) {
+        $!outer := $outer;
+    }
+    method outer() { $!outer }
+    method handle_last(*@value) { $!handle_last := @value[0] if @value;$!handle_last}
+}
+
+my class BlockBarrier {
+    has $!block;
+    has $!outer;
+
+    method new($block, $outer) {
+        my $obj := nqp::create(self);
+        $obj.BUILD($block, $outer);
+        $obj
+    }
+    method BUILD($block, $outer) {
+        $!block := $block;
+        $!outer := $outer;
+    }
+    method outer() { $!outer }
 }
 
 class QAST::OperationsJS {
@@ -745,7 +774,8 @@ class QAST::OperationsJS {
         }
 
         my $outer     := try $*BLOCK;
-        my $body := $comp.compile_block(@operands[1], $outer, :want($T_VOID), :extra_args(@body_args));
+        my $outer_loop := try $*LOOP; # TODO
+        my $body := $comp.compile_block(@operands[1], $outer, $outer_loop, :want($T_VOID), :extra_args(@body_args));
 
 
         Chunk.new($T_VOID, '', [
@@ -772,24 +802,29 @@ class QAST::OperationsJS {
             # TODO - return value
             # TODO while ... -> $cond {} 
 
-            my $*LOOP := LoopInfo.new();
+            my $loop := LoopInfo.new($*LOOP);
 
-            my $cond := $comp.as_js(@operands[0], :want($T_BOOL));
-            my $body := $comp.as_js(@operands[1], :want($T_VOID));
+            my $cond;
+            my $body;
+            {
+                my $*LOOP := $loop;
+                $cond := $comp.as_js(@operands[0], :want($T_BOOL));
+                $body := $comp.as_js(@operands[1], :want($T_VOID));
+            }
 
             if $op eq 'while' || $op eq 'until' {
                 my $neg := $op eq 'while' ?? '!' !! '';
                 Chunk.new($T_VOID, '', [
                     "for (;;) \{\n",
-                    ($*LOOP.has_redo
-                        ?? "if ({$*LOOP.redo}) \{;\n"
-                            ~ "{$*LOOP.redo} = false;\n"
+                    ($loop.has_redo
+                        ?? "if ({$loop.redo}) \{;\n"
+                            ~ "{$loop.redo} = false;\n"
                             ~  "\} else \{\n"
                         !! ''), 
                     $cond,
                     "if ($neg {$cond.expr}) \{break;\}\n",
-                    ($*LOOP.has_redo ?? "\}\n" !! ''),
-                    $body,
+                    ($loop.has_redo ?? "\}\n" !! ''),
+                    $comp.handle_control($loop, $body),
                     "\}"
                 ]);
             } else {
@@ -879,19 +914,27 @@ class QAST::OperationsJS {
     add_op('control', sub ($comp, $node, :$want) {
         return $comp.NYI("Labels to control") if $node[0];
         if $node.name eq 'last' {
-            if nqp::defined($*LOOP) {
+            if $*LOOP ~~ LoopInfo {
                 Chunk.new($T_VOID, '', ["break;\n"]);
-            } else {
-                $comp.NYI("indirect last");
+            } elsif $*LOOP ~~ BlockBarrier {
+                my $loop := $*LOOP;
+                while nqp::defined($loop.outer) {
+                    $loop := $loop.outer;
+                    if $loop ~~ LoopInfo {
+                        $loop.handle_last(1);
+                        return Chunk.new($T_VOID, '', ["throw 'last';\n"]);
+                    }
+                }
+                $comp.NYI("can't find surrounding loop for last");
             }
         } elsif $node.name eq 'next' {
-            if nqp::defined($*LOOP) {
+            if $*LOOP ~~ LoopInfo {
                 Chunk.new($T_VOID, '', ["continue;\n"]);
             } else {
                 $comp.NYI("indirect next");
             }
         } elsif $node.name eq 'redo' {
-            if nqp::defined($*LOOP) {
+            if $*LOOP ~~ LoopInfo {
                 Chunk.new($T_VOID, '', ["{$*LOOP.redo} = 1;\n;continue;\n"]);
             } else {
                 $comp.NYI("indirect redo");
@@ -1269,6 +1312,22 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         $chunk;
     }
 
+    method handle_control($loop, $chunk) {
+        if $loop.handle_last {
+            Chunk.new($chunk.type, $chunk.expr, [
+                "try \{\n",
+                $chunk,
+                "\} catch (e) \{\n",
+                "if (e == 'last') \{\n",
+                "break;\n",
+                "\} else \{ throw (e) \}\n" ,
+                "\}\n"
+            ]);
+        } else {
+            $chunk;
+        }
+    }
+
 
     # It's more usefull for me during this development to emit partial code instead of quiting
     method NYI($msg) {
@@ -1345,7 +1404,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     multi method as_js(QAST::Block $node, :$want) {
         my $outer     := try $*BLOCK;
-        self.compile_block($node, $outer, :$want);
+        my $outer_loop := try $*LOOP;
+        self.compile_block($node, $outer, $outer_loop, :$want);
     }
 
     method mangled_cuid($cuid) {
@@ -1399,7 +1459,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
     }
 
-    method compile_block(QAST::Block $node, $outer, :$want, :@extra_args=[]) {
+    method compile_block(QAST::Block $node, $outer, $outer_loop, :$want, :@extra_args=[]) {
         my $cuid := self.mangled_cuid($node.cuid);
 
         my $setup;
@@ -1410,7 +1470,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             self.register_cuid($node);
             my $*BINDVAL := 0;
             my $*BLOCK := BlockInfo.new($node, (nqp::defined($outer) ?? $outer !! NQPMu));
-            my $*LOOP;
+
+            my $*LOOP := BlockBarrier.new($*BLOCK, $outer_loop);
 
             my $create_ctx := self.create_fresh_ctx();
 
