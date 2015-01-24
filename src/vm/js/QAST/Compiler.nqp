@@ -1629,6 +1629,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
         }
 
+        my @post;
+        for $node.post_deserialize -> $node {
+            self.log($node.dump);
+            @post.push(self.as_js($node, :want($T_VOID)));
+        }
+        my $post := Chunk.new($T_VOID, "", @post);
+
         # Compile the block.
         my $block_js := self.as_js($node[0], :want($T_VOID));
 
@@ -1645,7 +1652,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             $body := $block_js;
         }
 
-        Chunk.new($T_VOID, "", [self.setup_cuids(), $pre , self.create_sc($node), $body]);
+        Chunk.new($T_VOID, "", [self.setup_cuids(), $pre , self.create_sc($node), $post, $body]);
     }
 
     method declare_var(QAST::Var $node) {
