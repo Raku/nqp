@@ -546,7 +546,7 @@ class QAST::OperationsJS {
         my $call;
         if nqp::islist($compiled_args) {
             $compiled_args := merge_arg_groups($compiled_args);
-            $call := '.apply(undefined,';
+            $call := '.$apply(';
         } else {
             $call := '.$call(';
         }
@@ -971,7 +971,7 @@ class QAST::OperationsJS {
     add_simple_op('captureposelems', $T_INT, [$T_OBJ]);
     add_simple_op('captureposarg', $T_OBJ, [$T_OBJ, $T_INT]);
     add_simple_op('invokewithcapture', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($invokee, $capture) {
-        "$invokee.apply(undefined,[{$*BLOCK.ctx}].concat($capture.named, $capture.pos))"
+        "$invokee.\$apply([{$*BLOCK.ctx}].concat($capture.named, $capture.pos))"
     }, :sideffects);
 
 

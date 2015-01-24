@@ -6,8 +6,8 @@ CodeRef.prototype.block = function(func) {
   func.codeRef = this;
 };
 
-CodeRef.prototype.apply = function(thisArg, argsArray) {
-  return this.$call.apply(thisArg, argsArray);
+CodeRef.prototype.$apply = function(argsArray) {
+  return this.$call.apply(this, argsArray);
 };
 
 CodeRef.prototype.takeclosure = function() {

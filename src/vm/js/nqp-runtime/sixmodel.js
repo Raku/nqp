@@ -15,8 +15,8 @@ STable.prototype.setinvokespec = function(classHandle, attrName, invocationHandl
   this.obj_constructor.prototype.$call = function() {
     return this[attrName].$call.apply(this, arguments);
   };
-  this.obj_constructor.prototype.apply = function() {
-    return this[attrName].apply.apply(this, arguments);
+  this.obj_constructor.prototype.$apply = function(args) {
+    return this[attrName].$apply(args);
   };
 };
 
