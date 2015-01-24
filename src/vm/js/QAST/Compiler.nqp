@@ -663,6 +663,7 @@ class QAST::OperationsJS {
 
             my $boolifed_cond := $comp.coerce($cond, $T_BOOL);
 
+            my $cond_without_sideeffects := Chunk.new($cond.type, $cond.expr, []);
 
             if $node.op eq 'if' {
                 $then := $comp.as_js($node[1], :$want);
@@ -670,13 +671,13 @@ class QAST::OperationsJS {
                 if $operands == 3 {
                     $else := $comp.as_js($node[2], :$want);
                 } else {
-                    $else := $comp.coerce($cond, $want);
+                    $else := $comp.coerce($cond_without_sideeffects, $want);
                 }
             } else {
                 if $operands == 3 {
                     $then := $comp.as_js($node[2], :$want);
                 } else {
-                    $then := $comp.coerce($cond, $want);
+                    $then := $comp.coerce($cond_without_sideeffects, $want);
                 }
                 $else := $comp.as_js($node[1], :$want);
             }
