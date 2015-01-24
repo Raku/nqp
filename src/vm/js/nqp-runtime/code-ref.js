@@ -16,4 +16,9 @@ CodeRef.prototype.takeclosure = function() {
   return closure;
 };
 
+CodeRef.prototype.setCodeObj = function(codeObj) {
+  this.codeObj = codeObj;
+  return this;
+};
+
 module.exports = CodeRef;

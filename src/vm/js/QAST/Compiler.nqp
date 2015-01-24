@@ -1481,8 +1481,15 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             my $sig := self.compile_sig($*BLOCK.params);
 
+            # Set code object, if any.
+            my $set_code_object := '';
+            my $code_obj := $node.code_object;
+            if nqp::isconcrete($code_obj) {
+                 $set_code_object := ".setCodeObj({self.value_as_js($code_obj)})";
+            }
+
             $setup := [
-                "$cuid.block(function({$sig.expr}) \{\n",
+                $cuid ~ $set_code_object ~ ".block(function({$sig.expr}) \{\n",
                 self.setup_setting($node),
                 self.declare_js_vars($*BLOCK.tmps),
                 self.declare_js_vars($*BLOCK.js_lexicals),
