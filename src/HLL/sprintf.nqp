@@ -59,14 +59,14 @@ my module sprintf {
             my @statements;
             @statements.push( $_.made ) for $<statement>;
 
-            if $assert_used_args && $*ARGS_USED < +@*ARGS_HAVE {
-                nqp::die("Too few directives: found $*ARGS_USED,"
-                ~ " fewer than the " ~ +@*ARGS_HAVE ~ " arguments after the format string")
-            }
-            if $*ARGS_USED > +@*ARGS_HAVE {
-                nqp::die("Too many directives: found $*ARGS_USED, but "
-                ~ (+@*ARGS_HAVE > 0 ?? "only " ~ +@*ARGS_HAVE !! "no")
-                ~ " arguments after the format string")
+            if ($assert_used_args && $*ARGS_USED < +@*ARGS_HAVE) || ($*ARGS_USED > +@*ARGS_HAVE) {
+                nqp::die("Directives specify "
+                    ~ ($*ARGS_USED == 1 ?? "1 argument, but "
+                                        !! "$*ARGS_USED arguments, but ")
+                    ~ (+@*ARGS_HAVE < 1      ?? "no argument was"
+                        !! +@*ARGS_HAVE == 1 ?? "1 argument was"
+                                             !! +@*ARGS_HAVE ~ " arguments were")
+                    ~ " supplied")
             }
             make nqp::join('', @statements);
         }
