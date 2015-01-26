@@ -211,15 +211,18 @@ sub git_checkout {
     my $dir  = shift;
     my $checkout = shift;
     my $pushurl = shift;
-    my $git_depth = shift;
-	my $depth = $git_depth ? '--depth=' . $git_depth : '';
+    my $depth = shift;
+    my $reference = shift;
     my $pwd = cwd();
 
     # get an up-to-date repository
     if (! -d $dir) {
-        my @args = ('git', 'clone', $repo, $dir);
-		push @args, $depth if $depth;
-		system_or_die(@args);
+        my @args = ('git', 'clone');
+        push @args, $reference if $reference ne '';
+        push @args, $depth if $depth ne '';
+        push @args, $repo;
+        push @args, $dir;
+        system_or_die(@args);
         chdir($dir);
         system('git', 'config', 'remote.origin.pushurl', $pushurl)
             if defined $pushurl && $pushurl ne $repo;
@@ -321,7 +324,8 @@ sub gen_nqp {
             github_url($git_protocol, 'perl6', 'nqp'),
             'nqp', $nqp_want,
             github_url('ssh', 'perl6', 'nqp'),
-            $options{'git-depth'},
+            $options{'git-depth'} ? "--depth=$options{'git-depth'}" : '',
+            $options{'git-reference'} ? "--reference=$options{'git-reference'}/nqp" : '',
         );
     }
 
@@ -374,7 +378,8 @@ sub gen_parrot {
             github_url($git_protocol, 'parrot', 'parrot'),
             'parrot', $gen_parrot,
             github_url('ssh', 'parrot', 'parrot'),
-            $options{'git-depth'},
+            $options{'git-depth'} ? "--depth=$options{'git-depth'}" : '',
+            $options{'git-reference'} ? "--reference=$options{'git-reference'}/parrot" : '',
         );
         $par_ok = $par_have eq $par_repo;
     }
@@ -383,7 +388,8 @@ sub gen_parrot {
             github_url($git_protocol, 'parrot', 'parrot'),
             'parrot', $par_want,
             github_url('ssh', 'parrot', 'parrot'),
-            $options{'git-depth'},
+            $options{'git-depth'} ? "--depth=$options{'git-depth'}" : '',
+            $options{'git-reference'} ? "--reference=$options{'git-reference'}/parrot" : '',
         );
     }
 
@@ -457,7 +463,8 @@ sub gen_moar {
         github_url($git_protocol, 'MoarVM', 'MoarVM'),
         'MoarVM', $gen_moar || $moar_want,
         github_url('ssh', 'MoarVM', 'MoarVM'),
-        $options{'git-depth'},
+        $options{'git-depth'} ? "--depth=$options{'git-depth'}" : '',
+        $options{'git-reference'} ? "--reference=$options{'git-reference'}/MoarVM" : '',
     );
 
     unless (cmp_rev($moar_repo, $moar_want) >= 0) {
