@@ -33,7 +33,7 @@ MAIN: {
                'with-moar=s', 'gen-moar:s', 'moar-option=s@',
                'make-install!', 'makefile-timing!',
                'git-protocol=s',
-               'git-depth=s',);
+               'git-depth=s', 'git-reference=s',);
 
     # Print help if it's requested
     if ($options{'help'}) {
@@ -326,7 +326,11 @@ General Options:
                        Protocol to use for git clone. Default: https
     --make-install     Immediately run `MAKE install` after configuring
     --git-depth=<number>
-                       Use the --depth option for git clone with parameter number
+                       Use the --git-depth option for git clone with parameter number
+    --git-reference=<path>
+                       Use --git-reference option to identify local path where git repositories are stored
+                       For example: --git-reference=/home/user/repo/for_perl6
+                       Folders 'nqp', 'moar', 'parrot' with corresponding git repos should be in for_perl6 folder
 
 Configure.pl also reads options from 'config.default' in the current directory.
 END
