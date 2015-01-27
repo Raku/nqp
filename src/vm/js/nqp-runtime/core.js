@@ -186,6 +186,10 @@ op.setinvokespec = function(obj, classHandle, attrName, invocationHandler) {
     return obj;
 };
 
+// Stub
+op.setboolspec = function(obj, mode, method) {
+}
+
 function Capture(named,pos) {
   this.pos = pos;
 }

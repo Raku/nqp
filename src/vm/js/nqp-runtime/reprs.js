@@ -156,4 +156,15 @@ function Uninstantiable() {
 Uninstantiable.prototype.type_object_for = basic_type_object_for;
 module.exports.Uninstantiable = Uninstantiable;
 
+/* Stubs */
+function P6int() {
+}
+module.exports.P6int = P6int;
 
+function P6num() {
+}
+module.exports.P6num = P6num;
+
+function P6str() {
+}
+module.exports.P6str = P6str;
