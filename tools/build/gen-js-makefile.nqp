@@ -99,8 +99,9 @@ my $nqp-mo-combined := combine(:stage(2), :sources('$(NQP_MO_SOURCES)'), :file('
 
 my $nqp-mo-moarvm := cross-compile(:stage(2), :source($nqp-mo-combined), :target('nqpmo'), :setting('NULL'), :no-regex-lib(1));
 
-#
-#my $nqpcore-combined := combine(:stage(2), :sources('$(CORE_SETTING_SOURCES)'), :file('$(CORE_SETTING_COMBINED).nqp'));
+
+my $nqpcore-combined := combine(:stage(2), :sources('$(CORE_SETTING_SOURCES)'), :file('$(CORE_SETTING_COMBINED).nqp'));
+
 #my $nqpcore-pbc := cross-compile(:stage(2), :source($nqpcore-combined), :target('NQPCORE.setting'), :setting('NULL'), :no-regex-lib(1), :deps([$nqp-mo-pbc]));
 #
 #my $QASTNode-combined := combine(:stage(2), :sources('$(QASTNODE_SOURCES)'), :file('$(QASTNODE_COMBINED)'));
@@ -135,9 +136,9 @@ deps('js-stage1-compiler', '$(JS_STAGE1_COMPILER)');
 #deps('js-runner-default', 'js-all');
 #
 
-say("node_modules/mini-setting.setting.js: \$(JS_STAGE1_COMPILER) src/vm/js/mini-setting $nqp-mo-moarvm
+say("node_modules/NQPCORE.setting.js: \$(JS_STAGE1_COMPILER) $nqpcore-combined  $nqp-mo-moarvm
 	\$(MKPATH) gen/js/stage2
-	./nqp-m --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --module-path gen/js/stage2 --setting=NULL --target=mbc --output gen/js/stage2/mini-setting.setting.moarvm src/vm/js/mini-setting > node_modules/mini-setting.setting.js");
+	./nqp-m --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --module-path gen/js/stage2 --setting=NULL --target=mbc --output gen/js/stage2/NQPCORE.setting.moarvm $nqpcore-combined > node_modules/NQPCORE.setting.js");
 
 say('js-test: js-all
 	src/vm/js/bin/run_tests');
@@ -146,7 +147,7 @@ say("\n\njs-clean:
 	\$(RM_RF) gen/js/stage1 gen/js/stage2
 ");
 
-deps("js-all", 'm-all', 'js-stage1-compiler', 'node_modules/installed','node_modules/mini-setting.setting.js');
+deps("js-all", 'm-all', 'js-stage1-compiler', 'node_modules/installed','node_modules/NQPCORE.setting.js', $nqpcore-combined);
 
 # Enforce the google coding standards
 say("js-lint:

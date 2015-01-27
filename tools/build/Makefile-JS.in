@@ -26,10 +26,15 @@ $(JS_STAGE2)/nqpmo.moarvm: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(NQP_MO_COMBINED)
 	$(MKPATH) $(JS_STAGE2)
 	$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NULL --target=mbc --output $(JS_STAGE2)/nqpmo.moarvm $(JS_STAGE2)/$(NQP_MO_COMBINED) > node_modules/nqpmo.js
 
+$(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp: $(CORE_SETTING_SOURCES)
+	$(MKPATH) $(JS_STAGE2)
+	
+	$(PERL) tools/build/gen-cat.pl js $(CORE_SETTING_SOURCES)  > $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp
+
 js-stage1-compiler : $(JS_STAGE1_COMPILER)
-node_modules/mini-setting.setting.js: $(JS_STAGE1_COMPILER) src/vm/js/mini-setting $(JS_STAGE2)/nqpmo.moarvm
+node_modules/NQPCORE.setting.js: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp  $(JS_STAGE2)/nqpmo.moarvm
 	$(MKPATH) gen/js/stage2
-	./nqp-m --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --module-path gen/js/stage2 --setting=NULL --target=mbc --output gen/js/stage2/mini-setting.setting.moarvm src/vm/js/mini-setting > node_modules/mini-setting.setting.js
+	./nqp-m --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --module-path gen/js/stage2 --setting=NULL --target=mbc --output gen/js/stage2/NQPCORE.setting.moarvm $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp > node_modules/NQPCORE.setting.js
 js-test: js-all
 	src/vm/js/bin/run_tests
 
@@ -37,7 +42,7 @@ js-test: js-all
 js-clean:
 	$(RM_RF) gen/js/stage1 gen/js/stage2
 
-js-all : m-all js-stage1-compiler node_modules/installed node_modules/mini-setting.setting.js
+js-all : m-all js-stage1-compiler node_modules/installed node_modules/NQPCORE.setting.js $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp
 js-lint:
 	gjslint --strict --nojsdoc src/vm/js/nqp-runtime/*.js
 node_modules/installed: src/vm/js/nqp-runtime/*.js src/vm/js/nqp-runtime/package.json
