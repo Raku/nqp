@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(115);
+plan(117);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -166,3 +166,5 @@ sub test_splice_with_return() {
     @children
 }
 ok(nqp::elems(test_splice_with_return()) == 2, 'splice works as a return value');
+ok(!nqp::isnull_s("foo"), 'test for isnull_s with a normal string');
+ok(nqp::isnull_s(nqp::null_s()), 'test for isnull_s with a null_s');
