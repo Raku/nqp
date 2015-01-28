@@ -408,6 +408,9 @@ class QAST::OperationsJS {
     add_simple_op('null', $T_OBJ, [], sub () {"null"});
     add_simple_op('isnull', $T_BOOL, [$T_OBJ], sub ($obj) {"($obj === null)"});
 
+    add_simple_op('null_s', $T_STR, [], sub () {"null"});
+    add_simple_op('isnull_s', $T_BOOL, [$T_STR], sub ($obj) {"($obj === null)"});
+
     add_simple_op('escape', $T_STR, [$T_STR]);
     add_simple_op('x', $T_STR, [$T_STR, $T_INT]);
 
