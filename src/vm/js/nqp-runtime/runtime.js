@@ -22,6 +22,8 @@ load_ops(deserialization);
 
 exports.CodeRef = require('./code-ref.js');
 
+var Hash = require('./hash.js');
+
 module.exports.knowhowattr = require('./bootstrap.js').knowhowattr;
 
 var currentSetting;
@@ -90,6 +92,8 @@ exports.to_bool = function(arg) {
     return arg == '' || arg == '0' ? 0 : 1;
   } else if (arg instanceof Array) {
     return arg.length == 0 ? 0 : 1;
+  } else if (arg instanceof Hash) {
+    return Object.keys(arg).length == 0 ? 0 : 1;
   } else if (arg === undefined || arg == null) {
     return 0;
   } else if (arg.$$to_bool) {
