@@ -47,7 +47,7 @@ exports.ctxsave = function(ctx) {
     savedCtxs[currentSetting] = ctx;
 };
 
-exports.to_str = function(arg) {
+exports.to_str = function(arg, ctx) {
   if (typeof arg == 'number') {
     return arg.toString();
   } else if (typeof arg == 'string') {
@@ -60,7 +60,7 @@ exports.to_str = function(arg) {
   }
 };
 
-exports.to_num = function(arg) {
+exports.to_num = function(arg, ctx) {
   if (typeof arg == 'number') {
     return arg;
   } else if (typeof arg == 'string') {
@@ -77,7 +77,7 @@ exports.to_num = function(arg) {
   }
 };
 
-exports.to_int = function(arg) {
+exports.to_int = function(arg, ctx) {
   if (typeof arg == 'number') {
     return arg | 0;
   } else {
@@ -85,7 +85,7 @@ exports.to_int = function(arg) {
   }
 };
 
-exports.to_bool = function(arg) {
+exports.to_bool = function(arg, ctx) {
   if (typeof arg == 'number') {
     return arg ? 1 : 0;
   } else if (typeof arg == 'string') {
@@ -97,9 +97,7 @@ exports.to_bool = function(arg) {
   } else if (arg === undefined || arg == null) {
     return 0;
   } else if (arg.$$to_bool) {
-    return arg.$$to_bool();
-  } else if (arg.type_object_) {
-    return false;
+    return arg.$$to_bool(ctx);
   } else {
     throw "Can't decide if arg is true";
   }

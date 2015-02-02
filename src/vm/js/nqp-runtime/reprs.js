@@ -5,8 +5,7 @@ function basic_type_object_for(HOW) {
   this._STable = st;
   var obj = new st.obj_constructor();
 
-  /*st.WHAT = obj;
-  sixmodel.mark_as_type_object(obj);*/
+  obj.type_object_ = 1;
   return obj;
 }
 

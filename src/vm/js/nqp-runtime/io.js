@@ -100,7 +100,7 @@ FileHandle.prototype.printfh = function(content) {
   return fs.writeSync(this.fd, buffer, 0, buffer.length, 0);
 };
 
-FileHandle.prototype.$$to_bool = function() {
+FileHandle.prototype.$$to_bool = function(ctx) {
   return 1;
 };
 

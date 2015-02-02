@@ -4,11 +4,26 @@ function STable(REPR, HOW) {
   this.obj_constructor = function() {};
   this.obj_constructor.prototype._STable = this;
 
+  /* Default boolification mode 5 */
+  this.obj_constructor.prototype.$$to_bool = function(ctx) {
+    return this.type_object_ ? 0 : 1;
+  };
+
   if (this.REPR.setup_STable) {
     this.REPR.setup_STable(this);
   }
 }
 
+STable.prototype.setboolspec = function(mode, method) {
+    if (mode == 0) {
+      this.obj_constructor.prototype.$$to_bool = function(ctx) {
+        return method.$call(ctx, {}, this);
+      };
+    } else if (mode == 5) {
+    } else {
+      throw "setboolspec with mode: "+mode+" NYI";
+    }
+};
 
 STable.prototype.setinvokespec = function(classHandle, attrName, invocationHandler) {
   // TODO take classHandle into account

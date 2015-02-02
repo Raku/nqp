@@ -84,7 +84,7 @@ Iter.prototype.shift = function() {
   return this.array[this.idx++];
 };
 
-Iter.prototype.$$to_bool = function() {
+Iter.prototype.$$to_bool = function(ctx) {
   return arg.idx < arg.target;
 };
 
@@ -99,7 +99,7 @@ HashIter.prototype.shift = function() {
   return new IterPair(this.hash, this.keys[this.idx++]);
 };
 
-HashIter.prototype.$$to_bool = function() {
+HashIter.prototype.$$to_bool = function(ctx) {
   return arg.idx < arg.target;
 };
 
@@ -188,7 +188,9 @@ op.setinvokespec = function(obj, classHandle, attrName, invocationHandler) {
 
 // Stub
 op.setboolspec = function(obj, mode, method) {
-}
+    obj._STable.setboolspec(mode, method);
+    return obj;
+};
 
 function Capture(named,pos) {
   this.pos = pos;

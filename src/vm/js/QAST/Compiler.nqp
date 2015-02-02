@@ -1289,7 +1289,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 %convert{$T_NUM} := 'to_num';
                 %convert{$T_INT} := 'to_int';
                 %convert{$T_BOOL} := 'to_bool';
-                return Chunk.new($desired, 'nqp.' ~ %convert{$desired} ~ '(' ~ $chunk.expr ~ ')', [$chunk]);
+                return Chunk.new($desired, 'nqp.' ~ %convert{$desired} ~ '(' ~ $chunk.expr ~ ", {$*BLOCK.ctx})", [$chunk]);
             }
 
             if $desired == $T_STR {
