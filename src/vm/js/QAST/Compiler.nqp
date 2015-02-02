@@ -493,6 +493,10 @@ class QAST::OperationsJS {
         $comp.as_js(@children[0], :want($T_OBJ));
     });
 
+    add_op('bindkey', sub ($comp, $node, :$want) {
+        $comp.bind_key($node[0], $node[1], $node[2]);
+    });
+
     add_op('list', sub ($comp, $node, :$want) {
        my @setup;
        my @exprs;
@@ -1791,10 +1795,11 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             # TODO work on things other than nqp lists
             # TODO think about nulls and missing elements
             if $*BINDVAL {
-                my $hash := self.as_js_clear_bindval($var[0], :want($T_OBJ));
-                my $key := self.as_js_clear_bindval($var[1], :want($T_STR));
-                my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ));
-                Chunk.new($T_OBJ, $bindval.expr, [$hash, $key, $bindval, "({$hash.expr}[{$key.expr}] = {$bindval.expr});\n"], :node($var));
+                my $bindval := $*BINDVAL;
+                {
+                    my $*BINDVAL;
+                    self.bind_key($var[0], $var[1], $bindval, :node($var));
+                }
             } else {
                 my $hash := self.as_js($var[0], :want($T_OBJ));
                 my $key := self.as_js($var[1], :want($T_STR));
@@ -1822,6 +1827,14 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         } else {
             self.NYI("Unimplemented QAST::Var scope: " ~ $var.scope);
         }
+    }
+
+    method bind_key($hash, $key, $value, :$node) {
+        my $hash_chunk := self.as_js($hash, :want($T_OBJ));
+        my $key_chunk := self.as_js($key, :want($T_STR));
+        my $value_chunk := self.as_js($value, :want($T_OBJ));
+
+        Chunk.new($T_OBJ, $value_chunk.expr, [$hash_chunk, $key_chunk, $value_chunk, "({$hash_chunk.expr}[{$key_chunk.expr}] = {$value_chunk.expr});\n"], :node($node));
     }
 
     multi method as_js($unknown, :$want) {
