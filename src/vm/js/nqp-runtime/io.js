@@ -87,10 +87,6 @@ function FileHandle(fd) {
   this.fd = fd;
 }
 
-FileHandle.prototype.to_bool = function() {
-  return 1;
-};
-
 FileHandle.prototype.closefh = function() {
   fs.closeSync(this.fd);
 };
