@@ -1,4 +1,4 @@
-plan(3);
+plan(5);
 class Foo {
     has $!counter;
     has $!bool;
@@ -18,3 +18,11 @@ ok(nqp::istrue($foo) == 0);
 ok(nqp::istrue($foo) == 1);
 ok(nqp::istrue($foo) == 0);
 
+class Bar {
+}
+
+my $bar := Bar.new();
+
+nqp::setboolspec(Bar,5,$method);
+ok(nqp::istrue($bar) == 1, "setboolspec MODE_NOT_TYPE_OBJECT = 5 works correctly in true case");
+ok(nqp::istrue(Bar) == 0, "setboolspec MODE_NOT_TYPE_OBJECT = 5 works correctly in false case");
