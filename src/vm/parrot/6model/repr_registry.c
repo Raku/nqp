@@ -285,7 +285,7 @@ static INTVAL REPR_register_dynamic(PARROT_INTERP, STRING *name, REPROps * (*reg
 /* Initializes the representations registry, building up all of the various
  * representations. */
 void REPR_initialize_registry(PARROT_INTERP) {
-    PMC *dyn_reg_func;
+    PMC *dyn_reg_func, *lookup_func;
     
     /* Allocate name to ID map, and anchor it with the GC. */
     repr_name_to_id_map = Parrot_pmc_new(interp, enum_class_Hash);
@@ -320,6 +320,12 @@ void REPR_initialize_registry(PARROT_INTERP) {
     VTABLE_set_pointer(interp, dyn_reg_func, REPR_register_dynamic);
     VTABLE_set_pmc_keyed_str(interp, interp->root_namespace,
         Parrot_str_new_constant(interp, "_REGISTER_REPR"), dyn_reg_func);
+
+    /* Set up object for looking up the id of representations. */
+    lookup_func = Parrot_pmc_new(interp, enum_class_Pointer);
+    VTABLE_set_pointer(interp, lookup_func, REPR_name_to_id);
+    VTABLE_set_pmc_keyed_str(interp, interp->root_namespace,
+        Parrot_str_new_constant(interp, "_LOOKUP_REPR_ID"), lookup_func);
 }
 
 /* Get a representation's ID from its name. Note that the IDs may change so

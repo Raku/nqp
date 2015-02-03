@@ -516,11 +516,18 @@ PMC * hllize(PARROT_INTERP, PMC *obj, INTVAL hll_id);
 typedef PMC * (*wrap_object_t)(PARROT_INTERP, void *obj);
 typedef PMC * (*create_stable_t)(PARROT_INTERP, REPROps *REPR, PMC *HOW);
 typedef INTVAL (* rf) (PARROT_INTERP, STRING *name, REPROps * (*reg) (PARROT_INTERP, wrap_object_t, create_stable_t));
+typedef INTVAL (* lf) (PARROT_INTERP, STRING *name);
 #define REGISTER_DYNAMIC_REPR(interp, name, reg_func) \
     ((rf) \
         VTABLE_get_pointer(interp, \
             VTABLE_get_pmc_keyed_str(interp, interp->root_namespace, \
                 Parrot_str_new_constant(interp, "_REGISTER_REPR"))))(interp, name, reg_func)
+
+#define LOOKUP_REPR_ID(interp, name) \
+    ((lf) \
+        VTABLE_get_pointer(interp, \
+            VTABLE_get_pmc_keyed_str(interp, interp->root_namespace, \
+                Parrot_str_new_constant(interp, "_LOOKUP_REPR_ID"))))(interp, name)
 
 /* Dynamic container configuration registration. */
 typedef void (*cspec_conf) (PARROT_INTERP, STRING *name, ContainerConfigurer *configurer);
