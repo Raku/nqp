@@ -21,9 +21,10 @@ CodeRef.prototype.setCodeObj = function(codeObj) {
   return this;
 };
 
-CodeRef.prototype.setClosureTemplate = function(ctx, closureTemplate) {
+CodeRef.prototype.setInfo = function(ctx, closureTemplate, staticInfo) {
   this.closureTemplate = closureTemplate;
   this.ctx = ctx;
+  this.staticInfo = staticInfo;
   return this;
 };
 

@@ -1090,9 +1090,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         method variables() { @!variables }
     }
 
-    has %!closure_templates;
-    has %!block_ctx;
-
     method is_valid_js_identifier($identifier) {
         # TODO - implement a simplified version of https://mathiasbynens.be/notes/javascript-identifiers
         0;
@@ -1470,6 +1467,27 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
     }
 
+
+    has %!serialized_code_ref_info;
+
+    my class SerializedCodeRefInfo {
+        has $!closure_template;
+        has $!static_info;
+        has $!ctx;
+        method ctx() {$!ctx}
+        method static_info() {$!static_info}
+        method closure_template() {$!closure_template}
+    }
+
+    method static_info_for_lexicals(BlockInfo $block) {
+        my @static_info;
+        for $block.variables -> $var {
+            nqp::push(@static_info,quote_string($var.name)
+                ~ ': [' ~ nqp::objprimspec($var.returns) ~ ',' ~ quote_string(self.mangle_name($var.name)) ~ ']');
+        }
+        '{' ~ nqp::join(',', @static_info) ~ '}';
+    }
+
     method compile_block(QAST::Block $node, $outer, $outer_loop, :$want, :@extra_args=[]) {
         my $cuid := self.mangled_cuid($node.cuid);
 
@@ -1524,8 +1542,11 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     # TODO think about that, and find a way to test this
                     #say("// it's an immediate one");
                 } else {
-                    %!closure_templates{$node.cuid} := Chunk.new($T_OBJ, "", $function).join();
-                    %!block_ctx{$node.cuid} := $*BLOCK.ctx;
+                    %!serialized_code_ref_info{$node.cuid} := SerializedCodeRefInfo.new(
+                        closure_template => Chunk.new($T_OBJ, "", $function).join(),
+                        ctx => $*BLOCK.ctx,
+                        static_info => self.static_info_for_lexicals($*BLOCK)
+                    );
                 }
             }
 
@@ -1630,15 +1651,17 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             @blocks.push(self.mangled_cuid($block.cuid));
         }
 
-        my $set_closure_templates := '';
+        my $set_info := '';
         for $code_ref_blocks -> $block {
-            if nqp::existskey(%!closure_templates, $block.cuid) {
-                $set_closure_templates := $set_closure_templates
+            if nqp::existskey(%!serialized_code_ref_info, $block.cuid) {
+                my $info := %!serialized_code_ref_info{$block.cuid};
+                
+                $set_info := $set_info
                     ~ self.mangled_cuid($block.cuid)
-                    ~ ".setClosureTemplate("
-                    ~ quote_string(%!block_ctx{$block.cuid}) 
-                    ~ ","
-                    ~ quote_string(%!closure_templates{$block.cuid})
+                    ~ ".setInfo("
+                    ~ quote_string($info.ctx) ~ ","
+                    ~ quote_string($info.closure_template) ~ ","
+                    ~ $info.static_info
                     ~ ");\n";
             }
         }
@@ -1646,7 +1669,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         "var sh=[{nqp::join(',',@sh)}];\n"
         ~ "var sc = nqp.op.createsc({quote_string(nqp::scgethandle($sc))});\n"
         ~ "var code_refs = [{nqp::join(',',@blocks)}];\n" # TODO
-        ~ $set_closure_templates
+        ~ $set_info
         ~ "nqp.op.deserialize($quoted_data,sc,sh,code_refs,null);\n"
         ~ "nqp.op.scsetdesc(sc,{quote_string(nqp::scgetdesc($sc))});\n"
     }

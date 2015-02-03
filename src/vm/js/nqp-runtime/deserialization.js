@@ -286,10 +286,40 @@ BinaryCursor.prototype.closureEntry = function() {
 BinaryCursor.prototype.contextEntry = function(contextsData) {
   var entry = {};
   entry.staticCode = this.staticCodeRef();
-  entry.data = this.at(contextsData + this.I32());
+  var data = this.at(contextsData + this.I32());
   entry.outer = this.I32();
   entry.inner = [];
   entry.closures = [];
+
+  var count = data.I64();
+  var info = entry.staticCode.staticInfo;
+
+  var lexicals = {};
+
+  for (var i = 0; i < count; i++) {
+    var name = data.str();
+
+    if (!info[name]) {
+      throw "no static info for: ", name;
+    }
+
+    switch (info[name][0]) {
+      case 0: // obj
+        lexicals[name] = data.variant();
+        break;
+      case 1: // int
+        lexicals[name] = data.I64();
+        break;
+      case 2: // num
+        lexicals[name] = data.double();
+        break;
+      case 3: // str
+        lexicals[name] = data.str();
+    }
+  }
+
+  entry.lexicals = lexicals;
+
   return entry;
 };
 
@@ -423,27 +453,40 @@ BinaryCursor.prototype.deserialize = function(sc) {
   for (var i = 0; i < contexts.length ; i++) {
   }
 
+  var data = [];
   var code = '';
   for (var i = 0; i < contexts.length ; i++) {
     if (contexts[i].outer == 0) {
-      code += this.contextToCode(contexts[i]);
+      code += this.contextToCode(contexts[i], data) + "\n\n";
     }
   }
 
   var prelude = "var nqp = require('nqp-runtime');\n"
   if (code) {
-    console.log("building contexts", code);
+    /* TODO reduce accidental poisoning */
+    /* TODO make cuids be in scope */
     eval(prelude + code);
   }
 };
 
-BinaryCursor.prototype.contextToCode = function(context) {
-  var outer_ctx = 'null';
+BinaryCursor.prototype.contextToCode = function(context, data) {
+  var outer_ctx = 'null'; // TODO
   var caller_ctx = 'null';
   var create_ctx = "var " + context.staticCode.ctx + " = new nqp.Ctx(" + outer_ctx + ", " + caller_ctx + ");\n";
+  var set_vars = '';
+
+
+  var lexicals = [];
+  for (var name in context.lexicals) {
+      data.push(context.lexicals[name]);
+      set_vars += 'var ' + context.staticCode.staticInfo[name][1] + " = data[" + (data.length-1) + "]\n";
+      console.l
+  }
+
   return "(function() {\n" +
     create_ctx +
-    context.inner.map(function(inner) {return this.contextToCode(inner)}).join("") +
+    set_vars +
+    context.inner.map(function(inner) {return this.contextToCode(inner, data)}).join("") +
     context.closures.map(function(closure) {
       return 'sc.code_refs[' + closure.index + '].block(' + 
         closure.staticCode.closureTemplate
