@@ -4,6 +4,7 @@ BEGIN_OPS_PREAMBLE
 #include "parrot/extend.h"
 #include "parrot/dynext.h"
 #include "../6model/sixmodelobject.h"
+#include "../6model/repr_registry.h"
 #include "../6model/reprs/NativeCall.h"
 #include "../6model/reprs/CStruct.h"
 #include "../6model/reprs/CPointer.h"
@@ -12,6 +13,7 @@ BEGIN_OPS_PREAMBLE
 #include "../6model/reprs/P6int.h"
 #include "../6model/reprs/P6num.h"
 #include "../6model/reprs/P6str.h"
+#include "../6model/reprs/VMArray.h"
 #include "../6model/reprs/dyncall_reprs.h"
 
 /* This library contains just three operations: one to initialize it,
@@ -37,6 +39,7 @@ BEGIN_OPS_PREAMBLE
  *     cpointer
  *     cstruct
  *     carray
+ *     vmarray
  *     callback
  *
  * free_str
@@ -65,6 +68,7 @@ BEGIN_OPS_PREAMBLE
 #define DYNCALL_ARG_CARRAY          24
 #define DYNCALL_ARG_CALLBACK        26
 #define DYNCALL_ARG_CPOINTER        28
+#define DYNCALL_ARG_VMARRAY         30
 #define DYNCALL_ARG_TYPE_MASK       30
 
 /* Flag for whether we should free a string after passing it or not. */
@@ -96,6 +100,7 @@ static INTVAL cstr_repr_id = 0;
 static INTVAL p6int_repr_id = 0;
 static INTVAL p6num_repr_id = 0;
 static INTVAL p6str_repr_id = 0;
+static INTVAL vma_repr_id = 0;
 static INTVAL smo_id = 0;
 
 PMC *callback_cache = NULL;
@@ -175,6 +180,9 @@ get_arg_type(PARROT_INTERP, PMC *info, INTVAL is_return) {
     else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "carray"))) {
         return DYNCALL_ARG_CARRAY;
     }
+    else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "vmarray"))) {
+        return DYNCALL_ARG_VMARRAY;
+    }
     else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "callback"))) {
         return DYNCALL_ARG_CALLBACK;
     }
@@ -234,6 +242,7 @@ get_signature_char(INTVAL type_id) {
         case DYNCALL_ARG_CSTRUCT:
         case DYNCALL_ARG_CPOINTER:
         case DYNCALL_ARG_CARRAY:
+        case DYNCALL_ARG_VMARRAY:
         case DYNCALL_ARG_CALLBACK:
             return 'p';
         default:
@@ -462,6 +471,26 @@ unmarshal_carray(PARROT_INTERP, PMC *value) {
 }
 
 static void *
+unmarshal_vmarray(PARROT_INTERP, PMC *value) {
+    if (value->vtable->base_type != smo_id)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can't unmarshal non-sixmodel PMC to array");
+
+    if (!IS_CONCRETE(value))
+        return NULL;
+    else if (REPR(value)->ID == vma_repr_id) {
+        VMArrayBody *body          = &((VMArrayInstance *)value)->body;
+        VMArrayREPRData *repr_data = (VMArrayREPRData *)STABLE(value)->REPR_data;
+        size_t start_pos           = body->start * repr_data->elem_size;
+        return ((char *)body->slots) + start_pos;
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Native call expected object with VMArray representation, but got a %s",
+            Parrot_str_to_encoded_cstring(interp, REPR(value)->name, Parrot_utf8_encoding_ptr));
+}
+
+static void *
 unmarshal_cpointer(PARROT_INTERP, PMC *value) {
     if (value->vtable->base_type != smo_id)
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -608,6 +637,7 @@ static PMC * native_call_cast(PARROT_INTERP, PMC *target_spec, PMC *target_type,
         else if (REPR(target_type)->ID == ca_repr_id) {
             result = make_carray_result(interp, target_type, (void *)cpointer_body);
         }
+        /* XXX case REPR(target_type)->ID == vma_repr_id */
         else {
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Internal error: unhandled target type");
@@ -791,6 +821,7 @@ callback_handler(DCCallback *cb, DCArgs *args, DCValue *result, CallbackData *da
             case DYNCALL_ARG_CARRAY:
                 value = make_carray_result(data->interp, type, dcbArgPointer(args));
                 break;
+            /* XXX case DYNCALL_ARG_VMARRAY */
             case DYNCALL_ARG_CALLBACK:
                 /* TODO: A callback -return- value means that we have a C method
                 * that needs to be wrapped similarly to a is native(...) Perl 6
@@ -850,6 +881,9 @@ callback_handler(DCCallback *cb, DCArgs *args, DCValue *result, CallbackData *da
         case DYNCALL_ARG_CARRAY:
             result->p = unmarshal_carray(data->interp, retval);
             break;
+        case DYNCALL_ARG_VMARRAY:
+            result->p = unmarshal_vmarray(data->interp, retval);
+            break;
         case DYNCALL_ARG_CALLBACK:
             result->p = unmarshal_callback(data->interp, retval, data->types[0]);
             break;
@@ -885,11 +919,13 @@ inline op nqp_native_call_setup() :base_core {
             Parrot_str_new_constant(interp, "CStr"),
             CStr_initialize);
     if (!p6int_repr_id)
-        p6int_repr_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "P6int", 0));
+        p6int_repr_id = LOOKUP_REPR_ID(interp, Parrot_str_new(interp, "P6int", 0));
     if (!p6num_repr_id)
-        p6num_repr_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "P6num", 0));
+        p6num_repr_id = LOOKUP_REPR_ID(interp, Parrot_str_new(interp, "P6num", 0));
     if (!p6str_repr_id)
-        p6str_repr_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "P6str", 0));
+        p6str_repr_id = LOOKUP_REPR_ID(interp, Parrot_str_new(interp, "P6str", 0));
+    if (!vma_repr_id)
+        vma_repr_id   = LOOKUP_REPR_ID(interp, Parrot_str_new(interp, "VMArray", 0));
     if (!smo_id)
         smo_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
 }
@@ -1038,6 +1074,9 @@ inline op nqp_native_call(out PMC, invar PMC, invar PMC, invar PMC) :base_core {
             case DYNCALL_ARG_CARRAY:
                 dcArgPointer(vm, unmarshal_carray(interp, value));
                 break;
+            case DYNCALL_ARG_VMARRAY:
+                dcArgPointer(vm, unmarshal_vmarray(interp, value));
+                break;
             case DYNCALL_ARG_CALLBACK:
                 dcArgPointer(vm, unmarshal_callback(interp, value, body->arg_info[i]));
                 break;
@@ -1088,6 +1127,7 @@ inline op nqp_native_call(out PMC, invar PMC, invar PMC, invar PMC) :base_core {
         case DYNCALL_ARG_CARRAY:
             result = make_carray_result(interp, $2, dcCallPointer(vm, body->entry_point));
             break;
+        /* XXX case DYNCALL_ARG_VMARRAY */
         case DYNCALL_ARG_CALLBACK:
             /* XXX Above are all still todo. */
             /* TODO: A callback -return- value means that we have a C method
