@@ -1238,12 +1238,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
         }
 
-#        if $slurpy_named {
-#            $bind_named := $bind_named ~ self.bind_var($slurpy_named,self.js('_NAMED'),1) ~ ";\n";
-#        }
-
-
-
         if $slurpy {
             @setup.push("{self.mangle_name($slurpy.name)} = Array.prototype.slice.call(arguments,{+@sig});\n");
         }
