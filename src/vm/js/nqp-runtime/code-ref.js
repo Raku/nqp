@@ -21,4 +21,10 @@ CodeRef.prototype.setCodeObj = function(codeObj) {
   return this;
 };
 
+CodeRef.prototype.setClosureTemplate = function(ctx, closureTemplate) {
+  this.closureTemplate = closureTemplate;
+  this.ctx = ctx;
+  return this;
+};
+
 module.exports = CodeRef;

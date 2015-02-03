@@ -8,6 +8,7 @@ var SerializationContext = require('./serialization-context');
 var __6MODEL_CORE__ = require('./bootstrap.js').core;
 var Hash = require('./hash.js');
 var Int64 = require('node-int64');
+var CodeRef = require('./code-ref.js');
 
 
 /** All the loaded serialization contexts using their unique IDs as keys */
@@ -189,7 +190,14 @@ BinaryCursor.prototype.variant = function() {
       return this.hashOfVariants(this);
     case 11:
     case 12:
-      return this.sc.deps[this.I32()].code_refs[this.I32()];
+      var scID = this.I32();
+      var codeRefID = this.I32();
+      var codeRef = this.sc.deps[scID].code_refs[codeRefID];
+      if (!codeRef) {
+        console.log('missing code ref while deserializing', scID, codeRefID);
+        console.log(this.sc.code_refs);
+      }
+      return codeRef;
     default:
       console.trace('unknown variant');
       throw 'unknown variant: ' + type;
@@ -253,6 +261,37 @@ BinaryCursor.prototype.STable = function(STable) {
 
 
 }
+
+BinaryCursor.prototype.staticCodeRef = function() {
+  var scID = this.I32();
+  var codeRefID = this.I32();
+  var staticCode = this.sc.deps[scID].code_refs[codeRefID];
+  if (!staticCode) {
+    console.log('Code ref has an invalid static code');
+  }
+  return staticCode;
+}
+
+BinaryCursor.prototype.closureEntry = function() {
+  var entry = {};
+  entry.staticCode = this.staticCodeRef();
+  entry.context = this.I32();
+  var hasCodeObj = this.I32();
+  if (hasCodeObj) {
+    entry.codeObj = this.objRef();
+  }
+  return entry;
+}
+
+BinaryCursor.prototype.contextEntry = function(contextsData) {
+  var entry = {};
+  entry.staticCode = this.staticCodeRef();
+  entry.data = this.at(contextsData + this.I32());
+  entry.outer = this.I32();
+  entry.inner = [];
+  entry.closures = [];
+  return entry;
+};
 
 /** Read a whole serialization context */
 BinaryCursor.prototype.deserialize = function(sc) {
@@ -342,6 +381,19 @@ BinaryCursor.prototype.deserialize = function(sc) {
     STables[i][1].STable(sc.root_stables[i]);
   }
 
+  var closures_offset = this.I32();
+  var closures_number = this.I32();
+  var closures =
+      this.at(closures_offset).times(closures_number, function(cursor) {
+    return cursor.closureEntry();
+  });
+
+  var closures_base = sc.code_refs.length
+  for (var i=0; i < closures.length; i++) {
+    sc.code_refs[closures_base+i] = new CodeRef();
+    closures[i].index = closures_base+i;
+  }
+
   /* Finish up objects */
   for (var i = 0; i < objects.length; i++) {
     if (objects[i].is_concrete) {
@@ -352,27 +404,53 @@ BinaryCursor.prototype.deserialize = function(sc) {
     }
   }
 
-  /*
-  var closures_offset = this.I32();
-  var closures_number = this.I32();
-  header.closures =
-      this.at(closures_offset).times(closures_number, function(cursor) {
-    return cursor.closureEntry();
-  });
-
-
   var contexts_offset = this.I32();
   var contexts_number = this.I32();
   var contexts_data = this.I32();
-  header.contexts =
+  var contexts =
       this.at(contexts_offset).times(contexts_number, function(cursor) {
     return cursor.contextEntry(contexts_data);
   });
 
-  var repossessions_offset = this.I32();
-  var repossessions_number = this.I32();
-  */
+  for (var i = 0; i < contexts.length ; i++) {
+    if (contexts[i].outer) contexts[contexts[i].outer-1].inner.push(contexts[i]);
+  }
+
+  for (var i = 0; i < closures.length ; i++) {
+    if (closures[i].context) contexts[closures[i].context-1].closures.push(closures[i]);
+  }
+
+  for (var i = 0; i < contexts.length ; i++) {
+  }
+
+  var code = '';
+  for (var i = 0; i < contexts.length ; i++) {
+    if (contexts[i].outer == 0) {
+      code += this.contextToCode(contexts[i]);
+    }
+  }
+
+  var prelude = "var nqp = require('nqp-runtime');\n"
+  if (code) {
+    console.log("building contexts", code);
+    eval(prelude + code);
+  }
 };
+
+BinaryCursor.prototype.contextToCode = function(context) {
+  var outer_ctx = 'null';
+  var caller_ctx = 'null';
+  var create_ctx = "var " + context.staticCode.ctx + " = new nqp.Ctx(" + outer_ctx + ", " + caller_ctx + ");\n";
+  return "(function() {\n" +
+    create_ctx +
+    context.inner.map(function(inner) {return this.contextToCode(inner)}).join("") +
+    context.closures.map(function(closure) {
+      return 'sc.code_refs[' + closure.index + '].block(' + 
+        closure.staticCode.closureTemplate
+        + ');\n';
+    }).join("") +
+    "})();\n";
+}
 
 /** Read a 32bit integer */
 BinaryCursor.prototype.I32 = function() {

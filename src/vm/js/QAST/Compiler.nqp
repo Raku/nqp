@@ -1090,7 +1090,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         method variables() { @!variables }
     }
 
-
+    has %!closure_templates;
+    has %!block_ctx;
 
     method is_valid_js_identifier($identifier) {
         # TODO - implement a simplified version of https://mathiasbynens.be/notes/javascript-identifiers
@@ -1499,7 +1500,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
 
             $setup := [
-                $cuid ~ $set_code_object ~ ".block(function({$sig.expr}) \{\n",
+                ];
+
+            my $function := [
+                "function({$sig.expr}) \{\n",
                 self.setup_setting($node),
                 self.declare_js_vars($*BLOCK.tmps),
                 self.declare_js_vars($*BLOCK.js_lexicals),
@@ -1507,7 +1511,24 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 $create_ctx,
                 $stmts,
                 "return {$stmts.expr};\n",
-                "\});\n"];
+                "\}"
+            ];
+
+            $setup := nqp::clone($function);
+
+            nqp::unshift($setup, $cuid ~ $set_code_object ~ ".block(");
+            nqp::push($setup, ");\n");
+
+            if self.is_block_part_of_sc($node) {
+                if $node.blocktype eq 'immediate' {
+                    # TODO think about that, and find a way to test this
+                    #say("// it's an immediate one");
+                } else {
+                    %!closure_templates{$node.cuid} := Chunk.new($T_OBJ, "", $function).join();
+                    %!block_ctx{$node.cuid} := $*BLOCK.ctx;
+                }
+            }
+
         }
 
         if $node.blocktype eq 'immediate' {
@@ -1609,9 +1630,23 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             @blocks.push(self.mangled_cuid($block.cuid));
         }
 
+        my $set_closure_templates := '';
+        for $code_ref_blocks -> $block {
+            if nqp::existskey(%!closure_templates, $block.cuid) {
+                $set_closure_templates := $set_closure_templates
+                    ~ self.mangled_cuid($block.cuid)
+                    ~ ".setClosureTemplate("
+                    ~ quote_string(%!block_ctx{$block.cuid}) 
+                    ~ ","
+                    ~ quote_string(%!closure_templates{$block.cuid})
+                    ~ ");\n";
+            }
+        }
+
         "var sh=[{nqp::join(',',@sh)}];\n"
         ~ "var sc = nqp.op.createsc({quote_string(nqp::scgethandle($sc))});\n"
         ~ "var code_refs = [{nqp::join(',',@blocks)}];\n" # TODO
+        ~ $set_closure_templates
         ~ "nqp.op.deserialize($quoted_data,sc,sh,code_refs,null);\n"
         ~ "nqp.op.scsetdesc(sc,{quote_string(nqp::scgetdesc($sc))});\n"
     }
@@ -1622,6 +1657,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             nqp::die("QAST::CompUnit should have one child that is a QAST::Block");
         }
 
+        my $*COMPUNIT := $node;
 
         my $*SETTING_NAME;
         my $*SETTING_TARGET;
@@ -1670,6 +1706,16 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
 
         Chunk.new($T_VOID, "", [self.setup_cuids(), $pre , self.create_sc($node), $post, $body]);
+    }
+
+
+    method is_block_part_of_sc($block) {
+        for $*COMPUNIT.code_ref_blocks() -> $block_in_compunit {
+            if nqp::eqaddr($block, $block_in_compunit) {
+                return 1;
+            }
+        }
+        return 0;
     }
 
     method declare_var(QAST::Var $node) {
