@@ -959,6 +959,8 @@ class QAST::OperationsJS {
 
     add_simple_op('create', $T_OBJ, [$T_OBJ], :sideffects);
 
+    add_simple_op('die', $T_VOID, [$T_STR], :sideffects, sub ($msg) {"{$*BLOCK.ctx}.die($msg)"});
+
     # TODO work on containers
     add_simple_op('decont', $T_OBJ, [$T_OBJ], sub ($obj) {$obj});
 

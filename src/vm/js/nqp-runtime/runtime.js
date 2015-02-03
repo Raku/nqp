@@ -108,6 +108,10 @@ function Ctx(caller_ctx, outer_ctx) {
   this.outer = outer_ctx;
 };
 
+Ctx.prototype.die = function(msg) {
+  throw msg;
+};
+
 Ctx.prototype.lookup_dynamic = function(name) {
   var ctx = this;
   while (ctx) {
