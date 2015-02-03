@@ -1725,6 +1725,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             my $static := $node.decl eq 'static' ?? " = {self.value_as_js($node.value)}" !! '';
             $*BLOCK.add_js_lexical(self.mangle_name($node.name) ~ $static);
         } elsif $node.decl eq 'param' {
+            $*BLOCK.add_variable($node);
             if $node.scope eq 'local' || $node.scope eq 'lexical' {
                 $*BLOCK.add_param($node);
             } else {
