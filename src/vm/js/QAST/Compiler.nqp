@@ -326,12 +326,15 @@ class QAST::OperationsJS {
     add_simple_op('mul_i', $T_INT, [$T_INT, $T_INT], sub ($a, $b) {"Math.imul($a,$b)"});
 
     # TODO handle attributes properly
-    add_simple_op('bindattr', $T_OBJ, [$T_OBJ, $T_OBJ, $T_STR, $T_OBJ], :sideffects,
-        sub ($obj, $type, $attr, $value) {
-            # TODO take second argument into account
-            "($obj[$attr] = $value)";
-        }
-    );
+    for ['', $T_OBJ, '_i', $T_INT, '_n', $T_NUM, '_s', $T_STR] -> $suffix, $type {
+        add_simple_op('bindattr' ~ $suffix, $type, [$T_OBJ, $T_OBJ, $T_STR, $type], :sideffects,
+            sub ($obj, $type, $attr, $value) {
+                # TODO take second argument into account
+                "($obj[$attr] = $value)";
+            }
+        );
+    }
+
     add_simple_op('attrinited', $T_BOOL, [$T_OBJ, $T_OBJ, $T_STR],
         sub ($obj, $type, $attr) {
             # TODO take second argument into account
