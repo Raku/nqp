@@ -55,17 +55,40 @@ class HLLBackend::JavaScript {
     
     method js($qast, *%adverbs) {
         my $backend := QAST::CompilerJS.new;
+
+
         if %adverbs<source-map> {
             $backend.emit_with_source_map($qast);
         } else {
-            $backend.emit($qast);
+            my $code := $backend.emit($qast);
+            $code := self.beautify($code) if %adverbs<beautify>;
+            $code;
         }
+    }
+
+    method beautify($code) {
+        my $tmp_file := self.tmp_file();
+
+
+        my $fh := nqp::open($tmp_file, 'w');
+        nqp::printfh($fh, $code);
+        nqp::closefh($fh);
+
+        my $pipe := nqp::openpipe("uglifyjs $tmp_file -b", nqp::cwd(), nqp::getenvhash(), '');
+        my $beautified := nqp::readallfh($pipe);
+        nqp::closefh($pipe);
+        $beautified;
+    }
+
+    method tmp_file() {
+        # TODO a better temporary file name
+        'tmp.js';
     }
     
     method node($js) {
         # TODO source map support
-        # TODO a better temporary file name
-        my $tmp_file := 'tmp.js';
+        my $tmp_file := self.tmp_file;
+
         my $code := nqp::open($tmp_file, 'w');
         nqp::printfh($code, $js);
         nqp::closefh($code);
