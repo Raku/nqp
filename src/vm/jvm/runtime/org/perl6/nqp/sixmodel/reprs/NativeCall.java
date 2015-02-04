@@ -31,7 +31,8 @@ public class NativeCall extends REPR {
         CSTRUCT,
         CARRAY,
         CALLBACK,
-        CPOINTER;
+        CPOINTER,
+        VMARRAY;
     }
 
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {

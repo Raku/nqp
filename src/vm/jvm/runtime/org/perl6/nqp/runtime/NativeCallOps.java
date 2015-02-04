@@ -21,6 +21,16 @@ import org.perl6.nqp.sixmodel.REPR;
 import org.perl6.nqp.sixmodel.REPRRegistry;
 import org.perl6.nqp.sixmodel.StorageSpec;
 import org.perl6.nqp.sixmodel.SixModelObject;
+import org.perl6.nqp.sixmodel.reprs.VMArrayInstance;
+import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_i;
+import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_i8;
+import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_i16;
+import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_i32;
+import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_n;
+import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_s;
+import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_u8;
+import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_u16;
+import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_u32;
 import org.perl6.nqp.sixmodel.reprs.CArrayInstance;
 import org.perl6.nqp.sixmodel.reprs.CPointerInstance;
 import org.perl6.nqp.sixmodel.reprs.CStrInstance;
@@ -302,6 +312,36 @@ public final class NativeCallOps {
             return ((CStructInstance) o).storage;
         case CALLBACK:
             return callbackHandlerFor(o, info, tc);
+        case VMARRAY: {
+            if (o instanceof VMArrayInstance_i) {
+                return ((VMArrayInstance_i) o).slots;
+            }
+            if (o instanceof VMArrayInstance_i8) {
+                return ((VMArrayInstance_i8) o).slots;
+            }
+            else if (o instanceof VMArrayInstance_i16) {
+                return ((VMArrayInstance_i16) o).slots;
+            }
+            else if (o instanceof VMArrayInstance_i32) {
+                return ((VMArrayInstance_i32) o).slots;
+            }
+            else if (o instanceof VMArrayInstance_n) {
+                return ((VMArrayInstance_n) o).slots;
+            }
+            else if (o instanceof VMArrayInstance_s) {
+                return ((VMArrayInstance_s) o).slots;
+            }
+            else if (o instanceof VMArrayInstance_u8) {
+                return ((VMArrayInstance_u8) o).slots;
+            }
+            else if (o instanceof VMArrayInstance_u16) {
+                return ((VMArrayInstance_u16) o).slots;
+            }
+            else if (o instanceof VMArrayInstance_u32) {
+                return ((VMArrayInstance_u16) o).slots;
+            }
+            return ((VMArrayInstance) o).slots;
+        }
         default:
             throw ExceptionHandling.dieInternal(tc, String.format("Don't know how to convert %s arguments to JNA yet", target));
         }
