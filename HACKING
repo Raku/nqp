@@ -3,3 +3,28 @@
 src/vm/js/QAST/Compiler.nqp - turns QAST into JavaScript code
 src/vm/js/nqp-runtime - a node module the code we generate uses
 src/vm/js/bin/run_tests - a list of tests we use
+
+# Overview
+
+The bulk of the compilation is done by QAST::CompilerJS.as_js($node, :$want).
+It takes a QAST::Node and produces a Chunk.
+
+A chunk is created by Chunk.new($type, $expr, @setup, :$node).
+
+$expr represents a sideffect free JavaScript expression.
+$type describes what the expression evaluates to.
+
+$type can be one of $T_OBJ, $T_INT, $T_STR, $T_BOOL, $T_VOID, $T_NONVAL.
+
+@setup is the JavaScript code that needs to be run for $expr to be valid.
+@setup is an array containing either string literals with JavaScript code or other Chunks.
+
+$node is a QAST::Node we get line positions from when emitting source maps.
+
+Simple chunk examples:
+
+    Chunk.new($T_STR, "'Hello World'", []);
+
+    my $foo := Chunk.new($T_STR, "foo", ["foo = 'Hello World';\n"]);
+
+    Chunk.new($T_VOID, "", [$foo, "alert({$foo.expr});\n"]); # We don't ever use the $expr of $T_VOID chunks
