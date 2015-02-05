@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(126);
+plan(128);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -182,3 +182,14 @@ ok(nqp::eqat("foobar","foo", 1) == 0, "eqat with needle argument that matches");
 ok(nqp::eqat("foobar","bar", -3) == 1, "eqat with a negative offset argument");
 ok(nqp::eqat("foobar","foo", -9001) == 1, "eqat with a gigantic offset argument");
 ok(nqp::eqat("foobar","foobarbaz", 0) == 0, "eqat with needle argument longer than haystack");
+
+{
+    my $source := nqp::list("100", "200", "300");
+    my $a := nqp::list("1", "2", "3");
+    nqp::splice($a, $source, 0, 0);
+    ok(nqp::join(",", $a) eq '100,200,300,1,2,3', "splice");
+
+    my $b := nqp::list("1", "2", "3", "4");
+    nqp::splice($b, $source, 1, 2);
+    ok(nqp::join(",", $b) eq '1,100,200,300,4', "splice");
+}
