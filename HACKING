@@ -1,0 +1,5 @@
+# Source layout.
+
+src/vm/js/QAST/Compiler.nqp - turns QAST into JavaScript code
+src/vm/js/nqp-runtime - a node module the code we generate uses
+src/vm/js/bin/run_tests - a list of tests we use
