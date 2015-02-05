@@ -400,6 +400,12 @@ class QAST::OperationsJS {
         nqp::defined($length) ?? "$string.substr($start,$length)" !! "$string.substr($start)";
     });
 
+    # TODO portability to JScript (according to mdn it doesn't support negative offset - check it)
+    add_simple_op('eqat', $T_BOOL, [$T_STR, $T_STR, $T_INT], sub ($haystack, $needle, $offset) {
+        "($haystack.substr($offset, $needle.length) === $needle)"
+    });
+
+
 
     add_simple_op('chr', $T_STR, [$T_INT], sub ($code) {"String.fromCharCode($code)"});
 
