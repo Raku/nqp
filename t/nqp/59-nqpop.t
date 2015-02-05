@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(120);
+plan(126);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -175,3 +175,10 @@ ok(nqp::time_i() != 0, 'time_i is not zero');
 my $time_a := nqp::time_i();
 my $time_b := nqp::time_n();
 ok($time_b >= $time_a, "time_n >= time_i");
+
+ok(nqp::eqat("foobar","foo", 0) == 1, "eqat with needle argument that matches at 0");
+ok(nqp::eqat("foobar","oob", 1) == 1, "eqat with needle argument that matches at 1");
+ok(nqp::eqat("foobar","foo", 1) == 0, "eqat with needle argument that matches");
+ok(nqp::eqat("foobar","bar", -3) == 1, "eqat with a negative offset argument");
+ok(nqp::eqat("foobar","foo", -9001) == 1, "eqat with a gigantic offset argument");
+ok(nqp::eqat("foobar","foobarbaz", 0) == 0, "eqat with needle argument longer than haystack");
