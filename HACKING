@@ -25,6 +25,33 @@ Simple chunk examples:
 
     Chunk.new($T_STR, "'Hello World'", []);
 
-    my $foo := Chunk.new($T_STR, "foo", ["foo = 'Hello World';\n"]);
+    my $foo := Chunk.new($T_STR, "foo", ["var foo = 'Hello World';\n"]);
 
     Chunk.new($T_VOID, "", [$foo, "alert({$foo.expr});\n"]); # We don't ever use the $expr of $T_VOID chunks
+
+When compiling a QAST::Block we need to keep a bunch of information about it.
+We store it in a dynamic $*BLOCK variable (which contains a BlockInfo).
+
+     my $tmp := $*BLOCK.add_tmp(); # that creates a temporary variable in js function we are emitting.
+     my $foo := Chunk.new($T_STR, $tmp, ["$tmp = 'Hello World';\n"]);
+
+
+# NQP op codes
+
+
+QAST::OperationsJS.compile_op(QAST::CompilerJS $compiler, QAST::Node $node, :$want) handles the compilation of QAST::Op nodes
+
+The more complex ops are defined using add_op.
+
+    add_op($op, sub ($comp, $node, :$want) {
+        # this should return a chunk
+    });
+
+The simpler ones are defined using add_simple_op($op, $return_type, @argument_types, $cb, :$sideffects).
+$cb gets a bunch of .expr parts from the Chunks the op arguments are compiled to.
+$cb should return a string containing a JavaScript expression.
+If the op has sideffects the :$sideffects flag needs to be true.
+
+Example:
+
+    add_simple_op('lc', $T_STR, [$T_STR], sub ($string) {"$string.toLowerCase()"});
