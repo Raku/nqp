@@ -386,6 +386,8 @@ class QAST::OperationsJS {
        });
     }
 
+    add_simple_op('isstr', $T_BOOL, [$T_OBJ], sub ($obj) {"(typeof $obj == 'string')"});
+
     add_simple_op('chars', $T_INT, [$T_STR], sub ($string) {"$string.length"});
 
     add_simple_op('join', $T_STR, [$T_STR, $T_OBJ], sub ($delim, $list) {"$list.join($delim)"});
