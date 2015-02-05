@@ -1,3 +1,6 @@
+Missing features
+    - reasumable exceptions t/nqp/44-try-catch.t
+
 General stuff that helps all backends
     Write tests (to avoid implementing stuff in crazy ways)
     - nqp::eoffh - EASY
