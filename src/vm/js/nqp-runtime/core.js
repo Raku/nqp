@@ -218,3 +218,14 @@ op.curcode = function() {
   var current = arguments.callee.caller;
   return current.codeRef;
 };
+
+
+// TODO benchmark and pick a fast way of doing this
+op.splice = function(target, source, offset, length) {
+  var args = [offset, length];
+  for (var i = 0; i < source.length; i++) {
+    args.push(source[i]);
+  }
+  target.splice.apply(target, args);
+  return target;
+}
