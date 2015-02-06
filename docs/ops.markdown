@@ -1178,7 +1178,7 @@ Returns unix style mode. Returns -1 if an exception occurred.
 
 Returns number of hard links to the path. Returns -1 if an exception occurred.
 
-    * `nqp::const::STAT_PLATFORM_NLINKS`
+    * `nqp::const::STAT_PLATFORM_DEV`
 
 Returns the device identifier.  Returns -1 if an exception occurred.
 
