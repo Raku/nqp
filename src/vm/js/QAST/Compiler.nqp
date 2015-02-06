@@ -1021,6 +1021,7 @@ class QAST::OperationsJS {
 }
 
 class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
+    has $!nyi;
 
     #= If the env var NQPJS_LOG is set log to nqpjs.log
     method log(*@msgs) {
@@ -1351,6 +1352,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     # It's more usefull for me during this development to emit partial code instead of quiting
     method NYI($msg) {
+        if $!nyi eq 'ignore' {
+        } elsif $!nyi eq 'warn' {
+            nqp::printfh(nqp::getstderr(), "NYI: $msg\n");
+        }
         Chunk.new($T_VOID,"NYI({quote_string($msg)})",["console.trace(\"NYI: \"+{quote_string($msg)});\n"]);
         #nqp::die("NYI: $msg");
     }

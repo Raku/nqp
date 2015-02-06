@@ -14,6 +14,7 @@ sub MAIN(*@ARGS) {
     my @clo := $nqpcomp-cc.commandline_options();
     @clo.push('source-map');
     @clo.push('beautify');
+    @clo.push('nyi=s');
 
     $nqpcomp-cc.command_line(@ARGS, :stable-sc(1),:module-path('gen/js/stage2'),
         :setting-path('gen/js/stage2'),
