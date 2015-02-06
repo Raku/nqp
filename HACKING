@@ -55,3 +55,5 @@ If the op has sideffects the :$sideffects flag needs to be true.
 Example:
 
     add_simple_op('lc', $T_STR, [$T_STR], sub ($string) {"$string.toLowerCase()"});
+
+Sometimes old code can be scavanged for ways to implement things on node from src/vm/old-runtime-code (warning: crap code lives there).
