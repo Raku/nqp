@@ -629,6 +629,178 @@ public class BootJavaInterop {
             mv.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(what));
             mv.visitLabel(done);
         }
+        // array cases
+        else if (what == boolean[].class 
+              || what == byte[].class 
+              || what == short[].class
+              || what == int[].class
+              || what == long[].class
+              || what == float[].class
+              || what == double[].class
+              || what == String[].class
+              || what == char[].class
+              || what == SixModelObject[].class
+              || what == Object[].class) {
+            mv.visitVarInsn(Opcodes.ASTORE, 6);
+            mv.visitVarInsn(Opcodes.ALOAD, 6);
+            mv.visitVarInsn(Opcodes.ALOAD, c.tcLoc);
+            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/Ops", "elems", 
+                Type.getMethodDescriptor(Type.getType(long.class), TYPE_SMO, TYPE_TC));
+            mv.visitInsn(Opcodes.L2I);
+
+            if (what == boolean[].class) {
+                mv.visitIntInsn(Opcodes.NEWARRAY, Opcodes.T_BOOLEAN);
+            } 
+            else if (what == byte[].class) {
+                mv.visitIntInsn(Opcodes.NEWARRAY, Opcodes.T_BYTE);
+            }
+            else if (what == short[].class) {
+                mv.visitIntInsn(Opcodes.NEWARRAY, Opcodes.T_SHORT);
+            }
+            else if (what == int[].class) {
+                mv.visitIntInsn(Opcodes.NEWARRAY, Opcodes.T_INT);
+            }
+            else if (what == long[].class) {
+                mv.visitIntInsn(Opcodes.NEWARRAY, Opcodes.T_LONG);
+            }
+            else if (what == float[].class) {
+                mv.visitIntInsn(Opcodes.NEWARRAY, Opcodes.T_FLOAT);
+            }
+            else if (what == double[].class) {
+                mv.visitIntInsn(Opcodes.NEWARRAY, Opcodes.T_FLOAT);
+            }
+            else if (what == char[].class) {
+                mv.visitIntInsn(Opcodes.NEWARRAY, Opcodes.T_CHAR);
+            }
+            else {
+                mv.visitTypeInsn(Opcodes.ANEWARRAY, Type.getDescriptor(what));
+            }
+
+            mv.visitVarInsn(Opcodes.ASTORE, 7);
+            mv.visitInsn(Opcodes.LCONST_0);
+            mv.visitVarInsn(Opcodes.LSTORE, 8);
+            Label loop = new Label();
+            mv.visitLabel(loop);
+            mv.visitVarInsn(Opcodes.LLOAD, 8);
+            mv.visitInsn(Opcodes.L2I);
+            mv.visitVarInsn(Opcodes.ALOAD, 7);
+            mv.visitInsn(Opcodes.ARRAYLENGTH);
+            Label loopend = new Label();
+            mv.visitJumpInsn(Opcodes.IF_ICMPGE, loopend);
+            mv.visitVarInsn(Opcodes.ALOAD, 7);
+            mv.visitVarInsn(Opcodes.LLOAD, 8);
+            mv.visitInsn(Opcodes.L2I);
+            mv.visitVarInsn(Opcodes.ALOAD, 6);
+            mv.visitVarInsn(Opcodes.LLOAD, 8);
+            mv.visitVarInsn(Opcodes.ALOAD, c.tcLoc);
+
+            if (what == boolean[].class) {
+                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/Ops", "atpos_i",
+                    Type.getMethodDescriptor(Type.getType(long.class), TYPE_SMO, Type.getType(long.class), TYPE_TC));
+                Label f = new Label(), e = new Label();
+                mv.visitJumpInsn(Opcodes.IFEQ, f);
+                mv.visitInsn(Opcodes.ICONST_1);
+                mv.visitJumpInsn(Opcodes.GOTO, e);
+                mv.visitLabel(f);
+                mv.visitInsn(Opcodes.ICONST_0);
+                mv.visitLabel(e);
+                mv.visitInsn(Opcodes.BASTORE);
+            }
+            else if (what == byte[].class) {
+                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/Ops", "atpos_i",
+                    Type.getMethodDescriptor(Type.getType(long.class), TYPE_SMO, Type.getType(long.class), TYPE_TC));
+                mv.visitInsn(Opcodes.L2I);
+                mv.visitInsn(Opcodes.I2B);
+                mv.visitInsn(Opcodes.BASTORE);
+            }
+            else if (what == short[].class) {
+
+                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/Ops", "atpos_i",
+                    Type.getMethodDescriptor(Type.getType(long.class), TYPE_SMO, Type.getType(long.class), TYPE_TC));
+                mv.visitInsn(Opcodes.L2I);
+                mv.visitInsn(Opcodes.I2S);
+                mv.visitInsn(Opcodes.SASTORE);
+
+            }
+            else if (what == int[].class) {
+
+                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/Ops", "atpos_i",
+                    Type.getMethodDescriptor(Type.getType(long.class), TYPE_SMO, Type.getType(long.class), TYPE_TC));
+                mv.visitInsn(Opcodes.L2I);
+                mv.visitInsn(Opcodes.IASTORE);
+
+            }
+            else if (what == long[].class) {
+
+                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/Ops", "atpos_i",
+                    Type.getMethodDescriptor(Type.getType(long.class), TYPE_SMO, Type.getType(long.class), TYPE_TC));
+                mv.visitInsn(Opcodes.LASTORE);
+
+            }
+            else if(what == float[].class) {
+
+                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/Ops", "atpos_n",
+                    Type.getMethodDescriptor(Type.getType(double.class), TYPE_SMO, Type.getType(long.class), TYPE_TC));
+                mv.visitInsn(Opcodes.D2F);
+                mv.visitInsn(Opcodes.FASTORE);
+
+                mv.visitIincInsn(7, 1);
+                mv.visitJumpInsn(Opcodes.GOTO, loop);
+                mv.visitLabel(loopend);
+            }
+            else if(what == double[].class) {
+
+                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/Ops", "atpos_n",
+                    Type.getMethodDescriptor(Type.getType(double.class), TYPE_SMO, Type.getType(long.class), TYPE_TC));
+                mv.visitInsn(Opcodes.DASTORE);
+
+            }
+            else if(what == String[].class) {
+
+                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/Ops", "atpos_s",
+                    Type.getMethodDescriptor(Type.getType(String.class), TYPE_SMO, Type.getType(long.class), TYPE_TC));
+                mv.visitInsn(Opcodes.AASTORE);
+
+            }
+            else if(what == char[].class) {
+
+                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/Ops", "atpos_s",
+                    Type.getMethodDescriptor(Type.getType(String.class), TYPE_SMO, Type.getType(long.class), TYPE_TC));
+                mv.visitInsn(Opcodes.ICONST_0);
+                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/String", "charAt", "(I)C");
+                mv.visitInsn(Opcodes.CASTORE);
+
+            }
+            else if(what == SixModelObject[].class) {
+
+                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/Ops", "atpos",
+                    Type.getMethodDescriptor(TYPE_SMO, TYPE_SMO, Type.getType(long.class), TYPE_TC));
+                mv.visitVarInsn(Opcodes.ALOAD, c.tcLoc);
+                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/Ops", "decont", 
+                    Type.getMethodDescriptor(TYPE_SMO, TYPE_SMO, TYPE_TC));
+                mv.visitInsn(Opcodes.AASTORE);
+
+            }
+            else if(what == Object[].class) {
+
+                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/Ops", "atpos",
+                    Type.getMethodDescriptor(TYPE_SMO, TYPE_SMO, Type.getType(long.class), TYPE_TC));
+                mv.visitVarInsn(Opcodes.ALOAD, c.tcLoc);
+                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/Ops", "decont", 
+                    Type.getMethodDescriptor(TYPE_SMO, TYPE_SMO, TYPE_TC));
+                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/BootJavaInterop$RuntimeSupport", "unboxJava", Type.getMethodDescriptor(TYPE_OBJ, TYPE_SMO));
+                mv.visitInsn(Opcodes.AASTORE);
+
+            }
+
+            mv.visitVarInsn(Opcodes.LLOAD, 8);
+            mv.visitInsn(Opcodes.LCONST_1);
+            mv.visitInsn(Opcodes.LADD);
+            mv.visitVarInsn(Opcodes.LSTORE, 8);
+            mv.visitJumpInsn(Opcodes.GOTO, loop);
+            mv.visitLabel(loopend);
+            mv.visitVarInsn(Opcodes.ALOAD, 7);
+        }
         else {
             mv.visitVarInsn(Opcodes.ALOAD, c.tcLoc);
             mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/Ops", "decont", Type.getMethodDescriptor(TYPE_SMO, TYPE_SMO, TYPE_TC));
