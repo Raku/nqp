@@ -1992,6 +1992,7 @@ QAST::MASTOperations.add_core_moarop_mapping('mkdir', 'mkdir', 0);
 QAST::MASTOperations.add_core_moarop_mapping('rename', 'rename_f', 0);
 QAST::MASTOperations.add_core_moarop_mapping('copy', 'copy_f', 0);
 QAST::MASTOperations.add_core_moarop_mapping('symlink', 'symlink');
+QAST::MASTOperations.add_core_moarop_mapping('readlink', 'readlink');
 QAST::MASTOperations.add_core_moarop_mapping('link', 'link');
 QAST::MASTOperations.add_core_moarop_mapping('opendir', 'open_dir');
 QAST::MASTOperations.add_core_moarop_mapping('nextfiledir', 'read_dir');
