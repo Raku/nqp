@@ -2451,6 +2451,10 @@ add_getattr_op('getattr_i', 'getattr_i', 'getattrs_i', $MVM_reg_int64);
 add_getattr_op('getattr_n', 'getattr_n', 'getattrs_n', $MVM_reg_num64);
 add_getattr_op('getattr_s', 'getattr_s', 'getattrs_s', $MVM_reg_str);
 
+add_getattr_op('getattrref_i', 'getattrref_i', 'getattrsref_i', $MVM_reg_obj);
+add_getattr_op('getattrref_n', 'getattrref_n', 'getattrsref_n', $MVM_reg_obj);
+add_getattr_op('getattrref_s', 'getattrref_s', 'getattrsref_s', $MVM_reg_obj);
+
 QAST::MASTOperations.add_core_moarop_mapping('hintfor', 'hintfor');
 QAST::MASTOperations.add_core_moarop_mapping('unbox_i', 'unbox_i', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('unbox_n', 'unbox_n', :decont(0));
