@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(128);
+plan(131);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -33,6 +33,7 @@ ok( nqp::index('Hello World', 'l', 4) == 9, 'nqp::index with third argument, thi
 ok( nqp::chr(120) eq 'x', 'nqp::chr');
 ok( nqp::ord('xyz') eq 120, 'nqp::ord');
 ok( nqp::ord('xyz',2) eq 122, '2 argument nqp::ord');
+ok( nqp::ordat('xyz',2) eq 122, 'nqp::ordat');
 ok( nqp::lc('Hello World') eq 'hello world', 'nqp::downcase');
 ok( nqp::uc("Don't Panic") eq "DON'T PANIC", 'nqp::upcase');
 ok( nqp::flip("foo") eq "oof", "nqp::flip");
@@ -192,4 +193,11 @@ ok(nqp::eqat("foobar","foobarbaz", 0) == 0, "eqat with needle argument longer th
     my $b := nqp::list("1", "2", "3", "4");
     nqp::splice($b, $source, 1, 2);
     ok(nqp::join(",", $b) eq '1,100,200,300,4', "splice");
+}
+
+{
+    my $list := nqp::list("1","2","3","4","5");
+    my $ret := nqp::setelems($list, 3);
+    ok(nqp::join(",", $list) eq '1,2,3', 'nqp::setelems reduces list length properly');
+    ok(nqp::join(",", $ret) eq '1,2,3', 'nqp::setelems return value');
 }
