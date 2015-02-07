@@ -415,6 +415,7 @@ class QAST::OperationsJS {
     add_simple_op('flip', $T_STR, [$T_STR], sub ($string) {"$string.split('').reverse().join('')"});
 
     add_simple_op('ord', $T_INT, [$T_STR, $T_INT], sub ($string, $pos='0') {"$string.charCodeAt($pos)"});
+    %ops<ordat> := %ops<ord>;
 
     add_simple_op('null', $T_OBJ, [], sub () {"null"});
     add_simple_op('isnull', $T_BOOL, [$T_OBJ], sub ($obj) {"($obj === null)"});
