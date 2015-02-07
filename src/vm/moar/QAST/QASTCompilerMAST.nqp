@@ -1414,6 +1414,18 @@ my class MASTCompilerInstance {
     multi method as_mast_constant(QAST::NVal $nv) {
         MAST::NVal.new( :value($nv.value) )
     }
+    multi method as_mast_constant(QAST::Want $want) {
+        my int $finger := 1;
+        my @children := $want.list;
+        while $finger < nqp::elems(@children) {
+            my str $got := @children[$finger];
+            if $got eq 'Ss' || $got eq 'Ii' || $got eq 'Nn' {
+                return self.as_mast_constant(@children[$finger + 1]);
+            }
+            $finger := $finger + 2;
+        }
+        return self.as_mast_constant(@children[0]);
+    }
     multi method as_mast_constant(QAST::Node $qast) {
         nqp::die("expected QAST constant; didn't get one");
     }
