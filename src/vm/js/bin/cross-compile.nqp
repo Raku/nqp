@@ -21,6 +21,22 @@ class HLL::Backend::JavaScriptAndMoar {
     }
 }
 
+# Shim that makes a compiler instance and uses it to drive compilation.
+class FreshMonkeyPatchedCompiler {
+    has $!instance;
+    has $!operations;
+    method to_mast($qast) {
+        my $new := $!instance.new;
+        $new.HOW.mixin($new, SerializeOnce);
+        $new.to_mast($qast)
+    }
+
+    method operations() {
+        $!operations;
+    }
+
+}
+
 sub MAIN(*@ARGS, *%ARGS) {
     my $nqpcomp-orig := nqp::getcomp('nqp');
     my $nqpcomp-cc   := nqp::clone($nqpcomp-orig);
@@ -33,8 +49,9 @@ sub MAIN(*@ARGS, *%ARGS) {
     my $q := nqp::getcomp('QAST');
 
 
-    my $instance := $q.instance.new.HOW.mixin($q,SerializeOnce);
-    nqp::bindcomp('QAST', $instance);
+    my $monkey_patched := FreshMonkeyPatchedCompiler.new(instance => $q.instance, operation => $q.operations);
+
+    nqp::bindcomp('QAST', $monkey_patched);
 
     my $moar := $nqpcomp-cc.backend;
     my $js := HLLBackend::JavaScript.new();
@@ -46,15 +63,11 @@ sub MAIN(*@ARGS, *%ARGS) {
 
     $nqpcomp-cc.backend($combined);
 
-
-    $nqpcomp-cc.command_line(@ARGS,|%ARGS, :encoding('utf8'), :transcode('ascii iso-8859-1'), :no-regex-lib(1), :precomp(1), :bootstrap(1));
-
-#    old options - might be useful
-#    $nqpcomp-cc.command_line(:target('pir'), :stable-sc(0), :no-regex-lib($no-regex-lib),
-#        :setting-path('gen/js/stage2'),
-#        :setting($setting),
-#        :precomp(1),
-#        :custom-regex-lib('QRegex'),
-#        :module-path("gen/js/stage2"),
+    $nqpcomp-cc.command_line(@ARGS,:module-path('gen/js/stage2'),
+        :setting-path('gen/js/stage2'),
+        :bootstrap(1),
+        :custom-regex-lib('QRegex'),
+        :no-regex-lib(1),
+        :encoding('utf8'), :transcode('ascii iso-8859-1'));
 
 }
