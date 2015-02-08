@@ -62,6 +62,6 @@ Sometimes old code can be scavanged for ways to implement things on node from sr
 
 ./nqp-js --target=js --beautify -e 'say("Hello World")'
 
-# t/nqp/js
+# t/js
 
 JS backend specific tests should placed here
