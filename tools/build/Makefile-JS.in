@@ -31,10 +31,29 @@ $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp: $(CORE_SETTING_SOURCES)
 	
 	$(PERL) tools/build/gen-cat.pl js $(CORE_SETTING_SOURCES)  > $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp
 
+$(JS_STAGE2)/NQPCORE.setting.moarvm: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp $(JS_STAGE2)/nqpmo.moarvm
+	$(MKPATH) $(JS_STAGE2)
+	$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NULL --target=mbc --output $(JS_STAGE2)/NQPCORE.setting.moarvm $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp > node_modules/NQPCORE.setting.js
+
+$(JS_STAGE2)/$(QASTNODE_COMBINED): $(QASTNODE_SOURCES)
+	$(MKPATH) $(JS_STAGE2)
+	
+	$(PERL) tools/build/gen-cat.pl js $(QASTNODE_SOURCES)  > $(JS_STAGE2)/$(QASTNODE_COMBINED)
+
+$(JS_STAGE2)/QASTNode.moarvm: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(QASTNODE_COMBINED) $(JS_STAGE2)/NQPCORE.setting.moarvm
+	$(MKPATH) $(JS_STAGE2)
+	$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NQPCORE --target=mbc --output $(JS_STAGE2)/QASTNode.moarvm $(JS_STAGE2)/$(QASTNODE_COMBINED) > node_modules/QASTNode.js
+
+$(JS_STAGE2)/$(QREGEX_COMBINED): $(QREGEX_SOURCES)
+	$(MKPATH) $(JS_STAGE2)
+	
+	$(PERL) tools/build/gen-cat.pl js $(QREGEX_SOURCES)  > $(JS_STAGE2)/$(QREGEX_COMBINED)
+
+$(JS_STAGE2)/QRegex.moarvm: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(QREGEX_COMBINED) $(JS_STAGE2)/NQPCORE.setting.moarvm $(JS_STAGE2)/QASTNode.moarvm
+	$(MKPATH) $(JS_STAGE2)
+	$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NQPCORE --target=mbc --output $(JS_STAGE2)/QRegex.moarvm $(JS_STAGE2)/$(QREGEX_COMBINED) > node_modules/QRegex.js
+
 js-stage1-compiler : $(JS_STAGE1_COMPILER)
-node_modules/NQPCORE.setting.js: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp  $(JS_STAGE2)/nqpmo.moarvm
-	$(MKPATH) gen/js/stage2
-	./nqp-m --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --module-path gen/js/stage2 --setting=NULL --target=mbc --output gen/js/stage2/NQPCORE.setting.moarvm $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp > node_modules/NQPCORE.setting.js
 js-test: js-all
 	src/vm/js/bin/run_tests
 
@@ -42,7 +61,7 @@ js-test: js-all
 js-clean:
 	$(RM_RF) gen/js/stage1 gen/js/stage2
 
-js-all : m-all js-stage1-compiler node_modules/installed node_modules/NQPCORE.setting.js $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp
+js-all : m-all js-stage1-compiler node_modules/installed $(JS_STAGE2)/NQPCORE.setting.moarvm $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp $(JS_STAGE2)/QASTNode.moarvm $(JS_STAGE2)/QRegex.moarvm
 js-lint:
 	gjslint --strict --nojsdoc src/vm/js/nqp-runtime/*.js
 node_modules/installed: src/vm/js/nqp-runtime/*.js src/vm/js/nqp-runtime/package.json
