@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(131);
+plan(148);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -49,7 +49,6 @@ ok( nqp::elems(@items) == 11 && @items[0] eq '' && @items[10] eq '', 'nqp::split
 @items := nqp::split('', 'a little lamb');
 ok( nqp::join('|', @items) eq 'a| |l|i|t|t|l|e| |l|a|m|b', 'nqp::split("", ...)');
 
-ok( nqp::iseq_i(2, 2) == 1, 'nqp::iseq_i');
 
 ok( nqp::cmp_i(2, 0) ==  1, 'nqp::cmp_i');
 ok( nqp::cmp_i(2, 2) ==  0, 'nqp::cmp_i');
@@ -201,3 +200,28 @@ ok(nqp::eqat("foobar","foobarbaz", 0) == 0, "eqat with needle argument longer th
     ok(nqp::join(",", $list) eq '1,2,3', 'nqp::setelems reduces list length properly');
     ok(nqp::join(",", $ret) eq '1,2,3', 'nqp::setelems return value');
 }
+
+ok(nqp::isge_i(10, 10) == 1, "isge_i =");
+ok(nqp::isge_i(9, 10) == 0, "isge_i <");
+ok(nqp::isge_i(11, 10) == 1, "isge_i >");
+
+ok(nqp::isgt_i(10, 10) == 0, "isge_i =");
+ok(nqp::isgt_i(9, 10) == 0, "isge_i <");
+ok(nqp::isgt_i(11, 10) == 1, "isge_i >");
+
+ok(nqp::islt_i(10, 10) == 0, "islt_i =");
+ok(nqp::islt_i(9, 10) == 1, "islt_i <");
+ok(nqp::islt_i(11, 10) == 0, "islt_i >");
+
+ok(nqp::isle_i(10, 10) == 1, "isle_i =");
+ok(nqp::isle_i(9, 10) == 1, "isle_i <");
+ok(nqp::isle_i(11, 10) == 0, "isle_i >");
+
+ok(nqp::isne_i(10, 10) == 0, "isne_i =");
+ok(nqp::isne_i(9, 10) == 1, "isne_i <");
+ok(nqp::isne_i(11, 10) == 1, "isne_i >");
+
+ok(nqp::iseq_i(10, 10) == 1, "iseq_i =");
+ok(nqp::iseq_i(9, 10) == 0, "iseq_i <");
+ok(nqp::iseq_i(11, 10) == 0, "iseq_i >");
+

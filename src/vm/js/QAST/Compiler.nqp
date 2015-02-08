@@ -301,14 +301,16 @@ class QAST::OperationsJS {
 
     add_infix_op('concat', $T_STR, '+', $T_STR, $T_STR);
 
-    add_infix_op('isle_n', $T_NUM, '<=', $T_NUM, $T_BOOL);
-    add_infix_op('islt_n', $T_NUM, '<', $T_NUM, $T_BOOL);
-    add_infix_op('isgt_n', $T_NUM, '>', $T_NUM, $T_BOOL);
-    add_infix_op('isge_n', $T_NUM, '>=', $T_NUM, $T_BOOL);
-    add_infix_op('iseq_n', $T_NUM, '==', $T_NUM, $T_BOOL);
-    add_infix_op('isne_n', $T_NUM, '!=', $T_NUM, $T_BOOL);
+    for ['_i', $T_INT, '_n', $T_NUM] -> $suffix, $type {
+        add_infix_op('isle' ~ $suffix, $type, '<=', $type, $T_BOOL);
+        add_infix_op('islt' ~ $suffix, $type, '<', $type, $T_BOOL);
+        add_infix_op('isgt' ~ $suffix, $type, '>', $type, $T_BOOL);
+        add_infix_op('isge' ~ $suffix, $type, '>=', $type, $T_BOOL);
+        add_infix_op('iseq' ~ $suffix, $type, '==', $type, $T_BOOL);
+        add_infix_op('isne' ~ $suffix, $type, '!=', $type, $T_BOOL);
+    }
 
-    add_infix_op('iseq_i', $T_INT, '==', $T_INT, $T_BOOL);
+
     add_infix_op('iseq_s', $T_STR, '==', $T_STR, $T_BOOL);
     add_infix_op('isne_s', $T_STR, '!=', $T_STR, $T_BOOL);
 
