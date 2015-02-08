@@ -46,5 +46,5 @@ nqp::bindattr($low, Lowlevel, '$!obj', nqp::list(1000,2000));
 
 ok($low.get_int == 456, 'nqp::bindattr_i');
 ok($low.get_num == 12.3, 'nqp::bindattr_n');
-ok($low.get_str == "hello world", 'nqp::bindattr_s');
+ok($low.get_str eq "hello world", 'nqp::bindattr_s');
 ok($low.get_obj[1] == 2000, 'nqp::bindattr');
