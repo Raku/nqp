@@ -60,6 +60,8 @@ Example:
 
 Sometimes old code can be scavanged for ways to implement things on node from src/vm/old-runtime-code (warning: crap code lives there).
 
+Looking at src/vm/jvm/runtime/org/perl6/nqp/runtime/Ops.java can provide insight on how the various ops should work.
+
 # Reading generated code
 
 ./nqp-js --target=js --beautify -e 'say("Hello World")'
