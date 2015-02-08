@@ -27,7 +27,6 @@ We need to write tests (if they don't already exist in t/nqp)
  -  pop_i
  -  push_i
  -  push_s
- -  setelems
  -  sprintf
 
 General stuff that helps all backends
