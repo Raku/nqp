@@ -333,6 +333,12 @@ class QAST::OperationsJS {
                 "($obj[$attr] = $value)";
             }
         );
+        add_simple_op('getattr' ~ $suffix, $type, [$T_OBJ, $T_OBJ, $T_STR],
+            sub ($obj, $type, $attr) {
+                # TODO take second argument into account
+                "$obj[$attr]";
+            }
+        );
     }
 
     add_simple_op('attrinited', $T_BOOL, [$T_OBJ, $T_OBJ, $T_STR],

@@ -11,9 +11,6 @@ We need to write tests (if they don't already exist in t/nqp)
  -  die_s
  -  findmethod
  -  findnotcclass
- -  getattr
- -  getattr_i
- -  getattr_s
  -  getcodename
  -  getlexdyn
  -  iscclass - EASY
