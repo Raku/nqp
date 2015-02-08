@@ -1,3 +1,5 @@
+# Hacking tips for the JS backend of NQP
+
 # Source layout.
 
 src/vm/js/QAST/Compiler.nqp - turns QAST into JavaScript code
