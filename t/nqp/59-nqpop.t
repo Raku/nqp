@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(148);
+plan(153);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -225,3 +225,16 @@ ok(nqp::iseq_i(10, 10) == 1, "iseq_i =");
 ok(nqp::iseq_i(9, 10) == 0, "iseq_i <");
 ok(nqp::iseq_i(11, 10) == 0, "iseq_i >");
 
+{
+    my $a := nqp::list_i();
+    nqp::push_i($a, 10.4);
+    nqp::push_i($a, 11);
+    nqp::push_i($a, 12);
+    ok(nqp::elems($a) == 3, 'nqp::elems/nqp::push_i');
+    ok(nqp::pop_i($a) == 12, 'nqp::pop_i');
+    ok(nqp::elems($a) == 2, 'nqp::pop_i reduces the number of elements correctly');
+    ok(nqp::islist($a) == 1, 'nqp::islist(nqp::list_i())');
+
+    my $b := nqp::list_i(1,2,30.4);
+    ok(nqp::atpos_i($b,2) == 30, 'atpos_i');
+}

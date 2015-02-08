@@ -15,13 +15,10 @@ We need to write tests (if they don't already exist in t/nqp)
  -  getlexdyn
  -  iscclass - EASY
  -  istype
- -  list_i
  -  list_s
  -  nfafromstatelist
  -  nfarunalt
  -  nfarunproto
- -  pop_i
- -  push_i
  -  push_s
  -  sprintf
 

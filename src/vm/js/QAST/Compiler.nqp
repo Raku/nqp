@@ -519,18 +519,20 @@ class QAST::OperationsJS {
         $comp.bind_key($node[0], $node[1], $node[2]);
     });
 
-    add_op('list', sub ($comp, $node, :$want) {
-       my @setup;
-       my @exprs;
+    for ['_i', $T_INT, '', $T_OBJ] -> $suffix, $type {
+        add_op('list' ~ $suffix, sub ($comp, $node, :$want) {
+           my @setup;
+           my @exprs;
 
-       for $node.list -> $elem {
-           my $chunk := $comp.as_js($elem, :want($T_OBJ));
-           @setup.push($chunk);
-           @exprs.push($chunk.expr);
-       }
+           for $node.list -> $elem {
+               my $chunk := $comp.as_js($elem, :want($type));
+               @setup.push($chunk);
+               @exprs.push($chunk.expr);
+           }
 
-       Chunk.new($T_OBJ, '[' ~ nqp::join(',', @exprs) ~ ']' , @setup, :$node);
-    });
+           Chunk.new($T_OBJ, '[' ~ nqp::join(',', @exprs) ~ ']' , @setup, :$node);
+        });
+    }
 
     add_op('hash', sub ($comp, $node, :$want) {
         my $hash := $*BLOCK.add_tmp();
@@ -633,15 +635,18 @@ class QAST::OperationsJS {
 
     add_simple_op('islist', $T_BOOL, [$T_OBJ], sub ($obj) {"($obj instanceof Array)"});
 
-    add_simple_op('atpos', $T_OBJ, [$T_OBJ, $T_INT], sub ($array, $index) {"$array[$index]"});
+    for ['_i', $T_INT, '', $T_OBJ] -> $suffix, $type {
+        add_simple_op('atpos' ~ $suffix, $type, [$T_OBJ, $T_INT], sub ($array, $index) {"$array[$index]"});
+        add_simple_op('pop' ~ $suffix, $type, [$T_OBJ], sub ($array) {"$array.pop()"}, :sideffects);
+        add_simple_op('push' ~ $suffix, $type, [$T_OBJ, $type], sub ($array, $elem) {"$array.push($elem)"}, :sideffects);
+    }
 
     add_simple_op('shift', $T_OBJ, [$T_OBJ], sub ($array) {"$array.shift()"}, :sideffects);
-    add_simple_op('pop', $T_OBJ, [$T_OBJ], sub ($array) {"$array.pop()"}, :sideffects);
-    add_simple_op('push', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($array, $elem) {"$array.push($elem)"}, :sideffects);
     add_simple_op('unshift', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($array, $elem) {"$array.unshift($elem)"}, :sideffects);
     add_simple_op('splice', $T_OBJ, [$T_OBJ, $T_OBJ, $T_INT, $T_INT], :sideffects);
 
     add_simple_op('setelems', $T_OBJ, [$T_OBJ, $T_INT], :sideffects, sub ($array, $elems) {"($array.length = $elems, $array)"});
+
 
     add_simple_op('iterator', $T_OBJ, [$T_OBJ], :sideffects);
 
