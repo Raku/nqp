@@ -167,3 +167,12 @@ module.exports.P6num = P6num;
 function P6str() {
 }
 module.exports.P6str = P6str;
+
+function NFA() {
+}
+NFA.prototype.deserialize_finish = function(object, data) {
+  // STUB
+};
+NFA.prototype.type_object_for = basic_type_object_for;
+NFA.prototype.allocate = basic_allocate;
+exports.NFA = NFA;
