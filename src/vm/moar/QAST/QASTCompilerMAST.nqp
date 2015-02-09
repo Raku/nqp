@@ -1363,7 +1363,7 @@ my class MASTCompilerInstance {
         }
         elsif $scope eq 'lexicalref' {
             if $*BINDVAL {
-                nqp::die('Cannot bind to QAST::Var with scope lexicalref');
+                nqp::die("Cannot bind to QAST::Var '{$name}' with scope lexicalref");
             }
             my $lex;
             my $lexref;
@@ -1501,7 +1501,7 @@ my class MASTCompilerInstance {
                 nqp::die("An attribute reference needs an object and a class handle");
             }
             if $*BINDVAL {
-                nqp::die('Cannot bind to QAST::Var with scope attributeref');
+                nqp::die("Cannot bind to QAST::Var '{$name}' with scope attributeref");
             }
 
             # Ensure we've a natively typed attribute to take a ref to.
