@@ -1,3 +1,4 @@
+#plan(11);
 plan(9);
 {
     my $node := QAST::Stmts.new();
@@ -14,3 +15,9 @@ plan(9);
     ok($node.pop == 3,"QAST::Stmts.pop returns the element");
     ok(nqp::elems($node.list) == 1,"QAST::Stmts.pop removes the element");
 }
+#{
+#    my $node := QAST::Var.new( :name('$?CLASS'), :scope('typevar') );
+#    ok($node.has_compile_time_value == 0,"a QAST::Node has no compile time value when created");
+#    $node.set_compile_time_value("foo");
+#    ok($node.has_compile_time_value == 1,"we can set a compile time value");
+#}
