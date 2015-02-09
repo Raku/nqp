@@ -17,7 +17,7 @@ We need to write tests (if they don't already exist in t/nqp)
  -  list_s - EASY
  -  nfafromstatelist
  -  nfarunalt
- -  nfarunproto
+ -  nfarunproto - MEDIUM (Look at t/nqp/74-nfa.t)
  -  push_s - EASY
  -  sprintf - MEDIUM (See t/hll/06-sprintf.t)
 
