@@ -20,6 +20,6 @@ sub MAIN(*@ARGS) {
         :setting-path('gen/js/stage2'),
         :bootstrap(1),
         :custom-regex-lib('QRegex'),
-        :no-regex-lib(1),
+        :no-regex-lib(0),
         :encoding('utf8'), :transcode('ascii iso-8859-1'));
 }
