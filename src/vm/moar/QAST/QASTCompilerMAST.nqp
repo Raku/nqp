@@ -483,6 +483,18 @@ my class MASTCompilerInstance {
         'attr_o'
     ];
 
+    my @attrref_opnames := [
+        '',
+        'getattrref_i',
+        'getattrref_i',
+        'getattrref_i',
+        'getattrref_i',
+        'getattrref_n',
+        'getattrref_n',
+        'getattrref_s',
+        ''
+    ];
+
     my @kind_to_op_slot := [
         0, 0, 0, 0, 0, 1, 1, 2, 3
     ];
@@ -1479,6 +1491,41 @@ my class MASTCompilerInstance {
                     $han.result_reg, MAST::SVal.new( :value($name) ),
                         MAST::IVal.new( :value($hint) ) );
             }
+            $*REGALLOC.release_register($obj.result_reg, $MVM_reg_obj);
+            $*REGALLOC.release_register($han.result_reg, $MVM_reg_obj);
+        }
+        elsif $scope eq 'attributeref' {
+            # Ensure we have object and class handle, and aren't binding.
+            my @args := $node.list();
+            if +@args != 2 {
+                nqp::die("An attribute reference needs an object and a class handle");
+            }
+            if $*BINDVAL {
+                nqp::die('Cannot bind to QAST::Var with scope attributeref');
+            }
+
+            # Ensure we've a natively typed attribute to take a ref to.
+            my $kind := self.type_to_register_kind($node.returns);
+            if $kind == $MVM_reg_obj {
+                nqp::die("Attribute references can only be to native types");
+            }
+
+            # Compile object and handle, and get hint.
+            my $obj := self.as_mast_clear_bindval(@args[0], :want($MVM_reg_obj));
+            my $han := self.as_mast_clear_bindval(@args[1], :want($MVM_reg_obj));
+            push_ilist(@ins, $obj);
+            push_ilist(@ins, $han);
+            my int $hint := -1;
+            if nqp::istype(@args[1], QAST::WVal) {
+                $hint := nqp::hintfor(@args[1].value, $name);
+            }
+
+            # Emit lookup.
+            $res_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
+            $res_kind := $MVM_reg_obj;
+            push_op(@ins, @attrref_opnames[$kind], $res_reg, $obj.result_reg,
+                $han.result_reg, MAST::SVal.new( :value($name) ),
+                    MAST::IVal.new( :value($hint) ) );
             $*REGALLOC.release_register($obj.result_reg, $MVM_reg_obj);
             $*REGALLOC.release_register($han.result_reg, $MVM_reg_obj);
         }
