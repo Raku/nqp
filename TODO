@@ -9,18 +9,17 @@ We need to write tests (if they don't already exist in t/nqp)
  -  clone
  -  curlexpad
  -  die_s
- -  findmethod
- -  findnotcclass
+ -  findnotcclass - EASY
  -  getcodename
  -  getlexdyn
  -  iscclass - EASY
  -  istype
- -  list_s
+ -  list_s - EASY
  -  nfafromstatelist
  -  nfarunalt
  -  nfarunproto
- -  push_s
- -  sprintf
+ -  push_s - EASY
+ -  sprintf - MEDIUM (See t/hll/06-sprintf.t)
 
 General stuff that helps all backends
     Write tests (to avoid implementing stuff in crazy ways)
