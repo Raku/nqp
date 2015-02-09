@@ -26,25 +26,34 @@ var Hash = require('./hash.js');
 
 module.exports.knowhowattr = require('./bootstrap.js').knowhowattr;
 
-var currentSetting;
+var saveCtxAs;
 var savedCtxs = {};
 
-exports.load_setting = function(settingName) {
-  currentSetting = settingName;
+function saveCtx(where, block) {
+  var old = saveCtxAs;
+  saveCtxAs = where;
+  block();
+  saveCtxAs = old;
+}
 
-  require(settingName+".setting");
+exports.load_setting = function(settingName) {
+  saveCtx(settingName, function() {
+    require(settingName+".setting");
+  });
 };
 
 exports.load_module = function(module) {
-  require(module);
+  saveCtx(module, function() {
+    require(module);
+  });
 };
 
 exports.setup_setting = function(settingName) {
-  return savedCtxs[currentSetting];
+  return savedCtxs[settingName];
 };
 
 exports.ctxsave = function(ctx) {
-    savedCtxs[currentSetting] = ctx;
+    savedCtxs[saveCtxAs] = ctx;
 };
 
 exports.to_str = function(arg, ctx) {
