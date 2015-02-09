@@ -627,6 +627,9 @@ class QAST::OperationsJS {
 
     });
 
+
+    add_simple_op('findmethod', $T_OBJ, [$T_OBJ, $T_STR], :sideffects);
+
     add_simple_op('split', $T_OBJ, [$T_STR, $T_STR], sub ($separator, $string) {
         "({$string} == '' ? [] : {$string}.split({$separator}))"
     });

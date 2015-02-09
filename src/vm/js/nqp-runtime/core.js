@@ -229,3 +229,7 @@ op.splice = function(target, source, offset, length) {
   target.splice.apply(target, args);
   return target;
 }
+
+op.findmethod = function(obj, method) {
+  return obj._STable._method_cache[method];
+};
