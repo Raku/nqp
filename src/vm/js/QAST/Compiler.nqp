@@ -680,6 +680,7 @@ class QAST::OperationsJS {
     add_simple_op('stat', $T_INT, [$T_STR, $T_INT]);
 
     add_simple_op('defined', $T_INT, [$T_OBJ]);
+    %ops<isconcrete> := %ops<defined>;
 
     # TODO - those are stubs until we have serialization support
     add_simple_op('scwbenable', $T_VOID, [], -> {''});
