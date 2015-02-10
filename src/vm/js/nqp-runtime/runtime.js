@@ -61,7 +61,7 @@ exports.to_str = function(arg, ctx) {
     return arg.toString();
   } else if (typeof arg == 'string') {
     return arg;
-  } else if (arg !== undefined && arg.type_object_) {
+  } else if (arg !== undefined && arg !== null && arg.type_object_) {
     return "";
   } else {
     console.log(arg);
