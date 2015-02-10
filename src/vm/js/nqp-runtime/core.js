@@ -247,5 +247,9 @@ op.newtype = function(how, repr) {
   var REPR = new reprs[repr]();
   REPR.name = repr;
   return REPR.type_object_for(how);
+}
+
+op.can = function(obj, method) {
+  return obj._STable.method_cache.hasOwnProperty(method) ? 1 : 0;
 };
 
