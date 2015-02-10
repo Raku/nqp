@@ -135,6 +135,14 @@ P6opaque.prototype.deserialize_finish = function(object, data) {
 };
 
 P6opaque.prototype.type_object_for = basic_type_object_for;
+
+
+P6opaque.prototype.change_type = function(obj, new_type) {
+  // TODO some sanity checks for the new mro being a subset and new_type being also a P6opaque
+  // HACK usage of __proto__ which is not fully portable and might interfere with the optimizer
+  obj.__proto__ = new_type._STable.obj_constructor.prototype;
+};
+
 P6opaque.name = 'P6opaque';
 
 module.exports.P6opaque = P6opaque;

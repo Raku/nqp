@@ -272,6 +272,11 @@ op.setcodename = function(code, name) {
   code.name = name;
 };
 
+op.rebless = function(obj, new_type) {
+  obj._STable.REPR.change_type(obj, new_type);
+  return obj;
+};
+
 // STUB
 op.clone = function(obj) {
   console.log("cloning", obj);
