@@ -253,3 +253,11 @@ op.can = function(obj, method) {
   return obj._STable.method_cache.hasOwnProperty(method) ? 1 : 0;
 };
 
+op.getcodename = function(code) {
+  return code.name;
+};
+
+op.setcodename = function(code, name) {
+  console.log(code, name);
+  code.name = name;
+};

@@ -1032,6 +1032,9 @@ class QAST::OperationsJS {
         $cache;
     });
 
+    add_simple_op('getcodename', $T_OBJ, [$T_OBJ]);
+    add_simple_op('setcodename', $T_OBJ, [$T_OBJ, $T_STR], :sideffects);
+
     add_simple_op('getcodeobj', $T_OBJ, [$T_OBJ]);
     add_simple_op('setcodeobj', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
     add_simple_op('curcode', $T_OBJ, []);
@@ -1471,7 +1474,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     has %!cuids;
 
     method register_cuid($node) {
-        %!cuids{$node.cuid} := 1;
+        %!cuids{$node.cuid} := $node;
     }
 
     method is_known_cuid($node) {
@@ -1481,7 +1484,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     method setup_cuids() {
         my @cuids;
         for %!cuids {
-            @cuids.push("{self.mangled_cuid($_.key)} = new nqp.CodeRef()");
+            @cuids.push("{self.mangled_cuid($_.key)} = new nqp.CodeRef({quote_string($_.value.name)})");
         }
         self.declare_js_vars(@cuids);
     }

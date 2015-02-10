@@ -1,4 +1,5 @@
-function CodeRef() {
+function CodeRef(name) {
+  this.name = name;
 }
 
 CodeRef.prototype.block = function(func) {
