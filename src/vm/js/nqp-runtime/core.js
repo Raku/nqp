@@ -235,5 +235,5 @@ op.findmethod = function(obj, method) {
 };
 
 op.reprname = function(obj) {
-    return obj._STable.REPR.name;
+  return obj._STable.REPR.name;
 };
