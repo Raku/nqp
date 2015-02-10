@@ -125,6 +125,8 @@ P6opaque.prototype.deserialize_finish = function(object, data) {
   }
 };
 
+P6opaque.name = 'P6opaque';
+
 module.exports.P6opaque = P6opaque;
 
 function KnowHOWREPR() {
@@ -138,6 +140,7 @@ KnowHOWREPR.prototype.deserialize_finish = function(object, data) {
 
 KnowHOWREPR.prototype.type_object_for = basic_type_object_for;
 KnowHOWREPR.prototype.allocate = basic_allocate;
+KnowHOWREPR.name = 'KnowHOWREPR';
 module.exports.KnowHOWREPR = KnowHOWREPR;
 
 function KnowHOWAttribute() {
@@ -148,24 +151,29 @@ KnowHOWAttribute.prototype.deserialize_finish = function(object, data) {
 
 KnowHOWAttribute.prototype.type_object_for = basic_type_object_for;
 KnowHOWAttribute.prototype.allocate = basic_allocate;
+KnowHOWAttribute.name = 'KnowHOWAttribute';
 module.exports.KnowHOWAttribute = KnowHOWAttribute;
 
 function Uninstantiable() {
 }
 Uninstantiable.prototype.type_object_for = basic_type_object_for;
+Uninstantiable.name = 'Uninstantiable';
 module.exports.Uninstantiable = Uninstantiable;
 
 /* Stubs */
 function P6int() {
 }
+P6int.name = 'P6int';
 module.exports.P6int = P6int;
 
 function P6num() {
 }
+P6num.name = 'P6num';
 module.exports.P6num = P6num;
 
 function P6str() {
 }
+P6str.name = 'P6str';
 module.exports.P6str = P6str;
 
 function NFA() {
@@ -175,4 +183,5 @@ NFA.prototype.deserialize_finish = function(object, data) {
 };
 NFA.prototype.type_object_for = basic_type_object_for;
 NFA.prototype.allocate = basic_allocate;
+NFA.name = 'NFA';
 exports.NFA = NFA;

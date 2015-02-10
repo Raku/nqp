@@ -386,6 +386,7 @@ BinaryCursor.prototype.deserialize = function(sc) {
       throw 'Unknown REPR: ' + repr;
     }
     var REPR = new reprs[repr]();
+    REPR.name = repr;
     var HOW = null; /* We will fill that in later once objects are stubbed */
     sc.root_stables[i] = new sixmodel.STable(REPR, HOW);
     sc.root_stables[i]._SC = sc;

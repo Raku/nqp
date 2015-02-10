@@ -361,6 +361,8 @@ class QAST::OperationsJS {
         });
     }
 
+    add_simple_op('reprname', $T_STR, [$T_OBJ]);
+
     add_cmp_op('cmp_i', $T_INT);
     add_cmp_op('cmp_n', $T_NUM);
     add_cmp_op('cmp_s', $T_STR);

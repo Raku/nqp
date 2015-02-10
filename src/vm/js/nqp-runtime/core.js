@@ -233,3 +233,7 @@ op.splice = function(target, source, offset, length) {
 op.findmethod = function(obj, method) {
   return obj._STable.method_cache[method];
 };
+
+op.reprname = function(obj) {
+    return obj._STable.REPR.name;
+};
