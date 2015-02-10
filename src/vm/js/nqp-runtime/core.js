@@ -4,6 +4,8 @@ exports.op = op;
 var Hash = require('./hash.js');
 var CodeRef = require('./code-ref.js');
 
+var reprs = require('./reprs.js');
+
 exports.CodeRef = CodeRef;
 
 op.getcomp = function(lang) {
@@ -237,3 +239,13 @@ op.findmethod = function(obj, method) {
 op.reprname = function(obj) {
   return obj._STable.REPR.name;
 };
+
+op.newtype = function(how, repr) {
+  if (!reprs[repr]) {
+    throw 'Unknown REPR: ' + repr;
+  }
+  var REPR = new reprs[repr]();
+  REPR.name = repr;
+  return REPR.type_object_for(how);
+};
+

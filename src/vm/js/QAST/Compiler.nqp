@@ -362,6 +362,7 @@ class QAST::OperationsJS {
     }
 
     add_simple_op('reprname', $T_STR, [$T_OBJ]);
+    add_simple_op('newtype', $T_OBJ, [$T_OBJ, $T_STR]);
 
     add_cmp_op('cmp_i', $T_INT);
     add_cmp_op('cmp_n', $T_NUM);

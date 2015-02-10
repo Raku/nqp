@@ -125,6 +125,7 @@ P6opaque.prototype.deserialize_finish = function(object, data) {
   }
 };
 
+P6opaque.prototype.type_object_for = basic_type_object_for;
 P6opaque.name = 'P6opaque';
 
 module.exports.P6opaque = P6opaque;
