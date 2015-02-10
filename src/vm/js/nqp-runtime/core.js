@@ -247,6 +247,11 @@ op.istype = function(obj, type) {
   return 0;
 };
 
+op.settypecache = function(obj, cache) {
+  obj._STable.type_check_cache = cache;
+  return obj;
+};
+
 op.reprname = function(obj) {
   return obj._STable.REPR.name;
 };

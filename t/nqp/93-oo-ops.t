@@ -1,4 +1,4 @@
-plan(9);
+plan(10);
 class Foo {
     method foo() {
         'bar';
@@ -29,3 +29,10 @@ ok(nqp::eqaddr($ret, $foo2), "return value of nqp::rebless");
 
 ok($foo.foo eq 'bar', "other objects of that class don't change");
 ok($foo2.foo eq 'reblessed bar', "the rebless object has new methods");
+
+class Foo3 {
+}
+
+nqp::settypecache(Foo, [Foo3]);
+
+ok(nqp::istype($foo, Foo3), "nqp::settypecache works");
