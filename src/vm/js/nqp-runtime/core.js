@@ -258,7 +258,6 @@ op.getcodename = function(code) {
 };
 
 op.setcodename = function(code, name) {
-  console.log(code, name);
   code.name = name;
 };
 
