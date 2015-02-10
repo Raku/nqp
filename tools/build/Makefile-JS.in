@@ -67,3 +67,6 @@ js-lint:
 node_modules/installed: src/vm/js/nqp-runtime/*.js src/vm/js/nqp-runtime/package.json
 	npm install src/vm/js/nqp-runtime
 	touch node_modules/installed
+
+js-install: js-all
+	@echo "*** The JavaScript backend can't be installed yet, sorry! ***"
