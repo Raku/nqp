@@ -18,6 +18,15 @@ function P6opaque() {
 
 P6opaque.prototype.allocate = function(STable) {
   var obj = new STable.obj_constructor();
+
+  /* TODO take classes into account when storing attributes */
+  for (var i in this.name_to_index_mapping) {
+    for (var j in this.name_to_index_mapping[i].slots) {
+      var name = this.name_to_index_mapping[i].names[j];
+      obj[name] = null;
+    }
+  }
+
   if (this.autovived) {
     for (var attr in this.autovived) {
       obj[attr] = this.autovived[attr];

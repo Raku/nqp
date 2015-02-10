@@ -1,6 +1,6 @@
 #! nqp
 
-plan(10);
+plan(12);
 
 class Foo {
     has $!answer;
@@ -55,3 +55,23 @@ ok(nqp::getattr_i($low, Lowlevel, '$!int') == 456, 'nqp::getattr_i');
 ok(nqp::getattr_n($low, Lowlevel, '$!num') == 12.3, 'nqp::getattr_n');
 ok(nqp::getattr_s($low, Lowlevel, '$!str') eq 'hello world', 'nqp::getattr_s');
 ok(nqp::eqaddr(nqp::getattr($low, Lowlevel, '$!obj'), $obj), 'nqp::getattr');
+
+class ClassA {
+    has %!starts_with_hash;
+    method get_attr() {
+        %!starts_with_hash;
+    }
+}
+class ClassB {
+    method new(:$name) {
+        my $obj := nqp::create(self);
+        $obj
+    }
+
+    has %!starts_with_null;
+    method get_attr() {
+        %!starts_with_null;
+    }
+}
+ok(nqp::ishash(ClassA.new.get_attr), 'BUILD initializes a % attribute with a hash');
+ok(nqp::isnull(ClassB.new.get_attr), 'without a BUILD a % attribute is initialized with a null');
