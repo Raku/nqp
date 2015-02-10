@@ -329,6 +329,9 @@ class QAST::OperationsJS {
 
     add_simple_op('istype', $T_BOOL, [$T_OBJ, $T_OBJ], sub ($value, $type) {"($value instanceof $type.constructor)"});
 
+
+    add_simple_op('clone', $T_OBJ, [$T_OBJ]);
+
     # TODO handle attributes properly
     for ['', $T_OBJ, '_i', $T_INT, '_n', $T_NUM, '_s', $T_STR] -> $suffix, $type {
         add_simple_op('bindattr' ~ $suffix, $type, [$T_OBJ, $T_OBJ, $T_STR, $type], :sideffects,
@@ -1005,6 +1008,8 @@ class QAST::OperationsJS {
     add_simple_op('how', $T_OBJ, [$T_OBJ], sub ($obj) {"$obj._STable.HOW"});
     add_simple_op('who', $T_OBJ, [$T_OBJ], sub ($obj) {"$obj._STable.WHO"});
     add_simple_op('setwho', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($obj, $who) {"($obj._STable.WHO = $who, $obj)"}, :sideffects);
+
+    add_simple_op('where', $T_INT, [$T_OBJ]);
 
     # HACK
     # TODO think what we should return on 1.WHAT and "foo".WHAT

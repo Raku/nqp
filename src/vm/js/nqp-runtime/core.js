@@ -261,3 +261,21 @@ op.setcodename = function(code, name) {
   console.log(code, name);
   code.name = name;
 };
+
+// STUB
+op.clone = function(obj) {
+  console.log("cloning", obj);
+  return obj;
+};
+
+var where_counter = 0;
+op.where = function(obj) {
+  if (obj._STable) { // HACK
+    if (!obj._WHERE) {
+        obj._WHERE = ++where_counter;
+    }
+    return obj._WHERE;
+  } else {
+    throw "WHERE on this type of thing unimplemented";
+  }
+};
