@@ -252,6 +252,11 @@ op.settypecache = function(obj, cache) {
   return obj;
 };
 
+op.setmethcache = function(obj, cache) {
+    obj._STable.setMethodCache(cache);
+    return obj;
+};
+
 op.reprname = function(obj) {
   return obj._STable.REPR.name;
 };

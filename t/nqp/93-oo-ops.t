@@ -1,4 +1,4 @@
-plan(10);
+plan(11);
 class Foo {
     method foo() {
         'bar';
@@ -36,3 +36,7 @@ class Foo3 {
 nqp::settypecache(Foo, [Foo3]);
 
 ok(nqp::istype($foo, Foo3), "nqp::settypecache works");
+
+nqp::setmethcache(Foo, nqp::hash('baz', sub ($invocant) {'baz method called'}));
+
+ok($foo.baz eq 'baz method called', "nqp::setmethcache works");
