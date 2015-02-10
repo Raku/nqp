@@ -236,6 +236,17 @@ op.findmethod = function(obj, method) {
   return obj._STable.method_cache[method];
 };
 
+op.istype = function(obj, type) {
+  // TODO cases where the type_check_cache isn't authoritative
+  var cache = obj._STable.type_check_cache;
+  for (var i=0; i < cache.length; i++) {
+    if (cache[i] === type) {
+      return 1;
+    }
+  }
+  return 0;
+};
+
 op.reprname = function(obj) {
   return obj._STable.REPR.name;
 };

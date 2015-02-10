@@ -229,6 +229,7 @@ BinaryCursor.prototype.STable = function(STable) {
   for (var i = 0; i < type_check_cache_len; i++) {
     type_check_cache.push(this.variant());
   }
+  STable.type_check_cache = type_check_cache;
 
   STable.mode_flags = this.I64();
 

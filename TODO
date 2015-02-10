@@ -13,7 +13,6 @@ We need to write tests (if they don't already exist in t/nqp)
  -  getcodename
  -  getlexdyn
  -  iscclass - EASY
- -  istype
  -  list_s - EASY
  -  nfafromstatelist
  -  nfarunalt
