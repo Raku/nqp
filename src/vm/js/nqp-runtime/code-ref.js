@@ -29,4 +29,11 @@ CodeRef.prototype.setInfo = function(ctx, closureTemplate, staticInfo) {
   return this;
 };
 
+CodeRef.prototype.$$clone = function() {
+  var clone = new CodeRef(this.name);
+  clone.$call = this.$call;
+  clone.codeObj = this.codeObj;
+  return clone;
+};
+
 module.exports = CodeRef;

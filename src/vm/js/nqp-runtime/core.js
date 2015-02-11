@@ -293,10 +293,14 @@ op.rebless = function(obj, new_type) {
   return obj;
 };
 
-// STUB
 op.clone = function(obj) {
-  console.log("cloning", obj);
-  return obj;
+  if (obj.$$clone) {
+    return obj.$$clone(); 
+  } else {
+    // STUB
+    console.log("NYI cloning", obj);
+    return obj;
+  }
 };
 
 var where_counter = 0;
