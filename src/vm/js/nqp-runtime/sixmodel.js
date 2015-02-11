@@ -4,6 +4,17 @@ function STable(REPR, HOW) {
   this.obj_constructor = function() {};
   this.obj_constructor.prototype._STable = this;
 
+  /* HACK - it's a bit hackish - think how correct it is */
+  this.obj_constructor.prototype.$$clone = function() {
+      var clone = new this._STable.obj_constructor();
+      for (var i in this) {
+        if (this.hasOwnProperty(i) && i != '_SC') {
+          clone[i] = this[i];
+        }
+      }
+      return clone;
+  };
+
   /* Default boolification mode 5 */
   this.obj_constructor.prototype.$$to_bool = function(ctx) {
     return this.type_object_ ? 0 : 1;
