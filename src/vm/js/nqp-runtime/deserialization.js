@@ -491,8 +491,8 @@ BinaryCursor.prototype.contextToCode = function(context, data) {
     context.inner.map(function(inner) {return this.contextToCode(inner, data)}).join("") +
     context.closures.map(function(closure) {
       return 'sc.code_refs[' + closure.index + '].block(' + 
-        closure.staticCode.closureTemplate
-        + ');\n';
+        closure.staticCode.closureTemplate +
+        ');\n';
     }).join("") +
     "})();\n";
 }
