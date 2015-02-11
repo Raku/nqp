@@ -1373,9 +1373,6 @@ my class MASTCompilerInstance {
             }
         }
         elsif $scope eq 'lexicalref' {
-            if $*BINDVAL {
-                nqp::die("Cannot bind to QAST::Var '{$name}' with scope lexicalref");
-            }
             my $lex;
             my $lexref;
             my $outer := 0;
@@ -1394,10 +1391,16 @@ my class MASTCompilerInstance {
             $res_reg := $*REGALLOC.fresh_register($res_kind);
             if $lex {
                 # We need to take a reference to the lexical.
+                if $*BINDVAL {
+                    nqp::die("Cannot bind to non-reference QAST::Var '{$name}'");
+                }
                 if $outer {
                     $lex := MAST::Lexical.new( :index($lex.index), :frames_out($outer) );
                 }
                 my $lex_kind := $block.lexical_kind($name);
+                if $lex_kind == $MVM_reg_obj {
+                    nqp::die('Cannot take a reference to a non-native lexical');
+                }
                 push_op(@ins, @lexref_opnames[@kind_to_op_slot[$lex_kind]], $res_reg, $lex);
             }
             elsif $lexref {
@@ -1406,9 +1409,20 @@ my class MASTCompilerInstance {
                 if $outer {
                     $lexref := MAST::Lexical.new( :index($lexref.index), :frames_out($outer) );
                 }
-                push_op(@ins, 'getlex', $res_reg, $lexref);
+                if $*BINDVAL {
+                    my $valmast := self.as_mast_clear_bindval($*BINDVAL, :want($MVM_reg_obj));
+                    $res_reg := $valmast.result_reg;
+                    push_ilist(@ins, $valmast);
+                    push_op(@ins, 'bindlex', $lexref, $res_reg);
+                }
+                else {
+                    push_op(@ins, 'getlex', $res_reg, $lexref);
+                }
             }
             else {
+                if $*BINDVAL {
+                    nqp::die('Cannot bind to late-bound QAST::Var with scope lexicalref');
+                }
                 my $lex_kind := self.type_to_register_kind($node.returns);
                 push_op(@ins, @lexref_n_opnames[@kind_to_op_slot[$lex_kind]],
                     $res_reg, MAST::SVal.new( :value($name) ));
