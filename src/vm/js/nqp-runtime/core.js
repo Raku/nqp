@@ -257,6 +257,12 @@ op.setmethcache = function(obj, cache) {
     return obj;
 };
 
+op.setmethcacheauth = function(obj, isAuth) {
+    /* TODO we currently assume method caches are always authorative
+    sadly that's not always the case*/
+    return obj;
+};
+
 op.reprname = function(obj) {
   return obj._STable.REPR.name;
 };

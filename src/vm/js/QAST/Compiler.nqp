@@ -1045,6 +1045,7 @@ class QAST::OperationsJS {
 
     add_simple_op('settypecache', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
     add_simple_op('setmethcache', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
+    add_simple_op('setmethcacheauth', $T_OBJ, [$T_OBJ, $T_INT], :sideffects);
 
     add_simple_op('getcodename', $T_OBJ, [$T_OBJ]);
     add_simple_op('setcodename', $T_OBJ, [$T_OBJ, $T_STR], :sideffects);
