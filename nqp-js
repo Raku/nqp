@@ -1,2 +1,3 @@
 #!/bin/sh
 ./nqp-m --module-path gen/js/stage1/ src/vm/js/bin/nqp-js.nqp "$@"
+rm tmp.js
