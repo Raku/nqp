@@ -1265,9 +1265,20 @@ my class MASTCompilerInstance {
             }
         }
 
-        # Declaration in void context need generate no code.
-        if nqp::isconcrete($want) && $want == $MVM_reg_void {
-            return MAST::InstructionList.new([], MAST::VOID, $MVM_reg_void);
+        # If we know what we're after, some opts:
+        if nqp::isconcrete($want) {
+            # Declaration in void context need generate no code.
+            if $want == $MVM_reg_void {
+                return MAST::InstructionList.new([], MAST::VOID, $MVM_reg_void);
+            }
+
+            # Both lexicalref and attributeref in the context we want a
+            # non-object devolve to lexical and attribute, since we'd only
+            # de-ref right away anyway.
+            if $want != $MVM_reg_obj {
+                $scope := 'lexical'   if $scope eq 'lexicalref';
+                $scope := 'attribute' if $scope eq 'attributeref';
+            }
         }
 
         # Now go by scope.
