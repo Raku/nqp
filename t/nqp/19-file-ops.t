@@ -2,7 +2,7 @@
 
 # Test nqp::op file operations.
 
-plan(55);
+plan(56);
 
 ok( nqp::stat('CREDITS', nqp::const::STAT_EXISTS) == 1, 'nqp::stat exists');
 ok( nqp::stat('AARDVARKS', nqp::const::STAT_EXISTS) == 0, 'nqp::stat not exists');
@@ -188,7 +188,7 @@ else {
         ok(1, 'ok 45 # Skipped: stat + STAT_ISLNK is broken on parrot');
     }
     else {
-#        ok(nqp::stat($test-file ~ '-symlink', nqp::const::STAT_ISLNK), 'the symbolic link should actually *be* a symbolic link');
+        ok(nqp::stat($test-file ~ '-symlink', nqp::const::STAT_ISLNK), 'the symbolic link should actually *be* a symbolic link');
     }
     nqp::unlink($test-file);
     nqp::unlink($test-file ~ '-symlink');
