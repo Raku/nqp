@@ -203,3 +203,37 @@ NFA.prototype.type_object_for = basic_type_object_for;
 NFA.prototype.allocate = basic_allocate;
 NFA.name = 'NFA';
 exports.NFA = NFA;
+
+function VMArray() {
+}
+VMArray.prototype.deserialize_finish = function(object, data) {
+  console.log("deserializing VMArray");
+  // STUB
+};
+VMArray.prototype.type_object_for = basic_type_object_for;
+
+VMArray.prototype.deserialize_repr_data = function(cursor) {
+    this.type = cursor.variant();
+    /* TODO - type */
+};
+
+VMArray.prototype.deserialize_array = function(object,data) {
+  if (this.type !== null) {
+    console.log("NYI: VMArrays of a type different then null");
+  }
+  var size = data.varint();
+  for (var i = 0; i < size; i++) {
+    object[i] = data.variant();
+  }
+};
+
+exports.VMArray = VMArray;
+
+function VMIter() {
+}
+VMIter.prototype.deserialize_finish = function(object, data) {
+  console.log("deserializing VMIter");
+  // STUB
+};
+VMIter.prototype.type_object_for = basic_type_object_for;
+exports.VMIter = VMIter;

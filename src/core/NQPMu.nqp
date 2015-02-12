@@ -109,7 +109,6 @@ my class NQPMu {
 }
 
 #?if !parrot
-#?if !js
 # A few bits when we're bootstrapping everything 6model-style rather than using
 # Parrot-supplied things.
 my class NQPArray is repr('VMArray') {
@@ -134,7 +133,6 @@ nqp::sethllconfig('nqp', nqp::hash(
     'array_iter', NQPArrayIter,
     'hash_iter', NQPHashIter
 ));
-#?endif
 #?endif
 
 my class NQPLabel { }

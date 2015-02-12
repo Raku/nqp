@@ -314,3 +314,14 @@ op.where = function(obj) {
     throw "WHERE on this type of thing unimplemented";
   }
 };
+
+
+op.settypehllrole = function(type, role) {
+  /* STUB */
+  return role;
+};
+
+op.sethllconfig = function(language, configHash) {
+  /* STUB */
+  return configHash;
+};

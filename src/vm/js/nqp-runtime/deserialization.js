@@ -400,8 +400,16 @@ BinaryCursor.prototype.deserialize = function(sc) {
     if (!STable_for_obj) {
       console.log('Missing stable',objects[i].STable[0],objects[i].STable[1],deps[objects[i].STable[0]].root_stables);
     }
-    sc.root_objects[i] = new (STable_for_obj.obj_constructor)();
-    sc.root_objects[i]._SC = sc;
+
+    objects[i].is_array = objects[i].is_concrete && STable_for_obj.REPR.name == 'VMArray';
+    objects[i].array_repr = STable_for_obj.REPR;
+
+    if (objects[i].is_array) {
+      sc.root_objects[i] = [];
+    } else {
+      sc.root_objects[i] = new (STable_for_obj.obj_constructor)();
+      sc.root_objects[i]._SC = sc;
+    }
 
     if (!objects[i].is_concrete) {
         // TODO think more about it
@@ -428,7 +436,10 @@ BinaryCursor.prototype.deserialize = function(sc) {
 
   /* Finish up objects */
   for (var i = 0; i < objects.length; i++) {
-    if (objects[i].is_concrete) {
+    if (objects[i].is_array) {
+      var repr = objects[i].array_repr;
+      repr.deserialize_array(sc.root_objects[i], objects[i].data);
+    } else if (objects[i].is_concrete) {
       var repr = sc.root_objects[i]._STable.REPR;
       if (repr.deserialize_finish) {
         repr.deserialize_finish(sc.root_objects[i], objects[i].data);
