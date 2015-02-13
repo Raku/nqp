@@ -1110,9 +1110,9 @@ directory didn't exist. May throw an exception.
 ## stat
 * `stat(str $path, int $code)`
 
-Given a path and a code, return an int describing that path. Any of
-these variants may throw an exception if the platform does not support
-them. (JVM does not support `STAT_PLATFORM_BLOCKSIZE` or
+Given a path and a code, return an int describing that path using the OS's
+stat() function. Any of these variants may throw an exception if the platform
+does not support them. (JVM does not support `STAT_PLATFORM_BLOCKSIZE` or
 `STAT_PLATFORM_BLOCKS`).
 
     * `nqp::const::STAT_EXISTS` 
@@ -1189,6 +1189,12 @@ Returns preferred I/O size in bytes for interacting with the file.
     * `nqp::const::STAT_PLATFORM_BLOCKS`
 
 Returns number of system-specific blocks allocated on disk.
+
+## lstat
+* `lstat(str $path, int $code)`
+
+Same as stat, but internally uses the OS's lstat() function, which does *not*
+follow symlinks.
 
 ## symlink
 * `symlink(str $before, str $after)`
