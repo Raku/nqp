@@ -1929,6 +1929,14 @@ my %const_map := nqp::hash(
     'SIG_STKFLT',               116,
     'SIG_PWR',                  130,
     'SIG_BREAK',                221,
+
+    'C_TYPE_CHAR',              -1,
+    'C_TYPE_SHORT',             -2,
+    'C_TYPE_INT',               -3,
+    'C_TYPE_LONGLONG',          -4,
+    'C_TYPE_FLOAT',             -5,
+    'C_TYPE_DOUBLE',            -6,
+    'C_TYPE_LONGDOUBLE',        -7,
 );
 QAST::MASTOperations.add_core_op('const', -> $qastcomp, $op {
     if nqp::existskey(%const_map, $op.name) {
