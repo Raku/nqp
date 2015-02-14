@@ -17,6 +17,9 @@ We need to write tests (if they don't already exist in t/nqp)
  -  nfarunproto - MEDIUM (Look at t/nqp/74-nfa.t)
  -  sprintf - MEDIUM (See t/hll/06-sprintf.t)
 
+Portability 
+   - Check if Function.name works on IE. If it doesn't instead checking for _ in callercode check for a custom property.
+
 General stuff that helps all backends
     Write tests (to avoid implementing stuff in crazy ways)
     - nqp::eoffh - EASY
