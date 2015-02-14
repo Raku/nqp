@@ -12,6 +12,7 @@ our @EXPORT_OK = qw(sorry slurp system_or_die
                     git_checkout
                     verify_install gen_moar
                     github_url
+                    probe_node
                     gen_nqp gen_parrot);
 
 our $exe = $^O eq 'MSWin32' ? '.exe' : '';
@@ -496,6 +497,18 @@ sub github_url {
     else {
         die "Unknown protocol '$protocol' (fine are: ssh, https, git)";
     }
+}
+
+sub probe_node {
+    # Debian ships a 'node' binary that is related to amateur radio.
+    # the javascript thingy is called 'nodejs' there
+    for my $binary (qw/nodejs node/) {
+        my $version_str = qx/$binary -v 2>&1/;
+        if ($version_str =~ /^v\d/) {
+            return $binary;
+        }
+    }
+    return;
 }
 
 
