@@ -10,6 +10,7 @@ use Cwd qw/abs_path cwd/;
 use lib "tools/lib";
 use NQP::Configure qw(cmp_rev read_parrot_config gen_moar
                       fill_template_file fill_template_text
+                      probe_node
                       slurp system_or_die verify_install sorry gen_parrot);
 
 my @known_backends = qw/moar jvm parrot js/;
@@ -230,6 +231,8 @@ MAIN: {
 
     if ($backends{js}) {
         $config{'make'}   = $^O eq 'MSWin32' ? 'nmake' : 'make';
+        $config{'node'}   = probe_node()
+            or sorry('No node or nodejs binary found');
         fill_template_file(
             'tools/build/Makefile-JS.in',
             $MAKEFILE,
