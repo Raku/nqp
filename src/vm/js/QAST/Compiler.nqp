@@ -1502,7 +1502,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     method setup_cuids() {
         my @cuids;
         for %!cuids {
-            @cuids.push("{self.mangled_cuid($_.key)} = new nqp.CodeRef({quote_string($_.value.name)})");
+            @cuids.push("{self.mangled_cuid($_.key)} = new nqp.CodeRef({quote_string($_.value.name)},{quote_string($_.key)})");
         }
         self.declare_js_vars(@cuids);
     }
@@ -1538,7 +1538,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         has $!closure_template;
         has $!static_info;
         has $!ctx;
+        has $!outer_ctx;
         method ctx() {$!ctx}
+        method outer_ctx() {$!outer_ctx}
         method static_info() {$!static_info}
         method closure_template() {$!closure_template}
     }
@@ -1609,6 +1611,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     %!serialized_code_ref_info{$node.cuid} := SerializedCodeRefInfo.new(
                         closure_template => Chunk.new($T_OBJ, "", $function).join(),
                         ctx => $*BLOCK.ctx,
+                        outer_ctx => $*BLOCK.outer.ctx,
                         static_info => self.static_info_for_lexicals($*BLOCK)
                     );
                 }
@@ -1724,6 +1727,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     ~ self.mangled_cuid($block.cuid)
                     ~ ".setInfo("
                     ~ quote_string($info.ctx) ~ ","
+                    ~ quote_string($info.outer_ctx) ~ ","
                     ~ quote_string($info.closure_template) ~ ","
                     ~ $info.static_info
                     ~ ");\n";

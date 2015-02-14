@@ -430,7 +430,8 @@ BinaryCursor.prototype.deserialize = function(sc) {
 
   var closures_base = sc.code_refs.length
   for (var i=0; i < closures.length; i++) {
-    sc.code_refs[closures_base+i] = new CodeRef();
+    sc.code_refs[closures_base+i] = new CodeRef('closure: ' + sc.handle + " " +(closures_base+i));
+    if (closures[i].codeObj) sc.code_refs[closures_base+i].codeObj = closures[i].codeObj;
     closures[i].index = closures_base+i;
   }
 
@@ -458,16 +459,29 @@ BinaryCursor.prototype.deserialize = function(sc) {
   for (var i = 0; i < contexts.length ; i++) {
     if (contexts[i].outer) contexts[contexts[i].outer-1].inner.push(contexts[i]);
   }
+  
+  var no_context_closures = [];
+
 
   for (var i = 0; i < closures.length ; i++) {
-    if (closures[i].context) contexts[closures[i].context-1].closures.push(closures[i]);
+    if (closures[i].context) {
+        contexts[closures[i].context-1].closures.push(closures[i]);
+    } else {
+        no_context_closures.push(closures[i]);
+    }
   }
+
+  var code = no_context_closures.map(function(closure) {
+      return 'var ' + closure.staticCode.outerCtx + ' = null;\n' +
+      'sc.code_refs[' + closure.index + '].block(' + 
+        closure.staticCode.closureTemplate +
+        ');\n'
+    }).join("");
 
   for (var i = 0; i < contexts.length ; i++) {
   }
 
   var data = [];
-  var code = '';
   for (var i = 0; i < contexts.length ; i++) {
     if (contexts[i].outer == 0) {
       code += this.contextToCode(contexts[i], data) + "\n\n";
