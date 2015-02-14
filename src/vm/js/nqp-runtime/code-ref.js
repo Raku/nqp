@@ -8,7 +8,7 @@ CodeRef.prototype.block = function(func) {
   func.codeRef = this;
 };
 
-CodeRef.prototype.$apply = function(argsArray) {
+CodeRef.prototype.$apply = function _(argsArray) {
   return this.$call.apply(this, argsArray);
 };
 

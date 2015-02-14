@@ -40,16 +40,16 @@ STable.prototype.setboolspec = function(mode, method) {
 
 STable.prototype.setinvokespec = function(classHandle, attrName, invocationHandler) {
   // TODO take classHandle into account
-  this.obj_constructor.prototype.$call = function() {
+  this.obj_constructor.prototype.$call = function _() {
     return this[attrName].$call.apply(this, arguments);
   };
-  this.obj_constructor.prototype.$apply = function(args) {
+  this.obj_constructor.prototype.$apply = function _(args) {
     return this[attrName].$apply(args);
   };
 };
 
 function injectMethod(proto, name, method) {
-  proto[name] = function() {
+  proto[name] = function _() {
 //    console.log("calling method:",name,method);
     if (method.$call) {
       var args = [];
