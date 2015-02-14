@@ -29,7 +29,7 @@ op.getcomp = function(lang) {
 };
 
 op.isinvokable = function(obj) {
-  return (obj instanceof CodeRef ? 1 : 0);
+  return (obj instanceof CodeRef || (obj._STable && obj._STable.invocationSpec) ? 1 : 0);
 };
 
 op.escape = function(str) {

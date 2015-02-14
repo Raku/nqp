@@ -46,6 +46,7 @@ STable.prototype.setinvokespec = function(classHandle, attrName, invocationHandl
   this.obj_constructor.prototype.$apply = function _(args) {
     return this[attrName].$apply(args);
   };
+  this.invocationSpec = {classHandle: classHandle, attrName: attrName, invocationHandler: invocationHandler};
 };
 
 function injectMethod(proto, name, method) {

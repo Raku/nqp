@@ -25,3 +25,8 @@ $bar.set_code_ref(sub () {1001});
 $bar.set_code_ref_differently(sub () {1002});
 ok($bar() == 1002,"setinvokespec with a attribute in a subclass");
 
+class Baz {
+}
+
+ok(nqp::isinvokable(Foo) == 1, "nqp::isinvokable works on objects that have a set invokespec");
+ok(nqp::isinvokable(Baz) == 0, "nqp::isinvokable works on objects that don't have a set invokespec");
