@@ -525,7 +525,7 @@ class QAST::OperationsJS {
         $comp.bind_key($node[0], $node[1], $node[2]);
     });
 
-    for ['_i', $T_INT, '', $T_OBJ] -> $suffix, $type {
+    for ['_i', $T_INT, '', $T_OBJ, '_s', $T_STR] -> $suffix, $type {
         add_op('list' ~ $suffix, sub ($comp, $node, :$want) {
            my @setup;
            my @exprs;
@@ -648,7 +648,7 @@ class QAST::OperationsJS {
 
     add_simple_op('islist', $T_BOOL, [$T_OBJ], sub ($obj) {"($obj instanceof Array)"});
 
-    for ['_i', $T_INT, '', $T_OBJ] -> $suffix, $type {
+    for ['_i', $T_INT, '', $T_OBJ, '_s', $T_STR] -> $suffix, $type {
         add_simple_op('atpos' ~ $suffix, $type, [$T_OBJ, $T_INT], sub ($array, $index) {"$array[$index]"});
         add_simple_op('pop' ~ $suffix, $type, [$T_OBJ], sub ($array) {"$array.pop()"}, :sideffects);
         add_simple_op('push' ~ $suffix, $type, [$T_OBJ, $type], sub ($array, $elem) {"$array.push($elem)"}, :sideffects);
