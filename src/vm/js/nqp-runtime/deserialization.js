@@ -478,9 +478,6 @@ BinaryCursor.prototype.deserialize = function(sc) {
         ');\n'
     }).join("");
 
-  for (var i = 0; i < contexts.length ; i++) {
-  }
-
   var data = [];
   for (var i = 0; i < contexts.length ; i++) {
     if (contexts[i].outer == 0) {
