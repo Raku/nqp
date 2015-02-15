@@ -349,3 +349,9 @@ op.sethllconfig = function(language, configHash) {
   /* STUB */
   return configHash;
 };
+
+var sha1 = require('sha1');
+
+op.sha1 = function(text) {
+  return sha1(text).toUpperCase();
+};

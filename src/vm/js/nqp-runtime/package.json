@@ -11,6 +11,7 @@
       "sleep": "*",
       "iconv-lite": "*",
       "execSync": "*",
-      "node-int64": "*"
+      "node-int64": "*",
+      "sha1": "*"
   }
 }

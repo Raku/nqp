@@ -475,6 +475,9 @@ class QAST::OperationsJS {
     add_simple_op('shell', $T_VOID, [$T_STR, $T_STR, $T_OBJ], :sideffects);
 
 
+    add_simple_op('sha1', $T_STR, [$T_STR]);
+
+
     add_simple_op('isinvokable', $T_INT, [$T_OBJ]);
 
     # Stubs
