@@ -256,6 +256,11 @@ op.findmethod = function(obj, method) {
 };
 
 op.istype = function(obj, type) {
+  /* Null always type checks false. */
+  if (obj === null) {
+      return 0;
+  }
+
   // TODO cases where the type_check_cache isn't authoritative
   var cache = obj._STable.type_check_cache;
   for (var i=0; i < cache.length; i++) {
