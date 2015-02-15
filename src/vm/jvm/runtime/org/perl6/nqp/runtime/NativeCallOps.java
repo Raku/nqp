@@ -7,6 +7,7 @@ import java.util.HashMap;
 
 import com.sun.jna.Callback;
 import com.sun.jna.NativeLibrary;
+import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 
@@ -253,7 +254,7 @@ public final class NativeCallOps {
         case INT:
             return Integer.class;
         case LONG:
-            return Long.class;
+            return NativeLong.class;
         case FLOAT:
             return Float.class;
         case DOUBLE:
@@ -285,7 +286,7 @@ public final class NativeCallOps {
         case INT:
             return new Integer((int) o.get_int(tc));
         case LONG:
-            return new Long((long) o.get_int(tc));
+            return new NativeLong((long) o.get_int(tc));
         case FLOAT:
             return new Float((float) o.get_num(tc));
         case DOUBLE:
@@ -371,7 +372,7 @@ public final class NativeCallOps {
             break;
         }
         case LONG: {
-            long val = ((Long) o).longValue();
+            long val = ((NativeLong) o).longValue();
             nqpobj.set_int(tc, val);
             break;
         }
