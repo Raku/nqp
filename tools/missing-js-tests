@@ -1,7 +1,6 @@
 #!perl
 use v5.12;
 use warnings;
-use Data::Printer;
 use File::Slurp qw(slurp);
 
 my $tests = slurp('src/vm/js/bin/run_tests'); 
