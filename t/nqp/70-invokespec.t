@@ -1,4 +1,4 @@
-plan(2);
+plan(4);
 class Foo {
     has $!here_we_keep_the_code_ref;
     has $!other_place_we_could_keep_the_code_ref_in;
