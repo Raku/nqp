@@ -58,6 +58,15 @@ static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
          * Parrot's INTVAL is inherently signed? */
         repr_data->bits = VTABLE_get_integer_keyed_str(interp, integer,
             Parrot_str_new_constant(interp, "bits"));
+
+        switch (repr_data->bits) {
+            case P6INT_C_TYPE_CHAR:     repr_data->bits = 8 * sizeof(char);      break;
+            case P6INT_C_TYPE_SHORT:    repr_data->bits = 8 * sizeof(short);     break;
+            case P6INT_C_TYPE_INT:      repr_data->bits = 8 * sizeof(int);       break;
+            case P6INT_C_TYPE_LONG:     repr_data->bits = 8 * sizeof(long);      break;
+            case P6INT_C_TYPE_LONGLONG: repr_data->bits = 8 * sizeof(long long); break;
+        }
+
         if (!repr_data->bits) repr_data->bits = sizeof(INTVAL)*8;
 
         if (repr_data->bits !=  1 && repr_data->bits !=  2 && repr_data->bits !=  4

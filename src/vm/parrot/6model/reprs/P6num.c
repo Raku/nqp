@@ -56,6 +56,13 @@ static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
     if(!PMC_IS_NULL(info)) {
         repr_data->bits = VTABLE_get_integer_keyed_str(interp, info,
             Parrot_str_new_constant(interp, "bits"));
+
+        switch (repr_data->bits) {
+            case P6NUM_C_TYPE_FLOAT:      repr_data->bits = 8 * sizeof(float);       break;
+            case P6NUM_C_TYPE_DOUBLE:     repr_data->bits = 8 * sizeof(double);      break;
+            case P6NUM_C_TYPE_LONGDOUBLE: repr_data->bits = 8 * sizeof(long double); break;
+        }
+
         if (!repr_data->bits) repr_data->bits = sizeof(FLOATVAL)*8;
 
         if(repr_data->bits != 32 && repr_data->bits != 64) {

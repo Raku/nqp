@@ -1,6 +1,12 @@
 #ifndef P6INT_H_GUARD
 #define P6INT_H_GUARD
 
+#define P6INT_C_TYPE_CHAR      -1
+#define P6INT_C_TYPE_SHORT     -2
+#define P6INT_C_TYPE_INT       -3
+#define P6INT_C_TYPE_LONG      -4
+#define P6INT_C_TYPE_LONGLONG  -5
+
 typedef struct {
     /* Integer storage slot. */
     INTVAL value;
