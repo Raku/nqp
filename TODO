@@ -5,7 +5,6 @@ Ops missing for regexes.
 We need to write tests (if they don't already exist in t/nqp)
 
  -  bindpos
- -  clone
  -  curlexpad
  -  die_s
  -  findnotcclass - EASY
