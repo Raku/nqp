@@ -524,6 +524,9 @@ class QAST::OperationsJS {
     add_op('bindkey', sub ($comp, $node, :$want) {
         $comp.bind_key($node[0], $node[1], $node[2]);
     });
+    add_op('bindpos', sub ($comp, $node, :$want) {
+        $comp.bind_pos($node[0], $node[1], $node[2]);
+    });
 
     for ['_i', $T_INT, '', $T_OBJ, '_s', $T_STR] -> $suffix, $type {
         add_op('list' ~ $suffix, sub ($comp, $node, :$want) {
@@ -1918,10 +1921,11 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             # TODO work on things other than nqp lists
             # TODO think about nulls and missing elements
             if $*BINDVAL {
-                my $array := self.as_js_clear_bindval($var[0], :want($T_OBJ));
-                my $index := self.as_js_clear_bindval($var[1], :want($T_INT));
-                my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ));
-                Chunk.new($T_OBJ, $bindval.expr, [$array, $index, $bindval, "({$array.expr}[{$index.expr}] = {$bindval.expr});\n"], :node($var));
+                my $bindval := $*BINDVAL;
+                {
+                    my $*BINDVAL;
+                    self.bind_pos($var[0], $var[1], $bindval, :node($var));
+                }
             } else {
                 my $array := self.as_js($var[0], :want($T_OBJ));
                 my $index := self.as_js($var[1], :want($T_INT));
@@ -1971,6 +1975,14 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my $value_chunk := self.as_js($value, :want($T_OBJ));
 
         Chunk.new($T_OBJ, $value_chunk.expr, [$hash_chunk, $key_chunk, $value_chunk, "({$hash_chunk.expr}[{$key_chunk.expr}] = {$value_chunk.expr});\n"], :node($node));
+    }
+
+    method bind_pos($array, $index, $value, :$node) {
+        my $array_chunk := self.as_js($array, :want($T_OBJ));
+        my $index_chunk := self.as_js($index, :want($T_STR));
+        my $value_chunk := self.as_js($value, :want($T_OBJ));
+
+        Chunk.new($T_OBJ, $value_chunk.expr, [$array_chunk, $index_chunk, $value_chunk, "({$array_chunk.expr}[{$index_chunk.expr}] = {$value_chunk.expr});\n"], :node($node));
     }
 
     multi method as_js($unknown, :$want) {

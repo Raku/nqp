@@ -4,7 +4,6 @@ Missing features
 Ops missing for regexes.
 We need to write tests (if they don't already exist in t/nqp)
 
- -  bindpos
  -  curlexpad
  -  die_s
  -  findnotcclass - EASY

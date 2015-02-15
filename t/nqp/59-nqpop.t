@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(158);
+plan(159);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -251,4 +251,10 @@ ok(nqp::iseq_i(11, 10) == 0, "iseq_i >");
 
     my $b := nqp::list_s("A","B","C");
     ok(nqp::atpos_s($b,2) eq "C", 'atpos_s');
+}
+
+{
+    my $a := nqp::list();
+    nqp::bindpos($a, 1, "Hello World");
+    ok($a[1] eq 'Hello World', 'nqp::bindpos')
 }
