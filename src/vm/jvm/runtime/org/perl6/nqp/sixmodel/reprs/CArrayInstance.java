@@ -168,6 +168,7 @@ public class CArrayInstance extends SixModelObject implements Refreshable {
 
         if (managed) {
             Memory new_storage = new Memory(new_size*repr_data.jna_size);
+            new_storage.clear();
             if (storage != null) {
                 Memory old_storage = (Memory) storage;
                 new_storage.write(0, old_storage.getByteArray(0, (int) old_storage.size()), 0, (int) old_storage.size());
