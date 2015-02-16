@@ -482,7 +482,6 @@ unmarshal_vmarray(PARROT_INTERP, PMC *value) {
         VMArrayBody *body          = &((VMArrayInstance *)PMC_data(value))->body;
         VMArrayREPRData *repr_data = (VMArrayREPRData *)STABLE(value)->REPR_data;
         size_t start_pos           = body->start * repr_data->elem_size;
-        fprintf(stderr, "body->start(%d) * repr_data->elem_size(%d)\n", body->start, repr_data->elem_size);
         return ((char *)body->slots) + start_pos;
     }
     else
