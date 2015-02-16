@@ -69,7 +69,7 @@ BEGIN_OPS_PREAMBLE
 #define DYNCALL_ARG_CALLBACK        26
 #define DYNCALL_ARG_CPOINTER        28
 #define DYNCALL_ARG_VMARRAY         30
-#define DYNCALL_ARG_TYPE_MASK       30
+#define DYNCALL_ARG_TYPE_MASK       62
 
 /* Flag for whether we should free a string after passing it or not. */
 #define DYNCALL_ARG_NO_FREE_STR     0
@@ -479,9 +479,10 @@ unmarshal_vmarray(PARROT_INTERP, PMC *value) {
     if (!IS_CONCRETE(value))
         return NULL;
     else if (REPR(value)->ID == vma_repr_id) {
-        VMArrayBody *body          = &((VMArrayInstance *)value)->body;
+        VMArrayBody *body          = &((VMArrayInstance *)PMC_data(value))->body;
         VMArrayREPRData *repr_data = (VMArrayREPRData *)STABLE(value)->REPR_data;
         size_t start_pos           = body->start * repr_data->elem_size;
+        fprintf(stderr, "body->start(%d) * repr_data->elem_size(%d)\n", body->start, repr_data->elem_size);
         return ((char *)body->slots) + start_pos;
     }
     else
