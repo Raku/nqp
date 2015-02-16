@@ -558,7 +558,7 @@ unmarshal_callback(PARROT_INTERP, PMC *value, PMC *info) {
             typehash = VTABLE_get_pmc_keyed_int(interp, info, i);
             data->types[i] = VTABLE_get_pmc_keyed_str(interp, typehash,
                     Parrot_str_new_constant(interp, "typeobj"));
-            data->typeinfos[i] = get_arg_type(interp, typehash, 0);
+            data->typeinfos[i] = get_arg_type(interp, typehash, 0) & ~DYNCALL_ARG_FREE_STR;
             signature[i-1] = get_signature_char(data->typeinfos[i]);
         }
 
