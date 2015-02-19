@@ -1064,24 +1064,6 @@ p-qregex-test-loud: $(P_RUNNER)$(BAT)
 p-clean:
 	$(RM_RF) $(P_CLEANUPS)
 
-distclean: realclean
-
-realclean: clean
-	$(RM_F) Makefile MANIFEST
-
-testclean:
-
-manifest:
-	echo MANIFEST >MANIFEST
-	git ls-files >>MANIFEST
-
-release: manifest
-	[ -n "$(VERSION)" ] || ( echo "\nTry 'make release VERSION=yyyy.mm'\n\n"; exit 1 )
-	[ -d nqp-$(VERSION) ] || ln -s . nqp-$(VERSION)
-	$(PERL) -ne 'print "nqp-$(VERSION)/$$_"' MANIFEST |\
-	    tar -zcv -T - -f nqp-$(VERSION).tar.gz
-	rm nqp-$(VERSION)
-
 # nqp::makefile <-- tells Configure.pm to convert / to \ in the above
 #                   template for Win32 systems
 # Local variables:

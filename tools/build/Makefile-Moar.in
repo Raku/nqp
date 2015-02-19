@@ -52,6 +52,24 @@ M_STAGE2_OUTPUT = $(M_STAGE2)/$(NQP_MO_MOAR) $(M_STAGE2)/$(MODULE_LOADER_MOAR) \
                 $(M_STAGE2)/$(QAST_MOAR) $(M_STAGE2)/$(P6QREGEX_MOAR) \
                 $(M_STAGE2)/$(NQP_MOAR)
 
+manifest:
+	echo MANIFEST >MANIFEST
+	git ls-files >>MANIFEST
+
+release: manifest
+	[ -n "$(VERSION)" ] || ( echo "\nTry 'make release VERSION=yyyy.mm'\n\n"; exit 1 )
+	[ -d nqp-$(VERSION) ] || ln -s . nqp-$(VERSION)
+	$(PERL) -ne 'print "nqp-$(VERSION)/$$_"' MANIFEST |\
+	    tar -zcv -T - -f nqp-$(VERSION).tar.gz
+	rm nqp-$(VERSION)
+
+distclean: realclean
+
+realclean: clean
+	$(RM_F) Makefile MANIFEST
+
+testclean:
+
 m-all: $(NQP_MOAR) $(M_RUNNER) $(P5QREGEX_MOAR)
 
 m-install: m-all
