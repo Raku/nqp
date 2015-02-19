@@ -1067,7 +1067,7 @@ p-clean:
 distclean: realclean
 
 realclean: clean
-	$(RM_F) Makefile
+	$(RM_F) Makefile MANIFEST
 
 testclean:
 
