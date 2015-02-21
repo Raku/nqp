@@ -141,6 +141,34 @@ public final class NativeCallOps {
         }
     }
 
+    public static long nativecallsizeof(SixModelObject obj, ThreadContext tc) {
+        obj            = Ops.decont(obj, tc);
+        StorageSpec ss = obj.st.REPR.get_storage_spec(tc, obj.st);
+
+        switch (ss.boxed_primitive) {
+            case StorageSpec.BP_INT:
+            case StorageSpec.BP_NUM:
+                return ss.bits / 8;
+            case StorageSpec.BP_STR:
+                return Pointer.SIZE;
+            default:
+                if (Ops.isconcrete(obj, tc) == 0)
+                    obj = obj.st.REPR.allocate(tc, obj.st);
+                if (obj instanceof org.perl6.nqp.sixmodel.reprs.CStrInstance
+                 || obj instanceof org.perl6.nqp.sixmodel.reprs.CPointerInstance
+                 || obj instanceof org.perl6.nqp.sixmodel.reprs.CArrayInstance) {
+                    return Pointer.SIZE;
+                }
+                else if (obj instanceof org.perl6.nqp.sixmodel.reprs.CStructInstance) {
+                    return ((CStructInstance) obj).storage.size();
+                }
+                else {
+                    throw ExceptionHandling.dieInternal(tc,
+                        String.format("NativeCall op sizeof expected type with CPointer, CStruct, CArray, P6int or P6num representation, but got a %s", obj));
+                }
+        }
+    }
+
     public static SixModelObject nativecallcast(SixModelObject target_spec, SixModelObject target_type, SixModelObject source, ThreadContext tc) {
         Pointer o = null;
 

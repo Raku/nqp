@@ -2591,6 +2591,7 @@ QAST::MASTOperations.add_core_op('nativecall', -> $qastcomp, $op {
 QAST::MASTOperations.add_core_moarop_mapping('nativecallrefresh', 'nativecallrefresh', 0, :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('nativecallcast', 'nativecallcast');
 QAST::MASTOperations.add_core_moarop_mapping('nativecallglobal', 'nativecallglobal');
+QAST::MASTOperations.add_core_moarop_mapping('nativecallsizeof', 'nativecallsizeof', :decont(0));
 
 # process related opcodes
 QAST::MASTOperations.add_core_moarop_mapping('exit', 'exit', 0);
