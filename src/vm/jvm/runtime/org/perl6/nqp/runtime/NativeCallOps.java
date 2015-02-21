@@ -160,7 +160,7 @@ public final class NativeCallOps {
                     return Pointer.SIZE;
                 }
                 else if (obj instanceof org.perl6.nqp.sixmodel.reprs.CStructInstance) {
-                    return ((CStructInstance) obj).storage.size() / 8;
+                    return ((CStructInstance) obj).storage.size();
                 }
                 else {
                     throw ExceptionHandling.dieInternal(tc,
