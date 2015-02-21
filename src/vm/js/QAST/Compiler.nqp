@@ -1988,6 +1988,138 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         Chunk.new($T_OBJ, $value_chunk.expr, [$array_chunk, $index_chunk, $value_chunk, "({$array_chunk.expr}[{$index_chunk.expr}] = {$value_chunk.expr});\n"], :node($node));
     }
 
+    my class RegexInfo {
+        has $!label; # the label we will jump to on the next while loop iteration
+
+        has $!js_loop_label; # we need this call break to stop the while loop 
+
+        has $!unique_label; # we need a supply of unique labels
+
+        has $!fail_label; # when we fail and need to backtrack
+        has $!done_label; # when we can't backtrack no more
+        has $!initial_label; # when we can't backtrack no more
+
+        has $!cursor;
+        has $!target;
+        has $!pos; # the position we are matching at
+        has $!curclass;
+        has $!bstack;
+        has $!restart;
+        has $!cstack;
+        has $!subcur;
+
+        # accessors
+
+        method label() { $!label }
+
+        method cursor() { $!cursor }
+        method target() { $!target }
+        method pos() { $!pos }
+        method curclass() { $!curclass }
+        method bstack() { $!bstack }
+        method restart() { $!restart }
+        method cstack() { $!cstack }
+        method subcur() { $!subcur }
+
+        method fail_label() { $!fail_label }
+        method done_label() { $!done_label }
+        method initial_label() { $!initial_label }
+
+        method js_loop_label() { $!js_loop_label }
+
+        method BUILD() {
+            $!unique_label := 0;
+
+            $!label := $*BLOCK.add_tmp();
+
+            $!cursor := $*BLOCK.add_tmp();
+            $!target := $*BLOCK.add_tmp();
+            $!pos := $*BLOCK.add_tmp();
+            $!curclass := $*BLOCK.add_tmp();
+            $!bstack := $*BLOCK.add_tmp();
+            $!restart := $*BLOCK.add_tmp();
+            $!cstack := $*BLOCK.add_tmp();
+            $!subcur := $*BLOCK.add_tmp();
+
+            $!fail_label := self.new_label;
+            $!done_label := self.new_label;
+            $!initial_label := self.new_label;
+
+            $!js_loop_label := QAST::Node.unique('js_regex_loop_label');
+        }
+
+        # labels are just integers the case statement matches on
+        method new_label() {
+            $!unique_label++;
+        }
+    }
+
+    multi method as_js(QAST::Regex $node, :$want) {
+
+        my $*RX := RegexInfo.new();
+
+
+        # TODO better name for $start
+        # we need to unpack the array we !cursor_start_all into a bunch of variables 
+        my $start := $*BLOCK.add_tmp();
+
+        Chunk.new($T_OBJ, $*RX.cursor, [
+            "{$*RX.label} = {$*RX.initial_label};\n",
+            "$start = self['!cursor_start_all']({$*BLOCK.ctx}, \{\});\n",
+            "{$*RX.cursor} = $start[0];\n",
+            "{$*RX.target} = $start[1];\n",
+            "{$*RX.pos} = $start[2];\n",
+            "{$*RX.curclass} = $start[3];\n",
+            "{$*RX.bstack} = $start[4];\n",
+            "{$*RX.restart} = $start[5];\n",
+            "{$*RX.js_loop_label}: while (1) \{\nswitch ({$*RX.label}) \{\n",
+            self.regex_case($*RX.initial_label),
+            self.compile_rx($node),
+            self.regex_case($*RX.fail_label),
+            self.regex_goto($*RX.done_label),
+            self.regex_case($*RX.done_label),
+            "{$*RX.cursor}['!cursor_fail']({$*BLOCK.ctx}, \{\});\n",
+            "break {$*RX.js_loop_label}\n",
+            "\}\n\}\n"
+        ]);
+    }
+
+    method compile_rx($node) {
+        if $node.rxtype eq 'concat' {
+            my @setup;
+            for $node.list {
+                @setup.push(self.compile_rx($_));
+            }
+            Chunk.new($T_VOID, "", @setup);
+        } elsif $node.rxtype eq 'literal' {
+            my $const := $node.subtype eq 'ignorecase' ?? nqp::lc($node[0]) !! $node[0];
+            my $qconst := quote_string($const);
+            my $constlen := nqp::chars($const);
+            my $cmpop := $node.negate ?? '==' !! '!=';
+            my $str := "{$*RX.target}.substr({$*RX.pos},$constlen)";
+            if $node.subtype eq 'ignorecase' {
+                $str := "$str.toLowerCase()";
+            }
+            "if ($str $cmpop $qconst) \{{self.regex_fail}\} else \{{$*RX.pos}+=$constlen\}\n";
+         } else {
+            self.NYI("NYI QAST::Regex rxtype = {$node.rxtype}");
+         }
+    }
+
+
+
+    method regex_case($label) {
+        "case $label:\n"
+    }
+
+    method regex_goto($label) {
+        "{$*RX.label} = $label;break;\n"; 
+    }
+
+    method regex_fail() {
+        self.regex_goto($*RX.fail_label);
+    }
+
     multi method as_js($unknown, :$want) {
         self.NYI("Unimplemented QAST node type: " ~ $unknown.HOW.name($unknown));
     }
