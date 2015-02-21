@@ -261,6 +261,11 @@ op.istype = function(obj, type) {
       return 0;
   }
 
+  // HACK
+  if (typeof obj === 'number' || typeof obj === 'string') {
+      return 0;
+  }
+
   // TODO cases where the type_check_cache isn't authoritative
   var cache = obj._STable.type_check_cache;
   for (var i=0; i < cache.length; i++) {
