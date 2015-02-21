@@ -2101,6 +2101,25 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 $str := "$str.toLowerCase()";
             }
             "if ($str $cmpop $qconst) \{{self.regex_fail}\} else \{{$*RX.pos}+=$constlen\}\n";
+
+        } elsif $node.rxtype eq 'pass' {
+            my $name;
+
+            if $node.name {
+                $name := quote_string($node.name);
+            } 
+            elsif +@($node) == 1 {
+                $name := self.as_js($node[0], :want($T_STR));
+            }
+
+            Chunk.new($T_VOID, "", [
+                "{$*RX.cursor}['!cursor_pass']({$*BLOCK.ctx},",
+                "\{backtrack: {$node.backtrack ne 'r'}\}, {$*RX.pos}",
+                (nqp::defined($name) ?? $name !! ''),
+                (nqp::defined($name) ?? ',' !! ''),
+                ");\n",
+                "break {$*RX.js_loop_label};\n"
+            ]);
          } else {
             self.NYI("NYI QAST::Regex rxtype = {$node.rxtype}");
          }
