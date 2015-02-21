@@ -20,7 +20,7 @@ class HLL::Compiler does HLL::Backend::Default {
         @!stages     := nqp::split(' ', 'start parse ast ' ~ $!backend.stages());
         
         # Command options and usage.
-        @!cmdoptions := nqp::split(' ', 'e=s help|h target=s trace|t=s encoding=s output|o=s combine version|v show-config verbose-config|V stagestats=s? ll-exception rxtrace nqpevent=s profile profile-compile');
+        @!cmdoptions := nqp::split(' ', 'e=s help|h target=s trace|t=s encoding=s output|o=s combine version|v show-config verbose-config|V stagestats=s? ll-exception rxtrace nqpevent=s profile profile-compile profile-filename=s');
         %!config     := nqp::hash();
     }
     
@@ -148,7 +148,7 @@ class HLL::Compiler does HLL::Backend::Default {
             }
 
             if (%adverbs<profile>) {
-                $output := $!backend.run_profiled({ $output(|@args) });
+                $output := $!backend.run_profiled({ $output(|@args) }, %adverbs<profile-filename>);
             }
             elsif %adverbs<trace> {
                 $output := $!backend.run_traced(%adverbs<trace>, { $output(|@args) });

@@ -37,7 +37,7 @@ class HLL::Backend::MoarVM {
                 )))));
         }
     }
-    method run_profiled($what) {
+    method run_profiled($what, $filename) {
         my @END := nqp::gethllsym('perl6', '@END_PHASERS');
         @END.push: -> { self.dump_profile_data($prof_end_sub()) } if nqp::defined(@END);
         self.ensure_prof_routines();
@@ -45,11 +45,11 @@ class HLL::Backend::MoarVM {
         my $res  := $what();
         unless nqp::defined(@END) {
             my $data := $prof_end_sub();
-            self.dump_profile_data($data);
+            self.dump_profile_data($data, $filename);
         }
         $res;
     }
-    method dump_profile_data($data) {
+    method dump_profile_data($data, $filename) {
         my @pieces := nqp::list_s();
 
         sub post_process_call_graph_node($node) {
@@ -137,9 +137,14 @@ class HLL::Backend::MoarVM {
             $template := slurp(nqp::backendconfig()<prefix> ~ '/languages/nqp/lib/profiler/template.html');
         }
         my $results  := subst($template, /'{{{PROFIELR_OUTPUT}}}'/, $json);
-        my $filename := 'profile-' ~ nqp::time_n() ~ '.html';
-        spew($filename, $results);
-        nqp::sayfh(nqp::getstderr(), "Wrote profiler output to $filename");
+        if nqp::defined($filename) {
+            spew($filename, $results);
+        }
+        else {
+            my $filename := 'profile-' ~ nqp::time_n() ~ '.html';
+            spew($filename, $results);
+            nqp::sayfh(nqp::getstderr(), "Wrote profiler output to $filename");
+        }
     }
 
     method run_traced($level, $what) {
