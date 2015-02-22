@@ -82,7 +82,7 @@ class HLLBackend::JavaScript {
 
     method tmp_file() {
         # TODO a better temporary file name
-        'tmp.js';
+        'tmp-' ~ nqp::getpid() ~ '.js';
     }
     
     method node($js) {
