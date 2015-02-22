@@ -1090,9 +1090,9 @@ class RegexCompiler {
     has $!initial_label; # when we can't backtrack no more
 
     has $!cursor;
-    has $!target;
-    has $!pos; # the position we are matching at
-    has $!curclass;
+    has $!target; # the string we are matching against
+    has $!pos; # the position in $!target we are currently at
+    has $!curclass; # the class of the object in $!cursor
     has $!bstack;
     has $!restart;
     has $!cstack;
