@@ -1148,7 +1148,6 @@ class RegexCompiler {
         if nqp::can(self, $rxtype) {
             self."$rxtype"($node);
         } else {
-            say($!compiler.HOW.name($!compiler));
             $!compiler.NYI("NYI QAST::Regex rxtype = {$node.rxtype}");
         }
     }
