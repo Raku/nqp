@@ -1097,11 +1097,15 @@ class RegexCompiler {
     has $!restart;
     has $!cstack;
     has $!subcur;
+    has $!rep;
 
     method compile($node) {
         # TODO better name for $start
         # we need to unpack the array we !cursor_start_all into a bunch of variables 
         my $start := $*BLOCK.add_tmp();
+
+        my $jump := $*BLOCK.add_tmp();
+        my $cstack_top := $*BLOCK.add_tmp();
 
         Chunk.new($T_OBJ, $!cursor, [
             "{$!label} = {$!initial_label};\n",
@@ -1113,10 +1117,25 @@ class RegexCompiler {
             "{$!bstack} = $start[4];\n",
             "{$!restart} = $start[5];\n",
             "{$!js_loop_label}: while (1) \{\nswitch ({$!label}) \{\n",
+
             self.case($!initial_label),
             self.compile_rx($node),
+
             self.case($!fail_label),
-            self.goto($!done_label),
+            "if ($!bstack.length == 0) \{{self.goto($!done_label)}\}\n",
+            "$cstack_top = $!bstack.pop();\n",
+            "if ($!cstack && $!cstack.length != 0) \{\n",
+            "$!subcur = $!cstack[$cstack_top-1];\n",
+            "\}\n",
+            "$!rep = $!bstack.pop();\n$!pos=$!bstack.pop();\n$jump=$!bstack.pop();\n",
+            "if ($!pos < -1) \{{self.goto($!done_label)}\}\n",
+            "if ($!pos < 0) \{{self.fail}\}\n",
+            "if ($jump == 0) \{{self.fail}\}\n",
+            "if (!($!cstack instanceof Array)) \{{self.goto($jump)}\}\n",
+            "if ($!bstack.length == 0) \{$!cstack.length = 0;{self.goto($jump)}\}\n",
+            "$!cstack.length = $!bstack[$!bstack.length-1];\n",
+            self.goto($jump),
+
             self.case($!done_label),
             "{$!cursor}['!cursor_fail']({$*BLOCK.ctx}, \{\});\n",
             "break {$!js_loop_label}\n",
@@ -1154,6 +1173,22 @@ class RegexCompiler {
         "if ($str $cmpop $qconst) \{{self.fail}\} else \{{$!pos}+=$constlen\}\n";
     }
 
+    method scan($node) {
+        my $loop := self.new_label;
+        my $scan := self.new_label;
+        my $done := self.new_label;
+
+        "if (self['\$!from'] != -1) \{{self.goto($done)}\}\n" # HACK
+        ~ self.goto($scan)
+        ~ self.case($loop)
+        ~ "$!pos++;\n"
+        ~ "if ($!pos >= $!target.length) \{{self.fail}\}\n" # HACK
+        ~ "$!cursor['\$!from'] = $!pos;\n"
+        ~ self.case($scan)
+        ~ self.mark($loop,$!pos,0)
+        ~ self.case($done);
+    }
+
     method pass($node) {
         my $name;
 
@@ -1189,6 +1224,7 @@ class RegexCompiler {
         $!restart := $*BLOCK.add_tmp();
         $!cstack := $*BLOCK.add_tmp();
         $!subcur := $*BLOCK.add_tmp();
+        $!rep := $*BLOCK.add_tmp();
 
         $!fail_label := self.new_label;
         $!done_label := self.new_label;
@@ -1208,6 +1244,12 @@ class RegexCompiler {
 
     method goto($label) {
         "$!label = $label;break;\n"; 
+    }
+
+    # push a new backtracking mark on the bstack with label $label, position $pos and count $count.
+    # (all arguments are taken as js code snippets).
+    method mark($label,$pos,$count) {
+      "$!bstack.push($label,$pos,$count,$!bstack.length ? $!bstack[bstack.length-1] : 0);\n";
     }
 
     method fail() {
