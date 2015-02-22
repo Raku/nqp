@@ -231,8 +231,15 @@ MAIN: {
 
     if ($backends{js}) {
         $config{'make'}   = $^O eq 'MSWin32' ? 'nmake' : 'make';
-        $config{'node'}   = probe_node()
-            or sorry('No node or nodejs binary found');
+        my $node   = probe_node();
+
+        if ($node eq 'nodejs') {
+            sorry('You have a broken node.js. Please install node.js as node instead of nodejs.')
+        }
+        elsif (!$node) {
+            sorry("You don't have node.js. Please install node.js.");
+        }
+
         fill_template_file(
             'tools/build/Makefile-JS.in',
             $MAKEFILE,
