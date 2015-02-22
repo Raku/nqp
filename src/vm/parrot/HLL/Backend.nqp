@@ -47,7 +47,7 @@ class HLL::Backend::Parrot {
         }
     }
     
-    method run_profiled($what) {
+    method run_profiled($what, $filename?) {
         my $old_runcore := pir::interpinfo__Si(pir::const::INTERPINFO_CURRENT_RUNCORE);
         pir::set_runcore__0s("subprof_hll");
         my $res := $what();
