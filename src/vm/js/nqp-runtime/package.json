@@ -10,7 +10,7 @@
       "fs-ext": "*",
       "sleep": "*",
       "iconv-lite": "*",
-      "execSync": "*",
+      "fallback-exec-sync": "*",
       "node-int64": "*",
       "sha1": "*"
   }

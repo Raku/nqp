@@ -1,7 +1,7 @@
 var fs = require('fs-ext');
 var sleep = require('sleep');
 var iconv = require('iconv-lite');
-var execSync = require('execSync');
+var execSync = require('fallback-exec-sync');
 
 var Hash = require('./hash.js');
 
