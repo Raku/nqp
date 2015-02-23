@@ -502,7 +502,7 @@ sub github_url {
 sub probe_node {
     # Debian ships a 'node' binary that is related to amateur radio.
     # the javascript thingy is called 'nodejs' there
-    for my $binary (qw/nodejs node/) {
+    for my $binary (qw/node nodejs /) {
         my $version_str = qx/$binary -v 2>&1/;
         if ($version_str =~ /^v\d/) {
             return $binary;
