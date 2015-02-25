@@ -2480,9 +2480,66 @@ QAST::MASTOperations.add_core_moarop_mapping('setinvokespec', 'setinvokespec', 0
 QAST::MASTOperations.add_core_moarop_mapping('setmultispec', 'setmultispec', 0, :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('setcontspec', 'setcontspec', 0, :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('assign', 'assign', 0, :decont(1));
-QAST::MASTOperations.add_core_moarop_mapping('assign_i', 'assign_i', 0);
-QAST::MASTOperations.add_core_moarop_mapping('assign_n', 'assign_n', 0);
-QAST::MASTOperations.add_core_moarop_mapping('assign_s', 'assign_s', 0);
+
+sub try_get_bind_scope($var) {
+    if nqp::istype($var, QAST::Var) {
+        my str $scope := $var.scope;
+        if $scope eq 'attributeref' {
+            return 'attribute';
+        }
+        elsif $scope eq 'lexicalref' {
+            # Make sure we've got the lexical itself in scope to bind to.
+            my $lex;
+            my $lexref;
+            my $outer := 0;
+            my $block := $*BLOCK;
+            my $name  := $var.name;
+            while nqp::istype($block, BlockInfo) {
+                last if $block.qast.ann('DYN_COMP_WRAPPER');
+                $lex := $block.lexical($name);
+                last if $lex;
+                last if $block.lexicalref($name);
+                $block := $block.outer;
+                $outer++;
+            }
+            if $lex {
+                return 'lexical';
+            }
+        }
+    }
+    ''
+}
+sub add_native_assign_op($op_name, $kind) {
+    QAST::MASTOperations.add_core_op($op_name, -> $qastcomp, $op {
+        my @operands := $op.list;
+        unless +@operands == 2 {
+            nqp::die($op ~ ' op requires two arguments');
+        }
+        my $target := @operands[0];
+        if try_get_bind_scope($target) -> $bind_scope {
+            # Can lower it to a bind instead.
+            $op.op('bind');
+            $target.scope($bind_scope);
+            $qastcomp.as_mast($op)
+        }
+        else {
+            # Really need to emit an assign.
+            my $regalloc := $*REGALLOC;
+            my $target_mast := $qastcomp.as_mast( :want($MVM_reg_obj), $op[0] );
+            my $value_mast  := $qastcomp.as_mast( :want($kind), $op[1] );
+            my @ins;
+            push_ilist(@ins, $target_mast);
+            push_ilist(@ins, $value_mast);
+            push_op(@ins, $op_name, $target_mast.result_reg, $value_mast.result_reg);
+            $regalloc.release_register($value_mast.result_reg, $kind);
+            MAST::InstructionList.new(@ins, $target_mast.result_reg, $MVM_reg_obj)
+        }
+    })
+}
+add_native_assign_op('assign_i', $MVM_reg_int64);
+add_native_assign_op('assign_n', $MVM_reg_num64);
+add_native_assign_op('assign_s', $MVM_reg_str);
+
 QAST::MASTOperations.add_core_moarop_mapping('assignunchecked', 'assignunchecked', 0, :decont(1));
 QAST::MASTOperations.add_core_moarop_mapping('setparameterizer', 'setparameterizer', 0, :decont(0, 1));
 QAST::MASTOperations.add_core_moarop_mapping('parameterizetype', 'parameterizetype', :decont(0, 1));
