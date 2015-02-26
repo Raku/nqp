@@ -36,6 +36,7 @@ import org.perl6.nqp.sixmodel.reprs.Semaphore;
 import org.perl6.nqp.sixmodel.reprs.ConcBlockingQueue;
 import org.perl6.nqp.sixmodel.reprs.ConditionVariable;
 import org.perl6.nqp.sixmodel.reprs.AsyncTask;
+import org.perl6.nqp.sixmodel.reprs.NativeRef;
 
 public class REPRRegistry {
     private static HashMap<String, Integer> reprIdMap = new HashMap<String, Integer>();
@@ -96,5 +97,6 @@ public class REPRRegistry {
         addREPR("ConcBlockingQueue", new ConcBlockingQueue());
         addREPR("ConditionVariable", new ConditionVariable());
         addREPR("AsyncTask", new AsyncTask());
+        addREPR("NativeRef", new NativeRef());
     }
 }
