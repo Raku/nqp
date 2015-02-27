@@ -80,7 +80,7 @@ public abstract class SixModelObject implements Cloneable {
         throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement at_pos_boxed");
     }
     public void at_pos_native(ThreadContext tc, long index) {
-        throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement at_pos_boxed_native");
+        throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement at_pos_native");
     }
     public void bind_pos_boxed(ThreadContext tc, long index, SixModelObject value) {
         throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement bind_pos_boxed");
