@@ -2781,7 +2781,6 @@ class QAST::CompilerJAST {
         has $!outer;            # Outer block's BlockInfo
         has @!params;           # QAST::Var nodes of params
         has @!locals;           # QAST::Var nodes of declared locals
-        has @!lexicals;         # QAST::Var nodes of declared lexicals
         has %!local_types;      # Mapping of local registers to type names
         has %!lexical_types;    # Mapping of lexical names to types
         has %!lexical_idxs;     # Lexical indexes (but have to know type too)
@@ -2800,7 +2799,6 @@ class QAST::CompilerJAST {
             $!outer := $outer;
             @!params := nqp::list();
             @!locals := nqp::list();
-            @!lexicals := nqp::list();
             %!local_types := nqp::hash();
             %!lexical_types := nqp::hash();
             %!lexical_idxs := nqp::hash();
@@ -2829,7 +2827,6 @@ class QAST::CompilerJAST {
                              $is_cont   ?? 1 !! 2;
                 nqp::push(%blv{$!qast.cuid}, [$var.name, $var.value, $flags]);
             }
-            @!lexicals[+@!lexicals] := $var;
         }
         
         method add_local($var) {
@@ -2891,7 +2888,6 @@ class QAST::CompilerJAST {
         method qast() { $!qast }
         method outer() { $!outer }
         method params() { @!params }
-        method lexicals() { @!lexicals }
         method locals() { @!locals }
         
         method local_info($name) {
