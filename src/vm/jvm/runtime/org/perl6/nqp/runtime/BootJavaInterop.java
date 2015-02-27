@@ -95,57 +95,15 @@ public class BootJavaInterop {
 
     /** Main entry point for OO-ish callouts. */
     public SixModelObject typeForName(String name) {
+        Class<?> klass = null;
+        ClassLoader syscl = ClassLoader.getSystemClassLoader();
         try {
-            return getSTableForClass(Class.forName(name)).WHAT;
-        } catch (ClassNotFoundException e) {
-            try {
-                String cfname = name.replace(".", "/");
-                String cpStr = System.getProperty("java.class.path");
-                String[] cps = cpStr.split("[;:]");
-                String cfpath = null;
-                File cf = null;
-                for(int i = 0; i < cps.length; i++) {
-                    cf = new File(cps[i] + "/" + cfname + ".class");
-                    if(cf.exists()) {
-                        cfpath = cf.toString().replace(cfname + ".class",  "");
-                        break;
-                    }
-                    cf = null;
-                }
-                if(cfpath != null) {
-                    try {
-                        URL url = new URL("file://" + cfpath + "/");
-                        URLClassLoader cl = new URLClassLoader(new URL[] { url });
-                        jarClassLoaders.put(cfname, cl);
-                        return getSTableForClass(cl.loadClass(name)).WHAT;
-                    } catch (MalformedURLException mue) {
-                        throw mue;
-                    }
-                } else {
-                    throw e;
-                }
-            } catch (ClassNotFoundException|MalformedURLException ine) {
-                throw ExceptionHandling.dieInternal(gc.getCurrentThreadContext(), ine);
-            }
+            klass = syscl.loadClass(name);
         }
-    }
-    public SixModelObject typeForNameFromJAR(String name, String JAR) {
-        try {
-            URLClassLoader cl = jarClassLoaders.get(JAR);
-            if (cl == null) {
-                URL url = new URL("jar:" + new File(JAR).toURI().toURL() + "!/");
-                cl = new URLClassLoader(new URL[] { url });
-                jarClassLoaders.put(JAR, cl);
-            }
-            return getSTableForClass(Class.forName(name, true, cl)).WHAT;
-        } catch (ClassNotFoundException e) {
-            throw ExceptionHandling.dieInternal(gc.getCurrentThreadContext(), e);
-        } catch (MalformedURLException e) {
-            throw ExceptionHandling.dieInternal(gc.getCurrentThreadContext(), e);
-        } catch (Throwable e) {
-            e.printStackTrace();
-            throw e;
+        catch( ClassNotFoundException cnfe ) {
+            throw ExceptionHandling.dieInternal(gc.getCurrentThreadContext(), cnfe);
         }
+        return getSTableForClass(klass).WHAT;
     }
 
     /** Convenience methods for NQP coding. */
