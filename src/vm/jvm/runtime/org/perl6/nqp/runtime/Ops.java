@@ -62,6 +62,7 @@ import org.perl6.nqp.sixmodel.BoolificationSpec;
 import org.perl6.nqp.sixmodel.ContainerConfigurer;
 import org.perl6.nqp.sixmodel.ContainerSpec;
 import org.perl6.nqp.sixmodel.InvocationSpec;
+import org.perl6.nqp.sixmodel.NativeRefContainerSpec;
 import org.perl6.nqp.sixmodel.ParameterizedType;
 import org.perl6.nqp.sixmodel.ParametricType;
 import org.perl6.nqp.sixmodel.REPRRegistry;
@@ -86,6 +87,7 @@ import org.perl6.nqp.sixmodel.reprs.MultiCacheInstance;
 import org.perl6.nqp.sixmodel.reprs.NFA;
 import org.perl6.nqp.sixmodel.reprs.NFAInstance;
 import org.perl6.nqp.sixmodel.reprs.NFAStateInfo;
+import org.perl6.nqp.sixmodel.reprs.NativeRefREPRData;
 import org.perl6.nqp.sixmodel.reprs.P6bigintInstance;
 import org.perl6.nqp.sixmodel.reprs.P6int;
 import org.perl6.nqp.sixmodel.reprs.P6str;
@@ -2841,6 +2843,23 @@ public final class Ops {
     }
     public static long iscont(SixModelObject obj) {
         return obj == null || obj.st.ContainerSpec == null ? 0 : 1;
+    }
+    private static short getContainerPrimitive(SixModelObject obj) {
+        if (obj != null && !(obj instanceof TypeObject)) {
+            ContainerSpec cs = obj.st.ContainerSpec;
+            if (cs instanceof NativeRefContainerSpec)
+                return ((NativeRefREPRData)(obj.st.REPRData)).ref_kind;
+        }
+        return StorageSpec.BP_NONE;
+    }
+    public static long iscont_i(SixModelObject obj) {
+        return getContainerPrimitive(obj) == StorageSpec.BP_INT ? 1 : 0;
+    }
+    public static long iscont_n(SixModelObject obj) {
+        return getContainerPrimitive(obj) == StorageSpec.BP_NUM ? 1 : 0;
+    }
+    public static long iscont_s(SixModelObject obj) {
+        return getContainerPrimitive(obj) == StorageSpec.BP_STR ? 1 : 0;
     }
     public static SixModelObject decont(SixModelObject obj, ThreadContext tc) {
         if (obj == null)
