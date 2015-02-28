@@ -32,10 +32,10 @@ public class NativeRef extends REPR {
                         obj = new NativeRefInstanceIntLex();
                         break;
                     case StorageSpec.BP_NUM:
-                        obj = new NativeRefInstanceIntLex();
+                        obj = new NativeRefInstanceNumLex();
                         break;
                     case StorageSpec.BP_STR:
-                        obj = new NativeRefInstanceIntLex();
+                        obj = new NativeRefInstanceStrLex();
                         break;
                     default:
                         throw ExceptionHandling.dieInternal(tc,
