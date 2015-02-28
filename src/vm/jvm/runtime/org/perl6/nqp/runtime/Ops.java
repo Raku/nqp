@@ -3037,6 +3037,30 @@ public final class Ops {
         ContainerSpec cs = obj.st.ContainerSpec;
         return cs == null || obj instanceof TypeObject ? obj : cs.fetch(tc, obj);
     }
+    public static long decont_i(SixModelObject obj, ThreadContext tc) {
+        if (!(obj instanceof TypeObject)) {
+            ContainerSpec cs = obj.st.ContainerSpec;
+            if (cs != null)
+                return cs.fetch_i(tc, obj);
+        }
+        return obj.get_int(tc);
+    }
+    public static double decont_n(SixModelObject obj, ThreadContext tc) {
+        if (!(obj instanceof TypeObject)) {
+            ContainerSpec cs = obj.st.ContainerSpec;
+            if (cs != null)
+                return cs.fetch_n(tc, obj);
+        }
+        return obj.get_num(tc);
+    }
+    public static String decont_s(SixModelObject obj, ThreadContext tc) {
+        if (!(obj instanceof TypeObject)) {
+            ContainerSpec cs = obj.st.ContainerSpec;
+            if (cs != null)
+                return cs.fetch_s(tc, obj);
+        }
+        return obj.get_str(tc);
+    }
     public static SixModelObject assign(SixModelObject cont, SixModelObject value, ThreadContext tc) {
         ContainerSpec cs = cont.st.ContainerSpec;
         if (cs != null)
