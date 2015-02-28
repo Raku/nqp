@@ -4163,6 +4163,15 @@ class QAST::CompilerJAST {
                 nqp::die("No scope specified or locatable in the symbol table for '$name'");
             }
         }
+
+        # Both lexicalref and attributeref in the context we want a
+        # non-object devolve to lexical and attribute, since we'd only
+        # de-ref right away anyway.
+        my $want := $*WANT;
+        if nqp::defined($want) && $want != $RT_OBJ {
+            $scope := 'lexical'   if $scope eq 'lexicalref';
+            $scope := 'attribute' if $scope eq 'attributeref';
+        }
         
         # Now go by scope.
         if $scope eq 'local' {
