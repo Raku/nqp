@@ -2,6 +2,7 @@ package org.perl6.nqp.sixmodel;
 
 import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.ThreadContext;
+import org.perl6.nqp.sixmodel.REPRRegistry;
 
 /**
  * All 6model objects derive from this base class. A bunch of the REPR
@@ -49,28 +50,30 @@ public abstract class SixModelObject implements Cloneable {
      * Boxing related functions.
      */
     public void set_int(ThreadContext tc, long value) {
-        throw ExceptionHandling.dieInternal(tc, "This representation can not box a native int");
+        throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation can not box a native int");
     }
     public long get_int(ThreadContext tc) {
-        throw ExceptionHandling.dieInternal(tc, "This representation can not unbox to a native int");
+        throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation can not unbox to a native int");
     }
     public void set_num(ThreadContext tc, double value) {
-        throw ExceptionHandling.dieInternal(tc, "This representation can not box a native num");
+        throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation can not box a native num");
     }
     public double get_num(ThreadContext tc) {
-        throw ExceptionHandling.dieInternal(tc, "This representation can not unbox to a native num");
+        throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation can not unbox to a native num");
     }
     public void set_str(ThreadContext tc, String value) {
-        throw ExceptionHandling.dieInternal(tc, "This representation can not box a native str");
+        throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation can not box a native str");
     }
     public String get_str(ThreadContext tc) {
-        throw ExceptionHandling.dieInternal(tc, "This representation can not unbox to a native str");
+        throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation can not unbox to a native str");
     }
     public void set_boxing_of(ThreadContext tc, long reprId, Object value) {
-        throw ExceptionHandling.dieInternal(tc, "This representation can not box another");
+        throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation can not box "
+            + REPRRegistry.getById((int)reprId).name);
     }
     public Object get_boxing_of(ThreadContext tc, long reprId) {
-        throw ExceptionHandling.dieInternal(tc, "This representation can not unbox another");
+        throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation can not unbox "
+            + REPRRegistry.getById((int)reprId).name);
     }
     
     /**
