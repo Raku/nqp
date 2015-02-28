@@ -4478,6 +4478,40 @@ class QAST::CompilerJAST {
             
             return result($il, $type);
         }
+        elsif $scope eq 'attributeref' {
+            # Ensure we have object and class handle, and aren't binding.
+            my @args := $node.list;
+            if +@args != 2 {
+                nqp::die("An attribute lookup needs an object and a class handle");
+            }
+            if $*BINDVAL {
+                nqp::die("Cannot bind to QAST::Var '{$name}' with scope attributeref");
+            }
+
+            # Ensure we've a natively typed attribute to take a ref to.
+            my $type := rttype_from_typeobj($node.returns);
+            if $type == $RT_OBJ {
+                nqp::die("Attribute references can only be to native types");
+            }
+
+            # Compile object, handle and name.
+            my $il := JAST::InstructionList.new();
+            my $obj_res := self.as_jast_clear_bindval(@args[0], :want($RT_OBJ));
+            $il.append($obj_res.jast);
+            my $han_res := self.as_jast_clear_bindval(@args[1], :want($RT_OBJ));
+            $il.append($han_res.jast);
+            my $name_res := self.as_jast_clear_bindval(QAST::SVal.new( :value($name) ), :want($RT_STR));
+            $il.append($name_res.jast);
+
+            # Emit lookup.
+            my $char  := typechar($type);
+            $*STACK.obtain($il, $obj_res, $han_res, $name_res);
+            $il.append($ALOAD_1);
+            $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+                "getattrref_$char", $TYPE_SMO, $TYPE_SMO, $TYPE_SMO, $TYPE_STR, $TYPE_TC ));
+
+            return result($il, $RT_OBJ);
+        }
         elsif $scope eq 'positional' {
             return self.as_jast_clear_bindval($*BINDVAL
                 ?? QAST::Op.new( :op('positional_bind'), |$node.list, $*BINDVAL)
