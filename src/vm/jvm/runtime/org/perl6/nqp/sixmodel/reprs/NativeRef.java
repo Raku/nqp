@@ -42,6 +42,9 @@ public class NativeRef extends REPR {
                             "Unknown primtive type in native ref allocation");
                 }
                 break;
+            case NativeRefREPRData.REF_ATTRIBUTE:
+                obj = new NativeRefInstanceAttribute();
+                break;
             default:
                 throw ExceptionHandling.dieInternal(tc,
                     "Unknown reference kind in native ref allocation");
