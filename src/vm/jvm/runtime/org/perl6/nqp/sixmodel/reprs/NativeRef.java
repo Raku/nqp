@@ -6,6 +6,7 @@ import org.perl6.nqp.sixmodel.REPR;
 import org.perl6.nqp.sixmodel.STable;
 import org.perl6.nqp.sixmodel.StorageSpec;
 import org.perl6.nqp.sixmodel.SerializationReader;
+import org.perl6.nqp.sixmodel.SerializationWriter;
 import org.perl6.nqp.sixmodel.SixModelObject;
 import org.perl6.nqp.sixmodel.TypeObject;
 
@@ -98,5 +99,26 @@ public class NativeRef extends REPR {
     public void deserialize_finish(ThreadContext tc, STable st,
             SerializationReader reader, SixModelObject obj) {
         throw ExceptionHandling.dieInternal(tc, "Cannot deserialize a native reference");
+    }
+
+    public void serialize_repr_data(ThreadContext tc, STable st, SerializationWriter writer)
+    {
+        NativeRefREPRData rd = (NativeRefREPRData)st.REPRData;
+        if (rd != null) {
+            writer.writeInt32(rd.primitive_type);
+            writer.writeInt32(rd.ref_kind);
+        }
+        else {
+            writer.writeInt32(0);
+            writer.writeInt32(0);
+        }
+    }
+
+    public void deserialize_repr_data(ThreadContext tc, STable st, SerializationReader reader)
+    {
+        NativeRefREPRData rd = new NativeRefREPRData();
+        rd.primitive_type = (short)reader.readInt32();
+        rd.ref_kind = (short)reader.readInt32();
+        st.REPRData = rd;
     }
 }
