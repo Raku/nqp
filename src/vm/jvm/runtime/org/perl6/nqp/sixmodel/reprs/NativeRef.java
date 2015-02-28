@@ -45,6 +45,9 @@ public class NativeRef extends REPR {
             case NativeRefREPRData.REF_ATTRIBUTE:
                 obj = new NativeRefInstanceAttribute();
                 break;
+            case NativeRefREPRData.REF_POSITIONAL:
+                obj = new NativeRefInstancePositional();
+                break;
             default:
                 throw ExceptionHandling.dieInternal(tc,
                     "Unknown reference kind in native ref allocation");
