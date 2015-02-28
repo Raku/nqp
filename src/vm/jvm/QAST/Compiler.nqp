@@ -4418,17 +4418,17 @@ class QAST::CompilerJAST {
             else {
                 my $c := typechar($type);
                 if $local {
-                    $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
+                    $il.append($ALOAD_1);
                     $il.append(JAST::PushIndex.new( :value($*BLOCK.lexical_idx($name)) ));
                     $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
-                        "getlexref_$c", $TYPE_SMO, $TYPE_CF, 'Integer' ));
+                        "getlexref_$c", $TYPE_SMO, $TYPE_TC, 'Integer' ));
                 }
                 else {
-                    $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
+                    $il.append($ALOAD_1);
                     $il.append(JAST::PushIndex.new( :value($declarer.lexical_idx($name)) ));
                     $il.append(JAST::PushIndex.new( :value($scopes) ));
                     $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
-                        "getlexref_{$c}_si", $TYPE_SMO, $TYPE_CF, 'Integer', 'Integer' ));
+                        "getlexref_{$c}_si", $TYPE_SMO, $TYPE_TC, 'Integer', 'Integer' ));
                 }
                 return result($il, $RT_OBJ);
             }
