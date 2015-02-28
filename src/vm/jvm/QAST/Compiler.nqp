@@ -4395,7 +4395,7 @@ class QAST::CompilerJAST {
                 }
                 my $char := typechar($type);
                 my $name_sval := QAST::SVal.new( :value($name) );
-                return QAST::Op.new( :op("getlexref_$char"), $name_sval );
+                return self.as_jast(QAST::Op.new( :op("getlexref_$char"), $name_sval ));
             }
 
             # If it's a ref and we want a ref, just look it up as an object
