@@ -90,6 +90,7 @@ import org.perl6.nqp.sixmodel.reprs.NFAStateInfo;
 import org.perl6.nqp.sixmodel.reprs.NativeRefInstanceAttribute;
 import org.perl6.nqp.sixmodel.reprs.NativeRefInstanceIntLex;
 import org.perl6.nqp.sixmodel.reprs.NativeRefInstanceNumLex;
+import org.perl6.nqp.sixmodel.reprs.NativeRefInstancePositional;
 import org.perl6.nqp.sixmodel.reprs.NativeRefInstanceStrLex;
 import org.perl6.nqp.sixmodel.reprs.NativeRefREPRData;
 import org.perl6.nqp.sixmodel.reprs.P6bigintInstance;
@@ -2820,6 +2821,38 @@ public final class Ops {
     public static SixModelObject splice(SixModelObject arr, SixModelObject from, long offset, long count, ThreadContext tc) {
         arr.splice(tc, from, offset, count);
         return arr;
+    }
+
+    /* Positional reference operations. */
+    public static SixModelObject atposref_i(SixModelObject obj, long idx, ThreadContext tc) {
+        SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intPosRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No int positional reference type registered for current HLL");
+        NativeRefInstancePositional ref = (NativeRefInstancePositional)refType.st.REPR.allocate(tc, refType.st);
+        ref.obj = obj;
+        ref.idx = idx;
+        return ref;
+    }
+    public static SixModelObject atposref_n(SixModelObject obj, long idx, ThreadContext tc) {
+        SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.numPosRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No num positional reference type registered for current HLL");
+        NativeRefInstancePositional ref = (NativeRefInstancePositional)refType.st.REPR.allocate(tc, refType.st);
+        ref.obj = obj;
+        ref.idx = idx;
+        return ref;
+    }
+    public static SixModelObject atposref_s(SixModelObject obj, long idx, ThreadContext tc) {
+        SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strPosRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No string positional reference type registered for current HLL");
+        NativeRefInstancePositional ref = (NativeRefInstancePositional)refType.st.REPR.allocate(tc, refType.st);
+        ref.obj = obj;
+        ref.idx = idx;
+        return ref;
     }
 
     /* Associative operations. */
