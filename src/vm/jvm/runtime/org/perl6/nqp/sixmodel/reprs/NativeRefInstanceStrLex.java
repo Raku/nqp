@@ -5,7 +5,7 @@ import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.SixModelObject;
 
 /* Integer native lexical reference. */
-public class NativeRefInstanceStrLex extends SixModelObject {
+public class NativeRefInstanceStrLex extends NativeRefInstance {
     public String[] lexicals;
     public int idx;
     
