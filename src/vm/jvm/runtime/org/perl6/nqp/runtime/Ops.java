@@ -87,6 +87,9 @@ import org.perl6.nqp.sixmodel.reprs.MultiCacheInstance;
 import org.perl6.nqp.sixmodel.reprs.NFA;
 import org.perl6.nqp.sixmodel.reprs.NFAInstance;
 import org.perl6.nqp.sixmodel.reprs.NFAStateInfo;
+import org.perl6.nqp.sixmodel.reprs.NativeRefInstanceIntLex;
+import org.perl6.nqp.sixmodel.reprs.NativeRefInstanceNumLex;
+import org.perl6.nqp.sixmodel.reprs.NativeRefInstanceStrLex;
 import org.perl6.nqp.sixmodel.reprs.NativeRefREPRData;
 import org.perl6.nqp.sixmodel.reprs.P6bigintInstance;
 import org.perl6.nqp.sixmodel.reprs.P6int;
@@ -1225,6 +1228,134 @@ public final class Ops {
             if (found != null)
                 return curFrame.sLex[found] = value;
             curFrame = curFrame.outer;
+        }
+        throw ExceptionHandling.dieInternal(tc, "Lexical '" + name + "' not found");
+    }
+
+    /* Native lexical references. */
+    public static SixModelObject getlexref_i(ThreadContext tc, int idx) {
+        CallFrame cf = tc.curFrame;
+        SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.intLexRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No int lexical reference type registered for current HLL");
+        NativeRefInstanceIntLex ref = (NativeRefInstanceIntLex)refType.st.REPR.allocate(tc, refType.st);
+        ref.lexicals = cf.iLex;
+        ref.idx = idx;
+        return ref;
+    }
+    public static SixModelObject getlexref_n(ThreadContext tc, int idx) {
+        CallFrame cf = tc.curFrame;
+        SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.numLexRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No num lexical reference type registered for current HLL");
+        NativeRefInstanceNumLex ref = (NativeRefInstanceNumLex)refType.st.REPR.allocate(tc, refType.st);
+        ref.lexicals = cf.nLex;
+        ref.idx = idx;
+        return ref;
+    }
+    public static SixModelObject getlexref_s(ThreadContext tc, int idx) {
+        CallFrame cf = tc.curFrame;
+        SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.strLexRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No str lexical reference type registered for current HLL");
+        NativeRefInstanceStrLex ref = (NativeRefInstanceStrLex)refType.st.REPR.allocate(tc, refType.st);
+        ref.lexicals = cf.sLex;
+        ref.idx = idx;
+        return ref;
+    }
+    public static SixModelObject getlexref_i_si(ThreadContext tc, int idx, int si) {
+        CallFrame cf = tc.curFrame;
+        SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.intLexRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No int lexical reference type registered for current HLL");
+        while (si-- > 0)
+            cf = cf.outer;
+        NativeRefInstanceIntLex ref = (NativeRefInstanceIntLex)refType.st.REPR.allocate(tc, refType.st);
+        ref.lexicals = cf.iLex;
+        ref.idx = idx;
+        return ref;
+    }
+    public static SixModelObject getlexref_n_si(ThreadContext tc, int idx, int si) {
+        CallFrame cf = tc.curFrame;
+        SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.numLexRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No num lexical reference type registered for current HLL");
+        while (si-- > 0)
+            cf = cf.outer;
+        NativeRefInstanceNumLex ref = (NativeRefInstanceNumLex)refType.st.REPR.allocate(tc, refType.st);
+        ref.lexicals = cf.nLex;
+        ref.idx = idx;
+        return ref;
+    }
+    public static SixModelObject getlexref_s_si(ThreadContext tc, int idx, int si) {
+        CallFrame cf = tc.curFrame;
+        SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.strLexRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No str lexical reference type registered for current HLL");
+        while (si-- > 0)
+            cf = cf.outer;
+        NativeRefInstanceStrLex ref = (NativeRefInstanceStrLex)refType.st.REPR.allocate(tc, refType.st);
+        ref.lexicals = cf.sLex;
+        ref.idx = idx;
+        return ref;
+    }
+    public static SixModelObject getlexref_i(String name, ThreadContext tc) {
+        CallFrame cf = tc.curFrame;
+        SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.intLexRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No int lexical reference type registered for current HLL");
+        while (cf != null) {
+            Integer found = cf.codeRef.staticInfo.iTryGetLexicalIdx(name);
+            if (found != null) {
+                NativeRefInstanceIntLex ref = (NativeRefInstanceIntLex)refType.st.REPR.allocate(tc, refType.st);
+                ref.lexicals = cf.iLex;
+                ref.idx = (int)found;
+                return ref;
+            }
+            cf = cf.outer;
+        }
+        throw ExceptionHandling.dieInternal(tc, "Lexical '" + name + "' not found");
+    }
+    public static SixModelObject getlexref_n(String name, ThreadContext tc) {
+        CallFrame cf = tc.curFrame;
+        SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.numLexRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No num lexical reference type registered for current HLL");
+        while (cf != null) {
+            Integer found = cf.codeRef.staticInfo.nTryGetLexicalIdx(name);
+            if (found != null) {
+                NativeRefInstanceNumLex ref = (NativeRefInstanceNumLex)refType.st.REPR.allocate(tc, refType.st);
+                ref.lexicals = cf.nLex;
+                ref.idx = (int)found;
+                return ref;
+            }
+            cf = cf.outer;
+        }
+        throw ExceptionHandling.dieInternal(tc, "Lexical '" + name + "' not found");
+    }
+    public static SixModelObject getlexref_s(String name, ThreadContext tc) {
+        CallFrame cf = tc.curFrame;
+        SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.strLexRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No str lexical reference type registered for current HLL");
+        while (cf != null) {
+            Integer found = cf.codeRef.staticInfo.sTryGetLexicalIdx(name);
+            if (found != null) {
+                NativeRefInstanceStrLex ref = (NativeRefInstanceStrLex)refType.st.REPR.allocate(tc, refType.st);
+                ref.lexicals = cf.sLex;
+                ref.idx = (int)found;
+                return ref;
+            }
+            cf = cf.outer;
         }
         throw ExceptionHandling.dieInternal(tc, "Lexical '" + name + "' not found");
     }
