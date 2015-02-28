@@ -4851,6 +4851,24 @@ public final class Ops {
             config.nullValue = configHash.at_key_boxed(tc, "null_value");
         if (configHash.exists_key(tc, "exit_handler") != 0)
             config.exitHandler = configHash.at_key_boxed(tc, "exit_handler");
+        if (configHash.exists_key(tc, "int_lex_ref") != 0)
+            config.exitHandler = configHash.at_key_boxed(tc, "int_lex_ref");
+        if (configHash.exists_key(tc, "num_lex_ref") != 0)
+            config.exitHandler = configHash.at_key_boxed(tc, "num_lex_ref");
+        if (configHash.exists_key(tc, "str_lex_ref") != 0)
+            config.exitHandler = configHash.at_key_boxed(tc, "str_lex_ref");
+        if (configHash.exists_key(tc, "int_attr_ref") != 0)
+            config.exitHandler = configHash.at_key_boxed(tc, "int_attr_ref");
+        if (configHash.exists_key(tc, "num_attr_ref") != 0)
+            config.exitHandler = configHash.at_key_boxed(tc, "num_attr_ref");
+        if (configHash.exists_key(tc, "str_attr_ref") != 0)
+            config.exitHandler = configHash.at_key_boxed(tc, "str_attr_ref");
+        if (configHash.exists_key(tc, "int_pos_ref") != 0)
+            config.exitHandler = configHash.at_key_boxed(tc, "int_pos_ref");
+        if (configHash.exists_key(tc, "num_pos_ref") != 0)
+            config.exitHandler = configHash.at_key_boxed(tc, "num_pos_ref");
+        if (configHash.exists_key(tc, "str_pos_ref") != 0)
+            config.exitHandler = configHash.at_key_boxed(tc, "str_pos_ref");
         return configHash;
     }
     public static SixModelObject getcomp(String name, ThreadContext tc) {
