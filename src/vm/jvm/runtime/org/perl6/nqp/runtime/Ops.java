@@ -87,6 +87,7 @@ import org.perl6.nqp.sixmodel.reprs.MultiCacheInstance;
 import org.perl6.nqp.sixmodel.reprs.NFA;
 import org.perl6.nqp.sixmodel.reprs.NFAInstance;
 import org.perl6.nqp.sixmodel.reprs.NFAStateInfo;
+import org.perl6.nqp.sixmodel.reprs.NativeRefInstanceAttribute;
 import org.perl6.nqp.sixmodel.reprs.NativeRefInstanceIntLex;
 import org.perl6.nqp.sixmodel.reprs.NativeRefInstanceNumLex;
 import org.perl6.nqp.sixmodel.reprs.NativeRefInstanceStrLex;
@@ -2621,6 +2622,44 @@ public final class Ops {
     public static long attrhintfor(SixModelObject ch, String name, ThreadContext tc) {
         ch = decont(ch, tc);
         return ch.st.REPR.hint_for(tc, ch.st, ch, name);
+    }
+
+    /* Attribute reference operations. */
+    public static SixModelObject getattrref_i(SixModelObject obj, SixModelObject ch, String name, ThreadContext tc) {
+        SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intAttrRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No int attribute reference type registered for current HLL");
+        NativeRefInstanceAttribute ref = (NativeRefInstanceAttribute)refType.st.REPR.allocate(tc, refType.st);
+        ref.obj = obj;
+        ref.classHandle = decont(ch, tc);
+        ref.name = name;
+        ref.hint = STable.NO_HINT;
+        return ref;
+    }
+    public static SixModelObject getattrref_n(SixModelObject obj, SixModelObject ch, String name, ThreadContext tc) {
+        SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.numAttrRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No num attribute reference type registered for current HLL");
+        NativeRefInstanceAttribute ref = (NativeRefInstanceAttribute)refType.st.REPR.allocate(tc, refType.st);
+        ref.obj = obj;
+        ref.classHandle = decont(ch, tc);
+        ref.name = name;
+        ref.hint = STable.NO_HINT;
+        return ref;
+    }
+    public static SixModelObject getattrref_s(SixModelObject obj, SixModelObject ch, String name, ThreadContext tc) {
+        SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strAttrRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No string attribute reference type registered for current HLL");
+        NativeRefInstanceAttribute ref = (NativeRefInstanceAttribute)refType.st.REPR.allocate(tc, refType.st);
+        ref.obj = obj;
+        ref.classHandle = decont(ch, tc);
+        ref.name = name;
+        ref.hint = STable.NO_HINT;
+        return ref;
     }
 
     /* Positional operations. */
