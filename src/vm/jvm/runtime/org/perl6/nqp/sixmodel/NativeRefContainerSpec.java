@@ -1,14 +1,30 @@
 package org.perl6.nqp.sixmodel;
 
 import org.perl6.nqp.runtime.ExceptionHandling;
+import org.perl6.nqp.runtime.HLLConfig;
 import org.perl6.nqp.runtime.Ops;
 import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.reprs.NativeRefInstance;
+import org.perl6.nqp.sixmodel.reprs.NativeRefREPRData;
 
 public class NativeRefContainerSpec extends ContainerSpec {
     /* Fetches a value out of a container. Used for decontainerization. */
     public SixModelObject fetch(ThreadContext tc, SixModelObject cont) {
-        throw ExceptionHandling.dieInternal(tc, "NYI");
+        NativeRefREPRData rd = (NativeRefREPRData)cont.st.REPRData;
+        HLLConfig hll = cont.st.hllOwner;
+        if (hll == null)
+            hll = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig;
+        switch (rd.primitive_type) {
+            case StorageSpec.BP_INT:
+                return Ops.box_i(fetch_i(tc, cont), hll.intBoxType, tc);
+            case StorageSpec.BP_NUM:
+                return Ops.box_n(fetch_n(tc, cont), hll.numBoxType, tc);
+            case StorageSpec.BP_STR:
+                return Ops.box_s(fetch_s(tc, cont), hll.strBoxType, tc);
+            default:
+                throw ExceptionHandling.dieInternal(tc,
+                    "Unknown native reference primitive type");
+        }
     }
     public long fetch_i(ThreadContext tc, SixModelObject cont) {
         return ((NativeRefInstance)cont).fetch_i(tc);
@@ -22,7 +38,21 @@ public class NativeRefContainerSpec extends ContainerSpec {
     
     /* Stores a value in a container. Used for assignment. */
     public void store(ThreadContext tc, SixModelObject cont, SixModelObject obj) {
-        throw ExceptionHandling.dieInternal(tc, "NYI");
+        NativeRefREPRData rd = (NativeRefREPRData)cont.st.REPRData;
+        switch (rd.primitive_type) {
+            case StorageSpec.BP_INT:
+                store_i(tc, cont, obj.get_int(tc));
+                break;
+            case StorageSpec.BP_NUM:
+                store_n(tc, cont, obj.get_num(tc));
+                break;
+            case StorageSpec.BP_STR:
+                store_s(tc, cont, obj.get_str(tc));
+                break;
+            default:
+                throw ExceptionHandling.dieInternal(tc,
+                    "Unknown native reference primitive type");
+        }
     }
     public void store_i(ThreadContext tc, SixModelObject cont, long value) {
         ((NativeRefInstance)cont).store_i(tc, value);
