@@ -3051,7 +3051,7 @@ public final class Ops {
         if (obj != null && !(obj instanceof TypeObject)) {
             ContainerSpec cs = obj.st.ContainerSpec;
             if (cs instanceof NativeRefContainerSpec)
-                return ((NativeRefREPRData)(obj.st.REPRData)).ref_kind;
+                return ((NativeRefREPRData)(obj.st.REPRData)).primitive_type;
         }
         return StorageSpec.BP_NONE;
     }
