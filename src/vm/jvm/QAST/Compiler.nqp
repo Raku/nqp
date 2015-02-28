@@ -2830,6 +2830,10 @@ class QAST::CompilerJAST {
                 nqp::push(%blv{$!qast.cuid}, [$var.name, $var.value, $flags]);
             }
         }
+
+        method add_lexicalref($var) {
+            self.register_lexicalref($var);
+        }
         
         method add_local($var) {
             my $tempify := %!local2temp{$var.name};
