@@ -3,6 +3,7 @@ package org.perl6.nqp.sixmodel;
 import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.Ops;
 import org.perl6.nqp.runtime.ThreadContext;
+import org.perl6.nqp.sixmodel.reprs.NativeRefInstance;
 
 public class NativeRefContainerSpec extends ContainerSpec {
     /* Fetches a value out of a container. Used for decontainerization. */
@@ -10,13 +11,13 @@ public class NativeRefContainerSpec extends ContainerSpec {
         throw ExceptionHandling.dieInternal(tc, "NYI");
     }
     public long fetch_i(ThreadContext tc, SixModelObject cont) {
-        throw ExceptionHandling.dieInternal(tc, "NYI");
+        return ((NativeRefInstance)cont).fetch_i(tc);
     }
     public double fetch_n(ThreadContext tc, SixModelObject cont) {
-        throw ExceptionHandling.dieInternal(tc, "NYI");
+        return ((NativeRefInstance)cont).fetch_n(tc);
     }
     public String fetch_s(ThreadContext tc, SixModelObject cont) {
-        throw ExceptionHandling.dieInternal(tc, "NYI");
+        return ((NativeRefInstance)cont).fetch_s(tc);
     }
     
     /* Stores a value in a container. Used for assignment. */
@@ -24,13 +25,13 @@ public class NativeRefContainerSpec extends ContainerSpec {
         throw ExceptionHandling.dieInternal(tc, "NYI");
     }
     public void store_i(ThreadContext tc, SixModelObject cont, long value) {
-        throw ExceptionHandling.dieInternal(tc, "NYI");
+        ((NativeRefInstance)cont).store_i(tc, value);
     }
     public void store_n(ThreadContext tc, SixModelObject cont, double value) {
-        throw ExceptionHandling.dieInternal(tc, "NYI");
+        ((NativeRefInstance)cont).store_n(tc, value);
     }
     public void store_s(ThreadContext tc, SixModelObject cont, String value) {
-        throw ExceptionHandling.dieInternal(tc, "NYI");
+        ((NativeRefInstance)cont).store_s(tc, value);
     }
     
     /* Stores a value in a container, without any checking of it (this
