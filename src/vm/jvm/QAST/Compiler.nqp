@@ -4207,10 +4207,11 @@ class QAST::CompilerJAST {
                 # It is. Nothing more to do.
                 $local := 1;
             }
-            elsif nqp::defined($type) {
+            elsif nqp::defined($reftype) {
                 # It is, and also a ref. Nothing more to do.
                 $local := 1;
                 $ref := 1;
+                $type := $RT_OBJ;
             }
             elsif $scope eq 'lexical' || $scope eq 'typevar' {
                 # Try to find it in an outer scope.
@@ -4314,7 +4315,7 @@ class QAST::CompilerJAST {
                 # Need to de-ref the container.
                 $il.append($ALOAD_1);
                 $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
-                    "decont_$c", $jtype, $TYPE_SMO, $TYPE_TC ));
+                    "decont_{typechar($reftype)}", jtype($reftype), $TYPE_SMO, $TYPE_TC ));
             }
 
             return result($il, $type);
@@ -4331,7 +4332,7 @@ class QAST::CompilerJAST {
                 # It is. Nothing more to do.
                 $local := 1;
             }
-            elsif nqp::defined($type) {
+            elsif nqp::defined($reftype) {
                 # It is, and also a ref. Nothing more to do.
                 $local := 1;
                 $ref := 1;
