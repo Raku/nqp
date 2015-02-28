@@ -15,12 +15,14 @@ public class NativeRef extends REPR {
         SixModelObject obj = new TypeObject();
         obj.st = st;
         st.WHAT = obj;
-        st.REPRData = new NativeRefREPRData();
         return st.WHAT;
     }
 
     public SixModelObject allocate(ThreadContext tc, STable st) {
         NativeRefREPRData rd = (NativeRefREPRData)st.REPRData;
+        if (rd == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "Cannot allocate NativeRef type that is not yet composed");
         SixModelObject obj;
         switch (rd.ref_kind) {
             case NativeRefREPRData.REF_LEXICAL:
@@ -45,6 +47,48 @@ public class NativeRef extends REPR {
         }
         obj.st = st;
         return obj;
+    }
+
+    public void compose(ThreadContext tc, STable st, SixModelObject repr_info) {
+        SixModelObject info = repr_info.at_key_boxed(tc, "nativeref");
+        if (info != null) {
+            SixModelObject type = info.at_key_boxed(tc, "type");
+            short prim = type.st.REPR.get_storage_spec(tc, type.st).boxed_primitive;
+            if (prim != StorageSpec.BP_NONE) {
+                SixModelObject refkind = info.at_key_boxed(tc, "refkind");
+                if (refkind != null) {
+                    String refkind_s = refkind.get_str(tc);
+                    NativeRefREPRData rd = new NativeRefREPRData();
+                    if (refkind_s.equals("lexical")) {
+                        rd.ref_kind = NativeRefREPRData.REF_LEXICAL;
+                    }
+                    else if (refkind_s.equals("attribute")) {
+                        rd.ref_kind = NativeRefREPRData.REF_ATTRIBUTE;
+                    }
+                    else if (refkind_s.equals("positional")) {
+                        rd.ref_kind = NativeRefREPRData.REF_POSITIONAL;
+                    }
+                    else {
+                        throw ExceptionHandling.dieInternal(tc,
+                            "NativeRef: invalid refkind in compose");
+                    }
+                    rd.primitive_type = prim;
+                    st.REPRData = rd;
+                }
+                else {
+                    throw ExceptionHandling.dieInternal(tc,
+                        "NativeRef: missing refkind in compose");
+                }
+            }
+            else {
+                throw ExceptionHandling.dieInternal(tc,
+                    "NativeRef: non-native type supplied in compose");
+            }
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc,
+                "NativeRef: missing nativeref protocol in compose");
+        }
     }
 
     public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
