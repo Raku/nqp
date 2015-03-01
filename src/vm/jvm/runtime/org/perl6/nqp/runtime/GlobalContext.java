@@ -12,6 +12,7 @@ import java.util.WeakHashMap;
 import org.perl6.nqp.sixmodel.CodePairContainerConfigurer;
 import org.perl6.nqp.sixmodel.ContainerConfigurer;
 import org.perl6.nqp.sixmodel.KnowHOWBootstrapper;
+import org.perl6.nqp.sixmodel.NativeRefContainerConfigurer;
 import org.perl6.nqp.sixmodel.SerializationContext;
 import org.perl6.nqp.sixmodel.SixModelObject;
 import org.perl6.nqp.sixmodel.reprs.CallCaptureInstance;
@@ -241,6 +242,7 @@ public class GlobalContext {
         
         contConfigs = new HashMap<String, ContainerConfigurer>();
         contConfigs.put("code_pair", new CodePairContainerConfigurer());
+        contConfigs.put("native_ref", new NativeRefContainerConfigurer());
         
         currentThreadCtxRef = new ThreadLocal< >();
         allThreads = new WeakHashMap< >();

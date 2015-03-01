@@ -2283,6 +2283,9 @@ QAST::MASTOperations.add_core_moarop_mapping('atpos', 'atpos_o');
 QAST::MASTOperations.add_core_moarop_mapping('atpos_i', 'atpos_i');
 QAST::MASTOperations.add_core_moarop_mapping('atpos_n', 'atpos_n');
 QAST::MASTOperations.add_core_moarop_mapping('atpos_s', 'atpos_s');
+QAST::MASTOperations.add_core_moarop_mapping('atposref_i', 'atposref_i');
+QAST::MASTOperations.add_core_moarop_mapping('atposref_n', 'atposref_n');
+QAST::MASTOperations.add_core_moarop_mapping('atposref_s', 'atposref_s');
 QAST::MASTOperations.add_core_moarop_mapping('atkey', 'atkey_o');
 QAST::MASTOperations.add_core_moarop_mapping('atkey_i', 'atkey_i');
 QAST::MASTOperations.add_core_moarop_mapping('atkey_n', 'atkey_n');
@@ -2364,7 +2367,13 @@ QAST::MASTOperations.add_core_moarop_mapping('create', 'create');
 QAST::MASTOperations.add_core_moarop_mapping('clone', 'clone', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('isconcrete', 'isconcrete', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('iscont', 'iscont');
+QAST::MASTOperations.add_core_moarop_mapping('iscont_i', 'iscont_i');
+QAST::MASTOperations.add_core_moarop_mapping('iscont_n', 'iscont_n');
+QAST::MASTOperations.add_core_moarop_mapping('iscont_s', 'iscont_s');
 QAST::MASTOperations.add_core_moarop_mapping('decont', 'decont');
+QAST::MASTOperations.add_core_moarop_mapping('decont_i', 'decont_i');
+QAST::MASTOperations.add_core_moarop_mapping('decont_n', 'decont_n');
+QAST::MASTOperations.add_core_moarop_mapping('decont_s', 'decont_s');
 QAST::MASTOperations.add_core_moarop_mapping('isnull', 'isnull');
 QAST::MASTOperations.add_core_moarop_mapping('isnull_s', 'isnull_s');
 QAST::MASTOperations.add_core_moarop_mapping('istrue', 'istrue', :decont(0));
@@ -2445,6 +2454,10 @@ add_getattr_op('getattr_i', 'getattr_i', 'getattrs_i', $MVM_reg_int64);
 add_getattr_op('getattr_n', 'getattr_n', 'getattrs_n', $MVM_reg_num64);
 add_getattr_op('getattr_s', 'getattr_s', 'getattrs_s', $MVM_reg_str);
 
+add_getattr_op('getattrref_i', 'getattrref_i', 'getattrsref_i', $MVM_reg_obj);
+add_getattr_op('getattrref_n', 'getattrref_n', 'getattrsref_n', $MVM_reg_obj);
+add_getattr_op('getattrref_s', 'getattrref_s', 'getattrsref_s', $MVM_reg_obj);
+
 QAST::MASTOperations.add_core_moarop_mapping('hintfor', 'hintfor');
 QAST::MASTOperations.add_core_moarop_mapping('unbox_i', 'unbox_i', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('unbox_n', 'unbox_n', :decont(0));
@@ -2467,6 +2480,66 @@ QAST::MASTOperations.add_core_moarop_mapping('setinvokespec', 'setinvokespec', 0
 QAST::MASTOperations.add_core_moarop_mapping('setmultispec', 'setmultispec', 0, :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('setcontspec', 'setcontspec', 0, :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('assign', 'assign', 0, :decont(1));
+
+sub try_get_bind_scope($var) {
+    if nqp::istype($var, QAST::Var) {
+        my str $scope := $var.scope;
+        if $scope eq 'attributeref' {
+            return 'attribute';
+        }
+        elsif $scope eq 'lexicalref' {
+            # Make sure we've got the lexical itself in scope to bind to.
+            my $lex;
+            my $lexref;
+            my $outer := 0;
+            my $block := $*BLOCK;
+            my $name  := $var.name;
+            while nqp::istype($block, BlockInfo) {
+                last if $block.qast.ann('DYN_COMP_WRAPPER');
+                $lex := $block.lexical($name);
+                last if $lex;
+                last if $block.lexicalref($name);
+                $block := $block.outer;
+                $outer++;
+            }
+            if $lex {
+                return 'lexical';
+            }
+        }
+    }
+    ''
+}
+sub add_native_assign_op($op_name, $kind) {
+    QAST::MASTOperations.add_core_op($op_name, -> $qastcomp, $op {
+        my @operands := $op.list;
+        unless +@operands == 2 {
+            nqp::die($op ~ ' op requires two arguments');
+        }
+        my $target := @operands[0];
+        if try_get_bind_scope($target) -> $bind_scope {
+            # Can lower it to a bind instead.
+            $op.op('bind');
+            $target.scope($bind_scope);
+            $qastcomp.as_mast($op)
+        }
+        else {
+            # Really need to emit an assign.
+            my $regalloc := $*REGALLOC;
+            my $target_mast := $qastcomp.as_mast( :want($MVM_reg_obj), $op[0] );
+            my $value_mast  := $qastcomp.as_mast( :want($kind), $op[1] );
+            my @ins;
+            push_ilist(@ins, $target_mast);
+            push_ilist(@ins, $value_mast);
+            push_op(@ins, $op_name, $target_mast.result_reg, $value_mast.result_reg);
+            $regalloc.release_register($value_mast.result_reg, $kind);
+            MAST::InstructionList.new(@ins, $target_mast.result_reg, $MVM_reg_obj)
+        }
+    })
+}
+add_native_assign_op('assign_i', $MVM_reg_int64);
+add_native_assign_op('assign_n', $MVM_reg_num64);
+add_native_assign_op('assign_s', $MVM_reg_str);
+
 QAST::MASTOperations.add_core_moarop_mapping('assignunchecked', 'assignunchecked', 0, :decont(1));
 QAST::MASTOperations.add_core_moarop_mapping('setparameterizer', 'setparameterizer', 0, :decont(0, 1));
 QAST::MASTOperations.add_core_moarop_mapping('parameterizetype', 'parameterizetype', :decont(0, 1));
@@ -2482,6 +2555,9 @@ QAST::MASTOperations.add_core_moarop_mapping('getlex', 'getlex_no');
 QAST::MASTOperations.add_core_moarop_mapping('getlex_i', 'getlex_ni');
 QAST::MASTOperations.add_core_moarop_mapping('getlex_n', 'getlex_nn');
 QAST::MASTOperations.add_core_moarop_mapping('getlex_s', 'getlex_ns');
+QAST::MASTOperations.add_core_moarop_mapping('getlexref_i', 'getlexref_ni');
+QAST::MASTOperations.add_core_moarop_mapping('getlexref_n', 'getlexref_nn');
+QAST::MASTOperations.add_core_moarop_mapping('getlexref_s', 'getlexref_ns');
 QAST::MASTOperations.add_core_moarop_mapping('bindlex', 'bindlex_no', 1);
 QAST::MASTOperations.add_core_moarop_mapping('bindlex_i', 'bindlex_ni', 1);
 QAST::MASTOperations.add_core_moarop_mapping('bindlex_n', 'bindlex_nn', 1);

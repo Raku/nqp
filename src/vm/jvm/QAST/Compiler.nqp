@@ -2321,6 +2321,9 @@ QAST::OperationsJAST.map_classlib_core_op('atpos', $TYPE_OPS, 'atpos', [$RT_OBJ,
 QAST::OperationsJAST.map_classlib_core_op('atpos_i', $TYPE_OPS, 'atpos_i', [$RT_OBJ, $RT_INT], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('atpos_n', $TYPE_OPS, 'atpos_n', [$RT_OBJ, $RT_INT], $RT_NUM, :tc);
 QAST::OperationsJAST.map_classlib_core_op('atpos_s', $TYPE_OPS, 'atpos_s', [$RT_OBJ, $RT_INT], $RT_STR, :tc);
+QAST::OperationsJAST.map_classlib_core_op('atposref_i', $TYPE_OPS, 'atposref_i', [$RT_OBJ, $RT_INT], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('atposref_n', $TYPE_OPS, 'atposref_n', [$RT_OBJ, $RT_INT], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('atposref_s', $TYPE_OPS, 'atposref_s', [$RT_OBJ, $RT_INT], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('atkey', $TYPE_OPS, 'atkey', [$RT_OBJ, $RT_STR], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('atkey_i', $TYPE_OPS, 'atkey_i', [$RT_OBJ, $RT_STR], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('atkey_n', $TYPE_OPS, 'atkey_n', [$RT_OBJ, $RT_STR], $RT_NUM, :tc);
@@ -2401,6 +2404,9 @@ QAST::OperationsJAST.map_classlib_core_op('getattr', $TYPE_OPS, 'getattr', [$RT_
 QAST::OperationsJAST.map_classlib_core_op('getattr_i', $TYPE_OPS, 'getattr_i', [$RT_OBJ, $RT_OBJ, $RT_STR], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getattr_n', $TYPE_OPS, 'getattr_n', [$RT_OBJ, $RT_OBJ, $RT_STR], $RT_NUM, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getattr_s', $TYPE_OPS, 'getattr_s', [$RT_OBJ, $RT_OBJ, $RT_STR], $RT_STR, :tc);
+QAST::OperationsJAST.map_classlib_core_op('getattrref_i', $TYPE_OPS, 'getattrref_i', [$RT_OBJ, $RT_OBJ, $RT_STR], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('getattrref_n', $TYPE_OPS, 'getattrref_n', [$RT_OBJ, $RT_OBJ, $RT_STR], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('getattrref_s', $TYPE_OPS, 'getattrref_s', [$RT_OBJ, $RT_OBJ, $RT_STR], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bindattr', $TYPE_OPS, 'bindattr', [$RT_OBJ, $RT_OBJ, $RT_STR, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bindattr_i', $TYPE_OPS, 'bindattr_i', [$RT_OBJ, $RT_OBJ, $RT_STR, $RT_INT], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bindattr_n', $TYPE_OPS, 'bindattr_n', [$RT_OBJ, $RT_OBJ, $RT_STR, $RT_NUM], $RT_NUM, :tc);
@@ -2442,15 +2448,27 @@ QAST::OperationsJAST.map_classlib_core_op('defined', $TYPE_OPS, 'isconcrete', [$
 # container related
 QAST::OperationsJAST.map_classlib_core_op('setcontspec', $TYPE_OPS, 'setcontspec', [$RT_OBJ, $RT_STR, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('iscont', $TYPE_OPS, 'iscont', [$RT_OBJ], $RT_INT);
+QAST::OperationsJAST.map_classlib_core_op('iscont_i', $TYPE_OPS, 'iscont_i', [$RT_OBJ], $RT_INT);
+QAST::OperationsJAST.map_classlib_core_op('iscont_n', $TYPE_OPS, 'iscont_n', [$RT_OBJ], $RT_INT);
+QAST::OperationsJAST.map_classlib_core_op('iscont_s', $TYPE_OPS, 'iscont_s', [$RT_OBJ], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('decont', $TYPE_OPS, 'decont', [$RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('decont_i', $TYPE_OPS, 'decont_i', [$RT_OBJ], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('decont_n', $TYPE_OPS, 'decont_n', [$RT_OBJ], $RT_NUM, :tc);
+QAST::OperationsJAST.map_classlib_core_op('decont_s', $TYPE_OPS, 'decont_s', [$RT_OBJ], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('assign', $TYPE_OPS, 'assign', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('assignunchecked', $TYPE_OPS, 'assignunchecked', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('assign_i', $TYPE_OPS, 'assign_i', [$RT_OBJ, $RT_INT], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('assign_n', $TYPE_OPS, 'assign_n', [$RT_OBJ, $RT_NUM], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('assign_s', $TYPE_OPS, 'assign_s', [$RT_OBJ, $RT_STR], $RT_OBJ, :tc);
 
 # lexical related opcodes
 QAST::OperationsJAST.map_classlib_core_op('getlex', $TYPE_OPS, 'getlex', [$RT_STR], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getlex_i', $TYPE_OPS, 'getlex_i', [$RT_STR], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getlex_n', $TYPE_OPS, 'getlex_n', [$RT_STR], $RT_NUM, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getlex_s', $TYPE_OPS, 'getlex_s', [$RT_STR], $RT_STR, :tc);
+QAST::OperationsJAST.map_classlib_core_op('getlexref_i', $TYPE_OPS, 'getlexref_i', [$RT_STR], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('getlexref_n', $TYPE_OPS, 'getlexref_n', [$RT_STR], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('getlexref_s', $TYPE_OPS, 'getlexref_s', [$RT_STR], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bindlex', $TYPE_OPS, 'bindlex', [$RT_STR, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bindlex_i', $TYPE_OPS, 'bindlex_i', [$RT_STR, $RT_INT], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bindlex_n', $TYPE_OPS, 'bindlex_n', [$RT_STR, $RT_NUM], $RT_NUM, :tc);
@@ -2763,9 +2781,9 @@ class QAST::CompilerJAST {
         has $!outer;            # Outer block's BlockInfo
         has @!params;           # QAST::Var nodes of params
         has @!locals;           # QAST::Var nodes of declared locals
-        has @!lexicals;         # QAST::Var nodes of declared lexicals
         has %!local_types;      # Mapping of local registers to type names
         has %!lexical_types;    # Mapping of lexical names to types
+        has %!lexicalref_types; # Mapping of lexical names to types
         has %!lexical_idxs;     # Lexical indexes (but have to know type too)
         has @!lexical_names;    # List by type of lexial name lists
         has int $!num_save_sites;   # Count of points where a SaveStackException handler is needed
@@ -2782,9 +2800,9 @@ class QAST::CompilerJAST {
             $!outer := $outer;
             @!params := nqp::list();
             @!locals := nqp::list();
-            @!lexicals := nqp::list();
             %!local_types := nqp::hash();
             %!lexical_types := nqp::hash();
+            %!lexicalref_types := nqp::hash();
             %!lexical_idxs := nqp::hash();
             %!local2temp := nqp::hash();
             @!lexical_names := nqp::list([],[],[],[]);
@@ -2799,7 +2817,7 @@ class QAST::CompilerJAST {
             }
             @!params[+@!params] := $var;
         }
-        
+
         method add_lexical($var, :$is_static, :$is_cont, :$is_state) {
             self.register_lexical($var);
             if $is_static || $is_cont || $is_state {
@@ -2811,7 +2829,10 @@ class QAST::CompilerJAST {
                              $is_cont   ?? 1 !! 2;
                 nqp::push(%blv{$!qast.cuid}, [$var.name, $var.value, $flags]);
             }
-            @!lexicals[+@!lexicals] := $var;
+        }
+
+        method add_lexicalref($var) {
+            self.register_lexicalref($var);
         }
         
         method add_local($var) {
@@ -2846,12 +2867,23 @@ class QAST::CompilerJAST {
         method register_lexical($var) {
             my $name := $var.name;
             my $type := rttype_from_typeobj($var.returns);
-            if nqp::existskey(%!lexical_types, $name) {
+            if nqp::existskey(%!lexical_types, $name) || nqp::existskey(%!lexicalref_types, $name) {
                 nqp::die("Lexical '$name' already declared");
             }
             %!lexical_types{$name} := $type;
             %!lexical_idxs{$name} := nqp::elems(@!lexical_names[$type]);
             nqp::push(@!lexical_names[$type], $name);
+        }
+
+        method register_lexicalref($var) {
+            my $name := $var.name;
+            my $type := rttype_from_typeobj($var.returns);
+            if nqp::existskey(%!lexical_types, $name) || nqp::existskey(%!lexicalref_types, $name) {
+                nqp::die("Lexical '$name' already declared");
+            }
+            %!lexicalref_types{$name} := $type;
+            %!lexical_idxs{$name}     := nqp::elems(@!lexical_names[$RT_OBJ]);
+            nqp::push(@!lexical_names[$RT_OBJ], $name);
         }
         
         method register_local($var) {
@@ -2873,7 +2905,6 @@ class QAST::CompilerJAST {
         method qast() { $!qast }
         method outer() { $!outer }
         method params() { @!params }
-        method lexicals() { @!lexicals }
         method locals() { @!locals }
         
         method local_info($name) {
@@ -2881,6 +2912,7 @@ class QAST::CompilerJAST {
             $tempify ?? $tempify[0] !! [ $name, %!local_types{$name} ]
         }
         method lexical_type($name) { %!lexical_types{$name} }
+        method lexicalref_type($name) { %!lexicalref_types{$name} }
         method lexical_idx($name) { %!lexical_idxs{$name} }
         method lexical_names_by_type() { @!lexical_names }
     }
@@ -4082,8 +4114,11 @@ class QAST::CompilerJAST {
                 elsif $scope eq 'lexical' {
                     $*BLOCK.add_lexical($node);
                 }
+                elsif $scope eq 'lexicalref' {
+                    $*BLOCK.add_lexicalref($node);
+                }
                 else {
-                    nqp::die("Cannot declare variable with scope '$scope'; use 'local' or 'lexical'");
+                    nqp::die("Cannot declare variable with scope '$scope'; use 'local' or 'lexical' or 'lexicalref'");
                 }
             }
             elsif $decl eq 'static' {
@@ -4128,6 +4163,15 @@ class QAST::CompilerJAST {
                 nqp::die("No scope specified or locatable in the symbol table for '$name'");
             }
         }
+
+        # Both lexicalref and attributeref in the context we want a
+        # non-object devolve to lexical and attribute, since we'd only
+        # de-ref right away anyway.
+        my $want := $*WANT;
+        if nqp::defined($want) && $want != $RT_OBJ {
+            $scope := 'lexical'   if $scope eq 'lexicalref';
+            $scope := 'attribute' if $scope eq 'attributeref';
+        }
         
         # Now go by scope.
         if $scope eq 'local' {
@@ -4154,12 +4198,20 @@ class QAST::CompilerJAST {
         elsif $scope eq 'lexical' || $scope eq 'typevar' || $scope eq 'contextual' {
             # See if it's declared in the local scope.
             my int $local  := 0;
+            my int $ref    := 0;
             my int $scopes := 0;
             my $type       := $*BLOCK.lexical_type($name);
+            my $reftype    := $*BLOCK.lexicalref_type($name);
             my $declarer;
             if nqp::defined($type) {
                 # It is. Nothing more to do.
                 $local := 1;
+            }
+            elsif nqp::defined($reftype) {
+                # It is, and also a ref. Nothing more to do.
+                $local := 1;
+                $ref := 1;
+                $type := $RT_OBJ;
             }
             elsif $scope eq 'lexical' || $scope eq 'typevar' {
                 # Try to find it in an outer scope.
@@ -4171,9 +4223,16 @@ class QAST::CompilerJAST {
                     }
                     else {
                         $type := $cur_block.lexical_type($name);
+                        $reftype := $cur_block.lexicalref_type($name);
                         if nqp::defined($type) {
                             $scopes := $i;
                             $declarer := $cur_block;
+                            $cur_block := NQPMu;
+                        }
+                        elsif nqp::defined($reftype) {
+                            $scopes := $i;
+                            $declarer := $cur_block;
+                            $ref := 1;
                             $cur_block := NQPMu;
                         }
                         else {
@@ -4215,12 +4274,15 @@ class QAST::CompilerJAST {
             }
             
             # Map type in a couple of ways we'll need.
-            my $jtype := jtype($type);
-            my $c     := typechar($type);
+            my $jtype := $ref ?? $TYPE_SMO !! jtype($type);
+            my $c     := $ref ?? 'o' !! typechar($type);
             
             # If binding, always want the thing we're binding evaluated.
             my $il := JAST::InstructionList.new();
             if $*BINDVAL {
+                if $ref {
+                    nqp::die('Cannot bind to QAST::Var resolving to a lexicalref');
+                }
                 my $valres := self.as_jast_clear_bindval($*BINDVAL, :want($type));
                 $il.append($valres.jast);
                 $*STACK.obtain($il, $valres);
@@ -4249,7 +4311,141 @@ class QAST::CompilerJAST {
                             "getlex_{$c}_si", $jtype, $TYPE_CF, 'Integer', 'Integer' ));
             }
 
+            if $ref {
+                # Need to de-ref the container.
+                $il.append($ALOAD_1);
+                $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+                    "decont_{typechar($reftype)}", jtype($reftype), $TYPE_SMO, $TYPE_TC ));
+            }
+
             return result($il, $type);
+        }
+        elsif $scope eq 'lexicalref' {
+            # See if it's declared in the local scope.
+            my int $local  := 0;
+            my int $ref    := 0;
+            my int $scopes := 0;
+            my $type       := $*BLOCK.lexical_type($name);
+            my $reftype    := $*BLOCK.lexicalref_type($name);
+            my $declarer;
+            if nqp::defined($type) {
+                # It is. Nothing more to do.
+                $local := 1;
+            }
+            elsif nqp::defined($reftype) {
+                # It is, and also a ref. Nothing more to do.
+                $local := 1;
+                $ref := 1;
+            }
+            else {
+                # Try to find it in an outer scope.
+                my int $i := 1;
+                my $cur_block := $*BLOCK.outer();
+                while nqp::istype($cur_block, BlockInfo) {
+                    if $cur_block.qast.ann('DYN_COMP_WRAPPER') {
+                        $cur_block := NQPMu;
+                    }
+                    else {
+                        $type := $cur_block.lexical_type($name);
+                        $reftype := $cur_block.lexicalref_type($name);
+                        if nqp::defined($type) {
+                            $scopes := $i;
+                            $declarer := $cur_block;
+                            $cur_block := NQPMu;
+                        }
+                        elsif nqp::defined($reftype) {
+                            $scopes := $i;
+                            $declarer := $cur_block;
+                            $ref := 1;
+                            $cur_block := NQPMu;
+                        }
+                        else {
+                            $cur_block := $cur_block.outer();
+                            $i++;
+                        }
+                    }
+                }
+            }
+
+            # Can only bind if it's a ref.
+            if $*BINDVAL {
+                unless $local || $scopes {
+                    nqp::die('Cannot bind to late-bound QAST::Var with scope lexicalref');
+                }
+                unless $ref {
+                    nqp::die("Cannot bind to non-reference QAST::Var '{$name}'");
+                }
+                my $il := JAST::InstructionList.new();
+                my $valres := self.as_jast_clear_bindval($*BINDVAL, :want($RT_OBJ));
+                $il.append($valres.jast);
+                $*STACK.obtain($il, $valres);
+                if $local {
+                    $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
+                    $il.append(JAST::PushIndex.new( :value($*BLOCK.lexical_idx($name)) ));
+                    $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+                            "bindlex_o", $TYPE_SMO, $TYPE_SMO, $TYPE_CF, 'Integer' ));
+                }
+                else {
+                    $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
+                    $il.append(JAST::PushIndex.new( :value($declarer.lexical_idx($name)) ));
+                    $il.append(JAST::PushIndex.new( :value($scopes) ));
+                    $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+                        "bindlex_o_si", $TYPE_SMO,  $TYPE_SMO, $TYPE_CF, 'Integer', 'Integer' ));
+                }
+                return result($il, $RT_OBJ);
+            }
+
+            # If we didn't find it anywhere, it musta been explicitly marked as
+            # lexicalref. Take the type from .returns and rewrite to a more dynamic
+            # lookup.
+            unless $local || $scopes {
+                $type := rttype_from_typeobj($node.returns);
+                if $type == $RT_OBJ {
+                    nqp::die('Cannot take a reference to a non-native lexical');
+                }
+                my $char := typechar($type);
+                my $name_sval := QAST::SVal.new( :value($name) );
+                return self.as_jast(QAST::Op.new( :op("getlexref_$char"), $name_sval ));
+            }
+
+            # If it's a ref and we want a ref, just look it up as an object
+            # lexical.
+            my $il := JAST::InstructionList.new();
+            if $ref {
+                if $local {
+                    $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
+                    $il.append(JAST::PushIndex.new( :value($*BLOCK.lexical_idx($name)) ));
+                    $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+                        "getlex_o", $TYPE_SMO, $TYPE_CF, 'Integer' ));
+                }
+                else {
+                    $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
+                    $il.append(JAST::PushIndex.new( :value($declarer.lexical_idx($name)) ));
+                    $il.append(JAST::PushIndex.new( :value($scopes) ));
+                    $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+                        "getlex_o_si", $TYPE_SMO, $TYPE_CF, 'Integer', 'Integer' ));
+                }
+                return result($il, $RT_OBJ);
+            }
+
+            # Otherwise, need to take the reference.
+            else {
+                my $c := typechar($type);
+                if $local {
+                    $il.append($ALOAD_1);
+                    $il.append(JAST::PushIndex.new( :value($*BLOCK.lexical_idx($name)) ));
+                    $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+                        "getlexref_$c", $TYPE_SMO, $TYPE_TC, 'Integer' ));
+                }
+                else {
+                    $il.append($ALOAD_1);
+                    $il.append(JAST::PushIndex.new( :value($declarer.lexical_idx($name)) ));
+                    $il.append(JAST::PushIndex.new( :value($scopes) ));
+                    $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+                        "getlexref_{$c}_si", $TYPE_SMO, $TYPE_TC, 'Integer', 'Integer' ));
+                }
+                return result($il, $RT_OBJ);
+            }
         }
         elsif $scope eq 'attribute' {
             # Ensure we have object and class handle.
@@ -4295,6 +4491,40 @@ class QAST::CompilerJAST {
             }
             
             return result($il, $type);
+        }
+        elsif $scope eq 'attributeref' {
+            # Ensure we have object and class handle, and aren't binding.
+            my @args := $node.list;
+            if +@args != 2 {
+                nqp::die("An attribute lookup needs an object and a class handle");
+            }
+            if $*BINDVAL {
+                nqp::die("Cannot bind to QAST::Var '{$name}' with scope attributeref");
+            }
+
+            # Ensure we've a natively typed attribute to take a ref to.
+            my $type := rttype_from_typeobj($node.returns);
+            if $type == $RT_OBJ {
+                nqp::die("Attribute references can only be to native types");
+            }
+
+            # Compile object, handle and name.
+            my $il := JAST::InstructionList.new();
+            my $obj_res := self.as_jast_clear_bindval(@args[0], :want($RT_OBJ));
+            $il.append($obj_res.jast);
+            my $han_res := self.as_jast_clear_bindval(@args[1], :want($RT_OBJ));
+            $il.append($han_res.jast);
+            my $name_res := self.as_jast_clear_bindval(QAST::SVal.new( :value($name) ), :want($RT_STR));
+            $il.append($name_res.jast);
+
+            # Emit lookup.
+            my $char  := typechar($type);
+            $*STACK.obtain($il, $obj_res, $han_res, $name_res);
+            $il.append($ALOAD_1);
+            $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+                "getattrref_$char", $TYPE_SMO, $TYPE_SMO, $TYPE_SMO, $TYPE_STR, $TYPE_TC ));
+
+            return result($il, $RT_OBJ);
         }
         elsif $scope eq 'positional' {
             return self.as_jast_clear_bindval($*BINDVAL

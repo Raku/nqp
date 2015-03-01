@@ -101,6 +101,8 @@ my class MASTCompilerInstance {
         has %!lexicals;             # Mapping of lexical names to lexicals
         has %!lexical_kinds;        # Mapping of lexical names to kinds
         has %!lexical_params;       # Mapping of lexical param names to their initial result reg
+        has %!lexicalrefs;          # Mapping of lexical reference names to lexicals
+        has %!lexicalref_kinds;     # Mapping of lexical reference names to kinds
         has int $!param_idx;        # Current lexical parameter index
         has $!compiler;             # The QAST::MASTCompiler
         has @!params;               # List of QAST::Var param nodes
@@ -125,6 +127,8 @@ my class MASTCompilerInstance {
             %!lexicals := nqp::hash();
             %!lexical_kinds := nqp::hash();
             %!lexical_params := nqp::hash();
+            %!lexicalrefs := nqp::hash();
+            %!lexicalref_kinds := nqp::hash();
             @!params := nqp::list();
             @!captured_inners := nqp::list();
             %!cloned_inners := nqp::hash();
@@ -149,7 +153,7 @@ my class MASTCompilerInstance {
             my $type  := $var.returns;
             my $kind  := $!compiler.type_to_register_kind($type);
             my $index := $mf.add_lexical($type, $var.name);
-            self.register_lexical($var, $index, 0, $kind);
+            self.register_lexical($var.name, $index, $kind);
             if $is_static || $is_cont || $is_state {
                 my int $flags := $is_static ?? 0 !!
                                  $is_cont   ?? 1 !! 2;
@@ -166,15 +170,35 @@ my class MASTCompilerInstance {
             $kind;
         }
 
-        method register_lexical($var, $index, $outer, $kind) {
-            my $name := $var.name;
-            # not entirely sure whether this check should go here or in add_lexical
-            if nqp::existskey(%!lexicals, $name) {
+        method register_lexical(str $name, $index, $kind) {
+            if nqp::existskey(%!lexicals, $name) || nqp::existskey(%!lexicalrefs, $name) {
                 nqp::die("Lexical '$name' already declared");
             }
-            my $lex := MAST::Lexical.new( :index($index), :frames_out($outer) );
+            my $lex := MAST::Lexical.new( :index($index), :frames_out(0) );
             %!lexicals{$name} := $lex;
             %!lexical_kinds{$name} := $kind;
+            $lex;
+        }
+
+        method add_lexicalref($var) {
+            my $mf   := $*MAST_FRAME;
+            my $type := $var.returns;
+            my $kind := $!compiler.type_to_register_kind($type);
+            unless nqp::objprimspec($type) {
+                nqp::die("lexicalref declaration must have a native type");
+            }
+            my $index := $mf.add_lexical(NQPMu, $var.name);
+            self.register_lexicalref($var.name, $index, $kind);
+            $MVM_reg_obj
+        }
+
+        method register_lexicalref(str $name, $index, $kind) {
+            if nqp::existskey(%!lexicals, $name) || nqp::existskey(%!lexicalrefs, $name) {
+                nqp::die("Lexical '$name' already declared");
+            }
+            my $lex := MAST::Lexical.new( :index($index), :frames_out(0) );
+            %!lexicalrefs{$name} := $lex;
+            %!lexicalref_kinds{$name} := $kind;
             $lex;
         }
 
@@ -229,10 +253,14 @@ my class MASTCompilerInstance {
         method outer() { $!outer }
         method lexical($name) { %!lexicals{$name} }
         method lexicals() { %!lexicals }
+        method lexicalref($name) { %!lexicalrefs{$name} }
+        method lexicalrefs() { %!lexicalrefs }
         method local($name) { %!locals{$name} }
         method local_kind($name) { %!local_kinds{$name} }
         method lexical_kind($name) { %!lexical_kinds{$name} }
         method lexical_kinds() { %!lexical_kinds }
+        method lexicalref_kind($name) { %!lexicalref_kinds{$name} }
+        method lexicalref_kinds() { %!lexicalref_kinds }
         method params() { @!params }
         method lexical_param($name) { %!lexical_params{$name} }
 
@@ -453,6 +481,18 @@ my class MASTCompilerInstance {
         'attr_n',
         'attr_s',
         'attr_o'
+    ];
+
+    my @attrref_opnames := [
+        '',
+        'getattrref_i',
+        'getattrref_i',
+        'getattrref_i',
+        'getattrref_i',
+        'getattrref_n',
+        'getattrref_n',
+        'getattrref_s',
+        ''
     ];
 
     my @kind_to_op_slot := [
@@ -1107,6 +1147,25 @@ my class MASTCompilerInstance {
         'lex_no'
     ];
 
+    my @lexref_opnames := [
+        'getlexref_i',
+        'getlexref_n',
+        'getlexref_s'
+    ];
+
+    my @lexref_n_opnames := [
+        'getlexref_ni',
+        'getlexref_nn',
+        'getlexref_ns'
+    ];
+
+    my @decont_opnames := [
+        'decont_i',
+        'decont_n',
+        'decont_s',
+        'decont'
+    ];
+
     multi method compile_node(QAST::Var $node, :$want) {
         self.compile_var($node, :$want)
     }
@@ -1171,6 +1230,9 @@ my class MASTCompilerInstance {
                 elsif $scope eq 'lexical' {
                     $*BLOCK.add_lexical($node);
                 }
+                elsif $scope eq 'lexicalref' {
+                    $*BLOCK.add_lexicalref($node);
+                }
                 else {
                     nqp::die("Cannot declare variable with scope '$scope'; use 'local' or 'lexical'");
                 }
@@ -1203,9 +1265,20 @@ my class MASTCompilerInstance {
             }
         }
 
-        # Declaration in void context need generate no code.
-        if nqp::isconcrete($want) && $want == $MVM_reg_void {
-            return MAST::InstructionList.new([], MAST::VOID, $MVM_reg_void);
+        # If we know what we're after, some opts:
+        if nqp::isconcrete($want) {
+            # Declaration in void context need generate no code.
+            if $want == $MVM_reg_void {
+                return MAST::InstructionList.new([], MAST::VOID, $MVM_reg_void);
+            }
+
+            # Both lexicalref and attributeref in the context we want a
+            # non-object devolve to lexical and attribute, since we'd only
+            # de-ref right away anyway.
+            if $want != $MVM_reg_obj {
+                $scope := 'lexical'   if $scope eq 'lexicalref';
+                $scope := 'attribute' if $scope eq 'attributeref';
+            }
         }
 
         # Now go by scope.
@@ -1229,6 +1302,7 @@ my class MASTCompilerInstance {
         }
         elsif $scope eq 'lexical' {
             my $lex;
+            my $lexref;
             my $outer := 0;
             my $block := $*BLOCK;
             # find the block where the lexical was declared, if any
@@ -1236,6 +1310,8 @@ my class MASTCompilerInstance {
                 last if $block.qast.ann('DYN_COMP_WRAPPER');
                 $lex := $block.lexical($name);
                 last if $lex;
+                $lexref := $block.lexicalref($name);
+                last if $lexref;
                 $block := $block.outer;
                 $outer++;
             }
@@ -1266,6 +1342,20 @@ my class MASTCompilerInstance {
                     push_op(@ins, 'getlex', $res_reg, $lex);
                 }
             }
+            elsif $lexref {
+                if $*BINDVAL {
+                    nqp::die('Cannot bind to QAST::Var resolving to a lexicalref');
+                }
+                $res_kind := $block.lexicalref_kind($name);
+                if $outer {
+                    $lexref := MAST::Lexical.new( :index($lexref.index), :frames_out($outer) );
+                }
+                my $tmp_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
+                $res_reg := $*REGALLOC.fresh_register($res_kind);
+                push_op(@ins, 'getlex', $tmp_reg, $lexref);
+                push_op(@ins, @decont_opnames[@kind_to_op_slot[$res_kind]], $res_reg, $tmp_reg);
+                $*REGALLOC.release_register($tmp_reg, $MVM_reg_obj);
+            }
             else {
                 $res_kind := self.type_to_register_kind($node.returns);
                 if $*BINDVAL {
@@ -1280,6 +1370,62 @@ my class MASTCompilerInstance {
                     push_op(@ins, "get"~@lex_n_opnames[@kind_to_op_slot[$res_kind]],
                         $res_reg, MAST::SVal.new( :value($name) ));
                 }
+            }
+        }
+        elsif $scope eq 'lexicalref' {
+            my $lex;
+            my $lexref;
+            my $outer := 0;
+            my $block := $*BLOCK;
+            # find the block where the lexical was declared, if any
+            while nqp::istype($block, BlockInfo) {
+                last if $block.qast.ann('DYN_COMP_WRAPPER');
+                $lex := $block.lexical($name);
+                last if $lex;
+                $lexref := $block.lexicalref($name);
+                last if $lexref;
+                $block := $block.outer;
+                $outer++;
+            }
+            $res_kind := $MVM_reg_obj;
+            $res_reg := $*REGALLOC.fresh_register($res_kind);
+            if $lex {
+                # We need to take a reference to the lexical.
+                if $*BINDVAL {
+                    nqp::die("Cannot bind to non-reference QAST::Var '{$name}'");
+                }
+                if $outer {
+                    $lex := MAST::Lexical.new( :index($lex.index), :frames_out($outer) );
+                }
+                my $lex_kind := $block.lexical_kind($name);
+                if $lex_kind == $MVM_reg_obj {
+                    nqp::die('Cannot take a reference to a non-native lexical');
+                }
+                push_op(@ins, @lexref_opnames[@kind_to_op_slot[$lex_kind]], $res_reg, $lex);
+            }
+            elsif $lexref {
+                # We want a reference, the register contains a reference, so
+                # just do the lookup.
+                if $outer {
+                    $lexref := MAST::Lexical.new( :index($lexref.index), :frames_out($outer) );
+                }
+                if $*BINDVAL {
+                    my $valmast := self.as_mast_clear_bindval($*BINDVAL, :want($MVM_reg_obj));
+                    $res_reg := $valmast.result_reg;
+                    push_ilist(@ins, $valmast);
+                    push_op(@ins, 'bindlex', $lexref, $res_reg);
+                }
+                else {
+                    push_op(@ins, 'getlex', $res_reg, $lexref);
+                }
+            }
+            else {
+                if $*BINDVAL {
+                    nqp::die('Cannot bind to late-bound QAST::Var with scope lexicalref');
+                }
+                my $lex_kind := self.type_to_register_kind($node.returns);
+                push_op(@ins, @lexref_n_opnames[@kind_to_op_slot[$lex_kind]],
+                    $res_reg, MAST::SVal.new( :value($name) ));
             }
         }
         elsif $scope eq 'typevar' {
@@ -1373,6 +1519,41 @@ my class MASTCompilerInstance {
             $*REGALLOC.release_register($obj.result_reg, $MVM_reg_obj);
             $*REGALLOC.release_register($han.result_reg, $MVM_reg_obj);
         }
+        elsif $scope eq 'attributeref' {
+            # Ensure we have object and class handle, and aren't binding.
+            my @args := $node.list();
+            if +@args != 2 {
+                nqp::die("An attribute reference needs an object and a class handle");
+            }
+            if $*BINDVAL {
+                nqp::die("Cannot bind to QAST::Var '{$name}' with scope attributeref");
+            }
+
+            # Ensure we've a natively typed attribute to take a ref to.
+            my $kind := self.type_to_register_kind($node.returns);
+            if $kind == $MVM_reg_obj {
+                nqp::die("Attribute references can only be to native types");
+            }
+
+            # Compile object and handle, and get hint.
+            my $obj := self.as_mast_clear_bindval(@args[0], :want($MVM_reg_obj));
+            my $han := self.as_mast_clear_bindval(@args[1], :want($MVM_reg_obj));
+            push_ilist(@ins, $obj);
+            push_ilist(@ins, $han);
+            my int $hint := -1;
+            if nqp::istype(@args[1], QAST::WVal) {
+                $hint := nqp::hintfor(@args[1].value, $name);
+            }
+
+            # Emit lookup.
+            $res_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
+            $res_kind := $MVM_reg_obj;
+            push_op(@ins, @attrref_opnames[$kind], $res_reg, $obj.result_reg,
+                $han.result_reg, MAST::SVal.new( :value($name) ),
+                    MAST::IVal.new( :value($hint) ) );
+            $*REGALLOC.release_register($obj.result_reg, $MVM_reg_obj);
+            $*REGALLOC.release_register($han.result_reg, $MVM_reg_obj);
+        }
         elsif $scope eq 'positional' {
             return self.as_mast_clear_bindval($*BINDVAL
                 ?? QAST::Op.new( :op('positional_bind'), |$node.list, $*BINDVAL)
@@ -1413,6 +1594,18 @@ my class MASTCompilerInstance {
     }
     multi method as_mast_constant(QAST::NVal $nv) {
         MAST::NVal.new( :value($nv.value) )
+    }
+    multi method as_mast_constant(QAST::Want $want) {
+        my int $finger := 1;
+        my @children := $want.list;
+        while $finger < nqp::elems(@children) {
+            my str $got := @children[$finger];
+            if $got eq 'Ss' || $got eq 'Ii' || $got eq 'Nn' {
+                return self.as_mast_constant(@children[$finger + 1]);
+            }
+            $finger := $finger + 2;
+        }
+        return self.as_mast_constant(@children[0]);
     }
     multi method as_mast_constant(QAST::Node $qast) {
         nqp::die("expected QAST constant; didn't get one");

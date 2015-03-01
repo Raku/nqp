@@ -62,6 +62,7 @@ import org.perl6.nqp.sixmodel.BoolificationSpec;
 import org.perl6.nqp.sixmodel.ContainerConfigurer;
 import org.perl6.nqp.sixmodel.ContainerSpec;
 import org.perl6.nqp.sixmodel.InvocationSpec;
+import org.perl6.nqp.sixmodel.NativeRefContainerSpec;
 import org.perl6.nqp.sixmodel.ParameterizedType;
 import org.perl6.nqp.sixmodel.ParametricType;
 import org.perl6.nqp.sixmodel.REPRRegistry;
@@ -86,6 +87,12 @@ import org.perl6.nqp.sixmodel.reprs.MultiCacheInstance;
 import org.perl6.nqp.sixmodel.reprs.NFA;
 import org.perl6.nqp.sixmodel.reprs.NFAInstance;
 import org.perl6.nqp.sixmodel.reprs.NFAStateInfo;
+import org.perl6.nqp.sixmodel.reprs.NativeRefInstanceAttribute;
+import org.perl6.nqp.sixmodel.reprs.NativeRefInstanceIntLex;
+import org.perl6.nqp.sixmodel.reprs.NativeRefInstanceNumLex;
+import org.perl6.nqp.sixmodel.reprs.NativeRefInstancePositional;
+import org.perl6.nqp.sixmodel.reprs.NativeRefInstanceStrLex;
+import org.perl6.nqp.sixmodel.reprs.NativeRefREPRData;
 import org.perl6.nqp.sixmodel.reprs.P6bigintInstance;
 import org.perl6.nqp.sixmodel.reprs.P6int;
 import org.perl6.nqp.sixmodel.reprs.P6str;
@@ -1227,6 +1234,134 @@ public final class Ops {
         throw ExceptionHandling.dieInternal(tc, "Lexical '" + name + "' not found");
     }
 
+    /* Native lexical references. */
+    public static SixModelObject getlexref_i(ThreadContext tc, int idx) {
+        CallFrame cf = tc.curFrame;
+        SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.intLexRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No int lexical reference type registered for current HLL");
+        NativeRefInstanceIntLex ref = (NativeRefInstanceIntLex)refType.st.REPR.allocate(tc, refType.st);
+        ref.lexicals = cf.iLex;
+        ref.idx = idx;
+        return ref;
+    }
+    public static SixModelObject getlexref_n(ThreadContext tc, int idx) {
+        CallFrame cf = tc.curFrame;
+        SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.numLexRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No num lexical reference type registered for current HLL");
+        NativeRefInstanceNumLex ref = (NativeRefInstanceNumLex)refType.st.REPR.allocate(tc, refType.st);
+        ref.lexicals = cf.nLex;
+        ref.idx = idx;
+        return ref;
+    }
+    public static SixModelObject getlexref_s(ThreadContext tc, int idx) {
+        CallFrame cf = tc.curFrame;
+        SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.strLexRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No str lexical reference type registered for current HLL");
+        NativeRefInstanceStrLex ref = (NativeRefInstanceStrLex)refType.st.REPR.allocate(tc, refType.st);
+        ref.lexicals = cf.sLex;
+        ref.idx = idx;
+        return ref;
+    }
+    public static SixModelObject getlexref_i_si(ThreadContext tc, int idx, int si) {
+        CallFrame cf = tc.curFrame;
+        SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.intLexRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No int lexical reference type registered for current HLL");
+        while (si-- > 0)
+            cf = cf.outer;
+        NativeRefInstanceIntLex ref = (NativeRefInstanceIntLex)refType.st.REPR.allocate(tc, refType.st);
+        ref.lexicals = cf.iLex;
+        ref.idx = idx;
+        return ref;
+    }
+    public static SixModelObject getlexref_n_si(ThreadContext tc, int idx, int si) {
+        CallFrame cf = tc.curFrame;
+        SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.numLexRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No num lexical reference type registered for current HLL");
+        while (si-- > 0)
+            cf = cf.outer;
+        NativeRefInstanceNumLex ref = (NativeRefInstanceNumLex)refType.st.REPR.allocate(tc, refType.st);
+        ref.lexicals = cf.nLex;
+        ref.idx = idx;
+        return ref;
+    }
+    public static SixModelObject getlexref_s_si(ThreadContext tc, int idx, int si) {
+        CallFrame cf = tc.curFrame;
+        SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.strLexRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No str lexical reference type registered for current HLL");
+        while (si-- > 0)
+            cf = cf.outer;
+        NativeRefInstanceStrLex ref = (NativeRefInstanceStrLex)refType.st.REPR.allocate(tc, refType.st);
+        ref.lexicals = cf.sLex;
+        ref.idx = idx;
+        return ref;
+    }
+    public static SixModelObject getlexref_i(String name, ThreadContext tc) {
+        CallFrame cf = tc.curFrame;
+        SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.intLexRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No int lexical reference type registered for current HLL");
+        while (cf != null) {
+            Integer found = cf.codeRef.staticInfo.iTryGetLexicalIdx(name);
+            if (found != null) {
+                NativeRefInstanceIntLex ref = (NativeRefInstanceIntLex)refType.st.REPR.allocate(tc, refType.st);
+                ref.lexicals = cf.iLex;
+                ref.idx = (int)found;
+                return ref;
+            }
+            cf = cf.outer;
+        }
+        throw ExceptionHandling.dieInternal(tc, "Lexical '" + name + "' not found");
+    }
+    public static SixModelObject getlexref_n(String name, ThreadContext tc) {
+        CallFrame cf = tc.curFrame;
+        SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.numLexRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No num lexical reference type registered for current HLL");
+        while (cf != null) {
+            Integer found = cf.codeRef.staticInfo.nTryGetLexicalIdx(name);
+            if (found != null) {
+                NativeRefInstanceNumLex ref = (NativeRefInstanceNumLex)refType.st.REPR.allocate(tc, refType.st);
+                ref.lexicals = cf.nLex;
+                ref.idx = (int)found;
+                return ref;
+            }
+            cf = cf.outer;
+        }
+        throw ExceptionHandling.dieInternal(tc, "Lexical '" + name + "' not found");
+    }
+    public static SixModelObject getlexref_s(String name, ThreadContext tc) {
+        CallFrame cf = tc.curFrame;
+        SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.strLexRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No str lexical reference type registered for current HLL");
+        while (cf != null) {
+            Integer found = cf.codeRef.staticInfo.sTryGetLexicalIdx(name);
+            if (found != null) {
+                NativeRefInstanceStrLex ref = (NativeRefInstanceStrLex)refType.st.REPR.allocate(tc, refType.st);
+                ref.lexicals = cf.sLex;
+                ref.idx = (int)found;
+                return ref;
+            }
+            cf = cf.outer;
+        }
+        throw ExceptionHandling.dieInternal(tc, "Lexical '" + name + "' not found");
+    }
+
     /* Dynamic lexicals. */
     public static SixModelObject bindlexdyn(SixModelObject value, String name, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame.caller;
@@ -1936,6 +2071,9 @@ public final class Ops {
     public static final Object[] emptyArgList = new Object[0];
     public static final CallSiteDescriptor invocantCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ }, null);
     public static final CallSiteDescriptor storeCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ }, null);
+    public static final CallSiteDescriptor storeCallSite_i = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_INT }, null);
+    public static final CallSiteDescriptor storeCallSite_n = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_NUM }, null);
+    public static final CallSiteDescriptor storeCallSite_s = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_STR }, null);
     public static final CallSiteDescriptor findmethCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_STR }, null);
     public static final CallSiteDescriptor typeCheckCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ }, null);
     public static final CallSiteDescriptor howObjCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ }, null);
@@ -2487,6 +2625,44 @@ public final class Ops {
         return ch.st.REPR.hint_for(tc, ch.st, ch, name);
     }
 
+    /* Attribute reference operations. */
+    public static SixModelObject getattrref_i(SixModelObject obj, SixModelObject ch, String name, ThreadContext tc) {
+        SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intAttrRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No int attribute reference type registered for current HLL");
+        NativeRefInstanceAttribute ref = (NativeRefInstanceAttribute)refType.st.REPR.allocate(tc, refType.st);
+        ref.obj = obj;
+        ref.classHandle = decont(ch, tc);
+        ref.name = name;
+        ref.hint = STable.NO_HINT;
+        return ref;
+    }
+    public static SixModelObject getattrref_n(SixModelObject obj, SixModelObject ch, String name, ThreadContext tc) {
+        SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.numAttrRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No num attribute reference type registered for current HLL");
+        NativeRefInstanceAttribute ref = (NativeRefInstanceAttribute)refType.st.REPR.allocate(tc, refType.st);
+        ref.obj = obj;
+        ref.classHandle = decont(ch, tc);
+        ref.name = name;
+        ref.hint = STable.NO_HINT;
+        return ref;
+    }
+    public static SixModelObject getattrref_s(SixModelObject obj, SixModelObject ch, String name, ThreadContext tc) {
+        SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strAttrRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No string attribute reference type registered for current HLL");
+        NativeRefInstanceAttribute ref = (NativeRefInstanceAttribute)refType.st.REPR.allocate(tc, refType.st);
+        ref.obj = obj;
+        ref.classHandle = decont(ch, tc);
+        ref.name = name;
+        ref.hint = STable.NO_HINT;
+        return ref;
+    }
+
     /* Positional operations. */
     public static SixModelObject atpos(SixModelObject arr, long idx, ThreadContext tc) {
         return arr.at_pos_boxed(tc, idx);
@@ -2645,6 +2821,38 @@ public final class Ops {
     public static SixModelObject splice(SixModelObject arr, SixModelObject from, long offset, long count, ThreadContext tc) {
         arr.splice(tc, from, offset, count);
         return arr;
+    }
+
+    /* Positional reference operations. */
+    public static SixModelObject atposref_i(SixModelObject obj, long idx, ThreadContext tc) {
+        SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intPosRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No int positional reference type registered for current HLL");
+        NativeRefInstancePositional ref = (NativeRefInstancePositional)refType.st.REPR.allocate(tc, refType.st);
+        ref.obj = obj;
+        ref.idx = idx;
+        return ref;
+    }
+    public static SixModelObject atposref_n(SixModelObject obj, long idx, ThreadContext tc) {
+        SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.numPosRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No num positional reference type registered for current HLL");
+        NativeRefInstancePositional ref = (NativeRefInstancePositional)refType.st.REPR.allocate(tc, refType.st);
+        ref.obj = obj;
+        ref.idx = idx;
+        return ref;
+    }
+    public static SixModelObject atposref_s(SixModelObject obj, long idx, ThreadContext tc) {
+        SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strPosRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No string positional reference type registered for current HLL");
+        NativeRefInstancePositional ref = (NativeRefInstancePositional)refType.st.REPR.allocate(tc, refType.st);
+        ref.obj = obj;
+        ref.idx = idx;
+        return ref;
     }
 
     /* Associative operations. */
@@ -2839,16 +3047,81 @@ public final class Ops {
     public static long iscont(SixModelObject obj) {
         return obj == null || obj.st.ContainerSpec == null ? 0 : 1;
     }
+    private static short getContainerPrimitive(SixModelObject obj) {
+        if (obj != null && !(obj instanceof TypeObject)) {
+            ContainerSpec cs = obj.st.ContainerSpec;
+            if (cs instanceof NativeRefContainerSpec)
+                return ((NativeRefREPRData)(obj.st.REPRData)).primitive_type;
+        }
+        return StorageSpec.BP_NONE;
+    }
+    public static long iscont_i(SixModelObject obj) {
+        return getContainerPrimitive(obj) == StorageSpec.BP_INT ? 1 : 0;
+    }
+    public static long iscont_n(SixModelObject obj) {
+        return getContainerPrimitive(obj) == StorageSpec.BP_NUM ? 1 : 0;
+    }
+    public static long iscont_s(SixModelObject obj) {
+        return getContainerPrimitive(obj) == StorageSpec.BP_STR ? 1 : 0;
+    }
     public static SixModelObject decont(SixModelObject obj, ThreadContext tc) {
         if (obj == null)
             return null;
         ContainerSpec cs = obj.st.ContainerSpec;
         return cs == null || obj instanceof TypeObject ? obj : cs.fetch(tc, obj);
     }
+    public static long decont_i(SixModelObject obj, ThreadContext tc) {
+        if (!(obj instanceof TypeObject)) {
+            ContainerSpec cs = obj.st.ContainerSpec;
+            if (cs != null)
+                return cs.fetch_i(tc, obj);
+        }
+        return obj.get_int(tc);
+    }
+    public static double decont_n(SixModelObject obj, ThreadContext tc) {
+        if (!(obj instanceof TypeObject)) {
+            ContainerSpec cs = obj.st.ContainerSpec;
+            if (cs != null)
+                return cs.fetch_n(tc, obj);
+        }
+        return obj.get_num(tc);
+    }
+    public static String decont_s(SixModelObject obj, ThreadContext tc) {
+        if (!(obj instanceof TypeObject)) {
+            ContainerSpec cs = obj.st.ContainerSpec;
+            if (cs != null)
+                return cs.fetch_s(tc, obj);
+        }
+        return obj.get_str(tc);
+    }
     public static SixModelObject assign(SixModelObject cont, SixModelObject value, ThreadContext tc) {
         ContainerSpec cs = cont.st.ContainerSpec;
         if (cs != null)
             cs.store(tc, cont, decont(value, tc));
+        else
+            ExceptionHandling.dieInternal(tc, "Cannot assign to an immutable value");
+        return cont;
+    }
+    public static SixModelObject assign_i(SixModelObject cont, long value, ThreadContext tc) {
+        ContainerSpec cs = cont.st.ContainerSpec;
+        if (cs != null)
+            cs.store_i(tc, cont, value);
+        else
+            ExceptionHandling.dieInternal(tc, "Cannot assign to an immutable value");
+        return cont;
+    }
+    public static SixModelObject assign_n(SixModelObject cont, double value, ThreadContext tc) {
+        ContainerSpec cs = cont.st.ContainerSpec;
+        if (cs != null)
+            cs.store_n(tc, cont, value);
+        else
+            ExceptionHandling.dieInternal(tc, "Cannot assign to an immutable value");
+        return cont;
+    }
+    public static SixModelObject assign_s(SixModelObject cont, String value, ThreadContext tc) {
+        ContainerSpec cs = cont.st.ContainerSpec;
+        if (cs != null)
+            cs.store_s(tc, cont, value);
         else
             ExceptionHandling.dieInternal(tc, "Cannot assign to an immutable value");
         return cont;
@@ -4805,6 +5078,24 @@ public final class Ops {
             config.nullValue = configHash.at_key_boxed(tc, "null_value");
         if (configHash.exists_key(tc, "exit_handler") != 0)
             config.exitHandler = configHash.at_key_boxed(tc, "exit_handler");
+        if (configHash.exists_key(tc, "int_lex_ref") != 0)
+            config.intLexRef = configHash.at_key_boxed(tc, "int_lex_ref");
+        if (configHash.exists_key(tc, "num_lex_ref") != 0)
+            config.numLexRef = configHash.at_key_boxed(tc, "num_lex_ref");
+        if (configHash.exists_key(tc, "str_lex_ref") != 0)
+            config.strLexRef = configHash.at_key_boxed(tc, "str_lex_ref");
+        if (configHash.exists_key(tc, "int_attr_ref") != 0)
+            config.intAttrRef = configHash.at_key_boxed(tc, "int_attr_ref");
+        if (configHash.exists_key(tc, "num_attr_ref") != 0)
+            config.numAttrRef = configHash.at_key_boxed(tc, "num_attr_ref");
+        if (configHash.exists_key(tc, "str_attr_ref") != 0)
+            config.strAttrRef = configHash.at_key_boxed(tc, "str_attr_ref");
+        if (configHash.exists_key(tc, "int_pos_ref") != 0)
+            config.intPosRef = configHash.at_key_boxed(tc, "int_pos_ref");
+        if (configHash.exists_key(tc, "num_pos_ref") != 0)
+            config.numPosRef = configHash.at_key_boxed(tc, "num_pos_ref");
+        if (configHash.exists_key(tc, "str_pos_ref") != 0)
+            config.strPosRef = configHash.at_key_boxed(tc, "str_pos_ref");
         return configHash;
     }
     public static SixModelObject getcomp(String name, ThreadContext tc) {
