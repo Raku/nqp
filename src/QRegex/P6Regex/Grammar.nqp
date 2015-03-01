@@ -271,8 +271,8 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     proto token metachar { <...> }
     token metachar:sym<[ ]> { '[' ~ ']' <nibbler> <.SIGOK> }
     token metachar:sym<( )> { '(' ~ ')' <nibbler> <.SIGOK> }
-    token metachar:sym<'> { <?['‘]> <quote_EXPR: ':q'>  <.SIGOK> }
-    token metachar:sym<"> { <?["“]> <quote_EXPR: ':qq'> <.SIGOK> }
+    token metachar:sym<'> { <?['‘‚]> <quote_EXPR: ':q'>  <.SIGOK> }
+    token metachar:sym<"> { <?["“„]> <quote_EXPR: ':qq'> <.SIGOK> }
     token metachar:sym<.> { <sym> <.SIGOK> }
     token metachar:sym<^> { <sym> <.SIGOK> }
     token metachar:sym<^^> { <sym> <.SIGOK> }
