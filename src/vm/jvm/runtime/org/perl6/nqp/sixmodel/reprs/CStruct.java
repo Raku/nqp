@@ -219,7 +219,14 @@ public class CStruct extends REPR {
         }
         else if (repr instanceof CStruct) {
             info.argType = ArgType.CSTRUCT;
-            return Type.getDescriptor(((CStructREPRData) info.type.st.REPRData).structureClass);
+            Class c = ((CStructREPRData) info.type.st.REPRData).structureClass;
+
+            /* When we hit a struct in an attribute that is not composed yet, we most likely
+             * have hit a struct of our own kind. */
+            if (c == null)
+                return "L__CStruct__" + typeId + ";";
+
+            return Type.getDescriptor(c);
         }
         else {
             ExceptionHandling.dieInternal(tc, "CStruct representation only handles int, num, CArray, CPointer and CStruct");
