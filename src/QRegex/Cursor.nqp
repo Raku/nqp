@@ -715,6 +715,7 @@ class NQPMatch is NQPCapture {
     method orig() { $!orig }
     method to()   { $!to }
     method CURSOR() { $!cursor }
+    method PRECURSOR() { $!cursor."!cursor_init"($!orig,:p($!from)) }
 #?if parrot
     method Str() is parrot_vtable('get_string')  { nqp::substr($!orig, $!from, $!to-$!from) }
     method Int() is parrot_vtable('get_integer') { +self.Str() }
