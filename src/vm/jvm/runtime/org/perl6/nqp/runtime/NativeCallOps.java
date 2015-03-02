@@ -175,6 +175,12 @@ public final class NativeCallOps {
         if (source instanceof CPointerInstance) { // TODO Care about CPointer type object
             o = ((CPointerInstance)source).pointer;
         }
+        else if (source instanceof CArrayInstance) {
+            o = ((CStructInstance)source).storage.getPointer();
+        }
+        else if (source instanceof CStructInstance) {
+            o = ((CStructInstance)source).storage.getPointer();
+        }
         else {
             throw ExceptionHandling.dieInternal(tc,
                 "Native call expected object with CPointer representation, but got something else");
