@@ -280,7 +280,8 @@ class NQP::Optimizer {
             $op.returns(int);
         } elsif $typeinfo eq '_s' {
             $op.returns(str);
-        } elsif $opname eq 'numify' {
+        }
+        if $opname eq 'numify' {
             # if we can establish that the argument is a list, we are good
             # to claim it returns an int.
             if nqp::istype($op[0], QAST::Var) {
