@@ -773,7 +773,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         $block;
     }
 
-    sub capnames($ast, $count) {
+    sub capnames($ast, int $count) {
         my %capnames;
         my $rxtype := $ast.rxtype;
         if $rxtype eq 'concat' {
