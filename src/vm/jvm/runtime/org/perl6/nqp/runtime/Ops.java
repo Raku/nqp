@@ -4208,6 +4208,8 @@ public final class Ops {
         }
     }
     public static SixModelObject getobjsc(SixModelObject obj, ThreadContext tc) {
+        if (obj == null)
+            return null;
         SerializationContext sc = obj.sc;
         if (sc == null)
             return null;
