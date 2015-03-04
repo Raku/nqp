@@ -3775,9 +3775,6 @@ class QAST::CompilerJAST {
             # rethrown, after calling CallFrame.leave. Others are passed on to
             # dieInternal. Finally, if there's no exception, we also need to
             # call CallFrame.leave.
-            $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
-            $il.append(JAST::Instruction.new( :op('invokevirtual'),
-                $TYPE_CF, 'leave', 'Void' ));
             my $posthan := JAST::InstructionList.new();
             my $nclab   := JAST::Label.new( :name('non_cont_ex') );
             $posthan.append($DUP);
@@ -3795,6 +3792,9 @@ class QAST::CompilerJAST {
             $posthan.append($ATHROW);
             $*JMETH.append(JAST::TryCatch.new( :try($il), :catch($posthan),
                 :type($TYPE_THROWABLE) ));
+            $*JMETH.append(JAST::Instruction.new( :op('aload'), 'cf' ));
+            $*JMETH.append(JAST::Instruction.new( :op('invokevirtual'),
+                $TYPE_CF, 'leave', 'Void' ));
             $*JMETH.append($RETURN);
 
             if $save_sites {
