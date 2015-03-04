@@ -19,11 +19,9 @@ plan(14);
     ok( nqp::defined($q) == 1, 'nqp::openpipe nonexistent cmd');
 
     my $qstr := nqp::readallfh($q);
-    nqp::getcomp('nqp').backend.name eq 'moar' ??
-        ok( $qstr eq '', 'nqp::readallfh with a pipe nonexistent command') !!
     nqp::getcomp('nqp').backend.name eq 'parrot' ??
         ok( $qstr ~~ / 'doesnotexist' /, 'nqp::readallfh with a pipe nonexistent command') !!
-        ok( $qstr ~~ / 'not found' | 'not recognized' /, 'nqp::readallfh with a pipe nonexistent command');
+        ok( $qstr eq '', 'nqp::readallfh with a pipe nonexistent command');
 
     nqp::closefh($q); ok( 1, 'nqp::closefh with a pipe nonexistent command');
 }
@@ -43,11 +41,9 @@ plan(14);
     ok( nqp::defined($q) == 1, 'nqp::openpipe nonexistent cmd');
 
     my $qstr := nqp::readallfh($q);
-    nqp::getcomp('nqp').backend.name eq 'moar' ??
-        ok( $qstr eq '', 'nqp::readallfh with a pipe nonexistent command') !!
     nqp::getcomp('nqp').backend.name eq 'parrot' ??
         ok( $qstr ~~ / 'doesnotexist' /, 'nqp::readallfh with a pipe nonexistent command') !!
-        ok( $qstr ~~ / 'not found' | 'not recognized' /, 'nqp::readallfh with a pipe nonexistent command');
+        ok( $qstr eq '', 'nqp::readallfh with a pipe nonexistent command');
 
     ok( nqp::closefh_i($q) != 0, 'nqp::closefh_i with a pipe nonexistent command');
 }
