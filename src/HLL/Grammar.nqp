@@ -624,6 +624,7 @@ An operator precedence parser.
             nqp::bindkey(%markhash, $markname, $cur);
         }
         else {
+	    nqp::bindattr_i($cur, $cursor_class, '$!from', self.from);
             $cur."!cursor_pos"(self.pos());
             $cur
         }
