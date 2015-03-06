@@ -21,7 +21,6 @@ General stuff that helps all backends
     - nqp::eoffh - EASY
     - nqp::isstr
     - nqp::getmessage
-    - nqp::split("",...)  - EASY
     - nqp::printfh in combination with nqp::getstdout(),nqp::getstderr()
     - add a test for nqp::index with three arguments to t/nqp/59-nqpop.t - EASY
     - a test for if cond() -> $value-of-cond {...} - EASY
