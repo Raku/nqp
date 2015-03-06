@@ -967,6 +967,11 @@ class QAST::OperationsJS {
         }
     });
 
+
+    add_simple_op('findcclass', $T_INT, [$T_INT, $T_STR, $T_INT, $T_INT]);
+    add_simple_op('findnotcclass', $T_INT, [$T_INT, $T_STR, $T_INT, $T_INT]);
+    add_simple_op('iscclass', $T_INT, [$T_INT, $T_STR, $T_INT]);
+
     # TODO consider/handle if lexotic is not the topmost thing in a block
     # TODO implement returning from nested block
     add_op('lexotic', sub ($comp, $node, :$want) {
