@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(120);
+plan(126);
 
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
@@ -27,7 +27,10 @@ ok( nqp::index('Hello World', 'l', 0) == 2, 'nqp::index with third argument, fir
 ok( nqp::index('Hello World', 'l', 2) == 2, 'nqp::index with third argument, first match (2)');
 ok( nqp::index('Hello World', 'l', 3) == 3, 'nqp::index with third argument, second match');
 ok( nqp::index('Hello World', 'l', 4) == 9, 'nqp::index with third argument, third match');
-ok( nqp::index('Hello World', '') == -1, 'nqp::index with empty match returns -1');
+ok( nqp::index('Hello World', '') == 0, 'nqp::index with empty match returns 0');
+ok( nqp::index('Hello World', '', 1) == 1, 'nqp::index with empty match at offset returns offset');
+ok( nqp::index('Hello World', '', 11) == 11, 'nqp::index with empty match at end returns length');
+ok( nqp::index('Hello World', '', 100) == -1, 'nqp::index with empty match at offset outside string returns -1');
 
 ok( nqp::rindex('rakudo', 'do') == 4, 'nqp::rindex found');
 ok( nqp::rindex('rakudo', 'dont') == -1, 'nqp::rindex not found');
@@ -37,7 +40,10 @@ ok( nqp::rindex('Hello World', 'l', 10) == 9, 'nqp::rindex with third argument, 
 ok( nqp::rindex('Hello World', 'l', 9) == 9, 'nqp::rindex with third argument, first match (2)');
 ok( nqp::rindex('Hello World', 'l', 8) == 3, 'nqp::rindex with third argument, second match');
 ok( nqp::rindex('Hello World', 'l', 2) == 2, 'nqp::rindex with third argument, third match');
-ok( nqp::rindex('Hello World', '') == -1, 'nqp::rindex with empty match returns -1');
+ok( nqp::rindex('Hello World', '') == 11, 'nqp::rindex with empty match returns length');
+ok( nqp::rindex('Hello World', '', 1) == 1, 'nqp::rindex with empty match at offset returns offset');
+ok( nqp::rindex('Hello World', '', 11) == 11, 'nqp::rindex with empty match at end returns length');
+ok( nqp::index('Hello World', '', 100) == -1, 'nqp::rindex with empty match at offset outside string returns -1');
 
 ok( nqp::chr(120) eq 'x', 'nqp::chr');
 ok( nqp::ord('xyz') eq 120, 'nqp::ord');
