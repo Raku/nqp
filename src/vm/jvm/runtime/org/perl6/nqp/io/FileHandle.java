@@ -87,11 +87,8 @@ public class FileHandle extends SyncHandle implements IIOSeekable {
             return false;
         else {
             try {
-                long position = fc.position();
-                getc(tc);
-                fc.position(position);
-                readBuffer = null;
-                return false;
+                eof = fc.position() >= fc.size();
+                return eof;
             }
             catch (Exception e) {
                 eof = true;
