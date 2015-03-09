@@ -3548,17 +3548,14 @@ public final class Ops {
     }
 
     public static long indexfrom(String string, String pattern, long fromIndex) {
-        if (pattern.length() == 0) return -1;
         return string.indexOf(pattern, (int)fromIndex);
     }
 
     public static long rindexfromend(String string, String pattern) {
-        if (pattern.length() == 0) return -1;
         return string.lastIndexOf(pattern);
     }
 
     public static long rindexfrom(String string, String pattern, long fromIndex) {
-        if (pattern.length() == 0) return -1;
         return string.lastIndexOf(pattern, (int)fromIndex);
     }
 
