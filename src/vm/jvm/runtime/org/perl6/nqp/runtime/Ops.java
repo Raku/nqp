@@ -5638,6 +5638,8 @@ public final class Ops {
         catch (NumberFormatException e) {
             if (in.equals("Inf"))
                 return Double.POSITIVE_INFINITY;
+            if (in.equals("+Inf"))
+                return Double.POSITIVE_INFINITY;
             if (in.equals("-Inf"))
                 return Double.NEGATIVE_INFINITY;
             if (in.equals("NaN"))
