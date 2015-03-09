@@ -3548,6 +3548,7 @@ public final class Ops {
     }
 
     public static long indexfrom(String string, String pattern, long fromIndex) {
+	if (fromIndex > string.length()) { return -1; }
         return string.indexOf(pattern, (int)fromIndex);
     }
 
@@ -3556,6 +3557,7 @@ public final class Ops {
     }
 
     public static long rindexfrom(String string, String pattern, long fromIndex) {
+	if (fromIndex > string.length()) { return -1; }
         return string.lastIndexOf(pattern, (int)fromIndex);
     }
 
