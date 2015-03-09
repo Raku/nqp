@@ -3183,7 +3183,7 @@ class QAST::CompilerJAST {
         my $best := @possibles.shift;
         my $char := %want_char{$type};
         for @possibles -> $sel, $ast {
-            if nqp::index($sel, $char) >= 0 {
+            if nqp::chars($char) == 0 || nqp::index($sel, $char) >= 0 {
                 $best := $ast;
             }
         }
