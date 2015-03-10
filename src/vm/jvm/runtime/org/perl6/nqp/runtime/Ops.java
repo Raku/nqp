@@ -16,6 +16,7 @@ import java.nio.charset.Charset;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
+import java.nio.file.NotLinkException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -626,6 +627,16 @@ public final class Ops {
             die_s("flushfh requires an object with the IOHandle REPR", tc);
         }
         return obj;
+    }
+
+    public static String readlink(String path, ThreadContext tc) {
+        try {
+            return Files.readSymbolicLink(new File(path).toPath()).toString();
+        } catch (NotLinkException e) {
+            throw ExceptionHandling.dieInternal(tc, path + " is not a symbolic link");
+        } catch (IOException e) {
+            throw ExceptionHandling.dieInternal(tc, "Failed to readlink file: " + e);
+        }
     }
 
     public static String readlinefh(SixModelObject obj, ThreadContext tc) {
