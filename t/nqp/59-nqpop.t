@@ -43,7 +43,7 @@ ok( nqp::rindex('Hello World', 'l', 2) == 2, 'nqp::rindex with third argument, t
 ok( nqp::rindex('Hello World', '') == 11, 'nqp::rindex with empty match returns length');
 ok( nqp::rindex('Hello World', '', 1) == 1, 'nqp::rindex with empty match at offset returns offset');
 ok( nqp::rindex('Hello World', '', 11) == 11, 'nqp::rindex with empty match at end returns length');
-ok( nqp::index('Hello World', '', 100) == -1, 'nqp::rindex with empty match at offset outside string returns -1');
+ok( nqp::rindex('Hello World', '', 100) == -1, 'nqp::rindex with empty match at offset outside string returns -1');
 
 ok( nqp::chr(120) eq 'x', 'nqp::chr');
 ok( nqp::ord('xyz') eq 120, 'nqp::ord');
