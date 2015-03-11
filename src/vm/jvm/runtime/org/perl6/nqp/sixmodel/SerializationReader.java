@@ -122,6 +122,7 @@ public class SerializationReader {
         deserializeContexts();
         attachClosureOuters(crCount);
         attachContextOuters();
+        fixupContextOuters();
     }
 
     /* Checks the header looks sane and all of the places it points to make sense.
@@ -518,6 +519,15 @@ public class SerializationReader {
             int idx = orig.getInt();
             if (idx > 0)
                 contexts[i].outer = contexts[idx - 1];
+        }
+    }
+
+    private void fixupContextOuters() {
+        for (int i = 0; i < contextTableEntries; i++) {
+            if (contexts[i].outer == null &&
+                contexts[i].codeRef.staticInfo.priorInvocation != null &&
+                contexts[i].codeRef.staticInfo.priorInvocation.outer != null)
+                contexts[i].outer = contexts[i].codeRef.staticInfo.priorInvocation.outer;
         }
     }
 
