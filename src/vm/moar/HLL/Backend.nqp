@@ -113,6 +113,9 @@ class HLL::Backend::MoarVM {
             elsif nqp::isint($obj) || nqp::isnum($obj) {
                 nqp::push_s(@pieces, ~$obj);
             }
+            elsif nqp::can($obj, 'Str') {
+                to_json(nqp::unbox_s($obj.Str));
+            }
             else {
                 nqp::die("Don't know how to dump a " ~ $obj.HOW.name($obj));
             }
