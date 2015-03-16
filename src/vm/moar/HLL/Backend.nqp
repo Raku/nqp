@@ -137,7 +137,7 @@ class HLL::Backend::MoarVM {
         # Insert it into a template and write it.
         my $template := try slurp('src/vm/moar/profiler/template.html');
         unless $template {
-            $template := slurp(nqp::backendconfig()<prefix> ~ '/languages/nqp/lib/profiler/template.html');
+            $template := slurp(nqp::backendconfig()<prefix> ~ '/share/nqp/lib/profiler/template.html');
         }
         my $results  := subst($template, /'{{{PROFIELR_OUTPUT}}}'/, $json);
         if nqp::defined($filename) {

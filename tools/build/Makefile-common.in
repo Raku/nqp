@@ -99,7 +99,7 @@ RM_RF         = $(PERL) -MExtUtils::Command -e rm_rf
 
 PREFIX          = @prefix@
 BIN_DIR         = $(PREFIX)/bin
-NQP_LANG_DIR    = $(PREFIX)/languages/nqp
+NQP_LANG_DIR    = $(PREFIX)/share/nqp
 NQP_LIB_DIR     = $(NQP_LANG_DIR)/lib
 PROVE           = prove
 
