@@ -13,8 +13,8 @@ unless (File::Spec->file_name_is_absolute($prefix)) {
     $prefix = File::Spec->rel2abs($prefix);
 }
 
-my $jar_dir = File::Spec->catfile($prefix, 'languages', 'nqp', 'runtime');
-my $lib_dir = File::Spec->catfile($prefix, 'languages', 'nqp', 'lib');
+my $jar_dir = File::Spec->catfile($prefix, 'share', 'nqp', 'runtime');
+my $lib_dir = File::Spec->catfile($prefix, 'share', 'nqp', 'lib');
 
 if ($^O eq 'MSWin32') {
     my $install_to = File::Spec->catfile($realpath, 'bin', 'nqp-j.bat');

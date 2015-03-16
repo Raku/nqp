@@ -16,8 +16,8 @@ my $jardir = ".";
 my $libdir = ".";
 
 if ($prefix ne '.') {
-    $jardir = "${prefix}/languages/nqp/runtime";
-    $libdir = "${prefix}/languages/nqp/lib";
+    $jardir = "${prefix}/share/nqp/runtime";
+    $libdir = "${prefix}/share/nqp/lib";
 	my @jars = grep { s/^.*\/// } split($cpsep, $thirdPartyJars);
 	$thirdPartyJars = join($cpsep, grep { s/^/${jardir}\// } @jars);
 }
