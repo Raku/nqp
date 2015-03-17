@@ -5401,7 +5401,12 @@ class QAST::CompilerJAST {
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<eos> ));
         $il.append($LCMP);
         $il.append(JAST::Instruction.new( :op('ifge'), %*REG<fail> ));
-        
+
+        $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
+        $il.append($IVAL_ZERO);
+        $il.append($LCMP);
+        $il.append(JAST::Instruction.new( :op('iflt'), %*REG<fail> ));
+
         $il.append(JAST::PushSVal.new( :value($node[0]) ));
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<tgt> ));
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
