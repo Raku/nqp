@@ -962,7 +962,7 @@ public final class Ops {
         if (os.indexOf("win") >= 0) {
             args.add("cmd");
             args.add("/c");
-            args.add(cmd.replace('/', '\\'));
+            args.add(cmd);
         } else {
             args.add("sh");
             args.add("-c");
