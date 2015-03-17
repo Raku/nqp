@@ -37,7 +37,7 @@ class HLL::Backend::MoarVM {
                 )))));
         }
     }
-    method run_profiled($what, $filename) {
+    method run_profiled($what, $filename?) {
         my @END := nqp::gethllsym('perl6', '@END_PHASERS');
         @END.push: -> { self.dump_profile_data($prof_end_sub(), $filename) } if nqp::defined(@END);
         self.ensure_prof_routines();
