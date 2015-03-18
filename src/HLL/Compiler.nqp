@@ -67,8 +67,8 @@ class HLL::Compiler does HLL::Backend::Default {
         while 1 {
             last if nqp::eoffh($stdin);
 
-            my str $newcode := nqp::readlineintfh($stdin, ~$prompt);
-            if nqp::isnull_s($newcode) {
+            my str $newcode := nqp::readlinefh($stdin);
+            if nqp::isnull_s($newcode) || !nqp::defined($newcode) {
                 nqp::print("\n");
                 last;
             }

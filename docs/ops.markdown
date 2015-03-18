@@ -1037,11 +1037,6 @@ in the next `$count` bytes from the filehandle and store them in the array.
 
 Return the next line of the open filehandle.
 
-## readlineintfh
-* `readlineintfh(Handle $fh, str $prompt)`
-
-Prompt the user with `$prompt`, then return the next line of the open filehandle.
-
 ## readcharsfh
 * `nqp::readcharsfh(Handle $fh, $chars)`
 

@@ -1984,7 +1984,6 @@ QAST::MASTOperations.add_core_moarop_mapping('writefh', 'write_fhb', 1);
 QAST::MASTOperations.add_core_moarop_mapping('printfh', 'write_fhs');
 QAST::MASTOperations.add_core_moarop_mapping('sayfh', 'say_fhs');
 QAST::MASTOperations.add_core_moarop_mapping('readlinefh', 'readline_fh');
-QAST::MASTOperations.add_core_moarop_mapping('readlineintfh', 'readlineint_fh');
 QAST::MASTOperations.add_core_moarop_mapping('readallfh', 'readall_fh');
 QAST::MASTOperations.add_core_op('getcfh', -> $qastcomp, $op {
     $qastcomp.as_mast( QAST::VM.new( :moarop('read_fhs'), $op[0], QAST::IVal.new( :value(1) )) )
