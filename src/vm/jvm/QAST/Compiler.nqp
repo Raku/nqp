@@ -1708,7 +1708,25 @@ QAST::OperationsJAST.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
     $tryil.append($prores.jast);
     $*STACK.obtain($tryil, $prores);
     $tryil.append(JAST::Instruction.new( :op('astore'), $result ));
-    
+
+    # Handle any runtime exceptions (Throwable) that are not ControlException
+    my $erril := JAST::InstructionList.new();
+    my $nclab   := JAST::Label.new( :name( $qastcomp.unique('non_cont_ex') ) );
+    $erril.append($DUP);
+    $erril.append(JAST::Instruction.new( :op('instanceof'), $TYPE_EX_CONT ));
+    $erril.append(JAST::Instruction.new( :op('ifeq'), $nclab ));
+    $erril.append($ATHROW);
+    $erril.append($nclab);
+    $erril.append($ALOAD_1);
+    $erril.append($SWAP);
+    $erril.append(JAST::Instruction.new( :op('invokestatic'),
+        $TYPE_EH, 'dieInternal', $TYPE_EX_RT, $TYPE_TC, $TYPE_THROWABLE ));
+    $erril.append($ATHROW);
+
+    # Inner try/catch block to catch runtime exceptions (Throwable)
+    my $inner := JAST::InstructionList.new();
+    $inner.append(JAST::TryCatch.new( :try($tryil), :catch($erril), :type($TYPE_THROWABLE) ));
+
     # The catch part just handles unwind; grab the result. Also check "exit
     # after unwind" flag, used to force this whole block to exit.
     my $catchil := JAST::InstructionList.new();
@@ -1731,7 +1749,7 @@ QAST::OperationsJAST.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
     
     # Wrap it all up in try/catch etc.
     $il.append($qastcomp.delimit_handler(
-        JAST::TryCatch.new( :try($tryil), :catch($catchil), :type($TYPE_EX_UNWIND) ),
+        JAST::TryCatch.new( :try($inner), :catch($catchil), :type($TYPE_EX_UNWIND) ),
         $*HANDLER_IDX, $handler));
 
     # Evaluate to the result.
