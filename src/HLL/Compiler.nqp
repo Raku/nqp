@@ -51,10 +51,16 @@ class HLL::Compiler does HLL::Backend::Default {
             unless nqp::tellfh(nqp::getstdout()) > $*AUTOPRINTPOS;
     }
 
+    method readline($stdin, $stdout, $prompt) {
+        nqp::printfh(nqp::getstdout(), $prompt);
+        return nqp::readlinefh($stdin);
+    }
+
     method interactive(*%adverbs) {
         nqp::printfh(nqp::getstderr(), self.interactive_banner);
 
         my $stdin    := nqp::getstdin();
+        my $stdout   := nqp::getstdout();
         my $encoding := ~%adverbs<encoding>;
         if $encoding && $encoding ne 'fixed_8' {
             nqp::setencoding($stdin, $encoding);
@@ -67,8 +73,7 @@ class HLL::Compiler does HLL::Backend::Default {
         while 1 {
             last if nqp::eoffh($stdin);
 
-            nqp::printfh(nqp::getstdout(), ~$prompt);
-            my str $newcode := nqp::readlinefh($stdin);
+            my str $newcode := self.readline($stdin, $stdout, ~$prompt);
             if nqp::isnull_s($newcode) || !nqp::defined($newcode) {
                 nqp::print("\n");
                 last;
