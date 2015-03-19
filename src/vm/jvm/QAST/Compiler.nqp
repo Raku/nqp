@@ -4183,13 +4183,20 @@ class QAST::CompilerJAST {
             }
         }
 
-        # Both lexicalref and attributeref in the context we want a
-        # non-object devolve to lexical and attribute, since we'd only
-        # de-ref right away anyway.
         my $want := $*WANT;
-        if nqp::defined($want) && $want != $RT_OBJ {
-            $scope := 'lexical'   if $scope eq 'lexicalref';
-            $scope := 'attribute' if $scope eq 'attributeref';
+        # If we know what we're after, some opts:
+        if nqp::isconcrete($want) {
+            if $want == $RT_VOID {
+                return result(JAST::Instruction.new(:op('nop')), $RT_VOID);
+            }
+
+            # Both lexicalref and attributeref in the context we want a
+            # non-object devolve to lexical and attribute, since we'd only
+            # de-ref right away anyway.
+            if nqp::defined($want) && $want != $RT_OBJ {
+                $scope := 'lexical'   if $scope eq 'lexicalref';
+                $scope := 'attribute' if $scope eq 'attributeref';
+            }
         }
         
         # Now go by scope.
@@ -4328,13 +4335,6 @@ class QAST::CompilerJAST {
                             "bindlex_{$c}_si", $jtype, $jtype, $TYPE_CF, 'Integer', 'Integer' )
                     !! JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
                             "getlex_{$c}_si", $jtype, $TYPE_CF, 'Integer', 'Integer' ));
-            }
-
-            if $ref {
-                # Need to de-ref the container.
-                $il.append($ALOAD_1);
-                $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
-                    "decont_{typechar($reftype)}", jtype($reftype), $TYPE_SMO, $TYPE_TC ));
             }
 
             return result($il, $type);
