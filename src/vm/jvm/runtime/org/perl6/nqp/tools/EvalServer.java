@@ -1,7 +1,6 @@
 package org.perl6.nqp.tools;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.InetSocketAddress;
@@ -37,40 +36,6 @@ public class EvalServer {
     private ServerSocketChannel serv;
     private WritableByteChannel tokenCh;
     private Path tokenPath;
-
-    public String run(String appPath, String code) throws Exception {
-        String[] argv = new String[2];
-        argv[0] = "-e";
-        argv[1] = code;
-        return run(appPath, argv);
-    }
-
-    public String run(String appPath, String[] argv) throws Exception {
-        try {
-            cuType = LibraryLoader.loadFile( appPath, true );
-        } catch (ThreadDeath td) {
-            throw new RuntimeException("Couldn't loadFile. Your CLASSPATH might not be set up correctly.");
-        }
-
-        GlobalContext gc = new GlobalContext();
-        gc.in = new ByteArrayInputStream(new byte[0]);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        gc.out = gc.err = new PrintStream( baos, true, "UTF-8" );
-        gc.interceptExit = true;
-        gc.sharingHint = true;
-
-        CompilationUnit cu = CompilationUnit.setupCompilationUnit(gc.mainThread, cuType, true);
-        CodeRef entryRef = null;
-        if (cu.entryQbid() >= 0) entryRef = cu.lookupCodeRef(cu.entryQbid());
-        if (entryRef == null)
-            throw new RuntimeException("This class is not an entry point");
-        try {
-            Ops.invokeMain(gc.mainThread, entryRef, cuType.getName(), argv);
-        } catch (ThreadDeath td) {
-            baos.flush();
-        }
-        return baos.toString("UTF-8");
-    }
 
     public static void main(String[] args) throws Exception {
         String executableName = System.getProperty("perl6.execname");
