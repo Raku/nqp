@@ -19,10 +19,12 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.security.SecureRandom;
 import java.util.EnumSet;
 import java.util.Set;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.Arrays;
+import java.util.concurrent.Future;
 
 import org.perl6.nqp.runtime.Base64;
 import org.perl6.nqp.runtime.CodeRef;
@@ -147,9 +149,11 @@ public class EvalServer {
 
         private class RunThread extends Thread {
             private String[] argv;
+            private PrintStream ops;
 
-            public RunThread(String[] argv) {
+            public RunThread(String[] argv, PrintStream ops) {
                 this.argv = argv;
+                this.ops = ops;
             }
 
             @Override
@@ -174,7 +178,7 @@ public class EvalServer {
             private void eval() throws Exception {
                 GlobalContext gc = new GlobalContext();
                 gc.in = new ByteArrayInputStream(new byte[0]);
-                gc.out = gc.err = new PrintStream( Channels.newOutputStream(sock), true, "UTF-8" );
+                gc.out = gc.err = this.ops;
                 gc.interceptExit = true;
                 gc.sharingHint = true;
 
@@ -222,17 +226,23 @@ public class EvalServer {
                 System.exit(0);
             }
             else if (cmdStrings[1].equals("run")) {
-                Thread runner = new RunThread(argv);
+                PrintStream out = new PrintStream( Channels.newOutputStream(sock), true, "UTF-8" );
+                Thread runner = new RunThread(argv, out);
                 runner.run();
                 runner.join();
+                out.close();
             }
             else if (cmdStrings[1].equals("run_limited")) {
+                PrintStream out = new PrintStream( Channels.newOutputStream(sock), true, "UTF-8" );
                 Integer timeout = new Integer(cmdStrings[2]);
                 ExecutorService ste = Executors.newSingleThreadExecutor();
                 argv = new String[cmdStrings.length - 4];
                 System.arraycopy(cmdStrings, 3, argv, 0, argv.length);
-                Thread runner = new RunThread(argv);
-                ste.invokeAll(Arrays.asList(Executors.callable(runner)), timeout, TimeUnit.SECONDS);
+                Thread runner = new RunThread(argv, out);
+                List<Future<Object>> future = ste.invokeAll(Arrays.asList(Executors.callable(runner)), timeout, TimeUnit.SECONDS);
+                if(future.get(0).isCancelled()) {
+                    out.println("\n(timeout)");
+                }
             }
             else {
                 throw new RuntimeException("Unknown command "+cmdStrings[1]);
