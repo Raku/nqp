@@ -19,6 +19,10 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.security.SecureRandom;
 import java.util.EnumSet;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.Arrays;
 
 import org.perl6.nqp.runtime.Base64;
 import org.perl6.nqp.runtime.CodeRef;
@@ -73,6 +77,7 @@ public class EvalServer {
     }
 
     public static void main(String[] args) throws Exception {
+
         String executableName = System.getProperty("perl6.execname");
         if (executableName != null) {
             System.setProperty("perl6.execname", executableName.replace("eval-server", "j"));
@@ -81,6 +86,7 @@ public class EvalServer {
         e.parseArgs(args);
         e.run();
     }
+
     private void run() throws Exception {
         cuType = LibraryLoader.loadFile( mainPath, true );
 
@@ -139,6 +145,48 @@ public class EvalServer {
     private class ServiceThread extends Thread {
         public SocketChannel sock;
 
+        private class RunThread extends Thread {
+            private String[] argv;
+
+            public RunThread(String[] argv) {
+                this.argv = argv;
+            }
+
+            @Override
+            public void run() {
+                try {
+                    eval();
+                } catch (ThreadDeath t) {
+                    // swallowed exit
+                } catch (Throwable t) {
+                    System.err.print("Error in socket connection:");
+                    t.printStackTrace();
+                } finally {
+                    try {
+                        sock.close();
+                    } catch (IOException iex) {
+                        iex.printStackTrace();
+                    }
+                }
+
+            }
+
+            private void eval() throws Exception {
+                GlobalContext gc = new GlobalContext();
+                gc.in = new ByteArrayInputStream(new byte[0]);
+                gc.out = gc.err = new PrintStream( Channels.newOutputStream(sock), true, "UTF-8" );
+                gc.interceptExit = true;
+                gc.sharingHint = true;
+
+                CompilationUnit cu = CompilationUnit.setupCompilationUnit(gc.mainThread, cuType, true);
+                CodeRef entryRef = null;
+                if (cu.entryQbid() >= 0) entryRef = cu.lookupCodeRef(cu.entryQbid());
+                if (entryRef == null)
+                    throw new RuntimeException("This class is not an entry point");
+                Ops.invokeMain(gc.mainThread, entryRef, cuType.getName(), argv);
+            }
+        }
+
         @Override
         public void run() {
             try {
@@ -163,6 +211,8 @@ public class EvalServer {
             command.flip();
 
             String[] cmdStrings = StandardCharsets.UTF_8.decode(command).toString().split("\u0000",-1);
+            String[] argv = new String[cmdStrings.length - 3];
+            System.arraycopy(cmdStrings, 2, argv, 0, argv.length);
 
             if (cmdStrings.length < 3 || !cmdStrings[cmdStrings.length-1].isEmpty() || !cookie.equals(cmdStrings[0]))
                 throw new RuntimeException("command format error");
@@ -172,21 +222,17 @@ public class EvalServer {
                 System.exit(0);
             }
             else if (cmdStrings[1].equals("run")) {
-                String[] argv = new String[cmdStrings.length - 3];
-                System.arraycopy(cmdStrings, 2, argv, 0, argv.length);
-
-                GlobalContext gc = new GlobalContext();
-                gc.in = new ByteArrayInputStream(new byte[0]);
-                gc.out = gc.err = new PrintStream( Channels.newOutputStream(sock), true, "UTF-8" );
-                gc.interceptExit = true;
-                gc.sharingHint = true;
-
-                CompilationUnit cu = CompilationUnit.setupCompilationUnit(gc.mainThread, cuType, true);
-                CodeRef entryRef = null;
-                if (cu.entryQbid() >= 0) entryRef = cu.lookupCodeRef(cu.entryQbid());
-                if (entryRef == null)
-                    throw new RuntimeException("This class is not an entry point");
-                Ops.invokeMain(gc.mainThread, entryRef, cuType.getName(), argv);
+                Thread runner = new RunThread(argv);
+                runner.run();
+                runner.join();
+            }
+            else if (cmdStrings[1].equals("run_limited")) {
+                Integer timeout = new Integer(cmdStrings[2]);
+                ExecutorService ste = Executors.newSingleThreadExecutor();
+                argv = new String[cmdStrings.length - 4];
+                System.arraycopy(cmdStrings, 3, argv, 0, argv.length);
+                Thread runner = new RunThread(argv);
+                ste.invokeAll(Arrays.asList(Executors.callable(runner)), timeout, TimeUnit.SECONDS);
             }
             else {
                 throw new RuntimeException("Unknown command "+cmdStrings[1]);
