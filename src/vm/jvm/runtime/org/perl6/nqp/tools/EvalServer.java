@@ -102,7 +102,7 @@ public class EvalServer {
                 EnumSet.of(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE);
             Files.setPosixFilePermissions(tokenPath, perms);
         } catch (UnsupportedOperationException e) {
-            // non-posix systems tend not to have such wide default perms, so this is safe to ignor
+            // non-posix systems tend not to have such wide default perms, so this is safe to ignore
         }
         tokenCh.write(ByteBuffer.wrap( String.format("%d %s\n", serv.socket().getLocalPort(), cookie).getBytes("UTF-8") ));
 
