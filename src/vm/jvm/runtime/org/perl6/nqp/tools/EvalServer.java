@@ -165,7 +165,7 @@ public class EvalServer {
             String[] cmdStrings = StandardCharsets.UTF_8.decode(command).toString().split("\u0000",-1);
 
             if (cmdStrings.length < 3 || !cmdStrings[cmdStrings.length-1].isEmpty() || !cookie.equals(cmdStrings[0]))
-                throw new RuntimeException("commnd format error");
+                throw new RuntimeException("command format error");
 
             if (cmdStrings[1].equals("exit")) {
                 Files.delete(tokenPath);
