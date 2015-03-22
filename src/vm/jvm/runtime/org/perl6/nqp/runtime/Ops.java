@@ -6191,4 +6191,18 @@ public final class Ops {
 
         return res;
     }
+
+    public static String getuniname(long codePoint, ThreadContext tc) {
+        String name;
+        int cp = (int) codePoint;
+        try {
+            name = Character.getName(cp);
+            if(name == null) {
+                name = "<unassigned>";
+            }
+        } catch (IllegalArgumentException iae) {
+            name = "<illegal>";
+        }
+        return name;
+    }
 }
