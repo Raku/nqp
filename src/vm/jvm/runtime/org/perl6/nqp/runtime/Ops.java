@@ -3559,7 +3559,7 @@ public final class Ops {
     }
 
     public static long indexfrom(String string, String pattern, long fromIndex) {
-	if (fromIndex > string.length()) { return -1; }
+        if (fromIndex > string.length()) { return -1; }
         return string.indexOf(pattern, (int)fromIndex);
     }
 
@@ -3568,7 +3568,7 @@ public final class Ops {
     }
 
     public static long rindexfrom(String string, String pattern, long fromIndex) {
-	if (fromIndex > string.length()) { return -1; }
+        if (fromIndex > string.length()) { return -1; }
         return string.lastIndexOf(pattern, (int)fromIndex);
     }
 
@@ -5423,8 +5423,8 @@ public final class Ops {
                             continue;
                         }
                         else if (act == NFA.EDGE_EPSILON && to <= numStates && done[to] != gen) {
-			    if (to != 0)
-				curst.add(to);
+                            if (to != 0)
+                                curst.add(to);
                             continue;
                         }
                     }
@@ -6180,14 +6180,14 @@ public final class Ops {
         SixModelObject res = hashType.st.REPR.allocate(tc, hashType.st);
 
         try {
-                        InputStream is = Ops.class.getResourceAsStream("/jvmconfig.properties");
-                        Properties config = new Properties();
-                        config.load(is);
-                        for (String name : config.stringPropertyNames())
-                            res.bind_key_boxed(tc, name, box_s(config.getProperty(name), strType, tc));
-                } catch (Throwable e) {
-                        die_s("Failed to load config.properties", tc);
-                }
+            InputStream is = Ops.class.getResourceAsStream("/jvmconfig.properties");
+            Properties config = new Properties();
+            config.load(is);
+            for (String name : config.stringPropertyNames())
+                res.bind_key_boxed(tc, name, box_s(config.getProperty(name), strType, tc));
+        } catch (Throwable e) {
+            die_s("Failed to load config.properties", tc);
+        }
 
         return res;
     }
