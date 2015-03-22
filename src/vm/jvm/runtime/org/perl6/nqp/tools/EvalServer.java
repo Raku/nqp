@@ -146,6 +146,7 @@ public class EvalServer {
 
     private class ServiceThread extends Thread {
         public SocketChannel sock;
+        private PrintStream p6Out;
 
         private class RunThread extends Thread {
             private String[] argv;
@@ -158,14 +159,22 @@ public class EvalServer {
 
             @Override
             public void run() {
+                PrintStream orgOut = System.out;
+                PrintStream orgErr = System.err;
+                System.setOut(ops);
+                System.setErr(ops);
                 try {
                     eval();
                 } catch (ThreadDeath t) {
                     // swallowed exit
                 } catch (Throwable t) {
+                    System.setOut(orgOut);
+                    System.setErr(orgErr);
                     System.err.print("Error in socket connection:");
                     t.printStackTrace();
                 } finally {
+                    System.setOut(orgOut);
+                    System.setErr(orgErr);
                     try {
                         sock.close();
                     } catch (IOException iex) {
@@ -194,6 +203,7 @@ public class EvalServer {
         @Override
         public void run() {
             try {
+                p6Out = new PrintStream( Channels.newOutputStream(sock), true, "UTF-8" );
                 service();
             } catch (ThreadDeath t) {
                 // swallowed exit
@@ -226,22 +236,19 @@ public class EvalServer {
                 System.exit(0);
             }
             else if (cmdStrings[1].equals("run")) {
-                PrintStream out = new PrintStream( Channels.newOutputStream(sock), true, "UTF-8" );
-                Thread runner = new RunThread(argv, out);
+                Thread runner = new RunThread(argv, p6Out);
                 runner.run();
                 runner.join();
-                out.close();
             }
             else if (cmdStrings[1].equals("run_limited")) {
-                PrintStream out = new PrintStream( Channels.newOutputStream(sock), true, "UTF-8" );
                 Integer timeout = new Integer(cmdStrings[2]);
                 ExecutorService ste = Executors.newSingleThreadExecutor();
                 argv = new String[cmdStrings.length - 4];
                 System.arraycopy(cmdStrings, 3, argv, 0, argv.length);
-                Thread runner = new RunThread(argv, out);
+                Thread runner = new RunThread(argv, p6Out);
                 List<Future<Object>> future = ste.invokeAll(Arrays.asList(Executors.callable(runner)), timeout, TimeUnit.SECONDS);
                 if(future.get(0).isCancelled()) {
-                    out.println("\n(timeout)");
+                    p6Out.println("\n(timeout)");
                 }
             }
             else {
