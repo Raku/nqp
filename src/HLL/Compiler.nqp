@@ -11,6 +11,7 @@ class HLL::Compiler does HLL::Backend::Default {
     has @!cli-arguments;
     has %!cli-options;
     has $!backend;
+    has $!save_ctx;
 
     method BUILD() {
         # Backend is set to the default one, by default.
@@ -56,6 +57,10 @@ class HLL::Compiler does HLL::Backend::Default {
         return nqp::readlinefh($stdin);
     }
 
+    method context() {
+        $!save_ctx # XXX starting value?
+    }
+
     method interactive(*%adverbs) {
         nqp::printfh(nqp::getstderr(), self.interactive_banner);
 
@@ -67,7 +72,6 @@ class HLL::Compiler does HLL::Backend::Default {
         }
 
         my $target := nqp::lc(%adverbs<target>);
-        my $save_ctx;
         my $prompt := self.interactive_prompt // '> ';
         my $code;
         while 1 {
@@ -100,13 +104,13 @@ class HLL::Compiler does HLL::Backend::Default {
                 $code := $code ~ "\n";
                 my $output;
                 {
-                    $output := self.eval($code, :outer_ctx($save_ctx), |%adverbs);
+                    $output := self.eval($code, :outer_ctx($!save_ctx), |%adverbs);
                     CATCH {
                         self.interactive_exception($!);
                     }
                 };
                 if nqp::defined($*MAIN_CTX) {
-                    $save_ctx := $*MAIN_CTX;
+                    $!save_ctx := $*MAIN_CTX;
                 }
 
                 $code := "";
