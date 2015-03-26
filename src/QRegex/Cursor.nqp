@@ -36,8 +36,22 @@ role NQPCursorRole is export {
     has $!regexsub;
     has $!restart;
 
-    method orig() { nqp::getattr($!shared, ParseShared, '$!orig') }
-    method target() { nqp::getattr_s($!shared, ParseShared, '$!target') }
+    method orig($value = '') {
+        my $orig := nqp::getattr($!shared, ParseShared, '$!orig');
+        if $value ne '' {
+            $orig := $orig ~ $value;
+            nqp::bindattr($!shared, ParseShared, '$!orig', $orig);
+        }
+        $orig
+    }
+    method target($value = '') {
+        my $target := nqp::getattr_s($!shared, ParseShared, '$!target');
+        if $value ne '' {
+            $target := $target ~ $value;
+            nqp::bindattr_s($!shared, ParseShared, '$!target', $target);
+        }
+        $target
+    }
     method from() { $!from }
     method pos() { $!pos }
 
