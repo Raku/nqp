@@ -50,22 +50,22 @@ public abstract class SixModelObject implements Cloneable {
      * Boxing related functions.
      */
     public void set_int(ThreadContext tc, long value) {
-        throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation can not box a native int");
+        throw ExceptionHandling.dieInternal(tc, "This type cannot box a native integer");
     }
     public long get_int(ThreadContext tc) {
-        throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation can not unbox to a native int");
+        throw ExceptionHandling.dieInternal(tc, "This type cannot unbox to a native integer");
     }
     public void set_num(ThreadContext tc, double value) {
-        throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation can not box a native num");
+        throw ExceptionHandling.dieInternal(tc, "This type cannot box a native number");
     }
     public double get_num(ThreadContext tc) {
-        throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation can not unbox to a native num");
+        throw ExceptionHandling.dieInternal(tc, "This type cannot unbox to a native number");
     }
     public void set_str(ThreadContext tc, String value) {
-        throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation can not box a native str");
+        throw ExceptionHandling.dieInternal(tc, "This type cannot box a native string");
     }
     public String get_str(ThreadContext tc) {
-        throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation can not unbox to a native str");
+        throw ExceptionHandling.dieInternal(tc, "This type cannot unbox to a native string");
     }
     public void set_boxing_of(ThreadContext tc, long reprId, Object value) {
         throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation can not box "
