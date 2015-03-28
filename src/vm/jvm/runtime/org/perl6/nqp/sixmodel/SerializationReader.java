@@ -13,7 +13,7 @@ import org.perl6.nqp.sixmodel.reprs.VMHashInstance;
 
 public class SerializationReader {
     /* The current version of the serialization format. */
-    private final int CURRENT_VERSION = 9;
+    private final int CURRENT_VERSION = 10;
 
     /* The minimum version of the serialization format. */
     private final int MIN_VERSION = 4;
@@ -438,6 +438,16 @@ public class SerializationReader {
                     ParametricType pt = new ParametricType();
                     pt.parameterizer = readRef();
                     pt.lookup = new ArrayList<Map.Entry<SixModelObject, SixModelObject>>();
+                    st.parametricity = pt;
+                }
+                else if (paraFlag == 2) {
+                    ParameterizedType pt = new ParameterizedType();
+                    pt.parametricType = readObjRef();
+                    SixModelObject BOOTArray = tc.gc.BOOTArray;
+                    pt.parameters = BOOTArray.st.REPR.allocate(tc, BOOTArray.st);
+                    int elems = orig.getInt();
+                    for (int j = 0; j < elems; j++)
+                        pt.parameters.bind_pos_boxed(tc, j, readRef());
                     st.parametricity = pt;
                 }
                 else if (paraFlag != 0) {

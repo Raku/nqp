@@ -18,7 +18,7 @@ import org.perl6.nqp.sixmodel.reprs.MultiCache;
 
 public class SerializationWriter {
     /* The current version of the serialization format. */
-    private final int CURRENT_VERSION = 9;
+    private final int CURRENT_VERSION = 10;
 
     /* Various sizes (in bytes). */
     private final int HEADER_SIZE               = 4 * 16;
@@ -593,6 +593,16 @@ public class SerializationWriter {
             writeInt(1);
             writeRef(((ParametricType)st.parametricity).parameterizer);
         }
+
+        /* If it's a parametric type, save parametric type and parameters. */
+        else if (st.parametricity instanceof ParameterizedType) {
+            writeInt(2);
+            ParameterizedType pt = (ParameterizedType)st.parametricity;
+            writeObjRef(pt.parametricType);
+            pt.parameters.st.REPR.serialize(tc, this, pt.parameters);
+        }
+
+        /* Otherwise it's neither. */
         else {
             writeInt(0);
         }
