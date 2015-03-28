@@ -255,7 +255,7 @@ public class VMArrayInstance_u16 extends SixModelObject {
     
     public SixModelObject clone(ThreadContext tc) {
         try {
-            VMArrayInstance_i16 clone = (VMArrayInstance_i16)this.clone();
+            VMArrayInstance_u16 clone = (VMArrayInstance_u16)this.clone();
             clone.sc = null;
             if (clone.slots != null)
                 clone.slots = this.slots.clone();
