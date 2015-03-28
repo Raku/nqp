@@ -436,7 +436,10 @@ An operator precedence parser.
             $termcur := $here."$termishrx"();
             $pos := nqp::getattr_i($termcur, $cursor_class, '$!pos');
             nqp::bindattr_i($here, $cursor_class, '$!pos', $pos);
-            return $here if $pos < 0;
+            if $pos < 0 {
+		$here.panic('Missing required term after infix') if @opstack;
+		return $here;
+	    }
 
             $termish := $termcur.MATCH();
             
