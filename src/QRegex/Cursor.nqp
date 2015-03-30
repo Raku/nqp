@@ -48,6 +48,15 @@ role NQPCursorRole is export {
         $!regexsub := NQPMu;
     }
 
+    method !APPEND_TO_ORIG($value) {
+        my $orig := nqp::getattr($!shared, ParseShared, '$!orig');
+        $orig := $orig ~ $value;
+        nqp::bindattr($!shared, ParseShared, '$!orig', $orig);
+        my $target := nqp::getattr_s($!shared, ParseShared, '$!target');
+        $target := $target ~ $value;
+        nqp::bindattr_s($!shared, ParseShared, '$!target', $target);
+    }
+
     my $NO_CAPS := nqp::hash();
     method CAPHASH() {
         my $caps    := nqp::hash();
