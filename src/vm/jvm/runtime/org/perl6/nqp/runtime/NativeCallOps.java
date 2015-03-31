@@ -383,39 +383,43 @@ public final class NativeCallOps {
     }
 
     public static SixModelObject toNQPType(ThreadContext tc, ArgType target, SixModelObject type, Object o) {
-        SixModelObject nqpobj = null;
-        if (target != ArgType.VOID)
-            nqpobj = type.st.REPR.allocate(tc, type.st);
+        SixModelObject nqpobj = type;
 
         switch (target) {
         case VOID:
             return type;
         case CHAR: {
+            nqpobj = type.st.REPR.allocate(tc, type.st);
             byte val = ((Byte) o).byteValue();
             nqpobj.set_int(tc, val);
             break;
         }
         case SHORT: {
+            nqpobj = type.st.REPR.allocate(tc, type.st);
             short val = ((Short) o).shortValue();
             nqpobj.set_int(tc, val);
             break;
         }
         case INT: {
+            nqpobj = type.st.REPR.allocate(tc, type.st);
             int val = ((Integer) o).intValue();
             nqpobj.set_int(tc, val);
             break;
         }
         case LONG: {
+            nqpobj = type.st.REPR.allocate(tc, type.st);
             long val = ((NativeLong) o).longValue();
             nqpobj.set_int(tc, val);
             break;
         }
         case FLOAT: {
+            nqpobj = type.st.REPR.allocate(tc, type.st);
             float val = ((Float) o).floatValue();
             nqpobj.set_num(tc, val);
             break;
         }
         case DOUBLE: {
+            nqpobj = type.st.REPR.allocate(tc, type.st);
             double val = ((Double) o).floatValue();
             nqpobj.set_num(tc, val);
             break;
@@ -425,26 +429,33 @@ public final class NativeCallOps {
         case UTF16STR:
             /* TODO: Handle encodings. */
             if (o != null) {
+                nqpobj = type.st.REPR.allocate(tc, type.st);
                 nqpobj.set_str(tc, (String) o);
-            }
-            else {
-                nqpobj = type;
             }
             break;
         case CPOINTER: {
-            CPointerInstance cpointer = (CPointerInstance) nqpobj;
-            cpointer.pointer = (Pointer) o;
+            if (o != null) {
+                nqpobj = type.st.REPR.allocate(tc, type.st);
+                CPointerInstance cpointer = (CPointerInstance) nqpobj;
+                cpointer.pointer = (Pointer) o;
+            }
             break;
         }
         case CARRAY: {
-            CArrayInstance carray = (CArrayInstance) nqpobj;
-            carray.storage = (Pointer) o;
-            carray.managed = false;
+            if (o != null) {
+                nqpobj = type.st.REPR.allocate(tc, type.st);
+                CArrayInstance carray = (CArrayInstance) nqpobj;
+                carray.storage = (Pointer) o;
+                carray.managed = false;
+            }
             break;
         }
         case CSTRUCT: {
-            CStructInstance cstruct = (CStructInstance) nqpobj;
-            cstruct.storage = (Structure) o;
+            if (o != null) {
+                nqpobj = type.st.REPR.allocate(tc, type.st);
+                CStructInstance cstruct = (CStructInstance) nqpobj;
+                cstruct.storage = (Structure) o;
+            }
             break;
         }
         default:
