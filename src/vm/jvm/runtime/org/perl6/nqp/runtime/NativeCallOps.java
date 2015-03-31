@@ -172,7 +172,7 @@ public final class NativeCallOps {
     public static SixModelObject nativecallcast(SixModelObject target_spec, SixModelObject target_type, SixModelObject source, ThreadContext tc) {
         Pointer o = null;
 
-        if (source instanceof CPointerInstance) { // TODO Care about CPointer type object
+        if (source instanceof CPointerInstance) {
             o = ((CPointerInstance)source).pointer;
         }
         else if (source instanceof CArrayInstance) {
@@ -182,8 +182,14 @@ public final class NativeCallOps {
             o = ((CStructInstance)source).storage.getPointer();
         }
         else {
-            throw ExceptionHandling.dieInternal(tc,
-                "Native call expected object with CPointer representation, but got something else");
+            /* If we got something that is either a CPointer, CArray or CStruct but is not an instance,
+             * it is the type object which represents NULL. So, just don't throw and we are fine. */
+            if ( !(source.st.REPR instanceof org.perl6.nqp.sixmodel.reprs.CPointer
+                || source.st.REPR instanceof org.perl6.nqp.sixmodel.reprs.CArray
+                || source.st.REPR instanceof org.perl6.nqp.sixmodel.reprs.CStruct) ) {
+                throw ExceptionHandling.dieInternal(tc,
+                    "Native call expected object with CPointer representation, but got something else");
+            }
         }
 
         return castNativeCall(tc, target_spec, target_type, o);
