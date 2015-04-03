@@ -1193,6 +1193,17 @@ class RegexCompiler {
         ~ self.case($done);
     }
 
+
+    method anchor($node) {
+        if $node.subtype eq 'eos' {
+            "if ($!pos < $!target.length) \{{self.fail}\}\n";
+        } elsif $node.subtype eq 'bos' {
+            "if ($!pos != 0) \{{self.fail}\}\n";
+        } else {
+            $!compiler.NYI("anchor type: {$node.subtype}");
+        }
+    }
+
     method pass($node) {
         my $name;
 
