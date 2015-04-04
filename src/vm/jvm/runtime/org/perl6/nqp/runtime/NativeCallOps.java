@@ -295,6 +295,8 @@ public final class NativeCallOps {
             return Integer.class;
         case LONG:
             return NativeLong.class;
+        case LONGLONG:
+            return Long.class;
         case FLOAT:
             return Float.class;
         case DOUBLE:
@@ -327,6 +329,8 @@ public final class NativeCallOps {
             return new Integer((int) o.get_int(tc));
         case LONG:
             return new NativeLong((long) o.get_int(tc));
+        case LONGLONG:
+            return new Long((long) o.get_int(tc));
         case FLOAT:
             return new Float((float) o.get_num(tc));
         case DOUBLE:
@@ -415,6 +419,12 @@ public final class NativeCallOps {
         case LONG: {
             nqpobj = type.st.REPR.allocate(tc, type.st);
             long val = ((NativeLong) o).longValue();
+            nqpobj.set_int(tc, val);
+            break;
+        }
+        case LONGLONG: {
+            nqpobj = type.st.REPR.allocate(tc, type.st);
+            long val = ((Long) o).longValue();
             nqpobj.set_int(tc, val);
             break;
         }
