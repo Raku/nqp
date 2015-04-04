@@ -2647,10 +2647,12 @@ QAST::MASTOperations.add_core_op('nativecall', -> $qastcomp, $op {
         my int $n := nqp::elems(@args);
         my $obj;
         while $i < $n {
-            $obj := nqp::decont(nqp::atpos(@args, $i));
-            nqp::bindpos(@args, $i, nqp::can($obj, 'cstr')
-                ?? nqp::decont($obj.cstr())
-                !! $obj);
+            $obj := nqp::atpos(@args, $i);
+            unless nqp::iscont_i($obj) || nqp::iscont_n($obj) || nqp::iscont_s($obj) {
+                nqp::bindpos(@args, $i, nqp::can($obj, 'cstr')
+                    ?? nqp::decont($obj.cstr())
+                    !! nqp::decont($obj));
+            }
             $i++;
         }
         @args
