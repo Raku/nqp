@@ -297,6 +297,16 @@ public final class NativeCallOps {
             return NativeLong.class;
         case LONGLONG:
             return Long.class;
+        case UCHAR:
+            return Byte.class;
+        case USHORT:
+            return Short.class;
+        case UINT:
+            return Integer.class;
+        case ULONG:
+            return NativeLong.class;
+        case ULONGLONG:
+            return Long.class;
         case FLOAT:
             return Float.class;
         case DOUBLE:
@@ -330,6 +340,16 @@ public final class NativeCallOps {
         case LONG:
             return new NativeLong((long) o.get_int(tc));
         case LONGLONG:
+            return new Long((long) o.get_int(tc));
+        case UCHAR:
+            return new Byte((byte) o.get_int(tc));
+        case USHORT:
+            return new Short((short) o.get_int(tc));
+        case UINT:
+            return new Integer((int) o.get_int(tc));
+        case ULONG:
+            return new NativeLong((long) o.get_int(tc));
+        case ULONGLONG:
             return new Long((long) o.get_int(tc));
         case FLOAT:
             return new Float((float) o.get_num(tc));
@@ -423,6 +443,44 @@ public final class NativeCallOps {
             break;
         }
         case LONGLONG: {
+            nqpobj = type.st.REPR.allocate(tc, type.st);
+            long val = ((Long) o).longValue();
+            nqpobj.set_int(tc, val);
+            break;
+        }
+        case UCHAR: {
+            nqpobj = type.st.REPR.allocate(tc, type.st);
+            long val = ((Byte) o).byteValue();
+            if (val < 0)
+                val += 0x100;
+            nqpobj.set_int(tc, val);
+            break;
+        }
+        case USHORT: {
+            nqpobj = type.st.REPR.allocate(tc, type.st);
+            long val = ((Short) o).byteValue();
+            if (val < 0)
+                val += 0x10000;
+            nqpobj.set_int(tc, val);
+            break;
+        }
+        case UINT: {
+            nqpobj = type.st.REPR.allocate(tc, type.st);
+            long val = ((Integer) o).byteValue();
+            if (val < 0)
+                val += 0x100000000L;
+            nqpobj.set_int(tc, val);
+            break;
+        }
+        case ULONG: {
+            /* TODO: handle unsignedness properly. */
+            nqpobj = type.st.REPR.allocate(tc, type.st);
+            long val = ((NativeLong) o).longValue();
+            nqpobj.set_int(tc, val);
+            break;
+        }
+        case ULONGLONG: {
+            /* TODO: handle unsignedness properly. */
             nqpobj = type.st.REPR.allocate(tc, type.st);
             long val = ((Long) o).longValue();
             nqpobj.set_int(tc, val);
