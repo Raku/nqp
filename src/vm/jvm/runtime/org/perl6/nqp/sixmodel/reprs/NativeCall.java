@@ -37,7 +37,19 @@ public class NativeCall extends REPR {
         USHORT,
         UINT,
         ULONG,
-        ULONGLONG;
+        ULONGLONG,
+        CHAR_RW,
+        SHORT_RW,
+        INT_RW,
+        LONG_RW,
+        LONGLONG_RW,
+        FLOAT_RW,
+        DOUBLE_RW,
+        UCHAR_RW,
+        USHORT_RW,
+        UINT_RW,
+        ULONG_RW,
+        ULONGLONG_RW;
     }
 
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
