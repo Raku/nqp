@@ -281,22 +281,22 @@ m-bootstrap-files: $(M_STAGE2_OUTPUT)
 ## testing
 
 m-test: m-all
-	prove -r --exec ".@slash@$(M_RUNNER)" t/nqp t/hll t/qregex t/p5regex t/qast t/moar t/serialization t/nativecall
+	$(PROVE) -r --exec ".@slash@$(M_RUNNER)" t/nqp t/hll t/qregex t/p5regex t/qast t/moar t/serialization t/nativecall
 
 m-test-loud: m-all
-	prove -r -v --exec ".@slash@$(M_RUNNER)" t/nqp t/hll t/qregex t/p5regex t/qast t/moar t/serialization t/nativecall
+	$(PROVE) -r -v --exec ".@slash@$(M_RUNNER)" t/nqp t/hll t/qregex t/p5regex t/qast t/moar t/serialization t/nativecall
 
 m-core-test: $(M_RUNNER)
-	prove -r --exec ".@slash@$(M_RUNNER)" t/nqp
+	$(PROVE) -r --exec ".@slash@$(M_RUNNER)" t/nqp
 
 m-core-test-loud: $(M_RUNNER)
-	prove -r -v --exec ".@slash@$(M_RUNNER)" t/nqp
+	$(PROVE) -r -v --exec ".@slash@$(M_RUNNER)" t/nqp
 
 m-qregex-test: $(M_RUNNER)
-	prove -r --exec ".@slash@$(M_RUNNER)" t/qregex
+	$(PROVE) -r --exec ".@slash@$(M_RUNNER)" t/qregex
 
 m-qregex-test-loud: $(M_RUNNER)
-	prove -r -v --exec ".@slash@$(M_RUNNER)" t/qregex
+	$(PROVE) -r -v --exec ".@slash@$(M_RUNNER)" t/qregex
 
 # nqp::makefile <-- tells NQP::Configure to treat this file as a makefile,
 #                   performing win32 slash and makefile conversions
