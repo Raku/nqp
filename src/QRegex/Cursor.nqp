@@ -851,6 +851,7 @@ class NQPCursor does NQPCursorRole {
             # For captures with lists, initialize the lists.
             my %caplist := $NO_CAPS;
             my $rxsub   := nqp::getattr(self, NQPCursor, '$!regexsub');
+            my int $sawcaps := 0;
             if !nqp::isnull($rxsub) && nqp::defined($rxsub) {
                 %caplist := nqp::can($rxsub, 'CAPS') ?? $rxsub.CAPS() !! nqp::null();
                 if !nqp::isnull(%caplist) && nqp::istrue(%caplist) {
@@ -864,6 +865,10 @@ class NQPCursor does NQPCursorRole {
                                         nqp::defor($list, $list := nqp::list()),
                                         $name, nqp::list())
                                 !! nqp::bindkey($hash, $name, nqp::list());
+                            $sawcaps := 1;
+                        }
+                        elsif nqp::iterval($curcap) >= 1 {
+                            $sawcaps := 1;
                         }
                     }
                 }
@@ -871,15 +876,15 @@ class NQPCursor does NQPCursorRole {
 
             # Walk the Cursor stack and populate the Cursor.
             my $cs := nqp::getattr(self, NQPCursor, '$!cstack');
-            if !nqp::isnull($cs) && nqp::istrue($cs) {
+            if $sawcaps && !nqp::isnull($cs) && nqp::istrue($cs) {
                 my int $cselems := nqp::elems($cs);
                 my int $csi;
                 while $csi < $cselems {
                     my $subcur   := nqp::atpos($cs, $csi);
-                    my $submatch := $subcur.MATCH;
                     my $name := nqp::getattr($subcur, $?CLASS, '$!name');
-                    if !nqp::isnull($name) && nqp::defined($name) {
-                        if $name ne '' && nqp::ordat($name, 0) == 36 && ($name eq '$!from' || $name eq '$!to') {
+                    if !nqp::isnull($name) && nqp::defined($name) && $name ne '' {
+                        my $submatch := $subcur.MATCH();
+                        if nqp::ordat($name, 0) == 36 && ($name eq '$!from' || $name eq '$!to') {
                             nqp::bindattr_i($match, NQPMatch, $name, $submatch.from);
                         }
                         elsif nqp::index($name, '=') < 0 {
