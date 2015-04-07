@@ -495,8 +495,39 @@ match was found.
 
 Return a string that is the concatenation of the two passed in strings.
 
+## decode
+* `decode($buffer, str $encoding)`
+
+Returns an (NFG) string resulting from decoding the specified buffer assuming
+the specified encoding.
+
+## decodetocodes
+* `decodetocodes`($buffer, str $encoding, int $normalization, $codes)
+
+Decodes the bytes in the specified buffer using the provided encoding. Applies
+normalization as requested (must be one of the nqp::const::NORMALIZE_* values;
+use nqp::const::NORMALIZE_NONE to apply no normalization). Places the code
+points into $codes, which should be some VMArray holding 32-bit integers.
+
 ## encode
-* `encode(str, 'encoding', buffer)`
+* `encode(str $string, str $encoding, $buffer)`
+
+Encodes an (NFG) string into the specified encoding, writing into the buffer
+provided. The data written is normalized according to NFC.
+
+## encodefromcodes
+* `encodefromcodes($codes, str $encoding, $buffer)
+
+Takes a 32-bit integer array of Unicode codepoints, encodes them using the
+chosen encoding, and writes them into the buffer. No normalization is applied.
+
+## encodenorm
+* `encode(str $string, str $encoding, int $normalization, $buffer)
+
+Encodes an (NFG) string into the specified encoding, writing into the buffer
+provided. The data written is normalized according to the normalization value
+passed (which must be one of the nqp::const::NORMALIZE_* values). Specifying
+NORMALIZE_NONE is equivalent to NFC.
 
 ## escape
 * `escape(str $str)`
@@ -564,6 +595,13 @@ fields separated by the value of EXPR, and returns that new string.
 
 Return lowercase copy of string.
 
+## normalizecodes
+* `normalizecodes($codes-in, int $normalization, $codes-out)
+
+Takes the codepoints in $codes-in, applies the specified normalization, and
+places the result into the $codes-out array. Both arrays of codepoints must
+be 32-bit integer arrays.
+
 ## ord
 * `ord(str $str)`
 * `ord(str $str, int $i)`
@@ -629,6 +667,20 @@ the substrings between delimiters in the original string.
 
 If the original string begins or ends with the delimiter, the resulting
 array will begin or end with an empty element.
+
+## strfromcodes
+* `strfromcodes($codes)`
+
+Returns an (NFG) string built from the specified codepoints, which must be
+provided as a 32-bit integer array.
+
+## strtocodes
+* `strtocodes(str $str, int $normalization, $codes)
+
+Takes an NFG string, and places the codepoints from it into the codes array,
+which must be a 32-bit integer array. Applies the specified normalization,
+specified as one of the nqp::const::NORMALIZE_* values; NORMALIZE_NONE is
+equivalent to NORMALIZE_NFC.
 
 ## substr
 * `substr(str $str, int $position)`
