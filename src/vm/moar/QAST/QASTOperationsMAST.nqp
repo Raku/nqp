@@ -2154,6 +2154,12 @@ QAST::MASTOperations.add_core_moarop_mapping('substr_s', 'substr_s');
 QAST::MASTOperations.add_core_moarop_mapping('codepointfromname', 'getcpbyname');
 QAST::MASTOperations.add_core_moarop_mapping('encode', 'encode');
 QAST::MASTOperations.add_core_moarop_mapping('decode', 'decode');
+QAST::MASTOperations.add_core_moarop_mapping('decodetocodes', 'decodetocodes', 3);
+QAST::MASTOperations.add_core_moarop_mapping('encodefromcodes', 'encodefromcodes', 2);
+QAST::MASTOperations.add_core_moarop_mapping('encodenorm', 'encodenorm', 3);
+QAST::MASTOperations.add_core_moarop_mapping('normalizecodes', 'normalizecodes', 2);
+QAST::MASTOperations.add_core_moarop_mapping('strfromcodes', 'strfromcodes');
+QAST::MASTOperations.add_core_moarop_mapping('strtocodes', 'strtocodes', 2);
 
 QAST::MASTOperations.add_core_op('tclc', -> $qastcomp, $op {
     my @operands := $op.list;
