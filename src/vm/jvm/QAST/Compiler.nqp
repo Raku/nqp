@@ -1993,10 +1993,11 @@ my %const_map := nqp::hash(
     'C_TYPE_DOUBLE',            -2,
     'C_TYPE_LONGDOUBLE',        -3,
 
-    'NORMALIZE_NFC',             0,
-    'NORMALIZE_NFD',             1,
-    'NORMALIZE_NFKC',            2,
-    'NORMALIZE_NFKD',            3,
+    'NORMALIZE_NONE',            0,
+    'NORMALIZE_NFC',             1,
+    'NORMALIZE_NFD',             2,
+    'NORMALIZE_NFKC',            3,
+    'NORMALIZE_NFKD',            4,
 );
 QAST::OperationsJAST.add_core_op('const', -> $qastcomp, $op {
     if nqp::existskey(%const_map, $op.name) {
