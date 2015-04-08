@@ -835,9 +835,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                 $count := %astcap{''};
             }
         }
-        %capnames{''} := $count;
-        nqp::deletekey(%capnames, '$!from');
-        nqp::deletekey(%capnames, '$!to');
+        %capnames{''} := $count;  # will be deleted in SET_CAPS
         %capnames;
     }
     

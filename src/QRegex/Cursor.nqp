@@ -837,7 +837,7 @@ class NQPCursor does NQPCursorRole {
     my $NO_CAPS    := nqp::hash();
     method MATCH() {
         my $match := nqp::getattr(self, NQPCursor, '$!match');
-        unless nqp::istype($match, NQPMatch) || nqp::ishash($match) {
+        if nqp::isnull($match) || (!nqp::istype($match, NQPMatch) && !nqp::ishash($match)) {
             # Set up basic state of Match.
             my $list;
             my $hash := nqp::hash();
@@ -851,7 +851,6 @@ class NQPCursor does NQPCursorRole {
             # For captures with lists, initialize the lists.
             my %caplist := $NO_CAPS;
             my $rxsub   := nqp::getattr(self, NQPCursor, '$!regexsub');
-            my int $sawcaps := 1;
             if !nqp::isnull($rxsub) && nqp::defined($rxsub) {
                 %caplist := nqp::can($rxsub, 'CAPS') ?? $rxsub.CAPS() !! nqp::null();
                 if !nqp::isnull(%caplist) && nqp::istrue(%caplist) {
@@ -865,10 +864,6 @@ class NQPCursor does NQPCursorRole {
                                         nqp::defor($list, $list := nqp::list()),
                                         $name, nqp::list())
                                 !! nqp::bindkey($hash, $name, nqp::list());
-                            $sawcaps := 1;
-                        }
-                        elsif nqp::iterval($curcap) >= 1 {
-                            $sawcaps := 1;
                         }
                     }
                 }
@@ -876,7 +871,13 @@ class NQPCursor does NQPCursorRole {
 
             # Walk the Cursor stack and populate the Cursor.
             my $cs := nqp::getattr(self, NQPCursor, '$!cstack');
-            if $sawcaps && !nqp::isnull($cs) && nqp::istrue($cs) {
+# Dunno why this optimization gives a NullPointer exception on JVM...
+#?if jvm
+            if !nqp::isnull($cs) && nqp::istrue($cs) {
+#?endif
+#?if !jvm
+            if %caplist && !nqp::isnull($cs) && nqp::istrue($cs) {
+#?endif
                 my int $cselems := nqp::elems($cs);
                 my int $csi;
                 while $csi < $cselems {
