@@ -566,9 +566,20 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                 for $<arglist>.ast.list { $qast[0].push( $_ ) }
             }
             elsif $<nibbler> {
-                $name eq 'after' ??
-                    $qast[0].push(self.qbuildsub(self.flip_ast($<nibbler>.ast), :anon(1), :addself(1))) !!
+                if $name eq 'after' {
+                    my int $litlen := self.offset_ast($<nibbler>.ast);
+                    if $litlen >= 0 {
+                        $qast[0][0].value('before');
+                        $qast[0].push(self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1)));
+                        $qast[0].push(QAST::IVal.new( :value($litlen) ));  # optional offset to before
+                    }
+                    else {
+                        $qast[0].push(self.qbuildsub(self.flip_ast($<nibbler>.ast), :anon(1), :addself(1)));
+                    }
+                }
+                else {
                     $qast[0].push(self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1)));
+                }
             }
         }
         make $qast;
@@ -855,6 +866,29 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         $ast.subtype('capture');
     }
 
+    method offset_ast($qast) {
+        return -1 unless nqp::istype($qast, QAST::Regex);
+        if $qast.rxtype eq 'literal' {
+            return nqp::chars($qast[0]);
+        }
+        elsif $qast.rxtype eq 'cclass' {
+            return 1;
+        }
+        elsif $qast.rxtype eq 'anchor' {
+            return 0;
+        }
+        elsif $qast.rxtype eq 'concat' {
+            my int $litlen;
+            for @($qast) {
+                my int $ll := self.offset_ast($_);
+                return -1 if $ll < 0;
+                $litlen := $litlen + $ll;
+            }
+            return $litlen;
+        }
+        return -1;
+    }
+ 
     method flip_ast($qast) {
         return $qast unless nqp::istype($qast, QAST::Regex);
         if $qast.rxtype eq 'literal' {

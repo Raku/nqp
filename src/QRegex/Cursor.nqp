@@ -512,13 +512,13 @@ role NQPCursorRole is export {
         $cur;
     }
 
-    method before($regex) {
+    method before($regex, $off = 0) {
         my int $orig_highwater := nqp::getattr_i($!shared, ParseShared, '$!highwater');
         my $orig_highexpect := nqp::getattr($!shared, ParseShared, '@!highexpect');
         nqp::bindattr($!shared, ParseShared, '@!highexpect', nqp::list_s());
         my $cur := self."!cursor_start_cur"();
-        nqp::bindattr_i($cur, $?CLASS, '$!pos', $!pos);
-        nqp::getattr_i($regex($cur), $?CLASS, '$!pos') >= 0 ??
+        nqp::bindattr_i($cur, $?CLASS, '$!pos', $!pos - $off);
+        $!pos >= $off && nqp::getattr_i($regex($cur), $?CLASS, '$!pos') >= 0 ??
             $cur."!cursor_pass"($!pos, 'before') !!
             nqp::bindattr_i($cur, $?CLASS, '$!pos', -3);
         nqp::bindattr_i($!shared, ParseShared, '$!highwater', $orig_highwater);

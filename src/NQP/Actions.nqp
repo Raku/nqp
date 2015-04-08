@@ -1888,9 +1888,20 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
                 for $<arglist>.ast.list { $qast[0].push( $_ ) }
             }
             elsif $<nibbler> {
-                $name eq 'after' ??
-                    $qast[0].push(self.qbuildsub(self.flip_ast($<nibbler>.ast), :anon(1), :addself(1))) !!
+                if $name eq 'after' {
+                    my int $litlen := self.offset_ast($<nibbler>.ast);
+                    if $litlen >= 0 {
+                        $qast[0][0].value('before');
+                        $qast[0].push(self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1)));
+                        $qast[0].push(QAST::IVal.new( :value($litlen) ));  # optional offset to before
+                    }
+                    else {
+                        $qast[0].push(self.qbuildsub(self.flip_ast($<nibbler>.ast), :anon(1), :addself(1)));
+                    }
+                }
+                else {
                     $qast[0].push(self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1)));
+                }
             }
         }
         make $qast;
