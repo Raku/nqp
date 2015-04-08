@@ -871,13 +871,7 @@ class NQPCursor does NQPCursorRole {
 
             # Walk the Cursor stack and populate the Cursor.
             my $cs := nqp::getattr(self, NQPCursor, '$!cstack');
-# Dunno why this optimization gives a NullPointer exception on JVM...
-#?if jvm
-            if !nqp::isnull($cs) && nqp::istrue($cs) {
-#?endif
-#?if !jvm
-            if %caplist && !nqp::isnull($cs) && nqp::istrue($cs) {
-#?endif
+            if !nqp::isnull(%caplist) && %caplist && !nqp::isnull($cs) && nqp::istrue($cs) {
                 my int $cselems := nqp::elems($cs);
                 my int $csi;
                 while $csi < $cselems {
