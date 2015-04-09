@@ -2691,6 +2691,14 @@ QAST::OperationsJAST.map_classlib_core_op('nativecallsizeof', $TYPE_NATIVE_OPS, 
 QAST::OperationsJAST.map_classlib_core_op('nativecallcast', $TYPE_NATIVE_OPS, 'nativecallcast', [$RT_OBJ, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('nativecallglobal', $TYPE_NATIVE_OPS, 'nativecallglobal', [$RT_STR, $RT_STR, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 
+QAST::OperationsJAST.add_core_op('getcodelocation', -> $qastcomp, $op {
+    $qastcomp.as_jast(QAST::Op.new(
+        :op('hash'),
+        QAST::SVal.new( :value<file> ), QAST::SVal.new( :value<unknown> ),
+        QAST::SVal.new( :value<line> ), QAST::IVal.new( :value(-1) )
+    ));
+});
+
 QAST::OperationsJAST.map_classlib_core_op('getuniname', $TYPE_OPS, 'getuniname', [$RT_INT], $RT_STR, :tc);
 
 class QAST::CompilerJAST {
