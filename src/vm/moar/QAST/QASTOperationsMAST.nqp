@@ -2683,6 +2683,8 @@ QAST::MASTOperations.add_core_moarop_mapping('nativecallcast', 'nativecallcast')
 QAST::MASTOperations.add_core_moarop_mapping('nativecallglobal', 'nativecallglobal');
 QAST::MASTOperations.add_core_moarop_mapping('nativecallsizeof', 'nativecallsizeof', :decont(0));
 
+QAST::MASTOperations.add_core_moarop_mapping('getcodelocation', 'getcodelocation', :decont(0));
+
 # process related opcodes
 QAST::MASTOperations.add_core_moarop_mapping('exit', 'exit', 0);
 QAST::MASTOperations.add_core_moarop_mapping('sleep', 'sleep', 0);
