@@ -340,7 +340,7 @@ my module sprintf {
         method directive:sym<o>($/) {
             my $int := intify(next_argument($/));
             $int := nqp::base_I($int, 8);
-            my $pre := '0' if $int && has_flag($/, 'hash');
+            my $pre := '0' if $int ne '0' && has_flag($/, 'hash');
             if nqp::chars($<precision>) {
                 $int := '' if $<precision>.made == 0 && $int == 0;
                 $int := $pre ~ infix_x('0', intify($<precision>.made) - nqp::chars($int)) ~ $int;
@@ -376,7 +376,7 @@ my module sprintf {
         method directive:sym<x>($/) {
             my $int := intify(next_argument($/));
             $int := nqp::base_I($int, 16);
-            my $pre := '0X' if $int && has_flag($/, 'hash');
+            my $pre := '0X' if $int ne '0' && has_flag($/, 'hash');
             if nqp::chars($<precision>) {
                 $int := '' if $<precision>.made == 0 && $int == 0;
                 $int := $pre ~ infix_x('0', $<precision>.made - nqp::chars($int)) ~ $int;
