@@ -133,7 +133,7 @@ ok( nqp::isnull(13232) == 0, 'nqp::isnull(number)' );
 ok( nqp::istrue(0) == 0, 'nqp::istrue');
 ok( nqp::istrue(1) == 1, 'nqp::istrue');
 ok( nqp::istrue('') == 0, 'nqp::istrue');
-ok( nqp::istrue('0') == 0, 'nqp::istrue');
+ok( nqp::istrue('0') == 1, 'nqp::istrue');
 ok( nqp::istrue('no') == 1, 'nqp::istrue');
 ok( nqp::istrue(0.0) == 0, 'nqp::istrue');
 ok( nqp::istrue(0.1) == 1, 'nqp::istrue');
