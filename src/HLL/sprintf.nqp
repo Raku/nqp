@@ -147,17 +147,30 @@ my module sprintf {
 
         method directive:sym<b>($/) {
             my $int := intify(next_argument($/));
-            $int := nqp::base_I($int, 2);
-            my $pre := ($<sym> eq 'b' ?? '0b' !! '0B') if $int ne '0' && has_flag($/, 'hash');
-            if nqp::chars($<precision>) {
-                $int := '' if $<precision>.made == 0 && $int == 0;
-                $int := $pre ~ infix_x('0', $<precision>.made - nqp::chars($int)) ~ $int;
+            my $pad := padding_char($/);
+            my $sign := nqp::islt_I($int, $zero) ?? '-'
+                     !! has_flag($/, 'plus') ?? '+' 
+                     !! has_flag($/, 'space') ?? ' ' 
+                     !! '';
+            $int := nqp::base_I(nqp::abs_I($int, $knowhow), 2);
+            my $size := $<size> ?? $<size>.made !! 0;
+            my $pre := '';
+            $pre := ($<sym> eq 'b' ?? '0b' !! '0B') if $int ne '0' && has_flag($/, 'hash');
+            if nqp::chars($<precision>) { 
+                $int := ($<precision>.made == 0 && $int == 0) ?? ''
+                     !! $sign ~ $pre ~ infix_x('0', $<precision>.made - nqp::chars($int)) ~ $int;
             }
             else {
-                $int := $pre ~ $int
+                if $pad ne ' ' && $size {
+                    my $chars_sign_pre := $sign ?? nqp::chars($pre) + 1 !! nqp::chars($pre);
+                    $int := $sign ~ $pre ~ infix_x($pad, $size - $chars_sign_pre - nqp::chars($int)) ~ $int;
+                } else {
+                    $int := $sign ~ $pre ~ $int;
+                }
             }
             make $int;
         }
+
         method directive:sym<c>($/) {
             make nqp::chr(next_argument($/))
         }
