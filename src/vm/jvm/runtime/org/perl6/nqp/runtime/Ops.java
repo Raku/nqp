@@ -3237,6 +3237,11 @@ public final class Ops {
             return obj instanceof TypeObject || obj.get_num(tc) == 0.0 ? 0 : 1;
         case BoolificationSpec.MODE_UNBOX_STR_NOT_EMPTY:
             return obj instanceof TypeObject || obj.get_str(tc).equals("") ? 0 : 1;
+        case BoolificationSpec.MODE_UNBOX_STR_NOT_EMPTY_OR_ZERO:
+            if (obj instanceof TypeObject)
+                return 0;
+            String str = obj.get_str(tc);
+            return str == null || str.equals("") || str.equals("0") ? 0 : 1;
         case BoolificationSpec.MODE_NOT_TYPE_OBJECT:
             return obj instanceof TypeObject ? 0 : 1;
         case BoolificationSpec.MODE_BIGINT:

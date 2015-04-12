@@ -11,6 +11,7 @@ public class BoolificationSpec {
     public static final int MODE_UNBOX_INT = 1;
     public static final int MODE_UNBOX_NUM = 2;
     public static final int MODE_UNBOX_STR_NOT_EMPTY = 3;
+    public static final int MODE_UNBOX_STR_NOT_EMPTY_OR_ZERO = 4;
     public static final int MODE_NOT_TYPE_OBJECT = 5;
     public static final int MODE_BIGINT = 6;
     public static final int MODE_ITER = 7;
