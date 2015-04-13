@@ -167,12 +167,12 @@ nqp::unlink($test-file ~ '-linked');
 
 # symlink
 
-my $tmp_file := "tmp";
+my $tmp-file := "tmp";
 my $env := nqp::getenvhash();
 $env<NQP_SHELL_TEST_ENV_VAR> := "123foo";
-nqp::shell("echo %NQP_SHELL_TEST_ENV_VAR% > $tmp_file",nqp::cwd(),$env);
-my $output := slurp($tmp_file);
-nqp::unlink($tmp_file);
+nqp::shell("echo %NQP_SHELL_TEST_ENV_VAR% > $tmp-file",nqp::cwd(),$env);
+my $output := slurp($tmp-file);
+nqp::unlink($tmp-file);
 my $is-windows := $output ne "%NQP_SHELL_TEST_ENV_VAR%\n";
 
 if $is-windows {
