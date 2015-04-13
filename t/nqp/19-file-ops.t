@@ -172,6 +172,7 @@ my $env := nqp::getenvhash();
 $env<NQP_SHELL_TEST_ENV_VAR> := "123foo";
 nqp::shell("echo %NQP_SHELL_TEST_ENV_VAR% > $tmp_file",nqp::cwd(),$env);
 my $output := slurp($tmp_file);
+nqp::unlink($tmp_file);
 my $is-windows := $output ne "%NQP_SHELL_TEST_ENV_VAR%\n";
 
 if $is-windows {

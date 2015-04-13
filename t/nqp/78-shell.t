@@ -26,3 +26,4 @@ if $output eq "%NQP_SHELL_TEST_ENV_VAR%\n" {
 } else {
   ok($output ~~ /^123foo/,"passing env variables to child processes works on windows");
 }
+nqp::unlink($tmp_file);
