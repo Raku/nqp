@@ -13,7 +13,7 @@ class NQP::Actions is HLL::Actions {
         }
         $block;
     }
-    
+
     sub default_for($sigil) {
         if $sigil eq '@' {
             QAST::Op.new( :op('list') )
@@ -30,7 +30,7 @@ class NQP::Actions is HLL::Actions {
             $default
         }
     }
-    
+
     sub default_value_for_prim($prim) {
         $prim == 1 ?? QAST::IVal.new( :value(0) ) !!
         $prim == 2 ?? QAST::NVal.new( :value(0.0) ) !!
@@ -41,7 +41,7 @@ class NQP::Actions is HLL::Actions {
 
     method deflongname($/) {
         make $<colonpair>
-             ?? ~$<identifier> ~ ':' ~ $<colonpair>.made.named 
+             ?? ~$<identifier> ~ ':' ~ $<colonpair>.made.named
                     ~ '<' ~ colonpair_str($<colonpair>.made) ~ '>'
              !! ~$/;
     }
@@ -67,7 +67,7 @@ class NQP::Actions is HLL::Actions {
         unless $*HAS_YOU_ARE_HERE {
             $unit.push( self.CTXSAVE() );
         }
-        
+
         # Detect if we're the main unit by if we were given any args. If so,
         # register the mainline as a module (so trying to use ourself in the
         # program will not explode). If we have a MAIN sub, call it at end of
@@ -83,17 +83,17 @@ class NQP::Actions is HLL::Actions {
                 )
             ));
         }
-        
+
         # Push mainline statements into UNIT.
         $unit.push($mainline);
 
         # Load the needed libraries.
         $unit.push($*W.libs());
-        
+
         # Wrap everything in a QAST::CompUnit.
         my $compunit := QAST::CompUnit.new(
             :hll('nqp'),
-            
+
             # Serialization related bits.
             :sc($*W.sc()),
             :code_ref_blocks($*W.code_ref_blocks()),
@@ -108,7 +108,7 @@ class NQP::Actions is HLL::Actions {
                 :op('call'),
                 QAST::BVal.new( :value($unit) )
             )),
-            
+
             # If we're executed as the mainline, get the command line args
             # and pass them along.
             :main(QAST::Stmts.new(
@@ -123,9 +123,9 @@ class NQP::Actions is HLL::Actions {
             # elements.
             $unit
         );
-        
+
         $*W.cleanup();
-        
+
         make $compunit;
     }
 
@@ -229,7 +229,7 @@ class NQP::Actions is HLL::Actions {
             # We haven't got a specified outer context already, so load a
             # setting.
             my $SETTING := $*W.load_setting(%*COMPILING<%?OPTIONS><setting> // 'NQPCORE');
-            
+
             # If it exports HOWs, grab them. Also, if we're loading the
             # setting, also by default load Regex library (we can't load
             # this in the setting as Regex depends on the setting).
@@ -247,8 +247,8 @@ class NQP::Actions is HLL::Actions {
         }
         self.SET_BLOCK_OUTER_CTX($*W.cur_lexpad());
     }
-    
-    sub import_HOW_exports($UNIT) {    
+
+    sub import_HOW_exports($UNIT) {
         # See if we've exported any HOWs.
         if nqp::existskey($UNIT, 'EXPORTHOW') {
             for $UNIT<EXPORTHOW>.WHO {
@@ -399,7 +399,7 @@ class NQP::Actions is HLL::Actions {
             ),
             default_for('$'));
     }
-	
+
 	method statement_prefix:sym<BEGIN>($/) {
         make $*W.run_begin_block($<blorst>.ast);
         $/.prune();
@@ -457,7 +457,7 @@ class NQP::Actions is HLL::Actions {
 
     method statement_mod_loop:sym<while>($/)  { make $<cond>.ast; }
     method statement_mod_loop:sym<until>($/)  { make $<cond>.ast; }
-    
+
     ## Terms
 
     method term:sym<fatarrow>($/)           { make $<fatarrow>.ast; }
@@ -538,7 +538,7 @@ class NQP::Actions is HLL::Actions {
                         QAST::Var.new( :name('self'), :scope('lexical') ) ),
                     $ch
                 );
-                
+
                 # Make sure the attribute exists and add type info.
                 unless $*IN_DECL {
                     my $attr;
@@ -591,13 +591,13 @@ class NQP::Actions is HLL::Actions {
     method package_declarator:sym<grammar>($/) { make $<package_def>.ast }
     method package_declarator:sym<role>($/)    { make $<package_def>.ast }
     method package_declarator:sym<native>($/)  { make $<package_def>.ast }
-    
+
     method package_declarator:sym<stub>($/) {
         # Construct meta-object with specified metaclass, adding it to the
         # serialization context for this compilation unit.
         my $HOW := $*W.find_sym($<metaclass><identifier>);
         my $PACKAGE := $*W.pkg_create_mo($HOW, :name(~$<name>));
-        
+
         # Install it in the current package or current lexpad as needed.
         if $*SCOPE eq 'our' || $*SCOPE eq '' {
             $*W.install_package_symbol($*OUTERPACKAGE, $<name><identifier>, $PACKAGE);
@@ -614,7 +614,7 @@ class NQP::Actions is HLL::Actions {
         else {
             $/.CURSOR.panic("$*SCOPE scoped packages are not supported");
         }
-        
+
         make QAST::Stmts.new();
         $/.prune;
     }
@@ -699,12 +699,12 @@ class NQP::Actions is HLL::Actions {
 
         # Finally, compose.
         $*W.pkg_compose($*PACKAGE);
-        
+
         # If it's a grammar, pre-compute the NFAs.
         if $*PKGDECL eq 'grammar' && nqp::can($*PACKAGE, '!precompute_nfas') {
             $*PACKAGE.'!precompute_nfas'();
         }
-        
+
         # Export if needed.
         if $<export> {
             $*EXPORT.WHO<DEFAULT>.WHO{$name} := $*PACKAGE;
@@ -713,7 +713,7 @@ class NQP::Actions is HLL::Actions {
         make $ast;
         $/.prune;
     }
-    
+
     method role_params($/) {
         for $<variable> {
             my $var := $_.ast;
@@ -759,12 +759,12 @@ class NQP::Actions is HLL::Actions {
             if $<initializer> {
                 $/.CURSOR.panic('Initiailizers not supported on has-scoped variables');
             }
-            
+
             # Locate the type of meta-attribute we need.
             unless nqp::existskey(%*HOW, $*PKGDECL ~ '-attr') {
                 $/.CURSOR.panic("$*PKGDECL packages do not support attributes");
             }
-            
+
             # Set up arguments for meta-attribute instantiation.
             my %lit_args;
             my %obj_args;
@@ -780,7 +780,7 @@ class NQP::Actions is HLL::Actions {
                     try %obj_args<default> := $*W.find_sym(['NQPMu']);
                 }
             }
-            
+
             # Add it.
             $*DECLARAND_ATTR := $*W.pkg_add_attribute($*PACKAGE, %*HOW{$*PKGDECL ~ '-attr'},
                 %lit_args, %obj_args);
@@ -877,7 +877,7 @@ class NQP::Actions is HLL::Actions {
                     if %sym<proto> {
                         $proto := %sym<value>;
                     }
-                    
+
                     # Otherwise, no candidate holder, so add one.
                     else {
                         # Check we have a proto in scope.
@@ -901,14 +901,14 @@ class NQP::Actions is HLL::Actions {
                         # Set up dispatch routine in this scope.
 						nqp::die("Dispatcher derivation NYI");
                     }
-                    
+
                     # Create a code object and attach the signature.
                     my $code := $*W.create_code($ast, $name, 0);
                     attach_multi_signature($code, $ast);
 
                     # Add this candidate to the proto.
                     $proto.add_dispatchee($code);
-                    
+
                     # Ensure we emit the code block.
                     # XXX We'll mark it static so the code object inside the
                     # proto is captured correctly. Technically this is wrong,
@@ -930,7 +930,7 @@ class NQP::Actions is HLL::Actions {
                         $ast
                     ));
                     $BLOCK.symbol('&' ~ $name, :scope('lexical'), :proto(1), :value($code), :declared(1) );
-                    
+
                     # Also stash the current lexical dispatcher and capture, for the {*}
                     # to resolve.
                     $block[0].push(QAST::Op.new(
@@ -961,11 +961,11 @@ class NQP::Actions is HLL::Actions {
                             lexical_package_lookup([$name], $/),
                             QAST::Var.new( :name('&' ~ $name), :scope('lexical') )
                         ));
-                        
+
                         # Static code object needs re-capturing also, as it's
                         # our-scoped.
                         $ast.blocktype('declaration_static');
-                        
+
                         # Also need to make sure it gets a code object so it's
                         # in the SC.
                         $*W.create_code($ast, $name, 0);
@@ -976,13 +976,13 @@ class NQP::Actions is HLL::Actions {
             else {
                 $/.CURSOR.panic("$*SCOPE scoped routines are not supported yet");
             }
-            
+
             # Is it the MAIN sub?
             if $name eq 'MAIN' && $*MULTINESS ne 'multi' {
                 $*MAIN_SUB := $block;
             }
         }
-        else {            
+        else {
             if $*W.is_precompilation_mode() {
                 $*W.create_code($ast, '<anon>', 0)
             }
@@ -993,13 +993,13 @@ class NQP::Actions is HLL::Actions {
         $lex_ast.annotate('block_ast', $block);
         make $lex_ast;
 
-        # Apply traits.        
+        # Apply traits.
         if $<trait> {
             for $<trait> { $_.ast()($/); }
         }
         $/.prune;
     }
-    
+
     method method_def($/) {
         # If it's just got * as a body, make a multi-dispatch enterer.
         # Otherwise, build method block QAST.
@@ -1023,7 +1023,7 @@ class NQP::Actions is HLL::Actions {
             ));
         }
         $ast.symbol('self', :scope('lexical') );
-        
+
         # Install it where it should go (methods table / namespace).
         my $name := "";
         if $<deflongname> {
@@ -1046,12 +1046,12 @@ class NQP::Actions is HLL::Actions {
             if $*MULTINESS eq 'multi' { attach_multi_signature($code, $ast); }
             $*W.pkg_add_method($*PACKAGE, $meta_meth, $name, $code);
             $ast.annotate('code_obj', $code);
-            
+
             # Install it in the package also if needed.
             if $*SCOPE eq 'our' {
                 $*W.install_package_routine($*PACKAGE, $name, $ast);
             }
-                    
+
             # If it's a proto, also stash the current lexical dispatcher, for the {*}
             # to resolve.
             if $is_dispatcher {
@@ -1121,7 +1121,7 @@ class NQP::Actions is HLL::Actions {
         }
         $*W.set_routine_signature($code_obj, $types, $definednesses);
     }
-    
+
     sub wrap_return_handler($ast) {
         QAST::Op.new(
             :op<lexotic>, :name<RETURN>,
@@ -1245,7 +1245,7 @@ class NQP::Actions is HLL::Actions {
             my $package := $*PACKAGE;
             my $is_dispatcher := $*SCOPE eq 'proto';
             make -> $match {
-                $*W.pkg_add_method($package, 'add_parrot_vtable_mapping', $name, 
+                $*W.pkg_add_method($package, 'add_parrot_vtable_mapping', $name,
                     $match.ast.ann('code_obj') //
                         $*W.create_code($match.ast.ann('block_ast'), $name, $is_dispatcher));
             };
@@ -1323,7 +1323,7 @@ class NQP::Actions is HLL::Actions {
             my $regex := %*LANG<Regex-actions>.qbuildsub($<p6regex>.ast, $block,
                 code_obj => $code, cursor_type => $*W.find_sym(['NQPCursor']));
             $regex.name($name);
-            
+
             if $*PKGDECL && nqp::can($*PACKAGE.HOW, 'add_method') {
                 # Add the actual method, marking it as a static declaration
                 # since it's reachable through the method table.
@@ -1340,7 +1340,7 @@ class NQP::Actions is HLL::Actions {
                     $code.SET_GENERIC_NFA($gen_nfa);
                 }
             }
-            
+
             # In sink context, we don't need the Regex::Regex object.
             $ast := QAST::Op.new(
                 :op<callmethod>, :name<new>,
@@ -1422,7 +1422,7 @@ class NQP::Actions is HLL::Actions {
                 $var := lexical_package_lookup(@ns, $/);
             }
         }
-        
+
         # If it's a call, add the arguments.
         my $ast := $var;
         if $<args> {
@@ -1651,45 +1651,45 @@ class NQP::Actions is HLL::Actions {
                  :node($/)
         );
     }
-    
+
     method term:sym<next>($/) {
         my $ast := QAST::Op.new( :op('control'), :name('next') );
-        
+
         if $<identifier> {
             $ast.push(QAST::WVal.new( :value($*W.find_sym([$<identifier>])), :named('label') ));
         }
-        
+
         make $ast
     }
     method term:sym<last>($/) {
         my $ast := QAST::Op.new( :op('control'), :name('last') );
-        
+
         if $<identifier> {
             $ast.push(QAST::WVal.new( :value($*W.find_sym([$<identifier>])), :named('label') ));
         }
-        
+
         make $ast
     }
     method term:sym<redo>($/) {
         my $ast := QAST::Op.new( :op('control'), :name('redo') );
-        
+
         if $<identifier> {
             $ast.push(QAST::WVal.new( :value($*W.find_sym([$<identifier>])), :named('label') ));
         }
-        
+
         make $ast
     }
 
     method infix:sym<~~>($/) {
         make QAST::Op.new( :op<callmethod>, :name<ACCEPTS>, :node($/) );
     }
-    
+
     # Takes a multi-part name that we know is in a package and generates
     # QAST to look it up using NQP package semantics.
     sub lexical_package_lookup(@name, $/) {
         # Catch empty names and die helpfully.
         if +@name == 0 { $/.CURSOR.panic("Cannot compile empty name"); }
-        
+
         # The final lookup will always be just a keyed access to a
         # symbol table.
         my $final_name := @name.pop();
@@ -1697,7 +1697,7 @@ class NQP::Actions is HLL::Actions {
             :scope('associative'),
             QAST::SVal.new( :value(~$final_name) )
         );
-        
+
         # If there's no explicit qualification, then look it up in the
         # current package, and fall back to looking in GLOBAL.
         if +@name == 0 {
@@ -1717,7 +1717,7 @@ class NQP::Actions is HLL::Actions {
                 ),
                 default_for(nqp::substr(~$final_name, 0, 1))));
         }
-        
+
         # Otherwise, see if the first part of the name is lexically
         # known. If not, it's in GLOBAL. Also, if first part is GLOBAL
         # then strip it off.
@@ -1781,7 +1781,7 @@ class NQP::Actions is HLL::Actions {
                 $lookup.fallback(default_for($sigil));
             }
         }
-        
+
         return $lookup;
     }
 }
@@ -1794,8 +1794,8 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
                               :rxtype('qastnode'), :subtype('declarative'), :node($/) );
     }
 
-    method metachar:sym<{ }>($/) { 
-        make QAST::Regex.new( $<codeblock>.ast, 
+    method metachar:sym<{ }>($/) {
+        make QAST::Regex.new( $<codeblock>.ast,
                               :rxtype<qastnode>, :node($/) );
     }
 
@@ -1807,15 +1807,15 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
                               :rxtype<subrule>, :subtype<method>, :node($/));
     }
 
-    method assertion:sym<{ }>($/) { 
+    method assertion:sym<{ }>($/) {
         make QAST::Regex.new( QAST::NodeList.new(
                                   QAST::SVal.new( :value('!INTERPOLATE_REGEX') ),
                                   $<codeblock>.ast),
                               :rxtype<subrule>, :subtype<method>, :node($/));
     }
 
-    method assertion:sym<?{ }>($/) { 
-        make QAST::Regex.new( $<codeblock>.ast, 
+    method assertion:sym<?{ }>($/) {
+        make QAST::Regex.new( $<codeblock>.ast,
                               :subtype<zerowidth>, :negate( $<zw> eq '!' ),
                               :rxtype<qastnode>, :node($/) );
     }
@@ -1823,7 +1823,7 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
     method assertion:sym<var>($/) {
         make QAST::Regex.new( QAST::NodeList.new(
                                   QAST::SVal.new( :value('!INTERPOLATE_REGEX') ),
-                                  $<var>.ast), 
+                                  $<var>.ast),
                               :rxtype<subrule>, :subtype<method>, :node($/));
     }
 
@@ -1845,7 +1845,7 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
             );
         make $ast;
     }
-    
+
     method assertion:sym<name>($/) {
         my $name := ~$<longname>;
         my $qast;
@@ -1855,7 +1855,7 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
                 self.subrule_alias($qast, $name);
             }
             else {
-                $qast := QAST::Regex.new( $qast, :name($name), 
+                $qast := QAST::Regex.new( $qast, :name($name),
                                           :rxtype<subcapture>, :node($/) );
             }
         }
@@ -1908,11 +1908,11 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
     }
 
     method arglist($/) { make $<arglist>.ast }
-    
+
     method arg($/) {
         make $<quote_EXPR>.ast;
     }
-    
+
     method create_regex_code_object($block) {
         my $code := $*W.create_code($block, '', 0, :code_type_name<NQPRegex>);
         if nqp::existskey(%*RX, 'code') {
@@ -1920,15 +1920,15 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
         }
         $code
     }
-    
+
     method store_regex_nfa($code_obj, $block, $nfa) {
         $code_obj.SET_NFA($nfa.save);
     }
-    
+
     method store_regex_caps($code_obj, $block, %caps) {
         $code_obj.SET_CAPS(%caps);
     }
-    
+
     method store_regex_alt_nfa($code_obj, $block, $key, @alternatives) {
         my @saved;
         for @alternatives {

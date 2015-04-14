@@ -258,7 +258,7 @@ class NQP::Optimizer {
         if $typeinfo eq '_n' && nqp::existskey(%opt_n_i, $asm) {
             self.num_to_int($op, $asm);
         }
-        
+
         # Calls to fixed names that are compile-time known can be simplified.
         elsif $opname eq 'call' && $op.name {
             my @sym := self.find_lex_scope_level($op.name);
@@ -274,7 +274,7 @@ class NQP::Optimizer {
                 # error reporting in this branch.
             }
         }
-        
+
         # Enrich various ops with int/num/str annotations.
         elsif $typeinfo eq '_i' {
             $op.returns(int);

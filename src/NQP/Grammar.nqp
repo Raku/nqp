@@ -13,7 +13,7 @@ grammar NQP::Grammar is HLL::Grammar {
         my %*HOW;
         %*HOW<knowhow>      := nqp::knowhow();
         %*HOW<knowhow-attr> := nqp::knowhowattr();
-        
+
         # Serialization context builder - keeps track of objects that
         # cross the compile-time/run-time boundary that are associated
         # with this compilation unit.
@@ -46,7 +46,7 @@ grammar NQP::Grammar is HLL::Grammar {
     }
 
     token ENDSTMT {
-        [ 
+        [
         <.unv>? $$ <.ws> <?MARKER('endstmt')>
         ]?
     }
@@ -88,7 +88,7 @@ grammar NQP::Grammar is HLL::Grammar {
             || <.panic: '=begin without matching =end'>
             ]
         | <identifier> {}
-            .*? \n <?before \h* [ 
+            .*? \n <?before \h* [
                 '='
                 [ 'cut' »
                   <.panic: 'Obsolete pod format, please use =begin/=end instead'> ]?
@@ -108,7 +108,7 @@ grammar NQP::Grammar is HLL::Grammar {
         :my $*HAS_YOU_ARE_HERE := 0;
         :my $*MAIN_SUB;
         :my $*UNIT := $*W.push_lexpad($/);
-        
+
         # Create GLOBALish - the current GLOBAL view, created fresh
         # for each compilation unit so we get separate compilation.
         :my $*GLOBALish := $*W.pkg_create_mo(%*HOW<knowhow>, :name('GLOBALish'));
@@ -116,11 +116,11 @@ grammar NQP::Grammar is HLL::Grammar {
             $*GLOBALish.HOW.compose($*GLOBALish);
             $*W.install_lexical_symbol($*UNIT, 'GLOBALish', $*GLOBALish);
         }
-        
+
         # This is also the starting package.
         :my $*PACKAGE := $*GLOBALish;
         { $*W.install_lexical_symbol($*UNIT, '$?PACKAGE', $*PACKAGE); }
-        
+
         # Create EXPORT::DEFAULT.
         :my $*EXPORT;
         {
@@ -133,11 +133,11 @@ grammar NQP::Grammar is HLL::Grammar {
                 ($*EXPORT.WHO)<DEFAULT> := $DEFAULT;
             }
         }
-        
+
         { $*W.add_initializations(); }
-        
+
         <.outerctx>
-        
+
         <statementlist>
         [ $ || <.panic: 'Confused'> ]
     }
@@ -349,7 +349,7 @@ grammar NQP::Grammar is HLL::Grammar {
     token package_declarator:sym<module> {
         :my $*OUTERPACKAGE := $*PACKAGE;
         :my $*PKGDECL := 'module';
-        <sym> <package_def> 
+        <sym> <package_def>
     }
     token package_declarator:sym<knowhow> {
         :my $*OUTERPACKAGE := $*PACKAGE;
@@ -393,7 +393,7 @@ grammar NQP::Grammar is HLL::Grammar {
         <.newpad>
         [ <?{ $*PKGDECL eq 'role' }> '[' ~ ']' <role_params> ]?
         [ 'is' 'repr(' <repr=.quote_EXPR> ')' ]?
-        
+
         {
             # Construct meta-object for this package, adding it to the
             # serialization context for this compilation unit.
@@ -433,7 +433,7 @@ grammar NQP::Grammar is HLL::Grammar {
                 $/.CURSOR.panic("$*SCOPE scoped packages are not supported");
             }
         }
-        
+
         [ $<export>=['is export'] ]?
         [ 'is' <parent=.name> ]?
         [ 'does' <role=.name> ]*
@@ -444,7 +444,7 @@ grammar NQP::Grammar is HLL::Grammar {
         ]
         ]
     }
-    
+
     rule role_params {
         :my $*SCOPE   := 'my';
         :my $*IN_DECL := 'variable';
@@ -480,7 +480,7 @@ grammar NQP::Grammar is HLL::Grammar {
         <trait>*
         <initializer>?
     }
-    
+
     token initializer {
         ':=' <.ws> [ <EXPR('f=')> || <.panic: "Malformed binding"> ]
     }
@@ -580,7 +580,7 @@ grammar NQP::Grammar is HLL::Grammar {
           || '::(' <latename=variable> ')'
           || <deflongname>
           ]
-          [ 
+          [
           || '{*}'<?ENDSTMT>
           || '{' '<...>' '}'<?ENDSTMT>
           || '{' '<*>' '}'<?ENDSTMT>
@@ -594,7 +594,7 @@ grammar NQP::Grammar is HLL::Grammar {
           <.newpad>
           [ '(' ~ ')' <signature> ]**0..1
           :my %*RX;
-          {   
+          {
               %*RX<s>    := $<sym> eq 'rule';
               %*RX<r>    := $<sym> eq 'token' || $<sym> eq 'rule';
               %*RX<name> := $<deflongname> ?? $<deflongname>.made !! "!!LATENAME!!" ~ ~$<latename>;
@@ -605,9 +605,9 @@ grammar NQP::Grammar is HLL::Grammar {
     }
 
     token dotty {
-        '.' 
+        '.'
         [ <longname=deflongname>
-        | <?['"]> <quote> 
+        | <?['"]> <quote>
             [ <?[(]> || <.panic: "Quoted method name requires parenthesized arguments"> ]
         ]
 
@@ -643,7 +643,7 @@ grammar NQP::Grammar is HLL::Grammar {
         '{*}' <?ENDSTMT>
         [ <?{ $*MULTINESS eq 'proto' }> || <.panic: '{*} may only appear in proto'> ]
     }
-    
+
     token term:sym<name> {
         <name> <?{ ~$<name> ne 'return' }> <args>**0..1
     }
@@ -825,7 +825,7 @@ grammar NQP::Regex is QRegex::P6Regex::Grammar {
     token rxstopper {
         <[ } / ]>
     }
-    
+
     token metachar:sym<:my> {
         ':' <?before 'my'> <statement=.LANG('MAIN', 'statement')> <.ws> ';'
     }
@@ -841,7 +841,7 @@ grammar NQP::Regex is QRegex::P6Regex::Grammar {
     token assertion:sym<{ }> {
         <?[{]> <codeblock>
     }
-    
+
     token assertion:sym<?> { '?' [ <?[>]> | <![{]> <assertion> ] }
     token assertion:sym<!> { '!' [ <?[>]> | <![{]> <assertion> ] }
 
@@ -872,7 +872,7 @@ grammar NQP::Regex is QRegex::P6Regex::Grammar {
     token codeblock {
         <block=.LANG('MAIN','pblock')>
     }
-    
+
     token arg {
         <quote_EXPR=.LANG('MAIN','quote_EXPR')>
     }
