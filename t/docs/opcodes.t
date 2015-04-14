@@ -110,7 +110,7 @@ sub find_documented_opcodes() {
             }
         }
         next unless $line ~~ / ^ '* ' .* '(' /;
-        $line := nqp::substr2($line, 3);
+        $line := nqp::substr($line, 3);
         $line := nqp::split("(", $line)[0];
         for @opcode_vms -> $vm {
             %documented_ops{$vm}{$line} := 1 ;
