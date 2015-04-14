@@ -39,14 +39,14 @@ grammar JSON::Grammar is HLL::Grammar {
     }
 
     token string {
-        <?["]> <quote_EXPR: ':qq'> 
+        <?["]> <quote_EXPR: ':qq'>
     }
 }
 
 
 class JSON::Actions is HLL::Actions {
-    method TOP($/) { 
-        make PAST::Block.new($<value>.ast, :node($/)); 
+    method TOP($/) {
+        make PAST::Block.new($<value>.ast, :node($/));
     };
 
     method value:sym<string>($/) { make $<string>.ast; }
@@ -64,14 +64,14 @@ class JSON::Actions is HLL::Actions {
     method value:sym<object>($/) {
         my $past := PAST::Stmts.new( :node($/) );
         my $hashname := PAST::Compiler.unique('hash');
-        my $hash := PAST::Var.new( :scope<register>, :name($hashname), 
+        my $hash := PAST::Var.new( :scope<register>, :name($hashname),
                                    :viviself('Hash'), :isdecl );
         my $hashreg := PAST::Var.new( :scope<register>, :name($hashname) );
         $past.'push'($hash);
         # loop through all string/value pairs, add set opcodes for each pair.
         my $n := 0;
         while $n < +$<string> {
-            $past.'push'(PAST::Op.new( :pirop<set__vQ~*>, $hashreg, 
+            $past.'push'(PAST::Op.new( :pirop<set__vQ~*>, $hashreg,
                                        $<string>[$n].ast, $<value>[$n].ast ) );
             $n++;
         }

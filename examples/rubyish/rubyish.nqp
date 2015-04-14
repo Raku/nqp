@@ -365,7 +365,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
     token prefix:sym<not> { <sym>  <O('%loose_not,     :op<not_i>')> }
     token infix:sym<and>  { <sym>  <O('%loose_logical, :op<if>')> }
     token infix:sym<or>   { <sym>  <O('%loose_logical, :op<unless>')> }
- 
+
     # Parenthesis
     token circumfix:sym<( )> { :my $*IN_PARENS := 1;
                                '(' ~ ')' <EXPR> <O('%methodop')> }
@@ -419,7 +419,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
     }
 
     token term:sym<code> {
-        'begin' ~ 'end' <stmtlist> 
+        'begin' ~ 'end' <stmtlist>
     }
 
     token closure  {:s ['{'  ['|' ~ '|' <signature>?]? ]  ~ '}'   <stmtlist>
@@ -428,7 +428,7 @@ grammar Rubyish::Grammar is HLL::Grammar {
 
     token term:sym<lambda> {:s
         :my $*CUR_BLOCK := QAST::Block.new(QAST::Stmts.new());
-        ['lambda' <closure> 
+        ['lambda' <closure>
         | '->' <closure=.closure2>
         ]
     }
@@ -730,7 +730,7 @@ class Rubyish::Actions is HLL::Actions {
             ));
             $*CUR_BLOCK.symbol('self', :declared(1));
         }
- 
+
         make $*CUR_BLOCK;
     }
 
@@ -825,7 +825,7 @@ class Rubyish::Actions is HLL::Actions {
 
     method stmt:sym<EXPR>($/) { make $<EXPR>.ast; }
 
-    method term:sym<infix=>($/) { 
+    method term:sym<infix=>($/) {
         my $op := $<OPER><O><op>;
         make  QAST::Op.new( :op('bind'),
                             $<var>.ast,
@@ -959,7 +959,7 @@ class Rubyish::Actions is HLL::Actions {
         $ast.op( ~$<op> );
         $ast.push( $<else>.ast )
             if $<else>;
- 
+
         make $ast;
     }
 
@@ -1011,7 +1011,7 @@ class Rubyish::Actions is HLL::Actions {
         my $text := QAST::Stmts.new( :node($/) );
         $text.push( QAST::Op.new( :op<print>, $_.ast ) )
             for $<template-nibble>;
-        
+
         make $text;
     }
 
