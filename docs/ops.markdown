@@ -52,7 +52,32 @@ opcodes will eventually be removed from NQP. Internal opcodes are typically
 used at compile time to replace opcodes that take a variable number of
 arguments.
 
-# Arithmetic Opcodes
+The opcodes are grouped into the following categories:
+
+* [Arithmetic Opcodes](#arithmetic)
+* [Numeric Opcodes](#numeric)
+* [Trigonometric Opcodes](#trig)
+* [Relational / Logic Opcodes](#logic)
+* [Array Opcodes](#array)
+* [Hash Opcodes](#hash)
+* [String Opcodes](#string)
+* [Unicode Property Opcodes](#unicode)
+* [Conditional Opcodes](#conditional)
+* [Loop/Control Opcodes](#control)
+* [Exceptional Opcodes](#exceptions)
+* [Input/Output Opcodes](#io)
+* [External command Opcodes](#extern)
+* [File / Directory / Network Opcodes](#filedirnet)
+* [Type/Conversion Opcodes](#type)
+* [OO/SixModel Opcodes](#sixmodel)
+* [Bit Opcodes](#bit)
+* [Context Introspection Opcodes](#context)
+* [Variable Opcodes](#variable)
+* [Miscellaneous Opcodes](#misc)
+* [Native Call / Interoperability Opcodes](#nativecall)
+* [Asynchronous operations](#async)
+
+# <a id="arithmetic"></a> Arithmetic Opcodes
 
 ## abs
 * `abs_i(int $i)`
@@ -127,7 +152,7 @@ Return the negative of a number.
 Subtract $r from $l, returning the result.
 `_I` variant returns an object of the given type.
 
-# Numeric Opcodes
+# <a id="numeric"></a> Numeric Opcodes
 
 ## base
 * `base_I(Int $i, int $radix)`
@@ -199,7 +224,7 @@ given number.
 ## sqrt
 * `sqrt_n(num $l, num $r)`
 
-# Trigonometric Opcodes
+# <a id="trig"></a> Trigonometric Opcodes
 
 Each opcode corresponds directly to the trigonometric function of the same
 name. `h` indicates a hyperbolic variant.
@@ -243,7 +268,7 @@ name. `h` indicates a hyperbolic variant.
 ## tanh
 * `tanh_n(num $n)`
 
-# Relational / Logic Opcodes
+# <a id="logic"></a> Relational / Logic Opcodes
 
 ## cmp
 * `cmp_i(int $l, int $r)`
@@ -313,7 +338,7 @@ Return non-zero if the two parameters are not equal.
 
 Return 1 if `$val` is 0, 0 otherwise.
 
-# Array opcodes
+# <a id="array"></a> Array opcodes
 
 ## atpos
 * `atpos(@arr, int $i)`
@@ -424,7 +449,7 @@ while $iter {
 
 You can also use `nqp::iterator()` to iterate over a hash's key-value pairs.
 
-# Hash opcodes
+# <a id="hash"></a> Hash opcodes
 
 ## atkey
 * `atkey(%hash, String $key)`
@@ -471,7 +496,7 @@ for %hash {
 
 Returns the value associated with the given key-value pair.
 
-# String Opcodes
+# <a id="string"></a> String Opcodes
 
 ## chars
 * `chars(str $str)`
@@ -733,7 +758,7 @@ my class MyHandler {
 }
 ```
 
-# Unicode Property Opcodes
+# <a id="unicode"></a> Unicode Property Opcodes
 
 ## getuniname
 * `getuniname(int $codepoint)`
@@ -777,7 +802,7 @@ Looks up a codepoint property and return 1 if it matches the pval, 0 otherwise.
 The propcode and pvalcode may be looked up with the opcodes above.  (Note that
 you can use the property value name (e.g. Nd) for both lookups.)
 
-# Conditional Opcodes
+# <a id="conditional"></a> Conditional Opcodes
 
 ## if
 * `if(Block $condition, Block $then)`
@@ -793,7 +818,7 @@ If not, and an `$else` block is present, run that instead.
 If the `$condition` evaluates to 0, run the `$then` block.
 If not, and an `$else` block is present, run that instead.
 
-# Loop/Control Opcodes
+# <a id="control"></a> Loop/Control Opcodes
 
 ## for
 * `for(Iterable $iter, Block $body)`
@@ -855,7 +880,7 @@ Not callable directly from NQP, but used in languages via QAST to perform loop
 control. The specific kind of loop control desired is specified via the
 `:name` atttribute; either `next`, `last`, or `redo`.
 
-# Exceptional Opcodes
+# <a id="exceptions"></a> Exceptional Opcodes
 
 ## backtrace
 * `backtrace(Exception $ex)`
@@ -928,7 +953,7 @@ Sets the exception payload.
 
 Throw the exception.
 
-# Input/Output Opcodes
+# <a id="io"></a> Input/Output Opcodes
 
 ## closefh
 * `closefh(Handle $fh)`
@@ -1043,7 +1068,7 @@ Return current access position for an open handle.
 
 Output the given object to the filehandle.
 
-# External command Opcodes
+# <a id="extern"></a> External command Opcodes
 
 ## shell
 * `shell(str $cmd, str $path, %env)`
@@ -1071,7 +1096,7 @@ processing of args is done. The first value of `@args` is the command
 executed, further values are passed as arguments. Blocks until command is
 complete.
 
-# File / Directory / Network Opcodes
+# <a id="filedirnet"></a> File / Directory / Network Opcodes
 
 ## chdir
 * `chdir(str $path)`
@@ -1259,7 +1284,7 @@ Create a symbolic link from `$after` to `$before`
 Delete the given file $path. Returns 0 on success, -2 if the file
 didn't exist. May throw an exception.
 
-# Type/Conversion Opcodes
+# <a id="type"></a> Type/Conversion Opcodes
 
 ## bool
 * `bool_I(Int $val)`
@@ -1442,7 +1467,7 @@ Convert Big Integer value to a native number.
 Given a Perl 6 object, return a native with the same value,
 of the type indicated by the opcode suffix.
 
-# OO/SixModel Opcodes
+# <a id="sixmodel"></a> OO/SixModel Opcodes
 
 ## bindattr
 * `bindattr(Mu $obj, Mu:T $type, str $attributename, Mu $new_value)`
@@ -1579,7 +1604,7 @@ NQP equivalent for Perl 6's `$obj.WHAT`.
 
 Return a unique ID for this `$obj`.
 
-# Bit Opcodes
+# <a id="bit"></a> Bit Opcodes
 
 ## bitand
 * `bitand_i(int $l, int $r)`
@@ -1626,7 +1651,7 @@ Signed right shift of `$bits` by `$count`.
 XOR the bits in `$l` and `$r`.
 `_I` variant returns an object of the given type.
 
-# Context Introspection Opcodes
+# <a id="context"></a> Context Introspection Opcodes
 
 ## ctx
 * `ctx()`
@@ -1729,7 +1754,7 @@ Looks up the contextual with the specified name in the caller chain, starting at
 
 Looks up the lexical with the specified name, starting at the given $context. It checks all outer frames of the caller chain.
 
-# Variable opcodes
+# <a id="variable"></a> Variable opcodes
 
 ## bind
 * `bind(Mu $variable, Mu $value)`
@@ -1737,7 +1762,7 @@ Looks up the lexical with the specified name, starting at the given $context. It
 Binds `$value` to the `$variable`. Dies if `$variable` isn't actually a
 variable. Same as the `:=` operator in NQP.
 
-# Miscellaneous Opcodes
+# <a id="misc"></a> Miscellaneous Opcodes
 
 ## const
 * `const()`
@@ -1857,14 +1882,14 @@ Creates a lexical closure from the block's outer scope.
 Return the time in seconds since January 1, 1970 UTC. `_i` variant returns
 an integral number of seconds, `_n` returns a fractional amount.
 
-# Native Call / Interoperability Opcodes
+# <a id="nativecall"></a> Native Call / Interoperability Opcodes
 
 ## x_posixerrno
 * `x_posixerrno()`
 
 Returns an int that corresponds to the value of POSIX's errno.
 
-# Asynchronous operations
+# <a id="async"></a> Asynchronous operations
 
 The various asynchronous operations, such as timers and asynchronous I/O, take
 a concurrent queue to push a work item into at an appropriate time. This may
