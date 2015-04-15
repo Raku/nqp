@@ -15,7 +15,7 @@ variants (e.g. `mul_i`, `mul_n`) together with a single description.
 
 Opcode variants may contain a type suffix, which usually indicates:
 
-* `_i` argument is native int 
+* `_i` argument is native int
 * `_n` argument is native float
 * `_s` argument is native string
 * `_b` argument is code blocks
@@ -110,14 +110,14 @@ a native num, using a scale of 309, and a rounding mode equivalent to Java's
 * `gcd_i(int $l, int $r)`
 * `gcd_I(Int $l, Int $r, Mu:T $type)`
 
-Return the greatest common multiple of two numbers. 
+Return the greatest common multiple of two numbers.
 `_I` variant returns an object of the given type.
 
 ## lcm
 * `lcm_i(int $l, int $r)`
 * `lcm_I(Int $l, Int $r, Mu:T $type)`
 
-Return the lowest common multiple of two numbers. 
+Return the lowest common multiple of two numbers.
 `_I` variant returns an object of the given type.
 
 ## mod
@@ -218,7 +218,7 @@ and of type `$type_bigint` for positive exponents.
 * `rand_I(Int $i, Mu:T $type)`
 
 Returns a psuedo-random bigint up to the value of the
-given number. 
+given number.
 `_I` variant returns an object of the given type.
 
 ## sqrt
@@ -293,7 +293,7 @@ or 0 otherwise.
 
 Return non-zero if the two parameters are equal.
 
-## isgt 
+## isgt
 * `isgt_i(int $l, int $r)`
 * `isgt_n(num $l, num $r)`
 * `isgt_s(str $l, str $r)`
@@ -386,7 +386,8 @@ are coerced to the appropriate type.
 * `push_s(Array str @arr, str $v)`
 
 "Push $v onto the end of @arr."
-Bind $v to @arr at the position at the end of @arr, i.e., the position that is just after the last position of @arr that has been bound to.
+Bind $v to @arr at the position at the end of @arr, i.e., the position that
+is just after the last position of @arr that has been bound to.
 
 Return value is not currently defined.
 
@@ -397,7 +398,8 @@ Return value is not currently defined.
 * `pop_s(@arr)`
 
 "Pop the last value off the end of @arr."
-Return the value of @arr at its last bound position, and unbind @arr at that position.
+Return the value of @arr at its last bound position, and unbind @arr at that
+position.
 
 ## setelems
 * `setelems(@arr, int $i)`
@@ -413,7 +415,9 @@ elments at the end are bound with potentially VM specific null entries.
 * `shift_s(@arr)`
 
 "Shift the last value from the beginning of @arr."
-Return the value of @arr at index 0, unbind @arr at index 0, and move all other binding of @arr to the index one below what they were previously bound to.
+Return the value of @arr at index 0, unbind @arr at index 0, and move all
+other binding of @arr to the index one below what they were previously bound
+to.
 
 ## splice
 * `splice(@arr, @from, int $offset, int $count)`
@@ -428,7 +432,8 @@ Replace them with all the elements from `@from`.
 * `unshift_s(@arr, str $v)`
 
 "Shift $v into the beginning of @arr."
-Bind $v to @arr at index 0, move all other bindings of @arr to the index one above what they were previously bound to.
+Bind $v to @arr at index 0, move all other bindings of @arr to the index one
+above what they were previously bound to.
 Return the number of elements of @arr on Parrot, $v on JVM.
 
 ## iterator
@@ -734,21 +739,23 @@ Return a new string containing `$count` copies of `$str`.
 ## sprintf
 * `sprintf(str $pattern, @values)`
 
-Returns a string formatted by the printf conventions similar to Perl 5 / C. Machine sized numeric
-types, their limits and therefor overflows are not implemented though.
+Returns a string formatted by the printf conventions similar to Perl 5 / C.
+Machine sized numeric types, their limits and therefor overflows are not
+implemented though.
 
 ## sprintfdirectives
 * `sprintfdirectives(str $pattern)`
 
-This takes the same pattern as `sprintf` does, and computes the needed value-count that `sprintf`
-would have to provide.
+This takes the same pattern as `sprintf` does, and computes the needed
+value-count that `sprintf` would have to provide.
 
 ## sprintfaddargumenthandler
 * `sprintfaddargumenthandler(Mu $handler)`
 
-Lets you register a handler-instance that supports the sprintf op when it has to numify
-custom types. This handler has to provide two methods, `mine` and `int`. `mine` gets the
-the value in question and returns true if this handler is in charge for this type, false otherwise.
+Lets you register a handler-instance that supports the sprintf op when it
+has to numify custom types. This handler has to provide two methods, `mine`
+and `int`. `mine` gets the the value in question and returns true if this
+handler is in charge for this type, false otherwise.
 The method `int` does the conversion for patterns like %d.
 
 ```perl
@@ -798,9 +805,10 @@ Same thing, but fetches a boolean property value.
 ## matchuniprop
 * `matchuniprop(int $codepoint, int $propcode, int $pvalcode)`
 
-Looks up a codepoint property and return 1 if it matches the pval, 0 otherwise.
-The propcode and pvalcode may be looked up with the opcodes above.  (Note that
-you can use the property value name (e.g. Nd) for both lookups.)
+Looks up a codepoint property and return 1 if it matches the pval, 0
+otherwise.  The propcode and pvalcode may be looked up with the opcodes
+above.  (Note that you can use the property value name (e.g. Nd) for both
+lookups.)
 
 # <a id="conditional"></a> Conditional Opcodes
 
@@ -1080,7 +1088,8 @@ until command is complete.
 
 * `shell(str $cmd)` _Deprecated: use the three argument version_
 
-Same as the three argument version of `shell`, using the current directory and an empty environment.
+Same as the three argument version of `shell`, using the current directory
+and an empty environment.
 
 * `shell1(str $cmd)` _Internal, Deprecated_
 * `shell3(str $cmd, str $path, %env)` _Internal_
@@ -1192,11 +1201,11 @@ stat() function. Any of these variants may throw an exception if the platform
 does not support them. (JVM does not support `STAT_PLATFORM_BLOCKSIZE` or
 `STAT_PLATFORM_BLOCKS`).
 
-    * `nqp::const::STAT_EXISTS` 
+    * `nqp::const::STAT_EXISTS`
 
 Returns 1 if the path exists, 0 otherwise.
 
-    * `nqp::const::STAT_FILESIZE` 
+    * `nqp::const::STAT_FILESIZE`
 
 Returns the size of the file in bytes.
 
@@ -1230,7 +1239,7 @@ an exception occurred.
 
     * `nqp::const::STAT_BACKUPTIME`
 
-Returns -1. 
+Returns -1.
 
     * `nqp::const::STAT_GID`
     * `nqp::const::STAT_UID`
@@ -1446,7 +1455,7 @@ differently depending on the backend.
 ## jvmisnull `jvm`
 * `jvmisnull(Mu $obj)`
 
-Returns a 1 if the object is an NQP Type object *or*  the underlying 
+Returns a 1 if the object is an NQP Type object *or*  the underlying
 JVM object is null. Returns 0 otherwise.
 
 ## tostr
@@ -1698,7 +1707,8 @@ Used by the multi-dispatcher.
 
 Gets hold of the argument capture passed to the current block.
 (a future usecapture may invalidate it)
-It's valid to implement this exactly the same way as savecapture if there's no performance benefit to be had in a split.
+It's valid to implement this exactly the same way as savecapture if there's
+no performance benefit to be had in a split.
 Used by the multi-dispatcher.
 
 ## getlex
@@ -1707,7 +1717,8 @@ Used by the multi-dispatcher.
 * `getlex_n(str $name)`
 * `getlex_s(str $name)`
 
-Looks up the lexical with the specified name and the specified type. Searching in the outer frames, starting at the current.
+Looks up the lexical with the specified name and the specified type.
+Searching in the outer frames, starting at the current.
 An error is thrown if it does not exist or if the type is incorrect.
 
 ## bindlex
@@ -1716,43 +1727,51 @@ An error is thrown if it does not exist or if the type is incorrect.
 * `bindlex_n(str $name, num $value)`
 * `bindlex_s(str $name, str $value)`
 
-Binds $value to the lexical specified by name and type. Searching in the outer frames, starting at the current.
+Binds $value to the lexical specified by name and type. Searching in the
+outer frames, starting at the current.
 An error is thrown if it does not exist or if the type is incorrect.
 
 ## getlexdyn
 * `getlexdyn(str $name)`
 
-Looks up the contextual with the specified name in the caller chain, starting at the calling frame.
+Looks up the contextual with the specified name in the caller chain,
+starting at the calling frame.
 
 ## bindlexdyn
 * `bindlexdyn(str $name, Mu $value)`
 
-Binds $value to the contextual with the specified name, searching for it in the call-chain, starting at the calling frame.
+Binds $value to the contextual with the specified name, searching for it in
+the call-chain, starting at the calling frame.
 
 ## getlexouter
 * `getlexouter(str $name)`
 
-Looks up the lexical with the specified name and the specified type. Searching in the outer frames, starting at outer.
+Looks up the lexical with the specified name and the specified type.
+Searching in the outer frames, starting at outer.
 
 ## getlexcaller
 * `getlexcaller(str $name)`
 
-Looks up the lexical with the specified name, starting at the calling frame. It checks all outer frames of the caller chain.
+Looks up the lexical with the specified name, starting at the calling frame.
+It checks all outer frames of the caller chain.
 
 ## getlexrel
 * `getlexrel(Mu $context, str $name)`
 
-Looks up the lexical with the specified name and the specified type. Searching in the outer frames, starting at the given $context.
+Looks up the lexical with the specified name and the specified type.
+Searching in the outer frames, starting at the given $context.
 
 ## getlexreldyn
 * `getlexreldyn(Mu $context, str $name)`
 
-Looks up the contextual with the specified name in the caller chain, starting at the given $context.
+Looks up the contextual with the specified name in the caller chain,
+starting at the given $context.
 
 ## getlexrelcaller
 * `getlexrelcaller(Mu $context, str $name)`
 
-Looks up the lexical with the specified name, starting at the given $context. It checks all outer frames of the caller chain.
+Looks up the lexical with the specified name, starting at the given
+$context. It checks all outer frames of the caller chain.
 
 # <a id="variable"></a> Variable Opcodes
 
@@ -1768,7 +1787,7 @@ variable. Same as the `:=` operator in NQP.
 * `const()`
 
 Not actually an opcode, but a collection of several constants. Each of the
-constants below can be used in nqp as (e.g.) `nqp::const::CCLASS_ANY`. 
+constants below can be used in nqp as (e.g.) `nqp::const::CCLASS_ANY`.
 
     * CCLASS_ANY
     * CCLASS_UPPERCASE
@@ -1852,7 +1871,7 @@ configure and build flags.
 ## getpid
 * `getpid()`
 
-Return the current process id, an int. 
+Return the current process id, an int.
 
 ## jvmclasspaths `jvm`
 * `jvmclasspaths()`
@@ -1961,28 +1980,30 @@ error, and a string containing an error or some type object if none.
 ## asyncwritebytes
 * `asyncwritebytes($handle, $queue, $schedulee, $to_write, $handle_type)`
 
-Writes a byte array to some handle capable of asynchronous operations. Once the write
-is complete, the queue will be passed an array consisting of the schedulee, an
-integer containing the number of bytes written or a type object if there was an error,
-and a string containing an error or some type object if none.
+Writes a byte array to some handle capable of asynchronous operations. Once
+the write is complete, the queue will be passed an array consisting of the
+schedulee, an integer containing the number of bytes written or a type
+object if there was an error, and a string containing an error or some type
+object if none.
 
 ## asyncreadchars
 * `asyncreadchars($handle, $queue, $schedulee, $handle_type)`
 
-Starts reading chars from the handle. When a packet is received and decoded, an
-array will be pushed to the queue containing the schedulee, a squence number that
-starts at 0, the string if anything was decoded (type object on error) and an error
-string (some type object if no error). If EOF is reached, a sequence number of -1
-is sent. Cancel to stop reading.
+Starts reading chars from the handle. When a packet is received and decoded,
+an array will be pushed to the queue containing the schedulee, a squence
+number that starts at 0, the string if anything was decoded (type object on
+error) and an error string (some type object if no error). If EOF is
+reached, a sequence number of -1 is sent. Cancel to stop reading.
 
 ## asyncreadbytes
 * `asyncreadbytes($handle, $queue, $schedulee, $buf_type, $handle_type)`
 
-Starts reading bytes from the handle. When a packet is received, a $buf_type will be
-constructed and point to the received memory. An array will be pushed to the queue
-containing the schedulee, a sequence number that starts at 0, the buffer or just its
-type object on error, and an error string (type object if no error). If EOF is reached,
-a sequence number of -1 is sent. Cancel to stop reading.
+Starts reading bytes from the handle. When a packet is received, a $buf_type
+will be constructed and point to the received memory. An array will be
+pushed to the queue containing the schedulee, a sequence number that starts
+at 0, the buffer or just its type object on error, and an error string (type
+object if no error). If EOF is reached, a sequence number of -1 is sent.
+Cancel to stop reading.
 
 ## spawnprocasync
 * `spawnprocasync($queue, $args, $cwd, %env, $callbacks)`
