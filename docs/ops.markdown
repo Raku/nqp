@@ -338,7 +338,7 @@ Return non-zero if the two parameters are not equal.
 
 Return 1 if `$val` is 0, 0 otherwise.
 
-# <a id="array"></a> Array opcodes
+# <a id="array"></a> Array Opcodes
 
 ## atpos
 * `atpos(@arr, int $i)`
@@ -449,7 +449,7 @@ while $iter {
 
 You can also use `nqp::iterator()` to iterate over a hash's key-value pairs.
 
-# <a id="hash"></a> Hash opcodes
+# <a id="hash"></a> Hash Opcodes
 
 ## atkey
 * `atkey(%hash, String $key)`
@@ -1754,7 +1754,7 @@ Looks up the contextual with the specified name in the caller chain, starting at
 
 Looks up the lexical with the specified name, starting at the given $context. It checks all outer frames of the caller chain.
 
-# <a id="variable"></a> Variable opcodes
+# <a id="variable"></a> Variable Opcodes
 
 ## bind
 * `bind(Mu $variable, Mu $value)`
@@ -1889,7 +1889,7 @@ an integral number of seconds, `_n` returns a fractional amount.
 
 Returns an int that corresponds to the value of POSIX's errno.
 
-# <a id="async"></a> Asynchronous operations
+# <a id="async"></a> Asynchronous Operations
 
 The various asynchronous operations, such as timers and asynchronous I/O, take
 a concurrent queue to push a work item into at an appropriate time. This may
