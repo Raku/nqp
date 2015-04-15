@@ -405,8 +405,8 @@ position.
 * `setelems(@arr, int $i)`
 
 Set the size of `@arr` to `$i` elements. If less than the current size,
-any elements after the newlast position are unbound. If greater, the empty
-elments at the end are bound with potentially VM specific null entries.
+any elements after the new last position are unbound. If greater, the empty
+elements at the end are bound with potentially VM specific null entries.
 
 ## shift
 * `shift(@arr)`
@@ -740,7 +740,7 @@ Return a new string containing `$count` copies of `$str`.
 * `sprintf(str $pattern, @values)`
 
 Returns a string formatted by the printf conventions similar to Perl 5 / C.
-Machine sized numeric types, their limits and therefor overflows are not
+Machine sized numeric types, their limits and therefore overflows are not
 implemented though.
 
 ## sprintfdirectives
@@ -886,7 +886,7 @@ If a `$post` block is present, run that at the end, regardless of `$condition`.
 
 Not callable directly from NQP, but used in languages via QAST to perform loop
 control. The specific kind of loop control desired is specified via the
-`:name` atttribute; either `next`, `last`, or `redo`.
+`:name` attribute; either `next`, `last`, or `redo`.
 
 # <a id="exceptions"></a> Exceptional Opcodes
 
@@ -1155,7 +1155,7 @@ If not, returns 0. If an error occurs, return -1.
 ## filewritable
 * `filewritable(str $str)`
 
-If the specified filename refers to a writable file, returns 1.
+If the specified filename refers to a writeable file, returns 1.
 If not, returns 0. If an error occurs, return -1.
 
 ## link
@@ -1408,7 +1408,7 @@ Returns a 1 if the object is an Array, 0 otherwise.
 * `isnanorinf(num $n)`
 
 Return truth value indicating if this number represents any of the special
-values, postive infinity, negative infinity, or NaN.
+values, positive infinity, negative infinity, or NaN.
 
 ## isnull
 * `isnull(Mu $obj)`
@@ -1510,7 +1510,7 @@ to invoke the method with positional arguments `*@pos` and named arguments
 
 Example:
 
-class A { method x($a, $b, :$c) { say("$a $b $c") } }
+    class A { method x($a, $b, :$c) { say("$a $b $c") } }
 
     nqp::callmethod(A, 'x', '4', '2', c => 'foo');
     # same as: A.x(4, 2, c => 'foo')
@@ -1553,7 +1553,7 @@ object was declared in class `$type`. The `_n`, `_i`, and `_s` variants are
 for natively typed attributes.
 
 The following example demonstrates why the type object needs to passed along,
-and cannot be infered from the object:
+and cannot be inferred from the object:
 
     class A      { has str $!x }
     class B is A { has str $!x }
@@ -1940,13 +1940,13 @@ AsyncTask REPR. Cancellation stops the timer ever repeating again.
 * `signal($queue, $schedulee, int [nqp::cosnt::SIG_], $handle_type)`
 
 Sets up a signal handler for the given signal. Whenever it occurs, an
-array is pushed to the queue containg the schedulee and the signal number.
+array is pushed to the queue containing the schedulee and the signal number.
 Cancel to stop handling it.
 
 ## watchfile
 * `watchfile($queue, $schedulee, str $filename, $handle_type)`
 
-Watches an individual file for changes. Pushes the an array to the queue
+Watches an individual file for changes. Pushes an array to the queue
 when a change is detected, consisting of the schedulee, the filename that
 changed if provided by the underlying watcher mechanism, a 0 if the file
 changed, and a 1 if it was renamed. Cancel to stop watching.
