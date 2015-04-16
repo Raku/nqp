@@ -79,6 +79,10 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         self.panic('Quantifier quantifies nothing.');
     }
 
+    method throw_solitary_backtrack_control() {
+        self.panic("Backtrack control ':' does not seem to have a preceding atom to control");
+    }
+
     method throw_null_pattern() {
         self.panic('Null regex not allowed');
     }
@@ -320,6 +324,10 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
             { $*VARDEF := 0 }
         ]**0..1
         <.SIGOK>
+    }
+
+    token metachar:sym<:> {
+        <sym> <?before \s> <.throw_solitary_backtrack_control>
     }
 
     proto token backslash { <...> }
