@@ -110,10 +110,10 @@ is(nqp::sprintf('%u', [22.01]), '22', 'decimal %u');
 is(nqp::sprintf("%u", [2**32]), "4294967296", "max uint32 to %u");
 
 is(nqp::sprintf('%B', [2**32-1]), '11111111111111111111111111111111', 'simple %B');
-is(nqp::sprintf('%+B', [2**32-1]), '11111111111111111111111111111111', 'simple %B with plus sign');
+is(nqp::sprintf('%+B', [2**32-1]), '+11111111111111111111111111111111', 'simple %B with plus sign');
 is(nqp::sprintf('%#B', [2**32-1]), '0B11111111111111111111111111111111', '%B with 0B prefixed');
 is(nqp::sprintf('%b', [2**32-1]), '11111111111111111111111111111111', 'simple %b');
-is(nqp::sprintf('%+b', [2**32-1]), '11111111111111111111111111111111', 'simple %b with plus sign');
+is(nqp::sprintf('%+b', [2**32-1]), '+11111111111111111111111111111111', 'simple %b with plus sign');
 is(nqp::sprintf('%#b', [2**32-1]), '0b11111111111111111111111111111111', '%b with 0b prefixed');
 is(nqp::sprintf('%34b', [2**32-1]), '  11111111111111111111111111111111', '%b right justified using space chars');
 is(nqp::sprintf('%034b', [2**32-1]), '0011111111111111111111111111111111', '%b right justified, 0-padding');
@@ -122,7 +122,7 @@ is(nqp::sprintf('%-034b', [2**32-1]), '11111111111111111111111111111111  ', '%b 
 is(nqp::sprintf('%6b', [12]), '  1100', 'simple %b, padded');
 is(nqp::sprintf('%6.5b', [12]), ' 01100', '%b, right justified and precision');
 is(nqp::sprintf('%-6.5b', [12]), '01100 ', '%b, left justified and precision');
-is(nqp::sprintf('%+6.5b', [12]), ' 01100', '%b, right justified and precision, plus sign');
+is(nqp::sprintf('%+6.5b', [12]), '+01100', '%b, right justified and precision, plus sign');
 is(nqp::sprintf('% 6.5b', [12]), ' 01100', '%b, right justified and precision, space char');
 is(nqp::sprintf('%06.5b', [12]), ' 01100', '%b, 0 flag with precision: no effect');
 is(nqp::sprintf('%.5b', [12]), '01100', '%b with precision but no width');
@@ -137,8 +137,8 @@ is(nqp::sprintf('%#3.2b', [0]), ' 00', '%b, width and precision but zero value')
 is(nqp::sprintf('%#3.3b', [0]), '000', '%b, width and precision but zero value');
 is(nqp::sprintf('%#3.4b', [0]), '0000', '%b, width and precision but zero value, overlong');
 is(nqp::sprintf('%.0b', [1]), '1', '%b, precision zero and value');
-is(nqp::sprintf('%+.0b', [1]), '1', '%b, precision zero, plus sign and value');
-is(nqp::sprintf('% .0b', [1]), '1', '%b, precision zero, space char and value');
+is(nqp::sprintf('%+.0b', [1]), '+1', '%b, precision zero, plus sign and value');
+is(nqp::sprintf('% .0b', [1]), ' 1', '%b, precision zero, space char and value');
 is(nqp::sprintf('%-.0b', [1]), '1', '%b, precision zero, hash and value');
 is(nqp::sprintf('%#.0b', [1]), '0b1', '%b, width, zero precision, no value');
 is(nqp::sprintf('%#3.0b', [1]), '0b1', '%b, width, zero precision but value');
