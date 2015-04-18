@@ -134,7 +134,7 @@ class HLL::Compiler does HLL::Backend::Default {
         if (%adverbs<profile-compile>) {
             $output := $!backend.run_profiled({
                 self.compile($code, :compunit_ok(1), |%adverbs);
-            });
+            }, %adverbs<profile-filename>);
         }
         else {
             $output := self.compile($code, :compunit_ok(1), |%adverbs);
