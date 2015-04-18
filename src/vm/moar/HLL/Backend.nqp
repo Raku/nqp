@@ -52,6 +52,29 @@ class HLL::Backend::MoarVM {
     method dump_profile_data($data, $filename) {
         my @pieces := nqp::list_s();
 
+        unless nqp::defined($filename) {
+            $filename := 'profile-' ~ nqp::time_n() ~ '.html';
+        }
+        nqp::sayfh(nqp::getstderr(), "Writing profiler output to $filename");
+        my $profile_fh := open($filename, :w);
+        my $want_json  := ?($filename ~~ /'.json'$/);
+
+        my $escaped_backslash;
+        my $escaped_dquote;
+        my $escaped_squote;
+        if $want_json {
+            # Single quotes don't require escaping here
+            $escaped_backslash := q{\\\\};
+            $escaped_dquote    := q{\\"};
+        }
+        else {
+            # Here we're creating a double-quoted JSON string destined for the
+            # inside of a single-quoted JS string. Ouch.
+            $escaped_backslash := q{\\\\\\\\};
+            $escaped_dquote    := q{\\\\"};
+            $escaped_squote    := q{\\'};
+        }
+
         sub post_process_call_graph_node($node) {
             for $node<allocations> -> %alloc_info {
                 my $type := %alloc_info<type>;
@@ -97,16 +120,16 @@ class HLL::Backend::MoarVM {
                 nqp::push_s(@pieces, '}');
             }
             elsif nqp::isstr($obj) {
-                nqp::push_s(@pieces, '"');
                 if nqp::index($obj, '\\') {
-                    $obj := subst($obj, /'\\'/, '\\\\\\\\', :global);
+                    $obj := subst($obj, /'\\'/, $escaped_backslash, :global);
                 }
                 if nqp::index($obj, '"') {
-                    $obj := subst($obj, /'"'/, '\\\\"', :global);
+                    $obj := subst($obj, /'"'/, $escaped_dquote, :global);
                 }
-                if nqp::index($obj, "'") {
-                    $obj := subst($obj, /"'"/, '\\\'', :global);
+                if nqp::defined($escaped_squote) && nqp::index($obj, "'") {
+                    $obj := subst($obj, /"'"/, $escaped_squote, :global);
                 }
+                nqp::push_s(@pieces, '"');
                 nqp::push_s(@pieces, $obj);
                 nqp::push_s(@pieces, '"');
             }
@@ -120,8 +143,8 @@ class HLL::Backend::MoarVM {
                 nqp::die("Don't know how to dump a " ~ $obj.HOW.name($obj));
             }
             if nqp::elems(@pieces) > 4096 {
-                nqp::bindpos_s(@pieces, 0, nqp::join('', @pieces));
-                nqp::setelems(@pieces, 1);
+                nqp::printfh($profile_fh, nqp::join('', @pieces));
+                nqp::setelems(@pieces, 0);
             }
         }
 
@@ -130,24 +153,24 @@ class HLL::Backend::MoarVM {
             post_process_call_graph_node($_<call_graph>);
         }
 
-        # JSONify the data.
-        to_json($data);
-        my $json := nqp::join('', @pieces);
-
-        # Insert it into a template and write it.
-        my $template := try slurp('src/vm/moar/profiler/template.html');
-        unless $template {
-            $template := slurp(nqp::backendconfig()<prefix> ~ '/share/nqp/lib/profiler/template.html');
-        }
-        my $results  := subst($template, /'{{{PROFIELR_OUTPUT}}}'/, $json);
-        if nqp::defined($filename) {
-            spew($filename, $results);
+        if $want_json {
+            to_json($data);
         }
         else {
-            my $filename := 'profile-' ~ nqp::time_n() ~ '.html';
-            spew($filename, $results);
-            nqp::sayfh(nqp::getstderr(), "Wrote profiler output to $filename");
+            # Get profiler template, split it in half, and write those either
+            # side of the JSON itself.
+            my $template := try slurp('src/vm/moar/profiler/template.html');
+            unless $template {
+                $template := slurp(nqp::backendconfig()<prefix> ~ '/share/nqp/lib/profiler/template.html');
+            }
+            my @tpl_pieces := nqp::split('{{{PROFIELR_OUTPUT}}}', $template);
+
+            nqp::printfh($profile_fh, @tpl_pieces[0]);
+            to_json($data);
+            nqp::printfh($profile_fh, nqp::join('', @pieces));
+            nqp::printfh($profile_fh, @tpl_pieces[1]);
         }
+        nqp::closefh($profile_fh);
     }
 
     method run_traced($level, $what) {
