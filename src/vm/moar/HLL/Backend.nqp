@@ -50,6 +50,34 @@ class HLL::Backend::MoarVM {
         $res;
     }
     method dump_profile_data($data, $filename) {
+        # Insert it into a template and write it.
+        # (but only use the template if we want an html output file at all)
+
+        my $wants-html := !nqp::defined($filename) || ($filename ~~ / '.html' $ /).Bool;
+
+        # in this variable we store anything that comes after the json data
+        my $post-text := "";
+        $filename := $filename || ('profile-' ~ nqp::time_n() ~ '.html');
+
+        my $profiler-fh := nqp::open($filename, "w");
+
+        if $wants-html {
+            my str $template := try slurp('src/vm/moar/profiler/template.html');
+            unless $template {
+                $template := slurp(nqp::backendconfig()<prefix> ~ '/share/nqp/lib/profiler/template.html');
+            }
+
+            if $template {
+                my $find_placeholder := $template ~~ /'{{{PROFIELR_OUTPUT}}}'/;
+
+                nqp::printfh($profiler-fh, nqp::substr($template, 0, $find_placeholder.from));
+
+                $post-text := nqp::substr($template, $find_placeholder.to);
+            } else {
+                nqp::sayfh(nqp::getstderr(), "couldn't find the profiler template.html; will output raw json instead");
+            }
+        }
+
         my @pieces := nqp::list_s();
 
         sub post_process_call_graph_node($node) {
@@ -120,8 +148,8 @@ class HLL::Backend::MoarVM {
                 nqp::die("Don't know how to dump a " ~ $obj.HOW.name($obj));
             }
             if nqp::elems(@pieces) > 4096 {
-                nqp::bindpos_s(@pieces, 0, nqp::join('', @pieces));
-                nqp::setelems(@pieces, 1);
+                nqp::printfh($profiler-fh, nqp::join('', @pieces));
+                nqp::setelems(@pieces, 0);
             }
         }
 
@@ -132,22 +160,11 @@ class HLL::Backend::MoarVM {
 
         # JSONify the data.
         to_json($data);
-        my $json := nqp::join('', @pieces);
+        nqp::printfh($profiler-fh, nqp::join('', @pieces));
 
-        # Insert it into a template and write it.
-        my $template := try slurp('src/vm/moar/profiler/template.html');
-        unless $template {
-            $template := slurp(nqp::backendconfig()<prefix> ~ '/share/nqp/lib/profiler/template.html');
-        }
-        my $results  := subst($template, /'{{{PROFIELR_OUTPUT}}}'/, $json);
-        if nqp::defined($filename) {
-            spew($filename, $results);
-        }
-        else {
-            my $filename := 'profile-' ~ nqp::time_n() ~ '.html';
-            spew($filename, $results);
-            nqp::sayfh(nqp::getstderr(), "Wrote profiler output to $filename");
-        }
+        nqp::printfh($profiler-fh, $post-text);
+
+        nqp::sayfh(nqp::getstderr(), "Wrote profiler output to $filename");
     }
 
     method run_traced($level, $what) {
