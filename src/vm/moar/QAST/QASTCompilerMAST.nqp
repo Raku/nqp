@@ -1360,12 +1360,13 @@ my class MASTCompilerInstance {
                 if $*BINDVAL {
                     nqp::die('Cannot bind to a local resolving to a localref');
                 }
-                my $res_kind := $*BLOCK.local_kind($name);
-                if $res_kind == $MVM_reg_obj {
+                my $local_kind := $*BLOCK.local_kind($name);
+                if $local_kind == $MVM_reg_obj {
                     nqp::die('Cannot take a reference to a non-native local');
                 }
                 $res_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
-                push_op(@ins, @localref_opnames[@kind_to_op_slot[$res_kind]], $res_reg, $local);
+                $res_kind := $MVM_reg_obj;
+                push_op(@ins, @localref_opnames[@kind_to_op_slot[$local_kind]], $res_reg, $local);
             }
             else {
                 nqp::die("Cannot reference undeclared local '$name'");

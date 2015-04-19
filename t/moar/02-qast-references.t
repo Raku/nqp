@@ -54,7 +54,7 @@ is_qast(
             QAST::Var.new( :name<intloc>, :scope<local>, :decl<var>, :returns(int) ),
             QAST::Op.new(
                 :op<assign_i>,
-                QAST::Var.new( :name<intloc>, :scope<localref>, :returns(int) ),
+                QAST::Var.new( :name<intloc>, :scope<localref> ),
                 QAST::IVal.new( :value(23) )
             ),
             QAST::Var.new( :name<intloc>, :scope<local> )
