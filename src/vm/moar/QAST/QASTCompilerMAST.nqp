@@ -1347,7 +1347,7 @@ my class MASTCompilerInstance {
             my $localref := $*BLOCK.localref($name);
             my $local    := $*BLOCK.local($name);
             if $localref {
-                $res_kind := $*BLOCK.localref_kind($name);
+                $res_kind := $MVM_reg_obj;
                 if $*BINDVAL {
                     my $valmast := self.as_mast_clear_bindval($*BINDVAL, :want($MVM_reg_obj));
                     push_ilist(@ins, $valmast);
