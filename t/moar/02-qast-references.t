@@ -1,6 +1,6 @@
 use QAST;
 
-plan(3);
+plan(5);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -10,10 +10,20 @@ sub compile_qast($qast) {
 sub is_qast($qast, $value, $desc) {
     try {
         my $code := compile_qast($qast);
-        my $result := $code();
+        my int $count := 0;
+        my $result;
+        while $count < 200 {
+            try {
+                $result := $code();
+            }
+            $count := $count + 1;
+        }
+        $result := $code();
         ok($result eq $value, $desc);
         CATCH { ok(0, $desc ~ $!) }
     }
+    my $code := compile_qast($qast);
+    $code();
 }
 sub is_qast_args($qast, @args, $value, $desc) {
     try {
@@ -96,3 +106,52 @@ is_qast(
     'localref of type str with a value assigned to it'
 );
 
+#is_qast(
+    #QAST::CompUnit.new( :hll<nqp>,
+        #QAST::Block.new(
+            #QAST::Var.new( :name<intloc>, :scope<local>, :decl<var>, :returns(int) ),
+            #QAST::Var.new( :name<intref>, :scope<localref>, :decl<var> ),
+            #QAST::Op.new( :op<bind>,
+                #QAST::Var.new( :name<intref>, :scope<localref> ),
+                #QAST::Var.new( :name<intloc>, :scope<localref> )
+            #),
+            #QAST::Op.new(
+                #:op<assign_i>,
+                #QAST::Var.new( :name<intref>, :scope<local> ),
+                #QAST::IVal.new( :value(123) )
+            #),
+            #QAST::Op.new(
+                #:op<list_i>,
+                #QAST::Var.new( :name<intloc>, :scope<local> ),
+                #QAST::Var.new( :name<intref>, :scope<local> )
+            #)
+        #)
+    #),
+    #nqp::list_i(23, 23),
+    #"a localref'd var can have a local ref'd thing bound to it and accessed (int)"
+#);
+
+is_qast(
+    QAST::CompUnit.new( :hll<nqp>,
+        QAST::Block.new(
+            QAST::Var.new( :name<strloc>, :scope<local>, :decl<var>, :returns(str) ),
+            QAST::Var.new( :name<strref>, :scope<localref>, :decl<var>, :returns(str) ),
+            QAST::Op.new( :op<bind>,
+                QAST::Var.new( :name<strref>, :scope<localref> ),
+                QAST::Var.new( :name<strloc>, :scope<localref> )
+            ),
+            QAST::Op.new(
+                :op<assign_s>,
+                QAST::Var.new( :name<strref>, :scope<local> ),
+                QAST::SVal.new( :value("hooray") )
+            ),
+            QAST::Op.new(
+                :op<list_s>,
+                QAST::Var.new( :name<strloc>, :scope<local> ),
+                QAST::Var.new( :name<strref>, :scope<local> )
+            )
+        )
+    ),
+    nqp::list_s("hooray", "hooray"),
+    "a localref'd var can have a local ref'd thing bound to it and accessed (str)"
+);
