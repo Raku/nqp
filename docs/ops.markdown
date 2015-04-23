@@ -1059,7 +1059,7 @@ Output the given string to the filehandle, followed by a newline.
 * `setencoding(Handle $fh, str $encoding)`
 
 Set the encoding for the given handle. Valid encodings are: ascii,
-iso-8859-1, utf8, utf16, and binary.
+iso-8859-1, windows-1252, utf8, utf16, and binary.
 
 ## setinputlinesep
 * `setinputlinesep(Handle $fh, str $sep)`
