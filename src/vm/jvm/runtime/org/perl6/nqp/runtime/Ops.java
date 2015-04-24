@@ -458,6 +458,8 @@ public final class Ops {
                 cs = Charset.forName("UTF-8");
             else if (encoding.equals("utf16"))
                 cs = Charset.forName("UTF-16");
+            else if (encoding.equals("windows-1252"))
+                cs = Charset.forName("windows-1252");
             else
                 throw ExceptionHandling.dieInternal(tc,
                     "Unsupported encoding " + encoding);
@@ -3698,6 +3700,9 @@ public final class Ops {
             else if (encoding.equals("iso-8859-1")) {
                 Buffers.stashBytes(tc, res, str.getBytes("ISO-8859-1"));
             }
+            else if (encoding.equals("windows-1252")) {
+                Buffers.stashBytes(tc, res, str.getBytes("windows-1252"));
+            }
             else if (encoding.equals("utf16")) {
                 short[] buffer = new short[str.length()];
                 for (int i = 0; i < str.length(); i++)
@@ -3762,6 +3767,9 @@ public final class Ops {
         }
         else if (encoding.equals("iso-8859-1")) {
             return decode8(buf, "ISO-8859-1", tc);
+        }
+        else if (encoding.equals("windows-1252")) {
+            return decode8(buf, "windows-1252", tc);
         }
         else if (encoding.equals("utf16") || encoding.equals("utf32")) {
             int n = (int)buf.elems(tc);
