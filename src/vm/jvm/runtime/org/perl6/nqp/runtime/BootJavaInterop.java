@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.perl6.nqp.sixmodel.STable;
+import org.perl6.nqp.sixmodel.TypeObject;
 import org.perl6.nqp.sixmodel.SixModelObject;
 import org.perl6.nqp.sixmodel.StorageSpec;
 import org.perl6.nqp.sixmodel.reprs.JavaObjectWrapper;
@@ -725,10 +726,18 @@ public class BootJavaInterop {
                 Type.getMethodDescriptor(Type.getType(Object[].class), TYPE_SMO, TYPE_TC, Type.getType(Class.class)));
         }
         else {
+            Label isntWrapped = new Label(), done = new Label();
+            mv.visitInsn(Opcodes.DUP);
             mv.visitVarInsn(Opcodes.ALOAD, c.tcLoc);
+            mv.visitMethodInsn(Opcodes.INVOKESTATIC, TYPE_OPS.getInternalName(), "decont", Type.getMethodDescriptor(TYPE_SMO, TYPE_SMO, TYPE_TC));
+            mv.visitTypeInsn(Opcodes.INSTANCEOF, Type.getType(JavaObjectWrapper.class).getInternalName());
+            mv.visitJumpInsn(Opcodes.IFEQ, isntWrapped);
+            mv.visitVarInsn(Opcodes.ALOAD, c.tcLoc);
+            // XXX: the secondary decont is a bit awkward, but storing to the stack doesn't seem to work out
             mv.visitMethodInsn(Opcodes.INVOKESTATIC, TYPE_OPS.getInternalName(), "decont", Type.getMethodDescriptor(TYPE_SMO, TYPE_SMO, TYPE_TC));
             mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/BootJavaInterop$RuntimeSupport", "unboxJava", Type.getMethodDescriptor(TYPE_OBJ, TYPE_SMO));
             mv.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(what));
+            mv.visitLabel(isntWrapped);
         }
     }
 
