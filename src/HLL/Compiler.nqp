@@ -11,6 +11,7 @@ class HLL::Compiler does HLL::Backend::Default {
     has @!cli-arguments;
     has %!cli-options;
     has $!backend;
+    has $!save_ctx;
 
     method BUILD() {
         # Backend is set to the default one, by default.
@@ -51,24 +52,33 @@ class HLL::Compiler does HLL::Backend::Default {
             unless nqp::tellfh(nqp::getstdout()) > $*AUTOPRINTPOS;
     }
 
+    method readline($stdin, $stdout, $prompt) {
+        nqp::printfh(nqp::getstdout(), $prompt);
+        return nqp::readlinefh($stdin);
+    }
+
+    method context() {
+        $!save_ctx # XXX starting value?
+    }
+
     method interactive(*%adverbs) {
         nqp::printfh(nqp::getstderr(), self.interactive_banner);
 
         my $stdin    := nqp::getstdin();
+        my $stdout   := nqp::getstdout();
         my $encoding := ~%adverbs<encoding>;
         if $encoding && $encoding ne 'fixed_8' {
             nqp::setencoding($stdin, $encoding);
         }
 
         my $target := nqp::lc(%adverbs<target>);
-        my $save_ctx;
         my $prompt := self.interactive_prompt // '> ';
         my $code;
         while 1 {
             last if nqp::eoffh($stdin);
 
-            my str $newcode := nqp::readlineintfh($stdin, ~$prompt);
-            if nqp::isnull_s($newcode) {
+            my str $newcode := self.readline($stdin, $stdout, ~$prompt);
+            if nqp::isnull_s($newcode) || !nqp::defined($newcode) {
                 nqp::print("\n");
                 last;
             }
@@ -94,13 +104,13 @@ class HLL::Compiler does HLL::Backend::Default {
                 $code := $code ~ "\n";
                 my $output;
                 {
-                    $output := self.eval($code, :outer_ctx($save_ctx), |%adverbs);
+                    $output := self.eval($code, :outer_ctx($!save_ctx), |%adverbs);
                     CATCH {
                         self.interactive_exception($!);
                     }
                 };
                 if nqp::defined($*MAIN_CTX) {
-                    $save_ctx := $*MAIN_CTX;
+                    $!save_ctx := $*MAIN_CTX;
                 }
 
                 $code := "";

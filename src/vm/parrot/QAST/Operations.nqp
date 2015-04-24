@@ -1821,15 +1821,6 @@ QAST::Operations.add_core_op('readlinefh', -> $qastcomp, $op {
         $op[0]
     ))
 });
-QAST::Operations.add_core_op('readlineintfh', -> $qastcomp, $op {
-    if +$op.list != 2 {
-        nqp::die("The 'readlineintfh' op expects two operands");
-    }
-    $qastcomp.as_post(QAST::Op.new(
-        :op('callmethod'), :name('readline_interactive'),
-        $op[0], $op[1]
-    ))
-});
 QAST::Operations.add_core_op('readallfh', -> $qastcomp, $op {
     if +$op.list != 1 {
         nqp::die("The 'readallfh' op expects one operand");

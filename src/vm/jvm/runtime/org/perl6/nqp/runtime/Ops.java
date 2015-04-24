@@ -656,21 +656,6 @@ public final class Ops {
         }
     }
 
-    public static String readlineintfh(SixModelObject obj, String prompt, ThreadContext tc) {
-        if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-            if (h.handle instanceof IIOInteractive)
-                return ((IIOInteractive)h.handle).readlineInteractive(tc, prompt);
-            else
-                throw ExceptionHandling.dieInternal(tc,
-                    "This handle does not support readline interactive");
-        }
-        else {
-            throw ExceptionHandling.dieInternal(tc,
-                "readlineintfh requires an object with the IOHandle REPR");
-        }
-    }
-
     public static String readallfh(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
             IOHandleInstance h = (IOHandleInstance)obj;
