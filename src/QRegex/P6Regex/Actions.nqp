@@ -451,19 +451,23 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     method cclass_backslash:sym<o>($/) {
         my $octlit :=
             HLL::Actions.ints_to_string( $<octint> || $<octints><octint> );
-        make $<sym> eq 'O'
+        my $ast := $<sym> eq 'O'
              ?? QAST::Regex.new( $octlit, :rxtype('enumcharlist'),
                                   :negate(1), :node($/) )
              !! QAST::Regex.new( $octlit, :rxtype('literal'), :node($/) );
+        $ast.annotate('codepoint', $<octint> ?? $<octint>.ast !! $<octints><octint>[0].ast);
+        make $ast;
     }
 
     method cclass_backslash:sym<x>($/) {
         my $hexlit :=
             HLL::Actions.ints_to_string( $<hexint> || $<hexints><hexint> );
-        make $<sym> eq 'X'
+        my $ast := $<sym> eq 'X'
              ?? QAST::Regex.new( $hexlit, :rxtype('enumcharlist'),
                                   :negate(1), :node($/) )
              !! QAST::Regex.new( $hexlit, :rxtype('literal'), :node($/) );
+        $ast.annotate('codepoint', $<hexint> ?? $<hexint>.ast !! $<hexints><hexint>[0].ast);
+        make $ast;
     }
 
     method cclass_backslash:sym<c>($/) {
@@ -645,30 +649,28 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             for $<charspec> {
                 if $_[1] {
                     my $node;
-                    my $lhs;
-                    my $rhs;
+                    my $ord0;
+                    my $ord1;
                     if $_[0]<cclass_backslash> {
                         $node := $_[0]<cclass_backslash>.ast;
                         $/.CURSOR.panic("Illegal range endpoint in regex: " ~ ~$_)
                             if $node.rxtype ne 'literal' && $node.rxtype ne 'enumcharlist'
                                 || $node.negate || nqp::chars($node[0]) != 1;
-                        $lhs := $node[0];
+                        $ord0 := $node.ann('codepoint') // nqp::ord($node[0]);
                     }
                     else {
-                        $lhs := ~$_[0][0];
+                        $ord0 := nqp::ord(~$_[0][0]);
                     }
                     if $_[1][0]<cclass_backslash> {
                         $node := $_[1][0]<cclass_backslash>.ast;
                         $/.CURSOR.panic("Illegal range endpoint in regex: " ~ ~$_)
                             if $node.rxtype ne 'literal' && $node.rxtype ne 'enumcharlist'
                                 || $node.negate || nqp::chars($node[0]) != 1;
-                        $rhs := $node[0];
+                        $ord1 := $node.ann('codepoint') // nqp::ord($node[0]);
                     }
                     else {
-                        $rhs := ~$_[1][0][0];
+                        $ord1 := nqp::ord(~$_[1][0][0]);
                     }
-                    my $ord0 := nqp::ord($lhs);
-                    my $ord1 := nqp::ord($rhs);
                     $/.CURSOR.panic("Illegal reversed character range in regex: " ~ ~$_)
                         if $ord0 > $ord1;
                     @alts.push(QAST::Regex.new(
