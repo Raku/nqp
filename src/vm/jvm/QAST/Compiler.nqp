@@ -6246,6 +6246,9 @@ class QAST::CompilerJAST {
 
     method uniprop($node) {
         my $il := JAST::InstructionList.new();
+        if +@($node) > 1 {
+            nqp::die("Unicode property pairs NYI on jvm backend");
+        }
 
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<eos> ));

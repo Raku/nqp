@@ -638,11 +638,14 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                                       :negate( $<sign> eq '-' ), :node($/),
                                       QAST::NodeList.new(QAST::SVal.new( :value($name) )) );
         }
-        elsif $<uniprop> {
-            my $uniprop := ~$<uniprop>;
-            $qast := QAST::Regex.new( $uniprop, :rxtype<uniprop>,
+        # <:Letter>
+        elsif $<identifier> {
+            $qast := QAST::Regex.new( $*key, :rxtype<uniprop>,
                                       :negate( $<sign> eq '-' && $<invert> ne '!' # $<sign> ^^ $<invert>
                                         || $<sign> ne '-' && $<invert> eq '!' ), :node($/) );
+
+            # <:NumericValue(0 ^..^ 1)>
+            $qast.push($<coloncircumfix>.ast) if $<coloncircumfix>;
         }
         else {
             my @alts;

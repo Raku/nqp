@@ -698,6 +698,8 @@ grammar NQP::Grammar is HLL::Grammar {
     token circumfix:sym<« »> { <?[«]>  <quote_EXPR: ':qq', ':w'>  }
     token circumfix:sym<{ }> { <?[{]> <pblock> }
 
+    token coloncircumfix($front) { <circumfix> }
+
     token semilist { <.ws> <statement> <.ws> }
 
     ## Operators

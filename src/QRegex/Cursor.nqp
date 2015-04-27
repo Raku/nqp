@@ -506,6 +506,10 @@ role NQPCursorRole is export {
         }
     }
 
+    method !DELEGATE_ACCEPTS($obj, $arg) {
+        $obj.ACCEPTS($arg) ?? 1 !! 0
+    }
+
     method at($pos) {
         my $cur := self."!cursor_start_cur"();
         $cur."!cursor_pass"($!pos) if +$pos == $!pos;

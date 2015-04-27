@@ -1223,44 +1223,75 @@ class QAST::MASTRegexCompiler {
     }
 
     method uniprop($node) {
-        my $pname := $!regalloc.fresh_s();
-        my $pcode := $!regalloc.fresh_i();
-        my $pvcode := $!regalloc.fresh_i();
-        my $pprop := $!regalloc.fresh_s();
-        my $i0 := $!regalloc.fresh_i();
-        my $testop := $node.negate ?? 'if_i' !! 'unless_i';
-        my $hasvalcode := label();
-        my $endblock   := label();
-        my $succeed    := label();
-        my @ins := [
+        my $pname   := $!regalloc.fresh_s();
+        my $pcode   := $!regalloc.fresh_i();
+        my $pvcode  := $!regalloc.fresh_i();
+        my $pprop   := $!regalloc.fresh_s();
+        my $i0      := $!regalloc.fresh_i();
+        my $testop  := $node.negate ?? 'if_i' !! 'unless_i';
+        my $succeed := label();
+        my @ins     := [
             op('ge_i', $i0, %!reg<pos>, %!reg<eos>),
             op('if_i', $i0, %!reg<fail>),
         ];
-        if ~$node[0] ~~ /^ [ In<[A..Z]> | in<[a..z]> ]/ { # "InArabic" is a lookup of Block Arabic
+        if +@($node) == 1 {
+            my $hasvalcode := label();
+            my $endblock   := label();
+            if ~$node[0] ~~ /^ [ In<[A..Z]> | in<[a..z]> ]/ { # "InArabic" is a lookup of Block Arabic
+                merge_ins(@ins, [
+                    op('const_s', $pname, sval(nqp::substr($node[0],2))),
+                    op('uniisblock', $i0, %!reg<tgt>, %!reg<pos>, $pname),
+                    op('if_i', $i0, $succeed),
+                    op('const_s', $pprop, sval('Block')),
+                    op('const_s', $pname, sval(nqp::substr($node[0],2))),
+                    op('unipropcode', $pcode, $pprop),
+                    op('unless_i', $pcode, $endblock),
+                    op('unipvalcode', $pvcode, $pcode, $pname),
+                    op('if_i', $pvcode, $hasvalcode),
+                    $endblock,
+                ]);
+            }
             merge_ins(@ins, [
-                op('const_s', $pname, sval(nqp::substr($node[0],2))),
-                op('uniisblock', $i0, %!reg<tgt>, %!reg<pos>, $pname),
-                op('if_i', $i0, $succeed),
-                
-                op('const_s', $pprop, sval('Block')),
-                op('const_s', $pname, sval(nqp::substr($node[0],2))),
-                op('unipropcode', $pcode, $pprop),
-                op('unless_i', $pcode, $endblock),
+                op('const_s', $pname, sval($node[0])),
+                op('unipropcode', $pcode, $pname),
                 op('unipvalcode', $pvcode, $pcode, $pname),
-                op('if_i', $pvcode, $hasvalcode),
-                $endblock,
+                #~ op($testop, $pvcode, %!reg<fail>), # XXX I am sure we should fail here
+                $hasvalcode,
+                op('hasuniprop', $i0, %!reg<tgt>, %!reg<pos>, $pcode, $pvcode),
+                $succeed,
+                op($testop, $i0, %!reg<fail>),
             ]);
         }
-        merge_ins(@ins, [
-            op('const_s', $pname, sval($node[0])),
-            op('unipropcode', $pcode, $pname),
-            op('unipvalcode', $pvcode, $pcode, $pname),
-            #~ op($testop, $pvcode, %!reg<fail>), # XXX I am sure we should fail here
-            $hasvalcode,
-            op('hasuniprop', $i0, %!reg<tgt>, %!reg<pos>, $pcode, $pvcode),
-            $succeed,
-            op($testop, $i0, %!reg<fail>),
-        ]);
+        else {
+            my $sname         := $!regalloc.fresh_s();
+            my $smrtmtch_mast := $!qastcomp.as_mast($node[1], :want($MVM_reg_obj));
+            my $s0            := $!regalloc.fresh_s();
+            my $tryintprop    := label();
+            my $tryboolprop   := label();
+            merge_ins(@ins, $smrtmtch_mast.instructions);
+            merge_ins(@ins, [
+                op('const_s', $pname, sval($node[0])),
+                op('unipropcode', $pcode, $pname),
+                op('unipvalcode', $pvcode, $pcode, $pname),
+                op('ordat', $i0, %!reg<tgt>, %!reg<pos>),
+
+                op('getuniprop_str', $s0, $i0, $pcode),
+                op('unless_s', $s0, $tryintprop),
+                op('findmeth', %!reg<method>, %!reg<cur>, sval('!DELEGATE_ACCEPTS')),
+                call(%!reg<method>, [$Arg::obj, $Arg::obj, $Arg::str], :result($i0),
+                    %!reg<cur>, $smrtmtch_mast.result_reg, $s0),
+                op('goto', $succeed),
+
+                $tryintprop,
+                op('getuniprop_int', $i0, $i0, $pcode),
+                op('findmeth', %!reg<method>, %!reg<cur>, sval('!DELEGATE_ACCEPTS')),
+                call(%!reg<method>, [$Arg::obj, $Arg::obj, $Arg::int], :result($i0),
+                    %!reg<cur>, $smrtmtch_mast.result_reg, $i0),
+
+                $succeed,
+                op($testop, $i0, %!reg<fail>),
+            ]);
+        }
         nqp::push(@ins, op('inc_i', %!reg<pos>)) unless $node.subtype eq 'zerowidth';
         @ins
     }

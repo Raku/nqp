@@ -393,6 +393,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token assertion:sym<[> { <?before '['|'+'|'-'|':'> <cclass_elem>+ }
 
     token cclass_elem {
+        :my $*key;
         $<sign>=['+'|'-'|<?>]
         <.normspace>?
         [
@@ -417,7 +418,11 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
               }
           \s* ']'
         | $<name>=[\w+]
-        | ':' $<invert>=['!'|<?>] $<uniprop>=[\w+]
+        | ':' $<invert>=['!'|<?>] <identifier> { $*key := $<identifier>.Str }
+            [
+            || <coloncircumfix=.LANG('MAIN','coloncircumfix', $*key)>
+            || <?>
+            ]
         ]
         <.normspace>?
     }

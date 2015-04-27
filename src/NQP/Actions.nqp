@@ -1562,6 +1562,10 @@ class NQP::Actions is HLL::Actions {
         $/.prune;
     }
 
+    method coloncircumfix($/) {
+        make $<circumfix>.ast
+    }
+
     method semilist($/) { make $<statement>.ast; $/.prune; }
 
     method postcircumfix:sym<[ ]>($/) {
