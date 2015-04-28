@@ -6189,9 +6189,13 @@ public final class Ops {
         String name;
         int cp = (int) codePoint;
         try {
-            name = Character.getName(cp);
-            if(name == null) {
-                name = "<unassigned>";
+            if(codePoint < 0) {
+                name = "<illegal>";
+            } else {
+                name = Character.getName(cp);
+                if(name == null) {
+                    name = "<unassigned>";
+                }
             }
         } catch (IllegalArgumentException iae) {
             name = "<unassigned>";
