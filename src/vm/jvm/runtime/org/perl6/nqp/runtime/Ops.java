@@ -6194,7 +6194,7 @@ public final class Ops {
                 name = "<unassigned>";
             }
         } catch (IllegalArgumentException iae) {
-            name = "<illegal>";
+            name = "<unassigned>";
         }
         return name;
     }
