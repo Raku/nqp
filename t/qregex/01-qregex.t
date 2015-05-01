@@ -14,8 +14,7 @@ my @files := [
     'rx_subrules',
 #    'rx_lookarounds',
     'rx_modifiers',
-# loops:
-#    'rx_goal',
+    'rx_goal',
 ];
 
 my %expansions;

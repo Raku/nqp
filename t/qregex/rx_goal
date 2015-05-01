@@ -1,7 +1,7 @@
 ##   Goal tests
 '(' ~ ')' \d+		(123)		y	basic goal syntax
-'(' ~ ')' \d+		(123		/couldn't find final/	missing goal
-'(' ~ ')' \d+		(123abc)	/couldn't find final/	stuff before goal
+'(' ~ ')' \d+		(123		<couldn't find final>	missing goal
+'(' ~ ')' \d+		(123abc)	<couldn't find final>	stuff before goal
 '(' ~ ')' \d+		(abc)		n	can't match internal stuff
 '(' ~ ')' \d+		()		n	missing internal stuff
 ['('] ~ [')'] \d+		(123)		y	goal syntax with brackets
@@ -10,6 +10,5 @@
 ('(') ~ (')') (\d\d+)		(123)		y	goal syntax with parentheses
 '(' ~ <[()]> \d+		(123)		y	non-literal goal
 '(' ~ <[()]> \d+		(123(		y	non-literal goal
-'(' ~ <[()]> \d+		(123]		/Unable to parse/	failing non-literal goal
-# todo :pge<:dba>
-:dba('zz') '(' ~ ')' \d+	(123		/zz/	:dba adverb
+'(' ~ <[()]> \d+		(123]		<Unable to parse>	failing non-literal goal
+:dba('zz') '(' ~ ')' \d+	(123		<zz>	:dba adverb
