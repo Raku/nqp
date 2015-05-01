@@ -297,18 +297,15 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     method metachar:sym<~>($/) {
         my @dba := [QAST::SVal.new(:value(%*RX<dba>))] if nqp::existskey(%*RX, 'dba');
         make QAST::Regex.new(
+            :rxtype<goal>,
+            $<GOAL>.ast,
             $<EXPR>.ast,
             QAST::Regex.new(
-                $<GOAL>.ast,
-                QAST::Regex.new( :rxtype<subrule>, :subtype<method>,
-                    QAST::NodeList.new(
-                        QAST::SVal.new( :value('FAILGOAL') ),
-                        QAST::SVal.new( :value(~$<GOAL>) ),
-                        |@dba) ),
-                :rxtype<altseq>
-            ),
-            :rxtype<concat>
-        );
+                :rxtype<subrule>, :subtype<method>,
+                QAST::NodeList.new(
+                    QAST::SVal.new( :value('FAILGOAL') ),
+                    QAST::SVal.new( :value(~$<GOAL>) ),
+                    |@dba) ) );
     }
     
     method metachar:sym<mod>($/) { make $<mod_internal>.ast; }
@@ -792,7 +789,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     sub capnames($ast, int $count) {
         my %capnames;
         my $rxtype := $ast.rxtype;
-        if $rxtype eq 'concat' {
+        if $rxtype eq 'concat' || $rxtype eq 'goal' {
             for $ast.list {
                 my %x := capnames($_, $count);
                 for %x { %capnames{$_.key} := +%capnames{$_.key} + $_.value; }

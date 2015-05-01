@@ -1457,6 +1457,14 @@ class QAST::Compiler is HLL::Compiler {
         $ops;
     }
 
+    method goal($node) {
+        self.regex_post(QAST::Regex.new(
+            :rxtype<concat>,
+            $node[1],
+            QAST::Regex.new( :rxtype<altseq>, $node[0], $node[2] )
+        ))
+    }
+
     method conj($node) { self.conjseq($node) }
 
     method conjseq($node) {

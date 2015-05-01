@@ -460,6 +460,14 @@ class QAST::MASTRegexCompiler {
         @ins
     }
 
+    method goal($node) {
+        self.regex_mast(QAST::Regex.new(
+            :rxtype<concat>,
+            $node[1],
+            QAST::Regex.new( :rxtype<altseq>, $node[0], $node[2] )
+        ))
+    }
+
     method conj($node) { self.conjseq($node) }
 
     method conjseq($node) {
