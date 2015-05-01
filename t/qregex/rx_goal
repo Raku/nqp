@@ -13,7 +13,5 @@
 '(' ~ <[()]> \d+		(123]		<Unable to parse>	failing non-literal goal
 :dba('zz') '(' ~ ')' \d+	(123		<zz>	:dba adverb
 (a) ~ (c) (b)		abc		<mob[0]: a @ 0>	capturing and goal matching interaction (1)
-# todo :pge<goal>
 (a) ~ (c) (b)		abc		<mob[1]: c @ 2>	capturing and goal matching interaction (2)
-# todo :pge<goal>
 (a) ~ (c) (b)		abc		<mob[2]: b @ 1>	capturing and goal matching interaction (3)
