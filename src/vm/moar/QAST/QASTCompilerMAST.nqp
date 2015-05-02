@@ -616,23 +616,12 @@ my class MASTCompilerInstance {
     }
 
     method deserialization_code($sc, @code_ref_blocks, $repo_conf_res) {
-        # Serialize it.
-        my $sh := nqp::list_s();
-        my str $serialized := nqp::serialize($sc, $sh);
+        # Serialize it; we don't keep a reference to the string heap as we
+        # will leave MoarVM to just use the compilation unit's one.
+        my str $serialized := nqp::serialize($sc, nqp::list_s());
 
         # Now it's serialized, pop this SC off the compiling SC stack.
         nqp::popcompsc();
-
-        # String heap QAST.
-        my $sh_ast := QAST::Op.new( :op('list_s') );
-        my $sh_elems := nqp::elems($sh);
-        my $i := 0;
-        while $i < $sh_elems {
-            $sh_ast.push(nqp::isnull_s(nqp::atpos_s($sh, $i))
-                ?? QAST::Op.new( :op('null_s') )
-                !! QAST::SVal.new( :value(nqp::atpos_s($sh, $i)) ));
-            $i := $i + 1;
-        }
 
         # Code references.
         my $cr_ast := QAST::Op.new( :op('list_b'), |@code_ref_blocks );
@@ -671,7 +660,7 @@ my class MASTCompilerInstance {
                     ?? QAST::Op.new( :op('null_s') )
                     !! QAST::SVal.new( :value($serialized) ),
                 QAST::Var.new( :name('cur_sc'), :scope('local') ),
-                $sh_ast,
+                QAST::Op.new( :op('null') ),
                 QAST::Block.new( :blocktype('immediate'), $cr_ast ),
                 QAST::Var.new( :name('conflicts'), :scope('local') )
             ),
