@@ -507,7 +507,20 @@ class QAST::MASTRegexCompiler {
     method enumcharlist($node) {
         my @ins;
         my $op := $node.negate ?? 'indexnat' !! 'indexat';
-        nqp::push(@ins, op($op, %!reg<tgt>, %!reg<pos>, sval($node[0]), %!reg<fail>));
+        if $node.subtype eq 'ignoremark' || $node.subtype eq 'ignorecase+ignoremark' {
+            my $i0 := $!regalloc.fresh_i();
+            my $s0 := $!regalloc.fresh_s();
+            merge_ins(@ins, [
+                op('ge_i', $i0, %!reg<pos>, %!reg<eos>),
+                op('if_i', $i0, %!reg<fail>),
+                op('ordbaseat', $i0, %!reg<tgt>, %!reg<pos>),
+                op('chr', $s0, $i0),
+                op($op, $s0, %!reg<zero>, sval($node[0]), %!reg<fail>),
+            ]);
+        }
+        else {
+            nqp::push(@ins, op($op, %!reg<tgt>, %!reg<pos>, sval($node[0]), %!reg<fail>));
+        }
         nqp::push(@ins, op('inc_i', %!reg<pos>))
             unless $node.subtype eq 'zerowidth';
         @ins
@@ -577,10 +590,8 @@ class QAST::MASTRegexCompiler {
 
     method literal($node) {
         my $litconst := $node[0];
-        my $eq_op := $node.subtype eq 'ignorecase' ?? 'eqatic_s' !! 'eqat_s';
         my $s0 := $!regalloc.fresh_s();
         my $i0 := $!regalloc.fresh_i();
-        my $cmpop := $node.negate ?? 'if_i' !! 'unless_i';
         my @ins;
         if $node.negate {
             # Need explicit check we're not going beyond the string end in the
@@ -594,11 +605,27 @@ class QAST::MASTRegexCompiler {
         # can happen only once at the beginning of a regex. hash of string constants
         # to the registers to which they are assigned.
         # XXX or make a specialized eqat_sc op that takes a constant string.
-        nqp::push(@ins, op('const_s', $s0, sval($litconst)));
         # also, consider making the op branch directly from the comparison
         # instead of storing an integer to a temporary register
-        nqp::push(@ins, op($eq_op, $i0, %!reg<tgt>, $s0, %!reg<pos>));
-        nqp::push(@ins, op($cmpop, $i0, %!reg<fail>));
+        if $node.subtype eq 'ignorecase+ignoremark' {
+            my $op := $node.negate ?? 'indexnat' !! 'indexat';
+            my $c  := nqp::chr(nqp::ordbaseat($litconst, 0));
+            merge_ins(@ins, [
+                op('ge_i', $i0, %!reg<pos>, %!reg<eos>),
+                op('if_i', $i0, %!reg<fail>),
+                op('ordbaseat', $i0, %!reg<tgt>, %!reg<pos>),
+                op('chr', $s0, $i0),
+                op($op, $s0, %!reg<zero>, sval(nqp::lc($c) ~ nqp::uc($c)), %!reg<fail>),
+            ]);
+        }
+        else {
+            my $eq_op := $node.subtype eq 'ignorecase' ?? 'eqatic_s' !!
+                         $node.subtype eq 'ignoremark' ?? 'eqatim_s' !! 'eqat_s';
+            my $cmpop := $node.negate ?? 'if_i' !! 'unless_i';
+            nqp::push(@ins, op('const_s', $s0, sval($litconst)));
+            nqp::push(@ins, op($eq_op, $i0, %!reg<tgt>, $s0, %!reg<pos>));
+            nqp::push(@ins, op($cmpop, $i0, %!reg<fail>));
+        }
         unless $node.subtype eq 'zerowidth' {
             nqp::push(@ins, op('const_i64', $i0, ival(nqp::chars($litconst))));
             nqp::push(@ins, op('add_i', %!reg<pos>, %!reg<pos>, $i0));
@@ -922,7 +949,7 @@ class QAST::MASTRegexCompiler {
             $looplabel,
             op('inc_i', %!reg<pos>),
         ];
-        if $node.list && $node.subtype ne 'ignorecase' {
+        if $node.list && $node.subtype ne 'ignorecase' && $node.subtype ne 'ignoremark' && $node.subtype ne 'ignorecase+ignoremark' {
             my $lit := $!regalloc.fresh_s();
             nqp::push(@ins, op('const_s', $lit, sval($node[0])));
             nqp::push(@ins, op('index_s', %!reg<pos>, %!reg<tgt>, $lit, %!reg<pos>));

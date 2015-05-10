@@ -453,6 +453,12 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     proto token mod_ident { <...> }
     token mod_ident:sym<ignorecase> { $<sym>=[i] 'gnorecase'? » }
+    token mod_ident:sym<ignoremark> {
+        [
+        | $<sym>=[m]
+        | 'ignore' $<sym>=[m] 'ark'
+        ] »
+    }
     token mod_ident:sym<ratchet>    { $<sym>=[r] 'atchet'? » }
     token mod_ident:sym<sigspace>   { $<sym>=[s] 'igspace'? » }
     token mod_ident:sym<dba>        { <sym> » }
