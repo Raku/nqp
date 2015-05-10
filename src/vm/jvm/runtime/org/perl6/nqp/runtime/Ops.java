@@ -3601,6 +3601,10 @@ public final class Ops {
         return str.codePointAt((int)offset);
     }
 
+    public static long ordbaseat(String str, long offset) {
+        throw new RuntimeException("ordbaseat NYI");
+    }
+
     public static String sprintf(String format, SixModelObject arr, ThreadContext tc) {
         // This function just assumes that Java's printf format is compatible
         // with NQP's printf format...

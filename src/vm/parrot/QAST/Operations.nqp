@@ -2228,6 +2228,14 @@ QAST::Operations.add_core_op('ord', :inlinable(1), -> $qastcomp, $op {
         ?? QAST::Op.new( :op('ordfirst'), |@operands )
         !! QAST::Op.new( :op('ordat'), |@operands ));
 });
+QAST::Operations.add_core_op('ordbaseat', :inlinable(1), -> $qastcomp, $op {
+    $qastcomp.as_post(
+        QAST::VM.new( :pirop('nqp_string_ordbase_at__Isi'),
+            $op.list[0],
+            $op.list[1]
+        )
+    );
+});
 
 # index may or may not take a starting position
 QAST::Operations.add_core_pirop_mapping('indexfrom', 'index', 'Issi', :inlinable(1));

@@ -4387,6 +4387,20 @@ inline op nqp_string_equal_at(out INT, in STR, in STR, in INT) {
     }
 }
 
+/*
+
+=item nqp_string_ordbase_at
+
+Returns the codepoint of the base character of the grapheme in string $2 at offset $3.
+
+=cut
+
+*/
+inline op nqp_string_ordbase_at(out INT, in STR, in INT) {
+    Parrot_ex_throw_from_c_noargs(interp, EXCEPTION_UNIMPLEMENTED,
+        "ordbaseat NYI");
+}
+
 inline op nqp_setparameterizer(invar PMC, invar PMC) {
     PMC *type          = decontainerize(interp, $1);
     PMC *parameterizer = decontainerize(interp, $2);

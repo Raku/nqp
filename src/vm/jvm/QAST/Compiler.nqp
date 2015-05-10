@@ -2236,6 +2236,7 @@ QAST::OperationsJAST.add_core_op('ord',  -> $qastcomp, $op {
         ?? QAST::Op.new( :op('ordfirst'), |@operands )
         !! QAST::Op.new( :op('ordat'), |@operands ));
 });
+QAST::OperationsJAST.map_classlib_core_op('ordbaseat', $TYPE_OPS, 'ordbaseat', [$RT_STR, $RT_INT], $RT_INT);
 
 # index may or may not take a starting position
 QAST::OperationsJAST.map_classlib_core_op('indexfrom', $TYPE_OPS, 'indexfrom', [$RT_STR, $RT_STR, $RT_INT], $RT_INT);
