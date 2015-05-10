@@ -538,29 +538,75 @@ class QAST::MASTRegexCompiler {
             op('const_i64', $lower, ival($node[1].value)),
             op('const_i64', $upper, ival($node[2].value)),
         ]);
-        if $node[0] eq 'ignorecase' {
+        if $node[0] eq 'ignorecase+ignoremark' {
+            my $succeed := label();
             my $s0      := $!regalloc.fresh_s();
             my $s1      := $!regalloc.fresh_s();
             my $i2      := $!regalloc.fresh_i();
-            my $succeed := label();
             my $goal    := $node.negate ?? %!reg<fail> !! $succeed;
             merge_ins(@ins, [
-                op('const_i64', $i2, ival(1)),
-                op('substr_s', $s0, %!reg<tgt>, %!reg<pos>, $i2),
+                op('substr_s', $s0, %!reg<tgt>, %!reg<pos>, %!reg<one>),
+                op('lc', $s1, $s0),
+                op('ordbaseat', $i0, $s1, %!reg<zero>),
+                op('ge_i', $i1, $i0, $lower),
+                op('le_i', $i2, $i0, $upper),
+                op('band_i', $i1, $i1, $i2),
+                op('if_i', $i1, $goal),
+                op('uc', $s1, $s0),
+                op('ordbaseat', $i0, $s1, %!reg<zero>),
+                op('ge_i', $i1, $i0, $lower),
+                op('le_i', $i2, $i0, $upper),
+                op('band_i', $i1, $i1, $i2),
+                op('if_i', $i1, $goal),
+            ]);
+            $!regalloc.release_register($s0, $MVM_reg_str);
+            $!regalloc.release_register($s1, $MVM_reg_str);
+            $!regalloc.release_register($i2, $MVM_reg_int64);
+            unless $node.negate {
+                nqp::push(@ins, op('goto', %!reg<fail>));
+                nqp::push(@ins, $succeed);
+            }
+        }
+        elsif $node[0] eq 'ignorecase' {
+            my $succeed := label();
+            my $s0      := $!regalloc.fresh_s();
+            my $s1      := $!regalloc.fresh_s();
+            my $i2      := $!regalloc.fresh_i();
+            my $goal    := $node.negate ?? %!reg<fail> !! $succeed;
+            merge_ins(@ins, [
+                op('substr_s', $s0, %!reg<tgt>, %!reg<pos>, %!reg<one>),
                 op('lc', $s1, $s0),
                 op('ordfirst', $i0, $s1),
                 op('ge_i', $i1, $i0, $lower),
                 op('le_i', $i2, $i0, $upper),
-                op('bitand_i', $i1, $i1, $i2),
+                op('band_i', $i1, $i1, $i2),
                 op('if_i', $i1, $goal),
                 op('uc', $s1, $s0),
                 op('ordfirst', $i0, $s1),
                 op('ge_i', $i1, $i0, $lower),
                 op('le_i', $i2, $i0, $upper),
-                op('bitand_i', $i1, $i1, $i2),
+                op('band_i', $i1, $i1, $i2),
                 op('if_i', $i1, $goal),
             ]);
+            $!regalloc.release_register($s0, $MVM_reg_str);
+            $!regalloc.release_register($s1, $MVM_reg_str);
+            $!regalloc.release_register($i2, $MVM_reg_int64);
             unless $node.negate {
+                nqp::push(@ins, op('goto', %!reg<fail>));
+                nqp::push(@ins, $succeed);
+            }
+        }
+        elsif $node[0] eq 'ignoremark' {
+            my $succeed := label();
+            my $goal := $node.negate ?? $succeed !! %!reg<fail>;
+            merge_ins(@ins, [
+                op('ordbaseat', $i0, %!reg<tgt>, %!reg<pos>),
+                op('gt_i', $i1, $i0, $upper),
+                op('if_i', $i1, $goal),
+                op('lt_i', $i1, $i0, $lower),
+                op('if_i', $i1, $goal),
+            ]);
+            if $node.negate {
                 nqp::push(@ins, op('goto', %!reg<fail>));
                 nqp::push(@ins, $succeed);
             }

@@ -670,6 +670,9 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         }
         else {
             my @alts;
+            my $RXi := %*RX<i>;
+            my $RXm := %*RX<m>;
+            my $RXim := $RXi && $RXm;
             for $<charspec> {
                 if $_[1] {
                     my $node;
@@ -681,9 +684,10 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                             if $node.rxtype ne 'literal' && $node.rxtype ne 'enumcharlist'
                                 || $node.negate || nqp::chars($node[0]) != 1;
                         $ord0 := $node.ann('codepoint') // nqp::ord($node[0]);
+                        $ord0 := nqp::ordbaseat(nqp::chr($ord0), 0) if $RXm;
                     }
                     else {
-                        $ord0 := nqp::ord(~$_[0][0]);
+                        $ord0 := $RXm ?? nqp::ordbaseat(~$_[0][0], 0) !! nqp::ord(~$_[0][0]);
                     }
                     if $_[1][0]<cclass_backslash> {
                         $node := $_[1][0]<cclass_backslash>.ast;
@@ -691,14 +695,17 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                             if $node.rxtype ne 'literal' && $node.rxtype ne 'enumcharlist'
                                 || $node.negate || nqp::chars($node[0]) != 1;
                         $ord1 := $node.ann('codepoint') // nqp::ord($node[0]);
+                        $ord1 := nqp::ordbaseat(nqp::chr($ord1), 0) if $RXm;
                     }
                     else {
-                        $ord1 := nqp::ord(~$_[1][0][0]);
+                        $ord1 := $RXm ?? nqp::ordbaseat(~$_[1][0][0], 0) !! nqp::ord(~$_[1][0][0]);
                     }
                     $/.CURSOR.panic("Illegal reversed character range in regex: " ~ ~$_)
                         if $ord0 > $ord1;
                     @alts.push(QAST::Regex.new(
-                        %*RX<i> ?? 'ignorecase' !! '', # XXX ignoremark
+                        $RXim ?? 'ignorecase+ignoremark' !!
+                        $RXi  ?? 'ignorecase' !!
+                        $RXm  ?? 'ignoremark' !! '',
                         QAST::IVal.new( :value($ord0) ),
                         QAST::IVal.new( :value($ord1) ),
                         :negate( $<sign> eq '-' ),
@@ -714,15 +721,15 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                         @alts.push($bs);
                     }
                 }
-                elsif %*RX<i> && %*RX<m> { # >
+                elsif $RXim {
                     my $c := nqp::chr(nqp::ordbaseat(~$_[0], 0));
                     $str := $str ~ nqp::lc($c) ~ nqp::uc($c);
                 }
-                elsif %*RX<i> {
+                elsif $RXi {
                     my $c := ~$_[0];
                     $str := $str ~ nqp::lc($c) ~ nqp::uc($c);
                 }
-                elsif %*RX<m> { # >
+                elsif $RXm {
                     $str := $str ~ nqp::chr(nqp::ordbaseat(~$_[0], 0));
                 }
                 else {
@@ -730,7 +737,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                 }
             }
             @alts.push(QAST::Regex.new( $str, :rxtype<enumcharlist>, :node($/), :negate( $<sign> eq '-' ),
-                :subtype(%*RX<m> ?? 'ignoremark' !! '') )) # >
+                                        :subtype($RXm ?? 'ignoremark' !! '') ))
                 if nqp::chars($str);
             $qast := +@alts == 1 ?? @alts[0] !!
                 $<sign> eq '-' ??
