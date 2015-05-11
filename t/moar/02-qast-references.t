@@ -135,7 +135,7 @@ is_qast(
     QAST::CompUnit.new( :hll<nqp>,
         QAST::Block.new(
             QAST::Var.new( :name<strloc>, :scope<local>, :decl<var>, :returns(str) ),
-            QAST::Var.new( :name<strref>, :scope<localref>, :decl<var>, :returns(str) ),
+            QAST::Var.new( :name<strref>, :scope<localref>, :decl<var> ),
             QAST::Op.new( :op<bind>,
                 QAST::Var.new( :name<strref>, :scope<localref> ),
                 QAST::Var.new( :name<strloc>, :scope<localref> )
