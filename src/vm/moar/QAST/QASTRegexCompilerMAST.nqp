@@ -1311,6 +1311,7 @@ class QAST::MASTRegexCompiler {
         my $i0      := $!regalloc.fresh_i();
         my $testop  := $node.negate ?? 'if_i' !! 'unless_i';
         my $succeed := label();
+        my $prop    := ~$node[0];
         my @ins     := [
             op('ge_i', $i0, %!reg<pos>, %!reg<eos>),
             op('if_i', $i0, %!reg<fail>),
@@ -1318,13 +1319,26 @@ class QAST::MASTRegexCompiler {
         if +@($node) == 1 {
             my $hasvalcode := label();
             my $endblock   := label();
-            if ~$node[0] ~~ /^ [ In<[A..Z]> | in<[a..z]> ]/ { # "InArabic" is a lookup of Block Arabic
+            if $prop eq 'name' || $prop eq 'Name' {
+                my $s0 := $!regalloc.fresh_s();
                 merge_ins(@ins, [
-                    op('const_s', $pname, sval(nqp::substr($node[0],2))),
+                    op('ordat', $i0, %!reg<tgt>, %!reg<pos>),
+                    op('getuniname', $s0, $i0),
+                    op('const_i64', $i0, %!reg<zero>),
+                    op('unless_s', $s0, $endblock),
+                    op('ordfirst', $i0, $s0),
+                    op('const_i64', $pcode, ival(60)), # not a property code but the ord of '<'
+                    op('ne_i', $i0, $i0, $pcode),
+                    $endblock,
+                    op('if_i', $i0, $succeed),
+                ]);
+            }
+            elsif $prop ~~ /^ [ In<[A..Z]> | in<[a..z]> ]/ { # "InArabic" is a lookup of Block Arabic
+                merge_ins(@ins, [
+                    op('const_s', $pname, sval(nqp::substr($prop,2))),
                     op('uniisblock', $i0, %!reg<tgt>, %!reg<pos>, $pname),
                     op('if_i', $i0, $succeed),
                     op('const_s', $pprop, sval('Block')),
-                    op('const_s', $pname, sval(nqp::substr($node[0],2))),
                     op('unipropcode', $pcode, $pprop),
                     op('unless_i', $pcode, $endblock),
                     op('unipvalcode', $pvcode, $pcode, $pname),
@@ -1343,15 +1357,27 @@ class QAST::MASTRegexCompiler {
                 op($testop, $i0, %!reg<fail>),
             ]);
         }
+        elsif $prop eq 'name' || $prop eq 'Name' {
+            my $smrtmtch_mast := $!qastcomp.as_mast($node[1], :want($MVM_reg_obj));
+            my $s0            := $!regalloc.fresh_s();
+            merge_ins(@ins, $smrtmtch_mast.instructions);
+            merge_ins(@ins, [
+                op('ordat', $i0, %!reg<tgt>, %!reg<pos>),
+                op('getuniname', $s0, $i0),
+                op('findmeth', %!reg<method>, %!reg<cur>, sval('!DELEGATE_ACCEPTS')),
+                call(%!reg<method>, [$Arg::obj, $Arg::obj, $Arg::str], :result($i0),
+                    %!reg<cur>, $smrtmtch_mast.result_reg, $s0),
+                op($testop, $i0, %!reg<fail>),
+            ]);
+        }
         else {
-            my $sname         := $!regalloc.fresh_s();
             my $smrtmtch_mast := $!qastcomp.as_mast($node[1], :want($MVM_reg_obj));
             my $s0            := $!regalloc.fresh_s();
             my $tryintprop    := label();
             my $tryboolprop   := label();
             merge_ins(@ins, $smrtmtch_mast.instructions);
             merge_ins(@ins, [
-                op('const_s', $pname, sval($node[0])),
+                op('const_s', $pname, sval($prop)),
                 op('unipropcode', $pcode, $pname),
                 op('unipvalcode', $pvcode, $pcode, $pname),
                 op('ordat', $i0, %!reg<tgt>, %!reg<pos>),
