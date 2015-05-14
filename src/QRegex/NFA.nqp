@@ -23,6 +23,8 @@ class QRegex::NFA {
     my $EDGE_CODEPOINT_I_LL  := 15;
     my $EDGE_CODEPOINT_M     := 16;
     my $EDGE_CODEPOINT_M_NEG := 17;
+    my $EDGE_CODEPOINT_IM     := 18;
+    my $EDGE_CODEPOINT_IM_NEG := 19;
 
     my $ACTIONS;
     my $nfadeb;
@@ -254,7 +256,16 @@ class QRegex::NFA {
                 }
                 # XXX $EDGE_CODEPOINT_M_LL ?
             }
-            # XXX elsif $node.subtype eq 'ignorecase+ignoremark' { ... }
+            elsif $node.subtype eq 'ignorecase+ignoremark' {
+                my str $litconst_lc := nqp::lc($node[0]);
+                my str $litconst_uc := nqp::uc($node[0]);
+                while $i <= $litlen {
+                    $from := self.addedge($from, -1, $EDGE_CODEPOINT_IM,
+                        [nqp::ordbaseat($litconst_lc, $i), nqp::ordbaseat($litconst_uc, $i)]);
+                    $i := $i + 1;
+                }
+                # XXX $EDGE_CODEPOINT_IM_LL ?
+            }
             else {
                 my str $litconst := $node[0];
                 while $i < $litlen {
