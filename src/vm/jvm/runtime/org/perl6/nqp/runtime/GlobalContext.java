@@ -214,6 +214,9 @@ public class GlobalContext {
     ThreadLocal<WeakReference<ThreadContext>> currentThreadCtxRef;
     WeakHashMap<Thread, ThreadContext> allThreads;
 
+    /** Objects we will never repossess. */
+    public WeakHashMap<SixModelObject, Object> neverRepossess;
+
     /**
      * Initializes the runtime environment.
      */
@@ -260,6 +263,8 @@ public class GlobalContext {
 
         hllGlobalAll = new HashMap<ContextKey<?,?>, Object>();
         hllGlobalAllLock = new Object();
+
+        neverRepossess = new WeakHashMap<SixModelObject, Object>();
 
         byteClassLoader = new ByteClassLoader();
     }

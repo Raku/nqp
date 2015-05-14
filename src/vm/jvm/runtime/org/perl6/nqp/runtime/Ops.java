@@ -4331,12 +4331,18 @@ public final class Ops {
             tc.compilingSCs = null;
         return result;
     }
+    public static SixModelObject neverrepossess(SixModelObject obj, ThreadContext tc) {
+        tc.gc.neverRepossess.put(obj, null);
+        return obj;
+    }
 
     /* SC write barriers (not really ops, but putting them here with the SC
      * related bits). */
     public static void scwbObject(ThreadContext tc, SixModelObject obj) {
         int cscSize = tc.compilingSCs == null ? 0 : tc.compilingSCs.size();
         if (cscSize == 0 || tc.scwbDisableDepth > 0)
+            return;
+        if (tc.gc.neverRepossess.containsKey(obj))
             return;
 
         /* See if the object is actually owned by another, and it's the
