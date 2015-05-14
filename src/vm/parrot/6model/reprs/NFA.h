@@ -17,6 +17,12 @@
 #define EDGE_CHARRANGE_NEG     13
 #define EDGE_CODEPOINT_LL      14
 #define EDGE_CODEPOINT_I_LL    15
+#define EDGE_CODEPOINT_M       16
+#define EDGE_CODEPOINT_M_NEG   17
+#define EDGE_CODEPOINT_M_LL    18
+#define EDGE_CODEPOINT_IM      19
+#define EDGE_CODEPOINT_IM_NEG  20
+#define EDGE_CODEPOINT_IM_LL   21
 
 /* State entry. */
 typedef struct {
