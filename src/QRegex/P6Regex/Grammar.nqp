@@ -413,6 +413,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
                   }
                   for %seen {
                       next if $_.value < 2;
+                      self.worry("Quotes are not metacharacters in character classes") if $_.key eq '"' || $_.key eq "'";
                       self.worry("Repeated character (" ~ $_.key ~ ") unexpectedly found in character class");
                   }
               }
