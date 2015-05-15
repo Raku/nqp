@@ -250,44 +250,40 @@ class HLL::Compiler does HLL::Backend::Default {
         my $has_error := 0;
         my $target := nqp::lc(%adverbs<target>);
         try {
-            if nqp::defined(%adverbs<e>) {
-                $!user_progname := '-e';
-                my $?FILES := '-e';
-                $result := self.eval(%adverbs<e>, '-e', |@a, |%adverbs);
-                unless $target eq '' || $!backend.is_textual_stage($target) || %adverbs<output> {
-					self.dumper($result, $target, |%adverbs);
-				}
-            }
-            elsif !@a { $result := self.interactive(|%adverbs) }
-            elsif %adverbs<combine> { $result := self.evalfiles(@a, |%adverbs) }
-            else { $result := self.evalfiles(@a[0], |@a, |%adverbs) }
+            {
+                if nqp::defined(%adverbs<e>) {
+                    $!user_progname := '-e';
+                    my $?FILES := '-e';
+                    $result := self.eval(%adverbs<e>, '-e', |@a, |%adverbs);
+                    unless $target eq '' || $!backend.is_textual_stage($target) || %adverbs<output> {
+                        self.dumper($result, $target, |%adverbs);
+                    }
+                }
+                elsif !@a { $result := self.interactive(|%adverbs) }
+                elsif %adverbs<combine> { $result := self.evalfiles(@a, |%adverbs) }
+                else { $result := self.evalfiles(@a[0], |@a, |%adverbs) }
 
-            if !nqp::isnull($result) && ($!backend.is_textual_stage($target) || %adverbs<output>) {
-                my $output := %adverbs<output>;
-                my $fh := ($output eq '' || $output eq '-')
-                        ?? nqp::getstdout()
-                        !! nqp::open($output, 'w');
-                self.panic("Cannot write to $output") unless $fh;
-                nqp::printfh($fh, $result);
-                nqp::flushfh($fh);
-                nqp::closefh($fh) unless ($output eq '' || $output eq '-');
+                if !nqp::isnull($result) && ($!backend.is_textual_stage($target) || %adverbs<output>) {
+                    my $output := %adverbs<output>;
+                    my $fh := ($output eq '' || $output eq '-')
+                            ?? nqp::getstdout()
+                            !! nqp::open($output, 'w');
+                    self.panic("Cannot write to $output") unless $fh;
+                    nqp::printfh($fh, $result);
+                    nqp::flushfh($fh);
+                    nqp::closefh($fh) unless ($output eq '' || $output eq '-');
+                }
+                CONTROL {
+                    if nqp::can(self, 'handle-control') {
+                        self.handle-control($_);
+                    } else {
+                        nqp::rethrow($_);
+                    }
+                }
             }
             CATCH {
                 $has_error := 1;
                 $error     := $_;
-            }
-            CONTROL {
-                if nqp::can(self, 'handle-control') {
-                    try {
-                        self.handle-control($_);
-                        CATCH {
-                            $has_error := 1;
-                            $error     := $_;
-                        }
-                    }
-                } else {
-                    nqp::rethrow($_);
-                }
             }
         }
         if ($has_error) {
