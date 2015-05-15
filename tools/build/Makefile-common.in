@@ -18,6 +18,7 @@ CORE_SETTING_SOURCES = \
   src/core/IO.nqp \
   src/core/Regex.nqp \
   src/core/Hash.nqp \
+  src/core/NQPLock.nqp \
   src/core/testing.nqp \
   src/core/YOUAREHERE.nqp \
 
