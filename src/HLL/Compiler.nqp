@@ -278,12 +278,16 @@ class HLL::Compiler does HLL::Backend::Default {
             }
             CONTROL {
                 if nqp::can(self, 'handle-control') {
-                    self.handle-control($_);
+                    try {
+                        self.handle-control($_);
+                        CATCH {
+                            $has_error := 1;
+                            $error     := $_;
+                        }
+                    }
                 } else {
                     nqp::rethrow($_);
                 }
-                $has_error := 1;
-                $error     := $_;
             }
         }
         if ($has_error) {
