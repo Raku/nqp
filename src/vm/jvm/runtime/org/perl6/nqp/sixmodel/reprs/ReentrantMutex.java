@@ -7,6 +7,7 @@ import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.REPR;
 import org.perl6.nqp.sixmodel.STable;
 import org.perl6.nqp.sixmodel.SerializationReader;
+import org.perl6.nqp.sixmodel.SerializationWriter;
 import org.perl6.nqp.sixmodel.SixModelObject;
 import org.perl6.nqp.sixmodel.TypeObject;
 
@@ -27,11 +28,15 @@ public class ReentrantMutex extends REPR {
     }
 
     public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
-        throw ExceptionHandling.dieInternal(tc, "Cannot deserialize a lock");
+        return allocate(tc, st);
     }
 
     public void deserialize_finish(ThreadContext tc, STable st,
             SerializationReader reader, SixModelObject obj) {
-        throw ExceptionHandling.dieInternal(tc, "Cannot deserialize a lock");
+        /* Already did it all in deserialize_stub. */
+    }
+
+    public void serialize(ThreadContext tc, SerializationWriter writer, SixModelObject obj) {
+        /* Nothing to do, we just re-create the lock on deserialization. */
     }
 }
