@@ -2235,6 +2235,7 @@ QAST::MASTOperations.add_core_moarop_mapping('scwbenable', 'scwbenable');
 QAST::MASTOperations.add_core_moarop_mapping('pushcompsc', 'pushcompsc', 0);
 QAST::MASTOperations.add_core_moarop_mapping('popcompsc', 'popcompsc');
 QAST::MASTOperations.add_core_moarop_mapping('neverrepossess', 'neverrepossess', 0);
+QAST::MASTOperations.add_core_moarop_mapping('scdisclaim', 'scdisclaim', 0);
 
 # bitwise opcodes
 QAST::MASTOperations.add_core_moarop_mapping('bitor_i', 'bor_i');
