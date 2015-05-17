@@ -4334,6 +4334,18 @@ public final class Ops {
         tc.gc.neverRepossess.put(obj, null);
         return obj;
     }
+    public static SixModelObject scdisclaim(SixModelObject scRef, ThreadContext tc) {
+        if (scRef instanceof SCRefInstance) {
+            SerializationContext sc = ((SCRefInstance)scRef).referencedSC;
+            sc.disclaimObjects();
+            sc.disclaimSTables();
+            sc.disclaimCodes();
+            return scRef;
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc, "scdisclaim was not passed a valid SCRef");
+        }
+    }
 
     /* SC write barriers (not really ops, but putting them here with the SC
      * related bits). */

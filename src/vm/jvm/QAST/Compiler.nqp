@@ -2282,6 +2282,7 @@ QAST::OperationsJAST.map_classlib_core_op('scwbenable', $TYPE_OPS, 'scwbenable',
 QAST::OperationsJAST.map_classlib_core_op('pushcompsc', $TYPE_OPS, 'pushcompsc', [$RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('popcompsc', $TYPE_OPS, 'popcompsc', [], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('neverrepossess', $TYPE_OPS, 'neverrepossess', [$RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('scdisclaim', $TYPE_OPS, 'scdisclaim', [$RT_OBJ], $RT_OBJ, :tc);
 
 # bitwise opcodes
 QAST::OperationsJAST.map_classlib_core_op('bitor_i', $TYPE_OPS, 'bitor_i', [$RT_INT, $RT_INT], $RT_INT);
