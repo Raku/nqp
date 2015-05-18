@@ -4363,7 +4363,10 @@ public final class Ops {
             obj = owner;
 
         SerializationContext compSC = tc.compilingSCs.get(cscSize - 1).referencedSC;
-        if (obj.sc != compSC) {
+        if (obj.sc == null) { /* Probably disclaimed. */
+            return;
+        }
+        else if (obj.sc != compSC) {
             compSC.repossessObject(obj.sc, obj);
             obj.sc = compSC;
         }
