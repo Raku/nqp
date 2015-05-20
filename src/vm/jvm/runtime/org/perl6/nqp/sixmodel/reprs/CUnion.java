@@ -3,7 +3,7 @@ package org.perl6.nqp.sixmodel.reprs;
 import java.util.List;
 import java.util.ArrayList;
 
-import com.sun.jna.Structure;
+import com.sun.jna.Union;
 
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.FieldVisitor;
@@ -18,13 +18,13 @@ import org.perl6.nqp.sixmodel.STable;
 import org.perl6.nqp.sixmodel.StorageSpec;
 import org.perl6.nqp.sixmodel.TypeObject;
 
-import org.perl6.nqp.sixmodel.reprs.CStructREPRData.AttrInfo;
+import org.perl6.nqp.sixmodel.reprs.CUnionREPRData.AttrInfo;
 import org.perl6.nqp.sixmodel.reprs.NativeCall.ArgType;
 
 import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.ThreadContext;
 
-public class CStruct extends REPR {
+public class CUnion extends REPR {
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
         STable st = new STable(this, HOW);
         SixModelObject obj = new TypeObject();
@@ -35,7 +35,7 @@ public class CStruct extends REPR {
 
     public void compose(ThreadContext tc, STable st, SixModelObject repr_info_hash) {
         SixModelObject repr_info = repr_info_hash.at_key_boxed(tc, "attribute");
-        CStructREPRData repr_data = new CStructREPRData();
+        CUnionREPRData repr_data = new CUnionREPRData();
 
         long mroLength = repr_info.elems(tc);
         List<AttrInfo> attrInfos = new ArrayList<AttrInfo>();
@@ -57,14 +57,14 @@ public class CStruct extends REPR {
                     repr_data.fieldTypes.put(info.name, info);
 
                     if (info.type == null) {
-                        ExceptionHandling.dieInternal(tc, "CStruct representation requires the types of all attributes to be specified");
+                        ExceptionHandling.dieInternal(tc, "CUnion representation requires the types of all attributes to be specified");
                     }
 
                     attrInfos.add(info);
                 }
             }
             else {
-                ExceptionHandling.dieInternal(tc, "CStruct representation does not support multiple inheritance");
+                ExceptionHandling.dieInternal(tc, "CUnion representation does not support multiple inheritance");
             }
         }
 
@@ -78,11 +78,11 @@ public class CStruct extends REPR {
     public SixModelObject allocate(ThreadContext tc, STable st) {
         /* TODO: Die if someone tries to allocate a CStruct before it's been
          * composed. */
-        CStructInstance obj = new CStructInstance();
-        CStructREPRData repr_data = (CStructREPRData) st.REPRData;
+        CUnionInstance obj = new CUnionInstance();
+        CUnionREPRData repr_data = (CUnionREPRData) st.REPRData;
         obj.st = st;
         try {
-            obj.storage = (Structure) repr_data.structureClass.newInstance();
+            obj.storage = (Union) repr_data.structureClass.newInstance();
         }
         catch (InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
@@ -93,25 +93,25 @@ public class CStruct extends REPR {
 
     public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
         /* This REPR can't be serialized. */
-        ExceptionHandling.dieInternal(tc, "Can't deserialize_stub a CStruct object.");
+        ExceptionHandling.dieInternal(tc, "Can't deserialize_stub a CUnion object.");
 
         return null;
     }
 
     public void deserialize_finish(ThreadContext tc, STable st, SerializationReader reader, SixModelObject obj) {
-        ExceptionHandling.dieInternal(tc, "Can't deserialize_finish a CStruct object.");
+        ExceptionHandling.dieInternal(tc, "Can't deserialize_finish a CUnion object.");
     }
 
     private static long typeId = 0;
     private void generateStructClass(ThreadContext tc, STable st, List<AttrInfo> fields) {
-        CStructREPRData reprData = (CStructREPRData) st.REPRData;
+        CUnionREPRData reprData = (CUnionREPRData) st.REPRData;
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
-        String className = "__CStruct__" + typeId++;
+        String className = "__CUnion__" + typeId++;
 
         int attributes = fields.size();
 
-        // public $className extends com.sun.jna.Structure implements com.sun.jna.Structure.ByReference { ... }
-        cw.visit(Opcodes.V1_7, Opcodes.ACC_PUBLIC | Opcodes.ACC_SUPER, className, null, "com/sun/jna/Structure", null);
+        // public $className extends com.sun.jna.Union implements com.sun.jna.Structure.ByReference { ... }
+        cw.visit(Opcodes.V1_7, Opcodes.ACC_PUBLIC | Opcodes.ACC_SUPER, className, null, "com/sun/jna/Union", null);
 
         //     private static List<String> fieldOrder;
         FieldVisitor fv = cw.visitField(Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC, "fieldOrder", "Ljava/util/List;",
@@ -161,7 +161,7 @@ public class CStruct extends REPR {
         constructor.visitCode();
         constructor.visitVarInsn(Opcodes.ALOAD, 0);
         constructor.visitMethodInsn(Opcodes.INVOKESPECIAL, 
-                "com/sun/jna/Structure", "<init>", "()V");
+                "com/sun/jna/Union", "<init>", "()V");
         constructor.visitInsn(Opcodes.RETURN);
         constructor.visitMaxs(1, 1);
         constructor.visitEnd();
@@ -193,7 +193,7 @@ public class CStruct extends REPR {
                 return "J";
             }
             else {
-                ExceptionHandling.dieInternal(tc, "CStruct representation only handles 8, 16, 32 and 64 bit ints");
+                ExceptionHandling.dieInternal(tc, "CUnion representation only handles 8, 16, 32 and 64 bit ints");
                 return null;
             }
         }
@@ -207,7 +207,7 @@ public class CStruct extends REPR {
                 return "D";
             }
             else {
-                ExceptionHandling.dieInternal(tc, "CStruct representation only handles 32 and 64 bit nums");
+                ExceptionHandling.dieInternal(tc, "CUnion representation only handles 32 and 64 bit nums");
                 return null;
             }
         }
@@ -223,24 +223,24 @@ public class CStruct extends REPR {
             info.argType = ArgType.CPOINTER;
             return "Lcom/sun/jna/Pointer;";
         }
-        else if (repr instanceof CUnion) {
-            info.argType = ArgType.CUNION;
-            Class c = ((CUnionREPRData) info.type.st.REPRData).structureClass;
-            return Type.getDescriptor(c);
-        }
         else if (repr instanceof CStruct) {
             info.argType = ArgType.CSTRUCT;
             Class c = ((CStructREPRData) info.type.st.REPRData).structureClass;
+            return Type.getDescriptor(c);
+        }
+        else if (repr instanceof CUnion) {
+            info.argType = ArgType.CUNION;
+            Class c = ((CUnionREPRData) info.type.st.REPRData).structureClass;
 
-            /* When we hit a struct in an attribute that is not composed yet, we most likely
-             * have hit a struct of our own kind. */
+            /* When we hit a union in an attribute that is not composed yet, we most likely
+             * have hit a union of our own kind. */
             if (c == null)
-                return "L__CStruct__" + typeId + ";";
+                return "L__CUnion__" + typeId + ";";
 
             return Type.getDescriptor(c);
         }
         else {
-            ExceptionHandling.dieInternal(tc, "CStruct representation only handles int, num, CArray, CPointer, CStruct and CUnion");
+            ExceptionHandling.dieInternal(tc, "CUnion representation only handles int, num, CArray, CPointer and CStruct");
             return null;
         }
     }

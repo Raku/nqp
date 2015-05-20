@@ -13,18 +13,18 @@ import org.perl6.nqp.runtime.ThreadContext;
 
 import org.perl6.nqp.sixmodel.SixModelObject;
 
-import org.perl6.nqp.sixmodel.reprs.CStructREPRData.AttrInfo;
+import org.perl6.nqp.sixmodel.reprs.CUnionREPRData.AttrInfo;
 import org.perl6.nqp.sixmodel.reprs.NativeCall.ArgType;
 
-public class CStructInstance extends SixModelObject implements Refreshable {
-    public Structure storage;
+public class CUnionInstance extends SixModelObject implements Refreshable {
+    public Union storage;
     /* XXX: Using a hash to store members is probably not an optimal solution.
      * Dynamically generating subclasses that have the appropriate members and
      * such is probably better, but that's harder to implement. */
     public HashMap<String, SixModelObject> memberCache = new HashMap<String, SixModelObject>();
 
     public void bind_attribute_boxed(ThreadContext tc, SixModelObject class_handle, String name, long hint, SixModelObject value) {
-        CStructREPRData data = (CStructREPRData) class_handle.st.REPRData;
+        CUnionREPRData data = (CUnionREPRData) class_handle.st.REPRData;
         AttrInfo info = data.fieldTypes.get(name);
         /* XXX: This'll break if we try to set a callback member. OTOH, it's
          * broken on Parrot too, so it's not a NativeCall regression as
@@ -46,7 +46,7 @@ public class CStructInstance extends SixModelObject implements Refreshable {
     }
 
     public void bind_attribute_native(ThreadContext tc, SixModelObject class_handle, String name, long hint) {
-        CStructREPRData data = (CStructREPRData) class_handle.st.REPRData;
+        CUnionREPRData data = (CUnionREPRData) class_handle.st.REPRData;
         AttrInfo info = data.fieldTypes.get(name);
         Object value;
         switch (info.argType) {
@@ -75,7 +75,7 @@ public class CStructInstance extends SixModelObject implements Refreshable {
             value = new Double((double) tc.native_n);
             break;
         default:
-            ExceptionHandling.dieInternal(tc, String.format("CStruct.bind_attribute_native: Can't handle %s", info.argType));
+            ExceptionHandling.dieInternal(tc, String.format("CUnion.bind_attribute_native: Can't handle %s", info.argType));
             value = null;
         }
         storage.writeField(name, value);
@@ -85,7 +85,7 @@ public class CStructInstance extends SixModelObject implements Refreshable {
         SixModelObject member = memberCache.get(name);
         if (member != null) return member;
 
-        CStructREPRData data = (CStructREPRData) class_handle.st.REPRData;
+        CUnionREPRData data = (CUnionREPRData) class_handle.st.REPRData;
         AttrInfo info = data.fieldTypes.get(name);
 
         Object o = storage.readField(name);
@@ -106,7 +106,7 @@ public class CStructInstance extends SixModelObject implements Refreshable {
     }
 
     public void get_attribute_native(ThreadContext tc, SixModelObject class_handle, String name, long hint) {
-        CStructREPRData data = (CStructREPRData) class_handle.st.REPRData;
+        CUnionREPRData data = (CUnionREPRData) class_handle.st.REPRData;
         AttrInfo info = data.fieldTypes.get(name);
 
         Object o = storage.readField(name);
@@ -136,12 +136,12 @@ public class CStructInstance extends SixModelObject implements Refreshable {
             tc.native_n = ((Double) o).doubleValue();
             break;
         default:
-            ExceptionHandling.dieInternal(tc, String.format("CStruct.get_attribute_native: Can't handle %s", info.argType));
+            ExceptionHandling.dieInternal(tc, String.format("CUnion.get_attribute_native: Can't handle %s", info.argType));
         }
     }
 
     public void refresh(ThreadContext tc) {
-        CStructREPRData repr_data = (CStructREPRData) st.REPRData;
+        CUnionREPRData repr_data = (CUnionREPRData) st.REPRData;
 
         // Recursively refresh our members.
         for (Entry<String, SixModelObject> entry: memberCache.entrySet()) {

@@ -11,6 +11,7 @@ import com.sun.jna.NativeLong;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
+import com.sun.jna.Union;
 
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
@@ -38,6 +39,8 @@ import org.perl6.nqp.sixmodel.reprs.CPointerInstance;
 import org.perl6.nqp.sixmodel.reprs.CStrInstance;
 import org.perl6.nqp.sixmodel.reprs.CStructInstance;
 import org.perl6.nqp.sixmodel.reprs.CStructREPRData;
+import org.perl6.nqp.sixmodel.reprs.CUnionInstance;
+import org.perl6.nqp.sixmodel.reprs.CUnionREPRData;
 import org.perl6.nqp.sixmodel.reprs.NativeCall.ArgType;
 import org.perl6.nqp.sixmodel.reprs.NativeCallInstance;
 import org.perl6.nqp.sixmodel.reprs.NativeCallBody;
@@ -196,9 +199,12 @@ public final class NativeCallOps {
                 else if (obj instanceof org.perl6.nqp.sixmodel.reprs.CStructInstance) {
                     return ((CStructInstance) obj).storage.size();
                 }
+                else if (obj instanceof org.perl6.nqp.sixmodel.reprs.CUnionInstance) {
+                    return ((CUnionInstance) obj).storage.size();
+                }
                 else {
                     throw ExceptionHandling.dieInternal(tc,
-                        String.format("NativeCall op sizeof expected type with CPointer, CStruct, CArray, P6int or P6num representation, but got a %s", obj));
+                        String.format("NativeCall op sizeof expected type with CPointer, CStruct, CUnion, CArray, P6int or P6num representation, but got a %s", obj));
                 }
         }
     }
@@ -215,12 +221,16 @@ public final class NativeCallOps {
         else if (source instanceof CStructInstance) {
             o = ((CStructInstance)source).storage.getPointer();
         }
+        else if (source instanceof CUnionInstance) {
+            o = ((CUnionInstance)source).storage.getPointer();
+        }
         else {
             /* If we got something that is either a CPointer, CArray or CStruct but is not an instance,
              * it is the type object which represents NULL. So, just don't throw and we are fine. */
             if ( !(source.st.REPR instanceof org.perl6.nqp.sixmodel.reprs.CPointer
                 || source.st.REPR instanceof org.perl6.nqp.sixmodel.reprs.CArray
-                || source.st.REPR instanceof org.perl6.nqp.sixmodel.reprs.CStruct) ) {
+                || source.st.REPR instanceof org.perl6.nqp.sixmodel.reprs.CStruct
+                || source.st.REPR instanceof org.perl6.nqp.sixmodel.reprs.CUnion) ) {
                 throw ExceptionHandling.dieInternal(tc,
                     "Native call expected object with CPointer representation, but got something else");
             }
@@ -292,6 +302,11 @@ public final class NativeCallOps {
                     CStructInstance cstruct = (CStructInstance)nqpobj;
                     cstruct.storage         = Structure.newInstance(structClass, o);
                 }
+                else if (nqpobj instanceof org.perl6.nqp.sixmodel.reprs.CUnionInstance) {
+                    Class<?>  structClass = ((CUnionREPRData)target_type.st.REPRData).structureClass;
+                    CUnionInstance cunion = (CUnionInstance)nqpobj;
+                    cunion.storage        = (Union)Union.newInstance(structClass, o);
+                }
                 else {
                     throw ExceptionHandling.dieInternal(tc,
                         String.format("Don't know how to cast to %s", nqpobj));
@@ -355,6 +370,8 @@ public final class NativeCallOps {
             return Pointer.class;
         case CSTRUCT:
             return ((CStructREPRData) smoType.st.REPRData).structureClass;
+        case CUNION:
+            return ((CUnionREPRData) smoType.st.REPRData).structureClass;
         default:
             throw ExceptionHandling.dieInternal(tc, String.format("Don't know correct Java class for %s arguments yet", target));
         }
@@ -438,6 +455,10 @@ public final class NativeCallOps {
             o = Ops.decont(o, tc);
             if (Ops.isconcrete(o, tc) == 0) return null;
             return ((CStructInstance) o).storage;
+        case CUNION:
+            o = Ops.decont(o, tc);
+            if (Ops.isconcrete(o, tc) == 0) return null;
+            return ((CUnionInstance) o).storage;
         case CALLBACK:
             o = Ops.decont(o, tc);
             if (Ops.isconcrete(o, tc) == 0) return null;
@@ -657,6 +678,14 @@ public final class NativeCallOps {
                 nqpobj = type.st.REPR.allocate(tc, type.st);
                 CStructInstance cstruct = (CStructInstance) nqpobj;
                 cstruct.storage = (Structure) o;
+            }
+            break;
+        }
+        case CUNION: {
+            if (o != null) {
+                nqpobj = type.st.REPR.allocate(tc, type.st);
+                CUnionInstance cunion = (CUnionInstance) nqpobj;
+                cunion.storage = (Union) o;
             }
             break;
         }
