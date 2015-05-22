@@ -89,13 +89,13 @@ release guide for links on how to create GPG keys, should it be necessary.
 
 Sign the tarball:
 
-    $ gpg --sign nqp-YYY.MM.tar.gz
+    $ gpg -b --armor nqp-YYY.MM.tar.gz
 
 =item 8
 
 Upload the release tarball and signature to L<http://rakudo.org/downloads/rakudo>:
 
-  $ scp nqp-2013.12.tar.gz nqp-2013.12.tar.gz.gpg \
+  $ scp nqp-2013.12.tar.gz nqp-2013.12.tar.gz.asc \
         rakudo@rakudo.org:public_html/downloads/nqp/
 
 If you do not have permissions for that, ask one of (pmichaud, jnthn, FROGGS,
