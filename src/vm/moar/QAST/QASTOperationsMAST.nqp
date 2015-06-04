@@ -1894,6 +1894,16 @@ my %const_map := nqp::hash(
     'STAT_PLATFORM_BLOCKSIZE', -6,
     'STAT_PLATFORM_BLOCKS',    -7,
 
+    'PIPE_INHERIT_IN',          1,
+    'PIPE_IGNORE_IN',           2,
+    'PIPE_CAPTURE_IN',          4,
+    'PIPE_INHERIT_OUT',         8,
+    'PIPE_IGNORE_OUT',          16,
+    'PIPE_CAPTURE_OUT',         32,
+    'PIPE_INHERIT_ERR',         64,
+    'PIPE_IGNORE_ERR',          128,
+    'PIPE_CAPTURE_ERR',         256,
+
     'SIG_HUP',                  1,
     'SIG_INT',                  2,
     'SIG_QUIT',                 3,
@@ -2696,6 +2706,7 @@ QAST::MASTOperations.add_core_moarop_mapping('shell', 'shell');
 QAST::MASTOperations.add_core_moarop_mapping('spawn', 'spawn');
 QAST::MASTOperations.add_core_moarop_mapping('gethostname', 'gethostname');
 QAST::MASTOperations.add_core_moarop_mapping('openpipe', 'openpipe');
+QAST::MASTOperations.add_core_moarop_mapping('syncpipe', 'syncpipe');
 QAST::MASTOperations.add_core_moarop_mapping('rand_i', 'rand_i');
 QAST::MASTOperations.add_core_moarop_mapping('rand_n', 'randscale_n');
 QAST::MASTOperations.add_core_moarop_mapping('srand', 'srand', 0);

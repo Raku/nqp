@@ -1,49 +1,73 @@
 #! nqp
 
-# Testing nqp::openpipe on JVM.
+# Testing nqp::openpipe.
 
-plan(14);
+plan(16);
+
+my $read_out         := nqp::const::PIPE_INHERIT_IN + nqp::const::PIPE_CAPTURE_OUT + nqp::const::PIPE_INHERIT_ERR;
+my $read_out_and_err := nqp::const::PIPE_INHERIT_IN + nqp::const::PIPE_CAPTURE_OUT + nqp::const::PIPE_CAPTURE_ERR;
 
 {
-    my $p := nqp::openpipe('echo aardvarks', nqp::cwd(), nqp::getenvhash(), '');
-    ok( nqp::defined($p) == 1, 'nqp::openpipe' );
+    my $in  := nqp::syncpipe();
+    my $out := nqp::syncpipe();
+    my $err := nqp::syncpipe();
+    my $pid := nqp::openpipe('echo aardvarks', nqp::cwd(), nqp::getenvhash(), $in, $out, $err, $read_out);
+    ok( $pid, 'nqp::openpipe' );
 
-    my $pstr := nqp::readallfh($p);
+    my $pstr := nqp::readallfh($out);
     ok( $pstr ~~ / 'aardvarks' /, 'nqp::readallfh with a pipe');
 
     # What should the return value of nqp::close be? MoarVM and JVM always return 1.
-    nqp::closefh($p); ok( 1, 'nqp::closefh with a pipe');
-    nqp::closefh($p); ok( 1, 'nqp::closefh with a pipe already closed');
+    nqp::closefh($out); ok( 1, 'nqp::closefh with a pipe');
+    nqp::closefh($out); ok( 1, 'nqp::closefh with a pipe already closed');
+}
 
-    my $q := nqp::openpipe('doesnotexist', nqp::cwd(), nqp::getenvhash(), '');
-    ok( nqp::defined($q) == 1, 'nqp::openpipe nonexistent cmd');
+{
+    my $in  := nqp::syncpipe();
+    my $out := nqp::syncpipe();
+    my $err := nqp::syncpipe();
+    my $pid := nqp::openpipe('doesnotexist', nqp::cwd(), nqp::getenvhash(), $in, $out, $err, $read_out_and_err);
+    ok( $pid, 'nqp::openpipe nonexistent cmd');
 
-    my $qstr := nqp::readallfh($q);
+    my $str_out := nqp::readallfh($out);
+    my $str_err := nqp::readallfh($err);
     nqp::getcomp('nqp').backend.name eq 'parrot' ??
-        ok( $qstr ~~ / 'doesnotexist' /, 'nqp::readallfh with a pipe nonexistent command') !!
-        ok( $qstr eq '', 'nqp::readallfh with a pipe nonexistent command');
+        ok( $str_out ~~ / 'doesnotexist' /, 'nqp::readallfh with a pipe nonexistent command') !!
+        ok( $str_out eq '' && $str_err ~~ / 'doesnotexist' /, 'nqp::readallfh with a pipe nonexistent command');
 
-    nqp::closefh($q); ok( 1, 'nqp::closefh with a pipe nonexistent command');
+    nqp::closefh($out); ok( 1, 'nqp::closefh with a pipe nonexistent command');
+    nqp::closefh($err); ok( 1, 'nqp::closefh with a pipe nonexistent command');
 }
 
 # same tests but do nqp::closefh_i instead of nqp::closefh
 {
-    my $p := nqp::openpipe('echo aardvarks', nqp::cwd(), nqp::getenvhash(), '');
-    ok( nqp::defined($p) == 1, 'nqp::openpipe' );
+    my $in  := nqp::syncpipe();
+    my $out := nqp::syncpipe();
+    my $err := nqp::syncpipe();
+    my $pid := nqp::openpipe('echo aardvarks', nqp::cwd(), nqp::getenvhash(), $in, $out, $err, $read_out);
+    ok( $pid, 'nqp::openpipe' );
 
-    my $pstr := nqp::readallfh($p);
-    ok( $pstr ~~ / 'aardvarks' /, 'nqp::readallfh with a pipe');
+    my $str := nqp::readallfh($out);
+    ok( $str ~~ / 'aardvarks' /, 'nqp::readallfh with a pipe');
 
-    ok( nqp::closefh_i($p) == 0, 'nqp::closefh_i with a pipe');
-    ok( nqp::closefh_i($p) == 0, 'nqp::closefh_i with a pipe already closed');
+    ok( nqp::closefh_i($out) == 0, 'nqp::closefh_i with a pipe');
+    ok( nqp::closefh_i($out) == 0, 'nqp::closefh_i with a pipe already closed');
+}
 
-    my $q := nqp::openpipe('doesnotexist', nqp::cwd(), nqp::getenvhash(), '');
-    ok( nqp::defined($q) == 1, 'nqp::openpipe nonexistent cmd');
+{
+    my $in  := nqp::syncpipe();
+    my $out := nqp::syncpipe();
+    my $err := nqp::syncpipe();
+    my $pid := nqp::openpipe('doesnotexist', nqp::cwd(), nqp::getenvhash(), $in, $out, $err, $read_out_and_err);
+    ok( $pid, 'nqp::openpipe nonexistent cmd');
 
-    my $qstr := nqp::readallfh($q);
+    my $str_out := nqp::readallfh($out);
+    my $str_err := nqp::readallfh($err);
     nqp::getcomp('nqp').backend.name eq 'parrot' ??
-        ok( $qstr ~~ / 'doesnotexist' /, 'nqp::readallfh with a pipe nonexistent command') !!
-        ok( $qstr eq '', 'nqp::readallfh with a pipe nonexistent command');
+        ok( $str_out ~~ / 'doesnotexist' /, 'nqp::readallfh with a pipe nonexistent command') !!
+        ok( $str_out eq '' && $str_err ~~ / 'doesnotexist' /, 'nqp::readallfh with a pipe nonexistent command');
 
-    ok( nqp::closefh_i($q) != 0, 'nqp::closefh_i with a pipe nonexistent command');
+    # Only the first call to closefh_i returns the exit code.
+    ok( nqp::closefh_i($out) != 0, 'nqp::closefh_i with a pipe nonexistent command');
+    ok( nqp::closefh_i($err) == 0, 'nqp::closefh_i with a pipe nonexistent command');
 }
