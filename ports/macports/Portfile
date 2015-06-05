@@ -1,0 +1,39 @@
+# $Id$
+
+PortSystem          1.0
+
+name                nqp
+version             2015.05
+depends_lib         port:MoarVM
+depends_build       port:MoarVM
+depends_run         port:MoarVM
+categories          lang devel
+platforms           darwin
+license             Artistic-2
+maintainers         coleda.com:will
+description         A lightweight Perl-6 like language for virtual machines.
+long_description    Unlike a full-fledged implementation of Perl 6, NQP \
+                    strives to have as small a runtime footprint as it can, \
+                    while still providing a Perl 6 object model and regular \
+                    expression engine for the virtual machine.
+
+homepage            https://github.com/perl6/nqp
+master_sites        http://rakudo.org/downloads/nqp/
+
+# To find the correct checksums for the given release, use:
+# openssl dgst -rmd160 <file>
+# openssl dgst -sha256 <file>
+checksums           rmd160 8fc571c56d222b0d57984199643918e54af259c2 \
+                    sha256 790bfc3fa1af7f88f039d170875d69e6e17a9b03cd2119887e5df20834374316
+
+# FIXME: may need ExtUtil::Command if by chance our default perl5 binary
+# does not match what Apple ships.
+depends_build       port:perl5
+
+# Unsupported by configure.pl.
+configure.universal_args-delete --disable-dependency-tracking
+
+universal_variant   yes
+
+configure.cmd       ${prefix}/bin/perl Configure.pl --backends=moar --with-moar=${prefix}/bin/moar
+
