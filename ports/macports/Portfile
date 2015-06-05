@@ -4,9 +4,6 @@ PortSystem          1.0
 
 name                nqp
 version             2015.05
-depends_lib         port:MoarVM
-depends_build       port:MoarVM
-depends_run         port:MoarVM
 categories          lang devel
 platforms           darwin
 license             Artistic-2
@@ -35,5 +32,15 @@ configure.universal_args-delete --disable-dependency-tracking
 
 universal_variant   yes
 
-configure.cmd       ${prefix}/bin/perl Configure.pl --backends=moar --with-moar=${prefix}/bin/moar
+
+subport nqp {
+    depends_lib         port:MoarVM
+    depends_build       port:MoarVM
+    depends_run         port:MoarVM
+    configure.cmd       ${prefix}/bin/perl Configure.pl --backends=moar --with-moar=${prefix}/bin/moar
+}
+subport nqp-jvm {
+    distfiles           nqp-${version}.tar.gz
+    configure.cmd       ${prefix}/bin/perl Configure.pl --backends=jvm 
+}
 
