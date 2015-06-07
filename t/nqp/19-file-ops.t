@@ -170,7 +170,9 @@ nqp::unlink($test-file ~ '-linked');
 my $tmp-file := "tmp";
 my $env := nqp::getenvhash();
 $env<NQP_SHELL_TEST_ENV_VAR> := "123foo";
-nqp::shell("echo %NQP_SHELL_TEST_ENV_VAR% > $tmp-file",nqp::cwd(),$env);
+nqp::shell("echo %NQP_SHELL_TEST_ENV_VAR% > $tmp-file",nqp::cwd(),$env, nqp::null(), nqp::null(), nqp::null(),
+    nqp::const::PIPE_INHERIT_IN + nqp::const::PIPE_INHERIT_OUT + nqp::const::PIPE_INHERIT_ERR
+);
 my $output := slurp($tmp-file);
 nqp::unlink($tmp-file);
 my $is-windows := $output ne "%NQP_SHELL_TEST_ENV_VAR%\n";
