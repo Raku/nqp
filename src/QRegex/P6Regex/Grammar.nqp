@@ -223,7 +223,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         | \w
 	  [
 	  | \w+! <?before \w>
-	  | <?before ' ' \w> <!{ %*RX<s> }> <.worry("Space is not signficant here; please use quotes or :s (:sigspace) modifier (or, to suppress this warning, omit the space, or otherwise change the spacing)")>
+	  | <?before ' ' \w> <!{ %*RX<s> }> <.worry("Space is not significant here; please use quotes or :s (:sigspace) modifier (or, to suppress this warning, omit the space, or otherwise change the spacing)")>
 	  ]?
 	  <.SIGOK>
         | <metachar>
