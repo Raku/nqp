@@ -213,7 +213,7 @@ MAIN: {
                 "(You can get a MoarVM built automatically with --gen-moar.)";
         }
         sorry(@errors) if @errors;
-        $config{'make'}   = $^O eq 'MSWin32' ? 'nmake' : 'make';
+        $config{'make'} = $^O eq 'MSWin32' ? ($ENV{VisualStudioVersion} ? 'nmake' : 'gmake') : 'make';
         $config{moar} = $moar_path;
         fill_template_file(
             'tools/build/Makefile-Moar.in',
