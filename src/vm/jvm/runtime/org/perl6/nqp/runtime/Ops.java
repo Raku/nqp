@@ -2141,7 +2141,7 @@ public final class Ops {
         else {
             InvocationSpec is = invokee.st.InvocationSpec;
             if (is == null)
-                throw ExceptionHandling.dieInternal(tc, "Can not invoke this object");
+                throw ExceptionHandling.dieInternal(tc, "Cannot invoke this object");
             if (is.ClassHandle != null)
                 cr = (CodeRef)invokee.get_attribute_boxed(tc, is.ClassHandle, is.AttrName, is.Hint);
             else {
@@ -2292,7 +2292,7 @@ public final class Ops {
     }
     public static SixModelObject findmethod(ThreadContext tc, SixModelObject invocant, String name) {
         if (invocant == null)
-            throw ExceptionHandling.dieInternal(tc, "Can not call method '" + name + "' on a null object");
+            throw ExceptionHandling.dieInternal(tc, "Cannot call method '" + name + "' on a null object");
         invocant = decont(invocant, tc);
 
         SixModelObject meth = invocant.st.MethodCache.get(name);
@@ -2303,7 +2303,7 @@ public final class Ops {
     }
     public static SixModelObject findmethod(SixModelObject invocant, String name, ThreadContext tc) {
         if (invocant == null)
-            throw ExceptionHandling.dieInternal(tc, "Can not call method '" + name + "' on a null object");
+            throw ExceptionHandling.dieInternal(tc, "Cannot call method '" + name + "' on a null object");
         invocant = decont(invocant, tc);
 
         Map<String, SixModelObject> cache = invocant.st.MethodCache;
