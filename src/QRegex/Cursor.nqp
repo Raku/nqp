@@ -262,11 +262,10 @@ role NQPCursorRole is export {
 		    nqp::push($!cstack, $capture);
 		}
 		else {
-		    # $top capture just used for pos advancement, so update it in place.
-		    # We copy the pos rather than the entire $capture because $capture is
-		    # somewhat likelier to be in the nursery than $top is;
-		    my int $pos := nqp::getattr($capture,$?CLASS,'$!pos');
-		    nqp::bindattr_i($top,$?CLASS,'$!pos', $pos);
+		    # $top anon capture just used for pos advancement, so update it in place.
+		    # We replace the whole capture because jvm can't seem to copy only the pos,
+		    # and because the chances are that both captures are in the nursury anyway.
+		    nqp::bindpos($!cstack,-1,$capture);
 		}
 	    }
 	}
