@@ -242,15 +242,46 @@ role NQPCursorRole is export {
         nqp::push_i($!bstack, $!pos);
         nqp::push_i($!bstack, 0);
         nqp::push_i($!bstack, nqp::elems($!cstack));
+#	nqp::printfh(nqp::getstderr(), "cursor_capture $name\n");
+#	nqp::printfh(nqp::getstderr(), "\tcstack=" ~ nqp::elems($!cstack) ~ "\n");
+#	nqp::printfh(nqp::getstderr(), "\tbstack=" ~ nqp::elems($!bstack) ~ "\n");
         $!cstack;
     }
     
     method !cursor_push_cstack($capture) {
 	if !nqp::defined($!cstack) { $!cstack := [$capture] }
+	elsif nqp::elems($!cstack) == 0 {
+#	    nqp::printfh(nqp::getstderr(), "cursor_push_cstack EMPTY\n");
+	    nqp::push($!cstack, $capture);
+	}
 	elsif !nqp::isnull($capture) {
 	    my $name := nqp::getattr($capture, $?CLASS, '$!name');
 	    if !nqp::isnull($name) && nqp::defined($name) {
+#		nqp::printfh(nqp::getstderr(), "cursor_push_cstack $name\n");
+#		nqp::printfh(nqp::getstderr(), "\t" ~ $capture.pos ~ "\n") if $capture.pos;
+#		nqp::printfh(nqp::getstderr(), "\tcstack=" ~ nqp::elems($!cstack) ~ "\n");
+#		nqp::printfh(nqp::getstderr(), "\tbstack=" ~ nqp::elems($!bstack) ~ "\n");
 		nqp::push($!cstack, $capture);
+	    }
+	    else {  # is top capture anonymous enough to be reused?
+		my $top := nqp::atpos($!cstack,-1);
+		my $topname := nqp::getattr($top, $?CLASS, '$!name');
+		if !nqp::isnull($topname) && nqp::defined($topname) {
+#		    nqp::printfh(nqp::getstderr(), "cursor_push_cstack ANON over $topname\n");
+		    nqp::push($!cstack, $capture);
+		}
+		else {
+#		    nqp::printfh(nqp::getstderr(), "cursor_push_cstack ANON replace\n");
+#		    nqp::printfh(nqp::getstderr(), "\t" ~ $capture.pos ~ "\n") if $capture.pos;
+#		    nqp::printfh(nqp::getstderr(), "\tcstack=" ~ nqp::elems($!cstack) ~ "\n");
+#		    nqp::printfh(nqp::getstderr(), "\tbstack=" ~ nqp::elems($!bstack) ~ "\n");
+
+		    # $top capture just used for pos advancement, so update it in place.
+		    # We copy the pos rather than the entire $capture because $capture is
+		    # somewhat likelier to be in the nursery than $top is;
+		    my int $pos := nqp::getattr($capture,$?CLASS,'$!pos');
+		    nqp::bindattr_i($top,$?CLASS,'$!pos', $pos);
+		}
 	    }
 	}
         $!cstack;
