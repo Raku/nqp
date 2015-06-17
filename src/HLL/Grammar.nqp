@@ -454,8 +454,8 @@ An operator precedence parser.
                 while @prefixish && @postfixish {
                     my %preO     := @prefixish[0]<OPER><O>;
                     my %postO    := @postfixish[nqp::elems(@postfixish)-1]<OPER><O>;
-                    my $preprec  := nqp::ifnull(nqp::atkey(%preO, 'prec'), '');
-                    my $postprec := nqp::ifnull(nqp::atkey(%postO, 'prec'), '');
+                    my $preprec  := nqp::ifnull(nqp::atkey(%preO, 'sub'), nqp::ifnull(nqp::atkey(%preO, 'prec'), ''));
+                    my $postprec := nqp::ifnull(nqp::atkey(%postO, 'sub'), nqp::ifnull(nqp::atkey(%postO, 'prec'), ''));
                     
                     if $postprec gt $preprec ||
                     $postprec eq $preprec && %postO<uassoc> eq 'right'
@@ -508,11 +508,11 @@ An operator precedence parser.
                     $term_done := 1;
                     last;
                 }
-        
-                %inO<prec> := nqp::ifnull(nqp::atkey(%inO, 'sub'), nqp::atkey(%inO, 'prec'));
-                
+
                 while @opstack {
-                    $opprec := ~@opstack[+@opstack-1]<OPER><O><prec>;
+                    my %opO := @opstack[+@opstack-1]<OPER><O>;
+
+                    $opprec := nqp::ifnull(nqp::atkey(%opO, 'sub'), nqp::atkey(%opO, 'prec'));
                     last unless $opprec gt $inprec;
                     self.EXPR_reduce(@termstack, @opstack);
                 }
