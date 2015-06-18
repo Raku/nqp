@@ -214,7 +214,7 @@ MAIN: {
         }
         sorry(@errors) if @errors;
         $config{'make'} = `$moar_path --libpath="src/vm/moar/stage0" "src/vm/moar/stage0/nqp.moarvm" -e "print(nqp::backendconfig()<make>)"`
-                        // 'make';
+                        || 'make';
         $config{moar} = $moar_path;
         fill_template_file(
             'tools/build/Makefile-Moar.in',
