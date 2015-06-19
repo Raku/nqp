@@ -7,6 +7,8 @@ import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.ProcessBuilder.Redirect;
+import java.lang.Thread;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -899,26 +901,6 @@ public final class Ops {
         return 0;
     }
 
-    public static SixModelObject openpipe(String cmd, String dir,
-            SixModelObject envObj, String errPath, ThreadContext tc) {
-
-        // TODO: errPath NYI
-
-        Map<String, String> env = new HashMap<String, String>();
-        SixModelObject iter = iter(envObj, tc);
-        while (istrue(iter, tc) != 0) {
-            SixModelObject kv = iter.shift_boxed(tc);
-            String key = iterkey_s(kv, tc);
-            String value = unbox_s(iterval(kv, tc), tc);
-            env.put(key, value);
-        }
-
-        SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType;
-        IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
-        h.handle = new ProcessHandle(tc, cmd, dir, env);
-        return h;
-    }
-
     public static String gethostname(){
         try {
             String hostname = InetAddress.getLocalHost().getHostName();
@@ -928,21 +910,15 @@ public final class Ops {
         }
     }
 
-    // To be removed once shell3 is adopted
-    public static long shell1(String cmd, ThreadContext tc) {
-        return shell3(cmd, cwd(), getenvhash(tc), tc);
+    public static SixModelObject syncpipe(ThreadContext tc) {
+        SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType;
+        IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
+        h.handle = new ProcessHandle(tc);
+        return h;
     }
 
-    public static long shell3(String cmd, String dir, SixModelObject envObj, ThreadContext tc) {
-        Map<String, String> env = new HashMap<String, String>();
-        SixModelObject iter = iter(envObj, tc);
-        while (istrue(iter, tc) != 0) {
-            SixModelObject kv = iter.shift_boxed(tc);
-            String key = iterkey_s(kv, tc);
-            String value = unbox_s(iterval(kv, tc), tc);
-            env.put(key, value);
-        }
-
+    public static long shell(String cmd, String dir, SixModelObject envObj,
+            SixModelObject in, SixModelObject out, SixModelObject err, long flags, ThreadContext tc) {
         List<String> args = new ArrayList<String>();
 
         String os = System.getProperty("os.name").toLowerCase();
@@ -956,10 +932,11 @@ public final class Ops {
             args.add(cmd);
         }
 
-        return spawn(args, dir, env);
+        return spawn(tc, args, envObj, dir, in, out, err, flags);
     }
 
-    public static long spawn(SixModelObject argsObj, String dir, SixModelObject envObj, ThreadContext tc) {
+    public static long spawn(SixModelObject argsObj, String dir, SixModelObject envObj,
+            SixModelObject in, SixModelObject out, SixModelObject err, long flags, ThreadContext tc) {
         List<String> args = new ArrayList<String>();
         SixModelObject argIter = iter(argsObj, tc);
         while (istrue(argIter, tc) != 0) {
@@ -968,6 +945,64 @@ public final class Ops {
             args.add(arg);
         }
 
+        return spawn(tc, args, envObj, dir, in, out, err, flags);
+    }
+
+    public static final int PIPE_INHERIT        = 1;
+    public static final int PIPE_IGNORE         = 2;
+    public static final int PIPE_CAPTURE        = 4;
+    public static final int PIPE_INHERIT_IN     = 1;
+    public static final int PIPE_IGNORE_IN      = 2;
+    public static final int PIPE_CAPTURE_IN     = 4;
+    public static final int PIPE_INHERIT_OUT    = 8;
+    public static final int PIPE_IGNORE_OUT     = 16;
+    public static final int PIPE_CAPTURE_OUT    = 32;
+    public static final int PIPE_INHERIT_ERR    = 64;
+    public static final int PIPE_IGNORE_ERR     = 128;
+    public static final int PIPE_CAPTURE_ERR    = 256;
+
+    private static void setup_process_builder(ThreadContext tc, ProcessBuilder pb, SixModelObject in, SixModelObject out, SixModelObject err, long flags) {
+        if ((flags & PIPE_INHERIT_IN) == 0 || in instanceof IOHandleInstance)
+            pb.redirectInput(Redirect.PIPE);
+        else
+            pb.redirectInput(Redirect.INHERIT);
+
+        if ((flags & PIPE_INHERIT_OUT) == 0 || out instanceof IOHandleInstance)
+            pb.redirectOutput(Redirect.PIPE);
+        else
+            pb.redirectOutput(Redirect.INHERIT);
+
+        if ((flags & PIPE_INHERIT_ERR) == 0 || err instanceof IOHandleInstance)
+            pb.redirectError(Redirect.PIPE);
+        else
+            pb.redirectError(Redirect.INHERIT);
+    }
+
+    private static void setup_process_streams(ThreadContext tc, Process process, SixModelObject in, SixModelObject out, SixModelObject err, long flags) {
+        if (in instanceof IOHandleInstance) {
+            if ((flags & PIPE_CAPTURE_IN) != 0)
+                /* getOutputStream() returns the output stream connected to the normal input of the subprocess. */
+                ((ProcessHandle)((IOHandleInstance)in).handle).bindChannel(tc, process, process.getOutputStream());
+
+            if ((flags & PIPE_INHERIT_IN) != 0) {
+                /* If our stdin is connected to an output stream of another process, we need to let it run in a thread. */
+                ProcessChannel pc = new ProcessChannel(process, process.getOutputStream(),
+                    ((ProcessChannel)((ProcessHandle)((IOHandleInstance)in).handle).chan).in);
+                new Thread(pc).start();
+            }
+        }
+
+        if ((flags & PIPE_CAPTURE_OUT) != 0 && out instanceof IOHandleInstance)
+            /* getInputStream() returns the input stream connected to the normal output of the subprocess. */
+            ((ProcessHandle)((IOHandleInstance)out).handle).bindChannel(tc, process, process.getInputStream());
+
+        if ((flags & PIPE_CAPTURE_ERR) != 0 && err instanceof IOHandleInstance)
+            /* getErrorStream() returns the input stream connected to the error output of the subprocess. */
+            ((ProcessHandle)((IOHandleInstance)err).handle).bindChannel(tc, process, process.getErrorStream());
+    }
+
+    private static long spawn(ThreadContext tc, List<String> args, SixModelObject envObj, String dir,
+            SixModelObject in, SixModelObject out, SixModelObject err, long flags) {
         Map<String, String> env = new HashMap<String, String>();
         SixModelObject iter = iter(envObj, tc);
         while (istrue(iter, tc) != 0) {
@@ -977,34 +1012,41 @@ public final class Ops {
             env.put(key, value);
         }
 
-        return spawn(args, dir , env);
-    }
+        long       retval = 255;
+        ProcessBuilder pb = new ProcessBuilder(args);
+        pb.directory(new File(dir));
 
-    private static long spawn(List<String> args, String dir, Map<String, String> env) {
-        long retval = 255;
-        try {
-            ProcessBuilder pb = new ProcessBuilder(args);
-            pb.directory(new File(dir));
+        // Clear the JVM inherited environment and use provided only
+        Map<String, String> pbEnv = pb.environment();
+        pbEnv.clear();
+        pbEnv.putAll(env);
 
-            // Clear the JVM inherited environment and use provided only
-            Map<String, String> pbEnv = pb.environment();
-            pbEnv.clear();
-            pbEnv.putAll(env);
+        setup_process_builder(tc, pb, in, out, err, flags);
 
-            Process proc = pb.inheritIO().start();
-
-            boolean finished = false;
-            do {
-                try {
-                    proc.waitFor();
-                    finished = true;
-                } catch (InterruptedException e) {
-                }
-            } while (!finished);
-
-            retval = proc.exitValue();
+        if ((flags & (PIPE_CAPTURE_IN | PIPE_CAPTURE_OUT | PIPE_CAPTURE_ERR)) != 0) {
+            try {
+                Process process = pb.start();
+                setup_process_streams(tc, process, in, out, err, flags);
+            }
+            catch (IOException e) {
+                throw ExceptionHandling.dieInternal(tc, e);
+            }
         }
-        catch (IOException e) {
+        /* run immediatly */
+        else {
+            try {
+                boolean finished = false;
+                Process process  = pb.start();
+                setup_process_streams(tc, process, in, out, err, flags);
+                do {
+                    try {
+                        retval   = process.waitFor();
+                        finished = true;
+                    } catch (InterruptedException e) {
+                    }
+                } while (!finished);
+            } catch (IOException e) {
+            }
         }
 
         /* Return exit code left shifted by 8 for POSIX emulation. */

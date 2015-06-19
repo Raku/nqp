@@ -1980,6 +1980,16 @@ my %const_map := nqp::hash(
     'STAT_PLATFORM_BLOCKSIZE', -6,
     'STAT_PLATFORM_BLOCKS',    -7,
 
+    'PIPE_INHERIT_IN',          1,
+    'PIPE_IGNORE_IN',           2,
+    'PIPE_CAPTURE_IN',          4,
+    'PIPE_INHERIT_OUT',         8,
+    'PIPE_IGNORE_OUT',          16,
+    'PIPE_CAPTURE_OUT',         32,
+    'PIPE_INHERIT_ERR',         64,
+    'PIPE_IGNORE_ERR',          128,
+    'PIPE_CAPTURE_ERR',         256,
+
     'TYPE_CHECK_CACHE_DEFINITIVE',  0,
     'TYPE_CHECK_CACHE_THEN_METHOD', 1,
     'TYPE_CHECK_NEEDS_ACCEPTS',     2,
@@ -2055,17 +2065,9 @@ QAST::OperationsJAST.map_classlib_core_op('link', $TYPE_OPS, 'link', [$RT_STR, $
 
 QAST::OperationsJAST.map_classlib_core_op('gethostname', $TYPE_OPS, 'gethostname', [], $RT_STR);
 
-# Two variants of shell until we deprecate shell1
-QAST::OperationsJAST.map_classlib_core_op('shell1', $TYPE_OPS, 'shell1', [$RT_STR], $RT_INT, :tc);
-QAST::OperationsJAST.map_classlib_core_op('shell3', $TYPE_OPS, 'shell3', [$RT_STR, $RT_STR, $RT_OBJ], $RT_INT, :tc);
-QAST::OperationsJAST.add_core_op('shell', -> $qastcomp, $op {
-    my @operands := $op.list;
-    $qastcomp.as_jast(+@operands == 1
-        ?? QAST::Op.new( :op('shell1'), |@operands )
-        !! QAST::Op.new( :op('shell3'), |@operands ));
-});
-QAST::OperationsJAST.map_classlib_core_op('spawn', $TYPE_OPS, 'spawn', [$RT_OBJ, $RT_STR, $RT_OBJ], $RT_INT, :tc);
-QAST::OperationsJAST.map_classlib_core_op('openpipe', $TYPE_OPS, 'openpipe', [$RT_STR, $RT_STR, $RT_OBJ, $RT_STR], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('shell', $TYPE_OPS, 'shell', [$RT_STR, $RT_STR, $RT_OBJ, $RT_OBJ, $RT_OBJ, $RT_OBJ, $RT_INT], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('spawn', $TYPE_OPS, 'spawn', [$RT_OBJ, $RT_STR, $RT_OBJ, $RT_OBJ, $RT_OBJ, $RT_OBJ, $RT_INT], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('syncpipe', $TYPE_OPS, 'syncpipe', [], $RT_OBJ, :tc);
 
 QAST::OperationsJAST.map_classlib_core_op('symlink', $TYPE_OPS, 'symlink', [$RT_STR, $RT_STR], $RT_INT, :tc);
 
