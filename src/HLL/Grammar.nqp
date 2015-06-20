@@ -504,7 +504,7 @@ An operator precedence parser.
                 $inprec := ~%inO<prec>;
                 $infixcur.panic('Missing infixish operator precedence')
                     unless $inprec;
-                if $inprec lt $preclim {
+                if $inprec le $preclim {
                     $term_done := 1;
                     last;
                 }
