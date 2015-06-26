@@ -776,7 +776,7 @@ public final class Ops {
             if (h.handle instanceof IIOClosable
              && h.handle instanceof IIOExitable) {
                 ((IIOClosable)h.handle).close(tc);
-                return (long)((IIOExitable)h.handle).exitValue(tc);
+                return (long)((IIOExitable)h.handle).exitValue(tc) << 8;
             }
             else
                 throw ExceptionHandling.dieInternal(tc,
