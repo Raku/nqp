@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Ant-Version: Apache Ant 1.7.1
+Created-By: 11.0-b15 (Sun Microsystems Inc.)
+Main-Class: com.simontuffs.onejar.Boot
+One-Jar-Main-Class: org.perl6.rakudo.StandaloneJARWrapper
+Class-Path: ./main/:./lib/nqp-runtime.jar
