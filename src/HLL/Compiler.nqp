@@ -21,7 +21,7 @@ class HLL::Compiler does HLL::Backend::Default {
         @!stages     := nqp::split(' ', 'start parse ast ' ~ $!backend.stages());
         
         # Command options and usage.
-        @!cmdoptions := nqp::split(' ', 'e=s help|h target=s trace|t=s encoding=s output|o=s combine version|v show-config verbose-config|V stagestats=s? ll-exception rxtrace nqpevent=s profile profile-compile profile-filename=s');
+        @!cmdoptions := nqp::split(' ', 'e=s help|h target=s trace|t=s encoding=s output|o=s combine version|v show-config verbose-config|V stagestats=s? ll-exception rxtrace nqpevent=s profile profile-compile profile-filename=s with-cu=s');
         %!config     := nqp::hash();
     }
     
@@ -258,6 +258,12 @@ class HLL::Compiler does HLL::Backend::Default {
                     unless $target eq '' || $!backend.is_textual_stage($target) || %adverbs<output> {
                         self.dumper($result, $target, |%adverbs);
                     }
+                }
+                elsif %adverbs<with-cu> && nqp::can($!backend, 'with_cu') {
+                    while self.stages()[0] ne $!backend.cu_start_stage() {
+                        self.removestage(self.stages()[0]);
+                    }
+                    $result := $!backend.with_cu(%adverbs<with-cu>);
                 }
                 elsif !@a { $result := self.interactive(|%adverbs) }
                 elsif %adverbs<combine> { $result := self.evalfiles(@a, |%adverbs) }

@@ -2705,6 +2705,8 @@ QAST::OperationsJAST.add_core_op('getcodelocation', -> $qastcomp, $op {
 
 QAST::OperationsJAST.map_classlib_core_op('getuniname', $TYPE_OPS, 'getuniname', [$RT_INT], $RT_STR, :tc);
 
+QAST::OperationsJAST.map_classlib_core_op('getmoduleurl', $TYPE_OPS, 'getmoduleurl', [$RT_STR], $RT_STR, :tc);
+
 class QAST::CompilerJAST {
     # Responsible for handling issues around code references, building the
     # switch statement dispatcher, etc.

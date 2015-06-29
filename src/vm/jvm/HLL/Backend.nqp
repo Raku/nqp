@@ -109,6 +109,15 @@ class HLL::Backend::JVM {
     method compunit_coderefs($cu) {
         nqp::compunitcodes($cu)
     }
+
+    method cu_start_stage() {
+        'jvm'
+    }
+
+    method with_cu($cu) {
+        my $*MAIN_CTX;
+        nqp::loadbytecode($cu);
+    }
 }
 
 # Role specifying the default backend for this build.

@@ -44,6 +44,13 @@ public class EvalServer {
     private WritableByteChannel tokenCh;
     private Path tokenPath;
 
+    public String run(Class<?> cuType, String code) throws Exception {
+        String[] argv = new String[2];
+        argv[0] = "-e";
+        argv[1] = code;
+        return run(cuType, argv);
+    }
+
     public String run(String appPath, String code) throws Exception {
         String[] argv = new String[2];
         argv[0] = "-e";
@@ -51,13 +58,7 @@ public class EvalServer {
         return run(appPath, argv);
     }
 
-    public String run(String appPath, String[] argv) throws Exception {
-        try {
-            cuType = LibraryLoader.loadFile( appPath, true );
-        } catch (ThreadDeath td) {
-            throw new RuntimeException("Couldn't loadFile. Your CLASSPATH might not be set up correctly.");
-        }
-
+    public String run(Class<?> cuType, String[] argv) throws Exception {
         GlobalContext gc = new GlobalContext();
         gc.in = new ByteArrayInputStream(new byte[0]);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -76,6 +77,16 @@ public class EvalServer {
             baos.flush();
         }
         return baos.toString("UTF-8");
+    }
+
+    public String run(String appPath, String[] argv) throws Exception {
+        try {
+            cuType = LibraryLoader.loadFile( appPath, true );
+        } catch (ThreadDeath td) {
+            throw new RuntimeException("Couldn't loadFile. Your CLASSPATH might not be set up correctly.");
+        }
+
+        return run(cuType, argv);
     }
 
     public static void main(String[] args) throws Exception {

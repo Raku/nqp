@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.net.InetAddress;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.file.DirectoryStream;
@@ -6275,5 +6276,16 @@ public final class Ops {
             name = "<unassigned>";
         }
         return name;
+    }
+
+    public static String getmoduleurl(String filename, ThreadContext tc) {
+        URL fileurl = Ops.class.getResource("/" + filename);
+        if( fileurl == null ) {
+            fileurl = Ops.class.getResource("/lib/" + filename);
+        }
+        if( fileurl == null ) {
+            fileurl = Ops.class.getResource("/lib/" + filename + ".jar");
+        }
+        return fileurl.toString();
     }
 }
