@@ -730,10 +730,7 @@ role NQPCursorRole is export {
     }
 
     method FAILGOAL($goal, $dba?) {
-        unless $dba {
-            $dba := nqp::getcodename(nqp::callercode());
-        }
-        nqp::die("Unable to parse expression in $dba; couldn't find final $goal");
+        self."!cursor_start_cur"()
     }
 }
 
