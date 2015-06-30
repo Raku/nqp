@@ -223,7 +223,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         | \w
 	  [
 	  | \w+! <?before \w>
-	  | <?before ' ' \w> <!{ %*RX<s> }> <.worry("Space is not significant here; please use quotes or :s (:sigspace) modifier (or, to suppress this warning, omit the space, or otherwise change the spacing)")>
+	  | <?before ' ' \w> <!{ %*RX<s> || $*HAS_GOAL }> <.worry("Space is not significant here; please use quotes or :s (:sigspace) modifier (or, to suppress this warning, omit the space, or otherwise change the spacing)")>
 	  ]?
 	  <.SIGOK>
         | <metachar>
@@ -301,6 +301,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     ## we cheat here, really should be regex_infix:sym<~>
     token metachar:sym<~> {
+	:my $*HAS_GOAL := 1;
         <sym>
         <.ws> <GOAL=.quantified_atom>
         <.ws> <EXPR=.quantified_atom>
