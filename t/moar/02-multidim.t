@@ -1,6 +1,6 @@
 #! nqp
 
-plan(115);
+plan(125);
 
 sub is-dims(@arr, @expected-dims, $description) {
     my $got-dims := nqp::dimensions(@arr);
@@ -13,10 +13,14 @@ sub is-dims(@arr, @expected-dims, $description) {
     }
     ok($ok, "$description - correct dimensions");
 }
-sub dies-ok($code, $description) {
-    my $fail := 0;
-    try { $code(); CATCH { $fail := 1; } }
-    ok($fail, $description);
+sub dies-ok($code, $description, :$message) {
+    my $died := 0;
+    my $got-message := '';
+    try { $code(); CATCH { $died := 1; $got-message := nqp::getmessage($_); } }
+    ok($died, $description);
+    if $message {
+        ok($got-message ~~ /$message/, "Exception message contained '$message'");
+    }
 }
 
 # Normal dynamic array has a single element, irrespective of type or contents.
@@ -282,4 +286,15 @@ dies-ok({
     dies-ok({ nqp::atposnd_n($int_array_3d, nqp::list_i(1, 1, 1)) }, 'Wrong type access to native int array dies (1)');
     dies-ok({ nqp::atposnd_s($int_array_3d, nqp::list_i(1, 1, 1)) }, 'Wrong type access to native int array dies (2)');
     dies-ok({ nqp::atposnd($int_array_3d, nqp::list_i(1, 1, 1)) }, 'Wrong type access to native int array dies (3)');
+}
+
+# push/pop/shift/unshift/splice dies appropriately
+{
+    my $test_1d := nqp::create($array_type_1d);
+    nqp::setdimensions($test_1d, nqp::list_i(3));
+    dies-ok({ nqp::pop($test_1d) }, :message('pop'), 'popping dies');
+    dies-ok({ nqp::push($test_1d, 1) }, :message('push'), 'pushing dies');
+    dies-ok({ nqp::shift($test_1d) }, :message('shift'), 'shifting dies');
+    dies-ok({ nqp::unshift($test_1d, 1) }, :message('unshift'), 'unshifting dies');
+    dies-ok({ nqp::splice($test_1d, [], 0, 3) }, :message('splice'), 'splicing dies');
 }
