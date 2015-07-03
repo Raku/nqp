@@ -1,6 +1,6 @@
 #! nqp
 
-plan(50);
+plan(57);
 
 sub is-dims(@arr, @expected-dims, $description) {
     my $got-dims := nqp::dimensions(@arr);
@@ -103,3 +103,27 @@ dies-ok({ nqp::bindpos3d(nqp::list(), 0, 0, 0, NQPMu) }, 'normal object array ca
 dies-ok({ nqp::bindpos3d_i(nqp::list_i(), 0, 0, 0, 42) }, 'normal int array cannot be accessed in 3D');
 dies-ok({ nqp::bindpos3d_n(nqp::list_n(), 0, 0, 0, 4.2e0) }, 'normal num array cannot be accessed in 3D');
 dies-ok({ nqp::bindpos3d_s(nqp::list_s(), 0, 0, 0, 'omg') }, 'normal str array cannot be accessed in 3D');
+
+# Trying to create 0-dimensional array type dies.
+dies-ok({
+    my $type := nqp::newtype(nqp::knowhow(), 'MultiDimArray');
+    nqp::composetype($type, nqp::hash('array', nqp::hash('dimensions', 0)));
+}, 'Cannot create 0-dimensions MultiDimArray REPR');
+
+# Can create and allocate a 1-dimensional array.
+my $array_type_1d := nqp::newtype(nqp::knowhow(), 'MultiDimArray');
+nqp::composetype($array_type_1d, nqp::hash('array', nqp::hash('dimensions', 1)));
+ok(nqp::isconcrete(nqp::create($array_type_1d)), 'Can create 1-d array');
+ok(nqp::numdimensions(nqp::create($array_type_1d)) == 1, '1-d array claims to have 1 dimension');
+
+# Can create and allocate a 2-dimensional array.
+my $array_type_2d := nqp::newtype(nqp::knowhow(), 'MultiDimArray');
+nqp::composetype($array_type_2d, nqp::hash('array', nqp::hash('dimensions', 2)));
+ok(nqp::isconcrete(nqp::create($array_type_2d)), 'Can create 2-d array');
+ok(nqp::numdimensions(nqp::create($array_type_2d)) == 2, '2-d array claims to have 2 dimension');
+
+# Can create and allocate a 3-dimensional array.
+my $array_type_3d := nqp::newtype(nqp::knowhow(), 'MultiDimArray');
+nqp::composetype($array_type_3d, nqp::hash('array', nqp::hash('dimensions', 3)));
+ok(nqp::isconcrete(nqp::create($array_type_3d)), 'Can create 3-d array');
+ok(nqp::numdimensions(nqp::create($array_type_3d)) == 3, '3-d array claims to have 3 dimension');
