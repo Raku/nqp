@@ -1,6 +1,6 @@
 #! nqp
 
-plan(104);
+plan(115);
 
 sub is-dims(@arr, @expected-dims, $description) {
     my $got-dims := nqp::dimensions(@arr);
@@ -254,4 +254,32 @@ dies-ok({
         'Access to 2D array with out-of-range index dies (1)');
     dies-ok({ nqp::atpos($test_2d, nqp::list_i(0, 3)) },
         'Access to 2D array with out-of-range index dies (2)');
+}
+
+# Can have 3D list of native int.
+{
+    my $int_array_type_3d := nqp::newtype(nqp::knowhow(), 'MultiDimArray');
+    nqp::composetype($int_array_type_3d, nqp::hash('array',
+        nqp::hash('type', int, 'dimensions', 3)));
+    my $int_array_3d := nqp::create($int_array_type_3d);
+    nqp::setdimensions($int_array_3d, nqp::list_i(2,2,2));
+    nqp::bindposnd_i($int_array_3d, nqp::list_i(0, 0, 0), 100);
+    nqp::bindposnd_i($int_array_3d, nqp::list_i(0, 0, 1), 101);
+    nqp::bindposnd_i($int_array_3d, nqp::list_i(0, 1, 0), 110);
+    nqp::bindposnd_i($int_array_3d, nqp::list_i(0, 1, 1), 111);
+    nqp::bindposnd_i($int_array_3d, nqp::list_i(1, 0, 0), 200);
+    nqp::bindposnd_i($int_array_3d, nqp::list_i(1, 0, 1), 201);
+    nqp::bindposnd_i($int_array_3d, nqp::list_i(1, 1, 0), 210);
+    nqp::bindposnd_i($int_array_3d, nqp::list_i(1, 1, 1), 211);
+    ok(nqp::atposnd_i($int_array_3d, nqp::list_i(0, 0, 0)) == 100, 'Value stored in 3D native int array (1)');
+    ok(nqp::atposnd_i($int_array_3d, nqp::list_i(0, 0, 1)) == 101, 'Value stored in 3D native int array (2)');
+    ok(nqp::atposnd_i($int_array_3d, nqp::list_i(0, 1, 0)) == 110, 'Value stored in 3D native int array (3)');
+    ok(nqp::atposnd_i($int_array_3d, nqp::list_i(0, 1, 1)) == 111, 'Value stored in 3D native int array (4)');
+    ok(nqp::atposnd_i($int_array_3d, nqp::list_i(1, 0, 0)) == 200, 'Value stored in 3D native int array (5)');
+    ok(nqp::atposnd_i($int_array_3d, nqp::list_i(1, 0, 1)) == 201, 'Value stored in 3D native int array (6)');
+    ok(nqp::atposnd_i($int_array_3d, nqp::list_i(1, 1, 0)) == 210, 'Value stored in 3D native int array (7)');
+    ok(nqp::atposnd_i($int_array_3d, nqp::list_i(1, 1, 1)) == 211, 'Value stored in 3D native int array (8)');
+    dies-ok({ nqp::atposnd_n($int_array_3d, nqp::list_i(1, 1, 1)) }, 'Wrong type access to native int array dies (1)');
+    dies-ok({ nqp::atposnd_s($int_array_3d, nqp::list_i(1, 1, 1)) }, 'Wrong type access to native int array dies (2)');
+    dies-ok({ nqp::atposnd($int_array_3d, nqp::list_i(1, 1, 1)) }, 'Wrong type access to native int array dies (3)');
 }
