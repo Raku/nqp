@@ -475,6 +475,9 @@
               <div>
                 {{alloc.Allocations}}
               </div>
+              <div>
+                  {{alloc.AllocationsEarlyDeathsPercent}}% early deaths
+              </div>
             </td>
             <td>
               <a href="" ng-click="showAllocatingRoutines(alloc)">View</a>
@@ -520,6 +523,8 @@
                       <div>
                           {{routine.Allocations}}
                       </div>
+                      <div>
+                          {{routine.AllocationsEarlyDeathsPercentHuman}}% early deaths
                     </td>
                   </tr>
                 </tbody>
@@ -991,6 +996,8 @@
         var typeIdToName         = {};
         var typeIdToAllocations  = {};
         var typeIdToAllocationsByType  = {};
+        var typeIdToEarlyDeathsByType  = {};
+        var typeIdToEarlyDeaths  = {};
         var typeIdToRoutineStats = {};
         var maxAllocations       = 1;
         function walkCallGraphNode(node) {
@@ -998,24 +1005,31 @@
                 if (!typeIdToName[alloc.id]) {
                     typeIdToName[alloc.id]         = alloc.type == "" ? "<anon>" : alloc.type;
                     typeIdToAllocations[alloc.id]  = 0;
+                    typeIdToEarlyDeaths[alloc.id]  = 0;
                     typeIdToAllocationsByType[alloc.id] = [0, 0, 0];
+                    typeIdToEarlyDeathsByType[alloc.id] = 0;
                     typeIdToRoutineStats[alloc.id] = {};
                 }
                 typeIdToAllocations[alloc.id] += alloc.count;
+                typeIdToEarlyDeaths[alloc.id] += alloc.early_death;
+
                 typeIdToAllocationsByType[alloc.id][0] += alloc.count - alloc.spesh - alloc.jit;
                 typeIdToAllocationsByType[alloc.id][1] += alloc.spesh;
                 typeIdToAllocationsByType[alloc.id][2] += alloc.jit;
+                typeIdToEarlyDeathsByType[alloc.id]    += alloc.early_death;
                 if (typeIdToAllocations[alloc.id] > maxAllocations)
                     maxAllocations = typeIdToAllocations[alloc.id];
                 if (typeIdToRoutineStats[alloc.id][node.id]) {
                     typeIdToRoutineStats[alloc.id][node.id]['count'] += alloc.count;
                     typeIdToRoutineStats[alloc.id][node.id]['spesh'] += alloc.spesh;
                     typeIdToRoutineStats[alloc.id][node.id]['jit'] += alloc.jit;
+                    typeIdToRoutineStats[alloc.id][node.id]['early_death'] += alloc.early_death;
                 } else {
                     typeIdToRoutineStats[alloc.id][node.id] = {
                         count: alloc.count,
                         spesh: alloc.spesh,
-                        jit: alloc.jit
+                        jit: alloc.jit,
+                        early_death: alloc.early_death
                         };
                 }
             });
@@ -1041,18 +1055,23 @@
                     Allocations:        typeIdToRoutineStats[id][rid]['count'],
                     AllocationsSpesh:   typeIdToRoutineStats[id][rid]['spesh'],
                     AllocationsJit:     typeIdToRoutineStats[id][rid]['jit'],
+                    AllocationsEarlyDeaths: typeIdToRoutineStats[id][rid]['early_death'],
                     AllocationsPercent: (100 * typeIdToRoutineStats[id][rid]['count'] / maxAllocationByRoutine),
                     AllocationsInterpPercent: (100 * (typeIdToRoutineStats[id][rid]['count'] - typeIdToRoutineStats[id][rid]['jit'] - typeIdToRoutineStats[id][rid]['spesh'])  / maxAllocationByRoutine),
                     AllocationsSpeshPercent:  (100 * typeIdToRoutineStats[id][rid]['spesh'] / maxAllocationByRoutine),
-                    AllocationsJitPercent:    (100 * typeIdToRoutineStats[id][rid]['jit'] / maxAllocationByRoutine)
+                    AllocationsJitPercent:    (100 * typeIdToRoutineStats[id][rid]['jit'] / maxAllocationByRoutine),
+                    AllocationsEarlyDeathsPercent: (100 * typeIdToRoutineStats[id][rid]['early_death'] / typeIdToRoutineStats[id][rid]['count']),
+                    AllocationsEarlyDeathsPercentHuman: (100 * typeIdToRoutineStats[id][rid]['early_death'] / typeIdToRoutineStats[id][rid]['count']).toFixed(2)
                 });
             var entry = {
                 Name:                 typeIdToName[id],
                 Allocations:          typeIdToAllocations[id],
+                AllocationsEarlyDeaths: typeIdTo
                 AllocationsPercent:   +(100 * typeIdToAllocations[id] / maxAllocations).toFixed(2),
                 AllocationsInterpPercent: +(100 * typeIdToAllocationsByType[id][0] / maxAllocations).toFixed(2),
                 AllocationsSpeshPercent:  +(100 * typeIdToAllocationsByType[id][1] / maxAllocations).toFixed(2),
                 AllocationsJitPercent:    +(100 * typeIdToAllocationsByType[id][2] / maxAllocations).toFixed(2),
+                AllocationsEarlyDeathsPercent:    +(100 * typeIdToEarlyDeathsByType[id] / typeIdToAllocationsByType[id]).toFixed(2),
                 RoutineStats:         routineStats
             };
             allocationSummary.push(entry);
