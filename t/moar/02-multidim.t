@@ -1,6 +1,6 @@
 #! nqp
 
-plan(125);
+plan(134);
 
 sub is-dims(@arr, @expected-dims, $description) {
     my $got-dims := nqp::dimensions(@arr);
@@ -297,4 +297,33 @@ dies-ok({
     dies-ok({ nqp::shift($test_1d) }, :message('shift'), 'shifting dies');
     dies-ok({ nqp::unshift($test_1d, 1) }, :message('unshift'), 'unshifting dies');
     dies-ok({ nqp::splice($test_1d, [], 0, 3) }, :message('splice'), 'splicing dies');
+}
+
+# can use normal array access ops on a 1D multi-dimensioned array (this makes
+# it convenient to use these for fixed side 1D arrays)
+{
+    my $test_1d := nqp::create($array_type_1d);
+    nqp::setdimensions($test_1d, nqp::list_i(3));
+    nqp::bindpos($test_1d, 0, 'cwrw');
+    nqp::bindpos($test_1d, 1, 'pivo');
+    nqp::bindpos($test_1d, 2, 'biru');
+    dies-ok({ nqp::bindpos($test_1d, -1, 'cola') },
+        'Using bindpos on 1D array with negative index dies');
+    dies-ok({ nqp::bindpos($test_1d, 3, 'cola') },
+        'Using bindpos on 1D array with out-of-range index dies');
+    ok(nqp::atpos($test_1d, 0) eq 'cwrw', 'Access to 1D array with bindpos/atpos works (1)');
+    ok(nqp::atpos($test_1d, 1) eq 'pivo', 'Access to 1D array with bindpos/atpos works (2)');
+    ok(nqp::atpos($test_1d, 2) eq 'biru', 'Access to 1D array with bindpos/atpos works (3)');
+    dies-ok({ nqp::atpos($test_1d, -1) },
+        'Using atpos on 1D array with negative index dies');
+    dies-ok({ nqp::atpos($test_1d, 3) },
+        'Using atpos on 1D array with out-of-range index dies');
+}
+
+# cannot use normal array access ops on higher dimensioned arrays
+{
+    my $test_2d := nqp::create($array_type_2d);
+    nqp::setdimensions($test_2d, nqp::list_i(2, 3));
+    dies-ok({ nqp::bindpos($test_2d, 0, []) }, 'cannot use bindpos on 2D array');
+    dies-ok({ nqp::atpos($test_2d, 0) }, 'cannot use atpos on 2D array');
 }
