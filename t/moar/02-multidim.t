@@ -1,6 +1,6 @@
 #! nqp
 
-plan(134);
+plan(140);
 
 sub is-dims(@arr, @expected-dims, $description) {
     my $got-dims := nqp::dimensions(@arr);
@@ -326,4 +326,26 @@ dies-ok({
     nqp::setdimensions($test_2d, nqp::list_i(2, 3));
     dies-ok({ nqp::bindpos($test_2d, 0, []) }, 'cannot use bindpos on 2D array');
     dies-ok({ nqp::atpos($test_2d, 0) }, 'cannot use atpos on 2D array');
+}
+
+# can use setelems to configure dimensions for a 1D array
+{
+    my $test_1d := nqp::create($array_type_1d);
+    nqp::setelems($test_1d, 3);
+    is-dims($test_1d, [3], 'can use setelems op to set dimension of 1D array');
+    dies-ok({ nqp::setelems($test_1d, 3); }, 'can only used setelems once on 1D array');
+
+    my $test_2d := nqp::create($array_type_2d);
+    dies-ok({ nqp::setelems($test_2d, 3); }, 'cannot use setelems on a 2D array');
+}
+
+# elems returns the first dimension
+{
+    my $test_1d := nqp::create($array_type_1d);
+    nqp::setdimensions($test_1d, nqp::list_i(3));
+    ok(nqp::elems($test_1d) == 3, 'elems returns only dimension of a 1D array');
+
+    my $test_2d := nqp::create($array_type_2d);
+    nqp::setdimensions($test_2d, nqp::list_i(2, 3));
+    ok(nqp::elems($test_2d) == 2, 'elems returns first dimension of a 2D array');
 }
