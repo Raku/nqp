@@ -1,6 +1,6 @@
 #! nqp
 
-plan(57);
+plan(72);
 
 sub is-dims(@arr, @expected-dims, $description) {
     my $got-dims := nqp::dimensions(@arr);
@@ -127,3 +127,57 @@ my $array_type_3d := nqp::newtype(nqp::knowhow(), 'MultiDimArray');
 nqp::composetype($array_type_3d, nqp::hash('array', nqp::hash('dimensions', 3)));
 ok(nqp::isconcrete(nqp::create($array_type_3d)), 'Can create 3-d array');
 ok(nqp::numdimensions(nqp::create($array_type_3d)) == 3, '3-d array claims to have 3 dimension');
+
+# 1D array can have dimensions set as expected.
+{
+    my $test_1d := nqp::create($array_type_1d);
+    nqp::setdimensions($test_1d, nqp::list_i(3));
+    my $dims := nqp::dimensions($test_1d);
+    ok(nqp::elems($dims) == 1, 'Can introspect set dimensions on 1D array (1)');
+    ok(nqp::atpos_i($dims, 0) == 3, 'Can introspect set dimensions on 1D array (2)');
+}
+
+# 2D array can have dimensions set as expected.
+{
+    my $test_2d := nqp::create($array_type_2d);
+    nqp::setdimensions($test_2d, nqp::list_i(4, 3));
+    my $dims := nqp::dimensions($test_2d);
+    ok(nqp::elems($dims) == 2, 'Can introspect set dimensions on 2D array (1)');
+    ok(nqp::atpos_i($dims, 0) == 4, 'Can introspect set dimensions on 2D array (2)');
+    ok(nqp::atpos_i($dims, 1) == 3, 'Can introspect set dimensions on 2D array (3)');
+}
+
+# 3D array can have dimensions set as expected.
+{
+    my $test_3d := nqp::create($array_type_3d);
+    nqp::setdimensions($test_3d, nqp::list_i(24, 60, 60));
+    my $dims := nqp::dimensions($test_3d);
+    ok(nqp::elems($dims) == 3, 'Can introspect set dimensions on 2D array (1)');
+    ok(nqp::atpos_i($dims, 0) == 24, 'Can introspect set dimensions on 2D array (2)');
+    ok(nqp::atpos_i($dims, 1) == 60, 'Can introspect set dimensions on 2D array (3)');
+    ok(nqp::atpos_i($dims, 2) == 60, 'Can introspect set dimensions on 2D array (4)');
+}
+
+# Cannot set up wrong number of dimensions.
+dies-ok({ nqp::setdimensions(nqp::create($array_type_1d), nqp::list_i()) },
+    'Cannot set-dimensions a 1D array with 0 dimensions');
+dies-ok({ nqp::setdimensions(nqp::create($array_type_1d), nqp::list_i(3, 3)) },
+    'Cannot set-dimensions a 1D array with 2 dimensions');
+dies-ok({ nqp::setdimensions(nqp::create($array_type_2d), nqp::list_i()) },
+    'Cannot set-dimensions a 2D array with 0 dimensions');
+dies-ok({ nqp::setdimensions(nqp::create($array_type_2d), nqp::list_i(3)) },
+    'Cannot set-dimensions a 2D array with 1 dimension');
+dies-ok({ nqp::setdimensions(nqp::create($array_type_2d), nqp::list_i(3,3,3)) },
+    'Cannot set-dimensions a 2D array with 3 dimension');
+
+# Cannot set dimensions more than once.
+dies-ok({
+    my $arr := nqp::create($array_type_1d);
+    nqp::setdimensions($arr, nqp::list_i(3));
+    nqp::setdimensions($arr, nqp::list_i(3));
+}, 'Cannot set dimensions more than once (1)');
+dies-ok({
+    my $arr := nqp::create($array_type_2d);
+    nqp::setdimensions($arr, nqp::list_i(3, 3));
+    nqp::setdimensions($arr, nqp::list_i(4, 4));
+}, 'Cannot set dimensions more than once (2)');
