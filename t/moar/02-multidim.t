@@ -193,13 +193,13 @@ dies-ok({
     nqp::bindposnd($test_1d, nqp::list_i(0), 'cwrw');
     nqp::bindposnd($test_1d, nqp::list_i(1), 'pivo');
     nqp::bindposnd($test_1d, nqp::list_i(2), 'biru');
-    dies-ok({ nqp::bindpos($test_1d, nqp::list_i(), 'cola') },
+    dies-ok({ nqp::bindposnd($test_1d, nqp::list_i(), 'cola') },
         'Bind to 1D array with 0 indices dies');
-    dies-ok({ nqp::bindpos($test_1d, nqp::list_i(0, 1), 'cola') },
+    dies-ok({ nqp::bindposnd($test_1d, nqp::list_i(0, 1), 'cola') },
         'Bind to 1D array with 2 indices dies');
-    dies-ok({ nqp::bindpos($test_1d, nqp::list_i(-1), 'cola') },
+    dies-ok({ nqp::bindposnd($test_1d, nqp::list_i(-1), 'cola') },
         'Bind to 1D array with negative index dies');
-    dies-ok({ nqp::bindpos($test_1d, nqp::list_i(3), 'cola') },
+    dies-ok({ nqp::bindposnd($test_1d, nqp::list_i(3), 'cola') },
         'Bind to 1D array with out-of-range index dies');
     ok(nqp::atposnd($test_1d, nqp::list_i(0)) eq 'cwrw', 'Access to 1D array works (1)');
     ok(nqp::atposnd($test_1d, nqp::list_i(1)) eq 'pivo', 'Access to 1D array works (2)');
@@ -224,19 +224,19 @@ dies-ok({
     nqp::bindposnd($test_2d, nqp::list_i(1,0), 201);
     nqp::bindposnd($test_2d, nqp::list_i(1,1), 202);
     nqp::bindposnd($test_2d, nqp::list_i(1,2), 203);
-    dies-ok({ nqp::bindpos($test_2d, nqp::list_i(), 69) },
+    dies-ok({ nqp::bindposnd($test_2d, nqp::list_i(), 69) },
         'Bind to 2D array with 0 indices dies');
-    dies-ok({ nqp::bindpos($test_2d, nqp::list_i(0), 69) },
+    dies-ok({ nqp::bindposnd($test_2d, nqp::list_i(0), 69) },
         'Bind to 2D array with 1 indices dies');
-    dies-ok({ nqp::bindpos($test_2d, nqp::list_i(0, 0, 0), 69) },
+    dies-ok({ nqp::bindposnd($test_2d, nqp::list_i(0, 0, 0), 69) },
         'Bind to 2D array with 3 indices dies');
-    dies-ok({ nqp::bindpos($test_2d, nqp::list_i(-1, 0), 69) },
+    dies-ok({ nqp::bindposnd($test_2d, nqp::list_i(-1, 0), 69) },
         'Bind to 2D array with negative index dies (1)');
-    dies-ok({ nqp::bindpos($test_2d, nqp::list_i(0, -1), 69) },
+    dies-ok({ nqp::bindposnd($test_2d, nqp::list_i(0, -1), 69) },
         'Bind to 2D array with negative index dies (2)');
-    dies-ok({ nqp::bindpos($test_2d, nqp::list_i(2, 0), 69) },
+    dies-ok({ nqp::bindposnd($test_2d, nqp::list_i(2, 0), 69) },
         'Bind to 2D array with out-of-range index dies (1)');
-    dies-ok({ nqp::bindpos($test_2d, nqp::list_i(0, 3), 69) },
+    dies-ok({ nqp::bindposnd($test_2d, nqp::list_i(0, 3), 69) },
         'Bind to 2D array with out-of-range index dies (2)');
     ok(nqp::atposnd($test_2d, nqp::list_i(0, 0)) == 101, 'Access to 2D array works (1)');
     ok(nqp::atposnd($test_2d, nqp::list_i(0, 1)) == 102, 'Access to 2D array works (2)');
