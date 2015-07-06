@@ -1,6 +1,6 @@
 #! nqp
 
-plan(176);
+plan(188);
 
 sub is-dims(@arr, @expected-dims, $description) {
     my $got-dims := nqp::dimensions(@arr);
@@ -437,4 +437,50 @@ dies-ok({
     dies-ok({ nqp::atpos3d_n($int_array_3d, 1, 1, 1) }, 'Wrong type access to native int array with special 3D ops dies (1)');
     dies-ok({ nqp::atpos3d_s($int_array_3d, 1, 1, 1) }, 'Wrong type access to native int array with special 3D ops dies (2)');
     dies-ok({ nqp::atpos3d($int_array_3d, 1, 1, 1) }, 'Wrong type access to native int array with special 3D ops dies (3)');
+}
+
+{
+    # Create serialization context.
+    sub add_to_sc($sc, $idx, $obj) {
+        nqp::scsetobj($sc, $idx, $obj);
+        nqp::setobjsc($obj, $sc);
+    }
+    my $sc := nqp::createsc('TEST_SC_IN');
+    my $sh := nqp::list_s();
+    
+    # Add 2D array type.
+    add_to_sc($sc, 0, $array_type_2d);
+
+    # Create and populate an array and put that into the SC also.
+    my $test_2d := nqp::create($array_type_2d);
+    nqp::setdimensions($test_2d, nqp::list_i(2, 2));
+    nqp::bindposnd($test_2d, nqp::list_i(0, 0), 10);
+    nqp::bindposnd($test_2d, nqp::list_i(0, 1), 11);
+    nqp::bindposnd($test_2d, nqp::list_i(1, 0), 20);
+    nqp::bindposnd($test_2d, nqp::list_i(1, 1), 21);
+    add_to_sc($sc, 1, $test_2d);
+
+    # Serialize.
+    my $serialized := nqp::serialize($sc, $sh);
+
+    # Deserialize.
+    my $dsc := nqp::createsc('TEST_SC_OUT');
+    nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
+
+    # Check we get a 2D array type back out.
+    my $type_out := nqp::scgetobj($dsc, 0);
+    ok(nqp::reprname($type_out) eq 'MultiDimArray', 'Got a MultiDimArray type serialized/deserialized');
+    ok(!nqp::isconcrete($type_out), 'It really is a type');
+    ok(nqp::numdimensions($type_out) == 2, 'Number of dimensions preserved');
+
+    # Check we get a 2D array as expected back.
+    my $value_out := nqp::scgetobj($dsc, 1);
+    ok(nqp::reprname($value_out) eq 'MultiDimArray', 'Got a MultiDimArray object serialized/deserialized');
+    ok(nqp::isconcrete($value_out), 'It really is a concrete object');
+    ok(nqp::numdimensions($value_out) == 2, 'Number of dimensions preserved');
+    is-dims($value_out, [2,2], 'Dimensions themselves preserved');
+    ok(nqp::atposnd($value_out, nqp::list_i(0, 0)) == 10, 'Deserialized MultiDimArray has correct values (1)');
+    ok(nqp::atposnd($value_out, nqp::list_i(0, 1)) == 11, 'Deserialized MultiDimArray has correct values (2)');
+    ok(nqp::atposnd($value_out, nqp::list_i(1, 0)) == 20, 'Deserialized MultiDimArray has correct values (3)');
+    ok(nqp::atposnd($value_out, nqp::list_i(1, 1)) == 21, 'Deserialized MultiDimArray has correct values (4)');
 }
