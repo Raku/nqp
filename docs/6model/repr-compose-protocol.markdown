@@ -87,6 +87,9 @@ A hash that may have the following keys:
   each element. Again, this is just about layout and lookup, not about type
   checking.
 
+* dimensions - the number of dimensions an array of this type supports. A
+  given REPR may be restricted to only support a single dimensions.
+
 ## hash
 
 A hash that may have the following keys:
