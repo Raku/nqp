@@ -1,6 +1,6 @@
 #! nqp
 
-plan(140);
+plan(151);
 
 sub is-dims(@arr, @expected-dims, $description) {
     my $got-dims := nqp::dimensions(@arr);
@@ -348,4 +348,31 @@ dies-ok({
     my $test_2d := nqp::create($array_type_2d);
     nqp::setdimensions($test_2d, nqp::list_i(2, 3));
     ok(nqp::elems($test_2d) == 2, 'elems returns first dimension of a 2D array');
+}
+
+# can clone
+{
+    my $test_2d := nqp::create($array_type_2d);
+    nqp::setdimensions($test_2d, nqp::list_i(2, 2));
+    nqp::bindposnd($test_2d, nqp::list_i(0, 0), 10);
+    nqp::bindposnd($test_2d, nqp::list_i(0, 1), 11);
+    nqp::bindposnd($test_2d, nqp::list_i(1, 0), 20);
+    nqp::bindposnd($test_2d, nqp::list_i(1, 1), 21);
+
+    my $copied := nqp::clone($test_2d);
+    ok(nqp::numdimensions($copied) == 2, 'Cloned MultiDimArray has correct number of dimensions');
+    is-dims($test_2d, [2,2], 'Cloned MultiDimArray has correct dimensions');
+    ok(nqp::atposnd($copied, nqp::list_i(0, 0)) == 10, 'Clone gets correct values (1)');
+    ok(nqp::atposnd($copied, nqp::list_i(0, 1)) == 11, 'Clone gets correct values (2)');
+    ok(nqp::atposnd($copied, nqp::list_i(1, 0)) == 20, 'Clone gets correct values (3)');
+    ok(nqp::atposnd($copied, nqp::list_i(1, 1)) == 21, 'Clone gets correct values (4)');
+
+    nqp::bindposnd($test_2d, nqp::list_i(0, 0), 42);
+    nqp::bindposnd($test_2d, nqp::list_i(0, 1), 43);
+    nqp::bindposnd($test_2d, nqp::list_i(1, 0), 44);
+    nqp::bindposnd($test_2d, nqp::list_i(1, 1), 45);
+    ok(nqp::atposnd($copied, nqp::list_i(0, 0)) == 10, 'Modifying original does not affect clone (1)');
+    ok(nqp::atposnd($copied, nqp::list_i(0, 1)) == 11, 'Modifying original does not affect clone (2)');
+    ok(nqp::atposnd($copied, nqp::list_i(1, 0)) == 20, 'Modifying original does not affect clone (3)');
+    ok(nqp::atposnd($copied, nqp::list_i(1, 1)) == 21, 'Modifying original does not affect clone (4)');
 }
