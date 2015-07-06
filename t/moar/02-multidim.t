@@ -1,6 +1,6 @@
 #! nqp
 
-plan(151);
+plan(176);
 
 sub is-dims(@arr, @expected-dims, $description) {
     my $got-dims := nqp::dimensions(@arr);
@@ -375,4 +375,66 @@ dies-ok({
     ok(nqp::atposnd($copied, nqp::list_i(0, 1)) == 11, 'Modifying original does not affect clone (2)');
     ok(nqp::atposnd($copied, nqp::list_i(1, 0)) == 20, 'Modifying original does not affect clone (3)');
     ok(nqp::atposnd($copied, nqp::list_i(1, 1)) == 21, 'Modifying original does not affect clone (4)');
+}
+
+# Special-cased 2D access ops work.
+{
+    my $test_2d := nqp::create($array_type_2d);
+    nqp::setdimensions($test_2d, nqp::list_i(2, 3));
+    nqp::bindpos2d($test_2d, 0, 0, 101);
+    nqp::bindpos2d($test_2d, 0, 1, 102);
+    nqp::bindpos2d($test_2d, 0, 2, 103);
+    nqp::bindpos2d($test_2d, 1, 0, 201);
+    nqp::bindpos2d($test_2d, 1, 1, 202);
+    nqp::bindpos2d($test_2d, 1, 2, 203);
+    dies-ok({ nqp::bindpos2d($test_2d, -1, 0, 69) },
+        'Bind with special 2D ops to 2D array with negative index dies (1)');
+    dies-ok({ nqp::bindpos2d($test_2d, 0, -1, 69) },
+        'Bind with special 2D ops to 2D array with negative index dies (2)');
+    dies-ok({ nqp::bindpos2d($test_2d, 2, 0, 69) },
+        'Bind with special 2D ops to 2D array with out-of-range index dies (1)');
+    dies-ok({ nqp::bindpos2d($test_2d, 0, 3, 69) },
+        'Bind with special 2D ops to 2D array with out-of-range index dies (2)');
+    ok(nqp::atpos2d($test_2d, 0, 0) == 101, 'Access to 2D array works with special 2D ops (1)');
+    ok(nqp::atpos2d($test_2d, 0, 1) == 102, 'Access to 2D array works with special 2D ops (2)');
+    ok(nqp::atpos2d($test_2d, 0, 2) == 103, 'Access to 2D array works with special 2D ops (3)');
+    ok(nqp::atpos2d($test_2d, 1, 0) == 201, 'Access to 2D array works with special 2D ops (4)');
+    ok(nqp::atpos2d($test_2d, 1, 1) == 202, 'Access to 2D array works with special 2D ops (5)');
+    ok(nqp::atpos2d($test_2d, 1, 2) == 203, 'Access to 2D array works with special 2D ops (6)');
+    dies-ok({ nqp::atpos2d($test_2d, -1, 0) },
+        'Access with special 2D ops to 2D array with negative index dies (1)');
+    dies-ok({ nqp::atpos2d($test_2d, 0, -1) },
+        'Access with special 2D ops to 2D array with negative index dies (2)');
+    dies-ok({ nqp::atpos2d($test_2d, 2, 0) },
+        'Access with special 2D ops to 2D array with out-of-range index dies (1)');
+    dies-ok({ nqp::atpos2d($test_2d, 0, 3) },
+        'Access with special 2D ops to 2D array with out-of-range index dies (2)');
+}
+
+# Special-cased 3D access ops work.
+{
+    my $int_array_type_3d := nqp::newtype(nqp::knowhow(), 'MultiDimArray');
+    nqp::composetype($int_array_type_3d, nqp::hash('array',
+        nqp::hash('type', int, 'dimensions', 3)));
+    my $int_array_3d := nqp::create($int_array_type_3d);
+    nqp::setdimensions($int_array_3d, nqp::list_i(2,2,2));
+    nqp::bindpos3d_i($int_array_3d, 0, 0, 0, 100);
+    nqp::bindpos3d_i($int_array_3d, 0, 0, 1, 101);
+    nqp::bindpos3d_i($int_array_3d, 0, 1, 0, 110);
+    nqp::bindpos3d_i($int_array_3d, 0, 1, 1, 111);
+    nqp::bindpos3d_i($int_array_3d, 1, 0, 0, 200);
+    nqp::bindpos3d_i($int_array_3d, 1, 0, 1, 201);
+    nqp::bindpos3d_i($int_array_3d, 1, 1, 0, 210);
+    nqp::bindpos3d_i($int_array_3d, 1, 1, 1, 211);
+    ok(nqp::atpos3d_i($int_array_3d, 0, 0, 0) == 100, 'Can use special case 3D ops with 3D native int array (1)');
+    ok(nqp::atpos3d_i($int_array_3d, 0, 0, 1) == 101, 'Can use special case 3D ops with 3D native int array (2)');
+    ok(nqp::atpos3d_i($int_array_3d, 0, 1, 0) == 110, 'Can use special case 3D ops with 3D native int array (3)');
+    ok(nqp::atpos3d_i($int_array_3d, 0, 1, 1) == 111, 'Can use special case 3D ops with 3D native int array (4)');
+    ok(nqp::atpos3d_i($int_array_3d, 1, 0, 0) == 200, 'Can use special case 3D ops with 3D native int array (5)');
+    ok(nqp::atpos3d_i($int_array_3d, 1, 0, 1) == 201, 'Can use special case 3D ops with 3D native int array (6)');
+    ok(nqp::atpos3d_i($int_array_3d, 1, 1, 0) == 210, 'Can use special case 3D ops with 3D native int array (7)');
+    ok(nqp::atpos3d_i($int_array_3d, 1, 1, 1) == 211, 'Can use special case 3D ops with 3D native int array (8)');
+    dies-ok({ nqp::atpos3d_n($int_array_3d, 1, 1, 1) }, 'Wrong type access to native int array with special 3D ops dies (1)');
+    dies-ok({ nqp::atpos3d_s($int_array_3d, 1, 1, 1) }, 'Wrong type access to native int array with special 3D ops dies (2)');
+    dies-ok({ nqp::atpos3d($int_array_3d, 1, 1, 1) }, 'Wrong type access to native int array with special 3D ops dies (3)');
 }
