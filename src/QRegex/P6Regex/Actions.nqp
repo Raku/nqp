@@ -298,7 +298,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         my $name := $<pos> ?? +$<pos> !! ~$<name>;
         if $<quantified_atom> {
             $qast := $<quantified_atom>[0].ast;
-            if $qast.rxtype eq 'quant' && $qast[0].rxtype eq 'subrule' {
+            if ($qast.rxtype eq 'quant' || $qast.rxtype eq 'dynquant') && $qast[0].rxtype eq 'subrule' {
                 self.subrule_alias($qast[0], $name);
             }
             elsif $qast.rxtype eq 'subrule' { 
@@ -867,14 +867,15 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             for %x { %capnames{$_.key} := +%capnames{$_.key} + %x{$_.key} }
             $count := %x{''};
         }
-        elsif $rxtype eq 'quant' {
+        elsif $rxtype eq 'quant' || $rxtype eq 'dynquant' {
             my $ilist := ($ast.subtype eq 'item');
             my %astcap := capnames($ast[0], $count);
             for %astcap { %capnames{$_.key} := $ilist ?? $_.value !! 2 }
             $count := %astcap{''};
-            if $ast[1] {
+            my $sep_ast := $ast[$rxtype eq 'quant' ?? 1 !! 2];
+            if $sep_ast {
                 # handle any separator quantification
-                my %astcap := capnames($ast[1], $count);
+                my %astcap := capnames($sep_ast, $count);
                 for %astcap { %capnames{$_.key} := $ilist ?? $_.value !! 2 }
                 $count := %astcap{''};
             }
