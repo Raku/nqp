@@ -2977,6 +2977,28 @@ public final class Ops {
         agg.set_elems(tc, elems);
         return agg;
     }
+    public static long numdimensions(SixModelObject agg, ThreadContext tc) {
+        return agg.dimensions(tc).length;
+    }
+    public static SixModelObject dimensions(SixModelObject agg, ThreadContext tc) {
+        long[] dims = agg.dimensions(tc);
+        SixModelObject BOOTIntArray = tc.gc.BOOTIntArray;
+        SixModelObject dimRes = BOOTIntArray.st.REPR.allocate(tc, BOOTIntArray.st);
+        for (int i = 0; i < dims.length; i++) {
+            tc.native_i = dims[i];
+            dimRes.bind_pos_native(tc, i);
+        }
+        return dimRes;
+    }
+    public static SixModelObject setdimensions(SixModelObject agg, SixModelObject dims, ThreadContext tc) {
+        long[] jdims = new long[(int)dims.elems(tc)];
+        for (int i = 0; i < jdims.length; i++) {
+            dims.at_pos_native(tc, i);
+            jdims[i] = tc.native_i;
+        }
+        agg.set_dimensions(tc, jdims);
+        return agg;
+    }
     public static long existspos(SixModelObject agg, long key, ThreadContext tc) {
         return agg.exists_pos(tc, key);
     }
