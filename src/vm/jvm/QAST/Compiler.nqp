@@ -2396,7 +2396,7 @@ QAST::OperationsJAST.map_classlib_core_op('elems', $TYPE_OPS, 'elems', [$RT_OBJ]
 QAST::OperationsJAST.map_classlib_core_op('setelems', $TYPE_OPS, 'setelems', [$RT_OBJ, $RT_INT], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('dimensions', $TYPE_OPS, 'dimensions', [$RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('setdimensions', $TYPE_OPS, 'setdimensions', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
-QAST::OperationsJAST.map_classlib_core_op('numdimensions', $TYPE_OPS, 'numdimensions', [$RT_OBJ], $RT_INT);
+QAST::OperationsJAST.map_classlib_core_op('numdimensions', $TYPE_OPS, 'numdimensions', [$RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('push', $TYPE_OPS, 'push', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('push_i', $TYPE_OPS, 'push_i', [$RT_OBJ, $RT_INT], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('push_n', $TYPE_OPS, 'push_n', [$RT_OBJ, $RT_NUM], $RT_NUM, :tc);
