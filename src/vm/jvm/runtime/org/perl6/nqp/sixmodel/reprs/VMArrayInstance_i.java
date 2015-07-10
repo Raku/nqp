@@ -6,7 +6,7 @@ import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.SixModelObject;
 
-public class VMArrayInstance_i extends SixModelObject {
+public class VMArrayInstance_i extends VMArrayInstanceBase {
     public int elems;
     public int start;
     public long[] slots;
