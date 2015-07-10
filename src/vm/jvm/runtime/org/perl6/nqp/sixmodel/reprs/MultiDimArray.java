@@ -20,7 +20,17 @@ public class MultiDimArray extends REPR {
     }
 
     public SixModelObject allocate(ThreadContext tc, STable st) {
-        throw ExceptionHandling.dieInternal(tc, "allocate NYI");
+        MultiDimArrayREPRData rd = (MultiDimArrayREPRData)st.REPRData;
+        if (rd != null) {
+            MultiDimArrayInstanceBase obj = new MultiDimArrayInstanceBase();
+            obj.dimensions = new long[rd.numDimensions];
+            obj.st = st;
+            return obj;
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc,
+                 "Cannot allocate a multi-dim array type before it is composed");
+        }
     }
     
     public void compose(ThreadContext tc, STable st, SixModelObject repr_info) {
