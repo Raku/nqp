@@ -124,16 +124,16 @@ public abstract class SixModelObject implements Cloneable {
     public void splice(ThreadContext tc, SixModelObject from, long offset, long count) {
         throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement splice");
     }
-    public void at_pos_boxed_multidim(ThreadContext tc, long[] indices) {
+    public SixModelObject at_pos_multidim_boxed(ThreadContext tc, long[] indices) {
         throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement at_pos_boxed_multidim");
     }
     public void at_pos_multidim_native(ThreadContext tc, long[] indices) {
         throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement at_pos_multidim_native");
     }
-    public void bind_pos_boxed_multidim(ThreadContext tc, long[] indices, SixModelObject value) {
+    public void bind_pos_multidim_boxed(ThreadContext tc, long[] indices, SixModelObject value) {
         throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement bind_pos_boxed_multidim");
     }
-    public void bind_pos_native_multidim(ThreadContext tc, long[] indices) {
+    public void bind_pos_multidim_native(ThreadContext tc, long[] indices) {
         throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement bind_pos_native_multidim");
     }
     public long[] dimensions(ThreadContext tc) {
