@@ -90,4 +90,23 @@ public abstract class MultiDimArrayInstanceBase extends SixModelObject {
     public void splice(ThreadContext tc, SixModelObject from, long offset, long count) {
         throw ExceptionHandling.dieInternal(tc, "Cannot splice a fixed dimension array");
     }
+
+    public SixModelObject at_pos_boxed(ThreadContext tc, long index) {
+        return this.at_pos_multidim_boxed(tc, new long[] { index });
+    }
+    public void at_pos_native(ThreadContext tc, long index) {
+        this.at_pos_multidim_native(tc, new long[] { index });
+    }
+    public void bind_pos_boxed(ThreadContext tc, long index, SixModelObject value) {
+        this.bind_pos_multidim_boxed(tc, new long[] { index }, value);
+    }
+    public void bind_pos_native(ThreadContext tc, long index) {
+        this.bind_pos_multidim_native(tc, new long[] { index });
+    }
+    public void set_elems(ThreadContext tc, long count) {
+        this.set_dimensions(tc, new long[] { count });
+    }
+    public long elems(ThreadContext tc) {
+        return this.dimensions(tc)[0];
+    }
 }
