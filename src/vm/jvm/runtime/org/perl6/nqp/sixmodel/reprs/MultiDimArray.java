@@ -22,7 +22,7 @@ public class MultiDimArray extends REPR {
     public SixModelObject allocate(ThreadContext tc, STable st) {
         MultiDimArrayREPRData rd = (MultiDimArrayREPRData)st.REPRData;
         if (rd != null) {
-            MultiDimArrayInstanceBase obj = new MultiDimArrayInstanceBase();
+            MultiDimArrayInstance obj = new MultiDimArrayInstance();
             obj.dimensions = new long[rd.numDimensions];
             obj.st = st;
             return obj;

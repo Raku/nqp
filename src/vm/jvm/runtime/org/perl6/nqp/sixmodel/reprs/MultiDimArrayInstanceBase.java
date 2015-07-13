@@ -6,7 +6,7 @@ import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.SixModelObject;
 
-public class MultiDimArrayInstanceBase extends SixModelObject {
+public abstract class MultiDimArrayInstanceBase extends SixModelObject {
     public long[] dimensions;
 
     public long[] dimensions(ThreadContext tc) {
@@ -22,6 +22,44 @@ public class MultiDimArrayInstanceBase extends SixModelObject {
             throw ExceptionHandling.dieInternal(tc, String.format(
                 "Array type of %d dimensions cannot be initialized with %d dimensions",
                 rd.numDimensions, dims.length));
+        }
+    }
+
+    protected int numSlots() {
+        long result = dimensions[0];
+        for (int i = 1; i < dimensions.length; i++)
+            result *= dimensions[i];
+        return (int)result;
+    }
+
+    protected void duplicateSetDimensions(ThreadContext tc) {
+        throw ExceptionHandling.dieInternal(tc,
+            "MultiDimArray: can only set dimensions once");
+    }
+    
+    protected int indicesToFlatIndex(ThreadContext tc, long[] indices) {
+        if (indices.length == dimensions.length) {
+            long multiplier = 1;
+            long result     = 0;
+            for (int i = dimensions.length - 1; i >= 0; i--) {
+                long dim_size = dimensions[i];
+                long index    = indices[i];
+                if (index >= 0 && index < dim_size) {
+                    result += index * multiplier;
+                    multiplier *= dim_size;
+                }
+                else {
+                    throw ExceptionHandling.dieInternal(tc, String.format(
+                        "Index %d for dimension %d out of range (must be 0..%d)",
+                        index, i + 1, dim_size));
+                }
+            }
+            return (int)result;
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc, String.format(
+            "Cannot access %d dimension array with %d indices",
+            dimensions.length, indices.length));
         }
     }
 }
