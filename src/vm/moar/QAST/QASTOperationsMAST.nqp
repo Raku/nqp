@@ -1118,11 +1118,13 @@ for ('', 'repeat_') -> $repness {
                 my $redo_mask := $HandlerCategory::redo;
                 my $next_mask := $HandlerCategory::next;
                 my $last_mask := $HandlerCategory::last;
+                my $return_mask := $HandlerCategory::return;
                 my $il        := nqp::list();
                 if $label_wval {
                     $redo_mask  := $redo_mask + $HandlerCategory::labeled;
                     $next_mask  := $next_mask + $HandlerCategory::labeled;
                     $last_mask  := $last_mask + $HandlerCategory::labeled;
+                    $return_mask  := $return_mask + $HandlerCategory::labeled;
                     my $labmast := $qastcomp.as_mast($label_wval, :want($MVM_reg_obj)); #nqp::where($label.value);
                     my $labreg  := $labmast.result_reg;
                     $lablocal   := MAST::Local.new(:index($*MAST_FRAME.add_local(NQPMu)));
@@ -1130,8 +1132,15 @@ for ('', 'repeat_') -> $repness {
                     push_op($il, 'set', $lablocal, $labreg);
                     $regalloc.release_register($labreg, $MVM_reg_obj);
                 }
-                my @redo_il := [MAST::HandlerScope.new(
+                my @return_il := [MAST::HandlerScope.new(
                     :instructions(@loop_il),
+                    :category_mask($return_mask),
+                    :action($HandlerAction::unwind_and_goto),
+                    :goto($done_lbl),
+                    :label($lablocal)
+                )];
+                my @redo_il := [MAST::HandlerScope.new(
+                    :instructions(@return_il),
                     :category_mask($redo_mask),
                     :action($HandlerAction::unwind_and_goto),
                     :goto($redo_lbl),
@@ -1597,6 +1606,8 @@ QAST::MASTOperations.add_core_moarop_mapping('getextype', 'getexcategory');
 QAST::MASTOperations.add_core_moarop_mapping('setextype', 'bindexcategory', 1);
 QAST::MASTOperations.add_core_moarop_mapping('getpayload', 'getexpayload');
 QAST::MASTOperations.add_core_moarop_mapping('setpayload', 'bindexpayload', 1);
+QAST::MASTOperations.add_core_moarop_mapping('getlabel', 'getexlabel');
+QAST::MASTOperations.add_core_moarop_mapping('setlabel', 'bindexlabel', 1);
 QAST::MASTOperations.add_core_moarop_mapping('getmessage', 'getexmessage');
 QAST::MASTOperations.add_core_moarop_mapping('setmessage', 'bindexmessage', 1);
 QAST::MASTOperations.add_core_moarop_mapping('newexception', 'newexception');
@@ -1609,6 +1620,7 @@ QAST::MASTOperations.add_core_moarop_mapping('resume', 'resume');
 my %handler_names := nqp::hash(
     'CATCH',   $HandlerCategory::catch,
     'CONTROL', $HandlerCategory::control,
+    'RETURN',  $HandlerCategory::return,
     'NEXT',    $HandlerCategory::next,
     'LAST',    $HandlerCategory::last,
     'REDO',    $HandlerCategory::redo,
@@ -1709,7 +1721,8 @@ QAST::MASTOperations.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
 my %control_map := nqp::hash(
     'next', $HandlerCategory::next,
     'last', $HandlerCategory::last,
-    'redo', $HandlerCategory::redo
+    'redo', $HandlerCategory::redo,
+    'return', $HandlerCategory::return
 );
 QAST::MASTOperations.add_core_op('control', -> $qastcomp, $op {
     my $regalloc := $*REGALLOC;
@@ -1867,6 +1880,7 @@ my %const_map := nqp::hash(
     'CONTROL_NEXT',         4,
     'CONTROL_REDO',         8,
     'CONTROL_LAST',         16,
+    'CONTROL_RETURN',       32,
     'CONTROL_TAKE',         128,
     'CONTROL_WARN',         256,
     'CONTROL_SUCCEED',      512,
