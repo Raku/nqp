@@ -2872,6 +2872,48 @@ public final class Ops {
         }
         return res;
     }
+    public static SixModelObject atpos2d_o(SixModelObject arr, long idx1, long idx2, ThreadContext tc) {
+        return arr.at_pos_multidim_boxed(tc, new long[] { idx1, idx2 });
+    }
+    public static long atpos2d_i(SixModelObject arr, long idx1, long idx2, ThreadContext tc) {
+        arr.at_pos_multidim_native(tc, new long[] { idx1, idx2 });
+        if (tc.native_type != ThreadContext.NATIVE_INT)
+            throw ExceptionHandling.dieInternal(tc, "This is not a native int array");
+        return tc.native_i;
+    }
+    public static double atpos2d_n(SixModelObject arr, long idx1, long idx2, ThreadContext tc) {
+        arr.at_pos_multidim_native(tc, new long[] { idx1, idx2 });
+        if (tc.native_type != ThreadContext.NATIVE_NUM)
+            throw ExceptionHandling.dieInternal(tc, "This is not a native num array");
+        return tc.native_n;
+    }
+    public static String atpos2d_s(SixModelObject arr, long idx1, long idx2, ThreadContext tc) {
+        arr.at_pos_multidim_native(tc, new long[] { idx1, idx2 });
+        if (tc.native_type != ThreadContext.NATIVE_STR)
+            throw ExceptionHandling.dieInternal(tc, "This is not a native str array");
+        return tc.native_s;
+    }
+    public static SixModelObject atpos3d_o(SixModelObject arr, long idx1, long idx2, long idx3, ThreadContext tc) {
+        return arr.at_pos_multidim_boxed(tc, new long[] { idx1, idx2, idx3 });
+    }
+    public static long atpos3d_i(SixModelObject arr, long idx1, long idx2, long idx3, ThreadContext tc) {
+        arr.at_pos_multidim_native(tc, new long[] { idx1, idx2, idx3 });
+        if (tc.native_type != ThreadContext.NATIVE_INT)
+            throw ExceptionHandling.dieInternal(tc, "This is not a native int array");
+        return tc.native_i;
+    }
+    public static double atpos3d_n(SixModelObject arr, long idx1, long idx2, long idx3, ThreadContext tc) {
+        arr.at_pos_multidim_native(tc, new long[] { idx1, idx2, idx3 });
+        if (tc.native_type != ThreadContext.NATIVE_NUM)
+            throw ExceptionHandling.dieInternal(tc, "This is not a native num array");
+        return tc.native_n;
+    }
+    public static String atpos3d_s(SixModelObject arr, long idx1, long idx2, long idx3, ThreadContext tc) {
+        arr.at_pos_multidim_native(tc, new long[] { idx1, idx2, idx3 });
+        if (tc.native_type != ThreadContext.NATIVE_STR)
+            throw ExceptionHandling.dieInternal(tc, "This is not a native str array");
+        return tc.native_s;
+    }
     public static SixModelObject atposnd_o(SixModelObject arr, SixModelObject indices, ThreadContext tc) {
         return arr.at_pos_multidim_boxed(tc, smoToLongArray(tc, indices));
     }
@@ -2892,6 +2934,56 @@ public final class Ops {
         if (tc.native_type != ThreadContext.NATIVE_STR)
             throw ExceptionHandling.dieInternal(tc, "This is not a native str array");
         return tc.native_s;
+    }
+    public static SixModelObject bindpos2d_o(SixModelObject arr, long idx1, long idx2, SixModelObject value, ThreadContext tc) {
+        arr.bind_pos_multidim_boxed(tc, new long[] { idx1, idx2 }, value);
+        return value;
+    }
+    public static long bindpos2d_i(SixModelObject arr, long idx1, long idx2, long value, ThreadContext tc) {
+        tc.native_i = value;
+        arr.bind_pos_multidim_native(tc, new long[] { idx1, idx2 });
+        if (tc.native_type != ThreadContext.NATIVE_INT)
+            throw ExceptionHandling.dieInternal(tc, "This is not a native int array");
+        return value;
+    }
+    public static double bindpos2d_n(SixModelObject arr, long idx1, long idx2, double value, ThreadContext tc) {
+        tc.native_n = value;
+        arr.bind_pos_multidim_native(tc, new long[] { idx1, idx2 });
+        if (tc.native_type != ThreadContext.NATIVE_NUM)
+            throw ExceptionHandling.dieInternal(tc, "This is not a native num array");
+        return value;
+    }
+    public static String bindpos2d_s(SixModelObject arr, long idx1, long idx2, String value, ThreadContext tc) {
+        tc.native_s = value;
+        arr.bind_pos_multidim_native(tc, new long[] { idx1, idx2 });
+        if (tc.native_type != ThreadContext.NATIVE_STR)
+            throw ExceptionHandling.dieInternal(tc, "This is not a native str array");
+        return value;
+    }
+    public static SixModelObject bindpos3d_o(SixModelObject arr, long idx1, long idx2, long idx3, SixModelObject value, ThreadContext tc) {
+        arr.bind_pos_multidim_boxed(tc, new long[] { idx1, idx2, idx3 }, value);
+        return value;
+    }
+    public static long bindpos3d_i(SixModelObject arr, long idx1, long idx2, long idx3, long value, ThreadContext tc) {
+        tc.native_i = value;
+        arr.bind_pos_multidim_native(tc, new long[] { idx1, idx2, idx3 });
+        if (tc.native_type != ThreadContext.NATIVE_INT)
+            throw ExceptionHandling.dieInternal(tc, "This is not a native int array");
+        return value;
+    }
+    public static double bindpos3d_n(SixModelObject arr, long idx1, long idx2, long idx3, double value, ThreadContext tc) {
+        tc.native_n = value;
+        arr.bind_pos_multidim_native(tc, new long[] { idx1, idx2, idx3 });
+        if (tc.native_type != ThreadContext.NATIVE_NUM)
+            throw ExceptionHandling.dieInternal(tc, "This is not a native num array");
+        return value;
+    }
+    public static String bindpos3d_s(SixModelObject arr, long idx1, long idx2, long idx3, String value, ThreadContext tc) {
+        tc.native_s = value;
+        arr.bind_pos_multidim_native(tc, new long[] { idx1, idx2, idx3 });
+        if (tc.native_type != ThreadContext.NATIVE_STR)
+            throw ExceptionHandling.dieInternal(tc, "This is not a native str array");
+        return value;
     }
     public static SixModelObject bindposnd_o(SixModelObject arr, SixModelObject indices, SixModelObject value, ThreadContext tc) {
         long[] jIndices = smoToLongArray(tc, indices);
