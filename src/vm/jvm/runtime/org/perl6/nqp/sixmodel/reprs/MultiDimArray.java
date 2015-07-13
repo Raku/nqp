@@ -22,7 +22,41 @@ public class MultiDimArray extends REPR {
     public SixModelObject allocate(ThreadContext tc, STable st) {
         MultiDimArrayREPRData rd = (MultiDimArrayREPRData)st.REPRData;
         if (rd != null) {
-            MultiDimArrayInstance obj = new MultiDimArrayInstance();
+            MultiDimArrayInstanceBase obj;
+            if (rd.ss != null) {
+                StorageSpec ss = rd.ss;
+                switch (ss.boxed_primitive) {
+                case StorageSpec.BP_INT:
+                    if (ss.bits == 64)
+                        obj = new MultiDimArrayInstance_i();
+                    else if (ss.bits == 8)
+                        obj = ss.is_unsigned == 0
+                            ? new MultiDimArrayInstance_i8()
+                            : new MultiDimArrayInstance_u8();
+                    else if (ss.bits == 16)
+                        obj = ss.is_unsigned == 0
+                            ? new MultiDimArrayInstance_i16()
+                            : new MultiDimArrayInstance_u16();
+                    else if (ss.bits == 32)
+                        obj = ss.is_unsigned == 0
+                            ? new MultiDimArrayInstance_i32()
+                            : new MultiDimArrayInstance_u32();
+                    else
+                        obj = new MultiDimArrayInstance_i();
+                    break;
+                case StorageSpec.BP_NUM:
+                    obj = new MultiDimArrayInstance_n();
+                    break;
+                case StorageSpec.BP_STR:
+                    obj = new MultiDimArrayInstance_s();
+                    break;
+                default:
+                    obj = new MultiDimArrayInstance();
+                }
+            }
+            else {
+                obj = new MultiDimArrayInstance();
+            }
             obj.dimensions = new long[rd.numDimensions];
             obj.st = st;
             return obj;
