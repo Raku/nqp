@@ -4,6 +4,8 @@ import java.lang.System;
 
 import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.ThreadContext;
+import org.perl6.nqp.sixmodel.SerializationReader;
+import org.perl6.nqp.sixmodel.SerializationWriter;
 import org.perl6.nqp.sixmodel.SixModelObject;
 
 public abstract class MultiDimArrayInstanceBase extends SixModelObject {
@@ -111,4 +113,6 @@ public abstract class MultiDimArrayInstanceBase extends SixModelObject {
     }
 
     public abstract SixModelObject clone(ThreadContext tc);
+    public abstract void serializeValues(ThreadContext tc, SerializationWriter writer);
+    public abstract void deserializeValues(ThreadContext tc, SerializationReader reader);
 }

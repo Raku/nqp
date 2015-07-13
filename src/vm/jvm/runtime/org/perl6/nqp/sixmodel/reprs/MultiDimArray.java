@@ -103,21 +103,63 @@ public class MultiDimArray extends REPR {
         }
     }
 
+    public StorageSpec get_value_storage_spec(ThreadContext tc, STable st) {
+        return st.REPRData == null ? StorageSpec.BOXED : ((MultiDimArrayREPRData)st.REPRData).ss;
+    }
+
     public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
-        throw ExceptionHandling.dieInternal(tc, "deserialize NYI");
+        MultiDimArrayREPRData rd = (MultiDimArrayREPRData)st.REPRData;
+        MultiDimArrayInstanceBase obj = null;
+        if (rd != null && rd.ss != null) {
+            StorageSpec ss = rd.ss;
+            switch (ss.boxed_primitive) {
+            case StorageSpec.BP_INT:
+                if (ss.bits == 64)
+                    obj = new MultiDimArrayInstance_i();
+                else if (ss.bits == 8)
+                    obj = ss.is_unsigned == 0
+                        ? new MultiDimArrayInstance_i8()
+                        : new MultiDimArrayInstance_u8();
+                else if (ss.bits == 16)
+                    obj = ss.is_unsigned == 0
+                        ? new MultiDimArrayInstance_i16()
+                        : new MultiDimArrayInstance_u16();
+                else if (ss.bits == 32)
+                    obj = ss.is_unsigned == 0
+                        ? new MultiDimArrayInstance_i32()
+                        : new MultiDimArrayInstance_u32();
+                else
+                    obj = new MultiDimArrayInstance_i();
+                break;
+            case StorageSpec.BP_NUM:
+                obj = new MultiDimArrayInstance_n();
+                break;
+            case StorageSpec.BP_STR:
+                obj = new MultiDimArrayInstance_s();
+                break;
+            }
+        }
+        if (obj == null)
+            obj = new MultiDimArrayInstance();
+        obj.st = st;
+        return obj;
     }
     
     public void deserialize_finish(ThreadContext tc, STable st,
             SerializationReader reader, SixModelObject obj) {
-        throw ExceptionHandling.dieInternal(tc, "deserialize NYI");
+        MultiDimArrayInstanceBase mda = (MultiDimArrayInstanceBase)obj;
+        MultiDimArrayREPRData rd = (MultiDimArrayREPRData)st.REPRData;
+        mda.dimensions = new long[rd.numDimensions];
+        for (int i = 0; i < mda.dimensions.length; i++)
+            mda.dimensions[i] = reader.readLong();
+        mda.deserializeValues(tc, reader);
     }
     
     public void serialize(ThreadContext tc, SerializationWriter writer, SixModelObject obj) {
-        throw ExceptionHandling.dieInternal(tc, "serialize NYI");
-    }
-
-    public StorageSpec get_value_storage_spec(ThreadContext tc, STable st) {
-        return st.REPRData == null ? StorageSpec.BOXED : ((MultiDimArrayREPRData)st.REPRData).ss;
+        MultiDimArrayInstanceBase mda = (MultiDimArrayInstanceBase)obj;
+        for (int i = 0; i < mda.dimensions.length; i++)
+            writer.writeInt(mda.dimensions[i]);
+        mda.serializeValues(tc, writer);
     }
     
     /**
@@ -126,7 +168,14 @@ public class MultiDimArray extends REPR {
      */
     public void serialize_repr_data(ThreadContext tc, STable st, SerializationWriter writer)
     {
-        throw ExceptionHandling.dieInternal(tc, "repr serialize NYI");
+        MultiDimArrayREPRData rd = (MultiDimArrayREPRData)st.REPRData;
+        if (rd != null) {
+            writer.writeInt(rd.numDimensions);
+            writer.writeRef(rd.type);
+        }
+        else {
+            writer.writeInt(0);
+        }
     }
     
     /**
@@ -135,6 +184,16 @@ public class MultiDimArray extends REPR {
      */
     public void deserialize_repr_data(ThreadContext tc, STable st, SerializationReader reader)
     {
-        throw ExceptionHandling.dieInternal(tc, "repr deserialize NYI");
+        int dims = (int)reader.readLong();
+        if (dims > 0) {
+            MultiDimArrayREPRData reprData = new MultiDimArrayREPRData();
+            reprData.numDimensions = dims;
+            SixModelObject type = reader.readRef();
+            if (type != null) {
+                reprData.type = type;
+                reprData.ss = type.st.REPR.get_storage_spec(tc, type.st);
+            }
+            st.REPRData = reprData;
+        }
     }
 }
