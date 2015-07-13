@@ -62,4 +62,32 @@ public abstract class MultiDimArrayInstanceBase extends SixModelObject {
             dimensions.length, indices.length));
         }
     }
+
+    public void push_boxed(ThreadContext tc, SixModelObject value) {
+        throw ExceptionHandling.dieInternal(tc, "Cannot push onto a fixed dimension array");
+    }
+    public void push_native(ThreadContext tc) {
+        throw ExceptionHandling.dieInternal(tc, "Cannot push onto a fixed dimension array");
+    }
+    public SixModelObject pop_boxed(ThreadContext tc) {
+        throw ExceptionHandling.dieInternal(tc, "Cannot pop a fixed dimension array");
+    }
+    public void pop_native(ThreadContext tc) {
+        throw ExceptionHandling.dieInternal(tc, "Cannot pop a fixed dimension array");
+    }
+    public void unshift_boxed(ThreadContext tc, SixModelObject value) {
+        throw ExceptionHandling.dieInternal(tc, "Cannot unshift onto a fixed dimension array");
+    }
+    public void unshift_native(ThreadContext tc) {
+        throw ExceptionHandling.dieInternal(tc, "Cannot unshift onto a fixed dimension array");
+    }
+    public SixModelObject shift_boxed(ThreadContext tc) {
+        throw ExceptionHandling.dieInternal(tc, "Cannot shift a fixed dimension array");
+    }
+    public void shift_native(ThreadContext tc) {
+        throw ExceptionHandling.dieInternal(tc, "Cannot shift a fixed dimension array");
+    }
+    public void splice(ThreadContext tc, SixModelObject from, long offset, long count) {
+        throw ExceptionHandling.dieInternal(tc, "Cannot splice a fixed dimension array");
+    }
 }
