@@ -1,6 +1,6 @@
 #! nqp
 
-plan(188);
+plan(187);
 
 sub is-dims(@arr, @expected-dims, $description) {
     my $got-dims := nqp::dimensions(@arr);
@@ -471,7 +471,6 @@ dies-ok({
     my $type_out := nqp::scgetobj($dsc, 0);
     ok(nqp::reprname($type_out) eq 'MultiDimArray', 'Got a MultiDimArray type serialized/deserialized');
     ok(!nqp::isconcrete($type_out), 'It really is a type');
-    ok(nqp::numdimensions($type_out) == 2, 'Number of dimensions preserved');
 
     # Check we get a 2D array as expected back.
     my $value_out := nqp::scgetobj($dsc, 1);
