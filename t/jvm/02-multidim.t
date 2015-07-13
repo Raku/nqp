@@ -1,6 +1,6 @@
 #! nqp
 
-plan(187);
+plan(190);
 
 sub is-dims(@arr, @expected-dims, $description) {
     my $got-dims := nqp::dimensions(@arr);
@@ -439,12 +439,12 @@ dies-ok({
     dies-ok({ nqp::atpos3d($int_array_3d, 1, 1, 1) }, 'Wrong type access to native int array with special 3D ops dies (3)');
 }
 
+sub add_to_sc($sc, $idx, $obj) {
+    nqp::scsetobj($sc, $idx, $obj);
+    nqp::setobjsc($obj, $sc);
+}
 {
     # Create serialization context.
-    sub add_to_sc($sc, $idx, $obj) {
-        nqp::scsetobj($sc, $idx, $obj);
-        nqp::setobjsc($obj, $sc);
-    }
     my $sc := nqp::createsc('TEST_SC_IN');
     my $sh := nqp::list_s();
     
@@ -483,3 +483,21 @@ dies-ok({
     ok(nqp::atposnd($value_out, nqp::list_i(1, 0)) == 20, 'Deserialized MultiDimArray has correct values (3)');
     ok(nqp::atposnd($value_out, nqp::list_i(1, 1)) == 21, 'Deserialized MultiDimArray has correct values (4)');
 }
+
+# Can serialize/deserialize uncomposed multi-dim array without crash.
+{
+    my $some_uncomposed_type := nqp::newtype(nqp::knowhow(), 'MultiDimArray');
+    my $sc := nqp::createsc('TEST_SC_IN_2');
+    my $sh := nqp::list_s();
+    add_to_sc($sc, 0, $some_uncomposed_type);
+    my $serialized := nqp::serialize($sc, $sh);
+    my $dsc := nqp::createsc('TEST_SC_OUT_2');
+    nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
+    my $type_out := nqp::scgetobj($dsc, 0);
+    ok(nqp::reprname($type_out) eq 'MultiDimArray',
+        'Got uncomposed MultiDimArray type serialized/deserialized');
+}
+
+# Can't use numdimensions or dimensions on a type object.
+dies-ok({ nqp::numdimensions($array_type_2d) }, "Can't use numdimensions on a type object");
+dies-ok({ nqp::dimensions($array_type_2d) }, "Can't use dimensions on a type object");
