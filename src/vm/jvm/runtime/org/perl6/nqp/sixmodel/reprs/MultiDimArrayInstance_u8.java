@@ -30,4 +30,17 @@ public class MultiDimArrayInstance_u8 extends MultiDimArrayInstanceBase {
         tc.native_type = ThreadContext.NATIVE_INT;
         slots[indicesToFlatIndex(tc, indices)] = (byte)tc.native_i;
     }
+
+    public SixModelObject clone(ThreadContext tc) {
+        try {
+            MultiDimArrayInstance_u8 clone = (MultiDimArrayInstance_u8)this.clone();
+            clone.sc = null;
+            clone.dimensions = this.dimensions.clone();
+            if (this.slots != null)
+                clone.slots = this.slots.clone();
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

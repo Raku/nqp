@@ -109,4 +109,6 @@ public abstract class MultiDimArrayInstanceBase extends SixModelObject {
     public long elems(ThreadContext tc) {
         return this.dimensions(tc)[0];
     }
+
+    public abstract SixModelObject clone(ThreadContext tc);
 }

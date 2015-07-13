@@ -24,4 +24,17 @@ public class MultiDimArrayInstance extends MultiDimArrayInstanceBase {
     public void bind_pos_multidim_boxed(ThreadContext tc, long[] indices, SixModelObject value) {
         slots[indicesToFlatIndex(tc, indices)] = value;
     }
+
+    public SixModelObject clone(ThreadContext tc) {
+        try {
+            MultiDimArrayInstance clone = (MultiDimArrayInstance)this.clone();
+            clone.sc = null;
+            clone.dimensions = this.dimensions.clone();
+            if (this.slots != null)
+                clone.slots = this.slots.clone();
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
