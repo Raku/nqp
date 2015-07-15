@@ -160,6 +160,21 @@ class QRegex::NFA {
         dentout($to);
     }
 
+    method altseq($node, $from, $to) {
+        if +@($node) {
+            my $indent := dentin();
+            my int $st := self.regex_nfa($node[0], $from, $to);
+            $to := $st if $to < 0 && $st > 0;
+            $st := self.addedge($from, $to, $EDGE_EPSILON, 0);
+            $to := $st if $to < 0 && $st > 0;
+            note("$indent ...altseq returns $to") if $nfadeb;
+            dentout($to);
+        }
+        else {
+            self.fate($node, $from, $to);
+        }
+    }
+
     method anchor($node, $from, $to) { 
         self.addedge($from, $to, $EDGE_EPSILON, 0);
     }
