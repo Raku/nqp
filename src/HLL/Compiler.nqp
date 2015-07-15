@@ -341,11 +341,15 @@ class HLL::Compiler does HLL::Backend::Default {
                 if $filename eq '-' {
                     $in-handle := nqp::getstdin();
                 }
+                elsif nqp::stat($filename, nqp::const::STAT_ISDIR) {
+                    nqp::sayfh(nqp::getstderr(), "Can not run directory $filename.");
+                    $err := 1;
+                }
                 else {
                     $in-handle := nqp::open($filename, 'r');
                 }
                 CATCH {
-                    nqp::say("Could not open $filename. $_");
+                    nqp::sayfh(nqp::getstderr(), "Could not open $filename. $_");
                     $err := 1;
                 }
             }
@@ -355,10 +359,11 @@ class HLL::Compiler does HLL::Backend::Default {
                 nqp::push(@codes, nqp::readallfh($in-handle));
                 nqp::closefh($in-handle);
                 CATCH {
-                    $err := "Error while reading from file: $_";
+                    nqp::sayfh(nqp::getstderr(), "Error while reading from file: $_");
+                    $err := 1;
                 }
             }
-            nqp::die($err) if $err;
+            nqp::exit(1) if $err;
         }
         my $code := join('', @codes);
         my $?FILES := join(' ', @files);
