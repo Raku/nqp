@@ -93,7 +93,7 @@ grammar NQP::Grammar is HLL::Grammar {
                 [ 'cut' »
                   <.panic: 'Obsolete pod format, please use =begin/=end instead'> ]?
               | \n ]>
-        |
+        |   {}
             [ \s || <.panic: 'Illegal pod directive'> ]
             \N*
         ]
