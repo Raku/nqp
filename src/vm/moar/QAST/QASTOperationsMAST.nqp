@@ -1118,13 +1118,13 @@ for ('', 'repeat_') -> $repness {
                 my $redo_mask := $HandlerCategory::redo;
                 my $next_mask := $HandlerCategory::next;
                 my $last_mask := $HandlerCategory::last;
-                my $return_mask := $HandlerCategory::return;
+                my $leave_mask := $HandlerCategory::leave;
                 my $il        := nqp::list();
                 if $label_wval {
                     $redo_mask  := $redo_mask + $HandlerCategory::labeled;
                     $next_mask  := $next_mask + $HandlerCategory::labeled;
                     $last_mask  := $last_mask + $HandlerCategory::labeled;
-                    $return_mask  := $return_mask + $HandlerCategory::labeled;
+                    $leave_mask := $leave_mask + $HandlerCategory::labeled;
                     my $labmast := $qastcomp.as_mast($label_wval, :want($MVM_reg_obj)); #nqp::where($label.value);
                     my $labreg  := $labmast.result_reg;
                     $lablocal   := MAST::Local.new(:index($*MAST_FRAME.add_local(NQPMu)));
@@ -1132,15 +1132,15 @@ for ('', 'repeat_') -> $repness {
                     push_op($il, 'set', $lablocal, $labreg);
                     $regalloc.release_register($labreg, $MVM_reg_obj);
                 }
-                my @return_il := [MAST::HandlerScope.new(
+                my @leave_il := [MAST::HandlerScope.new(
                     :instructions(@loop_il),
-                    :category_mask($return_mask),
+                    :category_mask($leave_mask),
                     :action($HandlerAction::unwind_and_goto),
                     :goto($done_lbl),
                     :label($lablocal)
                 )];
                 my @redo_il := [MAST::HandlerScope.new(
-                    :instructions(@return_il),
+                    :instructions(@leave_il),
                     :category_mask($redo_mask),
                     :action($HandlerAction::unwind_and_goto),
                     :goto($redo_lbl),
@@ -1616,11 +1616,12 @@ QAST::MASTOperations.add_core_moarop_mapping('backtrace', 'backtrace');
 QAST::MASTOperations.add_core_moarop_mapping('throw', 'throwdyn');
 QAST::MASTOperations.add_core_moarop_mapping('rethrow', 'rethrow');
 QAST::MASTOperations.add_core_moarop_mapping('resume', 'resume');
+QAST::MASTOperations.add_core_moarop_mapping('leave', 'leave', 0);
 
 my %handler_names := nqp::hash(
     'CATCH',   $HandlerCategory::catch,
     'CONTROL', $HandlerCategory::control,
-    'RETURN',  $HandlerCategory::return,
+    'LEAVE',   $HandlerCategory::leave,
     'NEXT',    $HandlerCategory::next,
     'LAST',    $HandlerCategory::last,
     'REDO',    $HandlerCategory::redo,
@@ -1722,7 +1723,7 @@ my %control_map := nqp::hash(
     'next', $HandlerCategory::next,
     'last', $HandlerCategory::last,
     'redo', $HandlerCategory::redo,
-    'return', $HandlerCategory::return
+    'leave', $HandlerCategory::leave
 );
 QAST::MASTOperations.add_core_op('control', -> $qastcomp, $op {
     my $regalloc := $*REGALLOC;
@@ -1885,6 +1886,7 @@ my %const_map := nqp::hash(
     'CONTROL_WARN',         256,
     'CONTROL_SUCCEED',      512,
     'CONTROL_PROCEED',      1024,
+    'CONTROL_LEAVE',        2048,
     'CONTROL_LABELED',      4096,
 
     'STAT_EXISTS',             0,
