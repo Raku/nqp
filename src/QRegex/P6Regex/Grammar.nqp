@@ -201,7 +201,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         ||  <sigmaybe>?
             [
             | <!rxstopper> <quantifier>
-            | <?[:]> <backmod> <!alpha>
+            | <?[:]> <backmod> <!alnum>
             ]
             [ <!{$*VARDEF}> <.SIGOK> <sigfinal=.sigmaybe> ]?
             [ <.ws> <separator> ]?
