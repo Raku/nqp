@@ -466,5 +466,9 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token mod_ident:sym<ratchet>    { $<sym>=[r] 'atchet'? » }
     token mod_ident:sym<sigspace>   { $<sym>=[s] 'igspace'? » }
     token mod_ident:sym<dba>        { <sym> » }
-    token mod_ident:sym<oops>       { {} (\D+) { $/.CURSOR.panic('Unrecognized regex modifier :' ~ $/[0].Str) } }
+    token mod_ident:sym<oops>       { {} (\w+) { self.throw_unrecognized_regex_modifier($/[0].Str) } }
+
+    method throw_unrecognized_regex_modifier($mod) {
+        self.panic('Unrecognized regex modifier :' ~ $mod);
+    }
 }
