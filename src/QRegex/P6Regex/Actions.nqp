@@ -89,8 +89,8 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         }
         if $<separator> {
             if $qast.rxtype ne 'quant' && $qast.rxtype ne 'dynquant' {
-                $/.CURSOR.panic("'" ~ $<separator>[0]<septype> ~
-                    "' many only be used immediately following a quantifier")
+                $/.CURSOR.panic("'" ~ $<separator><septype> ~
+                    "' may only be used immediately following a quantifier")
             }
             $qast.push($<separator>.ast);
             if $<separator><septype> eq '%%' {
