@@ -14,23 +14,6 @@ must be tagged for release immediately prior to the Rakudo release.
 
 =item 1.
 
-I<Note: This step has changed starting in 2012.07.>
-
-Check to see if F<tools/build/PARROT_REVISION> needs to be
-bumped to a later Parrot release.  If PARROT_REVISION already
-contains a Parrot release tag (e.g., C<RELEASE_3_9_0>) then
-it does not need to be changed.  If PARROT_REVISION refers to
-an interim commit, as in C<RELEASE_4_6_0-27-gda9adfa>, then
-update PARROT_REVISION to contain the tag corresponding to
-Parrot's monthly release.
-
-To see a list of Parrot release tags, use C<git tag> on an
-up-to-date Parrot repository.
-
-Once F<tools/build/PARROT_REVISION> has been set to a Parrot
-release, it must not be changed (except to another Parrot
-release) until after the Rakudo release.
-
 MoarVM tries to have a synchronised release schedule with NQP
 and rakudo, so there's most probably a release tag for MoarVM
 that you can bump F<tools/build/MOAR_REVISION> to. Release tags
