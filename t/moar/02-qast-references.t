@@ -1,6 +1,6 @@
 use QAST;
 
-plan(5);
+plan(6);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -10,21 +10,37 @@ sub compile_qast($qast) {
 sub is_qast($qast, $value, $desc) {
     try {
         my $code := compile_qast($qast);
-        my int $count := 0;
-        my $result;
-        while $count < 200 {
-            try {
-                $result := $code();
-            }
-            $count := $count + 1;
-        }
-        $result := $code();
+        my $result := $code();
         ok($result eq $value, $desc);
         CATCH { ok(0, $desc ~ $!) }
     }
-    my $code := compile_qast($qast);
-    $code();
 }
+
+##
+## If you want to inspect the generated code, use this version of
+## is_qast and use MVM_SPESH_LOG=foo.txt - the loop will cause spesh
+## to run it and it'll show up in the log.
+##
+#
+#sub is_qast($qast, $value, $desc) {
+    #try {
+        #my $code := compile_qast($qast);
+        #my int $count := 0;
+        #my $result;
+        #while $count < 200 {
+            #try {
+                #$result := $code();
+            #}
+            #$count := $count + 1;
+        #}
+        #$result := $code();
+        #ok($result eq $value, $desc);
+        #CATCH { ok(0, $desc ~ $!) }
+    #}
+    #my $code := compile_qast($qast);
+    #$code();
+#}
+
 sub is_qast_args($qast, @args, $value, $desc) {
     try {
         my $code := compile_qast($qast);
