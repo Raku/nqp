@@ -1811,6 +1811,7 @@ QAST::MASTOperations.add_hll_box('', $MVM_reg_void, -> $qastcomp, $reg {
 QAST::MASTOperations.add_core_moarop_mapping('ctx', 'ctx', :!inlinable);
 QAST::MASTOperations.add_core_moarop_mapping('ctxouter', 'ctxouter', :!inlinable);
 QAST::MASTOperations.add_core_moarop_mapping('ctxcaller', 'ctxcaller', :!inlinable);
+QAST::MASTOperations.add_core_moarop_mapping('ctxcode', 'ctxcode', :!inlinable);
 QAST::MASTOperations.add_core_moarop_mapping('ctxouterskipthunks', 'ctxouterskipthunks', :!inlinable);
 QAST::MASTOperations.add_core_moarop_mapping('ctxcallerskipthunks', 'ctxcallerskipthunks', :!inlinable);
 QAST::MASTOperations.add_core_moarop_mapping('curcode', 'curcode', :!inlinable);
