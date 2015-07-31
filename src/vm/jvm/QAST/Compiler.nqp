@@ -1881,6 +1881,7 @@ QAST::OperationsJAST.add_hll_unbox('', $RT_STR, -> $qastcomp {
 QAST::OperationsJAST.map_classlib_core_op('ctx', $TYPE_OPS, 'ctx', [], $RT_OBJ, :tc, :!inlinable);
 QAST::OperationsJAST.map_classlib_core_op('ctxouter', $TYPE_OPS, 'ctxouter', [$RT_OBJ], $RT_OBJ, :tc, :!inlinable);
 QAST::OperationsJAST.map_classlib_core_op('ctxcaller', $TYPE_OPS, 'ctxcaller', [$RT_OBJ], $RT_OBJ, :tc, :!inlinable);
+QAST::OperationsJAST.map_classlib_core_op('ctxcode', $TYPE_OPS, 'ctxcode', [$RT_OBJ], $RT_OBJ, :tc, :!inlinable);
 QAST::OperationsJAST.map_classlib_core_op('ctxouterskipthunks', $TYPE_OPS, 'ctxouterskipthunks', [$RT_OBJ], $RT_OBJ, :tc, :!inlinable);
 QAST::OperationsJAST.map_classlib_core_op('ctxcallerskipthunks', $TYPE_OPS, 'ctxcallerskipthunks', [$RT_OBJ], $RT_OBJ, :tc, :!inlinable);
 QAST::OperationsJAST.map_classlib_core_op('curcode', $TYPE_OPS, 'curcode', [], $RT_OBJ, :tc, :!inlinable);

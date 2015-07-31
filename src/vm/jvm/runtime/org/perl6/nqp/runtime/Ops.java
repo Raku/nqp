@@ -1528,6 +1528,12 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc, "ctxcaller requires an operand with REPR ContextRef");
         }
     }
+    public static SixModelObject ctxcode(SixModelObject ctx, ThreadContext tc) {
+        if (ctx instanceof ContextRefInstance)
+            return ((ContextRefInstance)ctx).context.codeRef;
+        else
+            throw ExceptionHandling.dieInternal(tc, "ctxcode requires an operand with REPR ContextRef");
+    }
     public static SixModelObject ctxouterskipthunks(SixModelObject ctx, ThreadContext tc) {
         if (ctx instanceof ContextRefInstance) {
             CallFrame outer = ((ContextRefInstance)ctx).context.outer;
