@@ -14,7 +14,7 @@ class HLL::Backend::JVM {
     }
     
     method force_gc() {
-        nqp::die("Cannot force GC on JVM backend yet");
+        nqp::force_gc()
     }
     
     method name() {
