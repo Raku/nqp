@@ -6451,4 +6451,9 @@ public final class Ops {
         }
         return name;
     }
+
+    public static SixModelObject force_gc(ThreadContext tc) {
+        System.gc();
+        return null;
+    }
 }
