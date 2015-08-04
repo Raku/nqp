@@ -1029,8 +1029,17 @@ for ('', 'repeat_') -> $repness {
                 @comp_ops.push($comp);
                 @comp_types.push($comp.result_kind);
             }
-            my $res_kind := @comp_types[0];
-            my $res_reg := $regalloc.fresh_register($res_kind);
+
+            my $res_kind := $MVM_reg_obj;
+            my $res_reg;
+
+            if nqp::defined($*WANT) && $*WANT == $MVM_reg_void {
+                $res_kind := $MVM_reg_void;
+                $res_reg := MAST::VOID;
+            } else {
+                $res_reg := $regalloc.fresh_register($res_kind);
+            }
+
             if $orig_type {
                 @children[1][0].blocktype($orig_type);
             }
@@ -1043,24 +1052,15 @@ for ('', 'repeat_') -> $repness {
             # Test the condition and jump to the loop end if it's
             # not met.
             my @loop_il;
+
+            # Generate a lousy return value for our while loop.
+            unless $res_reg =:= MAST::VOID {
+                push_op(@loop_il, 'null', $res_reg);
+            }
+
             if $repness {
                 # It's a repeat_ variant, need to go straight into the
-                # loop body unconditionally. Be sure to set the register
-                # for the result to something first.
-                if $res_kind == $MVM_reg_obj {
-                    push_op(@loop_il, 'null', $res_reg);
-                }
-                elsif $res_kind == $MVM_reg_str {
-                    push_op(@loop_il, 'null_s', $res_reg);
-                }
-                elsif $res_kind == $MVM_reg_num64 {
-                    push_op(@loop_il, 'const_n64', $res_reg,
-                        MAST::NVal.new( :value(0.0) ));
-                }
-                else {
-                    push_op(@loop_il, 'const_i64', $res_reg,
-                        MAST::IVal.new( :value(0) ));
-                }
+                # loop body unconditionally.
                 if $cond_temp {
                     push_op(@loop_il, 'null', $*BLOCK.local($cond_temp));
                 }
@@ -1068,7 +1068,6 @@ for ('', 'repeat_') -> $repness {
             }
             nqp::push(@loop_il, $test_lbl);
             push_ilist(@loop_il, @comp_ops[0]);
-            push_op(@loop_il, 'set', $res_reg, @comp_ops[0].result_reg);
             if @comp_ops[0].result_kind == $MVM_reg_obj {
                 my $decont_reg := $regalloc.fresh_register($MVM_reg_obj);
                 push_op(@loop_il, 'decont', $decont_reg, @comp_ops[0].result_reg);
@@ -1085,11 +1084,6 @@ for ('', 'repeat_') -> $repness {
                     @comp_ops[0].result_reg,
                     $done_lbl
                 );
-            }
-
-            # Handle immediate blocks wanting the value as an arg.
-            if $*IMM_ARG {
-                $*IMM_ARG($res_reg);
             }
 
             # Emit the loop body; stash the result.
