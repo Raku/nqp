@@ -1351,7 +1351,7 @@ my class MASTCompilerInstance {
                 }
                 my $local_kind := $*BLOCK.local_kind($name);
                 if $local_kind == $MVM_reg_obj {
-                    nqp::die('Cannot take a reference to a non-native local');
+                    nqp::die('Cannot take a reference to non-native local ' ~ $name);
                 }
                 $res_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
                 $res_kind := $MVM_reg_obj;
