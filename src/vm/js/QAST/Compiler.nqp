@@ -1043,7 +1043,7 @@ class QAST::OperationsJS {
 
     add_simple_op('knowhowattr', $T_OBJ, [], sub () {"nqp.knowhowattr"});
 
-    add_simple_op('atkey', $T_OBJ, [$T_OBJ, $T_STR], sub ($hash, $key) {"$hash[$key]"});
+    add_simple_op('atkey', $T_OBJ, [$T_OBJ, $T_STR], sub ($hash, $key) {"$hash.\$\$atkey($key)"});
 
     for <savecapture usecapture> -> $op {
         add_simple_op($op, $T_OBJ, [], sub () {
@@ -2158,7 +2158,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             } else {
                 my $hash := self.as_js($var[0], :want($T_OBJ));
                 my $key := self.as_js($var[1], :want($T_STR));
-                Chunk.new($T_OBJ, "{$hash.expr}[{$key.expr}]", [$hash, $key], :node($var));
+                Chunk.new($T_OBJ, "{$hash.expr}.\$\$atkey({$key.expr})", [$hash, $key], :node($var));
             }
         } elsif ($var.scope eq 'attribute') {
             # TODO take second argument into account
@@ -2189,7 +2189,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my $key_chunk := self.as_js($key, :want($T_STR));
         my $value_chunk := self.as_js($value, :want($T_OBJ));
 
-        Chunk.new($T_OBJ, $value_chunk.expr, [$hash_chunk, $key_chunk, $value_chunk, "({$hash_chunk.expr}[{$key_chunk.expr}] = {$value_chunk.expr});\n"], :node($node));
+        Chunk.new($T_OBJ, $value_chunk.expr, [$hash_chunk, $key_chunk, $value_chunk, "{$hash_chunk.expr}.\$\$bindkey({$key_chunk.expr},{$value_chunk.expr});\n"], :node($node));
     }
 
     method bind_pos($array, $index, $value, :$node) {
