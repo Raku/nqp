@@ -37,7 +37,7 @@ P6opaque.prototype.allocate = function(STable) {
 };
 
 
-P6opaque.prototype.deserialize_repr_data = function(cursor) {
+P6opaque.prototype.deserialize_repr_data = function(cursor, STable) {
   this.deserialized = 1;
   var num_attributes = cursor.varint();
   this.flattened_stables = [];
@@ -85,11 +85,14 @@ P6opaque.prototype.deserialize_repr_data = function(cursor) {
       }
   }
 
+
+  var slots = [];
   var autovived = {};
   for (var i in this.name_to_index_mapping) {
     for (var j in this.name_to_index_mapping[i].slots) {
         var name = this.name_to_index_mapping[i].names[j];
         var slot = this.name_to_index_mapping[i].slots[j];
+        slots[slot] = name;
         if (this.auto_viv_values[slot]) {
             if (!this.auto_viv_values[slot].type_object_) {
                 console.log('autoviv', name, slot, this.auto_viv_values[slot]);
@@ -104,6 +107,14 @@ P6opaque.prototype.deserialize_repr_data = function(cursor) {
   
   if (Object.keys(autovived).length != 0) {
     this.autovived = autovived;
+  }
+
+  
+  this.positional_delegate_slot = cursor.varint();
+  this.associative_delegate_slot = cursor.varint();
+
+  if (this.positional_delegate_slot != -1) {
+    STable.setPositionalDelegate(slots[this.positional_delegate_slot]);
   }
 
   /* TODO make possitional and associative delegates work */

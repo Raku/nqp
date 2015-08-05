@@ -76,4 +76,16 @@ STable.prototype.setMethodCache = function(method_cache) {
   }
 };
 
+// TODO handle attrs properly
+// TODO delegation to something that is not an array
+STable.prototype.setPositionalDelegate = function(attr) {
+    this.obj_constructor.prototype.$$bindpos = function(index, value) {
+        return this[attr][index] = value;
+    };
+    this.obj_constructor.prototype.$$atpos = function(index) {
+        return this[attr][index];
+    };
+
+};
+
 module.exports.STable = STable;

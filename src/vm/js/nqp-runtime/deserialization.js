@@ -257,7 +257,7 @@ BinaryCursor.prototype.STable = function(STable) {
   STable.hll_owner = this.str();
 
   if (STable.REPR.deserialize_repr_data) {
-    STable.REPR.deserialize_repr_data(this.clone());
+    STable.REPR.deserialize_repr_data(this.clone(),STable);
   }
 
 
