@@ -660,6 +660,13 @@ class QAST::OperationsJS {
         add_simple_op('push' ~ $suffix, $type, [$T_OBJ, $type], sub ($array, $elem) {"$array.push($elem)"}, :sideffects);
     }
 
+    for ['_i', $T_INT, '_s', $T_STR] -> $suffix, $type {
+        add_simple_op('atpos' ~ $suffix, $type, [$T_OBJ, $T_INT], sub ($array, $index) {"$array[$index]"});
+    }
+
+
+    add_op('atpos', sub ($comp, $node, :$want) { $comp.atpos($node[0], $node[1], :$node) });
+
     add_simple_op('shift', $T_OBJ, [$T_OBJ], sub ($array) {"$array.shift()"}, :sideffects);
     add_simple_op('unshift', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($array, $elem) {"$array.unshift($elem)"}, :sideffects);
     add_simple_op('splice', $T_OBJ, [$T_OBJ, $T_OBJ, $T_INT, $T_INT], :sideffects);
@@ -2093,6 +2100,11 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         return 0;
     }
 
+    method atpos($array, $index, :$node) {
+        my $array_chunk := self.as_js($array, :want($T_OBJ));
+        my $index_chunk := self.as_js($index, :want($T_INT));
+        Chunk.new($T_OBJ, "nqp.op.atpos({$array_chunk.expr},{$index_chunk.expr})", [$array_chunk, $index_chunk], :node($node));
+    }
 
     method compile_var(QAST::Var $var) {
         if self.var_is_lexicalish($var) && self.is_dynamic_var($var) {
@@ -2132,9 +2144,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     self.bind_pos($var[0], $var[1], $bindval, :node($var));
                 }
             } else {
-                my $array := self.as_js($var[0], :want($T_OBJ));
-                my $index := self.as_js($var[1], :want($T_INT));
-                Chunk.new($T_OBJ, "{$array.expr}[{$index.expr}]", [$array, $index], :node($var));
+                self.atpos($var[0], $var[1], :node($var));
             }
         } elsif ($var.scope eq 'associative') {
             # TODO work on things other than nqp lists
@@ -2187,7 +2197,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my $index_chunk := self.as_js($index, :want($T_STR));
         my $value_chunk := self.as_js($value, :want($T_OBJ));
 
-        Chunk.new($T_OBJ, $value_chunk.expr, [$array_chunk, $index_chunk, $value_chunk, "({$array_chunk.expr}[{$index_chunk.expr}] = {$value_chunk.expr});\n"], :node($node));
+        Chunk.new($T_OBJ, $value_chunk.expr, [$array_chunk, $index_chunk, $value_chunk, "nqp.op.bindpos({$array_chunk.expr},{$index_chunk.expr},{$value_chunk.expr});\n"], :node($node));
     }
 
 

@@ -8,6 +8,18 @@ var reprs = require('./reprs.js');
 
 exports.CodeRef = CodeRef;
 
+op.atpos = function(array, index) {
+  return (array instanceof Array ? array[index] : array.$$atpos(index));
+};
+
+op.bindpos = function(array, index, value) {
+  if (array instanceof Array) {
+      return (array[index] = value);
+  } else {
+      return array.$$bindpos(index, value);
+  }
+};
+
 op.getcomp = function(lang) {
   if (lang == 'JavaScript') {
     return {
