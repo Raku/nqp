@@ -85,7 +85,16 @@ STable.prototype.setPositionalDelegate = function(attr) {
     this.obj_constructor.prototype.$$atpos = function(index) {
         return this[attr][index];
     };
+};
 
+// TODO handle attrs properly
+STable.prototype.setAssociativeDelegate = function(attr) {
+    this.obj_constructor.prototype.$$bindkey = function(key, value) {
+        return this[attr].$$bindkey(key, value);
+    };
+    this.obj_constructor.prototype.$$atkey = function(key) {
+        return this[attr].$$atkey(key);
+    };
 };
 
 module.exports.STable = STable;

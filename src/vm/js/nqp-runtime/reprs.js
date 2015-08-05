@@ -116,8 +116,10 @@ P6opaque.prototype.deserialize_repr_data = function(cursor, STable) {
   if (this.positional_delegate_slot != -1) {
     STable.setPositionalDelegate(slots[this.positional_delegate_slot]);
   }
+  if (this.associative_delegate_slot != -1) {
+    STable.setAssociativeDelegate(slots[this.associative_delegate_slot]);
+  }
 
-  /* TODO make possitional and associative delegates work */
   /* TODO make auto viv values work */
 };
 
