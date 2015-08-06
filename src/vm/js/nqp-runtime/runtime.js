@@ -22,6 +22,8 @@ load_ops(deserialization);
 
 exports.CodeRef = require('./code-ref.js');
 
+exports.CurLexpad = require('./curlexpad.js');
+
 var Hash = require('./hash.js');
 
 module.exports.knowhowattr = require('./bootstrap.js').knowhowattr;

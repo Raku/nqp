@@ -664,7 +664,23 @@ class QAST::OperationsJS {
         add_simple_op('atpos' ~ $suffix, $type, [$T_OBJ, $T_INT], sub ($array, $index) {"$array[$index]"});
     }
 
+    add_op('curlexpad', sub ($comp, $node, :$want) {
+            my @get;
+            my @set;
+            for $*BLOCK.variables -> $var {
+                @set.push(quote_string($var.name) ~ 
+                   ~ ': function(value) {' 
+                   ~ $comp.mangle_name($var.name) ~ ' = value' 
+                   ~ '}');
+                @get.push(quote_string($var.name) ~ 
+                   ~ ': function() {' 
+                   ~ 'return ' ~ $comp.mangle_name($var.name) ~ ''
+                   ~ '}');
+            }
+            Chunk.new($T_OBJ, "new nqp.CurLexpad(\{{nqp::join(',', @get)}\}, \{{nqp::join(',', @set)}\})", [], :$node);
+    });
 
+    add_op('atpos', sub ($comp, $node, :$want) { $comp.atpos($node[0], $node[1], :$node) });
     add_op('atpos', sub ($comp, $node, :$want) { $comp.atpos($node[0], $node[1], :$node) });
 
     add_simple_op('shift', $T_OBJ, [$T_OBJ], sub ($array) {"$array.shift()"}, :sideffects);

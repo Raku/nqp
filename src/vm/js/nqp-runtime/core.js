@@ -441,3 +441,7 @@ op.findnotcclass = function(cclass, target, offset, count) {
 };
 
 
+op.curlexpad = function(get, set) {
+    return new CurLexpad(get, set);
+};
+
