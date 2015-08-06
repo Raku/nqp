@@ -156,6 +156,11 @@ P6opaque.prototype.change_type = function(obj, new_type) {
   obj.__proto__ = new_type._STable.obj_constructor.prototype;
 };
 
+
+P6opaque.prototype.compose = function(obj, repr_info) {
+    // TODO - fill it in
+};
+
 P6opaque.name = 'P6opaque';
 
 module.exports.P6opaque = P6opaque;

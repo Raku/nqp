@@ -1060,6 +1060,7 @@ class QAST::OperationsJS {
     add_simple_op('setwho', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($obj, $who) {"($obj._STable.WHO = $who, $obj)"}, :sideffects);
 
     add_simple_op('rebless', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
+    add_simple_op('composetype', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
 
     add_simple_op('where', $T_INT, [$T_OBJ]);
 

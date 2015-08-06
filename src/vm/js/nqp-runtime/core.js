@@ -334,6 +334,10 @@ op.rebless = function(obj, new_type) {
   return obj;
 };
 
+op.composetype = function(obj, reprinfo) {
+  obj._STable.REPR.compose(obj._STable, reprinfo);
+};
+
 op.clone = function(obj) {
   if (obj.$$clone) {
     return obj.$$clone(); 
