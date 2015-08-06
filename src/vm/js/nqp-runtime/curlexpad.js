@@ -4,11 +4,11 @@ function CurLexpad(get, set) {
 }
 
 CurLexpad.prototype.$$atkey = function(key) {
-    return this.get(key);
+    return this.get[key]();
 };
 
 CurLexpad.prototype.$$bindkey = function(key, value) {
-    this.set(key, value);
+    this.set[key](value);
     return value;
 };
 
