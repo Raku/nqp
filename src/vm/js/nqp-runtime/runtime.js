@@ -16,6 +16,9 @@ exports.named = core.named;
 var io = require('./io.js');
 load_ops(io);
 
+var nfa = require('./nfa.js');
+load_ops(nfa);
+
 var deserialization = require('./deserialization.js');
 exports.wval = deserialization.wval;
 load_ops(deserialization);
