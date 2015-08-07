@@ -29,7 +29,9 @@ exports.CurLexpad = require('./curlexpad.js');
 
 var Hash = require('./hash.js');
 
-module.exports.knowhowattr = require('./bootstrap.js').knowhowattr;
+var bootstrap = require('./bootstrap.js');
+module.exports.knowhowattr = bootstrap.knowhowattr;
+module.exports.knowhow = bootstrap.knowhow;
 
 var saveCtxAs;
 var savedCtxs = {};

@@ -81,13 +81,16 @@ add_knowhow_how_method("methods", function() {
 });
 
 
+module.exports.knowhow = KnowHOW;
 
 
 /* KnowHOW.HOW */
 //add_to_sc_with_st(STABLE(tc->instance->KnowHOW)->HOW);
 
 var KnowHOWAttribute = create_KnowHOWAttribute();
+
 module.exports.knowhowattr = KnowHOWAttribute;
+
 /* KnowHOWAttribute */
 add_to_sc_with_st(KnowHOWAttribute);
 
