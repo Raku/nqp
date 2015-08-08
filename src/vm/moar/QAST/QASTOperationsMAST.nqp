@@ -690,7 +690,7 @@ sub needs_cond_passed($n) {
     nqp::istype($n, QAST::Block) && $n.arity > 0 &&
         ($n.blocktype eq 'immediate' || $n.blocktype eq 'immediate_static')
 }
-for <if unless> -> $op_name {
+for <if unless with without> -> $op_name {
     QAST::MASTOperations.add_core_op($op_name, -> $qastcomp, $op {
         # Check operand count.
         my $operands := +$op.list;
@@ -707,14 +707,22 @@ for <if unless> -> $op_name {
         my $is_void := nqp::defined($*WANT) && $*WANT == $MVM_reg_void;
         my $wanted  := $is_void ?? $MVM_reg_void !! NQPMu;
         my @comp_ops;
-        my $cond_temp_lbl := needs_cond_passed($op[1]) || needs_cond_passed($op[2])
+        my $is_withy := $op_name eq 'with' || $op_name eq 'without';
+        my $cond_temp_lbl := $is_withy || needs_cond_passed($op[1]) || needs_cond_passed($op[2])
             ?? $qastcomp.unique('__im_cond_')
             !! '';
         if $cond_temp_lbl {
-            @comp_ops[0] := $qastcomp.as_mast(QAST::Op.new(
-                :op('bind'),
-                QAST::Var.new( :name($cond_temp_lbl), :scope('local'), :decl('var') ),
-                $op[0]));
+            if $is_withy {
+                @comp_ops[0] := $qastcomp.as_mast(QAST::Op.new(
+                    :op('bind'),
+                    QAST::Var.new( :name($cond_temp_lbl), :scope('local'), :decl('var') ),
+                    $op[0]), :want($MVM_reg_obj));
+            } else {
+                @comp_ops[0] := $qastcomp.as_mast(QAST::Op.new(
+                    :op('bind'),
+                    QAST::Var.new( :name($cond_temp_lbl), :scope('local'), :decl('var') ),
+                    $op[0]));
+            }
         } else {
             @comp_ops[0] := $qastcomp.as_mast($op[0]);
         }
@@ -781,8 +789,15 @@ for <if unless> -> $op_name {
         if @comp_ops[0].result_kind == $MVM_reg_obj {
             my $decont_reg := $regalloc.fresh_register($MVM_reg_obj);
             push_op(@ins, 'decont', $decont_reg, @comp_ops[0].result_reg);
+            if $is_withy {
+                my $method_reg := $regalloc.fresh_register($MVM_reg_obj);
+                push_op(@ins, 'findmeth', $method_reg, $decont_reg, MAST::SVal.new( :value('defined')));
+                nqp::push(@ins,
+                   MAST::Call.new( :target($method_reg), :result($decont_reg), :flags([$Arg::obj]), $decont_reg));
+		$regalloc.release_register($method_reg, $MVM_reg_obj);
+	    }
             push_op(@ins,
-                resolve_condition_op(@comp_ops[0].result_kind, $op_name eq 'if'),
+                resolve_condition_op(@comp_ops[0].result_kind, $op_name eq 'if' || $op_name eq 'with'),
                 $decont_reg,
                 ($operands == 3 ?? $else_lbl !! $end_lbl)
             );
