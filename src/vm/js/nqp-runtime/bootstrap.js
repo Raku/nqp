@@ -80,6 +80,31 @@ add_knowhow_how_method("methods", function() {
   return this.__methods;
 });
 
+add_knowhow_how_method("new_type", function(ctx, _NAMED) {
+  /* We first create a new HOW instance. */
+  var HOW = this._STable.REPR.allocate(this._STable);
+
+  /* See if we have a representation name; if not default to P6opaque. */
+  var repr_name = _NAMED['repr'] || 'P6opaque';
+
+  /* Create a new type object of the desired REPR. (Note that we can't
+     * default to KnowHOWREPR here, since it doesn't know how to actually
+     * store attributes, it's just for bootstrapping knowhow's. */
+  var type_object = (new reprs[repr_name]).type_object_for(HOW);
+
+  /* See if we were given a name; put it into the meta-object if so. */
+  if (_NAMED['name']) {
+    HOW.__name = _NAMED['name'];
+  } else {
+    HOW.__name = null;
+  }
+
+  /* Set .WHO to an empty hash. */
+  type_object._STable.WHO = new Hash();
+
+  return type_object;
+});
+
 
 module.exports.knowhow = KnowHOW;
 
