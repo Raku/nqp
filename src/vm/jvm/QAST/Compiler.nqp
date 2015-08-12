@@ -724,7 +724,8 @@ sub boolify_instructions($il, $cond_type) {
         $il.append($LCMP);
     }
 }
-for <if unless> -> $op_name {
+for <if unless with without> -> $op_name {
+    my $is_withy := $op_name eq 'with' || $op_name eq 'without';
     QAST::OperationsJAST.add_core_op($op_name, -> $qastcomp, $op {
         # Check operand count.
         my $operands := +$op.list;
@@ -790,9 +791,18 @@ for <if unless> -> $op_name {
         }
         
         # Emit test.
-        boolify_instructions($il, $cond.type);
+        if $is_withy {
+            $il.append($ALOAD_1);
+            $il.append(JAST::Instruction.new(:op('invokestatic'),
+                $TYPE_OPS, 'isconcrete', 'Long', $TYPE_SMO, $TYPE_TC));
+            $il.append($IVAL_ZERO);
+            $il.append($LCMP);
+        }
+        else {
+            boolify_instructions($il, $cond.type);
+        }
         $il.append(JAST::Instruction.new($else_lbl,
-            :op($op_name eq 'if' ?? 'ifeq' !! 'ifne')));
+            :op($op_name eq 'if' || $op_name eq 'with' ?? 'ifeq' !! 'ifne')));
         
         # Compile the "then".
         my $then;
