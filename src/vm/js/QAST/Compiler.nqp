@@ -1102,6 +1102,10 @@ class QAST::OperationsJS {
     add_simple_op('getcodeobj', $T_OBJ, [$T_OBJ]);
     add_simple_op('setcodeobj', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
 
+    add_simple_op('box_i', $T_OBJ, [$T_INT, $T_OBJ]);
+    add_simple_op('fromstr_I', $T_OBJ, [$T_STR, $T_OBJ]);
+    add_simple_op('tostr_I', $T_STR, [$T_OBJ]);
+
     add_simple_op('curcode', $T_OBJ, []);
     add_simple_op('callercode', $T_OBJ, []);
 

@@ -16,6 +16,9 @@ exports.named = core.named;
 var io = require('./io.js');
 load_ops(io);
 
+var bignum = require('./bignum.js');
+load_ops(bignum);
+
 var nfa = require('./nfa.js');
 load_ops(nfa);
 

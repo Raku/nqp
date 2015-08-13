@@ -1,4 +1,5 @@
 var sixmodel = require('./sixmodel.js');
+var Hash = require('./hash.js');
 
 function basic_type_object_for(HOW) {
   var st = new sixmodel.STable(this, HOW);
@@ -12,6 +13,10 @@ function basic_type_object_for(HOW) {
 function basic_allocate(STable) {
   return new STable.obj_constructor()
 }
+
+function noop_compose(obj, repr_info) {
+};
+
 
 function P6opaque() {
 }
@@ -175,7 +180,15 @@ KnowHOWREPR.prototype.deserialize_finish = function(object, data) {
 };
 
 KnowHOWREPR.prototype.type_object_for = basic_type_object_for;
-KnowHOWREPR.prototype.allocate = basic_allocate;
+
+KnowHOWREPR.prototype.allocate = function(STable) {
+  var obj = new STable.obj_constructor();
+  obj.__methods = new Hash();
+  obj.__attributes = [];
+  obj.__name = '<anon>';
+  return obj;
+};
+
 KnowHOWREPR.name = 'KnowHOWREPR';
 module.exports.KnowHOWREPR = KnowHOWREPR;
 
@@ -255,3 +268,22 @@ VMIter.prototype.deserialize_finish = function(object, data) {
 };
 VMIter.prototype.type_object_for = basic_type_object_for;
 exports.VMIter = VMIter;
+
+var bigint = require('bigint');
+
+function P6bigint() {
+}
+
+P6bigint.prototype.basic_type_object_for = basic_type_object_for;
+
+P6bigint.prototype.type_object_for = function(HOW) {
+    var type_object = this.basic_type_object_for(HOW);
+    this._STable.obj_constructor.prototype.$$set_int = function(value) {
+        this.value = bigint(value);
+    };
+    return type_object;
+};
+
+P6bigint.prototype.allocate = basic_allocate;
+P6bigint.prototype.compose = noop_compose;
+exports.P6bigint = P6bigint;

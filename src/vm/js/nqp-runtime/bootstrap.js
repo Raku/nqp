@@ -1,5 +1,7 @@
 var SerializationContext = require('./serialization-context.js');
 var reprs = require('./reprs.js');
+
+var Hash = require('./hash.js');
 var STable = require('./sixmodel.js').STable;
 
 var repr = new reprs.KnowHOWREPR();
@@ -103,6 +105,56 @@ add_knowhow_how_method("new_type", function(ctx, _NAMED) {
   type_object._STable.WHO = new Hash();
 
   return type_object;
+});
+
+add_knowhow_how_method("compose", function(ctx, _NAMED, type_object) {
+  /* Set method cache */
+  type_object._STable.setMethodCache(this.__methods);
+
+  /* Set type check cache. */
+
+  type_object._STable.type_check_cache = [type_object];
+
+  /* Use any attribute information to produce attribute protocol
+     * data. The protocol consists of an array... */
+  var repr_info = [];
+
+  /* ...which contains an array per MRO entry... */
+  var type_info = [];
+  repr_info.push(type_info);
+
+  /* ...which in turn contains this type... */
+  type_info.push(type_object);
+
+  /* ...then an array of hashes per attribute... */
+  var attr_info_list = [];
+  type_info.push(attr_info_list);
+
+  /* ...then an array of hashes per attribute... */
+  for (var i = 0; i < this.__attributes.length; i++) {
+    var attr_info = new Hash();
+    var attr = this.__attributes[i];
+    attr_info.name = attr.__name;
+    attr_info.type = attr.__type;
+    if (attr.__box_target) {
+      attr_info.box_target = attr.__box_target;
+    }
+    attr_info_list.push(attr_info);
+  }
+
+  /* ...followed by a list of parents (none). */
+  var parent_info = [];
+  type_info.push(parent_info);
+
+  /* All of this goes in a hash. */
+  var repr_info_hash = new Hash();
+  repr_info_hash.attribute = repr_info;
+
+
+  /* Compose the representation using it. */
+  type_object._STable.REPR.compose(type_object._STable, repr_info_hash);
+
+  return type_info;
 });
 
 
