@@ -1103,6 +1103,26 @@ class QAST::OperationsJS {
     add_simple_op('setcodeobj', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
 
     add_simple_op('box_i', $T_OBJ, [$T_INT, $T_OBJ]);
+    add_simple_op('unbox_i', $T_INT, [$T_OBJ]);
+
+    add_simple_op('iseq_I', $T_INT, [$T_OBJ, $T_OBJ]);
+
+    # bigint arithmetic operators operators
+
+    add_simple_op('mul_I', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ]);
+    add_simple_op('add_I', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ]);
+    add_simple_op('sub_I', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ]);
+    add_simple_op('div_I', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ]);
+
+    # bigint binary operators
+
+    add_simple_op('bitor_I', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ]);
+    add_simple_op('bitxor_I', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ]);
+    add_simple_op('bitand_I', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ]);
+    add_simple_op('bitneg_I', $T_OBJ, [$T_OBJ, $T_OBJ]);
+    add_simple_op('bitshiftl_I', $T_OBJ, [$T_OBJ, $T_INT, $T_OBJ]);
+    add_simple_op('bitshiftr_I', $T_OBJ, [$T_OBJ, $T_INT, $T_OBJ]);
+
     add_simple_op('fromstr_I', $T_OBJ, [$T_STR, $T_OBJ]);
     add_simple_op('tostr_I', $T_STR, [$T_OBJ]);
 

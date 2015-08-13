@@ -278,9 +278,14 @@ P6bigint.prototype.basic_type_object_for = basic_type_object_for;
 
 P6bigint.prototype.type_object_for = function(HOW) {
     var type_object = this.basic_type_object_for(HOW);
+
     this._STable.obj_constructor.prototype.$$set_int = function(value) {
         this.value = bigint(value);
     };
+    this._STable.obj_constructor.prototype.$$get_int = function(value) {
+        return this.value.toNumber();
+    };
+
     return type_object;
 };
 
