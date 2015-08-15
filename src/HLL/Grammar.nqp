@@ -52,13 +52,13 @@ grammar HLL::Grammar {
     token decint  { [\d+]+ % '_' }
     token decints { [<.ws><decint><.ws>]+ % ',' }
 
-    token hexint  { [<[ 0..9 a..f A..F ]>+]+ % '_' }
+    token hexint  { [[\d|<[ a..f A..F ａ..ｆ Ａ..Ｆ ]>]+]+ % '_' }
     token hexints { [<.ws><hexint><.ws>]+ % ',' }
 
-    token octint  { [<[ 0..7 ]>+]+ % '_' }
+    token octint  { [\d+]+ % '_' }
     token octints { [<.ws><octint><.ws>]+ % ',' }
 
-    token binint  { [<[ 0..1 ]>+]+ % '_' }
+    token binint  { [\d+]+ % '_' }
     token binints { [<.ws><binint><.ws>]+ % ',' }
 
     token integer {
