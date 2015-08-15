@@ -75,7 +75,7 @@ op.expmod_I = function(a, b, c, type) {
 };
 op.div_In = function(a, b) {
   var digits = 1e+20;
-  return getBI(a).mul(bignum(digits)).div(getBI(b)).toNumber()/digits;
+  return getBI(a).mul(bigint(digits)).div(getBI(b)).toNumber()/digits;
 };
 op.rand_I = function(max, type) {
   return makeBI(type, getBI(max).rand());
@@ -118,4 +118,21 @@ op.lcm_I = function(n, m, type) {
 };
 op.gcd_I = function(a, b, type) {
   return makeBI(type, getBI(a).gcd(getBI(b)));
+};
+
+op.tonum_I = function(n) {
+  return getBI(n).toNumber();
+};
+
+op.fromnum_I = function(num, type) {
+  // node-bigint bug workaround, when a negative number is too big it gets turned into 0
+  if (num < 0) {
+    return makeBI(type,bigint(-num).neg());
+  } else {
+    return makeBI(type,bigint(num));
+  }
+};
+
+op.bool_I = function(n) {
+  return intish_bool(getBI(n).toNumber());
 };

@@ -1113,6 +1113,7 @@ class QAST::OperationsJS {
     add_simple_op('add_I', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ]);
     add_simple_op('sub_I', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ]);
     add_simple_op('div_I', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ]);
+    add_simple_op('pow_I', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ]);
 
     # bigint binary operators
 
@@ -1125,6 +1126,26 @@ class QAST::OperationsJS {
 
     add_simple_op('fromstr_I', $T_OBJ, [$T_STR, $T_OBJ]);
     add_simple_op('tostr_I', $T_STR, [$T_OBJ]);
+
+    add_simple_op('base_I', $T_STR, [$T_OBJ, $T_INT]);
+
+
+    add_simple_op('div_In', $T_NUM, [$T_OBJ, $T_OBJ]);
+    add_simple_op('isle_I', $T_INT, [$T_OBJ, $T_OBJ]);
+    add_simple_op('islt_I', $T_INT, [$T_OBJ, $T_OBJ]);
+    add_simple_op('isgt_I', $T_INT, [$T_OBJ, $T_OBJ]);
+
+    add_simple_op('gcd_I', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ]);
+    add_simple_op('lcm_I', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ]);
+    add_simple_op('isprime_I', $T_INT, [$T_OBJ, $T_INT]);
+
+    add_simple_op('rand_I', $T_OBJ, [$T_OBJ, $T_OBJ]);
+    add_simple_op('expmod_I', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ]);
+    add_simple_op('bool_I', $T_INT, [$T_OBJ]);
+
+    add_simple_op('tonum_I', $T_NUM, [$T_OBJ]);
+    add_simple_op('fromnum_I', $T_OBJ, [$T_NUM, $T_OBJ]);
+
 
     add_simple_op('curcode', $T_OBJ, []);
     add_simple_op('callercode', $T_OBJ, []);

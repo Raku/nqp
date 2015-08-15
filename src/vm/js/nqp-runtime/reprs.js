@@ -204,7 +204,6 @@ P6opaque.prototype.compose = function(STable, repr_info_hash) {
 
         /* old boxing method generation */
         if (attr.box_target) {
-          console.log("boxing stuff up", attr.type._STable.REPR.constructor.name);
           attr.type._STable.REPR.generateBoxingMethods(this, attr);
         }
 
