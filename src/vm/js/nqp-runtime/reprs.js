@@ -6,6 +6,7 @@ function basic_type_object_for(HOW) {
   this._STable = st;
   var obj = new st.obj_constructor();
 
+  this._STable.WHAT = obj;
   obj.type_object_ = 1;
   return obj;
 }
