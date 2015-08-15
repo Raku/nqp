@@ -162,8 +162,129 @@ P6opaque.prototype.change_type = function(obj, new_type) {
 };
 
 
-P6opaque.prototype.compose = function(obj, repr_info) {
-    // TODO - fill it in
+P6opaque.prototype.compose = function(STable, repr_info_hash) {
+  // TODO 
+
+  /* Get attribute part of the protocol from the hash. */
+  var repr_info = repr_info_hash.attribute;
+
+  /* Go through MRO and find all classes with attributes and build up
+   * mapping info hashes. Note, reverse order so indexes will match
+   * those in parent types. */
+
+  this.unbox_int_slot = -1;
+  this.unbox_num_slot = -1;
+  this.unbox_str_slot = -1;
+
+  this.posDelegateSlot = -1;
+  this.assocDelegateSlot = -1;
+
+  var curAttr = 0;
+  /*
+  List<SixModelObject> autoVivs = new ArrayList<SixModelObject>();
+  List<AttrInfo> attrInfoList = new ArrayList<AttrInfo>();
+  long mroLength = repr_info.elems(tc);
+  */
+  this.name_to_index_mapping = [];
+  this.flattened_stables = [];
+  var mi = false;
+  for (var i = repr_info.length - 1; i >= 0; i--) {
+    var entry = repr_info[i];
+    var type = entry[0];
+    var attrs = entry[1];
+    var parents = entry[2];
+
+    /* If it has any attributes, give them each indexes and put them
+       * in the list to add to the layout. */
+    var numAttrs = attrs.length;
+    if (numAttrs > 0) {
+      var indexes = new Hash();
+      for (var j = 0; j < numAttrs; j++) {
+        var attr = attrs[j];
+
+        /* old boxing method generation */
+        if (attr.box_target) {
+          console.log("boxing stuff up", attr.type._STable.REPR.constructor.name);
+          attr.type._STable.REPR.generateBoxingMethods(this, attr);
+        }
+
+        /* TODO */
+        //              if (attrType == Null)
+        //                  attrType = tc.gc.KnowHOW;
+        indexes[attr.name] = curAttr;
+
+        /*              AttrInfo info = new AttrInfo();
+
+              info.st = attrType.st;*/
+
+        this.flattened_stables.push(null);
+
+        if (attr.positional_delegate) {
+          this.posDelegateSlot = curAttr;
+          // TODO
+          //this._STable.delegatePositional(attr.name);
+        }
+        if (attr.associative_delegate) {
+          this.assocDelegateSlot = curAttr;
+          // TODO
+          //this._STable.delegatePositional(attr.name);
+        }
+        /* TODO think if we want to flatten some things */
+        /*if (attrType.st.REPR.get_storage_spec(tc, attrType.st).inlineable == StorageSpec.INLINED)
+                  flattenedSTables.add(attrType.st);
+              else
+                  flattenedSTables.add(null);*/
+
+        /* info.boxTarget = attrHash.exists_key(tc, "box_target") != 0;
+              SixModelObject autoViv = attrHash.at_key_boxed(tc, "auto_viv_container");
+              autoVivs.add(autoViv);
+              if (autoViv != null)
+                  info.hasAutoVivContainer = true;
+              info.posDelegate = attrHash.exists_key(tc, "positional_delegate") != 0;
+              info.assDelegate = attrHash.exists_key(tc, "associative_delegate") != 0;
+              attrInfoList.add(info);*/
+
+        /* TODO
+              if (info.boxTarget) {
+                  switch (info.st.REPR.get_storage_spec(tc, info.st).boxed_primitive) {
+                  case StorageSpec.BP_INT:
+                      ((P6OpaqueREPRData)st.REPRData).unboxIntSlot = curAttr;
+                      break;
+                  case StorageSpec.BP_NUM:
+                      ((P6OpaqueREPRData)st.REPRData).unboxNumSlot = curAttr;
+                      break;
+                  case StorageSpec.BP_STR:
+                      ((P6OpaqueREPRData)st.REPRData).unboxStrSlot = curAttr;
+                      break;
+                  }
+              }*/
+        /*if (info.posDelegate)
+                  ((P6OpaqueREPRData)st.REPRData).posDelSlot = curAttr;
+              if (info.assDelegate)
+                  ((P6OpaqueREPRData)st.REPRData).assDelSlot = curAttr;
+
+              */
+        curAttr++;
+      }
+      /*classHandles.add(type);
+          attrIndexes.add(indexes);*/
+      this.name_to_index_mapping.push({class_key: type, name_map: indexes});
+    }
+
+    /* Multiple parents means it's multiple inheritance. */
+    if (parents.length > 1) {
+      mi = true;
+    }
+  }
+
+  /* Populate some REPR data. */
+  /*((P6OpaqueREPRData)st.REPRData).classHandles = classHandles.toArray(new SixModelObject[0]);
+  ((P6OpaqueREPRData)st.REPRData).nameToHintMap = attrIndexes.toArray(new HashMap[0]);
+  ((P6OpaqueREPRData)st.REPRData).autoVivContainers = autoVivs.toArray(new SixModelObject[0]);
+  ((P6OpaqueREPRData)st.REPRData).flattenedSTables = flattenedSTables.toArray(new STable[0]);
+  ((P6OpaqueREPRData)st.REPRData).mi = mi;
+  */
+  this.mi = mi ? 1 : 0;
 };
 
 P6opaque.name = 'P6opaque';
@@ -279,14 +400,33 @@ P6bigint.prototype.basic_type_object_for = basic_type_object_for;
 P6bigint.prototype.type_object_for = function(HOW) {
     var type_object = this.basic_type_object_for(HOW);
 
-    this._STable.obj_constructor.prototype.$$set_int = function(value) {
+    this._STable.addInternalMethod('$$set_int', function(value) {
         this.value = bigint(value);
-    };
-    this._STable.obj_constructor.prototype.$$get_int = function(value) {
+    });
+
+    this._STable.addInternalMethod('$$get_int', function() {
         return this.value.toNumber();
-    };
+    });
 
     return type_object;
+};
+
+P6bigint.prototype.generateBoxingMethods = function(repr, attr) {
+  repr._STable.addInternalMethod('$$set_int', function(value) {
+      this[attr.name] = bigint(value);
+  });
+
+  repr._STable.addInternalMethod('$$get_int', function() {
+      return this[attr.name].toNumber();
+  });
+
+  repr._STable.addInternalMethod('$$get_bignum', function() {
+      return this[attr.name];
+  });
+
+  repr._STable.addInternalMethod('$$set_bignum', function(num) {
+      this[attr.name] = num;
+  });
 };
 
 P6bigint.prototype.allocate = basic_allocate;

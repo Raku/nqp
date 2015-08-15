@@ -25,15 +25,17 @@ function makeBI(type, num) {
   if (type._STable.REPR instanceof reprs.P6bigint) {
     instance.value = num;
   } else {
-    throw "NYI";
-    //instance._STable.set_bignum(instance,num)
+    instance.$$set_bignum(num);
   }
   return instance;
 }
 
 function getBI(obj) {
-  // TODO
-  return obj.value;
+  if (obj._STable.REPR instanceof reprs.P6bigint) {
+    return obj.value;
+  } else {
+    return obj.$$get_bignum();
+  }
 }
 
 op.fromstr_I = function(str, type) {

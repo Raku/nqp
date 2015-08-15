@@ -97,4 +97,8 @@ STable.prototype.setAssociativeDelegate = function(attr) {
     };
 };
 
+STable.prototype.addInternalMethod = function(name, func) {
+   this.obj_constructor.prototype[name] = func;
+};
+
 module.exports.STable = STable;
