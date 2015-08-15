@@ -407,6 +407,14 @@ P6bigint.prototype.type_object_for = function(HOW) {
         return this.value.toNumber();
     });
 
+    this._STable.addInternalMethod('$$set_bignum', function(value) {
+        this.value = value;
+    });
+
+    this._STable.addInternalMethod('$$get_bignum', function() {
+        return this.value;
+    });
+
     return type_object;
 };
 

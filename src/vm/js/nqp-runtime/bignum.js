@@ -22,20 +22,12 @@ function intish_bool(b) {
 
 function makeBI(type, num) {
   var instance = type._STable.REPR.allocate(type._STable);
-  if (type._STable.REPR instanceof reprs.P6bigint) {
-    instance.value = num;
-  } else {
-    instance.$$set_bignum(num);
-  }
+  instance.$$set_bignum(num);
   return instance;
 }
 
 function getBI(obj) {
-  if (obj._STable.REPR instanceof reprs.P6bigint) {
-    return obj.value;
-  } else {
-    return obj.$$get_bignum();
-  }
+  return obj.$$get_bignum();
 }
 
 op.fromstr_I = function(str, type) {
