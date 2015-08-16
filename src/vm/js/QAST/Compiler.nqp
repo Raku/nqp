@@ -1079,6 +1079,8 @@ class QAST::OperationsJS {
         } , :sideffects);
     }
 
+    add_simple_op('getlexdyn', $T_OBJ, [$T_STR], sub ($name) {"{$*BLOCK.ctx}.lookup_dynamic_from_caller($name)"});
+
     add_simple_op('captureposelems', $T_INT, [$T_OBJ]);
     add_simple_op('captureposarg', $T_OBJ, [$T_OBJ, $T_INT]);
     add_simple_op('invokewithcapture', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($invokee, $capture) {

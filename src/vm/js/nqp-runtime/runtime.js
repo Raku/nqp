@@ -144,6 +144,19 @@ Ctx.prototype.lookup_dynamic = function(name) {
      nqp code usually fallbacks to looking up of global */
 };
 
+Ctx.prototype.lookup_dynamic_from_caller = function(name) {
+  var ctx = this.caller;
+  while (ctx) {
+    if (ctx.hasOwnProperty(name)) {
+      return ctx[name];
+    }
+    ctx = ctx.caller;
+  }
+  return null;
+  /* Looking up of a contextual is allowed to fail,
+     nqp code usually fallbacks to looking up of global */
+};
+
 Ctx.prototype.lookup = function(name, value) {
   var ctx = this;
   while (ctx) {
