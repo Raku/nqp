@@ -1297,8 +1297,7 @@ class RegexCompiler {
         Chunk.new($T_VOID, "", [
             "{$!cursor}['!cursor_pass']({$*BLOCK.ctx},",
             "\{backtrack: {$node.backtrack ne 'r'}\}, {$!pos}",
-            (nqp::defined($name) ?? $name !! ''),
-            (nqp::defined($name) ?? ',' !! ''),
+            (nqp::defined($name) ?? ',' ~ $name !! ''),
             ");\n",
             "break {$!js_loop_label};\n"
         ]);
