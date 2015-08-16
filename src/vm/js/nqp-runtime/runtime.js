@@ -92,6 +92,8 @@ exports.to_num = function(arg, ctx) {
   } else if (arg.type_object_) {
     // TODO - is that a correct way to do that?
     return 0;
+  } else if (arg.Num) {
+    return arg.Num(ctx);
   } else {
     console.log(arg);
     throw "Can't convert to num";
@@ -101,6 +103,8 @@ exports.to_num = function(arg, ctx) {
 exports.to_int = function(arg, ctx) {
   if (typeof arg == 'number') {
     return arg | 0;
+  } else if (arg.Int) {
+    return arg.Int(ctx);
   } else {
     throw "Can't convert to int";
   }
