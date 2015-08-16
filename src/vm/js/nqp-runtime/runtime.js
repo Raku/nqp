@@ -73,6 +73,8 @@ exports.to_str = function(arg, ctx) {
     return arg;
   } else if (arg !== undefined && arg !== null && arg.type_object_) {
     return "";
+  } else if (arg.Str) {
+    return arg.Str(ctx);
   } else {
     console.log(arg);
     throw "Can't convert to str";
