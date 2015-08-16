@@ -725,14 +725,6 @@ class NQPMatch is NQPCapture {
     method Int() { +self.Str() }
     method Num() { +self.Str() }
 #?endif
-
-# HACK
-#?if js
-    method to_s() { self.Str() }
-    method to_i() { self.Int() }
-    method to_n() { self.Num() }
-#?endif
-
     method Bool() { $!to >= $!from }
     method chars() { $!to >= $!from ?? $!to - $!from !! 0 }
 
