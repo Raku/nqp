@@ -1286,6 +1286,7 @@ class RegexCompiler {
         }
     }
 
+
     method pass($node) {
         my $name;
 
@@ -1303,6 +1304,91 @@ class RegexCompiler {
             ");\n",
             "break {$!js_loop_label};\n"
         ]);
+    }
+
+
+    method subrule($node) {
+
+            my $captured := 0;
+
+            my sub call($invocant, $method, *@args) {
+                nqp::unshift(@args, $*BLOCK.ctx);
+                nqp::unshift(@args, 'nqp.named([])');
+                $invocant ~ "[" ~ quote_string($method) ~ "](" ~ nqp::join(",", @args) ~ ")";
+            }
+
+            my $call;
+            if nqp::istype($node[0][0], QAST::Block) {
+                $call := $!compiler.NYI("special subrule call");
+#                #TODO think if arguments are possible, etc.
+#                #$call := self.as_js($node[0][0])~".apply(cursor,[{self.ctx},nqp.empty_named(),cursor])";
+            }
+            else {
+                # TODO arguments
+                my $args := nqp::clone($node[0].list);
+                my $method := $args.shift;
+
+                # TODO .method name when it's valid 
+                $call := Chunk.new($T_OBJ, $!cursor ~ '[' ~ quote_string($node.name) ~ "]()", []);
+            }
+
+            my $testop := $node.negate ?? '>=' !! '<';
+
+            my $subcur := $*BLOCK.add_tmp;
+
+            my $capture_code := '';
+
+            if $node.subtype ne 'zerowidth' {
+                my $pass_label := self.new_label();
+                if $node.backtrack eq 'r' {
+                    unless $node.subtype eq 'method' {
+                        $capture_code := self.mark($pass_label,-1,0) ~ self.case($pass_label);
+                    }
+                }
+                else {
+
+
+                    my $back_label := new_label();
+
+                    $capture_code := $capture_code
+                        ~ self.goto($pass_label)
+                        ~ self.case($back_label)
+                        ~ "$subcur =" ~ call($!subcur, "!cursor_next") ~ ";\n"
+                        ~ "if($subcur['$!pos'] $testop 0) \{{self.fail}\};\n"
+                        ~ self.case($pass_label);
+
+                    if $node.subtype eq 'capture' {
+                        $capture_code := $capture_code
+                            ~ "$!cstack = " 
+                            ~ call($!cursor, "!cursor_capture", $subcur, quote_string($node.name)) ~ ";\n";
+                        $captured := 1;
+                    }
+                    else {
+                        $capture_code := $capture_code
+                            ~ "$!cstack = "
+                            ~ call($!cursor, "!cursor_push_cstack", $subcur) ~ ";\n" ~
+                            ~  "$!bstack.push($back_label, 0, $!pos, $!cstack.length);\n";
+                    }
+                    
+               }
+            }
+
+            if !$captured && $node.subtype eq 'capture' {
+                $capture_code := $capture_code
+                    ~ "$!cstack = " ~
+                    call($!cursor, "!cursor_capture", $subcur,  quote_string($node.name)) ~ ";\n"
+            }
+
+            # TODO proper $!pos access
+            Chunk.new($T_VOID, "", [
+                "$!cursor['\$!pos\'] = $!pos;\n",
+                $call,
+                "$subcur = {$call.expr};\n",
+                "if ($subcur['\$!pos\'] $testop 0) \{{self.fail}\}\n",
+                $capture_code,
+
+                ($node.subtype eq 'zerowidth' ?? '' !! "$!pos = $subcur['\$!pos\'];\n")
+            ]);
     }
 
     method BUILD(:$compiler) {
