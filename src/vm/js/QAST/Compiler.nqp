@@ -200,6 +200,61 @@ role DWIMYNameMangling {
     }
 }
 
+
+my %const_map := nqp::hash(
+    'CCLASS_ANY',           65535,
+    'CCLASS_UPPERCASE',     1,
+    'CCLASS_LOWERCASE',     2,
+    'CCLASS_ALPHABETIC',    4,
+    'CCLASS_NUMERIC',       8,
+    'CCLASS_HEXADECIMAL',   16,
+    'CCLASS_WHITESPACE',    32,
+    'CCLASS_PRINTING',      64,
+    'CCLASS_BLANK',         256,
+    'CCLASS_CONTROL',       512,
+    'CCLASS_PUNCTUATION',   1024,
+    'CCLASS_ALPHANUMERIC',  2048,
+    'CCLASS_NEWLINE',       4096,
+    'CCLASS_WORD',          8192,
+    
+    'HLL_ROLE_NONE',        0,
+    'HLL_ROLE_INT',         1,
+    'HLL_ROLE_NUM',         2,
+    'HLL_ROLE_STR',         3,
+    'HLL_ROLE_ARRAY',       4,
+    'HLL_ROLE_HASH',        5,
+    'HLL_ROLE_CODE',        6,
+    
+    'CONTROL_TAKE',         32,
+    'CONTROL_LAST',         16,
+    'CONTROL_NEXT',         4,
+    'CONTROL_REDO',         8,
+    'CONTROL_SUCCEED',      128,
+    'CONTROL_PROCEED',      256,
+    'CONTROL_WARN',         64,
+    
+    'STAT_EXISTS',             0,
+    'STAT_FILESIZE',           1,
+    'STAT_ISDIR',              2,
+    'STAT_ISREG',              3,
+    'STAT_ISDEV',              4,
+    'STAT_CREATETIME',         5,
+    'STAT_ACCESSTIME',         6,
+    'STAT_MODIFYTIME',         7,
+    'STAT_CHANGETIME',         8,
+    'STAT_BACKUPTIME',         9,
+    'STAT_UID',                10,
+    'STAT_GID',                11,
+    'STAT_ISLNK',              12,
+    'STAT_PLATFORM_DEV',       -1,
+    'STAT_PLATFORM_INODE',     -2,
+    'STAT_PLATFORM_MODE',      -3,
+    'STAT_PLATFORM_NLINKS',    -4,
+    'STAT_PLATFORM_DEVTYPE',   -5,
+    'STAT_PLATFORM_BLOCKSIZE', -6,
+    'STAT_PLATFORM_BLOCKS',    -7,
+);
+
 # Holds information about the javascript loop we are emitting code inside of.
 # The currently emitted loop is stored in $*LOOP.
 my class LoopInfo {
@@ -938,59 +993,6 @@ class QAST::OperationsJS {
     }
 
     # Constant mapping.
-    my %const_map := nqp::hash(
-        'CCLASS_ANY',           65535,
-        'CCLASS_UPPERCASE',     1,
-        'CCLASS_LOWERCASE',     2,
-        'CCLASS_ALPHABETIC',    4,
-        'CCLASS_NUMERIC',       8,
-        'CCLASS_HEXADECIMAL',   16,
-        'CCLASS_WHITESPACE',    32,
-        'CCLASS_PRINTING',      64,
-        'CCLASS_BLANK',         256,
-        'CCLASS_CONTROL',       512,
-        'CCLASS_PUNCTUATION',   1024,
-        'CCLASS_ALPHANUMERIC',  2048,
-        'CCLASS_NEWLINE',       4096,
-        'CCLASS_WORD',          8192,
-        
-        'HLL_ROLE_NONE',        0,
-        'HLL_ROLE_INT',         1,
-        'HLL_ROLE_NUM',         2,
-        'HLL_ROLE_STR',         3,
-        'HLL_ROLE_ARRAY',       4,
-        'HLL_ROLE_HASH',        5,
-        'HLL_ROLE_CODE',        6,
-        
-        'CONTROL_TAKE',         32,
-        'CONTROL_LAST',         16,
-        'CONTROL_NEXT',         4,
-        'CONTROL_REDO',         8,
-        'CONTROL_SUCCEED',      128,
-        'CONTROL_PROCEED',      256,
-        'CONTROL_WARN',         64,
-        
-        'STAT_EXISTS',             0,
-        'STAT_FILESIZE',           1,
-        'STAT_ISDIR',              2,
-        'STAT_ISREG',              3,
-        'STAT_ISDEV',              4,
-        'STAT_CREATETIME',         5,
-        'STAT_ACCESSTIME',         6,
-        'STAT_MODIFYTIME',         7,
-        'STAT_CHANGETIME',         8,
-        'STAT_BACKUPTIME',         9,
-        'STAT_UID',                10,
-        'STAT_GID',                11,
-        'STAT_ISLNK',              12,
-        'STAT_PLATFORM_DEV',       -1,
-        'STAT_PLATFORM_INODE',     -2,
-        'STAT_PLATFORM_MODE',      -3,
-        'STAT_PLATFORM_NLINKS',    -4,
-        'STAT_PLATFORM_DEVTYPE',   -5,
-        'STAT_PLATFORM_BLOCKSIZE', -6,
-        'STAT_PLATFORM_BLOCKS',    -7,
-     );
 
     add_op('const', sub ($comp, $node, :$want) {
         if nqp::existskey(%const_map, $node.name) {
@@ -1306,6 +1308,27 @@ class RegexCompiler {
         ]);
     }
 
+
+    method cclass($node) {
+        my %cclass_code;
+        %cclass_code<.>  := %const_map<CCLASS_ANY>;
+        %cclass_code<d>  := %const_map<CCLASS_NUMERIC>;
+        %cclass_code<s>  := %const_map<CCLASS_WHITESPACE>;
+        %cclass_code<w>  := %const_map<CCLASS_WORD>;
+        %cclass_code<n>  := %const_map<CCLASS_NEWLINE>;
+
+        my $cclass := %cclass_code{ $node.name };
+        my $code := "if ($!pos >= $!target.length) \{{self.fail()}\}\n";
+
+        if $node.name ne '.' {
+            $code := $code ~ "if ({$node.negate ?? '' !! '!'}nqp.op.iscclass($cclass,$!target,$!pos)) \{{self.fail}\}\n";
+            if $node.name eq 'n' {
+                $code := $code ~ "if ($!target.substr($!pos,2) == \"\\r\\n\") \{$!pos++\}\n";
+            } 
+        }
+        $code := $code ~ "$!pos++;\n" unless $node.subtype eq 'zerowidth';
+        $code;
+    }
 
     method subrule($node) {
 
