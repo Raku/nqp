@@ -1625,6 +1625,9 @@ my %handler_names := nqp::hash(
     'WARN',    $HandlerCategory::warn,
     'PROCEED', $HandlerCategory::proceed,
     'SUCCEED', $HandlerCategory::succeed,
+    'AWAIT',   $HandlerCategory::await,
+    'EMIT',    $HandlerCategory::emit,
+    'DONE',    $HandlerCategory::done,
 );
 QAST::MASTOperations.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
     my @children := nqp::clone($op.list());
@@ -1882,6 +1885,9 @@ my %const_map := nqp::hash(
     'CONTROL_SUCCEED',      512,
     'CONTROL_PROCEED',      1024,
     'CONTROL_LABELED',      4096,
+    'CONTROL_AWAIT',        8192,
+    'CONTROL_EMIT',         16384,
+    'CONTROL_DONE',         32768,
 
     'STAT_EXISTS',             0,
     'STAT_FILESIZE',           1,
