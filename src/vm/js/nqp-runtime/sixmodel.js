@@ -31,6 +31,7 @@ STable.prototype.setboolspec = function(mode, method) {
         return method.$call(ctx, {}, this);
       };
     } else if (mode == 5) {
+      // this is the default - do nothing
     } else if (mode == 7 || mode == 8) {
       // STUB
     } else {

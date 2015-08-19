@@ -235,8 +235,9 @@ BinaryCursor.prototype.STable = function(STable) {
 
   var boolification_flag = this.flag64();
   if (boolification_flag) {
-    STable.boolification_mode = this.I64();
-    STable.boolification_method = this.variant();
+    var boolification_mode = this.I64();
+    var boolification_method = this.variant();
+    STable.setboolspec(boolification_mode, boolification_method);
   }
   var container_flag = this.flag64();
   if (container_flag) {
