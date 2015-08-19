@@ -1413,6 +1413,66 @@ class RegexCompiler {
         ]);
     }
 
+    method quant($node) {
+        my $min       := $node.min;
+        my $max       := $node.max;
+        my $needrep   := $min > 1 || $max > 1;
+        my $needmark  := $needrep || $node.backtrack eq 'r';
+        my $sep       := $node[1];
+        my $loop := self.new_label;
+        my $done := self.new_label;
+
+        my $rep := $*BLOCK.add_tmp();
+
+        # TODO - think about removing irep
+
+        if $min == 0 && $max == 0 {
+            # Nothing to do, and nothing to backtrack into.
+            "";
+        } elsif $node.backtrack eq 'f' {
+            my $irep := $*BLOCK.add_tmp();
+            my $seplabel := self.new_label;
+
+            "$rep = 0;\n"
+             ~ ($min < 1 ?? self.mark($loop,$!pos,$rep) ~ self.goto($done) !! '')
+             ~ ($sep ?? self.goto($seplabel) !! '')
+             ~ self.case($loop)
+             ~ "$irep = $rep;\n"
+             ~ ($sep ?? self.compile_rx($sep) ~ self.case($seplabel) !! '')
+             ~ self.compile_rx($node[0])
+             ~ self.case($loop)
+             ~ "$rep = $irep;\n"
+             ~ "$rep++;\n"
+             ~ ($min > 1 ?? "if (rep < $min) \{{self.goto($loop)}\}\n" !! '')
+             ~ ($max > 1 ?? "if (rep >= $max) \{{self.goto($done)}\}\n" !! '')
+             ~ ($max != 1 ?? self.mark($loop, $!pos, $rep) !! '')
+             ~ self.case($done)
+        } else {
+            my $code;
+
+            if $min == 0 { $code := self.mark($done,$!pos,0) }
+            elsif $needmark { $code := self.mark($done,-1,0) }
+
+            $code := $code ~ self.case($loop) ~ self.compile_rx($node[0]);
+
+            if $needmark {
+                $code := $code
+                    ~ self.peek($done, '*', $rep)
+                    ~ ($node.backtrack eq 'r' ?? self.commit($done) !! '')
+                    ~ "$rep++;\n"
+                    ~ ($max > 1 ?? "if ($rep >= {$node.max}) \{{self.goto($done)}\}\n" !! '');
+            }
+            unless $max == 1 {
+                $code := $code
+                   ~ self.mark($done, $!pos, $rep)
+                   ~ ($sep ?? self.compile_rx($sep) !! '')
+                   ~ self.goto($loop);
+            }
+
+            $code ~ self.case($done) ~ ($min > 1 ?? "if ($rep < {+$node.min}) \{{self.fail}\}" !! "");
+        }
+    }
+
     method BUILD(:$compiler) {
         $!compiler := $compiler;
 
@@ -1448,6 +1508,19 @@ class RegexCompiler {
 
     method goto($label) {
         "$!label = $label;break;\n"; 
+    }
+
+    method peek($mark, *@regs) {
+        my $code := "var peek = nqp.regexPeek($!bstack, $mark);\n";
+        for @regs {
+            $code := $code ~ "peek++;\n";
+            $code := $code ~ "$_ = $!bstack[peek]\n;" if $_ ne '*';
+        }
+        $code;
+    }
+
+    method commit($label) {
+        "nqp.regexCommit($!bstack,$label);\n";
     }
 
     # push a new backtracking mark on the bstack with label $label, position $pos and count $count.

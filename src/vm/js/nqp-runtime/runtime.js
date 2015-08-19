@@ -220,3 +220,45 @@ exports.top_context = function() {
   return null;
 };
 
+// helper for regexs
+exports.regexPeek = function(bstack, mark) {
+  var ptr = bstack.length;
+  while (ptr >= 0) {
+    if (bstack[ptr] == mark)
+      break;
+    ptr -= 4;
+  }
+  return ptr;
+};
+
+exports.regexCommit = function(bstack, mark) {
+  var ptr = bstack.length;
+  var caps;
+  if (ptr > 0) {
+    caps = bstack[ptr - 1];
+  }
+  else {
+    caps = 0;
+  }
+
+  while (ptr >= 0) {
+    if (bstack[ptr] == mark) {
+      break;
+    }
+    ptr -= 4;
+  }
+
+  bstack.length = ptr;
+
+  if (caps > 0) {
+    if (ptr > 0) {
+      /* top mark frame is an autofail frame, reuse it to hold captures */
+      if (bstack[ptr - 3] < 0) {
+        bstack[ptr - 1] = caps;
+      }
+    }
+
+    /* push a new autofail frame onto bstack to hold the captures */
+    bstack.push(0, -1, 0, caps);
+  }
+};
