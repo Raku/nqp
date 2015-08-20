@@ -84,7 +84,7 @@ my $EX_CAT_DONE    := 32768;
 my $EX_CAT_CONTROL := $EX_CAT_NEXT +| $EX_CAT_REDO +| $EX_CAT_LAST +|
                       $EX_CAT_TAKE +| $EX_CAT_WARN +|
                       $EX_CAT_SUCCEED +| $EX_CAT_PROCEED +|
-                      $EX_CAT_AWIAT +| $EX_CAT_EMIT +| $EX_CAT_DONE;
+                      $EX_CAT_AWAIT +| $EX_CAT_EMIT +| $EX_CAT_DONE;
 my $EX_CAT_LABELED := 4096;
 
 # Exception handler kinds.
