@@ -1370,7 +1370,7 @@ class RegexCompiler {
             else {
 
 
-                my $back_label := new_label();
+                my $back_label := self.new_label();
 
                 $capture_code := $capture_code
                     ~ self.goto($pass_label)
