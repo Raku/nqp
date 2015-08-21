@@ -1330,14 +1330,15 @@ class RegexCompiler {
         $code;
     }
 
+    my sub call($invocant, $method, *@args) {
+        nqp::unshift(@args, $*BLOCK.ctx);
+        nqp::unshift(@args, 'nqp.named([])');
+        $invocant ~ "[" ~ quote_string($method) ~ "](" ~ nqp::join(",", @args) ~ ")";
+    }
+
     method subrule($node) {
         my $captured := 0;
 
-        my sub call($invocant, $method, *@args) {
-            nqp::unshift(@args, $*BLOCK.ctx);
-            nqp::unshift(@args, 'nqp.named([])');
-            $invocant ~ "[" ~ quote_string($method) ~ "](" ~ nqp::join(",", @args) ~ ")";
-        }
 
         my $call;
         if nqp::istype($node[0][0], QAST::Block) {
@@ -1410,6 +1411,29 @@ class RegexCompiler {
             $capture_code,
 
             ($node.subtype eq 'zerowidth' ?? '' !! "$!pos = $subcur['\$!pos\'];\n")
+        ]);
+    }
+
+
+    method subcapture($node) {
+        my $done_label := self.new_label; 
+        my $fail_label := self.new_label; 
+
+        my $subcapture_from := $*BLOCK.add_tmp;
+        my $subcur := $*BLOCK.add_tmp;
+
+        Chunk.new($T_VOID, "", [
+            self.mark($fail_label,$!pos,0),
+            self.compile_rx($node[0]),
+            self.peek($fail_label,$subcapture_from),
+            "$!cursor['\$!pos\'] = $!pos;\n",
+            "$subcur = " ~ call($!cursor, '!cursor_start_subcapture', $subcapture_from) ~ ";\n",
+            call($subcur, '!cursor_pass', $!pos) ~ ";\n",
+            "$!cstack = " ~ call($!cursor, '!cursor_capture', $subcur, quote_string($node.name)) ~ ";\n",
+            self.goto($done_label),
+            self.case($fail_label),
+            self.fail(),
+            self.case($done_label)
         ]);
     }
 
