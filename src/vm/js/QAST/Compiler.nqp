@@ -43,6 +43,10 @@ class Chunk {
         $obj
     }
 
+    method void(*@setup, :$node) {
+        self.new($T_VOID, "", @setup, :$node);
+    }
+
     method BUILD($type, $expr, @setup, :$node) {
         $!type := $type;
         $!expr := $expr;
@@ -930,13 +934,13 @@ class QAST::OperationsJS {
         my $body := $comp.compile_block(@operands[1], $outer, $outer_loop, :want($T_VOID), :extra_args(@body_args));
 
 
-        Chunk.new($T_VOID, '', [
+        Chunk.void(
             $list,
             "$iterator = nqp.op.iterator({$list.expr});\n",
             "while ($iterator.idx < $iterator.target) \{\n",
             $body,
             "\}\n"
-        ], :node($node));
+        , :node($node));
     });
 
     for <while until repeat_while repeat_until> -> $op {
@@ -966,7 +970,7 @@ class QAST::OperationsJS {
 
             if $op eq 'while' || $op eq 'until' {
                 my $neg := $op eq 'while' ?? '!' !! '';
-                Chunk.new($T_VOID, '', [
+                Chunk.void(
                     "for (;;) \{\n",
                     ($loop.has_redo
                         ?? "if ({$loop.redo}) \{;\n"
@@ -978,16 +982,16 @@ class QAST::OperationsJS {
                     ($loop.has_redo ?? "\}\n" !! ''),
                     $comp.handle_control($loop, $body),
                     "\}"
-                ]);
+                );
             } else {
                 # TODO redo
                 my $neg := $op eq 'repeat_while' ?? '' !! '!';
-                Chunk.new($T_VOID, '', [
+                Chunk.void(
                     "do \{\n",
                     $body,
                     $cond,
                     "\} while ($neg {$cond.expr});"
-                ]);
+                );
             }
         });
     }
@@ -1019,27 +1023,27 @@ class QAST::OperationsJS {
         return $comp.NYI("Labels to control") if $node[0];
         if $node.name eq 'last' {
             if $*LOOP ~~ LoopInfo {
-                Chunk.new($T_VOID, '', ["break;\n"]);
+                Chunk.void("break;\n");
             } elsif $*LOOP ~~ BlockBarrier {
                 my $loop := $*LOOP;
                 while nqp::defined($loop.outer) {
                     $loop := $loop.outer;
                     if $loop ~~ LoopInfo {
                         $loop.handle_last(1);
-                        return Chunk.new($T_VOID, '', ["throw 'last';\n"]);
+                        return Chunk.void("throw 'last';\n");
                     }
                 }
                 $comp.NYI("can't find surrounding loop for last");
             }
         } elsif $node.name eq 'next' {
             if $*LOOP ~~ LoopInfo {
-                Chunk.new($T_VOID, '', ["continue;\n"]);
+                Chunk.void("continue;\n");
             } else {
                 $comp.NYI("indirect next");
             }
         } elsif $node.name eq 'redo' {
             if $*LOOP ~~ LoopInfo {
-                Chunk.new($T_VOID, '', ["{$*LOOP.redo} = 1;\n;continue;\n"]);
+                Chunk.void("{$*LOOP.redo} = 1;\n;continue;\n");
             } else {
                 $comp.NYI("indirect redo");
             }
@@ -1299,13 +1303,13 @@ class RegexCompiler {
             $name := $!compiler.as_js($node[0], :want($T_STR));
         }
 
-        Chunk.new($T_VOID, "", [
+        Chunk.void(
             "{$!cursor}['!cursor_pass']({$*BLOCK.ctx},",
             "\{backtrack: {$node.backtrack ne 'r'}\}, {$!pos}",
             (nqp::defined($name) ?? ',' ~ $name !! ''),
             ");\n",
             "break {$!js_loop_label};\n"
-        ]);
+        );
     }
 
 
@@ -1403,7 +1407,7 @@ class RegexCompiler {
         }
 
         # TODO proper $!pos access
-        Chunk.new($T_VOID, "", [
+        Chunk.void(
             "$!cursor['\$!pos\'] = $!pos;\n",
             $call,
             "$subcur = {$call.expr};\n",
@@ -1411,7 +1415,7 @@ class RegexCompiler {
             $capture_code,
 
             ($node.subtype eq 'zerowidth' ?? '' !! "$!pos = $subcur['\$!pos\'];\n")
-        ]);
+        );
     }
 
 
@@ -1422,7 +1426,7 @@ class RegexCompiler {
         my $subcapture_from := $*BLOCK.add_tmp;
         my $subcur := $*BLOCK.add_tmp;
 
-        Chunk.new($T_VOID, "", [
+        Chunk.void(
             self.mark($fail_label,$!pos,0),
             self.compile_rx($node[0]),
             self.peek($fail_label,$subcapture_from),
@@ -1434,20 +1438,20 @@ class RegexCompiler {
             self.case($fail_label),
             self.fail(),
             self.case($done_label)
-        ]);
+        );
     }
 
     method qastnode($node) {
         my $code := $!compiler.as_js($node[0], :want($T_BOOL));
 
-        Chunk.new($T_VOID, "", [
+        Chunk.void(
             "$!cursor['\$!pos\'] = $!pos;\n",
             $!compiler.mangle_name("$¢") ~ " = $!cursor;\n",
             $code,
             $node.subtype eq 'zerowidth' ??
                 "if ({$node.negate ?? '' !! '!'}{$code.expr}) \{{self.fail}\}\n"
                 !! ""
-        ]);
+        );
     }
 
     method quant($node) {
@@ -1789,11 +1793,11 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     $*BLOCK.add_js_lexical($name);
                     @sig.push($tmp);
                     my $default_value := self.as_js($_.default, :want($T_OBJ));
-                    @setup.push(Chunk.new($T_VOID, "", [
+                    @setup.push(Chunk.void(
                         "if (arguments.length < {+@sig}) \{\n",
                          $default_value,
                          "$name = {$default_value.expr};\n\} else \{\n$name = $tmp;\n\}\n"
-                    ]));
+                    ));
 
                 } else {
                     @sig.push($name);
@@ -2014,7 +2018,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     method stored_result($chunk, :$want) {
         if $chunk.type == $T_VOID || $want == $T_VOID {
-            Chunk.new($T_VOID, '', [$chunk, $chunk.expr~";\n"]);
+            Chunk.void($chunk, $chunk.expr~";\n");
         } else {
             my $tmp := $*BLOCK.add_tmp();
             Chunk.new($chunk.type, $tmp, [$chunk, "$tmp = {$chunk.expr};\n"]);
@@ -2182,7 +2186,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             for $*BLOCK.variables -> $var {
                 @lexicals.push(quote_string($var.name) ~ ': ' ~ self.mangle_name($var.name));
             }
-            Chunk.new($T_VOID,'',["nqp.ctxsave(\{{nqp::join(',', @lexicals)}\});\n"]);
+            Chunk.void("nqp.ctxsave(\{{nqp::join(',', @lexicals)}\});\n");
         } else {
             self.compile_all_the_statements($node, $want);
         }
@@ -2295,13 +2299,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             my $main := self.as_js($main_block, :want($T_VOID));
 
-            $body := Chunk.new($T_VOID, "", [$block_js, $main, self.mangled_cuid($main_block.cuid) ~ ".\$call();\n"]);
+            $body := Chunk.void($block_js, $main, self.mangled_cuid($main_block.cuid) ~ ".\$call();\n");
             
         } else {
             $body := $block_js;
         }
 
-        Chunk.new($T_VOID, "", [self.setup_cuids(), $pre , self.create_sc($node), $post, $body]);
+        Chunk.void(self.setup_cuids(), $pre , self.create_sc($node), $post, $body);
     }
 
 
@@ -2500,13 +2504,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
 
     method as_js_with_prelude($ast) {
-        Chunk.new($T_VOID,"",[
+        Chunk.void(
             "var nqp = require('nqp-runtime');\n",
             "\nvar top_ctx = nqp.top_context();\n",
             # temporary HACK
             "var ARGS = process.argv;\n",
             self.as_js($ast, :want($T_VOID))
-        ]);
+        );
     }
 
     method emit($ast) {
