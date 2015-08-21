@@ -1437,6 +1437,19 @@ class RegexCompiler {
         ]);
     }
 
+    method qastnode($node) {
+        my $code := $!compiler.as_js($node[0], :want($T_BOOL));
+
+        Chunk.new($T_VOID, "", [
+            "$!cursor['\$!pos\'] = $!pos;\n",
+            $!compiler.mangle_name("$¢") ~ " = $!cursor;\n",
+            $code,
+            $node.subtype eq 'zerowidth' ??
+                "if ({$node.negate ?? '' !! '!'}{$code.expr}) \{{self.fail}\}\n"
+                !! ""
+        ]);
+    }
+
     method quant($node) {
         my $min       := $node.min;
         my $max       := $node.max;
