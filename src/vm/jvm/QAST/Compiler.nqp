@@ -2134,6 +2134,7 @@ QAST::OperationsJAST.map_classlib_core_op('rand_n', $TYPE_OPS, 'rand_n', [$RT_NU
 QAST::OperationsJAST.map_classlib_core_op('srand', $TYPE_OPS, 'srand', [$RT_INT], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('rand_I', $TYPE_OPS, 'rand_I', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('mod_n', $TYPE_OPS, 'mod_n', [$RT_NUM, $RT_NUM], $RT_NUM);
+QAST::OperationsJAST.map_classlib_core_op('pow_i', $TYPE_OPS, 'pow_i', [$RT_INT, $RT_INT], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('pow_n', $TYPE_OPS, 'pow_n', [$RT_NUM, $RT_NUM], $RT_NUM);
 QAST::OperationsJAST.map_classlib_core_op('pow_I', $TYPE_OPS, 'pow_I', [$RT_OBJ, $RT_OBJ, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_jvm_core_op('neg_i', 'lneg', [$RT_INT], $RT_INT);
