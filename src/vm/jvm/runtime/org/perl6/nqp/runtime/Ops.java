@@ -6071,6 +6071,10 @@ public final class Ops {
         }
         return makeBI(tc, type, random);
     }
+    
+    public static int pow_i(int a, int b) {
+        return (int)Math.pow(a, b);
+    }
 
     public static double pow_n(double a, double b) {
         if (a == 1 && !Double.isNaN(b)) {
