@@ -1550,7 +1550,7 @@ class RegexCompiler {
     # push a new backtracking mark on the bstack with label $label, position $pos and count $count.
     # (all arguments are taken as js code snippets).
     method mark($label,$pos,$count) {
-      "$!bstack.push($label,$pos,$count,$!bstack.length ? $!bstack[bstack.length-1] : 0);\n";
+      "$!bstack.push($label,$pos,$count,$!bstack.length ? $!bstack[$!bstack.length-1] : 0);\n";
     }
 
     method fail() {
