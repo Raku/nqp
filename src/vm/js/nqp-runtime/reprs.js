@@ -334,6 +334,12 @@ module.exports.Uninstantiable = Uninstantiable;
 function P6int() {
 }
 P6int.name = 'P6int';
+P6int.prototype.allocate = basic_allocate;
+P6int.prototype.deserialize_finish = function(object, data) {
+  // TODO integers bigger than 32bit
+  object.value = data.varint();
+};
+
 module.exports.P6int = P6int;
 
 function P6num() {
