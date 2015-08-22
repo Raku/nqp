@@ -1346,9 +1346,9 @@ class RegexCompiler {
 
         my $call;
         if nqp::istype($node[0][0], QAST::Block) {
-            $call := $!compiler.NYI("special subrule call");
-#                #TODO think if arguments are possible, etc.
-#                #$call := self.as_js($node[0][0])~".apply(cursor,[{self.ctx},nqp.empty_named(),cursor])";
+            #TODO think if arguments are possible, etc.
+            my $block := $!compiler.as_js($node[0][0], :want($T_OBJ));
+            $call := Chunk.new($T_OBJ, $block.expr ~ ".\$call({$*BLOCK.ctx},nqp.named([]),$!cursor)", [$block]);
         }
         else {
             # TODO arguments
