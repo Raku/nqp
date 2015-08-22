@@ -1514,6 +1514,8 @@ class RegexCompiler {
 
             @code.push(self.case($done));
             @code.push($min > 1 ?? "if ($rep < {+$node.min}) \{{self.fail}\}" !! "");
+
+            Chunk.new($T_VOID, "", @code);
         }
     }
 
