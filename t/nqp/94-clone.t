@@ -1,4 +1,4 @@
-plan(7);
+plan(10);
 sub foo() {
     'hello there';
 }
@@ -30,3 +30,16 @@ class Foo {
     ok($d.get_foo == 123, "changing an attr on the cloned object doesn't affect the orginal");
     ok($c.get_foo == 456, "we can change an attr on the new object");
 }
+
+my $list := nqp::list(0,100,200,300, nqp::list(400, 401, 402));
+
+my $cloned := nqp::clone($list);
+
+$cloned[2] := 20;
+
+ok($cloned[2] == 20, "we can change an element of a cloned array");
+ok($list[2] == 200, "...and the original array remains unchanged");
+
+$cloned[4][2] := 42;
+
+ok($list[4][2] == 42, "cloning is shallow");

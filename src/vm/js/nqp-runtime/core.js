@@ -341,6 +341,8 @@ op.composetype = function(obj, reprinfo) {
 op.clone = function(obj) {
   if (obj.$$clone) {
     return obj.$$clone(); 
+  } else if (obj instanceof Array) {
+    return obj.slice();
   } else {
     // STUB
     console.log("NYI cloning", obj);
