@@ -571,7 +571,7 @@ class NQP::Actions is HLL::Actions {
             else {
                 my $name := ~@name.pop;
                 my int $is_lex := 0;
-                if $*IN_DECL eq 'variable' || $name eq '$_' || $name eq '$/'
+                if $*IN_DECL eq 'variable' || $name eq '$_' || $name eq '$/' || $name eq '$¢'
                 || $name eq '$!' || $<twigil> eq '?' || ($is_lex := $*W.is_lexical($name)) {
                     $ast := QAST::Var.new( :name($name),
                         :scope($name eq '$?CLASS' ?? 'typevar' !! 'lexical') );

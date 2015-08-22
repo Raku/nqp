@@ -338,7 +338,7 @@ grammar NQP::Grammar is HLL::Grammar {
         | <sigil> <twigil>? <desigilname=.name>
         | <sigil> <?[<]> <postcircumfix>
         | <sigil> '(' ~ ')' <semilist>
-        | $<sigil>=['$'] $<desigilname>=[<[/_!]>]
+        | $<sigil>=['$'] $<desigilname>=[<[/_!¢]>]
     }
 
     token sigil { <[$@%&]> }
