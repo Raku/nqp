@@ -106,7 +106,8 @@ MAIN: {
 
     my $launcher = substr($default_backend, 0, 1) . '-runner-default';
     print $MAKEFILE "all: ", join(' ', map("$_-all", @prefixes), $launcher), "\n";
-    for my $t (qw/clean test qregex-test install/) {
+    print $MAKEFILE "install: ", join(' ', map("$_-install", @prefixes), $launcher . '-install'), "\n";
+    for my $t (qw/clean test qregex-test/) {
         print $MAKEFILE "$t: ", join(' ', map "$_-$t", @prefixes), "\n";
     }
 

@@ -255,6 +255,10 @@ j-runner-default: j-all
 	$(CP) $(J_RUNNER) nqp$(BAT)
 	$(CHMOD) 755 nqp$(BAT)
 
+j-runner-default-install: j-runner-default j-install
+	$(CP) $(DESTDIR)$(BIN_DIR)/$(J_RUNNER) $(DESTDIR)$(BIN_DIR)/nqp$(BAT)
+	$(CHMOD) 755 $(DESTDIR)$(BIN_DIR)/nqp$(BAT)
+
 $(P5QREGEX_JAR): $(ALL_OUTPUT) $(P5QREGEX_SOURCES)
 	$(MKPATH) $(J_STAGE2)
 	$(PERL) tools/build/gen-cat.pl jvm $(P5QREGEX_SOURCES) > $(J_STAGE2)/$(P5QREGEX_COMBINED)

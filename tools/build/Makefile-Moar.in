@@ -260,6 +260,10 @@ m-runner-default: m-all
 	$(CP) $(M_RUNNER) nqp$(BAT)
 	$(CHMOD) 755 nqp$(BAT)
 
+m-runner-default-install: m-runner-default m-install
+	$(CP) $(DESTDIR)$(BIN_DIR)/$(M_RUNNER) $(DESTDIR)$(BIN_DIR)/nqp$(BAT)
+	$(CHMOD) 755 $(DESTDIR)$(BIN_DIR)/nqp$(BAT)
+
 $(P5QREGEX_MOAR): $(P5QREGEX_SOURCES) $(NQP_MOAR) $(M_RUNNER)
 	$(MKPATH) $(M_STAGE2)/gen
 	$(PERL) tools/build/gen-cat.pl moar $(P5QREGEX_SOURCES) > $(M_STAGE2)/$(P5QREGEX_COMBINED)
