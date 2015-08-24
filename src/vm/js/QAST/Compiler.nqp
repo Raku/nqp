@@ -920,15 +920,17 @@ class QAST::OperationsJS {
         }
 
         my $outer     := try $*BLOCK;
-        my $outer_loop := try $*LOOP; # TODO
-        my $body := $comp.compile_block(@operands[1], $outer, $outer_loop, :want($T_VOID), :extra_args(@body_args));
+        my $outer_loop := try $*LOOP;
+        my $loop := LoopInfo.new($outer_loop);
+
+        my $body := $comp.compile_block(@operands[1], $outer, $loop , :want($T_VOID), :extra_args(@body_args));
 
 
         Chunk.void(
             $list,
             "$iterator = nqp.op.iterator({$list.expr});\n",
             "while ($iterator.idx < $iterator.target) \{\n",
-            $body,
+            $comp.handle_control($loop, $body),
             "\}\n"
         , :node($node));
     });
