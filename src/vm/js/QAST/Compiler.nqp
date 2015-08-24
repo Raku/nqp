@@ -620,20 +620,6 @@ class QAST::OperationsJS {
     });
     add_simple_op('ishash', $T_INT, [$T_OBJ]);
 
-    sub merge_arg_groups($groups) {
-        if nqp::islist($groups) {
-            my @exprs;
-
-            my @setup := [];
-
-            for $groups -> $group {
-                @exprs.push($group.expr);
-                @setup.push($group);
-            }
-
-            Chunk.new($T_NONVAL, @exprs.shift ~ '.concat(' ~ nqp::join(',', @exprs) ~ ')', $groups);
-        }
-    }
 
     add_op('call', sub ($comp, $node, :$want) {
         if $*BLOCK.is_local_lexotic($node.name) {
@@ -651,7 +637,7 @@ class QAST::OperationsJS {
 
         my $call;
         if nqp::islist($compiled_args) {
-            $compiled_args := merge_arg_groups($compiled_args);
+            $compiled_args := $comp.merge_arg_groups($compiled_args);
             $call := '.$apply(';
         } else {
             $call := '.$call(';
@@ -697,7 +683,7 @@ class QAST::OperationsJS {
 
         my $call;
         if nqp::islist($compiled_args) {
-            $compiled_args := merge_arg_groups($compiled_args);
+            $compiled_args := $comp.merge_arg_groups($compiled_args);
             $call := ".apply({$invocant.expr},";
         } else {
             $call := '(';
@@ -1345,18 +1331,28 @@ class RegexCompiler {
 
 
         my $call;
-        if nqp::istype($node[0][0], QAST::Block) {
+
+        if nqp::istype($node[0][0], QAST::SVal) {
+            my @args := nqp::clone($node[0].list);
+            my $method := @args.shift.value;
+            my $compiled_args := $!compiler.args(@args);
+
+            my $invocation;
+            if nqp::islist($compiled_args) {
+                $compiled_args := $!compiler.merge_arg_groups($compiled_args);
+                $invocation := ".apply({$!cursor},";
+            } else {
+                $invocation := '(';
+            }
+
+            $call := Chunk.new($T_OBJ,
+                $!cursor ~ '[' ~ quote_string($method) ~ "]" ~ $invocation ~ $compiled_args.expr ~ ')',
+                [$compiled_args]);
+        }
+        else {
             #TODO think if arguments are possible, etc.
             my $block := $!compiler.as_js($node[0][0], :want($T_OBJ));
             $call := Chunk.new($T_OBJ, $block.expr ~ ".\$call({$*BLOCK.ctx},nqp.named([]),$!cursor)", [$block]);
-        }
-        else {
-            # TODO arguments
-            my $args := nqp::clone($node[0].list);
-            my $method := $args.shift;
-
-            # TODO .method name when it's valid 
-            $call := Chunk.new($T_OBJ, $!cursor ~ '[' ~ quote_string($node.name) ~ "]()", []);
         }
 
         my $testop := $node.negate ?? '>=' !! '<';
@@ -1756,6 +1752,21 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
         }
         @js_args;
+    }
+
+    method merge_arg_groups($groups) {
+        if nqp::islist($groups) {
+            my @exprs;
+
+            my @setup := [];
+
+            for $groups -> $group {
+                @exprs.push($group.expr);
+                @setup.push($group);
+            }
+
+            Chunk.new($T_NONVAL, @exprs.shift ~ '.concat(' ~ nqp::join(',', @exprs) ~ ')', $groups);
+        }
     }
 
     method compile_sig(@params) {
