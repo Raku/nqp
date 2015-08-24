@@ -625,6 +625,10 @@ class QAST::OperationsJS {
         if $*BLOCK.is_local_lexotic($node.name) {
             my $value := $comp.as_js($node[0], :want($T_OBJ));
             return Chunk.new($want, '', [$value, "return {$value.expr};\n"]);
+        } elsif $*BLOCK.is_lexotic($node.name) {
+            $*BLOCK.mark_lexotic_usage($node.name);
+            my $value := $comp.as_js($node[0], :want($T_OBJ));
+            return Chunk.new($want, 'null', [$value, $comp.mangle_name($node.name) ~ "(" ~ $value.expr ~ ");\n"]);
         }
 
         my $args := nqp::clone($node.list);
@@ -998,10 +1002,22 @@ class QAST::OperationsJS {
     add_simple_op('iscclass', $T_INT, [$T_INT, $T_STR, $T_INT]);
 
     # TODO consider/handle if lexotic is not the topmost thing in a block
-    # TODO implement returning from nested block
     add_op('lexotic', sub ($comp, $node, :$want) {
-       $*BLOCK.register_lexotic($node.name);
-       $comp.as_js($node[0], :$want);
+        $*BLOCK.register_lexotic($node.name);
+        my $inner := $comp.as_js($node[0], :$want);
+
+        if $*BLOCK.is_lexotic_used($node.name) {
+            my $exception := $*BLOCK.add_tmp;
+            my $value := $*BLOCK.add_tmp;
+            Chunk.new($T_OBJ, $inner.expr, [
+                "var {$comp.mangle_name($node.name)} = function(value) \{$value = value; throw $exception\};\n",
+                "try \{\n",
+                $inner,
+                "\} catch (e) \{ if (e === $exception) \{return $value\} else \{ throw e \}\}"
+            ]);
+        } else {
+            $inner;
+        }
     });
 
 
@@ -1627,10 +1643,40 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
 
         method register_lexotic($name) {
+            %!lexotic{$name} := 0;
+        }
+
+        method mark_local_lexotic_usage($name) {
             %!lexotic{$name} := 1;
         }
+
+        method is_lexotic_used($name) {
+            %!lexotic{$name} == 1;
+        }
+
         method is_local_lexotic($name) {
             nqp::existskey(%!lexotic, $name);
+        }
+
+        method mark_lexotic_usage($name) {
+            my $block := self;
+            while $block {
+                if $block.is_local_lexotic($name) {
+                    $block.mark_local_lexotic_usage($name);
+                    return;
+                }
+                $block := $block.outer;
+            }
+        }
+        method is_lexotic($name) {
+            my $block := self;
+            while $block {
+                if $block.is_local_lexotic($name) {
+                    return 1;
+                }
+                $block := $block.outer;
+            }
+            return 0;
         }
 
         method add_tmp() {
