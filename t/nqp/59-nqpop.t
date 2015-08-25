@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(160);
+plan(161);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -239,6 +239,13 @@ ok(nqp::sha1("Hello World") eq '0A4D55A8D778E5022FAB701977C5D840BBC486D0', "sha1
 
     my $b := nqp::list_i(1,2,30.4);
     ok(nqp::atpos_i($b,2) == 30, 'atpos_i');
+
+
+    my $c := nqp::list_i();
+    nqp::bindpos_i($c, 1, 102);
+    nqp::bindpos_i($c, 1, 103);
+    nqp::bindpos_i($c, 0, 101);
+    ok(nqp::atpos_i($c, 1) == 103, 'bindpos_i works');
 }
 
 {
