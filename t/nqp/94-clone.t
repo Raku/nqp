@@ -1,4 +1,4 @@
-plan(10);
+plan(12);
 sub foo() {
     'hello there';
 }
@@ -43,3 +43,12 @@ ok($list[2] == 200, "...and the original array remains unchanged");
 $cloned[4][2] := 42;
 
 ok($list[4][2] == 42, "cloning is shallow");
+
+{
+    my %hash;
+    %hash<foo> := 123;
+    my $cloned_hash := nqp::clone(%hash);
+    ok($cloned_hash<foo> == 123, "the keys in a hash are cloned");
+    $cloned_hash<foo> := 456;
+    ok(%hash<foo> == 123, "changing the cloned hash doesn't affect the orignal");
+}
