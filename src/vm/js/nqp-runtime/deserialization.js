@@ -486,11 +486,19 @@ BinaryCursor.prototype.deserialize = function(sc) {
     }
   }
 
+  var cuids = [];
+  for (var cuid in CodeRef.cuids) {
+     mangledCuid = cuid.replace(/\./g, "_");
+     cuids.push(mangledCuid + " = CodeRef.cuids[\"" + cuid + "\"]");
+  }
+
+  var declareCuids = "var " + cuids.join(",") + ";\n";
+
   var prelude = "var nqp = require('nqp-runtime');\n"
   if (code) {
     /* TODO reduce accidental poisoning */
     /* TODO make cuids be in scope */
-    eval(prelude + code);
+    eval(prelude + declareCuids + code);
   }
 };
 

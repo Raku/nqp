@@ -1,6 +1,8 @@
+CodeRef.cuids = {};
 function CodeRef(name, cuid) {
   this.name = name;
   this.cuid = cuid;
+  if (cuid) CodeRef.cuids[cuid] = this;
 }
 
 CodeRef.prototype.block = function(func) {
