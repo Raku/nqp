@@ -77,6 +77,10 @@ class HLLBackend::JavaScript {
         my $pipe := nqp::openpipe("uglifyjs $tmp_file -b", nqp::cwd(), nqp::getenvhash(), '');
         my $beautified := nqp::readallfh($pipe);
         nqp::closefh($pipe);
+
+        # TODO think about safety
+        nqp::unlink($tmp_file);
+
         $beautified;
     }
 
@@ -95,6 +99,11 @@ class HLLBackend::JavaScript {
 
         my $env := nqp::getenvhash();
         nqp::shell("node $tmp_file",nqp::cwd(),nqp::getenvhash());
+
+
+        # TODO think about safety
+        nqp::unlink($tmp_file);
+
         '';
     }
 
