@@ -2184,7 +2184,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     %!serialized_code_ref_info{$node.cuid} := SerializedCodeRefInfo.new(
                         closure_template => Chunk.new($T_OBJ, "", $function).join(),
                         ctx => $*BLOCK.ctx,
-                        outer_ctx => $*BLOCK.outer.ctx,
+                        outer_ctx => (nqp::defined($*BLOCK.outer) ?? $*BLOCK.outer.ctx !! ""),
                         static_info => self.static_info_for_lexicals($*BLOCK)
                     );
                 }
