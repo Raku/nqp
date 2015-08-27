@@ -9,7 +9,7 @@ my %documented_ops := nqp::hash();
 my @doc_lines := nqp::split("\n", nqp::readallfh(nqp::open("docs/ops.markdown","r")));
 for @doc_lines -> $line {
     next unless $line ~~ / ^ '* ' .* '(' /;
-    $line := nqp::substr2($line, 3);
+    $line := nqp::substr($line, 3);
     $line := nqp::split("(", $line)[0];
     %documented_ops{$line} := 1 ;
 }
