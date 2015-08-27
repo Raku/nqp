@@ -49,6 +49,8 @@ class QRegex::NFA {
     # list.
     has $!states;
     
+    has $!fates;
+
     # Non-zero if this NFA has some edges added.
     has $!edges;
     
@@ -108,6 +110,7 @@ class QRegex::NFA {
     }
 
     method states() { $!states }
+    method fates() { $!fates }
 
     method addnode($node, :$*vars_as_generic) {
         my $indent := dentin();
@@ -134,7 +137,7 @@ class QRegex::NFA {
         dentout($result);
     }
 
-    method fate($node, $from, $to) { 
+    method fate($node, $from, $to) {
         my $indent := dentin();
         note("$indent fate $from -> $to") if $nfadeb;
         dentout(self.addedge($from, 0, $EDGE_FATE, 0, :newedge(0)));
@@ -677,13 +680,6 @@ class QRegex::NFA {
             self.mydump() if $nfadeb;
             nqp::scwbdisable();
             $!nfa_object := nqp::nfafromstatelist($!states, NFAType);
-            my $reconstructed_states := nqp::nfatostatelist($!nfa_object, NQPArray);
-            note("========");
-            note("before reconstruction:");
-            dump_statelist($!states);
-            note("after reconstruction:");
-            dump_statelist($!states);
-            note("========");
             nqp::scwbenable();
         }
 #        my $t0 := nqp::time_n();
@@ -703,13 +699,6 @@ class QRegex::NFA {
             self.mydump() if $nfadeb;
             nqp::scwbdisable();
             $!nfa_object := nqp::nfafromstatelist($!states, NFAType);
-            my $reconstructed_states := nqp::nfatostatelist($!nfa_object, NQPArray);
-            note("========");
-            note("before reconstruction:");
-            dump_statelist($!states);
-            note("after reconstruction:");
-            dump_statelist($!states);
-            note("========");
             nqp::scwbenable();
         }
 #        my $t0 := nqp::time_n();
@@ -978,6 +967,9 @@ class QRegex::NFA {
             }
             self.mydump() if $nfadeb;
         }
+        $!nfa_object := nqp::nfafromstatelist($!states, NFAType);
+        $!fates := $!states[0];
+        $!states := NQPMu;
     }
 
     method mydump() {
@@ -986,7 +978,7 @@ class QRegex::NFA {
             my $err := nqp::getstderr();
             nqp::printfh($err, "==========================================\n   $send states\n");
             nqp::printfh($err, "Fates:\n");
-            for $!states[0] -> $f {
+            for $!fates -> $f {
                 $f := "" if nqp::isnull($f);
                 nqp::printfh($err, "\t$f\n");
             }

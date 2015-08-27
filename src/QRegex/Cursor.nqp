@@ -350,7 +350,7 @@ role NQPCursorRole is export {
         }
         
         # Visit rules in fate order.
-        my @rxfate := $nfa.states[0];
+        my @rxfate := $nfa.fates;
         my $cur;
         my $rxname;
         while @fates {
@@ -365,7 +365,7 @@ role NQPCursorRole is export {
     method !protoregex_nfa($name) {
         my %protorx := self.HOW.cache(self, "!protoregex_table", { self."!protoregex_table"() });
         my $nfa := QRegex::NFA.new;
-        my @fates := $nfa.states[0];
+        my @fates := $nfa.fates;
         my int $start := 1;
         my int $fate := 0;
         if nqp::existskey(%protorx, $name) {
