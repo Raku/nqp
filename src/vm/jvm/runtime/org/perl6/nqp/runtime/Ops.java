@@ -19,6 +19,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.NotLinkException;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -169,6 +170,8 @@ public final class Ops {
             case STAT_ISDIR:
                 try {
                     rval = (Boolean) Files.getAttribute(Paths.get(filename), "basic:isDirectory") ? 1 : 0;
+                } catch(NoSuchFileException e) {
+                    rval = 0;
                 } catch (Exception e) {
                     rval = -1;
                 }
@@ -177,6 +180,8 @@ public final class Ops {
             case STAT_ISREG:
                 try {
                     rval = (Boolean) Files.getAttribute(Paths.get(filename), "basic:isRegularFile") ? 1 : 0;
+                } catch(NoSuchFileException e) {
+                    rval = 0;
                 } catch (Exception e) {
                     rval = -1;
                 }
@@ -185,6 +190,8 @@ public final class Ops {
             case STAT_ISDEV:
                 try {
                     rval = (Boolean) Files.getAttribute(Paths.get(filename), "basic:isOther") ? 1 : 0;
+                } catch(NoSuchFileException e) {
+                    rval = 0;
                 } catch (Exception e) {
                     rval = -1;
                 }
@@ -245,6 +252,8 @@ public final class Ops {
             case STAT_ISLNK:
                 try {
                     rval = (Boolean) Files.getAttribute(Paths.get(filename), "basic:isSymbolicLink", LinkOption.NOFOLLOW_LINKS) ? 1 : 0;
+                } catch(NoSuchFileException e) {
+                    rval = 0;
                 } catch (Exception e) {
                     rval = -1;
                 }
