@@ -2703,6 +2703,7 @@ QAST::MASTOperations.add_core_moarop_mapping('hllizefor', 'hllizefor');
 
 # regex engine related opcodes
 QAST::MASTOperations.add_core_moarop_mapping('nfafromstatelist', 'nfafromstatelist');
+QAST::MASTOperations.add_core_moarop_mapping('nfatostatelist', 'nfatostatelist');
 QAST::MASTOperations.add_core_moarop_mapping('nfarunproto', 'nfarunproto');
 QAST::MASTOperations.add_core_moarop_mapping('nfarunalt', 'nfarunalt', 0);
 

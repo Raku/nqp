@@ -646,11 +646,44 @@ class QRegex::NFA {
     # NFA type.
     my knowhow NFAType is repr('NFA') { }
 
+    sub dump_statelist($statelist) {
+        my @fates := nqp::atpos($statelist, 0);
+        my @fates_as_strings;
+        nqp::printfh(nqp::getstderr(), "fates: ");
+        for @fates {
+            nqp::printfh(nqp::getstderr(), "$_ ");
+        }
+        note("");
+        my int $elems := nqp::elems($statelist) - 1;
+        my int $i := 1;
+        while $i < $elems {
+            nqp::printfh(nqp::getstderr(), "edges of $i: ");
+            for nqp::atpos($statelist, $i) {
+                try {
+                    nqp::printfh(nqp::getstderr(), "$_ ");
+                    CATCH {
+                        nqp::printfh(nqp::getstderr(), "cannot_stringify_this ");
+                    }
+                }
+            }
+            note("");
+            $i++;
+        }
+        note(".");
+    }
+
     method run(str $target, int $offset) {
         unless nqp::isconcrete($!nfa_object) {
             self.mydump() if $nfadeb;
             nqp::scwbdisable();
             $!nfa_object := nqp::nfafromstatelist($!states, NFAType);
+            my $reconstructed_states := nqp::nfatostatelist($!nfa_object, NQPArray);
+            note("========");
+            note("before reconstruction:");
+            dump_statelist($!states);
+            note("after reconstruction:");
+            dump_statelist($!states);
+            note("========");
             nqp::scwbenable();
         }
 #        my $t0 := nqp::time_n();
@@ -670,6 +703,13 @@ class QRegex::NFA {
             self.mydump() if $nfadeb;
             nqp::scwbdisable();
             $!nfa_object := nqp::nfafromstatelist($!states, NFAType);
+            my $reconstructed_states := nqp::nfatostatelist($!nfa_object, NQPArray);
+            note("========");
+            note("before reconstruction:");
+            dump_statelist($!states);
+            note("after reconstruction:");
+            dump_statelist($!states);
+            note("========");
             nqp::scwbenable();
         }
 #        my $t0 := nqp::time_n();
