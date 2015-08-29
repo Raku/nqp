@@ -431,7 +431,7 @@ BinaryCursor.prototype.deserialize = function(sc) {
 
   var closures_base = sc.code_refs.length
   for (var i=0; i < closures.length; i++) {
-    sc.code_refs[closures_base+i] = new CodeRef('closure: ' + sc.handle + " " +(closures_base+i));
+    sc.code_refs[closures_base+i] = new CodeRef(closures[i].staticCode.name);
     if (closures[i].codeObj) sc.code_refs[closures_base+i].codeObj = closures[i].codeObj;
     closures[i].index = closures_base+i;
   }
