@@ -12,7 +12,9 @@ var EDGE_FATE = 0,
     EDGE_SUBRULE = 8,
     EDGE_CODEPOINT_I = 9,
     EDGE_CODEPOINT_I_NEG = 10,
-    EDGE_GENERIC_VAR = 11;
+    EDGE_GENERIC_VAR = 11,
+    EDGE_CODEPOINT_LL = 14,
+    EDGE_CODEPOINT_I_LL = 15;
 
 // TODO think about type conversions of the stuff inside the array
 op.nfafromstatelist = function(states, type) {
@@ -23,9 +25,12 @@ op.nfafromstatelist = function(states, type) {
     nfa.states[i - 1] = [];
     for (var j = 0; j < states[i].length; j += 3) {
       var edge = {act: states[i][j], to: states[i][j + 2]};
-      switch (edge.act) {
+      switch (edge.act & 0xff) {
+        case EDGE_EPSILON:
+          break;
         case EDGE_FATE:
         case EDGE_CODEPOINT:
+        case EDGE_CODEPOINT_LL:
         case EDGE_CODEPOINT_NEG:
         case EDGE_CHARCLASS:
         case EDGE_CHARCLASS_NEG:
@@ -36,10 +41,13 @@ op.nfafromstatelist = function(states, type) {
           edge.arg_s = states[i][j + 1];
           break;
         case EDGE_CODEPOINT_I:
+        case EDGE_CODEPOINT_I_LL:
         case EDGE_CODEPOINT_I_NEG:
           edge.arg_lc = states[i][j + 1][0];
           edge.arg_uc = states[i][j + 1][1];
           break;
+        default:
+          throw "nfafromstatelist: unknown codepoint type: " + edge.act;
       }
       nfa.states[i - 1].push(edge);
     }
@@ -48,6 +56,13 @@ op.nfafromstatelist = function(states, type) {
 };
 
 function runNFA(nfa, target, pos) {
+
+  var orig_pos = pos;
+
+  var longlit = [];
+  for (var i=0;i < 200;i++) longlit[i] = 0;
+
+
   var eos = target.length;
   var gen = 1;
 
@@ -61,6 +76,8 @@ function runNFA(nfa, target, pos) {
   var numStates = nfa.states.length;
 
   nextst.push(1);
+
+  var usedlonglit = 0;
 
   while (nextst.length && pos <= eos) {
     /* Translation of:
@@ -90,35 +107,61 @@ function runNFA(nfa, target, pos) {
         var act = edgeInfo[i].act;
         var to = edgeInfo[i].to;
 
-        if (act == EDGE_FATE) {
-          /* Crossed a fate edge. Check if we already saw this, and
-             * if so bump the entry we already saw. */
-          var arg = edgeInfo[i].arg_i;
-          var foundFate = false;
-          for (var j = 0; j < fates.length; j++) {
-            if (foundFate) {
-              fates[j - 1] = fates[j];
+        if (act <= EDGE_EPSILON) {
+            if (act < 0) {
+                act &= 0xff;
+            } else if (act == EDGE_FATE) {
+              /* Crossed a fate edge. Check if we already saw this, and
+                 * if so bump the entry we already saw. */
+              var arg = edgeInfo[i].arg_i;
+              var foundFate = false;
+
+              arg &= 0xffffff;
+              for (var j = 0; j < fates.length; j++) {
+                if (foundFate) {
+                  fates[j - 1] = fates[j];
+                }
+                if (fates[j] == arg) {
+                  foundFate = true;
+                  if (j < prevFates)
+                    prevFates--;
+                }
+              }
+
+              if (arg < usedlonglit) {
+                  arg -= longlit[arg] << 24;
+              }
+
+              if (foundFate)
+                fates[fates.length - 1] = arg;
+              else
+                fates.push(arg);
+              continue;
             }
-            if (fates[j] == arg) {
-              foundFate = true;
-              if (j < prevFates)
-                prevFates--;
+            else if (act == EDGE_EPSILON && to <= numStates && done[to] != gen) {
+              if (to != 0) {
+                curst.push(to);
+              }
+              continue;
             }
-          }
-          if (foundFate)
-            fates[fates.length - 1] = arg;
-          else
-            fates.push(arg);
         }
-        else if (act == EDGE_EPSILON && to <= numStates && done[to] != gen) {
-          curst.push(to);
-        }
-        else if (pos >= eos) {
+
+
+        if (pos >= eos) {
         /* Can't match, so drop state. */
         }
         else if (act == EDGE_CODEPOINT) {
           if (target.charCodeAt(pos) == edgeInfo[i].arg_i)
             nextst.push(to);
+        }
+        else if (act == EDGE_CODEPOINT_LL) {
+            if (target.charCodeAt(pos) == edgeInfo[i].arg_i) {
+              var fate = (edgeInfo[i].act >> 8) & 0xfffff;  /* act is probably signed 32 bits */
+              nextst.push(to);
+              while (usedlonglit <= fate)
+                  longlit[usedlonglit++] = 0;
+              longlit[fate] = pos - orig_pos;
+           }
         }
         else if (act == EDGE_CODEPOINT_NEG) {
           if (target.charCodeAt(pos) != edgeInfo[i].arg_i)
@@ -142,8 +185,11 @@ function runNFA(nfa, target, pos) {
             nextst.push(to);
           }
         }
+        else if (act == EDGE_CODEPOINT_I_LL) {
+          console.log('TODO CODEPOINT I LL');
+        }
         else if (act == EDGE_CODEPOINT_I) {
-          console.log('TODO CODEPOINT NEG');
+          console.log('TODO CODEPOINT I');
         /*char uc_arg = edgeInfo[i].arg_uc;
               char lc_arg = edgeInfo[i].arg_lc;
               char ord = target.charAt((int)pos);
@@ -157,6 +203,8 @@ function runNFA(nfa, target, pos) {
               char ord = target.charAt((int)pos);
               if (ord != lc_arg && ord != uc_arg)
                   nextst.push(to);*/
+        } else {
+          console.log("unknown codepoint", act);
         }
       }
     }
@@ -174,6 +222,13 @@ function runNFA(nfa, target, pos) {
       charFateList.sort(function(a, b) {return b - a;});
       fates = fates.slice(0, prevFates).concat(charFateList);
     }
+  }
+
+
+  if (usedlonglit > 0) {
+      for (var i=0; i < fates.length; i++) {
+          fates[i] = fates[i] &  0xffffff;
+      }
   }
 
   return fates;
