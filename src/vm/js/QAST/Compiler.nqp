@@ -723,9 +723,9 @@ class QAST::OperationsJS {
         add_simple_op('push' ~ $suffix, $type, [$T_OBJ, $type], sub ($array, $elem) {"$array.push($elem)"}, :sideffects);
     }
 
-    for ['_i', $T_INT, '_s', $T_STR] -> $suffix, $type {
-        add_simple_op('atpos' ~ $suffix, $type, [$T_OBJ, $T_INT], sub ($array, $index) {"$array[$index]"});
-    }
+
+    # HACK
+    add_simple_op('atpos_i', $T_INT, [$T_OBJ, $T_INT], sub ($array, $index) {"($array[$index] === undefined ? 0 : $array[$index])"});
 
     add_op('curlexpad', sub ($comp, $node, :$want) {
             my @get;
