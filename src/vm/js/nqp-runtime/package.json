@@ -13,6 +13,6 @@
       "fallback-exec-sync": "*",
       "node-int64": "*",
       "sha1": "*",
-      "bigint": "*"
+      "bignum": "*"
   }
 }

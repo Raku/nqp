@@ -1,6 +1,6 @@
 var reprs = require('./reprs.js');
 
-var bigint = require('bigint');
+var bignum = require('bignum');
 
 var op = {};
 exports.op = op;
@@ -31,7 +31,7 @@ function getBI(obj) {
 }
 
 op.fromstr_I = function(str, type) {
-  return makeBI(type,bigint(str));
+  return makeBI(type,bignum(str));
 };
 
 op.tostr_I = function(n) {
@@ -76,7 +76,7 @@ op.expmod_I = function(a, b, c, type) {
 
 op.div_In = function(a, b) {
   var digits = 1e+20;
-  return getBI(a).mul(bigint(digits)).div(getBI(b)).toNumber()/digits;
+  return getBI(a).mul(bignum(digits)).div(getBI(b)).toNumber()/digits;
 };
 
 op.rand_I = function(max, type) {
@@ -138,11 +138,11 @@ op.tonum_I = function(n) {
 };
 
 op.fromnum_I = function(num, type) {
-  // node-bigint bug workaround, when a negative number is too big it gets turned into 0
+  // node-bignum bug workaround, when a negative number is too big it gets turned into 0
   if (num < 0) {
-    return makeBI(type,bigint(-num).neg());
+    return makeBI(type,bignum(-num).neg());
   } else {
-    return makeBI(type,bigint(num));
+    return makeBI(type,bignum(num));
   }
 };
 

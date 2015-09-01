@@ -396,7 +396,7 @@ VMIter.prototype.deserialize_finish = function(object, data) {
 VMIter.prototype.type_object_for = basic_type_object_for;
 exports.VMIter = VMIter;
 
-var bigint = require('bigint');
+var bignum = require('bignum');
 
 function P6bigint() {
 }
@@ -407,7 +407,7 @@ P6bigint.prototype.type_object_for = function(HOW) {
     var type_object = this.basic_type_object_for(HOW);
 
     this._STable.addInternalMethod('$$set_int', function(value) {
-        this.value = bigint(value);
+        this.value = bignum(value);
     });
 
     this._STable.addInternalMethod('$$get_int', function() {
@@ -427,7 +427,7 @@ P6bigint.prototype.type_object_for = function(HOW) {
 
 P6bigint.prototype.generateBoxingMethods = function(repr, attr) {
   repr._STable.addInternalMethod('$$set_int', function(value) {
-      this[attr.name] = bigint(value);
+      this[attr.name] = bignum(value);
   });
 
   repr._STable.addInternalMethod('$$get_int', function() {
