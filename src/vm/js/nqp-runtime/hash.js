@@ -3,8 +3,14 @@ function Hash() {
 Hash.prototype.$$bindkey = function(key, value) {
     return (this[key] = value);
 };
+
 Hash.prototype.$$atkey = function(key) {
+    // TODO check for leakage from the prototype
     return this[key];
+};
+
+Hash.prototype.$$existskey = function(key) {
+    return this.hasOwnProperty(key);
 };
 
 Hash.prototype.$$clone = function() {

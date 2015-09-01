@@ -12,4 +12,8 @@ CurLexpad.prototype.$$bindkey = function(key, value) {
     return value;
 };
 
+CurLexpad.prototype.$$existskey = function(key) {
+    return this.set.hasOwnProperty(key);
+};
+
 module.exports = CurLexpad;
