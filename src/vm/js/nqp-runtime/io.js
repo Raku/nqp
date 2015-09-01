@@ -236,3 +236,13 @@ op.getenvhash = function() {
   }
   return hash;
 };
+
+function Stderr() {
+};
+Stderr.prototype.printfh = function(msg) {
+    process.stderr.write(msg);
+}
+
+op.getstderr = function() {
+    return new Stderr();
+};
