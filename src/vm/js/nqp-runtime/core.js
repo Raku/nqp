@@ -450,3 +450,29 @@ op.findnotcclass = function(cclass, target, offset, count) {
 op.curlexpad = function(get, set) {
     return new CurLexpad(get, set);
 };
+
+op.setcontspec = function(type, cont_spec_type, hash) {
+    if (cont_spec_type === 'code_pair') {
+        type._STable.addInternalMethod('$$assignunchecked', function(ctx, value) {
+          hash.store.$call(ctx, {}, this, value);
+          return value;
+        });
+        type._STable.addInternalMethod('$$assign', function(ctx, value) {
+          hash.store.$call(ctx, {}, this, value);
+          return value;
+        });
+        type._STable.addInternalMethod('$$decont', function(ctx) {
+          return hash.fetch.$call(ctx, {}, this);
+        });
+    } else {
+        throw "NYI cont spec: "+cont_spec_type;
+    }
+};
+
+op.iscont = function(cont) {
+    return cont.$$decont ? 1 : 0;
+};
+
+op.decont = function(ctx, cont) {
+    return cont.$$decont ? cont.$$decont(ctx) : cont;
+};

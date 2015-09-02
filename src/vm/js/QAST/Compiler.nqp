@@ -348,6 +348,13 @@ class QAST::OperationsJS {
         };
     }
 
+
+    add_simple_op('setcontspec', $T_OBJ, [$T_OBJ, $T_STR, $T_OBJ], :sideffects);
+    add_simple_op('assign',  $T_OBJ, [$T_OBJ, $T_OBJ], sub ($cont, $value) {"$cont.\$\$assign({$*BLOCK.ctx},$value)"}, :sideffects);
+    add_simple_op('assignunchecked',  $T_OBJ, [$T_OBJ, $T_OBJ], sub ($cont, $value) {"$cont.\$\$assignunchecked({$*BLOCK.ctx},$value)"}, :sideffects);
+    add_simple_op('decont', $T_OBJ, [$T_OBJ], sub ($cont) {"nqp.op.decont({$*BLOCK.ctx}, $cont)"});
+    add_simple_op('iscont', $T_INT, [$T_OBJ]);
+
     add_infix_op('add_n', $T_NUM, '+', $T_NUM, $T_NUM);
     add_infix_op('sub_n', $T_NUM, '-', $T_NUM, $T_NUM);
     add_infix_op('mul_n', $T_NUM, '*', $T_NUM, $T_NUM);
@@ -584,6 +591,7 @@ class QAST::OperationsJS {
         my $*BINDVAL := @children[1];
         $comp.as_js(@children[0], :want($T_OBJ));
     });
+
 
     add_op('bindkey', sub ($comp, $node, :$want) {
         $comp.bind_key($node[0], $node[1], $node[2]);
@@ -1066,8 +1074,6 @@ class QAST::OperationsJS {
 
     add_simple_op('die', $T_VOID, [$T_STR], :sideffects, sub ($msg) {"{$*BLOCK.ctx}.die($msg)"});
 
-    # TODO work on containers
-    add_simple_op('decont', $T_OBJ, [$T_OBJ], sub ($obj) {$obj});
 
     add_simple_op('how', $T_OBJ, [$T_OBJ], sub ($obj) {"$obj._STable.HOW"});
     add_simple_op('who', $T_OBJ, [$T_OBJ], sub ($obj) {"$obj._STable.WHO"});
