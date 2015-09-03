@@ -262,3 +262,7 @@ exports.regexCommit = function(bstack, mark) {
     bstack.push(0, -1, 0, caps);
   }
 };
+
+exports.Last = function(label) {
+    this.label = label;
+};

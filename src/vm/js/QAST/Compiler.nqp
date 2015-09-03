@@ -265,6 +265,7 @@ my class LoopInfo {
     has $!outer;
     has $!redo;
     has $!handle_last;
+    has $!label;
 
     method redo() {
         unless nqp::defined($!redo) {
@@ -275,16 +276,18 @@ my class LoopInfo {
     method has_redo() {
         nqp::defined($!redo);
     }
-    method new($outer) {
+    method new($outer, :$label) {
         my $obj := nqp::create(self);
-        $obj.BUILD($outer);
+        $obj.BUILD($outer, $label);
         $obj
     }
-    method BUILD($outer) {
+    method BUILD($outer, $label) {
         $!outer := $outer;
+        $!label := $label;
     }
     method outer() { $!outer }
     method handle_last(*@value) { $!handle_last := @value[0] if @value;$!handle_last}
+    method label(*@value) { $!label := @value[0] if @value;$!label}
 }
 
 my class BlockBarrier {
@@ -933,7 +936,8 @@ class QAST::OperationsJS {
 
         my $outer     := try $*BLOCK;
         my $outer_loop := try $*LOOP;
-        my $loop := LoopInfo.new($outer_loop);
+
+        my $loop := LoopInfo.new($outer_loop, :$label);
 
         my $body := $comp.compile_block(@operands[1], $outer, $loop , :want($T_VOID), :extra_args(@body_args));
 
@@ -962,7 +966,7 @@ class QAST::OperationsJS {
             # TODO - return value
             # TODO while ... -> $cond {} 
 
-            my $loop := LoopInfo.new($*LOOP);
+            my $loop := LoopInfo.new($*LOOP, :$label);
 
             my $cond;
             my $body;
@@ -1036,20 +1040,33 @@ class QAST::OperationsJS {
 
 
     add_op('control', sub ($comp, $node, :$want) {
-        return $comp.NYI("Labels to control") if $node[0];
         if $node.name eq 'last' {
             if $*LOOP ~~ LoopInfo {
                 Chunk.void("break;\n");
             } elsif $*LOOP ~~ BlockBarrier {
                 my $loop := $*LOOP;
+                my $label := $node[0];
+
+
                 while nqp::defined($loop.outer) {
                     $loop := $loop.outer;
                     if $loop ~~ LoopInfo {
-                        $loop.handle_last(1);
-                        return Chunk.void("throw 'last';\n");
+                        if $label {
+                            # TODO compare labels which are WVals to reduce the number of loops that catch exceptions
+                            $loop.handle_last(1);
+                        } else {
+                            $loop.handle_last(1);
+                            return Chunk.void("throw new nqp.Last(null);\n");
+                        }
                     }
                 }
-                $comp.NYI("can't find surrounding loop for last");
+
+                if $label {
+                    my $compiled_label := $comp.as_js($label, :want($T_OBJ));
+                    Chunk.void($compiled_label, "throw new nqp.Last({$compiled_label.expr});\n");
+                } else {
+                    $comp.NYI("can't find surrounding loop for last");
+                }
             }
         } elsif $node.name eq 'next' {
             if $*LOOP ~~ LoopInfo {
@@ -1963,19 +1980,29 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         $chunk;
     }
 
-    method handle_control($loop, $chunk) {
+    method handle_control($loop, $body) {
+        my $handle_control_exceptions := $loop.handle_last;
         if $loop.handle_last {
-            Chunk.new($chunk.type, $chunk.expr, [
+            my $setup_label := "";
+            my $check_label := "e.label === null";
+            if $loop.label {
+                $setup_label := self.as_js($loop.label, :want($T_OBJ));
+                $check_label := $check_label ~ ' || e.label === ' ~ $setup_label.expr;
+            } else {
+             }
+
+            Chunk.new($body.type, $body.expr, [
+                $setup_label,
                 "try \{\n",
-                $chunk,
+                $body,
                 "\} catch (e) \{\n",
-                "if (e == 'last') \{\n",
+                "if (e instanceof nqp.Last && ($check_label)) \{\n",
                 "break;\n",
                 "\} else \{ throw (e) \}\n" ,
                 "\}\n"
             ]);
         } else {
-            $chunk;
+            $body;
         }
     }
 
