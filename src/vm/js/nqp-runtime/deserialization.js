@@ -124,6 +124,7 @@ BinaryCursor.prototype.hashOfVariants = function() {
 
 /** Read a int of variable length */
 /* TODO - make it work correctly for values bigger than 32bit integers*/
+// XXX TODO - length checks
 BinaryCursor.prototype.varint = function() {
     var result;
     var first;
@@ -138,7 +139,6 @@ BinaryCursor.prototype.varint = function() {
 
     need = first >> 4;
 
-    // XXX TODO - length checks
     if (!need) {
         // unrolled loop for optimization
         result =
@@ -154,8 +154,19 @@ BinaryCursor.prototype.varint = function() {
 
         return result;
     }
-    // TODO
-    throw new Error('Reading a varint with need is NYI');
+
+    result = first << 8 * need;
+
+    var shift_places = 0;
+    for(var i = 0; i < need; i++) {
+        var byte = buffer.readUInt8(this.offset++);
+        result |= (byte << shift_places);
+        shift_places += 8;
+    }
+    result = result << (64 - 4 - 8 * need);
+    result = result >> (64 - 4 - 8 * need);
+
+    return result;
 }
 
 /** Read a variant reference */
