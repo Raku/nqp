@@ -123,49 +123,45 @@ BinaryCursor.prototype.hashOfVariants = function() {
 };
 
 /** Read a int of variable length */
-/* TODO - make it work correctly for values bigger then 32bit integers*/
+/* TODO - make it work correctly for values bigger than 32bit integers*/
 BinaryCursor.prototype.varint = function() {
-    var inner_offset = 0;
-    var shift_amount = 0;
-    var negation_mask = 0;
+    var result;
+    var first;
+    var need;
+    var buffer = this.buffer;
 
-    var read_on = !!(this.buffer.readInt8(this.offset) & 0x80) + 1;
+    first = buffer.readUInt8(this.offset++);
 
-    var value = 0;
-
-    while (read_on && inner_offset != 8) {
-        value = value | ((this.buffer.readInt8(this.offset + inner_offset) & 0x7f) << shift_amount);
-        negation_mask = negation_mask | (0x7F << shift_amount);
-
-        if (read_on == 1 && this.buffer.readInt8(this.offset + inner_offset) & 0x80) {
-            read_on = 2;
-        }
-        read_on--;
-        inner_offset++;
-        shift_amount += 7;
+    if (first & 0x80) {
+        return first - 129;
     }
-    // our last byte will be a full byte, so that we reach the full 64 bits
-    // TODO handle the last full byte
-    /*
-    if (read_on && inner_offset == 8) {
-        *value = *value | ((int64_t)buffer[offset + inner_offset] << shift_amount);
-        negation_mask = negation_mask | ((int64_t)0xFF << shift_amount);
-        ++inner_offset;
-    }*/
-    negation_mask = negation_mask >> 1;
-    // do we have a negative number so far?
-    if (value & ~negation_mask) {
-        // we have to fill it up with ones all the way to the left.
-        value = value | ~negation_mask;
+
+    need = first >> 4;
+
+    // XXX TODO - length checks
+    if (!need) {
+        // unrolled loop for optimization
+        result =
+            buffer.readUInt8(this.offset + 0)       |
+            buffer.readUInt8(this.offset + 1) << 8  |
+            buffer.readUInt8(this.offset + 2) << 16 |
+            buffer.readUInt8(this.offset + 3) << 24 |
+            buffer.readUInt8(this.offset + 4) << 32 |
+            buffer.readUInt8(this.offset + 5) << 40 |
+            buffer.readUInt8(this.offset + 6) << 48 |
+            buffer.readUInt8(this.offset + 7) << 56;
+        this.offset += 8;
+
+        return result;
     }
-    this.offset += inner_offset;
-    return value;
+    // TODO
+    throw new Error('Reading a varint with need is NYI');
 }
 
 /** Read a variant reference */
 BinaryCursor.prototype.variant = function() {
-  var type = this.buffer.readUInt16LE(this.offset);
-  this.offset += 2;
+  var type = this.buffer.readInt8(this.offset);
+  this.offset += 1;
   switch (type) {
     case 2:
       return this.objRef();
@@ -213,16 +209,7 @@ BinaryCursor.prototype.STable = function(STable) {
 
   var method_cache = this.variant();
 
-  //console.log("method_cache", method_cache);
   STable.setMethodCache(method_cache);
-
-  //TODO: maybe we should just get rid of the vtable
-  var vtable = [];
-  var vtable_len = this.I64();
-  if (vtable_len != 0) {
-    console.log("obsolete vtable leftovers", vtable_len);
-    process.exit();
-  }
 
   var type_check_cache = [];
   var type_check_cache_len = this.I64();
@@ -256,6 +243,9 @@ BinaryCursor.prototype.STable = function(STable) {
   }
 
   STable.hll_owner = this.str();
+
+  // TODO check for MVM_PARAMETRIC_TYPE mode_flags
+  // TODO check for MVM_PARAMETRIC_TYPE mode_flags
 
   if (STable.REPR.deserialize_repr_data) {
     STable.REPR.deserialize_repr_data(this.clone(),STable);
@@ -327,13 +317,18 @@ BinaryCursor.prototype.contextEntry = function(contextsData) {
 
 /** Read a whole serialization context */
 BinaryCursor.prototype.deserialize = function(sc) {
+  // XXX varint encoding is different (there's an NYI bit...see if it's impl'd later on)
+  // XXX stable serialization has changed
 
-
+  // XXX writing/reading refs where !IS_CONCRETE looks different
+  // XXX read_discrim
+  // XXX deserialize_method_cache_lazy
+  // XXX parameterized types
   var version = this.I32();
 
   this.sc = sc;
 
-  if (version != 12) {
+  if (version != 14) {
     throw 'Unsupported serialization format version: ' + version;
   }
 
@@ -499,6 +494,15 @@ BinaryCursor.prototype.deserialize = function(sc) {
     /* TODO reduce accidental poisoning */
     /* TODO make cuids be in scope */
     eval(prelude + declareCuids + code);
+  }
+
+  var reposTable = this.I32();
+  var numRepos = this.I32();
+  var paramInternsData = this.I32();
+  var numParamInterns = this.I32();
+
+  if(numParamInterns != 0) {
+      // XXX do we need to care?
   }
 };
 
