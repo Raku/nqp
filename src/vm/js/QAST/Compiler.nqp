@@ -264,8 +264,10 @@ my %const_map := nqp::hash(
 my class LoopInfo {
     has $!outer;
     has $!redo;
-    has $!handle_last;
+
     has $!label;
+
+    has %!handled;
 
     method redo() {
         unless nqp::defined($!redo) {
@@ -284,9 +286,26 @@ my class LoopInfo {
     method BUILD($outer, $label) {
         $!outer := $outer;
         $!label := $label;
+        %!handled := nqp::hash();
     }
+
     method outer() { $!outer }
-    method handle_last(*@value) { $!handle_last := @value[0] if @value;$!handle_last}
+
+    # do we have to catch the control exception? 
+
+    method handled() {
+        my @handled;
+        for %!handled {
+            @handled.push($_.key);
+        }
+        @handled;
+    }
+
+    method handle($type) {
+        %!handled{$type} := 1;
+    }
+
+
     method label(*@value) { $!label := @value[0] if @value;$!label}
 }
 
@@ -978,6 +997,9 @@ class QAST::OperationsJS {
 
             if $op eq 'while' || $op eq 'until' {
                 my $neg := $op eq 'while' ?? '!' !! '';
+
+                # handle_control can set redo so we call it here
+                my $handled := $comp.handle_control($loop, $body);
                 Chunk.void(
                     "for (;;) \{\n",
                     ($loop.has_redo
@@ -988,7 +1010,7 @@ class QAST::OperationsJS {
                     $cond,
                     "if ($neg {$cond.expr}) \{break;\}\n",
                     ($loop.has_redo ?? "\}\n" !! ''),
-                    $comp.handle_control($loop, $body),
+                    $handled,
                     "\}"
                 );
             } else {
@@ -1040,51 +1062,7 @@ class QAST::OperationsJS {
 
 
     add_op('control', sub ($comp, $node, :$want) {
-        if $node.name eq 'last' {
-            if $*LOOP ~~ LoopInfo {
-                Chunk.void("break;\n");
-            } elsif $*LOOP ~~ BlockBarrier {
-                my $loop := $*LOOP;
-                my $label := $node[0];
-
-
-                while nqp::defined($loop.outer) {
-                    $loop := $loop.outer;
-                    if $loop ~~ LoopInfo {
-                        if $label {
-                            # TODO compare labels which are WVals to reduce the number of loops that catch exceptions
-                            $loop.handle_last(1);
-                        } else {
-                            $loop.handle_last(1);
-                            return Chunk.void("throw new nqp.Last(null);\n");
-                        }
-                    }
-                }
-
-                if $label {
-                    my $compiled_label := $comp.as_js($label, :want($T_OBJ));
-                    Chunk.void($compiled_label, "throw new nqp.Last({$compiled_label.expr});\n");
-                } else {
-                    $comp.NYI("can't find surrounding loop for last");
-                }
-            }
-        } elsif $node.name eq 'next' {
-            if $*LOOP ~~ LoopInfo {
-                Chunk.void("continue;\n");
-            } else {
-                $comp.NYI("indirect next");
-            }
-        } elsif $node.name eq 'redo' {
-            if $*LOOP ~~ LoopInfo {
-                Chunk.void("{$*LOOP.redo} = 1;\n;continue;\n");
-            } else {
-                $comp.NYI("indirect redo");
-            }
-            
-
-        } else {
-            $comp.NYI("control with name: "~$node.name);
-        }
+        $comp.throw_control_exception($node.name, $*LOOP, $node[0]);
     });
 
     add_simple_op('create', $T_OBJ, [$T_OBJ], :sideffects);
@@ -1981,24 +1959,29 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     method handle_control($loop, $body) {
-        my $handle_control_exceptions := $loop.handle_last;
-        if $loop.handle_last {
+        if nqp::elems($loop.handled) > 0 {
             my $setup_label := "";
             my $check_label := "e.label === null";
+
             if $loop.label {
                 $setup_label := self.as_js($loop.label, :want($T_OBJ));
                 $check_label := $check_label ~ ' || e.label === ' ~ $setup_label.expr;
-            } else {
-             }
+            }
+
+
+            my @handle_exceptions;
+
+            for $loop.handled -> $type {
+                @handle_exceptions.push("if (e instanceof nqp.{ucfirst($type)} && ($check_label)) \{ {self.do_control($type, $loop) } \}\n");
+            }
 
             Chunk.new($body.type, $body.expr, [
                 $setup_label,
                 "try \{\n",
                 $body,
                 "\} catch (e) \{\n",
-                "if (e instanceof nqp.Last && ($check_label)) \{\n",
-                "break;\n",
-                "\} else \{ throw (e) \}\n" ,
+                Chunk.void(|@handle_exceptions),
+                "throw (e);",
                 "\}\n"
             ]);
         } else {
@@ -2350,6 +2333,42 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         ~ $set_info
         ~ "nqp.op.deserialize($quoted_data,sc,sh,code_refs,null);\n"
         ~ "nqp.op.scsetdesc(sc,{quote_string(nqp::scgetdesc($sc))});\n"
+    }
+
+    method do_control($type, $loop) {
+        if $type eq 'last' {
+            "break;\n";
+        } elsif $type eq 'next' {
+            "continue;\n";
+        } elsif $type eq 'redo' {
+            "{$loop.redo} = 1;\n;continue;\n";
+        }
+    }
+
+    my sub ucfirst($str) {
+        nqp::uc(nqp::substr($str, 0, 1)) ~ nqp::substr($str, 1);
+    }
+
+    method throw_control_exception($type, $loop, $label) {
+        while nqp::defined($loop) {
+            if $loop ~~ LoopInfo {
+                if $label {
+                    # TODO compare labels which are WVals to reduce the number of loops that catch exceptions
+                    $loop.handle($type);
+                } else {
+                    $loop.handle($type);
+                    return Chunk.void("throw new nqp.{ucfirst($type)}(null);\n");
+                }
+            }
+            $loop := $loop.outer;
+        }
+
+        if $label {
+            my $compiled_label := self.as_js($label, :want($T_OBJ));
+            Chunk.void($compiled_label, "throw new nqp.{ucfirst($type)}({$compiled_label.expr});\n");
+        } else {
+            self.NYI("can't find surrounding loop for last");
+        }
     }
 
     multi method as_js(QAST::CompUnit $node, :$want) {
