@@ -246,3 +246,12 @@ Stderr.prototype.printfh = function(msg) {
 op.getstderr = function() {
     return new Stderr();
 };
+
+function Stdout() {
+};
+Stdout.prototype.printfh = function(msg) {
+    process.stdout.write(msg);
+}
+op.getstdout = function() {
+    return new Stdout();
+};
