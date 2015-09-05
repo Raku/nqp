@@ -4,13 +4,7 @@ Missing features
 Ops missing for regexes.
 We need to write tests (if they don't already exist in t/nqp)
 
- -  curlexpad
  -  die_s
- -  getcodename
- -  getlexdyn
- -  nfafromstatelist
- -  nfarunalt
- -  nfarunproto - MEDIUM (Look at t/nqp/74-nfa.t)
  -  sprintf - MEDIUM (See t/hll/06-sprintf.t)
 
 Portability 
@@ -18,6 +12,7 @@ Portability
 
 General stuff that helps all backends
     Write tests (to avoid implementing stuff in crazy ways)
+    -  nfarunalt
     - nqp::eoffh - EASY
     - nqp::isstr
     - nqp::getmessage
