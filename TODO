@@ -1,18 +1,13 @@
-Missing features
-    - reasumable exceptions t/nqp/44-try-catch.t
 
-Ops missing for regexes.
-We need to write tests (if they don't already exist in t/nqp)
-
- -  die_s
- -  sprintf - MEDIUM (See t/hll/06-sprintf.t)
+- port from using bigint to bignum (it's more mantained, builds on current node.js etc.)
+  the tricky part about that is getting binary and/or working on negative bignums under bigint
 
 Portability 
    - Check if Function.name works on IE. If it doesn't instead checking for _ in callercode check for a custom property.
 
 General stuff that helps all backends
     Write tests (to avoid implementing stuff in crazy ways)
-    -  nfarunalt
+    - nfarunalt
     - nqp::eoffh - EASY
     - nqp::isstr
     - nqp::getmessage
@@ -31,4 +26,5 @@ Build system
 Portability
     - Get the build system to work on windows (haven't tried that yet)
 
-Write a HACKING file.
+Expand the HACKING file.
+  (Asking question that pmurias will glady answer is the best way to do this)
