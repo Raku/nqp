@@ -99,16 +99,73 @@ function SerializedObjRef(sc, id) {
 
 /** Read an entry from the objects table */
 BinaryCursor.prototype.objectEntry = function(objectsData) {
+    const OBJECTS_TABLE_ENTRY_SC_MASK     = 0x7FF;
+    const OBJECTS_TABLE_ENTRY_SC_IDX_MASK = 0x000FFFFF;
+    const OBJECTS_TABLE_ENTRY_SC_MAX      = 0x7FE;
+    const OBJECTS_TABLE_ENTRY_SC_IDX_MAX  = 0x000FFFFF;
+    const OBJECTS_TABLE_ENTRY_SC_SHIFT    = 20;
+    const OBJECTS_TABLE_ENTRY_SC_OVERFLOW = 0x7FF;
+    const OBJECTS_TABLE_ENTRY_IS_CONCRETE = 0x80000000;
+
+  var packed = this.I32();
+  var offset = this.I32();
+
+  var sc = (packed >> OBJECTS_TABLE_ENTRY_SC_SHIFT) & OBJECTS_TABLE_ENTRY_SC_MASK;
+  var sc_idx;
+
+  if (sc == OBJECTS_TABLE_ENTRY_SC_OVERFLOW) {
+      throw new Error("Objects Overflow NYI");
+  } else {
+      sc_idx = packed & OBJECTS_TABLE_ENTRY_SC_IDX_MASK;
+  }
+
   return {
-    STable: [this.I32(), this.I32()],
-    data: this.at(objectsData + this.I32()),
-    is_concrete: this.I32()
+    STable: [sc, sc_idx],
+    data: this.at(objectsData + offset),
+    is_concrete: packed & OBJECTS_TABLE_ENTRY_IS_CONCRETE
   };
 };
 
+BinaryCursor.prototype.locate_thing = function (thing_type) {
+  var packed;
+  var sc_id;
+  var index;
+  var sc;
+
+  const v15 = true;
+
+  const PACKED_SC_SHIFT    = 20;
+  const PACKED_SC_OVERFLOW = 0xfff;
+  const PACKED_SC_IDX_MASK = 0x000fffff;
+
+  if (v15) {
+    packed = this.U32();
+    sc_id  = packed >>> PACKED_SC_SHIFT;
+    index  = packed & PACKED_SC_IDX_MASK;
+
+    if (sc_id != PACKED_SC_OVERFLOW) {
+      index = packed & PACKED_SC_IDX_MASK;
+    } else {
+      sc_id = this.I32();
+      index = this.I32();
+    }
+  } else {
+    sc_id = this.I32();
+    index = this.I32();
+  }
+
+  try {
+    return this.sc.deps[sc_id][thing_type][index];
+  } catch(e) {
+    console.log(this.sc.deps.length);
+    console.log(e.toString(), sc_id, thing_type, index);
+    throw e;
+  }
+}
+
 /**  */
 BinaryCursor.prototype.objRef = function() {
-  return this.sc.deps[this.I32()].root_objects[this.I32()];
+  return this.locate_thing('root_objects');
 };
 
 /** Read a hash of variants */
@@ -197,11 +254,9 @@ BinaryCursor.prototype.variant = function() {
       return this.hashOfVariants(this);
     case 11:
     case 12:
-      var scID = this.I32();
-      var codeRefID = this.I32();
-      var codeRef = this.sc.deps[scID].code_refs[codeRefID];
+      var codeRef = this.locate_thing('code_refs');
       if (!codeRef) {
-        console.log('missing code ref while deserializing', scID, codeRefID);
+        console.log('missing code ref while deserializing');
         console.log(this.sc.code_refs);
       }
       return codeRef;
@@ -266,9 +321,7 @@ BinaryCursor.prototype.STable = function(STable) {
 }
 
 BinaryCursor.prototype.staticCodeRef = function() {
-  var scID = this.I32();
-  var codeRefID = this.I32();
-  var staticCode = this.sc.deps[scID].code_refs[codeRefID];
+  var staticCode = this.locate_thing('code_refs');
   if (!staticCode) {
     console.log('Code ref has an invalid static code');
   }
@@ -277,18 +330,31 @@ BinaryCursor.prototype.staticCodeRef = function() {
 
 BinaryCursor.prototype.closureEntry = function() {
   var entry = {};
-  entry.staticCode = this.staticCodeRef();
+  var staticScId = this.I32();
+  var staticIndex = this.I32();
+  entry.staticCode = this.sc.deps[staticScId].code_refs[staticIndex];
+  //entry.staticCode = this.staticCodeRef();
   entry.context = this.I32();
   var hasCodeObj = this.I32();
   if (hasCodeObj) {
-    entry.codeObj = this.objRef();
+    //entry.codeObj = this.objRef();
+    var objectScId  = this.I32();
+    var objectIndex = this.I32();
+    //entry.codeObj  = this.sc.deps[objectScId].root_objects[objectIndex];
+  } else {
+    // we're packed along a 24-byte alignment
+    this.I32();
+    this.I32();
   }
   return entry;
 }
 
 BinaryCursor.prototype.contextEntry = function(contextsData) {
   var entry = {};
-  entry.staticCode = this.staticCodeRef();
+  var staticScId = this.I32();
+  var staticIndex = this.I32();
+  entry.staticCode = this.sc.deps[staticScId].code_refs[staticIndex];
+  //entry.staticCode = this.staticCodeRef();
   var data = this.at(contextsData + this.I32());
   entry.outer = this.I32();
   entry.inner = [];
@@ -339,7 +405,7 @@ BinaryCursor.prototype.deserialize = function(sc) {
 
   this.sc = sc;
 
-  if (version != 14) {
+  if (version != 15) {
     throw 'Unsupported serialization format version: ' + version;
   }
 
@@ -546,6 +612,12 @@ BinaryCursor.prototype.contextToCode = function(context, data) {
 /** Read a 32bit integer */
 BinaryCursor.prototype.I32 = function() {
   var ret = this.buffer.readInt32LE(this.offset);
+  this.offset += 4;
+  return ret;
+};
+
+BinaryCursor.prototype.U32 = function() {
+  var ret = this.buffer.readUInt32LE(this.offset);
   this.offset += 4;
   return ret;
 };

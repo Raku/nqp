@@ -49,7 +49,7 @@ P6opaque.prototype.deserialize_repr_data = function(cursor, STable) {
   this.flattened_stables = [];
   for (var i = 0; i < num_attributes; i++) {
     var not_null = cursor.varint();
-    this.flattened_stables.push(not_null != 0 ? cursor.sc.deps[cursor.I32()].root_stables[cursor.I32()] : null);
+    this.flattened_stables.push(not_null != 0 ? cursor.locate_thing('root_stables') : null);
   }
   this.mi = cursor.varint();
   var has_auto_viv_values = cursor.varint();
