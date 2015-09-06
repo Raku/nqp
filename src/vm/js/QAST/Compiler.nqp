@@ -372,9 +372,9 @@ class QAST::OperationsJS {
 
 
     add_simple_op('setcontspec', $T_OBJ, [$T_OBJ, $T_STR, $T_OBJ], :sideffects);
-    add_simple_op('assign',  $T_OBJ, [$T_OBJ, $T_OBJ], sub ($cont, $value) {"$cont.\$\$assign({$*BLOCK.ctx},$value)"}, :sideffects);
-    add_simple_op('assignunchecked',  $T_OBJ, [$T_OBJ, $T_OBJ], sub ($cont, $value) {"$cont.\$\$assignunchecked({$*BLOCK.ctx},$value)"}, :sideffects);
-    add_simple_op('decont', $T_OBJ, [$T_OBJ], sub ($cont) {"nqp.op.decont({$*BLOCK.ctx}, $cont)"});
+    add_simple_op('assign',  $T_OBJ, [$T_OBJ, $T_OBJ], sub ($cont, $value) {"$cont.\$\$assign({$*CTX},$value)"}, :sideffects);
+    add_simple_op('assignunchecked',  $T_OBJ, [$T_OBJ, $T_OBJ], sub ($cont, $value) {"$cont.\$\$assignunchecked({$*CTX},$value)"}, :sideffects);
+    add_simple_op('decont', $T_OBJ, [$T_OBJ], sub ($cont) {"nqp.op.decont({$*CTX}, $cont)"});
     add_simple_op('iscont', $T_INT, [$T_OBJ]);
 
     add_infix_op('add_n', $T_NUM, '+', $T_NUM, $T_NUM);
@@ -1068,7 +1068,7 @@ class QAST::OperationsJS {
 
     add_simple_op('create', $T_OBJ, [$T_OBJ], :sideffects);
 
-    add_simple_op('die', $T_VOID, [$T_STR], :sideffects, sub ($msg) {"{$*BLOCK.ctx}.die($msg)"});
+    add_simple_op('die', $T_VOID, [$T_STR], :sideffects, sub ($msg) {"{$*CTX}.die($msg)"});
 
 
     add_simple_op('how', $T_OBJ, [$T_OBJ], sub ($obj) {"$obj._STable.HOW"});
@@ -1095,12 +1095,12 @@ class QAST::OperationsJS {
         } , :sideffects);
     }
 
-    add_simple_op('getlexdyn', $T_OBJ, [$T_STR], sub ($name) {"{$*BLOCK.ctx}.lookup_dynamic_from_caller($name)"});
+    add_simple_op('getlexdyn', $T_OBJ, [$T_STR], sub ($name) {"{$*CTX}.lookup_dynamic_from_caller($name)"});
 
     add_simple_op('captureposelems', $T_INT, [$T_OBJ]);
     add_simple_op('captureposarg', $T_OBJ, [$T_OBJ, $T_INT]);
     add_simple_op('invokewithcapture', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($invokee, $capture) {
-        "$invokee.\$apply([{$*BLOCK.ctx}].concat($capture.named, $capture.pos))"
+        "$invokee.\$apply([{$*CTX}].concat($capture.named, $capture.pos))"
     }, :sideffects);
 
 
@@ -1212,7 +1212,7 @@ class RegexCompiler {
 
         Chunk.new($T_OBJ, $!cursor, [
             "{$!label} = {$!initial_label};\n",
-            "$start = self['!cursor_start_all']({$*BLOCK.ctx}, \{\});\n",
+            "$start = self['!cursor_start_all']({$*CTX}, \{\});\n",
             "{$!cursor} = $start[0];\n",
             "{$!target} = $start[1];\n",
             "{$!pos} = $start[2];\n",
@@ -1240,7 +1240,7 @@ class RegexCompiler {
             self.goto($jump),
 
             self.case($!done_label),
-            "{$!cursor}['!cursor_fail']({$*BLOCK.ctx}, \{\});\n",
+            "{$!cursor}['!cursor_fail']({$*CTX}, \{\});\n",
             "break {$!js_loop_label}\n",
             "\}\n\}\n"
         ]);
@@ -1314,7 +1314,7 @@ class RegexCompiler {
         }
 
         Chunk.void(
-            "{$!cursor}['!cursor_pass']({$*BLOCK.ctx},",
+            "{$!cursor}['!cursor_pass']({$*CTX},",
             "\{backtrack: {$node.backtrack ne 'r'}\}, {$!pos}",
             (nqp::defined($name) ?? ',' ~ $name !! ''),
             ");\n",
@@ -1345,7 +1345,7 @@ class RegexCompiler {
     }
 
     my sub call($invocant, $method, *@args) {
-        nqp::unshift(@args, $*BLOCK.ctx);
+        nqp::unshift(@args, $*CTX);
         nqp::unshift(@args, 'nqp.named([])');
         $invocant ~ "[" ~ quote_string($method) ~ "](" ~ nqp::join(",", @args) ~ ")";
     }
@@ -1376,7 +1376,7 @@ class RegexCompiler {
         else {
             #TODO think if arguments are possible, etc.
             my $block := $!compiler.as_js($node[0][0], :want($T_OBJ));
-            $call := Chunk.new($T_OBJ, $block.expr ~ ".\$call({$*BLOCK.ctx},nqp.named([]),$!cursor)", [$block]);
+            $call := Chunk.new($T_OBJ, $block.expr ~ ".\$call({$*CTX},nqp.named([]),$!cursor)", [$block]);
         }
 
         my $testop := $node.negate ?? '>=' !! '<';
@@ -1777,7 +1777,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             @groups[0].unshift(@named_groups[0]);
         }
 
-        @groups[0].unshift($*BLOCK.ctx);
+        @groups[0].unshift($*CTX);
 
         my sub chunkify(@group, $pre = '', $post = '') {
             my @exprs;
@@ -1922,7 +1922,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 %convert{$T_NUM} := 'to_num';
                 %convert{$T_INT} := 'to_int';
                 %convert{$T_BOOL} := 'to_bool';
-                return Chunk.new($desired, 'nqp.' ~ %convert{$desired} ~ '(' ~ $chunk.expr ~ ", {$*BLOCK.ctx})", [$chunk]);
+                return Chunk.new($desired, 'nqp.' ~ %convert{$desired} ~ '(' ~ $chunk.expr ~ ", {$*CTX})", [$chunk]);
             }
 
             if $desired == $T_STR {
@@ -2153,6 +2153,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my $setup;
 
+        my $outer_ctx := try $*CTX;
+
         if self.is_known_cuid($node) {
             $setup := [];
         } else {
@@ -2162,6 +2164,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             my $*LOOP := BlockBarrier.new($*BLOCK, $outer_loop);
 
+            my $*CTX;
             my $create_ctx := self.create_fresh_ctx();
 
             my $body_want := $node.blocktype eq 'immediate' ?? $want !! $T_OBJ;
@@ -2204,7 +2207,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 } else {
                     %!serialized_code_ref_info{$node.cuid} := SerializedCodeRefInfo.new(
                         closure_template => Chunk.new($T_OBJ, "", $function).join(),
-                        ctx => $*BLOCK.ctx,
+                        ctx => $*CTX,
                         outer_ctx => (nqp::defined($*BLOCK.outer) ?? $*BLOCK.outer.ctx !! ""),
                         static_info => self.static_info_for_lexicals($*BLOCK)
                     );
@@ -2214,7 +2217,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
 
         if $node.blocktype eq 'immediate' {
-            my @args := [$outer.ctx,'{}'];
+            my @args := [$outer_ctx,'{}'];
             for @extra_args -> $arg {
                 @args.push($arg.expr);
                 $setup.push($arg);
@@ -2234,8 +2237,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     method create_fresh_ctx() {
-        $*BLOCK.ctx(self.unique_var('ctx'));
-        self.create_ctx($*BLOCK.ctx);
+        $*CTX := self.unique_var('ctx');
+        $*BLOCK.ctx($*CTX);
+        self.create_ctx($*CTX);
     }
 
     method outer_ctx() {
@@ -2528,15 +2532,15 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             if $*BINDVAL {
                 my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ));
                 if $var.decl eq 'var' {
-                    self.stored_result(Chunk.new($T_OBJ, "({$*BLOCK.ctx}[{quote_string($var.name)}] = {$bindval.expr})",  [$bindval]));
+                    self.stored_result(Chunk.new($T_OBJ, "({$*CTX}[{quote_string($var.name)}] = {$bindval.expr})",  [$bindval]));
                 } else {
-                    self.stored_result(Chunk.new($T_OBJ, "{$*BLOCK.ctx}.bind({quote_string($var.name)}, {$bindval.expr})",  [$bindval]));
+                    self.stored_result(Chunk.new($T_OBJ, "{$*CTX}.bind({quote_string($var.name)}, {$bindval.expr})",  [$bindval]));
                 }
             } else {
                 if $var.decl eq 'var' {
-                    self.stored_result(Chunk.new($T_OBJ, "({$*BLOCK.ctx}[{quote_string($var.name)}] = null)",  []));
+                    self.stored_result(Chunk.new($T_OBJ, "({$*CTX}[{quote_string($var.name)}] = null)",  []));
                 } else {
-                    Chunk.new($T_OBJ, "{$*BLOCK.ctx}.lookup({quote_string($var.name)})", [], :node($var));
+                    Chunk.new($T_OBJ, "{$*CTX}.lookup({quote_string($var.name)})", [], :node($var));
                 }
             }
         } elsif self.var_is_lexicalish($var) || $var.scope eq 'local' {
@@ -2592,9 +2596,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         } elsif ($var.scope eq 'contextual') {
             if $*BINDVAL {
                 my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ));
-                self.stored_result(Chunk.new($T_OBJ, "{$*BLOCK.ctx}.bind_dynamic({quote_string($var.name)},{$bindval.expr})", [$bindval]));
+                self.stored_result(Chunk.new($T_OBJ, "{$*CTX}.bind_dynamic({quote_string($var.name)},{$bindval.expr})", [$bindval]));
             } else {
-                Chunk.new($T_OBJ, "{$*BLOCK.ctx}.lookup_dynamic({quote_string($var.name)})", []);
+                Chunk.new($T_OBJ, "{$*CTX}.lookup_dynamic({quote_string($var.name)})", []);
             }
         } else {
             self.NYI("Unimplemented QAST::Var scope: " ~ $var.scope);
