@@ -231,7 +231,9 @@ class QAST::OperationsJAST {
         if %core_ops{$name} -> $mapper {
             return $mapper($qastcomp, $op);
         }
-        nqp::die("No registered operation handler for '$name'");
+
+        my $source := $qastcomp.source_for_node($op);
+        nqp::die("Error while compiling op $name$source, no registered operation handler");
     }
     
     # Adds a core op handler.
@@ -4118,19 +4120,8 @@ class QAST::CompilerJAST {
     
     multi method as_jast(QAST::Op $node, :$want) {
         my $hll := '';
-        my $result;
-        my $err;
         try $hll := $*HLL;
-        try {
-            $result := QAST::OperationsJAST.compile_op(self, $hll, $node);
-            CATCH { $err := $! }
-        }
-        if $err {
-            nqp::die($err) if nqp::index($err, "Error while compiling op ") == 0;
-            my $source := self.source_for_node($node);
-            nqp::die("Error while compiling op " ~ $node.op ~ "$source: $err");
-        }
-        $result
+        QAST::OperationsJAST.compile_op(self, $hll, $node);
     }
     
     multi method as_jast(QAST::VM $node, :$want) {
