@@ -734,6 +734,69 @@ class QAST::OperationsJS {
 
     });
 
+    # TODO - implement and bechmark different ways of preventing the try/catch from murdering performance 
+    add_op('handle', sub ($comp, $node, :$want) {
+        my @children := nqp::clone($node.list());
+        if @children == 0 {
+            nqp::die("The 'handle' op requires at least one child");
+        }
+
+        # If there's exactly one child, then there's nothing protecting
+        # it; just compile it and we're done.
+        my $protected := @children.shift();
+        unless @children {
+            return $comp.as_js($protected, :$want);
+        }
+        
+
+        my $outer_ctx := $*CTX;
+        {
+            my $*CTX := $comp.unique_var('ctx');
+            my $unwind_marker := $*BLOCK.add_tmp;
+
+            my $try_ret := $want == $T_VOID ?? '' !! $*BLOCK.add_tmp;
+
+            my $handle := '';
+            for @children -> $type, $handler {
+                if $type eq 'CATCH' {  
+                    my $catch_body := $comp.as_js($handler, :want($T_OBJ));
+                    $handle := Chunk.void(
+                        "//want: $want\n",
+                        "$unwind_marker = \{\};\n",
+                        "$*CTX.CATCH = function() \{\n",
+                        $catch_body,
+                        "return {$catch_body.expr};\n",
+                        "\};\n",
+                        "$*CTX.unwind = $unwind_marker;\n" 
+                    );
+                } else {
+                    return $comp.NYI("Not implemented type with handle: $type");
+                }
+            }
+
+            my $body := $comp.as_js($protected, :$want);
+            return Chunk.new($want, $try_ret, [
+                "var $*CTX = new nqp.Ctx($outer_ctx, $outer_ctx);\n",
+                $handle,
+                "try \{",
+                $body,
+                # HACK we need to check $body.type if we handle something like return
+                "//want: $want, body_expr: <{$body.expr}>, body_type:<{$body.type}>\n",
+                (($want == $T_VOID || $body.type == $T_VOID) ?? '' !! "$try_ret = {$body.expr};\n"),
+                "\} catch (e) \{if (e === $unwind_marker) \{",
+                ($want == $T_VOID ?? '' !! "$try_ret = $unwind_marker.ret;\n"),
+                "\} else \{\n",
+                "throw e;\n",
+                "\}\n",
+                "\}\n"
+            ], :$node);
+        }
+    });
+
+
+    add_simple_op('exception', $T_OBJ, [], sub () {"$*CTX.exception"});
+    add_simple_op('rethrow', $T_VOID, [$T_OBJ], sub ($exception) {"$*CTX.rethrow($exception)"}, :sideffects);
+    add_simple_op('resume', $T_VOID, [$T_OBJ], sub ($exception) {"$*CTX.resume($exception)"}, :sideffects);
 
     add_simple_op('findmethod', $T_OBJ, [$T_OBJ, $T_STR], :sideffects);
     add_simple_op('can', $T_INT, [$T_OBJ, $T_STR], :sideffects);

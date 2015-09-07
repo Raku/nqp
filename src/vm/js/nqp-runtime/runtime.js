@@ -133,8 +133,44 @@ function Ctx(caller_ctx, outer_ctx) {
   this.outer = outer_ctx;
 };
 
-Ctx.prototype.die = function(msg) {
+
+function NqpException(msg) {
+    this.msg = msg;
+}
+
+NqpException.prototype.Str = function(ctx, _NAMED) {
+    return this.msg;
+};
+
+Ctx.prototype.propagateException = function(exception) {
+  var ctx = this;
+  while (ctx) {
+      if (ctx.CATCH) {
+          exception.caught = ctx;
+          exception.resume = false;
+          ctx.exception = exception;
+          ctx.unwind.ret = ctx.CATCH();
+          if (exception.resume) {
+              return;
+          } else {
+            throw ctx.unwind;
+          }
+      }
+      ctx = ctx.caller;
+  }
   throw msg;
+};
+
+Ctx.prototype.rethrow = function(exception) {
+    exception.caught.caller.propagateException(exception);
+};
+
+Ctx.prototype.die = function(msg) {
+    this.propagateException(new NqpException(msg));
+};
+
+Ctx.prototype.resume = function(exception) {
+    exception.resume = true;
 };
 
 Ctx.prototype.lookup_dynamic = function(name) {
