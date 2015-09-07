@@ -158,7 +158,7 @@ Ctx.prototype.propagateException = function(exception) {
       }
       ctx = ctx.caller;
   }
-  throw msg;
+  throw exception.msg;
 };
 
 Ctx.prototype.rethrow = function(exception) {
