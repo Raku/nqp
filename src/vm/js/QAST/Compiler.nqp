@@ -659,7 +659,7 @@ class QAST::OperationsJS {
     add_op('call', sub ($comp, $node, :$want) {
         if $*BLOCK.is_local_lexotic($node.name) {
             my $value := $comp.as_js($node[0], :want($T_OBJ));
-            return Chunk.new($want, '', [$value, "return {$value.expr};\n"]);
+            return Chunk.new($T_VOID, '', [$value, "return {$value.expr};\n"]);
         } elsif $*BLOCK.is_lexotic($node.name) {
             $*BLOCK.mark_lexotic_usage($node.name);
             my $value := $comp.as_js($node[0], :want($T_OBJ));
