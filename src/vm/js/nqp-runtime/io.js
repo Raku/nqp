@@ -166,7 +166,13 @@ op.readallfh = function(fh) {
   return iconv.decode(all, fh.encoding);
 };
 
-op.seekfh = function(fh, offset, whence) {
+op.seekfh = function(fh, offset, whence, ctx) {
+  if (whence == 0 && offset < 0) {
+      ctx.die("Can't seek to position: " + offset);
+  }
+  if (!(whence == 0 || whence == 1 || whence == 2)) {
+      ctx.die("Invalid whence passed to seekfh: " + whence);
+  }
   fs.seekSync(fh.fd, offset, whence);
 };
 
