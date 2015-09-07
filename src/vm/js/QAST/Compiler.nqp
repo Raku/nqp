@@ -540,6 +540,7 @@ class QAST::OperationsJS {
 
     add_simple_op('getstderr', $T_OBJ, [], :sideffects);
     add_simple_op('getstdout', $T_OBJ, [], :sideffects);
+    add_simple_op('getstdin', $T_OBJ, [], :sideffects);
 
     add_simple_op('open', $T_OBJ, [$T_STR, $T_STR], :sideffects);
 

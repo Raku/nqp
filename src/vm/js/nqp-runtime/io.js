@@ -261,3 +261,9 @@ Stdout.prototype.printfh = function(msg) {
 op.getstdout = function() {
     return new Stdout();
 };
+
+function Stdin() {
+}
+op.getstdin = function() {
+    return new Stdin();
+};
