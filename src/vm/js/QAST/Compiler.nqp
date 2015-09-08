@@ -24,7 +24,13 @@ sub quote_string($str) {
         } elsif $backslash && $c eq 'a' {
             $out := $out ~ 'x07';
         } else {
-            $out := $out ~ $c;
+            if ($c eq "\x[2028]") {
+                $out := $out ~ "\\u2028";
+            } elsif ($c eq "\x[2029]") {
+                $out := $out ~ "\\u2029";
+            } else {
+                $out := $out ~ $c;
+            }
         }
         $backslash := !$backslash && $c eq '\\';
     }
@@ -1357,12 +1363,48 @@ class RegexCompiler {
         ~ self.case($done);
     }
 
+    method enumcharlist($node) {
+        my $charlist := quote_string($node[0]);
+        my $testop := $node.negate ?? '!=' !! '==';
+
+        "if ($!pos >= $!target.length) \{{self.fail()}\}"
+        ~ "if ($charlist.indexOf($!target.substr($!pos,1)) $testop -1) \{{self.fail()}\}"
+        ~ ($node.subtype eq 'zerowidth' ?? '' !! "$!pos++;\n")
+
+    }
+
+    method cclass_check($cclass,:$pos=$!pos,:$negated=0) {
+        "if ({$negated ?? '' !! '!'}nqp.op.iscclass({%const_map{$cclass}},$!target,$pos)) \{{self.fail}\}\n";
+    }
 
     method anchor($node) {
         if $node.subtype eq 'eos' {
             "if ($!pos < $!target.length) \{{self.fail}\}\n";
         } elsif $node.subtype eq 'bos' {
             "if ($!pos != 0) \{{self.fail}\}\n";
+        } elsif $node.subtype eq 'lwb' {
+            "if ($!pos >= $!target.length) \{{self.fail}\}\n"
+            ~ self.cclass_check('CCLASS_WORD')
+            ~ self.cclass_check('CCLASS_WORD', :negated(1), :pos("$!pos-1"));
+        } elsif $node.subtype eq 'rwb' {
+            "if ($!pos <= 0) \{{self.fail}\}\n"
+            ~ self.cclass_check('CCLASS_WORD', :negated(1), :pos($!pos))
+            ~ self.cclass_check('CCLASS_WORD', :pos("$!pos-1"));
+        } elsif $node.subtype eq 'bol' {
+            my $done_label := self.new_label;
+
+            "if ($!pos == 0) \{{self.goto($done_label)}\}\n"
+            ~ "if ($!pos >= $!target.length) \{{self.fail}\}\n"
+            ~ self.cclass_check('CCLASS_NEWLINE',:pos("$!pos-1"))
+            ~ self.case($done_label);
+        } elsif $node.subtype eq 'eol' {
+            my $done_label := self.new_label;
+
+            "if (nqp.op.iscclass({%const_map<CCLASS_NEWLINE>},$!target,$!pos)) \{{self.goto($done_label)}\}\n"
+            ~ "if ($!pos != $!target.length) \{{self.fail}\}\n"
+            ~ "if ($!pos == 0) \{{self.goto($done_label)}\}\n"
+            ~ self.cclass_check('CCLASS_NEWLINE', :negated(1), :pos("$!pos-1"))
+            ~ self.case($done_label);
         } else {
             $!compiler.NYI("anchor type: {$node.subtype}");
         }
@@ -1572,8 +1614,8 @@ class RegexCompiler {
                  self.case($loop),
                  "$rep = $irep;\n",
                  "$rep++;\n",
-                 ($min > 1 ?? "if (rep < $min) \{{self.goto($loop)}\}\n" !! ''),
-                 ($max > 1 ?? "if (rep >= $max) \{{self.goto($done)}\}\n" !! ''),
+                 ($min > 1 ?? "if ($rep < $min) \{{self.goto($loop)}\}\n" !! ''),
+                 ($max > 1 ?? "if ($rep >= $max) \{{self.goto($done)}\}\n" !! ''),
                  ($max != 1 ?? self.mark($loop, $!pos, $rep) !! ''),
                  self.case($done)
            );
