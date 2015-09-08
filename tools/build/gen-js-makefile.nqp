@@ -143,8 +143,11 @@ deps('js-stage1-compiler', '$(JS_STAGE1_COMPILER)');
 #	\$(MKPATH) gen/js/stage2
 #	./nqp-m --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --module-path gen/js/stage2 --setting=NULL --target=mbc --output gen/js/stage2/NQPCORE.setting.moarvm $nqpcore-combined > node_modules/NQPCORE.setting.js");
 
-say('js-test: js-all
+say('js-test: js-all gen/js/qregex.t
 	src/vm/js/bin/run_tests');
+
+say('gen/js/qregex.t: tools/build/process-qregex-tests
+	$(JS_NQP) tools/build/process-qregex-tests > gen/js/qregex.t');
 
 say("\n\njs-clean:
 	\$(RM_RF) gen/js/stage1 gen/js/stage2
@@ -159,3 +162,6 @@ say("js-lint:
 say('node_modules/installed: src/vm/js/nqp-runtime/*.js src/vm/js/nqp-runtime/package.json
 	npm install src/vm/js/nqp-runtime
 	touch node_modules/installed');
+
+say('js-install: js-all
+	@echo "*** The JavaScript backend can\'t be installed yet, sorry! ***"');

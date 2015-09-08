@@ -1,0 +1,105 @@
+#! nqp
+
+say('
+sub test_line($rxsub,$target,$expect,$desc) {
+
+    my $expect_substr := nqp::substr($expect, 0, 1) eq "<"
+                           ?? nqp::substr($expect, 1, nqp::chars($expect) - 2)
+                           !! "";
+
+    try {
+        my $cursor := NQPCursor."!cursor_init"($target, :c(0));
+        my $match  := $rxsub($cursor).MATCH;
+        if $expect_substr {
+            my $got := ~$match."!dump_str"("mob");
+            my $m := nqp::index($got, $expect_substr) >= 0;
+            ok($m, $desc);
+            say("#      got: $got\n# expected: $expect_substr") unless $m;
+        }
+        else {
+            ok($expect eq "y" ?? $match !! !$match, $desc);
+        }
+        CATCH {
+            if $expect_substr {
+                my $m := nqp::index(~$_, $expect_substr) >= 0;
+                ok($m, $desc);
+                say("#      got: $_\n# expected: $expect") unless $m;
+            }
+            else {
+                ok(0, $desc);
+                say("# ERROR: $_");
+            }
+       }
+   }
+}
+');
+
+
+
+my @files := [
+#     'rx_captures',
+#     'rx_qcaps',
+     'rx_basic',
+#      'rx_quantifiers',
+#     'rx_metachars',
+#     'rx_charclass',
+#     'rx_backtrack',
+#     'rx_subrules',
+#     'rx_modifiers',
+];
+my $tests := 0;
+for @files -> $fn {
+    say("say('# file: $fn');");
+    my $contents := slurp('t/qregex/' ~ $fn);
+    my @lines    := nqp::split("\n", $contents);
+
+    my $todo := 0;
+    for @lines -> $line {
+        my $m := $line ~~ /'# todo ' .*? ':pge<' (.*) '>'/;
+        if $m {
+          $todo := 1;
+        }
+        else {
+            next if $line ~~ /^\s*\# | ^\s*$ /;
+
+            if $todo {
+               $todo := 0;
+               next;
+            }
+
+
+            my @parts  := match($line, /\T+/, :global);
+            my $regex  := @parts[0];
+            my $target := @parts[1];
+            my $expect := @parts[2];
+            my $desc   := @parts[3];
+
+            my $expect_substr := nqp::substr($expect, 0, 1) eq "<"
+                ?? nqp::substr($expect, 1, nqp::chars($expect) - 2)
+                !! "";
+
+
+            next if $expect_substr eq 'Unsupported' || $expect_substr eq 'Unrecognized';
+    
+            $target := subst($target, /\\x(<[a..fA..F0..9]>**4)/, -> $m { '\\x['~$m[0]~']' }, :global);
+            $target := subst($target, /\"/, -> $m { '\\"' }, :global);
+            $target := subst($target, /\{/, -> $m { '\\{' }, :global);
+            $target := subst($target, /\}/, -> $m { '\\}' }, :global);
+            $target := subst($target, /\\\]/, -> $m { '\\\\]' }, :global);
+
+            $desc := nqp::escape($desc);
+
+            $target := '' if $target eq "''";
+
+            $tests := $tests + 1;
+
+            say("test_line(/$regex{$desc ~~ /comments/ ?? "\n" !! ""}/,\"$target\",'$expect',\"$desc\");");
+
+        }
+    }
+    say("say('# done with file $fn');");
+}
+say("say('1..$tests');");
+
+
+# vim: ft=perl6
