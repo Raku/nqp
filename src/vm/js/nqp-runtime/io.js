@@ -124,33 +124,49 @@ op.setencoding = function(fh, encoding) {
   fh.encoding = encoding;
 };
 
+op.setinputlinesep = function(fh, sep) {
+    fh.sep = sep;
+};
+
 op.readlinefh = function(fh) {
   var line = '';
   var buffer = new Buffer(16);
-  var position = fs.seekSync(fh.fd, 0, 1);
+  var starting = fs.seekSync(fh.fd, 0, 1);
+  var position = starting;
   var bytesRead;
   READ_LINE:
+  var string = '';
   while ((bytesRead =
               fs.readSync(fh.fd, buffer, 0, buffer.length, position)) != 0) {
-    var string = buffer.slice(0, bytesRead).toString(fh.encoding);
-    var cr = string.indexOf('\r');
-    var nl = string.indexOf('\n');
-    var newline = (cr != -1 ? (cr < nl ? (cr + 1 == nl ? nl : cr) : nl) : nl);
+    position += bytesRead;
+    var string = string + buffer.slice(0, bytesRead).toString(fh.encoding);
+
+    var newline;
+    // TODO think/ask about a "" sep
+    var offset;
+    if (fh.sep) {
+        newline = string.indexOf(fh.sep);
+        if (newline != -1) {
+            newline += fh.sep.length - 1;
+        }
+    } else {
+        var cr = string.indexOf('\r');
+        var nl = string.indexOf('\n');
+        newline = (cr != -1 ? (cr < nl ? (cr + 1 == nl ? nl : cr) : nl) : nl);
+    }
 
     if (newline != -1) {
       var up_to_newline = string.slice(0, newline + 1);
-      line += up_to_newline;
       // THINK ABOUT decoding and encoding might give a different offset
+
       fs.seekSync(fh.fd,
-          Buffer.byteLength(up_to_newline, fh.encoding) + position, 0);
-      return line;
-    } else {
-      line += string;
+          Buffer.byteLength(up_to_newline, fh.encoding) + starting, 0);
+      return up_to_newline;
     }
-    position += bytesRead;
   }
+
   fs.seekSync(fh.fd, position, 0);
-  return line;
+  return string;
 };
 
 
