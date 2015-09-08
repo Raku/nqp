@@ -53,7 +53,7 @@ public abstract class MultiDimArrayInstanceBase extends SixModelObject {
                 else {
                     throw ExceptionHandling.dieInternal(tc, String.format(
                         "Index %d for dimension %d out of range (must be 0..%d)",
-                        index, i + 1, dim_size));
+                        index, i + 1, dim_size - 1));
                 }
             }
             return (int)result;
