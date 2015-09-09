@@ -1666,7 +1666,37 @@ class RegexCompiler {
         }
     }
 
+    method altseq($node) {
+        my @code;
+
+        my $iter     := nqp::iterator($node.list);
+        my $endlabel := self.new_label;
+        my $altlabel := self.new_label;
+        my $acode    := self.compile_rx(nqp::shift($iter));
+
+        while $iter {
+            @code.push(self.case($altlabel));
+            $altlabel := self.new_label;
+
+            @code.push(self.mark($altlabel, $!pos, 0));
+            @code.push($acode);
+            @code.push(self.goto($endlabel));
+
+            $acode := self.compile_rx(nqp::shift($iter));
+        }
+
+        @code.push(self.case($altlabel));
+        @code.push($acode);
+        @code.push(self.case($endlabel));
+
+        Chunk.void(|@code);
+    }
+
     method alt($node) {
+        unless $node.name {
+            return self.altseq($node);
+        }
+
         # Calculate all the branches to try, which populates the bstack
         # with the options. Then immediately fail to start iterating it.
 
