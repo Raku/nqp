@@ -1699,6 +1699,52 @@ class RegexCompiler {
         );
     }
 
+    method conjseq($node) {
+
+        my $conj_label := self.new_label;
+        my $first_label := self.new_label;
+
+        my $iter := nqp::iterator($node.list);
+        # make a mark that holds our starting position in the pos slot
+
+        my $start_pos := $*BLOCK.add_tmp;
+        my $end_pos := $*BLOCK.add_tmp;
+
+        my @code;
+
+        @code.push(
+            self.mark($conj_label, $!pos, 0)
+            ~ self.goto($first_label)
+            ~ self.case($conj_label)
+            ~ self.fail()
+
+            # call the first child
+            ~ self.case($first_label)
+        );
+        @code.push(self.compile_rx(nqp::shift($iter)));
+
+        # use previous mark to make one with pos=start, rep=end
+        @code.push(
+            self.peek($conj_label, $start_pos)
+            ~ self.mark($conj_label, $start_pos, $!pos));
+
+        while $iter {
+            @code.push("$!pos = $start_pos;\n");
+            @code.push(self.compile_rx(nqp::shift($iter)));
+            @code.push(
+                self.peek($conj_label, $start_pos, $end_pos)
+                ~ "if ($!pos != $end_pos) \{{self.fail()}\}\n"
+            );
+        }
+        if $node.subtype eq 'zerowidth' {
+            @code.push("$!pos = $start_pos;\n");
+        }
+
+        Chunk.void(|@code);
+    }
+
+    method conj($node) { self.conjseq($node) }
+
     method BUILD(:$compiler) {
         $!compiler := $compiler;
 
