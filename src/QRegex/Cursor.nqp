@@ -502,20 +502,25 @@ role NQPCursorRole is export {
         $cur;
     }
 
-    method !LITERAL(str $str, int $i = 0) {
-        my $cur;
-        my int $litlen := nqp::chars($str);
-        my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
-        if $litlen < 1 ||
-            ($i ?? nqp::lc(nqp::substr($target, $!pos, $litlen)) eq nqp::lc($str)
-                !! nqp::substr($target, $!pos, $litlen) eq $str) {
-            $cur := self."!cursor_start_cur"();
-            $cur."!cursor_pass"($!pos + $litlen);
+    method !LITERAL($strish, int $i = 0) {
+        if nqp::isconcrete($strish) {
+            my str $str := $strish;
+            my int $litlen := nqp::chars($str);
+            my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
+            if $litlen < 1 ||
+                ($i ?? nqp::lc(nqp::substr($target, $!pos, $litlen)) eq nqp::lc($str)
+                    !! nqp::substr($target, $!pos, $litlen) eq $str) {
+                my $cur := self."!cursor_start_cur"();
+                $cur."!cursor_pass"($!pos + $litlen);
+                $cur
+            }
+            else {
+                nqp::getattr($!shared, ParseShared, '$!fail_cursor');
+            }
         }
         else {
-            $cur := nqp::getattr($!shared, ParseShared, '$!fail_cursor');
+            nqp::getattr($!shared, ParseShared, '$!fail_cursor');
         }
-        $cur;
     }
 
     method !DYNQUANT_LIMITS($mm) {
