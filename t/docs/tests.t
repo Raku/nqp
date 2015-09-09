@@ -9,7 +9,7 @@ my %documented_ops := nqp::hash();
 my @doc_lines := nqp::split("\n", nqp::readallfh(nqp::open("docs/ops.markdown","r")));
 for @doc_lines -> $line {
     next unless $line ~~ / ^ '* ' .* '(' /;
-    $line := nqp::substr2($line, 3);
+    $line := nqp::substr($line, 3);
     $line := nqp::split("(", $line)[0];
     %documented_ops{$line} := 1 ;
 }
@@ -19,14 +19,18 @@ my @folders := nqp::list('t', 'src/NQP', 'src/how', 'src/core', 'src/HLL', 'src/
 
 my @files := nqp::list();
 while (nqp::elems(@folders)) {
-    my $dh := nqp::opendir(@folders.shift);
+    my $folder := @folders.shift;
+    my $dh := nqp::opendir($folder);
     my $f  := nqp::nextfiledir($dh);
-    while (! nqp::isnull_s($f)) {
-        my $isdir := nqp::stat($f,2); # TODO, use nqp::const
-        if ($isdir == 1) {
-            nqp::push(@folders,$f);
-        } else {
-            nqp::push(@files, $f);
+    while (! nqp::isnull_s($f) && nqp::chars($f) != 0) {
+        my $ff := $folder ~ '/' ~ $f;
+        if $f ne "." && $f ne ".." {
+            my $isdir := nqp::stat($ff, 2); # TODO, use nqp::const
+            if ($isdir == 1) {
+                nqp::push(@folders,$ff);
+            } else {
+                nqp::push(@files, $ff);
+            }
         }
         $f  := nqp::nextfiledir($dh);
     }

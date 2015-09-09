@@ -80,22 +80,13 @@ j-install: j-all
 	$(MKPATH) $(DESTDIR)$(BIN_DIR)
 	$(MKPATH) $(DESTDIR)$(NQP_JAR_DIR)
 	$(MKPATH) $(DESTDIR)$(NQP_LIB_DIR)
-	$(CP) 3rdparty/asm/asm-4.1.jar $(DESTDIR)$(NQP_JAR_DIR)
-	$(CP) 3rdparty/asm/asm-tree-4.1.jar $(DESTDIR)$(NQP_JAR_DIR)
-	$(CP) 3rdparty/jline/jline-1.0.jar $(DESTDIR)$(NQP_JAR_DIR)
-	$(CP) 3rdparty/jna/jna.jar $(DESTDIR)$(NQP_JAR_DIR)
+	$(CP) 3rdparty/asm/asm-4.1.jar 3rdparty/asm/asm-tree-4.1.jar  $(DESTDIR)$(NQP_JAR_DIR)
+	$(CP) 3rdparty/jline/jline-1.0.jar 3rdparty/jna/jna.jar $(DESTDIR)$(NQP_JAR_DIR)
 	$(CP) $(RUNTIME_JAR) $(DESTDIR)$(NQP_JAR_DIR)
-	$(CP) $(NQP_MO_JAR) $(DESTDIR)$(NQP_LIB_DIR)
-	$(CP) $(MODULE_LOADER_JAR) $(DESTDIR)$(NQP_LIB_DIR)
-	$(CP) $(CORE_SETTING_JAR) $(DESTDIR)$(NQP_LIB_DIR)
-	$(CP) $(QASTNODE_JAR) $(DESTDIR)$(NQP_LIB_DIR)
-	$(CP) $(QREGEX_JAR) $(DESTDIR)$(NQP_LIB_DIR)
-	$(CP) $(HLL_JAR) $(DESTDIR)$(NQP_LIB_DIR)
-	$(CP) $(JASTNODES_JAR) $(DESTDIR)$(NQP_LIB_DIR)
-	$(CP) $(QAST_JAR) $(DESTDIR)$(NQP_LIB_DIR)
-	$(CP) $(P6QREGEX_JAR) $(DESTDIR)$(NQP_LIB_DIR)
-	$(CP) $(NQP_JAR) $(DESTDIR)$(NQP_LIB_DIR)
-	$(CP) $(P5QREGEX_JAR) $(DESTDIR)$(NQP_LIB_DIR)
+	$(CP) $(NQP_MO_JAR) $(MODULE_LOADER_JAR) $(DESTDIR)$(NQP_LIB_DIR)
+	$(CP) $(CORE_SETTING_JAR) $(QASTNODE_JAR) $(QREGEX_JAR) $(DESTDIR)$(NQP_LIB_DIR)
+	$(CP) $(HLL_JAR) $(JASTNODES_JAR) $(QAST_JAR) $(P6QREGEX_JAR) $(DESTDIR)$(NQP_LIB_DIR)
+	$(CP) $(NQP_JAR) $(P5QREGEX_JAR) $(DESTDIR)$(NQP_LIB_DIR)
 	$(CP) $(EVAL_CLIENT) $(DESTDIR)$(BIN_DIR)
 	$(CHMOD) 0755 $(DESTDIR)$(BIN_DIR)/eval-client.pl
 	$(PERL) tools/build/install-jvm-runner.pl "$(DESTDIR)" $(PREFIX)
@@ -251,16 +242,10 @@ $(J_STAGE2)/$(NQP_JAR): $(J_STAGE1) $(J_NQP_SOURCES) $(J_STAGE2)/$(P6QREGEX_JAR)
 	    --output=$(J_STAGE2)/$(NQP_JAR) $(J_STAGE2)/$(NQP_COMBINED)
 
 $(ALL_OUTPUT): $(J_STAGE2_OUTPUT)
-	$(CP) $(J_STAGE2)/$(NQP_MO_JAR) .
-	$(CP) $(J_STAGE2)/$(MODULE_LOADER_JAR) .
-	$(CP) $(J_STAGE2)/$(CORE_SETTING_JAR) .
-	$(CP) $(J_STAGE2)/$(QASTNODE_JAR) .
-	$(CP) $(J_STAGE2)/$(QREGEX_JAR) .
-	$(CP) $(J_STAGE2)/$(HLL_JAR) .
-	$(CP) $(J_STAGE2)/$(JASTNODES_JAR) .
-	$(CP) $(J_STAGE2)/$(QAST_JAR) .
-	$(CP) $(J_STAGE2)/$(P6QREGEX_JAR) .
-	$(CP) $(J_STAGE2)/$(NQP_JAR) .
+	$(CP) $(J_STAGE2)/$(NQP_MO_JAR) $(J_STAGE2)/$(MODULE_LOADER_JAR) .
+	$(CP) $(J_STAGE2)/$(CORE_SETTING_JAR) $(J_STAGE2)/$(QASTNODE_JAR) .
+	$(CP) $(J_STAGE2)/$(QREGEX_JAR) $(J_STAGE2)/$(HLL_JAR) $(J_STAGE2)/$(JASTNODES_JAR) .
+	$(CP) $(J_STAGE2)/$(QAST_JAR) $(J_STAGE2)/$(P6QREGEX_JAR) $(J_STAGE2)/$(NQP_JAR) .
 
 $(J_RUNNER): src/vm/jvm/runners/$(J_RUNNER)
 	$(CP) src/vm/jvm/runners/$(J_RUNNER) .
@@ -269,6 +254,10 @@ $(J_RUNNER): src/vm/jvm/runners/$(J_RUNNER)
 j-runner-default: j-all
 	$(CP) $(J_RUNNER) nqp$(BAT)
 	$(CHMOD) 755 nqp$(BAT)
+
+j-runner-default-install: j-runner-default j-install
+	$(CP) $(DESTDIR)$(BIN_DIR)/$(J_RUNNER) $(DESTDIR)$(BIN_DIR)/nqp$(BAT)
+	$(CHMOD) 755 $(DESTDIR)$(BIN_DIR)/nqp$(BAT)
 
 $(P5QREGEX_JAR): $(ALL_OUTPUT) $(P5QREGEX_SOURCES)
 	$(MKPATH) $(J_STAGE2)
@@ -291,19 +280,19 @@ j-bootstrap-files: $(J_STAGE2_OUTPUT)
 ## testing
 
 j-test: j-all
-	prove -r --exec .@slash@$(J_RUNNER) t/nqp t/hll t/qregex t/p5regex t/qast t/serialization t/jvm t/nativecall
+	$(PROVE) -r --exec .@slash@$(J_RUNNER) t/nqp t/hll t/qregex t/p5regex t/qast t/serialization t/jvm t/nativecall
 
 j-test-loud: j-all
-	prove -r -v --exec .@slash@$(J_RUNNER) t/nqp t/hll t/qregex t/p5regex t/qast t/serialization t/jvm t/nativecall
+	$(PROVE) -r -v --exec .@slash@$(J_RUNNER) t/nqp t/hll t/qregex t/p5regex t/qast t/serialization t/jvm t/nativecall
 
 j-core-test: $(J_RUNNER)
-	prove -r --exec .@slash@$(J_RUNNER) t/nqp
+	$(PROVE) -r --exec .@slash@$(J_RUNNER) t/nqp
 
 j-core-test-loud: $(J_RUNNER)
-	prove -r -v --exec .@slash@$(J_RUNNER) t/nqp
+	$(PROVE) -r -v --exec .@slash@$(J_RUNNER) t/nqp
 
 j-qregex-test: $(J_RUNNER)
-	prove -r --exec .@slash@$(J_RUNNER) t/qregex
+	$(PROVE) -r --exec .@slash@$(J_RUNNER) t/qregex
 
 j-qregex-test-loud: $(J_RUNNER)
-	prove -r -v --exec .@slash@$(J_RUNNER) t/qregex
+	$(PROVE) -r -v --exec .@slash@$(J_RUNNER) t/qregex

@@ -8,10 +8,20 @@ import org.perl6.nqp.runtime.ThreadContext;
 public abstract class ContainerSpec {
     /* Fetches a value out of a container. Used for decontainerization. */
     public abstract SixModelObject fetch(ThreadContext tc, SixModelObject cont);
+
+    /* Native value fetches. */
+    public abstract long fetch_i(ThreadContext tc, SixModelObject cont);
+    public abstract double fetch_n(ThreadContext tc, SixModelObject cont);
+    public abstract String fetch_s(ThreadContext tc, SixModelObject cont);
     
     /* Stores a value in a container. Used for assignment. */
     public abstract void store(ThreadContext tc, SixModelObject cont, SixModelObject obj);
-    
+
+    /* Native container stores. */
+    public abstract void store_i(ThreadContext tc, SixModelObject cont, long value);
+    public abstract void store_n(ThreadContext tc, SixModelObject cont, double value);
+    public abstract void store_s(ThreadContext tc, SixModelObject cont, String value);
+
     /* Stores a value in a container, without any checking of it (this
      * assumes an optimizer or something else already did it). Used for
      * assignment. */

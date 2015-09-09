@@ -53,6 +53,13 @@ data blob) where various tables can be located.
     | Number of entries in the repossessions table            |
     |    32-bit integer                                       |
     +---------------------------------------------------------+
+    | Offset (from start of data) of the parameterization     |
+    | interns data                                            |
+    |    32-bit integer                                       |
+    +---------------------------------------------------------+
+    | Number of entries in the parameterization intern data   |
+    |    32-bit integer                                       |
+    +---------------------------------------------------------+
 
 ## Dependencies Table
 This table describes the Serialization Contexts (SC) that are required to
@@ -206,7 +213,46 @@ due to being modified while it was being compiled.
     | Index in that SC where the original object is located.  |
     |    32-bit integer                                       |
     +---------------------------------------------------------+
-    
+
+## Parameterization Interning Data
+Parameterized types are interned in a VM instance, meaning that if we
+deserialize two compilation units that have both serialized identical
+parameterizations, we will allow the first unit's parameterization to
+"win". The data in this section of the serialization blob identifies
+types whose STables and type objects are subject to this interning.
+
+This section exclusively contains entries meeting the following rules:
+
+* The parametric type must be from another SC
+* All the parameters must be objects from another SC
+
+Each entry starts as follows:
+
+    +---------------------------------------------------------+
+    | Base-1 index of the SC that owns the parametric type    |
+    | (this is the type that was parameterized to get the one |
+    | we're dealing with the interning of). A value of 0 is   |
+    | invalid, as that would imply the current SC.            |
+    |    32-bit integer                                       |
+    +---------------------------------------------------------+
+    | Index in that SC where the parametric type's type       |
+    | object can be found                                     |
+    |    32-bit integer                                       |
+    +---------------------------------------------------------+
+    | Index in our object list where the type object we may   |
+    | intern is located.                                      |
+    |    32-bit integer                                       |
+    +---------------------------------------------------------+
+    | Index in our STable list where the STable we may intern |
+    | is located.                                             |
+    |    32-bit integer                                       |
+    +---------------------------------------------------------+
+    | The number of parameters in this parameterization       |
+    |    32-bit integer                                       |
+    +---------------------------------------------------------+
+
+Following this, for each parameter an object reference is written.
+
 ## Primitives
 This section describes how the various primitive types known to the
 serializer are stored.

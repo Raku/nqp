@@ -5,27 +5,27 @@ class NQP::World is HLL::World {
     # The stack of lexical pads, actually as QAST::Block objects. The
     # outermost frame is at the bottom, the latest frame is on top.
     has @!BLOCKS;
-    
+
     # Set of code objects that need to be fixed up if dynamic compilation
     # takes place (that is, compiling parts of the program early during
     # compile time because they're needed at a BEGIN phase). Maps per-
     # compilation unit ID to a list of code objects.
     has %!code_objects_to_fix_up;
-    
+
     # The types of those code objects.
     has %!code_object_types;
-    
+
     # Mapping of QAST::Stmts node containing fixups, keyed by sub ID. If
     # we do dynamic compilation then we do the fixups immediately and
     # then clear this list.
     has %!code_object_fixup_list;
-    
+
     # Mapping of sub IDs to SC indexes of code stubs.
     has %!code_stub_sc_idx;
-    
+
     # Clear-up tasks.
-    has @!clearup_tasks; 
-    
+    has @!clearup_tasks;
+
     method BUILD(*%opts) {
         @!BLOCKS := nqp::list();
         %!code_objects_to_fix_up := nqp::hash();
@@ -43,7 +43,7 @@ class NQP::World is HLL::World {
         }
 #?endif
     }
-    
+
     # Creates a new lexical scope and puts it on top of the stack.
     method push_lexpad($/) {
         # Create pad, link to outer and add to stack.
@@ -51,17 +51,17 @@ class NQP::World is HLL::World {
         @!BLOCKS[+@!BLOCKS] := $pad;
         $pad
     }
-    
+
     # Pops a lexical scope off the stack.
     method pop_lexpad() {
         @!BLOCKS.pop()
     }
-    
+
     # Gets the top lexpad.
     method cur_lexpad() {
         @!BLOCKS[+@!BLOCKS - 1]
     }
-    
+
     # XXX This goes away really soon...after the multi refactor.
     method get_legacy_block_list() {
         my @x := nqp::clone(@!BLOCKS);
@@ -73,17 +73,17 @@ class NQP::World is HLL::World {
     # can't just use ...; it; we break the circularity by using the global
     # HLL symbol stash.
     my $loader := nqp::getcurhllsym('ModuleLoader');
-    
-    # Loads the setting and emits code 
+
+    # Loads the setting and emits code
     method load_setting($setting_name) {
         # Do nothing for the NULL setting.
-        if $setting_name ne 'NULL' {    
+        if $setting_name ne 'NULL' {
             # Load it immediately, so the compile time info is available.
             # Once it's loaded, set it as the outer context of the code
             # being compiled.
             my $setting := %*COMPILING<%?OPTIONS><outer_ctx>
                         := $loader.load_setting($setting_name);
-            
+
 
             # Emit fixup or loading code.
             my $set_outer := QAST::Op.new(
@@ -112,17 +112,17 @@ class NQP::World is HLL::World {
             else {
                 self.add_fixup_task(:fixup_ast($set_outer));
             }
-            
+
             return nqp::ctxlexpad($setting);
         }
     }
-    
+
     # Loads a module immediately, and also makes sure we load it
     # during the deserialization.
     method load_module($module_name, $cur_GLOBALish) {
         # Immediate loading.
         my $module := $loader.load_module($module_name, $cur_GLOBALish);
-        
+
         # Make sure we do the loading during deserialization.
         if self.is_precompilation_mode() {
             self.add_load_dependency_task(:deserialize_ast(QAST::Stmts.new(
@@ -145,20 +145,20 @@ class NQP::World is HLL::World {
 
         return nqp::ctxlexpad($module);
     }
-    
+
     method import($stash) {
         my $target := self.cur_lexpad();
         for $stash {
             self.install_lexical_symbol($target, $_.key, $_.value);
         }
     }
-    
+
     # Installs a symbol into the package. Does so immediately, and
     # makes sure this happens on deserialization also.
     method install_package_symbol($package, @sym, $obj) {
         @sym := nqp::clone(@sym);
         my $name := ~@sym.pop();
-        
+
         # Install symbol immediately.
         my $target := $package;
         for @sym {
@@ -177,7 +177,7 @@ class NQP::World is HLL::World {
         }
         ($target.WHO){$name} := $obj;
     }
-    
+
     # Installs a lexical symbol. Takes a QAST::Block object, name and
     # the object to install.
     method install_lexical_symbol($block, $name, $obj) {
@@ -186,7 +186,7 @@ class NQP::World is HLL::World {
             :scope('lexical'), :name($name), :decl('static'), :value($obj)
         ));
     }
-    
+
     # Adds a fixup to install a specified QAST::Block in a package under the
     # specified name.
     method install_package_routine($package, $name, $ast_block) {
@@ -198,7 +198,7 @@ class NQP::World is HLL::World {
         );
         self.add_fixup_task(:deserialize_ast($fixup), :fixup_ast($fixup));
     }
-    
+
     # Registers a code object, and gives it a dynamic compilation thunk.
     # Makes a real code object if it's a dispatcher.
     method create_code($ast, $name, $is_dispatcher, :$code_type_name = 'NQPRoutine') {
@@ -209,7 +209,7 @@ class NQP::World is HLL::World {
             $code_type := self.find_sym([$code_type_name]);
             $have_code_type := $*PACKAGE.HOW.name($*PACKAGE) ne $code_type_name;
         }
-        
+
         # For code refs, we need a "stub" that we'll clone and use for the
         # compile-time representation. If it ever gets invoked it'll go
         # and compile the code and run it.
@@ -242,24 +242,24 @@ class NQP::World is HLL::World {
                     }
                     nqp::markcodestatic(@allcodes[$i]);
                     self.update_root_code_ref(%!code_stub_sc_idx{$subid}, @allcodes[$i]);
-                    
+
                     # Clear up the fixup statements.
                     my $fixup_stmts := %!code_object_fixup_list{$subid};
                     $fixup_stmts.shift() while +@($fixup_stmts);
                 }
                 $i := $i + 1;
             }
-            
+
             my $mainline := $compiler.backend.compunit_mainline($compiled);
             $mainline(|@args, |%named)
         };
-        
+
         # Create code object, if we'll need one.
         my $code_obj;
         if $have_code_type {
             $code_obj := nqp::create($code_type);
         }
-        
+
         # See if we already have our compile-time dummy. If not, create it.
         my $fixups := QAST::Stmts.new();
         my $dummy  := $ast.ann('compile_time_dummy');
@@ -268,14 +268,14 @@ class NQP::World is HLL::World {
             # Create a fresh stub code, and set its name.
             $dummy := nqp::freshcoderef($stub_code);
             nqp::setcodename($dummy, $name);
-            
+
             # Tag it as a static code ref and add it to the root code refs set.
             nqp::markcodestatic($dummy);
             nqp::markcodestub($dummy);
             $code_ref_idx := self.add_root_code_ref($dummy, $ast);
             %!code_stub_sc_idx{$ast.cuid()} := $code_ref_idx;
             $ast.annotate('compile_time_dummy', $dummy);
-            
+
             # Things with code objects may be methods in roles or multi-dispatch
             # routines. We need to handle their cloning and maintain the fixup
             # list.
@@ -308,7 +308,7 @@ class NQP::World is HLL::World {
                             ),
                             QAST::WVal.new( :value($code_obj) )
                         ));
-                            
+
                         # Add to dynamic compilation fixup list.
                         %!code_objects_to_fix_up{$ast.cuid()}.push($code_obj);
                     };
@@ -319,10 +319,10 @@ class NQP::World is HLL::World {
                 }
             }
         }
-        
+
         # Add fixups task node; it'll get populated or cleared during the compile.
         self.add_fixup_task(:fixup_ast($fixups));
-        
+
         # Provided we have the code type, now wrap what we have up in a
         # code object.
         if $have_code_type {
@@ -344,11 +344,11 @@ class NQP::World is HLL::World {
                 QAST::SVal.new( :value('$!do') ),
                 QAST::BVal.new( :value($ast) )
             ));
-            
+
             # Add it to the dynamic compilation fixup todo list.
             %!code_objects_to_fix_up{$ast.cuid()} := [$code_obj];
             %!code_object_types{$ast.cuid()} := $code_type;
-            
+
             $code_obj
         }
         else {
@@ -366,7 +366,7 @@ class NQP::World is HLL::World {
             return $dummy;
         }
     }
-    
+
     # Creates a meta-object for a package, adds it to the root objects and
     # stores an event for the action. Returns the created object.
     method pkg_create_mo($how, :$name, :$repr) {
@@ -380,7 +380,7 @@ class NQP::World is HLL::World {
         # Result is just the object.
         return $mo;
     }
-    
+
     # Constructs a meta-attribute and adds it to a meta-object. Expects to
     # be passed the meta-attribute type object, a set of literal named
     # arguments to pass and a set of name to object mappings to pass also
@@ -391,12 +391,12 @@ class NQP::World is HLL::World {
         $obj.HOW.add_attribute($obj, $attr);
         $attr
     }
-    
+
     # Adds a method to the meta-object.
     method pkg_add_method($obj, $meta_method_name, $name, $code) {
         $obj.HOW."$meta_method_name"($obj, $name, $code);
     }
-    
+
     # Associates a signature with a code object.
     method set_routine_signature($code_obj, $types, $definednesses) {
         my $sig_type  := self.find_sym(['NQPSignature']);
@@ -408,16 +408,16 @@ class NQP::World is HLL::World {
             compilee_list($definednesses));
         nqp::bindattr($code_obj, $code_type, '$!signature', $sig_obj);
     }
-    
+
     # This handles associating the role body with a role declaration.
     method pkg_set_body_block($obj, $body_ast) {
         # Get a code object for the body block.
         my $body_code_obj := self.create_code($body_ast, $body_ast.name, 0);
-        
+
         # Set it as the body block.
         $obj.HOW.set_body_block($obj, $body_code_obj);
     }
-    
+
     # Adds a parent or role to the meta-object.
     method pkg_add_parent_or_role($obj, $meta_method_name, $to_add) {
         $obj.HOW."$meta_method_name"($obj, $to_add);
@@ -431,7 +431,7 @@ class NQP::World is HLL::World {
     method pkg_compose($obj) {
         $obj.HOW.compose($obj);
     }
-    
+
     # Runs a block at BEGIN time.
     method run_begin_block($ast) {
         # Create a wrapper that makes all outer symbols visible.
@@ -458,20 +458,20 @@ class NQP::World is HLL::World {
                 }
             }
         }
-        
+
         # Compile and run it.
         my $code := self.create_code($wrapper, 'BEGIN block', 0);
         my $old_global := nqp::getcurhllsym('GLOBAL');
         nqp::bindcurhllsym('GLOBAL', $*GLOBALish);
         $code();
         nqp::bindcurhllsym('GLOBAL', $old_global);
-        
+
         # Need any nested blocks inside the BEGIN block to make it into the
         # output code.
         $wrapper.shift();
         return $wrapper;
     }
-    
+
     # Adds libraries that NQP code depends on.
     method libs() {
 #?if parrot
@@ -511,7 +511,7 @@ class NQP::World is HLL::World {
         $libs
 #?endif
     }
-    
+
     # Adds some initial tasks.
     method add_initializations() {
         self.add_load_dependency_task(:deserialize_ast(QAST::VM.new(
@@ -528,12 +528,12 @@ class NQP::World is HLL::World {
             :moar(QAST::Op.new( :op('null') ))
         )));
     }
-    
+
     # Does cleanups.
     method cleanup() {
         for @!clearup_tasks { $_() }
     }
-    
+
     # Makes a list safe to cross the compilation boundary.
     sub compilee_list(@orig?) {
 #?if parrot
@@ -549,19 +549,19 @@ class NQP::World is HLL::World {
         $list
 #?endif
     }
-    
+
     # Checks if the given name is known anywhere in the lexpad
     # and with lexical scope.
     method is_lexical($name) {
         self.is_scope($name, 'lexical')
     }
-    
+
     # Checks if the given name is known anywhere in the lexpad
     # and with package scope.
     method is_package($name) {
         self.is_scope($name, 'package')
     }
-    
+
     # Checks if a given name is known in the lexpad anywhere
     # with the specified scope.
     method is_scope($name, $wanted_scope) {
@@ -588,7 +588,7 @@ class NQP::World is HLL::World {
         }
         nqp::die("Lexical $name type could not be found");
     }
-    
+
     # Checks if the symbol is known.
     method known_sym($/, @name) {
         my $known := 0;
@@ -598,14 +598,14 @@ class NQP::World is HLL::World {
         }
         $known
     }
-    
+
     # Finds a symbol that has a known value at compile time from the
     # perspective of the current scope. Checks for lexicals, then if
     # that fails tries package lookup.
     method find_sym(@name) {
         # Make sure it's not an empty name.
         unless +@name { nqp::die("Cannot look up empty name"); }
-        
+
         # If it's a single-part name, look through the lexical
         # scopes.
         if +@name == 1 {
@@ -619,7 +619,7 @@ class NQP::World is HLL::World {
                 }
             }
         }
-        
+
         # If it's a multi-part name, see if the containing package
         # is a lexical somewhere. Otherwise we fall back to looking
         # in GLOBALish.
@@ -637,7 +637,7 @@ class NQP::World is HLL::World {
                 }
             }
         }
-        
+
         # Try to chase down the parts of the name.
         for @name {
             if nqp::existskey($result.WHO, ~$_) {
@@ -648,7 +648,7 @@ class NQP::World is HLL::World {
                     join('::', @name));
             }
         }
-        
+
         $result;
     }
 

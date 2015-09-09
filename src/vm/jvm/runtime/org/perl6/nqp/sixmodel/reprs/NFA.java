@@ -25,6 +25,12 @@ public class NFA extends REPR {
     public static final int EDGE_CHARRANGE_NEG    = 13;
     public static final int EDGE_CODEPOINT_LL     = 14;
     public static final int EDGE_CODEPOINT_I_LL   = 15;
+    public static final int EDGE_CODEPOINT_M      = 16;
+    public static final int EDGE_CODEPOINT_M_NEG  = 17;
+    public static final int EDGE_CODEPOINT_M_LL   = 18;
+    public static final int EDGE_CODEPOINT_IM     = 19;
+    public static final int EDGE_CODEPOINT_IM_NEG = 20;
+    public static final int EDGE_CODEPOINT_IM_LL  = 21;
     
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
         STable st = new STable(this, HOW);

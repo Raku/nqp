@@ -78,9 +78,13 @@ my $EX_CAT_TAKE    := 32;
 my $EX_CAT_WARN    := 64;
 my $EX_CAT_SUCCEED := 128;
 my $EX_CAT_PROCEED := 256;
+my $EX_CAT_AWAIT   := 8192;
+my $EX_CAT_EMIT    := 16384;
+my $EX_CAT_DONE    := 32768;
 my $EX_CAT_CONTROL := $EX_CAT_NEXT +| $EX_CAT_REDO +| $EX_CAT_LAST +|
                       $EX_CAT_TAKE +| $EX_CAT_WARN +|
-                      $EX_CAT_SUCCEED +| $EX_CAT_PROCEED;
+                      $EX_CAT_SUCCEED +| $EX_CAT_PROCEED +|
+                      $EX_CAT_AWAIT +| $EX_CAT_EMIT +| $EX_CAT_DONE;
 my $EX_CAT_LABELED := 4096;
 
 # Exception handler kinds.
@@ -227,7 +231,9 @@ class QAST::OperationsJAST {
         if %core_ops{$name} -> $mapper {
             return $mapper($qastcomp, $op);
         }
-        nqp::die("No registered operation handler for '$name'");
+
+        my $source := $qastcomp.source_for_node($op);
+        nqp::die("Error while compiling op $name$source, no registered operation handler");
     }
     
     # Adds a core op handler.
@@ -724,7 +730,8 @@ sub boolify_instructions($il, $cond_type) {
         $il.append($LCMP);
     }
 }
-for <if unless> -> $op_name {
+for <if unless with without> -> $op_name {
+    my $is_withy := $op_name eq 'with' || $op_name eq 'without';
     QAST::OperationsJAST.add_core_op($op_name, -> $qastcomp, $op {
         # Check operand count.
         my $operands := +$op.list;
@@ -790,9 +797,18 @@ for <if unless> -> $op_name {
         }
         
         # Emit test.
-        boolify_instructions($il, $cond.type);
+        if $is_withy {
+            $il.append($ALOAD_1);
+            $il.append(JAST::Instruction.new(:op('invokestatic'),
+                $TYPE_OPS, 'isconcrete', 'Long', $TYPE_SMO, $TYPE_TC));
+            $il.append($IVAL_ZERO);
+            $il.append($LCMP);
+        }
+        else {
+            boolify_instructions($il, $cond.type);
+        }
         $il.append(JAST::Instruction.new($else_lbl,
-            :op($op_name eq 'if' ?? 'ifeq' !! 'ifne')));
+            :op($op_name eq 'if' || $op_name eq 'with' ?? 'ifeq' !! 'ifne')));
         
         # Compile the "then".
         my $then;
@@ -1604,6 +1620,9 @@ my %handler_names := nqp::hash(
     'WARN',    $EX_CAT_WARN,
     'PROCEED', $EX_CAT_PROCEED,
     'SUCCEED', $EX_CAT_SUCCEED,
+    'AWAIT',   $EX_CAT_AWAIT,
+    'EMIT',    $EX_CAT_EMIT,
+    'DONE',    $EX_CAT_DONE,
 );
 QAST::OperationsJAST.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
     my @children := nqp::clone($op.list());
@@ -1708,7 +1727,25 @@ QAST::OperationsJAST.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
     $tryil.append($prores.jast);
     $*STACK.obtain($tryil, $prores);
     $tryil.append(JAST::Instruction.new( :op('astore'), $result ));
-    
+
+    # Handle any runtime exceptions (Throwable) that are not ControlException
+    my $erril := JAST::InstructionList.new();
+    my $nclab   := JAST::Label.new( :name( $qastcomp.unique('non_cont_ex') ) );
+    $erril.append($DUP);
+    $erril.append(JAST::Instruction.new( :op('instanceof'), $TYPE_EX_CONT ));
+    $erril.append(JAST::Instruction.new( :op('ifeq'), $nclab ));
+    $erril.append($ATHROW);
+    $erril.append($nclab);
+    $erril.append($ALOAD_1);
+    $erril.append($SWAP);
+    $erril.append(JAST::Instruction.new( :op('invokestatic'),
+        $TYPE_EH, 'dieInternal', $TYPE_EX_RT, $TYPE_TC, $TYPE_THROWABLE ));
+    $erril.append($ATHROW);
+
+    # Inner try/catch block to catch runtime exceptions (Throwable)
+    my $inner := JAST::InstructionList.new();
+    $inner.append(JAST::TryCatch.new( :try($tryil), :catch($erril), :type($TYPE_THROWABLE) ));
+
     # The catch part just handles unwind; grab the result. Also check "exit
     # after unwind" flag, used to force this whole block to exit.
     my $catchil := JAST::InstructionList.new();
@@ -1731,7 +1768,7 @@ QAST::OperationsJAST.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
     
     # Wrap it all up in try/catch etc.
     $il.append($qastcomp.delimit_handler(
-        JAST::TryCatch.new( :try($tryil), :catch($catchil), :type($TYPE_EX_UNWIND) ),
+        JAST::TryCatch.new( :try($inner), :catch($catchil), :type($TYPE_EX_UNWIND) ),
         $*HANDLER_IDX, $handler));
 
     # Evaluate to the result.
@@ -1863,6 +1900,7 @@ QAST::OperationsJAST.add_hll_unbox('', $RT_STR, -> $qastcomp {
 QAST::OperationsJAST.map_classlib_core_op('ctx', $TYPE_OPS, 'ctx', [], $RT_OBJ, :tc, :!inlinable);
 QAST::OperationsJAST.map_classlib_core_op('ctxouter', $TYPE_OPS, 'ctxouter', [$RT_OBJ], $RT_OBJ, :tc, :!inlinable);
 QAST::OperationsJAST.map_classlib_core_op('ctxcaller', $TYPE_OPS, 'ctxcaller', [$RT_OBJ], $RT_OBJ, :tc, :!inlinable);
+QAST::OperationsJAST.map_classlib_core_op('ctxcode', $TYPE_OPS, 'ctxcode', [$RT_OBJ], $RT_OBJ, :tc, :!inlinable);
 QAST::OperationsJAST.map_classlib_core_op('ctxouterskipthunks', $TYPE_OPS, 'ctxouterskipthunks', [$RT_OBJ], $RT_OBJ, :tc, :!inlinable);
 QAST::OperationsJAST.map_classlib_core_op('ctxcallerskipthunks', $TYPE_OPS, 'ctxcallerskipthunks', [$RT_OBJ], $RT_OBJ, :tc, :!inlinable);
 QAST::OperationsJAST.map_classlib_core_op('curcode', $TYPE_OPS, 'curcode', [], $RT_OBJ, :tc, :!inlinable);
@@ -1940,6 +1978,9 @@ my %const_map := nqp::hash(
     'CONTROL_PROCEED',      256,
     'CONTROL_WARN',         64,
     'CONTROL_LABELED',      4096,
+    'CONTROL_AWAIT',        8192,
+    'CONTROL_EMIT',         16384,
+    'CONTROL_DONE',         32768,
     
     'STAT_EXISTS',             0,
     'STAT_FILESIZE',           1,
@@ -1962,9 +2003,34 @@ my %const_map := nqp::hash(
     'STAT_PLATFORM_BLOCKSIZE', -6,
     'STAT_PLATFORM_BLOCKS',    -7,
 
+    'PIPE_INHERIT_IN',          1,
+    'PIPE_IGNORE_IN',           2,
+    'PIPE_CAPTURE_IN',          4,
+    'PIPE_INHERIT_OUT',         8,
+    'PIPE_IGNORE_OUT',          16,
+    'PIPE_CAPTURE_OUT',         32,
+    'PIPE_INHERIT_ERR',         64,
+    'PIPE_IGNORE_ERR',          128,
+    'PIPE_CAPTURE_ERR',         256,
+
     'TYPE_CHECK_CACHE_DEFINITIVE',  0,
     'TYPE_CHECK_CACHE_THEN_METHOD', 1,
     'TYPE_CHECK_NEEDS_ACCEPTS',     2,
+
+    'C_TYPE_CHAR',              -1,
+    'C_TYPE_SHORT',             -2,
+    'C_TYPE_INT',               -3,
+    'C_TYPE_LONG',              -4,
+    'C_TYPE_LONGLONG',          -5,
+    'C_TYPE_FLOAT',             -1,
+    'C_TYPE_DOUBLE',            -2,
+    'C_TYPE_LONGDOUBLE',        -3,
+
+    'NORMALIZE_NONE',            0,
+    'NORMALIZE_NFC',             1,
+    'NORMALIZE_NFD',             2,
+    'NORMALIZE_NFKC',            3,
+    'NORMALIZE_NFKD',            4,
 );
 QAST::OperationsJAST.add_core_op('const', -> $qastcomp, $op {
     if nqp::existskey(%const_map, $op.name) {
@@ -1986,6 +2052,7 @@ QAST::OperationsJAST.map_classlib_core_op('print', $TYPE_OPS, 'print', [$RT_STR]
 QAST::OperationsJAST.map_classlib_core_op('say', $TYPE_OPS, 'say', [$RT_STR], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('stat', $TYPE_OPS, 'stat', [$RT_STR, $RT_INT], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('open', $TYPE_OPS, 'open', [$RT_STR, $RT_STR], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('readlink', $TYPE_OPS, 'readlink', [$RT_STR], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('filereadable', $TYPE_OPS, 'filereadable', [$RT_STR], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('filewritable', $TYPE_OPS, 'filewritable', [$RT_STR], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('fileexecutable', $TYPE_OPS, 'fileexecutable', [$RT_STR], $RT_INT, :tc);
@@ -2003,7 +2070,6 @@ QAST::OperationsJAST.map_classlib_core_op('printfh', $TYPE_OPS, 'printfh', [$RT_
 QAST::OperationsJAST.map_classlib_core_op('sayfh', $TYPE_OPS, 'sayfh', [$RT_OBJ, $RT_STR], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('flushfh', $TYPE_OPS, 'flushfh', [$RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('readlinefh', $TYPE_OPS, 'readlinefh', [$RT_OBJ], $RT_STR, :tc);
-QAST::OperationsJAST.map_classlib_core_op('readlineintfh', $TYPE_OPS, 'readlineintfh', [$RT_OBJ, $RT_STR], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('readallfh', $TYPE_OPS, 'readallfh', [$RT_OBJ], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getcfh', $TYPE_OPS, 'getcfh', [$RT_OBJ], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('eoffh', $TYPE_OPS, 'eoffh', [$RT_OBJ], $RT_INT, :tc);
@@ -2022,17 +2088,9 @@ QAST::OperationsJAST.map_classlib_core_op('link', $TYPE_OPS, 'link', [$RT_STR, $
 
 QAST::OperationsJAST.map_classlib_core_op('gethostname', $TYPE_OPS, 'gethostname', [], $RT_STR);
 
-# Two variants of shell until we deprecate shell1
-QAST::OperationsJAST.map_classlib_core_op('shell1', $TYPE_OPS, 'shell1', [$RT_STR], $RT_INT, :tc);
-QAST::OperationsJAST.map_classlib_core_op('shell3', $TYPE_OPS, 'shell3', [$RT_STR, $RT_STR, $RT_OBJ], $RT_INT, :tc);
-QAST::OperationsJAST.add_core_op('shell', -> $qastcomp, $op {
-    my @operands := $op.list;
-    $qastcomp.as_jast(+@operands == 1
-        ?? QAST::Op.new( :op('shell1'), |@operands )
-        !! QAST::Op.new( :op('shell3'), |@operands ));
-});
-QAST::OperationsJAST.map_classlib_core_op('spawn', $TYPE_OPS, 'spawn', [$RT_OBJ, $RT_STR, $RT_OBJ], $RT_INT, :tc);
-QAST::OperationsJAST.map_classlib_core_op('openpipe', $TYPE_OPS, 'openpipe', [$RT_STR, $RT_STR, $RT_OBJ, $RT_STR], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('shell', $TYPE_OPS, 'shell', [$RT_STR, $RT_STR, $RT_OBJ, $RT_OBJ, $RT_OBJ, $RT_OBJ, $RT_INT], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('spawn', $TYPE_OPS, 'spawn', [$RT_OBJ, $RT_STR, $RT_OBJ, $RT_OBJ, $RT_OBJ, $RT_OBJ, $RT_INT], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('syncpipe', $TYPE_OPS, 'syncpipe', [], $RT_OBJ, :tc);
 
 QAST::OperationsJAST.map_classlib_core_op('symlink', $TYPE_OPS, 'symlink', [$RT_STR, $RT_STR], $RT_INT, :tc);
 
@@ -2078,6 +2136,7 @@ QAST::OperationsJAST.map_classlib_core_op('rand_n', $TYPE_OPS, 'rand_n', [$RT_NU
 QAST::OperationsJAST.map_classlib_core_op('srand', $TYPE_OPS, 'srand', [$RT_INT], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('rand_I', $TYPE_OPS, 'rand_I', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('mod_n', $TYPE_OPS, 'mod_n', [$RT_NUM, $RT_NUM], $RT_NUM);
+QAST::OperationsJAST.map_classlib_core_op('pow_i', $TYPE_OPS, 'pow_i', [$RT_INT, $RT_INT], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('pow_n', $TYPE_OPS, 'pow_n', [$RT_NUM, $RT_NUM], $RT_NUM);
 QAST::OperationsJAST.map_classlib_core_op('pow_I', $TYPE_OPS, 'pow_I', [$RT_OBJ, $RT_OBJ, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_jvm_core_op('neg_i', 'lneg', [$RT_INT], $RT_INT);
@@ -2203,6 +2262,7 @@ QAST::OperationsJAST.add_core_op('ord',  -> $qastcomp, $op {
         ?? QAST::Op.new( :op('ordfirst'), |@operands )
         !! QAST::Op.new( :op('ordat'), |@operands ));
 });
+QAST::OperationsJAST.map_classlib_core_op('ordbaseat', $TYPE_OPS, 'ordbaseat', [$RT_STR, $RT_INT], $RT_INT);
 
 # index may or may not take a starting position
 QAST::OperationsJAST.map_classlib_core_op('indexfrom', $TYPE_OPS, 'indexfrom', [$RT_STR, $RT_STR, $RT_INT], $RT_INT);
@@ -2247,6 +2307,8 @@ QAST::OperationsJAST.map_classlib_core_op('scwbdisable', $TYPE_OPS, 'scwbdisable
 QAST::OperationsJAST.map_classlib_core_op('scwbenable', $TYPE_OPS, 'scwbenable', [], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('pushcompsc', $TYPE_OPS, 'pushcompsc', [$RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('popcompsc', $TYPE_OPS, 'popcompsc', [], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('neverrepossess', $TYPE_OPS, 'neverrepossess', [$RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('scdisclaim', $TYPE_OPS, 'scdisclaim', [$RT_OBJ], $RT_OBJ, :tc);
 
 # bitwise opcodes
 QAST::OperationsJAST.map_classlib_core_op('bitor_i', $TYPE_OPS, 'bitor_i', [$RT_INT, $RT_INT], $RT_INT);
@@ -2312,6 +2374,21 @@ QAST::OperationsJAST.map_classlib_core_op('atpos', $TYPE_OPS, 'atpos', [$RT_OBJ,
 QAST::OperationsJAST.map_classlib_core_op('atpos_i', $TYPE_OPS, 'atpos_i', [$RT_OBJ, $RT_INT], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('atpos_n', $TYPE_OPS, 'atpos_n', [$RT_OBJ, $RT_INT], $RT_NUM, :tc);
 QAST::OperationsJAST.map_classlib_core_op('atpos_s', $TYPE_OPS, 'atpos_s', [$RT_OBJ, $RT_INT], $RT_STR, :tc);
+QAST::OperationsJAST.map_classlib_core_op('atposref_i', $TYPE_OPS, 'atposref_i', [$RT_OBJ, $RT_INT], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('atposref_n', $TYPE_OPS, 'atposref_n', [$RT_OBJ, $RT_INT], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('atposref_s', $TYPE_OPS, 'atposref_s', [$RT_OBJ, $RT_INT], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('atpos2d', $TYPE_OPS, 'atpos2d_o', [$RT_OBJ, $RT_INT, $RT_INT], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('atpos2d_i', $TYPE_OPS, 'atpos2d_i', [$RT_OBJ, $RT_INT, $RT_INT], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('atpos2d_n', $TYPE_OPS, 'atpos2d_n', [$RT_OBJ, $RT_INT, $RT_INT], $RT_NUM, :tc);
+QAST::OperationsJAST.map_classlib_core_op('atpos2d_s', $TYPE_OPS, 'atpos2d_s', [$RT_OBJ, $RT_INT, $RT_INT], $RT_STR, :tc);
+QAST::OperationsJAST.map_classlib_core_op('atpos3d', $TYPE_OPS, 'atpos3d_o', [$RT_OBJ, $RT_INT, $RT_INT, $RT_INT], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('atpos3d_i', $TYPE_OPS, 'atpos3d_i', [$RT_OBJ, $RT_INT, $RT_INT, $RT_INT], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('atpos3d_n', $TYPE_OPS, 'atpos3d_n', [$RT_OBJ, $RT_INT, $RT_INT, $RT_INT], $RT_NUM, :tc);
+QAST::OperationsJAST.map_classlib_core_op('atpos3d_s', $TYPE_OPS, 'atpos3d_s', [$RT_OBJ, $RT_INT, $RT_INT, $RT_INT], $RT_STR, :tc);
+QAST::OperationsJAST.map_classlib_core_op('atposnd', $TYPE_OPS, 'atposnd_o', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('atposnd_i', $TYPE_OPS, 'atposnd_i', [$RT_OBJ, $RT_OBJ], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('atposnd_n', $TYPE_OPS, 'atposnd_n', [$RT_OBJ, $RT_OBJ], $RT_NUM, :tc);
+QAST::OperationsJAST.map_classlib_core_op('atposnd_s', $TYPE_OPS, 'atposnd_s', [$RT_OBJ, $RT_OBJ], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('atkey', $TYPE_OPS, 'atkey', [$RT_OBJ, $RT_STR], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('atkey_i', $TYPE_OPS, 'atkey_i', [$RT_OBJ, $RT_STR], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('atkey_n', $TYPE_OPS, 'atkey_n', [$RT_OBJ, $RT_STR], $RT_NUM, :tc);
@@ -2320,6 +2397,18 @@ QAST::OperationsJAST.map_classlib_core_op('bindpos', $TYPE_OPS, 'bindpos', [$RT_
 QAST::OperationsJAST.map_classlib_core_op('bindpos_i', $TYPE_OPS, 'bindpos_i', [$RT_OBJ, $RT_INT, $RT_INT], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bindpos_n', $TYPE_OPS, 'bindpos_n', [$RT_OBJ, $RT_INT, $RT_NUM], $RT_NUM, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bindpos_s', $TYPE_OPS, 'bindpos_s', [$RT_OBJ, $RT_INT, $RT_STR], $RT_STR, :tc);
+QAST::OperationsJAST.map_classlib_core_op('bindpos2d', $TYPE_OPS, 'bindpos2d_o', [$RT_OBJ, $RT_INT, $RT_INT, $RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('bindpos2d_i', $TYPE_OPS, 'bindpos2d_i', [$RT_OBJ, $RT_INT, $RT_INT, $RT_INT], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('bindpos2d_n', $TYPE_OPS, 'bindpos2d_n', [$RT_OBJ, $RT_INT, $RT_INT, $RT_NUM], $RT_NUM, :tc);
+QAST::OperationsJAST.map_classlib_core_op('bindpos2d_s', $TYPE_OPS, 'bindpos2d_s', [$RT_OBJ, $RT_INT, $RT_INT, $RT_STR], $RT_STR, :tc);
+QAST::OperationsJAST.map_classlib_core_op('bindpos3d', $TYPE_OPS, 'bindpos3d_o', [$RT_OBJ, $RT_INT, $RT_INT, $RT_INT, $RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('bindpos3d_i', $TYPE_OPS, 'bindpos3d_i', [$RT_OBJ, $RT_INT, $RT_INT, $RT_INT, $RT_INT], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('bindpos3d_n', $TYPE_OPS, 'bindpos3d_n', [$RT_OBJ, $RT_INT, $RT_INT, $RT_INT, $RT_NUM], $RT_NUM, :tc);
+QAST::OperationsJAST.map_classlib_core_op('bindpos3d_s', $TYPE_OPS, 'bindpos3d_s', [$RT_OBJ, $RT_INT, $RT_INT, $RT_INT, $RT_STR], $RT_STR, :tc);
+QAST::OperationsJAST.map_classlib_core_op('bindposnd', $TYPE_OPS, 'bindposnd_o', [$RT_OBJ, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('bindposnd_i', $TYPE_OPS, 'bindposnd_i', [$RT_OBJ, $RT_OBJ, $RT_INT], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('bindposnd_n', $TYPE_OPS, 'bindposnd_n', [$RT_OBJ, $RT_OBJ, $RT_NUM], $RT_NUM, :tc);
+QAST::OperationsJAST.map_classlib_core_op('bindposnd_s', $TYPE_OPS, 'bindposnd_s', [$RT_OBJ, $RT_OBJ, $RT_STR], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bindkey', $TYPE_OPS, 'bindkey', [$RT_OBJ, $RT_STR, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bindkey_i', $TYPE_OPS, 'bindkey_i', [$RT_OBJ, $RT_STR, $RT_INT], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bindkey_n', $TYPE_OPS, 'bindkey_n', [$RT_OBJ, $RT_STR, $RT_NUM], $RT_NUM, :tc);
@@ -2329,6 +2418,9 @@ QAST::OperationsJAST.map_classlib_core_op('existskey', $TYPE_OPS, 'existskey', [
 QAST::OperationsJAST.map_classlib_core_op('deletekey', $TYPE_OPS, 'deletekey', [$RT_OBJ, $RT_STR], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('elems', $TYPE_OPS, 'elems', [$RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('setelems', $TYPE_OPS, 'setelems', [$RT_OBJ, $RT_INT], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('dimensions', $TYPE_OPS, 'dimensions', [$RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('setdimensions', $TYPE_OPS, 'setdimensions', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('numdimensions', $TYPE_OPS, 'numdimensions', [$RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('push', $TYPE_OPS, 'push', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('push_i', $TYPE_OPS, 'push_i', [$RT_OBJ, $RT_INT], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('push_n', $TYPE_OPS, 'push_n', [$RT_OBJ, $RT_NUM], $RT_NUM, :tc);
@@ -2392,6 +2484,9 @@ QAST::OperationsJAST.map_classlib_core_op('getattr', $TYPE_OPS, 'getattr', [$RT_
 QAST::OperationsJAST.map_classlib_core_op('getattr_i', $TYPE_OPS, 'getattr_i', [$RT_OBJ, $RT_OBJ, $RT_STR], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getattr_n', $TYPE_OPS, 'getattr_n', [$RT_OBJ, $RT_OBJ, $RT_STR], $RT_NUM, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getattr_s', $TYPE_OPS, 'getattr_s', [$RT_OBJ, $RT_OBJ, $RT_STR], $RT_STR, :tc);
+QAST::OperationsJAST.map_classlib_core_op('getattrref_i', $TYPE_OPS, 'getattrref_i', [$RT_OBJ, $RT_OBJ, $RT_STR], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('getattrref_n', $TYPE_OPS, 'getattrref_n', [$RT_OBJ, $RT_OBJ, $RT_STR], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('getattrref_s', $TYPE_OPS, 'getattrref_s', [$RT_OBJ, $RT_OBJ, $RT_STR], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bindattr', $TYPE_OPS, 'bindattr', [$RT_OBJ, $RT_OBJ, $RT_STR, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bindattr_i', $TYPE_OPS, 'bindattr_i', [$RT_OBJ, $RT_OBJ, $RT_STR, $RT_INT], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bindattr_n', $TYPE_OPS, 'bindattr_n', [$RT_OBJ, $RT_OBJ, $RT_STR, $RT_NUM], $RT_NUM, :tc);
@@ -2433,15 +2528,27 @@ QAST::OperationsJAST.map_classlib_core_op('defined', $TYPE_OPS, 'isconcrete', [$
 # container related
 QAST::OperationsJAST.map_classlib_core_op('setcontspec', $TYPE_OPS, 'setcontspec', [$RT_OBJ, $RT_STR, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('iscont', $TYPE_OPS, 'iscont', [$RT_OBJ], $RT_INT);
+QAST::OperationsJAST.map_classlib_core_op('iscont_i', $TYPE_OPS, 'iscont_i', [$RT_OBJ], $RT_INT);
+QAST::OperationsJAST.map_classlib_core_op('iscont_n', $TYPE_OPS, 'iscont_n', [$RT_OBJ], $RT_INT);
+QAST::OperationsJAST.map_classlib_core_op('iscont_s', $TYPE_OPS, 'iscont_s', [$RT_OBJ], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('decont', $TYPE_OPS, 'decont', [$RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('decont_i', $TYPE_OPS, 'decont_i', [$RT_OBJ], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('decont_n', $TYPE_OPS, 'decont_n', [$RT_OBJ], $RT_NUM, :tc);
+QAST::OperationsJAST.map_classlib_core_op('decont_s', $TYPE_OPS, 'decont_s', [$RT_OBJ], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('assign', $TYPE_OPS, 'assign', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('assignunchecked', $TYPE_OPS, 'assignunchecked', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('assign_i', $TYPE_OPS, 'assign_i', [$RT_OBJ, $RT_INT], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('assign_n', $TYPE_OPS, 'assign_n', [$RT_OBJ, $RT_NUM], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('assign_s', $TYPE_OPS, 'assign_s', [$RT_OBJ, $RT_STR], $RT_OBJ, :tc);
 
 # lexical related opcodes
 QAST::OperationsJAST.map_classlib_core_op('getlex', $TYPE_OPS, 'getlex', [$RT_STR], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getlex_i', $TYPE_OPS, 'getlex_i', [$RT_STR], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getlex_n', $TYPE_OPS, 'getlex_n', [$RT_STR], $RT_NUM, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getlex_s', $TYPE_OPS, 'getlex_s', [$RT_STR], $RT_STR, :tc);
+QAST::OperationsJAST.map_classlib_core_op('getlexref_i', $TYPE_OPS, 'getlexref_i', [$RT_STR], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('getlexref_n', $TYPE_OPS, 'getlexref_n', [$RT_STR], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('getlexref_s', $TYPE_OPS, 'getlexref_s', [$RT_STR], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bindlex', $TYPE_OPS, 'bindlex', [$RT_STR, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bindlex_i', $TYPE_OPS, 'bindlex_i', [$RT_STR, $RT_INT], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bindlex_n', $TYPE_OPS, 'bindlex_n', [$RT_STR, $RT_NUM], $RT_NUM, :tc);
@@ -2635,8 +2742,21 @@ QAST::OperationsJAST.map_classlib_core_op('initnativecall', $TYPE_NATIVE_OPS, 'i
 QAST::OperationsJAST.map_classlib_core_op('buildnativecall', $TYPE_NATIVE_OPS, 'build', [$RT_OBJ, $RT_STR, $RT_STR, $RT_STR, $RT_OBJ, $RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('nativecall', $TYPE_NATIVE_OPS, 'call', [$RT_OBJ, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('nativecallrefresh', $TYPE_NATIVE_OPS, 'refresh', [$RT_OBJ], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('nativecallsizeof', $TYPE_NATIVE_OPS, 'nativecallsizeof', [$RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('nativecallcast', $TYPE_NATIVE_OPS, 'nativecallcast', [$RT_OBJ, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('nativecallglobal', $TYPE_NATIVE_OPS, 'nativecallglobal', [$RT_STR, $RT_STR, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
+
+QAST::OperationsJAST.add_core_op('getcodelocation', -> $qastcomp, $op {
+    $qastcomp.as_jast(QAST::Op.new(
+        :op('hash'),
+        QAST::SVal.new( :value<file> ), QAST::SVal.new( :value<unknown> ),
+        QAST::SVal.new( :value<line> ), QAST::IVal.new( :value(-1) )
+    ));
+});
+
+QAST::OperationsJAST.map_classlib_core_op('getuniname', $TYPE_OPS, 'getuniname', [$RT_INT], $RT_STR, :tc);
+
+QAST::OperationsJAST.map_classlib_core_op('force_gc', $TYPE_OPS, 'force_gc', [], $RT_OBJ, :tc);
 
 class QAST::CompilerJAST {
     # Responsible for handling issues around code references, building the
@@ -2753,9 +2873,9 @@ class QAST::CompilerJAST {
         has $!outer;            # Outer block's BlockInfo
         has @!params;           # QAST::Var nodes of params
         has @!locals;           # QAST::Var nodes of declared locals
-        has @!lexicals;         # QAST::Var nodes of declared lexicals
         has %!local_types;      # Mapping of local registers to type names
         has %!lexical_types;    # Mapping of lexical names to types
+        has %!lexicalref_types; # Mapping of lexical names to types
         has %!lexical_idxs;     # Lexical indexes (but have to know type too)
         has @!lexical_names;    # List by type of lexial name lists
         has int $!num_save_sites;   # Count of points where a SaveStackException handler is needed
@@ -2772,9 +2892,9 @@ class QAST::CompilerJAST {
             $!outer := $outer;
             @!params := nqp::list();
             @!locals := nqp::list();
-            @!lexicals := nqp::list();
             %!local_types := nqp::hash();
             %!lexical_types := nqp::hash();
+            %!lexicalref_types := nqp::hash();
             %!lexical_idxs := nqp::hash();
             %!local2temp := nqp::hash();
             @!lexical_names := nqp::list([],[],[],[]);
@@ -2789,7 +2909,7 @@ class QAST::CompilerJAST {
             }
             @!params[+@!params] := $var;
         }
-        
+
         method add_lexical($var, :$is_static, :$is_cont, :$is_state) {
             self.register_lexical($var);
             if $is_static || $is_cont || $is_state {
@@ -2801,7 +2921,10 @@ class QAST::CompilerJAST {
                              $is_cont   ?? 1 !! 2;
                 nqp::push(%blv{$!qast.cuid}, [$var.name, $var.value, $flags]);
             }
-            @!lexicals[+@!lexicals] := $var;
+        }
+
+        method add_lexicalref($var) {
+            self.register_lexicalref($var);
         }
         
         method add_local($var) {
@@ -2836,12 +2959,23 @@ class QAST::CompilerJAST {
         method register_lexical($var) {
             my $name := $var.name;
             my $type := rttype_from_typeobj($var.returns);
-            if nqp::existskey(%!lexical_types, $name) {
+            if nqp::existskey(%!lexical_types, $name) || nqp::existskey(%!lexicalref_types, $name) {
                 nqp::die("Lexical '$name' already declared");
             }
             %!lexical_types{$name} := $type;
             %!lexical_idxs{$name} := nqp::elems(@!lexical_names[$type]);
             nqp::push(@!lexical_names[$type], $name);
+        }
+
+        method register_lexicalref($var) {
+            my $name := $var.name;
+            my $type := rttype_from_typeobj($var.returns);
+            if nqp::existskey(%!lexical_types, $name) || nqp::existskey(%!lexicalref_types, $name) {
+                nqp::die("Lexical '$name' already declared");
+            }
+            %!lexicalref_types{$name} := $type;
+            %!lexical_idxs{$name}     := nqp::elems(@!lexical_names[$RT_OBJ]);
+            nqp::push(@!lexical_names[$RT_OBJ], $name);
         }
         
         method register_local($var) {
@@ -2863,7 +2997,6 @@ class QAST::CompilerJAST {
         method qast() { $!qast }
         method outer() { $!outer }
         method params() { @!params }
-        method lexicals() { @!lexicals }
         method locals() { @!locals }
         
         method local_info($name) {
@@ -2871,6 +3004,7 @@ class QAST::CompilerJAST {
             $tempify ?? $tempify[0] !! [ $name, %!local_types{$name} ]
         }
         method lexical_type($name) { %!lexical_types{$name} }
+        method lexicalref_type($name) { %!lexicalref_types{$name} }
         method lexical_idx($name) { %!lexical_idxs{$name} }
         method lexical_names_by_type() { @!lexical_names }
     }
@@ -3141,7 +3275,7 @@ class QAST::CompilerJAST {
         my $best := @possibles.shift;
         my $char := %want_char{$type};
         for @possibles -> $sel, $ast {
-            if nqp::index($sel, $char) >= 0 {
+            if nqp::chars($char) == 0 || nqp::index($sel, $char) >= 0 {
                 $best := $ast;
             }
         }
@@ -3733,9 +3867,6 @@ class QAST::CompilerJAST {
             # rethrown, after calling CallFrame.leave. Others are passed on to
             # dieInternal. Finally, if there's no exception, we also need to
             # call CallFrame.leave.
-            $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
-            $il.append(JAST::Instruction.new( :op('invokevirtual'),
-                $TYPE_CF, 'leave', 'Void' ));
             my $posthan := JAST::InstructionList.new();
             my $nclab   := JAST::Label.new( :name('non_cont_ex') );
             $posthan.append($DUP);
@@ -3753,6 +3884,9 @@ class QAST::CompilerJAST {
             $posthan.append($ATHROW);
             $*JMETH.append(JAST::TryCatch.new( :try($il), :catch($posthan),
                 :type($TYPE_THROWABLE) ));
+            $*JMETH.append(JAST::Instruction.new( :op('aload'), 'cf' ));
+            $*JMETH.append(JAST::Instruction.new( :op('invokevirtual'),
+                $TYPE_CF, 'leave', 'Void' ));
             $*JMETH.append($RETURN);
 
             if $save_sites {
@@ -3986,19 +4120,8 @@ class QAST::CompilerJAST {
     
     multi method as_jast(QAST::Op $node, :$want) {
         my $hll := '';
-        my $result;
-        my $err;
         try $hll := $*HLL;
-        try {
-            $result := QAST::OperationsJAST.compile_op(self, $hll, $node);
-            CATCH { $err := $! }
-        }
-        if $err {
-            nqp::die($err) if nqp::index($err, "Error while compiling op ") == 0;
-            my $source := self.source_for_node($node);
-            nqp::die("Error while compiling op " ~ $node.op ~ "$source: $err");
-        }
-        $result
+        QAST::OperationsJAST.compile_op(self, $hll, $node);
     }
     
     multi method as_jast(QAST::VM $node, :$want) {
@@ -4072,8 +4195,11 @@ class QAST::CompilerJAST {
                 elsif $scope eq 'lexical' {
                     $*BLOCK.add_lexical($node);
                 }
+                elsif $scope eq 'lexicalref' {
+                    $*BLOCK.add_lexicalref($node);
+                }
                 else {
-                    nqp::die("Cannot declare variable with scope '$scope'; use 'local' or 'lexical'");
+                    nqp::die("Cannot declare variable with scope '$scope'; use 'local' or 'lexical' or 'lexicalref'");
                 }
             }
             elsif $decl eq 'static' {
@@ -4118,6 +4244,22 @@ class QAST::CompilerJAST {
                 nqp::die("No scope specified or locatable in the symbol table for '$name'");
             }
         }
+
+        my $want := $*WANT;
+        # If we know what we're after, some opts:
+        if nqp::isconcrete($want) {
+            if $want == $RT_VOID {
+                return result(JAST::Instruction.new(:op('nop')), $RT_VOID);
+            }
+
+            # Both lexicalref and attributeref in the context we want a
+            # non-object devolve to lexical and attribute, since we'd only
+            # de-ref right away anyway.
+            if nqp::defined($want) && $want != $RT_OBJ {
+                $scope := 'lexical'   if $scope eq 'lexicalref';
+                $scope := 'attribute' if $scope eq 'attributeref';
+            }
+        }
         
         # Now go by scope.
         if $scope eq 'local' {
@@ -4144,12 +4286,20 @@ class QAST::CompilerJAST {
         elsif $scope eq 'lexical' || $scope eq 'typevar' || $scope eq 'contextual' {
             # See if it's declared in the local scope.
             my int $local  := 0;
+            my int $ref    := 0;
             my int $scopes := 0;
             my $type       := $*BLOCK.lexical_type($name);
+            my $reftype    := $*BLOCK.lexicalref_type($name);
             my $declarer;
             if nqp::defined($type) {
                 # It is. Nothing more to do.
                 $local := 1;
+            }
+            elsif nqp::defined($reftype) {
+                # It is, and also a ref. Nothing more to do.
+                $local := 1;
+                $ref := 1;
+                $type := $RT_OBJ;
             }
             elsif $scope eq 'lexical' || $scope eq 'typevar' {
                 # Try to find it in an outer scope.
@@ -4161,9 +4311,16 @@ class QAST::CompilerJAST {
                     }
                     else {
                         $type := $cur_block.lexical_type($name);
+                        $reftype := $cur_block.lexicalref_type($name);
                         if nqp::defined($type) {
                             $scopes := $i;
                             $declarer := $cur_block;
+                            $cur_block := NQPMu;
+                        }
+                        elsif nqp::defined($reftype) {
+                            $scopes := $i;
+                            $declarer := $cur_block;
+                            $ref := 1;
                             $cur_block := NQPMu;
                         }
                         else {
@@ -4205,12 +4362,15 @@ class QAST::CompilerJAST {
             }
             
             # Map type in a couple of ways we'll need.
-            my $jtype := jtype($type);
-            my $c     := typechar($type);
+            my $jtype := $ref ?? $TYPE_SMO !! jtype($type);
+            my $c     := $ref ?? 'o' !! typechar($type);
             
             # If binding, always want the thing we're binding evaluated.
             my $il := JAST::InstructionList.new();
             if $*BINDVAL {
+                if $ref {
+                    nqp::die('Cannot bind to QAST::Var resolving to a lexicalref');
+                }
                 my $valres := self.as_jast_clear_bindval($*BINDVAL, :want($type));
                 $il.append($valres.jast);
                 $*STACK.obtain($il, $valres);
@@ -4240,6 +4400,133 @@ class QAST::CompilerJAST {
             }
 
             return result($il, $type);
+        }
+        elsif $scope eq 'lexicalref' {
+            # See if it's declared in the local scope.
+            my int $local  := 0;
+            my int $ref    := 0;
+            my int $scopes := 0;
+            my $type       := $*BLOCK.lexical_type($name);
+            my $reftype    := $*BLOCK.lexicalref_type($name);
+            my $declarer;
+            if nqp::defined($type) {
+                # It is. Nothing more to do.
+                $local := 1;
+            }
+            elsif nqp::defined($reftype) {
+                # It is, and also a ref. Nothing more to do.
+                $local := 1;
+                $ref := 1;
+            }
+            else {
+                # Try to find it in an outer scope.
+                my int $i := 1;
+                my $cur_block := $*BLOCK.outer();
+                while nqp::istype($cur_block, BlockInfo) {
+                    if $cur_block.qast.ann('DYN_COMP_WRAPPER') {
+                        $cur_block := NQPMu;
+                    }
+                    else {
+                        $type := $cur_block.lexical_type($name);
+                        $reftype := $cur_block.lexicalref_type($name);
+                        if nqp::defined($type) {
+                            $scopes := $i;
+                            $declarer := $cur_block;
+                            $cur_block := NQPMu;
+                        }
+                        elsif nqp::defined($reftype) {
+                            $scopes := $i;
+                            $declarer := $cur_block;
+                            $ref := 1;
+                            $cur_block := NQPMu;
+                        }
+                        else {
+                            $cur_block := $cur_block.outer();
+                            $i++;
+                        }
+                    }
+                }
+            }
+
+            # Can only bind if it's a ref.
+            if $*BINDVAL {
+                unless $local || $scopes {
+                    nqp::die('Cannot bind to late-bound QAST::Var with scope lexicalref');
+                }
+                unless $ref {
+                    nqp::die("Cannot bind to non-reference QAST::Var '{$name}'");
+                }
+                my $il := JAST::InstructionList.new();
+                my $valres := self.as_jast_clear_bindval($*BINDVAL, :want($RT_OBJ));
+                $il.append($valres.jast);
+                $*STACK.obtain($il, $valres);
+                if $local {
+                    $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
+                    $il.append(JAST::PushIndex.new( :value($*BLOCK.lexical_idx($name)) ));
+                    $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+                            "bindlex_o", $TYPE_SMO, $TYPE_SMO, $TYPE_CF, 'Integer' ));
+                }
+                else {
+                    $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
+                    $il.append(JAST::PushIndex.new( :value($declarer.lexical_idx($name)) ));
+                    $il.append(JAST::PushIndex.new( :value($scopes) ));
+                    $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+                        "bindlex_o_si", $TYPE_SMO,  $TYPE_SMO, $TYPE_CF, 'Integer', 'Integer' ));
+                }
+                return result($il, $RT_OBJ);
+            }
+
+            # If we didn't find it anywhere, it musta been explicitly marked as
+            # lexicalref. Take the type from .returns and rewrite to a more dynamic
+            # lookup.
+            unless $local || $scopes {
+                $type := rttype_from_typeobj($node.returns);
+                if $type == $RT_OBJ {
+                    nqp::die('Cannot take a reference to a non-native lexical');
+                }
+                my $char := typechar($type);
+                my $name_sval := QAST::SVal.new( :value($name) );
+                return self.as_jast(QAST::Op.new( :op("getlexref_$char"), $name_sval ));
+            }
+
+            # If it's a ref and we want a ref, just look it up as an object
+            # lexical.
+            my $il := JAST::InstructionList.new();
+            if $ref {
+                if $local {
+                    $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
+                    $il.append(JAST::PushIndex.new( :value($*BLOCK.lexical_idx($name)) ));
+                    $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+                        "getlex_o", $TYPE_SMO, $TYPE_CF, 'Integer' ));
+                }
+                else {
+                    $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
+                    $il.append(JAST::PushIndex.new( :value($declarer.lexical_idx($name)) ));
+                    $il.append(JAST::PushIndex.new( :value($scopes) ));
+                    $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+                        "getlex_o_si", $TYPE_SMO, $TYPE_CF, 'Integer', 'Integer' ));
+                }
+                return result($il, $RT_OBJ);
+            }
+
+            # Otherwise, need to take the reference.
+            else {
+                my $c := typechar($type);
+                if $local {
+                    $il.append($ALOAD_1);
+                    $il.append(JAST::PushIndex.new( :value($*BLOCK.lexical_idx($name)) ));
+                    $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+                        "getlexref_$c", $TYPE_SMO, $TYPE_TC, 'Integer' ));
+                }
+                else {
+                    $il.append($ALOAD_1);
+                    $il.append(JAST::PushIndex.new( :value($declarer.lexical_idx($name)) ));
+                    $il.append(JAST::PushIndex.new( :value($scopes) ));
+                    $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+                        "getlexref_{$c}_si", $TYPE_SMO, $TYPE_TC, 'Integer', 'Integer' ));
+                }
+                return result($il, $RT_OBJ);
+            }
         }
         elsif $scope eq 'attribute' {
             # Ensure we have object and class handle.
@@ -4285,6 +4572,40 @@ class QAST::CompilerJAST {
             }
             
             return result($il, $type);
+        }
+        elsif $scope eq 'attributeref' {
+            # Ensure we have object and class handle, and aren't binding.
+            my @args := $node.list;
+            if +@args != 2 {
+                nqp::die("An attribute lookup needs an object and a class handle");
+            }
+            if $*BINDVAL {
+                nqp::die("Cannot bind to QAST::Var '{$name}' with scope attributeref");
+            }
+
+            # Ensure we've a natively typed attribute to take a ref to.
+            my $type := rttype_from_typeobj($node.returns);
+            if $type == $RT_OBJ {
+                nqp::die("Attribute references can only be to native types");
+            }
+
+            # Compile object, handle and name.
+            my $il := JAST::InstructionList.new();
+            my $obj_res := self.as_jast_clear_bindval(@args[0], :want($RT_OBJ));
+            $il.append($obj_res.jast);
+            my $han_res := self.as_jast_clear_bindval(@args[1], :want($RT_OBJ));
+            $il.append($han_res.jast);
+            my $name_res := self.as_jast_clear_bindval(QAST::SVal.new( :value($name) ), :want($RT_STR));
+            $il.append($name_res.jast);
+
+            # Emit lookup.
+            my $char  := typechar($type);
+            $*STACK.obtain($il, $obj_res, $han_res, $name_res);
+            $il.append($ALOAD_1);
+            $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+                "getattrref_$char", $TYPE_SMO, $TYPE_SMO, $TYPE_SMO, $TYPE_STR, $TYPE_TC ));
+
+            return result($il, $RT_OBJ);
         }
         elsif $scope eq 'positional' {
             return self.as_jast_clear_bindval($*BINDVAL
@@ -5009,6 +5330,14 @@ class QAST::CompilerJAST {
         $il
     }
 
+    method goal($node) {
+        self.regex_jast(QAST::Regex.new(
+            :rxtype<concat>,
+            $node[1],
+            QAST::Regex.new( :rxtype<altseq>, $node[0], $node[2] )
+        ))
+    }
+
     method conj($node) { self.conjseq($node) }
     
     method conjseq($node) {
@@ -5160,7 +5489,12 @@ class QAST::CompilerJAST {
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<eos> ));
         $il.append($LCMP);
         $il.append(JAST::Instruction.new( :op('ifge'), %*REG<fail> ));
-        
+
+        $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
+        $il.append($IVAL_ZERO);
+        $il.append($LCMP);
+        $il.append(JAST::Instruction.new( :op('iflt'), %*REG<fail> ));
+
         $il.append(JAST::PushSVal.new( :value($node[0]) ));
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<tgt> ));
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
@@ -5967,6 +6301,9 @@ class QAST::CompilerJAST {
 
     method uniprop($node) {
         my $il := JAST::InstructionList.new();
+        if +@($node) > 1 {
+            nqp::die("Unicode property pairs NYI on jvm backend");
+        }
 
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<eos> ));

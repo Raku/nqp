@@ -79,6 +79,10 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         self.panic('Quantifier quantifies nothing.');
     }
 
+    method throw_solitary_backtrack_control() {
+        self.panic("Backtrack control ':' does not seem to have a preceding atom to control");
+    }
+
     method throw_null_pattern() {
         self.panic('Null regex not allowed');
     }
@@ -197,7 +201,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         ||  <sigmaybe>?
             [
             | <!rxstopper> <quantifier>
-            | <?[:]> <backmod> <!alpha>
+            | <?[:]> <backmod> <!alnum>
             ]
             [ <!{$*VARDEF}> <.SIGOK> <sigfinal=.sigmaybe> ]?
             [ <.ws> <separator> ]?
@@ -216,7 +220,9 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token atom {
         # :dba('regex atom')
         [
-        | \w [ \w+! <?before \w> ]? <.SIGOK>
+        | \w
+          [ <?before ' ' \w> <!{ %*RX<s> || $*HAS_GOAL }> <.worry("Space is not significant here; please use quotes or :s (:sigspace) modifier (or, to suppress this warning, omit the space, or otherwise change the spacing)")> ]?
+          <.SIGOK>
         | <metachar>
         ]
     }
@@ -271,8 +277,8 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     proto token metachar { <...> }
     token metachar:sym<[ ]> { '[' ~ ']' <nibbler> <.SIGOK> }
     token metachar:sym<( )> { '(' ~ ')' <nibbler> <.SIGOK> }
-    token metachar:sym<'> { <?[']> <quote_EXPR: ':q'>  <.SIGOK> }
-    token metachar:sym<"> { <?["]> <quote_EXPR: ':qq'> <.SIGOK> }
+    token metachar:sym<'> { <?['‘‚]> <quote_EXPR: ':q'>  <.SIGOK> }
+    token metachar:sym<"> { <?["“„]> <quote_EXPR: ':qq'> <.SIGOK> }
     token metachar:sym<.> { <sym> <.SIGOK> }
     token metachar:sym<^> { <sym> <.SIGOK> }
     token metachar:sym<^^> { <sym> <.SIGOK> }
@@ -292,6 +298,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     ## we cheat here, really should be regex_infix:sym<~>
     token metachar:sym<~> {
+	:my $*HAS_GOAL := 1;
         <sym>
         <.ws> <GOAL=.quantified_atom>
         <.ws> <EXPR=.quantified_atom>
@@ -320,6 +327,10 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
             { $*VARDEF := 0 }
         ]**0..1
         <.SIGOK>
+    }
+
+    token metachar:sym<:> {
+        <sym> <?before \s> <.throw_solitary_backtrack_control>
     }
 
     proto token backslash { <...> }
@@ -385,6 +396,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token assertion:sym<[> { <?before '['|'+'|'-'|':'> <cclass_elem>+ }
 
     token cclass_elem {
+        :my $*key;
         $<sign>=['+'|'-'|<?>]
         <.normspace>?
         [
@@ -404,12 +416,17 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
                   }
                   for %seen {
                       next if $_.value < 2;
+                      self.worry("Quotes are not metacharacters in character classes") if $_.key eq '"' || $_.key eq "'";
                       self.worry("Repeated character (" ~ $_.key ~ ") unexpectedly found in character class");
                   }
               }
           \s* ']'
         | $<name>=[\w+]
-        | ':' $<invert>=['!'|<?>] $<uniprop>=[\w+]
+        | ':' $<invert>=['!'|<?>] <identifier> { $*key := $<identifier>.Str }
+            [
+            || <coloncircumfix=.LANG('MAIN','coloncircumfix', $*key)>
+            || <?>
+            ]
         ]
         <.normspace>?
     }
@@ -440,8 +457,18 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     proto token mod_ident { <...> }
     token mod_ident:sym<ignorecase> { $<sym>=[i] 'gnorecase'? » }
+    token mod_ident:sym<ignoremark> {
+        [
+        | $<sym>=[m]
+        | 'ignore' $<sym>=[m] 'ark'
+        ] »
+    }
     token mod_ident:sym<ratchet>    { $<sym>=[r] 'atchet'? » }
     token mod_ident:sym<sigspace>   { $<sym>=[s] 'igspace'? » }
     token mod_ident:sym<dba>        { <sym> » }
-    token mod_ident:sym<oops>       { {} (\D+) { $/.CURSOR.panic('Unrecognized regex modifier :' ~ $/[0].Str) } }
+    token mod_ident:sym<oops>       { {} (\w+) { self.throw_unrecognized_regex_modifier($/[0].Str) } }
+
+    method throw_unrecognized_regex_modifier($mod) {
+        self.panic('Unrecognized regex modifier :' ~ $mod);
+    }
 }

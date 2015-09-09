@@ -17,7 +17,7 @@ import org.perl6.nqp.runtime.ThreadContext;
 public abstract class SyncHandle implements IIOClosable, IIOEncodable,
         IIOSyncReadable, IIOSyncWritable, IIOLineSeparable, IIOExitable {
 
-    protected ByteChannel chan;
+    public ByteChannel chan;
     protected CharsetEncoder enc;
     protected CharsetDecoder dec;
     protected boolean eof = false;

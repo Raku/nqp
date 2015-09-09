@@ -51,27 +51,23 @@ sub spew($filename, $contents) {
 }
 
 sub print(*@args) {
-    for @args {
-        nqp::print($_);
-    }
+    nqp::print(join('', @args));
     1;
 }
 
 sub say(*@args) {
-    print(|@args, "\n");
+    nqp::say(join('', @args));
+    1;
 }
 
 sub note(*@args) {
-    my $err := nqp::getstderr();
-    for @args {
-        nqp::printfh($err, $_);
-    }
-    nqp::printfh($err, "\n");
+    nqp::sayfh(nqp::getstderr(), join('', @args));
+    1;
 }
 
 sub join($delim, @things) {
-    my @strs;
-    for @things { nqp::push(@strs, ~$_) }
+    my @strs := nqp::list_s();
+    for @things { nqp::push_s(@strs, ~$_) }
     nqp::join($delim, @strs)
 }
 

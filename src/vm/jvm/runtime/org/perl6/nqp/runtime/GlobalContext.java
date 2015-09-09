@@ -12,6 +12,7 @@ import java.util.WeakHashMap;
 import org.perl6.nqp.sixmodel.CodePairContainerConfigurer;
 import org.perl6.nqp.sixmodel.ContainerConfigurer;
 import org.perl6.nqp.sixmodel.KnowHOWBootstrapper;
+import org.perl6.nqp.sixmodel.NativeRefContainerConfigurer;
 import org.perl6.nqp.sixmodel.SerializationContext;
 import org.perl6.nqp.sixmodel.SixModelObject;
 import org.perl6.nqp.sixmodel.reprs.CallCaptureInstance;
@@ -213,6 +214,9 @@ public class GlobalContext {
     ThreadLocal<WeakReference<ThreadContext>> currentThreadCtxRef;
     WeakHashMap<Thread, ThreadContext> allThreads;
 
+    /** Objects we will never repossess. */
+    public WeakHashMap<SixModelObject, Object> neverRepossess;
+
     /**
      * Initializes the runtime environment.
      */
@@ -241,6 +245,7 @@ public class GlobalContext {
         
         contConfigs = new HashMap<String, ContainerConfigurer>();
         contConfigs.put("code_pair", new CodePairContainerConfigurer());
+        contConfigs.put("native_ref", new NativeRefContainerConfigurer());
         
         currentThreadCtxRef = new ThreadLocal< >();
         allThreads = new WeakHashMap< >();
@@ -258,6 +263,8 @@ public class GlobalContext {
 
         hllGlobalAll = new HashMap<ContextKey<?,?>, Object>();
         hllGlobalAllLock = new Object();
+
+        neverRepossess = new WeakHashMap<SixModelObject, Object>();
 
         byteClassLoader = new ByteClassLoader();
     }

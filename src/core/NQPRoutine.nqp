@@ -372,7 +372,7 @@ my knowhow NQPRegex {
     method SET_CAPS($caps) {
         my %h_caps;
         for $caps {
-            %h_caps{$_.key} := $_.value;
+            %h_caps{$_.key} := $_.value unless $_.key eq '';
         }
         $!caps := %h_caps;
     }

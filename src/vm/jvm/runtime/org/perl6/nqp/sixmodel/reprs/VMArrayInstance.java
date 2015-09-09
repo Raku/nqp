@@ -10,7 +10,7 @@ import org.perl6.nqp.sixmodel.SixModelObject;
  * This is a fairly direct port of the QRPA logic implemented by Patrick Michaud in
  * the NQP repository. Thus the C-ish nature of the code. :-)
  */
-public class VMArrayInstance extends SixModelObject {
+public class VMArrayInstance extends VMArrayInstanceBase {
     public int elems;
     public int start;
     public SixModelObject[] slots;

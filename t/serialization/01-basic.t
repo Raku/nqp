@@ -1,6 +1,6 @@
 #! nqp
 
-plan(1355);
+plan(1475);
 
 sub add_to_sc($sc, $idx, $obj) {
     nqp::scsetobj($sc, $idx, $obj);
@@ -430,11 +430,25 @@ sub round_trip_int_array($seq, $desc, @a) {
     my int $b := 512;
 
     while ($i < 63) {
+        if $i >= 31 && nqp::getcomp('nqp').backend.name eq 'parrot'
+            && nqp::backendconfig(){"intvalsize"} < 8 {
+            todo("native NQP ints are only 32 bit on 32 bit parrot :-(", 1);
+            # Sadly this also means that the rest of the tests for these sizes
+            # are (effectively) meaningless, because $b is 0, and 0 + 0 is still
+            # 0. However, they don't fail, because 0 - 4 to 0 + 2 serialise just
+            # fine. So marking them as TODO would give false positive TODO
+            # passes, which prove would alert us to.
+            # It's not clear *what* size guarantees NQP gives (and therefore
+            # expects from the underlying VM). This may need to be revisited
+            # for JS, because JS won't really cope with integers larger than
+            # 2**53
+        }
+        ok(nqp::isgt_i($b, 511), '$b is positive for 2 ** ' ~ $i);
         my @a;
-        my int $j := nqp::sub_i($b, 4);
-        while (nqp::islt_i($j, nqp::add_i($b, 2))) {
-            nqp::push(@a, $j);
-            nqp::push(@a, nqp::neg_i($j));
+        my int $j := -4;
+        while (nqp::islt_i($j, 2)) {
+            nqp::push(@a, nqp::add_i($b, $j));
+            nqp::push(@a, nqp::neg_i(nqp::add_i($b, $j)));
             $j := nqp::add_i($j, 1);
         }
         round_trip_int_array($i + 7, 'integers around 2 ** ' ~ $i, @a);
@@ -469,4 +483,15 @@ sub round_trip_int_array($seq, $desc, @a) {
     }
 
     round_trip_int_array(70, 'special case integers', @a);
+}
+
+{
+    my @a;
+    my $i := 0;
+    while ($i < 64) {
+        nqp::push(@a, nqp::bitxor_i(-1, nqp::bitshiftl_i(1, $i)));
+        ++$i;
+    }
+
+    round_trip_int_array(71, 'integers with one zero bit', @a);
 }

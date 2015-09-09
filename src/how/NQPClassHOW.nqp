@@ -238,7 +238,7 @@ knowhow NQPClassHOW {
         self.incorporate_multi_candidates($obj);
 
         # Compose attributes.
-        for self.attributes($obj, :local<0> ) { $_.compose($obj) }
+        for self.attributes($obj, :local(0) ) { $_.compose($obj) }
 
         # Publish type and method caches and boolification spec.
         self.publish_type_cache($obj);

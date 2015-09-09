@@ -47,7 +47,7 @@ public class KnowHOWBootstrapper {
         Ops.setboolspec(tc.gc.BOOTIter, BoolificationSpec.MODE_ITER, null, tc);
         Ops.setboolspec(tc.gc.BOOTInt, BoolificationSpec.MODE_UNBOX_INT, null, tc);
         Ops.setboolspec(tc.gc.BOOTNum, BoolificationSpec.MODE_UNBOX_NUM, null, tc);
-        Ops.setboolspec(tc.gc.BOOTStr, BoolificationSpec.MODE_UNBOX_STR_NOT_EMPTY_OR_ZERO, null, tc);
+        Ops.setboolspec(tc.gc.BOOTStr, BoolificationSpec.MODE_UNBOX_STR_NOT_EMPTY, null, tc);
         Ops.setboolspec(tc.gc.BOOTArray, BoolificationSpec.MODE_HAS_ELEMS, null, tc);
         Ops.setboolspec(tc.gc.BOOTIntArray, BoolificationSpec.MODE_HAS_ELEMS, null, tc);
         Ops.setboolspec(tc.gc.BOOTNumArray, BoolificationSpec.MODE_HAS_ELEMS, null, tc);

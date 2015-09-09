@@ -2,6 +2,7 @@ package org.perl6.nqp.sixmodel;
 
 import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.ThreadContext;
+import org.perl6.nqp.sixmodel.REPRRegistry;
 
 /**
  * All 6model objects derive from this base class. A bunch of the REPR
@@ -49,28 +50,30 @@ public abstract class SixModelObject implements Cloneable {
      * Boxing related functions.
      */
     public void set_int(ThreadContext tc, long value) {
-        throw ExceptionHandling.dieInternal(tc, "This representation can not box a native int");
+        throw ExceptionHandling.dieInternal(tc, "This type cannot box a native integer");
     }
     public long get_int(ThreadContext tc) {
-        throw ExceptionHandling.dieInternal(tc, "This representation can not unbox to a native int");
+        throw ExceptionHandling.dieInternal(tc, "This type cannot unbox to a native integer");
     }
     public void set_num(ThreadContext tc, double value) {
-        throw ExceptionHandling.dieInternal(tc, "This representation can not box a native num");
+        throw ExceptionHandling.dieInternal(tc, "This type cannot box a native number");
     }
     public double get_num(ThreadContext tc) {
-        throw ExceptionHandling.dieInternal(tc, "This representation can not unbox to a native num");
+        throw ExceptionHandling.dieInternal(tc, "This type cannot unbox to a native number");
     }
     public void set_str(ThreadContext tc, String value) {
-        throw ExceptionHandling.dieInternal(tc, "This representation can not box a native str");
+        throw ExceptionHandling.dieInternal(tc, "This type cannot box a native string");
     }
     public String get_str(ThreadContext tc) {
-        throw ExceptionHandling.dieInternal(tc, "This representation can not unbox to a native str");
+        throw ExceptionHandling.dieInternal(tc, "This type cannot unbox to a native string");
     }
     public void set_boxing_of(ThreadContext tc, long reprId, Object value) {
-        throw ExceptionHandling.dieInternal(tc, "This representation can not box another");
+        throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation can not box "
+            + REPRRegistry.getById((int)reprId).name);
     }
     public Object get_boxing_of(ThreadContext tc, long reprId) {
-        throw ExceptionHandling.dieInternal(tc, "This representation can not unbox another");
+        throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation can not unbox "
+            + REPRRegistry.getById((int)reprId).name);
     }
     
     /**
@@ -80,7 +83,7 @@ public abstract class SixModelObject implements Cloneable {
         throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement at_pos_boxed");
     }
     public void at_pos_native(ThreadContext tc, long index) {
-        throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement at_pos_boxed_native");
+        throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement at_pos_native");
     }
     public void bind_pos_boxed(ThreadContext tc, long index, SixModelObject value) {
         throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement bind_pos_boxed");
@@ -120,6 +123,24 @@ public abstract class SixModelObject implements Cloneable {
     }
     public void splice(ThreadContext tc, SixModelObject from, long offset, long count) {
         throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement splice");
+    }
+    public SixModelObject at_pos_multidim_boxed(ThreadContext tc, long[] indices) {
+        throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement at_pos_boxed_multidim");
+    }
+    public void at_pos_multidim_native(ThreadContext tc, long[] indices) {
+        throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement at_pos_multidim_native");
+    }
+    public void bind_pos_multidim_boxed(ThreadContext tc, long[] indices, SixModelObject value) {
+        throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement bind_pos_boxed_multidim");
+    }
+    public void bind_pos_multidim_native(ThreadContext tc, long[] indices) {
+        throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement bind_pos_native_multidim");
+    }
+    public long[] dimensions(ThreadContext tc) {
+        throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement dimensions");
+    }
+    public void set_dimensions(ThreadContext tc, long[] dimensions) {
+        throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement set_dimensions");
     }
     
     /**

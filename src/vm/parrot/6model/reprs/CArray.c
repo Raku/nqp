@@ -133,7 +133,7 @@ static void initialize(PARROT_INTERP, STable *st, void *data) {
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
     CArrayBody *body = (CArrayBody *)data;
     UNUSED(interp);
-    body->storage = mem_sys_allocate(4 * repr_data->elem_size);
+    body->storage = mem_sys_allocate_zeroed(4 * repr_data->elem_size);
     body->managed = 1;
     /* Don't need child_objs for numerics or strings. */
     if (repr_data->elem_kind == CARRAY_ELEM_KIND_NUMERIC)
@@ -219,7 +219,7 @@ static void expand(PARROT_INTERP, CArrayREPRData *repr_data, CArrayBody *body, I
     if (min_size > next_size)
         next_size = min_size;
     if (body->managed)
-        body->storage = mem_sys_realloc(body->storage, next_size * repr_data->elem_size);
+        body->storage = mem_sys_realloc_zeroed(body->storage, next_size * repr_data->elem_size, body->allocated * repr_data->elem_size);
 
     is_complex = (repr_data->elem_kind == CARRAY_ELEM_KIND_CARRAY
                || repr_data->elem_kind == CARRAY_ELEM_KIND_CPOINTER

@@ -393,4 +393,21 @@ would not create a sub-node for string context, or else
 
 would work without complaining.
 
+##QAST::ParamTypeCheck
+
+Used by rakudo to generate code to multidispatch or
+enforce signatures at runtime.
+
+For example C<sub f(Mu:D) { ... }> leads to the generation of
+the following code where C<$name> is the name of the checked variable.
+Probably the first because the binder does a check too. That would be
+redundant.
+
+    $var.push(QAST::ParamTypeCheck.new(QAST::Op.new(
+        :op('isconcrete'),
+         QAST::Var.new( :name($name), :scope('local') )
+    )));
+
+
+
 ## QAST::VM

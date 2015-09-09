@@ -1042,45 +1042,27 @@ p-bootstrap-files: $(STAGE2_PBCS) $(P_STAGE2)/$(CORE_SETTING_NQP)
 ## testing
 
 p-test: p-all
-	prove -r --exec "$(P_RUNNER) --vmlibs=nqp_dyncall_ops" t/nqp t/parrot t/hll t/qregex t/p5regex t/qast t/serialization t/nativecall
+	$(PROVE) -r --exec "$(P_RUNNER) --vmlibs=nqp_dyncall_ops" t/nqp t/parrot t/hll t/qregex t/p5regex t/qast t/serialization t/nativecall
 
 p-test-loud: p-all
-	prove -r -v --exec "$(P_RUNNER) --vmlibs=nqp_dyncall_ops" t/nqp t/parrot t/hll t/qregex t/p5regex t/qast t/serialization t/nativecall
+	$(PROVE) -r -v --exec "$(P_RUNNER) --vmlibs=nqp_dyncall_ops" t/nqp t/parrot t/hll t/qregex t/p5regex t/qast t/serialization t/nativecall
 
 p-core-test: $(P_RUNNER)$(BAT)
-	prove -r --exec $(PARROT_BUILD_DIR)/$(NQP_EXE) t/nqp t/parrot
+	$(PROVE) -r --exec $(PARROT_BUILD_DIR)/$(NQP_EXE) t/nqp t/parrot
 
 p-core-test-loud: $(P_RUNNER)$(BAT)
-	prove -r -v --exec $(P_RUNNER) t/nqp t/parrot
+	$(PROVE) -r -v --exec $(P_RUNNER) t/nqp t/parrot
 
 p-qregex-test: $(P_RUNNER)$(BAT)
-	prove -r --exec $(P_RUNNER) t/qregex
+	$(PROVE) -r --exec $(P_RUNNER) t/qregex
 
 p-qregex-test-loud: $(P_RUNNER)$(BAT)
-	prove -r -v --exec $(P_RUNNER) t/qregex
+	$(PROVE) -r -v --exec $(P_RUNNER) t/qregex
 
 ## cleaning
 
 p-clean:
 	$(RM_RF) $(P_CLEANUPS)
-
-distclean: realclean
-
-realclean: clean
-	$(RM_F) Makefile
-
-testclean:
-
-manifest:
-	echo MANIFEST >MANIFEST
-	git ls-files >>MANIFEST
-
-release: manifest
-	[ -n "$(VERSION)" ] || ( echo "\nTry 'make release VERSION=yyyy.mm'\n\n"; exit 1 )
-	[ -d nqp-$(VERSION) ] || ln -s . nqp-$(VERSION)
-	$(PERL) -ne 'print "nqp-$(VERSION)/$$_"' MANIFEST |\
-	    tar -zcv -T - -f nqp-$(VERSION).tar.gz
-	rm nqp-$(VERSION)
 
 # nqp::makefile <-- tells Configure.pm to convert / to \ in the above
 #                   template for Win32 systems

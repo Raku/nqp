@@ -16,10 +16,31 @@ public class CodePairContainerSpec extends ContainerSpec {
         Ops.invokeDirect(tc, fetchCode, Ops.invocantCallSite, new Object[] { cont });
         return Ops.result_o(tc.curFrame);
     }
+    public long fetch_i(ThreadContext tc, SixModelObject cont) {
+        Ops.invokeDirect(tc, fetchCode, Ops.invocantCallSite, new Object[] { cont });
+        return Ops.result_i(tc.curFrame);
+    }
+    public double fetch_n(ThreadContext tc, SixModelObject cont) {
+        Ops.invokeDirect(tc, fetchCode, Ops.invocantCallSite, new Object[] { cont });
+        return Ops.result_n(tc.curFrame);
+    }
+    public String fetch_s(ThreadContext tc, SixModelObject cont) {
+        Ops.invokeDirect(tc, fetchCode, Ops.invocantCallSite, new Object[] { cont });
+        return Ops.result_s(tc.curFrame);
+    }
     
     /* Stores a value in a container. Used for assignment. */
     public void store(ThreadContext tc, SixModelObject cont, SixModelObject obj) {
         Ops.invokeDirect(tc, storeCode, Ops.storeCallSite, new Object[] { cont, obj });
+    }
+    public void store_i(ThreadContext tc, SixModelObject cont, long value) {
+        Ops.invokeDirect(tc, storeCode, Ops.storeCallSite_i, new Object[] { cont, value });
+    }
+    public void store_n(ThreadContext tc, SixModelObject cont, double value) {
+        Ops.invokeDirect(tc, storeCode, Ops.storeCallSite_n, new Object[] { cont, value });
+    }
+    public void store_s(ThreadContext tc, SixModelObject cont, String value) {
+        Ops.invokeDirect(tc, storeCode, Ops.storeCallSite_s, new Object[] { cont, value });
     }
     
     /* Stores a value in a container, without any checking of it (this

@@ -108,7 +108,8 @@ MAIN: {
 
     my $launcher = $prefixes{$default_backend} . '-runner-default';
     print $MAKEFILE "all: ", join(' ', map("$_-all", @prefixes), $launcher), "\n";
-    for my $t (qw/clean test qregex-test install/) {
+    print $MAKEFILE "install: ", join(' ', map("$_-install", @prefixes), $launcher . '-install'), "\n";
+    for my $t (qw/clean test qregex-test/) {
         print $MAKEFILE "$t: ", join(' ', map "$_-$t", @prefixes), "\n";
     }
 
@@ -220,7 +221,8 @@ MAIN: {
                 "(You can get a MoarVM built automatically with --gen-moar.)";
         }
         sorry(@errors) if @errors;
-        $config{'make'}   = $^O eq 'MSWin32' ? 'nmake' : 'make';
+        $config{'make'} = `$moar_path --libpath="src/vm/moar/stage0" "src/vm/moar/stage0/nqp.moarvm" -e "print(nqp::backendconfig()<make>)"`
+                        || 'make';
         $config{moar} = $moar_path;
         fill_template_file(
             'tools/build/Makefile-Moar.in',

@@ -15,7 +15,7 @@ variants (e.g. `mul_i`, `mul_n`) together with a single description.
 
 Opcode variants may contain a type suffix, which usually indicates:
 
-* `_i` argument is native int 
+* `_i` argument is native int
 * `_n` argument is native float
 * `_s` argument is native string
 * `_b` argument is code blocks
@@ -52,7 +52,32 @@ opcodes will eventually be removed from NQP. Internal opcodes are typically
 used at compile time to replace opcodes that take a variable number of
 arguments.
 
-# Arithmetic Opcodes
+The opcodes are grouped into the following categories:
+
+* [Arithmetic Opcodes](#arithmetic)
+* [Numeric Opcodes](#numeric)
+* [Trigonometric Opcodes](#trig)
+* [Relational / Logic Opcodes](#logic)
+* [Array Opcodes](#array)
+* [Hash Opcodes](#hash)
+* [String Opcodes](#string)
+* [Unicode Property Opcodes](#unicode)
+* [Conditional Opcodes](#conditional)
+* [Loop/Control Opcodes](#control)
+* [Exceptional Opcodes](#exceptions)
+* [Input/Output Opcodes](#io)
+* [External command Opcodes](#extern)
+* [File / Directory / Network Opcodes](#filedirnet)
+* [Type/Conversion Opcodes](#type)
+* [OO/SixModel Opcodes](#sixmodel)
+* [Bit Opcodes](#bit)
+* [Context Introspection Opcodes](#context)
+* [Variable Opcodes](#variable)
+* [Miscellaneous Opcodes](#misc)
+* [Native Call / Interoperability Opcodes](#nativecall)
+* [Asynchronous operations](#async)
+
+# <a id="arithmetic"></a> Arithmetic Opcodes
 
 ## abs
 * `abs_i(int $i)`
@@ -85,14 +110,14 @@ a native num, using a scale of 309, and a rounding mode equivalent to Java's
 * `gcd_i(int $l, int $r)`
 * `gcd_I(Int $l, Int $r, Mu:T $type)`
 
-Return the greatest common multiple of two numbers. 
+Return the greatest common multiple of two numbers.
 `_I` variant returns an object of the given type.
 
 ## lcm
 * `lcm_i(int $l, int $r)`
 * `lcm_I(Int $l, Int $r, Mu:T $type)`
 
-Return the lowest common multiple of two numbers. 
+Return the lowest common multiple of two numbers.
 `_I` variant returns an object of the given type.
 
 ## mod
@@ -127,7 +152,7 @@ Return the negative of a number.
 Subtract $r from $l, returning the result.
 `_I` variant returns an object of the given type.
 
-# Numeric Opcodes
+# <a id="numeric"></a> Numeric Opcodes
 
 ## base
 * `base_I(Int $i, int $radix)`
@@ -193,13 +218,13 @@ and of type `$type_bigint` for positive exponents.
 * `rand_I(Int $i, Mu:T $type)`
 
 Returns a psuedo-random bigint up to the value of the
-given number. 
+given number.
 `_I` variant returns an object of the given type.
 
 ## sqrt
 * `sqrt_n(num $l, num $r)`
 
-# Trigonometric Opcodes
+# <a id="trig"></a> Trigonometric Opcodes
 
 Each opcode corresponds directly to the trigonometric function of the same
 name. `h` indicates a hyperbolic variant.
@@ -243,7 +268,7 @@ name. `h` indicates a hyperbolic variant.
 ## tanh
 * `tanh_n(num $n)`
 
-# Relational / Logic Opcodes
+# <a id="logic"></a> Relational / Logic Opcodes
 
 ## cmp
 * `cmp_i(int $l, int $r)`
@@ -268,7 +293,7 @@ or 0 otherwise.
 
 Return non-zero if the two parameters are equal.
 
-## isgt 
+## isgt
 * `isgt_i(int $l, int $r)`
 * `isgt_n(num $l, num $r)`
 * `isgt_s(str $l, str $r)`
@@ -313,7 +338,7 @@ Return non-zero if the two parameters are not equal.
 
 Return 1 if `$val` is 0, 0 otherwise.
 
-# Array opcodes
+# <a id="array"></a> Array Opcodes
 
 ## atpos
 * `atpos(@arr, int $i)`
@@ -361,7 +386,8 @@ are coerced to the appropriate type.
 * `push_s(Array str @arr, str $v)`
 
 "Push $v onto the end of @arr."
-Bind $v to @arr at the position at the end of @arr, i.e., the position that is just after the last position of @arr that has been bound to.
+Bind $v to @arr at the position at the end of @arr, i.e., the position that
+is just after the last position of @arr that has been bound to.
 
 Return value is not currently defined.
 
@@ -372,14 +398,15 @@ Return value is not currently defined.
 * `pop_s(@arr)`
 
 "Pop the last value off the end of @arr."
-Return the value of @arr at its last bound position, and unbind @arr at that position.
+Return the value of @arr at its last bound position, and unbind @arr at that
+position.
 
 ## setelems
 * `setelems(@arr, int $i)`
 
 Set the size of `@arr` to `$i` elements. If less than the current size,
-any elements after the newlast position are unbound. If greater, the empty
-elments at the end are bound with potentially VM specific null entries.
+any elements after the new last position are unbound. If greater, the empty
+elements at the end are bound with potentially VM specific null entries.
 
 ## shift
 * `shift(@arr)`
@@ -388,7 +415,9 @@ elments at the end are bound with potentially VM specific null entries.
 * `shift_s(@arr)`
 
 "Shift the last value from the beginning of @arr."
-Return the value of @arr at index 0, unbind @arr at index 0, and move all other binding of @arr to the index one below what they were previously bound to.
+Return the value of @arr at index 0, unbind @arr at index 0, and move all
+other binding of @arr to the index one below what they were previously bound
+to.
 
 ## splice
 * `splice(@arr, @from, int $offset, int $count)`
@@ -403,7 +432,8 @@ Replace them with all the elements from `@from`.
 * `unshift_s(@arr, str $v)`
 
 "Shift $v into the beginning of @arr."
-Bind $v to @arr at index 0, move all other bindings of @arr to the index one above what they were previously bound to.
+Bind $v to @arr at index 0, move all other bindings of @arr to the index one
+above what they were previously bound to.
 Return the number of elements of @arr on Parrot, $v on JVM.
 
 ## iterator
@@ -424,7 +454,7 @@ while $iter {
 
 You can also use `nqp::iterator()` to iterate over a hash's key-value pairs.
 
-# Hash opcodes
+# <a id="hash"></a> Hash Opcodes
 
 ## atkey
 * `atkey(%hash, String $key)`
@@ -471,7 +501,7 @@ for %hash {
 
 Returns the value associated with the given key-value pair.
 
-# String Opcodes
+# <a id="string"></a> String Opcodes
 
 ## chars
 * `chars(str $str)`
@@ -495,8 +525,39 @@ match was found.
 
 Return a string that is the concatenation of the two passed in strings.
 
+## decode
+* `decode($buffer, str $encoding)`
+
+Returns an (NFG) string resulting from decoding the specified buffer assuming
+the specified encoding.
+
+## decodetocodes
+* `decodetocodes`($buffer, str $encoding, int $normalization, $codes)
+
+Decodes the bytes in the specified buffer using the provided encoding. Applies
+normalization as requested (must be one of the nqp::const::NORMALIZE_* values;
+use nqp::const::NORMALIZE_NONE to apply no normalization). Places the code
+points into $codes, which should be some VMArray holding 32-bit integers.
+
 ## encode
-* `encode(str, 'encoding', buffer)`
+* `encode(str $string, str $encoding, $buffer)`
+
+Encodes an (NFG) string into the specified encoding, writing into the buffer
+provided. The data written is normalized according to NFC.
+
+## encodefromcodes
+* `encodefromcodes($codes, str $encoding, $buffer)
+
+Takes a 32-bit integer array of Unicode codepoints, encodes them using the
+chosen encoding, and writes them into the buffer. No normalization is applied.
+
+## encodenorm
+* `encode(str $string, str $encoding, int $normalization, $buffer)
+
+Encodes an (NFG) string into the specified encoding, writing into the buffer
+provided. The data written is normalized according to the normalization value
+passed (which must be one of the nqp::const::NORMALIZE_* values). Specifying
+NORMALIZE_NONE is equivalent to NFC.
 
 ## escape
 * `escape(str $str)`
@@ -564,6 +625,13 @@ fields separated by the value of EXPR, and returns that new string.
 
 Return lowercase copy of string.
 
+## normalizecodes
+* `normalizecodes($codes-in, int $normalization, $codes-out)
+
+Takes the codepoints in $codes-in, applies the specified normalization, and
+places the result into the $codes-out array. Both arrays of codepoints must
+be 32-bit integer arrays.
+
 ## ord
 * `ord(str $str)`
 * `ord(str $str, int $i)`
@@ -630,6 +698,20 @@ the substrings between delimiters in the original string.
 If the original string begins or ends with the delimiter, the resulting
 array will begin or end with an empty element.
 
+## strfromcodes
+* `strfromcodes($codes)`
+
+Returns an (NFG) string built from the specified codepoints, which must be
+provided as a 32-bit integer array.
+
+## strtocodes
+* `strtocodes(str $str, int $normalization, $codes)
+
+Takes an NFG string, and places the codepoints from it into the codes array,
+which must be a 32-bit integer array. Applies the specified normalization,
+specified as one of the nqp::const::NORMALIZE_* values; NORMALIZE_NONE is
+equivalent to NORMALIZE_NFC.
+
 ## substr
 * `substr(str $str, int $position)`
 * `substr(str $str, int $position, int $length)`
@@ -657,21 +739,23 @@ Return a new string containing `$count` copies of `$str`.
 ## sprintf
 * `sprintf(str $pattern, @values)`
 
-Returns a string formatted by the printf conventions similar to Perl 5 / C. Machine sized numeric
-types, their limits and therefor overflows are not implemented though.
+Returns a string formatted by the printf conventions similar to Perl 5 / C.
+Machine sized numeric types, their limits and therefore overflows are not
+implemented though.
 
 ## sprintfdirectives
 * `sprintfdirectives(str $pattern)`
 
-This takes the same pattern as `sprintf` does, and computes the needed value-count that `sprintf`
-would have to provide.
+This takes the same pattern as `sprintf` does, and computes the needed
+value-count that `sprintf` would have to provide.
 
 ## sprintfaddargumenthandler
 * `sprintfaddargumenthandler(Mu $handler)`
 
-Lets you register a handler-instance that supports the sprintf op when it has to numify
-custom types. This handler has to provide two methods, `mine` and `int`. `mine` gets the
-the value in question and returns true if this handler is in charge for this type, false otherwise.
+Lets you register a handler-instance that supports the sprintf op when it
+has to numify custom types. This handler has to provide two methods, `mine`
+and `int`. `mine` gets the the value in question and returns true if this
+handler is in charge for this type, false otherwise.
 The method `int` does the conversion for patterns like %d.
 
 ```perl
@@ -681,7 +765,7 @@ my class MyHandler {
 }
 ```
 
-# Unicode Property Opcodes
+# <a id="unicode"></a> Unicode Property Opcodes
 
 ## getuniname
 * `getuniname(int $codepoint)`
@@ -721,11 +805,12 @@ Same thing, but fetches a boolean property value.
 ## matchuniprop
 * `matchuniprop(int $codepoint, int $propcode, int $pvalcode)`
 
-Looks up a codepoint property and return 1 if it matches the pval, 0 otherwise.
-The propcode and pvalcode may be looked up with the opcodes above.  (Note that
-you can use the property value name (e.g. Nd) for both lookups.)
+Looks up a codepoint property and return 1 if it matches the pval, 0
+otherwise.  The propcode and pvalcode may be looked up with the opcodes
+above.  (Note that you can use the property value name (e.g. Nd) for both
+lookups.)
 
-# Conditional Opcodes
+# <a id="conditional"></a> Conditional Opcodes
 
 ## if
 * `if(Block $condition, Block $then)`
@@ -741,7 +826,7 @@ If not, and an `$else` block is present, run that instead.
 If the `$condition` evaluates to 0, run the `$then` block.
 If not, and an `$else` block is present, run that instead.
 
-# Loop/Control Opcodes
+# <a id="control"></a> Loop/Control Opcodes
 
 ## for
 * `for(Iterable $iter, Block $body)`
@@ -801,9 +886,9 @@ If a `$post` block is present, run that at the end, regardless of `$condition`.
 
 Not callable directly from NQP, but used in languages via QAST to perform loop
 control. The specific kind of loop control desired is specified via the
-`:name` atttribute; either `next`, `last`, or `redo`.
+`:name` attribute; either `next`, `last`, or `redo`.
 
-# Exceptional Opcodes
+# <a id="exceptions"></a> Exceptional Opcodes
 
 ## backtrace
 * `backtrace(Exception $ex)`
@@ -876,7 +961,7 @@ Sets the exception payload.
 
 Throw the exception.
 
-# Input/Output Opcodes
+# <a id="io"></a> Input/Output Opcodes
 
 ## closefh
 * `closefh(Handle $fh)`
@@ -952,11 +1037,6 @@ in the next `$count` bytes from the filehandle and store them in the array.
 
 Return the next line of the open filehandle.
 
-## readlineintfh
-* `readlineintfh(Handle $fh, str $prompt)`
-
-Prompt the user with `$prompt`, then return the next line of the open filehandle.
-
 ## readcharsfh
 * `nqp::readcharsfh(Handle $fh, $chars)`
 
@@ -974,7 +1054,7 @@ Output the given string to the filehandle, followed by a newline.
 * `setencoding(Handle $fh, str $encoding)`
 
 Set the encoding for the given handle. Valid encodings are: ascii,
-iso-8859-1, utf8, utf16, and binary.
+iso-8859-1, windows-1252, utf8, utf16, and binary.
 
 ## setinputlinesep
 * `setinputlinesep(Handle $fh, str $sep)`
@@ -991,7 +1071,7 @@ Return current access position for an open handle.
 
 Output the given object to the filehandle.
 
-# External command Opcodes
+# <a id="extern"></a> External command Opcodes
 
 ## shell
 * `shell(str $cmd, str $path, %env)`
@@ -1003,7 +1083,8 @@ until command is complete.
 
 * `shell(str $cmd)` _Deprecated: use the three argument version_
 
-Same as the three argument version of `shell`, using the current directory and an empty environment.
+Same as the three argument version of `shell`, using the current directory
+and an empty environment.
 
 * `shell1(str $cmd)` _Internal, Deprecated_
 * `shell3(str $cmd, str $path, %env)` _Internal_
@@ -1019,7 +1100,7 @@ processing of args is done. The first value of `@args` is the command
 executed, further values are passed as arguments. Blocks until command is
 complete.
 
-# File / Directory / Network Opcodes
+# <a id="filedirnet"></a> File / Directory / Network Opcodes
 
 ## chdir
 * `chdir(str $path)`
@@ -1069,7 +1150,7 @@ If not, returns 0. If an error occurs, return -1.
 ## filewritable
 * `filewritable(str $str)`
 
-If the specified filename refers to a writable file, returns 1.
+If the specified filename refers to a writeable file, returns 1.
 If not, returns 0. If an error occurs, return -1.
 
 ## link
@@ -1110,16 +1191,16 @@ directory didn't exist. May throw an exception.
 ## stat
 * `stat(str $path, int $code)`
 
-Given a path and a code, return an int describing that path. Any of
-these variants may throw an exception if the platform does not support
-them. (JVM does not support `STAT_PLATFORM_BLOCKSIZE` or
+Given a path and a code, return an int describing that path using the OS's
+stat() function. Any of these variants may throw an exception if the platform
+does not support them. (JVM does not support `STAT_PLATFORM_BLOCKSIZE` or
 `STAT_PLATFORM_BLOCKS`).
 
-    * `nqp::const::STAT_EXISTS` 
+    * `nqp::const::STAT_EXISTS`
 
 Returns 1 if the path exists, 0 otherwise.
 
-    * `nqp::const::STAT_FILESIZE` 
+    * `nqp::const::STAT_FILESIZE`
 
 Returns the size of the file in bytes.
 
@@ -1153,7 +1234,7 @@ an exception occurred.
 
     * `nqp::const::STAT_BACKUPTIME`
 
-Returns -1. 
+Returns -1.
 
     * `nqp::const::STAT_GID`
     * `nqp::const::STAT_UID`
@@ -1190,6 +1271,12 @@ Returns preferred I/O size in bytes for interacting with the file.
 
 Returns number of system-specific blocks allocated on disk.
 
+## lstat
+* `lstat(str $path, int $code)`
+
+Same as stat, but internally uses the OS's lstat() function, which does *not*
+follow symlinks.
+
 ## symlink
 * `symlink(str $before, str $after)`
 
@@ -1201,7 +1288,7 @@ Create a symbolic link from `$after` to `$before`
 Delete the given file $path. Returns 0 on success, -2 if the file
 didn't exist. May throw an exception.
 
-# Type/Conversion Opcodes
+# <a id="type"></a> Type/Conversion Opcodes
 
 ## bool
 * `bool_I(Int $val)`
@@ -1316,7 +1403,7 @@ Returns a 1 if the object is an Array, 0 otherwise.
 * `isnanorinf(num $n)`
 
 Return truth value indicating if this number represents any of the special
-values, postive infinity, negative infinity, or NaN.
+values, positive infinity, negative infinity, or NaN.
 
 ## isnull
 * `isnull(Mu $obj)`
@@ -1363,7 +1450,7 @@ differently depending on the backend.
 ## jvmisnull `jvm`
 * `jvmisnull(Mu $obj)`
 
-Returns a 1 if the object is an NQP Type object *or*  the underlying 
+Returns a 1 if the object is an NQP Type object *or*  the underlying
 JVM object is null. Returns 0 otherwise.
 
 ## tostr
@@ -1384,7 +1471,7 @@ Convert Big Integer value to a native number.
 Given a Perl 6 object, return a native with the same value,
 of the type indicated by the opcode suffix.
 
-# OO/SixModel Opcodes
+# <a id="sixmodel"></a> OO/SixModel Opcodes
 
 ## bindattr
 * `bindattr(Mu $obj, Mu:T $type, str $attributename, Mu $new_value)`
@@ -1418,7 +1505,7 @@ to invoke the method with positional arguments `*@pos` and named arguments
 
 Example:
 
-class A { method x($a, $b, :$c) { say("$a $b $c") } }
+    class A { method x($a, $b, :$c) { say("$a $b $c") } }
 
     nqp::callmethod(A, 'x', '4', '2', c => 'foo');
     # same as: A.x(4, 2, c => 'foo')
@@ -1461,7 +1548,7 @@ object was declared in class `$type`. The `_n`, `_i`, and `_s` variants are
 for natively typed attributes.
 
 The following example demonstrates why the type object needs to passed along,
-and cannot be infered from the object:
+and cannot be inferred from the object:
 
     class A      { has str $!x }
     class B is A { has str $!x }
@@ -1521,7 +1608,7 @@ NQP equivalent for Perl 6's `$obj.WHAT`.
 
 Return a unique ID for this `$obj`.
 
-# Bit Opcodes
+# <a id="bit"></a> Bit Opcodes
 
 ## bitand
 * `bitand_i(int $l, int $r)`
@@ -1568,7 +1655,7 @@ Signed right shift of `$bits` by `$count`.
 XOR the bits in `$l` and `$r`.
 `_I` variant returns an object of the given type.
 
-# Context Introspection Opcodes
+# <a id="context"></a> Context Introspection Opcodes
 
 ## ctx
 * `ctx()`
@@ -1615,7 +1702,8 @@ Used by the multi-dispatcher.
 
 Gets hold of the argument capture passed to the current block.
 (a future usecapture may invalidate it)
-It's valid to implement this exactly the same way as savecapture if there's no performance benefit to be had in a split.
+It's valid to implement this exactly the same way as savecapture if there's
+no performance benefit to be had in a split.
 Used by the multi-dispatcher.
 
 ## getlex
@@ -1624,7 +1712,8 @@ Used by the multi-dispatcher.
 * `getlex_n(str $name)`
 * `getlex_s(str $name)`
 
-Looks up the lexical with the specified name and the specified type. Searching in the outer frames, starting at the current.
+Looks up the lexical with the specified name and the specified type.
+Searching in the outer frames, starting at the current.
 An error is thrown if it does not exist or if the type is incorrect.
 
 ## bindlex
@@ -1633,45 +1722,53 @@ An error is thrown if it does not exist or if the type is incorrect.
 * `bindlex_n(str $name, num $value)`
 * `bindlex_s(str $name, str $value)`
 
-Binds $value to the lexical specified by name and type. Searching in the outer frames, starting at the current.
+Binds $value to the lexical specified by name and type. Searching in the
+outer frames, starting at the current.
 An error is thrown if it does not exist or if the type is incorrect.
 
 ## getlexdyn
 * `getlexdyn(str $name)`
 
-Looks up the contextual with the specified name in the caller chain, starting at the calling frame.
+Looks up the contextual with the specified name in the caller chain,
+starting at the calling frame.
 
 ## bindlexdyn
 * `bindlexdyn(str $name, Mu $value)`
 
-Binds $value to the contextual with the specified name, searching for it in the call-chain, starting at the calling frame.
+Binds $value to the contextual with the specified name, searching for it in
+the call-chain, starting at the calling frame.
 
 ## getlexouter
 * `getlexouter(str $name)`
 
-Looks up the lexical with the specified name and the specified type. Searching in the outer frames, starting at outer.
+Looks up the lexical with the specified name and the specified type.
+Searching in the outer frames, starting at outer.
 
 ## getlexcaller
 * `getlexcaller(str $name)`
 
-Looks up the lexical with the specified name, starting at the calling frame. It checks all outer frames of the caller chain.
+Looks up the lexical with the specified name, starting at the calling frame.
+It checks all outer frames of the caller chain.
 
 ## getlexrel
 * `getlexrel(Mu $context, str $name)`
 
-Looks up the lexical with the specified name and the specified type. Searching in the outer frames, starting at the given $context.
+Looks up the lexical with the specified name and the specified type.
+Searching in the outer frames, starting at the given $context.
 
 ## getlexreldyn
 * `getlexreldyn(Mu $context, str $name)`
 
-Looks up the contextual with the specified name in the caller chain, starting at the given $context.
+Looks up the contextual with the specified name in the caller chain,
+starting at the given $context.
 
 ## getlexrelcaller
 * `getlexrelcaller(Mu $context, str $name)`
 
-Looks up the lexical with the specified name, starting at the given $context. It checks all outer frames of the caller chain.
+Looks up the lexical with the specified name, starting at the given
+$context. It checks all outer frames of the caller chain.
 
-# Variable opcodes
+# <a id="variable"></a> Variable Opcodes
 
 ## bind
 * `bind(Mu $variable, Mu $value)`
@@ -1679,13 +1776,13 @@ Looks up the lexical with the specified name, starting at the given $context. It
 Binds `$value` to the `$variable`. Dies if `$variable` isn't actually a
 variable. Same as the `:=` operator in NQP.
 
-# Miscellaneous Opcodes
+# <a id="misc"></a> Miscellaneous Opcodes
 
 ## const
 * `const()`
 
 Not actually an opcode, but a collection of several constants. Each of the
-constants below can be used in nqp as (e.g.) `nqp::const::CCLASS_ANY`. 
+constants below can be used in nqp as (e.g.) `nqp::const::CCLASS_ANY`.
 
     * CCLASS_ANY
     * CCLASS_UPPERCASE
@@ -1769,7 +1866,7 @@ configure and build flags.
 ## getpid
 * `getpid()`
 
-Return the current process id, an int. 
+Return the current process id, an int.
 
 ## jvmclasspaths `jvm`
 * `jvmclasspaths()`
@@ -1799,14 +1896,14 @@ Creates a lexical closure from the block's outer scope.
 Return the time in seconds since January 1, 1970 UTC. `_i` variant returns
 an integral number of seconds, `_n` returns a fractional amount.
 
-# Native Call / Interoperability Opcodes
+# <a id="nativecall"></a> Native Call / Interoperability Opcodes
 
 ## x_posixerrno
 * `x_posixerrno()`
 
 Returns an int that corresponds to the value of POSIX's errno.
 
-# Asynchronous operations
+# <a id="async"></a> Asynchronous Operations
 
 The various asynchronous operations, such as timers and asynchronous I/O, take
 a concurrent queue to push a work item into at an appropriate time. This may
@@ -1838,13 +1935,13 @@ AsyncTask REPR. Cancellation stops the timer ever repeating again.
 * `signal($queue, $schedulee, int [nqp::cosnt::SIG_], $handle_type)`
 
 Sets up a signal handler for the given signal. Whenever it occurs, an
-array is pushed to the queue containg the schedulee and the signal number.
+array is pushed to the queue containing the schedulee and the signal number.
 Cancel to stop handling it.
 
 ## watchfile
 * `watchfile($queue, $schedulee, str $filename, $handle_type)`
 
-Watches an individual file for changes. Pushes the an array to the queue
+Watches an individual file for changes. Pushes an array to the queue
 when a change is detected, consisting of the schedulee, the filename that
 changed if provided by the underlying watcher mechanism, a 0 if the file
 changed, and a 1 if it was renamed. Cancel to stop watching.
@@ -1878,28 +1975,30 @@ error, and a string containing an error or some type object if none.
 ## asyncwritebytes
 * `asyncwritebytes($handle, $queue, $schedulee, $to_write, $handle_type)`
 
-Writes a byte array to some handle capable of asynchronous operations. Once the write
-is complete, the queue will be passed an array consisting of the schedulee, an
-integer containing the number of bytes written or a type object if there was an error,
-and a string containing an error or some type object if none.
+Writes a byte array to some handle capable of asynchronous operations. Once
+the write is complete, the queue will be passed an array consisting of the
+schedulee, an integer containing the number of bytes written or a type
+object if there was an error, and a string containing an error or some type
+object if none.
 
 ## asyncreadchars
 * `asyncreadchars($handle, $queue, $schedulee, $handle_type)`
 
-Starts reading chars from the handle. When a packet is received and decoded, an
-array will be pushed to the queue containing the schedulee, a squence number that
-starts at 0, the string if anything was decoded (type object on error) and an error
-string (some type object if no error). If EOF is reached, a sequence number of -1
-is sent. Cancel to stop reading.
+Starts reading chars from the handle. When a packet is received and decoded,
+an array will be pushed to the queue containing the schedulee, a squence
+number that starts at 0, the string if anything was decoded (type object on
+error) and an error string (some type object if no error). If EOF is
+reached, a sequence number of -1 is sent. Cancel to stop reading.
 
 ## asyncreadbytes
 * `asyncreadbytes($handle, $queue, $schedulee, $buf_type, $handle_type)`
 
-Starts reading bytes from the handle. When a packet is received, a $buf_type will be
-constructed and point to the received memory. An array will be pushed to the queue
-containing the schedulee, a sequence number that starts at 0, the buffer or just its
-type object on error, and an error string (type object if no error). If EOF is reached,
-a sequence number of -1 is sent. Cancel to stop reading.
+Starts reading bytes from the handle. When a packet is received, a $buf_type
+will be constructed and point to the received memory. An array will be
+pushed to the queue containing the schedulee, a sequence number that starts
+at 0, the buffer or just its type object on error, and an error string (type
+object if no error). If EOF is reached, a sequence number of -1 is sent.
+Cancel to stop reading.
 
 ## spawnprocasync
 * `spawnprocasync($queue, $args, $cwd, %env, $callbacks)`

@@ -3,7 +3,9 @@ package org.perl6.nqp.sixmodel.reprs;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import com.sun.jna.Union;
 import com.sun.jna.Structure;
+import com.sun.jna.Pointer;
 
 import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.NativeCallOps;
@@ -27,7 +29,19 @@ public class CStructInstance extends SixModelObject implements Refreshable {
         /* XXX: This'll break if we try to set a callback member. OTOH, it's
          * broken on Parrot too, so it's not a NativeCall regression as
          * such... */
-        storage.writeField(name, NativeCallOps.toJNAType(tc, value, info.argType, null));
+        ArgType type = info.argType;
+        Object o     = NativeCallOps.toJNAType(tc, value, type, null);
+        if (info.inlined == 0) {
+            if (type == ArgType.CSTRUCT) {
+                type = ArgType.CPOINTER;
+                o    = (Object)((Structure)o).getPointer();
+            }
+            else if (type == ArgType.CUNION) {
+                type = ArgType.CPOINTER;
+                o    = (Object)((Union)o).getPointer();
+            }
+        }
+        storage.writeField(name, o);
         memberCache.put(name, value);
     }
 
@@ -73,7 +87,20 @@ public class CStructInstance extends SixModelObject implements Refreshable {
 
         CStructREPRData data = (CStructREPRData) class_handle.st.REPRData;
         AttrInfo info = data.fieldTypes.get(name);
-        member = NativeCallOps.toNQPType(tc, info.argType, info.type, storage.readField(name));
+
+        Object o = storage.readField(name);
+        if (info.inlined == 0) {
+            if (info.argType == ArgType.CSTRUCT) {
+                Class<?> structClass = ((CStructREPRData)info.type.st.REPRData).structureClass;
+                o                    = (Object)Structure.newInstance(structClass, ((Pointer)o));
+            }
+            else if (info.argType == ArgType.CUNION) {
+                Class<?> structClass = ((CUnionREPRData)info.type.st.REPRData).structureClass;
+                o                    = (Object)Union.newInstance(structClass, ((Pointer)o));
+            }
+        }
+
+        member = NativeCallOps.toNQPType(tc, info.argType, info.type, o);
         memberCache.put(name, member);
         return member;
     }
@@ -120,7 +147,7 @@ public class CStructInstance extends SixModelObject implements Refreshable {
         for (Entry<String, SixModelObject> entry: memberCache.entrySet()) {
             ArgType argType = repr_data.fieldTypes.get(entry.getKey()).argType;
             SixModelObject child = entry.getValue();
-            if (argType == ArgType.CARRAY || argType == ArgType.CSTRUCT) {
+            if (argType == ArgType.CARRAY || argType == ArgType.CSTRUCT || argType == ArgType.CUNION) {
                 NativeCallOps.refresh(child, tc);
             }
         }

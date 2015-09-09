@@ -1290,6 +1290,15 @@ my %const_map := nqp::hash(
     'TYPE_CHECK_CACHE_DEFINITIVE',  0,
     'TYPE_CHECK_CACHE_THEN_METHOD', 1,
     'TYPE_CHECK_NEEDS_ACCEPTS',     2,
+
+    'C_TYPE_CHAR',              -1,
+    'C_TYPE_SHORT',             -2,
+    'C_TYPE_INT',               -3,
+    'C_TYPE_LONG',              -4,
+    'C_TYPE_LONGLONG',          -5,
+    'C_TYPE_FLOAT',             -1,
+    'C_TYPE_DOUBLE',            -2,
+    'C_TYPE_LONGDOUBLE',        -3,
 );
 QAST::Operations.add_core_op('const', -> $qastcomp, $op {
     if nqp::existskey(%const_map, $op.name) {
@@ -1812,15 +1821,6 @@ QAST::Operations.add_core_op('readlinefh', -> $qastcomp, $op {
         $op[0]
     ))
 });
-QAST::Operations.add_core_op('readlineintfh', -> $qastcomp, $op {
-    if +$op.list != 2 {
-        nqp::die("The 'readlineintfh' op expects two operands");
-    }
-    $qastcomp.as_post(QAST::Op.new(
-        :op('callmethod'), :name('readline_interactive'),
-        $op[0], $op[1]
-    ))
-});
 QAST::Operations.add_core_op('readallfh', -> $qastcomp, $op {
     if +$op.list != 1 {
         nqp::die("The 'readallfh' op expects one operand");
@@ -2227,6 +2227,14 @@ QAST::Operations.add_core_op('ord', :inlinable(1), -> $qastcomp, $op {
     $qastcomp.as_post(+@operands == 1
         ?? QAST::Op.new( :op('ordfirst'), |@operands )
         !! QAST::Op.new( :op('ordat'), |@operands ));
+});
+QAST::Operations.add_core_op('ordbaseat', :inlinable(1), -> $qastcomp, $op {
+    $qastcomp.as_post(
+        QAST::VM.new( :pirop('nqp_string_ordbase_at__Isi'),
+            $op.list[0],
+            $op.list[1]
+        )
+    );
 });
 
 # index may or may not take a starting position

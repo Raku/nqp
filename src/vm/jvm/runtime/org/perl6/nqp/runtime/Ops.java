@@ -7,6 +7,8 @@ import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.ProcessBuilder.Redirect;
+import java.lang.Thread;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -16,6 +18,8 @@ import java.nio.charset.Charset;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
+import java.nio.file.NotLinkException;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -62,6 +66,7 @@ import org.perl6.nqp.sixmodel.BoolificationSpec;
 import org.perl6.nqp.sixmodel.ContainerConfigurer;
 import org.perl6.nqp.sixmodel.ContainerSpec;
 import org.perl6.nqp.sixmodel.InvocationSpec;
+import org.perl6.nqp.sixmodel.NativeRefContainerSpec;
 import org.perl6.nqp.sixmodel.ParameterizedType;
 import org.perl6.nqp.sixmodel.ParametricType;
 import org.perl6.nqp.sixmodel.REPRRegistry;
@@ -86,6 +91,12 @@ import org.perl6.nqp.sixmodel.reprs.MultiCacheInstance;
 import org.perl6.nqp.sixmodel.reprs.NFA;
 import org.perl6.nqp.sixmodel.reprs.NFAInstance;
 import org.perl6.nqp.sixmodel.reprs.NFAStateInfo;
+import org.perl6.nqp.sixmodel.reprs.NativeRefInstanceAttribute;
+import org.perl6.nqp.sixmodel.reprs.NativeRefInstanceIntLex;
+import org.perl6.nqp.sixmodel.reprs.NativeRefInstanceNumLex;
+import org.perl6.nqp.sixmodel.reprs.NativeRefInstancePositional;
+import org.perl6.nqp.sixmodel.reprs.NativeRefInstanceStrLex;
+import org.perl6.nqp.sixmodel.reprs.NativeRefREPRData;
 import org.perl6.nqp.sixmodel.reprs.P6bigintInstance;
 import org.perl6.nqp.sixmodel.reprs.P6int;
 import org.perl6.nqp.sixmodel.reprs.P6str;
@@ -159,6 +170,8 @@ public final class Ops {
             case STAT_ISDIR:
                 try {
                     rval = (Boolean) Files.getAttribute(Paths.get(filename), "basic:isDirectory") ? 1 : 0;
+                } catch(NoSuchFileException e) {
+                    rval = 0;
                 } catch (Exception e) {
                     rval = -1;
                 }
@@ -167,6 +180,8 @@ public final class Ops {
             case STAT_ISREG:
                 try {
                     rval = (Boolean) Files.getAttribute(Paths.get(filename), "basic:isRegularFile") ? 1 : 0;
+                } catch(NoSuchFileException e) {
+                    rval = 0;
                 } catch (Exception e) {
                     rval = -1;
                 }
@@ -175,6 +190,8 @@ public final class Ops {
             case STAT_ISDEV:
                 try {
                     rval = (Boolean) Files.getAttribute(Paths.get(filename), "basic:isOther") ? 1 : 0;
+                } catch(NoSuchFileException e) {
+                    rval = 0;
                 } catch (Exception e) {
                     rval = -1;
                 }
@@ -235,6 +252,8 @@ public final class Ops {
             case STAT_ISLNK:
                 try {
                     rval = (Boolean) Files.getAttribute(Paths.get(filename), "basic:isSymbolicLink", LinkOption.NOFOLLOW_LINKS) ? 1 : 0;
+                } catch(NoSuchFileException e) {
+                    rval = 0;
                 } catch (Exception e) {
                     rval = -1;
                 }
@@ -450,6 +469,8 @@ public final class Ops {
                 cs = Charset.forName("UTF-8");
             else if (encoding.equals("utf16"))
                 cs = Charset.forName("UTF-16");
+            else if (encoding.equals("windows-1252"))
+                cs = Charset.forName("windows-1252");
             else
                 throw ExceptionHandling.dieInternal(tc,
                     "Unsupported encoding " + encoding);
@@ -621,6 +642,16 @@ public final class Ops {
         return obj;
     }
 
+    public static String readlink(String path, ThreadContext tc) {
+        try {
+            return Files.readSymbolicLink(new File(path).toPath()).toString();
+        } catch (NotLinkException e) {
+            throw ExceptionHandling.dieInternal(tc, path + " is not a symbolic link");
+        } catch (IOException e) {
+            throw ExceptionHandling.dieInternal(tc, "Failed to readlink file: " + e);
+        }
+    }
+
     public static String readlinefh(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
             IOHandleInstance h = (IOHandleInstance)obj;
@@ -633,21 +664,6 @@ public final class Ops {
         else {
             throw ExceptionHandling.dieInternal(tc,
                 "readlinefh requires an object with the IOHandle REPR");
-        }
-    }
-
-    public static String readlineintfh(SixModelObject obj, String prompt, ThreadContext tc) {
-        if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-            if (h.handle instanceof IIOInteractive)
-                return ((IIOInteractive)h.handle).readlineInteractive(tc, prompt);
-            else
-                throw ExceptionHandling.dieInternal(tc,
-                    "This handle does not support readline interactive");
-        }
-        else {
-            throw ExceptionHandling.dieInternal(tc,
-                "readlineintfh requires an object with the IOHandle REPR");
         }
     }
 
@@ -769,7 +785,7 @@ public final class Ops {
             if (h.handle instanceof IIOClosable
              && h.handle instanceof IIOExitable) {
                 ((IIOClosable)h.handle).close(tc);
-                return (long)((IIOExitable)h.handle).exitValue(tc);
+                return (long)((IIOExitable)h.handle).exitValue(tc) << 8;
             }
             else
                 throw ExceptionHandling.dieInternal(tc,
@@ -894,26 +910,6 @@ public final class Ops {
         return 0;
     }
 
-    public static SixModelObject openpipe(String cmd, String dir,
-            SixModelObject envObj, String errPath, ThreadContext tc) {
-
-        // TODO: errPath NYI
-
-        Map<String, String> env = new HashMap<String, String>();
-        SixModelObject iter = iter(envObj, tc);
-        while (istrue(iter, tc) != 0) {
-            SixModelObject kv = iter.shift_boxed(tc);
-            String key = iterkey_s(kv, tc);
-            String value = unbox_s(iterval(kv, tc), tc);
-            env.put(key, value);
-        }
-
-        SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType;
-        IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
-        h.handle = new ProcessHandle(tc, cmd, dir, env);
-        return h;
-    }
-
     public static String gethostname(){
         try {
             String hostname = InetAddress.getLocalHost().getHostName();
@@ -923,38 +919,33 @@ public final class Ops {
         }
     }
 
-    // To be removed once shell3 is adopted
-    public static long shell1(String cmd, ThreadContext tc) {
-        return shell3(cmd, cwd(), getenvhash(tc), tc);
+    public static SixModelObject syncpipe(ThreadContext tc) {
+        SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType;
+        IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
+        h.handle = new ProcessHandle(tc);
+        return h;
     }
 
-    public static long shell3(String cmd, String dir, SixModelObject envObj, ThreadContext tc) {
-        Map<String, String> env = new HashMap<String, String>();
-        SixModelObject iter = iter(envObj, tc);
-        while (istrue(iter, tc) != 0) {
-            SixModelObject kv = iter.shift_boxed(tc);
-            String key = iterkey_s(kv, tc);
-            String value = unbox_s(iterval(kv, tc), tc);
-            env.put(key, value);
-        }
-
+    public static long shell(String cmd, String dir, SixModelObject envObj,
+            SixModelObject in, SixModelObject out, SixModelObject err, long flags, ThreadContext tc) {
         List<String> args = new ArrayList<String>();
 
         String os = System.getProperty("os.name").toLowerCase();
         if (os.indexOf("win") >= 0) {
             args.add("cmd");
             args.add("/c");
-            args.add(cmd.replace('/', '\\'));
+            args.add(cmd);
         } else {
             args.add("sh");
             args.add("-c");
             args.add(cmd);
         }
 
-        return spawn(args, dir, env);
+        return spawn(tc, args, envObj, dir, in, out, err, flags);
     }
 
-    public static long spawn(SixModelObject argsObj, String dir, SixModelObject envObj, ThreadContext tc) {
+    public static long spawn(SixModelObject argsObj, String dir, SixModelObject envObj,
+            SixModelObject in, SixModelObject out, SixModelObject err, long flags, ThreadContext tc) {
         List<String> args = new ArrayList<String>();
         SixModelObject argIter = iter(argsObj, tc);
         while (istrue(argIter, tc) != 0) {
@@ -963,6 +954,64 @@ public final class Ops {
             args.add(arg);
         }
 
+        return spawn(tc, args, envObj, dir, in, out, err, flags);
+    }
+
+    public static final int PIPE_INHERIT        = 1;
+    public static final int PIPE_IGNORE         = 2;
+    public static final int PIPE_CAPTURE        = 4;
+    public static final int PIPE_INHERIT_IN     = 1;
+    public static final int PIPE_IGNORE_IN      = 2;
+    public static final int PIPE_CAPTURE_IN     = 4;
+    public static final int PIPE_INHERIT_OUT    = 8;
+    public static final int PIPE_IGNORE_OUT     = 16;
+    public static final int PIPE_CAPTURE_OUT    = 32;
+    public static final int PIPE_INHERIT_ERR    = 64;
+    public static final int PIPE_IGNORE_ERR     = 128;
+    public static final int PIPE_CAPTURE_ERR    = 256;
+
+    private static void setup_process_builder(ThreadContext tc, ProcessBuilder pb, SixModelObject in, SixModelObject out, SixModelObject err, long flags) {
+        if ((flags & PIPE_INHERIT_IN) == 0 || in instanceof IOHandleInstance)
+            pb.redirectInput(Redirect.PIPE);
+        else
+            pb.redirectInput(Redirect.INHERIT);
+
+        if ((flags & PIPE_INHERIT_OUT) == 0 || out instanceof IOHandleInstance)
+            pb.redirectOutput(Redirect.PIPE);
+        else
+            pb.redirectOutput(Redirect.INHERIT);
+
+        if ((flags & PIPE_INHERIT_ERR) == 0 || err instanceof IOHandleInstance)
+            pb.redirectError(Redirect.PIPE);
+        else
+            pb.redirectError(Redirect.INHERIT);
+    }
+
+    private static void setup_process_streams(ThreadContext tc, Process process, SixModelObject in, SixModelObject out, SixModelObject err, long flags) {
+        if (in instanceof IOHandleInstance) {
+            if ((flags & PIPE_CAPTURE_IN) != 0)
+                /* getOutputStream() returns the output stream connected to the normal input of the subprocess. */
+                ((ProcessHandle)((IOHandleInstance)in).handle).bindChannel(tc, process, process.getOutputStream());
+
+            if ((flags & PIPE_INHERIT_IN) != 0) {
+                /* If our stdin is connected to an output stream of another process, we need to let it run in a thread. */
+                ProcessChannel pc = new ProcessChannel(process, process.getOutputStream(),
+                    ((ProcessChannel)((ProcessHandle)((IOHandleInstance)in).handle).chan).in);
+                new Thread(pc).start();
+            }
+        }
+
+        if ((flags & PIPE_CAPTURE_OUT) != 0 && out instanceof IOHandleInstance)
+            /* getInputStream() returns the input stream connected to the normal output of the subprocess. */
+            ((ProcessHandle)((IOHandleInstance)out).handle).bindChannel(tc, process, process.getInputStream());
+
+        if ((flags & PIPE_CAPTURE_ERR) != 0 && err instanceof IOHandleInstance)
+            /* getErrorStream() returns the input stream connected to the error output of the subprocess. */
+            ((ProcessHandle)((IOHandleInstance)err).handle).bindChannel(tc, process, process.getErrorStream());
+    }
+
+    private static long spawn(ThreadContext tc, List<String> args, SixModelObject envObj, String dir,
+            SixModelObject in, SixModelObject out, SixModelObject err, long flags) {
         Map<String, String> env = new HashMap<String, String>();
         SixModelObject iter = iter(envObj, tc);
         while (istrue(iter, tc) != 0) {
@@ -972,34 +1021,41 @@ public final class Ops {
             env.put(key, value);
         }
 
-        return spawn(args, dir , env);
-    }
+        long       retval = 255;
+        ProcessBuilder pb = new ProcessBuilder(args);
+        pb.directory(new File(dir));
 
-    private static long spawn(List<String> args, String dir, Map<String, String> env) {
-        long retval = 255;
-        try {
-            ProcessBuilder pb = new ProcessBuilder(args);
-            pb.directory(new File(dir));
+        // Clear the JVM inherited environment and use provided only
+        Map<String, String> pbEnv = pb.environment();
+        pbEnv.clear();
+        pbEnv.putAll(env);
 
-            // Clear the JVM inherited environment and use provided only
-            Map<String, String> pbEnv = pb.environment();
-            pbEnv.clear();
-            pbEnv.putAll(env);
+        setup_process_builder(tc, pb, in, out, err, flags);
 
-            Process proc = pb.inheritIO().start();
-
-            boolean finished = false;
-            do {
-                try {
-                    proc.waitFor();
-                    finished = true;
-                } catch (InterruptedException e) {
-                }
-            } while (!finished);
-
-            retval = proc.exitValue();
+        if ((flags & (PIPE_CAPTURE_IN | PIPE_CAPTURE_OUT | PIPE_CAPTURE_ERR)) != 0) {
+            try {
+                Process process = pb.start();
+                setup_process_streams(tc, process, in, out, err, flags);
+            }
+            catch (IOException e) {
+                throw ExceptionHandling.dieInternal(tc, e);
+            }
         }
-        catch (IOException e) {
+        /* run immediatly */
+        else {
+            try {
+                boolean finished = false;
+                Process process  = pb.start();
+                setup_process_streams(tc, process, in, out, err, flags);
+                do {
+                    try {
+                        retval   = process.waitFor();
+                        finished = true;
+                    } catch (InterruptedException e) {
+                    }
+                } while (!finished);
+            } catch (IOException e) {
+            }
         }
 
         /* Return exit code left shifted by 8 for POSIX emulation. */
@@ -1227,6 +1283,134 @@ public final class Ops {
         throw ExceptionHandling.dieInternal(tc, "Lexical '" + name + "' not found");
     }
 
+    /* Native lexical references. */
+    public static SixModelObject getlexref_i(ThreadContext tc, int idx) {
+        CallFrame cf = tc.curFrame;
+        SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.intLexRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No int lexical reference type registered for current HLL");
+        NativeRefInstanceIntLex ref = (NativeRefInstanceIntLex)refType.st.REPR.allocate(tc, refType.st);
+        ref.lexicals = cf.iLex;
+        ref.idx = idx;
+        return ref;
+    }
+    public static SixModelObject getlexref_n(ThreadContext tc, int idx) {
+        CallFrame cf = tc.curFrame;
+        SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.numLexRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No num lexical reference type registered for current HLL");
+        NativeRefInstanceNumLex ref = (NativeRefInstanceNumLex)refType.st.REPR.allocate(tc, refType.st);
+        ref.lexicals = cf.nLex;
+        ref.idx = idx;
+        return ref;
+    }
+    public static SixModelObject getlexref_s(ThreadContext tc, int idx) {
+        CallFrame cf = tc.curFrame;
+        SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.strLexRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No str lexical reference type registered for current HLL");
+        NativeRefInstanceStrLex ref = (NativeRefInstanceStrLex)refType.st.REPR.allocate(tc, refType.st);
+        ref.lexicals = cf.sLex;
+        ref.idx = idx;
+        return ref;
+    }
+    public static SixModelObject getlexref_i_si(ThreadContext tc, int idx, int si) {
+        CallFrame cf = tc.curFrame;
+        SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.intLexRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No int lexical reference type registered for current HLL");
+        while (si-- > 0)
+            cf = cf.outer;
+        NativeRefInstanceIntLex ref = (NativeRefInstanceIntLex)refType.st.REPR.allocate(tc, refType.st);
+        ref.lexicals = cf.iLex;
+        ref.idx = idx;
+        return ref;
+    }
+    public static SixModelObject getlexref_n_si(ThreadContext tc, int idx, int si) {
+        CallFrame cf = tc.curFrame;
+        SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.numLexRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No num lexical reference type registered for current HLL");
+        while (si-- > 0)
+            cf = cf.outer;
+        NativeRefInstanceNumLex ref = (NativeRefInstanceNumLex)refType.st.REPR.allocate(tc, refType.st);
+        ref.lexicals = cf.nLex;
+        ref.idx = idx;
+        return ref;
+    }
+    public static SixModelObject getlexref_s_si(ThreadContext tc, int idx, int si) {
+        CallFrame cf = tc.curFrame;
+        SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.strLexRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No str lexical reference type registered for current HLL");
+        while (si-- > 0)
+            cf = cf.outer;
+        NativeRefInstanceStrLex ref = (NativeRefInstanceStrLex)refType.st.REPR.allocate(tc, refType.st);
+        ref.lexicals = cf.sLex;
+        ref.idx = idx;
+        return ref;
+    }
+    public static SixModelObject getlexref_i(String name, ThreadContext tc) {
+        CallFrame cf = tc.curFrame;
+        SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.intLexRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No int lexical reference type registered for current HLL");
+        while (cf != null) {
+            Integer found = cf.codeRef.staticInfo.iTryGetLexicalIdx(name);
+            if (found != null) {
+                NativeRefInstanceIntLex ref = (NativeRefInstanceIntLex)refType.st.REPR.allocate(tc, refType.st);
+                ref.lexicals = cf.iLex;
+                ref.idx = (int)found;
+                return ref;
+            }
+            cf = cf.outer;
+        }
+        throw ExceptionHandling.dieInternal(tc, "Lexical '" + name + "' not found");
+    }
+    public static SixModelObject getlexref_n(String name, ThreadContext tc) {
+        CallFrame cf = tc.curFrame;
+        SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.numLexRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No num lexical reference type registered for current HLL");
+        while (cf != null) {
+            Integer found = cf.codeRef.staticInfo.nTryGetLexicalIdx(name);
+            if (found != null) {
+                NativeRefInstanceNumLex ref = (NativeRefInstanceNumLex)refType.st.REPR.allocate(tc, refType.st);
+                ref.lexicals = cf.nLex;
+                ref.idx = (int)found;
+                return ref;
+            }
+            cf = cf.outer;
+        }
+        throw ExceptionHandling.dieInternal(tc, "Lexical '" + name + "' not found");
+    }
+    public static SixModelObject getlexref_s(String name, ThreadContext tc) {
+        CallFrame cf = tc.curFrame;
+        SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.strLexRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No str lexical reference type registered for current HLL");
+        while (cf != null) {
+            Integer found = cf.codeRef.staticInfo.sTryGetLexicalIdx(name);
+            if (found != null) {
+                NativeRefInstanceStrLex ref = (NativeRefInstanceStrLex)refType.st.REPR.allocate(tc, refType.st);
+                ref.lexicals = cf.sLex;
+                ref.idx = (int)found;
+                return ref;
+            }
+            cf = cf.outer;
+        }
+        throw ExceptionHandling.dieInternal(tc, "Lexical '" + name + "' not found");
+    }
+
     /* Dynamic lexicals. */
     public static SixModelObject bindlexdyn(SixModelObject value, String name, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame.caller;
@@ -1352,6 +1536,12 @@ public final class Ops {
         else {
             throw ExceptionHandling.dieInternal(tc, "ctxcaller requires an operand with REPR ContextRef");
         }
+    }
+    public static SixModelObject ctxcode(SixModelObject ctx, ThreadContext tc) {
+        if (ctx instanceof ContextRefInstance)
+            return ((ContextRefInstance)ctx).context.codeRef;
+        else
+            throw ExceptionHandling.dieInternal(tc, "ctxcode requires an operand with REPR ContextRef");
     }
     public static SixModelObject ctxouterskipthunks(SixModelObject ctx, ThreadContext tc) {
         if (ctx instanceof ContextRefInstance) {
@@ -1936,6 +2126,9 @@ public final class Ops {
     public static final Object[] emptyArgList = new Object[0];
     public static final CallSiteDescriptor invocantCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ }, null);
     public static final CallSiteDescriptor storeCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ }, null);
+    public static final CallSiteDescriptor storeCallSite_i = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_INT }, null);
+    public static final CallSiteDescriptor storeCallSite_n = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_NUM }, null);
+    public static final CallSiteDescriptor storeCallSite_s = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_STR }, null);
     public static final CallSiteDescriptor findmethCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_STR }, null);
     public static final CallSiteDescriptor typeCheckCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ }, null);
     public static final CallSiteDescriptor howObjCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ }, null);
@@ -2005,7 +2198,7 @@ public final class Ops {
         else {
             InvocationSpec is = invokee.st.InvocationSpec;
             if (is == null)
-                throw ExceptionHandling.dieInternal(tc, "Can not invoke this object");
+                throw ExceptionHandling.dieInternal(tc, "Cannot invoke this object");
             if (is.ClassHandle != null)
                 cr = (CodeRef)invokee.get_attribute_boxed(tc, is.ClassHandle, is.AttrName, is.Hint);
             else {
@@ -2156,7 +2349,7 @@ public final class Ops {
     }
     public static SixModelObject findmethod(ThreadContext tc, SixModelObject invocant, String name) {
         if (invocant == null)
-            throw ExceptionHandling.dieInternal(tc, "Can not call method '" + name + "' on a null object");
+            throw ExceptionHandling.dieInternal(tc, "Cannot call method '" + name + "' on a null object");
         invocant = decont(invocant, tc);
 
         SixModelObject meth = invocant.st.MethodCache.get(name);
@@ -2167,7 +2360,7 @@ public final class Ops {
     }
     public static SixModelObject findmethod(SixModelObject invocant, String name, ThreadContext tc) {
         if (invocant == null)
-            throw ExceptionHandling.dieInternal(tc, "Can not call method '" + name + "' on a null object");
+            throw ExceptionHandling.dieInternal(tc, "Cannot call method '" + name + "' on a null object");
         invocant = decont(invocant, tc);
 
         Map<String, SixModelObject> cache = invocant.st.MethodCache;
@@ -2487,6 +2680,44 @@ public final class Ops {
         return ch.st.REPR.hint_for(tc, ch.st, ch, name);
     }
 
+    /* Attribute reference operations. */
+    public static SixModelObject getattrref_i(SixModelObject obj, SixModelObject ch, String name, ThreadContext tc) {
+        SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intAttrRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No int attribute reference type registered for current HLL");
+        NativeRefInstanceAttribute ref = (NativeRefInstanceAttribute)refType.st.REPR.allocate(tc, refType.st);
+        ref.obj = obj;
+        ref.classHandle = decont(ch, tc);
+        ref.name = name;
+        ref.hint = STable.NO_HINT;
+        return ref;
+    }
+    public static SixModelObject getattrref_n(SixModelObject obj, SixModelObject ch, String name, ThreadContext tc) {
+        SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.numAttrRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No num attribute reference type registered for current HLL");
+        NativeRefInstanceAttribute ref = (NativeRefInstanceAttribute)refType.st.REPR.allocate(tc, refType.st);
+        ref.obj = obj;
+        ref.classHandle = decont(ch, tc);
+        ref.name = name;
+        ref.hint = STable.NO_HINT;
+        return ref;
+    }
+    public static SixModelObject getattrref_s(SixModelObject obj, SixModelObject ch, String name, ThreadContext tc) {
+        SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strAttrRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No string attribute reference type registered for current HLL");
+        NativeRefInstanceAttribute ref = (NativeRefInstanceAttribute)refType.st.REPR.allocate(tc, refType.st);
+        ref.obj = obj;
+        ref.classHandle = decont(ch, tc);
+        ref.name = name;
+        ref.hint = STable.NO_HINT;
+        return ref;
+    }
+
     /* Positional operations. */
     public static SixModelObject atpos(SixModelObject arr, long idx, ThreadContext tc) {
         return arr.at_pos_boxed(tc, idx);
@@ -2647,6 +2878,190 @@ public final class Ops {
         return arr;
     }
 
+    /* Multi-dimensional positional access ops. */
+    private static long[] smoToLongArray(ThreadContext tc, SixModelObject arr) {
+        long[] res = new long[(int)arr.elems(tc)];
+        for (int i = 0; i < res.length; i++) {
+            arr.at_pos_native(tc, i);
+            res[i] = tc.native_i;
+        }
+        return res;
+    }
+    public static SixModelObject atpos2d_o(SixModelObject arr, long idx1, long idx2, ThreadContext tc) {
+        return arr.at_pos_multidim_boxed(tc, new long[] { idx1, idx2 });
+    }
+    public static long atpos2d_i(SixModelObject arr, long idx1, long idx2, ThreadContext tc) {
+        arr.at_pos_multidim_native(tc, new long[] { idx1, idx2 });
+        if (tc.native_type != ThreadContext.NATIVE_INT)
+            throw ExceptionHandling.dieInternal(tc, "This is not a native int array");
+        return tc.native_i;
+    }
+    public static double atpos2d_n(SixModelObject arr, long idx1, long idx2, ThreadContext tc) {
+        arr.at_pos_multidim_native(tc, new long[] { idx1, idx2 });
+        if (tc.native_type != ThreadContext.NATIVE_NUM)
+            throw ExceptionHandling.dieInternal(tc, "This is not a native num array");
+        return tc.native_n;
+    }
+    public static String atpos2d_s(SixModelObject arr, long idx1, long idx2, ThreadContext tc) {
+        arr.at_pos_multidim_native(tc, new long[] { idx1, idx2 });
+        if (tc.native_type != ThreadContext.NATIVE_STR)
+            throw ExceptionHandling.dieInternal(tc, "This is not a native str array");
+        return tc.native_s;
+    }
+    public static SixModelObject atpos3d_o(SixModelObject arr, long idx1, long idx2, long idx3, ThreadContext tc) {
+        return arr.at_pos_multidim_boxed(tc, new long[] { idx1, idx2, idx3 });
+    }
+    public static long atpos3d_i(SixModelObject arr, long idx1, long idx2, long idx3, ThreadContext tc) {
+        arr.at_pos_multidim_native(tc, new long[] { idx1, idx2, idx3 });
+        if (tc.native_type != ThreadContext.NATIVE_INT)
+            throw ExceptionHandling.dieInternal(tc, "This is not a native int array");
+        return tc.native_i;
+    }
+    public static double atpos3d_n(SixModelObject arr, long idx1, long idx2, long idx3, ThreadContext tc) {
+        arr.at_pos_multidim_native(tc, new long[] { idx1, idx2, idx3 });
+        if (tc.native_type != ThreadContext.NATIVE_NUM)
+            throw ExceptionHandling.dieInternal(tc, "This is not a native num array");
+        return tc.native_n;
+    }
+    public static String atpos3d_s(SixModelObject arr, long idx1, long idx2, long idx3, ThreadContext tc) {
+        arr.at_pos_multidim_native(tc, new long[] { idx1, idx2, idx3 });
+        if (tc.native_type != ThreadContext.NATIVE_STR)
+            throw ExceptionHandling.dieInternal(tc, "This is not a native str array");
+        return tc.native_s;
+    }
+    public static SixModelObject atposnd_o(SixModelObject arr, SixModelObject indices, ThreadContext tc) {
+        return arr.at_pos_multidim_boxed(tc, smoToLongArray(tc, indices));
+    }
+    public static long atposnd_i(SixModelObject arr, SixModelObject indices, ThreadContext tc) {
+        arr.at_pos_multidim_native(tc, smoToLongArray(tc, indices));
+        if (tc.native_type != ThreadContext.NATIVE_INT)
+            throw ExceptionHandling.dieInternal(tc, "This is not a native int array");
+        return tc.native_i;
+    }
+    public static double atposnd_n(SixModelObject arr, SixModelObject indices, ThreadContext tc) {
+        arr.at_pos_multidim_native(tc, smoToLongArray(tc, indices));
+        if (tc.native_type != ThreadContext.NATIVE_NUM)
+            throw ExceptionHandling.dieInternal(tc, "This is not a native num array");
+        return tc.native_n;
+    }
+    public static String atposnd_s(SixModelObject arr, SixModelObject indices, ThreadContext tc) {
+        arr.at_pos_multidim_native(tc, smoToLongArray(tc, indices));
+        if (tc.native_type != ThreadContext.NATIVE_STR)
+            throw ExceptionHandling.dieInternal(tc, "This is not a native str array");
+        return tc.native_s;
+    }
+    public static SixModelObject bindpos2d_o(SixModelObject arr, long idx1, long idx2, SixModelObject value, ThreadContext tc) {
+        arr.bind_pos_multidim_boxed(tc, new long[] { idx1, idx2 }, value);
+        return value;
+    }
+    public static long bindpos2d_i(SixModelObject arr, long idx1, long idx2, long value, ThreadContext tc) {
+        tc.native_i = value;
+        arr.bind_pos_multidim_native(tc, new long[] { idx1, idx2 });
+        if (tc.native_type != ThreadContext.NATIVE_INT)
+            throw ExceptionHandling.dieInternal(tc, "This is not a native int array");
+        return value;
+    }
+    public static double bindpos2d_n(SixModelObject arr, long idx1, long idx2, double value, ThreadContext tc) {
+        tc.native_n = value;
+        arr.bind_pos_multidim_native(tc, new long[] { idx1, idx2 });
+        if (tc.native_type != ThreadContext.NATIVE_NUM)
+            throw ExceptionHandling.dieInternal(tc, "This is not a native num array");
+        return value;
+    }
+    public static String bindpos2d_s(SixModelObject arr, long idx1, long idx2, String value, ThreadContext tc) {
+        tc.native_s = value;
+        arr.bind_pos_multidim_native(tc, new long[] { idx1, idx2 });
+        if (tc.native_type != ThreadContext.NATIVE_STR)
+            throw ExceptionHandling.dieInternal(tc, "This is not a native str array");
+        return value;
+    }
+    public static SixModelObject bindpos3d_o(SixModelObject arr, long idx1, long idx2, long idx3, SixModelObject value, ThreadContext tc) {
+        arr.bind_pos_multidim_boxed(tc, new long[] { idx1, idx2, idx3 }, value);
+        return value;
+    }
+    public static long bindpos3d_i(SixModelObject arr, long idx1, long idx2, long idx3, long value, ThreadContext tc) {
+        tc.native_i = value;
+        arr.bind_pos_multidim_native(tc, new long[] { idx1, idx2, idx3 });
+        if (tc.native_type != ThreadContext.NATIVE_INT)
+            throw ExceptionHandling.dieInternal(tc, "This is not a native int array");
+        return value;
+    }
+    public static double bindpos3d_n(SixModelObject arr, long idx1, long idx2, long idx3, double value, ThreadContext tc) {
+        tc.native_n = value;
+        arr.bind_pos_multidim_native(tc, new long[] { idx1, idx2, idx3 });
+        if (tc.native_type != ThreadContext.NATIVE_NUM)
+            throw ExceptionHandling.dieInternal(tc, "This is not a native num array");
+        return value;
+    }
+    public static String bindpos3d_s(SixModelObject arr, long idx1, long idx2, long idx3, String value, ThreadContext tc) {
+        tc.native_s = value;
+        arr.bind_pos_multidim_native(tc, new long[] { idx1, idx2, idx3 });
+        if (tc.native_type != ThreadContext.NATIVE_STR)
+            throw ExceptionHandling.dieInternal(tc, "This is not a native str array");
+        return value;
+    }
+    public static SixModelObject bindposnd_o(SixModelObject arr, SixModelObject indices, SixModelObject value, ThreadContext tc) {
+        long[] jIndices = smoToLongArray(tc, indices);
+        arr.bind_pos_multidim_boxed(tc, jIndices, value);
+        return value;
+    }
+    public static long bindposnd_i(SixModelObject arr, SixModelObject indices, long value, ThreadContext tc) {
+        long[] jIndices = smoToLongArray(tc, indices);
+        tc.native_i = value;
+        arr.bind_pos_multidim_native(tc, jIndices);
+        if (tc.native_type != ThreadContext.NATIVE_INT)
+            throw ExceptionHandling.dieInternal(tc, "This is not a native int array");
+        return value;
+    }
+    public static double bindposnd_n(SixModelObject arr, SixModelObject indices, double value, ThreadContext tc) {
+        long[] jIndices = smoToLongArray(tc, indices);
+        tc.native_n = value;
+        arr.bind_pos_multidim_native(tc, jIndices);
+        if (tc.native_type != ThreadContext.NATIVE_NUM)
+            throw ExceptionHandling.dieInternal(tc, "This is not a native num array");
+        return value;
+    }
+    public static String bindposnd_s(SixModelObject arr, SixModelObject indices, String value, ThreadContext tc) {
+        long[] jIndices = smoToLongArray(tc, indices);
+        tc.native_s = value;
+        arr.bind_pos_multidim_native(tc, jIndices);
+        if (tc.native_type != ThreadContext.NATIVE_STR)
+            throw ExceptionHandling.dieInternal(tc, "This is not a native str array");
+        return value;
+    }
+
+    /* Positional reference operations. */
+    public static SixModelObject atposref_i(SixModelObject obj, long idx, ThreadContext tc) {
+        SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intPosRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No int positional reference type registered for current HLL");
+        NativeRefInstancePositional ref = (NativeRefInstancePositional)refType.st.REPR.allocate(tc, refType.st);
+        ref.obj = obj;
+        ref.idx = idx;
+        return ref;
+    }
+    public static SixModelObject atposref_n(SixModelObject obj, long idx, ThreadContext tc) {
+        SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.numPosRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No num positional reference type registered for current HLL");
+        NativeRefInstancePositional ref = (NativeRefInstancePositional)refType.st.REPR.allocate(tc, refType.st);
+        ref.obj = obj;
+        ref.idx = idx;
+        return ref;
+    }
+    public static SixModelObject atposref_s(SixModelObject obj, long idx, ThreadContext tc) {
+        SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strPosRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No string positional reference type registered for current HLL");
+        NativeRefInstancePositional ref = (NativeRefInstancePositional)refType.st.REPR.allocate(tc, refType.st);
+        ref.obj = obj;
+        ref.idx = idx;
+        return ref;
+    }
+
     /* Associative operations. */
     public static SixModelObject atkey(SixModelObject hash, String key, ThreadContext tc) {
         return hash.at_key_boxed(tc, key);
@@ -2727,6 +3142,23 @@ public final class Ops {
     }
     public static SixModelObject setelems(SixModelObject agg, long elems, ThreadContext tc) {
         agg.set_elems(tc, elems);
+        return agg;
+    }
+    public static long numdimensions(SixModelObject agg, ThreadContext tc) {
+        return agg.dimensions(tc).length;
+    }
+    public static SixModelObject dimensions(SixModelObject agg, ThreadContext tc) {
+        long[] dims = agg.dimensions(tc);
+        SixModelObject BOOTIntArray = tc.gc.BOOTIntArray;
+        SixModelObject dimRes = BOOTIntArray.st.REPR.allocate(tc, BOOTIntArray.st);
+        for (int i = 0; i < dims.length; i++) {
+            tc.native_i = dims[i];
+            dimRes.bind_pos_native(tc, i);
+        }
+        return dimRes;
+    }
+    public static SixModelObject setdimensions(SixModelObject agg, SixModelObject dims, ThreadContext tc) {
+        agg.set_dimensions(tc, smoToLongArray(tc, dims));
         return agg;
     }
     public static long existspos(SixModelObject agg, long key, ThreadContext tc) {
@@ -2839,16 +3271,81 @@ public final class Ops {
     public static long iscont(SixModelObject obj) {
         return obj == null || obj.st.ContainerSpec == null ? 0 : 1;
     }
+    private static short getContainerPrimitive(SixModelObject obj) {
+        if (obj != null && !(obj instanceof TypeObject)) {
+            ContainerSpec cs = obj.st.ContainerSpec;
+            if (cs instanceof NativeRefContainerSpec)
+                return ((NativeRefREPRData)(obj.st.REPRData)).primitive_type;
+        }
+        return StorageSpec.BP_NONE;
+    }
+    public static long iscont_i(SixModelObject obj) {
+        return getContainerPrimitive(obj) == StorageSpec.BP_INT ? 1 : 0;
+    }
+    public static long iscont_n(SixModelObject obj) {
+        return getContainerPrimitive(obj) == StorageSpec.BP_NUM ? 1 : 0;
+    }
+    public static long iscont_s(SixModelObject obj) {
+        return getContainerPrimitive(obj) == StorageSpec.BP_STR ? 1 : 0;
+    }
     public static SixModelObject decont(SixModelObject obj, ThreadContext tc) {
         if (obj == null)
             return null;
         ContainerSpec cs = obj.st.ContainerSpec;
         return cs == null || obj instanceof TypeObject ? obj : cs.fetch(tc, obj);
     }
+    public static long decont_i(SixModelObject obj, ThreadContext tc) {
+        if (!(obj instanceof TypeObject)) {
+            ContainerSpec cs = obj.st.ContainerSpec;
+            if (cs != null)
+                return cs.fetch_i(tc, obj);
+        }
+        return obj.get_int(tc);
+    }
+    public static double decont_n(SixModelObject obj, ThreadContext tc) {
+        if (!(obj instanceof TypeObject)) {
+            ContainerSpec cs = obj.st.ContainerSpec;
+            if (cs != null)
+                return cs.fetch_n(tc, obj);
+        }
+        return obj.get_num(tc);
+    }
+    public static String decont_s(SixModelObject obj, ThreadContext tc) {
+        if (!(obj instanceof TypeObject)) {
+            ContainerSpec cs = obj.st.ContainerSpec;
+            if (cs != null)
+                return cs.fetch_s(tc, obj);
+        }
+        return obj.get_str(tc);
+    }
     public static SixModelObject assign(SixModelObject cont, SixModelObject value, ThreadContext tc) {
         ContainerSpec cs = cont.st.ContainerSpec;
         if (cs != null)
             cs.store(tc, cont, decont(value, tc));
+        else
+            ExceptionHandling.dieInternal(tc, "Cannot assign to an immutable value");
+        return cont;
+    }
+    public static SixModelObject assign_i(SixModelObject cont, long value, ThreadContext tc) {
+        ContainerSpec cs = cont.st.ContainerSpec;
+        if (cs != null)
+            cs.store_i(tc, cont, value);
+        else
+            ExceptionHandling.dieInternal(tc, "Cannot assign to an immutable value");
+        return cont;
+    }
+    public static SixModelObject assign_n(SixModelObject cont, double value, ThreadContext tc) {
+        ContainerSpec cs = cont.st.ContainerSpec;
+        if (cs != null)
+            cs.store_n(tc, cont, value);
+        else
+            ExceptionHandling.dieInternal(tc, "Cannot assign to an immutable value");
+        return cont;
+    }
+    public static SixModelObject assign_s(SixModelObject cont, String value, ThreadContext tc) {
+        ContainerSpec cs = cont.st.ContainerSpec;
+        if (cs != null)
+            cs.store_s(tc, cont, value);
         else
             ExceptionHandling.dieInternal(tc, "Cannot assign to an immutable value");
         return cont;
@@ -2974,10 +3471,10 @@ public final class Ops {
         return istrue(obj, tc) == 0 ? 1 : 0;
     }
     public static long istrue_s(String str) {
-        return str == null || str.equals("") || str.equals("0") ? 0 : 1;
+        return str == null || str.equals("") ? 0 : 1;
     }
     public static long isfalse_s(String str) {
-        return str == null || str.equals("") || str.equals("0") ? 1 : 0;
+        return str == null || str.equals("") ? 1 : 0;
     }
     public static long not_i(long v) {
         return v == 0 ? 1 : 0;
@@ -3275,6 +3772,7 @@ public final class Ops {
     }
 
     public static long indexfrom(String string, String pattern, long fromIndex) {
+        if (fromIndex > string.length()) { return -1; }
         return string.indexOf(pattern, (int)fromIndex);
     }
 
@@ -3283,6 +3781,7 @@ public final class Ops {
     }
 
     public static long rindexfrom(String string, String pattern, long fromIndex) {
+        if (fromIndex > string.length()) { return -1; }
         return string.lastIndexOf(pattern, (int)fromIndex);
     }
 
@@ -3326,6 +3825,10 @@ public final class Ops {
 
     public static long ordat(String str, long offset) {
         return str.codePointAt((int)offset);
+    }
+
+    public static long ordbaseat(String str, long offset) {
+        throw new RuntimeException("ordbaseat NYI");
     }
 
     public static String sprintf(String format, SixModelObject arr, ThreadContext tc) {
@@ -3412,6 +3915,9 @@ public final class Ops {
             else if (encoding.equals("iso-8859-1")) {
                 Buffers.stashBytes(tc, res, str.getBytes("ISO-8859-1"));
             }
+            else if (encoding.equals("windows-1252")) {
+                Buffers.stashBytes(tc, res, str.getBytes("windows-1252"));
+            }
             else if (encoding.equals("utf16")) {
                 short[] buffer = new short[str.length()];
                 for (int i = 0; i < str.length(); i++)
@@ -3476,6 +3982,9 @@ public final class Ops {
         }
         else if (encoding.equals("iso-8859-1")) {
             return decode8(buf, "ISO-8859-1", tc);
+        }
+        else if (encoding.equals("windows-1252")) {
+            return decode8(buf, "windows-1252", tc);
         }
         else if (encoding.equals("utf16") || encoding.equals("utf32")) {
             int n = (int)buf.elems(tc);
@@ -3647,13 +4156,19 @@ public final class Ops {
         canonNames.put("inarabicpresentationformsb", "InArabicPresentationForms-B");
         canonNames.put("insupplementaryprivateuseareaa", "InSupplementaryPrivateUseArea-A");
         canonNames.put("insupplementaryprivateuseareab", "InSupplementaryPrivateUseArea-B");
+        canonNames.put("ascii", "ASCII");
+        canonNames.put("alpha", "IsAlphabetic");
         canonNames.put("alphabetic", "IsAlphabetic");
         canonNames.put("ideographic", "IsIdeographic");
         canonNames.put("letter", "IsLetter");
+        canonNames.put("lower", "IsLowercase");
         canonNames.put("lowercase", "IsLowercase");
+        canonNames.put("upper", "IsUppercase");
         canonNames.put("uppercase", "IsUppercase");
         canonNames.put("titlecase", "IsTitlecase");
+        canonNames.put("punct", "IsPunctuation");
         canonNames.put("punctuation", "IsPunctuation");
+        canonNames.put("cntrl", "IsControl");
         canonNames.put("control", "IsControl");
         canonNames.put("white_space", "IsWhite_Space");
         canonNames.put("digit", "IsDigit");
@@ -3698,6 +4213,7 @@ public final class Ops {
         canonNames.put("privateuse", "Co");
         canonNames.put("unassigned", "Cn");
         canonNames.put("other", "C");
+        derivedProps.put("space", new int[] { 32, 32 });
         derivedProps.put("WhiteSpace", new int[] { 9,13,32,32,133,133,160,160,5760,5760,6158,6158,8192,8202,8232,8232,8233,8233,8239,8239,8287,8287,12288,12288 });
         derivedProps.put("BidiControl", new int[] { 8206,8207,8234,8238 });
         derivedProps.put("JoinControl", new int[] { 8204,8205 });
@@ -3935,6 +4451,8 @@ public final class Ops {
         }
     }
     public static SixModelObject getobjsc(SixModelObject obj, ThreadContext tc) {
+        if (obj == null)
+            return null;
         SerializationContext sc = obj.sc;
         if (sc == null)
             return null;
@@ -4038,12 +4556,30 @@ public final class Ops {
             tc.compilingSCs = null;
         return result;
     }
+    public static SixModelObject neverrepossess(SixModelObject obj, ThreadContext tc) {
+        tc.gc.neverRepossess.put(obj, null);
+        return obj;
+    }
+    public static SixModelObject scdisclaim(SixModelObject scRef, ThreadContext tc) {
+        if (scRef instanceof SCRefInstance) {
+            SerializationContext sc = ((SCRefInstance)scRef).referencedSC;
+            sc.disclaimObjects();
+            sc.disclaimSTables();
+            sc.disclaimCodes();
+            return scRef;
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc, "scdisclaim was not passed a valid SCRef");
+        }
+    }
 
     /* SC write barriers (not really ops, but putting them here with the SC
      * related bits). */
     public static void scwbObject(ThreadContext tc, SixModelObject obj) {
         int cscSize = tc.compilingSCs == null ? 0 : tc.compilingSCs.size();
         if (cscSize == 0 || tc.scwbDisableDepth > 0)
+            return;
+        if (tc.gc.neverRepossess.containsKey(obj))
             return;
 
         /* See if the object is actually owned by another, and it's the
@@ -4053,7 +4589,10 @@ public final class Ops {
             obj = owner;
 
         SerializationContext compSC = tc.compilingSCs.get(cscSize - 1).referencedSC;
-        if (obj.sc != compSC) {
+        if (obj.sc == null) { /* Probably disclaimed. */
+            return;
+        }
+        else if (obj.sc != compSC) {
             compSC.repossessObject(obj.sc, obj);
             obj.sc = compSC;
         }
@@ -4805,6 +5344,24 @@ public final class Ops {
             config.nullValue = configHash.at_key_boxed(tc, "null_value");
         if (configHash.exists_key(tc, "exit_handler") != 0)
             config.exitHandler = configHash.at_key_boxed(tc, "exit_handler");
+        if (configHash.exists_key(tc, "int_lex_ref") != 0)
+            config.intLexRef = configHash.at_key_boxed(tc, "int_lex_ref");
+        if (configHash.exists_key(tc, "num_lex_ref") != 0)
+            config.numLexRef = configHash.at_key_boxed(tc, "num_lex_ref");
+        if (configHash.exists_key(tc, "str_lex_ref") != 0)
+            config.strLexRef = configHash.at_key_boxed(tc, "str_lex_ref");
+        if (configHash.exists_key(tc, "int_attr_ref") != 0)
+            config.intAttrRef = configHash.at_key_boxed(tc, "int_attr_ref");
+        if (configHash.exists_key(tc, "num_attr_ref") != 0)
+            config.numAttrRef = configHash.at_key_boxed(tc, "num_attr_ref");
+        if (configHash.exists_key(tc, "str_attr_ref") != 0)
+            config.strAttrRef = configHash.at_key_boxed(tc, "str_attr_ref");
+        if (configHash.exists_key(tc, "int_pos_ref") != 0)
+            config.intPosRef = configHash.at_key_boxed(tc, "int_pos_ref");
+        if (configHash.exists_key(tc, "num_pos_ref") != 0)
+            config.numPosRef = configHash.at_key_boxed(tc, "num_pos_ref");
+        if (configHash.exists_key(tc, "str_pos_ref") != 0)
+            config.strPosRef = configHash.at_key_boxed(tc, "str_pos_ref");
         return configHash;
     }
     public static SixModelObject getcomp(String name, ThreadContext tc) {
@@ -5117,8 +5674,8 @@ public final class Ops {
                             continue;
                         }
                         else if (act == NFA.EDGE_EPSILON && to <= numStates && done[to] != gen) {
-			    if (to != 0)
-				curst.add(to);
+                            if (to != 0)
+                                curst.add(to);
                             continue;
                         }
                     }
@@ -5342,6 +5899,8 @@ public final class Ops {
         catch (NumberFormatException e) {
             if (in.equals("Inf"))
                 return Double.POSITIVE_INFINITY;
+            if (in.equals("+Inf"))
+                return Double.POSITIVE_INFINITY;
             if (in.equals("-Inf"))
                 return Double.NEGATIVE_INFINITY;
             if (in.equals("NaN"))
@@ -5520,6 +6079,10 @@ public final class Ops {
             random = new BigInteger(size.bitLength(), tc.random);
         }
         return makeBI(tc, type, random);
+    }
+    
+    public static int pow_i(int a, int b) {
+        return (int)Math.pow(a, b);
     }
 
     public static double pow_n(double a, double b) {
@@ -5872,15 +6435,38 @@ public final class Ops {
         SixModelObject res = hashType.st.REPR.allocate(tc, hashType.st);
 
         try {
-                        InputStream is = Ops.class.getResourceAsStream("/jvmconfig.properties");
-                        Properties config = new Properties();
-                        config.load(is);
-                        for (String name : config.stringPropertyNames())
-                            res.bind_key_boxed(tc, name, box_s(config.getProperty(name), strType, tc));
-                } catch (Throwable e) {
-                        die_s("Failed to load config.properties", tc);
-                }
+            InputStream is = Ops.class.getResourceAsStream("/jvmconfig.properties");
+            Properties config = new Properties();
+            config.load(is);
+            for (String name : config.stringPropertyNames())
+                res.bind_key_boxed(tc, name, box_s(config.getProperty(name), strType, tc));
+        } catch (Throwable e) {
+            die_s("Failed to load config.properties", tc);
+        }
 
         return res;
+    }
+
+    public static String getuniname(long codePoint, ThreadContext tc) {
+        String name;
+        int cp = (int) codePoint;
+        try {
+            if(codePoint < 0) {
+                name = "<illegal>";
+            } else {
+                name = Character.getName(cp);
+                if(name == null) {
+                    name = "<unassigned>";
+                }
+            }
+        } catch (IllegalArgumentException iae) {
+            name = "<unassigned>";
+        }
+        return name;
+    }
+
+    public static SixModelObject force_gc(ThreadContext tc) {
+        System.gc();
+        return null;
     }
 }

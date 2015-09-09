@@ -2,7 +2,8 @@
 use JASTNodes;
 
 class HLL::Backend::JVM {
-    our %jvm_config := nqp::backendconfig();
+    our %jvm_config   := nqp::backendconfig();
+    my $compile_count := 0;
 
     method apply_transcodings($s, $transcode) {
         $s
@@ -13,7 +14,7 @@ class HLL::Backend::JVM {
     }
     
     method force_gc() {
-        nqp::die("Cannot force GC on JVM backend yet");
+        nqp::force_gc()
     }
     
     method name() {
@@ -24,7 +25,7 @@ class HLL::Backend::JVM {
         # Doesn't do anything just yet
     }
     
-    method run_profiled($what) {
+    method run_profiled($what, $filename?) {
         nqp::printfh(nqp::getstderr(),
             "Attach a profiler (e.g. JVisualVM) and press enter");
         nqp::readlinefh(nqp::getstdin());
@@ -53,13 +54,13 @@ class HLL::Backend::JVM {
     
     method classname($source, *%adverbs) {
         unless %*COMPILING<%?OPTIONS><javaclass> {
-            %*COMPILING<%?OPTIONS><javaclass> := nqp::sha1(nqp::sha1($source) ~ nqp::time_n());
+            %*COMPILING<%?OPTIONS><javaclass> := nqp::sha1(nqp::sha1($source) ~ nqp::time_n() ~ $compile_count++);
         }
         $source
     }
     
     method jast($qast, *%adverbs) {
-        my $classname := %*COMPILING<%?OPTIONS><javaclass> || nqp::sha1('eval-at-' ~ nqp::time_n());
+        my $classname := %*COMPILING<%?OPTIONS><javaclass> || nqp::sha1('eval-at-' ~ nqp::time_n() ~ $compile_count++);
         nqp::getcomp('QAST').jast($qast, :$classname);
     }
 

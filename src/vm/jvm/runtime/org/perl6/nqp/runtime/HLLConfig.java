@@ -90,4 +90,17 @@ public class HLLConfig {
      * Block exit handler, for those that need it.
      */
     public SixModelObject exitHandler;
+
+    /**
+     * Native reference types.
+     */
+    public SixModelObject intLexRef;
+    public SixModelObject numLexRef;
+    public SixModelObject strLexRef;
+    public SixModelObject intAttrRef;
+    public SixModelObject numAttrRef;
+    public SixModelObject strAttrRef;
+    public SixModelObject intPosRef;
+    public SixModelObject numPosRef;
+    public SixModelObject strPosRef;
 }

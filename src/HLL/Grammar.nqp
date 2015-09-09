@@ -52,13 +52,13 @@ grammar HLL::Grammar {
     token decint  { [\d+]+ % '_' }
     token decints { [<.ws><decint><.ws>]+ % ',' }
 
-    token hexint  { [<[ 0..9 a..f A..F ]>+]+ % '_' }
+    token hexint  { [[\d|<[ a..f A..F ａ..ｆ Ａ..Ｆ ]>]+]+ % '_' }
     token hexints { [<.ws><hexint><.ws>]+ % ',' }
 
-    token octint  { [<[ 0..7 ]>+]+ % '_' }
+    token octint  { [\d+]+ % '_' }
     token octints { [<.ws><octint><.ws>]+ % ',' }
 
-    token binint  { [<[ 0..1 ]>+]+ % '_' }
+    token binint  { [\d+]+ % '_' }
     token binints { [<.ws><binint><.ws>]+ % ',' }
 
     token integer {
@@ -436,7 +436,10 @@ An operator precedence parser.
             $termcur := $here."$termishrx"();
             $pos := nqp::getattr_i($termcur, $cursor_class, '$!pos');
             nqp::bindattr_i($here, $cursor_class, '$!pos', $pos);
-            return $here if $pos < 0;
+            if $pos < 0 {
+		$here.panic('Missing required term after infix') if @opstack;
+		return $here;
+	    }
 
             $termish := $termcur.MATCH();
             
@@ -451,8 +454,8 @@ An operator precedence parser.
                 while @prefixish && @postfixish {
                     my %preO     := @prefixish[0]<OPER><O>;
                     my %postO    := @postfixish[nqp::elems(@postfixish)-1]<OPER><O>;
-                    my $preprec  := nqp::ifnull(nqp::atkey(%preO, 'prec'), '');
-                    my $postprec := nqp::ifnull(nqp::atkey(%postO, 'prec'), '');
+                    my $preprec  := nqp::ifnull(nqp::atkey(%preO, 'sub'), nqp::ifnull(nqp::atkey(%preO, 'prec'), ''));
+                    my $postprec := nqp::ifnull(nqp::atkey(%postO, 'sub'), nqp::ifnull(nqp::atkey(%postO, 'prec'), ''));
                     
                     if $postprec gt $preprec ||
                     $postprec eq $preprec && %postO<uassoc> eq 'right'
@@ -501,15 +504,15 @@ An operator precedence parser.
                 $inprec := ~%inO<prec>;
                 $infixcur.panic('Missing infixish operator precedence')
                     unless $inprec;
-                if $inprec lt $preclim {
+                if $inprec le $preclim {
                     $term_done := 1;
                     last;
                 }
-        
-                %inO<prec> := nqp::ifnull(nqp::atkey(%inO, 'sub'), nqp::atkey(%inO, 'prec'));
-                
+
                 while @opstack {
-                    $opprec := ~@opstack[+@opstack-1]<OPER><O><prec>;
+                    my %opO := @opstack[+@opstack-1]<OPER><O>;
+
+                    $opprec := nqp::ifnull(nqp::atkey(%opO, 'sub'), nqp::atkey(%opO, 'prec'));
                     last unless $opprec gt $inprec;
                     self.EXPR_reduce(@termstack, @opstack);
                 }
@@ -624,6 +627,7 @@ An operator precedence parser.
             nqp::bindkey(%markhash, $markname, $cur);
         }
         else {
+	    nqp::bindattr_i($cur, $cursor_class, '$!from', self.from);
             $cur."!cursor_pos"(self.pos());
             $cur
         }

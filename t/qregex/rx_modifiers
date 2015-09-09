@@ -95,12 +95,12 @@ ab [:ignorecase cd ] ef		aBCDef	n	ignorecase, lexical (:ignorecase)
 :sigspace b c d		a b c def	y	sigspace (:sigspace)
 :sigspace b c d		ab c d ef	y	sigspace (:sigspace)
 # todo :pugs<feature>
-:s(1) b c [:s(0) d e f ]	a b c def	y	sigspace, lexical repetition (:s)
-:s b c [:!s d e f ]	a b c def	y	sigspace, lexical repetition (:s)
-:s(0) b c [:s(1) d e f ]	a b c def	n	sigspace, lexical repetition (:s)
-:!s b c [:s d e f ]	a b c def	n	sigspace, lexical repetition (:s)
-:s(0) b c [:s(0) d e f ]	a b c def	n	sigspace, lexical repetition (:s)
-:!s b c [:!s d e f ]	a b c def	n	sigspace, lexical repetition (:s)
+:s(1) b c [:s(0) d \w f ]	a b c def	y	sigspace, lexical repetition (:s)
+:s b c [:!s d \w f ]	a b c def	y	sigspace, lexical repetition (:s)
+:s(0) b \w [:s(1) d \w f ]	a b c def	n	sigspace, lexical repetition (:s)
+:!s b \w [:s d \w f ]	a b c def	n	sigspace, lexical repetition (:s)
+:s(0) b \w [:s(0) d \w f ]	a b c def	n	sigspace, lexical repetition (:s)
+:!s b \w [:!s d \w f ]	a b c def	n	sigspace, lexical repetition (:s)
 # todo :pugs<feature>
 :s ab 				ab		y	sigspace, trailing ws
 foo\s*'-'?\s*bar		foo\t \n-\n\t bar	y	basic match

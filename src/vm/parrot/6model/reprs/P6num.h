@@ -1,6 +1,10 @@
 #ifndef P6NUM_H_GUARD
 #define P6NUM_H_GUARD
 
+#define P6NUM_C_TYPE_FLOAT       -1
+#define P6NUM_C_TYPE_DOUBLE      -2
+#define P6NUM_C_TYPE_LONGDOUBLE  -3
+
 typedef struct {
     /* Floating point storage slot. */
     FLOATVAL value;

@@ -168,4 +168,23 @@ public class SerializationContext {
     public int coderefCount() {
         return root_codes.size();
     }
+
+    public void disclaimObjects() {
+        for (SixModelObject obj : this.root_objects) {
+            obj.sc = null;
+        }
+        this.root_objects = new ArrayList<SixModelObject>();
+    }
+    public void disclaimSTables() {
+        for (STable stable : this.root_stables) {
+            stable.sc = null;
+        }
+        this.root_stables = new ArrayList<STable>();
+    }
+    public void disclaimCodes() {
+        for (CodeRef obj : this.root_codes) {
+            obj.sc = null;
+        }
+        this.root_codes = new ArrayList<CodeRef>();
+    }
 }

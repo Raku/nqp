@@ -87,7 +87,12 @@ A hash that may have the following keys:
   each element. Again, this is just about layout and lookup, not about type
   checking.
 
+* dimensions - the number of dimensions an array of this type supports. A
+  given REPR may be restricted to only support a single dimensions.
+
 ## hash
+
+A hash that may have the following keys:
 
 * valuetype - the type of the hash value. As with arrays, it's up to the REPR
   how or if it handles native types. Just about layout.
@@ -96,3 +101,13 @@ A hash that may have the following keys:
   since they need to understand the representation of the provided key well
   enough to hash it. This will probably mean strings and whatever REPR ObjAt
   in Perl 6 (or some other language's variant) has.
+
+## nativeref
+
+A hash that must have the following two keys:
+
+* type - the native type that is being referenced. Must have a storage spec
+  that claims to be a native int/num/str.
+
+* refkind - the kind of reference, specified as a string. Must be one of
+  'attribute', 'positional', or 'lexical'.

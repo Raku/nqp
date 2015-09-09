@@ -17,6 +17,7 @@ public class CStructREPRData {
         String name;
         SixModelObject type;
         ArgType argType;
+        short inlined;
         short bits;
     }
 }

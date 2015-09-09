@@ -21,6 +21,12 @@ class QRegex::NFA {
     my $EDGE_CHARRANGE_NEG   := 13;
     my $EDGE_CODEPOINT_LL    := 14;
     my $EDGE_CODEPOINT_I_LL  := 15;
+    my $EDGE_CODEPOINT_M     := 16;
+    my $EDGE_CODEPOINT_M_NEG := 17;
+    my $EDGE_CODEPOINT_M_LL  := 18;
+    my $EDGE_CODEPOINT_IM     := 19;
+    my $EDGE_CODEPOINT_IM_NEG := 20;
+    my $EDGE_CODEPOINT_IM_LL  := 21;
 
     my $ACTIONS;
     my $nfadeb;
@@ -154,6 +160,21 @@ class QRegex::NFA {
         dentout($to);
     }
 
+    method altseq($node, $from, $to) {
+        if +@($node) {
+            my $indent := dentin();
+            my int $st := self.regex_nfa($node[0], $from, $to);
+            $to := $st if $to < 0 && $st > 0;
+            $st := self.addedge($from, $to, $EDGE_EPSILON, 0);
+            $to := $st if $to < 0 && $st > 0;
+            note("$indent ...altseq returns $to") if $nfadeb;
+            dentout($to);
+        }
+        else {
+            self.fate($node, $from, $to);
+        }
+    }
+
     method anchor($node, $from, $to) { 
         self.addedge($from, $to, $EDGE_EPSILON, 0);
     }
@@ -171,7 +192,7 @@ class QRegex::NFA {
         %cclass_code<n>  := nqp::const::CCLASS_NEWLINE;
         %cclass_code<nl> := nqp::const::CCLASS_NEWLINE;
         $nfadeb := nqp::existskey(nqp::getenvhash(),'NQP_NFA_DEB');
-        $ACTIONS := ['FATE','EPSILON','CODEPOINT','CODEPOINT_NEG','CHARCLASS','CHARCLASS_NEG','CHARLIST','CHARLIST_NEG','SUBRULE','CODEPOINT_I','CODEPOINT_I_NEG','GENERIC_VAR','CHARRANGE','CHARRANGE_NEG','CODEPOINT_LL','CODEPOINT_I_LL'];
+        $ACTIONS := ['FATE','EPSILON','CODEPOINT','CODEPOINT_NEG','CHARCLASS','CHARCLASS_NEG','CHARLIST','CHARLIST_NEG','SUBRULE','CODEPOINT_I','CODEPOINT_I_NEG','GENERIC_VAR','CHARRANGE','CHARRANGE_NEG','CODEPOINT_LL','CODEPOINT_I_LL','CODEPOINT_M','CODEPOINT_M_NEG'];
         # $ind := 0;
         # $indent := '';
         $nfatime := 0;
@@ -243,6 +264,27 @@ class QRegex::NFA {
                 }
                 dentout(self.addedge($from, $to, $!LITEND ?? $EDGE_CODEPOINT_I !!  $EDGE_CODEPOINT_I_LL,
                     [nqp::ord($litconst_lc, $i), nqp::ord($litconst_uc, $i)]));
+            }
+            elsif $node.subtype eq 'ignoremark' {
+                my str $litconst := $node[0];
+                while $i < $litlen {
+                    $from := self.addedge($from, -1, $EDGE_CODEPOINT_M, nqp::ordbaseat($litconst, $i));
+                    $i := $i + 1;
+                }
+                dentout(self.addedge($from, $to, $EDGE_CODEPOINT_M, nqp::ordbaseat($litconst, $i)));
+                # XXX $EDGE_CODEPOINT_M_LL ?
+            }
+            elsif $node.subtype eq 'ignorecase+ignoremark' {
+                my str $litconst_lc := nqp::lc($node[0]);
+                my str $litconst_uc := nqp::uc($node[0]);
+                while $i < $litlen {
+                    $from := self.addedge($from, -1, $EDGE_CODEPOINT_IM,
+                        [nqp::ordbaseat($litconst_lc, $i), nqp::ordbaseat($litconst_uc, $i)]);
+                    $i := $i + 1;
+                }
+                dentout(self.addedge($from, $to, $EDGE_CODEPOINT_IM,
+                    [nqp::ordbaseat($litconst_lc, $i), nqp::ordbaseat($litconst_uc, $i)]));
+                # XXX $EDGE_CODEPOINT_IM_LL ?
             }
             else {
                 my str $litconst := $node[0];

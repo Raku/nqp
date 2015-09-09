@@ -13,8 +13,8 @@ unless (File::Spec->file_name_is_absolute($prefix)) {
     $prefix = File::Spec->rel2abs($prefix);
 }
 
-my $lib_dir = File::Spec->catfile($prefix, 'languages', 'nqp', 'lib');
-my $nqp_mvm = File::Spec->catfile($prefix, 'languages', 'nqp', 'lib', 'nqp.moarvm');
+my $lib_dir = File::Spec->catfile($prefix, 'share', 'nqp', 'lib');
+my $nqp_mvm = File::Spec->catfile($prefix, 'share', 'nqp', 'lib', 'nqp.moarvm');
 
 if ($^O eq 'MSWin32') {
     my $install_to = File::Spec->catfile($realpath, 'bin', 'nqp-m.bat');

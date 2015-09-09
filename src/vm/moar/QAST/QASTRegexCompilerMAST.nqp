@@ -460,6 +460,14 @@ class QAST::MASTRegexCompiler {
         @ins
     }
 
+    method goal($node) {
+        self.regex_mast(QAST::Regex.new(
+            :rxtype<concat>,
+            $node[1],
+            QAST::Regex.new( :rxtype<altseq>, $node[0], $node[2] )
+        ))
+    }
+
     method conj($node) { self.conjseq($node) }
 
     method conjseq($node) {
@@ -499,7 +507,20 @@ class QAST::MASTRegexCompiler {
     method enumcharlist($node) {
         my @ins;
         my $op := $node.negate ?? 'indexnat' !! 'indexat';
-        nqp::push(@ins, op($op, %!reg<tgt>, %!reg<pos>, sval($node[0]), %!reg<fail>));
+        if $node.subtype eq 'ignoremark' || $node.subtype eq 'ignorecase+ignoremark' {
+            my $i0 := $!regalloc.fresh_i();
+            my $s0 := $!regalloc.fresh_s();
+            merge_ins(@ins, [
+                op('ge_i', $i0, %!reg<pos>, %!reg<eos>),
+                op('if_i', $i0, %!reg<fail>),
+                op('ordbaseat', $i0, %!reg<tgt>, %!reg<pos>),
+                op('chr', $s0, $i0),
+                op($op, $s0, %!reg<zero>, sval($node[0]), %!reg<fail>),
+            ]);
+        }
+        else {
+            nqp::push(@ins, op($op, %!reg<tgt>, %!reg<pos>, sval($node[0]), %!reg<fail>));
+        }
         nqp::push(@ins, op('inc_i', %!reg<pos>))
             unless $node.subtype eq 'zerowidth';
         @ins
@@ -517,29 +538,75 @@ class QAST::MASTRegexCompiler {
             op('const_i64', $lower, ival($node[1].value)),
             op('const_i64', $upper, ival($node[2].value)),
         ]);
-        if $node[0] eq 'ignorecase' {
+        if $node[0] eq 'ignorecase+ignoremark' {
+            my $succeed := label();
             my $s0      := $!regalloc.fresh_s();
             my $s1      := $!regalloc.fresh_s();
             my $i2      := $!regalloc.fresh_i();
-            my $succeed := label();
             my $goal    := $node.negate ?? %!reg<fail> !! $succeed;
             merge_ins(@ins, [
-                op('const_i64', $i2, ival(1)),
-                op('substr_s', $s0, %!reg<tgt>, %!reg<pos>, $i2),
+                op('substr_s', $s0, %!reg<tgt>, %!reg<pos>, %!reg<one>),
+                op('lc', $s1, $s0),
+                op('ordbaseat', $i0, $s1, %!reg<zero>),
+                op('ge_i', $i1, $i0, $lower),
+                op('le_i', $i2, $i0, $upper),
+                op('band_i', $i1, $i1, $i2),
+                op('if_i', $i1, $goal),
+                op('uc', $s1, $s0),
+                op('ordbaseat', $i0, $s1, %!reg<zero>),
+                op('ge_i', $i1, $i0, $lower),
+                op('le_i', $i2, $i0, $upper),
+                op('band_i', $i1, $i1, $i2),
+                op('if_i', $i1, $goal),
+            ]);
+            $!regalloc.release_register($s0, $MVM_reg_str);
+            $!regalloc.release_register($s1, $MVM_reg_str);
+            $!regalloc.release_register($i2, $MVM_reg_int64);
+            unless $node.negate {
+                nqp::push(@ins, op('goto', %!reg<fail>));
+                nqp::push(@ins, $succeed);
+            }
+        }
+        elsif $node[0] eq 'ignorecase' {
+            my $succeed := label();
+            my $s0      := $!regalloc.fresh_s();
+            my $s1      := $!regalloc.fresh_s();
+            my $i2      := $!regalloc.fresh_i();
+            my $goal    := $node.negate ?? %!reg<fail> !! $succeed;
+            merge_ins(@ins, [
+                op('substr_s', $s0, %!reg<tgt>, %!reg<pos>, %!reg<one>),
                 op('lc', $s1, $s0),
                 op('ordfirst', $i0, $s1),
                 op('ge_i', $i1, $i0, $lower),
                 op('le_i', $i2, $i0, $upper),
-                op('bitand_i', $i1, $i1, $i2),
+                op('band_i', $i1, $i1, $i2),
                 op('if_i', $i1, $goal),
                 op('uc', $s1, $s0),
                 op('ordfirst', $i0, $s1),
                 op('ge_i', $i1, $i0, $lower),
                 op('le_i', $i2, $i0, $upper),
-                op('bitand_i', $i1, $i1, $i2),
+                op('band_i', $i1, $i1, $i2),
                 op('if_i', $i1, $goal),
             ]);
+            $!regalloc.release_register($s0, $MVM_reg_str);
+            $!regalloc.release_register($s1, $MVM_reg_str);
+            $!regalloc.release_register($i2, $MVM_reg_int64);
             unless $node.negate {
+                nqp::push(@ins, op('goto', %!reg<fail>));
+                nqp::push(@ins, $succeed);
+            }
+        }
+        elsif $node[0] eq 'ignoremark' {
+            my $succeed := label();
+            my $goal := $node.negate ?? $succeed !! %!reg<fail>;
+            merge_ins(@ins, [
+                op('ordbaseat', $i0, %!reg<tgt>, %!reg<pos>),
+                op('gt_i', $i1, $i0, $upper),
+                op('if_i', $i1, $goal),
+                op('lt_i', $i1, $i0, $lower),
+                op('if_i', $i1, $goal),
+            ]);
+            if $node.negate {
                 nqp::push(@ins, op('goto', %!reg<fail>));
                 nqp::push(@ins, $succeed);
             }
@@ -569,10 +636,8 @@ class QAST::MASTRegexCompiler {
 
     method literal($node) {
         my $litconst := $node[0];
-        my $eq_op := $node.subtype eq 'ignorecase' ?? 'eqatic_s' !! 'eqat_s';
         my $s0 := $!regalloc.fresh_s();
         my $i0 := $!regalloc.fresh_i();
-        my $cmpop := $node.negate ?? 'if_i' !! 'unless_i';
         my @ins;
         if $node.negate {
             # Need explicit check we're not going beyond the string end in the
@@ -586,11 +651,27 @@ class QAST::MASTRegexCompiler {
         # can happen only once at the beginning of a regex. hash of string constants
         # to the registers to which they are assigned.
         # XXX or make a specialized eqat_sc op that takes a constant string.
-        nqp::push(@ins, op('const_s', $s0, sval($litconst)));
         # also, consider making the op branch directly from the comparison
         # instead of storing an integer to a temporary register
-        nqp::push(@ins, op($eq_op, $i0, %!reg<tgt>, $s0, %!reg<pos>));
-        nqp::push(@ins, op($cmpop, $i0, %!reg<fail>));
+        if $node.subtype eq 'ignorecase+ignoremark' {
+            my $op := $node.negate ?? 'indexnat' !! 'indexat';
+            my $c  := nqp::chr(nqp::ordbaseat($litconst, 0));
+            merge_ins(@ins, [
+                op('ge_i', $i0, %!reg<pos>, %!reg<eos>),
+                op('if_i', $i0, %!reg<fail>),
+                op('ordbaseat', $i0, %!reg<tgt>, %!reg<pos>),
+                op('chr', $s0, $i0),
+                op($op, $s0, %!reg<zero>, sval(nqp::lc($c) ~ nqp::uc($c)), %!reg<fail>),
+            ]);
+        }
+        else {
+            my $eq_op := $node.subtype eq 'ignorecase' ?? 'eqatic_s' !!
+                         $node.subtype eq 'ignoremark' ?? 'eqatim_s' !! 'eqat_s';
+            my $cmpop := $node.negate ?? 'if_i' !! 'unless_i';
+            nqp::push(@ins, op('const_s', $s0, sval($litconst)));
+            nqp::push(@ins, op($eq_op, $i0, %!reg<tgt>, $s0, %!reg<pos>));
+            nqp::push(@ins, op($cmpop, $i0, %!reg<fail>));
+        }
         unless $node.subtype eq 'zerowidth' {
             nqp::push(@ins, op('const_i64', $i0, ival(nqp::chars($litconst))));
             nqp::push(@ins, op('add_i', %!reg<pos>, %!reg<pos>, $i0));
@@ -914,7 +995,7 @@ class QAST::MASTRegexCompiler {
             $looplabel,
             op('inc_i', %!reg<pos>),
         ];
-        if $node.list && $node.subtype ne 'ignorecase' {
+        if $node.list && $node.subtype ne 'ignorecase' && $node.subtype ne 'ignoremark' && $node.subtype ne 'ignorecase+ignoremark' {
             my $lit := $!regalloc.fresh_s();
             nqp::push(@ins, op('const_s', $lit, sval($node[0])));
             nqp::push(@ins, op('index_s', %!reg<pos>, %!reg<tgt>, $lit, %!reg<pos>));
@@ -1223,44 +1304,101 @@ class QAST::MASTRegexCompiler {
     }
 
     method uniprop($node) {
-        my $pname := $!regalloc.fresh_s();
-        my $pcode := $!regalloc.fresh_i();
-        my $pvcode := $!regalloc.fresh_i();
-        my $pprop := $!regalloc.fresh_s();
-        my $i0 := $!regalloc.fresh_i();
-        my $testop := $node.negate ?? 'if_i' !! 'unless_i';
-        my $hasvalcode := label();
-        my $endblock   := label();
-        my $succeed    := label();
-        my @ins := [
+        my $pname   := $!regalloc.fresh_s();
+        my $pcode   := $!regalloc.fresh_i();
+        my $pvcode  := $!regalloc.fresh_i();
+        my $pprop   := $!regalloc.fresh_s();
+        my $i0      := $!regalloc.fresh_i();
+        my $testop  := $node.negate ?? 'if_i' !! 'unless_i';
+        my $succeed := label();
+        my $prop    := ~$node[0];
+        my @ins     := [
             op('ge_i', $i0, %!reg<pos>, %!reg<eos>),
             op('if_i', $i0, %!reg<fail>),
         ];
-        if ~$node[0] ~~ /^ [ In<[A..Z]> | in<[a..z]> ]/ { # "InArabic" is a lookup of Block Arabic
+        if +@($node) == 1 {
+            my $hasvalcode := label();
+            my $endblock   := label();
+            if $prop eq 'name' || $prop eq 'Name' {
+                my $s0 := $!regalloc.fresh_s();
+                merge_ins(@ins, [
+                    op('ordat', $i0, %!reg<tgt>, %!reg<pos>),
+                    op('getuniname', $s0, $i0),
+                    op('const_i64', $i0, %!reg<zero>),
+                    op('unless_s', $s0, $endblock),
+                    op('ordfirst', $i0, $s0),
+                    op('const_i64', $pcode, ival(60)), # not a property code but the ord of '<'
+                    op('ne_i', $i0, $i0, $pcode),
+                    $endblock,
+                    op('if_i', $i0, $succeed),
+                ]);
+            }
+            elsif $prop ~~ /^ [ In<[A..Z]> | in<[a..z]> ]/ { # "InArabic" is a lookup of Block Arabic
+                merge_ins(@ins, [
+                    op('const_s', $pname, sval(nqp::substr($prop,2))),
+                    op('uniisblock', $i0, %!reg<tgt>, %!reg<pos>, $pname),
+                    op('if_i', $i0, $succeed),
+                    op('const_s', $pprop, sval('Block')),
+                    op('unipropcode', $pcode, $pprop),
+                    op('unless_i', $pcode, $endblock),
+                    op('unipvalcode', $pvcode, $pcode, $pname),
+                    op('if_i', $pvcode, $hasvalcode),
+                    $endblock,
+                ]);
+            }
             merge_ins(@ins, [
-                op('const_s', $pname, sval(nqp::substr($node[0],2))),
-                op('uniisblock', $i0, %!reg<tgt>, %!reg<pos>, $pname),
-                op('if_i', $i0, $succeed),
-                
-                op('const_s', $pprop, sval('Block')),
-                op('const_s', $pname, sval(nqp::substr($node[0],2))),
-                op('unipropcode', $pcode, $pprop),
-                op('unless_i', $pcode, $endblock),
+                op('const_s', $pname, sval($node[0])),
+                op('unipropcode', $pcode, $pname),
                 op('unipvalcode', $pvcode, $pcode, $pname),
-                op('if_i', $pvcode, $hasvalcode),
-                $endblock,
+                #~ op($testop, $pvcode, %!reg<fail>), # XXX I am sure we should fail here
+                $hasvalcode,
+                op('hasuniprop', $i0, %!reg<tgt>, %!reg<pos>, $pcode, $pvcode),
+                $succeed,
+                op($testop, $i0, %!reg<fail>),
             ]);
         }
-        merge_ins(@ins, [
-            op('const_s', $pname, sval($node[0])),
-            op('unipropcode', $pcode, $pname),
-            op('unipvalcode', $pvcode, $pcode, $pname),
-            #~ op($testop, $pvcode, %!reg<fail>), # XXX I am sure we should fail here
-            $hasvalcode,
-            op('hasuniprop', $i0, %!reg<tgt>, %!reg<pos>, $pcode, $pvcode),
-            $succeed,
-            op($testop, $i0, %!reg<fail>),
-        ]);
+        elsif $prop eq 'name' || $prop eq 'Name' {
+            my $smrtmtch_mast := $!qastcomp.as_mast($node[1], :want($MVM_reg_obj));
+            my $s0            := $!regalloc.fresh_s();
+            merge_ins(@ins, $smrtmtch_mast.instructions);
+            merge_ins(@ins, [
+                op('ordat', $i0, %!reg<tgt>, %!reg<pos>),
+                op('getuniname', $s0, $i0),
+                op('findmeth', %!reg<method>, %!reg<cur>, sval('!DELEGATE_ACCEPTS')),
+                call(%!reg<method>, [$Arg::obj, $Arg::obj, $Arg::str], :result($i0),
+                    %!reg<cur>, $smrtmtch_mast.result_reg, $s0),
+                op($testop, $i0, %!reg<fail>),
+            ]);
+        }
+        else {
+            my $smrtmtch_mast := $!qastcomp.as_mast($node[1], :want($MVM_reg_obj));
+            my $s0            := $!regalloc.fresh_s();
+            my $tryintprop    := label();
+            my $tryboolprop   := label();
+            merge_ins(@ins, $smrtmtch_mast.instructions);
+            merge_ins(@ins, [
+                op('const_s', $pname, sval($prop)),
+                op('unipropcode', $pcode, $pname),
+                op('unipvalcode', $pvcode, $pcode, $pname),
+                op('ordat', $i0, %!reg<tgt>, %!reg<pos>),
+
+                op('getuniprop_str', $s0, $i0, $pcode),
+                op('unless_s', $s0, $tryintprop),
+                op('findmeth', %!reg<method>, %!reg<cur>, sval('!DELEGATE_ACCEPTS')),
+                call(%!reg<method>, [$Arg::obj, $Arg::obj, $Arg::str], :result($i0),
+                    %!reg<cur>, $smrtmtch_mast.result_reg, $s0),
+                op('goto', $succeed),
+
+                $tryintprop,
+                op('getuniprop_int', $i0, $i0, $pcode),
+                op('findmeth', %!reg<method>, %!reg<cur>, sval('!DELEGATE_ACCEPTS')),
+                call(%!reg<method>, [$Arg::obj, $Arg::obj, $Arg::int], :result($i0),
+                    %!reg<cur>, $smrtmtch_mast.result_reg, $i0),
+
+                $succeed,
+                op($testop, $i0, %!reg<fail>),
+            ]);
+        }
         nqp::push(@ins, op('inc_i', %!reg<pos>)) unless $node.subtype eq 'zerowidth';
         @ins
     }

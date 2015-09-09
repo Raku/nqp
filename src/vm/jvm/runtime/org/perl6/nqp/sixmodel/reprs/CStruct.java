@@ -48,11 +48,12 @@ public class CStruct extends REPR {
                 long numAttrs = attrs.elems(tc);
                 for (long j = 0; j < numAttrs; j++) {
                     SixModelObject attrHash = attrs.at_pos_boxed(tc, j);
-                    AttrInfo info = new AttrInfo();
-                    info.name = attrHash.at_key_boxed(tc, "name").get_str(tc);
-                    info.type = attrHash.at_key_boxed(tc, "type");
+                    AttrInfo info    = new AttrInfo();
+                    info.name        = attrHash.at_key_boxed(tc, "name").get_str(tc);
+                    info.type        = attrHash.at_key_boxed(tc, "type");
+                    info.inlined     = (short)attrHash.at_key_boxed(tc, "inlined").get_int(tc);
                     StorageSpec spec = info.type.st.REPR.get_storage_spec(tc, info.type.st);
-                    info.bits = spec.bits;
+                    info.bits        = spec.bits;
                     repr_data.fieldTypes.put(info.name, info);
 
                     if (info.type == null) {
@@ -110,8 +111,7 @@ public class CStruct extends REPR {
         int attributes = fields.size();
 
         // public $className extends com.sun.jna.Structure implements com.sun.jna.Structure.ByReference { ... }
-        cw.visit(Opcodes.V1_7, Opcodes.ACC_PUBLIC | Opcodes.ACC_SUPER, className, null,
-                "com/sun/jna/Structure", new String[]{"com/sun/jna/Structure$ByReference"});
+        cw.visit(Opcodes.V1_7, Opcodes.ACC_PUBLIC | Opcodes.ACC_SUPER, className, null, "com/sun/jna/Structure", null);
 
         //     private static List<String> fieldOrder;
         FieldVisitor fv = cw.visitField(Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC, "fieldOrder", "Ljava/util/List;",
@@ -119,7 +119,13 @@ public class CStruct extends REPR {
         fv.visitEnd();
 
         for (AttrInfo info: fields) {
-            fv = cw.visitField(Opcodes.ACC_PUBLIC, info.name, typeDescriptor(tc, info), null, null);
+            String type = typeDescriptor(tc, info);
+            /* Indirect referenced structs need to be handled as pointers here, since the default of
+             * structs and unions is to inline. */
+            if (info.inlined == 0 && (info.argType == ArgType.CSTRUCT || info.argType == ArgType.CUNION))
+                fv = cw.visitField(Opcodes.ACC_PUBLIC, info.name, "Lcom/sun/jna/Pointer;", null, null);
+            else
+                fv = cw.visitField(Opcodes.ACC_PUBLIC, info.name, type, null, null);
             fv.visitEnd();
         }
 
@@ -217,12 +223,24 @@ public class CStruct extends REPR {
             info.argType = ArgType.CPOINTER;
             return "Lcom/sun/jna/Pointer;";
         }
+        else if (repr instanceof CUnion) {
+            info.argType = ArgType.CUNION;
+            Class c = ((CUnionREPRData) info.type.st.REPRData).structureClass;
+            return Type.getDescriptor(c);
+        }
         else if (repr instanceof CStruct) {
             info.argType = ArgType.CSTRUCT;
-            return Type.getDescriptor(((CStructREPRData) info.type.st.REPRData).structureClass);
+            Class c = ((CStructREPRData) info.type.st.REPRData).structureClass;
+
+            /* When we hit a struct in an attribute that is not composed yet, we most likely
+             * have hit a struct of our own kind. */
+            if (c == null)
+                return "L__CStruct__" + typeId + ";";
+
+            return Type.getDescriptor(c);
         }
         else {
-            ExceptionHandling.dieInternal(tc, "CStruct representation only handles int, num, CArray, CPointer and CStruct");
+            ExceptionHandling.dieInternal(tc, "CStruct representation only handles int, num, CArray, CPointer, CStruct and CUnion");
             return null;
         }
     }

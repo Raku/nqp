@@ -1,5 +1,6 @@
 package org.perl6.nqp.sixmodel.reprs;
 
+import com.sun.jna.NativeLong;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -13,6 +14,16 @@ import org.perl6.nqp.sixmodel.StorageSpec;
 import org.perl6.nqp.sixmodel.TypeObject;
 
 public class P6int extends REPR {
+
+    /**
+     * Possible C types we can handle.
+     */
+    public final static byte P6INT_C_TYPE_CHAR     =  -1;
+    public final static byte P6INT_C_TYPE_SHORT    =  -2;
+    public final static byte P6INT_C_TYPE_INT      =  -3;
+    public final static byte P6INT_C_TYPE_LONG     =  -4;
+    public final static byte P6INT_C_TYPE_LONGLONG =  -5;
+
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
         STable st = new STable(this, HOW);
         SixModelObject obj = new TypeObject();
@@ -28,13 +39,36 @@ public class P6int extends REPR {
         
         return st.WHAT;
     }
-    
+
     public void compose(ThreadContext tc, STable st, SixModelObject repr_info) {
         SixModelObject integerInfo = repr_info.at_key_boxed(tc, "integer");
         if (integerInfo != null) {
             SixModelObject bits = integerInfo.at_key_boxed(tc, "bits");
-            if (bits != null)
-                ((StorageSpec)st.REPRData).bits = (short)bits.get_int(tc);
+            if (bits != null) {
+                short bitwidth = (short)bits.get_int(tc);
+                switch (bitwidth) {
+                    case P6INT_C_TYPE_CHAR:
+                        ((StorageSpec)st.REPRData).bits = Byte.SIZE;
+                        break;
+                    case P6INT_C_TYPE_SHORT:
+                        ((StorageSpec)st.REPRData).bits = Short.SIZE;
+                        break;
+                    case P6INT_C_TYPE_INT:
+                        ((StorageSpec)st.REPRData).bits = Integer.SIZE;
+                        break;
+                    case P6INT_C_TYPE_LONG:
+                        /* NativeLong.SIZE is in bytes, not bits. */
+                        ((StorageSpec)st.REPRData).bits = (short)(8 * NativeLong.SIZE);
+                        break;
+                    case P6INT_C_TYPE_LONGLONG:
+                        /* There is no LongLong in Java */
+                        ((StorageSpec)st.REPRData).bits = Long.SIZE;
+                        break;
+                    default:
+                        ((StorageSpec)st.REPRData).bits = bitwidth;
+                        break;
+                }
+            }
 
             SixModelObject unsigned = integerInfo.at_key_boxed(tc, "unsigned");
             if (unsigned != null)

@@ -54,7 +54,6 @@ plan(24);
     }, 0);
     ok(nqp::defined($t), 'Can create another new thread after previous joins');
 
-    # XXXX: nqp-m locks up here, but nqp-j does not
     $tid := nqp::threadid($t);
     ok($tid, 'New thread has a non-zero ID');
     ok($tid != $pid, 'Parent and new thread have different IDs');

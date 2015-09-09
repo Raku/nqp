@@ -48,6 +48,15 @@ role NQPCursorRole is export {
         $!regexsub := NQPMu;
     }
 
+    method !APPEND_TO_ORIG($value) {
+        my $orig := nqp::getattr($!shared, ParseShared, '$!orig');
+        $orig := $orig ~ $value;
+        nqp::bindattr($!shared, ParseShared, '$!orig', $orig);
+        my $target := nqp::getattr_s($!shared, ParseShared, '$!target');
+        $target := $target ~ $value;
+        nqp::bindattr_s($!shared, ParseShared, '$!target', $target);
+    }
+
     my $NO_CAPS := nqp::hash();
     method CAPHASH() {
         my $caps    := nqp::hash();
@@ -237,8 +246,29 @@ role NQPCursorRole is export {
     }
     
     method !cursor_push_cstack($capture) {
-        $!cstack := [] unless nqp::defined($!cstack);
-        nqp::push($!cstack, $capture);
+	if !nqp::defined($!cstack) { $!cstack := [$capture] }
+	elsif nqp::elems($!cstack) == 0 {
+	    nqp::push($!cstack, $capture);
+	}
+	elsif !nqp::isnull($capture) {
+	    my $name := nqp::getattr($capture, $?CLASS, '$!name');
+	    if !nqp::isnull($name) && nqp::defined($name) {
+		nqp::push($!cstack, $capture);
+	    }
+	    else {  # is top capture anonymous enough to be reused?
+		my $top := nqp::atpos($!cstack,-1);
+		my $topname := nqp::getattr($top, $?CLASS, '$!name');
+		if !nqp::isnull($topname) && nqp::defined($topname) {
+		    nqp::push($!cstack, $capture);
+		}
+		else {
+		    # $top anon capture just used for pos advancement, so update it in place.
+		    # We replace the whole capture because jvm can't seem to copy only the pos,
+		    # and because the chances are that both captures are in the nursury anyway.
+		    nqp::bindpos($!cstack,-1,$capture);
+		}
+	    }
+	}
         $!cstack;
     }
 
@@ -497,19 +527,23 @@ role NQPCursorRole is export {
         }
     }
 
+    method !DELEGATE_ACCEPTS($obj, $arg) {
+        $obj.ACCEPTS($arg) ?? 1 !! 0
+    }
+
     method at($pos) {
         my $cur := self."!cursor_start_cur"();
         $cur."!cursor_pass"($!pos) if +$pos == $!pos;
         $cur;
     }
 
-    method before($regex) {
+    method before($regex, $off = 0) {
         my int $orig_highwater := nqp::getattr_i($!shared, ParseShared, '$!highwater');
         my $orig_highexpect := nqp::getattr($!shared, ParseShared, '@!highexpect');
         nqp::bindattr($!shared, ParseShared, '@!highexpect', nqp::list_s());
         my $cur := self."!cursor_start_cur"();
-        nqp::bindattr_i($cur, $?CLASS, '$!pos', $!pos);
-        nqp::getattr_i($regex($cur), $?CLASS, '$!pos') >= 0 ??
+        nqp::bindattr_i($cur, $?CLASS, '$!pos', $!pos - $off);
+        $!pos >= $off && nqp::getattr_i($regex($cur), $?CLASS, '$!pos') >= 0 ??
             $cur."!cursor_pass"($!pos, 'before') !!
             nqp::bindattr_i($cur, $?CLASS, '$!pos', -3);
         nqp::bindattr_i($!shared, ParseShared, '$!highwater', $orig_highwater);
@@ -696,10 +730,7 @@ role NQPCursorRole is export {
     }
 
     method FAILGOAL($goal, $dba?) {
-        unless $dba {
-            $dba := nqp::getcodename(nqp::callercode());
-        }
-        nqp::die("Unable to parse expression in $dba; couldn't find final $goal");
+        self."!cursor_start_cur"()
     }
 }
 
@@ -715,6 +746,7 @@ class NQPMatch is NQPCapture {
     method orig() { $!orig }
     method to()   { $!to }
     method CURSOR() { $!cursor }
+    method PRECURSOR() { $!cursor."!cursor_init"($!orig,:p($!from)) }
 #?if parrot
     method Str() is parrot_vtable('get_string')  { nqp::substr($!orig, $!from, $!to-$!from) }
     method Int() is parrot_vtable('get_integer') { +self.Str() }
@@ -827,7 +859,7 @@ class NQPCursor does NQPCursorRole {
     my $NO_CAPS    := nqp::hash();
     method MATCH() {
         my $match := nqp::getattr(self, NQPCursor, '$!match');
-        unless nqp::istype($match, NQPMatch) || nqp::ishash($match) {
+        if nqp::isnull($match) || (!nqp::istype($match, NQPMatch) && !nqp::ishash($match)) {
             # Set up basic state of Match.
             my $list;
             my $hash := nqp::hash();
@@ -841,15 +873,19 @@ class NQPCursor does NQPCursorRole {
             # For captures with lists, initialize the lists.
             my %caplist := $NO_CAPS;
             my $rxsub   := nqp::getattr(self, NQPCursor, '$!regexsub');
+	    my $onlyname := '';
+	    my int $namecount := 0;
             if !nqp::isnull($rxsub) && nqp::defined($rxsub) {
                 %caplist := nqp::can($rxsub, 'CAPS') ?? $rxsub.CAPS() !! nqp::null();
                 if !nqp::isnull(%caplist) && nqp::istrue(%caplist) {
                     my $iter := nqp::iterator(%caplist);
                     while $iter {
                         my $curcap := nqp::shift($iter);
+			my str $name := nqp::iterkey_s($curcap);
+			$namecount++;
                         if nqp::iterval($curcap) >= 2 {
-                            my str $name := nqp::iterkey_s($curcap);
-                            nqp::iscclass(nqp::const::CCLASS_NUMERIC, $name, 0)
+			    $onlyname := $name if $namecount == 1;
+			    nqp::ord($name) < 58
                                 ?? nqp::bindpos(
                                         nqp::defor($list, $list := nqp::list()),
                                         $name, nqp::list())
@@ -861,20 +897,43 @@ class NQPCursor does NQPCursorRole {
 
             # Walk the Cursor stack and populate the Cursor.
             my $cs := nqp::getattr(self, NQPCursor, '$!cstack');
-            if !nqp::isnull($cs) && nqp::istrue($cs) {
+	    if nqp::isnull($cs) || !nqp::istrue($cs) {}
+	    elsif $namecount == 1 && $onlyname ne '' && !nqp::eqat($onlyname,'$!',0) {
+		# If there's only one destination, avoid repeated hash lookups
+		my int $cselems := nqp::elems($cs);
+		my int $csi;
+		my $dest;
+		if nqp::ord($onlyname) < 58 {
+		    $dest := nqp::atpos($list, $onlyname);
+		}
+		else {
+		    $dest := nqp::atkey($hash, $onlyname);
+		}
+		while $csi < $cselems {
+		    my $subcur := nqp::atpos($cs, $csi);
+		    my $name := nqp::getattr($subcur, $?CLASS, '$!name');
+		    if !nqp::isnull($name) && nqp::defined($name) {
+			my $submatch := $subcur.MATCH();
+			nqp::push($dest, $submatch);
+		    }
+                    $csi++;
+		}
+	    }
+            elsif !nqp::isnull(%caplist) && %caplist  {
                 my int $cselems := nqp::elems($cs);
                 my int $csi;
+#		note($cselems);
                 while $csi < $cselems {
                     my $subcur   := nqp::atpos($cs, $csi);
-                    my $submatch := $subcur.MATCH;
                     my $name := nqp::getattr($subcur, $?CLASS, '$!name');
-                    if !nqp::isnull($name) && nqp::defined($name) {
-                        if $name ne '' && nqp::ordat($name, 0) == 36 && ($name eq '$!from' || $name eq '$!to') {
+                    if !nqp::isnull($name) && nqp::defined($name) && $name ne '' {
+                        my $submatch := $subcur.MATCH();
+                        if nqp::ordat($name, 0) == 36 && ($name eq '$!from' || $name eq '$!to') {
                             nqp::bindattr_i($match, NQPMatch, $name, $submatch.from);
                         }
                         elsif nqp::index($name, '=') < 0 {
                             my int $needs_list := %caplist{$name} >= 2;
-                            if nqp::iscclass(nqp::const::CCLASS_NUMERIC, $name, 0) {
+			    if nqp::ord($name) < 58 {
                                 $list := nqp::list() unless nqp::isconcrete($list);
                                 $needs_list
                                     ?? nqp::push(nqp::atpos($list, $name), $submatch)
@@ -889,7 +948,7 @@ class NQPCursor does NQPCursorRole {
                         else {
                             for nqp::split('=', $name) -> $name {
                                 my int $needs_list := %caplist{$name} >= 2;
-                                if nqp::iscclass(nqp::const::CCLASS_NUMERIC, $name, 0) {
+				if nqp::ord($name) < 58 {
                                     $list := nqp::list() unless nqp::isconcrete($list);
                                     $needs_list
                                         ?? nqp::push(nqp::atpos($list, $name), $submatch)
@@ -905,6 +964,30 @@ class NQPCursor does NQPCursorRole {
                     }
                     $csi++;
                 }
+#		{
+#                    my $iter := nqp::iterator(%caplist);
+#                    while $iter {
+#                        my $curcap := nqp::shift($iter);
+#			my str $name := nqp::iterkey_s($curcap);
+#			my int $iv := nqp::iterval($curcap);
+#                        if $iv >= 2 {
+#			    if nqp::iscclass(nqp::const::CCLASS_NUMERIC, $name, 0) {
+#				note("\t" ~ $name ~ "\t" ~ nqp::elems(nqp::atpos($list, $name)));
+#			    }
+#			    else {
+#				note("\t" ~ $name ~ "\t" ~ nqp::elems(nqp::atkey($hash, $name)));
+#			    }
+#                        }
+#			elsif $iv >= 1 {
+#			    if nqp::iscclass(nqp::const::CCLASS_NUMERIC, $name, 0) {
+#				note("\t" ~ $name ~ "\t" ~ nqp::defined(nqp::atpos($list, $name)));
+#			    }
+#			    else {
+#				note("\t" ~ $name ~ "\t" ~ nqp::defined(nqp::atkey($hash, $name)));
+#			    }
+#			}
+#                    }
+#		}
             }
             nqp::bindattr($match, NQPCapture, '@!array', nqp::isconcrete($list) ?? $list !! @EMPTY_LIST);
             nqp::bindattr($match, NQPCapture, '%!hash', $hash);

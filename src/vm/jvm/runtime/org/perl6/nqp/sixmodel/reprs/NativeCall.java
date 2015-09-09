@@ -29,10 +29,28 @@ public class NativeCall extends REPR {
         UTF8STR,
         UTF16STR,
         CSTRUCT,
+        CUNION,
         CARRAY,
         CALLBACK,
         CPOINTER,
-        VMARRAY;
+        VMARRAY,
+        UCHAR,
+        USHORT,
+        UINT,
+        ULONG,
+        ULONGLONG,
+        CHAR_RW,
+        SHORT_RW,
+        INT_RW,
+        LONG_RW,
+        LONGLONG_RW,
+        FLOAT_RW,
+        DOUBLE_RW,
+        UCHAR_RW,
+        USHORT_RW,
+        UINT_RW,
+        ULONG_RW,
+        ULONGLONG_RW;
     }
 
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {

@@ -71,6 +71,8 @@ public class IndyBootstrap {
     public static void subcallResolve_noa(Lookup caller, MutableCallSite cs, String name, int csIdx, ThreadContext tc, Object... args) {
         /* Locate the thing to call. */
         SixModelObject invokee = Ops.getlex(name, tc);
+        if (invokee == null)
+            throw ExceptionHandling.dieInternal(tc, "Can not invoke object '" + name + "'");
 
         /* Don't update callsite in cases where it's not safe. */
         boolean shared = tc.curFrame.codeRef.staticInfo.compUnit.shared;
@@ -142,6 +144,9 @@ public class IndyBootstrap {
 
     public static void subInvoker(MethodHandle mh, String name, CallSiteDescriptor csd, ThreadContext tc, Object[] args) throws Throwable {
         SixModelObject invokee = Ops.getlex(name, tc);
+        if (invokee == null)
+            throw ExceptionHandling.dieInternal(tc, "Can not invoke object '" + name + "'");
+
         CodeRef cr;
         if (invokee instanceof CodeRef) {
             cr = (CodeRef)invokee;
@@ -189,6 +194,8 @@ public class IndyBootstrap {
     public static void subcallstaticResolve_noa(Lookup caller, MutableCallSite cs, String name, int csIdx, ThreadContext tc, Object... args) {
         /* Locate the thing to call. */
         SixModelObject invokee = Ops.getlex(name, tc);
+        if (invokee == null)
+            throw ExceptionHandling.dieInternal(tc, "Can not invoke object '" + name + "'");
 
         /* Don't update callsite in cases where it's not safe. */
         boolean shared = tc.curFrame.codeRef.staticInfo.compUnit.shared;

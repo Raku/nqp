@@ -7,8 +7,11 @@ import java.util.HashMap;
 
 import com.sun.jna.Callback;
 import com.sun.jna.NativeLibrary;
+import com.sun.jna.NativeLong;
+import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
+import com.sun.jna.Union;
 
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
@@ -36,9 +39,12 @@ import org.perl6.nqp.sixmodel.reprs.CPointerInstance;
 import org.perl6.nqp.sixmodel.reprs.CStrInstance;
 import org.perl6.nqp.sixmodel.reprs.CStructInstance;
 import org.perl6.nqp.sixmodel.reprs.CStructREPRData;
+import org.perl6.nqp.sixmodel.reprs.CUnionInstance;
+import org.perl6.nqp.sixmodel.reprs.CUnionREPRData;
 import org.perl6.nqp.sixmodel.reprs.NativeCall.ArgType;
 import org.perl6.nqp.sixmodel.reprs.NativeCallInstance;
 import org.perl6.nqp.sixmodel.reprs.NativeCallBody;
+import org.perl6.nqp.sixmodel.reprs.NativeRefInstance;
 import org.perl6.nqp.sixmodel.reprs.Refreshable;
 
 public final class NativeCallOps {
@@ -98,8 +104,40 @@ public final class NativeCallOps {
             /* The actual foreign function call. */
             Object returned = call.entry_point.invoke(javaType(tc, call.ret_type, returns), cArgs);
 
+            /* Assign to NativeRefs in case the argument is in an 'is rw' param slot, or otherwise call refresh(). */
             for (int i = 0; i < arguments.elems(tc); i++) {
-                refresh(arguments.at_pos_boxed(tc, i), tc);
+                SixModelObject o = arguments.at_pos_boxed(tc, i);
+                switch (call.arg_types[i]) {
+                    case CHAR_RW:
+                    case UCHAR_RW:
+                        ((NativeRefInstance) o).store_i(tc, ((Memory) cArgs[i]).getByte(0));
+                        break;
+                    case SHORT_RW:
+                    case USHORT_RW:
+                        ((NativeRefInstance) o).store_i(tc, ((Memory) cArgs[i]).getShort(0));
+                        break;
+                    case INT_RW:
+                    case UINT_RW:
+                        ((NativeRefInstance) o).store_i(tc, ((Memory) cArgs[i]).getInt(0));
+                        break;
+                    case LONG_RW:
+                    case ULONG_RW:
+                        ((NativeRefInstance) o).store_i(tc, ((Memory) cArgs[i]).getNativeLong(0).longValue());
+                        break;
+                    case LONGLONG_RW:
+                    case ULONGLONG_RW:
+                        ((NativeRefInstance) o).store_i(tc, ((Memory) cArgs[i]).getLong(0));
+                        break;
+                    case FLOAT_RW:
+                        ((NativeRefInstance) o).store_n(tc, ((Memory) cArgs[i]).getFloat(0));
+                        break;
+                    case DOUBLE_RW:
+                        ((NativeRefInstance) o).store_n(tc, ((Memory) cArgs[i]).getDouble(0));
+                        break;
+                    default:
+                        refresh(o, tc);
+                        break;
+                }
             }
 
             /* Wrap returned in the appropriate REPR type. */
@@ -140,15 +178,62 @@ public final class NativeCallOps {
         }
     }
 
+    public static long nativecallsizeof(SixModelObject obj, ThreadContext tc) {
+        obj            = Ops.decont(obj, tc);
+        StorageSpec ss = obj.st.REPR.get_storage_spec(tc, obj.st);
+
+        switch (ss.boxed_primitive) {
+            case StorageSpec.BP_INT:
+            case StorageSpec.BP_NUM:
+                return ss.bits / 8;
+            case StorageSpec.BP_STR:
+                return Pointer.SIZE;
+            default:
+                if (Ops.isconcrete(obj, tc) == 0)
+                    obj = obj.st.REPR.allocate(tc, obj.st);
+                if (obj instanceof org.perl6.nqp.sixmodel.reprs.CStrInstance
+                 || obj instanceof org.perl6.nqp.sixmodel.reprs.CPointerInstance
+                 || obj instanceof org.perl6.nqp.sixmodel.reprs.CArrayInstance) {
+                    return Pointer.SIZE;
+                }
+                else if (obj instanceof org.perl6.nqp.sixmodel.reprs.CStructInstance) {
+                    return ((CStructInstance) obj).storage.size();
+                }
+                else if (obj instanceof org.perl6.nqp.sixmodel.reprs.CUnionInstance) {
+                    return ((CUnionInstance) obj).storage.size();
+                }
+                else {
+                    throw ExceptionHandling.dieInternal(tc,
+                        String.format("NativeCall op sizeof expected type with CPointer, CStruct, CUnion, CArray, P6int or P6num representation, but got a %s", obj));
+                }
+        }
+    }
+
     public static SixModelObject nativecallcast(SixModelObject target_spec, SixModelObject target_type, SixModelObject source, ThreadContext tc) {
         Pointer o = null;
 
-        if (source instanceof CPointerInstance) { // TODO Care about CPointer type object
+        if (source instanceof CPointerInstance) {
             o = ((CPointerInstance)source).pointer;
         }
+        else if (source instanceof CArrayInstance) {
+            o = ((CStructInstance)source).storage.getPointer();
+        }
+        else if (source instanceof CStructInstance) {
+            o = ((CStructInstance)source).storage.getPointer();
+        }
+        else if (source instanceof CUnionInstance) {
+            o = ((CUnionInstance)source).storage.getPointer();
+        }
         else {
-            throw ExceptionHandling.dieInternal(tc,
-                "Native call expected object with CPointer representation, but got something else");
+            /* If we got something that is either a CPointer, CArray or CStruct but is not an instance,
+             * it is the type object which represents NULL. So, just don't throw and we are fine. */
+            if ( !(source.st.REPR instanceof org.perl6.nqp.sixmodel.reprs.CPointer
+                || source.st.REPR instanceof org.perl6.nqp.sixmodel.reprs.CArray
+                || source.st.REPR instanceof org.perl6.nqp.sixmodel.reprs.CStruct
+                || source.st.REPR instanceof org.perl6.nqp.sixmodel.reprs.CUnion) ) {
+                throw ExceptionHandling.dieInternal(tc,
+                    "Native call expected object with CPointer representation, but got something else");
+            }
         }
 
         return castNativeCall(tc, target_spec, target_type, o);
@@ -217,6 +302,11 @@ public final class NativeCallOps {
                     CStructInstance cstruct = (CStructInstance)nqpobj;
                     cstruct.storage         = Structure.newInstance(structClass, o);
                 }
+                else if (nqpobj instanceof org.perl6.nqp.sixmodel.reprs.CUnionInstance) {
+                    Class<?>  structClass = ((CUnionREPRData)target_type.st.REPRData).structureClass;
+                    CUnionInstance cunion = (CUnionInstance)nqpobj;
+                    cunion.storage        = (Union)Union.newInstance(structClass, o);
+                }
                 else {
                     throw ExceptionHandling.dieInternal(tc,
                         String.format("Don't know how to cast to %s", nqpobj));
@@ -253,6 +343,18 @@ public final class NativeCallOps {
         case INT:
             return Integer.class;
         case LONG:
+            return NativeLong.class;
+        case LONGLONG:
+            return Long.class;
+        case UCHAR:
+            return Byte.class;
+        case USHORT:
+            return Short.class;
+        case UINT:
+            return Integer.class;
+        case ULONG:
+            return NativeLong.class;
+        case ULONGLONG:
             return Long.class;
         case FLOAT:
             return Float.class;
@@ -268,32 +370,69 @@ public final class NativeCallOps {
             return Pointer.class;
         case CSTRUCT:
             return ((CStructREPRData) smoType.st.REPRData).structureClass;
+        case CUNION:
+            return ((CUnionREPRData) smoType.st.REPRData).structureClass;
         default:
             throw ExceptionHandling.dieInternal(tc, String.format("Don't know correct Java class for %s arguments yet", target));
         }
     }
 
     public static Object toJNAType(ThreadContext tc, SixModelObject o, ArgType target, SixModelObject info) {
-        o = Ops.decont(o, tc);
-        if (Ops.isconcrete(o, tc) == 0) return null;
-
         switch (target) {
         case CHAR:
+            o = Ops.decont(o, tc);
+            if (Ops.isconcrete(o, tc) == 0) return null;
             return new Byte((byte) o.get_int(tc));
         case SHORT:
+            o = Ops.decont(o, tc);
+            if (Ops.isconcrete(o, tc) == 0) return null;
             return new Short((short) o.get_int(tc));
         case INT:
+            o = Ops.decont(o, tc);
+            if (Ops.isconcrete(o, tc) == 0) return null;
             return new Integer((int) o.get_int(tc));
         case LONG:
+            o = Ops.decont(o, tc);
+            if (Ops.isconcrete(o, tc) == 0) return null;
+            return new NativeLong((long) o.get_int(tc));
+        case LONGLONG:
+            o = Ops.decont(o, tc);
+            if (Ops.isconcrete(o, tc) == 0) return null;
+            return new Long((long) o.get_int(tc));
+        case UCHAR:
+            o = Ops.decont(o, tc);
+            if (Ops.isconcrete(o, tc) == 0) return null;
+            return new Byte((byte) o.get_int(tc));
+        case USHORT:
+            o = Ops.decont(o, tc);
+            if (Ops.isconcrete(o, tc) == 0) return null;
+            return new Short((short) o.get_int(tc));
+        case UINT:
+            o = Ops.decont(o, tc);
+            if (Ops.isconcrete(o, tc) == 0) return null;
+            return new Integer((int) o.get_int(tc));
+        case ULONG:
+            o = Ops.decont(o, tc);
+            if (Ops.isconcrete(o, tc) == 0) return null;
+            return new NativeLong((long) o.get_int(tc));
+        case ULONGLONG:
+            o = Ops.decont(o, tc);
+            if (Ops.isconcrete(o, tc) == 0) return null;
             return new Long((long) o.get_int(tc));
         case FLOAT:
+            o = Ops.decont(o, tc);
+            if (Ops.isconcrete(o, tc) == 0) return null;
             return new Float((float) o.get_num(tc));
         case DOUBLE:
+            o = Ops.decont(o, tc);
+            if (Ops.isconcrete(o, tc) == 0) return null;
             return new Double((double) o.get_num(tc));
         case ASCIISTR:
         case UTF8STR:
         case UTF16STR: {
             /* TODO: Handle encodings. */
+            o = Ops.decont(o, tc);
+            if (Ops.isconcrete(o, tc) == 0) return null;
             SixModelObject meth = Ops.findmethod(o, "cstr", tc);
             if (meth != null) {
                 Ops.invokeDirect(tc, meth, new CallSiteDescriptor(new byte[] { ARG_OBJ }, null), new Object[] { o });
@@ -305,14 +444,28 @@ public final class NativeCallOps {
             }
         }
         case CPOINTER:
+            o = Ops.decont(o, tc);
+            if (Ops.isconcrete(o, tc) == 0) return null;
             return ((CPointerInstance) o).pointer;
         case CARRAY:
+            o = Ops.decont(o, tc);
+            if (Ops.isconcrete(o, tc) == 0) return null;
             return ((CArrayInstance) o).storage;
         case CSTRUCT:
+            o = Ops.decont(o, tc);
+            if (Ops.isconcrete(o, tc) == 0) return null;
             return ((CStructInstance) o).storage;
+        case CUNION:
+            o = Ops.decont(o, tc);
+            if (Ops.isconcrete(o, tc) == 0) return null;
+            return ((CUnionInstance) o).storage;
         case CALLBACK:
+            o = Ops.decont(o, tc);
+            if (Ops.isconcrete(o, tc) == 0) return null;
             return callbackHandlerFor(o, info, tc);
         case VMARRAY: {
+            o = Ops.decont(o, tc);
+            if (Ops.isconcrete(o, tc) == 0) return null;
             if (o instanceof VMArrayInstance_i) {
                 return ((VMArrayInstance_i) o).slots;
             }
@@ -342,45 +495,154 @@ public final class NativeCallOps {
             }
             return ((VMArrayInstance) o).slots;
         }
+        case CHAR_RW:
+        case UCHAR_RW: {
+            if (Ops.iscont_i(o) == 0)
+                throw ExceptionHandling.dieInternal(tc,
+                    String.format("Native call expected argument that references a native integer, but got %s", o));
+            Memory m = new Memory(Byte.SIZE);
+            m.setByte(0, (byte) ((NativeRefInstance) o).fetch_i(tc));
+            return m;
+        }
+        case SHORT_RW:
+        case USHORT_RW: {
+            if (Ops.iscont_i(o) == 0)
+                throw ExceptionHandling.dieInternal(tc,
+                    String.format("Native call expected argument that references a native integer, but got %s", o));
+            Memory m = new Memory(Short.SIZE);
+            m.setShort(0, (short) ((NativeRefInstance) o).fetch_i(tc));
+            return m;
+        }
+        case INT_RW:
+        case UINT_RW: {
+            if (Ops.iscont_i(o) == 0)
+                throw ExceptionHandling.dieInternal(tc,
+                    String.format("Native call expected argument that references a native integer, but got %s", o));
+            Memory m = new Memory(Integer.SIZE);
+            m.setInt(0, (int) ((NativeRefInstance) o).fetch_i(tc));
+            return m;
+        }
+        case LONG_RW:
+        case ULONG_RW: {
+            if (Ops.iscont_i(o) == 0)
+                throw ExceptionHandling.dieInternal(tc,
+                    String.format("Native call expected argument that references a native integer, but got %s", o));
+            Memory m = new Memory(NativeLong.SIZE);
+            m.setNativeLong(0, new NativeLong((long) ((NativeRefInstance) o).fetch_i(tc)));
+            return m;
+        }
+        case LONGLONG_RW:
+        case ULONGLONG_RW: {
+            if (Ops.iscont_i(o) == 0)
+                throw ExceptionHandling.dieInternal(tc,
+                    String.format("Native call expected argument that references a native integer, but got %s", o));
+            Memory m = new Memory(Long.SIZE);
+            m.setLong(0, (long) ((NativeRefInstance) o).fetch_i(tc));
+            return m;
+        }
+        case FLOAT_RW: {
+            if (Ops.iscont_n(o) == 0)
+                throw ExceptionHandling.dieInternal(tc,
+                    String.format("Native call expected argument that references a native number, but got %s", o));
+            Memory m = new Memory(Float.SIZE);
+            m.setFloat(0, (float) ((NativeRefInstance) o).fetch_n(tc));
+            return m;
+        }
+        case DOUBLE_RW: {
+            if (Ops.iscont_n(o) == 0)
+                throw ExceptionHandling.dieInternal(tc,
+                    String.format("Native call expected argument that references a native number, but got %s", o));
+            Memory m = new Memory(Double.SIZE);
+            m.setDouble(0, (double) ((NativeRefInstance) o).fetch_n(tc));
+            return m;
+        }
         default:
             throw ExceptionHandling.dieInternal(tc, String.format("Don't know how to convert %s arguments to JNA yet", target));
         }
     }
 
     public static SixModelObject toNQPType(ThreadContext tc, ArgType target, SixModelObject type, Object o) {
-        SixModelObject nqpobj = null;
-        if (target != ArgType.VOID)
-            nqpobj = type.st.REPR.allocate(tc, type.st);
+        SixModelObject nqpobj = type;
 
         switch (target) {
         case VOID:
             return type;
         case CHAR: {
+            nqpobj = type.st.REPR.allocate(tc, type.st);
             byte val = ((Byte) o).byteValue();
             nqpobj.set_int(tc, val);
             break;
         }
         case SHORT: {
+            nqpobj = type.st.REPR.allocate(tc, type.st);
             short val = ((Short) o).shortValue();
             nqpobj.set_int(tc, val);
             break;
         }
         case INT: {
+            nqpobj = type.st.REPR.allocate(tc, type.st);
             int val = ((Integer) o).intValue();
             nqpobj.set_int(tc, val);
             break;
         }
         case LONG: {
+            nqpobj = type.st.REPR.allocate(tc, type.st);
+            long val = ((NativeLong) o).longValue();
+            nqpobj.set_int(tc, val);
+            break;
+        }
+        case LONGLONG: {
+            nqpobj = type.st.REPR.allocate(tc, type.st);
+            long val = ((Long) o).longValue();
+            nqpobj.set_int(tc, val);
+            break;
+        }
+        case UCHAR: {
+            nqpobj = type.st.REPR.allocate(tc, type.st);
+            long val = ((Byte) o).byteValue();
+            if (val < 0)
+                val += 0x100;
+            nqpobj.set_int(tc, val);
+            break;
+        }
+        case USHORT: {
+            nqpobj = type.st.REPR.allocate(tc, type.st);
+            long val = ((Short) o).byteValue();
+            if (val < 0)
+                val += 0x10000;
+            nqpobj.set_int(tc, val);
+            break;
+        }
+        case UINT: {
+            nqpobj = type.st.REPR.allocate(tc, type.st);
+            long val = ((Integer) o).byteValue();
+            if (val < 0)
+                val += 0x100000000L;
+            nqpobj.set_int(tc, val);
+            break;
+        }
+        case ULONG: {
+            /* TODO: handle unsignedness properly. */
+            nqpobj = type.st.REPR.allocate(tc, type.st);
+            long val = ((NativeLong) o).longValue();
+            nqpobj.set_int(tc, val);
+            break;
+        }
+        case ULONGLONG: {
+            /* TODO: handle unsignedness properly. */
+            nqpobj = type.st.REPR.allocate(tc, type.st);
             long val = ((Long) o).longValue();
             nqpobj.set_int(tc, val);
             break;
         }
         case FLOAT: {
+            nqpobj = type.st.REPR.allocate(tc, type.st);
             float val = ((Float) o).floatValue();
             nqpobj.set_num(tc, val);
             break;
         }
         case DOUBLE: {
+            nqpobj = type.st.REPR.allocate(tc, type.st);
             double val = ((Double) o).floatValue();
             nqpobj.set_num(tc, val);
             break;
@@ -390,26 +652,41 @@ public final class NativeCallOps {
         case UTF16STR:
             /* TODO: Handle encodings. */
             if (o != null) {
+                nqpobj = type.st.REPR.allocate(tc, type.st);
                 nqpobj.set_str(tc, (String) o);
-            }
-            else {
-                nqpobj = type;
             }
             break;
         case CPOINTER: {
-            CPointerInstance cpointer = (CPointerInstance) nqpobj;
-            cpointer.pointer = (Pointer) o;
+            if (o != null) {
+                nqpobj = type.st.REPR.allocate(tc, type.st);
+                CPointerInstance cpointer = (CPointerInstance) nqpobj;
+                cpointer.pointer = (Pointer) o;
+            }
             break;
         }
         case CARRAY: {
-            CArrayInstance carray = (CArrayInstance) nqpobj;
-            carray.storage = (Pointer) o;
-            carray.managed = false;
+            if (o != null) {
+                nqpobj = type.st.REPR.allocate(tc, type.st);
+                CArrayInstance carray = (CArrayInstance) nqpobj;
+                carray.storage = (Pointer) o;
+                carray.managed = false;
+            }
             break;
         }
         case CSTRUCT: {
-            CStructInstance cstruct = (CStructInstance) nqpobj;
-            cstruct.storage = (Structure) o;
+            if (o != null) {
+                nqpobj = type.st.REPR.allocate(tc, type.st);
+                CStructInstance cstruct = (CStructInstance) nqpobj;
+                cstruct.storage = (Structure) o;
+            }
+            break;
+        }
+        case CUNION: {
+            if (o != null) {
+                nqpobj = type.st.REPR.allocate(tc, type.st);
+                CUnionInstance cunion = (CUnionInstance) nqpobj;
+                cunion.storage = (Union) o;
+            }
             break;
         }
         default:
@@ -421,6 +698,10 @@ public final class NativeCallOps {
 
     private static ArgType getArgType(ThreadContext tc, SixModelObject info, boolean isReturn) {
         String type_name = info.at_key_boxed(tc, "type").get_str(tc);
+
+        SixModelObject rw = info.at_key_boxed(tc, "rw");
+        if (rw != null && rw.get_int(tc) == 1)
+            type_name += "_RW";
 
         ArgType type = ArgType.VOID;
         try {

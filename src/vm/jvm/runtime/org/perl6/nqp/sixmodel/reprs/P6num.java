@@ -13,6 +13,13 @@ import org.perl6.nqp.sixmodel.StorageSpec;
 import org.perl6.nqp.sixmodel.TypeObject;
 
 public class P6num extends REPR {
+    /**
+     * Possible C types we can handle.
+     */
+    public final static byte P6NUM_C_TYPE_FLOAT      =  -1;
+    public final static byte P6NUM_C_TYPE_DOUBLE     =  -2;
+    public final static byte P6NUM_C_TYPE_LONGDOUBLE =  -3;
+
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
         STable st = new STable(this, HOW);
         SixModelObject obj = new TypeObject();
@@ -33,8 +40,24 @@ public class P6num extends REPR {
         SixModelObject floatInfo = repr_info.at_key_boxed(tc, "float");
         if (floatInfo != null) {
             SixModelObject bits = floatInfo.at_key_boxed(tc, "bits");
-            if (bits != null)
-                ((StorageSpec)st.REPRData).bits = (short)bits.get_int(tc);
+            if (bits != null) {
+                short bitwidth = (short)bits.get_int(tc);
+                switch (bitwidth) {
+                    case P6NUM_C_TYPE_FLOAT:
+                        ((StorageSpec)st.REPRData).bits = Float.SIZE;
+                        break;
+                    case P6NUM_C_TYPE_DOUBLE:
+                        ((StorageSpec)st.REPRData).bits = Double.SIZE;
+                        break;
+                    case P6NUM_C_TYPE_LONGDOUBLE:
+                        /* There is no LongDouble in Java */
+                        ((StorageSpec)st.REPRData).bits = Double.SIZE;
+                        break;
+                    default:
+                        ((StorageSpec)st.REPRData).bits = bitwidth;
+                        break;
+                }
+            }
         }
     }
 

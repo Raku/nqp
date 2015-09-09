@@ -9,17 +9,18 @@ sub plan($quantity) {
 sub ok($condition, $desc?) {
     $test_counter := $test_counter + 1;
 
+    my @output;
     unless $condition {
-        print("not ");
+        @output.push("not ");
     }
-    print("ok $test_counter");
+    @output.push("ok $test_counter");
     if $desc {
-        print(" - $desc");
+        @output.push(" - $desc");
     }
     if $test_counter <= $todo_upto_test_num {
-        print($todo_reason);
+        @output.push($todo_reason);
     }
-    print("\n");
+    say(|@output);
     
     $condition ?? 1 !! 0
 }

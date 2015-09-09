@@ -11,6 +11,7 @@ class HLL::Compiler does HLL::Backend::Default {
     has @!cli-arguments;
     has %!cli-options;
     has $!backend;
+    has $!save_ctx;
 
     method BUILD() {
         # Backend is set to the default one, by default.
@@ -20,7 +21,7 @@ class HLL::Compiler does HLL::Backend::Default {
         @!stages     := nqp::split(' ', 'start parse ast ' ~ $!backend.stages());
         
         # Command options and usage.
-        @!cmdoptions := nqp::split(' ', 'e=s help|h target=s trace|t=s encoding=s output|o=s combine version|v show-config verbose-config|V stagestats=s? ll-exception rxtrace nqpevent=s profile profile-compile');
+        @!cmdoptions := nqp::split(' ', 'e=s help|h target=s trace|t=s encoding=s output|o=s combine version|v show-config verbose-config|V stagestats=s? ll-exception rxtrace nqpevent=s profile profile-compile profile-filename=s');
         %!config     := nqp::hash();
     }
     
@@ -51,24 +52,33 @@ class HLL::Compiler does HLL::Backend::Default {
             unless nqp::tellfh(nqp::getstdout()) > $*AUTOPRINTPOS;
     }
 
+    method readline($stdin, $stdout, $prompt) {
+        nqp::printfh(nqp::getstdout(), $prompt);
+        return nqp::readlinefh($stdin);
+    }
+
+    method context() {
+        $!save_ctx # XXX starting value?
+    }
+
     method interactive(*%adverbs) {
         nqp::printfh(nqp::getstderr(), self.interactive_banner);
 
         my $stdin    := nqp::getstdin();
+        my $stdout   := nqp::getstdout();
         my $encoding := ~%adverbs<encoding>;
         if $encoding && $encoding ne 'fixed_8' {
             nqp::setencoding($stdin, $encoding);
         }
 
         my $target := nqp::lc(%adverbs<target>);
-        my $save_ctx;
         my $prompt := self.interactive_prompt // '> ';
         my $code;
         while 1 {
             last if nqp::eoffh($stdin);
 
-            my $newcode := nqp::readlineintfh($stdin, ~$prompt);
-            if nqp::isnull($newcode) || !nqp::defined($newcode) {
+            my str $newcode := self.readline($stdin, $stdout, ~$prompt);
+            if nqp::isnull_s($newcode) || !nqp::defined($newcode) {
                 nqp::print("\n");
                 last;
             }
@@ -94,13 +104,13 @@ class HLL::Compiler does HLL::Backend::Default {
                 $code := $code ~ "\n";
                 my $output;
                 {
-                    $output := self.eval($code, :outer_ctx($save_ctx), |%adverbs);
+                    $output := self.eval($code, :outer_ctx($!save_ctx), |%adverbs);
                     CATCH {
                         self.interactive_exception($!);
                     }
                 };
                 if nqp::defined($*MAIN_CTX) {
-                    $save_ctx := $*MAIN_CTX;
+                    $!save_ctx := $*MAIN_CTX;
                 }
 
                 $code := "";
@@ -134,7 +144,7 @@ class HLL::Compiler does HLL::Backend::Default {
         if (%adverbs<profile-compile>) {
             $output := $!backend.run_profiled({
                 self.compile($code, :compunit_ok(1), |%adverbs);
-            });
+            }, %adverbs<profile-filename>);
         }
         else {
             $output := self.compile($code, :compunit_ok(1), |%adverbs);
@@ -148,7 +158,7 @@ class HLL::Compiler does HLL::Backend::Default {
             }
 
             if (%adverbs<profile>) {
-                $output := $!backend.run_profiled({ $output(|@args) });
+                $output := $!backend.run_profiled({ $output(|@args) }, %adverbs<profile-filename>);
             }
             elsif %adverbs<trace> {
                 $output := $!backend.run_traced(%adverbs<trace>, { $output(|@args) });
@@ -240,38 +250,38 @@ class HLL::Compiler does HLL::Backend::Default {
         my $has_error := 0;
         my $target := nqp::lc(%adverbs<target>);
         try {
-            if nqp::defined(%adverbs<e>) {
-                $!user_progname := '-e';
-                my $?FILES := '-e';
-                $result := self.eval(%adverbs<e>, '-e', |@a, |%adverbs);
-                unless $target eq '' || $!backend.is_textual_stage($target) || %adverbs<output> {
-					self.dumper($result, $target, |%adverbs);
-				}
-            }
-            elsif !@a { $result := self.interactive(|%adverbs) }
-            elsif %adverbs<combine> { $result := self.evalfiles(@a, |%adverbs) }
-            else { $result := self.evalfiles(@a[0], |@a, |%adverbs) }
+            {
+                if nqp::defined(%adverbs<e>) {
+                    $!user_progname := '-e';
+                    my $?FILES := '-e';
+                    $result := self.eval(%adverbs<e>, '-e', |@a, |%adverbs);
+                    unless $target eq '' || $!backend.is_textual_stage($target) || %adverbs<output> {
+                        self.dumper($result, $target, |%adverbs);
+                    }
+                }
+                elsif !@a { $result := self.interactive(|%adverbs) }
+                elsif %adverbs<combine> { $result := self.evalfiles(@a, |%adverbs) }
+                else { $result := self.evalfiles(@a[0], |@a, |%adverbs) }
 
-            if !nqp::isnull($result) && ($!backend.is_textual_stage($target) || %adverbs<output>) {
-                my $output := %adverbs<output>;
-                my $fh := ($output eq '' || $output eq '-')
-                        ?? nqp::getstdout()
-                        !! nqp::open($output, 'w');
-                self.panic("Cannot write to $output") unless $fh;
-                nqp::printfh($fh, $result);
-                nqp::flushfh($fh);
-                nqp::closefh($fh) unless ($output eq '' || $output eq '-');
+                if !nqp::isnull($result) && ($!backend.is_textual_stage($target) || %adverbs<output>) {
+                    my $output := %adverbs<output>;
+                    my $fh := ($output eq '' || $output eq '-')
+                            ?? nqp::getstdout()
+                            !! nqp::open($output, 'w');
+                    self.panic("Cannot write to $output") unless $fh;
+                    nqp::printfh($fh, $result);
+                    nqp::flushfh($fh);
+                    nqp::closefh($fh) unless ($output eq '' || $output eq '-');
+                }
+                CONTROL {
+                    if nqp::can(self, 'handle-control') {
+                        self.handle-control($_);
+                    } else {
+                        nqp::rethrow($_);
+                    }
+                }
             }
             CATCH {
-                $has_error := 1;
-                $error     := $_;
-            }
-            CONTROL {
-                if nqp::can(self, 'handle-control') {
-                    self.handle-control($_);
-                } else {
-                    nqp::rethrow($_);
-                }
                 $has_error := 1;
                 $error     := $_;
             }
@@ -331,11 +341,15 @@ class HLL::Compiler does HLL::Backend::Default {
                 if $filename eq '-' {
                     $in-handle := nqp::getstdin();
                 }
+                elsif nqp::stat($filename, nqp::const::STAT_ISDIR) {
+                    nqp::sayfh(nqp::getstderr(), "Can not run directory $filename.");
+                    $err := 1;
+                }
                 else {
                     $in-handle := nqp::open($filename, 'r');
                 }
                 CATCH {
-                    nqp::say("Could not open $filename. $_");
+                    nqp::sayfh(nqp::getstderr(), "Could not open $filename. $_");
                     $err := 1;
                 }
             }
@@ -345,10 +359,11 @@ class HLL::Compiler does HLL::Backend::Default {
                 nqp::push(@codes, nqp::readallfh($in-handle));
                 nqp::closefh($in-handle);
                 CATCH {
-                    $err := "Error while reading from file: $_";
+                    nqp::sayfh(nqp::getstderr(), "Error while reading from file: $_");
+                    $err := 1;
                 }
             }
-            nqp::die($err) if $err;
+            nqp::exit(1) if $err;
         }
         my $code := join('', @codes);
         my $?FILES := join(' ', @files);

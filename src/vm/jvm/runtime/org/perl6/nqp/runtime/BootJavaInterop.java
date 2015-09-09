@@ -4,6 +4,7 @@ import java.io.File;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.perl6.nqp.sixmodel.STable;
+import org.perl6.nqp.sixmodel.TypeObject;
 import org.perl6.nqp.sixmodel.SixModelObject;
 import org.perl6.nqp.sixmodel.StorageSpec;
 import org.perl6.nqp.sixmodel.reprs.JavaObjectWrapper;
@@ -94,57 +96,15 @@ public class BootJavaInterop {
 
     /** Main entry point for OO-ish callouts. */
     public SixModelObject typeForName(String name) {
+        Class<?> klass = null;
+        ClassLoader syscl = ClassLoader.getSystemClassLoader();
         try {
-            return getSTableForClass(Class.forName(name)).WHAT;
-        } catch (ClassNotFoundException e) {
-            try {
-                String cfname = name.replace(".", "/");
-                String cpStr = System.getProperty("java.class.path");
-                String[] cps = cpStr.split("[;:]");
-                String cfpath = null;
-                File cf = null;
-                for(int i = 0; i < cps.length; i++) {
-                    cf = new File(cps[i] + "/" + cfname + ".class");
-                    if(cf.exists()) {
-                        cfpath = cf.toString().replace(cfname + ".class",  "");
-                        break;
-                    }
-                    cf = null;
-                }
-                if(cfpath != null) {
-                    try {
-                        URL url = new URL("file://" + cfpath + "/");
-                        URLClassLoader cl = new URLClassLoader(new URL[] { url });
-                        jarClassLoaders.put(cfname, cl);
-                        return getSTableForClass(cl.loadClass(name)).WHAT;
-                    } catch (MalformedURLException mue) {
-                        throw mue;
-                    }
-                } else {
-                    throw e;
-                }
-            } catch (ClassNotFoundException|MalformedURLException ine) {
-                throw ExceptionHandling.dieInternal(gc.getCurrentThreadContext(), ine);
-            }
+            klass = syscl.loadClass(name);
         }
-    }
-    public SixModelObject typeForNameFromJAR(String name, String JAR) {
-        try {
-            URLClassLoader cl = jarClassLoaders.get(JAR);
-            if (cl == null) {
-                URL url = new URL("jar:" + new File(JAR).toURI().toURL() + "!/");
-                cl = new URLClassLoader(new URL[] { url });
-                jarClassLoaders.put(JAR, cl);
-            }
-            return getSTableForClass(Class.forName(name, true, cl)).WHAT;
-        } catch (ClassNotFoundException e) {
-            throw ExceptionHandling.dieInternal(gc.getCurrentThreadContext(), e);
-        } catch (MalformedURLException e) {
-            throw ExceptionHandling.dieInternal(gc.getCurrentThreadContext(), e);
-        } catch (Throwable e) {
-            e.printStackTrace();
-            throw e;
+        catch( ClassNotFoundException cnfe ) {
+            throw ExceptionHandling.dieInternal(gc.getCurrentThreadContext(), cnfe);
         }
+        return getSTableForClass(klass).WHAT;
     }
 
     /** Convenience methods for NQP coding. */
@@ -571,6 +531,135 @@ public class BootJavaInterop {
         emitPutToNQP(c, ix, storageForType(what));
     }
 
+    public static Object castObjectToClass(Object obj, Class<?> klass) throws Throwable {
+        Object retVal = null;
+
+        if( klass.isAssignableFrom(obj.getClass()) ) {
+            retVal = obj;
+        }
+        else if( klass.equals(Boolean.class) && obj.getClass().equals(Long.class) ){
+            retVal = new Boolean( ((Long)obj) == 0 ? false : true);
+        }
+        else if( klass.equals(Byte.class) && obj.getClass().equals(Long.class) ){
+            retVal = new Byte( ((Long)obj).byteValue() );
+        }
+        else if( klass.equals(Short.class) && obj.getClass().equals(Long.class) ){
+            retVal = new Short( ((Long)obj).shortValue() );
+        }
+        else if( klass.equals(Integer.class) && obj.getClass().equals(Long.class) ){
+            retVal = new Integer( ((Long)obj).intValue() );
+        }
+        else if( klass.equals(Long.class) && obj.getClass().equals(Long.class) ){
+            retVal = (Long) obj;
+        }
+        else if( klass.equals(Float.class) && obj.getClass().equals(Double.class) ){
+            retVal = new Float( ((Double)obj).floatValue() );
+        }
+        else if( klass.equals(Double.class) && obj.getClass().equals(Double.class) ){
+            retVal = (Double) obj;
+        }
+        else if( klass.equals(Character.class) && obj.getClass().equals(String.class) ){
+            retVal = new Character( ((String)obj).charAt(0));
+        }
+        else if( klass.equals(String.class) && obj.getClass().equals(String.class) ){
+            retVal = (String) obj;
+        }
+        else if( klass.equals(boolean.class) && obj.getClass().equals(Long.class) ) {
+            retVal = obj != null
+                ? ((Long) obj) == 0
+                    ? new Boolean(false)
+                    : new Boolean(true)
+                : null;
+        }
+        else if( klass.equals(byte.class) && obj.getClass().equals(Long.class) ) {
+            retVal = obj != null ? ((Long)obj).byteValue() : null;
+        }
+        else if( klass.equals(short.class) && obj.getClass().equals(Long.class) ) {
+            retVal = obj != null ? ((Long)obj).shortValue() : null;
+        }
+        else if( klass.equals(int.class) && obj.getClass().equals(Long.class) ) {
+            retVal = obj != null ? ((Long)obj).intValue() : null;
+        }
+        else if( klass.equals(long.class) && obj.getClass().equals(Long.class) ) {
+            retVal = obj;
+        }
+        else if( klass.equals(char.class) && obj.getClass().equals(String.class) ) {
+            retVal = ((String) obj).charAt(0);
+        }
+        else if( klass.equals(float.class) && obj.getClass().equals(Double.class) ) {
+            retVal = obj != null ? ((Double)obj).floatValue() : null;
+        }
+        else if( klass.equals(double.class) && obj.getClass().equals(Double.class) ) {
+            retVal = obj;
+        }
+
+        return retVal;
+    }
+
+    public static Object marshalOutRecursive(SixModelObject in, ThreadContext tc, Class<?> what) throws Throwable {
+        Object out = null;
+        int size = (int) Ops.elems(in, tc);
+        if(what != null) {
+            out = Array.newInstance(what.getComponentType(), size);
+            for( int i = 0; i < size; ++i ) {
+                in.at_pos_native(tc, i);
+                Object value = null;
+                if( tc.native_type == ThreadContext.NATIVE_NUM ) {
+                    value = new Double(tc.native_n);
+                }
+                else if( tc.native_type == ThreadContext.NATIVE_STR ) {
+                    value = tc.native_s;
+                }
+                else if( tc.native_type == ThreadContext.NATIVE_INT ) {
+                    value = new Long(tc.native_i);
+                } 
+                else {
+                    SixModelObject cur = Ops.atpos(in, i, tc);
+                    if( cur instanceof JavaObjectWrapper ) {
+                        value = RuntimeSupport.unboxJava(cur);
+                    } // XXX: probably cases missing here
+                    else {
+                        value = marshalOutRecursive(cur, tc, what.getComponentType());
+                    }
+                }
+                value = castObjectToClass(value, what.getComponentType());
+                Array.set(out, i, value);
+            }
+        }
+        else { 
+            // we've hopefully been called from a subclass, so we rely on them for casting and just unbox
+            for( int i = 0; i < size; ++i ) {
+                in.at_pos_native(tc, i);
+                Object value = null;
+                if( tc.native_type == ThreadContext.NATIVE_NUM ) {
+                    if( out == null ) 
+                        out = new Double[size];
+                    ((Double[]) out)[i] = new Double(tc.native_n);
+                }
+                else if( tc.native_type == ThreadContext.NATIVE_STR ) {
+                    if( out == null )
+                        out = new String[size];
+                    ((String[]) out)[i] = tc.native_s;
+                }
+                else if( tc.native_type == ThreadContext.NATIVE_INT ) {
+                    if( out == null )
+                        out = new Long[size];
+                    ((Long[]) out)[i] = new Long(tc.native_i);
+                } 
+                else {
+                    SixModelObject cur = Ops.atpos(in, i, tc);
+                    if( cur instanceof JavaObjectWrapper ) {
+                        ((Object[]) out)[i] = RuntimeSupport.unboxJava(cur);
+                    } // XXX: probably cases missing here?
+                    else {
+                        ((Object[]) out)[i] = marshalOutRecursive(cur, tc, null);
+                    }
+                }
+            }
+        }
+        return out;
+    }
+
     /**
      * Generates code for a marshal-out (NQP to Java).
      */
@@ -630,182 +719,25 @@ public class BootJavaInterop {
             mv.visitLabel(done);
         }
         // array cases
-        else if (what == boolean[].class 
-              || what == byte[].class 
-              || what == short[].class
-              || what == int[].class
-              || what == long[].class
-              || what == float[].class
-              || what == double[].class
-              || what == String[].class
-              || what == char[].class
-              || what == SixModelObject[].class
-              || what == Object[].class) {
-            mv.visitVarInsn(Opcodes.ASTORE, 6);
-            mv.visitVarInsn(Opcodes.ALOAD, 6);
+        else if(what.getComponentType() != null) {
             mv.visitVarInsn(Opcodes.ALOAD, c.tcLoc);
-            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/Ops", "elems", 
-                Type.getMethodDescriptor(Type.getType(long.class), TYPE_SMO, TYPE_TC));
-            mv.visitInsn(Opcodes.L2I);
-
-            if (what == boolean[].class) {
-                mv.visitIntInsn(Opcodes.NEWARRAY, Opcodes.T_BOOLEAN);
-            } 
-            else if (what == byte[].class) {
-                mv.visitIntInsn(Opcodes.NEWARRAY, Opcodes.T_BYTE);
-            }
-            else if (what == short[].class) {
-                mv.visitIntInsn(Opcodes.NEWARRAY, Opcodes.T_SHORT);
-            }
-            else if (what == int[].class) {
-                mv.visitIntInsn(Opcodes.NEWARRAY, Opcodes.T_INT);
-            }
-            else if (what == long[].class) {
-                mv.visitIntInsn(Opcodes.NEWARRAY, Opcodes.T_LONG);
-            }
-            else if (what == float[].class) {
-                mv.visitIntInsn(Opcodes.NEWARRAY, Opcodes.T_FLOAT);
-            }
-            else if (what == double[].class) {
-                mv.visitIntInsn(Opcodes.NEWARRAY, Opcodes.T_FLOAT);
-            }
-            else if (what == char[].class) {
-                mv.visitIntInsn(Opcodes.NEWARRAY, Opcodes.T_CHAR);
-            }
-            else {
-                mv.visitTypeInsn(Opcodes.ANEWARRAY, Type.getDescriptor(what));
-            }
-
-            mv.visitVarInsn(Opcodes.ASTORE, 7);
-            mv.visitInsn(Opcodes.LCONST_0);
-            mv.visitVarInsn(Opcodes.LSTORE, 8);
-            Label loop = new Label();
-            mv.visitLabel(loop);
-            mv.visitVarInsn(Opcodes.LLOAD, 8);
-            mv.visitInsn(Opcodes.L2I);
-            mv.visitVarInsn(Opcodes.ALOAD, 7);
-            mv.visitInsn(Opcodes.ARRAYLENGTH);
-            Label loopend = new Label();
-            mv.visitJumpInsn(Opcodes.IF_ICMPGE, loopend);
-            mv.visitVarInsn(Opcodes.ALOAD, 7);
-            mv.visitVarInsn(Opcodes.LLOAD, 8);
-            mv.visitInsn(Opcodes.L2I);
-            mv.visitVarInsn(Opcodes.ALOAD, 6);
-            mv.visitVarInsn(Opcodes.LLOAD, 8);
-            mv.visitVarInsn(Opcodes.ALOAD, c.tcLoc);
-
-            if (what == boolean[].class) {
-                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/Ops", "atpos_i",
-                    Type.getMethodDescriptor(Type.getType(long.class), TYPE_SMO, Type.getType(long.class), TYPE_TC));
-                Label f = new Label(), e = new Label();
-                mv.visitJumpInsn(Opcodes.IFEQ, f);
-                mv.visitInsn(Opcodes.ICONST_1);
-                mv.visitJumpInsn(Opcodes.GOTO, e);
-                mv.visitLabel(f);
-                mv.visitInsn(Opcodes.ICONST_0);
-                mv.visitLabel(e);
-                mv.visitInsn(Opcodes.BASTORE);
-            }
-            else if (what == byte[].class) {
-                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/Ops", "atpos_i",
-                    Type.getMethodDescriptor(Type.getType(long.class), TYPE_SMO, Type.getType(long.class), TYPE_TC));
-                mv.visitInsn(Opcodes.L2I);
-                mv.visitInsn(Opcodes.I2B);
-                mv.visitInsn(Opcodes.BASTORE);
-            }
-            else if (what == short[].class) {
-
-                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/Ops", "atpos_i",
-                    Type.getMethodDescriptor(Type.getType(long.class), TYPE_SMO, Type.getType(long.class), TYPE_TC));
-                mv.visitInsn(Opcodes.L2I);
-                mv.visitInsn(Opcodes.I2S);
-                mv.visitInsn(Opcodes.SASTORE);
-
-            }
-            else if (what == int[].class) {
-
-                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/Ops", "atpos_i",
-                    Type.getMethodDescriptor(Type.getType(long.class), TYPE_SMO, Type.getType(long.class), TYPE_TC));
-                mv.visitInsn(Opcodes.L2I);
-                mv.visitInsn(Opcodes.IASTORE);
-
-            }
-            else if (what == long[].class) {
-
-                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/Ops", "atpos_i",
-                    Type.getMethodDescriptor(Type.getType(long.class), TYPE_SMO, Type.getType(long.class), TYPE_TC));
-                mv.visitInsn(Opcodes.LASTORE);
-
-            }
-            else if(what == float[].class) {
-
-                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/Ops", "atpos_n",
-                    Type.getMethodDescriptor(Type.getType(double.class), TYPE_SMO, Type.getType(long.class), TYPE_TC));
-                mv.visitInsn(Opcodes.D2F);
-                mv.visitInsn(Opcodes.FASTORE);
-
-                mv.visitIincInsn(7, 1);
-                mv.visitJumpInsn(Opcodes.GOTO, loop);
-                mv.visitLabel(loopend);
-            }
-            else if(what == double[].class) {
-
-                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/Ops", "atpos_n",
-                    Type.getMethodDescriptor(Type.getType(double.class), TYPE_SMO, Type.getType(long.class), TYPE_TC));
-                mv.visitInsn(Opcodes.DASTORE);
-
-            }
-            else if(what == String[].class) {
-
-                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/Ops", "atpos_s",
-                    Type.getMethodDescriptor(Type.getType(String.class), TYPE_SMO, Type.getType(long.class), TYPE_TC));
-                mv.visitInsn(Opcodes.AASTORE);
-
-            }
-            else if(what == char[].class) {
-
-                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/Ops", "atpos_s",
-                    Type.getMethodDescriptor(Type.getType(String.class), TYPE_SMO, Type.getType(long.class), TYPE_TC));
-                mv.visitInsn(Opcodes.ICONST_0);
-                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/String", "charAt", "(I)C");
-                mv.visitInsn(Opcodes.CASTORE);
-
-            }
-            else if(what == SixModelObject[].class) {
-
-                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/Ops", "atpos",
-                    Type.getMethodDescriptor(TYPE_SMO, TYPE_SMO, Type.getType(long.class), TYPE_TC));
-                mv.visitVarInsn(Opcodes.ALOAD, c.tcLoc);
-                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/Ops", "decont", 
-                    Type.getMethodDescriptor(TYPE_SMO, TYPE_SMO, TYPE_TC));
-                mv.visitInsn(Opcodes.AASTORE);
-
-            }
-            else if(what == Object[].class) {
-
-                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/Ops", "atpos",
-                    Type.getMethodDescriptor(TYPE_SMO, TYPE_SMO, Type.getType(long.class), TYPE_TC));
-                mv.visitVarInsn(Opcodes.ALOAD, c.tcLoc);
-                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/Ops", "decont", 
-                    Type.getMethodDescriptor(TYPE_SMO, TYPE_SMO, TYPE_TC));
-                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/BootJavaInterop$RuntimeSupport", "unboxJava", Type.getMethodDescriptor(TYPE_OBJ, TYPE_SMO));
-                mv.visitInsn(Opcodes.AASTORE);
-
-            }
-
-            mv.visitVarInsn(Opcodes.LLOAD, 8);
-            mv.visitInsn(Opcodes.LCONST_1);
-            mv.visitInsn(Opcodes.LADD);
-            mv.visitVarInsn(Opcodes.LSTORE, 8);
-            mv.visitJumpInsn(Opcodes.GOTO, loop);
-            mv.visitLabel(loopend);
-            mv.visitVarInsn(Opcodes.ALOAD, 7);
+            mv.visitLdcInsn(Type.getType(what));
+            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/BootJavaInterop", "marshalOutRecursive",
+                Type.getMethodDescriptor(Type.getType(Object[].class), TYPE_SMO, TYPE_TC, Type.getType(Class.class)));
         }
         else {
+            Label isntWrapped = new Label(), done = new Label();
+            mv.visitInsn(Opcodes.DUP);
             mv.visitVarInsn(Opcodes.ALOAD, c.tcLoc);
-            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/Ops", "decont", Type.getMethodDescriptor(TYPE_SMO, TYPE_SMO, TYPE_TC));
+            mv.visitMethodInsn(Opcodes.INVOKESTATIC, TYPE_OPS.getInternalName(), "decont", Type.getMethodDescriptor(TYPE_SMO, TYPE_SMO, TYPE_TC));
+            mv.visitTypeInsn(Opcodes.INSTANCEOF, Type.getType(JavaObjectWrapper.class).getInternalName());
+            mv.visitJumpInsn(Opcodes.IFEQ, isntWrapped);
+            mv.visitVarInsn(Opcodes.ALOAD, c.tcLoc);
+            // XXX: the secondary decont is a bit awkward, but storing to the stack doesn't seem to work out
+            mv.visitMethodInsn(Opcodes.INVOKESTATIC, TYPE_OPS.getInternalName(), "decont", Type.getMethodDescriptor(TYPE_SMO, TYPE_SMO, TYPE_TC));
             mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/BootJavaInterop$RuntimeSupport", "unboxJava", Type.getMethodDescriptor(TYPE_OBJ, TYPE_SMO));
             mv.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(what));
+            mv.visitLabel(isntWrapped);
         }
     }
 
