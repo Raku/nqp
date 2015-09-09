@@ -704,7 +704,8 @@ my class MASTCompilerInstance {
                     ?? QAST::Op.new( :op('null_s') )
                     !! QAST::SVal.new( :value($serialized) ),
                 QAST::Var.new( :name('cur_sc'), :scope('local') ),
-                $sh_ast,
+                $sh_ast, # XXX I had to leave this in, otherwise the JS backend doesn't build.
+                         #     I would love some help figuring out why!
                 QAST::Block.new( :blocktype('immediate'), $cr_ast ),
                 QAST::Var.new( :name('conflicts'), :scope('local') )
             ),
