@@ -446,3 +446,11 @@ P6bigint.prototype.generateBoxingMethods = function(repr, attr) {
 P6bigint.prototype.allocate = basic_allocate;
 P6bigint.prototype.compose = noop_compose;
 exports.P6bigint = P6bigint;
+
+function ReentrantMutex() {}
+
+module.exports.ReentrantMutex = ReentrantMutex;
+
+function ConditionVariable() {}
+
+module.exports.ConditionVariable = ConditionVariable;
