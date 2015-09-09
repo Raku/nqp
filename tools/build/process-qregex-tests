@@ -42,7 +42,7 @@ my @files := [
      'rx_basic',
       'rx_quantifiers',
 #     'rx_metachars',
-#     'rx_charclass',
+     'rx_charclass',
 #     'rx_backtrack',
 #     'rx_subrules',
 #     'rx_modifiers',
