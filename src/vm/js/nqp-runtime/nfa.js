@@ -13,6 +13,8 @@ var EDGE_FATE = 0,
     EDGE_CODEPOINT_I = 9,
     EDGE_CODEPOINT_I_NEG = 10,
     EDGE_GENERIC_VAR = 11,
+    EDGE_CHARRANGE        = 12,
+    EDGE_CHARRANGE_NEG    = 13,
     EDGE_CODEPOINT_LL = 14,
     EDGE_CODEPOINT_I_LL = 15;
 
@@ -40,9 +42,12 @@ op.nfafromstatelist = function(states, type) {
         case EDGE_CHARLIST_NEG:
           edge.arg_s = states[i][j + 1];
           break;
+
         case EDGE_CODEPOINT_I:
         case EDGE_CODEPOINT_I_LL:
         case EDGE_CODEPOINT_I_NEG:
+        case EDGE_CHARRANGE:
+        case EDGE_CHARRANGE_NEG:
           edge.arg_lc = states[i][j + 1][0];
           edge.arg_uc = states[i][j + 1][1];
           break;
@@ -203,9 +208,20 @@ function runNFA(nfa, target, pos) {
               char ord = target.charAt((int)pos);
               if (ord != lc_arg && ord != uc_arg)
                   nextst.push(to);*/
-        } else {
-          console.log("unknown codepoint", act);
-        }
+       }
+       else if (act == EDGE_CHARRANGE) {
+         var uc_arg = edgeInfo[i].arg_uc;
+         var lc_arg = edgeInfo[i].arg_lc;
+         var ord = target.charCodeAt(pos);
+         if (ord >= lc_arg && ord <= uc_arg) {
+           nextst.push(to);
+         }
+       }
+       else if (act == EDGE_CHARRANGE_NEG) {
+         // TODO
+       } else {
+         console.log("runNFA: unknown codepoint", act);
+       }
       }
     }
     /* Move to next character and generation. */
@@ -236,4 +252,18 @@ function runNFA(nfa, target, pos) {
 
 op.nfarunproto = function(nfa, target, pos) {
   return runNFA(nfa, target, pos);
+};
+
+op.nfarunalt = function(nfa, target, pos, bstack, cstack, marks) {
+  /* Run the NFA. */
+  var fates = runNFA(nfa, target, pos);
+
+  /* Push the results onto the bstack. */
+  var caps = cstack ? cstack.length : 0;
+
+  for (var i = 0; i < fates.length; i++) {
+    bstack.push(marks[fates[i]], pos, 0, caps);
+  }
+
+  return nfa;
 };

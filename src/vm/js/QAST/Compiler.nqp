@@ -703,10 +703,10 @@ class QAST::OperationsJS {
 
     add_simple_op('nfafromstatelist', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
     add_simple_op('nfarunproto', $T_OBJ, [$T_OBJ, $T_STR, $T_INT], :sideffects);
+    add_simple_op('nfarunalt', $T_OBJ, [$T_OBJ, $T_STR, $T_INT, $T_OBJ, $T_OBJ, $T_OBJ]);
 
     # TODO 
     # add_simple_op('nfatostatelist', $T_OBJ, [$T_OBJ]);
-    # add_simple_op('nfarunalt', $T_OBJ, [$T_OBJ, $T_STR, $T_INT, $T_OBJ, $T_OBJ, $T_OBJ]);
 
     add_op('callmethod', sub ($comp, $node, :$want) {
 
@@ -1358,11 +1358,15 @@ class RegexCompiler {
         ~ self.goto($scan)
         ~ self.case($loop)
         ~ "$!pos++;\n"
-        ~ "if ($!pos >= $!target.length) \{{self.fail}\}\n" # HACK
-        ~ "$!cursor['\$!from'] = $!pos;\n"
+        ~ "if ($!pos >= $!target.length) \{{self.fail}\}\n"
+        ~ "$!cursor['\$!from'] = $!pos;\n" # HACK
         ~ self.case($scan)
         ~ self.mark($loop,$!pos,0)
         ~ self.case($done);
+    }
+
+    method has_char() {
+        "if ($!pos >= $!target.length) \{{self.fail()}\}";
     }
 
     method enumcharlist($node) {
@@ -1372,7 +1376,20 @@ class RegexCompiler {
         "if ($!pos >= $!target.length) \{{self.fail()}\}"
         ~ "if ($charlist.indexOf($!target.substr($!pos,1)) $testop -1) \{{self.fail()}\}"
         ~ ($node.subtype eq 'zerowidth' ?? '' !! "$!pos++;\n")
+    }
 
+    method charrange($node) {
+        if $node[0] eq 'ignorecase' {
+            $!compiler.NYI("charrange with ignorecase");
+        } else {
+            my $lower := $node[1].value;
+            my $upper := $node[2].value;
+
+            self.has_char 
+            ~ "if ({$node.negate ?? "" !! "!"} ($!target.charCodeAt($!pos) >= $lower && $!target.charCodeAt($!pos) <= $upper)) \{"
+            ~ self.fail ~ "\}\n"
+            ~ "$!pos++;\n"
+        }
     }
 
     method cclass_check($cclass,:$pos=$!pos,:$negated=0) {
@@ -1649,6 +1666,39 @@ class RegexCompiler {
         }
     }
 
+    method alt($node) {
+        # Calculate all the branches to try, which populates the bstack
+        # with the options. Then immediately fail to start iterating it.
+
+        my $end_label := self.new_label;
+
+
+        my @alt_code;
+        my @alt_labels;
+
+        # Emit all the possible alternations.
+        my $iter     := nqp::iterator($node.list);
+        while $iter {
+            my $alt_label := self.new_label;
+
+            @alt_code.push(self.case($alt_label));
+            @alt_code.push(self.compile_rx(nqp::shift($iter)));
+            @alt_code.push(self.goto($end_label));
+
+            @alt_labels.push(~$alt_label);
+        }
+
+        Chunk.void(
+            "$!subcur = [{nqp::join(',',@alt_labels)}];\n",
+             self.mark($end_label, -1, 0),
+             call($!cursor, '!alt', $!pos, quote_string($node.name), $!subcur) ~ ";\n",
+             self.fail,
+             Chunk.void(|@alt_code),
+             self.case($end_label),
+            ($node.backtrack eq 'r' ?? self.commit($end_label) !! '')
+        );
+    }
+
     method BUILD(:$compiler) {
         $!compiler := $compiler;
 
@@ -1708,6 +1758,7 @@ class RegexCompiler {
     method fail() {
         self.goto($!fail_label);
     }
+
 
 }
 
