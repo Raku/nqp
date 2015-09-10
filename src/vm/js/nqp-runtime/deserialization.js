@@ -340,7 +340,7 @@ BinaryCursor.prototype.closureEntry = function() {
     //entry.codeObj = this.objRef();
     var objectScId  = this.I32();
     var objectIndex = this.I32();
-    //entry.codeObj  = this.sc.deps[objectScId].root_objects[objectIndex];
+    entry.codeObj  = this.sc.deps[objectScId].root_objects[objectIndex];
   } else {
     // we're packed along a 24-byte alignment
     this.I32();
