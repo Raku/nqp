@@ -1588,7 +1588,7 @@ class RegexCompiler {
 
         Chunk.void(
             "$!cursor['\$!pos\'] = $!pos;\n",
-            $!compiler.mangle_name("$¢") ~ " = $!cursor;\n",
+            $!compiler.mangle_name('$¢') ~ " = $!cursor;\n",
             $code,
             $node.subtype eq 'zerowidth' ??
                 "if ({$node.negate ?? '' !! '!'}{$code.expr}) \{{self.fail}\}\n"
