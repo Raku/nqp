@@ -6,19 +6,25 @@ sub plan($quantity) {
     say("1..$quantity");
 }
 
+# We use nqp::push instead of .push to workaround a js backend bug
+
 sub ok($condition, $desc?) {
     $test_counter := $test_counter + 1;
 
     my @output;
     unless $condition {
-        @output.push("not ");
+#        @output.push("not ");
+        nqp::push(@output, "not ");
     }
-    @output.push("ok $test_counter");
+#    @output.push("ok $test_counter");
+    nqp::push(@output, "ok $test_counter");
     if $desc {
-        @output.push(" - $desc");
+        nqp::push(@output, " - $desc");
+#        @output.push(" - $desc");
     }
     if $test_counter <= $todo_upto_test_num {
-        @output.push($todo_reason);
+        nqp::push(@output, $todo_reason);
+#        @output.push($todo_reason);
     }
     say(|@output);
     
