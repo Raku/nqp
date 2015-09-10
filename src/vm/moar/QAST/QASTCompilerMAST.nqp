@@ -640,6 +640,7 @@ my class MASTCompilerInstance {
         }
     }
 
+    # this method is a hook point so that we can override serialization when cross-compiling
     method serialize_sc($sc) {
         # Serialize it.
         my $sh := nqp::list_s();
@@ -648,7 +649,7 @@ my class MASTCompilerInstance {
         # Now it's serialized, pop this SC off the compiling SC stack.
         nqp::popcompsc();
 
-        [$serialized,$sh];
+        [$serialized, nqp::null()];
     }
 
     method deserialization_code($sc, @code_ref_blocks, $repo_conf_res) {
@@ -657,14 +658,21 @@ my class MASTCompilerInstance {
         my $sh := $sc_tuple[1];
 
         # String heap QAST.
-        my $sh_ast := QAST::Op.new( :op('list_s') );
-        my $sh_elems := nqp::elems($sh);
-        my $i := 0;
-        while $i < $sh_elems {
-            $sh_ast.push(nqp::isnull_s(nqp::atpos_s($sh, $i))
-                ?? QAST::Op.new( :op('null_s') )
-                !! QAST::SVal.new( :value(nqp::atpos_s($sh, $i)) ));
-            $i := $i + 1;
+        my $sh_ast;
+
+        if nqp::islist($sh) {
+            $sh_ast := QAST::Op.new( :op('list_s') );
+            my $sh_elems := nqp::elems($sh);
+            my $i := 0;
+            while $i < $sh_elems {
+                $sh_ast.push(nqp::isnull_s(nqp::atpos_s($sh, $i))
+                    ?? QAST::Op.new( :op('null_s') )
+                    !! QAST::SVal.new( :value(nqp::atpos_s($sh, $i)) ));
+                $i := $i + 1;
+            }
+        }
+        else {
+            $sh_ast := QAST::Op.new( :op('null') );
         }
 
         # Code references.
