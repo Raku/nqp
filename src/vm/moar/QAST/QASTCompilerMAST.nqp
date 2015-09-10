@@ -1021,15 +1021,15 @@ my class MASTCompilerInstance {
         }
         elsif $node.blocktype eq 'declaration_static' {
             $*BLOCK.capture_inner($node);
-            if $want ne 'v' {
-                my $clone_reg := $*BLOCK.clone_inner($node);
-                MAST::InstructionList.new(nqp::list(), $clone_reg, $MVM_reg_obj)
-            }
-            else {
+            if nqp::defined($want) && $want == $MVM_reg_void {
                 my $code_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
                 my @ins;
                 push_op(@ins, 'getcode', $code_reg, %!mast_frames{$node.cuid});
                 MAST::InstructionList.new(@ins, $code_reg, $MVM_reg_obj)
+            }
+            else {
+                my $clone_reg := $*BLOCK.clone_inner($node);
+                MAST::InstructionList.new(nqp::list(), $clone_reg, $MVM_reg_obj)
             }
         }
         else {
