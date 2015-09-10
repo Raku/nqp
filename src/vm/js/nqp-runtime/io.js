@@ -225,7 +225,25 @@ op.mkdir = function(dir, mode) {
   fs.mkdirSync(dir, mode);
 };
 
-op.shell = function(command, dir, env) {
+var PIPE_INHERIT        = 1;
+var PIPE_IGNORE         = 2;
+var PIPE_CAPTURE        = 4;
+var PIPE_INHERIT_IN     = 1;
+var PIPE_IGNORE_IN      = 2;
+var PIPE_CAPTURE_IN     = 4;
+var PIPE_INHERIT_OUT    = 8;
+var PIPE_IGNORE_OUT     = 16;
+var PIPE_CAPTURE_OUT    = 32;
+var PIPE_INHERIT_ERR    = 64;
+var PIPE_IGNORE_ERR     = 128;
+var PIPE_CAPTURE_ERR    = 256;
+
+op.shell = function(command, dir, env, input, output, error, flags) {
+
+  if (flags != PIPE_INHERIT_IN + PIPE_INHERIT_OUT + PIPE_INHERIT_ERR) {
+      throw "shell: NYI combination of flags";
+  }
+
   var oldEnv = {};
   for (var v in process.env) {
     oldEnv[v] = process.env[v];
