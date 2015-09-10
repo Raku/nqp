@@ -39,7 +39,7 @@ op.tostr_I = function(n) {
 };
 
 op.base_I = function(n, base) {
-  return getBI(n).toString(base).toUpperCase();
+  return getBI(n).toString(base).toUpperCase().replace(/^-0+/,"-");
 };
 
 op.iseq_I = function(a, b) {
