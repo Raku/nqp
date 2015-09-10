@@ -2135,10 +2135,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     proto method as_js($node, :$want) {
-        unless nqp::defined($want) {
-            nqp::die("Unknown want");
-        }
-
         if nqp::defined($want) {
             if nqp::istype($node, QAST::Want) {
                 self.NYI("QAST::Want");
@@ -2149,7 +2145,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
         }
         else {
-            {*}
+            nqp::die("Unknown want");
         }
     }
 
