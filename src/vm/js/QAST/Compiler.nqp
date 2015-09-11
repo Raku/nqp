@@ -753,7 +753,7 @@ class QAST::OperationsJS {
         @setup.push($compiled_args);
 
         $comp.stored_result(
-            Chunk.new($T_OBJ, $invocant.expr ~ $method ~ $call ~ $compiled_args.expr ~ ')' , @setup, :$node), :$want);
+            Chunk.new($T_OBJ, $comp.wrap_for_call($invocant.expr, $node.name) ~ $method ~ $call ~ $compiled_args.expr ~ ')' , @setup, :$node), :$want);
 
     });
 
@@ -1928,6 +1928,24 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
         }
         @js_args;
+    }
+
+
+    my %array_methods := nqp::hash(
+        'unshift', 1,
+        'shift', 1,
+        'pop', 1,
+        'push', 1,
+    );
+
+    # when calling a method on an javascript Array we need to wrap it
+    method wrap_for_call($obj, $method_name) {
+        # do we now the method name and is this a method name that an Array dosn't support? 
+        if $method_name && (!nqp::existskey(%array_methods, $method_name)) {
+            $obj;
+        } else {
+            "nqp.wrapObj($obj)";
+        }
     }
 
     method merge_arg_groups($groups) {
