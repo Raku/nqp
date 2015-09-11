@@ -13,7 +13,7 @@ public class P6OpaqueBaseInstance extends SixModelObject {
     public final int resolveAttribute(SixModelObject classHandle, String name) {
         P6OpaqueREPRData rd = (P6OpaqueREPRData)this.st.REPRData;
         for (int i = 0; i < rd.classHandles.length; i++) {
-            if (rd.classHandles[i] == classHandle) {
+            if (rd.classHandles[i].st == classHandle.st) {
                 Integer idx = rd.nameToHintMap[i].get(name);
                 if (idx != null)
                     return idx;
