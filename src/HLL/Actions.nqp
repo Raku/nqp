@@ -1,4 +1,6 @@
 class HLL::Actions {
+    method perl() { self.HOW.name(self) ~ '.new() #`[' ~ nqp::where(self) ~ ']' }
+
     method string_to_int($src, $base) {
         my $res := nqp::radix($base, $src, 0, 2);
         $src.CURSOR.panic("'$src' is not a valid number")
