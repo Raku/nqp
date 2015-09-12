@@ -301,3 +301,7 @@ function Stdin() {
 op.getstdin = function() {
     return new Stdin();
 };
+
+op.exit = function(code) {
+    process.exit(code);
+};
