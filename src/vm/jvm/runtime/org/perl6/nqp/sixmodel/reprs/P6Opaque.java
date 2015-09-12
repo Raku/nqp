@@ -624,7 +624,7 @@ public class P6Opaque extends REPR {
         
         byte[] classCompiled = cw.toByteArray();
         // Uncomment the following line to help debug the code-gen.
-        if (System.getenv("NQP_DEBUG_DUMP_CLASSFILES") {
+        if (System.getenv("NQP_DEBUG_DUMP_CLASSFILES") != null) {
             try {
                 FileOutputStream fos = new FileOutputStream(new File(className + ".class"));
                 fos.write(classCompiled);
