@@ -155,6 +155,7 @@ class HLL::Backend::MoarVM {
 
         if $want_json {
             to_json($data);
+            nqp::printfh($profile_fh, nqp::join('', @pieces));
         }
         else {
             # Get profiler template, split it in half, and write those either
