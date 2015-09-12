@@ -1155,6 +1155,7 @@ class QAST::OperationsJS {
     add_simple_op('create', $T_OBJ, [$T_OBJ], :sideffects);
 
     add_simple_op('die', $T_VOID, [$T_STR], :sideffects, sub ($msg) {"{$*CTX}.die($msg)"});
+    %ops<die_s> := %ops<die>;
 
 
     add_simple_op('how', $T_OBJ, [$T_OBJ], sub ($obj) {"$obj._STable.HOW"});
