@@ -7,6 +7,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
@@ -620,12 +624,14 @@ public class P6Opaque extends REPR {
         
         byte[] classCompiled = cw.toByteArray();
         // Uncomment the following line to help debug the code-gen.
-//        try {
-//            FileOutputStream fos = new FileOutputStream(new File(className + ".class"));
-//            fos.write(classCompiled);
-//            fos.close();
-//        } catch (IOException e) {
-//        }
+        if (System.getenv("NQP_DEBUG_DUMP_CLASSFILES") {
+            try {
+                FileOutputStream fos = new FileOutputStream(new File(className + ".class"));
+                fos.write(classCompiled);
+                fos.close();
+            } catch (IOException e) {
+            }
+        }
         return tc.gc.byteClassLoader.defineClass(className, classCompiled);
     }
 
