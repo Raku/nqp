@@ -4,11 +4,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.ProcessBuilder.Redirect;
 import java.lang.Thread;
+import java.lang.NoSuchFieldException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -29,10 +32,12 @@ import java.nio.file.attribute.PosixFilePermissions;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.AbstractMap;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -4848,10 +4853,10 @@ public final class Ops {
          */
         try {
             java.lang.management.RuntimeMXBean runtime = java.lang.management.ManagementFactory.getRuntimeMXBean();
-            java.lang.reflect.Field jvm = runtime.getClass().getDeclaredField("jvm");
+            Field jvm = runtime.getClass().getDeclaredField("jvm");
             jvm.setAccessible(true);
             Object mgmt = jvm.get(runtime);
-            java.lang.reflect.Method pid_method = mgmt.getClass().getDeclaredMethod("getProcessId");
+            Method pid_method = mgmt.getClass().getDeclaredMethod("getProcessId");
             pid_method.setAccessible(true);
             return (Integer)pid_method.invoke(mgmt);
         }
@@ -5942,9 +5947,36 @@ public final class Ops {
     private static BigInteger getBI(ThreadContext tc, SixModelObject obj) {
         if (obj instanceof P6bigintInstance)
             return ((P6bigintInstance)obj).value;
-        /* What follows is a bit of a hack, relying on the first field being the
-         * big integer. */
-        obj.get_attribute_native(tc, null, null, 0);
+        /* What follows is a bit of a hack.
+         * Unlike previously, we cannot rely on field_0 being the bigint,
+         * because we might have an allomorph coming in.
+         * To correctly handle that case we need to find the field on obj
+         * which contains a BigInteger in field_0, in case we failed to
+         * find the BigInteger in field_0 of obj.
+        */
+        try {
+            obj.get_attribute_native(tc, null, null, 0);
+        }
+        catch (RuntimeException RTE) {
+            List<Field> interestingFields = new ArrayList<Field>(Arrays.asList(obj.getClass().getFields()));
+            for( Iterator<Field> it = interestingFields.iterator(); it.hasNext(); ) {
+                if( !it.next().getName().startsWith("field_") ) {
+                    it.remove();
+                }
+            }
+
+            for( Field field : interestingFields ) {
+                try {
+                    SixModelObject curAttr = (SixModelObject) field.get(obj);
+                    try {
+                        curAttr.get_attribute_native(tc, null, null, 0);
+                    } catch (RuntimeException innerRTE) {
+                    }
+                } catch(IllegalAccessException iae) {
+                    // this really shouldn't happen, but...
+                }
+            }
+        }
         return (BigInteger)tc.native_j;
     }
 
