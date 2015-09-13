@@ -76,7 +76,7 @@ public class CUnion extends REPR {
     }
 
     public SixModelObject allocate(ThreadContext tc, STable st) {
-        /* TODO: Die if someone tries to allocate a CStruct before it's been
+        /* TODO: Die if someone tries to allocate a CUnion before it's been
          * composed. */
         CUnionInstance obj = new CUnionInstance();
         CUnionREPRData repr_data = (CUnionREPRData) st.REPRData;
@@ -122,7 +122,8 @@ public class CUnion extends REPR {
             String type = typeDescriptor(tc, info);
             /* Indirect referenced structs need to be handled as pointers here, since the default of
              * structs and unions is to inline. */
-            if (info.inlined == 0 && (info.argType == ArgType.CSTRUCT || info.argType == ArgType.CUNION))
+            if (info.inlined == 0
+            && (info.argType == ArgType.CSTRUCT || info.argType == ArgType.CPPSTRUCT || info.argType == ArgType.CUNION))
                 fv = cw.visitField(Opcodes.ACC_PUBLIC, info.name, "Lcom/sun/jna/Pointer;", null, null);
             else
                 fv = cw.visitField(Opcodes.ACC_PUBLIC, info.name, type, null, null);
@@ -228,6 +229,11 @@ public class CUnion extends REPR {
             Class c = ((CStructREPRData) info.type.st.REPRData).structureClass;
             return Type.getDescriptor(c);
         }
+        else if (repr instanceof CPPStruct) {
+            info.argType = ArgType.CPPSTRUCT;
+            Class c = ((CPPStructREPRData) info.type.st.REPRData).structureClass;
+            return Type.getDescriptor(c);
+        }
         else if (repr instanceof CUnion) {
             info.argType = ArgType.CUNION;
             Class c = ((CUnionREPRData) info.type.st.REPRData).structureClass;
@@ -240,7 +246,7 @@ public class CUnion extends REPR {
             return Type.getDescriptor(c);
         }
         else {
-            ExceptionHandling.dieInternal(tc, "CUnion representation only handles int, num, CArray, CPointer and CStruct");
+            ExceptionHandling.dieInternal(tc, "CUnion representation only handles int, num, CArray, CPointer, CStruct, CPPStruct and CUnion");
             return null;
         }
     }

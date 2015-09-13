@@ -32,7 +32,7 @@ public class CStructInstance extends SixModelObject implements Refreshable {
         ArgType type = info.argType;
         Object o     = NativeCallOps.toJNAType(tc, value, type, null);
         if (info.inlined == 0) {
-            if (type == ArgType.CSTRUCT) {
+            if (type == ArgType.CSTRUCT || type == ArgType.CPPSTRUCT) {
                 type = ArgType.CPOINTER;
                 o    = (Object)((Structure)o).getPointer();
             }
@@ -94,6 +94,10 @@ public class CStructInstance extends SixModelObject implements Refreshable {
                 Class<?> structClass = ((CStructREPRData)info.type.st.REPRData).structureClass;
                 o                    = (Object)Structure.newInstance(structClass, ((Pointer)o));
             }
+            else if (info.argType == ArgType.CPPSTRUCT) {
+                Class<?> structClass = ((CPPStructREPRData)info.type.st.REPRData).structureClass;
+                o                    = (Object)Structure.newInstance(structClass, ((Pointer)o));
+            }
             else if (info.argType == ArgType.CUNION) {
                 Class<?> structClass = ((CUnionREPRData)info.type.st.REPRData).structureClass;
                 o                    = (Object)Union.newInstance(structClass, ((Pointer)o));
@@ -147,7 +151,10 @@ public class CStructInstance extends SixModelObject implements Refreshable {
         for (Entry<String, SixModelObject> entry: memberCache.entrySet()) {
             ArgType argType = repr_data.fieldTypes.get(entry.getKey()).argType;
             SixModelObject child = entry.getValue();
-            if (argType == ArgType.CARRAY || argType == ArgType.CSTRUCT || argType == ArgType.CUNION) {
+            if (argType == ArgType.CARRAY
+             || argType == ArgType.CSTRUCT
+             || argType == ArgType.CPPSTRUCT
+             || argType == ArgType.CUNION) {
                 NativeCallOps.refresh(child, tc);
             }
         }

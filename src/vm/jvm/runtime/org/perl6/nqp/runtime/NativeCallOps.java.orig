@@ -39,8 +39,6 @@ import org.perl6.nqp.sixmodel.reprs.CPointerInstance;
 import org.perl6.nqp.sixmodel.reprs.CStrInstance;
 import org.perl6.nqp.sixmodel.reprs.CStructInstance;
 import org.perl6.nqp.sixmodel.reprs.CStructREPRData;
-import org.perl6.nqp.sixmodel.reprs.CPPStructInstance;
-import org.perl6.nqp.sixmodel.reprs.CPPStructREPRData;
 import org.perl6.nqp.sixmodel.reprs.CUnionInstance;
 import org.perl6.nqp.sixmodel.reprs.CUnionREPRData;
 import org.perl6.nqp.sixmodel.reprs.NativeCall.ArgType;
@@ -95,75 +93,56 @@ public final class NativeCallOps {
         NativeCallBody call = getNativeCallBody(tc, callObject);
 
         try {
-            /* C++ structure invocant, in case we hit a C++ constructor. */
-            CPPStructInstance cppstruct = null;
             /* Convert arguments into array of appropriate objects. */
             int n = (int) arguments.elems(tc);
             /* TODO: Make sure n == call.arg_types.length? */
             Object[] cArgs = new Object[n];
             for (int i = 0; i < n; i++) {
-                SixModelObject arg = arguments.at_pos_boxed(tc, i);
-                /* We need to allocate the struct (THIS) for C++ constructor before passing it along. */
-                if (i == 0 && call.arg_types[i] == ArgType.CPPSTRUCT && Ops.isconcrete(arg, tc) == 0) {
-                    CPPStructREPRData repr_data = (CPPStructREPRData)returns.st.REPRData;
-                    Class<?>    structClass     = repr_data.structureClass;
-                    cppstruct                   = (CPPStructInstance)returns.st.REPR.allocate(tc, returns.st);
-                    cppstruct.storage           = (Structure)structClass.newInstance();
-                    cArgs[i]                    = cppstruct.storage;
-                }
-                else {
-                    cArgs[i] = toJNAType(tc, arg, call.arg_types[i], call.arg_info[i]);
+                /* TODO: Converting sixmodel objects to appropriate JNA types. */
+                cArgs[i] = toJNAType(tc, arguments.at_pos_boxed(tc, i), call.arg_types[i], call.arg_info[i]);
+            }
+
+            /* The actual foreign function call. */
+            Object returned = call.entry_point.invoke(javaType(tc, call.ret_type, returns), cArgs);
+
+            /* Assign to NativeRefs in case the argument is in an 'is rw' param slot, or otherwise call refresh(). */
+            for (int i = 0; i < arguments.elems(tc); i++) {
+                SixModelObject o = arguments.at_pos_boxed(tc, i);
+                switch (call.arg_types[i]) {
+                    case CHAR_RW:
+                    case UCHAR_RW:
+                        ((NativeRefInstance) o).store_i(tc, ((Memory) cArgs[i]).getByte(0));
+                        break;
+                    case SHORT_RW:
+                    case USHORT_RW:
+                        ((NativeRefInstance) o).store_i(tc, ((Memory) cArgs[i]).getShort(0));
+                        break;
+                    case INT_RW:
+                    case UINT_RW:
+                        ((NativeRefInstance) o).store_i(tc, ((Memory) cArgs[i]).getInt(0));
+                        break;
+                    case LONG_RW:
+                    case ULONG_RW:
+                        ((NativeRefInstance) o).store_i(tc, ((Memory) cArgs[i]).getNativeLong(0).longValue());
+                        break;
+                    case LONGLONG_RW:
+                    case ULONGLONG_RW:
+                        ((NativeRefInstance) o).store_i(tc, ((Memory) cArgs[i]).getLong(0));
+                        break;
+                    case FLOAT_RW:
+                        ((NativeRefInstance) o).store_n(tc, ((Memory) cArgs[i]).getFloat(0));
+                        break;
+                    case DOUBLE_RW:
+                        ((NativeRefInstance) o).store_n(tc, ((Memory) cArgs[i]).getDouble(0));
+                        break;
+                    default:
+                        refresh(o, tc);
+                        break;
                 }
             }
 
-            if (cppstruct != null) {
-                /* We are calling a C++ constructor so we hand back the invocant (THIS) we recorded earlier. */
-                call.entry_point.invoke(Void.class, cArgs);
-                return toNQPType(tc, call.ret_type, returns, cppstruct.storage);
-            }
-            else {
-                /* The actual foreign function call. */
-                Object returned = call.entry_point.invoke(javaType(tc, call.ret_type, returns), cArgs);
-
-                /* Assign to NativeRefs in case the argument is in an 'is rw' param slot, or otherwise call refresh(). */
-                for (int i = 0; i < arguments.elems(tc); i++) {
-                    SixModelObject o = arguments.at_pos_boxed(tc, i);
-                    switch (call.arg_types[i]) {
-                        case CHAR_RW:
-                        case UCHAR_RW:
-                            ((NativeRefInstance) o).store_i(tc, ((Memory) cArgs[i]).getByte(0));
-                            break;
-                        case SHORT_RW:
-                        case USHORT_RW:
-                            ((NativeRefInstance) o).store_i(tc, ((Memory) cArgs[i]).getShort(0));
-                            break;
-                        case INT_RW:
-                        case UINT_RW:
-                            ((NativeRefInstance) o).store_i(tc, ((Memory) cArgs[i]).getInt(0));
-                            break;
-                        case LONG_RW:
-                        case ULONG_RW:
-                            ((NativeRefInstance) o).store_i(tc, ((Memory) cArgs[i]).getNativeLong(0).longValue());
-                            break;
-                        case LONGLONG_RW:
-                        case ULONGLONG_RW:
-                            ((NativeRefInstance) o).store_i(tc, ((Memory) cArgs[i]).getLong(0));
-                            break;
-                        case FLOAT_RW:
-                            ((NativeRefInstance) o).store_n(tc, ((Memory) cArgs[i]).getFloat(0));
-                            break;
-                        case DOUBLE_RW:
-                            ((NativeRefInstance) o).store_n(tc, ((Memory) cArgs[i]).getDouble(0));
-                            break;
-                        default:
-                            refresh(o, tc);
-                            break;
-                    }
-                }
-
-                /* Wrap returned in the appropriate REPR type. */
-                return toNQPType(tc, call.ret_type, returns, returned);
-            }
+            /* Wrap returned in the appropriate REPR type. */
+            return toNQPType(tc, call.ret_type, returns, returned);
         }
         catch (ControlException e) { throw e; }
         catch (Throwable t) {
@@ -221,9 +200,6 @@ public final class NativeCallOps {
                 else if (obj instanceof org.perl6.nqp.sixmodel.reprs.CStructInstance) {
                     return ((CStructInstance) obj).storage.size();
                 }
-                else if (obj instanceof org.perl6.nqp.sixmodel.reprs.CPPStructInstance) {
-                    return ((CPPStructInstance) obj).storage.size();
-                }
                 else if (obj instanceof org.perl6.nqp.sixmodel.reprs.CUnionInstance) {
                     return ((CUnionInstance) obj).storage.size();
                 }
@@ -246,9 +222,6 @@ public final class NativeCallOps {
         else if (source instanceof CStructInstance) {
             o = ((CStructInstance)source).storage.getPointer();
         }
-        else if (source instanceof CPPStructInstance) {
-            o = ((CPPStructInstance)source).storage.getPointer();
-        }
         else if (source instanceof CUnionInstance) {
             o = ((CUnionInstance)source).storage.getPointer();
         }
@@ -258,7 +231,6 @@ public final class NativeCallOps {
             if ( !(source.st.REPR instanceof org.perl6.nqp.sixmodel.reprs.CPointer
                 || source.st.REPR instanceof org.perl6.nqp.sixmodel.reprs.CArray
                 || source.st.REPR instanceof org.perl6.nqp.sixmodel.reprs.CStruct
-                || source.st.REPR instanceof org.perl6.nqp.sixmodel.reprs.CPPStruct
                 || source.st.REPR instanceof org.perl6.nqp.sixmodel.reprs.CUnion) ) {
                 throw ExceptionHandling.dieInternal(tc,
                     "Native call expected object with CPointer representation, but got something else");
@@ -330,11 +302,6 @@ public final class NativeCallOps {
                     Class<?>    structClass = ((CStructREPRData)target_type.st.REPRData).structureClass;
                     CStructInstance cstruct = (CStructInstance)nqpobj;
                     cstruct.storage         = Structure.newInstance(structClass, o);
-                }
-                else if (nqpobj instanceof org.perl6.nqp.sixmodel.reprs.CPPStructInstance) {
-                    Class<?>    structClass     = ((CPPStructREPRData)target_type.st.REPRData).structureClass;
-                    CPPStructInstance cppstruct = (CPPStructInstance)nqpobj;
-                    cppstruct.storage           = Structure.newInstance(structClass, o);
                 }
                 else if (nqpobj instanceof org.perl6.nqp.sixmodel.reprs.CUnionInstance) {
                     Class<?>  structClass = ((CUnionREPRData)target_type.st.REPRData).structureClass;
@@ -408,8 +375,6 @@ public final class NativeCallOps {
             return Pointer.class;
         case CSTRUCT:
             return ((CStructREPRData) smoType.st.REPRData).structureClass;
-        case CPPSTRUCT:
-            return ((CPPStructREPRData) smoType.st.REPRData).structureClass;
         case CUNION:
             return ((CUnionREPRData) smoType.st.REPRData).structureClass;
         default:
@@ -495,10 +460,6 @@ public final class NativeCallOps {
             o = Ops.decont(o, tc);
             if (Ops.isconcrete(o, tc) == 0) return null;
             return ((CStructInstance) o).storage;
-        case CPPSTRUCT:
-            o = Ops.decont(o, tc);
-            if (Ops.isconcrete(o, tc) == 0) return null;
-            return ((CPPStructInstance) o).storage;
         case CUNION:
             o = Ops.decont(o, tc);
             if (Ops.isconcrete(o, tc) == 0) return null;
@@ -722,14 +683,6 @@ public final class NativeCallOps {
                 nqpobj = type.st.REPR.allocate(tc, type.st);
                 CStructInstance cstruct = (CStructInstance) nqpobj;
                 cstruct.storage = (Structure) o;
-            }
-            break;
-        }
-        case CPPSTRUCT: {
-            if (o != null) {
-                nqpobj = type.st.REPR.allocate(tc, type.st);
-                CPPStructInstance cppstruct = (CPPStructInstance) nqpobj;
-                cppstruct.storage = (Structure) o;
             }
             break;
         }

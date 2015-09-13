@@ -6,6 +6,7 @@ import com.sun.jna.Memory;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
+import com.sun.jna.Union;
 
 import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.NativeCallOps;
@@ -151,6 +152,12 @@ public class CArrayInstance extends SixModelObject implements Refreshable {
             case CSTRUCT:
                 ptr = ((CStructInstance) value).storage.getPointer();
                 break;
+            case CPPSTRUCT:
+                ptr = ((CPPStructInstance) value).storage.getPointer();
+                break;
+            case CUNION:
+                ptr = ((CUnionInstance) value).storage.getPointer();
+                break;
             case CPOINTER:
                 ptr = ((CPointerInstance) value).pointer;
                 break;
@@ -179,6 +186,8 @@ public class CArrayInstance extends SixModelObject implements Refreshable {
         boolean complex = repr_data.elem_kind == ElemKind.CARRAY
             || repr_data.elem_kind == ElemKind.CPOINTER
             || repr_data.elem_kind == ElemKind.CSTRUCT
+            || repr_data.elem_kind == ElemKind.CPPSTRUCT
+            || repr_data.elem_kind == ElemKind.CUNION
             || repr_data.elem_kind == ElemKind.STRING;
 
         if (complex) {
@@ -204,9 +213,18 @@ public class CArrayInstance extends SixModelObject implements Refreshable {
             return NativeCallOps.toNQPType(tc, ArgType.CARRAY, repr_data.elem_type, ptr);
         case CPOINTER:
             return NativeCallOps.toNQPType(tc, ArgType.CPOINTER, repr_data.elem_type, ptr);
-        case CSTRUCT:
+        case CSTRUCT: {
             Class<?> structClass = ((CStructREPRData) repr_data.elem_type.st.REPRData).structureClass;
             return NativeCallOps.toNQPType(tc, ArgType.CSTRUCT, repr_data.elem_type, Structure.newInstance(structClass, ptr));
+        }
+        case CPPSTRUCT: {
+            Class<?> structClass = ((CPPStructREPRData) repr_data.elem_type.st.REPRData).structureClass;
+            return NativeCallOps.toNQPType(tc, ArgType.CPPSTRUCT, repr_data.elem_type, Structure.newInstance(structClass, ptr));
+        }
+        case CUNION: {
+            Class<?> structClass = ((CUnionREPRData) repr_data.elem_type.st.REPRData).structureClass;
+            return NativeCallOps.toNQPType(tc, ArgType.CUNION, repr_data.elem_type, Union.newInstance(structClass, ptr));
+        }
         default:
             ExceptionHandling.dieInternal(tc, "CArray can only makeObject strings, arrays, structs and pointers");
         }
@@ -221,7 +239,10 @@ public class CArrayInstance extends SixModelObject implements Refreshable {
         // No need to refresh if we don't have any cached children.
         if (child_objs == null) return;
 
-        if (repr_data.elem_kind == ElemKind.CARRAY || repr_data.elem_kind == ElemKind.CSTRUCT) {
+        if (repr_data.elem_kind == ElemKind.CARRAY
+         || repr_data.elem_kind == ElemKind.CSTRUCT
+         || repr_data.elem_kind == ElemKind.CPPSTRUCT
+         || repr_data.elem_kind == ElemKind.CUNION) {
             refreshComplex(tc);
         }
         else {

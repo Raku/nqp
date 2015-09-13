@@ -18,13 +18,13 @@ import org.perl6.nqp.sixmodel.STable;
 import org.perl6.nqp.sixmodel.StorageSpec;
 import org.perl6.nqp.sixmodel.TypeObject;
 
-import org.perl6.nqp.sixmodel.reprs.CStructREPRData.AttrInfo;
+import org.perl6.nqp.sixmodel.reprs.CPPStructREPRData.AttrInfo;
 import org.perl6.nqp.sixmodel.reprs.NativeCall.ArgType;
 
 import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.ThreadContext;
 
-public class CStruct extends REPR {
+public class CPPStruct extends REPR {
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
         STable st = new STable(this, HOW);
         SixModelObject obj = new TypeObject();
@@ -35,7 +35,7 @@ public class CStruct extends REPR {
 
     public void compose(ThreadContext tc, STable st, SixModelObject repr_info_hash) {
         SixModelObject repr_info = repr_info_hash.at_key_boxed(tc, "attribute");
-        CStructREPRData repr_data = new CStructREPRData();
+        CPPStructREPRData repr_data = new CPPStructREPRData();
 
         long mroLength = repr_info.elems(tc);
         List<AttrInfo> attrInfos = new ArrayList<AttrInfo>();
@@ -57,14 +57,14 @@ public class CStruct extends REPR {
                     repr_data.fieldTypes.put(info.name, info);
 
                     if (info.type == null) {
-                        ExceptionHandling.dieInternal(tc, "CStruct representation requires the types of all attributes to be specified");
+                        ExceptionHandling.dieInternal(tc, "CPPStruct representation requires the types of all attributes to be specified");
                     }
 
                     attrInfos.add(info);
                 }
             }
             else {
-                ExceptionHandling.dieInternal(tc, "CStruct representation does not support multiple inheritance");
+                ExceptionHandling.dieInternal(tc, "CPPStruct representation does not support multiple inheritance");
             }
         }
 
@@ -76,10 +76,10 @@ public class CStruct extends REPR {
     }
 
     public SixModelObject allocate(ThreadContext tc, STable st) {
-        /* TODO: Die if someone tries to allocate a CStruct before it's been
+        /* TODO: Die if someone tries to allocate a CPPStruct before it's been
          * composed. */
-        CStructInstance obj = new CStructInstance();
-        CStructREPRData repr_data = (CStructREPRData) st.REPRData;
+        CPPStructInstance obj = new CPPStructInstance();
+        CPPStructREPRData repr_data = (CPPStructREPRData) st.REPRData;
         obj.st = st;
         try {
             obj.storage = (Structure) repr_data.structureClass.newInstance();
@@ -93,20 +93,20 @@ public class CStruct extends REPR {
 
     public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
         /* This REPR can't be serialized. */
-        ExceptionHandling.dieInternal(tc, "Can't deserialize_stub a CStruct object.");
+        ExceptionHandling.dieInternal(tc, "Can't deserialize_stub a CPPStruct object.");
 
         return null;
     }
 
     public void deserialize_finish(ThreadContext tc, STable st, SerializationReader reader, SixModelObject obj) {
-        ExceptionHandling.dieInternal(tc, "Can't deserialize_finish a CStruct object.");
+        ExceptionHandling.dieInternal(tc, "Can't deserialize_finish a CPPStruct object.");
     }
 
     private static long typeId = 0;
     private void generateStructClass(ThreadContext tc, STable st, List<AttrInfo> fields) {
-        CStructREPRData reprData = (CStructREPRData) st.REPRData;
+        CPPStructREPRData reprData = (CPPStructREPRData) st.REPRData;
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
-        String className = "__CStruct__" + typeId++;
+        String className = "__CPPStruct__" + typeId++;
 
         int attributes = fields.size();
 
@@ -194,7 +194,7 @@ public class CStruct extends REPR {
                 return "J";
             }
             else {
-                ExceptionHandling.dieInternal(tc, "CStruct representation only handles 8, 16, 32 and 64 bit ints");
+                ExceptionHandling.dieInternal(tc, "CPPStruct representation only handles 8, 16, 32 and 64 bit ints");
                 return null;
             }
         }
@@ -208,7 +208,7 @@ public class CStruct extends REPR {
                 return "D";
             }
             else {
-                ExceptionHandling.dieInternal(tc, "CStruct representation only handles 32 and 64 bit nums");
+                ExceptionHandling.dieInternal(tc, "CPPStruct representation only handles 32 and 64 bit nums");
                 return null;
             }
         }
@@ -229,24 +229,24 @@ public class CStruct extends REPR {
             Class c = ((CUnionREPRData) info.type.st.REPRData).structureClass;
             return Type.getDescriptor(c);
         }
-        else if (repr instanceof CPPStruct) {
-            info.argType = ArgType.CPPSTRUCT;
-            Class c = ((CPPStructREPRData) info.type.st.REPRData).structureClass;
-            return Type.getDescriptor(c);
-        }
         else if (repr instanceof CStruct) {
             info.argType = ArgType.CSTRUCT;
             Class c = ((CStructREPRData) info.type.st.REPRData).structureClass;
+            return Type.getDescriptor(c);
+        }
+        else if (repr instanceof CPPStruct) {
+            info.argType = ArgType.CPPSTRUCT;
+            Class c = ((CPPStructREPRData) info.type.st.REPRData).structureClass;
 
             /* When we hit a struct in an attribute that is not composed yet, we most likely
              * have hit a struct of our own kind. */
             if (c == null)
-                return "L__CStruct__" + typeId + ";";
+                return "L__CPPStruct__" + typeId + ";";
 
             return Type.getDescriptor(c);
         }
         else {
-            ExceptionHandling.dieInternal(tc, "CStruct representation only handles int, num, CArray, CPointer, CStruct, CPPStruct and CUnion");
+            ExceptionHandling.dieInternal(tc, "CPPStruct representation only handles int, num, CArray, CPointer, CStruct, CPPStruct and CUnion");
             return null;
         }
     }

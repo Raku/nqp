@@ -29,6 +29,7 @@ public class NativeCall extends REPR {
         UTF8STR,
         UTF16STR,
         CSTRUCT,
+        CPPSTRUCT,
         CUNION,
         CARRAY,
         CALLBACK,

@@ -8,5 +8,5 @@ public class CArrayREPRData {
     public ElemKind       elem_kind;
     public int            jna_size;
 
-    public enum ElemKind { INTEGER, NUMERIC, STRING, CPOINTER, CARRAY, CSTRUCT }
+    public enum ElemKind { INTEGER, NUMERIC, STRING, CPOINTER, CARRAY, CSTRUCT, CPPSTRUCT, CUNION }
 }

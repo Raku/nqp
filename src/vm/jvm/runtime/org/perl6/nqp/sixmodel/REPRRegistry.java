@@ -11,6 +11,7 @@ import org.perl6.nqp.sixmodel.reprs.CArray;
 import org.perl6.nqp.sixmodel.reprs.CPointer;
 import org.perl6.nqp.sixmodel.reprs.CStr;
 import org.perl6.nqp.sixmodel.reprs.CStruct;
+import org.perl6.nqp.sixmodel.reprs.CPPStruct;
 import org.perl6.nqp.sixmodel.reprs.CUnion;
 import org.perl6.nqp.sixmodel.reprs.IOHandle;
 import org.perl6.nqp.sixmodel.reprs.JavaWrap;
@@ -93,6 +94,7 @@ public class REPRRegistry {
         addREPR("CArray", new CArray());
         addREPR("CStr", new CStr());
         addREPR("CStruct", new CStruct());
+        addREPR("CPPStruct", new CPPStruct());
         addREPR("CUnion", new CUnion());
         addREPR("VMThread", new VMThread());
         addREPR("ReentrantMutex", new ReentrantMutex());
