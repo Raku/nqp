@@ -46,6 +46,7 @@ import org.perl6.nqp.sixmodel.reprs.NativeCallInstance;
 import org.perl6.nqp.sixmodel.reprs.NativeCallBody;
 import org.perl6.nqp.sixmodel.reprs.NativeRefInstance;
 import org.perl6.nqp.sixmodel.reprs.Refreshable;
+import org.perl6.nqp.sixmodel.reprs.P6OpaqueBaseInstance;
 
 public final class NativeCallOps {
     public static long init() {
@@ -323,6 +324,10 @@ public final class NativeCallOps {
             call = ((NativeCallInstance)target).body;
         }
         else {
+            /* Handle mixins by following delegates. */
+            if (target instanceof P6OpaqueBaseInstance
+            && ((P6OpaqueBaseInstance)target).delegate != null)
+                target = ((P6OpaqueBaseInstance)target).delegate;
             call = (NativeCallBody)target.get_boxing_of(tc, ncrepr.ID);
             if (call == null) {
                 call = new NativeCallBody();
