@@ -200,6 +200,10 @@ public class CArrayInstance extends SixModelObject implements Refreshable {
         allocated = new_size;
     }
 
+    public long elems(ThreadContext tc) {
+        return elems;
+    }
+
     private SixModelObject makeObject(ThreadContext tc, Pointer ptr) {
         CArrayREPRData repr_data = (CArrayREPRData) st.REPRData;
 
