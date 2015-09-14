@@ -120,7 +120,7 @@ role NQPCursorRole is export {
         unless $shared {
             $shared := nqp::create(ParseShared);
             nqp::bindattr($shared, ParseShared, '$!CUR_CLASS', $?CLASS);
-            nqp::bindattr($shared, ParseShared, '$!orig', $orig);
+            nqp::bindattr($shared, ParseShared, '$!orig', nqp::decont($orig));
             nqp::bindattr_s($shared, ParseShared, '$!target',
 #?if parrot
                 pir::trans_encoding__Ssi($orig, pir::find_encoding__Is('ucs4')));
