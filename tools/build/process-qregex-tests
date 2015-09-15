@@ -40,11 +40,11 @@ my @files := [
 #     'rx_captures',
 #     'rx_qcaps',
      'rx_basic',
-#      'rx_quantifiers',
-#     'rx_metachars',
-#     'rx_charclass',
-#     'rx_backtrack',
-#     'rx_subrules',
+     'rx_quantifiers',
+     'rx_metachars',
+     'rx_charclass',
+     'rx_backtrack',
+     'rx_subrules',
 #     'rx_modifiers',
 ];
 my $tests := 0;

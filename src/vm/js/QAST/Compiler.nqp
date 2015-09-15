@@ -542,7 +542,9 @@ class QAST::OperationsJS {
     %ops<ordat> := %ops<ord>;
 
     add_simple_op('null', $T_OBJ, [], sub () {"null"});
-    add_simple_op('isnull', $T_BOOL, [$T_OBJ], sub ($obj) {"($obj === null)"});
+
+    #HACK we need to avoid using undefined at all
+    add_simple_op('isnull', $T_BOOL, [$T_OBJ], sub ($obj) {"($obj === null || $obj === undefined)"});
 
     add_simple_op('null_s', $T_STR, [], sub () {"null"});
     add_simple_op('isnull_s', $T_BOOL, [$T_STR], sub ($obj) {"($obj === null)"});
@@ -717,10 +719,10 @@ class QAST::OperationsJS {
 
     add_simple_op('nfafromstatelist', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
     add_simple_op('nfarunproto', $T_OBJ, [$T_OBJ, $T_STR, $T_INT], :sideffects);
+    add_simple_op('nfarunalt', $T_OBJ, [$T_OBJ, $T_STR, $T_INT, $T_OBJ, $T_OBJ, $T_OBJ]);
 
     # TODO 
     # add_simple_op('nfatostatelist', $T_OBJ, [$T_OBJ]);
-    # add_simple_op('nfarunalt', $T_OBJ, [$T_OBJ, $T_STR, $T_INT, $T_OBJ, $T_OBJ, $T_OBJ]);
 
     add_op('callmethod', sub ($comp, $node, :$want) {
 
@@ -1373,11 +1375,15 @@ class RegexCompiler {
         ~ self.goto($scan)
         ~ self.case($loop)
         ~ "$!pos++;\n"
-        ~ "if ($!pos >= $!target.length) \{{self.fail}\}\n" # HACK
-        ~ "$!cursor['\$!from'] = $!pos;\n"
+        ~ "if ($!pos >= $!target.length) \{{self.fail}\}\n"
+        ~ "$!cursor['\$!from'] = $!pos;\n" # HACK
         ~ self.case($scan)
         ~ self.mark($loop,$!pos,0)
         ~ self.case($done);
+    }
+
+    method has_char() {
+        "if ($!pos >= $!target.length) \{{self.fail()}\}";
     }
 
     method enumcharlist($node) {
@@ -1387,7 +1393,20 @@ class RegexCompiler {
         "if ($!pos >= $!target.length) \{{self.fail()}\}"
         ~ "if ($charlist.indexOf($!target.substr($!pos,1)) $testop -1) \{{self.fail()}\}"
         ~ ($node.subtype eq 'zerowidth' ?? '' !! "$!pos++;\n")
+    }
 
+    method charrange($node) {
+        if $node[0] eq 'ignorecase' {
+            $!compiler.NYI("charrange with ignorecase");
+        } else {
+            my $lower := $node[1].value;
+            my $upper := $node[2].value;
+
+            self.has_char 
+            ~ "if ({$node.negate ?? "" !! "!"} ($!target.charCodeAt($!pos) >= $lower && $!target.charCodeAt($!pos) <= $upper)) \{"
+            ~ self.fail ~ "\}\n"
+            ~ "$!pos++;\n"
+        }
     }
 
     method cclass_check($cclass,:$pos=$!pos,:$negated=0) {
@@ -1664,6 +1683,115 @@ class RegexCompiler {
         }
     }
 
+    method altseq($node) {
+        my @code;
+
+        my $iter     := nqp::iterator($node.list);
+        my $endlabel := self.new_label;
+        my $altlabel := self.new_label;
+        my $acode    := self.compile_rx(nqp::shift($iter));
+
+        while $iter {
+            @code.push(self.case($altlabel));
+            $altlabel := self.new_label;
+
+            @code.push(self.mark($altlabel, $!pos, 0));
+            @code.push($acode);
+            @code.push(self.goto($endlabel));
+
+            $acode := self.compile_rx(nqp::shift($iter));
+        }
+
+        @code.push(self.case($altlabel));
+        @code.push($acode);
+        @code.push(self.case($endlabel));
+
+        Chunk.void(|@code);
+    }
+
+    method alt($node) {
+        unless $node.name {
+            return self.altseq($node);
+        }
+
+        # Calculate all the branches to try, which populates the bstack
+        # with the options. Then immediately fail to start iterating it.
+
+        my $end_label := self.new_label;
+
+
+        my @alt_code;
+        my @alt_labels;
+
+        # Emit all the possible alternations.
+        my $iter     := nqp::iterator($node.list);
+        while $iter {
+            my $alt_label := self.new_label;
+
+            @alt_code.push(self.case($alt_label));
+            @alt_code.push(self.compile_rx(nqp::shift($iter)));
+            @alt_code.push(self.goto($end_label));
+
+            @alt_labels.push(~$alt_label);
+        }
+
+        Chunk.void(
+            "$!subcur = [{nqp::join(',',@alt_labels)}];\n",
+             self.mark($end_label, -1, 0),
+             call($!cursor, '!alt', $!pos, quote_string($node.name), $!subcur) ~ ";\n",
+             self.fail,
+             Chunk.void(|@alt_code),
+             self.case($end_label),
+            ($node.backtrack eq 'r' ?? self.commit($end_label) !! '')
+        );
+    }
+
+    method conjseq($node) {
+
+        my $conj_label := self.new_label;
+        my $first_label := self.new_label;
+
+        my $iter := nqp::iterator($node.list);
+        # make a mark that holds our starting position in the pos slot
+
+        my $start_pos := $*BLOCK.add_tmp;
+        my $end_pos := $*BLOCK.add_tmp;
+
+        my @code;
+
+        @code.push(
+            self.mark($conj_label, $!pos, 0)
+            ~ self.goto($first_label)
+            ~ self.case($conj_label)
+            ~ self.fail()
+
+            # call the first child
+            ~ self.case($first_label)
+        );
+        @code.push(self.compile_rx(nqp::shift($iter)));
+
+        # use previous mark to make one with pos=start, rep=end
+        @code.push(
+            self.peek($conj_label, $start_pos)
+            ~ self.mark($conj_label, $start_pos, $!pos));
+
+        while $iter {
+            @code.push("$!pos = $start_pos;\n");
+            @code.push(self.compile_rx(nqp::shift($iter)));
+            @code.push(
+                self.peek($conj_label, $start_pos, $end_pos)
+                ~ "if ($!pos != $end_pos) \{{self.fail()}\}\n"
+            );
+        }
+        if $node.subtype eq 'zerowidth' {
+            @code.push("$!pos = $start_pos;\n");
+        }
+
+        Chunk.void(|@code);
+    }
+
+    method conj($node) { self.conjseq($node) }
+
     method BUILD(:$compiler) {
         $!compiler := $compiler;
 
@@ -1723,6 +1851,7 @@ class RegexCompiler {
     method fail() {
         self.goto($!fail_label);
     }
+
 
 }
 
