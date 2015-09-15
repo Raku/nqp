@@ -282,7 +282,7 @@ op.istype = function(obj, type) {
   }
 
   // HACK
-  if (typeof obj === 'number' || typeof obj === 'string') {
+  if (typeof obj === 'number' || typeof obj === 'string' || obj instanceof Array) {
       return 0;
   }
 
