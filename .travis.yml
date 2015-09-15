@@ -25,3 +25,5 @@ env:
   matrix:
     - NQP_OPTIONS="--gen-moar"
     - NQP_OPTIONS="--gen-moar=master"
+    - NQP_OPTIONS="--gen-moar --backends=js,moar"
+    - NQP_OPTIONS="--gen-moar=master --backends=js,moar"
