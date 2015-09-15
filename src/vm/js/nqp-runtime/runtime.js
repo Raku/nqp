@@ -22,6 +22,9 @@ load_ops(bignum);
 var nfa = require('./nfa.js');
 load_ops(nfa);
 
+var cclass = require('./cclass.js');
+load_ops(cclass);
+
 var deserialization = require('./deserialization.js');
 exports.wval = deserialization.wval;
 load_ops(deserialization);
