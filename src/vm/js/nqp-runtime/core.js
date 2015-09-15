@@ -9,7 +9,14 @@ var reprs = require('./reprs.js');
 exports.CodeRef = CodeRef;
 
 op.atpos = function(array, index) {
-  return (array instanceof Array ? array[index] : array.$$atpos(index));
+  if (array instanceof Array) {
+    if (index < 0) {
+      index = array.length + index;
+    }
+    return array[index];
+  } else {
+    return array.$$atpos(index);
+  }
 };
 
 op.bindpos = function(array, index, value) {
