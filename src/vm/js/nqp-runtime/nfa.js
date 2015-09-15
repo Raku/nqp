@@ -1,6 +1,8 @@
 var op = {};
 exports.op = op;
 
+var iscclass = require('./cclass.js').op.iscclass;
+
 var EDGE_FATE = 0,
     EDGE_EPSILON = 1,
     EDGE_CODEPOINT = 2,
