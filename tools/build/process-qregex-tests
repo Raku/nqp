@@ -44,7 +44,7 @@ my @files := [
      'rx_metachars',
      'rx_charclass',
      'rx_backtrack',
-#     'rx_subrules',
+     'rx_subrules',
 #     'rx_modifiers',
 ];
 my $tests := 0;
