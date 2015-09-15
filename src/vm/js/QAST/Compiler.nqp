@@ -23,6 +23,8 @@ sub quote_string($str) {
             $out := $out ~ 'x1b';
         } elsif $backslash && $c eq 'a' {
             $out := $out ~ 'x07';
+        } elsif $backslash && $c eq 'n' {
+            $out := $out ~ "n\\\n";
         } else {
             if ($c eq "\x[2028]") {
                 $out := $out ~ "\\u2028";
