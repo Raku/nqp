@@ -51,6 +51,9 @@ sub MAIN(@ARGS) {
 #?if jvm
 sub MAIN(*@ARGS) {
 #?endif
+#?if js
+sub MAIN(*@ARGS) {
+#?endif
     # Enter the compiler.
     $nqpcomp.command_line(@ARGS, :encoding('utf8'), :transcode('ascii iso-8859-1'));
 

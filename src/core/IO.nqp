@@ -12,7 +12,9 @@ sub open($filename, :$r, :$w, :$a, :$bin) {
     my $mode := $w ?? 'w' !! ($a ?? 'wa' !! 'r');
     my $handle := nqp::open($filename, $mode);
 #?if !parrot
+#?if !js
     nqp::setinputlinesep($handle, "\n") if $r;
+#?endif
 #?endif
     nqp::setencoding($handle, 'utf8') unless $bin;
     $handle;

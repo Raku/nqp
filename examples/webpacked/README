@@ -1,0 +1,18 @@
+You need to install webpack.
+And then using npm install src/vm/js/nqp-loader and src/vm/js/nqp-runtime.
+For increased awesomeness we use webpack-dev-server and webpack-reload-plugin so you need to install those.
+
+
+Afterwards
+
+$ webpack
+
+Should bundle up example.nqp into bundle.js, which is loaded by index.html.
+
+If you run:
+
+$ webpack-dev-server --progress --colors -d
+
+A webserver will startup at localhost:8080 and example.nqp will be automatically reloaded and recompiled when you change it.
+
+

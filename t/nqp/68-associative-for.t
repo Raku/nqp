@@ -2,7 +2,7 @@
 
 # check hash access methods
 
-plan(10);
+plan(14);
 
 my %h;
 
@@ -53,3 +53,17 @@ for %h {
 ok($sum == 1234,"we iterate over the correct keys");
 ok($count == 4,"we iterate the correct number of times");
 
+my $it := nqp::iterator(%h);
+nqp::shift($it);
+nqp::shift($it);
+nqp::shift($it);
+ok(nqp::istrue($it) == 1, "iterator is true while we haven't iterator over everything");
+nqp::shift($it);
+ok(nqp::istrue($it) == 0, "iterator is false when we have iterated over everything");
+
+my %h1;
+%h1<foo> := 123;
+my $it_h1 := nqp::iterator(%h1);
+my $kv := nqp::shift($it_h1);
+ok(nqp::iterkey_s($kv) eq 'foo', 'nqp::iterkey_s on the thing returned by shifting an iterator');
+ok(nqp::iterval($kv) == 123, 'nqp::iterkey_s on the thing returned by shifting an iterator');

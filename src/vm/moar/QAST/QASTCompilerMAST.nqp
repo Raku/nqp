@@ -640,13 +640,40 @@ my class MASTCompilerInstance {
         }
     }
 
-    method deserialization_code($sc, @code_ref_blocks, $repo_conf_res) {
-        # Serialize it; we don't keep a reference to the string heap as we
-        # will leave MoarVM to just use the compilation unit's one.
-        my str $serialized := nqp::serialize($sc, nqp::list_s());
+    # this method is a hook point so that we can override serialization when cross-compiling
+    method serialize_sc($sc) {
+        # Serialize it.
+        my $sh := nqp::list_s();
+        my str $serialized := nqp::serialize($sc, $sh);
 
         # Now it's serialized, pop this SC off the compiling SC stack.
         nqp::popcompsc();
+
+        [$serialized, nqp::null()];
+    }
+
+    method deserialization_code($sc, @code_ref_blocks, $repo_conf_res) {
+        my $sc_tuple := self.serialize_sc($sc);
+        my str $serialized := $sc_tuple[0];
+        my $sh := $sc_tuple[1];
+
+        # String heap QAST.
+        my $sh_ast;
+
+        if nqp::islist($sh) {
+            $sh_ast := QAST::Op.new( :op('list_s') );
+            my $sh_elems := nqp::elems($sh);
+            my $i := 0;
+            while $i < $sh_elems {
+                $sh_ast.push(nqp::isnull_s(nqp::atpos_s($sh, $i))
+                    ?? QAST::Op.new( :op('null_s') )
+                    !! QAST::SVal.new( :value(nqp::atpos_s($sh, $i)) ));
+                $i := $i + 1;
+            }
+        }
+        else {
+            $sh_ast := QAST::Op.new( :op('null') );
+        }
 
         # Code references.
         my $cr_ast := QAST::Op.new( :op('list_b'), |@code_ref_blocks );
@@ -685,7 +712,8 @@ my class MASTCompilerInstance {
                     ?? QAST::Op.new( :op('null_s') )
                     !! QAST::SVal.new( :value($serialized) ),
                 QAST::Var.new( :name('cur_sc'), :scope('local') ),
-                QAST::Op.new( :op('null') ),
+                $sh_ast, # XXX I had to leave this in, otherwise the JS backend doesn't build.
+                         #     I would love some help figuring out why!
                 QAST::Block.new( :blocktype('immediate'), $cr_ast ),
                 QAST::Var.new( :name('conflicts'), :scope('local') )
             ),
@@ -1793,6 +1821,10 @@ class QAST::MASTCompiler {
 
     method operations() {
         QAST::MASTOperations
+    }
+
+    method instance() {
+        MASTCompilerInstance
     }
 }
 

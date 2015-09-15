@@ -28,7 +28,7 @@ $abc.foo();
 $xyz.foo();
 $xyz.bar();
 my $xyzhow := $xyz.HOW;
-if $xyzhow.isa($xyz, ABC) { say('ok 4') }
-if $xyzhow.isa($xyz, XYZ) { say('ok 5') }
+if $xyzhow.isa($xyz, ABC) { say('ok 4') } else { say('not ok 4') }
+if $xyzhow.isa($xyz, XYZ) { say('ok 5') } else { say('not ok 4') }
 say( $abc.HOW.isa($abc, XYZ) ?? 'not ok 6' !! 'ok 6' );
 

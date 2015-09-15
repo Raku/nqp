@@ -14,20 +14,19 @@ print <<"END_HEAD";
 
 END_HEAD
 
+
 foreach my $file (@files) {
     print "# From $file\n\n";
     open(my $fh, "<:utf8",  $file) or die "$file: $!";
-    my $in_cond = 0;
     my $in_omit = 0;
+    my @conds;
     while (<$fh>) {
         if (/^#\?if\s+(!)?\s*(\w+)\s*$/) {
-            die "Nested conditionals not supported" if $in_cond;
-            $in_cond = 1;
-            $in_omit = $1 && $2 eq $backend || !$1 && $2 ne $backend;
+            push @conds,$in_omit;
+            $in_omit = $in_omit || ($1 && $2 eq $backend || !$1 && $2 ne $backend);
         }
         elsif (/^#\?endif\s*$/) {
-            $in_cond = 0;
-            $in_omit = 0;
+            $in_omit = pop @conds;
         }
         elsif (!$in_omit) {
             print;

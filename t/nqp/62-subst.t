@@ -5,7 +5,7 @@ plan(7);
 my $str := 'hello';
 
 ok(subst($str, /h/, 'f') eq 'fello', 'We can use subst');
-ok($str                  eq 'hello', '.. withouth side effect');
+ok($str                  eq 'hello', '.. without side effect');
 
 ok(subst($str, /l/, 'r', :global) eq 'herro', 'We can use subst to replace all matches');
 

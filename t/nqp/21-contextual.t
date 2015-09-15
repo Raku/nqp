@@ -2,7 +2,7 @@
 
 # Tests for contextual variables
 
-plan(7);
+plan(10);
 
 sub foo() { $*VAR }
 
@@ -27,4 +27,28 @@ sub foo() { $*VAR }
     ok($*VAR eq 'abc', 'nested contextuals don\'t affect outer ones');
 }
 
+
+
+sub simple_lookup() {
+    my $foo := nqp::getlexdyn('$*fo' ~ 'o');
+    ok( $foo eq 'bar', "getting dynamic variable using getlexdyn");
+}
+
+{
+    my $*foo := "bar";
+    simple_lookup();
+}
+
+sub ignore_local() {
+    my $*foo2;
+    $*foo2 := "baz";
+    my $foo := nqp::getlexdyn('$*foo2');
+    ok( $foo eq 'bar2', "getting dynamic variable using getlexdyn gets the variable from the caller");
+    ok( nqp::isnull(nqp::getlexdyn("$*no_such")), "nqp::getlexdyn return null for missing variables");
+}
+
+{
+    my $*foo2 := "bar2";
+    ignore_local();
+}
 

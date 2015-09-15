@@ -2,7 +2,7 @@
 
 # Test nqp::op file operations.
 
-plan(56);
+plan(61);
 
 ok( nqp::stat('CREDITS', nqp::const::STAT_EXISTS) == 1, 'nqp::stat exists');
 ok( nqp::stat('AARDVARKS', nqp::const::STAT_EXISTS) == 0, 'nqp::stat not exists');
@@ -12,6 +12,7 @@ ok( nqp::stat('CREDITS', nqp::const::STAT_ISDIR) == 0, 'nqp::stat not directory'
 
 ok( nqp::stat('CREDITS', nqp::const::STAT_ISREG) == 1, 'nqp::stat is regular file');
 ok( nqp::stat('t', nqp::const::STAT_ISREG) == 0, 'nqp::stat not regular file');
+
 
 my $credits := nqp::open('CREDITS', 'r');
 nqp::setinputlinesep($credits, "\n");
@@ -31,6 +32,32 @@ ok( nqp::chars(nqp::readlinefh($credits)) == 0, 'nqp::readlinefh end of file rep
 ok( nqp::chars(nqp::readallfh($credits)) == 0, 'nqp::readallfh end of file');
 ok( nqp::chars(nqp::readlinefh($credits)) == 0, 'nqp::readlinefh end of file repeat');
 ok( nqp::defined(nqp::closefh($credits)), 'nqp::closefh');
+
+# setinputlinesep tests
+
+{
+    my $data := nqp::open('t/nqp/19-setinputlinesep.txt', 'r');
+    nqp::setinputlinesep($data, "a");
+    my $line1 := nqp::readlinefh($data);
+    my $line2 := nqp::readlinefh($data);
+    ok($line1 eq 'This is a', "setinputlinesep with a input separator containing of one character... reading first line");
+    ok($line2 eq ' ra', "setinputlinesep with a input separator containing of one character... reading first line");
+}
+
+if nqp::getcomp('nqp').backend.name eq 'js' {
+    my $data := nqp::open('t/nqp/19-setinputlinesep.txt', 'r');
+    nqp::setinputlinesep($data, "ba");
+    my $line1 := nqp::readlinefh($data);
+    my $line2 := nqp::readlinefh($data);
+    my $line3 := nqp::readlinefh($data);
+    ok($line1 eq 'This is a random line ending with ba', "setinputlinesep with a input separator containing of two character... reading first line");
+    my $long := ' and not a newline...............................................................ba';
+    ok($line2 eq $long, '... reading second line');
+    ok(nqp::substr($line3, 0, 9) eq '123456789' && (nqp::chars($line3) == 10 || nqp::chars($line3) == 11), '... reading last line not ending with input separator');
+}
+else {
+    ok(1, "$_ # Skipped: setinputlinesep with multiple chars is broken for the MoarVM and possibly others") for (22, 23, 24);
+}
 
 ok( nqp::defined(nqp::getstdin()), 'nqp::getstdin');
 ok( nqp::defined(nqp::getstdout()), 'nqp::getstdout');

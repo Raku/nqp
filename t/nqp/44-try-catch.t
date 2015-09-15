@@ -2,10 +2,15 @@
 
 # Tests for try and catch
 
-plan(9);
+plan(10);
 
 sub oops($msg = "oops!") { # throw an exception
     nqp::die($msg);
+}
+
+# for historical reasons we have nqp::die_s and nqp::die until one of them dies test both
+sub oops_s() { # throw an exception using nqp::die_s
+    nqp::die_s("oops_s!");
 }
 
 my $ok := 1;
@@ -79,3 +84,9 @@ $ok := "";
 }
 
 ok($ok eq "oops!", "combination of both try and CATCH");
+
+{
+        CATCH {$ok := $_}
+        oops_s();
+}
+ok($ok eq "oops_s!", "nqp::die_s");

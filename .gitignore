@@ -40,7 +40,7 @@ config.default
 3rdparty/dyncall/ConfigVars
 3rdparty/dyncall/*/*.a
 /nqp_const.pir
-bin
+node_modules
 nqp-runtime.jar
 *.class
 *.jar

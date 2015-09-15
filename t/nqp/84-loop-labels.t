@@ -1,4 +1,4 @@
-plan(12);
+plan(13);
 
 my $i := 0; # counter
 my $k := 0; # counter
@@ -71,6 +71,28 @@ TESTD1: for ["foo"] {
     }
 }
 is($t, 'foobarfoobar', 'redoing outer for loop');
+
+my @skip;
+@skip[0] := 4;
+@skip[1] := 6;
+@skip[2] := 7;
+my @not_skipped;
+
+
+$i := 0;
+MAIN_LOOP: while $i < 10 {
+    $i := $i + 1;
+    my $j := 0;
+    while $j < 3 {
+        my $check := @skip[$j];
+        $j := $j + 1;
+        if $check == $i {
+            next MAIN_LOOP;
+        }
+    }
+    nqp::push(@not_skipped, ~$i);
+}
+ok(nqp::join(',', @not_skipped) eq '1,2,3,5,8,9,10', 'testing next with a loop label');
 
 sub is($a, $b, $text) {
     if $a == $b {

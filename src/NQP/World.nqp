@@ -487,6 +487,9 @@ class NQP::World is HLL::World {
 #?if jvm
         QAST::Op.new( :op('null') )
 #?endif
+#?if js
+        QAST::Op.new( :op('null') )
+#?endif
 #?if moar
         my $libs := QAST::Stmts.new();
         if %*COMPILING<%?OPTIONS><vmlibs> {

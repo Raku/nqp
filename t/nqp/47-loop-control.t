@@ -1,6 +1,6 @@
 #! nqp
 
-plan(3);
+plan(4);
 
 my $runs := 0;
 
@@ -30,3 +30,15 @@ while $i < 5 {
 }
 
 ok($runs == 10, "redo works in while");
+
+$runs := 0;
+my $list := (1,20,300,4000,50000);
+my $sum := 0;
+for $list {
+    $runs++;
+    if $_ == 4000 {
+        last;
+    }
+    $sum := $_ + $sum;
+}
+ok($runs == 4 && $sum == 321, "last works in for");

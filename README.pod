@@ -97,3 +97,20 @@ machine.  Also, nqp-rx only ran on Parrot, whereas NQP also runs on the JVM
 and MoarVM and is designed to be portable to more.
 
     [2] http://github.com/perl6/nqp-rx
+
+=head2 JavaScript backend
+
+The JavaScript backend is currently undergoing a refactor/rewrite of parts to generate decently performing javascript, add source maps and remove some old hack as well as clean up the code. 
+As a result of that it's in a really rough state so the best thing before playing with it/hacking on it is to contact pmurias via irc at #perl6 on irc.freenode.org.
+
+Building the JavaScript backend currently requires building the moar backend.
+
+perl Configure.pl --backends=moar,js
+make
+
+Currently it needs to be run like:
+
+    ./nqp-js file.nqp
+
+To run the tests 
+   make js-test

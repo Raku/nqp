@@ -2,13 +2,15 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(126);
-
+plan(177);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
 ok( nqp::mul_i(5,2) == 10, 'nqp::mul_i');
 ok( nqp::div_i(5,2) == 2, 'nqp::div_i');
+
+ok(nqp::bitshiftl_i(1, 30) == 1073741824, 'nqp::bitshiftl_i');
+ok(nqp::bitshiftl_i(131, 3) == 1048, 'nqp::bitshiftl_i');
 
 ok( nqp::add_n(5,2) == 7, 'nqp::add_n');
 ok( nqp::sub_n(5,2) == 3, 'nqp::sub_n');
@@ -47,6 +49,8 @@ ok( nqp::rindex('Hello World', '', 100) == -1, 'nqp::rindex with empty match at 
 
 ok( nqp::chr(120) eq 'x', 'nqp::chr');
 ok( nqp::ord('xyz') eq 120, 'nqp::ord');
+ok( nqp::ord('xyz',2) eq 122, '2 argument nqp::ord');
+ok( nqp::ordat('xyz',2) eq 122, 'nqp::ordat');
 ok( nqp::lc('Hello World') eq 'hello world', 'nqp::downcase');
 ok( nqp::uc("Don't Panic") eq "DON'T PANIC", 'nqp::upcase');
 ok( nqp::flip("foo") eq "oof", "nqp::flip");
@@ -62,7 +66,6 @@ ok( nqp::elems(@items) == 11 && @items[0] eq '' && @items[10] eq '', 'nqp::split
 @items := nqp::split('', 'a little lamb');
 ok( nqp::join('|', @items) eq 'a| |l|i|t|t|l|e| |l|a|m|b', 'nqp::split("", ...)');
 
-ok( nqp::iseq_i(2, 2) == 1, 'nqp::iseq_i');
 
 ok( nqp::cmp_i(2, 0) ==  1, 'nqp::cmp_i');
 ok( nqp::cmp_i(2, 2) ==  0, 'nqp::cmp_i');
@@ -154,6 +157,9 @@ ok( nqp::shift($iter) eq 'b', 'nqp::iterator');
 ok( nqp::shift($iter) == 3.0, 'nqp::iterator');
 ok( nqp::elems($list) == 3, "iterator doesn't modify list");
 ok( nqp::islist($list), "nqp::islist works");
+nqp::unshift($list,'zero');
+ok( nqp::elems($list) == 4, 'nqp::unshift adds 1 element');
+ok( nqp::atpos($list,0) == 'zero', 'nqp::unshift the correct element');
 
 my %hash;
 %hash<foo> := 1;
@@ -177,3 +183,105 @@ sub test_splice_with_return() {
     @children
 }
 ok(nqp::elems(test_splice_with_return()) == 2, 'splice works as a return value');
+ok(!nqp::isnull_s("foo"), 'test for isnull_s with a normal string');
+ok(nqp::isnull_s(nqp::null_s()), 'test for isnull_s with a null_s');
+
+ok(nqp::time_n() != 0, 'time_n is not zero');
+ok(nqp::time_i() != 0, 'time_i is not zero');
+
+my $time_a := nqp::time_i();
+my $time_b := nqp::time_n();
+ok($time_b >= $time_a, "time_n >= time_i");
+
+ok(nqp::eqat("foobar","foo", 0) == 1, "eqat with needle argument that matches at 0");
+ok(nqp::eqat("foobar","oob", 1) == 1, "eqat with needle argument that matches at 1");
+ok(nqp::eqat("foobar","foo", 1) == 0, "eqat with needle argument that matches");
+ok(nqp::eqat("foobar","bar", -3) == 1, "eqat with a negative offset argument");
+ok(nqp::eqat("foobar","foo", -9001) == 1, "eqat with a gigantic offset argument");
+ok(nqp::eqat("foobar","foobarbaz", 0) == 0, "eqat with needle argument longer than haystack");
+
+{
+    my $source := nqp::list("100", "200", "300");
+    my $a := nqp::list("1", "2", "3");
+    nqp::splice($a, $source, 0, 0);
+    ok(nqp::join(",", $a) eq '100,200,300,1,2,3', "splice");
+
+    my $b := nqp::list("1", "2", "3", "4");
+    nqp::splice($b, $source, 1, 2);
+    ok(nqp::join(",", $b) eq '1,100,200,300,4', "splice");
+}
+
+{
+    my $list := nqp::list("1","2","3","4","5");
+    my $ret := nqp::setelems($list, 3);
+    ok(nqp::join(",", $list) eq '1,2,3', 'nqp::setelems reduces list length properly');
+    ok(nqp::join(",", $ret) eq '1,2,3', 'nqp::setelems return value');
+}
+
+ok(nqp::isge_i(10, 10) == 1, "isge_i =");
+ok(nqp::isge_i(9, 10) == 0, "isge_i <");
+ok(nqp::isge_i(11, 10) == 1, "isge_i >");
+
+ok(nqp::isgt_i(10, 10) == 0, "isge_i =");
+ok(nqp::isgt_i(9, 10) == 0, "isge_i <");
+ok(nqp::isgt_i(11, 10) == 1, "isge_i >");
+
+ok(nqp::islt_i(10, 10) == 0, "islt_i =");
+ok(nqp::islt_i(9, 10) == 1, "islt_i <");
+ok(nqp::islt_i(11, 10) == 0, "islt_i >");
+
+ok(nqp::isle_i(10, 10) == 1, "isle_i =");
+ok(nqp::isle_i(9, 10) == 1, "isle_i <");
+ok(nqp::isle_i(11, 10) == 0, "isle_i >");
+
+ok(nqp::isne_i(10, 10) == 0, "isne_i =");
+ok(nqp::isne_i(9, 10) == 1, "isne_i <");
+ok(nqp::isne_i(11, 10) == 1, "isne_i >");
+
+ok(nqp::iseq_i(10, 10) == 1, "iseq_i =");
+ok(nqp::iseq_i(9, 10) == 0, "iseq_i <");
+ok(nqp::iseq_i(11, 10) == 0, "iseq_i >");
+
+ok(nqp::sha1("Hello World") eq '0A4D55A8D778E5022FAB701977C5D840BBC486D0', "sha1");
+
+{
+    my $a := nqp::list_i();
+    nqp::push_i($a, 10.4);
+    nqp::push_i($a, 11);
+    nqp::push_i($a, 12);
+    ok(nqp::elems($a) == 3, 'nqp::elems/nqp::push_i');
+    ok(nqp::pop_i($a) == 12, 'nqp::pop_i');
+    ok(nqp::elems($a) == 2, 'nqp::pop_i reduces the number of elements correctly');
+    ok(nqp::islist($a) == 1, 'nqp::islist(nqp::list_i())');
+
+    my $b := nqp::list_i(1,2,30.4);
+    ok(nqp::atpos_i($b,2) == 30, 'atpos_i');
+
+
+    my $c := nqp::list_i();
+    nqp::bindpos_i($c, 1, 102);
+    nqp::bindpos_i($c, 1, 103);
+    nqp::bindpos_i($c, 0, 101);
+    ok(nqp::atpos_i($c, 1) == 103, 'bindpos_i works');
+}
+
+{
+    my $a := nqp::list_s();
+    nqp::push_s($a, "A");
+    nqp::push_s($a, "B");
+    nqp::push_s($a, "C");
+    ok(nqp::elems($a) == 3, 'nqp::elems/nqp::push_s');
+    ok(nqp::pop_s($a) eq "C", 'nqp::pop_s');
+    ok(nqp::elems($a) == 2, 'nqp::pop_s reduces the number of elements correctly');
+    ok(nqp::islist($a) == 1, 'nqp::islist(nqp::list_s())');
+
+    my $b := nqp::list_s("A","B","C");
+    ok(nqp::atpos_s($b,2) eq "C", 'atpos_s');
+}
+
+{
+    my $a := nqp::list();
+    nqp::bindpos($a, 1, "Hello World");
+    ok($a[1] eq 'Hello World', 'nqp::bindpos')
+}
+

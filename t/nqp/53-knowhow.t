@@ -17,7 +17,7 @@ ok($x.lol eq "yay, methods", "method calls on knowhow instance");
 
 $x.set_bbq("wurst");
 ok($x.get_bbq eq "wurst", "attributes on knowhow instance");
-ok(Foo.HOW.name(Foo), "getting the name using the HOW works correctly");
+ok(Foo.HOW.name(Foo) eq 'Foo', "getting the name using the HOW works correctly");
 
 my $attrs := Foo.HOW.attributes(Foo);
 ok($attrs[0].name eq '$!bbq',"we can get the attributes");
