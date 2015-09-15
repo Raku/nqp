@@ -276,7 +276,8 @@ op.findmethod = function(obj, method) {
 
 op.istype = function(obj, type) {
   /* Null always type checks false. */
-  if (obj === null) {
+  /* HACK - undefined */
+  if (obj === null || obj === undefined) {
       return 0;
   }
 
