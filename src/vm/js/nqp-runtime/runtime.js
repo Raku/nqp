@@ -105,6 +105,9 @@ exports.to_int = function(arg, ctx) {
     return arg | 0;
   } else if (arg.Int) {
     return arg.Int(ctx);
+  } else if (typeof arg == 'string') {
+    var ret = parseInt(arg);
+    return isNaN(ret) ? 0 : ret;
   } else {
     throw "Can't convert to int";
   }
