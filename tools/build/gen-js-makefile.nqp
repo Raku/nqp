@@ -153,15 +153,20 @@ say("\n\njs-clean:
 	\$(RM_RF) gen/js/stage1 gen/js/stage2
 ");
 
-deps("js-all", 'm-all', 'js-stage1-compiler', 'node_modules/installed',$nqpcore-moarvm, $nqpcore-combined, $QASTNode-moarvm, $QRegex-moarvm);
+deps("js-all", 'm-all', 'js-stage1-compiler', 'node_modules/runtime_copied',$nqpcore-moarvm, $nqpcore-combined, $QASTNode-moarvm, $QRegex-moarvm);
 
 # Enforce the google coding standards
 say("js-lint:
 	gjslint --strict --nojsdoc src/vm/js/nqp-runtime/*.js");
 
-say('node_modules/installed: src/vm/js/nqp-runtime/*.js src/vm/js/nqp-runtime/package.json
+say('node_modules/npm_installed: src/vm/js/nqp-runtime/package.json
 	npm install src/vm/js/nqp-runtime
-	touch node_modules/installed');
+	touch node_modules/npm_installed');
+
+say('node_modules/runtime_copied: node_modules/npm_installed src/vm/js/nqp-runtime/*.js
+	rm node_modules/nqp-runtime/*.js
+	cp src/vm/js/nqp-runtime/*.js node_modules/nqp-runtime/
+	touch node_modules/runtime_copied');
 
 say('js-install: js-all
 	@echo "*** The JavaScript backend can\'t be installed yet, sorry! ***"');

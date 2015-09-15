@@ -63,11 +63,15 @@ gen/js/qregex.t: tools/build/process-qregex-tests
 js-clean:
 	$(RM_RF) gen/js/stage1 gen/js/stage2
 
-js-all : m-all js-stage1-compiler node_modules/installed $(JS_STAGE2)/NQPCORE.setting.moarvm $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp $(JS_STAGE2)/QASTNode.moarvm $(JS_STAGE2)/QRegex.moarvm
+js-all : m-all js-stage1-compiler node_modules/runtime_copied $(JS_STAGE2)/NQPCORE.setting.moarvm $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp $(JS_STAGE2)/QASTNode.moarvm $(JS_STAGE2)/QRegex.moarvm
 js-lint:
 	gjslint --strict --nojsdoc src/vm/js/nqp-runtime/*.js
-node_modules/installed: src/vm/js/nqp-runtime/*.js src/vm/js/nqp-runtime/package.json
+node_modules/npm_installed: src/vm/js/nqp-runtime/package.json
 	npm install src/vm/js/nqp-runtime
-	touch node_modules/installed
+	touch node_modules/npm_installed
+node_modules/runtime_copied: node_modules/npm_installed src/vm/js/nqp-runtime/*.js
+	rm node_modules/nqp-runtime/*.js
+	cp src/vm/js/nqp-runtime/*.js node_modules/nqp-runtime/
+	touch node_modules/runtime_copied
 js-install: js-all
 	@echo "*** The JavaScript backend can't be installed yet, sorry! ***"
