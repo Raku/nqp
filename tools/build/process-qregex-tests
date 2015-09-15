@@ -37,8 +37,8 @@ sub test_line($rxsub,$target,$expect,$desc) {
 
 
 my @files := [
-#     'rx_captures',
-#     'rx_qcaps',
+     'rx_captures',
+     'rx_qcaps',
      'rx_basic',
      'rx_quantifiers',
      'rx_metachars',
