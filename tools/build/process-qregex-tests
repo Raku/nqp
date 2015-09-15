@@ -45,7 +45,7 @@ my @files := [
      'rx_charclass',
      'rx_backtrack',
      'rx_subrules',
-#     'rx_modifiers',
+     'rx_modifiers',
 ];
 my $tests := 0;
 for @files -> $fn {
