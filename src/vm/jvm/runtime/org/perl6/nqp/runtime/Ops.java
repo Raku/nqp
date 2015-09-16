@@ -3391,7 +3391,7 @@ public final class Ops {
             SixModelObject iterType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.hashIteratorType;
             VMIterInstance iter = (VMIterInstance)iterType.st.REPR.allocate(tc, iterType.st);
             iter.target = agg;
-            iter.hashKeyIter = ((VMHashInstance)agg).storage.keySet().iterator();
+            iter.hashKeyIter = ((HashMap)((VMHashInstance)agg).storage.clone()).keySet().iterator();
             iter.iterMode = VMIterInstance.MODE_HASH;
             return iter;
         }
