@@ -37,7 +37,8 @@ changed in step 1 above. Don't forget to build the JVM backend, as well.
   $ make realclean
   $ perl Configure.pl --gen-parrot --gen-moar --backend=parrot,moar,jvm
   $ make
-  $ make test
+  $ make m-test
+  $ make j-test
 
 Resolve any problems that may still exist.  You may want to try building
 each backend seperately if a problem occurs building all backends at the same
