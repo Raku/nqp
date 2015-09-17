@@ -63,7 +63,7 @@ step 3.
 
 Tag NQP by its release month ("YYYY.MM")
 
-  $ git tag -s -a -m"tag release YYYY.MM" YYYY.MM    # e.g., 2012.12
+  $ git tag -u <email address> -s -a -m"tag release YYYY.MM" YYYY.MM    # e.g., 2012.12
   $ git push --tags
 
 The C<-s> tells git to sign the tag with your GPG key. Please see rakudo's
