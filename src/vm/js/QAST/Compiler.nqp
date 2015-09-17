@@ -1302,6 +1302,8 @@ class RegexCompiler {
         my $jump := $*BLOCK.add_tmp();
         my $cstack_top := $*BLOCK.add_tmp();
 
+        my $restart_label := self.new_label;
+
         Chunk.new($T_OBJ, $!cursor, [
             "{$!label} = {$!initial_label};\n",
             "$start = self['!cursor_start_all']({$*CTX}, \{\});\n",
@@ -1311,11 +1313,14 @@ class RegexCompiler {
             "{$!curclass} = $start[3];\n",
             "{$!bstack} = $start[4];\n",
             "{$!restart} = $start[5];\n",
+            "if ($!pos > $!target.length) \{$!label = $!fail_label\}\n",
+            "if ($!restart) \{$!label = $restart_label\}\n",
             "{$!js_loop_label}: while (1) \{\nswitch ({$!label}) \{\n",
 
             self.case($!initial_label),
             self.compile_rx($node),
-
+            self.case($restart_label),
+            "$!cstack = $!cursor[\"\$!cstack\"];\n",
             self.case($!fail_label),
             "if ($!bstack.length == 0) \{{self.goto($!done_label)}\}\n",
             "$cstack_top = $!bstack.pop();\n",
@@ -1526,7 +1531,6 @@ class RegexCompiler {
 
         my $testop := $node.negate ?? '>=' !! '<';
 
-        my $subcur := $*BLOCK.add_tmp;
 
         my $capture_code := '';
 
@@ -1545,22 +1549,22 @@ class RegexCompiler {
                 $capture_code := $capture_code
                     ~ self.goto($pass_label)
                     ~ self.case($back_label)
-                    ~ "$subcur =" ~ call($!subcur, "!cursor_next") ~ ";\n"
-                    ~ "if($subcur['$!pos'] $testop 0) \{{self.fail}\};\n"
+                    ~ "$!subcur =" ~ call($!subcur, "!cursor_next") ~ ";\n"
+                    ~ "if($!subcur['\$!pos'] $testop 0) \{{self.fail}\};\n"
                     ~ self.case($pass_label);
 
                 if $node.subtype eq 'capture' {
                     $capture_code := $capture_code
                         ~ "$!cstack = " 
-                        ~ call($!cursor, "!cursor_capture", $subcur, quote_string($node.name)) ~ ";\n";
+                        ~ call($!cursor, "!cursor_capture", $!subcur, quote_string($node.name)) ~ ";\n";
                     $captured := 1;
                 }
                 else {
                     $capture_code := $capture_code
                         ~ "$!cstack = "
-                        ~ call($!cursor, "!cursor_push_cstack", $subcur) ~ ";\n" ~
-                        ~  "$!bstack.push($back_label, 0, $!pos, $!cstack.length);\n";
+                        ~ call($!cursor, "!cursor_push_cstack", $!subcur) ~ ";\n";
                 }
+                $capture_code := $capture_code ~  "$!bstack.push($back_label, $!pos, 0, $!cstack.length);\n";
                 
            }
         }
@@ -1568,18 +1572,18 @@ class RegexCompiler {
         if !$captured && $node.subtype eq 'capture' {
             $capture_code := $capture_code
                 ~ "$!cstack = " ~
-                call($!cursor, "!cursor_capture", $subcur,  quote_string($node.name)) ~ ";\n"
+                call($!cursor, "!cursor_capture", $!subcur,  quote_string($node.name)) ~ ";\n"
         }
 
         # TODO proper $!pos access
         Chunk.void(
             "$!cursor['\$!pos\'] = $!pos;\n",
             $call,
-            "$subcur = {$call.expr};\n",
-            "if ($subcur['\$!pos\'] $testop 0) \{{self.fail}\}\n",
+            "$!subcur = {$call.expr};\n",
+            "if ($!subcur['\$!pos\'] $testop 0) \{{self.fail}\}\n",
             $capture_code,
 
-            ($node.subtype eq 'zerowidth' ?? '' !! "$!pos = $subcur['\$!pos\'];\n")
+            ($node.subtype eq 'zerowidth' ?? '' !! "$!pos = $!subcur['\$!pos\'];\n")
         );
     }
 
@@ -1589,16 +1593,15 @@ class RegexCompiler {
         my $fail_label := self.new_label; 
 
         my $subcapture_from := $*BLOCK.add_tmp;
-        my $subcur := $*BLOCK.add_tmp;
 
         Chunk.void(
             self.mark($fail_label,$!pos,0),
             self.compile_rx($node[0]),
             self.peek($fail_label,$subcapture_from),
             "$!cursor['\$!pos\'] = $!pos;\n",
-            "$subcur = " ~ call($!cursor, '!cursor_start_subcapture', $subcapture_from) ~ ";\n",
-            call($subcur, '!cursor_pass', $!pos) ~ ";\n",
-            "$!cstack = " ~ call($!cursor, '!cursor_capture', $subcur, quote_string($node.name)) ~ ";\n",
+            "$!subcur = " ~ call($!cursor, '!cursor_start_subcapture', $subcapture_from) ~ ";\n",
+            call($!subcur, '!cursor_pass', $!pos) ~ ";\n",
+            "$!cstack = " ~ call($!cursor, '!cursor_capture', $!subcur, quote_string($node.name)) ~ ";\n",
             self.goto($done_label),
             self.case($fail_label),
             self.fail(),
