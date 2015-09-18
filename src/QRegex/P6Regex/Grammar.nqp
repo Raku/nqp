@@ -421,7 +421,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
                   }
               }
           \s* ']'
-        | $<name>=[\w+]
+        | $<name>=<identifier>
         | ':' $<invert>=['!'|<?>] <identifier> { $*key := $<identifier>.Str }
             [
             || <coloncircumfix=.LANG('MAIN','coloncircumfix', $*key)>
