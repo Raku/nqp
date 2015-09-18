@@ -5968,12 +5968,12 @@ public final class Ops {
             for( Field field : interestingFields ) {
                 try {
                     SixModelObject curAttr = (SixModelObject) field.get(obj);
-                    try {
+                    Field field_0 = curAttr.getClass().getFields()[0];
+                    if( field_0.get(curAttr).getClass().isInstance(BigInteger.class) ) {
                         curAttr.get_attribute_native(tc, null, null, 0);
-                    } catch (RuntimeException innerRTE) {
                     }
-                } catch(IllegalAccessException iae) {
-                    // this really shouldn't happen, but...
+                } catch (IllegalAccessException iae) {
+                    // this really shouldn't happen, we should be allowed to know the definitions etc.
                 }
             }
         }
