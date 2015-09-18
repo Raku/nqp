@@ -106,6 +106,7 @@ import org.perl6.nqp.sixmodel.reprs.P6bigintInstance;
 import org.perl6.nqp.sixmodel.reprs.P6int;
 import org.perl6.nqp.sixmodel.reprs.P6str;
 import org.perl6.nqp.sixmodel.reprs.P6num;
+import org.perl6.nqp.sixmodel.reprs.P6OpaqueREPRData;
 import org.perl6.nqp.sixmodel.reprs.ReentrantMutexInstance;
 import org.perl6.nqp.sixmodel.reprs.SCRefInstance;
 import org.perl6.nqp.sixmodel.reprs.SemaphoreInstance;
@@ -5943,39 +5944,34 @@ public final class Ops {
     }
 
     /* Big integer operations. */
-
     private static BigInteger getBI(ThreadContext tc, SixModelObject obj) {
         if (obj instanceof P6bigintInstance)
             return ((P6bigintInstance)obj).value;
-        /* What follows is a bit of a hack.
-         * Unlike previously, we cannot rely on field_0 being the bigint,
-         * because we might have an allomorph coming in.
-         * To correctly handle that case we need to find the field on obj
-         * which contains a BigInteger in field_0, in case we failed to
-         * find the BigInteger in field_0 of obj.
-        */
-        try {
-            obj.get_attribute_native(tc, null, null, 0);
-        }
-        catch (RuntimeException RTE) {
-            List<Field> interestingFields = new ArrayList<Field>(Arrays.asList(obj.getClass().getFields()));
-            for( Iterator<Field> it = interestingFields.iterator(); it.hasNext(); ) {
-                if( !it.next().getName().startsWith("field_") ) {
-                    it.remove();
-                }
-            }
+        return getBI(tc, obj, obj.st.WHAT);
+    }
 
-            for( Field field : interestingFields ) {
-                try {
-                    SixModelObject curAttr = (SixModelObject) field.get(obj);
-                    Field field_0 = curAttr.getClass().getFields()[0];
-                    if( field_0.get(curAttr).getClass().isInstance(BigInteger.class) ) {
-                        curAttr.get_attribute_native(tc, null, null, 0);
-                    }
-                } catch (IllegalAccessException iae) {
-                    // this really shouldn't happen, we should be allowed to know the definitions etc.
-                }
-            }
+    private static BigInteger getBI(ThreadContext tc, SixModelObject obj, SixModelObject type) {
+        if (obj instanceof P6bigintInstance)
+            return ((P6bigintInstance)obj).value;
+
+        int hint = 0;
+        if( obj.st.REPRData != null ) {
+            hint = ((P6OpaqueREPRData) obj.st.REPRData) != null ? ((P6OpaqueREPRData) obj.st.REPRData).unboxIntSlot : -1;
+        }
+        if( hint < 0 && type.st.REPRData != null ) {
+            hint = ((P6OpaqueREPRData) type.st.REPRData) != null ? ((P6OpaqueREPRData) type.st.REPRData).unboxIntSlot : -1;
+        }
+
+        hint = hint < 0 ? 0 : hint;
+
+        try {
+            obj.get_attribute_native(tc, null, null, hint);
+        } catch (RuntimeException rte) {
+            // we couldn't get native, let's just getBI for the slot hinted at, with the type for that hint
+            // XXX: type.st.REPRData could theoretically be null here - it shouldn't be, because if it was
+            // we should already have handled a P6bigint successfully in the try above.
+            SixModelObject innerType = ((P6OpaqueREPRData) type.st.REPRData).flattenedSTables[hint].WHAT;
+            tc.native_j = (BigInteger) getBI(tc, obj.get_attribute_boxed(tc, null, null, hint), innerType);
         }
         return (BigInteger)tc.native_j;
     }
@@ -5986,8 +5982,16 @@ public final class Ops {
             ((P6bigintInstance)res).value = value;
         }
         else {
+            int hint = (int) ((P6OpaqueREPRData) type.st.REPRData).unboxIntSlot;
+            hint = hint < 0 ? 0 : hint;
             tc.native_j = value;
-            res.bind_attribute_native(tc, null, null, 0);
+            try {
+                res.bind_attribute_native(tc, null, null, hint);
+            } catch (RuntimeException rte) {
+                // we couldn't bind native, let's just makeBI for the slot hinted at, with the type for that hint
+                SixModelObject innerType = ((P6OpaqueREPRData) type.st.REPRData).flattenedSTables[hint].WHAT;
+                res.bind_attribute_boxed(tc, null, null, hint, makeBI(tc, innerType, value));
+            }
         }
         return res;
     }
@@ -6052,20 +6056,20 @@ public final class Ops {
     }
 
     public static SixModelObject add_I(SixModelObject a, SixModelObject b, SixModelObject type, ThreadContext tc) {
-        return makeBI(tc, type, getBI(tc, a).add(getBI(tc, b)));
+        return makeBI(tc, type, getBI(tc, a, type).add(getBI(tc, b, type)));
     }
 
     public static SixModelObject sub_I(SixModelObject a, SixModelObject b, SixModelObject type, ThreadContext tc) {
-        return makeBI(tc, type, getBI(tc, a).subtract(getBI(tc, b)));
+        return makeBI(tc, type, getBI(tc, a, type).subtract(getBI(tc, b, type)));
     }
 
     public static SixModelObject mul_I(SixModelObject a, SixModelObject b, SixModelObject type, ThreadContext tc) {
-        return makeBI(tc, type, getBI(tc, a).multiply(getBI(tc, b)));
+        return makeBI(tc, type, getBI(tc, a, type).multiply(getBI(tc, b, type)));
     }
 
     public static SixModelObject div_I(SixModelObject a, SixModelObject b, SixModelObject type, ThreadContext tc) {
-        BigInteger dividend = getBI(tc, a);
-        BigInteger divisor = getBI(tc, b);
+        BigInteger dividend = getBI(tc, a, type);
+        BigInteger divisor = getBI(tc, b, type);
         long dividend_sign = dividend.signum();
         long divisor_sign = divisor.signum();
         if (dividend_sign * divisor_sign == -1) {
@@ -6081,10 +6085,10 @@ public final class Ops {
     }
 
     public static SixModelObject mod_I(SixModelObject a, SixModelObject b, SixModelObject type, ThreadContext tc) {
-        BigInteger divisor = getBI(tc, b);
+        BigInteger divisor = getBI(tc, b, type);
         if (divisor.compareTo(BigInteger.ZERO) < 0) {
             BigInteger negDivisor = divisor.negate();
-            BigInteger res = getBI(tc, a).mod(negDivisor);
+            BigInteger res = getBI(tc, a, type).mod(negDivisor);
             return makeBI(tc, type, res.equals(BigInteger.ZERO) ? res : divisor.add(res));
         }
         else {
@@ -6093,7 +6097,7 @@ public final class Ops {
     }
 
     public static SixModelObject expmod_I(SixModelObject a, SixModelObject b, SixModelObject c, SixModelObject type, ThreadContext tc) {
-        return makeBI(tc, type, getBI(tc, a).modPow(getBI(tc, b), getBI(tc, c)));
+        return makeBI(tc, type, getBI(tc, a, type).modPow(getBI(tc, b, type), getBI(tc, c, type)));
     }
 
     public static long isprime_I(SixModelObject a, long certainty, ThreadContext tc) {
@@ -6105,7 +6109,7 @@ public final class Ops {
     }
 
     public static SixModelObject rand_I(SixModelObject a, SixModelObject type, ThreadContext tc) {
-        BigInteger size = getBI(tc, a);
+        BigInteger size = getBI(tc, a, type);
         BigInteger random = new BigInteger(size.bitLength(), tc.random);
         while (random.compareTo (size) != -1) {
             random = new BigInteger(size.bitLength(), tc.random);

@@ -9,16 +9,18 @@ public class P6OpaqueBaseInstance extends SixModelObject {
     // If this is not null, all operations are delegate to it. Used when we
     // load the object from an SC or when we mix in and it causes a resize.
     public SixModelObject delegate;
-    
+
     public final int resolveAttribute(SixModelObject classHandle, String name) {
         P6OpaqueREPRData rd = (P6OpaqueREPRData)this.st.REPRData;
-        for (int i = 0; i < rd.classHandles.length; i++) {
-            if (rd.classHandles[i].st == classHandle.st) {
-                Integer idx = rd.nameToHintMap[i].get(name);
-                if (idx != null)
-                    return idx;
-                else
-                    break;
+        if( classHandle != null && name != null ) {
+            for (int i = 0; i < rd.classHandles.length; i++) {
+                if (rd.classHandles[i].st == classHandle.st) {
+                    Integer idx = rd.nameToHintMap[i].get(name);
+                    if (idx != null)
+                        return idx;
+                    else
+                        break;
+                }
             }
         }
         throw new RuntimeException("No such attribute '" + name + "' for this object");
