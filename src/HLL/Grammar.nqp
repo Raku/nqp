@@ -46,7 +46,7 @@ grammar HLL::Grammar {
         <!stopper>
         [
         | <quote_escape>
-        | [ <-quote_escape-stopper-starter> ]+
+        | [ <-quote_escape - stopper - starter> ]+
         | <starter> <quote_atom>* <stopper>
         ]
     }
