@@ -6006,7 +6006,7 @@ public final class Ops {
 
     public static long isbig_I(SixModelObject value, ThreadContext tc) {
         /* Check if it needs more bits than a long can offer; note that
-         * bitLength excludes sign considerations, thus 32 rather than
+         * bitLength excludes sign considerations, thus 31 rather than
          * 32. */
         return getBI(tc, value).bitLength() > 31 ? 1 : 0;
     }
