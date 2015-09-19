@@ -394,13 +394,6 @@ BinaryCursor.prototype.contextEntry = function(contextsData) {
 
 /** Read a whole serialization context */
 BinaryCursor.prototype.deserialize = function(sc) {
-  // XXX varint encoding is different (there's an NYI bit...see if it's impl'd later on)
-  // XXX stable serialization has changed
-
-  // XXX writing/reading refs where !IS_CONCRETE looks different
-  // XXX read_discrim
-  // XXX deserialize_method_cache_lazy
-  // XXX parameterized types
   var version = this.I32();
 
   this.sc = sc;
