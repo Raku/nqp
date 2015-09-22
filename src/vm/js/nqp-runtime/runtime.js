@@ -29,6 +29,9 @@ var deserialization = require('./deserialization.js');
 exports.wval = deserialization.wval;
 load_ops(deserialization);
 
+var serialization = require('./serialization.js');
+load_ops(serialization);
+
 exports.CodeRef = require('./code-ref.js');
 
 exports.CurLexpad = require('./curlexpad.js');

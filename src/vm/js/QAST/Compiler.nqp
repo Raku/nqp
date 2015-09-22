@@ -716,6 +716,10 @@ class QAST::OperationsJS {
     });
 
 
+    add_simple_op('serialize', $T_STR, [$T_OBJ, $T_OBJ], :sideffects);
+    add_simple_op('scobjcount', $T_INT, [$T_OBJ]);
+    add_simple_op('createsc', $T_OBJ, [$T_STR], :sideffects);
+    add_simple_op('deserialize', $T_OBJ, [$T_STR, $T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ], :sideffects);
 
     # Ops for NFA
 

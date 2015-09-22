@@ -34,6 +34,10 @@ op.scsetdesc = function(sc, desc) {
   sc.description = desc;
 };
 
+op.scobjcount = function(sc) {
+  return sc.root_objects.length;
+};
+
 /**
   We define a BinaryCursor class so we can read sequential things easily
   @constructor
