@@ -716,6 +716,15 @@ role NQPCursorRole is export {
         $cur;
     }
 
+    method print() {
+        my $cur := self."!cursor_start_cur"();
+        my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
+        $cur."!cursor_pass"($!pos+1, 'print')
+          if $!pos < nqp::chars($target)
+             && nqp::iscclass(nqp::const::CCLASS_PRINTING, $target, $!pos);
+        $cur;
+    }
+
     method cntrl() {
         my $cur := self."!cursor_start_cur"();
         my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
@@ -731,6 +740,16 @@ role NQPCursorRole is export {
         $cur."!cursor_pass"($!pos+1, 'punct')
           if $!pos < nqp::chars($target)
              && nqp::iscclass(nqp::const::CCLASS_PUNCTUATION, $target, $!pos);
+        $cur;
+    }
+
+    method graph() {
+        my $cur := self."!cursor_start_cur"();
+        my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
+        $cur."!cursor_pass"($!pos+1, 'graph')
+          if $!pos < nqp::chars($target)
+             && (nqp::iscclass(nqp::const::CCLASS_ALPHANUMERIC, $target, $!pos)
+                 || nqp::iscclass(nqp::const::CCLASS_PUNCTUATION, $target, $!pos));
         $cur;
     }
 
