@@ -19,8 +19,16 @@ function noop_compose(obj, repr_info) {
 };
 
 
+function basic_constructor(STable) {
+  var obj_constructor = function() {};
+  obj_constructor.prototype._STable = STable;
+  return obj_constructor;
+}
+
 function P6opaque() {
 }
+
+P6opaque.prototype.create_obj_constructor = basic_constructor;
 
 P6opaque.prototype.allocate = function(STable) {
   var obj = new STable.obj_constructor();
@@ -294,6 +302,8 @@ module.exports.P6opaque = P6opaque;
 function KnowHOWREPR() {
 }
 
+KnowHOWREPR.prototype.create_obj_constructor = basic_constructor;
+
 KnowHOWREPR.prototype.deserialize_finish = function(object, data) {
   object.__name = data.str();
   object.__attributes = data.variant();
@@ -310,11 +320,14 @@ KnowHOWREPR.prototype.allocate = function(STable) {
   return obj;
 };
 
+
 KnowHOWREPR.name = 'KnowHOWREPR';
 module.exports.KnowHOWREPR = KnowHOWREPR;
 
 function KnowHOWAttribute() {
 }
+KnowHOWAttribute.prototype.create_obj_constructor = basic_constructor;
+
 KnowHOWAttribute.prototype.deserialize_finish = function(object, data) {
   object.__name = data.str();
 };
@@ -326,6 +339,7 @@ module.exports.KnowHOWAttribute = KnowHOWAttribute;
 
 function Uninstantiable() {
 }
+Uninstantiable.prototype.create_obj_constructor = basic_constructor;
 Uninstantiable.prototype.type_object_for = basic_type_object_for;
 Uninstantiable.name = 'Uninstantiable';
 module.exports.Uninstantiable = Uninstantiable;
@@ -333,6 +347,22 @@ module.exports.Uninstantiable = Uninstantiable;
 /* Stubs */
 function P6int() {
 }
+
+P6int.prototype.basic_constructor = basic_constructor;
+P6int.prototype.create_obj_constructor = function(STable) {
+  var c = this.basic_constructor(STable);
+
+  STable.obj_constructor = c; // HACK it's set again later, we set it for addInternalMethod
+
+  STable.addInternalMethod('$$set_int', function(value) {
+    this.value = value;
+  });
+  STable.addInternalMethod('$$get_int', function() {
+    return this.value;
+  });
+  return c;
+};
+
 P6int.name = 'P6int';
 P6int.prototype.allocate = basic_allocate;
 P6int.prototype.deserialize_finish = function(object, data) {
@@ -340,20 +370,32 @@ P6int.prototype.deserialize_finish = function(object, data) {
   object.value = data.varint();
 };
 
+
+P6int.prototype.type_object_for = function(HOW) {
+    var type_object = this.basic_type_object_for(HOW);
+    return type_object;
+};
+
 module.exports.P6int = P6int;
 
 function P6num() {
 }
+
+P6num.prototype.create_obj_constructor = basic_constructor;
+
 P6num.name = 'P6num';
 module.exports.P6num = P6num;
 
 function P6str() {
 }
+P6str.prototype.create_obj_constructor = basic_constructor;
+
 P6str.name = 'P6str';
 module.exports.P6str = P6str;
 
 function NFA() {
 }
+NFA.prototype.create_obj_constructor = basic_constructor;
 NFA.prototype.deserialize_finish = function(object, data) {
   // STUB
 };
@@ -364,6 +406,8 @@ exports.NFA = NFA;
 
 function VMArray() {
 }
+VMArray.prototype.create_obj_constructor = basic_constructor;
+
 VMArray.prototype.deserialize_finish = function(object, data) {
   console.log("deserializing VMArray");
   // STUB
@@ -389,6 +433,7 @@ exports.VMArray = VMArray;
 
 function VMIter() {
 }
+VMIter.prototype.create_obj_constructor = basic_constructor;
 VMIter.prototype.deserialize_finish = function(object, data) {
   console.log("deserializing VMIter");
   // STUB
@@ -400,6 +445,7 @@ var bignum = require('bignum');
 
 function P6bigint() {
 }
+P6bigint.prototype.create_obj_constructor = basic_constructor;
 
 P6bigint.prototype.basic_type_object_for = basic_type_object_for;
 
@@ -447,10 +493,15 @@ P6bigint.prototype.allocate = basic_allocate;
 P6bigint.prototype.compose = noop_compose;
 exports.P6bigint = P6bigint;
 
+
+/* Stubs */
+
 function ReentrantMutex() {}
+ReentrantMutex.prototype.create_obj_constructor = basic_constructor;
 
 module.exports.ReentrantMutex = ReentrantMutex;
 
 function ConditionVariable() {}
+ConditionVariable.prototype.create_obj_constructor = basic_constructor;
 
 module.exports.ConditionVariable = ConditionVariable;

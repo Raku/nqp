@@ -1,8 +1,9 @@
 function STable(REPR, HOW) {
   this.REPR = REPR;
   this.HOW = HOW;
-  this.obj_constructor = function() {};
-  this.obj_constructor.prototype._STable = this;
+
+  this.obj_constructor = REPR.create_obj_constructor(this);
+
 
   /* HACK - it's a bit hackish - think how correct it is */
   this.obj_constructor.prototype.$$clone = function() {
