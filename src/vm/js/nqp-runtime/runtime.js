@@ -347,3 +347,17 @@ exports.wrapObj = function(obj) {
     return obj;
   }
 };
+
+/* For debugging purposes */
+exports.dumpObj = function(obj) {
+  var seen = [];
+
+  return JSON.stringify(obj, function(key, value) {
+    if (key == '_SC') return undefined;
+    for (var i = 0; i < seen.length; i++) {
+      if (seen[i] === value) return "circular";
+    }
+    seen.push(value);
+    return value;
+  }, "  ");
+};
