@@ -101,10 +101,7 @@ class QAST::Node {
         nqp::die(self.HOW.name(self) ~ " does not support evaluating unquotes");
     }
 
-    method dump($indent?) {
-        unless nqp::defined($indent) {
-            $indent := 0;
-        }
+    method dump(int $indent = 0) {
         my @chunks := [
             nqp::x(' ', $indent), '- ', self.HOW.name(self),
         ];
