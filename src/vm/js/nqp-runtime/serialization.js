@@ -1,7 +1,15 @@
+
 var op = {};
 exports.op = op;
 
 var CURRENT_VERSION = 15;
+var OBJECTS_TABLE_ENTRY_SC_MASK     = 0x7FF;
+var OBJECTS_TABLE_ENTRY_SC_IDX_MASK = 0x000FFFFF;
+var OBJECTS_TABLE_ENTRY_SC_IDX_MAX  = 0x000FFFFF;
+var OBJECTS_TABLE_ENTRY_SC_MAX      = 0x7FE;
+var OBJECTS_TABLE_ENTRY_SC_SHIFT    = 20;
+var OBJECTS_TABLE_ENTRY_SC_OVERFLOW = 0x7FF;
+var OBJECTS_TABLE_ENTRY_IS_CONCRETE = 0x80000000;
 
 function BinaryWriteCursor(writer) {
   this.buffer = new Buffer(1024);
@@ -23,6 +31,16 @@ BinaryWriteCursor.prototype.string = function(str) {
     str = '?';
   }
   this.I32(this.writer.stringIndex(str));
+};
+
+SerializationWriter.prototype.stringIndex = function(str) {
+  /* The first entry in the heap represents the null string */
+  var idx = this.sh.indexOf(str);
+  if (idx == -1) {
+    this.sh.push(str);
+    idx = this.sh.length - 1;
+  }
+  return idx;
 };
 
 BinaryWriteCursor.prototype.I32 = function(value) {
@@ -48,6 +66,48 @@ BinaryWriteCursor.prototype.double = function(value) {
   this.growToHold(8);
   this.buffer.writeDoubleLE(value, this.offset);
   this.offset += 8;
+};
+
+SerializationWriter.prototype.serializeObject = function(obj) {
+  /* Get index of SC that holds the STable and its index. */
+  if (!obj._STable) {
+    console.log('obj:', obj.constructor.name, obj);
+    console.trace("can't serialize");
+    //process.exit();
+  }
+  var ref = this.getSTableRefInfo(obj._STable);
+  var sc = ref[0];
+  var sc_idx = ref[1];
+
+  var packed = obj._type_object ? OBJECTS_TABLE_ENTRY_IS_CONCRETE : 0;
+
+  if (sc <= OBJECTS_TABLE_ENTRY_SC_MAX && sc_idx <= OBJECTS_TABLE_ENTRY_SC_IDX_MAX) {
+      packed |= (sc << OBJECTS_TABLE_ENTRY_SC_SHIFT) | sc_idx;
+  } else {
+      packed |= OBJECTS_TABLE_ENTRY_SC_OVERFLOW << OBJECTS_TABLE_ENTRY_SC_SHIFT;
+      this.objects_data.I32(sc);
+      this.objects_data.I32(sc_idx);
+  }
+
+  /* Make objects table entry. */
+
+  //write_int32(writer->root.objects_table, offset + 0, packed);
+  //write_int32(writer->root.objects_table, offset + 4, writer->objects_data_offset);
+
+  this.objects.I32(packed);
+  this.objects.I32(this.objects_data.offset);
+
+
+
+  /* Delegate to its serialization REPR function. */
+  if (!obj._type_object && obj._STable.REPR.serialize) {
+    obj._STable.REPR.serialize(this.objects_data, obj);
+  }
+
+  /* Make objects table entry. */
+  /*this.objects.I32(sc);
+  this.objects.I32(sc_idx);
+  this.objects.I32(obj._type_object ? 0 : 1);*/
 };
 
 /* This is the overall serialization loop. It keeps an index into the list of
@@ -132,6 +192,44 @@ SerializationWriter.prototype.writeChunk = function(cursor) {
   }
   this.offset += cursor.offset;
 };
+
+SerializationWriter.prototype.getSCId = function(sc) {
+  if (!sc) {
+    console.trace('undefined sc');
+    process.exit();
+  }
+  /* Easy if it's in the current SC. */
+  if (sc == this.sc)
+    return 0;
+
+  /* If not, try to find it in our dependencies list. */
+  var found = this.dependentSCs.indexOf(sc);
+  if (found >= 0)
+    return found + 1;
+
+  /* Otherwise, need to add it to our dependencies list. */
+  this.dependentSCs.push(sc);
+
+  this.deps.string(sc.handle);
+  this.deps.string(sc.description);
+
+  return this.dependentSCs.length; /* Deliberately index + 1. */
+};
+
+SerializationWriter.prototype.getSTableRefInfo = function(st) {
+  /* Add to this SC if needed. */
+  if (!st._SC) {
+    st._SC = this.sc;
+    this.sc.root_stables.push(st);
+  }
+
+  /* Work out SC reference. */
+  if (st.sc) {
+    console.log(st);
+  }
+  return [this.getSCId(st._SC), st._SC.root_stables.indexOf(st)];
+};
+
 
 SerializationWriter.prototype.concatenateOutputs = function() {
   var output_size = 0;
@@ -223,3 +321,14 @@ op.serialize = function(sc, sh) {
   var writer = new SerializationWriter(sc, sh);
   return writer.serialize();
 };
+
+op.scsetobj = function(sc, idx, obj) {
+  sc.setObj(idx, obj);
+  return obj;
+};
+
+op.setobjsc = function(obj, sc) {
+  obj._SC = sc;
+  return obj;
+};
+

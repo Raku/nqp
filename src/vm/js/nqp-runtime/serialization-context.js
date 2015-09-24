@@ -32,5 +32,14 @@ function SerializationContext(handle) {
    * be repossessed in the case a write barrier is hit. */
   //  this.owned_objects = new HashMap<SixModelObject, SixModelObject>();
 }
+
+SerializationContext.prototype.setObj = function(idx, obj) {
+  this.root_objects[idx] = obj;
+  if (!obj._STable._SC) {
+    this.root_stables.push(obj._STable);
+    obj._STable._SC = this;
+  }
+};
+
 SerializationContext.contexts = {};
 module.exports = SerializationContext;
