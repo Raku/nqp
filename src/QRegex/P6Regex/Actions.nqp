@@ -119,16 +119,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         }
         else {
             my $qast := QAST::Regex.new( ~$/, :rxtype<literal>, :node($/));
-            if %*RX<i> && %*RX<m> { # >
-                $qast.subtype('ignorecase+ignoremark')
-            }
-            elsif %*RX<i> {
-                $qast.subtype('ignorecase')
-            }
-            elsif %*RX<m> { # >
-                $qast.subtype('ignoremark')
-            }
-            make $qast;
+            make self.apply_literal_modifiers($qast);
         }
     }
 
@@ -213,32 +204,14 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         my $quote := $<quote_EXPR>.ast;
         if QAST::SVal.ACCEPTS($quote) { $quote := $quote.value; }
         my $qast := QAST::Regex.new( $quote, :rxtype<literal>, :node($/) );
-        if %*RX<i> && %*RX<m> { # >
-            $qast.subtype('ignorecase+ignoremark')
-        }
-        elsif %*RX<i> {
-            $qast.subtype('ignorecase')
-        }
-        elsif %*RX<m> { # >
-            $qast.subtype('ignoremark')
-        }
-        make $qast;
+        make self.apply_literal_modifiers($qast);
     }
 
     method metachar:sym<">($/) {
         my $quote := $<quote_EXPR>.ast;
         if QAST::SVal.ACCEPTS($quote) { $quote := $quote.value; }
         my $qast := QAST::Regex.new( $quote, :rxtype<literal>, :node($/) );
-        if %*RX<i> && %*RX<m> { # >
-            $qast.subtype('ignorecase+ignoremark')
-        }
-        elsif %*RX<i> {
-            $qast.subtype('ignorecase')
-        }
-        elsif %*RX<m> { # >
-            $qast.subtype('ignoremark')
-        }
-        make $qast;
+        make self.apply_literal_modifiers($qast);
     }
 
     method metachar:sym<.>($/) {
@@ -770,6 +743,19 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         elsif $backmod eq ':?' || $backmod eq '?' { $ast.backtrack('f') }
         elsif $backmod eq ':!' || $backmod eq '!' { $ast.backtrack('g') }
         $ast;
+    }
+
+    method apply_literal_modifiers($qast) {
+        if %*RX<i> && %*RX<m> { # >
+            $qast.subtype('ignorecase+ignoremark')
+        }
+        elsif %*RX<i> {
+            $qast.subtype('ignorecase')
+        }
+        elsif %*RX<m> { # >
+            $qast.subtype('ignoremark')
+        }
+        return $qast
     }
 
     method qbuildsub($qast, $block = QAST::Block.new(), :$anon, :$addself, *%rest) {
