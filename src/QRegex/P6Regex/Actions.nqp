@@ -274,8 +274,9 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             if ($qast.rxtype eq 'quant' || $qast.rxtype eq 'dynquant') && $qast[0].rxtype eq 'subrule' {
                 self.subrule_alias($qast[0], $name);
             }
-            elsif $qast.rxtype eq 'subrule' { 
-                self.subrule_alias($qast, $name); 
+            elsif $qast.rxtype eq 'subrule' {
+                self.subrule_alias($qast, $name);
+                $qast := QAST::Regex.new( :rxtype<quant>, :min(0), :max(-1), $qast) if $<wantarray>;
             }
             else {
                 $qast := QAST::Regex.new( $qast, :name($name), 

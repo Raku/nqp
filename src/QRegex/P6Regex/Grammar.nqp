@@ -316,6 +316,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     token metachar:sym<var> {
         [
+        | $<wantarray>=['@'] '<' $<name>=[<-[>]>+] '>'
         | '$<' $<name>=[<-[>]>+] '>'
         | '$' $<pos>=[\d+]
         ]
