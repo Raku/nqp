@@ -386,9 +386,31 @@ module.exports.P6int = P6int;
 function P6num() {
 }
 
-P6num.prototype.create_obj_constructor = basic_constructor;
+P6num.name = 'P6int';
+P6num.prototype.allocate = basic_allocate;
+P6num.prototype.basic_constructor = basic_constructor;
+P6num.prototype.create_obj_constructor = function(STable) {
+  var c = this.basic_constructor(STable);
 
-P6num.name = 'P6num';
+  STable.obj_constructor = c; // HACK it's set again later, we set it for addInternalMethod
+
+  STable.addInternalMethod('$$set_num', function(value) {
+    this.value = value;
+  });
+  STable.addInternalMethod('$$get_num', function() {
+    return this.value;
+  });
+  return c;
+};
+
+P6num.prototype.serialize = function(data, object) {
+  data.double(object.value);
+};
+
+P6num.prototype.deserialize_finish = function(object, data) {
+  object.value = data.double();
+};
+
 module.exports.P6num = P6num;
 
 function P6str() {

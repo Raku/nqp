@@ -416,3 +416,14 @@ op.iscont = function(cont) {
 op.decont = function(ctx, cont) {
     return cont.$$decont ? cont.$$decont(ctx) : cont;
 };
+
+op.box_n = function(n, type) {
+  var repr = type._STable.REPR;
+  var obj = repr.allocate(type._STable);
+  obj.$$set_num(n);
+  return obj;
+};
+
+op.unbox_n = function(obj) {
+    return obj.$$get_num();
+};
