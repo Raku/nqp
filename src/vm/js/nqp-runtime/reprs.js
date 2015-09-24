@@ -415,7 +415,30 @@ module.exports.P6num = P6num;
 
 function P6str() {
 }
-P6str.prototype.create_obj_constructor = basic_constructor;
+
+P6str.prototype.allocate = basic_allocate;
+P6str.prototype.basic_constructor = basic_constructor;
+P6str.prototype.create_obj_constructor = function(STable) {
+  var c = this.basic_constructor(STable);
+
+  STable.obj_constructor = c; // HACK it's set again later, we set it for addInternalMethod
+
+  STable.addInternalMethod('$$set_str', function(value) {
+    this.value = value;
+  });
+  STable.addInternalMethod('$$get_str', function() {
+    return this.value;
+  });
+  return c;
+};
+
+P6str.prototype.serialize = function(data, object) {
+  data.str(object.value);
+};
+
+P6str.prototype.deserialize_finish = function(object, data) {
+  object.value = data.str();
+};
 
 P6str.name = 'P6str';
 module.exports.P6str = P6str;

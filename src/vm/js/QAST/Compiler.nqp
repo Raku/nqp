@@ -1225,6 +1225,9 @@ class QAST::OperationsJS {
     add_simple_op('box_n', $T_OBJ, [$T_NUM, $T_OBJ]);
     add_simple_op('unbox_n', $T_NUM, [$T_OBJ]);
 
+    add_simple_op('box_s', $T_OBJ, [$T_STR, $T_OBJ]);
+    add_simple_op('unbox_s', $T_STR, [$T_OBJ]);
+
     add_simple_op('iseq_I', $T_INT, [$T_OBJ, $T_OBJ]);
 
     # bigint arithmetic operators operators

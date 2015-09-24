@@ -427,3 +427,14 @@ op.box_n = function(n, type) {
 op.unbox_n = function(obj) {
     return obj.$$get_num();
 };
+
+op.box_s = function(value, type) {
+  var repr = type._STable.REPR;
+  var obj = repr.allocate(type._STable);
+  obj.$$set_str(value);
+  return obj;
+};
+
+op.unbox_s = function(obj) {
+    return obj.$$get_str();
+};

@@ -25,7 +25,7 @@ BinaryWriteCursor.prototype.growToHold = function(space) {
   }
 };
 
-BinaryWriteCursor.prototype.string = function(str) {
+BinaryWriteCursor.prototype.str = function(str) {
   if (str === undefined) {
     console.trace('undefined string');
     str = '?';
@@ -275,8 +275,8 @@ SerializationWriter.prototype.getSCId = function(sc) {
   /* Otherwise, need to add it to our dependencies list. */
   this.dependentSCs.push(sc);
 
-  this.deps.string(sc.handle);
-  this.deps.string(sc.description);
+  this.deps.str(sc.handle);
+  this.deps.str(sc.description);
 
   return this.dependentSCs.length; /* Deliberately index + 1. */
 };
