@@ -33,6 +33,56 @@ BinaryWriteCursor.prototype.string = function(str) {
   this.I32(this.writer.stringIndex(str));
 };
 
+/* Writing function for variable sized integers. Writes out a 64 bit value
+   using between 1 and 9 bytes. */
+BinaryWriteCursor.prototype.varint = function(value) {
+    var storage_needed;
+
+    if (value >= -1 && value <= 126) {
+        storage_needed = 1;
+    } else {
+        var abs_val = value < 0 ? -value - 1 : value;
+
+        if (abs_val <= 0x7FF)
+            storage_needed = 2;
+        else if (abs_val <= 0x000000000007FFFF)
+            storage_needed = 3;
+        else if (abs_val <= 0x0000000007FFFFFF)
+            storage_needed = 4;
+        else if (abs_val <= 0x00000007FFFFFFFF)
+            storage_needed = 5;
+
+        /* TODO bigger numbers */
+        /*else if (abs_val <= 0x000007FFFFFFFFFFLL)
+            storage_needed = 6;
+        else if (abs_val <= 0x0007FFFFFFFFFFFFLL)
+            storage_needed = 7;
+        else if (abs_val <= 0x07FFFFFFFFFFFFFFLL)
+            storage_needed = 8;
+        else
+            storage_needed = 9;*/
+    }
+
+    if (storage_needed == 1) {
+        this.U8(0x80 | (value + 129));
+    } else if (storage_needed == 9) {
+        this.I8(0x00);
+        this.I64(value);
+    } else {
+        var rest = storage_needed - 1;
+        var nybble = value >> 8 * rest;
+        /* All the other high bits should be the same as the top bit of the
+           nybble we keep. Or we have a bug.  */
+
+        console.assert((nybble >> 3) == 0
+               || (nybble >> 3) == ~0);
+
+        this.I8((rest << 4) | (nybble & 0xF));
+        console.log("TODO - writing varints that take 2-8 bytes");
+        //memcpy(buffer + offset, &value, rest);
+    }
+};
+
 SerializationWriter.prototype.stringIndex = function(str) {
   /* The first entry in the heap represents the null string */
   var idx = this.sh.indexOf(str);
@@ -43,12 +93,27 @@ SerializationWriter.prototype.stringIndex = function(str) {
   return idx;
 };
 
+BinaryWriteCursor.prototype.I8 = function(value) {
+  this.growToHold(1);
+  this.buffer.writeInt8(value, this.offset);
+  this.offset += 1;
+};
+
+BinaryWriteCursor.prototype.U8 = function(value) {
+  this.growToHold(1);
+  this.buffer.writeUInt8(value, this.offset);
+  this.offset += 1;
+};
+
+
 BinaryWriteCursor.prototype.I32 = function(value) {
   this.growToHold(4);
   this.buffer.writeInt32LE(value, this.offset);
   this.offset += 4;
 };
 
+
+/* TODO - numbers bigger than 32bit */
 BinaryWriteCursor.prototype.I64 = function(value) {
   this.growToHold(8);
   this.buffer.writeInt32LE(value, this.offset);
@@ -79,7 +144,7 @@ SerializationWriter.prototype.serializeObject = function(obj) {
   var sc = ref[0];
   var sc_idx = ref[1];
 
-  var packed = obj._type_object ? OBJECTS_TABLE_ENTRY_IS_CONCRETE : 0;
+  var packed = !obj._type_object ? OBJECTS_TABLE_ENTRY_IS_CONCRETE : 0;
 
   if (sc <= OBJECTS_TABLE_ENTRY_SC_MAX && sc_idx <= OBJECTS_TABLE_ENTRY_SC_IDX_MAX) {
       packed |= (sc << OBJECTS_TABLE_ENTRY_SC_SHIFT) | sc_idx;
@@ -325,6 +390,10 @@ op.serialize = function(sc, sh) {
 op.scsetobj = function(sc, idx, obj) {
   sc.setObj(idx, obj);
   return obj;
+};
+
+op.scgetobj = function(sc, idx) {
+  return sc.root_objects[idx];
 };
 
 op.setobjsc = function(obj, sc) {

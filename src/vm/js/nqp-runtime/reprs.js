@@ -370,6 +370,11 @@ P6int.prototype.deserialize_finish = function(object, data) {
   object.value = data.varint();
 };
 
+P6int.prototype.serialize = function(data, object) {
+  // TODO integers bigger than 32bit
+  data.varint(object.value);
+};
+
 
 P6int.prototype.type_object_for = function(HOW) {
     var type_object = this.basic_type_object_for(HOW);

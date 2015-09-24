@@ -721,6 +721,7 @@ class QAST::OperationsJS {
     add_simple_op('createsc', $T_OBJ, [$T_STR], :sideffects);
     add_simple_op('deserialize', $T_OBJ, [$T_STR, $T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ], :sideffects);
     add_simple_op('scsetobj', $T_OBJ, [$T_OBJ, $T_INT, $T_OBJ], :sideffects);
+    add_simple_op('scgetobj', $T_OBJ, [$T_OBJ, $T_INT], :sideffects);
     add_simple_op('setobjsc', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
 
     # Ops for NFA
