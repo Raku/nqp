@@ -351,7 +351,7 @@ BinaryWriteCursor.prototype.ref = function(ref) {
         if (key === undefined) {
           console.log(ref);
         }
-        this.string(key);
+        this.str(key);
         this.ref(ref[key]);
       }
       break;
