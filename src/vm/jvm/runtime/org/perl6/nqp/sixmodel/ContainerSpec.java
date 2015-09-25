@@ -35,4 +35,9 @@ public abstract class ContainerSpec {
     
     /* Deserializes the container data, if any. */
     public abstract void deserialize(ThreadContext tc, STable st, SerializationReader reader);
+
+    /* Can the container store values. Usually yes, so default to true. */
+    public boolean canStore(ThreadContext tc, SixModelObject cont) {
+        return true;
+    }
 }

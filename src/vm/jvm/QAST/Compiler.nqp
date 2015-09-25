@@ -2531,6 +2531,7 @@ QAST::OperationsJAST.map_classlib_core_op('iscont', $TYPE_OPS, 'iscont', [$RT_OB
 QAST::OperationsJAST.map_classlib_core_op('iscont_i', $TYPE_OPS, 'iscont_i', [$RT_OBJ], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('iscont_n', $TYPE_OPS, 'iscont_n', [$RT_OBJ], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('iscont_s', $TYPE_OPS, 'iscont_s', [$RT_OBJ], $RT_INT);
+QAST::OperationsJAST.map_classlib_core_op('isrwcont', $TYPE_OPS, 'isrwcont', [$RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('decont', $TYPE_OPS, 'decont', [$RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('decont_i', $TYPE_OPS, 'decont_i', [$RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('decont_n', $TYPE_OPS, 'decont_n', [$RT_OBJ], $RT_NUM, :tc);

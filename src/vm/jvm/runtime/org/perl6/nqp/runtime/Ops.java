@@ -3277,6 +3277,14 @@ public final class Ops {
     public static long iscont(SixModelObject obj) {
         return obj == null || obj.st.ContainerSpec == null ? 0 : 1;
     }
+    public static long isrwcont(SixModelObject obj, ThreadContext tc) {
+        if (obj != null) {
+            ContainerSpec cs = obj.st.ContainerSpec;
+            if (cs != null && cs.canStore(tc, obj))
+                return 1;
+        }
+        return 0;
+    }
     private static short getContainerPrimitive(SixModelObject obj) {
         if (obj != null && !(obj instanceof TypeObject)) {
             ContainerSpec cs = obj.st.ContainerSpec;
