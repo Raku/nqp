@@ -232,8 +232,7 @@ BinaryCursor.prototype.varint = function() {
 
 /** Read a variant reference */
 BinaryCursor.prototype.variant = function() {
-  var type = this.buffer.readInt8(this.offset);
-  this.offset += 1;
+  var type = this.I8();
   switch (type) {
     case 2:
       return this.objRef();
@@ -616,6 +615,12 @@ BinaryCursor.prototype.I32 = function() {
 BinaryCursor.prototype.U32 = function() {
   var ret = this.buffer.readUInt32LE(this.offset);
   this.offset += 4;
+  return ret;
+};
+
+BinaryCursor.prototype.I8 = function() {
+  var ret = this.buffer.readInt8(this.offset);
+  this.offset += 1;
   return ret;
 };
 

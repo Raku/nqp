@@ -1,3 +1,5 @@
+var Hash = require('./hash.js');
+var CodeRef = require('./code-ref.js');
 
 var op = {};
 exports.op = op;
@@ -10,6 +12,20 @@ var OBJECTS_TABLE_ENTRY_SC_MAX      = 0x7FE;
 var OBJECTS_TABLE_ENTRY_SC_SHIFT    = 20;
 var OBJECTS_TABLE_ENTRY_SC_OVERFLOW = 0x7FF;
 var OBJECTS_TABLE_ENTRY_IS_CONCRETE = 0x80000000;
+
+/* Possible reference types we can serialize. */
+var REFVAR_NULL = 1;
+var REFVAR_OBJECT = 2;
+var REFVAR_VM_NULL = 3;
+var REFVAR_VM_INT = 4;
+var REFVAR_VM_NUM = 5;
+var REFVAR_VM_STR = 6;
+var REFVAR_VM_ARR_VAR = 7;
+var REFVAR_VM_ARR_STR = 8;
+var REFVAR_VM_ARR_INT = 9;
+var REFVAR_VM_HASH_STR_VAR = 10;
+var REFVAR_STATIC_CODEREF = 11;
+var REFVAR_CLONED_CODEREF = 12;
 
 function BinaryWriteCursor(writer) {
   this.buffer = new Buffer(1024);
@@ -78,7 +94,7 @@ BinaryWriteCursor.prototype.varint = function(value) {
                || (nybble >> 3) == ~0);
 
         this.I8((rest << 4) | (nybble & 0xF));
-        console.log("TODO - writing varints that take 2-8 bytes");
+        console.log("TODO - writing varints that take 2-8 bytes", value, storage_needed);
         //memcpy(buffer + offset, &value, rest);
     }
 };
@@ -173,6 +189,182 @@ SerializationWriter.prototype.serializeObject = function(obj) {
   /*this.objects.I32(sc);
   this.objects.I32(sc_idx);
   this.objects.I32(obj._type_object ? 0 : 1);*/
+};
+
+var PACKED_SC_IDX_MASK = 0x000FFFFF;
+var PACKED_SC_MAX      = 0xFFE;
+var PACKED_SC_IDX_MAX  = 0x000FFFFF;
+var PACKED_SC_SHIFT    = 20;
+var PACKED_SC_OVERFLOW = 0xFFF;
+
+/* Writes the ID, index pair that identifies an entry in a Serialization
+   context. */
+BinaryWriteCursor.prototype.idIdx = function(sc_id, idx) {
+//static void write_sc_id_idx(MVMThreadContext *tc, MVMSerializationWriter *writer, MVMint32 sc_id, MVMint32 idx) {
+    if (sc_id <= PACKED_SC_MAX && idx <= PACKED_SC_IDX_MAX) {
+        var packed = (sc_id << PACKED_SC_SHIFT) | (idx & PACKED_SC_IDX_MASK);
+        this.I32(packed);
+    } else {
+        var packed = PACKED_SC_OVERFLOW << PACKED_SC_SHIFT;
+
+        this.I32(packed);
+        this.I32(sc_id);
+        this.I32(idx);
+        /*write_int32(*(writer->cur_write_buffer), *(writer->cur_write_offset), packed);
+        write_int32(*(writer->cur_write_buffer), *(writer->cur_write_offset), sc_id);
+        write_int32(*(writer->cur_write_buffer), *(writer->cur_write_offset), idx);*/
+    }
+}
+
+BinaryWriteCursor.prototype.objRef = function(ref) {
+  var writer_sc = this.writer.sc;
+  if (!ref._STable) {
+    console.log(ref);
+    console.trace("can't serialize this for sure");
+    console.log(typeof ref);
+    console.log(ref.code_ref);
+    process.exit();
+  }
+  if (!ref._SC) {
+    /* This object doesn't belong to an SC yet, so it must be serialized
+     * as part of this compilation unit. Add it to the work list. */
+    ref._SC = 123;
+    ref._SC = writer_sc;
+
+    this.writer.sc.root_objects.push(ref);
+  }
+
+  var sc = ref._SC;
+  if (!sc) {
+    console.log('!sc', !ref._SC, ref._SC);
+    console.trace('!sc');
+    //process.exit();
+  }
+  /* Write SC index, then object index. */
+  this.idIdx(this.writer.getSCId(sc), sc.root_objects.indexOf(ref));
+};
+
+BinaryWriteCursor.prototype.ref = function(ref) {
+  /* Work out what kind of thing we have and determine the discriminator. */
+  //  cnsole.log('got to ref',value);
+  var discrim = 0;
+
+  if (ref == null) {
+    discrim = REFVAR_VM_NULL;
+  }
+//  else if (ref.st.REPR instanceof IOHandle) {
+//      /* Can't serialize handles. */
+//      discrim = REFVAR_VM_NULL;
+//  }
+//  else if (ref.st.REPR instanceof CallCapture) {
+//      /* This is a hack for Rakudo's sake; it keeps a CallCapture around in
+//       * the lexpad, for no really good reason. */
+//      discrim = REFVAR_VM_NULL;
+//  }
+//  else if (ref.st.REPR instanceof MultiCache) {
+//      /* These are re-computed each time. */
+//      discrim = REFVAR_VM_NULL;
+//  }
+//  else if (ref.st.WHAT == tc.gc.BOOTInt) {
+//      discrim = REFVAR_VM_INT;
+//  }
+  else if (typeof ref == 'number') {
+    discrim = REFVAR_VM_NUM;
+  }
+  else if (typeof ref == 'string') {
+    discrim = REFVAR_VM_STR;
+  }
+  else if (ref instanceof Array) {
+    discrim = REFVAR_VM_ARR_VAR;
+  }
+//  else if (ref.st.WHAT == tc.gc.BOOTIntArray) {
+//      discrim = REFVAR_VM_ARR_INT;
+//  }
+//  else if (ref.st.WHAT == tc.gc.BOOTStrArray) {
+//      discrim = REFVAR_VM_ARR_STR;
+//  }
+  else if (ref instanceof Hash) {
+    discrim = REFVAR_VM_HASH_STR_VAR;
+  }
+  else if (ref instanceof CodeRef || typeof ref == 'function') {
+    //      console.log("serializing code ref");
+    discrim = REFVAR_VM_NULL;
+    if (ref._SC && ref.isStaticCodeRef) {
+      /* Static code reference. */
+      discrim = REFVAR_STATIC_CODEREF;
+    }
+    else if (ref._SC) {
+      /* Closure, but already seen and serialization already handled. */
+      discrim = REFVAR_CLONED_CODEREF;
+    }
+    else {
+      /* Closure but didn't see it yet. Take care of it serialization, which
+           * gets it marked with this SC. Then it's just a normal code ref that
+           * needs serializing. */
+      this.writer.serializeClosure(ref);
+      discrim = REFVAR_CLONED_CODEREF;
+    }
+  }
+  else {
+    /* Just a normal object, with no special serialization needs. */
+    discrim = REFVAR_OBJECT;
+  }
+
+
+  this.I8(discrim);
+
+  /* Now take appropriate action. */
+  switch (discrim) {
+    case REFVAR_NULL:
+    case REFVAR_VM_NULL:
+      /* Nothing to do for these. */
+      break;
+    case REFVAR_OBJECT:
+      this.objRef(ref);
+      break;
+    case REFVAR_VM_INT:
+      this.I64(ref);
+      break;
+    case REFVAR_VM_NUM:
+      this.double(ref);
+      //          writeNum(ref.get_num(tc));
+      break;
+    case REFVAR_VM_STR:
+      this.str(ref);
+      break;
+    //      case REFVAR_VM_ARR_INT:
+    //      case REFVAR_VM_ARR_STR:
+    //          ref.st.REPR.serialize(tc, this, ref);
+    case REFVAR_VM_ARR_VAR:
+      this.I32(ref.length);
+      for (var i = 0; i < ref.length; i++) {
+        this.ref(ref[i]);
+      }
+      break;
+    case REFVAR_VM_HASH_STR_VAR:
+      var count = 0;
+      for (var key in ref) {
+        count++;
+      }
+      this.I32(count);
+      for (var key in ref) {
+        if (key === undefined) {
+          console.log(ref);
+        }
+        this.string(key);
+        this.ref(ref[key]);
+      }
+      break;
+    case REFVAR_STATIC_CODEREF:
+    case REFVAR_CLONED_CODEREF:
+      var scId = this.writer.getSCId(ref._SC);
+      var idx = ref._SC.root_codes.indexOf(ref);
+      this.I32(scId);
+      this.I32(idx);
+      break;
+    default:
+      throw 'Serialization Error: Unimplemented object type: ' + discrim;
+  }
 };
 
 /* This is the overall serialization loop. It keeps an index into the list of

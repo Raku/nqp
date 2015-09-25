@@ -140,6 +140,17 @@ P6opaque.prototype.deserialize_repr_data = function(cursor, STable) {
 P6opaque.prototype.deserialize_finish = function(object, data) {
   var attrs = [];
 
+  var names = {};
+
+  for (var i in this.name_to_index_mapping) {
+    for (var j in this.name_to_index_mapping[i].slots) {
+        var name = this.name_to_index_mapping[i].names[j];
+        var slot = this.name_to_index_mapping[i].slots[j];
+        // TODO take class key into account with attribute storage
+        names[slot] = name;
+    }
+  }
+
   for (var i = 0; i < this.flattened_stables.length; i++) {
     if (this.flattened_stables[i]) {
       var STable = this.flattened_stables[i];
@@ -151,12 +162,48 @@ P6opaque.prototype.deserialize_finish = function(object, data) {
       attrs.push(data.variant());
     }
   }
+
   for (var i in this.name_to_index_mapping) {
     for (var j in this.name_to_index_mapping[i].slots) {
         var name = this.name_to_index_mapping[i].names[j];
         var slot = this.name_to_index_mapping[i].slots[j];
         // TODO take class key into account with attribute storage
         object[name] = attrs[slot];
+    }
+  }
+};
+
+P6opaque.prototype.serialize = function(cursor, obj) {
+  var flattened = obj._STable.REPR.flattened_stables;
+  var nqp = require('nqp-runtime');
+  if (!flattened) {
+    throw 'Representation must be composed before it can be serialized';
+  }
+
+  var attrs = [];
+
+  var names = [];
+
+  for (var i in this.name_to_index_mapping) {
+    for (var j in this.name_to_index_mapping[i].slots) {
+        var name = this.name_to_index_mapping[i].names[j];
+        var slot = this.name_to_index_mapping[i].slots[j];
+
+        // TODO take class key into account with attribute storage
+        attrs[slot] = obj[name];
+        names[slot] = name;
+    }
+  }
+
+  for (var i = 0; i < flattened.length; i++) {
+    if (flattened[i] == null || !flattened[i]) {
+      // TODO - think about what happens when we get an undefined value here
+      cursor.ref(attrs[i]);
+    }
+    else {
+      // HACK different kinds of numbers etc.
+      var attr = typeof attrs[i] == 'object' ? attrs[i] : {value: attrs[i]}; // HACK - think if that's a correct way of serializing a native attribute
+      this.flattened_stables[i].REPR.serialize(cursor, attr);
     }
   }
 };

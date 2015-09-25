@@ -81,6 +81,12 @@ exports.to_str = function(arg, ctx) {
     return "";
   } else if (arg.Str) {
     return arg.Str(ctx);
+  } else if (arg.$$get_str) {
+    return arg.$$get_str();
+  } else if (arg.$$get_num) {
+    return arg.$$get_num().toString();
+  } else if (arg.$$get_int) {
+    return arg.$$get_int().toString();
   } else {
     console.log(arg);
     throw "Can't convert to str";
@@ -100,6 +106,10 @@ exports.to_num = function(arg, ctx) {
     return 0;
   } else if (arg.Num) {
     return arg.Num(ctx);
+  } else if (arg.$$get_num) {
+    return arg.$$get_num();
+  } else if (arg.$$get_int) {
+    return arg.$$get_int();
   } else {
     console.log(arg);
     throw "Can't convert to num";
