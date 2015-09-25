@@ -2439,6 +2439,7 @@ QAST::MASTOperations.add_core_moarop_mapping('iscont', 'iscont');
 QAST::MASTOperations.add_core_moarop_mapping('iscont_i', 'iscont_i');
 QAST::MASTOperations.add_core_moarop_mapping('iscont_n', 'iscont_n');
 QAST::MASTOperations.add_core_moarop_mapping('iscont_s', 'iscont_s');
+QAST::MASTOperations.add_core_moarop_mapping('isrwcont', 'isrwcont');
 QAST::MASTOperations.add_core_moarop_mapping('decont', 'decont');
 QAST::MASTOperations.add_core_moarop_mapping('decont_i', 'decont_i');
 QAST::MASTOperations.add_core_moarop_mapping('decont_n', 'decont_n');
