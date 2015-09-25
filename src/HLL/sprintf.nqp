@@ -298,7 +298,7 @@ my module sprintf {
             my $exp := $float == 0.0 ?? 0 !! nqp::floor_n(nqp::log_n($float) / nqp::log_n(10));
 
             if -2 - $precision < $exp && $exp < $precision {
-                my $fixed-precision := $exp > $precision ?? 0 !! $precision - ($exp + 1);
+                my $fixed-precision := $precision - ($exp + 1);
                 my $fixed := stringify-to-precision2($float, $precision);
                 pad-with-sign($sign, $fixed, $size, $pad);
             } else {
