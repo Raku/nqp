@@ -654,6 +654,8 @@ class QAST::OperationsJS {
 
     add_simple_op('bindpos_i', $T_INT, [$T_OBJ, $T_INT, $T_INT], sub ($list, $index, $value) {"($list[$index] = $value)"}, :sideffects);
 
+    add_simple_op('bindpos_s', $T_INT, [$T_OBJ, $T_INT, $T_STR], sub ($list, $index, $value) {"($list[$index] = $value)"}, :sideffects);
+
     for ['_i', $T_INT, '', $T_OBJ, '_s', $T_STR] -> $suffix, $type {
         add_op('list' ~ $suffix, sub ($comp, $node, :$want) {
            my @setup;
