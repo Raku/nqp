@@ -678,7 +678,7 @@ class QAST::OperationsJS {
             my $val_chunk := $comp.as_js($val, :want($T_OBJ));
             @setup.push($key_chunk);
             @setup.push($val_chunk);
-            @setup.push("$hash[{$key_chunk.expr}] = {$val_chunk.expr};\n");
+            @setup.push("$hash.content[{$key_chunk.expr}] = {$val_chunk.expr};\n");
          }
          Chunk.new($T_OBJ, $hash , @setup , :$node);
     });
@@ -843,7 +843,7 @@ class QAST::OperationsJS {
         "({$string} == '' ? [] : {$string}.split({$separator}))"
     });
 
-    add_simple_op('elems', $T_INT, [$T_OBJ], sub ($list) {"($list.length)"});
+    add_simple_op('elems', $T_INT, [$T_OBJ]);
 
     add_simple_op('islist', $T_BOOL, [$T_OBJ], sub ($obj) {"($obj instanceof Array)"});
 
@@ -2017,7 +2017,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             if nqp::istype($arg,QAST::SpecialArg) {
                 if $arg.flat {
                     if $arg.named {
-                        @named_groups.push(self.as_js($arg, :want($T_OBJ)));
+                        my $arg_chunk := self.as_js($arg, :want($T_OBJ));
+                        my $unwraped := Chunk.new($T_OBJ, "nqp.unwrap_named({$arg_chunk.expr})", [$arg_chunk]);
+                        @named_groups.push($unwraped);
                     } else {
                         @groups.push(self.as_js($arg, :want($T_OBJ)));
                         @groups.push([]);
@@ -2851,7 +2853,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 self.atpos($var[0], $var[1], :node($var));
             }
         } elsif ($var.scope eq 'associative') {
-            # TODO work on things other than nqp lists
             # TODO think about nulls and missing elements
             if $*BINDVAL {
                 my $bindval := $*BINDVAL;

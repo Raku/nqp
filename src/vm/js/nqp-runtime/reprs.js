@@ -222,7 +222,7 @@ P6opaque.prototype.compose = function(STable, repr_info_hash) {
   // TODO 
 
   /* Get attribute part of the protocol from the hash. */
-  var repr_info = repr_info_hash.attribute;
+  var repr_info = repr_info_hash.content.attribute;
 
   /* Go through MRO and find all classes with attributes and build up
    * mapping info hashes. Note, reverse order so indexes will match
@@ -256,7 +256,7 @@ P6opaque.prototype.compose = function(STable, repr_info_hash) {
     if (numAttrs > 0) {
       var indexes = new Hash();
       for (var j = 0; j < numAttrs; j++) {
-        var attr = attrs[j];
+        var attr = attrs[j].content;
 
         /* old boxing method generation */
         if (attr.box_target) {
@@ -323,6 +323,7 @@ P6opaque.prototype.compose = function(STable, repr_info_hash) {
       }
       /*classHandles.add(type);
           attrIndexes.add(indexes);*/
+      /* FIXME*/
       this.name_to_index_mapping.push({class_key: type, name_map: indexes});
     }
 

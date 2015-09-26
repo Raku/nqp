@@ -12,6 +12,7 @@ load_ops(core);
 exports.hash = core.hash;
 exports.slurpy_named = core.slurpy_named;
 exports.named = core.named;
+exports.unwrap_named = core.unwrap_named;
 
 var io = require('./io.js');
 load_ops(io);
@@ -137,7 +138,7 @@ exports.to_bool = function(arg, ctx) {
   } else if (arg instanceof Array) {
     return arg.length == 0 ? 0 : 1;
   } else if (arg instanceof Hash) {
-    return Object.keys(arg).length == 0 ? 0 : 1;
+    return Object.keys(arg.content).length == 0 ? 0 : 1;
   } else if (arg === undefined || arg == null) {
     return 0;
   } else if (arg.$$to_bool) {

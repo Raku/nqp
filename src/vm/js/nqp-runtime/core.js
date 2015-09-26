@@ -111,7 +111,7 @@ Iter.prototype.$$to_bool = function(ctx) {
 
 function HashIter(hash) {
   this.hash = hash;
-  this.keys = Object.keys(hash);
+  this.keys = Object.keys(hash.content);
   this.target = this.keys.length;
   this.idx = 0;
 }
@@ -126,7 +126,7 @@ HashIter.prototype.$$to_bool = function(ctx) {
 
 function IterPair(hash, key) {
   this._key = key;
-  this._hash = hash;
+  this._hash = hash.content;
 }
 
 IterPair.prototype.iterval = function() {
@@ -162,16 +162,23 @@ exports.hash = function() {
 exports.slurpy_named = function(named) {
   var hash = new Hash();
   for (key in named) {
-    hash[key] = named[key];
+    hash.content[key] = named[key];
   }
   return hash;
+};
+
+exports.unwrap_named = function(named) {
+  if (!named instanceof Hash) console.log("expecting a hash here");
+  return named.content;
 };
 
 exports.named = function(parts) {
   var all = {};
   for (var i=0; i < parts.length; i++) {
-    for (var key in parts[i]) {
-      all[key] = parts[i][key];
+    var part = parts[i];
+//    if (part instanceof Hash) part = part.content;
+    for (var key in part) {
+      all[key] = part[key];
     }
   }
   return all;
@@ -302,7 +309,10 @@ op.settypecache = function(obj, cache) {
 };
 
 op.setmethcache = function(obj, cache) {
-    obj._STable.setMethodCache(cache);
+    if (!cache instanceof Hash) {
+      console.log("we expect a hash here");
+    }
+    obj._STable.setMethodCache(cache.content);
     return obj;
 };
 
@@ -392,17 +402,19 @@ op.curlexpad = function(get, set) {
 };
 
 op.setcontspec = function(type, cont_spec_type, hash) {
+    var fetch = hash.content.fetch;
+    var store = hash.content.store;
     if (cont_spec_type === 'code_pair') {
         type._STable.addInternalMethod('$$assignunchecked', function(ctx, value) {
-          hash.store.$call(ctx, {}, this, value);
+          store.$call(ctx, {}, this, value);
           return value;
         });
         type._STable.addInternalMethod('$$assign', function(ctx, value) {
-          hash.store.$call(ctx, {}, this, value);
+          store.$call(ctx, {}, this, value);
           return value;
         });
         type._STable.addInternalMethod('$$decont', function(ctx) {
-          return hash.fetch.$call(ctx, {}, this);
+          return fetch.$call(ctx, {}, this);
         });
     } else {
         throw "NYI cont spec: "+cont_spec_type;
@@ -437,4 +449,12 @@ op.box_s = function(value, type) {
 
 op.unbox_s = function(obj) {
     return obj.$$get_str();
+};
+
+op.elems = function(obj) {
+  if (obj instanceof Array) {
+    return obj.length;
+  } else if (obj instanceof Hash) {
+    return obj.$$elems();
+  }
 };

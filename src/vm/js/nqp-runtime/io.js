@@ -249,8 +249,8 @@ op.shell = function(command, dir, env, input, output, error, flags) {
     oldEnv[v] = process.env[v];
   }
   var oldCwd = process.cwd();
-  for (var v in env) {
-    process.env[v] = env[v];
+  for (var v in env.content) {
+    process.env[v] = env.content[v];
   }
   process.chdir(dir);
   execSync.run(command);

@@ -109,7 +109,7 @@ add_knowhow_how_method("new_type", function(ctx, _NAMED) {
 
 add_knowhow_how_method("compose", function(ctx, _NAMED, type_object) {
   /* Set method cache */
-  type_object._STable.setMethodCache(this.__methods);
+  type_object._STable.setMethodCache(this.__methods.content);
 
   /* Set type check cache. */
 
@@ -134,10 +134,10 @@ add_knowhow_how_method("compose", function(ctx, _NAMED, type_object) {
   for (var i = 0; i < this.__attributes.length; i++) {
     var attr_info = new Hash();
     var attr = this.__attributes[i];
-    attr_info.name = attr.__name;
-    attr_info.type = attr.__type;
+    attr_info.content.name = attr.__name;
+    attr_info.content.type = attr.__type;
     if (attr.__box_target) {
-      attr_info.box_target = attr.__box_target;
+      attr_info.content.box_target = attr.__box_target;
     }
     attr_info_list.push(attr_info);
   }
@@ -148,7 +148,7 @@ add_knowhow_how_method("compose", function(ctx, _NAMED, type_object) {
 
   /* All of this goes in a hash. */
   var repr_info_hash = new Hash();
-  repr_info_hash.attribute = repr_info;
+  repr_info_hash.content.attribute = repr_info;
 
 
   /* Compose the representation using it. */
