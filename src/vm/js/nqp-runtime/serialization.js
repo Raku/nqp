@@ -343,16 +343,10 @@ BinaryWriteCursor.prototype.ref = function(ref) {
       break;
     case REFVAR_VM_HASH_STR_VAR:
       var count = 0;
-      for (var key in ref) {
-        count++;
-      }
-      this.I32(count);
-      for (var key in ref) {
-        if (key === undefined) {
-          console.log(ref);
-        }
+      this.I32(ref.$$elems());
+      for (var key in ref.content) {
         this.str(key);
-        this.ref(ref[key]);
+        this.ref(ref.content[key]);
       }
       break;
     case REFVAR_STATIC_CODEREF:
