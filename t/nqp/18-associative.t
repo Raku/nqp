@@ -2,7 +2,7 @@
 
 # check hash access methods
 
-plan(14);
+plan(15);
 
 my %h;
 
@@ -34,6 +34,8 @@ ok(%h<c> == 0,"a missing key behaves properly when used as number");
 my $h := nqp::hash('foo', 123,'bar','hello');
 ok($h<foo> == 123, 'hash access on a hash created with nqp::hash');
 ok($h<bar> eq 'hello', 'hash access on a hash created with nqp::hash');
+
+ok(nqp::elems($h) == 2, 'nqp::elems on a hash');
 
 ok(nqp::istrue(nqp::hash('foo', 1, 'bar', 2)) == 1, 'a hash with 2 elements is true');
 ok(nqp::istrue(nqp::hash()) == 0, 'a hash with 0 elements is false');
