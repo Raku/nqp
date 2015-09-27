@@ -160,7 +160,7 @@ SerializationWriter.prototype.serializeObject = function(obj) {
   var sc = ref[0];
   var sc_idx = ref[1];
 
-  var packed = !obj._type_object ? OBJECTS_TABLE_ENTRY_IS_CONCRETE : 0;
+  var packed = !obj.type_object_ ? OBJECTS_TABLE_ENTRY_IS_CONCRETE : 0;
 
   if (sc <= OBJECTS_TABLE_ENTRY_SC_MAX && sc_idx <= OBJECTS_TABLE_ENTRY_SC_IDX_MAX) {
       packed |= (sc << OBJECTS_TABLE_ENTRY_SC_SHIFT) | sc_idx;
@@ -181,14 +181,13 @@ SerializationWriter.prototype.serializeObject = function(obj) {
 
 
   /* Delegate to its serialization REPR function. */
-  if (!obj._type_object && obj._STable.REPR.serialize) {
-    obj._STable.REPR.serialize(this.objects_data, obj);
+  if (!obj.type_object_) {
+    if (!obj._STable.REPR.serialize) {
+      console.trace("don't know how to serialize");
+    } else {
+      obj._STable.REPR.serialize(this.objects_data, obj);
+    }
   }
-
-  /* Make objects table entry. */
-  /*this.objects.I32(sc);
-  this.objects.I32(sc_idx);
-  this.objects.I32(obj._type_object ? 0 : 1);*/
 };
 
 var PACKED_SC_IDX_MASK = 0x000FFFFF;
@@ -361,6 +360,94 @@ BinaryWriteCursor.prototype.ref = function(ref) {
   }
 };
 
+/* This handles the serialization of an STable, and calls off to serialize
+ * its representation data also. */
+
+SerializationWriter.prototype.serializeSTable = function(st) {
+
+  /* Make STables table entry. */
+  this.stables.str(st.REPR.constructor.name);
+  this.stables.I32(this.stables_data.offset);
+
+  /* Write HOW, WHAT and WHO. */
+
+  if (!st.HOW) {
+    console.log('!.HOW', st, st.HOW);
+  }
+  
+  /* TODO lazy HOW loading */
+
+  this.stables_data.objRef(st.HOW);
+  this.stables_data.objRef(st.WHAT);
+  this.stables_data.ref(st.WHO || null);
+
+  /* Method cache*/
+  if (st.method_cache) {
+    var hash = new Hash();
+    hash.content = st.method_cache;
+    this.stables_data.ref(hash);
+  }
+  else {
+    this.stables_data.ref(null);
+  }
+
+  /* Type check cache. */
+  var tcl = !st.type_check_cache ? 0 : st.type_check_cache.length;
+  this.stables_data.I64(tcl);
+  for (var i = 0; i < tcl; i++) {
+    this.stables_data.ref(st.type_check_cache[i]);
+  }
+
+  /* Mode flags. */
+  //    writeInt(st.ModeFlags);
+  this.stables_data.I64(0);
+
+  /* Boolification spec. */
+  this.stables_data.I64(0);
+
+  /*writeInt(st.BoolificationSpec == null ? 0 : 1);
+    if (st.BoolificationSpec != null) {
+        writeInt(st.BoolificationSpec.Mode);
+        writeRef(st.BoolificationSpec.Method);
+    }*/
+
+  /* Container spec. */
+  this.stables_data.I64(0);
+
+  /*this.stables_data.writeInt(st.ContainerSpec == null ? 0 : 1);
+    if (st.ContainerSpec != null) {
+        writeStr(st.ContainerSpec.name());
+        st.ContainerSpec.serialize(tc, st, this);
+    }*/
+
+  /* Invocation spec. */
+  this.stables_data.I64(0);
+
+  /*writeInt(st.InvocationSpec == null ? 0 : 1);
+    if (st.InvocationSpec != null) {
+        writeRef(st.InvocationSpec.ClassHandle);
+        writeStr(st.InvocationSpec.AttrName);
+        writeInt(st.InvocationSpec.Hint);
+        writeRef(st.InvocationSpec.InvocationHandler);
+    }*/
+
+  /* HLL info. */
+  /*this.stables_data.str(st.hllOwner ? st.hllOwner.name : "");
+    this.stables_data.I32(hllRole);
+    writeStr(st.hllOwner == null ? "" : st.hllOwner.name);
+    writeInt(st.hllRole);
+    */
+
+  /* Location of REPR data. */
+  this.stables.I32(this.stables_data.offset);
+
+  /* If the REPR has a function to serialize representation data, call it. */
+  if (st.REPR.serialize_repr_data) {
+    st.REPR.serialize_repr_data(st, this.stables_data);
+  }
+
+};
+
 /* This is the overall serialization loop. It keeps an index into the list of
  * STables and objects in the SC. As we discover new ones, they get added. We
  * finished when we've serialized everything. */
@@ -474,10 +561,6 @@ SerializationWriter.prototype.getSTableRefInfo = function(st) {
     this.sc.root_stables.push(st);
   }
 
-  /* Work out SC reference. */
-  if (st.sc) {
-    console.log(st);
-  }
   return [this.getSCId(st._SC), st._SC.root_stables.indexOf(st)];
 };
 

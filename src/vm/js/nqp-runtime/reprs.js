@@ -358,6 +358,12 @@ KnowHOWREPR.prototype.deserialize_finish = function(object, data) {
   object.__methods = data.variant();
 };
 
+KnowHOWREPR.prototype.serialize = function(data, object) {
+  data.str(object.__name);
+  data.ref(object.__attributes);
+  data.ref(object.__methods);
+};
+
 KnowHOWREPR.prototype.type_object_for = basic_type_object_for;
 
 KnowHOWREPR.prototype.allocate = function(STable) {
@@ -397,6 +403,8 @@ function P6int() {
 }
 
 P6int.prototype.basic_constructor = basic_constructor;
+P6int.prototype.basic_type_object_for = basic_type_object_for;
+
 P6int.prototype.create_obj_constructor = function(STable) {
   var c = this.basic_constructor(STable);
 
@@ -409,6 +417,10 @@ P6int.prototype.create_obj_constructor = function(STable) {
     return this.value;
   });
   return c;
+};
+
+P6int.prototype.compose = function(STable, repr_info_hash) {
+    // TODO bits
 };
 
 P6int.name = 'P6int';
