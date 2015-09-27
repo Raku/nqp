@@ -13,6 +13,7 @@ function add_to_sc_with_st(obj) {
     core.root_objects.push(obj);
     core.root_stables.push(obj._STable);
     obj._SC = core;
+    obj._STable._SC = core;
 }
 
 function add_to_sc_with_st_and_mo() {
