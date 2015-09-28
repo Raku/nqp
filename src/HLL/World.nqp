@@ -28,7 +28,7 @@ class HLL::World {
     has $!precomp_mode;
     
     # The number of code refs we've added to the code refs root so far.
-    has $!num_code_refs;
+    has int $!num_code_refs;
     
     # List of QAST blocks that map to the code refs table, for use in
     # building deserialization code.
@@ -61,14 +61,14 @@ class HLL::World {
     # Adds an object to the root set, along with a mapping.
     method add_object($obj) {
         nqp::setobjsc($obj, $!sc);
-        my $idx := nqp::scobjcount($!sc);
+        my int $idx := nqp::scobjcount($!sc);
         nqp::scsetobj($!sc, $idx, $obj);
         $idx
     }
     
     # Adds a code reference to the root set of code refs.
     method add_root_code_ref($code_ref, $ast_block) {
-        my $code_ref_idx := $!num_code_refs;
+        my int $code_ref_idx := $!num_code_refs;
         $!num_code_refs := $!num_code_refs + 1;
         $!code_ref_blocks.push($ast_block);
         nqp::scsetcode($!sc, $code_ref_idx, $code_ref);
