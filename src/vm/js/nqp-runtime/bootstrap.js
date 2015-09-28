@@ -108,6 +108,10 @@ add_knowhow_how_method("new_type", function(ctx, _NAMED) {
   return type_object;
 });
 
+add_knowhow_how_method("add_attribute", function(ctx, _NAMED, type, attr) {
+  this.__attributes.push(attr);
+});
+
 add_knowhow_how_method("compose", function(ctx, _NAMED, type_object) {
   /* Set method cache */
   type_object._STable.setMethodCache(this.__methods.content);
