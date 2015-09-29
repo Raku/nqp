@@ -1,9 +1,10 @@
 var fs = require('fs-ext');
 var sleep = require('sleep');
 var iconv = require('iconv-lite');
-var execSync = require('fallback-exec-sync');
 
 var Hash = require('./hash.js');
+
+var child_process = require('child_process');
 
 function boolish(bool) {
   return bool ? 1 : 0;
@@ -253,7 +254,7 @@ op.shell = function(command, dir, env, input, output, error, flags) {
     process.env[v] = env.content[v];
   }
   process.chdir(dir);
-  execSync.run(command);
+  child_process.execSync(command);
   process.chdir(oldCwd);
 
   // restore the contents of object in process.env
