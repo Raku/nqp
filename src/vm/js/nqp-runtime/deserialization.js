@@ -669,3 +669,4 @@ BinaryCursor.prototype.str = function() {
   return this.sh[this.I32()];
 };
 
+exports.BinaryCursor = BinaryCursor;

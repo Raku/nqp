@@ -670,3 +670,4 @@ op.setobjsc = function(obj, sc) {
   return obj;
 };
 
+exports.BinaryWriteCursor = BinaryWriteCursor;
