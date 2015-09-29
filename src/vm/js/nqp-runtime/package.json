@@ -7,7 +7,7 @@
   "repository":"http://github.com/pmurias/nqp-js/",
   "main":"runtime.js",
   "dependencies":{
-      "fs-ext": "*",
+      "fs-ext": "pmurias/node-fs-ext#nan_2",
       "sleep": "*",
       "iconv-lite": "*",
       "fallback-exec-sync": "*",
