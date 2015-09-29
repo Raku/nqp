@@ -102,20 +102,22 @@ P6opaque.prototype.deserialize_repr_data = function(cursor, STable) {
 
   var slots = [];
   var autovived = {};
-  for (var i in this.name_to_index_mapping) {
-    for (var j in this.name_to_index_mapping[i].slots) {
-        var name = this.name_to_index_mapping[i].names[j];
-        var slot = this.name_to_index_mapping[i].slots[j];
-        slots[slot] = name;
-        if (this.auto_viv_values[slot]) {
-            if (!this.auto_viv_values[slot].type_object_) {
-                console.log('autoviv', name, slot, this.auto_viv_values[slot]);
-                throw "We currently only implement autoviv with type object values";
-            }
-            /* TODO autoviving things that aren't typeobjects */
-            /* TODO we need to store attributes better */
-            autovived[name] = this.auto_viv_values[slot];
-        }
+  if (this.auto_viv_values) {
+    for (var i in this.name_to_index_mapping) {
+      for (var j in this.name_to_index_mapping[i].slots) {
+          var name = this.name_to_index_mapping[i].names[j];
+          var slot = this.name_to_index_mapping[i].slots[j];
+          slots[slot] = name;
+          if (this.auto_viv_values[slot]) {
+              if (!this.auto_viv_values[slot].type_object_) {
+                  console.log('autoviv', name, slot, this.auto_viv_values[slot]);
+                  throw "We currently only implement autoviv with type object values";
+              }
+              /* TODO autoviving things that aren't typeobjects */
+              /* TODO we need to store attributes better */
+              autovived[name] = this.auto_viv_values[slot];
+          }
+      }
     }
   }
   
@@ -135,6 +137,62 @@ P6opaque.prototype.deserialize_repr_data = function(cursor, STable) {
   }
 
   /* TODO make auto viv values work */
+};
+
+P6opaque.prototype.serialize_repr_data = function(st, cursor) {
+   var numAttrs = st.REPR.flattened_stables.length;
+   cursor.varint(numAttrs);
+
+   STARTING_OFFSET = cursor.offset;
+ 
+   for (var i = 0; i < numAttrs; i++) {
+     if (st.REPR.flattened_stables[i] == null) {
+       cursor.varint(0);
+     }
+     else {
+       cursor.varint(1);
+       throw "NYI";
+       cursor.STableRef(st.REPR.flattened_stables[i]);
+     }
+   }
+ 
+   cursor.varint(st.REPR.mi ? 1 : 0);
+ 
+   //TODO
+   //  if (st.REPR.auto_viv_values != null) {
+   //      cursor.varint(1);
+   //      for (var i = 0; i < numAttrs; i++)
+   //         cursor.ref(st.REPR.auto_viv_values[i]);
+   //  }
+   //  else {
+   cursor.varint(0);
+   //  }
+ 
+
+
+   cursor.varint(st.REPR.unbox_int_slot);
+   cursor.varint(st.REPR.unbox_str_slot);
+   cursor.varint(st.REPR.unbox_str_slot);
+
+   // TODO: Unbox slots
+   cursor.varint(0);
+
+  cursor.varint(this.name_to_index_mapping.length);
+  for (var i = 0; i < this.name_to_index_mapping.length; i++) {
+    cursor.ref(this.name_to_index_mapping[i].class_key);
+
+    var num_attrs = this.name_to_index_mapping[i].names.length;
+
+    cursor.varint(num_attrs);
+
+    for (var j = 0; j < num_attrs; j++) {
+      cursor.str(this.name_to_index_mapping[i].names[j]);
+      cursor.varint(this.name_to_index_mapping[i].slots[j]);
+    }
+  }
+
+  cursor.varint(this.positional_delegate_slot);
+  cursor.varint(this.associative_delegate_slot);
 };
 
 P6opaque.prototype.deserialize_finish = function(object, data) {
@@ -232,8 +290,8 @@ P6opaque.prototype.compose = function(STable, repr_info_hash) {
   this.unbox_num_slot = -1;
   this.unbox_str_slot = -1;
 
-  this.posDelegateSlot = -1;
-  this.assocDelegateSlot = -1;
+  this.positional_delegate_slot = -1;
+  this.associative_delegate_slot = -1;
 
   var curAttr = 0;
   /*
@@ -254,7 +312,9 @@ P6opaque.prototype.compose = function(STable, repr_info_hash) {
        * in the list to add to the layout. */
     var numAttrs = attrs.length;
     if (numAttrs > 0) {
-      var indexes = new Hash();
+      var names = [];
+      var slots = [];
+
       for (var j = 0; j < numAttrs; j++) {
         var attr = attrs[j].content;
 
@@ -266,7 +326,9 @@ P6opaque.prototype.compose = function(STable, repr_info_hash) {
         /* TODO */
         //              if (attrType == Null)
         //                  attrType = tc.gc.KnowHOW;
-        indexes[attr.name] = curAttr;
+
+        slots.push(curAttr);
+        names.push(attr.name);
 
         /*              AttrInfo info = new AttrInfo();
 
@@ -324,7 +386,7 @@ P6opaque.prototype.compose = function(STable, repr_info_hash) {
       /*classHandles.add(type);
           attrIndexes.add(indexes);*/
       /* FIXME*/
-      this.name_to_index_mapping.push({class_key: type, name_map: indexes});
+      this.name_to_index_mapping.push({class_key: type, slots: slots, names: names});
     }
 
     /* Multiple parents means it's multiple inheritance. */
@@ -384,6 +446,10 @@ KnowHOWAttribute.prototype.create_obj_constructor = basic_constructor;
 
 KnowHOWAttribute.prototype.deserialize_finish = function(object, data) {
   object.__name = data.str();
+};
+
+KnowHOWAttribute.prototype.serialize = function(data, object) {
+  data.str(object.__name);
 };
 
 KnowHOWAttribute.prototype.type_object_for = basic_type_object_for;

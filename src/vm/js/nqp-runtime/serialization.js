@@ -438,6 +438,9 @@ SerializationWriter.prototype.serializeSTable = function(st) {
     writeInt(st.hllRole);
     */
 
+  /* TODO - HLL owner */
+
+  this.stables_data.str(null);
   /* Location of REPR data. */
   this.stables.I32(this.stables_data.offset);
 
