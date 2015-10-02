@@ -458,3 +458,8 @@ op.elems = function(obj) {
     return obj.$$elems();
   }
 };
+
+op.markcodestatic = function(code) {
+  code.isStatic = true;
+  return code;
+};

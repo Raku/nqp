@@ -288,7 +288,7 @@ BinaryWriteCursor.prototype.ref = function(ref) {
   else if (ref instanceof CodeRef || typeof ref == 'function') {
     //      console.log("serializing code ref");
     discrim = REFVAR_VM_NULL;
-    if (ref._SC && ref.isStaticCodeRef) {
+    if (ref._SC && ref.isStatic) {
       /* Static code reference. */
       discrim = REFVAR_STATIC_CODEREF;
     }
@@ -352,8 +352,7 @@ BinaryWriteCursor.prototype.ref = function(ref) {
     case REFVAR_CLONED_CODEREF:
       var scId = this.writer.getSCId(ref._SC);
       var idx = ref._SC.root_codes.indexOf(ref);
-      this.I32(scId);
-      this.I32(idx);
+      this.idIdx(scId, idx);
       break;
     default:
       throw 'Serialization Error: Unimplemented object type: ' + discrim;
@@ -669,6 +668,12 @@ op.scgetobj = function(sc, idx) {
 };
 
 op.setobjsc = function(obj, sc) {
+  obj._SC = sc;
+  return obj;
+};
+
+op.scsetcode = function(sc, idx, obj) {
+  sc.root_codes[idx] = obj;
   obj._SC = sc;
   return obj;
 };
