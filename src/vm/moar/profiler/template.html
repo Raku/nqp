@@ -278,7 +278,7 @@
     </div>
 
     <script type="text/ng-template" id="icycle_graph_callee_renderer.html">
-        <a href="#" class="call" style="background-color: {{backgroundColor()}};" ng-click="toCallee(callee)">{{callee.name}}</a>
+        <a href="#" class="call" style="background-color:{{backgroundColor(callee)}}" ng-click="toCallee(callee)">{{callee.name}}</a>
         <div class="child" style="width: {{callee.inclusive_time * 100 / Current.inclusive_time}}%;" ng-repeat="callee in callee.callees" title="{{callee.name}}" ng-include="'icycle_graph_callee_renderer.html'"></div>
     </script>
 
@@ -708,7 +708,7 @@
 
     <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.21/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.2/angular.min.js"></script>
     <script>
     var rawData = JSON.parse('{{{PROFIELR_OUTPUT}}}');
 
@@ -729,8 +729,10 @@
         walkCallGraphNode(rawData[0].call_graph);
     }());
 
-    // Register application and add controllers.
-    var moarProfApp = angular.module('moarProfApp', []);
+    // Register application and add controllers, increase recursion depth for callGraphController
+    var moarProfApp = angular.module('moarProfApp', []).config(function($rootScopeProvider) {
+        $rootScopeProvider.digestTtl(100);
+    });
 
     moarProfApp.controller('NavigationController', function ($scope) {
         $scope.Tab = 'Overview';
@@ -924,11 +926,15 @@
             updateCurrentData();
         }
 
-        $scope.backgroundColor = function () {
-          var component = Math.floor(128 + Math.random()*127).toString(16);
-          if (component.length == 1)
-            component = '0' + component;
-          return '#' + component + component + 'ff';
+        /*
+         * Given a callee, create a unique, repeatable color;
+         * h/t https://stackoverflow.com/questions/3426404
+         */
+        $scope.backgroundColor = function (callee) {
+            var str = callee.$$hashKey + callee.file + callee.name;
+            for (var i = 0, hash = 0; i < str.length; hash = str.charCodeAt(i++) + ((hash << 5) - hash));
+            for (var i = 0, colour = "#"; i < 3; colour += ("00" + ((hash >> i++ * 8) & 0xFF).toString(16)).slice(-2));
+            return colour;
         }
 
         function updateCurrentData() {
