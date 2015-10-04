@@ -12,11 +12,11 @@ function basic_type_object_for(HOW) {
 }
 
 function basic_allocate(STable) {
-  return new STable.obj_constructor()
+  return new STable.obj_constructor();
 }
 
 function noop_compose(obj, repr_info) {
-};
+}
 
 
 function basic_constructor(STable) {
@@ -111,7 +111,7 @@ P6opaque.prototype.deserialize_repr_data = function(cursor, STable) {
           if (this.auto_viv_values[slot]) {
               if (!this.auto_viv_values[slot].type_object_) {
                   console.log('autoviv', name, slot, this.auto_viv_values[slot]);
-                  throw "We currently only implement autoviv with type object values";
+                  throw 'We currently only implement autoviv with type object values';
               }
               /* TODO autoviving things that aren't typeobjects */
               /* TODO we need to store attributes better */
@@ -120,12 +120,12 @@ P6opaque.prototype.deserialize_repr_data = function(cursor, STable) {
       }
     }
   }
-  
+
   if (Object.keys(autovived).length != 0) {
     this.autovived = autovived;
   }
 
-  
+
   this.positional_delegate_slot = cursor.varint();
   this.associative_delegate_slot = cursor.varint();
 
@@ -144,20 +144,20 @@ P6opaque.prototype.serialize_repr_data = function(st, cursor) {
    cursor.varint(numAttrs);
 
    STARTING_OFFSET = cursor.offset;
- 
+
    for (var i = 0; i < numAttrs; i++) {
      if (st.REPR.flattened_stables[i] == null) {
        cursor.varint(0);
      }
      else {
        cursor.varint(1);
-       throw "NYI";
+       throw 'NYI';
        cursor.STableRef(st.REPR.flattened_stables[i]);
      }
    }
- 
+
    cursor.varint(st.REPR.mi ? 1 : 0);
- 
+
    //TODO
    //  if (st.REPR.auto_viv_values != null) {
    //      cursor.varint(1);
@@ -167,7 +167,7 @@ P6opaque.prototype.serialize_repr_data = function(st, cursor) {
    //  else {
    cursor.varint(0);
    //  }
- 
+
 
 
    cursor.varint(st.REPR.unbox_int_slot);
@@ -277,7 +277,7 @@ P6opaque.prototype.change_type = function(obj, new_type) {
 
 
 P6opaque.prototype.compose = function(STable, repr_info_hash) {
-  // TODO 
+  // TODO
 
   /* Get attribute part of the protocol from the hash. */
   var repr_info = repr_info_hash.content.attribute;
@@ -585,7 +585,7 @@ function VMArray() {
 VMArray.prototype.create_obj_constructor = basic_constructor;
 
 VMArray.prototype.deserialize_finish = function(object, data) {
-  console.log("deserializing VMArray");
+  console.log('deserializing VMArray');
   // STUB
 };
 VMArray.prototype.type_object_for = basic_type_object_for;
@@ -597,7 +597,7 @@ VMArray.prototype.deserialize_repr_data = function(cursor) {
 
 VMArray.prototype.deserialize_array = function(object,data) {
   if (this.type !== null) {
-    console.log("NYI: VMArrays of a type different then null");
+    console.log('NYI: VMArrays of a type different then null');
   }
   var size = data.varint();
   for (var i = 0; i < size; i++) {
@@ -611,7 +611,7 @@ function VMIter() {
 }
 VMIter.prototype.create_obj_constructor = basic_constructor;
 VMIter.prototype.deserialize_finish = function(object, data) {
-  console.log("deserializing VMIter");
+  console.log('deserializing VMIter');
   // STUB
 };
 VMIter.prototype.type_object_for = basic_type_object_for;

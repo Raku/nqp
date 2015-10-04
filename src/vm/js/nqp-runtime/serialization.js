@@ -5,11 +5,11 @@ var op = {};
 exports.op = op;
 
 var CURRENT_VERSION = 15;
-var OBJECTS_TABLE_ENTRY_SC_MASK     = 0x7FF;
+var OBJECTS_TABLE_ENTRY_SC_MASK = 0x7FF;
 var OBJECTS_TABLE_ENTRY_SC_IDX_MASK = 0x000FFFFF;
-var OBJECTS_TABLE_ENTRY_SC_IDX_MAX  = 0x000FFFFF;
-var OBJECTS_TABLE_ENTRY_SC_MAX      = 0x7FE;
-var OBJECTS_TABLE_ENTRY_SC_SHIFT    = 20;
+var OBJECTS_TABLE_ENTRY_SC_IDX_MAX = 0x000FFFFF;
+var OBJECTS_TABLE_ENTRY_SC_MAX = 0x7FE;
+var OBJECTS_TABLE_ENTRY_SC_SHIFT = 20;
 var OBJECTS_TABLE_ENTRY_SC_OVERFLOW = 0x7FF;
 var OBJECTS_TABLE_ENTRY_IS_CONCRETE = 0x80000000;
 
@@ -67,7 +67,7 @@ BinaryWriteCursor.prototype.varint = function(value) {
             storage_needed = 4;
         else if (abs_val <= 0x00000007FFFFFFFF)
             storage_needed = 5;
-        else console.log("TODO serializing bigger integers");
+        else console.log('TODO serializing bigger integers');
 
         /* TODO bigger numbers */
         /*else if (abs_val <= 0x000007FFFFFFFFFFLL)
@@ -194,9 +194,9 @@ SerializationWriter.prototype.serializeObject = function(obj) {
 };
 
 var PACKED_SC_IDX_MASK = 0x000FFFFF;
-var PACKED_SC_MAX      = 0xFFE;
-var PACKED_SC_IDX_MAX  = 0x000FFFFF;
-var PACKED_SC_SHIFT    = 20;
+var PACKED_SC_MAX = 0xFFE;
+var PACKED_SC_IDX_MAX = 0x000FFFFF;
+var PACKED_SC_SHIFT = 20;
 var PACKED_SC_OVERFLOW = 0xFFF;
 
 /* Writes the ID, index pair that identifies an entry in a Serialization
@@ -216,7 +216,7 @@ BinaryWriteCursor.prototype.idIdx = function(sc_id, idx) {
         write_int32(*(writer->cur_write_buffer), *(writer->cur_write_offset), sc_id);
         write_int32(*(writer->cur_write_buffer), *(writer->cur_write_offset), idx);*/
     }
-}
+};
 
 BinaryWriteCursor.prototype.objRef = function(ref) {
   var writer_sc = this.writer.sc;
@@ -376,7 +376,7 @@ SerializationWriter.prototype.serializeSTable = function(st) {
   if (!st.HOW) {
     console.log('!.HOW', st, st.HOW);
   }
-  
+
   /* TODO lazy HOW loading */
 
   this.stables_data.objRef(st.HOW);

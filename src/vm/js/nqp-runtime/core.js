@@ -168,13 +168,13 @@ exports.slurpy_named = function(named) {
 };
 
 exports.unwrap_named = function(named) {
-  if (!named instanceof Hash) console.log("expecting a hash here");
+  if (!named instanceof Hash) console.log('expecting a hash here');
   return named.content;
 };
 
 exports.named = function(parts) {
   var all = {};
-  for (var i=0; i < parts.length; i++) {
+  for (var i = 0; i < parts.length; i++) {
     var part = parts[i];
     for (var key in part) {
       all[key] = part[key];
@@ -207,7 +207,7 @@ op.defined = function(obj) {
 
 op.setinvokespec = function(obj, classHandle, attrName, invocationHandler) {
     if (invocationHandler !== null) {
-        throw "invocationHandler argument to setinvokespec not supported";
+        throw 'invocationHandler argument to setinvokespec not supported';
     }
     obj._STable.setinvokespec(classHandle, attrName, invocationHandler);
     return obj;
@@ -238,7 +238,7 @@ op.setcodeobj = function(codeRef, codeObj) {
   return codeRef;
 };
 op.getcodeobj = function(codeRef) {
-  return codeRef.codeObj ;
+  return codeRef.codeObj;
 };
 
 op.curcode = function() {
@@ -274,7 +274,7 @@ op.splice = function(target, source, offset, length) {
   }
   target.splice.apply(target, args);
   return target;
-}
+};
 
 op.findmethod = function(obj, method) {
   return obj._STable.method_cache[method];
@@ -294,7 +294,7 @@ op.istype = function(obj, type) {
 
   // TODO cases where the type_check_cache isn't authoritative
   var cache = obj._STable.type_check_cache;
-  for (var i=0; i < cache.length; i++) {
+  for (var i = 0; i < cache.length; i++) {
     if (cache[i] === type) {
       return 1;
     }
@@ -309,7 +309,7 @@ op.settypecache = function(obj, cache) {
 
 op.setmethcache = function(obj, cache) {
     if (!cache instanceof Hash) {
-      console.log("we expect a hash here");
+      console.log('we expect a hash here');
     }
     obj._STable.setMethodCache(cache.content);
     return obj;
@@ -332,7 +332,7 @@ op.newtype = function(how, repr) {
   var REPR = new reprs[repr]();
   REPR.name = repr;
   return REPR.type_object_for(how);
-}
+};
 
 op.can = function(obj, method) {
   return obj._STable.method_cache.hasOwnProperty(method) ? 1 : 0;
@@ -357,12 +357,12 @@ op.composetype = function(obj, reprinfo) {
 
 op.clone = function(obj) {
   if (obj.$$clone) {
-    return obj.$$clone(); 
+    return obj.$$clone();
   } else if (obj instanceof Array) {
     return obj.slice();
   } else {
     // STUB
-    console.log("NYI cloning", obj);
+    console.log('NYI cloning', obj);
     return obj;
   }
 };
@@ -375,7 +375,7 @@ op.where = function(obj) {
     }
     return obj._WHERE;
   } else {
-    throw "WHERE on this type of thing unimplemented";
+    throw 'WHERE on this type of thing unimplemented';
   }
 };
 
@@ -416,7 +416,7 @@ op.setcontspec = function(type, cont_spec_type, hash) {
           return fetch.$call(ctx, {}, this);
         });
     } else {
-        throw "NYI cont spec: "+cont_spec_type;
+        throw 'NYI cont spec: '+ cont_spec_type;
     }
 };
 

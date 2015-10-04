@@ -17,7 +17,7 @@ function add_to_sc_with_st(obj) {
 }
 
 function add_to_sc_with_st_and_mo() {
-    throw "...";
+    throw '...';
 }
 
 
@@ -61,8 +61,8 @@ var KnowHOW_HOW = repr.allocate(st);
 
 add_to_sc_with_st(KnowHOW_HOW);
 
-KnowHOW_HOW.id = "KnowHOW_HOW";
-KnowHOW._STable.id = "KnowHOW";
+KnowHOW_HOW.id = 'KnowHOW_HOW';
+KnowHOW._STable.id = 'KnowHOW';
 KnowHOW._STable.HOW = KnowHOW_HOW;
 
 function add_knowhow_how_method(name, method) {
@@ -71,19 +71,19 @@ function add_knowhow_how_method(name, method) {
   KnowHOW._STable.obj_constructor.prototype[name] = method;
 }
 
-add_knowhow_how_method("name", function() {
+add_knowhow_how_method('name', function() {
   return this.__name;
 });
 
-add_knowhow_how_method("attributes", function() {
+add_knowhow_how_method('attributes', function() {
   return this.__attributes;
 });
 
-add_knowhow_how_method("methods", function() {
+add_knowhow_how_method('methods', function() {
   return this.__methods;
 });
 
-add_knowhow_how_method("new_type", function(ctx, _NAMED) {
+add_knowhow_how_method('new_type', function(ctx, _NAMED) {
   /* We first create a new HOW instance. */
   var HOW = this._STable.REPR.allocate(this._STable);
 
@@ -108,11 +108,11 @@ add_knowhow_how_method("new_type", function(ctx, _NAMED) {
   return type_object;
 });
 
-add_knowhow_how_method("add_attribute", function(ctx, _NAMED, type, attr) {
+add_knowhow_how_method('add_attribute', function(ctx, _NAMED, type, attr) {
   this.__attributes.push(attr);
 });
 
-add_knowhow_how_method("compose", function(ctx, _NAMED, type_object) {
+add_knowhow_how_method('compose', function(ctx, _NAMED, type_object) {
   /* Set method cache */
   type_object._STable.setMethodCache(this.__methods.content);
 

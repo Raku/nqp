@@ -15,8 +15,8 @@ var EDGE_FATE = 0,
     EDGE_CODEPOINT_I = 9,
     EDGE_CODEPOINT_I_NEG = 10,
     EDGE_GENERIC_VAR = 11,
-    EDGE_CHARRANGE        = 12,
-    EDGE_CHARRANGE_NEG    = 13,
+    EDGE_CHARRANGE = 12,
+    EDGE_CHARRANGE_NEG = 13,
     EDGE_CODEPOINT_LL = 14,
     EDGE_CODEPOINT_I_LL = 15;
 
@@ -54,7 +54,7 @@ op.nfafromstatelist = function(states, type) {
           edge.arg_uc = states[i][j + 1][1];
           break;
         default:
-          throw "nfafromstatelist: unknown codepoint type: " + edge.act;
+          throw 'nfafromstatelist: unknown codepoint type: ' + edge.act;
       }
       nfa.states[i - 1].push(edge);
     }
@@ -67,7 +67,7 @@ function runNFA(nfa, target, pos) {
   var orig_pos = pos;
 
   var longlit = [];
-  for (var i=0;i < 200;i++) longlit[i] = 0;
+  for (var i = 0; i < 200; i++) longlit[i] = 0;
 
 
   var eos = target.length;
@@ -222,7 +222,7 @@ function runNFA(nfa, target, pos) {
        else if (act == EDGE_CHARRANGE_NEG) {
          // TODO
        } else {
-         console.log("runNFA: unknown codepoint", act);
+         console.log('runNFA: unknown codepoint', act);
        }
       }
     }
@@ -244,8 +244,8 @@ function runNFA(nfa, target, pos) {
 
 
   if (usedlonglit > 0) {
-      for (var i=0; i < fates.length; i++) {
-          fates[i] = fates[i] &  0xffffff;
+      for (var i = 0; i < fates.length; i++) {
+          fates[i] = fates[i] & 0xffffff;
       }
   }
 

@@ -55,7 +55,7 @@ function saveCtx(where, block) {
 
 exports.load_setting = function(settingName) {
   saveCtx(settingName, function() {
-    require(settingName+".setting");
+    require(settingName + '.setting');
   });
 };
 
@@ -79,7 +79,7 @@ exports.to_str = function(arg, ctx) {
   } else if (typeof arg == 'string') {
     return arg;
   } else if (arg !== undefined && arg !== null && arg.type_object_) {
-    return "";
+    return '';
   } else if (arg.Str) {
     return arg.Str(ctx);
   } else if (arg.$$get_str) {
@@ -151,7 +151,7 @@ exports.to_bool = function(arg, ctx) {
 function Ctx(caller_ctx, outer_ctx) {
   this.caller = caller_ctx;
   this.outer = outer_ctx;
-};
+}
 
 
 function NqpException(msg) {
@@ -335,20 +335,20 @@ function WrappedArray(array) {
 
 WrappedArray.prototype.push = function(ctx, _NAMED, element) {
   this.array.push(element);
-  return element;   
+  return element;
 };
 
 WrappedArray.prototype.unshift = function(ctx, _NAMED, element) {
   this.array.unshift(element);
-  return element;   
+  return element;
 };
 
 WrappedArray.prototype.shift = function(ctx, _NAMED) {
-  return this.array.shift();   
+  return this.array.shift();
 };
 
 WrappedArray.prototype.pop = function(ctx, _NAMED) {
-  return this.array.pop();   
+  return this.array.pop();
 };
 
 exports.wrapObj = function(obj) {
@@ -366,9 +366,9 @@ exports.dumpObj = function(obj) {
   return JSON.stringify(obj, function(key, value) {
     if (key == '_SC') return undefined;
     for (var i = 0; i < seen.length; i++) {
-      if (seen[i] === value) return "circular";
+      if (seen[i] === value) return 'circular';
     }
     seen.push(value);
     return value;
-  }, "  ");
+  }, '  ');
 };

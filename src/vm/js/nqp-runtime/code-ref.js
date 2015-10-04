@@ -37,7 +37,7 @@ CodeRef.prototype.$$clone = function() {
   var clone = new CodeRef(this.name);
   clone.$call = this.$call;
   clone.codeObj = this.codeObj;
-  clone.cuid = this.cuid+" clone";
+  clone.cuid = this.cuid + ' clone';
   return clone;
 };
 

@@ -31,7 +31,7 @@ function getBI(obj) {
 }
 
 op.fromstr_I = function(str, type) {
-  return makeBI(type,bignum(str));
+  return makeBI(type, bignum(str));
 };
 
 op.tostr_I = function(n) {
@@ -39,7 +39,7 @@ op.tostr_I = function(n) {
 };
 
 op.base_I = function(n, base) {
-  return getBI(n).toString(base).toUpperCase().replace(/^-0+/,"-");
+  return getBI(n).toString(base).toUpperCase().replace(/^-0+/, '-');
 };
 
 op.iseq_I = function(a, b) {
@@ -76,7 +76,7 @@ op.expmod_I = function(a, b, c, type) {
 
 op.div_In = function(a, b) {
   var digits = 1e+20;
-  return getBI(a).mul(bignum(digits)).div(getBI(b)).toNumber()/digits;
+  return getBI(a).mul(bignum(digits)).div(getBI(b)).toNumber() / digits;
 };
 
 op.rand_I = function(max, type) {
@@ -140,9 +140,9 @@ op.tonum_I = function(n) {
 op.fromnum_I = function(num, type) {
   // node-bignum bug workaround, when a negative number is too big it gets turned into 0
   if (num < 0) {
-    return makeBI(type,bignum(-num).neg());
+    return makeBI(type, bignum(-num).neg());
   } else {
-    return makeBI(type,bignum(num));
+    return makeBI(type, bignum(num));
   }
 };
 

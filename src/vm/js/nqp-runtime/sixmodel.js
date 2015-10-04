@@ -36,7 +36,7 @@ STable.prototype.setboolspec = function(mode, method) {
     } else if (mode == 7 || mode == 8) {
       // STUB
     } else {
-      throw "setboolspec with mode: "+mode+" NYI";
+      throw 'setboolspec with mode: '+ mode + ' NYI';
     }
 };
 

@@ -1,5 +1,5 @@
 function Hash() {
-  this.content = {}
+  this.content = {};
 }
 Hash.prototype.$$bindkey = function(key, value) {
   return (this.content[key] = value);
@@ -27,6 +27,6 @@ Hash.prototype.$$elems = function() {
     count++;
   }
   return count;
-}
+};
 
 module.exports = Hash;

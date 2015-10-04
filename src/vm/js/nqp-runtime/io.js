@@ -188,7 +188,7 @@ op.seekfh = function(fh, offset, whence, ctx) {
       ctx.die("Can't seek to position: " + offset);
   }
   if (!(whence == 0 || whence == 1 || whence == 2)) {
-      ctx.die("Invalid whence passed to seekfh: " + whence);
+      ctx.die('Invalid whence passed to seekfh: ' + whence);
   }
   fs.seekSync(fh.fd, offset, whence);
 };
@@ -226,23 +226,23 @@ op.mkdir = function(dir, mode) {
   fs.mkdirSync(dir, mode);
 };
 
-var PIPE_INHERIT        = 1;
-var PIPE_IGNORE         = 2;
-var PIPE_CAPTURE        = 4;
-var PIPE_INHERIT_IN     = 1;
-var PIPE_IGNORE_IN      = 2;
-var PIPE_CAPTURE_IN     = 4;
-var PIPE_INHERIT_OUT    = 8;
-var PIPE_IGNORE_OUT     = 16;
-var PIPE_CAPTURE_OUT    = 32;
-var PIPE_INHERIT_ERR    = 64;
-var PIPE_IGNORE_ERR     = 128;
-var PIPE_CAPTURE_ERR    = 256;
+var PIPE_INHERIT = 1;
+var PIPE_IGNORE = 2;
+var PIPE_CAPTURE = 4;
+var PIPE_INHERIT_IN = 1;
+var PIPE_IGNORE_IN = 2;
+var PIPE_CAPTURE_IN = 4;
+var PIPE_INHERIT_OUT = 8;
+var PIPE_IGNORE_OUT = 16;
+var PIPE_CAPTURE_OUT = 32;
+var PIPE_INHERIT_ERR = 64;
+var PIPE_IGNORE_ERR = 128;
+var PIPE_CAPTURE_ERR = 256;
 
 op.shell = function(command, dir, env, input, output, error, flags) {
 
   if (flags != PIPE_INHERIT_IN + PIPE_INHERIT_OUT + PIPE_INHERIT_ERR) {
-      throw "shell: NYI combination of flags";
+      throw 'shell: NYI combination of flags';
   }
 
   var oldEnv = {};
@@ -279,20 +279,20 @@ op.getenvhash = function() {
 };
 
 function Stderr() {
-};
+}
 Stderr.prototype.printfh = function(msg) {
     process.stderr.write(msg);
-}
+};
 
 op.getstderr = function() {
     return new Stderr();
 };
 
 function Stdout() {
-};
+}
 Stdout.prototype.printfh = function(msg) {
     process.stdout.write(msg);
-}
+};
 op.getstdout = function() {
     return new Stdout();
 };
