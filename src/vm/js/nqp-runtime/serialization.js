@@ -67,6 +67,7 @@ BinaryWriteCursor.prototype.varint = function(value) {
             storage_needed = 4;
         else if (abs_val <= 0x00000007FFFFFFFF)
             storage_needed = 5;
+        else console.log("TODO serializing bigger integers");
 
         /* TODO bigger numbers */
         /*else if (abs_val <= 0x000007FFFFFFFFFFLL)
@@ -94,8 +95,10 @@ BinaryWriteCursor.prototype.varint = function(value) {
                || (nybble >> 3) == ~0);
 
         this.I8((rest << 4) | (nybble & 0xF));
-        console.log("TODO - writing varints that take 2-8 bytes", value, storage_needed);
-        //memcpy(buffer + offset, &value, rest);
+
+        this.growToHold(rest);
+        this.buffer.writeIntLE(value, this.offset, rest, true);
+        this.offset += rest;
     }
 };
 
