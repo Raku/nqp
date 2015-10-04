@@ -595,7 +595,7 @@ VMArray.prototype.deserialize_repr_data = function(cursor) {
   /* TODO - type */
 };
 
-VMArray.prototype.deserialize_array = function(object,data) {
+VMArray.prototype.deserialize_array = function(object, data) {
   if (this.type !== null) {
     console.log('NYI: VMArrays of a type different then null');
   }

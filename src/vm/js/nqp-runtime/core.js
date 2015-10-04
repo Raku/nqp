@@ -53,14 +53,14 @@ op.isinvokable = function(obj) {
 
 op.escape = function(str) {
   return str
-    .replace(/\\/g, '\\\\')
-    .replace(/\x1B/g, '\\e')
-    .replace(/\n/g, '\\n')
-    .replace(/\r/g, '\\r')
-    .replace(/\t/g, '\\t')
-    .replace(/\f/g, '\\f')
-    .replace(/[\b]/g, '\\b')
-    .replace(/"/g, '\\"');
+      .replace(/\\/g, '\\\\')
+      .replace(/\x1B/g, '\\e')
+      .replace(/\n/g, '\\n')
+      .replace(/\r/g, '\\r')
+      .replace(/\t/g, '\\t')
+      .replace(/\f/g, '\\f')
+      .replace(/[\b]/g, '\\b')
+      .replace(/"/g, '\\"');
 };
 
 op.x = function(str, times) {
@@ -219,7 +219,7 @@ op.setboolspec = function(obj, mode, method) {
   return obj;
 };
 
-function Capture(named,pos) {
+function Capture(named, pos) {
   this.pos = pos;
 }
 

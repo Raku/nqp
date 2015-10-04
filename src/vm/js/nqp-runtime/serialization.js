@@ -91,8 +91,7 @@ BinaryWriteCursor.prototype.varint = function(value) {
     /* All the other high bits should be the same as the top bit of the
            nybble we keep. Or we have a bug.  */
 
-    console.assert((nybble >> 3) == 0
-               || (nybble >> 3) == ~0);
+    console.assert((nybble >> 3) == 0 || (nybble >> 3) == ~0);
 
     this.I8((rest << 4) | (nybble & 0xF));
 

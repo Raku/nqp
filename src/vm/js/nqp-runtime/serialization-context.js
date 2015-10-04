@@ -5,15 +5,15 @@
 
 /**
  * @constructor
- * @property handle The handle of this SC.
- * @property description Description (probably the file name) if any.
- * @property root_objects The root set of objects that live in this SC.
- * @property root_stables The root set of STables that live in this SC.
- * @property root_codes The root set of code refs that live in this SC.
- * @property rep_indexes Repossession info. The following lists have matching indexes, each
+ * @public handle The handle of this SC.
+ * @public description Description (probably the file name) if any.
+ * @public root_objects The root set of objects that live in this SC.
+ * @public root_stables The root set of STables that live in this SC.
+ * @public root_codes The root set of code refs that live in this SC.
+ * @public rep_indexes Repossession info. The following lists have matching indexes, each
  * representing the integer of an object in our root set along with the SC
  * that the object was originally from.
- * @property rep_scs
+ * @public rep_scs
 */
 
 function SerializationContext(handle) {

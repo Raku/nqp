@@ -454,8 +454,7 @@ BinaryCursor.prototype.deserialize = function(sc) {
   var objects_offset = this.I32();
   var objects_number = this.I32();
   var objects_data = this.I32();
-  var objects =
-      this.at(objects_offset).times(objects_number, function(cursor) {
+  var objects = this.at(objects_offset).times(objects_number, function(cursor) {
     return cursor.objectEntry(objects_data);
   });
 
@@ -504,8 +503,7 @@ BinaryCursor.prototype.deserialize = function(sc) {
 
   var closures_offset = this.I32();
   var closures_number = this.I32();
-  var closures =
-      this.at(closures_offset).times(closures_number, function(cursor) {
+  var closures = this.at(closures_offset).times(closures_number, function(cursor) {
     return cursor.closureEntry();
   });
 
@@ -532,8 +530,7 @@ BinaryCursor.prototype.deserialize = function(sc) {
   var contexts_offset = this.I32();
   var contexts_number = this.I32();
   var contexts_data = this.I32();
-  var contexts =
-      this.at(contexts_offset).times(contexts_number, function(cursor) {
+  var contexts = this.at(contexts_offset).times(contexts_number, function(cursor) {
     return cursor.contextEntry(contexts_data);
   });
 
