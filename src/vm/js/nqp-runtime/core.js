@@ -176,7 +176,6 @@ exports.named = function(parts) {
   var all = {};
   for (var i=0; i < parts.length; i++) {
     var part = parts[i];
-//    if (part instanceof Hash) part = part.content;
     for (var key in part) {
       all[key] = part[key];
     }
