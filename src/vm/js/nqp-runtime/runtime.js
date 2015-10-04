@@ -70,7 +70,7 @@ exports.setup_setting = function(settingName) {
 };
 
 exports.ctxsave = function(ctx) {
-    savedCtxs[saveCtxAs] = ctx;
+  savedCtxs[saveCtxAs] = ctx;
 };
 
 exports.to_str = function(arg, ctx) {
@@ -155,42 +155,42 @@ function Ctx(caller_ctx, outer_ctx) {
 
 
 function NqpException(msg) {
-    this.msg = msg;
+  this.msg = msg;
 }
 
 NqpException.prototype.Str = function(ctx, _NAMED) {
-    return this.msg;
+  return this.msg;
 };
 
 Ctx.prototype.propagateException = function(exception) {
   var ctx = this;
   while (ctx) {
-      if (ctx.CATCH) {
-          exception.caught = ctx;
-          exception.resume = false;
-          ctx.exception = exception;
-          ctx.unwind.ret = ctx.CATCH();
-          if (exception.resume) {
-              return;
-          } else {
-            throw ctx.unwind;
-          }
+    if (ctx.CATCH) {
+      exception.caught = ctx;
+      exception.resume = false;
+      ctx.exception = exception;
+      ctx.unwind.ret = ctx.CATCH();
+      if (exception.resume) {
+        return;
+      } else {
+        throw ctx.unwind;
       }
-      ctx = ctx.caller;
+    }
+    ctx = ctx.caller;
   }
   throw exception.msg;
 };
 
 Ctx.prototype.rethrow = function(exception) {
-    exception.caught.caller.propagateException(exception);
+  exception.caught.caller.propagateException(exception);
 };
 
 Ctx.prototype.die = function(msg) {
-    this.propagateException(new NqpException(msg));
+  this.propagateException(new NqpException(msg));
 };
 
 Ctx.prototype.resume = function(exception) {
-    exception.resume = true;
+  exception.resume = true;
 };
 
 Ctx.prototype.lookup_dynamic = function(name) {
@@ -320,13 +320,13 @@ exports.regexCommit = function(bstack, mark) {
 };
 
 exports.Last = function(label) {
-    this.label = label;
+  this.label = label;
 };
 exports.Redo = function(label) {
-    this.label = label;
+  this.label = label;
 };
 exports.Next = function(label) {
-    this.label = label;
+  this.label = label;
 };
 
 function WrappedArray(array) {

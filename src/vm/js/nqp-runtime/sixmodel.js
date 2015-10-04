@@ -7,13 +7,13 @@ function STable(REPR, HOW) {
 
   /* HACK - it's a bit hackish - think how correct it is */
   this.obj_constructor.prototype.$$clone = function() {
-      var clone = new this._STable.obj_constructor();
-      for (var i in this) {
-        if (this.hasOwnProperty(i) && i != '_SC') {
-          clone[i] = this[i];
-        }
+    var clone = new this._STable.obj_constructor();
+    for (var i in this) {
+      if (this.hasOwnProperty(i) && i != '_SC') {
+        clone[i] = this[i];
       }
-      return clone;
+    }
+    return clone;
   };
 
   /* Default boolification mode 5 */
@@ -27,17 +27,17 @@ function STable(REPR, HOW) {
 }
 
 STable.prototype.setboolspec = function(mode, method) {
-    if (mode == 0) {
-      this.obj_constructor.prototype.$$to_bool = function(ctx) {
-        return method.$call(ctx, {}, this);
-      };
-    } else if (mode == 5) {
-      // this is the default - do nothing
-    } else if (mode == 7 || mode == 8) {
-      // STUB
-    } else {
-      throw 'setboolspec with mode: '+ mode + ' NYI';
-    }
+  if (mode == 0) {
+    this.obj_constructor.prototype.$$to_bool = function(ctx) {
+      return method.$call(ctx, {}, this);
+    };
+  } else if (mode == 5) {
+  // this is the default - do nothing
+  } else if (mode == 7 || mode == 8) {
+  // STUB
+  } else {
+    throw 'setboolspec with mode: ' + mode + ' NYI';
+  }
 };
 
 STable.prototype.setinvokespec = function(classHandle, attrName, invocationHandler) {
@@ -53,7 +53,7 @@ STable.prototype.setinvokespec = function(classHandle, attrName, invocationHandl
 
 function injectMethod(proto, name, method) {
   proto[name] = function _() {
-//    console.log("calling method:",name,method);
+    //    console.log("calling method:",name,method);
     if (method.$call) {
       var args = [];
       args.push(arguments[0]);
@@ -81,26 +81,26 @@ STable.prototype.setMethodCache = function(method_cache) {
 // TODO handle attrs properly
 // TODO delegation to something that is not an array
 STable.prototype.setPositionalDelegate = function(attr) {
-    this.obj_constructor.prototype.$$bindpos = function(index, value) {
-        return this[attr][index] = value;
-    };
-    this.obj_constructor.prototype.$$atpos = function(index) {
-        return this[attr][index];
-    };
+  this.obj_constructor.prototype.$$bindpos = function(index, value) {
+    return this[attr][index] = value;
+  };
+  this.obj_constructor.prototype.$$atpos = function(index) {
+    return this[attr][index];
+  };
 };
 
 // TODO handle attrs properly
 STable.prototype.setAssociativeDelegate = function(attr) {
-    this.obj_constructor.prototype.$$bindkey = function(key, value) {
-        return this[attr].$$bindkey(key, value);
-    };
-    this.obj_constructor.prototype.$$atkey = function(key) {
-        return this[attr].$$atkey(key);
-    };
+  this.obj_constructor.prototype.$$bindkey = function(key, value) {
+    return this[attr].$$bindkey(key, value);
+  };
+  this.obj_constructor.prototype.$$atkey = function(key) {
+    return this[attr].$$atkey(key);
+  };
 };
 
 STable.prototype.addInternalMethod = function(name, func) {
-   this.obj_constructor.prototype[name] = func;
+  this.obj_constructor.prototype[name] = func;
 };
 
 module.exports.STable = STable;

@@ -21,9 +21,9 @@ op.atpos = function(array, index) {
 
 op.bindpos = function(array, index, value) {
   if (array instanceof Array) {
-      return (array[index] = value);
+    return (array[index] = value);
   } else {
-      return array.$$bindpos(index, value);
+    return array.$$bindpos(index, value);
   }
 };
 
@@ -206,17 +206,17 @@ op.defined = function(obj) {
 
 
 op.setinvokespec = function(obj, classHandle, attrName, invocationHandler) {
-    if (invocationHandler !== null) {
-        throw 'invocationHandler argument to setinvokespec not supported';
-    }
-    obj._STable.setinvokespec(classHandle, attrName, invocationHandler);
-    return obj;
+  if (invocationHandler !== null) {
+    throw 'invocationHandler argument to setinvokespec not supported';
+  }
+  obj._STable.setinvokespec(classHandle, attrName, invocationHandler);
+  return obj;
 };
 
 // Stub
 op.setboolspec = function(obj, mode, method) {
-    obj._STable.setboolspec(mode, method);
-    return obj;
+  obj._STable.setboolspec(mode, method);
+  return obj;
 };
 
 function Capture(named,pos) {
@@ -284,12 +284,12 @@ op.istype = function(obj, type) {
   /* Null always type checks false. */
   /* HACK - undefined */
   if (obj === null || obj === undefined) {
-      return 0;
+    return 0;
   }
 
   // HACK
   if (typeof obj === 'number' || typeof obj === 'string' || obj instanceof Array) {
-      return 0;
+    return 0;
   }
 
   // TODO cases where the type_check_cache isn't authoritative
@@ -308,17 +308,17 @@ op.settypecache = function(obj, cache) {
 };
 
 op.setmethcache = function(obj, cache) {
-    if (!cache instanceof Hash) {
-      console.log('we expect a hash here');
-    }
-    obj._STable.setMethodCache(cache.content);
-    return obj;
+  if (!cache instanceof Hash) {
+    console.log('we expect a hash here');
+  }
+  obj._STable.setMethodCache(cache.content);
+  return obj;
 };
 
 op.setmethcacheauth = function(obj, isAuth) {
-    /* TODO we currently assume method caches are always authorative
+  /* TODO we currently assume method caches are always authorative
     sadly that's not always the case*/
-    return obj;
+  return obj;
 };
 
 op.reprname = function(obj) {
@@ -371,7 +371,7 @@ var where_counter = 0;
 op.where = function(obj) {
   if (obj._STable) { // HACK
     if (!obj._WHERE) {
-        obj._WHERE = ++where_counter;
+      obj._WHERE = ++where_counter;
     }
     return obj._WHERE;
   } else {
@@ -397,35 +397,35 @@ op.sha1 = function(text) {
 };
 
 op.curlexpad = function(get, set) {
-    return new CurLexpad(get, set);
+  return new CurLexpad(get, set);
 };
 
 op.setcontspec = function(type, cont_spec_type, hash) {
-    var fetch = hash.content.fetch;
-    var store = hash.content.store;
-    if (cont_spec_type === 'code_pair') {
-        type._STable.addInternalMethod('$$assignunchecked', function(ctx, value) {
-          store.$call(ctx, {}, this, value);
-          return value;
-        });
-        type._STable.addInternalMethod('$$assign', function(ctx, value) {
-          store.$call(ctx, {}, this, value);
-          return value;
-        });
-        type._STable.addInternalMethod('$$decont', function(ctx) {
-          return fetch.$call(ctx, {}, this);
-        });
-    } else {
-        throw 'NYI cont spec: '+ cont_spec_type;
-    }
+  var fetch = hash.content.fetch;
+  var store = hash.content.store;
+  if (cont_spec_type === 'code_pair') {
+    type._STable.addInternalMethod('$$assignunchecked', function(ctx, value) {
+      store.$call(ctx, {}, this, value);
+      return value;
+    });
+    type._STable.addInternalMethod('$$assign', function(ctx, value) {
+      store.$call(ctx, {}, this, value);
+      return value;
+    });
+    type._STable.addInternalMethod('$$decont', function(ctx) {
+      return fetch.$call(ctx, {}, this);
+    });
+  } else {
+    throw 'NYI cont spec: ' + cont_spec_type;
+  }
 };
 
 op.iscont = function(cont) {
-    return cont.$$decont ? 1 : 0;
+  return cont.$$decont ? 1 : 0;
 };
 
 op.decont = function(ctx, cont) {
-    return cont.$$decont ? cont.$$decont(ctx) : cont;
+  return cont.$$decont ? cont.$$decont(ctx) : cont;
 };
 
 op.box_n = function(n, type) {
@@ -436,7 +436,7 @@ op.box_n = function(n, type) {
 };
 
 op.unbox_n = function(obj) {
-    return obj.$$get_num();
+  return obj.$$get_num();
 };
 
 op.box_s = function(value, type) {
@@ -447,7 +447,7 @@ op.box_s = function(value, type) {
 };
 
 op.unbox_s = function(obj) {
-    return obj.$$get_str();
+  return obj.$$get_str();
 };
 
 op.elems = function(obj) {

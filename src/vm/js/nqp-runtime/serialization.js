@@ -52,25 +52,25 @@ BinaryWriteCursor.prototype.str = function(str) {
 /* Writing function for variable sized integers. Writes out a 64 bit value
    using between 1 and 9 bytes. */
 BinaryWriteCursor.prototype.varint = function(value) {
-    var storage_needed;
+  var storage_needed;
 
-    if (value >= -1 && value <= 126) {
-        storage_needed = 1;
-    } else {
-        var abs_val = value < 0 ? -value - 1 : value;
+  if (value >= -1 && value <= 126) {
+    storage_needed = 1;
+  } else {
+    var abs_val = value < 0 ? -value - 1 : value;
 
-        if (abs_val <= 0x7FF)
-            storage_needed = 2;
-        else if (abs_val <= 0x000000000007FFFF)
-            storage_needed = 3;
-        else if (abs_val <= 0x0000000007FFFFFF)
-            storage_needed = 4;
-        else if (abs_val <= 0x00000007FFFFFFFF)
-            storage_needed = 5;
-        else console.log('TODO serializing bigger integers');
+    if (abs_val <= 0x7FF)
+      storage_needed = 2;
+    else if (abs_val <= 0x000000000007FFFF)
+      storage_needed = 3;
+    else if (abs_val <= 0x0000000007FFFFFF)
+      storage_needed = 4;
+    else if (abs_val <= 0x00000007FFFFFFFF)
+      storage_needed = 5;
+    else console.log('TODO serializing bigger integers');
 
-        /* TODO bigger numbers */
-        /*else if (abs_val <= 0x000007FFFFFFFFFFLL)
+    /* TODO bigger numbers */
+    /*else if (abs_val <= 0x000007FFFFFFFFFFLL)
             storage_needed = 6;
         else if (abs_val <= 0x0007FFFFFFFFFFFFLL)
             storage_needed = 7;
@@ -78,28 +78,28 @@ BinaryWriteCursor.prototype.varint = function(value) {
             storage_needed = 8;
         else
             storage_needed = 9;*/
-    }
+  }
 
-    if (storage_needed == 1) {
-        this.U8(0x80 | (value + 129));
-    } else if (storage_needed == 9) {
-        this.I8(0x00);
-        this.I64(value);
-    } else {
-        var rest = storage_needed - 1;
-        var nybble = value >> 8 * rest;
-        /* All the other high bits should be the same as the top bit of the
+  if (storage_needed == 1) {
+    this.U8(0x80 | (value + 129));
+  } else if (storage_needed == 9) {
+    this.I8(0x00);
+    this.I64(value);
+  } else {
+    var rest = storage_needed - 1;
+    var nybble = value >> 8 * rest;
+    /* All the other high bits should be the same as the top bit of the
            nybble we keep. Or we have a bug.  */
 
-        console.assert((nybble >> 3) == 0
+    console.assert((nybble >> 3) == 0
                || (nybble >> 3) == ~0);
 
-        this.I8((rest << 4) | (nybble & 0xF));
+    this.I8((rest << 4) | (nybble & 0xF));
 
-        this.growToHold(rest);
-        this.buffer.writeIntLE(value, this.offset, rest, true);
-        this.offset += rest;
-    }
+    this.growToHold(rest);
+    this.buffer.writeIntLE(value, this.offset, rest, true);
+    this.offset += rest;
+  }
 };
 
 SerializationWriter.prototype.stringIndex = function(str) {
@@ -166,11 +166,11 @@ SerializationWriter.prototype.serializeObject = function(obj) {
   var packed = !obj.type_object_ ? OBJECTS_TABLE_ENTRY_IS_CONCRETE : 0;
 
   if (sc <= OBJECTS_TABLE_ENTRY_SC_MAX && sc_idx <= OBJECTS_TABLE_ENTRY_SC_IDX_MAX) {
-      packed |= (sc << OBJECTS_TABLE_ENTRY_SC_SHIFT) | sc_idx;
+    packed |= (sc << OBJECTS_TABLE_ENTRY_SC_SHIFT) | sc_idx;
   } else {
-      packed |= OBJECTS_TABLE_ENTRY_SC_OVERFLOW << OBJECTS_TABLE_ENTRY_SC_SHIFT;
-      this.objects_data.I32(sc);
-      this.objects_data.I32(sc_idx);
+    packed |= OBJECTS_TABLE_ENTRY_SC_OVERFLOW << OBJECTS_TABLE_ENTRY_SC_SHIFT;
+    this.objects_data.I32(sc);
+    this.objects_data.I32(sc_idx);
   }
 
   /* Make objects table entry. */
@@ -202,20 +202,20 @@ var PACKED_SC_OVERFLOW = 0xFFF;
 /* Writes the ID, index pair that identifies an entry in a Serialization
    context. */
 BinaryWriteCursor.prototype.idIdx = function(sc_id, idx) {
-//static void write_sc_id_idx(MVMThreadContext *tc, MVMSerializationWriter *writer, MVMint32 sc_id, MVMint32 idx) {
-    if (sc_id <= PACKED_SC_MAX && idx <= PACKED_SC_IDX_MAX) {
-        var packed = (sc_id << PACKED_SC_SHIFT) | (idx & PACKED_SC_IDX_MASK);
-        this.I32(packed);
-    } else {
-        var packed = PACKED_SC_OVERFLOW << PACKED_SC_SHIFT;
+  //static void write_sc_id_idx(MVMThreadContext *tc, MVMSerializationWriter *writer, MVMint32 sc_id, MVMint32 idx) {
+  if (sc_id <= PACKED_SC_MAX && idx <= PACKED_SC_IDX_MAX) {
+    var packed = (sc_id << PACKED_SC_SHIFT) | (idx & PACKED_SC_IDX_MASK);
+    this.I32(packed);
+  } else {
+    var packed = PACKED_SC_OVERFLOW << PACKED_SC_SHIFT;
 
-        this.I32(packed);
-        this.I32(sc_id);
-        this.I32(idx);
-        /*write_int32(*(writer->cur_write_buffer), *(writer->cur_write_offset), packed);
+    this.I32(packed);
+    this.I32(sc_id);
+    this.I32(idx);
+    /*write_int32(*(writer->cur_write_buffer), *(writer->cur_write_offset), packed);
         write_int32(*(writer->cur_write_buffer), *(writer->cur_write_offset), sc_id);
         write_int32(*(writer->cur_write_buffer), *(writer->cur_write_offset), idx);*/
-    }
+  }
 };
 
 BinaryWriteCursor.prototype.objRef = function(ref) {
@@ -501,7 +501,7 @@ SerializationWriter.prototype.serializationLoop = function() {
 
 
 SerializationWriter.prototype.serializeRepossessions = function() {
-    /* TODO */
+  /* TODO */
 };
 
 function SerializationWriter(sc, sh) {

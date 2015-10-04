@@ -115,42 +115,42 @@ function runNFA(nfa, target, pos) {
         var to = edgeInfo[i].to;
 
         if (act <= EDGE_EPSILON) {
-            if (act < 0) {
-                act &= 0xff;
-            } else if (act == EDGE_FATE) {
-              /* Crossed a fate edge. Check if we already saw this, and
+          if (act < 0) {
+            act &= 0xff;
+          } else if (act == EDGE_FATE) {
+            /* Crossed a fate edge. Check if we already saw this, and
                  * if so bump the entry we already saw. */
-              var arg = edgeInfo[i].arg_i;
-              var foundFate = false;
+            var arg = edgeInfo[i].arg_i;
+            var foundFate = false;
 
-              arg &= 0xffffff;
-              for (var j = 0; j < fates.length; j++) {
-                if (foundFate) {
-                  fates[j - 1] = fates[j];
-                }
-                if (fates[j] == arg) {
-                  foundFate = true;
-                  if (j < prevFates)
-                    prevFates--;
-                }
+            arg &= 0xffffff;
+            for (var j = 0; j < fates.length; j++) {
+              if (foundFate) {
+                fates[j - 1] = fates[j];
               }
-
-              if (arg < usedlonglit) {
-                  arg -= longlit[arg] << 24;
+              if (fates[j] == arg) {
+                foundFate = true;
+                if (j < prevFates)
+                  prevFates--;
               }
-
-              if (foundFate)
-                fates[fates.length - 1] = arg;
-              else
-                fates.push(arg);
-              continue;
             }
-            else if (act == EDGE_EPSILON && to <= numStates && done[to] != gen) {
-              if (to != 0) {
-                curst.push(to);
-              }
-              continue;
+
+            if (arg < usedlonglit) {
+              arg -= longlit[arg] << 24;
             }
+
+            if (foundFate)
+              fates[fates.length - 1] = arg;
+            else
+              fates.push(arg);
+            continue;
+          }
+          else if (act == EDGE_EPSILON && to <= numStates && done[to] != gen) {
+            if (to != 0) {
+              curst.push(to);
+            }
+            continue;
+          }
         }
 
 
@@ -162,13 +162,13 @@ function runNFA(nfa, target, pos) {
             nextst.push(to);
         }
         else if (act == EDGE_CODEPOINT_LL) {
-            if (target.charCodeAt(pos) == edgeInfo[i].arg_i) {
-              var fate = (edgeInfo[i].act >> 8) & 0xfffff;  /* act is probably signed 32 bits */
-              nextst.push(to);
-              while (usedlonglit <= fate)
-                  longlit[usedlonglit++] = 0;
-              longlit[fate] = pos - orig_pos;
-           }
+          if (target.charCodeAt(pos) == edgeInfo[i].arg_i) {
+            var fate = (edgeInfo[i].act >> 8) & 0xfffff;  /* act is probably signed 32 bits */
+            nextst.push(to);
+            while (usedlonglit <= fate)
+              longlit[usedlonglit++] = 0;
+            longlit[fate] = pos - orig_pos;
+          }
         }
         else if (act == EDGE_CODEPOINT_NEG) {
           if (target.charCodeAt(pos) != edgeInfo[i].arg_i)
@@ -210,20 +210,20 @@ function runNFA(nfa, target, pos) {
               char ord = target.charAt((int)pos);
               if (ord != lc_arg && ord != uc_arg)
                   nextst.push(to);*/
-       }
-       else if (act == EDGE_CHARRANGE) {
-         var uc_arg = edgeInfo[i].arg_uc;
-         var lc_arg = edgeInfo[i].arg_lc;
-         var ord = target.charCodeAt(pos);
-         if (ord >= lc_arg && ord <= uc_arg) {
-           nextst.push(to);
-         }
-       }
-       else if (act == EDGE_CHARRANGE_NEG) {
-         // TODO
-       } else {
-         console.log('runNFA: unknown codepoint', act);
-       }
+        }
+        else if (act == EDGE_CHARRANGE) {
+          var uc_arg = edgeInfo[i].arg_uc;
+          var lc_arg = edgeInfo[i].arg_lc;
+          var ord = target.charCodeAt(pos);
+          if (ord >= lc_arg && ord <= uc_arg) {
+            nextst.push(to);
+          }
+        }
+        else if (act == EDGE_CHARRANGE_NEG) {
+        // TODO
+        } else {
+          console.log('runNFA: unknown codepoint', act);
+        }
       }
     }
     /* Move to next character and generation. */
@@ -244,9 +244,9 @@ function runNFA(nfa, target, pos) {
 
 
   if (usedlonglit > 0) {
-      for (var i = 0; i < fates.length; i++) {
-          fates[i] = fates[i] & 0xffffff;
-      }
+    for (var i = 0; i < fates.length; i++) {
+      fates[i] = fates[i] & 0xffffff;
+    }
   }
 
   return fates;

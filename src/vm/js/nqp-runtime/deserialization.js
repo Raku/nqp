@@ -38,6 +38,8 @@ op.scobjcount = function(sc) {
   return sc.root_objects.length;
 };
 
+
+
 /**
   We define a BinaryCursor class so we can read sequential things easily
   @constructor
@@ -51,6 +53,7 @@ function BinaryCursor(buffer, offset, sh, sc) {
 
 /* Export for unit testing*/
 exports.BinaryCursor = BinaryCursor;
+
 
 /** Clone the cursor */
 BinaryCursor.prototype.clone = function() {
@@ -81,6 +84,7 @@ BinaryCursor.prototype.times = function(count, cb) {
   return array;
 };
 
+
 /** Read an array of elements parsed by the callback */
 BinaryCursor.prototype.array = function(readElem) {
   var elems = this.I32();
@@ -101,15 +105,16 @@ function SerializedObjRef(sc, id) {
   this.id = id;
 }
 
+
 /** Read an entry from the objects table */
 BinaryCursor.prototype.objectEntry = function(objectsData) {
-    const OBJECTS_TABLE_ENTRY_SC_MASK = 0x7FF;
-    const OBJECTS_TABLE_ENTRY_SC_IDX_MASK = 0x000FFFFF;
-    const OBJECTS_TABLE_ENTRY_SC_MAX = 0x7FE;
-    const OBJECTS_TABLE_ENTRY_SC_IDX_MAX = 0x000FFFFF;
-    const OBJECTS_TABLE_ENTRY_SC_SHIFT = 20;
-    const OBJECTS_TABLE_ENTRY_SC_OVERFLOW = 0x7FF;
-    const OBJECTS_TABLE_ENTRY_IS_CONCRETE = 0x80000000;
+  const OBJECTS_TABLE_ENTRY_SC_MASK = 0x7FF;
+  const OBJECTS_TABLE_ENTRY_SC_IDX_MASK = 0x000FFFFF;
+  const OBJECTS_TABLE_ENTRY_SC_MAX = 0x7FE;
+  const OBJECTS_TABLE_ENTRY_SC_IDX_MAX = 0x000FFFFF;
+  const OBJECTS_TABLE_ENTRY_SC_SHIFT = 20;
+  const OBJECTS_TABLE_ENTRY_SC_OVERFLOW = 0x7FF;
+  const OBJECTS_TABLE_ENTRY_IS_CONCRETE = 0x80000000;
 
   var packed = this.I32();
   var offset = this.I32();
@@ -118,9 +123,9 @@ BinaryCursor.prototype.objectEntry = function(objectsData) {
   var sc_idx;
 
   if (sc == OBJECTS_TABLE_ENTRY_SC_OVERFLOW) {
-      throw new Error('Objects Overflow NYI');
+    throw new Error('Objects Overflow NYI');
   } else {
-      sc_idx = packed & OBJECTS_TABLE_ENTRY_SC_IDX_MASK;
+    sc_idx = packed & OBJECTS_TABLE_ENTRY_SC_IDX_MASK;
   }
 
   return {
@@ -167,10 +172,12 @@ BinaryCursor.prototype.locate_thing = function(thing_type) {
   }
 };
 
+
 /**  */
 BinaryCursor.prototype.objRef = function() {
   return this.locate_thing('root_objects');
 };
+
 
 /** Read a hash of variants */
 BinaryCursor.prototype.hashOfVariants = function() {
@@ -187,23 +194,23 @@ BinaryCursor.prototype.hashOfVariants = function() {
 /* TODO - make it work correctly for values bigger than 32bit integers*/
 // XXX TODO - length checks
 BinaryCursor.prototype.varint = function() {
-    var result;
-    var first;
-    var need;
-    var buffer = this.buffer;
+  var result;
+  var first;
+  var need;
+  var buffer = this.buffer;
 
-    first = buffer.readUInt8(this.offset++);
+  first = buffer.readUInt8(this.offset++);
 
-    if (first & 0x80) {
-        return first - 129;
-    }
+  if (first & 0x80) {
+    return first - 129;
+  }
 
-    need = first >> 4;
+  need = first >> 4;
 
-    if (!need) {
-        // unrolled loop for optimization
-        result =
-            buffer.readUInt8(this.offset + 0) |
+  if (!need) {
+    // unrolled loop for optimization
+    result =
+        buffer.readUInt8(this.offset + 0) |
             buffer.readUInt8(this.offset + 1) << 8 |
             buffer.readUInt8(this.offset + 2) << 16 |
             buffer.readUInt8(this.offset + 3) << 24 |
@@ -211,24 +218,25 @@ BinaryCursor.prototype.varint = function() {
             buffer.readUInt8(this.offset + 5) << 40 |
             buffer.readUInt8(this.offset + 6) << 48 |
             buffer.readUInt8(this.offset + 7) << 56;
-        this.offset += 8;
-
-        return result;
-    }
-
-    result = first << 8 * need;
-
-    var shift_places = 0;
-    for (var i = 0; i < need; i++) {
-        var byte = buffer.readUInt8(this.offset++);
-        result |= (byte << shift_places);
-        shift_places += 8;
-    }
-    result = result << (64 - 4 - 8 * need);
-    result = result >> (64 - 4 - 8 * need);
+    this.offset += 8;
 
     return result;
+  }
+
+  result = first << 8 * need;
+
+  var shift_places = 0;
+  for (var i = 0; i < need; i++) {
+    var byte = buffer.readUInt8(this.offset++);
+    result |= (byte << shift_places);
+    shift_places += 8;
+  }
+  result = result << (64 - 4 - 8 * need);
+  result = result >> (64 - 4 - 8 * need);
+
+  return result;
 };
+
 
 /** Read a variant reference */
 BinaryCursor.prototype.variant = function() {
@@ -251,7 +259,7 @@ BinaryCursor.prototype.variant = function() {
     case 8:
       return this.array(function(cursor) {return cursor.str()});
       /* TODO varints */
-/*    case 9:
+    /*    case 9:
       return this.array(function(cursor) {return cursor.I64()});*/
     case 10:
       return this.hashOfVariants(this);
@@ -269,6 +277,7 @@ BinaryCursor.prototype.variant = function() {
   }
 
 };
+
 
 /** Read an entry from the STable table */
 BinaryCursor.prototype.STable = function(STable) {
@@ -397,6 +406,7 @@ BinaryCursor.prototype.contextEntry = function(contextsData) {
   return entry;
 };
 
+
 /** Read a whole serialization context */
 BinaryCursor.prototype.deserialize = function(sc) {
   var version = this.I32();
@@ -438,7 +448,7 @@ BinaryCursor.prototype.deserialize = function(sc) {
   var STables = this.at(STables_offset).times(STables_number,
       function(cursor) {
         return [cursor.str(), cursor.at(STables_data + cursor.I32()), cursor.at(STables_data + cursor.I32())];
-  });
+      });
 
 
   var objects_offset = this.I32();
@@ -483,8 +493,8 @@ BinaryCursor.prototype.deserialize = function(sc) {
     }
 
     if (!objects[i].is_concrete) {
-        // TODO think more about it
-        sc.root_objects[i].type_object_ = 1;
+      // TODO think more about it
+      sc.root_objects[i].type_object_ = 1;
     }
   }
 
@@ -536,18 +546,18 @@ BinaryCursor.prototype.deserialize = function(sc) {
 
   for (var i = 0; i < closures.length; i++) {
     if (closures[i].context) {
-        contexts[closures[i].context - 1].closures.push(closures[i]);
+      contexts[closures[i].context - 1].closures.push(closures[i]);
     } else {
-        no_context_closures.push(closures[i]);
+      no_context_closures.push(closures[i]);
     }
   }
 
   var code = no_context_closures.map(function(closure) {
-      return 'var ' + closure.staticCode.outerCtx + ' = null;\n' +
-      'sc.code_refs[' + closure.index + '].block(' +
+    return 'var ' + closure.staticCode.outerCtx + ' = null;\n' +
+        'sc.code_refs[' + closure.index + '].block(' +
         closure.staticCode.closureTemplate +
         ');\n';
-    }).join('');
+  }).join('');
 
   var data = [];
   for (var i = 0; i < contexts.length; i++) {
@@ -558,8 +568,8 @@ BinaryCursor.prototype.deserialize = function(sc) {
 
   var cuids = [];
   for (var cuid in CodeRef.cuids) {
-     mangledCuid = cuid.replace(/\./g, '_');
-     cuids.push(mangledCuid + ' = CodeRef.cuids[\"' + cuid + '\"]');
+    mangledCuid = cuid.replace(/\./g, '_');
+    cuids.push(mangledCuid + ' = CodeRef.cuids[\"' + cuid + '\"]');
   }
 
   var declareCuids = 'var ' + cuids.join(',') + ';\n';
@@ -577,7 +587,7 @@ BinaryCursor.prototype.deserialize = function(sc) {
   var numParamInterns = this.I32();
 
   if (numParamInterns != 0) {
-      // XXX do we need to care?
+    // XXX do we need to care?
   }
 };
 
@@ -590,22 +600,23 @@ BinaryCursor.prototype.contextToCode = function(context, data) {
 
   var lexicals = [];
   for (var name in context.lexicals) {
-      data.push(context.lexicals[name]);
-      set_vars += 'var ' + context.staticCode.staticInfo[name][1] + ' = data[' + (data.length - 1) + ']\n';
-      console.l;
+    data.push(context.lexicals[name]);
+    set_vars += 'var ' + context.staticCode.staticInfo[name][1] + ' = data[' + (data.length - 1) + ']\n';
+    console.l;
   }
 
   return '(function() {\n' +
-    create_ctx +
-    set_vars +
-    context.inner.map(function(inner) {return this.contextToCode(inner, data)}).join('') +
-    context.closures.map(function(closure) {
-      return 'sc.code_refs[' + closure.index + '].block(' +
-        closure.staticCode.closureTemplate +
-        ');\n';
-    }).join('') +
-    '})();\n';
+      create_ctx +
+      set_vars +
+      context.inner.map(function(inner) {return this.contextToCode(inner, data)}).join('') +
+      context.closures.map(function(closure) {
+        return 'sc.code_refs[' + closure.index + '].block(' +
+           closure.staticCode.closureTemplate +
+           ');\n';
+      }).join('') +
+      '})();\n';
 };
+
 
 /** Read a 32bit integer */
 BinaryCursor.prototype.I32 = function() {
@@ -630,6 +641,7 @@ BinaryCursor.prototype.I8 = function() {
 function int64(high, low) {
   return new Int64(high, low).toNumber();
 }
+
 
 /** Read a 64bit integer */
 BinaryCursor.prototype.I64 = function() {
@@ -663,6 +675,7 @@ BinaryCursor.prototype.flag64 = function() {
   }
   return low;
 };
+
 
 /** Read a String */
 BinaryCursor.prototype.str = function() {

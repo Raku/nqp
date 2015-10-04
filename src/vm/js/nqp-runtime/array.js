@@ -1,5 +1,5 @@
 function NqpArray() {
-    this.array = [];
+  this.array = [];
 }
 
 module.exports = NqpArray;

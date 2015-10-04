@@ -13,11 +13,11 @@ op.box_i = function(i, type) {
 };
 
 op.unbox_i = function(obj) {
-    return obj.$$get_int();
+  return obj.$$get_int();
 };
 
 function intish_bool(b) {
-    return b ? 1 : 0;
+  return b ? 1 : 0;
 }
 
 function makeBI(type, num) {

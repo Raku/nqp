@@ -10,18 +10,18 @@ var core = new SerializationContext('__6MODEL_CORE__');
 core.description = 'core SC';
 
 function add_to_sc_with_st(obj) {
-    core.root_objects.push(obj);
-    core.root_stables.push(obj._STable);
-    obj._SC = core;
-    obj._STable._SC = core;
+  core.root_objects.push(obj);
+  core.root_stables.push(obj._STable);
+  obj._SC = core;
+  obj._STable._SC = core;
 }
 
 function add_to_sc_with_st_and_mo() {
-    throw '...';
+  throw '...';
 }
 
 
- /* Creates and installs the KnowHOWAttribute type. */
+/* Creates and installs the KnowHOWAttribute type. */
 function create_KnowHOWAttribute() {
   var meta_obj = KnowHOW_HOW._STable.REPR.allocate(KnowHOW_HOW._STable);
 

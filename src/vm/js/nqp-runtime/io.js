@@ -126,7 +126,7 @@ op.setencoding = function(fh, encoding) {
 };
 
 op.setinputlinesep = function(fh, sep) {
-    fh.sep = sep;
+  fh.sep = sep;
 };
 
 op.readlinefh = function(fh) {
@@ -146,14 +146,14 @@ op.readlinefh = function(fh) {
     // TODO think/ask about a "" sep
     var offset;
     if (fh.sep) {
-        newline = string.indexOf(fh.sep);
-        if (newline != -1) {
-            newline += fh.sep.length - 1;
-        }
+      newline = string.indexOf(fh.sep);
+      if (newline != -1) {
+        newline += fh.sep.length - 1;
+      }
     } else {
-        var cr = string.indexOf('\r');
-        var nl = string.indexOf('\n');
-        newline = (cr != -1 ? (cr < nl ? (cr + 1 == nl ? nl : cr) : nl) : nl);
+      var cr = string.indexOf('\r');
+      var nl = string.indexOf('\n');
+      newline = (cr != -1 ? (cr < nl ? (cr + 1 == nl ? nl : cr) : nl) : nl);
     }
 
     if (newline != -1) {
@@ -185,10 +185,10 @@ op.readallfh = function(fh) {
 
 op.seekfh = function(fh, offset, whence, ctx) {
   if (whence == 0 && offset < 0) {
-      ctx.die("Can't seek to position: " + offset);
+    ctx.die("Can't seek to position: " + offset);
   }
   if (!(whence == 0 || whence == 1 || whence == 2)) {
-      ctx.die('Invalid whence passed to seekfh: ' + whence);
+    ctx.die('Invalid whence passed to seekfh: ' + whence);
   }
   fs.seekSync(fh.fd, offset, whence);
 };
@@ -242,7 +242,7 @@ var PIPE_CAPTURE_ERR = 256;
 op.shell = function(command, dir, env, input, output, error, flags) {
 
   if (flags != PIPE_INHERIT_IN + PIPE_INHERIT_OUT + PIPE_INHERIT_ERR) {
-      throw 'shell: NYI combination of flags';
+    throw 'shell: NYI combination of flags';
   }
 
   var oldEnv = {};
@@ -281,28 +281,28 @@ op.getenvhash = function() {
 function Stderr() {
 }
 Stderr.prototype.printfh = function(msg) {
-    process.stderr.write(msg);
+  process.stderr.write(msg);
 };
 
 op.getstderr = function() {
-    return new Stderr();
+  return new Stderr();
 };
 
 function Stdout() {
 }
 Stdout.prototype.printfh = function(msg) {
-    process.stdout.write(msg);
+  process.stdout.write(msg);
 };
 op.getstdout = function() {
-    return new Stdout();
+  return new Stdout();
 };
 
 function Stdin() {
 }
 op.getstdin = function() {
-    return new Stdin();
+  return new Stdin();
 };
 
 op.exit = function(code) {
-    process.exit(code);
+  process.exit(code);
 };

@@ -89,14 +89,14 @@ P6opaque.prototype.deserialize_repr_data = function(cursor, STable) {
   this.name_to_index_mapping = [];
 
   for (var i = 0; i < num_classes; i++) {
-      this.name_to_index_mapping[i] = {slots: [], names: [], class_key: cursor.variant()};
+    this.name_to_index_mapping[i] = {slots: [], names: [], class_key: cursor.variant()};
 
-      var num_attrs = cursor.varint();
+    var num_attrs = cursor.varint();
 
-      for (var j = 0; j < num_attrs; j++) {
-          this.name_to_index_mapping[i].names[j] = cursor.str();
-          this.name_to_index_mapping[i].slots[j] = cursor.varint();
-      }
+    for (var j = 0; j < num_attrs; j++) {
+      this.name_to_index_mapping[i].names[j] = cursor.str();
+      this.name_to_index_mapping[i].slots[j] = cursor.varint();
+    }
   }
 
 
@@ -105,18 +105,18 @@ P6opaque.prototype.deserialize_repr_data = function(cursor, STable) {
   if (this.auto_viv_values) {
     for (var i in this.name_to_index_mapping) {
       for (var j in this.name_to_index_mapping[i].slots) {
-          var name = this.name_to_index_mapping[i].names[j];
-          var slot = this.name_to_index_mapping[i].slots[j];
-          slots[slot] = name;
-          if (this.auto_viv_values[slot]) {
-              if (!this.auto_viv_values[slot].type_object_) {
-                  console.log('autoviv', name, slot, this.auto_viv_values[slot]);
-                  throw 'We currently only implement autoviv with type object values';
-              }
-              /* TODO autoviving things that aren't typeobjects */
-              /* TODO we need to store attributes better */
-              autovived[name] = this.auto_viv_values[slot];
+        var name = this.name_to_index_mapping[i].names[j];
+        var slot = this.name_to_index_mapping[i].slots[j];
+        slots[slot] = name;
+        if (this.auto_viv_values[slot]) {
+          if (!this.auto_viv_values[slot].type_object_) {
+            console.log('autoviv', name, slot, this.auto_viv_values[slot]);
+            throw 'We currently only implement autoviv with type object values';
           }
+          /* TODO autoviving things that aren't typeobjects */
+          /* TODO we need to store attributes better */
+          autovived[name] = this.auto_viv_values[slot];
+        }
       }
     }
   }
@@ -140,42 +140,42 @@ P6opaque.prototype.deserialize_repr_data = function(cursor, STable) {
 };
 
 P6opaque.prototype.serialize_repr_data = function(st, cursor) {
-   var numAttrs = st.REPR.flattened_stables.length;
-   cursor.varint(numAttrs);
+  var numAttrs = st.REPR.flattened_stables.length;
+  cursor.varint(numAttrs);
 
-   STARTING_OFFSET = cursor.offset;
+  STARTING_OFFSET = cursor.offset;
 
-   for (var i = 0; i < numAttrs; i++) {
-     if (st.REPR.flattened_stables[i] == null) {
-       cursor.varint(0);
-     }
-     else {
-       cursor.varint(1);
-       throw 'NYI';
-       cursor.STableRef(st.REPR.flattened_stables[i]);
-     }
-   }
+  for (var i = 0; i < numAttrs; i++) {
+    if (st.REPR.flattened_stables[i] == null) {
+      cursor.varint(0);
+    }
+    else {
+      cursor.varint(1);
+      throw 'NYI';
+      cursor.STableRef(st.REPR.flattened_stables[i]);
+    }
+  }
 
-   cursor.varint(st.REPR.mi ? 1 : 0);
+  cursor.varint(st.REPR.mi ? 1 : 0);
 
-   //TODO
-   //  if (st.REPR.auto_viv_values != null) {
-   //      cursor.varint(1);
-   //      for (var i = 0; i < numAttrs; i++)
-   //         cursor.ref(st.REPR.auto_viv_values[i]);
-   //  }
-   //  else {
-   cursor.varint(0);
-   //  }
+  //TODO
+  //  if (st.REPR.auto_viv_values != null) {
+  //      cursor.varint(1);
+  //      for (var i = 0; i < numAttrs; i++)
+  //         cursor.ref(st.REPR.auto_viv_values[i]);
+  //  }
+  //  else {
+  cursor.varint(0);
+  //  }
 
 
 
-   cursor.varint(st.REPR.unbox_int_slot);
-   cursor.varint(st.REPR.unbox_str_slot);
-   cursor.varint(st.REPR.unbox_str_slot);
+  cursor.varint(st.REPR.unbox_int_slot);
+  cursor.varint(st.REPR.unbox_str_slot);
+  cursor.varint(st.REPR.unbox_str_slot);
 
-   // TODO: Unbox slots
-   cursor.varint(0);
+  // TODO: Unbox slots
+  cursor.varint(0);
 
   cursor.varint(this.name_to_index_mapping.length);
   for (var i = 0; i < this.name_to_index_mapping.length; i++) {
@@ -202,10 +202,10 @@ P6opaque.prototype.deserialize_finish = function(object, data) {
 
   for (var i in this.name_to_index_mapping) {
     for (var j in this.name_to_index_mapping[i].slots) {
-        var name = this.name_to_index_mapping[i].names[j];
-        var slot = this.name_to_index_mapping[i].slots[j];
-        // TODO take class key into account with attribute storage
-        names[slot] = name;
+      var name = this.name_to_index_mapping[i].names[j];
+      var slot = this.name_to_index_mapping[i].slots[j];
+      // TODO take class key into account with attribute storage
+      names[slot] = name;
     }
   }
 
@@ -223,10 +223,10 @@ P6opaque.prototype.deserialize_finish = function(object, data) {
 
   for (var i in this.name_to_index_mapping) {
     for (var j in this.name_to_index_mapping[i].slots) {
-        var name = this.name_to_index_mapping[i].names[j];
-        var slot = this.name_to_index_mapping[i].slots[j];
-        // TODO take class key into account with attribute storage
-        object[name] = attrs[slot];
+      var name = this.name_to_index_mapping[i].names[j];
+      var slot = this.name_to_index_mapping[i].slots[j];
+      // TODO take class key into account with attribute storage
+      object[name] = attrs[slot];
     }
   }
 };
@@ -244,12 +244,12 @@ P6opaque.prototype.serialize = function(cursor, obj) {
 
   for (var i in this.name_to_index_mapping) {
     for (var j in this.name_to_index_mapping[i].slots) {
-        var name = this.name_to_index_mapping[i].names[j];
-        var slot = this.name_to_index_mapping[i].slots[j];
+      var name = this.name_to_index_mapping[i].names[j];
+      var slot = this.name_to_index_mapping[i].slots[j];
 
-        // TODO take class key into account with attribute storage
-        attrs[slot] = obj[name];
-        names[slot] = name;
+      // TODO take class key into account with attribute storage
+      attrs[slot] = obj[name];
+      names[slot] = name;
     }
   }
 
@@ -486,7 +486,7 @@ P6int.prototype.create_obj_constructor = function(STable) {
 };
 
 P6int.prototype.compose = function(STable, repr_info_hash) {
-    // TODO bits
+  // TODO bits
 };
 
 P6int.name = 'P6int';
@@ -503,8 +503,8 @@ P6int.prototype.serialize = function(data, object) {
 
 
 P6int.prototype.type_object_for = function(HOW) {
-    var type_object = this.basic_type_object_for(HOW);
-    return type_object;
+  var type_object = this.basic_type_object_for(HOW);
+  return type_object;
 };
 
 module.exports.P6int = P6int;
@@ -591,8 +591,8 @@ VMArray.prototype.deserialize_finish = function(object, data) {
 VMArray.prototype.type_object_for = basic_type_object_for;
 
 VMArray.prototype.deserialize_repr_data = function(cursor) {
-    this.type = cursor.variant();
-    /* TODO - type */
+  this.type = cursor.variant();
+  /* TODO - type */
 };
 
 VMArray.prototype.deserialize_array = function(object,data) {
@@ -626,42 +626,42 @@ P6bigint.prototype.create_obj_constructor = basic_constructor;
 P6bigint.prototype.basic_type_object_for = basic_type_object_for;
 
 P6bigint.prototype.type_object_for = function(HOW) {
-    var type_object = this.basic_type_object_for(HOW);
+  var type_object = this.basic_type_object_for(HOW);
 
-    this._STable.addInternalMethod('$$set_int', function(value) {
-        this.value = bignum(value);
-    });
+  this._STable.addInternalMethod('$$set_int', function(value) {
+    this.value = bignum(value);
+  });
 
-    this._STable.addInternalMethod('$$get_int', function() {
-        return this.value.toNumber();
-    });
+  this._STable.addInternalMethod('$$get_int', function() {
+    return this.value.toNumber();
+  });
 
-    this._STable.addInternalMethod('$$set_bignum', function(value) {
-        this.value = value;
-    });
+  this._STable.addInternalMethod('$$set_bignum', function(value) {
+    this.value = value;
+  });
 
-    this._STable.addInternalMethod('$$get_bignum', function() {
-        return this.value;
-    });
+  this._STable.addInternalMethod('$$get_bignum', function() {
+    return this.value;
+  });
 
-    return type_object;
+  return type_object;
 };
 
 P6bigint.prototype.generateBoxingMethods = function(repr, attr) {
   repr._STable.addInternalMethod('$$set_int', function(value) {
-      this[attr.name] = bignum(value);
+    this[attr.name] = bignum(value);
   });
 
   repr._STable.addInternalMethod('$$get_int', function() {
-      return this[attr.name].toNumber();
+    return this[attr.name].toNumber();
   });
 
   repr._STable.addInternalMethod('$$get_bignum', function() {
-      return this[attr.name];
+    return this[attr.name];
   });
 
   repr._STable.addInternalMethod('$$set_bignum', function(num) {
-      this[attr.name] = num;
+    this[attr.name] = num;
   });
 };
 
