@@ -127,7 +127,7 @@ deps("js-all", 'm-all', 'js-stage1-compiler', 'node_modules/runtime_copied',$nqp
 
 # Enforce the google coding standards
 say("js-lint:
-	gjslint --strict --nojsdoc src/vm/js/nqp-runtime/*.js");
+	gjslint --strict --max_line_length=200 --nojsdoc src/vm/js/nqp-runtime/*.js");
 
 say('node_modules/npm_installed: src/vm/js/nqp-runtime/package.json
 	npm install src/vm/js/nqp-runtime

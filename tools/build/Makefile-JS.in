@@ -65,7 +65,7 @@ js-clean:
 
 js-all : m-all js-stage1-compiler node_modules/runtime_copied $(JS_STAGE2)/NQPCORE.setting.moarvm $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp $(JS_STAGE2)/QASTNode.moarvm $(JS_STAGE2)/QRegex.moarvm
 js-lint:
-	gjslint --strict --nojsdoc src/vm/js/nqp-runtime/*.js
+	gjslint --strict --max_line_length=200 --nojsdoc src/vm/js/nqp-runtime/*.js
 node_modules/npm_installed: src/vm/js/nqp-runtime/package.json
 	npm install src/vm/js/nqp-runtime
 	touch node_modules/npm_installed
