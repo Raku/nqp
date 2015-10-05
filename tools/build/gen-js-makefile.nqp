@@ -69,10 +69,13 @@ sub cross-compile(:$stage, :$source, :$target, :$setting='NQPCORE', :$no-regex-l
     nqp::unshift($deps, $source);
     nqp::unshift($deps, '$(JS_STAGE1_COMPILER)');
 
+    my $js := "node_modules/$target.js";
+
+
     rule($moarvm, nqp::join(' ', $deps), 
         make_parents($moarvm),
-
-	"\$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=$setting --target=mbc --output $moarvm $source > node_modules/$target.js"
+        make_parents($js),
+	"\$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=$setting --target=mbc --output $moarvm $source > $js"
         );
 }
 
@@ -140,3 +143,19 @@ say('node_modules/runtime_copied: node_modules/npm_installed src/vm/js/nqp-runti
 
 say('js-install: js-all
 	@echo "*** The JavaScript backend can\'t be installed yet, sorry! ***"');
+
+constant('JS_NQP_SOURCES', '$(COMMON_NQP_SOURCES)');
+
+
+my $p6regex-combined := combine(:stage(2), :sources('$(P6QREGEX_SOURCES)'), :file('$(P6QREGEX_COMBINED)'));
+
+my $nqp-combined := combine(:stage(2), :sources('$(JS_NQP_SOURCES)'), :file('$(NQP_COMBINED)'));
+
+constant('JS_HLL_SOURCES', 'src/vm/js/HLL/Backend.nqp $(COMMON_HLL_SOURCES)');
+
+my $hll-combined := combine(:stage(2), :sources('$(JS_HLL_SOURCES)'), :file('$(HLL_COMBINED)'));
+
+
+my $QAST-Compiler-moarvm := cross-compile(:stage(2), :source('src/vm/js/QAST/Compiler.nqp'), :target('QAST/Compiler'), :setting('NQPCORE'), :no-regex-lib(1), :deps([$nqpcore-moarvm, $QASTNode-moarvm]));
+
+deps("js-bootstrap", $nqp-combined, $p6regex-combined, $hll-combined, $QAST-Compiler-moarvm);
