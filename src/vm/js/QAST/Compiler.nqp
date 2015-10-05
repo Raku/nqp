@@ -728,6 +728,11 @@ class QAST::OperationsJS {
     add_simple_op('setobjsc', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
     add_simple_op('markcodestatic', $T_OBJ, [$T_OBJ], :sideffects);
 
+    add_simple_op('scsetdesc', $T_STR, [$T_OBJ, $T_STR], :sideffects);
+    add_simple_op('scgetdesc', $T_STR, [$T_OBJ]);
+
+    add_simple_op('scgethandle', $T_STR, [$T_OBJ]);
+
     # Ops for NFA
 
     add_simple_op('nfafromstatelist', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
@@ -2724,6 +2729,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
 
     method is_block_part_of_sc($block) {
+        return 0 unless try $*COMPUNIT;
         for $*COMPUNIT.code_ref_blocks() -> $block_in_compunit {
             if nqp::eqaddr($block, $block_in_compunit) {
                 return 1;

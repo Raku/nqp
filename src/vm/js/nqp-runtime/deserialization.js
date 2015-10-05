@@ -32,6 +32,15 @@ op.createsc = function(handle) {
 
 op.scsetdesc = function(sc, desc) {
   sc.description = desc;
+  return desc;
+};
+
+op.scgetdesc = function(sc) {
+  return sc.description;
+};
+
+op.scgethandle = function(sc) {
+  return sc.handle;
 };
 
 op.scobjcount = function(sc) {
