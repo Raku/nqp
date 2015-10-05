@@ -1,6 +1,21 @@
 #! nqp
 
-plan(1475);
+plan(1482);
+
+{
+    my $sc := nqp::createsc('exampleHandle');
+    ok(nqp::scsetdesc($sc, "foobar") eq 'foobar', 'scsetdesc has correct return value');
+    ok(nqp::scgetdesc($sc) eq 'foobar', 'scgetdesc');
+    ok(nqp::scgethandle($sc) eq 'exampleHandle', 'scgethandle');
+
+    my $sc2 := nqp::createsc('exampleHandle2');
+
+    ok(nqp::scgethandle(nqp::pushcompsc($sc)) eq 'exampleHandle', 'pushcompsc return correct value');
+    ok(nqp::scgethandle(nqp::pushcompsc($sc2)) eq 'exampleHandle2', 'pushcompsc return correct value');
+
+    ok(nqp::scgethandle(nqp::popcompsc()) eq 'exampleHandle2', 'popping the correct sc');
+    ok(nqp::scgethandle(nqp::popcompsc()) eq 'exampleHandle', 'again popping the correct sc');
+}
 
 sub add_to_sc($sc, $idx, $obj) {
     nqp::scsetobj($sc, $idx, $obj);
