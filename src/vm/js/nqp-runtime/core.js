@@ -463,3 +463,14 @@ op.markcodestatic = function(code) {
   code.isStatic = true;
   return code;
 };
+
+/* TODO - make serialization take this into account */
+var compilingSCs = [];
+op.pushcompsc = function(sc) {
+  compilingSCs.push(sc);
+  return sc;
+};
+
+op.popcompsc = function(sc) {
+  return compilingSCs.pop();
+};

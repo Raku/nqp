@@ -733,6 +733,9 @@ class QAST::OperationsJS {
 
     add_simple_op('scgethandle', $T_STR, [$T_OBJ]);
 
+    add_simple_op('pushcompsc', $T_OBJ, [$T_OBJ], :sideffects);
+    add_simple_op('popcompsc', $T_OBJ, [], :sideffects);
+
     # Ops for NFA
 
     add_simple_op('nfafromstatelist', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
