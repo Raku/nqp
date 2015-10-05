@@ -221,6 +221,7 @@ op.setboolspec = function(obj, mode, method) {
 
 function Capture(named, pos) {
   this.pos = pos;
+  this.named = named;
 }
 
 op.savecapture = function(args) {
