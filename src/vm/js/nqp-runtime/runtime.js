@@ -61,6 +61,7 @@ exports.load_setting = function(settingName) {
 
 exports.load_module = function(module) {
   saveCtx(module, function() {
+    module = module.replace(/::/g,"/");
     require(module);
   });
 };
