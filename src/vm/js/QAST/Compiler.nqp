@@ -2450,7 +2450,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my $setup;
 
-        my $outer_ctx := try $*CTX;
+        my $outer_ctx := try $*CTX // "null";
 
         if self.is_known_cuid($node) {
             $setup := [];
