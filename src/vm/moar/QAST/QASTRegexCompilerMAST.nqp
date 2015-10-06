@@ -1056,6 +1056,12 @@ class QAST::MASTRegexCompiler {
             my $kind := $mast.result_kind;
             nqp::push(@result_kinds, $kind);
             my $flag := @kind_to_args[$kind];
+            if $_.flat {
+                $flag := $flag +| ($_.named ?? $Arg::flatnamed !! $Arg::flat);
+            }
+            elsif $_.named {
+                nqp::die('Named args in regex subrule calls NYI');
+            }
             nqp::push(@flags, $flag);
         }
         [@masts, @results, @result_kinds, @flags]
