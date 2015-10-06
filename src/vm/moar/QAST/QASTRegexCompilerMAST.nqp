@@ -226,19 +226,6 @@ class QAST::MASTRegexCompiler {
         MAST::InstructionList.new(@ins, $cur, $MVM_reg_obj)
     }
 
-    method children($node) {
-        my @masts := nqp::list();
-        my @results := nqp::list();
-        my @result_kinds := nqp::list();
-        for @($node) {
-            my $mast := $!qastcomp.as_mast($_);
-            merge_ins(@masts, $mast.instructions);
-            nqp::push(@results, $mast.result_reg);
-            nqp::push(@result_kinds, $mast.result_kind);
-        }
-        [@masts, @results, @result_kinds]
-    }
-
     method alt($node) {
         unless $node.name {
             return self.altseq($node);
@@ -1057,31 +1044,49 @@ class QAST::MASTRegexCompiler {
         $Arg::obj   # $MVM_reg_obj             := 8;
     ];
 
+     method children($node) {
+        my @masts := nqp::list();
+        my @results := nqp::list();
+        my @result_kinds := nqp::list();
+        my @flags := nqp::list();
+        for @($node) {
+            my $mast := $!qastcomp.as_mast($_);
+            merge_ins(@masts, $mast.instructions);
+            nqp::push(@results, $mast.result_reg);
+            my $kind := $mast.result_kind;
+            nqp::push(@result_kinds, $kind);
+            my $flag := @kind_to_args[$kind];
+            nqp::push(@flags, $flag);
+        }
+        [@masts, @results, @result_kinds, @flags]
+    }
+
     method subrule($node) {
         my @ins      := nqp::list();
         my $subtype  := $node.subtype;
         my $testop   := $node.negate ?? 'ge_i' !! 'lt_i';
         my $captured := 0;
 
-        my $cpn := self.children($node[0]);
-        my @pargs := $cpn[1];
-        my @pkinds := $cpn[2]; # positional result registers
+        my @arg_info := self.children($node[0]);
+        my @args := @arg_info[1];
+        my @kinds := @arg_info[2];
+        my @flags := @arg_info[3];
 
-        my $submast := nqp::shift(@pargs);
-        my $submast_kind := nqp::shift(@pkinds);
+        my $submast := nqp::shift(@args);
+        my $submast_kind := nqp::shift(@kinds);
         $!regalloc.release_register($submast, $submast_kind);
 
         my $i := 0;
-        my @flags := [$Arg::obj];
-        for @pkinds {
-            nqp::push(@flags, @kind_to_args[$_]);
-            $!regalloc.release_register(@pargs[$i++], $_);
+        for @kinds {
+            $!regalloc.release_register(@args[$i++], $_);
         }
+
+        @flags[0] := $Arg::obj;
 
         my $p11 := %!reg<P11>;
         my $i11 := $!regalloc.fresh_i();
 
-        merge_ins(@ins, $cpn[0]);
+        merge_ins(@ins, @arg_info[0]);
         merge_ins(@ins, [
             op('bindattr_i', %!reg<cur>, %!reg<curclass>, sval('$!pos'),
                 %!reg<pos>, ival(-1))
@@ -1090,13 +1095,13 @@ class QAST::MASTRegexCompiler {
             # Method call.
             merge_ins(@ins, [
                 op('findmeth', %!reg<method>, %!reg<cur>, sval($node[0][0].value)),
-                call(%!reg<method>, @flags, %!reg<cur>, |@pargs, :result($p11))
+                call(%!reg<method>, @flags, %!reg<cur>, |@args, :result($p11))
             ]);
         }
         else {
             # Normal invocation (probably positional capture).
             merge_ins(@ins, [
-                call($submast, @flags, %!reg<cur>, |@pargs, :result($p11))
+                call($submast, @flags, %!reg<cur>, |@args, :result($p11))
             ]);
         }
         merge_ins(@ins, [
