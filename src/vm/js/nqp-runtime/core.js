@@ -474,3 +474,9 @@ op.pushcompsc = function(sc) {
 op.popcompsc = function(sc) {
   return compilingSCs.pop();
 };
+
+op.backendconfig = function() {
+  var config = new Hash();
+  config.content.intvalsize = 4;
+  return config;
+};

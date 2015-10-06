@@ -736,6 +736,10 @@ class QAST::OperationsJS {
     add_simple_op('pushcompsc', $T_OBJ, [$T_OBJ], :sideffects);
     add_simple_op('popcompsc', $T_OBJ, [], :sideffects);
 
+    # Misc ops
+
+    add_simple_op('backendconfig', $T_OBJ, []);
+
     # Ops for NFA
 
     add_simple_op('nfafromstatelist', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
