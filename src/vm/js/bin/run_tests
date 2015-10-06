@@ -1,4 +1,0 @@
-#!/bin/bash
-# 19 and 30 where moved out as they were parrot specific, 52,54 is missing, we can't pass 49 till we are bootstraped
-prove -e 'node' t/js/varint.js # unit tests for the js runtime
-prove "$@" -e  './nqp-js' gen/js/qregex.t t/nqp/{01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,17,18,19,20,21,22,23,25,26,27,28,31,32,33,34,35,36,37,38,39,40,41,42,44,45,46,47,48,50,51,53,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,83,84,88,89,90,91,92,93,94,95,96}*.t t/js/getcomp-js.t t/qast/02* t/serialization/02-types.t 
