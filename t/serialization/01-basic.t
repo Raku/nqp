@@ -445,7 +445,8 @@ sub round_trip_int_array($seq, $desc, @a) {
     my int $b := 512;
 
     while ($i < 63) {
-        if $i >= 31 && nqp::getcomp('nqp').backend.name eq 'parrot'
+        my $backend := nqp::getcomp('nqp').backend.name;
+        if $i >= 31 && ($backend eq 'parrot' || $backend eq 'js')
             && nqp::backendconfig(){"intvalsize"} < 8 {
             todo("native NQP ints are only 32 bit on 32 bit parrot :-(", 1);
             # Sadly this also means that the rest of the tests for these sizes
