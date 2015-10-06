@@ -1052,16 +1052,18 @@ class QAST::MASTRegexCompiler {
         for @($node) {
             my $mast := $!qastcomp.as_mast($_);
             merge_ins(@masts, $mast.instructions);
-            nqp::push(@results, $mast.result_reg);
             my $kind := $mast.result_kind;
-            nqp::push(@result_kinds, $kind);
             my $flag := @kind_to_args[$kind];
             if $_.flat {
                 $flag := $flag +| ($_.named ?? $Arg::flatnamed !! $Arg::flat);
             }
             elsif $_.named {
-                nqp::die('Named args in regex subrule calls NYI');
+                nqp::push(@results, MAST::SVal.new( value => $_.named ));
+                nqp::push(@result_kinds, NQPMu);
+                $flag := $flag +| $Arg::named;
             }
+            nqp::push(@results, $mast.result_reg);
+            nqp::push(@result_kinds, $kind);
             nqp::push(@flags, $flag);
         }
         [@masts, @results, @result_kinds, @flags]
@@ -1084,7 +1086,9 @@ class QAST::MASTRegexCompiler {
 
         my $i := 0;
         for @kinds {
-            $!regalloc.release_register(@args[$i++], $_);
+            $!regalloc.release_register(@args[$i], $_)
+                if nqp::isconcrete($_);
+            $i++;
         }
 
         @flags[0] := $Arg::obj;
