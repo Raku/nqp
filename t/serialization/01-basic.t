@@ -419,7 +419,7 @@ sub round_trip_int_array($seq, $desc, @a) {
     my $dsc := nqp::createsc($seq ~ '_OUT');
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
 
-    ok(nqp::istype(nqp::scgetobj($dsc, 0), Array), $desc ~ 'deserialized object has correct type');
+    ok(nqp::istype(nqp::scgetobj($dsc, 0), T12), $desc ~ 'deserialized object has correct type');
     my $j := 0;
     my @b := nqp::scgetobj($dsc, 0).get_a();
     ok(nqp::elems(@b) == $elems, $desc ~ 'array came back with correct element count');
