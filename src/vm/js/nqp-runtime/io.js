@@ -102,7 +102,7 @@ FileHandle.prototype.$$to_bool = function(ctx) {
 };
 
 op.open = function(name, mode) {
-  var modes = {r: 'r', w: 'w', wa: 'a'};
+  var modes = {r: 'r', w: 'w', wa: 'a', '-ct': 'w', '-ca': 'a'};
   if (!modes[mode]) { throw 'unknown mode to open: ' + mode }
   var fh = new FileHandle(fs.openSync(name, modes[mode]));
   fh.encoding = 'utf8';
