@@ -220,9 +220,9 @@
           <th><a href="" ng-click="reverse = predicate == 'InclusiveTimePercent' ? !reverse : true; predicate = 'InclusiveTimePercent';">Inclusive Time</a></th>
           <th><a href="" ng-click="reverse = predicate == 'ExclusiveTimePercent' ? !reverse : true; predicate = 'ExclusiveTimePercent';">Exclusive Time</a></th>
           <th>
-            <span class="text-danger" data-toggle="tooltip" data-placement="bottom" title="Unoptimized interpreted code">Interp</span> /
-            <span class="text-warning" data-toggle="tooltip" data-placement="bottom" title="Type-specialized interpreted code">Spesh</span> /
-            <span class="text-success" data-toggle="tooltip" data-placement="bottom" title="Type-specialized, JIT-compiled code">JIT</span>
+            <span class="text-danger" tooltip-placement="bottom" tooltip="Unoptimized interpreted code">Interp</span> /
+            <span class="text-warning" tooltip-placement="bottom" tooltip="Type-specialized interpreted code">Spesh</span> /
+            <span class="text-success" tooltip-placement="bottom" tooltip="Type-specialized, JIT-compiled code">JIT</span>
           </th>
         </thead>
         <tbody>
@@ -385,12 +385,12 @@
               <th><a href="" ng-click="reverse = predicate == 'Calls' ? !reverse : true; predicate = 'Calls';">Calls</a></th>
               <th><a href="" ng-click="reverse = predicate == 'TimePercent' ? !reverse : true; predicate = 'TimePercent';">Time In Callee</a></th>
               <th>
-                <span class="text-danger" data-toggle="tooltip" data-placement="bottom" title="Unoptimized interpreted code">Interp</span> /
-                <span class="text-warning" data-toggle="tooltip" data-placement="bottom" title="Type-specialized interpreted code">Spesh</span> /
-                <span class="text-success" data-toggle="tooltip" data-placement="bottom" title="Type-specialized, JIT-compiled code">JIT</span>
+                <span class="text-danger" tooltip-placement="bottom" tooltip="Unoptimized interpreted code">Interp</span> /
+                <span class="text-warning" tooltip-placement="bottom" tooltip="Type-specialized interpreted code">Spesh</span> /
+                <span class="text-success" tooltip-placement="bottom" tooltip="Type-specialized, JIT-compiled code">JIT</span>
               </th>
               <th>
-                <span data-toggle="tooltip" data-placement="bottom" title="Code from this callee was flattened into the routine by the optimizer">Inlined</span>
+                <span tooltip-placement="bottom" tooltip="Code from this callee was flattened into the routine by the optimizer">Inlined</span>
               </th>
             </thead>
             <tbody>
@@ -482,9 +482,7 @@
           </tr>
         </tbody>
       </table>
-      <div class="modal fade" id="allocatingRoutinesModal" tabindex="-1" role="dialog" aria-labelledby="allocatingRoutinesModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
+      <script type="text/ng-template" id="myModalContent.html">
             <div class="modal-header">
               <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
               <h4 class="modal-title" id="allocatingRoutinesModalLabel">
@@ -528,9 +526,7 @@
             <div class="modal-footer">
               <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
             </div>
-          </div>
-        </div>
-      </div>
+      </script>
       </div>
     </div>
     
@@ -547,9 +543,9 @@
           </th>
           <th>
             Nursery:
-            <span class="text-danger" data-toggle="tooltip" data-placement="bottom" title="Bytes retained in the nursery">Retained</span> /
-            <span class="text-warning" data-toggle="tooltip" data-placement="bottom" title="Bytes promoted to gen2 and now available in nursery">Promoted</span> /
-            <span class="text-success" data-toggle="tooltip" data-placement="bottom" title="Bytes released and now availabe in nursery">Freed</span>
+            <span class="text-danger" tooltip-placement="bottom" tooltip="Bytes retained in the nursery">Retained</span> /
+            <span class="text-warning" tooltip-placement="bottom" tooltip="Bytes promoted to gen2 and now available in nursery">Promoted</span> /
+            <span class="text-success" tooltip-placement="bottom" tooltip="Bytes released and now availabe in nursery">Freed</span>
           </th>
         </thead>
         <tbody>
@@ -706,9 +702,8 @@
       </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.2/angular.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.13.4/ui-bootstrap-tpls.js"></script>
     <script>
     var rawData = JSON.parse('{{{PROFIELR_OUTPUT}}}');
 
@@ -730,7 +725,7 @@
     }());
 
     // Register application and add controllers, increase recursion depth for callGraphController
-    var moarProfApp = angular.module('moarProfApp', []).config(function($rootScopeProvider) {
+    var moarProfApp = angular.module('moarProfApp', ['ui.bootstrap']).config(function($rootScopeProvider) {
         $rootScopeProvider.digestTtl(100);
     });
 
@@ -992,7 +987,7 @@
         }
     });
 
-    moarProfApp.controller('AllocationsController', function ($scope) {
+    moarProfApp.controller('AllocationsController', function ($scope, $modal) {
         // Traverse all call nodes, counting up the allocations.
         var typeIdToName         = {};
         var typeIdToAllocations  = {};
@@ -1074,7 +1069,10 @@
             // Show modal dialog with data.
             $scope.CurrentAllocatingRoutine      = alloc.Name;
             $scope.CurrentAllocatingRoutineStats = alloc.RoutineStats;
-            $('#allocatingRoutinesModal').modal();
+            var modalInstance = $modal.open({
+                templateUrl: 'myModalContent.html',
+                scope: $scope
+            });
         }
     });
 
@@ -1174,10 +1172,6 @@
         $scope.DeoptAlls = deoptAlls;
         $scope.predicate = 'Count';
         $scope.reverse   = true;
-    });
-
-    $(function () {
-        $("[data-toggle='tooltip']").tooltip();
     });
     </script>
   </body>
