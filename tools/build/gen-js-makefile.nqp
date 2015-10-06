@@ -117,7 +117,7 @@ my $QRegex-moarvm := cross-compile(:stage(2), :source($QRegex-combined), :target
 deps('js-stage1-compiler', '$(JS_STAGE1_COMPILER)');
 
 say('js-test: js-all gen/js/qregex.t
-	src/vm/js/bin/run_tests');
+	perl src/vm/js/bin/run_tests.pl');
 
 say('gen/js/qregex.t: tools/build/process-qregex-tests
 	$(JS_NQP) tools/build/process-qregex-tests > gen/js/qregex.t');
