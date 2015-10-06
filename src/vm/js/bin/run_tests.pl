@@ -8,7 +8,7 @@ my $harness = TAP::Harness->new({
     }
 });
 my @regex = "gen/js/qregex.t";
-my @serialization = "t/serialization/02-types.t";
+my @serialization = glob "t/serialization/{01,02}*.t";
 my @qast = glob "t/qast/02*";
 my @js_specific = "t/js/getcomp-js.t";
 
