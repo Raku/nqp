@@ -375,3 +375,7 @@ exports.dumpObj = function(obj) {
     return value;
   }, '  ');
 };
+
+exports.args = function() {
+  return process.argv.slice(1);
+};

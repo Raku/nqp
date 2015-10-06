@@ -2725,7 +2725,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             my $main := self.as_js($main_block, :want($T_VOID));
 
-            $body := Chunk.void($block_js, $main, self.mangled_cuid($main_block.cuid) ~ ".\$call();\n");
+            $body := Chunk.void($block_js, $main, self.mangled_cuid($main_block.cuid) ~ ".\$apply([null, \{\}].concat(nqp.args()));\n");
             
         } else {
             $body := $block_js;
