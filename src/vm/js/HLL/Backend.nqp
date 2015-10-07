@@ -48,8 +48,7 @@ class HLLBackend::JavaScript {
     }
     
     method is_textual_stage($stage) {
-        # stage '' is the last stage (js)
-        $stage eq 'js' || $stage eq '';
+        $stage eq 'js';
     }
     
     
@@ -100,15 +99,25 @@ class HLLBackend::JavaScript {
         nqp::printfh($code, $js);
         nqp::closefh($code);
 
-        my $env := nqp::getenvhash();
-        nqp::shell("node $tmp_file",nqp::cwd(),nqp::getenvhash(),
-            nqp::null(), nqp::null(), nqp::null(),
-            nqp::const::PIPE_INHERIT_IN + nqp::const::PIPE_INHERIT_OUT + nqp::const::PIPE_INHERIT_ERR);
 
-        # TODO think about safety
-        nqp::unlink($tmp_file);
+        
 
-        '';
+        sub (*@args) {
+            my @cmd := ["node",$tmp_file];
+
+            my $i := 1;
+            while $i < nqp::elems(@args) {
+                @cmd.push(@args[$i]);
+                $i := $i + 1;
+            }
+
+            my $env := nqp::getenvhash();
+            nqp::spawn(@cmd,nqp::cwd(),nqp::getenvhash(),
+                nqp::null(), nqp::null(), nqp::null(),
+                nqp::const::PIPE_INHERIT_IN + nqp::const::PIPE_INHERIT_OUT + nqp::const::PIPE_INHERIT_ERR);
+        
+            nqp::unlink($tmp_file); # TODO think about safety
+        };
     }
 
     method node_module($js,*%adverbs) {
@@ -121,9 +130,13 @@ class HLLBackend::JavaScript {
         my $package_json := '{ "main": "main.js", "version": "0.0.0", "name": "'~ %adverbs<name> ~ '" }';
         spew($module ~ '/package.json', $package_json);
     }
+
+    method compunit_mainline($output) {
+        $output;
+    }
     
     method is_compunit($cuish) {
-        0;
+        1;
     }
 }
 
