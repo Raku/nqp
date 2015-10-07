@@ -543,18 +543,16 @@ role NQPCursorRole is export {
     }
 
     method same() {
-        my $cur := self."!cursor_start_cur"();
         my $target := nqp::getattr_s($!shared, ParseShared, '$!target');
 
         if $!pos < 1 || $!pos >= nqp::chars($target) { # no other side to compare to
-            $cur := nqp::getattr($!shared, ParseShared, '$!fail_cursor');
+            nqp::getattr($!shared, ParseShared, '$!fail_cursor');
         } elsif nqp::eqat($target, nqp::substr($target, $!pos, 1), $!pos - 1) { # same char on both sides
+            my $cur := self."!cursor_start_cur"();
             $cur."!cursor_pass"($!pos, 'same');
         } else { # different chars on both sides
-            $cur := nqp::getattr($!shared, ParseShared, '$!fail_cursor');
+            nqp::getattr($!shared, ParseShared, '$!fail_cursor');
         }
-
-        $cur;
     }
 
     method before($regex, $off = 0) {
