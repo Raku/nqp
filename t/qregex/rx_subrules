@@ -2,6 +2,8 @@
 
 a<at(1)>		ab					y	at (matching)
 b<at(1)>		ab					n	at (not matching)
+a<?same>		aa					y	between same characters
+a<!same>		ab					y	between not-same characters
 <ident>			2+3 ab2		<mob<ident>: ab2 @ 4>		capturing builtin <ident>
 <.ident>			2+3 ab2		y		non-capturing builtin <.ident>
 
