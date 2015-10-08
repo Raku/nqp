@@ -7,7 +7,7 @@ M_STAGE1 = gen/moar/stage1
 M_STAGE2 = gen/moar/stage2
 
 M_STAGE0_NQP = $(MOAR) --libpath=$(M_STAGE0) $(M_STAGE0)/nqp.moarvm --bootstrap
-M_STAGE1_NQP = $(MOAR) --libpath=$(M_STAGE1) $(M_STAGE1)/nqp.moarvm --bootstrap
+M_STAGE1_NQP = $(MOAR) --libpath=$(M_STAGE1) $(M_STAGE1)/nqp.moarvm --bootstrap --stable-sc=s1
 
 NQP_MO_MOAR     = nqpmo.moarvm
 

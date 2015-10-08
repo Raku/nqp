@@ -19,7 +19,7 @@ grammar NQP::Grammar is HLL::Grammar {
         # with this compilation unit.
         my $file := nqp::getlexdyn('$?FILES');
         my $source_id := nqp::sha1(self.target()) ~
-            (%*COMPILING<%?OPTIONS><stable-sc> ?? '' !! '-' ~ ~nqp::time_n());
+            (%*COMPILING<%?OPTIONS><stable-sc> || '-' ~ ~nqp::time_n());
         my $*W := nqp::isnull($file) ??
             NQP::World.new(:handle($source_id)) !!
             NQP::World.new(:handle($source_id), :description($file));
