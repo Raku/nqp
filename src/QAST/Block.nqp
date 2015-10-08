@@ -37,7 +37,7 @@ class QAST::Block is QAST::Node does QAST::Children {
     }
 
     my $cur_cuid := 0;
-    my $cuid_suffix := ~nqp::time_n();
+    my $cuid_suffix := %*COMPILING<%?OPTIONS><stable-sc> || ~nqp::time_n();
     
     method cuid($value = NO_VALUE) {
         if !($value =:= NO_VALUE) {
