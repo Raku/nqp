@@ -2161,6 +2161,7 @@ QAST::MASTOperations.add_core_moarop_mapping('chars', 'chars');
 QAST::MASTOperations.add_core_moarop_mapping('uc', 'uc');
 QAST::MASTOperations.add_core_moarop_mapping('lc', 'lc');
 QAST::MASTOperations.add_core_moarop_mapping('tc', 'tc');
+QAST::MASTOperations.add_core_moarop_mapping('fc', 'fc');
 QAST::MASTOperations.add_core_moarop_mapping('x', 'repeat_s');
 QAST::MASTOperations.add_core_moarop_mapping('iscclass', 'iscclass');
 QAST::MASTOperations.add_core_moarop_mapping('findcclass', 'findcclass');
