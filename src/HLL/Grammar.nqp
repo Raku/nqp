@@ -36,7 +36,7 @@ grammar HLL::Grammar {
     token nullterm_alt { <term=.nullterm> }
 
     # Return <termish> if it matches, <nullterm_alt> otherwise.
-    method nulltermish() { self.termish || self.nullterm_alt }
+    method nulltermish() { !self.terminator && self.termish || self.nullterm_alt }
 
     token quote_delimited {
         <starter> <quote_atom>* <stopper>
