@@ -96,9 +96,29 @@ $(JS_STAGE2)/$(HLL_COMBINED): $(JS_HLL_SOURCES)
 	
 	$(PERL) tools/build/gen-cat.pl js $(JS_HLL_SOURCES)  > $(JS_STAGE2)/$(HLL_COMBINED)
 
-$(JS_STAGE2)/QAST/Compiler.moarvm: $(JS_STAGE1_COMPILER) src/vm/js/QAST/Compiler.nqp $(JS_STAGE2)/NQPCORE.setting.moarvm $(JS_STAGE2)/QASTNode.moarvm
-	$(MKPATH) $(JS_STAGE2)/QAST
-	$(MKPATH) node_modules/QAST
-	$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NQPCORE --target=mbc --output $(JS_STAGE2)/QAST/Compiler.moarvm src/vm/js/QAST/Compiler.nqp > node_modules/QAST/Compiler.js
+$(JS_STAGE2)/$(QAST_COMBINED): $(JS_QAST_SOURCES)
+	$(MKPATH) $(JS_STAGE2)
+	
+	$(PERL) tools/build/gen-cat.pl js $(JS_QAST_SOURCES)  > $(JS_STAGE2)/$(QAST_COMBINED)
 
-js-bootstrap : $(JS_STAGE2)/$(NQP_COMBINED) $(JS_STAGE2)/$(P6QREGEX_COMBINED) $(JS_STAGE2)/$(HLL_COMBINED) $(JS_STAGE2)/QAST/Compiler.moarvm
+$(JS_STAGE2)/QAST.moarvm: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(QAST_COMBINED) $(JS_STAGE2)/NQPCORE.setting.moarvm $(JS_STAGE2)/QASTNode.moarvm
+	$(MKPATH) $(JS_STAGE2)
+	$(MKPATH) node_modules
+	$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NQPCORE --target=mbc --output $(JS_STAGE2)/QAST.moarvm $(JS_STAGE2)/$(QAST_COMBINED) > node_modules/QAST.js
+
+$(JS_STAGE2)/NQPHLL.moarvm: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(HLL_COMBINED) $(JS_STAGE2)/NQPCORE.setting.moarvm $(JS_STAGE2)/QAST.moarvm
+	$(MKPATH) $(JS_STAGE2)
+	$(MKPATH) node_modules
+	$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NQPCORE --target=mbc --output $(JS_STAGE2)/NQPHLL.moarvm $(JS_STAGE2)/$(HLL_COMBINED) > node_modules/NQPHLL.js
+
+$(JS_STAGE2)/$(P6QREGEX_COMBINED): $(P6QREGEX_SOURCES)
+	$(MKPATH) $(JS_STAGE2)
+	
+	$(PERL) tools/build/gen-cat.pl js $(P6QREGEX_SOURCES)  > $(JS_STAGE2)/$(P6QREGEX_COMBINED)
+
+$(JS_STAGE2)/NQPP6QRegex.moarvm: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(P6QREGEX_COMBINED) $(JS_STAGE2)/NQPCORE.setting.moarvm $(JS_STAGE2)/QAST.moarvm $(JS_STAGE2)/NQPHLL.moarvm
+	$(MKPATH) $(JS_STAGE2)
+	$(MKPATH) node_modules
+	$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NQPCORE --target=mbc --output $(JS_STAGE2)/NQPP6QRegex.moarvm $(JS_STAGE2)/$(P6QREGEX_COMBINED) > node_modules/NQPP6QRegex.js
+
+js-bootstrap : $(JS_STAGE2)/$(NQP_COMBINED) $(JS_STAGE2)/$(P6QREGEX_COMBINED) $(JS_STAGE2)/$(HLL_COMBINED) $(JS_STAGE2)/QAST.moarvm $(JS_STAGE2)/NQPP6QRegex.moarvm

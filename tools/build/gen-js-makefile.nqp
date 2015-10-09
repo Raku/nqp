@@ -156,6 +156,20 @@ constant('JS_HLL_SOURCES', 'src/vm/js/HLL/Backend.nqp $(COMMON_HLL_SOURCES)');
 my $hll-combined := combine(:stage(2), :sources('$(JS_HLL_SOURCES)'), :file('$(HLL_COMBINED)'));
 
 
-my $QAST-Compiler-moarvm := cross-compile(:stage(2), :source('src/vm/js/QAST/Compiler.nqp'), :target('QAST/Compiler'), :setting('NQPCORE'), :no-regex-lib(1), :deps([$nqpcore-moarvm, $QASTNode-moarvm]));
 
-deps("js-bootstrap", $nqp-combined, $p6regex-combined, $hll-combined, $QAST-Compiler-moarvm);
+#my $QAST-Compiler-moarvm := cross-compile(:stage(2), :source('src/vm/js/QAST/Compiler.nqp'), :target('QAST/Compiler'), :setting('NQPCORE'), :no-regex-lib(1), :deps([$nqpcore-moarvm, $QASTNode-moarvm]));
+
+my $QAST-combined := combine(:stage(2), :sources('$(JS_QAST_SOURCES)'), :file('$(QAST_COMBINED)'));
+my $QAST-moarvm := cross-compile(:stage(2), :source($QAST-combined), :target('QAST'), :setting('NQPCORE'), :no-regex-lib(1), :deps([$nqpcore-moarvm, $QASTNode-moarvm]));
+
+my $hll-moar := cross-compile(:stage(2), :source($hll-combined), :target('NQPHLL'), :setting('NQPCORE'), :no-regex-lib(1), :deps([$nqpcore-moarvm, $QAST-moarvm]));
+
+my $p6qregex-combined := combine(:stage(2), :sources('$(P6QREGEX_SOURCES)'), :file('$(P6QREGEX_COMBINED)'));
+
+
+
+my $NQPP6QRegex-moarvm := cross-compile(:stage(2), :source($p6regex-combined), :target('NQPP6QRegex'), :setting('NQPCORE'), :no-regex-lib(1), :deps([$nqpcore-moarvm, $QAST-moarvm, $hll-moar]));
+
+
+deps("js-bootstrap", $nqp-combined, $p6regex-combined, $hll-combined, $QAST-moarvm, $NQPP6QRegex-moarvm);
+

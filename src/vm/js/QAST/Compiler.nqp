@@ -407,7 +407,7 @@ class QAST::OperationsJS {
 
     add_infix_op('concat', $T_STR, '+', $T_STR, $T_STR);
 
-    for ['_i', $T_INT, '_n', $T_NUM] -> $suffix, $type {
+    for ['_i', $T_INT, '_n', $T_NUM, '_s', $T_STR] -> $suffix, $type {
         add_infix_op('isle' ~ $suffix, $type, '<=', $type, $T_BOOL);
         add_infix_op('islt' ~ $suffix, $type, '<', $type, $T_BOOL);
         add_infix_op('isgt' ~ $suffix, $type, '>', $type, $T_BOOL);
@@ -415,10 +415,6 @@ class QAST::OperationsJS {
         add_infix_op('iseq' ~ $suffix, $type, '==', $type, $T_BOOL);
         add_infix_op('isne' ~ $suffix, $type, '!=', $type, $T_BOOL);
     }
-
-
-    add_infix_op('iseq_s', $T_STR, '==', $T_STR, $T_BOOL);
-    add_infix_op('isne_s', $T_STR, '!=', $T_STR, $T_BOOL);
 
     add_infix_op('bitor_i', $T_INT, '|', $T_INT, $T_INT);
     add_infix_op('bitand_i', $T_INT, '&', $T_INT, $T_INT);
