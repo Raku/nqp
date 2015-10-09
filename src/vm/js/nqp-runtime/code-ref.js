@@ -15,8 +15,16 @@ CodeRef.prototype.$apply = function _(argsArray) {
 };
 
 CodeRef.prototype.takeclosure = function() {
-  var closure = new CodeRef;
-  closure.$call = this.$call;
+  console.trace("takeclosure shouldn't be used");
+};
+
+CodeRef.prototype.closure = function(block) {
+  this.$call = block; // HACK - we need to figure what needs to replace this
+
+  var closure = new CodeRef(this.name, undefined);
+  closure.codeObj = this.codeObj;
+  closure.$call = block;
+  closure.$call.codeRef = closure;
   return closure;
 };
 

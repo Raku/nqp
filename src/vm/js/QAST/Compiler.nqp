@@ -605,12 +605,10 @@ class QAST::OperationsJS {
     add_simple_op('can', $T_INT, [$T_OBJ, $T_STR]);
     add_simple_op('isconcrete', $T_INT, [$T_OBJ]);
 
-    # TODO - think if it's the correct thing to do
+    # XXX explicit takeclosure will go away under new model (which nqp-m uses); for now, no-op it.
     add_op('takeclosure', sub ($comp, $node, :$want) {
-        $comp.as_js($node[0], :want($T_OBJ))~'.takeclosure()';
+        $comp.as_js($node[0], :want($want));
     });
-
-    add_simple_op('takeclosure', $T_OBJ, [$T_OBJ], sub ($closure) {"$closure.takeclosure()"});
 
     add_op('istrue', sub ($comp, $node, :$want) {
         $comp.as_js($node[0], :want($T_BOOL));
@@ -1912,6 +1910,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         has %!lexotic;          
         has @!params;           # the parameters the block takes
         has @!variables;        # the variables declared in this block
+        has %!cloned_inners;    # Mapping of CUIDs of blocks we clone to register with the clone
 
         method new($qast, $outer) {
             my $obj := nqp::create(self);
@@ -1927,7 +1926,23 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             @!variables := nqp::list();
             $!tmp := 0;
             %!lexotic := nqp::hash();
+            %!cloned_inners := nqp::hash();
         }
+
+        method clone_inner($block) {
+            my $cuid    := $block.cuid;
+            my $already := %!cloned_inners{$cuid};
+            if $already {
+                $already
+            }
+            else {
+                my $reg := self.add_tmp;
+                %!cloned_inners{$cuid} := $reg;
+                $reg
+            }
+        }
+
+        method cloned_inners() { %!cloned_inners }
 
         method add_js_lexical($name) {
             @!js_lexicals.push($name);
@@ -2449,17 +2464,26 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         '{' ~ nqp::join(',', @static_info) ~ '}';
     }
 
+    method clone_inners($block) {
+        my @clone_inners;
+        for $block.cloned_inners {
+            my $reg   := $_.value;
+            @clone_inners.push("$reg = ");
+            @clone_inners.push(%*BLOCKS_DONE{$_.key});
+            @clone_inners.push(";\n");
+        }
+        Chunk.void(|@clone_inners);
+    }
+
     method compile_block(QAST::Block $node, $outer, $outer_loop, :$want, :@extra_args=[]) {
         my $cuid := self.mangled_cuid($node.cuid);
-
-        my $setup;
 
         my $outer_ctx := try $*CTX // "null";
 
         if self.is_known_cuid($node) {
-            $setup := [];
         } else {
             self.register_cuid($node);
+
             my $*BINDVAL := 0;
             my $*BLOCK := BlockInfo.new($node, (nqp::defined($outer) ?? $outer !! NQPMu));
 
@@ -2481,33 +2505,31 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                  $set_code_object := ".setCodeObj({self.value_as_js($code_obj)})";
             }
 
-            $setup := [
-                ];
 
-            my $function := [
+
+
+            my @function := [
                 "function({$sig.expr}) \{\n",
                 self.setup_setting($node),
                 self.declare_js_vars($*BLOCK.tmps),
                 self.declare_js_vars($*BLOCK.js_lexicals),
                 $sig,
                 $create_ctx,
+                self.clone_inners($*BLOCK),
                 $stmts,
                 "return {$stmts.expr};\n",
                 "\}"
             ];
 
-            $setup := nqp::clone($function);
-
-            nqp::unshift($setup, $cuid ~ $set_code_object ~ ".block(");
-            nqp::push($setup, ");\n");
-
+            %*BLOCKS_DONE{$node.cuid} := Chunk.void("$cuid.closure(", |@function, ")" ~ $set_code_object);
+                
             if self.is_block_part_of_sc($node) {
                 if $node.blocktype eq 'immediate' {
                     # TODO think about that, and find a way to test this
                     #say("// it's an immediate one");
                 } else {
                     %!serialized_code_ref_info{$node.cuid} := SerializedCodeRefInfo.new(
-                        closure_template => Chunk.new($T_OBJ, "", $function).join(),
+                        closure_template => Chunk.new($T_OBJ, "", @function).join(),
                         ctx => $*CTX,
                         outer_ctx => (nqp::defined($*BLOCK.outer) ?? $*BLOCK.outer.ctx !! ""),
                         static_info => self.static_info_for_lexicals($*BLOCK)
@@ -2518,14 +2540,17 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
 
         if $node.blocktype eq 'immediate' {
+            my $setup := [];
+            my $cloned_block := $outer.clone_inner($node);
             my @args := [$outer_ctx,'{}'];
             for @extra_args -> $arg {
                 @args.push($arg.expr);
                 $setup.push($arg);
             }
-            self.stored_result(Chunk.new($want, $cuid~".\$call({nqp::join(',', @args)})", $setup, :$node), :$want);
+            self.stored_result(Chunk.new($want, $cloned_block~".\$call({nqp::join(',', @args)})", $setup, :$node), :$want);
         } else {
-            Chunk.new($T_OBJ, $cuid, $setup);
+            my $cloned_block := $outer.clone_inner($node);
+            Chunk.new($T_OBJ, $cloned_block, []);
         }
     }
 
@@ -2688,6 +2713,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my $*SETTING_NAME;
         my $*SETTING_TARGET;
 
+        # Blocks we've seen while compiling.
+        my %*BLOCKS_DONE;
+
+        # A fake outer block 
+        my $*BLOCK := BlockInfo.new(NQPMu, NQPMu);
+        $*BLOCK.ctx("null");
+
         my $pre := '';
 
         for $node.pre_deserialize -> $obj {
@@ -2723,15 +2755,15 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         if nqp::defined($node.main) {
             my $main_block := QAST::Block.new($node.main);
 
-            my $main := self.as_js($main_block, :want($T_VOID));
+            my $main := self.as_js($main_block, :want($T_OBJ));
 
-            $body := Chunk.void($block_js, $main, self.mangled_cuid($main_block.cuid) ~ ".\$apply([null, \{\}].concat(nqp.args()));\n");
+            $body := Chunk.void($block_js, $main, $main.expr ~ ".\$apply([null, \{\}].concat(nqp.args()));\n");
             
         } else {
             $body := $block_js;
         }
 
-        Chunk.void(self.setup_cuids(), $pre , self.create_sc($node), $post, $body);
+        Chunk.void(self.setup_cuids(), $pre , self.create_sc($node), $post, self.declare_js_vars($*BLOCK.tmps), self.clone_inners($*BLOCK), $body);
     }
 
 
