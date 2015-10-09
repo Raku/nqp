@@ -24,4 +24,4 @@ if ($node_version =~ /^0\.10/) {
     @nqp_tests = grep {!/19|78/} @nqp_tests;
 }
 
-$harness->runtests(@runtime_unit_tests, @regex, @nqp_tests, @serialization, @qast, @js_specific);
+$harness->runtests(@runtime_unit_tests,  @nqp_tests, @regex, @serialization, @qast, @js_specific);
