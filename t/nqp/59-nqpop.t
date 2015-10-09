@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(179);
+plan(189);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -243,6 +243,19 @@ ok(nqp::isne_i(11, 10) == 1, "isne_i >");
 ok(nqp::iseq_i(10, 10) == 1, "iseq_i =");
 ok(nqp::iseq_i(9, 10) == 0, "iseq_i <");
 ok(nqp::iseq_i(11, 10) == 0, "iseq_i >");
+
+ok(nqp::isle_s('aaa', 'aab'), 'nqp::isle');
+ok(nqp::isle_s('a', 'aa'), 'nqp::isle');
+ok(nqp::isle_s('abcdaz', 'abcdbzefg'), 'nqp::isle');
+ok(nqp::isle_s('abc', 'abc'), 'nqp::isle - both string equal');
+ok(!nqp::isle_s('abcdbzefg', 'abcdaz'), 'nqp::isle left string greater');
+
+ok(nqp::isge_s('aab', 'aaa', ), 'nqp::isge');
+ok(nqp::isge_s('aa', 'a'), 'nqp::isge');
+ok(nqp::isge_s('abcdbzefg', 'abcdaz',), 'nqp::isge');
+ok(nqp::isge_s('abc', 'abc'), 'nqp::isge - both string equal');
+ok(!nqp::isge_s('abcdaz', 'abcdbzefg'), 'nqp::isge left string greater');
+
 
 ok(nqp::sha1("Hello World") eq '0A4D55A8D778E5022FAB701977C5D840BBC486D0', "sha1");
 
