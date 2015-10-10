@@ -1,5 +1,4 @@
-#plan(11);
-plan(9);
+plan(11);
 {
     my $node := QAST::Stmts.new();
     ok(nqp::elems($node.list) == 0,"QAST::Stmts start with 0 children");
@@ -15,6 +14,14 @@ plan(9);
     ok($node.pop == 3,"QAST::Stmts.pop returns the element");
     ok(nqp::elems($node.list) == 1,"QAST::Stmts.pop removes the element");
 }
+
+my $block := QAST::Block.new();
+ok(nqp::ishash($block.symbol("no-such")));
+
+$block.symbol('thing', :attr('foo'));
+
+ok($block.symbol('thing')<attr> eq 'foo');
+
 #{
 #    my $node := QAST::Var.new( :name('$?CLASS'), :scope('typevar') );
 #    ok($node.has_compile_time_value == 0,"a QAST::Node has no compile time value when created");
