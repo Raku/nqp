@@ -498,3 +498,7 @@ op.backendconfig = function() {
 op.ordbaseat = function(str, index) {
   throw 'ordbaseat NYI';
 };
+
+op.getpid = function() {
+  return process.pid;
+};

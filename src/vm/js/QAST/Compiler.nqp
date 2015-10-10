@@ -577,6 +577,8 @@ class QAST::OperationsJS {
     add_simple_op('closefh', $T_OBJ, [$T_OBJ], :sideffects);
     add_simple_op('setinputlinesep', $T_OBJ, [$T_OBJ, $T_STR], :sideffects);
 
+    add_simple_op('getpid', $T_INT, []);
+
     add_simple_op('exit', $T_VOID, [$T_INT], :sideffects);
 
     add_simple_op('symlink', $T_VOID, [$T_STR, $T_STR], :sideffects);
