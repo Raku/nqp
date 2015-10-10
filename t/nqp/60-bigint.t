@@ -130,3 +130,7 @@ ok(nqp::iseq_I(nqp::lcm_I(box(18), box(12), $bi_type), box(36)), 'nqp::lcm_I');
 
 ok(nqp::bool_I(box(42)), 'bool_I(42)');
 ok(!nqp::bool_I(box(0)), 'bool_I(0)');
+
+ok(str(nqp::abs_I(box(189), $bi_type)) eq '189', 'nqp::abs_I with positive number');
+
+ok(str(nqp::abs_I(box(-18), $bi_type)) eq '18', 'nqp::abs_I with negative number');
