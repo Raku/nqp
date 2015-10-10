@@ -496,5 +496,5 @@ op.backendconfig = function() {
 };
 
 op.ordbaseat = function(str, index) {
-  throw "ordbaseat NYI";
+  throw 'ordbaseat NYI';
 };
