@@ -376,6 +376,6 @@ exports.dumpObj = function(obj) {
   }, '  ');
 };
 
-exports.args = function() {
-  return process.argv.slice(1);
+exports.args = function(module) {
+  return require.main === module ? process.argv.slice(1) : [];
 };
