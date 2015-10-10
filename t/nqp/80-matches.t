@@ -1,4 +1,4 @@
-plan(10);
+plan(12);
 my $match := 'abcdef' ~~ / c(.)<alpha> /;
 ok( $match eq 'cde', "simple match" );
 for $match.list {
@@ -13,6 +13,8 @@ ok( $match.to == 5, ".to works");
 ok( $match.orig eq "abcdef", ".orig works");
 ok( $match.chars == 3, ".chars works");
 
+ok( nqp::existskey($match, 'alpha'), 'existskey on match' );
+ok( !nqp::existskey($match, 'beta'), 'existskey on match with missing key' );
 
 ok($match."!dump_str"('mob') eq "mob: cde @ 2\nmob[0]: d @ 3\nmob<alpha>: e @ 4\n",".\"!dump_str\" works correctly");
 
