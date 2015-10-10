@@ -926,6 +926,9 @@ class QAST::OperationsJS {
 
     add_simple_op('bindcurhllsym', $T_OBJ, [$T_STR, $T_OBJ], :sideffects);
 
+    add_simple_op('bindcomp', $T_OBJ, [$T_STR, $T_OBJ], :sideffects);
+    add_simple_op('getcomp', $T_OBJ, [$T_STR], :sideffects);
+
     # TODO avoid copy & paste - move it into code shared between backends
     add_op('defor', sub ($comp, $node, :$want) {
         if +$node.list != 2 {

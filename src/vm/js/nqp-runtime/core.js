@@ -480,6 +480,15 @@ op.popcompsc = function(sc) {
   return compilingSCs.pop();
 };
 
+var compilerRegistry = {};
+op.bindcomp = function(language, compiler) {
+  return (compilerRegistry[language] = compiler);
+};
+
+op.getcomp = function(language) {
+  return compilerRegistry[language];
+};
+
 op.backendconfig = function() {
   var config = new Hash();
   config.content.intvalsize = 4;
