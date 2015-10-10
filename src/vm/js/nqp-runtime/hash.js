@@ -13,6 +13,11 @@ Hash.prototype.$$existskey = function(key) {
   return this.content.hasOwnProperty(key);
 };
 
+Hash.prototype.$$deletekey = function(key) {
+  delete this.content[key];
+  return this;
+};
+
 Hash.prototype.$$clone = function() {
   var clone = new Hash();
   for (var key in this.content) {
