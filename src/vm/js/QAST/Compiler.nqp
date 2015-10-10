@@ -539,6 +539,8 @@ class QAST::OperationsJS {
     add_simple_op('ord', $T_INT, [$T_STR, $T_INT], sub ($string, $pos='0') {"$string.charCodeAt($pos)"});
     %ops<ordat> := %ops<ord>;
 
+    add_simple_op('ordbaseat', $T_INT, [$T_STR, $T_INT]);
+
     add_simple_op('null', $T_OBJ, [], sub () {"null"});
 
     #HACK we need to avoid using undefined at all

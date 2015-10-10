@@ -480,3 +480,7 @@ op.backendconfig = function() {
   config.content.intvalsize = 4;
   return config;
 };
+
+op.ordbaseat = function(str, index) {
+  throw "ordbaseat NYI";
+};
