@@ -1477,6 +1477,8 @@ class RegexCompiler {
             ~ "if ($!pos == 0) \{{self.goto($done_label)}\}\n"
             ~ self.cclass_check('CCLASS_NEWLINE', :negated(1), :pos("$!pos-1"))
             ~ self.case($done_label);
+        } elsif $node.subtype eq 'pass' {
+            '';
         } else {
             $!compiler.NYI("anchor type: {$node.subtype}");
         }
