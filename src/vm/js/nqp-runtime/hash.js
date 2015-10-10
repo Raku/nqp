@@ -6,7 +6,7 @@ Hash.prototype.$$bindkey = function(key, value) {
 };
 
 Hash.prototype.$$atkey = function(key) {
-  return this.content[key];
+  return this.content.hasOwnProperty(key) ? this.content[key] : null;
 };
 
 Hash.prototype.$$existskey = function(key) {
@@ -32,6 +32,10 @@ Hash.prototype.$$elems = function() {
     count++;
   }
   return count;
+};
+
+Hash.prototype.Num = function() {
+  return this.$$elems();
 };
 
 module.exports = Hash;
