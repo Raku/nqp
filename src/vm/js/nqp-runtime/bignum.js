@@ -133,6 +133,10 @@ op.gcd_I = function(a, b, type) {
   return makeBI(type, getBI(a).gcd(getBI(b)));
 };
 
+op.abs_I = function(n, type) {
+  return makeBI(type, getBI(n).abs());
+};
+
 op.tonum_I = function(n) {
   return getBI(n).toNumber();
 };

@@ -1284,6 +1284,7 @@ class QAST::OperationsJS {
     add_simple_op('gcd_I', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ]);
     add_simple_op('lcm_I', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ]);
     add_simple_op('isprime_I', $T_INT, [$T_OBJ, $T_INT]);
+    add_simple_op('abs_I', $T_OBJ, [$T_OBJ, $T_OBJ]);
 
     add_simple_op('rand_I', $T_OBJ, [$T_OBJ, $T_OBJ]);
     add_simple_op('expmod_I', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ]);
