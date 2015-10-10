@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(189);
+plan(191);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -258,6 +258,11 @@ ok(!nqp::isge_s('abcdaz', 'abcdbzefg'), 'nqp::isge left string greater');
 
 
 ok(nqp::sha1("Hello World") eq '0A4D55A8D778E5022FAB701977C5D840BBC486D0', "sha1");
+
+nqp::bindcomp("noSuchLanguageEver1", nqp::list("compiler1"));
+ok(nqp::bindcomp("noSuchLanguageEver2", "compiler2") eq "compiler2", "correct return value for bindcomp");
+
+ok(nqp::getcomp("noSuchLanguageEver1")[0] eq "compiler1", "nqp::getcomp");
 
 {
     my $a := nqp::list_i();
