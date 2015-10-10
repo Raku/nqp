@@ -924,6 +924,8 @@ class QAST::OperationsJS {
     add_simple_op('settypehllrole', $T_OBJ, [$T_OBJ, $T_INT], :sideffects);
     add_simple_op('sethllconfig', $T_OBJ,  [$T_STR, $T_OBJ], :sideffects);
 
+    add_simple_op('bindcurhllsym', $T_OBJ, [$T_STR, $T_OBJ], :sideffects);
+
     # TODO avoid copy & paste - move it into code shared between backends
     add_op('defor', sub ($comp, $node, :$want) {
         if +$node.list != 2 {

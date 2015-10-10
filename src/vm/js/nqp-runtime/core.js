@@ -381,6 +381,11 @@ op.where = function(obj) {
 };
 
 
+op.bindcurhllsym = function(name, value) {
+  /* STUB */
+  return value;
+};
+
 op.settypehllrole = function(type, role) {
   /* STUB */
   return role;
