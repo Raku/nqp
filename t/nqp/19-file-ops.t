@@ -2,7 +2,7 @@
 
 # Test nqp::op file operations.
 
-plan(61);
+plan(64);
 
 ok( nqp::stat('CREDITS', nqp::const::STAT_EXISTS) == 1, 'nqp::stat exists');
 ok( nqp::stat('AARDVARKS', nqp::const::STAT_EXISTS) == 0, 'nqp::stat not exists');
@@ -62,6 +62,10 @@ else {
 ok( nqp::defined(nqp::getstdin()), 'nqp::getstdin');
 ok( nqp::defined(nqp::getstdout()), 'nqp::getstdout');
 ok( nqp::defined(nqp::getstderr()), 'nqp::getstderr');
+
+ok( nqp::istrue(nqp::getstdin()), 'nqp::getstdin');
+ok( nqp::istrue(nqp::getstdout()), 'nqp::getstdout');
+ok( nqp::istrue(nqp::getstderr()), 'nqp::getstderr');
 
 ## open, printfh, readallfh, closefh
 my $test-file := 'test-nqp-19';
