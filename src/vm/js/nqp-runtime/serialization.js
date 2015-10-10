@@ -669,6 +669,17 @@ op.scgetobj = function(sc, idx) {
   return sc.root_objects[idx];
 };
 
+op.getobjsc = function(obj) {
+  return obj._SC || null;
+};
+
+op.scgetobjidx = function(sc, obj) {
+  var idx = sc.root_objects.indexOf(obj);
+  if (idx < 0)
+    throw 'Object does not exist in this SC';
+  return idx;
+};
+
 op.setobjsc = function(obj, sc) {
   obj._SC = sc;
   return obj;

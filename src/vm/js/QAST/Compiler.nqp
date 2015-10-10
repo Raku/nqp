@@ -729,6 +729,9 @@ class QAST::OperationsJS {
 
     add_simple_op('scgethandle', $T_STR, [$T_OBJ]);
 
+    add_simple_op('getobjsc', $T_OBJ, [$T_OBJ]);
+    add_simple_op('scgetobjidx', $T_INT, [$T_OBJ, $T_OBJ]);
+
     add_simple_op('pushcompsc', $T_OBJ, [$T_OBJ], :sideffects);
     add_simple_op('popcompsc', $T_OBJ, [], :sideffects);
 
