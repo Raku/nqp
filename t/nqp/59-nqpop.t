@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(191);
+plan(193);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -165,8 +165,14 @@ ok( nqp::atpos($list,0) == 'zero', 'nqp::unshift the correct element');
 
 my %hash;
 %hash<foo> := 1;
-ok( nqp::existskey(%hash,"foo"),"existskey with existing key");
-ok( !nqp::existskey(%hash,"bar"),"existskey with missing key");
+%hash<baz> := 2;
+%hash<foobaz> := 3;
+ok( nqp::existskey(%hash,"foo"),"nqp::existskey with existing key");
+ok( !nqp::existskey(%hash,"bar"),"nqp::existskey with missing key");
+nqp::deletekey(%hash, "bar");
+ok(nqp::elems(%hash) == 3,"nqp::deletekey with missing key doesn't remove anything");
+nqp::deletekey(%hash, "baz");
+ok( !nqp::existskey(%hash,"baz"),"nqp::deletekey deletes correct key");
 
 my @arr;
 @arr[1] := 3;

@@ -1,4 +1,4 @@
-plan(10);
+plan(12);
 
 class Foo {
     has @!pos_foo;
@@ -27,9 +27,15 @@ $foo<baz> := "world";
 ok($foo[0] == 123,"getting and setting element 0");
 ok($foo[1] == 456,"getting and setting element 1");
 ok($foo<1> == 678,"associative access is seperate");
+
+
 ok($foo<bar> eq 'hello',"assosiative storage takes strings as keys");
 ok($foo.get_pos_1 == 456,"positional are stored in the attribute");
 ok($foo.get_assoc_1 == 678,"associatives are stored in the attribute");
+
+ok(nqp::existskey($foo, "bar"), "delegating existskey");
+nqp::deletekey($foo, "bar");
+ok(!nqp::existskey($foo, "bar"), "...the key got deleted by deletekey");
 
 my $pos_attr;
 my $assoc_attr;
