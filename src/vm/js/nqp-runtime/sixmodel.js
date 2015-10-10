@@ -97,6 +97,9 @@ STable.prototype.setAssociativeDelegate = function(attr) {
   this.obj_constructor.prototype.$$atkey = function(key) {
     return this[attr].$$atkey(key);
   };
+  this.obj_constructor.prototype.$$existskey = function(key) {
+    return this[attr].$$existskey(key);
+  };
 };
 
 STable.prototype.addInternalMethod = function(name, func) {
