@@ -369,6 +369,11 @@ op.bindcurhllsym = function(name, value) {
   return value;
 };
 
+op.getcurhllsym = function(name) {
+  /* STUB */
+  return null;
+};
+
 op.settypehllrole = function(type, role) {
   /* STUB */
   return role;
