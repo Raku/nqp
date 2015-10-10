@@ -1074,13 +1074,13 @@ class QAST::OperationsJS {
         my $body := $comp.compile_block(@operands[1], $outer, $loop , :want($T_VOID), :extra_args(@body_args));
 
 
-        Chunk.void(
+        my $chunk := Chunk.new($T_OBJ, 'null', [
             $list,
             "$iterator = nqp.op.iterator({$list.expr});\n",
             "while ($iterator.idx < $iterator.target) \{\n",
             $comp.handle_control($loop, $body),
             "\}\n"
-        , :node($node));
+        ], :node($node));
     });
 
     for <while until repeat_while repeat_until> -> $op {
