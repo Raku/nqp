@@ -820,6 +820,8 @@ class QAST::OperationsJS {
                         "\};\n",
                         "$*CTX.unwind = $unwind_marker;\n" 
                     );
+                } elsif $type eq 'CONTROL' {
+                    # STUB - we are nooping this, needs to be implemented
                 } else {
                     return $comp.NYI("Not implemented type with handle: $type");
                 }
