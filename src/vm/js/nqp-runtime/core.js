@@ -28,23 +28,6 @@ op.bindpos = function(array, index, value) {
 };
 
 op.getcomp = function(lang) {
-  if (lang == 'JavaScript') {
-    return {
-      eval: function(ctx, named, code) {
-        return eval(code);
-      }
-    };
-  } else if (lang == 'nqp') {
-    return {
-      backend: function(ctx, named) {
-        return {
-          name: function(ctx, named) {
-            return 'js';
-          }
-        };
-      }
-    };
-  }
 };
 
 op.isinvokable = function(obj) {
@@ -484,6 +467,23 @@ var compilerRegistry = {};
 op.bindcomp = function(language, compiler) {
   return (compilerRegistry[language] = compiler);
 };
+
+compilerRegistry['JavaScript'] = {
+  eval: function(ctx, named, code) {
+    return eval(code);
+  }
+};
+
+compilerRegistry['nqp'] = {
+  backend: function(ctx, named) {
+    return {
+      name: function(ctx, named) {
+        return 'js';
+      }
+    };
+  }
+};
+
 
 op.getcomp = function(language) {
   return compilerRegistry[language];
