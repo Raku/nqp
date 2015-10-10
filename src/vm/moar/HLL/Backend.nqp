@@ -164,7 +164,7 @@ class HLL::Backend::MoarVM {
             unless $template {
                 $template := slurp(nqp::backendconfig()<prefix> ~ '/share/nqp/lib/profiler/template.html');
             }
-            my @tpl_pieces := nqp::split('{{{PROFIELR_OUTPUT}}}', $template);
+            my @tpl_pieces := nqp::split('{{{PROFILER_OUTPUT}}}', $template);
 
             nqp::printfh($profile_fh, @tpl_pieces[0]);
             to_json($data);
