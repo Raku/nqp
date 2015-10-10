@@ -307,6 +307,11 @@ op.getstdout = function() {
   return new Stdout();
 };
 
+op.flushfh = function(fh) {
+  // STUB - will require custom io to implement
+  return fh;
+};
+
 function Stdin() {
 }
 
