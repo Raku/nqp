@@ -280,8 +280,13 @@ op.getenvhash = function() {
 
 function Stderr() {
 }
+
 Stderr.prototype.printfh = function(msg) {
   process.stderr.write(msg);
+};
+
+Stderr.prototype.$$to_bool = function(ctx) {
+  return 1;
 };
 
 op.getstderr = function() {
@@ -293,12 +298,22 @@ function Stdout() {
 Stdout.prototype.printfh = function(msg) {
   process.stdout.write(msg);
 };
+
+Stdout.prototype.$$to_bool = function(ctx) {
+  return 1;
+};
+
 op.getstdout = function() {
   return new Stdout();
 };
 
 function Stdin() {
 }
+
+Stdin.prototype.$$to_bool = function(ctx) {
+  return 1;
+};
+
 op.getstdin = function() {
   return new Stdin();
 };
