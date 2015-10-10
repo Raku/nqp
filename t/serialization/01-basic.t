@@ -1,6 +1,6 @@
 #! nqp
 
-plan(1482);
+plan(1485);
 
 {
     my $sc := nqp::createsc('exampleHandle');
@@ -20,6 +20,22 @@ plan(1482);
 sub add_to_sc($sc, $idx, $obj) {
     nqp::scsetobj($sc, $idx, $obj);
     nqp::setobjsc($obj, $sc);
+}
+
+# Test nqp::getobjsc/nqp::scgetobjidx
+{
+    my $sc := nqp::createsc('TEST_SC_0_IN');
+    class T0 is repr('P6int') { }
+    my $v1 := nqp::box_i(42, T0);
+    my $v2 := nqp::box_i(43, T0);
+
+    ok(nqp::isnull(nqp::getobjsc($v1)), 'nqp::getobjsc on an object without sc');
+
+    add_to_sc($sc, 0, $v1);
+    add_to_sc($sc, 1, $v2);
+
+    ok(nqp::eqaddr(nqp::getobjsc($v1), $sc), 'nqp::getobjsc');
+    ok(nqp::scgetobjidx($sc, $v2) == 1, 'nqp::scgetobjidx');
 }
 
 # Serializing an empty SC.
