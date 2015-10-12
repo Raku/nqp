@@ -85,7 +85,7 @@ class HLL::Actions {
                 $ast.op( ~$<OPER><O><op> );
             }
             if $key eq 'LIST' { $key := 'infix'; }
-            my $name := nqp::lc($key) ~ ':<' ~ $<OPER><sym> ~ '>';
+            my $name := nqp::lc($key) ~ ':' ~ ($<OPER><sym> ~~ /<[ < > ]>/ ?? '«' ~ $<OPER><sym> ~ '»' !! '<' ~ $<OPER><sym> ~ '>');
             $ast.name('&' ~ $name);
             unless $ast.op {
                 $ast.op('call');

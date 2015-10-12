@@ -42,18 +42,20 @@ class NQP::Actions is HLL::Actions {
     method deflongname($/) {
         make $<colonpair>
              ?? ~$<identifier> ~ ':' ~ $<colonpair>.made.named
-                    ~ '<' ~ colonpair_str($<colonpair>.made) ~ '>'
+                    ~ colonpair_str($<colonpair>.made)
              !! ~$/;
     }
 
     sub colonpair_str($ast) {
+	my $s;
         if nqp::istype($ast, QAST::Op) {
             my @parts;
             for $ast.list { @parts.push($_.value) }
-            join(' ', @parts)
+            $s := join(' ', @parts)
         } else {
-            $ast.value
+            $s := $ast.value
         }
+	$s ~~ /<[ < > ]>/ ?? '«' ~ $s ~ '»' !! '<' ~ $s ~ '>';
     }
 
     method comp_unit($/) {
@@ -1866,7 +1868,7 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
         elsif $name eq 'sym' {
             my str $fullrxname := %*RX<name>;
             my str $rxname := "";
-            my int $loc := nqp::index($fullrxname, ':sym<');
+            my int $loc := nqp::index($fullrxname, ':sym');
             if $loc >= 0 {
                 $rxname := nqp::substr($fullrxname, $loc + 5 );
                 $rxname := nqp::substr( $rxname, 0, nqp::chars($rxname) - 1);
@@ -1874,6 +1876,7 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
             else {
                 $loc := nqp::index($fullrxname, ':');
                 my $angleloc := nqp::index($fullrxname, '<', $loc);
+                $angleloc := nqp::index($fullrxname, '«', $loc) if $angleloc < 0;
                 $rxname := nqp::substr($fullrxname, $loc + 1, $angleloc - $loc - 1) unless $loc < 0;
             }
             if $loc >= 0 {
