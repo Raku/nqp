@@ -2,6 +2,8 @@ var fs = require('fs-ext');
 var sleep = require('sleep');
 var iconv = require('iconv-lite');
 
+var nqpIo = require('nqp-js-io');
+
 var Hash = require('./hash.js');
 
 var child_process = require('child_process');
@@ -238,6 +240,10 @@ var PIPE_CAPTURE_OUT = 32;
 var PIPE_INHERIT_ERR = 64;
 var PIPE_IGNORE_ERR = 128;
 var PIPE_CAPTURE_ERR = 256;
+
+op.spawn = function(command, dir, env, input, output, error, flags) {
+    nqpIo.spawn(command, dir, env.content, input, output, error, flags);
+};
 
 op.shell = function(command, dir, env, input, output, error, flags) {
 

@@ -595,6 +595,8 @@ class QAST::OperationsJS {
 
     add_simple_op('shell', $T_VOID, [$T_STR, $T_STR, $T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ, $T_INT], :sideffects);
 
+    add_simple_op('spawn', $T_VOID, [$T_OBJ, $T_STR, $T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ, $T_INT], :sideffects);
+
 
     add_simple_op('sha1', $T_STR, [$T_STR]);
 
