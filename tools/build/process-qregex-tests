@@ -46,6 +46,7 @@ my @files := [
      'rx_backtrack',
      'rx_subrules',
      'rx_modifiers',
+     'rx_goal'
 ];
 my $tests := 0;
 for @files -> $fn {

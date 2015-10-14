@@ -1404,6 +1404,19 @@ class RegexCompiler {
         }
     }
     
+
+    method goal($node) {
+        self.compile_rx(QAST::Regex.new(
+            :rxtype<concat>,
+            $node[1],
+            QAST::Regex.new( :rxtype<altseq>, $node[0], $node[2] )
+        ));
+    }
+
+    method dba($node) {
+        call($!cursor, "!dba", $!pos, quote_string($node.name)) ~ ";\n";
+    }
+    
     method concat($node) {
         my @setup;
         for $node.list {
