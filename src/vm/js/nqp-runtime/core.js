@@ -121,6 +121,10 @@ IterPair.prototype.iterkey_s = function() {
   return this._key;
 };
 
+IterPair.prototype.Str = function(ctx) {
+  return this._key;
+};
+
 IterPair.prototype.key = function(ctx, named) {
   return this._key;
 };
