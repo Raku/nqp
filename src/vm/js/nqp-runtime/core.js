@@ -514,3 +514,6 @@ op.getpid = function() {
   return process.pid;
 };
 
+op.getmessage = function(exception) {
+  return exception.msg;
+};
