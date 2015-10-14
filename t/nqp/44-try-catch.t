@@ -2,7 +2,7 @@
 
 # Tests for try and catch
 
-plan(10);
+plan(11);
 
 sub oops($msg = "oops!") { # throw an exception
     nqp::die($msg);
@@ -12,6 +12,16 @@ sub oops($msg = "oops!") { # throw an exception
 sub oops_s() { # throw an exception using nqp::die_s
     nqp::die_s("oops_s!");
 }
+
+
+my $msg;
+try {
+  oops();
+  CATCH {
+    $msg := nqp::getmessage($_);
+  }
+}
+ok($msg eq "oops!", "nqp::getmessage");
 
 my $ok := 1;
 try {
