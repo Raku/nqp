@@ -273,7 +273,7 @@ op.cwd = function() {
 op.getenvhash = function() {
   var hash = new Hash();
   for (var key in process.env) {
-    hash[key] = process.env[key];
+    hash.content[key] = process.env[key];
   }
   return hash;
 };
