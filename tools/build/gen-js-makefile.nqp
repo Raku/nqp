@@ -173,10 +173,17 @@ my $NQPP6QRegex-moarvm := cross-compile(:stage(2), :source($p6qregex-combined), 
 
 my $nqp-bootstrapped := "nqp-bootstrapped.js";
 
-say("nqp-bootstrapped.js: $QAST-moarvm $NQPP6QRegex-moarvm $nqp-combined $QRegex-moarvm
-	./nqp-js --target=js --output=$nqp-bootstrapped $nqp-combined
+my $ModuleLoader := "node_modules/ModuleLoader.js";
+
+say("node_modules/ModuleLoader.js: $nqpcore-moarvm src/vm/js/ModuleLoader.nqp
+	./nqp-js --target=js --output $ModuleLoader src/vm/js/ModuleLoader.nqp
+");
+
+say("$nqp-bootstrapped: $QAST-moarvm $NQPP6QRegex-moarvm $nqp-combined $QRegex-moarvm
+	echo 'require(\"ModuleLoader\");' > $nqp-bootstrapped
+	./nqp-js --target=js  $nqp-combined >> $nqp-bootstrapped
 ");
 
 
-deps("js-bootstrap", "js-all", $nqp-bootstrapped);
+deps("js-bootstrap", "js-all", $nqp-bootstrapped, $ModuleLoader);
 

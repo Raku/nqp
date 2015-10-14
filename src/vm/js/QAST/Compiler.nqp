@@ -865,6 +865,13 @@ class QAST::OperationsJS {
         "({$string} == '' ? [] : {$string}.split({$separator}))"
     });
 
+    add_simple_op('ctxlexpad', $T_OBJ, [$T_OBJ]);
+    add_simple_op('lexprimspec', $T_INT, [$T_OBJ, $T_STR]);
+    add_simple_op('ctxouter', $T_OBJ, [$T_OBJ]);
+
+    add_simple_op('loadbytecode', $T_STR, [$T_STR],
+        sub ($path) { "nqp.op.loadbytecode($*CTX, $path)" }, :sideffects);
+
     add_simple_op('elems', $T_INT, [$T_OBJ]);
 
     add_simple_op('islist', $T_BOOL, [$T_OBJ], sub ($obj) {"($obj instanceof Array)"});

@@ -54,9 +54,7 @@ function saveCtx(where, block) {
 }
 
 exports.load_setting = function(settingName) {
-  saveCtx(settingName, function() {
-    require(settingName + '.setting');
-  });
+  exports.load_module(settingName + '.setting');
 };
 
 exports.load_module = function(module) {
@@ -67,11 +65,38 @@ exports.load_module = function(module) {
 };
 
 exports.setup_setting = function(settingName) {
-  return savedCtxs[settingName];
+  return savedCtxs[settingName + '.setting'];
 };
 
 exports.ctxsave = function(ctx) {
   savedCtxs[saveCtxAs] = ctx;
+};
+
+
+var LexPadHack = require('./lexpad-hack.js');
+
+op.loadbytecode = function(ctx, file) {
+  exports.load_module(file);
+  ctx.bind_dynamic('$*MAIN_CTX', new LexPadHack(savedCtxs[file]));
+  return file;
+};
+
+op.ctxlexpad = function(ctx) {
+  // HACK
+  if (ctx instanceof LexPadHack) {
+    return ctx;
+  } else {
+    console.log("ctxlexpad NYI");
+  }
+};
+
+op.lexprimspec = function(pad, key) {
+  // HACK
+  return 0;
+};
+
+op.ctxouter = function(hack) {
+ return null;
 };
 
 exports.to_str = function(arg, ctx) {
