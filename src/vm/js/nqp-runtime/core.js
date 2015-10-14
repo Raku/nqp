@@ -280,7 +280,7 @@ op.istype = function(obj, type) {
   }
 
   // HACK
-  if (typeof obj === 'number' || typeof obj === 'string' || obj instanceof Array) {
+  if (typeof obj === 'number' || typeof obj === 'string' || obj instanceof Array || obj instanceof Hash) {
     return 0;
   }
 
