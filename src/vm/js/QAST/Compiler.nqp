@@ -906,7 +906,8 @@ class QAST::OperationsJS {
 
 
     add_simple_op('shift', $T_OBJ, [$T_OBJ], sub ($array) {"$array.shift()"}, :sideffects);
-    add_simple_op('unshift', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($array, $elem) {"$array.unshift($elem)"}, :sideffects);
+    add_simple_op('unshift', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
+
     add_simple_op('splice', $T_OBJ, [$T_OBJ, $T_OBJ, $T_INT, $T_INT], :sideffects);
 
     add_simple_op('setelems', $T_OBJ, [$T_OBJ, $T_INT], :sideffects, sub ($array, $elems) {"($array.length = $elems, $array)"});
