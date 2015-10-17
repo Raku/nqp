@@ -794,8 +794,8 @@ for <if unless with without> -> $op_name {
                 push_op(@ins, 'findmeth', $method_reg, $decont_reg, MAST::SVal.new( :value('defined')));
                 nqp::push(@ins,
                    MAST::Call.new( :target($method_reg), :result($decont_reg), :flags([$Arg::obj]), $decont_reg));
-		$regalloc.release_register($method_reg, $MVM_reg_obj);
-	    }
+                $regalloc.release_register($method_reg, $MVM_reg_obj);
+            }
             push_op(@ins,
                 resolve_condition_op(@comp_ops[0].result_kind, $op_name eq 'if' || $op_name eq 'with'),
                 $decont_reg,
@@ -2832,3 +2832,5 @@ sub push_op(@dest, str $op, *@args) {
 sub push_ilist(@dest, $src) is export {
     nqp::splice(@dest, $src.instructions, +@dest, 0);
 }
+
+# vim: ft=perl6 expandtab sw=4
