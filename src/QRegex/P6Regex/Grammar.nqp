@@ -79,6 +79,10 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         self.panic('Quantifier quantifies nothing.');
     }
 
+    method throw_non_quantifiable() {
+        self.panic('Can only quantify a construct that produces a match');
+    }
+
     method throw_solitary_backtrack_control() {
         self.panic("Backtrack control ':' does not seem to have a preceding atom to control");
     }

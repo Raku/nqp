@@ -83,6 +83,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         if $<quantifier> {
             $/.CURSOR.panic('Quantifier quantifies nothing')
                 unless $qast;
+            $/.CURSOR.throw_non_quantifiable() if $qast.rxtype eq 'qastnode';
             my $ast := $<quantifier>.ast;
             $ast.unshift($qast);
             $qast := $ast;
