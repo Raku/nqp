@@ -405,7 +405,11 @@ exports.dumpObj = function(obj) {
     seen.push(value);
     return value;
   }, '  ');
+exports.NYI = function(msg) {
+    console.trace(msg);
+    return null;
 };
+
 
 exports.args = function(module) {
   return require.main === module ? process.argv.slice(1) : [];

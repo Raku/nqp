@@ -2318,7 +2318,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
 
 
-            return Chunk.new($desired, "coercion($got, $desired, {$chunk.expr})", []) #TODO
+            return Chunk.new($desired, "nqp.coercion($got, $desired, {$chunk.expr})", []) #TODO
         }
         $chunk;
     }
@@ -2361,7 +2361,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         } elsif $!nyi eq 'warn' {
             nqp::printfh(nqp::getstderr(), "NYI: $msg\n");
         }
-        Chunk.new($T_VOID,"NYI({quote_string($msg)})",["console.trace(\"NYI: \"+{quote_string($msg)});\n"]);
+        Chunk.new($T_VOID,"nqp.NYI({quote_string($msg)})",["console.trace(\"NYI: \"+{quote_string($msg)});\n"]);
         #nqp::die("NYI: $msg");
     }
 
