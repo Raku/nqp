@@ -23,6 +23,9 @@ op.atpos = function(array, index) {
 
 op.bindpos = function(array, index, value) {
   if (array instanceof Array) {
+    if (index < 0) {
+      index = array.length + index;
+    }
     return (array[index] = value);
   } else {
     return array.$$bindpos(index, value);

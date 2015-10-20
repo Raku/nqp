@@ -2990,7 +2990,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     method bind_pos($array, $index, $value, :$node) {
         my $array_chunk := self.as_js($array, :want($T_OBJ));
-        my $index_chunk := self.as_js($index, :want($T_STR));
+        my $index_chunk := self.as_js($index, :want($T_INT));
         my $value_chunk := self.as_js($value, :want($T_OBJ));
 
         Chunk.new($T_OBJ, $value_chunk.expr, [$array_chunk, $index_chunk, $value_chunk, "nqp.op.bindpos({$array_chunk.expr},{$index_chunk.expr},{$value_chunk.expr});\n"], :node($node));
