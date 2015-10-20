@@ -869,6 +869,8 @@ class QAST::OperationsJS {
 
     add_simple_op('ctxlexpad', $T_OBJ, [$T_OBJ]);
     add_simple_op('lexprimspec', $T_INT, [$T_OBJ, $T_STR]);
+    add_simple_op('objprimspec', $T_INT, [$T_OBJ]);
+
     add_simple_op('ctxouter', $T_OBJ, [$T_OBJ]);
 
     add_simple_op('loadbytecode', $T_STR, [$T_STR],

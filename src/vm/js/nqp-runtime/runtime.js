@@ -95,6 +95,12 @@ op.lexprimspec = function(pad, key) {
   return 0;
 };
 
+op.objprimspec = function(obj) {
+  // HACK
+  // STUB
+  return 0;
+};
+
 op.ctxouter = function(hack) {
  return null;
 };
