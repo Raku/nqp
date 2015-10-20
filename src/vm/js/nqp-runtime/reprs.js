@@ -116,6 +116,10 @@ P6opaque.prototype.deserialize_repr_data = function(cursor, STable) {
           /* TODO autoviving things that aren't typeobjects */
           /* TODO we need to store attributes better */
           autovived[name] = this.auto_viv_values[slot];
+        } else if (this.flattened_stables[slot]) {
+          if (this.flattened_stables[slot].REPR.flattened_default !== undefined) {
+            autovived[name] = this.flattened_stables[slot].REPR.flattened_default;
+          }
         }
       }
     }
@@ -467,6 +471,8 @@ module.exports.Uninstantiable = Uninstantiable;
 /* Stubs */
 function P6int() {
 }
+
+P6int.prototype.flattened_default = 0;
 
 P6int.prototype.basic_constructor = basic_constructor;
 P6int.prototype.basic_type_object_for = basic_type_object_for;
