@@ -225,7 +225,11 @@ op.rmdir = function(dir) {
 };
 
 op.mkdir = function(dir, mode) {
-  fs.mkdirSync(dir, mode);
+  try {
+    fs.accessSync(dir, fs.F_OK);
+  } catch(e) {
+    fs.mkdirSync(dir, mode);
+  }
 };
 
 var PIPE_INHERIT = 1;
