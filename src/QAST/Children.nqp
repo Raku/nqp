@@ -17,8 +17,8 @@ role QAST::Children {
         @!children := @children;
     }
 
-    method dump_children(int $indent, @onto) {
-        for @!children {
+    method dump_node_list(int $indent, @onto, @node_list) {
+        for @node_list {
             if nqp::istype($_, QAST::Node) {
                 nqp::push(@onto, $_.dump($indent));
             }
@@ -29,5 +29,9 @@ role QAST::Children {
                 nqp::push(@onto, "\n");
             }
         }
+    }
+
+    method dump_children(int $indent, @onto) {
+        self.dump_node_list($indent, @onto, @!children);
     }
 }

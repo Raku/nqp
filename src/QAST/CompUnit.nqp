@@ -58,4 +58,21 @@ class QAST::CompUnit is QAST::Node does QAST::Children {
     method code_ref_blocks($value = NO_VALUE) {
         $!code_ref_blocks := $value unless $value =:= NO_VALUE; $!code_ref_blocks
     }
+
+    method dump_children(int $indent, @onto) {
+        if self.pre_deserialize {
+            nqp::push(@onto, nqp::x(' ', $indent) ~ "[pre deserialize]\n");
+            self.dump_node_list($indent, @onto, self.pre_deserialize);
+        }
+
+        if self.post_deserialize {
+            nqp::push(@onto, nqp::x(' ', $indent) ~ "[post deserialize]\n");
+            self.dump_node_list($indent, @onto, self.post_deserialize);
+        }
+
+        if self.pre_deserialize || self.post_deserialize {
+            nqp::push(@onto, nqp::x(' ', $indent) ~ "[children]\n") 
+        }
+        self.dump_node_list($indent, @onto, self.list);
+    }
 }
