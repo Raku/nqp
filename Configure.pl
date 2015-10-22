@@ -29,6 +29,7 @@ MAIN: {
 
     my %options;
     GetOptions(\%options, 'help!', 'prefix=s',
+               'sysroot=s', 'sdkroot=s',
                'backends=s',
                'no-clean',
                'with-parrot=s', 'gen-parrot:s', 'parrot-config=s', 'parrot-option=s@',
@@ -82,9 +83,16 @@ MAIN: {
         $default_backend = 'moar';
     }
 
+    # XXX mkpath instead?
     mkdir($options{'prefix'}) if $options{'prefix'} && $^O =~ /Win32/ && !-d $options{'prefix'};
-    my $prefix      = ($options{'prefix'} && abs_path($options{'prefix'})) || cwd().'/install';
+    my $prefix      = $options{'prefix'}
+                    ? abs_path($options{'prefix'})
+                    : ($options{sysroot}
+		      ? '/usr'
+		      : File::Spec->catdir(cwd, 'install'));
     $config{prefix} = $prefix;
+    $config{sysroot} = $options{sysroot};
+    $config{sdkroot} = $options{sdkroot};
 
     # Save options in config.status
     unlink('config.status');
@@ -336,6 +344,9 @@ Configure.pl - NQP Configure
 General Options:
     --help             Show this text
     --prefix=dir       Install files in dir
+    --sdkroot=dir      When given, use for searching build tools here, e.g.
+                       nqp, java etc.
+    --sysroot=dir      When given, use for searching runtime components here
     --backends=list    Backends to use: $backends
     --with-parrot=path/to/bin/parrot
                        Parrot executable to use to build NQP
