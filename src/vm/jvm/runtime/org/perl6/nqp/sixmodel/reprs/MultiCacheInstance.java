@@ -86,9 +86,12 @@ public class MultiCacheInstance extends SixModelObject {
             }
         }
         
+        if (numArgs >= MD_CACHE_MAX_ARITY)
+            return;
+
         /* If the cache is saturated, don't do anything (we could instead do a random
          * replacement). */
-        ArityCache ac = this.arityCaches[numArgs - 1];
+        ArityCache ac = this.arityCaches[numArgs];
         if (ac != null && ac.numEntries == MD_CACHE_MAX_ENTRIES)
             return;
         
