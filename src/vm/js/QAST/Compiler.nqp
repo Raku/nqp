@@ -2225,6 +2225,23 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 # TODO required named arguments and defaultless optional ones
 
                 @setup.push("{self.mangle_name($_.name)} = $value;\n");
+            } elsif self.is_dynamic_var($_) {
+               my $tmp := self.unique_var('param');
+               @sig.push($tmp);
+
+               my $set := "{$*CTX}[{quote_string($_.name)}] = ";
+
+               if $_.default {
+                   my $default_value := self.as_js($_.default, :want($T_OBJ));
+
+                   @setup.push(Chunk.void(
+                       "if (arguments.length < {+@sig}) \{\n",
+                        $default_value,
+                        "$set {$default_value.expr};\n\} else \{\n$set $tmp;\n\}\n"
+                   ));
+               } else {
+                   @setup.push($set ~ $tmp ~ ";\n");
+                }
             } else {
                 my $default := '';
                 my $name := self.mangle_name($_.name);
@@ -2563,8 +2580,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 self.setup_setting($node),
                 self.declare_js_vars($*BLOCK.tmps),
                 self.declare_js_vars($*BLOCK.js_lexicals),
-                $sig,
                 $create_ctx,
+                $sig,
                 self.clone_inners($*BLOCK),
                 $stmts,
                 "return {$stmts.expr};\n",
