@@ -400,7 +400,7 @@ exports.dumpObj = function(obj) {
   return JSON.stringify(obj, function(key, value) {
     if (key == '_SC') return undefined;
     for (var i = 0; i < seen.length; i++) {
-      if (seen[i] === value) return 'circular';
+      if (typeof value !== 'string' && typeof value !== 'number' && seen[i] === value) return 'circular';
     }
     seen.push(value);
     return value;
