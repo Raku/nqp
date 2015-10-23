@@ -2,7 +2,7 @@
 
 # check hash access methods
 
-plan(14);
+plan(16);
 
 my %h;
 
@@ -33,9 +33,11 @@ for %h {
   }
 
   if $_.key eq 'a' {
+    ok($_ eq 'a', 'keyvalue pair stringifies correctly for key a');
     ok($_.value == 1000,'correct value for key a');
   }
   elsif $_.key eq 'b' {
+    ok($_ eq 'b', 'keyvalue pair stringifies correctly for key b');
     ok($_.value == 200,'correct value for key b');
   }
   elsif $_.key eq '1' {

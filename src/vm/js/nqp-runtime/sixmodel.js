@@ -87,6 +87,9 @@ STable.prototype.setPositionalDelegate = function(attr) {
   this.obj_constructor.prototype.$$atpos = function(index) {
     return this[attr][index];
   };
+  this.obj_constructor.prototype.$$unshift = function(value) {
+    return this[attr].unshift(value);
+  };
 };
 
 // TODO handle attrs properly

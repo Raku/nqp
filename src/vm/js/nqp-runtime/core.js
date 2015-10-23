@@ -4,6 +4,8 @@ exports.op = op;
 var Hash = require('./hash.js');
 var CodeRef = require('./code-ref.js');
 
+var LexPadHack = require('./lexpad-hack.js');
+
 var reprs = require('./reprs.js');
 
 exports.CodeRef = CodeRef;
@@ -21,6 +23,9 @@ op.atpos = function(array, index) {
 
 op.bindpos = function(array, index, value) {
   if (array instanceof Array) {
+    if (index < 0) {
+      index = array.length + index;
+    }
     return (array[index] = value);
   } else {
     return array.$$bindpos(index, value);
@@ -119,6 +124,10 @@ IterPair.prototype.iterkey_s = function() {
   return this._key;
 };
 
+IterPair.prototype.Str = function(ctx) {
+  return this._key;
+};
+
 IterPair.prototype.key = function(ctx, named) {
   return this._key;
 };
@@ -132,6 +141,8 @@ op.iterator = function(obj) {
     return new Iter(obj);
   } else if (obj instanceof Hash) {
     return new HashIter(obj);
+  } else if (obj instanceof LexPadHack) {
+    return new Iter(Object.keys(obj.content));
   } else {
     throw 'unsupported thing to iterate over';
   }
@@ -272,7 +283,7 @@ op.istype = function(obj, type) {
   }
 
   // HACK
-  if (typeof obj === 'number' || typeof obj === 'string' || obj instanceof Array) {
+  if (typeof obj === 'number' || typeof obj === 'string' || obj instanceof Array || obj instanceof Hash) {
     return 0;
   }
 
@@ -364,14 +375,16 @@ op.where = function(obj) {
 };
 
 
+/* HACK - take the current HLL settings into regard */
+
+var hllsyms = {}
 op.bindcurhllsym = function(name, value) {
-  /* STUB */
+  hllsyms[name] = value;
   return value;
 };
 
 op.getcurhllsym = function(name) {
-  /* STUB */
-  return null;
+  return hllsyms.hasOwnProperty(name) ? hllsyms[name] :  null;
 };
 
 op.settypehllrole = function(type, role) {
@@ -506,4 +519,13 @@ op.ordbaseat = function(str, index) {
 
 op.getpid = function() {
   return process.pid;
+};
+
+op.getmessage = function(exception) {
+  return exception.msg;
+};
+
+op.unshift = function(target, value) {
+  if (target.$$unshift) return target.$$unshift(value);
+  return target.unshift(value);
 };

@@ -427,6 +427,7 @@ class QAST::OperationsJS {
     add_simple_op('add_i', $T_INT, [$T_INT, $T_INT], sub ($a, $b) {"(($a + $b) | 0)"});
     add_simple_op('sub_i', $T_INT, [$T_INT, $T_INT], sub ($a, $b) {"(($a - $b) | 0)"});
     add_simple_op('div_i', $T_INT, [$T_INT, $T_INT], sub ($a, $b) {"(($a / $b) | 0)"});
+    add_simple_op('mod_i', $T_INT, [$T_INT, $T_INT], sub ($a, $b) {"(($a % $b) | 0)"});
     add_simple_op('mul_i', $T_INT, [$T_INT, $T_INT], sub ($a, $b) {"Math.imul($a,$b)"});
 
     add_simple_op('istype', $T_BOOL, [$T_OBJ, $T_OBJ], sub ($value, $type) {"($value instanceof $type.constructor)"});
@@ -594,6 +595,8 @@ class QAST::OperationsJS {
     add_simple_op('cwd', $T_STR, [], :sideffects);
 
     add_simple_op('shell', $T_VOID, [$T_STR, $T_STR, $T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ, $T_INT], :sideffects);
+
+    add_simple_op('spawn', $T_VOID, [$T_OBJ, $T_STR, $T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ, $T_INT], :sideffects);
 
 
     add_simple_op('sha1', $T_STR, [$T_STR]);
@@ -853,6 +856,7 @@ class QAST::OperationsJS {
     add_simple_op('exception', $T_OBJ, [], sub () {"$*CTX.exception"});
     add_simple_op('rethrow', $T_VOID, [$T_OBJ], sub ($exception) {"$*CTX.rethrow($exception)"}, :sideffects);
     add_simple_op('resume', $T_VOID, [$T_OBJ], sub ($exception) {"$*CTX.resume($exception)"}, :sideffects);
+    add_simple_op('getmessage', $T_STR, [$T_OBJ]);
 
     add_simple_op('findmethod', $T_OBJ, [$T_OBJ, $T_STR], :sideffects);
     add_simple_op('can', $T_INT, [$T_OBJ, $T_STR], :sideffects);
@@ -862,6 +866,15 @@ class QAST::OperationsJS {
     add_simple_op('split', $T_OBJ, [$T_STR, $T_STR], sub ($separator, $string) {
         "({$string} == '' ? [] : {$string}.split({$separator}))"
     });
+
+    add_simple_op('ctxlexpad', $T_OBJ, [$T_OBJ]);
+    add_simple_op('lexprimspec', $T_INT, [$T_OBJ, $T_STR]);
+    add_simple_op('objprimspec', $T_INT, [$T_OBJ]);
+
+    add_simple_op('ctxouter', $T_OBJ, [$T_OBJ]);
+
+    add_simple_op('loadbytecode', $T_STR, [$T_STR],
+        sub ($path) { "nqp.op.loadbytecode($*CTX, $path)" }, :sideffects);
 
     add_simple_op('elems', $T_INT, [$T_OBJ]);
 
@@ -896,7 +909,8 @@ class QAST::OperationsJS {
 
 
     add_simple_op('shift', $T_OBJ, [$T_OBJ], sub ($array) {"$array.shift()"}, :sideffects);
-    add_simple_op('unshift', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($array, $elem) {"$array.unshift($elem)"}, :sideffects);
+    add_simple_op('unshift', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
+
     add_simple_op('splice', $T_OBJ, [$T_OBJ, $T_OBJ, $T_INT, $T_INT], :sideffects);
 
     add_simple_op('setelems', $T_OBJ, [$T_OBJ, $T_INT], :sideffects, sub ($array, $elems) {"($array.length = $elems, $array)"});
@@ -1392,6 +1406,19 @@ class RegexCompiler {
         } else {
             $!compiler.NYI("NYI QAST::Regex rxtype = {$node.rxtype}");
         }
+    }
+    
+
+    method goal($node) {
+        self.compile_rx(QAST::Regex.new(
+            :rxtype<concat>,
+            $node[1],
+            QAST::Regex.new( :rxtype<altseq>, $node[0], $node[2] )
+        ));
+    }
+
+    method dba($node) {
+        call($!cursor, "!dba", $!pos, quote_string($node.name)) ~ ";\n";
     }
     
     method concat($node) {
@@ -2291,7 +2318,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
 
 
-            return Chunk.new($desired, "coercion($got, $desired, {$chunk.expr})", []) #TODO
+            return Chunk.new($desired, "nqp.coercion($got, $desired, {$chunk.expr})", []) #TODO
         }
         $chunk;
     }
@@ -2334,7 +2361,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         } elsif $!nyi eq 'warn' {
             nqp::printfh(nqp::getstderr(), "NYI: $msg\n");
         }
-        Chunk.new($T_VOID,"NYI({quote_string($msg)})",["console.trace(\"NYI: \"+{quote_string($msg)});\n"]);
+        Chunk.new($T_VOID,"nqp.NYI({quote_string($msg)})",["console.trace(\"NYI: \"+{quote_string($msg)});\n"]);
         #nqp::die("NYI: $msg");
     }
 
@@ -2965,7 +2992,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     method bind_pos($array, $index, $value, :$node) {
         my $array_chunk := self.as_js($array, :want($T_OBJ));
-        my $index_chunk := self.as_js($index, :want($T_STR));
+        my $index_chunk := self.as_js($index, :want($T_INT));
         my $value_chunk := self.as_js($value, :want($T_OBJ));
 
         Chunk.new($T_OBJ, $value_chunk.expr, [$array_chunk, $index_chunk, $value_chunk, "nqp.op.bindpos({$array_chunk.expr},{$index_chunk.expr},{$value_chunk.expr});\n"], :node($node));

@@ -221,6 +221,7 @@ function runNFA(nfa, target, pos) {
         }
         else if (act == EDGE_CHARRANGE_NEG) {
         // TODO
+        } else if (act == EDGE_EPSILON) {
         } else {
           console.log('runNFA: unknown codepoint', act);
         }
