@@ -31,7 +31,27 @@ role QAST::Children {
         }
     }
 
+    method extra_children() {
+        [];
+    }
+
     method dump_children(int $indent, @onto) {
-        self.dump_node_list($indent, @onto, @!children);
+        my $extra := 0;
+        for self.extra_children -> $tag, $nodes {
+            if $nodes {
+                nqp::push(@onto, nqp::x(' ', $indent));
+                nqp::push(@onto, "[" ~ $tag ~ "]");
+                nqp::push(@onto, "\n");
+                self.dump_node_list($indent+2, @onto, $nodes);
+            }
+            $extra := $extra + nqp::elems($nodes);
+        }
+
+        if $extra && @!children {
+            nqp::push(@onto, nqp::x(' ', $indent) ~ "[children]\n");
+            self.dump_node_list($indent+2, @onto, @!children);
+        } else {
+            self.dump_node_list($indent, @onto, @!children);
+        }
     }
 }
