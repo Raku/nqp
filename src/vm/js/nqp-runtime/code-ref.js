@@ -18,11 +18,17 @@ CodeRef.prototype.takeclosure = function() {
   console.trace("takeclosure shouldn't be used");
 };
 
+CodeRef.prototype.capture = function(block) {
+  this.$call = block;
+  block.codeRef = this;
+  return this;
+};
+
 CodeRef.prototype.closure = function(block) {
   this.$call = block; // HACK - we need to figure what needs to replace this
 
   var closure = new CodeRef(this.name, undefined);
-  closure.codeObj = this.codeObj;
+  closure.codeObj = this.codeObj; // HACK it seems that MoarVM doesn't do it
   closure.$call = block;
   closure.$call.codeRef = closure;
   return closure;
