@@ -2321,6 +2321,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 if $got == $T_NUM {
                     return Chunk.new($T_INT, "({$chunk.expr}|0)", [$chunk]);
                 }
+                if $got == $T_BOOL {
+                    return Chunk.new($T_INT, "({$chunk.expr} ? '1' : '0')", [$chunk]);
+                }
             }
 
             if $got == $T_OBJ {
