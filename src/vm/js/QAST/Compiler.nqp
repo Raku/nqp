@@ -719,6 +719,7 @@ class QAST::OperationsJS {
             Chunk.new($T_OBJ, $callee.expr ~ $call ~ $compiled_args.expr ~ ')' , [$callee, $compiled_args], :$node), :$want);
     });
 
+    %ops<callstatic> := %ops<call>;
 
     add_simple_op('serialize', $T_STR, [$T_OBJ, $T_OBJ], :sideffects);
     add_simple_op('scobjcount', $T_INT, [$T_OBJ]);
