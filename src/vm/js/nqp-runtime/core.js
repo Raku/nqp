@@ -460,7 +460,7 @@ op.unbox_s = function(obj) {
 op.elems = function(obj) {
   if (obj instanceof Array) {
     return obj.length;
-  } else if (obj instanceof Hash) {
+  } else if (obj.$$elems) {
     return obj.$$elems();
   }
 };
