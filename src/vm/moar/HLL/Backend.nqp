@@ -76,9 +76,11 @@ class HLL::Backend::MoarVM {
         }
 
         sub post_process_call_graph_node($node) {
-            for $node<allocations> -> %alloc_info {
-                my $type := %alloc_info<type>;
-                %alloc_info<type> := $type.HOW.name($type);
+            if $node<allocations> {
+                for $node<allocations> -> %alloc_info {
+                    my $type := %alloc_info<type>;
+                    %alloc_info<type> := $type.HOW.name($type);
+                }
             }
             if $node<callees> {
                 for $node<callees> {
