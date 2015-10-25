@@ -470,6 +470,11 @@ op.markcodestatic = function(code) {
   return code;
 };
 
+op.freshcoderef = function(code) {
+  // TODO - think about static code info
+  return code.$$clone();
+};
+
 /* TODO - make serialization take this into account */
 var compilingSCs = [];
 op.pushcompsc = function(sc) {
