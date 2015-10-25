@@ -106,7 +106,7 @@
             </tr>
           </tbody>
         </table>
-        
+
         <h3>Call Frames</h3>
         <p>In total, <strong>{{EntriesWithoutInline}} call frames</strong> were
           entered and exited by the profiled code. Inlining eliminated the need
@@ -207,7 +207,7 @@
         </p>
       </div>
     </div>
-  
+
     <div class="container" ng-show="Tab == 'Routines'">
       <div ng-controller="RoutinesController">
       <table class="table table-striped table-condensed table-bordered">
@@ -373,7 +373,7 @@
             </tr>
           </tbody>
         </table>
-          
+
         <div class="panel panel-default">
           <div class="panel-heading">Callees</div>
           <table class="table table-striped table-condensed table-bordered" ng-show="Callees.length > 0">
@@ -529,7 +529,7 @@
       </script>
       </div>
     </div>
-    
+
     <div class="container" ng-show="Tab == 'GC'">
       <div ng-controller="GCController">
       <table class="table table-striped table-condensed table-bordered">
@@ -590,7 +590,7 @@
       </table>
       </div>
     </div>
-    
+
     <div class="container" ng-show="Tab == 'OSR/Deopt'">
       <div ng-controller="OSRDeoptController">
         <h3>OSR</h3>
@@ -630,7 +630,7 @@
 
         <h3>Local Deoptimization</h3>
         <p>Local deoptimization happens when a guard in specialized or JIT-compiled
-          code fails. Since the code was produced assuming the guard would hold, 
+          code fails. Since the code was produced assuming the guard would hold,
           the VM falls back to running the safe, but slower, interpreted code.</p>
         <table class="table table-striped table-condensed table-bordered" ng-show="DeoptOnes.length > 0">
           <thead>
@@ -806,7 +806,7 @@
         // Dynamic optimization
         var optimizedFrames    = speshEntries + jitEntries;
         $scope.OptimizedFrames = optimizedFrames;
-        $scope.DeoptOnes       = deoptOnes; 
+        $scope.DeoptOnes       = deoptOnes;
         $scope.DeoptOnePercent = +(100 * deoptOnes / (optimizedFrames || 1)).toFixed(2);
         $scope.DeoptAlls       = deoptAlls;
         $scope.OSRs            = osrs;
@@ -849,7 +849,7 @@
             }
         }
         walkCallGraphNode(rawData[0].call_graph);
-    
+
         // Build object list per routine.
         var routineList = [];
         for (id in idToEntries) {
