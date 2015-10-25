@@ -87,4 +87,4 @@ say('ok ', next_());
 sub redo_() { 17 };
 say('ok ', redo_());
 sub eighteen($a-a) {}
-say('ok paramer with a dash')
+say('ok 18 # paramer with a dash')
