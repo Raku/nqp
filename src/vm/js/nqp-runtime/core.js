@@ -470,6 +470,11 @@ op.markcodestatic = function(code) {
   return code;
 };
 
+op.markcodestub = function(code) {
+  code.isCompilerStub = true;
+  return code;
+};
+
 op.freshcoderef = function(code) {
   // TODO - think about static code info
   return code.$$clone();
