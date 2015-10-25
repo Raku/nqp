@@ -1,4 +1,4 @@
-plan(12);
+plan(13);
 
 class Foo {
     has @!pos_foo;
@@ -26,6 +26,7 @@ $foo<baz> := "world";
 
 ok($foo[0] == 123,"getting and setting element 0");
 ok($foo[1] == 456,"getting and setting element 1");
+ok(nqp::elems($foo) == 2, "nqp::elems works with positional_delegate");
 ok($foo<1> == 678,"associative access is seperate");
 
 
