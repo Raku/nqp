@@ -45,4 +45,8 @@ class QAST::Var is QAST::Node does QAST::Children {
         my $info := nqp::isnull_s($!name) ?? $!scope !! "$!scope $!name";
         nqp::chars($!decl) ?? "$info :decl($!decl)" !! $info
     }
+
+    method extra_children() {
+        $!default_or_value ?? [$!decl eq 'param' ?? 'default' !! 'value', [$!default_or_value]] !! [];
+    }
 }
