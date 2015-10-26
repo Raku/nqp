@@ -55,4 +55,8 @@ CodeRef.prototype.$$clone = function() {
   return clone;
 };
 
+CodeRef.prototype.$$to_bool = function(ctx) {
+  return 1;
+};
+
 module.exports = CodeRef;
