@@ -341,14 +341,14 @@ P6opaque.prototype.compose = function(STable, repr_info_hash) {
         this.flattened_stables.push(null);
 
         if (attr.positional_delegate) {
-          this.posDelegateSlot = curAttr;
-          // TODO
-          //this._STable.delegatePositional(attr.name);
+          this.positional_delegate_slot = curAttr;
+          this._STable.setPositionalDelegate(attr.name);
         }
+
         if (attr.associative_delegate) {
+          this.associative_delegate_slot = curAttr;
           this.assocDelegateSlot = curAttr;
-          // TODO
-          //this._STable.delegatePositional(attr.name);
+          this._STable.setAssociativeDelegate(attr.name);
         }
         /* TODO think if we want to flatten some things */
         /*if (attrType.st.REPR.get_storage_spec(tc, attrType.st).inlineable == StorageSpec.INLINED)
