@@ -3,8 +3,9 @@ use v5.12;
 use warnings;
 use File::Slurp qw(slurp);
 
-my $tests = slurp('src/vm/js/bin/run_tests'); 
-my ($match) = $tests =~ /prove "\$@" -e  '\.\/nqp-js' gen\/js\/qregex.t (t\/nqp\/\{[0-9,]+\}\*)/;
+my $tests = slurp('src/vm/js/bin/run_tests.pl'); 
+
+my ($match) = $tests =~ /my \@nqp_tests = glob "(t\/nqp\/\{[0-9,]+\}\*)/;
 
 my @tests = glob $match;
 
