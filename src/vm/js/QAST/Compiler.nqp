@@ -997,6 +997,7 @@ class QAST::OperationsJS {
             "\}\n"], :node($node));
     });
 
+
     for <if unless> -> $op_name {
         add_op($op_name, sub ($comp, $node, :$want) {
             unless nqp::defined($want) {
@@ -1007,8 +1008,17 @@ class QAST::OperationsJS {
             nqp::die("Operation '"~$node.op~"' needs either 2 or 3 operands")
                 if $operands < 2 || $operands > 3;
 
+            my sub needs_cond_passed($n) {
+                nqp::istype($n, QAST::Block) && $n.arity > 0 &&
+                    ($n.blocktype eq 'immediate' || $n.blocktype eq 'immediate_static')
+            }
+
+            my $cond_type := (needs_cond_passed($node[1]) || needs_cond_passed($node[2]))
+                ?? $T_OBJ
+                !! (($operands == 3 || $want == $T_VOID) ?? $T_BOOL !! $want);
+
             # The 2 operand form of if in a non-void context also uses the cond as the return value
-            my $cond := $comp.as_js($node[0], :want( ($operands == 3 || $want == $T_VOID) ?? $T_BOOL !! $want));
+            my $cond := $comp.as_js($node[0], :want($cond_type));
             my $then;
             my $else;
 
@@ -1033,21 +1043,32 @@ class QAST::OperationsJS {
 
             my $cond_without_sideeffects := Chunk.new($cond.type, $cond.expr, []);
 
+
+            my sub compile_block($node) {
+                if needs_cond_passed($node) {
+                    my $block := try $*BLOCK;
+                    my $loop := try $*LOOP;
+                    $comp.compile_block($node, $block, $loop, :$want, :extra_args([$cond_without_sideeffects]));
+                } else {
+                    $comp.as_js($node, :$want);
+                }
+            }
+
             if $node.op eq 'if' {
-                $then := $comp.as_js($node[1], :$want);
+                $then := compile_block($node[1]);
 
                 if $operands == 3 {
-                    $else := $comp.as_js($node[2], :$want);
+                    $else := compile_block($node[2]);
                 } else {
                     $else := $comp.coerce($cond_without_sideeffects, $want);
                 }
             } else {
                 if $operands == 3 {
-                    $then := $comp.as_js($node[2], :$want);
+                    $then := compile_block($node[2]);
                 } else {
                     $then := $comp.coerce($cond_without_sideeffects, $want);
                 }
-                $else := $comp.as_js($node[1], :$want);
+                $else := compile_block($node[1]);
             }
 
 
