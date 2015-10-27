@@ -58,4 +58,11 @@ class QAST::CompUnit is QAST::Node does QAST::Children {
     method code_ref_blocks($value = NO_VALUE) {
         $!code_ref_blocks := $value unless $value =:= NO_VALUE; $!code_ref_blocks
     }
+
+    method extra_children() {
+        [
+            'pre_deserialize', self.pre_deserialize,
+            'post_deserialize', self.post_deserialize
+        ];
+    }
 }

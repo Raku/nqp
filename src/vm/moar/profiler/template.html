@@ -106,7 +106,7 @@
             </tr>
           </tbody>
         </table>
-        
+
         <h3>Call Frames</h3>
         <p>In total, <strong>{{EntriesWithoutInline}} call frames</strong> were
           entered and exited by the profiled code. Inlining eliminated the need
@@ -207,7 +207,7 @@
         </p>
       </div>
     </div>
-  
+
     <div class="container" ng-show="Tab == 'Routines'">
       <div ng-controller="RoutinesController">
       <table class="table table-striped table-condensed table-bordered">
@@ -373,7 +373,7 @@
             </tr>
           </tbody>
         </table>
-          
+
         <div class="panel panel-default">
           <div class="panel-heading">Callees</div>
           <table class="table table-striped table-condensed table-bordered" ng-show="Callees.length > 0">
@@ -529,7 +529,7 @@
       </script>
       </div>
     </div>
-    
+
     <div class="container" ng-show="Tab == 'GC'">
       <div ng-controller="GCController">
       <table class="table table-striped table-condensed table-bordered">
@@ -590,7 +590,7 @@
       </table>
       </div>
     </div>
-    
+
     <div class="container" ng-show="Tab == 'OSR/Deopt'">
       <div ng-controller="OSRDeoptController">
         <h3>OSR</h3>
@@ -630,7 +630,7 @@
 
         <h3>Local Deoptimization</h3>
         <p>Local deoptimization happens when a guard in specialized or JIT-compiled
-          code fails. Since the code was produced assuming the guard would hold, 
+          code fails. Since the code was produced assuming the guard would hold,
           the VM falls back to running the safe, but slower, interpreted code.</p>
         <table class="table table-striped table-condensed table-bordered" ng-show="DeoptOnes.length > 0">
           <thead>
@@ -760,18 +760,18 @@
             }
         });
         function walkCallGraphNode(node) {
-            totalEntries  += node.entries;
-            inlineEntries += node.inlined_entries;
-            speshEntries  += node.spesh_entries;
-            jitEntries    += node.jit_entries;
-            deoptOnes     += node.deopt_one;
-            deoptAlls     += node.deopt_all;
-            osrs          += node.osr;
+            totalEntries  += node.entries || 0;
+            inlineEntries += node.inlined_entries || 0;
+            speshEntries  += node.spesh_entries || 0;
+            jitEntries    += node.jit_entries || 0;
+            deoptOnes     += node.deopt_one || 0;
+            deoptAlls     += node.deopt_all || 0;
+            osrs          += node.osr || 0;
             if (node.callees)
                 node.callees.map(walkCallGraphNode);
         }
         walkCallGraphNode(rawData[0].call_graph);
-        
+
         // Time spent
         var overheadTime            = speshTime + gcTime;
         var executingTime           = totalTime - overheadTime;
@@ -806,7 +806,7 @@
         // Dynamic optimization
         var optimizedFrames    = speshEntries + jitEntries;
         $scope.OptimizedFrames = optimizedFrames;
-        $scope.DeoptOnes       = deoptOnes; 
+        $scope.DeoptOnes       = deoptOnes;
         $scope.DeoptOnePercent = +(100 * deoptOnes / (optimizedFrames || 1)).toFixed(2);
         $scope.DeoptAlls       = deoptAlls;
         $scope.OSRs            = osrs;
@@ -833,11 +833,11 @@
                 idToOSR[node.id]          = false;
                 idRecDepth[node.id]       = 0;
             }
-            idToEntries[node.id]      += node.entries;
-            idToSpeshEntries[node.id] += node.spesh_entries;
-            idToJITEntries[node.id]   += node.jit_entries;
-            idToExclusive[node.id]    += node.exclusive_time;
-            totalExclusive            += node.exclusive_time;
+            idToEntries[node.id]      += node.entries || 0;
+            idToSpeshEntries[node.id] += node.spesh_entries || 0;
+            idToJITEntries[node.id]   += node.jit_entries || 0;
+            idToExclusive[node.id]    += node.exclusive_time || 0;
+            totalExclusive            += node.exclusive_time || 0;
             if (node.osr > 0)
                 idToOSR[node.id] = true;
             if (idRecDepth[node.id] == 0)
@@ -849,7 +849,7 @@
             }
         }
         walkCallGraphNode(rawData[0].call_graph);
-    
+
         // Build object list per routine.
         var routineList = [];
         for (id in idToEntries) {
@@ -995,31 +995,33 @@
         var typeIdToRoutineStats = {};
         var maxAllocations       = 1;
         function walkCallGraphNode(node) {
-            node.allocations.map(function (alloc) {
-                if (!typeIdToName[alloc.id]) {
-                    typeIdToName[alloc.id]         = alloc.type == "" ? "<anon>" : alloc.type;
-                    typeIdToAllocations[alloc.id]  = 0;
-                    typeIdToAllocationsByType[alloc.id] = [0, 0, 0];
-                    typeIdToRoutineStats[alloc.id] = {};
-                }
-                typeIdToAllocations[alloc.id] += alloc.count;
-                typeIdToAllocationsByType[alloc.id][0] += alloc.count - alloc.spesh - alloc.jit;
-                typeIdToAllocationsByType[alloc.id][1] += alloc.spesh;
-                typeIdToAllocationsByType[alloc.id][2] += alloc.jit;
-                if (typeIdToAllocations[alloc.id] > maxAllocations)
-                    maxAllocations = typeIdToAllocations[alloc.id];
-                if (typeIdToRoutineStats[alloc.id][node.id]) {
-                    typeIdToRoutineStats[alloc.id][node.id]['count'] += alloc.count;
-                    typeIdToRoutineStats[alloc.id][node.id]['spesh'] += alloc.spesh;
-                    typeIdToRoutineStats[alloc.id][node.id]['jit'] += alloc.jit;
-                } else {
-                    typeIdToRoutineStats[alloc.id][node.id] = {
-                        count: alloc.count,
-                        spesh: alloc.spesh,
-                        jit: alloc.jit
-                        };
-                }
-            });
+            if (node.allocations) {
+                node.allocations.map(function (alloc) {
+                    if (!typeIdToName[alloc.id]) {
+                        typeIdToName[alloc.id]         = alloc.type == "" ? "<anon>" : alloc.type;
+                        typeIdToAllocations[alloc.id]  = 0;
+                        typeIdToAllocationsByType[alloc.id] = [0, 0, 0];
+                        typeIdToRoutineStats[alloc.id] = {};
+                    }
+                    typeIdToAllocations[alloc.id] += alloc.count;
+                    typeIdToAllocationsByType[alloc.id][0] += alloc.count - (alloc.spesh || 0) - (alloc.jit || 0);
+                    typeIdToAllocationsByType[alloc.id][1] += alloc.spesh || 0;
+                    typeIdToAllocationsByType[alloc.id][2] += alloc.jit || 0;
+                    if (typeIdToAllocations[alloc.id] > maxAllocations)
+                        maxAllocations = typeIdToAllocations[alloc.id];
+                    if (typeIdToRoutineStats[alloc.id][node.id]) {
+                        typeIdToRoutineStats[alloc.id][node.id]['count'] += alloc.count || 0;
+                        typeIdToRoutineStats[alloc.id][node.id]['spesh'] += alloc.spesh || 0;
+                        typeIdToRoutineStats[alloc.id][node.id]['jit'] += alloc.jit || 0;
+                    } else {
+                        typeIdToRoutineStats[alloc.id][node.id] = {
+                            count: alloc.count || 0,
+                            spesh: alloc.spesh || 0,
+                            jit: alloc.jit || 0
+                            };
+                    }
+                });
+            }
             if (node.callees) {
                 node.callees.map(walkCallGraphNode);
             }
@@ -1120,9 +1122,9 @@
                 idToDeoptOne[node.id] = 0;
                 idToDeoptAll[node.id] = 0;
             }
-            idToOSR[node.id]      += node.osr;
-            idToDeoptOne[node.id] += node.deopt_one;
-            idToDeoptAll[node.id] += node.deopt_all;
+            idToOSR[node.id]      += node.osr || 0;
+            idToDeoptOne[node.id] += node.deopt_one || 0;
+            idToDeoptAll[node.id] += node.deopt_all || 0;
             if (idToOSR[node.id] > maxOSR)
                 maxOSR = idToOSR[node.id];
             if (idToDeoptOne[node.id] > maxDeoptOne)

@@ -6,6 +6,8 @@ var STable = require('./sixmodel.js').STable;
 
 var repr = new reprs.KnowHOWREPR();
 
+var CodeRef = require('./code-ref.js');
+
 var core = new SerializationContext('__6MODEL_CORE__');
 core.description = 'core SC';
 
@@ -42,8 +44,11 @@ function create_KnowHOWAttribute() {
     return attr;
   };
 
+  type_obj._STable.method_cache = {};
+
   for (var method in methods) {
     type_obj._STable.obj_constructor.prototype[method] = methods[method];
+    type_obj._STable.method_cache[method] = wrap_method(method, methods[method]);
   }
 
   return type_obj;
@@ -65,10 +70,28 @@ KnowHOW_HOW.id = 'KnowHOW_HOW';
 KnowHOW._STable.id = 'KnowHOW';
 KnowHOW._STable.HOW = KnowHOW_HOW;
 
+KnowHOW._STable.method_cache = {};
+KnowHOW_HOW._STable.method_cache = {};
+
+function wrap_method(name, method) {
+  var code_ref = new CodeRef(name);
+  code_ref.$call = function(ctx, _NAMED, self) {
+    var args = Array.prototype.slice.call(arguments, 3);
+    args.unshift(ctx);
+    args.unshift(_NAMED);
+
+    return method.apply(self, args);
+  };
+}
 function add_knowhow_how_method(name, method) {
   /* TODO - think if setting the object cache would be better */
+
   KnowHOW_HOW._STable.obj_constructor.prototype[name] = method;
   KnowHOW._STable.obj_constructor.prototype[name] = method;
+
+  var wrapped = wrap_method(name, method);
+  KnowHOW._STable.method_cache[name] = wrapped;
+  KnowHOW_HOW._STable.method_cache[name] = wrapped;
 }
 
 add_knowhow_how_method('name', function() {
@@ -110,6 +133,10 @@ add_knowhow_how_method('new_type', function(ctx, _NAMED) {
 
 add_knowhow_how_method('add_attribute', function(ctx, _NAMED, type, attr) {
   this.__attributes.push(attr);
+});
+
+add_knowhow_how_method('add_method', function(ctx, _NAMED, type, name, code) {
+  this.__methods.content[name] = code;
 });
 
 add_knowhow_how_method('compose', function(ctx, _NAMED, type_object) {

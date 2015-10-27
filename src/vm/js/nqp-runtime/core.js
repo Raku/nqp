@@ -460,7 +460,7 @@ op.unbox_s = function(obj) {
 op.elems = function(obj) {
   if (obj instanceof Array) {
     return obj.length;
-  } else if (obj instanceof Hash) {
+  } else if (obj.$$elems) {
     return obj.$$elems();
   }
 };
@@ -468,6 +468,16 @@ op.elems = function(obj) {
 op.markcodestatic = function(code) {
   code.isStatic = true;
   return code;
+};
+
+op.markcodestub = function(code) {
+  code.isCompilerStub = true;
+  return code;
+};
+
+op.freshcoderef = function(code) {
+  // TODO - think about static code info
+  return code.$$clone();
 };
 
 /* TODO - make serialization take this into account */

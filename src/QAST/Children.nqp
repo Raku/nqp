@@ -17,8 +17,8 @@ role QAST::Children {
         @!children := @children;
     }
 
-    method dump_children(int $indent, @onto) {
-        for @!children {
+    method dump_node_list(int $indent, @onto, @node_list) {
+        for @node_list {
             if nqp::istype($_, QAST::Node) {
                 nqp::push(@onto, $_.dump($indent));
             }
@@ -28,6 +28,30 @@ role QAST::Children {
                 nqp::push(@onto, nqp::istype($_, NQPMu) ?? '(NQPMu)' !! ~$_);
                 nqp::push(@onto, "\n");
             }
+        }
+    }
+
+    method extra_children() {
+        [];
+    }
+
+    method dump_children(int $indent, @onto) {
+        my $extra := 0;
+        for self.extra_children -> $tag, $nodes {
+            if $nodes {
+                nqp::push(@onto, nqp::x(' ', $indent));
+                nqp::push(@onto, "[" ~ $tag ~ "]");
+                nqp::push(@onto, "\n");
+                self.dump_node_list($indent+2, @onto, $nodes);
+            }
+            $extra := $extra + nqp::elems($nodes);
+        }
+
+        if $extra && @!children {
+            nqp::push(@onto, nqp::x(' ', $indent) ~ "[children]\n");
+            self.dump_node_list($indent+2, @onto, @!children);
+        } else {
+            self.dump_node_list($indent, @onto, @!children);
         }
     }
 }

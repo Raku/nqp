@@ -2,7 +2,7 @@
 
 # Tests for contextual variables
 
-plan(10);
+plan(13);
 
 sub foo() { $*VAR }
 
@@ -51,4 +51,27 @@ sub ignore_local() {
     my $*foo2 := "bar2";
     ignore_local();
 }
+
+my $passed_value;
+sub internal() {
+    $passed_value := $*signatured;
+}
+
+sub bind_using_signature($*signatured) {
+    internal();
+}
+
+bind_using_signature("secret value 1");
+ok($passed_value eq "secret value 1", "setting dynamic variables using signatures");
+
+sub bind_using_signature_with_default($*signatured = 'default value') {
+    internal();
+}
+
+
+bind_using_signature_with_default();
+ok($passed_value eq "default value", "setting dynamic variables using signatures with default values (no argument)");
+
+bind_using_signature_with_default("not default value");
+ok($passed_value eq "not default value", "setting dynamic variables using signatures with default values (passed argument)");
 
