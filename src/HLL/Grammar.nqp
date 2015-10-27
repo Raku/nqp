@@ -458,14 +458,21 @@ An operator precedence parser.
                     my %postO    := @postfixish[nqp::elems(@postfixish)-1]<OPER><O>;
                     my $preprec  := nqp::ifnull(nqp::atkey(%preO, 'sub'), nqp::ifnull(nqp::atkey(%preO, 'prec'), ''));
                     my $postprec := nqp::ifnull(nqp::atkey(%postO, 'sub'), nqp::ifnull(nqp::atkey(%postO, 'prec'), ''));
-                    
-                    if $postprec gt $preprec ||
-                    $postprec eq $preprec && %postO<uassoc> eq 'right'
-                    {
+
+                    if $postprec gt $preprec {
                         nqp::push(@opstack, nqp::shift(@prefixish));
                     }
-                    else {
+                    elsif $postprec lt $preprec {
                         nqp::push(@opstack, nqp::pop(@postfixish));
+                    }
+                    elsif %postO<uassoc> eq 'right' {
+                        nqp::push(@opstack, nqp::shift(@prefixish));
+                    }
+                    elsif %postO<uassoc> eq 'left' {
+                        nqp::push(@opstack, nqp::pop(@postfixish));
+                    }
+                    else {
+                        self.EXPR_nonassoc($here, ~@prefixish[0], ~@postfixish[0]);
                     }
                 }
                 nqp::push(@opstack, nqp::shift(@prefixish)) while @prefixish;
