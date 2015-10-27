@@ -202,9 +202,10 @@ public class JASTCompiler {
         }
 
         m.visitLabel(method.endAll);
+        int i = 0;
         for (Map.Entry<String, VariableDef> e : method.locals.entrySet()) {
             VariableDef def = e.getValue();
-            m.visitLocalVariable(e.getKey(), def.type, null, def.start, def.end, def.index);
+            m.visitLocalVariable("__local_" + i++, def.type, null, def.start, def.end, def.index);
         }
 
         for (Map.Entry<String, LabelInfo> e : method.labels.entrySet()) {
