@@ -6,6 +6,8 @@ var STable = require('./sixmodel.js').STable;
 
 var repr = new reprs.KnowHOWREPR();
 
+var CodeRef = require('./code-ref.js');
+
 var core = new SerializationContext('__6MODEL_CORE__');
 core.description = 'core SC';
 
@@ -65,10 +67,25 @@ KnowHOW_HOW.id = 'KnowHOW_HOW';
 KnowHOW._STable.id = 'KnowHOW';
 KnowHOW._STable.HOW = KnowHOW_HOW;
 
+KnowHOW._STable.method_cache = {};
+KnowHOW_HOW._STable.method_cache = {};
+
 function add_knowhow_how_method(name, method) {
   /* TODO - think if setting the object cache would be better */
+  var code_ref = new CodeRef(name);
+  code_ref.$call = function(ctx, _NAMED, self) {
+    var args = Array.prototype.slice.call(arguments, 3);
+    args.unshift(ctx);
+    args.unshift(_NAMED);
+
+    return method.apply(self, args);
+  };
+
   KnowHOW_HOW._STable.obj_constructor.prototype[name] = method;
   KnowHOW._STable.obj_constructor.prototype[name] = method;
+
+  KnowHOW._STable.method_cache[name] = code_ref;
+  KnowHOW_HOW._STable.method_cache[name] = method;
 }
 
 add_knowhow_how_method('name', function() {
