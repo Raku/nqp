@@ -347,9 +347,9 @@ P6opaque.prototype.compose = function(STable, repr_info_hash) {
 
         if (attr.associative_delegate) {
           this.associative_delegate_slot = curAttr;
-          this.assocDelegateSlot = curAttr;
           this._STable.setAssociativeDelegate(attr.name);
         }
+
         /* TODO think if we want to flatten some things */
         /*if (attrType.st.REPR.get_storage_spec(tc, attrType.st).inlineable == StorageSpec.INLINED)
                   flattenedSTables.add(attrType.st);
@@ -379,17 +379,8 @@ P6opaque.prototype.compose = function(STable, repr_info_hash) {
                       break;
                   }
               }*/
-        /*if (info.posDelegate)
-                  ((P6OpaqueREPRData)st.REPRData).posDelSlot = curAttr;
-              if (info.assDelegate)
-                  ((P6OpaqueREPRData)st.REPRData).assDelSlot = curAttr;
-
-              */
         curAttr++;
       }
-      /*classHandles.add(type);
-          attrIndexes.add(indexes);*/
-      /* FIXME*/
       this.name_to_index_mapping.push({class_key: type, slots: slots, names: names});
     }
 
