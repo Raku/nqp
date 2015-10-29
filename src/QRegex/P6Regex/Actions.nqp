@@ -356,6 +356,18 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         my $qast := QAST::Regex.new( "\x[0a,0b,0c,0d,85,2028,2029]",
                         :rxtype('enumcharlist'),
                         :negate($<sym> eq 'V'), :node($/) );
+        if $qast.negate {
+            $qast := QAST::Regex.new(
+                :rxtype('conj'),
+                QAST::Regex.new( :rxtype<cclass>, :name<n>, :negate(1) ),
+                $qast);
+        }
+        else {
+            $qast := QAST::Regex.new(
+                :rxtype('alt'),
+                QAST::Regex.new( :rxtype<cclass>, :name<n> ),
+                $qast);
+        }
         make $qast;
     }
 
