@@ -596,6 +596,7 @@ NFA.prototype.deserialize_finish = function(object, data) {
 };
 NFA.prototype.type_object_for = basic_type_object_for;
 NFA.prototype.allocate = basic_allocate;
+NFA.prototype.compose = noop_compose;
 NFA.name = 'NFA';
 exports.NFA = NFA;
 
