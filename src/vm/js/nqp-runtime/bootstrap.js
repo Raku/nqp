@@ -82,6 +82,7 @@ function wrap_method(name, method) {
 
     return method.apply(self, args);
   };
+  return code_ref;
 }
 function add_knowhow_how_method(name, method) {
   /* TODO - think if setting the object cache would be better */

@@ -578,6 +578,8 @@ class QAST::OperationsJS {
     add_simple_op('closefh', $T_OBJ, [$T_OBJ], :sideffects);
     add_simple_op('setinputlinesep', $T_OBJ, [$T_OBJ, $T_STR], :sideffects);
 
+    add_simple_op('bootarray', $T_OBJ, []);
+
     add_simple_op('getpid', $T_INT, []);
 
     add_simple_op('exit', $T_VOID, [$T_INT], :sideffects);
@@ -663,13 +665,17 @@ class QAST::OperationsJS {
            my @setup;
            my @exprs;
 
+           my $list := $*BLOCK.add_tmp();
+
            for $node.list -> $elem {
                my $chunk := $comp.as_js($elem, :want($type));
                @setup.push($chunk);
                @exprs.push($chunk.expr);
            }
 
-           Chunk.new($T_OBJ, '[' ~ nqp::join(',', @exprs) ~ ']' , @setup, :$node);
+           @setup.push("$list = " ~ '[' ~ nqp::join(',', @exprs) ~ "];\n");
+
+           Chunk.new($T_OBJ, $list , @setup, :$node);
         });
     }
 

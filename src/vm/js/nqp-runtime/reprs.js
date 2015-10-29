@@ -50,6 +50,34 @@ P6opaque.prototype.allocate = function(STable) {
   return obj;
 };
 
+P6opaque.prototype.calculate_autoviv = function() {
+  var autovived = {};
+  if (this.auto_viv_values) {
+    for (var i in this.name_to_index_mapping) {
+      for (var j in this.name_to_index_mapping[i].slots) {
+        var name = this.name_to_index_mapping[i].names[j];
+        var slot = this.name_to_index_mapping[i].slots[j];
+        if (this.auto_viv_values[slot]) {
+          if (!this.auto_viv_values[slot].type_object_) {
+            console.log('autoviv', name, slot, this.auto_viv_values[slot]);
+            throw 'We currently only implement autoviv with type object values';
+          }
+          /* TODO autoviving things that aren't typeobjects */
+          /* TODO we need to store attributes better */
+          autovived[name] = this.auto_viv_values[slot];
+        } else if (this.flattened_stables[slot]) {
+          if (this.flattened_stables[slot].REPR.flattened_default !== undefined) {
+            autovived[name] = this.flattened_stables[slot].REPR.flattened_default;
+          }
+        }
+      }
+    }
+  }
+
+  if (Object.keys(autovived).length != 0) {
+    this.autovived = autovived;
+  }
+};
 
 P6opaque.prototype.deserialize_repr_data = function(cursor, STable) {
   this.deserialized = 1;
@@ -88,47 +116,27 @@ P6opaque.prototype.deserialize_repr_data = function(cursor, STable) {
   var num_classes = cursor.varint();
   this.name_to_index_mapping = [];
 
+  var slots = [];
+
   for (var i = 0; i < num_classes; i++) {
     this.name_to_index_mapping[i] = {slots: [], names: [], class_key: cursor.variant()};
 
     var num_attrs = cursor.varint();
 
     for (var j = 0; j < num_attrs; j++) {
-      this.name_to_index_mapping[i].names[j] = cursor.str();
-      this.name_to_index_mapping[i].slots[j] = cursor.varint();
+      var name = cursor.str();
+      var slot = cursor.varint(); 
+
+      this.name_to_index_mapping[i].names[j] = name;
+      this.name_to_index_mapping[i].slots[j] = slot ;
+
+
+      slots[slot] = name;
     }
   }
 
 
-  var slots = [];
-  var autovived = {};
-  if (this.auto_viv_values) {
-    for (var i in this.name_to_index_mapping) {
-      for (var j in this.name_to_index_mapping[i].slots) {
-        var name = this.name_to_index_mapping[i].names[j];
-        var slot = this.name_to_index_mapping[i].slots[j];
-        slots[slot] = name;
-        if (this.auto_viv_values[slot]) {
-          if (!this.auto_viv_values[slot].type_object_) {
-            console.log('autoviv', name, slot, this.auto_viv_values[slot]);
-            throw 'We currently only implement autoviv with type object values';
-          }
-          /* TODO autoviving things that aren't typeobjects */
-          /* TODO we need to store attributes better */
-          autovived[name] = this.auto_viv_values[slot];
-        } else if (this.flattened_stables[slot]) {
-          if (this.flattened_stables[slot].REPR.flattened_default !== undefined) {
-            autovived[name] = this.flattened_stables[slot].REPR.flattened_default;
-          }
-        }
-      }
-    }
-  }
-
-  if (Object.keys(autovived).length != 0) {
-    this.autovived = autovived;
-  }
-
+  this.calculate_autoviv();
 
   this.positional_delegate_slot = cursor.varint();
   this.associative_delegate_slot = cursor.varint();
@@ -162,16 +170,21 @@ P6opaque.prototype.serialize_repr_data = function(st, cursor) {
 
   cursor.varint(st.REPR.mi ? 1 : 0);
 
+
   //TODO
   //  if (st.REPR.auto_viv_values != null) {
-  //      cursor.varint(1);
-  //      for (var i = 0; i < numAttrs; i++)
-  //         cursor.ref(st.REPR.auto_viv_values[i]);
   //  }
   //  else {
-  cursor.varint(0);
   //  }
 
+  if (st.REPR.auto_viv_values) {
+    cursor.varint(1);
+    for (var i = 0; i < numAttrs; i++) {
+      cursor.ref(st.REPR.auto_viv_values[i]);
+    }
+  } else {
+    cursor.varint(0);
+  }
 
 
   cursor.varint(st.REPR.unbox_int_slot);
@@ -306,6 +319,9 @@ P6opaque.prototype.compose = function(STable, repr_info_hash) {
   this.name_to_index_mapping = [];
   this.flattened_stables = [];
   var mi = false;
+
+  this.auto_viv_values = [];
+
   for (var i = repr_info.length - 1; i >= 0; i--) {
     var entry = repr_info[i];
     var type = entry[0];
@@ -347,14 +363,18 @@ P6opaque.prototype.compose = function(STable, repr_info_hash) {
 
         if (attr.associative_delegate) {
           this.associative_delegate_slot = curAttr;
-          this.assocDelegateSlot = curAttr;
           this._STable.setAssociativeDelegate(attr.name);
         }
+
         /* TODO think if we want to flatten some things */
         /*if (attrType.st.REPR.get_storage_spec(tc, attrType.st).inlineable == StorageSpec.INLINED)
                   flattenedSTables.add(attrType.st);
               else
                   flattenedSTables.add(null);*/
+
+        if (attr.auto_viv_container) {
+          this.auto_viv_values[curAttr] = attr.auto_viv_container;
+        }
 
         /* info.boxTarget = attrHash.exists_key(tc, "box_target") != 0;
               SixModelObject autoViv = attrHash.at_key_boxed(tc, "auto_viv_container");
@@ -379,17 +399,8 @@ P6opaque.prototype.compose = function(STable, repr_info_hash) {
                       break;
                   }
               }*/
-        /*if (info.posDelegate)
-                  ((P6OpaqueREPRData)st.REPRData).posDelSlot = curAttr;
-              if (info.assDelegate)
-                  ((P6OpaqueREPRData)st.REPRData).assDelSlot = curAttr;
-
-              */
         curAttr++;
       }
-      /*classHandles.add(type);
-          attrIndexes.add(indexes);*/
-      /* FIXME*/
       this.name_to_index_mapping.push({class_key: type, slots: slots, names: names});
     }
 
@@ -407,6 +418,8 @@ P6opaque.prototype.compose = function(STable, repr_info_hash) {
   ((P6OpaqueREPRData)st.REPRData).mi = mi;
   */
   this.mi = mi ? 1 : 0;
+
+  this.calculate_autoviv();
 };
 
 P6opaque.name = 'P6opaque';
@@ -583,6 +596,7 @@ NFA.prototype.deserialize_finish = function(object, data) {
 };
 NFA.prototype.type_object_for = basic_type_object_for;
 NFA.prototype.allocate = basic_allocate;
+NFA.prototype.compose = noop_compose;
 NFA.name = 'NFA';
 exports.NFA = NFA;
 

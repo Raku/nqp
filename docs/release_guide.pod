@@ -73,7 +73,7 @@ release guide for links on how to create GPG keys, should it be necessary.
 
 Sign the tarball:
 
-    $ gpg -b --armor nqp-YYY.MM.tar.gz
+    $ gpg -b --armor nqp-YYYY.MM.tar.gz
 
 =item 8
 
