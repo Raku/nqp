@@ -506,6 +506,8 @@ class QAST::OperationsJS {
     }
 
     add_simple_op('isstr', $T_BOOL, [$T_OBJ], sub ($obj) {"(typeof $obj == 'string')"});
+    add_simple_op('isint', $T_INT, [$T_OBJ]);
+    add_simple_op('isnum', $T_INT, [$T_OBJ]);
 
     add_simple_op('chars', $T_INT, [$T_STR], sub ($string) {"$string.length"});
 
@@ -757,7 +759,9 @@ class QAST::OperationsJS {
 
     # Ops for NFA
 
-    add_simple_op('nfafromstatelist', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
+    add_simple_op('nfafromstatelist', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($states, $type) {
+        "nqp.op.nfafromstatelist($states, $type, $*CTX)";
+    }, :sideffects);
     add_simple_op('nfarunproto', $T_OBJ, [$T_OBJ, $T_STR, $T_INT], :sideffects);
     add_simple_op('nfarunalt', $T_OBJ, [$T_OBJ, $T_STR, $T_INT, $T_OBJ, $T_OBJ, $T_OBJ]);
 
@@ -1282,8 +1286,8 @@ class QAST::OperationsJS {
 
 
     # TODO implement the multi method cache for better performance
-    add_simple_op('multicachefind', $T_INT, [$T_OBJ, $T_OBJ], sub ($cache, $capture) {"null"});
-    add_simple_op('multicacheadd', $T_INT, [$T_OBJ, $T_OBJ, $T_OBJ], sub ($cache, $capture, $result) {
+    add_simple_op('multicachefind', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($cache, $capture) {"null"});
+    add_simple_op('multicacheadd', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ], sub ($cache, $capture, $result) {
         $cache;
     });
 
@@ -1402,7 +1406,7 @@ class RegexCompiler {
             "$start = self['!cursor_start_all']({$*CTX}, \{\});\n",
             "{$!cursor} = $start[0];\n",
             "{$!target} = $start[1];\n",
-            "{$!pos} = $start[2];\n",
+            "{$!pos} = nqp.to_int($start[2], $*CTX);\n",
             "{$!curclass} = $start[3];\n",
             "{$!bstack} = $start[4];\n",
             "{$!restart} = $start[5];\n",
@@ -1608,6 +1612,16 @@ class RegexCompiler {
         $invocant ~ "[" ~ quote_string($method) ~ "](" ~ nqp::join(",", @args) ~ ")";
     }
 
+    # TODO proper $!pos access
+    method pos_from_cursor($cursor) {
+        "nqp.to_int($cursor['\$!pos'], $*CTX)";
+    }
+    
+    # TODO proper $!pos access
+    method set_cursor_pos() {
+        "$!cursor['\$!pos\'] = $!pos;\n";
+    }
+
     method subrule($node) {
         my $captured := 0;
 
@@ -1658,7 +1672,7 @@ class RegexCompiler {
                     ~ self.goto($pass_label)
                     ~ self.case($back_label)
                     ~ "$!subcur =" ~ call($!subcur, "!cursor_next") ~ ";\n"
-                    ~ "if($!subcur['\$!pos'] $testop 0) \{{self.fail}\};\n"
+                    ~ "if({self.pos_from_cursor($!subcur)} $testop 0) \{{self.fail}\};\n"
                     ~ self.case($pass_label);
 
                 if $node.subtype eq 'capture' {
@@ -1683,15 +1697,14 @@ class RegexCompiler {
                 call($!cursor, "!cursor_capture", $!subcur,  quote_string($node.name)) ~ ";\n"
         }
 
-        # TODO proper $!pos access
         Chunk.void(
-            "$!cursor['\$!pos\'] = $!pos;\n",
+            self.set_cursor_pos,
             $call,
             "$!subcur = {$call.expr};\n",
-            "if ($!subcur['\$!pos\'] $testop 0) \{{self.fail}\}\n",
+            "if ({self.pos_from_cursor($!subcur)} $testop 0) \{{self.fail}\}\n",
             $capture_code,
 
-            ($node.subtype eq 'zerowidth' ?? '' !! "$!pos = $!subcur['\$!pos\'];\n")
+            ($node.subtype eq 'zerowidth' ?? '' !! "$!pos = {self.pos_from_cursor($!subcur)};\n")
         );
     }
 
@@ -1706,7 +1719,7 @@ class RegexCompiler {
             self.mark($fail_label,$!pos,0),
             self.compile_rx($node[0]),
             self.peek($fail_label,$subcapture_from),
-            "$!cursor['\$!pos\'] = $!pos;\n",
+            self.set_cursor_pos,
             "$!subcur = " ~ call($!cursor, '!cursor_start_subcapture', $subcapture_from) ~ ";\n",
             call($!subcur, '!cursor_pass', $!pos) ~ ";\n",
             "$!cstack = " ~ call($!cursor, '!cursor_capture', $!subcur, quote_string($node.name)) ~ ";\n",
@@ -1721,7 +1734,7 @@ class RegexCompiler {
         my $code := $!compiler.as_js($node[0], :want($T_BOOL));
 
         Chunk.void(
-            "$!cursor['\$!pos\'] = $!pos;\n",
+            self.set_cursor_pos,
             $!compiler.mangle_name('$¢') ~ " = $!cursor;\n",
             $code,
             $node.subtype eq 'zerowidth' ??
@@ -2375,8 +2388,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
 
             if $desired == $T_OBJ {
-                if $got == $T_INT || $got == $T_NUM || $got == $T_STR {
+                if $got == $T_NUM || $got == $T_STR {
                     return $chunk;
+                } elsif $got == $T_INT {
+                    return Chunk.new($T_OBJ, "new nqp.NQPInt({$chunk.expr})", [$chunk]);
                 } elsif $got == $T_BOOL {
                     return Chunk.new($T_OBJ, "({$chunk.expr} ? 1 : 0)", [$chunk]);
                 } elsif $got == $T_VOID {

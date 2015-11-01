@@ -5,6 +5,7 @@ var Hash = require('./hash.js');
 var CodeRef = require('./code-ref.js');
 
 var LexPadHack = require('./lexpad-hack.js');
+var NQPInt = require('./nqp-int.js');
 
 var reprs = require('./reprs.js');
 
@@ -291,7 +292,7 @@ op.istype = function(obj, type) {
   }
 
   // HACK
-  if (typeof obj === 'number' || typeof obj === 'string' || obj instanceof Array || obj instanceof Hash) {
+  if (typeof obj === 'number' || typeof obj === 'string' || obj instanceof Array || obj instanceof Hash || obj instanceof NQPInt) {
     return 0;
   }
 
@@ -547,3 +548,12 @@ op.unshift = function(target, value) {
   if (target.$$unshift) return target.$$unshift(value);
   return target.unshift(value);
 };
+
+op.isnum = function(value) {
+  return (typeof value == "number") ? 1 : 0;
+};
+
+op.isint = function(value) {
+  return (value instanceof NQPInt) ? 1 : 0;
+};
+

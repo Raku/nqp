@@ -2,6 +2,7 @@ var op = {};
 exports.op = op;
 
 var iscclass = require('./cclass.js').op.iscclass;
+var nqp = require('nqp-runtime');
 
 var EDGE_FATE = 0,
     EDGE_EPSILON = 1,
@@ -21,14 +22,15 @@ var EDGE_FATE = 0,
     EDGE_CODEPOINT_I_LL = 15;
 
 // TODO think about type conversions of the stuff inside the array
-op.nfafromstatelist = function(states, type) {
+op.nfafromstatelist = function(states, type, ctx) {
+
   var nfa = type._STable.REPR.allocate(type._STable);
   nfa.fates = states[0];
   nfa.states = [];
   for (var i = 1; i < states.length; i++) {
     nfa.states[i - 1] = [];
     for (var j = 0; j < states[i].length; j += 3) {
-      var edge = {act: states[i][j], to: states[i][j + 2]};
+      var edge = {act: nqp.to_int(states[i][j], ctx), to: nqp.to_int(states[i][j + 2], ctx)};
       switch (edge.act & 0xff) {
         case EDGE_EPSILON:
           break;
@@ -38,11 +40,11 @@ op.nfafromstatelist = function(states, type) {
         case EDGE_CODEPOINT_NEG:
         case EDGE_CHARCLASS:
         case EDGE_CHARCLASS_NEG:
-          edge.arg_i = states[i][j + 1];
+          edge.arg_i = nqp.to_int(states[i][j + 1], ctx);
           break;
         case EDGE_CHARLIST:
         case EDGE_CHARLIST_NEG:
-          edge.arg_s = states[i][j + 1];
+          edge.arg_s = nqp.to_str(states[i][j + 1], ctx);
           break;
 
         case EDGE_CODEPOINT_I:
@@ -50,8 +52,8 @@ op.nfafromstatelist = function(states, type) {
         case EDGE_CODEPOINT_I_NEG:
         case EDGE_CHARRANGE:
         case EDGE_CHARRANGE_NEG:
-          edge.arg_lc = states[i][j + 1][0];
-          edge.arg_uc = states[i][j + 1][1];
+          edge.arg_lc = nqp.to_int(states[i][j + 1][0], ctx);
+          edge.arg_uc = nqp.to_int(states[i][j + 1][1], ctx);
           break;
         default:
           throw 'nfafromstatelist: unknown codepoint type: ' + edge.act;

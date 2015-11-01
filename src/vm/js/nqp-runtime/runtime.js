@@ -1,6 +1,8 @@
 var op = {};
 exports.op = op;
 
+exports.NQPInt = require("./nqp-int.js");
+
 function load_ops(module) {
   for (var name in module.op) {
     op[name] = module.op[name];
