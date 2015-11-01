@@ -183,3 +183,8 @@ a**!2..4		baaabbb		y	three "a" characters (explicit greed)
 a**:!2..4		baaabbb		y	three "a" characters (explicit greed)
 xa**0			xaa		<x @ 0>	nothing matched by ** 0
 xa**0..0			xaa		<x @ 0>	nothing matched by ** 0..0
+a**^10          aaaaaaaaa   y   9 "a" characters
+a**^10          bbbbbbbb    y   no "a" characters
+a**^*           aaaaa       y   5 "a" characters
+a**^*           bbaaabbb    y   3 "a" characters
+a**^*           bbbbbbbb    y   no "a" characters
