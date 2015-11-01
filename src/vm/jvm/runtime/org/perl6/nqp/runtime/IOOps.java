@@ -33,7 +33,7 @@ public final class IOOps {
     }
 
     public static SixModelObject asynclisten(SixModelObject queue, SixModelObject schedulee,
-            String host, long port, SixModelObject asyncType, ThreadContext tc) {
+            String host, long port, long backlog, SixModelObject asyncType, ThreadContext tc) {
 
         AsyncTaskInstance task = (AsyncTaskInstance) asyncType.st.REPR.allocate(tc, asyncType.st);
         task.queue = queue;
@@ -42,7 +42,7 @@ public final class IOOps {
         AsyncServerSocketHandle handle = new AsyncServerSocketHandle(tc);
         task.handle = handle;
 
-        handle.bind(tc, host, (int) port);
+        handle.bind(tc, host, (int) port, (int) backlog);
         handle.accept(tc, task);
 
         return task;

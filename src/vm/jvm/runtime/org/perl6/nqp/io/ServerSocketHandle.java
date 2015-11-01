@@ -20,10 +20,10 @@ public class ServerSocketHandle implements IIOBindable {
         }
     }
     
-    public void bind(ThreadContext tc, String host, int port) {
+    public void bind(ThreadContext tc, String host, int port, int backlog) {
         try {
             InetSocketAddress addr = new InetSocketAddress(host, port);
-            listenChan.bind(addr);
+            listenChan.bind(addr, backlog);
         } catch (IOException e) {
             throw ExceptionHandling.dieInternal(tc, e);
         }
