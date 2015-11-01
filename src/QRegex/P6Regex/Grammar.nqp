@@ -256,7 +256,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token quantifier:sym<**> {
         <sym> <.normspace>? <backmod> <.normspace>?
         [
-        | $<min>='^' <max=.integer>
+        | $<min>='^' [ <max=.integer> | $<max>='*' ]
         | <min=.integer> \s+ '..' <.throw_spaces_in_bare_range>
         | <min=.integer>
           [ '..'
