@@ -162,6 +162,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         }
         else {
             my $min := $<min>.ast;
+            if $<min>.Str eq '^' { $min := 0 }
             my $max := -1;
             if ! $<max> { $max := $min }
             elsif $<max> ne '*' {
