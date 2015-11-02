@@ -2010,6 +2010,7 @@ QAST::MASTOperations.add_core_moarop_mapping('writefh', 'write_fhb', 1);
 QAST::MASTOperations.add_core_moarop_mapping('printfh', 'write_fhs');
 QAST::MASTOperations.add_core_moarop_mapping('sayfh', 'say_fhs');
 QAST::MASTOperations.add_core_moarop_mapping('readlinefh', 'readline_fh');
+QAST::MASTOperations.add_core_moarop_mapping('readlinechompfh', 'readlinechomp_fh');
 QAST::MASTOperations.add_core_moarop_mapping('readallfh', 'readall_fh');
 QAST::MASTOperations.add_core_op('getcfh', -> $qastcomp, $op {
     $qastcomp.as_mast( QAST::VM.new( :moarop('read_fhs'), $op[0], QAST::IVal.new( :value(1) )) )
@@ -2023,6 +2024,7 @@ QAST::MASTOperations.add_core_moarop_mapping('bindsock', 'bind_sk', 0);
 QAST::MASTOperations.add_core_moarop_mapping('accept', 'accept_sk');
 QAST::MASTOperations.add_core_moarop_mapping('readcharsfh', 'read_fhs');
 QAST::MASTOperations.add_core_moarop_mapping('setinputlinesep', 'setinputlinesep_fh', 0);
+QAST::MASTOperations.add_core_moarop_mapping('setinputlineseps', 'setinputlineseps_fh', 0);
 
 QAST::MASTOperations.add_core_moarop_mapping('chmod', 'chmod_f', 0);
 QAST::MASTOperations.add_core_moarop_mapping('unlink', 'delete_f', 0);
