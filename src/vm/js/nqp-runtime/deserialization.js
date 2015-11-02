@@ -96,7 +96,7 @@ BinaryCursor.prototype.times = function(count, cb) {
 
 /** Read an array of elements parsed by the callback */
 BinaryCursor.prototype.array = function(readElem) {
-  var elems = this.I32();
+  var elems = this.varint();
   var array = [];
   for (var i = 0; i < elems; i++) {
     array.push(readElem(this));
@@ -287,6 +287,10 @@ BinaryCursor.prototype.variant = function() {
 
 };
 
+var STABLE_BOOLIFICATION_SPEC_MODE_MASK = 0x0F;
+var STABLE_HAS_CONTAINER_SPEC           = 0x10;
+var STABLE_HAS_INVOCATION_SPEC          = 0x20;
+var STABLE_HAS_HLL_OWNER                = 0x40;
 
 /** Read an entry from the STable table */
 BinaryCursor.prototype.STable = function(STable) {
@@ -301,37 +305,45 @@ BinaryCursor.prototype.STable = function(STable) {
   }
 
   var type_check_cache = [];
-  var type_check_cache_len = this.I64();
+  var type_check_cache_len = this.varint();
   for (var i = 0; i < type_check_cache_len; i++) {
     type_check_cache.push(this.variant());
   }
   STable.type_check_cache = type_check_cache;
 
-  STable.mode_flags = this.I64();
+  STable.mode_flags = this.U8();
 
-  var boolification_flag = this.flag64();
-  if (boolification_flag) {
-    var boolification_mode = this.I64();
+  var flags = this.U8();
+  var boolification_mode = flags & 0xF;
+
+  if (boolification_mode != 0xF) {
     var boolification_method = this.variant();
     STable.setboolspec(boolification_mode, boolification_method);
   }
-  var container_flag = this.flag64();
-  if (container_flag) {
-    STable.container_class_handle = this.variant();
+
+  if (flags & STABLE_HAS_CONTAINER_SPEC) {
+    console.log("TODO container spec");
+    /* TODO - container stuff */
+   /* STable.container_class_handle = this.variant();
     STable.container_attr_name = this.str();
     STable.container_hint = this.I64();
-    STable.container_fetch_method = this.variant();
+    STable.container_fetch_method = this.variant();*/
   }
 
-  var invocation_spec = this.flag64();
-  if (invocation_spec) {
+  if (flags & STABLE_HAS_INVOCATION_SPEC) {
+    /* TODO */ 
+    console.log("TODO invocation spec");
+    /*
     STable.invocation_class_handle = this.variant();
     STable.invocation_attr_name = this.str();
     STable.invocation_hint = this.I64();
     STable.invocation_handler = this.variant();
+    */
   }
 
-  STable.hll_owner = this.str();
+  if (flags & STABLE_HAS_HLL_OWNER) {
+    STable.hll_owner = this.str();
+  }
 
   // TODO check for MVM_PARAMETRIC_TYPE mode_flags
   // TODO check for MVM_PARAMETRIC_TYPE mode_flags
@@ -422,7 +434,7 @@ BinaryCursor.prototype.deserialize = function(sc) {
 
   this.sc = sc;
 
-  if (version != 15) {
+  if (version != 16) {
     throw 'Unsupported serialization format version: ' + version;
   }
 
@@ -431,7 +443,7 @@ BinaryCursor.prototype.deserialize = function(sc) {
 
 
   var dependencies = this.at(deps_offset).times(deps_number,
-      function(cursor) { return [cursor.str(), cursor.str()]; });
+      function(cursor) { return [cursor.str32(), cursor.str32()]; });
 
   var deps = [sc];
   this.sc.deps = deps;
@@ -456,7 +468,7 @@ BinaryCursor.prototype.deserialize = function(sc) {
 
   var STables = this.at(STables_offset).times(STables_number,
       function(cursor) {
-        return [cursor.str(), cursor.at(STables_data + cursor.I32()), cursor.at(STables_data + cursor.I32())];
+        return [cursor.str32(), cursor.at(STables_data + cursor.I32()), cursor.at(STables_data + cursor.I32())];
       });
 
 
@@ -631,6 +643,18 @@ BinaryCursor.prototype.I32 = function() {
   return ret;
 };
 
+BinaryCursor.prototype.U8 = function() {
+  var ret = this.buffer.readUInt8(this.offset);
+  this.offset += 1;
+  return ret;
+};
+
+BinaryCursor.prototype.U16 = function() {
+  var ret = this.buffer.readUInt16LE(this.offset);
+  this.offset += 2;
+  return ret;
+};
+
 BinaryCursor.prototype.U32 = function() {
   var ret = this.buffer.readUInt32LE(this.offset);
   this.offset += 4;
@@ -682,9 +706,24 @@ BinaryCursor.prototype.flag64 = function() {
   return low;
 };
 
+var STRING_HEAP_LOC_PACKED_OVERFLOW = 0x00008000;
+var STRING_HEAP_LOC_PACKED_SHIFT    = 16;
 
 /** Read a String */
 BinaryCursor.prototype.str = function() {
+  var offset = this.U16();
+  if (offset & STRING_HEAP_LOC_PACKED_OVERFLOW) {
+      offset ^= STRING_HEAP_LOC_PACKED_OVERFLOW;
+      offset <<= STRING_HEAP_LOC_PACKED_SHIFT;
+      offset |= this.U16();
+  }
+  if (!this.sh.hasOwnProperty(offset)) {
+    throw "can't read str: " + offset;
+  }
+  return this.sh[offset];
+};
+
+BinaryCursor.prototype.str32 = function() {
   return this.sh[this.I32()];
 };
 
