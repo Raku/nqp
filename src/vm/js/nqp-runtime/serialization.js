@@ -1,5 +1,6 @@
 var Hash = require('./hash.js');
 var CodeRef = require('./code-ref.js');
+var NQPInt = require('./nqp-int.js');
 
 var op = {};
 exports.op = op;
@@ -266,9 +267,11 @@ BinaryWriteCursor.prototype.ref = function(ref) {
 //      /* These are re-computed each time. */
 //      discrim = REFVAR_VM_NULL;
 //  }
-//  else if (ref.st.WHAT == tc.gc.BOOTInt) {
-//      discrim = REFVAR_VM_INT;
-//  }
+  else if (ref instanceof NQPInt) {
+    // HACK
+    ref = ref.value;
+    discrim = REFVAR_VM_NUM;
+  }
   else if (typeof ref == 'number') {
     discrim = REFVAR_VM_NUM;
   }
@@ -324,7 +327,7 @@ BinaryWriteCursor.prototype.ref = function(ref) {
       this.objRef(ref);
       break;
     case REFVAR_VM_INT:
-      this.I64(ref);
+      this.varint(ref.value);
       break;
     case REFVAR_VM_NUM:
       this.double(ref);
