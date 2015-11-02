@@ -606,7 +606,7 @@ class HLL::Compiler does HLL::Backend::Default {
 				# Treat \r\n as a single logical newline. Note that NFG
                 # implementations, we should check it really is a lone \r,
                 # not the first bit of a \r\n grapheme.
-				if nqp::iseq_i($ord, 13) && nqp::substr($s, $jpos - 1, 1) eq '\r' &&
+				if nqp::iseq_i($ord, 13) && nqp::substr($s, $jpos - 1, 1) eq "\r" &&
                    $jpos < $eos && nqp::iseq_i(nqp::ord($s, $jpos), 10)
 				{
 					$jpos := nqp::add_i($jpos, 1);
