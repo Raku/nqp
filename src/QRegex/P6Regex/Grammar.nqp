@@ -76,7 +76,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     }
 
     method throw_unessary_upto_inf() {
-        self.panic('Unecessary use of "** ^*" qunatifier. Did you mean to use the "*" quantifier');
+        self.panic('Unecessary use of "** ^*" quantifier. Did you mean to use the "*" quantifier');
     }
 
     method throw_solitary_quantifier() {
