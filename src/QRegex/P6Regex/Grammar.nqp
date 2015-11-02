@@ -75,6 +75,10 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         self.panic('Spaces not allowed in bare range.');
     }
 
+    method throw_unessary_upto_inf() {
+        self.panic('Unecessary use of "** ^*" qunatifier. Did you mean to use the "*" quantifier');
+    }
+
     method throw_solitary_quantifier() {
         self.panic('Quantifier quantifies nothing.');
     }
@@ -254,20 +258,24 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         <.obs: '{N,M} as general quantifier', '** N..M (or ** N..*)'>
     }
     token quantifier:sym<**> {
+        # 10 | 1..10 | 1^..10 | 1^..^10 | 1..^10 | ^10 | 1..* | 1^..*
         <sym> <.normspace>? <backmod> <.normspace>?
         [
-        | $<min>='^' [ <max=.integer> | $<max>='*' ]
         | <min=.integer> \s+ '..' <.throw_spaces_in_bare_range>
-        | <min=.integer>
-          [ '..'
-            [
-            | <max=.integer> {
-                $/.CURSOR.panic("Negative numbers are not allowed as quantifiers") if $<max>.Str < 0;
-              }
-            | $<max>=['*']
-            | <.throw_malformed_range>
-            ]
-          ]?
+        | '^' '*' <.throw_unecessary_upto_inf>
+        | $<upto>='^' <max=.integer>
+        | [
+          | <min=.integer> $<from>='^'?
+            [ '..'
+              [
+              | $<upto>='^'? <max=.integer> {
+                  $/.CURSOR.panic("Negative numbers are not allowed as quantifiers") if $<max>.Str < 0;
+                }
+              | $<max>=['*']
+              | <.throw_malformed_range>
+              ]
+            ]?
+          ]
           { $/.CURSOR.panic("Negative numbers are not allowed as quantifiers") if $<min>.Str < 0 }
         | <?[{]> <codeblock>
         ]

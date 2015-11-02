@@ -161,12 +161,27 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             );
         }
         else {
-            my $min := $<min>.ast;
-            if $<min>.Str eq '^' { $min := 0 }
+            my $min := 0;
+            if $<min> { $min := $<min>.ast; }
+
             my $max := -1;
-            if ! $<max> { $max := $min }
+            my $upto := $<upto>;
+
+            if $<from> eq '^' { $min++ }
+
+            if ! $<max> {
+                if $<from> eq '^' {
+                    $max := '*'
+                }
+                else {
+                    $max := $min
+                }
+            }
             elsif $<max> ne '*' {
                 $max := $<max>.ast;
+                if $<upto> eq '^' {
+                    $max--;
+                }
                 $/.CURSOR.panic("Empty range") if $min > $max;
             }
             $qast := QAST::Regex.new( :rxtype<quant>, :min($min), :max($max), :node($/) );
