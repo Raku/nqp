@@ -76,7 +76,9 @@ my $tests := 0;
 for @files -> $fn {
     say("# file: $fn");
     my $contents := slurp('t/qregex/' ~ $fn);
-    my @lines    := nqp::split("\n", $contents);
+    my @lines    := nqp::index($contents, "\r\n") >= 0
+        ?? nqp::split("\r\n", $contents)
+        !! nqp::split("\n", $contents);
 
     for @lines -> $l {
         my $m := $l ~~ /'# todo ' .*? ':pge<' (.*?) '>'/;
