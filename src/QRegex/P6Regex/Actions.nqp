@@ -55,6 +55,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     method termish($/) {
         my $qast := QAST::Regex.new( :rxtype<concat>, :node($/) );
         my $lastlit := 0;
+        my $last_noun;
         for $<noun> {
             my $ast := $_.ast;
             if $ast {
@@ -63,6 +64,11 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                         && $lastlit.subtype eq $ast.subtype {
                     $lastlit[0] := $lastlit[0] ~ $ast[0];
                 }
+                elsif $last_noun && $last_noun eq '\r' && $_ eq '\n' &&
+                        !$ast.negate && !$last_noun.ast.negate {
+                    $qast.pop();
+                    $qast.push(QAST::Regex.new( :rxtype<literal>, "\r\n" ));
+                }
                 else {
                     $qast.push($_.ast);
                     $lastlit := $ast.rxtype eq 'literal' 
@@ -70,6 +76,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                                   ?? $ast !! 0;
                 }
             }
+            $last_noun := $_;
         }
         make $qast;
     }
