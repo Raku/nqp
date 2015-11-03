@@ -5,7 +5,7 @@ var NQPInt = require('./nqp-int.js');
 var op = {};
 exports.op = op;
 
-var CURRENT_VERSION = 15;
+var CURRENT_VERSION = 16;
 var OBJECTS_TABLE_ENTRY_SC_MASK = 0x7FF;
 var OBJECTS_TABLE_ENTRY_SC_IDX_MASK = 0x000FFFFF;
 var OBJECTS_TABLE_ENTRY_SC_IDX_MAX = 0x000FFFFF;
@@ -13,6 +13,12 @@ var OBJECTS_TABLE_ENTRY_SC_MAX = 0x7FE;
 var OBJECTS_TABLE_ENTRY_SC_SHIFT = 20;
 var OBJECTS_TABLE_ENTRY_SC_OVERFLOW = 0x7FF;
 var OBJECTS_TABLE_ENTRY_IS_CONCRETE = 0x80000000;
+
+var STRING_HEAP_LOC_MAX             = 0x7FFFFFFF;
+var STRING_HEAP_LOC_PACKED_MAX      = 0x00007FFF;
+var STRING_HEAP_LOC_PACKED_OVERFLOW = 0x00008000;
+var STRING_HEAP_LOC_PACKED_LOW_MASK = 0x0000FFFF;
+var STRING_HEAP_LOC_PACKED_SHIFT    = 16
 
 /* Possible reference types we can serialize. */
 var REFVAR_NULL = 1;
@@ -47,6 +53,23 @@ BinaryWriteCursor.prototype.str = function(str) {
     console.trace('undefined string');
     str = '?';
   }
+
+  var heap_loc = this.writer.stringIndex(str);
+
+  if (!(heap_loc >= 0 && heap_loc <= STRING_HEAP_LOC_MAX)) {
+      throw "Serialization error: string offset " + heap_loc + "can't be serialized";
+  }
+
+  if (heap_loc <= STRING_HEAP_LOC_PACKED_MAX) {
+    this.U16(heap_loc);
+  } else {
+    this.U16((heap_loc >> STRING_HEAP_LOC_PACKED_SHIFT)
+        | STRING_HEAP_LOC_PACKED_OVERFLOW);
+    this.U16(heap_loc & STRING_HEAP_LOC_PACKED_LOW_MASK);
+  }
+};
+
+BinaryWriteCursor.prototype.str32 = function(str) {
   this.I32(this.writer.stringIndex(str));
 };
 
@@ -122,6 +145,12 @@ BinaryWriteCursor.prototype.U8 = function(value) {
   this.growToHold(1);
   this.buffer.writeUInt8(value, this.offset);
   this.offset += 1;
+};
+
+BinaryWriteCursor.prototype.U16 = function(value) {
+  this.growToHold(2);
+  this.buffer.writeUInt16LE(value, this.offset);
+  this.offset += 2;
 };
 
 
@@ -340,7 +369,7 @@ BinaryWriteCursor.prototype.ref = function(ref) {
     //      case REFVAR_VM_ARR_STR:
     //          ref.st.REPR.serialize(tc, this, ref);
     case REFVAR_VM_ARR_VAR:
-      this.I32(ref.length);
+      this.varint(ref.length);
       for (var i = 0; i < ref.length; i++) {
         this.ref(ref[i]);
       }
@@ -370,7 +399,7 @@ BinaryWriteCursor.prototype.ref = function(ref) {
 SerializationWriter.prototype.serializeSTable = function(st) {
 
   /* Make STables table entry. */
-  this.stables.str(st.REPR.constructor.name);
+  this.stables.str32(st.REPR.constructor.name);
   this.stables.I32(this.stables_data.offset);
 
   /* Write HOW, WHAT and WHO. */
@@ -397,26 +426,59 @@ SerializationWriter.prototype.serializeSTable = function(st) {
 
   /* Type check cache. */
   var tcl = !st.type_check_cache ? 0 : st.type_check_cache.length;
-  this.stables_data.I64(tcl);
+  this.stables_data.varint(tcl);
   for (var i = 0; i < tcl; i++) {
     this.stables_data.ref(st.type_check_cache[i]);
   }
 
-  /* Mode flags. */
-  //    writeInt(st.ModeFlags);
-  this.stables_data.I64(0);
+
+  /* Mode flags.
+     These are stored as MVMuint16, but currently only the bottom 6 bits are
+     used. Whilst we could store these as 2 bytes, we don't actually gain any
+     future-proofing from that, because if we start assigning meaning to
+     currently unused bits, then we have to bump the serialisation version
+     *anyway*. If we didn't, older readers would encounter files with the
+     newly used bits, but ignore whatever semantics those bits were meant to
+     convey, and hence show buggy behaviour. And if we're bumping the
+     serialisation version, then we can increase the storage size.  */
+
+  /* TODO */
+  this.stables_data.U8(0);
 
   /* Boolification spec. */
-  this.stables_data.I64(0);
+  /* As this only needs 4 bits, also use the same byte to store various
+     NULL/not-NULL flag bits. */
+
+  /*TODO serialize boolifcation spec*/
+  var flags;
+
+  if (false) {
+      //if (st->boolification_spec->mode >= 0xF) {
+      //    MVM_exception_throw_adhoc(tc,
+      //                          "Serialization error: boolification spec mode %u out of range and can't be serialized",
+      //                              st->boolification_spec->mode);
+      //}
+      //flags = st->boolification_spec->mode;
+  } else {
+      flags = 0xF;
+  }
+  /*
+  if (st->container_spec != NULL)
+      flags |= STABLE_HAS_CONTAINER_SPEC;
+  if (st->invocation_spec != NULL)
+      flags |= STABLE_HAS_INVOCATION_SPEC;
+  if (st->hll_owner != NULL)
+      flags |= STABLE_HAS_HLL_OWNER;
+  */
+
+  /* Boolification spec. */
+  this.stables_data.U8(flags);
 
   /*writeInt(st.BoolificationSpec == null ? 0 : 1);
     if (st.BoolificationSpec != null) {
         writeInt(st.BoolificationSpec.Mode);
         writeRef(st.BoolificationSpec.Method);
     }*/
-
-  /* Container spec. */
-  this.stables_data.I64(0);
 
   /*this.stables_data.writeInt(st.ContainerSpec == null ? 0 : 1);
     if (st.ContainerSpec != null) {
@@ -425,7 +487,6 @@ SerializationWriter.prototype.serializeSTable = function(st) {
     }*/
 
   /* Invocation spec. */
-  this.stables_data.I64(0);
 
   /*writeInt(st.InvocationSpec == null ? 0 : 1);
     if (st.InvocationSpec != null) {
@@ -444,7 +505,8 @@ SerializationWriter.prototype.serializeSTable = function(st) {
 
   /* TODO - HLL owner */
 
-  this.stables_data.str(null);
+  //this.stables_data.str(null);
+
   /* Location of REPR data. */
   this.stables.I32(this.stables_data.offset);
 
@@ -555,8 +617,8 @@ SerializationWriter.prototype.getSCId = function(sc) {
   /* Otherwise, need to add it to our dependencies list. */
   this.dependentSCs.push(sc);
 
-  this.deps.str(sc.handle);
-  this.deps.str(sc.description);
+  this.deps.str32(sc.handle);
+  this.deps.str32(sc.description);
 
   return this.dependentSCs.length; /* Deliberately index + 1. */
 };
