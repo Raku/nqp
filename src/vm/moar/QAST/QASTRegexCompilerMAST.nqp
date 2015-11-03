@@ -426,14 +426,6 @@ class QAST::MASTRegexCompiler {
             nqp::push(@ins, op('const_i64', $i0, ival($cclass)));
             nqp::push(@ins, op('iscclass', $i0, $i0, %!reg<tgt>, %!reg<pos>));
             nqp::push(@ins, op($testop, $i0, %!reg<fail>));
-
-            if $cclass == nqp::const::CCLASS_NEWLINE && $node.subtype ne 'zerowidth' {
-                my $s0 := $!regalloc.fresh_s();
-                nqp::push(@ins, op('const_s', $s0, sval("\r\n")));
-                nqp::push(@ins, op('eqat_s', $i0, %!reg<tgt>, $s0, %!reg<pos>));
-                nqp::push(@ins, op('add_i', %!reg<pos>, %!reg<pos>, $i0));
-                $!regalloc.release_register($s0, $MVM_reg_str);
-            }
         }
 
         nqp::push(@ins, op('inc_i', %!reg<pos>)) unless $node.subtype eq 'zerowidth';
