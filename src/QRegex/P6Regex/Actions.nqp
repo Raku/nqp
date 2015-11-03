@@ -613,6 +613,11 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         my int $i := 1;
         my int $n := nqp::elems($clist);
         while $i < $n {
+	    unless ~$clist[$i]<sign> {
+		my $curse := $clist[$i]<sign>.CURSOR;
+		$curse."!clear_highwater"();
+		$curse.panic('Missing + or - between character class elements')
+	    }
             my $ast := $clist[$i].ast;
             if $ast.negate || $ast.rxtype eq 'cclass' && ~$ast.node le 'Z' {
                 $ast.subtype('zerowidth');
