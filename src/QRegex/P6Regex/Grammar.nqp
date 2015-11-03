@@ -75,7 +75,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         self.panic('Spaces not allowed in bare range.');
     }
 
-    method throw_unessary_upto_inf() {
+    method throw_unecessary_upto_inf() {
         self.panic('Unecessary use of "** ^*" quantifier. Did you mean to use the "*" quantifier');
     }
 
@@ -265,8 +265,12 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         | '^' '*' <.throw_unecessary_upto_inf>
         | $<upto>='^' <max=.integer>
         | [
-          | <min=.integer> $<from>='^'?
-            [ '..'
+          | <min=.integer>
+            [
+              [
+              | $<from>='^' [ '..' | <.throw_malformed_range> ]
+              | '..'
+              ]
               [
               | $<upto>='^'? <max=.integer> {
                   $/.CURSOR.panic("Negative numbers are not allowed as quantifiers") if $<max>.Str < 0;

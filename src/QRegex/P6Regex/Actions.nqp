@@ -170,12 +170,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             if $<from> eq '^' { $min++ }
 
             if ! $<max> {
-                if $<from> eq '^' {
-                    $max := '*'
-                }
-                else {
-                    $max := $min
-                }
+                $max := $min
             }
             elsif $<max> ne '*' {
                 $max := $<max>.ast;
