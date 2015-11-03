@@ -11,12 +11,12 @@ class QRegex::P6Regex::World is HLL::World {
         # Tag it as a static code ref and add it to the root code refs set.
         nqp::markcodestatic($dummy);
         self.add_root_code_ref($dummy, $ast);
-        
+
         # Create code object.
         my $code_obj := nqp::create(NQPRegex);
         nqp::bindattr($code_obj, NQPRegex, '$!do', $dummy);
         my $slot := self.add_object($code_obj);
-            
+
         # Add fixup of the code object and the $!do attribute.
         my $fixups := QAST::Stmt.new();
         $fixups.push(QAST::Op.new(
@@ -60,10 +60,10 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     }
 
     method throw_unspace($char) {
-        self.panic: "No unspace allowed in regex; " ~ 
-            " if you meant to match the literal character," ~ 
-            " please enclose in single quotes ('" 
-            ~ $char ~ "') or use a backslashed form like \\x" 
+        self.panic: "No unspace allowed in regex; " ~
+            " if you meant to match the literal character," ~
+            " please enclose in single quotes ('"
+            ~ $char ~ "') or use a backslashed form like \\x"
             ~ nqp::sprintf('%02x', [nqp::ord($char)]);
     }
 
@@ -73,6 +73,10 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     method throw_spaces_in_bare_range() {
         self.panic('Spaces not allowed in bare range.');
+    }
+
+    method throw_unecessary_upto_inf() {
+        self.panic('Unecessary use of "** ^*" quantifier. Did you mean to use the "*" quantifier');
     }
 
     method throw_solitary_quantifier() {
@@ -145,7 +149,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         || <.throw_regex_not_terminated>
         ]
     }
-    
+
     regex infixstopper {
         :dba('infix stopper')
         [
@@ -154,7 +158,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         | <?rxstopper>
         ]
     }
-    
+
     token rxstopper { $ }
 
     # XXX Eventually squish termseq and termish and
@@ -220,7 +224,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         :my $*SIGOK  := 0;
         <quantified_atom>
     }
-    
+
     token atom {
         # :dba('regex atom')
         [
@@ -254,19 +258,28 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         <.obs: '{N,M} as general quantifier', '** N..M (or ** N..*)'>
     }
     token quantifier:sym<**> {
+        # 10 | 1..10 | 1^..10 | 1^..^10 | 1..^10 | ^10 | 1..* | 1^..*
         <sym> <.normspace>? <backmod> <.normspace>?
         [
         | <min=.integer> \s+ '..' <.throw_spaces_in_bare_range>
-        | <min=.integer>
-          [ '..'
+        | '^' '*' <.throw_unecessary_upto_inf>
+        | $<upto>='^' <max=.integer>
+        | [
+          | <min=.integer>
             [
-            | <max=.integer> {
-                $/.CURSOR.panic("Negative numbers are not allowed as quantifiers") if $<max>.Str < 0;
-              }
-            | $<max>=['*']
-            | <.throw_malformed_range>
-            ]
-          ]?
+              [
+              | $<from>='^' [ '..' | <.throw_malformed_range> ]
+              | '..'
+              ]
+              [
+              | $<upto>='^'? <max=.integer> {
+                  $/.CURSOR.panic("Negative numbers are not allowed as quantifiers") if $<max>.Str < 0;
+                }
+              | $<max>=['*']
+              | <.throw_malformed_range>
+              ]
+            ]?
+          ]
           { $/.CURSOR.panic("Negative numbers are not allowed as quantifiers") if $<min>.Str < 0 }
         | <?[{]> <codeblock>
         ]
