@@ -128,10 +128,22 @@ op.setencoding = function(fh, encoding) {
 };
 
 op.setinputlinesep = function(fh, sep) {
-  fh.sep = sep;
+  fh.seps = [sep];
+};
+
+op.setinputlineseps = function(fh, seps) {
+  fh.seps = seps;
 };
 
 op.readlinefh = function(fh) {
+  return readline(fh, false);
+};
+
+op.readlinechompfh = function(fh) {
+  return readline(fh, true);
+};
+
+function readline(fh, chomp) {
   var line = '';
   var buffer = new Buffer(16);
   var starting = fs.seekSync(fh.fd, 0, 1);
@@ -147,24 +159,43 @@ op.readlinefh = function(fh) {
     var newline;
     // TODO think/ask about a "" sep
     var offset;
-    if (fh.sep) {
-      newline = string.indexOf(fh.sep);
-      if (newline != -1) {
-        newline += fh.sep.length - 1;
+    var sep;
+    var newline = -1;
+    if (fh.seps) {
+      for (var i=0; i < fh.seps.length; i++) {
+        var offset = string.indexOf(fh.seps[i]);
+        if (offset != -1 && (newline == -1 || offset < newline)) {
+          newline = offset;
+          sep = fh.seps[i];
+        }
       }
+
     } else {
       var cr = string.indexOf('\r');
       var nl = string.indexOf('\n');
-      newline = (cr != -1 ? (cr < nl ? (cr + 1 == nl ? nl : cr) : nl) : nl);
+      if (cr != -1 && cr < nl) {
+        if (cr < nl) {
+          newline = cr;
+          if (cr + 1 == nl) {
+            sep = "\r\n";
+          } else {
+            sep = "\r";
+          }
+        }
+      } else {
+        newline = nl;
+        sep = "\n";
+      }
     }
 
     if (newline != -1) {
-      var up_to_newline = string.slice(0, newline + 1);
+      var up_to_newline = string.slice(0, newline);
       // THINK ABOUT decoding and encoding might give a different offset
 
       fs.seekSync(fh.fd,
-          Buffer.byteLength(up_to_newline, fh.encoding) + starting, 0);
-      return up_to_newline;
+          Buffer.byteLength(up_to_newline + sep, fh.encoding) + starting, 0);
+
+      return (chomp ? up_to_newline : up_to_newline + sep);
     }
   }
 
