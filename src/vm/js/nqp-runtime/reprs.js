@@ -506,11 +506,13 @@ P6int.prototype.create_obj_constructor = function(STable) {
 };
 
 P6int.prototype.compose = function(STable, repr_info_hash) {
-  // TODO bits
-  if (repr_info_hash.content.integer && !(repr_info_hash.content.integer.content.bits instanceof NQPInt)) {
-    throw "bits to P6int.compose must be a native int";
-    this.bits = repr_info_hash.content.integer.content.bits.value;
-  }
+  if (repr_info_hash.content.integer) { 
+    if (repr_info_hash.content.integer.content.bits instanceof NQPInt) {
+      this.bits = repr_info_hash.content.integer.content.bits.value;
+    } else {
+      throw "bits to P6int.compose must be a native int";
+    }
+  } 
 };
 
 P6int.name = 'P6int';
