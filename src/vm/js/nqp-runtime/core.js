@@ -557,3 +557,54 @@ op.isint = function(value) {
   return (value instanceof NQPInt) ? 1 : 0;
 };
 
+function renameEncoding(encoding) {
+  return encoding == 'utf16' ? 'utf16le' : encoding;
+}
+
+function byteSize(buf) {
+  if (buf.bytes) return buf.bytes;
+
+  var bits = buf._STable.REPR.type._STable.REPR.bits;
+
+  if (bits % 8) {
+    throw "only buffer sizes that are a multiple of 8 are supported";
+  }
+
+  return bits / 8;
+}
+
+// HACK should be using buf instead of creating a new one
+// TODO needs to be fixed after an Array handling refactor
+
+op.encode = function(str, encoding_, buf) {
+  var encoding = renameEncoding(encoding_);
+
+  var elementSize = byteSize(buf);
+
+  var ret = [];
+  ret.bytes = elementSize;
+
+  var buffer = new Buffer(str, encoding);
+
+  var offset = 0;
+  for (var i=0; i < buffer.length / elementSize; i++) {
+    ret[i] = buffer.readIntLE(offset, elementSize);
+    offset += elementSize;
+  }
+  return ret;
+};
+
+op.decode = function(buf, encoding_) {
+  var encoding = renameEncoding(encoding_);
+  var elementSize = byteSize(buf);
+
+  var buffer = new Buffer(buf.length * elementSize);
+
+  var offset = 0;
+  for (var i=0; i < buf.length; i++) {
+    buffer.writeIntLE(buf[i], offset, elementSize);
+    offset += elementSize;
+  }
+
+  return buffer.toString(encoding);
+};

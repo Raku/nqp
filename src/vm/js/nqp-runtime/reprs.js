@@ -1,5 +1,6 @@
 var sixmodel = require('./sixmodel.js');
 var Hash = require('./hash.js');
+var NQPInt = require('./nqp-int.js');
 
 function basic_type_object_for(HOW) {
   var st = new sixmodel.STable(this, HOW);
@@ -506,6 +507,10 @@ P6int.prototype.create_obj_constructor = function(STable) {
 
 P6int.prototype.compose = function(STable, repr_info_hash) {
   // TODO bits
+  if (repr_info_hash.content.integer && !(repr_info_hash.content.integer.content.bits instanceof NQPInt)) {
+    throw "bits to P6int.compose must be a native int";
+    this.bits = repr_info_hash.content.integer.content.bits.value;
+  }
 };
 
 P6int.name = 'P6int';
@@ -622,6 +627,15 @@ VMArray.prototype.deserialize_array = function(object, data) {
   var size = data.varint();
   for (var i = 0; i < size; i++) {
     object[i] = data.variant();
+  }
+};
+
+// HACK
+VMArray.prototype.allocate = basic_allocate;
+
+VMArray.prototype.compose = function(STable, repr_info_hash) {
+  if (repr_info_hash.content.array) {
+    this.type = repr_info_hash.content.array.content.type;
   }
 };
 

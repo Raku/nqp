@@ -610,6 +610,9 @@ class QAST::OperationsJS {
 
     add_simple_op('isinvokable', $T_INT, [$T_OBJ]);
 
+    add_simple_op('encode', $T_OBJ, [$T_STR, $T_STR, $T_OBJ], :sideffects);
+    add_simple_op('decode', $T_STR, [$T_OBJ, $T_STR]);
+
     # Stubs
     add_simple_op('where', $T_INT, [$T_OBJ]);
     add_simple_op('can', $T_INT, [$T_OBJ, $T_STR]);
