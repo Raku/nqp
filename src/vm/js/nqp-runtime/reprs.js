@@ -653,7 +653,7 @@ P6bigint.prototype.type_object_for = function(HOW) {
   });
 
   this._STable.addInternalMethod('$$get_int', function() {
-    return this.value.toNumber();
+    return this.value.toNumber()|0;
   });
 
   this._STable.addInternalMethod('$$set_bignum', function(value) {

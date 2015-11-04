@@ -1,5 +1,5 @@
 function NQPInt(value) {
-  this.value = value;
+  this.value = value|0;
 }
 
 NQPInt.prototype.Int = function(ctx) {

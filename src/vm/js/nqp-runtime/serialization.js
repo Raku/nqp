@@ -1,6 +1,7 @@
 var Hash = require('./hash.js');
 var CodeRef = require('./code-ref.js');
 var NQPInt = require('./nqp-int.js');
+var Int64 = require('node-int64');
 
 var op = {};
 exports.op = op;
@@ -111,7 +112,8 @@ BinaryWriteCursor.prototype.varint = function(value) {
     this.I64(value);
   } else {
     var rest = storage_needed - 1;
-    var nybble = value >> 8 * rest;
+    var nybble = rest == 4 ? 0 : value >> 8 * rest;
+
     /* All the other high bits should be the same as the top bit of the
            nybble we keep. Or we have a bug.  */
 
@@ -119,8 +121,12 @@ BinaryWriteCursor.prototype.varint = function(value) {
 
     this.I8((rest << 4) | (nybble & 0xF));
 
+    var tmp = new Int64(value).toBuffer();
     this.growToHold(rest);
-    this.buffer.writeIntLE(value, this.offset, rest, true);
+    for (var i = 0; i < rest; i++) {
+        this.buffer[this.offset+i] = tmp[8-(i+1)];
+    }
+
     this.offset += rest;
   }
 };
@@ -297,9 +303,7 @@ BinaryWriteCursor.prototype.ref = function(ref) {
 //      discrim = REFVAR_VM_NULL;
 //  }
   else if (ref instanceof NQPInt) {
-    // HACK
-    ref = ref.value;
-    discrim = REFVAR_VM_NUM;
+    discrim = REFVAR_VM_INT;
   }
   else if (typeof ref == 'number') {
     discrim = REFVAR_VM_NUM;

@@ -232,7 +232,7 @@ BinaryCursor.prototype.varint = function() {
     return result;
   }
 
-  result = first << 8 * need;
+  result = (first & 0x0F) << 8 * need;
 
   var shift_places = 0;
   for (var i = 0; i < need; i++) {
@@ -240,8 +240,11 @@ BinaryCursor.prototype.varint = function() {
     result |= (byte << shift_places);
     shift_places += 8;
   }
-  result = result << (64 - 4 - 8 * need);
-  result = result >> (64 - 4 - 8 * need);
+
+  if (need < 4) {
+      result = result << (64 - 4 - 8 * need);
+      result = result >> (64 - 4 - 8 * need);
+  }
 
   return result;
 };
