@@ -1,7 +1,8 @@
 var op = {};
 exports.op = op;
 
-exports.NQPInt = require("./nqp-int.js");
+var NQPInt = require("./nqp-int.js");
+exports.NQPInt = NQPInt;
 
 function load_ops(module) {
   for (var name in module.op) {
@@ -414,6 +415,14 @@ exports.NYI = function(msg) {
     return null;
 };
 
+/* HACK - needed until we handle types on attributes */
+exports.intAttrHack = function(attrValue) {
+  if (attrValue instanceof exports.NQPInt) {
+    return attrValue.value;
+  } else {
+    return attrValue;
+  }
+};
 
 exports.args = function(module) {
   return require.main === module ? process.argv.slice(1) : [];

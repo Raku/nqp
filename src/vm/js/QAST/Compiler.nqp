@@ -451,6 +451,11 @@ class QAST::OperationsJS {
         );
     }
 
+    # HACK - we need this until we handle types on attributes properly 
+    add_simple_op('getattr_i', $T_INT, [$T_OBJ, $T_OBJ, $T_STR], sub ($obj, $type, $attr) {
+        "nqp.intAttrHack($obj[$attr])"
+    });
+
     add_simple_op('attrinited', $T_BOOL, [$T_OBJ, $T_OBJ, $T_STR],
         sub ($obj, $type, $attr) {
             # TODO take second argument into account
