@@ -93,7 +93,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
             :rxtype('concat'),
             QAST::Regex.new(
                 :rxtype('quant'), :min(0), :max(1),
-                QAST::Regex.new( :rxtype('literal'), "\n" )
+                QAST::Regex.new( :rxtype('cclass'), :name<n> )
             ),
             QAST::Regex.new( :rxtype<anchor>, :subtype(%*RX<m> ?? 'eol' !! 'eos'), :node($/) )
         );
@@ -244,7 +244,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
             :rxtype('concat'),
             QAST::Regex.new(
                 :rxtype('quant'), :min(0), :max(1),
-                QAST::Regex.new( :rxtype('literal'), "\n" )
+                QAST::Regex.new( :rxtype('cclass'), :name<n> )
             ),
             QAST::Regex.new( :rxtype<anchor>, :subtype('eos'), :node($/) )
         );
