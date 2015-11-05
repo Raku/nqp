@@ -67,6 +67,15 @@ function injectMethod(proto, name, method) {
   };
 }
 
+STable.prototype.createTypeObject = function() {
+  var obj = new this.obj_constructor();
+  obj.type_object_ = 1;
+  obj.$$atkey = function(key) {
+    return null;
+  };
+  return obj;
+};
+
 STable.prototype.setMethodCache = function(method_cache) {
   // TODO delete old methods
   var proto = this.obj_constructor.prototype;

@@ -511,13 +511,10 @@ BinaryCursor.prototype.deserialize = function(sc) {
     if (objects[i].is_array) {
       sc.root_objects[i] = [];
     } else {
-      sc.root_objects[i] = new (STable_for_obj.obj_constructor)();
+      sc.root_objects[i] = objects[i].is_concrete
+        ? new (STable_for_obj.obj_constructor)()
+        : STable_for_obj.createTypeObject();
       sc.root_objects[i]._SC = sc;
-    }
-
-    if (!objects[i].is_concrete) {
-      // TODO think more about it
-      sc.root_objects[i].type_object_ = 1;
     }
   }
 

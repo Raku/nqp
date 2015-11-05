@@ -5,10 +5,10 @@ var NQPInt = require('./nqp-int.js');
 function basic_type_object_for(HOW) {
   var st = new sixmodel.STable(this, HOW);
   this._STable = st;
-  var obj = new st.obj_constructor();
 
+  var obj = st.createTypeObject();
   this._STable.WHAT = obj;
-  obj.type_object_ = 1;
+
   return obj;
 }
 
