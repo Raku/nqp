@@ -168,10 +168,10 @@ public class EvalServer {
                 } catch (ThreadDeath t) {
                     // swallowed exit
                 } catch (Throwable t) {
-                    System.setOut(orgOut);
-                    System.setErr(orgErr);
                     System.err.print("Error in socket connection:");
                     t.printStackTrace();
+                    System.setOut(orgOut);
+                    System.setErr(orgErr);
                 } finally {
                     System.setOut(orgOut);
                     System.setErr(orgErr);
