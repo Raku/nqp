@@ -2762,6 +2762,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         self.as_js($node.value, :$want);
     }
 
+    # Helps with register allocation on other backends
+    # We don't do allocate registers so just ignore that
+    multi method as_js(QAST::Stmt $node, :$want) {
+        self.as_js($node[0], :$want);
+    }
+
     multi method as_js(QAST::Stmts $node, :$want) {
         # for performance purposes we use the native js lexicals as much as possible, that means we need hacks for things that other backends can do easily with all the various ctx ops
         if self.is_ctxsave($node) {
