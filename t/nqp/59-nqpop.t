@@ -126,7 +126,7 @@ ok( nqp::not_i(0) == 1, 'nqp::not_i');
 ok( nqp::not_i(1) == 0, 'nqp::not_i');
 ok( nqp::not_i(-1) == 0, 'nqp::not_i');
 
-ok(nqp::escape("\b \n \r \f \t \" \\ \e foo") eq '\\b \\n \\r \\f \\t \\" \\\\ \e foo','nqp::escape');
+ok(nqp::escape("\b \n \r \f \t \" \r\n \\ \e foo") eq '\\b \\n \\r \\f \\t \\" \\r\\n \\\\ \e foo','nqp::escape');
 my $var := 'foo';
 ok(nqp::escape($var) eq 'foo','nqp::escape works with literal');
 
