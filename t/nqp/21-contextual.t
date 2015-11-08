@@ -2,7 +2,7 @@
 
 # Tests for contextual variables
 
-plan(13);
+plan(14);
 
 sub foo() { $*VAR }
 
@@ -75,3 +75,9 @@ ok($passed_value eq "default value", "setting dynamic variables using signatures
 bind_using_signature_with_default("not default value");
 ok($passed_value eq "not default value", "setting dynamic variables using signatures with default values (passed argument)");
 
+sub bind_using_named(:$*signatured) {
+    internal();
+}
+
+bind_using_named(:signatured("secret value 2"));
+ok($passed_value eq "secret value 2", "setting dynamic variables using a named argument");
