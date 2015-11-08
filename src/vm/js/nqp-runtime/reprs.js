@@ -487,6 +487,7 @@ function P6int() {
 }
 
 P6int.prototype.flattened_default = 0;
+P6int.prototype.boxed_primitive = 1;
 
 P6int.prototype.basic_constructor = basic_constructor;
 P6int.prototype.basic_type_object_for = basic_type_object_for;
@@ -539,6 +540,8 @@ function P6num() {
 }
 
 P6num.name = 'P6int';
+P6num.prototype.boxed_primitive = 2;
+
 P6num.prototype.allocate = basic_allocate;
 P6num.prototype.basic_constructor = basic_constructor;
 P6num.prototype.create_obj_constructor = function(STable) {
@@ -567,6 +570,8 @@ module.exports.P6num = P6num;
 
 function P6str() {
 }
+
+P6str.prototype.boxed_primitive = 3;
 
 P6str.prototype.allocate = basic_allocate;
 P6str.prototype.basic_constructor = basic_constructor;

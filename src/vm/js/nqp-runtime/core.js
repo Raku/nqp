@@ -608,3 +608,7 @@ op.decode = function(buf, encoding_) {
 
   return buffer.toString(encoding);
 };
+
+op.objprimspec = function(obj) {
+  return (obj._STable && obj._STable.REPR.boxed_primitive ? obj._STable.REPR.boxed_primitive : 0);
+};
