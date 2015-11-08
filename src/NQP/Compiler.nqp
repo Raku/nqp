@@ -22,6 +22,7 @@ my @clo := $nqpcomp.commandline_options();
 @clo.push('parsetrace');
 @clo.push('setting=s');
 @clo.push('setting-path=s');
+@clo.push('custom-regex-lib=s');
 @clo.push('module-path=s');
 @clo.push('no-regex-lib');
 @clo.push('stable-sc');
