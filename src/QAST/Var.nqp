@@ -47,6 +47,6 @@ class QAST::Var is QAST::Node does QAST::Children {
     }
 
     method extra_children() {
-        $!default_or_value ?? [$!decl eq 'param' ?? 'default' !! 'value', [$!default_or_value]] !! [];
+        nqp::defined($!default_or_value) ?? [$!decl eq 'param' ?? 'default' !! 'value', [$!default_or_value]] !! [];
     }
 }
