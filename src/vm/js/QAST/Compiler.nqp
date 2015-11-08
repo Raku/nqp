@@ -2283,7 +2283,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     $slurpy := $_;
                 }
             } elsif $_.named {
-                $*BLOCK.add_js_lexical(self.mangle_name($_.name));
                 my $quoted := quote_string($_.named);
                 my $value := "_NAMED[$quoted]";
                 if $_.default {
@@ -2295,7 +2294,14 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 }
                 # TODO required named arguments and defaultless optional ones
 
-                @setup.push("{self.mangle_name($_.name)} = $value;\n");
+                if self.is_dynamic_var($_) {
+                    @setup.push("{$*CTX}[{quote_string($_.name)}] = $value;\n");
+                }
+                else {
+                    $*BLOCK.add_js_lexical(self.mangle_name($_.name));
+                    @setup.push("{self.mangle_name($_.name)} = $value;\n");
+                }
+
             } elsif self.is_dynamic_var($_) {
                my $tmp := self.unique_var('param');
                @sig.push($tmp);
