@@ -268,7 +268,7 @@ my module sprintf {
                      !! has_flag($/, 'space') ?? ' ' 
                      !! '';
             $float := nqp::abs_n($float);
-            $float := stringify-to-precision($float, $precision);
+            $float := stringify-to-precision($float, $precision) unless nqp::isnanorinf($float);
             pad-with-sign($sign, $float, $size, $pad);
         }
         sub scientific($float, $e, $precision, $size, $pad, $/) {
@@ -277,14 +277,16 @@ my module sprintf {
                      !! has_flag($/, 'space') ?? ' ' 
                      !! '';
             $float := nqp::abs_n($float);
-            my $exp := $float == 0.0 ?? 0 !! nqp::floor_n(nqp::log_n($float) / nqp::log_n(10));
-            $float := $float / nqp::pow_n(10, $exp);
-            $float := stringify-to-precision($float, $precision);
-            if $exp < 0 {
-                $exp := -$exp;
-                $float := $float ~ $e ~ '-' ~ ($exp < 10 ?? '0' !! '') ~ $exp;
-            } else {
-                $float := $float ~ $e ~ '+' ~ ($exp < 10 ?? '0' !! '') ~ $exp;
+            unless nqp::isnanorinf($float) {
+                my $exp := $float == 0.0 ?? 0 !! nqp::floor_n(nqp::log_n($float) / nqp::log_n(10));
+                $float := $float / nqp::pow_n(10, $exp);
+                $float := stringify-to-precision($float, $precision);
+                if $exp < 0 {
+                    $exp := -$exp;
+                    $float := $float ~ $e ~ '-' ~ ($exp < 10 ?? '0' !! '') ~ $exp;
+                } else {
+                    $float := $float ~ $e ~ '+' ~ ($exp < 10 ?? '0' !! '') ~ $exp;
+                }
             }
             pad-with-sign($sign, $float, $size, $pad);
         }
@@ -294,6 +296,8 @@ my module sprintf {
                      !! has_flag($/, 'space') ?? ' ' 
                      !! '';
             $float := nqp::abs_n($float);
+
+            return pad-with-sign($sign, $float, $size, $pad) if nqp::isnanorinf($float);
 
             my $exp := $float == 0.0 ?? 0 !! nqp::floor_n(nqp::log_n($float) / nqp::log_n(10));
 
