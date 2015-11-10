@@ -437,13 +437,14 @@ sub gen_moar {
     my %options  = @_;
 
     my $prefix     = $options{'prefix'} || cwd()."/install";
+    my $sdkroot    = $options{'sdkroot'} || '';
     my $gen_moar   = $options{'gen-moar'};
     my @opts       = @{ $options{'moar-option'} || [] };
     push @opts, "--optimize";
     my $startdir   = cwd();
     my $git_protocol = $options{'git-protocol'} || 'https';
 
-    my $moar_exe   = $options{'with-moar'} || "$prefix/bin/moar$exe";
+    my $moar_exe   = $options{'with-moar'} || File::Spec->catfile( $sdkroot, $prefix, 'bin', "moar$exe" );
     my $moar_have  = qx{ $moar_exe --version };
     if ($moar_have) {
         $moar_have = $moar_have =~ /version (\S+)/ ? $1 : undef;
