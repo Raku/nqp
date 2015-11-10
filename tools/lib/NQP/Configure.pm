@@ -443,8 +443,10 @@ sub gen_moar {
     push @opts, "--optimize";
     my $startdir   = cwd();
     my $git_protocol = $options{'git-protocol'} || 'https';
-
-    my $moar_exe   = $options{'with-moar'} || File::Spec->catfile( $sdkroot, $prefix, 'bin', "moar$exe" );
+    my $moar_exe   = $options{'with-moar'} || (
+        $sdkroot
+            ? File::Spec->catfile( $sdkroot, $prefix, 'bin', "moar$exe" )
+            : File::Spec->catfile( $prefix, 'bin', "moar$exe" ));
     my $moar_have  = qx{ $moar_exe --version };
     if ($moar_have) {
         $moar_have = $moar_have =~ /version (\S+)/ ? $1 : undef;
