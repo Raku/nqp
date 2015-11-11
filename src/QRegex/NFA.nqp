@@ -27,6 +27,8 @@ class QRegex::NFA {
     my $EDGE_CODEPOINT_IM     := 19;
     my $EDGE_CODEPOINT_IM_NEG := 20;
     my $EDGE_CODEPOINT_IM_LL  := 21;
+    my $EDGE_CHARRANGE_M      := 22;
+    my $EDGE_CHARRANGE_M_NEG  := 23;
 
     my $ACTIONS;
     my $nfadeb;
@@ -237,7 +239,9 @@ class QRegex::NFA {
     method charrange($node, $from, $to) {
         my $indent := dentin();
         note("$indent charrange $from -> $to") if $nfadeb;
-        my $base_edge := $EDGE_CHARRANGE;
+        my $base_edge := $node[0] eq 'ignoremark' || $node[0] eq 'ignorecase+ignoremark'
+            ?? $EDGE_CHARRANGE_M
+            !! $EDGE_CHARRANGE;
         my @to_add;
         if $node[0] eq 'ignorecase' || $node[0] eq 'ignorecase+ignoremark' {
             nqp::push(@to_add, nqp::ord(nqp::lc(nqp::chr($node[1].value))));
