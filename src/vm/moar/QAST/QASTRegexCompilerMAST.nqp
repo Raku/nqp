@@ -1147,6 +1147,21 @@ class QAST::MASTRegexCompiler {
                         %!reg<cur>, $p11, $sname, :result(%!reg<cstack>)));
                     $!regalloc.release_register($sname, $MVM_reg_str);
                     $captured := 1;
+
+                    # Record a mark on the bstack saying how many captures we
+                    # had before pushing this one, so we can remove it upon
+                    # backtracking (otherwise we end up keeping backtracked
+                    # over subrule captures around).
+                    my $bstack := %!reg<bstack>;
+                    merge_ins(@ins, [
+                        op('const_i64', $i11, ival($backlabel_index)),
+                        op('push_i', $bstack, $i11),
+                        op('push_i', $bstack, %!reg<negone>),
+                        op('push_i', $bstack, %!reg<negone>),
+                        op('elems', $i11, %!reg<cstack>),
+                        op('dec_i', $i11),
+                        op('push_i', $bstack, $i11)
+                    ]);
                 }
                 else {
                     nqp::push(@ins, op('findmeth', %!reg<method>, %!reg<cur>,
