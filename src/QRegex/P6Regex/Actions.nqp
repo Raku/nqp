@@ -679,27 +679,40 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                     my $node;
                     my $ord0;
                     my $ord1;
+                    sub non_synth_ord($chr) {
+                        my int $ord := nqp::ord($chr);
+                        if nqp::chr($ord) ne $chr {
+                            $/.CURSOR.panic("Cannot use $chr as a range endpoint, as it is not a single codepoint");
+                        }
+                        $ord
+                    }
                     if $_[0]<cclass_backslash> {
                         $node := $_[0]<cclass_backslash>.ast;
                         $/.CURSOR.panic("Illegal range endpoint in regex: " ~ ~$_)
                             if $node.rxtype ne 'literal' && $node.rxtype ne 'enumcharlist'
                                 || $node.negate || nqp::chars($node[0]) != 1;
-                        $ord0 := $node.ann('codepoint') // nqp::ord($node[0]);
-                        $ord0 := nqp::ordbaseat(nqp::chr($ord0), 0) if $RXm;
+                        $ord0 := $node.ann('codepoint') // ($RXm
+                            ?? nqp::ordbaseat($node[0], 0)
+                            !! non_synth_ord($node[0]));
                     }
                     else {
-                        $ord0 := $RXm ?? nqp::ordbaseat(~$_[0][0], 0) !! nqp::ord(~$_[0][0]);
+                        $ord0 := $RXm
+                            ?? nqp::ordbaseat(~$_[0][0], 0)
+                            !! non_synth_ord(~$_[0][0]);
                     }
                     if $_[1][0]<cclass_backslash> {
                         $node := $_[1][0]<cclass_backslash>.ast;
                         $/.CURSOR.panic("Illegal range endpoint in regex: " ~ ~$_)
                             if $node.rxtype ne 'literal' && $node.rxtype ne 'enumcharlist'
                                 || $node.negate || nqp::chars($node[0]) != 1;
-                        $ord1 := $node.ann('codepoint') // nqp::ord($node[0]);
-                        $ord1 := nqp::ordbaseat(nqp::chr($ord1), 0) if $RXm;
+                        $ord1 := $node.ann('codepoint') // ($RXm
+                            ?? nqp::ordbaseat($node[0], 0)
+                            !! non_synth_ord($node[0]));
                     }
                     else {
-                        $ord1 := $RXm ?? nqp::ordbaseat(~$_[1][0][0], 0) !! nqp::ord(~$_[1][0][0]);
+                        $ord1 := $RXm
+                            ?? nqp::ordbaseat(~$_[1][0][0], 0)
+                            !! non_synth_ord(~$_[1][0][0]);
                     }
                     $/.CURSOR.panic("Illegal reversed character range in regex: " ~ ~$_)
                         if $ord0 > $ord1;
