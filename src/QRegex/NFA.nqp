@@ -268,6 +268,14 @@ class QRegex::NFA {
         $result
     }
 
+    # Synthetics must be conveyed as strings; anything else can go as an
+    # integer
+    sub ord-or-str($str, $idx) {
+        my int $ord := nqp::ord($str, $idx);
+        my str $chr := nqp::substr($str, $idx, 1);
+        nqp::chr($ord) eq $chr ?? $ord !! $chr
+    }
+
     method literal($node, $from, $to) {
         my $indent := dentin();
         my int $litlen   := nqp::chars($node[0]) - 1;
@@ -279,11 +287,11 @@ class QRegex::NFA {
                 my str $litconst_uc := nqp::uc($node[0]);
                 while $i < $litlen {
                     $from := self.addedge($from, -1, $EDGE_CODEPOINT_I,
-                        [nqp::ord($litconst_lc, $i), nqp::ord($litconst_uc, $i)]);
+                        [ord-or-str($litconst_lc, $i), ord-or-str($litconst_uc, $i)]);
                     $i := $i + 1;
                 }
                 dentout(self.addedge($from, $to, $!LITEND ?? $EDGE_CODEPOINT_I !!  $EDGE_CODEPOINT_I_LL,
-                    [nqp::ord($litconst_lc, $i), nqp::ord($litconst_uc, $i)]));
+                    [ord-or-str($litconst_lc, $i), ord-or-str($litconst_uc, $i)]));
             }
             elsif $node.subtype eq 'ignoremark' {
                 my str $litconst := $node[0];
@@ -309,10 +317,11 @@ class QRegex::NFA {
             else {
                 my str $litconst := $node[0];
                 while $i < $litlen {
-                    $from := self.addedge($from, -1, $EDGE_CODEPOINT, nqp::ord($litconst, $i));
+                    $from := self.addedge($from, -1, $EDGE_CODEPOINT, ord-or-str($litconst, $i));
                     $i := $i + 1;
                 }
-                dentout(self.addedge($from, $to, $!LITEND ?? $EDGE_CODEPOINT !!  $EDGE_CODEPOINT_LL, nqp::ord($litconst, $i)));
+                dentout(self.addedge($from, $to, $!LITEND ?? $EDGE_CODEPOINT !!  $EDGE_CODEPOINT_LL,
+                    ord-or-str($litconst, $i)));
             }
         }
         else {
