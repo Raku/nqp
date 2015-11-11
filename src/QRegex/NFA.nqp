@@ -237,15 +237,31 @@ class QRegex::NFA {
     method charrange($node, $from, $to) {
         my $indent := dentin();
         note("$indent charrange $from -> $to") if $nfadeb;
-        if $node.subtype eq 'zerowidth' {
-            $from := self.addedge($from, -1, $EDGE_CHARRANGE + ?$node.negate,
-                [$node[1].value, $node[2].value]);
-            dentout(self.addedge($from, 0, $EDGE_FATE, 0));
+        my $base_edge := $EDGE_CHARRANGE;
+        my @to_add;
+        if $node[0] eq 'ignorecase' || $node[0] eq 'ignorecase+ignoremark' {
+            nqp::push(@to_add, nqp::ord(nqp::lc(nqp::chr($node[1].value))));
+            nqp::push(@to_add, nqp::ord(nqp::lc(nqp::chr($node[2].value))));
+            nqp::push(@to_add, nqp::ord(nqp::uc(nqp::chr($node[1].value))));
+            nqp::push(@to_add, nqp::ord(nqp::uc(nqp::chr($node[2].value))));
         }
         else {
-            dentout(self.addedge($from, $to, $EDGE_CHARRANGE + ?$node.negate,
-                [$node[1].value, $node[2].value]));
+            nqp::push(@to_add, $node[1].value);
+            nqp::push(@to_add, $node[2].value);
         }
+        my $result;
+        for @to_add -> $ord0, $ord1 {
+            if $node.subtype eq 'zerowidth' {
+                my $next := self.addedge($from, -1, $base_edge + ?$node.negate,
+                    [$ord0, $ord1]);
+                $result := dentout(self.addedge($next, 0, $EDGE_FATE, 0));
+            }
+            else {
+                $result := dentout(self.addedge($from, $to, $base_edge + ?$node.negate,
+                    [$ord0, $ord1]));
+            }
+        }
+        $result
     }
 
     method literal($node, $from, $to) {
