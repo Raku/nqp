@@ -489,15 +489,29 @@ role NQPCursorRole is export {
     method !BACKREF($name) {
         my $cur   := self."!cursor_start_cur"();
         my int $n := $!cstack ?? nqp::elems($!cstack) - 1 !! -1;
-        $n-- while $n >= 0 && (nqp::isnull(nqp::getattr($!cstack[$n], $?CLASS, '$!name')) ||
-                               nqp::getattr($!cstack[$n], $?CLASS, '$!name') ne $name);
-        if $n >= 0 {
-            my $subcur := $!cstack[$n];
-            my int $litlen := $subcur.pos - $subcur.from;
+        my $last;
+        my $first;
+        while $n >= 0 {
+            my $cs_cur  := $!cstack[$n];
+            my $cs_name := nqp::getattr($cs_cur, $?CLASS, '$!name');
+            if !nqp::isnull($cs_name) && $cs_name eq $name {
+                if nqp::isconcrete($last) {
+                    last unless $cs_cur.pos == $first.from;
+                }
+                else {
+                    $last := $cs_cur;
+                }
+                $first := $cs_cur;
+            }
+            $n--;
+        }
+        if nqp::isconcrete($last) {
+            my int $from   := $first.from;
+            my int $litlen := $last.pos - $from;
             my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
             $cur."!cursor_pass"($!pos + $litlen, '')
               if nqp::substr($target, $!pos, $litlen) 
-                   eq nqp::substr($target, $subcur.from, $litlen);
+                   eq nqp::substr($target, $from, $litlen);
         }
         $cur;
     }
