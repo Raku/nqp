@@ -516,6 +516,22 @@ role NQPCursorRole is export {
         $cur;
     }
 
+    method !BACKREF-LATEST-CAPTURE($name) {
+        my $cur   := self."!cursor_start_cur"();
+        my int $n := $!cstack ?? nqp::elems($!cstack) - 1 !! -1;
+        $n-- while $n >= 0 && (nqp::isnull(nqp::getattr($!cstack[$n], $?CLASS, '$!name')) ||
+                               nqp::getattr($!cstack[$n], $?CLASS, '$!name') ne $name);
+        if $n >= 0 {
+            my $subcur := $!cstack[$n];
+            my int $litlen := $subcur.pos - $subcur.from;
+            my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
+            $cur."!cursor_pass"($!pos + $litlen, '')
+              if nqp::substr($target, $!pos, $litlen) 
+                   eq nqp::substr($target, $subcur.from, $litlen);
+        }
+        $cur;
+    }
+
     method !LITERAL($strish, int $i = 0) {
         if nqp::isconcrete($strish) {
             my str $str := $strish;

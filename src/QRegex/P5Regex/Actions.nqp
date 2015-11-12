@@ -257,7 +257,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         else {
             make QAST::Regex.new( :rxtype<subrule>, :subtype<method>, :node($/),
                 QAST::NodeList.new(
-                    QAST::SVal.new( :value('!BACKREF') ),
+                    QAST::SVal.new( :value('!BACKREF-LATEST-CAPTURE') ),
                     QAST::SVal.new( :value(~$<number> - 1) ) ) );
         }
     }
@@ -532,7 +532,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         else {
             $qast := QAST::Regex.new( :rxtype<subrule>, :subtype<method>, :node($/),
                 QAST::NodeList.new(
-                    QAST::SVal.new( :value('!BACKREF') ),
+                    QAST::SVal.new( :value('!BACKREF-LATEST-CAPTURE') ),
                     QAST::SVal.new( :value($name) ) ) );
         }
         make $qast;
