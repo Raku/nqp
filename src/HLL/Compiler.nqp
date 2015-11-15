@@ -393,9 +393,6 @@ class HLL::Compiler does HLL::Backend::Default {
         my $result := $source;
         my $stderr := nqp::getstderr();
         my $stdin  := nqp::getstdin();
-#?if moar
-        nqp::setinputlinesep($stdin, "\n");
-#?endif
         my $stagestats := %adverbs<stagestats>;
         unless $from eq '' || self.exists_stage($from) {
             nqp::die("Unknown compilation input '$from'");
