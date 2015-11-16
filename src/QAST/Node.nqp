@@ -31,7 +31,7 @@ class QAST::Node {
     
     method named($value = NO_VALUE) {
         if $value =:= NO_VALUE {
-            ""
+            NQPMu
         }
         else {
             self.HOW.mixin(self, QAST::SpecialArg);

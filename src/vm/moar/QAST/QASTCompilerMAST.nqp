@@ -858,15 +858,19 @@ my class MASTCompilerInstance {
                     my int $pos_slurpy   := 0;
                     my int $named_slurpy := 0;
                     for $block.params {
-                        if $_.named {
-                            # Don't count towards arity or count.
-                            if $_.slurpy { $named_slurpy := 1 }
-                        }
-                        elsif $_.slurpy {
-                            if $pos_slurpy {
-                                nqp::die("Only one slurpy positional allowed");
+                        if $_.slurpy {
+                            if $_.named {
+                                $named_slurpy := 1
                             }
-                            $pos_slurpy := 1;
+                            else {
+                                if $pos_slurpy {
+                                    nqp::die("Only one slurpy positional allowed");
+                                }
+                                $pos_slurpy := 1;
+                            }
+                        }
+                        elsif nqp::defined($_.named) {
+                            # Don't count towards arity or count.
                         }
                         elsif $_.default {
                             if $pos_slurpy {
@@ -899,7 +903,7 @@ my class MASTCompilerInstance {
                         my $param_kind := self.type_to_register_kind($var.returns);
                         my $opslot := @kind_to_op_slot[$param_kind];
 
-                        my $opname_index := ($var.named
+                        my $opname_index := (nqp::defined($var.named)
                                 ?? (nqp::islist($var.named) ?? 16 !! 8)
                                 !! 0)
                             + ($var.default ?? 4 !! 0) + $opslot;
@@ -917,7 +921,8 @@ my class MASTCompilerInstance {
                                 $opname := "param_sp";
                             }
                         }
-                        elsif $var.named -> $name {
+                        elsif nqp::defined($var.named) {
+                            my $name := $var.named;
                             if nqp::islist($name) {
                                 unless nqp::elems($name) == 2 {
                                     nqp::die("Can only support a single fallback name for a named parameter");
