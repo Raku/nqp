@@ -209,9 +209,9 @@ class HLL::Backend::MoarVM {
         }
         else {
             my $boot_mode := %adverbs<bootstrap> ?? 1 !! 0;
-            __MVM__usecompileehllconfig() if $boot_mode;
+            nqp::usecompileehllconfig() if $boot_mode;
             my $result := $assmblr.assemble_and_load($mast);
-            __MVM__usecompilerhllconfig() if $boot_mode;
+            nqp::usecompilerhllconfig() if $boot_mode;
             $result
         }
     }
@@ -221,15 +221,15 @@ class HLL::Backend::MoarVM {
     }
 
     method is_compunit($cuish) {
-        __MVM__iscompunit($cuish)
+        nqp::iscompunit($cuish)
     }
 
     method compunit_mainline($cu) {
-        __MVM__compunitmainline($cu)
+        nqp::compunitmainline($cu)
     }
 
     method compunit_coderefs($cu) {
-        __MVM__compunitcodes($cu)
+        nqp::compunitcodes($cu)
     }
 }
 

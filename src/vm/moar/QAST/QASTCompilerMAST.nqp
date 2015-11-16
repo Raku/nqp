@@ -1853,11 +1853,11 @@ class MASTBytecodeAssembler {
     }
     
     method assemble_to_file($mast, $file) {
-        __MVM__masttofile($mast, self.node_hash(), $file)
+        nqp::masttofile($mast, self.node_hash(), $file)
     }
     
     method assemble_and_load($mast) {
-        __MVM__masttocu($mast, self.node_hash())
+        nqp::masttocu($mast, self.node_hash())
     }
 }
 
