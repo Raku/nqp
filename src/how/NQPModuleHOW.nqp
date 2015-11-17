@@ -50,4 +50,9 @@ knowhow NQPModuleHOW {
     method name($obj) {
         $!name
     }
+
+    method shortname($obj) {
+        my @parts := nqp::split('::', self.name($obj) // '');
+        @parts ?? @parts[nqp::elems(@parts) - 1] !! '<anon>'
+    }
 }

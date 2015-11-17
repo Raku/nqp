@@ -182,6 +182,11 @@ knowhow NQPParametricRoleHOW {
         $!name
     }
 
+    method shortname($obj) {
+        my @parts := nqp::split('::', self.name($obj) // '');
+        @parts ?? @parts[nqp::elems(@parts) - 1] !! '<anon>'
+    }
+
     method attributes($obj, :$local) {
         my @attrs;
         for @!attributes {
