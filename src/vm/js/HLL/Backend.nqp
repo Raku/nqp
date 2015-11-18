@@ -91,7 +91,7 @@ class HLLBackend::JavaScript {
         'tmp-' ~ nqp::getpid() ~ '.js';
     }
     
-    method node($js) {
+    method node($js, *%adverbs) {
         # TODO source map support
         my $tmp_file := self.tmp_file;
 
@@ -120,7 +120,7 @@ class HLLBackend::JavaScript {
         };
     }
 
-    method node_module($js,*%adverbs) {
+    method node_module($js, *%adverbs) {
         my $module := %adverbs<output>;
         if nqp::stat($module, nqp::const::STAT_EXISTS) == 0 {
             nqp::mkdir($module, 0o777);

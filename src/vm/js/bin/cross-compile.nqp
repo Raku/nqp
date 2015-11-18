@@ -14,7 +14,7 @@ class HLL::Backend::JavaScriptAndMoar {
     method stages() {
         'js ' ~ 'mast mbc moar'
     }
-    method js($qast) {
+    method js($qast, *%adverbs) {
         my $js_code := $!js.js($qast);
         say($js_code);
         $qast;
