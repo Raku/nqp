@@ -60,6 +60,7 @@ import org.perl6.nqp.io.IIOLineSeparable;
 import org.perl6.nqp.io.IIOSeekable;
 import org.perl6.nqp.io.IIOSyncReadable;
 import org.perl6.nqp.io.IIOSyncWritable;
+import org.perl6.nqp.io.IIOPossiblyTTY;
 import org.perl6.nqp.io.ProcessHandle;
 import org.perl6.nqp.io.ProcessChannel;
 import org.perl6.nqp.io.ServerSocketHandle;
@@ -809,6 +810,20 @@ public final class Ops {
         }
         else {
             die_s("closefhi requires an object with the IOHandle REPR", tc);
+        }
+        return -1;
+    }
+
+    public static long isttyfh(SixModelObject obj, ThreadContext tc) {
+        if (obj instanceof IOHandleInstance) {
+            IOHandleInstance h = (IOHandleInstance)obj;
+            if (h.handle instanceof IIOPossiblyTTY)
+                return ((IIOPossiblyTTY)h.handle).isTTY(tc) ? 1 : 0;
+            else
+                return 0;
+        }
+        else {
+            die_s("isttyfh requires an object with the IOHandle REPR", tc);
         }
         return -1;
     }
