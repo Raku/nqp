@@ -2,7 +2,7 @@
 
 # Test nqp::op file operations.
 
-plan(64);
+plan(65);
 
 ok( nqp::stat('CREDITS', nqp::const::STAT_EXISTS) == 1, 'nqp::stat exists');
 ok( nqp::stat('AARDVARKS', nqp::const::STAT_EXISTS) == 0, 'nqp::stat not exists');
@@ -30,6 +30,9 @@ ok( nqp::chars(nqp::readlinefh($credits)) == 0, 'nqp::readlinefh end of file');
 ok( nqp::chars(nqp::readlinefh($credits)) == 0, 'nqp::readlinefh end of file repeat');
 ok( nqp::chars(nqp::readallfh($credits)) == 0, 'nqp::readallfh end of file');
 ok( nqp::chars(nqp::readlinefh($credits)) == 0, 'nqp::readlinefh end of file repeat');
+
+ok( !nqp::isttyfh($credits), "nqp::isttyfh on a regular file");
+
 ok( nqp::defined(nqp::closefh($credits)), 'nqp::closefh');
 
 # setinputlinesep tests
