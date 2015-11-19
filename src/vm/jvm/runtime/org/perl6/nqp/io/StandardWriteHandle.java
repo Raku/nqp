@@ -11,7 +11,7 @@ import java.nio.charset.CharsetEncoder;
 import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.ThreadContext;
 
-public class StandardWriteHandle implements IIOClosable, IIOSeekable, IIOEncodable, IIOSyncWritable, IIOPossiblyTTY {
+public class StandardWriteHandle implements IIOClosable, IIOSeekable, IIOEncodable, IIOSyncWritable {
     private PrintStream ps;
     private CharsetEncoder enc;
     private CharsetDecoder dec;
@@ -64,9 +64,5 @@ public class StandardWriteHandle implements IIOClosable, IIOSeekable, IIOEncodab
     
     public void flush(ThreadContext tc) {
         ps.flush();
-    }
-
-    public boolean isTTY(ThreadContext tc) {
-        return System.console() != null;
     }
 }
