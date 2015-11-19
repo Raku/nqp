@@ -12,7 +12,7 @@ import jline.ConsoleReader;
 import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.ThreadContext;
 
-public class StandardReadHandle implements IIOClosable, IIOEncodable, IIOSyncReadable, IIOInteractive {
+public class StandardReadHandle implements IIOClosable, IIOEncodable, IIOSyncReadable, IIOInteractive, IIOPossiblyTTY {
     private InputStream is;
     private BufferedReader br;
     private ConsoleReader cr;
@@ -117,5 +117,9 @@ public class StandardReadHandle implements IIOClosable, IIOEncodable, IIOSyncRea
     
     public boolean eof(ThreadContext tc) {
         return eof;
+    }
+
+    public boolean isTTY(ThreadContext tc) {
+        return System.console() != null;
     }
 }
