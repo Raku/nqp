@@ -1,11 +1,7 @@
 =head1 release_guide.pod - guide to NQP releases
 
 NQP's development release cycle is intimately tied to Rakudo's release
-cycle.  There is no separate, independent release cycle for NQP.
-
-Parrot is scheduled to release the third Tuesday of each month; Rakudo
-will generally issue its own development release soon after the scheduled
-Parrot release (usually within a few days).  To accomplish this, NQP
+cycle.  There is no separate, independent release cycle for NQP; NQP
 must be tagged for release immediately prior to the Rakudo release.
 
 =head2 Steps to create an NQP release
@@ -15,7 +11,7 @@ must be tagged for release immediately prior to the Rakudo release.
 =item 1.
 
 MoarVM tries to have a synchronised release schedule with NQP
-and rakudo, so there's most probably a release tag for MoarVM
+and Rakudo, so there's most probably a release tag for MoarVM
 that you can bump F<tools/build/MOAR_REVISION> to. Release tags
 for MoarVM have the format C<2014.02>. Find all of the tags with
 C<git tag> in an up-to-date MoarVM checkout.
@@ -31,26 +27,24 @@ Change the C<VERSION> file in nqp:
 =item 3.
 
 Make sure everything compiles and runs from a known clean state. This step
-is especially important if C<PARROT_REVISION> and/or C<MOAR_REVISION> were
-changed in step 1 above. Don't forget to build the JVM backend, as well.
+is especially important if C<MOAR_REVISION> was changed in step 1 above.
 
   $ make realclean
-  $ perl Configure.pl --gen-parrot --gen-moar --backend=parrot,moar,jvm
+  $ perl Configure.pl --gen-moar --backend=moar,jvm
   $ make
   $ make m-test
   $ make j-test
 
-Resolve any problems that may still exist.  You may want to try building
-each backend separately if a problem occurs building all backends at the same
-time.
+Resolve any problems that may still exist. Issues that impact backends
+other than MoarVM may potentially be ignored for a release for now.
+Check on the IRC channel if you have any questions.
 
 =item 4.
 
 Create a release tarball (needed for the Rakudo Star release)
 by entering C<make release VERSION=YYYY.MM>, where YYYY.MM is
 the month for which the release is being made.  This will
-create a tarball file named C<nqp-YYYY.MM.tar.gz>.  Note: for some reason,
-this functionality only exists in the parrot Makefile.
+create a tarball file named C<nqp-YYYY.MM.tar.gz>.
 
 =item 5.
 
@@ -66,7 +60,7 @@ Tag NQP by its release month ("YYYY.MM")
   $ git tag -u <email address> -s -a -m"tag release YYYY.MM" YYYY.MM    # e.g., 2012.12
   $ git push --tags
 
-The C<-s> tells git to sign the tag with your GPG key. Please see rakudo's
+The C<-s> tells git to sign the tag with your GPG key. Please see Rakudo's
 release guide for links on how to create GPG keys, should it be necessary.
 
 =item 7.
