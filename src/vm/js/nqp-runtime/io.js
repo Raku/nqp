@@ -2,6 +2,7 @@ var fs = require('fs-ext');
 var sleep = require('sleep');
 var iconv = require('iconv-lite');
 
+var tty = require('tty');
 var nqpIo = require('nqp-js-io');
 
 var Hash = require('./hash.js');
@@ -92,6 +93,10 @@ function FileHandle(fd) {
 
 FileHandle.prototype.closefh = function() {
   fs.closeSync(this.fd);
+};
+
+FileHandle.prototype.isttyfh = function() {
+  return tty.isatty(this.fd) ? 1 : 0;
 };
 
 FileHandle.prototype.printfh = function(content) {
@@ -231,6 +236,10 @@ op.closefh = function(fh) {
   return fh;
 };
 
+op.isttyfh = function(fh) {
+  return fh.isttyfh();
+};
+
 op.printfh = function(fh, content) {
   return fh.printfh(content);
 };
@@ -326,6 +335,10 @@ Stderr.prototype.printfh = function(msg) {
   process.stderr.write(msg);
 };
 
+Stderr.prototype.isttyfh = function() {
+  return (process.stderr.isTTY ? 1 : 0);
+};
+
 Stderr.prototype.$$to_bool = function(ctx) {
   return 1;
 };
@@ -336,6 +349,11 @@ op.getstderr = function() {
 
 function Stdout() {
 }
+
+Stdout.prototype.isttyfh = function() {
+  return (process.stdout.isTTY ? 1 : 0);
+};
+
 Stdout.prototype.printfh = function(msg) {
   process.stdout.write(msg);
 };
@@ -358,6 +376,10 @@ function Stdin() {
 
 Stdin.prototype.$$to_bool = function(ctx) {
   return 1;
+};
+
+Stdin.prototype.isttyfh = function() {
+  return (process.stdin.isTTY ? 1 : 0);
 };
 
 op.getstdin = function() {
