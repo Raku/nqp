@@ -1,9 +1,12 @@
 package org.perl6.nqp.sixmodel;
+import org.perl6.nqp.runtime.CodeRef;
 import org.perl6.nqp.runtime.CompilationUnit;
 import org.perl6.nqp.runtime.HLLConfig;
 import org.perl6.nqp.runtime.Ops;
 import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.reprs.KnowHOWREPRInstance;
+
+import java.util.Map;
 
 public class KnowHOWBootstrapper {
     public static void bootstrap(ThreadContext tc)
@@ -44,6 +47,11 @@ public class KnowHOWBootstrapper {
         tc.gc.Lexotic = bootType(tc, "Lexotic", "Lexotic");
         tc.gc.BOOTJava = bootType(tc, "BOOTJavaObject", "JavaWrap");
         
+        // fixup missing STable for knowhow_how methods
+        for (Map.Entry<String,SixModelObject> cr : ((KnowHOWREPRInstance)tc.gc.KnowHOW.st.HOW).methods.entrySet()) {
+            cr.getValue().st = tc.gc.BOOTCode.st;
+        }
+
         Ops.setboolspec(tc.gc.BOOTIter, BoolificationSpec.MODE_ITER, null, tc);
         Ops.setboolspec(tc.gc.BOOTInt, BoolificationSpec.MODE_UNBOX_INT, null, tc);
         Ops.setboolspec(tc.gc.BOOTNum, BoolificationSpec.MODE_UNBOX_NUM, null, tc);
