@@ -2719,8 +2719,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
             self.stored_result(Chunk.new($want, $cloned_block~".\$call({nqp::join(',', @args)})", $setup, :$node), :$want);
         } elsif $node.blocktype eq 'declaration' ||  $node.blocktype eq '' {
-            my $cloned_block := $outer.clone_inner($node);
-            Chunk.new($T_OBJ, $cloned_block, []);
+            if $want == $T_VOID {
+                Chunk.void();
+            } else {
+                my $cloned_block := $outer.clone_inner($node);
+                Chunk.new($T_OBJ, $cloned_block, []);
+            }
         } elsif $node.blocktype eq 'declaration_static' {
             my $cloned_block := $outer.capture_inner($node);
             Chunk.new($T_OBJ, $cloned_block, []);
