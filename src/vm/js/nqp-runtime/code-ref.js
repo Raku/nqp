@@ -10,6 +10,18 @@ CodeRef.prototype.block = function(func) {
   func.codeRef = this;
 };
 
+// HACK - do this properly
+CodeRef.prototype.$call = function() {
+  var nqp = require('nqp-runtime');
+  if (this["$!do"].closureTemplate) {
+    console.log(this["$!do"]);
+    var template = "var " + this["$!do"].outerCtx + "= null;(" + this["$!do"].closureTemplate + ")";
+    this.$call = eval(template);
+    this.$call.codeRef = this;
+    return this.$call.apply(this, arguments);
+  }
+}
+
 CodeRef.prototype.$apply = function _(argsArray) {
   return this.$call.apply(this, argsArray);
 };
@@ -25,10 +37,8 @@ CodeRef.prototype.capture = function(block) {
 };
 
 CodeRef.prototype.closure = function(block) {
-  this.$call = block; // HACK - we need to figure what needs to replace this
-
   var closure = new CodeRef(this.name, undefined);
-  closure.codeObj = this.codeObj; // HACK it seems that MoarVM doesn't do it
+  closure.codeObj = this.codeObj;
   closure.$call = block;
   closure.$call.codeRef = closure;
   return closure;
