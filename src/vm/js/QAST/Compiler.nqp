@@ -351,13 +351,18 @@ class QAST::OperationsJS {
         %ops{$op} := $cb;
     }
 
-    sub op_template($comp, $node, $return_type, @argument_types, $cb) {
+    sub op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx) {
         my @exprs;
         my @setup;
         my $i := 0;
         if $node.list > @argument_types {
             nqp::die("{+$node.list} arguments for {$node.op}, the maximum is {+@argument_types}");
         } 
+
+        if $ctx {
+          @exprs.push($*CTX);
+        }
+
         for $node.list -> $arg {
             my $chunk := $comp.as_js($arg, :want(@argument_types[$i]));
             @exprs.push($chunk.expr);
@@ -373,9 +378,9 @@ class QAST::OperationsJS {
         }
     }
 
-    sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op, @argument_types), :$sideffects) {
+    sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op, @argument_types), :$sideffects, :$ctx) {
         %ops{$op} := sub ($comp, $node, :$want) {
-            my $chunk := op_template($comp, $node, $return_type, @argument_types, $cb);
+            my $chunk := op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx);
             $sideffects ?? $comp.stored_result($chunk) !! $chunk;
         };
     }
@@ -977,6 +982,12 @@ class QAST::OperationsJS {
 
     add_simple_op('bindcomp', $T_OBJ, [$T_STR, $T_OBJ], :sideffects);
     add_simple_op('getcomp', $T_OBJ, [$T_STR], :sideffects);
+
+    add_simple_op('setparameterizer', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects, :ctx);
+    add_simple_op('parameterizetype', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects, :ctx);
+    add_simple_op('typeparameterized', $T_OBJ, [$T_OBJ]);
+    add_simple_op('typeparameters', $T_OBJ, [$T_OBJ], :ctx);
+    add_simple_op('typeparameterat', $T_OBJ, [$T_OBJ, $T_INT], :ctx);
 
     # TODO avoid copy & paste - move it into code shared between backends
     add_op('defor', sub ($comp, $node, :$want) {

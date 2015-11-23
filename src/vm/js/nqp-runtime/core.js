@@ -612,3 +612,79 @@ op.decode = function(buf, encoding_) {
 op.objprimspec = function(obj) {
   return (obj._STable && obj._STable.REPR.boxed_primitive ? obj._STable.REPR.boxed_primitive : 0);
 };
+
+/* Parametricity operations. */
+op.setparameterizer = function(ctx, type, parameterizer) {
+  var st = type._STable;
+  /* Ensure that the type is not already parametric or parameterized. */
+  if (st.parameterizer) {
+    ctx.die("This type is already parametric");
+    return null;
+  } else if (st.parametricType) {
+    ctx.die("Cannot make a parameterized type also be parametric");
+    return null;
+  }
+
+  /* Set up the type as parameterized. */
+  st.parameterizer = parameterizer;
+  st.parameterizerCache = [];
+
+  return type;
+};
+
+op.parameterizetype = function(ctx, type, params) {
+  /* Ensure we have a parametric type. */
+  var st = type._STable;
+  if (!st.parameterizer) {
+    ctx.die("This type is not parametric");
+  }
+
+  var lookup = st.parameterizerCache;
+  for (var i = 0; i < lookup.length; i++) {
+    if (params.length == lookup[i].params.length) {
+      var match = true;
+      for (var j=0; j < params.length; j++) {
+        /* XXX More cases to consider here. - copied over from the jvm backend, need to consider what they are*/
+        if (params[j] != lookup[i].params[j]) {
+          match = false;
+          break;
+        }
+      }
+
+      if (match) {
+        return lookup[i].type;
+      }
+    }
+  }
+
+  var result = st.parameterizer.$call(ctx, {}, st.WHAT, params);
+
+  var newSTable = result._STable;
+  newSTable.parametricType = type;
+  newSTable.parameters = params;
+
+  lookup.push({type: result, params: params});
+
+  return result;
+};
+
+function typeparameters(ctx, type) {
+  var st = type._STable;
+  if (!st.parametricType) {
+    ctx.die("This type is not parameterized");
+  }
+
+  return st.parameters;
+}
+
+op.typeparameters = typeparameters;
+
+op.typeparameterat = function(ctx, type, idx) {
+  return typeparameters(ctx, type)[idx];
+};
+
+op.typeparameterized = function(type) {
+  var st = type._STable;
+  var nqp = require('nqp-runtime');
+  return st.parametricType ? st.parametricType : null;
+};
