@@ -57,6 +57,7 @@ import org.perl6.nqp.io.IIOEncodable;
 import org.perl6.nqp.io.IIOExitable;
 import org.perl6.nqp.io.IIOInteractive;
 import org.perl6.nqp.io.IIOLineSeparable;
+import org.perl6.nqp.io.IIOLockable;
 import org.perl6.nqp.io.IIOSeekable;
 import org.perl6.nqp.io.IIOSyncReadable;
 import org.perl6.nqp.io.IIOSyncWritable;
@@ -541,6 +542,40 @@ public final class Ops {
         else {
             throw ExceptionHandling.dieInternal(tc,
                 "tellfh requires an object with the IOHandle REPR");
+        }
+    }
+
+    public static SixModelObject lockfh(SixModelObject obj, long flag, ThreadContext tc) {
+        if (obj instanceof IOHandleInstance) {
+            IOHandleInstance h = (IOHandleInstance)obj;
+            if (h.handle instanceof IIOLockable) {
+                ((IIOLockable)h.handle).lock(tc, flag);
+                return obj;
+            }
+            else
+                throw ExceptionHandling.dieInternal(tc,
+                    "This handle does not support seek");
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc,
+                "seekfh requires an object with the IOHandle REPR");
+        }
+    }
+
+    public static SixModelObject unlockfh(SixModelObject obj, ThreadContext tc) {
+        if (obj instanceof IOHandleInstance) {
+            IOHandleInstance h = (IOHandleInstance)obj;
+            if (h.handle instanceof IIOLockable) {
+                ((IIOLockable)h.handle).unlock(tc);
+                return obj;
+            }
+            else
+                throw ExceptionHandling.dieInternal(tc,
+                    "This handle does not support seek");
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc,
+                "seekfh requires an object with the IOHandle REPR");
         }
     }
 

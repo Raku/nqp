@@ -3,6 +3,7 @@ package org.perl6.nqp.io;
 import java.io.File;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.nio.charset.Charset;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
@@ -13,9 +14,10 @@ import java.util.List;
 import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.ThreadContext;
 
-public class FileHandle extends SyncHandle implements IIOSeekable {
+public class FileHandle extends SyncHandle implements IIOSeekable, IIOLockable {
     
     FileChannel fc;
+    FileLock lock;
     protected boolean eof = false;
     
     public static OpenOption[] resolveOpenMode(String mode) {
@@ -93,6 +95,29 @@ public class FileHandle extends SyncHandle implements IIOSeekable {
             long position = fc.position();
             return readBuffer != null ? position - readBuffer.remaining() : position;
         } catch (IOException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
+        }
+    }
+
+    public void lock(ThreadContext tc, long flag) {
+        try {
+            lock = fc.lock();
+        } catch (IOException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
+        } catch (IllegalArgumentException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
+        }
+    }
+
+    public void unlock(ThreadContext tc) {
+        try {
+            if (lock != null) {
+                lock.release();
+                lock = null;
+            }
+        } catch (IOException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
+        } catch (IllegalArgumentException e) {
             throw ExceptionHandling.dieInternal(tc, e);
         }
     }
