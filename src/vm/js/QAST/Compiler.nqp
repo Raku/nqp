@@ -397,7 +397,7 @@ class QAST::OperationsJS {
     add_simple_op('setcontspec', $T_OBJ, [$T_OBJ, $T_STR, $T_OBJ], :sideffects);
     add_simple_op('assign',  $T_OBJ, [$T_OBJ, $T_OBJ], sub ($cont, $value) {"$cont.\$\$assign({$*CTX},$value)"}, :sideffects);
     add_simple_op('assignunchecked',  $T_OBJ, [$T_OBJ, $T_OBJ], sub ($cont, $value) {"$cont.\$\$assignunchecked({$*CTX},$value)"}, :sideffects);
-    add_simple_op('decont', $T_OBJ, [$T_OBJ], sub ($cont) {"nqp.op.decont({$*CTX}, $cont)"});
+    add_simple_op('decont', $T_OBJ, [$T_OBJ], :ctx);
     add_simple_op('iscont', $T_INT, [$T_OBJ]);
 
     add_infix_op('add_n', $T_NUM, '+', $T_NUM, $T_NUM);
@@ -580,8 +580,7 @@ class QAST::OperationsJS {
     add_simple_op('open', $T_OBJ, [$T_STR, $T_STR], :sideffects);
 
     add_simple_op('tellfh', $T_INT, [$T_OBJ], :sideffects);
-    add_simple_op('seekfh', $T_INT, [$T_OBJ, $T_INT, $T_INT],
-        sub ($fh, $offset, $whence) { "nqp.op.seekfh($fh, $offset, $whence, $*CTX)" }, :sideffects);
+    add_simple_op('seekfh', $T_INT, [$T_OBJ, $T_INT, $T_INT], :ctx, :sideffects);
     add_simple_op('eoffh', $T_INT, [$T_OBJ], :sideffects);
     add_simple_op('readlinefh', $T_STR, [$T_OBJ], :sideffects);
     add_simple_op('readlinechompfh', $T_STR, [$T_OBJ], :sideffects);
@@ -775,9 +774,7 @@ class QAST::OperationsJS {
 
     # Ops for NFA
 
-    add_simple_op('nfafromstatelist', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($states, $type) {
-        "nqp.op.nfafromstatelist($states, $type, $*CTX)";
-    }, :sideffects);
+    add_simple_op('nfafromstatelist', $T_OBJ, [$T_OBJ, $T_OBJ], :ctx, :sideffects);
     add_simple_op('nfarunproto', $T_OBJ, [$T_OBJ, $T_STR, $T_INT], :sideffects);
     add_simple_op('nfarunalt', $T_OBJ, [$T_OBJ, $T_STR, $T_INT, $T_OBJ, $T_OBJ, $T_OBJ]);
 
@@ -903,8 +900,7 @@ class QAST::OperationsJS {
 
     add_simple_op('ctxouter', $T_OBJ, [$T_OBJ]);
 
-    add_simple_op('loadbytecode', $T_STR, [$T_STR],
-        sub ($path) { "nqp.op.loadbytecode($*CTX, $path)" }, :sideffects);
+    add_simple_op('loadbytecode', $T_STR, [$T_STR], :ctx, :sideffects);
 
     add_simple_op('elems', $T_INT, [$T_OBJ]);
 

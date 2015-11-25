@@ -22,7 +22,7 @@ var EDGE_FATE = 0,
     EDGE_CODEPOINT_I_LL = 15;
 
 // TODO think about type conversions of the stuff inside the array
-op.nfafromstatelist = function(states, type, ctx) {
+op.nfafromstatelist = function(ctx, states, type) {
 
   var nfa = type._STable.REPR.allocate(type._STable);
   nfa.fates = states[0];

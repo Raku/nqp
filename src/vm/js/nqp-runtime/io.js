@@ -221,7 +221,7 @@ op.readallfh = function(fh) {
   return iconv.decode(all, fh.encoding);
 };
 
-op.seekfh = function(fh, offset, whence, ctx) {
+op.seekfh = function(ctx, fh, offset, whence) {
   if (whence == 0 && offset < 0) {
     ctx.die("Can't seek to position: " + offset);
   }
