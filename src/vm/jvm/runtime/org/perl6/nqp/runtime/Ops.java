@@ -6569,6 +6569,14 @@ public final class Ops {
         return name;
     }
 
+    public static String getuniprop_str(long codepoint, long property, ThreadContext tc) {
+        return "";
+    }
+
+    public static long unipropcode(String prop, ThreadContext tc) {
+        return -1;
+    }
+
     public static SixModelObject force_gc(ThreadContext tc) {
         System.gc();
         return null;
