@@ -554,11 +554,11 @@ public final class Ops {
             }
             else
                 throw ExceptionHandling.dieInternal(tc,
-                    "This handle does not support seek");
+                    "This handle does not support locking");
         }
         else {
             throw ExceptionHandling.dieInternal(tc,
-                "seekfh requires an object with the IOHandle REPR");
+                "lockfh requires an object with the IOHandle REPR");
         }
     }
 
@@ -571,11 +571,11 @@ public final class Ops {
             }
             else
                 throw ExceptionHandling.dieInternal(tc,
-                    "This handle does not support seek");
+                    "This handle does not support locking");
         }
         else {
             throw ExceptionHandling.dieInternal(tc,
-                "seekfh requires an object with the IOHandle REPR");
+                "unlockfh requires an object with the IOHandle REPR");
         }
     }
 
