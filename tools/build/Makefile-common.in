@@ -98,6 +98,7 @@ CHMOD         = $(PERL) -MExtUtils::Command -e chmod
 CP            = $(PERL) -MExtUtils::Command -e cp
 RM_RF         = $(PERL) -MExtUtils::Command -e rm_rf
 RM_F          = $(PERL) -MExtUtils::Command -e rm_f
+SHELL         = @shell@
 
 SYSROOT         = @sysroot@
 PREFIX          = @prefix@
