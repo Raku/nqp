@@ -688,3 +688,17 @@ op.typeparameterized = function(type) {
   var nqp = require('nqp-runtime');
   return st.parametricType ? st.parametricType : null;
 };
+
+function startTrampoline(thunk_) {
+  var thunk = thunk_;
+  while (thunk) {
+    thunk = thunk();
+  }
+};
+
+op.continuationreset = function(ctx, tag, continuation) {
+  startTrampoline(function() {
+    continuation.$callCPS(ctx, {});
+  });
+};
+

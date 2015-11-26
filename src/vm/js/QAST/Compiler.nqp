@@ -1375,7 +1375,12 @@ class QAST::OperationsJS {
     add_simple_op('curcode', $T_OBJ, []);
     add_simple_op('callercode', $T_OBJ, []);
 
-    method compile_op($comp, $op, :$want) {
+    add_simple_op('continuationreset', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects, :ctx);
+    add_simple_op('continuationinvoke', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects, :ctx);
+    add_simple_op('continuationcontrol', $T_OBJ, [$T_INT, $T_OBJ, $T_OBJ], :sideffects);
+
+    method compile_op($comp, $op, :$want, :$cps) {
+        # TODO cps
         my str $name := $op.op;
         if nqp::existskey(%ops, $name) {
             %ops{$name}($comp, $op, :$want);
@@ -2274,12 +2279,16 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
     }
 
-    method compile_sig(@params) {
+    method compile_sig(@params, :$cps) {
         my $slurpy_named; # *%foo
         my $slurpy;       # *@foo
 
         my @sig := ['caller_ctx','_NAMED'];
         my @setup;
+
+        if $cps {
+            @sig.push('cont');
+        }
 
         my $bind_named := '';
         for @params {
@@ -2491,7 +2500,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         # TODO
     }
 
-    proto method as_js($node, :$want) {
+    proto method as_js($node, :$want, :$cps) {
         if nqp::defined($want) {
             if nqp::istype($node, QAST::Want) {
                 self.NYI("QAST::Want");
@@ -2518,7 +2527,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     # TODO save the value of the last statement
-    method compile_all_the_statements(QAST::Stmts $node, $want, :$resultchild) {
+    method compile_all_the_statements(QAST::Stmts $node, $want, :$resultchild, :$cps) {
         my @setup;
         my @stmts := $node.list;
         my int $n := +@stmts;
@@ -2533,7 +2542,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my int $i := 0;
         for @stmts {
-            my $chunk := self.as_js($_, :want($i == $resultchild ?? $want !! $T_VOID));
+            my $chunk := self.as_js($_, :want($i == $resultchild ?? $want !! $T_VOID), :$cps);
             $result := $chunk.expr if $i == $resultchild;
             nqp::push(@setup, $chunk);
             $i := $i + 1;
@@ -2541,7 +2550,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         Chunk.new($want, $result, @setup);
     }
 
-    multi method as_js(QAST::Block $node, :$want) {
+    multi method as_js(QAST::Block $node, :$want, :$cps) {
         my $outer     := try $*BLOCK;
         my $outer_loop := try $*LOOP;
         self.compile_block($node, $outer, $outer_loop, :$want);
@@ -2640,6 +2649,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             @clone_inners.push("$reg = $cuid.closure");
             @clone_inners.push(%*BLOCKS_DONE{$_.key});
+            @clone_inners.push(".cps");
+            @clone_inners.push(%*BLOCKS_DONE_CPS{$_.key});
             @clone_inners.push(";\n");
         }
         Chunk.void(|@clone_inners);
@@ -2680,10 +2691,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             my $sig := self.compile_sig($*BLOCK.params);
 
-
-
-
-
             my @function := [
                 "function({$sig.expr}) \{\n",
                 self.setup_setting($node),
@@ -2698,7 +2705,30 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 "\}"
             ];
 
+            # The CPS version
+
+            my $stmts_cps := self.compile_all_the_statements($node, $body_want, :cps);
+
+            my $sig_cps := self.compile_sig($*BLOCK.params, :cps);
+
+            my @function_cps := [
+                "function({$sig.expr}) \{\n",
+                self.setup_setting($node),
+                self.declare_js_vars($*BLOCK.tmps),
+                self.declare_js_vars($*BLOCK.js_lexicals),
+                $create_ctx,
+                $sig,
+                self.clone_inners($*BLOCK),
+                self.capture_inners($*BLOCK),
+                $stmts,
+                "return {$stmts.expr};\n",
+                "\}"
+            ];
+
             %*BLOCKS_DONE{$node.cuid} := Chunk.void("(", |@function, ")");
+
+            %*BLOCKS_DONE_CPS{$node.cuid} := Chunk.void("(", |@function_cps, ")");
+
                 
             if self.is_block_part_of_sc($node) {
                 if $node.blocktype eq 'immediate' {
@@ -2764,29 +2794,29 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         "var $name = new nqp.Ctx(caller_ctx, {self.outer_ctx});\n";
     }
 
-    multi method as_js(QAST::IVal $node, :$want) {
+    multi method as_js(QAST::IVal $node, :$want, :$cps) {
         Chunk.new($T_INT,'('~$node.value()~')',[],:$node);
     }
 
-    multi method as_js(QAST::NVal $node, :$want) {
+    multi method as_js(QAST::NVal $node, :$want, :$cps) {
         Chunk.new($T_NUM,'('~$node.value()~')',[],:$node);
     }
 
-    multi method as_js(QAST::SVal $node, :$want) {
+    multi method as_js(QAST::SVal $node, :$want, :$cps) {
         Chunk.new($T_STR,quote_string($node.value()),[],:$node);
     }
 
-    multi method as_js(QAST::BVal $node, :$want) {
+    multi method as_js(QAST::BVal $node, :$want, :$cps) {
         self.as_js($node.value, :$want);
     }
 
     # Helps with register allocation on other backends
     # We don't do allocate registers so just ignore that
-    multi method as_js(QAST::Stmt $node, :$want) {
-        self.as_js($node[0], :$want);
+    multi method as_js(QAST::Stmt $node, :$want, :$cps) {
+        self.as_js($node[0], :$want, :$cps);
     }
 
-    multi method as_js(QAST::Stmts $node, :$want) {
+    multi method as_js(QAST::Stmts $node, :$want, :$cps) {
         # for performance purposes we use the native js lexicals as much as possible, that means we need hacks for things that other backends can do easily with all the various ctx ops
         if self.is_ctxsave($node) {
             my @lexicals;
@@ -2795,17 +2825,17 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
             Chunk.void("nqp.ctxsave(\{{nqp::join(',', @lexicals)}\});\n");
         } else {
-            self.compile_all_the_statements($node, $want);
+            self.compile_all_the_statements($node, $want, :$cps);
         }
     }
 
-    multi method as_js(QAST::VM $node, :$want) {
+    multi method as_js(QAST::VM $node, :$want, :$cps) {
         # We ignore QAST::VM as we don't support a js specific one, and the ones nqp generate contain parrot specific stuff we don't care about.
         Chunk.new($T_VOID,'',[]);
     }
 
-    multi method as_js(QAST::Op $node, :$want) {
-        QAST::OperationsJS.compile_op(self, $node, :$want);
+    multi method as_js(QAST::Op $node, :$want, :$cps) {
+        QAST::OperationsJS.compile_op(self, $node, :$want, :$cps);
     }
 
     method create_sc($ast) {
@@ -2894,7 +2924,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
     }
 
-    multi method as_js(QAST::CompUnit $node, :$want) {
+    multi method as_js(QAST::CompUnit $node, :$want, :$cps) {
         # Should have a single child which is the outer block.
         if +@($node) != 1 || !nqp::istype($node[0], QAST::Block) {
             nqp::die("QAST::CompUnit should have one child that is a QAST::Block");
@@ -2907,6 +2937,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         # Blocks we've seen while compiling.
         my %*BLOCKS_DONE;
+        my %*BLOCKS_DONE_CPS;
 
         # A fake outer block 
         my $*BLOCK := BlockInfo.new(NQPMu, NQPMu);
@@ -2988,12 +3019,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
     }
 
-    multi method as_js(QAST::Var $node, :$want) {
+    multi method as_js(QAST::Var $node, :$want, :$cps) {
         self.declare_var($node);
         self.compile_var($node);
     }
 
-    multi method as_js(QAST::VarWithFallback $node, :$want) {
+    multi method as_js(QAST::VarWithFallback $node, :$want, :$cps) {
+        # TODO CPS
         my $var := self.compile_var($node);
         if $var.type == $T_OBJ {
             my $fallback := self.as_js($node.fallback, :want($T_OBJ));
@@ -3009,7 +3041,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
     }
 
-    multi method as_js(QAST::Regex $node, :$want) {
+    multi method as_js(QAST::Regex $node, :$want, :$cps) {
+        # TODO CPS 
         RegexCompiler.new(compiler => self).compile($node);
     }
 
@@ -3020,7 +3053,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         "nqp.wval({quote_string($handle)},$idx)";
     }
 
-    multi method as_js(QAST::WVal $node, :$want) {
+    multi method as_js(QAST::WVal $node, :$want, :$cps) {
         Chunk.new($T_OBJ, self.value_as_js($node.value), []);
     }
     
@@ -3028,9 +3061,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         $var.scope eq 'lexical' || $var.scope eq 'typevar';
     }
 
-    method as_js_clear_bindval($node, :$want) {
+    method as_js_clear_bindval($node, :$want, :$cps) {
         my $*BINDVAL := 0;
-        self.as_js($node, :$want);
+        self.as_js($node, :$want, :$cps);
     }
 
     method is_dynamic_var($var) {
@@ -3053,10 +3086,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         Chunk.new($T_OBJ, "nqp.op.atpos({$array_chunk.expr},{$index_chunk.expr})", [$array_chunk, $index_chunk], :node($node));
     }
 
-    method compile_var(QAST::Var $var) {
+    method compile_var(QAST::Var $var, :$cps) {
         if self.var_is_lexicalish($var) && self.is_dynamic_var($var) {
             if $*BINDVAL {
-                my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ));
+                my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ), :$cps);
                 if $var.decl eq 'var' {
                     self.stored_result(Chunk.new($T_OBJ, "({$*CTX}[{quote_string($var.name)}] = {$bindval.expr})",  [$bindval]));
                 } else {
@@ -3075,7 +3108,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             if $*BINDVAL {
                 # TODO better source mapping
                 # TODO use the proper type 
-                my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ));
+                my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ), :$cps);
                 Chunk.new($type,$mangled, [$bindval,'('~$mangled~' = ('~ $bindval.expr ~ "));\n"]);
             } else {
                 # TODO get the proper type 
@@ -3110,17 +3143,17 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             # TODO take second argument into account
             # TODO figure out if the second argument can be always assumed to be a WVal 
             # TODO types
-            my $self := self.as_js_clear_bindval($var[0], :want($T_OBJ));
+            my $self := self.as_js_clear_bindval($var[0], :want($T_OBJ), :$cps);
             my $attr := Chunk.new($T_OBJ, "{$self.expr}[{quote_string($var.name)}]", [$self]);
             if $*BINDVAL {
-                my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ));
+                my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ), :$cps);
                 Chunk.new($T_OBJ, $bindval.expr, [$attr, $bindval, "{$attr.expr} = {$bindval.expr};\n"]);
             } else {
                 $attr;
             }
         } elsif ($var.scope eq 'contextual') {
             if $*BINDVAL {
-                my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ));
+                my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ), :$cps);
                 self.stored_result(Chunk.new($T_OBJ, "{$*CTX}.bind_dynamic({quote_string($var.name)},{$bindval.expr})", [$bindval]));
             } else {
                 Chunk.new($T_OBJ, "{$*CTX}.lookup_dynamic({quote_string($var.name)})", []);
@@ -3148,7 +3181,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
 
 
-    multi method as_js($unknown, :$want) {
+    multi method as_js($unknown, :$want, :$cps) {
         self.NYI("Unimplemented QAST node type: " ~ $unknown.HOW.name($unknown));
     }
 

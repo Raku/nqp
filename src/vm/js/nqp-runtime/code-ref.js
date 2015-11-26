@@ -44,6 +44,12 @@ CodeRef.prototype.closure = function(block) {
   return closure;
 };
 
+CodeRef.prototype.cps = function(block) {
+  this.$callCPS = block;
+  this.$callCPS.codeRef = this;
+  return this;
+};
+
 CodeRef.prototype.setCodeObj = function(codeObj) {
   this.codeObj = codeObj;
   return this;
