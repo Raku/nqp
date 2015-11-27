@@ -486,12 +486,21 @@ class QAST::MASTRegexCompiler {
     method enumcharlist($node) {
         my @ins;
         my $op := $node.negate ?? 'indexnat' !! 'indexat';
+	my $i0 := $!regalloc.fresh_i();
+	my $donelabel := label();
+	# The indexat and indexnat opcodes assume <+[]>/<-[]> semantics, and don't return true at EOS,
+	# so we compensate here by checking for EOS explicitly in the negative case, and succeeding.
+	# (If instead we fix indexnat, we'd have to put the EOS check on the non-zerowidth branches,
+	# but that makes the compiler loop for some reason, hence this approach.)
+	if $node.subtype eq 'zerowidth' && $node.negate {
+            merge_ins(@ins, [
+		op('ge_i', $i0, %!reg<pos>, %!reg<eos>),
+		op('if_i', $i0, $donelabel),
+	    ]);
+	}
         if $node.subtype eq 'ignoremark' || $node.subtype eq 'ignorecase+ignoremark' {
-            my $i0 := $!regalloc.fresh_i();
             my $s0 := $!regalloc.fresh_s();
             merge_ins(@ins, [
-                op('ge_i', $i0, %!reg<pos>, %!reg<eos>),
-                op('if_i', $i0, %!reg<fail>),
                 op('ordbaseat', $i0, %!reg<tgt>, %!reg<pos>),
                 op('chr', $s0, $i0),
                 op($op, $s0, %!reg<zero>, sval($node[0]), %!reg<fail>),
@@ -500,8 +509,9 @@ class QAST::MASTRegexCompiler {
         else {
             nqp::push(@ins, op($op, %!reg<tgt>, %!reg<pos>, sval($node[0]), %!reg<fail>));
         }
-        nqp::push(@ins, op('inc_i', %!reg<pos>))
-            unless $node.subtype eq 'zerowidth';
+	nqp::push(@ins, op('inc_i', %!reg<pos>))
+	    unless $node.subtype eq 'zerowidth';
+	nqp::push(@ins, $donelabel) if $donelabel;
         @ins
     }
 
