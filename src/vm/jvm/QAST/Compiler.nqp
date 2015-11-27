@@ -5494,11 +5494,19 @@ class QAST::CompilerJAST {
     
     method enumcharlist($node) {
         my $il := JAST::InstructionList.new();
+        my $donelabel;
         
-        $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
-        $il.append(JAST::Instruction.new( :op('lload'), %*REG<eos> ));
-        $il.append($LCMP);
-        $il.append(JAST::Instruction.new( :op('ifge'), %*REG<fail> ));
+	$il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
+	$il.append(JAST::Instruction.new( :op('lload'), %*REG<eos> ));
+	$il.append($LCMP);
+        if $node.subtype eq 'zerowidth' && $node.negate {
+	    my $prefix     := self.unique('enumcharlist');
+	    $donelabel := JAST::Label.new( :name($prefix ~ '_done') );
+	    $il.append(JAST::Instruction.new( :op('ifge'), $donelabel ));
+	}
+	else {
+	    $il.append(JAST::Instruction.new( :op('ifge'), %*REG<fail> ));
+	}
 
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
         $il.append($IVAL_ZERO);
@@ -5521,6 +5529,7 @@ class QAST::CompilerJAST {
             $il.append($LADD);
             $il.append(JAST::Instruction.new( :op('lstore'), %*REG<pos> ));
         }
+	$il.append($donelabel) if $donelabel;
         
         $il;
     }
