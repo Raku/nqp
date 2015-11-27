@@ -194,8 +194,7 @@ public class AsyncSocketHandle implements IIOClosable, IIOEncodable {
 
                 try {
                     if (numRead == -1) {
-                        task.seq = -1;
-                        callback(curTC, task, -1, Str, Null);
+                        callback(curTC, task, task.seq, Str, Null);
                     } else {
                         readBuffer.flip();
                         SixModelObject decoded = decoder.decode(tc, readBuffer, numRead);
