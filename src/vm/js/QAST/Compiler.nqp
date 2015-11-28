@@ -2609,7 +2609,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                         my $needs_cont := self.unique_var('cont');
                         my $cont_expr := self.unique_var('result');
                         @setup.push("var {$chunk.cont} = function({$chunk.expr}) \{\n");
-                        @setup.push("return function() \{$needs_cont\($result\)\}\n");
+                        @setup.push("return function() \{return $needs_cont\($result\)\}\n");
                         @setup.push("\};\n");
                     }
                 } else {
@@ -2638,7 +2638,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 if $i == $n - 1 && $used_cps {
                     $needs_cont := self.unique_var('cont');
                     $cont_expr := self.unique_var('result');
-                    @setup.push("return function() \{$needs_cont\($result\)\}\n");
+                    @setup.push("return function() \{return $needs_cont\($result\)\}\n");
                 }
             } else {
                 nqp::die("Unknown type seen by compile_all_the_statements");

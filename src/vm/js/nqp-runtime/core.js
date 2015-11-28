@@ -707,9 +707,9 @@ op.continuationreset = function(ctx, tag, continuation) {
 };
 
 op.continuationcontrol = function(ctx, protect, tag, run, cont) {
-  run.$callCPS(ctx, {}, cont, function() {
+  startTrampoline(run.$callCPS(ctx, {}, cont, function() {
     console.log("hmm what should we do");
-  });
+  }));
   return null;
 };
 
