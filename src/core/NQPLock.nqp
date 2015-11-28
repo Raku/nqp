@@ -19,7 +19,10 @@ my class NQPLock is repr('ReentrantMutex') {
         nqp::lock(self);
         my $res := $code();
         nqp::unlock(self);
-        CATCH { nqp::unlock(self); }
+        CATCH {
+            nqp::unlock(self);
+            nqp::rethrow($!);
+        }
         $res
     }
 
