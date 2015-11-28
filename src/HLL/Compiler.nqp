@@ -493,7 +493,13 @@ class HLL::Compiler does HLL::Backend::Default {
     method version() {
         my $version := %!config<version>;
         my $backver := $!backend.version_string();
-        nqp::say("This is $!language version $version built on $backver");
+	my $language := $!language;
+	if $language eq 'perl6' {    # XXX This hardwired info needs to come from somewhere else
+	    nqp::say("This is rakudo version $version built on $backver implementing Perl v6.b.");
+	}
+	else {
+	    nqp::say("This is $language version $version built on $backver.");
+	}
         nqp::exit(0);
     }
 
