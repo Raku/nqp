@@ -119,6 +119,10 @@ class ChunkCPS is Chunk {
         Chunk.HOW.method_table(Chunk)<BUILD>(self, $type, $expr, @setup, :$node);
         $!cont := $cont;
     }
+
+    method cont() {
+        $!cont;
+    }
 }
 
 # It only makes sense to serialize a serialization context once, so when cross compiling we cache the result
@@ -388,8 +392,8 @@ class QAST::OperationsJS {
         if $cps {
             my $cont := $comp.unique_var('cont');
             my $result := $comp.unique_var('result');
-            @exprs.unshift($cont);
-            @setup.push($cb(|@exprs));
+            @exprs.push($cont);
+            @setup.push($cb(|@exprs) ~ ";\n");
             ChunkCPS.new($return_type, $result, @setup, $cont, :$node);
         } else {
             Chunk.new($return_type, $cb(|@exprs), @setup, :$node);
@@ -1402,7 +1406,7 @@ class QAST::OperationsJS {
     add_simple_op('continuationreset', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects, :ctx);
     add_simple_op('continuationinvoke', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects, :ctx);
 
-    add_simple_op('continuationcontrol', $T_OBJ, [$T_INT, $T_OBJ, $T_OBJ], :sideffects, :ctx, :cps);
+    add_simple_op('continuationcontrol', $T_OBJ, [$T_INT, $T_OBJ, $T_OBJ], :ctx, :cps);
 
     method compile_op($comp, $op, :$want, :$cps) {
         # TODO cps
@@ -2312,7 +2316,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my @setup;
 
         if $cps {
-            @sig.push('cont');
+            @sig.push($cps);
         }
 
         my $bind_named := '';
@@ -2393,8 +2397,14 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         Chunk.new($T_NONVAL, nqp::join(',', @sig), @setup);
     }
 
+    proto method coerce($chunk, $desired) { * }
+    
+    multi method coerce(ChunkCPS $chunk, $desired) {
+        # TODO 
+        $chunk;
+    }
 
-    method coerce($chunk, $desired) {
+    multi method coerce(Chunk $chunk, $desired) {
         my $got := $chunk.type;
         if $got != $desired {
             if $desired == $T_VOID {
@@ -2559,27 +2569,80 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
 #        my $all_void := $*WANT == $T_VOID;
 
-        unless nqp::defined($resultchild) {
-            $resultchild := $n - 1;
-        }
+        my $result_var;
 
         my $result := "";
 
+        if nqp::defined($resultchild) {
+            $result_var := $*BLOCK.add_tmp;
+            $result := $result_var;
+        } else {
+            $resultchild := $n - 1;
+        }
+
+
+        my $needs_cont;
+        my $cont_expr;
+
+        my $used_cps := 0;
+
         my sub compile_statements($i) {
+            if $i >= $n {
+                return;
+            }
+
+
             my $chunk := self.as_js(@stmts[$i], :want($i == $resultchild ?? $want !! $T_VOID), :$cps);
-            $result := $chunk.expr if $i == $resultchild;
-            nqp::push(@setup, $chunk);
-            $i := $i + 1;
-            if $i < $n {
-                compile_statements($i);
+            if nqp::istype($chunk, ChunkCPS) {
+                $used_cps := 1;
+                if $i == $n - 1 {
+                    if $i == $resultchild {
+                        $needs_cont := $chunk.cont;
+                        $cont_expr  := $chunk.expr;
+                    } else {
+                        my $needs_cont := slef.unique_var('cont');
+                        my $cont_expr := self.unique_var('result');
+                        @setup.push("var {$chunk.cont} = function({$chunk.expr}) \{\n");
+                        @setup.push("return function() \{$needs_cont\($result\)\}\n");
+                        @setup.push("\};\n");
+                    }
+                } else {
+                    @setup.push("var {$chunk.cont} = function({$chunk.expr}) \{\n");
+                    $result := $chunk.expr if $i == $resultchild;
+                    compile_statements($i+1);
+                    @setup.push("\};\n");
+                }
+                @setup.push($chunk);
+            } elsif nqp::istype($chunk, Chunk) {
+                nqp::push(@setup, $chunk);
+
+                if $i == $resultchild {
+                    if $result_var {
+                        @setup.push("$result_var := {$chunk.expr};\n");
+                    } else {
+                        $result := $chunk.expr;
+                    }
+                }
+
+                compile_statements($i+1);
+
+                if $i == $n - 1 && $used_cps {
+                    $needs_cont := self.unique_var('cont');
+                    $cont_expr := self.unique_var('result');
+                    @setup.push("return function() \{$needs_cont\($result\)\}\n");
+                }
+            } else {
+                self.NYI("Unknown type seen by compile_all_the_statements");
             }
         }
 
-        if $n > 0 {
-           compile_statements(0);
-        }
+        compile_statements(0);
 
-        Chunk.new($want, $result, @setup);
+        if $needs_cont {
+            ChunkCPS.new($want, $result, @setup, $needs_cont);
+        } else {
+            Chunk.new($want, $result, @setup);
+        }
     }
 
 
@@ -2682,9 +2745,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             @clone_inners.push("$reg = $cuid.closure");
             @clone_inners.push(%*BLOCKS_DONE{$_.key});
-            @clone_inners.push(".cps");
-            @clone_inners.push(%*BLOCKS_DONE_CPS{$_.key});
-            @clone_inners.push(";\n");
+            if %*BLOCKS_DONE_CPS{$_.key} {
+                @clone_inners.push(".CPS");
+                @clone_inners.push(%*BLOCKS_DONE_CPS{$_.key});
+                @clone_inners.push(";\n");
+            } else {
+                @clone_inners.push(".sameCPS();\n");
+            }
         }
         Chunk.void(|@clone_inners);
     }
@@ -2740,27 +2807,33 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             # The CPS version
 
+
             my $stmts_cps := self.compile_all_the_statements($node, $body_want, :cps);
 
-            my $sig_cps := self.compile_sig($*BLOCK.params, :cps);
+            if nqp::istype($stmts_cps, ChunkCPS) {
+                my $sig_cps := self.compile_sig($*BLOCK.params, :cps($stmts_cps.cont));
 
-            my @function_cps := [
-                "function({$sig.expr}) \{\n",
-                self.setup_setting($node),
-                self.declare_js_vars($*BLOCK.tmps),
-                self.declare_js_vars($*BLOCK.js_lexicals),
-                $create_ctx,
-                $sig,
-                self.clone_inners($*BLOCK),
-                self.capture_inners($*BLOCK),
-                $stmts,
-                "return {$stmts.expr};\n",
-                "\}"
-            ];
+                my @function_cps := [
+                    "function({$sig_cps.expr}) \{\n",
+                    self.setup_setting($node),
+                    self.declare_js_vars($*BLOCK.tmps),
+                    self.declare_js_vars($*BLOCK.js_lexicals),
+                    $create_ctx,
+                    $sig,
+                    self.clone_inners($*BLOCK),
+                    self.capture_inners($*BLOCK),
+                    $stmts_cps,
+                    "return {$stmts_cps.expr};\n",
+                    "\}"
+                ];
+                %*BLOCKS_DONE_CPS{$node.cuid} := Chunk.void("(", |@function_cps, ")");
+            } else {
+                #say("/* SKIPPING: {$stmts_cps.join} */\n");
+            }
+
 
             %*BLOCKS_DONE{$node.cuid} := Chunk.void("(", |@function, ")");
 
-            %*BLOCKS_DONE_CPS{$node.cuid} := Chunk.void("(", |@function_cps, ")");
 
                 
             if self.is_block_part_of_sc($node) {

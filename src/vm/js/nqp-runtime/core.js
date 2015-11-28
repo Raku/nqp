@@ -698,14 +698,20 @@ function startTrampoline(thunk_) {
 
 op.continuationreset = function(ctx, tag, continuation) {
   startTrampoline(function() {
-    continuation.$callCPS(ctx, {});
+    continuation.$callCPS(ctx, {}, function() {
+      console.log("we reached the end of our trampoline experience");
+    });
   });
 };
 
-op.continuationcontrol = function(ctx, cont, protect, tag, run) {
-  console.log("got continuation", cont);
+op.continuationcontrol = function(ctx, protect, tag, run, cont) {
+  run.$callCPS(ctx, {}, cont, function() {
+    console.log("hmm what should we do");
+  });
+  return null;
 };
 
 op.continuationinvoke = function(ctx, cont, inject) {
-  console.log("invoking continuation", cont);
+  // TODO inject
+  startTrampoline(cont);
 };
