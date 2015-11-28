@@ -694,6 +694,7 @@ function startTrampoline(thunk_) {
   while (thunk) {
     thunk = thunk();
   }
+  console.log("ended trampoline");
 };
 
 var continuationValue;

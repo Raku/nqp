@@ -2560,26 +2560,29 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         && nqp::istype($node[0][0], QAST::Var)
         && $node[0][0].name eq 'ctxsave';
     }
+    
+    method chunk_sequence(@chunks, $type, :$node, :$result_child, :$expr) {
+        if nqp::defined($expr) && nqp::defined($result_child) {
+            nqp::die("Can't pass both a :expr and :result_child");
+        }
 
-    # TODO save the value of the last statement
-    method compile_all_the_statements(QAST::Stmts $node, $want, :$resultchild, :$cps) {
         my @setup;
-        my @stmts := $node.list;
-        my int $n := +@stmts;
 
-#        my $all_void := $*WANT == $T_VOID;
+        my int $n := +@chunks;
 
         my $result_var;
 
-        my $result := "";
+        my $result;
 
-        if nqp::defined($resultchild) {
-            $result_var := $*BLOCK.add_tmp;
-            $result := $result_var;
-        } else {
-            $resultchild := $n - 1;
+        if nqp::defined($expr) {
+            $result := $expr;
         }
 
+
+        if nqp::defined($result_child) && $result_child != $n - 1 {
+            $result_var := $*BLOCK.add_tmp;
+            $result := $result_var;
+        }
 
         my $needs_cont;
         my $cont_expr;
@@ -2591,16 +2594,15 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 return;
             }
 
-
-            my $chunk := self.as_js(@stmts[$i], :want($i == $resultchild ?? $want !! $T_VOID), :$cps);
+            my $chunk := @chunks[$i];
             if nqp::istype($chunk, ChunkCPS) {
                 $used_cps := 1;
                 if $i == $n - 1 {
-                    if $i == $resultchild {
+                    if $i == $result_child {
                         $needs_cont := $chunk.cont;
                         $cont_expr  := $chunk.expr;
                     } else {
-                        my $needs_cont := slef.unique_var('cont');
+                        my $needs_cont := self.unique_var('cont');
                         my $cont_expr := self.unique_var('result');
                         @setup.push("var {$chunk.cont} = function({$chunk.expr}) \{\n");
                         @setup.push("return function() \{$needs_cont\($result\)\}\n");
@@ -2608,7 +2610,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     }
                 } else {
                     @setup.push("var {$chunk.cont} = function({$chunk.expr}) \{\n");
-                    $result := $chunk.expr if $i == $resultchild;
+                    $result := $chunk.expr if $i == $result_child;
                     compile_statements($i+1);
                     @setup.push("\};\n");
                 }
@@ -2616,9 +2618,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             } elsif nqp::istype($chunk, Chunk) {
                 nqp::push(@setup, $chunk);
 
-                if $i == $resultchild {
+                if $i == $result_child {
                     if $result_var {
-                        @setup.push("$result_var := {$chunk.expr};\n");
+                        @setup.push("$result_var = {$chunk.expr};\n");
                     } else {
                         $result := $chunk.expr;
                     }
@@ -2639,12 +2641,24 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         compile_statements(0);
 
         if $needs_cont {
-            ChunkCPS.new($want, $result, @setup, $needs_cont);
+            ChunkCPS.new($type, $result, @setup, $needs_cont, :$node);
         } else {
-            Chunk.new($want, $result, @setup);
+            Chunk.new($type, $result, @setup, :$node);
         }
     }
+    
+    method compile_all_the_statements(QAST::Stmts $node, $want, :$result_child = +$node.list -1, :$cps) {
+        my @chunks;
+        my @stmts := $node.list;
 
+        my $i := 0;
+        for @stmts -> $stmt {
+            my $chunk := self.as_js(@stmts[$i], :want($i == $result_child ?? $want !! $T_VOID), :$cps);
+            @chunks.push($chunk);
+            $i := $i + 1;
+        }
+        self.chunk_sequence(@chunks, $want, :$result_child, :$node);
+    }
 
     multi method as_js(QAST::Block $node, :$want, :$cps) {
         my $outer     := try $*BLOCK;
