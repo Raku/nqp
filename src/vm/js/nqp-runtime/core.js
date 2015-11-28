@@ -702,3 +702,10 @@ op.continuationreset = function(ctx, tag, continuation) {
   });
 };
 
+op.continuationcontrol = function(ctx, cont, protect, tag, run) {
+  console.log("got continuation", cont);
+};
+
+op.continuationinvoke = function(ctx, cont, inject) {
+  console.log("invoking continuation", cont);
+};

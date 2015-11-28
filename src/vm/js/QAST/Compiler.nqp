@@ -106,6 +106,21 @@ class Chunk {
     }
 }
 
+class ChunkCPS is Chunk {
+    has $!cont;
+
+    method new($type, $expr, @setup, $cont, :$node) {
+        my $obj := nqp::create(self);
+        $obj.BUILD($type, $expr, @setup, $cont, :$node);
+        $obj
+    }
+
+    method BUILD($type, $expr, @setup, $cont, :$node) {
+        Chunk.HOW.method_table(Chunk)<BUILD>(self, $type, $expr, @setup, :$node);
+        $!cont := $cont;
+    }
+}
+
 # It only makes sense to serialize a serialization context once, so when cross compiling we cache the result
 role SerializeOnce {
     method serialize_sc_without_caching($sc) {
@@ -351,7 +366,7 @@ class QAST::OperationsJS {
         %ops{$op} := $cb;
     }
 
-    sub op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx) {
+    sub op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx, :$cps) {
         my @exprs;
         my @setup;
         my $i := 0;
@@ -369,7 +384,16 @@ class QAST::OperationsJS {
             @setup.push($chunk);
             $i := $i + 1;
         }
-        Chunk.new($return_type, $cb(|@exprs), @setup, :$node);
+
+        if $cps {
+            my $cont := $comp.unique_var('cont');
+            my $result := $comp.unique_var('result');
+            @exprs.unshift($cont);
+            @setup.push($cb(|@exprs));
+            ChunkCPS.new($return_type, $result, @setup, $cont, :$node);
+        } else {
+            Chunk.new($return_type, $cb(|@exprs), @setup, :$node);
+        }
     }
 
     sub runtime_op($op, @argument_types) {
@@ -378,9 +402,9 @@ class QAST::OperationsJS {
         }
     }
 
-    sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op, @argument_types), :$sideffects, :$ctx) {
+    sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op, @argument_types), :$sideffects, :$ctx, :$cps) {
         %ops{$op} := sub ($comp, $node, :$want) {
-            my $chunk := op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx);
+            my $chunk := op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx, :$cps);
             $sideffects ?? $comp.stored_result($chunk) !! $chunk;
         };
     }
@@ -1377,7 +1401,8 @@ class QAST::OperationsJS {
 
     add_simple_op('continuationreset', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects, :ctx);
     add_simple_op('continuationinvoke', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects, :ctx);
-    add_simple_op('continuationcontrol', $T_OBJ, [$T_INT, $T_OBJ, $T_OBJ], :sideffects);
+
+    add_simple_op('continuationcontrol', $T_OBJ, [$T_INT, $T_OBJ, $T_OBJ], :sideffects, :ctx, :cps);
 
     method compile_op($comp, $op, :$want, :$cps) {
         # TODO cps
@@ -2540,15 +2565,23 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my $result := "";
 
-        my int $i := 0;
-        for @stmts {
-            my $chunk := self.as_js($_, :want($i == $resultchild ?? $want !! $T_VOID), :$cps);
+        my sub compile_statements($i) {
+            my $chunk := self.as_js(@stmts[$i], :want($i == $resultchild ?? $want !! $T_VOID), :$cps);
             $result := $chunk.expr if $i == $resultchild;
             nqp::push(@setup, $chunk);
             $i := $i + 1;
+            if $i < $n {
+                compile_statements($i);
+            }
         }
+
+        if $n > 0 {
+           compile_statements(0);
+        }
+
         Chunk.new($want, $result, @setup);
     }
+
 
     multi method as_js(QAST::Block $node, :$want, :$cps) {
         my $outer     := try $*BLOCK;
