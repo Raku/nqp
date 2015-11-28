@@ -104,6 +104,10 @@ class Chunk {
     method setup() {
         @!setup;
     }
+
+    method node() {
+        $!node;
+    }
 }
 
 class ChunkCPS is Chunk {
@@ -2561,14 +2565,14 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         && $node[0][0].name eq 'ctxsave';
     }
     
-    method chunk_sequence(@chunks, $type, :$node, :$result_child, :$expr) {
+    method chunk_sequence($type, @chunks, :$node, :$result_child, :$expr) {
         if nqp::defined($expr) && nqp::defined($result_child) {
             nqp::die("Can't pass both a :expr and :result_child");
         }
 
         my @setup;
 
-        my int $n := +@chunks;
+        my int $n := nqp::elems(@chunks);
 
         my $result_var;
 
@@ -2615,14 +2619,17 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     @setup.push("\};\n");
                 }
                 @setup.push($chunk);
-            } elsif nqp::istype($chunk, Chunk) {
+            } elsif nqp::istype($chunk, Chunk) || nqp::isstr($chunk) {
+
+                my $chunk_expr := nqp::isstr($chunk) ?? $chunk !! $chunk.expr;
+
                 nqp::push(@setup, $chunk);
 
                 if $i == $result_child {
                     if $result_var {
-                        @setup.push("$result_var = {$chunk.expr};\n");
+                        @setup.push("$result_var = $chunk_expr;\n");
                     } else {
-                        $result := $chunk.expr;
+                        $result := $chunk_expr;
                     }
                 }
 
@@ -2634,7 +2641,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     @setup.push("return function() \{$needs_cont\($result\)\}\n");
                 }
             } else {
-                self.NYI("Unknown type seen by compile_all_the_statements");
+                nqp::die("Unknown type seen by compile_all_the_statements");
             }
         }
 
@@ -2657,7 +2664,14 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             @chunks.push($chunk);
             $i := $i + 1;
         }
-        self.chunk_sequence(@chunks, $want, :$result_child, :$node);
+        self.chunk_sequence($want, @chunks, :$result_child, :$node);
+    }
+
+    proto method cpsify_chunk($chunk) { * }
+    multi method cpsify_chunk(ChunkCPS $chunk) { $chunk }
+    multi method cpsify_chunk(Chunk $chunk) {
+        my $ret := self.chunk_sequence($chunk.type, $chunk.setup, :expr($chunk.expr), :node($chunk.node));
+        $ret;
     }
 
     multi method as_js(QAST::Block $node, :$want, :$cps) {
@@ -3229,10 +3243,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 # TODO better source mapping
                 # TODO use the proper type 
                 my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ), :$cps);
-                Chunk.new($type,$mangled, [$bindval,'('~$mangled~' = ('~ $bindval.expr ~ "));\n"]);
+                self.cpsify_chunk(Chunk.new($type,$mangled, [$bindval,'('~$mangled~' = ('~ $bindval.expr ~ "));\n"]));
             } else {
                 # TODO get the proper type 
-                Chunk.new($type, $mangled, [], :node($var));
+                self.cpsify_chunk(Chunk.new($type, $mangled, [], :node($var)));
             }
         } elsif ($var.scope eq 'positional') {
             # TODO work on things other than nqp lists
