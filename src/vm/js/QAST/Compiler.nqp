@@ -2774,7 +2774,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             } elsif %*BLOCKS_DONE_CPS{$_.key} {
                 @clone_inners.push("$reg = $cuid.onlyCPS()");
             } else {
-                say("//Broken block: {$_.key}");
+                nqp::die("//Broken block: {$_.key}");
             }
 
             if %*BLOCKS_DONE_CPS{$_.key} {
