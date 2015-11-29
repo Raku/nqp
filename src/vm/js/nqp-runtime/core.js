@@ -714,7 +714,8 @@ op.continuationcontrol = function(ctx, protect, tag, run, cont) {
 };
 
 op.continuationinvoke = function(ctx, cont, inject) {
-  // TODO inject
-  startTrampoline(cont);
+  // TODO really place inject inside the cont
+  var value = inject.$call(ctx, {});
+  startTrampoline(cont(value));
   return continuationValue;
 };
