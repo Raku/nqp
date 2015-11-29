@@ -174,6 +174,9 @@ exports.to_bool = function(arg, ctx) {
     return 0;
   } else if (arg.$$to_bool) {
     return arg.$$to_bool(ctx);
+  } else if (typeof arg == 'function') { 
+    // needed for continuations
+    return 1;
   } else {
     throw "Can't decide if arg is true";
   }
