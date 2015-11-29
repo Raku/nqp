@@ -60,7 +60,12 @@ CodeRef.prototype.sameCPS = function(block) {
   return this;
 };
 
-
+CodeRef.prototype.onlyCPS = function(block) {
+  this.$call = function() {
+    throw "this block can be only called in CPS mode";
+  };
+  return this;
+};
 
 CodeRef.prototype.setCodeObj = function(codeObj) {
   this.codeObj = codeObj;

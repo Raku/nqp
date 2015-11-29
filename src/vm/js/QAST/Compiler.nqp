@@ -2771,8 +2771,15 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             my $reg   := $_.value;
             my $cuid := self.mangled_cuid($_.key);
 
-            @clone_inners.push("$reg = $cuid.closure");
-            @clone_inners.push(%*BLOCKS_DONE{$_.key});
+            if %*BLOCKS_DONE{$_.key} {
+                @clone_inners.push("$reg = $cuid.closure");
+                @clone_inners.push(%*BLOCKS_DONE{$_.key});
+            } elsif %*BLOCKS_DONE_CPS{$_.key} {
+                @clone_inners.push("$reg = $cuid.onlyCPS()");
+            } else {
+                say("//Broken block: {$_.key}");
+            }
+
             if %*BLOCKS_DONE_CPS{$_.key} {
                 @clone_inners.push(".CPS");
                 @clone_inners.push(%*BLOCKS_DONE_CPS{$_.key});
@@ -2817,21 +2824,41 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             my $stmts := self.compile_all_the_statements($node, $body_want);
 
-            my $sig := self.compile_sig($*BLOCK.params);
+            if nqp::istype($stmts, ChunkCPS) {
+                say("//can't emit closure version of block");
+            } else {
+                my $sig := self.compile_sig($*BLOCK.params);
 
-            my @function := [
-                "function({$sig.expr}) \{\n",
-                self.setup_setting($node),
-                self.declare_js_vars($*BLOCK.tmps),
-                self.declare_js_vars($*BLOCK.js_lexicals),
-                $create_ctx,
-                $sig,
-                self.clone_inners($*BLOCK),
-                self.capture_inners($*BLOCK),
-                $stmts,
-                "return {$stmts.expr};\n",
-                "\}"
-            ];
+                my @function := [
+                    "function({$sig.expr}) \{\n",
+                    self.setup_setting($node),
+                    self.declare_js_vars($*BLOCK.tmps),
+                    self.declare_js_vars($*BLOCK.js_lexicals),
+                    $create_ctx,
+                    $sig,
+                    self.clone_inners($*BLOCK),
+                    self.capture_inners($*BLOCK),
+                    $stmts,
+                    "return {$stmts.expr};\n",
+                    "\}"
+                ];
+                %*BLOCKS_DONE{$node.cuid} := Chunk.void("(", |@function, ")");
+
+                if self.is_block_part_of_sc($node) {
+                    if $node.blocktype eq 'immediate' {
+                        # TODO think about that, and find a way to test this
+                        #say("// it's an immediate one");
+                    } else {
+                        %!serialized_code_ref_info{$node.cuid} := SerializedCodeRefInfo.new(
+                            closure_template => Chunk.new($T_OBJ, "", @function).join(),
+                            ctx => $*CTX,
+                            outer_ctx => (nqp::defined($*BLOCK.outer) ?? $*BLOCK.outer.ctx !! ""),
+                            static_info => self.static_info_for_lexicals($*BLOCK)
+                        );
+                    }
+                }
+            }
+
 
             # The CPS version
 
@@ -2847,7 +2874,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     self.declare_js_vars($*BLOCK.tmps),
                     self.declare_js_vars($*BLOCK.js_lexicals),
                     $create_ctx,
-                    $sig,
+                    $sig_cps,
                     self.clone_inners($*BLOCK),
                     self.capture_inners($*BLOCK),
                     $stmts_cps,
@@ -2860,23 +2887,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
 
 
-            %*BLOCKS_DONE{$node.cuid} := Chunk.void("(", |@function, ")");
 
 
                 
-            if self.is_block_part_of_sc($node) {
-                if $node.blocktype eq 'immediate' {
-                    # TODO think about that, and find a way to test this
-                    #say("// it's an immediate one");
-                } else {
-                    %!serialized_code_ref_info{$node.cuid} := SerializedCodeRefInfo.new(
-                        closure_template => Chunk.new($T_OBJ, "", @function).join(),
-                        ctx => $*CTX,
-                        outer_ctx => (nqp::defined($*BLOCK.outer) ?? $*BLOCK.outer.ctx !! ""),
-                        static_info => self.static_info_for_lexicals($*BLOCK)
-                    );
-                }
-            }
 
         }
 
