@@ -2301,11 +2301,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         if nqp::islist($groups) {
             my @exprs;
 
-            my @setup := [];
-
             for $groups -> $group {
                 @exprs.push($group.expr);
-                @setup.push($group);
             }
 
             Chunk.new($T_NONVAL, @exprs.shift ~ '.concat(' ~ nqp::join(',', @exprs) ~ ')', $groups);
