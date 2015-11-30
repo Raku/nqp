@@ -727,7 +727,7 @@ class QAST::OperationsJS {
 
            @setup.push("$list = " ~ '[' ~ nqp::join(',', @exprs) ~ "];\n");
 
-           Chunk.new($T_OBJ, $list , @setup, :$node);
+           $comp.cpsify_chunk(Chunk.new($T_OBJ, $list , @setup, :$node));
         });
     }
 
@@ -2617,8 +2617,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         && $node[0][0].name eq 'ctxsave';
     }
     
-    method chunk_sequence($type, @chunks, :$node, :$result_child, :$expr) {
-        if nqp::defined($expr) && nqp::defined($result_child) {
+    method chunk_sequence($type, @chunks, :$node, :$result_child = -1, :$expr) {
+        if nqp::defined($expr) && $result_child != -1 {
             nqp::die("Can't pass both a :expr and :result_child");
         }
 
@@ -2635,7 +2635,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
 
 
-        if nqp::defined($result_child) && $result_child != $n - 1 {
+        if $result_child != -1 && $result_child != $n - 1 {
             $result_var := $*BLOCK.add_tmp;
             $result := $result_var;
         }
