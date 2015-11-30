@@ -374,7 +374,7 @@ class QAST::OperationsJS {
         %ops{$op} := $cb;
     }
 
-    sub op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx, :$cps) {
+    sub op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx, :$required_cps) {
         my @exprs;
         my @setup;
         my $i := 0;
@@ -393,7 +393,7 @@ class QAST::OperationsJS {
             $i := $i + 1;
         }
 
-        if $cps {
+        if $required_cps {
             my $cont := $comp.unique_var('cont');
             my $result := $comp.unique_var('result');
             @exprs.push($cont);
@@ -410,18 +410,18 @@ class QAST::OperationsJS {
         }
     }
 
-    sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op, @argument_types), :$sideffects, :$ctx, :$cps) {
-        %ops{$op} := sub ($comp, $node, :$want) {
-            my $chunk := op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx, :$cps);
+    sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op, @argument_types), :$sideffects, :$ctx, :$required_cps) {
+        %ops{$op} := sub ($comp, $node, :$want, :$cps) {
+            my $chunk := op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx, :$required_cps);
             $sideffects ?? $comp.stored_result($chunk) !! $chunk;
         };
     }
 
     sub add_infix_op($op, $left_type, $syntax, $right_type, $return_type) {
-        %ops{$op} := sub ($comp, $node, :$want) {
-            my $left  := $comp.as_js($node[0], :want($left_type));
-            my $right := $comp.as_js($node[1], :want($right_type));
-            Chunk.new($return_type, "({$left.expr} $syntax {$right.expr})", [$left, $right], :$node);
+        %ops{$op} := sub ($comp, $node, :$want, :$cps) {
+            my $left  := $comp.as_js($node[0], :want($left_type), :$cps);
+            my $right := $comp.as_js($node[1], :want($right_type), :$cps);
+            $comp.cpsify_chunk(Chunk.new($return_type, "({$left.expr} $syntax {$right.expr})", [$left, $right], :$node));
         };
     }
 
@@ -517,7 +517,7 @@ class QAST::OperationsJS {
     add_cmp_op('cmp_s', $T_STR);
 
     for <preinc predec> -> $op {
-        add_op($op, sub ($comp, $node, :$want) {
+        add_op($op, sub ($comp, $node, :$want, :$cps) {
             my $action := $op eq 'preinc' ?? 'add_i' !! 'sub_i';
             $comp.as_js(
                 QAST::Op.new(
@@ -525,13 +525,15 @@ class QAST::OperationsJS {
                     $node[0],
                     QAST::Op.new(:op($action),$node[0],QAST::IVal.new(:value(1)))
                 ),
-                :$want
+                :$want,
+                :$cps
             );
         });
     }
 
     for <postinc postdec> -> $op {
-        add_op($op, sub ($comp, $node, :$want) {
+        add_op($op, sub ($comp, $node, :$want, :$cps) {
+            # TODO CPS
             my $tmp := $*BLOCK.add_tmp();
             my $var := $comp.as_js($node[0], :want($T_INT));
             my $action := $op eq 'postinc' ?? 'add_i' !! 'sub_i';
@@ -661,29 +663,29 @@ class QAST::OperationsJS {
     add_simple_op('isconcrete', $T_INT, [$T_OBJ]);
 
     # XXX explicit takeclosure will go away under new model (which nqp-m uses); for now, no-op it.
-    add_op('takeclosure', sub ($comp, $node, :$want) {
-        $comp.as_js($node[0], :want($want));
+    add_op('takeclosure', sub ($comp, $node, :$want, :$cps) {
+        $comp.as_js($node[0], :want($want), :$cps);
     });
 
-    add_op('istrue', sub ($comp, $node, :$want) {
-        $comp.as_js($node[0], :want($T_BOOL));
+    add_op('istrue', sub ($comp, $node, :$want, :$cps) {
+        $comp.as_js($node[0], :want($T_BOOL), :$cps);
     });
-    add_op('stringify', sub ($comp, $node, :$want) {
-        $comp.as_js($node[0], :want($T_STR));
+    add_op('stringify', sub ($comp, $node, :$want, :$cps) {
+        $comp.as_js($node[0], :want($T_STR), :$cps);
     });
-    add_op('numify', sub ($comp, $node, :$want) {
-        $comp.as_js($node[0], :want($T_NUM));
+    add_op('numify', sub ($comp, $node, :$want, :$cps) {
+        $comp.as_js($node[0], :want($T_NUM), :$cps);
     });
 
     add_simple_op('falsey', $T_BOOL, [$T_BOOL], sub ($boolified) {"(!$boolified)"});
 
     add_simple_op('not_i', $T_BOOL, [$T_INT], sub ($int) {"(!$int)"});
 
-    add_op('locallifetime', sub ($comp, $node, :$want) {
-        $comp.as_js($node[0], :want($want));
+    add_op('locallifetime', sub ($comp, $node, :$want, :$cps) {
+        $comp.as_js($node[0], :want($want), :$cps);
     });
 
-    add_op('bind', sub ($comp, $node, :$want) {
+    add_op('bind', sub ($comp, $node, :$want, :$cps) {
         my @children := $node.list;
         if +@children != 2 {
             nqp::die("A 'bind' op must have exactly two children");
@@ -694,15 +696,15 @@ class QAST::OperationsJS {
 
         # TODO take the type of variable into account
         my $*BINDVAL := @children[1];
-        $comp.as_js(@children[0], :want($T_OBJ));
+        $comp.as_js(@children[0], :want($T_OBJ), :$cps);
     });
 
 
-    add_op('bindkey', sub ($comp, $node, :$want) {
-        $comp.bind_key($node[0], $node[1], $node[2]);
+    add_op('bindkey', sub ($comp, $node, :$want, :$cps) {
+        $comp.bind_key($node[0], $node[1], $node[2], :$cps);
     });
-    add_op('bindpos', sub ($comp, $node, :$want) {
-        $comp.bind_pos($node[0], $node[1], $node[2]);
+    add_op('bindpos', sub ($comp, $node, :$want, :$cps) {
+        $comp.bind_pos($node[0], $node[1], $node[2], :$cps);
     });
 
     add_simple_op('bindpos_i', $T_INT, [$T_OBJ, $T_INT, $T_INT], sub ($list, $index, $value) {"($list[$index] = $value)"}, :sideffects);
@@ -710,7 +712,8 @@ class QAST::OperationsJS {
     add_simple_op('bindpos_s', $T_INT, [$T_OBJ, $T_INT, $T_STR], sub ($list, $index, $value) {"($list[$index] = $value)"}, :sideffects);
 
     for ['_i', $T_INT, '', $T_OBJ, '_s', $T_STR] -> $suffix, $type {
-        add_op('list' ~ $suffix, sub ($comp, $node, :$want) {
+        add_op('list' ~ $suffix, sub ($comp, $node, :$want, :$cps) {
+           # TODO CPS
            my @setup;
            my @exprs;
 
@@ -728,7 +731,8 @@ class QAST::OperationsJS {
         });
     }
 
-    add_op('hash', sub ($comp, $node, :$want) {
+    add_op('hash', sub ($comp, $node, :$want, :$cps) {
+        # TODO CPS
         my $hash := $*BLOCK.add_tmp();
         my @setup;
         @setup.push("$hash = nqp.hash();\n");
@@ -744,7 +748,7 @@ class QAST::OperationsJS {
     add_simple_op('ishash', $T_INT, [$T_OBJ]);
 
 
-    add_op('call', sub ($comp, $node, :$want) {
+    add_op('call', sub ($comp, $node, :$want, :$cps) {
         if $*BLOCK.is_local_lexotic($node.name) {
             my $value := $comp.as_js($node[0], :want($T_OBJ));
             return Chunk.new($T_VOID, '', [$value, "return {$value.expr};\n"]);
@@ -760,18 +764,52 @@ class QAST::OperationsJS {
             ?? $comp.as_js(QAST::Var.new(:name($node.name),:scope('lexical')), :want($T_OBJ))
             !! $comp.as_js(nqp::shift($args), :want($T_OBJ));
 
-        my $compiled_args := $comp.args($args);
 
         my $call;
-        if nqp::islist($compiled_args) {
-            $compiled_args := $comp.merge_arg_groups($compiled_args);
-            $call := '.$apply(';
-        } else {
-            $call := '.$call(';
-        }
 
-        $comp.stored_result(
-            Chunk.new($T_OBJ, $callee.expr ~ $call ~ $compiled_args.expr ~ ')' , [$callee, $compiled_args], :$node), :$want);
+
+        if $cps {
+            my $cont := $comp.unique_var('cont');
+            my $result := $comp.unique_var('result');
+
+            my $compiled_args := $comp.args($args, :$cont);
+
+            my @setup;
+            @setup.push($callee);
+
+            if nqp::islist($compiled_args) {
+                for $compiled_args -> $arg_group {
+                    for $arg_group.setup -> $arg {
+                        @setup.push($arg);
+                    }
+                }
+                $compiled_args := $comp.merge_arg_groups($compiled_args);
+                $call := '.$applyCPS(';
+            } else {
+                for $compiled_args.setup -> $arg {
+                    @setup.push($arg);
+                }
+                $call := '.$callCPS(';
+            }
+
+            
+            my $call_chunk := ChunkCPS.new($T_OBJ, $result, [$callee.expr ~ $call ~ $compiled_args.expr ~ ");\n"], $cont);
+
+            @setup.push($call_chunk);
+
+            $comp.chunk_sequence($T_OBJ, @setup, :$node, :result_child(nqp::elems(@setup) - 1));
+        } else {
+            my $compiled_args := $comp.args($args);
+
+            if nqp::islist($compiled_args) {
+                $compiled_args := $comp.merge_arg_groups($compiled_args);
+                $call := '.$apply(';
+            } else {
+                $call := '.$call(';
+            }
+            $comp.stored_result(
+                Chunk.new($T_OBJ, $callee.expr ~ $call ~ $compiled_args.expr ~ ')' , [$callee, $compiled_args], :$node), :$want);
+        }
     });
 
     %ops<callstatic> := %ops<call>;
@@ -813,7 +851,8 @@ class QAST::OperationsJS {
     # TODO 
     # add_simple_op('nfatostatelist', $T_OBJ, [$T_OBJ]);
 
-    add_op('callmethod', sub ($comp, $node, :$want) {
+    add_op('callmethod', sub ($comp, $node, :$want, :$cps) {
+        #TODO CPS
 
         my @args := nqp::clone($node.list);
 
@@ -851,7 +890,8 @@ class QAST::OperationsJS {
     });
 
     # TODO - implement and bechmark different ways of preventing the try/catch from murdering performance 
-    add_op('handle', sub ($comp, $node, :$want) {
+    add_op('handle', sub ($comp, $node, :$want, :$cps) {
+        # TODO CPS
         my @children := nqp::clone($node.list());
         if @children == 0 {
             nqp::die("The 'handle' op requires at least one child");
@@ -947,9 +987,11 @@ class QAST::OperationsJS {
     add_simple_op('atpos_s', $T_STR, [$T_OBJ, $T_INT], sub ($array, $index) {"$array[$index]"});
     # HACK
     add_simple_op('atpos_i', $T_INT, [$T_OBJ, $T_INT], sub ($array, $index) {"($array[$index] === undefined ? 0 : $array[$index])"});
-    add_op('atpos', sub ($comp, $node, :$want) { $comp.atpos($node[0], $node[1], :$node) });
+    #TODO CPS
+    add_op('atpos', sub ($comp, $node, :$want, :$cps) { $comp.atpos($node[0], $node[1], :$node) });
 
-    add_op('curlexpad', sub ($comp, $node, :$want) {
+    #TODO CPS
+    add_op('curlexpad', sub ($comp, $node, :$want, :$cps) {
             my @get;
             my @set;
             for $*BLOCK.variables -> $var {
@@ -1018,7 +1060,8 @@ class QAST::OperationsJS {
     add_simple_op('typeparameterat', $T_OBJ, [$T_OBJ, $T_INT], :ctx);
 
     # TODO avoid copy & paste - move it into code shared between backends
-    add_op('defor', sub ($comp, $node, :$want) {
+    add_op('defor', sub ($comp, $node, :$want, :$cps) {
+        # TODO CPS
         if +$node.list != 2 {
             nqp::die("Operation 'defor' needs 2 operands");
         }
@@ -1040,7 +1083,8 @@ class QAST::OperationsJS {
             )), :$want)
     });
 
-    add_op('ifnull', sub ($comp, $node, :$want) {
+    add_op('ifnull', sub ($comp, $node, :$want, :$cps) {
+        # TODO CPS
         if +$node.list != 2 {
             nqp::die("Operation 'ifnull' needs 2 operands");
         }
@@ -1059,7 +1103,8 @@ class QAST::OperationsJS {
 
 
     for <if unless> -> $op_name {
-        add_op($op_name, sub ($comp, $node, :$want) {
+        add_op($op_name, sub ($comp, $node, :$want, :$cps) {
+            #TODO CPS
             unless nqp::defined($want) {
                 nqp::die("Unknown want");
             }
@@ -1145,7 +1190,8 @@ class QAST::OperationsJS {
         });
     }
 
-    add_op('for', sub ($comp, $node, :$want) {
+    add_op('for', sub ($comp, $node, :$want, :$cps) {
+        #TODO CPS
         # TODO redo etc.
 
         my $handler := 1;
@@ -1202,7 +1248,8 @@ class QAST::OperationsJS {
     });
 
     for <while until repeat_while repeat_until> -> $op {
-        add_op($op, sub ($comp, $node, :$want) {
+        add_op($op, sub ($comp, $node, :$want, :$cps) {
+            #TODO CPS
             my $label;
             my $handler := 1;
             my @operands;
@@ -1259,9 +1306,9 @@ class QAST::OperationsJS {
 
     # Constant mapping.
 
-    add_op('const', sub ($comp, $node, :$want) {
+    add_op('const', sub ($comp, $node, :$want, :$cps) {
         if nqp::existskey(%const_map, $node.name) {
-            $comp.as_js(QAST::IVal.new( :value(%const_map{$node.name})), :$want);
+            $comp.as_js(QAST::IVal.new( :value(%const_map{$node.name})), :$want, :$cps);
         } else {
             $comp.NYI("Constant "~$node.name);
         }
@@ -1273,7 +1320,8 @@ class QAST::OperationsJS {
     add_simple_op('iscclass', $T_INT, [$T_INT, $T_STR, $T_INT]);
 
     # TODO consider/handle if lexotic is not the topmost thing in a block
-    add_op('lexotic', sub ($comp, $node, :$want) {
+    add_op('lexotic', sub ($comp, $node, :$want, :$cps) {
+        #TODO CPS
         $*BLOCK.register_lexotic($node.name);
         my $inner := $comp.as_js($node[0], :$want);
 
@@ -1292,7 +1340,8 @@ class QAST::OperationsJS {
     });
 
 
-    add_op('control', sub ($comp, $node, :$want) {
+    add_op('control', sub ($comp, $node, :$want, :$cps) {
+        #TODO CPS
         $comp.throw_control_exception($node.name, $*LOOP, $node[0]);
     });
 
@@ -1410,13 +1459,12 @@ class QAST::OperationsJS {
     add_simple_op('continuationreset', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects, :ctx);
     add_simple_op('continuationinvoke', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects, :ctx);
 
-    add_simple_op('continuationcontrol', $T_OBJ, [$T_INT, $T_OBJ, $T_OBJ], :ctx, :cps);
+    add_simple_op('continuationcontrol', $T_OBJ, [$T_INT, $T_OBJ, $T_OBJ], :ctx, :required_cps);
 
     method compile_op($comp, $op, :$want, :$cps) {
-        # TODO cps
         my str $name := $op.op;
         if nqp::existskey(%ops, $name) {
-            %ops{$name}($comp, $op, :$want);
+            %ops{$name}($comp, $op, :$want, :$cps);
         } else {
             $comp.NYI("unimplemented QAST::Op {$op.op}");
         }
@@ -2201,7 +2249,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     # $args is the list of QAST::Node arguments
     # returns either a js code string which contains the arguments, or a list of js code strings that when executed create arrays of arguments (suitable for concatenating and passing into Function.apply) 
 
-    method args($args) {
+    method args($args, :$cont) {
         my @setup;
         my @args;
 
@@ -2211,29 +2259,32 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my @named_groups;
 
         my @groups := [[]];
+        
+        my $cps := nqp::istrue($cont);
+
         for $args -> $arg {
             if nqp::istype($arg,QAST::SpecialArg) {
                 if $arg.flat {
                     if $arg.named {
-                        my $arg_chunk := self.as_js($arg, :want($T_OBJ));
+                        my $arg_chunk := self.as_js($arg, :want($T_OBJ), :$cps);
                         my $unwraped := Chunk.new($T_OBJ, "nqp.unwrap_named({$arg_chunk.expr})", [$arg_chunk]);
                         @named_groups.push($unwraped);
                     } else {
-                        @groups.push(self.as_js($arg, :want($T_OBJ)));
+                        @groups.push(self.as_js($arg, :want($T_OBJ),:$cps));
                         @groups.push([]);
                     }
                 }
                 elsif $arg.named {
-                    my $compiled_arg := self.as_js($arg, :want($T_OBJ));
+                    my $compiled_arg := self.as_js($arg, :want($T_OBJ), :$cps);
                     @named.push($compiled_arg);
                     @named_exprs.push(quote_string($arg.named) ~ ":" ~ $compiled_arg.expr);
 
                 }
                 else {
-                    @groups[@groups-1].push(self.as_js($arg, :want($T_OBJ)));
+                    @groups[@groups-1].push(self.as_js($arg, :want($T_OBJ), :$cps));
                 }
             } else {
-                @groups[@groups-1].push(self.as_js($arg, :want($T_OBJ)));
+                @groups[@groups-1].push(self.as_js($arg, :want($T_OBJ), :$cps));
             }
         }
 
@@ -2249,6 +2300,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
 
         @groups[0].unshift($*CTX);
+        
+        if $cont {
+            @groups[nqp::elems(@groups)-1].push($cont);
+        }
 
         my sub chunkify(@group, $pre = '', $post = '') {
             my @exprs;
@@ -2335,7 +2390,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 if $_.default {
                     # TODO types
 
-                    my $default := self.as_js($_.default, :want($T_OBJ));
+                    my $default := self.as_js($_.default, :want($T_OBJ), :$cps);
                     @setup.push($default);
                     $value := "(_NAMED.hasOwnProperty($quoted) ? $value : {$default.expr})";
                 }
@@ -2356,7 +2411,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                my $set := "{$*CTX}[{quote_string($_.name)}] = ";
 
                if $_.default {
-                   my $default_value := self.as_js($_.default, :want($T_OBJ));
+                   my $default_value := self.as_js($_.default, :want($T_OBJ), :$cps);
 
                    @setup.push(Chunk.void(
                        "if (arguments.length < {+@sig}) \{\n",
@@ -2603,8 +2658,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                         $needs_cont := $chunk.cont;
                         $cont_expr  := $chunk.expr;
                     } else {
-                        my $needs_cont := self.unique_var('cont');
-                        my $cont_expr := self.unique_var('result');
+                        $needs_cont := self.unique_var('cont');
+                        $cont_expr := self.unique_var('result');
                         @setup.push("var {$chunk.cont} = function({$chunk.expr}) \{\n");
                         @setup.push("return function() \{return $needs_cont\($result\)\}\n");
                         @setup.push("\};\n");
@@ -2645,7 +2700,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         compile_statements(0);
 
         if $needs_cont {
-            ChunkCPS.new($type, $result, @setup, $needs_cont, :$node);
+            ChunkCPS.new($type, $cont_expr, @setup, $needs_cont, :$node);
         } else {
             Chunk.new($type, $result, @setup, :$node);
         }
@@ -2822,7 +2877,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             my $stmts := self.compile_all_the_statements($node, $body_want);
 
             if nqp::istype($stmts, ChunkCPS) {
-                say("//can't emit closure version of block");
             } else {
                 my $sig := self.compile_sig($*BLOCK.params);
 
@@ -3307,7 +3361,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
     }
 
-    method bind_key($hash, $key, $value, :$node) {
+    method bind_key($hash, $key, $value, :$node, :$cps) {
+        # TODO CPS
         my $hash_chunk := self.as_js($hash, :want($T_OBJ));
         my $key_chunk := self.as_js($key, :want($T_STR));
         my $value_chunk := self.as_js($value, :want($T_OBJ));
@@ -3315,7 +3370,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         Chunk.new($T_OBJ, $value_chunk.expr, [$hash_chunk, $key_chunk, $value_chunk, "{$hash_chunk.expr}.\$\$bindkey({$key_chunk.expr},{$value_chunk.expr});\n"], :node($node));
     }
 
-    method bind_pos($array, $index, $value, :$node) {
+    method bind_pos($array, $index, $value, :$node, :$cps) {
+        # TODO CPS
         my $array_chunk := self.as_js($array, :want($T_OBJ));
         my $index_chunk := self.as_js($index, :want($T_INT));
         my $value_chunk := self.as_js($value, :want($T_OBJ));
