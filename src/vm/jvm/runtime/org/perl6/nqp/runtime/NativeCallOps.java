@@ -155,6 +155,10 @@ public final class NativeCallOps {
                         case DOUBLE_RW:
                             ((NativeRefInstance) o).store_n(tc, ((Memory) cArgs[i]).getDouble(0));
                             break;
+                        case CPOINTER_RW:
+                            o = Ops.decont(o, tc);
+                            ((CPointerInstance) o).set_int(tc, Pointer.nativeValue(((Memory) cArgs[i]).getPointer(0)));
+                            break;
                         default:
                             refresh(o, tc);
                             break;
@@ -598,6 +602,16 @@ public final class NativeCallOps {
                     String.format("Native call expected argument that references a native number, but got %s", o));
             Memory m = new Memory(Double.SIZE);
             m.setDouble(0, (double) ((NativeRefInstance) o).fetch_n(tc));
+            return m;
+        }
+        case CPOINTER_RW: {
+            Memory m = new Memory(Pointer.SIZE);
+            o        = Ops.decont(o, tc);
+            long ptr = ((CPointerInstance) o).get_int(tc);
+            if (ptr > 0)
+                m.setPointer(0, Pointer.createConstant(ptr));
+            else
+                m.setPointer(0, null);
             return m;
         }
         default:
