@@ -425,6 +425,7 @@ class QAST::OperationsJS {
     add_infix_op('bitand_i', $T_INT, '&', $T_INT, $T_INT);
     add_infix_op('bitxor_i', $T_INT, '^', $T_INT, $T_INT);
     add_infix_op('bitshiftl_i', $T_INT, '<<', $T_INT, $T_INT);
+    add_infix_op('bitshiftr_i', $T_INT, '>>', $T_INT, $T_INT);
 
     add_infix_op('eqaddr', $T_OBJ, '===', $T_OBJ, $T_BOOL);
 
