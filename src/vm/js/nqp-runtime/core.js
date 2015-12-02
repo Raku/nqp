@@ -694,26 +694,30 @@ function startTrampoline(thunk_) {
   while (thunk) {
     thunk = thunk();
   }
-  console.log("ended trampoline");
 };
 
 var resetValue;
 var invokeValue;
 op.continuationreset = function(ctx, tag, continuation) {
   startTrampoline(function() {
-    continuation.$callCPS(ctx, {}, function(value) {
-      console.log("got to the end");
+    return continuation.$callCPS(ctx, {}, function(value) {
       resetValue = value;
       invokeValue = value;
+      return null;
     });
   });
   return resetValue;
 };
 
-op.continuationcontrol = function(ctx, protect, tag, run, cont) {
-  startTrampoline(run.$callCPS(ctx, {}, cont, function(value) {
+op.continuationresetCPS = function(ctx, tag, continuation, continuation) {
+  console.log("continuation reset in CPS mode");
+};
+
+op.continuationcontrolCPS = function(ctx, protect, tag, run, cont) {
+  startTrampoline(run.$callCPS(ctx, {}, function(value) {
     resetValue = value;
-  }));
+    return null;
+  }, cont));
   return null;
 };
 
@@ -722,4 +726,10 @@ op.continuationinvoke = function(ctx, cont, inject) {
   var value = inject.$call(ctx, {});
   startTrampoline(cont(value));
   return invokeValue;
+};
+
+op.continuationinvokeCPS = function(ctx, invokedCont, inject, cont) {
+  // TODO really place inject inside the cont, use callCPS
+  var value = inject.$call(ctx, {});
+  return invokedCont(value);
 };

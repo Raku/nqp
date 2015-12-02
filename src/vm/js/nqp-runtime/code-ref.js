@@ -53,9 +53,8 @@ CodeRef.prototype.CPS = function(block) {
 CodeRef.prototype.sameCPS = function(block) {
   this.$callCPS = function() {
     var args = Array.prototype.slice.call(arguments);
-    var cont = args.pop();
+    var cont = args.splice(2,1)[0];
     return cont(this.$call.apply(this, args));
-    console.log('cont', cont);
   };
   return this;
 };

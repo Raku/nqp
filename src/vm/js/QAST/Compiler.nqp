@@ -374,7 +374,7 @@ class QAST::OperationsJS {
         %ops{$op} := $cb;
     }
 
-    sub op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx, :$required_cps) {
+    sub op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx, :$cps) {
         my @exprs;
         my @setup;
         my $i := 0;
@@ -393,11 +393,11 @@ class QAST::OperationsJS {
             $i := $i + 1;
         }
 
-        if $required_cps {
+        if $cps {
             my $cont := $comp.unique_var('cont');
             my $result := $comp.unique_var('result');
             @exprs.push($cont);
-            @setup.push($cb(|@exprs) ~ ";\n");
+            @setup.push('return ' ~ $cb(|@exprs, :$cps) ~ ";\n");
             ChunkCPS.new($return_type, $result, @setup, $cont, :$node);
         } else {
             Chunk.new($return_type, $cb(|@exprs), @setup, :$node);
@@ -405,15 +405,16 @@ class QAST::OperationsJS {
     }
 
     sub runtime_op($op, @argument_types) {
-        sub (*@args) {
-            "nqp.op.$op({nqp::join(',', @args)})";
+        sub (*@args, :$cps) {
+            "nqp.op.$op{$cps ?? 'CPS' !! ''}({nqp::join(',', @args)})";
         }
     }
 
-    sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op, @argument_types), :$sideffects, :$ctx, :$required_cps) {
+    sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op, @argument_types), :$sideffects, :$ctx, :$required_cps, :$cps_aware) {
         %ops{$op} := sub ($comp, $node, :$want, :$cps) {
-            my $chunk := op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx, :$required_cps);
-            $sideffects ?? $comp.stored_result($chunk) !! $chunk;
+            my $use_cps := $required_cps || ($cps_aware && $cps);
+            my $chunk := op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx, :cps($use_cps));
+            ($sideffects && !$use_cps) ?? $comp.stored_result($chunk) !! $chunk;
         };
     }
 
@@ -793,7 +794,7 @@ class QAST::OperationsJS {
             }
 
             
-            my $call_chunk := ChunkCPS.new($T_OBJ, $result, [$callee.expr ~ $call ~ $compiled_args.expr ~ ");\n"], $cont);
+            my $call_chunk := ChunkCPS.new($T_OBJ, $result, ['return ' ~ $callee.expr ~ $call ~ $compiled_args.expr ~ ");\n"], $cont);
 
             @setup.push($call_chunk);
 
@@ -1457,7 +1458,7 @@ class QAST::OperationsJS {
     add_simple_op('callercode', $T_OBJ, []);
 
     add_simple_op('continuationreset', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects, :ctx);
-    add_simple_op('continuationinvoke', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects, :ctx);
+    add_simple_op('continuationinvoke', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects, :ctx, :cps_aware);
 
     add_simple_op('continuationcontrol', $T_OBJ, [$T_INT, $T_OBJ, $T_OBJ], :ctx, :required_cps);
 
@@ -2292,6 +2293,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         if @named || @named_groups == 0 {
             @named_groups.push(Chunk.new($T_OBJ,'{' ~ nqp::join(',',@named_exprs) ~ '}', @named));
         }
+        if $cont {
+            @groups[0].unshift($cont);
+        }
 
         if +@named_groups > 1 {
             @groups[0].unshift(Chunk.new($T_NONVAL, 'nqp.named([' ~ join_exprs(',', @named_groups) ~ '])', @named_groups));
@@ -2301,9 +2305,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         @groups[0].unshift($*CTX);
         
-        if $cont {
-            @groups[nqp::elems(@groups)-1].push($cont);
-        }
 
         my sub chunkify(@group, $pre = '', $post = '') {
             my @exprs;
@@ -2913,28 +2914,38 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             # The CPS version
 
+            # TODO recreate other things than block
 
-            my $stmts_cps := self.compile_all_the_statements($node, $body_want, :cps);
+            {
+                my $*BLOCK := BlockInfo.new($node, (nqp::defined($outer) ?? $outer !! NQPMu));
 
-            if nqp::istype($stmts_cps, ChunkCPS) {
-                my $sig_cps := self.compile_sig($*BLOCK.params, :cps($stmts_cps.cont));
+                my $stmts_cps := self.compile_all_the_statements($node, $body_want, :cps);
 
-                my @function_cps := [
-                    "function({$sig_cps.expr}) \{\n",
-                    self.setup_setting($node),
-                    self.declare_js_vars($*BLOCK.tmps),
-                    self.declare_js_vars($*BLOCK.js_lexicals),
-                    $create_ctx,
-                    $sig_cps,
-                    self.clone_inners($*BLOCK),
-                    self.capture_inners($*BLOCK),
-                    $stmts_cps,
-                    "return {$stmts_cps.expr};\n",
-                    "\}"
-                ];
-                %*BLOCKS_DONE_CPS{$node.cuid} := Chunk.void("(", |@function_cps, ")");
-            } else {
-                #say("/* SKIPPING: {$stmts_cps.join} */\n");
+                if nqp::istype($stmts_cps, ChunkCPS) {
+                    self.compile_sig($*BLOCK.params, :cps($stmts_cps.cont));
+                    self.compile_sig($*BLOCK.params, :cps($stmts_cps.cont));
+                    self.compile_sig($*BLOCK.params, :cps($stmts_cps.cont));
+                    self.compile_sig($*BLOCK.params, :cps($stmts_cps.cont));
+
+                    my $sig_cps := self.compile_sig($*BLOCK.params, :cps($stmts_cps.cont));
+
+
+                    my @function_cps := [
+                        "function({$sig_cps.expr}) \{\n",
+                        self.setup_setting($node),
+                        self.declare_js_vars($*BLOCK.tmps),
+                        self.declare_js_vars($*BLOCK.js_lexicals),
+                        $create_ctx,
+                        $sig_cps,
+                        self.clone_inners($*BLOCK),
+                        self.capture_inners($*BLOCK),
+                        $stmts_cps,
+                        "\}"
+                    ];
+                    %*BLOCKS_DONE_CPS{$node.cuid} := Chunk.void("(", |@function_cps, ")");
+                } else {
+                    #say("/* SKIPPING: {$stmts_cps.join} */\n");
+                }
             }
 
 
