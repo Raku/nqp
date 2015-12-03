@@ -3513,6 +3513,7 @@ public final class Ops {
     }
     public static long istrue(SixModelObject obj, ThreadContext tc) {
         obj = decont(obj, tc);
+        if (obj == null) return 0;
         BoolificationSpec bs = obj.st.BoolificationSpec;
         switch (bs == null ? BoolificationSpec.MODE_NOT_TYPE_OBJECT : bs.Mode) {
         case BoolificationSpec.MODE_CALL_METHOD:
