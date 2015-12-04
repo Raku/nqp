@@ -30,10 +30,10 @@ public class AsyncServerSocketHandle implements IIOBindable, IIOCancelable {
     }
 
     @Override
-    public void bind(ThreadContext tc, String host, int port) {
+    public void bind(ThreadContext tc, String host, int port, int backlog) {
         try {
             InetSocketAddress addr = new InetSocketAddress(host, port);
-            listenChan.bind(addr);
+            listenChan.bind(addr, backlog);
         } catch (UnresolvedAddressException uae) {
             ExceptionHandling.dieInternal(tc, "Failed to resolve host name");
         } catch (IOException e) {
