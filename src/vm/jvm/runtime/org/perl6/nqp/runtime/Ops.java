@@ -359,10 +359,10 @@ public final class Ops {
         return obj;
     }
 
-    public static SixModelObject bindsock(SixModelObject obj, String host, long port, ThreadContext tc) {
+    public static SixModelObject bindsock(SixModelObject obj, String host, long port, long backlog, ThreadContext tc) {
         IOHandleInstance h = (IOHandleInstance)obj;
         if (h.handle instanceof IIOBindable) {
-            ((IIOBindable)h.handle).bind(tc, host, (int) port);
+            ((IIOBindable)h.handle).bind(tc, host, (int) port, (int)backlog);
         } else {
             ExceptionHandling.dieInternal(tc,
                 "This handle does not support bind");
