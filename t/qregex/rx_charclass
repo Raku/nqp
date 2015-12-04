@@ -86,7 +86,6 @@
 <[A..Z0..9]>		abcdef		n	two enumerated ranges
 <[A..Z0..9]>		abcDef		y	two enumerated ranges
 
-# todo :pge<regression>
 abc <![d]>		abc		y	negated charclass at end of string (issue 9)
 
 <[abc]-[a]>		abc		<b>		character class substraction 1
