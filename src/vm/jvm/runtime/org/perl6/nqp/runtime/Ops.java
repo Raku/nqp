@@ -929,9 +929,9 @@ public final class Ops {
         try {
             String os = System.getProperty("os.name").toLowerCase();
             if (os.indexOf("win") >= 0)
-                Files.createDirectory(Paths.get(path));
+                Files.createDirectories(Paths.get(path));
             else
-                Files.createDirectory(Paths.get(path),
+                Files.createDirectories(Paths.get(path),
                     PosixFilePermissions.asFileAttribute(modeToPosixFilePermission(mode)));
         }
         catch (Exception e) {
