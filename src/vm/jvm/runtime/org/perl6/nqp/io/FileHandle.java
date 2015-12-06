@@ -100,12 +100,23 @@ public class FileHandle extends SyncHandle implements IIOSeekable, IIOLockable {
     }
 
     public void lock(ThreadContext tc, long flag) {
-        try {
-            lock = fc.lock();
-        } catch (IOException e) {
-            throw ExceptionHandling.dieInternal(tc, e);
-        } catch (IllegalArgumentException e) {
-            throw ExceptionHandling.dieInternal(tc, e);
+        if (lock != null && lock.acquiredBy() == fc) {
+            /* XXX: *might* not be quite the exact condition we want,
+             *      which more precisely would be "are we the thread that locked?"
+             *      but the Lock doesn't know which Thread it came from, afaict.
+             *      In any case, to match nqp-m behavior, we just don't do anything.
+             */
+        }
+        else {
+            try {
+                lock = fc.lock();
+            } catch (IOException e) {
+                throw ExceptionHandling.dieInternal(tc, e);
+            } catch (IllegalArgumentException e) {
+                throw ExceptionHandling.dieInternal(tc, e);
+            } catch (IllegalStateException e) {
+                throw ExceptionHandling.dieInternal(tc, e);
+            }
         }
     }
 
