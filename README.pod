@@ -87,6 +87,15 @@ Should this happen to you, then a solution might be the following:
 Note that the 10.9 in the above, represents the major version of OS X being
 used.  On Mavericks use 10.9 (like above), on Yosemite use 10.10.
 
+=head2 Using NQP
+
+The L<examples directory|https://github.com/perl6/nqp/examples> is a good place to start, with the
+L<loops|examples/https://github.com/perl6/nqp/loops.nqp> and other files. Opcodes are listed in
+L<the docs directory|https://github.com/perl6/nqp/docs/ops.markdown>. You can use NQP from this
+release, it will be already installed if you have built Perl6 from
+scratch. 
+
+
 =head2 Differences from nqp-rx
 
 NQP is the successor implementation of "nqp-rx" [2].  Unlike nqp-rx, which
