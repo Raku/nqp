@@ -1134,17 +1134,6 @@ class QAST::OperationsJS {
                 $result := $*BLOCK.add_tmp();
             }
 
-            # See if any immediate block wants to be passed the condition.
-            my $im_then := (nqp::istype($node[1], QAST::Block) && 
-                           $node[1].blocktype eq 'immediate' &&
-                           $node[1].arity > 0) ?? 1 !! 0;
-            my $im_else := ($operands == 3 &&
-                           nqp::istype($node[2], QAST::Block) && 
-                           $node[2].blocktype eq 'immediate' &&
-                           $node[2].arity > 0) ?? 1 !! 0;
-
-            # TODO if cond() -> $var {...}
-
             my $boolifed_cond := $comp.coerce($cond, $T_BOOL);
 
             my $cond_without_sideeffects := Chunk.new($cond.type, $cond.expr, []);
