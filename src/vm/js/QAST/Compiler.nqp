@@ -1119,12 +1119,13 @@ class QAST::OperationsJS {
                     ($n.blocktype eq 'immediate' || $n.blocktype eq 'immediate_static')
             }
 
+
             my $cond_type := (needs_cond_passed($node[1]) || needs_cond_passed($node[2]))
                 ?? $T_OBJ
                 !! (($operands == 3 || $want == $T_VOID) ?? $T_BOOL !! $want);
 
             # The 2 operand form of if in a non-void context also uses the cond as the return value
-            my $cond := $comp.as_js($node[0], :want($cond_type));
+            my $cond := $comp.as_js($node[0], :want($cond_type), :$cps);
             my $then;
             my $else;
 
@@ -1145,7 +1146,7 @@ class QAST::OperationsJS {
                     my $loop := try $*LOOP;
                     $comp.compile_block($node, $block, $loop, :$want, :extra_args([$cond_without_sideeffects]));
                 } else {
-                    $comp.as_js($node, :$want);
+                    $comp.as_js($node, :$want, :$cps);
                 }
             }
 
@@ -1166,6 +1167,33 @@ class QAST::OperationsJS {
                 $else := compile_block($node[1]);
             }
 
+
+            # TODO ->
+
+            if nqp::istype($cond, ChunkCPS) || nqp::istype($then, ChunkCPS) || nqp::istype($else, ChunkCPS) {
+                if needs_cond_passed($then) || needs_cond_passed($else) {
+                    return $comp.NYI("if ... -> \{...\} in CPS mode");
+                }
+
+                if nqp::istype($cond, ChunkCPS) {
+                    return $comp.NYI("if in CPS mode with CPSish condition");
+                } else {
+                    my $cont := $comp.unique_var('cont');
+                    my $result := $comp.unique_var('result');
+                    return ChunkCPS.new($want, $result, [
+                        $boolifed_cond,
+                        "if ({$boolifed_cond.expr}) \{\n",
+                        nqp::istype($then, ChunkCPS) ?? "{$then.cont} = $cont;\n" !! "",
+                        $then,
+                        nqp::istype($then, ChunkCPS) ?? "" !! "return $cont({$then.expr});\n",
+                        "\} else \{\n",
+                        nqp::istype($else, ChunkCPS) ?? "{$else.cont} = $cont;\n" !! "",
+                        $else,
+                        nqp::istype($else, ChunkCPS) ?? "" !! "return $cont({$else.expr});\n",
+                        "\}\n"
+                    ], $cont, :$node);
+                }
+            }
 
             Chunk.new($want, $result, [
                 $boolifed_cond,
