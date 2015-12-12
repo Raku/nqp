@@ -115,7 +115,7 @@ role NQPCursorRole is export {
         $caps;
     }
 
-    method !cursor_init($orig, :$p = 0, :$c, :$shared) {
+    method !cursor_init($orig, :$p = 0, :$c, :$shared, *%ignore) {
         my $new := self.CREATE();
         unless $shared {
             $shared := nqp::create(ParseShared);
