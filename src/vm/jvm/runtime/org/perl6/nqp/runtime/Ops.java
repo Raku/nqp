@@ -863,6 +863,11 @@ public final class Ops {
         return -1;
     }
 
+    public static long filenofh(SixModelObject obj, ThreadContext tc) {
+        /* XXX Implement this */
+        return -1;
+    }
+
     public static Set<PosixFilePermission> modeToPosixFilePermission(long mode) {
         Set<PosixFilePermission> perms = EnumSet.noneOf(PosixFilePermission.class);
         if ((mode & 0001) != 0) perms.add(PosixFilePermission.OTHERS_EXECUTE);
