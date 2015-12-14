@@ -1,6 +1,7 @@
 package org.perl6.nqp.sixmodel.reprs;
 
 import com.sun.jna.NativeLong;
+import com.sun.jna.Native;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -23,6 +24,8 @@ public class P6int extends REPR {
     public final static byte P6INT_C_TYPE_INT      =  -3;
     public final static byte P6INT_C_TYPE_LONG     =  -4;
     public final static byte P6INT_C_TYPE_LONGLONG =  -5;
+    public final static byte P6INT_C_TYPE_SIZE_T   =  -6;
+    public final static byte P6INT_C_TYPE_BOOL     =  -7;
 
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
         STable st = new STable(this, HOW);
@@ -63,6 +66,13 @@ public class P6int extends REPR {
                     case P6INT_C_TYPE_LONGLONG:
                         /* There is no LongLong in Java */
                         ((StorageSpec)st.REPRData).bits = Long.SIZE;
+                        break;
+                    case P6INT_C_TYPE_SIZE_T:
+                        ((StorageSpec)st.REPRData).bits = (short)(8 * Native.SIZE_T_SIZE);
+                        break;
+                    case P6INT_C_TYPE_BOOL:
+                        /* Let's just hope that a bool is 1 byte in size, always. */
+                        ((StorageSpec)st.REPRData).bits = Byte.SIZE;
                         break;
                     default:
                         ((StorageSpec)st.REPRData).bits = bitwidth;
