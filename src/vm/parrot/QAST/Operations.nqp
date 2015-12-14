@@ -1296,6 +1296,8 @@ my %const_map := nqp::hash(
     'C_TYPE_INT',               -3,
     'C_TYPE_LONG',              -4,
     'C_TYPE_LONGLONG',          -5,
+    'C_TYPE_SIZE_T',            -6,
+    'C_TYPE_BOOL',              -7,
     'C_TYPE_FLOAT',             -1,
     'C_TYPE_DOUBLE',            -2,
     'C_TYPE_LONGDOUBLE',        -3,
