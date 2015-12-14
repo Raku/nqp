@@ -109,6 +109,25 @@ class QAST::Node {
         if nqp::chars($extra) {
             nqp::push(@chunks, "($extra)");
         }
+        if nqp::ishash(%!annotations) {
+	    for %!annotations {
+		my $k := $_.key;
+		nqp::push(@chunks, ' :' ~ $k);
+		my $v := $_.value;
+		try {
+		    if nqp::isconcrete($v) {
+			if $k eq 'context' {
+			    nqp::push(@chunks, '<' ~ $v ~ '>');
+			}
+			elsif $k eq 'sink_ok' || $k eq 'WANTED' || $k eq 'final' {
+			}
+			else {   # dunno how to introspect
+			    nqp::push(@chunks, '<?>');
+			}
+		    }
+		}
+	    }
+	}
         if (self.node) {
             nqp::push(@chunks, ' ');
             my $escaped_node := nqp::escape(self.node);
