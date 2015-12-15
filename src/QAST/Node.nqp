@@ -109,25 +109,8 @@ class QAST::Node {
         if nqp::chars($extra) {
             nqp::push(@chunks, "($extra)");
         }
-        if nqp::ishash(%!annotations) {
-	    for %!annotations {
-		my $k := $_.key;
-		nqp::push(@chunks, ' :' ~ $k);
-		my $v := $_.value;
-		try {
-		    if nqp::isconcrete($v) {
-			if $k eq 'context' {
-			    nqp::push(@chunks, '<' ~ $v ~ '>');
-			}
-			elsif $k eq 'sink_ok' || $k eq 'WANTED' || $k eq 'final' {
-			}
-			else {   # dunno how to introspect
-			    nqp::push(@chunks, '<?>');
-			}
-		    }
-		}
-	    }
-	}
+	nqp::push(@chunks, ' ');
+	nqp::push(@chunks, self.dump_annotations);
         if (self.node) {
             nqp::push(@chunks, ' ');
             my $escaped_node := nqp::escape(self.node);
@@ -139,6 +122,30 @@ class QAST::Node {
         nqp::push(@chunks, "\n");
         self.dump_children($indent + 2, @chunks);
         return join('', @chunks);
+    }
+
+    method dump_annotations() {
+	my @anns;
+        if nqp::ishash(%!annotations) {
+	    for %!annotations {
+		my $k := $_.key;
+		my $v := $_.value;
+		try {
+		    if nqp::isconcrete($v) {
+			if $k eq 'context' || $k eq 'IN_DECL' || $k eq 'BY' {
+			    nqp::push(@anns, ':' ~ $k ~ '<' ~ $v ~ '>');
+			}
+			elsif $k eq 'sink_ok' || $k eq 'WANTED' || $k eq 'final' {
+			    nqp::push(@anns, ':' ~ $k);
+			}
+			else {   # dunno how to introspect
+			    nqp::push(@anns, ':' ~ $k ~ '<?>');
+			}
+		    }
+		}
+	    }
+	}
+	nqp::join(' ',@anns);
     }
 
     method dump_children(int $indent, @onto) { }

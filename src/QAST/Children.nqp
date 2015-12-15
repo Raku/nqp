@@ -29,6 +29,7 @@ role QAST::Children {
                 nqp::push(@onto, "\n");
             }
         }
+	CATCH { nqp::push(@onto, "Oops!!!") }
     }
 
     method extra_children() {
