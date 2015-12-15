@@ -58,6 +58,10 @@ my class NQPMu {
                             nqp::getattr(self, nqp::atpos($task, 1), nqp::atpos($task, 2))));
                 }
             }
+            elsif nqp::iseq_i($code, 13) {
+                # Defeat lazy allocation
+                nqp::getattr(self, nqp::atpos($task, 1), nqp::atpos($task, 2))
+            }
             else {
                 nqp::die("Invalid BUILDALLPLAN");
             }
