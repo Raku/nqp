@@ -87,11 +87,11 @@ nqp::closefh($fh);
 
 $fh := nqp::open($test-file, 'wa');
 ok(nqp::printfh($fh, "awesome") == 7, 'appended a string to that file');
-ok(nqp::printfh($fh, " thing!\n") == 8, 'appended a string to that file... again');
+ok(nqp::printfh($fh, " thing!!") == 8, 'appended a string to that file... again');
 nqp::closefh($fh);
 
 $fh := nqp::open($test-file, 'r');
-ok(nqp::readallfh($fh) eq "awesome thing!\n", 'test file contains the strings');
+ok(nqp::readallfh($fh) eq "awesome thing!!", 'test file contains the strings');
 ok(nqp::tellfh($fh) == 15, 'tellfh gives correct position');
 nqp::closefh($fh);
 
@@ -101,13 +101,13 @@ nqp::seekfh($fh, 0, 2);
 ok(nqp::tellfh($fh) == $size, 'seekfh to end gives correct position');
 nqp::seekfh($fh, 8, 0);
 ok(nqp::tellfh($fh) == 8, 'seekfh relative to start gives correct position');
-ok(nqp::readallfh($fh) eq "thing!\n", 'seekfh relative to start gives correct content');
+ok(nqp::readallfh($fh) eq "thing!!", 'seekfh relative to start gives correct content');
 nqp::seekfh($fh, -7, 2);
 ok(nqp::tellfh($fh) == 8, 'seekfh relative to end gives correct position');
-ok(nqp::readallfh($fh) eq "thing!\n", 'seekfh relative to end gives correct content');
+ok(nqp::readallfh($fh) eq "thing!!", 'seekfh relative to end gives correct content');
 nqp::seekfh($fh, -8, 1);
 ok(nqp::tellfh($fh) == 7, 'seekfh relative to current pos gives correct position');
-ok(nqp::readallfh($fh) eq " thing!\n", 'seekfh relative to current pos gives correct content');
+ok(nqp::readallfh($fh) eq " thing!!", 'seekfh relative to current pos gives correct content');
 my $ok := 1;
 try { nqp::seekfh($fh, -5, 0); $ok := 0; 1 }
 ok($ok, 'seekfh before start of file fails');
