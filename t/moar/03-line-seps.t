@@ -58,7 +58,7 @@ my $test-file := 'line-seps-test-file';
     my $rfh := nqp::open($test-file, 'r');
     nqp::setinputlineseps($rfh, nqp::list_s("\n", "\r\n"));
     ok(nqp::readlinefh($rfh) eq "abc\n", '\n separator used');
-    ok(nqp::readlinefh($rfh) eq "def\r\n", '\r\n separator used');
+    ok(nqp::readlinefh($rfh) eq "def\n", '\r\n separator used'); # \n due to translation
     ok(nqp::readlinefh($rfh) eq "ghi", 'final read to end of file worked');
     nqp::closefh($rfh);
 
