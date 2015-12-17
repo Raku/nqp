@@ -905,6 +905,16 @@ my class MASTCompilerInstance {
                 }
                 $ins := self.compile_all_the_stmts(@($node));
 
+                # Ensure we return full-width.
+                my $ins_result_kind := $ins.result_kind;
+                if $ins_result_kind == $MVM_reg_num32 {
+                    $ins := self.coerce($ins, $MVM_reg_num64);
+                }
+                elsif $ins_result_kind == $MVM_reg_int32 || $ins_result_kind == $MVM_reg_int16 ||
+                        $ins_result_kind == $MVM_reg_int8 {
+                    $ins := self.coerce($ins, $MVM_reg_int64);
+                }
+
                 # Add to instructions list for this block.
                 nqp::splice($frame.instructions, $ins.instructions, +$frame.instructions, 0);
 
