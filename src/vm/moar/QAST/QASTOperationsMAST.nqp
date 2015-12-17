@@ -1323,6 +1323,14 @@ my @kind_to_args := [0,
 sub handle_arg($arg, $qastcomp, @ins, @arg_regs, @arg_flags, @arg_kinds) {
     # generate the code for the arg expression
     my $arg_mast := $qastcomp.as_mast($arg);
+    my int $arg_mast_kind := $arg_mast.result_kind;
+    if $arg_mast_kind == $MVM_reg_num32 {
+        $arg_mast := $qastcomp.coerce($arg_mast, $MVM_reg_num64);
+    }
+    elsif $arg_mast_kind == $MVM_reg_int32 || $arg_mast_kind == $MVM_reg_int16 ||
+            $arg_mast_kind == $MVM_reg_int8 {
+        $arg_mast := $qastcomp.coerce($arg_mast, $MVM_reg_int64);
+    }
 
     nqp::die("arg expression cannot be void")
         if $arg_mast.result_kind == $MVM_reg_void;
