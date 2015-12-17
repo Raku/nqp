@@ -13,6 +13,10 @@ my $MVM_reg_num32           := 5;
 my $MVM_reg_num64           := 6;
 my $MVM_reg_str             := 7;
 my $MVM_reg_obj             := 8;
+my $MVM_reg_uint8           := 17;
+my $MVM_reg_uint16          := 18;
+my $MVM_reg_uint32          := 19;
+my $MVM_reg_uint64          := 20;
 
 class QAST::MASTRegexCompiler {
     # The compiler we're working against.

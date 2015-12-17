@@ -35,6 +35,10 @@ my class MASTCompilerInstance {
         has @!num64s;
         has @!num32s;
         has @!strs;
+        has @!uint64s;
+        has @!uint32s;
+        has @!uint16s;
+        has @!uint8s;
         has %!released_indexes;
 
         method new($frame) {
@@ -48,6 +52,10 @@ my class MASTCompilerInstance {
             nqp::bindattr($obj, RegAlloc, '@!num64s', []);
             nqp::bindattr($obj, RegAlloc, '@!num32s', []);
             nqp::bindattr($obj, RegAlloc, '@!strs', []);
+            nqp::bindattr($obj, RegAlloc, '@!uint64s', []);
+            nqp::bindattr($obj, RegAlloc, '@!uint32s', []);
+            nqp::bindattr($obj, RegAlloc, '@!uint16s', []);
+            nqp::bindattr($obj, RegAlloc, '@!uint8s', []);
             nqp::bindattr($obj, RegAlloc, '%!released_indexes', {});
             $obj
         }
@@ -65,14 +73,18 @@ my class MASTCompilerInstance {
             # set $new to 1 here if you suspect a problem with the allocator,
             # or if you suspect a register is being double-released somewhere.
             # $new := 1;
-               if $kind == $MVM_reg_int64 { @arr := @!int64s; $type := int }
-            elsif $kind == $MVM_reg_num64 { @arr := @!num64s; $type := num }
-            elsif $kind == $MVM_reg_str   { @arr := @!strs; $type := str }
-            elsif $kind == $MVM_reg_obj   { @arr := @!objs; $type := NQPMu }
-            elsif $kind == $MVM_reg_int32 { @arr := @!int32s; $type := int32 }
-            elsif $kind == $MVM_reg_int16 { @arr := @!int16s; $type := int16 }
-            elsif $kind == $MVM_reg_int8  { @arr := @!int8s; $type := int8 }
-            elsif $kind == $MVM_reg_num32 { @arr := @!num32s; $type := num32 }
+               if $kind == $MVM_reg_int64  { @arr := @!int64s; $type := int }
+            elsif $kind == $MVM_reg_num64  { @arr := @!num64s; $type := num }
+            elsif $kind == $MVM_reg_str    { @arr := @!strs; $type := str }
+            elsif $kind == $MVM_reg_obj    { @arr := @!objs; $type := NQPMu }
+            elsif $kind == $MVM_reg_int32  { @arr := @!int32s; $type := int32 }
+            elsif $kind == $MVM_reg_int16  { @arr := @!int16s; $type := int16 }
+            elsif $kind == $MVM_reg_int8   { @arr := @!int8s; $type := int8 }
+            elsif $kind == $MVM_reg_num32  { @arr := @!num32s; $type := num32 }
+            elsif $kind == $MVM_reg_uint64 { @arr := @!uint64s; $type := uint64 }
+            elsif $kind == $MVM_reg_uint32 { @arr := @!uint32s; $type := uint32 }
+            elsif $kind == $MVM_reg_uint16 { @arr := @!uint16s; $type := uint16 }
+            elsif $kind == $MVM_reg_uint8  { @arr := @!uint8s; $type := uint8 }
             else { nqp::die("unhandled reg kind $kind") }
 
             my $reg;
@@ -103,6 +115,10 @@ my class MASTCompilerInstance {
             return nqp::push(@!int16s, $reg) if $kind == $MVM_reg_int16;
             return nqp::push(@!int8s, $reg) if $kind == $MVM_reg_int8;
             return nqp::push(@!num32s, $reg) if $kind == $MVM_reg_num32;
+            return nqp::push(@!uint64s, $reg) if $kind == $MVM_reg_uint64;
+            return nqp::push(@!uint32s, $reg) if $kind == $MVM_reg_uint32;
+            return nqp::push(@!uint16s, $reg) if $kind == $MVM_reg_uint16;
+            return nqp::push(@!uint8s, $reg) if $kind == $MVM_reg_uint8;
             nqp::die("unhandled reg kind $kind");
         }
     }

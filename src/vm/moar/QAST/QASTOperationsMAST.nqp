@@ -19,6 +19,10 @@ my $MVM_operand_lex_outer   := (11 * 8);
 my $MVM_operand_coderef     := (12 * 8);
 my $MVM_operand_callsite    := (13 * 8);
 my $MVM_operand_type_mask   := (15 * 8);
+my $MVM_operand_uint8       := ($MVM_reg_uint8 * 8);
+my $MVM_operand_uint16      := ($MVM_reg_uint16 * 8);
+my $MVM_operand_uint32      := ($MVM_reg_uint32 * 8);
+my $MVM_operand_uint64      := ($MVM_reg_uint64 * 8);
 
 # This is used as a return value from all of the various compilation routines.
 # It groups together a set of instructions along with a result register and a
