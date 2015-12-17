@@ -1840,6 +1840,8 @@ QAST::MASTOperations.add_core_moarop_mapping('captureexistsnamed', 'captureexist
 QAST::MASTOperations.add_core_moarop_mapping('capturehasnameds', 'capturehasnameds');
 QAST::MASTOperations.add_core_moarop_mapping('capturenamedshash', 'capturenamedshash');
 QAST::MASTOperations.add_core_moarop_mapping('objprimspec', 'objprimspec');
+QAST::MASTOperations.add_core_moarop_mapping('objprimbits', 'objprimbits');
+QAST::MASTOperations.add_core_moarop_mapping('objprimunsigned', 'objprimunsigned');
 
 # Multiple dispatch related.
 QAST::MASTOperations.add_core_moarop_mapping('invokewithcapture', 'invokewithcapture');
