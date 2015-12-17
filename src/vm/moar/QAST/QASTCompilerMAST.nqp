@@ -410,7 +410,14 @@ my class MASTCompilerInstance {
                     $grow.result_reg);
                 $il := $grow.instructions;
                 push_ilist($il, $box);
-                $*REGALLOC.release_register($grow.result_reg, $MVM_reg_num64);
+                $reg := $box.result_reg;
+            }
+            elsif $got == $MVM_reg_int32 || $got == $MVM_reg_int16 || $got == $MVM_reg_int8 {
+                my $grow := self.coercion($res, $MVM_reg_int64);
+                my $box := QAST::MASTOperations.box(self, $!hll, $MVM_reg_int64, 
+                    $grow.result_reg);
+                $il := $grow.instructions;
+                push_ilist($il, $box);
                 $reg := $box.result_reg;
             }
             else {
@@ -424,6 +431,13 @@ my class MASTCompilerInstance {
             }
             elsif $desired == $MVM_reg_num32 {
                 my $unbox := QAST::MASTOperations.unbox(self, $!hll, $MVM_reg_num64, $reg);
+                my $shrink := self.coercion($unbox, $desired);
+                $il := $unbox.instructions;
+                push_ilist($il, $shrink);
+                $reg := $shrink.result_reg;
+            }
+            elsif $desired == $MVM_reg_int32 || $desired == $MVM_reg_int16 || $desired == $MVM_reg_int8 {
+                my $unbox := QAST::MASTOperations.unbox(self, $!hll, $MVM_reg_int64, $reg);
                 my $shrink := self.coercion($unbox, $desired);
                 $il := $unbox.instructions;
                 push_ilist($il, $shrink);
@@ -444,6 +458,15 @@ my class MASTCompilerInstance {
                 }
                 elsif $got == $MVM_reg_void {
                     push_op($il, 'const_i64', $res_reg, MAST::IVal.new( :value(0) ));
+                }
+                elsif $got == $MVM_reg_int32 {
+                    push_op($il, 'extend_i32', $res_reg, $reg);
+                }
+                elsif $got == $MVM_reg_int16 {
+                    push_op($il, 'extend_i16', $res_reg, $reg);
+                }
+                elsif $got == $MVM_reg_int8 {
+                    push_op($il, 'extend_i8', $res_reg, $reg);
                 }
                 else {
                     nqp::die("Unknown coercion case for int; got: "~$got);
@@ -486,6 +509,30 @@ my class MASTCompilerInstance {
                 }
                 else {
                     nqp::die("Unknown coercion case for num32; got: "~$got);
+                }
+            }
+            elsif $desired == $MVM_reg_int32 {
+                if $got == $MVM_reg_int64 {
+                    push_op($il, 'trunc_i32', $res_reg, $reg);
+                }
+                else {
+                    nqp::die("Unknown coercion case for int32; got: " ~ $got);
+                }
+            }
+            elsif $desired == $MVM_reg_int16 {
+                if $got == $MVM_reg_int64 {
+                    push_op($il, 'trunc_i16', $res_reg, $reg);
+                }
+                else {
+                    nqp::die("Unknown coercion case for int16; got: " ~ $got);
+                }
+            }
+            elsif $desired == $MVM_reg_int8 {
+                if $got == $MVM_reg_int64 {
+                    push_op($il, 'trunc_i8', $res_reg, $reg);
+                }
+                else {
+                    nqp::die("Unknown coercion case for int8; got: " ~ $got);
                 }
             }
             else {
