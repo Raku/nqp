@@ -435,6 +435,8 @@ grammar NQP::Grammar is HLL::Grammar {
         }
 
         [ $<export>=['is export'] ]?
+        [ $<nativesize>=['is nativesize(' $<size>=[\d+] ')' ] ]?
+        [ $<unsigned>=['is unsigned'] ]?
         [ 'is' <parent=.name> ]?
         [ 'does' <role=.name> ]*
         [

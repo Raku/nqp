@@ -1,5 +1,7 @@
 knowhow NQPNativeHOW {
     has $!name;
+    has $!nativesize;
+    has $!unsigned;
     has $!composed;
 
     my $archetypes := Archetypes.new( :nominal(1) );
@@ -15,6 +17,8 @@ knowhow NQPNativeHOW {
 
     method BUILD(:$name) {
         $!name := $name;
+        $!nativesize := 0;
+        $!unsigned := 0;
         $!composed := 0;
     }
 
@@ -39,11 +43,36 @@ knowhow NQPNativeHOW {
     }
 
     method compose($obj) {
+        if !$!composed && $!nativesize {
+            my $info := nqp::hash();
+            $info<integer> := nqp::hash();
+            $info<integer><unsigned> := 1 if $!unsigned;
+            $info<integer><bits> := $!nativesize;
+            $info<float> := nqp::hash();
+            $info<float><bits> := $!nativesize;
+            nqp::composetype($obj, $info);
+        }
         $!composed := 1;
     }
 
     method name($obj) {
         $!name
+    }
+
+    method set_nativesize($obj, $nativesize) {
+        $!nativesize := $nativesize;
+    }
+
+    method nativesize($obj) {
+        $!nativesize
+    }
+    
+    method set_unsigned($obj, $unsigned) {
+        $!unsigned := $unsigned ?? 1 !! 0
+    }
+    
+    method unsigned($obj) {
+        $!unsigned
     }
 
     method shortname($obj) {
