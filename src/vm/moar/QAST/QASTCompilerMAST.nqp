@@ -428,6 +428,9 @@ my class MASTCompilerInstance {
                 elsif $got == $MVM_reg_str {
                     push_op($il, 'coerce_sn', $res_reg, $reg);
                 }
+                elsif $got == $MVM_reg_num32 {
+                    push_op($il, 'extend_n32', $res_reg, $reg);
+                }
                 elsif $got == $MVM_reg_void {
                     push_op($il, 'const_n64', $res_reg, MAST::NVal.new( :value(0) ));
                 }
@@ -447,6 +450,14 @@ my class MASTCompilerInstance {
                 }
                 else {
                     nqp::die("Unknown coercion case for str; got: "~$got);
+                }
+            }
+            elsif $desired == $MVM_reg_num32 {
+                if $got == $MVM_reg_num64 {
+                    push_op($il, 'trunc_n32', $res_reg, $reg);
+                }
+                else {
+                    nqp::die("Unknown coercion case for num32; got: "~$got);
                 }
             }
             else {
