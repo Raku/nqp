@@ -28,8 +28,12 @@ my class MASTCompilerInstance {
     my class RegAlloc {
         has $!frame;
         has @!objs;
-        has @!ints;
-        has @!nums;
+        has @!int64s;
+        has @!int32s;
+        has @!int16s;
+        has @!int8s;
+        has @!num64s;
+        has @!num32s;
         has @!strs;
         has %!released_indexes;
 
@@ -37,8 +41,12 @@ my class MASTCompilerInstance {
             my $obj := nqp::create(self);
             nqp::bindattr($obj, RegAlloc, '$!frame', $frame);
             nqp::bindattr($obj, RegAlloc, '@!objs', []);
-            nqp::bindattr($obj, RegAlloc, '@!ints', []);
-            nqp::bindattr($obj, RegAlloc, '@!nums', []);
+            nqp::bindattr($obj, RegAlloc, '@!int64s', []);
+            nqp::bindattr($obj, RegAlloc, '@!int32s', []);
+            nqp::bindattr($obj, RegAlloc, '@!int16s', []);
+            nqp::bindattr($obj, RegAlloc, '@!int8s', []);
+            nqp::bindattr($obj, RegAlloc, '@!num64s', []);
+            nqp::bindattr($obj, RegAlloc, '@!num32s', []);
             nqp::bindattr($obj, RegAlloc, '@!strs', []);
             nqp::bindattr($obj, RegAlloc, '%!released_indexes', {});
             $obj
@@ -57,10 +65,14 @@ my class MASTCompilerInstance {
             # set $new to 1 here if you suspect a problem with the allocator,
             # or if you suspect a register is being double-released somewhere.
             # $new := 1;
-               if $kind == $MVM_reg_int64 { @arr := @!ints; $type := int }
-            elsif $kind == $MVM_reg_num64 { @arr := @!nums; $type := num }
+               if $kind == $MVM_reg_int64 { @arr := @!int64s; $type := int }
+            elsif $kind == $MVM_reg_num64 { @arr := @!num64s; $type := num }
             elsif $kind == $MVM_reg_str   { @arr := @!strs; $type := str }
             elsif $kind == $MVM_reg_obj   { @arr := @!objs; $type := NQPMu }
+            elsif $kind == $MVM_reg_int32 { @arr := @!int32s; $type := int32 }
+            elsif $kind == $MVM_reg_int16 { @arr := @!int16s; $type := int16 }
+            elsif $kind == $MVM_reg_int8  { @arr := @!int8s; $type := int8 }
+            elsif $kind == $MVM_reg_num32 { @arr := @!num32s; $type := num32 }
             else { nqp::die("unhandled reg kind $kind") }
 
             my $reg;
@@ -83,10 +95,14 @@ my class MASTCompilerInstance {
             return 1 if $kind == $MVM_reg_void || !$force && $*BLOCK.is_var($reg)
                 || nqp::existskey(%!released_indexes, $reg.index);
             %!released_indexes{$reg.index} := 1;
-            return nqp::push(@!ints, $reg) if $kind == $MVM_reg_int64;
-            return nqp::push(@!nums, $reg) if $kind == $MVM_reg_num64;
+            return nqp::push(@!int64s, $reg) if $kind == $MVM_reg_int64;
+            return nqp::push(@!num64s, $reg) if $kind == $MVM_reg_num64;
             return nqp::push(@!strs, $reg) if $kind == $MVM_reg_str;
             return nqp::push(@!objs, $reg) if $kind == $MVM_reg_obj;
+            return nqp::push(@!int32s, $reg) if $kind == $MVM_reg_int32;
+            return nqp::push(@!int16s, $reg) if $kind == $MVM_reg_int16;
+            return nqp::push(@!int8s, $reg) if $kind == $MVM_reg_int8;
+            return nqp::push(@!num32s, $reg) if $kind == $MVM_reg_num32;
             nqp::die("unhandled reg kind $kind");
         }
     }
@@ -1814,7 +1830,32 @@ my class MASTCompilerInstance {
 
     my @prim_to_reg := [$MVM_reg_obj, $MVM_reg_int64, $MVM_reg_num64, $MVM_reg_str];
     method type_to_register_kind($type) {
-        @prim_to_reg[nqp::isnull($type) ?? 0 !! nqp::objprimspec($type)]
+        if nqp::isnull($type) {
+            $MVM_reg_obj
+        }
+        else {
+            my int $primspec := nqp::objprimspec($type);
+            if $primspec == 0 {
+                $MVM_reg_obj
+            }
+            elsif $primspec == 1 {
+                my int $size := nqp::objprimbits($type);
+                if $size == 64    { $MVM_reg_int64 }
+                elsif $size == 32 { $MVM_reg_int32 }
+                elsif $size == 16 { $MVM_reg_int16 }
+                elsif $size == 8  { $MVM_reg_int8 }
+                else { nqp::die("Unknown int size $size") }
+            }
+            elsif $primspec == 2 {
+                my int $size := nqp::objprimbits($type);
+                if $size == 64    { $MVM_reg_num64 }
+                elsif $size == 32 { $MVM_reg_num32 }
+                else { nqp::die("Unknown num size $size") }
+            }
+            else {
+                $MVM_reg_str
+            }
+        }
     }
 }
 
