@@ -1222,7 +1222,12 @@ my class MASTCompilerInstance {
     ];
 
     my @lexref_opnames := [
+        '',
+        'getlexref_i8',
+        'getlexref_i16',
+        'getlexref_i32',
         'getlexref_i',
+        'getlexref_n32',
         'getlexref_n',
         'getlexref_s'
     ];
@@ -1234,7 +1239,12 @@ my class MASTCompilerInstance {
     ];
 
     my @localref_opnames := [
+        '',
+        'getregref_i8',
+        'getregref_i16',
+        'getregref_i32',
         'getregref_i',
+        'getregref_n32',
         'getregref_n',
         'getregref_s'
     ];
@@ -1415,7 +1425,7 @@ my class MASTCompilerInstance {
                 }
                 $res_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
                 $res_kind := $MVM_reg_obj;
-                push_op(@ins, @localref_opnames[@kind_to_op_slot[$local_kind]], $res_reg, $local);
+                push_op(@ins, @localref_opnames[$local_kind], $res_reg, $local);
             }
             else {
                 nqp::die("Cannot reference undeclared local '$name'");
@@ -1522,7 +1532,7 @@ my class MASTCompilerInstance {
                 if $lex_kind == $MVM_reg_obj {
                     nqp::die('Cannot take a reference to a non-native lexical');
                 }
-                push_op(@ins, @lexref_opnames[@kind_to_op_slot[$lex_kind]], $res_reg, $lex);
+                push_op(@ins, @lexref_opnames[$lex_kind], $res_reg, $lex);
             }
             elsif $lexref {
                 # We want a reference, the register contains a reference, so
