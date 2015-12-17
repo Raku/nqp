@@ -1040,10 +1040,34 @@ my class MASTCompilerInstance {
                             $val := MAST::IVal.new( :size(16), :value($param_index));
                         }
 
-                        # the variable register
-                        my $valreg := $scope eq 'lexical'
+                        # Parameter passing is always at full width. In the best
+                        # case the register we target is already full-width, but
+                        # if not we need a truncation op.
+                        my $targetreg := $scope eq 'lexical'
                             ?? $block.lexical_param($var.name)
                             !! $block.local($var.name);
+                        my $valreg;
+                        my $truncop;
+                        if $param_kind == $MVM_reg_obj || $param_kind == $MVM_reg_int64 ||
+                                $param_kind == $MVM_reg_num64 || $param_kind == $MVM_reg_str {
+                            $valreg := $targetreg;
+                        }
+                        elsif $param_kind == $MVM_reg_num32 {
+                            $valreg := $*REGALLOC.fresh_register($MVM_reg_num64);
+                            $truncop := 'trunc_n32';
+                        }
+                        elsif $param_kind == $MVM_reg_int32 {
+                            $valreg := $*REGALLOC.fresh_register($MVM_reg_int64);
+                            $truncop := 'trunc_i32';
+                        }
+                        elsif $param_kind == $MVM_reg_int16 {
+                            $valreg := $*REGALLOC.fresh_register($MVM_reg_int64);
+                            $truncop := 'trunc_i16';
+                        }
+                        elsif $param_kind == $MVM_reg_int8 {
+                            $valreg := $*REGALLOC.fresh_register($MVM_reg_int64);
+                            $truncop := 'trunc_i8';
+                        }
 
                         # NQP->QAST always provides a default value for optional NQP params
                         # even if no default initializer expression is provided.
@@ -1085,9 +1109,13 @@ my class MASTCompilerInstance {
                                 !! push_op(@pre, $opname, $valreg, $val);
                         }
 
+                        if $truncop {
+                            push_op(@pre, $truncop, $targetreg, $valreg);
+                        }
+
                         if $scope eq 'lexical' {
                             # emit the op to bind the lexical to the result register
-                            push_op(@pre, 'bindlex', $block.lexical($var.name), $valreg);
+                            push_op(@pre, 'bindlex', $block.lexical($var.name), $targetreg);
                         }
 
                         # Emit any additional tasks and typechecks.
