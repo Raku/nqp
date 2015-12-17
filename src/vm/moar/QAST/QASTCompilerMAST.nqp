@@ -397,13 +397,41 @@ my class MASTCompilerInstance {
         }
         elsif $desired == $MVM_reg_void {
             $reg := MAST::VOID;
-            $got := $MVM_reg_void;
         }
         elsif $desired == $MVM_reg_obj {
-            return QAST::MASTOperations.box(self, $!hll, $got, $reg);
+            # See if we already have full-width native.
+            if $got == $MVM_reg_int64 || $got == $MVM_reg_num64 ||
+                    $got == $MVM_reg_str || $got == $MVM_reg_void {
+                return QAST::MASTOperations.box(self, $!hll, $got, $reg);
+            }
+            elsif $got == $MVM_reg_num32 {
+                my $grow := self.coercion($res, $MVM_reg_num64);
+                my $box := QAST::MASTOperations.box(self, $!hll, $MVM_reg_num64, 
+                    $grow.result_reg);
+                $il := $grow.instructions;
+                push_ilist($il, $box);
+                $*REGALLOC.release_register($grow.result_reg, $MVM_reg_num64);
+                $reg := $box.result_reg;
+            }
+            else {
+                nqp::die("Unknown boxing case; got: " ~ $got);
+            }
         }
         elsif $got == $MVM_reg_obj {
-            return QAST::MASTOperations.unbox(self, $!hll, $desired, $reg);
+            # See if we want a full-width native.
+            if $desired == $MVM_reg_int64 || $desired == $MVM_reg_num64 || $desired == $MVM_reg_str {
+                return QAST::MASTOperations.unbox(self, $!hll, $desired, $reg);
+            }
+            elsif $desired == $MVM_reg_num32 {
+                my $unbox := QAST::MASTOperations.unbox(self, $!hll, $MVM_reg_num64, $reg);
+                my $shrink := self.coercion($unbox, $desired);
+                $il := $unbox.instructions;
+                push_ilist($il, $shrink);
+                $reg := $shrink.result_reg;
+            }
+            else {
+                nqp::die("Unknown unboxing case; desired: " ~ $desired);
+            }
         }
         else {
             my $res_reg := $*REGALLOC.fresh_register($desired);
