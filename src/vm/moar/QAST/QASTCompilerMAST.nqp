@@ -1742,8 +1742,16 @@ my class MASTCompilerInstance {
                 $hint := nqp::hintfor(@args[1].value, $name);
             }
 
-            # Go by whether it's a bind or lookup.
+            # Go by whether it's a bind or lookup. We always access the
+            # attributes at full-width from the VM op interface.
             my $kind := self.type_to_register_kind($node.returns);
+            if $kind == $MVM_reg_num32 {
+                $kind := $MVM_reg_num64;
+            }
+            elsif $kind == $MVM_reg_int32 || $kind == $MVM_reg_int16 ||
+                    $kind == $MVM_reg_int8 {
+                $kind := $MVM_reg_int64;
+            }
             if $*BINDVAL {
                 my $valmast := self.as_mast_clear_bindval($*BINDVAL, :want($kind));
                 push_ilist(@ins, $valmast);
@@ -2044,3 +2052,4 @@ class MASTBytecodeAssembler {
 if nqp::isnull(nqp::getcomp('MAST')) {
     nqp::bindcomp('MAST', MASTBytecodeAssembler);
 }
+ 
