@@ -443,7 +443,8 @@ class QAST::MASTOperations {
 
     # Adds a HLL box handler.
     method add_hll_box(str $hll, $type, $handler) {
-        unless $type == $MVM_reg_int64 || $type == $MVM_reg_num64 || $type == $MVM_reg_str || $type == $MVM_reg_void {
+        unless $type == $MVM_reg_int64 || $type == $MVM_reg_num64 || $type == $MVM_reg_str ||
+                $type == $MVM_reg_uint64 || $type == $MVM_reg_void {
             nqp::die("Unknown box type '$type'");
         }
         %hll_box{$hll} := {} unless nqp::existskey(%hll_box, $hll);
@@ -452,7 +453,8 @@ class QAST::MASTOperations {
 
     # Adds a HLL unbox handler.
     method add_hll_unbox(str $hll, $type, $handler) {
-        unless $type == $MVM_reg_int64 || $type == $MVM_reg_num64 || $type == $MVM_reg_str {
+        unless $type == $MVM_reg_int64 || $type == $MVM_reg_num64 ||
+                $type == $MVM_reg_str || $type == $MVM_reg_uint64 {
             nqp::die("Unknown unbox type '$type'");
         }
         %hll_unbox{$hll} := {} unless nqp::existskey(%hll_unbox, $hll);
@@ -1332,7 +1334,9 @@ sub handle_arg($arg, $qastcomp, @ins, @arg_regs, @arg_flags, @arg_kinds) {
         $arg_mast := $qastcomp.coerce($arg_mast, $MVM_reg_num64);
     }
     elsif $arg_mast_kind == $MVM_reg_int32 || $arg_mast_kind == $MVM_reg_int16 ||
-            $arg_mast_kind == $MVM_reg_int8 {
+            $arg_mast_kind == $MVM_reg_int8 || $arg_mast_kind == $MVM_reg_uint64 ||
+            $arg_mast_kind == $MVM_reg_uint32 || $arg_mast_kind == $MVM_reg_uint16 ||
+            $arg_mast_kind == $MVM_reg_uint8 {
         $arg_mast := $qastcomp.coerce($arg_mast, $MVM_reg_int64);
     }
 
@@ -1804,6 +1808,20 @@ QAST::MASTOperations.add_hll_unbox('', $MVM_reg_str, -> $qastcomp, $reg {
     $regalloc.release_register($dc, $MVM_reg_obj);
     MAST::InstructionList.new($il, $res_reg, $MVM_reg_str)
 });
+QAST::MASTOperations.add_hll_unbox('', $MVM_reg_uint64, -> $qastcomp, $reg {
+    my $regalloc := $*REGALLOC;
+    my $il := nqp::list();
+    my $a := $regalloc.fresh_register($MVM_reg_num64);
+    my $b := $regalloc.fresh_register($MVM_reg_uint64);
+    $regalloc.release_register($reg, $MVM_reg_obj);
+    my $dc := $regalloc.fresh_register($MVM_reg_obj);
+    push_op($il, 'decont', $dc, $reg);
+    push_op($il, 'smrt_numify', $a, $dc);
+    push_op($il, 'coerce_nu', $b, $a);
+    $regalloc.release_register($a, $MVM_reg_num64);
+    $regalloc.release_register($dc, $MVM_reg_obj);
+    MAST::InstructionList.new($il, $b, $MVM_reg_int64)
+});
 sub boxer($kind, $type_op, $op) {
     -> $qastcomp, $reg {
         my $regalloc := $*REGALLOC;
@@ -1818,6 +1836,7 @@ sub boxer($kind, $type_op, $op) {
 QAST::MASTOperations.add_hll_box('', $MVM_reg_int64, boxer($MVM_reg_int64, 'hllboxtype_i', 'box_i'));
 QAST::MASTOperations.add_hll_box('', $MVM_reg_num64, boxer($MVM_reg_num64, 'hllboxtype_n', 'box_n'));
 QAST::MASTOperations.add_hll_box('', $MVM_reg_str, boxer($MVM_reg_str, 'hllboxtype_s', 'box_s'));
+QAST::MASTOperations.add_hll_box('', $MVM_reg_uint64, boxer($MVM_reg_uint64, 'hllboxtype_i', 'box_u'));
 QAST::MASTOperations.add_hll_box('', $MVM_reg_void, -> $qastcomp, $reg {
     my $il := nqp::list();
     my $res_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
@@ -2553,9 +2572,11 @@ QAST::MASTOperations.add_core_moarop_mapping('hintfor', 'hintfor');
 QAST::MASTOperations.add_core_moarop_mapping('unbox_i', 'unbox_i', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('unbox_n', 'unbox_n', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('unbox_s', 'unbox_s', :decont(0));
+QAST::MASTOperations.add_core_moarop_mapping('unbox_u', 'unbox_u', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('box_i', 'box_i');
 QAST::MASTOperations.add_core_moarop_mapping('box_n', 'box_n');
 QAST::MASTOperations.add_core_moarop_mapping('box_s', 'box_s');
+QAST::MASTOperations.add_core_moarop_mapping('box_u', 'box_u');
 QAST::MASTOperations.add_core_moarop_mapping('can', 'can_s', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('reprname', 'reprname', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('newtype', 'newtype', :decont(0));
