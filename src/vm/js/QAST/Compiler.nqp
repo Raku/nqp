@@ -1236,7 +1236,11 @@ class QAST::OperationsJS {
 
         my $iterator := $*BLOCK.add_tmp();
 
-        my $list := $comp.as_js(@operands[0], :want($T_OBJ));
+        my $list := $comp.as_js(@operands[0], :want($T_OBJ), :$cps);
+
+        if nqp::istype($list, ChunkCPS) {
+            return $comp.NYI("interating over a CPS list");
+        }
 
         # TODO think if creating the block once, and the calling it multiple times would be faster
 
@@ -1253,16 +1257,38 @@ class QAST::OperationsJS {
 
         my $loop := LoopInfo.new($outer_loop, :$label);
 
-        my $body := $comp.compile_block(@operands[1], $outer, $loop , :want($T_VOID), :extra_args(@body_args));
+        my $body := $comp.compile_block(@operands[1], $outer, $loop , :want($T_VOID), :extra_args(@body_args), :$cps);
 
 
-        my $chunk := Chunk.new($T_OBJ, 'null', [
-            $list,
-            "$iterator = nqp.op.iterator({$list.expr});\n",
-            "while ($iterator.idx < $iterator.target) \{\n",
-            $comp.handle_control($loop, $body),
-            "\}\n"
-        ], :node($node));
+        if nqp::istype($body, ChunkCPS) {
+            # TODO handle_control
+            my $cont := $comp.unique_var('cont');
+            my $result := $comp.unique_var('result');
+            my $loop := $comp.unique_var('cont');
+
+            ChunkCPS.new($T_OBJ, $result, [
+                $list,
+                "$iterator = nqp.op.iterator({$list.expr});\n",
+                "var $loop = function() \{\n",
+                "if ($iterator.idx < $iterator.target) \{\n",
+                "{$body.cont} = $loop;\n",
+                $body,
+                "\} else \{\n",
+                "return $cont(null);\n",
+                "\}\n",
+                "\}\n",
+                "return $loop;"
+            ], $cont);
+        } else {
+            Chunk.new($T_OBJ, 'null', [
+                $list,
+                "$iterator = nqp.op.iterator({$list.expr});\n",
+                "while ($iterator.idx < $iterator.target) \{\n",
+                $comp.handle_control($loop, $body),
+                "\}\n"
+            ], :node($node));
+        }
+
     });
 
     for <while until repeat_while repeat_until> -> $op {
@@ -2874,7 +2900,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         Chunk.void(|@capture_inners);
     }
 
-    method compile_block(QAST::Block $node, $outer, $outer_loop, :$want, :@extra_args=[]) {
+    method compile_block(QAST::Block $node, $outer, $outer_loop, :$want, :@extra_args=[], :$cps) {
 
         my $outer_ctx := try $*CTX // "null";
 
@@ -2975,12 +3001,32 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         if $node.blocktype eq 'immediate' {
             my $setup := [];
             my $cloned_block := $outer.clone_inner($node);
-            my @args := [$outer_ctx,'{}'];
-            for @extra_args -> $arg {
-                @args.push($arg.expr);
-                $setup.push($arg);
+
+            if $cps {
+                my $cont := self.unique_var('cont');
+                my $result := self.unique_var('result');
+
+                my @args := [$outer_ctx,'{}'];
+
+                @args.push($cont);
+
+                for @extra_args -> $arg {
+                    @args.push($arg.expr);
+                    $setup.push($arg);
+                }
+
+                $setup.push('return ' ~ $cloned_block ~ ".\$callCPS({nqp::join(',', @args)})");
+
+                ChunkCPS.new($T_OBJ, $result, $setup, $cont, :$node);
+            } else {
+                my @args := [$outer_ctx,'{}'];
+                for @extra_args -> $arg {
+                    @args.push($arg.expr);
+                    $setup.push($arg);
+                }
+
+                self.stored_result(Chunk.new($want, $cloned_block~".\$call({nqp::join(',', @args)})", $setup, :$node), :$want);
             }
-            self.stored_result(Chunk.new($want, $cloned_block~".\$call({nqp::join(',', @args)})", $setup, :$node), :$want);
         } elsif $node.blocktype eq 'declaration' ||  $node.blocktype eq '' {
             if $want == $T_VOID {
                 Chunk.void();
