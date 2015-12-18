@@ -1183,11 +1183,11 @@ class QAST::OperationsJS {
                     return ChunkCPS.new($want, $result, [
                         $boolifed_cond,
                         "if ({$boolifed_cond.expr}) \{\n",
-                        nqp::istype($then, ChunkCPS) ?? "{$then.cont} = $cont;\n" !! "",
+                        nqp::istype($then, ChunkCPS) ?? $*BLOCK.set_cont($then, $cont) !! "",
                         $then,
                         nqp::istype($then, ChunkCPS) ?? "" !! "return $cont({$then.expr});\n",
                         "\} else \{\n",
-                        nqp::istype($else, ChunkCPS) ?? "{$else.cont} = $cont;\n" !! "",
+                        nqp::istype($else, ChunkCPS) ?? $*BLOCK.set_cont($else, $cont) !! "",
                         $else,
                         nqp::istype($else, ChunkCPS) ?? "" !! "return $cont({$else.expr});\n",
                         "\}\n"
@@ -1271,7 +1271,7 @@ class QAST::OperationsJS {
                 "$iterator = nqp.op.iterator({$list.expr});\n",
                 "var $loop = function() \{\n",
                 "if ($iterator.idx < $iterator.target) \{\n",
-                "{$body.cont} = $loop;\n",
+                $*BLOCK.set_cont($body, $loop),
                 $body,
                 "\} else \{\n",
                 "return $cont(null);\n",
@@ -2171,6 +2171,11 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             %!lexotic := nqp::hash();
             %!cloned_inners := nqp::hash();
             %!captured_inners := nqp::hash();
+        }
+
+        method set_cont($chunk, $cont) {
+            $*BLOCK.add_js_lexical($chunk.cont);
+            "{$chunk.cont} = $cont;\n";
         }
 
         method clone_inner($block) {
