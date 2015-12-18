@@ -2153,6 +2153,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         has @!params;           # the parameters the block takes
         has @!variables;        # the variables declared in this block
         has %!cloned_inners;    # Mapping of CUIDs of blocks we clone to register with the clone
+
+        has %!need_cps;       # Do we need to clone the CPS version of a block
+        has %!need_direct;    # Do we need to clone the none-CPS version of a block
+
         has %!captured_inners;  # Mapping of CUIDs of blocks we statically clone to register with the code
 
         method new($qast, $outer) {
@@ -2171,6 +2175,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             %!lexotic := nqp::hash();
             %!cloned_inners := nqp::hash();
             %!captured_inners := nqp::hash();
+            %!need_cps := nqp::hash();
+            %!need_direct := nqp::hash();
         }
 
         method set_cont($chunk, $cont) {
@@ -2178,9 +2184,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             "{$chunk.cont} = $cont;\n";
         }
 
-        method clone_inner($block) {
+        method clone_inner($block, :$cps = 1, :$direct = 1) {
             my $cuid    := $block.cuid;
             my $already := %!cloned_inners{$cuid};
+
+            %!need_cps{$cuid} := $cps || %!need_cps{$cuid};
+            %!need_direct{$cuid} := $direct || %!need_direct{$cuid};
+
             if $already {
                 $already
             }
@@ -2207,6 +2217,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
 
         method captured_inners() { %!captured_inners }
+
+        method need_direct() { %!need_direct }
+        method need_cps() { %!need_cps }
 
         method add_js_lexical($name) {
             @!js_lexicals.push($name);
@@ -2872,20 +2885,28 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             my $reg   := $_.value;
             my $cuid := self.mangled_cuid($_.key);
 
-            if %*BLOCKS_DONE{$_.key} {
+            if !$block.need_direct{$_.key} {
+                # we know the block won't be ever called in direct mode
+                @clone_inners.push("$reg = $cuid");
+            } elsif %*BLOCKS_DONE{$_.key} {
                 @clone_inners.push("$reg = $cuid.closure");
                 @clone_inners.push(%*BLOCKS_DONE{$_.key});
             } elsif %*BLOCKS_DONE_CPS{$_.key} {
+                # we are unable to emit a direct version of the block
                 @clone_inners.push("$reg = $cuid.onlyCPS()");
             } else {
                 nqp::die("//Broken block: {$_.key}");
             }
 
-            if %*BLOCKS_DONE_CPS{$_.key} {
+            if !$block.need_cps{$_.key} {
+                # we know the block won't be ever called in cps mode
+                @clone_inners.push(";\n");
+            } elsif %*BLOCKS_DONE_CPS{$_.key} {
                 @clone_inners.push(".CPS");
                 @clone_inners.push(%*BLOCKS_DONE_CPS{$_.key});
                 @clone_inners.push(";\n");
             } else {
+                # we can just use the direct version of the block in CPS mode
                 @clone_inners.push(".sameCPS();\n");
             }
         }
@@ -3005,7 +3026,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         if $node.blocktype eq 'immediate' {
             my $setup := [];
-            my $cloned_block := $outer.clone_inner($node);
+            my $cloned_block := $outer.clone_inner($node, :cps($cps), :direct(!$cps));
 
             if $cps {
                 my $cont := self.unique_var('cont');
