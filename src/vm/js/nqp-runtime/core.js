@@ -292,8 +292,16 @@ op.istype = function(obj, type) {
   }
 
   // HACK
-  if (typeof obj === 'number' || typeof obj === 'string' || obj instanceof Array || obj instanceof Hash || obj instanceof NQPInt) {
+  if (typeof obj === 'number' || typeof obj === 'string' || obj instanceof Hash || obj instanceof NQPInt) {
     return 0;
+  }
+
+  if (obj instanceof Array) {
+    if (hllConfigs.nqp && type == hllConfigs.nqp.content.list) {
+      return 1;
+    } else {
+      return 0;
+    }
   }
 
   // TODO cases where the type_check_cache isn't authoritative
@@ -401,7 +409,9 @@ op.settypehllrole = function(type, role) {
   return role;
 };
 
+var hllConfigs = {};
 op.sethllconfig = function(language, configHash) {
+  hllConfigs[language] = configHash;
   /* STUB */
   return configHash;
 };
