@@ -137,7 +137,7 @@ say("js-lint:
 	gjslint --strict --max_line_length=200 --nojsdoc src/vm/js/nqp-runtime/*.js");
 
 say('node_modules/npm_installed: src/vm/js/nqp-runtime/package.json
-	mkdir node_modules
+	$(MKPATH) node_modules
 	npm install src/vm/js/nqp-runtime
 	touch node_modules/npm_installed');
 

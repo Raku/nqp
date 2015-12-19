@@ -73,7 +73,7 @@ js-all : m-all js-stage1-compiler node_modules/runtime_copied $(JS_STAGE2)/NQPCO
 js-lint:
 	gjslint --strict --max_line_length=200 --nojsdoc src/vm/js/nqp-runtime/*.js
 node_modules/npm_installed: src/vm/js/nqp-runtime/package.json
-	mkdir node_modules
+	$(MKPATH) node_modules
 	npm install src/vm/js/nqp-runtime
 	touch node_modules/npm_installed
 node_modules/runtime_copied: node_modules/npm_installed src/vm/js/nqp-runtime/*.js
