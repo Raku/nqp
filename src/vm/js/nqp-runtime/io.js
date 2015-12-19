@@ -200,12 +200,12 @@ function readline(fh, chomp) {
       fs.seekSync(fh.fd,
           Buffer.byteLength(up_to_newline + sep, fh.encoding) + starting, 0);
 
-      return (chomp ? up_to_newline : up_to_newline + sep);
+      return (chomp ? up_to_newline : up_to_newline + sep).replace(/\r\n/, "\n");
     }
   }
 
   fs.seekSync(fh.fd, position, 0);
-  return string;
+  return string.replace(/\r\n/, "\n");
 };
 
 
@@ -218,7 +218,7 @@ op.readallfh = function(fh) {
     total += bytesRead;
     var all = Buffer.concat([all, buf], total);
   }
-  return iconv.decode(all, fh.encoding);
+  return iconv.decode(all, fh.encoding).replace(/\r\n/, "\n");
 };
 
 op.seekfh = function(fh, offset, whence, ctx) {
