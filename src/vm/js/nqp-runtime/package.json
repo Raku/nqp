@@ -17,7 +17,6 @@
   "dependencies": {
     "bignum": "*",
     "fs-ext": "pmurias/node-fs-ext#nan_2",
-    "iconv-lite": "*",
     "node-int64": "*",
     "nqp-js-io": "pmurias/nqp-js-io",
     "sha1": "*",

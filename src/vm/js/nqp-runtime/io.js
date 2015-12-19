@@ -1,11 +1,12 @@
 var fs = require('fs-ext');
 var sleep = require('sleep');
-var iconv = require('iconv-lite');
 
 var tty = require('tty');
 var nqpIo = require('nqp-js-io');
 
 var Hash = require('./hash.js');
+
+var core = require('./core.js');
 
 var child_process = require('child_process');
 
@@ -129,7 +130,7 @@ op.eoffh = function(fh) {
 };
 
 op.setencoding = function(fh, encoding) {
-  fh.encoding = encoding;
+  fh.encoding = core.renameEncoding(encoding);
 };
 
 op.setinputlinesep = function(fh, sep) {
@@ -218,7 +219,7 @@ op.readallfh = function(fh) {
     total += bytesRead;
     var all = Buffer.concat([all, buf], total);
   }
-  return iconv.decode(all, fh.encoding).replace(/\r\n/, "\n");
+  return all.toString(fh.encoding).replace(/\r\n/, "\n");
 };
 
 op.seekfh = function(fh, offset, whence, ctx) {

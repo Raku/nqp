@@ -558,8 +558,10 @@ op.isint = function(value) {
 };
 
 function renameEncoding(encoding) {
-  return encoding == 'utf16' ? 'utf16le' : encoding;
+  return {utf16: 'utf16le', 'iso-8859-1': 'binary'}[encoding] || encoding;
 }
+
+exports.renameEncoding = renameEncoding;
 
 function byteSize(buf) {
   if (buf.bytes) return buf.bytes;
