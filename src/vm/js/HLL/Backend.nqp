@@ -53,7 +53,7 @@ class HLLBackend::JavaScript {
     
     
     method js($qast, *%adverbs) {
-        my $backend := QAST::CompilerJS.new(nyi=>%adverbs<nyi> // 'ignore');
+        my $backend := QAST::CompilerJS.new(nyi=>%adverbs<nyi> // 'ignore', cps=>%adverbs<cps> // 'on');
 
 
         if %adverbs<source-map> {

@@ -2131,6 +2131,8 @@ class RegexCompiler {
 class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     has $!nyi;
 
+    has $!cps; # If it's set to "off" we don't support continuations
+
     #= If the env var NQPJS_LOG is set log to nqpjs.log
     method log(*@msgs) {
         my %env := nqp::getenvhash();
@@ -2898,7 +2900,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 nqp::die("//Broken block: {$_.key}");
             }
 
-            if !$block.need_cps{$_.key} {
+            if !$block.need_cps{$_.key} || $!cps eq 'off' {
                 # we know the block won't be ever called in cps mode
                 @clone_inners.push(";\n");
             } elsif %*BLOCKS_DONE_CPS{$_.key} {
@@ -2985,7 +2987,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             # TODO recreate other things than block
 
-            {
+            if $!cps ne 'off' {
                 my $*BLOCK := BlockInfo.new($node, (nqp::defined($outer) ?? $outer !! NQPMu));
 
                 my $stmts_cps := self.compile_all_the_statements($node, $body_want, :cps);
