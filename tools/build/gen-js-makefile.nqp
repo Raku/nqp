@@ -138,7 +138,7 @@ say("js-lint:
 
 say('node_modules/npm_installed: src/vm/js/nqp-runtime/package.json
 	$(MKPATH) node_modules
-	npm install src/vm/js/nqp-runtime
+	npm install src/vm/js/nqp-runtime tap
 	touch node_modules/npm_installed');
 
 say('node_modules/runtime_copied: node_modules/npm_installed src/vm/js/nqp-runtime/*.js
