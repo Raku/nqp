@@ -14,7 +14,6 @@ CodeRef.prototype.block = function(func) {
 CodeRef.prototype.$call = function() {
   var nqp = require('nqp-runtime');
   if (this["$!do"].closureTemplate) {
-    console.log(this["$!do"]);
     var template = "var " + this["$!do"].outerCtx + "= null;(" + this["$!do"].closureTemplate + ")";
     this.$call = eval(template);
     this.$call.codeRef = this;
