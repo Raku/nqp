@@ -2,7 +2,7 @@
 
 # Test nqp::op file operations.
 
-plan(65);
+plan(66);
 
 ok( nqp::stat('CREDITS', nqp::const::STAT_EXISTS) == 1, 'nqp::stat exists');
 ok( nqp::stat('AARDVARKS', nqp::const::STAT_EXISTS) == 0, 'nqp::stat not exists');
@@ -170,11 +170,14 @@ else {
     nqp::unlink($test-file);
 }
 
-if nqp::getcomp('nqp').backend.name eq 'parrot' {
+my $backend := nqp::getcomp('nqp').backend.name;
+my $crlf-conversion := $backend eq 'moar' || $backend eq 'js';
+
+if $backend eq 'parrot' {
     ok(1, "ok $_ # Skipped: readlinefh is broken on parrot") for (36, 37, 38, 39, 40);
 }
-elsif nqp::getcomp('nqp').backend.name eq 'moar' {
-    ok(1, "ok $_ # Skipped: readlinefh won't match \\r on Moar") for (36, 37, 38, 39, 40);
+elsif $crlf-conversion {
+    ok(1, "ok $_ # Skipped: readlinefh won't match \\r on $backend") for (36, 37, 38, 39, 40);
 }
 else {
     $fh := nqp::open('t/nqp/19-readline.txt', 'r');
@@ -228,4 +231,17 @@ else {
     }
     nqp::unlink($test-file);
     nqp::unlink($test-file ~ '-symlink');
+}
+
+if $crlf-conversion {
+    my $wfh := nqp::open($test-file, 'w');
+    nqp::printfh($wfh, "abc\ndef\r\nghi");
+    nqp::closefh($wfh);
+
+    my $fh := nqp::open($test-file, 'r');
+    my $input := nqp::readallfh($fh);
+    ok($input eq "abc\ndef\nghi", "reading a whole file");
+    nqp::closefh($fh);
+} else {
+    ok(1, "ok 67 # Skipped: readallfh doesn't convert \\r\\n on $backend");
 }
