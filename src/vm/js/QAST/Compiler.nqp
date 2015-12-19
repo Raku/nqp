@@ -1529,8 +1529,9 @@ class RegexCompiler {
         my $charlist := quote_string($node[0]);
         my $testop := $node.negate ?? '!=' !! '==';
 
-        "if ($!pos >= $!target.length) \{{self.fail()}\}"
-        ~ "if ($charlist.indexOf($!target.substr($!pos,1)) $testop -1) \{{self.fail()}\}"
+        my $end_of_string := ($node.negate && $node.subtype eq 'zerowidth') ?? "$!pos < $!target.length &&" !! "$!pos >= $!target.length ||";
+
+        "if ($end_of_string $charlist.indexOf($!target.substr($!pos,1)) $testop -1) \{{self.fail()}\}"
         ~ ($node.subtype eq 'zerowidth' ?? '' !! "$!pos++;\n")
     }
 
