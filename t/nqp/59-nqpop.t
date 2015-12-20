@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(207);
+plan(208);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -125,6 +125,8 @@ ok( nqp::floor_n(5.2) == 5.0, 'nqp::floor_n');
 ok( nqp::floor_n(-5.2) == -6.0, 'nqp::floor_n');
 ok( nqp::floor_n(5.0) == 5.0, 'nqp::floor_n');
 ok( nqp::floor_n(-5.0) == -5.0, 'nqp::floor_n');
+
+ok( nqp::sqrt_n(6.25) == 2.5, 'nqp::sqrt_n');
 
 ok( nqp::substr('rakudo', 1, 3) eq 'aku', 'nqp::substr');
 ok( nqp::substr('rakudo', 1) eq 'akudo', 'nqp::substr');
