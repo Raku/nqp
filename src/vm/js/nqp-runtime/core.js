@@ -695,6 +695,10 @@ op.lcm_i = function(a, b) {
   return (a * b) / op.gcd_i(a, b);
 };
 
+op.mod_n = function(a, b) {
+  return a - Math.floor(a / b) * b;
+};
+
 function typeparameters(ctx, type) {
   var st = type._STable;
   if (!st.parametricType) {

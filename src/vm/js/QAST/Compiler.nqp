@@ -440,6 +440,9 @@ class QAST::OperationsJS {
     add_infix_op('div_n', $T_NUM, '/', $T_NUM, $T_NUM);
     add_infix_op('mod_n', $T_NUM, '%', $T_NUM, $T_NUM);
 
+    add_simple_op('mod_n', $T_NUM, [$T_NUM, $T_NUM]);
+
+
     add_simple_op('neg_n', $T_NUM, [$T_NUM], sub ($num) {"(-$num)"});
     add_simple_op('neg_i', $T_INT, [$T_INT], sub ($num) {"(-$num)"});
 
