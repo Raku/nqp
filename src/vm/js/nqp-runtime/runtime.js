@@ -174,6 +174,9 @@ exports.to_bool = function(arg, ctx) {
     return 0;
   } else if (arg.$$to_bool) {
     return arg.$$to_bool(ctx);
+  } else if (typeof arg == 'function') { 
+    // needed for continuations
+    return 1;
   } else {
     throw "Can't decide if arg is true";
   }
@@ -421,3 +424,12 @@ exports.intAttrHack = function(attrValue) {
 exports.args = function(module) {
   return require.main === module ? process.argv.slice(1) : [];
 };
+
+function runCPS(thunk_) {
+  var thunk = thunk_;
+  while (thunk) {
+    thunk = thunk();
+  }
+}
+
+exports.runCPS = runCPS;

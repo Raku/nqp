@@ -43,6 +43,28 @@ CodeRef.prototype.closure = function(block) {
   return closure;
 };
 
+CodeRef.prototype.CPS = function(block) {
+  this.$callCPS = block;
+  this.$callCPS.codeRef = this;
+  return this;
+};
+
+CodeRef.prototype.sameCPS = function(block) {
+  this.$callCPS = function() {
+    var args = Array.prototype.slice.call(arguments);
+    var cont = args.splice(2,1)[0];
+    return cont(this.$call.apply(this, args));
+  };
+  return this;
+};
+
+CodeRef.prototype.onlyCPS = function(block) {
+  this.$call = function() {
+    throw "this block can be only called in CPS mode";
+  };
+  return this;
+};
+
 CodeRef.prototype.setCodeObj = function(codeObj) {
   this.codeObj = codeObj;
   return this;

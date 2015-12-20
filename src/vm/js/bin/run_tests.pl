@@ -3,6 +3,7 @@ use TAP::Harness;
 my $harness = TAP::Harness->new({
     exec => sub {
         my ($harness, $test_file) = @_;
+        return ['./nqp-js', '--cps=off', $test_file] if $test_file =~ /qregex.t$/;
         return ['./nqp-js', $test_file] if $test_file =~ /\.t$/;
         return ['node', $test_file] if $test_file =~ /\.js$/;
     }
@@ -17,6 +18,7 @@ my @nqp_tests = glob "t/nqp/{01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,17,
 my @moar_tests = glob "t/moar/03*.t";
 
 my @runtime_unit_tests = qw(t/js/varint.js);
+my @continuation_tests = qw(t/js/continuations.t);
 
 my $node_version = `node -v`;
 
@@ -26,4 +28,4 @@ if ($node_version =~ /^0\.10/) {
     @nqp_tests = grep {!/19|78/} @nqp_tests;
 }
 
-$harness->runtests(@runtime_unit_tests,  @nqp_tests, @moar_tests, @regex, @serialization, @qast, @js_specific);
+$harness->runtests(@runtime_unit_tests,  @nqp_tests, @moar_tests, @regex, @serialization, @qast, @js_specific, @continuation_tests);

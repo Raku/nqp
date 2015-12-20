@@ -292,8 +292,16 @@ op.istype = function(obj, type) {
   }
 
   // HACK
-  if (typeof obj === 'number' || typeof obj === 'string' || obj instanceof Array || obj instanceof Hash || obj instanceof NQPInt) {
+  if (typeof obj === 'number' || typeof obj === 'string' || obj instanceof Hash || obj instanceof NQPInt) {
     return 0;
+  }
+
+  if (obj instanceof Array) {
+    if (hllConfigs.nqp && type == hllConfigs.nqp.content.list) {
+      return 1;
+    } else {
+      return 0;
+    }
   }
 
   // TODO cases where the type_check_cache isn't authoritative
@@ -401,7 +409,9 @@ op.settypehllrole = function(type, role) {
   return role;
 };
 
+var hllConfigs = {};
 op.sethllconfig = function(language, configHash) {
+  hllConfigs[language] = configHash;
   /* STUB */
   return configHash;
 };
@@ -689,4 +699,49 @@ op.typeparameterized = function(type) {
   var st = type._STable;
   var nqp = require('nqp-runtime');
   return st.parametricType ? st.parametricType : null;
+};
+
+function startTrampoline(thunk_) {
+  var thunk = thunk_;
+  while (thunk) {
+    thunk = thunk();
+  }
+};
+
+var resetValue;
+var invokeValue;
+op.continuationreset = function(ctx, tag, continuation) {
+  startTrampoline(function() {
+    return continuation.$callCPS(ctx, {}, function(value) {
+      resetValue = value;
+      invokeValue = value;
+      return null;
+    });
+  });
+  return resetValue;
+};
+
+op.continuationresetCPS = function(ctx, tag, continuation, continuation) {
+  console.log("continuation reset in CPS mode");
+};
+
+op.continuationcontrolCPS = function(ctx, protect, tag, run, cont) {
+  startTrampoline(run.$callCPS(ctx, {}, function(value) {
+    resetValue = value;
+    return null;
+  }, cont));
+  return null;
+};
+
+op.continuationinvoke = function(ctx, cont, inject) {
+  // TODO really place inject inside the cont
+  var value = inject.$call(ctx, {});
+  startTrampoline(cont(value));
+  return invokeValue;
+};
+
+op.continuationinvokeCPS = function(ctx, invokedCont, inject, cont) {
+  // TODO really place inject inside the cont, use callCPS
+  var value = inject.$call(ctx, {});
+  return invokedCont(value);
 };
