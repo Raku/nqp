@@ -471,6 +471,8 @@ class QAST::OperationsJS {
     add_simple_op('mod_i', $T_INT, [$T_INT, $T_INT], sub ($a, $b) {"(($a % $b) | 0)"});
     add_simple_op('mul_i', $T_INT, [$T_INT, $T_INT], sub ($a, $b) {"Math.imul($a,$b)"});
     add_simple_op('pow_i', $T_INT, [$T_INT, $T_INT], sub ($a, $b) {"(Math.pow($a,$b)|0)"});
+    add_simple_op('gcd_i', $T_INT, [$T_INT, $T_INT]);
+    add_simple_op('lcm_i', $T_INT, [$T_INT, $T_INT]);
 
     add_simple_op('istype', $T_BOOL, [$T_OBJ, $T_OBJ], sub ($value, $type) {"($value instanceof $type.constructor)"});
 

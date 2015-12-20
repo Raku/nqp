@@ -680,6 +680,21 @@ op.parameterizetype = function(ctx, type, params) {
   return result;
 };
 
+op.gcd_i = function(a, b) {
+  var c;
+  while (a != 0) {
+    c = a;
+    a = b % a;
+    b = c;
+  }
+  return b;
+};
+
+// TODO think about overflow
+op.lcm_i = function(a, b) {
+  return (a * b) / op.gcd_i(a, b);
+};
+
 function typeparameters(ctx, type) {
   var st = type._STable;
   if (!st.parametricType) {
