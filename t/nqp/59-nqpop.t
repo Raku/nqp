@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(203);
+plan(205);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -10,6 +10,8 @@ ok( nqp::mul_i(5,2) == 10, 'nqp::mul_i');
 ok( nqp::div_i(5,2) == 2, 'nqp::div_i');
 ok( nqp::mod_i(5,2) == 1, 'nqp::mod_i');
 ok( nqp::pow_i(6, 4) == 1296, 'nqp::pow_i');
+ok( nqp::gcd_i(8, 12) == 4, 'nqp::gcd_i');
+ok( nqp::lcm_i(6, 8) == 24, 'nqp::lcm_i');
 
 ok(nqp::bitshiftl_i(1, 30) == 1073741824, 'nqp::bitshiftl_i');
 ok(nqp::bitshiftl_i(131, 3) == 1048, 'nqp::bitshiftl_i');
