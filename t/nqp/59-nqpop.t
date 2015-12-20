@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(208);
+plan(214);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -281,6 +281,13 @@ ok(!nqp::isge_s('abcdaz', 'abcdbzefg'), 'nqp::isge left string greater');
 
 ok((1.1 != 1) == 1, '!= between floating point numbers (not equal)');
 ok((1.1 != 1.1) == 0,'!= between floating point numbers (equal)'); 
+
+ok(12.5 % 5 == 2.5, '% test');
+ok(3 % 2.5 == 0.5, '% test');
+ok(-12.5 % 5 == 2.5, '% test');
+ok(12.5 % -5 == -2.5, '% test');
+ok(-12.5 % -5 == -2.5, '% test');
+ok(20 % 7 == 6, '% with integer arguments');
 
 ok(nqp::sha1("Hello World") eq '0A4D55A8D778E5022FAB701977C5D840BBC486D0', "sha1");
 
