@@ -1033,7 +1033,7 @@ class QAST::OperationsJS {
 
     add_simple_op('existspos', $T_BOOL, [$T_OBJ, $T_INT]);
 
-    for <ceil floor abs log> -> $func {
+    for <ceil floor abs log sqrt> -> $func {
         add_simple_op($func ~ '_n', $T_NUM, [$T_NUM], sub ($arg) {"Math.$func($arg)"});
     }
 
