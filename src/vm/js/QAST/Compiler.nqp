@@ -460,6 +460,8 @@ class QAST::OperationsJS {
     add_infix_op('bitshiftl_i', $T_INT, '<<', $T_INT, $T_INT);
     add_infix_op('bitshiftr_i', $T_INT, '>>', $T_INT, $T_INT);
 
+    add_simple_op('bitneg_i', $T_INT, [$T_INT], sub ($n) {"(~$n)"});
+
     add_infix_op('eqaddr', $T_OBJ, '===', $T_OBJ, $T_BOOL);
 
     # Integer arithmetic
