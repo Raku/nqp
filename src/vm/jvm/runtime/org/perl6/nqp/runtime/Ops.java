@@ -6191,7 +6191,7 @@ public final class Ops {
         return makeBI(tc, type, random);
     }
     
-    public static int pow_i(int a, int b) {
+    public static long pow_i(long a, long b) {
         return (int)Math.pow(a, b);
     }
 
