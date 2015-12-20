@@ -6192,7 +6192,7 @@ public final class Ops {
     }
     
     public static long pow_i(long a, long b) {
-        return (int)Math.pow(a, b);
+        return (long)Math.pow(a, b);
     }
 
     public static double pow_n(double a, double b) {
