@@ -230,11 +230,21 @@ function Capture(named, pos) {
 op.savecapture = function(args) {
   return new Capture(args[1], Array.prototype.slice.call(args, 2));
 };
+
 op.captureposelems = function(capture) {
   return capture.pos.length;
 };
+
 op.captureposarg = function(capture, i) {
   return capture.pos[i];
+};
+
+op.capturehasnameds = function(capture) {
+  return Object.keys(capture.named).length == 0 ? 0 : 1;
+};
+
+op.captureexistsnamed = function(capture, arg) {
+  return capture.named.hasOwnProperty(arg) ? 1 : 0;
 };
 
 op.setcodeobj = function(codeRef, codeObj) {
