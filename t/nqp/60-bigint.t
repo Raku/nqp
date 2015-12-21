@@ -1,7 +1,7 @@
 #! nqp
 use nqpmo;
 
-plan(49);
+plan(80);
 
 my $knowhow := nqp::knowhow();
 my $bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
@@ -20,6 +20,8 @@ ok(str($c) eq '-123', 'can round-trip negative number (string) by boxing');
 ok(nqp::unbox_i($b) == -123, 'can round-trip negative number by unboxing');
 ok(!nqp::iseq_I($one, $b), 'nqp::iseq_I can return false');
 ok(nqp::iseq_I($one, $one), 'nqp::iseq_I can return true');
+ok(nqp::isne_I($one, $b) == 1, 'nqp::isne_I can return false');
+ok(nqp::isne_I($one, $one) == 0, 'nqp::isne_I can return true');
 ok(iseq(nqp::mul_I($b, $b, $b), 15129,), 'multiplication');
 ok(iseq(nqp::add_I($b, $b, $b),  -246,), 'addition');
 ok(nqp::iseq_I(nqp::sub_I($b, $b, $b), nqp::box_i(0, $bi_type)), 'subtraction');
@@ -35,6 +37,32 @@ ok(iseq(nqp::bitxor_I(box(0xdead), box(0xbeef), $one), 0x6042), 'bit xor');
 
 ok(iseq(nqp::bitneg_I(box(-123), $one), 122), 'bit negation');
 
+ok(nqp::islt_I(box(100), box(200)) == 1, 'nqp::lt_I <');
+ok(nqp::islt_I(box(100), box(100)) == 0, 'nqp::lt_I =');
+ok(nqp::islt_I(box(200), box(100)) == 0, 'nqp::lt_I >');
+
+ok(nqp::isle_I(box(100), box(200)) == 1, 'nqp::le_I <');
+ok(nqp::isle_I(box(100), box(100)) == 1, 'nqp::le_I =');
+ok(nqp::isle_I(box(200), box(100)) == 0, 'nqp::le_I >');
+
+ok(nqp::isge_I(box(100), box(200)) == 0, 'nqp::ge_I <');
+ok(nqp::isge_I(box(100), box(100)) == 1, 'nqp::ge_I =');
+ok(nqp::isge_I(box(200), box(100)) == 1, 'nqp::ge_I >');
+
+ok(nqp::isgt_I(box(100), box(200)) == 0, 'nqp::gt_I <');
+ok(nqp::isgt_I(box(100), box(100)) == 0, 'nqp::gt_I =');
+ok(nqp::isgt_I(box(200), box(100)) == 1, 'nqp::gt_I >');
+
+ok(nqp::cmp_I(box(100), box(200)) == -1, 'nqp::cmp_I <');
+ok(nqp::cmp_I(box(100), box(100)) == 0, 'nqp::cmp_I =');
+ok(nqp::cmp_I(box(200), box(100)) == 1, 'nqp::cmp_I >');
+
+ok(iseq(nqp::mod_I(box(12), box(5), $bi_type), 2), "mod_I - both positive");
+ok(iseq(nqp::mod_I(box(-12), box(5), $bi_type), 3), "mod_I - negative and positive");
+ok(iseq(nqp::mod_I(box(-12), box(4), $bi_type), 0), "mod_I - negative and positive");
+ok(iseq(nqp::mod_I(box(-12), box(-5), $bi_type), -2), "mod_I - both negative");
+ok(iseq(nqp::mod_I(box(12), box(-5), $bi_type), -3), "mod_I - positive and negative");
+ok(iseq(nqp::mod_I(box(12), box(-4), $bi_type), 0), "mod_I - positive and negative");
 
 if nqp::getcomp('nqp').backend.name eq 'js' {
     ok(1, "skipping bitand on negative numbers untill the bignum library supports them");
@@ -134,3 +162,14 @@ ok(!nqp::bool_I(box(0)), 'bool_I(0)');
 ok(str(nqp::abs_I(box(189), $bi_type)) eq '189', 'nqp::abs_I with positive number');
 
 ok(str(nqp::abs_I(box(-18), $bi_type)) eq '18', 'nqp::abs_I with negative number');
+
+
+ok(iseq(nqp::neg_I(box(-234), $bi_type), 234), 'nqp::neg_I with negative number');
+ok(iseq(nqp::neg_I(box(134), $bi_type), -134), 'nqp::neg_I with positive number');
+
+ok(nqp::isbig_I(box(0)) == 0, 'isbig on small value');
+ok(nqp::isbig_I(box(1)) == 0, 'isbig on small value');
+ok(nqp::isbig_I(box(2)) == 0, 'isbig on small value');
+ok(nqp::isbig_I(box(-2)) == 0, 'isbig on small value');
+ok(nqp::isbig_I(box(12)) == 0, 'isbig on small value');
+ok(nqp::isbig_I(nqp::fromstr_I('2988348162058574136915891421498819466320163312926952423791023078876139', $bi_type)) == 1, 'isbig on huge value');
