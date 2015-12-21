@@ -46,6 +46,10 @@ op.iseq_I = function(a, b) {
   return intish_bool(getBI(a).eq(getBI(b)));
 };
 
+op.isne_I = function(a, b) {
+  return intish_bool(!getBI(a).eq(getBI(b)));
+};
+
 op.mul_I = function(a, b, type) {
   return makeBI(type, getBI(a).mul(getBI(b)));
 };
@@ -70,6 +74,31 @@ op.pow_I = function(a, b, type) {
   return makeBI(type, getBI(a).pow(getBI(b)));
 };
 
+op.mod_I = function(n, m, type) {
+  /* TODO - think if this can be optimized. */
+  /* We are doing this in complicated because,
+     bignum returns the module with the sign equal to the dividend not the divisor. */
+  var a = getBI(n);
+  var b = getBI(m);
+  if ((a.lt(0) && b.gt(0)) || (a.gt(0) && b.lt(0))) {
+      var x = a.div(b).sub(1);
+      var ret = a.sub(b.mul(x));
+      return makeBI(type, (ret.eq(b) ? bignum(0) : ret));
+  }
+  return makeBI(type, a.mod(b));
+};
+
+op.neg_I = function(a, type) {
+  return makeBI(type, getBI(a).neg());
+};
+
+op.isbig_I = function(n) {
+  /* Check if it needs more bits than a long can offer; note that
+   * bitLength excludes sign considerations, thus 31 rather than
+   * 32. */
+  return getBI(n).bitLength() > 31 ? 1 : 0;
+};
+
 op.expmod_I = function(a, b, c, type) {
   return makeBI(type, getBI(a).powm(getBI(b), getBI(c)));
 };
@@ -88,7 +117,20 @@ op.isle_I = function(a, b) {
 };
 
 op.islt_I = function(a, b) {
-  return intish_bool(getBI(a).le(getBI(b)));
+  return intish_bool(getBI(a).lt(getBI(b)));
+};
+
+op.isge_I = function(a, b) {
+  return intish_bool(getBI(a).ge(getBI(b)));
+};
+
+op.isgt_I = function(a, b) {
+  return intish_bool(getBI(a).gt(getBI(b)));
+};
+
+op.cmp_I = function(a, b) {
+  var result = getBI(a).cmp(getBI(b));
+  return result == 0 ? 0 : (result < 0 ? -1 : 1);
 };
 
 op.isprime_I = function(n) {

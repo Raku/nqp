@@ -1465,6 +1465,7 @@ class QAST::OperationsJS {
     add_simple_op('unbox_s', $T_STR, [$T_OBJ]);
 
     add_simple_op('iseq_I', $T_INT, [$T_OBJ, $T_OBJ]);
+    add_simple_op('isne_I', $T_INT, [$T_OBJ, $T_OBJ]);
 
 
     # bigint arithmetic operators operators
@@ -1474,6 +1475,8 @@ class QAST::OperationsJS {
     add_simple_op('sub_I', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ]);
     add_simple_op('div_I', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ]);
     add_simple_op('pow_I', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ]);
+    add_simple_op('mod_I', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ]);
+    add_simple_op('neg_I', $T_OBJ, [$T_OBJ, $T_OBJ]);
 
     # bigint binary operators
 
@@ -1493,7 +1496,9 @@ class QAST::OperationsJS {
     add_simple_op('div_In', $T_NUM, [$T_OBJ, $T_OBJ]);
     add_simple_op('isle_I', $T_INT, [$T_OBJ, $T_OBJ]);
     add_simple_op('islt_I', $T_INT, [$T_OBJ, $T_OBJ]);
+    add_simple_op('isge_I', $T_INT, [$T_OBJ, $T_OBJ]);
     add_simple_op('isgt_I', $T_INT, [$T_OBJ, $T_OBJ]);
+    add_simple_op('cmp_I', $T_INT, [$T_OBJ, $T_OBJ]);
 
     add_simple_op('gcd_I', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ]);
     add_simple_op('lcm_I', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ]);
@@ -1503,6 +1508,7 @@ class QAST::OperationsJS {
     add_simple_op('rand_I', $T_OBJ, [$T_OBJ, $T_OBJ]);
     add_simple_op('expmod_I', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ]);
     add_simple_op('bool_I', $T_INT, [$T_OBJ]);
+    add_simple_op('isbig_I', $T_INT, [$T_OBJ]);
 
     add_simple_op('tonum_I', $T_NUM, [$T_OBJ]);
     add_simple_op('fromnum_I', $T_OBJ, [$T_NUM, $T_OBJ]);
