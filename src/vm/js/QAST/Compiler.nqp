@@ -2466,6 +2466,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 } else {
                     $slurpy := $_;
                 }
+                $*BLOCK.add_js_lexical(self.mangle_name($_.name));
             } elsif $_.named {
                 my $quoted := quote_string($_.named);
                 my $value := "_NAMED[$quoted]";
