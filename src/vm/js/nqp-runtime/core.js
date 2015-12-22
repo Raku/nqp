@@ -59,7 +59,7 @@ op.x = function(str, times) {
   return ret;
 };
 
-op.radix = function(radix, str, zpos, flags) {
+function radix_helper(radix, str, zpos, flags) {
   if (flags != 2) {throw 'flags != 2 not implemented yet: ' + flags}
 
   var lowercase = 'a-' + String.fromCharCode('a'.charCodeAt(0) + radix - 11);
@@ -75,13 +75,21 @@ op.radix = function(radix, str, zpos, flags) {
   var str = str.slice(zpos);
   var search = str.match(regex);
   if (search == null) {
-    return [0, 1, -1];
+    return null;
   }
   var number = search[0].replace(/_/g, '');
   var power = number[0] == '-' ? number.length - 1 : number.length;
-  var pow = Math.pow(radix, power);
-  var ret = [parseInt(number, radix), pow, zpos + search[0].length];
-  return ret;
+  return {power: power, offset: zpos + search[0].length, number: number};
+};
+exports.radix_helper = radix_helper;
+
+op.radix = function(radix, str, zpos, flags) {
+  var extracted = radix_helper(radix, str, zpos, flags);
+  if (extracted == null) {
+    return [0, 1, -1];
+  }
+  var pow = Math.pow(radix, extracted.power);
+  return [parseInt(extracted.number, radix), pow, extracted.offset];
 };
 
 function Iter(array) {

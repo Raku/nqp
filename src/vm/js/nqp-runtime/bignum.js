@@ -2,6 +2,8 @@ var reprs = require('./reprs.js');
 
 var bignum = require('bignum');
 
+var core = require('./core.js');
+
 var op = {};
 exports.op = op;
 
@@ -194,4 +196,36 @@ op.fromnum_I = function(num, type) {
 
 op.bool_I = function(n) {
   return intish_bool(getBI(n).toNumber());
+};
+
+op.radix_I = function(radix, str, zpos, flags, type) {
+  var extracted = core.radix_helper(radix, str, zpos, flags);
+  if (extracted == null) {
+    return [makeBI(type, bignum(0)), makeBI(type, bignum(1)), -1];
+  }
+
+  if (radix == 10 || radix == 16) {
+    var pow = bignum(radix).pow(extracted.power);
+    return [makeBI(type, bignum(extracted.number, radix)), makeBI(type, pow), extracted.offset];
+  } else {
+    var n = extracted.number;
+    var base = bignum(1);
+    var result = bignum(0);
+
+    for (var i = n.length-1; i >= 0; i--) {
+      var digit = n.charCodeAt(i);
+      if (digit >= 48 && digit <= 57) digit -= 48; // 0-9
+      else if (digit >= 97 && digit <= 122) digit = digit - 97 + 10; // a-z
+      else if (digit >= 65 && digit <= 90) digit = digit - 65 + 10; // A-Z
+      else break;
+
+      result = result.add(base.mul(digit));
+      base = base.mul(radix);
+
+    }
+
+    if (n[0] == '-') result = result.neg();
+
+    return [makeBI(type, result), makeBI(type, base), extracted.offset];
+  }
 };
