@@ -1,4 +1,4 @@
-plan(11*3*2 + 3);
+plan(20*3*2 + 3);
 
 sub test_radix($radix,$str,$pos,$flags,$value,$mult,$offset,$desc) {
     my $result := nqp::radix($radix,$str,$pos,$flags);
@@ -23,6 +23,18 @@ sub test_radix_both(*@args) {
     test_radix(|@args);
     test_radix_I(|@args);
 }
+
+test_radix_both(10,"123",0,2,  123,1000,3, "base-10 radix call with no flags" );
+test_radix_both(10,"+123",0,2,  123,1000,4, "base-10 radix call with flag 2 and +" );
+test_radix_both(10,"-123",0,2,  -123,1000,4, "base-10 radix call with flag 2 and -" );
+test_radix_both(10,"-10",0,0,  0,1,-1,  "no digits consumed when we get - without flag");
+test_radix_both(10,"+10",0,0,  0,1,-1,  "no digits consumed when we get + without flag");
+
+test_radix_both(10, "123", 0, 1, -123, 1000, 3, "base-10 radix with flag 1");
+
+test_radix_both(10, "12000", 0, 4, 12, 100, 5, "base-10 radix with flags 4");
+test_radix_both(10, "12000", 0, 5, -12, 100, 5, "base-10 radix with flags 4 and 1");
+test_radix_both(10, "-12000", 0, 6, -12, 100, 6, "base-10 radix with flags 4 and 2");
 
 test_radix_both(10,"123",0,2,  123,1000,3,  "basic base-10 radix call");
 test_radix_both(10,"123",1,2,  23,100,3, "basic base-10 radix call with pos" );
