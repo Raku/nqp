@@ -60,15 +60,13 @@ op.x = function(str, times) {
 };
 
 function radix_helper(radix, str, zpos, flags) {
-  if (flags != 2) {throw 'flags != 2 not implemented yet: ' + flags}
-
   var lowercase = 'a-' + String.fromCharCode('a'.charCodeAt(0) + radix - 11);
   var uppercase = 'A-' + String.fromCharCode('A'.charCodeAt(0) + radix - 11);
 
   var letters = radix >= 11 ? lowercase + uppercase : '';
 
   var digitclass = '[0-' + Math.min(radix - 1, 9) + letters + ']';
-  var minus = flags & 0x02 ? '-?' : '';
+  var minus = flags & 0x02 ? '(?:-?|\\+?)' : '';
   var regex = new RegExp(
       '^' + minus + digitclass + '(?:_' +
       digitclass + '|' + digitclass + ')*');
@@ -77,10 +75,13 @@ function radix_helper(radix, str, zpos, flags) {
   if (search == null) {
     return null;
   }
-  var number = search[0].replace(/_/g, '');
+  var number = search[0].replace(/_/g, '').replace(/^\+/, '');
+  if (flags & 0x01) number = '-' + number;
+  if (flags & 0x04) number = number.replace(/0+$/, '');
   var power = number[0] == '-' ? number.length - 1 : number.length;
   return {power: power, offset: zpos + search[0].length, number: number};
 };
+
 exports.radix_helper = radix_helper;
 
 op.radix = function(radix, str, zpos, flags) {
