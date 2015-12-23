@@ -457,6 +457,11 @@ class QAST::OperationsJS {
         add_infix_op('isne' ~ $suffix, $type, '!=', $type, $T_BOOL);
     }
 
+    add_simple_op('inf', $T_NUM, [], sub () {"Infinity"});
+    add_simple_op('neginf', $T_NUM, [], sub () {"(-Infinity)"});
+    add_simple_op('nan', $T_NUM, [], sub () {"NaN"});
+    add_simple_op('isnanorinf', $T_INT, [$T_NUM]);
+
     add_infix_op('bitor_i', $T_INT, '|', $T_INT, $T_INT);
     add_infix_op('bitand_i', $T_INT, '&', $T_INT, $T_INT);
     add_infix_op('bitxor_i', $T_INT, '^', $T_INT, $T_INT);

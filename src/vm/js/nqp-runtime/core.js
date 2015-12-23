@@ -718,6 +718,10 @@ op.mod_n = function(a, b) {
   return a - Math.floor(a / b) * b;
 };
 
+op.isnanorinf = function(n) {
+  return (isNaN(n) || n == Infinity || n == -Infinity) ? 1 : 0;
+};
+
 function typeparameters(ctx, type) {
   var st = type._STable;
   if (!st.parametricType) {
