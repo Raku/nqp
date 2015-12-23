@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(214);
+plan(225);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -337,3 +337,15 @@ ok(nqp::getcomp("noSuchLanguageEver1")[0] eq "compiler1", "nqp::getcomp");
     ok($a[1] eq 'Hello World', 'nqp::bindpos')
 }
 
+ok(nqp::isnanorinf(nqp::nan()) == 1, "nqp::isnanorinf - nan");
+ok(nqp::isnanorinf(nqp::inf()) == 1, "nqp::isnanorinf - inf");
+ok(nqp::isnanorinf(nqp::neginf()) == 1, "nqp::isnanorinf - inf");
+ok(nqp::isnanorinf(123.5) == 0, "nqp::isnanorinf - normal number");
+
+ok(nqp::inf() == nqp::inf(), "nqp::inf() equals itself");
+ok(nqp::nan() != nqp::nan(), "nqp::nan() doesn't equal itself");
+ok(nqp::neginf() < 0, "nqp::neginf() is negative");
+ok(nqp::inf() > 0, "nqp::inf() is positive");
+ok(nqp::inf()+123 == nqp::inf()-123, "nqp::neginf() doesn't change after adding or substracting");
+ok(nqp::neginf()+123 == nqp::neginf()-123, "nqp::neginf() doesn't change after adding or substracting");
+ok(nqp::neginf() == -nqp::inf(), "nqp::neginf() is negated nqp::inf()");
