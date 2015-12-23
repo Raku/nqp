@@ -66,8 +66,8 @@ ok( nqp::chr(120) eq 'x', 'nqp::chr');
 ok( nqp::ord('xyz') eq 120, 'nqp::ord');
 ok( nqp::ord('xyz',2) eq 122, '2 argument nqp::ord');
 ok( nqp::ordat('xyz',2) eq 122, 'nqp::ordat');
-ok( nqp::lc('Hello World') eq 'hello world', 'nqp::downcase');
-ok( nqp::uc("Don't Panic") eq "DON'T PANIC", 'nqp::upcase');
+ok( nqp::lc('Hello World') eq 'hello world', 'nqp::lc');
+ok( nqp::uc("Don't Panic") eq "DON'T PANIC", 'nqp::uc');
 ok( nqp::flip("foo") eq "oof", "nqp::flip");
 
 my @items := nqp::split(' ', 'a little lamb');
