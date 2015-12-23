@@ -1,6 +1,6 @@
 #! nqp
 
-plan(14);
+plan(15);
 
 # Counter to make sure parameterization interning works right.
 my int $num_parameterizations := 0;
@@ -63,6 +63,10 @@ ok(nqp::eqaddr(nqp::typeparameterized($ct1), $coercion_types), 'Can get back to 
 
 ok(nqp::eqaddr($ct1.HOW.to_type($ct1), A), 'Can get type parameter (1)');
 ok(nqp::eqaddr($ct1.HOW.from_type($ct1), B), 'Can get type parameter (2)');
+
+ok(nqp::elems(nqp::typeparameters($ct1)) == 2
+   && nqp::eqaddr(nqp::atpos(nqp::typeparameters($ct1), 0), A)
+   && nqp::eqaddr(nqp::atpos(nqp::typeparameters($ct1), 1), B), 'nqp::typeparameters works correctly');
 
 $failed := 0;
 try {
