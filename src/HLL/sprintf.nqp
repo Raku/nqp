@@ -60,7 +60,7 @@ my module sprintf {
             @statements.push( $_.made ) for $<statement>;
 
             if ($assert_used_args && $*ARGS_USED < +@*ARGS_HAVE) || ($*ARGS_USED > +@*ARGS_HAVE) {
-                nqp::die("Directives specify "
+                nqp::die("Your printf-style directives specify "
                     ~ ($*ARGS_USED == 1 ?? "1 argument, but "
                                         !! "$*ARGS_USED arguments, but ")
                     ~ (+@*ARGS_HAVE < 1      ?? "no argument was"
