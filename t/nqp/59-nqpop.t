@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(229);
+plan(239);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -278,6 +278,18 @@ ok(nqp::isge_s('aa', 'a'), 'nqp::isge');
 ok(nqp::isge_s('abcdbzefg', 'abcdaz',), 'nqp::isge');
 ok(nqp::isge_s('abc', 'abc'), 'nqp::isge - both string equal');
 ok(!nqp::isge_s('abcdaz', 'abcdbzefg'), 'nqp::isge left string greater');
+
+ok(nqp::islt_s('aaa', 'aab'), 'nqp::isle');
+ok(nqp::islt_s('a', 'aa'), 'nqp::isle');
+ok(nqp::islt_s('abcdaz', 'abcdbzefg'), 'nqp::isle');
+ok(!nqp::islt_s('abc', 'abc'), 'nqp::isle - both string equal');
+ok(!nqp::islt_s('abcdbzefg', 'abcdaz'), 'nqp::isle left string greater');
+
+ok(nqp::isgt_s('aab', 'aaa', ), 'nqp::isge');
+ok(nqp::isgt_s('aa', 'a'), 'nqp::isge');
+ok(nqp::isgt_s('abcdbzefg', 'abcdaz',), 'nqp::isge');
+ok(!nqp::isgt_s('abc', 'abc'), 'nqp::isge - both string equal');
+ok(!nqp::isgt_s('abcdaz', 'abcdbzefg'), 'nqp::isge left string greater');
 
 ok((1.1 != 1) == 1, '!= between floating point numbers (not equal)');
 ok((1.1 != 1.1) == 0,'!= between floating point numbers (equal)'); 
