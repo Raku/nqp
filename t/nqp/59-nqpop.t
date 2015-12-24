@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(225);
+plan(229);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -349,3 +349,15 @@ ok(nqp::inf() > 0, "nqp::inf() is positive");
 ok(nqp::inf()+123 == nqp::inf()-123, "nqp::neginf() doesn't change after adding or substracting");
 ok(nqp::neginf()+123 == nqp::neginf()-123, "nqp::neginf() doesn't change after adding or substracting");
 ok(nqp::neginf() == -nqp::inf(), "nqp::neginf() is negated nqp::inf()");
+
+my $n := nqp::rand_n(4);
+ok($n >= 0 && $n < 4, "generating number before calling srand");
+nqp::srand(100);
+my $a1 := nqp::rand_n(4);
+my $b1 := nqp::rand_n(4);
+nqp::srand(100);
+ok($a1 >= 0 && $a1 < 4, "the generated number is in the wanted range");
+my $a2 := nqp::rand_n(4);
+my $b2 := nqp::rand_n(4);
+ok($a1 == $a2, "after calling srand the first generated number is the same");
+ok($b1 == $b2, "after calling srand the second generated number is the same");
