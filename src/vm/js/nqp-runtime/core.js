@@ -787,3 +787,15 @@ op.continuationinvokeCPS = function(ctx, invokedCont, inject, cont) {
   var value = inject.$call(ctx, {});
   return invokedCont(value);
 };
+
+var generator = Math;
+op.rand_n = function(limit) {
+  return generator.random() * limit;
+};
+
+
+op.srand = function(seed) {
+  var XorShift = require('xorshift').constructor;
+  generator = new XorShift([seed, 0, 0, 0]);
+  return seed;
+};
