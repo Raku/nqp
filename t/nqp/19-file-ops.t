@@ -2,7 +2,7 @@
 
 # Test nqp::op file operations.
 
-plan(66);
+plan(67);
 
 ok( nqp::stat('CREDITS', nqp::const::STAT_EXISTS) == 1, 'nqp::stat exists');
 ok( nqp::stat('AARDVARKS', nqp::const::STAT_EXISTS) == 0, 'nqp::stat not exists');
@@ -23,6 +23,7 @@ ok( !nqp::eoffh($credits), 'Not at EOF after first line read');
 ok( nqp::chars($line) == 5 || nqp::chars($line) == 6, 'nqp::readlinefh line to read'); # =pod\r?\n
 ok( nqp::tellfh($credits) == 5 || nqp::tellfh($credits) == 6, 'nqp::tellfh line two');
 my $rest := nqp::readallfh($credits);
+ok( nqp::eoffh($credits), 'At EOF after readallfh');
 ok( nqp::chars($rest) > 100, 'nqp::readallfh lines to read');
 ok( nqp::tellfh($credits) >= nqp::chars($line) + nqp::chars($rest), 'nqp::tellfh end of file');
 
