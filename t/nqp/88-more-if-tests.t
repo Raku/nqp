@@ -1,4 +1,4 @@
-plan(7);
+plan(10);
 my $foo := 0;
 1 if $foo++;
 ok($foo == 1, "the if condition is evaluated once");
@@ -36,3 +36,12 @@ if side-effect() -> $value {
 
 ok($count == 10, "side effect happens once");
 
+my $log := '';
+sub log($msg, $value) {
+    $log := $log ~ $msg;
+    $value;
+}
+
+ok(nqp::ifnull(log('a', nqp::null()), log('b', 'value1')) eq 'value1', 'ifnull with null');
+ok(nqp::ifnull(log('c', 'value2'), log('d', 'value3')) eq 'value2', 'ifnull without null');
+ok($log eq 'abc', 'only the right things are evaled');
