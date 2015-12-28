@@ -246,3 +246,4 @@ if $crlf-conversion {
 } else {
     ok(1, "ok 67 # Skipped: readallfh doesn't convert \\r\\n on $backend");
 }
+nqp::unlink($test-file) if nqp::stat($test-file, nqp::const::STAT_EXISTS); # clean up test-file
