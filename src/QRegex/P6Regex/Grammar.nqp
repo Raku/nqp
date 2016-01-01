@@ -388,6 +388,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token cclass_backslash:sym<o> { $<sym>=[<[oO]>] [ <octint> | '[' <octints> ']' ] }
     token cclass_backslash:sym<x> { $<sym>=[<[xX]>] [ <hexint> | '[' <hexints> ']' ] }
     token cclass_backslash:sym<c> { $<sym>=[<[cC]>] <charspec> }
+    token cclass_backslash:sym<0> { $<sym>=['0'] }
     token cclass_backslash:sym<any> { . }
 
     proto token assertion { <...> }
