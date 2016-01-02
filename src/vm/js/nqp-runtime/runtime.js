@@ -36,6 +36,9 @@ load_ops(deserialization);
 var serialization = require('./serialization.js');
 load_ops(serialization);
 
+var nativecall = require('./nativecall.js');
+load_ops(nativecall);
+
 exports.CodeRef = require('./code-ref.js');
 
 exports.CurLexpad = require('./curlexpad.js');

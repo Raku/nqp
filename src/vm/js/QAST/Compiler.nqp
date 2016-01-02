@@ -9,6 +9,14 @@ my $T_BOOL := 4; # Something that can be used in boolean context in javascript. 
 my $T_VOID := -1; # Value of this type shouldn't exist, we use a "" as the expr
 my $T_NONVAL := -2; # something that is not a nqp value
 
+my sub join($delim, $array) {
+    my $ret := '';
+    for $array -> $part {
+        $ret := $ret ~ $part;
+    }
+    $ret;
+}
+
 # turn a string into a javascript literal
 sub quote_string($str) {
     my $out := '';
@@ -1526,6 +1534,11 @@ class QAST::OperationsJS {
     add_simple_op('curcode', $T_OBJ, []);
     add_simple_op('callercode', $T_OBJ, []);
 
+    # Native Call
+    add_simple_op('buildnativecall',  $T_INT, [$T_OBJ, $T_STR, $T_STR, $T_STR, $T_OBJ, $T_OBJ], :sideffects, :ctx);
+    add_simple_op('nativecall', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ], :sideffects);
+
+    # Continuations
     add_simple_op('continuationreset', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects, :ctx);
     add_simple_op('continuationinvoke', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects, :ctx, :cps_aware);
 

@@ -717,6 +717,15 @@ exports.P6bigint = P6bigint;
 
 /* Stubs */
 
+function NativeCall() {}
+NativeCall.prototype.create_obj_constructor = basic_constructor;
+NativeCall.prototype.allocate = basic_allocate;
+exports.NativeCall = NativeCall;
+
+function CPointer() {}
+CPointer.prototype.create_obj_constructor = basic_constructor;
+exports.CPointer = CPointer;
+
 function ReentrantMutex() {}
 ReentrantMutex.prototype.create_obj_constructor = basic_constructor;
 

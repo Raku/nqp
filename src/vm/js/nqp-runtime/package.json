@@ -21,6 +21,8 @@
     "nqp-js-io": "pmurias/nqp-js-io",
     "sha1": "*",
     "sleep": "*",
-    "xorshift": "*"
+    "xorshift": "*",
+    "ffi": "*",
+    "ref": "*"
   }
 }
