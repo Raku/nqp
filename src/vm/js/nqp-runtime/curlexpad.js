@@ -16,4 +16,8 @@ CurLexpad.prototype.$$existskey = function(key) {
   return this.set.hasOwnProperty(key);
 };
 
+CurLexpad.prototype.lookup = function(key) {
+  return this.get.hasOwnProperty(key) ? this.get[key]() : null;
+};
+
 module.exports = CurLexpad;

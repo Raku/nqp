@@ -800,3 +800,7 @@ op.srand = function(seed) {
   generator = new XorShift([seed, 0, 0, 0]);
   return seed;
 };
+
+op.getlexrel = function(pad, name) {
+  return pad.lookup(name);
+};
