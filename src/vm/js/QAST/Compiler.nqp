@@ -1424,6 +1424,7 @@ class QAST::OperationsJS {
     add_simple_op('composetype', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
 
     add_simple_op('where', $T_INT, [$T_OBJ]);
+    add_simple_op('objectid', $T_INT, [$T_OBJ]);
 
     # HACK
     # TODO think what we should return on 1.WHAT and "foo".WHAT

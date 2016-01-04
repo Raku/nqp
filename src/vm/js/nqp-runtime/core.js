@@ -406,10 +406,11 @@ op.where = function(obj) {
     }
     return obj._WHERE;
   } else {
-    throw 'WHERE on this type of thing unimplemented';
+    throw 'WHERE/objectid on this type of thing unimplemented';
   }
 };
 
+op.objectid = op.where;
 
 /* HACK - take the current HLL settings into regard */
 
