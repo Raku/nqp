@@ -306,6 +306,17 @@ my %const_map := nqp::hash(
     'PIPE_INHERIT_ERR',         64,
     'PIPE_IGNORE_ERR',          128,
     'PIPE_CAPTURE_ERR',         256,
+
+    'C_TYPE_CHAR',              -1,
+    'C_TYPE_SHORT',             -2,
+    'C_TYPE_INT',               -3,
+    'C_TYPE_LONG',              -4,
+    'C_TYPE_LONGLONG',          -5,
+    'C_TYPE_SIZE_T',            -6,
+    'C_TYPE_BOOL',              -7,
+    'C_TYPE_FLOAT',             -1,
+    'C_TYPE_DOUBLE',            -2,
+    'C_TYPE_LONGDOUBLE',        -3,
 );
 
 # Holds information about the javascript loop we are emitting code inside of.
