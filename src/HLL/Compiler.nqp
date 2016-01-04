@@ -54,7 +54,7 @@ class HLL::Compiler does HLL::Backend::Default {
 
     method readline($stdin, $stdout, $prompt) {
         nqp::printfh(nqp::getstdout(), $prompt);
-        return nqp::readlinefh($stdin);
+        return nqp::readlinechompfh($stdin);
     }
 
     method context() {
