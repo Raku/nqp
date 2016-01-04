@@ -29,6 +29,9 @@ load_ops(nfa);
 var cclass = require('./cclass.js');
 load_ops(cclass);
 
+var hll = require('./hll.js');
+load_ops(hll);
+
 var deserialization = require('./deserialization.js');
 exports.wval = deserialization.wval;
 load_ops(deserialization);

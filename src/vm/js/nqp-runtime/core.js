@@ -414,16 +414,6 @@ op.objectid = op.where;
 
 /* HACK - take the current HLL settings into regard */
 
-var hllsyms = {}
-op.bindcurhllsym = function(name, value) {
-  hllsyms[name] = value;
-  return value;
-};
-
-op.getcurhllsym = function(name) {
-  return hllsyms.hasOwnProperty(name) ? hllsyms[name] :  null;
-};
-
 op.settypehllrole = function(type, role) {
   /* STUB */
   return role;
