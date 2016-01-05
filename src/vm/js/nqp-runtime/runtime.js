@@ -175,7 +175,7 @@ exports.to_bool = function(arg, ctx) {
   } else if (arg instanceof Array) {
     return arg.length == 0 ? 0 : 1;
   } else if (arg instanceof Hash) {
-    return Object.keys(arg.content).length == 0 ? 0 : 1;
+    return arg.content.size == 0 ? 0 : 1;
   } else if (arg === undefined || arg == null) {
     return 0;
   } else if (arg.$$to_bool) {

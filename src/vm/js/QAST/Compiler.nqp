@@ -771,7 +771,7 @@ class QAST::OperationsJS {
             my $val_chunk := $comp.as_js($val, :want($T_OBJ));
             @setup.push($key_chunk);
             @setup.push($val_chunk);
-            @setup.push("$hash.content[{$key_chunk.expr}] = {$val_chunk.expr};\n");
+            @setup.push("$hash.content.set({$key_chunk.expr}, {$val_chunk.expr});\n");
          }
          Chunk.new($T_OBJ, $hash , @setup , :$node);
     });

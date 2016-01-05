@@ -298,7 +298,7 @@ P6opaque.prototype.compose = function(STable, repr_info_hash) {
   // TODO
 
   /* Get attribute part of the protocol from the hash. */
-  var repr_info = repr_info_hash.content.attribute;
+  var repr_info = repr_info_hash.content.get('attribute');
 
   /* Go through MRO and find all classes with attributes and build up
    * mapping info hashes. Note, reverse order so indexes will match
@@ -340,8 +340,8 @@ P6opaque.prototype.compose = function(STable, repr_info_hash) {
         var attr = attrs[j].content;
 
         /* old boxing method generation */
-        if (attr.box_target) {
-          attr.type._STable.REPR.generateBoxingMethods(this, attr);
+        if (attr.get('box_target')) {
+          attr.get('type')._STable.REPR.generateBoxingMethods(this, attr);
         }
 
         /* TODO */
@@ -349,7 +349,7 @@ P6opaque.prototype.compose = function(STable, repr_info_hash) {
         //                  attrType = tc.gc.KnowHOW;
 
         slots.push(curAttr);
-        names.push(attr.name);
+        names.push(attr.get('name'));
 
         /*              AttrInfo info = new AttrInfo();
 
@@ -357,14 +357,14 @@ P6opaque.prototype.compose = function(STable, repr_info_hash) {
 
         this.flattened_stables.push(null);
 
-        if (attr.positional_delegate) {
+        if (attr.get('positional_delegate')) {
           this.positional_delegate_slot = curAttr;
-          this._STable.setPositionalDelegate(attr.name);
+          this._STable.setPositionalDelegate(attr.get('name'));
         }
 
-        if (attr.associative_delegate) {
+        if (attr.get('associative_delegate')) {
           this.associative_delegate_slot = curAttr;
-          this._STable.setAssociativeDelegate(attr.name);
+          this._STable.setAssociativeDelegate(attr.get('name'));
         }
 
         /* TODO think if we want to flatten some things */
@@ -373,8 +373,8 @@ P6opaque.prototype.compose = function(STable, repr_info_hash) {
               else
                   flattenedSTables.add(null);*/
 
-        if (attr.auto_viv_container) {
-          this.auto_viv_values[curAttr] = attr.auto_viv_container;
+        if (attr.get('auto_viv_container')) {
+          this.auto_viv_values[curAttr] = attr.get('auto_viv_container');
         }
 
         /* info.boxTarget = attrHash.exists_key(tc, "box_target") != 0;
@@ -507,9 +507,11 @@ P6int.prototype.create_obj_constructor = function(STable) {
 };
 
 P6int.prototype.compose = function(STable, repr_info_hash) {
-  if (repr_info_hash.content.integer) { 
-    if (repr_info_hash.content.integer.content.bits instanceof NQPInt) {
-      this.bits = repr_info_hash.content.integer.content.bits.value;
+  var integer = repr_info_hash.content.get('integer');
+  if (integer) { 
+    var bits = integer.content.get('bits');
+    if (bits instanceof NQPInt) {
+      this.bits = bits.value;
     } else {
       throw "bits to P6int.compose must be a native int";
     }
@@ -645,8 +647,8 @@ VMArray.prototype.deserialize_array = function(object, data) {
 VMArray.prototype.allocate = basic_allocate;
 
 VMArray.prototype.compose = function(STable, repr_info_hash) {
-  if (repr_info_hash.content.array) {
-    this.type = repr_info_hash.content.array.content.type;
+  if (repr_info_hash.content.get('array')) {
+    this.type = repr_info_hash.content.get('array').content.get('type');
   }
 };
 
@@ -693,20 +695,21 @@ P6bigint.prototype.type_object_for = function(HOW) {
 };
 
 P6bigint.prototype.generateBoxingMethods = function(repr, attr) {
+  var name = attr.get('name');
   repr._STable.addInternalMethod('$$set_int', function(value) {
-    this[attr.name] = bignum(value);
+    this[name] = bignum(value);
   });
 
   repr._STable.addInternalMethod('$$get_int', function() {
-    return this[attr.name].toNumber();
+    return this[name].toNumber();
   });
 
   repr._STable.addInternalMethod('$$get_bignum', function() {
-    return this[attr.name];
+    return this[name];
   });
 
   repr._STable.addInternalMethod('$$set_bignum', function(num) {
-    this[attr.name] = num;
+    this[name] = num;
   });
 };
 

@@ -108,8 +108,8 @@ Iter.prototype.$$to_bool = function(ctx) {
 };
 
 function HashIter(hash) {
-  this.hash = hash;
-  this.keys = Object.keys(hash.content);
+  this.hash = hash.content;
+  this.keys = Object.keys(hash.$$toObject());
   this.target = this.keys.length;
   this.idx = 0;
 }
@@ -124,11 +124,11 @@ HashIter.prototype.$$to_bool = function(ctx) {
 
 function IterPair(hash, key) {
   this._key = key;
-  this._hash = hash.content;
+  this._hash = hash;
 }
 
 IterPair.prototype.iterval = function() {
-  return this._hash[this._key];
+  return this._hash.get(this._key);
 };
 IterPair.prototype.iterkey_s = function() {
   return this._key;
@@ -142,7 +142,7 @@ IterPair.prototype.key = function(ctx, named) {
   return this._key;
 };
 IterPair.prototype.value = function(ctx, named) {
-  return this._hash[this._key];
+  return this._hash.get(this._key);
 };
 
 
@@ -166,14 +166,14 @@ exports.hash = function() {
 exports.slurpy_named = function(named) {
   var hash = new Hash();
   for (key in named) {
-    hash.content[key] = named[key];
+    hash.content.set(key, named[key]);
   }
   return hash;
 };
 
 exports.unwrap_named = function(named) {
   if (!named instanceof Hash) console.log('expecting a hash here');
-  return named.content;
+  return named.$$toObject();
 };
 
 exports.named = function(parts) {
@@ -316,7 +316,7 @@ op.istype = function(obj, type) {
   }
 
   if (obj instanceof Array) {
-    if (hllConfigs.nqp && type == hllConfigs.nqp.content.list) {
+    if (hllConfigs.nqp && type == hllConfigs.nqp.content.get('list')) {
       return 1;
     } else {
       return 0;
@@ -342,7 +342,7 @@ op.setmethcache = function(obj, cache) {
   if (!cache instanceof Hash) {
     console.log('we expect a hash here');
   }
-  obj._STable.setMethodCache(cache.content);
+  obj._STable.setMethodCache(cache.$$toObject());
   return obj;
 };
 
@@ -437,8 +437,8 @@ op.curlexpad = function(get, set) {
 };
 
 op.setcontspec = function(type, cont_spec_type, hash) {
-  var fetch = hash.content.fetch;
-  var store = hash.content.store;
+  var fetch = hash.content.get('fetch');
+  var store = hash.content.get('store');
   if (cont_spec_type === 'code_pair') {
     type._STable.addInternalMethod('$$assignunchecked', function(ctx, value) {
       store.$call(ctx, {}, this, value);
@@ -548,7 +548,7 @@ op.getcomp = function(language) {
 
 op.backendconfig = function() {
   var config = new Hash();
-  config.content.intvalsize = 4;
+  config.content.set('intvalsize', 4);
   return config;
 };
 

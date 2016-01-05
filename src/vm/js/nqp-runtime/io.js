@@ -287,7 +287,7 @@ var PIPE_IGNORE_ERR = 128;
 var PIPE_CAPTURE_ERR = 256;
 
 op.spawn = function(command, dir, env, input, output, error, flags) {
-    nqpIo.spawn(command, dir, env.content, input, output, error, flags);
+    nqpIo.spawn(command, dir, env.$$toObject(), input, output, error, flags);
 };
 
 op.shell = function(command, dir, env, input, output, error, flags) {
@@ -301,9 +301,9 @@ op.shell = function(command, dir, env, input, output, error, flags) {
     oldEnv[v] = process.env[v];
   }
   var oldCwd = process.cwd();
-  for (var v in env.content) {
-    process.env[v] = env.content[v];
-  }
+  env.content.forEach(function(value, key,  map) {
+    process.env[key] = value;
+  });
   process.chdir(dir);
   child_process.execSync(command);
   process.chdir(oldCwd);
@@ -324,7 +324,7 @@ op.cwd = function() {
 op.getenvhash = function() {
   var hash = new Hash();
   for (var key in process.env) {
-    hash.content[key] = process.env[key];
+    hash.content.set(key, process.env[key]);
   }
   return hash;
 };

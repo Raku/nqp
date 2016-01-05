@@ -1,41 +1,49 @@
+var Map = require('es6-map')
+
 function Hash() {
-  this.content = {};
+  this.content = new Map();
 }
+
 Hash.prototype.$$bindkey = function(key, value) {
-  return (this.content[key] = value);
+  return this.content.set(key,value);
+  return value;
 };
 
 Hash.prototype.$$atkey = function(key) {
-  return this.content.hasOwnProperty(key) ? this.content[key] : null;
+  return this.content.has(key) ? this.content.get(key) : null;
 };
 
 Hash.prototype.$$existskey = function(key) {
-  return this.content.hasOwnProperty(key);
+  return this.content.has(key);
 };
 
 Hash.prototype.$$deletekey = function(key) {
-  delete this.content[key];
+  this.content.delete(key);
   return this;
 };
 
 Hash.prototype.$$clone = function() {
   var clone = new Hash();
-  for (var key in this.content) {
-    clone.content[key] = this.content[key];
-  }
+  this.content.forEach(function(value, key, map) {
+    clone.content.set(key, value);
+  });
   return clone;
 };
 
 Hash.prototype.$$elems = function() {
-  var count = 0;
-  for (var key in this.content) {
-    count++;
-  }
-  return count;
+  return this.content.size;
 };
 
 Hash.prototype.Num = function() {
   return this.$$elems();
+};
+
+Hash.prototype.$$toObject = function() {
+  var ret = {};
+  this.content.forEach(function(value, key, map) {
+    ret[key] = value;
+  });
+  return ret;
 };
 
 module.exports = Hash;

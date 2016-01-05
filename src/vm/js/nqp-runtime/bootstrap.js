@@ -137,12 +137,12 @@ add_knowhow_how_method('add_attribute', function(ctx, _NAMED, type, attr) {
 });
 
 add_knowhow_how_method('add_method', function(ctx, _NAMED, type, name, code) {
-  this.__methods.content[name] = code;
+  this.__methods.content.set(name, code);
 });
 
 add_knowhow_how_method('compose', function(ctx, _NAMED, type_object) {
   /* Set method cache */
-  type_object._STable.setMethodCache(this.__methods.content);
+  type_object._STable.setMethodCache(this.__methods.$$toObject());
 
   /* Set type check cache. */
 
@@ -167,10 +167,10 @@ add_knowhow_how_method('compose', function(ctx, _NAMED, type_object) {
   for (var i = 0; i < this.__attributes.length; i++) {
     var attr_info = new Hash();
     var attr = this.__attributes[i];
-    attr_info.content.name = attr.__name;
-    attr_info.content.type = attr.__type;
+    attr_info.content.set('name', attr.__name);
+    attr_info.content.set('type', attr.__type);
     if (attr.__box_target) {
-      attr_info.content.box_target = attr.__box_target;
+      attr_info.content.set('box_target', attr.__box_target);
     }
     attr_info_list.push(attr_info);
   }
@@ -181,7 +181,7 @@ add_knowhow_how_method('compose', function(ctx, _NAMED, type_object) {
 
   /* All of this goes in a hash. */
   var repr_info_hash = new Hash();
-  repr_info_hash.content.attribute = repr_info;
+  repr_info_hash.content.set('attribute', repr_info);
 
 
   /* Compose the representation using it. */

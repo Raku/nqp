@@ -194,7 +194,7 @@ BinaryCursor.prototype.hashOfVariants = function() {
   var hash = new Hash();
   for (var i = 0; i < elems; i++) {
     var str = this.str();
-    hash.content[str] = this.variant();
+    hash.content.set(str,this.variant());
   }
   return hash;
 };
@@ -304,7 +304,7 @@ BinaryCursor.prototype.STable = function(STable) {
   var method_cache = this.variant();
 
   if (method_cache instanceof Hash) {
-    STable.setMethodCache(method_cache.content);
+    STable.setMethodCache(method_cache.$$toObject());
   }
 
   var type_check_cache = [];

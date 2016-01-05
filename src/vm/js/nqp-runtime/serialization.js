@@ -381,10 +381,10 @@ BinaryWriteCursor.prototype.ref = function(ref) {
     case REFVAR_VM_HASH_STR_VAR:
       var count = 0;
       this.I32(ref.$$elems());
-      for (var key in ref.content) {
+      ref.content.forEach(function(value, key, map) {
         this.str(key);
-        this.ref(ref.content[key]);
-      }
+        this.ref(value);
+      }, this);
       break;
     case REFVAR_STATIC_CODEREF:
     case REFVAR_CLONED_CODEREF:
@@ -421,7 +421,9 @@ SerializationWriter.prototype.serializeSTable = function(st) {
   /* Method cache*/
   if (st.method_cache) {
     var hash = new Hash();
-    hash.content = st.method_cache;
+    for (var key in st.method_cache) {
+      hash.content.set(key, st.method_cache[key]);
+    }
     this.stables_data.ref(hash);
   }
   else {

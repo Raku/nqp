@@ -4,7 +4,7 @@ var ref = require('ref');
 exports.op = op;
 
 function mapType(typeHash) {
-  var nativeCallType = typeHash.content.type;
+  var nativeCallType = typeHash.content.get('type');
   if (nativeCallType === 'void') {
     return ref.types.void;
   } else if (nativeCallType === 'cpointer') {
