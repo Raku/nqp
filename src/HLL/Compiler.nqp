@@ -88,7 +88,8 @@ class HLL::Compiler does HLL::Backend::Default {
 
             if $newcode && nqp::substr($newcode, nqp::chars($newcode) - 1) eq "\\" {
                 # Need to get more code before we execute
-                $code := nqp::substr($code, 0, nqp::chars($code) - 1); # strip the \
+                # Strip the trailing \, but reinstate the newline 
+                $code := nqp::substr($code, 0, nqp::chars($code) - 1) ~ "\n";
                 if $code {
                     $prompt := '* ';
                 }
