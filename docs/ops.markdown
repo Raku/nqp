@@ -179,7 +179,9 @@
     - [rename](#rename)
     - [rmdir](#rmdir)
     - [stat](#stat)
+    - [stat_time](#stat_time)
     - [lstat](#lstat)
+    - [stat_time](#stat_time)
     - [symlink](#symlink)
     - [unlink](#unlink)
 - [Type/Conversion Opcodes](#-typeconversion-opcodes)
@@ -1562,11 +1564,24 @@ Returns preferred I/O size in bytes for interacting with the file.
 
 Returns number of system-specific blocks allocated on disk.
 
+## stat_time
+* `stat_time(str $path, int $code)`
+
+Given a path and one of the `STAT_*TIME` codes, return that time attribute as
+a num, using the OS's stat() function.
+
 ## lstat
 * `lstat(str $path, int $code)`
 
 Same as stat, but internally uses the OS's lstat() function, which does *not*
 follow symlinks.
+
+## lstat_time
+* `stat_time(str $path, int $code)`
+
+Same as stat_time, but internally uses the OS's lstat() function, which does
+*not* follow symlinks.
+
 
 ## symlink
 * `symlink(str $before, str $after)`
