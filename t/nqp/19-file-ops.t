@@ -2,7 +2,7 @@
 
 # Test nqp::op file operations.
 
-plan(67);
+plan(73);
 
 ok( nqp::stat('CREDITS', nqp::const::STAT_EXISTS) == 1, 'nqp::stat exists');
 ok( nqp::stat('AARDVARKS', nqp::const::STAT_EXISTS) == 0, 'nqp::stat not exists');
@@ -188,6 +188,26 @@ else {
     ok(nqp::readlinefh($fh) eq "\n",          'reading an empty line');
     ok(nqp::readlinefh($fh) eq "line4",     'reading a line till EOF');
     nqp::closefh($fh);
+}
+
+# file times
+my $mtime := nqp::stat('t/nqp/19-file-ops.t', nqp::const::STAT_MODIFYTIME);
+ok($mtime > 0, 'integer mtime');
+my $atime := nqp::stat('t/nqp/19-file-ops.t', nqp::const::STAT_ACCESSTIME);
+ok($atime > 0, 'integer atime');
+my $ctime := nqp::stat('t/nqp/19-file-ops.t', nqp::const::STAT_CHANGETIME);
+ok($ctime > 0, 'integer ctime');
+
+if $backend eq 'moar' {
+    my $mtime_n := nqp::stat_time('t/nqp/19-file-ops.t', nqp::const::STAT_MODIFYTIME);
+    ok($mtime_n >= $mtime, 'float mtime >= integer');
+    my $atime_n := nqp::stat_time('t/nqp/19-file-ops.t', nqp::const::STAT_ACCESSTIME);
+    ok($atime_n >= $mtime, 'float atime >= integer');
+    my $ctime_n := nqp::stat_time('t/nqp/19-file-ops.t', nqp::const::STAT_CHANGETIME);
+    ok($ctime_n >= $mtime, 'float ctime >= integer');
+}
+else {
+    ok(1, "Skipped: no stat_time op on $backend") for 1,2,3;
 }
 
 # link

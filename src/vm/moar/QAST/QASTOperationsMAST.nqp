@@ -2019,7 +2019,9 @@ QAST::MASTOperations.add_core_moarop_mapping('associative_bind', 'bindkey_o', 2)
 QAST::MASTOperations.add_core_moarop_mapping('say', 'say', 0);
 QAST::MASTOperations.add_core_moarop_mapping('print', 'print', 0);
 QAST::MASTOperations.add_core_moarop_mapping('stat', 'stat');
+QAST::MASTOperations.add_core_moarop_mapping('stat_time', 'stat_time');
 QAST::MASTOperations.add_core_moarop_mapping('lstat', 'lstat');
+QAST::MASTOperations.add_core_moarop_mapping('stat_time', 'stat_time');
 QAST::MASTOperations.add_core_moarop_mapping('open', 'open_fh');
 QAST::MASTOperations.add_core_moarop_mapping('filereadable', 'filereadable');
 QAST::MASTOperations.add_core_moarop_mapping('filewritable', 'filewritable');
