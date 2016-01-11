@@ -235,7 +235,7 @@ nqp::unlink($tmp-file);
 my $is-windows := $output ne "%NQP_SHELL_TEST_ENV_VAR%\n";
 
 if $is-windows {
-    skip("symlink not tested on Windows", 4);
+    skip("symlink not tested on Windows", 5);
 }
 else {
     nqp::unlink($test-file ~ '-symlink') if nqp::stat($test-file ~ '-symlink', nqp::const::STAT_EXISTS);
@@ -276,7 +276,7 @@ if $crlf-conversion {
 nqp::unlink($test-file) if nqp::stat($test-file, nqp::const::STAT_EXISTS); # clean up test-file
 
 if $is-windows || ($backend ne 'moar' && $backend ne 'js') {
-    skip("symlink test not tested on Windows or $backend", 11);
+    skip("symlink test not tested on Windows or $backend", 12);
 }
 else {
 
