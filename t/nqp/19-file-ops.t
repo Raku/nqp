@@ -2,7 +2,7 @@
 
 # Test nqp::op file operations.
 
-plan(73);
+plan(88);
 
 ok( nqp::stat('CREDITS', nqp::const::STAT_EXISTS) == 1, 'nqp::stat exists');
 ok( nqp::stat('AARDVARKS', nqp::const::STAT_EXISTS) == 0, 'nqp::stat not exists');
@@ -198,7 +198,7 @@ ok($atime > 0, 'integer atime');
 my $ctime := nqp::stat('t/nqp/19-file-ops.t', nqp::const::STAT_CHANGETIME);
 ok($ctime > 0, 'integer ctime');
 
-if $backend eq 'moar' {
+if $backend eq 'moar' || $backend eq 'js' {
     my $mtime_n := nqp::stat_time('t/nqp/19-file-ops.t', nqp::const::STAT_MODIFYTIME);
     ok($mtime_n >= $mtime, 'float mtime >= integer');
     my $atime_n := nqp::stat_time('t/nqp/19-file-ops.t', nqp::const::STAT_ACCESSTIME);
@@ -235,7 +235,7 @@ nqp::unlink($tmp-file);
 my $is-windows := $output ne "%NQP_SHELL_TEST_ENV_VAR%\n";
 
 if $is-windows {
-    ok(1, "ok $_ # Skipped: symlink not tested on Windows") for (44, 45);
+    ok(1, "ok $_ # Skipped: symlink not tested on Windows") for (44, 45, 46, 47);
 }
 else {
     nqp::unlink($test-file ~ '-symlink') if nqp::stat($test-file ~ '-symlink', nqp::const::STAT_EXISTS);
@@ -244,6 +244,7 @@ else {
     nqp::closefh($fh);
     nqp::symlink($test-file, $test-file ~ '-symlink');
     ok(nqp::stat($test-file ~ '-symlink', nqp::const::STAT_EXISTS), 'the symbolic link should exist');
+    ok(nqp::lstat($test-file ~ '-symlink', nqp::const::STAT_EXISTS), 'the symbolic link should exist');
     if nqp::getcomp('nqp').backend.name eq 'parrot' {
         ok(1, 'ok 45 # Skipped: stat + STAT_ISLNK is broken on parrot');
     }
@@ -252,6 +253,12 @@ else {
     }
     nqp::unlink($test-file);
     nqp::unlink($test-file ~ '-symlink');
+
+    nqp::symlink($test-file~'missing', $test-file ~ '-missing-symlink');
+    ok( nqp::stat( $test-file ~ '-missing-symlink', nqp::const::STAT_EXISTS) == 0, 'nqp::stat exists on symlink');
+    ok( nqp::lstat( $test-file ~ '-missing-symlink', nqp::const::STAT_EXISTS) == 1, 'nqp::lstat exists on symlink pointing to missing file');
+
+    nqp::unlink($test-file ~ '-missing-symlink') if nqp::lstat($test-file ~ '-missing-symlink', nqp::const::STAT_EXISTS);
 }
 
 if $crlf-conversion {
@@ -264,6 +271,35 @@ if $crlf-conversion {
     ok($input eq "abc\ndef\nghi", "reading a whole file");
     nqp::closefh($fh);
 } else {
-    ok(1, "ok 67 # Skipped: readallfh doesn't convert \\r\\n on $backend");
+    ok(1, "ok 69 # Skipped: readallfh doesn't convert \\r\\n on $backend");
 }
 nqp::unlink($test-file) if nqp::stat($test-file, nqp::const::STAT_EXISTS); # clean up test-file
+
+if $is-windows || ($backend ne 'moar' && $backend ne 'js') {
+    my $i := 77;
+    while $i <= 88 {
+        ok(1, "ok $i # Skipped: symlink test not tested on Windows or $backend");
+        $i := $i + 1;
+    }
+}
+else {
+
+    my $symlink := $test-file ~ '-symlink';
+    my $file := 't/nqp/19-file-ops.t';
+
+    nqp::symlink('t/nqp/19-file-ops.t', $symlink);
+
+
+    for [nqp::const::STAT_MODIFYTIME, nqp::const::STAT_ACCESSTIME, nqp::const::STAT_CHANGETIME] -> $flag {
+      ok(nqp::stat_time($file, $flag) == nqp::lstat_time($file, $flag), 'stat_time works as lstat_time on regular file');
+      ok(nqp::stat($file, $flag) == nqp::lstat($file, $flag), 'stat works as lstat on regular file');
+      ok(nqp::stat_time($symlink, $flag) == nqp::lstat_time($file, $flag), 'stat_time follows symlink');
+      ok(nqp::lstat_time($symlink, $flag) != nqp::lstat_time($file, $flag), 'lstat_time doesn\'t follow symlink');
+    }
+
+
+    if nqp::lstat($symlink, nqp::const::STAT_EXISTS) {
+        nqp::unlink($symlink);
+    }
+
+}
