@@ -164,7 +164,7 @@ class QAST::MASTRegexCompiler {
                 ival(nqp::hintfor($!cursor_type, '$!restart'))),
             op('isconcrete', $i19, $tmp),
             op('bindlex', $*BLOCK.resolve_lexical('$¢'), $cur),
-            op('graphs_s', $eos, $tgt),
+            op('chars', $eos, $tgt),
             op('eq_i', $i0, $one, $i19),
             op('if_i', $i0, $restartlabel),
             op('gt_i', $i0, $pos, $eos),
