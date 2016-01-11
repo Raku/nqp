@@ -30,7 +30,7 @@ op.say = function(arg) {
   }
 };
 
-op.stat = function(file, code) {
+function stat(file, code, lstat) {
   var EXISTS = 0;
   var FILESIZE = 1;
   var ISDIR = 2;
@@ -54,7 +54,11 @@ op.stat = function(file, code) {
 
   // we can't use fs.existsSync(file) as it follows symlinks
   try {
-    var stats = fs.lstatSync(file);
+    if (lstat) {
+      var stats = fs.lstatSync(file);
+    } else {
+      var stats = fs.statSync(file);
+    }
   } catch (err) {
     if (code == EXISTS && err.code === 'ENOENT') {
       return 0;
@@ -86,6 +90,23 @@ op.stat = function(file, code) {
     case PLATFORM_BLOCKSIZE: return stats.blksize;
     case PLATFORM_BLOCKS: return stats.blocks;
   }
+}
+
+
+op.stat = function(file, code) {
+  return stat(file, code, false) | 0;
+};
+
+op.stat_time = function(file, code) {
+  return stat(file, code, false);
+};
+
+op.lstat = function(file, code) {
+  return stat(file, code, true) | 0;
+};
+
+op.lstat_time = function(file, code) {
+  return stat(file, code, true);
 };
 
 function FileHandle(fd) {

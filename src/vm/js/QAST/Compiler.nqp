@@ -1071,6 +1071,10 @@ class QAST::OperationsJS {
     add_simple_op('radix', $T_OBJ, [$T_INT, $T_STR, $T_INT, $T_INT]);
 
     add_simple_op('stat', $T_INT, [$T_STR, $T_INT]);
+    add_simple_op('stat_time', $T_NUM, [$T_STR, $T_INT]);
+
+    add_simple_op('lstat', $T_INT, [$T_STR, $T_INT]);
+    add_simple_op('lstat_time', $T_NUM, [$T_STR, $T_INT]);
 
     add_simple_op('defined', $T_INT, [$T_OBJ]);
     %ops<isconcrete> := %ops<defined>;
