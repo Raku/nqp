@@ -54,7 +54,7 @@ function stat(file, code, lstat) {
 
   // we can't use fs.existsSync(file) as it follows symlinks
   try {
-    if (lstat) {
+    if (lstat || code == ISLNK) {
       var stats = fs.lstatSync(file);
     } else {
       var stats = fs.statSync(file);
