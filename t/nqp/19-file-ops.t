@@ -59,7 +59,7 @@ if nqp::getcomp('nqp').backend.name eq 'js' {
     ok(nqp::substr($line3, 0, 9) eq '123456789' && (nqp::chars($line3) == 10 || nqp::chars($line3) == 11), '... reading last line not ending with input separator');
 }
 else {
-    ok(1, "$_ # Skipped: setinputlinesep with multiple chars is broken for the MoarVM and possibly others") for (22, 23, 24);
+   skip("setinputlinesep with multiple chars is broken for the MoarVM and possibly others", 3);
 }
 
 ok( nqp::defined(nqp::getstdin()), 'nqp::getstdin');
@@ -143,7 +143,7 @@ nqp::closefh($fh);
 
 ## chdir
 if nqp::getcomp('nqp').backend.name eq 'jvm' {
-    ok(1, "$_ # Skipped: chdir is not possible on jvm") for (33, 34, 35);
+    skip("chdir is not possible on jvm", 3);
 }
 else {
     nqp::chdir('t');
@@ -175,10 +175,10 @@ my $backend := nqp::getcomp('nqp').backend.name;
 my $crlf-conversion := $backend eq 'moar' || $backend eq 'js';
 
 if $backend eq 'parrot' {
-    ok(1, "ok $_ # Skipped: readlinefh is broken on parrot") for (36, 37, 38, 39, 40);
+    skip("readlinefh is broken on parrot", 5);
 }
 elsif $crlf-conversion {
-    ok(1, "ok $_ # Skipped: readlinefh won't match \\r on $backend") for (36, 37, 38, 39, 40);
+    skip("readlinefh won't match \\r on $backend", 5);
 }
 else {
     $fh := nqp::open('t/nqp/19-readline.txt', 'r');
@@ -207,7 +207,7 @@ if $backend eq 'moar' || $backend eq 'js' {
     ok($ctime_n >= $mtime, 'float ctime >= integer');
 }
 else {
-    ok(1, "Skipped: no stat_time op on $backend") for 1,2,3;
+    skip("no stat_time op on $backend", 3);
 }
 
 # link
@@ -235,7 +235,7 @@ nqp::unlink($tmp-file);
 my $is-windows := $output ne "%NQP_SHELL_TEST_ENV_VAR%\n";
 
 if $is-windows {
-    ok(1, "ok $_ # Skipped: symlink not tested on Windows") for (44, 45, 46, 47);
+    skip("symlink not tested on Windows", 4);
 }
 else {
     nqp::unlink($test-file ~ '-symlink') if nqp::stat($test-file ~ '-symlink', nqp::const::STAT_EXISTS);
@@ -246,7 +246,7 @@ else {
     ok(nqp::stat($test-file ~ '-symlink', nqp::const::STAT_EXISTS), 'the symbolic link should exist');
     ok(nqp::lstat($test-file ~ '-symlink', nqp::const::STAT_EXISTS), 'the symbolic link should exist');
     if nqp::getcomp('nqp').backend.name eq 'parrot' {
-        ok(1, 'ok 45 # Skipped: stat + STAT_ISLNK is broken on parrot');
+        skip('stat + STAT_ISLNK is broken on parrot');
     }
     else {
         ok(nqp::stat($test-file ~ '-symlink', nqp::const::STAT_ISLNK), 'the symbolic link should actually *be* a symbolic link');
@@ -271,16 +271,12 @@ if $crlf-conversion {
     ok($input eq "abc\ndef\nghi", "reading a whole file");
     nqp::closefh($fh);
 } else {
-    ok(1, "ok 69 # Skipped: readallfh doesn't convert \\r\\n on $backend");
+    skip("readallfh doesn't convert \\r\\n on $backend");
 }
 nqp::unlink($test-file) if nqp::stat($test-file, nqp::const::STAT_EXISTS); # clean up test-file
 
 if $is-windows || ($backend ne 'moar' && $backend ne 'js') {
-    my $i := 77;
-    while $i <= 88 {
-        ok(1, "ok $i # Skipped: symlink test not tested on Windows or $backend");
-        $i := $i + 1;
-    }
+    skip("symlink test not tested on Windows or $backend", 11);
 }
 else {
 

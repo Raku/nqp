@@ -30,9 +30,12 @@ sub todo($reason, $count) {
     $todo_reason        := "# TODO $reason";
 }
 
-sub skip($desc) {
-    $test_counter := $test_counter + 1;
-    say("ok $test_counter # SKIP $desc\n");
+sub skip($desc, $count=1) {
+    my $skip_to := $test_counter + $count;
+    while ($test_counter < $skip_to) {
+        $test_counter := $test_counter + 1;
+        say("ok $test_counter # SKIP $desc");
+    }
 }
 
 # vim: ft=perl6
