@@ -671,6 +671,8 @@ class QAST::OperationsJS {
     add_simple_op('unlink', $T_VOID, [$T_STR], :sideffects);
     add_simple_op('setencoding', $T_VOID, [$T_OBJ, $T_STR], :sideffects);
 
+    add_simple_op('readlink', $T_STR, [$T_STR]);
+
     add_simple_op('chdir', $T_VOID, [$T_STR], :sideffects);
     add_simple_op('rmdir', $T_VOID, [$T_STR], :sideffects);
     add_simple_op('mkdir', $T_VOID, [$T_STR, $T_INT], :sideffects);

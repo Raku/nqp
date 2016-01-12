@@ -411,3 +411,7 @@ op.getstdin = function() {
 op.exit = function(code) {
   process.exit(code);
 };
+
+op.readlink = function(path) {
+  return fs.readlinkSync(path);
+};
