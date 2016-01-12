@@ -626,6 +626,8 @@ class QAST::OperationsJS {
 
     add_simple_op('ordbaseat', $T_INT, [$T_STR, $T_INT]);
 
+    add_simple_op('getcodelocation', $T_OBJ, [$T_OBJ]);
+
     add_simple_op('null', $T_OBJ, [], sub () {"null"});
 
     #HACK we need to avoid using undefined at all
@@ -669,6 +671,7 @@ class QAST::OperationsJS {
     add_simple_op('getpid', $T_INT, []);
 
     add_simple_op('exit', $T_VOID, [$T_INT], :sideffects);
+
 
     add_simple_op('symlink', $T_VOID, [$T_STR, $T_STR], :sideffects);
     add_simple_op('link', $T_VOID, [$T_STR, $T_STR], :sideffects);

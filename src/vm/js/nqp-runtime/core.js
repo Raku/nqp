@@ -842,3 +842,10 @@ op.bitxor_s = function(a, b) {
     i++;
   }
 };
+
+op.getcodelocation = function(code) {
+  var hash = new Hash();
+  hash.content.set('file', 'unknown');
+  hash.content.set('line', new NQPInt(-1));
+  return hash;
+};
