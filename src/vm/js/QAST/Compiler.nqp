@@ -693,6 +693,7 @@ class QAST::OperationsJS {
     add_simple_op('encode', $T_OBJ, [$T_STR, $T_STR, $T_OBJ], :sideffects);
     add_simple_op('decode', $T_STR, [$T_OBJ, $T_STR]);
 
+    add_simple_op('gethostname', $T_STR, [$T_STR]);
 
     # XXX explicit takeclosure will go away under new model (which nqp-m uses); for now, no-op it.
     add_op('takeclosure', sub ($comp, $node, :$want, :$cps) {

@@ -1,4 +1,5 @@
 var fs = require('fs-ext');
+var os = require('os');
 var sleep = require('sleep');
 
 var tty = require('tty');
@@ -414,4 +415,8 @@ op.exit = function(code) {
 
 op.readlink = function(path) {
   return fs.readlinkSync(path);
+};
+
+op.gethostname = function() {
+  return os.hostname();
 };
