@@ -794,3 +794,51 @@ op.srand = function(seed) {
 op.getlexrel = function(pad, name) {
   return pad.lookup(name);
 };
+
+//TODO think about polyfill for codePointAt, fromCodePoint
+
+op.bitand_s = function(a, b) {
+  var ret = '';
+  var i = 0;
+  while (true) {
+    var codepointA = a.codePointAt(i);
+    var codepointB = b.codePointAt(i);
+    if (codepointA === undefined || codepointB == undefined) {
+      return ret;
+    }
+    ret += String.fromCodePoint(codepointA & codepointB);
+    i++;
+  }
+};
+
+op.bitor_s = function(a, b) {
+  var ret = '';
+  var i = 0;
+  while (true) {
+    var codepointA = a.codePointAt(i);
+    var codepointB = b.codePointAt(i);
+    if (codepointA === undefined && codepointB == undefined) {
+      return ret;
+    }
+    if (codepointA === undefined) codepointA = 0;
+    if (codepointB === undefined) codepointB = 0;
+    ret += String.fromCodePoint(codepointA | codepointB);
+    i++;
+  }
+};
+
+op.bitxor_s = function(a, b) {
+  var ret = '';
+  var i = 0;
+  while (true) {
+    var codepointA = a.codePointAt(i);
+    var codepointB = b.codePointAt(i);
+    if (codepointA === undefined && codepointB == undefined) {
+      return ret;
+    }
+    if (codepointA === undefined) codepointA = 0;
+    if (codepointB === undefined) codepointB = 0;
+    ret += String.fromCodePoint(codepointA ^ codepointB);
+    i++;
+  }
+};
