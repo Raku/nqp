@@ -2,7 +2,7 @@
 
 # Test nqp::op file operations.
 
-plan(88);
+plan(89);
 
 ok( nqp::stat('CREDITS', nqp::const::STAT_EXISTS) == 1, 'nqp::stat exists');
 ok( nqp::stat('AARDVARKS', nqp::const::STAT_EXISTS) == 0, 'nqp::stat not exists');
@@ -235,7 +235,7 @@ nqp::unlink($tmp-file);
 my $is-windows := $output ne "%NQP_SHELL_TEST_ENV_VAR%\n";
 
 if $is-windows {
-    skip("symlink not tested on Windows", 5);
+    skip("symlink not tested on Windows", 6);
 }
 else {
     nqp::unlink($test-file ~ '-symlink') if nqp::stat($test-file ~ '-symlink', nqp::const::STAT_EXISTS);
@@ -243,6 +243,7 @@ else {
     nqp::printfh($fh, 'Hello');
     nqp::closefh($fh);
     nqp::symlink($test-file, $test-file ~ '-symlink');
+    ok(nqp::readlink($test-file ~ '-symlink') eq $test-file, 'nqp::readlink');
     ok(nqp::stat($test-file ~ '-symlink', nqp::const::STAT_EXISTS), 'the symbolic link should exist');
     ok(nqp::lstat($test-file ~ '-symlink', nqp::const::STAT_EXISTS), 'the symbolic link should exist');
     if nqp::getcomp('nqp').backend.name eq 'parrot' {
