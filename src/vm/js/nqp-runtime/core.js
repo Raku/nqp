@@ -843,6 +843,10 @@ op.bitxor_s = function(a, b) {
   }
 };
 
+op.replace = function(str, offset, count, repl) {
+  return str.substr(0, offset) + repl + str.substr(offset + count);
+};
+
 op.getcodelocation = function(code) {
   var hash = new Hash();
   hash.content.set('file', 'unknown');
