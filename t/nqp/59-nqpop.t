@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(242);
+plan(243);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -373,6 +373,8 @@ my $a2 := nqp::rand_n(4);
 my $b2 := nqp::rand_n(4);
 ok($a1 == $a2, "after calling srand the first generated number is the same");
 ok($b1 == $b2, "after calling srand the second generated number is the same");
+
+ok(nqp::replace("0123456789", 2, 4, "abc") eq "01abc6789", "nqp::replace");
 
 # TODO higher unicode values
 ok(nqp::bitand_s('blabla12$#@', '9$dfa23219') eq ' $`b` 12 !', "nqp::bitand_s");
