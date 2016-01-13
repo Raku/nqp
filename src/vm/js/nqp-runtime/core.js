@@ -866,3 +866,7 @@ op.getcodelocation = function(code) {
   hash.content.set('line', new NQPInt(-1));
   return hash;
 };
+
+op.getcodecuid = function(codeRef) {
+  return codeRef.cuid;
+};

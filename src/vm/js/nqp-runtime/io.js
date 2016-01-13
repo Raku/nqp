@@ -420,3 +420,7 @@ op.readlink = function(path) {
 op.gethostname = function() {
   return os.hostname();
 };
+
+op.chmod = function(path, mode) {
+  return fs.chmodSync(path, mode);
+};

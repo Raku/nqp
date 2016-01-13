@@ -38,6 +38,7 @@ CodeRef.prototype.capture = function(block) {
 CodeRef.prototype.closure = function(block) {
   var closure = new CodeRef(this.name, undefined);
   closure.codeObj = this.codeObj;
+  closure.cuid = this.cuid;
   closure.$call = block;
   closure.$call.codeRef = closure;
   return closure;

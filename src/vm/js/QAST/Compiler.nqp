@@ -695,6 +695,8 @@ class QAST::OperationsJS {
     add_simple_op('rmdir', $T_VOID, [$T_STR], :sideffects);
     add_simple_op('mkdir', $T_VOID, [$T_STR, $T_INT], :sideffects);
 
+    add_simple_op('chmod', $T_VOID, [$T_STR, $T_INT], :sideffects);
+
     add_simple_op('getenvhash', $T_OBJ, [], :sideffects);
     add_simple_op('cwd', $T_STR, [], :sideffects);
 
@@ -1511,6 +1513,8 @@ class QAST::OperationsJS {
 
     add_simple_op('getcodeobj', $T_OBJ, [$T_OBJ]);
     add_simple_op('setcodeobj', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
+
+    add_simple_op('getcodecuid', $T_STR, [$T_OBJ]);
 
     add_simple_op('box_i', $T_OBJ, [$T_INT, $T_OBJ]);
     add_simple_op('unbox_i', $T_INT, [$T_OBJ]);
