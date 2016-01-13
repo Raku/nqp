@@ -2,7 +2,7 @@
 
 # slurpy args
 
-plan(6);
+plan(8);
 
 sub slurpy_pos(*@pos) {
     ok(@pos[0] == 1);
@@ -12,12 +12,14 @@ sub slurpy_pos(*@pos) {
 
 slurpy_pos(1, 2, 3);
 
-sub slurpy_named(*%named) {
+sub slurpy_named(:$uhorka, *%named) {
     ok(%named<pivo> eq "ok pivo");
     ok(%named<slanina> eq "ok slanina");
+    ok(!nqp::existskey(%named, "uhorka"), "declared named argument shouldn't be part of slurpy");
+    ok($uhorka eq "ok uhorka");
 }
 
-slurpy_named(:pivo("ok pivo"), :slanina("ok slanina"));
+slurpy_named(:pivo("ok pivo"), :slanina("ok slanina"), :uhorka("ok uhorka") );
 
 sub named_and_slurpy(:$x, *@foo) {
     ok($x eq "ok x");
