@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(243);
+plan(250);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -340,7 +340,29 @@ ok(nqp::getcomp("noSuchLanguageEver1")[0] eq "compiler1", "nqp::getcomp");
     ok(nqp::islist($a) == 1, 'nqp::islist(nqp::list_s())');
 
     my $b := nqp::list_s("A","B","C");
-    ok(nqp::atpos_s($b,2) eq "C", 'atpos_s');
+    ok(nqp::bindpos_s($b, 2, "D"), 'nqp::bindpos_s');
+    ok(nqp::atpos_s($b,2) eq "D", 'nqp::atpos_s');
+}
+
+{
+    my $a := nqp::list_n();
+    nqp::push_n($a, 10.4);
+    nqp::push_n($a, 11);
+    nqp::push_n($a, 12);
+    ok(nqp::elems($a) == 3, 'nqp::elems/nqp::push_n');
+    ok(nqp::pop_n($a) == 12, 'nqp::pop_n');
+    ok(nqp::elems($a) == 2, 'nqp::pop_n reduces the number of elements correctly');
+    ok(nqp::islist($a) == 1, 'nqp::islist(nqp::list_n())');
+
+    my $b := nqp::list_n(1,2,30.4);
+    ok(nqp::atpos_n($b,2) == 30.4, 'atpos_n');
+
+
+    my $c := nqp::list_n();
+    nqp::bindpos_n($c, 1, 102);
+    nqp::bindpos_n($c, 1, 103.5);
+    nqp::bindpos_n($c, 0, 101);
+    ok(nqp::atpos_n($c, 1) == 103.5, 'bindpos_n works');
 }
 
 {
