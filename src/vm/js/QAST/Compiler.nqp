@@ -385,6 +385,15 @@ my class BlockBarrier {
     method outer() { $!outer }
 }
 
+# TODO benchmark keeping a constant version of this
+sub known_named(@known_named) {
+    my @pairs;
+    for @known_named -> $named {
+        @pairs.push($named ~ ": true");
+    }
+    '{' ~ nqp::join(',', @pairs) ~ '}'
+}
+
 class QAST::OperationsJS {
     my %ops;
 
@@ -1469,7 +1478,7 @@ class QAST::OperationsJS {
 
     for <savecapture usecapture> -> $op {
         add_simple_op($op, $T_OBJ, [], sub () {
-            "nqp.op.savecapture(Array.prototype.slice.call(arguments))"
+            "nqp.op.savecapture(Array.prototype.slice.call(arguments), {known_named(@*KNOWN_NAMED)})"
         } , :sideffects);
     }
 
@@ -1480,6 +1489,8 @@ class QAST::OperationsJS {
     add_simple_op('capturehasnameds', $T_INT, [$T_OBJ]);
     add_simple_op('captureposelems', $T_INT, [$T_OBJ]);
     add_simple_op('captureposarg', $T_OBJ, [$T_OBJ, $T_INT]);
+    add_simple_op('capturenamedshash', $T_OBJ, [$T_OBJ]);
+
     add_simple_op('invokewithcapture', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($invokee, $capture) {
         "$invokee.\$apply([{$*CTX}].concat($capture.named, $capture.pos))"
     }, :sideffects);
@@ -2509,6 +2520,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             @sig.push($cps);
         }
 
+
         my $bind_named := '';
         for @params {
             if $_.slurpy {
@@ -2521,6 +2533,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 $*BLOCK.add_js_lexical(self.mangle_name($_.name));
             } elsif $_.named {
                 my $quoted := quote_string($_.named);
+                @*KNOWN_NAMED.push($quoted);
                 my $value := "_NAMED[$quoted]";
                 if $_.default {
                     # TODO types
@@ -2582,7 +2595,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             @setup.push("{self.mangle_name($slurpy.name)} = Array.prototype.slice.call(arguments,{+@sig});\n");
         }
         if $slurpy_named {
-            @setup.push("{self.mangle_name($slurpy_named.name)} = nqp.slurpy_named(_NAMED);\n");
+            @setup.push("{self.mangle_name($slurpy_named.name)} = nqp.slurpy_named(_NAMED, {known_named(@*KNOWN_NAMED)});\n");
         }
 
         Chunk.new($T_NONVAL, nqp::join(',', @sig), @setup);
@@ -3007,6 +3020,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         } else {
             self.register_cuid($node);
 
+            my @*KNOWN_NAMED;
             my $*BINDVAL := 0;
             my $*BLOCK := BlockInfo.new($node, (nqp::defined($outer) ?? $outer !! NQPMu));
 
@@ -3059,6 +3073,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             # TODO recreate other things than block
 
             if $!cps ne 'off' {
+                my @*KNOWN_NAMED;
                 my $*BLOCK := BlockInfo.new($node, (nqp::defined($outer) ?? $outer !! NQPMu));
 
                 my $stmts_cps := self.compile_all_the_statements($node, $body_want, :cps);

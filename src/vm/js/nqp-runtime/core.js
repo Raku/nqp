@@ -163,10 +163,12 @@ exports.hash = function() {
   return new Hash();
 };
 
-exports.slurpy_named = function(named) {
+exports.slurpy_named = function(named, skip) {
   var hash = new Hash();
   for (key in named) {
-    hash.content.set(key, named[key]);
+    if (!skip[key]) {
+      hash.content.set(key, named[key]);
+    }
   }
   return hash;
 };
@@ -231,13 +233,14 @@ op.setboolspec = function(obj, mode, method) {
   return obj;
 };
 
-function Capture(named, pos) {
+function Capture(named, pos, skip) {
   this.pos = pos;
   this.named = named;
+  this.skip = skip;
 }
 
-op.savecapture = function(args) {
-  return new Capture(args[1], Array.prototype.slice.call(args, 2));
+op.savecapture = function(args, skip) {
+  return new Capture(args[1], Array.prototype.slice.call(args, 2), skip);
 };
 
 op.captureposelems = function(capture) {
@@ -254,6 +257,16 @@ op.capturehasnameds = function(capture) {
 
 op.captureexistsnamed = function(capture, arg) {
   return capture.named.hasOwnProperty(arg) ? 1 : 0;
+};
+
+op.capturenamedshash = function(capture) {
+  var hash = new Hash();
+  for (key in capture.named) {
+    if (!capture.skip[key]) {
+      hash.content.set(key, capture.named[key]);
+    }
+  }
+  return hash;
 };
 
 op.setcodeobj = function(codeRef, codeObj) {
