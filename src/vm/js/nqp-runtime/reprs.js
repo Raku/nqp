@@ -1,6 +1,7 @@
 var sixmodel = require('./sixmodel.js');
 var Hash = require('./hash.js');
 var NQPInt = require('./nqp-int.js');
+var NQPException = require('./nqp-exception.js');
 
 function basic_type_object_for(HOW) {
   var st = new sixmodel.STable(this, HOW);
@@ -738,3 +739,112 @@ function ConditionVariable() {}
 ConditionVariable.prototype.create_obj_constructor = basic_constructor;
 
 module.exports.ConditionVariable = ConditionVariable;
+
+function MultiDimArray() {
+
+}
+MultiDimArray.prototype.type_object_for = basic_type_object_for;
+MultiDimArray.prototype.compose = function(STable, repr_info_hash) {
+  var array = repr_info_hash.content.get('array');
+  var dimensions = array.content.get('dimensions');
+
+  if (dimensions instanceof NQPInt) {
+    dimensions = dimensions.value;
+    if (dimensions === 0) {
+      throw new NQPException("MultiDimArray REPR must be composed with at least 1 dimension");
+    }
+
+  } else {
+    throw "dimensions to MultiDimArray.compose must be a native int";
+  }
+
+//  console.log('dimensions', dimensions);
+  STable.dimensions = dimensions;
+};
+MultiDimArray.prototype.allocate = basic_allocate;
+
+MultiDimArray.prototype.basic_constructor = basic_constructor;
+MultiDimArray.prototype.create_obj_constructor = function(STable) {
+  var c = this.basic_constructor(STable);
+
+  STable.obj_constructor = c; // HACK it's set again later, we set it for addInternalMethod
+
+  STable.addInternalMethod('$$numdimensions', function(value) {
+    if (this.type_object_) {
+      throw new NQPException("Cannot get number of dimensions of a type object");
+    }
+    return STable.dimensions;
+  });
+
+  STable.addInternalMethod('$$clone', function() {
+    var clone = new this._STable.obj_constructor();
+    clone.storage = this.storage.slice();
+    clone.dimensions = this.dimensions;
+    return clone;
+  });
+
+  STable.addInternalMethod('$$dimensions', function() {
+    if (this.type_object_) {
+      throw new NQPException("Cannot get dimensions of a type object");
+    }
+    return this.dimensions;
+  });
+
+  STable.addInternalMethod('$$setdimensions', function(value) {
+    if (value.length != STable.dimensions) {
+      throw new NQPException("Array type of " + STable.dimensions + " dimensions cannot be intialized with " + value.length + " dimensions");
+    } else if (this.dimensions) {
+      throw new NQPException("Can only set dimensions once");
+    }
+    this.storage = [];
+    return (this.dimensions = value);
+  });
+
+
+  STable.addInternalMethod('$$calculateIndex', function(idx, value) {
+    if (idx.length != STable.dimensions) {
+      throw new NQPException("Cannot access " + STable.dimensions + " dimension array with " + idx.length + " indices");
+    }
+
+    for (var i=0; i < idx.length; i++) {
+      if (idx[i] < 0 || idx[i] >= this.dimensions[i]) {
+        throw new NQPException("Index " + idx[i] + " for dimension " + (i+1) + " out of range (must be 0.." + this.dimensions[i] + ")");
+      }
+    }
+    var calculatedIdx = 0;
+    for (var i=0; i < idx.length; i++) {
+      calculatedIdx = calculatedIdx * this.dimensions[i] + idx[i];
+    }
+    return calculatedIdx;
+  });
+
+  STable.addInternalMethod('$$atposnd', function(idx) {
+    return this.storage[this.$$calculateIndex(idx)];
+  });
+
+  STable.addInternalMethod('$$bindposnd', function(idx, value) {
+    return (this.storage[this.$$calculateIndex(idx)] = value);
+  });
+
+  // TODO optimize access
+  STable.addInternalMethod('$$bindpos', function(index, value) {
+    return this.$$bindposnd([index], value);
+  });
+
+  STable.addInternalMethod('$$setelems', function(elems) {
+    this.$$setdimensions([elems]);
+  });
+
+  STable.addInternalMethod('$$elems', function(elems) {
+    return this.dimensions[0];
+  });
+
+  STable.addInternalMethod('$$atpos', function(index) {
+    return this.$$atposnd([index]);
+  });
+
+
+  return c;
+};
+
+module.exports.MultiDimArray = MultiDimArray;

@@ -786,13 +786,18 @@ class QAST::OperationsJS {
         add_simple_op('pop' ~ $suffix, $type, [$T_OBJ], sub ($array) {"$array.pop()"}, :sideffects);
         add_simple_op('push' ~ $suffix, $type, [$T_OBJ, $type], sub ($array, $elem) {"$array.push($elem)"}, :sideffects);
 
-        add_simple_op('atposnd' ~ $suffix, $type, [$T_OBJ, $T_OBJ], :ctx);
-        add_simple_op('bindposnd' ~ $suffix, $type, [$T_OBJ, $T_OBJ, $type], :ctx, :sideffects);
+        add_simple_op('atposnd' ~ $suffix, $type, [$T_OBJ, $T_OBJ]);
+        add_simple_op('atpos2d' ~ $suffix, $type, [$T_OBJ, $T_INT, $T_INT, $type],  :sideffects);
+        add_simple_op('atpos3d' ~ $suffix, $type, [$T_OBJ, $T_INT, $T_INT, $T_INT, $type], :sideffects);
+
+        add_simple_op('bindposnd' ~ $suffix, $type, [$T_OBJ, $T_OBJ, $type], :sideffects);
+        add_simple_op('bindpos2d' ~ $suffix, $type, [$T_OBJ, $T_INT, $T_INT, $type], :sideffects);
+        add_simple_op('bindpos3d' ~ $suffix, $type, [$T_OBJ, $T_INT, $T_INT, $T_INT, $type], :sideffects);
     }
 
     add_simple_op('numdimensions', $T_INT, [$T_OBJ]);
     add_simple_op('dimensions', $T_OBJ, [$T_OBJ]);
-    add_simple_op('setdimensions', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects, :ctx);
+    add_simple_op('setdimensions', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
 
     add_op('hash', sub ($comp, $node, :$want, :$cps) {
         # TODO CPS
@@ -1004,10 +1009,11 @@ class QAST::OperationsJS {
                 "try \{",
                 $body,
                 # HACK we need to check $body.type if we handle something like return
-                "//want: $want, body_expr: <{$body.expr}>, body_type:<{$body.type}>\n",
                 (($want == $T_VOID || $body.type == $T_VOID) ?? '' !! "$try_ret = {$body.expr};\n"),
                 "\} catch (e) \{if (e === $unwind_marker) \{",
                 ($want == $T_VOID ?? '' !! "$try_ret = $unwind_marker.ret;\n"),
+                "\} else if (e instanceof nqp.NQPException) \{\n",
+                "$*CTX.catchException(e);\n",
                 "\} else \{\n",
                 "throw e;\n",
                 "\}\n",
@@ -1075,7 +1081,7 @@ class QAST::OperationsJS {
 
     add_simple_op('splice', $T_OBJ, [$T_OBJ, $T_OBJ, $T_INT, $T_INT], :sideffects);
 
-    add_simple_op('setelems', $T_OBJ, [$T_OBJ, $T_INT], :sideffects, sub ($array, $elems) {"($array.length = $elems, $array)"});
+    add_simple_op('setelems', $T_OBJ, [$T_OBJ, $T_INT], :sideffects);
 
 
     add_simple_op('iterator', $T_OBJ, [$T_OBJ], :sideffects);

@@ -7,6 +7,8 @@ var CodeRef = require('./code-ref.js');
 var LexPadHack = require('./lexpad-hack.js');
 var NQPInt = require('./nqp-int.js');
 
+var NQPException = require('./nqp-exception.js');
+
 var reprs = require('./reprs.js');
 
 exports.CodeRef = CodeRef;
@@ -502,8 +504,18 @@ op.unbox_s = function(obj) {
 op.elems = function(obj) {
   if (obj instanceof Array) {
     return obj.length;
-  } else if (obj.$$elems) {
+  } else {
     return obj.$$elems();
+  }
+};
+
+op.setelems = function(obj, elems) {
+  if (obj instanceof Array) {
+    obj.length = elems;
+    return obj;
+  } else {
+    obj.$$setelems(elems);
+    return obj;
   }
 };
 
@@ -874,48 +886,77 @@ op.getcodecuid = function(codeRef) {
 op.numdimensions = function(array) {
   if (array instanceof Array) {
     return 1;
+  } else {
+    return array.$$numdimensions();
   }
 };
 
 op.dimensions = function(array) {
   if (array instanceof Array) {
     return [array.length];
+  } else {
+    return array.$$dimensions();
   }
 };
 
-op.setdimensions = function(ctx, array, dimensions) {
+op.setdimensions = function(array, dimensions) {
   if (array instanceof Array) {
     if (dimensions.length != 1) {
-      ctx.die("A dynamic array can only have a single dimension");
+      throw new NQPException("A dynamic array can only have a single dimension");
     } else {
-        //console.log("setting ", array, dimensions);
         array.length = dimensions[0];
     }
+  } else {
+    array.$$setdimensions(dimensions);
   }
+  return dimensions;
 };
 
-op.atposnd = function(ctx, array, idx) {
+op.atposnd = function(array, idx) {
   if (array instanceof Array) {
     if (idx.length != 1) {
-      ctx.die("A dynamic array can only be indexed with a single dimension");
+      throw new NQPException("A dynamic array can only be indexed with a single dimension");
     }
     return array[idx[0]];
+  } else {
+    return array.$$atposnd(idx);
   }
 };
 
-op.atposnd_n = op.atposnd;
-op.atposnd_s = op.atposnd;
-op.atposnd_i = op.atposnd;
 
-op.bindposnd = function(ctx, array, idx, value) {
+
+op.bindposnd = function(array, idx, value) {
   if (array instanceof Array) {
     if (idx.length != 1) {
-      ctx.die("A dynamic array can only be indexed with a single dimension");
+      throw new NQPException("A dynamic array can only be indexed with a single dimension");
     }
     return (array[idx[0]] = value);
+  } else {
+    return array.$$bindposnd(idx, value);
   }
 };
 
-op.bindposnd_n = op.bindposnd;
-op.bindposnd_s = op.bindposnd;
-op.bindposnd_i = op.bindposnd;
+// TODO optimize
+op.atpos2d = function(array, x, y) {
+  return op.atposnd(array, [x, y]);
+};
+
+op.atpos3d = function(array, x, y, z) {
+  return op.atposnd(array, [x, y, z]);
+};
+
+op.bindpos2d = function(array, x, y, value) {
+  return op.bindposnd(array, [x, y], value);
+};
+
+op.bindpos3d = function(array, x, y, z, value) {
+  return op.bindposnd(array, [x, y, z], value);
+};
+
+['bindpos', 'atpos'].forEach(function(prefix) {
+  ['_n', '_s', '_i'].forEach(function(type) {
+    ['2d', '3d', 'nd'].forEach(function(dim) {
+      op[prefix + dim + type] = op[prefix + dim];
+    });
+  });
+});

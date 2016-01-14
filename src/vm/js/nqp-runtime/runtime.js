@@ -2,6 +2,7 @@ var op = {};
 exports.op = op;
 
 var NQPInt = require("./nqp-int.js");
+var NQPException = require("./nqp-exception.js");
 exports.NQPInt = NQPInt;
 
 function load_ops(module) {
@@ -219,6 +220,11 @@ Ctx.prototype.propagateException = function(exception) {
     ctx = ctx.caller;
   }
   throw exception.msg;
+};
+
+Ctx.prototype.catchException = function(exception) {
+  this.exception = exception;
+  this.CATCH();
 };
 
 Ctx.prototype.rethrow = function(exception) {
@@ -439,3 +445,4 @@ function runCPS(thunk_) {
 }
 
 exports.runCPS = runCPS;
+exports.NQPException = NQPException;

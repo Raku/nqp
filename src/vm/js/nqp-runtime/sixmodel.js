@@ -6,15 +6,17 @@ function STable(REPR, HOW) {
 
 
   /* HACK - it's a bit hackish - think how correct it is */
-  this.obj_constructor.prototype.$$clone = function() {
-    var clone = new this._STable.obj_constructor();
-    for (var i in this) {
-      if (this.hasOwnProperty(i) && i != '_SC') {
-        clone[i] = this[i];
+  if (!this.obj_constructor.prototype.hasOwnProperty('$$clone')) {
+    this.obj_constructor.prototype.$$clone = function() {
+      var clone = new this._STable.obj_constructor();
+      for (var i in this) {
+        if (this.hasOwnProperty(i) && i != '_SC') {
+          clone[i] = this[i];
+        }
       }
-    }
-    return clone;
-  };
+      return clone;
+    };
+  }
 
   /* Default boolification mode 5 */
   this.obj_constructor.prototype.$$to_bool = function(ctx) {
