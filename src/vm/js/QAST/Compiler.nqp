@@ -785,7 +785,14 @@ class QAST::OperationsJS {
  
         add_simple_op('pop' ~ $suffix, $type, [$T_OBJ], sub ($array) {"$array.pop()"}, :sideffects);
         add_simple_op('push' ~ $suffix, $type, [$T_OBJ, $type], sub ($array, $elem) {"$array.push($elem)"}, :sideffects);
+
+        add_simple_op('atposnd' ~ $suffix, $type, [$T_OBJ, $T_OBJ], :ctx);
+        add_simple_op('bindposnd' ~ $suffix, $type, [$T_OBJ, $T_OBJ, $type], :ctx, :sideffects);
     }
+
+    add_simple_op('numdimensions', $T_INT, [$T_OBJ]);
+    add_simple_op('dimensions', $T_OBJ, [$T_OBJ]);
+    add_simple_op('setdimensions', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects, :ctx);
 
     add_op('hash', sub ($comp, $node, :$want, :$cps) {
         # TODO CPS

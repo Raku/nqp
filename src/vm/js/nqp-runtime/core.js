@@ -870,3 +870,52 @@ op.getcodelocation = function(code) {
 op.getcodecuid = function(codeRef) {
   return codeRef.cuid;
 };
+
+op.numdimensions = function(array) {
+  if (array instanceof Array) {
+    return 1;
+  }
+};
+
+op.dimensions = function(array) {
+  if (array instanceof Array) {
+    return [array.length];
+  }
+};
+
+op.setdimensions = function(ctx, array, dimensions) {
+  if (array instanceof Array) {
+    if (dimensions.length != 1) {
+      ctx.die("A dynamic array can only have a single dimension");
+    } else {
+        //console.log("setting ", array, dimensions);
+        array.length = dimensions[0];
+    }
+  }
+};
+
+op.atposnd = function(ctx, array, idx) {
+  if (array instanceof Array) {
+    if (idx.length != 1) {
+      ctx.die("A dynamic array can only be indexed with a single dimension");
+    }
+    return array[idx[0]];
+  }
+};
+
+op.atposnd_n = op.atposnd;
+op.atposnd_s = op.atposnd;
+op.atposnd_i = op.atposnd;
+
+op.bindposnd = function(ctx, array, idx, value) {
+  if (array instanceof Array) {
+    if (idx.length != 1) {
+      ctx.die("A dynamic array can only be indexed with a single dimension");
+    }
+    return (array[idx[0]] = value);
+  }
+};
+
+op.bindposnd_n = op.bindposnd;
+op.bindposnd_s = op.bindposnd;
+op.bindposnd_i = op.bindposnd;
