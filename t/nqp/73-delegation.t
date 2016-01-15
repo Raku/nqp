@@ -1,4 +1,4 @@
-plan(13);
+plan(18);
 
 class Foo {
     has @!pos_foo;
@@ -11,6 +11,11 @@ class Foo {
     method get_pos_1() {
        @!pos_bar[1]; 
     }
+
+    method all_pos() {
+        nqp::join(',', @!pos_bar);
+    }
+
     method get_assoc_1() {
        %!assoc_bar<1>; 
     }
@@ -52,3 +57,12 @@ ok($pos_attr.positional_delegate == 1,"positional_delegate is set correctly");
 ok($pos_attr.associative_delegate == 0,"positional_delegate is not set incorrectly");
 ok($assoc_attr.positional_delegate == 0,"associative_delegate is not set incorrectly");
 ok($assoc_attr.associative_delegate == 1,"associative_delegate is set correctly");
+
+my $obj := Foo.new();
+ok(nqp::unshift($obj, 'a100') eq 'a100', 'nqp::unshift on object with positional_delegate');
+nqp::unshift($obj, 'b200');
+ok(nqp::shift($obj) eq 'b200', 'nqp::shift on object with positional_delegate');
+ok(nqp::push($obj, 'c300'), 'nqp::push on object with positional_delegate');
+nqp::push($obj, 'd400');
+ok(nqp::pop($obj) eq 'd400', 'nqp::pop on object with positional_delegate');
+ok($obj.all_pos eq 'a100,c300', 'object has correct elements after op calls');
