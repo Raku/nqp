@@ -95,12 +95,28 @@ STable.prototype.setPositionalDelegate = function(attr) {
   this.obj_constructor.prototype.$$bindpos = function(index, value) {
     return this[attr][index] = value;
   };
+
   this.obj_constructor.prototype.$$atpos = function(index) {
     return this[attr][index];
   };
+
   this.obj_constructor.prototype.$$unshift = function(value) {
-    return this[attr].unshift(value);
+    this[attr].unshift(value);
+    return value;
   };
+
+  this.obj_constructor.prototype.$$pop = function(value) {
+    return this[attr].pop(value);
+  };
+
+  this.obj_constructor.prototype.$$push = function(value) {
+    return this[attr].push(value);
+  };
+
+  this.obj_constructor.prototype.$$shift = function(value) {
+    return this[attr].shift(value);
+  };
+
   this.obj_constructor.prototype.$$elems = function(value) {
     return this[attr].length;
   };

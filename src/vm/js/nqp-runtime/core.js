@@ -591,7 +591,23 @@ op.getmessage = function(exception) {
 
 op.unshift = function(target, value) {
   if (target.$$unshift) return target.$$unshift(value);
-  return target.unshift(value);
+  target.unshift(value);
+  return value;
+};
+
+op.pop = function(target, value) {
+  if (target.$$pop) return target.$$pop(value);
+  return target.pop(value);
+};
+
+op.push = function(target, value) {
+  if (target.$$push) return target.$$push(value);
+  return target.push(value);
+};
+
+op.shift = function(target, value) {
+  if (target.$$shift) return target.$$shift(value);
+  return target.shift(value);
 };
 
 op.isnum = function(value) {

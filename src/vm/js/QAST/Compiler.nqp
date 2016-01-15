@@ -781,10 +781,10 @@ class QAST::OperationsJS {
 
         if $type != $T_OBJ {
             add_simple_op('bindpos' ~ $suffix, $type, [$T_OBJ, $T_INT, $type], sub ($list, $index, $value) {"($list[$index] = $value)"}, :sideffects);
+            add_simple_op('pop' ~ $suffix, $type, [$T_OBJ], sub ($array) {"$array.pop()"}, :sideffects);
+            add_simple_op('push' ~ $suffix, $type, [$T_OBJ, $type], sub ($array, $elem) {"$array.push($elem)"}, :sideffects);
         }
  
-        add_simple_op('pop' ~ $suffix, $type, [$T_OBJ], sub ($array) {"$array.pop()"}, :sideffects);
-        add_simple_op('push' ~ $suffix, $type, [$T_OBJ, $type], sub ($array, $elem) {"$array.push($elem)"}, :sideffects);
 
         add_simple_op('atposnd' ~ $suffix, $type, [$T_OBJ, $T_OBJ]);
         add_simple_op('atpos2d' ~ $suffix, $type, [$T_OBJ, $T_INT, $T_INT, $type],  :sideffects);
@@ -1076,8 +1076,10 @@ class QAST::OperationsJS {
     });
 
 
-    add_simple_op('shift', $T_OBJ, [$T_OBJ], sub ($array) {"$array.shift()"}, :sideffects);
+    add_simple_op('shift', $T_OBJ, [$T_OBJ], :sideffects);
     add_simple_op('unshift', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
+    add_simple_op('pop', $T_OBJ, [$T_OBJ], :sideffects);
+    add_simple_op('push', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
 
     add_simple_op('splice', $T_OBJ, [$T_OBJ, $T_OBJ, $T_INT, $T_INT], :sideffects);
 
