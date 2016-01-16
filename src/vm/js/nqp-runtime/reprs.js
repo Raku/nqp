@@ -748,6 +748,14 @@ MultiDimArray.prototype.compose = function(STable, repr_info_hash) {
   var array = repr_info_hash.content.get('array');
   var dimensions = array.content.get('dimensions');
 
+  var type = repr_info_hash.content.get('array').content.get('type');
+
+  if (type) {
+    STable.type = type._STable.REPR.boxed_primitive;
+  } else {
+    STable.type = 0;
+  }
+
   if (dimensions instanceof NQPInt) {
     dimensions = dimensions.value;
     if (dimensions === 0) {
@@ -838,10 +846,42 @@ MultiDimArray.prototype.create_obj_constructor = function(STable) {
   });
 
   STable.addInternalMethod('$$atposnd', function(idx) {
+    if (STable.type != 0) throw new NQPException("wrong type");
     return this.storage[this.$$calculateIndex(idx)];
   });
 
   STable.addInternalMethod('$$bindposnd', function(idx, value) {
+    if (STable.type != 0) throw new NQPException("wrong type: " + STable.type);
+    return (this.storage[this.$$calculateIndex(idx)] = value);
+  });
+
+  STable.addInternalMethod('$$atposnd_i', function(idx) {
+    if (STable.type != 1) throw new NQPException("wrong type: " + STable.type);
+    return this.storage[this.$$calculateIndex(idx)];
+  });
+
+  STable.addInternalMethod('$$bindposnd_i', function(idx, value) {
+    if (STable.type != 1) throw new NQPException("wrong type" + STable.type);
+    return (this.storage[this.$$calculateIndex(idx)] = value);
+  });
+
+  STable.addInternalMethod('$$atposnd_n', function(idx) {
+    if (STable.type != 2) throw new NQPException("wrong type");
+    return this.storage[this.$$calculateIndex(idx)];
+  });
+
+  STable.addInternalMethod('$$bindposnd_n', function(idx, value) {
+    if (STable.type != 2) throw new NQPException("wrong type");
+    return (this.storage[this.$$calculateIndex(idx)] = value);
+  });
+
+  STable.addInternalMethod('$$atposnd_s', function(idx) {
+    if (STable.type != 3) throw new NQPException("wrong type");
+    return this.storage[this.$$calculateIndex(idx)];
+  });
+
+  STable.addInternalMethod('$$bindposnd_s', function(idx, value) {
+    if (STable.type != 3) throw new NQPException("wrong type");
     return (this.storage[this.$$calculateIndex(idx)] = value);
   });
 

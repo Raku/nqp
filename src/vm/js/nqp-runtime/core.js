@@ -929,51 +929,44 @@ op.setdimensions = function(array, dimensions) {
   return dimensions;
 };
 
-op.atposnd = function(array, idx) {
-  if (array instanceof Array) {
-    if (idx.length != 1) {
-      throw new NQPException("A dynamic array can only be indexed with a single dimension");
-    }
-    return array[idx[0]];
-  } else {
-    return array.$$atposnd(idx);
-  }
-};
-
-
-
-op.bindposnd = function(array, idx, value) {
-  if (array instanceof Array) {
-    if (idx.length != 1) {
-      throw new NQPException("A dynamic array can only be indexed with a single dimension");
-    }
-    return (array[idx[0]] = value);
-  } else {
-    return array.$$bindposnd(idx, value);
-  }
-};
-
 // TODO optimize
-op.atpos2d = function(array, x, y) {
-  return op.atposnd(array, [x, y]);
-};
 
-op.atpos3d = function(array, x, y, z) {
-  return op.atposnd(array, [x, y, z]);
-};
-
-op.bindpos2d = function(array, x, y, value) {
-  return op.bindposnd(array, [x, y], value);
-};
-
-op.bindpos3d = function(array, x, y, z, value) {
-  return op.bindposnd(array, [x, y, z], value);
-};
-
-['bindpos', 'atpos'].forEach(function(prefix) {
-  ['_n', '_s', '_i'].forEach(function(type) {
-    ['2d', '3d', 'nd'].forEach(function(dim) {
-      op[prefix + dim + type] = op[prefix + dim];
-    });
-  });
+['_n', '_s', '_i', ''].forEach(function(type) {
+  op['atposnd' + type] = function(array, idx) {
+    if (array instanceof Array) {
+      if (idx.length != 1) {
+        throw new NQPException("A dynamic array can only be indexed with a single dimension");
+      }
+      return array[idx[0]];
+    } else {
+      return array['$$atposnd' + type](idx);
+    }
+  };
+  
+  op['bindposnd' + type] = function(array, idx, value) {
+    if (array instanceof Array) {
+      if (idx.length != 1) {
+        throw new NQPException("A dynamic array can only be indexed with a single dimension");
+      }
+      return (array[idx[0]] = value);
+    } else {
+      return array['$$bindposnd' + type](idx, value);
+    }
+  };
+  
+  op['atpos2d' + type] = function(array, x, y) {
+    return op['atposnd' + type](array, [x, y]);
+  };
+  
+  op['atpos3d' + type] = function(array, x, y, z) {
+    return op['atposnd' + type](array, [x, y, z]);
+  };
+  
+  op['bindpos2d' + type] = function(array, x, y, value) {
+    return op['bindposnd' + type](array, [x, y], value);
+  };
+  
+  op['bindpos3d' + type] = function(array, x, y, z, value) {
+    return op['bindposnd' + type](array, [x, y, z], value);
+  };
 });
