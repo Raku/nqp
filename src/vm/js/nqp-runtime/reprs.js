@@ -751,10 +751,12 @@ MultiDimArray.prototype.compose = function(STable, repr_info_hash) {
   var type = repr_info_hash.content.get('array').content.get('type');
 
   if (type) {
-    STable.type = type._STable.REPR.boxed_primitive;
+    STable.primType = type._STable.REPR.boxed_primitive;
   } else {
-    STable.type = 0;
+    STable.primType = 0;
   }
+
+  STable.type = type || null;
 
   if (dimensions instanceof NQPInt) {
     dimensions = dimensions.value;
@@ -846,42 +848,42 @@ MultiDimArray.prototype.create_obj_constructor = function(STable) {
   });
 
   STable.addInternalMethod('$$atposnd', function(idx) {
-    if (STable.type != 0) throw new NQPException("wrong type");
+    if (STable.primType != 0) throw new NQPException("wrong type");
     return this.storage[this.$$calculateIndex(idx)];
   });
 
   STable.addInternalMethod('$$bindposnd', function(idx, value) {
-    if (STable.type != 0) throw new NQPException("wrong type: " + STable.type);
+    if (STable.primType != 0) throw new NQPException("wrong type: " + STable.primType);
     return (this.storage[this.$$calculateIndex(idx)] = value);
   });
 
   STable.addInternalMethod('$$atposnd_i', function(idx) {
-    if (STable.type != 1) throw new NQPException("wrong type: " + STable.type);
+    if (STable.primType != 1) throw new NQPException("wrong type: " + STable.primType);
     return this.storage[this.$$calculateIndex(idx)];
   });
 
   STable.addInternalMethod('$$bindposnd_i', function(idx, value) {
-    if (STable.type != 1) throw new NQPException("wrong type" + STable.type);
+    if (STable.primType != 1) throw new NQPException("wrong type" + STable.primType);
     return (this.storage[this.$$calculateIndex(idx)] = value);
   });
 
   STable.addInternalMethod('$$atposnd_n', function(idx) {
-    if (STable.type != 2) throw new NQPException("wrong type");
+    if (STable.primType != 2) throw new NQPException("wrong type");
     return this.storage[this.$$calculateIndex(idx)];
   });
 
   STable.addInternalMethod('$$bindposnd_n', function(idx, value) {
-    if (STable.type != 2) throw new NQPException("wrong type");
+    if (STable.primType != 2) throw new NQPException("wrong type");
     return (this.storage[this.$$calculateIndex(idx)] = value);
   });
 
   STable.addInternalMethod('$$atposnd_s', function(idx) {
-    if (STable.type != 3) throw new NQPException("wrong type");
+    if (STable.primType != 3) throw new NQPException("wrong type");
     return this.storage[this.$$calculateIndex(idx)];
   });
 
   STable.addInternalMethod('$$bindposnd_s', function(idx, value) {
-    if (STable.type != 3) throw new NQPException("wrong type");
+    if (STable.primType != 3) throw new NQPException("wrong type");
     return (this.storage[this.$$calculateIndex(idx)] = value);
   });
 
@@ -904,6 +906,81 @@ MultiDimArray.prototype.create_obj_constructor = function(STable) {
 
 
   return c;
+};
+
+MultiDimArray.prototype.serialize_repr_data = function(st, cursor) {
+  if (st.dimensions) {
+    cursor.varint(st.dimensions);
+    cursor.ref(st.type);
+  } else {
+    cursor.varint(0);
+  }
+
+};
+
+MultiDimArray.prototype.deserialize_repr_data = function(cursor, STable) {
+  var dims = cursor.varint();
+  if (dims > 0) {
+    STable.dimensions = dims;
+    STable.type = cursor.variant();
+    STable.primType = STable.type ? STable.type._STable.REPR.boxed_primitive : 0;
+  }
+};
+
+MultiDimArray.prototype.valuesSize = function(object) {
+  var size = 1;
+  for (var i = 0; i < object.dimensions.length; i++) {
+    size = size * object.dimensions[i];
+  }
+  return size;
+};
+
+MultiDimArray.prototype.serialize = function(cursor, obj) {
+  for (var i = 0; i < obj._STable.dimensions; i++) {
+    cursor.varint(obj.dimensions[i]);
+  }
+  var size = this.valuesSize(obj);
+  for (var i=0;i < size;i++) {
+    switch (obj._STable.primType) {
+      case 0:
+        cursor.ref(obj.storage[i]);
+        break;
+      case 1:
+        cursor.varint(obj.storage[i]);
+        break;
+      case 2:
+        cursor.double(obj.storage[i]);
+        break;
+      case 3:
+        cursor.str(obj.storage[i]);
+        break;
+    }
+  }
+}
+
+MultiDimArray.prototype.deserialize_finish = function(object, data) {
+  object.dimensions = [];
+  for (var i = 0; i < object._STable.dimensions; i++) {
+    object.dimensions[i] = data.varint();
+  }
+  var size = this.valuesSize(object);
+  object.storage = [];
+  for (var i=0;i < size;i++) {
+    switch (object._STable.primType) {
+      case 0:
+        object.storage[i] = data.variant();
+        break;
+      case 1:
+        object.storage[i] = data.varint();
+        break;
+      case 2:
+        object.storage[i] = data.double();
+        break;
+      case 3:
+        object.storage[i] = data.str();
+        break;
+    }
+  }
 };
 
 module.exports.MultiDimArray = MultiDimArray;
