@@ -195,13 +195,6 @@ function Ctx(caller_ctx, outer_ctx) {
 }
 
 
-function NqpException(msg) {
-  this.msg = msg;
-}
-
-NqpException.prototype.Str = function(ctx, _NAMED) {
-  return this.msg;
-};
 
 Ctx.prototype.propagateException = function(exception) {
   var ctx = this;
@@ -232,7 +225,7 @@ Ctx.prototype.rethrow = function(exception) {
 };
 
 Ctx.prototype.die = function(msg) {
-  this.propagateException(new NqpException(msg));
+  this.propagateException(new NQPException(msg));
 };
 
 Ctx.prototype.resume = function(exception) {

@@ -586,7 +586,7 @@ op.getpid = function() {
 };
 
 op.getmessage = function(exception) {
-  return exception.msg;
+  return exception.message;
 };
 
 op.unshift = function(target, value) {
