@@ -800,6 +800,25 @@ MultiDimArray.prototype.create_obj_constructor = function(STable) {
     return (this.dimensions = value);
   });
 
+  STable.addInternalMethod('$$pop', function() {
+    throw new NQPException("Cannot pop a fixed dimension array");
+  });
+
+  STable.addInternalMethod('$$shift', function() {
+    throw new NQPException("Cannot shift a fixed dimension array");
+  });
+
+  STable.addInternalMethod('$$unshift', function(value) {
+    throw new NQPException("Cannot unshift a fixed dimension array");
+  });
+
+  STable.addInternalMethod('$$push', function(value) {
+    throw new NQPException("Cannot push a fixed dimension array");
+  });
+
+  STable.addInternalMethod('$$splice', function(value) {
+    throw new NQPException("Cannot splice a fixed dimension array");
+  });
 
   STable.addInternalMethod('$$calculateIndex', function(idx, value) {
     if (idx.length != STable.dimensions) {

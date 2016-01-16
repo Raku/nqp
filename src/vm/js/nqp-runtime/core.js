@@ -306,6 +306,7 @@ op.callercode = function() {
 
 // TODO benchmark and pick a fast way of doing this
 op.splice = function(target, source, offset, length) {
+  if (target.$$splice) return target.$$splice(source, offset, length);
   var args = [offset, length];
   for (var i = 0; i < source.length; i++) {
     args.push(source[i]);
