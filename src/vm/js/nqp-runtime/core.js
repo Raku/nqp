@@ -432,10 +432,6 @@ op.objectid = op.where;
 
 /* HACK - take the current HLL settings into regard */
 
-op.settypehllrole = function(type, role) {
-  /* STUB */
-  return role;
-};
 
 var sha1 = require('sha1');
 

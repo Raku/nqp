@@ -1122,6 +1122,8 @@ class QAST::OperationsJS {
     add_simple_op('scwbdisable', $T_VOID, [], -> {''});
 
     add_simple_op('settypehllrole', $T_OBJ, [$T_OBJ, $T_INT], :sideffects);
+    add_simple_op('settypehll', $T_OBJ, [$T_OBJ, $T_STR], :sideffects);
+
     add_simple_op('sethllconfig', $T_OBJ,  [$T_STR, $T_OBJ], :sideffects);
 
     add_simple_op('bindcurhllsym', $T_OBJ, [$T_STR, $T_OBJ], :sideffects);
