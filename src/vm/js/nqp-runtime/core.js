@@ -11,6 +11,8 @@ var NQPException = require('./nqp-exception.js');
 
 var reprs = require('./reprs.js');
 
+var hll = require('./hll.js');
+
 exports.CodeRef = CodeRef;
 
 op.atpos = function(array, index) {
@@ -332,7 +334,7 @@ op.istype = function(obj, type) {
   }
 
   if (obj instanceof Array) {
-    if (hllConfigs.nqp && type == hllConfigs.nqp.content.get('list')) {
+    if (hll.hllConfigs.nqp && type == hll.hllConfigs.nqp.content.get('list')) {
       return 1;
     } else {
       return 0;
@@ -433,13 +435,6 @@ op.objectid = op.where;
 op.settypehllrole = function(type, role) {
   /* STUB */
   return role;
-};
-
-var hllConfigs = {};
-op.sethllconfig = function(language, configHash) {
-  hllConfigs[language] = configHash;
-  /* STUB */
-  return configHash;
 };
 
 var sha1 = require('sha1');

@@ -1130,6 +1130,8 @@ class QAST::OperationsJS {
     add_simple_op('bindhllsym', $T_OBJ, [$T_STR, $T_STR, $T_OBJ], :sideffects);
     add_simple_op('gethllsym', $T_OBJ, [$T_STR, $T_STR]);
 
+    add_simple_op('hllizefor', $T_OBJ, [$T_OBJ, $T_STR], :ctx, :sideffects);
+
     add_simple_op('bindcomp', $T_OBJ, [$T_STR, $T_OBJ], :sideffects);
     add_simple_op('getcomp', $T_OBJ, [$T_STR], :sideffects);
 
