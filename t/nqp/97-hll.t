@@ -1,4 +1,4 @@
-plan(18);
+plan(26);
 
 ok(nqp::bindhllsym("blabla", "key1", "value1") eq 'value1', 'nqp::bindhllsym');
 nqp::bindhllsym("blabla", "key2", "value2");
@@ -49,3 +49,67 @@ ok(nqp::eqaddr($hash, $hash), 'preserving hash');
 ok(nqp::eqaddr(nqp::hllizefor($list, 'empty'), $list), 'preserving list');
 ok(nqp::eqaddr(nqp::hllizefor($sub, 'empty'), $sub), 'preserving code ref');
 ok(nqp::isnull(nqp::hllizefor(nqp::null(), 'empty')), 'preserving null');
+
+
+nqp::sethllconfig('baz', nqp::hash(
+    'foreign_transform_array', -> $array {
+        'ARRAY:' ~ $array.bazify();
+    },
+    'foreign_transform_code', -> $code {
+        'CODE:' ~ $code.bazify();
+    },
+    'foreign_transform_hash', -> $hash {
+        'HASH:' ~ $hash.bazify();
+    }
+));
+
+class FooBarArray {
+    method bazify() {
+        'bazified array';
+    }
+}
+nqp::settypehll(FooBarArray, "foobar");
+nqp::settypehllrole(FooBarArray, 4);
+
+my $foobar-array := FooBarArray.new;
+
+class FooBarCode {
+    method bazify() {
+        'bazified code';
+    }
+}
+nqp::settypehll(FooBarCode, "foobar");
+nqp::settypehllrole(FooBarCode, 6);
+
+my $foobar-code := FooBarCode.new;
+
+class FooBarHash {
+    method bazify() {
+        'bazified hash';
+    }
+}
+nqp::settypehll(FooBarHash, "foobar");
+nqp::settypehllrole(FooBarHash, 5);
+
+my $foobar-hash := FooBarHash.new;
+
+class FooBarOther {
+    method bazify() {
+        'bazified ?';
+    }
+}
+nqp::settypehll(FooBarOther, "other");
+my $foobar-other := FooBarOther.new;
+
+
+ok(nqp::eqaddr(nqp::hllizefor($foobar-array, "foobar"), $foobar-array), "array in correct language");
+ok(nqp::hllizefor($foobar-array, "baz") eq 'ARRAY:bazified array', "converting custom array");
+
+ok(nqp::eqaddr(nqp::hllizefor($foobar-code, "foobar"), $foobar-code), "code in correct language");
+ok(nqp::hllizefor($foobar-code, "baz") eq 'CODE:bazified code', "converting custom code");
+
+ok(nqp::eqaddr(nqp::hllizefor($foobar-hash, "foobar"), $foobar-hash), "hash in correct language");
+ok(nqp::hllizefor($foobar-hash, "baz") eq 'HASH:bazified hash', "converting custom hash");
+
+ok(nqp::eqaddr(nqp::hllizefor($foobar-other, "foobar"), $foobar-other), "other stuff doesn't get transformed");
+ok(nqp::eqaddr(nqp::hllizefor($foobar-other, "baz"), $foobar-other), "other stuff doesn't get transformed");
