@@ -2265,6 +2265,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         has %!captured_inners;  # Mapping of CUIDs of blocks we statically clone to register with the code
 
+        has %!var_types;    # Mapping of lexical names to types
+
         method new($qast, $outer) {
             my $obj := nqp::create(self);
             $obj.BUILD($qast, $outer);
@@ -2283,6 +2285,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             %!captured_inners := nqp::hash();
             %!need_cps := nqp::hash();
             %!need_direct := nqp::hash();
+            %!var_types := nqp::hash();
         }
 
         method set_cont($chunk, $cont) {
@@ -2390,6 +2393,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
             @tmps;
         }
+
+        method var_type($var) { %!var_types{$var.name} }
+        method register_var_type($var, $type) { %!var_types{$var.name} := $type }
 
         method js_lexicals() { @!js_lexicals }
         method outer() { $!outer }
@@ -3411,9 +3417,18 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     method declare_var(QAST::Var $node) {
         # TODO vars more complex the non-dynamic lexicals
+
+        if $node.decl eq 'var' && ($node.scope eq 'local' || $node.scope eq 'lexical') {
+            my @types := [$T_OBJ, $T_INT, $T_NUM, $T_STR];
+            my $type := @types[nqp::objprimspec($node.returns)];
+            $*BLOCK.register_var_type($node, $type);
+            self.log("type {$node.name} = $type");
+        }
+
         if $node.decl eq 'var' || $node.decl eq 'static' {
             $*BLOCK.add_variable($node);
             my $static := $node.decl eq 'static' ?? " = {self.value_as_js($node.value)}" !! '';
+
             $*BLOCK.add_js_lexical(self.mangle_name($node.name) ~ $static);
         } elsif $node.decl eq 'param' {
             $*BLOCK.add_variable($node);
@@ -3495,6 +3510,35 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         Chunk.new($T_OBJ, "nqp.op.atpos({$array_chunk.expr},{$index_chunk.expr})", [$array_chunk, $index_chunk], :node($node));
     }
 
+
+    method figure_out_type(QAST::Var $var) {
+        self.log("searching for type {$var.name}");
+
+        my $type := $*BLOCK.var_type($var);
+        if nqp::defined($type) {
+            return $type;
+        }
+
+        if $var.scope eq 'lexical' || $var.scope eq 'typevar' {
+            # Try to find it in an outer scope.
+            my $cur_block := $*BLOCK.outer();
+            while nqp::istype($cur_block, BlockInfo) {
+                $type := $cur_block.var_type($var);
+                if nqp::defined($type) {
+                    self.log("found type {$var.name} -> $type");
+                    return $type;
+                }
+                else {
+                    $cur_block := $cur_block.outer();
+                }
+            }
+        }
+
+        # TODO var not found and has .returns
+
+        $T_OBJ;
+    }
+
     method compile_var(QAST::Var $var, :$cps) {
         if self.var_is_lexicalish($var) && self.is_dynamic_var($var) {
             if $*BINDVAL {
@@ -3512,12 +3556,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 }
             }
         } elsif self.var_is_lexicalish($var) || $var.scope eq 'local' {
-            my $type := $T_OBJ;
+            my $type := self.figure_out_type($var);
             my $mangled := self.mangle_name($var.name);
             if $*BINDVAL {
                 # TODO better source mapping
                 # TODO use the proper type 
-                my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ), :$cps);
+                my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($type), :$cps);
                 self.cpsify_chunk(Chunk.new($type,$mangled, [$bindval,'('~$mangled~' = ('~ $bindval.expr ~ "));\n"]));
             } else {
                 # TODO get the proper type 
