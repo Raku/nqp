@@ -198,7 +198,7 @@ ok($atime > 0, 'integer atime');
 my $ctime := nqp::stat('t/nqp/19-file-ops.t', nqp::const::STAT_CHANGETIME);
 ok($ctime > 0, 'integer ctime');
 
-if $backend eq 'moar' || $backend eq 'js' {
+if $backend eq 'moar' || $backend eq 'js' || $backend eq 'jvm' {
     my $mtime_n := nqp::stat_time('t/nqp/19-file-ops.t', nqp::const::STAT_MODIFYTIME);
     ok($mtime_n >= $mtime, 'float mtime >= integer');
     my $atime_n := nqp::stat_time('t/nqp/19-file-ops.t', nqp::const::STAT_ACCESSTIME);
@@ -276,7 +276,7 @@ if $crlf-conversion {
 }
 nqp::unlink($test-file) if nqp::stat($test-file, nqp::const::STAT_EXISTS); # clean up test-file
 
-if $is-windows || ($backend ne 'moar' && $backend ne 'js') {
+if $is-windows || ($backend ne 'moar' && $backend ne 'js' && $backend ne 'jvm') {
     skip("symlink test not tested on Windows or $backend", 12);
 }
 else {

@@ -11,7 +11,6 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.ProcessBuilder.Redirect;
 import java.lang.Thread;
-import java.lang.NoSuchFieldException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -26,18 +25,17 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.AbstractMap;
-import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -164,20 +162,32 @@ public final class Ops {
     public static final int STAT_PLATFORM_BLOCKS    = -7;
 
     public static long stat(String filename, long status) {
+        return stat_internal(filename, status);
+    }
+
+    public static long lstat(String filename, long status) {
+        return stat_internal(filename, status, LinkOption.NOFOLLOW_LINKS);
+    }
+
+    public static long stat_internal(String filename, long status, LinkOption ... linkOption) {
         long rval = -1;
 
         switch ((int) status) {
             case STAT_EXISTS:
-                rval = new File(filename).exists() ? 1 : 0;
+                rval = Files.exists(Paths.get(filename), linkOption) ? 1 : 0;
                 break;
 
             case STAT_FILESIZE:
-                rval = new File(filename).length();
+                try {
+                    rval = Files.readAttributes(Paths.get(filename), BasicFileAttributes.class, linkOption).size();
+                } catch (Exception e) {
+                    rval = -1;
+                }
                 break;
 
             case STAT_ISDIR:
                 try {
-                    rval = (Boolean) Files.getAttribute(Paths.get(filename), "basic:isDirectory") ? 1 : 0;
+                    rval = (Boolean) Files.getAttribute(Paths.get(filename), "basic:isDirectory", linkOption) ? 1 : 0;
                 } catch(NoSuchFileException e) {
                     rval = 0;
                 } catch (Exception e) {
@@ -187,7 +197,7 @@ public final class Ops {
 
             case STAT_ISREG:
                 try {
-                    rval = (Boolean) Files.getAttribute(Paths.get(filename), "basic:isRegularFile") ? 1 : 0;
+                    rval = (Boolean) Files.getAttribute(Paths.get(filename), "basic:isRegularFile", linkOption) ? 1 : 0;
                 } catch(NoSuchFileException e) {
                     rval = 0;
                 } catch (Exception e) {
@@ -197,7 +207,7 @@ public final class Ops {
 
             case STAT_ISDEV:
                 try {
-                    rval = (Boolean) Files.getAttribute(Paths.get(filename), "basic:isOther") ? 1 : 0;
+                    rval = (Boolean) Files.getAttribute(Paths.get(filename), "basic:isOther", linkOption) ? 1 : 0;
                 } catch(NoSuchFileException e) {
                     rval = 0;
                 } catch (Exception e) {
@@ -207,7 +217,7 @@ public final class Ops {
 
             case STAT_CREATETIME:
                 try {
-                    rval = ((Number) Files.getAttribute(Paths.get(filename), "basic:creationTime")).longValue();
+                    rval = ((Number) Files.getAttribute(Paths.get(filename), "basic:creationTime", linkOption)).longValue();
                 } catch (Exception e) {
                     rval = -1;
                 }
@@ -215,7 +225,7 @@ public final class Ops {
 
             case STAT_ACCESSTIME:
                 try {
-                    rval = ((FileTime) Files.getAttribute(Paths.get(filename), "basic:lastAccessTime")).to(TimeUnit.SECONDS);
+                    rval = ((FileTime) Files.getAttribute(Paths.get(filename), "basic:lastAccessTime", linkOption)).to(TimeUnit.SECONDS);
                 } catch (Exception e) {
                     rval = -1;
                 }
@@ -223,7 +233,7 @@ public final class Ops {
 
             case STAT_MODIFYTIME:
                 try {
-                    rval = ((FileTime) Files.getAttribute(Paths.get(filename), "basic:lastModifiedTime")).to(TimeUnit.SECONDS);
+                    rval = ((FileTime) Files.getAttribute(Paths.get(filename), "basic:lastModifiedTime", linkOption)).to(TimeUnit.SECONDS);
                 } catch (Exception e) {
                     rval = -1;
                 }
@@ -231,7 +241,7 @@ public final class Ops {
 
             case STAT_CHANGETIME:
                 try {
-                    rval = ((FileTime) Files.getAttribute(Paths.get(filename), "unix:ctime")).to(TimeUnit.SECONDS);
+                    rval = ((FileTime) Files.getAttribute(Paths.get(filename), "unix:ctime", linkOption)).to(TimeUnit.SECONDS);
                 } catch (Exception e) {
                     rval = -1;
                 }
@@ -243,7 +253,7 @@ public final class Ops {
 
             case STAT_UID:
                 try {
-                    rval = ((Number) Files.getAttribute(Paths.get(filename), "unix:uid")).longValue();
+                    rval = ((Number) Files.getAttribute(Paths.get(filename), "unix:uid", linkOption)).longValue();
                 } catch (Exception e) {
                     rval = -1;
                 }
@@ -251,7 +261,7 @@ public final class Ops {
 
             case STAT_GID:
                 try {
-                    rval = ((Number) Files.getAttribute(Paths.get(filename), "unix:gid")).longValue();
+                    rval = ((Number) Files.getAttribute(Paths.get(filename), "unix:gid", linkOption)).longValue();
                 } catch (Exception e) {
                     rval = -1;
                 }
@@ -269,7 +279,7 @@ public final class Ops {
 
             case STAT_PLATFORM_DEV:
                 try {
-                    rval = ((Number) Files.getAttribute(Paths.get(filename), "unix:dev")).longValue();
+                    rval = ((Number) Files.getAttribute(Paths.get(filename), "unix:dev", linkOption)).longValue();
                 } catch (Exception e) {
                     rval = -1;
                 }
@@ -277,7 +287,7 @@ public final class Ops {
 
             case STAT_PLATFORM_INODE:
                 try {
-                    rval = ((Number) Files.getAttribute(Paths.get(filename), "unix:ino")).longValue();
+                    rval = ((Number) Files.getAttribute(Paths.get(filename), "unix:ino", linkOption)).longValue();
                 } catch (Exception e) {
                     rval = -1;
                 }
@@ -285,7 +295,7 @@ public final class Ops {
 
             case STAT_PLATFORM_MODE:
                 try {
-                    rval = ((Number) Files.getAttribute(Paths.get(filename), "unix:mode")).longValue();
+                    rval = ((Number) Files.getAttribute(Paths.get(filename), "unix:mode", linkOption)).longValue();
                 } catch (Exception e) {
                     rval = -1;
                 }
@@ -293,7 +303,7 @@ public final class Ops {
 
             case STAT_PLATFORM_NLINKS:
                 try {
-                    rval = ((Number) Files.getAttribute(Paths.get(filename), "unix:nlink")).longValue();
+                    rval = ((Number) Files.getAttribute(Paths.get(filename), "unix:nlink", linkOption)).longValue();
                 } catch (Exception e) {
                     rval = -1;
                 }
@@ -301,7 +311,7 @@ public final class Ops {
 
             case STAT_PLATFORM_DEVTYPE:
                 try {
-                    rval = ((Number) Files.getAttribute(Paths.get(filename), "unix:rdev")).longValue();
+                    rval = ((Number) Files.getAttribute(Paths.get(filename), "unix:rdev", linkOption)).longValue();
                 } catch (Exception e) {
                     rval = -1;
                 }
@@ -318,6 +328,41 @@ public final class Ops {
         }
 
         return rval;
+    }
+
+    public static double stat_time(String filename, long status) {
+        return stat_time_internal(filename, status);
+    }
+
+    public static double lstat_time(String filename, long status) {
+        return stat_time_internal(filename, status, LinkOption.NOFOLLOW_LINKS);
+    }
+
+    protected static double stat_time_internal(String filename, long status, LinkOption... linkOption) {
+        String attrName;
+        switch ((int) status) {
+        case STAT_CREATETIME:
+            attrName = "basic:creationTime";
+            break;
+        case STAT_ACCESSTIME:
+            attrName = "basic:lastAccessTime";
+            break;
+        case STAT_MODIFYTIME:
+            attrName = "basic:lastModifiedTime";
+            break;
+        case STAT_CHANGETIME:
+            attrName = "unix:ctime";
+            break;
+        default:
+            return -1;
+        }
+
+        try {
+            FileTime ft = ((FileTime) Files.getAttribute(Paths.get(filename), attrName, linkOption));
+            return ft.to(TimeUnit.NANOSECONDS) / 1000000000;
+        } catch (Exception e) {
+            return -1;
+        }
     }
 
     public static SixModelObject open(String path, String mode, ThreadContext tc) {

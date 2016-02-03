@@ -2053,6 +2053,9 @@ QAST::OperationsJAST.map_classlib_core_op('associative_bind', $TYPE_OPS, 'bindke
 QAST::OperationsJAST.map_classlib_core_op('print', $TYPE_OPS, 'print', [$RT_STR], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('say', $TYPE_OPS, 'say', [$RT_STR], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('stat', $TYPE_OPS, 'stat', [$RT_STR, $RT_INT], $RT_INT);
+QAST::OperationsJAST.map_classlib_core_op('lstat', $TYPE_OPS, 'lstat', [$RT_STR, $RT_INT], $RT_INT);
+QAST::OperationsJAST.map_classlib_core_op('stat_time', $TYPE_OPS, 'stat_time', [$RT_STR, $RT_INT], $RT_NUM);
+QAST::OperationsJAST.map_classlib_core_op('lstat_time', $TYPE_OPS, 'lstat_time', [$RT_STR, $RT_INT], $RT_NUM);
 QAST::OperationsJAST.map_classlib_core_op('open', $TYPE_OPS, 'open', [$RT_STR, $RT_STR], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('readlink', $TYPE_OPS, 'readlink', [$RT_STR], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('filereadable', $TYPE_OPS, 'filereadable', [$RT_STR], $RT_INT, :tc);
