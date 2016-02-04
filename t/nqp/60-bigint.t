@@ -1,7 +1,7 @@
 #! nqp
 use nqpmo;
 
-plan(80);
+plan(83);
 
 my $knowhow := nqp::knowhow();
 my $bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
@@ -127,6 +127,10 @@ ok(nqp::iseq_n($float, nqp::tonum_I(nqp::fromnum_I($float, $bi_type))),
 
 ok(nqp::base_I(box(-1234), 10) eq '-1234', 'base_I with base 10');
 ok(nqp::base_I(box(-1234), 16) eq '-4D2',  'base_I with base 16');
+
+ok(nqp::base_I(box(-1234), 15) eq '-574', 'base_I with base 15 for 1234');
+ok(nqp::base_I(box(1234), 15) eq '574', 'base_I with base 15 for 1234');
+ok(nqp::base_I(box(-25), 15) eq '-1A', 'base_I with base 15 for -25');
 
 ok(str(nqp::expmod_I(
     nqp::fromstr_I('2988348162058574136915891421498819466320163312926952423791023078876139', $bi_type),
