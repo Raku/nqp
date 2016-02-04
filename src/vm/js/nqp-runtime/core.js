@@ -371,7 +371,18 @@ op.setmethcacheauth = function(obj, isAuth) {
 };
 
 op.reprname = function(obj) {
-  return obj._STable.REPR.name;
+  if (obj._STable) {
+    return obj._STable.REPR.name;
+  } else if (obj instanceof NQPInt) {
+    return "P6int";
+  } else if (typeof obj == "string") {
+    return "P6str";
+  } else if (typeof obj == "number") {
+    return "P6num";
+  } else {
+    console.log(obj);
+    throw new Error("unsupported thing passed to reprname");
+  }
 };
 
 op.newtype = function(how, repr) {
