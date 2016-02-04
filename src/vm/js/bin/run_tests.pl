@@ -21,6 +21,7 @@ my @runtime_unit_tests = qw(t/js/varint.js);
 my @continuation_tests = qw(t/js/continuations.t);
 
 my @native_call_tests = qw(t/nativecall/01-basic.t);
+my @hll_tests = qw(t/hll/06-sprintf.t);
 
 my $node_version = `node -v`;
 
@@ -30,4 +31,4 @@ if ($node_version =~ /^0\.10/) {
     @nqp_tests = grep {!/19|78/} @nqp_tests;
 }
 
-$harness->runtests(@runtime_unit_tests,  @nqp_tests, @moar_tests, @regex, @serialization, @qast, @js_specific, @continuation_tests, @native_call_tests);
+$harness->runtests(@runtime_unit_tests,  @nqp_tests, @moar_tests, @regex, @serialization, @qast, @js_specific, @continuation_tests, @native_call_tests, @hll_tests);
