@@ -25,7 +25,7 @@ $(JS_STAGE2)/$(NQP_MO_COMBINED): $(NQP_MO_SOURCES)
 $(JS_STAGE2)/nqpmo.moarvm: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(NQP_MO_COMBINED)
 	$(MKPATH) $(JS_STAGE2)
 	$(MKPATH) node_modules
-	$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NULL --target=mbc --output $(JS_STAGE2)/nqpmo.moarvm $(JS_STAGE2)/$(NQP_MO_COMBINED) > node_modules/nqpmo.js
+	$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NULL --target=mbc --output $(JS_STAGE2)/nqpmo.moarvm --no-regex-lib $(JS_STAGE2)/$(NQP_MO_COMBINED) > node_modules/nqpmo.js
 
 $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp: $(CORE_SETTING_SOURCES)
 	$(MKPATH) $(JS_STAGE2)
@@ -35,7 +35,7 @@ $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp: $(CORE_SETTING_SOURCES)
 $(JS_STAGE2)/NQPCORE.setting.moarvm: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp $(JS_STAGE2)/nqpmo.moarvm
 	$(MKPATH) $(JS_STAGE2)
 	$(MKPATH) node_modules
-	$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NULL --target=mbc --output $(JS_STAGE2)/NQPCORE.setting.moarvm $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp > node_modules/NQPCORE.setting.js
+	$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NULL --target=mbc --output $(JS_STAGE2)/NQPCORE.setting.moarvm --no-regex-lib $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp > node_modules/NQPCORE.setting.js
 
 $(JS_STAGE2)/$(QASTNODE_COMBINED): $(QASTNODE_SOURCES)
 	$(MKPATH) $(JS_STAGE2)
@@ -45,7 +45,7 @@ $(JS_STAGE2)/$(QASTNODE_COMBINED): $(QASTNODE_SOURCES)
 $(JS_STAGE2)/QASTNode.moarvm: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(QASTNODE_COMBINED) $(JS_STAGE2)/NQPCORE.setting.moarvm
 	$(MKPATH) $(JS_STAGE2)
 	$(MKPATH) node_modules
-	$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NQPCORE --target=mbc --output $(JS_STAGE2)/QASTNode.moarvm $(JS_STAGE2)/$(QASTNODE_COMBINED) > node_modules/QASTNode.js
+	$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NQPCORE --target=mbc --output $(JS_STAGE2)/QASTNode.moarvm --no-regex-lib $(JS_STAGE2)/$(QASTNODE_COMBINED) > node_modules/QASTNode.js
 
 $(JS_STAGE2)/$(QREGEX_COMBINED): $(QREGEX_SOURCES)
 	$(MKPATH) $(JS_STAGE2)
@@ -55,7 +55,12 @@ $(JS_STAGE2)/$(QREGEX_COMBINED): $(QREGEX_SOURCES)
 $(JS_STAGE2)/QRegex.moarvm: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(QREGEX_COMBINED) $(JS_STAGE2)/NQPCORE.setting.moarvm $(JS_STAGE2)/QASTNode.moarvm
 	$(MKPATH) $(JS_STAGE2)
 	$(MKPATH) node_modules
-	$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NQPCORE --target=mbc --output $(JS_STAGE2)/QRegex.moarvm $(JS_STAGE2)/$(QREGEX_COMBINED) > node_modules/QRegex.js
+	$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NQPCORE --target=mbc --output $(JS_STAGE2)/QRegex.moarvm --no-regex-lib $(JS_STAGE2)/$(QREGEX_COMBINED) > node_modules/QRegex.js
+
+$(JS_STAGE2)/sprintf.moarvm: $(JS_STAGE1_COMPILER) src/HLL/sprintf.nqp $(JS_STAGE2)/NQPCORE.setting.moarvm $(JS_STAGE2)/QRegex.moarvm
+	$(MKPATH) $(JS_STAGE2)
+	$(MKPATH) node_modules
+	$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NQPCORE --target=mbc --output $(JS_STAGE2)/sprintf.moarvm  src/HLL/sprintf.nqp > node_modules/sprintf.js
 
 js-stage1-compiler : $(JS_STAGE1_COMPILER)
 js-test: js-all gen/js/qregex.t
@@ -69,7 +74,7 @@ gen/js/qregex.t: tools/build/process-qregex-tests
 js-clean:
 	$(RM_RF) gen/js/stage1 gen/js/stage2
 
-js-all : m-all js-stage1-compiler node_modules/runtime_copied $(JS_STAGE2)/NQPCORE.setting.moarvm $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp $(JS_STAGE2)/QASTNode.moarvm $(JS_STAGE2)/QRegex.moarvm
+js-all : m-all js-stage1-compiler node_modules/runtime_copied $(JS_STAGE2)/NQPCORE.setting.moarvm $(JS_STAGE2)/$(CORE_SETTING_COMBINED).nqp $(JS_STAGE2)/QASTNode.moarvm $(JS_STAGE2)/QRegex.moarvm $(JS_STAGE2)/sprintf.moarvm
 js-lint:
 	gjslint --strict --max_line_length=200 --nojsdoc src/vm/js/nqp-runtime/*.js
 node_modules/npm_installed: src/vm/js/nqp-runtime/package.json
@@ -97,17 +102,17 @@ $(JS_STAGE2)/$(HLL_COMBINED): $(JS_HLL_SOURCES)
 $(JS_STAGE2)/QAST/Compiler.moarvm: $(JS_STAGE1_COMPILER) src/vm/js/QAST/Compiler.nqp $(JS_STAGE2)/NQPCORE.setting.moarvm $(JS_STAGE2)/QASTNode.moarvm
 	$(MKPATH) $(JS_STAGE2)/QAST
 	$(MKPATH) node_modules/QAST
-	$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NQPCORE --target=mbc --output $(JS_STAGE2)/QAST/Compiler.moarvm src/vm/js/QAST/Compiler.nqp > node_modules/QAST/Compiler.js
+	$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NQPCORE --target=mbc --output $(JS_STAGE2)/QAST/Compiler.moarvm --no-regex-lib src/vm/js/QAST/Compiler.nqp > node_modules/QAST/Compiler.js
 
 $(JS_STAGE2)/QAST.moarvm: $(JS_STAGE1_COMPILER) src/vm/js/QAST.nqp $(JS_STAGE2)/NQPCORE.setting.moarvm $(JS_STAGE2)/QAST/Compiler.moarvm
 	$(MKPATH) $(JS_STAGE2)
 	$(MKPATH) node_modules
-	$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NQPCORE --target=mbc --output $(JS_STAGE2)/QAST.moarvm src/vm/js/QAST.nqp > node_modules/QAST.js
+	$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NQPCORE --target=mbc --output $(JS_STAGE2)/QAST.moarvm --no-regex-lib src/vm/js/QAST.nqp > node_modules/QAST.js
 
 $(JS_STAGE2)/NQPHLL.moarvm: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(HLL_COMBINED) $(JS_STAGE2)/NQPCORE.setting.moarvm $(JS_STAGE2)/QAST/Compiler.moarvm $(JS_STAGE2)/QRegex.moarvm
 	$(MKPATH) $(JS_STAGE2)
 	$(MKPATH) node_modules
-	$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NQPCORE --target=mbc --output $(JS_STAGE2)/NQPHLL.moarvm $(JS_STAGE2)/$(HLL_COMBINED) > node_modules/NQPHLL.js
+	$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NQPCORE --target=mbc --output $(JS_STAGE2)/NQPHLL.moarvm --no-regex-lib $(JS_STAGE2)/$(HLL_COMBINED) > node_modules/NQPHLL.js
 
 $(JS_STAGE2)/$(P6QREGEX_COMBINED): $(P6QREGEX_SOURCES)
 	$(MKPATH) $(JS_STAGE2)
@@ -117,7 +122,7 @@ $(JS_STAGE2)/$(P6QREGEX_COMBINED): $(P6QREGEX_SOURCES)
 $(JS_STAGE2)/NQPP6QRegex.moarvm: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(P6QREGEX_COMBINED) $(JS_STAGE2)/NQPCORE.setting.moarvm $(JS_STAGE2)/QAST.moarvm $(JS_STAGE2)/NQPHLL.moarvm $(JS_STAGE2)/QRegex.moarvm
 	$(MKPATH) $(JS_STAGE2)
 	$(MKPATH) node_modules
-	$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NQPCORE --target=mbc --output $(JS_STAGE2)/NQPP6QRegex.moarvm $(JS_STAGE2)/$(P6QREGEX_COMBINED) > node_modules/NQPP6QRegex.js
+	$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NQPCORE --target=mbc --output $(JS_STAGE2)/NQPP6QRegex.moarvm --no-regex-lib $(JS_STAGE2)/$(P6QREGEX_COMBINED) > node_modules/NQPP6QRegex.js
 
 node_modules/ModuleLoader.js: $(JS_STAGE2)/NQPCORE.setting.moarvm src/vm/js/ModuleLoader.nqp
 	./nqp-js --target=js --output node_modules/ModuleLoader.js src/vm/js/ModuleLoader.nqp

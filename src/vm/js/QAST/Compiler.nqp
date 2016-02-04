@@ -3387,6 +3387,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                         $*SETTING_NAME := $op[1][1].value;
                         $*SETTING_TARGET := $op[0].value;
                         $pre := $pre ~ "nqp.load_setting({quote_string($*SETTING_NAME)});\n";
+                        # HACK to get nqp::sprintf to work
+                        $pre := $pre ~ "require('sprintf');\n"; 
                     } elsif nqp::istype($op, QAST::Op)
                         && $op.op eq 'callmethod'
                         && $op.name eq 'load_module' {

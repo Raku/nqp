@@ -62,7 +62,7 @@ sub combine(:$sources, :$stage, :$file, :$gen-version = 0) {
     ); 
 }
 
-sub cross-compile(:$stage, :$source, :$target, :$setting='NQPCORE', :$no-regex-lib, :$deps = []) {
+sub cross-compile(:$stage, :$source, :$target, :$setting='NQPCORE', :$no-regex-lib=1, :$deps = []) {
     my $path := stage_path($stage);
     my $moarvm := $path ~ $target ~ '.moarvm';
     # todo dependency on compiler
@@ -76,7 +76,7 @@ sub cross-compile(:$stage, :$source, :$target, :$setting='NQPCORE', :$no-regex-l
     rule($moarvm, nqp::join(' ', $deps), 
         make_parents($moarvm),
         make_parents($js),
-	"\$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=$setting --target=mbc --output $moarvm $source > $js"
+	"\$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=$setting --target=mbc --output $moarvm {$no-regex-lib ?? "--no-regex-lib" !! ""} $source > $js"
         );
 }
 
@@ -115,6 +115,8 @@ my $QASTNode-moarvm := cross-compile(:stage(2), :source($QASTNode-combined), :ta
 my $QRegex-combined := combine(:stage(2), :sources('$(QREGEX_SOURCES)'), :file('$(QREGEX_COMBINED)'));
 my $QRegex-moarvm := cross-compile(:stage(2), :source($QRegex-combined), :target('QRegex'), :setting('NQPCORE'), :no-regex-lib(1), :deps([$nqpcore-moarvm, $QASTNode-moarvm]));
 
+my $sprintf-moarvm := cross-compile(:stage(2), :source('src/HLL/sprintf.nqp'), :target('sprintf'), :setting('NQPCORE'), :deps([$nqpcore-moarvm, $QRegex-moarvm]), :no-regex-lib(0)); 
+
 deps('js-stage1-compiler', '$(JS_STAGE1_COMPILER)');
 
 say('js-test: js-all gen/js/qregex.t
@@ -130,7 +132,7 @@ say("\n\njs-clean:
 	\$(RM_RF) gen/js/stage1 gen/js/stage2
 ");
 
-deps("js-all", 'm-all', 'js-stage1-compiler', 'node_modules/runtime_copied',$nqpcore-moarvm, $nqpcore-combined, $QASTNode-moarvm, $QRegex-moarvm);
+deps("js-all", 'm-all', 'js-stage1-compiler', 'node_modules/runtime_copied',$nqpcore-moarvm, $nqpcore-combined, $QASTNode-moarvm, $QRegex-moarvm, $sprintf-moarvm);
 
 # Enforce the google coding standards
 say("js-lint:
