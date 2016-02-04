@@ -41,7 +41,21 @@ op.tostr_I = function(n) {
 };
 
 op.base_I = function(n, base) {
-  return getBI(n).toString(base).toUpperCase().replace(/^-0+/, '-');
+  if (base == 16 || base == 10) {
+    return getBI(n).toString(base).toUpperCase().replace(/^-0+/, '-');
+  } else if (base < 16 && base > 1) {
+    var orig = getBI(n);
+    var num = orig.abs();
+    var string = "";
+    var letters = "0123456789ABCDEF";
+    while (num.gt(0)) {
+      string = letters[num.mod(base).toNumber()] + string;
+      num = num.div(base);
+    }
+    return (orig.lt(0) ? "-" : "") + string;
+  } else {
+    throw "base_I with base: " + base + " NYI";
+  }
 };
 
 op.iseq_I = function(a, b) {
