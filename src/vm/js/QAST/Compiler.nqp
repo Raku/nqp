@@ -446,6 +446,21 @@ class QAST::OperationsJS {
         };
     }
 
+    sub add_hll_op($op) {
+        %ops{$op} := sub ($comp, $node, :$want, :$cps) {
+            my @operands := $node.list;
+            $comp.as_js(QAST::Op.new(
+                :op('call'),
+                :returns(str),
+                QAST::Op.new(
+                    :op('gethllsym'),
+                    QAST::SVal.new( :value('nqp') ),
+                    QAST::SVal.new( :value($op) )
+                ),
+                |@operands ), :$want, :$cps);
+        };
+    }
+
     sub add_infix_op($op, $left_type, $syntax, $right_type, $return_type) {
         %ops{$op} := sub ($comp, $node, :$want, :$cps) {
             my $left  := $comp.as_js($node[0], :want($left_type), :$cps);
@@ -546,6 +561,11 @@ class QAST::OperationsJS {
             "$obj.hasOwnProperty($attr)";
         }
     );
+
+
+    add_hll_op('sprintf');
+    add_hll_op('sprintfdirectives');
+    add_hll_op('sprintfaddargumenthandler');
 
     add_simple_op('setinvokespec', $T_OBJ, [$T_OBJ, $T_OBJ, $T_STR, $T_OBJ], :sideffects);
     add_simple_op('setboolspec', $T_OBJ, [$T_OBJ, $T_INT, $T_OBJ], :sideffects);
