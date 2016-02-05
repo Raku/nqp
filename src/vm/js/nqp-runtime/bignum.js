@@ -41,11 +41,13 @@ op.tostr_I = function(n) {
 };
 
 op.base_I = function(n, base) {
+  var orig = getBI(n);
+  if (orig.eq(0)) return "0";
+
   if (base == 16 || base == 10) {
-    return getBI(n).toString(base).toUpperCase().replace(/^(-?)0+/, '$1');
+    return orig.toString(base).toUpperCase().replace(/^(-?)0+/, '$1');
   } else if (base < 16 && base > 1) {
     var orig = getBI(n);
-    if (orig.eq(0)) return "0";
     var num = orig.abs();
     var string = "";
     var letters = "0123456789ABCDEF";
