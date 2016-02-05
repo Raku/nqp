@@ -27,8 +27,7 @@ sub rule($target, $source, *@actions) {
     $target;
 }
 
-sub nqp($prefix, $file, $stage, :$deps=[]) {
-    my $source := $prefix ~ '/' ~ $file ~ '.nqp';
+sub nqp($prefix, $file, $stage, :$source=$prefix ~ '/' ~ $file ~ '.nqp', :$deps=[]) {
     my $path := stage_path($stage);
     my $mbc := $path ~ $file ~ '.moarvm';
 
@@ -91,9 +90,13 @@ constant('JS_STAGE1','$(JS_BUILD_DIR)/stage1');
 constant('JS_STAGE2','$(JS_BUILD_DIR)/stage2');
 constant('JS_NQP','./$(M_RUNNER)$(BAT)');
 
+
 say('js-runner-default: js-all');
 
-my $stage1-qast-compiler-moar := nqp('src/vm/js','QAST/Compiler',1);
+my $QASTCompiler-combined := combine(:stage(1), :sources('src/vm/js/Utils.nqp src/vm/js/SerializeOnce.nqp src/vm/js/const_map.nqp src/vm/js/LoopInfo.nqp src/vm/js/BlockBarrier.nqp src/vm/js/DWIMYNameMangling.nqp src/vm/js/Chunk.nqp src/vm/js/Operations.nqp src/vm/js/RegexCompiler.nqp src/vm/js/Compiler.nqp'), :file('QASTCompiler'));
+
+
+my $stage1-qast-compiler-moar := nqp('src/vm/js','QAST/Compiler',1, :source($QASTCompiler-combined));
 my $stage1-hll-backend-moar := nqp('src/vm/js','HLL/Backend',1,:deps([$stage1-qast-compiler-moar]));
 
 constant('JS_STAGE1_COMPILER',"$stage1-qast-compiler-moar $stage1-hll-backend-moar");
@@ -163,7 +166,7 @@ my $hll-combined := combine(:stage(2), :sources('$(JS_HLL_SOURCES)'), :file('$(H
 
 
 
-my $QAST-Compiler-moarvm := cross-compile(:stage(2), :source('src/vm/js/QAST/Compiler.nqp'), :target('QAST/Compiler'), :setting('NQPCORE'), :no-regex-lib(1), :deps([$nqpcore-moarvm, $QASTNode-moarvm]));
+my $QAST-Compiler-moarvm := cross-compile(:stage(2), :source($QASTCompiler-combined), :target('QAST/Compiler'), :setting('NQPCORE'), :no-regex-lib(1), :deps([$nqpcore-moarvm, $QASTNode-moarvm]));
 
 
 my $QAST-moarvm := cross-compile(:stage(2), :source('src/vm/js/QAST.nqp'), :target('QAST'), :setting('NQPCORE'), :no-regex-lib(1), :deps([$nqpcore-moarvm, $QAST-Compiler-moarvm]));
