@@ -1,13 +1,5 @@
 use QASTNode;
 
-my sub join($delim, $array) {
-    my $ret := '';
-    for $array -> $part {
-        $ret := $ret ~ $part;
-    }
-    $ret;
-}
-
 # turn a string into a javascript literal
 sub quote_string($str) {
     my $out := '';
