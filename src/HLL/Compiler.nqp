@@ -1,3 +1,5 @@
+my $more-code-sentinel := nqp::hash();
+
 # Provides base functionality for a compiler object.
 class HLL::Compiler does HLL::Backend::Default {
     has @!stages;
@@ -86,16 +88,6 @@ class HLL::Compiler does HLL::Backend::Default {
                 $code := $code ~ $newcode;
             }
 
-            if $newcode && nqp::substr($newcode, nqp::chars($newcode) - 1) eq "\\" {
-                # Need to get more code before we execute
-                # Strip the trailing \, but reinstate the newline 
-                $code := nqp::substr($code, 0, nqp::chars($code) - 1) ~ "\n";
-                if $code {
-                    $prompt := '* ';
-                }
-                next;
-            }
-
             # Set the current position of stdout for autoprinting control
             my $*AUTOPRINTPOS := nqp::tellfh(nqp::getstdout());
             my $*CTXSAVE := self;
@@ -110,6 +102,15 @@ class HLL::Compiler does HLL::Backend::Default {
                         self.interactive_exception($!);
                     }
                 };
+                if self.input-incomplete($output) {
+                    # Need to get more code before we execute
+                    # Strip the trailing \, but reinstate the newline
+                    $code := nqp::substr($code, 0, nqp::chars($code) - 1) ~ "\n";
+                    if $code {
+                        $prompt := '* ';
+                    }
+                    next;
+                }
                 if nqp::defined($*MAIN_CTX) {
                     $!save_ctx := $*MAIN_CTX;
                 }
@@ -139,8 +140,20 @@ class HLL::Compiler does HLL::Backend::Default {
         nqp::print(~$ex ~ "\n")
     }
 
+    method input-incomplete($value) {
+        nqp::where($value) == nqp::where($more-code-sentinel);
+    }
+
+    method needs-more-input() {
+        $more-code-sentinel
+    }
+
     method eval($code, *@args, *%adverbs) {
         my $output;
+
+        if $code && nqp::substr($code, nqp::chars($code) - 2) eq "\\\n" {
+            return self.needs-more-input();
+        }
 
         if (%adverbs<profile-compile>) {
             $output := $!backend.run_profiled({
