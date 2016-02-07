@@ -105,7 +105,9 @@ class HLL::Compiler does HLL::Backend::Default {
                 if self.input-incomplete($output) {
                     # Need to get more code before we execute
                     # Strip the trailing \, but reinstate the newline
-                    $code := nqp::substr($code, 0, nqp::chars($code) - 1) ~ "\n";
+                    if nqp::substr($code, 0, nqp::chars($code) - 2) eq "\\\n" {
+                        $code := nqp::substr($code, 0, nqp::chars($code) - 2) ~ "\n";
+                    }
                     if $code {
                         $prompt := '* ';
                     }
