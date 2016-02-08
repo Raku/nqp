@@ -579,7 +579,7 @@ class QAST::OperationsJS {
         @setup.push($compiled_args);
 
         $comp.stored_result(
-            Chunk.new($T_OBJ, $comp.wrap_for_call($invocant.expr, $node.name) ~ $method ~ $call ~ $compiled_args.expr ~ ')' , @setup, :$node), :$want);
+            Chunk.new($T_OBJ, $invocant.expr ~ $method ~ $call ~ $compiled_args.expr ~ ')' , @setup, :$node), :$want);
 
     });
 

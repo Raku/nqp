@@ -275,24 +275,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         @js_args;
     }
 
-
-    my %array_methods := nqp::hash(
-        'unshift', 1,
-        'shift', 1,
-        'pop', 1,
-        'push', 1,
-    );
-
-    # when calling a method on an javascript Array we need to wrap it
-    method wrap_for_call($obj, $method_name) {
-        # do we now the method name and is this a method name that an Array dosn't support? 
-        if $method_name && (!nqp::existskey(%array_methods, $method_name)) {
-            $obj;
-        } else {
-            "nqp.wrapObj($obj)";
-        }
-    }
-
     method merge_arg_groups($groups) {
         if nqp::islist($groups) {
             my @exprs;

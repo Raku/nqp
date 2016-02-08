@@ -368,36 +368,6 @@ exports.Next = function(label) {
   this.label = label;
 };
 
-function WrappedArray(array) {
-  this.array = array;
-}
-
-WrappedArray.prototype.push = function(ctx, _NAMED, element) {
-  this.array.push(element);
-  return element;
-};
-
-WrappedArray.prototype.unshift = function(ctx, _NAMED, element) {
-  this.array.unshift(element);
-  return element;
-};
-
-WrappedArray.prototype.shift = function(ctx, _NAMED) {
-  return this.array.shift();
-};
-
-WrappedArray.prototype.pop = function(ctx, _NAMED) {
-  return this.array.pop();
-};
-
-exports.wrapObj = function(obj) {
-  if (obj instanceof Array) {
-    return new WrappedArray(obj);
-  } else {
-    return obj;
-  }
-};
-
 /* For debugging purposes */
 exports.dumpObj = function(obj) {
   var seen = [];
