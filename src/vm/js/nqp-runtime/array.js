@@ -37,7 +37,7 @@ NQPArray.prototype.$$atpos_i = function(index) {
 };
 
 NQPArray.prototype.$$bindpos = function(index, value) {
-  return this.array[index] = value;
+  return this.array[index < 0 ? this.array.length + index : index] = value;
 };
 
 NQPArray.prototype.$$join = function(delim) {
