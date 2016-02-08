@@ -22,8 +22,8 @@ module.exports.wval = function(handle, idx) {
 
 op.deserialize = function(blob, sc, sh, code_refs, conflict) {
   var buffer = new Buffer(blob, 'base64');
-  sc.code_refs = code_refs instanceof Array? code_refs : code_refs.array;
-  sh = sh instanceof Array ? sh : sh.array;
+  sc.code_refs = code_refs.array;
+  sh = sh.array;
   var cursor = new BinaryCursor(buffer, 0, sh, sc);
 
   cursor.deserialize(sc);

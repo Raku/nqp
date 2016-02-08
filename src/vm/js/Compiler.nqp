@@ -1044,9 +1044,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
         }
 
-        "var sh=[{nqp::join(',',@sh)}];\n"
+        "var sh= new nqp.NQPArray([{nqp::join(',',@sh)}]);\n"
         ~ "var sc = nqp.op.createsc({quote_string(nqp::scgethandle($sc))});\n"
-        ~ "var code_refs = [{nqp::join(',',@blocks)}];\n" # TODO
+        ~ "var code_refs = new nqp.NQPArray([{nqp::join(',',@blocks)}]);\n" # TODO
         ~ $set_info
         ~ "nqp.op.deserialize($quoted_data,sc,sh,code_refs,null);\n"
         ~ "nqp.op.scsetdesc(sc,{quote_string(nqp::scgetdesc($sc))});\n"
