@@ -1779,6 +1779,13 @@ of the type indicated by the opcode suffix.
 
 # <a id="sixmodel"></a> OO/SixModel Opcodes
 
+## attrinited
+* `attrinited(Mu $obj. Mu:T $type, str $attributename)`
+ 
+Test if the attribute of name `$attributename` of object `$obj`
+has been binded, see `bindattr`. Note that any access to the atribute
+that results in a `getattr` call causes it to be inited.
+
 ## bindattr
 * `bindattr(Mu $obj, Mu:T $type, str $attributename, Mu $new_value)`
 * `bindattr_i(Mu $obj, Mu:T $type, str $attributename, int $new_value)`
