@@ -4,6 +4,8 @@ exports.op = op;
 var iscclass = require('./cclass.js').op.iscclass;
 var nqp = require('nqp-runtime');
 
+var NQPArray = require('./array.js');
+
 var EDGE_FATE = 0,
     EDGE_EPSILON = 1,
     EDGE_CODEPOINT = 2,
@@ -21,9 +23,17 @@ var EDGE_FATE = 0,
     EDGE_CODEPOINT_LL = 14,
     EDGE_CODEPOINT_I_LL = 15;
 
+function convertState(thing) {
+    if (thing instanceof NQPArray) {
+        return thing.array.map(function(x) { return convertState(x) });
+    } else {
+        return thing;
+    }
+}
+
 // TODO think about type conversions of the stuff inside the array
 op.nfafromstatelist = function(ctx, states, type) {
-
+  states = convertState(states);
   var nfa = type._STable.REPR.allocate(type._STable);
   nfa.fates = states[0];
   nfa.states = [];
@@ -252,7 +262,7 @@ function runNFA(nfa, target, pos) {
     }
   }
 
-  return fates;
+  return new NQPArray(fates);
 }
 
 op.nfarunproto = function(nfa, target, pos) {
@@ -260,8 +270,12 @@ op.nfarunproto = function(nfa, target, pos) {
 };
 
 op.nfarunalt = function(nfa, target, pos, bstack, cstack, marks) {
+  cstack = cstack instanceof NQPArray ? cstack.array : cstack;
+  bstack = bstack instanceof NQPArray ? bstack.array : bstack;
+  marks = marks instanceof NQPArray ? marks.array : marks;
+
   /* Run the NFA. */
-  var fates = runNFA(nfa, target, pos);
+  var fates = runNFA(nfa, target, pos).array;
 
   /* Push the results onto the bstack. */
   var caps = cstack ? cstack.length : 0;

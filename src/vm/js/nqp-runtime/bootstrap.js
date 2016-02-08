@@ -4,6 +4,8 @@ var reprs = require('./reprs.js');
 var Hash = require('./hash.js');
 var STable = require('./sixmodel.js').STable;
 
+var NQPArray = require('./array.js');
+
 var repr = new reprs.KnowHOWREPR();
 
 var CodeRef = require('./code-ref.js');
@@ -133,7 +135,7 @@ add_knowhow_how_method('new_type', function(ctx, _NAMED) {
 });
 
 add_knowhow_how_method('add_attribute', function(ctx, _NAMED, type, attr) {
-  this.__attributes.push(attr);
+  this.__attributes.$$push(attr);
 });
 
 add_knowhow_how_method('add_method', function(ctx, _NAMED, type, name, code) {
@@ -154,19 +156,19 @@ add_knowhow_how_method('compose', function(ctx, _NAMED, type_object) {
 
   /* ...which contains an array per MRO entry... */
   var type_info = [];
-  repr_info.push(type_info);
+  repr_info.push(new NQPArray(type_info));
 
   /* ...which in turn contains this type... */
   type_info.push(type_object);
 
   /* ...then an array of hashes per attribute... */
   var attr_info_list = [];
-  type_info.push(attr_info_list);
+  type_info.push(new NQPArray(attr_info_list));
 
   /* ...then an array of hashes per attribute... */
-  for (var i = 0; i < this.__attributes.length; i++) {
+  for (var i = 0; i < this.__attributes.array.length; i++) {
     var attr_info = new Hash();
-    var attr = this.__attributes[i];
+    var attr = this.__attributes.array[i];
     attr_info.content.set('name', attr.__name);
     attr_info.content.set('type', attr.__type);
     if (attr.__box_target) {
@@ -177,11 +179,11 @@ add_knowhow_how_method('compose', function(ctx, _NAMED, type_object) {
 
   /* ...followed by a list of parents (none). */
   var parent_info = [];
-  type_info.push(parent_info);
+  type_info.push(new NQPArray(parent_info));
 
   /* All of this goes in a hash. */
   var repr_info_hash = new Hash();
-  repr_info_hash.content.set('attribute', repr_info);
+  repr_info_hash.content.set('attribute', new NQPArray(repr_info));
 
 
   /* Compose the representation using it. */

@@ -160,7 +160,7 @@ op.setinputlinesep = function(fh, sep) {
 };
 
 op.setinputlineseps = function(fh, seps) {
-  fh.seps = seps;
+  fh.seps = seps.array;
 };
 
 op.readlinefh = function(fh) {

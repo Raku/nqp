@@ -10,6 +10,8 @@ var Hash = require('./hash.js');
 var Int64 = require('node-int64');
 var CodeRef = require('./code-ref.js');
 
+var NQPArray = require('./array.js');
+
 
 /** All the loaded serialization contexts using their unique IDs as keys */
 var serialization_contexts = SerializationContext.contexts;
@@ -20,7 +22,8 @@ module.exports.wval = function(handle, idx) {
 
 op.deserialize = function(blob, sc, sh, code_refs, conflict) {
   var buffer = new Buffer(blob, 'base64');
-  sc.code_refs = code_refs;
+  sc.code_refs = code_refs instanceof Array? code_refs : code_refs.array;
+  sh = sh instanceof Array ? sh : sh.array;
   var cursor = new BinaryCursor(buffer, 0, sh, sc);
 
   cursor.deserialize(sc);
@@ -101,7 +104,7 @@ BinaryCursor.prototype.array = function(readElem) {
   for (var i = 0; i < elems; i++) {
     array.push(readElem(this));
   }
-  return array;
+  return new NQPArray(array);
 };
 
 function StubedCodeRef(sc, id) {
@@ -509,7 +512,7 @@ BinaryCursor.prototype.deserialize = function(sc) {
     objects[i].array_repr = STable_for_obj.REPR;
 
     if (objects[i].is_array) {
-      sc.root_objects[i] = [];
+      sc.root_objects[i] = new NQPArray([]);
     } else {
       sc.root_objects[i] = objects[i].is_concrete
         ? new (STable_for_obj.obj_constructor)()

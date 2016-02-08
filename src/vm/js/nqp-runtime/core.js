@@ -13,6 +13,8 @@ var reprs = require('./reprs.js');
 
 var hll = require('./hll.js');
 
+var NQPArray = require('./array.js');
+
 exports.CodeRef = CodeRef;
 
 op.atpos = function(array, index) {
@@ -151,7 +153,9 @@ IterPair.prototype.value = function(ctx, named) {
 
 
 op.iterator = function(obj) {
-  if (obj instanceof Array) {
+  if (obj instanceof NQPArray) {
+    return new Iter(obj.array);
+  } else if (obj instanceof Array) {
     return new Iter(obj);
   } else if (obj instanceof Hash) {
     return new HashIter(obj);
@@ -198,6 +202,7 @@ exports.op.ishash = function(obj) {
 };
 
 op.existspos = function(array, idx) {
+  if (array.$$existspos) return array.$$existspos(idx);
   if (idx < 0) idx += array.length;
   return array.hasOwnProperty(idx) ? 1 : 0;
 };
@@ -333,7 +338,8 @@ op.istype = function(obj, type) {
     return 0;
   }
 
-  if (obj instanceof Array) {
+  // HACK
+  if (obj instanceof Array || obj instanceof NQPArray) {
     if (hll.hllConfigs.nqp && type == hll.hllConfigs.nqp.content.get('list')) {
       return 1;
     } else {
@@ -352,7 +358,7 @@ op.istype = function(obj, type) {
 };
 
 op.settypecache = function(obj, cache) {
-  obj._STable.type_check_cache = cache;
+  obj._STable.type_check_cache = cache.array;
   return obj;
 };
 
@@ -648,7 +654,6 @@ op.encode = function(str, encoding_, buf) {
   var elementSize = byteSize(buf);
 
   var ret = [];
-  ret.bytes = elementSize;
 
   var buffer = new Buffer(str, encoding);
 
@@ -657,12 +662,17 @@ op.encode = function(str, encoding_, buf) {
     ret[i] = buffer.readIntLE(offset, elementSize);
     offset += elementSize;
   }
+
+  ret = new NQPArray(ret);
+  ret.bytes = elementSize;
   return ret;
 };
 
 op.decode = function(buf, encoding_) {
   var encoding = renameEncoding(encoding_);
   var elementSize = byteSize(buf);
+  
+  buf = buf.array;
 
   var buffer = new Buffer(buf.length * elementSize);
 
@@ -705,13 +715,15 @@ op.parameterizetype = function(ctx, type, params) {
     ctx.die("This type is not parametric");
   }
 
+  var unpackedParams = params.array;
+
   var lookup = st.parameterizerCache;
   for (var i = 0; i < lookup.length; i++) {
-    if (params.length == lookup[i].params.length) {
+    if (unpackedParams.length == lookup[i].params.length) {
       var match = true;
-      for (var j=0; j < params.length; j++) {
+      for (var j=0; j < unpackedParams.length; j++) {
         /* XXX More cases to consider here. - copied over from the jvm backend, need to consider what they are*/
-        if (params[j] != lookup[i].params[j]) {
+        if (unpackedParams[j] != lookup[i].params[j]) {
           match = false;
           break;
         }
@@ -729,7 +741,7 @@ op.parameterizetype = function(ctx, type, params) {
   newSTable.parametricType = type;
   newSTable.parameters = params;
 
-  lookup.push({type: result, params: params});
+  lookup.push({type: result, params: unpackedParams});
 
   return result;
 };
@@ -769,7 +781,7 @@ function typeparameters(ctx, type) {
 op.typeparameters = typeparameters;
 
 op.typeparameterat = function(ctx, type, idx) {
-  return typeparameters(ctx, type)[idx];
+  return typeparameters(ctx, type).$$atpos(idx);
 };
 
 op.typeparameterized = function(type) {
@@ -957,18 +969,18 @@ op.setdimensions = function(array, dimensions) {
   };
   
   op['atpos2d' + type] = function(array, x, y) {
-    return op['atposnd' + type](array, [x, y]);
+    return op['atposnd' + type](array, new NQPArray([x, y]));
   };
   
   op['atpos3d' + type] = function(array, x, y, z) {
-    return op['atposnd' + type](array, [x, y, z]);
+    return op['atposnd' + type](array, new NQPArray([x, y, z]));
   };
   
   op['bindpos2d' + type] = function(array, x, y, value) {
-    return op['bindposnd' + type](array, [x, y], value);
+    return op['bindposnd' + type](array, new NQPArray([x, y]), value);
   };
   
   op['bindpos3d' + type] = function(array, x, y, z, value) {
-    return op['bindposnd' + type](array, [x, y, z], value);
+    return op['bindposnd' + type](array, new NQPArray([x, y, z]), value);
   };
 });

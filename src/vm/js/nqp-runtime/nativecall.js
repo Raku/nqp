@@ -19,7 +19,7 @@ function mapType(typeHash) {
 op.buildnativecall = function(ctx, target, libname, symbol, convention, args, returns) {
   try {
     var symbols = {};
-    symbols[symbol] = [mapType(returns), args.map(mapType)];
+    symbols[symbol] = [mapType(returns), args.array.map(mapType)];
     target.lib = ffi.Library(libname === '' ? null : libname, symbols);
     target.symbol = symbol;
   } catch (e) {
@@ -28,5 +28,5 @@ op.buildnativecall = function(ctx, target, libname, symbol, convention, args, re
 };
 
 op.nativecall = function(returns, callObject, args) {
-  return callObject.lib[callObject.symbol].apply(callObject.lib, args)
+  return callObject.lib[callObject.symbol].apply(callObject.lib, args.array)
 };

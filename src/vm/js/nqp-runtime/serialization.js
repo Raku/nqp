@@ -2,6 +2,7 @@ var Hash = require('./hash.js');
 var CodeRef = require('./code-ref.js');
 var NQPInt = require('./nqp-int.js');
 var Int64 = require('node-int64');
+var NQPArray = require('./array.js');
 
 var op = {};
 exports.op = op;
@@ -311,7 +312,7 @@ BinaryWriteCursor.prototype.ref = function(ref) {
   else if (typeof ref == 'string') {
     discrim = REFVAR_VM_STR;
   }
-  else if (ref instanceof Array) {
+  else if (ref instanceof NQPArray) {
     discrim = REFVAR_VM_ARR_VAR;
   }
 //  else if (ref.st.WHAT == tc.gc.BOOTIntArray) {
@@ -373,9 +374,9 @@ BinaryWriteCursor.prototype.ref = function(ref) {
     //      case REFVAR_VM_ARR_STR:
     //          ref.st.REPR.serialize(tc, this, ref);
     case REFVAR_VM_ARR_VAR:
-      this.varint(ref.length);
-      for (var i = 0; i < ref.length; i++) {
-        this.ref(ref[i]);
+      this.varint(ref.array.length);
+      for (var i = 0; i < ref.array.length; i++) {
+        this.ref(ref.array[i]);
       }
       break;
     case REFVAR_VM_HASH_STR_VAR:
@@ -727,7 +728,7 @@ SerializationWriter.prototype.serialize = function() {
 };
 
 op.serialize = function(sc, sh) {
-  var writer = new SerializationWriter(sc, sh);
+  var writer = new SerializationWriter(sc, sh.array);
   return writer.serialize();
 };
 

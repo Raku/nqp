@@ -90,35 +90,33 @@ STable.prototype.setMethodCache = function(method_cache) {
 };
 
 // TODO handle attrs properly
-// TODO delegation to something that is not an array
 STable.prototype.setPositionalDelegate = function(attr) {
   this.obj_constructor.prototype.$$bindpos = function(index, value) {
-    return this[attr][index] = value;
+    return this[attr].$$bindpos(index, value);
   };
 
   this.obj_constructor.prototype.$$atpos = function(index) {
-    return this[attr][index];
+    return this[attr].$$atpos(index);
   };
 
   this.obj_constructor.prototype.$$unshift = function(value) {
-    this[attr].unshift(value);
-    return value;
+    return this[attr].$$unshift(value);
   };
 
   this.obj_constructor.prototype.$$pop = function(value) {
-    return this[attr].pop(value);
+    return this[attr].$$pop(value);
   };
 
   this.obj_constructor.prototype.$$push = function(value) {
-    return this[attr].push(value);
+    return this[attr].$$push(value);
   };
 
   this.obj_constructor.prototype.$$shift = function(value) {
-    return this[attr].shift(value);
+    return this[attr].$$shift(value);
   };
 
   this.obj_constructor.prototype.$$elems = function(value) {
-    return this[attr].length;
+    return this[attr].$$elems();
   };
 };
 

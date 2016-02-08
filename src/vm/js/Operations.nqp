@@ -226,7 +226,7 @@ class QAST::OperationsJS {
 
     add_simple_op('chars', $T_INT, [$T_STR], sub ($string) {"$string.length"});
 
-    add_simple_op('join', $T_STR, [$T_STR, $T_OBJ], sub ($delim, $list) {"$list.join($delim)"});
+    add_simple_op('join', $T_STR, [$T_STR, $T_OBJ], sub ($delim, $list) {"$list.\$\$join($delim)"});
 
     add_simple_op('index', $T_INT, [$T_STR, $T_STR, $T_INT], sub ($string, $pattern, $from?) {
         nqp::defined($from) ?? "($from > $string.length ? -1 : $string.indexOf($pattern,$from))" !! "$string.indexOf($pattern)";
@@ -398,15 +398,17 @@ class QAST::OperationsJS {
                @exprs.push($chunk.expr);
            }
 
-           @setup.push("$list = " ~ '[' ~ nqp::join(',', @exprs) ~ "];\n");
+           @setup.push("$list = new nqp.NQPArray([" ~ nqp::join(',', @exprs) ~ "]);\n");
 
            $comp.cpsify_chunk(Chunk.new($T_OBJ, $list , @setup, :$node));
         });
 
         if $type != $T_OBJ {
-            add_simple_op('bindpos' ~ $suffix, $type, [$T_OBJ, $T_INT, $type], sub ($list, $index, $value) {"($list[$index] = $value)"}, :sideffects);
-            add_simple_op('pop' ~ $suffix, $type, [$T_OBJ], sub ($array) {"$array.pop()"}, :sideffects);
-            add_simple_op('push' ~ $suffix, $type, [$T_OBJ, $type], sub ($array, $elem) {"$array.push($elem)"}, :sideffects);
+            add_simple_op('bindpos' ~ $suffix, $type, [$T_OBJ, $T_INT, $type], sub ($list, $index, $value) {"$list.\$\$bindpos($index, $value)"}, :sideffects);
+            add_simple_op('pop' ~ $suffix, $type, [$T_OBJ], sub ($array) {"$array.\$\$pop()"}, :sideffects);
+            add_simple_op('push' ~ $suffix, $type, [$T_OBJ, $type], sub ($array, $elem) {"$array.\$\$push($elem)"}, :sideffects);
+            add_simple_op('atpos' ~ $suffix, $type, [$T_OBJ, $T_INT], sub ($list, $index) {"$list.\$\$atpos$suffix($index)"});
+
         }
  
 
@@ -658,7 +660,7 @@ class QAST::OperationsJS {
     add_simple_op('istype', $T_INT, [$T_OBJ, $T_OBJ], :sideffects);
 
     add_simple_op('split', $T_OBJ, [$T_STR, $T_STR], sub ($separator, $string) {
-        "({$string} == '' ? [] : {$string}.split({$separator}))"
+        "new nqp.NQPArray({$string} == '' ? [] : {$string}.split({$separator}))"
     });
 
     add_simple_op('ctxlexpad', $T_OBJ, [$T_OBJ]);
@@ -671,14 +673,10 @@ class QAST::OperationsJS {
 
     add_simple_op('elems', $T_INT, [$T_OBJ]);
 
-    add_simple_op('islist', $T_BOOL, [$T_OBJ], sub ($obj) {"($obj instanceof Array)"});
+    add_simple_op('islist', $T_BOOL, [$T_OBJ], sub ($obj) {"($obj instanceof Array || $obj instanceof nqp.NQPArray)"});
 
 
 
-    add_simple_op('atpos_s', $T_STR, [$T_OBJ, $T_INT], sub ($array, $index) {"$array[$index]"});
-    add_simple_op('atpos_n', $T_STR, [$T_OBJ, $T_INT], sub ($array, $index) {"$array[$index]"});
-    # HACK
-    add_simple_op('atpos_i', $T_INT, [$T_OBJ, $T_INT], sub ($array, $index) {"($array[$index] === undefined ? 0 : $array[$index])"});
     #TODO CPS
     add_op('atpos', sub ($comp, $node, :$want, :$cps) { $comp.atpos($node[0], $node[1], :$node) });
 

@@ -53,6 +53,8 @@ var bootstrap = require('./bootstrap.js');
 module.exports.knowhowattr = bootstrap.knowhowattr;
 module.exports.knowhow = bootstrap.knowhow;
 
+module.exports.NQPArray = require('./array.js');
+
 var saveCtxAs;
 var savedCtxs = {};
 
@@ -128,7 +130,7 @@ exports.to_str = function(arg, ctx) {
     return arg.$$get_int().toString();
   } else {
     console.log(arg);
-    throw "Can't convert to str";
+    throw Error("Can't convert to str");
   }
 };
 

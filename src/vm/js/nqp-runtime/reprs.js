@@ -2,6 +2,7 @@ var sixmodel = require('./sixmodel.js');
 var Hash = require('./hash.js');
 var NQPInt = require('./nqp-int.js');
 var NQPException = require('./nqp-exception.js');
+var NQPArray = require('./array.js');
 
 function basic_type_object_for(HOW) {
   var st = new sixmodel.STable(this, HOW);
@@ -299,7 +300,7 @@ P6opaque.prototype.compose = function(STable, repr_info_hash) {
   // TODO
 
   /* Get attribute part of the protocol from the hash. */
-  var repr_info = repr_info_hash.content.get('attribute');
+  var repr_info = repr_info_hash.content.get('attribute').array;
 
   /* Go through MRO and find all classes with attributes and build up
    * mapping info hashes. Note, reverse order so indexes will match
@@ -325,10 +326,10 @@ P6opaque.prototype.compose = function(STable, repr_info_hash) {
   this.auto_viv_values = [];
 
   for (var i = repr_info.length - 1; i >= 0; i--) {
-    var entry = repr_info[i];
+    var entry = repr_info[i].array;
     var type = entry[0];
-    var attrs = entry[1];
-    var parents = entry[2];
+    var attrs = entry[1].array;
+    var parents = entry[2].array;
 
     /* If it has any attributes, give them each indexes and put them
        * in the list to add to the layout. */
@@ -450,7 +451,7 @@ KnowHOWREPR.prototype.type_object_for = basic_type_object_for;
 KnowHOWREPR.prototype.allocate = function(STable) {
   var obj = new STable.obj_constructor();
   obj.__methods = new Hash();
-  obj.__attributes = [];
+  obj.__attributes = new NQPArray([]);
   obj.__name = '<anon>';
   return obj;
 };
@@ -640,7 +641,7 @@ VMArray.prototype.deserialize_array = function(object, data) {
   }
   var size = data.varint();
   for (var i = 0; i < size; i++) {
-    object[i] = data.variant();
+    object.array[i] = data.variant();
   }
 };
 
@@ -797,17 +798,17 @@ MultiDimArray.prototype.create_obj_constructor = function(STable) {
     if (this.type_object_) {
       throw new NQPException("Cannot get dimensions of a type object");
     }
-    return this.dimensions;
+    return new NQPArray(this.dimensions);
   });
 
   STable.addInternalMethod('$$setdimensions', function(value) {
-    if (value.length != STable.dimensions) {
+    if (value.array.length != STable.dimensions) {
       throw new NQPException("Array type of " + STable.dimensions + " dimensions cannot be intialized with " + value.length + " dimensions");
     } else if (this.dimensions) {
       throw new NQPException("Can only set dimensions once");
     }
     this.storage = [];
-    return (this.dimensions = value);
+    return (this.dimensions = value.array);
   });
 
   STable.addInternalMethod('$$pop', function() {
@@ -831,6 +832,7 @@ MultiDimArray.prototype.create_obj_constructor = function(STable) {
   });
 
   STable.addInternalMethod('$$calculateIndex', function(idx, value) {
+    idx = idx.array;
     if (idx.length != STable.dimensions) {
       throw new NQPException("Cannot access " + STable.dimensions + " dimension array with " + idx.length + " indices");
     }
@@ -889,11 +891,11 @@ MultiDimArray.prototype.create_obj_constructor = function(STable) {
 
   // TODO optimize access
   STable.addInternalMethod('$$bindpos', function(index, value) {
-    return this.$$bindposnd([index], value);
+    return this.$$bindposnd(new NQPArray([index]), value);
   });
 
   STable.addInternalMethod('$$setelems', function(elems) {
-    this.$$setdimensions([elems]);
+    this.$$setdimensions(new NQPArray([elems]));
   });
 
   STable.addInternalMethod('$$elems', function(elems) {
@@ -901,7 +903,7 @@ MultiDimArray.prototype.create_obj_constructor = function(STable) {
   });
 
   STable.addInternalMethod('$$atpos', function(index) {
-    return this.$$atposnd([index]);
+    return this.$$atposnd(new NQPArray([index]));
   });
 
 

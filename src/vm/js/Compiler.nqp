@@ -210,7 +210,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                         my $unwraped := Chunk.new($T_OBJ, "nqp.unwrap_named({$arg_chunk.expr})", [$arg_chunk]);
                         @named_groups.push($unwraped);
                     } else {
-                        @groups.push(self.as_js($arg, :want($T_OBJ),:$cps));
+                        my $arg_chunk := self.as_js($arg, :want($T_OBJ), :$cps);
+                        @groups.push(Chunk.new($T_OBJ, "({$arg_chunk.expr}).array", [$arg_chunk]));
                         @groups.push([]);
                     }
                 }
@@ -387,7 +388,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
 
         if $slurpy {
-            @setup.push("{self.mangle_name($slurpy.name)} = Array.prototype.slice.call(arguments,{+@sig});\n");
+            @setup.push("{self.mangle_name($slurpy.name)} = new nqp.NQPArray(Array.prototype.slice.call(arguments,{+@sig}));\n");
         }
         if $slurpy_named {
             @setup.push("{self.mangle_name($slurpy_named.name)} = nqp.slurpy_named(_NAMED, {known_named(@*KNOWN_NAMED)});\n");

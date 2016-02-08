@@ -33,12 +33,12 @@ class RegexCompiler {
 
         Chunk.new($T_OBJ, $!cursor, [
             "{$!label} = {$!initial_label};\n",
-            "$start = self['!cursor_start_all']({$*CTX}, \{\});\n",
+            "$start = self['!cursor_start_all']({$*CTX}, \{\}).array;\n",
             "{$!cursor} = $start[0];\n",
             "{$!target} = $start[1];\n",
             "{$!pos} = nqp.to_int($start[2], $*CTX);\n",
             "{$!curclass} = $start[3];\n",
-            "{$!bstack} = $start[4];\n",
+            "{$!bstack} = $start[4].array;\n",
             "{$!restart} = $start[5];\n",
             "if ($!pos > $!target.length) \{$!label = $!fail_label\}\n",
             "if ($!restart) \{$!label = $restart_label\}\n",
@@ -47,7 +47,9 @@ class RegexCompiler {
             self.case($!initial_label),
             self.compile_rx($node),
             self.case($restart_label),
-            "$!cstack = $!cursor[\"\$!cstack\"];\n",
+            "$!cstack = $!cursor[\"\$!cstack\"];",
+            "if (!$!cstack instanceof nqp.NQPArray) console.log($!cstack);\n",
+            "if ($!cstack instanceof nqp.NQPArray) $!cstack = $!cstack.array;\n",
             self.case($!fail_label),
             "if ($!bstack.length == 0) \{{self.goto($!done_label)}\}\n",
             "$cstack_top = $!bstack.pop();\n",
@@ -309,13 +311,13 @@ class RegexCompiler {
                 if $node.subtype eq 'capture' {
                     $capture_code := $capture_code
                         ~ "$!cstack = " 
-                        ~ call($!cursor, "!cursor_capture", $!subcur, quote_string($node.name)) ~ ";\n";
+                        ~ call($!cursor, "!cursor_capture", $!subcur, quote_string($node.name)) ~ ".array;\n";
                     $captured := 1;
                 }
                 else {
                     $capture_code := $capture_code
                         ~ "$!cstack = "
-                        ~ call($!cursor, "!cursor_push_cstack", $!subcur) ~ ";\n";
+                        ~ call($!cursor, "!cursor_push_cstack", $!subcur) ~ ".array;\n";
                 }
                 $capture_code := $capture_code ~  "$!bstack.push($back_label, $!pos, 0, $!cstack.length);\n";
                 
@@ -325,7 +327,7 @@ class RegexCompiler {
         if !$captured && $node.subtype eq 'capture' {
             $capture_code := $capture_code
                 ~ "$!cstack = " ~
-                call($!cursor, "!cursor_capture", $!subcur,  quote_string($node.name)) ~ ";\n"
+                call($!cursor, "!cursor_capture", $!subcur,  quote_string($node.name)) ~ ".array;\n"
         }
 
         Chunk.void(
@@ -353,7 +355,7 @@ class RegexCompiler {
             self.set_cursor_pos,
             "$!subcur = " ~ call($!cursor, '!cursor_start_subcapture', $subcapture_from) ~ ";\n",
             call($!subcur, '!cursor_pass', $!pos) ~ ";\n",
-            "$!cstack = " ~ call($!cursor, '!cursor_capture', $!subcur, quote_string($node.name)) ~ ";\n",
+            "$!cstack = " ~ call($!cursor, '!cursor_capture', $!subcur, quote_string($node.name)) ~ ".array;\n",
             self.goto($done_label),
             self.case($fail_label),
             self.fail(),
@@ -494,7 +496,7 @@ class RegexCompiler {
         Chunk.void(
             "$!subcur = [{nqp::join(',',@alt_labels)}];\n",
              self.mark($end_label, -1, 0),
-             call($!cursor, '!alt', $!pos, quote_string($node.name), $!subcur) ~ ";\n",
+             call($!cursor, '!alt', $!pos, quote_string($node.name), "new nqp.NQPArray($!subcur)") ~ ";\n",
              self.fail,
              Chunk.void(|@alt_code),
              self.case($end_label),
