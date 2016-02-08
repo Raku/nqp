@@ -46,4 +46,8 @@ Hash.prototype.$$toObject = function() {
   return ret;
 };
 
+Hash.prototype.$$to_bool = function() {
+  return this.content.size == 0 ? 0 : 1;
+};
+
 module.exports = Hash;
