@@ -26,9 +26,17 @@ NQPArray.prototype.$$atpos = function(index) {
   return this.array[index < 0 ? this.array.length + index : index];
 };
 
-// HACK
-NQPArray.prototype.$$atpos_s = NQPArray.prototype.$$atpos;
-NQPArray.prototype.$$atpos_n =  NQPArray.prototype.$$atpos;
+NQPArray.prototype.$$atpos_s = function(index) {
+  var value = this.array[index < 0 ? this.array.length + index : index];
+  if (value === undefined) return null;
+  return value;
+};
+
+NQPArray.prototype.$$atpos_n = function(index) {
+  var value = this.array[index < 0 ? this.array.length + index : index];
+  if (value === undefined) return 0.0;
+  return value;
+};
 
 NQPArray.prototype.$$atpos_i = function(index) {
   var value = this.array[index < 0 ? this.array.length + index : index];
