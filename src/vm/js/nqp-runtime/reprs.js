@@ -215,7 +215,7 @@ P6opaque.prototype.serialize_repr_data = function(st, cursor) {
   cursor.varint(this.associative_delegate_slot);
 };
 
-P6opaque.prototype.deserialize_finish = function(object, data) {
+P6opaque.prototype.deserialize_finish = function(obj, data) {
   var attrs = [];
 
   var names = {};
@@ -246,7 +246,7 @@ P6opaque.prototype.deserialize_finish = function(object, data) {
       var name = this.name_to_index_mapping[i].names[j];
       var slot = this.name_to_index_mapping[i].slots[j];
       // TODO take class key into account with attribute storage
-      object[name] = attrs[slot];
+      obj[name] = attrs[slot];
     }
   }
 };
@@ -434,16 +434,16 @@ function KnowHOWREPR() {
 
 KnowHOWREPR.prototype.create_obj_constructor = basic_constructor;
 
-KnowHOWREPR.prototype.deserialize_finish = function(object, data) {
-  object.__name = data.str();
-  object.__attributes = data.variant();
-  object.__methods = data.variant();
+KnowHOWREPR.prototype.deserialize_finish = function(obj, data) {
+  obj.__name = data.str();
+  obj.__attributes = data.variant();
+  obj.__methods = data.variant();
 };
 
-KnowHOWREPR.prototype.serialize = function(data, object) {
-  data.str(object.__name);
-  data.ref(object.__attributes);
-  data.ref(object.__methods);
+KnowHOWREPR.prototype.serialize = function(data, obj) {
+  data.str(obj.__name);
+  data.ref(obj.__attributes);
+  data.ref(obj.__methods);
 };
 
 KnowHOWREPR.prototype.type_object_for = basic_type_object_for;
@@ -464,12 +464,12 @@ function KnowHOWAttribute() {
 }
 KnowHOWAttribute.prototype.create_obj_constructor = basic_constructor;
 
-KnowHOWAttribute.prototype.deserialize_finish = function(object, data) {
-  object.__name = data.str();
+KnowHOWAttribute.prototype.deserialize_finish = function(obj, data) {
+  obj.__name = data.str();
 };
 
-KnowHOWAttribute.prototype.serialize = function(data, object) {
-  data.str(object.__name);
+KnowHOWAttribute.prototype.serialize = function(data, obj) {
+  data.str(obj.__name);
 };
 
 KnowHOWAttribute.prototype.type_object_for = basic_type_object_for;
@@ -522,14 +522,14 @@ P6int.prototype.compose = function(STable, repr_info_hash) {
 
 P6int.name = 'P6int';
 P6int.prototype.allocate = basic_allocate;
-P6int.prototype.deserialize_finish = function(object, data) {
+P6int.prototype.deserialize_finish = function(obj, data) {
   // TODO integers bigger than 32bit
-  object.value = data.varint();
+  obj.value = data.varint();
 };
 
-P6int.prototype.serialize = function(data, object) {
+P6int.prototype.serialize = function(data, obj) {
   // TODO integers bigger than 32bit
-  data.varint(object.value);
+  data.varint(obj.value);
 };
 
 
@@ -562,12 +562,12 @@ P6num.prototype.create_obj_constructor = function(STable) {
   return c;
 };
 
-P6num.prototype.serialize = function(data, object) {
-  data.double(object.value);
+P6num.prototype.serialize = function(data, obj) {
+  data.double(obj.value);
 };
 
-P6num.prototype.deserialize_finish = function(object, data) {
-  object.value = data.double();
+P6num.prototype.deserialize_finish = function(obj, data) {
+  obj.value = data.double();
 };
 
 module.exports.P6num = P6num;
@@ -593,12 +593,12 @@ P6str.prototype.create_obj_constructor = function(STable) {
   return c;
 };
 
-P6str.prototype.serialize = function(data, object) {
-  data.str(object.value);
+P6str.prototype.serialize = function(data, obj) {
+  data.str(obj.value);
 };
 
-P6str.prototype.deserialize_finish = function(object, data) {
-  object.value = data.str();
+P6str.prototype.deserialize_finish = function(obj, data) {
+  obj.value = data.str();
 };
 
 P6str.name = 'P6str';
@@ -607,7 +607,7 @@ module.exports.P6str = P6str;
 function NFA() {
 }
 NFA.prototype.create_obj_constructor = basic_constructor;
-NFA.prototype.deserialize_finish = function(object, data) {
+NFA.prototype.deserialize_finish = function(obj, data) {
   // STUB
 };
 NFA.prototype.type_object_for = basic_type_object_for;
@@ -620,7 +620,7 @@ function VMArray() {
 }
 VMArray.prototype.create_obj_constructor = basic_constructor;
 
-VMArray.prototype.deserialize_finish = function(object, data) {
+VMArray.prototype.deserialize_finish = function(obj, data) {
   console.log('deserializing VMArray');
   // STUB
 };
@@ -635,13 +635,13 @@ VMArray.prototype.serialize_repr_data = function(st, cursor) {
   cursor.ref(this.type);
 }
 
-VMArray.prototype.deserialize_array = function(object, data) {
+VMArray.prototype.deserialize_array = function(obj, data) {
   if (this.type !== null) {
     console.log('NYI: VMArrays of a type different then null');
   }
   var size = data.varint();
   for (var i = 0; i < size; i++) {
-    object.array[i] = data.variant();
+    obj.array[i] = data.variant();
   }
 };
 
@@ -659,7 +659,7 @@ exports.VMArray = VMArray;
 function VMIter() {
 }
 VMIter.prototype.create_obj_constructor = basic_constructor;
-VMIter.prototype.deserialize_finish = function(object, data) {
+VMIter.prototype.deserialize_finish = function(obj, data) {
   console.log('deserializing VMIter');
   // STUB
 };
@@ -929,10 +929,10 @@ MultiDimArray.prototype.deserialize_repr_data = function(cursor, STable) {
   }
 };
 
-MultiDimArray.prototype.valuesSize = function(object) {
+MultiDimArray.prototype.valuesSize = function(obj) {
   var size = 1;
-  for (var i = 0; i < object.dimensions.length; i++) {
-    size = size * object.dimensions[i];
+  for (var i = 0; i < obj.dimensions.length; i++) {
+    size = size * obj.dimensions[i];
   }
   return size;
 };
@@ -960,26 +960,26 @@ MultiDimArray.prototype.serialize = function(cursor, obj) {
   }
 }
 
-MultiDimArray.prototype.deserialize_finish = function(object, data) {
-  object.dimensions = [];
-  for (var i = 0; i < object._STable.dimensions; i++) {
-    object.dimensions[i] = data.varint();
+MultiDimArray.prototype.deserialize_finish = function(obj, data) {
+  obj.dimensions = [];
+  for (var i = 0; i < obj._STable.dimensions; i++) {
+    obj.dimensions[i] = data.varint();
   }
-  var size = this.valuesSize(object);
-  object.storage = [];
+  var size = this.valuesSize(obj);
+  obj.storage = [];
   for (var i=0;i < size;i++) {
-    switch (object._STable.primType) {
+    switch (obj._STable.primType) {
       case 0:
-        object.storage[i] = data.variant();
+        obj.storage[i] = data.variant();
         break;
       case 1:
-        object.storage[i] = data.varint();
+        obj.storage[i] = data.varint();
         break;
       case 2:
-        object.storage[i] = data.double();
+        obj.storage[i] = data.double();
         break;
       case 3:
-        object.storage[i] = data.str();
+        obj.storage[i] = data.str();
         break;
     }
   }
