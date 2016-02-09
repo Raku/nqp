@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(251);
+plan(254);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -321,6 +321,8 @@ ok(nqp::getcomp("noSuchLanguageEver1")[0] eq "compiler1", "nqp::getcomp");
     my $b := nqp::list_i(1,2,30.4);
     ok(nqp::atpos_i($b,2) == 30, 'atpos_i');
 
+    ok(nqp::atpos_i($b, 100) == 0, 'nqp::atpos_i ouside of array');
+
 
     my $c := nqp::list_i();
     nqp::bindpos_i($c, 1, 102);
@@ -342,6 +344,7 @@ ok(nqp::getcomp("noSuchLanguageEver1")[0] eq "compiler1", "nqp::getcomp");
     my $b := nqp::list_s("A","B","C");
     ok(nqp::bindpos_s($b, 2, "D"), 'nqp::bindpos_s');
     ok(nqp::atpos_s($b,2) eq "D", 'nqp::atpos_s');
+    ok(nqp::isnull_s(nqp::atpos_s($a, 10)), 'nqp::atpos_s with element outside of array');
 }
 
 {
@@ -363,6 +366,8 @@ ok(nqp::getcomp("noSuchLanguageEver1")[0] eq "compiler1", "nqp::getcomp");
     nqp::bindpos_n($c, 1, 103.5);
     nqp::bindpos_n($c, 0, 101);
     ok(nqp::atpos_n($c, 1) == 103.5, 'bindpos_n works');
+    ok(nqp::atpos_n($c, 10) == 0.0, 'atpos_n with element outside of the array');
+
 }
 
 {
