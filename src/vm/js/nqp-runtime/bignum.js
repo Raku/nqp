@@ -4,6 +4,8 @@ var bignum = require('bignum');
 
 var core = require('./core.js');
 
+var NQPArray = require('./array.js');
+
 var op = {};
 exports.op = op;
 
@@ -218,12 +220,12 @@ op.bool_I = function(n) {
 op.radix_I = function(radix, str, zpos, flags, type) {
   var extracted = core.radix_helper(radix, str, zpos, flags);
   if (extracted == null) {
-    return [makeBI(type, bignum(0)), makeBI(type, bignum(1)), -1];
+    return new NQPArray([makeBI(type, bignum(0)), makeBI(type, bignum(1)), -1]);
   }
 
   if (radix == 10 || radix == 16) {
     var pow = bignum(radix).pow(extracted.power);
-    return [makeBI(type, bignum(extracted.number, radix)), makeBI(type, pow), extracted.offset];
+    return new NQPArray([makeBI(type, bignum(extracted.number, radix)), makeBI(type, pow), extracted.offset]);
   } else {
     var n = extracted.number;
     var base = bignum(1);
@@ -243,6 +245,6 @@ op.radix_I = function(radix, str, zpos, flags, type) {
 
     if (n[0] == '-') result = result.neg();
 
-    return [makeBI(type, result), makeBI(type, base), extracted.offset];
+    return new NQPArray([makeBI(type, result), makeBI(type, base), extracted.offset]);
   }
 };

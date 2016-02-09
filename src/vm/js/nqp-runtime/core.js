@@ -18,25 +18,11 @@ var NQPArray = require('./array.js');
 exports.CodeRef = CodeRef;
 
 op.atpos = function(array, index) {
-  if (array instanceof Array) {
-    if (index < 0) {
-      index = array.length + index;
-    }
-    return array[index];
-  } else {
-    return array.$$atpos(index);
-  }
+  return array.$$atpos(index);
 };
 
 op.bindpos = function(array, index, value) {
-  if (array instanceof Array) {
-    if (index < 0) {
-      index = array.length + index;
-    }
-    return (array[index] = value);
-  } else {
-    return array.$$bindpos(index, value);
-  }
+  return array.$$bindpos(index, value);
 };
 
 op.getcomp = function(lang) {
@@ -93,10 +79,10 @@ exports.radix_helper = radix_helper;
 op.radix = function(radix, str, zpos, flags) {
   var extracted = radix_helper(radix, str, zpos, flags);
   if (extracted == null) {
-    return [0, 1, -1];
+    return new NQPArray([0, 1, -1]);
   }
   var pow = Math.pow(radix, extracted.power);
-  return [parseInt(extracted.number, radix), pow, extracted.offset];
+  return new NQPArray([parseInt(extracted.number, radix), pow, extracted.offset]);
 };
 
 function Iter(array) {
@@ -155,8 +141,6 @@ IterPair.prototype.value = function(ctx, named) {
 op.iterator = function(obj) {
   if (obj instanceof NQPArray) {
     return new Iter(obj.array);
-  } else if (obj instanceof Array) {
-    return new Iter(obj);
   } else if (obj instanceof Hash) {
     return new HashIter(obj);
   } else if (obj instanceof LexPadHack) {
@@ -339,7 +323,7 @@ op.istype = function(obj, type) {
   }
 
   // HACK
-  if (obj instanceof Array || obj instanceof NQPArray) {
+  if (obj instanceof NQPArray) {
     if (hll.hllConfigs.nqp && type == hll.hllConfigs.nqp.content.get('list')) {
       return 1;
     } else {
@@ -424,8 +408,6 @@ op.composetype = function(obj, reprinfo) {
 op.clone = function(obj) {
   if (obj.$$clone) {
     return obj.$$clone();
-  } else if (obj instanceof Array) {
-    return obj.slice();
   } else {
     // STUB
     console.log('NYI cloning', obj);
@@ -511,21 +493,12 @@ op.unbox_s = function(obj) {
 };
 
 op.elems = function(obj) {
-  if (obj instanceof Array) {
-    return obj.length;
-  } else {
-    return obj.$$elems();
-  }
+  return obj.$$elems();
 };
 
 op.setelems = function(obj, elems) {
-  if (obj instanceof Array) {
-    obj.length = elems;
-    return obj;
-  } else {
-    obj.$$setelems(elems);
-    return obj;
-  }
+  obj.$$setelems(elems);
+  return obj;
 };
 
 op.markcodestatic = function(code) {
@@ -915,31 +888,15 @@ op.getcodecuid = function(codeRef) {
 };
 
 op.numdimensions = function(array) {
-  if (array instanceof Array) {
-    return 1;
-  } else {
-    return array.$$numdimensions();
-  }
+  return array.$$numdimensions();
 };
 
 op.dimensions = function(array) {
-  if (array instanceof Array) {
-    return [array.length];
-  } else {
-    return array.$$dimensions();
-  }
+  return array.$$dimensions();
 };
 
 op.setdimensions = function(array, dimensions) {
-  if (array instanceof Array) {
-    if (dimensions.length != 1) {
-      throw new NQPException("A dynamic array can only have a single dimension");
-    } else {
-        array.length = dimensions[0];
-    }
-  } else {
-    array.$$setdimensions(dimensions);
-  }
+  array.$$setdimensions(dimensions);
   return dimensions;
 };
 
@@ -947,25 +904,11 @@ op.setdimensions = function(array, dimensions) {
 
 ['_n', '_s', '_i', ''].forEach(function(type) {
   op['atposnd' + type] = function(array, idx) {
-    if (array instanceof Array) {
-      if (idx.length != 1) {
-        throw new NQPException("A dynamic array can only be indexed with a single dimension");
-      }
-      return array[idx[0]];
-    } else {
-      return array['$$atposnd' + type](idx);
-    }
+    return array['$$atposnd' + type](idx);
   };
   
   op['bindposnd' + type] = function(array, idx, value) {
-    if (array instanceof Array) {
-      if (idx.length != 1) {
-        throw new NQPException("A dynamic array can only be indexed with a single dimension");
-      }
-      return (array[idx[0]] = value);
-    } else {
-      return array['$$bindposnd' + type](idx, value);
-    }
+    return array['$$bindposnd' + type](idx, value);
   };
   
   op['atpos2d' + type] = function(array, x, y) {

@@ -51,7 +51,7 @@ op.hllizefor = function(ctx, obj, language) {
     var foreign_transform_hash = config.get('foreign_transform_hash');
     if (foreign_transform_hash === undefined) return obj;
     return foreign_transform_hash.$call(ctx, {}, obj);
-  } else if (obj instanceof Array || obj instanceof NQPArray || role == 4) {
+  } else if (obj instanceof NQPArray || role == 4) {
     var foreign_transform_array = config.get('foreign_transform_array');
     if (foreign_transform_array === undefined) return obj;
     return foreign_transform_array.$call(ctx, {}, obj);

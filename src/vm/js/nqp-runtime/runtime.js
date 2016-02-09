@@ -140,8 +140,6 @@ exports.to_num = function(arg, ctx) {
   } else if (typeof arg == 'string') {
     var ret = parseFloat(arg);
     return isNaN(ret) ? 0 : ret;
-  } else if (arg instanceof Array) {
-    return arg.length;
   } else if (arg.type_object_) {
     // TODO - is that a correct way to do that?
     return 0;
@@ -175,8 +173,6 @@ exports.to_bool = function(arg, ctx) {
     return arg ? 1 : 0;
   } else if (typeof arg == 'string') {
     return arg == '' ? 0 : 1;
-  } else if (arg instanceof Array) {
-    return arg.length == 0 ? 0 : 1;
   } else if (arg === undefined || arg == null) {
     return 0;
   } else if (arg.$$to_bool) {
