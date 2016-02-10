@@ -46,7 +46,7 @@ class Chunk {
         my @parts;
         for @!setup -> $part {
             if nqp::isstr($part) {
-                nqp::push(@parts,quote_string($part));
+                nqp::push(@parts,quote_string($part, :json));
             } else {
                 nqp::push(@parts,$part.with_source_map_info);
             }
