@@ -532,9 +532,49 @@ op.bindcomp = function(language, compiler) {
   return (compilerRegistry[language] = compiler);
 };
 
+function WrappedFunction(func) {
+  this.func = func;
+}
+
+WrappedFunction.prototype.$apply = function(args) {
+  var converted = []; 
+  for (var i = 2; i < args.length; i++) {
+    converted.push(toJS(args[i]));
+  }
+  return fromJS(this.func.apply(null, converted));
+}
+
+WrappedFunction.prototype.$call = function(args) {
+  return this.$apply(arguments);
+}
+
+function fromJS(obj) {
+  if (typeof obj === 'function') {
+    return new WrappedFunction(obj);       
+  } else {
+    return obj;
+  }
+}
+
+function toJS(obj) {
+  if (obj instanceof NQPInt) {
+    return obj.value;
+  } else if (obj instanceof CodeRef) {
+    return function() {
+      var converted = [null, {}]; 
+      for (var i = 0; i < arguments.length; i++) {
+        converted.push(fromJS(arguments[i]));
+      }
+      return toJS(obj.$apply(converted));
+    };
+  } else {
+    return obj;
+  }
+}
+
 compilerRegistry['JavaScript'] = {
   eval: function(ctx, named, code) {
-    return eval(code);
+    return fromJS(eval(code));
   }
 };
 
