@@ -61,6 +61,25 @@ class Chunk {
         }
     }
 
+    method source_map_debug() {
+        my $js := ''; 
+        for @!setup -> $part {
+           if nqp::isstr($part) {
+              $js := $js ~ $part;
+           } else {
+              $js := $js ~ $part.source_map_debug;
+           }
+        }
+
+        if nqp::defined($!node) && $!node.node {
+            my $node := $!node.node;
+            my $line := HLL::Compiler.lineof($node.orig(), $node.from(), :cache(1));
+            "/* LINE $line */\n" ~ $js ~ "/* END $line */"
+        } else {
+            $js;
+        }
+    }
+
     method type() {
         $!type;
     }

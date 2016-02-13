@@ -56,7 +56,9 @@ class HLLBackend::JavaScript {
         my $backend := QAST::CompilerJS.new(nyi=>%adverbs<nyi> // 'ignore', cps=>%adverbs<cps> // 'on');
 
 
-        if %adverbs<source-map> {
+        if %adverbs<source-map-debug> {
+            $backend.emit_with_source_map_debug($qast);
+        } elsif %adverbs<source-map> {
             $backend.emit_with_source_map($qast);
         } else {
             my $code := $backend.emit($qast);

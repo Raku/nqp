@@ -1410,4 +1410,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     method emit_with_source_map($ast) {
        self.as_js_with_prelude($ast).with_source_map_info
     }
+
+    method emit_with_source_map_debug($ast) {
+       self.as_js_with_prelude($ast).source_map_debug
+    }
 }
