@@ -698,10 +698,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     method stored_result($chunk, :$want) {
         if $chunk.type == $T_VOID || $want == $T_VOID {
-            Chunk.void($chunk, $chunk.expr~";\n");
+            Chunk.void($chunk, $chunk.expr~";\n", :node($chunk.node));
         } else {
             my $tmp := $*BLOCK.add_tmp();
-            Chunk.new($chunk.type, $tmp, [$chunk, "$tmp = {$chunk.expr};\n"]);
+            Chunk.new($chunk.type, $tmp, [$chunk, "$tmp = {$chunk.expr};\n"], :node($chunk.node));
         }
     }
 
