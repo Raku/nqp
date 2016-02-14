@@ -604,7 +604,7 @@ class HLL::Compiler does HLL::Backend::Default {
     }
 
 	
-    method lineof($target, int $pos, int :$cache = 0) {
+    method line_and_column_of($target, int $pos, int :$cache = 0) {
         my $linepos;
         if $cache {
             # if we've previously cached c<linepos> for target, we use it.
@@ -652,8 +652,19 @@ class HLL::Compiler does HLL::Backend::Default {
                 $lo := nqp::add_i($line, 1);
             }
         }
-        nqp::add_i($lo, 1);
+
+        my $column := nqp::iseq_i($lo, 0)
+            ?? $pos 
+            !! nqp::sub_i($pos, nqp::atpos_i($linepos, nqp::sub_i($lo, 1)));
+
+        nqp::list_i(nqp::add_i($lo, 1), nqp::add_i($column, 1));
     }
+
+    method lineof($target, int $pos, int :$cache = 0) {
+        nqp::atpos_i(self.line_and_column_of($target, $pos, :$cache), 0);
+    }
+
+    
 
     # the name of the file(s) that are executed, or -e  or 'interactive'
     method user-progname() { $!user_progname // 'interactive' }
