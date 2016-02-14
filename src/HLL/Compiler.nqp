@@ -602,57 +602,58 @@ class HLL::Compiler does HLL::Backend::Default {
         }
         @actual_ns;
     }
+
 	
-	method lineof($target, int $pos, int :$cache = 0) {
-		my $linepos;
-		if $cache {
-			# if we've previously cached c<linepos> for target, we use it.
-			$linepos := $*LINEPOSCACHE;
-		}
-		unless nqp::defined($linepos) {
-			# calculate a new linepos array.
-			$linepos := nqp::list_i();
-			if $cache {
-				$*LINEPOSCACHE := $linepos;
-			}
-			my str $s := ~$target;
-			my int $eos := nqp::chars($s);
-			my int $jpos := 0;
-			my int $ord;
-			# search for all of the newline markers in c<target>.  when we
-			# find one, mark the ending offset of the line in c<linepos>.
-			while nqp::islt_i($jpos := nqp::findcclass(nqp::const::CCLASS_NEWLINE,
-													   $s, $jpos, $eos), $eos)
-			{
-				$ord := nqp::ord($s, $jpos);
-				$jpos := nqp::add_i($jpos, 1);
-				nqp::push_i($linepos, $jpos);
-				# Treat \r\n as a single logical newline. Note that NFG
+    method lineof($target, int $pos, int :$cache = 0) {
+        my $linepos;
+        if $cache {
+            # if we've previously cached c<linepos> for target, we use it.
+            $linepos := $*LINEPOSCACHE;
+        }
+        unless nqp::defined($linepos) {
+            # calculate a new linepos array.
+            $linepos := nqp::list_i();
+            if $cache {
+                $*LINEPOSCACHE := $linepos;
+            }
+            my str $s := ~$target;
+            my int $eos := nqp::chars($s);
+            my int $jpos := 0;
+            my int $ord;
+            # search for all of the newline markers in c<target>.  when we
+            # find one, mark the ending offset of the line in c<linepos>.
+            while nqp::islt_i($jpos := nqp::findcclass(nqp::const::CCLASS_NEWLINE,
+                                                       $s, $jpos, $eos), $eos)
+            {
+                $ord := nqp::ord($s, $jpos);
+                $jpos := nqp::add_i($jpos, 1);
+                nqp::push_i($linepos, $jpos);
+                # Treat \r\n as a single logical newline. Note that NFG
                 # implementations, we should check it really is a lone \r,
                 # not the first bit of a \r\n grapheme.
-				if nqp::iseq_i($ord, 13) && nqp::substr($s, $jpos - 1, 1) eq "\r" &&
+                if nqp::iseq_i($ord, 13) && nqp::substr($s, $jpos - 1, 1) eq "\r" &&
                    $jpos < $eos && nqp::iseq_i(nqp::ord($s, $jpos), 10)
-				{
-					$jpos := nqp::add_i($jpos, 1);
-				}
-			}
-		}
-		
-		# We have c<linepos>, so now we (binary) search the array
-		# for the largest element that is not greater than c<pos>.
-		my int $lo := 0;
-		my int $hi := nqp::elems($linepos);
-		my int $line;
-		while nqp::islt_i($lo, $hi) {
-			$line := nqp::div_i(nqp::add_i($lo, $hi), 2);
-			if nqp::isgt_i(nqp::atpos_i($linepos, $line), $pos) {
-				$hi := $line;
-			} else {
-				$lo := nqp::add_i($line, 1);
-			}
-		}
-		nqp::add_i($lo, 1);
-	}
+                {
+                    $jpos := nqp::add_i($jpos, 1);
+                }
+            }
+        }
+        
+        # We have c<linepos>, so now we (binary) search the array
+        # for the largest element that is not greater than c<pos>.
+        my int $lo := 0;
+        my int $hi := nqp::elems($linepos);
+        my int $line;
+        while nqp::islt_i($lo, $hi) {
+            $line := nqp::div_i(nqp::add_i($lo, $hi), 2);
+            if nqp::isgt_i(nqp::atpos_i($linepos, $line), $pos) {
+                $hi := $line;
+            } else {
+                $lo := nqp::add_i($line, 1);
+            }
+        }
+        nqp::add_i($lo, 1);
+    }
 
     # the name of the file(s) that are executed, or -e  or 'interactive'
     method user-progname() { $!user_progname // 'interactive' }
