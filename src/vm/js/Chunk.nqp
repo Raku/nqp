@@ -54,8 +54,8 @@ class Chunk {
         my $parts := '[' ~ nqp::join(',', @parts) ~ ']';
         if nqp::defined($!node) && $!node.node {
             my $node := $!node.node;
-            my $line := HLL::Compiler.lineof($node.orig(), $node.from(), :cache(1));
-            "\{\"line\": $line, \"parts\": $parts\}";
+            my $location := HLL::Compiler.line_and_column_of($node.orig(), $node.from(), :cache(1));
+            "\{\"line\": {nqp::atpos_i($location, 0)}, \"column\": {nqp::atpos_i($location, 1)}, \"parts\": $parts\}";
         } else {
             $parts;
         }
@@ -73,8 +73,9 @@ class Chunk {
 
         if nqp::defined($!node) && $!node.node {
             my $node := $!node.node;
-            my $line := HLL::Compiler.lineof($node.orig(), $node.from(), :cache(1));
-            "/* LINE $line */\n" ~ $js ~ "/* END $line */"
+            my $line_and_column := HLL::Compiler.line_and_column_of($node.orig(), $node.from(), :cache(1));
+            my $where := nqp::atpos_i($line_and_column, 0) ~ ":" ~ nqp::atpos_i($line_and_column, 1);
+            "/* LINE $where */\n" ~ $js ~ "/* END $where */"
         } else {
             $js;
         }
