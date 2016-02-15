@@ -48,7 +48,6 @@ class RegexCompiler {
             self.compile_rx($node),
             self.case($restart_label),
             "$!cstack = $!cursor[\"\$!cstack\"];",
-            "if (!$!cstack instanceof nqp.NQPArray) console.log($!cstack);\n",
             "if ($!cstack instanceof nqp.NQPArray) $!cstack = $!cstack.array;\n",
             self.case($!fail_label),
             "if ($!bstack.length == 0) \{{self.goto($!done_label)}\}\n",
