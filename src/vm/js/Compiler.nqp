@@ -907,7 +907,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 my $cont := self.unique_var('cont');
                 my $result := self.unique_var('result');
 
-                my @args := [$outer_ctx,'{}'];
+                my @args := [$outer_ctx, 'null'];
 
                 @args.push($cont);
 
@@ -920,7 +920,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
                 ChunkCPS.new($T_OBJ, $result, $setup, $cont, :$node);
             } else {
-                my @args := [$outer_ctx,'{}'];
+                my @args := [$outer_ctx, 'null'];
                 for @extra_args -> $arg {
                     @args.push($arg.expr);
                     $setup.push($arg);
@@ -1155,7 +1155,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             my $main := self.as_js($main_block, :want($T_OBJ));
 
-            $body := Chunk.void($block_js, $main, $main.expr ~ ".\$apply([null, \{\}].concat(nqp.args(module)));\n");
+            $body := Chunk.void($block_js, $main, $main.expr ~ ".\$apply([null, null].concat(nqp.args(module)));\n");
             
         } else {
             $body := $block_js;

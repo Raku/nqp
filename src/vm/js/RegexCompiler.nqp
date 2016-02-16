@@ -33,7 +33,7 @@ class RegexCompiler {
 
         Chunk.new($T_OBJ, $!cursor, [
             "{$!label} = {$!initial_label};\n",
-            "$start = self['!cursor_start_all']({$*CTX}, \{\}).array;\n",
+            "$start = self['!cursor_start_all']({$*CTX}, null).array;\n",
             "{$!cursor} = $start[0];\n",
             "{$!target} = $start[1];\n",
             "{$!pos} = nqp.to_int($start[2], $*CTX);\n",
@@ -65,7 +65,7 @@ class RegexCompiler {
             self.goto($jump),
 
             self.case($!done_label),
-            "{$!cursor}['!cursor_fail']({$*CTX}, \{\});\n",
+            "{$!cursor}['!cursor_fail']({$*CTX}, null);\n",
             "break {$!js_loop_label}\n",
             "\}\n\}\n"
         ]);
@@ -240,7 +240,7 @@ class RegexCompiler {
 
     my sub call($invocant, $method, *@args) {
         nqp::unshift(@args, $*CTX);
-        nqp::unshift(@args, 'nqp.named([])');
+        nqp::unshift(@args, 'null');
         $invocant ~ "[" ~ quote_string($method) ~ "](" ~ nqp::join(",", @args) ~ ")";
     }
 
@@ -280,7 +280,7 @@ class RegexCompiler {
         else {
             #TODO think if arguments are possible, etc.
             my $block := $!compiler.as_js($node[0][0], :want($T_OBJ));
-            $call := Chunk.new($T_OBJ, $block.expr ~ ".\$call({$*CTX},nqp.named([]),$!cursor)", [$block]);
+            $call := Chunk.new($T_OBJ, $block.expr ~ ".\$call({$*CTX}, null, $!cursor)", [$block]);
         }
 
         my $testop := $node.negate ?? '>=' !! '<';
