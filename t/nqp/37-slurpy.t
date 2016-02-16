@@ -2,7 +2,7 @@
 
 # slurpy args
 
-plan(8);
+plan(9);
 
 sub slurpy_pos(*@pos) {
     ok(@pos[0] == 1);
@@ -24,5 +24,11 @@ slurpy_named(:pivo("ok pivo"), :slanina("ok slanina"), :uhorka("ok uhorka") );
 sub named_and_slurpy(:$x, *@foo) {
     ok($x eq "ok x");
 };
+
+sub empty_slurpy(*@pos, *%named) {
+    ok(nqp::elems(@pos) == 0 && nqp::elems(%named) == 0, "empty slurpies");
+}
+
+empty_slurpy();
 
 named_and_slurpy(1, :x("ok x"));
