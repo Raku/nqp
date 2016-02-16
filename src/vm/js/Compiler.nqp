@@ -231,8 +231,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         # We want to always have at leat 1 thing to pass as the named argument
         if @named || @named_groups == 0 {
-            @named_groups.push(Chunk.new($T_OBJ,'{' ~ nqp::join(',',@named_exprs) ~ '}', @named));
+            if @named_exprs == 0 {
+                @named_groups.push(Chunk.new($T_OBJ, 'null', []));
+            } else {
+                @named_groups.push(Chunk.new($T_OBJ,'{' ~ nqp::join(',',@named_exprs) ~ '}', @named));
+            }
         }
+
         if $cont {
             @groups[0].unshift($cont);
         }
@@ -318,8 +323,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
                     my $default := self.as_js($_.default, :want($T_OBJ), :$cps);
                     @setup.push($default);
-                    $value := "(_NAMED.hasOwnProperty($quoted) ? $value : {$default.expr})";
+                    $value := "((_NAMED !== null && _NAMED.hasOwnProperty($quoted)) ? $value : {$default.expr})";
                 }
+                else {
+                    $value := "(_NAMED !== null ? $value : null)";
+                }
+
                 # TODO required named arguments and defaultless optional ones
 
                 if self.is_dynamic_var($_) {

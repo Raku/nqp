@@ -245,11 +245,11 @@ op.captureposarg = function(capture, i) {
 };
 
 op.capturehasnameds = function(capture) {
-  return Object.keys(capture.named).length == 0 ? 0 : 1;
+  return (!capture.named || Object.keys(capture.named).length == 0) ? 0 : 1;
 };
 
 op.captureexistsnamed = function(capture, arg) {
-  return capture.named.hasOwnProperty(arg) ? 1 : 0;
+  return (capture.named && capture.named.hasOwnProperty(arg)) ? 1 : 0;
 };
 
 op.capturenamedshash = function(capture) {
