@@ -31,7 +31,7 @@ module.exports = function(source) {
   var tmp = temp.openSync();
   fs.writeFileSync(tmp.path, source);
 
-  var command = "cd "+path+";.//nqp-js --setting=NULL --target=js --source-map '" + tmp.path + "'";
+  var command = "cd "+path+";.//nqp-js --target=js --source-map '" + tmp.path + "'";
 
 
   var result = child_process.execSync(command, {encoding:"utf8"});

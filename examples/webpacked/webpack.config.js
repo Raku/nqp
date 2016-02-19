@@ -7,11 +7,11 @@ module.exports = {
     alias: {
       "ffi": "empty-module",
       "fs-ext": "empty-module",
-      "bignum": "empty-module",
       "ffi": "empty-module",
       "ref": "empty-module",
       "nqp-js-io": "empty-module",
-      "sleep": "empty-module"
+      "sleep": "empty-module",
+      "bignum": "browserify-bignum"
     }
   },
   output: {

@@ -1097,6 +1097,11 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
     }
 
+    my sub loadable($name) {
+        # workaround for webpack
+        quote_string($name) ~ ", function() \{return require({quote_string($name)})\}";
+    }
+
     multi method as_js(QAST::CompUnit $node, :$want, :$cps) {
         # Should have a single child which is the outer block.
         if +@($node) != 1 || !nqp::istype($node[0], QAST::Block) {
@@ -1124,13 +1129,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     if nqp::istype($op, QAST::Op) && $op.op eq 'forceouterctx' {
                         $*SETTING_NAME := $op[1][1].value;
                         $*SETTING_TARGET := $op[0].value;
-                        $pre := $pre ~ "nqp.load_setting({quote_string($*SETTING_NAME)});\n";
+                        $pre := $pre ~ "nqp.load_setting({loadable($*SETTING_NAME ~ '.setting')});\n";
                         # HACK to get nqp::sprintf to work
                         $pre := $pre ~ "require('sprintf');\n"; 
                     } elsif nqp::istype($op, QAST::Op)
                         && $op.op eq 'callmethod'
                         && $op.name eq 'load_module' {
-                        $pre := $pre ~ "nqp.load_module({quote_string($op[1].value)});\n";
+                        $pre := $pre ~ "nqp.load_module({loadable($op[1].value)});\n";
                     } else {
 #                        self.log($op.dump);
                     }

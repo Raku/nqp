@@ -1,5 +1,5 @@
 You need to install webpack.
-And then using npm install src/vm/js/nqp-loader and src/vm/js/nqp-runtime and install empty-module from npm.
+And then using npm install src/vm/js/nqp-loader and src/vm/js/nqp-runtime and install empty-module, browserify-bignum from npm.
 For increased awesomeness we use webpack-dev-server and webpack-reload-plugin so you need to install those.
 
 

@@ -65,16 +65,18 @@ function saveCtx(where, block) {
   saveCtxAs = old;
 }
 
-exports.load_setting = function(settingName) {
-  exports.load_module(settingName + '.setting');
-};
-
-exports.load_module = function(module) {
+exports.load_module = function(module, helper) {
   saveCtx(module, function() {
     module = module.replace(/::/g, '/');
-    require(module);
+    if (helper) {
+        helper();
+    } else {
+        require(module);
+    }
   });
 };
+
+exports.load_setting = exports.load_module;
 
 exports.setup_setting = function(settingName) {
   return savedCtxs[settingName + '.setting'];

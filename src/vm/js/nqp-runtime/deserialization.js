@@ -595,10 +595,11 @@ BinaryCursor.prototype.deserialize = function(sc) {
 
   var declareCuids = 'var ' + cuids.join(',') + ';\n';
 
-  var prelude = "var nqp = require('nqp-runtime');\n";
+  var prelude = ";\n";
   if (code) {
     /* TODO reduce accidental poisoning */
     /* TODO make cuids be in scope */
+    var nqp = require('nqp-runtime');
     eval(prelude + declareCuids + code);
   }
 

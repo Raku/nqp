@@ -26,4 +26,4 @@ sub setup() {
 
 set-setup(&setup);
 
-nqp::say("Hello Fancy Browser World");
+say("Hello Fancy Browser World");
