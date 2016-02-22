@@ -275,26 +275,6 @@ op.curcode = function() {
   return current.codeRef;
 };
 
-op.callercode = function() {
-  var current = arguments.callee.caller;
-
-  /* Skip all fake first _ functions so we can skip a real one*/
-  while (current.name == '_') {
-    current = current.caller;
-  }
-
-  /* Skip a real function */
-  current = current.caller;
-
-  /* Skip all fake _ functions to get to a real one*/
-  while (current.name == '_') {
-    current = current.caller;
-  }
-
-  return current.codeRef;
-};
-
-
 // TODO benchmark and pick a fast way of doing this
 op.splice = function(target, source, offset, length) {
   if (target.$$splice) return target.$$splice(source, offset, length);

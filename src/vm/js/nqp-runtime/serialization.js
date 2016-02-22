@@ -7,7 +7,7 @@ var NQPArray = require('./array.js');
 var op = {};
 exports.op = op;
 
-var CURRENT_VERSION = 16;
+var CURRENT_VERSION = 17;
 var OBJECTS_TABLE_ENTRY_SC_MASK = 0x7FF;
 var OBJECTS_TABLE_ENTRY_SC_IDX_MASK = 0x000FFFFF;
 var OBJECTS_TABLE_ENTRY_SC_IDX_MAX = 0x000FFFFF;

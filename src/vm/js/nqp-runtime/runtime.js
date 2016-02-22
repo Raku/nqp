@@ -187,9 +187,10 @@ exports.to_bool = function(arg, ctx) {
   }
 };
 
-function Ctx(caller_ctx, outer_ctx) {
+function Ctx(caller_ctx, outer_ctx, codeRef) {
   this.caller = caller_ctx;
   this.outer = outer_ctx;
+  this.codeRef = codeRef;
 }
 
 

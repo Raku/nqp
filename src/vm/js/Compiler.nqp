@@ -963,8 +963,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     method create_ctx($name) {
         # TODO think about contexts
-        #"var $name = new nqp.Ctx(caller_ctx,{self.outer_ctx},'$name');\n";
-        "var $name = new nqp.Ctx(caller_ctx, {self.outer_ctx});\n";
+        "var $name = new nqp.Ctx(caller_ctx, {self.outer_ctx}, this);\n";
     }
 
     multi method as_js(QAST::IVal $node, :$want, :$cps) {

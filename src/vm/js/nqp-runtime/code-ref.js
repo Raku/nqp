@@ -13,8 +13,8 @@ CodeRef.prototype.block = function(func) {
 // HACK - do this properly
 CodeRef.prototype.$call = function() {
   var nqp = require('nqp-runtime');
-  if (this["$!do"].closureTemplate) {
-    var template = "var " + this["$!do"].outerCtx + "= null;(" + this["$!do"].closureTemplate + ")";
+  if (this.closureTemplate) {
+    var template = "var " + this.outerCtx + "= null;(" + this.closureTemplate + ")";
     this.$call = eval(template);
     this.$call.codeRef = this;
     return this.$call.apply(this, arguments);

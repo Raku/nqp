@@ -440,7 +440,7 @@ BinaryCursor.prototype.deserialize = function(sc) {
 
   this.sc = sc;
 
-  if (version != 16) {
+  if (version != 17) {
     throw 'Unsupported serialization format version: ' + version;
   }
 

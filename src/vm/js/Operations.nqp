@@ -1218,7 +1218,7 @@ class QAST::OperationsJS {
     add_simple_op('radix_I', $T_OBJ, [$T_INT, $T_STR, $T_INT, $T_INT, $T_OBJ]);
 
     add_simple_op('curcode', $T_OBJ, []);
-    add_simple_op('callercode', $T_OBJ, []);
+    add_simple_op('callercode', $T_OBJ, [], sub () {"caller_ctx.codeRef"});
 
     # Native Call
     add_simple_op('buildnativecall',  $T_INT, [$T_OBJ, $T_STR, $T_STR, $T_STR, $T_OBJ, $T_OBJ], :sideffects, :ctx);

@@ -45,7 +45,7 @@ STable.prototype.setboolspec = function(mode, method) {
 STable.prototype.setinvokespec = function(classHandle, attrName, invocationHandler) {
   // TODO take classHandle into account
   this.obj_constructor.prototype.$call = function _() {
-    return this[attrName].$call.apply(this, arguments);
+    return this[attrName].$call.apply(this[attrName], arguments);
   };
   this.obj_constructor.prototype.$apply = function _(args) {
     return this[attrName].$apply(args);
