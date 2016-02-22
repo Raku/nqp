@@ -2209,6 +2209,44 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc, "capturehasnameds requires a CallCapture");
         }
     }
+    public static SixModelObject capturenamedshash(SixModelObject obj, ThreadContext tc) {
+        if (obj instanceof CallCaptureInstance) {
+            CallCaptureInstance cc = (CallCaptureInstance)obj;
+
+            SixModelObject hashType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.hashType;
+            SixModelObject res = hashType.st.REPR.allocate(tc, hashType.st);
+
+            for (String name : cc.descriptor.nameMap.keySet()) {
+                Integer flagged = cc.descriptor.nameMap.get(name);
+                int i = flagged >> 3;
+
+                SixModelObject arg = null;
+
+                if ((flagged & CallSiteDescriptor.ARG_INT) != 0) {
+                    arg = box_i((long)cc.args[i],
+                        tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intBoxType, tc);
+                }
+                else if ((flagged & CallSiteDescriptor.ARG_OBJ) != 0) {
+                    arg = (SixModelObject)cc.args[i];
+                }
+                else if ((flagged & CallSiteDescriptor.ARG_STR) != 0) {
+                    arg = box_s((String)cc.args[i],
+                        tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strBoxType, tc);
+                }
+                else if ((flagged & CallSiteDescriptor.ARG_NUM) != 0) {
+                    arg = box_n((double)cc.args[i],
+                        tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.numBoxType, tc);
+                }
+
+                res.bind_key_boxed(tc, name, arg);
+            }
+
+            return res;
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc, "capturenamedshash requires a CallCapture");
+        }
+    }
     public static long capturehasnameds(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof CallCaptureInstance) {
             CallCaptureInstance cc = (CallCaptureInstance)obj;

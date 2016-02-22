@@ -1939,6 +1939,7 @@ QAST::OperationsJAST.map_classlib_core_op('captureposarg_s', $TYPE_OPS, 'capture
 QAST::OperationsJAST.map_classlib_core_op('captureposprimspec', $TYPE_OPS, 'captureposprimspec', [$RT_OBJ, $RT_INT], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('captureexistsnamed', $TYPE_OPS, 'captureexistsnamed', [$RT_OBJ, $RT_STR], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('capturehasnameds', $TYPE_OPS, 'capturehasnameds', [$RT_OBJ], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('capturenamedshash', $TYPE_OPS, 'capturenamedshash', [$RT_OBJ], $RT_OBJ, :tc);
 
 # Multiple dispatch related.
 QAST::OperationsJAST.map_classlib_core_op('invokewithcapture', $TYPE_OPS, 'invokewithcapture', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);

@@ -2,7 +2,7 @@ if nqp::getcomp('nqp').backend.name eq 'parrot' {
   say("1..0 # Skipped: nqp::savecapture is broken on parrot");
   nqp::exit(0);
 }
-plan(13);
+plan(14);
 
 my $x;
 sub savecapture($arg) {
@@ -43,9 +43,11 @@ sub namedhash(:$known, *%c) {
   my $hash := nqp::capturenamedshash($capture);
   ok(nqp::ishash($hash), "nqp::capturenamedhash returns a hash");
   ok($hash<a> == 100 && $hash<b> == 200, "...which contains the right values");
+  ok($hash<d> eq "Hello", "string with nqp::capturenamedhash");
+  ok($hash<e> == 2.4, "number with nqp::capturenamedhash");
   nqp::deletekey($hash, 'b');
   ok(nqp::existskey($hash, 'a') && !nqp::existskey($hash, 'b'), "...which allows deletion of keys");
   ok(nqp::existskey(nqp::capturenamedshash($capture), 'b'), "...without changing the oringal capture");
 }
-namedhash(:a(100), :b(200), :extra(42));
+namedhash(:a(100), :b(200), :extra(42), :d("Hello"), :e(2.4));
 
