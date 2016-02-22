@@ -42,7 +42,6 @@ sub namedhash(:$known, *%c) {
   my $capture := nqp::usecapture();
   my $hash := nqp::capturenamedshash($capture);
   ok(nqp::ishash($hash), "nqp::capturenamedhash returns a hash");
-  ok(!nqp::existskey($hash, 'known'), '..which contains only slurp named arguments');
   ok($hash<a> == 100 && $hash<b> == 200, "...which contains the right values");
   nqp::deletekey($hash, 'b');
   ok(nqp::existskey($hash, 'a') && !nqp::existskey($hash, 'b'), "...which allows deletion of keys");
