@@ -2,7 +2,7 @@ if nqp::getcomp('nqp').backend.name eq 'parrot' {
   say("1..0 # Skipped: nqp::savecapture is broken on parrot");
   nqp::exit(0);
 }
-plan(14);
+plan(18);
 
 my $x;
 sub savecapture($arg) {
@@ -51,3 +51,18 @@ sub namedhash(:$known, *%c) {
 }
 namedhash(:a(100), :b(200), :extra(42), :d("Hello"), :e(2.4));
 
+
+class Foo {
+  has $!attr;
+  method attr() {$!attr}
+  method foo($a,$b,$c,:$d) {
+    my $capture := nqp::usecapture();
+    ok(nqp::captureposelems($capture) == 4,"nqp::captureposelems on result of usecapture in a class");
+    ok(nqp::captureposarg($capture,2) == 20,"nqp::captureposarg on result of usecapture in a class");
+    ok(nqp::capturehasnameds($capture) == 0,"nqp::capturehasnameds with no nameds in a class");
+    ok(nqp::captureposarg($capture,0).attr eq 'foobar' ,"nqp::captureposarg on an invocant");
+  }
+}
+
+my $foo := Foo.new(attr => "foobar");
+$foo.foo(10,20,30);
