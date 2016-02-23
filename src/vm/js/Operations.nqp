@@ -630,7 +630,7 @@ class QAST::OperationsJS {
 
             my $body := $comp.as_js($protected, :$want);
             return Chunk.new($want, $try_ret, [
-                "var $*CTX = new nqp.Ctx($outer_ctx, $outer_ctx);\n",
+                "var $*CTX = new nqp.Ctx($outer_ctx, $outer_ctx, $outer_ctx.codeRef);\n",
                 $handle,
                 "try \{",
                 $body,
@@ -1121,7 +1121,11 @@ class QAST::OperationsJS {
 
     for <savecapture usecapture> -> $op {
         add_simple_op($op, $T_OBJ, [], sub () {
-            "nqp.op.savecapture(Array.prototype.slice.call(arguments), {known_named(@*KNOWN_NAMED)})"
+            if $*AS_METHOD {
+                "nqp.op.savecaptureAsMethod(this, Array.prototype.slice.call(arguments), {known_named(@*KNOWN_NAMED)})"
+            } else {
+                "nqp.op.savecapture(Array.prototype.slice.call(arguments), {known_named(@*KNOWN_NAMED)})"
+            }
         } , :sideffects);
     }
 
@@ -1217,7 +1221,7 @@ class QAST::OperationsJS {
 
     add_simple_op('radix_I', $T_OBJ, [$T_INT, $T_STR, $T_INT, $T_INT, $T_OBJ]);
 
-    add_simple_op('curcode', $T_OBJ, [], sub () {"this"});
+    add_simple_op('curcode', $T_OBJ, [], sub () {"$*CTX.codeRef"});
     add_simple_op('callercode', $T_OBJ, [], sub () {"caller_ctx.codeRef"});
 
     # Native Call

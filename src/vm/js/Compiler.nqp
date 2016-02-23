@@ -292,7 +292,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
     }
 
-    method compile_sig(@params, :$cps) {
+    method compile_sig(@params, :$cps, :$as_method) {
         my $slurpy_named; # *%foo
         my $slurpy;       # *@foo
 
@@ -304,6 +304,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
 
 
+        my $handled_this := 0;
         my $bind_named := '';
         for @params {
             if $_.slurpy {
@@ -359,7 +360,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             } else {
                 my $default := '';
                 my $name := self.mangle_name($_.name);
-                if $_.default {
+
+                if $as_method && !$handled_this {
+                    $*BLOCK.add_js_lexical($name);
+                    @setup.push("$name = this;\n");
+                    $handled_this := 1;
+                } elsif $_.default {
                     # Overwriting a parameter makes the v8 optimizer bail out so to avoid that we introduce a new variable
                     my $tmp := self.unique_var($name~'_');
 
@@ -737,10 +743,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         has $!static_info;
         has $!ctx;
         has $!outer_ctx;
+        has $!as_method;
         method ctx() {$!ctx}
         method outer_ctx() {$!outer_ctx}
         method static_info() {$!static_info}
         method closure_template() {$!closure_template}
+        method as_method() {$!as_method}
     }
 
     method static_info_for_lexicals(BlockInfo $block) {
@@ -792,11 +800,26 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             my $cuid := self.mangled_cuid($_.key);
             my $reg   := $_.value;
 
-            @capture_inners.push("$reg = $cuid.capture");
+            if %*BLOCKS_AS_METHOD{$_.key} {
+                @capture_inners.push("$reg = $cuid.method");
+            } else {
+                @capture_inners.push("$reg = $cuid.capture");
+            }
+
             @capture_inners.push(%*BLOCKS_DONE{$_.key});
             @capture_inners.push(";\n");
         }
         Chunk.void(|@capture_inners);
+    }
+
+    # Should we compile it to a form that's more efficent when used as a method
+    method looks_like_a_method(QAST::Block $node) {
+        $node.blocktype eq 'declaration_static'
+        && nqp::istype($node[0], QAST::Stmts)
+        && nqp::istype($node[0][0], QAST::Var)
+        && $node[0][0].name eq 'self'
+        && $node[0][0].decl eq 'param'
+        && !$node[0][0].default && !$node[0][0].named;
     }
 
     method compile_block(QAST::Block $node, $outer, $outer_loop, :$want, :@extra_args=[], :$cps) {
@@ -813,16 +836,25 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             my $*LOOP := BlockBarrier.new($*BLOCK, $outer_loop);
 
-            my $*CTX;
-            my $create_ctx := self.create_fresh_ctx();
+            my $*CTX := self.unique_var('ctx');
+            $*BLOCK.ctx($*CTX);
 
             my $body_want := $node.blocktype eq 'immediate' ?? $want !! $T_OBJ;
 
+            my $as_method := self.looks_like_a_method($node);
+
+            my $*AS_METHOD := $as_method;
+
             my $stmts := self.compile_all_the_statements($node, $body_want);
+
+
+            %*BLOCKS_AS_METHOD{$node.cuid} := $as_method;
+
+            my $create_ctx := self.create_ctx($*CTX, :code_ref($as_method ?? self.mangled_cuid($node.cuid) !! 'this'));
 
             if nqp::istype($stmts, ChunkCPS) {
             } else {
-                my $sig := self.compile_sig($*BLOCK.params);
+                my $sig := self.compile_sig($*BLOCK.params, :$as_method);
 
                 my @function := [
                     "function({$sig.expr}) \{\n",
@@ -844,10 +876,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                         # TODO think about that, and find a way to test this
                         #say("// it's an immediate one");
                     } else {
+                        # We need to override when deserializing closures
+                        @function[4] := self.create_ctx($*CTX, :code_ref('$$codeRef'));
                         %!serialized_code_ref_info{$node.cuid} := SerializedCodeRefInfo.new(
                             closure_template => Chunk.new($T_OBJ, "", @function).join(),
                             ctx => $*CTX,
                             outer_ctx => (nqp::defined($*BLOCK.outer) ?? $*BLOCK.outer.ctx !! ""),
+                            as_method => $as_method,
                             static_info => self.static_info_for_lexicals($*BLOCK)
                         );
                     }
@@ -946,19 +981,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         $prefix~$!unique_vars;
     }
 
-    method create_fresh_ctx() {
-        $*CTX := self.unique_var('ctx');
-        $*BLOCK.ctx($*CTX);
-        self.create_ctx($*CTX);
-    }
-
     method outer_ctx() {
         $*BLOCK.outer ?? $*BLOCK.outer.ctx !! 'null';
     }
 
-    method create_ctx($name) {
+    method create_ctx($name, :$code_ref) {
         # TODO think about contexts
-        "var $name = new nqp.Ctx(caller_ctx, {self.outer_ctx}, this);\n";
+        "var $name = new nqp.Ctx(caller_ctx, {self.outer_ctx}, $code_ref);\n";
     }
 
     multi method as_js(QAST::IVal $node, :$want, :$cps) {
@@ -1042,7 +1071,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     ~ quote_string($info.ctx) ~ ","
                     ~ quote_string($info.outer_ctx) ~ ","
                     ~ quote_string($info.closure_template) ~ ","
-                    ~ $info.static_info
+                    ~ $info.static_info ~ ","
+                    ~ ($info.as_method ?? "true" !! "false")
                     ~ ");\n";
             }
         }
@@ -1109,6 +1139,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         # Blocks we've seen while compiling.
         my %*BLOCKS_DONE;
+        my %*BLOCKS_AS_METHOD;
         my %*BLOCKS_DONE_CPS;
 
         # A fake outer block 

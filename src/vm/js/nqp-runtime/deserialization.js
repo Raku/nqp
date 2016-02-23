@@ -574,8 +574,12 @@ BinaryCursor.prototype.deserialize = function(sc) {
   }
 
   var code = no_context_closures.map(function(closure) {
+    var type = closure.staticCode.asMethod ? 'method' : 'block';
+    var code_ref = 'sc.code_refs[' + closure.index + ']'
+
     return 'var ' + closure.staticCode.outerCtx + ' = null;\n' +
-        'sc.code_refs[' + closure.index + '].block(' +
+        'var $$codeRef = ' + code_ref + ';\n' +
+        'sc.code_refs[' + closure.index + '].' + type + '(' +
         closure.staticCode.closureTemplate +
         ');\n';
   }).join('');
@@ -601,6 +605,7 @@ BinaryCursor.prototype.deserialize = function(sc) {
     /* TODO make cuids be in scope */
     var nqp = require('nqp-runtime');
     eval(prelude + declareCuids + code);
+    var code = prelude + declareCuids + code;
   }
 
   var reposTable = this.I32();
@@ -632,7 +637,9 @@ BinaryCursor.prototype.contextToCode = function(context, data) {
       set_vars +
       context.inner.map(function(inner) {return this.contextToCode(inner, data)}).join('') +
       context.closures.map(function(closure) {
-        return 'sc.code_refs[' + closure.index + '].block(' +
+        var type = closure.staticCode.asMethod ? 'method' : 'block';
+        var code_ref = 'sc.code_refs[' + closure.index + ']'
+        return 'var $$codeRef = ' + code_ref + ';\n' + code_ref + '.' + type + '(' +
            closure.staticCode.closureTemplate +
            ');\n';
       }).join('') +

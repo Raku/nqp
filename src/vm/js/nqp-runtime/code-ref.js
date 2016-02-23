@@ -14,6 +14,7 @@ CodeRef.prototype.$call = function() {
   var nqp = require('nqp-runtime');
   if (this.closureTemplate) {
     var template = "var " + this.outerCtx + "= null;(" + this.closureTemplate + ")";
+    var $$codeRef = this;
     this.$call = eval(template);
     return this.$call.apply(this, arguments);
   }
@@ -29,6 +30,22 @@ CodeRef.prototype.takeclosure = function() {
 
 CodeRef.prototype.capture = function(block) {
   this.$call = block;
+  return this;
+};
+
+CodeRef.prototype.method = function(method) {
+  this.$call = function() {
+    var args = [];
+    args.push(arguments[0]);
+    args.push(arguments[1]);
+    for (var i = 3; i < arguments.length; i++) {
+      args.push(arguments[i]);
+    }
+    return method.apply(arguments[2], args);
+  };
+
+  /* TODO - think about cloning */
+
   return this;
 };
 
@@ -66,11 +83,12 @@ CodeRef.prototype.setCodeObj = function(codeObj) {
   return this;
 };
 
-CodeRef.prototype.setInfo = function(ctx, outerCtx, closureTemplate, staticInfo) {
+CodeRef.prototype.setInfo = function(ctx, outerCtx, closureTemplate, staticInfo, asMethod) {
   this.closureTemplate = closureTemplate;
   this.ctx = ctx;
   this.outerCtx = outerCtx;
   this.staticInfo = staticInfo;
+  this.asMethod = asMethod;
   return this;
 };
 
