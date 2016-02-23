@@ -7,7 +7,6 @@ function CodeRef(name, cuid) {
 
 CodeRef.prototype.block = function(func) {
   this.$call = func;
-  func.codeRef = this;
 };
 
 // HACK - do this properly
@@ -16,7 +15,6 @@ CodeRef.prototype.$call = function() {
   if (this.closureTemplate) {
     var template = "var " + this.outerCtx + "= null;(" + this.closureTemplate + ")";
     this.$call = eval(template);
-    this.$call.codeRef = this;
     return this.$call.apply(this, arguments);
   }
 }
@@ -31,7 +29,6 @@ CodeRef.prototype.takeclosure = function() {
 
 CodeRef.prototype.capture = function(block) {
   this.$call = block;
-  block.codeRef = this;
   return this;
 };
 
@@ -40,13 +37,11 @@ CodeRef.prototype.closure = function(block) {
   closure.codeObj = this.codeObj;
   closure.cuid = this.cuid;
   closure.$call = block;
-  closure.$call.codeRef = closure;
   return closure;
 };
 
 CodeRef.prototype.CPS = function(block) {
   this.$callCPS = block;
-  this.$callCPS.codeRef = this;
   return this;
 };
 

@@ -270,11 +270,6 @@ op.getcodeobj = function(codeRef) {
   return codeRef.codeObj;
 };
 
-op.curcode = function() {
-  var current = arguments.callee.caller;
-  return current.codeRef;
-};
-
 // TODO benchmark and pick a fast way of doing this
 op.splice = function(target, source, offset, length) {
   if (target.$$splice) return target.$$splice(source, offset, length);
