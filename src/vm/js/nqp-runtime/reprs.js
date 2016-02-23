@@ -36,24 +36,12 @@ P6opaque.prototype.create_obj_constructor = basic_constructor;
 P6opaque.prototype.allocate = function(STable) {
   var obj = new STable.obj_constructor();
 
-  /* TODO take classes into account when storing attributes */
-  for (var i in this.name_to_index_mapping) {
-    for (var j in this.name_to_index_mapping[i].slots) {
-      var name = this.name_to_index_mapping[i].names[j];
-      obj[name] = null;
-    }
-  }
-
-  if (this.autovived) {
-    for (var attr in this.autovived) {
-      obj[attr] = this.autovived[attr];
-    }
-  }
+  Object.assign(obj, this.template);
 
   return obj;
 };
 
-P6opaque.prototype.calculate_autoviv = function() {
+P6opaque.prototype.precalculate = function() {
   var autovived = {};
   if (this.auto_viv_values) {
     for (var i in this.name_to_index_mapping) {
@@ -79,6 +67,21 @@ P6opaque.prototype.calculate_autoviv = function() {
 
   if (Object.keys(autovived).length != 0) {
     this.autovived = autovived;
+  }
+
+  this.template = {};
+  /* TODO take classes into account when storing attributes */
+  for (var i in this.name_to_index_mapping) {
+    for (var j in this.name_to_index_mapping[i].slots) {
+      var name = this.name_to_index_mapping[i].names[j];
+      this.template[name] = null;
+    }
+  }
+
+  if (this.autovived) {
+    for (var attr in this.autovived) {
+      this.template[attr] = this.autovived[attr];
+    }
   }
 };
 
@@ -139,7 +142,7 @@ P6opaque.prototype.deserialize_repr_data = function(cursor, STable) {
   }
 
 
-  this.calculate_autoviv();
+  this.precalculate();
 
   this.positional_delegate_slot = cursor.varint();
   this.associative_delegate_slot = cursor.varint();
@@ -422,7 +425,9 @@ P6opaque.prototype.compose = function(STable, repr_info_hash) {
   */
   this.mi = mi ? 1 : 0;
 
-  this.calculate_autoviv();
+  this.precalculate();
+
+
 };
 
 P6opaque.name = 'P6opaque';
