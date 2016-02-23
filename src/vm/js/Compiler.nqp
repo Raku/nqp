@@ -866,11 +866,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 my $stmts_cps := self.compile_all_the_statements($node, $body_want, :cps);
 
                 if nqp::istype($stmts_cps, ChunkCPS) {
-                    self.compile_sig($*BLOCK.params, :cps($stmts_cps.cont));
-                    self.compile_sig($*BLOCK.params, :cps($stmts_cps.cont));
-                    self.compile_sig($*BLOCK.params, :cps($stmts_cps.cont));
-                    self.compile_sig($*BLOCK.params, :cps($stmts_cps.cont));
-
                     my $sig_cps := self.compile_sig($*BLOCK.params, :cps($stmts_cps.cont));
 
 
