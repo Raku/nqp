@@ -13,12 +13,12 @@ CodeRef.prototype.block = function(func) {
 CodeRef.prototype.$call = function() {
   var nqp = require('nqp-runtime');
   if (this.closureTemplate) {
-    var template = "var " + this.outerCtx + "= null;(" + this.closureTemplate + ")";
+    var template = 'var ' + this.outerCtx + '= null;(' + this.closureTemplate + ')';
     var $$codeRef = this;
     this.$call = eval(template);
     return this.$call.apply(this, arguments);
   }
-}
+};
 
 CodeRef.prototype.$apply = function _(argsArray) {
   return this.$call.apply(this, argsArray);
@@ -65,7 +65,7 @@ CodeRef.prototype.CPS = function(block) {
 CodeRef.prototype.sameCPS = function(block) {
   this.$callCPS = function() {
     var args = Array.prototype.slice.call(arguments);
-    var cont = args.splice(2,1)[0];
+    var cont = args.splice(2, 1)[0];
     return cont(this.$call.apply(this, args));
   };
   return this;
@@ -73,7 +73,7 @@ CodeRef.prototype.sameCPS = function(block) {
 
 CodeRef.prototype.onlyCPS = function(block) {
   this.$call = function() {
-    throw "this block can be only called in CPS mode";
+    throw 'this block can be only called in CPS mode';
   };
   return this;
 };

@@ -1,8 +1,8 @@
 var op = {};
 exports.op = op;
 
-var NQPInt = require("./nqp-int.js");
-var NQPException = require("./nqp-exception.js");
+var NQPInt = require('./nqp-int.js');
+var NQPException = require('./nqp-exception.js');
 exports.NQPInt = NQPInt;
 
 function load_ops(module) {
@@ -69,9 +69,9 @@ exports.load_module = function(module, helper) {
   saveCtx(module, function() {
     module = module.replace(/::/g, '/');
     if (helper) {
-        helper();
+      helper();
     } else {
-        require(module);
+      require(module);
     }
   });
 };
@@ -100,7 +100,7 @@ op.ctxlexpad = function(ctx) {
   if (ctx instanceof LexPadHack) {
     return ctx;
   } else {
-    console.log("ctxlexpad NYI");
+    console.log('ctxlexpad NYI');
   }
 };
 
@@ -110,7 +110,7 @@ op.lexprimspec = function(pad, key) {
 };
 
 op.ctxouter = function(hack) {
- return null;
+  return null;
 };
 
 exports.to_str = function(arg, ctx) {
@@ -179,7 +179,7 @@ exports.to_bool = function(arg, ctx) {
     return 0;
   } else if (arg.$$to_bool) {
     return arg.$$to_bool(ctx);
-  } else if (typeof arg == 'function') { 
+  } else if (typeof arg == 'function') {
     // needed for continuations
     return 1;
   } else {
@@ -382,8 +382,8 @@ exports.dumpObj = function(obj) {
 };
 
 exports.NYI = function(msg) {
-    console.trace(msg);
-    return null;
+  console.trace(msg);
+  return null;
 };
 
 /* HACK - needed until we handle types on attributes */

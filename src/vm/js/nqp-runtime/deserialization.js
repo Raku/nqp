@@ -197,7 +197,7 @@ BinaryCursor.prototype.hashOfVariants = function() {
   var hash = new Hash();
   for (var i = 0; i < elems; i++) {
     var str = this.str();
-    hash.content.set(str,this.variant());
+    hash.content.set(str, this.variant());
   }
   return hash;
 };
@@ -245,8 +245,8 @@ BinaryCursor.prototype.varint = function() {
   }
 
   if (need < 4) {
-      result = result << (64 - 4 - 8 * need);
-      result = result >> (64 - 4 - 8 * need);
+    result = result << (64 - 4 - 8 * need);
+    result = result >> (64 - 4 - 8 * need);
   }
 
   return result;
@@ -294,9 +294,10 @@ BinaryCursor.prototype.variant = function() {
 };
 
 var STABLE_BOOLIFICATION_SPEC_MODE_MASK = 0x0F;
-var STABLE_HAS_CONTAINER_SPEC           = 0x10;
-var STABLE_HAS_INVOCATION_SPEC          = 0x20;
-var STABLE_HAS_HLL_OWNER                = 0x40;
+var STABLE_HAS_CONTAINER_SPEC = 0x10;
+var STABLE_HAS_INVOCATION_SPEC = 0x20;
+var STABLE_HAS_HLL_OWNER = 0x40;
+
 
 /** Read an entry from the STable table */
 BinaryCursor.prototype.STable = function(STable) {
@@ -328,17 +329,17 @@ BinaryCursor.prototype.STable = function(STable) {
   }
 
   if (flags & STABLE_HAS_CONTAINER_SPEC) {
-    console.log("TODO container spec");
+    console.log('TODO container spec');
     /* TODO - container stuff */
-   /* STable.container_class_handle = this.variant();
+    /* STable.container_class_handle = this.variant();
     STable.container_attr_name = this.str();
     STable.container_hint = this.I64();
     STable.container_fetch_method = this.variant();*/
   }
 
   if (flags & STABLE_HAS_INVOCATION_SPEC) {
-    /* TODO */ 
-    console.log("TODO invocation spec");
+    /* TODO */
+    console.log('TODO invocation spec');
     /*
     STable.invocation_class_handle = this.variant();
     STable.invocation_attr_name = this.str();
@@ -514,9 +515,9 @@ BinaryCursor.prototype.deserialize = function(sc) {
     if (objects[i].is_array) {
       sc.root_objects[i] = new NQPArray([]);
     } else {
-      sc.root_objects[i] = objects[i].is_concrete
-        ? new (STable_for_obj.obj_constructor)()
-        : STable_for_obj.createTypeObject();
+      sc.root_objects[i] = objects[i].is_concrete ?
+          new (STable_for_obj.obj_constructor)() :
+          STable_for_obj.createTypeObject();
       sc.root_objects[i]._SC = sc;
     }
   }
@@ -575,7 +576,7 @@ BinaryCursor.prototype.deserialize = function(sc) {
 
   var code = no_context_closures.map(function(closure) {
     var type = closure.staticCode.asMethod ? 'method' : 'block';
-    var code_ref = 'sc.code_refs[' + closure.index + ']'
+    var code_ref = 'sc.code_refs[' + closure.index + ']';
 
     return 'var ' + closure.staticCode.outerCtx + ' = null;\n' +
         'var $$codeRef = ' + code_ref + ';\n' +
@@ -599,7 +600,7 @@ BinaryCursor.prototype.deserialize = function(sc) {
 
   var declareCuids = 'var ' + cuids.join(',') + ';\n';
 
-  var prelude = ";\n";
+  var prelude = ';\n';
   if (code) {
     /* TODO reduce accidental poisoning */
     /* TODO make cuids be in scope */
@@ -638,7 +639,7 @@ BinaryCursor.prototype.contextToCode = function(context, data) {
       context.inner.map(function(inner) {return this.contextToCode(inner, data)}).join('') +
       context.closures.map(function(closure) {
         var type = closure.staticCode.asMethod ? 'method' : 'block';
-        var code_ref = 'sc.code_refs[' + closure.index + ']'
+        var code_ref = 'sc.code_refs[' + closure.index + ']';
         return 'var $$codeRef = ' + code_ref + ';\n' + code_ref + '.' + type + '(' +
            closure.staticCode.closureTemplate +
            ');\n';
@@ -718,15 +719,16 @@ BinaryCursor.prototype.flag64 = function() {
 };
 
 var STRING_HEAP_LOC_PACKED_OVERFLOW = 0x00008000;
-var STRING_HEAP_LOC_PACKED_SHIFT    = 16;
+var STRING_HEAP_LOC_PACKED_SHIFT = 16;
+
 
 /** Read a String */
 BinaryCursor.prototype.str = function() {
   var offset = this.U16();
   if (offset & STRING_HEAP_LOC_PACKED_OVERFLOW) {
-      offset ^= STRING_HEAP_LOC_PACKED_OVERFLOW;
-      offset <<= STRING_HEAP_LOC_PACKED_SHIFT;
-      offset |= this.U16();
+    offset ^= STRING_HEAP_LOC_PACKED_OVERFLOW;
+    offset <<= STRING_HEAP_LOC_PACKED_SHIFT;
+    offset |= this.U16();
   }
   if (!this.sh.hasOwnProperty(offset)) {
     throw "can't read str: " + offset;

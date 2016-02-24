@@ -1,5 +1,5 @@
 function NQPInt(value) {
-  this.value = value|0;
+  this.value = value | 0;
 }
 
 NQPInt.prototype.Int = function(ctx) {
@@ -15,7 +15,7 @@ NQPInt.prototype.Num = function(ctx) {
 };
 
 NQPInt.prototype.$$to_bool = function(ctx) {
-    return (this.value ? 1 : 0);
+  return (this.value ? 1 : 0);
 };
 
 module.exports = NQPInt;

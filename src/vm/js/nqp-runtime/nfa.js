@@ -24,11 +24,11 @@ var EDGE_FATE = 0,
     EDGE_CODEPOINT_I_LL = 15;
 
 function convertState(thing) {
-    if (thing instanceof NQPArray) {
-        return thing.array.map(function(x) { return convertState(x) });
-    } else {
-        return thing;
-    }
+  if (thing instanceof NQPArray) {
+    return thing.array.map(function(x) { return convertState(x) });
+  } else {
+    return thing;
+  }
 }
 
 // TODO think about type conversions of the stuff inside the array

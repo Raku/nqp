@@ -1,4 +1,4 @@
-var NQPException = require("./nqp-exception.js");
+var NQPException = require('./nqp-exception.js');
 
 function NQPArray(array) {
   this.array = array;
@@ -81,7 +81,7 @@ NQPArray.prototype.$$elems = function() {
 NQPArray.prototype.$$existspos = function(index) {
   if (index < 0) index += this.array.length;
   return this.array.hasOwnProperty(index) ? 1 : 0;
-}
+};
 
 NQPArray.prototype.Num = function() {
   return this.array.length;
@@ -111,7 +111,7 @@ NQPArray.prototype.$$dimensions = function() {
 
 NQPArray.prototype.$$setdimensions = function(dimensions) {
   if (dimensions.array.length != 1) {
-    throw new NQPException("A dynamic array can only have a single dimension");
+    throw new NQPException('A dynamic array can only have a single dimension');
   } else {
     this.array.length = dimensions.array[0];
   }
@@ -124,7 +124,7 @@ NQPArray.prototype.$$clone = function() {
 NQPArray.prototype.$$atposnd = function(idx) {
   console.log(idx);
   if (idx.array.length != 1) {
-    throw new NQPException("A dynamic array can only be indexed with a single dimension");
+    throw new NQPException('A dynamic array can only be indexed with a single dimension');
   }
   var index = idx.array[0];
   return this.array[index < 0 ? this.array.length + index : index];
@@ -136,7 +136,7 @@ NQPArray.prototype.$$atposnd_s = NQPArray.prototype.$$atposnd;
 
 NQPArray.prototype.$$bindposnd = function(idx, value) {
   if (idx.array.length != 1) {
-    throw new NQPException("A dynamic array can only be indexed with a single dimension");
+    throw new NQPException('A dynamic array can only be indexed with a single dimension');
   }
   var index = idx.array[0];
   return (this.array[index] = value);

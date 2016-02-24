@@ -44,22 +44,22 @@ op.tostr_I = function(n) {
 
 op.base_I = function(n, base) {
   var orig = getBI(n);
-  if (orig.eq(0)) return "0";
+  if (orig.eq(0)) return '0';
 
   if (base == 16 || base == 10) {
     return orig.toString(base).toUpperCase().replace(/^(-?)0+/, '$1');
   } else if (base < 16 && base > 1) {
     var orig = getBI(n);
     var num = orig.abs();
-    var string = "";
-    var letters = "0123456789ABCDEF";
+    var string = '';
+    var letters = '0123456789ABCDEF';
     while (num.gt(0)) {
       string = letters[num.mod(base).toNumber()] + string;
       num = num.div(base);
     }
-    return (orig.lt(0) ? "-" : "") + string;
+    return (orig.lt(0) ? '-' : '') + string;
   } else {
-    throw "base_I with base: " + base + " NYI";
+    throw 'base_I with base: ' + base + ' NYI';
   }
 };
 
@@ -102,9 +102,9 @@ op.mod_I = function(n, m, type) {
   var a = getBI(n);
   var b = getBI(m);
   if ((a.lt(0) && b.gt(0)) || (a.gt(0) && b.lt(0))) {
-      var x = a.div(b).sub(1);
-      var ret = a.sub(b.mul(x));
-      return makeBI(type, (ret.eq(b) ? bignum(0) : ret));
+    var x = a.div(b).sub(1);
+    var ret = a.sub(b.mul(x));
+    return makeBI(type, (ret.eq(b) ? bignum(0) : ret));
   }
   return makeBI(type, a.mod(b));
 };
@@ -231,7 +231,7 @@ op.radix_I = function(radix, str, zpos, flags, type) {
     var base = bignum(1);
     var result = bignum(0);
 
-    for (var i = n.length-1; i >= 0; i--) {
+    for (var i = n.length - 1; i >= 0; i--) {
       var digit = n.charCodeAt(i);
       if (digit >= 48 && digit <= 57) digit -= 48; // 0-9
       else if (digit >= 97 && digit <= 122) digit = digit - 97 + 10; // a-z

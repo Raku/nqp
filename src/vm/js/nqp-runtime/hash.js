@@ -1,11 +1,11 @@
-var Map = require('es6-map')
+var Map = require('es6-map');
 
 function Hash() {
   this.content = new Map();
 }
 
 Hash.prototype.$$bindkey = function(key, value) {
-  return this.content.set(key,value);
+  return this.content.set(key, value);
   return value;
 };
 

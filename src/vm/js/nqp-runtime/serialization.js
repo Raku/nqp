@@ -16,11 +16,11 @@ var OBJECTS_TABLE_ENTRY_SC_SHIFT = 20;
 var OBJECTS_TABLE_ENTRY_SC_OVERFLOW = 0x7FF;
 var OBJECTS_TABLE_ENTRY_IS_CONCRETE = 0x80000000;
 
-var STRING_HEAP_LOC_MAX             = 0x7FFFFFFF;
-var STRING_HEAP_LOC_PACKED_MAX      = 0x00007FFF;
+var STRING_HEAP_LOC_MAX = 0x7FFFFFFF;
+var STRING_HEAP_LOC_PACKED_MAX = 0x00007FFF;
 var STRING_HEAP_LOC_PACKED_OVERFLOW = 0x00008000;
 var STRING_HEAP_LOC_PACKED_LOW_MASK = 0x0000FFFF;
-var STRING_HEAP_LOC_PACKED_SHIFT    = 16
+var STRING_HEAP_LOC_PACKED_SHIFT = 16;
 
 /* Possible reference types we can serialize. */
 var REFVAR_NULL = 1;
@@ -59,14 +59,14 @@ BinaryWriteCursor.prototype.str = function(str) {
   var heap_loc = this.writer.stringIndex(str);
 
   if (!(heap_loc >= 0 && heap_loc <= STRING_HEAP_LOC_MAX)) {
-      throw "Serialization error: string offset " + heap_loc + "can't be serialized";
+    throw 'Serialization error: string offset ' + heap_loc + "can't be serialized";
   }
 
   if (heap_loc <= STRING_HEAP_LOC_PACKED_MAX) {
     this.U16(heap_loc);
   } else {
-    this.U16((heap_loc >> STRING_HEAP_LOC_PACKED_SHIFT)
-        | STRING_HEAP_LOC_PACKED_OVERFLOW);
+    this.U16((heap_loc >> STRING_HEAP_LOC_PACKED_SHIFT) |
+        STRING_HEAP_LOC_PACKED_OVERFLOW);
     this.U16(heap_loc & STRING_HEAP_LOC_PACKED_LOW_MASK);
   }
 };
@@ -125,7 +125,7 @@ BinaryWriteCursor.prototype.varint = function(value) {
     var tmp = new Int64(value).toBuffer();
     this.growToHold(rest);
     for (var i = 0; i < rest; i++) {
-        this.buffer[this.offset+i] = tmp[8-(i+1)];
+      this.buffer[this.offset + i] = tmp[8 - (i + 1)];
     }
 
     this.offset += rest;
@@ -460,14 +460,14 @@ SerializationWriter.prototype.serializeSTable = function(st) {
   var flags;
 
   if (false) {
-      //if (st->boolification_spec->mode >= 0xF) {
-      //    MVM_exception_throw_adhoc(tc,
-      //                          "Serialization error: boolification spec mode %u out of range and can't be serialized",
-      //                              st->boolification_spec->mode);
-      //}
-      //flags = st->boolification_spec->mode;
+  //if (st->boolification_spec->mode >= 0xF) {
+  //    MVM_exception_throw_adhoc(tc,
+  //                          "Serialization error: boolification spec mode %u out of range and can't be serialized",
+  //                              st->boolification_spec->mode);
+  //}
+  //flags = st->boolification_spec->mode;
   } else {
-      flags = 0xF;
+    flags = 0xF;
   }
   /*
   if (st->container_spec != NULL)

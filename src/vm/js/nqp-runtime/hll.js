@@ -1,4 +1,4 @@
-var Map = require('es6-map')
+var Map = require('es6-map');
 var Hash = require('./hash.js');
 var CodeRef = require('./code-ref.js');
 var NQPArray = require('./array.js');

@@ -190,7 +190,7 @@ function readline(fh, chomp) {
     var sep;
     var newline = -1;
     if (fh.seps) {
-      for (var i=0; i < fh.seps.length; i++) {
+      for (var i = 0; i < fh.seps.length; i++) {
         var offset = string.indexOf(fh.seps[i]);
         if (offset != -1 && (newline == -1 || offset < newline)) {
           newline = offset;
@@ -205,14 +205,14 @@ function readline(fh, chomp) {
         if (cr < nl) {
           newline = cr;
           if (cr + 1 == nl) {
-            sep = "\r\n";
+            sep = '\r\n';
           } else {
-            sep = "\r";
+            sep = '\r';
           }
         }
       } else {
         newline = nl;
-        sep = "\n";
+        sep = '\n';
       }
     }
 
@@ -223,13 +223,13 @@ function readline(fh, chomp) {
       fs.seekSync(fh.fd,
           Buffer.byteLength(up_to_newline + sep, fh.encoding) + starting, 0);
 
-      return (chomp ? up_to_newline : up_to_newline + sep).replace(/\r\n/, "\n");
+      return (chomp ? up_to_newline : up_to_newline + sep).replace(/\r\n/, '\n');
     }
   }
 
   fs.seekSync(fh.fd, position, 0);
-  return string.replace(/\r\n/, "\n");
-};
+  return string.replace(/\r\n/, '\n');
+}
 
 
 op.readallfh = function(fh) {
@@ -241,7 +241,7 @@ op.readallfh = function(fh) {
     total += bytesRead;
     var all = Buffer.concat([all, buf], total);
   }
-  return all.toString(fh.encoding).replace(/\r\n/, "\n");
+  return all.toString(fh.encoding).replace(/\r\n/, '\n');
 };
 
 op.seekfh = function(ctx, fh, offset, whence) {
@@ -290,7 +290,7 @@ op.rmdir = function(dir) {
 op.mkdir = function(dir, mode) {
   try {
     fs.accessSync(dir, fs.F_OK);
-  } catch(e) {
+  } catch (e) {
     fs.mkdirSync(dir, mode);
   }
 };
@@ -309,7 +309,7 @@ var PIPE_IGNORE_ERR = 128;
 var PIPE_CAPTURE_ERR = 256;
 
 op.spawn = function(command, dir, env, input, output, error, flags) {
-    nqpIo.spawn(command, dir, env.$$toObject(), input, output, error, flags);
+  nqpIo.spawn(command, dir, env.$$toObject(), input, output, error, flags);
 };
 
 op.shell = function(command, dir, env, input, output, error, flags) {

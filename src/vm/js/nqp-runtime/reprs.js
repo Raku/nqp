@@ -131,10 +131,10 @@ P6opaque.prototype.deserialize_repr_data = function(cursor, STable) {
 
     for (var j = 0; j < num_attrs; j++) {
       var name = cursor.str();
-      var slot = cursor.varint(); 
+      var slot = cursor.varint();
 
       this.name_to_index_mapping[i].names[j] = name;
-      this.name_to_index_mapping[i].slots[j] = slot ;
+      this.name_to_index_mapping[i].slots[j] = slot;
 
 
       slots[slot] = name;
@@ -515,14 +515,14 @@ P6int.prototype.create_obj_constructor = function(STable) {
 
 P6int.prototype.compose = function(STable, repr_info_hash) {
   var integer = repr_info_hash.content.get('integer');
-  if (integer) { 
+  if (integer) {
     var bits = integer.content.get('bits');
     if (bits instanceof NQPInt) {
       this.bits = bits.value;
     } else {
-      throw "bits to P6int.compose must be a native int";
+      throw 'bits to P6int.compose must be a native int';
     }
-  } 
+  }
 };
 
 P6int.name = 'P6int';
@@ -638,7 +638,7 @@ VMArray.prototype.deserialize_repr_data = function(cursor) {
 
 VMArray.prototype.serialize_repr_data = function(st, cursor) {
   cursor.ref(this.type);
-}
+};
 
 VMArray.prototype.deserialize_array = function(obj, data) {
   if (this.type !== null) {
@@ -687,7 +687,7 @@ P6bigint.prototype.type_object_for = function(HOW) {
   });
 
   this._STable.addInternalMethod('$$get_int', function() {
-    return this.value.toNumber()|0;
+    return this.value.toNumber() | 0;
   });
 
   this._STable.addInternalMethod('$$set_bignum', function(value) {
@@ -767,14 +767,14 @@ MultiDimArray.prototype.compose = function(STable, repr_info_hash) {
   if (dimensions instanceof NQPInt) {
     dimensions = dimensions.value;
     if (dimensions === 0) {
-      throw new NQPException("MultiDimArray REPR must be composed with at least 1 dimension");
+      throw new NQPException('MultiDimArray REPR must be composed with at least 1 dimension');
     }
 
   } else {
-    throw "dimensions to MultiDimArray.compose must be a native int";
+    throw 'dimensions to MultiDimArray.compose must be a native int';
   }
 
-//  console.log('dimensions', dimensions);
+  //  console.log('dimensions', dimensions);
   STable.dimensions = dimensions;
 };
 MultiDimArray.prototype.allocate = basic_allocate;
@@ -787,7 +787,7 @@ MultiDimArray.prototype.create_obj_constructor = function(STable) {
 
   STable.addInternalMethod('$$numdimensions', function(value) {
     if (this.type_object_) {
-      throw new NQPException("Cannot get number of dimensions of a type object");
+      throw new NQPException('Cannot get number of dimensions of a type object');
     }
     return STable.dimensions;
   });
@@ -801,96 +801,96 @@ MultiDimArray.prototype.create_obj_constructor = function(STable) {
 
   STable.addInternalMethod('$$dimensions', function() {
     if (this.type_object_) {
-      throw new NQPException("Cannot get dimensions of a type object");
+      throw new NQPException('Cannot get dimensions of a type object');
     }
     return new NQPArray(this.dimensions);
   });
 
   STable.addInternalMethod('$$setdimensions', function(value) {
     if (value.array.length != STable.dimensions) {
-      throw new NQPException("Array type of " + STable.dimensions + " dimensions cannot be intialized with " + value.length + " dimensions");
+      throw new NQPException('Array type of ' + STable.dimensions + ' dimensions cannot be intialized with ' + value.length + ' dimensions');
     } else if (this.dimensions) {
-      throw new NQPException("Can only set dimensions once");
+      throw new NQPException('Can only set dimensions once');
     }
     this.storage = [];
     return (this.dimensions = value.array);
   });
 
   STable.addInternalMethod('$$pop', function() {
-    throw new NQPException("Cannot pop a fixed dimension array");
+    throw new NQPException('Cannot pop a fixed dimension array');
   });
 
   STable.addInternalMethod('$$shift', function() {
-    throw new NQPException("Cannot shift a fixed dimension array");
+    throw new NQPException('Cannot shift a fixed dimension array');
   });
 
   STable.addInternalMethod('$$unshift', function(value) {
-    throw new NQPException("Cannot unshift a fixed dimension array");
+    throw new NQPException('Cannot unshift a fixed dimension array');
   });
 
   STable.addInternalMethod('$$push', function(value) {
-    throw new NQPException("Cannot push a fixed dimension array");
+    throw new NQPException('Cannot push a fixed dimension array');
   });
 
   STable.addInternalMethod('$$splice', function(value) {
-    throw new NQPException("Cannot splice a fixed dimension array");
+    throw new NQPException('Cannot splice a fixed dimension array');
   });
 
   STable.addInternalMethod('$$calculateIndex', function(idx, value) {
     idx = idx.array;
     if (idx.length != STable.dimensions) {
-      throw new NQPException("Cannot access " + STable.dimensions + " dimension array with " + idx.length + " indices");
+      throw new NQPException('Cannot access ' + STable.dimensions + ' dimension array with ' + idx.length + ' indices');
     }
 
-    for (var i=0; i < idx.length; i++) {
+    for (var i = 0; i < idx.length; i++) {
       if (idx[i] < 0 || idx[i] >= this.dimensions[i]) {
-        throw new NQPException("Index " + idx[i] + " for dimension " + (i+1) + " out of range (must be 0.." + this.dimensions[i] + ")");
+        throw new NQPException('Index ' + idx[i] + ' for dimension ' + (i + 1) + ' out of range (must be 0..' + this.dimensions[i] + ')');
       }
     }
     var calculatedIdx = 0;
-    for (var i=0; i < idx.length; i++) {
+    for (var i = 0; i < idx.length; i++) {
       calculatedIdx = calculatedIdx * this.dimensions[i] + idx[i];
     }
     return calculatedIdx;
   });
 
   STable.addInternalMethod('$$atposnd', function(idx) {
-    if (STable.primType != 0) throw new NQPException("wrong type");
+    if (STable.primType != 0) throw new NQPException('wrong type');
     return this.storage[this.$$calculateIndex(idx)];
   });
 
   STable.addInternalMethod('$$bindposnd', function(idx, value) {
-    if (STable.primType != 0) throw new NQPException("wrong type: " + STable.primType);
+    if (STable.primType != 0) throw new NQPException('wrong type: ' + STable.primType);
     return (this.storage[this.$$calculateIndex(idx)] = value);
   });
 
   STable.addInternalMethod('$$atposnd_i', function(idx) {
-    if (STable.primType != 1) throw new NQPException("wrong type: " + STable.primType);
+    if (STable.primType != 1) throw new NQPException('wrong type: ' + STable.primType);
     return this.storage[this.$$calculateIndex(idx)];
   });
 
   STable.addInternalMethod('$$bindposnd_i', function(idx, value) {
-    if (STable.primType != 1) throw new NQPException("wrong type" + STable.primType);
+    if (STable.primType != 1) throw new NQPException('wrong type' + STable.primType);
     return (this.storage[this.$$calculateIndex(idx)] = value);
   });
 
   STable.addInternalMethod('$$atposnd_n', function(idx) {
-    if (STable.primType != 2) throw new NQPException("wrong type");
+    if (STable.primType != 2) throw new NQPException('wrong type');
     return this.storage[this.$$calculateIndex(idx)];
   });
 
   STable.addInternalMethod('$$bindposnd_n', function(idx, value) {
-    if (STable.primType != 2) throw new NQPException("wrong type");
+    if (STable.primType != 2) throw new NQPException('wrong type');
     return (this.storage[this.$$calculateIndex(idx)] = value);
   });
 
   STable.addInternalMethod('$$atposnd_s', function(idx) {
-    if (STable.primType != 3) throw new NQPException("wrong type");
+    if (STable.primType != 3) throw new NQPException('wrong type');
     return this.storage[this.$$calculateIndex(idx)];
   });
 
   STable.addInternalMethod('$$bindposnd_s', function(idx, value) {
-    if (STable.primType != 3) throw new NQPException("wrong type");
+    if (STable.primType != 3) throw new NQPException('wrong type');
     return (this.storage[this.$$calculateIndex(idx)] = value);
   });
 
@@ -947,7 +947,7 @@ MultiDimArray.prototype.serialize = function(cursor, obj) {
     cursor.varint(obj.dimensions[i]);
   }
   var size = this.valuesSize(obj);
-  for (var i=0;i < size;i++) {
+  for (var i = 0; i < size; i++) {
     switch (obj._STable.primType) {
       case 0:
         cursor.ref(obj.storage[i]);
@@ -963,7 +963,7 @@ MultiDimArray.prototype.serialize = function(cursor, obj) {
         break;
     }
   }
-}
+};
 
 MultiDimArray.prototype.deserialize_finish = function(obj, data) {
   obj.dimensions = [];
@@ -972,7 +972,7 @@ MultiDimArray.prototype.deserialize_finish = function(obj, data) {
   }
   var size = this.valuesSize(obj);
   obj.storage = [];
-  for (var i=0;i < size;i++) {
+  for (var i = 0; i < size; i++) {
     switch (obj._STable.primType) {
       case 0:
         obj.storage[i] = data.variant();

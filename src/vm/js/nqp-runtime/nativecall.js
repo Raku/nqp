@@ -12,7 +12,7 @@ function mapType(typeHash) {
   } else if (nativeCallType === 'utf8str') {
     return ref.types.CString;
   } else {
-    throw "type not supported: " + nativeCallType;
+    throw 'type not supported: ' + nativeCallType;
   }
 }
 
@@ -28,5 +28,5 @@ op.buildnativecall = function(ctx, target, libname, symbol, convention, args, re
 };
 
 op.nativecall = function(returns, callObject, args) {
-  return callObject.lib[callObject.symbol].apply(callObject.lib, args.array)
+  return callObject.lib[callObject.symbol].apply(callObject.lib, args.array);
 };
