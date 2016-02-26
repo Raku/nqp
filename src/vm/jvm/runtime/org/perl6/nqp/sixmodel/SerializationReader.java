@@ -1,5 +1,6 @@
 package org.perl6.nqp.sixmodel;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -13,13 +14,14 @@ import org.perl6.nqp.sixmodel.reprs.VMHashInstance;
 
 public class SerializationReader {
     /* The current version of the serialization format. */
-    private final int CURRENT_VERSION = 10;
+    private final int CURRENT_VERSION = 11;
 
     /* The minimum version of the serialization format. */
     private final int MIN_VERSION = 4;
 
     /* Various sizes (in bytes). */
-    private final int HEADER_SIZE               = 4 * 16;
+    private final int V10_HEADER_SIZE           = 4 * 16;
+    private final int HEADER_SIZE               = 4 * 18;
     private final int DEP_TABLE_ENTRY_SIZE      = 8;
     private final int STABLES_TABLE_ENTRY_SIZE  = 12;
     private final int OBJECTS_TABLE_ENTRY_SIZE  = 16;
@@ -69,6 +71,8 @@ public class SerializationReader {
     private int contextDataOffset;
     private int reposTableOffset;
     private int reposTableEntries;
+    private int stringHeapOffset;
+    private int stringHeapEntries;
 
     /* Serialization contexts we depend on. */
     SerializationContext[] dependentSCs;
@@ -92,6 +96,9 @@ public class SerializationReader {
 
         // Split the input into the various segments.
         checkAndDisectInput();
+
+        deserializeStringHeap();
+
         resolveDependencies();
 
         // Put code refs in place.
@@ -142,9 +149,10 @@ public class SerializationReader {
             throw new RuntimeException("Unknown serialization format version " + version);
 
         /* Ensure that the data is at least as long as the header is expected to be. */
-        if (data_len < HEADER_SIZE)
-            throw new RuntimeException("Serialized data shorter than header (< " + HEADER_SIZE + " bytes)");
-        prov_pos += HEADER_SIZE;
+        int headerSize = version >= 11 ? HEADER_SIZE : V10_HEADER_SIZE;
+        if (data_len < headerSize)
+            throw new RuntimeException("Serialized data shorter than header (< " + headerSize + " bytes)");
+        prov_pos += headerSize;
 
         /* Get size and location of dependencies table. */
         depTableOffset = orig.getInt();
@@ -223,6 +231,37 @@ public class SerializationReader {
         prov_pos = reposTableOffset + reposTableEntries * REPOS_TABLE_ENTRY_SIZE;
         if (prov_pos > data_len)
             throw new RuntimeException("Corruption detected (repossessions table overruns end of data)");
+
+        if (version >= 11) {
+            /* Get size and location of string heap. */
+            stringHeapOffset = orig.getInt();
+            stringHeapEntries = orig.getInt();
+            if (stringHeapOffset < prov_pos)
+                throw new RuntimeException("Corruption detected (string table starts before repossessions tabke ends)");
+            prov_pos = stringHeapOffset;
+            if (prov_pos > data_len)
+                throw new RuntimeException("Corruption detected (string table starts after end of data)");
+        }
+    }
+
+    private void deserializeStringHeap() {
+        if (version >= 11) {
+            sh = new String[stringHeapEntries + 1];
+            sh[0] = null;
+
+            orig.position(stringHeapOffset);
+            for (int i = 1; i <= stringHeapEntries; i++) {
+                int len = orig.getInt();
+                byte[] bytes = new byte[len];
+                orig.get(bytes, 0, len);
+
+                try {
+                    sh[i] = new String(bytes, "utf-8");
+                } catch (UnsupportedEncodingException e) {
+                    throw new RuntimeException("Failed to decode a utf-8 encoded string heap entry");
+                }
+            }
+        }
     }
 
     private void resolveDependencies() {
@@ -493,7 +532,7 @@ public class SerializationReader {
             ctx.codeRef = staticCode;
             StaticCodeInfo sci = staticCode.staticInfo;
             if (sci.oLexicalNames != null)
-                ctx.oLex = sci.oLexStatic.clone();
+                ctx.oLex = sci.oLexStatic(tc).clone();
             if (sci.iLexicalNames != null)
                 ctx.iLex = new long[sci.iLexicalNames.length];
             if (sci.nLexicalNames != null)

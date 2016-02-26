@@ -1,5 +1,6 @@
 package org.perl6.nqp.sixmodel;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -18,10 +19,10 @@ import org.perl6.nqp.sixmodel.reprs.MultiCache;
 
 public class SerializationWriter {
     /* The current version of the serialization format. */
-    private final int CURRENT_VERSION = 10;
+    private final int CURRENT_VERSION = 11;
 
     /* Various sizes (in bytes). */
-    private final int HEADER_SIZE               = 4 * 16;
+    private final int HEADER_SIZE               = 4 * 18;
     private final int STABLES_TABLE_ENTRY_SIZE  = 12;
     private final int OBJECTS_TABLE_ENTRY_SIZE  = 16;
     private final int CLOSURES_TABLE_ENTRY_SIZE = 24;
@@ -59,6 +60,7 @@ public class SerializationWriter {
     private static final int CONTEXTS = 6;
     private static final int CONTEXT_DATA = 7;
     private static final int REPOS = 8;
+    private static final int STRINGS = 9;
     private ByteBuffer[] outputs;
     private int currentBuffer;
 
@@ -74,7 +76,7 @@ public class SerializationWriter {
         this.stringMap = new HashMap<String, Integer>();
         this.dependentSCs = new ArrayList<SerializationContext>();
         this.contexts = new ArrayList<CallFrame>();
-        this.outputs = new ByteBuffer[9];
+        this.outputs = new ByteBuffer[10];
         this.outputs[DEPS] = ByteBuffer.allocate(128);
         this.outputs[STABLES] = ByteBuffer.allocate(512);
         this.outputs[STABLE_DATA] = ByteBuffer.allocate(1024);
@@ -84,6 +86,7 @@ public class SerializationWriter {
         this.outputs[CONTEXTS] = ByteBuffer.allocate(128);
         this.outputs[CONTEXT_DATA] = ByteBuffer.allocate(1024);
         this.outputs[REPOS] = ByteBuffer.allocate(64);
+        this.outputs[STRINGS] = ByteBuffer.allocate(2048);
         this.outputs[DEPS].order(ByteOrder.LITTLE_ENDIAN);
         this.outputs[STABLES].order(ByteOrder.LITTLE_ENDIAN);
         this.outputs[STABLE_DATA].order(ByteOrder.LITTLE_ENDIAN);
@@ -93,6 +96,7 @@ public class SerializationWriter {
         this.outputs[CONTEXTS].order(ByteOrder.LITTLE_ENDIAN);
         this.outputs[CONTEXT_DATA].order(ByteOrder.LITTLE_ENDIAN);
         this.outputs[REPOS].order(ByteOrder.LITTLE_ENDIAN);
+        this.outputs[STRINGS].order(ByteOrder.LITTLE_ENDIAN);
         this.currentBuffer = 0;
         this.numClosures = 0;
         this.sTablesListPos = 0;
@@ -123,9 +127,18 @@ public class SerializationWriter {
             return idx;
 
         /* Otherwise, need to add it to the heap. */
-        int newIdx = sh.size();
-        sh.add(s);
+        int newIdx = stringMap.size() + 1;
         stringMap.put(s, newIdx);
+
+        try {
+            byte[] bytes = s.getBytes("utf-8");
+            growToHold(STRINGS, 4 + bytes.length);
+            outputs[STRINGS].putInt(bytes.length);
+            outputs[STRINGS].put(bytes);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException("Serialization Error: failed to encode string to utf-8");
+        }
+
         return newIdx;
     }
 
@@ -395,6 +408,7 @@ public class SerializationWriter {
 
         /* Calculate total size. */
         output_size += HEADER_SIZE;
+        output_size += outputs[STRINGS].position();
         output_size += outputs[DEPS].position();
         output_size += outputs[STABLES].position();
         output_size += outputs[STABLE_DATA].position();
@@ -414,10 +428,12 @@ public class SerializationWriter {
         offset += HEADER_SIZE;
 
         /* Put dependencies table in place and set location/rows in header. */
+        output.position(4);
         output.putInt(offset);
         output.putInt(this.dependentSCs.size());
         output.position(offset);
-        output.put(usedBytes(outputs[DEPS]));
+        outputs[DEPS].flip();
+        output.put(outputs[DEPS]);
         offset += outputs[DEPS].position();
 
         /* Put STables table in place, and set location/rows in header. */
@@ -425,14 +441,16 @@ public class SerializationWriter {
         output.putInt(offset);
         output.putInt(this.sc.stableCount());
         output.position(offset);
-        output.put(usedBytes(outputs[STABLES]));
+        outputs[STABLES].flip();
+        output.put(outputs[STABLES]);
         offset += outputs[STABLES].position();
 
         /* Put STables data in place. */
         output.position(20);
         output.putInt(offset);
         output.position(offset);
-        output.put(usedBytes(outputs[STABLE_DATA]));
+        outputs[STABLE_DATA].flip();
+        output.put(outputs[STABLE_DATA]);
         offset += outputs[STABLE_DATA].position();
 
         /* Put objects table in place, and set location/rows in header. */
@@ -440,14 +458,16 @@ public class SerializationWriter {
         output.putInt(offset);
         output.putInt(this.sc.objectCount());
         output.position(offset);
-        output.put(usedBytes(outputs[OBJECTS]));
+        outputs[OBJECTS].flip();
+        output.put(outputs[OBJECTS]);
         offset += outputs[OBJECTS].position();
 
         /* Put objects data in place. */
         output.position(32);
         output.putInt(offset);
         output.position(offset);
-        output.put(usedBytes(outputs[OBJECT_DATA]));
+        outputs[OBJECT_DATA].flip();
+        output.put(outputs[OBJECT_DATA]);
         offset += outputs[OBJECT_DATA].position();
 
         /* Put closures table in place, and set location/rows in header. */
@@ -455,7 +475,8 @@ public class SerializationWriter {
         output.putInt(offset);
         output.putInt(this.numClosures);
         output.position(offset);
-        output.put(usedBytes(outputs[CLOSURES]));
+        outputs[CLOSURES].flip();
+        output.put(outputs[CLOSURES]);
         offset += outputs[CLOSURES].position();
 
         /* Put contexts table in place, and set location/rows in header. */
@@ -463,14 +484,16 @@ public class SerializationWriter {
         output.putInt(offset);
         output.putInt(this.contexts.size());
         output.position(offset);
-        output.put(usedBytes(outputs[CONTEXTS]));
+        outputs[CONTEXTS].flip();
+        output.put(outputs[CONTEXTS]);
         offset += outputs[CONTEXTS].position();
 
         /* Put contexts data in place. */
         output.position(52);
         output.putInt(offset);
         output.position(offset);
-        output.put(usedBytes(outputs[CONTEXT_DATA]));
+        outputs[CONTEXT_DATA].flip();
+        output.put(outputs[CONTEXT_DATA]);
         offset += outputs[CONTEXT_DATA].position();
 
         /* Put repossessions table in place, and set location/rows in header. */
@@ -478,8 +501,18 @@ public class SerializationWriter {
         output.putInt(offset);
         output.putInt(this.sc.rep_scs.size());
         output.position(offset);
-        output.put(usedBytes(outputs[REPOS]));
+        outputs[REPOS].flip();
+        output.put(outputs[REPOS]);
         offset += outputs[REPOS].position();
+
+        /* Put strings data in place */
+        output.position(64);
+        output.putInt(offset);
+        output.putInt(this.stringMap.size());
+        output.position(offset);
+        outputs[STRINGS].flip();
+        output.put(outputs[STRINGS]);
+        offset += outputs[STRINGS].position();
 
         /* Sanity check. */
         if (offset != output_size)
@@ -487,15 +520,6 @@ public class SerializationWriter {
 
         /* Base 64 encode and return. */
         return Base64.encode(output);
-    }
-
-    /* Grabs an array of the bytes actually populated in the specified buffer. */
-    private byte[] usedBytes(ByteBuffer bb) {
-        byte[] result = new byte[bb.position()];
-        bb.position(0);
-        bb.get(result);
-        bb.position(result.length);
-        return result;
     }
 
     /* This handles the serialization of an object, which largely involves a
