@@ -532,7 +532,7 @@ public class SerializationReader {
             ctx.codeRef = staticCode;
             StaticCodeInfo sci = staticCode.staticInfo;
             if (sci.oLexicalNames != null)
-                ctx.oLex = sci.oLexStatic(tc).clone();
+                ctx.oLex = sci.oLexStatic.clone();
             if (sci.iLexicalNames != null)
                 ctx.iLex = new long[sci.iLexicalNames.length];
             if (sci.nLexicalNames != null)
