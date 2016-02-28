@@ -54,10 +54,12 @@ role DWIMYNameMangling {
         for nqp::split('',$name) -> $char {
             if nqp::iscclass(nqp::const::CCLASS_ALPHANUMERIC, $char, 0) {
                 $mangled := $mangled ~ $char;
-            } else {
+            }
+            else {
                 if nqp::existskey(%mangle, $char) {
                     $mangled := $mangled ~ '_' ~ %mangle{$char} ~ '_';
-                } else {
+                }
+                else {
                     $mangled := $mangled ~ '_' ~ nqp::ord($char) ~ '_';
                 }
             }

@@ -31,7 +31,8 @@ class QAST::OperationsJS {
             @exprs.push($cont);
             @setup.push('return ' ~ $cb(|@exprs, :$cps) ~ ";\n");
             ChunkCPS.new($return_type, $result, @setup, $cont, :$node);
-        } else {
+        }
+        else {
             Chunk.new($return_type, $cb(|@exprs), @setup, :$node);
         }
     }
@@ -446,7 +447,8 @@ class QAST::OperationsJS {
         if $*BLOCK.is_local_lexotic($node.name) {
             my $value := $comp.as_js($node[0], :want($T_OBJ));
             return Chunk.new($T_VOID, '', [$value, "return {$value.expr};\n"]);
-        } elsif $*BLOCK.is_lexotic($node.name) {
+        }
+        elsif $*BLOCK.is_lexotic($node.name) {
             $*BLOCK.mark_lexotic_usage($node.name);
             my $value := $comp.as_js($node[0], :want($T_OBJ));
             return Chunk.new($want, 'null', [$value, $comp.mangle_name($node.name) ~ "(" ~ $value.expr ~ ");\n"]);
@@ -479,7 +481,8 @@ class QAST::OperationsJS {
                 }
                 $compiled_args := $comp.merge_arg_groups($compiled_args);
                 $call := '.$applyCPS(';
-            } else {
+            }
+            else {
                 for $compiled_args.setup -> $arg {
                     @setup.push($arg);
                 }
@@ -492,13 +495,15 @@ class QAST::OperationsJS {
             @setup.push($call_chunk);
 
             $comp.chunk_sequence($T_OBJ, @setup, :$node, :result_child(nqp::elems(@setup) - 1));
-        } else {
+        }
+        else {
             my $compiled_args := $comp.args($args);
 
             if nqp::islist($compiled_args) {
                 $compiled_args := $comp.merge_arg_groups($compiled_args);
                 $call := '.$apply(';
-            } else {
+            }
+            else {
                 $call := '.$call(';
             }
             $comp.stored_result(
@@ -558,10 +563,12 @@ class QAST::OperationsJS {
         if $node.name {
             if $comp.is_valid_js_identifier($node.name) {
                 $method := '.' ~ $node.name;
-            } else {
+            }
+            else {
                 $method := '[' ~ quote_string($node.name) ~ ']';
             }
-        } else {
+        }
+        else {
             my $method_name := $comp.as_js(@args.shift, :want($T_STR));
             @setup.push($method_name);
             $method := "[{$method_name.expr}]";
@@ -573,7 +580,8 @@ class QAST::OperationsJS {
         if nqp::islist($compiled_args) {
             $compiled_args := $comp.merge_arg_groups($compiled_args);
             $call := ".apply({$invocant.expr},";
-        } else {
+        }
+        else {
             $call := '(';
         }
         @setup.push($compiled_args);
@@ -621,9 +629,11 @@ class QAST::OperationsJS {
                         "\};\n",
                         "$*CTX.unwind = $unwind_marker;\n" 
                     );
-                } elsif $type eq 'CONTROL' {
+                }
+                elsif $type eq 'CONTROL' {
                     # STUB - we are nooping this, needs to be implemented
-                } else {
+                }
+                else {
                     return $comp.NYI("Not implemented type with handle: $type");
                 }
             }
@@ -850,7 +860,8 @@ class QAST::OperationsJS {
                     my $block := try $*BLOCK;
                     my $loop := try $*LOOP;
                     $comp.compile_block($node, $block, $loop, :$want, :extra_args([$cond_without_sideeffects]));
-                } else {
+                }
+                else {
                     $comp.as_js($node, :$want, :$cps);
                 }
             }
@@ -860,13 +871,16 @@ class QAST::OperationsJS {
 
                 if $operands == 3 {
                     $else := compile_block($node[2]);
-                } else {
+                }
+                else {
                     $else := $comp.coerce($cond_without_sideeffects, $want);
                 }
-            } else {
+            }
+            else {
                 if $operands == 3 {
                     $then := compile_block($node[2]);
-                } else {
+                }
+                else {
                     $then := $comp.coerce($cond_without_sideeffects, $want);
                 }
                 $else := compile_block($node[1]);
@@ -882,7 +896,8 @@ class QAST::OperationsJS {
 
                 if nqp::istype($cond, ChunkCPS) {
                     return $comp.NYI("if in CPS mode with CPSish condition");
-                } else {
+                }
+                else {
                     my $cont := $comp.unique_var('cont');
                     my $result := $comp.unique_var('result');
                     return ChunkCPS.new($want, $result, [
@@ -984,7 +999,8 @@ class QAST::OperationsJS {
                 "\}\n",
                 "return $loop;"
             ], $cont);
-        } else {
+        }
+        else {
             Chunk.new($T_OBJ, 'null', [
                 $list,
                 "$iterator = nqp.op.iterator({$list.expr});\n",
@@ -1040,7 +1056,8 @@ class QAST::OperationsJS {
                     $handled,
                     "\}"
                 );
-            } else {
+            }
+            else {
                 # TODO redo
                 my $neg := $op eq 'repeat_while' ?? '' !! '!';
                 Chunk.void(
@@ -1058,7 +1075,8 @@ class QAST::OperationsJS {
     add_op('const', sub ($comp, $node, :$want, :$cps) {
         if nqp::existskey(%const_map, $node.name) {
             $comp.as_js(QAST::IVal.new( :value(%const_map{$node.name})), :$want, :$cps);
-        } else {
+        }
+        else {
             $comp.NYI("Constant "~$node.name);
         }
     });
@@ -1083,7 +1101,8 @@ class QAST::OperationsJS {
                 $inner,
                 "\} catch (e) \{ if (e === $exception) \{return $value\} else \{ throw e \}\}"
             ]);
-        } else {
+        }
+        else {
             $inner;
         }
     });
@@ -1123,7 +1142,8 @@ class QAST::OperationsJS {
         add_simple_op($op, $T_OBJ, [], sub () {
             if $*AS_METHOD {
                 "nqp.op.savecaptureAsMethod(this, Array.prototype.slice.call(arguments), {known_named(@*KNOWN_NAMED)})"
-            } else {
+            }
+            else {
                 "nqp.op.savecapture(Array.prototype.slice.call(arguments), {known_named(@*KNOWN_NAMED)})"
             }
         } , :sideffects);
@@ -1238,7 +1258,8 @@ class QAST::OperationsJS {
         my str $name := $op.op;
         if nqp::existskey(%ops, $name) {
             %ops{$name}($comp, $op, :$want, :$cps);
-        } else {
+        }
+        else {
             $comp.NYI("unimplemented QAST::Op {$op.op}");
         }
     }

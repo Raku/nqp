@@ -75,7 +75,8 @@ class RegexCompiler {
         my $rxtype := $node.rxtype() || 'concat';
         if nqp::can(self, $rxtype) {
             self."$rxtype"($node);
-        } else {
+        }
+        else {
             $!compiler.NYI("NYI QAST::Regex rxtype = {$node.rxtype}");
         }
     }
@@ -146,7 +147,8 @@ class RegexCompiler {
     method charrange($node) {
         if $node[0] eq 'ignorecase' {
             $!compiler.NYI("charrange with ignorecase");
-        } else {
+        }
+        else {
             my $lower := $node[1].value;
             my $upper := $node[2].value;
 
@@ -164,24 +166,29 @@ class RegexCompiler {
     method anchor($node) {
         if $node.subtype eq 'eos' {
             "if ($!pos < $!target.length) \{{self.fail}\}\n";
-        } elsif $node.subtype eq 'bos' {
+        }
+        elsif $node.subtype eq 'bos' {
             "if ($!pos != 0) \{{self.fail}\}\n";
-        } elsif $node.subtype eq 'lwb' {
+        }
+        elsif $node.subtype eq 'lwb' {
             "if ($!pos >= $!target.length) \{{self.fail}\}\n"
             ~ self.cclass_check('CCLASS_WORD')
             ~ self.cclass_check('CCLASS_WORD', :negated(1), :pos("$!pos-1"));
-        } elsif $node.subtype eq 'rwb' {
+        }
+        elsif $node.subtype eq 'rwb' {
             "if ($!pos <= 0) \{{self.fail}\}\n"
             ~ self.cclass_check('CCLASS_WORD', :negated(1), :pos($!pos))
             ~ self.cclass_check('CCLASS_WORD', :pos("$!pos-1"));
-        } elsif $node.subtype eq 'bol' {
+        }
+        elsif $node.subtype eq 'bol' {
             my $done_label := self.new_label;
 
             "if ($!pos == 0) \{{self.goto($done_label)}\}\n"
             ~ "if ($!pos >= $!target.length) \{{self.fail}\}\n"
             ~ self.cclass_check('CCLASS_NEWLINE',:pos("$!pos-1"))
             ~ self.case($done_label);
-        } elsif $node.subtype eq 'eol' {
+        }
+        elsif $node.subtype eq 'eol' {
             my $done_label := self.new_label;
 
             "if (nqp.op.iscclass({%const_map<CCLASS_NEWLINE>},$!target,$!pos)) \{{self.goto($done_label)}\}\n"
@@ -189,9 +196,11 @@ class RegexCompiler {
             ~ "if ($!pos == 0) \{{self.goto($done_label)}\}\n"
             ~ self.cclass_check('CCLASS_NEWLINE', :negated(1), :pos("$!pos-1"))
             ~ self.case($done_label);
-        } elsif $node.subtype eq 'pass' {
+        }
+        elsif $node.subtype eq 'pass' {
             '';
-        } else {
+        }
+        else {
             $!compiler.NYI("anchor type: {$node.subtype}");
         }
     }
@@ -269,7 +278,8 @@ class RegexCompiler {
             if nqp::islist($compiled_args) {
                 $compiled_args := $!compiler.merge_arg_groups($compiled_args);
                 $invocation := ".apply({$!cursor},";
-            } else {
+            }
+            else {
                 $invocation := '(';
             }
 
@@ -391,7 +401,8 @@ class RegexCompiler {
         if $min == 0 && $max == 0 {
             # Nothing to do, and nothing to backtrack into.
             "";
-        } elsif $node.backtrack eq 'f' {
+        }
+        elsif $node.backtrack eq 'f' {
             my $irep := $*BLOCK.add_tmp();
             my $seplabel := self.new_label;
 
@@ -412,7 +423,8 @@ class RegexCompiler {
                  ($max != 1 ?? self.mark($loop, $!pos, $rep) !! ''),
                  self.case($done)
            );
-        } else {
+        }
+        else {
             my @code;
 
             if $min == 0 { @code.push(self.mark($done,$!pos,0)) }

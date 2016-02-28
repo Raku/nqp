@@ -35,7 +35,8 @@ class Chunk {
         for @!setup -> $part {
            if nqp::isstr($part) {
               $js := $js ~ $part;
-           } else {
+           }
+           else {
               $js := $js ~ $part.join;
            }
         }
@@ -47,7 +48,8 @@ class Chunk {
         for @!setup -> $part {
             if nqp::isstr($part) {
                 nqp::push(@parts,quote_string($part, :json));
-            } else {
+            }
+            else {
                 nqp::push(@parts,$part.with_source_map_info);
             }
         }
@@ -56,7 +58,8 @@ class Chunk {
             my $node := $!node.node;
             my $location := HLL::Compiler.line_and_column_of($node.orig(), $node.from(), :cache(1));
             "\{\"line\": {nqp::atpos_i($location, 0)}, \"column\": {nqp::atpos_i($location, 1)}, \"parts\": $parts\}";
-        } else {
+        }
+        else {
             $parts;
         }
     }
@@ -66,7 +69,8 @@ class Chunk {
         for @!setup -> $part {
            if nqp::isstr($part) {
               $js := $js ~ $part;
-           } else {
+           }
+           else {
               $js := $js ~ $part.source_map_debug;
            }
         }
@@ -76,7 +80,8 @@ class Chunk {
             my $line_and_column := HLL::Compiler.line_and_column_of($node.orig(), $node.from(), :cache(1));
             my $where := nqp::atpos_i($line_and_column, 0) ~ ":" ~ nqp::atpos_i($line_and_column, 1);
             "/* LINE $where */\n" ~ $js ~ "/* END $where */"
-        } else {
+        }
+        else {
             $js;
         }
     }

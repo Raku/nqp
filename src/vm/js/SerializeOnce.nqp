@@ -27,10 +27,12 @@ role SerializeOnce {
             my $handle := nqp::scgethandle($sc);
             if nqp::existskey(%*SC_CACHE,$handle) {
               %*SC_CACHE{$handle};
-            } else {
+            }
+            else {
               %*SC_CACHE{$handle}  := self.serialize_sc_without_caching($sc);
             }
-        } else {
+        }
+        else {
           self.serialize_sc_without_caching($sc);
         }
     }
