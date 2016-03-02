@@ -1878,6 +1878,11 @@ my class MASTCompilerInstance {
                     $kind == $MVM_reg_int8 {
                 $kind := $MVM_reg_int64;
             }
+            elsif $kind == $MVM_reg_uint64 || $kind == $MVM_reg_uint32 ||
+                    $kind == $MVM_reg_uint16 || $kind == $MVM_reg_uint8 {
+                # For now compile as signed
+                $kind := $MVM_reg_int64;
+            }
             if $*BINDVAL {
                 my $valmast := self.as_mast_clear_bindval($*BINDVAL, :want($kind));
                 push_ilist(@ins, $valmast);
