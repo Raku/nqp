@@ -963,7 +963,7 @@ op.setdimensions = function(array, dimensions) {
   };
 });
 
-var BOOTException = bootstrap.bootType("BOOTException", "VMException");
+var BOOTException = bootstrap.bootType('BOOTException', 'VMException');
 /* TODO HLL support */
 op.newexception = function() {
   var exType = BOOTException;
