@@ -991,3 +991,11 @@ MultiDimArray.prototype.deserialize_finish = function(obj, data) {
 };
 
 module.exports.MultiDimArray = MultiDimArray;
+
+function VMException() {
+}
+VMException.prototype.create_obj_constructor = basic_constructor;
+VMException.prototype.allocate = basic_allocate;
+VMException.prototype.type_object_for = basic_type_object_for;
+
+module.exports.VMException = VMException;

@@ -231,6 +231,10 @@ Ctx.prototype.resume = function(exception) {
   exception.resume = true;
 };
 
+Ctx.prototype.throw = function(exception) {
+  this.propagateException(exception);
+};
+
 Ctx.prototype.lookup_dynamic = function(name) {
   var ctx = this;
   while (ctx) {

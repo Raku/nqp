@@ -662,6 +662,12 @@ class QAST::OperationsJS {
     add_simple_op('exception', $T_OBJ, [], sub () {"$*CTX.exception"});
     add_simple_op('rethrow', $T_VOID, [$T_OBJ], sub ($exception) {"$*CTX.rethrow($exception)"}, :sideffects);
     add_simple_op('resume', $T_VOID, [$T_OBJ], sub ($exception) {"$*CTX.resume($exception)"}, :sideffects);
+    add_simple_op('throw', $T_VOID, [$T_OBJ], :sideffects, sub ($exception) {"{$*CTX}.throw($exception)"});
+
+    add_simple_op('setpayload', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
+    add_simple_op('getpayload', $T_OBJ, [$T_OBJ, $T_OBJ]);
+
+    add_simple_op('setmessage', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
     add_simple_op('getmessage', $T_STR, [$T_OBJ]);
 
     add_simple_op('findmethod', $T_OBJ, [$T_OBJ, $T_STR], :sideffects);
