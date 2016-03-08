@@ -2,7 +2,7 @@
 
 # Tests for try and catch
 
-plan(11);
+plan(18);
 
 sub oops($msg = "oops!") { # throw an exception
     nqp::die($msg);
@@ -100,3 +100,33 @@ ok($ok eq "oops!", "combination of both try and CATCH");
         oops_s();
 }
 ok($ok eq "oops_s!", "nqp::die_s");
+
+
+{
+    my $exception := nqp::newexception();
+    nqp::setmessage($exception, "a cute exception");
+    nqp::setpayload($exception, "cute payload");
+    nqp::throw($exception);
+    CATCH {
+       ok(nqp::getmessage($_) eq "a cute exception", "nqp::setmessage/nqp::getmessage"); 
+       ok(nqp::getpayload($_) eq "cute payload", "nqp::setpayload/nqp::getpayload"); 
+    }
+}
+
+{
+    class Foo is repr('VMException') {
+        method custom_stuff() {"cool stuff"}
+    }
+
+    my $exception := Foo.new(custom_attr=>'custom');
+    my $msg := "a custom exception";
+    ok(nqp::setmessage($exception, $msg) eq $msg, "correct return value for nqp::setmessage");
+    my $payload := "custom payload";
+    ok(nqp::setpayload($exception, $payload) eq $payload, "correct return value for nqp::setpayload");
+    nqp::throw($exception);
+    CATCH {
+       ok($_.custom_stuff eq "cool stuff", "calling method on custom exception");
+       ok(nqp::getmessage($_) eq "a custom exception", "nqp::setmessage/nqp::getmessage on custom exception"); 
+       ok(nqp::getpayload($_) eq "custom payload", "nqp::setpayload/nqp::getpayload on custom exception"); 
+    }
+}
