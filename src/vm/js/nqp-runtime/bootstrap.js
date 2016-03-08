@@ -215,4 +215,24 @@ add_to_sc_with_st_and_mo(BOOTNum);
 add_to_sc_with_st_and_mo(BOOTStr);
 add_to_sc_with_st_and_mo(BOOTCode);*/
 
+function bootType(typeName, reprName) {
+  var meta_obj = KnowHOW_HOW._STable.REPR.allocate(KnowHOW_HOW._STable);
+  meta_obj.name = typeName;
+
+  var type_obj = (new reprs[reprName]).type_object_for(meta_obj);
+
+  //TODO?
+  //type_obj.st.MethodCache = meta_obj.methods;
+  //type_obj.st.ModeFlags = STable.METHOD_CACHE_AUTHORITATIVE;
+
+  core.root_objects.push(meta_obj);
+  meta_obj._SC = core;
+
+  add_to_sc_with_st(type_obj);
+
+  return type_obj;
+}
+
+module.exports.bootType = bootType;
+
 module.exports.core = core;

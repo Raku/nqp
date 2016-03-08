@@ -15,6 +15,8 @@ var hll = require('./hll.js');
 
 var NQPArray = require('./array.js');
 
+var bootstrap = require('./bootstrap.js');
+
 exports.CodeRef = CodeRef;
 
 op.atpos = function(array, index) {
@@ -960,3 +962,10 @@ op.setdimensions = function(array, dimensions) {
     return op['bindposnd' + type](array, new NQPArray([x, y, z]), value);
   };
 });
+
+var BOOTException = bootstrap.bootType("BOOTException", "VMException");
+/* TODO HLL support */
+op.newexception = function() {
+  var exType = BOOTException;
+  return exType._STable.REPR.allocate(exType._STable);
+};

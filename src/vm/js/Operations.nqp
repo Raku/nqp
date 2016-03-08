@@ -670,6 +670,8 @@ class QAST::OperationsJS {
     add_simple_op('setmessage', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
     add_simple_op('getmessage', $T_STR, [$T_OBJ]);
 
+    add_simpile_op('newexception', $T_OBJ, [], :sideffects);
+
     add_simple_op('findmethod', $T_OBJ, [$T_OBJ, $T_STR], :sideffects);
     add_simple_op('can', $T_INT, [$T_OBJ, $T_STR], :sideffects);
 
