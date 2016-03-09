@@ -56,7 +56,7 @@ class QAST::Block is QAST::Node does QAST::Children {
     }
 
     my %NOSYMS := nqp::hash();
-    method symbol($name, *%attrs) {
+    method symbol(str $name, *%attrs) {
         %!symbol := nqp::hash() if nqp::isnull(%!symbol);
         if %attrs {
             my %syms := %!symbol{$name};
