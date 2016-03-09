@@ -309,7 +309,7 @@ var PIPE_IGNORE_ERR = 128;
 var PIPE_CAPTURE_ERR = 256;
 
 op.spawn = function(command, dir, env, input, output, error, flags) {
-  nqpIo.spawn(command, dir, env.$$toObject(), input, output, error, flags);
+  nqpIo.spawn(command.array, dir, env.$$toObject(), input, output, error, flags);
 };
 
 op.shell = function(command, dir, env, input, output, error, flags) {
