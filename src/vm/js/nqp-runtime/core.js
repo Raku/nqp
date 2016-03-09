@@ -694,6 +694,7 @@ op.decode = function(buf, encoding_) {
 };
 
 op.objprimspec = function(obj) {
+  if (obj === null) return 0;
   return (obj._STable && obj._STable.REPR.boxed_primitive ? obj._STable.REPR.boxed_primitive : 0);
 };
 
