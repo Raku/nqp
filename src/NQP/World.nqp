@@ -201,7 +201,8 @@ class NQP::World is HLL::World {
 
     # Registers a code object, and gives it a dynamic compilation thunk.
     # Makes a real code object if it's a dispatcher.
-    method create_code($ast, $name, $is_dispatcher, :$code_type_name = 'NQPRoutine') {
+    method create_code($ast, $name, $is_dispatcher, :$code_type_name = 'NQPRoutine',
+            int :$onlystar = 0) {
         # See if NQPRoutine is available to wrap this up in.
         my $code_type;
         my $have_code_type := 0;
@@ -328,8 +329,12 @@ class NQP::World is HLL::World {
         if $have_code_type {
             # Create it now.
             nqp::bindattr($code_obj, $code_type, '$!do', $dummy);
-            nqp::bindattr($code_obj, $code_type, '$!dispatchees', compilee_list())
-                if $is_dispatcher;
+            if $is_dispatcher {
+                nqp::bindattr($code_obj, $code_type, '$!dispatchees', compilee_list());
+                if $onlystar {
+                    nqp::bindattr_i($code_obj, $code_type, '$!onlystar', 1);
+                }
+            }
             my $slot := self.add_object($code_obj);
 
             # Associate QAST block with code object, which will ensure it is

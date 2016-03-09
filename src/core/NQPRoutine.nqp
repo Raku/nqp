@@ -5,6 +5,7 @@ my knowhow NQPRoutine {
     has $!dispatch_cache;
     has $!dispatch_order;
     has $!clone_callback;
+    has int $!onlystar;
     
     # Adds a multi-dispatch candidate.
     method add_dispatchee($code) {
@@ -352,6 +353,9 @@ my knowhow NQPRoutine {
     method signature() { $!signature }
 }
 nqp::setinvokespec(NQPRoutine, NQPRoutine, '$!do', nqp::null);
+#?if moar
+nqp::setmultispec(NQPRoutine, NQPRoutine, '$!onlystar', '$!dispatch_cache');
+#?endif
 nqp::setboolspec(NQPRoutine, 5, nqp::null());
 
 my knowhow NQPSignature {

@@ -863,8 +863,10 @@ class NQP::Actions is HLL::Actions {
         # If it's just got * as a body, make a multi-dispatch enterer.
         # Otherwise, need to build a sub.
         my $ast;
+        my int $onlystar;
         if $<onlystar> {
             $ast := only_star_block();
+            $onlystar := 1;
         }
         else {
             $ast := $<blockoid>.ast;
@@ -932,7 +934,7 @@ class NQP::Actions is HLL::Actions {
                     # this proto will work over, and install them along
                     # with the proto.
                     if $*SCOPE eq 'our' { nqp::die('our-scoped protos not yet implemented') }
-                    my $code := $*W.create_code($ast, $name, 1);
+                    my $code := $*W.create_code($ast, $name, 1, :$onlystar);
                     my $BLOCK := $*W.cur_lexpad();
 					$BLOCK[0].push(QAST::Op.new(
                         :op('bind'),
@@ -1014,8 +1016,10 @@ class NQP::Actions is HLL::Actions {
         # If it's just got * as a body, make a multi-dispatch enterer.
         # Otherwise, build method block QAST.
         my $ast;
+        my int $onlystar;
         if $<onlystar> {
             $ast := only_star_block();
+            $onlystar := 1;
         }
         else {
             $ast := $<blockoid>.ast;
@@ -1052,7 +1056,7 @@ class NQP::Actions is HLL::Actions {
             # Insert it into the method table.
             my $meta_meth := $*MULTINESS eq 'multi' ?? 'add_multi_method' !! 'add_method';
             my $is_dispatcher := $*MULTINESS eq 'proto';
-            my $code := $*W.create_code($ast, $name, $is_dispatcher);
+            my $code := $*W.create_code($ast, $name, $is_dispatcher, :$onlystar);
             if $*MULTINESS eq 'multi' { attach_multi_signature($code, $ast); }
             $*W.pkg_add_method($*PACKAGE, $meta_meth, $name, $code);
             $ast.annotate('code_obj', $code);
