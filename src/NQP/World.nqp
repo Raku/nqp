@@ -180,7 +180,7 @@ class NQP::World is HLL::World {
 
     # Installs a lexical symbol. Takes a QAST::Block object, name and
     # the object to install.
-    method install_lexical_symbol($block, $name, $obj) {
+    method install_lexical_symbol($block, str $name, $obj) {
         $block.symbol($name, :scope('lexical'), :value($obj));
         $block[0].push(QAST::Var.new(
             :scope('lexical'), :name($name), :decl('static'), :value($obj)
@@ -552,19 +552,19 @@ class NQP::World is HLL::World {
 
     # Checks if the given name is known anywhere in the lexpad
     # and with lexical scope.
-    method is_lexical($name) {
+    method is_lexical(str $name) {
         self.is_scope($name, 'lexical')
     }
 
     # Checks if the given name is known anywhere in the lexpad
     # and with package scope.
-    method is_package($name) {
+    method is_package(str $name) {
         self.is_scope($name, 'package')
     }
 
     # Checks if a given name is known in the lexpad anywhere
     # with the specified scope.
-    method is_scope($name, $wanted_scope) {
+    method is_scope(str $name, $wanted_scope) {
         my $i := +@!BLOCKS;
         while $i > 0 {
             $i := $i - 1;
@@ -577,7 +577,7 @@ class NQP::World is HLL::World {
     }
 
     # Gets the type of a lexical.
-    method lexical_type($name) {
+    method lexical_type(str $name) {
         my $i := +@!BLOCKS;
         while $i > 0 {
             $i := $i - 1;
@@ -609,7 +609,7 @@ class NQP::World is HLL::World {
         # If it's a single-part name, look through the lexical
         # scopes.
         if +@name == 1 {
-            my $final_name := @name[0];
+            my str $final_name := ~@name[0];
             my $i := +@!BLOCKS;
             while $i > 0 {
                 $i := $i - 1;
@@ -625,8 +625,8 @@ class NQP::World is HLL::World {
         # in GLOBALish.
         my $result := $*GLOBALish;
         if +@name >= 2 {
-            my $first := @name[0];
-            my $i := +@!BLOCKS;
+            my str $first := ~@name[0];
+            my int $i := +@!BLOCKS;
             while $i > 0 {
                 $i := $i - 1;
                 my %sym := @!BLOCKS[$i].symbol($first);

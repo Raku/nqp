@@ -420,14 +420,14 @@ grammar NQP::Grammar is HLL::Grammar {
             if $*SCOPE eq 'our' || $*SCOPE eq '' {
                 $*W.install_package_symbol($*OUTERPACKAGE, $<name><identifier>, $*PACKAGE);
                 if +$<name><identifier> == 1 {
-                    $*W.install_lexical_symbol($OUTER, $<name><identifier>[0], $*PACKAGE);
+                    $*W.install_lexical_symbol($OUTER, ~$<name><identifier>[0], $*PACKAGE);
                 }
             }
             elsif $*SCOPE eq 'my' {
                 if +$<name><identifier> != 1 {
                     $<name>.CURSOR.panic("A my scoped package cannot have a multi-part name yet");
                 }
-                $*W.install_lexical_symbol($OUTER, $<name><identifier>[0], $*PACKAGE);
+                $*W.install_lexical_symbol($OUTER, ~$<name><identifier>[0], $*PACKAGE);
             }
             else {
                 $/.CURSOR.panic("$*SCOPE scoped packages are not supported");
@@ -881,4 +881,3 @@ grammar NQP::Regex is QRegex::P6Regex::Grammar {
         <quote_EXPR=.LANG('MAIN','quote_EXPR')>
     }
 }
-

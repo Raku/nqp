@@ -571,7 +571,7 @@ class NQP::Actions is HLL::Actions {
                 $ast.fallback( default_for( $<sigil> ) );
             }
             else {
-                my $name := ~@name.pop;
+                my str $name := ~@name.pop;
                 my int $is_lex := 0;
                 if $*IN_DECL eq 'variable' || $name eq '$_' || $name eq '$/' || $name eq '$¢'
                 || $name eq '$!' || $<twigil> eq '?' || ($is_lex := $*W.is_lexical($name)) {
@@ -604,14 +604,14 @@ class NQP::Actions is HLL::Actions {
         if $*SCOPE eq 'our' || $*SCOPE eq '' {
             $*W.install_package_symbol($*OUTERPACKAGE, $<name><identifier>, $PACKAGE);
             if +$<name><identifier> == 1 {
-                $*W.install_lexical_symbol($*W.cur_lexpad(), $<name><identifier>[0], $PACKAGE);
+                $*W.install_lexical_symbol($*W.cur_lexpad(), ~$<name><identifier>[0], $PACKAGE);
             }
         }
         elsif $*SCOPE eq 'my' {
             if +$<name><identifier> != 1 {
                 $<name>.CURSOR.panic("A my scoped package cannot have a multi-part name yet");
             }
-            $*W.install_lexical_symbol($*W.cur_lexpad(), $<name><identifier>[0], $PACKAGE);
+            $*W.install_lexical_symbol($*W.cur_lexpad(), ~$<name><identifier>[0], $PACKAGE);
         }
         else {
             $/.CURSOR.panic("$*SCOPE scoped packages are not supported");
@@ -1737,7 +1737,7 @@ class NQP::Actions is HLL::Actions {
         # then strip it off.
         else {
             my $path;
-            if $*W.is_lexical(@name[0]) {
+            if $*W.is_lexical(~@name[0]) {
                 try {
                     my $first := @name.shift();
                     $path := QAST::WVal.new( :value($*W.find_sym([$first])) );
