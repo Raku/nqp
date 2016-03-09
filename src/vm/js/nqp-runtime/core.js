@@ -773,6 +773,18 @@ op.mod_n = function(a, b) {
   return a - Math.floor(a / b) * b;
 };
 
+op.sec_n = function(x) {
+  return 1 / Math.cos(x);
+};
+
+op.asec_n = function(x) {
+  return Math.acos(1 / x);
+};
+
+op.sech_n = function(x) {
+  return (2 * Math.cosh(x)) / (Math.cosh(2 * x) + 1);
+};
+
 op.isnanorinf = function(n) {
   return (isNaN(n) || n == Infinity || n == -Infinity) ? 1 : 0;
 };
