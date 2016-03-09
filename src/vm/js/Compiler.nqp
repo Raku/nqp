@@ -1176,9 +1176,20 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
     }
 
+    my sub literal_subst($source, $pattern, $replacement) {
+        my $where := 0;
+        my $result := $source;
+        while (my $found := nqp::index($result, $pattern, $where)) != -1 {
+            $where := $found + nqp::chars($replacement);
+            $result := nqp::replace($result, $found, nqp::chars($pattern), $replacement);
+        };
+        $result;
+    }
+
     my sub loadable($name) {
         # workaround for webpack
-        quote_string($name) ~ ", function() \{return require({quote_string($name)})\}";
+        my $path := literal_subst($name, '::', '/');
+        quote_string($name) ~ ", function() \{return require({quote_string($path)})\}";
     }
 
     multi method as_js(QAST::CompUnit $node, :$want, :$cps) {
