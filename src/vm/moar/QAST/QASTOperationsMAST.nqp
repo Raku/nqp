@@ -34,7 +34,7 @@ class MAST::InstructionList {
     has str $!filename;
     has int $!lineno;
 
-    method new(@instructions, $result_reg, $result_kind, :$filename = '<anon>', :$lineno = 0) {
+    method new(@instructions, $result_reg, $result_kind, str :$filename = '<anon>', int :$lineno = 0) {
         my $obj := nqp::create(self);
         nqp::bindattr($obj, MAST::InstructionList, '@!instructions', @instructions);
         nqp::bindattr($obj, MAST::InstructionList, '$!result_reg', $result_reg);
