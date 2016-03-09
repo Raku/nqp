@@ -20,7 +20,7 @@ CodeRef.prototype.$call = function() {
   }
 };
 
-CodeRef.prototype.$apply = function _(argsArray) {
+CodeRef.prototype.$apply = function(argsArray) {
   return this.$call.apply(this, argsArray);
 };
 
