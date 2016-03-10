@@ -81,6 +81,8 @@ j-install: j-all
 	$(MKPATH) $(DESTDIR)$(BIN_DIR)
 	$(MKPATH) $(DESTDIR)$(NQP_JAR_DIR)
 	$(MKPATH) $(DESTDIR)$(NQP_LIB_DIR)
+	$(MKPATH) $(DESTDIR)$(NQP_LIB_DIR)/profiler
+	$(CP) src/vm/moar/profiler/template.html $(DESTDIR)$(NQP_LIB_DIR)/profiler/template.html
 	$(CP) 3rdparty/asm/asm-4.1.jar 3rdparty/asm/asm-tree-4.1.jar  $(DESTDIR)$(NQP_JAR_DIR)
 	$(CP) 3rdparty/jline/jline-1.0.jar 3rdparty/jna/jna.jar $(DESTDIR)$(NQP_JAR_DIR)
 	$(CP) $(RUNTIME_JAR) $(DESTDIR)$(NQP_JAR_DIR)

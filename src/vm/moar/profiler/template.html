@@ -735,7 +735,7 @@
 
     moarProfApp.controller('OverviewController', function ($scope) {
         var totalTime     = rawData[0].total_time;
-        var speshTime     = rawData[0].spesh_time;
+        var speshTime     = rawData[0].spesh_time || 0;
         var gcTime        = 0;
         var gcNursery     = 0;
         var gcFull        = 0;
@@ -748,7 +748,7 @@
         var deoptOnes     = 0;
         var deoptAlls     = 0;
         var osrs          = 0;
-        rawData[0].gcs.map(function (gc) {
+        rawData[0].gcs && rawData[0].gcs.map(function (gc) {
             gcTime += gc.time;
             if (gc.full) {
                 gcFull++;
@@ -1081,7 +1081,7 @@
     moarProfApp.controller('GCController', function ($scope) {
         // Find longest GC run.
         var longestGC = 0;
-        rawData[0].gcs.map(function (gc) {
+        rawData[0].gcs && rawData[0].gcs.map(function (gc) {
             if (gc.time > longestGC)
                 longestGC = gc.time;
         });
