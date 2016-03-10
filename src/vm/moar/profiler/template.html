@@ -707,6 +707,12 @@
     <script>
     var rawData = JSON.parse('{{{PROFILER_OUTPUT}}}');
 
+    // grab the "dictionary" from the very first entry
+    var id_to_things = rawData[0];
+    // the rest of the program expects the list to contain callframes, not the dictionary
+    // so we just shift it off the beginning.
+    rawData.shift();
+
     // Extract some common things out of the raw data.
     var nodeIdToName = {};
     var nodeIdToFile = {};
@@ -714,9 +720,10 @@
     (function () {
         function walkCallGraphNode(node) {
             if (!nodeIdToName[node.id]) {
-                nodeIdToName[node.id] = node.name == "" ? "<anon>"    : node.name;
-                nodeIdToLine[node.id] = node.line < 1   ? "<unknown>" : node.line;
-                nodeIdToFile[node.id] = node.file == "" ? "<unknown>" : node.file;
+                var existing_data = id_to_things[node.id.toString()];
+                nodeIdToName[node.id] = existing_data.name == "" ? "<anon>"    : existing_data.name;
+                nodeIdToLine[node.id] = existing_data.line < 1   ? "<unknown>" : existing_data.line;
+                nodeIdToFile[node.id] = existing_data.file == "" ? "<unknown>" : existing_data.file;
             }
             if (node.callees)
                 node.callees.map(walkCallGraphNode);

@@ -75,18 +75,68 @@ class HLL::Backend::MoarVM {
             $escaped_squote    := q{\\'};
         }
 
+        my $id_to_thing := nqp::hash();
+
         sub post_process_call_graph_node($node) {
-            if $node<allocations> {
-                for $node<allocations> -> %alloc_info {
-                    my $type := %alloc_info<type>;
-                    %alloc_info<type> := $type.HOW.name($type);
+            try {
+                if nqp::existskey($node, "allocations") {
+                    for $node<allocations> -> %alloc_info {
+                        my $type := %alloc_info<type>;
+                        unless nqp::existskey($id_to_thing, %alloc_info<id>) {
+                            $id_to_thing{%alloc_info<id>} := $type.HOW.name($type);
+                        }
+                        nqp::deletekey(%alloc_info, "type");
+                    }
+                }
+                unless nqp::existskey($id_to_thing, $node<id>) {
+                    my $shared_data := nqp::hash(
+                        "file", $node<file>,
+                        "line", $node<line>,
+                        "name", $node<name>,
+                    );
+                    $id_to_thing{$node<id>} := $shared_data;
+                }
+                nqp::deletekey($node, "file");
+                nqp::deletekey($node, "line");
+                nqp::deletekey($node, "name");
+                if nqp::existskey($node, "callees") {
+                    for $node<callees> {
+                        post_process_call_graph_node($_);
+                    }
+                }
+                CATCH {
+                    note(nqp::getmessage($!));
                 }
             }
-            if $node<callees> {
-                for $node<callees> {
-                    post_process_call_graph_node($_);
-                }
+        }
+
+        sub sorted_keys($hash) {
+            my @keys;
+            for $hash {
+                nqp::push(@keys, $_.key);
             }
+            if +@keys == 0 {
+                return @keys;
+            }
+
+            # we expect on the order of 6 or 7 keys here, so bubble sort is fine.
+            my int $start := 0;
+            my int $numkeys := +@keys;
+            my str $swap;
+            my int $current;
+            while $start < $numkeys - 1 {
+                $current := 0;
+                while $current < $numkeys - 1 {
+                    if @keys[$current] lt @keys[$current + 1] {
+                        $swap := @keys[$current];
+                        @keys[$current] := @keys[$current + 1];
+                        @keys[$current + 1] := $swap;
+                    }
+                    $current++;
+                }
+                $start++;
+            }
+            return @keys;
         }
 
         sub to_json($obj) {
@@ -107,7 +157,7 @@ class HLL::Backend::MoarVM {
             elsif nqp::ishash($obj) {
                 nqp::push_s(@pieces, '{');
                 my $first := 1;
-                for $obj {
+                for sorted_keys($obj) {
                     if $first {
                         $first := 0;
                     }
@@ -115,9 +165,9 @@ class HLL::Backend::MoarVM {
                         nqp::push_s(@pieces, ',');
                     }
                     nqp::push_s(@pieces, '"');
-                    nqp::push_s(@pieces, $_.key);
+                    nqp::push_s(@pieces, $_);
                     nqp::push_s(@pieces, '":');
-                    to_json($_.value);
+                    to_json($obj{$_});
                 }
                 nqp::push_s(@pieces, '}');
             }
@@ -154,6 +204,8 @@ class HLL::Backend::MoarVM {
         for $data {
             post_process_call_graph_node($_<call_graph>);
         }
+
+        nqp::unshift($data, $id_to_thing);
 
         if $want_json {
             to_json($data);
