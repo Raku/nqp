@@ -35,6 +35,7 @@ class RegexCompiler {
             "{$!label} = {$!initial_label};\n",
             "$start = self['!cursor_start_all']({$*CTX}, null).array;\n",
             "{$!cursor} = $start[0];\n",
+            $!compiler.mangle_name('$¢') ~ " = $!cursor;\n",
             "{$!target} = $start[1];\n",
             "{$!pos} = nqp.to_int($start[2], $*CTX);\n",
             "{$!curclass} = $start[3];\n",
