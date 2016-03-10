@@ -1253,7 +1253,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             my $main := self.as_js($main_block, :want($T_OBJ));
 
-            $body := Chunk.void($block_js, $main, $main.expr ~ ".\$apply([null, null].concat(nqp.args(module)));\n");
+            $body := try $*INSTANT ?? Chunk.void($block_js, $main, $main.expr ~ ".\$apply([null, null].concat(nqp.args(module)));\n") !! $main;
             
         }
         else {
@@ -1519,7 +1519,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
 
-    method as_js_with_prelude($ast) {
+    method as_js_with_prelude($ast, :$instant) {
+        my $*INSTANT := $instant;
         Chunk.void(
             "var nqp = require('nqp-runtime');\n",
             "\nvar top_ctx = nqp.top_context();\n",
@@ -1529,16 +1530,16 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         );
     }
 
-    method emit($ast) {
-       self.as_js_with_prelude($ast).join
+    method emit($ast, :$instant) {
+       self.as_js_with_prelude($ast, :$instant).join
     }
 
     # return a json datastructure we later process into a source map
-    method emit_with_source_map($ast) {
-       self.as_js_with_prelude($ast).with_source_map_info
+    method emit_with_source_map($ast, :$instant) {
+       self.as_js_with_prelude($ast, :$instant).with_source_map_info
     }
 
-    method emit_with_source_map_debug($ast) {
-       self.as_js_with_prelude($ast).source_map_debug
+    method emit_with_source_map_debug($ast, :$instant) {
+       self.as_js_with_prelude($ast, :$instant).source_map_debug
     }
 }

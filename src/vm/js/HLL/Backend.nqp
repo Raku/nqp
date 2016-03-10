@@ -39,7 +39,7 @@ class HLLBackend::JavaScript {
     }
     
     method stages() {
-        'js node'
+        'js run'
     }
     
     method is_precomp_stage($stage) {
@@ -50,18 +50,24 @@ class HLLBackend::JavaScript {
     method is_textual_stage($stage) {
         $stage eq 'js';
     }
+
+    method spawn_new_node() {
+        my $comp := nqp::getcomp('JavaScript');
+        nqp::isnull($comp);
+    }
     
     
     method js($qast, *%adverbs) {
         my $backend := QAST::CompilerJS.new(nyi=>%adverbs<nyi> // 'ignore', cps=>%adverbs<cps> // 'on');
 
+        my $instant := %adverbs<target> eq 'js' || self.spawn_new_node();
 
         if %adverbs<source-map-debug> {
-            $backend.emit_with_source_map_debug($qast);
+            $backend.emit_with_source_map_debug($qast, :$instant);
         } elsif %adverbs<source-map> {
-            $backend.emit_with_source_map($qast);
+            $backend.emit_with_source_map($qast, :$instant);
         } else {
-            my $code := $backend.emit($qast);
+            my $code := $backend.emit($qast, :$instant);
             $code := self.beautify($code) if %adverbs<beautify>;
             $code;
         }
@@ -93,16 +99,18 @@ class HLLBackend::JavaScript {
         'tmp-' ~ nqp::getpid() ~ '.js';
     }
     
-    method node($js, *%adverbs) {
+    method run($js, *%adverbs) {
         # TODO source map support
+
+        if !self.spawn_new_node {
+            return nqp::getcomp('JavaScript').eval($js);
+        }
+        
         my $tmp_file := self.tmp_file;
 
         my $code := nqp::open($tmp_file, 'w');
         nqp::printfh($code, $js);
         nqp::closefh($code);
-
-
-        
 
         sub (*@args) {
             my @cmd := ["node",$tmp_file];
