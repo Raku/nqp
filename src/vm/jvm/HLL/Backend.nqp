@@ -25,13 +25,151 @@ class HLL::Backend::JVM {
         # Doesn't do anything just yet
     }
     
+#    method run_profiled($what, $filename?) {
+#        nqp::printfh(nqp::getstderr(),
+#            "Attach a profiler (e.g. JVisualVM) and press enter");
+#        nqp::readlinefh(nqp::getstdin());
+#        $what();
+#    }
+
     method run_profiled($what, $filename?) {
-        nqp::printfh(nqp::getstderr(),
-            "Attach a profiler (e.g. JVisualVM) and press enter");
-        nqp::readlinefh(nqp::getstdin());
-        $what();
+        my @END := nqp::gethllsym('perl6', '@END_PHASERS');
+        @END.push: -> { self.dump_profile_data(nqp::endprofile(), $filename) } if nqp::defined(@END);
+        nqp::startprofile(nqp::hash());
+        my $res  := $what();
+        unless nqp::defined(@END) {
+            my $data := nqp::endprofile();
+            self.dump_profile_data($data, $filename);
+        }
+        $res;
     }
-    
+    method dump_profile_data($data, $filename) {
+        my @pieces := nqp::list_s();
+
+        unless nqp::defined($filename) {
+            $filename := 'profile-' ~ nqp::time_n() ~ '.html';
+        }
+        nqp::sayfh(nqp::getstderr(), "Writing profiler output to $filename");
+        my $profile_fh := open($filename, :w);
+        my $want_json  := ?($filename ~~ /'.json'$/);
+
+        my $escaped_backslash;
+        my $escaped_dquote;
+        my $escaped_squote;
+        if $want_json {
+            # Single quotes don't require escaping here
+            $escaped_backslash := q{\\\\};
+            $escaped_dquote    := q{\\"};
+        }
+        else {
+            # Here we're creating a double-quoted JSON string destined for the
+            # inside of a single-quoted JS string. Ouch.
+            $escaped_backslash := q{\\\\\\\\};
+            $escaped_dquote    := q{\\\\"};
+            $escaped_squote    := q{\\'};
+        }
+
+        sub post_process_call_graph_node($node) {
+            if $node<allocations> {
+                for $node<allocations> -> %alloc_info {
+                    my $type := %alloc_info<type>;
+                    %alloc_info<type> := $type.HOW.name($type);
+                }
+            }
+            if $node<callees> {
+                for $node<callees> {
+                    post_process_call_graph_node($_);
+                }
+            }
+        }
+
+        sub to_json($obj) {
+            if nqp::islist($obj) {
+                nqp::push_s(@pieces, '[');
+                my $first := 1;
+                for $obj {
+                    if $first {
+                        $first := 0;
+                    }
+                    else {
+                        nqp::push_s(@pieces, ',');
+                    }
+                    to_json($_);
+                }
+                nqp::push_s(@pieces, ']');
+            }
+            elsif nqp::ishash($obj) {
+                nqp::push_s(@pieces, '{');
+                my $first := 1;
+                for $obj {
+                    if $first {
+                        $first := 0;
+                    }
+                    else {
+                        nqp::push_s(@pieces, ',');
+                    }
+                    nqp::push_s(@pieces, '"');
+                    nqp::push_s(@pieces, $_.key);
+                    nqp::push_s(@pieces, '":');
+                    to_json($_.value);
+                }
+                nqp::push_s(@pieces, '}');
+            }
+            elsif nqp::isstr($obj) {
+                if nqp::index($obj, '\\') {
+                    $obj := subst($obj, /'\\'/, $escaped_backslash, :global);
+                }
+                if nqp::index($obj, '"') {
+                    $obj := subst($obj, /'"'/, $escaped_dquote, :global);
+                }
+                if nqp::defined($escaped_squote) && nqp::index($obj, "'") {
+                    $obj := subst($obj, /"'"/, $escaped_squote, :global);
+                }
+                nqp::push_s(@pieces, '"');
+                nqp::push_s(@pieces, $obj);
+                nqp::push_s(@pieces, '"');
+            }
+            elsif nqp::isint($obj) || nqp::isnum($obj) {
+                nqp::push_s(@pieces, ~$obj);
+            }
+            elsif nqp::can($obj, 'Str') {
+                to_json(nqp::unbox_s($obj.Str));
+            }
+            else {
+                nqp::die("Don't know how to dump a " ~ $obj.HOW.name($obj));
+            }
+            if nqp::elems(@pieces) > 4096 {
+                nqp::printfh($profile_fh, nqp::join('', @pieces));
+                nqp::setelems(@pieces, 0);
+            }
+        }
+
+        # Post-process the call data, turning objects into flat data.
+        for $data {
+            post_process_call_graph_node($_<call_graph>);
+        }
+
+        if $want_json {
+            to_json($data);
+            nqp::printfh($profile_fh, nqp::join('', @pieces));
+        }
+        else {
+            # Get profiler template, split it in half, and write those either
+            # side of the JSON itself.
+            my $template := try slurp('src/vm/moar/profiler/template.html');
+            unless $template {
+                $template := slurp(nqp::backendconfig()<prefix> ~ '/share/nqp/lib/profiler/template.html');
+            }
+            my @tpl_pieces := nqp::split('{{{PROFILER_OUTPUT}}}', $template);
+
+            nqp::printfh($profile_fh, @tpl_pieces[0]);
+            to_json($data);
+            nqp::printfh($profile_fh, nqp::join('', @pieces));
+            nqp::printfh($profile_fh, @tpl_pieces[1]);
+        }
+        nqp::closefh($profile_fh);
+    }
+
     method run_traced($level, $what) {
         nqp::die("No tracing support");
     }

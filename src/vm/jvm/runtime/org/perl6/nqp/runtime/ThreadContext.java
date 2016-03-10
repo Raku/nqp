@@ -6,6 +6,7 @@ import java.util.Random;
 
 import org.perl6.nqp.sixmodel.reprs.CallCaptureInstance;
 import org.perl6.nqp.sixmodel.reprs.SCRefInstance;
+import org.perl6.nqp.runtime.profiler.ProfileThreadData;
 import org.perl6.nqp.sixmodel.SixModelObject;
 
 /**
@@ -109,6 +110,8 @@ public class ThreadContext {
     HashMap<ContextKey<?,?>, Object> hllGlobalAllCache;
 
     Random random;
+
+    public ProfileThreadData profileData;
 
     // odds and ends for nqp
     ArrayList<Integer> fates = new ArrayList<Integer>(), curst = new ArrayList<Integer>(), nextst = new ArrayList<Integer>();

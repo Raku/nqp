@@ -217,6 +217,8 @@ public class GlobalContext {
     /** Objects we will never repossess. */
     public WeakHashMap<SixModelObject, Object> neverRepossess;
 
+    private boolean profiling = false;
+
     /**
      * Initializes the runtime environment.
      */
@@ -341,5 +343,23 @@ public class GlobalContext {
         synchronized(this) { allThreads.put(java.lang.Thread.currentThread(), tc); }
         currentThreadCtxRef.set(new WeakReference< >(tc));
         return tc;
+    }
+
+    public void startProfiling() {
+        if (profiling) {
+            throw new RuntimeException("Profiling is already started");
+        }
+        profiling = true;
+    }
+
+    public void stopProfiling() {
+        if (!profiling) {
+            throw new RuntimeException("Cannot end profiling since not profiling");
+        }
+        profiling = false;
+    }
+
+    public boolean isProfiling() {
+        return profiling;
     }
 }

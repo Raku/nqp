@@ -48,6 +48,7 @@ my $TYPE_CF         := 'Lorg/perl6/nqp/runtime/CallFrame;';
 my $TYPE_OPS        := 'Lorg/perl6/nqp/runtime/Ops;';
 my $TYPE_NATIVE_OPS := 'Lorg/perl6/nqp/runtime/NativeCallOps;';
 my $TYPE_IO_OPS     := 'Lorg/perl6/nqp/runtime/IOOps;';
+my $TYPE_PROFILER_OPS := 'Lorg/perl6/nqp/runtime/profiler/ProfilerOps;';
 my $TYPE_CSD        := 'Lorg/perl6/nqp/runtime/CallSiteDescriptor;';
 my $TYPE_SMO        := 'Lorg/perl6/nqp/sixmodel/SixModelObject;';
 my $TYPE_STR        := 'Ljava/lang/String;';
@@ -2760,6 +2761,10 @@ QAST::OperationsJAST.map_classlib_core_op('nativecallrefresh', $TYPE_NATIVE_OPS,
 QAST::OperationsJAST.map_classlib_core_op('nativecallsizeof', $TYPE_NATIVE_OPS, 'nativecallsizeof', [$RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('nativecallcast', $TYPE_NATIVE_OPS, 'nativecallcast', [$RT_OBJ, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('nativecallglobal', $TYPE_NATIVE_OPS, 'nativecallglobal', [$RT_STR, $RT_STR, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
+
+# Profiler ops
+QAST::OperationsJAST.map_classlib_core_op('startprofile', $TYPE_PROFILER_OPS, 'startProfiling', [$RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('endprofile', $TYPE_PROFILER_OPS, 'endProfiling', [], $RT_OBJ, :tc);
 
 QAST::OperationsJAST.add_core_op('getcodelocation', -> $qastcomp, $op {
     $qastcomp.as_jast(QAST::Op.new(

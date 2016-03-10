@@ -2,6 +2,7 @@ package org.perl6.nqp.runtime;
 
 import java.util.HashMap;
 
+import org.perl6.nqp.runtime.profiler.ProfileThreadData;
 import org.perl6.nqp.sixmodel.InvocationSpec;
 import org.perl6.nqp.sixmodel.SerializationContext;
 import org.perl6.nqp.sixmodel.SixModelObject;
@@ -167,6 +168,10 @@ public class CallFrame implements Cloneable {
 
         // Current call frame becomes this new one.
         tc.curFrame = this;
+
+        if (tc.gc.isProfiling()) {
+            ProfileThreadData.logEnter(tc, this);
+        }
     }
     
     // Constructor supporting auto-close.
@@ -214,6 +219,10 @@ public class CallFrame implements Cloneable {
             this.nLex = new double[sci.nLexicalNames.length];
         if (sci.sLexicalNames != null)
             this.sLex = new String[sci.sLexicalNames.length];
+
+        if (tc.gc.isProfiling()) {
+            ProfileThreadData.logEnter(tc, this);
+        }
     }
     
     public void autoClose(StaticCodeInfo wanted) {
@@ -225,6 +234,9 @@ public class CallFrame implements Cloneable {
     private static final CallSiteDescriptor exitHandlerCallSite = new CallSiteDescriptor(
         new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ }, null);
     public void leave() {
+        if (tc.gc.isProfiling()) {
+            ProfileThreadData.logLeave(tc);
+        }
         StaticCodeInfo sci = this.codeRef.staticInfo;
         sci.priorInvocation = this;
         if (sci.hasExitHandler) {
