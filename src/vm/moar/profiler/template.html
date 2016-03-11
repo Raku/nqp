@@ -721,9 +721,12 @@
         function walkCallGraphNode(node) {
             if (!nodeIdToName[node.id]) {
                 var existing_data = id_to_things[node.id.toString()];
-                nodeIdToName[node.id] = existing_data.name == "" ? "<anon>"    : existing_data.name;
-                nodeIdToLine[node.id] = existing_data.line < 1   ? "<unknown>" : existing_data.line;
-                nodeIdToFile[node.id] = existing_data.file == "" ? "<unknown>" : existing_data.file;
+                node.name = existing_data.name;
+                node.line = existing_data.line;
+                node.file = existing_data.file;
+                nodeIdToName[node.id] = node.name == "" ? "<anon>"    : node.name;
+                nodeIdToLine[node.id] = node.line < 1   ? "<unknown>" : node.line;
+                nodeIdToFile[node.id] = node.file == "" ? "<unknown>" : node.file;
             }
             if (node.callees)
                 node.callees.map(walkCallGraphNode);
