@@ -233,6 +233,9 @@ function readline(fh, chomp) {
 
 
 op.readallfh = function(fh) {
+  if (fh instanceof nqpIo.SyncPipe) {
+    return fh.slurp().toString(fh.encoding || 'utf8');
+  }
   var all = new Buffer(0);
   var buf = new Buffer(10);
   var total = 0;
@@ -255,8 +258,21 @@ op.seekfh = function(ctx, fh, offset, whence) {
 };
 
 op.closefh = function(fh) {
+  if (fh instanceof nqpIo.SyncPipe) {
+    fh.close();
+    return fh;
+  }
   fh.closefh();
   return fh;
+};
+
+op.closefh_i = function(fh) {
+  if (fh instanceof nqpIo.SyncPipe) {
+    return fh.close();
+  }
+  op.closefh(fh);
+  /* TODO proper return value */
+  return 0;
 };
 
 op.isttyfh = function(fh) {
@@ -312,31 +328,13 @@ op.spawn = function(command, dir, env, input, output, error, flags) {
   nqpIo.spawn(command.array, dir, env.$$toObject(), input, output, error, flags);
 };
 
+
+op.syncpipe = function() {
+  return new nqpIo.SyncPipe();
+};
+
 op.shell = function(command, dir, env, input, output, error, flags) {
-
-  if (flags != PIPE_INHERIT_IN + PIPE_INHERIT_OUT + PIPE_INHERIT_ERR) {
-    throw 'shell: NYI combination of flags';
-  }
-
-  var oldEnv = {};
-  for (var v in process.env) {
-    oldEnv[v] = process.env[v];
-  }
-  var oldCwd = process.cwd();
-  env.content.forEach(function(value, key,  map) {
-    process.env[key] = value;
-  });
-  process.chdir(dir);
-  child_process.execSync(command);
-  process.chdir(oldCwd);
-
-  // restore the contents of object in process.env
-  for (var v in process.env) {
-    delete process.env[v];
-  }
-  for (var v in oldEnv) {
-    process.env[v] = oldEnv[v];
-  }
+  nqpIo.shell(command, dir, env.$$toObject(), input, output, error, flags);
 };
 
 op.cwd = function() {

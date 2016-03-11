@@ -298,6 +298,7 @@ class QAST::OperationsJS {
     add_simple_op('printfh', $T_OBJ, [$T_OBJ, $T_STR], :sideffects);
     add_simple_op('flushfh', $T_OBJ, [$T_OBJ], :sideffects);
     add_simple_op('closefh', $T_OBJ, [$T_OBJ], :sideffects);
+    add_simple_op('closefh_i', $T_INT, [$T_OBJ], :sideffects);
     add_simple_op('isttyfh', $T_INT, [$T_OBJ]);
     add_simple_op('setinputlinesep', $T_OBJ, [$T_OBJ, $T_STR], :sideffects);
     add_simple_op('setinputlineseps', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
@@ -326,6 +327,7 @@ class QAST::OperationsJS {
     add_simple_op('cwd', $T_STR, [], :sideffects);
 
     add_simple_op('shell', $T_VOID, [$T_STR, $T_STR, $T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ, $T_INT], :sideffects);
+    add_simple_op('syncpipe', $T_OBJ, [], :sideffects);
 
     add_simple_op('spawn', $T_VOID, [$T_OBJ, $T_STR, $T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ, $T_INT], :sideffects);
 
