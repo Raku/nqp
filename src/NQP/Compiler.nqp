@@ -40,6 +40,13 @@ $nqpcomp.addstage('classname', :after<start>);
 @clo.push('vmlibs=s');
 @clo.push('bootstrap');
 #?endif
+#?if js
+@clo.push('source-map');
+@clo.push('source-map-debug');
+@clo.push('beautify');
+@clo.push('cps=s');
+@clo.push('nyi=s');
+#endif
 
 #?if parrot
 # XXX FIX ME
