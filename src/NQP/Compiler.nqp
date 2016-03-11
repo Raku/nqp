@@ -46,7 +46,7 @@ $nqpcomp.addstage('classname', :after<start>);
 @clo.push('beautify');
 @clo.push('cps=s');
 @clo.push('nyi=s');
-#endif
+#?endif
 
 #?if parrot
 # XXX FIX ME
