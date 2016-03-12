@@ -37,19 +37,31 @@ class HLL::Backend::MoarVM {
                 )))));
         }
     }
-    method run_profiled($what, $filename?) {
+    method run_profiled($what, $kind, $filename?) {
+        $kind := 'instrumented' unless $kind;
+
         my @END := nqp::gethllsym('perl6', '@END_PHASERS');
-        @END.push: -> { self.dump_profile_data($prof_end_sub(), $filename) } if nqp::defined(@END);
+        @END.push(-> { self.dump_profile_data($prof_end_sub(), $kind, $filename) })
+            if nqp::defined(@END);
+
         self.ensure_prof_routines();
-        $prof_start_sub(nqp::hash());
+        $prof_start_sub(nqp::hash('kind', $kind));
         my $res  := $what();
         unless nqp::defined(@END) {
             my $data := $prof_end_sub();
-            self.dump_profile_data($data, $filename);
+            self.dump_profile_data($data, $kind, $filename);
         }
         $res;
     }
-    method dump_profile_data($data, $filename) {
+    method dump_profile_data($data, $kind, $filename) {
+        if $kind eq 'instrumented' {
+            self.dump_instrumented_profile_data($data, $filename);
+        }
+        else {
+            nqp::die("Don't know how to dump data for $kind profile");
+        }
+    }
+    method dump_instrumented_profile_data($data, $filename) {
         my @pieces := nqp::list_s();
 
         unless nqp::defined($filename) {
