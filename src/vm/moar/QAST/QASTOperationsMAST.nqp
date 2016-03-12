@@ -2746,6 +2746,8 @@ QAST::MASTOperations.add_core_moarop_mapping('usecompilerhllconfig', 'usecompile
 QAST::MASTOperations.add_core_moarop_mapping('hllize', 'hllize');
 QAST::MASTOperations.add_core_moarop_mapping('hllizefor', 'hllizefor');
 
+QAST::MASTOperations.add_core_moarop_mapping('setdebugtypename', 'setdebugtypename', 0);
+
 # regex engine related opcodes
 QAST::MASTOperations.add_core_moarop_mapping('nfafromstatelist', 'nfafromstatelist');
 QAST::MASTOperations.add_core_moarop_mapping('nfarunproto', 'nfarunproto');
