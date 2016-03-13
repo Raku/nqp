@@ -87,13 +87,29 @@ class HLL::Backend::MoarVM {
             $escaped_squote    := q{\\'};
         }
 
+        my int $new-id-counter := 0;
+        my $id_remap    := nqp::hash();
         my $id_to_thing := nqp::hash();
 
         sub post_process_call_graph_node($node) {
             try {
+                if nqp::existskey($id_remap, $node<id>) {
+                    $node<id> := $id_remap{$node<id>};
+                } else {
+                    my str $newkey := ~($new-id-counter++);
+                    $id_remap{$node<id>} := $newkey;
+                    $node<id> := $newkey;
+                }
                 if nqp::existskey($node, "allocations") {
                     for $node<allocations> -> %alloc_info {
                         my $type := %alloc_info<type>;
+                        if nqp::existskey($id_remap, %alloc_info<id>) {
+                            %alloc_info<id> := $id_remap{%alloc_info<id>};
+                        } else {
+                            my str $newkey := ~($new-id-counter++);
+                            $id_remap{%alloc_info<id>} := $newkey;
+                            %alloc_info<id> := $newkey;
+                        }
                         unless nqp::existskey($id_to_thing, %alloc_info<id>) {
                             $id_to_thing{%alloc_info<id>} := $type.HOW.name($type);
                         }
