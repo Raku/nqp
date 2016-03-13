@@ -1008,6 +1008,7 @@
             if (node.allocations) {
                 node.allocations.map(function (alloc) {
                     if (!typeIdToName[alloc.id]) {
+                        alloc.type = id_to_things[alloc.id];
                         typeIdToName[alloc.id]         = alloc.type == "" ? "<anon>" : alloc.type;
                         typeIdToAllocations[alloc.id]  = 0;
                         typeIdToAllocationsByType[alloc.id] = [0, 0, 0];
