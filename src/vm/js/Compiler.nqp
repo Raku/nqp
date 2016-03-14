@@ -188,6 +188,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             @tmps;
         }
 
+        method cuid() {
+            $!qast ?? $!qast.cuid !! NQPMu;
+        }
+
         method var_type($var) { %!var_types{$var.name} }
         method register_var_type($var, $type) { %!var_types{$var.name} := $type }
 
@@ -860,6 +864,14 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             my $cuid := self.mangled_cuid($_.key);
             my $reg   := $_.value;
 
+            my $expected_outer := %*BLOCKS_INFO{$_.key}.outer;
+
+            if $expected_outer.cuid ne $*BLOCK.cuid {
+                @capture_inners.push("/*static block*/\n");
+                @capture_inners.push("(function() \{\n");
+                @capture_inners.push("var {$expected_outer.ctx} = null;\n");
+            }
+
             if %*BLOCKS_AS_METHOD{$_.key} {
                 @capture_inners.push("$reg = $cuid.method");
             }
@@ -867,8 +879,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 @capture_inners.push("$reg = $cuid.capture");
             }
 
+
             @capture_inners.push(%*BLOCKS_DONE{$_.key});
             @capture_inners.push(";\n");
+
+            if $expected_outer.cuid ne $*BLOCK.cuid {
+                @capture_inners.push("\})();\n");
+            }
         }
         Chunk.void(|@capture_inners);
     }
@@ -908,6 +925,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             my $*CTX := self.unique_var('ctx');
             $*BLOCK.ctx($*CTX);
+
+            %*BLOCKS_INFO{$node.cuid} := $*BLOCK;
 
             my $body_want := $node.blocktype eq 'immediate' ?? $want !! $T_OBJ;
 
@@ -1238,6 +1257,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         # Blocks we've seen while compiling.
         my %*BLOCKS_DONE;
+        my %*BLOCKS_INFO;
         my %*BLOCKS_AS_METHOD;
         my %*BLOCKS_DONE_CPS;
 
