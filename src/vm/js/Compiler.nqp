@@ -782,16 +782,20 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     # Instead of implementing forceouterctx we use this hack to support settings.
     method setup_setting($node) {
         if nqp::eqaddr($node, $*SETTING_TARGET) {
-            my @imported;
-            for $node.symtable -> $symbol {
-                @imported.push("{self.mangle_name($symbol.key)} = setting[{quote_string($symbol.key)}]");
-            }
-            "var setting = nqp.setup_setting({quote_string($*SETTING_NAME)});\n"
-            ~ self.declare_js_vars(@imported);
+            self.import_stuff_from_setting($node);
         }
         else {
             '';
         }
+    }
+
+    method import_stuff_from_setting($node) {
+        my @imported;
+        for $node.symtable -> $symbol {
+            @imported.push("{self.mangle_name($symbol.key)} = setting[{quote_string($symbol.key)}]");
+        }
+        "var setting = nqp.setup_setting({quote_string($*SETTING_NAME)});\n"
+        ~ self.declare_js_vars(@imported);
     }
 
 
@@ -867,8 +871,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             my $expected_outer := %*BLOCKS_INFO{$_.key}.outer;
 
             if $expected_outer.cuid ne $*BLOCK.cuid {
-                @capture_inners.push("/*static block*/\n");
                 @capture_inners.push("(function() \{\n");
+                @capture_inners.push(self.import_stuff_from_setting($*SETTING_TARGET));
                 @capture_inners.push("var {$expected_outer.ctx} = null;\n");
             }
 
