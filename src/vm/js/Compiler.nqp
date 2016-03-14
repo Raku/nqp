@@ -33,6 +33,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         has %!var_types;    # Mapping of lexical names to types
 
+        has %!static_variables;
+
         method new($qast, $outer) {
             my $obj := nqp::create(self);
             $obj.BUILD($qast, $outer);
@@ -52,6 +54,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             %!need_cps := nqp::hash();
             %!need_direct := nqp::hash();
             %!var_types := nqp::hash();
+            %!static_variables := nqp::hash();
         }
 
         method set_cont($chunk, $cont) {
@@ -103,6 +106,31 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         method add_variable($var) {
             @!variables.push($var);
         }
+
+        method add_static_variable($var) {
+            %!static_variables{$var.name} := $var;
+        }
+
+        method has_local_static_variable($name) {
+            nqp::existskey(%!static_variables, $name);
+        }
+
+        method get_static_variable($name) {
+            %!static_variables{$name};
+        }
+
+        method lookup_static_variable($var) {
+            my $info := self;
+            return nqp::null if $var.scope ne 'lexical';
+            while $info {
+                if $info.has_local_static_variable($var.name) {
+                    return $info.get_static_variable($var.name);
+                }
+                $info := $info.outer;
+            }
+            nqp::null();
+        }
+
 
         method register_lexotic($name) {
             %!lexotic{$name} := 0;
@@ -1067,7 +1095,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         if self.is_ctxsave($node) {
             my @lexicals;
             for $*BLOCK.variables -> $var {
-                @lexicals.push(quote_string($var.name) ~ ': ' ~ self.mangle_name($var.name));
+                if $*BLOCK.lookup_static_variable($var) -> $static {
+                    @lexicals.push(quote_string($var.name) ~ ': ' ~ self.value_as_js($static.value));
+                }
+                else {
+                    @lexicals.push(quote_string($var.name) ~ ': ' ~ self.mangle_name($var.name));
+                }
             }
             Chunk.void("nqp.ctxsave(\{{nqp::join(',', @lexicals)}\});\n");
         }
@@ -1236,6 +1269,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
         }
 
+        # Compile the block.
+        my $block_js := self.as_js($node[0], :want($T_VOID));
+
         my @post;
         for $node.post_deserialize -> $node {
             self.log($node.dump);
@@ -1243,8 +1279,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
         my $post := Chunk.new($T_VOID, "", @post);
 
-        # Compile the block.
-        my $block_js := self.as_js($node[0], :want($T_VOID));
 
         my $body;
 
@@ -1284,11 +1318,14 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             self.log("type {$node.name} = $type");
         }
 
-        if $node.decl eq 'var' || $node.decl eq 'static' {
+        if $node.decl eq 'var' {
             $*BLOCK.add_variable($node);
-            my $static := $node.decl eq 'static' ?? " = {self.value_as_js($node.value)}" !! '';
 
-            $*BLOCK.add_js_lexical(self.mangle_name($node.name) ~ $static);
+            $*BLOCK.add_js_lexical(self.mangle_name($node.name));
+        }
+        elsif $node.decl eq 'static' {
+            $*BLOCK.add_variable($node);
+            $*BLOCK.add_static_variable($node);
         }
         elsif $node.decl eq 'param' {
             $*BLOCK.add_variable($node);
@@ -1422,6 +1459,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     Chunk.new($T_OBJ, "{$*CTX}.lookup({quote_string($var.name)})", [], :node($var));
                 }
             }
+        }
+        elsif $*BLOCK.lookup_static_variable($var) -> $static {
+            Chunk.new($T_OBJ, self.value_as_js($static.value), []);
         }
         elsif self.var_is_lexicalish($var) || $var.scope eq 'local' {
             my $type := self.figure_out_type($var);
