@@ -71,7 +71,7 @@ BinaryWriteCursor.prototype.str = function(str) {
   }
 };
 
-/** Read a C String */
+/** Write a C String */
 BinaryWriteCursor.prototype.cstr = function(string) {
   if (string === undefined) {
     this.varint(0);
