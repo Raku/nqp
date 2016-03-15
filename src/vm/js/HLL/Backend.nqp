@@ -82,7 +82,7 @@ class HLLBackend::JavaScript {
         nqp::closefh($fh);
 
         my $pipe   := nqp::syncpipe();
-        my $status := nqp::shell("uglifyjs $tmp_file -b", nqp::cwd(), nqp::getenvhash(),
+        my $status := nqp::shell("js-beautify $tmp_file", nqp::cwd(), nqp::getenvhash(),
             nqp::null(), $pipe, nqp::null(),
             nqp::const::PIPE_INHERIT_IN + nqp::const::PIPE_CAPTURE_OUT + nqp::const::PIPE_INHERIT_ERR);
         my $beautified := nqp::readallfh($pipe);
