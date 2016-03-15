@@ -355,6 +355,8 @@ BinaryCursor.prototype.STable = function(STable) {
   // TODO check for MVM_PARAMETRIC_TYPE mode_flags
   // TODO check for MVM_PARAMETRIC_TYPE mode_flags
 
+  STable.debug_name = this.cstr();
+
   if (STable.REPR.deserialize_repr_data) {
     STable.REPR.deserialize_repr_data(this.clone(), STable);
   }
@@ -441,7 +443,7 @@ BinaryCursor.prototype.deserialize = function(sc) {
 
   this.sc = sc;
 
-  if (version != 17) {
+  if (version != 18) {
     throw 'Unsupported serialization format version: ' + version;
   }
 
@@ -734,6 +736,14 @@ BinaryCursor.prototype.str = function() {
     throw "can't read str: " + offset;
   }
   return this.sh[offset];
+};
+
+/** Read a C String */
+BinaryCursor.prototype.cstr = function() {
+  var len = this.varint();
+  var str = this.buffer.slice(this.offset, len).toString('utf8');
+  this.offset += len;
+  return str;
 };
 
 BinaryCursor.prototype.str32 = function() {

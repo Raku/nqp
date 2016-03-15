@@ -7,7 +7,7 @@ var NQPArray = require('./array.js');
 var op = {};
 exports.op = op;
 
-var CURRENT_VERSION = 17;
+var CURRENT_VERSION = 18;
 var OBJECTS_TABLE_ENTRY_SC_MASK = 0x7FF;
 var OBJECTS_TABLE_ENTRY_SC_IDX_MASK = 0x000FFFFF;
 var OBJECTS_TABLE_ENTRY_SC_IDX_MAX = 0x000FFFFF;
@@ -68,6 +68,16 @@ BinaryWriteCursor.prototype.str = function(str) {
     this.U16((heap_loc >> STRING_HEAP_LOC_PACKED_SHIFT) |
         STRING_HEAP_LOC_PACKED_OVERFLOW);
     this.U16(heap_loc & STRING_HEAP_LOC_PACKED_LOW_MASK);
+  }
+};
+
+/** Read a C String */
+BinaryWriteCursor.prototype.cstr = function(string) {
+  if (string === undefined) {
+    this.varint(0);
+  } else {
+    this.varint(Buffer.byteLength(string));
+    this.offset += this.buffer.write(string, this.offset);
   }
 };
 
@@ -513,6 +523,9 @@ SerializationWriter.prototype.serializeSTable = function(st) {
   /* TODO - HLL owner */
 
   //this.stables_data.str(null);
+
+  // TODO debug_name
+  this.stables_data.cstr(st.debug_name);
 
   /* Location of REPR data. */
   this.stables.I32(this.stables_data.offset);
