@@ -37,8 +37,6 @@ class QAST::Block is QAST::Node does QAST::Children {
     }
 
     my $cur_cuid := 0;
-    my $cuid_suffix := ~nqp::time_n();
-    
     method cuid($value = NO_VALUE) {
         if !($value =:= NO_VALUE) {
             # Set ID if we are provided one.
@@ -51,7 +49,7 @@ class QAST::Block is QAST::Node does QAST::Children {
         else {
             # Otherwise, generate one.
             $cur_cuid := $cur_cuid + 1;
-            $!cuid := 'cuid_' ~ $cur_cuid ~ '_' ~ $cuid_suffix;
+            $!cuid := ~$cur_cuid;
         }
     }
 
