@@ -1306,19 +1306,24 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my $body;
 
+        my $instant := try $*INSTANT;
         if nqp::defined($node.main) {
             my $main_block := QAST::Block.new($node.main);
 
             my $main := self.as_js($main_block, :want($T_OBJ));
 
-            $body := try $*INSTANT ?? Chunk.void($block_js, $main, $main.expr ~ ".\$apply([null, null].concat(nqp.args(module)));\n") !! $main;
+            $body := $instant ?? Chunk.void($block_js, $main, $main.expr ~ ".\$apply([null, null].concat(nqp.args(module)));\n") !! $main;
             
         }
         else {
             $body := $block_js;
         }
 
-        Chunk.void(self.setup_cuids(), $pre , self.create_sc($node), self.set_code_objects,  self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $post, $body);
+        my @setup := [self.setup_cuids(), $pre , self.create_sc($node), self.set_code_objects,  self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $post, $body];
+        if !$instant {
+            @setup.push($body.expr);
+        }
+        Chunk.new($T_VOID, "", @setup);
     }
 
 
