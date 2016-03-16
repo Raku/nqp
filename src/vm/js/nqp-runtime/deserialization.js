@@ -596,7 +596,7 @@ BinaryCursor.prototype.deserialize = function(sc) {
 
   var cuids = [];
   for (var cuid in CodeRef.cuids) {
-    mangledCuid = cuid.replace(/\./g, '_');
+    mangledCuid = 'cuid' + cuid;
     cuids.push(mangledCuid + ' = CodeRef.cuids[\"' + cuid + '\"]');
   }
 

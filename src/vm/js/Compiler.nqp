@@ -731,11 +731,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     method mangled_cuid($cuid) {
-        my $ret := '';
-        for nqp::split('',$cuid) -> $c {
-            $ret := $ret ~ ($c eq '.' ?? '_' !! $c); 
-        }
-        $ret;
+        'cuid'~$cuid;
     }
 
 
