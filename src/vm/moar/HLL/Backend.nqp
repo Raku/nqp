@@ -2,6 +2,103 @@
 class HLL::Backend::MoarVM {
     our %moar_config := nqp::backendconfig();
 
+    sub sorted_keys($hash) {
+        my @keys;
+        for $hash {
+            nqp::push(@keys, $_.key);
+        }
+        if +@keys == 0 {
+            return @keys;
+        }
+
+        # we expect on the order of 6 or 7 keys here, so bubble sort is fine.
+        my int $start := 0;
+        my int $numkeys := +@keys;
+        my str $swap;
+        my int $current;
+        while $start < $numkeys - 1 {
+            $current := 0;
+            while $current < $numkeys - 1 {
+                if @keys[$current] lt @keys[$current + 1] {
+                    $swap := @keys[$current];
+                    @keys[$current] := @keys[$current + 1];
+                    @keys[$current + 1] := $swap;
+                }
+                $current++;
+            }
+            $start++;
+        }
+        return @keys;
+    }
+
+    sub output_as_json($obj, $output_fh, $esc_backslash, $esc_dquote, $esc_squote?) {
+        my @pieces := nqp::list_s();
+
+        sub to_json($obj) {
+            if nqp::islist($obj) {
+                nqp::push_s(@pieces, '[');
+                my $first := 1;
+                for $obj {
+                    if $first {
+                        $first := 0;
+                    }
+                    else {
+                        nqp::push_s(@pieces, ',');
+                    }
+                    to_json($_);
+                }
+                nqp::push_s(@pieces, ']');
+            }
+            elsif nqp::ishash($obj) {
+                nqp::push_s(@pieces, '{');
+                my $first := 1;
+                for sorted_keys($obj) {
+                    if $first {
+                        $first := 0;
+                    }
+                    else {
+                        nqp::push_s(@pieces, ',');
+                    }
+                    nqp::push_s(@pieces, '"');
+                    nqp::push_s(@pieces, $_);
+                    nqp::push_s(@pieces, '":');
+                    to_json($obj{$_});
+                }
+                nqp::push_s(@pieces, '}');
+            }
+            elsif nqp::isstr($obj) {
+                if nqp::index($obj, '\\') {
+                    $obj := subst($obj, /'\\'/, $esc_backslash, :global);
+                }
+                if nqp::index($obj, '"') {
+                    $obj := subst($obj, /'"'/, $esc_dquote, :global);
+                }
+                if nqp::defined($esc_squote) && nqp::index($obj, "'") {
+                    $obj := subst($obj, /"'"/, $esc_squote, :global);
+                }
+                nqp::push_s(@pieces, '"');
+                nqp::push_s(@pieces, $obj);
+                nqp::push_s(@pieces, '"');
+            }
+            elsif nqp::isint($obj) || nqp::isnum($obj) {
+                nqp::push_s(@pieces, ~$obj);
+            }
+            elsif nqp::can($obj, 'Str') {
+                to_json(nqp::unbox_s($obj.Str));
+            }
+            else {
+                nqp::die("Don't know how to dump a " ~ $obj.HOW.name($obj));
+            }
+            if nqp::elems(@pieces) > 4096 {
+                nqp::printfh($output_fh, nqp::join('', @pieces));
+                nqp::setelems(@pieces, 0);
+            }
+        }
+
+        to_json($obj);
+        nqp::printfh($output_fh, nqp::join('', @pieces));
+    }
+
     method apply_transcodings($s, $transcode) {
         $s
     }
@@ -57,9 +154,22 @@ class HLL::Backend::MoarVM {
         if $kind eq 'instrumented' {
             self.dump_instrumented_profile_data($data, $filename);
         }
+        elsif $kind eq 'heap' {
+            self.dump_heap_profile_data($data, $filename);
+        }
         else {
             nqp::die("Don't know how to dump data for $kind profile");
         }
+    }
+    method dump_heap_profile_data($data, $filename) {
+        my @pieces;
+
+        unless nqp::defined($filename) {
+            $filename := 'heap-' ~ nqp::time_n() ~ '.json';
+        }
+        my $profile_fh := open($filename, :w);
+
+        output_as_json($data, $profile_fh, q{\\\\}, q{\\"});
     }
     method dump_instrumented_profile_data($data, $filename) {
         my @pieces := nqp::list_s();
@@ -72,8 +182,9 @@ class HLL::Backend::MoarVM {
         my $want_json  := ?($filename ~~ /'.json'$/);
 
         my $escaped_backslash;
-        my $escaped_dquote;
         my $escaped_squote;
+        my $escaped_dquote;
+
         if $want_json {
             # Single quotes don't require escaping here
             $escaped_backslash := q{\\\\};
@@ -137,97 +248,6 @@ class HLL::Backend::MoarVM {
                 }
             }
         }
-
-        sub sorted_keys($hash) {
-            my @keys;
-            for $hash {
-                nqp::push(@keys, $_.key);
-            }
-            if +@keys == 0 {
-                return @keys;
-            }
-
-            # we expect on the order of 6 or 7 keys here, so bubble sort is fine.
-            my int $start := 0;
-            my int $numkeys := +@keys;
-            my str $swap;
-            my int $current;
-            while $start < $numkeys - 1 {
-                $current := 0;
-                while $current < $numkeys - 1 {
-                    if @keys[$current] lt @keys[$current + 1] {
-                        $swap := @keys[$current];
-                        @keys[$current] := @keys[$current + 1];
-                        @keys[$current + 1] := $swap;
-                    }
-                    $current++;
-                }
-                $start++;
-            }
-            return @keys;
-        }
-
-        sub to_json($obj) {
-            if nqp::islist($obj) {
-                nqp::push_s(@pieces, '[');
-                my $first := 1;
-                for $obj {
-                    if $first {
-                        $first := 0;
-                    }
-                    else {
-                        nqp::push_s(@pieces, ',');
-                    }
-                    to_json($_);
-                }
-                nqp::push_s(@pieces, ']');
-            }
-            elsif nqp::ishash($obj) {
-                nqp::push_s(@pieces, '{');
-                my $first := 1;
-                for sorted_keys($obj) {
-                    if $first {
-                        $first := 0;
-                    }
-                    else {
-                        nqp::push_s(@pieces, ',');
-                    }
-                    nqp::push_s(@pieces, '"');
-                    nqp::push_s(@pieces, $_);
-                    nqp::push_s(@pieces, '":');
-                    to_json($obj{$_});
-                }
-                nqp::push_s(@pieces, '}');
-            }
-            elsif nqp::isstr($obj) {
-                if nqp::index($obj, '\\') {
-                    $obj := subst($obj, /'\\'/, $escaped_backslash, :global);
-                }
-                if nqp::index($obj, '"') {
-                    $obj := subst($obj, /'"'/, $escaped_dquote, :global);
-                }
-                if nqp::defined($escaped_squote) && nqp::index($obj, "'") {
-                    $obj := subst($obj, /"'"/, $escaped_squote, :global);
-                }
-                nqp::push_s(@pieces, '"');
-                nqp::push_s(@pieces, $obj);
-                nqp::push_s(@pieces, '"');
-            }
-            elsif nqp::isint($obj) || nqp::isnum($obj) {
-                nqp::push_s(@pieces, ~$obj);
-            }
-            elsif nqp::can($obj, 'Str') {
-                to_json(nqp::unbox_s($obj.Str));
-            }
-            else {
-                nqp::die("Don't know how to dump a " ~ $obj.HOW.name($obj));
-            }
-            if nqp::elems(@pieces) > 4096 {
-                nqp::printfh($profile_fh, nqp::join('', @pieces));
-                nqp::setelems(@pieces, 0);
-            }
-        }
-
         # Post-process the call data, turning objects into flat data.
         for $data {
             post_process_call_graph_node($_<call_graph>);
@@ -236,8 +256,7 @@ class HLL::Backend::MoarVM {
         nqp::unshift($data, $id_to_thing);
 
         if $want_json {
-            to_json($data);
-            nqp::printfh($profile_fh, nqp::join('', @pieces));
+            output_as_json($data, $profile_fh, $escaped_backslash, $escaped_dquote);
         }
         else {
             # Get profiler template, split it in half, and write those either
@@ -249,8 +268,7 @@ class HLL::Backend::MoarVM {
             my @tpl_pieces := nqp::split('{{{PROFILER_OUTPUT}}}', $template);
 
             nqp::printfh($profile_fh, @tpl_pieces[0]);
-            to_json($data);
-            nqp::printfh($profile_fh, nqp::join('', @pieces));
+            output_as_json($data, $profile_fh, $escaped_backslash, $escaped_dquote, $escaped_squote);
             nqp::printfh($profile_fh, @tpl_pieces[1]);
         }
         nqp::closefh($profile_fh);
