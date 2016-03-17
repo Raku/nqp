@@ -1137,9 +1137,44 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         QAST::OperationsJS.compile_op(self, $node, :$want, :$cps);
     }
 
+    method emit_code_refs_list($ast) {
+        my @blocks;
+        my $set_info := '';
+
+        if $ast.code_ref_blocks() -> $code_ref_blocks {
+            for $code_ref_blocks -> $block {
+                @blocks.push(self.mangled_cuid($block.cuid));
+            }
+
+            for $code_ref_blocks -> $block {
+                if nqp::existskey(%!serialized_code_ref_info, $block.cuid) {
+                    my $info := %!serialized_code_ref_info{$block.cuid};
+
+                    $set_info := $set_info
+                        ~ self.mangled_cuid($block.cuid)
+                        ~ ".setInfo("
+                        ~ quote_string($info.ctx) ~ ","
+                        ~ quote_string($info.outer_ctx) ~ ","
+                        ~ quote_string($info.closure_template) ~ ","
+                        ~ $info.static_info ~ ","
+                        ~ ($info.as_method ?? "true" !! "false")
+                        ~ ");\n";
+                }
+            }
+         }
+
+        "var code_refs = new nqp.NQPArray([{nqp::join(',',@blocks)}]);\n" # TODO
+        ~ $set_info
+    }
+
+
     method create_sc($ast) {
         my @sh;
         my $sc := $ast.sc;
+
+        if !nqp::defined($ast.sc) {
+            return self.emit_code_refs_list($ast);
+        }
 
         my $sc_tuple := self.serialize_sc($sc);
         my $sc_data := $sc_tuple[0];
@@ -1156,34 +1191,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my $quoted_data := nqp::isnull_s($sc_data) ?? 'null' !! quote_string($sc_data);
 
-        my $code_ref_blocks := $ast.code_ref_blocks();
-
-        my @blocks;
-        for $code_ref_blocks -> $block {
-            @blocks.push(self.mangled_cuid($block.cuid));
-        }
-
-        my $set_info := '';
-        for $code_ref_blocks -> $block {
-            if nqp::existskey(%!serialized_code_ref_info, $block.cuid) {
-                my $info := %!serialized_code_ref_info{$block.cuid};
-                
-                $set_info := $set_info
-                    ~ self.mangled_cuid($block.cuid)
-                    ~ ".setInfo("
-                    ~ quote_string($info.ctx) ~ ","
-                    ~ quote_string($info.outer_ctx) ~ ","
-                    ~ quote_string($info.closure_template) ~ ","
-                    ~ $info.static_info ~ ","
-                    ~ ($info.as_method ?? "true" !! "false")
-                    ~ ");\n";
-            }
-        }
 
         "var sh= new nqp.NQPArray([{nqp::join(',',@sh)}]);\n"
         ~ "var sc = nqp.op.createsc({quote_string(nqp::scgethandle($sc))});\n"
-        ~ "var code_refs = new nqp.NQPArray([{nqp::join(',',@blocks)}]);\n" # TODO
-        ~ $set_info
+        ~ self.emit_code_refs_list($ast)
         ~ "nqp.op.deserialize($quoted_data,sc,sh,code_refs,null);\n"
         ~ "nqp.op.scsetdesc(sc,{quote_string(nqp::scgetdesc($sc))});\n"
     }
@@ -1289,8 +1300,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
         }
 
+        my $instant := try $*INSTANT;
+
         # Compile the block.
-        my $block_js := self.as_js($node[0], :want($T_VOID));
+        my $block_js := self.as_js($node[0], :want($instant ?? $T_VOID !! $T_OBJ));
 
         my @post;
         for $node.post_deserialize -> $node {
@@ -1302,7 +1315,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my $body;
 
-        my $instant := try $*INSTANT;
         if nqp::defined($node.main) {
             my $main_block := QAST::Block.new($node.main);
 
@@ -1317,14 +1329,14 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my @setup := [self.setup_cuids(), $pre , self.create_sc($node), self.set_code_objects,  self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $post, $body];
         if !$instant {
-            @setup.push($body.expr);
+            @setup.push("new nqp.EvalResult({$body.expr}, code_refs)");
         }
         Chunk.new($T_VOID, "", @setup);
     }
 
 
     method is_block_part_of_sc($block) {
-        return 0 unless try $*COMPUNIT;
+        return 0 unless try $*COMPUNIT && $*COMPUNIT.code_ref_blocks();
         for $*COMPUNIT.code_ref_blocks() -> $block_in_compunit {
             if nqp::eqaddr($block, $block_in_compunit) {
                 return 1;

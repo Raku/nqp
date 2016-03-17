@@ -18,6 +18,8 @@ exports.slurpy_named = core.slurpy_named;
 exports.named = core.named;
 exports.unwrap_named = core.unwrap_named;
 
+exports.EvalResult = core.EvalResult;
+
 var io = require('./io.js');
 load_ops(io);
 

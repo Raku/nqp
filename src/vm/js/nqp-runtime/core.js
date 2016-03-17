@@ -982,3 +982,22 @@ op.newexception = function() {
   var exType = BOOTException;
   return exType._STable.REPR.allocate(exType._STable);
 };
+
+function EvalResult(mainline, codeRefs) {
+  this.mainline = mainline;
+  this.codeRefs = codeRefs;
+}
+
+exports.EvalResult = EvalResult;
+
+op.iscompunit = function(obj) {
+  return obj instanceof EvalResult ? 1 : 0;
+};
+
+op.compunitmainline = function(cu) {
+  return cu.mainline;
+};
+
+op.compunitcodes = function(cu) {
+  return cu.codeRefs;
+};

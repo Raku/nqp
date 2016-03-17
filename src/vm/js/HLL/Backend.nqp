@@ -141,12 +141,18 @@ class HLLBackend::JavaScript {
         spew($module ~ '/package.json', $package_json);
     }
 
-    method compunit_mainline($output) {
-        $output;
+    # When running on Moar a compunit is just a sub 
+
+    method compunit_mainline($cu) {
+        nqp::isinvokable($cu) ?? $cu !! nqp::compunitmainline($cu);
     }
-    
+
+    method compunit_coderefs($cu) {
+        nqp::compunitcodes($cu);
+    }
+
     method is_compunit($cuish) {
-        1;
+        nqp::isinvokable($cuish) || nqp::iscompunit($cuish);
     }
 }
 

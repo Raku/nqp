@@ -1270,6 +1270,12 @@ class QAST::OperationsJS {
 
     add_simple_op('continuationcontrol', $T_OBJ, [$T_INT, $T_OBJ, $T_OBJ], :ctx, :required_cps);
 
+    # Dealing with compiled compunits
+
+    add_simple_op('iscompunit', $T_INT, [$T_OBJ]);
+    add_simple_op('compunitcodes', $T_OBJ, [$T_OBJ]);
+    add_simple_op('compunitmainline', $T_OBJ, [$T_OBJ]);
+
     method compile_op($comp, $op, :$want, :$cps) {
         my str $name := $op.op;
         if nqp::existskey(%ops, $name) {
