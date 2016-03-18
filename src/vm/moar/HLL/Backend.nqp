@@ -165,11 +165,71 @@ class HLL::Backend::MoarVM {
         my @pieces;
 
         unless nqp::defined($filename) {
-            $filename := 'heap-' ~ nqp::time_n() ~ '.json';
+            $filename := 'heap-' ~ nqp::time_n() ~ '.txt';
         }
         my $profile_fh := open($filename, :w);
 
-        output_as_json($data, $profile_fh, q{\\\\}, q{\\"});
+        nqp::sayfh($profile_fh, '# This file contains MoarVM heap snapshots.');
+        nqp::sayfh($profile_fh, '# the stringheap section contains a list of');
+        nqp::sayfh($profile_fh, '# strings that are used throughout the file');
+        nqp::sayfh($profile_fh, '# by their index in the string heap.');
+        nqp::sayfh($profile_fh, '#');
+        nqp::sayfh($profile_fh, '# The types list has entries with two string');
+        nqp::sayfh($profile_fh, '# indices: The REPR of a type and the name.');
+        nqp::sayfh($profile_fh, '#');
+        nqp::sayfh($profile_fh, '# The following sections are per snapshot:');
+        nqp::sayfh($profile_fh, '#');
+        nqp::sayfh($profile_fh, '# Every entry in the collectables section starts');
+        nqp::sayfh($profile_fh, '# with the type or frame index as second value.');
+        nqp::sayfh($profile_fh, '#');
+        nqp::sayfh($profile_fh, '#   1 Object');
+        nqp::sayfh($profile_fh, '#   2 Type object');
+        nqp::sayfh($profile_fh, '#   3 STable');
+        nqp::sayfh($profile_fh, '#   4 Frame');
+        nqp::sayfh($profile_fh, '#   5 Perm Roots');
+        nqp::sayfh($profile_fh, '#   6 Instance Roots');
+        nqp::sayfh($profile_fh, '#   7 CStack Roots');
+        nqp::sayfh($profile_fh, '#   8 Thread Roots');
+        nqp::sayfh($profile_fh, '#   9 Root');
+        nqp::sayfh($profile_fh, '#');
+        nqp::sayfh($profile_fh, '# The third field is the size of the GC-managed');
+        nqp::sayfh($profile_fh, '# part. The fourth field is the size of extra');
+        nqp::sayfh($profile_fh, '# data, for example managed by malloc or the FSA.');
+        nqp::sayfh($profile_fh, '#');
+        nqp::sayfh($profile_fh, '# The fifth field is the starting index into the');
+        nqp::sayfh($profile_fh, '# references list, the sixth field is the number');
+        nqp::sayfh($profile_fh, '# of references that belong to this collectable.');
+        nqp::sayfh($profile_fh, '#');
+        nqp::sayfh($profile_fh, '# Each reference has its ref kind, its "data"');
+        nqp::sayfh($profile_fh, '# and the index of the referenced collectable as');
+        nqp::sayfh($profile_fh, '# its fields.');
+        nqp::sayfh($profile_fh, '#');
+        nqp::sayfh($profile_fh, '#   0 for unknown.');
+        nqp::sayfh($profile_fh, '#   1 for an index.');
+        nqp::sayfh($profile_fh, '#   2 for an entry in the string heap.');
+        nqp::sayfh($profile_fh, '#');
+        nqp::sayfh($profile_fh, '[ stringheap');
+        for $data<strings> {
+            if nqp::index($_, '\n') {
+                nqp::sayfh($profile_fh, subst($_, /\n/, q{\\n}, :global));
+            }
+            else {
+                nqp::sayfh($profile_fh, $_);
+            }
+        }
+        nqp::sayfh($profile_fh, '[ types');
+        nqp::sayfh($profile_fh, $data<types>);
+
+        nqp::sayfh($profile_fh, '[ snapshots');
+        my int $snapshotidx := 0;
+        for $data<snapshots> -> $snapshot {
+            nqp::sayfh($profile_fh, '[ s' ~ $snapshotidx);
+            nqp::sayfh($profile_fh, 'r ' ~ $snapshot<references>);
+            nqp::sayfh($profile_fh, 'c ' ~ $snapshot<collectables>);
+            $snapshotidx := $snapshotidx + 1;
+        }
+
+        nqp::closefh($profile_fh);
     }
     method dump_instrumented_profile_data($data, $filename) {
         my @pieces := nqp::list_s();
