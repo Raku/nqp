@@ -8,12 +8,17 @@ my module sprintf {
             ^ <statement>* $
         }
         
-        method panic($msg) { nqp::die($msg) }
+        method panic($message, $payload) { 
+            my $ex := nqp::newexception();
+            nqp::setmessage($ex, $message);
+            nqp::setpayload($ex, $payload);
+            nqp::throw($ex);
+        }
         
         token statement {
             [
             | <?[%]> [ [ <directive> | <escape> ]
-                || <.panic("'" ~ nqp::substr(self.orig,1) ~ "' is not valid in sprintf format sequence '" ~ self.orig ~ "'")> ]
+                || <.panic("'" ~ nqp::substr(self.orig,1) ~ "' is not valid in sprintf format sequence '" ~ self.orig ~ "'", nqp::hash('BAD_DIRECTIVE', nqp::hash('DIRECTIVE', nqp::substr(self.orig, 1), 'SEQUENCE', self.orig)))> ]
             | <![%]> <literal>
             ]
         }
@@ -60,22 +65,30 @@ my module sprintf {
             @statements.push( $_.made ) for $<statement>;
 
             if ($assert_used_args && $*ARGS_USED < +@*ARGS_HAVE) || ($*ARGS_USED > +@*ARGS_HAVE) {
-                nqp::die("Your printf-style directives specify "
+                panic("Your printf-style directives specify "
                     ~ ($*ARGS_USED == 1 ?? "1 argument, but "
                                         !! "$*ARGS_USED arguments, but ")
                     ~ (+@*ARGS_HAVE < 1      ?? "no argument was"
                         !! +@*ARGS_HAVE == 1 ?? "1 argument was"
                                              !! +@*ARGS_HAVE ~ " arguments were")
-                    ~ " supplied")
+                    ~ " supplied", nqp::hash('DIRECTIVES_COUNT', 
+                            nqp::hash('ARGS_HAVE', +@*ARGS_HAVE, 'ARGS_USED', $*ARGS_USED)))
             }
             make nqp::join('', @statements);
         }
 
-        sub panic($payload, $directive) {
+        sub panic($message, $payload) {
             my $ex := nqp::newexception();
-            nqp::setmessage($ex, "Directive $directive not applicable for type " ~ $payload.HOW.name($payload));
+            nqp::setmessage($ex, $message);
             nqp::setpayload($ex, $payload);
             nqp::throw($ex);
+        }
+
+        sub bad-type-for-directive($type, $directive) {
+            my $message := "Directive $directive not applicable for type " ~ $type.HOW.name($type);
+            my $payload := nqp::hash('BAD_TYPE_FOR_DIRECTIVE', 
+                nqp::hash('TYPE', $type.HOW.name($type), 'DIRECTIVE', $directive));
+            panic($message, $payload);
         }
         
         sub infix_x($s, $n) {
@@ -155,7 +168,7 @@ my module sprintf {
         method directive:sym<b>($/) {
             my $next := next_argument($/);
             CATCH {
-                panic($next, 'b');
+                bad-type-for-directive($next, 'b');
             }
             my $int := intify($next);
             $int := nqp::base_I($int, 2);
@@ -172,7 +185,7 @@ my module sprintf {
         method directive:sym<c>($/) {
             my $next := next_argument($/);
             CATCH {
-                panic($next, 'c');
+                bad-type-for-directive($next, 'c');
             }
             make nqp::chr($next)
         }
@@ -180,7 +193,7 @@ my module sprintf {
         method directive:sym<d>($/) {
             my $next := next_argument($/);
             CATCH {
-                panic($next, 'd');
+                bad-type-for-directive($next, 'd');
             }
             my $int := intify($next);
             my $pad := padding_char($/);
@@ -342,7 +355,7 @@ my module sprintf {
         method directive:sym<e>($/) {
             my $next := next_argument($/);
             CATCH {
-                panic($next, 'e');
+                bad-type-for-directive($next, 'e');
             }
             my $float := $next;
             my $precision := $<precision> ?? $<precision>.made !! 6;
@@ -353,7 +366,7 @@ my module sprintf {
         method directive:sym<f>($/) {
             my $next := next_argument($/);
             CATCH {
-                panic($next, 'f');
+                bad-type-for-directive($next, 'f');
             }
             my $int := $next;
             my $precision := $<precision> ?? $<precision>.made !! 6;
@@ -364,7 +377,7 @@ my module sprintf {
         method directive:sym<g>($/) {
             my $next := next_argument($/);
             CATCH {
-                panic($next, 'g');
+                bad-type-for-directive($next, 'g');
             }
             my $float := $next;
             my $precision := $<precision> ?? $<precision>.made !! 6;
@@ -375,7 +388,7 @@ my module sprintf {
         method directive:sym<o>($/) {
             my $next := next_argument($/);
             CATCH {
-                panic($next, 'o');
+                bad-type-for-directive($next, 'o');
             }
             my $int := intify($next);
             $int := nqp::base_I($int, 8);
@@ -393,7 +406,7 @@ my module sprintf {
         method directive:sym<s>($/) {
             my $next := next_argument($/);
             CATCH {
-                panic($next, 's');
+                bad-type-for-directive($next, 's');
             }
             my $string := $next;
             if nqp::chars($<precision>) && nqp::chars($string) > $<precision>.made {
@@ -406,7 +419,7 @@ my module sprintf {
         method directive:sym<u>($/) {
             my $next := next_argument($/);
             CATCH {
-                panic($next, 'u');
+                bad-type-for-directive($next, 'u');
             }
             my $int := intify($next);
             if nqp::islt_I($int, $zero) {
@@ -423,7 +436,7 @@ my module sprintf {
         method directive:sym<x>($/) {
             my $next := next_argument($/);
             CATCH {
-                panic($next, 'x');
+                bad-type-for-directive($next, 'x');
             }
             my $int := intify($next);
             $int := nqp::base_I($int, 16);
