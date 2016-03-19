@@ -341,6 +341,15 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             @sig.push($cps);
         }
 
+        my sub set_variable($var, $value) {
+            if self.is_dynamic_var($var) {
+                @setup.push("{$*CTX}[{quote_string($var.name)}] = $value;\n");
+            }
+            else {
+                $*BLOCK.add_js_lexical(self.mangle_name($var.name));
+                @setup.push("{self.mangle_name($var.name)} = $value;\n");
+            }
+        }
 
         my $handled_this := 0;
         my $bind_named := '';
@@ -353,7 +362,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 else {
                     $slurpy := $_;
                 }
-                $*BLOCK.add_js_lexical(self.mangle_name($_.name));
             }
             elsif $_.named {
                 my $quoted := quote_string($_.named);
@@ -372,14 +380,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
                 # TODO required named arguments and defaultless optional ones
 
-                if self.is_dynamic_var($_) {
-                    @setup.push("{$*CTX}[{quote_string($_.name)}] = $value;\n");
-                }
-                else {
-                    $*BLOCK.add_js_lexical(self.mangle_name($_.name));
-                    @setup.push("{self.mangle_name($_.name)} = $value;\n");
-                }
-
+                set_variable($_, $value);
             }
             elsif self.is_dynamic_var($_) {
                my $tmp := self.unique_var('param');
@@ -430,10 +431,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
 
         if $slurpy {
-            @setup.push("{self.mangle_name($slurpy.name)} = new nqp.NQPArray(Array.prototype.slice.call(arguments,{+@sig}));\n");
+            set_variable($slurpy, "new nqp.NQPArray(Array.prototype.slice.call(arguments,{+@sig}))");
         }
         if $slurpy_named {
-            @setup.push("{self.mangle_name($slurpy_named.name)} = nqp.slurpy_named(_NAMED, {known_named(@*KNOWN_NAMED)});\n");
+            set_variable($slurpy_named, "nqp.slurpy_named(_NAMED, {known_named(@*KNOWN_NAMED)})");
         }
 
         Chunk.new($T_NONVAL, nqp::join(',', @sig), @setup);
@@ -868,8 +869,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             if $expected_outer.cuid ne $*BLOCK.cuid {
                 @capture_inners.push("(function() \{\n");
-                @capture_inners.push(self.import_stuff_from_setting($*SETTING_TARGET));
                 @capture_inners.push("var {$expected_outer.ctx} = null;\n");
+                @capture_inners.push(self.import_stuff_from_setting($*SETTING_TARGET));
             }
 
             if %*BLOCKS_AS_METHOD{$_.key} {
@@ -892,6 +893,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     # Should we compile it to a form that's more efficent when used as a method
     method looks_like_a_method(QAST::Block $block) {
+        # Disable it as we currently don't make use of it at runtime
+        return 0;
+
         if $block.blocktype eq 'declaration_static'
                 && nqp::istype($block[0], QAST::Stmts)
                 && nqp::istype($block[0][0], QAST::Var)
@@ -948,10 +952,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
                 my @function := [
                     "function({$sig.expr}) \{\n",
-                    self.setup_setting($node),
                     self.declare_js_vars($*BLOCK.tmps),
                     self.declare_js_vars($*BLOCK.js_lexicals),
                     $create_ctx,
+                    self.setup_setting($node),
                     $sig,
                     self.clone_inners($*BLOCK),
                     self.capture_inners($*BLOCK),
@@ -997,10 +1001,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
                     my @function_cps := [
                         "function({$sig_cps.expr}) \{\n",
-                        self.setup_setting($node),
                         self.declare_js_vars($*BLOCK.tmps),
                         self.declare_js_vars($*BLOCK.js_lexicals),
                         $create_ctx,
+                        self.setup_setting($node),
                         $sig_cps,
                         self.clone_inners($*BLOCK),
                         self.capture_inners($*BLOCK),
@@ -1114,12 +1118,18 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         if self.is_ctxsave($node) {
             my @lexicals;
             for $*BLOCK.variables -> $var {
+                my $value;
                 if $*BLOCK.lookup_static_variable($var) -> $static {
-                    @lexicals.push(quote_string($var.name) ~ ': ' ~ self.value_as_js($static.value));
+                    $value := self.value_as_js($static.value);
+                }
+                elsif self.is_dynamic_var($var) {
+                    $value := "{$*CTX}.lookup({quote_string($var.name)})";
                 }
                 else {
-                    @lexicals.push(quote_string($var.name) ~ ': ' ~ self.mangle_name($var.name));
+                    $value := self.mangle_name($var.name);
                 }
+                @lexicals.push(quote_string($var.name) ~ ': ' ~ $value);
+
             }
             Chunk.void("nqp.ctxsave(\{{nqp::join(',', @lexicals)}\});\n");
         }
@@ -1477,41 +1487,54 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         $T_OBJ;
     }
 
-    method compile_var(QAST::Var $var, :$cps) {
-        if self.var_is_lexicalish($var) && self.is_dynamic_var($var) {
-            if $*BINDVAL {
-                my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ), :$cps);
-                if $var.decl eq 'var' {
-                    self.stored_result(Chunk.new($T_OBJ, "({$*CTX}[{quote_string($var.name)}] = {$bindval.expr})",  [$bindval]));
-                }
-                else {
-                    self.stored_result(Chunk.new($T_OBJ, "{$*CTX}.bind({quote_string($var.name)}, {$bindval.expr})",  [$bindval]));
-                }
+    method compile_var_as_js_var(QAST::Var $var, :$cps) {
+        my $type := self.figure_out_type($var);
+        my $mangled := self.mangle_name($var.name);
+        if $*BINDVAL {
+            # TODO better source mapping
+            # TODO use the proper type 
+            my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($type), :$cps);
+            self.cpsify_chunk(Chunk.new($type,$mangled, [$bindval,'('~$mangled~' = ('~ $bindval.expr ~ "));\n"]));
+        }
+        else {
+            # TODO get the proper type 
+            self.cpsify_chunk(Chunk.new($type, $mangled, [], :node($var)));
+        }
+    }
+
+    method compile_var_as_part_of_ctx(QAST::Var $var, :$cps) {
+        if $*BINDVAL {
+            my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ), :$cps);
+            if $var.decl eq 'var' {
+                self.stored_result(Chunk.new($T_OBJ, "({$*CTX}[{quote_string($var.name)}] = {$bindval.expr})",  [$bindval]));
             }
             else {
-                if $var.decl eq 'var' {
-                    self.stored_result(Chunk.new($T_OBJ, "({$*CTX}[{quote_string($var.name)}] = null)",  []));
-                }
-                else {
-                    Chunk.new($T_OBJ, "{$*CTX}.lookup({quote_string($var.name)})", [], :node($var));
-                }
+                self.stored_result(Chunk.new($T_OBJ, "{$*CTX}.bind({quote_string($var.name)}, {$bindval.expr})",  [$bindval]));
             }
         }
-        elsif $*BLOCK.lookup_static_variable($var) -> $static {
+        else {
+            if $var.decl eq 'var' {
+                self.stored_result(Chunk.new($T_OBJ, "({$*CTX}[{quote_string($var.name)}] = null)",  []));
+            }
+            else {
+                Chunk.new($T_OBJ, "{$*CTX}.lookup({quote_string($var.name)})", [], :node($var));
+            }
+        }
+    }
+
+    method compile_var(QAST::Var $var, :$cps) {
+        if $*BLOCK.lookup_static_variable($var) -> $static {
             Chunk.new($T_OBJ, self.value_as_js($static.value), []);
         }
-        elsif self.var_is_lexicalish($var) || $var.scope eq 'local' {
-            my $type := self.figure_out_type($var);
-            my $mangled := self.mangle_name($var.name);
-            if $*BINDVAL {
-                # TODO better source mapping
-                # TODO use the proper type 
-                my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($type), :$cps);
-                self.cpsify_chunk(Chunk.new($type,$mangled, [$bindval,'('~$mangled~' = ('~ $bindval.expr ~ "));\n"]));
+        elsif $var.scope eq 'local' {
+            self.compile_var_as_js_var($var, :$cps);
+        }
+        elsif self.var_is_lexicalish($var) {
+            if self.is_dynamic_var($var) {
+                self.compile_var_as_part_of_ctx($var, :$cps);
             }
             else {
-                # TODO get the proper type 
-                self.cpsify_chunk(Chunk.new($type, $mangled, [], :node($var)));
+                self.compile_var_as_js_var($var, :$cps);
             }
         }
         elsif ($var.scope eq 'positional') {
