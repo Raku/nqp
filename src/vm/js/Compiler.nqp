@@ -201,6 +201,20 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         method ctx(*@value) { $!ctx := @value[0] if @value;$!ctx}
         method params() { @!params }
         method variables() { @!variables }
+
+        method is_dynamic_var($var) {
+            # HACK due to a nqp misdesign we need a HACK
+            # TODO Make nqp mark dynamic variables explicitly
+            my $name := $var.name;
+            if nqp::chars($name) > 2 {
+                my str $sigil := nqp::substr($name, 0, 1);
+                my str $twigil := nqp::substr($name, 1, 1);
+                if $twigil eq '*' {
+                  return 1;
+                }
+            }
+            return 0;
+        }
     }
 
     method is_valid_js_identifier($identifier) {
@@ -342,7 +356,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
 
         my sub set_variable($var, $value) {
-            if self.is_dynamic_var($var) {
+            if $*BLOCK.is_dynamic_var($var) {
                 @setup.push("{$*CTX}[{quote_string($var.name)}] = $value;\n");
             }
             else {
@@ -382,7 +396,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
                 set_variable($_, $value);
             }
-            elsif self.is_dynamic_var($_) {
+            elsif $*BLOCK.is_dynamic_var($_) {
                my $tmp := self.unique_var('param');
                @sig.push($tmp);
 
@@ -1122,7 +1136,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 if $*BLOCK.lookup_static_variable($var) -> $static {
                     $value := self.value_as_js($static.value);
                 }
-                elsif self.is_dynamic_var($var) {
+                elsif $*BLOCK.is_dynamic_var($var) {
                     $value := "{$*CTX}.lookup({quote_string($var.name)})";
                 }
                 else {
@@ -1438,20 +1452,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         self.as_js($node, :$want, :$cps);
     }
 
-    method is_dynamic_var($var) {
-        # HACK due to a nqp misdesign we need a HACK
-        # TODO Make nqp mark dynamic variables explicitly
-        my $name := $var.name;
-        if nqp::chars($name) > 2 {
-            my str $sigil := nqp::substr($name, 0, 1);
-            my str $twigil := nqp::substr($name, 1, 1);
-            if $twigil eq '*' {
-              return 1;
-            }
-        }
-        return 0;
-    }
-
     method atpos($array, $index, :$node) {
         my $array_chunk := self.as_js($array, :want($T_OBJ));
         my $index_chunk := self.as_js($index, :want($T_INT));
@@ -1530,7 +1530,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             self.compile_var_as_js_var($var, :$cps);
         }
         elsif self.var_is_lexicalish($var) {
-            if self.is_dynamic_var($var) {
+            if $*BLOCK.is_dynamic_var($var) {
                 self.compile_var_as_part_of_ctx($var, :$cps);
             }
             else {
