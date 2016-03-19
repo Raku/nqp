@@ -3,7 +3,7 @@ use TAP::Harness;
 my $harness = TAP::Harness->new({
     exec => sub {
         my ($harness, $test_file) = @_;
-        return ['./nqp-js', '--cps=off', $test_file] if $test_file =~ /qregex.t$/;
+        return ['./nqp-js', '--cps=on', $test_file] if $test_file =~ /continuations.t$/;
         return ['./nqp-js', $test_file] if $test_file =~ /\.t$/;
         return ['node', $test_file] if $test_file =~ /\.js$/;
     }

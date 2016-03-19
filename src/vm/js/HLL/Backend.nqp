@@ -58,7 +58,7 @@ class HLLBackend::JavaScript {
     
     
     method js($qast, *%adverbs) {
-        my $backend := QAST::CompilerJS.new(nyi=>%adverbs<nyi> // 'ignore', cps=>%adverbs<cps> // 'on');
+        my $backend := QAST::CompilerJS.new(nyi=>%adverbs<nyi> // 'ignore', cps=>%adverbs<cps> // 'off');
 
         my $instant := %adverbs<target> eq 'js' || self.spawn_new_node();
 
