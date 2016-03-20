@@ -833,74 +833,88 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
         '{' ~ nqp::join(',', @static_info) ~ '}';
     }
+    
+    method wrap_static_block($expected_outer, @output, $block) {
+        my $missing_outer := $expected_outer.cuid ne $*BLOCK.cuid && $expected_outer.ctx ne 'null';
+        if $missing_outer {
+            @output.push("//Static wrapping\n");
+            @output.push("(function() \{\n");
+            @output.push("var {$expected_outer.ctx} = null;\n");
+            if $*SETTING_TARGET {
+                @output.push(self.import_stuff_from_setting($*SETTING_TARGET));
+            }
+            else {
+                @output.push("//Can't import stuff\n");
+            }
+        }
+
+        $block();
+
+        if $missing_outer {
+            @output.push("\})();\n");
+        }
+    }
 
     method clone_inners($block) {
         my @clone_inners;
-        for $block.cloned_inners {
-            my $reg   := $_.value;
-            my $cuid := self.mangled_cuid($_.key);
+        for $block.cloned_inners -> $kv {
+            my $reg   := $kv.value;
+            my $cuid := self.mangled_cuid($kv.key);
 
-            if !$block.need_direct{$_.key} {
-                # we know the block won't be ever called in direct mode
-                @clone_inners.push("$reg = $cuid");
-            }
-            elsif %*BLOCKS_DONE{$_.key} {
-                @clone_inners.push("$reg = $cuid.closure");
-                @clone_inners.push(%*BLOCKS_DONE{$_.key});
-            }
-            elsif %*BLOCKS_DONE_CPS{$_.key} {
-                # we are unable to emit a direct version of the block
-                @clone_inners.push("$reg = $cuid.onlyCPS()");
-            }
-            else {
-                nqp::die("//Broken block: {$_.key}");
-            }
+            self.wrap_static_block(%*BLOCKS_INFO{$kv.key}.outer, @clone_inners, -> {
+                if !$block.need_direct{$kv.key} {
+                    # we know the block won't be ever called in direct mode
+                    @clone_inners.push("$reg = $cuid");
+                }
+                elsif %*BLOCKS_DONE{$kv.key} {
+                    @clone_inners.push("$reg = $cuid.closure");
+                    @clone_inners.push(%*BLOCKS_DONE{$kv.key});
+                }
+                elsif %*BLOCKS_DONE_CPS{$kv.key} {
+                    # we are unable to emit a direct version of the block
+                    @clone_inners.push("$reg = $cuid.onlyCPS()");
+                }
+                else {
+                    nqp::die("//Broken block: {$kv.key}");
+                }
 
-            if !$block.need_cps{$_.key} || $!cps eq 'off' {
-                # we know the block won't be ever called in cps mode
-                @clone_inners.push(";\n");
-            }
-            elsif %*BLOCKS_DONE_CPS{$_.key} {
-                @clone_inners.push(".CPS");
-                @clone_inners.push(%*BLOCKS_DONE_CPS{$_.key});
-                @clone_inners.push(";\n");
-            }
-            else {
-                # we can just use the direct version of the block in CPS mode
-                @clone_inners.push(".sameCPS();\n");
-            }
+                if !$block.need_cps{$kv.key} || $!cps eq 'off' {
+                    # we know the block won't be ever called in cps mode
+                    @clone_inners.push(";\n");
+                }
+                elsif %*BLOCKS_DONE_CPS{$kv.key} {
+                    @clone_inners.push(".CPS");
+                    @clone_inners.push(%*BLOCKS_DONE_CPS{$kv.key});
+                    @clone_inners.push(";\n");
+                }
+                else {
+                    # we can just use the direct version of the block in CPS mode
+                    @clone_inners.push(".sameCPS();\n");
+                }
+            });
         }
         Chunk.void(|@clone_inners);
     }
 
     method capture_inners($block) {
         my @capture_inners;
-        for $block.captured_inners {
-            my $cuid := self.mangled_cuid($_.key);
-            my $reg   := $_.value;
+        for $block.captured_inners -> $kv {
+            my $cuid := self.mangled_cuid($kv.key);
+            my $reg   := $kv.value;
 
-            my $expected_outer := %*BLOCKS_INFO{$_.key}.outer;
+            self.wrap_static_block(%*BLOCKS_INFO{$kv.key}.outer, @capture_inners, -> {
+                if %*BLOCKS_AS_METHOD{$kv.key} {
+                    @capture_inners.push("$reg = $cuid.method");
+                }
+                else {
+                    @capture_inners.push("$reg = $cuid.capture");
+                }
 
-            if $expected_outer.cuid ne $*BLOCK.cuid {
-                @capture_inners.push("(function() \{\n");
-                @capture_inners.push("var {$expected_outer.ctx} = null;\n");
-                @capture_inners.push(self.import_stuff_from_setting($*SETTING_TARGET));
-            }
-
-            if %*BLOCKS_AS_METHOD{$_.key} {
-                @capture_inners.push("$reg = $cuid.method");
-            }
-            else {
-                @capture_inners.push("$reg = $cuid.capture");
-            }
+                @capture_inners.push(%*BLOCKS_DONE{$kv.key});
+                @capture_inners.push(";\n");
+            });
 
 
-            @capture_inners.push(%*BLOCKS_DONE{$_.key});
-            @capture_inners.push(";\n");
-
-            if $expected_outer.cuid ne $*BLOCK.cuid {
-                @capture_inners.push("\})();\n");
-            }
         }
         Chunk.void(|@capture_inners);
     }
@@ -1080,8 +1094,14 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
         }
         elsif $node.blocktype eq 'declaration_static' {
-            my $cloned_block := $outer.capture_inner($node);
-            Chunk.new($T_OBJ, $cloned_block, []);
+            $outer.capture_inner($node);
+            if $want == $T_VOID {
+                Chunk.void();
+            }
+            else {
+                my $cloned_block := $outer.clone_inner($node);
+                Chunk.new($T_OBJ, $cloned_block, []);
+            }
         }
         else {
             self.NYI("unknown blocktype: {$node.blocktype}");
