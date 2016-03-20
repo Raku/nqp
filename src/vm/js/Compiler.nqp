@@ -993,7 +993,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 ];
                 %*BLOCKS_DONE{$node.cuid} := Chunk.void("(", |@function, ")");
 
-                if self.is_block_part_of_sc($node) {
+                if 1 { # TODO make sure that only blocks that take in serialization have that info emitted
                     if $node.blocktype eq 'immediate' {
                         # TODO think about that, and find a way to test this
                         #say("// it's an immediate one");
@@ -1181,34 +1181,39 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         QAST::OperationsJS.compile_op(self, $node, :$want, :$cps);
     }
 
+    method set_static_info() {
+        my $set_info := '';
+
+        for %!cuids -> $kv {
+            if nqp::existskey(%!serialized_code_ref_info, $kv.key) {
+                my $cuid := $kv.key;
+                my $info := %!serialized_code_ref_info{$cuid};
+
+                $set_info := $set_info
+                    ~ self.mangled_cuid($cuid)
+                    ~ ".setInfo("
+                    ~ quote_string($info.ctx) ~ ","
+                    ~ quote_string($info.outer_ctx) ~ ","
+                    ~ quote_string($info.closure_template) ~ ","
+                    ~ $info.static_info ~ ","
+                    ~ ($info.as_method ?? "true" !! "false")
+                    ~ ");\n";
+            }
+        }
+        $set_info;
+    }
+
     method emit_code_refs_list($ast) {
         my @blocks;
-        my $set_info := '';
 
         if $ast.code_ref_blocks() -> $code_ref_blocks {
             for $code_ref_blocks -> $block {
                 @blocks.push(self.mangled_cuid($block.cuid));
             }
-
-            for $code_ref_blocks -> $block {
-                if nqp::existskey(%!serialized_code_ref_info, $block.cuid) {
-                    my $info := %!serialized_code_ref_info{$block.cuid};
-
-                    $set_info := $set_info
-                        ~ self.mangled_cuid($block.cuid)
-                        ~ ".setInfo("
-                        ~ quote_string($info.ctx) ~ ","
-                        ~ quote_string($info.outer_ctx) ~ ","
-                        ~ quote_string($info.closure_template) ~ ","
-                        ~ $info.static_info ~ ","
-                        ~ ($info.as_method ?? "true" !! "false")
-                        ~ ");\n";
-                }
-            }
          }
 
         "var code_refs = new nqp.NQPArray([{nqp::join(',',@blocks)}]);\n" # TODO
-        ~ $set_info
+        ~ self.set_static_info;
     }
 
 
@@ -1216,6 +1221,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my @sh;
         my $sc := $ast.sc;
 
+        # TODO refactor
         if !nqp::defined($ast.sc) {
             return self.emit_code_refs_list($ast);
         }
