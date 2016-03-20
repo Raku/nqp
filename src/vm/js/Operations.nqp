@@ -539,6 +539,8 @@ class QAST::OperationsJS {
     add_simple_op('pushcompsc', $T_OBJ, [$T_OBJ], :sideffects);
     add_simple_op('popcompsc', $T_OBJ, [], :sideffects);
 
+    add_simple_op('getstaticcode', $T_OBJ, [$T_OBJ]);
+
     # Misc ops
 
     add_simple_op('backendconfig', $T_OBJ, []);

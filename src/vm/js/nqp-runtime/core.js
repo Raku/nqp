@@ -1001,3 +1001,8 @@ op.compunitmainline = function(cu) {
 op.compunitcodes = function(cu) {
   return cu.codeRefs;
 };
+
+op.getstaticcode = function(codeRef) {
+  console.log("getting static code");
+  return codeRef;
+};

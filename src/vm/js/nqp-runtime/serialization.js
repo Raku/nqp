@@ -349,7 +349,7 @@ BinaryWriteCursor.prototype.ref = function(ref) {
       /* Closure but didn't see it yet. Take care of it serialization, which
            * gets it marked with this SC. Then it's just a normal code ref that
            * needs serializing. */
-      this.writer.serializeClosure(ref);
+      this.serializeClosure(ref);
       discrim = REFVAR_CLONED_CODEREF;
     }
   }
@@ -535,6 +535,11 @@ SerializationWriter.prototype.serializeSTable = function(st) {
     st.REPR.serialize_repr_data(st, this.stables_data);
   }
 
+};
+
+BinaryWriteCursor.prototype.serializeClosure = function(closure) {
+  console.log("serializing closure", closure);
+  process.exit();
 };
 
 /* This is the overall serialization loop. It keeps an index into the list of
