@@ -221,9 +221,6 @@ SerializationWriter.prototype.serializeObject = function(obj) {
 
   /* Make objects table entry. */
 
-  //write_int32(writer->root.objects_table, offset + 0, packed);
-  //write_int32(writer->root.objects_table, offset + 4, writer->objects_data_offset);
-
   this.objects.I32(packed);
   this.objects.I32(this.objects_data.offset);
 
@@ -248,7 +245,6 @@ var PACKED_SC_OVERFLOW = 0xFFF;
 /* Writes the ID, index pair that identifies an entry in a Serialization
    context. */
 BinaryWriteCursor.prototype.idIdx = function(sc_id, idx) {
-  //static void write_sc_id_idx(MVMThreadContext *tc, MVMSerializationWriter *writer, MVMint32 sc_id, MVMint32 idx) {
   if (sc_id <= PACKED_SC_MAX && idx <= PACKED_SC_IDX_MAX) {
     var packed = (sc_id << PACKED_SC_SHIFT) | (idx & PACKED_SC_IDX_MASK);
     this.I32(packed);
@@ -258,9 +254,6 @@ BinaryWriteCursor.prototype.idIdx = function(sc_id, idx) {
     this.I32(packed);
     this.I32(sc_id);
     this.I32(idx);
-    /*write_int32(*(writer->cur_write_buffer), *(writer->cur_write_offset), packed);
-        write_int32(*(writer->cur_write_buffer), *(writer->cur_write_offset), sc_id);
-        write_int32(*(writer->cur_write_buffer), *(writer->cur_write_offset), idx);*/
   }
 };
 
@@ -276,7 +269,6 @@ BinaryWriteCursor.prototype.objRef = function(ref) {
   if (!ref._SC) {
     /* This object doesn't belong to an SC yet, so it must be serialized
      * as part of this compilation unit. Add it to the work list. */
-    ref._SC = 123;
     ref._SC = writer_sc;
 
     this.writer.sc.root_objects.push(ref);
