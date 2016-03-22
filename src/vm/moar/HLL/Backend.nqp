@@ -2,103 +2,6 @@
 class HLL::Backend::MoarVM {
     our %moar_config := nqp::backendconfig();
 
-    sub sorted_keys($hash) {
-        my @keys;
-        for $hash {
-            nqp::push(@keys, $_.key);
-        }
-        if +@keys == 0 {
-            return @keys;
-        }
-
-        # we expect on the order of 6 or 7 keys here, so bubble sort is fine.
-        my int $start := 0;
-        my int $numkeys := +@keys;
-        my str $swap;
-        my int $current;
-        while $start < $numkeys - 1 {
-            $current := 0;
-            while $current < $numkeys - 1 {
-                if @keys[$current] lt @keys[$current + 1] {
-                    $swap := @keys[$current];
-                    @keys[$current] := @keys[$current + 1];
-                    @keys[$current + 1] := $swap;
-                }
-                $current++;
-            }
-            $start++;
-        }
-        return @keys;
-    }
-
-    sub output_as_json($obj, $output_fh, $esc_backslash, $esc_dquote, $esc_squote?) {
-        my @pieces := nqp::list_s();
-
-        sub to_json($obj) {
-            if nqp::islist($obj) {
-                nqp::push_s(@pieces, '[');
-                my $first := 1;
-                for $obj {
-                    if $first {
-                        $first := 0;
-                    }
-                    else {
-                        nqp::push_s(@pieces, ',');
-                    }
-                    to_json($_);
-                }
-                nqp::push_s(@pieces, ']');
-            }
-            elsif nqp::ishash($obj) {
-                nqp::push_s(@pieces, '{');
-                my $first := 1;
-                for sorted_keys($obj) {
-                    if $first {
-                        $first := 0;
-                    }
-                    else {
-                        nqp::push_s(@pieces, ',');
-                    }
-                    nqp::push_s(@pieces, '"');
-                    nqp::push_s(@pieces, $_);
-                    nqp::push_s(@pieces, '":');
-                    to_json($obj{$_});
-                }
-                nqp::push_s(@pieces, '}');
-            }
-            elsif nqp::isstr($obj) {
-                if nqp::index($obj, '\\') {
-                    $obj := subst($obj, /'\\'/, $esc_backslash, :global);
-                }
-                if nqp::index($obj, '"') {
-                    $obj := subst($obj, /'"'/, $esc_dquote, :global);
-                }
-                if nqp::defined($esc_squote) && nqp::index($obj, "'") {
-                    $obj := subst($obj, /"'"/, $esc_squote, :global);
-                }
-                nqp::push_s(@pieces, '"');
-                nqp::push_s(@pieces, $obj);
-                nqp::push_s(@pieces, '"');
-            }
-            elsif nqp::isint($obj) || nqp::isnum($obj) {
-                nqp::push_s(@pieces, ~$obj);
-            }
-            elsif nqp::can($obj, 'Str') {
-                to_json(nqp::unbox_s($obj.Str));
-            }
-            else {
-                nqp::die("Don't know how to dump a " ~ $obj.HOW.name($obj));
-            }
-            if nqp::elems(@pieces) > 4096 {
-                nqp::printfh($output_fh, nqp::join('', @pieces));
-                nqp::setelems(@pieces, 0);
-            }
-        }
-
-        to_json($obj);
-        nqp::printfh($output_fh, nqp::join('', @pieces));
-    }
-
     method apply_transcodings($s, $transcode) {
         $s
     }
@@ -150,6 +53,7 @@ class HLL::Backend::MoarVM {
         }
         $res;
     }
+
     method dump_profile_data($data, $kind, $filename) {
         if $kind eq 'instrumented' {
             self.dump_instrumented_profile_data($data, $filename);
@@ -161,76 +65,7 @@ class HLL::Backend::MoarVM {
             nqp::die("Don't know how to dump data for $kind profile");
         }
     }
-    method dump_heap_profile_data($data, $filename) {
-        my @pieces;
 
-        unless nqp::defined($filename) {
-            $filename := 'heap-' ~ nqp::time_n() ~ '.txt';
-        }
-        my $profile_fh := open($filename, :w);
-
-        nqp::sayfh($profile_fh, '# This file contains MoarVM heap snapshots.');
-        nqp::sayfh($profile_fh, '# the stringheap section contains a list of');
-        nqp::sayfh($profile_fh, '# strings that are used throughout the file');
-        nqp::sayfh($profile_fh, '# by their index in the string heap.');
-        nqp::sayfh($profile_fh, '#');
-        nqp::sayfh($profile_fh, '# The types list has entries with two string');
-        nqp::sayfh($profile_fh, '# indices: The REPR of a type and the name.');
-        nqp::sayfh($profile_fh, '#');
-        nqp::sayfh($profile_fh, '# The following sections are per snapshot:');
-        nqp::sayfh($profile_fh, '#');
-        nqp::sayfh($profile_fh, '# Every entry in the collectables section starts');
-        nqp::sayfh($profile_fh, '# with the type or frame index as second value.');
-        nqp::sayfh($profile_fh, '#');
-        nqp::sayfh($profile_fh, '#   1 Object');
-        nqp::sayfh($profile_fh, '#   2 Type object');
-        nqp::sayfh($profile_fh, '#   3 STable');
-        nqp::sayfh($profile_fh, '#   4 Frame');
-        nqp::sayfh($profile_fh, '#   5 Perm Roots');
-        nqp::sayfh($profile_fh, '#   6 Instance Roots');
-        nqp::sayfh($profile_fh, '#   7 CStack Roots');
-        nqp::sayfh($profile_fh, '#   8 Thread Roots');
-        nqp::sayfh($profile_fh, '#   9 Root');
-        nqp::sayfh($profile_fh, '#');
-        nqp::sayfh($profile_fh, '# The third field is the size of the GC-managed');
-        nqp::sayfh($profile_fh, '# part. The fourth field is the size of extra');
-        nqp::sayfh($profile_fh, '# data, for example managed by malloc or the FSA.');
-        nqp::sayfh($profile_fh, '#');
-        nqp::sayfh($profile_fh, '# The fifth field is the starting index into the');
-        nqp::sayfh($profile_fh, '# references list, the sixth field is the number');
-        nqp::sayfh($profile_fh, '# of references that belong to this collectable.');
-        nqp::sayfh($profile_fh, '#');
-        nqp::sayfh($profile_fh, '# Each reference has its ref kind, its "data"');
-        nqp::sayfh($profile_fh, '# and the index of the referenced collectable as');
-        nqp::sayfh($profile_fh, '# its fields.');
-        nqp::sayfh($profile_fh, '#');
-        nqp::sayfh($profile_fh, '#   0 for unknown.');
-        nqp::sayfh($profile_fh, '#   1 for an index.');
-        nqp::sayfh($profile_fh, '#   2 for an entry in the string heap.');
-        nqp::sayfh($profile_fh, '#');
-        nqp::sayfh($profile_fh, '[ stringheap');
-        for $data<strings> {
-            if nqp::index($_, '\n') {
-                nqp::sayfh($profile_fh, subst($_, /\n/, q{\\n}, :global));
-            }
-            else {
-                nqp::sayfh($profile_fh, $_);
-            }
-        }
-        nqp::sayfh($profile_fh, '[ types');
-        nqp::sayfh($profile_fh, $data<types>);
-
-        nqp::sayfh($profile_fh, '[ snapshots');
-        my int $snapshotidx := 0;
-        for $data<snapshots> -> $snapshot {
-            nqp::sayfh($profile_fh, '[ s' ~ $snapshotidx);
-            nqp::sayfh($profile_fh, 'r ' ~ $snapshot<references>);
-            nqp::sayfh($profile_fh, 'c ' ~ $snapshot<collectables>);
-            $snapshotidx := $snapshotidx + 1;
-        }
-
-        nqp::closefh($profile_fh);
-    }
     method dump_instrumented_profile_data($data, $filename) {
         my @pieces := nqp::list_s();
 
@@ -242,9 +77,8 @@ class HLL::Backend::MoarVM {
         my $want_json  := ?($filename ~~ /'.json'$/);
 
         my $escaped_backslash;
-        my $escaped_squote;
         my $escaped_dquote;
-
+        my $escaped_squote;
         if $want_json {
             # Single quotes don't require escaping here
             $escaped_backslash := q{\\\\};
@@ -308,6 +142,97 @@ class HLL::Backend::MoarVM {
                 }
             }
         }
+
+        sub sorted_keys($hash) {
+            my @keys;
+            for $hash {
+                nqp::push(@keys, $_.key);
+            }
+            if +@keys == 0 {
+                return @keys;
+            }
+
+            # we expect on the order of 6 or 7 keys here, so bubble sort is fine.
+            my int $start := 0;
+            my int $numkeys := +@keys;
+            my str $swap;
+            my int $current;
+            while $start < $numkeys - 1 {
+                $current := 0;
+                while $current < $numkeys - 1 {
+                    if @keys[$current] lt @keys[$current + 1] {
+                        $swap := @keys[$current];
+                        @keys[$current] := @keys[$current + 1];
+                        @keys[$current + 1] := $swap;
+                    }
+                    $current++;
+                }
+                $start++;
+            }
+            return @keys;
+        }
+
+        sub to_json($obj) {
+            if nqp::islist($obj) {
+                nqp::push_s(@pieces, '[');
+                my $first := 1;
+                for $obj {
+                    if $first {
+                        $first := 0;
+                    }
+                    else {
+                        nqp::push_s(@pieces, ',');
+                    }
+                    to_json($_);
+                }
+                nqp::push_s(@pieces, ']');
+            }
+            elsif nqp::ishash($obj) {
+                nqp::push_s(@pieces, '{');
+                my $first := 1;
+                for sorted_keys($obj) {
+                    if $first {
+                        $first := 0;
+                    }
+                    else {
+                        nqp::push_s(@pieces, ',');
+                    }
+                    nqp::push_s(@pieces, '"');
+                    nqp::push_s(@pieces, $_);
+                    nqp::push_s(@pieces, '":');
+                    to_json($obj{$_});
+                }
+                nqp::push_s(@pieces, '}');
+            }
+            elsif nqp::isstr($obj) {
+                if nqp::index($obj, '\\') {
+                    $obj := subst($obj, /'\\'/, $escaped_backslash, :global);
+                }
+                if nqp::index($obj, '"') {
+                    $obj := subst($obj, /'"'/, $escaped_dquote, :global);
+                }
+                if nqp::defined($escaped_squote) && nqp::index($obj, "'") {
+                    $obj := subst($obj, /"'"/, $escaped_squote, :global);
+                }
+                nqp::push_s(@pieces, '"');
+                nqp::push_s(@pieces, $obj);
+                nqp::push_s(@pieces, '"');
+            }
+            elsif nqp::isint($obj) || nqp::isnum($obj) {
+                nqp::push_s(@pieces, ~$obj);
+            }
+            elsif nqp::can($obj, 'Str') {
+                to_json(nqp::unbox_s($obj.Str));
+            }
+            else {
+                nqp::die("Don't know how to dump a " ~ $obj.HOW.name($obj));
+            }
+            if nqp::elems(@pieces) > 4096 {
+                nqp::printfh($profile_fh, nqp::join('', @pieces));
+                nqp::setelems(@pieces, 0);
+            }
+        }
+
         # Post-process the call data, turning objects into flat data.
         for $data {
             post_process_call_graph_node($_<call_graph>);
@@ -316,7 +241,8 @@ class HLL::Backend::MoarVM {
         nqp::unshift($data, $id_to_thing);
 
         if $want_json {
-            output_as_json($data, $profile_fh, $escaped_backslash, $escaped_dquote);
+            to_json($data);
+            nqp::printfh($profile_fh, nqp::join('', @pieces));
         }
         else {
             # Get profiler template, split it in half, and write those either
@@ -328,10 +254,103 @@ class HLL::Backend::MoarVM {
             my @tpl_pieces := nqp::split('{{{PROFILER_OUTPUT}}}', $template);
 
             nqp::printfh($profile_fh, @tpl_pieces[0]);
-            output_as_json($data, $profile_fh, $escaped_backslash, $escaped_dquote, $escaped_squote);
+            to_json($data);
+            nqp::printfh($profile_fh, nqp::join('', @pieces));
             nqp::printfh($profile_fh, @tpl_pieces[1]);
         }
         nqp::closefh($profile_fh);
+    }
+
+    method dump_heap_profile_data($data, $filename) {
+        unless nqp::defined($filename) {
+            $filename := 'heap-snapshot-' ~ nqp::time_n();
+        }
+        nqp::sayfh(nqp::getstderr(), "Writing heap snapshot to $filename");
+        my $hs_fh := open($filename, :w);
+
+        sub write_json($obj) {
+            my $escaped_backslash := q{\\\\};
+            my $escaped_dquote := q{\\"};
+            my @pieces := nqp::list_s();
+            sub to_json($obj) {
+                if nqp::islist($obj) {
+                    nqp::push_s(@pieces, '[');
+                    my $first := 1;
+                    for $obj {
+                        if $first {
+                            $first := 0;
+                        }
+                        else {
+                            nqp::push_s(@pieces, ',');
+                        }
+                        to_json($_);
+                    }
+                    nqp::push_s(@pieces, ']');
+                }
+                elsif nqp::ishash($obj) {
+                    nqp::push_s(@pieces, '{');
+                    my $first := 1;
+                    for sorted_keys($obj) {
+                        if $first {
+                            $first := 0;
+                        }
+                        else {
+                            nqp::push_s(@pieces, ',');
+                        }
+                        nqp::push_s(@pieces, '"');
+                        nqp::push_s(@pieces, $_);
+                        nqp::push_s(@pieces, '":');
+                        to_json($obj{$_});
+                    }
+                    nqp::push_s(@pieces, '}');
+                }
+                elsif nqp::isstr($obj) {
+                    if nqp::index($obj, '\\') {
+                        $obj := subst($obj, /'\\'/, $escaped_backslash, :global);
+                    }
+                    if nqp::index($obj, '"') {
+                        $obj := subst($obj, /'"'/, $escaped_dquote, :global);
+                    }
+                    nqp::push_s(@pieces, '"');
+                    nqp::push_s(@pieces, $obj);
+                    nqp::push_s(@pieces, '"');
+                }
+                elsif nqp::isint($obj) || nqp::isnum($obj) {
+                    nqp::push_s(@pieces, ~$obj);
+                }
+                elsif nqp::can($obj, 'Str') {
+                    to_json(nqp::unbox_s($obj.Str));
+                }
+                else {
+                    nqp::die("Don't know how to dump a " ~ $obj.HOW.name($obj));
+                }
+                if nqp::elems(@pieces) > 4096 {
+                    nqp::printfh($hs_fh, nqp::join('', @pieces));
+                    nqp::setelems(@pieces, 0);
+                }
+            }
+            to_json($obj);
+            nqp::printfh($hs_fh, nqp::join('', @pieces));
+        }
+
+        nqp::printfh($hs_fh, 'strings: ');
+        write_json($data<strings>);
+        nqp::printfh($hs_fh, "\ntypes: ");
+        nqp::printfh($hs_fh, $data<types>);
+        nqp::printfh($hs_fh, "\nstatic_frames: ");
+        nqp::printfh($hs_fh, $data<static_frames>);
+        nqp::printfh($hs_fh, "\n\n");
+
+        my int $i := 0;
+        for $data<snapshots> {
+            nqp::printfh($hs_fh, "snapshot $i\n");
+            nqp::printfh($hs_fh, "collectables: " ~ $_<collectables> ~ "\n");
+            nqp::printfh($hs_fh, "references: " ~ $_<references> ~ "\n");
+            nqp::printfh($hs_fh, "\n");
+            $i++;
+        }
+
+        nqp::closefh($hs_fh);
     }
 
     method run_traced($level, $what) {
