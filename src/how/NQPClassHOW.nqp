@@ -95,7 +95,9 @@ knowhow NQPClassHOW {
     # to go with it, and return that.
     method new_type(:$name = '<anon>', :$repr = 'P6opaque') {
         my $metaclass := self.new(:name($name));
-        nqp::setwho(nqp::newtype($metaclass, $repr), {});
+        nqp::setdebugtypename(
+            nqp::setwho(nqp::newtype($metaclass, $repr), {}),
+            $name);
     }
 
     method add_method($obj, $name, $code_obj) {
