@@ -21,6 +21,14 @@ class RegexCompiler {
     has $!subcur;
     has $!rep;
 
+    method set_cursor_var() {
+        if $*BLOCK.is_dynamic_var(QAST::Var.new(:name('$¢'))) {
+            "{$*CTX}.bind({quote_string('$¢')}, $!cursor);\n";
+        } else {
+            $!compiler.mangle_name('$¢') ~ " = $!cursor;\n";
+        }
+    }
+
     method compile($node) {
         # TODO better name for $start
         # we need to unpack the array we !cursor_start_all into a bunch of variables 
@@ -35,7 +43,7 @@ class RegexCompiler {
             "{$!label} = {$!initial_label};\n",
             "$start = self['!cursor_start_all']({$*CTX}, null).array;\n",
             "{$!cursor} = $start[0];\n",
-            $!compiler.mangle_name('$¢') ~ " = $!cursor;\n",
+            self.set_cursor_var(),
             "{$!target} = $start[1];\n",
             "{$!pos} = nqp.to_int($start[2], $*CTX);\n",
             "{$!curclass} = $start[3];\n",

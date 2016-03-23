@@ -41,5 +41,9 @@ SerializationContext.prototype.setObj = function(idx, obj) {
   }
 };
 
+SerializationContext.prototype.getCodeIndex = function(codeRef) {
+  return this.root_codes.indexOf(codeRef);
+};
+
 SerializationContext.contexts = {};
 module.exports = SerializationContext;

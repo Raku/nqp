@@ -24,6 +24,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         has %!lexotic;          
         has @!params;           # the parameters the block takes
         has @!variables;        # the variables declared in this block
+        has %!variables;        # the variables declared in this block
         has %!cloned_inners;    # Mapping of CUIDs of blocks we clone to register with the clone
 
         has %!need_cps;       # Do we need to clone the CPS version of a block
@@ -47,6 +48,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             @!js_lexicals := nqp::list();
             @!params := nqp::list();
             @!variables := nqp::list();
+            %!variables := nqp::hash();
             $!tmp := 0;
             %!lexotic := nqp::hash();
             %!cloned_inners := nqp::hash();
@@ -105,6 +107,11 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         method add_variable($var) {
             @!variables.push($var);
+            %!variables{$var.name} := $var;
+        }
+
+        method has_variable($name) {
+            nqp::existskey(%!variables, $name);
         }
 
         method add_static_variable($var) {
@@ -213,7 +220,22 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                   return 1;
                 }
             }
-            return 0;
+
+            # TODO fix this by actually looking if a variable is declared on the way
+            my $info := self;
+            return 0 if $var.scope eq 'local';
+            while $info {
+                if $info.has_variable($name) {
+                    return 1;
+                }
+                if $*SETTING_TARGET && nqp::eqaddr($info.qast, $*SETTING_TARGET) {
+                    my $is_part_of_setting := nqp::existskey($*SETTING_TARGET.symtable, $name);
+                    return !$is_part_of_setting;
+                }
+                $info := $info.outer;
+            }
+            return 1;
+
         }
     }
 
@@ -761,11 +783,15 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     method setup_cuids() {
-        my @cuids;
+        my @declared;
+        my @vars;
         for %!cuids {
-            @cuids.push("{self.mangled_cuid($_.key)} = new nqp.CodeRef({quote_string($_.value.name)},{quote_string($_.key)})");
+            my $var := self.mangled_cuid($_.key);
+            @vars.push($var);
+            @declared.push("$var = new nqp.CodeRef({quote_string($_.value.name)},{quote_string($_.key)})");
         }
-        self.declare_js_vars(@cuids);
+        @declared.push("cuids = [{nqp::join(',', @vars)}]");
+        self.declare_js_vars(@declared);
     }
 
     method set_code_objects() {
@@ -828,8 +854,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     method static_info_for_lexicals(BlockInfo $block) {
         my @static_info;
         for $block.variables -> $var {
-            nqp::push(@static_info,quote_string($var.name)
-                ~ ': [' ~ nqp::objprimspec($var.returns) ~ ',' ~ quote_string(self.mangle_name($var.name)) ~ ']');
+            if $block.is_dynamic_var($var) {
+                nqp::push(@static_info,quote_string($var.name)
+                    ~ ': [' ~ nqp::objprimspec($var.returns) ~ ']');
+            } else {
+                nqp::push(@static_info,quote_string($var.name)
+                    ~ ': [' ~ nqp::objprimspec($var.returns) ~ ',' ~ quote_string(self.mangle_name($var.name)) ~ ']');
+            }
         }
         '{' ~ nqp::join(',', @static_info) ~ '}';
     }
@@ -869,6 +900,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 elsif %*BLOCKS_DONE{$kv.key} {
                     @clone_inners.push("$reg = $cuid.closure");
                     @clone_inners.push(%*BLOCKS_DONE{$kv.key});
+                    if 1 { # TODO check if we need to have this closure serializable
+                        @clone_inners.push(".setOuter(" ~ %*BLOCKS_INFO{$kv.key}.outer.ctx ~ ")");
+                    }
                 }
                 elsif %*BLOCKS_DONE_CPS{$kv.key} {
                     # we are unable to emit a direct version of the block
@@ -995,8 +1029,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
                 if 1 { # TODO make sure that only blocks that take in serialization have that info emitted
                     if $node.blocktype eq 'immediate' {
-                        # TODO think about that, and find a way to test this
-                        #say("// it's an immediate one");
+                        %!serialized_code_ref_info{$node.cuid} := SerializedCodeRefInfo.new(
+                            ctx => $*CTX,
+                            static_info => self.static_info_for_lexicals($*BLOCK)
+                        );
                     }
                     else {
                         # We need to override when deserializing closures
@@ -1194,9 +1230,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     ~ ".setInfo("
                     ~ quote_string($info.ctx) ~ ","
                     ~ quote_string($info.outer_ctx) ~ ","
-                    ~ quote_string($info.closure_template) ~ ","
+                    ~ ($info.closure_template ?? quote_string($info.closure_template) !! "null") ~ ","
                     ~ $info.static_info ~ ","
-                    ~ ($info.as_method ?? "true" !! "false")
+                    ~ ($info.as_method ?? "true" !! "false") ~ ","
+                    ~ "cuids"
                     ~ ");\n";
             }
         }

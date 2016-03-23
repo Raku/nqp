@@ -707,13 +707,17 @@ class QAST::OperationsJS {
             my @get;
             my @set;
             for $*BLOCK.variables -> $var {
+                my $storage := $*BLOCK.is_dynamic_var($var) 
+                    ?? "{$*CTX}[{quote_string($var.name)}]"
+                    !! $comp.mangle_name($var.name);
+
                 @set.push(quote_string($var.name) ~ 
                    ~ ': function(value) {' 
-                   ~ $comp.mangle_name($var.name) ~ ' = value' 
+                   ~ $storage ~ ' = value' 
                    ~ '}');
                 @get.push(quote_string($var.name) ~ 
                    ~ ': function() {' 
-                   ~ 'return ' ~ $comp.mangle_name($var.name) ~ ''
+                   ~ 'return ' ~ $storage ~ ''
                    ~ '}');
             }
             Chunk.new($T_OBJ, "new nqp.CurLexpad(\{{nqp::join(',', @get)}\}, \{{nqp::join(',', @set)}\})", [], :$node);

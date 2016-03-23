@@ -1,5 +1,7 @@
 use TAP::Harness;
 
+my ($skip_qregex) = @ARGV;
+
 my $harness = TAP::Harness->new({
     exec => sub {
         my ($harness, $test_file) = @_;
@@ -8,8 +10,9 @@ my $harness = TAP::Harness->new({
         return ['node', $test_file] if $test_file =~ /\.js$/;
     }
 });
-my @regex = "gen/js/qregex.t";
-my @serialization = glob "t/serialization/{01,02}*.t";
+my @regex;
+#@regex = "gen/js/qregex.t" unless $skip_qregex;
+my @serialization = glob "t/serialization/{01,02,03}*.t";
 my @qast = glob "t/qast/02*";
 my @js_specific = "t/js/getcomp-js.t";
 
@@ -18,10 +21,10 @@ my @nqp_tests = glob "t/nqp/{01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,17,
 my @moar_tests = qw(t/moar/03-line-seps.t t/moar/02-multidim.t);
 
 my @runtime_unit_tests = qw(t/js/varint.js);
-my @continuation_tests = qw(t/js/continuations.t);
+my @continuation_tests; # = qw(t/js/continuations.t);
 
 my @native_call_tests = qw(t/nativecall/01-basic.t);
-my @hll_tests = qw(t/hll/06-sprintf.t);
+my @hll_tests; # = qw(t/hll/06-sprintf.t);
 
 my $node_version = `node -v`;
 

@@ -1003,6 +1003,5 @@ op.compunitcodes = function(cu) {
 };
 
 op.getstaticcode = function(codeRef) {
-  console.log("getting static code");
-  return codeRef;
+  return codeRef.staticCode;
 };

@@ -341,7 +341,7 @@ BinaryWriteCursor.prototype.ref = function(ref) {
       /* Closure but didn't see it yet. Take care of it serialization, which
            * gets it marked with this SC. Then it's just a normal code ref that
            * needs serializing. */
-      this.serializeClosure(ref);
+      this.writer.serializeClosure(ref);
       discrim = REFVAR_CLONED_CODEREF;
     }
   }
@@ -393,6 +393,9 @@ BinaryWriteCursor.prototype.ref = function(ref) {
     case REFVAR_CLONED_CODEREF:
       var scId = this.writer.getSCId(ref._SC);
       var idx = ref._SC.root_codes.indexOf(ref);
+      if (idx == -1) {
+        throw "can't write code ref";
+      }
       this.idIdx(scId, idx);
       break;
     default:
@@ -529,9 +532,157 @@ SerializationWriter.prototype.serializeSTable = function(st) {
 
 };
 
-BinaryWriteCursor.prototype.serializeClosure = function(closure) {
-  console.log("serializing closure", closure);
-  process.exit();
+
+SerializationWriter.prototype.serializeContext = function(ctx) {
+  /* Locate the static code ref this context points to. */
+  var staticCodeRef = this.closureToStaticCodeRef(ctx.codeRef, true);
+  var staticCodeSC = staticCodeRef._SC;
+  if (staticCodeSC == null) {
+    throw "Serialization Error: closure outer is a code object not in an SC";
+  }
+  var staticSCId = this.getSCId(staticCodeSC);
+  var staticIdx = staticCodeSC.getCodeIndex(staticCodeRef);
+
+
+  /* Make contexts table entry. */
+  this.contexts_headers.I32(staticSCId);
+  this.contexts_headers.I32(staticIdx);
+  this.contexts_headers.I32(this.contexts_data.offset);
+
+  /* See if there's any relevant outer context, and if so set it up to
+   * be serialized. */
+  if (ctx.outer != null) {
+      this.contexts_headers.I32(this.getSerializedContextIdx(ctx.outer));
+  } else {
+      this.contexts_headers.I32(0);
+  }
+
+
+
+  var staticInfo = staticCodeRef.staticInfo;
+
+  var lexicals = 0;
+  for (var name in staticInfo) lexicals++;
+
+  this.contexts_data.I64(lexicals);
+
+  for (var name in staticInfo) {
+      this.contexts_data.str(name);
+      switch (staticInfo[name][0]) {
+      case 0: // obj
+        this.contexts_data.ref(ctx[name]);
+        break;
+      case 1: // int
+        this.contexts_data.I64(ctx[name]);
+        break;
+      case 2: // num
+        this.contexts_data.double(ctx[name]);
+        break;
+      case 3: // str
+        this.contexts_data.str(ctx[name]);
+      }
+  }
+};
+
+SerializationWriter.prototype.getSerializedContextIdx = function(ctx) {
+  if (!ctx._SC) {
+    /* Make sure we should chase a level down. */
+    if (this.closureToStaticCodeRef(ctx.codeRef, false) == null) {
+      return 0;
+    }
+    else {
+      this.contexts.push(ctx);
+      ctx._SC = this.sc;
+      return this.contexts.length;
+    }
+  }
+  else {
+    if (ctx._SC != this.sc) {
+      throw "Serialization Error: reference to context outside of SC";
+    }
+    var idx = this.contexts.indexOf(cf);
+    if (idx < 0) {
+        throw "Serialization Error: could not locate outer context in current SC";
+    }
+    return idx + 1;
+  }
+};
+
+SerializationWriter.prototype.getSerializedOuterContextIdx = function(closure) {
+  if (closure.isCompilerStub)
+      return 0;
+  if (closure.outerCtx == null)
+      return 0;
+  return this.getSerializedContextIdx(closure.outerCtx);
+};
+
+SerializationWriter.prototype.closureToStaticCodeRef = function(closure, fatal) {
+  var staticCode = closure.staticInfo ? closure : closure.staticCode;
+  if (!staticCode) {
+    if (fatal) {
+      throw "Serialization Error: missing static code ref for closure";
+    } else {
+      return null;
+    }
+  }
+
+  if (!staticCode._SC) {
+    if (fatal) {
+      throw "Serialization Error: could not locate static code ref for closure";
+    } else {
+      return null;
+    }
+  }
+
+  return staticCode;
+};
+
+SerializationWriter.prototype.serializeClosure = function(closure) {
+  /* Locate the static code object. */
+  var staticCodeRef = this.closureToStaticCodeRef(closure, true);
+  var staticCodeSC = staticCodeRef._SC;
+
+  /* Add an entry to the closures table. */
+  var staticSCId = this.getSCId(staticCodeSC);
+  var staticIdx = staticCodeSC.getCodeIndex(staticCodeRef);
+
+  /* Get the index of the context (which will add it to the todo list if
+   * needed). */
+  var contextIdx = this.getSerializedOuterContextIdx(closure);
+
+  this.closures.I32(staticSCId);
+  this.closures.I32(staticIdx);
+  this.closures.I32(contextIdx);
+
+
+    /* Check if it has a static code object. */
+    if (closure.codeObject) {
+        var codeObject = closure.codeObject;
+        this.closures.I32(1);
+
+        if (!codeObject._SC) {
+        }
+        if (!codeObj._SC) {
+            codeObj._SC = this.sc;
+            this.writer.sc.root_objects.push(ref);
+        }
+
+        this.closures.I32(this.getSCId(codeObject._SC));
+        this.closures.I32(this.codeObject._SC.root_objects.indexOf(codeObject));
+    }
+    else {
+        this.closures.I32(0);
+        this.closures.I32(0);
+        this.closures.I32(0);
+    }
+
+    /* Increment count of closures in the table. */
+    this.numClosures++;
+
+
+  /* Add the closure to this SC, and mark it as as being in it. */
+  closure._SC = this.sc;
+  this.sc.root_codes.push(closure);
 };
 
 /* This is the overall serialization loop. It keeps an index into the list of

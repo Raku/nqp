@@ -524,9 +524,6 @@ BinaryCursor.prototype.deserialize = function(sc) {
     }
   }
 
-  for (var i = 0; i < STables.length; i++) {
-    STables[i][1].STable(sc.root_stables[i]);
-  }
 
   var closures_offset = this.I32();
   var closures_number = this.I32();
@@ -539,6 +536,10 @@ BinaryCursor.prototype.deserialize = function(sc) {
     sc.code_refs[closures_base + i] = new CodeRef(closures[i].staticCode.name);
     if (closures[i].codeObj) sc.code_refs[closures_base + i].codeObj = closures[i].codeObj;
     closures[i].index = closures_base + i;
+  }
+
+  for (var i = 0; i < STables.length; i++) {
+    STables[i][1].STable(sc.root_stables[i]);
   }
 
   /* Finish up objects */
@@ -629,10 +630,21 @@ BinaryCursor.prototype.contextToCode = function(context, data) {
 
 
   var lexicals = [];
+  function add_to_data(value) {
+    data.push(value);
+    return 'data[' + (data.length - 1) + ']';
+  }
+
   for (var name in context.lexicals) {
-    data.push(context.lexicals[name]);
-    set_vars += 'var ' + context.staticCode.staticInfo[name][1] + ' = data[' + (data.length - 1) + ']\n';
-    console.l;
+    var value = context.lexicals[name]
+    var info = context.staticCode.staticInfo[name];
+
+    var get_data = 'data[' + (data.length - 1) + ']\n';
+    if (info.length == 2) {
+      set_vars += ('var ' + info[1] + " = " + add_to_data(value) + "\n");
+    } else {
+      set_vars += (context.staticCode.ctx + "[" + add_to_data(name) + "] = " + add_to_data(value) + "\n");
+    }
   }
 
   return '(function() {\n' +

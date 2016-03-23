@@ -9,12 +9,26 @@ CodeRef.prototype.block = function(func) {
   this.$call = func;
 };
 
+CodeRef.prototype.setOuter = function(outerCtx) {
+  this.outerCtx = outerCtx;
+  return this;
+};
+
 // HACK - do this properly
 CodeRef.prototype.$call = function() {
   var nqp = require('nqp-runtime');
   if (this.closureTemplate) {
-    var template = 'var ' + this.outerCtx + '= null;(' + this.closureTemplate + ')';
+
+    var $$cuids = this.cuids;
+    var declare = [];
+    for (var i in $$cuids) {
+      declare.push('cuid' + $$cuids[i].cuid + " = $$cuids[" + i + "]");
+    }
+    var declare_cuids = "var " + declare.join(",") + ";\n" ;
+
+    var template = declare_cuids + 'var ' + this.outerCtx + '= null;(' + this.closureTemplate + ')';
     var $$codeRef = this;
+
     this.$call = eval(template);
     return this.$call.apply(this, arguments);
   }
@@ -54,6 +68,7 @@ CodeRef.prototype.closure = function(block) {
   closure.codeObj = this.codeObj;
   closure.cuid = this.cuid;
   closure.$call = block;
+  closure.staticCode = this;
   return closure;
 };
 
@@ -83,12 +98,13 @@ CodeRef.prototype.setCodeObj = function(codeObj) {
   return this;
 };
 
-CodeRef.prototype.setInfo = function(ctx, outerCtx, closureTemplate, staticInfo, asMethod) {
+CodeRef.prototype.setInfo = function(ctx, outerCtx, closureTemplate, staticInfo, asMethod, cuids) {
   this.closureTemplate = closureTemplate;
   this.ctx = ctx;
   this.outerCtx = outerCtx;
   this.staticInfo = staticInfo;
   this.asMethod = asMethod;
+  this.cuids = cuids;
   return this;
 };
 
@@ -97,6 +113,7 @@ CodeRef.prototype.$$clone = function() {
   clone.$call = this.$call;
   clone.codeObj = this.codeObj;
   clone.cuid = this.cuid + ' clone';
+  clone.staticCode = this;
   return clone;
 };
 
