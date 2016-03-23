@@ -994,9 +994,20 @@ module.exports.MultiDimArray = MultiDimArray;
 
 function VMException() {
 }
-VMException.prototype.create_obj_constructor = basic_constructor;
 VMException.prototype.allocate = basic_allocate;
 VMException.prototype.type_object_for = basic_type_object_for;
 VMException.prototype.compose = noop_compose;
+VMException.prototype.basic_type_object_for = basic_type_object_for;
+
+VMException.prototype.basic_constructor = basic_constructor
+
+VMException.prototype.create_obj_constructor = function(STable) {
+  var c = this.basic_constructor(STable);
+  STable.obj_constructor = c; // HACK it's set again later, we set it for addInternalMethod
+  STable.addInternalMethod('$$get_str', function() {
+    return this.message;
+  });
+  return c;
+};
 
 module.exports.VMException = VMException;

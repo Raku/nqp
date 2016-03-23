@@ -24,7 +24,7 @@ my @runtime_unit_tests = qw(t/js/varint.js);
 my @continuation_tests; # = qw(t/js/continuations.t);
 
 my @native_call_tests = qw(t/nativecall/01-basic.t);
-my @hll_tests; # = qw(t/hll/06-sprintf.t);
+my @hll_tests = qw(t/hll/06-sprintf.t);
 
 my $node_version = `node -v`;
 
