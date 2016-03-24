@@ -805,6 +805,10 @@ my class MASTCompilerInstance {
                     $cu.repo_conflict_resolver()));
             }
 
+            # Provided we have a serialization context,, pop it off the
+            # compiling SC stack.
+            nqp::popcompsc() if $cu.sc;
+
             # Add post-deserialization tasks.
             for @post_des {
                 $block.push(QAST::Stmt.new($_));
@@ -844,15 +848,10 @@ my class MASTCompilerInstance {
         }
     }
 
-    # this method is a hook point so that we can override serialization when cross-compiling
+    # This method is a hook point so that we can override serialization when cross-compiling
     method serialize_sc($sc) {
-        # Serialize it.
         my $sh := nqp::list_s();
         my str $serialized := nqp::serialize($sc, $sh);
-
-        # Now it's serialized, pop this SC off the compiling SC stack.
-        nqp::popcompsc();
-
         [$serialized, nqp::null()];
     }
 
