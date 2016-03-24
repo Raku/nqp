@@ -10,8 +10,7 @@ my $harness = TAP::Harness->new({
         return ['node', $test_file] if $test_file =~ /\.js$/;
     }
 });
-my @regex;
-#@regex = "gen/js/qregex.t" unless $skip_qregex;
+my @regex = "gen/js/qregex.t" unless $skip_qregex;
 my @serialization = glob "t/serialization/{01,02,03}*.t";
 my @qast = glob "t/qast/02*";
 my @js_specific = "t/js/getcomp-js.t";

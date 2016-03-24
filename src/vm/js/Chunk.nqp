@@ -30,6 +30,17 @@ class Chunk {
         $!node := $node if nqp::defined($node);
     }
 
+    method write($fh, :$escape) {
+        for @!setup -> $part {
+           if nqp::isstr($part) {
+                nqp::printfh($fh, $escape ?? nqp::escape($part) !! $part);
+           }
+           else {
+               $part.write($fh, :$escape);
+           }
+        }
+    }
+
     method join() {
         my $js := ''; 
         for @!setup -> $part {
@@ -120,4 +131,48 @@ class ChunkCPS is Chunk {
     method cont() {
         $!cont;
     }
+}
+
+class ChunkEscaped {
+    has @!setup;
+
+    method new(@setup) {
+        my $obj := nqp::create(self);
+        $obj.BUILD(@setup);
+        $obj
+    }
+
+    method BUILD(@setup) {
+        @!setup := @setup;
+    }
+
+    method join() {
+        my $js := ''; 
+        for @!setup -> $part {
+           if nqp::isstr($part) {
+              $js := $js ~ $part;
+           }
+           else {
+              $js := $js ~ $part.join;
+           }
+        }
+        '"' ~ nqp::escape($js) ~ '"';
+    }
+
+    method write($fh, :$escape) {
+        if $escape {
+            nqp::die("Double escaping NIY");
+        }
+        nqp::printfh($fh, '"');
+        for @!setup -> $part {
+           if nqp::isstr($part) {
+                nqp::printfh($fh, nqp::escape($part));
+           }
+           else {
+               $part.write($fh, :escape(1));
+           }
+        }
+        nqp::printfh($fh, '"');
+    }
+    # TODO source map support
 }

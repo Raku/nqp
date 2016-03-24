@@ -1038,7 +1038,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                         # We need to override when deserializing closures
                         @function[4] := self.create_ctx($*CTX, :code_ref('$$codeRef'));
                         %!serialized_code_ref_info{$node.cuid} := SerializedCodeRefInfo.new(
-                            closure_template => Chunk.new($T_OBJ, "", @function).join(),
+                            closure_template => ChunkEscaped.new(@function),
                             ctx => $*CTX,
                             outer_ctx => (nqp::defined($*BLOCK.outer) ?? $*BLOCK.outer.ctx !! ""),
                             as_method => $as_method,
@@ -1218,26 +1218,31 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     method set_static_info() {
-        my $set_info := '';
+        my @setup;
+
 
         for %!cuids -> $kv {
             if nqp::existskey(%!serialized_code_ref_info, $kv.key) {
                 my $cuid := $kv.key;
                 my $info := %!serialized_code_ref_info{$cuid};
 
-                $set_info := $set_info
+                @setup.push(
                     ~ self.mangled_cuid($cuid)
                     ~ ".setInfo("
                     ~ quote_string($info.ctx) ~ ","
-                    ~ quote_string($info.outer_ctx) ~ ","
-                    ~ ($info.closure_template ?? quote_string($info.closure_template) !! "null") ~ ","
-                    ~ $info.static_info ~ ","
+                    ~ quote_string($info.outer_ctx) ~ ",");
+
+                @setup.push($info.closure_template // "null");
+
+                @setup.push(
+                    ~ "," ~ $info.static_info ~ ","
                     ~ ($info.as_method ?? "true" !! "false") ~ ","
                     ~ "cuids"
-                    ~ ");\n";
+                    ~ ");\n");
             }
         }
-        $set_info;
+
+        Chunk.new($T_VOID, "", @setup);
     }
 
     method emit_code_refs_list($ast) {
@@ -1250,7 +1255,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
          }
 
         "var code_refs = new nqp.NQPArray([{nqp::join(',',@blocks)}]);\n" # TODO
-        ~ self.set_static_info;
     }
 
 
@@ -1260,7 +1264,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         # TODO refactor
         if !nqp::defined($ast.sc) {
-            return self.emit_code_refs_list($ast);
+            # TODO the code_refs are empty here - think what to do about it
+            return Chunk.void(self.emit_code_refs_list($ast), self.set_static_info);
         }
 
         my $sc_tuple := self.serialize_sc($sc);
@@ -1279,11 +1284,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my $quoted_data := nqp::isnull_s($sc_data) ?? 'null' !! quote_string($sc_data);
 
 
-        "var sh= new nqp.NQPArray([{nqp::join(',',@sh)}]);\n"
-        ~ "var sc = nqp.op.createsc({quote_string(nqp::scgethandle($sc))});\n"
-        ~ self.emit_code_refs_list($ast)
-        ~ "nqp.op.deserialize($quoted_data,sc,sh,code_refs,null);\n"
-        ~ "nqp.op.scsetdesc(sc,{quote_string(nqp::scgetdesc($sc))});\n"
+        Chunk.void(
+            "var sh= new nqp.NQPArray([{nqp::join(',',@sh)}]);\n"
+            ~ "var sc = nqp.op.createsc({quote_string(nqp::scgethandle($sc))});\n"
+            ~ self.emit_code_refs_list($ast)
+            , self.set_static_info
+            , "nqp.op.deserialize($quoted_data,sc,sh,code_refs,null);\n"
+            ~ "nqp.op.scsetdesc(sc,{quote_string(nqp::scgetdesc($sc))});\n");
     }
 
     method do_control($type, $loop) {
@@ -1693,8 +1700,14 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         );
     }
 
-    method emit($ast, :$instant) {
-       self.as_js_with_prelude($ast, :$instant).join
+    method emit($ast, :$instant, :$fh) {
+        my $chunk := self.as_js_with_prelude($ast, :$instant);
+        if $fh {
+            $chunk.write($fh);
+            return;
+        }
+        my $source := $chunk.join();
+        $source;
     }
 
     # return a json datastructure we later process into a source map
