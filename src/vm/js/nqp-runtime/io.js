@@ -124,7 +124,7 @@ FileHandle.prototype.isttyfh = function() {
 
 FileHandle.prototype.printfh = function(content) {
   var buffer = new Buffer(content, this.encoding);
-  return fs.writeSync(this.fd, buffer, 0, buffer.length, 0);
+  return fs.writeSync(this.fd, buffer, 0, buffer.length);
 };
 
 FileHandle.prototype.$$to_bool = function(ctx) {
