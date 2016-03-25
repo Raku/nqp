@@ -201,7 +201,7 @@ op.create = function(obj) {
 
 op.bootarray = function(obj) {
   return {_STable: {REPR: {allocate: function(STable) {
-    return [];
+    return new NQPArray([]);
   }}}};
 };
 
