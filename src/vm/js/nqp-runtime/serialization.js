@@ -656,19 +656,19 @@ SerializationWriter.prototype.serializeClosure = function(closure) {
 
 
     /* Check if it has a static code object. */
-    if (closure.codeObject) {
-        var codeObject = closure.codeObject;
+    if (closure.codeObj) {
+        var codeObj = closure.codeObj;
         this.closures.I32(1);
 
-        if (!codeObject._SC) {
+        if (!codeObj._SC) {
         }
         if (!codeObj._SC) {
             codeObj._SC = this.sc;
             this.writer.sc.root_objects.push(ref);
         }
 
-        this.closures.I32(this.getSCId(codeObject._SC));
-        this.closures.I32(this.codeObject._SC.root_objects.indexOf(codeObject));
+        this.closures.I32(this.getSCId(codeObj._SC));
+        this.closures.I32(codeObj._SC.root_objects.indexOf(codeObj));
     }
     else {
         this.closures.I32(0);
