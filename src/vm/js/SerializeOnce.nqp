@@ -17,8 +17,6 @@ role SerializeOnce {
         # HACK - now we pop our fake sc
         nqp::popcompsc();
 
-        # Now it's serialized, pop this SC off the compiling SC stack.
-        nqp::popcompsc();
         [$serialized,$sh];
     }
 
