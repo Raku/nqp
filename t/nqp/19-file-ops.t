@@ -2,7 +2,7 @@
 
 # Test nqp::op file operations.
 
-plan(86);
+plan(88);
 
 ok( nqp::stat('CREDITS', nqp::const::STAT_EXISTS) == 1, 'nqp::stat exists');
 ok( nqp::stat('AARDVARKS', nqp::const::STAT_EXISTS) == 0, 'nqp::stat not exists');
@@ -121,6 +121,21 @@ $fh := nqp::open($test-file, 'w');
 nqp::closefh($fh);
 $fh := nqp::open($test-file, 'r');
 ok(nqp::readallfh($fh) eq '', 'opening for writing truncates the file');
+nqp::closefh($fh);
+
+
+$fh := nqp::open($test-file, 'w');
+nqp::printfh($fh, "pretty awesome");
+nqp::printfh($fh, " th");
+nqp::printfh($fh, "i");
+nqp::printfh($fh, "n");
+nqp::printfh($fh, "g!");
+nqp::printfh($fh, "!");
+nqp::closefh($fh);
+
+$fh := nqp::open($test-file, 'r');
+ok(nqp::readallfh($fh) eq "pretty awesome thing!!", 'test file contains the string after multiple write with w mode');
+ok(nqp::tellfh($fh) == 22, 'tellfh gives correct position');
 nqp::closefh($fh);
 
 ## setencoding
