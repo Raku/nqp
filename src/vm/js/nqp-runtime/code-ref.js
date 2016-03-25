@@ -26,7 +26,7 @@ CodeRef.prototype.$call = function() {
     }
     var declare_cuids = "var " + declare.join(",") + ";\n" ;
 
-    var template = declare_cuids + 'var ' + this.outerCtx + '= null;(' + this.closureTemplate + ')';
+    var template = declare_cuids + this.setSetting + 'var ' + this.outerCtx + '= null;(' + this.closureTemplate + ')';
     var $$codeRef = this;
 
     this.$call = eval(template);
@@ -98,13 +98,14 @@ CodeRef.prototype.setCodeObj = function(codeObj) {
   return this;
 };
 
-CodeRef.prototype.setInfo = function(ctx, outerCtx, closureTemplate, staticInfo, asMethod, cuids) {
+CodeRef.prototype.setInfo = function(ctx, outerCtx, closureTemplate, staticInfo, asMethod, cuids, setSetting) {
   this.closureTemplate = closureTemplate;
   this.ctx = ctx;
   this.outerCtx = outerCtx;
   this.staticInfo = staticInfo;
   this.asMethod = asMethod;
   this.cuids = cuids;
+  this.setSetting = setSetting;
   return this;
 };
 

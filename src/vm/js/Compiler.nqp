@@ -794,6 +794,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         self.declare_js_vars(@declared);
     }
 
+    method setup_set_setting() {
+       "var setSetting = " ~ (
+            $*SETTING_TARGET ?? quote_string(self.import_stuff_from_setting($*SETTING_TARGET)) !! "null"
+       ) ~ ";\n";
+    }
+
     method set_code_objects() {
         my $set := "";
         for %!cuids {
@@ -1174,7 +1180,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     multi method as_js(QAST::BVal $node, :$want, :$cps) {
-        self.as_js($node.value, :$want);
+        Chunk.new($T_OBJ, self.mangled_cuid($node.value.cuid), [], :$node);
     }
 
     # Helps with register allocation on other backends
@@ -1237,7 +1243,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 @setup.push(
                     ~ "," ~ $info.static_info ~ ","
                     ~ ($info.as_method ?? "true" !! "false") ~ ","
-                    ~ "cuids"
+                    ~ "cuids, setSetting"
                     ~ ");\n");
             }
         }
@@ -1396,6 +1402,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my $instant := try $*INSTANT;
 
+
+        $node[0].blocktype('declaration_static'); # Hac
+        # TODO needs thinking about, it seems there is really nothing to captue here and a setting is forced as outer
+
         # Compile the block.
         my $block_js := self.as_js($node[0], :want($instant ?? $T_VOID !! $T_OBJ));
 
@@ -1421,7 +1431,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             $body := $block_js;
         }
 
-        my @setup := [self.setup_cuids(), $pre , self.create_sc($node), self.set_code_objects,  self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $post, $body];
+        my @setup := [self.setup_cuids(), self.setup_set_setting(), $pre , self.create_sc($node), self.set_code_objects,  self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $post, $body];
         if !$instant {
             @setup.push("new nqp.EvalResult({$body.expr}, code_refs)");
         }
