@@ -62,7 +62,9 @@ class QAST::CompUnit is QAST::Node does QAST::Children {
     method extra_children() {
         [
             'pre_deserialize', self.pre_deserialize,
-            'post_deserialize', self.post_deserialize
+            'post_deserialize', self.post_deserialize,
+            'main', self.main ?? [self.main] !! [],
+            'load', self.load ?? [self.load] !! [],
         ];
     }
 }
