@@ -609,7 +609,6 @@ BinaryCursor.prototype.deserialize = function(sc) {
     /* TODO make cuids be in scope */
     var nqp = require('nqp-runtime');
     eval(prelude + declareCuids + code);
-    var code = prelude + declareCuids + code;
   }
 
   var reposTable = this.I32();
