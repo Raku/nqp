@@ -408,11 +408,14 @@ class QAST::OperationsJS {
 
         if $type != $T_OBJ {
             add_simple_op('bindpos' ~ $suffix, $type, [$T_OBJ, $T_INT, $type], sub ($list, $index, $value) {"$list.\$\$bindpos($index, $value)"}, :sideffects);
-            add_simple_op('pop' ~ $suffix, $type, [$T_OBJ], sub ($array) {"$array.\$\$pop()"}, :sideffects);
-            add_simple_op('push' ~ $suffix, $type, [$T_OBJ, $type], sub ($array, $elem) {"$array.\$\$push($elem)"}, :sideffects);
             add_simple_op('atpos' ~ $suffix, $type, [$T_OBJ, $T_INT], sub ($list, $index) {"$list.\$\$atpos$suffix($index)"});
 
         }
+        
+        add_simple_op('pop' ~ $suffix, $type, [$T_OBJ], sub ($array) {"$array.\$\$pop()"}, :sideffects);
+        add_simple_op('push' ~ $suffix, $type, [$T_OBJ, $type], sub ($array, $elem) {"$array.\$\$push($elem)"}, :sideffects);
+        add_simple_op('unshift' ~ $suffix, $type, [$T_OBJ, $type], sub ($array, $elem) {"$array.\$\$unshift($elem)"}, :sideffects);
+        add_simple_op('shift' ~ $suffix, $type, [$T_OBJ], sub ($array) {"$array.\$\$shift()"}, :sideffects);
  
 
         add_simple_op('atposnd' ~ $suffix, $type, [$T_OBJ, $T_OBJ]);
@@ -723,12 +726,6 @@ class QAST::OperationsJS {
             Chunk.new($T_OBJ, "new nqp.CurLexpad(\{{nqp::join(',', @get)}\}, \{{nqp::join(',', @set)}\})", [], :$node);
     });
 
-
-    add_simple_op('shift', $T_OBJ, [$T_OBJ], :sideffects);
-    add_simple_op('unshift', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
-    add_simple_op('pop', $T_OBJ, [$T_OBJ], :sideffects);
-    add_simple_op('push', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
-
     add_simple_op('splice', $T_OBJ, [$T_OBJ, $T_OBJ, $T_INT, $T_INT], :sideffects);
 
     add_simple_op('setelems', $T_OBJ, [$T_OBJ, $T_INT], :sideffects);
@@ -990,7 +987,7 @@ class QAST::OperationsJS {
         my $arity := @operands[1].arity || 1;
         while $arity > 0 {
             my $iterval := $*BLOCK.add_tmp();
-            @body_args.push(Chunk.new($T_OBJ, $iterval, ["$iterval = $iterator.shift();\n"]));
+            @body_args.push(Chunk.new($T_OBJ, $iterval, ["$iterval = $iterator.\$\$shift();\n"]));
             $arity := $arity - 1;
         }
 

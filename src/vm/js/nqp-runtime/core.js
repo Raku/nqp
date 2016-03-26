@@ -93,7 +93,7 @@ function Iter(array) {
   this.idx = 0;
 }
 
-Iter.prototype.shift = function() {
+Iter.prototype.$$shift = function() {
   return this.array[this.idx++];
 };
 
@@ -108,7 +108,7 @@ function HashIter(hash) {
   this.idx = 0;
 }
 
-HashIter.prototype.shift = function() {
+HashIter.prototype.$$shift = function() {
   return new IterPair(this.hash, this.keys[this.idx++]);
 };
 
@@ -604,27 +604,6 @@ op.getpayload = function(exception) {
 
 op.setpayload = function(exception, payload) {
   return (exception.payload = payload);
-};
-
-op.unshift = function(target, value) {
-  if (target.$$unshift) return target.$$unshift(value);
-  target.unshift(value);
-  return value;
-};
-
-op.pop = function(target, value) {
-  if (target.$$pop) return target.$$pop(value);
-  return target.pop(value);
-};
-
-op.push = function(target, value) {
-  if (target.$$push) return target.$$push(value);
-  return target.push(value);
-};
-
-op.shift = function(target, value) {
-  if (target.$$shift) return target.$$shift(value);
-  return target.shift(value);
 };
 
 op.isnum = function(value) {
