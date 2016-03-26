@@ -153,23 +153,16 @@ BinaryCursor.prototype.locate_thing = function(thing_type) {
   var index;
   var sc;
 
-  const v15 = true;
-
   const PACKED_SC_SHIFT = 20;
   const PACKED_SC_OVERFLOW = 0xfff;
   const PACKED_SC_IDX_MASK = 0x000fffff;
 
-  if (v15) {
-    packed = this.U32();
-    sc_id = packed >>> PACKED_SC_SHIFT;
+  packed = this.U32();
+  sc_id = packed >>> PACKED_SC_SHIFT;
+  index = packed & PACKED_SC_IDX_MASK;
+  
+  if (sc_id != PACKED_SC_OVERFLOW) {
     index = packed & PACKED_SC_IDX_MASK;
-
-    if (sc_id != PACKED_SC_OVERFLOW) {
-      index = packed & PACKED_SC_IDX_MASK;
-    } else {
-      sc_id = this.I32();
-      index = this.I32();
-    }
   } else {
     sc_id = this.I32();
     index = this.I32();
