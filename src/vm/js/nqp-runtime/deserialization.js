@@ -160,7 +160,7 @@ BinaryCursor.prototype.locate_thing = function(thing_type) {
   packed = this.U32();
   sc_id = packed >>> PACKED_SC_SHIFT;
   index = packed & PACKED_SC_IDX_MASK;
-  
+
   if (sc_id != PACKED_SC_OVERFLOW) {
     index = packed & PACKED_SC_IDX_MASK;
   } else {
@@ -628,14 +628,14 @@ BinaryCursor.prototype.contextToCode = function(context, data) {
   }
 
   for (var name in context.lexicals) {
-    var value = context.lexicals[name]
+    var value = context.lexicals[name];
     var info = context.staticCode.staticInfo[name];
 
     var get_data = 'data[' + (data.length - 1) + ']\n';
     if (info.length == 2) {
-      set_vars += ('var ' + info[1] + " = " + add_to_data(value) + "\n");
+      set_vars += ('var ' + info[1] + ' = ' + add_to_data(value) + '\n');
     } else {
-      set_vars += (context.staticCode.ctx + "[" + add_to_data(name) + "] = " + add_to_data(value) + "\n");
+      set_vars += (context.staticCode.ctx + '[' + add_to_data(name) + '] = ' + add_to_data(value) + '\n');
     }
   }
 
@@ -741,6 +741,7 @@ BinaryCursor.prototype.str = function() {
   }
   return this.sh[offset];
 };
+
 
 /** Read a C String */
 BinaryCursor.prototype.cstr = function() {

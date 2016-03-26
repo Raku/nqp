@@ -71,6 +71,7 @@ BinaryWriteCursor.prototype.str = function(str) {
   }
 };
 
+
 /** Write a C String */
 BinaryWriteCursor.prototype.cstr = function(string) {
   if (string === undefined) {
@@ -538,7 +539,7 @@ SerializationWriter.prototype.serializeContext = function(ctx) {
   var staticCodeRef = this.closureToStaticCodeRef(ctx.codeRef, true);
   var staticCodeSC = staticCodeRef._SC;
   if (staticCodeSC == null) {
-    throw "Serialization Error: closure outer is a code object not in an SC";
+    throw 'Serialization Error: closure outer is a code object not in an SC';
   }
   var staticSCId = this.getSCId(staticCodeSC);
   var staticIdx = staticCodeSC.getCodeIndex(staticCodeRef);
@@ -552,9 +553,9 @@ SerializationWriter.prototype.serializeContext = function(ctx) {
   /* See if there's any relevant outer context, and if so set it up to
    * be serialized. */
   if (ctx.outer != null) {
-      this.contexts_headers.I32(this.getSerializedContextIdx(ctx.outer));
+    this.contexts_headers.I32(this.getSerializedContextIdx(ctx.outer));
   } else {
-      this.contexts_headers.I32(0);
+    this.contexts_headers.I32(0);
   }
 
 
@@ -567,8 +568,8 @@ SerializationWriter.prototype.serializeContext = function(ctx) {
   this.contexts_data.I64(lexicals);
 
   for (var name in staticInfo) {
-      this.contexts_data.str(name);
-      switch (staticInfo[name][0]) {
+    this.contexts_data.str(name);
+    switch (staticInfo[name][0]) {
       case 0: // obj
         this.contexts_data.ref(ctx[name]);
         break;
@@ -580,7 +581,7 @@ SerializationWriter.prototype.serializeContext = function(ctx) {
         break;
       case 3: // str
         this.contexts_data.str(ctx[name]);
-      }
+    }
   }
 };
 
@@ -598,11 +599,11 @@ SerializationWriter.prototype.getSerializedContextIdx = function(ctx) {
   }
   else {
     if (ctx._SC != this.sc) {
-      throw "Serialization Error: reference to context outside of SC";
+      throw 'Serialization Error: reference to context outside of SC';
     }
     var idx = this.contexts.indexOf(cf);
     if (idx < 0) {
-        throw "Serialization Error: could not locate outer context in current SC";
+      throw 'Serialization Error: could not locate outer context in current SC';
     }
     return idx + 1;
   }
@@ -610,9 +611,9 @@ SerializationWriter.prototype.getSerializedContextIdx = function(ctx) {
 
 SerializationWriter.prototype.getSerializedOuterContextIdx = function(closure) {
   if (closure.isCompilerStub)
-      return 0;
+    return 0;
   if (closure.outerCtx == null)
-      return 0;
+    return 0;
   return this.getSerializedContextIdx(closure.outerCtx);
 };
 
@@ -620,7 +621,7 @@ SerializationWriter.prototype.closureToStaticCodeRef = function(closure, fatal) 
   var staticCode = closure.staticInfo ? closure : closure.staticCode;
   if (!staticCode) {
     if (fatal) {
-      throw "Serialization Error: missing static code ref for closure";
+      throw 'Serialization Error: missing static code ref for closure';
     } else {
       return null;
     }
@@ -628,7 +629,7 @@ SerializationWriter.prototype.closureToStaticCodeRef = function(closure, fatal) 
 
   if (!staticCode._SC) {
     if (fatal) {
-      throw "Serialization Error: could not locate static code ref for closure";
+      throw 'Serialization Error: could not locate static code ref for closure';
     } else {
       return null;
     }
@@ -655,29 +656,29 @@ SerializationWriter.prototype.serializeClosure = function(closure) {
   this.closures.I32(contextIdx);
 
 
-    /* Check if it has a static code object. */
-    if (closure.codeObj) {
-        var codeObj = closure.codeObj;
-        this.closures.I32(1);
+  /* Check if it has a static code object. */
+  if (closure.codeObj) {
+    var codeObj = closure.codeObj;
+    this.closures.I32(1);
 
-        if (!codeObj._SC) {
-        }
-        if (!codeObj._SC) {
-            codeObj._SC = this.sc;
-            this.writer.sc.root_objects.push(ref);
-        }
-
-        this.closures.I32(this.getSCId(codeObj._SC));
-        this.closures.I32(codeObj._SC.root_objects.indexOf(codeObj));
+    if (!codeObj._SC) {
     }
-    else {
-        this.closures.I32(0);
-        this.closures.I32(0);
-        this.closures.I32(0);
+    if (!codeObj._SC) {
+      codeObj._SC = this.sc;
+      this.writer.sc.root_objects.push(ref);
     }
 
-    /* Increment count of closures in the table. */
-    this.numClosures++;
+    this.closures.I32(this.getSCId(codeObj._SC));
+    this.closures.I32(codeObj._SC.root_objects.indexOf(codeObj));
+  }
+  else {
+    this.closures.I32(0);
+    this.closures.I32(0);
+    this.closures.I32(0);
+  }
+
+  /* Increment count of closures in the table. */
+  this.numClosures++;
 
 
   /* Add the closure to this SC, and mark it as as being in it. */

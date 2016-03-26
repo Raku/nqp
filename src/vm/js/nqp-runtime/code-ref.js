@@ -22,9 +22,9 @@ CodeRef.prototype.$call = function() {
     var $$cuids = this.cuids;
     var declare = [];
     for (var i in $$cuids) {
-      declare.push('cuid' + $$cuids[i].cuid + " = $$cuids[" + i + "]");
+      declare.push('cuid' + $$cuids[i].cuid + ' = $$cuids[' + i + ']');
     }
-    var declare_cuids = "var " + declare.join(",") + ";\n" ;
+    var declare_cuids = 'var ' + declare.join(',') + ';\n';
 
     var template = declare_cuids + this.setSetting + 'var ' + this.outerCtx + '= null;(' + this.closureTemplate + ')';
     var $$codeRef = this;

@@ -999,7 +999,7 @@ VMException.prototype.type_object_for = basic_type_object_for;
 VMException.prototype.compose = noop_compose;
 VMException.prototype.basic_type_object_for = basic_type_object_for;
 
-VMException.prototype.basic_constructor = basic_constructor
+VMException.prototype.basic_constructor = basic_constructor;
 
 VMException.prototype.create_obj_constructor = function(STable) {
   var c = this.basic_constructor(STable);
