@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(257);
+plan(267);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -318,6 +318,15 @@ ok(nqp::getcomp("noSuchLanguageEver1")[0] eq "compiler1", "nqp::getcomp");
     ok(nqp::elems($a) == 2, 'nqp::pop_i reduces the number of elements correctly');
     ok(nqp::islist($a) == 1, 'nqp::islist(nqp::list_i())');
 
+
+    ok(nqp::shift_i($a) == 10, "shift_i");
+    ok(nqp::elems($a) == 1, 'nqp::shit_i reduces the number of elements correctly');
+
+    ok(nqp::unshift_i($a, 100) == 100, "unshift_i");
+
+    ok(nqp::elems($a) == 2, 'nqp::unshift_i increases the number of elements correctly');
+    ok(nqp::shift_i($a) == 100, 'the element get placed at the start');
+
     my $b := nqp::list_i(1,2,30.4);
     ok(nqp::atpos_i($b,2) == 30, 'atpos_i');
 
@@ -342,6 +351,14 @@ ok(nqp::getcomp("noSuchLanguageEver1")[0] eq "compiler1", "nqp::getcomp");
     ok(nqp::pop_s($a) eq "C", 'nqp::pop_s');
     ok(nqp::elems($a) == 2, 'nqp::pop_s reduces the number of elements correctly');
     ok(nqp::islist($a) == 1, 'nqp::islist(nqp::list_s())');
+
+    ok(nqp::shift_s($a) eq "A", "shift_s");
+    ok(nqp::elems($a) == 1, 'nqp::shit_s reduces the number of elements correctly');
+
+    ok(nqp::unshift_s($a, "X") eq "X", "unshift_s");
+
+    ok(nqp::elems($a) == 2, 'nqp::unshift_s increases the number of elements correctly');
+    ok(nqp::shift_s($a) == "X", 'the element get placed at the start');
 
     my $b := nqp::list_s("A","B","C");
     ok(nqp::bindpos_s($b, 2, "D"), 'nqp::bindpos_s');
