@@ -65,6 +65,7 @@ add_to_sc_with_st(KnowHOW);
 var st = new STable(repr, null);
 
 var KnowHOW_HOW = repr.allocate(st);
+KnowHOW_HOW.__name = 'KnowHOW';
 
 add_to_sc_with_st(KnowHOW_HOW);
 
