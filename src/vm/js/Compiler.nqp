@@ -1367,29 +1367,36 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my $*BLOCK := BlockInfo.new(NQPMu, NQPMu);
         $*BLOCK.ctx("null");
 
-        my $pre := '';
+        my @pre;
 
-        for $node.pre_deserialize -> $obj {
-            if nqp::istype($obj, QAST::Stmts) {
-                for $obj.list -> $op {
+        for $node.pre_deserialize -> $node {
+            if nqp::istype($node, QAST::Stmts) {
+                for $node.list -> $op {
                     if nqp::istype($op, QAST::Op) && $op.op eq 'forceouterctx' {
                         $*SETTING_NAME := $op[1][1].value;
                         $*SETTING_TARGET := $op[0].value;
-                        $pre := $pre ~ "nqp.load_setting({loadable($*SETTING_NAME ~ '.setting')});\n";
+                        @pre.push("nqp.load_setting({loadable($*SETTING_NAME ~ '.setting')});\n");
                         # HACK to get nqp::sprintf to work
-                        $pre := $pre ~ "require('sprintf');\n"; 
+                        @pre.push("require('sprintf');\n"); 
                     }
                     elsif nqp::istype($op, QAST::Op)
                         && $op.op eq 'callmethod'
                         && $op.name eq 'load_module' {
-                        $pre := $pre ~ "nqp.load_module({loadable($op[1].value)});\n";
+                        @pre.push("nqp.load_module({loadable($op[1].value)});\n");
+                    }
+                    elsif nqp::istype($op, QAST::Op)
+                        && $op.op eq 'loadbytecode' {
                     }
                     else {
-#                        self.log($op.dump);
+                        @pre.push(self.as_js($op, :want($T_VOID)));
                     }
                 }
             }
+            else {
+                @pre.push(self.as_js($node, :want($T_VOID)));
+            }
         }
+        my $pre := Chunk.new($T_VOID, "", @pre);
 
         my $instant := try $*INSTANT;
 
