@@ -741,9 +741,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
     }
     
-    method compile_all_the_statements(QAST::Stmts $node, $want, :$result_child = +$node.list -1, :$cps) {
+    method compile_all_the_statements(QAST::Stmts $node, $want, :$result_child, :$cps) {
         my @chunks;
         my @stmts := $node.list;
+
+        unless nqp::defined($result_child) {
+            $result_child := +$node.list - 1;
+        }
 
         my $i := 0;
         for @stmts -> $stmt {
@@ -1186,7 +1190,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     # Helps with register allocation on other backends
     # We don't do allocate registers so just ignore that
     multi method as_js(QAST::Stmt $node, :$want, :$cps) {
-        self.as_js($node[0], :$want, :$cps);
+        self.compile_all_the_statements($node, $want, :$cps, :result_child($node.resultchild));
     }
 
     multi method as_js(QAST::Stmts $node, :$want, :$cps) {
@@ -1210,7 +1214,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             Chunk.void("nqp.ctxsave(\{{nqp::join(',', @lexicals)}\});\n");
         }
         else {
-            self.compile_all_the_statements($node, $want, :$cps);
+            self.compile_all_the_statements($node, $want, :$cps, :result_child($node.resultchild));
         }
     }
 
