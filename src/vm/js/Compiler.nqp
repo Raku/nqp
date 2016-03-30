@@ -1363,14 +1363,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my $*COMPUNIT := $node;
 
-        my $*SETTING_NAME;
-        my $*SETTING_TARGET;
-
-        # Blocks we've seen while compiling.
-        my %*BLOCKS_DONE;
-        my %*BLOCKS_INFO;
-        my %*BLOCKS_AS_METHOD;
-        my %*BLOCKS_DONE_CPS;
 
         # A fake outer block 
         my $*BLOCK := BlockInfo.new(NQPMu, NQPMu);
@@ -1431,7 +1423,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             $body := $block_js;
         }
 
-        my @setup := [self.setup_cuids(), self.setup_set_setting(), $pre , self.create_sc($node), self.set_code_objects,  self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $post, $body];
+        my @setup := [self.setup_set_setting(), $pre , self.create_sc($node), self.set_code_objects,  self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $post, $body];
         if !$instant {
             @setup.push("new nqp.EvalResult({$body.expr}, code_refs)");
         }
@@ -1698,15 +1690,41 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         self.NYI("Unimplemented QAST node type: " ~ $unknown.HOW.name($unknown));
     }
 
+    method wrap_in_fake_block($code) {
+        # A fake outer block 
+        my $*BLOCK := BlockInfo.new(NQPMu, NQPMu);
+        $*BLOCK.ctx("null");
+
+        my $chunk := $code();
+
+        Chunk.new($chunk.type, $chunk.expr, [self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $chunk]);
+    }
 
     method as_js_with_prelude($ast, :$instant) {
         my $*INSTANT := $instant;
+
+        my $*SETTING_NAME;
+        my $*SETTING_TARGET;
+
+        # Blocks we've seen while compiling.
+        my %*BLOCKS_DONE;
+        my %*BLOCKS_INFO;
+        my %*BLOCKS_AS_METHOD;
+        my %*BLOCKS_DONE_CPS;
+
+        my $compile_block := -> {self.as_js($ast, :want($instant ?? $T_VOID !! $T_OBJ))};
+
+        my $chunk := nqp::istype($ast, QAST::CompUnit) ?? 
+            $compile_block()
+            !! self.wrap_in_fake_block($compile_block);
+
         Chunk.void(
             "var nqp = require('nqp-runtime');\n",
             "\nvar top_ctx = nqp.top_context();\n",
             # temporary HACK
             "var ARGS = process.argv;\n",
-            self.as_js($ast, :want($T_VOID))
+            self.setup_cuids(),
+            $chunk
         );
     }
 
