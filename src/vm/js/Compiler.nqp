@@ -1366,6 +1366,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         # A fake outer block 
         my $*BLOCK := BlockInfo.new(NQPMu, NQPMu);
         $*BLOCK.ctx("null");
+        my $*CTX := "null";
 
         my @pre;
 
