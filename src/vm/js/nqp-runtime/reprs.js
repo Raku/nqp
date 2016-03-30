@@ -496,21 +496,16 @@ function P6int() {
 P6int.prototype.flattened_default = 0;
 P6int.prototype.boxed_primitive = 1;
 
-P6int.prototype.basic_constructor = basic_constructor;
-P6int.prototype.basic_type_object_for = basic_type_object_for;
+P6int.prototype.create_obj_constructor = basic_constructor;
+P6int.prototype.type_object_for = basic_type_object_for;
 
-P6int.prototype.create_obj_constructor = function(STable) {
-  var c = this.basic_constructor(STable);
-
-  STable.obj_constructor = c; // HACK it's set again later, we set it for addInternalMethod
-
+P6int.prototype.setup_STable = function(STable) {
   STable.addInternalMethod('$$set_int', function(value) {
     this.value = value;
   });
   STable.addInternalMethod('$$get_int', function() {
     return this.value;
   });
-  return c;
 };
 
 P6int.prototype.compose = function(STable, repr_info_hash) {
@@ -537,11 +532,6 @@ P6int.prototype.serialize = function(data, obj) {
   data.varint(obj.value);
 };
 
-
-P6int.prototype.type_object_for = function(HOW) {
-  var type_object = this.basic_type_object_for(HOW);
-  return type_object;
-};
 
 module.exports.P6int = P6int;
 
@@ -677,28 +667,24 @@ function P6bigint() {
 }
 P6bigint.prototype.create_obj_constructor = basic_constructor;
 
-P6bigint.prototype.basic_type_object_for = basic_type_object_for;
+P6bigint.prototype.type_object_for = basic_type_object_for;
 
-P6bigint.prototype.type_object_for = function(HOW) {
-  var type_object = this.basic_type_object_for(HOW);
-
-  this._STable.addInternalMethod('$$set_int', function(value) {
+P6bigint.prototype.setup_STable = function(STable) {
+  STable.addInternalMethod('$$set_int', function(value) {
     this.value = bignum(value);
   });
 
-  this._STable.addInternalMethod('$$get_int', function() {
+  STable.addInternalMethod('$$get_int', function() {
     return this.value.toNumber() | 0;
   });
 
-  this._STable.addInternalMethod('$$set_bignum', function(value) {
+  STable.addInternalMethod('$$set_bignum', function(value) {
     this.value = value;
   });
 
-  this._STable.addInternalMethod('$$get_bignum', function() {
+  STable.addInternalMethod('$$get_bignum', function() {
     return this.value;
   });
-
-  return type_object;
 };
 
 P6bigint.prototype.generateBoxingMethods = function(repr, attr) {
@@ -779,12 +765,9 @@ MultiDimArray.prototype.compose = function(STable, repr_info_hash) {
 };
 MultiDimArray.prototype.allocate = basic_allocate;
 
-MultiDimArray.prototype.basic_constructor = basic_constructor;
-MultiDimArray.prototype.create_obj_constructor = function(STable) {
-  var c = this.basic_constructor(STable);
+MultiDimArray.prototype.create_obj_constructor = basic_constructor;
 
-  STable.obj_constructor = c; // HACK it's set again later, we set it for addInternalMethod
-
+MultiDimArray.prototype.setup_STable = function(STable) {
   STable.addInternalMethod('$$numdimensions', function(value) {
     if (this.type_object_) {
       throw new NQPException('Cannot get number of dimensions of a type object');
@@ -910,9 +893,6 @@ MultiDimArray.prototype.create_obj_constructor = function(STable) {
   STable.addInternalMethod('$$atpos', function(index) {
     return this.$$atposnd(new NQPArray([index]));
   });
-
-
-  return c;
 };
 
 MultiDimArray.prototype.serialize_repr_data = function(st, cursor) {
@@ -999,15 +979,12 @@ VMException.prototype.type_object_for = basic_type_object_for;
 VMException.prototype.compose = noop_compose;
 VMException.prototype.basic_type_object_for = basic_type_object_for;
 
-VMException.prototype.basic_constructor = basic_constructor;
+VMException.prototype.create_obj_constructor = basic_constructor;
 
-VMException.prototype.create_obj_constructor = function(STable) {
-  var c = this.basic_constructor(STable);
-  STable.obj_constructor = c; // HACK it's set again later, we set it for addInternalMethod
+VMException.prototype.setup_STable = function(STable) {
   STable.addInternalMethod('$$get_str', function() {
     return this.message;
   });
-  return c;
 };
 
 module.exports.VMException = VMException;
