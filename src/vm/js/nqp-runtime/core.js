@@ -557,7 +557,7 @@ function toJS(obj) {
 
 compilerRegistry['JavaScript'] = {
   eval: function(ctx, named, code) {
-    console.log("evaling [", code, "]");
+    //console.log("evaling [", code, "]");
     return fromJS(eval(code));
   }
 };

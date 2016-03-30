@@ -1271,7 +1271,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         # TODO refactor
         if !nqp::defined($ast.sc) {
             # TODO the code_refs are empty here - think what to do about it
-            return Chunk.void(self.emit_code_refs_list($ast), self.set_static_info);
+            return self.emit_code_refs_list($ast);
         }
 
         my $sc_tuple := self.serialize_sc($sc);
@@ -1294,7 +1294,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             "var sh= new nqp.NQPArray([{nqp::join(',',@sh)}]);\n"
             ~ "var sc = nqp.op.createsc({quote_string(nqp::scgethandle($sc))});\n"
             ~ self.emit_code_refs_list($ast)
-            , self.set_static_info
             , "nqp.op.deserialize($quoted_data,sc,sh,code_refs,null);\n"
             ~ "nqp.op.scsetdesc(sc,{quote_string(nqp::scgetdesc($sc))});\n");
     }
@@ -1423,7 +1422,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             $body := $block_js;
         }
 
-        my @setup := [self.setup_set_setting(), $pre , self.create_sc($node), self.set_code_objects,  self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $post, $body];
+        my @setup := [$pre , self.create_sc($node), self.set_code_objects,  self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $post, $body];
         if !$instant {
             @setup.push("new nqp.EvalResult({$body.expr}, code_refs)");
         }
@@ -1723,7 +1722,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             "\nvar top_ctx = nqp.top_context();\n",
             # temporary HACK
             "var ARGS = process.argv;\n",
-            self.setup_cuids(),
+            self.setup_cuids,
+            self.setup_set_setting(),
+            self.set_static_info,
             $chunk
         );
     }

@@ -26,7 +26,8 @@ CodeRef.prototype.$call = function() {
     }
     var declare_cuids = 'var ' + declare.join(',') + ';\n';
 
-    var template = declare_cuids + this.setSetting + 'var ' + this.outerCtx + '= null;(' + this.closureTemplate + ')';
+    var setSetting = this.setSetting || '';
+    var template = declare_cuids + setSetting + 'var ' + this.outerCtx + '= null;(' + this.closureTemplate + ')';
     var $$codeRef = this;
 
     this.$call = eval(template);
