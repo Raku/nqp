@@ -1148,6 +1148,12 @@ class QAST::OperationsJS {
     add_simple_op('where', $T_INT, [$T_OBJ]);
     add_simple_op('objectid', $T_INT, [$T_OBJ]);
 
+    # Set of sequential statements
+
+    add_op('stmts', sub ($comp, $node, :$want, :$cps) {
+        $comp.as_js(:$want, :$cps, QAST::Stmts.new( |@($node)));
+    });
+
     # HACK
     # TODO think what we should return on 1.WHAT and "foo".WHAT
     add_simple_op('what', $T_OBJ, [$T_OBJ], sub ($obj) {"($obj._STable ? $obj._STable.WHAT : null)"});
