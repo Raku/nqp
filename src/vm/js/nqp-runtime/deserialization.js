@@ -574,7 +574,7 @@ BinaryCursor.prototype.deserialize = function(sc) {
     var type = closure.staticCode.asMethod ? 'method' : 'block';
     var code_ref = 'sc.code_refs[' + closure.index + ']';
 
-    return 'var ' + closure.staticCode.outerCtx + ' = null;\n' +
+    return 'var ' + closure.staticCode.outerCtxVar + ' = null;\n' +
         'var $$codeRef = ' + code_ref + ';\n' +
         'sc.code_refs[' + closure.index + '].' + type + '(' +
         closure.staticCode.closureTemplate +

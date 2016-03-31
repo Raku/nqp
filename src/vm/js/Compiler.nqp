@@ -955,6 +955,11 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 }
 
                 @capture_inners.push(%*BLOCKS_DONE{$kv.key});
+
+                if 1 { # TODO check if we need to have this closure serializable
+                    @capture_inners.push(".setOuter(" ~ %*BLOCKS_INFO{$kv.key}.outer.ctx ~ ")");
+                }
+
                 @capture_inners.push(";\n");
             });
 
@@ -1436,7 +1441,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my @setup := [$pre , self.create_sc($node), self.set_code_objects,  self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $post, $body];
         if !$instant {
-            @setup.push("new nqp.EvalResult({$body.expr}, code_refs)");
+            @setup.push("new nqp.EvalResult({$body.expr}, new nqp.NQPArray(cuids))");
         }
         Chunk.new($T_VOID, "", @setup);
     }

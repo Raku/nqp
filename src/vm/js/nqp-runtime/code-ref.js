@@ -27,7 +27,7 @@ CodeRef.prototype.$call = function() {
     var declare_cuids = 'var ' + declare.join(',') + ';\n';
 
     var setSetting = this.setSetting || '';
-    var template = declare_cuids + setSetting + 'var ' + this.outerCtx + '= null;(' + this.closureTemplate + ')';
+    var template = declare_cuids + setSetting + 'var ' + this.outerCtxVar + '= null;(' + this.closureTemplate + ')';
     var $$codeRef = this;
 
     this.$call = eval(template);
@@ -99,10 +99,10 @@ CodeRef.prototype.setCodeObj = function(codeObj) {
   return this;
 };
 
-CodeRef.prototype.setInfo = function(ctx, outerCtx, closureTemplate, staticInfo, asMethod, cuids, setSetting) {
+CodeRef.prototype.setInfo = function(ctx, outerCtxVar, closureTemplate, staticInfo, asMethod, cuids, setSetting) {
   this.closureTemplate = closureTemplate;
   this.ctx = ctx;
-  this.outerCtx = outerCtx;
+  this.outerCtxVar = outerCtxVar;
   this.staticInfo = staticInfo;
   this.asMethod = asMethod;
   this.cuids = cuids;
@@ -116,6 +116,7 @@ CodeRef.prototype.$$clone = function() {
   clone.codeObj = this.codeObj;
   clone.cuid = this.cuid + ' clone';
   clone.staticCode = this;
+  clone.outerCtx = this.outerCtx;
   return clone;
 };
 
