@@ -601,7 +601,7 @@ SerializationWriter.prototype.getSerializedContextIdx = function(ctx) {
     if (ctx._SC != this.sc) {
       throw 'Serialization Error: reference to context outside of SC';
     }
-    var idx = this.contexts.indexOf(cf);
+    var idx = this.contexts.indexOf(ctx);
     if (idx < 0) {
       throw 'Serialization Error: could not locate outer context in current SC';
     }
