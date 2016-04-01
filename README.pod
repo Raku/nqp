@@ -121,3 +121,9 @@ Currently it needs to be run like:
 
 To run the tests 
    make js-test
+
+To build nqp-js-on-js (that is nqp-js itself running on node.js)
+    make js-bootstrap
+
+To run nqp-js-on-js
+    node nqp-bootstrapped.js -e "say('Hello World')"
