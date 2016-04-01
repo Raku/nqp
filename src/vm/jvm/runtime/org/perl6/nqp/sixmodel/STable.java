@@ -145,4 +145,9 @@ public class STable {
      * The role that the type plays in the HLL, if any.
      */
     public long hllRole;
+
+    /**
+     * Debug name for the type, for understanding what it is while debugging.
+     */
+    public String debugName;
 }

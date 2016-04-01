@@ -2534,6 +2534,8 @@ QAST::OperationsJAST.map_classlib_core_op('parameterizetype', $TYPE_OPS, 'parame
 QAST::OperationsJAST.map_classlib_core_op('typeparameterized', $TYPE_OPS, 'typeparameterized', [$RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('typeparameters', $TYPE_OPS, 'typeparameters', [$RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('typeparameterat', $TYPE_OPS, 'typeparameterat', [$RT_OBJ, $RT_INT], $RT_OBJ, :tc);
+
+QAST::OperationsJAST.map_classlib_core_op('setdebugtypename', $TYPE_OPS, 'setdebugtypename', [$RT_OBJ, $RT_STR], $RT_OBJ, :tc);
 })();
 
 # defined - overridden by HLL, but by default same as .DEFINITE.
