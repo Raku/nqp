@@ -93,18 +93,6 @@ L<the docs directory|https://github.com/perl6/nqp/blob/master/docs/ops.markdown>
 release, it will be already installed if you have built Perl6 from
 scratch. 
 
-
-=head2 Differences from nqp-rx
-
-NQP is the successor implementation of "nqp-rx" [2].  Unlike nqp-rx, which
-aimed to have almost no runtime component whatsoever, this new version of
-NQP accepts that a minimal Perl 6 object metamodel, multidispatcher, and
-regular expression engine are needed on top of the underlying virtual
-machine.  Also, nqp-rx only ran on Parrot, whereas NQP also runs on the JVM
-and MoarVM and is designed to be portable to more.
-
-    [2] http://github.com/perl6/nqp-rx
-
 =head2 JavaScript backend
 
 The JavaScript backend is currently undergoing a refactor/rewrite of parts to generate decently performing javascript, add source maps and remove some old hack as well as clean up the code. 
