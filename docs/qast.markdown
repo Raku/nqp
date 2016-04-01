@@ -336,6 +336,7 @@ Finally, there are a couple of other values of decl that work with lexicals.
 * contvar - means that the lexical should be initialized to a clone of the
   :value(...) argument. Presumably, this represents some kind of container
   type. There are no restrictions on re-binding.
+* typevar - means that the implementation is allowed to assume that the type of the variable doesn't change
 * statevar - same as for contvar, except the container created will be used
   for all given closure clones. To be clear, cloning a code ref doesn't bring
   state variables along. On the initial call, containers are formed in the way
