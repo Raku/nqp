@@ -716,10 +716,14 @@ exports.P6bigint = P6bigint;
 function NativeCall() {}
 NativeCall.prototype.create_obj_constructor = basic_constructor;
 NativeCall.prototype.allocate = basic_allocate;
+NativeCall.prototype.type_object_for = basic_type_object_for;
+NativeCall.prototype.compose = noop_compose;
 exports.NativeCall = NativeCall;
 
 function CPointer() {}
 CPointer.prototype.create_obj_constructor = basic_constructor;
+CPointer.prototype.type_object_for = basic_type_object_for;
+CPointer.prototype.compose = noop_compose;
 exports.CPointer = CPointer;
 
 function ReentrantMutex() {}

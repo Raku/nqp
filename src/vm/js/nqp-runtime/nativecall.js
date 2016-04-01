@@ -30,3 +30,7 @@ op.buildnativecall = function(ctx, target, libname, symbol, convention, args, re
 op.nativecall = function(returns, callObject, args) {
   return callObject.lib[callObject.symbol].apply(callObject.lib, args.array);
 };
+
+op.initnativecall = function() {
+  return 1;
+};
