@@ -543,6 +543,11 @@ P6num.prototype.boxed_primitive = 2;
 
 P6num.prototype.allocate = basic_allocate;
 P6num.prototype.basic_constructor = basic_constructor;
+P6num.prototype.type_object_for = basic_type_object_for;
+
+// TODO:  handle float/bits stuff
+P6num.prototype.compose = noop_compose;
+
 P6num.prototype.create_obj_constructor = function(STable) {
   var c = this.basic_constructor(STable);
 
@@ -572,8 +577,10 @@ function P6str() {
 
 P6str.prototype.boxed_primitive = 3;
 
+P6str.prototype.type_object_for = basic_type_object_for;
 P6str.prototype.allocate = basic_allocate;
 P6str.prototype.basic_constructor = basic_constructor;
+P6str.prototype.compose = noop_compose;
 P6str.prototype.create_obj_constructor = function(STable) {
   var c = this.basic_constructor(STable);
 
