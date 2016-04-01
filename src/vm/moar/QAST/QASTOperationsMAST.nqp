@@ -2660,6 +2660,7 @@ QAST::MASTOperations.add_core_moarop_mapping('parameterizetype', 'parameterizety
 QAST::MASTOperations.add_core_moarop_mapping('typeparameterized', 'typeparameterized', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('typeparameters', 'typeparameters', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('typeparameterat', 'typeparameterat', :decont(0));
+QAST::MASTOperations.add_core_moarop_mapping('setdebugtypename', 'setdebugtypename', 0);
 
 # defined - overridden by HLL, but by default same as .DEFINITE.
 QAST::MASTOperations.add_core_moarop_mapping('defined', 'isconcrete', :decont(0));
@@ -2745,8 +2746,6 @@ QAST::MASTOperations.add_core_moarop_mapping('usecompileehllconfig', 'usecompile
 QAST::MASTOperations.add_core_moarop_mapping('usecompilerhllconfig', 'usecompilerhllconfig');
 QAST::MASTOperations.add_core_moarop_mapping('hllize', 'hllize');
 QAST::MASTOperations.add_core_moarop_mapping('hllizefor', 'hllizefor');
-
-QAST::MASTOperations.add_core_moarop_mapping('setdebugtypename', 'setdebugtypename', 0);
 
 # regex engine related opcodes
 QAST::MASTOperations.add_core_moarop_mapping('nfafromstatelist', 'nfafromstatelist');
