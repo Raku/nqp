@@ -292,7 +292,7 @@ if $crlf-conversion {
 nqp::unlink($test-file) if nqp::stat($test-file, nqp::const::STAT_EXISTS); # clean up test-file
 
 if $is-windows || ($backend ne 'moar' && $backend ne 'js' && $backend ne 'jvm') {
-    skip("symlink test not tested on Windows or $backend", 12);
+    skip("symlink test not tested on Windows or $backend", 9);
 }
 else {
 
