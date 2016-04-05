@@ -87,6 +87,11 @@ op.radix = function(radix, str, zpos, flags) {
   return new NQPArray([parseInt(extracted.number, radix), pow, extracted.offset]);
 };
 
+op.setdebugtypename = function(type, debugName) {
+  type._STable.debugName = debugName;
+  return type;
+};
+
 function Iter(array) {
   this.array = array;
   this.target = array.length;
