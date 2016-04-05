@@ -218,20 +218,26 @@ class RegexCompiler {
     method pass($node) {
         my $name;
 
+        my @setup;
+        
+        @setup.push(
+            "{$!cursor}['!cursor_pass']({$*CTX},"
+            ~ "\{backtrack: {$node.backtrack ne 'r'}\}, {$!pos}"
+        );
+
         if $node.name {
-            $name := quote_string($node.name);
+            @setup.push("," ~ quote_string($node.name));
         } 
         elsif +@($node) == 1 {
             $name := $!compiler.as_js($node[0], :want($T_STR));
+            @setup.unshift($name);
+            @setup.push(',');
+            @setup.push($name.expr);
         }
 
-        Chunk.void(
-            "{$!cursor}['!cursor_pass']({$*CTX},",
-            "\{backtrack: {$node.backtrack ne 'r'}\}, {$!pos}",
-            (nqp::defined($name) ?? ',' ~ $name !! ''),
-            ");\n",
-            "break {$!js_loop_label};\n"
-        );
+        @setup.push(");\n" ~ "break {$!js_loop_label};\n");
+
+        Chunk.new($T_VOID, "", @setup);
     }
 
 
