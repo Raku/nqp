@@ -159,6 +159,10 @@ class ChunkEscaped {
         '"' ~ nqp::escape($js) ~ '"';
     }
 
+    method with_source_map_info() {
+        self.join;
+    }
+
     method write($fh, :$escape) {
         if $escape {
             nqp::die("Double escaping NIY");
