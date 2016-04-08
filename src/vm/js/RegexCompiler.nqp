@@ -206,7 +206,7 @@ class RegexCompiler {
             ~ self.cclass_check('CCLASS_NEWLINE', :negated(1), :pos("$!pos-1"))
             ~ self.case($done_label);
         }
-        elsif $node.subtype eq 'pass' {
+        elsif $node.subtype eq 'pass' || $node.subtype eq '' {
             '';
         }
         else {
