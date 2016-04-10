@@ -1039,11 +1039,11 @@ op.multicachefind = function(cache, capture) {
 
   var arityCache = cache.cache[arity-1];
 
-  for (var i=0; i < arityCache.length; i++) {
+  CANDIDATES: for (var i=0; i < arityCache.length; i++) {
     for (var j=0; j < arityCache[i].types.length; j++) {
-      if (arityCache[i].types[j] !== types[j]) return null;
+      if (arityCache[i].types[j] !== types[j]) continue CANDIDATES;
     }
-    if (arityCache[i].hasNamed !== hasNamed) return null;
+    if (arityCache[i].hasNamed !== hasNamed) continue CANDIDATES;
     return arityCache[i].result;
   }
 
