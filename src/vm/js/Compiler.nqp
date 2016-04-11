@@ -1343,7 +1343,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             Chunk.void($compiled_label, "throw new nqp.{ucfirst($type)}({$compiled_label.expr});\n");
         }
         else {
-            self.NYI("can't find surrounding loop for last");
+            self.NYI("can't find surrounding loop for $type");
         }
     }
 
