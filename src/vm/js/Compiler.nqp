@@ -1470,7 +1470,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         if $node.decl eq 'var' {
             $*BLOCK.add_variable($node);
 
-            $*BLOCK.add_js_lexical(self.mangle_name($node.name));
+            if !$*BLOCK.is_dynamic_var($node) {
+                $*BLOCK.add_js_lexical(self.mangle_name($node.name));
+            }
         }
         elsif $node.decl eq 'static' {
             $*BLOCK.add_variable($node);
