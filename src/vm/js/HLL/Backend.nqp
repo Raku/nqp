@@ -75,7 +75,7 @@ class HLLBackend::JavaScript {
 
             my $timestamp := nqp::time_n();
             my $code := slurp($tmp_file);
-            nqp::printfh(nqp::getstderr(), nqp::sprintf("[slurp %7.3f] ", [nqp::time_n() - $timestamp])) if $substagestats;
+            nqp::printfh(nqp::getstderr(), nqp::sprintf("[slurp %.3f] ", [nqp::time_n() - $timestamp])) if $substagestats;
 
             nqp::unlink($tmp_file);
             $code := self.beautify($code) if %adverbs<beautify>;
