@@ -60,6 +60,8 @@ class HLLBackend::JavaScript {
     method js($qast, *%adverbs) {
         my $backend := QAST::CompilerJS.new(nyi=>%adverbs<nyi> // 'ignore', cps=>%adverbs<cps> // 'off');
 
+        my $substagestats := nqp::defined(%adverbs<substagestats>);
+
         my $instant := %adverbs<target> eq 'js' || self.spawn_new_node();
 
         if %adverbs<source-map-debug> {
@@ -69,8 +71,12 @@ class HLLBackend::JavaScript {
         } else {
             my $tmp_file := self.tmp_file();
             my $fh := nqp::open($tmp_file, 'w');
-            $backend.emit($qast, :$instant, :$fh);
+            $backend.emit($qast, :$instant, :$fh, :$substagestats);
+
+            my $timestamp := nqp::time_n();
             my $code := slurp($tmp_file);
+            nqp::printfh(nqp::getstderr(), nqp::sprintf("[slurp %7.3f] ", [nqp::time_n() - $timestamp])) if $substagestats;
+
             nqp::unlink($tmp_file);
             $code := self.beautify($code) if %adverbs<beautify>;
             $code;

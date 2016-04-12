@@ -41,6 +41,7 @@ $nqpcomp.addstage('classname', :after<start>);
 @clo.push('bootstrap');
 #?endif
 #?if js
+@clo.push('substagestats');
 @clo.push('source-map');
 @clo.push('source-map-debug');
 @clo.push('beautify');

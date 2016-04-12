@@ -15,6 +15,7 @@ sub MAIN(*@ARGS) {
     @clo.push('source-map');
     @clo.push('source-map-debug');
     @clo.push('beautify');
+    @clo.push('substagestats');
     @clo.push('cps=s');
     @clo.push('nyi=s');
 

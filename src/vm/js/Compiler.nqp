@@ -1748,13 +1748,21 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         );
     }
 
-    method emit($ast, :$instant, :$fh) {
+    method emit($ast, :$instant, :$fh, :$substagestats) {
+
+        my $timestamp := nqp::time_n();
         my $chunk := self.as_js_with_prelude($ast, :$instant);
+        nqp::printfh(nqp::getstderr(), nqp::sprintf("[as_js %7.3f] ", [nqp::time_n() - $timestamp])) if $substagestats;
+
         if $fh {
+            $timestamp := nqp::time_n();
             $chunk.write($fh);
+            nqp::printfh(nqp::getstderr(), nqp::sprintf("[writing %7.3f] ", [nqp::time_n() - $timestamp])) if $substagestats;
             return;
         }
+        $timestamp := nqp::time_n();
         my $source := $chunk.join();
+        nqp::printfh(nqp::getstderr(), nqp::sprintf("[join %7.3f] ", [nqp::time_n() - $timestamp])) if $substagestats;
         $source;
     }
 
