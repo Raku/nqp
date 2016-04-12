@@ -237,7 +237,7 @@ op.readallfh = function(fh) {
     return fh.slurp().toString(fh.encoding || 'utf8');
   }
   var all = new Buffer(0);
-  var buf = new Buffer(10);
+  var buf = new Buffer(32768);
   var total = 0;
   var bytesRead;
   while ((bytesRead = fs.readSync(fh.fd, buf, 0, buf.length, null)) != 0) {
