@@ -1779,7 +1779,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 # Copy the MoarVM design, for now only support adding ops
 class Shim {
     method operations() {
-        say("Getting the operations");
         QAST::OperationsJS
     }
 }
