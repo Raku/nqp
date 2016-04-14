@@ -33,6 +33,15 @@ STable.prototype.setboolspec = function(mode, method) {
     this.obj_constructor.prototype.$$to_bool = function(ctx) {
       return method.$call(ctx, {}, this);
     };
+  } else if (mode == 3) {
+    this.obj_constructor.prototype.$$to_bool = function(ctx) {
+      return this.$$get_str() == '' ? 0 : 1;
+    };
+  } else if (mode == 4) {
+    this.obj_constructor.prototype.$$to_bool = function(ctx) {
+      var str = this.$$get_str();
+      return (str == '' || str == '0') ? 0 : 1;
+    };
   } else if (mode == 5) {
   // this is the default - do nothing
   } else if (mode == 7 || mode == 8) {
