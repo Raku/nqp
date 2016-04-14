@@ -33,6 +33,14 @@ STable.prototype.setboolspec = function(mode, method) {
     this.obj_constructor.prototype.$$to_bool = function(ctx) {
       return method.$call(ctx, {}, this);
     };
+  } else if (mode == 1) {
+    this.obj_constructor.prototype.$$to_bool = function(ctx) {
+      return this.$$get_int() == 0 ? 0 : 1;
+    };
+  } else if (mode == 2) {
+    this.obj_constructor.prototype.$$to_bool = function(ctx) {
+      return this.$$get_num() == 0 ? 0 : 1;
+    };
   } else if (mode == 3) {
     this.obj_constructor.prototype.$$to_bool = function(ctx) {
       return this.$$get_str() == '' ? 0 : 1;
@@ -44,8 +52,16 @@ STable.prototype.setboolspec = function(mode, method) {
     };
   } else if (mode == 5) {
   // this is the default - do nothing
-  } else if (mode == 7 || mode == 8) {
+  } else if (mode == 6) {
+    this.obj_constructor.prototype.$$to_bool = function(ctx) {
+      return this.$$get_bignum().eq(0) ? 0 : 1;
+    };
+  } else if (mode == 7) {
   // STUB
+  } else if (mode == 8) {
+    this.obj_constructor.prototype.$$to_bool = function(ctx) {
+      return this.$$elems() ? 1 : 0;
+    };
   } else {
     throw 'setboolspec with mode: ' + mode + ' NYI';
   }
