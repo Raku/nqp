@@ -428,9 +428,10 @@ op.curlexpad = function(get, set) {
 };
 
 op.setcontspec = function(type, cont_spec_type, hash) {
-  var fetch = hash.content.get('fetch');
-  var store = hash.content.get('store');
   if (cont_spec_type === 'code_pair') {
+    var fetch = hash.content.get('fetch');
+    var store = hash.content.get('store');
+
     type._STable.addInternalMethod('$$assignunchecked', function(ctx, value) {
       store.$call(ctx, {}, this, value);
       return value;
