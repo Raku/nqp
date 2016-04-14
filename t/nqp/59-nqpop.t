@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(267);
+plan(268);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -307,6 +307,8 @@ nqp::bindcomp("noSuchLanguageEver1", nqp::list("compiler1"));
 ok(nqp::bindcomp("noSuchLanguageEver2", "compiler2") eq "compiler2", "correct return value for bindcomp");
 
 ok(nqp::getcomp("noSuchLanguageEver1")[0] eq "compiler1", "nqp::getcomp");
+
+ok(nqp::isnull(nqp::getcomp("no_SuchLanguageNo_or_ever")), "nqp::getcomp for a missing language returns null");
 
 {
     my $a := nqp::list_i();
