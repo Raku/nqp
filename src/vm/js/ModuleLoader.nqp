@@ -44,19 +44,7 @@ knowhow ModuleLoader {
         # its mainline. Otherwise, we already loaded it so go on
         # with what we already have.
         my $module_ctx;
-        my $path := nqp::join('/', nqp::split('::', $module_name));
-
-#        my @prefixes := self.search_path('module-path');
-#        for @prefixes -> $prefix {
-#            if nqp::stat("$prefix/$path.jar", 0) {
-#                $path := "$prefix/$path.jar";
-#                last;
-#            }
-#            if nqp::stat("$prefix/$path.class", 0) {
-#                $path := "$prefix/$path.class";
-#                last;
-#            }
-#        }
+        my $path := $module_name;
 
         if nqp::existskey(%modules_loaded, $path) {
             $module_ctx := %modules_loaded{$path};
