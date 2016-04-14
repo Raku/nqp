@@ -474,6 +474,7 @@ op.box_s = function(value, type) {
 };
 
 op.unbox_s = function(obj) {
+  if (typeof obj == "string") return obj;
   return obj.$$get_str();
 };
 
