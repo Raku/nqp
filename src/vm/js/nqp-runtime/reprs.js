@@ -1031,3 +1031,11 @@ VMException.prototype.setup_STable = function(STable) {
 };
 
 module.exports.VMException = VMException;
+
+
+function NativeRef() {
+}
+NativeRef.prototype.allocate = basic_allocate;
+NativeRef.prototype.type_object_for = basic_type_object_for;
+NativeRef.prototype.compose = noop_compose;
+module.exports.NativeRef = NativeRef;
