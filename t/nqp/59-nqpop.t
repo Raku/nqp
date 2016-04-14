@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(268);
+plan(269);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -430,3 +430,5 @@ ok(nqp::replace("0123456789", 2, 4, "abc") eq "01abc6789", "nqp::replace");
 ok(nqp::bitand_s('blabla12$#@', '9$dfa23219') eq ' $`b` 12 !', "nqp::bitand_s");
 ok(nqp::bitor_s('blabla12$#@', '9$dfa23219') eq '{lefms325;@', "nqp::bitor_s");
 ok(nqp::bitxor_s(nqp::chr(1146) ~ nqp::chr(120), nqp::chr(1152)) eq nqp::chr(250) ~ nqp::chr(120), "nqp::bitxor_s");
+
+ok(nqp::unbox_s("hello") eq "hello", "nqp::unbox_s on a string");
