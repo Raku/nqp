@@ -2,7 +2,7 @@
 
 # class
 
-plan(10);
+plan(12);
 
 class XYZ {
     method foo($x) {
@@ -47,6 +47,9 @@ class ABC {
       ok($k == 14);
     }
 }
+
+ok(nqp::add_n(ABC, 0) == 0.0, "a typeobject numifies correctly");
+ok(nqp::add_i(ABC, 0) == 0, "a typeobject intifies correct");
 
 my $abc := ABC.new();
 ok($abc.foo(100) == 200,"using a lexical sub inside a method");
