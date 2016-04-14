@@ -167,6 +167,8 @@ exports.to_int = function(arg, ctx) {
   } else if (typeof arg == 'string') {
     var ret = parseInt(arg);
     return isNaN(ret) ? 0 : ret;
+  } else if (arg.type_object_) {
+    return 0;
   } else {
     throw "Can't convert to int";
   }
