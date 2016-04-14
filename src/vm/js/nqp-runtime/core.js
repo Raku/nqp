@@ -512,9 +512,11 @@ op.popcompsc = function(sc) {
   return compilingSCs.pop();
 };
 
-var compilerRegistry = {};
+var compilerRegistry = new Map();
+
 op.bindcomp = function(language, compiler) {
-  return (compilerRegistry[language] = compiler);
+  compilerRegistry.set(language, compiler);
+  return compiler;
 };
 
 function WrappedFunction(func) {
@@ -557,14 +559,14 @@ function toJS(obj) {
   }
 }
 
-compilerRegistry['JavaScript'] = {
+compilerRegistry.set('JavaScript', {
   eval: function(ctx, named, code) {
     //console.log("evaling [", code, "]");
     return fromJS(eval(code));
   }
-};
+});
 
-compilerRegistry['nqp'] = {
+compilerRegistry.set('nqp', {
   backend: function(ctx, named) {
     return {
       name: function(ctx, named) {
@@ -572,11 +574,11 @@ compilerRegistry['nqp'] = {
       }
     };
   }
-};
+});
 
 
 op.getcomp = function(language) {
-  return compilerRegistry[language];
+  return compilerRegistry.has(language) ? compilerRegistry.get(language) : null;
 };
 
 op.backendconfig = function() {

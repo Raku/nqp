@@ -6,6 +6,11 @@ class QAST::OperationsJS {
         %ops{$op} := $cb;
     }
 
+    # For registering p6 ops
+    method add_op($op, $cb) {
+        add_op($op, $cb);
+    }
+
     sub op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx, :$cps) {
         my @exprs;
         my @setup;

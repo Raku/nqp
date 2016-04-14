@@ -1775,3 +1775,16 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
        self.as_js_with_prelude($ast, :$instant).source_map_debug
     }
 }
+
+# Copy the MoarVM design, for now only support adding ops
+class Shim {
+    method operations() {
+        say("Getting the operations");
+        QAST::OperationsJS
+    }
+}
+
+# Register as the QAST compiler.
+if nqp::isnull(nqp::getcomp('QAST')) {
+    nqp::bindcomp('QAST', Shim);
+}
