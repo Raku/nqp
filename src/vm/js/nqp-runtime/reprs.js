@@ -532,6 +532,16 @@ P6int.prototype.serialize = function(data, obj) {
   data.varint(obj.value);
 };
 
+P6int.prototype.generateBoxingMethods = function(repr, attr) {
+  var name = attr.get('name');
+  repr._STable.addInternalMethod('$$set_int', function(value) {
+    this[name] = value;
+  });
+
+  repr._STable.addInternalMethod('$$get_int', function() {
+    return this[name];
+  });
+};
 
 module.exports.P6int = P6int;
 
@@ -570,6 +580,17 @@ P6num.prototype.deserialize_finish = function(obj, data) {
   obj.value = data.double();
 };
 
+P6num.prototype.generateBoxingMethods = function(repr, attr) {
+  var name = attr.get('name');
+  repr._STable.addInternalMethod('$$set_num', function(value) {
+    this[name] = value;
+  });
+
+  repr._STable.addInternalMethod('$$get_num', function() {
+    return this[name];
+  });
+};
+
 module.exports.P6num = P6num;
 
 function P6str() {
@@ -601,6 +622,17 @@ P6str.prototype.serialize = function(data, obj) {
 
 P6str.prototype.deserialize_finish = function(obj, data) {
   obj.value = data.str();
+};
+
+P6str.prototype.generateBoxingMethods = function(repr, attr) {
+  var name = attr.get('name');
+  repr._STable.addInternalMethod('$$set_str', function(value) {
+    this[name] = value;
+  });
+
+  repr._STable.addInternalMethod('$$get_str', function() {
+    return this[name];
+  });
 };
 
 P6str.name = 'P6str';
