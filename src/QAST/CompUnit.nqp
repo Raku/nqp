@@ -29,6 +29,8 @@ class QAST::CompUnit is QAST::Node does QAST::Children {
     # What to run if this is the main entry point.
     has $!main;
 
+    has $!is_nested;
+
     method new(*@children, *%options) {
         my $node := nqp::create(self);
         nqp::bindattr($node, QAST::CompUnit, '@!children', @children);
@@ -57,6 +59,9 @@ class QAST::CompUnit is QAST::Node does QAST::Children {
     }
     method code_ref_blocks($value = NO_VALUE) {
         $!code_ref_blocks := $value unless $value =:= NO_VALUE; $!code_ref_blocks
+    }
+    method is_nested($value = NO_VALUE) {
+        $!is_nested := $value unless $value =:= NO_VALUE; $!is_nested
     }
 
     method extra_children() {

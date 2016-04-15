@@ -375,11 +375,11 @@ my class MASTCompilerInstance {
     method mast_frames() { %!mast_frames }
     method sc() { $!sc }
 
-    method to_mast($qast) {
+    method to_mast($qast, %mast_frames = nqp::hash()) {
         # Set up compilation state.
         $!hll := '';
         $!mast_compunit := MAST::CompUnit.new();
-        %!mast_frames := nqp::hash();
+        %!mast_frames := %mast_frames;
         $!file := nqp::ifnull(nqp::getlexdyn('$?FILES'), "<unknown file>");
         $!sc := NQPMu;
 
@@ -786,6 +786,7 @@ my class MASTCompilerInstance {
         # If we are in compilation mode, or have pre-deserialization or
         # post-deserialization tasks, handle those. Overall, the process
         # is to desugar this into simpler QAST nodes, then compile those.
+        my $is_nested := $cu.is_nested;
         my $comp_mode := $cu.compilation_mode;
         my @pre_des   := $cu.pre_deserialize;
         my @post_des  := $cu.post_deserialize;
@@ -800,14 +801,16 @@ my class MASTCompilerInstance {
             }
 
             # If we need to do deserialization, emit code for that.
-            if $comp_mode {
+            if $comp_mode && !$is_nested {
                 $block.push(self.deserialization_code($cu.sc(), $cu.code_ref_blocks(),
                     $cu.repo_conflict_resolver()));
             }
 
             # Provided we have a serialization context,, pop it off the
             # compiling SC stack.
-            nqp::popcompsc() if $cu.sc;
+            unless $is_nested {
+                nqp::popcompsc() if $cu.sc;
+            }
 
             # Add post-deserialization tasks.
             for @post_des {
@@ -2146,8 +2149,8 @@ my class MASTCompilerInstance {
 
 # Shim that makes a compiler instance and uses it to drive compilation.
 class QAST::MASTCompiler {
-    method to_mast($qast) {
-        MASTCompilerInstance.new.to_mast($qast)
+    method to_mast($qast, %mast_frames = nqp::hash()) {
+        MASTCompilerInstance.new.to_mast($qast, %mast_frames)
     }
 
     method operations() {
