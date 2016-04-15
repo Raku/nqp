@@ -217,9 +217,6 @@ op.defined = function(obj) {
 
 
 op.setinvokespec = function(obj, classHandle, attrName, invocationHandler) {
-  if (invocationHandler !== null) {
-    throw 'invocationHandler argument to setinvokespec not supported';
-  }
   obj._STable.setinvokespec(classHandle, attrName, invocationHandler);
   return obj;
 };

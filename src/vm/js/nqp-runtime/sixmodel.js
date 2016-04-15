@@ -69,11 +69,35 @@ STable.prototype.setboolspec = function(mode, method) {
 
 STable.prototype.setinvokespec = function(classHandle, attrName, invocationHandler) {
   // TODO take classHandle into account
-  this.obj_constructor.prototype.$call = function() {
-    return this[attrName].$call.apply(this[attrName], arguments);
-  };
-  this.obj_constructor.prototype.$apply = function(args) {
-    return this[attrName].$apply(args);
+  if (classHandle) {
+    this.obj_constructor.prototype.$call = function() {
+      return this[attrName].$call.apply(this[attrName], arguments);
+    };
+    this.obj_constructor.prototype.$apply = function(args) {
+      return this[attrName].$apply(args);
+    };
+  } else {
+    this.obj_constructor.prototype.$call = function() {
+      var args = [];
+      args.push(arguments[0]);
+      args.push(arguments[1]);
+      args.push(this);
+      for (var i = 2; i < arguments.length; i++) {
+        args.push(arguments[i]);
+      }
+      return invocationHandler.$apply(args);
+    };
+
+    this.obj_constructor.prototype.$apply = function(args) {
+      var newArgs = [];
+      newArgs.push(args[0]);
+      newArgs.push(args[1]);
+      newArgs.push(this);
+      for (var i = 2; i < args.length; i++) {
+        newArgs.push(args[i]);
+      }
+      return invocationHandler.$apply(newArgs);
+    };
   };
   this.invocationSpec = {classHandle: classHandle, attrName: attrName, invocationHandler: invocationHandler};
 };
