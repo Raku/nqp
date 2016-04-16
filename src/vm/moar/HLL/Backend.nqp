@@ -116,7 +116,14 @@ class HLL::Backend::MoarVM {
                             %alloc_info<id> := $newkey;
                         }
                         unless nqp::existskey($id_to_thing, %alloc_info<id>) {
-                            $id_to_thing{%alloc_info<id>} := $type.HOW.name($type);
+                            my $typename;
+                            try {
+                                $typename := $type.HOW.name($type);
+                            }
+                            unless $typename {
+                                $typename := "<unknown type>";
+                            }
+                            $id_to_thing{%alloc_info<id>} := $typename;
                         }
                         nqp::deletekey(%alloc_info, "type");
                     }
@@ -138,6 +145,7 @@ class HLL::Backend::MoarVM {
                     }
                 }
                 CATCH {
+                    note("profiler caught an error during post_process_call_graph_node:");
                     note(nqp::getmessage($!));
                 }
             }
