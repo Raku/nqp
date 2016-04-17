@@ -209,6 +209,9 @@ class RegexCompiler {
         elsif $node.subtype eq 'pass' || $node.subtype eq '' {
             '';
         }
+        elsif $node.subtype eq 'fail' {
+            self.fail;
+        }
         else {
             $!compiler.NYI("anchor type: {$node.subtype}");
         }
