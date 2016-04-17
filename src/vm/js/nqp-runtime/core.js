@@ -1067,3 +1067,7 @@ op.multicacheadd = function(cache, capture, result) {
   c.cache[arity-1].push({types: posTypes(capture), hasNamed: hasNamed, result: result});
   return c;
 };
+
+op.backtracestrings = function(exception) {
+  return new NQPArray(["backtrace NYI"]);
+};
