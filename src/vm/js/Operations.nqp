@@ -6,7 +6,8 @@ class QAST::OperationsJS {
         %ops{$op} := $cb;
     }
 
-    # For registering p6 ops
+    # The code being compiled has access to this class as "nqp::getcomp('QAST').operations".
+    # We expose &add_op as a method so that it can call it.
     method add_op($op, $cb) {
         add_op($op, $cb);
     }
