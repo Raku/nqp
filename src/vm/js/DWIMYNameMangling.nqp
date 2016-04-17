@@ -2,15 +2,6 @@
 # TODO think if we should be using such a complicated name mangling scheme
 # It's separated into a role so we may replace it with an different scheme when we want to reduce the output size
 role DWIMYNameMangling {
-    # List taken from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Reserved_Words
-    my %reserved_words;
-    for nqp::split(" ",'break case catch continue debugger default delete do else finally for function if in instanceof new return switch this throw try typeof var void while with implements interface let package private protected public static yield class enum export extends import super') {
-        %reserved_words{$_} := 1;
-    }
-    method is_reserved_word($identifier) {
-        nqp::existskey(%reserved_words, $identifier);
-    }
-
     my %mangle;
     %mangle<_> := 'UNDERSCORE';
     %mangle<&> := 'AMPERSAND';
@@ -47,7 +38,7 @@ role DWIMYNameMangling {
     %mangle<\\> := 'BACKSLASH';
 
     method mangle_name($name) {
-        if self.is_reserved_word($name) {$name := "_$name"}
+        $name := 'p6$' ~ $name;
 
         my $mangled := '';
 

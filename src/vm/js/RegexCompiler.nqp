@@ -41,7 +41,7 @@ class RegexCompiler {
 
         Chunk.new($T_OBJ, $!cursor, [
             "{$!label} = {$!initial_label};\n",
-            "$start = self['!cursor_start_all']({$*CTX}, null).array;\n",
+            "$start = {$!compiler.mangle_name('self')}['!cursor_start_all']({$*CTX}, null).array;\n",
             "{$!cursor} = $start[0];\n",
             self.set_cursor_var(),
             "{$!target} = $start[1];\n",
@@ -128,7 +128,7 @@ class RegexCompiler {
         my $scan := self.new_label;
         my $done := self.new_label;
 
-        "if (self['\$!from'] != -1) \{{self.goto($done)}\}\n" # HACK
+        "if ({$!compiler.mangle_name('self')}['\$!from'] != -1) \{{self.goto($done)}\}\n" # HACK
         ~ self.goto($scan)
         ~ self.case($loop)
         ~ "$!pos++;\n"
