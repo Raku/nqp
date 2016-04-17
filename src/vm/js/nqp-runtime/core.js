@@ -441,7 +441,7 @@ op.setcontspec = function(type, cont_spec_type, hash) {
       return fetch.$call(ctx, {}, this);
     });
   } else {
-    throw 'NYI cont spec: ' + cont_spec_type;
+    console.warn('NYI cont spec: ' + cont_spec_type);
   }
 };
 

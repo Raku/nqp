@@ -50,8 +50,8 @@ P6opaque.prototype.precalculate = function() {
         var slot = this.name_to_index_mapping[i].slots[j];
         if (this.auto_viv_values[slot]) {
           if (!this.auto_viv_values[slot].type_object_) {
-            console.log('autoviv', name, slot, this.auto_viv_values[slot]);
-            throw 'We currently only implement autoviv with type object values';
+//            console.log('autoviv', name, slot, this.auto_viv_values[slot]);
+            console.warn('We currently only implement autoviv with type object values');
           }
           /* TODO autoviving things that aren't typeobjects */
           /* TODO we need to store attributes better */
