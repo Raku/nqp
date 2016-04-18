@@ -2,7 +2,7 @@
 
 use nqpmo;
 
-plan(31);
+plan(35);
 
 sub add_to_sc($sc, $idx, $obj) {
     nqp::scsetobj($sc, $idx, $obj);
@@ -14,7 +14,7 @@ sub add_to_sc($sc, $idx, $obj) {
 {
     my $sc := nqp::createsc('TEST_SC_1_IN');
     my $sh := nqp::list_s();
-    
+
     my $type := nqp::knowhow().new_type(:name('Badger'), :repr('P6int'));
     $type.HOW.compose($type);
     add_to_sc($sc, 0, $type);
@@ -149,4 +149,46 @@ sub add_to_sc($sc, $idx, $obj) {
     ok(nqp::scgetobj($dsc, 0).smell eq 'awful',       'method call on deserialized type object ok');
     ok(nqp::scgetobj($dsc, 1).smell eq 'awful',       'method call on deserialized instance object ok');
     ok(nqp::scgetobj($dsc, 1).intro eq "Hi, I'm Bob", 'method call accessing instance attributes ok');
+}
+
+# Serializing a type with boolification (P6opaque REPR, NQPClassHOW)
+{
+    my $sc := nqp::createsc('TEST_SC_5_IN');
+    my $sh := nqp::list_s();
+    
+
+    my $half-true := method () {
+        nqp::bindattr(self, self.WHAT, '$!bool', !nqp::getattr(self, self.WHAT, '$!bool'));
+        nqp::getattr(self, self.WHAT, '$!bool')
+    };
+
+    nqp::scsetcode($sc, 0, $half-true);
+    nqp::markcodestatic($half-true);
+
+    my $type := NQPClassHOW.new_type(:name('Llama'), :repr('P6opaque'));
+    $type.HOW.add_attribute($type, NQPAttribute.new(name => '$!bool'));
+    $type.HOW.add_method($type, 'half-true', $half-true);
+    $type.HOW.add_parent($type, NQPMu);
+    $type.HOW.compose($type);
+    nqp::setboolspec($type, 0, $half-true);
+
+    my $instance := nqp::create($type);
+    nqp::bindattr($instance, $type, '$!bool', 1);
+    add_to_sc($sc, 0, $instance);
+
+    my $serialized := nqp::serialize($sc, $sh);
+
+
+    my $dsc := nqp::createsc('TEST_SC_5_OUT');
+    my $cr := nqp::list($half-true);
+    nqp::deserialize($serialized, $dsc, $sh, $cr, nqp::null());
+
+    ok(nqp::scobjcount($dsc) >= 2, 'deserialized SC has at least the knowhow type and its instance');
+
+    my $obj := nqp::scgetobj($dsc, 0);
+
+    ok(nqp::istrue($obj) == 0, "checking our custom boolifier is called... 1/3");
+    ok(nqp::istrue($obj) == 1, "checking our custom boolifier is called... 2/3");
+    ok(nqp::istrue($obj) == 0, "checking our custom boolifier is called... 3/3");
+
 }
