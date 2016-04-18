@@ -483,8 +483,13 @@ SerializationWriter.prototype.serializeSTable = function(st) {
   /*
   if (st->container_spec != NULL)
       flags |= STABLE_HAS_CONTAINER_SPEC;
-  if (st->invocation_spec != NULL)
+  */
+
+  if (st.invocationSpec) {
       flags |= STABLE_HAS_INVOCATION_SPEC;
+  }
+
+  /*
   if (st->hll_owner != NULL)
       flags |= STABLE_HAS_HLL_OWNER;
   */
@@ -512,6 +517,19 @@ SerializationWriter.prototype.serializeSTable = function(st) {
         writeInt(st.InvocationSpec.Hint);
         writeRef(st.InvocationSpec.InvocationHandler);
     }*/
+
+  if (st.invocationSpec) {
+    /* cached stuff from the MoarVM backend is just ignored */
+    this.stables_data.ref(st.invocationSpec.classHandle);
+    this.stables_data.str(st.invocationSpec.attrName);
+    this.stables_data.varint(0); // hint
+    this.stables_data.ref(st.invocationSpec.invocationHandler);
+    this.stables_data.ref(null); // md_class_handle
+    this.stables_data.str(""); // md_cache_attr_name
+    this.stables_data.varint(0); // md_cache_hint
+    this.stables_data.str(""); // md_valid_attr_name
+    this.stables_data.varint(0); // md_valid_hint
+  }
 
   /* HLL info. */
   /*this.stables_data.str(st.hllOwner ? st.hllOwner.name : "");

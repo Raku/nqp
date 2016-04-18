@@ -331,14 +331,18 @@ BinaryCursor.prototype.STable = function(STable) {
   }
 
   if (flags & STABLE_HAS_INVOCATION_SPEC) {
-    /* TODO */
-    console.log('TODO invocation spec');
-    /*
-    STable.invocation_class_handle = this.variant();
-    STable.invocation_attr_name = this.str();
-    STable.invocation_hint = this.I64();
-    STable.invocation_handler = this.variant();
-    */
+    var classHandle = this.variant();
+    var attrName = this.str();
+    this.varint(); // hint
+    var invocationHandler = this.variant();
+
+    this.variant(); // md_class_handle
+    this.str(); // md_cache_attr_name
+    this.varint(); // md_cache_hint
+    this.str(); // md_valid_attr_name
+    this.varint(); // md_valid_hint
+
+    STable.setinvokespec(classHandle, attrName, invocationHandler);
   }
 
   if (flags & STABLE_HAS_HLL_OWNER) {
