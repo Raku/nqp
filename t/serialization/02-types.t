@@ -2,7 +2,7 @@
 
 use nqpmo;
 
-plan(35);
+plan(37);
 
 sub add_to_sc($sc, $idx, $obj) {
     nqp::scsetobj($sc, $idx, $obj);
@@ -191,4 +191,59 @@ sub add_to_sc($sc, $idx, $obj) {
     ok(nqp::istrue($obj) == 1, "checking our custom boolifier is called... 2/3");
     ok(nqp::istrue($obj) == 0, "checking our custom boolifier is called... 3/3");
 
+}
+
+# Serializing a type with a invocation spec (P6opaque REPR, NQPClassHOW)
+{
+    my $sc := nqp::createsc('TEST_SC_6_IN');
+    my $sh := nqp::list_s();
+    
+
+    my $invoke := sub ($invoke) {
+        700
+    };
+
+    nqp::scsetcode($sc, 0, $invoke);
+    nqp::markcodestatic($invoke);
+
+    my $code := sub () {
+        800
+    };
+
+    nqp::scsetcode($sc, 1, $code);
+    nqp::markcodestatic($code);
+
+    my $type := NQPClassHOW.new_type(:name('type1'), :repr('P6opaque'));
+    $type.HOW.add_parent($type, NQPMu);
+    $type.HOW.compose($type);
+
+    nqp::setinvokespec($type, nqp::null(), nqp::null_s(), $invoke);
+
+    my $type2 := NQPClassHOW.new_type(:name('type2'), :repr('P6opaque'));
+    $type2.HOW.add_parent($type2, NQPMu);
+    $type2.HOW.add_attribute($type, NQPAttribute.new(name => '$!code'));
+    $type2.HOW.compose($type2);
+
+    nqp::setinvokespec($type2, $type2, '$!code', nqp::null());
+
+    my $instance := nqp::create($type);
+    add_to_sc($sc, 0, $instance);
+
+    my $instance2 := nqp::create($type2);
+    nqp::bindattr($instance2, $type2, '$!code', $code);
+    add_to_sc($sc, 1, $instance2);
+
+    my $serialized := nqp::serialize($sc, $sh);
+
+    my $dsc := nqp::createsc('TEST_SC_6_OUT');
+    my $cr := nqp::list($invoke, $code);
+    nqp::deserialize($serialized, $dsc, $sh, $cr, nqp::null());
+
+    my $obj := nqp::scgetobj($dsc, 0);
+
+    ok($obj() == 700, "invokespec with invokeHandler survived serialization");
+
+    my $obj2 := nqp::scgetobj($dsc, 1);
+
+    ok($obj2() == 800, "invokespec with attribute survived serialization");
 }
