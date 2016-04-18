@@ -25,10 +25,10 @@ class HLL::Backend::JavaScriptAndMoar {
 class FreshMonkeyPatchedCompiler {
     has $!instance;
     has $!operations;
-    method to_mast($qast) {
+    method to_mast(*@args) {
         my $new := $!instance.new;
         $new.HOW.mixin($new, SerializeOnce);
-        $new.to_mast($qast)
+        $new.to_mast(|@args)
     }
 
     method operations() {
