@@ -29,6 +29,7 @@ function STable(REPR, HOW) {
 }
 
 STable.prototype.setboolspec = function(mode, method) {
+  this.boolificationSpec = {mode: mode, method: method};
   if (mode == 0) {
     this.obj_constructor.prototype.$$to_bool = function(ctx) {
       return method.$call(ctx, {}, this);

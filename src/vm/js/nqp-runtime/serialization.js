@@ -36,6 +36,11 @@ var REFVAR_VM_HASH_STR_VAR = 10;
 var REFVAR_STATIC_CODEREF = 11;
 var REFVAR_CLONED_CODEREF = 12;
 
+var STABLE_BOOLIFICATION_SPEC_MODE_MASK = 0x0F;
+var STABLE_HAS_CONTAINER_SPEC           = 0x10;
+var STABLE_HAS_INVOCATION_SPEC          = 0x20;
+var STABLE_HAS_HLL_OWNER                = 0x40;
+
 function BinaryWriteCursor(writer) {
   this.buffer = new Buffer(1024);
   this.writer = writer;
@@ -465,16 +470,16 @@ SerializationWriter.prototype.serializeSTable = function(st) {
   /*TODO serialize boolifcation spec*/
   var flags;
 
-  if (false) {
-  //if (st->boolification_spec->mode >= 0xF) {
-  //    MVM_exception_throw_adhoc(tc,
-  //                          "Serialization error: boolification spec mode %u out of range and can't be serialized",
-  //                              st->boolification_spec->mode);
-  //}
-  //flags = st->boolification_spec->mode;
+  if (st.boolificationSpec) {
+    var mode = st.boolificationSpec.mode;
+    if (mode >= 0xF) {
+      throw "Serialization error: boolification spec mode " + mode + " out of range and can't be serialized";
+    }
+    flags = mode;
   } else {
     flags = 0xF;
   }
+
   /*
   if (st->container_spec != NULL)
       flags |= STABLE_HAS_CONTAINER_SPEC;
@@ -484,14 +489,13 @@ SerializationWriter.prototype.serializeSTable = function(st) {
       flags |= STABLE_HAS_HLL_OWNER;
   */
 
-  /* Boolification spec. */
   this.stables_data.U8(flags);
 
-  /*writeInt(st.BoolificationSpec == null ? 0 : 1);
-    if (st.BoolificationSpec != null) {
-        writeInt(st.BoolificationSpec.Mode);
-        writeRef(st.BoolificationSpec.Method);
-    }*/
+  /* Boolification spec. */
+
+  if (st.boolificationSpec) {
+    this.stables_data.ref(st.boolificationSpec.method);
+  }
 
   /*this.stables_data.writeInt(st.ContainerSpec == null ? 0 : 1);
     if (st.ContainerSpec != null) {
