@@ -92,6 +92,10 @@ exports.ctxsave = function(ctx) {
 var LexPadHack = require('./lexpad-hack.js');
 
 op.loadbytecode = function(ctx, file) {
+  // HACK - temporary hack for rakudo-js
+  if (file == '/share/nqp/lib/Perl6/BOOTSTRAP.js') {
+    file = 'Perl6::Bootstrap';
+  }
   exports.load_module(file);
   ctx.bind_dynamic('$*MAIN_CTX', new LexPadHack(savedCtxs[file]));
   return file;
