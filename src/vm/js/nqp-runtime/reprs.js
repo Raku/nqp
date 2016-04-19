@@ -177,12 +177,6 @@ P6opaque.prototype.serialize_repr_data = function(st, cursor) {
   cursor.varint(st.REPR.mi ? 1 : 0);
 
 
-  //TODO
-  //  if (st.REPR.auto_viv_values != null) {
-  //  }
-  //  else {
-  //  }
-
   if (st.REPR.auto_viv_values) {
     cursor.varint(1);
     for (var i = 0; i < numAttrs; i++) {
