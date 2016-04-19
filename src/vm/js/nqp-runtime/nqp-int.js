@@ -14,7 +14,7 @@ NQPInt.prototype.Num = function(ctx) {
   return this.value;
 };
 
-NQPInt.prototype.$$to_bool = function(ctx) {
+NQPInt.prototype.$$toBool = function(ctx) {
   return (this.value ? 1 : 0);
 };
 

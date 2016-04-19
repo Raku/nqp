@@ -7,7 +7,7 @@ var NQPArray = require('./array.js');
 var reprs = {};
 var reprById = [];
 
-function basic_type_object_for(HOW) {
+function basicTypeObjectFor(HOW) {
   var st = new sixmodel.STable(this, HOW);
   this._STable = st;
 
@@ -17,27 +17,27 @@ function basic_type_object_for(HOW) {
   return obj;
 }
 
-function basic_allocate(STable) {
-  return new STable.obj_constructor();
+function basicAllocate(STable) {
+  return new STable.objConstructor();
 }
 
-function noop_compose(obj, repr_info) {
+function noopCompose(obj, reprInfo) {
 }
 
 
-function basic_constructor(STable) {
-  var obj_constructor = function() {};
-  obj_constructor.prototype._STable = STable;
-  return obj_constructor;
+function basicConstructor(STable) {
+  var objConstructor = function() {};
+  objConstructor.prototype._STable = STable;
+  return objConstructor;
 }
 
 function P6opaque() {
 }
 
-P6opaque.prototype.create_obj_constructor = basic_constructor;
+P6opaque.prototype.createObjConstructor = basicConstructor;
 
 P6opaque.prototype.allocate = function(STable) {
-  var obj = new STable.obj_constructor();
+  var obj = new STable.objConstructor();
 
   Object.assign(obj, this.template);
 
@@ -46,22 +46,22 @@ P6opaque.prototype.allocate = function(STable) {
 
 P6opaque.prototype.precalculate = function() {
   var autovived = {};
-  if (this.auto_viv_values) {
-    for (var i in this.name_to_index_mapping) {
-      for (var j in this.name_to_index_mapping[i].slots) {
-        var name = this.name_to_index_mapping[i].names[j];
-        var slot = this.name_to_index_mapping[i].slots[j];
-        if (this.auto_viv_values[slot]) {
-          if (!this.auto_viv_values[slot].type_object_) {
-            //            console.log('autoviv', name, slot, this.auto_viv_values[slot]);
+  if (this.autoVivValues) {
+    for (var i in this.nameToIndexMapping) {
+      for (var j in this.nameToIndexMapping[i].slots) {
+        var name = this.nameToIndexMapping[i].names[j];
+        var slot = this.nameToIndexMapping[i].slots[j];
+        if (this.autoVivValues[slot]) {
+          if (!this.autoVivValues[slot].typeObject_) {
+            //            console.log('autoviv', name, slot, this.autoVivValues[slot]);
             console.warn('We currently only implement autoviv with type object values');
           }
           /* TODO autoviving things that aren't typeobjects */
           /* TODO we need to store attributes better */
-          autovived[name] = this.auto_viv_values[slot];
-        } else if (this.flattened_stables[slot]) {
-          if (this.flattened_stables[slot].REPR.flattened_default !== undefined) {
-            autovived[name] = this.flattened_stables[slot].REPR.flattened_default;
+          autovived[name] = this.autoVivValues[slot];
+        } else if (this.flattenedStables[slot]) {
+          if (this.flattenedStables[slot].REPR.flattenedDefault !== undefined) {
+            autovived[name] = this.flattenedStables[slot].REPR.flattenedDefault;
           }
         }
       }
@@ -74,9 +74,9 @@ P6opaque.prototype.precalculate = function() {
 
   this.template = {};
   /* TODO take classes into account when storing attributes */
-  for (var i in this.name_to_index_mapping) {
-    for (var j in this.name_to_index_mapping[i].slots) {
-      var name = this.name_to_index_mapping[i].names[j];
+  for (var i in this.nameToIndexMapping) {
+    for (var j in this.nameToIndexMapping[i].slots) {
+      var name = this.nameToIndexMapping[i].names[j];
       this.template[name] = null;
     }
   }
@@ -88,58 +88,58 @@ P6opaque.prototype.precalculate = function() {
   }
 };
 
-P6opaque.prototype.deserialize_repr_data = function(cursor, STable) {
+P6opaque.prototype.deserializeReprData = function(cursor, STable) {
   this.deserialized = 1;
-  var num_attributes = cursor.varint();
-  this.flattened_stables = [];
-  for (var i = 0; i < num_attributes; i++) {
-    var not_null = cursor.varint();
-    this.flattened_stables.push(not_null != 0 ? cursor.locate_thing('root_stables') : null);
+  var numAttributes = cursor.varint();
+  this.flattenedStables = [];
+  for (var i = 0; i < numAttributes; i++) {
+    var notNull = cursor.varint();
+    this.flattenedStables.push(notNull != 0 ? cursor.locateThing('rootStables') : null);
   }
   this.mi = cursor.varint();
-  var has_auto_viv_values = cursor.varint();
-  if (has_auto_viv_values != 0) {
-    this.auto_viv_values = [];
-    for (var i = 0; i < num_attributes; i++) {
-      this.auto_viv_values.push(cursor.variant());
+  var hasAutoVivValues = cursor.varint();
+  if (hasAutoVivValues != 0) {
+    this.autoVivValues = [];
+    for (var i = 0; i < numAttributes; i++) {
+      this.autoVivValues.push(cursor.variant());
     }
   }
 
-  this.unbox_int_slot = cursor.varint();
-  this.unbox_num_slot = cursor.varint();
-  this.unbox_str_slot = cursor.varint();
+  this.unboxIntSlot = cursor.varint();
+  this.unboxNumSlot = cursor.varint();
+  this.unboxStrSlot = cursor.varint();
 
 
 
-  var has_unbox_slots = cursor.varint();
+  var hasUnboxSlots = cursor.varint();
 
-  if (has_unbox_slots != 0) {
-    this.unbox_slots = [];
-    for (var i = 0; i < num_attributes; i++) {
-      var repr_id = cursor.varint();
+  if (hasUnboxSlots != 0) {
+    this.unboxSlots = [];
+    for (var i = 0; i < numAttributes; i++) {
+      var reprId = cursor.varint();
       var slot = cursor.varint();
-      if (repr_id != 0) {
-        this.unbox_slots.push({slot: slot, repr_id: repr_id});
+      if (reprId != 0) {
+        this.unboxSlots.push({slot: slot, reprId: reprId});
       }
     }
   }
 
-  var num_classes = cursor.varint();
-  this.name_to_index_mapping = [];
+  var numClasses = cursor.varint();
+  this.nameToIndexMapping = [];
 
   var slots = [];
 
-  for (var i = 0; i < num_classes; i++) {
-    this.name_to_index_mapping[i] = {slots: [], names: [], class_key: cursor.variant()};
+  for (var i = 0; i < numClasses; i++) {
+    this.nameToIndexMapping[i] = {slots: [], names: [], classKey: cursor.variant()};
 
-    var num_attrs = cursor.varint();
+    var numAttrs = cursor.varint();
 
-    for (var j = 0; j < num_attrs; j++) {
+    for (var j = 0; j < numAttrs; j++) {
       var name = cursor.str();
       var slot = cursor.varint();
 
-      this.name_to_index_mapping[i].names[j] = name;
-      this.name_to_index_mapping[i].slots[j] = slot;
+      this.nameToIndexMapping[i].names[j] = name;
+      this.nameToIndexMapping[i].slots[j] = slot;
 
 
       slots[slot] = name;
@@ -149,65 +149,65 @@ P6opaque.prototype.deserialize_repr_data = function(cursor, STable) {
 
   this.precalculate();
 
-  this.positional_delegate_slot = cursor.varint();
-  this.associative_delegate_slot = cursor.varint();
+  this.positionalDelegateSlot = cursor.varint();
+  this.associativeDelegateSlot = cursor.varint();
 
-  if (this.positional_delegate_slot != -1) {
-    STable.setPositionalDelegate(slots[this.positional_delegate_slot]);
+  if (this.positionalDelegateSlot != -1) {
+    STable.setPositionalDelegate(slots[this.positionalDelegateSlot]);
   }
-  if (this.associative_delegate_slot != -1) {
-    STable.setAssociativeDelegate(slots[this.associative_delegate_slot]);
+  if (this.associativeDelegateSlot != -1) {
+    STable.setAssociativeDelegate(slots[this.associativeDelegateSlot]);
   }
 
-  if (this.unbox_slots) {
-    for (var i = 0; i < this.unbox_slots.length; i++) {
-      (new reprById[this.unbox_slots[i].repr_id]).generateBoxingMethods(STable, slots[this.unbox_slots[i].slot]);
+  if (this.unboxSlots) {
+    for (var i = 0; i < this.unboxSlots.length; i++) {
+      (new reprById[this.unboxSlots[i].reprId]).generateBoxingMethods(STable, slots[this.unboxSlots[i].slot]);
     }
   }
 
   /* TODO make auto viv values work */
 };
 
-P6opaque.prototype.serialize_repr_data = function(st, cursor) {
-  var numAttrs = st.REPR.flattened_stables.length;
+P6opaque.prototype.serializeReprData = function(st, cursor) {
+  var numAttrs = st.REPR.flattenedStables.length;
   cursor.varint(numAttrs);
 
   STARTING_OFFSET = cursor.offset;
 
   for (var i = 0; i < numAttrs; i++) {
-    if (st.REPR.flattened_stables[i] == null) {
+    if (st.REPR.flattenedStables[i] == null) {
       cursor.varint(0);
     }
     else {
       cursor.varint(1);
       throw 'NYI';
-      cursor.STableRef(st.REPR.flattened_stables[i]);
+      cursor.STableRef(st.REPR.flattenedStables[i]);
     }
   }
 
   cursor.varint(st.REPR.mi ? 1 : 0);
 
 
-  if (st.REPR.auto_viv_values) {
+  if (st.REPR.autoVivValues) {
     cursor.varint(1);
     for (var i = 0; i < numAttrs; i++) {
-      cursor.ref(st.REPR.auto_viv_values[i]);
+      cursor.ref(st.REPR.autoVivValues[i]);
     }
   } else {
     cursor.varint(0);
   }
 
 
-  cursor.varint(st.REPR.unbox_int_slot);
-  cursor.varint(st.REPR.unbox_num_slot);
-  cursor.varint(st.REPR.unbox_str_slot);
+  cursor.varint(st.REPR.unboxIntSlot);
+  cursor.varint(st.REPR.unboxNumSlot);
+  cursor.varint(st.REPR.unboxStrSlot);
 
-  if (this.unbox_slots) {
+  if (this.unboxSlots) {
     cursor.varint(1);
     for (var i = 0; i < numAttrs; i++) {
-      if (this.unbox_slots[i]) {
-        cursor.varint(this.unbox_slots[i].repr_id);
-        cursor.varint(this.unbox_slots[i].slot);
+      if (this.unboxSlots[i]) {
+        cursor.varint(this.unboxSlots[i].reprId);
+        cursor.varint(this.unboxSlots[i].slot);
       } else {
         cursor.varint(0);
         cursor.varint(0);
@@ -218,54 +218,54 @@ P6opaque.prototype.serialize_repr_data = function(st, cursor) {
   }
 
 
-  cursor.varint(this.name_to_index_mapping.length);
-  for (var i = 0; i < this.name_to_index_mapping.length; i++) {
-    cursor.ref(this.name_to_index_mapping[i].class_key);
+  cursor.varint(this.nameToIndexMapping.length);
+  for (var i = 0; i < this.nameToIndexMapping.length; i++) {
+    cursor.ref(this.nameToIndexMapping[i].classKey);
 
-    var num_attrs = this.name_to_index_mapping[i].names.length;
+    var numAttrs = this.nameToIndexMapping[i].names.length;
 
-    cursor.varint(num_attrs);
+    cursor.varint(numAttrs);
 
-    for (var j = 0; j < num_attrs; j++) {
-      cursor.str(this.name_to_index_mapping[i].names[j]);
-      cursor.varint(this.name_to_index_mapping[i].slots[j]);
+    for (var j = 0; j < numAttrs; j++) {
+      cursor.str(this.nameToIndexMapping[i].names[j]);
+      cursor.varint(this.nameToIndexMapping[i].slots[j]);
     }
   }
 
-  cursor.varint(this.positional_delegate_slot);
-  cursor.varint(this.associative_delegate_slot);
+  cursor.varint(this.positionalDelegateSlot);
+  cursor.varint(this.associativeDelegateSlot);
 };
 
-P6opaque.prototype.deserialize_finish = function(obj, data) {
+P6opaque.prototype.deserializeFinish = function(obj, data) {
   var attrs = [];
 
   var names = {};
 
-  for (var i in this.name_to_index_mapping) {
-    for (var j in this.name_to_index_mapping[i].slots) {
-      var name = this.name_to_index_mapping[i].names[j];
-      var slot = this.name_to_index_mapping[i].slots[j];
+  for (var i in this.nameToIndexMapping) {
+    for (var j in this.nameToIndexMapping[i].slots) {
+      var name = this.nameToIndexMapping[i].names[j];
+      var slot = this.nameToIndexMapping[i].slots[j];
       // TODO take class key into account with attribute storage
       names[slot] = name;
     }
   }
 
-  for (var i = 0; i < this.flattened_stables.length; i++) {
-    if (this.flattened_stables[i]) {
-      var STable = this.flattened_stables[i];
-      var flattened_object = STable.REPR.allocate(STable);
-      STable.REPR.deserialize_finish(flattened_object, data);
+  for (var i = 0; i < this.flattenedStables.length; i++) {
+    if (this.flattenedStables[i]) {
+      var STable = this.flattenedStables[i];
+      var flattenedObject = STable.REPR.allocate(STable);
+      STable.REPR.deserializeFinish(flattenedObject, data);
 
-      attrs.push(flattened_object);
+      attrs.push(flattenedObject);
     } else {
       attrs.push(data.variant());
     }
   }
 
-  for (var i in this.name_to_index_mapping) {
-    for (var j in this.name_to_index_mapping[i].slots) {
-      var name = this.name_to_index_mapping[i].names[j];
-      var slot = this.name_to_index_mapping[i].slots[j];
+  for (var i in this.nameToIndexMapping) {
+    for (var j in this.nameToIndexMapping[i].slots) {
+      var name = this.nameToIndexMapping[i].names[j];
+      var slot = this.nameToIndexMapping[i].slots[j];
       // TODO take class key into account with attribute storage
       obj[name] = attrs[slot];
     }
@@ -273,7 +273,7 @@ P6opaque.prototype.deserialize_finish = function(obj, data) {
 };
 
 P6opaque.prototype.serialize = function(cursor, obj) {
-  var flattened = obj._STable.REPR.flattened_stables;
+  var flattened = obj._STable.REPR.flattenedStables;
   var nqp = require('nqp-runtime');
   if (!flattened) {
     throw 'Representation must be composed before it can be serialized';
@@ -283,10 +283,10 @@ P6opaque.prototype.serialize = function(cursor, obj) {
 
   var names = [];
 
-  for (var i in this.name_to_index_mapping) {
-    for (var j in this.name_to_index_mapping[i].slots) {
-      var name = this.name_to_index_mapping[i].names[j];
-      var slot = this.name_to_index_mapping[i].slots[j];
+  for (var i in this.nameToIndexMapping) {
+    for (var j in this.nameToIndexMapping[i].slots) {
+      var name = this.nameToIndexMapping[i].names[j];
+      var slot = this.nameToIndexMapping[i].slots[j];
 
       // TODO take class key into account with attribute storage
       attrs[slot] = obj[name];
@@ -302,52 +302,52 @@ P6opaque.prototype.serialize = function(cursor, obj) {
     else {
       // HACK different kinds of numbers etc.
       var attr = typeof attrs[i] == 'object' ? attrs[i] : {value: attrs[i]}; // HACK - think if that's a correct way of serializing a native attribute
-      this.flattened_stables[i].REPR.serialize(cursor, attr);
+      this.flattenedStables[i].REPR.serialize(cursor, attr);
     }
   }
 };
 
-P6opaque.prototype.type_object_for = basic_type_object_for;
+P6opaque.prototype.typeObjectFor = basicTypeObjectFor;
 
 
-P6opaque.prototype.change_type = function(obj, new_type) {
-  // TODO some sanity checks for the new mro being a subset and new_type being also a P6opaque
+P6opaque.prototype.changeType = function(obj, newType) {
+  // TODO some sanity checks for the new mro being a subset and newType being also a P6opaque
   // HACK usage of __proto__ which is not fully portable and might interfere with the optimizer
-  obj.__proto__ = new_type._STable.obj_constructor.prototype;
+  obj.__proto__ = newType._STable.objConstructor.prototype;
 };
 
 
-P6opaque.prototype.compose = function(STable, repr_info_hash) {
+P6opaque.prototype.compose = function(STable, reprInfoHash) {
   // TODO
 
   /* Get attribute part of the protocol from the hash. */
-  var repr_info = repr_info_hash.content.get('attribute').array;
+  var reprInfo = reprInfoHash.content.get('attribute').array;
 
   /* Go through MRO and find all classes with attributes and build up
    * mapping info hashes. Note, reverse order so indexes will match
    * those in parent types. */
 
-  this.unbox_int_slot = -1;
-  this.unbox_num_slot = -1;
-  this.unbox_str_slot = -1;
+  this.unboxIntSlot = -1;
+  this.unboxNumSlot = -1;
+  this.unboxStrSlot = -1;
 
-  this.positional_delegate_slot = -1;
-  this.associative_delegate_slot = -1;
+  this.positionalDelegateSlot = -1;
+  this.associativeDelegateSlot = -1;
 
   var curAttr = 0;
   /*
   List<SixModelObject> autoVivs = new ArrayList<SixModelObject>();
   List<AttrInfo> attrInfoList = new ArrayList<AttrInfo>();
-  long mroLength = repr_info.elems(tc);
+  long mroLength = reprInfo.elems(tc);
   */
-  this.name_to_index_mapping = [];
-  this.flattened_stables = [];
+  this.nameToIndexMapping = [];
+  this.flattenedStables = [];
   var mi = false;
 
-  this.auto_viv_values = [];
+  this.autoVivValues = [];
 
-  for (var i = repr_info.length - 1; i >= 0; i--) {
-    var entry = repr_info[i].array;
+  for (var i = reprInfo.length - 1; i >= 0; i--) {
+    var entry = reprInfo[i].array;
     var type = entry[0];
     var attrs = entry[1].array;
     var parents = entry[2].array;
@@ -365,8 +365,8 @@ P6opaque.prototype.compose = function(STable, repr_info_hash) {
         /* old boxing method generation */
         if (attr.get('box_target')) {
           var REPR = attr.get('type')._STable.REPR;
-          if (!this.unbox_slots) this.unbox_slots = [];
-          this.unbox_slots.push({slot: curAttr, repr_id: REPR.ID});
+          if (!this.unboxSlots) this.unboxSlots = [];
+          this.unboxSlots.push({slot: curAttr, reprId: REPR.ID});
           REPR.generateBoxingMethods(STable, attr.get('name'));
         }
 
@@ -381,30 +381,30 @@ P6opaque.prototype.compose = function(STable, repr_info_hash) {
 
               info.st = attrType.st;*/
 
-        this.flattened_stables.push(null);
+        this.flattenedStables.push(null);
 
         if (attr.get('positional_delegate')) {
-          this.positional_delegate_slot = curAttr;
+          this.positionalDelegateSlot = curAttr;
           this._STable.setPositionalDelegate(attr.get('name'));
         }
 
         if (attr.get('associative_delegate')) {
-          this.associative_delegate_slot = curAttr;
+          this.associativeDelegateSlot = curAttr;
           this._STable.setAssociativeDelegate(attr.get('name'));
         }
 
         /* TODO think if we want to flatten some things */
-        /*if (attrType.st.REPR.get_storage_spec(tc, attrType.st).inlineable == StorageSpec.INLINED)
+        /*if (attrType.st.REPR.getStorageSpec(tc, attrType.st).inlineable == StorageSpec.INLINED)
                   flattenedSTables.add(attrType.st);
               else
                   flattenedSTables.add(null);*/
 
         if (attr.get('auto_viv_container')) {
-          this.auto_viv_values[curAttr] = attr.get('auto_viv_container');
+          this.autoVivValues[curAttr] = attr.get('auto_viv_container');
         }
 
-        /* info.boxTarget = attrHash.exists_key(tc, "box_target") != 0;
-              SixModelObject autoViv = attrHash.at_key_boxed(tc, "auto_viv_container");
+        /* info.boxTarget = attrHash.existsKey(tc, "box_target") != 0;
+              SixModelObject autoViv = attrHash.atKeyBoxed(tc, "auto_viv_container");
               autoVivs.add(autoViv);
               if (autoViv != null)
                   info.hasAutoVivContainer = true;
@@ -428,7 +428,7 @@ P6opaque.prototype.compose = function(STable, repr_info_hash) {
               }*/
         curAttr++;
       }
-      this.name_to_index_mapping.push({class_key: type, slots: slots, names: names});
+      this.nameToIndexMapping.push({classKey: type, slots: slots, names: names});
     }
 
     /* Multiple parents means it's multiple inheritance. */
@@ -456,9 +456,9 @@ reprs.P6opaque = P6opaque;
 function KnowHOWREPR() {
 }
 
-KnowHOWREPR.prototype.create_obj_constructor = basic_constructor;
+KnowHOWREPR.prototype.createObjConstructor = basicConstructor;
 
-KnowHOWREPR.prototype.deserialize_finish = function(obj, data) {
+KnowHOWREPR.prototype.deserializeFinish = function(obj, data) {
   obj.__name = data.str();
   obj.__attributes = data.variant();
   obj.__methods = data.variant();
@@ -470,10 +470,10 @@ KnowHOWREPR.prototype.serialize = function(data, obj) {
   data.ref(obj.__methods);
 };
 
-KnowHOWREPR.prototype.type_object_for = basic_type_object_for;
+KnowHOWREPR.prototype.typeObjectFor = basicTypeObjectFor;
 
 KnowHOWREPR.prototype.allocate = function(STable) {
-  var obj = new STable.obj_constructor();
+  var obj = new STable.objConstructor();
   obj.__methods = new Hash();
   obj.__attributes = new NQPArray([]);
   obj.__name = '<anon>';
@@ -485,9 +485,9 @@ reprs.KnowHOWREPR = KnowHOWREPR;
 
 function KnowHOWAttribute() {
 }
-KnowHOWAttribute.prototype.create_obj_constructor = basic_constructor;
+KnowHOWAttribute.prototype.createObjConstructor = basicConstructor;
 
-KnowHOWAttribute.prototype.deserialize_finish = function(obj, data) {
+KnowHOWAttribute.prototype.deserializeFinish = function(obj, data) {
   obj.__name = data.str();
 };
 
@@ -495,37 +495,37 @@ KnowHOWAttribute.prototype.serialize = function(data, obj) {
   data.str(obj.__name);
 };
 
-KnowHOWAttribute.prototype.type_object_for = basic_type_object_for;
-KnowHOWAttribute.prototype.allocate = basic_allocate;
+KnowHOWAttribute.prototype.typeObjectFor = basicTypeObjectFor;
+KnowHOWAttribute.prototype.allocate = basicAllocate;
 reprs.KnowHOWAttribute = KnowHOWAttribute;
 
 function Uninstantiable() {
 }
-Uninstantiable.prototype.create_obj_constructor = basic_constructor;
-Uninstantiable.prototype.type_object_for = basic_type_object_for;
+Uninstantiable.prototype.createObjConstructor = basicConstructor;
+Uninstantiable.prototype.typeObjectFor = basicTypeObjectFor;
 reprs.Uninstantiable = Uninstantiable;
 
 /* Stubs */
 function P6int() {
 }
 
-P6int.prototype.flattened_default = 0;
-P6int.prototype.boxed_primitive = 1;
+P6int.prototype.flattenedDefault = 0;
+P6int.prototype.boxedPrimitive = 1;
 
-P6int.prototype.create_obj_constructor = basic_constructor;
-P6int.prototype.type_object_for = basic_type_object_for;
+P6int.prototype.createObjConstructor = basicConstructor;
+P6int.prototype.typeObjectFor = basicTypeObjectFor;
 
 P6int.prototype.setup_STable = function(STable) {
-  STable.addInternalMethod('$$set_int', function(value) {
+  STable.addInternalMethod('$$setInt', function(value) {
     this.value = value;
   });
-  STable.addInternalMethod('$$get_int', function() {
+  STable.addInternalMethod('$$getInt', function() {
     return this.value;
   });
 };
 
-P6int.prototype.compose = function(STable, repr_info_hash) {
-  var integer = repr_info_hash.content.get('integer');
+P6int.prototype.compose = function(STable, reprInfoHash) {
+  var integer = reprInfoHash.content.get('integer');
   if (integer) {
     var bits = integer.content.get('bits');
     if (bits instanceof NQPInt) {
@@ -536,8 +536,8 @@ P6int.prototype.compose = function(STable, repr_info_hash) {
   }
 };
 
-P6int.prototype.allocate = basic_allocate;
-P6int.prototype.deserialize_finish = function(obj, data) {
+P6int.prototype.allocate = basicAllocate;
+P6int.prototype.deserializeFinish = function(obj, data) {
   // TODO integers bigger than 32bit
   obj.value = data.varint();
 };
@@ -548,11 +548,11 @@ P6int.prototype.serialize = function(data, obj) {
 };
 
 P6int.prototype.generateBoxingMethods = function(STable, name) {
-  STable.addInternalMethod('$$set_int', function(value) {
+  STable.addInternalMethod('$$setInt', function(value) {
     this[name] = value;
   });
 
-  STable.addInternalMethod('$$get_int', function() {
+  STable.addInternalMethod('$$getInt', function() {
     return this[name];
   });
 };
@@ -562,24 +562,24 @@ reprs.P6int = P6int;
 function P6num() {
 }
 
-P6num.prototype.boxed_primitive = 2;
+P6num.prototype.boxedPrimitive = 2;
 
-P6num.prototype.allocate = basic_allocate;
-P6num.prototype.basic_constructor = basic_constructor;
-P6num.prototype.type_object_for = basic_type_object_for;
+P6num.prototype.allocate = basicAllocate;
+P6num.prototype.basicConstructor = basicConstructor;
+P6num.prototype.typeObjectFor = basicTypeObjectFor;
 
 // TODO:  handle float/bits stuff
-P6num.prototype.compose = noop_compose;
+P6num.prototype.compose = noopCompose;
 
-P6num.prototype.create_obj_constructor = function(STable) {
-  var c = this.basic_constructor(STable);
+P6num.prototype.createObjConstructor = function(STable) {
+  var c = this.basicConstructor(STable);
 
-  STable.obj_constructor = c; // HACK it's set again later, we set it for addInternalMethod
+  STable.objConstructor = c; // HACK it's set again later, we set it for addInternalMethod
 
-  STable.addInternalMethod('$$set_num', function(value) {
+  STable.addInternalMethod('$$setNum', function(value) {
     this.value = value;
   });
-  STable.addInternalMethod('$$get_num', function() {
+  STable.addInternalMethod('$$getNum', function() {
     return this.value;
   });
   return c;
@@ -589,16 +589,16 @@ P6num.prototype.serialize = function(data, obj) {
   data.double(obj.value);
 };
 
-P6num.prototype.deserialize_finish = function(obj, data) {
+P6num.prototype.deserializeFinish = function(obj, data) {
   obj.value = data.double();
 };
 
 P6num.prototype.generateBoxingMethods = function(STable, name) {
-  STable.addInternalMethod('$$set_num', function(value) {
+  STable.addInternalMethod('$$setNum', function(value) {
     this[name] = value;
   });
 
-  STable.addInternalMethod('$$get_num', function() {
+  STable.addInternalMethod('$$getNum', function() {
     return this[name];
   });
 };
@@ -608,21 +608,21 @@ reprs.P6num = P6num;
 function P6str() {
 }
 
-P6str.prototype.boxed_primitive = 3;
+P6str.prototype.boxedPrimitive = 3;
 
-P6str.prototype.type_object_for = basic_type_object_for;
-P6str.prototype.allocate = basic_allocate;
-P6str.prototype.basic_constructor = basic_constructor;
-P6str.prototype.compose = noop_compose;
-P6str.prototype.create_obj_constructor = function(STable) {
-  var c = this.basic_constructor(STable);
+P6str.prototype.typeObjectFor = basicTypeObjectFor;
+P6str.prototype.allocate = basicAllocate;
+P6str.prototype.basicConstructor = basicConstructor;
+P6str.prototype.compose = noopCompose;
+P6str.prototype.createObjConstructor = function(STable) {
+  var c = this.basicConstructor(STable);
 
-  STable.obj_constructor = c; // HACK it's set again later, we set it for addInternalMethod
+  STable.objConstructor = c; // HACK it's set again later, we set it for addInternalMethod
 
-  STable.addInternalMethod('$$set_str', function(value) {
+  STable.addInternalMethod('$$setStr', function(value) {
     this.value = value;
   });
-  STable.addInternalMethod('$$get_str', function() {
+  STable.addInternalMethod('$$getStr', function() {
     return this.value;
   });
   return c;
@@ -632,16 +632,16 @@ P6str.prototype.serialize = function(data, obj) {
   data.str(obj.value);
 };
 
-P6str.prototype.deserialize_finish = function(obj, data) {
+P6str.prototype.deserializeFinish = function(obj, data) {
   obj.value = data.str();
 };
 
 P6str.prototype.generateBoxingMethods = function(STable, name) {
-  STable.addInternalMethod('$$set_str', function(value) {
+  STable.addInternalMethod('$$setStr', function(value) {
     this[name] = value;
   });
 
-  STable.addInternalMethod('$$get_str', function() {
+  STable.addInternalMethod('$$getStr', function() {
     return this[name];
   });
 };
@@ -650,35 +650,35 @@ reprs.P6str = P6str;
 
 function NFA() {
 }
-NFA.prototype.create_obj_constructor = basic_constructor;
-NFA.prototype.deserialize_finish = function(obj, data) {
+NFA.prototype.createObjConstructor = basicConstructor;
+NFA.prototype.deserializeFinish = function(obj, data) {
   // STUB
 };
-NFA.prototype.type_object_for = basic_type_object_for;
-NFA.prototype.allocate = basic_allocate;
-NFA.prototype.compose = noop_compose;
+NFA.prototype.typeObjectFor = basicTypeObjectFor;
+NFA.prototype.allocate = basicAllocate;
+NFA.prototype.compose = noopCompose;
 reprs.NFA = NFA;
 
 function VMArray() {
 }
-VMArray.prototype.create_obj_constructor = basic_constructor;
+VMArray.prototype.createObjConstructor = basicConstructor;
 
-VMArray.prototype.deserialize_finish = function(obj, data) {
+VMArray.prototype.deserializeFinish = function(obj, data) {
   console.log('deserializing VMArray');
   // STUB
 };
-VMArray.prototype.type_object_for = basic_type_object_for;
+VMArray.prototype.typeObjectFor = basicTypeObjectFor;
 
-VMArray.prototype.deserialize_repr_data = function(cursor) {
+VMArray.prototype.deserializeReprData = function(cursor) {
   this.type = cursor.variant();
   /* TODO - type */
 };
 
-VMArray.prototype.serialize_repr_data = function(st, cursor) {
+VMArray.prototype.serializeReprData = function(st, cursor) {
   cursor.ref(this.type);
 };
 
-VMArray.prototype.deserialize_array = function(obj, data) {
+VMArray.prototype.deserializeArray = function(obj, data) {
   if (this.type !== null) {
     console.log('NYI: VMArrays of a type different then null');
   }
@@ -689,11 +689,11 @@ VMArray.prototype.deserialize_array = function(obj, data) {
 };
 
 // HACK
-VMArray.prototype.allocate = basic_allocate;
+VMArray.prototype.allocate = basicAllocate;
 
-VMArray.prototype.compose = function(STable, repr_info_hash) {
-  if (repr_info_hash.content.get('array')) {
-    this.type = repr_info_hash.content.get('array').content.get('type');
+VMArray.prototype.compose = function(STable, reprInfoHash) {
+  if (reprInfoHash.content.get('array')) {
+    this.type = reprInfoHash.content.get('array').content.get('type');
   }
 };
 
@@ -701,101 +701,101 @@ reprs.VMArray = VMArray;
 
 function VMIter() {
 }
-VMIter.prototype.create_obj_constructor = basic_constructor;
-VMIter.prototype.deserialize_finish = function(obj, data) {
+VMIter.prototype.createObjConstructor = basicConstructor;
+VMIter.prototype.deserializeFinish = function(obj, data) {
   console.log('deserializing VMIter');
   // STUB
 };
-VMIter.prototype.type_object_for = basic_type_object_for;
+VMIter.prototype.typeObjectFor = basicTypeObjectFor;
 reprs.VMIter = VMIter;
 
 var bignum = require('bignum');
 
 function P6bigint() {
 }
-P6bigint.prototype.create_obj_constructor = basic_constructor;
+P6bigint.prototype.createObjConstructor = basicConstructor;
 
-P6bigint.prototype.type_object_for = basic_type_object_for;
+P6bigint.prototype.typeObjectFor = basicTypeObjectFor;
 
 P6bigint.prototype.setup_STable = function(STable) {
-  STable.addInternalMethod('$$set_int', function(value) {
+  STable.addInternalMethod('$$setInt', function(value) {
     this.value = bignum(value);
   });
 
-  STable.addInternalMethod('$$get_int', function() {
+  STable.addInternalMethod('$$getInt', function() {
     return this.value.toNumber() | 0;
   });
 
-  STable.addInternalMethod('$$set_bignum', function(value) {
+  STable.addInternalMethod('$$setBignum', function(value) {
     this.value = value;
   });
 
-  STable.addInternalMethod('$$get_bignum', function() {
+  STable.addInternalMethod('$$getBignum', function() {
     return this.value;
   });
 };
 
 P6bigint.prototype.generateBoxingMethods = function(STable, name) {
-  STable.addInternalMethod('$$set_int', function(value) {
+  STable.addInternalMethod('$$setInt', function(value) {
     this[name] = bignum(value);
   });
 
-  STable.addInternalMethod('$$get_int', function() {
+  STable.addInternalMethod('$$getInt', function() {
     return this[name].toNumber();
   });
 
-  STable.addInternalMethod('$$get_bignum', function() {
+  STable.addInternalMethod('$$getBignum', function() {
     return this[name];
   });
 
-  STable.addInternalMethod('$$set_bignum', function(num) {
+  STable.addInternalMethod('$$setBignum', function(num) {
     this[name] = num;
   });
 };
 
-P6bigint.prototype.allocate = basic_allocate;
-P6bigint.prototype.compose = noop_compose;
+P6bigint.prototype.allocate = basicAllocate;
+P6bigint.prototype.compose = noopCompose;
 reprs.P6bigint = P6bigint;
 
 
 /* Stubs */
 
 function NativeCall() {}
-NativeCall.prototype.create_obj_constructor = basic_constructor;
-NativeCall.prototype.allocate = basic_allocate;
-NativeCall.prototype.type_object_for = basic_type_object_for;
-NativeCall.prototype.compose = noop_compose;
+NativeCall.prototype.createObjConstructor = basicConstructor;
+NativeCall.prototype.allocate = basicAllocate;
+NativeCall.prototype.typeObjectFor = basicTypeObjectFor;
+NativeCall.prototype.compose = noopCompose;
 reprs.NativeCall = NativeCall;
 
 function CPointer() {}
-CPointer.prototype.create_obj_constructor = basic_constructor;
-CPointer.prototype.type_object_for = basic_type_object_for;
-CPointer.prototype.compose = noop_compose;
+CPointer.prototype.createObjConstructor = basicConstructor;
+CPointer.prototype.typeObjectFor = basicTypeObjectFor;
+CPointer.prototype.compose = noopCompose;
 reprs.CPointer = CPointer;
 
 function ReentrantMutex() {}
-ReentrantMutex.prototype.create_obj_constructor = basic_constructor;
-ReentrantMutex.prototype.allocate = basic_allocate;
+ReentrantMutex.prototype.createObjConstructor = basicConstructor;
+ReentrantMutex.prototype.allocate = basicAllocate;
 
 reprs.ReentrantMutex = ReentrantMutex;
 
 function ConditionVariable() {}
-ConditionVariable.prototype.create_obj_constructor = basic_constructor;
+ConditionVariable.prototype.createObjConstructor = basicConstructor;
 
 reprs.ConditionVariable = ConditionVariable;
 
 function MultiDimArray() {
 
 }
-MultiDimArray.prototype.type_object_for = basic_type_object_for;
-MultiDimArray.prototype.compose = function(STable, repr_info_hash) {
-  var array = repr_info_hash.content.get('array');
+MultiDimArray.prototype.typeObjectFor = basicTypeObjectFor;
+MultiDimArray.prototype.compose = function(STable, reprInfoHash) {
+  var array = reprInfoHash.content.get('array');
   var dimensions = array.content.get('dimensions');
 
-  var type = repr_info_hash.content.get('array').content.get('type');
+  var type = reprInfoHash.content.get('array').content.get('type');
 
   if (type) {
-    STable.primType = type._STable.REPR.boxed_primitive;
+    STable.primType = type._STable.REPR.boxedPrimitive;
   } else {
     STable.primType = 0;
   }
@@ -815,27 +815,27 @@ MultiDimArray.prototype.compose = function(STable, repr_info_hash) {
   //  console.log('dimensions', dimensions);
   STable.dimensions = dimensions;
 };
-MultiDimArray.prototype.allocate = basic_allocate;
+MultiDimArray.prototype.allocate = basicAllocate;
 
-MultiDimArray.prototype.create_obj_constructor = basic_constructor;
+MultiDimArray.prototype.createObjConstructor = basicConstructor;
 
 MultiDimArray.prototype.setup_STable = function(STable) {
   STable.addInternalMethod('$$numdimensions', function(value) {
-    if (this.type_object_) {
+    if (this.typeObject_) {
       throw new NQPException('Cannot get number of dimensions of a type object');
     }
     return STable.dimensions;
   });
 
   STable.addInternalMethod('$$clone', function() {
-    var clone = new this._STable.obj_constructor();
+    var clone = new this._STable.objConstructor();
     clone.storage = this.storage.slice();
     clone.dimensions = this.dimensions;
     return clone;
   });
 
   STable.addInternalMethod('$$dimensions', function() {
-    if (this.type_object_) {
+    if (this.typeObject_) {
       throw new NQPException('Cannot get dimensions of a type object');
     }
     return new NQPArray(this.dimensions);
@@ -947,7 +947,7 @@ MultiDimArray.prototype.setup_STable = function(STable) {
   });
 };
 
-MultiDimArray.prototype.serialize_repr_data = function(st, cursor) {
+MultiDimArray.prototype.serializeReprData = function(st, cursor) {
   if (st.dimensions) {
     cursor.varint(st.dimensions);
     cursor.ref(st.type);
@@ -957,12 +957,12 @@ MultiDimArray.prototype.serialize_repr_data = function(st, cursor) {
 
 };
 
-MultiDimArray.prototype.deserialize_repr_data = function(cursor, STable) {
+MultiDimArray.prototype.deserializeReprData = function(cursor, STable) {
   var dims = cursor.varint();
   if (dims > 0) {
     STable.dimensions = dims;
     STable.type = cursor.variant();
-    STable.primType = STable.type ? STable.type._STable.REPR.boxed_primitive : 0;
+    STable.primType = STable.type ? STable.type._STable.REPR.boxedPrimitive : 0;
   }
 };
 
@@ -997,7 +997,7 @@ MultiDimArray.prototype.serialize = function(cursor, obj) {
   }
 };
 
-MultiDimArray.prototype.deserialize_finish = function(obj, data) {
+MultiDimArray.prototype.deserializeFinish = function(obj, data) {
   obj.dimensions = [];
   for (var i = 0; i < obj._STable.dimensions; i++) {
     obj.dimensions[i] = data.varint();
@@ -1026,15 +1026,15 @@ reprs.MultiDimArray = MultiDimArray;
 
 function VMException() {
 }
-VMException.prototype.allocate = basic_allocate;
-VMException.prototype.type_object_for = basic_type_object_for;
-VMException.prototype.compose = noop_compose;
-VMException.prototype.basic_type_object_for = basic_type_object_for;
+VMException.prototype.allocate = basicAllocate;
+VMException.prototype.typeObjectFor = basicTypeObjectFor;
+VMException.prototype.compose = noopCompose;
+VMException.prototype.basicTypeObjectFor = basicTypeObjectFor;
 
-VMException.prototype.create_obj_constructor = basic_constructor;
+VMException.prototype.createObjConstructor = basicConstructor;
 
 VMException.prototype.setup_STable = function(STable) {
-  STable.addInternalMethod('$$get_str', function() {
+  STable.addInternalMethod('$$getStr', function() {
     return this.message;
   });
 };
@@ -1044,10 +1044,10 @@ reprs.VMException = VMException;
 
 function NativeRef() {
 }
-NativeRef.prototype.allocate = basic_allocate;
-NativeRef.prototype.create_obj_constructor = basic_constructor;
-NativeRef.prototype.type_object_for = basic_type_object_for;
-NativeRef.prototype.compose = noop_compose;
+NativeRef.prototype.allocate = basicAllocate;
+NativeRef.prototype.createObjConstructor = basicConstructor;
+NativeRef.prototype.typeObjectFor = basicTypeObjectFor;
+NativeRef.prototype.compose = noopCompose;
 reprs.NativeRef = NativeRef;
 
 var ID = 0;

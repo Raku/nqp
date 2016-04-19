@@ -50,7 +50,7 @@ op.x = function(str, times) {
   return ret;
 };
 
-function radix_helper(radix, str, zpos, flags) {
+function radixHelper(radix, str, zpos, flags) {
   var lowercase = 'a-' + String.fromCharCode('a'.charCodeAt(0) + radix - 11);
   var uppercase = 'A-' + String.fromCharCode('A'.charCodeAt(0) + radix - 11);
 
@@ -73,10 +73,10 @@ function radix_helper(radix, str, zpos, flags) {
   return {power: power, offset: zpos + search[0].length, number: number};
 }
 
-exports.radix_helper = radix_helper;
+exports.radixHelper = radixHelper;
 
 op.radix = function(radix, str, zpos, flags) {
-  var extracted = radix_helper(radix, str, zpos, flags);
+  var extracted = radixHelper(radix, str, zpos, flags);
   if (extracted == null) {
     return new NQPArray([0, 1, -1]);
   }
@@ -99,7 +99,7 @@ Iter.prototype.$$shift = function() {
   return this.array[this.idx++];
 };
 
-Iter.prototype.$$to_bool = function(ctx) {
+Iter.prototype.$$toBool = function(ctx) {
   return this.idx < this.target;
 };
 
@@ -114,7 +114,7 @@ HashIter.prototype.$$shift = function() {
   return new IterPair(this.hash, this.keys[this.idx++]);
 };
 
-HashIter.prototype.$$to_bool = function(ctx) {
+HashIter.prototype.$$toBool = function(ctx) {
   return this.idx < this.target;
 };
 
@@ -159,7 +159,7 @@ exports.hash = function() {
   return new Hash();
 };
 
-exports.slurpy_named = function(named, skip) {
+exports.slurpyNamed = function(named, skip) {
   var hash = new Hash();
   for (key in named) {
     if (!skip[key]) {
@@ -169,7 +169,7 @@ exports.slurpy_named = function(named, skip) {
   return hash;
 };
 
-exports.unwrap_named = function(named) {
+exports.unwrapNamed = function(named) {
   if (!named instanceof Hash) console.log('expecting a hash here');
   return named.$$toObject();
 };
@@ -209,7 +209,7 @@ op.bootarray = function(obj) {
 
 op.defined = function(obj) {
   // TODO - handle more things that aren't defined
-  if (obj === undefined || obj === null || obj.type_object_) {
+  if (obj === undefined || obj === null || obj.typeObject_) {
     return 0;
   }
   return 1;
@@ -289,7 +289,7 @@ op.splice = function(target, source, offset, length) {
 };
 
 op.findmethod = function(obj, method) {
-  return obj._STable.method_cache[method];
+  return obj._STable.methodCache[method];
 };
 
 op.istype = function(obj, type) {
@@ -313,8 +313,8 @@ op.istype = function(obj, type) {
     }
   }
 
-  // TODO cases where the type_check_cache isn't authoritative
-  var cache = obj._STable.type_check_cache;
+  // TODO cases where the typeCheckCache isn't authoritative
+  var cache = obj._STable.typeCheckCache;
   for (var i = 0; i < cache.length; i++) {
     if (cache[i] === type) {
       return 1;
@@ -324,7 +324,7 @@ op.istype = function(obj, type) {
 };
 
 op.settypecache = function(obj, cache) {
-  obj._STable.type_check_cache = cache.array;
+  obj._STable.typeCheckCache = cache.array;
   return obj;
 };
 
@@ -363,11 +363,11 @@ op.newtype = function(how, repr) {
   }
   var REPR = new reprs[repr]();
   REPR.name = repr;
-  return REPR.type_object_for(how);
+  return REPR.typeObjectFor(how);
 };
 
 op.can = function(obj, method) {
-  return obj._STable.method_cache.hasOwnProperty(method) ? 1 : 0;
+  return obj._STable.methodCache.hasOwnProperty(method) ? 1 : 0;
 };
 
 op.getcodename = function(code) {
@@ -378,8 +378,8 @@ op.setcodename = function(code, name) {
   code.name = name;
 };
 
-op.rebless = function(obj, new_type) {
-  obj._STable.REPR.change_type(obj, new_type);
+op.rebless = function(obj, newType) {
+  obj._STable.REPR.changeType(obj, newType);
   return obj;
 };
 
@@ -397,11 +397,11 @@ op.clone = function(obj) {
   }
 };
 
-var where_counter = 0;
+var whereCounter = 0;
 op.where = function(obj) {
   if (obj._STable) { // HACK
     if (!obj._WHERE) {
-      obj._WHERE = ++where_counter;
+      obj._WHERE = ++whereCounter;
     }
     return obj._WHERE;
   } else {
@@ -424,8 +424,8 @@ op.curlexpad = function(get, set) {
   return new CurLexpad(get, set);
 };
 
-op.setcontspec = function(type, cont_spec_type, hash) {
-  if (cont_spec_type === 'code_pair') {
+op.setcontspec = function(type, contSpecType, hash) {
+  if (contSpecType === 'code_pair') {
     var fetch = hash.content.get('fetch');
     var store = hash.content.get('store');
 
@@ -441,7 +441,7 @@ op.setcontspec = function(type, cont_spec_type, hash) {
       return fetch.$call(ctx, {}, this);
     });
   } else {
-    console.warn('NYI cont spec: ' + cont_spec_type);
+    console.warn('NYI cont spec: ' + contSpecType);
   }
 };
 
@@ -456,24 +456,24 @@ op.decont = function(ctx, cont) {
 op.box_n = function(n, type) {
   var repr = type._STable.REPR;
   var obj = repr.allocate(type._STable);
-  obj.$$set_num(n);
+  obj.$$setNum(n);
   return obj;
 };
 
 op.unbox_n = function(obj) {
-  return obj.$$get_num();
+  return obj.$$getNum();
 };
 
 op.box_s = function(value, type) {
   var repr = type._STable.REPR;
   var obj = repr.allocate(type._STable);
-  obj.$$set_str(value);
+  obj.$$setStr(value);
   return obj;
 };
 
 op.unbox_s = function(obj) {
   if (typeof obj == 'string') return obj;
-  return obj.$$get_str();
+  return obj.$$getStr();
 };
 
 op.elems = function(obj) {
@@ -678,7 +678,7 @@ op.decode = function(buf, encoding_) {
 
 op.objprimspec = function(obj) {
   if (obj === null) return 0;
-  return (obj._STable && obj._STable.REPR.boxed_primitive ? obj._STable.REPR.boxed_primitive : 0);
+  return (obj._STable && obj._STable.REPR.boxedPrimitive ? obj._STable.REPR.boxedPrimitive : 0);
 };
 
 /* Parametricity operations. */

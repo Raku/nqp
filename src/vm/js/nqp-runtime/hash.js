@@ -46,7 +46,7 @@ Hash.prototype.$$toObject = function() {
   return ret;
 };
 
-Hash.prototype.$$to_bool = function() {
+Hash.prototype.$$toBool = function() {
   return this.content.size == 0 ? 0 : 1;
 };
 

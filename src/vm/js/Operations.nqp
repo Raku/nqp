@@ -1189,7 +1189,7 @@ class QAST::OperationsJS {
         } , :sideffects);
     }
 
-    add_simple_op('getlexdyn', $T_OBJ, [$T_STR], sub ($name) {"{$*CTX}.lookup_dynamic_from_caller($name)"});
+    add_simple_op('getlexdyn', $T_OBJ, [$T_STR], sub ($name) {"{$*CTX}.lookupDynamicFromCaller($name)"});
     add_simple_op('getlexrel', $T_OBJ, [$T_OBJ, $T_STR]);
 
     add_simple_op('captureexistsnamed', $T_INT, [$T_OBJ, $T_STR]);

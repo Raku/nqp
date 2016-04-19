@@ -5,45 +5,45 @@ var NQPInt = require('./nqp-int.js');
 var NQPException = require('./nqp-exception.js');
 exports.NQPInt = NQPInt;
 
-function load_ops(module) {
+function loadOps(module) {
   for (var name in module.op) {
     op[name] = module.op[name];
   }
 }
 
 var core = require('./core');
-load_ops(core);
+loadOps(core);
 exports.hash = core.hash;
-exports.slurpy_named = core.slurpy_named;
+exports.slurpyNamed = core.slurpyNamed;
 exports.named = core.named;
-exports.unwrap_named = core.unwrap_named;
+exports.unwrapNamed = core.unwrapNamed;
 
 exports.EvalResult = core.EvalResult;
 
 var io = require('./io.js');
-load_ops(io);
+loadOps(io);
 
 var bignum = require('./bignum.js');
-load_ops(bignum);
+loadOps(bignum);
 
 var nfa = require('./nfa.js');
-load_ops(nfa);
+loadOps(nfa);
 
 var cclass = require('./cclass.js');
-load_ops(cclass);
+loadOps(cclass);
 
 var hll = require('./hll.js');
-load_ops(hll);
+loadOps(hll);
 
 var deserialization = require('./deserialization.js');
 exports.wval = deserialization.wval;
-load_ops(deserialization);
+loadOps(deserialization);
 
 var serialization = require('./serialization.js');
-load_ops(serialization);
+loadOps(serialization);
 
 var nativecall = require('./nativecall.js');
-load_ops(nativecall);
+loadOps(nativecall);
 
 exports.CodeRef = require('./code-ref.js');
 
@@ -67,7 +67,7 @@ function saveCtx(where, block) {
   saveCtxAs = old;
 }
 
-exports.load_module = function(module, helper) {
+exports.loadModule = function(module, helper) {
   saveCtx(module, function() {
     module = module.replace(/::/g, '/');
     if (helper) {
@@ -78,9 +78,9 @@ exports.load_module = function(module, helper) {
   });
 };
 
-exports.load_setting = exports.load_module;
+exports.loadSetting = exports.loadModule;
 
-exports.setup_setting = function(settingName) {
+exports.setupSetting = function(settingName) {
   return savedCtxs[settingName + '.setting'];
 };
 
@@ -96,8 +96,8 @@ op.loadbytecode = function(ctx, file) {
   if (file == '/share/nqp/lib/Perl6/BOOTSTRAP.js') {
     file = 'Perl6::Bootstrap';
   }
-  exports.load_module(file);
-  ctx.bind_dynamic('$*MAIN_CTX', new LexPadHack(savedCtxs[file]));
+  exports.loadModule(file);
+  ctx.bindDynamic('$*MAIN_CTX', new LexPadHack(savedCtxs[file]));
   return file;
 };
 
@@ -119,51 +119,51 @@ op.ctxouter = function(hack) {
   return null;
 };
 
-exports.to_str = function(arg, ctx) {
+exports.toStr = function(arg, ctx) {
   if (typeof arg == 'number') {
     return arg.toString();
   } else if (typeof arg == 'string') {
     return arg;
   } else if (arg === null) {
     return arg;
-  } else if (arg !== undefined && arg !== null && arg.type_object_) {
+  } else if (arg !== undefined && arg !== null && arg.typeObject_) {
     return '';
   } else if (arg.Str) {
     return arg.Str(ctx);
-  } else if (arg.$$get_str) {
-    return arg.$$get_str();
-  } else if (arg.$$get_num) {
-    return arg.$$get_num().toString();
-  } else if (arg.$$get_int) {
-    return arg.$$get_int().toString();
+  } else if (arg.$$getStr) {
+    return arg.$$getStr();
+  } else if (arg.$$getNum) {
+    return arg.$$getNum().toString();
+  } else if (arg.$$getInt) {
+    return arg.$$getInt().toString();
   } else {
     console.log(arg);
     throw Error("Can't convert to str");
   }
 };
 
-exports.to_num = function(arg, ctx) {
+exports.toNum = function(arg, ctx) {
   if (typeof arg == 'number') {
     return arg;
   } else if (typeof arg == 'string') {
     var ret = parseFloat(arg);
     return isNaN(ret) ? 0 : ret;
-  } else if (arg.type_object_) {
+  } else if (arg.typeObject_) {
     // TODO - is that a correct way to do that?
     return 0;
   } else if (arg.Num) {
     return arg.Num(ctx);
-  } else if (arg.$$get_num) {
-    return arg.$$get_num();
-  } else if (arg.$$get_int) {
-    return arg.$$get_int();
+  } else if (arg.$$getNum) {
+    return arg.$$getNum();
+  } else if (arg.$$getInt) {
+    return arg.$$getInt();
   } else {
     console.log(arg);
     throw "Can't convert to num";
   }
 };
 
-exports.to_int = function(arg, ctx) {
+exports.toInt = function(arg, ctx) {
   if (typeof arg == 'number') {
     return arg | 0;
   } else if (arg.Int) {
@@ -171,22 +171,22 @@ exports.to_int = function(arg, ctx) {
   } else if (typeof arg == 'string') {
     var ret = parseInt(arg);
     return isNaN(ret) ? 0 : ret;
-  } else if (arg.type_object_) {
+  } else if (arg.typeObject_) {
     return 0;
   } else {
     throw "Can't convert to int";
   }
 };
 
-exports.to_bool = function(arg, ctx) {
+exports.toBool = function(arg, ctx) {
   if (typeof arg == 'number') {
     return arg ? 1 : 0;
   } else if (typeof arg == 'string') {
     return arg == '' ? 0 : 1;
   } else if (arg === undefined || arg == null) {
     return 0;
-  } else if (arg.$$to_bool) {
-    return arg.$$to_bool(ctx);
+  } else if (arg.$$toBool) {
+    return arg.$$toBool(ctx);
   } else if (typeof arg == 'function') {
     // needed for continuations
     return 1;
@@ -195,9 +195,9 @@ exports.to_bool = function(arg, ctx) {
   }
 };
 
-function Ctx(caller_ctx, outer_ctx, codeRef) {
-  this.caller = caller_ctx;
-  this.outer = outer_ctx;
+function Ctx(callerCtx, outerCtx, codeRef) {
+  this.caller = callerCtx;
+  this.outer = outerCtx;
   this.codeRef = codeRef;
 }
 
@@ -243,7 +243,7 @@ Ctx.prototype.throw = function(exception) {
   this.propagateException(exception);
 };
 
-Ctx.prototype.lookup_dynamic = function(name) {
+Ctx.prototype.lookupDynamic = function(name) {
   var ctx = this;
   while (ctx) {
     if (ctx.hasOwnProperty(name)) {
@@ -256,7 +256,7 @@ Ctx.prototype.lookup_dynamic = function(name) {
      nqp code usually fallbacks to looking up of global */
 };
 
-Ctx.prototype.lookup_dynamic_from_caller = function(name) {
+Ctx.prototype.lookupDynamicFromCaller = function(name) {
   var ctx = this.caller;
   while (ctx) {
     if (ctx.hasOwnProperty(name)) {
@@ -292,7 +292,7 @@ Ctx.prototype.bind = function(name, value) {
   throw "Can't bind: " + name;
 };
 
-Ctx.prototype.bind_dynamic = function(name, value) {
+Ctx.prototype.bindDynamic = function(name, value) {
   var ctx = this;
   while (ctx) {
     if (ctx.hasOwnProperty(name)) {
@@ -322,7 +322,7 @@ if (!Math.imul) {
 }
 
 // Placeholder
-exports.top_context = function() {
+exports.topContext = function() {
   return null;
 };
 

@@ -12,26 +12,26 @@ exports.op = op;
 op.box_i = function(i, type) {
   var repr = type._STable.REPR;
   var obj = repr.allocate(type._STable);
-  obj.$$set_int(i);
+  obj.$$setInt(i);
   return obj;
 };
 
 op.unbox_i = function(obj) {
-  return obj.$$get_int();
+  return obj.$$getInt();
 };
 
-function intish_bool(b) {
+function intishBool(b) {
   return b ? 1 : 0;
 }
 
 function makeBI(type, num) {
   var instance = type._STable.REPR.allocate(type._STable);
-  instance.$$set_bignum(num);
+  instance.$$setBignum(num);
   return instance;
 }
 
 function getBI(obj) {
-  return obj.$$get_bignum();
+  return obj.$$getBignum();
 }
 
 op.fromstr_I = function(str, type) {
@@ -64,11 +64,11 @@ op.base_I = function(n, base) {
 };
 
 op.iseq_I = function(a, b) {
-  return intish_bool(getBI(a).eq(getBI(b)));
+  return intishBool(getBI(a).eq(getBI(b)));
 };
 
 op.isne_I = function(a, b) {
-  return intish_bool(!getBI(a).eq(getBI(b)));
+  return intishBool(!getBI(a).eq(getBI(b)));
 };
 
 op.mul_I = function(a, b, type) {
@@ -134,19 +134,19 @@ op.rand_I = function(max, type) {
 };
 
 op.isle_I = function(a, b) {
-  return intish_bool(getBI(a).le(getBI(b)));
+  return intishBool(getBI(a).le(getBI(b)));
 };
 
 op.islt_I = function(a, b) {
-  return intish_bool(getBI(a).lt(getBI(b)));
+  return intishBool(getBI(a).lt(getBI(b)));
 };
 
 op.isge_I = function(a, b) {
-  return intish_bool(getBI(a).ge(getBI(b)));
+  return intishBool(getBI(a).ge(getBI(b)));
 };
 
 op.isgt_I = function(a, b) {
-  return intish_bool(getBI(a).gt(getBI(b)));
+  return intishBool(getBI(a).gt(getBI(b)));
 };
 
 op.cmp_I = function(a, b) {
@@ -155,7 +155,7 @@ op.cmp_I = function(a, b) {
 };
 
 op.isprime_I = function(n) {
-  return intish_bool(getBI(n).probPrime(50));
+  return intishBool(getBI(n).probPrime(50));
 };
 
 op.bitshiftl_I = function(a, b, type) {
@@ -214,11 +214,11 @@ op.fromnum_I = function(num, type) {
 };
 
 op.bool_I = function(n) {
-  return intish_bool(getBI(n).toNumber());
+  return intishBool(getBI(n).toNumber());
 };
 
 op.radix_I = function(radix, str, zpos, flags, type) {
-  var extracted = core.radix_helper(radix, str, zpos, flags);
+  var extracted = core.radixHelper(radix, str, zpos, flags);
   if (extracted == null) {
     return new NQPArray([makeBI(type, bignum(0)), makeBI(type, bignum(1)), -1]);
   }

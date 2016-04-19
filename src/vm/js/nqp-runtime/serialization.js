@@ -61,18 +61,18 @@ BinaryWriteCursor.prototype.str = function(str) {
     str = '?';
   }
 
-  var heap_loc = this.writer.stringIndex(str);
+  var heapLoc = this.writer.stringIndex(str);
 
-  if (!(heap_loc >= 0 && heap_loc <= STRING_HEAP_LOC_MAX)) {
-    throw 'Serialization error: string offset ' + heap_loc + "can't be serialized";
+  if (!(heapLoc >= 0 && heapLoc <= STRING_HEAP_LOC_MAX)) {
+    throw 'Serialization error: string offset ' + heapLoc + "can't be serialized";
   }
 
-  if (heap_loc <= STRING_HEAP_LOC_PACKED_MAX) {
-    this.U16(heap_loc);
+  if (heapLoc <= STRING_HEAP_LOC_PACKED_MAX) {
+    this.U16(heapLoc);
   } else {
-    this.U16((heap_loc >> STRING_HEAP_LOC_PACKED_SHIFT) |
+    this.U16((heapLoc >> STRING_HEAP_LOC_PACKED_SHIFT) |
         STRING_HEAP_LOC_PACKED_OVERFLOW);
-    this.U16(heap_loc & STRING_HEAP_LOC_PACKED_LOW_MASK);
+    this.U16(heapLoc & STRING_HEAP_LOC_PACKED_LOW_MASK);
   }
 };
 
@@ -94,41 +94,41 @@ BinaryWriteCursor.prototype.str32 = function(str) {
 /* Writing function for variable sized integers. Writes out a 64 bit value
    using between 1 and 9 bytes. */
 BinaryWriteCursor.prototype.varint = function(value) {
-  var storage_needed;
+  var storageNeeded;
 
   if (value >= -1 && value <= 126) {
-    storage_needed = 1;
+    storageNeeded = 1;
   } else {
-    var abs_val = value < 0 ? -value - 1 : value;
+    var absVal = value < 0 ? -value - 1 : value;
 
-    if (abs_val <= 0x7FF)
-      storage_needed = 2;
-    else if (abs_val <= 0x000000000007FFFF)
-      storage_needed = 3;
-    else if (abs_val <= 0x0000000007FFFFFF)
-      storage_needed = 4;
-    else if (abs_val <= 0x00000007FFFFFFFF)
-      storage_needed = 5;
+    if (absVal <= 0x7FF)
+      storageNeeded = 2;
+    else if (absVal <= 0x000000000007FFFF)
+      storageNeeded = 3;
+    else if (absVal <= 0x0000000007FFFFFF)
+      storageNeeded = 4;
+    else if (absVal <= 0x00000007FFFFFFFF)
+      storageNeeded = 5;
     else console.log('TODO serializing bigger integers');
 
     /* TODO bigger numbers */
-    /*else if (abs_val <= 0x000007FFFFFFFFFFLL)
-            storage_needed = 6;
-        else if (abs_val <= 0x0007FFFFFFFFFFFFLL)
-            storage_needed = 7;
-        else if (abs_val <= 0x07FFFFFFFFFFFFFFLL)
-            storage_needed = 8;
+    /*else if (absVal <= 0x000007FFFFFFFFFFLL)
+            storageNeeded = 6;
+        else if (absVal <= 0x0007FFFFFFFFFFFFLL)
+            storageNeeded = 7;
+        else if (absVal <= 0x07FFFFFFFFFFFFFFLL)
+            storageNeeded = 8;
         else
-            storage_needed = 9;*/
+            storageNeeded = 9;*/
   }
 
-  if (storage_needed == 1) {
+  if (storageNeeded == 1) {
     this.U8(0x80 | (value + 129));
-  } else if (storage_needed == 9) {
+  } else if (storageNeeded == 9) {
     this.I8(0x00);
     this.I64(value);
   } else {
-    var rest = storage_needed - 1;
+    var rest = storageNeeded - 1;
     var nybble = rest == 4 ? 0 : value >> 8 * rest;
 
     /* All the other high bits should be the same as the top bit of the
@@ -213,31 +213,31 @@ SerializationWriter.prototype.serializeObject = function(obj) {
   }
   var ref = this.getSTableRefInfo(obj._STable);
   var sc = ref[0];
-  var sc_idx = ref[1];
+  var scIdx = ref[1];
 
-  var packed = !obj.type_object_ ? OBJECTS_TABLE_ENTRY_IS_CONCRETE : 0;
+  var packed = !obj.typeObject_ ? OBJECTS_TABLE_ENTRY_IS_CONCRETE : 0;
 
-  if (sc <= OBJECTS_TABLE_ENTRY_SC_MAX && sc_idx <= OBJECTS_TABLE_ENTRY_SC_IDX_MAX) {
-    packed |= (sc << OBJECTS_TABLE_ENTRY_SC_SHIFT) | sc_idx;
+  if (sc <= OBJECTS_TABLE_ENTRY_SC_MAX && scIdx <= OBJECTS_TABLE_ENTRY_SC_IDX_MAX) {
+    packed |= (sc << OBJECTS_TABLE_ENTRY_SC_SHIFT) | scIdx;
   } else {
     packed |= OBJECTS_TABLE_ENTRY_SC_OVERFLOW << OBJECTS_TABLE_ENTRY_SC_SHIFT;
-    this.objects_data.I32(sc);
-    this.objects_data.I32(sc_idx);
+    this.objectsData.I32(sc);
+    this.objectsData.I32(scIdx);
   }
 
   /* Make objects table entry. */
 
   this.objects.I32(packed);
-  this.objects.I32(this.objects_data.offset);
+  this.objects.I32(this.objectsData.offset);
 
 
 
   /* Delegate to its serialization REPR function. */
-  if (!obj.type_object_) {
+  if (!obj.typeObject_) {
     if (!obj._STable.REPR.serialize) {
       console.trace("don't know how to serialize");
     } else {
-      obj._STable.REPR.serialize(this.objects_data, obj);
+      obj._STable.REPR.serialize(this.objectsData, obj);
     }
   }
 };
@@ -250,34 +250,34 @@ var PACKED_SC_OVERFLOW = 0xFFF;
 
 /* Writes the ID, index pair that identifies an entry in a Serialization
    context. */
-BinaryWriteCursor.prototype.idIdx = function(sc_id, idx) {
-  if (sc_id <= PACKED_SC_MAX && idx <= PACKED_SC_IDX_MAX) {
-    var packed = (sc_id << PACKED_SC_SHIFT) | (idx & PACKED_SC_IDX_MASK);
+BinaryWriteCursor.prototype.idIdx = function(scId, idx) {
+  if (scId <= PACKED_SC_MAX && idx <= PACKED_SC_IDX_MAX) {
+    var packed = (scId << PACKED_SC_SHIFT) | (idx & PACKED_SC_IDX_MASK);
     this.I32(packed);
   } else {
     var packed = PACKED_SC_OVERFLOW << PACKED_SC_SHIFT;
 
     this.I32(packed);
-    this.I32(sc_id);
+    this.I32(scId);
     this.I32(idx);
   }
 };
 
 BinaryWriteCursor.prototype.objRef = function(ref) {
-  var writer_sc = this.writer.sc;
+  var writerSc = this.writer.sc;
   if (!ref._STable) {
     console.log(ref);
     console.trace("can't serialize this for sure");
     console.log(typeof ref);
-    console.log(ref.code_ref);
+    console.log(ref.codeRef);
     process.exit();
   }
   if (!ref._SC) {
     /* This object doesn't belong to an SC yet, so it must be serialized
      * as part of this compilation unit. Add it to the work list. */
-    ref._SC = writer_sc;
+    ref._SC = writerSc;
 
-    this.writer.sc.root_objects.push(ref);
+    this.writer.sc.rootObjects.push(ref);
   }
 
   var sc = ref._SC;
@@ -287,7 +287,7 @@ BinaryWriteCursor.prototype.objRef = function(ref) {
     //process.exit();
   }
   /* Write SC index, then object index. */
-  this.idIdx(this.writer.getSCId(sc), sc.root_objects.indexOf(ref));
+  this.idIdx(this.writer.getSCId(sc), sc.rootObjects.indexOf(ref));
 };
 
 BinaryWriteCursor.prototype.ref = function(ref) {
@@ -398,7 +398,7 @@ BinaryWriteCursor.prototype.ref = function(ref) {
     case REFVAR_STATIC_CODEREF:
     case REFVAR_CLONED_CODEREF:
       var scId = this.writer.getSCId(ref._SC);
-      var idx = ref._SC.root_codes.indexOf(ref);
+      var idx = ref._SC.rootCodes.indexOf(ref);
       if (idx == -1) {
         throw "can't write code ref";
       }
@@ -416,7 +416,7 @@ SerializationWriter.prototype.serializeSTable = function(st) {
 
   /* Make STables table entry. */
   this.stables.str32(st.REPR.constructor.name);
-  this.stables.I32(this.stables_data.offset);
+  this.stables.I32(this.stablesData.offset);
 
   /* Write HOW, WHAT and WHO. */
 
@@ -426,27 +426,27 @@ SerializationWriter.prototype.serializeSTable = function(st) {
 
   /* TODO lazy HOW loading */
 
-  this.stables_data.objRef(st.HOW);
-  this.stables_data.objRef(st.WHAT);
-  this.stables_data.ref(st.WHO || null);
+  this.stablesData.objRef(st.HOW);
+  this.stablesData.objRef(st.WHAT);
+  this.stablesData.ref(st.WHO || null);
 
   /* Method cache*/
-  if (st.method_cache) {
+  if (st.methodCache) {
     var hash = new Hash();
-    for (var key in st.method_cache) {
-      hash.content.set(key, st.method_cache[key]);
+    for (var key in st.methodCache) {
+      hash.content.set(key, st.methodCache[key]);
     }
-    this.stables_data.ref(hash);
+    this.stablesData.ref(hash);
   }
   else {
-    this.stables_data.ref(null);
+    this.stablesData.ref(null);
   }
 
   /* Type check cache. */
-  var tcl = !st.type_check_cache ? 0 : st.type_check_cache.length;
-  this.stables_data.varint(tcl);
+  var tcl = !st.typeCheckCache ? 0 : st.typeCheckCache.length;
+  this.stablesData.varint(tcl);
   for (var i = 0; i < tcl; i++) {
-    this.stables_data.ref(st.type_check_cache[i]);
+    this.stablesData.ref(st.typeCheckCache[i]);
   }
 
 
@@ -461,7 +461,7 @@ SerializationWriter.prototype.serializeSTable = function(st) {
      serialisation version, then we can increase the storage size.  */
 
   /* TODO */
-  this.stables_data.U8(0);
+  this.stablesData.U8(0);
 
   /* Boolification spec. */
   /* As this only needs 4 bits, also use the same byte to store various
@@ -481,7 +481,7 @@ SerializationWriter.prototype.serializeSTable = function(st) {
   }
 
   /*
-  if (st->container_spec != NULL)
+  if (st->containerSpec != NULL)
       flags |= STABLE_HAS_CONTAINER_SPEC;
   */
 
@@ -494,15 +494,15 @@ SerializationWriter.prototype.serializeSTable = function(st) {
       flags |= STABLE_HAS_HLL_OWNER;
   */
 
-  this.stables_data.U8(flags);
+  this.stablesData.U8(flags);
 
   /* Boolification spec. */
 
   if (st.boolificationSpec) {
-    this.stables_data.ref(st.boolificationSpec.method);
+    this.stablesData.ref(st.boolificationSpec.method);
   }
 
-  /*this.stables_data.writeInt(st.ContainerSpec == null ? 0 : 1);
+  /*this.stablesData.writeInt(st.ContainerSpec == null ? 0 : 1);
     if (st.ContainerSpec != null) {
         writeStr(st.ContainerSpec.name());
         st.ContainerSpec.serialize(tc, st, this);
@@ -520,37 +520,37 @@ SerializationWriter.prototype.serializeSTable = function(st) {
 
   if (st.invocationSpec) {
     /* cached stuff from the MoarVM backend is just ignored */
-    this.stables_data.ref(st.invocationSpec.classHandle);
-    this.stables_data.str(st.invocationSpec.attrName);
-    this.stables_data.varint(0); // hint
-    this.stables_data.ref(st.invocationSpec.invocationHandler);
-    this.stables_data.ref(null); // md_class_handle
-    this.stables_data.str(''); // md_cache_attr_name
-    this.stables_data.varint(0); // md_cache_hint
-    this.stables_data.str(''); // md_valid_attr_name
-    this.stables_data.varint(0); // md_valid_hint
+    this.stablesData.ref(st.invocationSpec.classHandle);
+    this.stablesData.str(st.invocationSpec.attrName);
+    this.stablesData.varint(0); // hint
+    this.stablesData.ref(st.invocationSpec.invocationHandler);
+    this.stablesData.ref(null); // md_class_handle
+    this.stablesData.str(''); // md_cache_attr_name
+    this.stablesData.varint(0); // md_cache_hint
+    this.stablesData.str(''); // md_valid_attr_name
+    this.stablesData.varint(0); // md_valid_hint
   }
 
   /* HLL info. */
-  /*this.stables_data.str(st.hllOwner ? st.hllOwner.name : "");
-    this.stables_data.I32(hllRole);
+  /*this.stablesData.str(st.hllOwner ? st.hllOwner.name : "");
+    this.stablesData.I32(hllRole);
     writeStr(st.hllOwner == null ? "" : st.hllOwner.name);
     writeInt(st.hllRole);
     */
 
   /* TODO - HLL owner */
 
-  //this.stables_data.str(null);
+  //this.stablesData.str(null);
 
-  // TODO debug_name
-  this.stables_data.cstr(st.debug_name);
+  // TODO debugName
+  this.stablesData.cstr(st.debugName);
 
   /* Location of REPR data. */
-  this.stables.I32(this.stables_data.offset);
+  this.stables.I32(this.stablesData.offset);
 
   /* If the REPR has a function to serialize representation data, call it. */
-  if (st.REPR.serialize_repr_data) {
-    st.REPR.serialize_repr_data(st, this.stables_data);
+  if (st.REPR.serializeReprData) {
+    st.REPR.serializeReprData(st, this.stablesData);
   }
 
 };
@@ -568,16 +568,16 @@ SerializationWriter.prototype.serializeContext = function(ctx) {
 
 
   /* Make contexts table entry. */
-  this.contexts_headers.I32(staticSCId);
-  this.contexts_headers.I32(staticIdx);
-  this.contexts_headers.I32(this.contexts_data.offset);
+  this.contextsHeaders.I32(staticSCId);
+  this.contextsHeaders.I32(staticIdx);
+  this.contextsHeaders.I32(this.contextsData.offset);
 
   /* See if there's any relevant outer context, and if so set it up to
    * be serialized. */
   if (ctx.outer != null) {
-    this.contexts_headers.I32(this.getSerializedContextIdx(ctx.outer));
+    this.contextsHeaders.I32(this.getSerializedContextIdx(ctx.outer));
   } else {
-    this.contexts_headers.I32(0);
+    this.contextsHeaders.I32(0);
   }
 
 
@@ -587,22 +587,22 @@ SerializationWriter.prototype.serializeContext = function(ctx) {
   var lexicals = 0;
   for (var name in staticInfo) lexicals++;
 
-  this.contexts_data.I64(lexicals);
+  this.contextsData.I64(lexicals);
 
   for (var name in staticInfo) {
-    this.contexts_data.str(name);
+    this.contextsData.str(name);
     switch (staticInfo[name][0]) {
       case 0: // obj
-        this.contexts_data.ref(ctx[name]);
+        this.contextsData.ref(ctx[name]);
         break;
       case 1: // int
-        this.contexts_data.I64(ctx[name]);
+        this.contextsData.I64(ctx[name]);
         break;
       case 2: // num
-        this.contexts_data.double(ctx[name]);
+        this.contextsData.double(ctx[name]);
         break;
       case 3: // str
-        this.contexts_data.str(ctx[name]);
+        this.contextsData.str(ctx[name]);
     }
   }
 };
@@ -687,11 +687,11 @@ SerializationWriter.prototype.serializeClosure = function(closure) {
     }
     if (!codeObj._SC) {
       codeObj._SC = this.sc;
-      this.writer.sc.root_objects.push(ref);
+      this.writer.sc.rootObjects.push(ref);
     }
 
     this.closures.I32(this.getSCId(codeObj._SC));
-    this.closures.I32(codeObj._SC.root_objects.indexOf(codeObj));
+    this.closures.I32(codeObj._SC.rootObjects.indexOf(codeObj));
   }
   else {
     this.closures.I32(0);
@@ -705,7 +705,7 @@ SerializationWriter.prototype.serializeClosure = function(closure) {
 
   /* Add the closure to this SC, and mark it as as being in it. */
   closure._SC = this.sc;
-  this.sc.root_codes.push(closure);
+  this.sc.rootCodes.push(closure);
 };
 
 /* This is the overall serialization loop. It keeps an index into the list of
@@ -719,8 +719,8 @@ SerializationWriter.prototype.serializationLoop = function() {
   var contextsListPos = 0;
   while (workTodo) {
     /* Current work list sizes. */
-    var sTablesTodo = this.sc.root_stables.length;
-    var objectsTodo = this.sc.root_objects.length;
+    var sTablesTodo = this.sc.rootStables.length;
+    var objectsTodo = this.sc.rootObjects.length;
     var contextsTodo = this.contexts.length;
 
     /* Reset todo flag - if we do some work we'll go round again as it
@@ -729,14 +729,14 @@ SerializationWriter.prototype.serializationLoop = function() {
 
     /* Serialize any STables on the todo list. */
     while (sTablesListPos < sTablesTodo) {
-      this.serializeSTable(this.sc.root_stables[sTablesListPos]);
+      this.serializeSTable(this.sc.rootStables[sTablesListPos]);
       sTablesListPos++;
       workTodo = true;
     }
 
     /* Serialize any objects on the todo list. */
     while (objectsListPos < objectsTodo) {
-      this.serializeObject(this.sc.root_objects[objectsListPos]);
+      this.serializeObject(this.sc.rootObjects[objectsListPos]);
       objectsListPos++;
       workTodo = true;
     }
@@ -768,20 +768,20 @@ function SerializationWriter(sc, sh) {
   this.numClosures = 0;
 
   this.stables = new BinaryWriteCursor(this);
-  this.stables_data = new BinaryWriteCursor(this);
+  this.stablesData = new BinaryWriteCursor(this);
   this.objects = new BinaryWriteCursor(this);
-  this.objects_data = new BinaryWriteCursor(this);
+  this.objectsData = new BinaryWriteCursor(this);
   this.deps = new BinaryWriteCursor(this);
   this.closures = new BinaryWriteCursor(this);
-  this.contexts_headers = new BinaryWriteCursor(this);
-  this.contexts_data = new BinaryWriteCursor(this);
+  this.contextsHeaders = new BinaryWriteCursor(this);
+  this.contextsData = new BinaryWriteCursor(this);
 }
 
 var HEADER_SIZE = 4 * 18;
 
 SerializationWriter.prototype.header_I32 = function(value) {
-  this.buffer.writeUInt32LE(value, this.header_offset);
-  this.header_offset += 4;
+  this.buffer.writeUInt32LE(value, this.headerOffset);
+  this.headerOffset += 4;
 };
 
 SerializationWriter.prototype.writeChunk = function(cursor) {
@@ -818,31 +818,31 @@ SerializationWriter.prototype.getSTableRefInfo = function(st) {
   /* Add to this SC if needed. */
   if (!st._SC) {
     st._SC = this.sc;
-    this.sc.root_stables.push(st);
+    this.sc.rootStables.push(st);
   }
 
-  return [this.getSCId(st._SC), st._SC.root_stables.indexOf(st)];
+  return [this.getSCId(st._SC), st._SC.rootStables.indexOf(st)];
 };
 
 
 SerializationWriter.prototype.concatenateOutputs = function() {
-  var output_size = 0;
+  var outputSize = 0;
 
-  this.header_offset = 0;
+  this.headerOffset = 0;
   this.offset = HEADER_SIZE;
 
   /* Calculate total size. */
-  output_size += HEADER_SIZE;
-  output_size += this.stables.offset;
-  output_size += this.stables_data.offset;
-  output_size += this.objects.offset;
-  output_size += this.objects_data.offset;
-  output_size += this.deps.offset;
-  output_size += this.closures.offset;
-  output_size += this.contexts_data.offset;
-  output_size += this.contexts_headers.offset;
+  outputSize += HEADER_SIZE;
+  outputSize += this.stables.offset;
+  outputSize += this.stablesData.offset;
+  outputSize += this.objects.offset;
+  outputSize += this.objectsData.offset;
+  outputSize += this.deps.offset;
+  outputSize += this.closures.offset;
+  outputSize += this.contextsData.offset;
+  outputSize += this.contextsHeaders.offset;
 
-  this.buffer = new Buffer(output_size);
+  this.buffer = new Buffer(outputSize);
 
   /* Write version into header. */
   this.header_I32(CURRENT_VERSION);
@@ -856,26 +856,26 @@ SerializationWriter.prototype.concatenateOutputs = function() {
 
   /* Put STables table in place, and set location/rows in header. */
   this.header_I32(this.offset);
-  this.header_I32(this.sc.root_stables.length);
+  this.header_I32(this.sc.rootStables.length);
 
   this.writeChunk(this.stables);
 
   /* Put STables data in place. */
   this.header_I32(this.offset);
 
-  this.writeChunk(this.stables_data);
+  this.writeChunk(this.stablesData);
 
   /* Put objects table in place, and set location/rows in header. */
 
   this.header_I32(this.offset);
-  this.header_I32(this.sc.root_objects.length);
+  this.header_I32(this.sc.rootObjects.length);
 
   this.writeChunk(this.objects);
 
   /* Put objects data in place. */
   this.header_I32(this.offset);
 
-  this.writeChunk(this.objects_data);
+  this.writeChunk(this.objectsData);
 
   /* Put closures table in place, and set location/rows in header. */
   this.header_I32(this.offset);
@@ -887,21 +887,21 @@ SerializationWriter.prototype.concatenateOutputs = function() {
   this.header_I32(this.offset);
   this.header_I32(this.contexts.length);
 
-  this.writeChunk(this.contexts_headers);
+  this.writeChunk(this.contextsHeaders);
 
   /* Put contexts data in place. */
   this.header_I32(this.offset);
 
-  this.writeChunk(this.contexts_data);
+  this.writeChunk(this.contextsData);
 
   /* Put repossessions table in place, and set location/rows in header. */
   this.header_I32(this.offset);
-  this.header_I32(this.sc.rep_scs.length);
+  this.header_I32(this.sc.repScs.length);
 
 
   //  /* Sanity check. */
-  if (this.offset != output_size)
-    throw 'Serialization sanity check failed: offset != output_size (' + offset + ' != ' + output_size + ')';
+  if (this.offset != outputSize)
+    throw 'Serialization sanity check failed: offset != outputSize (' + offset + ' != ' + outputSize + ')';
 
   return this.buffer.toString('base64');
 };
@@ -922,7 +922,7 @@ op.scsetobj = function(sc, idx, obj) {
 };
 
 op.scgetobj = function(sc, idx) {
-  return sc.root_objects[idx];
+  return sc.rootObjects[idx];
 };
 
 op.getobjsc = function(obj) {
@@ -930,7 +930,7 @@ op.getobjsc = function(obj) {
 };
 
 op.scgetobjidx = function(sc, obj) {
-  var idx = sc.root_objects.indexOf(obj);
+  var idx = sc.rootObjects.indexOf(obj);
   if (idx < 0)
     throw 'Object does not exist in this SC';
   return idx;
@@ -942,7 +942,7 @@ op.setobjsc = function(obj, sc) {
 };
 
 op.scsetcode = function(sc, idx, obj) {
-  sc.root_codes[idx] = obj;
+  sc.rootCodes[idx] = obj;
   obj._SC = sc;
   return obj;
 };

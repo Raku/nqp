@@ -45,7 +45,7 @@ class RegexCompiler {
             "{$!cursor} = $start[0];\n",
             self.set_cursor_var(),
             "{$!target} = $start[1];\n",
-            "{$!pos} = nqp.to_int($start[2], $*CTX);\n",
+            "{$!pos} = nqp.toInt($start[2], $*CTX);\n",
             "{$!curclass} = $start[3];\n",
             "{$!bstack} = $start[4].array;\n",
             "{$!restart} = $start[5];\n",
@@ -273,7 +273,7 @@ class RegexCompiler {
 
     # TODO proper $!pos access
     method pos_from_cursor($cursor) {
-        "nqp.to_int($cursor['\$!pos'], $*CTX)";
+        "nqp.toInt($cursor['\$!pos'], $*CTX)";
     }
     
     # TODO proper $!pos access

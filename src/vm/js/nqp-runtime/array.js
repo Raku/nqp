@@ -70,7 +70,7 @@ NQPArray.prototype.$$unshift = function(value) {
   return value;
 };
 
-NQPArray.prototype.$$to_bool = function(ctx) {
+NQPArray.prototype.$$toBool = function(ctx) {
   return this.array.length == 0 ? 0 : 1;
 };
 

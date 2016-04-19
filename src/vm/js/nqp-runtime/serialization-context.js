@@ -7,24 +7,24 @@
  * @constructor
  * @public handle The handle of this SC.
  * @public description Description (probably the file name) if any.
- * @public root_objects The root set of objects that live in this SC.
- * @public root_stables The root set of STables that live in this SC.
- * @public root_codes The root set of code refs that live in this SC.
- * @public rep_indexes Repossession info. The following lists have matching indexes, each
+ * @public rootObjects The root set of objects that live in this SC.
+ * @public rootStables The root set of STables that live in this SC.
+ * @public rootCodes The root set of code refs that live in this SC.
+ * @public repIndexes Repossession info. The following lists have matching indexes, each
  * representing the integer of an object in our root set along with the SC
  * that the object was originally from.
- * @public rep_scs
+ * @public repScs
 */
 
 function SerializationContext(handle) {
   this.description = '???';
   this.handle = handle;
   SerializationContext.contexts[handle] = this;
-  this.root_objects = [];
-  this.root_stables = [];
-  this.root_codes = [];
-  this.rep_indexes = [];
-  this.rep_scs = [];
+  this.rootObjects = [];
+  this.rootStables = [];
+  this.rootCodes = [];
+  this.repIndexes = [];
+  this.repScs = [];
   /* Some things we deserialize are not directly in an SC, root set, but
    * rather are owned by others. This is mostly thanks to Parrot legacy,
    * where not everything was a 6model object. This maps such owned
@@ -34,15 +34,15 @@ function SerializationContext(handle) {
 }
 
 SerializationContext.prototype.setObj = function(idx, obj) {
-  this.root_objects[idx] = obj;
+  this.rootObjects[idx] = obj;
   if (!obj._STable._SC) {
-    this.root_stables.push(obj._STable);
+    this.rootStables.push(obj._STable);
     obj._STable._SC = this;
   }
 };
 
 SerializationContext.prototype.getCodeIndex = function(codeRef) {
-  return this.root_codes.indexOf(codeRef);
+  return this.rootCodes.indexOf(codeRef);
 };
 
 SerializationContext.contexts = {};

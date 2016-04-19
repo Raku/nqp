@@ -275,7 +275,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 if $arg.flat {
                     if $arg.named {
                         my $arg_chunk := self.as_js($arg, :want($T_OBJ), :$cps);
-                        my $unwraped := Chunk.new($T_OBJ, "nqp.unwrap_named({$arg_chunk.expr})", [$arg_chunk]);
+                        my $unwraped := Chunk.new($T_OBJ, "nqp.unwrapNamed({$arg_chunk.expr})", [$arg_chunk]);
                         @named_groups.push($unwraped);
                     }
                     else {
@@ -470,7 +470,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             set_variable($slurpy, "new nqp.NQPArray(Array.prototype.slice.call(arguments,{+@sig}))");
         }
         if $slurpy_named {
-            set_variable($slurpy_named, "nqp.slurpy_named(_NAMED, {known_named(@*KNOWN_NAMED)})");
+            set_variable($slurpy_named, "nqp.slurpyNamed(_NAMED, {known_named(@*KNOWN_NAMED)})");
         }
 
         Chunk.new($T_NONVAL, nqp::join(',', @sig), @setup);
@@ -518,10 +518,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             if $got == $T_OBJ {
                 my %convert;
-                %convert{$T_STR} := 'to_str';
-                %convert{$T_NUM} := 'to_num';
-                %convert{$T_INT} := 'to_int';
-                %convert{$T_BOOL} := 'to_bool';
+                %convert{$T_STR} := 'toStr';
+                %convert{$T_NUM} := 'toNum';
+                %convert{$T_INT} := 'toInt';
+                %convert{$T_BOOL} := 'toBool';
                 return Chunk.new($desired, 'nqp.' ~ %convert{$desired} ~ '(' ~ $chunk.expr ~ ", {$*CTX})", [$chunk]);
             }
 
@@ -841,7 +841,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         for $node.symtable -> $symbol {
             @imported.push("{self.mangle_name($symbol.key)} = setting[{quote_string($symbol.key)}]");
         }
-        "var setting = nqp.setup_setting({quote_string($*SETTING_NAME)});\n"
+        "var setting = nqp.setupSetting({quote_string($*SETTING_NAME)});\n"
         ~ self.declare_js_vars(@imported);
     }
 
@@ -1385,14 +1385,14 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     if nqp::istype($op, QAST::Op) && $op.op eq 'forceouterctx' {
                         $*SETTING_NAME := $op[1][1].value;
                         $*SETTING_TARGET := $op[0].value;
-                        @pre.push("nqp.load_setting({loadable($*SETTING_NAME ~ '.setting')});\n");
+                        @pre.push("nqp.loadSetting({loadable($*SETTING_NAME ~ '.setting')});\n");
                         # HACK to get nqp::sprintf to work
                         @pre.push("require('sprintf');\n"); 
                     }
                     elsif nqp::istype($op, QAST::Op)
                         && $op.op eq 'callmethod'
                         && $op.name eq 'load_module' {
-                        @pre.push("nqp.load_module({loadable($op[1].value)});\n");
+                        @pre.push("nqp.loadModule({loadable($op[1].value)});\n");
                     }
                     elsif nqp::istype($op, QAST::Op)
                         && $op.op eq 'loadbytecode' {
@@ -1673,10 +1673,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         elsif ($var.scope eq 'contextual') {
             if $*BINDVAL {
                 my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ), :$cps);
-                self.stored_result(Chunk.new($T_OBJ, "{$*CTX}.bind_dynamic({quote_string($var.name)},{$bindval.expr})", [$bindval]));
+                self.stored_result(Chunk.new($T_OBJ, "{$*CTX}.bindDynamic({quote_string($var.name)},{$bindval.expr})", [$bindval]));
             }
             else {
-                Chunk.new($T_OBJ, "{$*CTX}.lookup_dynamic({quote_string($var.name)})", []);
+                Chunk.new($T_OBJ, "{$*CTX}.lookupDynamic({quote_string($var.name)})", []);
             }
         }
         else {
@@ -1738,7 +1738,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         Chunk.void(
             "var nqp = require('nqp-runtime');\n",
-            "\nvar top_ctx = nqp.top_context();\n",
+            "\nvar top_ctx = nqp.topContext();\n",
             # temporary HACK
             "var ARGS = process.argv;\n",
             self.setup_cuids,

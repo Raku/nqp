@@ -40,7 +40,7 @@ op.nfafromstatelist = function(ctx, states, type) {
   for (var i = 1; i < states.length; i++) {
     nfa.states[i - 1] = [];
     for (var j = 0; j < states[i].length; j += 3) {
-      var edge = {act: nqp.to_int(states[i][j], ctx), to: nqp.to_int(states[i][j + 2], ctx)};
+      var edge = {act: nqp.toInt(states[i][j], ctx), to: nqp.toInt(states[i][j + 2], ctx)};
       switch (edge.act & 0xff) {
         case EDGE_EPSILON:
           break;
@@ -50,11 +50,11 @@ op.nfafromstatelist = function(ctx, states, type) {
         case EDGE_CODEPOINT_NEG:
         case EDGE_CHARCLASS:
         case EDGE_CHARCLASS_NEG:
-          edge.arg_i = nqp.to_int(states[i][j + 1], ctx);
+          edge.argI = nqp.toInt(states[i][j + 1], ctx);
           break;
         case EDGE_CHARLIST:
         case EDGE_CHARLIST_NEG:
-          edge.arg_s = nqp.to_str(states[i][j + 1], ctx);
+          edge.argS = nqp.toStr(states[i][j + 1], ctx);
           break;
 
         case EDGE_CODEPOINT_I:
@@ -62,8 +62,8 @@ op.nfafromstatelist = function(ctx, states, type) {
         case EDGE_CODEPOINT_I_NEG:
         case EDGE_CHARRANGE:
         case EDGE_CHARRANGE_NEG:
-          edge.arg_lc = nqp.to_int(states[i][j + 1][0], ctx);
-          edge.arg_uc = nqp.to_int(states[i][j + 1][1], ctx);
+          edge.argLc = nqp.toInt(states[i][j + 1][0], ctx);
+          edge.argUc = nqp.toInt(states[i][j + 1][1], ctx);
           break;
         default:
           throw 'nfafromstatelist: unknown codepoint type: ' + edge.act;
@@ -76,7 +76,7 @@ op.nfafromstatelist = function(ctx, states, type) {
 
 function runNFA(nfa, target, pos) {
 
-  var orig_pos = pos;
+  var origPos = pos;
 
   var longlit = [];
   for (var i = 0; i < 200; i++) longlit[i] = 0;
@@ -132,7 +132,7 @@ function runNFA(nfa, target, pos) {
           } else if (act == EDGE_FATE) {
             /* Crossed a fate edge. Check if we already saw this, and
                  * if so bump the entry we already saw. */
-            var arg = edgeInfo[i].arg_i;
+            var arg = edgeInfo[i].argI;
             var foundFate = false;
 
             arg &= 0xffffff;
@@ -170,37 +170,37 @@ function runNFA(nfa, target, pos) {
         /* Can't match, so drop state. */
         }
         else if (act == EDGE_CODEPOINT) {
-          if (target.charCodeAt(pos) == edgeInfo[i].arg_i)
+          if (target.charCodeAt(pos) == edgeInfo[i].argI)
             nextst.push(to);
         }
         else if (act == EDGE_CODEPOINT_LL) {
-          if (target.charCodeAt(pos) == edgeInfo[i].arg_i) {
+          if (target.charCodeAt(pos) == edgeInfo[i].argI) {
             var fate = (edgeInfo[i].act >> 8) & 0xfffff;  /* act is probably signed 32 bits */
             nextst.push(to);
             while (usedlonglit <= fate)
               longlit[usedlonglit++] = 0;
-            longlit[fate] = pos - orig_pos;
+            longlit[fate] = pos - origPos;
           }
         }
         else if (act == EDGE_CODEPOINT_NEG) {
-          if (target.charCodeAt(pos) != edgeInfo[i].arg_i)
+          if (target.charCodeAt(pos) != edgeInfo[i].argI)
             nextst.push(to);
         }
         else if (act == EDGE_CHARCLASS) {
-          if (iscclass(edgeInfo[i].arg_i, target, pos) != 0)
+          if (iscclass(edgeInfo[i].argI, target, pos) != 0)
             nextst.push(to);
         }
         else if (act == EDGE_CHARCLASS_NEG) {
-          if (iscclass(edgeInfo[i].arg_i, target, pos) == 0)
+          if (iscclass(edgeInfo[i].argI, target, pos) == 0)
             nextst.push(to);
         }
         else if (act == EDGE_CHARLIST) {
-          if (edgeInfo[i].arg_s.indexOf(target[pos]) >= 0) {
+          if (edgeInfo[i].argS.indexOf(target[pos]) >= 0) {
             nextst.push(to);
           }
         }
         else if (act == EDGE_CHARLIST_NEG) {
-          if (edgeInfo[i].arg_s.indexOf(target[pos]) < 0) {
+          if (edgeInfo[i].argS.indexOf(target[pos]) < 0) {
             nextst.push(to);
           }
         }
@@ -209,25 +209,25 @@ function runNFA(nfa, target, pos) {
         }
         else if (act == EDGE_CODEPOINT_I) {
           console.log('TODO CODEPOINT I');
-        /*char uc_arg = edgeInfo[i].arg_uc;
-              char lc_arg = edgeInfo[i].arg_lc;
+        /*char ucArg = edgeInfo[i].argUc;
+              char lcArg = edgeInfo[i].argLc;
               char ord = target.charAt((int)pos);
-              if (ord == lc_arg || ord == uc_arg)
+              if (ord == lcArg || ord == ucArg)
                   nextst.push(to);*/
         }
         else if (act == EDGE_CODEPOINT_I_NEG) {
           console.log('TODO CODEPOINT NEG');
-          /*char uc_arg = edgeInfo[i].arg_uc;
-              char lc_arg = edgeInfo[i].arg_lc;
+          /*char ucArg = edgeInfo[i].argUc;
+              char lcArg = edgeInfo[i].argLc;
               char ord = target.charAt((int)pos);
-              if (ord != lc_arg && ord != uc_arg)
+              if (ord != lcArg && ord != ucArg)
                   nextst.push(to);*/
         }
         else if (act == EDGE_CHARRANGE) {
-          var uc_arg = edgeInfo[i].arg_uc;
-          var lc_arg = edgeInfo[i].arg_lc;
+          var ucArg = edgeInfo[i].argUc;
+          var lcArg = edgeInfo[i].argLc;
           var ord = target.charCodeAt(pos);
-          if (ord >= lc_arg && ord <= uc_arg) {
+          if (ord >= lcArg && ord <= ucArg) {
             nextst.push(to);
           }
         }

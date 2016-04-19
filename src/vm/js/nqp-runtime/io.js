@@ -127,7 +127,7 @@ FileHandle.prototype.printfh = function(content) {
   return fs.writeSync(this.fd, buffer, 0, buffer.length);
 };
 
-FileHandle.prototype.$$to_bool = function(ctx) {
+FileHandle.prototype.$$toBool = function(ctx) {
   return 1;
 };
 
@@ -217,13 +217,13 @@ function readline(fh, chomp) {
     }
 
     if (newline != -1) {
-      var up_to_newline = string.slice(0, newline);
+      var upToNewline = string.slice(0, newline);
       // THINK ABOUT decoding and encoding might give a different offset
 
       fs.seekSync(fh.fd,
-          Buffer.byteLength(up_to_newline + sep, fh.encoding) + starting, 0);
+          Buffer.byteLength(upToNewline + sep, fh.encoding) + starting, 0);
 
-      return (chomp ? up_to_newline : up_to_newline + sep).replace(/\r\n/, '\n');
+      return (chomp ? upToNewline : upToNewline + sep).replace(/\r\n/, '\n');
     }
   }
 
@@ -360,7 +360,7 @@ Stderr.prototype.isttyfh = function() {
   return (process.stderr.isTTY ? 1 : 0);
 };
 
-Stderr.prototype.$$to_bool = function(ctx) {
+Stderr.prototype.$$toBool = function(ctx) {
   return 1;
 };
 
@@ -379,7 +379,7 @@ Stdout.prototype.printfh = function(msg) {
   process.stdout.write(msg);
 };
 
-Stdout.prototype.$$to_bool = function(ctx) {
+Stdout.prototype.$$toBool = function(ctx) {
   return 1;
 };
 
@@ -395,7 +395,7 @@ op.flushfh = function(fh) {
 function Stdin() {
 }
 
-Stdin.prototype.$$to_bool = function(ctx) {
+Stdin.prototype.$$toBool = function(ctx) {
   return 1;
 };
 
