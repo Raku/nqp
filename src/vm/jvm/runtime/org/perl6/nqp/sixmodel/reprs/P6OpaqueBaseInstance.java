@@ -58,12 +58,18 @@ public class P6OpaqueBaseInstance extends SixModelObject {
     public void deserializeFields(ThreadContext tc, STable st, SerializationReader reader) {
     }
 
+    public class BadNativeRuntimeException extends RuntimeException {
+        public BadNativeRuntimeException(String msg) { super(msg); }
+    }
     public void badNative() {
-        throw new RuntimeException("Cannot access a reference attribute as a native attribute");
+        throw new BadNativeRuntimeException("Cannot access a reference attribute as a native attribute");
     }
     
+    public class BadReferenceRuntimeException extends RuntimeException {
+        public BadReferenceRuntimeException(String msg) { super(msg); }
+    }
     public void badReference() {
-        throw new RuntimeException("Cannot access a native attribute as a reference attribute");
+        throw new BadReferenceRuntimeException("Cannot access a native attribute as a reference attribute");
     }
     
     public SixModelObject get_attribute_boxed(ThreadContext tc, SixModelObject class_handle,
