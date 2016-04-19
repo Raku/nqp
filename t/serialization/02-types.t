@@ -2,7 +2,7 @@
 
 use nqpmo;
 
-plan(37);
+plan(39);
 
 sub add_to_sc($sc, $idx, $obj) {
     nqp::scsetobj($sc, $idx, $obj);
@@ -246,4 +246,30 @@ sub add_to_sc($sc, $idx, $obj) {
     my $obj2 := nqp::scgetobj($dsc, 1);
 
     ok($obj2() == 800, "invokespec with attribute survived serialization");
+}
+
+# Serializing a type with box_target attribute
+{
+    my $sc := nqp::createsc('TEST_SC_7_IN');
+    my $sh := nqp::list_s();
+
+    my $type := NQPClassHOW.new_type(:name('boxing_test'), :repr('P6opaque'));
+    $type.HOW.add_attribute($type, NQPAttribute.new(
+        :name('$!value'), :type(int), :box_target(1)
+    ));
+    $type.HOW.add_parent($type, NQPMu);
+    $type.HOW.compose($type);
+    add_to_sc($sc, 0, $type);
+
+    my $instance := nqp::box_i(4, $type);
+    add_to_sc($sc, 1, $instance);
+
+    my $serialized := nqp::serialize($sc, $sh);
+
+    my $dsc := nqp::createsc('TEST_SC_7_OUT');
+    my $cr := nqp::list();
+    nqp::deserialize($serialized, $dsc, $sh, $cr, nqp::null());
+
+    ok(nqp::unbox_i(nqp::box_i(7, nqp::scgetobj($dsc, 0))) == 7, "can use deserialized type for boxing");
+    ok(nqp::unbox_i(nqp::scgetobj($dsc, 1)) == 4, "can unbox deserialized object");
 }
