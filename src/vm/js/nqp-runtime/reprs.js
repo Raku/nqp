@@ -4,6 +4,8 @@ var NQPInt = require('./nqp-int.js');
 var NQPException = require('./nqp-exception.js');
 var NQPArray = require('./array.js');
 
+var reprs = {};
+
 function basic_type_object_for(HOW) {
   var st = new sixmodel.STable(this, HOW);
   this._STable = st;
@@ -424,9 +426,7 @@ P6opaque.prototype.compose = function(STable, repr_info_hash) {
 
 };
 
-P6opaque.name = 'P6opaque';
-
-module.exports.P6opaque = P6opaque;
+reprs.P6opaque = P6opaque;
 
 function KnowHOWREPR() {
 }
@@ -456,8 +456,7 @@ KnowHOWREPR.prototype.allocate = function(STable) {
 };
 
 
-KnowHOWREPR.name = 'KnowHOWREPR';
-module.exports.KnowHOWREPR = KnowHOWREPR;
+reprs.KnowHOWREPR = KnowHOWREPR;
 
 function KnowHOWAttribute() {
 }
@@ -473,15 +472,13 @@ KnowHOWAttribute.prototype.serialize = function(data, obj) {
 
 KnowHOWAttribute.prototype.type_object_for = basic_type_object_for;
 KnowHOWAttribute.prototype.allocate = basic_allocate;
-KnowHOWAttribute.name = 'KnowHOWAttribute';
-module.exports.KnowHOWAttribute = KnowHOWAttribute;
+reprs.KnowHOWAttribute = KnowHOWAttribute;
 
 function Uninstantiable() {
 }
 Uninstantiable.prototype.create_obj_constructor = basic_constructor;
 Uninstantiable.prototype.type_object_for = basic_type_object_for;
-Uninstantiable.name = 'Uninstantiable';
-module.exports.Uninstantiable = Uninstantiable;
+reprs.Uninstantiable = Uninstantiable;
 
 /* Stubs */
 function P6int() {
@@ -514,7 +511,6 @@ P6int.prototype.compose = function(STable, repr_info_hash) {
   }
 };
 
-P6int.name = 'P6int';
 P6int.prototype.allocate = basic_allocate;
 P6int.prototype.deserialize_finish = function(obj, data) {
   // TODO integers bigger than 32bit
@@ -537,12 +533,11 @@ P6int.prototype.generateBoxingMethods = function(repr, attr) {
   });
 };
 
-module.exports.P6int = P6int;
+reprs.P6int = P6int;
 
 function P6num() {
 }
 
-P6num.name = 'P6int';
 P6num.prototype.boxed_primitive = 2;
 
 P6num.prototype.allocate = basic_allocate;
@@ -585,7 +580,7 @@ P6num.prototype.generateBoxingMethods = function(repr, attr) {
   });
 };
 
-module.exports.P6num = P6num;
+reprs.P6num = P6num;
 
 function P6str() {
 }
@@ -629,8 +624,7 @@ P6str.prototype.generateBoxingMethods = function(repr, attr) {
   });
 };
 
-P6str.name = 'P6str';
-module.exports.P6str = P6str;
+reprs.P6str = P6str;
 
 function NFA() {
 }
@@ -641,7 +635,6 @@ NFA.prototype.deserialize_finish = function(obj, data) {
 NFA.prototype.type_object_for = basic_type_object_for;
 NFA.prototype.allocate = basic_allocate;
 NFA.prototype.compose = noop_compose;
-NFA.name = 'NFA';
 exports.NFA = NFA;
 
 function VMArray() {
@@ -762,12 +755,12 @@ exports.CPointer = CPointer;
 function ReentrantMutex() {}
 ReentrantMutex.prototype.create_obj_constructor = basic_constructor;
 
-module.exports.ReentrantMutex = ReentrantMutex;
+reprs.ReentrantMutex = ReentrantMutex;
 
 function ConditionVariable() {}
 ConditionVariable.prototype.create_obj_constructor = basic_constructor;
 
-module.exports.ConditionVariable = ConditionVariable;
+reprs.ConditionVariable = ConditionVariable;
 
 function MultiDimArray() {
 
@@ -1007,7 +1000,7 @@ MultiDimArray.prototype.deserialize_finish = function(obj, data) {
   }
 };
 
-module.exports.MultiDimArray = MultiDimArray;
+reprs.MultiDimArray = MultiDimArray;
 
 function VMException() {
 }
@@ -1024,7 +1017,7 @@ VMException.prototype.setup_STable = function(STable) {
   });
 };
 
-module.exports.VMException = VMException;
+reprs.VMException = VMException;
 
 
 function NativeRef() {
@@ -1033,4 +1026,8 @@ NativeRef.prototype.allocate = basic_allocate;
 NativeRef.prototype.create_obj_constructor = basic_constructor;
 NativeRef.prototype.type_object_for = basic_type_object_for;
 NativeRef.prototype.compose = noop_compose;
-module.exports.NativeRef = NativeRef;
+reprs.NativeRef = NativeRef;
+
+for (var repr in reprs) {
+  module.exports[repr] = reprs[repr];
+}
