@@ -37,9 +37,9 @@ var REFVAR_STATIC_CODEREF = 11;
 var REFVAR_CLONED_CODEREF = 12;
 
 var STABLE_BOOLIFICATION_SPEC_MODE_MASK = 0x0F;
-var STABLE_HAS_CONTAINER_SPEC           = 0x10;
-var STABLE_HAS_INVOCATION_SPEC          = 0x20;
-var STABLE_HAS_HLL_OWNER                = 0x40;
+var STABLE_HAS_CONTAINER_SPEC = 0x10;
+var STABLE_HAS_INVOCATION_SPEC = 0x20;
+var STABLE_HAS_HLL_OWNER = 0x40;
 
 function BinaryWriteCursor(writer) {
   this.buffer = new Buffer(1024);
@@ -473,7 +473,7 @@ SerializationWriter.prototype.serializeSTable = function(st) {
   if (st.boolificationSpec) {
     var mode = st.boolificationSpec.mode;
     if (mode >= 0xF) {
-      throw "Serialization error: boolification spec mode " + mode + " out of range and can't be serialized";
+      throw 'Serialization error: boolification spec mode ' + mode + " out of range and can't be serialized";
     }
     flags = mode;
   } else {
@@ -486,7 +486,7 @@ SerializationWriter.prototype.serializeSTable = function(st) {
   */
 
   if (st.invocationSpec) {
-      flags |= STABLE_HAS_INVOCATION_SPEC;
+    flags |= STABLE_HAS_INVOCATION_SPEC;
   }
 
   /*
@@ -525,9 +525,9 @@ SerializationWriter.prototype.serializeSTable = function(st) {
     this.stables_data.varint(0); // hint
     this.stables_data.ref(st.invocationSpec.invocationHandler);
     this.stables_data.ref(null); // md_class_handle
-    this.stables_data.str(""); // md_cache_attr_name
+    this.stables_data.str(''); // md_cache_attr_name
     this.stables_data.varint(0); // md_cache_hint
-    this.stables_data.str(""); // md_valid_attr_name
+    this.stables_data.str(''); // md_valid_attr_name
     this.stables_data.varint(0); // md_valid_hint
   }
 

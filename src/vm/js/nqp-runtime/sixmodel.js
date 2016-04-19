@@ -99,7 +99,7 @@ STable.prototype.setinvokespec = function(classHandle, attrName, invocationHandl
       }
       return invocationHandler.$apply(newArgs);
     };
-  };
+  }
   this.invocationSpec = {classHandle: classHandle, attrName: attrName, invocationHandler: invocationHandler};
 };
 

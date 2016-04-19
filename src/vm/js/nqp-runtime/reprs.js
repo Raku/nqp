@@ -53,7 +53,7 @@ P6opaque.prototype.precalculate = function() {
         var slot = this.name_to_index_mapping[i].slots[j];
         if (this.auto_viv_values[slot]) {
           if (!this.auto_viv_values[slot].type_object_) {
-//            console.log('autoviv', name, slot, this.auto_viv_values[slot]);
+            //            console.log('autoviv', name, slot, this.auto_viv_values[slot]);
             console.warn('We currently only implement autoviv with type object values');
           }
           /* TODO autoviving things that aren't typeobjects */
@@ -160,7 +160,7 @@ P6opaque.prototype.deserialize_repr_data = function(cursor, STable) {
   }
 
   if (this.unbox_slots) {
-    for (var i = 0;i < this.unbox_slots.length;i++) {
+    for (var i = 0; i < this.unbox_slots.length; i++) {
       (new reprById[this.unbox_slots[i].repr_id]).generateBoxingMethods(STable, slots[this.unbox_slots[i].slot]);
     }
   }
