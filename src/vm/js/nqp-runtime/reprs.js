@@ -657,7 +657,7 @@ NFA.prototype.deserialize_finish = function(obj, data) {
 NFA.prototype.type_object_for = basic_type_object_for;
 NFA.prototype.allocate = basic_allocate;
 NFA.prototype.compose = noop_compose;
-exports.NFA = NFA;
+reprs.NFA = NFA;
 
 function VMArray() {
 }
@@ -697,7 +697,7 @@ VMArray.prototype.compose = function(STable, repr_info_hash) {
   }
 };
 
-exports.VMArray = VMArray;
+reprs.VMArray = VMArray;
 
 function VMIter() {
 }
@@ -707,7 +707,7 @@ VMIter.prototype.deserialize_finish = function(obj, data) {
   // STUB
 };
 VMIter.prototype.type_object_for = basic_type_object_for;
-exports.VMIter = VMIter;
+reprs.VMIter = VMIter;
 
 var bignum = require('bignum');
 
@@ -755,7 +755,7 @@ P6bigint.prototype.generateBoxingMethods = function(STable, name) {
 
 P6bigint.prototype.allocate = basic_allocate;
 P6bigint.prototype.compose = noop_compose;
-exports.P6bigint = P6bigint;
+reprs.P6bigint = P6bigint;
 
 
 /* Stubs */
@@ -765,16 +765,17 @@ NativeCall.prototype.create_obj_constructor = basic_constructor;
 NativeCall.prototype.allocate = basic_allocate;
 NativeCall.prototype.type_object_for = basic_type_object_for;
 NativeCall.prototype.compose = noop_compose;
-exports.NativeCall = NativeCall;
+reprs.NativeCall = NativeCall;
 
 function CPointer() {}
 CPointer.prototype.create_obj_constructor = basic_constructor;
 CPointer.prototype.type_object_for = basic_type_object_for;
 CPointer.prototype.compose = noop_compose;
-exports.CPointer = CPointer;
+reprs.CPointer = CPointer;
 
 function ReentrantMutex() {}
 ReentrantMutex.prototype.create_obj_constructor = basic_constructor;
+ReentrantMutex.prototype.allocate = basic_allocate;
 
 reprs.ReentrantMutex = ReentrantMutex;
 
