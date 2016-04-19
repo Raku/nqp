@@ -80,6 +80,13 @@ class QAST::OperationsJS {
         };
     }
 
+    # Sets returns on an op node if we it has a native result type.
+    method attach_result_type($hll, $node) {
+        my $op := $node.op;
+
+        # TODO - it's a stub
+    }
+
 
     add_simple_op('setcontspec', $T_OBJ, [$T_OBJ, $T_STR, $T_OBJ], :sideffects);
     add_simple_op('assign',  $T_OBJ, [$T_OBJ, $T_OBJ], sub ($cont, $value) {"$cont.\$\$assign({$*CTX},$value)"}, :sideffects);
