@@ -96,6 +96,8 @@ import org.perl6.nqp.sixmodel.reprs.MultiCacheInstance;
 import org.perl6.nqp.sixmodel.reprs.NFA;
 import org.perl6.nqp.sixmodel.reprs.NFAInstance;
 import org.perl6.nqp.sixmodel.reprs.NFAStateInfo;
+import org.perl6.nqp.sixmodel.reprs.NativeCallBody;
+import org.perl6.nqp.sixmodel.reprs.NativeCallInstance;
 import org.perl6.nqp.sixmodel.reprs.NativeRefInstanceAttribute;
 import org.perl6.nqp.sixmodel.reprs.NativeRefInstanceIntLex;
 import org.perl6.nqp.sixmodel.reprs.NativeRefInstanceNumLex;
@@ -107,6 +109,7 @@ import org.perl6.nqp.sixmodel.reprs.P6int;
 import org.perl6.nqp.sixmodel.reprs.P6str;
 import org.perl6.nqp.sixmodel.reprs.P6num;
 import org.perl6.nqp.sixmodel.reprs.P6OpaqueREPRData;
+import org.perl6.nqp.sixmodel.reprs.P6OpaqueBaseInstance;
 import org.perl6.nqp.sixmodel.reprs.ReentrantMutexInstance;
 import org.perl6.nqp.sixmodel.reprs.SCRefInstance;
 import org.perl6.nqp.sixmodel.reprs.SemaphoreInstance;
@@ -2713,7 +2716,31 @@ public final class Ops {
 
     /* Attribute operations. */
     public static SixModelObject getattr(SixModelObject obj, SixModelObject ch, String name, ThreadContext tc) {
-        return obj.get_attribute_boxed(tc, decont(ch, tc), name, STable.NO_HINT);
+        try {
+            return obj.get_attribute_boxed(tc, decont(ch, tc), name, STable.NO_HINT);
+        }
+        catch (P6OpaqueBaseInstance.BadReferenceRuntimeException badRef) {
+            SixModelObject retval = null;
+            obj.get_attribute_native(tc, decont(ch, tc), name, STable.NO_HINT);
+            if (tc.native_type == ThreadContext.NATIVE_INT) {
+                retval = box_i((long)tc.native_i, tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intBoxType, tc);
+            }
+            else if (tc.native_type == ThreadContext.NATIVE_NUM) {
+                retval = box_n((double)tc.native_n, tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.numBoxType, tc);
+            }
+            else if (tc.native_type == ThreadContext.NATIVE_STR) {
+                retval = box_s((String)tc.native_s, tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strBoxType, tc);
+            }
+            else if (tc.native_type == ThreadContext.NATIVE_JVM_OBJ) {
+                /* XXX: there might be other cases and we have to figure out, what kind of
+                   REPR we need to properly wrap around the NATIVE_JVM_OBJ we goet here,
+                   but so far this seems to cover what's needed. */
+                retval = REPRRegistry.getByName("NativeCall").allocate(tc, 
+                    REPRRegistry.getByName("NativeCall").type_object_for(tc, tc.gc.KnowHOW).st);
+                ((NativeCallInstance)retval).body = (NativeCallBody) tc.native_j;
+            }
+            return retval;
+        }
     }
     public static long getattr_i(SixModelObject obj, SixModelObject ch, String name, ThreadContext tc) {
         obj.get_attribute_native(tc, decont(ch, tc), name, STable.NO_HINT);
@@ -2737,7 +2764,31 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc, "Attribute '" + name + "' is not a native str");
     }
     public static SixModelObject getattr(SixModelObject obj, SixModelObject ch, String name, long hint, ThreadContext tc) {
-        return obj.get_attribute_boxed(tc, decont(ch, tc), name, hint);
+        try {
+            return obj.get_attribute_boxed(tc, decont(ch, tc), name, hint);
+        }
+        catch (P6OpaqueBaseInstance.BadReferenceRuntimeException badRef) {
+            SixModelObject retval = null;
+            obj.get_attribute_native(tc, decont(ch, tc), name, hint);
+            if (tc.native_type == ThreadContext.NATIVE_INT) {
+                retval = box_i((long)tc.native_i, tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intBoxType, tc);
+            }
+            else if (tc.native_type == ThreadContext.NATIVE_NUM) {
+                retval = box_n((double)tc.native_n, tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.numBoxType, tc);
+            }
+            else if (tc.native_type == ThreadContext.NATIVE_STR) {
+                retval = box_s((String)tc.native_s, tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strBoxType, tc);
+            }
+            else if (tc.native_type == ThreadContext.NATIVE_JVM_OBJ) {
+                /* XXX: there might be other cases and we have to figure out, what kind of
+                   REPR we need to properly wrap around the NATIVE_JVM_OBJ we goet here,
+                   but so far this seems to cover what's needed. */
+                retval = REPRRegistry.getByName("NativeCall").allocate(tc, 
+                    REPRRegistry.getByName("NativeCall").type_object_for(tc, tc.gc.KnowHOW).st);
+                ((NativeCallInstance)retval).body = (NativeCallBody) tc.native_j;
+            }
+            return retval;
+        }
     }
     public static long getattr_i(SixModelObject obj, SixModelObject ch, String name, long hint, ThreadContext tc) {
         obj.get_attribute_native(tc, decont(ch, tc), name, hint);
