@@ -5,6 +5,7 @@ var NQPException = require('./nqp-exception.js');
 var NQPArray = require('./array.js');
 
 var reprs = {};
+var reprById = [];
 
 function basic_type_object_for(HOW) {
   var st = new sixmodel.STable(this, HOW);
@@ -117,7 +118,9 @@ P6opaque.prototype.deserialize_repr_data = function(cursor, STable) {
     for (var i = 0; i < num_attributes; i++) {
       var repr_id = cursor.varint();
       var slot = cursor.varint();
-      this.unbox_slots.push({slot: slot, repr_id: repr_id});
+      if (repr_id != 0) {
+        this.unbox_slots.push({slot: slot, repr_id: repr_id});
+      }
     }
   }
 
@@ -156,6 +159,12 @@ P6opaque.prototype.deserialize_repr_data = function(cursor, STable) {
     STable.setAssociativeDelegate(slots[this.associative_delegate_slot]);
   }
 
+  if (this.unbox_slots) {
+    for (var i = 0;i < this.unbox_slots.length;i++) {
+      (new reprById[this.unbox_slots[i].repr_id]).generateBoxingMethods(STable, slots[this.unbox_slots[i].slot]);
+    }
+  }
+
   /* TODO make auto viv values work */
 };
 
@@ -190,11 +199,24 @@ P6opaque.prototype.serialize_repr_data = function(st, cursor) {
 
 
   cursor.varint(st.REPR.unbox_int_slot);
-  cursor.varint(st.REPR.unbox_str_slot);
+  cursor.varint(st.REPR.unbox_num_slot);
   cursor.varint(st.REPR.unbox_str_slot);
 
-  // TODO: Unbox slots
-  cursor.varint(0);
+  if (this.unbox_slots) {
+    cursor.varint(1);
+    for (var i = 0; i < numAttrs; i++) {
+      if (this.unbox_slots[i]) {
+        cursor.varint(this.unbox_slots[i].repr_id);
+        cursor.varint(this.unbox_slots[i].slot);
+      } else {
+        cursor.varint(0);
+        cursor.varint(0);
+      }
+    }
+  } else {
+    cursor.varint(0);
+  }
+
 
   cursor.varint(this.name_to_index_mapping.length);
   for (var i = 0; i < this.name_to_index_mapping.length; i++) {
@@ -342,7 +364,10 @@ P6opaque.prototype.compose = function(STable, repr_info_hash) {
 
         /* old boxing method generation */
         if (attr.get('box_target')) {
-          attr.get('type')._STable.REPR.generateBoxingMethods(this, attr);
+          var REPR = attr.get('type')._STable.REPR;
+          if (!this.unbox_slots) this.unbox_slots = [];
+          this.unbox_slots.push({slot: curAttr, repr_id: REPR.ID});
+          REPR.generateBoxingMethods(STable, attr.get('name'));
         }
 
         /* TODO */
@@ -522,13 +547,12 @@ P6int.prototype.serialize = function(data, obj) {
   data.varint(obj.value);
 };
 
-P6int.prototype.generateBoxingMethods = function(repr, attr) {
-  var name = attr.get('name');
-  repr._STable.addInternalMethod('$$set_int', function(value) {
+P6int.prototype.generateBoxingMethods = function(STable, name) {
+  STable.addInternalMethod('$$set_int', function(value) {
     this[name] = value;
   });
 
-  repr._STable.addInternalMethod('$$get_int', function() {
+  STable.addInternalMethod('$$get_int', function() {
     return this[name];
   });
 };
@@ -569,13 +593,12 @@ P6num.prototype.deserialize_finish = function(obj, data) {
   obj.value = data.double();
 };
 
-P6num.prototype.generateBoxingMethods = function(repr, attr) {
-  var name = attr.get('name');
-  repr._STable.addInternalMethod('$$set_num', function(value) {
+P6num.prototype.generateBoxingMethods = function(STable, name) {
+  STable.addInternalMethod('$$set_num', function(value) {
     this[name] = value;
   });
 
-  repr._STable.addInternalMethod('$$get_num', function() {
+  STable.addInternalMethod('$$get_num', function() {
     return this[name];
   });
 };
@@ -613,13 +636,12 @@ P6str.prototype.deserialize_finish = function(obj, data) {
   obj.value = data.str();
 };
 
-P6str.prototype.generateBoxingMethods = function(repr, attr) {
-  var name = attr.get('name');
-  repr._STable.addInternalMethod('$$set_str', function(value) {
+P6str.prototype.generateBoxingMethods = function(STable, name) {
+  STable.addInternalMethod('$$set_str', function(value) {
     this[name] = value;
   });
 
-  repr._STable.addInternalMethod('$$get_str', function() {
+  STable.addInternalMethod('$$get_str', function() {
     return this[name];
   });
 };
@@ -713,21 +735,20 @@ P6bigint.prototype.setup_STable = function(STable) {
   });
 };
 
-P6bigint.prototype.generateBoxingMethods = function(repr, attr) {
-  var name = attr.get('name');
-  repr._STable.addInternalMethod('$$set_int', function(value) {
+P6bigint.prototype.generateBoxingMethods = function(STable, name) {
+  STable.addInternalMethod('$$set_int', function(value) {
     this[name] = bignum(value);
   });
 
-  repr._STable.addInternalMethod('$$get_int', function() {
+  STable.addInternalMethod('$$get_int', function() {
     return this[name].toNumber();
   });
 
-  repr._STable.addInternalMethod('$$get_bignum', function() {
+  STable.addInternalMethod('$$get_bignum', function() {
     return this[name];
   });
 
-  repr._STable.addInternalMethod('$$set_bignum', function(num) {
+  STable.addInternalMethod('$$set_bignum', function(num) {
     this[name] = num;
   });
 };
@@ -1028,6 +1049,10 @@ NativeRef.prototype.type_object_for = basic_type_object_for;
 NativeRef.prototype.compose = noop_compose;
 reprs.NativeRef = NativeRef;
 
-for (var repr in reprs) {
-  module.exports[repr] = reprs[repr];
+var ID = 0;
+for (var name in reprs) {
+  module.exports[name] = reprs[name];
+  reprs[name].prototype.ID = ID;
+  reprById[ID] = reprs[name];
+  ID++;
 }
