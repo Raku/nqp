@@ -88,13 +88,17 @@ class HLL::World {
             $!is_nested := 1;
         }
         else {
-            $!context   := CompilationContext.new(:$handle, :$description);
+            $!context   := self.context_class().new(:$handle, :$description);
             $!is_nested := 0;
         }
         # Initialize attributes.
         $!handle          := $handle;
         @!load_dependency_tasks := nqp::list();
         $!precomp_mode    := %*COMPILING<%?OPTIONS><precomp>;
+    }
+
+    method context_class() {
+        CompilationContext
     }
 
     # Adds an object to the root set, along with a mapping.
