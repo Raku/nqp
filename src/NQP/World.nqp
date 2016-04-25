@@ -530,7 +530,8 @@ class NQP::World is HLL::World {
                     QAST::VM.new( :pirop('get_class Ps'), QAST::SVal.new( :value('NQPLexPad') ) )
                 ))),
             :jvm(QAST::Op.new( :op('null') )),
-            :moar(QAST::Op.new( :op('null') ))
+            :moar(QAST::Op.new( :op('null') )),
+            :js(QAST::Op.new( :op('null') ))
         )));
     }
 
