@@ -616,15 +616,25 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
     }
 
-    sub want($node, $desired) {
-        # TODO
+    my %want_char := nqp::hash($T_INT, 'I', $T_NUM, 'N', $T_STR, 'S', $T_VOID, 'v');
+    my sub want($node, $type) {
+        my @possibles := nqp::clone($node.list);
+        my $best := @possibles.shift;
+        return $best unless %want_char{$type};
+        my $char := %want_char{$type};
+        for @possibles -> $sel, $ast {
+            if nqp::index($sel, $char) >= 0 {
+                $best := $ast;
+            }
+        }
+        $best
     }
 
     proto method as_js($node, :$want, :$cps) {
         if nqp::defined($want) {
             if nqp::istype($node, QAST::Want) {
                 self.NYI("QAST::Want");
-#                self.coerce(self.as_jast(want($node, $*WANT)), $*WANT)
+                self.coerce(self.as_js(want($node, $want), :$want), $want)
             }
             else {
                 self.coerce({*}, $want)
