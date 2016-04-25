@@ -397,7 +397,8 @@ class NQP::Actions is HLL::Actions {
                     QAST::IVal.new( :value(1) )
                 )),
                 :jvm(QAST::Op.new( :op('null') )),
-                :moar(QAST::Op.new( :op('null') ))
+                :moar(QAST::Op.new( :op('null') )),
+                :js(QAST::Op.new( :op('null') ))
             ),
             default_for('$'));
     }
@@ -438,7 +439,8 @@ class NQP::Actions is HLL::Actions {
                         QAST::IVal.new( :value(1) )
                     )),
                     :jvm(QAST::Op.new( :op('null') )),
-                    :moar(QAST::Op.new( :op('null') ))
+                    :moar(QAST::Op.new( :op('null') )),
+                    :js(QAST::Op.new( :op('null') ))
                 ),
                 default_for('$')
             ));
