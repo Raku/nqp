@@ -374,11 +374,9 @@ BinaryCursor.prototype.closureEntry = function() {
   var staticScId = this.I32();
   var staticIndex = this.I32();
   entry.staticCode = this.sc.deps[staticScId].codeRefs[staticIndex];
-  //entry.staticCode = this.staticCodeRef();
   entry.context = this.I32();
   var hasCodeObj = this.I32();
   if (hasCodeObj) {
-    //entry.codeObj = this.objRef();
     var objectScId = this.I32();
     var objectIndex = this.I32();
     entry.codeObj = this.sc.deps[objectScId].rootObjects[objectIndex];
