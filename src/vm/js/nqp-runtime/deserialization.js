@@ -393,7 +393,6 @@ BinaryCursor.prototype.contextEntry = function(contextsData) {
   var staticScId = this.I32();
   var staticIndex = this.I32();
   entry.staticCode = this.sc.deps[staticScId].codeRefs[staticIndex];
-  //entry.staticCode = this.staticCodeRef();
   var data = this.at(contextsData + this.I32());
   entry.outer = this.I32();
   entry.inner = [];
