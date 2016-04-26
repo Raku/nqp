@@ -34,6 +34,7 @@ MAIN: {
                'no-clean',
                'with-parrot=s', 'gen-parrot:s', 'parrot-config=s', 'parrot-option=s@',
                'with-moar=s', 'gen-moar:s', 'moar-option=s@',
+               'with-asm=s', 'with-asm-tree=s', 'with-jline=s', 'with-jna=s',
                'make-install!', 'makefile-timing!',
                'git-protocol=s',
                'git-depth=s', 'git-reference=s',);
@@ -49,6 +50,49 @@ MAIN: {
         sorry "The --parrot-config option has been removed.",
               "Use --prefix to specify a directory in which parrot is installed.";
     }
+
+    if ($options{'with-asm'}) {
+        if ($options{'with-asm'} ne '-') {
+            $config{'asm'} = $options{'with-asm'};
+        }
+    } else {
+        $config{'asm'} = "3rdparty/asm/asm-4.1.jar";
+    }
+    if ($options{'with-asm-tree'}) {
+        if ($options{'with-asm-tree'} ne '-') {
+            $config{'asmtree'} = $options{'with-asm-tree'};
+        }
+    } else {
+        $config{'asmtree'} = "3rdparty/asm/asm-tree-4.1.jar";
+    }
+    if ($options{'with-jline'}) {
+        if ($options{'with-jline'} ne '-') {
+            $config{'jline'} = $options{'with-jline'};
+        }
+    } else {
+        $config{'jline'} = "3rdparty/jline/jline-1.0.jar";
+    }
+    if ($options{'with-jna'}) {
+        if ($options{'with-jna'} ne '-') {
+            $config{'jna'} = $options{'with-jna'};
+        }
+    } else {
+        $config{'jna'} = "3rdparty/jna/jna.jar";
+    }
+
+    if ($^O eq 'MSWin32') {
+        $config{'asmfile'} = $config{'asm'} =~ s/.*\\//r;
+        $config{'jlinefile'} = $config{'jline'} =~ s/.*\\//r;
+    } else {
+        $config{'asmfile'} = $config{'asm'} =~ s/.*\///r;
+        $config{'jlinefile'} = $config{'jline'} =~ s/.*\///r;
+    }
+
+    fill_template_file(
+        'tools/build/install-jvm-runner.pl.in',
+        'tools/build/install-jvm-runner.pl',
+        %config,
+    );
 
     my $default_backend;
     my @backends;
@@ -357,6 +401,11 @@ General Options:
     --gen-moar         Download and build a copy of MoarVM to use
     --moar-option='--option=value'
                        Options to pass to MoarVM configuration for --gen-moar
+    --with-asm='/path/to/jar'
+    --with-asm-tree='/path/to/jar'
+    --with-jline='/path/to/jar'
+    --with-jna='/path/to/jar'
+                       Provide paths to already installed jars
     --git-protocol={ssh,https,git}
                        Protocol to use for git clone. Default: https
     --make-install     Immediately run `MAKE install` after configuring
