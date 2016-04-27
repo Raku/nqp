@@ -640,7 +640,7 @@ SerializationWriter.prototype.getSerializedOuterContextIdx = function(closure) {
 };
 
 SerializationWriter.prototype.closureToStaticCodeRef = function(closure, fatal) {
-  var staticCode = closure.staticInfo ? closure : closure.staticCode;
+  var staticCode = closure.staticCode;
   if (!staticCode) {
     if (fatal) {
       throw 'Serialization Error: missing static code ref for closure';

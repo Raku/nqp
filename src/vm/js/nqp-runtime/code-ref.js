@@ -2,6 +2,7 @@ CodeRef.cuids = {};
 function CodeRef(name, cuid) {
   this.name = name;
   this.cuid = cuid;
+  this.staticCode = this;
   if (cuid) CodeRef.cuids[cuid] = this;
 }
 
@@ -115,7 +116,7 @@ CodeRef.prototype.$$clone = function() {
   clone.$call = this.$call;
   clone.codeObj = this.codeObj;
   clone.cuid = this.cuid + ' clone';
-  clone.staticCode = this;
+  clone.staticCode = this.staticCode;
   clone.outerCtx = this.outerCtx;
   return clone;
 };

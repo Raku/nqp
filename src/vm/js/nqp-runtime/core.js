@@ -496,8 +496,9 @@ op.markcodestub = function(code) {
 };
 
 op.freshcoderef = function(code) {
-  // TODO - think about static code info
-  return code.$$clone();
+  var fresh = code.$$clone();
+  fresh.staticCode = fresh;
+  return fresh;
 };
 
 /* TODO - make serialization take this into account */
