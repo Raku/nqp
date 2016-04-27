@@ -345,6 +345,45 @@ class HLL::Compiler does HLL::Backend::Default {
         $res;
     }
 
+    method handle-read-failure($filename, $in-handle, $encoding, $err) {
+        my $str-error := ~$err;
+
+        if $encoding eq 'utf8' && $str-error ~~ /'Malformed UTF-8'/ {
+            # Let's use the fantastic utf8-c8 encoding to find the offending
+            # bytes in the source file and point it out.
+            my $new-handle := nqp::open($filename, 'r');
+            nqp::setencoding($new-handle, 'utf8-c8');
+
+            my str $line := "";
+            my int $lineno := 0;
+            my int $char-found := -1;
+
+            until $char-found != -1 {
+                $line := nqp::readlinechompfh($new-handle);
+                $lineno++;
+                my $idx := -1;
+                my $last := nqp::chars($line);
+
+                while ++$idx < $last {
+                    if nqp::ordat($line, $idx) == 0x10fffd {
+                        $char-found := $idx;
+                        last;
+                    }
+                }
+            }
+
+            if $char-found != -1 {
+                nqp::sayfh(nqp::getstderr(), "Error while reading from file: Invalid UTF-8 encountered on line $lineno, character $char-found");
+                nqp::sayfh(nqp::getstderr(), $line);
+                nqp::sayfh(nqp::getstderr(), nqp::x(" ", $char-found) ~ "^ here maybe?");
+
+                return;
+            }
+        }
+
+        nqp::sayfh(nqp::getstderr(), "Error while reading from file: $err");
+    }
+
     method evalfiles($files, *@args, *%adverbs) {
         my $target := nqp::lc(%adverbs<target>);
         my $encoding := %adverbs<encoding>;
