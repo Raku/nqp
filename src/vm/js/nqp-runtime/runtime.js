@@ -94,7 +94,7 @@ var LexPadHack = require('./lexpad-hack.js');
 op.loadbytecode = function(ctx, file) {
   // HACK - temporary hack for rakudo-js
   if (file == '/share/nqp/lib/Perl6/BOOTSTRAP.js') {
-    file = 'Perl6::Bootstrap';
+    file = 'Perl6::BOOTSTRAP';
   }
   exports.loadModule(file);
   ctx.bindDynamic('$*MAIN_CTX', new LexPadHack(savedCtxs[file]));
