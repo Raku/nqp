@@ -352,7 +352,12 @@ class HLL::Compiler does HLL::Backend::Default {
             # Let's use the fantastic utf8-c8 encoding to find the offending
             # bytes in the source file and point it out.
             my $new-handle := nqp::open($filename, 'r');
-            nqp::setencoding($new-handle, 'utf8-c8');
+            try {
+                nqp::setencoding($new-handle, 'utf8-c8');
+                CATCH {
+                    return 0;
+                }
+            }
 
             my str $line := "";
             my int $lineno := 0;
@@ -383,11 +388,11 @@ class HLL::Compiler does HLL::Backend::Default {
                     nqp::sayfh(nqp::getstderr(), "Is the caret in the wrong position?\nWe found $nulls-found null bytes, which usually means utf16 or ucs16 encoding.");
                 }
 
-                return;
+                return 1;
             }
         }
 
-        nqp::sayfh(nqp::getstderr(), "Error while reading from file: $err");
+        return 0;
     }
 
     method evalfiles($files, *@args, *%adverbs) {
@@ -421,7 +426,10 @@ class HLL::Compiler does HLL::Backend::Default {
                 nqp::push(@codes, nqp::readallfh($in-handle));
                 nqp::closefh($in-handle);
                 CATCH {
-                    self.handle-read-failure($filename, $in-handle, $encoding, $_);
+                    my $success := self.handle-read-failure($filename, $in-handle, $encoding, $_);
+                    unless $success {
+                        nqp::sayfh(nqp::getstderr(), "Error while reading from file: $err");
+                    }
                     $err := 1;
                 }
             }
