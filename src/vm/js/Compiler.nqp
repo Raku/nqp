@@ -1430,7 +1430,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         # TODO needs thinking about, it seems there is really nothing to captue here and a setting is forced as outer
 
         # Compile the block.
-        my $block_js := self.as_js($node[0], :want($instant ?? $T_VOID !! $T_OBJ));
+        my $block_js := self.as_js($node[0], :want(($instant && nqp::defined($node.main)) ?? $T_VOID !! $T_OBJ));
 
         my @post;
         for $node.post_deserialize -> $node {
@@ -1451,7 +1451,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             
         }
         else {
-            $body := $block_js;
+            $body := $instant ?? Chunk.void($block_js, $block_js.expr ~ ".\$apply([null, null].concat(nqp.args(module)));\n") !! $block_js;
         }
 
         my @setup := [$pre , self.create_sc($node), self.set_code_objects,  self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $post, $body];
