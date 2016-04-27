@@ -415,7 +415,7 @@ class HLL::Compiler does HLL::Backend::Default {
                 nqp::push(@codes, nqp::readallfh($in-handle));
                 nqp::closefh($in-handle);
                 CATCH {
-                    nqp::sayfh(nqp::getstderr(), "Error while reading from file: $_");
+                    self.handle-read-failure($filename, $in-handle, $encoding, $_);
                     $err := 1;
                 }
             }
