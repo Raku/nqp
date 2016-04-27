@@ -357,6 +357,7 @@ class HLL::Compiler does HLL::Backend::Default {
             my str $line := "";
             my int $lineno := 0;
             my int $char-found := -1;
+            my int $nulls-found := 0;
 
             until $char-found != -1 {
                 $line := nqp::readlinechompfh($new-handle);
@@ -368,6 +369,8 @@ class HLL::Compiler does HLL::Backend::Default {
                     if nqp::ordat($line, $idx) == 0x10fffd {
                         $char-found := $idx;
                         last;
+                    } elsif nqp::ordat($line, $idx) == 0 {
+                        $nulls-found++;
                     }
                 }
             }
@@ -376,6 +379,9 @@ class HLL::Compiler does HLL::Backend::Default {
                 nqp::sayfh(nqp::getstderr(), "Error while reading from file: Invalid UTF-8 encountered on line $lineno, character $char-found");
                 nqp::sayfh(nqp::getstderr(), $line);
                 nqp::sayfh(nqp::getstderr(), nqp::x(" ", $char-found) ~ "^ here maybe?");
+                if $nulls-found > 2 {
+                    nqp::sayfh(nqp::getstderr(), "Is the caret in the wrong position?\nWe found $nulls-found null bytes, which usually means utf16 or ucs16 encoding.");
+                }
 
                 return;
             }
