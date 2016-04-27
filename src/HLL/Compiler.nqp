@@ -382,6 +382,7 @@ class HLL::Compiler does HLL::Backend::Default {
 
             if $char-found != -1 {
                 nqp::sayfh(nqp::getstderr(), "Error while reading from file: Invalid UTF-8 encountered on line $lineno, character $char-found");
+                nqp::sayfh(nqp::getstderr(), "$filename:$lineno");
                 nqp::sayfh(nqp::getstderr(), $line);
                 nqp::sayfh(nqp::getstderr(), nqp::x(" ", $char-found) ~ "^ here maybe?");
                 if $nulls-found > 2 {
@@ -428,7 +429,7 @@ class HLL::Compiler does HLL::Backend::Default {
                 CATCH {
                     my $success := self.handle-read-failure($filename, $in-handle, $encoding, $_);
                     unless $success {
-                        nqp::sayfh(nqp::getstderr(), "Error while reading from file: $err");
+                        nqp::sayfh(nqp::getstderr(), "Error while reading from file $filename: $err");
                     }
                     $err := 1;
                 }
