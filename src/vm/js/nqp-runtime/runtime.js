@@ -97,7 +97,8 @@ op.loadbytecode = function(ctx, file) {
     file = 'Perl6::BOOTSTRAP';
   }
   exports.loadModule(file);
-  ctx.bindDynamic('$*MAIN_CTX', new LexPadHack(savedCtxs[file]));
+  // HACK - ctx is sometimes NULL on rakudo-js
+  if (ctx) ctx.bindDynamic('$*MAIN_CTX', new LexPadHack(savedCtxs[file]));
   return file;
 };
 
