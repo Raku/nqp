@@ -783,9 +783,10 @@ class QAST::OperationsJS {
     add_simple_op('defined', $T_INT, [$T_OBJ]);
     %ops<isconcrete> := %ops<defined>;
 
-    # TODO - those are stubs until we have serialization support
+    # TODO - those are stubs until we have repossession support
     add_simple_op('scwbenable', $T_VOID, [], -> {''});
     add_simple_op('scwbdisable', $T_VOID, [], -> {''});
+    add_simple_op('neverrepossess', $T_OBJ, [$T_OBJ]);
 
     add_simple_op('settypehllrole', $T_OBJ, [$T_OBJ, $T_INT], :sideffects);
     add_simple_op('settypehll', $T_OBJ, [$T_OBJ, $T_STR], :sideffects);

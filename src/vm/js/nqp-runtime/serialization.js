@@ -947,4 +947,8 @@ op.scsetcode = function(sc, idx, obj) {
   return obj;
 };
 
+op.neverrepossess = function(obj) {
+  return obj;
+};
+
 exports.BinaryWriteCursor = BinaryWriteCursor;
