@@ -110,10 +110,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             %!variables{$var.name} := $var;
         }
 
-        method has_variable($name) {
-            nqp::existskey(%!variables, $name);
-        }
-
         method add_static_variable($var) {
             %!static_variables{$var.name} := $var;
         }
@@ -225,12 +221,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             my $info := self;
             return 0 if $var.scope eq 'local';
             while $info {
-                if $info.has_variable($name) {
-                    return 1;
-                }
-                if $*SETTING_TARGET && nqp::eqaddr($info.qast, $*SETTING_TARGET) {
-                    my $is_part_of_setting := nqp::existskey($*SETTING_TARGET.symtable, $name);
-                    return !$is_part_of_setting;
+                if $info.qast && $info.qast.symbol($name) -> $symbol {
+                    return !$symbol<from_outer>;
                 }
                 $info := $info.outer;
             }
@@ -1378,6 +1370,34 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         quote_string($name) ~ ", function() \{return require({quote_string($path)})\}";
     }
 
+    # HACK NQP should do this like rakudo and distinguish using seperate blocks not a flag
+    method mark_symbols_as_from_outer($block) {
+        my $outer_ctx := %*COMPILING<%?OPTIONS><outer_ctx>;
+        if nqp::defined($outer_ctx) {
+            until nqp::isnull($outer_ctx) {
+                my $pad := nqp::ctxlexpad($outer_ctx);
+                unless nqp::isnull($pad) {
+                    for $pad {
+                        my str $key := ~$_;
+
+                        if $block.symbol($key) -> $symbol {
+                            my $lextype := nqp::lexprimspec($pad, $key);
+                            next unless $symbol<scope> eq 'lexical';
+                            if $lextype == 0 {
+                               unless nqp::eqaddr($symbol<lazy_value_from>, $pad) {
+                                   next; 
+                               }
+                            }
+                            # TODO check other types - they don't occur in the NQP setting and this hack is not neccesary for rakudo
+                            $symbol<from_outer> := 1;
+                        }
+                    }
+                }
+                $outer_ctx := nqp::ctxouter($outer_ctx);
+            }
+        }
+    }
+
     multi method as_js(QAST::CompUnit $node, :$want, :$cps) {
         # Should have a single child which is the outer block.
         if +@($node) != 1 || !nqp::istype($node[0], QAST::Block) {
@@ -1400,6 +1420,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     if nqp::istype($op, QAST::Op) && $op.op eq 'forceouterctx' {
                         $*SETTING_NAME := $op[1][1].value;
                         $*SETTING_TARGET := $op[0].value;
+                        self.mark_symbols_as_from_outer($*SETTING_TARGET);
                         @pre.push("nqp.loadSetting({loadable($*SETTING_NAME ~ '.setting')});\n");
                         # HACK to get nqp::sprintf to work
                         @pre.push("require('sprintf');\n"); 
