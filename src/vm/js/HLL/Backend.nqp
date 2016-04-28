@@ -44,7 +44,7 @@ class HLLBackend::JavaScript {
     
     method is_precomp_stage($stage) {
         # Currently, everything is pre-comp since we're a cross-compiler.
-        1
+        $stage eq 'js' || (($stage eq '' || $stage eq 'run') && self.spawn_new_node);
     }
     
     method is_textual_stage($stage) {

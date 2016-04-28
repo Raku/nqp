@@ -1398,6 +1398,19 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
     }
 
+    method is_op($node, $op) {
+        nqp::istype($node, QAST::Op) && $node.op eq $op;
+    }
+
+    method setting_hack($op, @pre) {
+       $*SETTING_NAME := $op[1][1].value;
+       $*SETTING_TARGET := $op[0].value;
+       self.mark_symbols_as_from_outer($*SETTING_TARGET);
+       @pre.push("nqp.loadSetting({loadable($*SETTING_NAME ~ '.setting')});\n");
+       # HACK to get nqp::sprintf to work
+       @pre.push("require('sprintf');\n"); 
+    }
+
     multi method as_js(QAST::CompUnit $node, :$want, :$cps) {
         # Should have a single child which is the outer block.
         if +@($node) != 1 || !nqp::istype($node[0], QAST::Block) {
@@ -1414,16 +1427,18 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my @pre;
 
+        # HACK
+        for $node.post_deserialize -> $node {
+           if self.is_op($node, 'forceouterctx') {
+               self.setting_hack($node, @pre);
+           }
+        }
+
         for $node.pre_deserialize -> $node {
             if nqp::istype($node, QAST::Stmts) {
                 for $node.list -> $op {
-                    if nqp::istype($op, QAST::Op) && $op.op eq 'forceouterctx' {
-                        $*SETTING_NAME := $op[1][1].value;
-                        $*SETTING_TARGET := $op[0].value;
-                        self.mark_symbols_as_from_outer($*SETTING_TARGET);
-                        @pre.push("nqp.loadSetting({loadable($*SETTING_NAME ~ '.setting')});\n");
-                        # HACK to get nqp::sprintf to work
-                        @pre.push("require('sprintf');\n"); 
+                    if self.is_op($op, 'forceouterctx') {
+                        self.setting_hack($op, @pre)
                     }
                     elsif nqp::istype($op, QAST::Op)
                         && $op.op eq 'callmethod'
@@ -1455,8 +1470,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my @post;
         for $node.post_deserialize -> $node {
+           if self.is_op($node, 'forceouterctx') {
+           }
+           else {
             self.log($node.dump);
             @post.push(self.as_js($node, :want($T_VOID)));
+          }
         }
         my $post := Chunk.new($T_VOID, "", @post);
 
@@ -1475,7 +1494,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             $body := $instant ?? Chunk.void($block_js, $block_js.expr ~ ".\$apply([null, null].concat(nqp.args(module)));\n") !! $block_js;
         }
 
-        my @setup := [$pre , self.create_sc($node), self.set_code_objects,  self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $post, $body];
+
+        # TODO nested compunits, we need to handle is_nested the same as the moar backend
+
+        my $comp_mode := $node.compilation_mode;
+
+        my @setup := [$pre , $comp_mode ?? self.create_sc($node) !! '', self.set_code_objects,  self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $post, $body];
         if !$instant {
             @setup.push("new nqp.EvalResult({$body.expr}, new nqp.NQPArray(cuids))");
         }
