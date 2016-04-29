@@ -6,12 +6,6 @@ class QAST::OperationsJS {
         %ops{$op} := $cb;
     }
 
-    # The code being compiled has access to this class as "nqp::getcomp('QAST').operations".
-    # We expose &add_op as a method so that it can call it.
-    method add_op($op, $cb) {
-        add_op($op, $cb);
-    }
-
     sub op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx, :$cps) {
         my @exprs;
         my @setup;
@@ -87,6 +81,20 @@ class QAST::OperationsJS {
         # TODO - it's a stub
     }
 
+    # The code being compiled has access to this class as "nqp::getcomp('QAST').operations".
+    # We expose &add_op as a method so that it can call it.
+    method add_op($op, $cb) {
+        add_op($op, $cb);
+    }
+
+    method add_simple_op(*@args, *%args) {
+        add_simple_op(|@args, |%args);
+    }
+
+    method OBJ() { $T_OBJ }
+    method INT() { $T_INT }
+    method STR() { $T_STR }
+    method NUM() { $T_NUM }
 
     add_simple_op('setcontspec', $T_OBJ, [$T_OBJ, $T_STR, $T_OBJ], :sideffects);
     add_simple_op('assign',  $T_OBJ, [$T_OBJ, $T_OBJ], sub ($cont, $value) {"$cont.\$\$assign({$*CTX},$value)"}, :sideffects);
