@@ -6,9 +6,9 @@ Ruby subset extended from the `rubyish-4` example, as introduced in the Edument
 
 Example usage:
 ```
-    % nqp-p rubyish.nqp -e'puts "Hello World!"'
-    % nqp-p rubyish.nqp examples-rubyish/template.rbi
-    % nqp-p rubyish.nqp  # repl mode
+    % nqp-m rubyish.nqp -e'puts "Hello World!"'
+    % nqp-m rubyish.nqp examples-rubyish/template.rbi
+    % nqp-m rubyish.nqp  # repl mode
     > puts 37 + 5
 ```
 Implemented:
@@ -40,14 +40,14 @@ Notes:
 
 Handy Options:
 
-    % nqp-p rubyish.nqp --target=parse -e'puts "Hello World!"'  # dump parse
-    % nqp-p rubyish.nqp --target=ast   -e'puts "Hello World!"'  # dump ast
-    % nqp-p rubyish.nqp --target=ast    # REPL mode, dump ASTS
+    % nqp-m rubyish.nqp --target=parse -e'puts "Hello World!"'  # dump parse
+    % nqp-m rubyish.nqp --target=ast   -e'puts "Hello World!"'  # dump ast
+    % nqp-m rubyish.nqp --target=ast    # REPL mode, dump ASTS
     > puts 42
 
 To run tests:
 ```
-    % prove -v -e'nqp-p rubyish.nqp' t
+    % prove -v -e'nqp-m rubyish.nqp' t
 ```
 
 Strings and truth values are Perlish rather than Rubyish:
