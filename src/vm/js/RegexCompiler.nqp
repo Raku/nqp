@@ -445,6 +445,8 @@ class RegexCompiler {
         else {
             my @code;
 
+            @code.push("$rep = 0;\n");
+
             if $min == 0 { @code.push(self.mark($done,$!pos,0)) }
             elsif $needmark { @code.push(self.mark($done,-1,0)) }
 
