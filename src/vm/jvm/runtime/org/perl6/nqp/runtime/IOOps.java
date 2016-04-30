@@ -42,7 +42,6 @@ public final class IOOps {
         Runnable sigrun = new SigRunnable(tc, schedulee, signalNum);
         Runtime.getRuntime().addShutdownHook(new Thread(sigrun));
         return task;
-        // throw new UnsupportedOperationException("signal is not available on JVM.");
     }
 
     public static SixModelObject watchfile(SixModelObject queue, SixModelObject schedulee,
