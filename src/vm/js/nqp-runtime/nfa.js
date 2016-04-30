@@ -278,7 +278,7 @@ op.nfarunalt = function(nfa, target, pos, bstack, cstack, marks) {
   var fates = runNFA(nfa, target, pos).array;
 
   /* Push the results onto the bstack. */
-  var caps = cstack ? cstack.length : 0;
+  var caps = cstack instanceof Array ? cstack.length : 0;
 
   for (var i = 0; i < fates.length; i++) {
     bstack.push(marks[fates[i]], pos, 0, caps);
