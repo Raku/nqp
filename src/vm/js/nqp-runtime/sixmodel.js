@@ -125,6 +125,9 @@ STable.prototype.createTypeObject = function() {
   obj.$$atkey = function(key) {
     return null;
   };
+  obj.$$atpos = function(index) {
+    return null;
+  };
   return obj;
 };
 
