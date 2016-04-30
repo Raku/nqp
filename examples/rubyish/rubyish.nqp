@@ -355,11 +355,11 @@ grammar Rubyish::Grammar is HLL::Grammar {
     token infix:sym<&&>   { <sym>  <O('%logical_and, :op<if>')> }
     token infix:sym<||>   { <sym>  <O('%logical_or,  :op<unless>')> }
 
-    token infix:sym<? :> {:s '?' <EXPR('i=')>
+    token infix:sym<? :>  {:s '?' <EXPR('i=')>
                              ':' <O('%conditional, :reducecheck<ternary>, :op<if>')>
     }
 
-    token bind-op     {'='<![>]>}
+    token bind-op       {'='<![>=]>}
     token infix:sym<=>  { <.bind-op> <O('%assignment, :op<bind>')> }
 
     token prefix:sym<not> { <sym>  <O('%loose_not,     :op<not_i>')> }
