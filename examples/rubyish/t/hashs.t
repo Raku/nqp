@@ -8,9 +8,10 @@ puts "#{h{h_idx} == 30? 'ok' : 'nok'} 3 - h{c_idx}"
 puts "#{h{'d'} == 100? 'ok' : 'nok'} 4 - h{'d'}"
 
 delete(h, 'd')
+t = 4
 
 for kv in h do
-    puts "ok #{value(kv) / 10  +  4 } - hash key iteration (#{key kv})"
+    puts "ok #{t += 1} - hash key iteration"
 end
 
 h<d> = ['nok','ok']
