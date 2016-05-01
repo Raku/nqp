@@ -309,7 +309,10 @@ BinaryCursor.prototype.STable = function(STable) {
   for (var i = 0; i < typeCheckCacheLen; i++) {
     typeCheckCache.push(this.variant());
   }
-  STable.typeCheckCache = typeCheckCache;
+  
+  if (typeCheckCache.length != 0) {
+    STable.typeCheckCache = typeCheckCache;
+  }
 
   STable.modeFlags = this.U8();
 

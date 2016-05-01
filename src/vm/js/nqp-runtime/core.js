@@ -17,6 +17,8 @@ var NQPArray = require('./array.js');
 
 var bootstrap = require('./bootstrap.js');
 
+var nqp = require('nqp-runtime');
+
 exports.CodeRef = CodeRef;
 
 op.atpos = function(array, index) {
@@ -292,7 +294,7 @@ op.findmethod = function(obj, method) {
   return obj._STable.methodCache[method];
 };
 
-op.istype = function(obj, type) {
+op.istype = function(ctx, obj, type) {
   /* Null always type checks false. */
   /* HACK - undefined */
   if (obj === null || obj === undefined) {
@@ -315,10 +317,17 @@ op.istype = function(obj, type) {
 
   // TODO cases where the typeCheckCache isn't authoritative
   var cache = obj._STable.typeCheckCache;
-  for (var i = 0; i < cache.length; i++) {
-    if (cache[i] === type) {
-      return 1;
+  if (cache) {
+    for (var i = 0; i < cache.length; i++) {
+      if (cache[i] === type) {
+        return 1;
+      }
     }
+  } else {
+    /* If we get here, need to call .^type_check on the value we're
+     * checking. */
+
+    return nqp.toBool(obj._STable.HOW.type_check(ctx, null, obj, type));
   }
   return 0;
 };
