@@ -6,17 +6,17 @@ plan(6);
 
 class ABC {
     method foo() {
-        say('ok 1');
+        'ok 1';
     }
 
     method bar() {
-        say('ok 3');
+        'ok 3';
     }
 }
 
 class XYZ is ABC {
     method foo() {
-        say('ok 2');
+        'ok 2';
     }
 }
 
@@ -24,11 +24,11 @@ class XYZ is ABC {
 my $abc := ABC.new();
 my $xyz := XYZ.new();
 
-$abc.foo();
-$xyz.foo();
-$xyz.bar();
+ok($abc.foo() eq 'ok 1');
+ok($xyz.foo() eq 'ok 2');
+ok($xyz.bar() eq 'ok 3');
 my $xyzhow := $xyz.HOW;
-if $xyzhow.isa($xyz, ABC) { say('ok 4') } else { say('not ok 4') }
-if $xyzhow.isa($xyz, XYZ) { say('ok 5') } else { say('not ok 4') }
-say( $abc.HOW.isa($abc, XYZ) ?? 'not ok 6' !! 'ok 6' );
+ok($xyzhow.isa($xyz, ABC));
+ok($xyzhow.isa($xyz, XYZ));
+ok(!$abc.HOW.isa($abc, XYZ));
 
