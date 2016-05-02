@@ -161,7 +161,8 @@ P6opaque.prototype.deserializeReprData = function(cursor, STable) {
 
   if (this.unboxSlots) {
     for (var i = 0; i < this.unboxSlots.length; i++) {
-      (new reprById[this.unboxSlots[i].reprId]).generateBoxingMethods(STable, slots[this.unboxSlots[i].slot]);
+      var slot = this.unboxSlots[i].slot;
+      (new reprById[this.unboxSlots[i].reprId]).generateBoxingMethods(STable, slots[slot], this.flattenedStables[slot]);
     }
   }
 
@@ -180,7 +181,6 @@ P6opaque.prototype.serializeReprData = function(st, cursor) {
     }
     else {
       cursor.varint(1);
-      throw 'NYI';
       cursor.STableRef(st.REPR.flattenedStables[i]);
     }
   }
@@ -362,12 +362,13 @@ P6opaque.prototype.compose = function(STable, reprInfoHash) {
       for (var j = 0; j < numAttrs; j++) {
         var attr = attrs[j].content;
 
+        var type = attr.get('type');
         /* old boxing method generation */
         if (attr.get('box_target')) {
-          var REPR = attr.get('type')._STable.REPR;
+          var REPR = type._STable.REPR;
           if (!this.unboxSlots) this.unboxSlots = [];
           this.unboxSlots.push({slot: curAttr, reprId: REPR.ID});
-          REPR.generateBoxingMethods(STable, attr.get('name'));
+          REPR.generateBoxingMethods(STable, attr.get('name'), type._STable);
         }
 
         /* TODO */
@@ -381,7 +382,13 @@ P6opaque.prototype.compose = function(STable, reprInfoHash) {
 
               info.st = attrType.st;*/
 
-        this.flattenedStables.push(null);
+        /* HACK we don't actually implement STable inlining, but just pass around the STable
+         to make boxing of bignums work */
+        if (attr.get('box_target') && type._STable.REPR.flattenSTable) {
+          this.flattenedStables.push(type._STable);
+        } else {
+          this.flattenedStables.push(null);
+        }
 
         if (attr.get('positional_delegate')) {
           this.positionalDelegateSlot = curAttr;
@@ -711,8 +718,22 @@ reprs.VMIter = VMIter;
 
 var bignum = require('bignum');
 
+function makeBI(STable, num) {
+  var instance = STable.REPR.allocate(STable);
+  instance.$$setBignum(num);
+  return instance;
+}
+
+function getBI(obj) {
+  return obj.$$getBignum();
+}
+
 function P6bigint() {
 }
+
+/* HACK - we should just do flattening properly instead of a weird flag */
+P6bigint.prototype.flattenSTable = true;
+
 P6bigint.prototype.createObjConstructor = basicConstructor;
 
 P6bigint.prototype.typeObjectFor = basicTypeObjectFor;
@@ -735,21 +756,50 @@ P6bigint.prototype.setup_STable = function(STable) {
   });
 };
 
-P6bigint.prototype.generateBoxingMethods = function(STable, name) {
+P6bigint.prototype.deserializeFinish = function(obj, data) {
+  if (data.varint() == 1) { /* Is it small int? */
+    obj.value = bignum(data.varint());
+  } else {
+    obj.value = bignum(data.str()); 
+  }
+};
+
+P6bigint.prototype.serialize = function(cursor, obj) {
+  var isSmall = 0; /* TODO - check */
+
+  cursor.varint(isSmall);
+  if (isSmall) {
+    cursor.varint(obj.value.toNumber());
+  } else {
+    cursor.str(obj.value.toString());
+  }
+};
+
+function makeBI(STable, num) {
+  var instance = STable.REPR.allocate(STable);
+  instance.$$setBignum(num);
+  return instance;
+}
+
+function getBI(obj) {
+  return obj.$$getBignum();
+}
+
+P6bigint.prototype.generateBoxingMethods = function(STable, name, attrSTable) {
   STable.addInternalMethod('$$setInt', function(value) {
-    this[name] = bignum(value);
+    this[name] = makeBI(attrSTable, bignum(value));
   });
 
   STable.addInternalMethod('$$getInt', function() {
-    return this[name].toNumber();
+    return getBI(this[name]).toNumber();
   });
 
   STable.addInternalMethod('$$getBignum', function() {
-    return this[name];
+    return getBI(this[name]);
   });
 
   STable.addInternalMethod('$$setBignum', function(num) {
-    this[name] = num;
+    this[name] = makeBI(attrSTable, num);
   });
 };
 

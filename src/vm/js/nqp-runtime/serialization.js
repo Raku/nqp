@@ -290,6 +290,11 @@ BinaryWriteCursor.prototype.objRef = function(ref) {
   this.idIdx(this.writer.getSCId(sc), sc.rootObjects.indexOf(ref));
 };
 
+BinaryWriteCursor.prototype.STableRef = function(STable) {
+  var ref = this.writer.getSTableRefInfo(STable);
+  this.idIdx(ref[0], ref[1]);
+};
+
 BinaryWriteCursor.prototype.ref = function(ref) {
   /* Work out what kind of thing we have and determine the discriminator. */
   //  cnsole.log('got to ref',value);
