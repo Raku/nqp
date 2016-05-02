@@ -1,7 +1,7 @@
 #! nqp
 use nqpmo;
 
-plan(87);
+plan(89);
 
 my $knowhow := nqp::knowhow();
 my $bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
@@ -86,6 +86,10 @@ ok(iseq($box_val_1, 4), 'can box to a complex type with a P6bigint target');
 my $box_val_2 := nqp::fromstr_I('38', $bi_boxer);
 ok(iseq($box_val_2, 38), 'can get a bigint from a string with boxing type');
 ok(iseq(nqp::add_I($box_val_1, $box_val_2, $bi_boxer), 42), 'addition works on boxing type');
+
+my $box_val_3 := nqp::box_i(7, $bi_boxer);
+ok(nqp::istype(nqp::getattr($box_val_3, $bi_boxer, '$!value'), $bi_type), "the boxed value is stored in the attribute as a bigint");
+ok(nqp::unbox_i(nqp::getattr($box_val_3, $bi_boxer, '$!value')) == 7, "you can extract it and then unbox it");
 
 
 # Note that the last argument to pow_I should be capable of boxing a num,
