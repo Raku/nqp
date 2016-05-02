@@ -3613,25 +3613,32 @@ public final class Ops {
             SixModelObject BOOTHash = tc.gc.BOOTHash;
             SixModelObject hash = BOOTHash.st.REPR.allocate(tc, BOOTHash.st);
 
-            /* TODO: don't cheat and just shove the nulls in. It's enough for
-             * the initial use case of this, though.
-             */
             StaticCodeInfo sci = ((ContextRefInstance)agg).context.codeRef.staticInfo;
             if (sci.oLexicalNames != null) {
                 for (int i = 0; i < sci.oLexicalNames.length; i++)
-                    hash.bind_key_boxed(tc, sci.oLexicalNames[i], null);
+                    hash.bind_key_boxed(tc, sci.oLexicalNames[i],
+                        ((ContextRefInstance)agg).at_key_boxed(tc, sci.oLexicalNames[i]));
             }
             if (sci.iLexicalNames != null) {
-                for (int i = 0; i < sci.iLexicalNames.length; i++)
-                    hash.bind_key_boxed(tc, sci.iLexicalNames[i], null);
+                for (int i = 0; i < sci.iLexicalNames.length; i++) {
+                    ((ContextRefInstance)agg).at_key_boxed(tc, sci.iLexicalNames[i]);
+                    hash.bind_key_boxed(tc, sci.iLexicalNames[i],
+                        box_i(tc.native_i, ((ContextRefInstance)agg).context.codeRef.staticInfo.compUnit.hllConfig.intBoxType, tc));
+                }
             }
             if (sci.nLexicalNames != null) {
-                for (int i = 0; i < sci.nLexicalNames.length; i++)
-                    hash.bind_key_boxed(tc, sci.nLexicalNames[i], null);
+                for (int i = 0; i < sci.nLexicalNames.length; i++) {
+                    ((ContextRefInstance)agg).at_key_boxed(tc, sci.nLexicalNames[i]);
+                    hash.bind_key_boxed(tc, sci.nLexicalNames[i],
+                        box_n(tc.native_n, ((ContextRefInstance)agg).context.codeRef.staticInfo.compUnit.hllConfig.numBoxType, tc));
+                }
             }
             if (sci.sLexicalNames != null) {
-                for (int i = 0; i < sci.sLexicalNames.length; i++)
-                    hash.bind_key_boxed(tc, sci.sLexicalNames[i], null);
+                for (int i = 0; i < sci.sLexicalNames.length; i++) {
+                    ((ContextRefInstance)agg).at_key_boxed(tc, sci.sLexicalNames[i]);
+                    hash.bind_key_boxed(tc, sci.sLexicalNames[i],
+                        box_s(tc.native_s, ((ContextRefInstance)agg).context.codeRef.staticInfo.compUnit.hllConfig.strBoxType, tc));
+                }
             }
 
             return iter(hash, tc);
