@@ -81,16 +81,16 @@ grammar Rubyish::Grammar is HLL::Grammar {
     proto token stmt {*}
 
     token stmt:sym<def> {:s
-        :my %sym-save := nqp::clone(%*SYM);
+        :my %*inner-sym := nqp::clone(%*SYM);
         :my $*DEF;
 
         'def' ~ 'end' <defbody> {
-            %sym-save{$*DEF} := %*SYM{$*DEF};
-            %*SYM := %sym-save;
+            %*SYM{$*DEF} := %*inner-sym{$*DEF};
         }
     }
 
     rule defbody {
+        :my %*SYM := %*inner-sym;
         :my $*CUR_BLOCK := QAST::Block.new(QAST::Stmts.new());
         <operation> {
             $*DEF := ~$<operation>;
@@ -122,14 +122,13 @@ grammar Rubyish::Grammar is HLL::Grammar {
     token stmt:sym<class> {
         :my $*IN_CLASS := 1;
         :my @*METHODS;
-        :my %sym-save := nqp::clone(%*SYM);
+        :my %*inner-sym := nqp::clone(%*SYM);
 
-        [<sym> \h+] ~ [\h* 'end'] <classbody> {
-            %*SYM := %sym-save
-        }
+        [<sym> \h+] ~ [\h* 'end'] <classbody>
     }
 
     rule classbody {
+        :my %*SYM := %*inner-sym;
         :my $*CUR_BLOCK   := QAST::Block.new(QAST::Stmts.new());
         :my $*CLASS_BLOCK := $*CUR_BLOCK;
 
