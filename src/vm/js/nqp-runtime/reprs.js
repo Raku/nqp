@@ -399,12 +399,12 @@ P6opaque.prototype.compose = function(STable, reprInfoHash) {
 
         if (attr.get('positional_delegate')) {
           this.positionalDelegateSlot = curAttr;
-          this._STable.setPositionalDelegate(attr.get('name'));
+          this._STable.setPositionalDelegate(slotToAttr(this.positionalDelegateSlot));
         }
 
         if (attr.get('associative_delegate')) {
           this.associativeDelegateSlot = curAttr;
-          this._STable.setAssociativeDelegate(attr.get('name'));
+          this._STable.setAssociativeDelegate(slotToAttr(this.positionalDelegateSlot));
         }
 
         /* TODO think if we want to flatten some things */
