@@ -345,7 +345,6 @@ BinaryCursor.prototype.STable = function(STable) {
     this.str(); // md_valid_attr_name
     this.varint(); // md_valid_hint
 
-    STable.setinvokespec(classHandle, attrName, invocationHandler);
   }
 
   if (flags & STABLE_HAS_HLL_OWNER) {
@@ -359,6 +358,10 @@ BinaryCursor.prototype.STable = function(STable) {
 
   if (STable.REPR.deserializeReprData) {
     STable.REPR.deserializeReprData(this.clone(), STable);
+  }
+
+  if (flags & STABLE_HAS_INVOCATION_SPEC) {
+    STable.setinvokespec(classHandle, attrName, invocationHandler);
   }
 
 

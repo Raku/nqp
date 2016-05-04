@@ -1717,17 +1717,41 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
         }
         elsif ($var.scope eq 'attribute') {
-            # TODO take second argument into account
-            # TODO figure out if the second argument can be always assumed to be a WVal 
             # TODO types
-            my $self := self.as_js_clear_bindval($var[0], :want($T_OBJ), :$cps);
-            my $attr := Chunk.new($T_OBJ, "{$self.expr}[{quote_string($var.name)}]", [$self]);
-            if $*BINDVAL {
-                my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ), :$cps);
-                Chunk.new($T_OBJ, $bindval.expr, [$attr, $bindval, "{$attr.expr} = {$bindval.expr};\n"]);
+
+            # Get lookup hint if possible.
+            my int $hint := -1;
+            if $var[1].has_compile_time_value {
+                $hint := nqp::hintfor($var[1].compile_time_value, $var.name);
             }
-            else {
-                $attr;
+
+            my $self := self.as_js_clear_bindval($var[0], :want($T_OBJ), :$cps);
+
+            if $hint == -1 {
+                my $type := self.as_js_clear_bindval($var[1], :want($T_OBJ), :$cps);
+                my $name := quote_string($var.name);
+                if $*BINDVAL {
+                    my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ), :$cps);
+                    Chunk.new($T_OBJ, $bindval.expr, [$self, $type, $bindval,
+                        "{$self.expr}.\$\$bindattr({$type.expr}, $name, {$bindval.expr});\n"
+                    ]);
+                }
+                else {
+                    $self.expr;
+                    $type.expr;
+                    Chunk.new($T_OBJ, "{$self.expr}.\$\$getattr({$type.expr}, $name)", [$self, $type]);
+                }
+            } else {
+                my $attr := Chunk.new($T_OBJ, "{$self.expr}.{'attr$' ~ $hint}", [$self]);
+                if $*BINDVAL {
+                    my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ), :$cps);
+                    $attr.expr;
+                    $bindval.expr;
+                    Chunk.new($T_OBJ, $bindval.expr, [$attr, $bindval, "{$attr.expr} = {$bindval.expr};\n"]);
+                }
+                else {
+                    $attr;
+                }
             }
         }
         elsif ($var.scope eq 'contextual') {

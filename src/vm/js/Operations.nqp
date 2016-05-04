@@ -161,33 +161,34 @@ class QAST::OperationsJS {
 
     add_simple_op('clone', $T_OBJ, [$T_OBJ]);
 
-    # TODO handle attributes properly
+    # TODO optimize cases where the class and the attribute are constants
     for ['', $T_OBJ, '_i', $T_INT, '_n', $T_NUM, '_s', $T_STR] -> $suffix, $type {
-        add_simple_op('bindattr' ~ $suffix, $type, [$T_OBJ, $T_OBJ, $T_STR, $type], :sideffects,
-            sub ($obj, $type, $attr, $value) {
-                # TODO take second argument into account
-                "($obj[$attr] = $value)";
-            }
-        );
+
+        add_op('bindattr' ~ $suffix, sub ($comp, $node, :$want, :$cps) {
+            my $obj := $comp.as_js(:want($T_OBJ), $node[0]);
+            my $classHandle := $comp.as_js(:want($T_OBJ), $node[1]);
+            my $attrName := $comp.as_js(:want($T_STR), $node[2]);
+            my $value := $comp.as_js(:want($type), $node[3]);
+
+            $comp.stored_result(Chunk.new($type,
+                "{$obj.expr}\.\$\$bindattr({$classHandle.expr}, {$attrName.expr}, {$value.expr})",
+            [$obj, $classHandle, $attrName, $value]));
+        });
+
         add_simple_op('getattr' ~ $suffix, $type, [$T_OBJ, $T_OBJ, $T_STR],
             sub ($obj, $type, $attr) {
-                # TODO take second argument into account
-                "$obj[$attr]";
+                "$obj\.\$\$getattr($type, $attr)";
             }
         );
     }
 
     # HACK - we need this until we handle types on attributes properly 
     add_simple_op('getattr_i', $T_INT, [$T_OBJ, $T_OBJ, $T_STR], sub ($obj, $type, $attr) {
-        "nqp.intAttrHack($obj[$attr])"
+        "nqp.intAttrHack($obj\.\$\$getattr($type, $attr))"
     });
 
-    add_simple_op('attrinited', $T_BOOL, [$T_OBJ, $T_OBJ, $T_STR],
-        sub ($obj, $type, $attr) {
-            # TODO take second argument into account
-            "$obj.hasOwnProperty($attr)";
-        }
-    );
+
+    add_simple_op('hintfor', $T_INT, [$T_OBJ, $T_STR]);
 
 
     add_hll_op('sprintf');

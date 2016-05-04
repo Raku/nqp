@@ -128,12 +128,12 @@ class RegexCompiler {
         my $scan := self.new_label;
         my $done := self.new_label;
 
-        "if ({$!compiler.mangle_name('self')}['\$!from'] != -1) \{{self.goto($done)}\}\n" # HACK
+        "if (nqp.getattrHack({$!compiler.mangle_name('self')},'\$!from') != -1) \{{self.goto($done)}\}\n"
         ~ self.goto($scan)
         ~ self.case($loop)
         ~ "$!pos++;\n"
         ~ "if ($!pos >= $!target.length) \{{self.fail}\}\n"
-        ~ "$!cursor['\$!from'] = $!pos;\n" # HACK
+        ~ "nqp.bindattrHack($!cursor, '\$!from', $!pos);\n"
         ~ self.case($scan)
         ~ self.mark($loop,$!pos,0)
         ~ self.case($done);
@@ -273,12 +273,12 @@ class RegexCompiler {
 
     # TODO proper $!pos access
     method pos_from_cursor($cursor) {
-        "nqp.toInt($cursor['\$!pos'], $*CTX)";
+        "nqp.toInt(nqp.getattrHack($cursor, '\$!pos'), $*CTX)";
     }
     
     # TODO proper $!pos access
     method set_cursor_pos() {
-        "$!cursor['\$!pos\'] = $!pos;\n";
+        "nqp.bindattrHack($!cursor, '\$!pos\', $!pos);\n";
     }
 
     method subrule($node) {

@@ -419,5 +419,25 @@ function runCPS(thunk_) {
   }
 }
 
+
+function hack(obj, attrName) {
+  var repr = obj._STable.REPR;
+  for (var i=0;i < repr.nameToIndexMapping.length; i++) {
+      for (var j=0;j < repr.nameToIndexMapping[i].slots.length; j++) {
+        if (repr.nameToIndexMapping[i].names[j] === attrName) {
+          return repr.nameToIndexMapping[i].slots[j];
+        }
+    }
+  }
+}
+
+exports.bindattrHack = function(obj, attr, value) {
+  return (obj['attr$' + hack(obj, attr)] = value);
+};
+
+exports.getattrHack = function(obj, attr) {
+  return (obj['attr$' + hack(obj, attr)]);
+};
+
 exports.runCPS = runCPS;
 exports.NQPException = NQPException;

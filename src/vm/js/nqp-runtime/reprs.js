@@ -31,6 +31,10 @@ function basicConstructor(STable) {
   return objConstructor;
 }
 
+function slotToAttr(slot) {
+  return 'attr$' + slot;
+}
+
 function P6opaque() {
 }
 
@@ -49,7 +53,6 @@ P6opaque.prototype.precalculate = function() {
   if (this.autoVivValues) {
     for (var i in this.nameToIndexMapping) {
       for (var j in this.nameToIndexMapping[i].slots) {
-        var name = this.nameToIndexMapping[i].names[j];
         var slot = this.nameToIndexMapping[i].slots[j];
         if (this.autoVivValues[slot]) {
           if (!this.autoVivValues[slot].typeObject_) {
@@ -58,10 +61,10 @@ P6opaque.prototype.precalculate = function() {
           }
           /* TODO autoviving things that aren't typeobjects */
           /* TODO we need to store attributes better */
-          autovived[name] = this.autoVivValues[slot];
+          autovived[slotToAttr(slot)] = this.autoVivValues[slot];
         } else if (this.flattenedStables[slot]) {
           if (this.flattenedStables[slot].REPR.flattenedDefault !== undefined) {
-            autovived[name] = this.flattenedStables[slot].REPR.flattenedDefault;
+            autovived[slotToAttr(slot)] = this.flattenedStables[slot].REPR.flattenedDefault;
           }
         }
       }
@@ -73,11 +76,11 @@ P6opaque.prototype.precalculate = function() {
   }
 
   this.template = {};
-  /* TODO take classes into account when storing attributes */
+  /* TODO think about attribute types */
   for (var i in this.nameToIndexMapping) {
     for (var j in this.nameToIndexMapping[i].slots) {
-      var name = this.nameToIndexMapping[i].names[j];
-      this.template[name] = null;
+      var slot = this.nameToIndexMapping[i].slots[j];
+      this.template[slotToAttr(slot)] = null;
     }
   }
 
@@ -153,20 +156,51 @@ P6opaque.prototype.deserializeReprData = function(cursor, STable) {
   this.associativeDelegateSlot = cursor.varint();
 
   if (this.positionalDelegateSlot != -1) {
-    STable.setPositionalDelegate(slots[this.positionalDelegateSlot]);
+    STable.setPositionalDelegate(slotToAttr(this.positionalDelegateSlot));
   }
   if (this.associativeDelegateSlot != -1) {
-    STable.setAssociativeDelegate(slots[this.associativeDelegateSlot]);
+    STable.setAssociativeDelegate(slotToAttr(this.associativeDelegateSlot));
   }
 
   if (this.unboxSlots) {
     for (var i = 0; i < this.unboxSlots.length; i++) {
       var slot = this.unboxSlots[i].slot;
-      (new reprById[this.unboxSlots[i].reprId]).generateBoxingMethods(STable, slots[slot], this.flattenedStables[slot]);
+      (new reprById[this.unboxSlots[i].reprId]).generateBoxingMethods(STable, slotToAttr(slot), this.flattenedStables[slot]);
     }
   }
 
   /* TODO make auto viv values work */
+};
+
+
+P6opaque.prototype.hintfor = function(classHandle, attrName) {
+  for (var i=0;i < this.nameToIndexMapping.length; i++) {
+    if (this.nameToIndexMapping[i].classKey === classHandle) {
+      for (var j=0;j < this.nameToIndexMapping[i].slots.length; j++) {
+        if (this.nameToIndexMapping[i].names[j] === attrName) {
+          return this.nameToIndexMapping[i].slots[j];
+        }
+      }
+    }
+  }
+  return -1;
+};
+
+P6opaque.prototype.getAttr = function(classHandle, attrName) {
+  var nqp = require('nqp-runtime');
+  var hint = this.hintfor(classHandle, attrName);
+  if (hint == -1) {
+    console.log('classHandle', classHandle);
+    if (classHandle === null) {
+      console.trace("null classHandle");
+      process.exit();
+    }
+    console.trace("getAttr", attrName);
+    console.log(nqp.dumpObj(this.nameToIndexMapping));
+    throw "Can't find: " + attrName;
+  } else {
+    return slotToAttr(hint);
+  }
 };
 
 P6opaque.prototype.serializeReprData = function(st, cursor) {
@@ -239,17 +273,6 @@ P6opaque.prototype.serializeReprData = function(st, cursor) {
 P6opaque.prototype.deserializeFinish = function(obj, data) {
   var attrs = [];
 
-  var names = {};
-
-  for (var i in this.nameToIndexMapping) {
-    for (var j in this.nameToIndexMapping[i].slots) {
-      var name = this.nameToIndexMapping[i].names[j];
-      var slot = this.nameToIndexMapping[i].slots[j];
-      // TODO take class key into account with attribute storage
-      names[slot] = name;
-    }
-  }
-
   for (var i = 0; i < this.flattenedStables.length; i++) {
     if (this.flattenedStables[i]) {
       var STable = this.flattenedStables[i];
@@ -264,10 +287,8 @@ P6opaque.prototype.deserializeFinish = function(obj, data) {
 
   for (var i in this.nameToIndexMapping) {
     for (var j in this.nameToIndexMapping[i].slots) {
-      var name = this.nameToIndexMapping[i].names[j];
       var slot = this.nameToIndexMapping[i].slots[j];
-      // TODO take class key into account with attribute storage
-      obj[name] = attrs[slot];
+      obj[slotToAttr(slot)] = attrs[slot];
     }
   }
 };
@@ -279,30 +300,16 @@ P6opaque.prototype.serialize = function(cursor, obj) {
     throw 'Representation must be composed before it can be serialized';
   }
 
-  var attrs = [];
-
-  var names = [];
-
-  for (var i in this.nameToIndexMapping) {
-    for (var j in this.nameToIndexMapping[i].slots) {
-      var name = this.nameToIndexMapping[i].names[j];
-      var slot = this.nameToIndexMapping[i].slots[j];
-
-      // TODO take class key into account with attribute storage
-      attrs[slot] = obj[name];
-      names[slot] = name;
-    }
-  }
-
   for (var i = 0; i < flattened.length; i++) {
+    var value = obj[slotToAttr(i)];
     if (flattened[i] == null || !flattened[i]) {
       // TODO - think about what happens when we get an undefined value here
-      cursor.ref(attrs[i]);
+      cursor.ref(value);
     }
     else {
       // HACK different kinds of numbers etc.
-      var attr = typeof attrs[i] == 'object' ? attrs[i] : {value: attrs[i]}; // HACK - think if that's a correct way of serializing a native attribute
-      this.flattenedStables[i].REPR.serialize(cursor, attr);
+      var wrapped = typeof value == 'object' ? value : {value: value}; // HACK - think if that's a correct way of serializing a native attribute
+      this.flattenedStables[i].REPR.serialize(cursor, wrapped);
     }
   }
 };
@@ -362,13 +369,13 @@ P6opaque.prototype.compose = function(STable, reprInfoHash) {
       for (var j = 0; j < numAttrs; j++) {
         var attr = attrs[j].content;
 
-        var type = attr.get('type');
+        var attrType = attr.get('type');
         /* old boxing method generation */
         if (attr.get('box_target')) {
-          var REPR = type._STable.REPR;
+          var REPR = attrType._STable.REPR;
           if (!this.unboxSlots) this.unboxSlots = [];
           this.unboxSlots.push({slot: curAttr, reprId: REPR.ID});
-          REPR.generateBoxingMethods(STable, attr.get('name'), type._STable);
+          REPR.generateBoxingMethods(STable, slotToAttr(curAttr), attrType._STable);
         }
 
         /* TODO */
@@ -384,8 +391,8 @@ P6opaque.prototype.compose = function(STable, reprInfoHash) {
 
         /* HACK we don't actually implement STable inlining, but just pass around the STable
          to make boxing of bignums work */
-        if (attr.get('box_target') && type._STable.REPR.flattenSTable) {
-          this.flattenedStables.push(type._STable);
+        if (attr.get('box_target') && attrType._STable.REPR.flattenSTable) {
+          this.flattenedStables.push(attrType._STable);
         } else {
           this.flattenedStables.push(null);
         }
@@ -456,6 +463,18 @@ P6opaque.prototype.compose = function(STable, reprInfoHash) {
   this.precalculate();
 
 
+};
+
+P6opaque.prototype.setup_STable = function(STable) {
+  var repr = this;
+  STable.addInternalMethod('$$bindattr', function(classHandle, attrName, value) {
+    this[repr.getAttr(classHandle, attrName)] = value;
+    return value;
+  });
+
+  STable.addInternalMethod('$$getattr', function(classHandle, attrName, value) {
+    return this[repr.getAttr(classHandle, attrName)];
+  });
 };
 
 reprs.P6opaque = P6opaque;
