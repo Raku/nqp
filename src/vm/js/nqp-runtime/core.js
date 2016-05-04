@@ -1081,3 +1081,7 @@ op.multicacheadd = function(cache, capture, result) {
 op.backtracestrings = function(exception) {
   return new NQPArray(['backtrace NYI']);
 };
+
+op.hintfor = function(classHandle, attrName) {
+  return classHandle._STable.REPR.hintfor(classHandle, attrName);
+};
