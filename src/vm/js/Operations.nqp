@@ -95,6 +95,7 @@ class QAST::OperationsJS {
     method INT() { $T_INT }
     method STR() { $T_STR }
     method NUM() { $T_NUM }
+    method BOOL() { $T_BOOL }
 
     add_simple_op('setcontspec', $T_OBJ, [$T_OBJ, $T_STR, $T_OBJ], :sideffects);
     add_simple_op('assign',  $T_OBJ, [$T_OBJ, $T_OBJ], sub ($cont, $value) {"$cont.\$\$assign({$*CTX},$value)"}, :sideffects);
