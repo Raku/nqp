@@ -14,12 +14,15 @@ class RegexCompiler {
     has $!cursor;
     has $!target; # the string we are matching against
     has $!pos; # the position in $!target we are currently at
-    has $!curclass; # the class of the object in $!cursor
+    has $!cursor_type_runtime; # the register with class of the object in $!cursor
     has $!bstack;
     has $!restart;
     has $!cstack;
     has $!subcur;
     has $!rep;
+
+    has $!has_cursor_type; # do we know the class of the object in $!cursor at compile time
+    has $!cursor_type; # the class of the object in $!cursor - if we know it at compile time
 
     method set_cursor_var() {
         if $*BLOCK.is_dynamic_var(QAST::Var.new(:name('$¢'))) {
@@ -39,6 +42,12 @@ class RegexCompiler {
 
         my $restart_label := self.new_label;
 
+        $!has_cursor_type := $node.has_cursor_type();
+        if $!has_cursor_type {
+            $!cursor_type := $node.cursor_type();
+            say("//we have cursor_type");
+        }
+
         Chunk.new($T_OBJ, $!cursor, [
             "{$!label} = {$!initial_label};\n",
             "$start = {$!compiler.mangle_name('self')}['!cursor_start_all']({$*CTX}, null).array;\n",
@@ -46,7 +55,7 @@ class RegexCompiler {
             self.set_cursor_var(),
             "{$!target} = $start[1];\n",
             "{$!pos} = nqp.toInt($start[2], $*CTX);\n",
-            "{$!curclass} = $start[3];\n",
+            ($!has_cursor_type ?? '' !! "{$!cursor_type_runtime} = $start[3];\n"),
             "{$!bstack} = $start[4].array;\n",
             "{$!restart} = $start[5];\n",
             "if ($!pos > $!target.length) \{$!label = $!fail_label\}\n",
@@ -128,12 +137,12 @@ class RegexCompiler {
         my $scan := self.new_label;
         my $done := self.new_label;
 
-        "if (nqp.getattrHack({$!compiler.mangle_name('self')},'\$!from') != -1) \{{self.goto($done)}\}\n"
+        "if ({self.get_cursor_attr($!compiler.mangle_name('self'), '$!from')} != -1) \{{self.goto($done)}\}\n"
         ~ self.goto($scan)
         ~ self.case($loop)
         ~ "$!pos++;\n"
         ~ "if ($!pos >= $!target.length) \{{self.fail}\}\n"
-        ~ "nqp.bindattrHack($!cursor, '\$!from', $!pos);\n"
+        ~ self.set_cursor_attr($!cursor, '$!from', $!pos)
         ~ self.case($scan)
         ~ self.mark($loop,$!pos,0)
         ~ self.case($done);
@@ -271,14 +280,38 @@ class RegexCompiler {
         $invocant ~ "[" ~ quote_string($method) ~ "](" ~ nqp::join(",", @args) ~ ")";
     }
 
-    # TODO proper $!pos access
+    method cursor_attr($cursor, $attr) {
+        my int $hint := nqp::hintfor($!cursor_type, $attr);
+        if $hint == -1 {
+            nqp::die("Can't get attr: $attr from the cursor");
+        }
+        $cursor ~ '.attr$' ~ $hint;
+    }
+
+    method get_cursor_attr($cursor, $attr) {
+        if $!has_cursor_type {
+            "nqp.toInt({self.cursor_attr($cursor, $attr)}, $*CTX)";
+        }
+        else {
+            "nqp.toInt($cursor.\$\$getattr($!cursor_type_runtime, {quote_string($attr)}), $*CTX)";
+        }
+    }
+
     method pos_from_cursor($cursor) {
-        "nqp.toInt(nqp.getattrHack($cursor, '\$!pos'), $*CTX)";
+        self.get_cursor_attr($cursor, '$!pos');
     }
     
-    # TODO proper $!pos access
+    method set_cursor_attr($cursor, $attr, $value) {
+        if $!has_cursor_type {
+            "{self.cursor_attr($cursor, $attr)} = $value;\n";
+        }
+        else {
+            "$cursor.\$\$bindattr($!cursor_type_runtime, {quote_string($attr)}, $value);\n";
+        }
+    }
+
     method set_cursor_pos() {
-        "nqp.bindattrHack($!cursor, '\$!pos\', $!pos);\n";
+        self.set_cursor_attr($!cursor, '$!pos', $!pos);
     }
 
     method subrule($node) {
@@ -591,7 +624,7 @@ class RegexCompiler {
         $!cursor := $*BLOCK.add_tmp();
         $!target := $*BLOCK.add_tmp();
         $!pos := $*BLOCK.add_tmp();
-        $!curclass := $*BLOCK.add_tmp();
+        $!cursor_type_runtime := $*BLOCK.add_tmp();
         $!bstack := $*BLOCK.add_tmp();
         $!restart := $*BLOCK.add_tmp();
         $!cstack := $*BLOCK.add_tmp();
