@@ -124,7 +124,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         method lookup_static_variable($var) {
             my $info := self;
-            return nqp::null if $var.scope ne 'lexical';
+            return nqp::null if $var.scope ne 'lexical' && $var.scope ne 'typevar';
             while $info {
                 if $info.has_local_static_variable($var.name) {
                     return $info.get_static_variable($var.name);
