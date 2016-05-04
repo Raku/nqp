@@ -45,7 +45,6 @@ class RegexCompiler {
         $!has_cursor_type := $node.has_cursor_type();
         if $!has_cursor_type {
             $!cursor_type := $node.cursor_type();
-            say("//we have cursor_type");
         }
 
         Chunk.new($T_OBJ, $!cursor, [
