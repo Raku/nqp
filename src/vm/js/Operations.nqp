@@ -1322,5 +1322,23 @@ class QAST::OperationsJS {
             $comp.NYI("unimplemented QAST::Op {$op.op}");
         }
     }
+
+    add_op('takedispatcher', sub ($comp, $node, :$want, :$cps) {
+        if +@($node) != 1 || !nqp::istype($node[0], QAST::SVal) {
+            nqp::die('takedispatcher requires one string literal operand');
+        }
+        my $var := $node[0].value;
+        unless $*BLOCK.is_dynamic_var(QAST::Var.new(:name($var), :scope<lexical>)) {
+            $comp.NYI("takedispatcher on a none-dynamic var");
+        }
+        Chunk.void(
+            "if (nqp.currentDispatcher !== undefined) \{"
+            ~ "{$*CTX}.bind({quote_string($var)}, nqp.currentDispatcher);\n"
+            ~ "nqp.currentDispatcher = undefined;\n"
+            ~ "\}\n"
+        );
+    });
+    add_simple_op('cleardispatcher', $T_VOID, [], sub () {"nqp.currentDispatcher = undefined"}, :sideffects);
+    add_simple_op('setdispatcher', $T_VOID, [$T_OBJ], sub ($value) {"nqp.currentDispatcher = $value"}, :sideffects);
 }
 
