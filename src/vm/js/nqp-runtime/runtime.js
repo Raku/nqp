@@ -11,6 +11,8 @@ function loadOps(module) {
   }
 }
 
+exports.loadOps = loadOps;
+
 var core = require('./core');
 loadOps(core);
 exports.hash = core.hash;
