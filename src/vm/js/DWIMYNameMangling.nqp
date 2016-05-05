@@ -3,7 +3,6 @@
 # It's separated into a role so we may replace it with an different scheme when we want to reduce the output size
 role DWIMYNameMangling {
     my %mangle;
-    %mangle<_> := 'UNDERSCORE';
     %mangle<&> := 'AMPERSAND';
     %mangle<:> := 'COLON';
     %mangle<;> := 'SEMI';
@@ -34,7 +33,6 @@ role DWIMYNameMangling {
     %mangle<.> := 'DOT';
     %mangle<|> := 'PIPE';
     %mangle<`> := 'BACKTICK';
-    %mangle<$> := 'DOLLAR';
     %mangle<\\> := 'BACKSLASH';
 
     method mangle_name($name) {
@@ -46,13 +44,17 @@ role DWIMYNameMangling {
             if nqp::iscclass(nqp::const::CCLASS_ALPHANUMERIC, $char, 0) {
                 $mangled := $mangled ~ $char;
             }
+            elsif $char eq '_' {
+                $mangled := $mangled ~ '__';
+            }
+            elsif $char eq '$' {
+                $mangled := $mangled ~ '$';
+            }
+            elsif nqp::existskey(%mangle, $char) {
+                $mangled := $mangled ~ '_' ~ %mangle{$char} ~ '_';
+            }
             else {
-                if nqp::existskey(%mangle, $char) {
-                    $mangled := $mangled ~ '_' ~ %mangle{$char} ~ '_';
-                }
-                else {
-                    $mangled := $mangled ~ '_' ~ nqp::ord($char) ~ '_';
-                }
+                $mangled := $mangled ~ '_' ~ nqp::ord($char) ~ '_';
             }
         }
 
