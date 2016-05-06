@@ -77,8 +77,12 @@ class QAST::OperationsJS {
     # Sets returns on an op node if we it has a native result type.
     method attach_result_type($hll, $node) {
         my $op := $node.op;
-
         # TODO - it's a stub
+    }
+
+    method is_inlinable(str $hll, str $op) {
+        # TODO - it's a stub
+        return 0;
     }
 
     # The code being compiled has access to this class as "nqp::getcomp('QAST').operations".
