@@ -1,9 +1,11 @@
 class QAST::OperationsJS {
     my %ops;
 
+    my %inlinable;
 
-    sub add_op($op, $cb) {
+    sub add_op($op, $cb, :$inlinable = 1) {
         %ops{$op} := $cb;
+        %inlinable{$op} := $inlinable;
     }
 
     sub op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx, :$cps) {
@@ -43,12 +45,12 @@ class QAST::OperationsJS {
         }
     }
 
-    sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op, @argument_types), :$sideffects, :$ctx, :$required_cps, :$cps_aware) {
-        %ops{$op} := sub ($comp, $node, :$want, :$cps) {
+    sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op, @argument_types), :$sideffects, :$ctx, :$required_cps, :$cps_aware, :$inlinable = 1) {
+        add_op($op, sub ($comp, $node, :$want, :$cps) {
             my $use_cps := $required_cps || ($cps_aware && $cps);
             my $chunk := op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx, :cps($use_cps));
             ($sideffects && !$use_cps) ?? $comp.stored_result($chunk) !! $chunk;
-        };
+        }, :$inlinable);
     }
 
     sub add_hll_op($op) {
@@ -74,25 +76,39 @@ class QAST::OperationsJS {
         };
     }
 
+    # Sets op native result type at a core level.
+    method set_op_result_type(str $op, $type) {
+        if $type == $T_INT {
+            %result_type{$op} := int;
+        }
+        elsif $type == $T_NUM {
+            %result_type{$op} := num;
+        }
+        elsif $type == $T_STR {
+            %result_type{$op} := str;
+        }
+    }
+
     # Sets returns on an op node if we it has a native result type.
     method attach_result_type($hll, $node) {
         my $op := $node.op;
-        # TODO - it's a stub
+        if nqp::existskey(%result_type, $op) {
+            $node.returns(%result_type{$op});
+        }
     }
 
     method is_inlinable(str $hll, str $op) {
-        # TODO - it's a stub
-        return 0;
+        return %inlinable{$op};
     }
 
     # The code being compiled has access to this class as "nqp::getcomp('QAST').operations".
     # We expose &add_op as a method so that it can call it.
-    method add_op($op, $cb) {
-        add_op($op, $cb);
+    method add_op($op, $cb, :$inlinable = 1) {
+        add_op($op, $cb, :$inlinable);
     }
 
-    method add_simple_op(*@args, *%args) {
-        add_simple_op(|@args, |%args);
+    method add_simple_op(*@args, *%args, :$inlinable) {
+        add_simple_op(|@args, |%args, :$inlinable);
     }
 
     method OBJ() { $T_OBJ }
@@ -475,7 +491,7 @@ class QAST::OperationsJS {
     add_simple_op('ishash', $T_INT, [$T_OBJ]);
 
 
-    add_op('call', sub ($comp, $node, :$want, :$cps) {
+    add_op('call', :!inlinable, sub ($comp, $node, :$want, :$cps) {
         if $*BLOCK.is_local_lexotic($node.name) {
             my $value := $comp.as_js($node[0], :want($T_OBJ));
             return Chunk.new($T_VOID, '', [$value, "return {$value.expr};\n"]);
@@ -628,7 +644,7 @@ class QAST::OperationsJS {
     add_simple_op('settypefinalize', $T_VOID, [$T_OBJ, $T_INT]);
 
     # TODO - implement and bechmark different ways of preventing the try/catch from murdering performance 
-    add_op('handle', sub ($comp, $node, :$want, :$cps) {
+    add_op('handle', :!inlinable, sub ($comp, $node, :$want, :$cps) {
         # TODO CPS
         my @children := nqp::clone($node.list());
         if @children == 0 {
@@ -717,11 +733,11 @@ class QAST::OperationsJS {
         "new nqp.NQPArray({$string} == '' ? [] : {$string}.split({$separator}))"
     });
 
-    add_simple_op('ctxlexpad', $T_OBJ, [$T_OBJ]);
+    add_simple_op('ctxlexpad', :!inlinable, $T_OBJ, [$T_OBJ]);
     add_simple_op('lexprimspec', $T_INT, [$T_OBJ, $T_STR]);
     add_simple_op('objprimspec', $T_INT, [$T_OBJ]);
 
-    add_simple_op('ctxouter', $T_OBJ, [$T_OBJ]);
+    add_simple_op('ctxouter', :!inlinable, $T_OBJ, [$T_OBJ]);
 
     add_simple_op('loadbytecode', $T_STR, [$T_STR], :ctx, :sideffects);
 
@@ -735,7 +751,7 @@ class QAST::OperationsJS {
     add_op('atpos', sub ($comp, $node, :$want, :$cps) { $comp.atpos($node[0], $node[1], :$node) });
 
     #TODO CPS
-    add_op('curlexpad', sub ($comp, $node, :$want, :$cps) {
+    add_op('curlexpad', :!inlinable, sub ($comp, $node, :$want, :$cps) {
             my @get;
             my @set;
             for $*BLOCK.variables -> $var {
@@ -1136,7 +1152,7 @@ class QAST::OperationsJS {
     add_simple_op('iscclass', $T_INT, [$T_INT, $T_STR, $T_INT]);
 
     # TODO consider/handle if lexotic is not the topmost thing in a block
-    add_op('lexotic', sub ($comp, $node, :$want, :$cps) {
+    add_op('lexotic', :!inlinable, sub ($comp, $node, :$want, :$cps) {
         #TODO CPS
         $*BLOCK.register_lexotic($node.name);
         my $inner := $comp.as_js($node[0], :$want);
@@ -1194,7 +1210,7 @@ class QAST::OperationsJS {
     add_simple_op('atkey', $T_OBJ, [$T_OBJ, $T_STR], sub ($hash, $key) {"$hash.\$\$atkey($key)"});
 
     for <savecapture usecapture> -> $op {
-        add_simple_op($op, $T_OBJ, [], sub () {
+        add_simple_op($op, :!inlinable, $T_OBJ, [], sub () {
             if $*AS_METHOD {
                 "nqp.op.savecaptureAsMethod(this, Array.prototype.slice.call(arguments), {known_named(@*KNOWN_NAMED)})"
             }
@@ -1296,8 +1312,8 @@ class QAST::OperationsJS {
 
     add_simple_op('radix_I', $T_OBJ, [$T_INT, $T_STR, $T_INT, $T_INT, $T_OBJ]);
 
-    add_simple_op('curcode', $T_OBJ, [], sub () {"$*CTX.codeRef"});
-    add_simple_op('callercode', $T_OBJ, [], sub () {"caller_ctx.codeRef"});
+    add_simple_op('curcode', :!inlinable, $T_OBJ, [], sub () {"$*CTX.codeRef"});
+    add_simple_op('callercode', :!inlinable, $T_OBJ, [], sub () {"caller_ctx.codeRef"});
 
     # Native Call
     add_simple_op('buildnativecall',  $T_INT, [$T_OBJ, $T_STR, $T_STR, $T_STR, $T_OBJ, $T_OBJ], :sideffects, :ctx);
