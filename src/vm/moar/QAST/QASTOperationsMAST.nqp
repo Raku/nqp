@@ -2171,6 +2171,9 @@ QAST::MASTOperations.add_core_moarop_mapping('fromstr_I', 'coerce_sI');
 QAST::MASTOperations.add_core_moarop_mapping('tonum_I', 'coerce_In');
 QAST::MASTOperations.add_core_moarop_mapping('fromnum_I', 'coerce_nI');
 
+QAST::MASTOperations.add_core_moarop_mapping('coerce_in', 'coerce_in');
+QAST::MASTOperations.add_core_moarop_mapping('coerce_ni', 'coerce_ni');
+
 # trig opcodes
 QAST::MASTOperations.add_core_moarop_mapping('sin_n', 'sin_n');
 QAST::MASTOperations.add_core_moarop_mapping('asin_n', 'asin_n');
