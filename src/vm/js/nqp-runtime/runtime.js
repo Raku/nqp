@@ -272,7 +272,7 @@ Ctx.prototype.lookupDynamicFromCaller = function(name) {
      nqp code usually fallbacks to looking up of global */
 };
 
-Ctx.prototype.lookup = function(name, value) {
+Ctx.prototype.lookup = function(name) {
   var ctx = this;
   while (ctx) {
     if (ctx.hasOwnProperty(name)) {
