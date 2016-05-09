@@ -6155,6 +6155,21 @@ public final class Ops {
         }
     }
 
+    public static long coerce_n2i(double in) {
+        if (in == Double.POSITIVE_INFINITY
+        ||  in == Double.NEGATIVE_INFINITY
+        ||  in != in) {
+            return Long.MIN_VALUE;
+        }
+        else {
+            return in.longValue();
+        }
+    }
+
+    public static double coerce_i2n(long in) {
+        return in.doubleValue();
+    }
+
     /* Long literal workaround. */
     public static String join_literal(String[] parts) {
         StringBuilder retval = new StringBuilder(parts.length * 65535);
