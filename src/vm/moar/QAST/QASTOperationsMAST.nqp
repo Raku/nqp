@@ -301,28 +301,43 @@ class QAST::MASTOperations {
     }
 
     # Adds a core op that maps to a Moar op.
-    method add_core_moarop_mapping(str $op, str $moarop, $ret = -1, :$mapper?, :$decont, :$inlinable = 1) {
-        my $moarop_mapper := $mapper
-            ?? $mapper(self, $moarop, $ret)
-            !! self.moarop_mapper($moarop, $ret, $decont);
-        %core_ops{$op} := -> $qastcomp, $op {
-            $moarop_mapper($qastcomp, $op.op, $op.list)
-        };
+    method add_core_moarop_mapping(str $op, str $moarop, $ret = -1, :$decont, :$inlinable = 1) {
+        %core_ops{$op} := self.moarop_mapper($moarop, $ret, $decont);
         self.set_core_op_inlinability($op, $inlinable);
         self.set_core_op_result_type($op, moarop_return_type($moarop));
     }
 
     # Adds a HLL op that maps to a Moar op.
-    method add_hll_moarop_mapping(str $hll, str $op, str $moarop, $ret = -1, :$mapper?, :$decont, :$inlinable = 1) {
-        my $moarop_mapper := $mapper
-            ?? $mapper(self, $moarop, $ret)
-            !! self.moarop_mapper($moarop, $ret, $decont);
+    method add_hll_moarop_mapping(str $hll, str $op, str $moarop, $ret = -1, :$decont, :$inlinable = 1) {
         %hll_ops{$hll} := {} unless %hll_ops{$hll};
-        %hll_ops{$hll}{$op} := -> $qastcomp, $op {
-            $moarop_mapper($qastcomp, $op.op, $op.list)
-        };
+        %hll_ops{$hll}{$op} := self.moarop_mapper($moarop, $ret, $decont);
         self.set_hll_op_inlinability($hll, $op, $inlinable);
         self.set_hll_op_result_type($hll, $op, moarop_return_type($moarop));
+    }
+
+    method check_ret_val(str $moarop, $ret) {
+        my int $num_operands;
+        my int $operands_offset;
+        my @operands_values;
+        if nqp::existskey(%core_op_codes, $moarop) {
+            my int $op_num   := %core_op_codes{$moarop};
+            $num_operands    := nqp::atpos_i(@core_operands_counts, $op_num);
+            $operands_offset := nqp::atpos_i(@core_operands_offsets, $op_num);
+            @operands_values := @core_operands_values;
+        }
+        elsif MAST::ExtOpRegistry.extop_known($moarop) {
+            @operands_values := MAST::ExtOpRegistry.extop_signature($moarop);
+            $num_operands    := nqp::elems(@operands_values);
+            $operands_offset := 0;
+        }
+        else {
+            nqp::die("MoarVM op '$moarop' is unknown as a core or extension op");
+        }
+        nqp::die("moarop $moarop return arg index out of range")
+            if $ret < -1 || $ret >= $num_operands;
+        nqp::die("moarop $moarop is not void")
+            if $num_operands && (nqp::atpos_i(@operands_values, $operands_offset) +& $MVM_operand_rw_mask) ==
+                $MVM_operand_write_reg;
     }
 
     # Returns a mapper closure for turning an operation into a Moar op.
@@ -334,28 +349,7 @@ class QAST::MASTOperations {
         my $self := self;
 
         if $ret != -1 {
-            my int $num_operands;
-            my int $operands_offset;
-            my @operands_values;
-            if nqp::existskey(%core_op_codes, $moarop) {
-                my int $op_num   := %core_op_codes{$moarop};
-                $num_operands    := nqp::atpos_i(@core_operands_counts, $op_num);
-                $operands_offset := nqp::atpos_i(@core_operands_offsets, $op_num);
-                @operands_values := @core_operands_values;
-            }
-            elsif MAST::ExtOpRegistry.extop_known($moarop) {
-                @operands_values := MAST::ExtOpRegistry.extop_signature($moarop);
-                $num_operands    := nqp::elems(@operands_values);
-                $operands_offset := 0;
-            }
-            else {
-                nqp::die("MoarVM op '$moarop' is unknown as a core or extension op");
-            }
-            nqp::die("moarop $moarop return arg index out of range")
-                if $ret < -1 || $ret >= $num_operands;
-            nqp::die("moarop $moarop is not void")
-                if $num_operands && (nqp::atpos_i(@operands_values, $operands_offset) +& $MVM_operand_rw_mask) ==
-                    $MVM_operand_write_reg;
+            self.check_ret_val($moarop, $ret);
         }
         
         my @deconts;
@@ -366,8 +360,8 @@ class QAST::MASTOperations {
             @deconts[$decont_in] := 1;
         }
 
-        -> $qastcomp, $op_name, @op_args {
-            $self.compile_mastop($qastcomp, $moarop, @op_args, @deconts, :returnarg($ret))
+        -> $qastcomp, $op {
+            $self.compile_mastop($qastcomp, $moarop, $op.list, @deconts, :returnarg($ret))
         }
     }
 
