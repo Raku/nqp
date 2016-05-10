@@ -2,7 +2,7 @@
 
 # Tests for try and catch
 
-plan(18);
+plan(20);
 
 sub oops($msg = "oops!") { # throw an exception
     nqp::die($msg);
@@ -130,3 +130,43 @@ ok($ok eq "oops_s!", "nqp::die_s");
        ok(nqp::getpayload($_) eq "custom payload", "nqp::setpayload/nqp::getpayload on custom exception"); 
     }
 }
+
+my $log := '';
+
+my $ex;
+{
+    {
+        {
+            {
+                oops();
+                CATCH {$log := $log ~ "#1"; $ex := $!; }
+            }
+            CATCH { $log := $log ~ "#2" }
+        }
+        nqp::rethrow($ex);
+        CATCH { $log := $log ~ "#3" }
+    }
+    CATCH { $log := $log ~ "#4" }
+}
+ok($log eq '#1#3', 'rethrow works from a scope higher then CATCH');
+
+$log := '';
+my $ex2;
+{
+    {
+        {
+            {
+                oops();
+                CATCH {$log := $log ~ "#1"; $ex2 := $!; }
+            }
+            CATCH { $log := $log ~ "#2" }
+        }
+        {
+            nqp::rethrow($ex);
+            CATCH { $log := $log ~ "#3" }
+        }
+    }
+    CATCH { $log := $log ~ "#4" }
+}
+
+ok($log eq '#1#3', 'rethrow works from a scope that is not a direct ancestor');
