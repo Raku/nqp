@@ -669,7 +669,7 @@ class QAST::OperationsJS {
 
         my $outer_ctx := $*CTX;
         {
-            my $*CTX := $comp.unique_var('ctx');
+            my $*HANDLER_CTX := $comp.unique_var('ctx');
             my $unwind_marker := $*BLOCK.add_tmp;
 
             my $try_ret := $want == $T_VOID ?? '' !! $*BLOCK.add_tmp;
@@ -679,13 +679,12 @@ class QAST::OperationsJS {
                 if $type eq 'CATCH' {  
                     my $catch_body := $comp.as_js($handler, :want($T_OBJ));
                     $handle := Chunk.void(
-                        "//want: $want\n",
                         "$unwind_marker = \{\};\n",
-                        "$*CTX.CATCH = function() \{\n",
+                        "$*HANDLER_CTX.CATCH = function() \{\n",
                         $catch_body,
                         "return {$catch_body.expr};\n",
                         "\};\n",
-                        "$*CTX.unwind = $unwind_marker;\n" 
+                        "$*HANDLER_CTX.unwind = $unwind_marker;\n" 
                     );
                 }
                 elsif $type eq 'CONTROL' {
@@ -696,28 +695,31 @@ class QAST::OperationsJS {
                 }
             }
 
-            my $body := $comp.as_js($protected, :$want);
-            return Chunk.new($want, $try_ret, [
-                "var $*CTX = new nqp.Ctx($outer_ctx, $outer_ctx, $outer_ctx.codeRef);\n",
-                $handle,
-                "try \{",
-                $body,
-                # HACK we need to check $body.type if we handle something like return
-                (($want == $T_VOID || $body.type == $T_VOID) ?? '' !! "$try_ret = {$body.expr};\n"),
-                "\} catch (e) \{if (e === $unwind_marker) \{",
-                ($want == $T_VOID ?? '' !! "$try_ret = $unwind_marker.ret;\n"),
-                "\} else if (e instanceof nqp.NQPException) \{\n",
-                "$*CTX.catchException(e);\n",
-                "\} else \{\n",
-                "throw e;\n",
-                "\}\n",
-                "\}\n"
-            ], :$node);
+            {
+                my $*CTX := $*HANDLER_CTX;
+                my $body := $comp.as_js($protected, :$want);
+                return Chunk.new($want, $try_ret, [
+                    "var $*CTX = new nqp.Ctx($outer_ctx, $outer_ctx, $outer_ctx.codeRef);\n",
+                    $handle,
+                    "try \{",
+                    $body,
+                    # HACK we need to check $body.type if we handle something like return
+                    (($want == $T_VOID || $body.type == $T_VOID) ?? '' !! "$try_ret = {$body.expr};\n"),
+                    "\} catch (e) \{if (e === $unwind_marker) \{",
+                    ($want == $T_VOID ?? '' !! "$try_ret = $unwind_marker.ret;\n"),
+                    "\} else if (e instanceof nqp.NQPException) \{\n",
+                    "$*CTX.catchException(e);\n",
+                    "\} else \{\n",
+                    "throw e;\n",
+                    "\}\n",
+                    "\}\n"
+                ], :$node);
+            }
         }
     });
 
 
-    add_simple_op('exception', $T_OBJ, [], sub () {"$*CTX.exception"});
+    add_simple_op('exception', $T_OBJ, [], sub () {"$*HANDLER_CTX.exception"});
     add_simple_op('rethrow', $T_VOID, [$T_OBJ], sub ($exception) {"$*CTX.rethrow($exception)"}, :sideffects);
     add_simple_op('resume', $T_VOID, [$T_OBJ], sub ($exception) {"$*CTX.resume($exception)"}, :sideffects);
     add_simple_op('throw', $T_VOID, [$T_OBJ], :sideffects, sub ($exception) {"{$*CTX}.throw($exception)"});

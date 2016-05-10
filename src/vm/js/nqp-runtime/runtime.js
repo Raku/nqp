@@ -231,7 +231,7 @@ Ctx.prototype.catchException = function(exception) {
 };
 
 Ctx.prototype.rethrow = function(exception) {
-  exception.caught.caller.propagateException(exception);
+  this.propagateException(exception);
 };
 
 Ctx.prototype.die = function(msg) {
