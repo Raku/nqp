@@ -232,17 +232,16 @@ op.setboolspec = function(obj, mode, method) {
 function Capture(named, pos, skip) {
   this.pos = pos;
   this.named = named;
-  this.skip = skip;
 }
 
-op.savecapture = function(args, skip) {
-  return new Capture(args[1], Array.prototype.slice.call(args, 2), skip);
+op.savecapture = function(args) {
+  return new Capture(args[1], Array.prototype.slice.call(args, 2));
 };
 
-op.savecaptureAsMethod = function(invocant, args, skip) {
+op.savecaptureAsMethod = function(invocant, args) {
   var withInvocant = Array.prototype.slice.call(args, 2);
   withInvocant.unshift(invocant);
-  return new Capture(args[1], withInvocant, skip);
+  return new Capture(args[1], withInvocant);
 };
 
 op.captureposelems = function(capture) {
@@ -264,9 +263,7 @@ op.captureexistsnamed = function(capture, arg) {
 op.capturenamedshash = function(capture) {
   var hash = new Hash();
   for (key in capture.named) {
-    if (!capture.skip[key]) {
-      hash.content.set(key, capture.named[key]);
-    }
+    hash.content.set(key, capture.named[key]);
   }
   return hash;
 };
