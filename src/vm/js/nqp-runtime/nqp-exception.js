@@ -10,4 +10,8 @@ NQPException.prototype.Str = function(ctx, _NAMED) {
   return this.message;
 };
 
+NQPException.prototype.$$toBool = function(ctx) {
+  return 1;
+};
+
 module.exports = NQPException;
