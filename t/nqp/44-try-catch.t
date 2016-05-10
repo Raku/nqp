@@ -2,7 +2,7 @@
 
 # Tests for try and catch
 
-plan(20);
+plan(21);
 
 sub oops($msg = "oops!") { # throw an exception
     nqp::die($msg);
@@ -170,3 +170,8 @@ my $ex2;
 }
 
 ok($log eq '#1#3', 'rethrow works from a scope that is not a direct ancestor');
+
+{
+    oops();
+    CATCH { ok(nqp::istrue($!), "exception is true") }
+}
