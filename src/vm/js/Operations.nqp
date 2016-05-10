@@ -3,6 +3,8 @@ class QAST::OperationsJS {
 
     my %inlinable;
 
+    my %result_type;
+
     sub add_op($op, $cb, :$inlinable = 1) {
         %ops{$op} := $cb;
         %inlinable{$op} := $inlinable;
@@ -46,11 +48,14 @@ class QAST::OperationsJS {
     }
 
     sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op, @argument_types), :$sideffects, :$ctx, :$required_cps, :$cps_aware, :$inlinable = 1) {
+
         add_op($op, sub ($comp, $node, :$want, :$cps) {
             my $use_cps := $required_cps || ($cps_aware && $cps);
             my $chunk := op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx, :cps($use_cps));
             ($sideffects && !$use_cps) ?? $comp.stored_result($chunk) !! $chunk;
         }, :$inlinable);
+
+        set_op_result_type($op, $return_type);
     }
 
     sub add_hll_op($op) {
@@ -77,7 +82,7 @@ class QAST::OperationsJS {
     }
 
     # Sets op native result type at a core level.
-    method set_op_result_type(str $op, $type) {
+    sub set_op_result_type(str $op, $type) {
         if $type == $T_INT {
             %result_type{$op} := int;
         }
