@@ -1,6 +1,6 @@
 use QAST;
 
-plan(68);
+plan(69);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -989,3 +989,63 @@ test_qast_result(
     -> $r {
         ok($r<pineapples>.m == 206, 'bindkey operation (int)');
     });
+
+class G {
+    has $!attr;
+    method plus() {
+        $!attr := $!attr+1;
+        $!attr
+    }
+}
+
+my $g1 := G.new(attr=>100);
+
+my $sc := nqp::createsc('exampleHandle');
+
+nqp::scsetobj($sc, 0, $g1);
+nqp::setobjsc($g1, $sc);
+
+is_qast(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op<bind>,
+            QAST::Var.new( :name<$i>, :scope<lexical>, :decl<var>, :returns(int) ),
+            QAST::IVal.new( :value(3) )
+        ),
+        QAST::Op.new(
+            :op<bind>,
+            QAST::Var.new( :name<$total>, :scope<lexical>, :decl<var>, :returns(int) ),
+            QAST::IVal.new( :value(0) )
+        ),
+        QAST::Op.new(
+            :op<while>,
+            QAST::Var.new( :name<$i>, :scope<lexical> ),
+            QAST::Block.new(:blocktype<immediate>,
+#                QAST::Op.new(:op('say'), QAST::Var.new(:name('$total'), :scope<lexical>)),
+                QAST::Var.new( :name<$x>, :scope<lexical>, :decl<contvar>, :value($g1) ),
+                QAST::Op.new(
+                    :op<bind>,
+                    QAST::Var.new( :name<$i>, :scope<lexical> ),
+                    QAST::Op.new(
+                        :op<sub_i>,
+                        QAST::Var.new( :name<$i>, :scope<lexical> ),
+                        QAST::IVal.new( :value(1) )
+                    )
+                ),
+                QAST::Op.new(
+                    :op<bind>,
+                    QAST::Var.new( :name<$total>, :scope<lexical>, :returns(int) ),
+                    QAST::Op.new(:op<add_i>,
+                        QAST::Op.new(
+                            :op<callmethod>, :name<plus>,
+                            QAST::Var.new( :name<$x>, :scope<lexical> )
+                        ),
+                        QAST::Var.new(:scope<lexical>, :name<$total>)
+                    )
+                ),
+            )
+        ),
+        QAST::Var.new(:scope<lexical>, :name<$total>)
+    ),
+    303,
+    'contvar');
