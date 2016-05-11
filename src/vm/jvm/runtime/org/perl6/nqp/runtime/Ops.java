@@ -6162,12 +6162,12 @@ public final class Ops {
             return Long.MIN_VALUE;
         }
         else {
-            return in.longValue();
+            return new Double(in).longValue();
         }
     }
 
     public static double coerce_i2n(long in) {
-        return in.doubleValue();
+        return new Long(in).doubleValue();
     }
 
     /* Long literal workaround. */
