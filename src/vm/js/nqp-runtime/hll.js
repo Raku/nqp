@@ -24,16 +24,6 @@ op.bindhllsym = function(hllName, name, value) {
   return value;
 };
 
-// HACK - language shouldn't be hardcoded to nqp
-
-op.bindcurhllsym = function(name, value) {
-  return op.bindhllsym('nqp', name, value);
-};
-
-op.getcurhllsym = function(name) {
-  return op.gethllsym('nqp', name);
-};
-
 op.hllizefor = function(ctx, obj, language) {
   var languageHash = hllConfigs[language];
   var config = languageHash.content;

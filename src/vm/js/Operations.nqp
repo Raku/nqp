@@ -838,8 +838,12 @@ class QAST::OperationsJS {
 
     add_simple_op('sethllconfig', $T_OBJ,  [$T_STR, $T_OBJ], :sideffects);
 
-    add_simple_op('bindcurhllsym', $T_OBJ, [$T_STR, $T_OBJ], :sideffects);
-    add_simple_op('getcurhllsym', $T_OBJ, [$T_STR]);
+    add_simple_op('bindcurhllsym', $T_OBJ, [$T_STR, $T_OBJ], :sideffects, sub ($sym, $value) {
+        "nqp.op.bindhllsym({quote_string($*HLL)}, $sym, $value)"
+    });
+    add_simple_op('getcurhllsym', $T_OBJ, [$T_STR], sub ($sym) {
+        "nqp.op.gethllsym({quote_string($*HLL)}, $sym)"
+    });
 
     add_simple_op('bindhllsym', $T_OBJ, [$T_STR, $T_STR, $T_OBJ], :sideffects);
     add_simple_op('gethllsym', $T_OBJ, [$T_STR, $T_STR]);
