@@ -1,6 +1,6 @@
 use QAST;
 
-plan(69);
+plan(70);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -1049,3 +1049,20 @@ is_qast(
     ),
     303,
     'contvar');
+
+is_qast(
+    QAST::CompUnit.new(
+        :hll<funnylang>,
+        QAST::Block.new(
+            QAST::Op.new(:op<sethllconfig>, QAST::SVal.new(:value<funnylang>),
+                QAST::Op.new(:op<hash>,
+                    QAST::SVal.new(:value<null_value>),
+                    QAST::SVal.new(:value<hilarious>)
+                )
+            ),
+            QAST::Op.new(:op<hllize>, QAST::Op.new(:op<null>)),
+        )
+
+    ),
+    'hilarious',
+    'hllize');
