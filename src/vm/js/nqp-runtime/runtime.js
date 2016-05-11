@@ -283,6 +283,10 @@ Ctx.prototype.lookup = function(name) {
   throw "Can't lookup: " + name;
 };
 
+Ctx.prototype.$$atkey = function(key) {
+  return this.lookup(key);
+};
+
 Ctx.prototype.bind = function(name, value) {
   var ctx = this;
   while (ctx) {

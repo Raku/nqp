@@ -1083,3 +1083,8 @@ op.hintfor = function(classHandle, attrName) {
   if (!classHandle._STable.REPR.hintfor) return -1;
   return classHandle._STable.REPR.hintfor(classHandle, attrName);
 };
+
+op.ctxcaller = function(ctx) {
+  return ctx.caller;
+};
+
