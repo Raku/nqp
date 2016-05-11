@@ -300,9 +300,29 @@ class QAST::MASTOperations {
         return %core_inlinability{$op} // 0;
     }
 
+    my %core_mapper_moarops;
+    my %core_mapper_deconts;
+    my %core_mapper_returnargs;
+
+    my $premade_core_moarop_closure;
+
+    sub core_moarop_closure($self) {
+        -> $qastcomp, $op {
+            my $returnarg := -1;
+            if nqp::existskey(%core_mapper_returnargs, $op.op) {
+                $returnarg := %core_mapper_returnargs{$op.op};
+            }
+            $self.compile_mastop($qastcomp, %core_mapper_moarops{$op.op}, $op.list, %core_mapper_deconts{$op.op}, :$returnarg);
+        }
+    }
+
     # Adds a core op that maps to a Moar op.
     method add_core_moarop_mapping(str $op, str $moarop, $ret = -1, :$decont, :$inlinable = 1) {
-        %core_ops{$op} := self.moarop_mapper($moarop, $ret, $decont);
+        self.register_moarop_mapper($moarop, $op, $ret, $decont);
+        if $premade_core_moarop_closure =:= NQPMu {
+            $premade_core_moarop_closure := core_moarop_closure(self);
+        }
+        %core_ops{$op} := $premade_core_moarop_closure;
         self.set_core_op_inlinability($op, $inlinable);
         self.set_core_op_result_type($op, moarop_return_type($moarop));
     }
@@ -338,6 +358,28 @@ class QAST::MASTOperations {
         nqp::die("moarop $moarop is not void")
             if $num_operands && (nqp::atpos_i(@operands_values, $operands_offset) +& $MVM_operand_rw_mask) ==
                 $MVM_operand_write_reg;
+    }
+
+    method register_moarop_mapper(str $moarop, $op, $ret, $decont_in) {
+        if $ret != -1 {
+            self.check_ret_val($moarop, $ret);
+        }
+
+        my @deconts;
+        if nqp::islist($decont_in) {
+            for $decont_in { @deconts[$_] := 1; }
+        }
+        elsif nqp::defined($decont_in) {
+            @deconts[$decont_in] := 1;
+        }
+
+        %core_mapper_moarops{$op} := $moarop;
+        %core_mapper_deconts{$op} := @deconts;
+        if $ret != -1 {
+            %core_mapper_returnargs{$op} := $ret;
+        }
+
+        NQPMu;
     }
 
     # Returns a mapper closure for turning an operation into a Moar op.
@@ -405,7 +447,7 @@ class QAST::MASTOperations {
             %core_result_type{$op} := str;
         }
     }
-    
+
     # Sets op inlinability at a HLL level. (Can override at HLL level whether
     # or not the HLL overrides the op itself.)
     method set_hll_op_result_type(str $hll, str $op, $type) {
