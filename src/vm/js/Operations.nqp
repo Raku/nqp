@@ -130,6 +130,11 @@ class QAST::OperationsJS {
     add_simple_op('assignunchecked',  $T_OBJ, [$T_OBJ, $T_OBJ], sub ($cont, $value) {"$cont.\$\$assignunchecked({$*CTX},$value)"}, :sideffects);
     add_simple_op('decont', $T_OBJ, [$T_OBJ], :ctx);
     add_simple_op('iscont', $T_INT, [$T_OBJ]);
+    add_simple_op('isrwcont', $T_INT, [$T_OBJ]);
+
+    add_simple_op('iscont_i', $T_INT, [$T_OBJ]);
+    add_simple_op('iscont_s', $T_INT, [$T_OBJ]);
+    add_simple_op('iscont_n', $T_INT, [$T_OBJ]);
 
     add_infix_op('add_n', $T_NUM, '+', $T_NUM, $T_NUM);
     add_infix_op('sub_n', $T_NUM, '-', $T_NUM, $T_NUM);
@@ -1238,6 +1243,8 @@ class QAST::OperationsJS {
     add_simple_op('captureposelems', $T_INT, [$T_OBJ]);
     add_simple_op('captureposarg', $T_OBJ, [$T_OBJ, $T_INT]);
     add_simple_op('capturenamedshash', $T_OBJ, [$T_OBJ]);
+
+    add_simple_op('captureposprimspec', $T_OBJ, [$T_OBJ, $T_INT]);
 
     add_simple_op('invokewithcapture', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($invokee, $capture) {
         "$invokee.\$apply([{$*CTX}].concat($capture.named, $capture.pos))"

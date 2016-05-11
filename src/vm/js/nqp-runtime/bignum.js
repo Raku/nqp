@@ -17,6 +17,7 @@ op.box_i = function(i, type) {
 };
 
 op.unbox_i = function(obj) {
+  if (typeof obj == 'number') return obj;
   return obj.$$getInt();
 };
 

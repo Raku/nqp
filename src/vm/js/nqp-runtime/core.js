@@ -455,6 +455,25 @@ op.iscont = function(cont) {
   return cont.$$decont ? 1 : 0;
 };
 
+op.iscont_i = function(cont) {
+  // Stub
+  return 0;
+};
+
+op.iscont_n = function(cont) {
+  // Stub
+  return 0;
+};
+
+op.iscont_s = function(cont) {
+  // Stub
+  return 0;
+};
+
+op.isrwcont = function(cont) {
+  return cont.$$decont ? 1 : 0;
+};
+
 op.decont = function(ctx, cont) {
   return cont.$$decont ? cont.$$decont(ctx) : cont;
 };
@@ -1088,3 +1107,6 @@ op.ctxcaller = function(ctx) {
   return ctx.caller;
 };
 
+op.captureposprimspec = function(capture, idx) {
+  return 0;
+};
