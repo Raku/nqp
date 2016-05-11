@@ -1,4 +1,4 @@
-plan(5);
+plan(6);
 
 # code_pair container spec
 {
@@ -14,6 +14,8 @@ plan(5);
     
     my $cont := nqp::create(SomeCont);
     ok(nqp::iscont($cont), 'correct result from iscont');
+
+    ok(nqp::isrwcont($cont), 'correct result from isrwcont');
     
     ok(nqp::decont($cont) == 42, 'initial decontainerization OK');
     
