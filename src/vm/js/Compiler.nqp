@@ -1527,11 +1527,14 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             self.log("type {$node.name} = $type");
         }
 
-        if $node.decl eq 'var' {
+        if $node.decl eq 'var' || $node.decl eq 'contvar' {
             $*BLOCK.add_variable($node);
 
             if !$*BLOCK.is_dynamic_var($node) {
                 $*BLOCK.add_js_lexical(self.mangle_name($node.name));
+                if $node.decl eq 'contvar' {
+                    nqp::die("TODO - contvars with none dynamic vars");
+                }
             }
         }
         elsif $node.decl eq 'static' {
@@ -1594,7 +1597,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
     
     method var_is_lexicalish(QAST::Var $var) {
-        $var.scope eq 'lexical' || $var.scope eq 'typevar';
+        # contvar - HACK
+        $var.scope eq 'lexical' || $var.scope eq 'typevar' || $var.scope eq 'contvar';
     }
 
     method as_js_clear_bindval($node, :$want, :$cps) {
@@ -1665,6 +1669,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         else {
             if $var.decl eq 'var' {
                 self.stored_result(Chunk.new($T_OBJ, "({$*CTX}[{quote_string($var.name)}] = null)",  []));
+            }
+            elsif $var.decl eq 'contvar' {
+                self.stored_result(Chunk.new($T_OBJ, "({$*CTX}[{quote_string($var.name)}] = nqp.op.clone({self.value_as_js($var.value)}))",  []));
             }
             else {
                 Chunk.new($T_OBJ, "{$*CTX}.lookup({quote_string($var.name)})", [], :node($var));
