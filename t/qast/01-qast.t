@@ -1,6 +1,6 @@
 use QAST;
 
-plan(70);
+plan(72);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -1066,3 +1066,36 @@ is_qast(
     ),
     'hilarious',
     'hllize');
+
+test_qast_result(
+    QAST::CompUnit.new(
+        :hll<foo>,
+        QAST::Block.new(
+            QAST::Op.new(:op<bindcurhllsym>,
+                QAST::SVal.new(:value<key1>),
+               QAST::IVal.new(:value(100))
+            ),
+             QAST::Op.new(:op<bindhllsym>,
+                 QAST::SVal.new(:value<bar>),
+                 QAST::SVal.new(:value<key1>),
+                 QAST::IVal.new(:value(200))
+             ),
+             QAST::Op.new(:op<bindhllsym>,
+                 QAST::SVal.new(:value<foo>),
+                 QAST::SVal.new(:value<key2>),
+                 QAST::IVal.new(:value(300))
+             ),
+             QAST::Op.new(
+                 :op('list'),
+                 QAST::Op.new(:op<gethllsym>, QAST::SVal.new(:value<foo>), QAST::SVal.new(:value<key1>)),
+                 QAST::Op.new(:op<getcurhllsym>, QAST::SVal.new(:value<key2>))
+             )
+       )
+    ),
+
+    -> $r {
+        ok($r[0] == 100, 'bindcurhllsym/gethllsym');
+        ok($r[1] == 300, 'bindhllsym/getcurhllsym');
+    }
+);
+
