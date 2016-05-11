@@ -312,7 +312,11 @@ class QAST::MASTOperations {
             if nqp::existskey(%core_mapper_returnargs, $op.op) {
                 $returnarg := %core_mapper_returnargs{$op.op};
             }
-            $self.compile_mastop($qastcomp, %core_mapper_moarops{$op.op}, $op.list, %core_mapper_deconts{$op.op}, :$returnarg);
+            my $moarop := $op.op;
+            if nqp::existskey(%core_mapper_moarops, $moarop) {
+                $moarop := %core_mapper_moarops{$moarop};
+            }
+            $self.compile_mastop($qastcomp, $moarop, $op.list, %core_mapper_deconts{$op.op}, :$returnarg);
         }
     }
 
@@ -373,8 +377,10 @@ class QAST::MASTOperations {
             @deconts[$decont_in] := 1;
         }
 
-        %core_mapper_moarops{$op} := $moarop;
         %core_mapper_deconts{$op} := @deconts;
+        if $op ne $moarop {
+            %core_mapper_moarops{$op} := $moarop;
+        }
         if $ret != -1 {
             %core_mapper_returnargs{$op} := $ret;
         }
