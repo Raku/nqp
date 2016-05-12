@@ -234,6 +234,10 @@ function Capture(named, pos, skip) {
   this.named = named;
 }
 
+Capture.prototype.$$clone = function() {
+  return this; // captures are immutable
+}
+
 op.savecapture = function(args) {
   return new Capture(args[1], Array.prototype.slice.call(args, 2));
 };
@@ -356,6 +360,8 @@ op.setmethcacheauth = function(obj, isAuth) {
 op.reprname = function(obj) {
   if (obj._STable) {
     return obj._STable.REPR.name;
+  } else if (obj instanceof Capture) {
+    return 'Capture';
   } else if (obj instanceof NQPInt) {
     return 'P6int';
   } else if (typeof obj == 'string') {
