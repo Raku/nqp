@@ -5629,6 +5629,13 @@ public final class Ops {
         new LibraryLoader().load(tc, filename);
         return filename;
     }
+    public static SixModelObject loadbytecodebuffer(SixModelObject buffer, ThreadContext tc) {
+        if (buffer instanceof VMArrayInstance_i8) {
+            byte[] serial = new byte[0];
+            new LibraryLoader().loadNew(((VMArrayInstance_i8)buffer).slots, serial);
+        }
+        return buffer;
+    }
     public static SixModelObject settypehll(SixModelObject type, String language, ThreadContext tc) {
         type.st.hllOwner = tc.gc.getHLLConfigFor(language);
         return type;
