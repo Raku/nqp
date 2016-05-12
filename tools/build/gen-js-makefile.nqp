@@ -176,7 +176,11 @@ my $hll-moar := cross-compile(:stage(2), :source($hll-combined), :target('NQPHLL
 
 my $p6qregex-combined := combine(:stage(2), :sources('$(P6QREGEX_SOURCES)'), :file('$(P6QREGEX_COMBINED)'));
 
+my $p5qregex-combined := combine(:stage(2), :sources('$(P5QREGEX_SOURCES)'), :file('$(P5QREGEX_COMBINED)'));
 
+
+
+my $NQPP5QRegex-moarvm := cross-compile(:stage(2), :source($p5qregex-combined), :target('NQPP5QRegex'), :setting('NQPCORE'), :no-regex-lib(1), :deps([$nqpcore-moarvm, $QAST-moarvm, $hll-moar, $QRegex-moarvm]));
 
 my $NQPP6QRegex-moarvm := cross-compile(:stage(2), :source($p6qregex-combined), :target('NQPP6QRegex'), :setting('NQPCORE'), :no-regex-lib(1), :deps([$nqpcore-moarvm, $QAST-moarvm, $hll-moar, $QRegex-moarvm]));
 
@@ -188,7 +192,7 @@ say("node_modules/ModuleLoader.js: $nqpcore-moarvm src/vm/js/ModuleLoader.nqp
 	./nqp-js --target=js --output $ModuleLoader src/vm/js/ModuleLoader.nqp
 ");
 
-say("$nqp-bootstrapped: $QAST-moarvm $NQPP6QRegex-moarvm $nqp-combined $QRegex-moarvm
+say("$nqp-bootstrapped: $QAST-moarvm $NQPP5QRegex-moarvm $NQPP6QRegex-moarvm $nqp-combined $QRegex-moarvm
 	echo 'require(\"ModuleLoader\");' > $nqp-bootstrapped
 	./nqp-js --target=js  $nqp-combined >> $nqp-bootstrapped
 ");

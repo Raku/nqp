@@ -124,6 +124,16 @@ $(JS_STAGE2)/$(P6QREGEX_COMBINED): $(P6QREGEX_SOURCES)
 	
 	$(PERL) tools/build/gen-cat.pl js $(P6QREGEX_SOURCES)  > $(JS_STAGE2)/$(P6QREGEX_COMBINED)
 
+$(JS_STAGE2)/$(P5QREGEX_COMBINED): $(P5QREGEX_SOURCES)
+	$(MKPATH) $(JS_STAGE2)
+	
+	$(PERL) tools/build/gen-cat.pl js $(P5QREGEX_SOURCES)  > $(JS_STAGE2)/$(P5QREGEX_COMBINED)
+
+$(JS_STAGE2)/NQPP5QRegex.moarvm: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(P5QREGEX_COMBINED) $(JS_STAGE2)/NQPCORE.setting.moarvm $(JS_STAGE2)/QAST.moarvm $(JS_STAGE2)/NQPHLL.moarvm $(JS_STAGE2)/QRegex.moarvm
+	$(MKPATH) $(JS_STAGE2)
+	$(MKPATH) node_modules
+	$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=NQPCORE --target=mbc --output $(JS_STAGE2)/NQPP5QRegex.moarvm --no-regex-lib $(JS_STAGE2)/$(P5QREGEX_COMBINED) > node_modules/NQPP5QRegex.js
+
 $(JS_STAGE2)/NQPP6QRegex.moarvm: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(P6QREGEX_COMBINED) $(JS_STAGE2)/NQPCORE.setting.moarvm $(JS_STAGE2)/QAST.moarvm $(JS_STAGE2)/NQPHLL.moarvm $(JS_STAGE2)/QRegex.moarvm
 	$(MKPATH) $(JS_STAGE2)
 	$(MKPATH) node_modules
@@ -132,7 +142,7 @@ $(JS_STAGE2)/NQPP6QRegex.moarvm: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(P6QREGEX_C
 node_modules/ModuleLoader.js: $(JS_STAGE2)/NQPCORE.setting.moarvm src/vm/js/ModuleLoader.nqp
 	./nqp-js --target=js --output node_modules/ModuleLoader.js src/vm/js/ModuleLoader.nqp
 
-nqp-bootstrapped.js: $(JS_STAGE2)/QAST.moarvm $(JS_STAGE2)/NQPP6QRegex.moarvm $(JS_STAGE2)/$(NQP_COMBINED) $(JS_STAGE2)/QRegex.moarvm
+nqp-bootstrapped.js: $(JS_STAGE2)/QAST.moarvm $(JS_STAGE2)/NQPP5QRegex.moarvm $(JS_STAGE2)/NQPP6QRegex.moarvm $(JS_STAGE2)/$(NQP_COMBINED) $(JS_STAGE2)/QRegex.moarvm
 	echo 'require("ModuleLoader");' > nqp-bootstrapped.js
 	./nqp-js --target=js  $(JS_STAGE2)/$(NQP_COMBINED) >> nqp-bootstrapped.js
 
