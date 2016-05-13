@@ -287,6 +287,10 @@ Ctx.prototype.$$atkey = function(key) {
   return this.lookup(key);
 };
 
+Ctx.prototype.$$bindkey = function(key, value) {
+  this[key] = value;
+};
+
 Ctx.prototype.bind = function(name, value) {
   var ctx = this;
   while (ctx) {
