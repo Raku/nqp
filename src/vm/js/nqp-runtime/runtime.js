@@ -222,7 +222,7 @@ Ctx.prototype.propagateException = function(exception) {
     }
     ctx = ctx.caller;
   }
-  throw exception.msg;
+  throw exception.message;
 };
 
 Ctx.prototype.catchException = function(exception) {
