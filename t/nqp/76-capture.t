@@ -2,7 +2,7 @@ if nqp::getcomp('nqp').backend.name eq 'parrot' {
   say("1..0 # Skipped: nqp::savecapture is broken on parrot");
   nqp::exit(0);
 }
-plan(18);
+plan(19);
 
 my $x;
 sub savecapture($arg) {
@@ -66,3 +66,9 @@ class Foo {
 
 my $foo := Foo.new(attr => "foobar");
 $foo.foo(10,20,30);
+
+
+my $capture := savecapture(100);
+
+my $clone := nqp::clone($capture);
+ok(nqp::captureposarg($clone, 0) == 100,"nqp::captureposarg on a cloned capture");
