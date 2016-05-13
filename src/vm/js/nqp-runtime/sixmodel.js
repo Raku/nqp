@@ -2,6 +2,8 @@ function STable(REPR, HOW) {
   this.REPR = REPR;
   this.HOW = HOW;
 
+  this.modeFlags = 0;
+
   this.objConstructor = REPR.createObjConstructor(this);
 
 

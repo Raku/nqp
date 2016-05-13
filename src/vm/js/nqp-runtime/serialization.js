@@ -465,8 +465,7 @@ SerializationWriter.prototype.serializeSTable = function(st) {
      convey, and hence show buggy behaviour. And if we're bumping the
      serialisation version, then we can increase the storage size.  */
 
-  /* TODO */
-  this.stablesData.U8(0);
+  this.stablesData.U8(this.modeFlags);
 
   /* Boolification spec. */
   /* As this only needs 4 bits, also use the same byte to store various
