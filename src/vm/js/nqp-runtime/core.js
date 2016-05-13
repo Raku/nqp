@@ -19,6 +19,8 @@ var bootstrap = require('./bootstrap.js');
 
 var nqp = require('nqp-runtime');
 
+var constants = require('./constants.js');
+
 exports.CodeRef = CodeRef;
 
 op.atpos = function(array, index) {
@@ -734,6 +736,8 @@ op.setparameterizer = function(ctx, type, parameterizer) {
   st.parameterizer = parameterizer;
   st.parameterizerCache = [];
 
+  st.modeFlags |= constants.PARAMETRIC_TYPE;
+
   return type;
 };
 
@@ -769,6 +773,7 @@ op.parameterizetype = function(ctx, type, params) {
   var newSTable = result._STable;
   newSTable.parametricType = type;
   newSTable.parameters = params;
+  newSTable.modeFlags |= constants.PARAMETERIZED_TYPE;
 
   lookup.push({type: result, params: unpackedParams});
 

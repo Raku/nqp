@@ -4,6 +4,8 @@ var NQPInt = require('./nqp-int.js');
 var Int64 = require('node-int64');
 var NQPArray = require('./array.js');
 
+var constants = require('./constants.js');
+
 var op = {};
 exports.op = op;
 
@@ -465,7 +467,7 @@ SerializationWriter.prototype.serializeSTable = function(st) {
      convey, and hence show buggy behaviour. And if we're bumping the
      serialisation version, then we can increase the storage size.  */
 
-  this.stablesData.U8(this.modeFlags);
+  this.stablesData.U8(st.modeFlags);
 
   /* Boolification spec. */
   /* As this only needs 4 bits, also use the same byte to store various
@@ -534,6 +536,21 @@ SerializationWriter.prototype.serializeSTable = function(st) {
     */
 
   /* TODO - HLL owner */
+
+  /* If it's a parametric type, save parameterizer. */
+  if (st.modeFlags & constants.PARAMETRIC_TYPE) {
+    this.stablesData.ref(st.parameterizer);
+  }
+
+  if (st.modeFlags & constants.PARAMETERIZED_TYPE) {
+    /* TODO - figure out the intern table */
+    this.stablesData.ref(st.parametricType);
+    var params = st.parameters.array;
+    this.stablesData.varint(params.length);
+    for (var i=0;i < params.length;i++) {
+      this.stablesData.ref(params[i]);
+    }
+  }
 
   this.stablesData.cstr(st.debugName);
 

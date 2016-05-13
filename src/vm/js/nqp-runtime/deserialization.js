@@ -9,7 +9,7 @@ var __6MODEL_CORE__ = require('./bootstrap.js').core;
 var Hash = require('./hash.js');
 var Int64 = require('node-int64');
 var CodeRef = require('./code-ref.js');
-
+var constants = require('./constants.js');
 var NQPArray = require('./array.js');
 
 
@@ -351,8 +351,33 @@ BinaryCursor.prototype.STable = function(STable) {
     STable.hllOwner = this.str();
   }
 
-  // TODO check for MVM_PARAMETRIC_TYPE mode_flags
-  // TODO check for MVM_PARAMETRIC_TYPE mode_flags
+  if (STable.modeFlags & constants.PARAMETRIC_TYPE) {
+    STable.parameterizer = this.variant();
+
+    if (!STable.parameterizerCache) {
+      STable.parameterizerCache = [];
+    }
+
+  }
+
+  if (STable.modeFlags & constants.PARAMETERIZED_TYPE) {
+    STable.parametricType = this.variant();
+    var count = this.varint();
+    var params = [];
+    for (var i = 0;i < count;i++) {
+      params[i] = this.variant();
+    }
+
+    var ptable = STable.parametricType._STable;
+
+    if (!ptable.parameterizerCache) {
+      ptable.parameterizerCache = [];
+    }
+
+    STable.parameters = new NQPArray(params);
+
+    ptable.parameterizerCache.push({type: STable.WHAT, params: params});
+  }
 
   STable.debugName = this.cstr();
 
