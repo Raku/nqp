@@ -2,7 +2,7 @@
 
 use nqpmo;
 
-plan(44);
+plan(46);
 
 sub add_to_sc($sc, $idx, $obj) {
     nqp::scsetobj($sc, $idx, $obj);
@@ -332,4 +332,60 @@ sub add_to_sc($sc, $idx, $obj) {
     ok(nqp::unbox_i(nqp::box_i(8, nqp::scgetobj($dsc, 3))) == 8, "can use deserialized type for boxing");
     ok(nqp::unbox_i(nqp::scgetobj($dsc, 1)) == 4, "can unbox bigint obj");
     ok(nqp::unbox_i(nqp::scgetobj($dsc, 2)) == 5, "can unbox autoboxed bigint obj");
+}
+
+# Serializing a parameterized type
+{
+    my $sc := nqp::createsc('TEST_SC_10_IN');
+    my $sh := nqp::list_s();
+
+    my $cr := nqp::list();
+
+    my $count := 0;
+
+    class SimpleCoerceHOW {
+        method new_type() {
+            my $type := nqp::newtype(self.new(), 'Uninstantiable');
+
+            my $parameterizer := -> $type, $params {
+                # Re-use same HOW.
+                $count := $count + 1;
+                nqp::newtype($type.HOW, 'Uninstantiable');
+            }
+
+            $cr[0] := $parameterizer;
+            nqp::scsetcode($sc, 0, $parameterizer);
+            nqp::markcodestatic($parameterizer);
+
+            nqp::setparameterizer($type, $parameterizer);
+            $type
+        }
+
+        method parameterize($type, $params) {
+            nqp::parameterizetype($type, $params);
+        }
+    }
+
+    my $with_param := SimpleCoerceHOW.new_type();
+
+
+    my $hi := $with_param.HOW.parameterize($with_param, ["Hi"]);
+
+    add_to_sc($sc, 0, $with_param);
+
+    add_to_sc($sc, 1, $hi);
+
+    my $serialized := nqp::serialize($sc, $sh);
+
+    my $dsc := nqp::createsc('TEST_SC_10_OUT');
+    nqp::deserialize($serialized, $dsc, $sh, $cr, nqp::null());
+
+    my $type := nqp::scgetobj($dsc, 0);
+
+    my $hello := $type.HOW.parameterize($type, ["Hello"]);
+    ok(nqp::typeparameterat($hello, 0) eq "Hello", "We can serialize a parameteric type");
+
+    my $dsc_hi := nqp::scgetobj($dsc, 1);
+
+    ok(nqp::typeparameterat($dsc_hi, 0) eq "Hi", "We can serialize a parameterized type");
 }
