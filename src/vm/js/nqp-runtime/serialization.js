@@ -471,7 +471,6 @@ SerializationWriter.prototype.serializeSTable = function(st) {
   /* As this only needs 4 bits, also use the same byte to store various
      NULL/not-NULL flag bits. */
 
-  /*TODO serialize boolifcation spec*/
   var flags;
 
   if (st.boolificationSpec) {
@@ -514,14 +513,6 @@ SerializationWriter.prototype.serializeSTable = function(st) {
 
   /* Invocation spec. */
 
-  /*writeInt(st.InvocationSpec == null ? 0 : 1);
-    if (st.InvocationSpec != null) {
-        writeRef(st.InvocationSpec.ClassHandle);
-        writeStr(st.InvocationSpec.AttrName);
-        writeInt(st.InvocationSpec.Hint);
-        writeRef(st.InvocationSpec.InvocationHandler);
-    }*/
-
   if (st.invocationSpec) {
     /* cached stuff from the MoarVM backend is just ignored */
     this.stablesData.ref(st.invocationSpec.classHandle);
@@ -544,9 +535,6 @@ SerializationWriter.prototype.serializeSTable = function(st) {
 
   /* TODO - HLL owner */
 
-  //this.stablesData.str(null);
-
-  // TODO debugName
   this.stablesData.cstr(st.debugName);
 
   /* Location of REPR data. */
