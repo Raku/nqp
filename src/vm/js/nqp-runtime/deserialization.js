@@ -27,6 +27,7 @@ op.deserialize = function(blob, sc, sh, codeRefs, conflict) {
   for (var i=0;i < sc.codeRefs.length;i++) {
     sc.codeRefs[i].isStatic = true;
     sc.codeRefs[i]._SC = sc;
+    sc.rootCodes.push(sc.codeRefs[i]);
   }
 
   sh = sh.array;
@@ -567,6 +568,9 @@ BinaryCursor.prototype.deserialize = function(sc) {
     sc.codeRefs[closuresBase + i] = new CodeRef(closures[i].staticCode.name);
     if (closures[i].codeObj) sc.codeRefs[closuresBase + i].codeObj = closures[i].codeObj;
     closures[i].index = closuresBase + i;
+
+    closures[i]._SC = sc;
+    sc.rootCodes.push(closures[i]);
   }
 
   for (var i = 0; i < STables.length; i++) {
