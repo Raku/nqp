@@ -363,7 +363,7 @@ op.reprname = function(obj) {
   if (obj._STable) {
     return obj._STable.REPR.name;
   } else if (obj instanceof Capture) {
-    return 'Capture';
+    return 'MVMCallCapture';
   } else if (obj instanceof NQPInt) {
     return 'P6int';
   } else if (typeof obj == 'string') {
