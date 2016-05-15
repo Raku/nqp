@@ -5639,10 +5639,15 @@ public final class Ops {
         new LibraryLoader().load(tc, filename);
         return filename;
     }
-    public static SixModelObject loadbytecodebuffer(SixModelObject buffer, ThreadContext tc) {
+    public static SixModelObject loadbytecodebuffer(SixModelObject buffer, ThreadContext tc) throws Exception {
         if (buffer instanceof VMArrayInstance_i8) {
-            byte[] serial = new byte[0];
-            new LibraryLoader().loadNew(((VMArrayInstance_i8)buffer).slots, serial);
+            new LibraryLoader().load(tc, ((VMArrayInstance_i8)buffer).slots);
+        }
+        else if (buffer instanceof VMArrayInstance_u8) {
+            new LibraryLoader().load(tc, ((VMArrayInstance_u8)buffer).slots);
+        }
+        else {
+            throw new RuntimeException("Must pass a uint8 or int8 buffer to loadbytecodebuffer");
         }
         return buffer;
     }
