@@ -192,6 +192,38 @@ class QAST::OperationsJS {
     add_simple_op('istype', $T_BOOL, [$T_OBJ, $T_OBJ], sub ($value, $type) {"($value instanceof $type.constructor)"});
 
 
+    add_op('chain', sub ($comp, $node, :$want, :$cps) {
+        my $ret := $*BLOCK.add_tmp;
+
+        my sub is_chain($part) {
+            $part ~~ QAST::Op && $part.op eq 'chain';
+        }
+
+        my sub chain_part($part) {
+            if is_chain($part) {
+                my $callee := $comp.as_js(QAST::Var.new(:name($part.name),:scope('lexical')), :want($T_OBJ));
+                my $left := chain_part($part[0]);
+                my $right := $comp.as_js($part[1], :want($T_OBJ));
+                my @setup;
+
+                @setup.push($left);
+
+                @setup.push("if (nqp.toBool($ret, $*CTX)) \{\n") if is_chain($part[0]);
+                @setup.push($callee);
+                @setup.push($right);
+                @setup.push("$ret = {$callee.expr}.\$call($*CTX, null, {$left.expr}, {$right.expr});\n");
+                @setup.push("\}") if is_chain($part[0]);
+
+                Chunk.new($T_OBJ, $right.expr, @setup, :node($part));
+            }
+            else {
+                $comp.as_js($part, :want($T_OBJ));
+            }
+        }
+
+        Chunk.new($T_OBJ, $ret, [chain_part($node)]);
+    });
+
     add_simple_op('clone', $T_OBJ, [$T_OBJ]);
 
     # TODO optimize cases where the class and the attribute are constants
