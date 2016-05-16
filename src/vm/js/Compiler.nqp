@@ -118,16 +118,23 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             nqp::existskey(%!static_variables, $name);
         }
 
+        method has_local_variable($name) {
+            nqp::existskey(%!variables, $name);
+        }
+
         method get_static_variable($name) {
             %!static_variables{$name};
         }
 
         method lookup_static_variable($var) {
             my $info := self;
-            return nqp::null if $var.scope ne 'lexical' && $var.scope ne 'typevar';
+            return nqp::null() if $var.scope ne 'lexical' && $var.scope ne 'typevar';
             while $info {
                 if $info.has_local_static_variable($var.name) {
                     return $info.get_static_variable($var.name);
+                }
+                if $info.has_local_variable($var.name) {
+                    return nqp::null();
                 }
                 $info := $info.outer;
             }
