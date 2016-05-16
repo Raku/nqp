@@ -206,19 +206,19 @@ else {
 }
 
 # file times
-my $mtime := nqp::stat('t/nqp/19-file-ops.t', nqp::const::STAT_MODIFYTIME);
+my $mtime := nqp::stat('t/nqp/019-file-ops.t', nqp::const::STAT_MODIFYTIME);
 ok($mtime > 0, 'integer mtime');
-my $atime := nqp::stat('t/nqp/19-file-ops.t', nqp::const::STAT_ACCESSTIME);
+my $atime := nqp::stat('t/nqp/019-file-ops.t', nqp::const::STAT_ACCESSTIME);
 ok($atime > 0, 'integer atime');
-my $ctime := nqp::stat('t/nqp/19-file-ops.t', nqp::const::STAT_CHANGETIME);
+my $ctime := nqp::stat('t/nqp/019-file-ops.t', nqp::const::STAT_CHANGETIME);
 ok($ctime > 0, 'integer ctime');
 
 if $backend eq 'moar' || $backend eq 'js' || $backend eq 'jvm' {
-    my $mtime_n := nqp::stat_time('t/nqp/19-file-ops.t', nqp::const::STAT_MODIFYTIME);
+    my $mtime_n := nqp::stat_time('t/nqp/019-file-ops.t', nqp::const::STAT_MODIFYTIME);
     ok($mtime_n >= $mtime, 'float mtime >= integer');
-    my $atime_n := nqp::stat_time('t/nqp/19-file-ops.t', nqp::const::STAT_ACCESSTIME);
+    my $atime_n := nqp::stat_time('t/nqp/019-file-ops.t', nqp::const::STAT_ACCESSTIME);
     ok($atime_n >= $mtime, 'float atime >= integer');
-    my $ctime_n := nqp::stat_time('t/nqp/19-file-ops.t', nqp::const::STAT_CHANGETIME);
+    my $ctime_n := nqp::stat_time('t/nqp/019-file-ops.t', nqp::const::STAT_CHANGETIME);
     ok($ctime_n >= $mtime, 'float ctime >= integer');
 }
 else {
@@ -297,9 +297,9 @@ if $is-windows || ($backend ne 'moar' && $backend ne 'js' && $backend ne 'jvm') 
 else {
 
     my $symlink := $test-file ~ '-symlink';
-    my $file := 't/nqp/19-file-ops.t';
+    my $file := 't/nqp/019-file-ops.t';
 
-    nqp::symlink('t/nqp/19-file-ops.t', $symlink);
+    nqp::symlink('t/nqp/019-file-ops.t', $symlink);
 
 
     for [nqp::const::STAT_MODIFYTIME, nqp::const::STAT_ACCESSTIME, nqp::const::STAT_CHANGETIME] -> $flag {
