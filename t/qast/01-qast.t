@@ -1,6 +1,6 @@
 use QAST;
 
-plan(72);
+plan(76);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -1099,3 +1099,85 @@ test_qast_result(
     }
 );
 
+my $dont_call;
+my class Ops {
+    method op1() {
+        my sub ($a, $b) {
+            nqp::list('+', $a, $b);
+        }
+    }
+    method op2() {
+        my sub ($a, $b) {
+            nqp::list('-', $a, $b);
+        }
+    }
+    method op3() {
+        my sub ($a, $b) {
+            0;
+        }
+    }
+    method is_called() {
+        $dont_call := 1;
+    }
+}
+
+
+sub stringy($op) {
+    if nqp::islist($op) {
+        '(' ~ stringy($op[1]) ~ ' ' ~ $op[0] ~ ' ' ~ $op[2] ~ ')';
+    }
+    else {
+        $op;
+    }
+}
+
+sub op($name) {
+    QAST::Op.new(
+        :op<bind>,
+        QAST::Var.new( :$name, :scope<lexical>, :decl<var>),
+        QAST::Op.new(
+           :op<callmethod>, :$name,
+           QAST::WVal.new( :value(Ops) )
+        ),
+    )
+}
+
+sub sval($value) {
+    QAST::SVal.new(:$value);
+}
+
+test_qast_result(
+    QAST::Block.new(
+        op('op1'),
+        op('op2'),
+        op('op3'),
+        QAST::Op.new(
+            :op<list>,
+            QAST::Op.new( :op<chain>, :name<op1>, sval('a'), sval('b')),
+            QAST::Op.new( :op<chain>, :name<op1>, 
+                QAST::Op.new( :op<chain>, :name<op2>,
+                    QAST::Op.new( :op<chain>, :name<op2>, sval('A'), sval('B')
+                    ),
+                    sval('C')
+                ),
+                sval('D')
+           ),
+           QAST::Op.new( :op<chain>, :name<op1>, 
+               QAST::Op.new( :op<chain>, :name<op2>,
+                   QAST::Op.new( :op<chain>, :name<op3>, 
+                       QAST::Op.new( :op<chain>, :name<op2>, sval('A'), sval('B')),
+                       sval('E')
+                   ),
+                   sval('C')
+               ),
+               QAST::Op.new( :op<callmethod>, :name('is_called'), QAST::WVal.new( :value(Ops) )),
+           ),
+       )
+    ),
+    -> $r {
+        ok(stringy($r[0]) eq '(a + b)', 'nqp::chain - just to arguments');
+        ok(stringy($r[1]) eq '(C + D)', 'nqp::chain - all return true');
+        ok(stringy($r[2]) eq '0', 'nqp::chain - we have falsehood');
+        ok(!$dont_call, 'nqp::chain shortcircuits');
+    }
+);
