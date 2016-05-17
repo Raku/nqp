@@ -818,6 +818,22 @@ class QAST::OperationsJS {
             Chunk.new($T_OBJ, "new nqp.CurLexpad(\{{nqp::join(',', @get)}\}, \{{nqp::join(',', @set)}\})", [], :$node);
     });
 
+    add_op('getlexouter', :!inlinable, sub ($comp, $node, :$want, :$cps) {
+        unless nqp::istype($node[0], QAST::SVal) {
+            $comp.NYI("getlexouter with an argument that isn't a string literal");
+        }
+        my $var_name := $node[0].value;
+        my $block := $*BLOCK.outer;
+        while $block {
+            last if $block.has_local_variable($var_name);
+            $block := $block.outer;
+        }
+        unless $block.is_dynamic_var(QAST::Var.new(:name($var_name), :scope<lexical>)) {
+            $comp.NYI("getlexouter on not a variable compiled as dynamic");
+        }
+        Chunk.new($T_OBJ, $block.ctx ~ "[" ~ quote_string($var_name) ~ "]", [], :$node);
+    });
+
     add_simple_op('splice', $T_OBJ, [$T_OBJ, $T_OBJ, $T_INT, $T_INT], :sideffects);
 
     add_simple_op('setelems', $T_OBJ, [$T_OBJ, $T_INT], :sideffects);
