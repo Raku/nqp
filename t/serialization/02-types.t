@@ -2,7 +2,7 @@
 
 use nqpmo;
 
-plan(46);
+plan(48);
 
 sub add_to_sc($sc, $idx, $obj) {
     nqp::scsetobj($sc, $idx, $obj);
@@ -388,4 +388,47 @@ sub add_to_sc($sc, $idx, $obj) {
     my $dsc_hi := nqp::scgetobj($dsc, 1);
 
     ok(nqp::typeparameterat($dsc_hi, 0) eq "Hi", "We can serialize a parameterized type");
+}
+
+# Serializing a type with HLL owner
+{
+
+    my $type := NQPClassHOW.new_type(:name('hll test'), :repr('P6opaque'));
+    $type.HOW.add_parent($type, NQPMu);
+    $type.HOW.compose($type);
+
+    nqp::settypehll($type, "foo");
+
+    class Baz {
+    }
+
+    nqp::sethllconfig('foo', nqp::hash(
+        'foreign_transform_array', -> $array {
+            'fooifed';
+         }
+    ));
+    nqp::sethllconfig('baz', nqp::hash(
+        'foreign_transform_array', -> $array {
+            Baz;
+        },
+    ));
+
+    my $sc := nqp::createsc('TEST_SC_11_IN');
+    my $sh := nqp::list_s();
+
+    my $cr := nqp::list();
+
+    add_to_sc($sc, 0, $type);
+
+    my $serialized := nqp::serialize($sc, $sh);
+
+    my $dsc := nqp::createsc('TEST_SC_11_OUT');
+    nqp::deserialize($serialized, $dsc, $sh, $cr, nqp::null());
+
+    my $obj := nqp::scgetobj($dsc, 0).new;
+
+    nqp::settypehllrole(nqp::scgetobj($dsc, 0), 4);
+
+    ok(nqp::eqaddr(nqp::hllizefor($obj, "foo"), $obj), "correct hll prevents convertion");
+    ok(nqp::eqaddr(nqp::hllizefor($obj, "baz"), Baz), "in this case it's converted anyway");
 }

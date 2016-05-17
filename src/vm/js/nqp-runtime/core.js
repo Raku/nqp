@@ -311,7 +311,7 @@ op.istype = function(ctx, obj, type) {
 
   // HACK
   if (obj instanceof NQPArray) {
-    if (hll.hllConfigs.nqp && type == hll.hllConfigs.nqp.content.get('list')) {
+    if (hll.hllConfigs.nqp && type == hll.hllConfigs.nqp.get('list')) {
       return 1;
     } else {
       return 0;
