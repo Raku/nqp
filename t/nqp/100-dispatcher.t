@@ -8,10 +8,6 @@ my $closure;
     ok($foo == 100);
     nqp::takedispatcher('$bar');
     ok($bar == 456);
-    $closure := -> {
-        $foo;
-        $bar;
-    };
 }
 
 {
@@ -20,7 +16,4 @@ my $closure;
     nqp::cleardispatcher();
     nqp::takedispatcher('$foo');
     ok($foo == 200);
-    $closure := -> {
-        $foo;
-    };
 }
