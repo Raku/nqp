@@ -2,7 +2,7 @@
 
 # Test nqp::op file operations.
 
-plan(88);
+plan(89);
 
 ok( nqp::stat('CREDITS', nqp::const::STAT_EXISTS) == 1, 'nqp::stat exists');
 ok( nqp::stat('AARDVARKS', nqp::const::STAT_EXISTS) == 0, 'nqp::stat not exists');
@@ -25,6 +25,7 @@ ok( nqp::tellfh($credits) == 5 || nqp::tellfh($credits) == 6, 'nqp::tellfh line 
 my $rest := nqp::readallfh($credits);
 ok( nqp::eoffh($credits), 'At EOF after readallfh');
 ok( nqp::chars($rest) > 100, 'nqp::readallfh lines to read');
+ok( nqp::substr($rest,0,4) ne '=pod', 'nqp::readallfh after nqp::readlinefh did not read line twice');
 ok( nqp::tellfh($credits) >= nqp::chars($line) + nqp::chars($rest), 'nqp::tellfh end of file');
 
 ok( nqp::chars(nqp::readlinefh($credits)) == 0, 'nqp::readlinefh end of file');
