@@ -494,10 +494,9 @@ SerializationWriter.prototype.serializeSTable = function(st) {
     flags |= STABLE_HAS_INVOCATION_SPEC;
   }
 
-  /*
-  if (st->hll_owner != NULL)
-      flags |= STABLE_HAS_HLL_OWNER;
-  */
+  if (st.hllOwner) {
+    flags |= STABLE_HAS_HLL_OWNER;
+  }
 
   this.stablesData.U8(flags);
 
@@ -529,13 +528,10 @@ SerializationWriter.prototype.serializeSTable = function(st) {
   }
 
   /* HLL info. */
-  /*this.stablesData.str(st.hllOwner ? st.hllOwner.name : "");
-    this.stablesData.I32(hllRole);
-    writeStr(st.hllOwner == null ? "" : st.hllOwner.name);
-    writeInt(st.hllRole);
-    */
 
-  /* TODO - HLL owner */
+  if (st.hllOwner) {
+    this.stablesData.str(st.hllOwner.get('name'));
+  }
 
   /* If it's a parametric type, save parameterizer. */
   if (st.modeFlags & constants.PARAMETRIC_TYPE) {

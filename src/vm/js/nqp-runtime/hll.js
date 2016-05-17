@@ -25,8 +25,8 @@ op.bindhllsym = function(hllName, name, value) {
 };
 
 op.hllizefor = function(ctx, obj, language) {
-  var languageHash = hllConfigs[language];
-  var config = languageHash.content;
+  var languageHash = getHLL(language);
+  var config = languageHash;
   var role;
   if (obj !== null && obj._STable) {
     if (obj._STable.hllOwner === languageHash) {
@@ -61,14 +61,31 @@ op.hllizefor = function(ctx, obj, language) {
 var hllConfigs = {};
 exports.hllConfigs = hllConfigs;
 
+function getHLL(language) {
+  if (!hllConfigs[language]) {
+    hllConfigs[language] = new Map;
+
+    // For serialization purposes
+    hllConfigs[language].set('name', language);
+  }
+  return hllConfigs[language]
+}
+
+exports.getHLL = getHLL;
+
 op.sethllconfig = function(language, configHash) {
-  hllConfigs[language] = configHash;
+  var hll = getHLL(language);
+
+  configHash.content.forEach(function(value, key, map) {
+    hll.set(key, value);
+  });
+
   return configHash;
 };
 
 
 op.settypehll = function(type, language) {
-  type._STable.hllOwner = hllConfigs[language];
+  type._STable.hllOwner = getHLL(language);
   return type;
 };
 

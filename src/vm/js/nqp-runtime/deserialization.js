@@ -12,6 +12,7 @@ var CodeRef = require('./code-ref.js');
 var constants = require('./constants.js');
 var NQPArray = require('./array.js');
 
+var hll = require('./hll.js');
 
 /** All the loaded serialization contexts using their unique IDs as keys */
 var serializationContexts = SerializationContext.contexts;
@@ -355,7 +356,7 @@ BinaryCursor.prototype.STable = function(STable) {
   }
 
   if (flags & STABLE_HAS_HLL_OWNER) {
-    STable.hllOwner = this.str();
+    STable.hllOwner = hll.getHLL(this.str());
   }
 
   if (STable.modeFlags & constants.PARAMETRIC_TYPE) {
