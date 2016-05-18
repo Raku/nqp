@@ -2,7 +2,7 @@
 
 # Tests for contextual variables
 
-plan(14);
+plan(17);
 
 sub foo() { $*VAR }
 
@@ -81,3 +81,30 @@ sub bind_using_named(:$*signatured) {
 
 bind_using_named(:signatured("secret value 2"));
 ok($passed_value eq "secret value 2", "setting dynamic variables using a named argument");
+
+
+my sub layer3() {
+    my $*baz := 800;
+    ok(nqp::getlexcaller('$*bar') == 300, 'nqp::getlexcaller - immediate caller');
+    ok(nqp::getlexcaller('$*baz') == 100, 'nqp::getlexcaller - more traversing');
+    ok(nqp::isnull(nqp::getlexcaller('$*no_such')), 'nqp::getlexcaller - missing var');
+}
+my sub layer2() {
+    layer3();
+}
+my sub layer1() {
+    my $*baz := 100;
+    my $*bar := 400;
+    {
+        my $*bar := 200;
+        {
+            my $*bar := 300;
+            layer2();
+        }
+    }
+}
+
+{
+    layer1();
+}
+
