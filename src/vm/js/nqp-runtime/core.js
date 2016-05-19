@@ -21,6 +21,8 @@ var nqp = require('nqp-runtime');
 
 var constants = require('./constants.js');
 
+var containerConfigurer = require('./container-configurer.js');
+
 exports.CodeRef = CodeRef;
 
 op.atpos = function(array, index) {
@@ -443,22 +445,10 @@ op.curlexpad = function(get, set) {
   return new CurLexpad(get, set);
 };
 
-op.setcontspec = function(type, contSpecType, hash) {
-  if (contSpecType === 'code_pair') {
-    var fetch = hash.content.get('fetch');
-    var store = hash.content.get('store');
-
-    type._STable.addInternalMethod('$$assignunchecked', function(ctx, value) {
-      store.$call(ctx, {}, this, value);
-      return value;
-    });
-    type._STable.addInternalMethod('$$assign', function(ctx, value) {
-      store.$call(ctx, {}, this, value);
-      return value;
-    });
-    type._STable.addInternalMethod('$$decont', function(ctx) {
-      return fetch.$call(ctx, {}, this);
-    });
+op.setcontspec = function(type, specType, conf) {
+  if (containerConfigurer[specType]) {
+    type._STable.containerSpec = new containerConfigurer[specType](type._STable);
+    type._STable.containerSpec.configure(conf);
   } else {
     console.warn('NYI cont spec: ' + contSpecType);
   }

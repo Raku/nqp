@@ -485,10 +485,9 @@ SerializationWriter.prototype.serializeSTable = function(st) {
     flags = 0xF;
   }
 
-  /*
-  if (st->containerSpec != NULL)
+  if (st.containerSpec) {
       flags |= STABLE_HAS_CONTAINER_SPEC;
-  */
+  }
 
   if (st.invocationSpec) {
     flags |= STABLE_HAS_INVOCATION_SPEC;
@@ -506,11 +505,13 @@ SerializationWriter.prototype.serializeSTable = function(st) {
     this.stablesData.ref(st.boolificationSpec.method);
   }
 
-  /*this.stablesData.writeInt(st.ContainerSpec == null ? 0 : 1);
-    if (st.ContainerSpec != null) {
-        writeStr(st.ContainerSpec.name());
-        st.ContainerSpec.serialize(tc, st, this);
-    }*/
+  if (st.containerSpec) {
+    /* Write container spec name. */
+    this.stablesData.str(st.containerSpec.name);
+
+    /* Give container spec a chance to serialize any data it wishes. */
+    st.containerSpec.serialize(this.stablesData);
+  }
 
   /* Invocation spec. */
 

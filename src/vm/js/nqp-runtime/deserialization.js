@@ -12,6 +12,8 @@ var CodeRef = require('./code-ref.js');
 var constants = require('./constants.js');
 var NQPArray = require('./array.js');
 
+var containerConfigurer = require('./container-configurer.js');
+
 var hll = require('./hll.js');
 
 /** All the loaded serialization contexts using their unique IDs as keys */
@@ -333,12 +335,9 @@ BinaryCursor.prototype.STable = function(STable) {
   }
 
   if (flags & STABLE_HAS_CONTAINER_SPEC) {
-    console.log('TODO container spec');
-    /* TODO - container stuff */
-    /* STable.container_class_handle = this.variant();
-    STable.containerAttrName = this.str();
-    STable.containerHint = this.I64();
-    STable.containerFetchMethod = this.variant();*/
+    var specType = this.str();
+    STable.containerSpec = new containerConfigurer[specType](STable);
+    STable.containerSpec.deserialize(this);
   }
 
   if (flags & STABLE_HAS_INVOCATION_SPEC) {
