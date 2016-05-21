@@ -1005,50 +1005,55 @@ my $sc := nqp::createsc('exampleHandle');
 nqp::scsetobj($sc, 0, $g1);
 nqp::setobjsc($g1, $sc);
 
-is_qast(
-    QAST::Block.new(
-        QAST::Op.new(
-            :op<bind>,
-            QAST::Var.new( :name<$i>, :scope<lexical>, :decl<var>, :returns(int) ),
-            QAST::IVal.new( :value(3) )
-        ),
-        QAST::Op.new(
-            :op<bind>,
-            QAST::Var.new( :name<$total>, :scope<lexical>, :decl<var>, :returns(int) ),
-            QAST::IVal.new( :value(0) )
-        ),
-        QAST::Op.new(
-            :op<while>,
-            QAST::Var.new( :name<$i>, :scope<lexical> ),
-            QAST::Block.new(:blocktype<immediate>,
-#                QAST::Op.new(:op('say'), QAST::Var.new(:name('$total'), :scope<lexical>)),
-                QAST::Var.new( :name<$x>, :scope<lexical>, :decl<contvar>, :value($g1) ),
-                QAST::Op.new(
-                    :op<bind>,
-                    QAST::Var.new( :name<$i>, :scope<lexical> ),
+if nqp::getcomp('nqp').backend.name eq 'jvm' {
+    todo('contvar tests need work on JVM', 1);
+    ok(0);
+} else {
+    is_qast(
+        QAST::Block.new(
+            QAST::Op.new(
+                :op<bind>,
+                QAST::Var.new( :name<$i>, :scope<lexical>, :decl<var>, :returns(int) ),
+                QAST::IVal.new( :value(3) )
+            ),
+            QAST::Op.new(
+                :op<bind>,
+                QAST::Var.new( :name<$total>, :scope<lexical>, :decl<var>, :returns(int) ),
+                QAST::IVal.new( :value(0) )
+            ),
+            QAST::Op.new(
+                :op<while>,
+                QAST::Var.new( :name<$i>, :scope<lexical> ),
+                QAST::Block.new(:blocktype<immediate>,
+    #                QAST::Op.new(:op('say'), QAST::Var.new(:name('$total'), :scope<lexical>)),
+                    QAST::Var.new( :name<$x>, :scope<lexical>, :decl<contvar>, :value($g1) ),
                     QAST::Op.new(
-                        :op<sub_i>,
+                        :op<bind>,
                         QAST::Var.new( :name<$i>, :scope<lexical> ),
-                        QAST::IVal.new( :value(1) )
-                    )
-                ),
-                QAST::Op.new(
-                    :op<bind>,
-                    QAST::Var.new( :name<$total>, :scope<lexical>, :returns(int) ),
-                    QAST::Op.new(:op<add_i>,
                         QAST::Op.new(
-                            :op<callmethod>, :name<plus>,
-                            QAST::Var.new( :name<$x>, :scope<lexical> )
-                        ),
-                        QAST::Var.new(:scope<lexical>, :name<$total>)
-                    )
-                ),
-            )
+                            :op<sub_i>,
+                            QAST::Var.new( :name<$i>, :scope<lexical> ),
+                            QAST::IVal.new( :value(1) )
+                        )
+                    ),
+                    QAST::Op.new(
+                        :op<bind>,
+                        QAST::Var.new( :name<$total>, :scope<lexical>, :returns(int) ),
+                        QAST::Op.new(:op<add_i>,
+                            QAST::Op.new(
+                                :op<callmethod>, :name<plus>,
+                                QAST::Var.new( :name<$x>, :scope<lexical> )
+                            ),
+                            QAST::Var.new(:scope<lexical>, :name<$total>)
+                        )
+                    ),
+                )
+            ),
+            QAST::Var.new(:scope<lexical>, :name<$total>)
         ),
-        QAST::Var.new(:scope<lexical>, :name<$total>)
-    ),
-    303,
-    'contvar');
+        303,
+        'contvar');
+}
 
 is_qast(
     QAST::CompUnit.new(
