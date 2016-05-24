@@ -47,6 +47,77 @@ function BinaryWriteCursor(writer) {
   this.buffer = new Buffer(1024);
   this.writer = writer;
   this.offset = 0;
+  this.metadata = [];
+  this.currentMetadata = [];
+}
+
+// TODO disable when not needed, Object.assign is not fully portable
+
+BinaryWriteCursor.prototype.start = function(tag) {
+  var meta = {tag: tag, start: this.offset};
+
+  this.metadata.push(meta);
+  this.currentMetadata.push(meta);
+};
+
+BinaryWriteCursor.prototype.end = function(tag, extra) {
+  this.currentMetadata[this.currentMetadata.length - 1].end = this.offset;
+  this.currentMetadata.pop();
+};
+
+BinaryWriteCursor.prototype.tagged = function() {
+  var out = "";
+  var events = [];
+  for (var i=0;i < this.metadata.length; i++) {
+    events.push({offset: this.metadata[i].start, start: this.metadata[i], i:i});
+    events.push({offset: this.metadata[i].end, end: this.metadata[i], i:i});
+  }
+
+  events.sort(function (a, b) {
+    if (a.offset < b.offset) return -1;
+    if (a.offset > b.offset) return 1;
+
+    if (a.end && b.start) return -1;
+    if (a.start && b.end) return 1;
+    
+    if (a.start && b.start) {
+      if (a.i < b.i) return -1;
+      if (a.i > b.i) return 1;
+    } else {
+      if (a.i < b.i) return 1;
+      if (a.i > b.i) return -1;
+    }
+
+    return 0;
+  });
+
+  var offset = 0;
+  for (var i=0;i < events.length;i++) {
+    var e = events[i];
+
+    var bytes = [];
+    while (offset < e.offset) {
+      bytes.push(this.buffer.readUInt8(offset));
+      offset++;
+    }
+    out += bytes.join(" ");
+
+    if (e.start) {
+      out += "<" + e.start.tag + ">";
+    } else if (e.end) {
+      out += "</" + e.end.tag + ">";
+    }
+
+  }
+
+  var bytes = [];
+  while (offset < this.offset) {
+    bytes.push(this.buffer.readUInt8(offset));
+    offset++;
+  }
+  out += bytes.join(" ");
+
+  return out;
 }
 
 BinaryWriteCursor.prototype.growToHold = function(space) {
@@ -96,6 +167,7 @@ BinaryWriteCursor.prototype.str32 = function(str) {
 /* Writing function for variable sized integers. Writes out a 64 bit value
    using between 1 and 9 bytes. */
 BinaryWriteCursor.prototype.varint = function(value) {
+  this.start('varint');
   var storageNeeded;
 
   if (value >= -1 && value <= 126) {
@@ -148,6 +220,8 @@ BinaryWriteCursor.prototype.varint = function(value) {
 
     this.offset += rest;
   }
+
+  this.end();
 };
 
 SerializationWriter.prototype.stringIndex = function(str) {
@@ -180,9 +254,13 @@ BinaryWriteCursor.prototype.U16 = function(value) {
 
 
 BinaryWriteCursor.prototype.I32 = function(value) {
+  this.start('I32');
+
   this.growToHold(4);
   this.buffer.writeInt32LE(value, this.offset);
   this.offset += 4;
+
+  this.end();
 };
 
 
@@ -420,6 +498,7 @@ BinaryWriteCursor.prototype.ref = function(ref) {
  * its representation data also. */
 
 SerializationWriter.prototype.serializeSTable = function(st) {
+  this.stablesData.start('stable');
 
   /* Make STables table entry. */
   this.stables.str32(st.REPR.constructor.name);
@@ -559,6 +638,7 @@ SerializationWriter.prototype.serializeSTable = function(st) {
     st.REPR.serializeReprData(st, this.stablesData);
   }
 
+  this.stablesData.end();
 };
 
 
