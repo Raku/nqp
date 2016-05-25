@@ -114,12 +114,21 @@ public class P6bigint extends REPR {
     }
 
     public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
-        throw new RuntimeException("Deserialization NYI for P6bigint");
+        P6bigintInstance obj = new P6bigintInstance();
+        // "error: BigInteger(long) has private access in BigInteger"
+        obj.value = new BigInteger("0");
+        obj.st = st;
+        return obj;
     }
 
     public void deserialize_finish(ThreadContext tc, STable st,
             SerializationReader reader, SixModelObject obj) {
-        throw new RuntimeException("Deserialization NYI for P6bigint");
+        ((P6bigintInstance)obj).value = new BigInteger(reader.readStr());
+    }
+
+    public void serialize(ThreadContext tc, SerializationWriter writer, SixModelObject obj) {
+        /* Write out as String. */
+        writer.writeStr(((P6bigintInstance)obj).value.toString());
     }
     
     public void serialize_inlined(ThreadContext tc, STable st, SerializationWriter writer,
