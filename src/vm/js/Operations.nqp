@@ -746,6 +746,9 @@ class QAST::OperationsJS {
                     ($want == $T_VOID ?? '' !! "$try_ret = $unwind_marker.ret;\n"),
                     "\} else if (e instanceof nqp.NQPException) \{\n",
                     "$*CTX.catchException(e);\n",
+                    # HACK - we should catch more exceptions
+                    "\} else if (e instanceof TypeError) \{\n",
+                    "$*CTX.catchException(nqp.wrapException(e));\n",
                     "\} else \{\n",
                     "throw e;\n",
                     "\}\n",
