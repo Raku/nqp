@@ -155,8 +155,14 @@ BinaryWriteCursor.prototype.cstr = function(string) {
   if (string === undefined) {
     this.varint(0);
   } else {
-    this.varint(Buffer.byteLength(string));
-    this.offset += this.buffer.write(string, this.offset);
+    var expected = Buffer.byteLength(string);
+    this.varint(expected);
+    this.growToHold(expected);
+    var wrote = this.buffer.write(string, this.offset);
+    if (expected != wrote) {
+      throw 'Problem with writing cstr, wrote: ' + wrote + ', expected to write:' + expected;
+    }
+    this.offset += wrote;
   }
 };
 
