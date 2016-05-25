@@ -287,18 +287,13 @@ sub add_to_sc($sc, $idx, $obj) {
     my $instance := nqp::box_i(147, $type);
     add_to_sc($sc, 1, $instance);
 
-    if nqp::getcomp('nqp').backend.name eq 'jvm' {
-        todo("bigints are TODO on JVM", 1);
-        ok(0);
-    } else {
-        my $serialized := nqp::serialize($sc, $sh);
+    my $serialized := nqp::serialize($sc, $sh);
 
-        my $dsc := nqp::createsc('TEST_SC_8_OUT');
-        my $cr := nqp::list();
-        nqp::deserialize($serialized, $dsc, $sh, $cr, nqp::null());
+    my $dsc := nqp::createsc('TEST_SC_8_OUT');
+    my $cr := nqp::list();
+    nqp::deserialize($serialized, $dsc, $sh, $cr, nqp::null());
 
-        ok(nqp::unbox_i(nqp::scgetobj($dsc, 1)) == 147, "can unbox serialized bigint");
-    }
+    ok(nqp::unbox_i(nqp::scgetobj($dsc, 1)) == 147, "can unbox serialized bigint");
 }
 
 # Serializing a type with box_target attribute and P6bigint type
@@ -327,24 +322,16 @@ sub add_to_sc($sc, $idx, $obj) {
 
     add_to_sc($sc, 3, $type);
 
-    if nqp::getcomp('nqp').backend.name eq 'jvm' {
-        todo("bigints are TODO on JVM", 4);
-        ok(0);
-        ok(0);
-        ok(0);
-        ok(0);
-    } else {
-        my $serialized := nqp::serialize($sc, $sh);
+    my $serialized := nqp::serialize($sc, $sh);
 
-        my $dsc := nqp::createsc('TEST_SC_9_OUT');
-        my $cr := nqp::list();
-        nqp::deserialize($serialized, $dsc, $sh, $cr, nqp::null());
+    my $dsc := nqp::createsc('TEST_SC_9_OUT');
+    my $cr := nqp::list();
+    nqp::deserialize($serialized, $dsc, $sh, $cr, nqp::null());
 
-        ok(nqp::unbox_i(nqp::box_i(7, nqp::scgetobj($dsc, 0))) == 7, "can use deserialized type for boxing");
-        ok(nqp::unbox_i(nqp::box_i(8, nqp::scgetobj($dsc, 3))) == 8, "can use deserialized type for boxing");
-        ok(nqp::unbox_i(nqp::scgetobj($dsc, 1)) == 4, "can unbox bigint obj");
-        ok(nqp::unbox_i(nqp::scgetobj($dsc, 2)) == 5, "can unbox autoboxed bigint obj");
-    }
+    ok(nqp::unbox_i(nqp::box_i(7, nqp::scgetobj($dsc, 0))) == 7, "can use deserialized type for boxing - got " ~ nqp::scgetobj($dsc,0));
+    ok(nqp::unbox_i(nqp::box_i(8, nqp::scgetobj($dsc, 3))) == 8, "can use deserialized type for boxing");
+    ok(nqp::unbox_i(nqp::scgetobj($dsc, 1)) == 4, "can unbox bigint obj");
+    ok(nqp::unbox_i(nqp::scgetobj($dsc, 2)) == 5, "can unbox autoboxed bigint obj");
 }
 
 # Serializing a parameterized type
