@@ -2790,12 +2790,22 @@ public final class Ops {
                 retval = box_s((String)tc.native_s, tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strBoxType, tc);
             }
             else if (tc.native_type == ThreadContext.NATIVE_JVM_OBJ) {
-                /* XXX: there might be other cases and we have to figure out, what kind of
-                   REPR we need to properly wrap around the NATIVE_JVM_OBJ we goet here,
-                   but so far this seems to cover what's needed. */
-                retval = REPRRegistry.getByName("NativeCall").allocate(tc, 
-                    REPRRegistry.getByName("NativeCall").type_object_for(tc, tc.gc.KnowHOW).st);
-                ((NativeCallInstance)retval).body = (NativeCallBody) tc.native_j;
+                int slot = ((P6OpaqueBaseInstance)obj).resolveAttribute(obj.st.WHAT, name);
+                STable attr_st = ((P6OpaqueREPRData) obj.st.REPRData).flattenedSTables[slot];
+                if (attr_st != null) {
+                    retval = attr_st.REPR.allocate(tc, attr_st);
+                    for (Field field : retval.getClass().getDeclaredFields()) {
+                        try {
+                            if (field.getType().isAssignableFrom(tc.native_j.getClass())) {
+                                field.set(retval, tc.native_j);
+                                break;
+                            }
+                        }
+                        catch (IllegalAccessException iae) {
+                            throw ExceptionHandling.dieInternal(tc, "Attribute '" + name + "' couldn't be boxed");
+                        }
+                    }
+                }
             }
             return retval;
         }
