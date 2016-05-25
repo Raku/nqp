@@ -21,7 +21,7 @@ var nqp = require('nqp-runtime');
 
 var constants = require('./constants.js');
 
-var containerConfigurer = require('./container-configurer.js');
+var containerSpecs = require('./container-specs.js');
 
 exports.CodeRef = CodeRef;
 
@@ -446,8 +446,8 @@ op.curlexpad = function(get, set) {
 };
 
 op.setcontspec = function(type, specType, conf) {
-  if (containerConfigurer[specType]) {
-    type._STable.containerSpec = new containerConfigurer[specType](type._STable);
+  if (containerSpecs[specType]) {
+    type._STable.containerSpec = new containerSpecs[specType](type._STable);
     type._STable.containerSpec.configure(conf);
   } else {
     console.warn('NYI cont spec: ' + specType);

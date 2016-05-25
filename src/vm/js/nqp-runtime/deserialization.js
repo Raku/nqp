@@ -12,7 +12,7 @@ var CodeRef = require('./code-ref.js');
 var constants = require('./constants.js');
 var NQPArray = require('./array.js');
 
-var containerConfigurer = require('./container-configurer.js');
+var containerSpecs = require('./container-specs.js');
 
 var hll = require('./hll.js');
 
@@ -336,7 +336,7 @@ BinaryCursor.prototype.STable = function(STable) {
 
   if (flags & STABLE_HAS_CONTAINER_SPEC) {
     var specType = this.str();
-    STable.containerSpec = new containerConfigurer[specType](STable);
+    STable.containerSpec = new containerSpecs[specType](STable);
     STable.containerSpec.deserialize(this);
   }
 
