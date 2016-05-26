@@ -1214,7 +1214,7 @@ public final class Ops {
                 IOHandleInstance ioh = (IOHandleInstance)obj;
                 if (ioh.dirstrm != null && ioh.diri != null) {
                     if (ioh.diri.hasNext()) {
-                        return ioh.diri.next().getFileName().toString();
+                        return ioh.diri.next().toString();
                     } else {
                         return null;
                     }
