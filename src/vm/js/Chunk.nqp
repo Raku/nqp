@@ -7,7 +7,16 @@ my $T_BOOL := 4; # Something that can be used in boolean context in javascript. 
 my $T_VOID := -1; # Value of this type shouldn't exist, we use a "" as the expr
 my $T_NONVAL := -2; # something that is not a nqp value
 
-class Chunk {
+
+role Joinable {
+    method join() {
+        my @strs := nqp::list_s();
+        self.collect(@strs);
+        nqp::join('', @strs);
+    }
+}
+
+class Chunk does Joinable {
     has int $!type; # the js type of $!expr
     has str $!expr; # a javascript expression without side effects
     has $!node; # a QAST::Node that contains info for source maps
@@ -30,28 +39,15 @@ class Chunk {
         $!node := $node if nqp::defined($node);
     }
 
-    method write($fh, :$escape) {
+    method collect(@strs, :$escape) {
         for @!setup -> $part {
-           if nqp::isstr($part) {
-                nqp::printfh($fh, $escape ?? nqp::escape($part) !! $part);
-           }
-           else {
-               $part.write($fh, :$escape);
-           }
+            if nqp::isstr($part) {
+                nqp::push_s(@strs, $escape ?? nqp::escape($part) !! $part);
+            }
+            else {
+                $part.collect(@strs, :$escape);
+            }
         }
-    }
-
-    method join() {
-        my $js := ''; 
-        for @!setup -> $part {
-           if nqp::isstr($part) {
-              $js := $js ~ $part;
-           }
-           else {
-              $js := $js ~ $part.join;
-           }
-        }
-        $js;
     }
     
     method with_source_map_info() {
@@ -133,7 +129,7 @@ class ChunkCPS is Chunk {
     }
 }
 
-class ChunkEscaped {
+class ChunkEscaped does Joinable {
     has @!setup;
 
     method new(@setup) {
@@ -146,37 +142,23 @@ class ChunkEscaped {
         @!setup := @setup;
     }
 
-    method join() {
-        my $js := ''; 
-        for @!setup -> $part {
-           if nqp::isstr($part) {
-              $js := $js ~ $part;
-           }
-           else {
-              $js := $js ~ $part.join;
-           }
-        }
-        '"' ~ nqp::escape($js) ~ '"';
-    }
-
     method with_source_map_info() {
         self.join;
     }
 
-    method write($fh, :$escape) {
+    method collect(@strs, :$escape) {
         if $escape {
             nqp::die("Double escaping NIY");
         }
-        nqp::printfh($fh, '"');
+        nqp::push_s(@strs, '"');
         for @!setup -> $part {
-           if nqp::isstr($part) {
-                nqp::printfh($fh, nqp::escape($part));
-           }
-           else {
-               $part.write($fh, :escape(1));
-           }
+            if nqp::isstr($part) {
+                nqp::push_s(@strs, nqp::escape($part));
+            }
+            else {
+                $part.collect(@strs, :escape(1));
+            }
         }
-        nqp::printfh($fh, '"');
+        nqp::push_s(@strs, '"');
     }
-    # TODO source map support
 }

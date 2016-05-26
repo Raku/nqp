@@ -69,15 +69,7 @@ class HLLBackend::JavaScript {
         } elsif %adverbs<source-map> {
             $backend.emit_with_source_map($qast, :$instant);
         } else {
-            my $tmp_file := self.tmp_file();
-            my $fh := nqp::open($tmp_file, 'w');
-            $backend.emit($qast, :$instant, :$fh, :$substagestats);
-
-            my $timestamp := nqp::time_n();
-            my $code := slurp($tmp_file);
-            nqp::printfh(nqp::getstderr(), nqp::sprintf("[slurp %.3f] ", [nqp::time_n() - $timestamp])) if $substagestats;
-
-            nqp::unlink($tmp_file);
+            my $code := $backend.emit($qast, :$instant, :$substagestats);
             $code := self.beautify($code) if %adverbs<beautify>;
             $code;
         }
