@@ -240,7 +240,7 @@ function Capture(named, pos, skip) {
 
 Capture.prototype.$$clone = function() {
   return this; // captures are immutable
-}
+};
 
 op.savecapture = function(args) {
   return new Capture(args[1], Array.prototype.slice.call(args, 2));

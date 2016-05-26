@@ -174,9 +174,9 @@ P6opaque.prototype.deserializeReprData = function(cursor, STable) {
 
 
 P6opaque.prototype.hintfor = function(classHandle, attrName) {
-  for (var i=0;i < this.nameToIndexMapping.length; i++) {
+  for (var i = 0; i < this.nameToIndexMapping.length; i++) {
     if (this.nameToIndexMapping[i].classKey === classHandle) {
-      for (var j=0;j < this.nameToIndexMapping[i].slots.length; j++) {
+      for (var j = 0; j < this.nameToIndexMapping[i].slots.length; j++) {
         if (this.nameToIndexMapping[i].names[j] === attrName) {
           return this.nameToIndexMapping[i].slots[j];
         }
@@ -192,10 +192,10 @@ P6opaque.prototype.getAttr = function(classHandle, attrName) {
   if (hint == -1) {
     console.log('classHandle', classHandle);
     if (classHandle === null) {
-      console.trace("null classHandle");
+      console.trace('null classHandle');
       process.exit();
     }
-    console.trace("getAttr", attrName);
+    console.trace('getAttr', attrName);
     console.log(nqp.dumpObj(this.nameToIndexMapping));
     throw "Can't find: " + attrName;
   } else {
@@ -779,7 +779,7 @@ P6bigint.prototype.deserializeFinish = function(obj, data) {
   if (data.varint() == 1) { /* Is it small int? */
     obj.value = bignum(data.varint());
   } else {
-    obj.value = bignum(data.str()); 
+    obj.value = bignum(data.str());
   }
 };
 

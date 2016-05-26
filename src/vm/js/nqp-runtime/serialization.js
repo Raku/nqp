@@ -66,20 +66,20 @@ BinaryWriteCursor.prototype.end = function(tag, extra) {
 };
 
 BinaryWriteCursor.prototype.tagged = function() {
-  var out = "";
+  var out = '';
   var events = [];
-  for (var i=0;i < this.metadata.length; i++) {
-    events.push({offset: this.metadata[i].start, start: this.metadata[i], i:i});
-    events.push({offset: this.metadata[i].end, end: this.metadata[i], i:i});
+  for (var i = 0; i < this.metadata.length; i++) {
+    events.push({offset: this.metadata[i].start, start: this.metadata[i], i: i});
+    events.push({offset: this.metadata[i].end, end: this.metadata[i], i: i});
   }
 
-  events.sort(function (a, b) {
+  events.sort(function(a, b) {
     if (a.offset < b.offset) return -1;
     if (a.offset > b.offset) return 1;
 
     if (a.end && b.start) return -1;
     if (a.start && b.end) return 1;
-    
+
     if (a.start && b.start) {
       if (a.i < b.i) return -1;
       if (a.i > b.i) return 1;
@@ -92,7 +92,7 @@ BinaryWriteCursor.prototype.tagged = function() {
   });
 
   var offset = 0;
-  for (var i=0;i < events.length;i++) {
+  for (var i = 0; i < events.length; i++) {
     var e = events[i];
 
     var bytes = [];
@@ -100,12 +100,12 @@ BinaryWriteCursor.prototype.tagged = function() {
       bytes.push(this.buffer.readUInt8(offset));
       offset++;
     }
-    out += bytes.join(" ");
+    out += bytes.join(' ');
 
     if (e.start) {
-      out += "<" + e.start.tag + ">";
+      out += '<' + e.start.tag + '>';
     } else if (e.end) {
-      out += "</" + e.end.tag + ">";
+      out += '</' + e.end.tag + '>';
     }
 
   }
@@ -115,10 +115,10 @@ BinaryWriteCursor.prototype.tagged = function() {
     bytes.push(this.buffer.readUInt8(offset));
     offset++;
   }
-  out += bytes.join(" ");
+  out += bytes.join(' ');
 
   return out;
-}
+};
 
 BinaryWriteCursor.prototype.growToHold = function(space) {
   if (this.offset + space > this.buffer.length) {
@@ -571,7 +571,7 @@ SerializationWriter.prototype.serializeSTable = function(st) {
   }
 
   if (st.containerSpec) {
-      flags |= STABLE_HAS_CONTAINER_SPEC;
+    flags |= STABLE_HAS_CONTAINER_SPEC;
   }
 
   if (st.invocationSpec) {
@@ -629,7 +629,7 @@ SerializationWriter.prototype.serializeSTable = function(st) {
     this.stablesData.ref(st.parametricType);
     var params = st.parameters.array;
     this.stablesData.varint(params.length);
-    for (var i=0;i < params.length;i++) {
+    for (var i = 0; i < params.length; i++) {
       this.stablesData.ref(params[i]);
     }
   }

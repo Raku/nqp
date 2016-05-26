@@ -68,7 +68,7 @@ function getHLL(language) {
     // For serialization purposes
     hllConfigs[language].set('name', language);
   }
-  return hllConfigs[language]
+  return hllConfigs[language];
 }
 
 exports.getHLL = getHLL;

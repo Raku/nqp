@@ -16,6 +16,7 @@ var containerSpecs = require('./container-specs.js');
 
 var hll = require('./hll.js');
 
+
 /** All the loaded serialization contexts using their unique IDs as keys */
 var serializationContexts = SerializationContext.contexts;
 
@@ -27,7 +28,7 @@ op.deserialize = function(blob, sc, sh, codeRefs, conflict) {
   var buffer = new Buffer(blob, 'base64');
   sc.codeRefs = codeRefs.array;
 
-  for (var i=0;i < sc.codeRefs.length;i++) {
+  for (var i = 0; i < sc.codeRefs.length; i++) {
     sc.codeRefs[i].isStatic = true;
     sc.codeRefs[i]._SC = sc;
     sc.rootCodes.push(sc.codeRefs[i]);
@@ -319,7 +320,7 @@ BinaryCursor.prototype.STable = function(STable) {
   for (var i = 0; i < typeCheckCacheLen; i++) {
     typeCheckCache.push(this.variant());
   }
-  
+
   if (typeCheckCache.length != 0) {
     STable.typeCheckCache = typeCheckCache;
   }
@@ -371,7 +372,7 @@ BinaryCursor.prototype.STable = function(STable) {
     STable.parametricType = this.variant();
     var count = this.varint();
     var params = [];
-    for (var i = 0;i < count;i++) {
+    for (var i = 0; i < count; i++) {
       params[i] = this.variant();
     }
 
