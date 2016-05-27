@@ -472,7 +472,7 @@ P6opaque.prototype.setup_STable = function(STable) {
     return value;
   });
 
-  STable.addInternalMethod('$$getattr', function(classHandle, attrName, value) {
+  STable.addInternalMethod('$$getattr', function(classHandle, attrName) {
     return this[repr.getAttr(classHandle, attrName)];
   });
 };
