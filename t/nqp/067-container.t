@@ -1,4 +1,4 @@
-plan(6);
+plan(10);
 
 # code_pair container spec
 {
@@ -26,4 +26,26 @@ plan(6);
     
     nqp::assignunchecked($cont, 69);
     ok(nqp::decont($cont) == 69, 'assignunchecked value stuck');
+
+    class Foo {
+        method foo() {
+            "foo";
+        }
+    }
+
+    my $obj := Foo.new;
+    nqp::assign($cont, $obj);
+
+    ok($cont.foo eq "foo", "calling a method on a container deconts");
+    ok($cont.HOW.name($cont) eq "Foo", "HOW deconts");
+    ok(nqp::eqaddr($cont.WHAT, Foo), "WHAT deconts"); 
+
+    class FooMore is Foo {
+        method foo() {
+            "more foo";
+        }
+    }
+
+    nqp::rebless($cont, FooMore);
+    ok($obj.foo eq "more foo", "nqp::rebless deconts");
 }
