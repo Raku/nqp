@@ -478,6 +478,7 @@ op.isrwcont = function(cont) {
 };
 
 op.decont = function(ctx, cont) {
+  if (cont === null || cont === undefined) return cont;
   return cont.$$decont ? cont.$$decont(ctx) : cont;
 };
 

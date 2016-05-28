@@ -13,7 +13,17 @@ class QAST::OperationsJS {
     sub op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx, :$cps, :$decont) {
         my @exprs;
         my @setup;
-        my $i := 0;
+
+        my @decont;
+        if nqp::islist($decont) {
+            for $decont -> $index {
+                @decont[$index] := 1;
+            }
+        }
+        elsif nqp::defined($decont) {
+            @decont[$decont] := 1;
+        }
+
         if $node.list > @argument_types {
             nqp::die("{+$node.list} arguments for {$node.op}, the maximum is {+@argument_types}");
         } 
@@ -22,9 +32,10 @@ class QAST::OperationsJS {
           @exprs.push($*CTX);
         }
 
+        my $i := 0;
         for $node.list -> $arg {
             my $chunk := $comp.as_js($arg, :want(@argument_types[$i]));
-            @exprs.push($i == $decont ?? "nqp.op.decont($*CTX, {$chunk.expr})" !! $chunk.expr);
+            @exprs.push(@decont[$i] ?? "nqp.op.decont($*CTX, {$chunk.expr})" !! $chunk.expr);
             @setup.push($chunk);
             $i := $i + 1;
         }
@@ -47,7 +58,7 @@ class QAST::OperationsJS {
         }
     }
 
-    sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op, @argument_types), :$sideffects, :$ctx, :$required_cps, :$cps_aware, :$inlinable = 1, :$decont = -1) {
+    sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op, @argument_types), :$sideffects, :$ctx, :$required_cps, :$cps_aware, :$inlinable = 1, :$decont) {
 
         add_op($op, sub ($comp, $node, :$want, :$cps) {
             my $use_cps := $required_cps || ($cps_aware && $cps);
@@ -125,8 +136,8 @@ class QAST::OperationsJS {
 
     method new_chunk(*@args) { Chunk.new(|@args) }
 
-    add_simple_op('setcontspec', $T_OBJ, [$T_OBJ, $T_STR, $T_OBJ], :sideffects);
-    add_simple_op('assign',  $T_OBJ, [$T_OBJ, $T_OBJ], sub ($cont, $value) {"$cont.\$\$assign({$*CTX},$value)"}, :sideffects);
+    add_simple_op('setcontspec', $T_OBJ, [$T_OBJ, $T_STR, $T_OBJ], :sideffects, :decont(0));
+    add_simple_op('assign',  $T_OBJ, [$T_OBJ, $T_OBJ], sub ($cont, $value) {"$cont.\$\$assign({$*CTX},$value)"}, :sideffects, :decont(1));
     add_simple_op('assignunchecked',  $T_OBJ, [$T_OBJ, $T_OBJ], sub ($cont, $value) {"$cont.\$\$assignunchecked({$*CTX},$value)"}, :sideffects);
     add_simple_op('decont', $T_OBJ, [$T_OBJ], :ctx);
     add_simple_op('iscont', $T_INT, [$T_OBJ]);
@@ -224,7 +235,7 @@ class QAST::OperationsJS {
         Chunk.new($T_OBJ, $ret, [chain_part($node)]);
     });
 
-    add_simple_op('clone', $T_OBJ, [$T_OBJ]);
+    add_simple_op('clone', $T_OBJ, [$T_OBJ], :decont(0));
 
     # TODO optimize cases where the class and the attribute are constants
     for ['', $T_OBJ, '_i', $T_INT, '_n', $T_NUM, '_s', $T_STR] -> $suffix, $type {
@@ -260,8 +271,8 @@ class QAST::OperationsJS {
     add_hll_op('sprintfdirectives');
     add_hll_op('sprintfaddargumenthandler');
 
-    add_simple_op('setinvokespec', $T_OBJ, [$T_OBJ, $T_OBJ, $T_STR, $T_OBJ], :sideffects);
-    add_simple_op('setboolspec', $T_OBJ, [$T_OBJ, $T_INT, $T_OBJ], :sideffects);
+    add_simple_op('setinvokespec', $T_OBJ, [$T_OBJ, $T_OBJ, $T_STR, $T_OBJ], :sideffects, :decont(0));
+    add_simple_op('setboolspec', $T_OBJ, [$T_OBJ, $T_INT, $T_OBJ], :sideffects, :decont(0));
 
     sub add_cmp_op($op, $type) {
         add_simple_op($op, $T_INT, [$type, $type], sub ($a, $b) {
@@ -269,8 +280,8 @@ class QAST::OperationsJS {
         });
     }
 
-    add_simple_op('reprname', $T_STR, [$T_OBJ]);
-    add_simple_op('newtype', $T_OBJ, [$T_OBJ, $T_STR], :sideffects);
+    add_simple_op('reprname', $T_STR, [$T_OBJ], :decont(0));
+    add_simple_op('newtype', $T_OBJ, [$T_OBJ, $T_STR], :sideffects, :decont(0));
 
     add_cmp_op('cmp_i', $T_INT);
     add_cmp_op('cmp_n', $T_NUM);
@@ -309,9 +320,9 @@ class QAST::OperationsJS {
        });
     }
 
-    add_simple_op('isstr', $T_BOOL, [$T_OBJ], sub ($obj) {"(typeof $obj == 'string')"});
-    add_simple_op('isint', $T_INT, [$T_OBJ]);
-    add_simple_op('isnum', $T_INT, [$T_OBJ]);
+    add_simple_op('isstr', $T_BOOL, [$T_OBJ], sub ($obj) {"(typeof $obj == 'string')"}, :decont(0));
+    add_simple_op('isint', $T_INT, [$T_OBJ], :decont(0));
+    add_simple_op('isnum', $T_INT, [$T_OBJ], :decont(0));
 
     add_simple_op('chars', $T_INT, [$T_STR], sub ($string) {"$string.length"});
 
@@ -435,6 +446,7 @@ class QAST::OperationsJS {
         $comp.as_js($node[0], :want($want), :$cps);
     });
 
+    # TODO decont
     add_op('istrue', sub ($comp, $node, :$want, :$cps) {
         $comp.as_js($node[0], :want($T_BOOL), :$cps);
     });
@@ -533,7 +545,7 @@ class QAST::OperationsJS {
          }
          Chunk.new($T_OBJ, $hash , @setup , :$node);
     });
-    add_simple_op('ishash', $T_INT, [$T_OBJ]);
+    add_simple_op('ishash', $T_INT, [$T_OBJ], :decont(0));
 
 
     add_op('call', :!inlinable, sub ($comp, $node, :$want, :$cps) {
@@ -774,10 +786,10 @@ class QAST::OperationsJS {
 
     add_simple_op('backtracestrings', $T_OBJ, [$T_OBJ]);
 
-    add_simple_op('findmethod', $T_OBJ, [$T_OBJ, $T_STR], :sideffects);
-    add_simple_op('can', $T_INT, [$T_OBJ, $T_STR], :sideffects);
+    add_simple_op('findmethod', $T_OBJ, [$T_OBJ, $T_STR], :sideffects, :decont(0));
+    add_simple_op('can', $T_INT, [$T_OBJ, $T_STR], :sideffects, :decont(0));
 
-    add_simple_op('istype', $T_INT, [$T_OBJ, $T_OBJ], :sideffects, :ctx);
+    add_simple_op('istype', $T_INT, [$T_OBJ, $T_OBJ], :sideffects, :ctx, :decont(0, 1));
 
     add_simple_op('split', $T_OBJ, [$T_STR, $T_STR], sub ($separator, $string) {
         "new nqp.NQPArray({$string} == '' ? [] : {$string}.split({$separator}))"
@@ -793,7 +805,7 @@ class QAST::OperationsJS {
 
     add_simple_op('elems', $T_INT, [$T_OBJ]);
 
-    add_simple_op('islist', $T_BOOL, [$T_OBJ], sub ($obj) {"($obj instanceof nqp.NQPArray)"});
+    add_simple_op('islist', $T_BOOL, [$T_OBJ], sub ($obj) {"($obj instanceof nqp.NQPArray)"}, :decont(0));
 
 
 
@@ -876,7 +888,7 @@ class QAST::OperationsJS {
     add_simple_op('lstat', $T_INT, [$T_STR, $T_INT]);
     add_simple_op('lstat_time', $T_NUM, [$T_STR, $T_INT]);
 
-    add_simple_op('defined', $T_INT, [$T_OBJ]);
+    add_simple_op('defined', $T_INT, [$T_OBJ], :decont(0));
     %ops<isconcrete> := %ops<defined>;
 
     # TODO - those are stubs until we have repossession support
@@ -908,11 +920,11 @@ class QAST::OperationsJS {
     add_simple_op('bindcomp', $T_OBJ, [$T_STR, $T_OBJ], :sideffects);
     add_simple_op('getcomp', $T_OBJ, [$T_STR], :sideffects);
 
-    add_simple_op('setparameterizer', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects, :ctx);
-    add_simple_op('parameterizetype', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects, :ctx);
-    add_simple_op('typeparameterized', $T_OBJ, [$T_OBJ]);
-    add_simple_op('typeparameters', $T_OBJ, [$T_OBJ], :ctx);
-    add_simple_op('typeparameterat', $T_OBJ, [$T_OBJ, $T_INT], :ctx);
+    add_simple_op('setparameterizer', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects, :ctx, :decont(0,1));
+    add_simple_op('parameterizetype', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects, :ctx, :decont(0,1));
+    add_simple_op('typeparameterized', $T_OBJ, [$T_OBJ], :decont(0));
+    add_simple_op('typeparameters', $T_OBJ, [$T_OBJ], :ctx, :decont(0));
+    add_simple_op('typeparameterat', $T_OBJ, [$T_OBJ, $T_INT], :ctx, :decont(0));
 
     # TODO avoid copy & paste - move it into code shared between backends
     add_op('defor', sub ($comp, $node, :$want, :$cps) {
@@ -1259,14 +1271,15 @@ class QAST::OperationsJS {
 
 
     add_simple_op('how', $T_OBJ, [$T_OBJ], sub ($obj) {"$obj._STable.HOW"}, :decont(0));
-    add_simple_op('who', $T_OBJ, [$T_OBJ], sub ($obj) {"$obj._STable.WHO"});
-    add_simple_op('setwho', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($obj, $who) {"($obj._STable.WHO = $who, $obj)"}, :sideffects);
+    add_simple_op('who', $T_OBJ, [$T_OBJ], sub ($obj) {"$obj._STable.WHO"}, :decont(0));
+    add_simple_op('setwho', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($obj, $who) {"($obj._STable.WHO = $who, $obj)"}, :sideffects, :decont(0));
 
-    add_simple_op('rebless', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects, :decont(0));
+    # TODO decont second argument
+    add_simple_op('rebless', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects, :decont(0, 1));
     add_simple_op('composetype', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
 
-    add_simple_op('where', $T_INT, [$T_OBJ]);
-    add_simple_op('objectid', $T_INT, [$T_OBJ]);
+    add_simple_op('where', $T_INT, [$T_OBJ], :decont(0));
+    add_simple_op('objectid', $T_INT, [$T_OBJ], :decont(0));
 
     # Set of sequential statements
 
@@ -1316,8 +1329,8 @@ class QAST::OperationsJS {
     add_simple_op('multicacheadd', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ]);
 
     add_simple_op('settypecache', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
-    add_simple_op('setmethcache', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
-    add_simple_op('setmethcacheauth', $T_OBJ, [$T_OBJ, $T_INT], :sideffects);
+    add_simple_op('setmethcache', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects, :decont(0));
+    add_simple_op('setmethcacheauth', $T_OBJ, [$T_OBJ, $T_INT], :sideffects, :decont(0));
 
     add_simple_op('getcodename', $T_OBJ, [$T_OBJ]);
     add_simple_op('setcodename', $T_OBJ, [$T_OBJ, $T_STR], :sideffects);
