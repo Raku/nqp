@@ -131,6 +131,9 @@ STable.prototype.createTypeObject = function() {
   obj.$$atpos = function(index) {
     return null;
   };
+  obj.$$decont = function(ctx) {
+    return this;
+  };
   return obj;
 };
 
