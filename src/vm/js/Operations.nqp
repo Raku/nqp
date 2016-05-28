@@ -10,7 +10,7 @@ class QAST::OperationsJS {
         %inlinable{$op} := $inlinable;
     }
 
-    sub op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx, :$cps) {
+    sub op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx, :$cps, :$decont) {
         my @exprs;
         my @setup;
         my $i := 0;
@@ -24,7 +24,7 @@ class QAST::OperationsJS {
 
         for $node.list -> $arg {
             my $chunk := $comp.as_js($arg, :want(@argument_types[$i]));
-            @exprs.push($chunk.expr);
+            @exprs.push($i == $decont ?? "nqp.op.decont($*CTX, {$chunk.expr})" !! $chunk.expr);
             @setup.push($chunk);
             $i := $i + 1;
         }
@@ -47,11 +47,11 @@ class QAST::OperationsJS {
         }
     }
 
-    sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op, @argument_types), :$sideffects, :$ctx, :$required_cps, :$cps_aware, :$inlinable = 1) {
+    sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op, @argument_types), :$sideffects, :$ctx, :$required_cps, :$cps_aware, :$inlinable = 1, :$decont = -1) {
 
         add_op($op, sub ($comp, $node, :$want, :$cps) {
             my $use_cps := $required_cps || ($cps_aware && $cps);
-            my $chunk := op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx, :cps($use_cps));
+            my $chunk := op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx, :cps($use_cps), :$decont);
             ($sideffects && !$use_cps) ?? $comp.stored_result($chunk) !! $chunk;
         }, :$inlinable);
 
@@ -1258,11 +1258,11 @@ class QAST::OperationsJS {
     %ops<die_s> := %ops<die>;
 
 
-    add_simple_op('how', $T_OBJ, [$T_OBJ], sub ($obj) {"$obj._STable.HOW"});
+    add_simple_op('how', $T_OBJ, [$T_OBJ], sub ($obj) {"$obj._STable.HOW"}, :decont(0));
     add_simple_op('who', $T_OBJ, [$T_OBJ], sub ($obj) {"$obj._STable.WHO"});
     add_simple_op('setwho', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($obj, $who) {"($obj._STable.WHO = $who, $obj)"}, :sideffects);
 
-    add_simple_op('rebless', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
+    add_simple_op('rebless', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects, :decont(0));
     add_simple_op('composetype', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
 
     add_simple_op('where', $T_INT, [$T_OBJ]);
@@ -1276,7 +1276,7 @@ class QAST::OperationsJS {
 
     # HACK
     # TODO think what we should return on 1.WHAT and "foo".WHAT
-    add_simple_op('what', $T_OBJ, [$T_OBJ], sub ($obj) {"($obj._STable ? $obj._STable.WHAT : null)"});
+    add_simple_op('what', $T_OBJ, [$T_OBJ], sub ($obj) {"($obj._STable ? $obj._STable.WHAT : null)"}, :decont(0));
 
     add_simple_op('knowhowattr', $T_OBJ, [], sub () {"nqp.knowhowattr"});
     add_simple_op('knowhow', $T_OBJ, [], sub () {"nqp.knowhow"});
