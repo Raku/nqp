@@ -2518,7 +2518,7 @@ QAST::OperationsJAST.map_classlib_core_op('box_i', $TYPE_OPS, 'box_i', [$RT_INT,
 QAST::OperationsJAST.map_classlib_core_op('box_n', $TYPE_OPS, 'box_n', [$RT_NUM, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('box_s', $TYPE_OPS, 'box_s', [$RT_STR, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('can', $TYPE_OPS, 'can', [$RT_OBJ, $RT_STR], $RT_INT, :tc);
-QAST::OperationsJAST.map_classlib_core_op('reprname', $TYPE_OPS, 'reprname', [$RT_OBJ], $RT_STR);
+QAST::OperationsJAST.map_classlib_core_op('reprname', $TYPE_OPS, 'reprname', [$RT_OBJ], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('newtype', $TYPE_OPS, 'newtype', [$RT_OBJ, $RT_STR], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('composetype', $TYPE_OPS, 'composetype', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('setboolspec', $TYPE_OPS, 'setboolspec', [$RT_OBJ, $RT_INT, $RT_OBJ], $RT_OBJ, :tc);

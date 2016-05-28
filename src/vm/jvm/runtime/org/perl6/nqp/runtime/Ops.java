@@ -2550,6 +2550,9 @@ public final class Ops {
     public static String reprname(SixModelObject obj) {
         return obj.st.REPR.name;
     }
+    public static String reprname(SixModelObject obj, ThreadContext tc) {
+        return decont(obj, tc).st.REPR.name;
+    }
     public static SixModelObject newtype(SixModelObject how, String reprname, ThreadContext tc) {
         return REPRRegistry.getByName(reprname).type_object_for(tc, decont(how, tc));
     }
