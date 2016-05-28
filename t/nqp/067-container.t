@@ -1,4 +1,4 @@
-plan(10);
+plan(11);
 
 # code_pair container spec
 {
@@ -6,7 +6,11 @@ plan(10);
     sub fetch($cont) { $value }
     sub store($cont, $new) { $value := $new }
     
-    class SomeCont { }
+    class SomeCont {
+        method foo() {
+            "container";
+        }
+    }
     nqp::setcontspec(SomeCont, 'code_pair', nqp::hash(
         'fetch', &fetch,
         'store', &store
@@ -37,6 +41,7 @@ plan(10);
     nqp::assign($cont, $obj);
 
     ok($cont.foo eq "foo", "calling a method on a container deconts");
+    ok(SomeCont.foo eq "container", "a method call on a type object dosen't decont");
     ok($cont.HOW.name($cont) eq "Foo", "HOW deconts");
     ok(nqp::eqaddr($cont.WHAT, Foo), "WHAT deconts"); 
 
