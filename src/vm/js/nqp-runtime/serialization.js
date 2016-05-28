@@ -42,6 +42,7 @@ var STABLE_BOOLIFICATION_SPEC_MODE_MASK = 0x0F;
 var STABLE_HAS_CONTAINER_SPEC = 0x10;
 var STABLE_HAS_INVOCATION_SPEC = 0x20;
 var STABLE_HAS_HLL_OWNER = 0x40;
+var STABLE_HAS_HLL_ROLE = 0x80;
 
 function BinaryWriteCursor(writer) {
   this.buffer = new Buffer(1024);
@@ -582,6 +583,10 @@ SerializationWriter.prototype.serializeSTable = function(st) {
     flags |= STABLE_HAS_HLL_OWNER;
   }
 
+  if (st.hllRole) {
+    flags |= STABLE_HAS_HLL_ROLE;
+  }
+
   this.stablesData.U8(flags);
 
   /* Boolification spec. */
@@ -617,6 +622,10 @@ SerializationWriter.prototype.serializeSTable = function(st) {
 
   if (st.hllOwner) {
     this.stablesData.str(st.hllOwner.get('name'));
+  }
+
+  if (st.hllRole) {
+    this.stablesData.varint(st.hllRole);
   }
 
   /* If it's a parametric type, save parameterizer. */

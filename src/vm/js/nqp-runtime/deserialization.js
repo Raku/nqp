@@ -301,6 +301,7 @@ var STABLE_BOOLIFICATION_SPEC_MODE_MASK = 0x0F;
 var STABLE_HAS_CONTAINER_SPEC = 0x10;
 var STABLE_HAS_INVOCATION_SPEC = 0x20;
 var STABLE_HAS_HLL_OWNER = 0x40;
+var STABLE_HAS_HLL_ROLE = 0x80;
 
 
 /** Read an entry from the STable table */
@@ -357,6 +358,10 @@ BinaryCursor.prototype.STable = function(STable) {
 
   if (flags & STABLE_HAS_HLL_OWNER) {
     STable.hllOwner = hll.getHLL(this.str());
+  }
+
+  if (flags & STABLE_HAS_HLL_ROLE) {
+    STable.hllRole = this.varint();
   }
 
   if (STable.modeFlags & constants.PARAMETRIC_TYPE) {
