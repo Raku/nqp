@@ -2415,16 +2415,6 @@ public final class Ops {
             return null;
     }
 
-    /* Basic 6model operations. */
-    public static SixModelObject what(SixModelObject o) {
-        return o.st.WHAT;
-    }
-    public static SixModelObject how(SixModelObject o) {
-        return o.st.HOW;
-    }
-    public static SixModelObject who(SixModelObject o) {
-        return o.st.WHO;
-    }
     public static long where(SixModelObject o) {
         return o.hashCode();
     }
