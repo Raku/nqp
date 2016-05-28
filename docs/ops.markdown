@@ -1331,7 +1331,7 @@ in the next `$count` bytes from the filehandle and store them in the array.
 Return the next line of the open filehandle.
 
 ## readcharsfh
-* `nqp::readcharsfh(Handle $fh, $chars)`
+* `readcharsfh(Handle $fh, $chars)`
 
 ## say
 * `say(str $str)`
@@ -2317,4 +2317,4 @@ Cancel to stop reading.
 * `spawnprocasync($queue, $args, $cwd, %env, $callbacks)`
 
 ## killprocasync
-* `nqp::killprocasync($handle, $signal)`
+* killprocasync($handle, $signal)`
