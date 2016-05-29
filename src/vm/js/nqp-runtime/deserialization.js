@@ -168,15 +168,15 @@ BinaryCursor.prototype.locateThing = function(thingType) {
   const PACKED_SC_OVERFLOW = 0xfff;
   const PACKED_SC_IDX_MASK = 0x000fffff;
 
-  packed = this.U32();
+  packed = this.varint();
   scId = packed >>> PACKED_SC_SHIFT;
   index = packed & PACKED_SC_IDX_MASK;
 
   if (scId != PACKED_SC_OVERFLOW) {
     index = packed & PACKED_SC_IDX_MASK;
   } else {
-    scId = this.I32();
-    index = this.I32();
+    scId = this.varint();
+    index = this.varint();
   }
 
   try {
@@ -197,7 +197,7 @@ BinaryCursor.prototype.objRef = function() {
 
 /** Read a hash of variants */
 BinaryCursor.prototype.hashOfVariants = function() {
-  var elems = this.I32();
+  var elems = this.varint();
   var hash = new Hash();
   for (var i = 0; i < elems; i++) {
     var str = this.str();
@@ -442,7 +442,7 @@ BinaryCursor.prototype.contextEntry = function(contextsData) {
   entry.inner = [];
   entry.closures = [];
 
-  var count = data.I64();
+  var count = data.varint();
   var info = entry.staticCode.staticInfo;
 
   var lexicals = {};
@@ -459,7 +459,7 @@ BinaryCursor.prototype.contextEntry = function(contextsData) {
         lexicals[name] = data.variant();
         break;
       case 1: // int
-        lexicals[name] = data.I64();
+        lexicals[name] = data.varint();
         break;
       case 2: // num
         lexicals[name] = data.double();
@@ -481,7 +481,7 @@ BinaryCursor.prototype.deserialize = function(sc) {
 
   this.sc = sc;
 
-  if (version != 18) {
+  if (version != 19) {
     throw 'Unsupported serialization format version: ' + version;
   }
 

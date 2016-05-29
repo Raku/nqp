@@ -9,7 +9,7 @@ var constants = require('./constants.js');
 var op = {};
 exports.op = op;
 
-var CURRENT_VERSION = 18;
+var CURRENT_VERSION = 19;
 var OBJECTS_TABLE_ENTRY_SC_MASK = 0x7FF;
 var OBJECTS_TABLE_ENTRY_SC_IDX_MASK = 0x000FFFFF;
 var OBJECTS_TABLE_ENTRY_SC_IDX_MAX = 0x000FFFFF;
@@ -340,13 +340,13 @@ var PACKED_SC_OVERFLOW = 0xFFF;
 BinaryWriteCursor.prototype.idIdx = function(scId, idx) {
   if (scId <= PACKED_SC_MAX && idx <= PACKED_SC_IDX_MAX) {
     var packed = (scId << PACKED_SC_SHIFT) | (idx & PACKED_SC_IDX_MASK);
-    this.I32(packed);
+    this.varint(packed);
   } else {
     var packed = PACKED_SC_OVERFLOW << PACKED_SC_SHIFT;
 
-    this.I32(packed);
-    this.I32(scId);
-    this.I32(idx);
+    this.varint(packed);
+    this.varint(scId);
+    this.varint(idx);
   }
 };
 
@@ -481,7 +481,7 @@ BinaryWriteCursor.prototype.ref = function(ref) {
       break;
     case REFVAR_VM_HASH_STR_VAR:
       var count = 0;
-      this.I32(ref.$$elems());
+      this.varint(ref.$$elems());
       ref.content.forEach(function(value, key, map) {
         this.str(key);
         this.ref(value);
@@ -688,7 +688,7 @@ SerializationWriter.prototype.serializeContext = function(ctx) {
   var lexicals = 0;
   for (var name in staticInfo) lexicals++;
 
-  this.contextsData.I64(lexicals);
+  this.contextsData.varint(lexicals);
 
   for (var name in staticInfo) {
     this.contextsData.str(name);
@@ -697,7 +697,7 @@ SerializationWriter.prototype.serializeContext = function(ctx) {
         this.contextsData.ref(ctx[name]);
         break;
       case 1: // int
-        this.contextsData.I64(ctx[name]);
+        this.contextsData.varint(ctx[name]);
         break;
       case 2: // num
         this.contextsData.double(ctx[name]);
