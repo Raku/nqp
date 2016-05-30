@@ -2,6 +2,7 @@ var Map = require('es6-map');
 var Hash = require('./hash.js');
 var CodeRef = require('./code-ref.js');
 var NQPArray = require('./array.js');
+var NQPInt = require('./nqp-int.js');
 
 var op = {};
 exports.op = op;
@@ -49,6 +50,25 @@ op.hllizefor = function(ctx, obj, language) {
     var foreignTransformCode = config.get('foreign_transform_code');
     if (foreignTransformCode === undefined) return obj;
     return foreignTransformCode.$call(ctx, {}, obj);
+  // TODO handle already boxed ones
+  } else if (obj instanceof NQPInt) {
+    var foreignTypeInt = config.get('foreign_type_int');
+    var repr = foreignTypeInt._STable.REPR;
+    var boxed = repr.allocate(foreignTypeInt._STable);
+    boxed.$$setInt(obj.value);
+    return boxed;
+  } else if (typeof obj == 'number') {
+    var foreignTypeNum = config.get('foreign_type_num');
+    var repr = foreignTypeNum._STable.REPR;
+    var boxed = repr.allocate(foreignTypeNum._STable);
+    boxed.$$setNum(obj);
+    return boxed;
+  } else if (typeof obj == 'string') {
+    var foreignTypeStr = config.get('foreign_type_str');
+    var repr = foreignTypeStr._STable.REPR;
+    var boxed = repr.allocate(foreignTypeStr._STable);
+    boxed.$$setStr(obj);
+    return boxed;
   } else if (obj == null) {
     var nullValue = config.get('null_value');
     if (nullValue === undefined) return obj;
