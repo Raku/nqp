@@ -1,4 +1,4 @@
-plan(26);
+plan(32);
 
 ok(nqp::bindhllsym("blabla", "key1", "value1") eq 'value1', 'nqp::bindhllsym');
 nqp::bindhllsym("blabla", "key2", "value2");
@@ -113,3 +113,29 @@ ok(nqp::hllizefor($foobar-hash, "baz") eq 'HASH:bazified hash', "converting cust
 
 ok(nqp::eqaddr(nqp::hllizefor($foobar-other, "foobar"), $foobar-other), "other stuff doesn't get transformed");
 ok(nqp::eqaddr(nqp::hllizefor($foobar-other, "baz"), $foobar-other), "other stuff doesn't get transformed");
+
+class BoxxyNum is repr('P6num') {
+}
+
+class BoxxyStr is repr('P6str') {
+}
+
+class BoxxyInt is repr('P6int') {
+}
+
+nqp::sethllconfig('boxxy', nqp::hash(
+    'foreign_type_num', BoxxyNum,
+    'foreign_type_str', BoxxyStr,
+    'foreign_type_int', BoxxyInt
+));
+
+my $num := nqp::hllizefor(1.3, 'boxxy');
+my $int := nqp::hllizefor(1, 'boxxy');
+my $str := nqp::hllizefor('trolling', 'boxxy');
+
+ok(nqp::istype($num, BoxxyNum), 'got the right type for num');
+ok(nqp::unbox_n($num) == 1.3, 'got the right value for num');
+ok(nqp::istype($str, BoxxyStr), 'got the right type for str');
+ok(nqp::unbox_s($str) eq "trolling", 'got the right value for str');
+ok(nqp::istype($int, BoxxyInt), 'got the right type for int');
+ok(nqp::unbox_i($int) == 1, 'got the right value for int');
