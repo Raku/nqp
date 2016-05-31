@@ -295,7 +295,8 @@ Ctx.prototype.lookup = function(name) {
     }
     ctx = ctx.outer;
   }
-  throw "Can't lookup: " + name;
+  /* Rakudo depends on returning null when we can't lookup a lexical */
+  return null;
 };
 
 Ctx.prototype.$$atkey = function(key) {
