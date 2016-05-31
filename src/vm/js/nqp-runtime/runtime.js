@@ -141,7 +141,7 @@ exports.toStr = function(arg, ctx) {
     return arg.$$getInt().toString();
   } else {
     console.log(arg);
-    throw Error("Can't convert to str");
+    throw new NQPException("Can't convert to str");
   }
 };
 
