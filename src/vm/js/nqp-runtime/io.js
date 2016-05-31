@@ -283,6 +283,10 @@ op.printfh = function(fh, content) {
   return fh.printfh(content);
 };
 
+op.sayfh = function(fh, content) {
+  return fh.printfh(content + "\n");
+};
+
 op.unlink = function(filename) {
   fs.unlinkSync(filename);
 };

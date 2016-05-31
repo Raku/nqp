@@ -395,6 +395,7 @@ class QAST::OperationsJS {
     add_simple_op('readlinechompfh', $T_STR, [$T_OBJ], :sideffects);
     add_simple_op('readallfh', $T_STR, [$T_OBJ], :sideffects);
     add_simple_op('printfh', $T_OBJ, [$T_OBJ, $T_STR], :sideffects);
+    add_simple_op('sayfh', $T_OBJ, [$T_OBJ, $T_STR], :sideffects);
     add_simple_op('flushfh', $T_OBJ, [$T_OBJ], :sideffects);
     add_simple_op('closefh', $T_OBJ, [$T_OBJ], :sideffects);
     add_simple_op('closefh_i', $T_INT, [$T_OBJ], :sideffects);
