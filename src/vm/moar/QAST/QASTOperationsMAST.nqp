@@ -217,7 +217,8 @@ class QAST::MASTOperations {
             # put the arg exression's generation code in the instruction list
             nqp::splice(@all_ins, $arg.instructions, +@all_ins, 0)
                 unless $constant_operand;
-            if @deconts[$arg_num] {
+            if @deconts[$arg_num] &&
+                    (!$_.has_compile_time_value || nqp::iscont($_.compile_time_value)) {
                 my $dc_reg := $regalloc.fresh_register($MVM_reg_obj);
                 nqp::push(@all_ins, MAST::Op.new( :op('decont'), $dc_reg, $arg.result_reg ));
                 nqp::push(@arg_regs, $dc_reg);
