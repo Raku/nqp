@@ -124,7 +124,7 @@ class QAST::MASTOperations {
         else {
             nqp::die("MoarVM op '$op' is unknown as a core or extension op");
         }
-        
+
         my $num_args := +@args;
         my $operand_num := 0;
         my $result_kind := $MVM_reg_void;
@@ -352,7 +352,7 @@ class QAST::MASTOperations {
         if $ret != -1 {
             self.check_ret_val($moarop, $ret);
         }
-        
+
         my @deconts;
         if nqp::islist($decont_in) {
             for $decont_in { @deconts[$_] := 1; }
@@ -406,7 +406,7 @@ class QAST::MASTOperations {
             %core_result_type{$op} := str;
         }
     }
-    
+
     # Sets op inlinability at a HLL level. (Can override at HLL level whether
     # or not the HLL overrides the op itself.)
     method set_hll_op_result_type(str $hll, str $op, $type) {
@@ -1034,26 +1034,26 @@ for ('', 'repeat_') -> $repness {
                     QAST::Var.new( :name($cond_temp), :scope('local') ));
             }
 
+            # Allocate result register if needed.
+            my $regalloc := $*REGALLOC;
+            my $res_kind := $MVM_reg_obj;
+            my $res_reg;
+            if nqp::defined($*WANT) && $*WANT == $MVM_reg_void {
+                $res_kind := $MVM_reg_void;
+                $res_reg := MAST::VOID;
+            } else {
+                $res_reg := $regalloc.fresh_register($res_kind);
+            }
+
             # Compile each of the children.
             my @comp_ops;
             my @comp_types;
-            my $regalloc := $*REGALLOC;
             for @children {
                 my $comp := nqp::elems(@comp_ops) == 0
                     ?? $qastcomp.as_mast($_)
                     !! $qastcomp.as_mast($_, :want($MVM_reg_void));
                 @comp_ops.push($comp);
                 @comp_types.push($comp.result_kind);
-            }
-
-            my $res_kind := $MVM_reg_obj;
-            my $res_reg;
-
-            if nqp::defined($*WANT) && $*WANT == $MVM_reg_void {
-                $res_kind := $MVM_reg_void;
-                $res_reg := MAST::VOID;
-            } else {
-                $res_reg := $regalloc.fresh_register($res_kind);
             }
 
             if $orig_type {
