@@ -1997,6 +1997,12 @@ my class MASTCompilerInstance {
         }
         return self.as_mast_constant(@children[0]);
     }
+    multi method as_mast_constant(QAST::Op $op) {
+        if $op.op eq 'const' && nqp::existskey(%const_map, $op.name) {
+            return MAST::IVal.new( :value(%const_map{$op.name}) );
+        }
+        nqp::die("expected QAST constant; got op " ~ $op.op);
+    }
     multi method as_mast_constant(QAST::Node $qast) {
         nqp::die("expected QAST constant; didn't get one");
     }
