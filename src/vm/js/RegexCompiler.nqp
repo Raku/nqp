@@ -128,7 +128,8 @@ class RegexCompiler {
         if $node.subtype eq 'ignorecase' {
             $str := "$str.toLowerCase()";
         }
-        "if ($str $cmpop $qconst) \{{self.fail}\} else \{{$!pos}+=$constlen\}\n";
+        "if ($str $cmpop $qconst) \{{self.fail}\}" ~
+            ($node.subtype eq 'zerowidth' ?? "\n" !! " else \{{$!pos}+=$constlen\}\n");
     }
 
     method scan($node) {
