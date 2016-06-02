@@ -1636,6 +1636,7 @@ my %handler_names := nqp::hash(
     'AWAIT',   $HandlerCategory::await,
     'EMIT',    $HandlerCategory::emit,
     'DONE',    $HandlerCategory::done,
+    'RETURN',  $HandlerCategory::return,
 );
 QAST::MASTOperations.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
     my @children := nqp::clone($op.list());
@@ -1723,6 +1724,36 @@ QAST::MASTOperations.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
     nqp::push($il, $endlbl);
 
     MAST::InstructionList.new($il, $protil.result_reg, $MVM_reg_obj)
+});
+
+# Simple payload handler.
+QAST::MASTOperations.add_core_op('handlepayload', :!inlinable, sub ($qastcomp, $op) {
+    my @children := $op.list;
+    if @children != 3 {
+        nqp::die("The 'handlepayload' op requires three children");
+    }
+    my str $type := @children[1];
+    unless nqp::existskey(%handler_names, $type) {
+        nqp::die("Invalid handler type '$type'");
+    }
+    my int $mask := %handler_names{$type};
+
+    my $il        := nqp::list();
+    my $protected := $qastcomp.as_mast(@children[0], :want($MVM_reg_obj));
+    my $handler   := $qastcomp.as_mast(@children[2], :want($MVM_reg_obj));
+    my $endlbl     := MAST::Label.new();
+    my $handlelbl  := MAST::Label.new();
+    push_op($protected.instructions, 'goto', $endlbl);
+    nqp::push($il, MAST::HandlerScope.new(
+        :instructions($protected.instructions), :goto($handlelbl),
+        :category_mask($mask), :action($HandlerAction::unwind_and_goto_with_payload)));
+    nqp::push($il, $handlelbl);
+    push_ilist($il, $handler);
+    push_op($il, 'set', $protected.result_reg, $handler.result_reg);
+    nqp::push($il, $endlbl);
+    $*REGALLOC.release_register($handler.result_reg, $MVM_reg_obj);
+
+    MAST::InstructionList.new($il, $protected.result_reg, $MVM_reg_obj)
 });
 
 # Control exception throwing.
