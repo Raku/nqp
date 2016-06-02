@@ -1140,8 +1140,8 @@ class NQP::Actions is HLL::Actions {
 
     sub wrap_return_handler($ast) {
         QAST::Op.new(
-            :op<lexotic>, :name<RETURN>,
-            $ast
+            :op<handlepayload>, $ast,
+            'RETURN', QAST::Op.new( :op<lastexpayload> )
         )
     }
 
@@ -1659,8 +1659,11 @@ class NQP::Actions is HLL::Actions {
     method postfix:sym<.>($/) { make $<dotty>.ast; }
 
     method term:sym<return>($/) {
-        make QAST::Op.new( :op('call'), :name('RETURN'),
-            $<EXPR> ?? $<EXPR>.ast !!  QAST::WVal.new( :value($*W.find_sym(['NQPMu'])) ));
+        make QAST::Op.new(
+            :op('throwpayloadlex'),
+            QAST::IVal.new( :value(32) ), # s/nqp::const::CONTROL_RETURN/32/ after bootstrap
+            $<EXPR> ?? $<EXPR>.ast !!  QAST::WVal.new( :value($*W.find_sym(['NQPMu'])))
+        );
     }
 
     method prefix:sym<make>($/) {
