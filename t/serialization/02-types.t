@@ -2,7 +2,7 @@
 
 use nqpmo;
 
-plan(48);
+plan(49);
 
 sub add_to_sc($sc, $idx, $obj) {
     nqp::scsetobj($sc, $idx, $obj);
@@ -431,4 +431,37 @@ sub add_to_sc($sc, $idx, $obj) {
 
     ok(nqp::eqaddr(nqp::hllizefor($obj, "foo"), $obj), "correct hll prevents convertion");
     ok(nqp::eqaddr(nqp::hllizefor($obj, "baz"), Baz), "in this case it's converted anyway");
+}
+
+# Serializing a type with HLL role
+{
+
+    my $type := NQPClassHOW.new_type(:name('hll test'), :repr('P6opaque'));
+    $type.HOW.add_parent($type, NQPMu);
+    $type.HOW.compose($type);
+
+    nqp::settypehllrole($type, 4);
+
+    nqp::sethllconfig('somelang', nqp::hash(
+        'foreign_transform_array', -> $array {
+            'fooifed';
+         }
+    ));
+    my $sc := nqp::createsc('TEST_SC_12_IN');
+    my $sh := nqp::list_s();
+
+    my $cr := nqp::list();
+
+    add_to_sc($sc, 0, $type);
+
+    my $serialized := nqp::serialize($sc, $sh);
+
+    my $dsc := nqp::createsc('TEST_SC_12_OUT');
+    nqp::deserialize($serialized, $dsc, $sh, $cr, nqp::null());
+
+    my $obj := nqp::scgetobj($dsc, 0).new;
+
+
+    my $hllized := nqp::hllizefor($obj, "somelang");
+    ok(nqp::isstr($hllized) && $hllized eq "fooifed", "hll role is preserved correctly");
 }
