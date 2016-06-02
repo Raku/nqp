@@ -1,4 +1,6 @@
-plan(11);
+plan(12);
+
+ok(nqp::isnull(nqp::decont(nqp::null())), 'nqp::decont works on nqp::null');
 
 # code_pair container spec
 {
