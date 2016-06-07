@@ -845,6 +845,7 @@ reprs.CPointer = CPointer;
 function ReentrantMutex() {}
 ReentrantMutex.prototype.createObjConstructor = basicConstructor;
 ReentrantMutex.prototype.allocate = basicAllocate;
+ReentrantMutex.prototype.typeObjectFor = basicTypeObjectFor;
 
 reprs.ReentrantMutex = ReentrantMutex;
 
