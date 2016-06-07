@@ -1668,24 +1668,26 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     method compile_var_as_part_of_ctx(QAST::Var $var, :$cps) {
+        my $type := self.figure_out_type($var);
         if $*BINDVAL {
-            my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ), :$cps);
+            my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($type), :$cps);
             if $var.decl eq 'var' {
-                self.stored_result(Chunk.new($T_OBJ, "({$*CTX}[{quote_string($var.name)}] = {$bindval.expr})",  [$bindval]));
+                self.stored_result(Chunk.new($type, "({$*CTX}[{quote_string($var.name)}] = {$bindval.expr})",  [$bindval]));
             }
             else {
-                self.stored_result(Chunk.new($T_OBJ, "{$*CTX}.bind({quote_string($var.name)}, {$bindval.expr})",  [$bindval]));
+                self.stored_result(Chunk.new($type, "{$*CTX}.bind({quote_string($var.name)}, {$bindval.expr})",  [$bindval]));
             }
         }
         else {
             if $var.decl eq 'var' {
-                self.stored_result(Chunk.new($T_OBJ, "({$*CTX}[{quote_string($var.name)}] = null)",  []));
+                my %default_value := nqp::hash($T_OBJ, 'null', $T_INT, '0', $T_NUM, '0', $T_STR, '""');
+                self.stored_result(Chunk.new($type, "({$*CTX}[{quote_string($var.name)}] = {%default_value{$type}})",  []));
             }
             elsif $var.decl eq 'contvar' {
                 self.stored_result(Chunk.new($T_OBJ, "({$*CTX}[{quote_string($var.name)}] = nqp.op.clone({self.value_as_js($var.value)}))",  []));
             }
             else {
-                Chunk.new($T_OBJ, "{$*CTX}.lookup({quote_string($var.name)})", [], :node($var));
+                Chunk.new($type, "{$*CTX}.lookup({quote_string($var.name)})", [], :node($var));
             }
         }
     }
