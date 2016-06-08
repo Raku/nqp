@@ -1619,8 +1619,8 @@ QAST::MASTOperations.add_core_moarop_mapping('backtrace', 'backtrace');
 QAST::MASTOperations.add_core_moarop_mapping('throw', 'throwdyn');
 QAST::MASTOperations.add_core_moarop_mapping('rethrow', 'rethrow');
 QAST::MASTOperations.add_core_moarop_mapping('resume', 'resume');
-QAST::MASTOperations.add_core_moarop_mapping('throwpayloadlex', 'throwpayloadlex');
-QAST::MASTOperations.add_core_moarop_mapping('throwpayloadlexcaller', 'throwpayloadlexcaller');
+QAST::MASTOperations.add_core_moarop_mapping('throwpayloadlex', 'throwpayloadlex', :!inlinable);
+QAST::MASTOperations.add_core_moarop_mapping('throwpayloadlexcaller', 'throwpayloadlexcaller', :!inlinable);
 QAST::MASTOperations.add_core_moarop_mapping('lastexpayload', 'lastexpayload');
 
 my %handler_names := nqp::hash(
