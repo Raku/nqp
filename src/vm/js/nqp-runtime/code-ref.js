@@ -74,6 +74,15 @@ CodeRef.prototype.closure = function(block) {
   return closure;
 };
 
+CodeRef.prototype.closureMethod = function(block) {
+  var closure = new CodeRef(this.name, undefined);
+  closure.codeObj = this.codeObj;
+  closure.cuid = this.cuid;
+  closure.method(block);
+  closure.staticCode = this;
+  return closure;
+};
+
 CodeRef.prototype.CPS = function(block) {
   this.$callCPS = block;
   return this;
