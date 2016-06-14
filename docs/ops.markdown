@@ -114,14 +114,14 @@
     - [if](#if)
     - [unless](#unless)
 - [Loop/Control Opcodes](#-loopcontrol-opcodes)
+    - [control](#control)
+    - [defor](#defor)
     - [for](#for)
     - [ifnull](#ifnull)
-    - [defor](#defor)
     - [repeat_until](#repeat_until)
     - [repeat_while](#repeat_while)
     - [until](#until)
     - [while](#while)
-    - [control](#control)
 - [Exceptional Opcodes](#-exceptional-opcodes)
     - [backtrace](#backtrace)
     - [backtracestrings](#backtracestrings)
@@ -1121,6 +1121,21 @@ If not, and an `$else` block is present, run that instead.
 
 # <a id="control"></a> Loop/Control Opcodes
 
+## control
+* `QAST::Op.new(:op<control>, :name<next>);`
+* `QAST::Op.new(:op<control>, :name<last>);`
+* `QAST::Op.new(:op<control>, :name<redo>);`
+
+Not callable directly from NQP, but used in languages via QAST to perform loop
+control. The specific kind of loop control desired is specified via the
+`:name` attribute; either `next`, `last`, or `redo`.
+
+## defor
+* `defor(Block $cond, Block $body)`
+
+If the `$cond` evaluates to defined value, return it, otherwise, evaluate
+the `$body`.
+
 ## for
 * `for(Iterable $iter, Block $body)`
 
@@ -1131,12 +1146,6 @@ Invoke the `$body` for every item available in `$iter`.
 
 If the `$cond` evaluates to null, evaluate the `$body`, otherwise return
 the result of `$cond`.
-
-## defor
-* `defor(Block $cond, Block $body)`
-
-If the `$cond` evaluates to defined value, return it, otherwise, evaluate
-the `$body`.
 
 ## repeat_until
 * `repeat_until(Block $condition, Block $body)`
@@ -1156,6 +1165,21 @@ only if the condition returns a non-0 value.
 
 If a `$post` block is present, run that at the end, regardless of `$condition`.
 
+## stmts
+* `stmts(...)`
+
+Executes the given statements sequentially. For example:
+
+```perl
+
+nqp::stmts((my $a := nqp::chars("foo")), say($a), say("bar"));
+# 3
+# bar
+
+```
+
+Note that `:=` statements must be surrounded by parentheses.
+
 ## until
 * `until(Block $condition, Block $body)`
 * `until(Block $condition, Block $body, Block $post)`
@@ -1171,15 +1195,6 @@ If a `$post` block is present, run that at the end, regardless of `$condition`.
 Enter a loop, running the `$body` only if the condition returns a non-0 value.
 
 If a `$post` block is present, run that at the end, regardless of `$condition`.
-
-## control
-* `QAST::Op.new(:op<control>, :name<next>);`
-* `QAST::Op.new(:op<control>, :name<last>);`
-* `QAST::Op.new(:op<control>, :name<redo>);`
-
-Not callable directly from NQP, but used in languages via QAST to perform loop
-control. The specific kind of loop control desired is specified via the
-`:name` attribute; either `next`, `last`, or `redo`.
 
 # <a id="exceptions"></a> Exceptional Opcodes
 
