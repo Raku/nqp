@@ -2039,6 +2039,7 @@ my %const_map := nqp::hash(
     'CONTROL_AWAIT',        8192,
     'CONTROL_EMIT',         16384,
     'CONTROL_DONE',         32768,
+    'CONTROL_RETURN',       65536,
     
     'STAT_EXISTS',             0,
     'STAT_FILESIZE',           1,
