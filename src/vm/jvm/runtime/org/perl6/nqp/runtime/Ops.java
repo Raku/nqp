@@ -5503,6 +5503,25 @@ public final class Ops {
     public static SixModelObject resume(SixModelObject obj, ThreadContext tc) {
         throw theResumer;
     }
+    public static void _throwpayloadlex_c(long category, SixModelObject payload, ThreadContext tc) {
+        SixModelObject exType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.exceptionType;
+        VMExceptionInstance exObj = (VMExceptionInstance)exType.st.REPR.allocate(tc, exType.st);
+        exObj.category = category;
+        exObj.origin = tc.curFrame;
+        tc.lastPayload = payload;
+        ExceptionHandling.handlerLexical(tc, category, exObj, false);
+    }
+    public static void _throwpayloadlexcaller_c(long category, SixModelObject payload, ThreadContext tc) {
+        SixModelObject exType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.exceptionType;
+        VMExceptionInstance exObj = (VMExceptionInstance)exType.st.REPR.allocate(tc, exType.st);
+        exObj.category = category;
+        exObj.origin = tc.curFrame;
+        tc.lastPayload = payload;
+        ExceptionHandling.handlerLexical(tc, category, exObj, true);
+    }
+    public static SixModelObject lastexpayload(ThreadContext tc) {
+        return tc.lastPayload;
+    }
 
     /* compatibility shims for next bootstrap TODO */
     public static String die_s(String msg, ThreadContext tc) {

@@ -114,6 +114,58 @@ all:
             panic(tc, category, exObj);
     }
 
+    /* Finds and executes a handler, using lexical scope to find it. */
+    public static void handlerLexical(ThreadContext tc, long category,
+            VMExceptionInstance exObj, boolean skipCaller) {
+        if (tc.gc.shuttingDown)
+            throw death;
+
+        CallFrame f = tc.curFrame;
+        if (skipCaller) {
+            f = f.caller;
+            while (f != null && f.codeRef.staticInfo.isThunk)
+                f = f.caller;
+        }
+        long[] handler = null;
+    all:
+        while (f != null) {
+            if (f.curHandler != 0) {
+                long tryHandler = f.curHandler;                
+                long[][] handlers = f.codeRef.staticInfo.handlers;
+                while (tryHandler != 0) {
+                    for (int i = 0; i < handlers.length; i++) {
+                        if (handlers[i][0] == tryHandler) {
+                            // Found an active one, but is it the right category?
+                            if ((handlers[i][2] & category) != 0) {
+                                // Correct category, but ensure we aren't already in it.
+                                boolean valid = true;
+                                for (int j = 0; j < tc.handlers.size(); j++) {
+                                    if (tc.handlers.get(j).handlerInfo == handlers[i]) {
+                                        valid = false;
+                                        break;
+                                    }
+                                }
+                                if (valid) {
+                                    handler = handlers[i];
+                                    break all;
+                                }
+                            }
+                            
+                            // If not, try outer one.
+                            tryHandler = handlers[i][1];
+                            break;
+                        }
+                    }
+                }
+            }
+            f = f.outer;
+        }
+        if (handler != null)
+            invokeHandler(tc, handler, category, f, false, exObj, null);
+        else
+            panic(tc, category, exObj);
+    }
+
     /* Invokes the handler. */
     private static final MethodHandle invokeHandlerReenter;
     static {

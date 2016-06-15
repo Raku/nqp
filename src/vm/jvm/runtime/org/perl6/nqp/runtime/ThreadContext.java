@@ -57,6 +57,11 @@ public class ThreadContext {
      * The current unwind exception.
      */
     public UnwindException unwinder;
+
+    /**
+     * The last exception payload.
+     */
+    public SixModelObject lastPayload;
     
     /**
      * Stack of handlers we're currently in.
