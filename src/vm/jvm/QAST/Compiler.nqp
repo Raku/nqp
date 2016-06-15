@@ -81,10 +81,12 @@ my $EX_CAT_PROCEED := 256;
 my $EX_CAT_AWAIT   := 8192;
 my $EX_CAT_EMIT    := 16384;
 my $EX_CAT_DONE    := 32768;
+my $EX_CAT_RETURN  := 65536;
 my $EX_CAT_CONTROL := $EX_CAT_NEXT +| $EX_CAT_REDO +| $EX_CAT_LAST +|
                       $EX_CAT_TAKE +| $EX_CAT_WARN +|
                       $EX_CAT_SUCCEED +| $EX_CAT_PROCEED +|
-                      $EX_CAT_AWAIT +| $EX_CAT_EMIT +| $EX_CAT_DONE;
+                      $EX_CAT_AWAIT +| $EX_CAT_EMIT +| $EX_CAT_DONE +|
+                      $EX_CAT_RETURN;
 my $EX_CAT_LABELED := 4096;
 
 # Exception handler kinds.
@@ -1623,6 +1625,7 @@ my %handler_names := nqp::hash(
     'AWAIT',   $EX_CAT_AWAIT,
     'EMIT',    $EX_CAT_EMIT,
     'DONE',    $EX_CAT_DONE,
+    'RETURN',  $EX_CAT_RETURN,
 );
 QAST::OperationsJAST.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
     my @children := nqp::clone($op.list());

@@ -22,6 +22,7 @@ public class ExceptionHandling {
     public static final int EX_CAT_AWAIT = 8192;
     public static final int EX_CAT_EMIT = 16384;
     public static final int EX_CAT_DONE = 32768;
+    public static final int EX_CAT_RETURN = 65536;
     
     /* Exception handler kinds. */
     public static final int EX_UNWIND_SIMPLE = 0;
