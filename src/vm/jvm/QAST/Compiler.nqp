@@ -1612,6 +1612,10 @@ QAST::OperationsJAST.map_classlib_core_op('backtracestrings', $TYPE_OPS, 'backtr
 QAST::OperationsJAST.map_classlib_core_op('throw', $TYPE_OPS, '_throw_c', [$RT_OBJ], $RT_OBJ, :tc, :cont);
 QAST::OperationsJAST.map_classlib_core_op('rethrow', $TYPE_OPS, 'rethrow_c', [$RT_OBJ], $RT_OBJ, :tc, :cont);
 QAST::OperationsJAST.map_classlib_core_op('resume', $TYPE_OPS, 'resume', [$RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('throwpayloadlex', $TYPE_OPS, '_throwpayloadlex_c', [$RT_INT, $RT_OBJ], $RT_OBJ, :tc, :cont);
+QAST::OperationsJAST.map_classlib_core_op('throwpayloadlexcaller', $TYPE_OPS, '_throwpayloadlexcaller_c', [$RT_INT, $RT_OBJ], $RT_OBJ, :tc, :cont);
+QAST::OperationsJAST.map_classlib_core_op('lastexpayload', $TYPE_OPS, 'lastexpayload', [], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('throwextype', $TYPE_OPS, 'throwcatdyn_c', [$RT_INT], $RT_OBJ, :tc, :cont);
 my %handler_names := nqp::hash(
     'CATCH',   $EX_CAT_CATCH,
     'CONTROL', $EX_CAT_CONTROL,
