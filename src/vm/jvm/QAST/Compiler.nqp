@@ -1783,6 +1783,56 @@ QAST::OperationsJAST.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
     result($il, $RT_OBJ);
 });
 
+# Simple payload handler.
+QAST::OperationsJAST.add_core_op('handlepayload', :!inlinable, sub ($qastcomp, $op) {
+    my @children := $op.list;
+    if @children != 3 {
+        nqp::die("The 'handlepayload' op requires three children");
+    }
+    my str $type := @children[1];
+    unless nqp::existskey(%handler_names, $type) {
+        nqp::die("Invalid handler type '$type'");
+    }
+    my int $mask := %handler_names{$type};
+
+    # Create label and handler.
+    my $hp_id := $qastcomp.unique('payload_handler');
+    my $done_lbl := JAST::Label.new( :name($hp_id ~ '_done') );
+    my $handler_id := &*REGISTER_UNWIND_HANDLER($*HANDLER_IDX, $mask, :ex_obj(1));
+
+    # Spill stack ahead of emitting try/catch.
+    my $il := JAST::InstructionList.new();
+    $*STACK.spill_to_locals($il);
+
+    # Compile code in protected region and stash result.
+    my $result := $*TA.fresh_o();
+    my $prores := $qastcomp.as_jast_in_handler(@children[0], $handler_id, :want($RT_OBJ));
+    my $tryil  := JAST::InstructionList.new();
+    $tryil.append($prores.jast);
+    $*STACK.obtain($tryil, $prores);
+    $tryil.append(JAST::Instruction.new( :op('astore'), $result ));
+    $tryil.append(JAST::Instruction.new( :op('goto'), $done_lbl ));
+
+    # Compile handler.
+    my $catch := JAST::InstructionList.new();
+    $qastcomp.unwind_check($catch, $handler_id, :outer($*HANDLER_IDX));
+    $catch.append($POP);
+    my $hanres := $qastcomp.as_jast(@children[2], :want($RT_OBJ));
+    $catch.append($hanres.jast);
+    $*STACK.obtain($catch, $hanres);
+    $catch.append(JAST::Instruction.new( :op('astore'), $result ));
+
+    # Wrap in try/catch.
+    $il.append($qastcomp.delimit_handler(
+        JAST::TryCatch.new( :try($tryil), :catch($catch), :type($TYPE_EX_UNWIND) ),
+        $*HANDLER_IDX, $handler_id));
+    $il.append($done_lbl);
+
+    # Load result.
+    $il.append(JAST::Instruction.new( :op('aload'), $result ));
+    result($il, $RT_OBJ)
+});
+
 # Control exception throwing.
 my %control_map := nqp::hash(
     'next', $EX_CAT_NEXT,
