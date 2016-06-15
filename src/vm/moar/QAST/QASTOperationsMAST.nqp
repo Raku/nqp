@@ -1622,6 +1622,7 @@ QAST::MASTOperations.add_core_moarop_mapping('resume', 'resume');
 QAST::MASTOperations.add_core_moarop_mapping('throwpayloadlex', 'throwpayloadlex', :!inlinable);
 QAST::MASTOperations.add_core_moarop_mapping('throwpayloadlexcaller', 'throwpayloadlexcaller', :!inlinable);
 QAST::MASTOperations.add_core_moarop_mapping('lastexpayload', 'lastexpayload');
+QAST::MASTOperations.add_core_moarop_mapping('throwextype', 'throwcatdyn');
 
 my %handler_names := nqp::hash(
     'CATCH',   $HandlerCategory::catch,
