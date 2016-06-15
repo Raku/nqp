@@ -19,6 +19,8 @@ public class ResumeStatus extends SixModelObject {
         public final Object[] saveSpace;
         /** If present, this frame should be set as the running frame on reentry. */
         public final CallFrame callFrame;
+        /** The curHandler of that frame we shouold set. */
+        public final long curHandler;
         /** The next deeper frame.  Don't modify after exposing to the world. */
         public Frame next;
         /** Thread context which the frame is being restored on.  Only valid during restore. */
@@ -33,6 +35,10 @@ public class ResumeStatus extends SixModelObject {
             this.resumePoint = resumePoint;
             this.saveSpace = saveSpace;
             this.callFrame = callFrame;
+            if (callFrame != null)
+                this.curHandler = callFrame.curHandler;
+            else
+                this.curHandler = 0;
             this.next = next;
         }
 
@@ -41,6 +47,7 @@ public class ResumeStatus extends SixModelObject {
             if (callFrame != null) {
                 callFrame.tc = tc;
                 callFrame.caller = tc.curFrame;
+                callFrame.curHandler = curHandler;
                 tc.curFrame = callFrame;
             }
             this.method.invokeExact(this);
