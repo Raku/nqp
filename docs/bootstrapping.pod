@@ -1,19 +1,21 @@
-=head1 Bootstrapping procedure for nqp-rx
+=head1 Bootstrapping procedure for NQP
 
-NPQ-rx is a bootstrapped compiler, which means that it uses itself to compile
+NPQ is a bootstrapped compiler, which means that it uses itself to compile
 itself.
 
-To make the first compilation possible, a compiled version of the compiler is
-stored in F</src/stage0/*.pir> and included in the source code repository.
-Also the parrot virtual machine ships the same
-C<stage0/*.pir> files.
+To make the first compilation possible under MoarVM, a compiled version of the
+compiler is stored in F<src/vm/moar/stage0/*.moarvm> and included in the source
+code repository.
 
 When you make changes to the compiler, eventually you need to update these
 I<stage0> files.
 
-Here is how you proceed to update the bootstrapping files nqp-rx and parrot.
-At any stage, if C<make test> fails, don't go ahead with the following steps,
-but fix the problem first.
+Here is how you proceed to update the MoarVM bootstrapping files in NQP.  At
+any stage, if C<make test> fails, don't go ahead with the following steps, but
+fix the problem first.
+
+(Note: the equivalent under JVM is F<src/vm/jvm/stage0/*.jar> with the update 
+target C<make j-bootstrap-files>)
 
 =over
 
@@ -23,7 +25,7 @@ Make your changes, run C<make test>
 
 =item *
 
-Run C<make bootstrap-files> and C<make test>
+Run C<make m-bootstrap-files> and C<make test>
 
 =item *
 
@@ -33,16 +35,6 @@ Commit the non-bootstrap files that you modified yourself
 
 Commit the bootstrap files
 
-=item *
-
-Copy the I<stage0> files over to parrot:
-
-    cp src/stage0/*.pir $PARROT_SRC/ext/nqp-rx/src/stage0
-
-=item *
-
-In the parrot source, run C<make test> and commit
-
 =back
 
-References: L<http://irclog.perlgeek.de/perl6/2010-04-22#i_2253227>
+Historic References: L<http://irclog.perlgeek.de/perl6/2010-04-22#i_2253227>
