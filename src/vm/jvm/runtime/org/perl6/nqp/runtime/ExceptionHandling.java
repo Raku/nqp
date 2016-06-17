@@ -123,7 +123,7 @@ all:
         CallFrame f = tc.curFrame;
         if (skipCaller) {
             f = f.caller;
-            while (f != null && f.codeRef.staticInfo.isThunk)
+            while (f != null && (f.codeRef.staticInfo.isThunk || f.codeRef.isCompilerStub))
                 f = f.caller;
         }
         long[] handler = null;
