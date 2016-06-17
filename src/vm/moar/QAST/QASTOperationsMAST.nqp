@@ -124,7 +124,7 @@ class QAST::MASTOperations {
         else {
             nqp::die("MoarVM op '$op' is unknown as a core or extension op");
         }
-        
+
         my $num_args := +@args;
         my $operand_num := 0;
         my $result_kind := $MVM_reg_void;
@@ -352,7 +352,7 @@ class QAST::MASTOperations {
         if $ret != -1 {
             self.check_ret_val($moarop, $ret);
         }
-        
+
         my @deconts;
         if nqp::islist($decont_in) {
             for $decont_in { @deconts[$_] := 1; }
@@ -406,7 +406,7 @@ class QAST::MASTOperations {
             %core_result_type{$op} := str;
         }
     }
-    
+
     # Sets op inlinability at a HLL level. (Can override at HLL level whether
     # or not the HLL overrides the op itself.)
     method set_hll_op_result_type(str $hll, str $op, $type) {
@@ -1034,26 +1034,26 @@ for ('', 'repeat_') -> $repness {
                     QAST::Var.new( :name($cond_temp), :scope('local') ));
             }
 
+            # Allocate result register if needed.
+            my $regalloc := $*REGALLOC;
+            my $res_kind := $MVM_reg_obj;
+            my $res_reg;
+            if nqp::defined($*WANT) && $*WANT == $MVM_reg_void {
+                $res_kind := $MVM_reg_void;
+                $res_reg := MAST::VOID;
+            } else {
+                $res_reg := $regalloc.fresh_register($res_kind);
+            }
+
             # Compile each of the children.
             my @comp_ops;
             my @comp_types;
-            my $regalloc := $*REGALLOC;
             for @children {
                 my $comp := nqp::elems(@comp_ops) == 0
                     ?? $qastcomp.as_mast($_)
                     !! $qastcomp.as_mast($_, :want($MVM_reg_void));
                 @comp_ops.push($comp);
                 @comp_types.push($comp.result_kind);
-            }
-
-            my $res_kind := $MVM_reg_obj;
-            my $res_reg;
-
-            if nqp::defined($*WANT) && $*WANT == $MVM_reg_void {
-                $res_kind := $MVM_reg_void;
-                $res_reg := MAST::VOID;
-            } else {
-                $res_reg := $regalloc.fresh_register($res_kind);
             }
 
             if $orig_type {
@@ -1619,6 +1619,10 @@ QAST::MASTOperations.add_core_moarop_mapping('backtrace', 'backtrace');
 QAST::MASTOperations.add_core_moarop_mapping('throw', 'throwdyn');
 QAST::MASTOperations.add_core_moarop_mapping('rethrow', 'rethrow');
 QAST::MASTOperations.add_core_moarop_mapping('resume', 'resume');
+QAST::MASTOperations.add_core_moarop_mapping('throwpayloadlex', 'throwpayloadlex', :!inlinable);
+QAST::MASTOperations.add_core_moarop_mapping('throwpayloadlexcaller', 'throwpayloadlexcaller', :!inlinable);
+QAST::MASTOperations.add_core_moarop_mapping('lastexpayload', 'lastexpayload');
+QAST::MASTOperations.add_core_moarop_mapping('throwextype', 'throwcatdyn');
 
 my %handler_names := nqp::hash(
     'CATCH',   $HandlerCategory::catch,
@@ -1633,6 +1637,7 @@ my %handler_names := nqp::hash(
     'AWAIT',   $HandlerCategory::await,
     'EMIT',    $HandlerCategory::emit,
     'DONE',    $HandlerCategory::done,
+    'RETURN',  $HandlerCategory::return,
 );
 QAST::MASTOperations.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
     my @children := nqp::clone($op.list());
@@ -1720,6 +1725,36 @@ QAST::MASTOperations.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
     nqp::push($il, $endlbl);
 
     MAST::InstructionList.new($il, $protil.result_reg, $MVM_reg_obj)
+});
+
+# Simple payload handler.
+QAST::MASTOperations.add_core_op('handlepayload', :!inlinable, sub ($qastcomp, $op) {
+    my @children := $op.list;
+    if @children != 3 {
+        nqp::die("The 'handlepayload' op requires three children");
+    }
+    my str $type := @children[1];
+    unless nqp::existskey(%handler_names, $type) {
+        nqp::die("Invalid handler type '$type'");
+    }
+    my int $mask := %handler_names{$type};
+
+    my $il        := nqp::list();
+    my $protected := $qastcomp.as_mast(@children[0], :want($MVM_reg_obj));
+    my $handler   := $qastcomp.as_mast(@children[2], :want($MVM_reg_obj));
+    my $endlbl     := MAST::Label.new();
+    my $handlelbl  := MAST::Label.new();
+    push_op($protected.instructions, 'goto', $endlbl);
+    nqp::push($il, MAST::HandlerScope.new(
+        :instructions($protected.instructions), :goto($handlelbl),
+        :category_mask($mask), :action($HandlerAction::unwind_and_goto_with_payload)));
+    nqp::push($il, $handlelbl);
+    push_ilist($il, $handler);
+    push_op($il, 'set', $protected.result_reg, $handler.result_reg);
+    nqp::push($il, $endlbl);
+    $*REGALLOC.release_register($handler.result_reg, $MVM_reg_obj);
+
+    MAST::InstructionList.new($il, $protected.result_reg, $MVM_reg_obj)
 });
 
 # Control exception throwing.
@@ -1902,6 +1937,7 @@ my %const_map := nqp::hash(
     'CONTROL_NEXT',         4,
     'CONTROL_REDO',         8,
     'CONTROL_LAST',         16,
+    'CONTROL_RETURN',       32,
     'CONTROL_TAKE',         128,
     'CONTROL_WARN',         256,
     'CONTROL_SUCCEED',      512,

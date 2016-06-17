@@ -22,6 +22,7 @@ public class ExceptionHandling {
     public static final int EX_CAT_AWAIT = 8192;
     public static final int EX_CAT_EMIT = 16384;
     public static final int EX_CAT_DONE = 32768;
+    public static final int EX_CAT_RETURN = 65536;
     
     /* Exception handler kinds. */
     public static final int EX_UNWIND_SIMPLE = 0;
@@ -109,6 +110,58 @@ all:
         }
         if (handler != null)
             invokeHandler(tc, handler, category, f, die_s_return, exObj, null);
+        else
+            panic(tc, category, exObj);
+    }
+
+    /* Finds and executes a handler, using lexical scope to find it. */
+    public static void handlerLexical(ThreadContext tc, long category,
+            VMExceptionInstance exObj, boolean skipCaller) {
+        if (tc.gc.shuttingDown)
+            throw death;
+
+        CallFrame f = tc.curFrame;
+        if (skipCaller) {
+            f = f.caller;
+            while (f != null && (f.codeRef.staticInfo.isThunk || f.codeRef.isCompilerStub))
+                f = f.caller;
+        }
+        long[] handler = null;
+    all:
+        while (f != null) {
+            if (f.curHandler != 0) {
+                long tryHandler = f.curHandler;                
+                long[][] handlers = f.codeRef.staticInfo.handlers;
+                while (tryHandler != 0) {
+                    for (int i = 0; i < handlers.length; i++) {
+                        if (handlers[i][0] == tryHandler) {
+                            // Found an active one, but is it the right category?
+                            if ((handlers[i][2] & category) != 0) {
+                                // Correct category, but ensure we aren't already in it.
+                                boolean valid = true;
+                                for (int j = 0; j < tc.handlers.size(); j++) {
+                                    if (tc.handlers.get(j).handlerInfo == handlers[i]) {
+                                        valid = false;
+                                        break;
+                                    }
+                                }
+                                if (valid) {
+                                    handler = handlers[i];
+                                    break all;
+                                }
+                            }
+                            
+                            // If not, try outer one.
+                            tryHandler = handlers[i][1];
+                            break;
+                        }
+                    }
+                }
+            }
+            f = f.outer;
+        }
+        if (handler != null)
+            invokeHandler(tc, handler, category, f, false, exObj, null);
         else
             panic(tc, category, exObj);
     }
