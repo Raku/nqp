@@ -7,13 +7,13 @@ This is "Not Quite Perl" -- a lightweight Perl 6-like environment for
 virtual machines.  The key feature of NQP is that it's designed to be a very
 small environment (as compared with, say, perl6 or Rakudo) and is focused on
 being a high-level way to create compilers and libraries for virtual
-machines (MoarVM [1], the JVM, and the Parrot Virtual Machine [2]).
+machines like MoarVM [1], the JVM, and others.
+
 Unlike a full-fledged implementation of Perl 6, NQP strives to have as small
 a runtime footprint as it can, while still providing a Perl 6 object model
 and regular expression engine for the virtual machine.
 
     [1] https://github.com/MoarVM/MoarVM
-    [2] http://parrot.org/
 
 =head2 Building from source
 
@@ -31,8 +31,12 @@ If you don't have git installed, you can get a tarball or zip of NQP from
 github by visiting http://github.com/perl6/nqp/tree/master and clicking
 "Download".  Then unpack the tarball or zip.
 
-NQP can run on three different backends: MoarVM, the JVM, and Parrot. Decide
-on which backends you want it to run, and configure and build it as follows:
+NQP can run on four different backends: MoarVM, the JVM, JavaScript, and
+Parrot.  But JavaScript is experimental (see notes below) and Parrot isn't
+currently maintained.
+
+Decide on which backends you want it to run, and configure and build it as
+follows:
 
 Once you have a copy of NQP, build it as follows:
 
@@ -96,7 +100,7 @@ scratch.
 =head2 JavaScript backend
 
 The JavaScript backend is currently undergoing a refactor/rewrite of parts to generate decently performing javascript, add source maps and remove some old hack as well as clean up the code. 
-As a result of that it's in a really rough state so the best thing before playing with it/hacking on it is to contact pmurias via irc at #perl6 on irc.freenode.org.
+As a result of that it's in a really rough state so the best thing before playing with it/hacking on it is to contact pmurias via IRC at #perl6 on irc.freenode.org.
 
 Building the JavaScript backend currently requires building the moar backend:
 
