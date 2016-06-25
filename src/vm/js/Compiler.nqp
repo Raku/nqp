@@ -988,6 +988,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     # Should we compile it to a form that's more efficent when used as a method
     method looks_like_a_method(QAST::Block $block) {
+        # Disable it as we currently don't make use of it at runtime
+        return 0;
+
         if $block.blocktype eq 'declaration_static'
                 && nqp::istype($block[0], QAST::Stmts)
                 && nqp::istype($block[0][0], QAST::Var)
