@@ -26,6 +26,7 @@ my %const_map := nqp::hash(
     'CONTROL_LAST',         16,
     'CONTROL_NEXT',         4,
     'CONTROL_REDO',         8,
+    'CONTROL_RETURN',       32,
     'CONTROL_SUCCEED',      128,
     'CONTROL_PROCEED',      256,
     'CONTROL_WARN',         64,
