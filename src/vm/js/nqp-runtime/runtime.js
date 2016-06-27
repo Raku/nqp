@@ -451,3 +451,9 @@ exports.wrapException = function(e) {
   console.log(e);
   return new NQPException(e.message);
 };
+
+function ControlReturn(payload) {
+  this.payload = payload;
+}
+
+exports.ControlReturn = ControlReturn;
