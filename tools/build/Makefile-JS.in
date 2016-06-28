@@ -15,7 +15,13 @@ $(JS_STAGE1)/QAST/Compiler.moarvm: $(JS_STAGE1)/QASTCompiler
 	$(MKPATH) gen/moar/stage2/QAST
 	$(CP) $(JS_STAGE1)/QAST/Compiler.moarvm gen/moar/stage2/QAST/Compiler.moarvm
 
-$(JS_STAGE1)/HLL/Backend.moarvm: src/vm/js/HLL/Backend.nqp $(JS_STAGE1)/QAST/Compiler.moarvm
+$(JS_STAGE1)/DataFlowOptimizer.moarvm: src/vm/js/DataFlowOptimizer.nqp
+	$(MKPATH) $(JS_STAGE1)
+	$(JS_NQP) --module-path=$(JS_STAGE1) --target=mbc --output=$(JS_STAGE1)/DataFlowOptimizer.moarvm src/vm/js/DataFlowOptimizer.nqp
+	$(MKPATH) gen/moar/stage2
+	$(CP) $(JS_STAGE1)/DataFlowOptimizer.moarvm gen/moar/stage2/DataFlowOptimizer.moarvm
+
+$(JS_STAGE1)/HLL/Backend.moarvm: src/vm/js/HLL/Backend.nqp $(JS_STAGE1)/QAST/Compiler.moarvm $(JS_STAGE1)/DataFlowOptimizer.moarvm
 	$(MKPATH) $(JS_STAGE1)/HLL
 	$(JS_NQP) --module-path=$(JS_STAGE1) --target=mbc --output=$(JS_STAGE1)/HLL/Backend.moarvm src/vm/js/HLL/Backend.nqp
 	$(MKPATH) gen/moar/stage2/HLL

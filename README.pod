@@ -122,3 +122,8 @@ To build nqp-js-on-js (that is nqp-js itself running on node.js):
 To run nqp-js-on-js:
 
     $ node nqp-bootstrapped.js -e "say('Hello World')"
+
+To build the new optimizer
+    $ cabal configure; cabal build in src/vm/js/dataflow-optimizer
+
+    Run with ./nqp-js -Ofun -e 1

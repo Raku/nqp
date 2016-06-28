@@ -97,7 +97,10 @@ my $QASTCompiler-combined := combine(:stage(1), :sources('src/vm/js/Utils.nqp sr
 
 
 my $stage1-qast-compiler-moar := nqp('src/vm/js','QAST/Compiler',1, :source($QASTCompiler-combined));
-my $stage1-hll-backend-moar := nqp('src/vm/js','HLL/Backend',1,:deps([$stage1-qast-compiler-moar]));
+
+my $stage1-dataflow-optimizer-moar := nqp('src/vm/js','DataFlowOptimizer',1);
+
+my $stage1-hll-backend-moar := nqp('src/vm/js','HLL/Backend',1,:deps([$stage1-qast-compiler-moar, $stage1-dataflow-optimizer-moar]));
 
 constant('JS_STAGE1_COMPILER',"$stage1-qast-compiler-moar $stage1-hll-backend-moar");
 

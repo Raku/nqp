@@ -1,5 +1,6 @@
 # Backend class for compiling to JavaScript.
 use QAST::Compiler;
+use DataFlowOptimizer;
 
 # HACK work around for nqp namespace bug
 class HLLBackend::JavaScript {
@@ -57,11 +58,14 @@ class HLLBackend::JavaScript {
     }
 
     method dataflow($qast, *%adverbs) {
-        if %adverbs<O> eq 'dataflow' {
-            say("TODO - hoopl-based data flow optimalization");
+        if %adverbs<O> eq 'fun' {
+            my $dataflow := DataFlowOptimizer.new;
+            $dataflow.optimize($qast);
             nqp::exit(0);
         }
-        $qast;
+        else {
+            $qast;
+        }
     }
     
     
