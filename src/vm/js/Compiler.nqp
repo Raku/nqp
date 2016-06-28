@@ -21,7 +21,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         has @!js_lexicals;      # javascript variables we need to declare for the block
         has $!tmp;              # We use a bunch of TMP{$n} to store intermediate javascript results
         has $!ctx;              # The object we keep dynamic variables and exception handlers in
-        has %!lexotic;          
         has @!params;           # the parameters the block takes
         has @!variables;        # the variables declared in this block
         has %!variables;        # the variables declared in this block
@@ -50,7 +49,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             @!variables := nqp::list();
             %!variables := nqp::hash();
             $!tmp := 0;
-            %!lexotic := nqp::hash();
             %!cloned_inners := nqp::hash();
             %!captured_inners := nqp::hash();
             %!need_cps := nqp::hash();
@@ -139,44 +137,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 $info := $info.outer;
             }
             nqp::null();
-        }
-
-
-        method register_lexotic($name) {
-            %!lexotic{$name} := 0;
-        }
-
-        method mark_local_lexotic_usage($name) {
-            %!lexotic{$name} := 1;
-        }
-
-        method is_lexotic_used($name) {
-            %!lexotic{$name} == 1;
-        }
-
-        method is_local_lexotic($name) {
-            nqp::existskey(%!lexotic, $name);
-        }
-
-        method mark_lexotic_usage($name) {
-            my $block := self;
-            while $block {
-                if $block.is_local_lexotic($name) {
-                    $block.mark_local_lexotic_usage($name);
-                    return;
-                }
-                $block := $block.outer;
-            }
-        }
-        method is_lexotic($name) {
-            my $block := self;
-            while $block {
-                if $block.is_local_lexotic($name) {
-                    return 1;
-                }
-                $block := $block.outer;
-            }
-            return 0;
         }
 
         method add_tmp() {

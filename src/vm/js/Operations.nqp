@@ -550,16 +550,6 @@ class QAST::OperationsJS {
 
 
     add_op('call', :!inlinable, sub ($comp, $node, :$want, :$cps) {
-        if $*BLOCK.is_local_lexotic($node.name) {
-            my $value := $comp.as_js($node[0], :want($T_OBJ));
-            return Chunk.new($T_VOID, '', [$value, "return {$value.expr};\n"]);
-        }
-        elsif $*BLOCK.is_lexotic($node.name) {
-            $*BLOCK.mark_lexotic_usage($node.name);
-            my $value := $comp.as_js($node[0], :want($T_OBJ));
-            return Chunk.new($want, 'null', [$value, $comp.mangle_name($node.name) ~ "(" ~ $value.expr ~ ");\n"]);
-        }
-
         my $args := nqp::clone($node.list);
 
         my $callee := $node.name
@@ -1237,27 +1227,6 @@ class QAST::OperationsJS {
     add_simple_op('findcclass', $T_INT, [$T_INT, $T_STR, $T_INT, $T_INT]);
     add_simple_op('findnotcclass', $T_INT, [$T_INT, $T_STR, $T_INT, $T_INT]);
     add_simple_op('iscclass', $T_INT, [$T_INT, $T_STR, $T_INT]);
-
-    # TODO consider/handle if lexotic is not the topmost thing in a block
-    add_op('lexotic', :!inlinable, sub ($comp, $node, :$want, :$cps) {
-        #TODO CPS
-        $*BLOCK.register_lexotic($node.name);
-        my $inner := $comp.as_js($node[0], :$want);
-
-        if $*BLOCK.is_lexotic_used($node.name) {
-            my $exception := $*BLOCK.add_tmp;
-            my $value := $*BLOCK.add_tmp;
-            Chunk.new($T_OBJ, $inner.expr, [
-                "var {$comp.mangle_name($node.name)} = function(value) \{$value = value; throw $exception\};\n",
-                "try \{\n",
-                $inner,
-                "\} catch (e) \{ if (e === $exception) \{return $value\} else \{ throw e \}\}"
-            ]);
-        }
-        else {
-            $inner;
-        }
-    });
 
     # Simple payload handler.
     add_op('handlepayload', :!inlinable, sub ($comp, $node, :$want, :$cps) {
