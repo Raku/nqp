@@ -3,8 +3,45 @@ class DataFlowOptimizer {
         {*}
     }
 
+    method children(QAST::Children $node) {
+        my @children;
+        for $node.list -> $child {
+            @children.push(self.pack($child));
+        }
+        "[" ~ nqp::join(",", @children) ~ "]";
+    }
+
+    method str($str) {
+        '"' ~ nqp::escape($str) ~ '"';
+    }
+
     multi method pack(QAST::CompUnit $node) {
-        "CompUnit []";
+        "CompUnit " ~ self.children($node);
+    }
+    multi method pack(QAST::Block $node) {
+        "Block " ~ self.children($node);
+    }
+    multi method pack(QAST::Stmts $node) {
+        "Stmts " ~ self.children($node);
+    }
+    multi method pack(QAST::Op $node) {
+        "Op {self.str($node.op)} {self.children($node)}";
+    }
+    multi method pack(QAST::Var $node) {
+        "Var";
+    }
+    multi method pack(QAST::IVal $node) {
+        "(IVal {$node.value})";
+    }
+
+    multi method pack(QAST::SVal $node) {
+        # TODO haskell string quoting rules
+        "(SVal {self.str($node.value)})";
+    }
+
+    multi method pack($node) {
+        say("Can't pack {$node.HOW.name($node)}");
+        "Unknown";
     }
 
     method optimize($ast) {
