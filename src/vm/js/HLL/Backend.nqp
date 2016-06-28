@@ -39,7 +39,7 @@ class HLLBackend::JavaScript {
     }
     
     method stages() {
-        'js run'
+        'dataflow js run'
     }
     
     method is_precomp_stage($stage) {
@@ -54,6 +54,14 @@ class HLLBackend::JavaScript {
     method spawn_new_node() {
         my $comp := nqp::getcomp('JavaScript');
         nqp::isnull($comp);
+    }
+
+    method dataflow($qast, *%adverbs) {
+        if %adverbs<O> eq 'dataflow' {
+            say("TODO - hoopl-based data flow optimalization");
+            nqp::exit(0);
+        }
+        $qast;
     }
     
     
