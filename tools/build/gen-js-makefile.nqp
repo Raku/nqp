@@ -93,7 +93,7 @@ constant('JS_NQP','./$(M_RUNNER)$(BAT)');
 
 say('js-runner-default: js-all');
 
-my $QASTCompiler-combined := combine(:stage(1), :sources('src/vm/js/Utils.nqp src/vm/js/SerializeOnce.nqp src/vm/js/const_map.nqp src/vm/js/LoopInfo.nqp src/vm/js/BlockBarrier.nqp src/vm/js/DWIMYNameMangling.nqp src/vm/js/Chunk.nqp src/vm/js/Operations.nqp src/vm/js/RegexCompiler.nqp src/vm/js/Compiler.nqp'), :file('QASTCompiler'));
+my $QASTCompiler-combined := combine(:stage(1), :sources('src/vm/js/Utils.nqp src/vm/js/SerializeOnce.nqp src/vm/js/const_map.nqp src/vm/js/LoopInfo.nqp src/vm/js/ReturnInfo.nqp src/vm/js/BlockBarrier.nqp src/vm/js/DWIMYNameMangling.nqp src/vm/js/Chunk.nqp src/vm/js/Operations.nqp src/vm/js/RegexCompiler.nqp src/vm/js/Compiler.nqp'), :file('QASTCompiler'));
 
 
 my $stage1-qast-compiler-moar := nqp('src/vm/js','QAST/Compiler',1, :source($QASTCompiler-combined));

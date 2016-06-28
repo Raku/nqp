@@ -4,10 +4,10 @@ JS_STAGE1 = $(JS_BUILD_DIR)/stage1
 JS_STAGE2 = $(JS_BUILD_DIR)/stage2
 JS_NQP = ./$(M_RUNNER)$(BAT)
 js-runner-default: js-all
-$(JS_STAGE1)/QASTCompiler: src/vm/js/Utils.nqp src/vm/js/SerializeOnce.nqp src/vm/js/const_map.nqp src/vm/js/LoopInfo.nqp src/vm/js/BlockBarrier.nqp src/vm/js/DWIMYNameMangling.nqp src/vm/js/Chunk.nqp src/vm/js/Operations.nqp src/vm/js/RegexCompiler.nqp src/vm/js/Compiler.nqp
+$(JS_STAGE1)/QASTCompiler: src/vm/js/Utils.nqp src/vm/js/SerializeOnce.nqp src/vm/js/const_map.nqp src/vm/js/LoopInfo.nqp src/vm/js/ReturnInfo.nqp src/vm/js/BlockBarrier.nqp src/vm/js/DWIMYNameMangling.nqp src/vm/js/Chunk.nqp src/vm/js/Operations.nqp src/vm/js/RegexCompiler.nqp src/vm/js/Compiler.nqp
 	$(MKPATH) $(JS_STAGE1)
 	
-	$(PERL) tools/build/gen-cat.pl js src/vm/js/Utils.nqp src/vm/js/SerializeOnce.nqp src/vm/js/const_map.nqp src/vm/js/LoopInfo.nqp src/vm/js/BlockBarrier.nqp src/vm/js/DWIMYNameMangling.nqp src/vm/js/Chunk.nqp src/vm/js/Operations.nqp src/vm/js/RegexCompiler.nqp src/vm/js/Compiler.nqp  > $(JS_STAGE1)/QASTCompiler
+	$(PERL) tools/build/gen-cat.pl js src/vm/js/Utils.nqp src/vm/js/SerializeOnce.nqp src/vm/js/const_map.nqp src/vm/js/LoopInfo.nqp src/vm/js/ReturnInfo.nqp src/vm/js/BlockBarrier.nqp src/vm/js/DWIMYNameMangling.nqp src/vm/js/Chunk.nqp src/vm/js/Operations.nqp src/vm/js/RegexCompiler.nqp src/vm/js/Compiler.nqp  > $(JS_STAGE1)/QASTCompiler
 
 $(JS_STAGE1)/QAST/Compiler.moarvm: $(JS_STAGE1)/QASTCompiler
 	$(MKPATH) $(JS_STAGE1)/QAST

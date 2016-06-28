@@ -1233,9 +1233,7 @@ class QAST::OperationsJS {
         if +$node.list != 3 {
             nqp::die("The 'handlepayload' op requires three children");
         }
-        my $protected := $comp.as_js(:want($T_OBJ), $node[0]);
         my str $type := $node[1];
-        my $handle_result := $comp.as_js(:want($T_OBJ), $node[2]);
 
 
         my $result := $*BLOCK.add_tmp;
@@ -1243,27 +1241,64 @@ class QAST::OperationsJS {
             $comp.NYI("handlepayload with type '$type'");
         }
 
-        Chunk.new($T_OBJ, $result, [
-            "try \{\n",
-                $protected,
-                "$result = {$protected.expr};\n",
-            "\} catch (\$\$e) \{\n",
-                "if (\$\$e instanceof nqp.ControlReturn) \{\n",
-                    $handle_result,
-                    "$result = {$handle_result.expr};\n",
-                "\} else \{",
-                    "throw \$\$e;\n",
-                "\}",
-            "\}"
-        ]);
+        my $*RETURN;
+
+        my @toplevels := $*BLOCK.qast.list;
+
+        my $is_last_toplevel := +@toplevels && nqp::eqaddr(@toplevels[+@toplevels - 1], $node);
+
+        my $just_return_payload := $node[2] ~~ QAST::Op && $node[2].op eq 'lastexpayload';
+
+        if $is_last_toplevel && $just_return_payload {
+           $*RETURN := TopLevelInBlock.new(block => $*BLOCK);
+        }
+        else {
+           $*RETURN := NotTopLevel.new();
+        }
+
+        my $protected := $comp.as_js(:want($T_OBJ), $node[0]);
+
+        if $*RETURN.is_used {
+            my $handle_result := $comp.as_js(:want($T_OBJ), $node[2]);
+
+            Chunk.new($T_OBJ, $result, [
+                "try \{\n",
+                    $protected,
+                    "$result = {$protected.expr};\n",
+                "\} catch (\$\$e) \{\n",
+                    "if (\$\$e instanceof nqp.ControlReturn) \{\n",
+                        $handle_result,
+                        "$result = {$handle_result.expr};\n",
+                    "\} else \{",
+                        "throw \$\$e;\n",
+                    "\}",
+                "\}"
+            ]);
+        }
+        else {
+            $protected;
+        }
+
     });
 
     add_op('throwpayloadlex', :!inlinable, sub ($comp, $node, :$want, :$cps) {
         my $category := $node[0];
         my $payload := $comp.as_js(:want($T_OBJ), $node[1]);
+
         unless $category ~~ QAST::IVal && $category.value == nqp::const::CONTROL_RETURN {
             return $comp.NYI("throwpayloadlex with something else then a CONTROL_RETURN literal");
         }
+
+        if $*RETURN.as_return {
+            return Chunk.new($T_VOID, "", [
+                $payload,
+                "return {$payload.expr};\n"
+            ]);
+        }
+        else {
+            $*RETURN.mark_used();
+        }
+
         Chunk.new($T_VOID, "", [
             $payload,
             "throw new nqp.ControlReturn({$payload.expr});\n"

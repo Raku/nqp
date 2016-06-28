@@ -1405,6 +1405,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         $*BLOCK.ctx("null");
         my $*CTX := "null";
 
+        my $*RETURN;
+
         my @pre;
 
         # HACK
