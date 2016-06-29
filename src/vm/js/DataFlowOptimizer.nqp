@@ -46,7 +46,7 @@ class DataFlowOptimizer {
 
     method optimize($ast) {
         my $packed := self.pack($ast);
-        say("PACKED<$packed>");
+        say("PACKED<$packed>\n");
         print(self.run($packed));
     }
 
