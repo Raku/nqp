@@ -12,15 +12,29 @@ data Value = IVal Int | Slot Slot
 
 data BlockDecl = BlockDecl (Graph Insn C C)
 
+indent :: String -> String    
+indent str = concat $ map (\line -> "  " ++ line ++ "\n") $ lines str
+
 instance (Show BlockDecl) where
-        show decl = "block {...}"
+        show (BlockDecl graph) = "immediate {\n" ++ (indent (showGraph prettyInsn graph)) ++ "}"
+
+
+compileStmts :: [QAST.Node] -> Graph Insn O O
+
+-- compileStmts stmts = foldl (<*>) (mkMiddle $ Unknown "start") (map compileStmt stmts)
+compileStmts stmts = catGraphs (map compileStmt stmts)
+
+
+compileStmt :: QAST.Node -> Graph Insn O O
+compileStmt (QAST.Stmts stmts) = compileStmts stmts
+compileStmt stmt = mkMiddle $ Unknown (show stmt)
 
 data Insn e x where 
     Label :: Label -> Insn C O
-    InsnOp :: Slot -> String -> [Value] -> Insn O O
     Branch :: Label -> Insn O C
     ImmediateBlock :: BlockDecl -> Insn O O
     ImplicitReturn :: Value -> Insn O C
+    Unknown :: String -> Insn O O
 
 deriving instance Show (Insn e x)
 
@@ -40,15 +54,16 @@ prettyInsn insn = show insn
 
 
 compileCompUnit :: QAST.Node -> SimpleUniqueMonad (Graph Insn C C)
-compileCompUnit (QAST.CompUnit [block]) = do 
+compileCompUnit (QAST.CompUnit [qastBlock]) = do 
     start <- freshLabel
---    blockContents <- compileImplicitBlock block
-    return ((mkFirst (mkLabelNode start)) <*> (mkLast (ImplicitReturn $ IVal 0)))
+    blockContents <- compileImplicitBlock qastBlock
+    let callBlock = ImmediateBlock $ BlockDecl blockContents
+    return ((mkFirst (mkLabelNode start)) <*> (mkMiddle callBlock) <*> (mkLast (ImplicitReturn $ IVal 0)))
 
-{-compileImplicitBlock :: QAST.Node -> SimpleUniqueMonad (Insn C C)
+compileImplicitBlock :: QAST.Node -> SimpleUniqueMonad (Graph Insn C C)
 compileImplicitBlock (QAST.Block nodes) = do
     startOfBlock <- freshLabel
-    return $ mkLabelNode startOfBlock <|> mkLast (ImplicitReturn $ IVal 0)-}
+    return $ (mkFirst (mkLabelNode startOfBlock)) <*> (compileStmts nodes) <*> mkLast (ImplicitReturn $ IVal 0)
 
 main = do 
     input <- getContents
