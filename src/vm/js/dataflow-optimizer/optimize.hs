@@ -3,6 +3,7 @@ import Control.Monad
 import qualified QAST
 import Compiler.Hoopl
 import Text.Groom
+import qualified Data.Map as Map
 
 
 type Result = Unique
@@ -84,6 +85,30 @@ compileImplicitBlock (QAST.Block nodes) = do
     (graph, values) <- compileStmts nodes
     let result = if null values then Void else last values
     return $ (mkFirst (mkLabelNode startOfBlock)) <*> graph <*> mkLast (ImplicitReturn result)
+
+type ConstFact = Map.Map Result (WithTop Int)
+constLattice :: DataflowLattice ConstFact
+constLattice = DataflowLattice
+    { fact_name = "Const result"
+    , fact_bot = Map.empty
+    , fact_join = joinMaps (extendJoinDomain constFactAdd)}
+    where
+        constFactAdd _ (OldFact old) (NewFact new)
+            = if new == old then (NoChange, PElem new)
+              else               (SomeChange, Top)
+
+resultIsConst :: FwdTransfer Insn ConstFact
+resultIsConst = mkFTransfer ft where
+    ft :: Insn e x -> ConstFact -> Fact x ConstFact
+    ft (Label _) f = f
+    ft (Say _) f = f
+    ft (Unknown _) f = f -- Unknown should make us forget everything
+    ft (AddI result (IVal a) (IVal b)) f = Map.insert result (PElem (a + b)) f
+    ft (AddI result _ _) f = Map.insert result Top f
+    ft (ImmediateBlock _) f = f 
+    ft (Branch l) f = mapSingleton l f
+    ft (ImplicitReturn _) _ = mapEmpty
+
 
 main = do 
     input <- getContents

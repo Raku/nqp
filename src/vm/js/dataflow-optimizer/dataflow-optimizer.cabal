@@ -53,5 +53,6 @@ executable dataflow-optimizer
   build-depends:
     base ==4.6.*,
     hoopl ==3.10.*,
-    groom
+    groom,
+    containers
   
