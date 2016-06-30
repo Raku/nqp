@@ -11,7 +11,6 @@ my class ReturnInfo {
 my class TopLevelInBlock is ReturnInfo {
     has $!block;
     method as_return() {
-        say("//checking if we are in nested block: {nqp::eqaddr($!block, $*BLOCK)}");
         return nqp::eqaddr($!block, $*BLOCK);
     }
 }
