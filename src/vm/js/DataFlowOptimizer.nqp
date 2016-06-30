@@ -14,6 +14,9 @@ class DataFlowOptimizer {
     method str($str) {
         '"' ~ nqp::escape($str) ~ '"';
     }
+    method int($int) {
+        ~$int;
+    }
 
     multi method pack(QAST::CompUnit $node) {
         "CompUnit " ~ self.children($node);
@@ -28,7 +31,7 @@ class DataFlowOptimizer {
         "Op {self.str($node.op)} {self.children($node)}";
     }
     multi method pack(QAST::Var $node) {
-        "Var";
+        "(Var {self.str($node.name)} {self.str($node.scope)} {self.str($node.decl)} {self.int($node.slurpy)})";
     }
     multi method pack(QAST::IVal $node) {
         "(IVal {$node.value})";
