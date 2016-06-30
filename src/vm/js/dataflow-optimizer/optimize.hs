@@ -1,4 +1,4 @@
-{-# LANGUAGE GADTs, StandaloneDeriving #-}
+{-# LANGUAGE GADTs, StandaloneDeriving, NoMonomorphismRestriction #-}
 import Control.Monad
 import qualified QAST
 import Compiler.Hoopl
@@ -11,13 +11,10 @@ type Result = Unique
 data Value = IVal Int | Result Unique | UnknownValue | Void
     deriving Show
 
-data BlockDecl = BlockDecl (Graph Insn C C)
 
 indent :: String -> String    
 indent str = concat $ map (\line -> "  " ++ line ++ "\n") $ lines str
 
-instance (Show BlockDecl) where
-        show (BlockDecl graph) = "immediate {\n" ++ (indent (showGraph prettyInsn graph)) ++ "}"
 
 
 compileStmts :: [QAST.Node] -> SimpleUniqueMonad (Graph Insn O O, [Value])
@@ -49,11 +46,10 @@ compileStmt stmt = return (mkMiddle $ Unknown (show stmt), UnknownValue)
 data Insn e x where 
     Label :: Label -> Insn C O
     Branch :: Label -> Insn O C
-    ImmediateBlock :: BlockDecl -> Insn O O
-    ImplicitReturn :: Value -> Insn O C
     Unknown :: String -> Insn O O
     Say :: Value -> Insn O O
     AddI :: Result -> Value -> Value -> Insn O O
+    Exit :: Insn O C
 
 deriving instance Show (Insn e x)
 
@@ -63,6 +59,7 @@ instance HooplNode (Insn) where
 
 instance NonLocal (Insn) where
     successors (Branch label) = [label]
+    successors (Exit) = []
     entryLabel (Label label) = label
    
 
@@ -72,19 +69,15 @@ prettyInsn insn = show insn
 
 
 
-compileCompUnit :: QAST.Node -> SimpleUniqueMonad (Graph Insn C C)
+compileCompUnit :: QAST.Node -> SimpleUniqueMonad (Graph Insn O C)
 compileCompUnit (QAST.CompUnit [qastBlock]) = do 
-    start <- freshLabel
     blockContents <- compileImplicitBlock qastBlock
-    let callBlock = ImmediateBlock $ BlockDecl blockContents
-    return ((mkFirst (mkLabelNode start)) <*> (mkMiddle callBlock) <*> (mkLast (ImplicitReturn $ IVal 0)))
+    return (blockContents <*> (mkLast Exit))
 
-compileImplicitBlock :: QAST.Node -> SimpleUniqueMonad (Graph Insn C C)
+compileImplicitBlock :: QAST.Node -> SimpleUniqueMonad (Graph Insn O O)
 compileImplicitBlock (QAST.Block nodes) = do
-    startOfBlock <- freshLabel
     (graph, values) <- compileStmts nodes
-    let result = if null values then Void else last values
-    return $ (mkFirst (mkLabelNode startOfBlock)) <*> graph <*> mkLast (ImplicitReturn result)
+    return graph 
 
 type ConstFact = Map.Map Result (WithTop Int)
 constLattice :: DataflowLattice ConstFact
@@ -105,15 +98,41 @@ resultIsConst = mkFTransfer ft where
     ft (Unknown _) f = f -- Unknown should make us forget everything
     ft (AddI result (IVal a) (IVal b)) f = Map.insert result (PElem (a + b)) f
     ft (AddI result _ _) f = Map.insert result Top f
-    ft (ImmediateBlock _) f = f 
     ft (Branch l) f = mapSingleton l f
-    ft (ImplicitReturn _) _ = mapEmpty
+    ft (Exit) _ = mapEmpty
 
+
+constProp :: FuelMonad m => FwdRewrite m Insn ConstFact
+
+constProp = mkFRewrite3 noop1 cp noop2
+    where 
+       cp insn f = return $ Nothing
+       noop1 insn f = return $ Nothing
+       noop2 insn f = return $ Nothing
+
+constPropPass = FwdPass
+    { fp_lattice = constLattice
+    , fp_transfer = resultIsConst
+    , fp_rewrite = constProp }
+
+
+simpleRun :: SimpleFuelMonad a -> a
+
+simpleRun = runSimpleUniqueMonad . runWithFuel infiniteFuel
 
 main = do 
     input <- getContents
     let compUnit = ((read input) :: QAST.Node)
     putStrLn $ groom compUnit
-    putStrLn "\nturned it into:\n"
+    putStrLn "\n2 turned it into:\n"
     let graph = runSimpleUniqueMonad (compileCompUnit compUnit)
+
+    let (optimized, facts, _) = simpleRun $ analyzeAndRewriteFwdOx constPropPass graph Map.empty
     putStrLn $ showGraph prettyInsn graph
+
+    putStrLn $ "facts:" ++ (show facts)
+
+    putStrLn "\noptimized into:\n"
+
+
+    putStrLn $ showGraph prettyInsn optimized
