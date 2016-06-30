@@ -7,7 +7,7 @@ import Text.Groom
 
 type Slot = Int
 
-data Value = IVal Int | Slot Slot
+data Value = IVal Int | Slot Slot | UnknownValue
     deriving Show
 
 data BlockDecl = BlockDecl (Graph Insn C C)
@@ -19,15 +19,26 @@ instance (Show BlockDecl) where
         show (BlockDecl graph) = "immediate {\n" ++ (indent (showGraph prettyInsn graph)) ++ "}"
 
 
-compileStmts :: [QAST.Node] -> Graph Insn O O
+compileStmts :: [QAST.Node] -> (Graph Insn O O, [Value])
 
--- compileStmts stmts = foldl (<*>) (mkMiddle $ Unknown "start") (map compileStmt stmts)
-compileStmts stmts = catGraphs (map compileStmt stmts)
+compileStmts stmts = 
+    let (graphs, values) = unzip $ map compileStmt stmts in
+        (catGraphs graphs, values)
 
+compileStmt :: QAST.Node -> (Graph Insn O O, Value)
 
-compileStmt :: QAST.Node -> Graph Insn O O
-compileStmt (QAST.Stmts stmts) = compileStmts stmts
-compileStmt stmt = mkMiddle $ Unknown (show stmt)
+compileStmt (QAST.Stmts stmts) = (fst $ compileStmts stmts, UnknownValue)
+compileStmt (QAST.Op "say" args) = 
+    let (graph, values) = compileStmts args in
+        (graph <*> (mkMiddle $ Say values), UnknownValue)
+
+compileStmt (QAST.Op "add_i" args) = 
+    let (graph, [a, b]) = compileStmts args
+        in (graph <*> (mkMiddle $ AddI a b), UnknownValue)
+
+compileStmt (QAST.IVal i) = (emptyGraph, IVal i)
+
+compileStmt stmt = (mkMiddle $ Unknown (show stmt), UnknownValue)
 
 data Insn e x where 
     Label :: Label -> Insn C O
@@ -35,6 +46,8 @@ data Insn e x where
     ImmediateBlock :: BlockDecl -> Insn O O
     ImplicitReturn :: Value -> Insn O C
     Unknown :: String -> Insn O O
+    Say :: [Value] -> Insn O O
+    AddI :: Value -> Value -> Insn O O
 
 deriving instance Show (Insn e x)
 
@@ -63,7 +76,9 @@ compileCompUnit (QAST.CompUnit [qastBlock]) = do
 compileImplicitBlock :: QAST.Node -> SimpleUniqueMonad (Graph Insn C C)
 compileImplicitBlock (QAST.Block nodes) = do
     startOfBlock <- freshLabel
-    return $ (mkFirst (mkLabelNode startOfBlock)) <*> (compileStmts nodes) <*> mkLast (ImplicitReturn $ IVal 0)
+    let (graph, values) = compileStmts nodes
+    let result = if null values then UnknownValue else last values
+    return $ (mkFirst (mkLabelNode startOfBlock)) <*> graph <*> mkLast (ImplicitReturn result)
 
 main = do 
     input <- getContents
