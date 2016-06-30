@@ -20,6 +20,7 @@ exports.op = op;
 
 op.print = function(arg) {
   process.stdout.write(arg);
+  return arg;
 };
 
 op.say = function(arg) {
@@ -29,6 +30,7 @@ op.say = function(arg) {
   } else {
     console.log(arg);
   }
+  return arg;
 };
 
 function stat(file, code, lstat) {
