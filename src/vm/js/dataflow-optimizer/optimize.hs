@@ -1,13 +1,13 @@
 {-# LANGUAGE GADTs, StandaloneDeriving #-}
+import Control.Monad
 import qualified QAST
 import Compiler.Hoopl
 import Text.Groom
 
 
+type Result = Unique
 
-type Slot = Int
-
-data Value = IVal Int | Slot Slot | UnknownValue
+data Value = IVal Int | Result Unique | UnknownValue | Void
     deriving Show
 
 data BlockDecl = BlockDecl (Graph Insn C C)
@@ -19,26 +19,31 @@ instance (Show BlockDecl) where
         show (BlockDecl graph) = "immediate {\n" ++ (indent (showGraph prettyInsn graph)) ++ "}"
 
 
-compileStmts :: [QAST.Node] -> (Graph Insn O O, [Value])
+compileStmts :: [QAST.Node] -> SimpleUniqueMonad (Graph Insn O O, [Value])
 
-compileStmts stmts = 
-    let (graphs, values) = unzip $ map compileStmt stmts in
-        (catGraphs graphs, values)
+compileStmts stmts = do
+    (graphs, values) <- mapAndUnzipM compileStmt stmts
+    return (catGraphs graphs, values)
 
-compileStmt :: QAST.Node -> (Graph Insn O O, Value)
+compileStmt :: QAST.Node -> SimpleUniqueMonad (Graph Insn O O, Value)
 
-compileStmt (QAST.Stmts stmts) = (fst $ compileStmts stmts, UnknownValue)
-compileStmt (QAST.Op "say" args) = 
-    let (graph, values) = compileStmts args in
-        (graph <*> (mkMiddle $ Say values), UnknownValue)
+compileStmt (QAST.Stmts stmts) = do
+    (graph, values) <- compileStmts stmts
+    let result = if null values then Void else last values
+    return (graph, result)
 
-compileStmt (QAST.Op "add_i" args) = 
-    let (graph, [a, b]) = compileStmts args
-        in (graph <*> (mkMiddle $ AddI a b), UnknownValue)
+compileStmt (QAST.Op "say" args) = do
+    (graph, [value]) <- compileStmts args
+    return (graph <*> (mkMiddle $ Say value), value)
 
-compileStmt (QAST.IVal i) = (emptyGraph, IVal i)
+compileStmt (QAST.Op "add_i" args) = do
+    result <- freshUnique
+    (graph, [a, b]) <- compileStmts args
+    return (graph <*> (mkMiddle $ AddI result a b), Result result)
 
-compileStmt stmt = (mkMiddle $ Unknown (show stmt), UnknownValue)
+compileStmt (QAST.IVal i) = return (emptyGraph, IVal i)
+
+compileStmt stmt = return (mkMiddle $ Unknown (show stmt), UnknownValue)
 
 data Insn e x where 
     Label :: Label -> Insn C O
@@ -46,8 +51,8 @@ data Insn e x where
     ImmediateBlock :: BlockDecl -> Insn O O
     ImplicitReturn :: Value -> Insn O C
     Unknown :: String -> Insn O O
-    Say :: [Value] -> Insn O O
-    AddI :: Value -> Value -> Insn O O
+    Say :: Value -> Insn O O
+    AddI :: Result -> Value -> Value -> Insn O O
 
 deriving instance Show (Insn e x)
 
@@ -76,8 +81,8 @@ compileCompUnit (QAST.CompUnit [qastBlock]) = do
 compileImplicitBlock :: QAST.Node -> SimpleUniqueMonad (Graph Insn C C)
 compileImplicitBlock (QAST.Block nodes) = do
     startOfBlock <- freshLabel
-    let (graph, values) = compileStmts nodes
-    let result = if null values then UnknownValue else last values
+    (graph, values) <- compileStmts nodes
+    let result = if null values then Void else last values
     return $ (mkFirst (mkLabelNode startOfBlock)) <*> graph <*> mkLast (ImplicitReturn result)
 
 main = do 
