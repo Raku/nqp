@@ -47,7 +47,7 @@ compileStmt (QAST.IVal i) = do
 
 compileStmt stmt = do
     result <- freshUnique
-    return (mkMiddle $ Unknown (show stmt), result)
+    return (mkMiddle $ Unknown (groom stmt), result)
 
 data Insn e x where 
     Label :: Label -> Insn C O
@@ -59,7 +59,23 @@ data Insn e x where
     Void :: Result -> Insn O O
     Exit :: Insn O C
 
-deriving instance Show (Insn e x)
+--deriving instance Show (Insn e x)
+
+showResult :: Result -> String
+showResult result = "$" ++ (show result)
+
+assign :: Result -> String -> String
+assign result rest = (showResult result) ++ " = " ++ rest
+
+instance Show (Insn e x) where
+    show (IVal result i) = assign result $ show i
+    show (AddI result a b) = assign result $ (showResult a) ++ " + " ++ (showResult b)
+    show (Void result) = assign result $ "void"
+    show (Say what) = "say " ++ (showResult what)
+    show (Unknown string) = "unknown " ++ string
+    show (Branch label) = "goto " ++ (show label)
+    show (Label label) = "label " ++ (show label)
+    show (Exit) = "exit"
 
 instance HooplNode (Insn) where
     mkBranchNode = Branch
