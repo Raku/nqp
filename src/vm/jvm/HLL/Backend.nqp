@@ -4,6 +4,7 @@ use JASTNodes;
 class HLL::Backend::JVM {
     our %jvm_config   := nqp::backendconfig();
     my $compile_count := 0;
+    my $frames := nqp::hash;
 
     method apply_transcodings($s, $transcode) {
         $s
@@ -61,7 +62,13 @@ class HLL::Backend::JVM {
     
     method jast($qast, *%adverbs) {
         my $classname := %*COMPILING<%?OPTIONS><javaclass> || nqp::sha1('eval-at-' ~ nqp::time_n() ~ $compile_count++);
-        nqp::getcomp('QAST').jast($qast, :$classname);
+        my $mframes := nqp::existskey(%*COMPILING<%?OPTIONS>, 'mast_frames') ?? nqp::atkey(%*COMPILING<%?OPTIONS>, 'mast_frames') !! nqp::hash();
+        my $iter := nqp::iterator($mframes);
+        while $iter {
+            my $cur := nqp::shift($iter);
+            nqp::bindkey($frames, nqp::iterkey_s($cur), nqp::iterval($cur));
+        }
+        nqp::getcomp('QAST').jast($qast, :$classname, :$frames);
     }
 
     method classfile($jast, *%adverbs) {

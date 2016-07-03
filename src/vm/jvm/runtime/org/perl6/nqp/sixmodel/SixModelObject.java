@@ -79,8 +79,11 @@ public abstract class SixModelObject implements Cloneable {
     /**
      * Positional access functions.
      */
+    public class MyRTE extends RuntimeException {
+        public MyRTE(String msg) { super(msg); }
+    }
     public SixModelObject at_pos_boxed(ThreadContext tc, long index) {
-        throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement at_pos_boxed");
+        throw new MyRTE(this.st.REPR.name + " representation does not implement at_pos_boxed");
     }
     public void at_pos_native(ThreadContext tc, long index) {
         throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement at_pos_native");

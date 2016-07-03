@@ -5354,8 +5354,10 @@ public final class Ops {
     public static long getextype(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof VMExceptionInstance)
             return ((VMExceptionInstance)obj).category;
-        else
+        else {
+            debugnoop(obj, tc);
             throw ExceptionHandling.dieInternal(tc, "getextype needs an object with VMException representation");
+        }
     }
     public static long setextype(SixModelObject obj, long category, ThreadContext tc) {
         if (obj instanceof VMExceptionInstance) {

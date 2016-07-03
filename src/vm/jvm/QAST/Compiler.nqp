@@ -3189,14 +3189,88 @@ class QAST::CompilerJAST {
         $source;
     }
 
-    method jast($source, :$classname!, *%adverbs) {
+    sub p6sort(@input_data) {
+        # using the "bottom-up" mergesort implementation as shown in the english
+        # wikipedia article
+
+        # for some extra (hopefully measurable) benefit, we plop our indices
+        # into native integer lists before going on.
+
+        my &comparator := -> $a, $b {
+            $a == $b
+            ?? 0
+            !!  $a < $b
+                ?? -1
+                !! 1
+        }
+
+        my @b_list := nqp::list_i();
+        my @data := nqp::list_i();
+        nqp::setelems(@b_list, +@input_data);
+        nqp::setelems(@b_list, 0);
+        nqp::setelems(@data, +@input_data);
+        nqp::setelems(@data, 0);
+
+        my int $copy_idx;
+        for @input_data {
+            nqp::bindpos_i(@data, $copy_idx++, $_);
+        }
+
+        my int $n := nqp::elems(@data);
+
+        my int $run_w := 1; # the width of each of the runs we are looking at
+        while $run_w < $n {
+            my int $i;
+
+            while $i < $n {
+                my int $left  := $i;
+                my int $right := $i + $run_w;
+                $right        := $n if $n < $right;
+
+                my int $end   := $i + 2 * $run_w;
+                $end          := $n if $n < $end;
+
+                my int $i0    := $left;
+                my int $i1    := $right;
+                my int $j     := $i0;
+
+                while $j < $end {
+                    if $i0 < $right && ($i1 >= $end || -1 == comparator(nqp::atpos_i(@data, $i0), nqp::atpos_i(@data, $i1))) {
+                        nqp::bindpos_i(@b_list, $j, nqp::atpos_i(@data, $i0));
+                        $i0 := $i0 + 1;
+                    } else {
+                        nqp::bindpos_i(@b_list, $j, nqp::atpos_i(@data, $i1));
+                        $i1 := $i1 + 1;
+                    }
+                    $j := $j + 1;
+                }
+
+                $i := $i + 2 * $run_w;
+            }
+
+            {
+                my $t := @b_list;
+                @b_list := @data;
+                @data := $t;
+            }
+
+            $run_w := $run_w * 2;
+        }
+
+        $copy_idx := 0;
+        for @data {
+            nqp::bindpos(@input_data, $copy_idx++, $_);
+        }
+    }
+
+    method jast($source, :$frames!, :$classname!, *%adverbs) {
         # Wrap $source in a QAST::CompUnit if it's not already a viable root node.
         unless nqp::istype($source, QAST::CompUnit) {
             my $unit := $source;
             $unit := QAST::Block.new($unit) unless nqp::istype($unit, QAST::Block);
             $source := QAST::CompUnit.new(:hll(''), $unit);
         }
-        
+
         # Set up a JAST::Class that will hold all the blocks (which become Java
         # methods) that we shall compile.
         my $file := nqp::ifnull(nqp::getlexdyn('$?FILES'), "");
@@ -3205,17 +3279,89 @@ class QAST::CompilerJAST {
             :super('org.perl6.nqp.runtime.CompilationUnit'),
             :filename($file)
         );
-        
+
+        nqp::sayfh(nqp::getstderr, "compiling $classname, $file");
+
         # We'll also need to keep track of all the blocks we compile into Java
         # methods; the CodeRefBuilder takes care of that.
-        my $*CODEREFS := CodeRefBuilder.new();
+        my $*CODEREFS; 
+        # if nqp::existskey($frames, $file) && nqp::existskey(nqp::atkey($frames, $file), 'CRB') {
+         #    $*CODEREFS := nqp::atkey(nqp::atkey($frames, $file), 'CRB');
+        # }
+        # else {
+            $*CODEREFS := CodeRefBuilder.new();
+        # }
+        my $*METH_CACHE;
+        nqp::sayfh(nqp::getstderr, "frames elems: " ~ nqp::elems($frames));
+        my $oiter := nqp::iterator($frames);
+        while $oiter && nqp::getenvhash()<DEBUG> {
+            my $key := nqp::iterkey_s(nqp::shift($oiter));
+            nqp::sayfh(nqp::getstderr, "got key: " ~ $key);
+            my $iiter := nqp::iterator(nqp::atkey($frames, $key));
+            while $iiter {
+                nqp::sayfh(nqp::getstderr, "inner key: " ~ nqp::iterkey_s(nqp::shift($iiter)));
+            }
+        }
+        if nqp::existskey($frames, $file) {
+            nqp::sayfh(nqp::getstderr(), "we got frames");
+            $*METH_CACHE := $frames{$file};
+        }
+        else {
+            nqp::sayfh(nqp::getstderr(), "we don't got no frames");
+            $*METH_CACHE := nqp::hash;
+        }
+
+        nqp::sayfh(nqp::getstderr, "and it got " ~ nqp::elems($*METH_CACHE) ~ " elems");
         
         # Now compile $source. By the end of this, the various data structures
         # set up above will be fully populated.
         self.as_jast($source);
+
+        nqp::sayfh(nqp::getstderr, "and it got " ~ nqp::elems($*METH_CACHE) ~ " elems after as_jast");
         
+        my $num-meths := +$*JCLASS.methods;
+        my $i := 0;
+        my @qbids;
+        while $i < $num-meths {
+            my $m-name := $*JCLASS.methods[$i].name;
+            my $idx := nqp::index($m-name, '_');
+            if $idx > 0 {
+                my $qbid := nqp::substr($m-name, nqp::index($m-name, '_') + 1);
+                nqp::push(@qbids, $qbid);
+            }
+            $i := $i + 1;
+        }
+        p6sort(@qbids);
+        $i := 0;
+        my $missing := -1;
+        while $i < +@qbids - 1 {
+            if @qbids[$i] - @qbids[$i + 1] != -1 {
+                $missing := @qbids[$i] + 1;
+                last;
+            }
+            $i := $i + 1;
+        }
+
+        if $missing != -1 && nqp::existskey($frames, $file) {
+            nqp::sayfh(nqp::getstderr, "adding patch meth now");
+            # We *might* have a case with more than 1 extra frame, but if that
+            # happens we'll need a better solution, as we currently can't know
+            # which patch meth belongs to which block...
+            nqp::sayfh(nqp::getstderr, "missing is $missing");
+            my $lost_meth := nqp::atkey(nqp::atkey($frames, $file), "qb_$missing");
+            nqp::sayfh(nqp::getstderr(), "got " ~ $lost_meth.name ~ " HOW: " ~ $lost_meth.HOW.name($lost_meth));
+            $*JCLASS.add_method($lost_meth);
+
+            # nqp::deletekey($frames, $file);
+        }
+
+        $frames{$file} := $*METH_CACHE if $file ne '';
+        $*METH_CACHE<CRB> := $*CODEREFS;
+
         # Make various code-ref/dispatch related things.
         $*CODEREFS.jastify();
+
+        nqp::sayfh(nqp::getstderr, "returning JCLASS now");
         
         # Finally, we hand back the finished class.
         return $*JCLASS
@@ -3424,13 +3570,13 @@ class QAST::CompilerJAST {
             }
             
             # If we need to do deserialization, emit code for that.
-            if $*COMP_MODE {
+            if $*COMP_MODE && !$cu.is_nested {
                 $block.push(self.deserialization_code($cu.sc(), $cu.code_ref_blocks(),
                     $cu.repo_conflict_resolver()));
             }
 
             # Add code object fixups.
-            if $cu.code_ref_blocks() {
+            if $cu.code_ref_blocks() && !$cu.is_nested {
                 my $cur_pd_block := QAST::Block.new( :blocktype('immediate') );
                 my $i := 0;
                 for $cu.code_ref_blocks() {
@@ -3730,6 +3876,8 @@ class QAST::CompilerJAST {
             # unique ID and name. (Note, always void return here as return values
             # are handled out of band).
             my $*JMETH := JAST::Method.new( :name('qb_'~self.cuid_to_qbid($node.cuid)), :returns('Void'), :static(1) );
+            nqp::sayfh(nqp::getstderr, "qb_" ~ self.cuid_to_qbid($node.cuid) ~ ":\n" ~ $node.node) if nqp::getenvhash()<DEBUG>;
+            nqp::bindkey($*METH_CACHE, $*JMETH.name, $*JMETH) if !nqp::existskey($*METH_CACHE, $*JMETH.name);
             $*JMETH.cr_name($node.name);
             $*JMETH.cr_cuid($node.cuid) unless $*COMP_MODE;
             $*CODEREFS.register_method($*JMETH, $node.cuid);

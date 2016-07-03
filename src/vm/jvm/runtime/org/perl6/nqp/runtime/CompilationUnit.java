@@ -69,6 +69,10 @@ public abstract class CompilationUnit {
         return cu;
     }
 
+    public class MyOtherRTE extends RuntimeException {
+        public MyOtherRTE(String msg) { super(msg); }
+    }
+
     /**
      * Does initialization work for the compilation unit.
      */
@@ -99,6 +103,7 @@ public abstract class CompilationUnit {
             codeRefList.add(cr);
 
             if (m.qbid >= 0 && m.qbid < qbidToCodeRef.length) qbidToCodeRef[m.qbid] = cr;
+            else throw new MyOtherRTE("what even");
 
             /* Stash outer, for later resolution. */
             outerCuid.add(ann);
