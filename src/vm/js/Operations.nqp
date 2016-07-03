@@ -1347,12 +1347,7 @@ class QAST::OperationsJS {
 
     for <savecapture usecapture> -> $op {
         add_simple_op($op, :!inlinable, $T_OBJ, [], sub () {
-            if $*AS_METHOD {
-                "nqp.op.savecaptureAsMethod(this, Array.prototype.slice.call(arguments))"
-            }
-            else {
-                "nqp.op.savecapture(Array.prototype.slice.call(arguments))"
-            }
+            "nqp.op.savecapture(Array.prototype.slice.call(arguments))"
         } , :sideffects);
     }
 

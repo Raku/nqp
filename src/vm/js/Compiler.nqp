@@ -325,7 +325,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
     }
 
-    method compile_sig(@params, :$cps, :$as_method) {
+    method compile_sig(@params, :$cps) {
         my $slurpy_named; # *%foo
         my $slurpy;       # *@foo
 
@@ -346,7 +346,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
         }
 
-        my $handled_this := 0;
         my $bind_named := '';
         for @params {
             if $_.slurpy {
@@ -380,36 +379,25 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             elsif $*BLOCK.is_dynamic_var($_) {
                 my $set := "{$*CTX}[{quote_string($_.name)}] = ";
 
-                if $as_method && !$handled_this {
-                   @setup.push("$set this;\n");
-                   $handled_this := 1;
+                my $tmp := self.unique_var('param');
+                @sig.push($tmp);
+                if $_.default {
+                    my $default_value := self.as_js($_.default, :want($T_OBJ), :$cps);
+                    @setup.push(Chunk.void(
+                        "if (arguments.length < {+@sig}) \{\n",
+                         $default_value,
+                         "$set {$default_value.expr};\n\} else \{\n$set $tmp;\n\}\n"
+                    ));
                 }
                 else {
-                    my $tmp := self.unique_var('param');
-                    @sig.push($tmp);
-                    if $_.default {
-                        my $default_value := self.as_js($_.default, :want($T_OBJ), :$cps);
-                        @setup.push(Chunk.void(
-                            "if (arguments.length < {+@sig}) \{\n",
-                             $default_value,
-                             "$set {$default_value.expr};\n\} else \{\n$set $tmp;\n\}\n"
-                        ));
-                    }
-                    else {
-                        @setup.push($set ~ $tmp ~ ";\n");
-                    }
+                    @setup.push($set ~ $tmp ~ ";\n");
                 }
             }
             else {
                 my $default := '';
                 my $name := self.mangle_name($_.name);
 
-                if $as_method && !$handled_this {
-                    $*BLOCK.add_js_lexical($name);
-                    @setup.push("$name = this;\n");
-                    $handled_this := 1;
-                }
-                elsif $_.default {
+                if $_.default {
                     # Overwriting a parameter makes the v8 optimizer bail out so to avoid that we introduce a new variable
                     my $tmp := self.unique_var($name~'_');
 
@@ -826,12 +814,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         has $!static_info;
         has $!ctx;
         has $!outer_ctx;
-        has $!as_method;
         method ctx() {$!ctx}
         method outer_ctx() {$!outer_ctx}
         method static_info() {$!static_info}
         method closure_template() {$!closure_template}
-        method as_method() {$!as_method}
     }
 
     method static_info_for_lexicals(BlockInfo $block) {
@@ -881,12 +867,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     @clone_inners.push("$reg = $cuid");
                 }
                 elsif %*BLOCKS_DONE{$kv.key} {
-                    if %*BLOCKS_AS_METHOD{$kv.key} {
-                        @clone_inners.push("$reg = $cuid.closureMethod");
-                    }
-                    else {
-                        @clone_inners.push("$reg = $cuid.closure");
-                    }
+                    @clone_inners.push("$reg = $cuid.closure");
                     @clone_inners.push(%*BLOCKS_DONE{$kv.key});
                     if 1 { # TODO check if we need to have this closure serializable
                         @clone_inners.push(".setOuter(" ~ %*BLOCKS_INFO{$kv.key}.outer.ctx ~ ")");
@@ -925,12 +906,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             my $reg   := $kv.value;
 
             self.wrap_static_block(%*BLOCKS_INFO{$kv.key}.outer, @capture_inners, -> {
-                if %*BLOCKS_AS_METHOD{$kv.key} {
-                    @capture_inners.push("$reg = $cuid.method");
-                }
-                else {
-                    @capture_inners.push("$reg = $cuid.capture");
-                }
+                @capture_inners.push("$reg = $cuid.capture");
 
                 @capture_inners.push(%*BLOCKS_DONE{$kv.key});
 
@@ -989,21 +965,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             my $body_want := $node.blocktype eq 'immediate' ?? $want !! $T_OBJ;
 
-            my $as_method := self.looks_like_a_method($node);
-
-            my $*AS_METHOD := $as_method;
-
             my $stmts := self.compile_all_the_statements($node, $body_want);
 
-
-            %*BLOCKS_AS_METHOD{$node.cuid} := $as_method;
-
-            my $create_ctx := self.create_ctx($*CTX, :code_ref($as_method ?? self.mangled_cuid($node.cuid) !! 'this'));
-
+            my $create_ctx := self.create_ctx($*CTX, :code_ref('this'));
             if nqp::istype($stmts, ChunkCPS) {
             }
             else {
-                my $sig := self.compile_sig($*BLOCK.params, :$as_method);
+                my $sig := self.compile_sig($*BLOCK.params);
 
                 my @function := [
                     "function({$sig.expr}) \{\n",
@@ -1034,7 +1002,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                             closure_template => ChunkEscaped.new(@function),
                             ctx => $*CTX,
                             outer_ctx => (nqp::defined($*BLOCK.outer) ?? $*BLOCK.outer.ctx !! ""),
-                            as_method => $as_method,
                             static_info => self.static_info_for_lexicals($*BLOCK)
                         );
                     }
@@ -1234,7 +1201,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
                 @setup.push(
                     ~ "," ~ $info.static_info ~ ","
-                    ~ ($info.as_method ?? "true" !! "false") ~ ","
                     ~ "cuids, setSetting"
                     ~ ");\n");
             }
@@ -1802,7 +1768,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         # Blocks we've seen while compiling.
         my %*BLOCKS_DONE;
         my %*BLOCKS_INFO;
-        my %*BLOCKS_AS_METHOD;
         my %*BLOCKS_DONE_CPS;
 
         my $compile_block := -> {self.as_js($ast, :want($instant ?? $T_VOID !! $T_OBJ))};

@@ -619,12 +619,11 @@ BinaryCursor.prototype.deserialize = function(sc) {
   }
 
   var code = noContextClosures.map(function(closure) {
-    var type = closure.staticCode.asMethod ? 'method' : 'block';
     var codeRef = 'sc.codeRefs[' + closure.index + ']';
 
     return 'var ' + closure.staticCode.outerCtxVar + ' = null;\n' +
         'var $$codeRef = ' + codeRef + ';\n' +
-        'sc.codeRefs[' + closure.index + '].' + type + '(' +
+        'sc.codeRefs[' + closure.index + '].block(' +
         closure.staticCode.closureTemplate +
         ');\n';
   }).join('');
@@ -692,9 +691,8 @@ BinaryCursor.prototype.contextToCode = function(context, data) {
       setVars +
       context.inner.map(function(inner) {return this.contextToCode(inner, data)}).join('') +
       context.closures.map(function(closure) {
-        var type = closure.staticCode.asMethod ? 'method' : 'block';
         var codeRef = 'sc.codeRefs[' + closure.index + ']';
-        return 'var $$codeRef = ' + codeRef + ';\n' + codeRef + '.' + type + '(' +
+        return 'var $$codeRef = ' + codeRef + ';\n' + codeRef + '.block(' +
            closure.staticCode.closureTemplate +
            ');\n';
       }).join('') +

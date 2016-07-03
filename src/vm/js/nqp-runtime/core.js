@@ -246,12 +246,6 @@ op.savecapture = function(args) {
   return new Capture(args[1], Array.prototype.slice.call(args, 2));
 };
 
-op.savecaptureAsMethod = function(invocant, args) {
-  var withInvocant = Array.prototype.slice.call(args, 2);
-  withInvocant.unshift(invocant);
-  return new Capture(args[1], withInvocant);
-};
-
 op.captureposelems = function(capture) {
   return capture.pos.length;
 };
