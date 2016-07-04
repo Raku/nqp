@@ -132,7 +132,7 @@ exports.toStr = function(arg, ctx) {
   } else if (arg !== undefined && arg !== null && arg.typeObject_) {
     return '';
   } else if (arg.Str) {
-    return arg.Str(ctx);
+    return arg.Str(ctx, null, arg);
   } else if (arg.$$getStr) {
     return arg.$$getStr();
   } else if (arg.$$getNum) {
@@ -154,7 +154,7 @@ exports.toNum = function(arg, ctx) {
     // TODO - is that a correct way to do that?
     return 0;
   } else if (arg.Num) {
-    return arg.Num(ctx);
+    return arg.Num(ctx, null, arg);
   } else if (arg.$$getNum) {
     return arg.$$getNum();
   } else if (arg.$$getInt) {

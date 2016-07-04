@@ -136,14 +136,14 @@ IterPair.prototype.iterkey_s = function() {
   return this._key;
 };
 
-IterPair.prototype.Str = function(ctx) {
+IterPair.prototype.Str = function(ctx, _NAMED, self) {
   return this._key;
 };
 
-IterPair.prototype.key = function(ctx, named) {
+IterPair.prototype.key = function(ctx, _NAMED, self) {
   return this._key;
 };
-IterPair.prototype.value = function(ctx, named) {
+IterPair.prototype.value = function(ctx, _NAMED, self) {
   return this._hash.get(this._key);
 };
 
@@ -583,7 +583,7 @@ function toJS(obj) {
 }
 
 compilerRegistry.set('JavaScript', {
-  eval: function(ctx, named, code) {
+  eval: function(ctx, _NAMED, self, code) {
     //console.log("evaling [", code, "]");
     return fromJS(eval(code));
   }

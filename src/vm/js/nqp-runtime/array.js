@@ -4,21 +4,21 @@ function NQPArray(array) {
   this.array = array;
 }
 
-NQPArray.prototype.push = function(ctx, _NAMED, element) {
+NQPArray.prototype.push = function(ctx, _NAMED, self, element) {
   this.array.push(element);
   return element;
 };
 
-NQPArray.prototype.unshift = function(ctx, _NAMED, element) {
+NQPArray.prototype.unshift = function(ctx, _NAMED, self, element) {
   this.array.unshift(element);
   return element;
 };
 
-NQPArray.prototype.shift = function(ctx, _NAMED) {
+NQPArray.prototype.shift = function(ctx, _NAMED, self) {
   return this.array.shift();
 };
 
-NQPArray.prototype.pop = function(ctx, _NAMED) {
+NQPArray.prototype.pop = function(ctx, _NAMED, self) {
   return this.array.pop();
 };
 

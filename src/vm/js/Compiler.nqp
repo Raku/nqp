@@ -216,7 +216,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     # $args is the list of QAST::Node arguments
     # returns either a js code string which contains the arguments, or a list of js code strings that when executed create arrays of arguments (suitable for concatenating and passing into Function.apply) 
 
-    method args($args, :$cont) {
+    method args($args, :$cont, :$invocant) {
         my @setup;
         my @args;
 
@@ -266,6 +266,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             else {
                 @named_groups.push(Chunk.new($T_OBJ,'{' ~ nqp::join(',',@named_exprs) ~ '}', @named));
             }
+        }
+
+        if $invocant {
+            @groups[0].unshift(Chunk.new($T_OBJ, $invocant, []));
         }
 
         if $cont {

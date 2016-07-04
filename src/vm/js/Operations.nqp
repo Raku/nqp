@@ -672,7 +672,7 @@ class QAST::OperationsJS {
             $method := "[{$method_name.expr}]";
         }
 
-        my $compiled_args := $comp.args(@args);
+        my $compiled_args := $comp.args(@args, :invocant($invocant.expr));
 
         my $call;
         if nqp::islist($compiled_args) {

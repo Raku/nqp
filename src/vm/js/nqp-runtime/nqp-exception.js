@@ -6,7 +6,7 @@ function NQPException(message) {
 NQPException.prototype = Object.create(Error.prototype);
 NQPException.prototype.constructor = NQPException;
 
-NQPException.prototype.Str = function(ctx, _NAMED) {
+NQPException.prototype.Str = function(ctx, _NAMED, self) {
   return this.message;
 };
 

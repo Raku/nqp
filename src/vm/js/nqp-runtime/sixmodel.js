@@ -107,17 +107,7 @@ STable.prototype.setinvokespec = function(classHandle, attrName, invocationHandl
 
 function injectMethod(proto, name, method) {
   proto[name] = function() {
-    //    console.log("calling method:",name,method);
-    if (method.$call) {
-      var args = [];
-      args.push(arguments[0]);
-      args.push(arguments[1]);
-      args.push(this);
-      for (var i = 2; i < arguments.length; i++) {
-        args.push(arguments[i]);
-      }
-      return method.$call.apply(method, args);
-    }
+    return method.$call.apply(method, arguments);
   };
 }
 

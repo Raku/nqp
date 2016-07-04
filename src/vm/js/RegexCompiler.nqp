@@ -47,9 +47,11 @@ class RegexCompiler {
             $!cursor_type := $node.cursor_type();
         }
 
+        my $self := $!compiler.mangle_name('self');
+
         Chunk.new($T_OBJ, $!cursor, [
             "{$!label} = {$!initial_label};\n",
-            "$start = {$!compiler.mangle_name('self')}['!cursor_start_all']({$*CTX}, null).array;\n",
+            "$start = $self['!cursor_start_all']({$*CTX}, null, $self).array;\n",
             "{$!cursor} = $start[0];\n",
             self.set_cursor_var(),
             "{$!target} = $start[1];\n",
@@ -82,7 +84,7 @@ class RegexCompiler {
             self.goto($jump),
 
             self.case($!done_label),
-            "{$!cursor}['!cursor_fail']({$*CTX}, null);\n",
+            "{$!cursor}['!cursor_fail']({$*CTX}, null, $!cursor);\n",
             "break {$!js_loop_label}\n",
             "\}\n\}\n"
         ]);
@@ -234,7 +236,7 @@ class RegexCompiler {
         
         @setup.push(
             "{$!cursor}['!cursor_pass']({$*CTX},"
-            ~ "\{backtrack: {$node.backtrack ne 'r'}\}, {$!pos}"
+            ~ "\{backtrack: {$node.backtrack ne 'r'}\}, $!cursor, {$!pos}"
         );
 
         if $node.name {
@@ -275,8 +277,9 @@ class RegexCompiler {
     }
 
     my sub call($invocant, $method, *@args) {
-        nqp::unshift(@args, $*CTX);
+        nqp::unshift(@args, $invocant);
         nqp::unshift(@args, 'null');
+        nqp::unshift(@args, $*CTX);
         $invocant ~ "[" ~ quote_string($method) ~ "](" ~ nqp::join(",", @args) ~ ")";
     }
 
@@ -323,7 +326,7 @@ class RegexCompiler {
         if nqp::istype($node[0][0], QAST::SVal) {
             my @args := nqp::clone($node[0].list);
             my $method := @args.shift.value;
-            my $compiled_args := $!compiler.args(@args);
+            my $compiled_args := $!compiler.args(@args, :invocant($!cursor));
 
             my $invocation;
             if nqp::islist($compiled_args) {

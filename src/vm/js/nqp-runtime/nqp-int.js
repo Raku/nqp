@@ -6,7 +6,7 @@ NQPInt.prototype.Int = function(ctx) {
   return this.value;
 };
 
-NQPInt.prototype.Str = function(ctx) {
+NQPInt.prototype.Str = function(ctx, _NAMED, self) {
   return this.value.toString();
 };
 

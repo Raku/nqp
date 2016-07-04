@@ -33,11 +33,11 @@ function create_KnowHOWAttribute() {
   var typeObj = r.typeObjectFor(metaObj);
 
   var methods = {};
-  methods.name = function() {
-    return this.__name;
+  methods.name = function(ctx, _NAMED, self) {
+    return self.__name;
   };
-  methods['new'] = function(ctx, _NAMED) {
-    var attr = r.allocate(this._STable);
+  methods['new'] = function(ctx, _NAMED, self) {
+    var attr = r.allocate(self._STable);
     //TODO convert to string
     attr.__name = _NAMED.name;
     attr.__type = _NAMED.type;
@@ -78,13 +78,7 @@ KnowHOW_HOW._STable.methodCache = {};
 
 function wrapMethod(name, method) {
   var codeRef = new CodeRef(name);
-  codeRef.$call = function(ctx, _NAMED, self) {
-    var args = Array.prototype.slice.call(arguments, 3);
-    args.unshift(ctx);
-    args.unshift(_NAMED);
-
-    return method.apply(self, args);
-  };
+  codeRef.$call = method
   return codeRef;
 }
 function addKnowhowHowMethod(name, method) {
@@ -98,21 +92,21 @@ function addKnowhowHowMethod(name, method) {
   KnowHOW_HOW._STable.methodCache[name] = wrapped;
 }
 
-addKnowhowHowMethod('name', function() {
-  return this.__name;
+addKnowhowHowMethod('name', function(ctx, _NAMED, self) {
+  return self.__name;
 });
 
-addKnowhowHowMethod('attributes', function() {
-  return this.__attributes;
+addKnowhowHowMethod('attributes', function(ctx, _NAMED, self) {
+  return self.__attributes;
 });
 
-addKnowhowHowMethod('methods', function() {
-  return this.__methods;
+addKnowhowHowMethod('methods', function(ctx, _NAMED, self) {
+  return self.__methods;
 });
 
-addKnowhowHowMethod('new_type', function(ctx, _NAMED) {
+addKnowhowHowMethod('new_type', function(ctx, _NAMED, self) {
   /* We first create a new HOW instance. */
-  var HOW = this._STable.REPR.allocate(this._STable);
+  var HOW = self._STable.REPR.allocate(self._STable);
 
   /* See if we have a representation name; if not default to P6opaque. */
   var reprName = (_NAMED && _NAMED.repr) ? _NAMED.repr : 'P6opaque';
@@ -135,17 +129,17 @@ addKnowhowHowMethod('new_type', function(ctx, _NAMED) {
   return typeObject;
 });
 
-addKnowhowHowMethod('add_attribute', function(ctx, _NAMED, type, attr) {
-  this.__attributes.$$push(attr);
+addKnowhowHowMethod('add_attribute', function(ctx, _NAMED, self, type, attr) {
+  self.__attributes.$$push(attr);
 });
 
-addKnowhowHowMethod('add_method', function(ctx, _NAMED, type, name, code) {
-  this.__methods.content.set(name, code);
+addKnowhowHowMethod('add_method', function(ctx, _NAMED, self, type, name, code) {
+  self.__methods.content.set(name, code);
 });
 
-addKnowhowHowMethod('compose', function(ctx, _NAMED, typeObject) {
+addKnowhowHowMethod('compose', function(ctx, _NAMED, self, typeObject) {
   /* Set method cache */
-  typeObject._STable.setMethodCache(this.__methods.$$toObject());
+  typeObject._STable.setMethodCache(self.__methods.$$toObject());
 
   /* Set type check cache. */
 
@@ -167,9 +161,9 @@ addKnowhowHowMethod('compose', function(ctx, _NAMED, typeObject) {
   typeInfo.push(new NQPArray(attrInfoList));
 
   /* ...then an array of hashes per attribute... */
-  for (var i = 0; i < this.__attributes.array.length; i++) {
+  for (var i = 0; i < self.__attributes.array.length; i++) {
     var attrInfo = new Hash();
-    var attr = this.__attributes.array[i];
+    var attr = self.__attributes.array[i];
     attrInfo.content.set('name', attr.__name);
     attrInfo.content.set('type', attr.__type);
     if (attr.__boxTarget) {
