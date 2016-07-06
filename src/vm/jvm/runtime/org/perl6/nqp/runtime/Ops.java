@@ -5342,7 +5342,11 @@ public final class Ops {
         ExceptionHandling.handlerDynamic(tc, ExceptionHandling.EX_CAT_CATCH, true, exObj);
     }
     public static void throwcatdyn_c(long category, ThreadContext tc) {
-        ExceptionHandling.handlerDynamic(tc, category, false, null);
+        SixModelObject exType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.exceptionType;
+        VMExceptionInstance exObj = (VMExceptionInstance)exType.st.REPR.allocate(tc, exType.st);
+        exObj.origin = tc.curFrame;
+        exObj.category = category;
+        ExceptionHandling.handlerDynamic(tc, category, false, exObj);
     }
     public static SixModelObject exception(ThreadContext tc) {
         int numHandlers = tc.handlers.size();
