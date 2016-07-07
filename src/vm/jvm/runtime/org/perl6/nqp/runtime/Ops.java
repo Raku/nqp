@@ -5624,6 +5624,8 @@ public final class Ops {
             config.numPosRef = configHash.at_key_boxed(tc, "num_pos_ref");
         if (configHash.exists_key(tc, "str_pos_ref") != 0)
             config.strPosRef = configHash.at_key_boxed(tc, "str_pos_ref");
+        if (configHash.exists_key(tc, "lexical_handler_not_found_error") != 0)
+            config.lexicalHandlerNotFoundError = configHash.at_key_boxed(tc, "lexical_handler_not_found_error");
         return configHash;
     }
     public static SixModelObject getcomp(String name, ThreadContext tc) {

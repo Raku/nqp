@@ -162,6 +162,11 @@ all:
         }
         if (handler != null)
             invokeHandler(tc, handler, category, f, false, exObj, null);
+        else if (tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.lexicalHandlerNotFoundError != null) {
+            Ops.invokeDirect(tc, tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.lexicalHandlerNotFoundError, 
+                new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_INT, CallSiteDescriptor.ARG_INT }, null),
+                false, new Object[] { category, 0L });
+        }
         else
             panic(tc, category, exObj);
     }

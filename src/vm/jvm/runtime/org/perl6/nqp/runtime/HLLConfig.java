@@ -92,6 +92,11 @@ public class HLLConfig {
     public SixModelObject exitHandler;
 
     /**
+     * HLL Handler for lexical exceptions without handler.
+     */
+    public SixModelObject lexicalHandlerNotFoundError;
+
+    /**
      * Native reference types.
      */
     public SixModelObject intLexRef;
