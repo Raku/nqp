@@ -2290,6 +2290,7 @@ public final class Ops {
     public static final CallSiteDescriptor typeCheckCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ }, null);
     public static final CallSiteDescriptor howObjCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ }, null);
     public static final CallSiteDescriptor parameterizeCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_OBJ, CallSiteDescriptor.ARG_OBJ }, null);
+    public static final CallSiteDescriptor intIntCallSite = new CallSiteDescriptor(new byte[] { CallSiteDescriptor.ARG_INT, CallSiteDescriptor.ARG_INT }, null);
     public static void invokeLexotic(SixModelObject invokee, CallSiteDescriptor csd, Object[] args, ThreadContext tc) {
         LexoticException throwee = tc.theLexotic;
         throwee.target = ((LexoticInstance)invokee).target;
