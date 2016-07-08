@@ -1,4 +1,4 @@
-plan(12);
+plan(14);
 
 ok(nqp::isnull(nqp::decont(nqp::null())), 'nqp::decont works on nqp::null');
 
@@ -55,4 +55,60 @@ ok(nqp::isnull(nqp::decont(nqp::null())), 'nqp::decont works on nqp::null');
 
     nqp::rebless($cont, FooMore);
     ok($obj.foo eq "more foo", "nqp::rebless deconts");
+}
+
+{
+    my $flag;
+    my $a := 100;
+    my $b := 200;
+
+    my sub fetch($cont) {
+        if $flag {
+            $a;
+        }
+        else {
+            $b;
+        }
+    }
+    my sub store($cont, $new) {
+        if $flag {
+            $a := $new
+        }
+        else {
+            $b := $new
+        }
+    }
+    
+    class FlaggyCont {
+    }
+
+    class Content2 {
+        method foo() {
+            "content2";
+        }
+    }
+
+    class Content1 {
+        method foo() {
+            "content1";
+        }
+        method check_self($self:) {
+            ok($self.foo eq 'content1', '$self deconts to the initial object at first');
+            $flag := 0;
+            ok($self.foo eq 'content2', '... and the deconts to a different object');
+        }
+    }
+    nqp::setcontspec(FlaggyCont, 'code_pair', nqp::hash(
+        'fetch', &fetch,
+        'store', &store
+    ));
+
+    my $cont := nqp::create(FlaggyCont);
+
+    $flag := 1; nqp::assign($cont, Content1.new);
+    $flag := 0; nqp::assign($cont, Content2.new);
+
+    $flag := 1;
+
+    $cont.check_self();
 }
