@@ -8,6 +8,10 @@ import qualified Data.Map as Map
 
 type Result = Unique
 
+data History = Unchanged QAST.Id | Replace QAST.Id
+
+replace (Unchanged id) = Replace id
+replace (Replace id) = Replace id
 
 indent :: String -> String    
 indent str = concat $ map (\line -> "  " ++ line ++ "\n") $ lines str
@@ -32,18 +36,18 @@ compileStmt (QAST.Stmts stmts) =
             return (graph, last values)
 
 
-compileStmt (QAST.Op "say" args) = do
+compileStmt (QAST.Op "say" args id) = do
     (graph, [value]) <- compileStmts args
-    return (graph <*> (mkMiddle $ Say value), value)
+    return (graph <*> (mkMiddle $ Say value (Unchanged id)), value)
 
-compileStmt (QAST.Op "add_i" args) = do
+compileStmt (QAST.Op "add_i" args id) = do
     result <- freshUnique
     (graph, [a, b]) <- compileStmts args
-    return (graph <*> (mkMiddle $ AddI result a b), result)
+    return (graph <*> (mkMiddle $ AddI result a b (Unchanged id)), result)
 
-compileStmt (QAST.IVal i) = do
+compileStmt (QAST.IVal i id) = do
     result <- freshUnique
-    return (mkMiddle $ IVal result i, result)
+    return (mkMiddle $ IVal result i (Unchanged id), result)
 
 compileStmt stmt = do
     result <- freshUnique
@@ -53,25 +57,29 @@ data Insn e x where
     Label :: Label -> Insn C O
     Branch :: Label -> Insn O C
     Unknown :: String -> Insn O O
-    Say :: Result -> Insn O O
-    AddI :: Result -> Result -> Result -> Insn O O
-    IVal :: Result -> Int -> Insn O O
+    Say :: Result -> History -> Insn O O
+    AddI :: Result -> Result -> Result -> History -> Insn O O
+    IVal :: Result -> Int -> History -> Insn O O
     Void :: Result -> Insn O O
     Exit :: Insn O C
 
 --deriving instance Show (Insn e x)
 
 showResult :: Result -> String
+
 showResult result = "$" ++ (show result)
 
 assign :: Result -> String -> String
 assign result rest = (showResult result) ++ " = " ++ rest
 
+showHistory (Replace i) = " # replace " ++ (show i)
+showHistory (Unchanged i) = "" -- " # unchanged " ++ (show i)
+
 instance Show (Insn e x) where
-    show (IVal result i) = assign result $ show i
-    show (AddI result a b) = assign result $ (showResult a) ++ " + " ++ (showResult b)
+    show (IVal result i history) = assign result $ show i ++ (showHistory history)
+    show (AddI result a b history) = assign result $ (showResult a) ++ " + " ++ (showResult b) ++ (showHistory history)
     show (Void result) = assign result $ "void"
-    show (Say what) = "say " ++ (showResult what)
+    show (Say what history) = "say " ++ (showResult what) ++ (showHistory history)
     show (Unknown string) = "unknown " ++ string
     show (Branch label) = "goto " ++ (show label)
     show (Label label) = "label " ++ (show label)
@@ -118,20 +126,32 @@ resultIsConst :: FwdTransfer Insn ConstFact
 resultIsConst = mkFTransfer ft where
     ft :: Insn e x -> ConstFact -> Fact x ConstFact
     ft (Label _) f = f
-    ft (Say _) f = f
+    ft (Say _ _) f = f
     ft (Unknown _) f = f -- Unknown should make us forget everything
-    ft (IVal result i) f = Map.insert result (PElem i) f
-    ft (AddI result _ _) f = Map.insert result Top f
+    ft (IVal result i _) f = Map.insert result (PElem i) f
+    ft (AddI result _ _ _) f = Map.insert result Top f
     ft (Branch l) f = mapSingleton l f
 --    ft (Exit) _ = mapEmpty
 
+data Change = DeleteNode QAST.Id | ReplacementIVal QAST.Id Int
+    deriving Show
+
+changes :: Insn e x -> [Change]
+
+changes (IVal _ i (Replace id)) = [ReplacementIVal id i]
+changes _ = []
+
+
+
+gatherChanges :: Graph Insn O O -> [Change]
+gatherChanges graph = foldGraphNodes (\node thusFar -> thusFar ++ (changes node)) graph []
 
 constProp :: FuelMonad m => FwdRewrite m Insn ConstFact
 
 constProp = mkFRewrite3 noop1 cp noop2
     where 
-       cp (AddI result a b) f = case (lookup a f, lookup b f) of
-            (Just n, Just m) -> return $ Just (mkMiddle $ IVal result (n+m))
+       cp (AddI result a b history) f = case (lookup a f, lookup b f) of
+            (Just n, Just m) -> return $ Just (mkMiddle $ IVal result (n+m) (replace history))
             _ -> return $ Nothing
        cp insn f = return $ Nothing
        noop1 insn f = return $ Nothing
@@ -165,3 +185,7 @@ main = do
 
 
     putStrLn $ showGraph prettyInsn optimized
+
+    putStrLn "\nlist of changes:\n"
+
+    putStrLn $ "result " ++ (show $ gatherChanges optimized)

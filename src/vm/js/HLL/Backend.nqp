@@ -61,7 +61,7 @@ class HLLBackend::JavaScript {
         if %adverbs<O> eq 'fun' {
             my $dataflow := DataFlowOptimizer.new;
             $dataflow.optimize($qast);
-            nqp::exit(0);
+            $qast;
         }
         else {
             $qast;
