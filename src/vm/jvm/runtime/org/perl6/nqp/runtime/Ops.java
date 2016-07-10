@@ -3910,8 +3910,11 @@ public final class Ops {
         return val.toUpperCase();
     }
 
-    public static String x(String val, long count) {
-        StringBuilder retval = new StringBuilder();
+    public static String x(String val, long count, ThreadContext tc) {
+        if (count < 0)
+            throw ExceptionHandling.dieInternal(tc, "repeat count (" + count + ") cannot be negative");
+
+        StringBuilder retval = new StringBuilder((int)Math.min(Integer.MAX_VALUE, val.length() * count));
         for (long ii = 1; ii <= count; ii++) {
             retval.append(val);
         }
