@@ -997,7 +997,7 @@ public final class Ops {
         Path before_o = Paths.get(before);
         Path after_o = Paths.get(after);
         try {
-            Files.move(before_o, after_o);
+            Files.move(before_o, after_o, StandardCopyOption.REPLACE_EXISTING);
         }
         catch (Exception e) {
             die_s(IOExceptionMessages.message(e), tc);
