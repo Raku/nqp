@@ -1499,5 +1499,7 @@ class QAST::OperationsJS {
 
     add_simple_op('lock', $T_OBJ, [$T_OBJ], sub ($lock) {$lock});
     add_simple_op('unlock', $T_OBJ, [$T_OBJ], sub ($lock) {$lock});
+
+    add_simple_op('sleep', $T_NUM, [$T_NUM], :sideffects);
 }
 
