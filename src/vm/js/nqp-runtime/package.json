@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "the runtime for the js backend for nqp",
   "bugs": {
-    "url:": "https://github.com/pmurias/nqp-js/issues",
+    "url:": "https://github.com/perl6/nqp/issues",
     "email": "pawelmurias@gmail.com"
   },
   "licenses": [
