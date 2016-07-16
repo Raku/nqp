@@ -78,7 +78,7 @@ Upload the release tarball and signature to L<http://rakudo.org/downloads/nqp>:
 
 If you do not have permissions for that, ask one of (pmichaud, jnthn, FROGGS,
 masak, tadzik, moritz, PerlJam/perlpilot, [Coke], lizmat, timotimo, fsergot,
-hoelzro) on #perl6 to do it for you.
+hoelzro, Zoffix) on #perl6 or #perl6-dev to do it for you.
 
 =item 9.
 
