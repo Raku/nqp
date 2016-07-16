@@ -215,7 +215,7 @@ public class BootJavaInterop {
         // chain of loaders above gc.byteClassLoader.
         ByteClassLoader loader = cc.target == null
                 ? gc.byteClassLoader
-                : new ByteClassLoader(cc.target.getClassLoader());
+                : new ByteClassLoader(getClass().getClassLoader());
         cc.constructed = loader.defineClass(cc.className.replace('/','.'), bits);
         try {
             cc.constructed.getField("constants").set(null, cc.constants.toArray(new Object[0]));

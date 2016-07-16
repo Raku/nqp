@@ -266,7 +266,7 @@ public class GlobalContext {
 
         neverRepossess = new WeakHashMap<SixModelObject, Object>();
 
-        byteClassLoader = new ByteClassLoader();
+        byteClassLoader = new ByteClassLoader(getClass().getClassLoader());
     }
     
     /**
