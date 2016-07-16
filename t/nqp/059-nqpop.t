@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(273);
+plan(272);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -69,8 +69,6 @@ ok( nqp::ordat('xyz',2) eq 122, 'nqp::ordat');
 ok( nqp::lc('Hello World') eq 'hello world', 'nqp::lc');
 ok( nqp::uc("Don't Panic") eq "DON'T PANIC", 'nqp::uc');
 ok( nqp::flip("foo") eq "oof", "nqp::flip");
-ok( nqp::sha1("abc") eq "A9993E364706816ABA3E25717850C26C9CD0D89D"), "nqp::sha1 sanity";
-ok( nqp::sha1("ab\x[0]c") eq "DBDD4F85D8A56500AA5C9C8A0D456F96280C92E5"), "nqp::sha1 null bytes";
 
 my @items := nqp::split(' ', 'a little lamb');
 ok( nqp::elems(@items) == 3 && @items[0] eq 'a' && @items[1] eq 'little' && @items[2] eq 'lamb', 'nqp::split');
@@ -304,6 +302,7 @@ ok(-12.5 % -5 == -2.5, '% test');
 ok(20 % 7 == 6, '% with integer arguments');
 
 ok(nqp::sha1("Hello World") eq '0A4D55A8D778E5022FAB701977C5D840BBC486D0', "sha1");
+ok( nqp::sha1("ab\x[0]c") eq "DBDD4F85D8A56500AA5C9C8A0D456F96280C92E5", "nqp::sha1 null bytes");
 
 nqp::bindcomp("noSuchLanguageEver1", nqp::list("compiler1"));
 ok(nqp::bindcomp("noSuchLanguageEver2", "compiler2") eq "compiler2", "correct return value for bindcomp");
