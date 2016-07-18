@@ -33,7 +33,25 @@ class HLLBackend::JavaScript {
     method run_profiled($what, $kind, $filename?) {
 
         my $comp := nqp::getcomp('JavaScript');
-        my $v8-profiler := $comp.eval('require("v8-profiler")');
+
+        my $v8-profiler := $comp.eval('
+            var v8profiler;
+            try {
+              v8profiler = require(\'v8-profiler\');
+            } catch (e) {
+              if (e.message == "Cannot find module \'v8-profiler\'") {
+                null;
+              } else {
+                throw e;
+              }
+            }
+            v8profiler;
+        ');
+
+        if nqp::isnull($v8-profiler) {
+            say("Cannot find module 'v8-profiler'. Install it from npm to enable profiling.");
+            nqp::exit(1);
+        }
 
         my &start := $comp.eval('(function(profiler, name) {profiler.startProfiling(name)})');
         my &write := $comp.eval('(function(profiler, name, filename) {
