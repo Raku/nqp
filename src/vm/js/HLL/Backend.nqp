@@ -22,12 +22,34 @@ class HLLBackend::JavaScript {
     method nqpevent($spec?) {
         # Doesn't do anything just yet
     }
+
+
+    method fresh_profile_filename() {
+        my $filename := 'profile-' ~ nqp::time_n() ~ '.cpuprofile';
+        nqp::sayfh(nqp::getstderr(), "Writing profiling data to $filename");
+        $filename;
+    }
     
     method run_profiled($what, $kind, $filename?) {
-        nqp::printfh(nqp::getstderr(),
-            "Attach a profiler (e.g. JVisualVM) and press enter");
-        nqp::readlinefh(nqp::getstdin());
-        $what();
+
+        my $comp := nqp::getcomp('JavaScript');
+        my $v8-profiler := $comp.eval('require("v8-profiler")');
+
+        my &start := $comp.eval('(function(profiler, name) {profiler.startProfiling(name)})');
+        my &write := $comp.eval('(function(profiler, name, filename) {
+            var profile = profiler.stopProfiling(name);
+            var fs = require("fs");
+            fs.writeFileSync(filename, JSON.stringify(profile));
+        })');
+
+
+        start($v8-profiler, '');
+
+        my $result := $what();
+
+        write($v8-profiler, '', $filename || self.fresh_profile_filename);
+
+        $result;
     }
     
     method run_traced($level, $what) {
