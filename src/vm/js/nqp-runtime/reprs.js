@@ -187,16 +187,8 @@ P6opaque.prototype.hintfor = function(classHandle, attrName) {
 };
 
 P6opaque.prototype.getAttr = function(classHandle, attrName) {
-  var nqp = require('nqp-runtime');
   var hint = this.hintfor(classHandle, attrName);
   if (hint == -1) {
-    console.log('classHandle', classHandle);
-    if (classHandle === null) {
-      console.trace('null classHandle');
-      process.exit();
-    }
-    console.trace('getAttr', attrName);
-    console.log(nqp.dumpObj(this.nameToIndexMapping));
     throw "Can't find: " + attrName;
   } else {
     return slotToAttr(hint);
