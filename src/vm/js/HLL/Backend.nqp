@@ -40,6 +40,7 @@ class HLLBackend::JavaScript {
             var profile = profiler.stopProfiling(name);
             var fs = require("fs");
             fs.writeFileSync(filename, JSON.stringify(profile));
+            profile.delete();
         })');
 
 
