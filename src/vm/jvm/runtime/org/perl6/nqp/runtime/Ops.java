@@ -742,6 +742,21 @@ public final class Ops {
         }
     }
 
+    public static String readcharsfh(SixModelObject obj, long chars, ThreadContext tc) {
+        if (obj instanceof IOHandleInstance) {
+            IOHandleInstance h = (IOHandleInstance)obj;
+            if (h.handle instanceof IIOSyncReadable)
+                return ((IIOSyncReadable)h.handle).readchars(tc, (int)chars);
+            else
+                throw ExceptionHandling.dieInternal(tc,
+                    "This handle does not support readchars");
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc,
+                "readcharsfh requires an object with the IOHandle REPR");
+        }
+    }
+
     public static String readlinefh(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
             IOHandleInstance h = (IOHandleInstance)obj;

@@ -82,6 +82,26 @@ public class StandardReadHandle implements IIOClosable, IIOEncodable, IIOSyncRea
             throw ExceptionHandling.dieInternal(tc, e);
         }
     }
+
+    /* TODO - think about unicode in readchars and getc */
+    public synchronized String readchars(ThreadContext tc, int count) {
+        try {
+            if (br == null)
+                br = new BufferedReader(new InputStreamReader(is, cs));
+            char[] chars = new char[count];
+
+            int actuallyRead = br.read(chars, 0, count);
+
+            if (actuallyRead == -1) {
+                return "";
+            }
+            else {
+                return new String(chars, 0, actuallyRead);
+            }
+        } catch (IOException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
+        }
+    }
     
     public synchronized String getc(ThreadContext tc) {
         try {
