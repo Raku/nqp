@@ -1346,7 +1346,10 @@ in the next `$count` bytes from the filehandle and store them in the array.
 Return the next line of the open filehandle.
 
 ## readcharsfh
-* `readcharsfh(Handle $fh, $chars)`
+* `readcharsfh(Handle $fh, int $count)`
+
+Given a readable `$fh`, read in the next `$count` bytes from the filehandle
+and return them as a string.
 
 ## say
 * `say(str $str)`
