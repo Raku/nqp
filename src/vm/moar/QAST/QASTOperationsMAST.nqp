@@ -2014,6 +2014,10 @@ my %const_map := nqp::hash(
     'SIG_PWR',                  130,
     'SIG_BREAK',                221,
 
+    'TYPE_CHECK_CACHE_DEFINITIVE',  0,
+    'TYPE_CHECK_CACHE_THEN_METHOD', 1,
+    'TYPE_CHECK_NEEDS_ACCEPTS',     2,
+
     'C_TYPE_CHAR',              -1,
     'C_TYPE_SHORT',             -2,
     'C_TYPE_INT',               -3,
