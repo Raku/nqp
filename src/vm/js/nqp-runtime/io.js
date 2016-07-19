@@ -233,13 +233,13 @@ function readline(fh, chomp) {
   return string.replace(/\r\n/, '\n');
 }
 
-
+var CHUNK_SIZE = 32768;
 op.readallfh = function(fh) {
   if (fh instanceof nqpIo.SyncPipe) {
     return fh.slurp().toString(fh.encoding || 'utf8');
   }
   var all = new Buffer(0);
-  var buf = new Buffer(32768);
+  var buf = new Buffer(CHUNK_SIZE);
   var total = 0;
   var bytesRead;
   while ((bytesRead = fs.readSync(fh.fd, buf, 0, buf.length, null)) != 0) {
@@ -247,6 +247,34 @@ op.readallfh = function(fh) {
     var all = Buffer.concat([all, buf], total);
   }
   return all.toString(fh.encoding).replace(/\r\n/, '\n');
+};
+
+op.readcharsfh = function(fh, count) {
+  var all = new Buffer(0);
+  var buf = new Buffer(CHUNK_SIZE);
+  var bytesRead;
+  var total = 0;
+
+  var starting = fs.seekSync(fh.fd, 0, 1);
+
+  while ((bytesRead = fs.readSync(fh.fd, buf, 0, buf.length, null)) != 0 && all.toString(fh.encoding).length < count) {
+    total += bytesRead;
+    all = Buffer.concat([all, buf], total);
+  }
+  var encoded = all.toString(fh.encoding);
+
+  if (encoded.length < count) {
+    return encoded;
+  }
+
+  while (encoded.length > count) {
+    /* We assume that n bytes contain at most n chars */
+    all = all.slice(0, all.length - (encoded.length - count));
+    encoded = all.toString(fh.encoding);
+  }
+
+  fs.seekSync(fh.fd, all.length + starting, 0);
+  return encoded;
 };
 
 op.seekfh = function(ctx, fh, offset, whence) {

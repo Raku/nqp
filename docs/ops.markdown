@@ -1346,7 +1346,10 @@ in the next `$count` bytes from the filehandle and store them in the array.
 Return the next line of the open filehandle.
 
 ## readcharsfh
-* `readcharsfh(Handle $fh, $chars)`
+* `readcharsfh(Handle $fh, int $count)`
+
+Given a readable `$fh`, read in the next `$count` bytes from the filehandle
+and return them as a string.
 
 ## say
 * `say(str $str)`
@@ -2167,6 +2170,47 @@ constants below can be used in nqp as (e.g.) `nqp::const::CCLASS_ANY`.
     * TYPE_CHECK_CACHE_DEFINITIVE
     * TYPE_CHECK_CACHE_THEN_METHOD
     * TYPE_CHECK_NEEDS_ACCEPTS
+
+The JVM only supports SIG_INT and SIG_KILL.
+
+On the MoarVM all of those signal constants below are defined.
+
+    * SIG_HUP
+    * SIG_INT
+    * SIG_QUIT
+    * SIG_ILL
+    * SIG_TRAP
+    * SIG_ABRT
+    * SIG_EMT
+    * SIG_FPE
+    * SIG_KILL
+    * SIG_BUS
+    * SIG_SEGV
+    * SIG_SYS
+    * SIG_PIPE
+    * SIG_ALRM
+    * SIG_TERM
+    * SIG_URG
+    * SIG_STOP
+    * SIG_TSTP
+    * SIG_CONT
+    * SIG_CHLD
+    * SIG_TTIN
+    * SIG_TTOU
+    * SIG_IO
+    * SIG_XCPU
+    * SIG_XFSZ
+    * SIG_VTALRM
+    * SIG_PROF
+    * SIG_WINCH
+    * SIG_INFO
+    * SIG_USR1
+    * SIG_USR2
+    * SIG_THR
+    * SIG_STKFLT
+    * SIG_PWR
+    * SIG_BREAK
+
 
 ## debugnoop
 * `debugnoop(Mu $a)`
