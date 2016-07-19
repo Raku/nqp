@@ -2,7 +2,7 @@
 
 # Test nqp::op file operations.
 
-plan(89);
+plan(93);
 
 ok( nqp::stat('CREDITS', nqp::const::STAT_EXISTS) == 1, 'nqp::stat exists');
 ok( nqp::stat('AARDVARKS', nqp::const::STAT_EXISTS) == 0, 'nqp::stat not exists');
@@ -317,4 +317,14 @@ else {
         nqp::unlink($symlink);
     }
 
+}
+
+{
+    my $fh := nqp::open('t/nqp/019-chars.txt', 'r');
+    ok(nqp::readcharsfh($fh, 3) eq 'lin', 'nqp::readcharsfh');
+    ok(nqp::readcharsfh($fh, 2) eq 'π1', 'nqp::readcharsfh the second time with a multi byte character');
+    nqp::readlinefh($fh);
+    ok(nqp::readcharsfh($fh, 5) eq 'line3', 'nqp::readcharsfh after nqp::readlinefh');
+    ok(nqp::readcharsfh($fh, 150) eq "line4\n", 'nqp::readcharsfh with more chars then they are in the file');
+    nqp::closefh($fh);
 }
