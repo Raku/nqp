@@ -170,12 +170,59 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
     }
 
     public synchronized String readchars(ThreadContext tc, int chars) {
-        /* TODO - optimize */
-        String out = "";
-        for (int i = 0; i < chars; i++) {
-            out += getc(tc);
+        try {
+            dec.reset();
+
+            CharBuffer decoded = CharBuffer.allocate(chars);
+
+            boolean needMoreChars = true;
+
+            if (readBuffer != null) {
+                CoderResult result = dec.decode(readBuffer, decoded, true);
+
+                if (result.isError()) {
+                    result.throwException();
+                }
+
+                needMoreChars = result.isUnderflow();
+            }
+
+            while (needMoreChars && !eof) {
+                ByteBuffer oldReadBuffer = readBuffer;
+
+                readBuffer = ByteBuffer.allocate(32768);
+
+                if (oldReadBuffer != null) {
+                    readBuffer.put(oldReadBuffer);
+                }
+
+                eof = chan.read(readBuffer) == -1;
+
+                readBuffer.flip();
+
+                CoderResult result = dec.decode(readBuffer, decoded, eof);
+
+                if (eof) {
+                    dec.flush(decoded);
+                }
+
+                if (result.isError()) {
+                    result.throwException();
+                }
+
+                needMoreChars = result.isUnderflow();
+
+            }
+
+            decoded.flip();
+
+            String ret = decoded.toString();
+
+            return ret;
+
+        } catch (IOException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
         }
-        return out;
     }
 
     public synchronized String getc(ThreadContext tc) {
