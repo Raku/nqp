@@ -504,11 +504,15 @@ class QAST::MASTRegexCompiler {
 	}
         if $node.subtype eq 'ignoremark' || $node.subtype eq 'ignorecase+ignoremark' {
             my $s0 := $!regalloc.fresh_s();
+            my $i1 := $!regalloc.fresh_i();
             merge_ins(@ins, [
                 op('ordbaseat', $i0, %!reg<tgt>, %!reg<pos>),
+                op('lt_i', $i1, $i0, %!reg<zero>),
+                op('if_i', $i1, %!reg<fail>),
                 op('chr', $s0, $i0),
                 op($op, $s0, %!reg<zero>, sval($node[0]), %!reg<fail>),
             ]);
+            $!regalloc.release_register($i1, $MVM_reg_int64);
         }
         else {
             nqp::push(@ins, op($op, %!reg<tgt>, %!reg<pos>, sval($node[0]), %!reg<fail>));
