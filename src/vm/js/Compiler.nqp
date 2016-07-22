@@ -926,27 +926,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         Chunk.void(|@capture_inners);
     }
 
-    # Should we compile it to a form that's more efficent when used as a method
-    method looks_like_a_method(QAST::Block $block) {
-        # Disable it as we currently don't make use of it at runtime
-        return 0;
-
-        if $block.blocktype eq 'declaration_static'
-                && nqp::istype($block[0], QAST::Stmts)
-                && nqp::istype($block[0][0], QAST::Var)
-                && $block[0][0].decl eq 'param'
-                && !$block[0][0].default && !$block[0][0].named
-                && $block.node() {
-            my $sub := nqp::rindex($block.node.orig(), "sub", $block.node.from());
-            my $method := nqp::rindex($block.node.orig(), "method", $block.node.from());
-
-            $method != -1 && $method > $sub;
-        }
-        else {
-            0;
-        }
-    }
-
     method compile_block(QAST::Block $node, $outer, $outer_loop, :$want, :@extra_args=[], :$cps) {
 
         my $outer_ctx := try $*CTX // "null";

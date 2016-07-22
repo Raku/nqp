@@ -49,36 +49,12 @@ CodeRef.prototype.capture = function(block) {
   return this;
 };
 
-CodeRef.prototype.method = function(method) {
-  this.$call = function() {
-    var args = [];
-    args.push(arguments[0]);
-    args.push(arguments[1]);
-    for (var i = 3; i < arguments.length; i++) {
-      args.push(arguments[i]);
-    }
-    return method.apply(arguments[2], args);
-  };
-
-  /* TODO - think about cloning */
-
-  return this;
-};
 
 CodeRef.prototype.closure = function(block) {
   var closure = new CodeRef(this.name, undefined);
   closure.codeObj = this.codeObj;
   closure.cuid = this.cuid;
   closure.$call = block;
-  closure.staticCode = this;
-  return closure;
-};
-
-CodeRef.prototype.closureMethod = function(block) {
-  var closure = new CodeRef(this.name, undefined);
-  closure.codeObj = this.codeObj;
-  closure.cuid = this.cuid;
-  closure.method(block);
   closure.staticCode = this;
   return closure;
 };
