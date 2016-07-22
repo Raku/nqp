@@ -312,9 +312,7 @@ BinaryCursor.prototype.STable = function(STable) {
 
   var methodCache = this.variant();
 
-  if (methodCache instanceof Hash) {
-    STable.setMethodCache(methodCache.$$toObject());
-  }
+  STable._methodCache = methodCache;
 
   var typeCheckCache = [];
   var typeCheckCacheLen = this.varint();
@@ -571,7 +569,7 @@ BinaryCursor.prototype.deserialize = function(sc) {
 
   var closuresBase = sc.codeRefs.length;
   for (var i = 0; i < closures.length; i++) {
-    sc.codeRefs[closuresBase + i] = new CodeRef(closures[i].staticCode.name);
+    sc.codeRefs[closuresBase + i] = new CodeRef(closures[i].staticCode.name, undefined, closures[i].staticCode.codeRefAttr);
     if (closures[i].codeObj) sc.codeRefs[closuresBase + i].codeObj = closures[i].codeObj;
     closures[i].index = closuresBase + i;
 
@@ -623,7 +621,7 @@ BinaryCursor.prototype.deserialize = function(sc) {
 
     return 'var ' + closure.staticCode.outerCtxVar + ' = null;\n' +
         'var $$codeRef = ' + codeRef + ';\n' +
-        'sc.codeRefs[' + closure.index + '].block(' +
+        'sc.codeRefs[' + closure.index + '].capture(' +
         closure.staticCode.closureTemplate +
         ');\n';
   }).join('');
@@ -659,6 +657,16 @@ BinaryCursor.prototype.deserialize = function(sc) {
   if (numParamInterns != 0) {
     // XXX do we need to care?
   }
+
+
+  /* We set the method caches after everything else is ready */
+  for (var i = 0; i < STables.length; i++) {
+    var STable = sc.rootStables[i];
+    if (STable._methodCache instanceof Hash) {
+      STable.setMethodCache(STable._methodCache.$$toObject());
+    }
+  }
+
 };
 
 BinaryCursor.prototype.contextToCode = function(context, data) {
@@ -692,7 +700,7 @@ BinaryCursor.prototype.contextToCode = function(context, data) {
       context.inner.map(function(inner) {return this.contextToCode(inner, data)}).join('') +
       context.closures.map(function(closure) {
         var codeRef = 'sc.codeRefs[' + closure.index + ']';
-        return 'var $$codeRef = ' + codeRef + ';\n' + codeRef + '.block(' +
+        return 'var $$codeRef = ' + codeRef + ';\n' + codeRef + '.capture(' +
            closure.staticCode.closureTemplate +
            ');\n';
       }).join('') +

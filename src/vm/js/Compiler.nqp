@@ -751,13 +751,17 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         nqp::existskey(%!cuids, $node.cuid);
     }
 
+    method code_ref_attr($cuid) {
+        '$codeRef$' ~ $cuid;
+    }
+
     method setup_cuids() {
         my @declared;
         my @vars;
         for %!cuids {
             my $var := self.mangled_cuid($_.key);
             @vars.push($var);
-            @declared.push("$var = new nqp.CodeRef({quote_string($_.value.name)},{quote_string($_.key)})");
+            @declared.push("$var = new nqp.CodeRef({quote_string($_.value.name)},{quote_string($_.key)}, {quote_string(self.code_ref_attr($_.key))})");
         }
         @declared.push("cuids = [{nqp::join(',', @vars)}]");
         self.declare_js_vars(@declared);
@@ -818,10 +822,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         has $!static_info;
         has $!ctx;
         has $!outer_ctx;
+        has $!code_ref_attr;
         method ctx() {$!ctx}
         method outer_ctx() {$!outer_ctx}
         method static_info() {$!static_info}
         method closure_template() {$!closure_template}
+        method code_ref_attr() {$!code_ref_attr}
     }
 
     method static_info_for_lexicals(BlockInfo $block) {
@@ -950,7 +956,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             my $stmts := self.compile_all_the_statements($node, $body_want);
 
-            my $create_ctx := self.create_ctx($*CTX, :code_ref('this'));
+            my $code_ref_attr := self.code_ref_attr($node.cuid);
+
+            my $create_ctx := self.create_ctx($*CTX, :code_ref('this.' ~ $code_ref_attr));
             if nqp::istype($stmts, ChunkCPS) {
             }
             else {
@@ -980,12 +988,14 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     }
                     else {
                         # We need to override when deserializing closures
+                        # TODO - think if the override is the right things 
                         @function[3] := self.create_ctx($*CTX, :code_ref('$$codeRef'));
                         %!serialized_code_ref_info{$node.cuid} := SerializedCodeRefInfo.new(
                             closure_template => ChunkEscaped.new(@function),
                             ctx => $*CTX,
                             outer_ctx => (nqp::defined($*BLOCK.outer) ?? $*BLOCK.outer.ctx !! ""),
-                            static_info => self.static_info_for_lexicals($*BLOCK)
+                            static_info => self.static_info_for_lexicals($*BLOCK),
+                            code_ref_attr => $code_ref_attr 
                         );
                     }
                 }
@@ -1184,7 +1194,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
                 @setup.push(
                     ~ "," ~ $info.static_info ~ ","
-                    ~ "cuids, setSetting"
+                    ~ "cuids, setSetting,"
+                    ~ quote_string($info.code_ref_attr)
                     ~ ");\n");
             }
         }

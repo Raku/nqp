@@ -1,13 +1,36 @@
 CodeRef.cuids = {};
-function CodeRef(name, cuid) {
+function CodeRef(name, cuid, codeRefAttr) {
   this.name = name;
   this.cuid = cuid;
   this.staticCode = this;
   if (cuid) CodeRef.cuids[cuid] = this;
+  this.codeRefAttr = codeRefAttr;
+  this[codeRefAttr] = this;
 }
 
-CodeRef.prototype.block = function(func) {
-  this.$call = func;
+CodeRef.prototype.$$injectMethod = function(proto, name) {
+  if (proto.hasOwnProperty(this.codeRefAttr) && proto[this.codeRefAttr] !== this) {
+    return;
+  }
+
+  proto[this.codeRefAttr] = this;
+
+  if (!this.inject) this.inject = [];
+  this.inject.push({name: name, proto: proto});
+
+  if (this.hasOwnProperty('$call')) {
+    proto[name] = this.$call;
+  }
+};
+
+CodeRef.prototype.capture = function(block) {
+  this.$call = block;
+  if (this.inject) {
+    for (var i = 0; i < this.inject.length; i++) {
+        this.inject[i].proto[this.inject[i].name] = block;
+    }
+  }
+  return this;
 };
 
 CodeRef.prototype.setOuter = function(outerCtx) {
@@ -44,14 +67,9 @@ CodeRef.prototype.takeclosure = function() {
   console.trace("takeclosure shouldn't be used");
 };
 
-CodeRef.prototype.capture = function(block) {
-  this.$call = block;
-  return this;
-};
-
 
 CodeRef.prototype.closure = function(block) {
-  var closure = new CodeRef(this.name, undefined);
+  var closure = new CodeRef(this.name, undefined, this.codeRefAttr);
   closure.codeObj = this.codeObj;
   closure.cuid = this.cuid;
   closure.$call = block;
@@ -85,7 +103,7 @@ CodeRef.prototype.setCodeObj = function(codeObj) {
   return this;
 };
 
-CodeRef.prototype.setInfo = function(ctx, outerCtxVar, closureTemplate, staticInfo, cuids, setSetting) {
+CodeRef.prototype.setInfo = function(ctx, outerCtxVar, closureTemplate, staticInfo, cuids, setSetting, codeRefAttr) {
   this.closureTemplate = closureTemplate;
   this.ctx = ctx;
   this.outerCtxVar = outerCtxVar;
@@ -96,10 +114,9 @@ CodeRef.prototype.setInfo = function(ctx, outerCtxVar, closureTemplate, staticIn
 };
 
 CodeRef.prototype.$$clone = function() {
-  var clone = new CodeRef(this.name);
+  var clone = new CodeRef(this.name, undefined, this.codeRefAttr);
   clone.$call = this.$call;
   clone.codeObj = this.codeObj;
-  clone.cuid = this.cuid + ' clone';
   clone.staticCode = this.staticCode;
   clone.outerCtx = this.outerCtx;
   return clone;

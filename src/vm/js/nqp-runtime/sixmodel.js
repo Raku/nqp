@@ -79,6 +79,12 @@ STable.prototype.setinvokespec = function(classHandle, attrName, invocationHandl
     this.objConstructor.prototype.$apply = function(args) {
       return this[attr].$apply(args);
     };
+
+    this.objConstructor.prototype.$$injectMethod = function(proto, name) {
+      if (this[attr] && this[attr].$$injectMethod) {
+        return this[attr].$$injectMethod(proto, name);
+      }
+    };
   } else {
     this.objConstructor.prototype.$call = function() {
       var args = [];
@@ -103,12 +109,22 @@ STable.prototype.setinvokespec = function(classHandle, attrName, invocationHandl
     };
   }
   this.invocationSpec = {classHandle: classHandle, attrName: attrName, invocationHandler: invocationHandler};
+
+  var setAgain = incompleteMethodCaches;
+  incompleteMethodCaches = [];
+  for (var i = 0;i < setAgain.length;i++) {
+    setAgain[i].setMethodCache(setAgain[i].methodCache);
+  }
 };
 
 function injectMethod(proto, name, method) {
   proto[name] = function() {
     return method.$call.apply(method, arguments);
   };
+
+  if (method.$$injectMethod) {
+    method.$$injectMethod(proto, name);
+  }
 }
 
 STable.prototype.createTypeObject = function() {
@@ -126,14 +142,24 @@ STable.prototype.createTypeObject = function() {
   return obj;
 };
 
+var incompleteMethodCaches = [];
+
 STable.prototype.setMethodCache = function(methodCache) {
   // TODO delete old methods
   var proto = this.objConstructor.prototype;
   this.methodCache = methodCache;
+  var notReadyYet = false;
   for (var name in methodCache) {
     if (methodCache.hasOwnProperty(name)) {
       injectMethod(proto, name, methodCache[name]);
+      if (!methodCache[name].$call) {
+        notReadyYet = true;
+      }
     }
+  }
+
+  if (notReadyYet) {
+    incompleteMethodCaches.push(this);
   }
 };
 
