@@ -3,6 +3,16 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     has $!cps; # If it's set to "off" we don't support continuations
 
+    my sub literal_subst($source, $pattern, $replacement) {
+        my $where := 0;
+        my $result := $source;
+        while (my $found := nqp::index($result, $pattern, $where)) != -1 {
+            $where := $found + nqp::chars($replacement);
+            $result := nqp::replace($result, $found, nqp::chars($pattern), $replacement);
+        };
+        $result;
+    }
+
     #= If the env var NQPJS_LOG is set log to nqpjs.log
     method log(*@msgs) {
         my %env := nqp::getenvhash();
@@ -751,8 +761,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         nqp::existskey(%!cuids, $node.cuid);
     }
 
+    my %code_ref_attr;
     method code_ref_attr($cuid) {
-        '$codeRef$' ~ $cuid;
+        if !nqp::existskey(%code_ref_attr, $cuid) {
+            %code_ref_attr{$cuid} := '$codeRef$' ~ $cuid ~ '_' ~ literal_subst(nqp::time_n(), '.', '_');
+        }
+        %code_ref_attr{$cuid};
     }
 
     method setup_cuids() {
@@ -1290,15 +1304,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
     }
 
-    my sub literal_subst($source, $pattern, $replacement) {
-        my $where := 0;
-        my $result := $source;
-        while (my $found := nqp::index($result, $pattern, $where)) != -1 {
-            $where := $found + nqp::chars($replacement);
-            $result := nqp::replace($result, $found, nqp::chars($pattern), $replacement);
-        };
-        $result;
-    }
 
     my sub loadable($name) {
         # workaround for webpack
