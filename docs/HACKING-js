@@ -2,7 +2,7 @@
 
 # Source layout.
 
-src/vm/js/QAST/Compiler.nqp - turns QAST into JavaScript code
+src/vm/js/Compiler.nqp - turns QAST into JavaScript code
 src/vm/js/nqp-runtime - a node module the code we generate uses
 src/vm/js/bin/run_tests.pl - a list of tests we use
 
@@ -57,8 +57,6 @@ If the op has sideffects the :$sideffects flag needs to be true.
 Example:
 
     add_simple_op('lc', $T_STR, [$T_STR], sub ($string) {"$string.toLowerCase()"});
-
-Sometimes old code can be scavanged for ways to implement things on node from src/vm/old-runtime-code (warning: crap code lives there).
 
 Looking at src/vm/jvm/runtime/org/perl6/nqp/runtime/Ops.java and src/vm/jvm/QAST/Compiler.nqp can provide insight on how the various ops should work.
 
