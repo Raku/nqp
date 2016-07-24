@@ -33,15 +33,6 @@ class NQP::World is HLL::World {
         %!code_object_fixup_list := nqp::hash();
         %!code_stub_sc_idx := nqp::hash();
         @!clearup_tasks := nqp::list();
-
-#?if parrot
-        if nqp::defined(%*COMPILING<%?OPTIONS><dynext>) {
-            my $dynext_path  := %*COMPILING<%?OPTIONS><dynext>;
-            my @dynext_paths := pir::getinterp__P()[pir::const::IGLOBALS_LIB_PATHS][pir::const::PARROT_LIB_PATH_DYNEXT];
-
-            @dynext_paths.push($dynext_path);
-        }
-#?endif
     }
 
     # Creates a new lexical scope and puts it on top of the stack.
@@ -102,7 +93,6 @@ class NQP::World is HLL::World {
                     QAST::Op.new(
                         :op('loadbytecode'),
                         QAST::VM.new(
-                            :parrot(QAST::SVal.new( :value('ModuleLoader.pbc') )),
                             :jvm(QAST::SVal.new( :value('ModuleLoader.class') )),
                             :moar(QAST::SVal.new( :value('ModuleLoader.moarvm') ))
                         )),
@@ -129,7 +119,6 @@ class NQP::World is HLL::World {
                 QAST::Op.new(
                     :op('loadbytecode'),
                     QAST::VM.new(
-                        :parrot(QAST::SVal.new( :value('ModuleLoader.pbc') )),
                         :jvm(QAST::SVal.new( :value('ModuleLoader.class') )),
                         :moar(QAST::SVal.new( :value('ModuleLoader.moarvm') ))
                     )),
@@ -428,10 +417,6 @@ class NQP::World is HLL::World {
         $obj.HOW."$meta_method_name"($obj, $to_add);
     }
 
-    method pkg_add_parrot_vtable_handler_mapping($obj, $name, $att_name) {
-        $obj.HOW.add_parrot_vtable_handler_mapping($obj, $name, $att_name);
-    }
-
     # Composes the package.
     method pkg_compose($obj) {
         $obj.HOW.compose($obj);
@@ -479,16 +464,6 @@ class NQP::World is HLL::World {
 
     # Adds libraries that NQP code depends on.
     method libs() {
-#?if parrot
-        # Need to load the NQP dynops/dympmcs, plus any extras requested.
-        my @loadlibs := ['nqp_group', 'nqp_ops', 'nqp_bigint_ops', 'trans_ops', 'io_ops'];
-        if %*COMPILING<%?OPTIONS><vmlibs> {
-            for nqp::split(',', %*COMPILING<%?OPTIONS><vmlibs>) {
-                @loadlibs.push($_);
-            }
-        }
-        QAST::VM.new( :@loadlibs );
-#?endif
 #?if jvm
         QAST::Op.new( :op('null') )
 #?endif
@@ -519,20 +494,6 @@ class NQP::World is HLL::World {
 
     # Adds some initial tasks.
     method add_initializations() {
-        self.add_load_dependency_task(:deserialize_ast(QAST::VM.new(
-            :parrot(QAST::Stmts.new(
-                QAST::VM.new( :pirop('nqp_dynop_setup v') ),
-                QAST::VM.new( :pirop('nqp_bigint_setup v') ),
-                QAST::Op.new(
-                    :op('callmethod'), :name('hll_map'),
-                    QAST::VM.new( :pirop('getinterp P') ),
-                    QAST::VM.new( :pirop('get_class Ps'), QAST::SVal.new( :value('LexPad') ) ),
-                    QAST::VM.new( :pirop('get_class Ps'), QAST::SVal.new( :value('NQPLexPad') ) )
-                ))),
-            :jvm(QAST::Op.new( :op('null') )),
-            :moar(QAST::Op.new( :op('null') )),
-            :js(QAST::Op.new( :op('null') ))
-        )));
     }
 
     # Does cleanups.
@@ -542,10 +503,6 @@ class NQP::World is HLL::World {
 
     # Makes a list safe to cross the compilation boundary.
     sub compilee_list(@orig?) {
-#?if parrot
-        nqp::islist(@orig) ?? @orig !! nqp::list()
-#?endif
-#?if !parrot
         my $list := nqp::create(nqp::bootarray());
         if nqp::islist(@orig) {
             for @orig {
@@ -553,7 +510,6 @@ class NQP::World is HLL::World {
             }
         }
         $list
-#?endif
     }
 
     # Checks if the given name is known anywhere in the lexpad
