@@ -972,7 +972,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             my $code_ref_attr := self.code_ref_attr($node.cuid);
 
-            my $create_ctx := self.create_ctx($*CTX, :code_ref('this.' ~ $code_ref_attr));
+            my $create_ctx := self.create_ctx($*CTX, :code_ref('this instanceof nqp.CodeRef ? this : this.' ~ $code_ref_attr));
             if nqp::istype($stmts, ChunkCPS) {
             }
             else {

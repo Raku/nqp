@@ -5,7 +5,6 @@ function CodeRef(name, cuid, codeRefAttr) {
   this.staticCode = this;
   if (cuid) CodeRef.cuids[cuid] = this;
   this.codeRefAttr = codeRefAttr;
-  this[codeRefAttr] = this;
 }
 
 CodeRef.prototype.$$injectMethod = function(proto, name) {
