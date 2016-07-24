@@ -1,4 +1,3 @@
-#?if !parrot
 my class NQPLock is repr('ReentrantMutex') {
     class ConditionVariable is repr('ConditionVariable') {
         method new() {
@@ -30,4 +29,3 @@ my class NQPLock is repr('ReentrantMutex') {
         nqp::getlockcondvar(self, ConditionVariable)
     }
 }
-#?endif

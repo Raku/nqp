@@ -1,6 +1,6 @@
 #! nqp
 
-my @*vms := nqp::list('parrot', 'jvm', 'moar');
+my @*vms := nqp::list('jvm', 'moar');
 
 my %documented_ops := find_documented_opcodes();
 
@@ -12,14 +12,6 @@ my %ops := hash_of_vms();
         "src/vm/jvm/NQP/Ops.nqp"
     ]),
     :keywords(<map_classlib_core_op add_core_op map_jvm_core_op add_hll_op>)
-);
-
-%ops<parrot> := find_opcodes(
-    :files([
-        "src/vm/parrot/QAST/Operations.nqp",
-        "src/vm/parrot/NQP/Ops.nqp"
-    ]),
-    :keywords(<add_core_op add_core_pirop_mapping add_hll_op>)
 );
 
 %ops<moar> := find_opcodes(
@@ -58,9 +50,7 @@ for %combined_ops -> $opcode {
 # Do documented opcodes actually exist? Fail once per vm if not.
 for @*vms -> $vm {
     for %documented_ops{$vm} -> $doc_op {
-        $vm eq "parrot"
-            ?? skip("Not all ops implemented in parrot")
-            !! ok(%ops{$vm}{$doc_op}, "documented op '$doc_op' exists in $vm");
+        ok(%ops{$vm}{$doc_op}, "documented op '$doc_op' exists in $vm");
     }
 }
 
@@ -102,9 +92,6 @@ sub find_documented_opcodes() {
                 @opcode_vms := nqp::list();
                 if $match[0] ~~ /jvm/ {
                     nqp::push(@opcode_vms,"jvm");
-                }
-                if $match[0] ~~ /parrot/ {
-                    nqp::push(@opcode_vms,"parrot");
                 }
                 if $match[0] ~~ /moar/ {
                     nqp::push(@opcode_vms,"moar");
