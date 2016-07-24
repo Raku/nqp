@@ -462,9 +462,9 @@ sub round_trip_int_array($seq, $desc, @a) {
 
     while ($i < 63) {
         my $backend := nqp::getcomp('nqp').backend.name;
-        if $i >= 31 && ($backend eq 'parrot' || $backend eq 'js')
+        if $i >= 31 &&  $backend eq 'js'
             && nqp::backendconfig(){"intvalsize"} < 8 {
-            todo("native NQP ints are only 32 bit on 32 bit parrot :-(", 1);
+            todo("native NQP ints are only 32 bit on js :-(", 1);
             # Sadly this also means that the rest of the tests for these sizes
             # are (effectively) meaningless, because $b is 0, and 0 + 0 is still
             # 0. However, they don't fail, because 0 - 4 to 0 + 2 serialise just
