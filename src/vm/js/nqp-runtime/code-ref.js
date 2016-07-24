@@ -1,18 +1,24 @@
 CodeRef.cuids = {};
-function CodeRef(name, cuid, codeRefAttr) {
+function CodeRef(name, cuid) {
   this.name = name;
   this.cuid = cuid;
   this.staticCode = this;
   if (cuid) CodeRef.cuids[cuid] = this;
-  this.codeRefAttr = codeRefAttr;
 }
 
 CodeRef.prototype.$$injectMethod = function(proto, name) {
-  if (proto.hasOwnProperty(this.codeRefAttr) && proto[this.codeRefAttr] !== this) {
+  var codeRefAttr = this.staticCode.codeRefAttr;
+  if (codeRefAttr === null) {
+    return;
+  } else if (codeRefAttr === undefined) {
+    console.warn("unknown codeRefAttr");
+  }
+
+  if (proto.hasOwnProperty(codeRefAttr) && proto[codeRefAttr] !== this) {
     return;
   }
 
-  proto[this.codeRefAttr] = this;
+  proto[codeRefAttr] = this;
 
   if (!this.inject) this.inject = [];
   this.inject.push({name: name, proto: proto});
@@ -68,7 +74,7 @@ CodeRef.prototype.takeclosure = function() {
 
 
 CodeRef.prototype.closure = function(block) {
-  var closure = new CodeRef(this.name, undefined, this.codeRefAttr);
+  var closure = new CodeRef(this.name, undefined);
   closure.codeObj = this.codeObj;
   closure.cuid = this.cuid;
   closure.$call = block;
@@ -112,8 +118,13 @@ CodeRef.prototype.setInfo = function(ctx, outerCtxVar, closureTemplate, staticIn
   return this;
 };
 
+CodeRef.prototype.setCodeRefAttr = function(codeRefAttr) {
+  this.codeRefAttr = codeRefAttr;
+  return this;
+};
+
 CodeRef.prototype.$$clone = function() {
-  var clone = new CodeRef(this.name, undefined, this.codeRefAttr);
+  var clone = new CodeRef(this.name, undefined);
   clone.$call = this.$call;
   clone.codeObj = this.codeObj;
   clone.staticCode = this.staticCode;

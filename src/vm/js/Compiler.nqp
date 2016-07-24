@@ -775,7 +775,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         for %!cuids {
             my $var := self.mangled_cuid($_.key);
             @vars.push($var);
-            @declared.push("$var = new nqp.CodeRef({quote_string($_.value.name)},{quote_string($_.key)}, {quote_string(self.code_ref_attr($_.key))})");
+            @declared.push("$var = new nqp.CodeRef({quote_string($_.value.name)},{quote_string($_.key)}).setCodeRefAttr({quote_string(self.code_ref_attr($_.key))})");
         }
         @declared.push("cuids = [{nqp::join(',', @vars)}]");
         self.declare_js_vars(@declared);

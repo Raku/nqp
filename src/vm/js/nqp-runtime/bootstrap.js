@@ -76,9 +76,8 @@ KnowHOW._STable.HOW = KnowHOW_HOW;
 KnowHOW._STable.methodCache = {};
 KnowHOW_HOW._STable.methodCache = {};
 
-var unique = 0;
 function wrapMethod(name, method) {
-  var codeRef = new CodeRef(name, undefined, 'wrapped' + unique++);
+  var codeRef = new CodeRef(name, undefined).setCodeRefAttr(null);
   codeRef.$call = method
   return codeRef;
 }
