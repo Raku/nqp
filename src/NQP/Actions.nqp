@@ -1559,9 +1559,6 @@ class NQP::Actions is HLL::Actions {
     method quote:sym<qq>($/)   { make $<quote_EXPR>.ast; }
     method quote:sym<q>($/)    { make $<quote_EXPR>.ast; }
     method quote:sym<Q>($/)    { make $<quote_EXPR>.ast; }
-    method quote:sym<Q:PIR>($/) {
-        make QAST::VM.new( :pir( $<quote_EXPR>.ast.value ), :node($/) );
-    }
 
     method quote:sym</ />($/) {
         my $block := $*W.pop_lexpad();

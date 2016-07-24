@@ -673,7 +673,6 @@ grammar NQP::Grammar is HLL::Grammar {
     token quote:sym<q>    { <sym> >> <![(]> <.ws> <quote_EXPR: ':q'>  }
     token quote:sym<qq>   { <sym> >> <![(]> <.ws> <quote_EXPR: ':qq'> }
     token quote:sym<Q>    { <sym> >>  <![(]> <.ws> <quote_EXPR> }
-    token quote:sym<Q:PIR> { <sym> <.ws> <quote_EXPR> }
     token quote:sym</ />  {
         '/'
         <.newpad>
