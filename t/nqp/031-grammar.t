@@ -2,7 +2,7 @@
 
 # Test grammars and regexes
 
-plan(6);
+plan(8);
 
 grammar ABC {
     token TOP { ok ' ' <integer> }
