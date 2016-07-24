@@ -1,5 +1,3 @@
-#!./parrot nqp.pbc
-
 # combination of conditional modifier and loop modifier
 
 plan(11);

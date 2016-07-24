@@ -1,5 +1,3 @@
-#!./parrot nqp.pbc
-
 # flattened arguments
 
 plan(6);

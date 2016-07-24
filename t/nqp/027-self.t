@@ -1,5 +1,3 @@
-#!./parrot nqp.pbc
-
 plan(5);
 
 class Foo {

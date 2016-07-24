@@ -1,5 +1,3 @@
-#!./parrot nqp.pbc
-
 # slurpy args
 
 plan(9);

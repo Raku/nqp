@@ -35,9 +35,7 @@ my $read_out_and_err := nqp::const::PIPE_INHERIT_IN + nqp::const::PIPE_CAPTURE_O
 
     my $str_out := nqp::readallfh($out);
     my $str_err := nqp::readallfh($err);
-    nqp::getcomp('nqp').backend.name eq 'parrot' ??
-        ok( $str_out ~~ / 'doesnotexist' /, 'nqp::readallfh with a pipe nonexistent command') !!
-        ok( $str_out eq '' && $str_err ~~ / 'doesnotexist' /, 'nqp::readallfh with a pipe nonexistent command');
+    ok( $str_out eq '' && $str_err ~~ / 'doesnotexist' /, 'nqp::readallfh with a pipe nonexistent command');
 
     nqp::closefh($out); ok( 1, 'nqp::closefh with a pipe nonexistent command');
     nqp::closefh($err); ok( 1, 'nqp::closefh with a pipe nonexistent command');
@@ -71,9 +69,7 @@ my $read_out_and_err := nqp::const::PIPE_INHERIT_IN + nqp::const::PIPE_CAPTURE_O
 
     my $str_out := nqp::readallfh($out);
     my $str_err := nqp::readallfh($err);
-    nqp::getcomp('nqp').backend.name eq 'parrot' ??
-        ok( $str_out ~~ / 'doesnotexist' /, 'nqp::readallfh with a pipe nonexistent command') !!
-        ok( $str_out eq '' && $str_err ~~ / 'doesnotexist' /, 'nqp::readallfh with a pipe nonexistent command');
+    ok( $str_out eq '' && $str_err ~~ / 'doesnotexist' /, 'nqp::readallfh with a pipe nonexistent command');
 
     ok( nqp::closefh_i($out) != 0, 'nqp::closefh_i with a pipe nonexistent command');
 }

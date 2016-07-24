@@ -1,5 +1,3 @@
-#!./parrot nqp.pbc
-
 # prefix sigils like @(...) and %(...)
 
 plan(1);
