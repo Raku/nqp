@@ -9,6 +9,10 @@ grammar ABC {
     token integer { \d+ }
     token TOP2 { ok ' ' <int-num> }
     token int-num { \d+ }
+
+    token a-or-b { <[ab]> }
+
+    token not_a_or_b { ^ <- a-or-b>+ $ }
 }
 
 my $match := ABC.parse('not ok');
@@ -25,3 +29,6 @@ $match := ABC.parse('ok 123', :rule<TOP2> );
 ok( ?$match, 'parse method works with :rule');
 
 ok( $match<int-num> == 123, 'captured $<int-num>');
+
+ok(?ABC.parse('ccc', :rule<not_a_or_b> ), "<- name-with-hyphen> matches");
+ok(!ABC.parse('cac', :rule<not_a_or_b> ), "<- name-with-hyphen> doesn't match");
