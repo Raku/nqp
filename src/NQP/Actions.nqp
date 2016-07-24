@@ -1402,19 +1402,6 @@ class NQP::Actions is HLL::Actions {
         $/.prune;
     }
 
-    method term:sym<pir::op>($/) {
-        my @args := $<args> ?? $<args>[0].ast.list !! [];
-        my $pirop := ~$<op>;
-        $pirop := join(' ', nqp::split('__', $pirop));
-        make QAST::VM.new( :pirop($pirop), :node($/), |@args );
-        $/.prune;
-    }
-
-    method term:sym<pir::const>($/) {
-        make QAST::VM.new( :pirconst(~$<const>) );
-        $/.prune;
-    }
-
     method term:sym<nqp::op>($/) {
         my $op    := ~$<op>;
         my @args  := $<args> ?? $<args>[0].ast.list !! [];

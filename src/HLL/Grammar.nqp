@@ -136,10 +136,10 @@ This subrule attaches operator precedence information to
 a match object (such as an operator token).  A typical
 invocation for the subrule might be:
 
-    token infix:sym<+> { <sym> <O( q{ %additive, :pirop<add> } )> }
+    token infix:sym<+> { <sym> <O( q{ %additive, :op<add> } )> }
 
 This says to add all of the attribute of the C<%additive> hash
-(described below) and a C<pirop> entry into the match object
+(described below) and a C<op> entry into the match object
 returned by the C<< infix:sym<+> >> token (as the C<O> named
 capture).  Note that this is a alphabetic "O", not a digit zero.
 
