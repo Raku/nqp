@@ -20,8 +20,6 @@ Overview of nqp repository directory structure:
       HLL      - base classes for building HLL compilers
       NQP      - NQP compiler sources
       ops      - NQP-specific Parrot opcode sources
-      pmc      - NQP-specific Parrot object types
-      PAST     - obsolete (but not removable yet)
 
       QAST     - code for QAST types, QAST to VM compiler
 
@@ -36,7 +34,6 @@ Overview of nqp repository directory structure:
       qregex/  - QRegex tests
       qast/    - QAST tests
       p5regex/ - P5 regex tests
-      pmc/     - Parrot PMC regression tests
       setting/ - ???
       serialization/ - NQP serializer tests
 
