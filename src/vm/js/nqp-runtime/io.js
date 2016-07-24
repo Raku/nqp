@@ -314,7 +314,7 @@ op.printfh = function(fh, content) {
 };
 
 op.sayfh = function(fh, content) {
-  return fh.printfh(content + "\n");
+  return fh.printfh(content + '\n');
 };
 
 op.unlink = function(filename) {
@@ -458,6 +458,6 @@ op.chmod = function(path, mode) {
 };
 
 op.sleep = function(seconds) {
-  sleep.usleep(Math.floor(seconds*1000000));
+  sleep.usleep(Math.floor(seconds * 1000000));
   return seconds;
-}
+};

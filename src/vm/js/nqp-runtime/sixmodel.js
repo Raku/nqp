@@ -112,7 +112,7 @@ STable.prototype.setinvokespec = function(classHandle, attrName, invocationHandl
 
   var setAgain = incompleteMethodCaches;
   incompleteMethodCaches = [];
-  for (var i = 0;i < setAgain.length;i++) {
+  for (var i = 0; i < setAgain.length; i++) {
     setAgain[i].setMethodCache(setAgain[i].methodCache);
   }
 };

@@ -11,7 +11,7 @@ CodeRef.prototype.$$injectMethod = function(proto, name) {
   if (codeRefAttr === null) {
     return;
   } else if (codeRefAttr === undefined) {
-    console.warn("unknown codeRefAttr");
+    console.warn('unknown codeRefAttr');
   }
 
   if (proto.hasOwnProperty(codeRefAttr) && proto[codeRefAttr] !== this) {
@@ -32,7 +32,7 @@ CodeRef.prototype.capture = function(block) {
   this.$call = block;
   if (this.inject) {
     for (var i = 0; i < this.inject.length; i++) {
-        this.inject[i].proto[this.inject[i].name] = block;
+      this.inject[i].proto[this.inject[i].name] = block;
     }
   }
   return this;
