@@ -216,8 +216,6 @@ sub gen_nqp {
     my $startdir    = cwd();
     my $git_protocol = $options{'git-protocol'} || 'https';
 
-    my $PARROT_REVISION = 'nqp/tools/build/PARROT_REVISION';
-
     my (%impls, %need);
 
     for my $b (qw/jvm moar/) {
