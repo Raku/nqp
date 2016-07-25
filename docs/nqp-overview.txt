@@ -19,7 +19,6 @@ Overview of nqp repository directory structure:
       guts     - multidispatch routines
       HLL      - base classes for building HLL compilers
       NQP      - NQP compiler sources
-      ops      - NQP-specific Parrot opcode sources
 
       QAST     - code for QAST types, QAST to VM compiler
 
