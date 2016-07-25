@@ -727,7 +727,7 @@ Replace them with all the elements from `@from`.
 "Shift $v into the beginning of @arr."
 Bind $v to @arr at index 0, move all other bindings of @arr to the index one
 above what they were previously bound to.
-Return the number of elements of @arr on Parrot, $v on JVM.
+Return the $v on JVM.
 
 ## iterator
 * `iterator()`
