@@ -356,7 +356,7 @@ BinaryWriteCursor.prototype.objRef = function(ref) {
     console.log(ref);
     console.trace("can't serialize this for sure");
     console.log(typeof ref);
-    console.log(ref.codeRef);
+    console.log(ref.codeRef());
     process.exit();
   }
   if (!ref._SC) {
@@ -659,7 +659,7 @@ SerializationWriter.prototype.serializeSTable = function(st) {
 
 SerializationWriter.prototype.serializeContext = function(ctx) {
   /* Locate the static code ref this context points to. */
-  var staticCodeRef = this.closureToStaticCodeRef(ctx.codeRef, true);
+  var staticCodeRef = this.closureToStaticCodeRef(ctx.codeRef(), true);
   var staticCodeSC = staticCodeRef._SC;
   if (staticCodeSC == null) {
     throw 'Serialization Error: closure outer is a code object not in an SC';
@@ -711,7 +711,7 @@ SerializationWriter.prototype.serializeContext = function(ctx) {
 SerializationWriter.prototype.getSerializedContextIdx = function(ctx) {
   if (!ctx._SC) {
     /* Make sure we should chase a level down. */
-    if (this.closureToStaticCodeRef(ctx.codeRef, false) == null) {
+    if (this.closureToStaticCodeRef(ctx.codeRef(), false) == null) {
       return 0;
     }
     else {

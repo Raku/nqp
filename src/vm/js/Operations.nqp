@@ -740,7 +740,7 @@ class QAST::OperationsJS {
                 my $*CTX := $*HANDLER_CTX;
                 my $body := $comp.as_js($protected, :$want);
                 return Chunk.new($want, $try_ret, [
-                    "var $*CTX = new nqp.Ctx($outer_ctx, $outer_ctx, $outer_ctx.codeRef);\n",
+                    "var $*CTX = new nqp.Ctx($outer_ctx, $outer_ctx, $outer_ctx.callThis, $outer_ctx.codeRefAttr);\n",
                     $handle,
                     "try \{",
                     $body,
@@ -1447,8 +1447,8 @@ class QAST::OperationsJS {
 
     add_simple_op('radix_I', $T_OBJ, [$T_INT, $T_STR, $T_INT, $T_INT, $T_OBJ]);
 
-    add_simple_op('curcode', :!inlinable, $T_OBJ, [], sub () {"$*CTX.codeRef"});
-    add_simple_op('callercode', :!inlinable, $T_OBJ, [], sub () {"caller_ctx.codeRef"});
+    add_simple_op('curcode', :!inlinable, $T_OBJ, [], sub () {"$*CTX.codeRef()"});
+    add_simple_op('callercode', :!inlinable, $T_OBJ, [], sub () {"caller_ctx.codeRef()"});
 
     # Native Call
     add_simple_op('buildnativecall',  $T_INT, [$T_OBJ, $T_STR, $T_STR, $T_STR, $T_OBJ, $T_OBJ], :sideffects, :ctx);

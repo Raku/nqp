@@ -47,7 +47,8 @@ loadOps(serialization);
 var nativecall = require('./nativecall.js');
 loadOps(nativecall);
 
-exports.CodeRef = require('./code-ref.js');
+var CodeRef = require('./code-ref.js');
+exports.CodeRef = CodeRef;
 
 exports.CurLexpad = require('./curlexpad.js');
 
@@ -197,13 +198,16 @@ exports.toBool = function(arg, ctx) {
   }
 };
 
-function Ctx(callerCtx, outerCtx, codeRef) {
+function Ctx(callerCtx, outerCtx, callThis, codeRefAttr) {
   this.caller = callerCtx;
   this.outer = outerCtx;
-  this.codeRef = codeRef;
+  this.callThis = callThis;
+  this.codeRefAttr = codeRefAttr;
 }
 
-
+Ctx.prototype.codeRef = function() {
+  return (this.callThis instanceof CodeRef ? this.callThis : this.callThis[this.codeRefAttr]);
+};
 
 Ctx.prototype.propagateException = function(exception) {
   var ctx = this;
