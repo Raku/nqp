@@ -180,7 +180,7 @@ sub git_checkout {
     }
 
     my $git_describe;
-    if (open(my $GIT, '-|', "git describe --tags --match=20\*")) {
+    if (open(my $GIT, '-|', 'git describe --tags "--match=20*"')) {
         $git_describe = <$GIT>;
         close($GIT);
         chomp $git_describe;
