@@ -625,14 +625,6 @@ grammar NQP::Grammar is HLL::Grammar {
         <deflongname> <args>
     }
 
-    token term:sym<pir::op> {
-        'pir::' $<op>=[\w+] <args>**0..1
-    }
-
-    token term:sym<pir::const> {
-        'pir::const::' $<const>=[\w+]
-    }
-
     token term:sym<nqp::op> {
         'nqp::' $<op>=[\w+] <args>**0..1
     }
@@ -681,7 +673,6 @@ grammar NQP::Grammar is HLL::Grammar {
     token quote:sym<q>    { <sym> >> <![(]> <.ws> <quote_EXPR: ':q'>  }
     token quote:sym<qq>   { <sym> >> <![(]> <.ws> <quote_EXPR: ':qq'> }
     token quote:sym<Q>    { <sym> >>  <![(]> <.ws> <quote_EXPR> }
-    token quote:sym<Q:PIR> { <sym> <.ws> <quote_EXPR> }
     token quote:sym</ />  {
         '/'
         <.newpad>

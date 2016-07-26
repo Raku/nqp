@@ -389,17 +389,6 @@ class NQP::Actions is HLL::Actions {
                 $block,
                 QAST::Op.new( :op('exception') ),
             ),
-            QAST::VM.new(
-                :parrot(QAST::Op.new(
-                    :op('bindkey_i'),
-                    QAST::Op.new( :op('exception') ),
-                    QAST::SVal.new( :value('handled') ),
-                    QAST::IVal.new( :value(1) )
-                )),
-                :jvm(QAST::Op.new( :op('null') )),
-                :moar(QAST::Op.new( :op('null') )),
-                :js(QAST::Op.new( :op('null') ))
-            ),
             default_for('$'));
     }
 
@@ -431,17 +420,6 @@ class NQP::Actions is HLL::Actions {
             $ast,
             'CATCH',
             QAST::Stmts.new(
-                QAST::VM.new(
-                    :parrot(QAST::Op.new(
-                        :op('bindkey_i'),
-                        QAST::Op.new( :op('exception') ),
-                        QAST::SVal.new( :value('handled') ),
-                        QAST::IVal.new( :value(1) )
-                    )),
-                    :jvm(QAST::Op.new( :op('null') )),
-                    :moar(QAST::Op.new( :op('null') )),
-                    :js(QAST::Op.new( :op('null') ))
-                ),
                 default_for('$')
             ));
         $/.prune();
@@ -1252,32 +1230,7 @@ class NQP::Actions is HLL::Actions {
     }
 
     method trait_mod:sym<is>($/) {
-        if $<longname> eq 'parrot_vtable' {
-            # XXX This should be in Parrot-specific module and need a pragma.
-            my $c_ast := $<circumfix>[0].ast;
-            $/.CURSOR.panic("Trait 'parrot_vtable' requires constant scalar argument")
-                unless $c_ast ~~ QAST::SVal;
-            my $name := $c_ast.value;
-            my $package := $*PACKAGE;
-            my $is_dispatcher := $*SCOPE eq 'proto';
-            make -> $match {
-                $*W.pkg_add_method($package, 'add_parrot_vtable_mapping', $name,
-                    $match.ast.ann('code_obj') //
-                        $*W.create_code($match.ast.ann('block_ast'), $name, $is_dispatcher));
-            };
-        }
-        elsif $<longname> eq 'parrot_vtable_handler' {
-            # XXX This should be in Parrot-specific module and need a pragma.
-            my $c_ast := $<circumfix>[0].ast;
-            $/.CURSOR.panic("Trait 'parrot_vtable_handler' requires constant scalar argument")
-                unless $c_ast ~~ QAST::SVal;
-            my $name := $c_ast.value;
-            my $package := $*PACKAGE;
-            make -> $match {
-                $*W.pkg_add_parrot_vtable_handler_mapping($package, $name, ~$match<variable>);
-            };
-        }
-        elsif $<longname> eq 'positional_delegate' {
+        if $<longname> eq 'positional_delegate' {
             make -> $m { $*DECLARAND_ATTR.set_positional_delegate(1) };
         }
         elsif $<longname> eq 'associative_delegate' {
@@ -1449,19 +1402,6 @@ class NQP::Actions is HLL::Actions {
         $/.prune;
     }
 
-    method term:sym<pir::op>($/) {
-        my @args := $<args> ?? $<args>[0].ast.list !! [];
-        my $pirop := ~$<op>;
-        $pirop := join(' ', nqp::split('__', $pirop));
-        make QAST::VM.new( :pirop($pirop), :node($/), |@args );
-        $/.prune;
-    }
-
-    method term:sym<pir::const>($/) {
-        make QAST::VM.new( :pirconst(~$<const>) );
-        $/.prune;
-    }
-
     method term:sym<nqp::op>($/) {
         my $op    := ~$<op>;
         my @args  := $<args> ?? $<args>[0].ast.list !! [];
@@ -1619,9 +1559,6 @@ class NQP::Actions is HLL::Actions {
     method quote:sym<qq>($/)   { make $<quote_EXPR>.ast; }
     method quote:sym<q>($/)    { make $<quote_EXPR>.ast; }
     method quote:sym<Q>($/)    { make $<quote_EXPR>.ast; }
-    method quote:sym<Q:PIR>($/) {
-        make QAST::VM.new( :pir( $<quote_EXPR>.ast.value ), :node($/) );
-    }
 
     method quote:sym</ />($/) {
         my $block := $*W.pop_lexpad();

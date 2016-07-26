@@ -190,10 +190,7 @@ else {
 my $backend := nqp::getcomp('nqp').backend.name;
 my $crlf-conversion := $backend eq 'moar' || $backend eq 'js';
 
-if $backend eq 'parrot' {
-    skip("readlinefh is broken on parrot", 5);
-}
-elsif $crlf-conversion {
+if $crlf-conversion {
     skip("readlinefh won't match \\r on $backend", 5);
 }
 else {
@@ -262,12 +259,7 @@ else {
     ok(nqp::readlink($test-file ~ '-symlink') eq $test-file, 'nqp::readlink');
     ok(nqp::stat($test-file ~ '-symlink', nqp::const::STAT_EXISTS), 'the symbolic link should exist');
     ok(nqp::lstat($test-file ~ '-symlink', nqp::const::STAT_EXISTS), 'the symbolic link should exist');
-    if nqp::getcomp('nqp').backend.name eq 'parrot' {
-        skip('stat + STAT_ISLNK is broken on parrot');
-    }
-    else {
-        ok(nqp::stat($test-file ~ '-symlink', nqp::const::STAT_ISLNK), 'the symbolic link should actually *be* a symbolic link');
-    }
+    ok(nqp::stat($test-file ~ '-symlink', nqp::const::STAT_ISLNK), 'the symbolic link should actually *be* a symbolic link');
     nqp::unlink($test-file);
     nqp::unlink($test-file ~ '-symlink');
 

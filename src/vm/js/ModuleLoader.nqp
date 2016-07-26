@@ -200,6 +200,4 @@ knowhow ModuleLoader {
     }
 }
 
-# Since this *is* the module loader, we can't locate it the normal way by
-# GLOBAL merging. So instead we stash it away in the Parrot namespace tree.
 nqp::bindcurhllsym('ModuleLoader', ModuleLoader);

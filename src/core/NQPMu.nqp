@@ -73,34 +73,9 @@ my class NQPMu {
         self.bless(|%attributes);
     }
 
-#?if parrot
-    proto method Str() is parrot_vtable('get_string') { * }
-    multi method Str(NQPMu:U $self:) {
-        ''
-    }
-    multi method Str(NQPMu:D $self:) {
-        self.HOW.name(self) ~ '<' ~ nqp::where(self) ~ '>'
-    }
-    
-    proto method Numeric() is parrot_vtable('get_number') { * }
-    multi method Numeric(NQPMu:U $self:) {
-        0.0
-    }
-    
-    proto method Int() is parrot_vtable('get_integer') { * }
-    multi method Int(NQPMu:U $self:) {
-        0
-    }
-
-    method defined() is parrot_vtable('defined') {
-        nqp::isconcrete(self)
-    }
-#?endif
-#?if !parrot
     method defined() {
         nqp::isconcrete(self)
     }
-#?endif
 
     proto method ACCEPTS($topic) { * }
     multi method ACCEPTS(NQPMu:U $self: $topic) {
@@ -112,9 +87,7 @@ my class NQPMu {
     }
 }
 
-#?if !parrot
-# A few bits when we're bootstrapping everything 6model-style rather than using
-# Parrot-supplied things.
+# A few bits when we're bootstrapping everything 6model-style
 my class NQPArray is repr('VMArray') {
     method push($value) { nqp::push(self, $value) }
     method pop() { nqp::pop(self) }
@@ -137,6 +110,5 @@ nqp::sethllconfig('nqp', nqp::hash(
     'array_iter', NQPArrayIter,
     'hash_iter', NQPHashIter
 ));
-#?endif
 
 my class NQPLabel { }

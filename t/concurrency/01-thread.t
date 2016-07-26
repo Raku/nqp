@@ -1,11 +1,5 @@
 #! nqp
 
-BEGIN {
-    if nqp::getcomp('nqp').backend.name eq 'parrot' {
-        nqp::say('1..0 # Skipped: Concurrency primitives are NYI on parrot');
-        nqp::exit(0);
-    }
-}
 
 plan(24);
 

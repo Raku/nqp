@@ -1,5 +1,3 @@
-#!./parrot nqp.pbc
-
 # postcircumfix:<( )>
 
 plan(1);

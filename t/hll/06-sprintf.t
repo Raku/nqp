@@ -1,6 +1,6 @@
 #! nqp
 
-# sprintf. This file will be moved to t/hll once it handles everything that parrot's sprintf can.
+# sprintf. This file will be moved to t/hll once it handles everything that vm-level sprintf can.
 
 my $die_message := 'unset';
 

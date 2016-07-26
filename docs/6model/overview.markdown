@@ -160,7 +160,7 @@ a method.
         say("mmmm...Starobrno!")
     });
 
-The .HOW macro in NQP maps to the PIR get_how opcode and it is used to
+The .HOW macro in NQP maps to the gethow opcode and it is used to
 get hold of the meta-object. We just pass a simple lambda expression in
 to add_method in order to specify what happens when the method is called.
 Finally, we can make an instance and call the method.

@@ -1,7 +1,3 @@
-if nqp::getcomp('nqp').backend.name eq 'parrot' {
-  say("1..0 # Skipped: nqp::savecapture is broken on parrot");
-  nqp::exit(0);
-}
 plan(19);
 
 my $x;

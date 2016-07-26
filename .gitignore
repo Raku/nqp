@@ -1,5 +1,4 @@
 Makefile
-/parrot
 /install
 .*.swp
 *.o
@@ -20,16 +19,10 @@ Makefile
 *.suo
 *.bundle
 *~
-*.pbc
-src/vm/parrot/ops/*.h
-src/vm/parrot/ops/*.c
-src/vm/parrot/pmc/pmc_*.h
-src/vm/parrot/pmc/*.c
 /nqp
 nqp.c
 nqp_group.c
 nqp_group.h
-src/gen/*.pir
 src/gen/*.nqp
 src/gen/*.pm
 src/gen/*.setting
@@ -39,7 +32,6 @@ config.status
 config.default
 3rdparty/dyncall/ConfigVars
 3rdparty/dyncall/*/*.a
-/nqp_const.pir
 node_modules
 nqp-runtime.jar
 *.class
