@@ -237,25 +237,49 @@ class QAST::OperationsJS {
 
     add_simple_op('clone', $T_OBJ, [$T_OBJ], :decont(0));
 
+    my sub static_attr($node) {
+        my int $hint := -1;
+        if $node[1].has_compile_time_value && nqp::istype($node[2], QAST::SVal) {
+            $hint := nqp::hintfor($node[1].compile_time_value, $node[2].value);
+        }
+
+        $hint != -1 ?? 'attr$' ~ $hint !! NQPMu;
+    }
+
     # TODO optimize cases where the class and the attribute are constants
     for ['', $T_OBJ, '_i', $T_INT, '_n', $T_NUM, '_s', $T_STR] -> $suffix, $type {
-
         add_op('bindattr' ~ $suffix, sub ($comp, $node, :$want, :$cps) {
             my $obj := $comp.as_js(:want($T_OBJ), $node[0]);
-            my $classHandle := $comp.as_js(:want($T_OBJ), $node[1]);
-            my $attrName := $comp.as_js(:want($T_STR), $node[2]);
             my $value := $comp.as_js(:want($type), $node[3]);
+            if static_attr($node) -> $attr {
+                $comp.stored_result(Chunk.new($type,
+                    "({$obj.expr}\.$attr = {$value.expr})",
+                [$obj, $value]));
+            }
+            else {
+                my $classHandle := $comp.as_js(:want($T_OBJ), $node[1]);
+                my $attrName := $comp.as_js(:want($T_STR), $node[2]);
 
-            $comp.stored_result(Chunk.new($type,
-                "{$obj.expr}\.\$\$bindattr({$classHandle.expr}, {$attrName.expr}, {$value.expr})",
-            [$obj, $classHandle, $attrName, $value]));
+                $comp.stored_result(Chunk.new($type,
+                    "{$obj.expr}\.\$\$bindattr({$classHandle.expr}, {$attrName.expr}, {$value.expr})",
+                [$obj, $classHandle, $attrName, $value]));
+            }
+
         });
 
-        add_simple_op('getattr' ~ $suffix, $type, [$T_OBJ, $T_OBJ, $T_STR],
-            sub ($obj, $type, $attr) {
-                "$obj\.\$\$getattr($type, $attr)";
+        add_op('getattr' ~ $suffix, sub ($comp, $node, :$want, :$cps) {
+            my $obj := $comp.as_js(:want($T_OBJ), $node[0]);
+            if static_attr($node) -> $attr {
+                Chunk.new($type, "({$obj.expr}\.$attr)", [$obj]);
             }
-        );
+            else {
+                my $classHandle := $comp.as_js(:want($T_OBJ), $node[1]);
+                my $attrName := $comp.as_js(:want($T_STR), $node[2]);
+
+                Chunk.new($type, "{$obj.expr}\.\$\$getattr({$classHandle.expr}, {$attrName.expr})",
+                    [$obj, $classHandle, $attrName]);
+            }
+        });
     }
 
     # HACK - we need this until we handle types on attributes properly 
