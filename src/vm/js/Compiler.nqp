@@ -206,6 +206,16 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             return 1;
 
         }
+
+        method ctx_for_var($var) {
+            my $info := self;
+            while $info {
+                if $info.qast && $info.qast.symbol($var.name) {
+                    return $info.ctx;
+                }
+                $info := $info.outer;
+            }
+        }
     }
 
     method is_valid_js_identifier($identifier) {
@@ -1611,7 +1621,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 self.stored_result(Chunk.new($type, "({$*CTX}[{quote_string($var.name)}] = {$bindval.expr})",  [$bindval]));
             }
             else {
-                self.stored_result(Chunk.new($type, "{$*CTX}.bind({quote_string($var.name)}, {$bindval.expr})",  [$bindval]));
+                if $*BLOCK.ctx_for_var($var) -> $ctx {
+                    self.stored_result(Chunk.new($type, "({$ctx}[{quote_string($var.name)}] = {$bindval.expr})",  [$bindval]));
+                } 
+                else {
+                    # nqp::die("we can't find ctx for {$var.name}");
+                    self.stored_result(Chunk.new($type, "{$*CTX}.bind({quote_string($var.name)}, {$bindval.expr})",  [$bindval]));
+                }
             }
         }
         else {
@@ -1623,7 +1639,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 self.stored_result(Chunk.new($T_OBJ, "({$*CTX}[{quote_string($var.name)}] = nqp.op.clone({self.value_as_js($var.value)}))",  []));
             }
             else {
-                Chunk.new($type, "{$*CTX}.lookup({quote_string($var.name)})", [], :node($var));
+                if $*BLOCK.ctx_for_var($var) -> $ctx {
+                    Chunk.new($type, "$ctx[{quote_string($var.name)}]", [], :node($var));
+                }
+                else {
+                    # nqp::die("we can't find ctx for {$var.name}");
+                    Chunk.new($type, "{$*CTX}.lookup({quote_string($var.name)})", [], :node($var));
+                }
             }
         }
     }
