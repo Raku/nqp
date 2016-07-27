@@ -1393,7 +1393,6 @@ class QAST::OperationsJS {
     }, :sideffects);
 
 
-    # TODO implement the multi method cache for better performance
     add_simple_op('multicachefind', $T_OBJ, [$T_OBJ, $T_OBJ]);
     add_simple_op('multicacheadd', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ]);
 
