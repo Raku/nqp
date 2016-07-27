@@ -163,7 +163,6 @@ STable.prototype.setMethodCache = function(methodCache) {
   }
 };
 
-// TODO handle attrs properly
 STable.prototype.setPositionalDelegate = function(attr) {
   this.objConstructor.prototype.$$bindpos = function(index, value) {
     return this[attr].$$bindpos(index, value);
@@ -194,7 +193,6 @@ STable.prototype.setPositionalDelegate = function(attr) {
   };
 };
 
-// TODO handle attrs properly
 STable.prototype.setAssociativeDelegate = function(attr) {
   this.objConstructor.prototype.$$bindkey = function(key, value) {
     return this[attr].$$bindkey(key, value);
