@@ -199,7 +199,7 @@ P6opaque.prototype.serializeReprData = function(st, cursor) {
   var numAttrs = st.REPR.flattenedStables.length;
   cursor.varint(numAttrs);
 
-  STARTING_OFFSET = cursor.offset;
+  var STARTING_OFFSET = cursor.offset;
 
   for (var i = 0; i < numAttrs; i++) {
     if (st.REPR.flattenedStables[i] == null) {
