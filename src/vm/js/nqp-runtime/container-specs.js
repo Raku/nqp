@@ -15,17 +15,17 @@ CodePair.prototype.setupSTable = function() {
   var store = this.store;
 
   this.STable.addInternalMethod('$$assignunchecked', function(ctx, value) {
-    store.$call(ctx, {}, this, value);
+    store.$$call(ctx, {}, this, value);
     return value;
   });
 
   this.STable.addInternalMethod('$$assign', function(ctx, value) {
-    store.$call(ctx, {}, this, value);
+    store.$$call(ctx, {}, this, value);
     return value;
   });
 
   this.STable.addInternalMethod('$$decont', function(ctx) {
-    return fetch.$call(ctx, {}, this);
+    return fetch.$$call(ctx, {}, this);
   });
 };
 

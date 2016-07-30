@@ -554,7 +554,7 @@ WrappedFunction.prototype.$apply = function(args) {
   return fromJS(this.func.apply(null, converted));
 };
 
-WrappedFunction.prototype.$call = function(args) {
+WrappedFunction.prototype.$$call = function(args) {
   return this.$apply(arguments);
 };
 
@@ -753,7 +753,7 @@ op.parameterizetype = function(ctx, type, params) {
     }
   }
 
-  var result = st.parameterizer.$call(ctx, {}, st.WHAT, params);
+  var result = st.parameterizer.$$call(ctx, {}, st.WHAT, params);
 
   var newSTable = result._STable;
   newSTable.parametricType = type;
@@ -832,7 +832,7 @@ var resetValue;
 var invokeValue;
 op.continuationreset = function(ctx, tag, continuation) {
   startTrampoline(function() {
-    return continuation.$callCPS(ctx, {}, function(value) {
+    return continuation.$$callCPS(ctx, {}, function(value) {
       resetValue = value;
       invokeValue = value;
       return null;
@@ -846,7 +846,7 @@ op.continuationresetCPS = function(ctx, tag, continuation, continuation) {
 };
 
 op.continuationcontrolCPS = function(ctx, protect, tag, run, cont) {
-  startTrampoline(run.$callCPS(ctx, {}, function(value) {
+  startTrampoline(run.$$callCPS(ctx, {}, function(value) {
     resetValue = value;
     return null;
   }, cont));
@@ -855,14 +855,14 @@ op.continuationcontrolCPS = function(ctx, protect, tag, run, cont) {
 
 op.continuationinvoke = function(ctx, cont, inject) {
   // TODO really place inject inside the cont
-  var value = inject.$call(ctx, {});
+  var value = inject.$$call(ctx, {});
   startTrampoline(cont(value));
   return invokeValue;
 };
 
 op.continuationinvokeCPS = function(ctx, invokedCont, inject, cont) {
   // TODO really place inject inside the cont, use callCPS
-  var value = inject.$call(ctx, {});
+  var value = inject.$$call(ctx, {});
   return invokedCont(value);
 };
 

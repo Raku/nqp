@@ -1083,7 +1083,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     $setup.push($arg);
                 }
 
-                $setup.push('return ' ~ $cloned_block ~ ".\$callCPS({nqp::join(',', @args)})");
+                $setup.push('return ' ~ $cloned_block ~ ".\$\$callCPS({nqp::join(',', @args)})");
 
                 ChunkCPS.new($T_OBJ, $result, $setup, $cont, :$node);
             }
@@ -1094,7 +1094,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     $setup.push($arg);
                 }
 
-                self.stored_result(Chunk.new($want, $cloned_block~".\$call({nqp::join(',', @args)})", $setup, :$node), :$want);
+                self.stored_result(Chunk.new($want, $cloned_block~".\$\$call({nqp::join(',', @args)})", $setup, :$node), :$want);
             }
         }
         elsif $node.blocktype eq 'declaration' ||  $node.blocktype eq '' {

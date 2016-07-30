@@ -344,7 +344,7 @@ class RegexCompiler {
         else {
             #TODO think if arguments are possible, etc.
             my $block := $!compiler.as_js($node[0][0], :want($T_OBJ));
-            $call := Chunk.new($T_OBJ, $block.expr ~ ".\$call({$*CTX}, null, $!cursor)", [$block]);
+            $call := Chunk.new($T_OBJ, $block.expr ~ ".\$\$call({$*CTX}, null, $!cursor)", [$block]);
         }
 
         my $testop := $node.negate ?? '>=' !! '<';

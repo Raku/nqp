@@ -34,7 +34,7 @@ STable.prototype.setboolspec = function(mode, method) {
   this.boolificationSpec = {mode: mode, method: method};
   if (mode == 0) {
     this.objConstructor.prototype.$$toBool = function(ctx) {
-      return method.$call(ctx, {}, this);
+      return method.$$call(ctx, {}, this);
     };
   } else if (mode == 1) {
     this.objConstructor.prototype.$$toBool = function(ctx) {
@@ -73,8 +73,8 @@ STable.prototype.setboolspec = function(mode, method) {
 STable.prototype.setinvokespec = function(classHandle, attrName, invocationHandler) {
   if (classHandle) {
     var attr = this.REPR.getAttr(classHandle, attrName);
-    this.objConstructor.prototype.$call = function() {
-      return this[attr].$call.apply(this[attr], arguments);
+    this.objConstructor.prototype.$$call = function() {
+      return this[attr].$$call.apply(this[attr], arguments);
     };
     this.objConstructor.prototype.$apply = function(args) {
       return this[attr].$apply(args);
@@ -86,7 +86,7 @@ STable.prototype.setinvokespec = function(classHandle, attrName, invocationHandl
       }
     };
   } else {
-    this.objConstructor.prototype.$call = function() {
+    this.objConstructor.prototype.$$call = function() {
       var args = [];
       args.push(arguments[0]);
       args.push(arguments[1]);
@@ -119,7 +119,7 @@ STable.prototype.setinvokespec = function(classHandle, attrName, invocationHandl
 
 function injectMethod(proto, name, method) {
   proto[name] = function() {
-    return method.$call.apply(method, arguments);
+    return method.$$call.apply(method, arguments);
   };
 
   if (method.$$injectMethod) {
@@ -152,7 +152,7 @@ STable.prototype.setMethodCache = function(methodCache) {
   for (var name in methodCache) {
     if (methodCache.hasOwnProperty(name)) {
       injectMethod(proto, name, methodCache[name]);
-      if (!methodCache[name].$call) {
+      if (!methodCache[name].$$call) {
         notReadyYet = true;
       }
     }

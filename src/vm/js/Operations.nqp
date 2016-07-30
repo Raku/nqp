@@ -222,7 +222,7 @@ class QAST::OperationsJS {
                 @setup.push("if (nqp.toBool($ret, $*CTX)) \{\n") if is_chain($part[0]);
                 @setup.push($callee);
                 @setup.push($right);
-                @setup.push("$ret = {$callee.expr}.\$call($*CTX, null, {$left.expr}, {$right.expr});\n");
+                @setup.push("$ret = {$callee.expr}.\$\$call($*CTX, null, {$left.expr}, {$right.expr});\n");
                 @setup.push("\}") if is_chain($part[0]);
 
                 Chunk.new($T_OBJ, $right.expr, @setup, :node($part));
@@ -607,7 +607,7 @@ class QAST::OperationsJS {
                 for $compiled_args.setup -> $arg {
                     @setup.push($arg);
                 }
-                $call := '.$callCPS(';
+                $call := '.$$callCPS(';
             }
 
             
@@ -625,7 +625,7 @@ class QAST::OperationsJS {
                 $call := '.$apply(';
             }
             else {
-                $call := '.$call(';
+                $call := '.$$call(';
             }
             $comp.stored_result(
                 Chunk.new($T_OBJ, $callee.expr ~ $call ~ $compiled_args.expr ~ ')' , [$callee, $compiled_args], :$node), :$want);
