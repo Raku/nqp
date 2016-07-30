@@ -601,7 +601,7 @@ class QAST::OperationsJS {
                     }
                 }
                 $compiled_args := $comp.merge_arg_groups($compiled_args);
-                $call := '.$applyCPS(';
+                $call := '.$$applyCPS(';
             }
             else {
                 for $compiled_args.setup -> $arg {
@@ -622,7 +622,7 @@ class QAST::OperationsJS {
 
             if nqp::islist($compiled_args) {
                 $compiled_args := $comp.merge_arg_groups($compiled_args);
-                $call := '.$apply(';
+                $call := '.$$apply(';
             }
             else {
                 $call := '.$$call(';
@@ -1389,7 +1389,7 @@ class QAST::OperationsJS {
     add_simple_op('captureposprimspec', $T_OBJ, [$T_OBJ, $T_INT]);
 
     add_simple_op('invokewithcapture', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($invokee, $capture) {
-        "$invokee.\$apply([{$*CTX}].concat($capture.named, $capture.pos))"
+        "$invokee.\$\$apply([{$*CTX}].concat($capture.named, $capture.pos))"
     }, :sideffects);
 
 

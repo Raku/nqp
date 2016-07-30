@@ -546,7 +546,7 @@ function WrappedFunction(func) {
   this.func = func;
 }
 
-WrappedFunction.prototype.$apply = function(args) {
+WrappedFunction.prototype.$$apply = function(args) {
   var converted = [];
   for (var i = 2; i < args.length; i++) {
     converted.push(toJS(args[i]));
@@ -555,7 +555,7 @@ WrappedFunction.prototype.$apply = function(args) {
 };
 
 WrappedFunction.prototype.$$call = function(args) {
-  return this.$apply(arguments);
+  return this.$$apply(arguments);
 };
 
 function fromJS(obj) {
@@ -575,7 +575,7 @@ function toJS(obj) {
       for (var i = 0; i < arguments.length; i++) {
         converted.push(fromJS(arguments[i]));
       }
-      return toJS(obj.$apply(converted));
+      return toJS(obj.$$apply(converted));
     };
   } else {
     return obj;

@@ -1444,11 +1444,11 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             my $main := self.as_js($main_block, :want($T_OBJ));
 
-            $body := $instant ?? Chunk.void($block_js, $main, $main.expr ~ ".\$apply([null, null].concat(nqp.args(module)));\n") !! $main;
+            $body := $instant ?? Chunk.void($block_js, $main, $main.expr ~ ".\$\$apply([null, null].concat(nqp.args(module)));\n") !! $main;
             
         }
         else {
-            $body := $instant ?? Chunk.void($block_js, $block_js.expr ~ ".\$apply([null, null].concat(nqp.args(module)));\n") !! $block_js;
+            $body := $instant ?? Chunk.void($block_js, $block_js.expr ~ ".\$\$apply([null, null].concat(nqp.args(module)));\n") !! $block_js;
         }
 
 

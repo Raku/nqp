@@ -76,8 +76,8 @@ STable.prototype.setinvokespec = function(classHandle, attrName, invocationHandl
     this.objConstructor.prototype.$$call = function() {
       return this[attr].$$call.apply(this[attr], arguments);
     };
-    this.objConstructor.prototype.$apply = function(args) {
-      return this[attr].$apply(args);
+    this.objConstructor.prototype.$$apply = function(args) {
+      return this[attr].$$apply(args);
     };
 
     this.objConstructor.prototype.$$injectMethod = function(proto, name) {
@@ -94,10 +94,10 @@ STable.prototype.setinvokespec = function(classHandle, attrName, invocationHandl
       for (var i = 2; i < arguments.length; i++) {
         args.push(arguments[i]);
       }
-      return invocationHandler.$apply(args);
+      return invocationHandler.$$apply(args);
     };
 
-    this.objConstructor.prototype.$apply = function(args) {
+    this.objConstructor.prototype.$$apply = function(args) {
       var newArgs = [];
       newArgs.push(args[0]);
       newArgs.push(args[1]);
@@ -105,7 +105,7 @@ STable.prototype.setinvokespec = function(classHandle, attrName, invocationHandl
       for (var i = 2; i < args.length; i++) {
         newArgs.push(args[i]);
       }
-      return invocationHandler.$apply(newArgs);
+      return invocationHandler.$$apply(newArgs);
     };
   }
   this.invocationSpec = {classHandle: classHandle, attrName: attrName, invocationHandler: invocationHandler};
