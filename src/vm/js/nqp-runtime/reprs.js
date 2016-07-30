@@ -1,3 +1,4 @@
+"use strict";
 var sixmodel = require('./sixmodel.js');
 var Hash = require('./hash.js');
 var NQPInt = require('./nqp-int.js');
@@ -198,8 +199,6 @@ P6opaque.prototype.getAttr = function(classHandle, attrName) {
 P6opaque.prototype.serializeReprData = function(st, cursor) {
   var numAttrs = st.REPR.flattenedStables.length;
   cursor.varint(numAttrs);
-
-  var STARTING_OFFSET = cursor.offset;
 
   for (var i = 0; i < numAttrs; i++) {
     if (st.REPR.flattenedStables[i] == null) {
