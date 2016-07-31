@@ -122,7 +122,6 @@ NQPArray.prototype.$$clone = function() {
 };
 
 NQPArray.prototype.$$atposnd = function(idx) {
-  console.log(idx);
   if (idx.array.length != 1) {
     throw new NQPException('A dynamic array can only be indexed with a single dimension');
   }
