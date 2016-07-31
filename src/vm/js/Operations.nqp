@@ -399,7 +399,7 @@ class QAST::OperationsJS {
     add_simple_op('time_i', $T_NUM, [], sub () {"Math.floor(new Date().getTime() / 1000)"}, :sideffects);
 
     add_simple_op('escape', $T_STR, [$T_STR]);
-    add_simple_op('x', $T_STR, [$T_STR, $T_INT]);
+    add_simple_op('x', $T_STR, [$T_STR, $T_INT], sub ($what, $times) {"$what.repeat($times)"});
 
     add_simple_op('getcomp', $T_OBJ, [$T_STR], :sideffects);
 

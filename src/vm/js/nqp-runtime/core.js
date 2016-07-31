@@ -49,13 +49,6 @@ op.escape = function(str) {
       .replace(/"/g, '\\"');
 };
 
-op.x = function(str, times) {
-  if (!times) return '';
-  var ret = str;
-  while (--times) ret += str;
-  return ret;
-};
-
 function radixHelper(radix, str, zpos, flags) {
   var lowercase = 'a-' + String.fromCharCode('a'.charCodeAt(0) + radix - 11);
   var uppercase = 'A-' + String.fromCharCode('A'.charCodeAt(0) + radix - 11);
