@@ -447,7 +447,7 @@ class P6opaque {
 
   }
 
-  setup_STable(STable) {
+  setupSTable(STable) {
     var repr = this;
     STable.addInternalMethod('$$bindattr', function(classHandle, attrName, value) {
       this[repr.getAttr(classHandle, attrName)] = value;
@@ -519,7 +519,7 @@ Uninstantiable.prototype.typeObjectFor = basicTypeObjectFor;
 reprs.Uninstantiable = Uninstantiable;
 
 class P6int {
-  setup_STable(STable) {
+  setupSTable(STable) {
     STable.addInternalMethod('$$setInt', function(value) {
       this.value = value;
     });
@@ -740,7 +740,7 @@ function getBI(obj) {
 }
 
 class P6bigint {
-  setup_STable(STable) {
+  setupSTable(STable) {
     STable.addInternalMethod('$$setInt', function(value) {
       this.value = bignum(value);
     });
@@ -868,7 +868,7 @@ class MultiDimArray {
 
 
 
-  setup_STable(STable) {
+  setupSTable(STable) {
     STable.addInternalMethod('$$numdimensions', function(value) {
       if (this.typeObject_) {
         throw new NQPException('Cannot get number of dimensions of a type object');
@@ -1087,7 +1087,7 @@ VMException.prototype.basicTypeObjectFor = basicTypeObjectFor;
 
 VMException.prototype.createObjConstructor = basicConstructor;
 
-VMException.prototype.setup_STable = function(STable) {
+VMException.prototype.setupSTable = function(STable) {
   STable.addInternalMethod('$$getStr', function() {
     return this.message;
   });

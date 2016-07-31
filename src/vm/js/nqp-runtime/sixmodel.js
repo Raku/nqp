@@ -30,8 +30,8 @@ class STable {
       return this.typeObject_ ? 0 : 1;
     };
   
-    if (this.REPR.setup_STable) {
-      this.REPR.setup_STable(this);
+    if (this.REPR.setupSTable) {
+      this.REPR.setupSTable(this);
     }
   }
 
