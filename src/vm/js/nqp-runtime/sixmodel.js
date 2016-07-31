@@ -2,15 +2,6 @@
 
 var incompleteMethodCaches = [];
 
-function injectMethod(proto, name, method) {
-  proto[name] = function() {
-    return method.$$call.apply(method, arguments);
-  };
-
-  if (method.$$injectMethod) {
-    method.$$injectMethod(proto, name);
-  }
-}
 
 class STable {
   constructor (REPR, HOW) {
@@ -147,6 +138,15 @@ class STable {
     return obj;
   }
 
+  injectMethod(proto, name, method) {
+    proto[name] = function() {
+      return method.$$call.apply(method, arguments);
+    };
+  
+    if (method.$$injectMethod) {
+      method.$$injectMethod(proto, name);
+    }
+  }
 
   setMethodCache(methodCache) {
     // TODO delete old methods
@@ -155,7 +155,7 @@ class STable {
     var notReadyYet = false;
     for (var name in methodCache) {
       if (methodCache.hasOwnProperty(name)) {
-        injectMethod(proto, name, methodCache[name]);
+        this.injectMethod(proto, name, methodCache[name]);
         if (!methodCache[name].$$call) {
           notReadyYet = true;
         }
