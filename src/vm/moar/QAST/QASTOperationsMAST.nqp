@@ -1977,6 +1977,7 @@ my %const_map := nqp::hash(
     'PIPE_INHERIT_ERR',         64,
     'PIPE_IGNORE_ERR',          128,
     'PIPE_CAPTURE_ERR',         256,
+    'PIPE_MERGED_OUT_ERR',      512,
 
     'SIG_HUP',                  1,
     'SIG_INT',                  2,
