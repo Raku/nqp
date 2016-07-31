@@ -1,3 +1,4 @@
+'use strict';
 var NQPException = require('./nqp-exception.js');
 
 function NQPArray(array) {

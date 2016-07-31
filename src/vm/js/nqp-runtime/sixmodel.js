@@ -1,3 +1,4 @@
+'use strict';
 function STable(REPR, HOW) {
   this.REPR = REPR;
   this.HOW = HOW;

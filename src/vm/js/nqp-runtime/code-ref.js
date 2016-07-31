@@ -1,3 +1,4 @@
+'use strict';
 CodeRef.cuids = {};
 function CodeRef(name, cuid) {
   this.name = name;

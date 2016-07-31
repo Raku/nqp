@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 var sixmodel = require('./sixmodel.js');
 var Hash = require('./hash.js');
 var NQPInt = require('./nqp-int.js');
