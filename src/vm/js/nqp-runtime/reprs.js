@@ -574,18 +574,13 @@ reprs.P6int = P6int;
 
 
 class P6num {
-  createObjConstructor(STable) {
-    var c = this.basicConstructor(STable);
-
-    STable.objConstructor = c; // HACK it's set again later, we set it for addInternalMethod
-
+  setupSTable(STable) {
     STable.addInternalMethod('$$setNum', function(value) {
       this.value = value;
     });
     STable.addInternalMethod('$$getNum', function() {
       return this.value;
     });
-    return c;
   }
 
   serialize(data, obj) {
@@ -610,7 +605,7 @@ class P6num {
 P6num.prototype.boxedPrimitive = 2;
 
 P6num.prototype.allocate = basicAllocate;
-P6num.prototype.basicConstructor = basicConstructor;
+P6num.prototype.createObjConstructor = basicConstructor;
 P6num.prototype.typeObjectFor = basicTypeObjectFor;
 
 // TODO:  handle float/bits stuff
@@ -619,18 +614,13 @@ P6num.prototype.compose = noopCompose;
 reprs.P6num = P6num;
 
 class P6str {
-  createObjConstructor(STable) {
-    var c = this.basicConstructor(STable);
-
-    STable.objConstructor = c; // HACK it's set again later, we set it for addInternalMethod
-
+  setupSTable(STable) {
     STable.addInternalMethod('$$setStr', function(value) {
       this.value = value;
     });
     STable.addInternalMethod('$$getStr', function() {
       return this.value;
     });
-    return c;
   }
 
   serialize(data, obj) {
@@ -656,7 +646,7 @@ P6str.prototype.boxedPrimitive = 3;
 
 P6str.prototype.typeObjectFor = basicTypeObjectFor;
 P6str.prototype.allocate = basicAllocate;
-P6str.prototype.basicConstructor = basicConstructor;
+P6str.prototype.createObjConstructor = basicConstructor;
 P6str.prototype.compose = noopCompose;
 
 
