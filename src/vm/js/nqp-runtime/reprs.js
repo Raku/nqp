@@ -36,6 +36,13 @@ function slotToAttr(slot) {
   return 'attr$' + slot;
 }
 
+class REPR {
+}
+REPR.prototype.allocate = basicAllocate;
+REPR.prototype.typeObjectFor = basicTypeObjectFor;
+REPR.prototype.compose = noopCompose;
+REPR.prototype.createObjConstructor = basicConstructor;
+
 class P6opaque {
   allocate(STable) {
     var obj = new STable.objConstructor();
@@ -518,7 +525,7 @@ Uninstantiable.prototype.createObjConstructor = basicConstructor;
 Uninstantiable.prototype.typeObjectFor = basicTypeObjectFor;
 reprs.Uninstantiable = Uninstantiable;
 
-class P6int {
+class P6int extends REPR {
   setupSTable(STable) {
     STable.addInternalMethod('$$setInt', function(value) {
       this.value = value;
@@ -564,16 +571,12 @@ class P6int {
 P6int.prototype.flattenedDefault = 0;
 P6int.prototype.boxedPrimitive = 1;
 
-P6int.prototype.createObjConstructor = basicConstructor;
-P6int.prototype.typeObjectFor = basicTypeObjectFor;
-
-P6int.prototype.allocate = basicAllocate;
-
 
 reprs.P6int = P6int;
 
 
-class P6num {
+// TODO:  handle float/bits stuff in compose
+class P6num extends REPR {
   setupSTable(STable) {
     STable.addInternalMethod('$$setNum', function(value) {
       this.value = value;
@@ -604,16 +607,9 @@ class P6num {
 
 P6num.prototype.boxedPrimitive = 2;
 
-P6num.prototype.allocate = basicAllocate;
-P6num.prototype.createObjConstructor = basicConstructor;
-P6num.prototype.typeObjectFor = basicTypeObjectFor;
-
-// TODO:  handle float/bits stuff
-P6num.prototype.compose = noopCompose;
-
 reprs.P6num = P6num;
 
-class P6str {
+class P6str extends REPR {
   setupSTable(STable) {
     STable.addInternalMethod('$$setStr', function(value) {
       this.value = value;
@@ -644,27 +640,19 @@ class P6str {
 
 P6str.prototype.boxedPrimitive = 3;
 
-P6str.prototype.typeObjectFor = basicTypeObjectFor;
-P6str.prototype.allocate = basicAllocate;
-P6str.prototype.createObjConstructor = basicConstructor;
-P6str.prototype.compose = noopCompose;
-
 
 reprs.P6str = P6str;
 
-class NFA {
+class NFA extends REPR {
   deserializeFinish(obj, data) {
     // STUB
   }
 }
 
-NFA.prototype.createObjConstructor = basicConstructor;
-NFA.prototype.typeObjectFor = basicTypeObjectFor;
-NFA.prototype.allocate = basicAllocate;
-NFA.prototype.compose = noopCompose;
 reprs.NFA = NFA;
 
-class VMArray {
+// TODO rework VMArray to be more correct
+class VMArray extends REPR {
   deserializeFinish(obj, data) {
     // STUB
   }
@@ -695,14 +683,6 @@ class VMArray {
   }
 }
 
-VMArray.prototype.createObjConstructor = basicConstructor;
-
-VMArray.prototype.typeObjectFor = basicTypeObjectFor;
-
-// HACK
-VMArray.prototype.allocate = basicAllocate;
-
-
 reprs.VMArray = VMArray;
 
 
@@ -729,7 +709,7 @@ function getBI(obj) {
   return obj.$$getBignum();
 }
 
-class P6bigint {
+class P6bigint extends REPR {
   setupSTable(STable) {
     STable.addInternalMethod('$$setInt', function(value) {
       this.value = bignum(value);
@@ -789,27 +769,15 @@ class P6bigint {
 /* HACK - we should just do flattening properly instead of a weird flag */
 P6bigint.prototype.flattenSTable = true;
 
-P6bigint.prototype.createObjConstructor = basicConstructor;
-
-P6bigint.prototype.typeObjectFor = basicTypeObjectFor;
-P6bigint.prototype.allocate = basicAllocate;
-P6bigint.prototype.compose = noopCompose;
 reprs.P6bigint = P6bigint;
 
 
 /* Stubs */
 
-class NativeCall {}
-NativeCall.prototype.createObjConstructor = basicConstructor;
-NativeCall.prototype.allocate = basicAllocate;
-NativeCall.prototype.typeObjectFor = basicTypeObjectFor;
-NativeCall.prototype.compose = noopCompose;
+class NativeCall extends REPR {}
 reprs.NativeCall = NativeCall;
 
-class CPointer {}
-CPointer.prototype.createObjConstructor = basicConstructor;
-CPointer.prototype.typeObjectFor = basicTypeObjectFor;
-CPointer.prototype.compose = noopCompose;
+class CPointer extends REPR {}
 reprs.CPointer = CPointer;
 
 class ReentrantMutex {}
@@ -826,8 +794,7 @@ ConditionVariable.prototype.createObjConstructor = basicConstructor;
 reprs.ConditionVariable = ConditionVariable;
 
 
-
-class MultiDimArray {
+class MultiDimArray extends REPR {
   compose(STable, reprInfoHash) {
     var array = reprInfoHash.content.get('array');
     var dimensions = array.content.get('dimensions');
@@ -1062,36 +1029,22 @@ class MultiDimArray {
 
 }
 
-MultiDimArray.prototype.typeObjectFor = basicTypeObjectFor;
-MultiDimArray.prototype.allocate = basicAllocate;
-MultiDimArray.prototype.createObjConstructor = basicConstructor;
-
 reprs.MultiDimArray = MultiDimArray;
 
-class VMException {
+class VMException extends REPR {
+  setupSTable(STable) {
+    STable.addInternalMethod('$$getStr', function() {
+      return this.message;
+    });
+  }
 }
-VMException.prototype.allocate = basicAllocate;
-VMException.prototype.typeObjectFor = basicTypeObjectFor;
-VMException.prototype.compose = noopCompose;
-VMException.prototype.basicTypeObjectFor = basicTypeObjectFor;
 
-VMException.prototype.createObjConstructor = basicConstructor;
-
-VMException.prototype.setupSTable = function(STable) {
-  STable.addInternalMethod('$$getStr', function() {
-    return this.message;
-  });
-};
 
 reprs.VMException = VMException;
 
 
-class NativeRef {
+class NativeRef extends REPR {
 }
-NativeRef.prototype.allocate = basicAllocate;
-NativeRef.prototype.createObjConstructor = basicConstructor;
-NativeRef.prototype.typeObjectFor = basicTypeObjectFor;
-NativeRef.prototype.compose = noopCompose;
 reprs.NativeRef = NativeRef;
 
 var ID = 0;
