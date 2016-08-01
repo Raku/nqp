@@ -357,7 +357,6 @@ class P6opaque {
           names.push(attr.get('name'));
 
           if (attrType && attrType._STable.REPR.flattenSTable) {
-            console.log("regular flattenSTable");
             this.flattenedStables.push(attrType._STable);
           } else {
             this.flattenedStables.push(null);
