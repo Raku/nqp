@@ -322,11 +322,6 @@ class P6opaque {
     this.associativeDelegateSlot = -1;
 
     var curAttr = 0;
-    /*
-    List<SixModelObject> autoVivs = new ArrayList<SixModelObject>();
-    List<AttrInfo> attrInfoList = new ArrayList<AttrInfo>();
-    long mroLength = reprInfo.elems(tc);
-    */
     this.nameToIndexMapping = [];
     this.flattenedStables = [];
     var mi = false;
@@ -358,16 +353,8 @@ class P6opaque {
             REPR.generateBoxingMethods(STable, slotToAttr(curAttr), attrType._STable);
           }
 
-          /* TODO */
-          //              if (attrType == Null)
-          //                  attrType = tc.gc.KnowHOW;
-
           slots.push(curAttr);
           names.push(attr.get('name'));
-
-          /*              AttrInfo info = new AttrInfo();
-
-                info.st = attrType.st;*/
 
           if (attrType && attrType._STable.REPR.flattenSTable) {
             console.log("regular flattenSTable");
@@ -386,39 +373,10 @@ class P6opaque {
             this._STable.setAssociativeDelegate(slotToAttr(this.associativeDelegateSlot));
           }
 
-          /* TODO think if we want to flatten some things */
-          /*if (attrType.st.REPR.getStorageSpec(tc, attrType.st).inlineable == StorageSpec.INLINED)
-                    flattenedSTables.add(attrType.st);
-                else
-                    flattenedSTables.add(null);*/
-
           if (attr.get('auto_viv_container')) {
             this.autoVivValues[curAttr] = attr.get('auto_viv_container');
           }
 
-          /* info.boxTarget = attrHash.existsKey(tc, "box_target") != 0;
-                SixModelObject autoViv = attrHash.atKeyBoxed(tc, "auto_viv_container");
-                autoVivs.add(autoViv);
-                if (autoViv != null)
-                    info.hasAutoVivContainer = true;
-                info.posDelegate = attrHash.exists_key(tc, "positional_delegate") != 0;
-                info.assDelegate = attrHash.exists_key(tc, "associative_delegate") != 0;
-                attrInfoList.add(info);*/
-
-          /* TODO
-                if (info.boxTarget) {
-                    switch (info.st.REPR.get_storage_spec(tc, info.st).boxed_primitive) {
-                    case StorageSpec.BP_INT:
-                        ((P6OpaqueREPRData)st.REPRData).unboxIntSlot = curAttr;
-                        break;
-                    case StorageSpec.BP_NUM:
-                        ((P6OpaqueREPRData)st.REPRData).unboxNumSlot = curAttr;
-                        break;
-                    case StorageSpec.BP_STR:
-                        ((P6OpaqueREPRData)st.REPRData).unboxStrSlot = curAttr;
-                        break;
-                    }
-                }*/
           curAttr++;
         }
         this.nameToIndexMapping.push({classKey: type, slots: slots, names: names});
@@ -431,12 +389,6 @@ class P6opaque {
     }
 
     /* Populate some REPR data. */
-    /*((P6OpaqueREPRData)st.REPRData).classHandles = classHandles.toArray(new SixModelObject[0]);
-    ((P6OpaqueREPRData)st.REPRData).nameToHintMap = attrIndexes.toArray(new HashMap[0]);
-    ((P6OpaqueREPRData)st.REPRData).autoVivContainers = autoVivs.toArray(new SixModelObject[0]);
-    ((P6OpaqueREPRData)st.REPRData).flattenedSTables = flattenedSTables.toArray(new STable[0]);
-    ((P6OpaqueREPRData)st.REPRData).mi = mi;
-    */
     this.mi = mi ? 1 : 0;
 
     this.precalculate();
