@@ -428,15 +428,6 @@ exports.NYI = function(msg) {
   return null;
 };
 
-/* HACK - needed until we handle types on attributes */
-exports.intAttrHack = function(attrValue) {
-  if (attrValue instanceof exports.NQPInt) {
-    return attrValue.value;
-  } else {
-    return attrValue;
-  }
-};
-
 exports.args = function(module) {
   return require.main === module ? process.argv.slice(1) : [];
 };

@@ -1695,8 +1695,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
         }
         elsif ($var.scope eq 'attribute') {
-            # TODO types
-
+            my @types := [$T_OBJ, $T_INT, $T_NUM, $T_STR];
+            my $type := @types[nqp::objprimspec($var.returns)];
             # Get lookup hint if possible.
             my int $hint := -1;
             if $var[1].has_compile_time_value {
@@ -1706,26 +1706,22 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             my $self := self.as_js_clear_bindval($var[0], :want($T_OBJ), :$cps);
 
             if $hint == -1 {
-                my $type := self.as_js_clear_bindval($var[1], :want($T_OBJ), :$cps);
+                my $class_handle := self.as_js_clear_bindval($var[1], :want($T_OBJ), :$cps);
                 my $name := quote_string($var.name);
                 if $*BINDVAL {
-                    my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ), :$cps);
-                    Chunk.new($T_OBJ, $bindval.expr, [$self, $type, $bindval,
-                        "{$self.expr}.\$\$bindattr({$type.expr}, $name, {$bindval.expr});\n"
+                    my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($type), :$cps);
+                    Chunk.new($type, $bindval.expr, [$self, $class_handle, $bindval,
+                        "{$self.expr}.\$\$bindattr({$class_handle.expr}, $name, {$bindval.expr});\n"
                     ]);
                 }
                 else {
-                    $self.expr;
-                    $type.expr;
-                    Chunk.new($T_OBJ, "{$self.expr}.\$\$getattr({$type.expr}, $name)", [$self, $type]);
+                    Chunk.new($type, "{$self.expr}.\$\$getattr({$class_handle.expr}, $name)", [$self, $class_handle]);
                 }
             } else {
-                my $attr := Chunk.new($T_OBJ, "{$self.expr}.{'attr$' ~ $hint}", [$self]);
+                my $attr := Chunk.new($type, "{$self.expr}.{'attr$' ~ $hint}", [$self]);
                 if $*BINDVAL {
-                    my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ), :$cps);
-                    $attr.expr;
-                    $bindval.expr;
-                    Chunk.new($T_OBJ, $bindval.expr, [$attr, $bindval, "{$attr.expr} = {$bindval.expr};\n"]);
+                    my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($type), :$cps);
+                    Chunk.new($type, $bindval.expr, [$attr, $bindval, "{$attr.expr} = {$bindval.expr};\n"]);
                 }
                 else {
                     $attr;

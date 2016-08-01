@@ -266,11 +266,7 @@ class P6opaque {
 
     for (var i = 0; i < this.flattenedStables.length; i++) {
       if (this.flattenedStables[i]) {
-        var STable = this.flattenedStables[i];
-        var flattenedObject = STable.REPR.allocate(STable);
-        STable.REPR.deserializeFinish(flattenedObject, data);
-
-        attrs.push(flattenedObject);
+        attrs.push(this.flattenedStables[i].REPR.deserializeInline(data));
       } else {
         attrs.push(data.variant());
       }
@@ -292,14 +288,12 @@ class P6opaque {
 
     for (var i = 0; i < flattened.length; i++) {
       var value = obj[slotToAttr(i)];
+
       if (flattened[i] == null || !flattened[i]) {
         // TODO - think about what happens when we get an undefined value here
         cursor.ref(value);
-      }
-      else {
-        // HACK different kinds of numbers etc.
-        var wrapped = typeof value == 'object' ? value : {value: value}; // HACK - think if that's a correct way of serializing a native attribute
-        this.flattenedStables[i].REPR.serialize(cursor, wrapped);
+      } else {
+        flattened[i].REPR.serializeInline(cursor, value)
       }
     }
   }
@@ -375,9 +369,8 @@ class P6opaque {
 
                 info.st = attrType.st;*/
 
-          /* HACK we don't actually implement STable inlining, but just pass around the STable
-           to make boxing of bignums work */
-          if (attr.get('box_target') && attrType._STable.REPR.flattenSTable) {
+          if (attrType && attrType._STable.REPR.flattenSTable) {
+            console.log("regular flattenSTable");
             this.flattenedStables.push(attrType._STable);
           } else {
             this.flattenedStables.push(null);
@@ -549,9 +542,18 @@ class P6int extends REPR {
     obj.value = data.varint();
   }
 
+  deserializeInline(data) {
+    return data.varint();
+  }
+
   serialize(data, obj) {
     // TODO integers bigger than 32bit
     data.varint(obj.value);
+  }
+
+  serializeInline(data, value) {
+    // TODO integers bigger than 32bit
+    data.varint(value);
   }
 
   generateBoxingMethods(STable, name) {
@@ -567,6 +569,7 @@ class P6int extends REPR {
 
 P6int.prototype.flattenedDefault = 0;
 P6int.prototype.boxedPrimitive = 1;
+P6int.prototype.flattenSTable = true;
 
 
 reprs.P6int = P6int;
@@ -587,8 +590,16 @@ class P6num extends REPR {
     data.double(obj.value);
   }
 
+  serializeInline(data, value) {
+    data.double(value);
+  }
+
   deserializeFinish(obj, data) {
     obj.value = data.double();
+  }
+
+  deserializeInline(data) {
+    return data.double();
   }
 
   generateBoxingMethods(STable, name) {
@@ -603,6 +614,7 @@ class P6num extends REPR {
 }
 
 P6num.prototype.boxedPrimitive = 2;
+P6num.prototype.flattenSTable = true;
 
 reprs.P6num = P6num;
 
@@ -620,8 +632,16 @@ class P6str extends REPR {
     data.str(obj.value);
   }
 
+  serializeInline(data, value) {
+    data.str(value);
+  }
+
   deserializeFinish(obj, data) {
     obj.value = data.str();
+  }
+
+  deserializeInline(data) {
+    return data.str();
   }
 
   generateBoxingMethods(STable, name) {
@@ -636,6 +656,7 @@ class P6str extends REPR {
 }
 
 P6str.prototype.boxedPrimitive = 3;
+P6str.prototype.flattenSTable = true;
 
 
 reprs.P6str = P6str;
