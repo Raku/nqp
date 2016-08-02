@@ -2277,7 +2277,7 @@ an integral number of seconds, `_n` returns a fractional amount.
 Returns an int that corresponds to the value of POSIX's errno.
 
 ## nativecallsrefresh
-Refresh the C-based data backing the Perl 6 object. This op should only be used if the user knows that changes have been made to the C-data, but these changes are not being reflected in the Perl 6 object.
+Refresh the C-based data backing the Perl 6 object. This op should only be used if changes have been made to the C-data, and these changes are not being reflected in the Perl 6 object.
 
 # <a id="async"></a> Asynchronous Operations
 
