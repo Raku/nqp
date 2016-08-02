@@ -550,7 +550,7 @@ An operator precedence parser.
                 elsif $inassoc eq 'list' {
                     my $op1 := @opstack[nqp::elems(@opstack)-1]<OPER>.Str;
                     my $op2 := $infix.Str();
-                    self.EXPR_nonassoc($infixcur, $op1, $op2) if $op1 ne $op2 && $op1 ne ':';
+                    self.EXPR_nonlistassoc($infixcur, $op1, $op2) if $op1 ne $op2 && $op1 ne ':';
                 }
             }
             
@@ -617,6 +617,10 @@ An operator precedence parser.
     
     method EXPR_nonassoc($cur, $op1, $op2) {
         $cur.panic('"' ~ $op1 ~ '" and "' ~ $op2 ~ '" are non-associative and require parens');
+    }
+
+    method EXPR_nonlistassoc($cur, $op1, $op2) {
+        $cur.panic('"' ~ $op1 ~ '" and "' ~ $op2 ~ '" are non-identical list-associatives and require parens');
     }
 
     method ternary($match) {
