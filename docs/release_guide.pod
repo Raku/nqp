@@ -61,7 +61,8 @@ Tag NQP by its release month ("YYYY.MM")
   $ git push --tags
 
 The C<-s> tells git to sign the tag with your GPG key. Please see Rakudo's
-release guide for links on how to create GPG keys, should it be necessary.
+release guide for links on how to create GPG keys and upload them to GitHub,
+should it be necessary.
 
 =item 7.
 
