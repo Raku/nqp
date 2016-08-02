@@ -2272,8 +2272,12 @@ an integral number of seconds, `_n` returns a fractional amount.
 
 ## x_posixerrno
 * `x_posixerrno()`
+* 
 
 Returns an int that corresponds to the value of POSIX's errno.
+
+## nativecallrefresh
+Refresh the C-based data backing the Perl 6 object. This op should only be used if changes have been made to the C-data, and these changes are not being reflected in the Perl 6 object.
 
 # <a id="async"></a> Asynchronous Operations
 
