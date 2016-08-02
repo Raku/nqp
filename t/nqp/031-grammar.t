@@ -2,7 +2,7 @@
 
 # Test grammars and regexes
 
-plan(8);
+plan(10);
 
 grammar ABC {
     token TOP { ok ' ' <integer> }
@@ -32,3 +32,21 @@ ok( $match<int-num> == 123, 'captured $<int-num>');
 
 ok(?ABC.parse('ccc', :rule<not_a_or_b> ), "<- name-with-hyphen> matches");
 ok(!ABC.parse('cac', :rule<not_a_or_b> ), "<- name-with-hyphen> doesn't match");
+
+my %args;
+%args<arg1> := 123;
+%args<arg2> := 456;
+grammar G {
+    token TOP {
+        <foo(|%args, :arg1<678>)>
+    }
+    token literal {
+        foo
+    }
+    method foo(*%args) {
+        ok(%args<arg1> == 678);
+        ok(%args<arg2> == 456);
+        self.literal;
+    }
+}
+G.parse('foo');
