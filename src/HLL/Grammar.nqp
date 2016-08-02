@@ -130,60 +130,40 @@ grammar HLL::Grammar {
 
 =begin 
 
-=item O($save, *%spec)
+=item O(*%spec)
 
 This subrule attaches operator precedence information to
 a match object (such as an operator token).  A typical
 invocation for the subrule might be:
 
-    token infix:sym<+> { <sym> <O(:inherit<%additive>, :op<add>)> }
+    token infix:sym<+> { <sym> <O(|%additive, :op<add>)> }
 
-This says to add all of the attribute of the C<%additive> hash
+This says to add all of the attributes of the C<%additive> hash
 (described below) and a C<op> entry into the match object
 returned by the C<< infix:sym<+> >> token (as the C<O> named
 capture).  Note that this is a alphabetic "O", not a digit zero.
 
-The C<save> argument is used to build "hash" aggregates that can
-be referred to by subsequent calls to C<O>.  For example,
+The %additive hash is simply a hash containing information that is shared
+between all additive operators. Generally, this will simply be a normal
+lexically scoped hash belonging to the grammar. For example, the NQP grammar
+has:
 
-    NQP::Grammar.O('%additive', :prec<t=>, :assoc<left>);
-
-specifies the values to be associated with later references to
-"%additive".  Eventually it will likely be possible to use true
-hashes from a package namespace, but this works for now.
+    grammar NQP::Grammar is HLL::Grammar {
+        my %additive := nqp::hash('prec', 't=', 'assoc', 'left');
+        token infix:sym<+>    { <sym>  <O(|%additive, :op<add_n>)> }
+    }
 
 =end
     
-    # This lexical holds the hash cache. Right now we have one
-    # cache for all grammars; eventually we may need a way to
-    # separate them out by cursor type.
-    my %ohash;
-    
-    method O($save?, *%spec) {
-        my %hash;
-        nqp::die("\%spec argument to HLL::Grammar.O must be non-empty.") if not %spec;
+    method O(*%spec) {
+        nqp::die("HLL::Grammar.O called without any arguments") if not %spec;
 
-        if %spec<inherit> {
-            %hash := nqp::clone(%ohash{%spec<inherit>});
-            nqp::deletekey(%spec, 'inherit');
-            for %spec -> $key { %hash{$key} := %spec{$key}; }
-        }
-        else {
-            %hash := %spec;
-        }
-
-        if $save {
-            %ohash{$save} := %hash;
-            self;
-        }
-        else {
-            # If we've been called as a subrule, then build a pass-cursor
-            # to indicate success and set the hash as the subrule's match object.
-            my $cur := self.'!cursor_start_cur'();
-            $cur.'!cursor_pass'(nqp::getattr_i($cur, $cursor_class, '$!from'));
-            nqp::bindattr($cur, $cursor_class, '$!match', %hash);
-            $cur;
-        }
+        # Build a pass-cursor to indicate success and set the hash as the
+        # subrule's match object.
+        my $cur := self.'!cursor_start_cur'();
+        $cur.'!cursor_pass'(nqp::getattr_i($cur, $cursor_class, '$!from'));
+        nqp::bindattr($cur, $cursor_class, '$!match', %spec);
+        $cur;
     }
 
 
