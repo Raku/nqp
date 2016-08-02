@@ -334,6 +334,11 @@ public class JASTCompiler {
         case 0x0f: // dconst_1
             m.visitInsn(instruction);
             break;
+        case 0x12: // ldc
+            // XXX: only supporting String constants currently
+            String constant = atpos(args, 0, tc).get_str(tc);
+            m.visitLdcInsn(constant);
+            break;
         case 0x15: // iload
         case 0x16: // lload
         case 0x17: // fload
