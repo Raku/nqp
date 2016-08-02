@@ -2272,7 +2272,6 @@ an integral number of seconds, `_n` returns a fractional amount.
 
 ## x_posixerrno
 * `x_posixerrno()`
-* 
 
 Returns an int that corresponds to the value of POSIX's errno.
 
