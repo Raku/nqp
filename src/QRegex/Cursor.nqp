@@ -580,6 +580,7 @@ role NQPCursorRole is export {
     }
 
     method before($regex, $off = 0) {
+	my $*SUPPOSING := 1;
         my int $orig_highwater := nqp::getattr_i($!shared, ParseShared, '$!highwater');
         my $orig_highexpect := nqp::getattr($!shared, ParseShared, '@!highexpect');
         nqp::bindattr($!shared, ParseShared, '@!highexpect', nqp::list_s());
@@ -596,6 +597,7 @@ role NQPCursorRole is export {
     # Expects to get a regex whose syntax tree was flipped during the
     # compile.
     method after($regex) {
+	my $*SUPPOSING := 1;
         my int $orig_highwater := nqp::getattr_i($!shared, ParseShared, '$!highwater');
         my $orig_highexpect := nqp::getattr($!shared, ParseShared, '@!highexpect');
         nqp::bindattr($!shared, ParseShared, '@!highexpect', nqp::list_s());
