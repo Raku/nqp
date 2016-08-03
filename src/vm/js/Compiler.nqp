@@ -591,6 +591,37 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
     }
 
+    has %!is_serializable;
+
+    method is_serializable($cuid) {
+        nqp::existskey(%!is_serializable, $cuid) ?? %!is_serializable{$cuid} !! 2;
+    }
+
+    proto method mark_serializable($node) {*}
+
+    method mark_children_serializable(QAST::Children $node) {
+        my int $serializable := 0;
+        for $node.list -> $child {
+            my $is_child_serializable := self.mark_serializable($child);
+            $serializable := $serializable || $is_child_serializable;
+        }
+        $serializable;
+    }
+
+    multi method mark_serializable(QAST::Block $node) {
+        my int $serializable := self.mark_children_serializable($node);
+        $serializable := $serializable || $node.blocktype ne 'immediate';
+        %!is_serializable{$node.cuid} := $serializable;
+    }
+
+
+    multi method mark_serializable(QAST::Children $node) {
+        self.mark_children_serializable($node);
+    }
+
+    multi method mark_serializable($other) {
+    }
+
     my %want_char := nqp::hash($T_INT, 'I', $T_NUM, 'N', $T_STR, 'S', $T_VOID, 'v');
     my sub want($node, $type) {
         my @possibles := nqp::clone($node.list);
@@ -903,7 +934,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 elsif %*BLOCKS_DONE{$kv.key} {
                     @clone_inners.push("$reg = $cuid.closure");
                     @clone_inners.push(%*BLOCKS_DONE{$kv.key});
-                    if 1 { # TODO check if we need to have this closure serializable
+                    if self.is_serializable($kv.key) {
                         @clone_inners.push(".setOuter(" ~ %*BLOCKS_INFO{$kv.key}.outer.ctx ~ ")");
                     }
                 }
@@ -989,7 +1020,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 my $sig := self.compile_sig($*BLOCK.params);
 
                 my @function := [
-                    "function({$sig.expr}) \{\n",
+                    "function({$sig.expr}) \{\n" ~ "/* serializable {self.is_serializable($node.cuid)} */\n",
                     self.declare_js_vars($*BLOCK.tmps),
                     self.declare_js_vars($*BLOCK.js_lexicals),
                     $create_ctx,
@@ -1421,6 +1452,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         $node[0].blocktype('declaration_static'); # Hac
         # TODO needs thinking about, it seems there is really nothing to captue here and a setting is forced as outer
+        self.mark_serializable($node[0]);
 
         # Compile the block.
         my $block_js := self.as_js($node[0], :want(($instant && nqp::defined($node.main)) ?? $T_VOID !! $T_OBJ));
