@@ -494,9 +494,8 @@ class QAST::OperationsJS {
             nqp::die("First child of a 'bind' op must be a QAST::Var");
         }
 
-        # TODO take the type of variable into account
         my $*BINDVAL := @children[1];
-        $comp.as_js(@children[0], :want($T_OBJ), :$cps);
+        $comp.as_js(@children[0], :want($want), :$cps);
     });
 
 
