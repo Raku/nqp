@@ -1366,16 +1366,35 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     method throw_control_exception($type, $loop, $label) {
+        my $direct := 1;
         while nqp::defined($loop) {
-            if $loop ~~ LoopInfo {
+            if nqp::istype($loop, LoopInfo) {
                 if $label {
-                    # TODO compare labels which are WVals to reduce the number of loops that catch exceptions
-                    $loop.handle($type);
+                    if nqp::istype($loop.label, QAST::WVal) && nqp::eqaddr($loop.label.value, $label.value) {
+                        if $direct {
+                            return Chunk.void(self.do_control($type, $loop));
+                        }
+                        else {
+                            $loop.handle($type);
+                        }
+                    }
+                    else {
+                        # TODO - make the loop have a label in javascript land
+                        $direct := 0;
+                    }
                 }
                 else {
-                    $loop.handle($type);
-                    return Chunk.void("throw new nqp.{ucfirst($type)}(null);\n");
+                    if $direct {
+                        return Chunk.void(self.do_control($type, $loop));
+                    }
+                    else {
+                        $loop.handle($type);
+                        return Chunk.void("throw new nqp.{ucfirst($type)}(null);\n");
+                    }
                 }
+            }
+            elsif nqp::istype($loop, BlockBarrier) {
+                $direct := 0;
             }
             $loop := $loop.outer;
         }
