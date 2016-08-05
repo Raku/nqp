@@ -25,14 +25,6 @@ var containerSpecs = require('./container-specs.js');
 
 exports.CodeRef = CodeRef;
 
-op.atpos = function(array, index) {
-  return array.$$atpos(index);
-};
-
-op.bindpos = function(array, index, value) {
-  return array.$$bindpos(index, value);
-};
-
 op.isinvokable = function(obj) {
   return (obj instanceof CodeRef || (obj._STable && obj._STable.invocationSpec) ? 1 : 0);
 };

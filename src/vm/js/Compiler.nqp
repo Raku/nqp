@@ -1645,7 +1645,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     method atpos($array, $index, :$node) {
         my $array_chunk := self.as_js($array, :want($T_OBJ));
         my $index_chunk := self.as_js($index, :want($T_INT));
-        Chunk.new($T_OBJ, "nqp.op.atpos({$array_chunk.expr},{$index_chunk.expr})", [$array_chunk, $index_chunk], :node($node));
+        Chunk.new($T_OBJ, "{$array_chunk.expr}.\$\$atpos({$index_chunk.expr})", [$array_chunk, $index_chunk], :node($node));
     }
 
 
@@ -1836,7 +1836,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my $index_chunk := self.as_js($index, :want($T_INT));
         my $value_chunk := self.as_js($value, :want($T_OBJ));
 
-        Chunk.new($T_OBJ, $value_chunk.expr, [$array_chunk, $index_chunk, $value_chunk, "nqp.op.bindpos({$array_chunk.expr},{$index_chunk.expr},{$value_chunk.expr});\n"], :node($node));
+        Chunk.new($T_OBJ, $value_chunk.expr, [$array_chunk, $index_chunk, $value_chunk, "{$array_chunk.expr}.\$\$bindpos({$index_chunk.expr},{$value_chunk.expr});\n"], :node($node));
     }
 
 
