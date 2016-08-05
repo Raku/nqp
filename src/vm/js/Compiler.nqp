@@ -249,7 +249,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         # TODO fix this by actually looking if a variable is declared on the way
         return 0 if $var.scope eq 'local';
         while $info {
-            if $info.qast && !self.is_serializable($info.qast.cuid) && $info.qast.symbol($name) {
+            if $info.qast && !self.are_children_serializable($info.qast.cuid) && $info.qast.symbol($name) {
                 return 0;
             }
             if $info.qast && $info.qast.symbol($name) -> $symbol {
@@ -638,7 +638,11 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     has %!is_serializable;
 
     method is_serializable($cuid) {
-        nqp::existskey(%!is_serializable, $cuid) ?? %!is_serializable{$cuid} !! 2;
+        nqp::existskey(%!is_serializable, $cuid) ?? %!is_serializable{$cuid} !! 3;
+    }
+
+    method are_children_serializable($cuid) {
+        nqp::existskey(%!is_serializable, $cuid) ?? %!is_serializable{$cuid} == 2 !! 3;
     }
 
     proto method mark_serializable($node) {*}
@@ -653,9 +657,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     multi method mark_serializable(QAST::Block $node) {
-        my int $serializable := self.mark_children_serializable($node);
-        $serializable := $serializable || $node.blocktype ne 'immediate';
-        %!is_serializable{$node.cuid} := $serializable;
+        my int $children_serializable := self.mark_children_serializable($node);
+        %!is_serializable{$node.cuid} := $children_serializable ?? 2 !! $node.blocktype ne 'immediate';
     }
 
 
