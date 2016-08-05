@@ -63,7 +63,7 @@ class QAST::OperationsJS {
         add_op($op, sub ($comp, $node, :$want, :$cps) {
             my $use_cps := $required_cps || ($cps_aware && $cps);
             my $chunk := op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx, :cps($use_cps), :$decont);
-            ($sideffects && !$use_cps) ?? $comp.stored_result($chunk) !! $chunk;
+            ($sideffects && !$use_cps) ?? $comp.stored_result($chunk, :$want) !! $chunk;
         }, :$inlinable);
 
         set_op_result_type($op, $return_type);
@@ -254,7 +254,7 @@ class QAST::OperationsJS {
             if static_attr($node) -> $attr {
                 $comp.stored_result(Chunk.new($type,
                     "({$obj.expr}\.$attr = {$value.expr})",
-                [$obj, $value]));
+                [$obj, $value]), :$want);
             }
             else {
                 my $classHandle := $comp.as_js(:want($T_OBJ), $node[1]);
@@ -262,7 +262,7 @@ class QAST::OperationsJS {
 
                 $comp.stored_result(Chunk.new($type,
                     "{$obj.expr}\.\$\$bindattr({$classHandle.expr}, {$attrName.expr}, {$value.expr})",
-                [$obj, $classHandle, $attrName, $value]));
+                [$obj, $classHandle, $attrName, $value]), :$want);
             }
 
         });
