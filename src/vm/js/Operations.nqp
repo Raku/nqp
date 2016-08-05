@@ -827,9 +827,9 @@ class QAST::OperationsJS {
             my @get;
             my @set;
             for $*BLOCK.variables -> $var {
-                my $storage := $*BLOCK.is_dynamic_var($var) 
+                my $storage := $comp.is_dynamic_var($*BLOCK, $var) 
                     ?? "{$*CTX}[{quote_string($var.name)}]"
-                    !! $comp.mangle_name($var.name);
+                    !! $*BLOCK.mangle_var($var.name);
 
                 @set.push(quote_string($var.name) ~ 
                    ~ ': function(value) {' 
@@ -853,10 +853,15 @@ class QAST::OperationsJS {
             last if $block.has_local_variable($var_name);
             $block := $block.outer;
         }
-        unless $block.is_dynamic_var(QAST::Var.new(:name($var_name), :scope<lexical>)) {
-            $comp.NYI("getlexouter on not a variable compiled as dynamic");
+
+        # TODO type 
+
+        if $comp.is_dynamic_var($block, QAST::Var.new(:name($var_name), :scope<lexical>)) {
+            Chunk.new($T_OBJ, $block.ctx ~ "[" ~ quote_string($var_name) ~ "]", [], :$node);
         }
-        Chunk.new($T_OBJ, $block.ctx ~ "[" ~ quote_string($var_name) ~ "]", [], :$node);
+        else {
+            Chunk.new($T_OBJ, $*BLOCK.outer.mangle_var($var_name) , [], :$node);
+        }
     });
 
     add_simple_op('splice', $T_OBJ, [$T_OBJ, $T_OBJ, $T_INT, $T_INT], :sideffects);
@@ -1500,12 +1505,14 @@ class QAST::OperationsJS {
             nqp::die('takedispatcher requires one string literal operand');
         }
         my $var := $node[0].value;
-        unless $*BLOCK.is_dynamic_var(QAST::Var.new(:name($var), :scope<lexical>)) {
-            $comp.NYI("takedispatcher on a none-dynamic var");
-        }
+
+        my $set_var := $comp.is_dynamic_var($*BLOCK, QAST::Var.new(:name($var), :scope<lexical>))
+            ?? "{$*CTX}.bind({quote_string($var)}, nqp.currentDispatcher);\n" 
+            !! $*BLOCK.mangle_var($var) ~ " = nqp.currentDispatcher;\n";
+
         Chunk.void(
             "if (nqp.currentDispatcher !== undefined) \{"
-            ~ "{$*CTX}.bind({quote_string($var)}, nqp.currentDispatcher);\n"
+            ~ $set_var
             ~ "nqp.currentDispatcher = undefined;\n"
             ~ "\}\n"
         );

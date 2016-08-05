@@ -25,14 +25,16 @@ class RegexCompiler {
     has $!cursor_type; # the class of the object in $!cursor - if we know it at compile time
 
     method set_cursor_var() {
-        if $*BLOCK.is_dynamic_var(QAST::Var.new(:name('$¢'))) {
+        if $!compiler.is_dynamic_var($*BLOCK, QAST::Var.new(:name('$¢'))) {
             "{$*CTX}.bind({quote_string('$¢')}, $!cursor);\n";
         } else {
-            $!compiler.mangle_name('$¢') ~ " = $!cursor;\n";
+            $*BLOCK.mangle_var('$¢') ~ " = $!cursor;\n";
         }
     }
 
     method compile($node) {
+        $*BLOCK.add_mangled_var('$¢');
+
         # TODO better name for $start
         # we need to unpack the array we !cursor_start_all into a bunch of variables 
         my $start := $*BLOCK.add_tmp();
@@ -47,7 +49,7 @@ class RegexCompiler {
             $!cursor_type := $node.cursor_type();
         }
 
-        my $self := $!compiler.mangle_name('self');
+        my $self := $*BLOCK.mangle_var('self');
 
         Chunk.new($T_OBJ, $!cursor, [
             "{$!label} = {$!initial_label};\n",
@@ -139,7 +141,7 @@ class RegexCompiler {
         my $scan := self.new_label;
         my $done := self.new_label;
 
-        "if ({self.get_cursor_attr($!compiler.mangle_name('self'), '$!from')} != -1) \{{self.goto($done)}\}\n"
+        "if ({self.get_cursor_attr($*BLOCK.mangle_var('self'), '$!from')} != -1) \{{self.goto($done)}\}\n"
         ~ self.goto($scan)
         ~ self.case($loop)
         ~ "$!pos++;\n"
@@ -431,7 +433,7 @@ class RegexCompiler {
 
         Chunk.void(
             self.set_cursor_pos,
-            $!compiler.mangle_name('$¢') ~ " = $!cursor;\n",
+            self.set_cursor_var,
             $code,
             $node.subtype eq 'zerowidth' ??
                 "if ({$node.negate ?? '' !! '!'}{$code.expr}) \{{self.fail}\}\n"

@@ -25,7 +25,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     # Holds information about the QAST::Block we're currently compiling.
     # The currently compiled block is stored in $*BLOCK
-    my class BlockInfo {
+    my class BlockInfo does DWIMYNameMangling {
         has $!qast;             # The QAST::Block
         has $!outer;            # Outer block's BlockInfo
         has @!js_lexicals;      # javascript variables we need to declare for the block
@@ -44,6 +44,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         has %!var_types;    # Mapping of lexical names to types
 
         has %!static_variables;
+
+        has %!mangled_vars;
 
         method new($qast, $outer) {
             my $obj := nqp::create(self);
@@ -65,6 +67,44 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             %!need_direct := nqp::hash();
             %!var_types := nqp::hash();
             %!static_variables := nqp::hash();
+            %!mangled_vars := nqp::hash();
+        }
+
+        my int $unique := 0;
+        method add_mangled_var($name) {
+            $unique := $unique + 1;
+            %!mangled_vars{$name} := self.mangle_name($name) ~ $unique;
+        }
+
+        method mangle_local_var($name) {
+            if nqp::existskey(%!mangled_vars, $name) {
+                %!mangled_vars{$name}
+            } else {
+                nqp::null();
+            }
+        }
+
+        method mangle_var($name, $fatal = 1) {
+            my $info := self;
+            while $info {
+                if $info.mangle_local_var($name) -> $mangled {
+                    return $mangled;
+                }
+                if $info.qast && $info.qast.symbol($name) -> $symbol {
+                    if $symbol<from_outer> {
+                        return self.mangle_name($name);
+                    }
+                }
+                $info := $info.outer;
+            }
+
+            if $fatal {
+                nqp::die("can't mangle $name");
+            }
+            else {
+                # HACK - we need to figure what exactly needs to happen
+                "missing"
+            }
         }
 
         method set_cont($chunk, $cont) {
@@ -182,30 +222,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         method params() { @!params }
         method variables() { @!variables }
 
-        method is_dynamic_var($var) {
-            # HACK due to a nqp misdesign we need a HACK
-            # TODO Make nqp mark dynamic variables explicitly
-            my $name := $var.name;
-            if nqp::chars($name) > 2 {
-                my str $sigil := nqp::substr($name, 0, 1);
-                my str $twigil := nqp::substr($name, 1, 1);
-                if $twigil eq '*' {
-                  return 1;
-                }
-            }
-
-            # TODO fix this by actually looking if a variable is declared on the way
-            my $info := self;
-            return 0 if $var.scope eq 'local';
-            while $info {
-                if $info.qast && $info.qast.symbol($name) -> $symbol {
-                    return !$symbol<from_outer>;
-                }
-                $info := $info.outer;
-            }
-            return 1;
-
-        }
 
         method ctx_for_var($var) {
             my $info := self;
@@ -216,6 +232,33 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 $info := $info.outer;
             }
         }
+    }
+
+    method is_dynamic_var(BlockInfo $info, QAST::Var $var) {
+        # HACK due to a nqp misdesign we need a HACK
+        # TODO Make nqp mark dynamic variables explicitly
+        my $name := $var.name;
+        if nqp::chars($name) > 2 {
+            my str $sigil := nqp::substr($name, 0, 1);
+            my str $twigil := nqp::substr($name, 1, 1);
+            if $twigil eq '*' {
+              return 1;
+            }
+        }
+
+        # TODO fix this by actually looking if a variable is declared on the way
+        return 0 if $var.scope eq 'local';
+        while $info {
+            if $info.qast && !self.is_serializable($info.qast.cuid) && $info.qast.symbol($name) {
+                return 0;
+            }
+            if $info.qast && $info.qast.symbol($name) -> $symbol {
+                return !$symbol<from_outer>;
+            }
+            $info := $info.outer;
+        }
+        return 1;
+
     }
 
     method is_valid_js_identifier($identifier) {
@@ -361,12 +404,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
 
         my sub set_variable($var, $value) {
-            if $*BLOCK.is_dynamic_var($var) {
+            if self.is_dynamic_var($*BLOCK, $var) {
                 @setup.push("{$*CTX}[{quote_string($var.name)}] = $value;\n");
             }
             else {
-                $*BLOCK.add_js_lexical(self.mangle_name($var.name));
-                @setup.push("{self.mangle_name($var.name)} = $value;\n");
+                my $mangled := $*BLOCK.mangle_var($var.name);
+                $*BLOCK.add_js_lexical($mangled);
+                @setup.push("$mangled = $value;\n");
             }
         }
 
@@ -400,7 +444,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
                 set_variable($_, $value);
             }
-            elsif $*BLOCK.is_dynamic_var($_) {
+            elsif self.is_dynamic_var($*BLOCK, $_) {
                 my $set := "{$*CTX}[{quote_string($_.name)}] = ";
 
                 my $tmp := self.unique_var('param');
@@ -419,7 +463,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
             else {
                 my $default := '';
-                my $name := self.mangle_name($_.name);
+                my $name := $*BLOCK.mangle_var($_.name);
 
                 if $_.default {
                     # Overwriting a parameter makes the v8 optimizer bail out so to avoid that we introduce a new variable
@@ -863,7 +907,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     method import_stuff_from_setting($node) {
         my @imported;
         for $node.symtable -> $symbol {
-            @imported.push("{self.mangle_name($symbol.key)} = setting[{quote_string($symbol.key)}]");
+            @imported.push("{BlockInfo.mangle_name($symbol.key)} = setting[{quote_string($symbol.key)}]");
         }
         "var setting = nqp.setupSetting({quote_string($*SETTING_NAME)});\n"
         ~ self.declare_js_vars(@imported);
@@ -888,12 +932,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     method static_info_for_lexicals(BlockInfo $block) {
         my @static_info;
         for $block.variables -> $var {
-            if $block.is_dynamic_var($var) {
+            if self.is_dynamic_var($block, $var) {
                 nqp::push(@static_info,quote_string($var.name)
                     ~ ': [' ~ nqp::objprimspec($var.returns) ~ ']');
             } else {
                 nqp::push(@static_info,quote_string($var.name)
-                    ~ ': [' ~ nqp::objprimspec($var.returns) ~ ',' ~ quote_string(self.mangle_name($var.name)) ~ ']');
+                    ~ ': [' ~ nqp::objprimspec($var.returns) ~ ',' ~ quote_string($block.mangle_var($var.name, 0)) ~ ']');
             }
         }
         '{' ~ nqp::join(',', @static_info) ~ '}';
@@ -1200,11 +1244,11 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 if $*BLOCK.lookup_static_variable($var) -> $static {
                     $value := self.value_as_js($static.value);
                 }
-                elsif $*BLOCK.is_dynamic_var($var) {
+                elsif self.is_dynamic_var($*BLOCK, $var) {
                     $value := "{$*CTX}.lookup({quote_string($var.name)})";
                 }
                 else {
-                    $value := self.mangle_name($var.name);
+                    $value := $*BLOCK.mangle_var($var.name);
                 }
                 @lexicals.push(quote_string($var.name) ~ ': ' ~ $value);
 
@@ -1519,8 +1563,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         if $node.decl eq 'var' || $node.decl eq 'contvar' {
             $*BLOCK.add_variable($node);
 
-            if !$*BLOCK.is_dynamic_var($node) {
-                $*BLOCK.add_js_lexical(self.mangle_name($node.name));
+            if !self.is_dynamic_var($*BLOCK, $node) {
+                $*BLOCK.add_js_lexical($*BLOCK.add_mangled_var($node.name));
                 if $node.decl eq 'contvar' {
                     nqp::die("TODO - contvars with none dynamic vars");
                 }
@@ -1533,6 +1577,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         elsif $node.decl eq 'param' {
             $*BLOCK.add_variable($node);
             if $node.scope eq 'local' || $node.scope eq 'lexical' {
+                if !self.is_dynamic_var($*BLOCK, $node) {
+                    $*BLOCK.add_mangled_var($node.name);
+                }
                 $*BLOCK.add_param($node);
             }
             else {
@@ -1632,7 +1679,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     method compile_var_as_js_var(QAST::Var $var, :$cps) {
         my $type := self.figure_out_type($var);
-        my $mangled := self.mangle_name($var.name);
+        my $mangled := $*BLOCK.mangle_var($var.name);
         if $*BINDVAL {
             # TODO better source mapping
             # TODO use the proper type 
@@ -1690,7 +1737,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             self.compile_var_as_js_var($var, :$cps);
         }
         elsif self.var_is_lexicalish($var) {
-            if $*BLOCK.is_dynamic_var($var) {
+            if self.is_dynamic_var($*BLOCK, $var) {
                 self.compile_var_as_part_of_ctx($var, :$cps);
             }
             else {
