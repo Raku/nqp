@@ -1378,7 +1378,7 @@ class NQP::Actions is HLL::Actions {
             }
         }
         else {
-            my @ns := nqp::clone($<name><identifier>);
+            my @ns := $<name><identifier>;
             unless $<args> {
                 try {
                     my $sym := $*W.find_sym(@ns);
