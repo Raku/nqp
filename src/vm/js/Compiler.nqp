@@ -242,7 +242,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         method ctx_for_var($var) {
             my $info := self;
             while $info {
-                if $info.qast && $info.qast.symbol($var.name) {
+                if $info.has_own_variable($var.name) {
                     return $info.ctx;
                 }
                 $info := $info.outer;
