@@ -8,7 +8,7 @@ my $harness = TAP::Harness->new({
     }
 });
 
-my @nqp_tests = glob "t/nqp/{01,02,03,04,05,06,08,09,10}*.t";
+my @nqp_tests = glob "t/nqp/*.t";
 
 $harness->runtests(@nqp_tests);
 
