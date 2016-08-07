@@ -3,6 +3,7 @@ class QAST::SVal is QAST::Node {
 
     method new(:$value, *%options) {
         my $node := nqp::create(self);
+        nqp::bindattr_i($node, QAST::Node, '$!flags', 0);
         nqp::bindattr_s($node, QAST::SVal, '$!value', $value);
         nqp::bindattr($node, QAST::Node, '$!returns', str);
         $node.set(%options) if %options;

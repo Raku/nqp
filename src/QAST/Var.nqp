@@ -7,6 +7,7 @@ class QAST::Var is QAST::Node does QAST::Children {
 
     method new(:$name, str :$scope, str :$decl, *@children, *%options) {
         my $node := nqp::create(self);
+        nqp::bindattr_i($node, QAST::Node, '$!flags', 0);
         nqp::bindattr($node, QAST::Var, '@!children', @children);
         nqp::bindattr_s($node, QAST::Var, '$!name', $name);
         nqp::bindattr_s($node, QAST::Var, '$!scope', $scope);
