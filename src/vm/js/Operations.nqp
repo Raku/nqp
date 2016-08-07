@@ -828,7 +828,7 @@ class QAST::OperationsJS {
             for $*BLOCK.variables -> $var {
                 my $storage := $comp.is_dynamic_var($*BLOCK, $var) 
                     ?? "{$*CTX}[{quote_string($var.name)}]"
-                    !! $*BLOCK.mangle_var($var.name);
+                    !! $*BLOCK.mangle_var($var);
 
                 @set.push(quote_string($var.name) ~ 
                    ~ ': function(value) {' 
@@ -859,7 +859,7 @@ class QAST::OperationsJS {
             Chunk.new($T_OBJ, $block.ctx ~ "[" ~ quote_string($var_name) ~ "]", [], :$node);
         }
         else {
-            Chunk.new($T_OBJ, $*BLOCK.outer.mangle_var($var_name) , [], :$node);
+            Chunk.new($T_OBJ, $*BLOCK.outer.mangle_lexical($var_name) , [], :$node);
         }
     });
 
@@ -1507,7 +1507,7 @@ class QAST::OperationsJS {
 
         my $set_var := $comp.is_dynamic_var($*BLOCK, QAST::Var.new(:name($var), :scope<lexical>))
             ?? "{$*CTX}.bind({quote_string($var)}, nqp.currentDispatcher);\n" 
-            !! $*BLOCK.mangle_var($var) ~ " = nqp.currentDispatcher;\n";
+            !! $*BLOCK.mangle_lexical($var) ~ " = nqp.currentDispatcher;\n";
 
         Chunk.void(
             "if (nqp.currentDispatcher !== undefined) \{"

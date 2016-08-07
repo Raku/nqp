@@ -28,12 +28,12 @@ class RegexCompiler {
         if $!compiler.is_dynamic_var($*BLOCK, QAST::Var.new(:name('$¢'))) {
             "{$*CTX}.bind({quote_string('$¢')}, $!cursor);\n";
         } else {
-            $*BLOCK.mangle_var('$¢') ~ " = $!cursor;\n";
+            $*BLOCK.mangle_lexical('$¢') ~ " = $!cursor;\n";
         }
     }
 
     method compile($node) {
-        $*BLOCK.add_mangled_var('$¢');
+        $*BLOCK.add_mangled_lexical('$¢');
 
         # TODO better name for $start
         # we need to unpack the array we !cursor_start_all into a bunch of variables 
@@ -49,7 +49,7 @@ class RegexCompiler {
             $!cursor_type := $node.cursor_type();
         }
 
-        my $self := $*BLOCK.mangle_var('self');
+        my $self := $*BLOCK.mangle_local('self');
 
         Chunk.new($T_OBJ, $!cursor, [
             "{$!label} = {$!initial_label};\n",
@@ -141,7 +141,7 @@ class RegexCompiler {
         my $scan := self.new_label;
         my $done := self.new_label;
 
-        "if ({self.get_cursor_attr($*BLOCK.mangle_var('self'), '$!from')} != -1) \{{self.goto($done)}\}\n"
+        "if ({self.get_cursor_attr($*BLOCK.mangle_local('self'), '$!from')} != -1) \{{self.goto($done)}\}\n"
         ~ self.goto($scan)
         ~ self.case($loop)
         ~ "$!pos++;\n"
