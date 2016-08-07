@@ -168,8 +168,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
 
         method add_variable($var) {
-            @!variables.push($var);
-            %!variables{$var.name} := $var;
+            if $var.scope ne 'local' {
+                @!variables.push($var);
+                %!variables{$var.name} := $var;
+            }
         }
 
         method add_static_variable($var) {
