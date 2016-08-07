@@ -638,7 +638,7 @@ class QAST::OperationsJS {
     add_simple_op('markcodestatic', $T_OBJ, [$T_OBJ], :sideffects);
 
     add_simple_op('freshcoderef', $T_OBJ, [$T_OBJ]);
-    add_simple_op('markcodestub', $T_OBJ, [$T_OBJ]);
+    add_simple_op('markcodestub', $T_OBJ, [$T_OBJ], :sideffects);
 
     add_simple_op('scsetdesc', $T_STR, [$T_OBJ, $T_STR], :sideffects);
     add_simple_op('scgetdesc', $T_STR, [$T_OBJ]);

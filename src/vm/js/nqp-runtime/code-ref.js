@@ -8,6 +8,9 @@ function CodeRef(name, cuid) {
 }
 
 CodeRef.prototype.$$injectMethod = function(proto, name) {
+  if (this.isCompilerStub) {
+    return;
+  }
   var codeRefAttr = this.staticCode.codeRefAttr;
   if (codeRefAttr === null) {
     return;
