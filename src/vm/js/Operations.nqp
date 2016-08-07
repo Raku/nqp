@@ -849,7 +849,7 @@ class QAST::OperationsJS {
         my $var_name := $node[0].value;
         my $block := $*BLOCK.outer;
         while $block {
-            last if $block.has_local_variable($var_name);
+            last if $block.has_own_variable($var_name);
             $block := $block.outer;
         }
 
