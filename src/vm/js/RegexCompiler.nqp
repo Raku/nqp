@@ -295,10 +295,10 @@ class RegexCompiler {
 
     method get_cursor_attr($cursor, $attr) {
         if $!has_cursor_type {
-            "nqp.toInt({self.cursor_attr($cursor, $attr)}, $*CTX)";
+            "{self.cursor_attr($cursor, $attr)}";
         }
         else {
-            "nqp.toInt($cursor.\$\$getattr($!cursor_type_runtime, {quote_string($attr)}), $*CTX)";
+            "$cursor.\$\$getattr($!cursor_type_runtime, {quote_string($attr)})";
         }
     }
 
