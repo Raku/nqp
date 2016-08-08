@@ -84,8 +84,6 @@ class QAST::Node {
     }
 
     method annotate(str $key, $value) {
-	if $key eq 'WANTED' { self.wanted(1) }
-	if $key eq 'context' { self.sunk(1) }
         %!annotations := nqp::hash() unless nqp::ishash(%!annotations);
         %!annotations{$key} := $value;
     }
