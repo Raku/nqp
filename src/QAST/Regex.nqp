@@ -5,6 +5,11 @@ role QAST::RegexCursorType {
         $!cursor_type := $value unless $value =:= NO_VALUE;
         $!cursor_type
     }
+
+    method dump_extra_node_info() {
+        my $info := QAST::Regex.HOW.method_table(QAST::Regex)<dump_extra_node_info>(self);
+        $info ~ " :cursor_type({$!cursor_type.HOW.name($!cursor_type)})"
+    }
 }
 
 class QAST::Regex is QAST::Node does QAST::Children {
