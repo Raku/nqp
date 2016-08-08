@@ -1290,7 +1290,7 @@ class NQP::Actions is HLL::Actions {
             $block.symbol('$/', :scope<lexical>);
             my $code  := %*RX<code>;
             my $regex := %*LANG<Regex-actions>.qbuildsub($<p6regex>.ast, $block,
-                code_obj => $code, cursor_type => $*W.find_sym(['NQPCursor']));
+                code_obj => $code);
             $regex.name($name);
 
             if $*PKGDECL && nqp::can($*PACKAGE.HOW, 'add_method') {
@@ -1899,5 +1899,9 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
             @saved.push($_.save(:non_empty));
         }
         $code_obj.SET_ALT_NFA($key, @saved);
+    }
+
+    method set_cursor_type($qast) {
+        $qast.cursor_type($*W.find_sym(['NQPCursor']));
     }
 }
