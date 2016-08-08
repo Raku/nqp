@@ -1902,6 +1902,10 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
     }
 
     method set_cursor_type($qast) {
-        $qast.cursor_type($*W.find_sym(['NQPCursor']));
+        my $cursor_type := nqp::null();
+        try {
+            $cursor_type := $*W.find_sym(['NQPCursor']);
+        };
+        $qast.cursor_type($cursor_type) unless nqp::isnull($cursor_type);
     }
 }
