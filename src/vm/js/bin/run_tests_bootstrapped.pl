@@ -8,7 +8,8 @@ my $harness = TAP::Harness->new({
     }
 });
 
-my @nqp_tests = glob "t/nqp/*.t";
+# skip test 055 which doesn't work when immediately evaling code rather than saving it to disk
+my @nqp_tests = grep {$_ !~ /055/} glob "t/nqp/*.t t/serialization/*.t t/qast/*.t";
 
 $harness->runtests(@nqp_tests);
 
