@@ -1598,7 +1598,7 @@ class NQP::Actions is HLL::Actions {
     method term:sym<return>($/) {
         # This can go away in favor of nqp::const::CONTROL_RETURN after rebootstrap
         # of Moar and JVM backends.
-        my $CONTROL_RETURN := nqp::getcomp('nqp').backend.name eq 'moar' ?? 32 !! 65536;
+        my $CONTROL_RETURN := (nqp::getcomp('nqp').backend.name eq 'moar' || nqp::getcomp('nqp').backend.name eq 'js') ?? 32 !! 65536;
         make QAST::Op.new(
             :op('throwpayloadlex'),
             QAST::IVal.new( :value($CONTROL_RETURN) ),
