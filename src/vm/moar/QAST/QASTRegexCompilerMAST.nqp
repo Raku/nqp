@@ -992,10 +992,21 @@ class QAST::MASTRegexCompiler {
             $looplabel,
             op('inc_i', %!reg<pos>),
         ];
-        if $node.list && $node.subtype ne 'ignorecase' && $node.subtype ne 'ignoremark' && $node.subtype ne 'ignorecase+ignoremark' {
+        if $node.list && $node.subtype ne 'ignoremark' && $node.subtype ne 'ignorecase+ignoremark' {
             my $lit := $!regalloc.fresh_s();
             nqp::push(@ins, op('const_s', $lit, sval($node[0])));
             nqp::push(@ins, op('index_s', %!reg<pos>, %!reg<tgt>, $lit, %!reg<pos>));
+            nqp::push(@ins, op('eq_i', $ireg0, %!reg<pos>, %!reg<negone>));
+            $!regalloc.release_register($lit, $MVM_reg_str);
+        }
+        elsif $node.list && $node.subtype eq 'ignorecase' {
+            my $lit := $!regalloc.fresh_s();
+            nqp::push(@ins, op('const_s', $lit, sval(nqp::lc($node[0]))));
+            unless nqp::existskey(%!reg, 'haystacklc') {
+                %!reg<haystacklc> := $!regalloc.fresh_s();
+                nqp::push(@ins, op('lc', %!reg<haystacklc>, %!reg<tgt>));
+            }
+            nqp::push(@ins, op('index_s', %!reg<pos>, %!reg<haystacklc>, $lit, %!reg<pos>));
             nqp::push(@ins, op('eq_i', $ireg0, %!reg<pos>, %!reg<negone>));
             $!regalloc.release_register($lit, $MVM_reg_str);
         }
