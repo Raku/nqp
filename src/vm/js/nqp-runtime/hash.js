@@ -1,5 +1,3 @@
-var Map = require('es6-map');
-
 function Hash() {
   this.content = new Map();
 }

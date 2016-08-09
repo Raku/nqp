@@ -23,7 +23,6 @@
     "sleep": "*",
     "xorshift": "*",
     "ffi": "*",
-    "ref": "*",
-    "es6-map": "*"
+    "ref": "*"
   }
 }
