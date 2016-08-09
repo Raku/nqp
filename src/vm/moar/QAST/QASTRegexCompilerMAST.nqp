@@ -661,9 +661,19 @@ class QAST::MASTRegexCompiler {
                 op($op, $s0, %!reg<zero>, sval(nqp::lc($c) ~ nqp::uc($c)), %!reg<fail>),
             ]);
         }
+        elsif $node.subtype eq 'ignorecase' {
+            # XXX ignorecase may want fc instead of lc
+            my $cmpop := $node.negate ?? 'if_i' !! 'unless_i';
+            nqp::push(@ins, op('const_s', $s0, sval(nqp::lc($litconst))));
+            unless nqp::existskey(%!reg, 'haystacklc') {
+                %!reg<haystacklc> := $!regalloc.fresh_s();
+                nqp::push(@ins, op('lc', %!reg<haystacklc>, %!reg<tgt>));
+            }
+            nqp::push(@ins, op('eqat_s', $i0, %!reg<haystacklc>, $s0, %!reg<pos>));
+            nqp::push(@ins, op($cmpop, $i0, %!reg<fail>));
+        }
         else {
-            my $eq_op := $node.subtype eq 'ignorecase' ?? 'eqatic_s' !!
-                         $node.subtype eq 'ignoremark' ?? 'eqatim_s' !! 'eqat_s';
+            my $eq_op := $node.subtype eq 'ignoremark' ?? 'eqatim_s' !! 'eqat_s';
             my $cmpop := $node.negate ?? 'if_i' !! 'unless_i';
             nqp::push(@ins, op('const_s', $s0, sval($litconst)));
             nqp::push(@ins, op($eq_op, $i0, %!reg<tgt>, $s0, %!reg<pos>));
