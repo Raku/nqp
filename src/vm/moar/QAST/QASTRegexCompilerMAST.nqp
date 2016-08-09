@@ -667,8 +667,12 @@ class QAST::MASTRegexCompiler {
             nqp::push(@ins, op('const_s', $s0, sval(nqp::lc($litconst))));
             unless nqp::existskey(%!reg, 'haystacklc') {
                 %!reg<haystacklc> := $!regalloc.fresh_s();
-                nqp::push(@ins, op('lc', %!reg<haystacklc>, %!reg<tgt>));
             }
+            my $no_need_lc := label();
+            nqp::push(@ins, op('isnull_s', $i0, %!reg<haystacklc>));
+            nqp::push(@ins, op('unless_i', $i0, $no_need_lc));
+            nqp::push(@ins, op('lc', %!reg<haystacklc>, %!reg<tgt>));
+            nqp::push(@ins, $no_need_lc);
             nqp::push(@ins, op('eqat_s', $i0, %!reg<haystacklc>, $s0, %!reg<pos>));
             nqp::push(@ins, op($cmpop, $i0, %!reg<fail>));
         }
@@ -1014,8 +1018,12 @@ class QAST::MASTRegexCompiler {
             nqp::push(@ins, op('const_s', $lit, sval(nqp::lc($node[0]))));
             unless nqp::existskey(%!reg, 'haystacklc') {
                 %!reg<haystacklc> := $!regalloc.fresh_s();
-                nqp::push(@ins, op('lc', %!reg<haystacklc>, %!reg<tgt>));
             }
+            my $no_need_lc := label();
+            nqp::push(@ins, op('isnull_s', $ireg0, %!reg<haystacklc>));
+            nqp::push(@ins, op('unless_i', $ireg0, $no_need_lc));
+            nqp::push(@ins, op('lc', %!reg<haystacklc>, %!reg<tgt>));
+            nqp::push(@ins, $no_need_lc);
             nqp::push(@ins, op('index_s', %!reg<pos>, %!reg<haystacklc>, $lit, %!reg<pos>));
             nqp::push(@ins, op('eq_i', $ireg0, %!reg<pos>, %!reg<negone>));
             $!regalloc.release_register($lit, $MVM_reg_str);
