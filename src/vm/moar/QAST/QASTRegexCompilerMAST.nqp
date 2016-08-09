@@ -1002,7 +1002,7 @@ class QAST::MASTRegexCompiler {
             $looplabel,
             op('inc_i', %!reg<pos>),
         ];
-        if $node.list && $node.subtype ne 'ignoremark' && $node.subtype ne 'ignorecase+ignoremark' {
+        if $node.list && $node.subtype ne 'ignorecase' && $node.subtype ne 'ignoremark' && $node.subtype ne 'ignorecase+ignoremark' {
             my $lit := $!regalloc.fresh_s();
             nqp::push(@ins, op('const_s', $lit, sval($node[0])));
             nqp::push(@ins, op('index_s', %!reg<pos>, %!reg<tgt>, $lit, %!reg<pos>));
