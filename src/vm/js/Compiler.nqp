@@ -931,27 +931,27 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     my class SerializedCodeRefInfo {
         has $!closure_template;
-        has $!static_info;
+        has $!lexicals_type_info;
         has $!ctx;
         has $!outer_ctx;
         has $!code_ref_attr;
         method ctx() {$!ctx}
         method outer_ctx() {$!outer_ctx}
-        method static_info() {$!static_info}
+        method lexicals_type_info() {$!lexicals_type_info}
         method closure_template() {$!closure_template}
         method code_ref_attr() {$!code_ref_attr}
     }
 
-    method static_info_for_lexicals(BlockInfo $block) {
-        my @static_info;
+    method type_info_for_lexicals(BlockInfo $block) {
+        my @type_info;
         for $block.variables -> $var {
             if self.is_dynamic_var($block, $var) {
-                nqp::push(@static_info,quote_string($var.name)
+                nqp::push(@type_info,quote_string($var.name)
                     ~ ': [' ~ nqp::objprimspec($var.returns) ~ ']');
             }
         }
 
-        '{' ~ nqp::join(',', @static_info) ~ '}';
+        '{' ~ nqp::join(',', @type_info) ~ '}';
     }
     
     method wrap_static_block($expected_outer, @output, $block) {
@@ -1093,7 +1093,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     if $node.blocktype eq 'immediate' {
                         %!serialized_code_ref_info{$node.cuid} := SerializedCodeRefInfo.new(
                             ctx => $*CTX,
-                            static_info => self.static_info_for_lexicals($*BLOCK)
+                            lexicals_type_info => self.type_info_for_lexicals($*BLOCK)
                         );
                     }
                     else {
@@ -1101,7 +1101,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                             closure_template => ChunkEscaped.new(@function),
                             ctx => $*CTX,
                             outer_ctx => (nqp::defined($*BLOCK.outer) ?? $*BLOCK.outer.ctx !! ""),
-                            static_info => self.static_info_for_lexicals($*BLOCK),
+                            lexicals_type_info => self.type_info_for_lexicals($*BLOCK),
                             code_ref_attr => $code_ref_attr 
                         );
                     }
@@ -1300,7 +1300,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 @setup.push($info.closure_template // "null");
 
                 @setup.push(
-                    ~ "," ~ $info.static_info ~ ","
+                    ~ "," ~ $info.lexicals_type_info ~ ","
                     ~ "cuids, setSetting,"
                     ~ quote_string($info.code_ref_attr)
                     ~ ");\n");

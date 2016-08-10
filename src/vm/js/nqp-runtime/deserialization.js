@@ -441,7 +441,7 @@ BinaryCursor.prototype.contextEntry = function(contextsData) {
   entry.closures = [];
 
   var count = data.varint();
-  var info = entry.staticCode.staticInfo;
+  var info = entry.staticCode.lexicalsTypeInfo;
 
   var lexicals = {};
 

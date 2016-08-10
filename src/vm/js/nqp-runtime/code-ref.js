@@ -110,11 +110,11 @@ CodeRef.prototype.setCodeObj = function(codeObj) {
   return this;
 };
 
-CodeRef.prototype.setInfo = function(ctx, outerCtxVar, closureTemplate, staticInfo, cuids, setSetting, codeRefAttr) {
+CodeRef.prototype.setInfo = function(ctx, outerCtxVar, closureTemplate, lexicalsTypeInfo, cuids, setSetting, codeRefAttr) {
   this.closureTemplate = closureTemplate;
   this.ctx = ctx;
   this.outerCtxVar = outerCtxVar;
-  this.staticInfo = staticInfo;
+  this.lexicalsTypeInfo = lexicalsTypeInfo;
   this.cuids = cuids;
   this.setSetting = setSetting;
   return this;
