@@ -89,8 +89,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
 
         # HACK - think how we can get rid of $fatal
-        method mangle_var(QAST::Var $var, :$fatal = 1) {
-            $var.scope eq 'local' ?? self.mangle_local($var.name) !! self.mangle_lexical($var.name, :$fatal);
+        method mangle_var(QAST::Var $var) {
+            $var.scope eq 'local' ?? self.mangle_local($var.name) !! self.mangle_lexical($var.name);
         }
 
         method mangle_local($name) {
@@ -98,7 +98,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
 
 
-        method mangle_lexical($name, :$fatal = 1) {
+        method mangle_lexical($name) {
             my $info := self;
             while $info {
                 if $info.mangle_own_lexical($name) -> $mangled {
@@ -112,13 +112,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 $info := $info.outer;
             }
 
-            if $fatal {
-                nqp::die("can't mangle $name");
-            }
-            else {
-                # HACK - think more about how $?CLASS and $?PACKAGE should be handled
-                "missing"
-            }
+            nqp::die("can't mangle $name");
         }
 
         method set_cont($chunk, $cont) {
@@ -954,11 +948,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             if self.is_dynamic_var($block, $var) {
                 nqp::push(@static_info,quote_string($var.name)
                     ~ ': [' ~ nqp::objprimspec($var.returns) ~ ']');
-            } else {
-                nqp::push(@static_info,quote_string($var.name)
-                    ~ ': [' ~ nqp::objprimspec($var.returns) ~ ',' ~ quote_string($block.mangle_var($var, :fatal(0))) ~ ']');
             }
         }
+
         '{' ~ nqp::join(',', @static_info) ~ '}';
     }
     
