@@ -904,7 +904,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
     }
 
-    # We try to use native js lexpads as much as we can to have a chance of decent programs
+    # We try to use native js lexpads as much as we can to have a chance of decent performance
     # Instead of implementing forceouterctx we use this hack to support settings.
     method setup_setting($node) {
         if nqp::eqaddr($node, $*SETTING_TARGET) {
