@@ -1188,6 +1188,10 @@ QAST::MASTOperations.add_core_op('for', -> $qastcomp, $op {
     unless nqp::istype(@operands[1], QAST::Block) {
         nqp::die("Operation 'for' expects a block as its second operand");
     }
+
+
+    my $orig_blocktype := @operands[1].blocktype;
+
     if @operands[1].blocktype eq 'immediate' {
         @operands[1].blocktype('declaration');
     }
@@ -1294,6 +1298,8 @@ QAST::MASTOperations.add_core_op('for', -> $qastcomp, $op {
         push_ilist($il, $loop_il);
     }
     nqp::push($il, $lbl_done);
+
+    @operands[1].blocktype($orig_blocktype);
 
     # Result; probably void, though evaluate to the input list if we must
     # give a value.
