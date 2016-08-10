@@ -300,8 +300,7 @@ class P6opaque {
 
   changeType(obj, newType) {
     // TODO some sanity checks for the new mro being a subset and newType being also a P6opaque
-    // HACK usage of __proto__ which is not fully portable and might interfere with the optimizer
-    obj.__proto__ = newType._STable.objConstructor.prototype;
+    Object.setPrototypeOf(obj, newType._STable.objConstructor.prototype)
   }
 
   compose(STable, reprInfoHash) {
