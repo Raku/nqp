@@ -867,7 +867,6 @@ op.getlexrel = function(pad, name) {
   return pad.lookup(name);
 };
 
-//TODO think about polyfill for codePointAt, fromCodePoint
 
 op.bitand_s = function(a, b) {
   var ret = '';
