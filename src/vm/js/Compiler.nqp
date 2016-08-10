@@ -1660,8 +1660,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
     
     method var_is_lexicalish(QAST::Var $var) {
-        # contvar - HACK
-        $var.scope eq 'lexical' || $var.scope eq 'typevar' || $var.scope eq 'contvar';
+        $var.scope eq 'lexical' || $var.scope eq 'typevar';
     }
 
     method as_js_clear_bindval($node, :$want, :$cps) {
