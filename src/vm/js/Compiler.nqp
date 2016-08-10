@@ -1521,8 +1521,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my $instant := try $*INSTANT;
 
 
-        $node[0].blocktype('declaration_static'); # Hac
-        # TODO needs thinking about, it seems there is really nothing to captue here and a setting is forced as outer
+        $node[0].blocktype('declaration_static'); # HACK
+        # TODO needs thinking about, it seems there is really nothing to capture here and a setting is forced as outer
         self.mark_serializable($node[0]);
 
         # Compile the block.
