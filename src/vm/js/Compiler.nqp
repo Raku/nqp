@@ -88,7 +88,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
         }
 
-        # HACK - think how we can get rid of $fatal
         method mangle_var(QAST::Var $var) {
             $var.scope eq 'local' ?? self.mangle_local($var.name) !! self.mangle_lexical($var.name);
         }
