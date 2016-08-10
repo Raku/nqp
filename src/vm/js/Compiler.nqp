@@ -1105,9 +1105,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                         );
                     }
                     else {
-                        # We need to override when deserializing closures
-                        # TODO - think if the override is the right things 
-                        @function[3] := self.create_ctx($*CTX, :code_ref('$$codeRef'), :code_ref_attr('null'));
                         %!serialized_code_ref_info{$node.cuid} := SerializedCodeRefInfo.new(
                             closure_template => ChunkEscaped.new(@function),
                             ctx => $*CTX,

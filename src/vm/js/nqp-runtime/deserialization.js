@@ -621,7 +621,6 @@ BinaryCursor.prototype.deserialize = function(sc) {
     var codeRef = 'sc.codeRefs[' + closure.index + ']';
 
     return 'var ' + closure.staticCode.outerCtxVar + ' = null;\n' +
-        'var $$codeRef = ' + codeRef + ';\n' +
         'sc.codeRefs[' + closure.index + '].capture(' +
         closure.staticCode.closureTemplate +
         ');\n';
@@ -701,7 +700,7 @@ BinaryCursor.prototype.contextToCode = function(context, data) {
       context.inner.map(function(inner) {return this.contextToCode(inner, data)}).join('') +
       context.closures.map(function(closure) {
         var codeRef = 'sc.codeRefs[' + closure.index + ']';
-        return 'var $$codeRef = ' + codeRef + ';\n' + codeRef + '.capture(' +
+        return codeRef + '.capture(' +
            closure.staticCode.closureTemplate +
            ');\n';
       }).join('') +

@@ -61,8 +61,6 @@ CodeRef.prototype.$$call = function() {
 
     var setSetting = this.setSetting || '';
     var template = declareCuids + setSetting + 'var ' + this.outerCtxVar + '= null;(' + this.closureTemplate + ')';
-    var $$codeRef = this;
-
     this.$$call = eval(template);
     return this.$$call.apply(this, arguments);
   }
