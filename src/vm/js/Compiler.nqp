@@ -947,7 +947,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         for $block.variables -> $var {
             if self.is_dynamic_var($block, $var) {
                 nqp::push(@type_info,quote_string($var.name)
-                    ~ ': [' ~ nqp::objprimspec($var.returns) ~ ']');
+                    ~ ': ' ~ nqp::objprimspec($var.returns));
             }
         }
 

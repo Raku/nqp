@@ -692,7 +692,7 @@ SerializationWriter.prototype.serializeContext = function(ctx) {
 
   for (var name in lexicalsTypeInfo) {
     this.contextsData.str(name);
-    switch (lexicalsTypeInfo[name][0]) {
+    switch (lexicalsTypeInfo[name]) {
       case 0: // obj
         this.contextsData.ref(ctx[name]);
         break;

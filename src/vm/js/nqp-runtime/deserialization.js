@@ -448,11 +448,11 @@ BinaryCursor.prototype.contextEntry = function(contextsData) {
   for (var i = 0; i < count; i++) {
     var name = data.str();
 
-    if (!info[name]) {
+    if (!info.hasOwnProperty([name])) {
       throw 'no static info for: ', name;
     }
 
-    switch (info[name][0]) {
+    switch (info[name]) {
       case 0: // obj
         lexicals[name] = data.variant();
         break;
