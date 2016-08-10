@@ -1114,9 +1114,7 @@ class QAST::OperationsJS {
         }
         
         unless @operands[1].blocktype eq 'immediate' {
-            # HACK - figure out how other a declaration blocktype gets here
-            # nqp::die("Operation 'for' expects the block to have blocktype to be immediate, is: {@operands[1].blocktype}");
-            @operands[1].blocktype('immediate');
+            nqp::die("Operation 'for' expects the block to have blocktype to be immediate, is: {@operands[1].blocktype}");
         }
 
         my $iterator := $*BLOCK.add_tmp();
