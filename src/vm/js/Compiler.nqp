@@ -427,7 +427,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         for @params {
             if $_.slurpy {
                 if $_.named {
-                    # TODO
                     $slurpy_named := $_; 
                 }
                 else {
