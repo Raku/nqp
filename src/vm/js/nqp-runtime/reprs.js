@@ -289,8 +289,7 @@ class P6opaque {
     for (var i = 0; i < flattened.length; i++) {
       var value = obj[slotToAttr(i)];
 
-      if (flattened[i] == null || !flattened[i]) {
-        // TODO - think about what happens when we get an undefined value here
+      if (flattened[i] == null) {
         cursor.ref(value);
       } else {
         flattened[i].REPR.serializeInline(cursor, value)
