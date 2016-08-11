@@ -383,8 +383,7 @@ class QAST::OperationsJS {
 
     add_simple_op('null', $T_OBJ, [], sub () {"null"});
 
-    #HACK we need to avoid using undefined at all
-    add_simple_op('isnull', $T_BOOL, [$T_OBJ], sub ($obj) {"($obj === null || $obj === undefined)"});
+    add_simple_op('isnull', $T_BOOL, [$T_OBJ], sub ($obj) {"($obj === null)"});
 
     add_simple_op('null_s', $T_STR, [], sub () {"null"});
     add_simple_op('isnull_s', $T_BOOL, [$T_STR], sub ($obj) {"($obj === null)"});
