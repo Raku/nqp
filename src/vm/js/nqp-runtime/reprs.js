@@ -733,7 +733,6 @@ class P6bigint extends REPR {
   }
 }
 
-/* HACK - we should just do flattening properly instead of a weird flag */
 P6bigint.prototype.flattenSTable = true;
 
 reprs.P6bigint = P6bigint;
