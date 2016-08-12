@@ -399,8 +399,8 @@ would work without complaining.
 Used by rakudo to generate code to multidispatch or
 enforce signatures at runtime.
 
-For example C<sub f(Mu:D) { ... }> leads to the generation of
-the following code where C<$name> is the name of the checked variable.
+For example `sub f(Mu:D) { ... }` leads to the generation of
+the following code, where `$name` is the name of the checked variable.
 Probably the first because the binder does a check too. That would be
 redundant.
 
