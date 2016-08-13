@@ -441,18 +441,18 @@ BinaryCursor.prototype.contextEntry = function(contextsData) {
   entry.closures = [];
 
   var count = data.varint();
-  var info = entry.staticCode.staticInfo;
+  var info = entry.staticCode.lexicalsTypeInfo;
 
   var lexicals = {};
 
   for (var i = 0; i < count; i++) {
     var name = data.str();
 
-    if (!info[name]) {
+    if (!info.hasOwnProperty([name])) {
       throw 'no static info for: ', name;
     }
 
-    switch (info[name][0]) {
+    switch (info[name]) {
       case 0: // obj
         lexicals[name] = data.variant();
         break;
@@ -621,7 +621,6 @@ BinaryCursor.prototype.deserialize = function(sc) {
     var codeRef = 'sc.codeRefs[' + closure.index + ']';
 
     return 'var ' + closure.staticCode.outerCtxVar + ' = null;\n' +
-        'var $$codeRef = ' + codeRef + ';\n' +
         'sc.codeRefs[' + closure.index + '].capture(' +
         closure.staticCode.closureTemplate +
         ');\n';
@@ -685,14 +684,9 @@ BinaryCursor.prototype.contextToCode = function(context, data) {
 
   for (var name in context.lexicals) {
     var value = context.lexicals[name];
-    var info = context.staticCode.staticInfo[name];
 
     var getData = 'data[' + (data.length - 1) + ']\n';
-    if (info.length == 2) {
-      setVars += ('var ' + info[1] + ' = ' + addToData(value) + '\n');
-    } else {
-      setVars += (context.staticCode.ctx + '[' + addToData(name) + '] = ' + addToData(value) + '\n');
-    }
+    setVars += (context.staticCode.ctx + '[' + addToData(name) + '] = ' + addToData(value) + '\n');
   }
 
   return '(function() {\n' +
@@ -701,7 +695,7 @@ BinaryCursor.prototype.contextToCode = function(context, data) {
       context.inner.map(function(inner) {return this.contextToCode(inner, data)}).join('') +
       context.closures.map(function(closure) {
         var codeRef = 'sc.codeRefs[' + closure.index + ']';
-        return 'var $$codeRef = ' + codeRef + ';\n' + codeRef + '.capture(' +
+        return codeRef + '.capture(' +
            closure.staticCode.closureTemplate +
            ');\n';
       }).join('') +

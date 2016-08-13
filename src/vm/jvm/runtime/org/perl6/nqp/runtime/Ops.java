@@ -5348,6 +5348,19 @@ public final class Ops {
         }
         return handle;
     }
+    public static SixModelObject cancelnotify(SixModelObject handle, SixModelObject queue,
+            SixModelObject schedulee, ThreadContext tc) {
+        AsyncTaskInstance task = (AsyncTaskInstance) handle;
+        if (!(queue instanceof ConcBlockingQueueInstance))
+            throw ExceptionHandling.dieInternal(tc, "notifycancel's second argument should have REPR ConcBlockingQueue");
+        if (task.handle instanceof IIOCancelable) {
+            ((IIOCancelable)task.handle).cancel(tc);
+            ((ConcBlockingQueueInstance)queue).queue.add(schedulee);
+        } else {
+            throw ExceptionHandling.dieInternal(tc, "This handle does not support cancel");
+        }
+        return handle;
+    }
 
     /* Exception related. */
     public static void die_s_c(String msg, ThreadContext tc) {

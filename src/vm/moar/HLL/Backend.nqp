@@ -1,4 +1,15 @@
 # Backend class for the MoarVM.
+
+my sub literal_subst(str $source, str $pattern, $replacement) {
+    my $where := 0;
+    my $result := $source;
+    while (my $found := nqp::index($result, $pattern, $where)) != -1 {
+        $where := $found + nqp::chars($replacement);
+        $result := nqp::replace($result, $found, nqp::chars($pattern), $replacement);
+    };
+    $result;
+}
+
 class HLL::Backend::MoarVM {
     our %moar_config := nqp::backendconfig();
 
@@ -74,7 +85,7 @@ class HLL::Backend::MoarVM {
         }
         nqp::sayfh(nqp::getstderr(), "Writing profiler output to $filename");
         my $profile_fh := open($filename, :w);
-        my $want_json  := ?($filename ~~ /'.json'$/);
+        my $want_json  := nqp::substr($filename, -5) eq '.json';
 
         my $escaped_backslash;
         my $escaped_dquote;
@@ -214,13 +225,13 @@ class HLL::Backend::MoarVM {
             }
             elsif nqp::isstr($obj) {
                 if nqp::index($obj, '\\') {
-                    $obj := subst($obj, /'\\'/, $escaped_backslash, :global);
+                    $obj := literal_subst($obj, '\\', $escaped_backslash);
                 }
                 if nqp::index($obj, '"') {
-                    $obj := subst($obj, /'"'/, $escaped_dquote, :global);
+                    $obj := literal_subst($obj, '"', $escaped_dquote);
                 }
                 if nqp::defined($escaped_squote) && nqp::index($obj, "'") {
-                    $obj := subst($obj, /"'"/, $escaped_squote, :global);
+                    $obj := literal_subst($obj, "'", $escaped_squote);
                 }
                 nqp::push_s(@pieces, '"');
                 nqp::push_s(@pieces, $obj);
@@ -314,10 +325,10 @@ class HLL::Backend::MoarVM {
                 }
                 elsif nqp::isstr($obj) {
                     if nqp::index($obj, '\\') {
-                        $obj := subst($obj, /'\\'/, $escaped_backslash, :global);
+                        $obj := literal_subst($obj, /'\\'/, $escaped_backslash);
                     }
                     if nqp::index($obj, '"') {
-                        $obj := subst($obj, /'"'/, $escaped_dquote, :global);
+                        $obj := literal_subst($obj, /'"'/, $escaped_dquote);
                     }
                     nqp::push_s(@pieces, '"');
                     nqp::push_s(@pieces, $obj);

@@ -1290,7 +1290,7 @@ class NQP::Actions is HLL::Actions {
             $block.symbol('$/', :scope<lexical>);
             my $code  := %*RX<code>;
             my $regex := %*LANG<Regex-actions>.qbuildsub($<p6regex>.ast, $block,
-                code_obj => $code, cursor_type => $*W.find_sym(['NQPCursor']));
+                code_obj => $code);
             $regex.name($name);
 
             if $*PKGDECL && nqp::can($*PACKAGE.HOW, 'add_method') {
@@ -1598,7 +1598,7 @@ class NQP::Actions is HLL::Actions {
     method term:sym<return>($/) {
         # This can go away in favor of nqp::const::CONTROL_RETURN after rebootstrap
         # of Moar and JVM backends.
-        my $CONTROL_RETURN := nqp::getcomp('nqp').backend.name eq 'moar' ?? 32 !! 65536;
+        my $CONTROL_RETURN := (nqp::getcomp('nqp').backend.name eq 'moar' || nqp::getcomp('nqp').backend.name eq 'js') ?? 32 !! 65536;
         make QAST::Op.new(
             :op('throwpayloadlex'),
             QAST::IVal.new( :value($CONTROL_RETURN) ),
@@ -1899,5 +1899,13 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
             @saved.push($_.save(:non_empty));
         }
         $code_obj.SET_ALT_NFA($key, @saved);
+    }
+
+    method set_cursor_type($qast) {
+        my $cursor_type := nqp::null();
+        try {
+            $cursor_type := $*W.find_sym(['NQPCursor']);
+        };
+        $qast.cursor_type($cursor_type) unless nqp::isnull($cursor_type);
     }
 }

@@ -1,4 +1,3 @@
-var Map = require('es6-map');
 var Hash = require('./hash.js');
 var CodeRef = require('./code-ref.js');
 var NQPArray = require('./array.js');
@@ -41,15 +40,15 @@ op.hllizefor = function(ctx, obj, language) {
   if (obj instanceof Hash || role == 5) {
     var foreignTransformHash = config.get('foreign_transform_hash');
     if (foreignTransformHash === undefined) return obj;
-    return foreignTransformHash.$call(ctx, {}, obj);
+    return foreignTransformHash.$$call(ctx, {}, obj);
   } else if (obj instanceof NQPArray || role == 4) {
     var foreignTransformArray = config.get('foreign_transform_array');
     if (foreignTransformArray === undefined) return obj;
-    return foreignTransformArray.$call(ctx, {}, obj);
+    return foreignTransformArray.$$call(ctx, {}, obj);
   } else if (obj instanceof CodeRef || role == 6) {
     var foreignTransformCode = config.get('foreign_transform_code');
     if (foreignTransformCode === undefined) return obj;
-    return foreignTransformCode.$call(ctx, {}, obj);
+    return foreignTransformCode.$$call(ctx, {}, obj);
   // TODO handle already boxed ones
   } else if (obj instanceof NQPInt) {
     var foreignTypeInt = config.get('foreign_type_int');

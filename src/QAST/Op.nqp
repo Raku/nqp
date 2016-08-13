@@ -6,6 +6,7 @@ class QAST::Op is QAST::Node does QAST::Children {
 
     method new(str :$name, str :$op, *@children, *%options) {
         my $node := nqp::create(self);
+        nqp::bindattr_i($node, QAST::Node, '$!flags', 0);
         nqp::bindattr($node, QAST::Op, '@!children', @children);
         nqp::bindattr_s($node, QAST::Op, '$!name', $name);
         nqp::bindattr_s($node, QAST::Op, '$!op', $op);

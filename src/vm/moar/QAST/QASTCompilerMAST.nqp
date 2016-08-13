@@ -1590,7 +1590,7 @@ my class MASTCompilerInstance {
                     $*BLOCK.add_lexical($node, :is_cont);
                 }
                 else {
-                    nqp::die("Can only use 'contvar' decl with scope 'lexical'");
+                    nqp::die("Can only use 'contvar' decl with scope 'lexical' or 'local'");
                 }
             }
             elsif $decl eq 'statevar' {

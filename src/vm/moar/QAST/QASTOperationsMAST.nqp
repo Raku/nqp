@@ -1188,6 +1188,10 @@ QAST::MASTOperations.add_core_op('for', -> $qastcomp, $op {
     unless nqp::istype(@operands[1], QAST::Block) {
         nqp::die("Operation 'for' expects a block as its second operand");
     }
+
+
+    my $orig_blocktype := @operands[1].blocktype;
+
     if @operands[1].blocktype eq 'immediate' {
         @operands[1].blocktype('declaration');
     }
@@ -1294,6 +1298,8 @@ QAST::MASTOperations.add_core_op('for', -> $qastcomp, $op {
         push_ilist($il, $loop_il);
     }
     nqp::push($il, $lbl_done);
+
+    @operands[1].blocktype($orig_blocktype);
 
     # Result; probably void, though evaluate to the input list if we must
     # give a value.
@@ -1977,6 +1983,7 @@ my %const_map := nqp::hash(
     'PIPE_INHERIT_ERR',         64,
     'PIPE_IGNORE_ERR',          128,
     'PIPE_CAPTURE_ERR',         256,
+    'PIPE_MERGED_OUT_ERR',      512,
 
     'SIG_HUP',                  1,
     'SIG_INT',                  2,
@@ -2860,6 +2867,7 @@ QAST::MASTOperations.add_core_moarop_mapping('queuepoll', 'queuepoll');
 # asynchrony related ops
 QAST::MASTOperations.add_core_moarop_mapping('timer', 'timer');
 QAST::MASTOperations.add_core_moarop_mapping('cancel', 'cancel', 0);
+QAST::MASTOperations.add_core_moarop_mapping('cancelnotify', 'cancelnotify', 0);
 QAST::MASTOperations.add_core_moarop_mapping('signal', 'signal');
 QAST::MASTOperations.add_core_moarop_mapping('watchfile', 'watchfile');
 QAST::MASTOperations.add_core_moarop_mapping('asyncconnect', 'asyncconnect');

@@ -5,6 +5,11 @@ role QAST::RegexCursorType {
         $!cursor_type := $value unless $value =:= NO_VALUE;
         $!cursor_type
     }
+
+    method dump_extra_node_info() {
+        my $info := QAST::Regex.HOW.method_table(QAST::Regex)<dump_extra_node_info>(self);
+        $info ~ " :cursor_type({$!cursor_type.HOW.name($!cursor_type)})"
+    }
 }
 
 class QAST::Regex is QAST::Node does QAST::Children {
@@ -18,6 +23,7 @@ class QAST::Regex is QAST::Node does QAST::Children {
     
     method new(str :$rxtype, str :$subtype, *@children, *%options) {
         my $node := nqp::create(self);
+        nqp::bindattr_i($node, QAST::Node, '$!flags', 0);
         nqp::bindattr($node, QAST::Regex, '@!children', @children);
         nqp::bindattr_s($node, QAST::Regex, '$!rxtype', $rxtype);
         nqp::bindattr_s($node, QAST::Regex, '$!subtype', $subtype);

@@ -683,16 +683,16 @@ SerializationWriter.prototype.serializeContext = function(ctx) {
 
 
 
-  var staticInfo = staticCodeRef.staticInfo;
+  var lexicalsTypeInfo = staticCodeRef.lexicalsTypeInfo;
 
   var lexicals = 0;
-  for (var name in staticInfo) lexicals++;
+  for (var name in lexicalsTypeInfo) lexicals++;
 
   this.contextsData.varint(lexicals);
 
-  for (var name in staticInfo) {
+  for (var name in lexicalsTypeInfo) {
     this.contextsData.str(name);
-    switch (staticInfo[name][0]) {
+    switch (lexicalsTypeInfo[name]) {
       case 0: // obj
         this.contextsData.ref(ctx[name]);
         break;

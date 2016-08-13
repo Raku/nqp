@@ -25,14 +25,16 @@ class RegexCompiler {
     has $!cursor_type; # the class of the object in $!cursor - if we know it at compile time
 
     method set_cursor_var() {
-        if $*BLOCK.is_dynamic_var(QAST::Var.new(:name('$¢'))) {
+        if $!compiler.is_dynamic_var($*BLOCK, QAST::Var.new(:name('$¢'))) {
             "{$*CTX}.bind({quote_string('$¢')}, $!cursor);\n";
         } else {
-            $!compiler.mangle_name('$¢') ~ " = $!cursor;\n";
+            $*BLOCK.mangle_lexical('$¢') ~ " = $!cursor;\n";
         }
     }
 
     method compile($node) {
+        $*BLOCK.add_mangled_lexical('$¢');
+
         # TODO better name for $start
         # we need to unpack the array we !cursor_start_all into a bunch of variables 
         my $start := $*BLOCK.add_tmp();
@@ -47,7 +49,7 @@ class RegexCompiler {
             $!cursor_type := $node.cursor_type();
         }
 
-        my $self := $!compiler.mangle_name('self');
+        my $self := $*BLOCK.mangle_local('self');
 
         Chunk.new($T_OBJ, $!cursor, [
             "{$!label} = {$!initial_label};\n",
@@ -139,7 +141,7 @@ class RegexCompiler {
         my $scan := self.new_label;
         my $done := self.new_label;
 
-        "if ({self.get_cursor_attr($!compiler.mangle_name('self'), '$!from')} != -1) \{{self.goto($done)}\}\n"
+        "if ({self.get_cursor_attr($*BLOCK.mangle_local('self'), '$!from')} != -1) \{{self.goto($done)}\}\n"
         ~ self.goto($scan)
         ~ self.case($loop)
         ~ "$!pos++;\n"
@@ -293,10 +295,10 @@ class RegexCompiler {
 
     method get_cursor_attr($cursor, $attr) {
         if $!has_cursor_type {
-            "nqp.toInt({self.cursor_attr($cursor, $attr)}, $*CTX)";
+            "{self.cursor_attr($cursor, $attr)}";
         }
         else {
-            "nqp.toInt($cursor.\$\$getattr($!cursor_type_runtime, {quote_string($attr)}), $*CTX)";
+            "$cursor.\$\$getattr($!cursor_type_runtime, {quote_string($attr)})";
         }
     }
 
@@ -344,7 +346,7 @@ class RegexCompiler {
         else {
             #TODO think if arguments are possible, etc.
             my $block := $!compiler.as_js($node[0][0], :want($T_OBJ));
-            $call := Chunk.new($T_OBJ, $block.expr ~ ".\$call({$*CTX}, null, $!cursor)", [$block]);
+            $call := Chunk.new($T_OBJ, $block.expr ~ ".\$\$call({$*CTX}, null, $!cursor)", [$block]);
         }
 
         my $testop := $node.negate ?? '>=' !! '<';
@@ -431,7 +433,7 @@ class RegexCompiler {
 
         Chunk.void(
             self.set_cursor_pos,
-            $!compiler.mangle_name('$¢') ~ " = $!cursor;\n",
+            self.set_cursor_var,
             $code,
             $node.subtype eq 'zerowidth' ??
                 "if ({$node.negate ?? '' !! '!'}{$code.expr}) \{{self.fail}\}\n"

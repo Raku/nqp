@@ -2,6 +2,7 @@ class QAST::Node {
     has %!annotations;
     has $!node;
     has $!returns;
+    has int $!flags;
 
     method new(*@children, *%options) {
         nqp::die('Can not instantiate QAST::Node; please use a subclass');
@@ -49,6 +50,30 @@ class QAST::Node {
         }
     }
     
+    method setflag($bit)   { $!flags := nqp::bitor_i($!flags, $bit) }
+    method clearflag($bit) { $!flags := nqp::bitand_i($!flags, nqp::bitneg_i($bit)) }
+    method isflag($bit)    { nqp::istrue(nqp::bitand_i($!flags, $bit)) }
+
+    method wanted ($value = NO_VALUE) { $value =:= NO_VALUE ?? self.isflag(0x1) !! $value ?? self.setflag(0x1) !! self.clearflag(0x1) }
+    method sunk   ($value = NO_VALUE) { $value =:= NO_VALUE ?? self.isflag(0x2) !! $value ?? self.setflag(0x2) !! self.clearflag(0x2) }
+    method nosink ($value = NO_VALUE) { $value =:= NO_VALUE ?? self.isflag(0x4) !! $value ?? self.setflag(0x4) !! self.clearflag(0x4) }
+    method sinkok ($value = NO_VALUE) { $value =:= NO_VALUE ?? self.isflag(0x8) !! $value ?? self.setflag(0x8) !! self.clearflag(0x8) }
+    method final  ($value = NO_VALUE) { $value =:= NO_VALUE ?? self.isflag(0x10) !! $value ?? self.setflag(0x10) !! self.clearflag(0x10) }
+    method okifnil($value = NO_VALUE) { $value =:= NO_VALUE ?? self.isflag(0x20) !! $value ?? self.setflag(0x20) !! self.clearflag(0x20) }
+
+    method dump_flags() {
+	my @flags;
+	if $!flags {
+	    nqp::push(@flags, 'wanted')  if self.wanted;
+	    nqp::push(@flags, 'sunk')    if self.sunk;
+	    nqp::push(@flags, 'nosink')  if self.nosink;
+	    nqp::push(@flags, 'sinkok')  if self.sinkok;
+	    nqp::push(@flags, 'final')   if self.final;
+	    nqp::push(@flags, 'okifnil') if self.okifnil;
+	}
+	'<' ~ nqp::join(' ',@flags) ~ '>';
+    }
+
     method has_compile_time_value() {
         0
     }
@@ -126,17 +151,16 @@ class QAST::Node {
 
     method dump_annotations() {
 	my @anns;
+	nqp::push(@anns, self.dump_flags);
+
         if nqp::ishash(%!annotations) {
 	    for %!annotations {
 		my $k := $_.key;
 		my $v := $_.value;
 		try {
 		    if nqp::isconcrete($v) {
-			if $k eq 'context' || $k eq 'IN_DECL' || $k eq 'BY' {
+			if $k eq 'IN_DECL' || $k eq 'BY' {
 			    nqp::push(@anns, ':' ~ $k ~ '<' ~ $v ~ '>');
-			}
-			elsif $k eq 'sink_ok' || $k eq 'WANTED' || $k eq 'final' {
-			    nqp::push(@anns, ':' ~ $k);
 			}
 			else {   # dunno how to introspect
 			    nqp::push(@anns, ':' ~ $k ~ '<?>');

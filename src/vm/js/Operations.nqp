@@ -63,7 +63,7 @@ class QAST::OperationsJS {
         add_op($op, sub ($comp, $node, :$want, :$cps) {
             my $use_cps := $required_cps || ($cps_aware && $cps);
             my $chunk := op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx, :cps($use_cps), :$decont);
-            ($sideffects && !$use_cps) ?? $comp.stored_result($chunk) !! $chunk;
+            ($sideffects && !$use_cps) ?? $comp.stored_result($chunk, :$want) !! $chunk;
         }, :$inlinable);
 
         set_op_result_type($op, $return_type);
@@ -222,7 +222,7 @@ class QAST::OperationsJS {
                 @setup.push("if (nqp.toBool($ret, $*CTX)) \{\n") if is_chain($part[0]);
                 @setup.push($callee);
                 @setup.push($right);
-                @setup.push("$ret = {$callee.expr}.\$call($*CTX, null, {$left.expr}, {$right.expr});\n");
+                @setup.push("$ret = {$callee.expr}.\$\$call($*CTX, null, {$left.expr}, {$right.expr});\n");
                 @setup.push("\}") if is_chain($part[0]);
 
                 Chunk.new($T_OBJ, $right.expr, @setup, :node($part));
@@ -254,7 +254,7 @@ class QAST::OperationsJS {
             if static_attr($node) -> $attr {
                 $comp.stored_result(Chunk.new($type,
                     "({$obj.expr}\.$attr = {$value.expr})",
-                [$obj, $value]));
+                [$obj, $value]), :$want);
             }
             else {
                 my $classHandle := $comp.as_js(:want($T_OBJ), $node[1]);
@@ -262,7 +262,7 @@ class QAST::OperationsJS {
 
                 $comp.stored_result(Chunk.new($type,
                     "{$obj.expr}\.\$\$bindattr({$classHandle.expr}, {$attrName.expr}, {$value.expr})",
-                [$obj, $classHandle, $attrName, $value]));
+                [$obj, $classHandle, $attrName, $value]), :$want);
             }
 
         });
@@ -281,12 +281,6 @@ class QAST::OperationsJS {
             }
         });
     }
-
-    # HACK - we need this until we handle types on attributes properly 
-    add_simple_op('getattr_i', $T_INT, [$T_OBJ, $T_OBJ, $T_STR], sub ($obj, $type, $attr) {
-        "nqp.intAttrHack($obj\.\$\$getattr($type, $attr))"
-    });
-
 
     add_simple_op('hintfor', $T_INT, [$T_OBJ, $T_STR]);
 
@@ -366,7 +360,6 @@ class QAST::OperationsJS {
 
     add_simple_op('replace', $T_STR, [$T_STR, $T_INT, $T_INT, $T_STR]);
 
-    # TODO portability to JScript (according to mdn it doesn't support negative offset - check it)
     add_simple_op('eqat', $T_BOOL, [$T_STR, $T_STR, $T_INT], sub ($haystack, $needle, $offset) {
         "($haystack.substr($offset, $needle.length) === $needle)"
     });
@@ -389,8 +382,7 @@ class QAST::OperationsJS {
 
     add_simple_op('null', $T_OBJ, [], sub () {"null"});
 
-    #HACK we need to avoid using undefined at all
-    add_simple_op('isnull', $T_BOOL, [$T_OBJ], sub ($obj) {"($obj === null || $obj === undefined)"});
+    add_simple_op('isnull', $T_BOOL, [$T_OBJ], sub ($obj) {"($obj === null)"});
 
     add_simple_op('null_s', $T_STR, [], sub () {"null"});
     add_simple_op('isnull_s', $T_BOOL, [$T_STR], sub ($obj) {"($obj === null)"});
@@ -399,7 +391,7 @@ class QAST::OperationsJS {
     add_simple_op('time_i', $T_NUM, [], sub () {"Math.floor(new Date().getTime() / 1000)"}, :sideffects);
 
     add_simple_op('escape', $T_STR, [$T_STR]);
-    add_simple_op('x', $T_STR, [$T_STR, $T_INT]);
+    add_simple_op('x', $T_STR, [$T_STR, $T_INT], sub ($what, $times) {"$what.repeat($times)"});
 
     add_simple_op('getcomp', $T_OBJ, [$T_STR], :sideffects);
 
@@ -500,9 +492,8 @@ class QAST::OperationsJS {
             nqp::die("First child of a 'bind' op must be a QAST::Var");
         }
 
-        # TODO take the type of variable into account
         my $*BINDVAL := @children[1];
-        $comp.as_js(@children[0], :want($T_OBJ), :$cps);
+        $comp.as_js(@children[0], :want($want), :$cps);
     });
 
 
@@ -601,13 +592,13 @@ class QAST::OperationsJS {
                     }
                 }
                 $compiled_args := $comp.merge_arg_groups($compiled_args);
-                $call := '.$applyCPS(';
+                $call := '.$$applyCPS(';
             }
             else {
                 for $compiled_args.setup -> $arg {
                     @setup.push($arg);
                 }
-                $call := '.$callCPS(';
+                $call := '.$$callCPS(';
             }
 
             
@@ -622,10 +613,10 @@ class QAST::OperationsJS {
 
             if nqp::islist($compiled_args) {
                 $compiled_args := $comp.merge_arg_groups($compiled_args);
-                $call := '.$apply(';
+                $call := '.$$apply(';
             }
             else {
-                $call := '.$call(';
+                $call := '.$$call(';
             }
             $comp.stored_result(
                 Chunk.new($T_OBJ, $callee.expr ~ $call ~ $compiled_args.expr ~ ')' , [$callee, $compiled_args], :$node), :$want);
@@ -645,7 +636,7 @@ class QAST::OperationsJS {
     add_simple_op('markcodestatic', $T_OBJ, [$T_OBJ], :sideffects);
 
     add_simple_op('freshcoderef', $T_OBJ, [$T_OBJ]);
-    add_simple_op('markcodestub', $T_OBJ, [$T_OBJ]);
+    add_simple_op('markcodestub', $T_OBJ, [$T_OBJ], :sideffects);
 
     add_simple_op('scsetdesc', $T_STR, [$T_OBJ, $T_STR], :sideffects);
     add_simple_op('scgetdesc', $T_STR, [$T_OBJ]);
@@ -833,9 +824,9 @@ class QAST::OperationsJS {
             my @get;
             my @set;
             for $*BLOCK.variables -> $var {
-                my $storage := $*BLOCK.is_dynamic_var($var) 
+                my $storage := $comp.is_dynamic_var($*BLOCK, $var) 
                     ?? "{$*CTX}[{quote_string($var.name)}]"
-                    !! $comp.mangle_name($var.name);
+                    !! $*BLOCK.mangle_var($var);
 
                 @set.push(quote_string($var.name) ~ 
                    ~ ': function(value) {' 
@@ -856,13 +847,18 @@ class QAST::OperationsJS {
         my $var_name := $node[0].value;
         my $block := $*BLOCK.outer;
         while $block {
-            last if $block.has_local_variable($var_name);
+            last if $block.has_own_variable($var_name);
             $block := $block.outer;
         }
-        unless $block.is_dynamic_var(QAST::Var.new(:name($var_name), :scope<lexical>)) {
-            $comp.NYI("getlexouter on not a variable compiled as dynamic");
+
+        # TODO type 
+
+        if $comp.is_dynamic_var($block, QAST::Var.new(:name($var_name), :scope<lexical>)) {
+            Chunk.new($T_OBJ, $block.ctx ~ "[" ~ quote_string($var_name) ~ "]", [], :$node);
         }
-        Chunk.new($T_OBJ, $block.ctx ~ "[" ~ quote_string($var_name) ~ "]", [], :$node);
+        else {
+            Chunk.new($T_OBJ, $*BLOCK.outer.mangle_lexical($var_name) , [], :$node);
+        }
     });
 
     add_simple_op('splice', $T_OBJ, [$T_OBJ, $T_OBJ, $T_INT, $T_INT], :sideffects);
@@ -1116,9 +1112,7 @@ class QAST::OperationsJS {
         }
         
         unless @operands[1].blocktype eq 'immediate' {
-            # HACK - figure out how other a declaration blocktype gets here
-            # nqp::die("Operation 'for' expects the block to have blocktype to be immediate, is: {@operands[1].blocktype}");
-            @operands[1].blocktype('immediate');
+            nqp::die("Operation 'for' expects the block to have blocktype to be immediate, is: {@operands[1].blocktype}");
         }
 
         my $iterator := $*BLOCK.add_tmp();
@@ -1389,7 +1383,7 @@ class QAST::OperationsJS {
     add_simple_op('captureposprimspec', $T_OBJ, [$T_OBJ, $T_INT]);
 
     add_simple_op('invokewithcapture', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($invokee, $capture) {
-        "$invokee.\$apply([{$*CTX}].concat($capture.named, $capture.pos))"
+        "$invokee.\$\$apply([{$*CTX}].concat($capture.named, $capture.pos))"
     }, :sideffects);
 
 
@@ -1506,12 +1500,14 @@ class QAST::OperationsJS {
             nqp::die('takedispatcher requires one string literal operand');
         }
         my $var := $node[0].value;
-        unless $*BLOCK.is_dynamic_var(QAST::Var.new(:name($var), :scope<lexical>)) {
-            $comp.NYI("takedispatcher on a none-dynamic var");
-        }
+
+        my $set_var := $comp.is_dynamic_var($*BLOCK, QAST::Var.new(:name($var), :scope<lexical>))
+            ?? "{$*CTX}.bind({quote_string($var)}, nqp.currentDispatcher);\n" 
+            !! $*BLOCK.mangle_lexical($var) ~ " = nqp.currentDispatcher;\n";
+
         Chunk.void(
             "if (nqp.currentDispatcher !== undefined) \{"
-            ~ "{$*CTX}.bind({quote_string($var)}, nqp.currentDispatcher);\n"
+            ~ $set_var
             ~ "nqp.currentDispatcher = undefined;\n"
             ~ "\}\n"
         );

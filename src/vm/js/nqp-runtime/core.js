@@ -25,14 +25,6 @@ var containerSpecs = require('./container-specs.js');
 
 exports.CodeRef = CodeRef;
 
-op.atpos = function(array, index) {
-  return array.$$atpos(index);
-};
-
-op.bindpos = function(array, index, value) {
-  return array.$$bindpos(index, value);
-};
-
 op.isinvokable = function(obj) {
   return (obj instanceof CodeRef || (obj._STable && obj._STable.invocationSpec) ? 1 : 0);
 };
@@ -47,13 +39,6 @@ op.escape = function(str) {
       .replace(/\f/g, '\\f')
       .replace(/[\b]/g, '\\b')
       .replace(/"/g, '\\"');
-};
-
-op.x = function(str, times) {
-  if (!times) return '';
-  var ret = str;
-  while (--times) ret += str;
-  return ret;
 };
 
 function radixHelper(radix, str, zpos, flags) {
@@ -546,7 +531,7 @@ function WrappedFunction(func) {
   this.func = func;
 }
 
-WrappedFunction.prototype.$apply = function(args) {
+WrappedFunction.prototype.$$apply = function(args) {
   var converted = [];
   for (var i = 2; i < args.length; i++) {
     converted.push(toJS(args[i]));
@@ -554,8 +539,8 @@ WrappedFunction.prototype.$apply = function(args) {
   return fromJS(this.func.apply(null, converted));
 };
 
-WrappedFunction.prototype.$call = function(args) {
-  return this.$apply(arguments);
+WrappedFunction.prototype.$$call = function(args) {
+  return this.$$apply(arguments);
 };
 
 function fromJS(obj) {
@@ -575,7 +560,7 @@ function toJS(obj) {
       for (var i = 0; i < arguments.length; i++) {
         converted.push(fromJS(arguments[i]));
       }
-      return toJS(obj.$apply(converted));
+      return toJS(obj.$$apply(converted));
     };
   } else {
     return obj;
@@ -753,7 +738,7 @@ op.parameterizetype = function(ctx, type, params) {
     }
   }
 
-  var result = st.parameterizer.$call(ctx, {}, st.WHAT, params);
+  var result = st.parameterizer.$$call(ctx, {}, st.WHAT, params);
 
   var newSTable = result._STable;
   newSTable.parametricType = type;
@@ -832,7 +817,7 @@ var resetValue;
 var invokeValue;
 op.continuationreset = function(ctx, tag, continuation) {
   startTrampoline(function() {
-    return continuation.$callCPS(ctx, {}, function(value) {
+    return continuation.$$callCPS(ctx, {}, function(value) {
       resetValue = value;
       invokeValue = value;
       return null;
@@ -846,7 +831,7 @@ op.continuationresetCPS = function(ctx, tag, continuation, continuation) {
 };
 
 op.continuationcontrolCPS = function(ctx, protect, tag, run, cont) {
-  startTrampoline(run.$callCPS(ctx, {}, function(value) {
+  startTrampoline(run.$$callCPS(ctx, {}, function(value) {
     resetValue = value;
     return null;
   }, cont));
@@ -855,14 +840,14 @@ op.continuationcontrolCPS = function(ctx, protect, tag, run, cont) {
 
 op.continuationinvoke = function(ctx, cont, inject) {
   // TODO really place inject inside the cont
-  var value = inject.$call(ctx, {});
+  var value = inject.$$call(ctx, {});
   startTrampoline(cont(value));
   return invokeValue;
 };
 
 op.continuationinvokeCPS = function(ctx, invokedCont, inject, cont) {
   // TODO really place inject inside the cont, use callCPS
-  var value = inject.$call(ctx, {});
+  var value = inject.$$call(ctx, {});
   return invokedCont(value);
 };
 
@@ -882,7 +867,6 @@ op.getlexrel = function(pad, name) {
   return pad.lookup(name);
 };
 
-//TODO think about polyfill for codePointAt, fromCodePoint
 
 op.bitand_s = function(a, b) {
   var ret = '';

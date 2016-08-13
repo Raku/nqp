@@ -852,11 +852,13 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         }
         $block.push($qast);
 
-        if nqp::existskey(%rest, 'cursor_type') {
-            $qast.cursor_type(%rest<cursor_type>);
-        }
+        self.set_cursor_type($qast);
         
         $block;
+    }
+
+    # A hook point that subclasses can set to the cursor type
+    method set_cursor_type($qast) {
     }
 
     sub capnames($ast, int $count) {

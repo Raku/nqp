@@ -1,6 +1,7 @@
 class QAST::WVal is QAST::Node does QAST::CompileTimeValue {
     method new(:$value, *%options) {
         my $node := nqp::create(self);
+        nqp::bindattr_i($node, QAST::Node, '$!flags', 0);
         nqp::bindattr($node, QAST::WVal, '$!compile_time_value', $value);
         $node.set(%options) if %options;
         $node

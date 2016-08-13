@@ -215,6 +215,6 @@ opertaions much more quickly. Of note, it is possible to publish:
 
 The word "cache" is chosen very deliberately. It's important
 that the meta-object knows that it is responsible for the
-updaing of any of the extra views of itself that it chooses
+updating of any of the extra views of itself that it chooses
 to publish. Put another way, in 6model the meta-object itself
 is always the authoritative source.
