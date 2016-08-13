@@ -154,18 +154,11 @@ has:
     }
 
 =end
-    
-    method O(*%spec) {
-        nqp::die("HLL::Grammar.O called without any arguments") if not %spec;
 
-        # Build a pass-cursor to indicate success and set the hash as the
-        # subrule's match object.
-        my $cur := self.'!cursor_start_cur'();
-        $cur.'!cursor_pass'(nqp::getattr_i($cur, $cursor_class, '$!from'));
-        nqp::bindattr($cur, $cursor_class, '$!match', %spec);
-        $cur;
+    token O(*%spec) {
+        :my %*SPEC := %spec;
+        <?>
     }
-
 
 =begin
 
@@ -366,8 +359,8 @@ An operator precedence parser.
  
             unless nqp::isnull(@prefixish) || nqp::isnull(@postfixish) {
                 while @prefixish && @postfixish {
-                    my %preO     := @prefixish[0]<OPER><O>;
-                    my %postO    := @postfixish[nqp::elems(@postfixish)-1]<OPER><O>;
+                    my %preO     := @prefixish[0]<OPER><O>.made;
+                    my %postO    := @postfixish[nqp::elems(@postfixish)-1]<OPER><O>.made;
                     my $preprec  := nqp::ifnull(nqp::atkey(%preO, 'sub'), nqp::ifnull(nqp::atkey(%preO, 'prec'), ''));
                     my $postprec := nqp::ifnull(nqp::atkey(%postO, 'sub'), nqp::ifnull(nqp::atkey(%postO, 'prec'), ''));
 
@@ -420,7 +413,7 @@ An operator precedence parser.
                 $infix := $infixcur.MATCH();
     
                 # We got an infix.
-                %inO := $infix<OPER><O>;
+                %inO := $infix<OPER><O>.made;
                 $termishrx := nqp::ifnull(nqp::atkey(%inO, 'nextterm'), 'termish');
                 $inprec := ~%inO<prec>;
                 $infixcur.panic('Missing infixish operator precedence')
@@ -431,7 +424,7 @@ An operator precedence parser.
                 }
 
                 while @opstack {
-                    my %opO := @opstack[+@opstack-1]<OPER><O>;
+                    my %opO := @opstack[+@opstack-1]<OPER><O>.made;
 
                     $opprec := nqp::ifnull(nqp::atkey(%opO, 'sub'), nqp::atkey(%opO, 'prec'));
                     last unless $opprec gt $inprec;
@@ -492,7 +485,7 @@ An operator precedence parser.
         # no positional captures and not taken them.
         nqp::bindattr($op, NQPCapture, '@!array', nqp::list());
         my %opOPER      := nqp::atkey($op, 'OPER');
-        my %opO         := nqp::atkey(%opOPER, 'O');
+        my %opO         := nqp::atkey(%opOPER, 'O').made;
         my str $opassoc := ~nqp::atkey(%opO, 'assoc');
         my str $key;
         my str $sym;
