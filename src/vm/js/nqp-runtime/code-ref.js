@@ -1,5 +1,13 @@
 'use strict';
 CodeRef.cuids = {};
+
+function WrappedCtx(wrap) {
+  this.outer = wrap;
+}
+WrappedCtx.prototype.codeRef = function() {
+  return {statiCode: null};
+}
+
 function CodeRef(name, cuid) {
   this.name = name;
   this.cuid = cuid;
@@ -60,9 +68,24 @@ CodeRef.prototype.$$call = function() {
     var declareCuids = 'var ' + declare.join(',') + ';\n';
 
     var setSetting = this.setSetting || '';
-    var template = declareCuids + setSetting + 'var ' + this.outerCtxVar + '= null;(' + this.closureTemplate + ')';
+
+    var searched = this;
+    var forcedOuterCtx = null;
+    while (searched) {
+      if (searched.forcedOuterCtx) {
+        forcedOuterCtx = searched.forcedOuterCtx;
+        break;
+      }
+      searched = searched.outerCodeRef;
+    }
+    var outerCtxVar = this.outerCodeRef.ctx;
+
+    if (forcedOuterCtx) forcedOuterCtx = new WrappedCtx(forcedOuterCtx);
+
+    var template = declareCuids + setSetting + 'var ' + outerCtxVar + '= forcedOuterCtx;(' + this.closureTemplate + ')';
     this.$$call = eval(template);
     return this.$$call.apply(this, arguments);
+
   }
 };
 
@@ -110,10 +133,10 @@ CodeRef.prototype.setCodeObj = function(codeObj) {
   return this;
 };
 
-CodeRef.prototype.setInfo = function(ctx, outerCtxVar, closureTemplate, lexicalsTypeInfo, cuids, setSetting, codeRefAttr) {
+CodeRef.prototype.setInfo = function(ctx, outerCodeRef, closureTemplate, lexicalsTypeInfo, cuids, setSetting, codeRefAttr) {
   this.closureTemplate = closureTemplate;
   this.ctx = ctx;
-  this.outerCtxVar = outerCtxVar;
+  this.outerCodeRef = outerCodeRef;
   this.lexicalsTypeInfo = lexicalsTypeInfo;
   this.cuids = cuids;
   this.setSetting = setSetting;

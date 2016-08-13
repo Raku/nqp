@@ -620,7 +620,8 @@ BinaryCursor.prototype.deserialize = function(sc) {
   var code = noContextClosures.map(function(closure) {
     var codeRef = 'sc.codeRefs[' + closure.index + ']';
 
-    return 'var ' + closure.staticCode.outerCtxVar + ' = null;\n' +
+    var outerCtxVar = closure.staticCode.outerCodeRef.ctx;
+    return 'var ' + outerCtxVar + ' = null;\n' +
         'sc.codeRefs[' + closure.index + '].capture(' +
         closure.staticCode.closureTemplate +
         ');\n';
