@@ -899,27 +899,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
     }
 
-    # We try to use native js lexpads as much as we can to have a chance of decent performance
-    # Instead of implementing forceouterctx we use this hack to support settings.
-    method setup_setting($node) {
-        if nqp::eqaddr($node, $*SETTING_TARGET) {
-            self.import_stuff_from_setting($node);
-        }
-        else {
-            '';
-        }
-    }
-
-    method import_stuff_from_setting($node) {
-        my @imported;
-        for $node.symtable -> $symbol {
-            @imported.push("{BlockInfo.mangle_name($symbol.key)} = setting[{quote_string($symbol.key)}]");
-        }
-        "var setting = nqp.setupSetting({quote_string($*SETTING_NAME)});\n"
-        ~ self.declare_js_vars(@imported);
-    }
-
-
     has %!serialized_code_ref_info;
 
     my class SerializedCodeRefInfo {
@@ -953,12 +932,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             @output.push("//Static wrapping\n");
             @output.push("(function() \{\n");
             @output.push("var {$expected_outer.ctx} = null;\n");
-            if $*SETTING_TARGET {
-                @output.push(self.import_stuff_from_setting($*SETTING_TARGET));
-            }
-            else {
-                @output.push("//Can't import stuff\n");
-            }
         }
 
         $block();
@@ -1072,7 +1045,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     self.declare_js_vars($*BLOCK.tmps),
                     self.declare_js_vars($*BLOCK.js_lexicals),
                     $create_ctx,
-                    self.setup_setting($node),
                     $sig,
                     self.clone_inners($*BLOCK),
                     self.capture_inners($*BLOCK),
@@ -1127,7 +1099,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                         self.declare_js_vars($*BLOCK.tmps),
                         self.declare_js_vars($*BLOCK.js_lexicals),
                         $create_ctx,
-                        self.setup_setting($node),
                         $sig_cps,
                         self.clone_inners($*BLOCK),
                         self.capture_inners($*BLOCK),
@@ -1455,10 +1426,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     method setting_hack($op, @pre) {
-       $*SETTING_NAME := $op[1][1].value;
-       $*SETTING_TARGET := $op[0].value;
-       self.mark_symbols_as_from_outer($*SETTING_TARGET);
-       @pre.push("nqp.loadSetting({loadable($*SETTING_NAME ~ '.setting')});\n");
+       my $SETTING_NAME := $op[1][1].value;
+       my $SETTING_TARGET := $op[0].value;
+       self.mark_symbols_as_from_outer($SETTING_TARGET);
+       @pre.push("nqp.loadSetting({loadable($SETTING_NAME ~ '.setting')});\n");
        # HACK to get nqp::sprintf to work
        @pre.push("require('sprintf');\n"); 
     }
@@ -1883,9 +1854,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     method as_js_with_prelude($ast, :$instant) {
         my $*INSTANT := $instant;
-
-        my $*SETTING_NAME;
-        my $*SETTING_TARGET;
 
         # Blocks we've seen while compiling.
         my %*BLOCKS_DONE;
