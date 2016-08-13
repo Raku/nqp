@@ -1471,11 +1471,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                         @pre.push(self.as_js($op, :want($T_VOID)));
                     }
                     elsif nqp::istype($op, QAST::Op)
-                        && $op.op eq 'callmethod'
-                        && $op.name eq 'load_module' {
-                        @pre.push("nqp.loadModule({loadable($op[1].value)});\n");
-                    }
-                    elsif nqp::istype($op, QAST::Op)
                         && $op.op eq 'loadbytecode' {
                     }
                     else {
