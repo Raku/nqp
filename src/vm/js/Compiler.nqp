@@ -103,11 +103,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 if $info.mangle_own_lexical($name) -> $mangled {
                     return $mangled;
                 }
-                if $info.qast && $info.qast.symbol($name) -> $symbol {
-                    if $symbol<from_outer> {
-                        return self.mangle_name($name);
-                    }
-                }
                 $info := $info.outer;
             }
 
