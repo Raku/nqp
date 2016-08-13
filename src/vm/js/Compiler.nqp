@@ -1426,10 +1426,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     method setting_hack($op, @pre) {
-       my $SETTING_NAME := $op[1][1].value;
        my $SETTING_TARGET := $op[0].value;
        self.mark_symbols_as_from_outer($SETTING_TARGET);
-       @pre.push("nqp.loadSetting({loadable($SETTING_NAME ~ '.setting')});\n");
        # HACK to get nqp::sprintf to work
        @pre.push("require('sprintf');\n"); 
     }
