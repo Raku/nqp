@@ -878,12 +878,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         self.declare_js_vars(@declared);
     }
 
-    method setup_set_setting() {
-       "var setSetting = " ~ (
-            $*SETTING_TARGET ?? quote_string(self.import_stuff_from_setting($*SETTING_TARGET)) !! "null"
-       ) ~ ";\n";
-    }
-
     method set_code_objects() {
         my $set := "";
         for %!cuids {
@@ -1306,7 +1300,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
                 @setup.push(
                     ~ "," ~ $info.lexicals_type_info ~ ","
-                    ~ "cuids, setSetting,"
+                    ~ "cuids, "
                     ~ quote_string($info.code_ref_attr)
                     ~ ");\n");
             }
@@ -1908,7 +1902,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             "var nqp = require('nqp-runtime');\n",
             "\nvar top_ctx = nqp.topContext();\n",
             self.setup_cuids,
-            self.setup_set_setting(),
             self.set_static_info,
             $chunk
         );

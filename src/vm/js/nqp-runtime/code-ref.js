@@ -67,8 +67,6 @@ CodeRef.prototype.$$call = function() {
     }
     var declareCuids = 'var ' + declare.join(',') + ';\n';
 
-    var setSetting = this.setSetting || '';
-
     var searched = this;
     var forcedOuterCtx = null;
     while (searched) {
@@ -82,7 +80,7 @@ CodeRef.prototype.$$call = function() {
 
     if (forcedOuterCtx) forcedOuterCtx = new WrappedCtx(forcedOuterCtx);
 
-    var template = declareCuids + setSetting + 'var ' + outerCtxVar + '= forcedOuterCtx;(' + this.closureTemplate + ')';
+    var template = declareCuids + 'var ' + outerCtxVar + '= forcedOuterCtx;(' + this.closureTemplate + ')';
     this.$$call = eval(template);
     return this.$$call.apply(this, arguments);
 
@@ -139,7 +137,6 @@ CodeRef.prototype.setInfo = function(ctx, outerCodeRef, closureTemplate, lexical
   this.outerCodeRef = outerCodeRef;
   this.lexicalsTypeInfo = lexicalsTypeInfo;
   this.cuids = cuids;
-  this.setSetting = setSetting;
   return this;
 };
 
