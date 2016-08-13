@@ -258,11 +258,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         # TODO fix this by actually looking if a variable is declared on the way
         return 0 if $var.scope eq 'local';
         while $info {
-            if $info.qast && !self.are_children_serializable($info.qast.cuid) && $info.qast.symbol($name) {
+            if $info.qast && !self.are_children_serializable($info.qast.cuid) && $info.qast.symbol($name) -> $symbol {
+                return 1 if $symbol<from_outer>;
                 return 0;
             }
             if $info.qast && $info.qast.symbol($name) -> $symbol {
-                return !$symbol<from_outer>;
+                return 1;
             }
             $info := $info.outer;
         }
@@ -1216,7 +1217,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     method create_ctx($name, :$code_ref, :$code_ref_attr) {
         # TODO think about contexts
-        "var $name = new nqp.Ctx(caller_ctx, {self.outer_ctx}, $code_ref, $code_ref_attr);\n";
+        "var $name = new nqp.Ctx(caller_ctx, this.forcedOuterCtx || {self.outer_ctx}, $code_ref, $code_ref_attr);\n";
     }
 
     multi method as_js(QAST::IVal $node, :$want, :$cps) {
@@ -1495,7 +1496,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             if nqp::istype($node, QAST::Stmts) {
                 for $node.list -> $op {
                     if self.is_op($op, 'forceouterctx') {
-                        self.setting_hack($op, @pre)
+                        self.setting_hack($op, @pre);
+                        @pre.push(self.as_js($op, :want($T_VOID)));
                     }
                     elsif nqp::istype($op, QAST::Op)
                         && $op.op eq 'callmethod'

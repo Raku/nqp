@@ -92,6 +92,14 @@ exports.ctxsave = function(ctx) {
 };
 
 
+// HACK
+
+op.bindhllsym("nqp", "ModuleLoader", {load_setting: function(ctx, _NAMED, self, settingName) {
+  exports.loadModule(settingName + '.setting');
+  var loaded = exports.setupSetting(settingName);
+  return loaded;
+}});
+
 var LexPadHack = require('./lexpad-hack.js');
 
 op.loadbytecode = function(ctx, file) {

@@ -808,6 +808,8 @@ class QAST::OperationsJS {
 
     add_simple_op('ctxouter', :!inlinable, $T_OBJ, [$T_OBJ]);
 
+    add_simple_op('forceouterctx', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
+
     add_simple_op('loadbytecode', $T_STR, [$T_STR], :ctx, :sideffects);
 
     add_simple_op('elems', $T_INT, [$T_OBJ]);

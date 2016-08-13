@@ -1095,3 +1095,8 @@ op.ctxcaller = function(ctx) {
 op.captureposprimspec = function(capture, idx) {
   return 0;
 };
+
+op.forceouterctx = function(code, ctx) {
+  code.forcedOuterCtx = ctx;
+  return code;
+};
