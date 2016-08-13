@@ -573,13 +573,13 @@ class QAST::MASTRegexCompiler {
             merge_ins(@ins, [
                 op('substr_s', $s0, %!reg<tgt>, %!reg<pos>, %!reg<one>),
                 op('lc', $s1, $s0),
-                op('ordfirst', $i0, $s1),
+                op('getcp_s', $i0, $s1, %!reg<zero>),  # safe for synthetics
                 op('ge_i', $i1, $i0, $lower),
                 op('le_i', $i2, $i0, $upper),
                 op('band_i', $i1, $i1, $i2),
                 op('if_i', $i1, $goal),
                 op('uc', $s1, $s0),
-                op('ordfirst', $i0, $s1),
+                op('getcp_s', $i0, $s1, %!reg<zero>),  # safe for synthetics
                 op('ge_i', $i1, $i0, $lower),
                 op('le_i', $i2, $i0, $upper),
                 op('band_i', $i1, $i1, $i2),
@@ -612,7 +612,7 @@ class QAST::MASTRegexCompiler {
             my $succeed := label();
             my $goal    := $node.negate ?? $succeed !! %!reg<fail>;
             merge_ins(@ins, [
-                op('ordat', $i0, %!reg<tgt>, %!reg<pos>),
+                op('getcp_s', $i0, %!reg<tgt>, %!reg<pos>),  # safe for synthetics
                 op('gt_i', $i1, $i0, $upper),
                 op('if_i', $i1, $goal),
                 op('lt_i', $i1, $i0, $lower),
