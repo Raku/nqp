@@ -1232,7 +1232,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     multi method as_js(QAST::VM $node, :$want, :$cps) {
-        # We ignore QAST::VM as we don't support a js specific one, and the ones nqp generate contain parrot specific stuff we don't care about.
         if $node.supports('js') {
             self.as_js($node.alternative('js'), :$want, :$cps);
         }
