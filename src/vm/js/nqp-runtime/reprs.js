@@ -37,7 +37,7 @@ function slotToAttr(slot) {
 }
 
 class REPR {
-}
+};
 REPR.prototype.allocate = basicAllocate;
 REPR.prototype.typeObjectFor = basicTypeObjectFor;
 REPR.prototype.compose = noopCompose;
@@ -292,14 +292,14 @@ class P6opaque {
       if (flattened[i] == null) {
         cursor.ref(value);
       } else {
-        flattened[i].REPR.serializeInline(cursor, value)
+        flattened[i].REPR.serializeInline(cursor, value);
       }
     }
   }
 
   changeType(obj, newType) {
     // TODO some sanity checks for the new mro being a subset and newType being also a P6opaque
-    Object.setPrototypeOf(obj, newType._STable.objConstructor.prototype)
+    Object.setPrototypeOf(obj, newType._STable.objConstructor.prototype);
   }
 
   compose(STable, reprInfoHash) {
@@ -406,7 +406,7 @@ class P6opaque {
 
   }
 
-}
+};
 
 P6opaque.prototype.createObjConstructor = basicConstructor;
 P6opaque.prototype.typeObjectFor = basicTypeObjectFor;
@@ -433,7 +433,7 @@ class KnowHOWREPR {
     obj.__name = '<anon>';
     return obj;
   }
-}
+};
 
 KnowHOWREPR.prototype.typeObjectFor = basicTypeObjectFor;
 KnowHOWREPR.prototype.createObjConstructor = basicConstructor;
@@ -450,7 +450,7 @@ class KnowHOWAttribute {
   serialize(data, obj) {
     data.str(obj.__name);
   }
-}
+};
 
 KnowHOWAttribute.prototype.createObjConstructor = basicConstructor;
 KnowHOWAttribute.prototype.typeObjectFor = basicTypeObjectFor;
@@ -459,7 +459,7 @@ KnowHOWAttribute.prototype.allocate = basicAllocate;
 reprs.KnowHOWAttribute = KnowHOWAttribute;
 
 class Uninstantiable {
-}
+};
 Uninstantiable.prototype.createObjConstructor = basicConstructor;
 Uninstantiable.prototype.typeObjectFor = basicTypeObjectFor;
 reprs.Uninstantiable = Uninstantiable;
@@ -514,7 +514,7 @@ class P6int extends REPR {
       return this[name];
     });
   }
-}
+};
 
 P6int.prototype.flattenedDefault = 0;
 P6int.prototype.boxedPrimitive = 1;
@@ -560,7 +560,7 @@ class P6num extends REPR {
       return this[name];
     });
   }
-}
+};
 
 P6num.prototype.boxedPrimitive = 2;
 P6num.prototype.flattenSTable = true;
@@ -602,7 +602,7 @@ class P6str extends REPR {
       return this[name];
     });
   }
-}
+};
 
 P6str.prototype.boxedPrimitive = 3;
 P6str.prototype.flattenSTable = true;
@@ -614,7 +614,7 @@ class NFA extends REPR {
   deserializeFinish(obj, data) {
     // STUB
   }
-}
+};
 
 reprs.NFA = NFA;
 
@@ -627,7 +627,7 @@ class VMArray extends REPR {
   deserializeReprData(cursor) {
     this.type = cursor.variant();
     /* TODO - type */
-  };
+  }
 
   serializeReprData(st, cursor) {
     cursor.ref(this.type);
@@ -648,7 +648,7 @@ class VMArray extends REPR {
       this.type = reprInfoHash.content.get('array').content.get('type');
     }
   }
-}
+};
 
 reprs.VMArray = VMArray;
 
@@ -658,7 +658,7 @@ class VMIter {
     // STUB
     console.log('deserializing VMIter');
   }
-}
+};
 
 VMIter.prototype.createObjConstructor = basicConstructor;
 VMIter.prototype.typeObjectFor = basicTypeObjectFor;
@@ -731,7 +731,7 @@ class P6bigint extends REPR {
       this[name] = makeBI(attrSTable, num);
     });
   }
-}
+};
 
 P6bigint.prototype.flattenSTable = true;
 
@@ -740,20 +740,20 @@ reprs.P6bigint = P6bigint;
 
 /* Stubs */
 
-class NativeCall extends REPR {}
+class NativeCall extends REPR {};
 reprs.NativeCall = NativeCall;
 
-class CPointer extends REPR {}
+class CPointer extends REPR {};
 reprs.CPointer = CPointer;
 
-class ReentrantMutex {}
+class ReentrantMutex {};
 ReentrantMutex.prototype.createObjConstructor = basicConstructor;
 ReentrantMutex.prototype.allocate = basicAllocate;
 ReentrantMutex.prototype.typeObjectFor = basicTypeObjectFor;
 
 reprs.ReentrantMutex = ReentrantMutex;
 
-class ConditionVariable {}
+class ConditionVariable {};
 
 ConditionVariable.prototype.createObjConstructor = basicConstructor;
 
@@ -993,7 +993,7 @@ class MultiDimArray extends REPR {
     }
   }
 
-}
+};
 
 reprs.MultiDimArray = MultiDimArray;
 
@@ -1003,14 +1003,14 @@ class VMException extends REPR {
       return this.message;
     });
   }
-}
+};
 
 
 reprs.VMException = VMException;
 
 
 class NativeRef extends REPR {
-}
+};
 reprs.NativeRef = NativeRef;
 
 var ID = 0;

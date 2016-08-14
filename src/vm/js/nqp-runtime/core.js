@@ -1100,7 +1100,7 @@ op.captureposprimspec = function(capture, idx) {
 
 op.forceouterctx = function(code, ctx) {
   if (!(code instanceof CodeRef))
-    throw "forceouterctx first operand must be a CodeRef";
+    throw 'forceouterctx first operand must be a CodeRef';
 
   if (ctx instanceof LexPadHack) {
     code.forcedOuterCtx = ctx.content;

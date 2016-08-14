@@ -6,7 +6,7 @@ function WrappedCtx(wrap) {
 }
 WrappedCtx.prototype.codeRef = function() {
   return {statiCode: null};
-}
+};
 
 function CodeRef(name, cuid) {
   this.name = name;
