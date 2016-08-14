@@ -250,12 +250,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
         }
 
-        # TODO fix this by actually looking if a variable is declared on the way
         return 0 if $var.scope eq 'local';
         while $info {
-            if $info.qast && !self.are_children_serializable($info.qast.cuid) && $info.qast.symbol($name) -> $symbol {
-                return 1 if $symbol<from_outer>;
-                return 0;
+            if $info.has_own_variable($name) {
+                return ($info.qast ?? self.are_children_serializable($info.qast.cuid) !! 1);
             }
             if $info.qast && $info.qast.symbol($name) -> $symbol {
                 return 1;
@@ -1388,41 +1386,11 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         quote_string($name) ~ ", function() \{return require({quote_string($path)})\}";
     }
 
-    # HACK NQP should do this like rakudo and distinguish using seperate blocks not a flag
-    method mark_symbols_as_from_outer($block) {
-        my $outer_ctx := %*COMPILING<%?OPTIONS><outer_ctx>;
-        if nqp::defined($outer_ctx) {
-            until nqp::isnull($outer_ctx) {
-                my $pad := nqp::ctxlexpad($outer_ctx);
-                unless nqp::isnull($pad) {
-                    for $pad {
-                        my str $key := ~$_;
-
-                        if $block.symbol($key) -> $symbol {
-                            my $lextype := nqp::lexprimspec($pad, $key);
-                            next unless $symbol<scope> eq 'lexical';
-                            if $lextype == 0 {
-                               unless nqp::eqaddr($symbol<lazy_value_from>, $pad) {
-                                   next; 
-                               }
-                            }
-                            # TODO check other types - they don't occur in the NQP setting and this hack is not neccesary for rakudo
-                            $symbol<from_outer> := 1;
-                        }
-                    }
-                }
-                $outer_ctx := nqp::ctxouter($outer_ctx);
-            }
-        }
-    }
-
     method is_op($node, $op) {
         nqp::istype($node, QAST::Op) && $node.op eq $op;
     }
 
     method setting_hack($op, @pre) {
-       my $SETTING_TARGET := $op[0].value;
-       self.mark_symbols_as_from_outer($SETTING_TARGET);
        # HACK to get nqp::sprintf to work
        @pre.push("require('sprintf');\n"); 
     }
