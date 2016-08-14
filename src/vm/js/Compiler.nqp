@@ -1440,12 +1440,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my @post;
         for $node.post_deserialize -> $node {
-           if self.is_op($node, 'forceouterctx') {
-           }
-           else {
-            self.log($node.dump);
             @post.push(self.as_js($node, :want($T_VOID)));
-          }
         }
         my $post := Chunk.new($T_VOID, "", @post);
 
