@@ -4,6 +4,8 @@ exports.op = op;
 var Hash = require('./hash.js');
 var CodeRef = require('./code-ref.js');
 
+var Ctx = require('./ctx.js');
+
 var LexPadHack = require('./lexpad-hack.js');
 var NQPInt = require('./nqp-int.js');
 
@@ -1097,6 +1099,16 @@ op.captureposprimspec = function(capture, idx) {
 };
 
 op.forceouterctx = function(code, ctx) {
-  code.forcedOuterCtx = ctx;
+  if (!(code instanceof CodeRef))
+    throw "forceouterctx first operand must be a CodeRef";
+
+  if (ctx instanceof LexPadHack) {
+    code.forcedOuterCtx = ctx.content;
+  } else if (ctx instanceof Ctx) {
+    code.forcedOuterCtx = ctx;
+  } else {
+    code.forcedOuterCtx = ctx;
+  }
+
   return code;
 };

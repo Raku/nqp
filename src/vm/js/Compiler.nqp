@@ -1410,21 +1410,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my $*RETURN;
 
         my @pre;
-
         for $node.pre_deserialize -> $node {
-            if nqp::istype($node, QAST::Stmts) {
-                for $node.list -> $op {
-                    if nqp::istype($op, QAST::Op)
-                        && $op.op eq 'loadbytecode' {
-                    }
-                    else {
-                        @pre.push(self.as_js($op, :want($T_VOID)));
-                    }
-                }
-            }
-            else {
-                @pre.push(self.as_js($node, :want($T_VOID)));
-            }
+            @pre.push(self.as_js($node, :want($T_VOID)));
         }
         my $pre := Chunk.new($T_VOID, "", @pre);
 
