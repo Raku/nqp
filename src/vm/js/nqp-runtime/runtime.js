@@ -101,6 +101,7 @@ op.bindhllsym("nqp", "ModuleLoader", {
     load_setting: function(ctx, _NAMED, self, settingName) {
       exports.loadModule(settingName + '.setting');
       var loaded = exports.setupSetting(settingName);
+      require('sprintf');
       return loaded;
     },
     load_module: function(ctx, _NAMED, self, moduleName) {

@@ -1389,11 +1389,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         nqp::istype($node, QAST::Op) && $node.op eq $op;
     }
 
-    method setting_hack($op, @pre) {
-       # HACK to get nqp::sprintf to work
-       @pre.push("require('sprintf');\n"); 
-    }
-
     multi method as_js(QAST::CompUnit $node, :$want, :$cps) {
         # Should have a single child which is the outer block.
         if +@($node) != 1 || !nqp::istype($node[0], QAST::Block) {
@@ -1416,21 +1411,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my @pre;
 
-        # HACK
-        for $node.post_deserialize -> $node {
-           if self.is_op($node, 'forceouterctx') {
-               self.setting_hack($node, @pre);
-           }
-        }
-
         for $node.pre_deserialize -> $node {
             if nqp::istype($node, QAST::Stmts) {
                 for $node.list -> $op {
-                    if self.is_op($op, 'forceouterctx') {
-                        self.setting_hack($op, @pre);
-                        @pre.push(self.as_js($op, :want($T_VOID)));
-                    }
-                    elsif nqp::istype($op, QAST::Op)
+                    if nqp::istype($op, QAST::Op)
                         && $op.op eq 'loadbytecode' {
                     }
                     else {
