@@ -73,7 +73,7 @@ function saveCtx(where, block) {
   saveCtxAs = old;
 }
 
-exports.loadModule = function(module, helper) {
+function loadModule(module, helper) {
   saveCtx(module, function() {
     module = module.replace(/::/g, '/');
     if (helper) {
@@ -82,32 +82,11 @@ exports.loadModule = function(module, helper) {
       require(module);
     }
   });
-};
-
-exports.loadSetting = exports.loadModule;
-
-exports.setupSetting = function(settingName) {
-  return savedCtxs[settingName + '.setting'];
-};
+}
 
 exports.ctxsave = function(ctx) {
   savedCtxs[saveCtxAs] = ctx;
 };
-
-
-// HACK
-
-op.bindhllsym("nqp", "ModuleLoader", {
-    load_setting: function(ctx, _NAMED, self, settingName) {
-      exports.loadModule(settingName + '.setting');
-      var loaded = exports.setupSetting(settingName);
-      require('sprintf');
-      return loaded;
-    },
-    load_module: function(ctx, _NAMED, self, moduleName) {
-      exports.loadModule(moduleName);
-    }
-});
 
 
 var LexPadHack = require('./lexpad-hack.js');
@@ -117,7 +96,7 @@ op.loadbytecode = function(ctx, file) {
   if (file == '/share/nqp/lib/Perl6/BOOTSTRAP.js') {
     file = 'Perl6::BOOTSTRAP';
   }
-  exports.loadModule(file);
+  loadModule(file);
   // HACK - ctx is sometimes NULL on rakudo-js
   if (ctx) ctx.bindDynamic('$*MAIN_CTX', new LexPadHack(savedCtxs[file]));
   return file;
