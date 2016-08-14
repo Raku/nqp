@@ -686,7 +686,6 @@ BinaryCursor.prototype.contextToCode = function(context, data) {
   for (var name in context.lexicals) {
     var value = context.lexicals[name];
 
-    var getData = 'data[' + (data.length - 1) + ']\n';
     setVars += (context.staticCode.ctx + '[' + addToData(name) + '] = ' + addToData(value) + '\n');
   }
 
