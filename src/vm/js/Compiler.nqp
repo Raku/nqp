@@ -652,7 +652,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     method mark_children_serializable(QAST::Children $node) {
         my int $serializable := 0;
         for $node.list -> $child {
-            my $is_child_serializable := self.mark_serializable($child);
+            my $is_child_serializable := self.is_ctxsave($node) || self.mark_serializable($child);
             $serializable := $serializable || $is_child_serializable;
         }
         $serializable;
@@ -1209,22 +1209,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     multi method as_js(QAST::Stmts $node, :$want, :$cps) {
         # for performance purposes we use the native js lexicals as much as possible, that means we need hacks for things that other backends can do easily with all the various ctx ops
         if self.is_ctxsave($node) {
-            my @lexicals;
-            for $*BLOCK.variables -> $var {
-                my $value;
-                if $*BLOCK.lookup_static_variable($var) -> $static {
-                    $value := self.value_as_js($static.value);
-                }
-                elsif self.is_dynamic_var($*BLOCK, $var) {
-                    $value := "{$*CTX}.lookup({quote_string($var.name)})";
-                }
-                else {
-                    $value := $*BLOCK.mangle_var($var);
-                }
-                @lexicals.push(quote_string($var.name) ~ ': ' ~ $value);
-
-            }
-            Chunk.void("nqp.ctxsave(\{{nqp::join(',', @lexicals)}\});\n");
+            Chunk.void("nqp.ctxsave($*CTX);\n");
         }
         else {
             self.compile_all_the_statements($node, $want, :$cps, :result_child($node.resultchild));

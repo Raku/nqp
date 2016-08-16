@@ -736,7 +736,7 @@ class QAST::OperationsJS {
                     my $catch_body := $comp.as_js($handler, :want($T_OBJ));
                     $handle := Chunk.void(
                         "$unwind_marker = \{\};\n",
-                        "$*HANDLER_CTX.CATCH = function() \{\n",
+                        "$*HANDLER_CTX.\$\$CATCH = function() \{\n",
                         $catch_body,
                         "return {$catch_body.expr};\n",
                         "\};\n",
@@ -755,7 +755,7 @@ class QAST::OperationsJS {
                 my $*CTX := $*HANDLER_CTX;
                 my $body := $comp.as_js($protected, :$want);
                 return Chunk.new($want, $try_ret, [
-                    "var $*CTX = new nqp.Ctx($outer_ctx, $outer_ctx, $outer_ctx.callThis, $outer_ctx.codeRefAttr);\n",
+                    "var $*CTX = new nqp.Ctx($outer_ctx, $outer_ctx, $outer_ctx.\$\$callThis, $outer_ctx.\$\$codeRefAttr);\n",
                     $handle,
                     "try \{",
                     $body,

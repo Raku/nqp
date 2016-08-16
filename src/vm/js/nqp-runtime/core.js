@@ -6,7 +6,6 @@ var CodeRef = require('./code-ref.js');
 
 var Ctx = require('./ctx.js');
 
-var LexPadHack = require('./lexpad-hack.js');
 var NQPInt = require('./nqp-int.js');
 
 var NQPException = require('./nqp-exception.js');
@@ -140,8 +139,8 @@ op.iterator = function(obj) {
     return new Iter(obj.array);
   } else if (obj instanceof Hash) {
     return new HashIter(obj);
-  } else if (obj instanceof LexPadHack) {
-    return new Iter(Object.keys(obj.content));
+  } else if (obj instanceof Ctx) {
+    return new Iter(Object.keys(obj).filter(key => key.substr(0, 2) != '$$'));
   } else {
     throw 'unsupported thing to iterate over';
   }
@@ -1091,7 +1090,7 @@ op.hintfor = function(classHandle, attrName) {
 };
 
 op.ctxcaller = function(ctx) {
-  return ctx.caller;
+  return ctx.$$caller;
 };
 
 op.captureposprimspec = function(capture, idx) {
@@ -1099,16 +1098,14 @@ op.captureposprimspec = function(capture, idx) {
 };
 
 op.forceouterctx = function(code, ctx) {
-  if (!(code instanceof CodeRef))
+  if (!(code instanceof CodeRef)) {
     throw 'forceouterctx first operand must be a CodeRef';
-
-  if (ctx instanceof LexPadHack) {
-    code.forcedOuterCtx = ctx.content;
-  } else if (ctx instanceof Ctx) {
-    code.forcedOuterCtx = ctx;
-  } else {
-    code.forcedOuterCtx = ctx;
   }
+  if (!(ctx instanceof Ctx)) {
+    throw 'forceouterctx second operand must be a CodeRef';
+  }
+
+  code.forcedOuterCtx = ctx;
 
   return code;
 };

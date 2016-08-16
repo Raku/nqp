@@ -2,7 +2,7 @@
 
 class WrappedCtx {
   constructor(wrap) {
-    this.outer = wrap;
+    this.$$outer = wrap;
   }
   codeRef() {
     return {statiCode: null};

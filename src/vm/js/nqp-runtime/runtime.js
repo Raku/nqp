@@ -89,7 +89,6 @@ exports.ctxsave = function(ctx) {
 };
 
 
-var LexPadHack = require('./lexpad-hack.js');
 
 op.loadbytecode = function(ctx, file) {
   // HACK - temporary hack for rakudo-js
@@ -98,16 +97,15 @@ op.loadbytecode = function(ctx, file) {
   }
   loadModule(file);
   // HACK - ctx is sometimes NULL on rakudo-js
-  if (ctx) ctx.bindDynamic('$*MAIN_CTX', new LexPadHack(savedCtxs[file]));
+  if (ctx) ctx.bindDynamic('$*MAIN_CTX', savedCtxs[file]);
   return file;
 };
 
 op.ctxlexpad = function(ctx) {
-  // HACK
-  if (ctx instanceof LexPadHack) {
+  if (ctx instanceof Ctx) {
     return ctx;
   } else {
-    console.log('ctxlexpad NYI');
+    throw 'ctxlexpad needs a ctx as an argument';
   }
 };
 

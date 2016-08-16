@@ -4,38 +4,38 @@ var NQPException = require('./nqp-exception.js');
 
 class Ctx {
   constructor(callerCtx, outerCtx, callThis, codeRefAttr) {
-    this.caller = callerCtx;
-    this.outer = outerCtx;
-    this.callThis = callThis;
-    this.codeRefAttr = codeRefAttr;
+    this.$$caller = callerCtx;
+    this.$$outer = outerCtx;
+    this.$$callThis = callThis;
+    this.$$codeRefAttr = codeRefAttr;
   }
 
   codeRef() {
-    return (this.callThis instanceof CodeRef ? this.callThis : this.callThis[this.codeRefAttr]);
+    return (this.$$callThis instanceof CodeRef ? this.$$callThis : this.$$callThis[this.$$codeRefAttr]);
   }
 
   propagateException(exception) {
     var ctx = this;
     while (ctx) {
-      if (ctx.CATCH) {
+      if (ctx.$$CATCH) {
         exception.caught = ctx;
         exception.resume = false;
         ctx.exception = exception;
-        ctx.unwind.ret = ctx.CATCH();
+        ctx.unwind.ret = ctx.$$CATCH();
         if (exception.resume) {
           return;
         } else {
           throw ctx.unwind;
         }
       }
-      ctx = ctx.caller;
+      ctx = ctx.$$caller;
     }
     throw exception.message;
   }
 
   catchException(exception) {
     this.exception = exception;
-    this.CATCH();
+    this.$$CATCH();
   }
 
   rethrow(exception) {
@@ -60,7 +60,7 @@ class Ctx {
       if (ctx.hasOwnProperty(name)) {
         return ctx[name];
       }
-      ctx = ctx.caller;
+      ctx = ctx.$$caller;
     }
     return null;
     /* Looking up of a contextual is allowed to fail,
@@ -68,12 +68,12 @@ class Ctx {
   }
 
   lookupDynamicFromCaller(name) {
-    var ctx = this.caller;
+    var ctx = this.$$caller;
     while (ctx) {
       if (ctx.hasOwnProperty(name)) {
         return ctx[name];
       }
-      ctx = ctx.caller;
+      ctx = ctx.$$caller;
     }
     return null;
     /* Looking up of a contextual is allowed to fail,
@@ -81,16 +81,16 @@ class Ctx {
   }
 
   lookupFromSomeCaller(name) {
-    var currentCallerCtx = this.caller;
+    var currentCallerCtx = this.$$caller;
     while (currentCallerCtx) {
       var currentCtx = currentCallerCtx;
       while (currentCtx) {
         if (currentCtx.hasOwnProperty(name)) {
           return currentCtx[name];
         }
-        currentCtx = currentCtx.outer;
+        currentCtx = currentCtx.$$outer;
       }
-      currentCallerCtx = currentCallerCtx.caller;
+      currentCallerCtx = currentCallerCtx.$$caller;
     }
     return null;
   }
@@ -101,7 +101,7 @@ class Ctx {
       if (ctx.hasOwnProperty(name)) {
         return ctx[name];
       }
-      ctx = ctx.outer;
+      ctx = ctx.$$outer;
     }
     /* Rakudo depends on returning null when we can't lookup a lexical */
     return null;
@@ -115,6 +115,10 @@ class Ctx {
     this[key] = value;
   }
 
+  $$existskey(key) {
+    return (this.hasOwnProperty(key) ? 1 : 0);
+  }
+
   bind(name, value) {
     var ctx = this;
     while (ctx) {
@@ -122,7 +126,7 @@ class Ctx {
         ctx[name] = value;
         return ctx[name];
       }
-      ctx = ctx.outer;
+      ctx = ctx.$$outer;
     }
     throw "Can't bind: " + name;
   }
@@ -134,7 +138,7 @@ class Ctx {
         ctx[name] = value;
         return ctx[name];
       }
-      ctx = ctx.caller;
+      ctx = ctx.$$caller;
     }
     throw "Can't bind dynamic: " + name;
   }
