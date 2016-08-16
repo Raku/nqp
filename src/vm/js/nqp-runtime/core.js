@@ -1102,7 +1102,7 @@ op.forceouterctx = function(code, ctx) {
     throw 'forceouterctx first operand must be a CodeRef';
   }
   if (!(ctx instanceof Ctx)) {
-    throw 'forceouterctx second operand must be a CodeRef';
+    throw 'forceouterctx second operand must be a Ctx';
   }
 
   code.forcedOuterCtx = ctx;
