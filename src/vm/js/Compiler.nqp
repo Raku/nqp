@@ -1207,7 +1207,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     multi method as_js(QAST::Stmts $node, :$want, :$cps) {
-        # for performance purposes we use the native js lexicals as much as possible, that means we need hacks for things that other backends can do easily with all the various ctx ops
+        # We currently don't pass the ctx properly to loaded code so we use a ctxsave hack
         if self.is_ctxsave($node) {
             Chunk.void("nqp.ctxsave($*CTX);\n");
         }
