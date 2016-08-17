@@ -77,7 +77,6 @@ class HLL::Actions {
     }
 
     method O($/) {
-        nqp::die("HLL::Grammar.O called without any arguments") if not %spec;
         make %*SPEC
     }
 
