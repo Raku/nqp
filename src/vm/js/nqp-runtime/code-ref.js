@@ -14,7 +14,6 @@ class CodeRef {
     this.name = name;
     this.cuid = cuid;
     this.staticCode = this;
-    if (cuid) CodeRef.cuids[cuid] = this;
   }
 
   $$injectMethod(proto, name) {
@@ -99,9 +98,8 @@ class CodeRef {
 
 
   closure(block) {
-    var closure = new CodeRef(this.name, undefined);
+    var closure = new CodeRef(this.name, this.cuid);
     closure.codeObj = this.codeObj;
-    closure.cuid = this.cuid;
     closure.$$call = block;
     closure.staticCode = this;
     return closure;
@@ -160,7 +158,5 @@ class CodeRef {
     return 1;
   }
 };
-
-CodeRef.cuids = {};
 
 module.exports = CodeRef;
