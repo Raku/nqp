@@ -897,14 +897,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     my class SerializedCodeRefInfo {
         has $!closure_template;
         has $!lexicals_type_info;
-        has $!ctx;
         has $!outer_cuid;
-        has $!code_ref_attr;
-        method ctx() {$!ctx}
         method outer_cuid() {$!outer_cuid}
         method lexicals_type_info() {$!lexicals_type_info}
         method closure_template() {$!closure_template}
-        method code_ref_attr() {$!code_ref_attr}
     }
 
     method type_info_for_lexicals(BlockInfo $block) {
@@ -1059,32 +1055,25 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 ];
                 %*BLOCKS_DONE{$node.cuid} := Chunk.void("(", |@function, ")");
 
-                if 1 { # TODO make sure that only blocks that take in serialization have that info emitted
+                if 1 { # TODO make sure that only blocks that take part in serialization have that info emitted
                     my $outer_cuid;
                     if nqp::defined($*BLOCK.outer) && $*BLOCK.outer.cuid {
                         $outer_cuid := self.mangled_cuid($*BLOCK.outer.cuid);
                     }
                     my $lexicals_type_info := self.type_info_for_lexicals($*BLOCK);
-                    if $node.blocktype eq 'immediate' {
-                        %!serialized_code_ref_info{$node.cuid} := SerializedCodeRefInfo.new(
-                            ctx => $*CTX,
-                            :$outer_cuid,
-                            :$lexicals_type_info
-                        );
-                    }
-                    else {
+                    my $closure_template;
+                    if $node.blocktype ne 'immediate' {
                         my @closure_template := nqp::clone(@function);
                         @closure_template.unshift("function({self.outer_ctxs($*BLOCK)}) \{ return ");
                         @closure_template.push("}");
-
-                        %!serialized_code_ref_info{$node.cuid} := SerializedCodeRefInfo.new(
-                            closure_template => Chunk.new($T_NONVAL, '', @closure_template),
-                            ctx => $*CTX,
-                            :$outer_cuid,
-                            :$lexicals_type_info,
-                            :$code_ref_attr
-                        );
+                        $closure_template := Chunk.new($T_NONVAL, '', @closure_template);
                     }
+
+                    %!serialized_code_ref_info{$node.cuid} := SerializedCodeRefInfo.new(
+                        :$closure_template,
+                        :$outer_cuid,
+                        :$lexicals_type_info,
+                    );
                 }
             }
 
@@ -1251,15 +1240,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 @setup.push(
                     ~ self.mangled_cuid($cuid)
                     ~ ".setInfo("
-                    ~ quote_string($info.ctx) ~ ","
                     ~ ($info.outer_cuid // "null") ~ ",");
 
                 @setup.push($info.closure_template // "null");
 
                 @setup.push(
-                    ~ "," ~ $info.lexicals_type_info ~ ","
-                    ~ "cuids, "
-                    ~ quote_string($info.code_ref_attr)
+                    ~ "," ~ $info.lexicals_type_info
                     ~ ");\n");
             }
         }

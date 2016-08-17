@@ -131,12 +131,10 @@ class CodeRef {
     return this;
   }
 
-  setInfo(ctx, outerCodeRef, closureTemplate, lexicalsTypeInfo, cuids, setSetting, codeRefAttr) {
+  setInfo(outerCodeRef, closureTemplate, lexicalsTypeInfo) {
     this.closureTemplate = closureTemplate;
-    this.ctx = ctx;
     this.outerCodeRef = outerCodeRef;
     this.lexicalsTypeInfo = lexicalsTypeInfo;
-    this.cuids = cuids;
     return this;
   }
 
