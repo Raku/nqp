@@ -1001,6 +1001,18 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         Chunk.void(|@capture_inners);
     }
 
+    method outer_ctxs(BlockInfo $block) {
+        my @ctxs;
+        my $info := $block.outer;
+
+        # Avoid the ctx from the fake outer ctx
+        while $info && !($info.ctx eq 'null' && !$info.outer) {
+            @ctxs.unshift($info.ctx);
+            $info := $info.outer;
+        }
+        nqp::join(',', @ctxs);
+    }
+
     method compile_block(QAST::Block $node, $outer, $outer_loop, :$want, :@extra_args=[], :$cps) {
 
         my $outer_ctx := try $*CTX // "null";
@@ -1034,7 +1046,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 my $sig := self.compile_sig($*BLOCK.params);
 
                 my @function := [
-                    "function({$sig.expr}) \{\n" ~ "/* serializable {self.is_serializable($node.cuid)} */\n",
+                    "function({$sig.expr}) \{\n" ,#~ "/* serializable {self.is_serializable($node.cuid)} */\n",
                     self.declare_js_vars($*BLOCK.tmps),
                     self.declare_js_vars($*BLOCK.js_lexicals),
                     $create_ctx,
@@ -1061,8 +1073,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                         );
                     }
                     else {
+                        my @closure_template := nqp::clone(@function);
+                        @closure_template.unshift("function({self.outer_ctxs($*BLOCK)}) \{ return ");
+                        @closure_template.push("}");
+
                         %!serialized_code_ref_info{$node.cuid} := SerializedCodeRefInfo.new(
-                            closure_template => ChunkEscaped.new(@function),
+                            closure_template => Chunk.new($T_NONVAL, '', @closure_template),
                             ctx => $*CTX,
                             :$outer_cuid,
                             :$lexicals_type_info,

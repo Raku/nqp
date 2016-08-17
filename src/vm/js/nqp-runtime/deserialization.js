@@ -12,6 +12,8 @@ var CodeRef = require('./code-ref.js');
 var constants = require('./constants.js');
 var NQPArray = require('./array.js');
 
+var Ctx = require('./ctx.js');
+
 var containerSpecs = require('./container-specs.js');
 
 var hll = require('./hll.js');
@@ -617,38 +619,23 @@ BinaryCursor.prototype.deserialize = function(sc) {
     }
   }
 
-  var code = noContextClosures.map(function(closure) {
-    var codeRef = 'sc.codeRefs[' + closure.index + ']';
+  for (closure of noContextClosures) {
+    var closureTemplate = closure.staticCode.closureTemplate;
+    var fakeCtxs = [];
+    var i = closureTemplate.length;
+    while (i--) {
+      fakeCtxs.push(null);
+    }
+    var built = closureTemplate.apply(null, fakeCtxs);
+    sc.codeRefs[closure.index].capture(built);
+  }
 
-    var outerCtxVar = closure.staticCode.outerCodeRef.ctx;
-    return 'var ' + outerCtxVar + ' = null;\n' +
-        'sc.codeRefs[' + closure.index + '].capture(' +
-        closure.staticCode.closureTemplate +
-        ');\n';
-  }).join('');
-
-  var data = [];
   for (var i = 0; i < contexts.length; i++) {
     if (contexts[i].outer == 0) {
-      code += this.contextToCode(contexts[i], data) + '\n\n';
+      this.deserializeCtx(contexts[i], []);
     }
   }
 
-  var cuids = [];
-  for (var cuid in CodeRef.cuids) {
-    mangledCuid = 'cuid' + cuid;
-    cuids.push(mangledCuid + ' = CodeRef.cuids[\"' + cuid + '\"]');
-  }
-
-  var declareCuids = 'var ' + cuids.join(',') + ';\n';
-
-  var prelude = ';\n';
-  if (code) {
-    /* TODO reduce accidental poisoning */
-    /* TODO make cuids be in scope */
-    var nqp = require('nqp-runtime');
-    eval(prelude + declareCuids + code);
-  }
 
   var reposTable = this.I32();
   var numRepos = this.I32();
@@ -667,39 +654,36 @@ BinaryCursor.prototype.deserialize = function(sc) {
       STable.setMethodCache(STable._methodCache.$$toObject());
     }
   }
-
 };
 
-BinaryCursor.prototype.contextToCode = function(context, data) {
-  var outerCtx = 'null'; // TODO
-  var callerCtx = 'null';
-  var createCtx = 'var ' + context.staticCode.ctx + ' = new nqp.Ctx(' + outerCtx + ', ' + callerCtx + ');\n';
-  var setVars = '';
+BinaryCursor.prototype.deserializeCtx = function(context, outers) {
+  var outerCtx = null; // TODO -  set the outer ctx
+  var callerCtx = null;
 
+  // TODO - think if we should set codeObj
+  var ctx = new Ctx(outerCtx, callerCtx);
 
   var lexicals = [];
-  function addToData(value) {
-    data.push(value);
-    return 'data[' + (data.length - 1) + ']';
-  }
 
   for (var name in context.lexicals) {
-    var value = context.lexicals[name];
-
-    setVars += (context.staticCode.ctx + '[' + addToData(name) + '] = ' + addToData(value) + '\n');
+    ctx[name] = context.lexicals[name];
   }
 
-  return '(function() {\n' +
-      createCtx +
-      setVars +
-      context.inner.map(function(inner) {return this.contextToCode(inner, data)}).join('') +
-      context.closures.map(function(closure) {
-        var codeRef = 'sc.codeRefs[' + closure.index + ']';
-        return codeRef + '.capture(' +
-           closure.staticCode.closureTemplate +
-           ');\n';
-      }).join('') +
-      '})();\n';
+  var newOuters = outers.slice();
+  newOuters.push(ctx);
+
+
+  for (inner of context.inner) {
+    this.deserializeCtx(inner, newOuters)
+  }
+
+  for (closure of context.closures) {
+    var closureTemplate = closure.staticCode.closureTemplate;
+    var codeRef = this.sc.codeRefs[closure.index];
+    while (newOuters.length < closure.staticCode.closureTemplate.length) newOuters.unshift(null);
+    codeRef.capture(closureTemplate.apply(null, newOuters));
+  }
+
 };
 
 

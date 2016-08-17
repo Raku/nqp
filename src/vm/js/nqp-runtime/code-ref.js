@@ -59,15 +59,8 @@ class CodeRef {
 
   // HACK - do this properly
   $$call() {
-    var nqp = require('nqp-runtime');
+    //console.log("doing a hack with closure template", this.closureTemplate);
     if (this.closureTemplate) {
-
-      var $$cuids = this.cuids;
-      var declare = [];
-      for (var i in $$cuids) {
-        declare.push('cuid' + $$cuids[i].cuid + ' = $$cuids[' + i + ']');
-      }
-      var declareCuids = 'var ' + declare.join(',') + ';\n';
 
       var searched = this;
       var forcedOuterCtx = null;
@@ -78,12 +71,19 @@ class CodeRef {
         }
         searched = searched.outerCodeRef;
       }
-      var outerCtxVar = this.outerCodeRef.ctx;
 
-      if (forcedOuterCtx) forcedOuterCtx = new WrappedCtx(forcedOuterCtx);
+      var i = this.closureTemplate.length;
 
-      var template = declareCuids + 'var ' + outerCtxVar + '= forcedOuterCtx;(' + this.closureTemplate + ')';
-      this.$$call = eval(template);
+      var fakeCtxs = [];
+      while (i--) {
+        fakeCtxs.push(null);
+      }
+
+      if (forcedOuterCtx) {
+        fakeCtxs[fakeCtxs.length-1] = new WrappedCtx(forcedOuterCtx);
+      }
+
+      this.$$call = this.closureTemplate.apply(null, fakeCtxs);
       return this.$$call.apply(this, arguments);
 
     }
