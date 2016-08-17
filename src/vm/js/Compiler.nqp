@@ -1774,7 +1774,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         Chunk.void(
             "var nqp = require('nqp-runtime');\n",
-            "\nvar top_ctx = nqp.topContext();\n",
             self.setup_cuids,
             self.set_static_info,
             $chunk
