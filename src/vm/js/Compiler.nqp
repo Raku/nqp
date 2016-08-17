@@ -1207,13 +1207,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     multi method as_js(QAST::Stmts $node, :$want, :$cps) {
-        # We currently don't pass the ctx properly to loaded code so we use a ctxsave hack
-        if self.is_ctxsave($node) {
-            Chunk.void("nqp.ctxsave($*CTX);\n");
-        }
-        else {
-            self.compile_all_the_statements($node, $want, :$cps, :result_child($node.resultchild));
-        }
+        self.compile_all_the_statements($node, $want, :$cps, :result_child($node.resultchild));
     }
 
     multi method as_js(QAST::VM $node, :$want, :$cps) {
@@ -1424,7 +1418,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             my $main := self.as_js($main_block, :want($T_OBJ));
 
-            $body := $instant ?? Chunk.void($block_js, $main, $main.expr ~ ".\$\$apply([null, null].concat(nqp.args(module)));\n") !! $main;
+            $body := $instant ?? Chunk.void($block_js, $main, $main.expr ~ ".\$\$apply([nqp.loaderCtx, null].concat(nqp.args(module)));\n") !! $main;
             
         }
         else {

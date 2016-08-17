@@ -368,6 +368,7 @@ op.newtype = function(how, repr) {
 };
 
 op.can = function(obj, method) {
+  if (obj instanceof NQPInt) return 0;
   return obj._STable.methodCache.hasOwnProperty(method) ? 1 : 0;
 };
 

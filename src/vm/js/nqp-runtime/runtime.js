@@ -63,41 +63,19 @@ module.exports.knowhow = bootstrap.knowhow;
 
 module.exports.NQPArray = require('./array.js');
 
-var saveCtxAs;
-var savedCtxs = {};
-
-function saveCtx(where, block) {
-  var old = saveCtxAs;
-  saveCtxAs = where;
-  block();
-  saveCtxAs = old;
-}
-
-function loadModule(module, helper) {
-  saveCtx(module, function() {
-    module = module.replace(/::/g, '/');
-    if (helper) {
-      helper();
-    } else {
-      require(module);
-    }
-  });
-}
-
-exports.ctxsave = function(ctx) {
-  savedCtxs[saveCtxAs] = ctx;
-};
-
-
+exports.loaderCtx = null;
 
 op.loadbytecode = function(ctx, file) {
   // HACK - temporary hack for rakudo-js
   if (file == '/share/nqp/lib/Perl6/BOOTSTRAP.js') {
     file = 'Perl6::BOOTSTRAP';
   }
-  loadModule(file);
-  // HACK - ctx is sometimes NULL on rakudo-js
-  if (ctx) ctx.bindDynamic('$*MAIN_CTX', savedCtxs[file]);
+
+  var oldLoaderCtx = exports.loaderCtx;
+  exports.loaderCtx = ctx;
+  require(file.replace(/::/g, '/'));
+  exports.loaderCtx = oldLoaderCtx;
+
   return file;
 };
 
