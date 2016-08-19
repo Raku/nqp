@@ -1185,7 +1185,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     method create_ctx($name, :$code_ref, :$code_ref_attr) {
-        # TODO think about contexts
         "var $name = new nqp.Ctx(caller_ctx, this.forcedOuterCtx || {self.outer_ctx}, $code_ref, $code_ref_attr);\n";
     }
 
