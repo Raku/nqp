@@ -829,9 +829,11 @@ for <if unless with without> -> $op_name {
         $regalloc.release_register(@comp_ops[1].result_reg, @comp_ops[1].result_kind);
 
         # Handle else branch (coercion of condition result if 2-arg).
-        push_op(@ins, 'goto', $end_lbl);
-        nqp::push(@ins, $else_lbl);
         if $operands == 3 {
+            # Terminate the then branch first.
+            push_op(@ins, 'goto', $end_lbl);
+            nqp::push(@ins, $else_lbl);
+
             push_ilist(@ins, @comp_ops[2]);
             if !$is_void {
                 if @comp_ops[2].result_kind != $res_kind {
@@ -844,13 +846,6 @@ for <if unless with without> -> $op_name {
                 }
             }
             $regalloc.release_register(@comp_ops[2].result_reg, @comp_ops[2].result_kind);
-        }
-        else {
-            if !$is_void && @comp_ops[0].result_kind != $res_kind {
-                my $coercion := $qastcomp.coercion(@comp_ops[0], $res_kind);
-                push_ilist(@ins, $coercion);
-                push_op(@ins, 'set', $res_reg, $coercion.result_reg);
-            }
         }
         $regalloc.release_register(@comp_ops[0].result_reg, @comp_ops[0].result_kind);
         nqp::push(@ins, $end_lbl);
