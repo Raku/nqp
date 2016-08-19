@@ -1,5 +1,6 @@
 'use strict';
 var NQPException = require('./nqp-exception.js');
+var Iter = require('./iter.js');
 
 function NQPArray(array) {
   this.array = array;
@@ -128,6 +129,10 @@ NQPArray.prototype.$$atposnd = function(idx) {
   }
   var index = idx.array[0];
   return this.array[index < 0 ? this.array.length + index : index];
+};
+
+NQPArray.prototype.$$iterator = function() {
+  return new Iter(this.array);
 };
 
 NQPArray.prototype.$$atposnd_i = NQPArray.prototype.$$atposnd;

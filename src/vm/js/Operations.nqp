@@ -874,7 +874,7 @@ class QAST::OperationsJS {
     add_simple_op('setelems', $T_OBJ, [$T_OBJ, $T_INT], :sideffects);
 
 
-    add_simple_op('iterator', $T_OBJ, [$T_OBJ], :sideffects);
+    add_simple_op('iterator', $T_OBJ, [$T_OBJ], sub ($over) {"$over.\$\$iterator()"}, :sideffects);
 
     add_simple_op('iterval', $T_OBJ, [$T_OBJ], sub ($iter) {"$iter.iterval()"});
     add_simple_op('iterkey_s', $T_STR, [$T_OBJ], sub ($iter) {"$iter.iterkey_s()"});

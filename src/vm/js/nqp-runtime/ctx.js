@@ -1,6 +1,7 @@
 'use strict';
 var CodeRef = require('./code-ref.js');
 var NQPException = require('./nqp-exception.js');
+var Iter = require('./iter.js');
 
 class Ctx {
   constructor(callerCtx, outerCtx, callThis, codeRefAttr) {
@@ -141,6 +142,10 @@ class Ctx {
       ctx = ctx.$$caller;
     }
     throw "Can't bind dynamic: " + name;
+  }
+
+  $$iterator() {
+    return new Iter(Object.keys(this).filter(key => key.substr(0, 2) != '$$'));
   }
 };
 

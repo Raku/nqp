@@ -81,69 +81,8 @@ op.setdebugtypename = function(type, debugName) {
   return type;
 };
 
-function Iter(array) {
-  this.array = array;
-  this.target = array.length;
-  this.idx = 0;
-}
-
-Iter.prototype.$$shift = function() {
-  return this.array[this.idx++];
-};
-
-Iter.prototype.$$toBool = function(ctx) {
-  return this.idx < this.target;
-};
-
-function HashIter(hash) {
-  this.hash = hash.content;
-  this.keys = Object.keys(hash.$$toObject());
-  this.target = this.keys.length;
-  this.idx = 0;
-}
-
-HashIter.prototype.$$shift = function() {
-  return new IterPair(this.hash, this.keys[this.idx++]);
-};
-
-HashIter.prototype.$$toBool = function(ctx) {
-  return this.idx < this.target;
-};
-
-function IterPair(hash, key) {
-  this._key = key;
-  this._hash = hash;
-}
-
-IterPair.prototype.iterval = function() {
-  return this._hash.get(this._key);
-};
-IterPair.prototype.iterkey_s = function() {
-  return this._key;
-};
-
-IterPair.prototype.Str = function(ctx, _NAMED, self) {
-  return this._key;
-};
-
-IterPair.prototype.key = function(ctx, _NAMED, self) {
-  return this._key;
-};
-IterPair.prototype.value = function(ctx, _NAMED, self) {
-  return this._hash.get(this._key);
-};
-
-
 op.iterator = function(obj) {
-  if (obj instanceof NQPArray) {
-    return new Iter(obj.array);
-  } else if (obj instanceof Hash) {
-    return new HashIter(obj);
-  } else if (obj instanceof Ctx) {
-    return new Iter(Object.keys(obj).filter(key => key.substr(0, 2) != '$$'));
-  } else {
-    throw 'unsupported thing to iterate over';
-  }
+  return obj.$$iterator();
 };
 
 
