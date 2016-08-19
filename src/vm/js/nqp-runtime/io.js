@@ -1,3 +1,4 @@
+'use strict';
 var fs = require('fs-ext');
 var os = require('os');
 var sleep = require('sleep');
@@ -112,25 +113,27 @@ op.lstat_time = function(file, code) {
   return stat(file, code, true);
 };
 
-function FileHandle(fd) {
-  this.fd = fd;
-}
+class FileHandle {
+  constructor(fd) {
+    this.fd = fd;
+  }
 
-FileHandle.prototype.closefh = function() {
-  fs.closeSync(this.fd);
-};
+  closefh() {
+    fs.closeSync(this.fd);
+  }
 
-FileHandle.prototype.isttyfh = function() {
-  return tty.isatty(this.fd) ? 1 : 0;
-};
+  isttyfh() {
+    return tty.isatty(this.fd) ? 1 : 0;
+  }
 
-FileHandle.prototype.printfh = function(content) {
-  var buffer = new Buffer(content, this.encoding);
-  return fs.writeSync(this.fd, buffer, 0, buffer.length);
-};
+  printfh(content) {
+    var buffer = new Buffer(content, this.encoding);
+    return fs.writeSync(this.fd, buffer, 0, buffer.length);
+  }
 
-FileHandle.prototype.$$toBool = function(ctx) {
-  return 1;
+  $$toBool(ctx) {
+    return 1;
+  }
 };
 
 op.open = function(name, mode) {
@@ -383,38 +386,36 @@ op.getenvhash = function() {
   return hash;
 };
 
-function Stderr() {
-}
+class Stderr {
+  printfh(msg) {
+    process.stderr.write(msg);
+  }
 
-Stderr.prototype.printfh = function(msg) {
-  process.stderr.write(msg);
-};
+  isttyfh() {
+    return (process.stderr.isTTY ? 1 : 0);
+  }
 
-Stderr.prototype.isttyfh = function() {
-  return (process.stderr.isTTY ? 1 : 0);
-};
-
-Stderr.prototype.$$toBool = function(ctx) {
-  return 1;
+  $$toBool(ctx) {
+    return 1;
+  }
 };
 
 op.getstderr = function() {
   return new Stderr();
 };
 
-function Stdout() {
-}
+class Stdout {
+  isttyfh() {
+    return (process.stdout.isTTY ? 1 : 0);
+  }
 
-Stdout.prototype.isttyfh = function() {
-  return (process.stdout.isTTY ? 1 : 0);
-};
+  printfh(msg) {
+    process.stdout.write(msg);
+  }
 
-Stdout.prototype.printfh = function(msg) {
-  process.stdout.write(msg);
-};
-
-Stdout.prototype.$$toBool = function(ctx) {
-  return 1;
+  $$toBool(ctx) {
+    return 1;
+  }
 };
 
 op.getstdout = function() {
@@ -426,15 +427,14 @@ op.flushfh = function(fh) {
   return fh;
 };
 
-function Stdin() {
-}
+class Stdin {
+  $$toBool(ctx) {
+    return 1;
+  }
 
-Stdin.prototype.$$toBool = function(ctx) {
-  return 1;
-};
-
-Stdin.prototype.isttyfh = function() {
-  return (process.stdin.isTTY ? 1 : 0);
+  isttyfh() {
+    return (process.stdin.isTTY ? 1 : 0);
+  }
 };
 
 op.getstdin = function() {

@@ -79,7 +79,7 @@ class CodeRef {
       }
 
       if (forcedOuterCtx) {
-        fakeCtxs[fakeCtxs.length-1] = new WrappedCtx(forcedOuterCtx);
+        fakeCtxs[fakeCtxs.length - 1] = new WrappedCtx(forcedOuterCtx);
       }
 
       this.$$call = this.closureTemplate.apply(null, fakeCtxs);

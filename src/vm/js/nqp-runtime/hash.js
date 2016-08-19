@@ -1,93 +1,103 @@
-function HashIter(hash) {
-  this.hash = hash.content;
-  this.keys = Object.keys(hash.$$toObject());
-  this.target = this.keys.length;
-  this.idx = 0;
-}
+'use strict';
 
-HashIter.prototype.$$shift = function() {
-  return new IterPair(this.hash, this.keys[this.idx++]);
+class HashIter {
+  constructor(hash) {
+    this.hash = hash.content;
+    this.keys = Object.keys(hash.$$toObject());
+    this.target = this.keys.length;
+    this.idx = 0;
+  }
+
+  $$shift() {
+    return new IterPair(this.hash, this.keys[this.idx++]);
+  }
+
+  $$toBool(ctx) {
+    return this.idx < this.target;
+  }
 };
 
-HashIter.prototype.$$toBool = function(ctx) {
-  return this.idx < this.target;
+class IterPair {
+  constructor(hash, key) {
+    this._key = key;
+    this._hash = hash;
+  }
+
+  iterval() {
+    return this._hash.get(this._key);
+  }
+
+  iterkey_s() {
+    return this._key;
+  }
+
+  Str(ctx, _NAMED, self) {
+    return this._key;
+  }
+
+  key(ctx, _NAMED, self) {
+    return this._key;
+  }
+
+  value(ctx, _NAMED, self) {
+    return this._hash.get(this._key);
+  }
 };
 
-function IterPair(hash, key) {
-  this._key = key;
-  this._hash = hash;
-}
+class Hash {
+  constructor() {
+    this.content = new Map();
+  }
 
-IterPair.prototype.iterval = function() {
-  return this._hash.get(this._key);
-};
-IterPair.prototype.iterkey_s = function() {
-  return this._key;
-};
+  $$bindkey(key, value) {
+    return this.content.set(key, value);
+    return value;
+  }
 
-IterPair.prototype.Str = function(ctx, _NAMED, self) {
-  return this._key;
-};
+  $$atkey(key) {
+    return this.content.has(key) ? this.content.get(key) : null;
+  }
 
-IterPair.prototype.key = function(ctx, _NAMED, self) {
-  return this._key;
-};
-IterPair.prototype.value = function(ctx, _NAMED, self) {
-  return this._hash.get(this._key);
-};
+  $$existskey(key) {
+    return this.content.has(key);
+  }
 
-function Hash() {
-  this.content = new Map();
-}
+  $$deletekey(key) {
+    this.content.delete(key);
+    return this;
+  }
 
-Hash.prototype.$$bindkey = function(key, value) {
-  return this.content.set(key, value);
-  return value;
-};
+  $$clone() {
+    var clone = new Hash();
+    this.content.forEach(function(value, key, map) {
+      clone.content.set(key, value);
+    });
+    return clone;
+  }
 
-Hash.prototype.$$atkey = function(key) {
-  return this.content.has(key) ? this.content.get(key) : null;
-};
+  $$elems() {
+    return this.content.size;
+  }
 
-Hash.prototype.$$existskey = function(key) {
-  return this.content.has(key);
-};
+  Num() {
+    return this.$$elems();
+  }
 
-Hash.prototype.$$deletekey = function(key) {
-  this.content.delete(key);
-  return this;
-};
+  $$toObject() {
+    var ret = {};
+    this.content.forEach(function(value, key, map) {
+      ret[key] = value;
+    });
+    return ret;
+  }
 
-Hash.prototype.$$clone = function() {
-  var clone = new Hash();
-  this.content.forEach(function(value, key, map) {
-    clone.content.set(key, value);
-  });
-  return clone;
-};
+  $$toBool() {
+    return this.content.size == 0 ? 0 : 1;
+  }
 
-Hash.prototype.$$elems = function() {
-  return this.content.size;
-};
-
-Hash.prototype.Num = function() {
-  return this.$$elems();
-};
-
-Hash.prototype.$$toObject = function() {
-  var ret = {};
-  this.content.forEach(function(value, key, map) {
-    ret[key] = value;
-  });
-  return ret;
-};
-
-Hash.prototype.$$toBool = function() {
-  return this.content.size == 0 ? 0 : 1;
-};
-
-Hash.prototype.$$iterator = function() {
-  return new HashIter(this);
+  $$iterator() {
+    return new HashIter(this);
+  }
 };
 
 module.exports = Hash;

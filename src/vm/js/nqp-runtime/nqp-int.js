@@ -1,21 +1,24 @@
-function NQPInt(value) {
-  this.value = value | 0;
-}
+'use strict';
+class NQPInt {
+  constructor(value) {
+    this.value = value | 0;
+  }
 
-NQPInt.prototype.Int = function(ctx) {
-  return this.value;
-};
+  Int(ctx) {
+    return this.value;
+  }
 
-NQPInt.prototype.Str = function(ctx, _NAMED, self) {
-  return this.value.toString();
-};
+  Str(ctx, _NAMED, self) {
+    return this.value.toString();
+  }
 
-NQPInt.prototype.Num = function(ctx) {
-  return this.value;
-};
+  Num(ctx) {
+    return this.value;
+  }
 
-NQPInt.prototype.$$toBool = function(ctx) {
-  return (this.value ? 1 : 0);
+  $$toBool(ctx) {
+    return (this.value ? 1 : 0);
+  }
 };
 
 module.exports = NQPInt;
