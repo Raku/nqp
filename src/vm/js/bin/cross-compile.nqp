@@ -54,7 +54,7 @@ sub MAIN(*@ARGS, *%ARGS) {
     nqp::bindcomp('QAST', $monkey_patched);
 
     my $moar := $nqpcomp-cc.backend;
-    my $js := HLLBackend::JavaScript.new();
+    my $js := JavaScriptBackend.new();
 
     my $combined := HLL::Backend::JavaScriptAndMoar.new($js);
 

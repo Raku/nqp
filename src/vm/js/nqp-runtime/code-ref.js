@@ -1,141 +1,160 @@
 'use strict';
-CodeRef.cuids = {};
-function CodeRef(name, cuid) {
-  this.name = name;
-  this.cuid = cuid;
-  this.staticCode = this;
-  if (cuid) CodeRef.cuids[cuid] = this;
-}
 
-CodeRef.prototype.$$injectMethod = function(proto, name) {
-  if (this.isCompilerStub) {
-    return;
+class WrappedCtx {
+  constructor(wrap) {
+    this.$$outer = wrap;
   }
-  var codeRefAttr = this.staticCode.codeRefAttr;
-  if (codeRefAttr === null) {
-    return;
-  } else if (codeRefAttr === undefined) {
-    console.warn('unknown codeRefAttr');
-  }
-
-  if (proto.hasOwnProperty(codeRefAttr) && proto[codeRefAttr] !== this) {
-    return;
-  }
-
-  proto[codeRefAttr] = this;
-
-  if (!this.inject) this.inject = [];
-  this.inject.push({name: name, proto: proto});
-
-  if (this.hasOwnProperty('$$call')) {
-    proto[name] = this.$$call;
+  codeRef() {
+    return {statiCode: null};
   }
 };
 
-CodeRef.prototype.capture = function(block) {
-  this.$$call = block;
-  if (this.inject) {
-    for (var i = 0; i < this.inject.length; i++) {
-      this.inject[i].proto[this.inject[i].name] = block;
+class CodeRef {
+  constructor(name, cuid) {
+    this.name = name;
+    this.cuid = cuid;
+    this.staticCode = this;
+  }
+
+  $$injectMethod(proto, name) {
+    if (this.isCompilerStub) {
+      return;
+    }
+    var codeRefAttr = this.staticCode.codeRefAttr;
+    if (codeRefAttr === null) {
+      return;
+    } else if (codeRefAttr === undefined) {
+      console.warn('unknown codeRefAttr');
+    }
+
+    if (proto.hasOwnProperty(codeRefAttr) && proto[codeRefAttr] !== this) {
+      return;
+    }
+
+    proto[codeRefAttr] = this;
+
+    if (!this.inject) this.inject = [];
+    this.inject.push({name: name, proto: proto});
+
+    if (this.hasOwnProperty('$$call')) {
+      proto[name] = this.$$call;
     }
   }
-  return this;
-};
 
-CodeRef.prototype.setOuter = function(outerCtx) {
-  this.outerCtx = outerCtx;
-  return this;
-};
-
-// HACK - do this properly
-CodeRef.prototype.$$call = function() {
-  var nqp = require('nqp-runtime');
-  if (this.closureTemplate) {
-
-    var $$cuids = this.cuids;
-    var declare = [];
-    for (var i in $$cuids) {
-      declare.push('cuid' + $$cuids[i].cuid + ' = $$cuids[' + i + ']');
+  capture(block) {
+    this.$$call = block;
+    if (this.inject) {
+      for (var i = 0; i < this.inject.length; i++) {
+        this.inject[i].proto[this.inject[i].name] = block;
+      }
     }
-    var declareCuids = 'var ' + declare.join(',') + ';\n';
-
-    var setSetting = this.setSetting || '';
-    var template = declareCuids + setSetting + 'var ' + this.outerCtxVar + '= null;(' + this.closureTemplate + ')';
-    this.$$call = eval(template);
-    return this.$$call.apply(this, arguments);
+    return this;
   }
-};
 
-CodeRef.prototype.$$apply = function(argsArray) {
-  return this.$$call.apply(this, argsArray);
-};
+  setOuter(outerCtx) {
+    this.outerCtx = outerCtx;
+    return this;
+  }
 
-CodeRef.prototype.takeclosure = function() {
-  console.trace("takeclosure shouldn't be used");
-};
+  // HACK - do this properly
+  $$call() {
+    //console.log("doing a hack with closure template", this.closureTemplate);
+    if (this.closureTemplate) {
+
+      var searched = this;
+      var forcedOuterCtx = null;
+      while (searched) {
+        if (searched.forcedOuterCtx) {
+          forcedOuterCtx = searched.forcedOuterCtx;
+          break;
+        }
+        searched = searched.outerCodeRef;
+      }
+
+      var i = this.closureTemplate.length;
+
+      var fakeCtxs = [];
+      while (i--) {
+        fakeCtxs.push(null);
+      }
+
+      if (forcedOuterCtx) {
+        fakeCtxs[fakeCtxs.length-1] = new WrappedCtx(forcedOuterCtx);
+      }
+
+      this.$$call = this.closureTemplate.apply(null, fakeCtxs);
+      return this.$$call.apply(this, arguments);
+
+    }
+  }
+
+  $$apply(argsArray) {
+    return this.$$call.apply(this, argsArray);
+  }
+
+  takeclosure() {
+    console.trace("takeclosure shouldn't be used");
+  }
 
 
-CodeRef.prototype.closure = function(block) {
-  var closure = new CodeRef(this.name, undefined);
-  closure.codeObj = this.codeObj;
-  closure.cuid = this.cuid;
-  closure.$$call = block;
-  closure.staticCode = this;
-  return closure;
-};
+  closure(block) {
+    var closure = new CodeRef(this.name, this.cuid);
+    closure.codeObj = this.codeObj;
+    closure.$$call = block;
+    closure.staticCode = this;
+    return closure;
+  }
 
-CodeRef.prototype.CPS = function(block) {
-  this.$$callCPS = block;
-  return this;
-};
+  CPS(block) {
+    this.$$callCPS = block;
+    return this;
+  }
 
-CodeRef.prototype.sameCPS = function(block) {
-  this.$$callCPS = function() {
-    var args = Array.prototype.slice.call(arguments);
-    var cont = args.splice(2, 1)[0];
-    return cont(this.$$call.apply(this, args));
-  };
-  return this;
-};
+  sameCPS(block) {
+    this.$$callCPS = function() {
+      var args = Array.prototype.slice.call(arguments);
+      var cont = args.splice(2, 1)[0];
+      return cont(this.$$call.apply(this, args));
+    };
+    return this;
+  }
 
-CodeRef.prototype.onlyCPS = function(block) {
-  this.$$call = function() {
-    throw 'this block can be only called in CPS mode';
-  };
-  return this;
-};
+  onlyCPS(block) {
+    this.$$call = function() {
+      throw 'this block can be only called in CPS mode';
+    };
+    return this;
+  }
 
-CodeRef.prototype.setCodeObj = function(codeObj) {
-  this.codeObj = codeObj;
-  return this;
-};
+  setCodeObj(codeObj) {
+    this.codeObj = codeObj;
+    return this;
+  }
 
-CodeRef.prototype.setInfo = function(ctx, outerCtxVar, closureTemplate, lexicalsTypeInfo, cuids, setSetting, codeRefAttr) {
-  this.closureTemplate = closureTemplate;
-  this.ctx = ctx;
-  this.outerCtxVar = outerCtxVar;
-  this.lexicalsTypeInfo = lexicalsTypeInfo;
-  this.cuids = cuids;
-  this.setSetting = setSetting;
-  return this;
-};
+  setInfo(outerCodeRef, closureTemplate, lexicalsTypeInfo) {
+    this.closureTemplate = closureTemplate;
+    this.outerCodeRef = outerCodeRef;
+    this.lexicalsTypeInfo = lexicalsTypeInfo;
+    return this;
+  }
 
-CodeRef.prototype.setCodeRefAttr = function(codeRefAttr) {
-  this.codeRefAttr = codeRefAttr;
-  return this;
-};
+  setCodeRefAttr(codeRefAttr) {
+    this.codeRefAttr = codeRefAttr;
+    return this;
+  }
 
-CodeRef.prototype.$$clone = function() {
-  var clone = new CodeRef(this.name, undefined);
-  clone.$$call = this.$$call;
-  clone.codeObj = this.codeObj;
-  clone.staticCode = this.staticCode;
-  clone.outerCtx = this.outerCtx;
-  return clone;
-};
+  $$clone() {
+    var clone = new CodeRef(this.name, undefined);
+    clone.$$call = this.$$call;
+    clone.codeObj = this.codeObj;
+    clone.staticCode = this.staticCode;
+    clone.outerCtx = this.outerCtx;
+    return clone;
+  }
 
-CodeRef.prototype.$$toBool = function(ctx) {
-  return 1;
+  $$toBool(ctx) {
+    return 1;
+  }
 };
 
 module.exports = CodeRef;

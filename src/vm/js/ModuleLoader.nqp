@@ -155,17 +155,6 @@ knowhow ModuleLoader {
         if $setting_name ne 'NULL' {
             # Add path prefix and .setting suffix.
             my $path := "$setting_name.setting";
-#            my @prefixes := self.search_path('setting-path');
-#            for @prefixes -> $prefix {
-#                if nqp::stat("$prefix/$path.jar", 0) {
-#                    $path := "$prefix/$path.jar";
-#                    last;
-#                }
-#                if nqp::stat("$prefix/$path.class", 0) {
-#                    $path := "$prefix/$path.class";
-#                    last;
-#                }
-#            }
 
             # Unless we already did so, load the setting.
             unless nqp::existskey(%settings_loaded, $path) {
@@ -191,6 +180,11 @@ knowhow ModuleLoader {
                     nqp::die("Unable to load setting $setting_name; maybe it is missing a YOU_ARE_HERE?");
                 }
                 %settings_loaded{$path} := $*MAIN_CTX;
+
+                # HACK - we can't but sprintf into the setting normally as it uses grammars
+                if $setting_name eq 'NQPCORE' {
+                    nqp::loadbytecode("sprintf");
+                }
             }
             
             $setting := %settings_loaded{$path};

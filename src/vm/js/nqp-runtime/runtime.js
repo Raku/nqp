@@ -54,63 +54,38 @@ exports.CurLexpad = require('./curlexpad.js');
 
 var Hash = require('./hash.js');
 
+var Ctx = require('./ctx.js');
+module.exports.Ctx = Ctx;
+
+module.exports.CtxWithStatic = require('./ctx-with-static.js');
+
 var bootstrap = require('./bootstrap.js');
 module.exports.knowhowattr = bootstrap.knowhowattr;
 module.exports.knowhow = bootstrap.knowhow;
 
 module.exports.NQPArray = require('./array.js');
 
-var saveCtxAs;
-var savedCtxs = {};
-
-function saveCtx(where, block) {
-  var old = saveCtxAs;
-  saveCtxAs = where;
-  block();
-  saveCtxAs = old;
-}
-
-exports.loadModule = function(module, helper) {
-  saveCtx(module, function() {
-    module = module.replace(/::/g, '/');
-    if (helper) {
-      helper();
-    } else {
-      require(module);
-    }
-  });
-};
-
-exports.loadSetting = exports.loadModule;
-
-exports.setupSetting = function(settingName) {
-  return savedCtxs[settingName + '.setting'];
-};
-
-exports.ctxsave = function(ctx) {
-  savedCtxs[saveCtxAs] = ctx;
-};
-
-
-var LexPadHack = require('./lexpad-hack.js');
+exports.loaderCtx = null;
 
 op.loadbytecode = function(ctx, file) {
   // HACK - temporary hack for rakudo-js
   if (file == '/share/nqp/lib/Perl6/BOOTSTRAP.js') {
     file = 'Perl6::BOOTSTRAP';
   }
-  exports.loadModule(file);
-  // HACK - ctx is sometimes NULL on rakudo-js
-  if (ctx) ctx.bindDynamic('$*MAIN_CTX', new LexPadHack(savedCtxs[file]));
+
+  var oldLoaderCtx = exports.loaderCtx;
+  exports.loaderCtx = ctx;
+  require(file.replace(/::/g, '/'));
+  exports.loaderCtx = oldLoaderCtx;
+
   return file;
 };
 
 op.ctxlexpad = function(ctx) {
-  // HACK
-  if (ctx instanceof LexPadHack) {
+  if (ctx instanceof Ctx) {
     return ctx;
   } else {
-    console.log('ctxlexpad NYI');
+    throw 'ctxlexpad needs a ctx as an argument';
   }
 };
 
@@ -198,143 +173,6 @@ exports.toBool = function(arg, ctx) {
   }
 };
 
-function Ctx(callerCtx, outerCtx, callThis, codeRefAttr) {
-  this.caller = callerCtx;
-  this.outer = outerCtx;
-  this.callThis = callThis;
-  this.codeRefAttr = codeRefAttr;
-}
-
-Ctx.prototype.codeRef = function() {
-  return (this.callThis instanceof CodeRef ? this.callThis : this.callThis[this.codeRefAttr]);
-};
-
-Ctx.prototype.propagateException = function(exception) {
-  var ctx = this;
-  while (ctx) {
-    if (ctx.CATCH) {
-      exception.caught = ctx;
-      exception.resume = false;
-      ctx.exception = exception;
-      ctx.unwind.ret = ctx.CATCH();
-      if (exception.resume) {
-        return;
-      } else {
-        throw ctx.unwind;
-      }
-    }
-    ctx = ctx.caller;
-  }
-  throw exception.message;
-};
-
-Ctx.prototype.catchException = function(exception) {
-  this.exception = exception;
-  this.CATCH();
-};
-
-Ctx.prototype.rethrow = function(exception) {
-  this.propagateException(exception);
-};
-
-Ctx.prototype.die = function(msg) {
-  this.propagateException(new NQPException(msg));
-};
-
-Ctx.prototype.resume = function(exception) {
-  exception.resume = true;
-};
-
-Ctx.prototype.throw = function(exception) {
-  this.propagateException(exception);
-};
-
-Ctx.prototype.lookupDynamic = function(name) {
-  var ctx = this;
-  while (ctx) {
-    if (ctx.hasOwnProperty(name)) {
-      return ctx[name];
-    }
-    ctx = ctx.caller;
-  }
-  return null;
-  /* Looking up of a contextual is allowed to fail,
-     nqp code usually fallbacks to looking up of global */
-};
-
-Ctx.prototype.lookupDynamicFromCaller = function(name) {
-  var ctx = this.caller;
-  while (ctx) {
-    if (ctx.hasOwnProperty(name)) {
-      return ctx[name];
-    }
-    ctx = ctx.caller;
-  }
-  return null;
-  /* Looking up of a contextual is allowed to fail,
-     nqp code usually fallbacks to looking up of global */
-};
-
-Ctx.prototype.lookupFromSomeCaller = function(name) {
-  var currentCallerCtx = this.caller;
-  while (currentCallerCtx) {
-    var currentCtx = currentCallerCtx;
-    while (currentCtx) {
-      if (currentCtx.hasOwnProperty(name)) {
-        return currentCtx[name];
-      }
-      currentCtx = currentCtx.outer;
-    }
-    currentCallerCtx = currentCallerCtx.caller;
-  }
-  return null;
-};
-
-Ctx.prototype.lookup = function(name) {
-  var ctx = this;
-  while (ctx) {
-    if (ctx.hasOwnProperty(name)) {
-      return ctx[name];
-    }
-    ctx = ctx.outer;
-  }
-  /* Rakudo depends on returning null when we can't lookup a lexical */
-  return null;
-};
-
-Ctx.prototype.$$atkey = function(key) {
-  return this.lookup(key);
-};
-
-Ctx.prototype.$$bindkey = function(key, value) {
-  this[key] = value;
-};
-
-Ctx.prototype.bind = function(name, value) {
-  var ctx = this;
-  while (ctx) {
-    if (ctx.hasOwnProperty(name)) {
-      ctx[name] = value;
-      return ctx[name];
-    }
-    ctx = ctx.outer;
-  }
-  throw "Can't bind: " + name;
-};
-
-Ctx.prototype.bindDynamic = function(name, value) {
-  var ctx = this;
-  while (ctx) {
-    if (ctx.hasOwnProperty(name)) {
-      ctx[name] = value;
-      return ctx[name];
-    }
-    ctx = ctx.caller;
-  }
-  throw "Can't bind dynamic: " + name;
-};
-
-exports.Ctx = Ctx;
 
 if (!Math.imul) {
   /* Polyfill from:

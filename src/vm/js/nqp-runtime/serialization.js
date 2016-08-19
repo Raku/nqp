@@ -675,8 +675,8 @@ SerializationWriter.prototype.serializeContext = function(ctx) {
 
   /* See if there's any relevant outer context, and if so set it up to
    * be serialized. */
-  if (ctx.outer != null) {
-    this.contextsHeaders.I32(this.getSerializedContextIdx(ctx.outer));
+  if (ctx.$$outer != null) {
+    this.contextsHeaders.I32(this.getSerializedContextIdx(ctx.$$outer));
   } else {
     this.contextsHeaders.I32(0);
   }

@@ -7,7 +7,7 @@ sub MAIN(*@ARGS) {
     my $nqpcomp-cc   := nqp::clone($nqpcomp-orig);
     $nqpcomp-cc.language('nqp-cc');
     
-    $nqpcomp-cc.backend(HLLBackend::JavaScript);
+    $nqpcomp-cc.backend(JavaScriptBackend);
     
     #:custom-regex-lib('QRegex')
 

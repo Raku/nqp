@@ -4,7 +4,8 @@ exports.op = op;
 var Hash = require('./hash.js');
 var CodeRef = require('./code-ref.js');
 
-var LexPadHack = require('./lexpad-hack.js');
+var Ctx = require('./ctx.js');
+
 var NQPInt = require('./nqp-int.js');
 
 var NQPException = require('./nqp-exception.js');
@@ -80,69 +81,8 @@ op.setdebugtypename = function(type, debugName) {
   return type;
 };
 
-function Iter(array) {
-  this.array = array;
-  this.target = array.length;
-  this.idx = 0;
-}
-
-Iter.prototype.$$shift = function() {
-  return this.array[this.idx++];
-};
-
-Iter.prototype.$$toBool = function(ctx) {
-  return this.idx < this.target;
-};
-
-function HashIter(hash) {
-  this.hash = hash.content;
-  this.keys = Object.keys(hash.$$toObject());
-  this.target = this.keys.length;
-  this.idx = 0;
-}
-
-HashIter.prototype.$$shift = function() {
-  return new IterPair(this.hash, this.keys[this.idx++]);
-};
-
-HashIter.prototype.$$toBool = function(ctx) {
-  return this.idx < this.target;
-};
-
-function IterPair(hash, key) {
-  this._key = key;
-  this._hash = hash;
-}
-
-IterPair.prototype.iterval = function() {
-  return this._hash.get(this._key);
-};
-IterPair.prototype.iterkey_s = function() {
-  return this._key;
-};
-
-IterPair.prototype.Str = function(ctx, _NAMED, self) {
-  return this._key;
-};
-
-IterPair.prototype.key = function(ctx, _NAMED, self) {
-  return this._key;
-};
-IterPair.prototype.value = function(ctx, _NAMED, self) {
-  return this._hash.get(this._key);
-};
-
-
 op.iterator = function(obj) {
-  if (obj instanceof NQPArray) {
-    return new Iter(obj.array);
-  } else if (obj instanceof Hash) {
-    return new HashIter(obj);
-  } else if (obj instanceof LexPadHack) {
-    return new Iter(Object.keys(obj.content));
-  } else {
-    throw 'unsupported thing to iterate over';
-  }
+  return obj.$$iterator();
 };
 
 
@@ -367,6 +307,7 @@ op.newtype = function(how, repr) {
 };
 
 op.can = function(obj, method) {
+  if (obj instanceof NQPInt) return 0;
   return obj._STable.methodCache.hasOwnProperty(method) ? 1 : 0;
 };
 
@@ -1089,9 +1030,22 @@ op.hintfor = function(classHandle, attrName) {
 };
 
 op.ctxcaller = function(ctx) {
-  return ctx.caller;
+  return ctx.$$caller;
 };
 
 op.captureposprimspec = function(capture, idx) {
   return 0;
+};
+
+op.forceouterctx = function(code, ctx) {
+  if (!(code instanceof CodeRef)) {
+    throw 'forceouterctx first operand must be a CodeRef';
+  }
+  if (!(ctx instanceof Ctx)) {
+    throw 'forceouterctx second operand must be a Ctx';
+  }
+
+  code.forcedOuterCtx = ctx;
+
+  return code;
 };

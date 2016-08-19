@@ -103,11 +103,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 if $info.mangle_own_lexical($name) -> $mangled {
                     return $mangled;
                 }
-                if $info.qast && $info.qast.symbol($name) -> $symbol {
-                    if $symbol<from_outer> {
-                        return self.mangle_name($name);
-                    }
-                }
                 $info := $info.outer;
             }
 
@@ -183,6 +178,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             %!static_variables{$name};
         }
 
+        method static_variables() {
+            %!static_variables;
+        }
+
         method lookup_static_variable($var) {
             my $info := self;
             return nqp::null() if $var.scope ne 'lexical' && $var.scope ne 'typevar';
@@ -255,14 +254,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
         }
 
-        # TODO fix this by actually looking if a variable is declared on the way
         return 0 if $var.scope eq 'local';
         while $info {
-            if $info.qast && !self.are_children_serializable($info.qast.cuid) && $info.qast.symbol($name) {
-                return 0;
+            if $info.has_own_variable($name) {
+                return ($info.qast ?? self.are_children_serializable($info.qast.cuid) !! 1);
             }
             if $info.qast && $info.qast.symbol($name) -> $symbol {
-                return !$symbol<from_outer>;
+                return 1;
             }
             $info := $info.outer;
         }
@@ -658,7 +656,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     method mark_children_serializable(QAST::Children $node) {
         my int $serializable := 0;
         for $node.list -> $child {
-            my $is_child_serializable := self.mark_serializable($child);
+            my $is_child_serializable := self.is_ctxsave($node) || self.mark_serializable($child);
             $serializable := $serializable || $is_child_serializable;
         }
         $serializable;
@@ -877,12 +875,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         self.declare_js_vars(@declared);
     }
 
-    method setup_set_setting() {
-       "var setSetting = " ~ (
-            $*SETTING_TARGET ?? quote_string(self.import_stuff_from_setting($*SETTING_TARGET)) !! "null"
-       ) ~ ";\n";
-    }
-
     method set_code_objects() {
         my $set := "";
         for %!cuids {
@@ -904,40 +896,15 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
     }
 
-    # We try to use native js lexpads as much as we can to have a chance of decent performance
-    # Instead of implementing forceouterctx we use this hack to support settings.
-    method setup_setting($node) {
-        if nqp::eqaddr($node, $*SETTING_TARGET) {
-            self.import_stuff_from_setting($node);
-        }
-        else {
-            '';
-        }
-    }
-
-    method import_stuff_from_setting($node) {
-        my @imported;
-        for $node.symtable -> $symbol {
-            @imported.push("{BlockInfo.mangle_name($symbol.key)} = setting[{quote_string($symbol.key)}]");
-        }
-        "var setting = nqp.setupSetting({quote_string($*SETTING_NAME)});\n"
-        ~ self.declare_js_vars(@imported);
-    }
-
-
     has %!serialized_code_ref_info;
 
     my class SerializedCodeRefInfo {
         has $!closure_template;
         has $!lexicals_type_info;
-        has $!ctx;
-        has $!outer_ctx;
-        has $!code_ref_attr;
-        method ctx() {$!ctx}
-        method outer_ctx() {$!outer_ctx}
+        has $!outer_cuid;
+        method outer_cuid() {$!outer_cuid}
         method lexicals_type_info() {$!lexicals_type_info}
         method closure_template() {$!closure_template}
-        method code_ref_attr() {$!code_ref_attr}
     }
 
     method type_info_for_lexicals(BlockInfo $block) {
@@ -958,12 +925,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             @output.push("//Static wrapping\n");
             @output.push("(function() \{\n");
             @output.push("var {$expected_outer.ctx} = null;\n");
-            if $*SETTING_TARGET {
-                @output.push(self.import_stuff_from_setting($*SETTING_TARGET));
-            }
-            else {
-                @output.push("//Can't import stuff\n");
-            }
         }
 
         $block();
@@ -1040,6 +1001,18 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         Chunk.void(|@capture_inners);
     }
 
+    method outer_ctxs(BlockInfo $block) {
+        my @ctxs;
+        my $info := $block.outer;
+
+        # Avoid the ctx from the fake outer ctx
+        while $info && !($info.ctx eq 'null' && !$info.outer) {
+            @ctxs.unshift($info.ctx);
+            $info := $info.outer;
+        }
+        nqp::join(',', @ctxs);
+    }
+
     method compile_block(QAST::Block $node, $outer, $outer_loop, :$want, :@extra_args=[], :$cps) {
 
         my $outer_ctx := try $*CTX // "null";
@@ -1073,11 +1046,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 my $sig := self.compile_sig($*BLOCK.params);
 
                 my @function := [
-                    "function({$sig.expr}) \{\n" ~ "/* serializable {self.is_serializable($node.cuid)} */\n",
+                    "function({$sig.expr}) \{\n" ,#~ "/* serializable {self.is_serializable($node.cuid)} */\n",
                     self.declare_js_vars($*BLOCK.tmps),
                     self.declare_js_vars($*BLOCK.js_lexicals),
                     $create_ctx,
-                    self.setup_setting($node),
                     $sig,
                     self.clone_inners($*BLOCK),
                     self.capture_inners($*BLOCK),
@@ -1087,22 +1059,25 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 ];
                 %*BLOCKS_DONE{$node.cuid} := Chunk.void("(", |@function, ")");
 
-                if 1 { # TODO make sure that only blocks that take in serialization have that info emitted
-                    if $node.blocktype eq 'immediate' {
-                        %!serialized_code_ref_info{$node.cuid} := SerializedCodeRefInfo.new(
-                            ctx => $*CTX,
-                            lexicals_type_info => self.type_info_for_lexicals($*BLOCK)
-                        );
+                if 1 { # TODO make sure that only blocks that take part in serialization have that info emitted
+                    my $outer_cuid;
+                    if nqp::defined($*BLOCK.outer) && $*BLOCK.outer.cuid {
+                        $outer_cuid := self.mangled_cuid($*BLOCK.outer.cuid);
                     }
-                    else {
-                        %!serialized_code_ref_info{$node.cuid} := SerializedCodeRefInfo.new(
-                            closure_template => ChunkEscaped.new(@function),
-                            ctx => $*CTX,
-                            outer_ctx => (nqp::defined($*BLOCK.outer) ?? $*BLOCK.outer.ctx !! ""),
-                            lexicals_type_info => self.type_info_for_lexicals($*BLOCK),
-                            code_ref_attr => $code_ref_attr 
-                        );
+                    my $lexicals_type_info := self.type_info_for_lexicals($*BLOCK);
+                    my $closure_template;
+                    if $node.blocktype ne 'immediate' {
+                        my @closure_template := nqp::clone(@function);
+                        @closure_template.unshift("function({self.outer_ctxs($*BLOCK)}) \{ return ");
+                        @closure_template.push("}");
+                        $closure_template := Chunk.new($T_NONVAL, '', @closure_template);
                     }
+
+                    %!serialized_code_ref_info{$node.cuid} := SerializedCodeRefInfo.new(
+                        :$closure_template,
+                        :$outer_cuid,
+                        :$lexicals_type_info,
+                    );
                 }
             }
 
@@ -1126,7 +1101,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                         self.declare_js_vars($*BLOCK.tmps),
                         self.declare_js_vars($*BLOCK.js_lexicals),
                         $create_ctx,
-                        self.setup_setting($node),
                         $sig_cps,
                         self.clone_inners($*BLOCK),
                         self.capture_inners($*BLOCK),
@@ -1215,8 +1189,18 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     method create_ctx($name, :$code_ref, :$code_ref_attr) {
-        # TODO think about contexts
-        "var $name = new nqp.Ctx(caller_ctx, {self.outer_ctx}, $code_ref, $code_ref_attr);\n";
+        my $ctx_type := "Ctx";
+        my $static := "";
+        if $*BLOCK.static_variables -> $vars {
+            $ctx_type := "CtxWithStatic";
+            my @static;
+            for $vars -> $var {
+                @static.push(quote_string($var.key) ~ ": " ~ self.value_as_js($var.value.value));
+            }
+            $static := ', {' ~ nqp::join(',', @static) ~ '}';
+        }
+        "var $name = new nqp.$ctx_type(caller_ctx, this.forcedOuterCtx || {self.outer_ctx}, $code_ref, $code_ref_attr$static);\n";
+
     }
 
     multi method as_js(QAST::IVal $node, :$want, :$cps) {
@@ -1242,32 +1226,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     multi method as_js(QAST::Stmts $node, :$want, :$cps) {
-        # for performance purposes we use the native js lexicals as much as possible, that means we need hacks for things that other backends can do easily with all the various ctx ops
-        if self.is_ctxsave($node) {
-            my @lexicals;
-            for $*BLOCK.variables -> $var {
-                my $value;
-                if $*BLOCK.lookup_static_variable($var) -> $static {
-                    $value := self.value_as_js($static.value);
-                }
-                elsif self.is_dynamic_var($*BLOCK, $var) {
-                    $value := "{$*CTX}.lookup({quote_string($var.name)})";
-                }
-                else {
-                    $value := $*BLOCK.mangle_var($var);
-                }
-                @lexicals.push(quote_string($var.name) ~ ': ' ~ $value);
-
-            }
-            Chunk.void("nqp.ctxsave(\{{nqp::join(',', @lexicals)}\});\n");
-        }
-        else {
-            self.compile_all_the_statements($node, $want, :$cps, :result_child($node.resultchild));
-        }
+        self.compile_all_the_statements($node, $want, :$cps, :result_child($node.resultchild));
     }
 
     multi method as_js(QAST::VM $node, :$want, :$cps) {
-        # We ignore QAST::VM as we don't support a js specific one, and the ones nqp generate contain parrot specific stuff we don't care about.
         if $node.supports('js') {
             self.as_js($node.alternative('js'), :$want, :$cps);
         }
@@ -1292,15 +1254,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 @setup.push(
                     ~ self.mangled_cuid($cuid)
                     ~ ".setInfo("
-                    ~ quote_string($info.ctx) ~ ","
-                    ~ quote_string($info.outer_ctx) ~ ",");
+                    ~ ($info.outer_cuid // "null") ~ ",");
 
                 @setup.push($info.closure_template // "null");
 
                 @setup.push(
-                    ~ "," ~ $info.lexicals_type_info ~ ","
-                    ~ "cuids, setSetting,"
-                    ~ quote_string($info.code_ref_attr)
+                    ~ "," ~ $info.lexicals_type_info
                     ~ ");\n");
             }
         }
@@ -1421,45 +1380,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         quote_string($name) ~ ", function() \{return require({quote_string($path)})\}";
     }
 
-    # HACK NQP should do this like rakudo and distinguish using seperate blocks not a flag
-    method mark_symbols_as_from_outer($block) {
-        my $outer_ctx := %*COMPILING<%?OPTIONS><outer_ctx>;
-        if nqp::defined($outer_ctx) {
-            until nqp::isnull($outer_ctx) {
-                my $pad := nqp::ctxlexpad($outer_ctx);
-                unless nqp::isnull($pad) {
-                    for $pad {
-                        my str $key := ~$_;
-
-                        if $block.symbol($key) -> $symbol {
-                            my $lextype := nqp::lexprimspec($pad, $key);
-                            next unless $symbol<scope> eq 'lexical';
-                            if $lextype == 0 {
-                               unless nqp::eqaddr($symbol<lazy_value_from>, $pad) {
-                                   next; 
-                               }
-                            }
-                            # TODO check other types - they don't occur in the NQP setting and this hack is not neccesary for rakudo
-                            $symbol<from_outer> := 1;
-                        }
-                    }
-                }
-                $outer_ctx := nqp::ctxouter($outer_ctx);
-            }
-        }
-    }
-
     method is_op($node, $op) {
         nqp::istype($node, QAST::Op) && $node.op eq $op;
-    }
-
-    method setting_hack($op, @pre) {
-       $*SETTING_NAME := $op[1][1].value;
-       $*SETTING_TARGET := $op[0].value;
-       self.mark_symbols_as_from_outer($*SETTING_TARGET);
-       @pre.push("nqp.loadSetting({loadable($*SETTING_NAME ~ '.setting')});\n");
-       # HACK to get nqp::sprintf to work
-       @pre.push("require('sprintf');\n"); 
     }
 
     multi method as_js(QAST::CompUnit $node, :$want, :$cps) {
@@ -1483,43 +1405,14 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my $*RETURN;
 
         my @pre;
-
-        # HACK
-        for $node.post_deserialize -> $node {
-           if self.is_op($node, 'forceouterctx') {
-               self.setting_hack($node, @pre);
-           }
-        }
-
         for $node.pre_deserialize -> $node {
-            if nqp::istype($node, QAST::Stmts) {
-                for $node.list -> $op {
-                    if self.is_op($op, 'forceouterctx') {
-                        self.setting_hack($op, @pre)
-                    }
-                    elsif nqp::istype($op, QAST::Op)
-                        && $op.op eq 'callmethod'
-                        && $op.name eq 'load_module' {
-                        @pre.push("nqp.loadModule({loadable($op[1].value)});\n");
-                    }
-                    elsif nqp::istype($op, QAST::Op)
-                        && $op.op eq 'loadbytecode' {
-                    }
-                    else {
-                        @pre.push(self.as_js($op, :want($T_VOID)));
-                    }
-                }
-            }
-            else {
-                @pre.push(self.as_js($node, :want($T_VOID)));
-            }
+            @pre.push(self.as_js($node, :want($T_VOID)));
         }
         my $pre := Chunk.new($T_VOID, "", @pre);
 
         my $instant := try $*INSTANT;
 
 
-        $node[0].blocktype('declaration_static'); # HACK
         # TODO needs thinking about, it seems there is really nothing to capture here and a setting is forced as outer
         self.mark_serializable($node[0]);
 
@@ -1528,12 +1421,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my @post;
         for $node.post_deserialize -> $node {
-           if self.is_op($node, 'forceouterctx') {
-           }
-           else {
-            self.log($node.dump);
             @post.push(self.as_js($node, :want($T_VOID)));
-          }
         }
         my $post := Chunk.new($T_VOID, "", @post);
 
@@ -1545,7 +1433,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             my $main := self.as_js($main_block, :want($T_OBJ));
 
-            $body := $instant ?? Chunk.void($block_js, $main, $main.expr ~ ".\$\$apply([null, null].concat(nqp.args(module)));\n") !! $main;
+            $body := $instant ?? Chunk.void($block_js, $main, $main.expr ~ ".\$\$apply([nqp.loaderCtx, null].concat(nqp.args(module)));\n") !! $main;
             
         }
         else {
@@ -1882,9 +1770,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     method as_js_with_prelude($ast, :$instant) {
         my $*INSTANT := $instant;
 
-        my $*SETTING_NAME;
-        my $*SETTING_TARGET;
-
         # Blocks we've seen while compiling.
         my %*BLOCKS_DONE;
         my %*BLOCKS_INFO;
@@ -1898,9 +1783,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         Chunk.void(
             "var nqp = require('nqp-runtime');\n",
-            "\nvar top_ctx = nqp.topContext();\n",
             self.setup_cuids,
-            self.setup_set_setting(),
             self.set_static_info,
             $chunk
         );

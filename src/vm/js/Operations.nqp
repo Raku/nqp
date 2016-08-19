@@ -736,7 +736,7 @@ class QAST::OperationsJS {
                     my $catch_body := $comp.as_js($handler, :want($T_OBJ));
                     $handle := Chunk.void(
                         "$unwind_marker = \{\};\n",
-                        "$*HANDLER_CTX.CATCH = function() \{\n",
+                        "$*HANDLER_CTX.\$\$CATCH = function() \{\n",
                         $catch_body,
                         "return {$catch_body.expr};\n",
                         "\};\n",
@@ -755,7 +755,7 @@ class QAST::OperationsJS {
                 my $*CTX := $*HANDLER_CTX;
                 my $body := $comp.as_js($protected, :$want);
                 return Chunk.new($want, $try_ret, [
-                    "var $*CTX = new nqp.Ctx($outer_ctx, $outer_ctx, $outer_ctx.callThis, $outer_ctx.codeRefAttr);\n",
+                    "var $*CTX = new nqp.Ctx($outer_ctx, $outer_ctx, $outer_ctx.\$\$callThis, $outer_ctx.\$\$codeRefAttr);\n",
                     $handle,
                     "try \{",
                     $body,
@@ -808,6 +808,8 @@ class QAST::OperationsJS {
 
     add_simple_op('ctxouter', :!inlinable, $T_OBJ, [$T_OBJ]);
 
+    add_simple_op('forceouterctx', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
+
     add_simple_op('loadbytecode', $T_STR, [$T_STR], :ctx, :sideffects);
 
     add_simple_op('elems', $T_INT, [$T_OBJ]);
@@ -823,19 +825,25 @@ class QAST::OperationsJS {
     add_op('curlexpad', :!inlinable, sub ($comp, $node, :$want, :$cps) {
             my @get;
             my @set;
-            for $*BLOCK.variables -> $var {
-                my $storage := $comp.is_dynamic_var($*BLOCK, $var) 
-                    ?? "{$*CTX}[{quote_string($var.name)}]"
-                    !! $*BLOCK.mangle_var($var);
 
-                @set.push(quote_string($var.name) ~ 
-                   ~ ': function(value) {' 
-                   ~ $storage ~ ' = value' 
-                   ~ '}');
-                @get.push(quote_string($var.name) ~ 
-                   ~ ': function() {' 
-                   ~ 'return ' ~ $storage ~ ''
-                   ~ '}');
+            for $*BLOCK.variables -> $var {
+                if $*BLOCK.lookup_static_variable($var) -> $static {
+                    # TODO
+                }
+                else {
+                    my $storage := $comp.is_dynamic_var($*BLOCK, $var)
+                        ?? "{$*CTX}[{quote_string($var.name)}]"
+                        !! $*BLOCK.mangle_var($var);
+
+                    @set.push(quote_string($var.name) ~
+                       ~ ': function(value) {'
+                       ~ $storage ~ ' = value'
+                       ~ '}');
+                    @get.push(quote_string($var.name) ~
+                       ~ ': function() {'
+                       ~ 'return ' ~ $storage ~ ''
+                       ~ '}');
+                }
             }
             Chunk.new($T_OBJ, "new nqp.CurLexpad(\{{nqp::join(',', @get)}\}, \{{nqp::join(',', @set)}\})", [], :$node);
     });
@@ -866,7 +874,7 @@ class QAST::OperationsJS {
     add_simple_op('setelems', $T_OBJ, [$T_OBJ, $T_INT], :sideffects);
 
 
-    add_simple_op('iterator', $T_OBJ, [$T_OBJ], :sideffects);
+    add_simple_op('iterator', $T_OBJ, [$T_OBJ], sub ($over) {"$over.\$\$iterator()"}, :sideffects);
 
     add_simple_op('iterval', $T_OBJ, [$T_OBJ], sub ($iter) {"$iter.iterval()"});
     add_simple_op('iterkey_s', $T_STR, [$T_OBJ], sub ($iter) {"$iter.iterkey_s()"});

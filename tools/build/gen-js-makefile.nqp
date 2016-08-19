@@ -135,7 +135,9 @@ say("\n\njs-clean:
 	\$(RM_RF) gen/js/stage1 gen/js/stage2
 ");
 
-deps("js-all", 'm-all', 'js-stage1-compiler', 'node_modules/runtime_copied',$nqpcore-moarvm, $nqpcore-combined, $QASTNode-moarvm, $QRegex-moarvm, $sprintf-moarvm);
+my $ModuleLoader := "node_modules/ModuleLoader.js";
+
+deps("js-all", 'm-all', 'js-stage1-compiler', 'node_modules/runtime_copied',$nqpcore-moarvm, $nqpcore-combined, $QASTNode-moarvm, $QRegex-moarvm, $sprintf-moarvm, $ModuleLoader);
 
 # Enforce the google coding standards
 say("js-lint:
@@ -186,10 +188,9 @@ my $NQPP6QRegex-moarvm := cross-compile(:stage(2), :source($p6qregex-combined), 
 
 my $nqp-bootstrapped := "nqp-bootstrapped.js";
 
-my $ModuleLoader := "node_modules/ModuleLoader.js";
 
-say("node_modules/ModuleLoader.js: $nqpcore-moarvm src/vm/js/ModuleLoader.nqp
-	./nqp-js --target=js --output $ModuleLoader src/vm/js/ModuleLoader.nqp
+say("node_modules/ModuleLoader.js: $nqpcore-moarvm src/vm/js/ModuleLoader.nqp \$(JS_STAGE1_COMPILER)
+	./nqp-js --settting=NULL --no-regex-lib --target=js --output $ModuleLoader src/vm/js/ModuleLoader.nqp
 ");
 
 say("$nqp-bootstrapped: $QAST-moarvm $NQPP5QRegex-moarvm $NQPP6QRegex-moarvm $nqp-combined $QRegex-moarvm
@@ -198,5 +199,5 @@ say("$nqp-bootstrapped: $QAST-moarvm $NQPP5QRegex-moarvm $NQPP6QRegex-moarvm $nq
 ");
 
 
-deps("js-bootstrap", "js-all", $nqp-bootstrapped, $ModuleLoader);
+deps("js-bootstrap", "js-all", $nqp-bootstrapped);
 

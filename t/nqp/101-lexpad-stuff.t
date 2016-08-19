@@ -1,10 +1,33 @@
-plan(5);
+plan(9);
 sub more-inner() {
     my $outer := nqp::ctxcaller(nqp::ctx());
     my $outermost := nqp::ctxcaller(nqp::ctxcaller(nqp::ctx()));
     $outer<$*baz> := 102;
     $outermost<$*baz> := 103;
+    ok(nqp::existskey($outermost, '$*foo'), 'nqp::existkey on ctx find directly defined var');
+    ok(!nqp::existskey($outer, '$*foo'), 'nqp::existkey on ctx with a var defined in an outer ctx');
+    ok(!nqp::existskey($outer, '$*no_such_var'), 'nqp::existkey on ctx with a missing var');
     ok($outermost<$*foo> == 245, 'accessing a variable using double ctxcaller');
+
+    my $seen_foo := 0;
+    my $seen_baz := 0;
+    my $seen_outervar := 0;
+    my $seen_other := 0;
+    for $outermost -> $var {
+        if $var eq '$*foo' {
+            $seen_foo := $seen_foo + 1;
+        }
+        elsif $var eq '$*baz' {
+            $seen_baz := $seen_baz + 1;
+        }
+        elsif $var eq '$*outervar' {
+            $seen_outervar := $seen_outervar + 1;
+        }
+        else {
+            $seen_other := $seen_other + 1;
+        }
+    }
+    ok($seen_foo == 1 && $seen_baz == 1 && $seen_outervar == 1 && $seen_other == 0, 'iterating over the variables in a ctx');
 }
 sub inner() {
     my $*baz;

@@ -4,14 +4,14 @@ var incompleteMethodCaches = [];
 
 
 class STable {
-  constructor (REPR, HOW) {
+  constructor(REPR, HOW) {
     this.REPR = REPR;
     this.HOW = HOW;
-  
+
     this.modeFlags = 0;
-  
+
     this.objConstructor = REPR.createObjConstructor(this);
-  
+
     /* HACK - it's a bit hackish - think how correct it is */
     if (!this.objConstructor.prototype.hasOwnProperty('$$clone')) {
       this.objConstructor.prototype.$$clone = function() {
@@ -24,12 +24,12 @@ class STable {
         return clone;
       };
     }
-  
+
     /* Default boolification mode 5 */
     this.objConstructor.prototype.$$toBool = function(ctx) {
       return this.typeObject_ ? 0 : 1;
     };
-  
+
     if (this.REPR.setupSTable) {
       this.REPR.setupSTable(this);
     }
@@ -84,7 +84,7 @@ class STable {
       this.objConstructor.prototype.$$apply = function(args) {
         return this[attr].$$apply(args);
       };
-  
+
       this.objConstructor.prototype.$$injectMethod = function(proto, name) {
         if (this[attr] && this[attr].$$injectMethod) {
           return this[attr].$$injectMethod(proto, name);
@@ -101,7 +101,7 @@ class STable {
         }
         return invocationHandler.$$apply(args);
       };
-  
+
       this.objConstructor.prototype.$$apply = function(args) {
         var newArgs = [];
         newArgs.push(args[0]);
@@ -114,7 +114,7 @@ class STable {
       };
     }
     this.invocationSpec = {classHandle: classHandle, attrName: attrName, invocationHandler: invocationHandler};
-  
+
     var setAgain = incompleteMethodCaches;
     incompleteMethodCaches = [];
     for (var i = 0; i < setAgain.length; i++) {
@@ -142,7 +142,7 @@ class STable {
     proto[name] = function() {
       return method.$$call.apply(method, arguments);
     };
-  
+
     if (method.$$injectMethod) {
       method.$$injectMethod(proto, name);
     }
@@ -161,42 +161,42 @@ class STable {
         }
       }
     }
-  
+
     if (notReadyYet) {
       incompleteMethodCaches.push(this);
     }
   }
-  
+
   setPositionalDelegate(attr) {
     this.objConstructor.prototype.$$bindpos = function(index, value) {
       return this[attr].$$bindpos(index, value);
     };
-  
+
     this.objConstructor.prototype.$$atpos = function(index) {
       return this[attr].$$atpos(index);
     };
-  
+
     this.objConstructor.prototype.$$unshift = function(value) {
       return this[attr].$$unshift(value);
     };
-  
+
     this.objConstructor.prototype.$$pop = function(value) {
       return this[attr].$$pop(value);
     };
-  
+
     this.objConstructor.prototype.$$push = function(value) {
       return this[attr].$$push(value);
     };
-  
+
     this.objConstructor.prototype.$$shift = function(value) {
       return this[attr].$$shift(value);
     };
-  
+
     this.objConstructor.prototype.$$elems = function(value) {
       return this[attr].$$elems();
     };
   }
-  
+
   setAssociativeDelegate(attr) {
     this.objConstructor.prototype.$$bindkey = function(key, value) {
       return this[attr].$$bindkey(key, value);
@@ -211,10 +211,10 @@ class STable {
       return this[attr].$$deletekey(key);
     };
   }
-  
+
   addInternalMethod(name, func) {
     this.objConstructor.prototype[name] = func;
   }
-}
+};
 
 module.exports.STable = STable;

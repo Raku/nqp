@@ -1,8 +1,8 @@
 # Backend class for compiling to JavaScript.
 use QAST::Compiler;
 
-# HACK work around for nqp namespace bug
-class HLLBackend::JavaScript {
+# It can be called HLL::Backend::JavaScript due to problems while merging namespaces
+class JavaScriptBackend {
     method apply_transcodings($s, $transcode) {
         $s
     }
@@ -201,5 +201,5 @@ class HLLBackend::JavaScript {
 
 # Role specifying the default backend for this build.
 role HLL::Backend::Default {
-    method default_backend() { HLLBackend::JavaScript }
+    method default_backend() { JavaScriptBackend }
 }
