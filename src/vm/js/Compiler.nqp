@@ -178,6 +178,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             %!static_variables{$name};
         }
 
+        method static_variables() {
+            %!static_variables;
+        }
+
         method lookup_static_variable($var) {
             my $info := self;
             return nqp::null() if $var.scope ne 'lexical' && $var.scope ne 'typevar';
@@ -1185,7 +1189,18 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     method create_ctx($name, :$code_ref, :$code_ref_attr) {
-        "var $name = new nqp.Ctx(caller_ctx, this.forcedOuterCtx || {self.outer_ctx}, $code_ref, $code_ref_attr);\n";
+        my $ctx_type := "Ctx";
+        my $static := "";
+        if $*BLOCK.static_variables -> $vars {
+            $ctx_type := "CtxWithStatic";
+            my @static;
+            for $vars -> $var {
+                @static.push(quote_string($var.key) ~ ": " ~ self.value_as_js($var.value.value));
+            }
+            $static := ', {' ~ nqp::join(',', @static) ~ '}';
+        }
+        "var $name = new nqp.$ctx_type(caller_ctx, this.forcedOuterCtx || {self.outer_ctx}, $code_ref, $code_ref_attr$static);\n";
+
     }
 
     multi method as_js(QAST::IVal $node, :$want, :$cps) {

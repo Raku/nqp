@@ -57,6 +57,8 @@ var Hash = require('./hash.js');
 var Ctx = require('./ctx.js');
 module.exports.Ctx = Ctx;
 
+module.exports.CtxWithStatic = require('./ctx-with-static.js');
+
 var bootstrap = require('./bootstrap.js');
 module.exports.knowhowattr = bootstrap.knowhowattr;
 module.exports.knowhow = bootstrap.knowhow;
