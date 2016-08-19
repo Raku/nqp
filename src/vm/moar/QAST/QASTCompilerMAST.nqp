@@ -1163,39 +1163,48 @@ my class MASTCompilerInstance {
                             ?? $block.lexical_param($var.name)
                             !! $block.local($var.name);
                         my $valreg;
+                        my $valreg_kind;
                         my $truncop;
+
                         if $param_kind == $MVM_reg_obj || $param_kind == $MVM_reg_int64 ||
                                 $param_kind == $MVM_reg_num64 || $param_kind == $MVM_reg_str ||
                                 $param_kind == $MVM_reg_uint64 {
+                            $valreg_kind := $param_kind;
                             $valreg := $targetreg;
                         }
                         elsif $param_kind == $MVM_reg_num32 {
-                            $valreg := $*REGALLOC.fresh_register($MVM_reg_num64);
+                            $valreg_kind := $MVM_reg_num64;
                             $truncop := 'trunc_n32';
                         }
                         elsif $param_kind == $MVM_reg_int32 {
-                            $valreg := $*REGALLOC.fresh_register($MVM_reg_int64);
+                            $valreg_kind := $MVM_reg_int64;
                             $truncop := 'trunc_i32';
                         }
                         elsif $param_kind == $MVM_reg_int16 {
-                            $valreg := $*REGALLOC.fresh_register($MVM_reg_int64);
+                            $valreg_kind := $MVM_reg_int64;
                             $truncop := 'trunc_i16';
                         }
                         elsif $param_kind == $MVM_reg_int8 {
-                            $valreg := $*REGALLOC.fresh_register($MVM_reg_int64);
+                            $valreg_kind := $MVM_reg_int64;
                             $truncop := 'trunc_i8';
                         }
                         elsif $param_kind == $MVM_reg_uint32 {
-                            $valreg := $*REGALLOC.fresh_register($MVM_reg_uint64);
+                            $valreg_kind := $MVM_reg_uint64;
                             $truncop := 'trunc_u32';
                         }
                         elsif $param_kind == $MVM_reg_uint16 {
-                            $valreg := $*REGALLOC.fresh_register($MVM_reg_uint64);
+                            $valreg_kind := $MVM_reg_uint64;
                             $truncop := 'trunc_u16';
                         }
                         elsif $param_kind == $MVM_reg_uint8 {
-                            $valreg := $*REGALLOC.fresh_register($MVM_reg_uint64);
+                            $valreg_kind := $MVM_reg_uint64;
                             $truncop := 'trunc_u8';
+                        }
+
+                        # Get a fresh register to store the result of the
+                        # truncation, but only if needed
+                        if $valreg_kind != $param_kind {
+                            $valreg := $*REGALLOC.fresh_register($valreg_kind);
                         }
 
                         # NQP->QAST always provides a default value for optional NQP params
@@ -1206,7 +1215,7 @@ my class MASTCompilerInstance {
 
                             # generate default initialization code. Could also be
                             # wrapped in another QAST::Block.
-                            my $default_mast := self.as_mast($var.default, :want($param_kind));
+                            my $default_mast := self.as_mast($var.default, :want($valreg_kind));
 
                             # emit param grabbing op
                             $val2
