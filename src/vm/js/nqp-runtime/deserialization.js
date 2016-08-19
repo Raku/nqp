@@ -64,16 +64,6 @@ op.scobjcount = function(sc) {
   return sc.rootObjects.length;
 };
 
-function StubedCodeRef(sc, id) {
-  this.sc = sc;
-  this.id = id;
-}
-
-function SerializedObjRef(sc, id) {
-  this.sc = sc;
-  this.id = id;
-}
-
 function int64(high, low) {
   return new Int64(high, low).toNumber();
 }
@@ -86,8 +76,6 @@ var STABLE_HAS_HLL_ROLE = 0x80;
 
 var STRING_HEAP_LOC_PACKED_OVERFLOW = 0x00008000;
 var STRING_HEAP_LOC_PACKED_SHIFT = 16;
-
-
 
 /**
   We define a BinaryCursor class so we can read sequential things easily
