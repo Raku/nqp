@@ -1713,19 +1713,21 @@ QAST::MASTOperations.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
 
     # Wrap instructions to try up in a handler and evaluate to the result
     # of the protected code of the exception handler.
+    my $protected_result  := $regalloc.fresh_o();
     my $protil := $qastcomp.as_mast($protected, :want($MVM_reg_obj));
     my $uwlbl  := MAST::Label.new();
     my $endlbl := MAST::Label.new();
+    push_op($protil.instructions, 'set', $protected_result, $protil.result_reg);
     push_op($protil.instructions, 'goto', $endlbl);
     nqp::push($il, MAST::HandlerScope.new(
         :instructions($protil.instructions), :goto($uwlbl), :block($hblocal),
         :category_mask($mask), :action($HandlerAction::invoke_and_we'll_see),
         :label($lablocal)));
     nqp::push($il, $uwlbl);
-    push_op($il, 'takehandlerresult', $protil.result_reg);
+    push_op($il, 'takehandlerresult', $protected_result);
     nqp::push($il, $endlbl);
 
-    MAST::InstructionList.new($il, $protil.result_reg, $MVM_reg_obj)
+    MAST::InstructionList.new($il, $protected_result, $MVM_reg_obj)
 });
 
 # Simple payload handler.

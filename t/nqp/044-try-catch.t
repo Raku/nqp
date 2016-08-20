@@ -2,7 +2,7 @@
 
 # Tests for try and catch
 
-plan(21);
+plan(23);
 
 sub oops($msg = "oops!") { # throw an exception
     nqp::die($msg);
@@ -175,3 +175,11 @@ ok($log eq '#1#3', 'rethrow works from a scope that is not a direct ancestor');
     oops();
     CATCH { ok(nqp::istrue($!), "exception is true") }
 }
+
+my $value := try { 200 };
+ok($value == 200, "returning values from try works");
+
+# regression test for issue #170
+my $var := 100; try {nqp::die('okohnoes'); $var};
+ok($var eq 100, "variable does get overwriten by bug");
+
