@@ -13,27 +13,27 @@ must be tagged for release immediately prior to the Rakudo release.
 MoarVM tries to have a synchronised release schedule with NQP
 and Rakudo, so there's most probably a release tag for MoarVM
 that you can bump F<tools/build/MOAR_REVISION> to. Release tags
-for MoarVM have the format C<2014.02>. Find all of the tags with
+for MoarVM have the format C<2016.02>. Find all of the tags with
 C<git tag> in an up-to-date MoarVM checkout.
 
 =item 2.
 
 Change the C<VERSION> file in nqp:
 
-  $ echo '2012.12' > VERSION
-  $ git commit -m 'bump VERSION to 2012.12' VERSION
-  $ git push
+  echo '2016.12' > VERSION
+  git commit -m 'bump VERSION to 2012.12' VERSION
+  git push
 
 =item 3.
 
 Make sure everything compiles and runs from a known clean state. This step
 is especially important if C<MOAR_REVISION> was changed in step 1 above.
 
-  $ make realclean
-  $ perl Configure.pl --gen-moar --backend=moar,jvm
-  $ make
-  $ make m-test
-  $ make j-test
+  make realclean
+  perl Configure.pl --gen-moar --backend=moar,jvm
+  make
+  make m-test
+  make j-test
 
 Resolve any problems that may still exist. Issues that impact backends
 other than MoarVM may potentially be ignored for a release for now.
@@ -57,8 +57,8 @@ step 3.
 
 Tag NQP by its release month ("YYYY.MM")
 
-  $ git tag -u <email address> -s -a -m "tag release YYYY.MM" YYYY.MM    # e.g., 2012.12
-  $ git push --tags
+  git tag -u <email address> -s -a -m "tag release YYYY.MM" YYYY.MM    # e.g., 2016.12
+  git push --tags
 
 The C<-s> tells git to sign the tag with your GPG key. Please see Rakudo's
 release guide for links on how to create GPG keys and upload them to GitHub,
@@ -68,13 +68,13 @@ should it be necessary.
 
 Sign the tarball:
 
-    $ gpg -b --armor nqp-YYYY.MM.tar.gz
+    gpg -b --armor nqp-YYYY.MM.tar.gz
 
 =item 8
 
 Upload the release tarball and signature to L<http://rakudo.org/downloads/nqp>:
 
-  $ scp nqp-2013.12.tar.gz nqp-2013.12.tar.gz.asc \
+  scp nqp-2013.12.tar.gz nqp-2013.12.tar.gz.asc \
         rakudo@rakudo.org:public_html/downloads/nqp/
 
 If you do not have permissions for that, ask one of (pmichaud, jnthn, FROGGS,
