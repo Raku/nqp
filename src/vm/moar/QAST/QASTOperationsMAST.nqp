@@ -1727,6 +1727,8 @@ QAST::MASTOperations.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
     push_op($il, 'takehandlerresult', $protected_result);
     nqp::push($il, $endlbl);
 
+    $regalloc.release_register($protil.result_reg, $MVM_reg_obj);
+
     MAST::InstructionList.new($il, $protected_result, $MVM_reg_obj)
 });
 
