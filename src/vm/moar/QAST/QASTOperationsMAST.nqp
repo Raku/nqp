@@ -2272,6 +2272,7 @@ QAST::MASTOperations.add_core_moarop_mapping('decodersetlineseps', 'decodersetli
 QAST::MASTOperations.add_core_moarop_mapping('decoderaddbytes', 'decoderaddbytes', 1);
 QAST::MASTOperations.add_core_moarop_mapping('decodertakechars', 'decodertakechars');
 QAST::MASTOperations.add_core_moarop_mapping('decodertakeallchars', 'decodertakeallchars');
+QAST::MASTOperations.add_core_moarop_mapping('decodertakeavailablechars', 'decodertakeavailablechars');
 QAST::MASTOperations.add_core_moarop_mapping('decodertakeline', 'decodertakeline');
 QAST::MASTOperations.add_core_moarop_mapping('decoderbytesavailable', 'decoderbytesavailable');
 QAST::MASTOperations.add_core_moarop_mapping('decodertakebytes', 'decodertakebytes');
