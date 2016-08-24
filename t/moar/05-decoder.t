@@ -1,4 +1,4 @@
-plan(20);
+plan(22);
 
 sub dies-ok(&code, $message) {
     my int $died := 0;
@@ -68,7 +68,10 @@ nqp::composetype($buf_type, nqp::hash('array', nqp::hash('type', uint8)));
     nqp::decoderaddbytes($dec, $testbuf2);
     ok(nqp::isnull_s(nqp::decodertakechars($dec, 100)),
         'Trying to read more than is available gets a null');
-    ok(nqp::decodertakeallchars($dec) eq 'водка',
-        'Can correctly take the rest');
+    ok(nqp::decodertakeavailablechars($dec) eq 'водк',
+        'Can correctly take the remaining available chars ("а" held by normalization")');
+    ok(!nqp::decoderempty($dec), 'Not empty when something left in normalization buffer');
+    ok(nqp::decodertakeallchars($dec) eq 'а',
+        'Taking all chars indicates EOF, so we get the final char');
     ok(nqp::decoderempty($dec), 'Empty after taking all chars');
 }
