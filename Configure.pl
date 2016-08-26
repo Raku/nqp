@@ -293,7 +293,7 @@ General Options:
                        nqp, java etc.
     --sysroot=dir      When given, use for searching runtime components here
     --backends=list    Backends to use: $backends
-    --gen-moar         Download and build a copy of MoarVM to use
+    --gen-moar         Download, build, and install a copy of MoarVM to use before writing the Makefile
     --moar-option='--option=value'
                        Options to pass to MoarVM configuration for --gen-moar
     --with-asm='/path/to/jar'
@@ -310,6 +310,10 @@ General Options:
                        Use --git-reference option to identify local path where git repositories are stored
                        For example: --git-reference=/home/user/repo/for_perl6
                        Folders 'nqp', 'MoarVM' with corresponding git repos should be in for_perl6 folder
+
+Please note that the --gen-moar option is there for convenience only and will
+actually immediately - at Configure time - compile and install moar. Moar will
+live under the path given to --prefix, unless other targeting options are used.
 
 Configure.pl also reads options from 'config.default' in the current directory.
 END
