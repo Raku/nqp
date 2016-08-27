@@ -35,7 +35,7 @@ class JavaScriptBackend {
         my $comp := nqp::getcomp('JavaScript');
 
         my $v8-profiler := $comp.eval('
-            var v8profiler;
+            var v8profiler = null;
             try {
               v8profiler = require(\'v8-profiler\');
             } catch (e) {
