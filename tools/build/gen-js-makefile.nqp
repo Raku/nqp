@@ -190,7 +190,7 @@ my $nqp-bootstrapped := "nqp-bootstrapped.js";
 
 
 say("node_modules/ModuleLoader.js: $nqpcore-moarvm src/vm/js/ModuleLoader.nqp \$(JS_STAGE1_COMPILER)
-	./nqp-js --settting=NULL --no-regex-lib --target=js --output $ModuleLoader src/vm/js/ModuleLoader.nqp
+	./nqp-js --setting=NULL --no-regex-lib --target=js --output $ModuleLoader src/vm/js/ModuleLoader.nqp
 ");
 
 say("$nqp-bootstrapped: $QAST-moarvm $NQPP5QRegex-moarvm $NQPP6QRegex-moarvm $nqp-combined $QRegex-moarvm
