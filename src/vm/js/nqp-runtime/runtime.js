@@ -73,9 +73,20 @@ op.loadbytecode = function(ctx, file) {
     file = 'Perl6::BOOTSTRAP';
   }
 
+  var loadFrom;
+  if (ctx && (loadFrom = ctx.lookupDynamic('$*LOADBYTECODE_FROM'))) {
+  } else {
+    loadFrom = module;
+  }
+
   var oldLoaderCtx = exports.loaderCtx;
   exports.loaderCtx = ctx;
-  require(file.replace(/::/g, '/'));
+  try {
+    var try_path = './' + file.replace(/::/g, '-');
+    loadFrom.require(try_path);
+  } catch(e) {
+    loadFrom.require('nqp-js-compiled-stuff/' + file.replace(/::/g, '-'));
+  }
   exports.loaderCtx = oldLoaderCtx;
 
   return file;

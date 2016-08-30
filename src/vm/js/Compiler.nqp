@@ -1405,8 +1405,15 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my $*RETURN;
 
         my @pre;
-        for $node.pre_deserialize -> $node {
-            @pre.push(self.as_js($node, :want($T_VOID)));
+        {
+            # We create this context so that dependecies are loaded relative to this file
+            my $*CTX := 'ctxWithPath';
+            @pre.push(
+                "var ctxWithPath = new nqp.Ctx(null, null, null, null);\n"
+                ~ "ctxWithPath['\$*LOADBYTECODE_FROM'] = module;\n");
+            for $node.pre_deserialize -> $node {
+                @pre.push(self.as_js($node, :want($T_VOID)));
+            }
         }
         my $pre := Chunk.new($T_VOID, "", @pre);
 
@@ -1767,7 +1774,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         Chunk.new($chunk.type, $chunk.expr, [self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $chunk]);
     }
 
-    method as_js_with_prelude($ast, :$instant) {
+    method as_js_with_prelude($ast, :$instant, :$shebang) {
         my $*INSTANT := $instant;
 
         # Blocks we've seen while compiling.
@@ -1782,6 +1789,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             !! self.wrap_in_fake_block($compile_block);
 
         Chunk.void(
+            $shebang ?? "#!/usr/bin/env node\n" !! '',
             "var nqp = require('nqp-runtime');\n",
             self.setup_cuids,
             self.set_static_info,
@@ -1789,10 +1797,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         );
     }
 
-    method emit($ast, :$instant, :$substagestats) {
+    method emit($ast, :$instant, :$substagestats, :$shebang) {
 
         my $timestamp := nqp::time_n();
-        my $chunk := self.as_js_with_prelude($ast, :$instant);
+        my $chunk := self.as_js_with_prelude($ast, :$instant, :$shebang);
         nqp::printfh(nqp::getstderr(), nqp::sprintf("[as_js %.3f] ", [nqp::time_n() - $timestamp])) if $substagestats;
 
         $timestamp := nqp::time_n();
@@ -1802,12 +1810,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     # return a json datastructure we later process into a source map
-    method emit_with_source_map($ast, :$instant) {
-       self.as_js_with_prelude($ast, :$instant).with_source_map_info
+    method emit_with_source_map($ast, :$instant, :$shebang) {
+       self.as_js_with_prelude($ast, :$instant, :$shebang).with_source_map_info
     }
 
-    method emit_with_source_map_debug($ast, :$instant) {
-       self.as_js_with_prelude($ast, :$instant).source_map_debug
+    method emit_with_source_map_debug($ast, :$instant,  :$shebang) {
+       self.as_js_with_prelude($ast, :$instant, :$shebang).source_map_debug
     }
 }
 

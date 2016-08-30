@@ -18,6 +18,7 @@ sub MAIN(*@ARGS) {
     @clo.push('substagestats');
     @clo.push('cps=s');
     @clo.push('nyi=s');
+    @clo.push('shebang');
 
     $nqpcomp-cc.command_line(@ARGS,:module-path('gen/js/stage2'),
         :setting-path('gen/js/stage2'),

@@ -61,6 +61,8 @@ sub combine(:$sources, :$stage, :$file, :$gen-version = 0) {
     ); 
 }
 
+my $nqp-js-on-js := 'nqp-js-on-js';
+
 sub cross-compile(:$stage, :$source, :$target, :$setting='NQPCORE', :$no-regex-lib=1, :$deps = []) {
     my $path := stage_path($stage);
     my $moarvm := $path ~ $target ~ '.moarvm';
@@ -69,7 +71,8 @@ sub cross-compile(:$stage, :$source, :$target, :$setting='NQPCORE', :$no-regex-l
     nqp::unshift($deps, $source);
     nqp::unshift($deps, '$(JS_STAGE1_COMPILER)');
 
-    my $js := "node_modules/$target.js";
+    my $replaced-target := subst($target, /\//, '-');
+    my $js := "$nqp-js-on-js/$replaced-target.js";
 
 
     rule($moarvm, nqp::join(' ', $deps), 
@@ -135,23 +138,13 @@ say("\n\njs-clean:
 	\$(RM_RF) gen/js/stage1 gen/js/stage2
 ");
 
-my $ModuleLoader := "node_modules/ModuleLoader.js";
+my $ModuleLoader := "$nqp-js-on-js/ModuleLoader.js";
 
-deps("js-all", 'm-all', 'js-stage1-compiler', 'node_modules/runtime_copied',$nqpcore-moarvm, $nqpcore-combined, $QASTNode-moarvm, $QRegex-moarvm, $sprintf-moarvm, $ModuleLoader);
+deps("js-all", 'm-all', 'js-stage1-compiler', $nqpcore-moarvm, $nqpcore-combined, $QASTNode-moarvm, $QRegex-moarvm, $sprintf-moarvm, $ModuleLoader);
 
 # Enforce the google coding standards
 say("js-lint:
 	gjslint --strict --max_line_length=200 --nojsdoc src/vm/js/nqp-runtime/*.js");
-
-say('node_modules/npm_installed: src/vm/js/nqp-runtime/package.json
-	$(MKPATH) node_modules
-	npm install src/vm/js/nqp-runtime tap
-	touch node_modules/npm_installed');
-
-say('node_modules/runtime_copied: node_modules/npm_installed src/vm/js/nqp-runtime/*.js
-	rm node_modules/nqp-runtime/*.js
-	cp src/vm/js/nqp-runtime/*.js node_modules/nqp-runtime/
-	touch node_modules/runtime_copied');
 
 say('js-install: js-all
 	@echo "*** The JavaScript backend can\'t be installed yet, sorry! ***"');
@@ -186,16 +179,15 @@ my $NQPP5QRegex-moarvm := cross-compile(:stage(2), :source($p5qregex-combined), 
 
 my $NQPP6QRegex-moarvm := cross-compile(:stage(2), :source($p6qregex-combined), :target('NQPP6QRegex'), :setting('NQPCORE'), :no-regex-lib(1), :deps([$nqpcore-moarvm, $QAST-moarvm, $hll-moar, $QRegex-moarvm]));
 
-my $nqp-bootstrapped := "nqp-bootstrapped.js";
+my $nqp-bootstrapped := "$nqp-js-on-js/nqp-bootstrapped.js";
 
 
-say("node_modules/ModuleLoader.js: $nqpcore-moarvm src/vm/js/ModuleLoader.nqp \$(JS_STAGE1_COMPILER)
+say("$nqp-js-on-js/ModuleLoader.js: $nqpcore-moarvm src/vm/js/ModuleLoader.nqp \$(JS_STAGE1_COMPILER)
 	./nqp-js --setting=NULL --no-regex-lib --target=js --output $ModuleLoader src/vm/js/ModuleLoader.nqp
 ");
 
 say("$nqp-bootstrapped: $QAST-moarvm $NQPP5QRegex-moarvm $NQPP6QRegex-moarvm $nqp-combined $QRegex-moarvm
-	echo 'require(\"ModuleLoader\");' > $nqp-bootstrapped
-	./nqp-js --target=js  $nqp-combined >> $nqp-bootstrapped
+	./nqp-js --target=js --shebang $nqp-combined > $nqp-bootstrapped
 ");
 
 

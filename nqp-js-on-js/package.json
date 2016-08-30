@@ -1,0 +1,16 @@
+{
+  "version": "0.0.1",
+  "name": "nqp-js-compiled-stuff",
+  "bin": {
+      "nqp-js-bootstrapped": "nqp-bootstrapped.js"
+  },
+  "licenses": [
+    {
+      "type": "Artistic 2",
+      "url": "http://opensource.org/licenses/Artistic-2.0"
+    }
+  ],
+  "dependencies": {
+    "nqp-runtime": "*"
+  }
+}

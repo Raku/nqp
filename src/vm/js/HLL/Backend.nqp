@@ -105,12 +105,14 @@ class JavaScriptBackend {
 
         my $instant := %adverbs<target> eq 'js' || self.spawn_new_node();
 
+        my $shebang := nqp::defined(%adverbs<shebang>);
+
         if %adverbs<source-map-debug> {
-            $backend.emit_with_source_map_debug($qast, :$instant);
+            $backend.emit_with_source_map_debug($qast, :$instant, :$shebang);
         } elsif %adverbs<source-map> {
-            $backend.emit_with_source_map($qast, :$instant);
+            $backend.emit_with_source_map($qast, :$instant, :$shebang);
         } else {
-            my $code := $backend.emit($qast, :$instant, :$substagestats);
+            my $code := $backend.emit($qast, :$instant, :$substagestats, :$shebang);
             $code := self.beautify($code) if %adverbs<beautify>;
             $code;
         }
