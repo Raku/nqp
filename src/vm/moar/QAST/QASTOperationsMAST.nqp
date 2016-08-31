@@ -2267,6 +2267,16 @@ QAST::MASTOperations.add_core_moarop_mapping('encodenorm', 'encodenorm', 3);
 QAST::MASTOperations.add_core_moarop_mapping('normalizecodes', 'normalizecodes', 2);
 QAST::MASTOperations.add_core_moarop_mapping('strfromcodes', 'strfromcodes');
 QAST::MASTOperations.add_core_moarop_mapping('strtocodes', 'strtocodes', 2);
+QAST::MASTOperations.add_core_moarop_mapping('decoderconfigure', 'decoderconfigure', 0);
+QAST::MASTOperations.add_core_moarop_mapping('decodersetlineseps', 'decodersetlineseps', 0);
+QAST::MASTOperations.add_core_moarop_mapping('decoderaddbytes', 'decoderaddbytes', 1);
+QAST::MASTOperations.add_core_moarop_mapping('decodertakechars', 'decodertakechars');
+QAST::MASTOperations.add_core_moarop_mapping('decodertakeallchars', 'decodertakeallchars');
+QAST::MASTOperations.add_core_moarop_mapping('decodertakeavailablechars', 'decodertakeavailablechars');
+QAST::MASTOperations.add_core_moarop_mapping('decodertakeline', 'decodertakeline');
+QAST::MASTOperations.add_core_moarop_mapping('decoderbytesavailable', 'decoderbytesavailable');
+QAST::MASTOperations.add_core_moarop_mapping('decodertakebytes', 'decodertakebytes');
+QAST::MASTOperations.add_core_moarop_mapping('decoderempty', 'decoderempty');
 
 QAST::MASTOperations.add_core_op('tclc', -> $qastcomp, $op {
     my @operands := $op.list;

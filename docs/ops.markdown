@@ -110,6 +110,17 @@
     - [getuniprop_str](#getuniprop_str)
     - [getuniprop_bool](#getuniprop_bool)
     - [matchuniprop](#matchuniprop)
+- [VM-Provided Streaming Decoder Opcodes](#-vm-provided-streaming-decoder-opcodes)
+    - [decoderconfigure](#decoderconfigure)
+    - [decodersetlineseps](#decodersetlineseps)
+    - [decoderaddbytes](#decoderaddbytes)
+    - [decodertakechars](#decodertakechars)
+    - [decodertakeallchars](#decodertakeallchars)
+    - [decodertakeavailablechars](#decodertakeavailablechars)
+    - [decodertakeline](#decodertakeline)
+    - [decoderbytesavailable](#decoderbytesavailable)
+    - [decodertakebytes](#decodertakebytes)
+    - [decoderempty](#decoderempty)
 - [Conditional Opcodes](#-conditional-opcodes)
     - [if](#if)
     - [unless](#unless)
@@ -1102,6 +1113,88 @@ Looks up a codepoint property and return 1 if it matches the pval, 0
 otherwise.  The propcode and pvalcode may be looked up with the opcodes
 above.  (Note that you can use the property value name (e.g. Nd) for both
 lookups.)
+
+# <a id="-vm-provided-streaming-decoder-opcodes"></a> VM-Provided Streaming Decoder Opcodes
+
+## decoderconfigure
+* `decoderconfigure(Decoder $dec, str $encoding, VMHash $config)`
+
+Configures the decoder with an encoding. The `$config` hash parameter is
+currently unused, and an empty hash or an `nqp::null` should be passed.
+
+## decodersetlineseps
+* `decodersetlineseps(Decoder $dec, VMArray $separators)`
+
+Sets the line separators to be used for line-based reading. It should be
+a string array (`nqp::list_s(...)`).
+
+## decoderaddbytes
+* `decoderaddbytes(Decoder $dec, VMArray $blob)`
+
+Adds bytes to the decoder's internal buffer. Must have VMArray REPR, and
+must have elements of type `int8` or `uint8`.
+
+## decodertakechars
+* `decodertakechars(Decoder $dec, int $num-chars)`
+
+Returns an NFG string consisting of `$num-chars` graphemes, provided that
+many are available after decoding. If less than `$num-chars` characters
+can be decoded, then `nqp::null_s` will be returned. Note that some a
+decoded codepoint at the end of a byte buffer may not be available as a
+character if the encoding allows the next character to be a combining
+character.
+
+## decodertakechars
+* `decodertakeallchars(Decoder $dec)`
+
+Decodes all remaining undecoded bytes, and flushes the normalization buffer.
+Returns an NFG string consisting of the decoded characters. This is suitable
+to use when the end of a stream of bytes to decode has been reached (for
+example, EOF when reading a file).
+
+## decodertakeavailablechars
+* `decodertakeavailablechars(Decoder $dec)`
+
+Decodes all remaining undecoded bytes. Returns an NFG string consisting of the
+decoded characters. Does not flush the normalization buffer. This is suitable
+when performing streaming decoding, and a later byte buffer may provide a
+combining character.
+
+## decodertakeline
+* `decodertakeline(Decoder $dec, int $chomp, int $incomplete-ok)`
+
+Decodes bytes until a line separator is reached, or all bytes have been
+decoded. If `$incomplete-ok` is zero and the separator was not found, then
+`nqp::null_s` will be returned. (Thus, `$incomplete-ok` is appropriate only
+when knowing that the end of the stream has been reached.) If `$chomp` is
+non-zero, then the separator - if present - will not be included in the
+resulting string.
+
+## decoderbytesavailable
+* `decoderbytesavailable(Decoder $dec)`
+
+Returns the number of undecoded bytes available inside of the decoder. This is
+useful in the case that chunks of the input should also be pulled out as bytes,
+and may be useful for doing tuning or pre-fetching in various other cases. Note
+that the result does not include bytes that were decoded but have not yet been
+taken as characters, or that were decoded to code points that are still in the
+normalization buffer. Thus the result is only accurate before reading any chars
+or after `decodertakechars` or after `decodertakeline` with `$incomplete-ok`
+passed a non-zero value.
+
+## decodertakebytes
+* `decodertakebytes`(Decoder $dec, VMArray $blob_type, int $bytes)`
+
+Takes up to `$bytes` bytes from the decode stream's undecoded buffer, makes an
+instance of the `$blob_type`, and places the bytes in it. The same set of
+caveats about decoded-but-untaken bytes in `decoderbytesavailable` apply.
+
+## decoderempty
+* `decoderempty(Decoder $dec)`
+
+Returns zero if the decoder is empty (this means that there are no undecoded
+bytes, no decoded but untaken chars, and nothing in the normalization buffer).
+Otherwise returns non-zero.
 
 # <a id="conditional"></a> Conditional Opcodes
 
