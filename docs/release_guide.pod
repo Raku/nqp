@@ -39,6 +39,11 @@ Resolve any problems that may still exist. Issues that impact backends
 other than MoarVM may potentially be ignored for a release for now.
 Check on the IRC channel if you have any questions.
 
+You will need JVM installed for the jvm tests to run. On Debian, you
+can install it with:
+
+    sudo apt-get install openjdk-7-jdk openjdk-7-jre
+
 =item 4.
 
 Create a release tarball (needed for the Rakudo Star release)
