@@ -56,7 +56,7 @@ class P6opaque {
     var autovived = {};
     if (this.autoVivValues) {
       for (var mapping of this.nameToIndexMapping) {
-        for (var slot in mapping.slots) {
+        for (var slot of mapping.slots) {
           if (this.autoVivValues[slot]) {
             if (!this.autoVivValues[slot].typeObject_) {
               //            console.log('autoviv', name, slot, this.autoVivValues[slot]);
@@ -273,7 +273,7 @@ class P6opaque {
     }
 
     for (var mapping of this.nameToIndexMapping) {
-      for (var slot in mapping.slots) {
+      for (var slot of mapping.slots) {
         obj[slotToAttr(slot)] = attrs[slot];
       }
     }
