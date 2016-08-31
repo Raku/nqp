@@ -1,8 +1,8 @@
 {
-  "version": "0.0.1",
-  "name": "nqp-js-compiled-stuff",
+  "version": "0.1.0",
+  "name": "nqp-js-on-js",
   "bin": {
-      "nqp-js-bootstrapped": "nqp-bootstrapped.js"
+      "nqp-js-on-js": "nqp-bootstrapped.js"
   },
   "licenses": [
     {
@@ -11,6 +11,6 @@
     }
   ],
   "dependencies": {
-    "nqp-runtime": "*"
+    "nqp-runtime": "0.1.0"
   }
 }

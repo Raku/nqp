@@ -134,7 +134,7 @@ $(JS_STAGE2)/NQPP6QRegex.moarvm: $(JS_STAGE1_COMPILER) $(JS_STAGE2)/$(P6QREGEX_C
 nqp-js-on-js/ModuleLoader.js: $(JS_STAGE2)/NQPCORE.setting.moarvm src/vm/js/ModuleLoader.nqp $(JS_STAGE1_COMPILER)
 	./nqp-js --setting=NULL --no-regex-lib --target=js --output nqp-js-on-js/ModuleLoader.js src/vm/js/ModuleLoader.nqp
 
-nqp-bootstrapped.js: $(JS_STAGE2)/QAST.moarvm $(JS_STAGE2)/NQPP5QRegex.moarvm $(JS_STAGE2)/NQPP6QRegex.moarvm $(JS_STAGE2)/$(NQP_COMBINED) $(JS_STAGE2)/QRegex.moarvm
-	./nqp-js --target=js --shebang $(JS_STAGE2)/$(NQP_COMBINED) > nqp-bootstrapped.js
+nqp-js-on-js/nqp-bootstrapped.js: $(JS_STAGE2)/QAST.moarvm $(JS_STAGE2)/NQPP5QRegex.moarvm $(JS_STAGE2)/NQPP6QRegex.moarvm $(JS_STAGE2)/$(NQP_COMBINED) $(JS_STAGE2)/QRegex.moarvm
+	./nqp-js --target=js --shebang $(JS_STAGE2)/$(NQP_COMBINED) > nqp-js-on-js/nqp-bootstrapped.js
 
-js-bootstrap : js-all nqp-bootstrapped.js
+js-bootstrap : js-all nqp-js-on-js/nqp-bootstrapped.js
