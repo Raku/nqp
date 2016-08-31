@@ -1,4 +1,4 @@
-plan(32);
+plan(45);
 
 sub dies-ok(&code, $message) {
     my int $died := 0;
@@ -103,4 +103,27 @@ nqp::composetype($buf_type, nqp::hash('array', nqp::hash('type', uint8)));
     ok(nqp::decodertakeline($dec, 0, 0) eq "line 2BB", 'read line 2, not chomped (custom seps)');
     ok(nqp::isnull_s(nqp::decodertakeline($dec, 1, 0)), 'cannot lead a complete line now (custom seps)');
     ok(nqp::decodertakeline($dec, 1, 1) eq "line 3", 'with incomplete flag, read final line (custom seps)');
+}
+
+{
+    my $testbuf1 := nqp::encode("над\nп", 'utf8', nqp::create($buf_type));
+    my $testbuf2 := nqp::encode('од', 'utf8', nqp::create($buf_type));
+    my $dec := nqp::create(VMDecoder);
+    nqp::decoderconfigure($dec, 'utf8', nqp::hash());
+    nqp::decoderaddbytes($dec, $testbuf1);
+    ok(nqp::decoderbytesavailable($dec) == 9, 'Can get number of bytes available');
+    ok(nqp::decodertakechars($dec, 4) eq "над\n", 'Read 4 chars OK');
+    ok(nqp::decoderbytesavailable($dec) == 2, 'Correct bytes available afterwards');
+    nqp::decoderaddbytes($dec, $testbuf2);
+    ok(nqp::decoderbytesavailable($dec) == 6, 'Adding more bytes is tracked');
+    my $bytes := nqp::decodertakebytes($dec, $buf_type, 6);
+    ok(nqp::elems($bytes), 'Could take 6 bytes as byte array');
+    ok(nqp::atpos_i($bytes, 0) == 0xd0, 'Byte 1 correct');
+    ok(nqp::atpos_i($bytes, 1) == 0xbf, 'Byte 2 correct');
+    ok(nqp::atpos_i($bytes, 2) == 0xd0, 'Byte 3 correct');
+    ok(nqp::atpos_i($bytes, 3) == 0xbe, 'Byte 4 correct');
+    ok(nqp::atpos_i($bytes, 4) == 0xd0, 'Byte 5 correct');
+    ok(nqp::atpos_i($bytes, 5) == 0xb4, 'Byte 6 correct');
+    ok(nqp::decoderbytesavailable($dec) == 0, 'Now no bytes available');
+    ok(nqp::decoderempty($dec), 'And so the decoder is empty');
 }
