@@ -251,12 +251,14 @@ op.istype = function(ctx, obj, type) {
     /* If we get here, need to call .^type_check on the value we're
      * checking. */
 
+    var HOW = obj._STable.HOW;
     /* This "hack" is stolen from the JVM */
-    if (!obj._STable.HOW.type_check) {
+    if (!HOW.type_check) {
       return 0;
     }
 
-    return nqp.toBool(obj._STable.HOW.type_check(ctx, null, obj, type));
+
+    return nqp.toBool(HOW.type_check(ctx, null, HOW, obj, type));
   }
   return 0;
 };
