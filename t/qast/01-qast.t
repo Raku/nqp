@@ -1,11 +1,12 @@
 use QAST;
 
-plan(76);
+plan(77);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
     my $*QAST_BLOCK_NO_CLOSE := 1;
-    nqp::getcomp('nqp').compile($qast, :from('ast'));
+    # Turn off the optimizer as it can only handle things things nqp generates
+    nqp::getcomp('nqp').compile($qast, :from('ast'), :optimize('off'));
 }
 sub is_qast($qast, $value, $desc) {
     try {
@@ -1006,7 +1007,8 @@ nqp::scsetobj($sc, 0, $g1);
 nqp::setobjsc($g1, $sc);
 
 if nqp::getcomp('nqp').backend.name eq 'jvm' {
-    todo('contvar tests need work on JVM', 1);
+    todo('contvar tests need work on JVM', 2);
+    ok(0);
     ok(0);
 } else {
     is_qast(
@@ -1053,6 +1055,51 @@ if nqp::getcomp('nqp').backend.name eq 'jvm' {
         ),
         303,
         'contvar');
+
+    is_qast(
+        QAST::Block.new(
+            QAST::Op.new(
+                :op<bind>,
+                QAST::Var.new( :name<$i>, :scope<lexical>, :decl<var>, :returns(int) ),
+                QAST::IVal.new( :value(3) )
+            ),
+            QAST::Op.new(
+                :op<bind>,
+                QAST::Var.new( :name<$total>, :scope<lexical>, :decl<var>, :returns(int) ),
+                QAST::IVal.new( :value(0) )
+            ),
+            QAST::Op.new(
+                :op<while>,
+                QAST::Var.new( :name<$i>, :scope<lexical> ),
+                QAST::Block.new(:blocktype<immediate>,
+                    QAST::Var.new( :name<$x>, :scope<local>, :decl<contvar>, :value($g1) ),
+                    QAST::Op.new(
+                        :op<bind>,
+                        QAST::Var.new( :name<$i>, :scope<lexical> ),
+                        QAST::Op.new(
+                            :op<sub_i>,
+                            QAST::Var.new( :name<$i>, :scope<lexical> ),
+                            QAST::IVal.new( :value(1) )
+                        )
+                    ),
+                    QAST::Op.new(
+                        :op<bind>,
+                        QAST::Var.new( :name<$total>, :scope<lexical>, :returns(int) ),
+                        QAST::Op.new(:op<add_i>,
+                            QAST::Op.new(
+                                :op<callmethod>, :name<plus>,
+                                QAST::Var.new( :name<$x>, :scope<local> )
+                            ),
+                            QAST::Var.new(:scope<lexical>, :name<$total>)
+                        )
+                    ),
+                )
+            ),
+            QAST::Var.new(:scope<lexical>, :name<$total>)
+        ),
+        303,
+        'contvar local')
+
 }
 
 is_qast(
