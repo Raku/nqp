@@ -81,12 +81,23 @@ op.loadbytecode = function(ctx, file) {
 
   var oldLoaderCtx = exports.loaderCtx;
   exports.loaderCtx = ctx;
-  try {
-    var try_path = './' + file.replace(/::/g, '-');
-    loadFrom.require(try_path);
-  } catch(e) {
-    loadFrom.require('nqp-js-compiled-stuff/' + file.replace(/::/g, '-'));
+  var mangled =  file.replace(/::/g, '-');
+
+  var prefixes = (process.env.NQPJS_LIB || '').split(':');
+  prefixes.push('./', 'nqp-js-on-js/');
+  var found = false;
+  for (var prefix of prefixes) {
+    try {
+      loadFrom.require(prefix + mangled);
+      found = true;
+      break;
+    } catch(e) {
+      if (e.code !== 'MODULE_NOT_FOUND') {
+        throw e;
+      }
+    }
   }
+  if (!found) throw "can't find: " + file + ", looking in: " + prefixes.join(', ') + " from " + loadFrom.filename;
   exports.loaderCtx = oldLoaderCtx;
 
   return file;
