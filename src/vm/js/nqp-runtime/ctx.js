@@ -108,6 +108,11 @@ class Ctx {
     return null;
   }
 
+  lookupFromOuter(name) {
+    console.log("looking up from outer", name);
+    return this.$$outer.lookup(name);
+  }
+
   $$atkey(key) {
     return this.lookup(key);
   }
