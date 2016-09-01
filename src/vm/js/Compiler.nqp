@@ -155,6 +155,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             @!js_lexicals.push($name);
         }
 
+        method add_js_lexical_with_value($name, $value) {
+            @!js_lexicals.push($name ~ " = $value");
+        }
+
         method add_variable($var) {
             if $var.scope ne 'local' {
                 @!variables.push($var);
@@ -1484,9 +1488,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             $*BLOCK.add_variable($node);
 
             if !self.is_dynamic_var($*BLOCK, $node) {
-                $*BLOCK.add_js_lexical($*BLOCK.add_mangled_var($node));
+                my $mangled_name := $*BLOCK.add_mangled_var($node);
                 if $node.decl eq 'contvar' {
-                    nqp::die("TODO - contvars with none dynamic vars");
+                    $*BLOCK.add_js_lexical_with_value($mangled_name, "nqp.op.clone({self.value_as_js($node.value)}"));
+                }
+                else {
+                    $*BLOCK.add_js_lexical($mangled_name);
                 }
             }
         }
