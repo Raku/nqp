@@ -1144,7 +1144,7 @@ decoded codepoint at the end of a byte buffer may not be available as a
 character if the encoding allows the next character to be a combining
 character.
 
-## decodertakechars
+## decodertakeallchars
 * `decodertakeallchars(Decoder $dec)`
 
 Decodes all remaining undecoded bytes, and flushes the normalization buffer.
