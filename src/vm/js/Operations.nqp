@@ -246,7 +246,6 @@ class QAST::OperationsJS {
         $hint != -1 ?? 'attr$' ~ $hint !! NQPMu;
     }
 
-    # TODO optimize cases where the class and the attribute are constants
     for ['', $T_OBJ, '_i', $T_INT, '_n', $T_NUM, '_s', $T_STR] -> $suffix, $type {
         add_op('bindattr' ~ $suffix, sub ($comp, $node, :$want, :$cps) {
             my $obj := $comp.as_js(:want($T_OBJ), $node[0]);
