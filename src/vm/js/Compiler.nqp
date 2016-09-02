@@ -1490,7 +1490,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             if !self.is_dynamic_var($*BLOCK, $node) {
                 my $mangled_name := $*BLOCK.add_mangled_var($node);
                 if $node.decl eq 'contvar' {
-                    $*BLOCK.add_js_lexical_with_value($mangled_name, "nqp.op.clone({self.value_as_js($node.value)}"));
+                    $*BLOCK.add_js_lexical_with_value($mangled_name, "nqp.op.clone({self.value_as_js($node.value)})");
                 }
                 else {
                     $*BLOCK.add_js_lexical($mangled_name);
