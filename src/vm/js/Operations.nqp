@@ -246,25 +246,39 @@ class QAST::OperationsJS {
         $hint != -1 ?? 'attr$' ~ $hint !! NQPMu;
     }
 
-    for ['', $T_OBJ, '_i', $T_INT, '_n', $T_NUM, '_s', $T_STR] -> $suffix, $type {
-        add_op('bindattr' ~ $suffix, sub ($comp, $node, :$want, :$cps) {
+    my sub bindattr($type, :$inverted_result) {
+        sub ($comp, $node, :$want, :$cps) {
             my $obj := $comp.as_js(:want($T_OBJ), $node[0]);
             my $value := $comp.as_js(:want($type), $node[3]);
+            my @setup;
+            my $action;
             if static_attr($node) -> $attr {
-                $comp.stored_result(Chunk.new($type,
-                    "({$obj.expr}\.$attr = {$value.expr})",
-                [$obj, $value]), :$want);
+                $action := "({$obj.expr}\.$attr = {$value.expr})";
+                @setup := [$obj, $value];
             }
             else {
                 my $classHandle := $comp.as_js(:want($T_OBJ), $node[1]);
                 my $attrName := $comp.as_js(:want($T_STR), $node[2]);
 
-                $comp.stored_result(Chunk.new($type,
-                    "{$obj.expr}\.\$\$bindattr({$classHandle.expr}, {$attrName.expr}, {$value.expr})",
-                [$obj, $classHandle, $attrName, $value]), :$want);
+                $action := "{$obj.expr}\.\$\$bindattr({$classHandle.expr}, {$attrName.expr}, {$value.expr})";
+                @setup := [$obj, $classHandle, $attrName, $value];
             }
 
-        });
+            if $inverted_result {
+                @setup.push($action);
+                Chunk.new($type, $obj.expr, @setup);
+            } else {
+                $comp.stored_result(Chunk.new($type, $action, @setup), :$want);
+            }
+        }
+    }
+
+    method bindattr($type, :$inverted_result) {
+        bindattr($type, :$inverted_result);
+    }
+
+    for ['', $T_OBJ, '_i', $T_INT, '_n', $T_NUM, '_s', $T_STR] -> $suffix, $type {
+        add_op('bindattr' ~ $suffix, bindattr($type));
 
         add_op('getattr' ~ $suffix, sub ($comp, $node, :$want, :$cps) {
             my $obj := $comp.as_js(:want($T_OBJ), $node[0]);
