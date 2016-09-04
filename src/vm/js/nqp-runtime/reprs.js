@@ -706,6 +706,14 @@ class P6bigint extends REPR {
     }
   }
 
+  deserializeInline(data) {
+    if (data.varint() == 1) { /* Is it small int? */
+      return bignum(data.varint());
+    } else {
+      return bignum(data.str());
+    }
+  }
+
   serialize(cursor, obj) {
     var isSmall = 0; /* TODO - check */
 
