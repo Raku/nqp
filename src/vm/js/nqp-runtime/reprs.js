@@ -54,22 +54,23 @@ class P6opaque {
 
   precalculate() {
     var autovived = {};
-    if (this.autoVivValues) {
-      for (var mapping of this.nameToIndexMapping) {
-        for (var slot of mapping.slots) {
-          if (this.autoVivValues[slot]) {
-            if (!this.autoVivValues[slot].typeObject_) {
-              //            console.log('autoviv', name, slot, this.autoVivValues[slot]);
-              console.warn('We currently only implement autoviv with type object values');
-            }
-            /* TODO autoviving things that aren't typeobjects */
-            /* TODO we need to store attributes better */
-            autovived[slotToAttr(slot)] = this.autoVivValues[slot];
-          } else if (this.flattenedStables[slot]) {
-            if (this.flattenedStables[slot].REPR.flattenedDefault !== undefined) {
-              autovived[slotToAttr(slot)] = this.flattenedStables[slot].REPR.flattenedDefault;
-            }
+    for (var mapping of this.nameToIndexMapping) {
+      for (var slotIndex in mapping.slots) {
+        var slot = mapping.slots[slotIndex];
+        var name = mapping.names[slotIndex];
+        if (this.flattenedStables[slot]) {
+          if (this.flattenedStables[slot].REPR.flattenedDefault !== undefined) {
+            autovived[slotToAttr(slot)] = this.flattenedStables[slot].REPR.flattenedDefault;
+          } else {
+            console.warn("we don't have a default for flattened attr " + name + " of REPR", this.flattenedStables[slot].REPR.name);
           }
+        } else if (this.autoVivValues && this.autoVivValues[slot]) {
+          if (!this.autoVivValues[slot].typeObject_) {
+
+            console.warn('We currently only implement autoviv with type object values: ' + name);
+          }
+          /* TODO autoviving things that aren't typeobjects */
+          autovived[slotToAttr(slot)] = this.autoVivValues[slot];
         }
       }
     }
@@ -567,6 +568,7 @@ class P6num extends REPR {
 
 P6num.prototype.boxedPrimitive = 2;
 P6num.prototype.flattenSTable = true;
+P6num.prototype.flattenedDefault = 0.0;
 
 reprs.P6num = P6num;
 
@@ -609,6 +611,7 @@ class P6str extends REPR {
 
 P6str.prototype.boxedPrimitive = 3;
 P6str.prototype.flattenSTable = true;
+P6str.prototype.flattenedDefault = null;
 
 
 reprs.P6str = P6str;
@@ -725,26 +728,38 @@ class P6bigint extends REPR {
     }
   }
 
+  serializeInline(data, value) {
+    var isSmall = 0; /* TODO - check */
+
+    data.varint(isSmall);
+    if (isSmall) {
+      data.varint(value.toNumber());
+    } else {
+      data.str(value.toString());
+    }
+  }
+
   generateBoxingMethods(STable, name, attrSTable) {
     STable.addInternalMethod('$$setInt', function(value) {
-      this[name] = makeBI(attrSTable, bignum(value));
+      this[name] = bignum(value);
     });
 
     STable.addInternalMethod('$$getInt', function() {
-      return getBI(this[name]).toNumber();
+      return this[name].toNumber();
     });
 
     STable.addInternalMethod('$$getBignum', function() {
-      return getBI(this[name]);
+      return this[name];
     });
 
     STable.addInternalMethod('$$setBignum', function(num) {
-      this[name] = makeBI(attrSTable, num);
+      this[name] = num;
     });
   }
 };
 
 P6bigint.prototype.flattenSTable = true;
+P6bigint.prototype.flattenedDefault = bignum(0);
 
 reprs.P6bigint = P6bigint;
 
