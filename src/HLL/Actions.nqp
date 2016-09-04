@@ -76,13 +76,17 @@ class HLL::Actions {
         }
     }
 
+    method O($/) {
+        make %*SPEC
+    }
+
     method EXPR($/, $key?) {
         unless $key { return 0; }
         my $ast := $/.ast // $<OPER>.ast;
         unless $ast {
             $ast := QAST::Op.new( :node($/) );
-            if $<OPER><O><op> {
-                $ast.op( ~$<OPER><O><op> );
+            if $<OPER><O>.made<op> {
+                $ast.op( ~$<OPER><O>.made<op> );
             }
             if $key eq 'LIST' { $key := 'infix'; }
             my $name := nqp::lc($key) ~ ':' ~ ($<OPER><sym> ~~ /<[ < > ]>/ ?? '«' ~ $<OPER><sym> ~ '»' !! '<' ~ $<OPER><sym> ~ '>');

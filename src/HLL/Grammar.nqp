@@ -129,130 +129,35 @@ grammar HLL::Grammar {
 
 =begin 
 
-=item O(spec [, save])
+=item O(*%spec)
 
 This subrule attaches operator precedence information to
 a match object (such as an operator token).  A typical
 invocation for the subrule might be:
 
-    token infix:sym<+> { <sym> <O( q{ %additive, :op<add> } )> }
+    token infix:sym<+> { <sym> <O(|%additive, :op<add>)> }
 
-This says to add all of the attribute of the C<%additive> hash
+This says to add all of the attributes of the C<%additive> hash
 (described below) and a C<op> entry into the match object
 returned by the C<< infix:sym<+> >> token (as the C<O> named
 capture).  Note that this is a alphabetic "O", not a digit zero.
 
-Currently the C<O> subrule accepts a string argument describing
-the hash to be stored.  (Note the C< q{ ... } > above.  Eventually
-it may be possible to omit the 'q' such that an actual (constant)
-hash constructor is passed as an argument to C<O>.
+The %additive hash is simply a hash containing information that is shared
+between all additive operators. Generally, this will simply be a normal
+lexically scoped hash belonging to the grammar. For example, the NQP grammar
+has:
 
-The hash built via the string argument to C<O> is cached, so that
-subsequent parses of the same token re-use the hash built from
-previous parses of the token, rather than building a new hash
-on each invocation.
-
-The C<save> argument is used to build "hash" aggregates that can
-be referred to by subsequent calls to C<O>.  For example,
-
-    NQP::Grammar.O(':prec<t=>, :assoc<left>', '%additive' );
-
-specifies the values to be associated with later references to
-"%additive".  Eventually it will likely be possible to use true
-hashes from a package namespace, but this works for now.
-
-Currently the only pairs recognized have the form C< :pair >,
-C< :!pair >, and C<< :pair<strval> >>.
-
-=end
-    
-    # This lexical holds the hash cache. Right now we have one
-    # cache for all grammars; eventually we may need a way to
-    # separate them out by cursor type.
-    my %ohash;
-    
-    method O(str $spec, $save?) {
-        # See if we've already created a Hash for the current
-        # specification string -- if so, use that.
-        my %hash := %ohash{$spec};
-        unless %hash {
-            # Otherwise, we need to build a new one.
-            %hash       := nqp::hash();
-            my int $eos := nqp::chars($spec);
-            my int $pos := 0;
-            while ($pos := nqp::findnotcclass(nqp::const::CCLASS_WHITESPACE,
-                                              $spec, $pos, $eos)) < $eos
-            {
-                my int $lpos;
-                my str $s := nqp::substr($spec, $pos, 1);
-                if $s eq ',' { # Ignore commas between elements for now.
-                    $pos++;
-                }
-                elsif $s eq ':' { # Parse whatever comes next like a pair.
-                    $pos++;
-                  
-                    # If the pair is of the form :!name, then reverse the value
-                    # and skip the exclamation mark.
-                    my $value := 1;
-                    if nqp::substr($spec, $pos, 1) eq '!' {
-                        $pos++;
-                        $value := 0;
-                    }
-
-                    # Get the name of the pair.
-                    $lpos    := nqp::findnotcclass(nqp::const::CCLASS_WORD,
-                                                   $spec, $pos, $eos);
-                    my $name := nqp::substr($spec, $pos, $lpos - $pos);
-                    $pos     := $lpos;
-
-                    # Look for a <...> that follows.
-                    if nqp::substr($spec, $pos, 1) eq '<' {
-                        $pos   := $pos + 1;
-                        $lpos  := nqp::index($spec, '>', $pos);
-                        $value := nqp::substr($spec, $pos, $lpos - $pos);
-                        $pos   := $lpos + 1;
-                    }
-                    # Done processing the pair, store it in the hash.
-                    %hash{$name} := $value;
-                }
-                else {
-                    # If whatever we found doesn't start with a colon, treat it
-                    # as a lookup of a previously saved hash to be merged in.
-                    # Find the first whitespace or comma
-                    $lpos      := nqp::findcclass(nqp::const::CCLASS_WHITESPACE,
-                                                  $spec, $pos, $eos);
-                    my $index  := nqp::index($spec, ',', $pos);
-                    $lpos      := $index unless $index < 0 || $index >= $lpos;
-                    my $lookup := nqp::substr($spec, $pos, $lpos - $pos);
-                    my %lhash  := %ohash{$lookup};
-                    self.'panic'('Unknown operator precedence specification "',
-                                 $lookup, '"') unless %lhash;
-                    my $lhash_it := nqp::iterator(%lhash);
-                    while $lhash_it {
-                        $s := nqp::shift($lhash_it);
-                        %hash{$s} := %lhash{$s};
-                    }
-                    $pos := $lpos;
-                }
-            }
-            # Done processing the spec string, cache the hash for later.
-            %ohash{$spec} := %hash;
-        }
-
-        if $save {
-            %ohash{$save} := %hash;
-            self;
-        }
-        else {
-            # If we've been called as a subrule, then build a pass-cursor
-            # to indicate success and set the hash as the subrule's match object.
-            my $cur := self.'!cursor_start_cur'();
-            $cur.'!cursor_pass'(nqp::getattr_i($cur, NQPCursor, '$!from'));
-            nqp::bindattr($cur, NQPCursor, '$!match', %hash);
-            $cur;
-        }
+    grammar NQP::Grammar is HLL::Grammar {
+        my %additive := nqp::hash('prec', 't=', 'assoc', 'left');
+        token infix:sym<+>    { <sym>  <O(|%additive, :op<add_n>)> }
     }
 
+=end
+
+    token O(*%spec) {
+        :my %*SPEC := %spec;
+        <?>
+    }
 
 =begin
 
@@ -453,8 +358,8 @@ An operator precedence parser.
  
             unless nqp::isnull(@prefixish) || nqp::isnull(@postfixish) {
                 while @prefixish && @postfixish {
-                    my %preO     := @prefixish[0]<OPER><O>;
-                    my %postO    := @postfixish[nqp::elems(@postfixish)-1]<OPER><O>;
+                    my %preO     := @prefixish[0]<OPER><O>.made;
+                    my %postO    := @postfixish[nqp::elems(@postfixish)-1]<OPER><O>.made;
                     my $preprec  := nqp::ifnull(nqp::atkey(%preO, 'sub'), nqp::ifnull(nqp::atkey(%preO, 'prec'), ''));
                     my $postprec := nqp::ifnull(nqp::atkey(%postO, 'sub'), nqp::ifnull(nqp::atkey(%postO, 'prec'), ''));
 
@@ -507,7 +412,7 @@ An operator precedence parser.
                 $infix := $infixcur.MATCH();
     
                 # We got an infix.
-                %inO := $infix<OPER><O>;
+                %inO := $infix<OPER><O>.made;
                 $termishrx := nqp::ifnull(nqp::atkey(%inO, 'nextterm'), 'termish');
                 $inprec := ~%inO<prec>;
                 $infixcur.panic('Missing infixish operator precedence')
@@ -518,7 +423,7 @@ An operator precedence parser.
                 }
 
                 while @opstack {
-                    my %opO := @opstack[+@opstack-1]<OPER><O>;
+                    my %opO := @opstack[+@opstack-1]<OPER><O>.made;
 
                     $opprec := nqp::ifnull(nqp::atkey(%opO, 'sub'), nqp::atkey(%opO, 'prec'));
                     last unless $opprec gt $inprec;
@@ -579,7 +484,7 @@ An operator precedence parser.
         # no positional captures and not taken them.
         nqp::bindattr($op, NQPCapture, '@!array', nqp::list());
         my %opOPER      := nqp::atkey($op, 'OPER');
-        my %opO         := nqp::atkey(%opOPER, 'O');
+        my %opO         := nqp::atkey(%opOPER, 'O').made;
         my str $opassoc := ~nqp::atkey(%opO, 'assoc');
         my str $key;
         my str $sym;
