@@ -175,6 +175,9 @@ class P6opaque {
   }
 
   hintfor(classHandle, attrName) {
+    if (!this.nameToIndexMapping) {
+      return -1;
+    }
     for (var i = 0; i < this.nameToIndexMapping.length; i++) {
       if (this.nameToIndexMapping[i].classKey === classHandle) {
         for (var j = 0; j < this.nameToIndexMapping[i].slots.length; j++) {
