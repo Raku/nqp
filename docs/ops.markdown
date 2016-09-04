@@ -131,6 +131,7 @@
     - [ifnull](#ifnull)
     - [repeat_until](#repeat_until)
     - [repeat_while](#repeat_while)
+    - [stmts](#stmts)
     - [until](#until)
     - [while](#while)
 - [Exceptional Opcodes](#-exceptional-opcodes)
