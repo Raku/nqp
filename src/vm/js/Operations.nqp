@@ -265,7 +265,7 @@ class QAST::OperationsJS {
             }
 
             if $inverted_result {
-                @setup.push($action);
+                @setup.push($action ~ ";\n");
                 Chunk.new($type, $obj.expr, @setup);
             } else {
                 $comp.stored_result(Chunk.new($type, $action, @setup), :$want);
