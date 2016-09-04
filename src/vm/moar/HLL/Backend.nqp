@@ -325,10 +325,10 @@ class HLL::Backend::MoarVM {
                 }
                 elsif nqp::isstr($obj) {
                     if nqp::index($obj, '\\') {
-                        $obj := literal_subst($obj, /'\\'/, $escaped_backslash);
+                        $obj := literal_subst($obj, '\\', $escaped_backslash);
                     }
                     if nqp::index($obj, '"') {
-                        $obj := literal_subst($obj, /'"'/, $escaped_dquote);
+                        $obj := literal_subst($obj, '"', $escaped_dquote);
                     }
                     nqp::push_s(@pieces, '"');
                     nqp::push_s(@pieces, $obj);
