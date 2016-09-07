@@ -89,6 +89,7 @@ import org.perl6.nqp.sixmodel.reprs.ConditionVariable;
 import org.perl6.nqp.sixmodel.reprs.ConditionVariableInstance;
 import org.perl6.nqp.sixmodel.reprs.ContextRef;
 import org.perl6.nqp.sixmodel.reprs.ContextRefInstance;
+import org.perl6.nqp.sixmodel.reprs.DecoderInstance;
 import org.perl6.nqp.sixmodel.reprs.IOHandleInstance;
 import org.perl6.nqp.sixmodel.reprs.JavaObjectWrapper;
 import org.perl6.nqp.sixmodel.reprs.LexoticInstance;
@@ -4279,6 +4280,20 @@ public final class Ops {
         }
         else {
             throw ExceptionHandling.dieInternal(tc, "Unknown encoding '" + encoding + "'");
+        }
+    }
+
+    public static SixModelObject decoderconfigure(SixModelObject decoder, String encoding, SixModelObject config, ThreadContext tc) {
+        if (decoder instanceof DecoderInstance) {
+            String mangledEncoding = javaEncodingName(encoding);
+            if (mangledEncoding != null)
+                ((DecoderInstance)decoder).configure(tc, mangledEncoding, config);
+            else
+                throw ExceptionHandling.dieInternal(tc, "Unsupported VM encoding '" + encoding + "'");
+            return decoder;
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc, "decoderconfigure requires an instance with the Decoder REPR");
         }
     }
 
