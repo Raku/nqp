@@ -19,7 +19,7 @@ my %ops := hash_of_vms();
         "src/vm/moar/QAST/QASTOperationsMAST.nqp",
         "src/vm/moar/NQP/Ops.nqp"
     ]),
-    :keywords(<add_core_op add_core_moarop_mapping add_hll_op>)
+    :keywords(<add_core_op add_core_moarop_mapping add_hll_op add_getattr_op>)
 );
 
 # Most backends programmatically add these ops - to keep our cheating simple,
