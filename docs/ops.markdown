@@ -1026,10 +1026,15 @@ If `$length` is specified, only return that many characters. The
 numbered variants required the args specified - the unnumbered
 version may use either signature.
 
+## substr2 `jvm`
 * `substr2(str $str, int $position)` _Internal_
+
+A JVM specific internal opcode for `substr`.
+
+## substr3 `jvm`
 * `substr3(str $str, int $position, int $length)` _Internal_
 
-`substr` is converted to these internal opcodes by the compiler.
+A JVM specific internal opcode for `substr`.
 
 ## tc
 * `tc(str $str)`
