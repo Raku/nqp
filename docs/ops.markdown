@@ -831,7 +831,7 @@ Return a string that is the concatenation of the two passed in strings.
 Returns an (NFG) string resulting from decoding the specified buffer assuming
 the specified encoding.
 
-## decodetocodes
+## decodetocodes `moar`
 * `decodetocodes($buffer, str $encoding, int $normalization, $codes)`
 
 Decodes the bytes in the specified buffer using the provided encoding. Applies
@@ -845,7 +845,7 @@ points into $codes, which should be some VMArray holding 32-bit integers.
 Encodes an (NFG) string into the specified encoding, writing into the buffer
 provided. The data written is normalized according to NFC.
 
-## encodefromcodes
+## encodefromcodes `moar`
 * `encodefromcodes($codes, str $encoding, $buffer)`
 
 Takes a 32-bit integer array of Unicode codepoints, encodes them using the
@@ -925,7 +925,7 @@ fields separated by the value of EXPR, and returns that new string.
 
 Return lowercase copy of string.
 
-## normalizecodes
+## normalizecodes `moar`
 * `normalizecodes($codes-in, int $normalization, $codes-out)`
 
 Takes the codepoints in $codes-in, applies the specified normalization, and
@@ -998,13 +998,13 @@ the substrings between delimiters in the original string.
 If the original string begins or ends with the delimiter, the resulting
 array will begin or end with an empty element.
 
-## strfromcodes
+## strfromcodes `moar`
 * `strfromcodes($codes)`
 
 Returns an (NFG) string built from the specified codepoints, which must be
 provided as a 32-bit integer array.
 
-## strtocodes
+## strtocodes `moar`
 * `strtocodes(str $str, int $normalization, $codes)`
 
 Takes an NFG string, and places the codepoints from it into the codes array,
@@ -1082,13 +1082,13 @@ Translate a codepoint to its Unicode name.
 
 Translates a property name to the property category it's in.
 
-## unipvalcode
+## unipvalcode `moar`
 * `unipvalcode(int $propcode, str $propname)`
 
 Looks up a property name in its property category, and returns which
 table within that category to use.
 
-## getuniprop_int
+## getuniprop_int `moar`
 * `getuniprop_int(int $codepoint, int $propcode)`
 
 Uses the table found by unipropcode to look up an integer property value
@@ -1102,12 +1102,12 @@ instead of the value you want.
 
 Same thing, but fetches a string property value.
 
-## getuniprop_bool
+## getuniprop_bool `moar`
 * `getuniprop_bool(int $codepoint, int $propcode)`
 
 Same thing, but fetches a boolean property value.
 
-## matchuniprop
+## matchuniprop `moar`
 * `matchuniprop(int $codepoint, int $propcode, int $pvalcode)`
 
 Looks up a codepoint property and return 1 if it matches the pval, 0
@@ -2463,8 +2463,8 @@ at 0, the buffer or just its type object on error, and an error string (type
 object if no error). If EOF is reached, a sequence number of -1 is sent.
 Cancel to stop reading.
 
-## spawnprocasync
+## spawnprocasync `moar`
 * `spawnprocasync($queue, $args, $cwd, %env, $callbacks)`
 
-## killprocasync
+## killprocasync `moar`
 * `killprocasync($handle, $signal)`
