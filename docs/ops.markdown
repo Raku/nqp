@@ -489,11 +489,6 @@ Return infinity.
 
 Return the log base 10 of a number.
 
-## ln
-* `ln_n(num $n)`
-
-Return the natural logarithm of a number.
-
 ## expmod
 * `expmod_I(Int $base, Int $exponent, Int $modulus, Mu:T $type)`
 
@@ -1496,10 +1491,9 @@ until command is complete.
 Same as the three argument version of `shell`, using the current directory
 and an empty environment.
 
-* `shell1(str $cmd)` _Internal, Deprecated_
 * `shell3(str $cmd, str $path, %env)` _Internal_
 
-`shell` is converted to these internal opcodes by the compiler.
+`shell` is converted to this internal opcode by the compiler.
 
 ## spawn
 * `spawn(@cmd, str $path, %env)`
@@ -2368,11 +2362,6 @@ Return the time in seconds since January 1, 1970 UTC. `_i` variant returns
 an integral number of seconds, `_n` returns a fractional amount.
 
 # <a id="nativecall"></a> Native Call / Interoperability Opcodes
-
-## x_posixerrno
-* `x_posixerrno()`
-
-Returns an int that corresponds to the value of POSIX's errno.
 
 ## nativecallrefresh
 Refresh the C-based data backing the Perl 6 object. This op should only be used if changes have been made to the C-data, and these changes are not being reflected in the Perl 6 object.
