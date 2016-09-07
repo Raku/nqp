@@ -40,6 +40,7 @@ import org.perl6.nqp.sixmodel.reprs.ConditionVariable;
 import org.perl6.nqp.sixmodel.reprs.AsyncTask;
 import org.perl6.nqp.sixmodel.reprs.NativeRef;
 import org.perl6.nqp.sixmodel.reprs.MultiDimArray;
+import org.perl6.nqp.sixmodel.reprs.Decoder;
 
 public class REPRRegistry {
     private static HashMap<String, Integer> reprIdMap = new HashMap<String, Integer>();
@@ -104,5 +105,6 @@ public class REPRRegistry {
         addREPR("AsyncTask", new AsyncTask());
         addREPR("NativeRef", new NativeRef());
         addREPR("MultiDimArray", new MultiDimArray());
+        addREPR("Decoder", new Decoder());
     }
 }
