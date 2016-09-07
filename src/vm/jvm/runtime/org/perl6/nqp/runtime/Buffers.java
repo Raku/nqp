@@ -15,6 +15,12 @@ public class Buffers {
             arr.start = 0;
             arr.slots = bytes;
         }
+        else if (res instanceof VMArrayInstance_u8) {
+            VMArrayInstance_u8 arr = (VMArrayInstance_u8)res;
+            arr.elems = bytes.length;
+            arr.start = 0;
+            arr.slots = bytes;
+        }
         else {
             res.set_elems(tc, bytes.length);
             for (int i = 0; i < bytes.length; i++) {
