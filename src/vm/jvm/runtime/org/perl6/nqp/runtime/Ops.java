@@ -4297,6 +4297,44 @@ public final class Ops {
         }
     }
 
+    public static long decoderempty(SixModelObject decoder, ThreadContext tc) {
+        if (decoder instanceof DecoderInstance)
+            return ((DecoderInstance)decoder).isEmpty(tc);
+        else
+            throw ExceptionHandling.dieInternal(tc, "decoderempty requires an instance with the Decoder REPR");
+    }
+
+    public static SixModelObject decoderaddbytes(SixModelObject decoder, SixModelObject bytes, ThreadContext tc) {
+        if (decoder instanceof DecoderInstance) {
+            ((DecoderInstance)decoder).addBytes(tc, Buffers.unstashBytes(bytes, tc));
+            return decoder;
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc, "decoderaddbytes requires an instance with the Decoder REPR");
+        }
+    }
+
+    public static String decodertakechars(SixModelObject decoder, long chars, ThreadContext tc) {
+        if (decoder instanceof DecoderInstance)
+            return ((DecoderInstance)decoder).takeChars(tc, chars);
+        else
+            throw ExceptionHandling.dieInternal(tc, "decodertakechars requires an instance with the Decoder REPR");
+    }
+
+    public static String decodertakeavailablechars(SixModelObject decoder, ThreadContext tc) {
+        if (decoder instanceof DecoderInstance)
+            return ((DecoderInstance)decoder).takeAvailableChars(tc);
+        else
+            throw ExceptionHandling.dieInternal(tc, "decodertakeavailablechars requires an instance with the Decoder REPR");
+    }
+
+    public static String decodertakeallchars(SixModelObject decoder, ThreadContext tc) {
+        if (decoder instanceof DecoderInstance)
+            return ((DecoderInstance)decoder).takeAllChars(tc);
+        else
+            throw ExceptionHandling.dieInternal(tc, "decodertakeallchars requires an instance with the Decoder REPR");
+    }
+
     private static final int CCLASS_ANY          = 65535;
     private static final int CCLASS_UPPERCASE    = 1;
     private static final int CCLASS_LOWERCASE    = 2;
