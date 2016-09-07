@@ -2364,6 +2364,16 @@ QAST::OperationsJAST.add_core_op('rindex',  -> $qastcomp, $op {
 QAST::OperationsJAST.map_classlib_core_op('codepointfromname', $TYPE_OPS, 'codepointfromname', [$RT_STR], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('encode', $TYPE_OPS, 'encode', [$RT_STR, $RT_STR, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('decode', $TYPE_OPS, 'decode', [$RT_OBJ, $RT_STR], $RT_STR, :tc);
+QAST::OperationsJAST.map_classlib_core_op('decoderconfigure', $TYPE_OPS, 'decoderconfigure', [$RT_OBJ, $RT_STR, $RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('decodersetlineseps', $TYPE_OPS, 'decodersetlineseps', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('decoderaddbytes', $TYPE_OPS, 'decoderaddbytes', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('decodertakechars', $TYPE_OPS, 'decodertakechars', [$RT_OBJ, $RT_INT], $RT_STR, :tc);
+QAST::OperationsJAST.map_classlib_core_op('decodertakeallchars', $TYPE_OPS, 'decodertakeallchars', [$RT_OBJ], $RT_STR, :tc);
+QAST::OperationsJAST.map_classlib_core_op('decodertakeavailablechars', $TYPE_OPS, 'decodertakeavailablechars', [$RT_OBJ], $RT_STR, :tc);
+QAST::OperationsJAST.map_classlib_core_op('decodertakeline', $TYPE_OPS, 'decodertakeline', [$RT_OBJ, $RT_INT, $RT_INT], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('decoderbytesavailable', $TYPE_OPS, 'decoderbytesavailable', [$RT_OBJ], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('decodertakebytes', $TYPE_OPS, 'decodertakebytes', [$RT_OBJ, $RT_OBJ, $RT_INT], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('decoderempty', $TYPE_OPS, 'decoderempty', [$RT_OBJ], $RT_INT, :tc);
 
 # serialization context opcodes
 QAST::OperationsJAST.map_classlib_core_op('sha1', $TYPE_OPS, 'sha1', [$RT_STR], $RT_STR);
