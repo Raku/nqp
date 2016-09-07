@@ -1184,7 +1184,7 @@ or after `decodertakechars` or after `decodertakeline` with `$incomplete-ok`
 passed a non-zero value.
 
 ## decodertakebytes
-* `decodertakebytes`(Decoder $dec, VMArray $blob_type, int $bytes)`
+* `decodertakebytes(Decoder $dec, VMArray $blob_type, int $bytes)`
 
 Takes up to `$bytes` bytes from the decode stream's undecoded buffer, makes an
 instance of the `$blob_type`, and places the bytes in it. The same set of
