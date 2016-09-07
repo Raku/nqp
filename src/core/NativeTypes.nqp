@@ -19,7 +19,6 @@ my module EXPORTHOW {
 }
 
 my native int is repr('P6int') { }
-#?if moar
 my native int64 is repr('P6int') is nativesize(64) { }
 my native int32 is repr('P6int') is nativesize(32) { }
 my native int16 is repr('P6int') is nativesize(16) { }
@@ -30,7 +29,6 @@ my native uint64 is repr('P6int') is nativesize(64) is unsigned { }
 my native uint32 is repr('P6int') is nativesize(32) is unsigned { }
 my native uint16 is repr('P6int') is nativesize(16) is unsigned { }
 my native uint8  is repr('P6int') is nativesize( 8) is unsigned { }
-#?endif
 
 my native num is repr('P6num') { }
 #?if moar
