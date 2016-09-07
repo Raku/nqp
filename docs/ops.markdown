@@ -2311,7 +2311,7 @@ On the MoarVM all of those signal constants below are defined.
     * SIG_BREAK
 
 
-## debugnoop
+## debugnoop `jvm`
 * `debugnoop(Mu $a)`
 
 Returns `$a`. Does nothing, exists only to provide a breakpoint location
