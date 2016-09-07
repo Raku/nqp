@@ -2473,4 +2473,4 @@ Cancel to stop reading.
 * `spawnprocasync($queue, $args, $cwd, %env, $callbacks)`
 
 ## killprocasync
-* killprocasync($handle, $signal)`
+* `killprocasync($handle, $signal)`
