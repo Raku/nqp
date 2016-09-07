@@ -4162,19 +4162,23 @@ public final class Ops {
         return found == null ? -1 : found;
     }
 
+    private static String javaEncodingName(String nameIn) {
+        if (nameIn.equals("utf8"))
+            return "UTF-8";
+        if (nameIn.equals("ascii"))
+            return "US-ASCII";
+        if (nameIn.equals("iso-8859-1"))
+            return "ISO-8859-1";
+        if (nameIn.equals("windows-1252"))
+            return "windows-1252";
+        return null;
+    }
+
     public static SixModelObject encode(String str, String encoding, SixModelObject res, ThreadContext tc) {
         try {
-            if (encoding.equals("utf8")) {
-                Buffers.stashBytes(tc, res, str.getBytes("UTF-8"));
-            }
-            else if (encoding.equals("ascii")) {
-                Buffers.stashBytes(tc, res, str.getBytes("US-ASCII"));
-            }
-            else if (encoding.equals("iso-8859-1")) {
-                Buffers.stashBytes(tc, res, str.getBytes("ISO-8859-1"));
-            }
-            else if (encoding.equals("windows-1252")) {
-                Buffers.stashBytes(tc, res, str.getBytes("windows-1252"));
+            String mangledEncoding = javaEncodingName(encoding);
+            if (mangledEncoding != null) {
+                Buffers.stashBytes(tc, res, str.getBytes(mangledEncoding));
             }
             else if (encoding.equals("utf16")) {
                 short[] buffer = new short[str.length()];
@@ -4232,17 +4236,9 @@ public final class Ops {
     }
 
     public static String decode(SixModelObject buf, String encoding, ThreadContext tc) {
-        if (encoding.equals("utf8")) {
-            return decode8(buf, "UTF-8", tc);
-        }
-        else if (encoding.equals("ascii")) {
-            return decode8(buf, "US-ASCII", tc);
-        }
-        else if (encoding.equals("iso-8859-1")) {
-            return decode8(buf, "ISO-8859-1", tc);
-        }
-        else if (encoding.equals("windows-1252")) {
-            return decode8(buf, "windows-1252", tc);
+        String mangledEncoding = javaEncodingName(encoding);
+        if (mangledEncoding != null) {
+            return decode8(buf, mangledEncoding, tc);
         }
         else if (encoding.equals("utf16") || encoding.equals("utf32")) {
             int n = (int)buf.elems(tc);
