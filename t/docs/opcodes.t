@@ -1,6 +1,6 @@
 #! nqp
 
-my @*vms := nqp::list('jvm', 'moar');
+my @*vms := nqp::list('jvm', 'moar', 'js');
 
 my %documented_ops := find_documented_opcodes();
 
@@ -13,6 +13,14 @@ my %ops := hash_of_vms();
     ]),
     :keywords(<map_classlib_core_op add_core_op map_jvm_core_op add_hll_op>)
 );
+
+%ops<js> := find_opcodes(
+    :files([
+        "src/vm/js/Operations.nqp"
+    ]),
+    :keywords(<add_simple_op>)
+);
+
 
 %ops<moar> := find_opcodes(
     :files([
