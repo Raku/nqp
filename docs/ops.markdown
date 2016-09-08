@@ -1490,15 +1490,6 @@ specified environment variables. Returns a POSIX-style return value. Command
 is executed using an OS-appropriate shell (`sh -c` or `cmd /c`). Blocks
 until command is complete.
 
-* `shell(str $cmd)` _Deprecated: use the three argument version_
-
-Same as the three argument version of `shell`, using the current directory
-and an empty environment.
-
-* `shell3(str $cmd, str $path, %env)` _Internal_
-
-`shell` is converted to this internal opcode by the compiler.
-
 ## spawn
 * `spawn(@cmd, str $path, %env)`
 
