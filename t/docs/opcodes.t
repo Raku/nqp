@@ -67,11 +67,17 @@ sub find_opcodes(:@files, :@keywords) {
     for @files -> $file {
         my @lines := nqp::split("\n", nqp::readallfh(nqp::open($file,"r")));
         for @lines -> $line {
-            next unless $line ~~ / @keywords /;
-            my @pieces := nqp::split("'", $line);
-            $line := @pieces[1] eq 'nqp' ?? @pieces[3] !! @pieces[1];
-            next unless nqp::chars($line);
-            %ops{$line} := 1;
+            if $line ~~ / @keywords / {
+                my @pieces := nqp::split("'", $line);
+                $line := @pieces[1] eq 'nqp' ?? @pieces[3] !! @pieces[1];
+                next unless nqp::chars($line);
+                %ops{$line} := 1;
+            } else {
+                my $match := $line ~~ / '%ops<' (<[a..zA..Z0..9_]>+) '> :=' /;
+                if ?$match {
+                    %ops{$match[0]} := 1;
+                }
+            }
         }
     }
     return %ops;
@@ -93,8 +99,8 @@ sub find_documented_opcodes() {
     my @opcode_vms := nqp::list();
     for @doc_lines -> $line {
         my $match := $line ~~ /^ '##' \s* <[a..zA..Z0..9_]>+ \s* ('`' .* '`')? /;
-        if (?$match) {
-            if (!?$match[0]) {
+        if ?$match {
+            if !?$match[0] {
                 @opcode_vms := nqp::clone(@*vms);
             } else {
                 @opcode_vms := nqp::list();
