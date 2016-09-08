@@ -18,7 +18,7 @@ my %ops := hash_of_vms();
     :files([
         "src/vm/js/Operations.nqp"
     ]),
-    :keywords(<add_op add_simple_op>)
+    :keywords(<add_op add_simple_op add_hll_op add_cmp_op add_infix_op>)
 );
 
 
