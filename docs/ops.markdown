@@ -980,9 +980,13 @@ Searching backwards through the `$haystack`, return the position at which
 specified, otherwise start from the last position.
 
 * `rindexfrom(str $haystack, str $needle, int $pos)` _Internal_
+
+`rindex` is converted to this internal opcode by the compiler.
+
+## rindexfromend `jvm`
 * `rindexfromend(str $haystack, str $needle)` _Internal_
 
-`rindex` is converted to these internal opcodes by the compiler.
+`rindex` is converted to this internal opcode by the compiler.
 
 ## uc
 * `uc(str $str)`
