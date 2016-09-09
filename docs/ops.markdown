@@ -320,11 +320,12 @@ variants (e.g. `mul_i`, `mul_n`) together with a single description.
 
 Opcode variants may contain a type suffix, which usually indicates:
 
-* `_i` argument is native int
-* `_n` argument is native float
-* `_s` argument is native string
-* `_b` argument is code blocks
-* `_I` argument is Big Integer
+* `_i` argument is a native int
+* `_u` argument is an unsigned int 
+* `_n` argument is a native float
+* `_s` argument is a native string
+* `_b` argument is a code block
+* `_I` argument is a Big Integer
 
 They may also have a numeric suffix, which typically indicates the number
 of arguments required.
