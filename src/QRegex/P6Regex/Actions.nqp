@@ -887,14 +887,26 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             if $name eq '' { $name := $count; $ast.name($name); }
             my @names := nqp::split('=', $name);
             for @names {
-                if $_ eq '0' || $_ > 0 { $count := $_ + 1; }
-                %capnames{$_} := 1;
+                my $n := nqp::radix(10, $_, 0, 0)[0];
+                if $_ eq '0' || $n > 0 {
+                    $count := $n + 1;
+                    %capnames{$n} := 1
+                }
+                else {
+                    %capnames{$_} := 1;
+                }
             }
         }
         elsif $rxtype eq 'subcapture' {
             for nqp::split(' ', $ast.name) {
-                if $_ eq '0' || $_ > 0 { $count := $_ + 1; }
-                %capnames{$_} := 1;
+                my $n := nqp::radix(10, $_, 0, 0)[0];
+                if $_ eq '0' || $n > 0 {
+                    $count := $n + 1;
+                    %capnames{$n} := 1
+                }
+                else {
+                    %capnames{$_} := 1;
+                }
             }
             my %x := capnames($ast[0], $count);
             for %x { %capnames{$_.key} := +%capnames{$_.key} + %x{$_.key} }
