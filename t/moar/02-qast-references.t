@@ -1,6 +1,6 @@
 use QAST;
 
-plan(6);
+plan(7);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -56,12 +56,12 @@ sub test_qast_result($qast, $tester) {
     }
 }
 
-sub make_ref_type($name, $kind) {
+sub make_ref_type($name, $kind, :$ref_kind = 'lexical') {
     my $class := nqp::newtype(NQPMu, 'NativeRef');
     my $info  := nqp::hash();
     $info<nativeref> := nqp::hash();
     $info<nativeref><type> := $kind;
-    $info<nativeref><refkind> := 'lexical';
+    $info<nativeref><refkind> := $ref_kind;
     nqp::composetype($class, $info);
     nqp::setcontspec($class, 'native_ref', nqp::null());
     return $class;
@@ -71,6 +71,7 @@ my $hllconfig := nqp::hash();
 $hllconfig<int_lex_ref> := make_ref_type('StubIntLexRef', int);
 $hllconfig<num_lex_ref> := make_ref_type('StubNumLexRef', num);
 $hllconfig<str_lex_ref> := make_ref_type('StubStrLexRef', str);
+$hllconfig<int_attr_ref> := make_ref_type('StubIntAttrRef', int, :ref_kind<attribute>);
 
 nqp::sethllconfig('nqp', $hllconfig);
 
@@ -208,3 +209,39 @@ is_qast(
     "99.9, 99.9",
     "a localref'd var can have a local ref'd thing bound to it and accessed (num)"
 );
+
+class E { has int $!x; }
+
+test_qast_result(
+    QAST::CompUnit.new( :hll<nqp>,
+        QAST::Block.new(
+            QAST::Op.new(
+                :op('bind'),
+                QAST::Var.new( :name('foo'), :scope('local'), :decl('var') ),
+                QAST::Op.new(
+                    :op('create'),
+                    QAST::WVal.new( :value(E) )
+                )
+            ),
+            QAST::Op.new(
+                :op('bind'),
+                QAST::Var.new( :name('ref_to_x'), :scope('local'), :decl('var') ),
+                QAST::Var.new(
+                    :scope('attributeref'), :name('$!x'), :returns(int),
+                    QAST::Var.new( :name('foo'), :scope('local') ),
+                    QAST::WVal.new( :value(E) )
+                )
+            ),
+            QAST::Op.new(
+                :op('assign_i'),
+                QAST::Var.new(
+                    :scope('local'), :name('ref_to_x')
+                ),
+                QAST::IVal.new( :value(99) )
+            ),
+            QAST::Var.new( :name('foo'), :scope('local') )
+        )
+    ),
+    -> $r {
+        ok(nqp::getattr_i($r, E, '$!x') == 99, 'attributeref works');
+    });
