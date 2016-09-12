@@ -1670,7 +1670,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 self.compile_var_as_js_var($var, :$cps);
             }
         }
-        elsif ($var.scope eq 'positional') {
+        elsif $var.scope eq 'positional' {
             # TODO work on things other than nqp lists
             # TODO think about nulls and missing elements
             if $*BINDVAL {
@@ -1684,7 +1684,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 self.atpos($var[0], $var[1], :node($var));
             }
         }
-        elsif ($var.scope eq 'associative') {
+        elsif $var.scope eq 'associative' {
             # TODO think about nulls and missing elements
             if $*BINDVAL {
                 my $bindval := $*BINDVAL;
@@ -1699,7 +1699,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 Chunk.new($T_OBJ, "{$hash.expr}.\$\$atkey({$key.expr})", [$hash, $key], :node($var));
             }
         }
-        elsif ($var.scope eq 'attribute') {
+        elsif $var.scope eq 'attribute' {
             my @types := [$T_OBJ, $T_INT, $T_NUM, $T_STR];
             my $type := @types[nqp::objprimspec($var.returns)];
             # Get lookup hint if possible.
@@ -1733,7 +1733,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 }
             }
         }
-        elsif ($var.scope eq 'contextual') {
+        elsif $var.scope eq 'contextual' {
             if $*BINDVAL {
                 my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ), :$cps);
                 self.stored_result(Chunk.new($T_OBJ, "{$*CTX}.bindDynamic({quote_string($var.name)},{$bindval.expr})", [$bindval]), :$want);
