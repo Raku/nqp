@@ -1388,6 +1388,18 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         nqp::istype($node, QAST::Op) && $node.op eq $op;
     }
 
+
+    my @types := [$T_OBJ, $T_INT, $T_NUM, $T_STR];
+    method type_from_typeobj($typeobj) {
+        @types[nqp::objprimspec($typeobj)];
+    }
+
+    my @suffix := ['', '_i', '_n', '_s'];
+
+    method suffix_from_type($type) {
+        @suffix[$type];
+    }
+
     multi method as_js(QAST::CompUnit $node, :$want, :$cps) {
         # Should have a single child which is the outer block.
         if +@($node) != 1 || !nqp::istype($node[0], QAST::Block) {
@@ -1478,8 +1490,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         # TODO vars more complex the non-dynamic lexicals
 
         if $node.decl eq 'var' && ($node.scope eq 'local' || $node.scope eq 'lexical') {
-            my @types := [$T_OBJ, $T_INT, $T_NUM, $T_STR];
-            my $type := @types[nqp::objprimspec($node.returns)];
+            my $type := self.type_from_typeobj($node.returns);
             $*BLOCK.register_var_type($node, $type);
             self.log("type {$node.name} = $type");
         }
@@ -1699,9 +1710,50 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 Chunk.new($T_OBJ, "{$hash.expr}.\$\$atkey({$key.expr})", [$hash, $key], :node($var));
             }
         }
+        elsif $var.scope eq 'attributeref' {
+            if +$var.list != 2 {
+                nqp::die("An attribute lookup needs an object and a class handle");
+            }
+
+            if $*BINDVAL {
+                nqp::die("Cannot bind to QAST::Var '{$var.name}' with scope attributeref");
+            }
+
+            my $type := self.type_from_typeobj($var.returns);
+            if $type == $T_OBJ {
+                nqp::die("Attribute references can only be to native types");
+            }
+
+
+            my @setup;
+            my $get;
+            my $set;
+
+            my $self := self.as_js_clear_bindval($var[0], :want($T_OBJ), :$cps);
+
+            @setup.push($self);
+
+            if 0 {
+                # TODO - use hint
+                # OPTIMALIZATION OPPORTUNITY 
+                # use hint
+            }
+            else {
+                my $class_handle := self.as_js($var[1], :want($T_OBJ), :$cps);
+                @setup.push($class_handle);
+                my $name := quote_string($var.name);
+
+                $get := "{$self.expr}.\$\$getattr({$class_handle.expr}, $name)";
+                $set := "{$self.expr}.\$\$bindattr({$class_handle.expr}, $name, value)";
+            }
+
+            my $suffix := self.suffix_from_type($type);
+
+            Chunk.new($T_OBJ, "nqp.op.getattrref{$suffix}({quote_string($*HLL)}, function() \{return $get\}, function(value) \{$set\})", [], :node($var));
+        }
         elsif $var.scope eq 'attribute' {
             my @types := [$T_OBJ, $T_INT, $T_NUM, $T_STR];
-            my $type := @types[nqp::objprimspec($var.returns)];
+            my $type := self.type_from_typeobj($var.returns);
             # Get lookup hint if possible.
             my int $hint := -1;
             if $var[1].has_compile_time_value {

@@ -1036,6 +1036,11 @@ reprs.VMException = VMException;
 
 
 class NativeRef extends REPR {
+  compose(STable, reprInfoHash) {
+    var nativeref = reprInfoHash.content.get('nativeref').content;
+    var type = nativeref.get('type');
+    var refkind = nativeref.get('refkind');
+  }
 };
 reprs.NativeRef = NativeRef;
 

@@ -1051,3 +1051,15 @@ op.forceouterctx = function(code, ctx) {
 
   return code;
 };
+
+op.getattrref_i = function(hllName, get, set) {
+  var refType = hll.hllConfigs[hllName].get('int_attr_ref');
+  if (refType == null) {
+    throw "No int attribute reference type registered for current HLL";
+  }
+  var STable = refType._STable;
+  var ref = STable.REPR.allocate(STable);
+  ref.get = get;
+  ref.set = set;
+  return ref;
+};

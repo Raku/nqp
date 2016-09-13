@@ -46,3 +46,31 @@ class CodePair {
 CodePair.prototype.name = 'code_pair';
 
 exports.code_pair = CodePair;
+
+class NativeRef {
+  constructor(STable) {
+    this.STable = STable;
+  }
+
+  configure(conf) {
+    this.setupSTable();
+  }
+
+  serialize(cursor) {
+  }
+
+  deserialize(cursor) {
+    this.setupSTable();
+  }
+
+  setupSTable() {
+    this.STable.addInternalMethod('$$assign_i', function(ctx, value) {
+      this.set(value);
+      return value;
+    });
+  }
+};
+
+NativeRef.prototype.name = 'native_ref';
+
+exports.native_ref = NativeRef;
