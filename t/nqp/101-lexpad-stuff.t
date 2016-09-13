@@ -1,4 +1,4 @@
-plan(9);
+plan(11);
 sub more-inner() {
     my $outer := nqp::ctxcaller(nqp::ctx());
     my $outermost := nqp::ctxcaller(nqp::ctxcaller(nqp::ctx()));
@@ -53,6 +53,18 @@ outer();
             my $foo := 104;
             ok(nqp::getlexouter('$bar') == 102, 'getlexouter from immediately nested block');
             ok(nqp::getlexouter('$foo') == 101, 'getlexouter from a not immediate parent');
+        }
+    }
+}
+
+{
+    my $*foo := 302;
+    {
+        my $*foo := 303;
+        {
+            my $*foo := 304;
+            ok(nqp::ctxouter(nqp::ctx())<$*foo> == 303, 'getting a dynamic variable from nqp::ctxouter');
+            ok(nqp::ctxouter(nqp::ctxouter(nqp::ctx()))<$*foo> == 302, 'getting a dynamic variable from double nqp::ctxouter');
         }
     }
 }
