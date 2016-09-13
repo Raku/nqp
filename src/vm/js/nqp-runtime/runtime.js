@@ -116,8 +116,8 @@ op.lexprimspec = function(pad, key) {
   return 0;
 };
 
-op.ctxouter = function(hack) {
-  return null;
+op.ctxouter = function(ctx) {
+  return ctx.$$outer;
 };
 
 exports.toStr = function(arg, ctx) {
