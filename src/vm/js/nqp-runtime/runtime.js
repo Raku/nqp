@@ -178,20 +178,24 @@ exports.toInt = function(arg, ctx) {
   }
 };
 
-exports.toBool = function(arg, ctx) {
-  if (typeof arg == 'number') {
-    return arg ? 1 : 0;
-  } else if (typeof arg == 'string') {
-    return arg == '' ? 0 : 1;
-  } else if (arg === undefined || arg == null) {
+exports.toBool = function(maybeContainer, ctx) {
+  if (maybeContainer === undefined || maybeContainer == null) {
     return 0;
-  } else if (arg.$$toBool) {
-    return arg.$$toBool(ctx);
-  } else if (typeof arg == 'function') {
+  }
+  var value = maybeContainer.$$decont ? maybeContainer.$$decont(ctx) : maybeContainer;
+  if (typeof value == 'number') {
+    return value ? 1 : 0;
+  } else if (typeof value == 'string') {
+    return value == '' ? 0 : 1;
+  } else if (value === undefined || value == null) {
+    return 0;
+  } else if (value.$$toBool) {
+    return value.$$toBool(ctx);
+  } else if (typeof value == 'function') {
     // needed for continuations
     return 1;
   } else {
-    throw "Can't decide if arg is true";
+    throw "Can't decide if value is true";
   }
 };
 
