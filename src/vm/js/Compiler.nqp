@@ -249,6 +249,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     method is_dynamic_var(BlockInfo $info, QAST::Var $var) {
         # HACK due to a nqp misdesign we need to check the name for the * twigil
         # TODO Make nqp mark dynamic variables explicitly
+        if $*HLL eq 'perl6' { # To make binding of signatures work
+            return 1;
+        }
         my $name := $var.name;
         if nqp::chars($name) > 2 {
             my str $sigil := nqp::substr($name, 0, 1);
