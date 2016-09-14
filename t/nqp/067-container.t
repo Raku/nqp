@@ -1,4 +1,4 @@
-plan(14);
+plan(16);
 
 ok(nqp::isnull(nqp::decont(nqp::null())), 'nqp::decont works on nqp::null');
 
@@ -32,6 +32,12 @@ ok(nqp::isnull(nqp::decont(nqp::null())), 'nqp::decont works on nqp::null');
     
     nqp::assignunchecked($cont, 69);
     ok(nqp::decont($cont) == 69, 'assignunchecked value stuck');
+
+    ok($cont, 'checking container for truthness - positive');
+
+    nqp::assign($cont, 0);
+
+    ok(!$cont, 'checking container for truthness - negative');
 
     class Foo {
         method foo() {
