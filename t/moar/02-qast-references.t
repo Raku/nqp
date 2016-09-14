@@ -1,6 +1,6 @@
 use QAST;
 
-plan(7);
+plan(13);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -74,6 +74,145 @@ $hllconfig<str_lex_ref> := make_ref_type('StubStrLexRef', str);
 $hllconfig<int_attr_ref> := make_ref_type('StubIntAttrRef', int, :ref_kind<attribute>);
 
 nqp::sethllconfig('nqp', $hllconfig);
+
+# Tests for lexicalref
+
+is_qast(
+    QAST::CompUnit.new( :hll<nqp>,
+        QAST::Block.new(
+            QAST::Var.new( :name<intloc>, :scope<lexical>, :decl<var>, :returns(int) ),
+            QAST::Op.new(
+                :op<assign_i>,
+                QAST::Var.new( :name<intloc>, :scope<lexicalref> ),
+                QAST::IVal.new( :value(23) )
+            ),
+            QAST::Var.new( :name<intloc>, :scope<lexical> )
+        )
+    ),
+    23,
+    'lexicalref of type int with value 23 assigned to it'
+);
+
+is_qast(
+    QAST::CompUnit.new( :hll<nqp>,
+        QAST::Block.new(
+            QAST::Var.new( :name<numloc>, :scope<lexical>, :decl<var>, :returns(num) ),
+            QAST::Op.new(
+                :op<assign_n>,
+                QAST::Var.new( :name<numloc>, :scope<lexicalref> ),
+                QAST::NVal.new( :value(99e2) )
+            ),
+            QAST::Var.new( :name<numloc>, :scope<lexical> )
+        )
+    ),
+    99e2,
+    'lexicalref of type num with value 99e2 assigned to it'
+);
+
+is_qast(
+    QAST::CompUnit.new( :hll<nqp>,
+        QAST::Block.new(
+            QAST::Var.new( :name<strloc>, :scope<lexical>, :decl<var>, :returns(str) ),
+            QAST::Op.new(
+                :op<assign_s>,
+                QAST::Var.new( :name<strloc>, :scope<lexicalref> ),
+                QAST::SVal.new( :value('What do we have here?') )
+            ),
+            QAST::Var.new( :name<strloc>, :scope<lexical> )
+        )
+    ),
+    'What do we have here?',
+    'lexicalref of type str with a value assigned to it'
+);
+
+is_qast(
+    QAST::CompUnit.new( :hll<nqp>,
+        QAST::Block.new(
+            QAST::Var.new( :name<strloc>, :scope<lexical>, :decl<var>, :returns(str) ),
+            QAST::Var.new( :name<strref>, :scope<lexicalref>, :decl<var>, :returns(str) ),
+            QAST::Op.new( :op<bind>,
+                QAST::Var.new( :name<strref>, :scope<lexicalref> ),
+                QAST::Var.new( :name<strloc>, :scope<lexicalref> )
+            ),
+            QAST::Op.new(
+                :op<assign_s>,
+                QAST::Var.new( :name<strref>, :scope<lexicalref> ),
+                QAST::SVal.new( :value("hooray") )
+            ),
+            QAST::Op.new(
+                :op<join>,
+                QAST::SVal.new( :value(', ') ),
+                QAST::Op.new(
+                    :op<list_s>,
+                    QAST::Var.new( :name<strloc>, :scope<lexical> ),
+                    QAST::Var.new( :name<strref>, :scope<lexical> )
+                )
+            )
+        )
+    ),
+    "hooray, hooray",
+    "a lexicalref'd var can have a lexical ref'd thing bound to it and accessed (str)"
+);
+
+is_qast(
+    QAST::CompUnit.new( :hll<nqp>,
+        QAST::Block.new(
+            QAST::Var.new( :name<intloc>, :scope<lexical>, :decl<var>, :returns(int) ),
+            QAST::Var.new( :name<intref>, :scope<lexicalref>, :decl<var>, :returns(int) ),
+            QAST::Op.new( :op<bind>,
+                QAST::Var.new( :name<intref>, :scope<lexicalref> ),
+                QAST::Var.new( :name<intloc>, :scope<lexicalref> )
+            ),
+            QAST::Op.new(
+                :op<assign_i>,
+                QAST::Var.new( :name<intref>, :scope<lexicalref> ),
+                QAST::IVal.new( :value(42) )
+            ),
+            QAST::Op.new(
+                :op<join>,
+                QAST::SVal.new( :value(', ') ),
+                QAST::Op.new(
+                    :op<list>,
+                    QAST::Op.new( :op<stringify>, QAST::Var.new( :name<intloc>, :scope<lexical> ) ),
+                    QAST::Op.new( :op<stringify>, QAST::Var.new( :name<intref>, :scope<lexical> ) ),
+                )
+            )
+        )
+    ),
+    "42, 42",
+    "a lexicalref'd var can have a lexical ref'd thing bound to it and accessed (int)"
+);
+
+is_qast(
+    QAST::CompUnit.new( :hll<nqp>,
+        QAST::Block.new(
+            QAST::Var.new( :name<intloc>, :scope<lexical>, :decl<var>, :returns(num) ),
+            QAST::Var.new( :name<intref>, :scope<lexicalref>, :decl<var>, :returns(num)  ),
+            QAST::Op.new( :op<bind>,
+                QAST::Var.new( :name<intref>, :scope<lexicalref> ),
+                QAST::Var.new( :name<intloc>, :scope<lexicalref> )
+            ),
+            QAST::Op.new(
+                :op<assign_n>,
+                QAST::Var.new( :name<intref>, :scope<lexicalref> ),
+                QAST::NVal.new( :value(99.9) )
+            ),
+            QAST::Op.new(
+                :op<join>,
+                QAST::SVal.new( :value(', ') ),
+                QAST::Op.new(
+                    :op<list>,
+                    QAST::Op.new( :op<stringify>, QAST::Var.new( :name<intloc>, :scope<lexical> ) ),
+                    QAST::Op.new( :op<stringify>, QAST::Var.new( :name<intref>, :scope<lexical> ) ),
+                )
+            )
+        )
+    ),
+    "99.9, 99.9",
+    "a lexicalref'd var can have a lexical ref'd thing bound to it and accessed (num)"
+);
+
+# Tests for localref
 
 is_qast(
     QAST::CompUnit.new( :hll<nqp>,
@@ -211,6 +350,8 @@ is_qast(
 );
 
 class E { has int $!x; }
+
+# Tests for attributeref
 
 test_qast_result(
     QAST::CompUnit.new( :hll<nqp>,
