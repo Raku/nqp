@@ -2659,7 +2659,7 @@ sub try_get_bind_scope($var) {
             my $outer := 0;
             my $block := $*BLOCK;
             my $name  := $var.name;
-            while nqp::istype($block, BlockInfo) {
+            while $block && nqp::istype($block, BlockInfo) {
                 last if $block.qast.ann('DYN_COMP_WRAPPER');
                 $lex := $block.lexical($name);
                 last if $lex;
