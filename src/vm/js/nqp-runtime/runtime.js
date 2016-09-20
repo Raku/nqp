@@ -145,6 +145,8 @@ exports.toStr = function(arg, ctx) {
 exports.toNum = function(arg, ctx) {
   if (typeof arg == 'number') {
     return arg;
+  } else if (arg === null) {
+    return 0;
   } else if (typeof arg == 'string') {
     var ret = parseFloat(arg);
     return isNaN(ret) ? 0 : ret;
@@ -166,6 +168,8 @@ exports.toNum = function(arg, ctx) {
 exports.toInt = function(arg, ctx) {
   if (typeof arg == 'number') {
     return arg | 0;
+  } else if (arg === null) {
+    return 0;
   } else if (arg.Int) {
     return arg.Int(ctx);
   } else if (typeof arg == 'string') {
