@@ -319,6 +319,7 @@ op.getcodename = function(code) {
 
 op.setcodename = function(code, name) {
   code.name = name;
+  return code;
 };
 
 op.rebless = function(obj, newType) {
