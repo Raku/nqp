@@ -70,10 +70,20 @@ sub find_opcodes(:@files, :@keywords) {
             if $line ~~ / @keywords / {
                 my @pieces := nqp::split("'", $line);
                 $line := @pieces[1] eq 'nqp' ?? @pieces[3] !! @pieces[1];
+
                 next unless nqp::chars($line);
+
+                if @pieces[1] ne 'nqp' && @pieces[2] ~~ /^ \s* '~' \s* '$suffix' /{
+                    for <_s _n _i> -> $suffix {
+                        %ops{$line ~ $suffix} := 1;
+                    }
+                }
                 %ops{$line} := 1;
-            } else {
-                my $match := $line ~~ / '%ops<' (<[a..zA..Z0..9_]>+) '> :=' /;
+            } elsif $line ~~ /^ \s* for \s* '<' (<[\w\ ]>+) '>' \s* '->' \s* '$func' \s* \{/ -> $match {
+                for nqp::split(' ', $match[0]) -> $func {
+                    %ops{$func ~ '_n'} := 1;
+                }
+            } elsif $line ~~ / '%ops<' (<[a..zA..Z0..9_]>+) '> :=' / -> $match {
                 if ?$match {
                     %ops{$match[0]} := 1;
                 }
