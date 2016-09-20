@@ -1401,11 +1401,10 @@ class QAST::OperationsJS {
 
     add_simple_op('atkey', $T_OBJ, [$T_OBJ, $T_STR], sub ($hash, $key) {"$hash.\$\$atkey($key)"});
 
-    for <savecapture usecapture> -> $op {
-        add_simple_op($op, :!inlinable, $T_OBJ, [], sub () {
-            "nqp.op.savecapture(Array.prototype.slice.call(arguments))"
-        } , :sideffects);
-    }
+    add_simple_op('savecapture', :!inlinable, $T_OBJ, [], sub () {
+        "nqp.op.savecapture(Array.prototype.slice.call(arguments))"
+    } , :sideffects);
+    %ops<usecapture> := %ops<savecapture>;
 
     add_simple_op('getlexdyn', $T_OBJ, [$T_STR], sub ($name) {"{$*CTX}.lookupDynamicFromCaller($name)"});
     add_simple_op('getlexcaller', $T_OBJ, [$T_STR], sub ($name) {"{$*CTX}.lookupFromSomeCaller($name)"});
