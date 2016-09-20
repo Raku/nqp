@@ -556,7 +556,7 @@ op.setmessage = function(exception, message) {
 };
 
 op.getpayload = function(exception) {
-  return exception.payload;
+  return exception.hasOwnProperty('payload') ? exception.payload : null;
 };
 
 op.setpayload = function(exception, payload) {
