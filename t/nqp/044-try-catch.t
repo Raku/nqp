@@ -2,7 +2,7 @@
 
 # Tests for try and catch
 
-plan(23);
+plan(24);
 
 sub oops($msg = "oops!") { # throw an exception
     nqp::die($msg);
@@ -110,6 +110,15 @@ ok($ok eq "oops_s!", "nqp::die_s");
     CATCH {
        ok(nqp::getmessage($_) eq "a cute exception", "nqp::setmessage/nqp::getmessage"); 
        ok(nqp::getpayload($_) eq "cute payload", "nqp::setpayload/nqp::getpayload"); 
+    }
+}
+
+{
+    my $exception := nqp::newexception();
+    nqp::setmessage($exception, "a cute exception");
+    nqp::throw($exception);
+    CATCH {
+       ok(nqp::isnull(nqp::getpayload($_)), "payload is null when not set");
     }
 }
 
