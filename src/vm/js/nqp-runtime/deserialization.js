@@ -655,7 +655,7 @@ class BinaryCursor {
   }
 
   deserializeCtx(context, outers) {
-    var outerCtx = null; // TODO -  set the outer ctx
+    var outerCtx = outers.length != 0 ? outers[outers.length-1] : null;
     var callerCtx = null;
 
     // TODO - think if we should set codeObj
