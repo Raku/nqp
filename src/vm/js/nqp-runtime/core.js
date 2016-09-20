@@ -1126,3 +1126,8 @@ op.getlexref_n = function(hllName, get, set) {
   ref.set = set;
   return ref;
 };
+
+// TODO: replace it with a fully correct implementation
+op.fc = function(string) {
+  return string.toLowerCase();
+};

@@ -194,7 +194,7 @@ class P6opaque {
   getAttr(classHandle, attrName) {
     var hint = this.hintfor(classHandle, attrName);
     if (hint == -1) {
-      throw "Can't find: " + attrName;
+      throw new NQPException("Can't find: " + attrName);
     } else {
       return slotToAttr(hint);
     }
