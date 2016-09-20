@@ -4,9 +4,9 @@
 # This only demonstrates something when run under MVM_JIT_EXPR_ENABLE=1
 
 my $h := nqp::getenvhash();
-my $e := nqp::atkey($h, 'MVM_JIT_EXPR_ENABLE');
-if (!nqp::istrue($e)) {
-   nqp::say("1..0 # Skipped: MVM_JIT_EXPR_ENABLE not set");
+my $e := nqp::atkey($h, 'MVM_JIT_EXPR_DISABLE');
+if (nqp::istrue($e)) {
+   nqp::say("1..0 # Skipped: MVM_JIT_EXPR_DISABLE set");
    nqp::exit(0);
 }
 
