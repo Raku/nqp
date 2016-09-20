@@ -10,7 +10,7 @@ if (nqp::istrue($e)) {
    nqp::exit(0);
 }
 
-sub foo() {
+sub foo($testno) {
     my int $a := 1;
     my int $b := 2;
     my int $c := 3;
@@ -42,13 +42,13 @@ sub foo() {
     my int $_c := $y + $m + $c;
     my int $_d := $z + $n + $b;
     my int $_e := $y + $o + $a;
-    nqp::say("OK $_e");
+    nqp::say("ok $testno $_e");
 }
 
-nqp::say("plan 300");
-my int $i := 0;
-while $i < 300 {
-    foo();
+nqp::say("1..300");
+my int $i := 1;
+while $i < 301 {
+    foo($i);
     $i := $i + 1;
 }
     
