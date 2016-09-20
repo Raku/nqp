@@ -400,7 +400,7 @@ class BinaryCursor {
       STable.setinvokespec(classHandle, attrName, invocationHandler);
     }
 
-
+    if (STable.containerSpec) STable.containerSpec.setupSTable(this);
   }
 
   staticCodeRef() {

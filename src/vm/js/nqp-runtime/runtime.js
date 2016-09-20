@@ -129,10 +129,10 @@ exports.toStr = function(arg, ctx) {
     return arg;
   } else if (arg !== undefined && arg !== null && arg.typeObject_) {
     return '';
-  } else if (arg.Str) {
-    return arg.Str(ctx, null, arg);
   } else if (arg.$$getStr) {
     return arg.$$getStr();
+  } else if (arg.Str) {
+    return arg.Str(ctx, null, arg);
   } else if (arg.$$getNum) {
     return arg.$$getNum().toString();
   } else if (arg.$$getInt) {
@@ -170,6 +170,8 @@ exports.toInt = function(arg, ctx) {
     return arg | 0;
   } else if (arg === null) {
     return 0;
+  } else if (arg.$$getInt) {
+    return arg.$$getInt();
   } else if (arg.Int) {
     return arg.Int(ctx);
   } else if (typeof arg == 'string') {
@@ -318,5 +320,11 @@ exports.wrapException = function(e) {
 function ControlReturn(payload) {
   this.payload = payload;
 }
+
+exports.setCodeRefHLL = function(codeRefs, hllName) {
+  for (var i = 0; i < codeRefs.length; i++) {
+    codeRefs[i].hll = hll.hllConfigs[hllName];
+  }
+};
 
 exports.ControlReturn = ControlReturn;

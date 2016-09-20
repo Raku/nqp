@@ -1039,7 +1039,18 @@ class NativeRef extends REPR {
   compose(STable, reprInfoHash) {
     var nativeref = reprInfoHash.content.get('nativeref').content;
     var type = nativeref.get('type');
-    var refkind = nativeref.get('refkind');
+    this.primitiveType = type._STable.REPR.boxedPrimitive;
+    this.refkind = nativeref.get('refkind');
+  }
+
+  serializeReprData(st, cursor) {
+    cursor.varint(this.primitiveType || 0);
+    cursor.varint(0);
+  }
+
+  deserializeReprData(cursor, STable) {
+    this.primitiveType = cursor.varint();
+    cursor.varint();
   }
 };
 reprs.NativeRef = NativeRef;

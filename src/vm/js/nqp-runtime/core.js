@@ -382,17 +382,19 @@ op.iscont = function(cont) {
 };
 
 op.iscont_i = function(cont) {
-  // Stub
+  if (cont.$$iscont_i) return cont.$$iscont_i();
   return 0;
 };
 
 op.iscont_n = function(cont) {
-  // Stub
+  if (cont.$$iscont_n) return cont.$$iscont_n();
   return 0;
 };
 
 op.iscont_s = function(cont) {
-  // Stub
+  if (cont.$$iscont_s) {
+    return cont.$$iscont_s();
+  }
   return 0;
 };
 
@@ -1057,6 +1059,66 @@ op.getattrref_i = function(hllName, get, set) {
   var refType = hll.hllConfigs[hllName].get('int_attr_ref');
   if (refType == null) {
     throw "No int attribute reference type registered for current HLL";
+  }
+  var STable = refType._STable;
+  var ref = STable.REPR.allocate(STable);
+  ref.get = get;
+  ref.set = set;
+  return ref;
+};
+
+op.getattrref_n = function(hllName, get, set) {
+  var refType = hll.hllConfigs[hllName].get('num_attr_ref');
+  if (refType == null) {
+    throw "No num attribute reference type registered for current HLL";
+  }
+  var STable = refType._STable;
+  var ref = STable.REPR.allocate(STable);
+  ref.get = get;
+  ref.set = set;
+  return ref;
+};
+
+op.getattrref_s = function(hllName, get, set) {
+  var refType = hll.hllConfigs[hllName].get('str_attr_ref');
+  if (refType == null) {
+    throw "No str attribute reference type registered for current HLL";
+  }
+  var STable = refType._STable;
+  var ref = STable.REPR.allocate(STable);
+  ref.get = get;
+  ref.set = set;
+  return ref;
+};
+
+op.getlexref_i = function(hllName, get, set) {
+  var refType = hll.hllConfigs[hllName].get('int_lex_ref');
+  if (refType == null) {
+    throw "No int lexical reference type registered for current HLL";
+  }
+  var STable = refType._STable;
+  var ref = STable.REPR.allocate(STable);
+  ref.get = get;
+  ref.set = set;
+  return ref;
+};
+
+op.getlexref_s = function(hllName, get, set) {
+  var refType = hll.hllConfigs[hllName].get('str_lex_ref');
+  if (refType == null) {
+    throw "No str lexical reference type registered for current HLL";
+  }
+  var STable = refType._STable;
+  var ref = STable.REPR.allocate(STable);
+  ref.get = get;
+  ref.set = set;
+  return ref;
+};
+
+op.getlexref_n = function(hllName, get, set) {
+  var refType = hll.hllConfigs[hllName].get('num_lex_ref');
+  if (refType == null) {
+    throw "No num lexical reference type registered for current HLL";
   }
   var STable = refType._STable;
   var ref = STable.REPR.allocate(STable);

@@ -47,6 +47,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         has %!mangled_lexicals;
 
+        has %!lexicalref_types;
+
         method new($qast, $outer) {
             my $obj := nqp::create(self);
             $obj.BUILD($qast, $outer);
@@ -68,6 +70,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             %!var_types := nqp::hash();
             %!static_variables := nqp::hash();
             %!mangled_lexicals := nqp::hash();
+            %!lexicalref_types := nqp::hash();
         }
 
         method add_mangled_var(QAST::Var $var) {
@@ -165,6 +168,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 %!variables{$var.name} := $var;
             }
         }
+
+        method register_lexicalref($var, $type) {
+            %!lexicalref_types{$var.name} := $type;
+        }
+
+        method lexicalref_type($var) { %!lexicalref_types{$var.name} }
 
         method add_static_variable($var) {
             %!static_variables{$var.name} := $var;
@@ -1473,7 +1482,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my $comp_mode := $node.compilation_mode;
 
-        my @setup := [$pre , $comp_mode ?? self.create_sc($node) !! '', self.set_code_objects,  self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $post, $body];
+        my $set_hll := $*HLL ?? "nqp.setCodeRefHLL(cuids, {quote_string($*HLL)});\n" !! '';
+
+        my @setup := [$pre , $comp_mode ?? self.create_sc($node) !! '', self.set_code_objects,  self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $set_hll, $post, $body];
         if !$instant {
             @setup.push("new nqp.EvalResult({$body.expr}, new nqp.NQPArray(cuids))");
         }
@@ -1500,7 +1511,14 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             self.log("type {$node.name} = $type");
         }
 
-        if $node.decl eq 'var' || $node.decl eq 'contvar' {
+        if $node.decl eq 'var' && $node.scope eq 'lexicalref' {
+            $*BLOCK.register_lexicalref($node, self.type_from_typeobj($node.returns));
+            $*BLOCK.add_variable($node);
+            if !self.is_dynamic_var($*BLOCK, $node) {
+                $*BLOCK.add_js_lexical($*BLOCK.add_mangled_var($node));
+            }
+        }
+        elsif $node.decl eq 'var' || $node.decl eq 'contvar' {
             $*BLOCK.add_variable($node);
 
             if !self.is_dynamic_var($*BLOCK, $node) {
@@ -1619,18 +1637,29 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         $T_OBJ;
     }
 
+    method figure_out_lexicalref_type(QAST::Var $var) {
+        my $cur_block := $*BLOCK;
+        while nqp::istype($cur_block, BlockInfo) {
+            my $type := $cur_block.lexicalref_type($var);
+            if nqp::defined($type) {
+                return $type;
+            }
+            else {
+                $cur_block := $cur_block.outer();
+            }
+        }
+        NQPMu;
+    }
+
     method compile_var_as_js_var(QAST::Var $var, :$cps) {
         my $type := self.figure_out_type($var);
-        my $mangled := $*BLOCK.mangle_var($var);
         if $*BINDVAL {
             # TODO better source mapping
-            # TODO use the proper type 
             my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($type), :$cps);
-            self.cpsify_chunk(Chunk.new($type,$mangled, [$bindval,'('~$mangled~' = ('~ $bindval.expr ~ "));\n"]));
+            self.cpsify_chunk(Chunk.new($type, $bindval.expr, [$bindval, self.set_var($var, $bindval.expr)]));
         }
         else {
-            # TODO get the proper type 
-            self.cpsify_chunk(Chunk.new($type, $mangled, [], :node($var)));
+            self.cpsify_chunk(Chunk.new($type, self.get_var($var), [], :node($var)));
         }
     }
 
@@ -1671,6 +1700,35 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
     }
 
+    method set_var($var, $js_expr) {
+        if self.is_dynamic_var($*BLOCK, $var) {
+            if $*BLOCK.ctx_for_var($var) -> $ctx {
+                "{$ctx}[{quote_string($var.name)}] = $js_expr;\n";
+            }
+            else {
+                "{$*CTX}.bind({quote_string($var.name)}, $js_expr);\n";
+            }
+        }
+        else {
+            my $mangled := $*BLOCK.mangle_var($var);
+            '('~$mangled~' = ('~ $js_expr ~ "));\n"
+        }
+    }
+
+    method get_var($var) {
+        if self.is_dynamic_var($*BLOCK, $var) {
+            if $*BLOCK.ctx_for_var($var) -> $ctx {
+                "$ctx[{quote_string($var.name)}]";
+            }
+            else {
+                "{$*CTX}.lookup({quote_string($var.name)})";
+            }
+        }
+        else {
+            $*BLOCK.mangle_var($var);
+        }
+    }
+
     method compile_var(QAST::Var $var, :$cps, :$want) {
         if $*BLOCK.lookup_static_variable($var) -> $static {
             Chunk.new($T_OBJ, self.value_as_js($static.value), []);
@@ -1678,7 +1736,49 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         elsif $var.scope eq 'local' {
             self.compile_var_as_js_var($var, :$cps);
         }
+        elsif $var.scope eq 'lexicalref' {
+            my $ref_type := self.figure_out_lexicalref_type($var);
+            if nqp::defined($ref_type) {
+                if $*BINDVAL {
+                    my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ), :$cps);
+                    self.cpsify_chunk(Chunk.new($T_OBJ, $bindval.expr, [$bindval, self.set_var($var, $bindval.expr)]));
+                }
+                else {
+                    self.cpsify_chunk(Chunk.new($T_OBJ, self.get_var($var), [], :node($var)));
+                }
+            }
+            else {
+                if $*BINDVAL {
+                    nqp::die('Cannot bind to QAST::Var resolving to a lexicalref');
+                }
+                else {
+                    my $type := self.figure_out_type($var);
+                    unless $type {
+                        $type := self.type_from_typeobj($var.returns);
+                    }
+                    if $type == $T_OBJ {
+                        nqp::die('Cannot take a reference to a non-native lexical');
+                    }
+                    my $suffix := self.suffix_from_type($type);
+                    my $get := self.get_var($var);
+                    my $set := self.set_var($var, 'value');
+                    Chunk.new($T_OBJ, "nqp.op.getlexref{$suffix}({quote_string($*HLL)}, function() \{return $get\}, function(value) \{$set\})", [], :node($var));
+                }
+            }
+        }
         elsif self.var_is_lexicalish($var) {
+            if $var.scope eq 'lexical' {
+                my $ref_type := self.figure_out_lexicalref_type($var);
+                if nqp::defined($ref_type) {
+                    if $*BINDVAL {
+                        nqp::die('Cannot bind to QAST::Var resolving to a lexicalref');
+                    }
+                    else {
+                        my $suffix := self.suffix_from_type($ref_type);
+                        return Chunk.new($ref_type, self.get_var($var) ~ ".\$\$decont{$suffix}()", [], :node($var));
+                    }
+                }
+            }
             if self.is_dynamic_var($*BLOCK, $var) {
                 self.compile_var_as_part_of_ctx($var, :$cps, :$want);
             }
