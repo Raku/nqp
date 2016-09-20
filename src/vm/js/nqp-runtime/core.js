@@ -268,6 +268,11 @@ op.settypecache = function(obj, cache) {
   return obj;
 };
 
+op.settypecheckmode = function(obj, mode) {
+  console.log("NYI settypecheckmode");
+  return obj;
+};
+
 op.setmethcache = function(obj, cache) {
   if (!cache instanceof Hash) {
     console.log('we expect a hash here');
