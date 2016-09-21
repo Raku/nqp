@@ -306,7 +306,7 @@ public class JASTCompiler {
             }
         }
         else {
-            throw new Exception("Unknown JAST::Node in @!instructions");
+            throw new Exception("Unknown JAST::Node in @!instructions: " + typeName(insn, tc));
         }
     }
 
