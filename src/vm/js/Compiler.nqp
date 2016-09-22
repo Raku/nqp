@@ -1561,20 +1561,17 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     multi method as_js(QAST::VarWithFallback $node, :$want, :$cps) {
         # TODO CPS
-        my $var := self.compile_var($node, :$want);
-        if $var.type == $T_OBJ {
-            my $fallback := self.as_js($node.fallback, :want($T_OBJ));
-            my $tmp := $*BLOCK.add_tmp();
-            Chunk.new($T_OBJ, $tmp, [
-                $var,
-                "if ({$var.expr} == null) \{\n"
-                    ,$fallback
-                    ,"$tmp = {$fallback.expr};\n\} else \{\n$tmp = {$var.expr};\n\}\n"
-                    ]);
-        }
-        else {
-            $var;
-        }
+
+        my $var := self.compile_var($node, :want($T_OBJ));
+
+        my $fallback := self.as_js($node.fallback, :want($T_OBJ));
+        my $tmp := $*BLOCK.add_tmp();
+        Chunk.new($T_OBJ, $tmp, [
+            $var,
+            "if ({$var.expr} == null) \{\n"
+                ,$fallback
+                ,"$tmp = {$fallback.expr};\n\} else \{\n$tmp = {$var.expr};\n\}\n"
+                ]);
     }
 
     multi method as_js(QAST::Regex $node, :$want, :$cps) {
@@ -1787,33 +1784,14 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
         }
         elsif $var.scope eq 'positional' {
-            # TODO work on things other than nqp lists
-            # TODO think about nulls and missing elements
-            if $*BINDVAL {
-                my $bindval := $*BINDVAL;
-                {
-                    my $*BINDVAL;
-                    self.bind_pos($var[0], $var[1], $bindval, :node($var));
-                }
-            }
-            else {
-                self.atpos($var[0], $var[1], :node($var));
-            }
+            return self.as_js_clear_bindval($*BINDVAL
+                ?? QAST::Op.new( :op('bindpos'), $var[0], $var[1], $*BINDVAL)
+                !! QAST::Op.new( :op('atpos'), $var[0], $var[1]), :$want);
         }
         elsif $var.scope eq 'associative' {
-            # TODO think about nulls and missing elements
-            if $*BINDVAL {
-                my $bindval := $*BINDVAL;
-                {
-                    my $*BINDVAL;
-                    self.bind_key($var[0], $var[1], $bindval, :node($var));
-                }
-            }
-            else {
-                my $hash := self.as_js($var[0], :want($T_OBJ));
-                my $key := self.as_js($var[1], :want($T_STR));
-                Chunk.new($T_OBJ, "{$hash.expr}.\$\$atkey({$key.expr})", [$hash, $key], :node($var));
-            }
+            return self.as_js_clear_bindval($*BINDVAL
+                ?? QAST::Op.new( :op('bindkey'), $var[0], $var[1], $*BINDVAL)
+                !! QAST::Op.new( :op('atkey'), $var[0], $var[1]), :$want);
         }
         elsif $var.scope eq 'attributeref' {
             if +$var.list != 2 {
