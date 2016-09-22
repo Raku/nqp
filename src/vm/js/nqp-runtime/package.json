@@ -23,6 +23,7 @@
     "sleep": "*",
     "xorshift": "*",
     "ffi": "*",
+    "xregexp": "*",
     "ref": "*"
   }
 }
