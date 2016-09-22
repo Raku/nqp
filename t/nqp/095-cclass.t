@@ -10,22 +10,24 @@ sub test_cclass($c, $str) {
   return $s;
 }
 
-my $teststr := "aB\n.8 \t!";
+#               012 3456 789
+my $teststr := "aB\n.8 \t!π_";
 
+#                                     0123456789
 my %matches := nqp::hash(
-    nqp::const::CCLASS_ANY, '11111111',
-    nqp::const::CCLASS_NUMERIC, '00001000',
-    nqp::const::CCLASS_WHITESPACE, '00100110',
-    nqp::const::CCLASS_WORD, '11001000',
-    nqp::const::CCLASS_NEWLINE, '00100000',
-    nqp::const::CCLASS_ALPHABETIC, '11000000',
-    nqp::const::CCLASS_UPPERCASE, '01000000',
-    nqp::const::CCLASS_LOWERCASE, '10000000',
-    nqp::const::CCLASS_HEXADECIMAL, '11001000',
-    nqp::const::CCLASS_BLANK, '00000110',
-    nqp::const::CCLASS_CONTROL, '00100010',
-    nqp::const::CCLASS_PUNCTUATION, '00010001',
-    nqp::const::CCLASS_ALPHANUMERIC, '11001000',
+    nqp::const::CCLASS_ANY,          '1111111111',
+    nqp::const::CCLASS_NUMERIC,      '0000100000',
+    nqp::const::CCLASS_WHITESPACE,   '0010011000',
+    nqp::const::CCLASS_WORD,         '1100100011',
+    nqp::const::CCLASS_NEWLINE,      '0010000000',
+    nqp::const::CCLASS_ALPHABETIC,   '1100000010',
+    nqp::const::CCLASS_UPPERCASE,    '0100000000',
+    nqp::const::CCLASS_LOWERCASE,    '1000000010',
+    nqp::const::CCLASS_HEXADECIMAL,  '1100100000',
+    nqp::const::CCLASS_BLANK,        '0000011000',
+    nqp::const::CCLASS_CONTROL,      '0010001000',
+    nqp::const::CCLASS_PUNCTUATION,  '0001000101',
+    nqp::const::CCLASS_ALPHANUMERIC, '1100100010',
 );
 
 my %const := nqp::hash(
@@ -85,6 +87,10 @@ for %const -> $cclass {
     my $got := test_findcclass($cclass.key, $teststr, 10);
     my $expected := test_mock_findcclass($cclass.key, $teststr, 10);
     ok($got eq $expected, "nqp::findcclass CCLASS_{$cclass.value}");
+    if ($got ne $expected) {
+        say("# GOT: $got");
+        say("# EXPECTED: $expected");
+    }
 }
 
 
