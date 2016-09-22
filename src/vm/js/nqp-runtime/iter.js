@@ -7,7 +7,9 @@ class Iter {
   }
 
   $$shift() {
-    return this.array[this.idx++];
+    var value = this.array[this.idx++];
+    if (value === undefined) return null;
+    return value;
   }
 
   $$toBool(ctx) {

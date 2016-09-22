@@ -18,15 +18,21 @@ class NQPArray {
   }
 
   shift(ctx, _NAMED, self) {
-    return this.array.shift();
+    var value = this.array.shift();
+    if (value === undefined) return null;
+    return value;
   }
 
   pop(ctx, _NAMED, self) {
-    return this.array.pop();
+    var value = this.array.pop();
+    if (value === undefined) return null;
+    return value;
   }
 
   $$atpos(index) {
-    return this.array[index < 0 ? this.array.length + index : index];
+    var value = this.array[index < 0 ? this.array.length + index : index];
+    if (value === undefined) return null;
+    return value;
   }
 
   $$atpos_s(index) {
@@ -61,11 +67,15 @@ class NQPArray {
   }
 
   $$pop() {
-    return this.array.pop();
+    var value = this.array.pop();
+    if (value === undefined) return null;
+    return value;
   }
 
   $$shift() {
-    return this.array.shift();
+    var value = this.array.shift();
+    if (value === undefined) return null;
+    return value;
   }
 
   $$unshift(value) {
@@ -129,7 +139,9 @@ class NQPArray {
       throw new NQPException('A dynamic array can only be indexed with a single dimension');
     }
     var index = idx.array[0];
-    return this.array[index < 0 ? this.array.length + index : index];
+    var value = this.array[index < 0 ? this.array.length + index : index];
+    if (value === undefined) return null;
+    return value;
   }
 
   $$iterator() {
