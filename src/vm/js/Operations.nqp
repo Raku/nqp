@@ -1559,5 +1559,27 @@ class QAST::OperationsJS {
     add_simple_op('unlock', $T_OBJ, [$T_OBJ], sub ($lock) {$lock});
 
     add_simple_op('sleep', $T_NUM, [$T_NUM], :sideffects);
+
+    add_op('js', sub ($comp, $node, :$want, :$cps) {
+        my %want_char := nqp::hash($T_INT, 'I', $T_NUM, 'N', $T_STR, 'S', $T_VOID, 'v');
+        my sub want($node, $type) {
+            my @possibles := nqp::clone($node.list);
+            my $best := @possibles.shift;
+            return $best unless %want_char{$type};
+            my $char := %want_char{$type};
+            for @possibles -> $sel, $ast {
+                if nqp::index($sel, $char) >= 0 {
+                    $best := $ast;
+                }
+            }
+            $best
+        }
+
+        my $code := nqp::istype($node[0], QAST::Want) ?? want($node[0], $T_STR) !! $node[0];
+        if +@($node) != 1 || !nqp::istype($code, QAST::SVal) {
+            nqp::die('js requires one string literal operand');
+        }
+        Chunk.void($code.value ~ ";\n");
+    });
 }
 
