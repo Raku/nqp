@@ -525,7 +525,9 @@ function toJS(obj) {
 
 compilerRegistry.set('JavaScript', {
   eval: function(ctx, _NAMED, self, code) {
-    //console.log("evaling [", code, "]");
+    if (/PRINTME/.test(code)) {
+      console.log("evaling [", code, "]");
+    }
     return fromJS(eval(code));
   }
 });
