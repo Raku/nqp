@@ -23,4 +23,8 @@ class CurLexpad {
   }
 };
 
+CurLexpad.prototype.$$atkey_i = CurLexpad.prototype.$$atkey_n = CurLexpad.prototype.$$atkey_s = CurLexpad.prototype.$$atkey;
+CurLexpad.prototype.$$bindkey_i = CurLexpad.prototype.$$bindkey_n = CurLexpad.prototype.$$bindkey_s = CurLexpad.prototype.$$bindkey;
+
+
 module.exports = CurLexpad;

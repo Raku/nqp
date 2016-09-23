@@ -559,6 +559,9 @@ class QAST::OperationsJS {
         add_simple_op('bindposnd' ~ $suffix, $type, [$T_OBJ, $T_OBJ, $type], :sideffects);
         add_simple_op('bindpos2d' ~ $suffix, $type, [$T_OBJ, $T_INT, $T_INT, $type], :sideffects);
         add_simple_op('bindpos3d' ~ $suffix, $type, [$T_OBJ, $T_INT, $T_INT, $T_INT, $type], :sideffects);
+
+        add_simple_op('atkey' ~ $suffix, $type, [$T_OBJ, $T_STR], sub ($hash, $key) {"$hash.\$\$atkey$suffix($key)"});
+        add_simple_op('bindkey' ~ $suffix, $type, [$T_OBJ, $T_STR, $type], sub ($hash, $key, $value) {"$hash.\$\$bindkey$suffix($key, $value)"}, :sideffects);
     }
 
     add_simple_op('numdimensions', $T_INT, [$T_OBJ]);
@@ -1387,8 +1390,6 @@ class QAST::OperationsJS {
     add_simple_op('knowhowattr', $T_OBJ, [], sub () {"nqp.knowhowattr"});
     add_simple_op('knowhow', $T_OBJ, [], sub () {"nqp.knowhow"});
 
-    add_simple_op('atkey', $T_OBJ, [$T_OBJ, $T_STR], sub ($hash, $key) {"$hash.\$\$atkey($key)"});
-    add_simple_op('bindkey', $T_OBJ, [$T_OBJ, $T_STR, $T_OBJ], sub ($hash, $key, $value) {"$hash.\$\$bindkey($key, $value)"}, :sideffects);
 
     add_simple_op('savecapture', :!inlinable, $T_OBJ, [], sub () {
         "nqp.op.savecapture(Array.prototype.slice.call(arguments))"
