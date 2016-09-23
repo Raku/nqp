@@ -9,6 +9,11 @@ class WrappedCtx {
   }
 };
 
+class StaticCtx {
+  constructor() {
+  }
+};
+
 class CodeRef {
   constructor(name, cuid) {
     this.name = name;
@@ -72,16 +77,14 @@ class CodeRef {
         searched = searched.outerCodeRef;
       }
 
-      var i = this.closureTemplate.length;
+      var i = this.closureTemplate.length - 1;
 
       var fakeCtxs = [];
-      while (i--) {
-        fakeCtxs.push(null);
+      while (i-- > 0) {
+        fakeCtxs.push(new StaticCtx());
       }
 
-      if (forcedOuterCtx) {
-        fakeCtxs[fakeCtxs.length - 1] = new WrappedCtx(forcedOuterCtx);
-      }
+      fakeCtxs.push(forcedOuterCtx ? new WrappedCtx(forcedOuterCtx) : new StaticCtx());
 
       this.$$call = this.closureTemplate.apply(null, fakeCtxs);
       return this.$$call.apply(this, arguments);
