@@ -25,6 +25,7 @@ class CodeRef {
       return;
     } else if (codeRefAttr === undefined) {
       console.warn('unknown codeRefAttr');
+      return;
     }
 
     if (proto.hasOwnProperty(codeRefAttr) && proto[codeRefAttr] !== this) {
