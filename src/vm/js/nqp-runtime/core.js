@@ -313,8 +313,13 @@ op.newtype = function(how, repr) {
   return REPR.typeObjectFor(how);
 };
 
+/* HACK - we need to handle can properly */
 op.can = function(obj, method) {
-  if (obj instanceof NQPInt) return 0;
+  if (typeof obj === "string" || obj instanceof NQPInt || obj instanceof CodeRef) return 0;
+  if (!obj._STable.methodCache) {
+    console.log("we have no method cache, checking: " + method);
+    return 0;
+  }
   return obj._STable.methodCache.hasOwnProperty(method) ? 1 : 0;
 };
 
