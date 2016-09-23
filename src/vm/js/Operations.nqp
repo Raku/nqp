@@ -523,12 +523,6 @@ class QAST::OperationsJS {
     });
 
 
-    add_op('bindkey', sub ($comp, $node, :$want, :$cps) {
-        $comp.bind_key($node[0], $node[1], $node[2], :$cps);
-    });
-    add_op('bindpos', sub ($comp, $node, :$want, :$cps) {
-        $comp.bind_pos($node[0], $node[1], $node[2], :$cps);
-    });
 
     for ['_i', $T_INT, '', $T_OBJ, '_s', $T_STR, '_n', $T_NUM] -> $suffix, $type {
         add_op('list' ~ $suffix, sub ($comp, $node, :$want, :$cps) {
@@ -549,11 +543,8 @@ class QAST::OperationsJS {
            $comp.cpsify_chunk(Chunk.new($T_OBJ, $list , @setup, :$node));
         });
 
-        if $type != $T_OBJ {
-            add_simple_op('bindpos' ~ $suffix, $type, [$T_OBJ, $T_INT, $type], sub ($list, $index, $value) {"$list.\$\$bindpos($index, $value)"}, :sideffects);
-            add_simple_op('atpos' ~ $suffix, $type, [$T_OBJ, $T_INT], sub ($list, $index) {"$list.\$\$atpos$suffix($index)"});
-
-        }
+        add_simple_op('bindpos' ~ $suffix, $type, [$T_OBJ, $T_INT, $type], sub ($list, $index, $value) {"$list.\$\$bindpos($index, $value)"}, :sideffects);
+        add_simple_op('atpos' ~ $suffix, $type, [$T_OBJ, $T_INT], sub ($list, $index) {"$list.\$\$atpos$suffix($index)"});
         
         add_simple_op('pop' ~ $suffix, $type, [$T_OBJ], sub ($array) {"$array.\$\$pop()"}, :sideffects);
         add_simple_op('push' ~ $suffix, $type, [$T_OBJ, $type], sub ($array, $elem) {"$array.\$\$push($elem)"}, :sideffects);
@@ -843,9 +834,6 @@ class QAST::OperationsJS {
     add_simple_op('islist', $T_BOOL, [$T_OBJ], sub ($obj) {"($obj instanceof nqp.NQPArray)"}, :decont(0));
 
 
-
-    #TODO CPS
-    add_op('atpos', sub ($comp, $node, :$want, :$cps) { $comp.atpos($node[0], $node[1], :$node) });
 
     #TODO CPS
     add_op('curlexpad', :!inlinable, sub ($comp, $node, :$want, :$cps) {
@@ -1400,6 +1388,7 @@ class QAST::OperationsJS {
     add_simple_op('knowhow', $T_OBJ, [], sub () {"nqp.knowhow"});
 
     add_simple_op('atkey', $T_OBJ, [$T_OBJ, $T_STR], sub ($hash, $key) {"$hash.\$\$atkey($key)"});
+    add_simple_op('bindkey', $T_OBJ, [$T_OBJ, $T_STR, $T_OBJ], sub ($hash, $key, $value) {"$hash.\$\$bindkey($key, $value)"}, :sideffects);
 
     add_simple_op('savecapture', :!inlinable, $T_OBJ, [], sub () {
         "nqp.op.savecapture(Array.prototype.slice.call(arguments))"

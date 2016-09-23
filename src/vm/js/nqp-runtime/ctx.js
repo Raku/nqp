@@ -119,6 +119,7 @@ class Ctx {
 
   $$bindkey(key, value) {
     this[key] = value;
+    return value;
   }
 
   $$existskey(key) {

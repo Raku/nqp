@@ -1599,13 +1599,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         self.as_js($node, :$want, :$cps);
     }
 
-    method atpos($array, $index, :$node) {
-        my $array_chunk := self.as_js($array, :want($T_OBJ));
-        my $index_chunk := self.as_js($index, :want($T_INT));
-        Chunk.new($T_OBJ, "{$array_chunk.expr}.\$\$atpos({$index_chunk.expr})", [$array_chunk, $index_chunk], :node($node));
-    }
-
-
     method figure_out_type(QAST::Var $var) {
         self.log("searching for type {$var.name}");
 
@@ -1881,26 +1874,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             self.NYI("Unimplemented QAST::Var scope: " ~ $var.scope);
         }
     }
-
-    method bind_key($hash, $key, $value, :$node, :$cps) {
-        # TODO CPS
-        my $hash_chunk := self.as_js($hash, :want($T_OBJ));
-        my $key_chunk := self.as_js($key, :want($T_STR));
-        my $value_chunk := self.as_js($value, :want($T_OBJ));
-
-        Chunk.new($T_OBJ, $value_chunk.expr, [$hash_chunk, $key_chunk, $value_chunk, "{$hash_chunk.expr}.\$\$bindkey({$key_chunk.expr},{$value_chunk.expr});\n"], :node($node));
-    }
-
-    method bind_pos($array, $index, $value, :$node, :$cps) {
-        # TODO CPS
-        my $array_chunk := self.as_js($array, :want($T_OBJ));
-        my $index_chunk := self.as_js($index, :want($T_INT));
-        my $value_chunk := self.as_js($value, :want($T_OBJ));
-
-        Chunk.new($T_OBJ, $value_chunk.expr, [$array_chunk, $index_chunk, $value_chunk, "{$array_chunk.expr}.\$\$bindpos({$index_chunk.expr},{$value_chunk.expr});\n"], :node($node));
-    }
-
-
 
     multi method as_js($unknown, :$want, :$cps) {
         self.NYI("Unimplemented QAST node type: " ~ $unknown.HOW.name($unknown));

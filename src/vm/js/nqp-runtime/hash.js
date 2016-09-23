@@ -50,7 +50,7 @@ class Hash {
   }
 
   $$bindkey(key, value) {
-    return this.content.set(key, value);
+    this.content.set(key, value);
     return value;
   }
 
