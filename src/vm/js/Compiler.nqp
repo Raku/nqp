@@ -507,6 +507,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     @sig.push($name);
                 }
             }
+
+            for $param.list -> $param_setup {
+                @setup.push(self.as_js($param_setup, :want($T_OBJ)));
+            }
         }
 
         if $slurpy {
