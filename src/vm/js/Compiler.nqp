@@ -440,23 +440,23 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
 
         my $bind_named := '';
-        for @params {
-            if $_.slurpy {
-                if $_.named {
-                    $slurpy_named := $_; 
+        for @params -> $param {
+            if $param.slurpy {
+                if $param.named {
+                    $slurpy_named := $param; 
                 }
                 else {
-                    $slurpy := $_;
+                    $slurpy := $param;
                 }
             }
-            elsif $_.named {
-                my $quoted := quote_string($_.named);
+            elsif $param.named {
+                my $quoted := quote_string($param.named);
                 @*KNOWN_NAMED.push($quoted);
                 my $value := "_NAMED[$quoted]";
-                if $_.default {
+                if $param.default {
                     # TODO types
 
-                    my $default := self.as_js($_.default, :want($T_OBJ), :$cps);
+                    my $default := self.as_js($param.default, :want($T_OBJ), :$cps);
                     @setup.push($default);
                     $value := "((_NAMED !== null && _NAMED.hasOwnProperty($quoted)) ? $value : {$default.expr})";
                 }
@@ -466,15 +466,15 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
                 # TODO required named arguments and defaultless optional ones
 
-                set_variable($_, $value);
+                set_variable($param, $value);
             }
-            elsif self.is_dynamic_var($*BLOCK, $_) {
-                my $set := "{$*CTX}[{quote_string($_.name)}] = ";
+            elsif self.is_dynamic_var($*BLOCK, $param) {
+                my $set := "{$*CTX}[{quote_string($param.name)}] = ";
 
                 my $tmp := self.unique_var('param');
                 @sig.push($tmp);
-                if $_.default {
-                    my $default_value := self.as_js($_.default, :want($T_OBJ), :$cps);
+                if $param.default {
+                    my $default_value := self.as_js($param.default, :want($T_OBJ), :$cps);
                     @setup.push(Chunk.void(
                         "if (arguments.length < {+@sig}) \{\n",
                          $default_value,
@@ -487,15 +487,15 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
             else {
                 my $default := '';
-                my $name := $*BLOCK.mangle_var($_);
+                my $name := $*BLOCK.mangle_var($param);
 
-                if $_.default {
+                if $param.default {
                     # Overwriting a parameter makes the v8 optimizer bail out so to avoid that we introduce a new variable
                     my $tmp := self.unique_var($name~'_');
 
                     $*BLOCK.add_js_lexical($name);
                     @sig.push($tmp);
-                    my $default_value := self.as_js($_.default, :want($T_OBJ));
+                    my $default_value := self.as_js($param.default, :want($T_OBJ));
                     @setup.push(Chunk.void(
                         "if (arguments.length < {+@sig}) \{\n",
                          $default_value,
