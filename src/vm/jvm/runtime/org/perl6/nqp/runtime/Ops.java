@@ -2748,7 +2748,7 @@ public final class Ops {
                     retval = attr_st.REPR.allocate(tc, attr_st);
                     for (Field field : retval.getClass().getDeclaredFields()) {
                         try {
-                            if (field.getType().isAssignableFrom(tc.native_j.getClass())) {
+                            if (tc.native_j == null || field.getType().isAssignableFrom(tc.native_j.getClass())) {
                                 field.set(retval, tc.native_j);
                                 break;
                             }
