@@ -328,11 +328,7 @@ Parameter declarations can also be given:
 Finally, there are a couple of other values of decl that work with lexicals.
 
 * static - means that the lexical should be given the value specified in the
-  :value(...) argument. Useful for things that wish to install symbols in the
-  lexical scope with the intention they'll not be mutated (for example, a type
-  declaration may be installed using this). No attempt is made to ensure you
-  do not re-bind such a symbol, but do not do this; runtimes are free to turn
-  lookups of static lexical symbols into direct references to the symbol.
+  :value(...) argument. There are no restrictions on re-binding.
 * contvar - means that the lexical should be initialized to a clone of the
   :value(...) argument. Presumably, this represents some kind of container
   type. There are no restrictions on re-binding.
