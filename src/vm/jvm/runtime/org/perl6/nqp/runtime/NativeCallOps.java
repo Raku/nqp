@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import com.sun.jna.Callback;
+import com.sun.jna.Function;
 import com.sun.jna.NativeLibrary;
 import com.sun.jna.NativeLong;
 import com.sun.jna.Memory;
@@ -63,10 +64,17 @@ public final class NativeCallOps {
         try {
             /* Load the library and locate the symbol. */
             /* TODO: Error handling! */
-            NativeLibrary library = libname == null || libname.equals("")
-                ? NativeLibrary.getProcess()
-                : NativeLibrary.getInstance(libname);
-            call.entry_point = library.getFunction(symbol);
+            SixModelObject entry_point = Ops.atkey(returns, "entry_point", tc);
+            if (Ops.isnull(entry_point) == 0) {
+                /* TODO: Set the calling convention? */
+                call.entry_point = Function.getFunction(new Pointer(Ops.unbox_i(entry_point, tc)));
+            }
+            else {
+                NativeLibrary library = libname == null || libname.equals("")
+                    ? NativeLibrary.getProcess()
+                    : NativeLibrary.getInstance(libname);
+                call.entry_point = library.getFunction(symbol);
+            }
     
             /* TODO: Set the calling convention. */
     
