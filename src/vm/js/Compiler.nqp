@@ -1522,7 +1522,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 $*BLOCK.add_js_lexical($*BLOCK.add_mangled_var($node));
             }
         }
-        elsif $node.decl eq 'var' || $node.decl eq 'contvar' {
+        elsif $node.decl eq 'var' || $node.decl eq 'contvar' || $node.decl eq 'static' {
             $*BLOCK.add_variable($node);
 
             if !self.is_dynamic_var($*BLOCK, $node) {
@@ -1530,15 +1530,18 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 if $node.decl eq 'contvar' {
                     $*BLOCK.add_js_lexical_with_value($mangled_name, "nqp.op.clone({self.value_as_js($node.value)})");
                 }
+                elsif $node.decl eq 'static' {
+                    $*BLOCK.add_js_lexical_with_value($mangled_name, self.value_as_js($node.value));
+                }
                 else {
                     $*BLOCK.add_js_lexical($mangled_name);
                 }
             }
         }
-        elsif $node.decl eq 'static' {
-            $*BLOCK.add_variable($node);
-            $*BLOCK.add_static_variable($node);
-        }
+#        elsif $node.decl eq 'static' {
+#            $*BLOCK.add_variable($node);
+#            $*BLOCK.add_static_variable($node);
+#        }
         elsif $node.decl eq 'param' {
             $*BLOCK.add_variable($node);
             if $node.scope eq 'local' || $node.scope eq 'lexical' {
@@ -1681,6 +1684,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
             elsif $var.decl eq 'contvar' {
                 self.stored_result(Chunk.new($T_OBJ, "({$*CTX}[{quote_string($var.name)}] = nqp.op.clone({self.value_as_js($var.value)}))",  []), :$want);
+            }
+            elsif $var.decl eq 'static' {
+                self.stored_result(Chunk.new($T_OBJ, "({$*CTX}[{quote_string($var.name)}] = {self.value_as_js($var.value)})",  []), :$want);
             }
             else {
                 if $*BLOCK.ctx_for_var($var) -> $ctx {
