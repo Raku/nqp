@@ -18,7 +18,7 @@ my @js_specific = "t/js/getcomp-js.t";
 # temporarily turned of test 060
 my @nqp_tests = grep {$_ !~ /regex-interpolation|060/} glob "t/nqp/*.t";
 
-my @moar_tests = qw(t/moar/03-line-seps.t t/moar/02-multidim.t);
+my @moar_tests = qw(t/moar/03-line-seps.t);
 
 my @runtime_unit_tests = qw(t/js/varint.js);
 my @continuation_tests; # = qw(t/js/continuations.t);
