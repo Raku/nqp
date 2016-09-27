@@ -43,8 +43,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         has %!var_types;    # Mapping of lexical names to types
 
-        has %!static_variables;
-
         has %!mangled_lexicals;
 
         has %!lexicalref_types;
@@ -68,7 +66,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             %!need_cps := nqp::hash();
             %!need_direct := nqp::hash();
             %!var_types := nqp::hash();
-            %!static_variables := nqp::hash();
             %!mangled_lexicals := nqp::hash();
             %!lexicalref_types := nqp::hash();
         }
@@ -175,39 +172,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         method lexicalref_type($var) { %!lexicalref_types{$var.name} }
 
-        method add_static_variable($var) {
-            %!static_variables{$var.name} := $var;
-        }
-
-        method has_own_static_variable($name) {
-            nqp::existskey(%!static_variables, $name);
-        }
-
         method has_own_variable($name) {
             nqp::existskey(%!variables, $name);
-        }
-
-        method get_static_variable($name) {
-            %!static_variables{$name};
-        }
-
-        method static_variables() {
-            %!static_variables;
-        }
-
-        method lookup_static_variable($var) {
-            my $info := self;
-            return nqp::null() if $var.scope ne 'lexical' && $var.scope ne 'typevar';
-            while $info {
-                if $info.has_own_static_variable($var.name) {
-                    return $info.get_static_variable($var.name);
-                }
-                if $info.has_own_variable($var.name) {
-                    return nqp::null();
-                }
-                $info := $info.outer;
-            }
-            nqp::null();
         }
 
         method add_tmp() {
@@ -1211,18 +1177,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     method create_ctx($name, :$code_ref, :$code_ref_attr) {
-        my $ctx_type := "Ctx";
-        my $static := "";
-        if $*BLOCK.static_variables -> $vars {
-            $ctx_type := "CtxWithStatic";
-            my @static;
-            for $vars -> $var {
-                @static.push(quote_string($var.key) ~ ": " ~ self.value_as_js($var.value.value));
-            }
-            $static := ', {' ~ nqp::join(',', @static) ~ '}';
-        }
-        "var $name = new nqp.$ctx_type(caller_ctx, this.forcedOuterCtx || {self.outer_ctx}, $code_ref, $code_ref_attr$static);\n";
-
+        "var $name = new nqp.Ctx(caller_ctx, this.forcedOuterCtx || {self.outer_ctx}, $code_ref, $code_ref_attr);\n";
     }
 
     multi method as_js(QAST::IVal $node, :$want, :$cps) {
@@ -1730,10 +1685,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     method compile_var(QAST::Var $var, :$cps, :$want) {
-        if $*BLOCK.lookup_static_variable($var) -> $static {
-            Chunk.new($T_OBJ, self.value_as_js($static.value), []);
-        }
-        elsif $var.scope eq 'local' {
+        if $var.scope eq 'local' {
             self.compile_var_as_js_var($var, :$cps);
         }
         elsif $var.scope eq 'lexicalref' {

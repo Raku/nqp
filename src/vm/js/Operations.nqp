@@ -844,23 +844,18 @@ class QAST::OperationsJS {
             my @set;
 
             for $*BLOCK.variables -> $var {
-                if $*BLOCK.lookup_static_variable($var) -> $static {
-                    # TODO
-                }
-                else {
-                    my $storage := $comp.is_dynamic_var($*BLOCK, $var)
-                        ?? "{$*CTX}[{quote_string($var.name)}]"
-                        !! $*BLOCK.mangle_var($var);
+                my $storage := $comp.is_dynamic_var($*BLOCK, $var)
+                    ?? "{$*CTX}[{quote_string($var.name)}]"
+                    !! $*BLOCK.mangle_var($var);
 
-                    @set.push(quote_string($var.name) ~
-                       ~ ': function(value) {'
-                       ~ $storage ~ ' = value'
-                       ~ '}');
-                    @get.push(quote_string($var.name) ~
-                       ~ ': function() {'
-                       ~ 'return ' ~ $storage ~ ''
-                       ~ '}');
-                }
+                @set.push(quote_string($var.name) ~
+                   ~ ': function(value) {'
+                   ~ $storage ~ ' = value'
+                   ~ '}');
+                @get.push(quote_string($var.name) ~
+                   ~ ': function() {'
+                   ~ 'return ' ~ $storage ~ ''
+                   ~ '}');
             }
             Chunk.new($T_OBJ, "new nqp.CurLexpad(\{{nqp::join(',', @get)}\}, \{{nqp::join(',', @set)}\})", [], :$node);
     });
