@@ -1,6 +1,6 @@
 use QAST;
 
-plan(77);
+plan(78);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -1233,3 +1233,26 @@ test_qast_result(
         ok(!$dont_call, 'nqp::chain shortcircuits');
     }
 );
+
+if nqp::getcomp('nqp').backend.name eq 'jvm' {
+    skip('children of a QAST::Var with a "param" decl are not implemented');
+}
+else {
+    is_qast_args(
+        QAST::Block.new(
+            QAST::Var.new( :name('other'), :scope('local'), :decl('var')),
+            QAST::Var.new( :name('arg'), :scope('local'), :decl('param'), :returns(str),
+                QAST::Op.new( :op('bind'),
+                    QAST::Var.new( :name('other'), :scope('local')),
+                    QAST::Op.new(:op<concat>,
+                        QAST::SVal.new(:value<Mmmmm...>),
+                        QAST::Var.new( :name('arg'), :scope('local')),
+                    )
+                )
+            ),
+            QAST::Var.new( :name('other'), :scope('local'))
+        ),
+        ['Highland Park!'],
+        'Mmmmm...Highland Park!',
+        'a QAST::Var with a param decl can have children which are executed');
+}
