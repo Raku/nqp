@@ -1,6 +1,6 @@
 use QAST;
 
-plan(78);
+plan(80);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -1256,3 +1256,38 @@ else {
         'Mmmmm...Highland Park!',
         'a QAST::Var with a param decl can have children which are executed');
 }
+
+test_qast_result(
+    QAST::Block.new(
+        QAST::Var.new( :name('before'), :scope('local'), :decl('var')),
+        QAST::Var.new( :name('after'), :scope('local'), :decl('var')),
+        QAST::Var.new( :name('foo'), :scope('lexical'), :decl('static'), :value(A)),
+        QAST::Op.new( :op('bind'),
+            QAST::Var.new( :name('before'), :scope('local')),
+            QAST::Op.new(
+                :op('callmethod'), :name('m'),
+               QAST::Var.new( :name('foo'), :scope('lexical')),
+            )
+        ),
+        QAST::Op.new( :op('bind'),
+            QAST::Var.new( :name('foo'), :scope('lexical')),
+            QAST::WVal.new(:value(B))
+        ),
+        QAST::Op.new( :op('bind'),
+            QAST::Var.new( :name('after'), :scope('local')),
+            QAST::Op.new(
+                :op('callmethod'), :name('m'),
+               QAST::Var.new( :name('foo'), :scope('lexical')),
+            )
+        ),
+        QAST::Op.new(
+            :op<list>,
+            QAST::Var.new( :name('before'), :scope('local')),
+            QAST::Var.new( :name('after'), :scope('local'))
+        )
+    ),
+    -> $r {
+       ok($r[0] eq 'a', 'a static QAST::Var before binding to it contains a correct value');
+       ok($r[1] eq 'b', 'a static QAST::Var after binding to it contains a correct value');
+    }
+);
