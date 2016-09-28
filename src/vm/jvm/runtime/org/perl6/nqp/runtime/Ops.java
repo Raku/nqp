@@ -2386,8 +2386,6 @@ public final class Ops {
             ArgsExpectation.invokeByExpectation(tc, cr, csd, args);
         }
         catch (ControlException e) {
-            if (barrier && (e instanceof SaveStackException))
-                ExceptionHandling.dieInternal(tc, "control operator crossed continuation barrier");
             throw e;
         }
         catch (Throwable e) {
