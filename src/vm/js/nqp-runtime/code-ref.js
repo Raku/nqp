@@ -79,16 +79,32 @@ class CodeRef {
 
       var i = this.closureTemplate.length - 1;
 
+      var codeRefForCtx = this.outerCodeRef;
       var fakeCtxs = [];
-      while (i-- > 0) {
-        fakeCtxs.push(new StaticCtx());
+
+      fakeCtxs.unshift(forcedOuterCtx ? new WrappedCtx(forcedOuterCtx) : new StaticCtx());
+
+
+      if (codeRefForCtx && codeRefForCtx.staticVars) {
+        for (var staticVarName in codeRefForCtx.staticVars) {
+          fakeCtxs[0][staticVarName] = codeRefForCtx.staticVars[staticVarName];
+        }
       }
 
-      fakeCtxs.push(forcedOuterCtx ? new WrappedCtx(forcedOuterCtx) : new StaticCtx());
+      while (i-- > 0) {
+        codeRefForCtx = codeRefForCtx.outerCodeRef;
+        fakeCtxs.unshift(new StaticCtx());
+
+        if (codeRefForCtx && codeRefForCtx.staticVars) {
+          for (var staticVarName in codeRefForCtx.staticVars) {
+            fakeCtxs[0][staticVarName] = codeRefForCtx.staticVars[staticVarName];
+          }
+        }
+      }
+
 
       this.$$call = this.closureTemplate.apply(null, fakeCtxs);
       return this.$$call.apply(this, arguments);
-
     }
   }
 
@@ -140,6 +156,10 @@ class CodeRef {
     this.outerCodeRef = outerCodeRef;
     this.lexicalsTypeInfo = lexicalsTypeInfo;
     return this;
+  }
+
+  setStaticVars(staticVars) {
+    this.staticVars = staticVars;
   }
 
   setCodeRefAttr(codeRefAttr) {

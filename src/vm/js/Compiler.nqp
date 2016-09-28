@@ -890,9 +890,11 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         has $!closure_template;
         has $!lexicals_type_info;
         has $!outer_cuid;
+        has $!static_lexicals;
         method outer_cuid() {$!outer_cuid}
         method lexicals_type_info() {$!lexicals_type_info}
         method closure_template() {$!closure_template}
+        method static_lexicals() {$!static_lexicals}
     }
 
     method type_info_for_lexicals(BlockInfo $block) {
@@ -1061,10 +1063,23 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                         $closure_template := Chunk.new($T_NONVAL, '', @closure_template);
                     }
 
+                    my @static;
+                    for $*BLOCK.variables -> $var {
+                        if $var.decl eq 'static' {
+                            @static.push(quote_string($var.name) ~ ': ' ~ self.value_as_js($var.value));
+                        }
+                    }
+
+                    my $static_lexicals;
+                    if +@static {
+                       $static_lexicals := '{' ~ nqp::join(',', @static) ~ '}';
+                    }
+
                     %!serialized_code_ref_info{$node.cuid} := SerializedCodeRefInfo.new(
                         :$closure_template,
                         :$outer_cuid,
                         :$lexicals_type_info,
+                        :$static_lexicals
                     );
                 }
             }
@@ -1217,6 +1232,23 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     multi method as_js(QAST::Op $node, :$want, :$cps) {
         QAST::OperationsJS.compile_op(self, $node, :$want, :$cps);
+    }
+
+    method set_static_vars() {
+        my @setup;
+        for %!cuids -> $kv {
+            if nqp::existskey(%!serialized_code_ref_info, $kv.key) {
+                my $cuid := $kv.key;
+                my $info := %!serialized_code_ref_info{$cuid};
+
+                if $info.static_lexicals {
+                    @setup.push(
+                        ~ self.mangled_cuid($cuid)
+                        ~ ".setStaticVars(" ~ $info.static_lexicals ~ ");\n");
+                }
+            }
+        }
+        Chunk.new($T_VOID, "", @setup);
     }
 
     method set_static_info() {
@@ -1443,7 +1475,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my $set_hll := $*HLL ?? "nqp.setCodeRefHLL(cuids, {quote_string($*HLL)});\n" !! '';
 
-        my @setup := [$pre , $comp_mode ?? self.create_sc($node) !! '', self.set_code_objects,  self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $set_hll, $post, $body];
+        my @setup := [$pre , $comp_mode ?? self.create_sc($node) !! '', self.set_code_objects,  self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $set_hll, self.set_static_vars, $post, $body];
         if !$instant {
             @setup.push("new nqp.EvalResult({$body.expr}, new nqp.NQPArray(cuids))");
         }
