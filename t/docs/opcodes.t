@@ -120,6 +120,9 @@ sub find_documented_opcodes() {
                 if $match[0] ~~ /moar/ {
                     nqp::push(@opcode_vms,"moar");
                 }
+                if $match[0] ~~ /js/ {
+                    nqp::push(@opcode_vms,"js");
+                }
             }
         }
         next unless $line ~~ / ^ '* ' .* '(' /;
