@@ -2337,7 +2337,9 @@ Converts the JVM property `java.class.path` into a list of paths, returns it.
 ## sha1
 * `sha1(str $str)`
 
-Given a UTF-8 string, return the SHA-1 digest for that string.
+Given a UTF-8 string, return the SHA-1 digest for that string. This op is built
+for the specific purpose of hashing source code for dependency management
+purposes, and isn't intended to be used more widely.
 
 ## sleep
 * `sleep(num $seconds)`
