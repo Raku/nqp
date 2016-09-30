@@ -1,4 +1,4 @@
-plan(16);
+plan(18);
 
 ok(nqp::isnull(nqp::decont(nqp::null())), 'nqp::decont works on nqp::null');
 
@@ -47,6 +47,9 @@ ok(nqp::isnull(nqp::decont(nqp::null())), 'nqp::decont works on nqp::null');
 
     my $obj := Foo.new;
     nqp::assign($cont, $obj);
+
+    ok(nqp::iscont(Foo) == 0, "iscont on a type object");
+    ok(nqp::iscont(SomeCont) == 1, "iscont on a type object that is a container");
 
     ok($cont.foo eq "foo", "calling a method on a container deconts");
     ok(SomeCont.foo eq "container", "a method call on a type object dosen't decont");
