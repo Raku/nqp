@@ -22,6 +22,7 @@ import org.perl6.nqp.sixmodel.reprs.CStructREPRData.AttrInfo;
 import org.perl6.nqp.sixmodel.reprs.NativeCall.ArgType;
 
 import org.perl6.nqp.runtime.ExceptionHandling;
+import org.perl6.nqp.runtime.Ops;
 import org.perl6.nqp.runtime.ThreadContext;
 
 public class CStruct extends REPR {
@@ -109,6 +110,10 @@ public class CStruct extends REPR {
         String className = "__CStruct__" + typeId++;
 
         int attributes = fields.size();
+
+        if (attributes == 0) {
+            ExceptionHandling.dieInternal(tc, "Class " + Ops.typeName(st.WHAT, tc) + " has repr CStruct but no fields");
+        }
 
         // public $className extends com.sun.jna.Structure implements com.sun.jna.Structure.ByReference { ... }
         cw.visit(Opcodes.V1_7, Opcodes.ACC_PUBLIC | Opcodes.ACC_SUPER, className, null, "com/sun/jna/Structure", null);
