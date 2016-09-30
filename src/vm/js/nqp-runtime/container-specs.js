@@ -28,6 +28,11 @@ class CodePair {
       return value;
     });
 
+    this.STable.addInternalMethod('$$iscont', function() {
+      return 1;
+    });
+
+
     this.STable.addInternalMethod('$$decont', function(ctx) {
       return fetch.$$call(ctx, {}, this);
     });

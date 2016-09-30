@@ -388,7 +388,7 @@ op.setcontspec = function(type, specType, conf) {
 };
 
 op.iscont = function(cont) {
-  return cont.$$decont ? 1 : 0;
+  return cont.$$iscont ? cont.$$iscont() : 0;
 };
 
 op.iscont_i = function(cont) {
