@@ -1525,10 +1525,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 }
             }
         }
-#        elsif $node.decl eq 'static' {
-#            $*BLOCK.add_variable($node);
-#            $*BLOCK.add_static_variable($node);
-#        }
         elsif $node.decl eq 'param' {
             $*BLOCK.add_variable($node);
             if $node.scope eq 'local' || $node.scope eq 'lexical' {
