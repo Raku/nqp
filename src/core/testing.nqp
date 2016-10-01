@@ -25,6 +25,17 @@ sub ok($condition, $desc?) {
     $condition ?? 1 !! 0
 }
 
+sub is($got, $expected, $desc?) {
+    ok($got eq $expected, $desc);
+    if $got ne $expected {
+        my $out := '';
+        for nqp::split("\n", "     got: '$got'\nexpected: '$expected'") -> $line {
+            $out := $out ~ "# $line\n";
+        }
+        print($out);
+    }
+}
+
 sub todo($reason, $count) {
     $todo_upto_test_num := $test_counter + $count;
     $todo_reason        := "# TODO $reason";
