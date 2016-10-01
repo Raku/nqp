@@ -112,7 +112,8 @@ public class CStruct extends REPR {
         int attributes = fields.size();
 
         if (attributes == 0) {
-            ExceptionHandling.dieInternal(tc, "Class " + Ops.typeName(st.WHAT, tc) + " has repr CStruct but no fields");
+            ExceptionHandling.dieInternal(tc, 
+                "Class " + Ops.typeName(st.WHAT, tc) + " has no attributes, which is illegal with the CStruct representation.");
         }
 
         // public $className extends com.sun.jna.Structure implements com.sun.jna.Structure.ByReference { ... }
