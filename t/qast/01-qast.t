@@ -1,6 +1,6 @@
 use QAST;
 
-plan(80);
+plan(81);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -1255,6 +1255,40 @@ else {
         ['Highland Park!'],
         'Mmmmm...Highland Park!',
         'a QAST::Var with a param decl can have children which are executed');
+
+    my $log;
+    class Log {
+        method add($thing) {
+            $log := $log ~ $thing ~ "\n";
+        }
+        method get() {
+            $log;
+        }
+    }
+
+    is_qast_args(
+        QAST::Block.new(
+            QAST::Var.new( :name('log'), :scope('local'), :decl('contvar'), :value(Log) ),
+            QAST::Op.new(
+                :op('callmethod'), :name('add'),
+               QAST::Var.new( :name('log'), :scope('local')),
+               QAST::SVal.new(:value<#2>),
+            ),
+            QAST::Var.new( :name('arg'), :scope('local'), :decl('param'), :returns(str),
+                QAST::Op.new(
+                    :op('callmethod'), :name('add'),
+                   QAST::Var.new( :name('log'), :scope('local')),
+                   QAST::Var.new( :name('arg'), :scope('local'))
+                ),
+            ),
+            QAST::Op.new(
+                :op('callmethod'), :name('get'),
+                QAST::Var.new( :name('log'), :scope('local'))
+            )
+        ),
+        ['#1'],
+        "#1\n#2\n",
+        'mixing a QAST::Var with children with a contvar');
 }
 
 test_qast_result(
