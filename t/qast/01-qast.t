@@ -1235,7 +1235,7 @@ test_qast_result(
 );
 
 if nqp::getcomp('nqp').backend.name eq 'jvm' {
-    skip('children of a QAST::Var with a "param" decl are not implemented');
+    skip('children of a QAST::Var with a "param" decl are not implemented', 4);
 }
 else {
     is_qast_args(
