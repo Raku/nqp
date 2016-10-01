@@ -1,6 +1,6 @@
 use QAST;
 
-plan(83);
+plan(88);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -1333,6 +1333,88 @@ else {
         ['#1'],
         "#1\n#2\n",
         'mixing a QAST::Var with children with a contvar - lexicals');
+}
+
+{
+    my $log := '';
+
+    my $got_pos;
+    my $got_named;
+    my $got_flat_pos;
+    my $got_flat_named;
+
+    my class TestFlat {
+        method test_flat($pos0, $pos1, :$bar, :$baz) {
+            $got_named := $baz;
+            $got_flat_named := $bar;
+            $got_pos := $pos0;
+            $got_flat_pos := $pos1;
+            $log := $log ~ "call;";
+        }
+        method flat_pos() {
+            $log := $log ~ "flat_pos;";
+            nqp::list(456);
+        }
+        method flat_named() {
+            $log := $log ~ "flat_named;";
+            nqp::hash('bar', 123);
+        }
+        method pos() {
+            $log := $log ~ "pos;";
+            "normal pos";
+        }
+
+        method named() {
+            $log := $log ~ "named;";
+            "normal named";
+        }
+    }
+
+    my $with_flat_named := QAST::Op.new(
+        :op('callmethod'), :name('flat_named'),
+        QAST::Var.new( :name('log'), :scope('lexical')),
+    );
+    $with_flat_named.named(1);
+    $with_flat_named.flat(1);
+
+    my $with_named := QAST::Op.new(
+        :op('callmethod'), :name('named'),
+        QAST::Var.new( :name('log'), :scope('lexical')),
+    );
+    $with_named.named('baz');
+
+    my $with_pos := QAST::Op.new(
+        :op('callmethod'), :name('pos'),
+        QAST::Var.new( :name('log'), :scope('lexical')),
+    );
+
+    my $with_flat_pos := QAST::Op.new(
+        :op('callmethod'), :name('flat_pos'),
+        QAST::Var.new( :name('log'), :scope('lexical')),
+    );
+    $with_flat_pos.flat(1);
+
+
+    test_qast_result(
+        QAST::Block.new(
+            QAST::Var.new( :name('log'), :scope('lexical'), :decl('static'), :value(TestFlat) ),
+
+            QAST::Op.new(
+                :op('callmethod'), :name('test_flat'),
+                QAST::Var.new( :name('log'), :scope('lexical')),
+                $with_pos,
+                $with_flat_pos,
+                $with_named,
+                $with_flat_named
+            )
+        ),
+        -> $r {
+            is($got_named, 'normal named', 'passing nameds works');
+            is($got_flat_named, 123, 'passing flat nameds works');
+            is($got_pos, 'normal pos', 'passing positionals works');
+            is($got_flat_pos, 456, 'passing flat positionals works');
+            is($log, 'pos;flat_pos;named;flat_named;call;', 'correct order of evaluation of arguments');
+        });
 }
 
 test_qast_result(
