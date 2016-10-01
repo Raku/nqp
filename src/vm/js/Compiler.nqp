@@ -47,6 +47,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         has %!lexicalref_types;
 
+        has @!var_setup;
+
         method new($qast, $outer) {
             my $obj := nqp::create(self);
             $obj.BUILD($qast, $outer);
@@ -68,6 +70,15 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             %!var_types := nqp::hash();
             %!mangled_lexicals := nqp::hash();
             %!lexicalref_types := nqp::hash();
+            @!var_setup := nqp::list();
+        }
+
+        method add_var_setup($setup) {
+            @!var_setup.push($setup);
+        }
+
+        method var_setup() {
+            nqp::join('', @!var_setup);
         }
 
         method add_mangled_var(QAST::Var $var) {
@@ -1040,6 +1051,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     self.declare_js_vars($*BLOCK.tmps),
                     self.declare_js_vars($*BLOCK.js_lexicals),
                     $create_ctx,
+                    $*BLOCK.var_setup,
                     $sig,
                     self.clone_inners($*BLOCK),
                     self.capture_inners($*BLOCK),
@@ -1661,15 +1673,25 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
         }
         else {
-            if $var.decl eq 'var' {
-                my %default_value := nqp::hash($T_OBJ, 'null', $T_INT, '0', $T_NUM, '0', $T_STR, '""');
-                self.stored_result(Chunk.new($type, "({$*CTX}[{quote_string($var.name)}] = {%default_value{$type}})",  []), :$want);
-            }
-            elsif $var.decl eq 'contvar' {
-                self.stored_result(Chunk.new($T_OBJ, "({$*CTX}[{quote_string($var.name)}] = nqp.op.clone({self.value_as_js($var.value)}))",  []), :$want);
-            }
-            elsif $var.decl eq 'static' {
-                self.stored_result(Chunk.new($T_OBJ, "({$*CTX}[{quote_string($var.name)}] = {self.value_as_js($var.value)})",  []), :$want);
+            if $var.decl && $var.decl ne 'param' {
+                my $initial_value;
+                if $var.decl eq 'var' {
+                    my %default_value := nqp::hash($T_OBJ, 'null', $T_INT, '0', $T_NUM, '0', $T_STR, '""');
+                    $initial_value := %default_value{$type};
+                }
+                elsif $var.decl eq 'contvar' {
+                    $initial_value := "nqp.op.clone({self.value_as_js($var.value)})";
+                }
+                elsif $var.decl eq 'static' {
+                    $initial_value := self.value_as_js($var.value);
+                }
+                else {
+                    nqp::die("can't handle:" ~ $var.decl);
+                }
+
+                $*BLOCK.add_var_setup("{$*CTX}[{quote_string($var.name)}] = $initial_value;\n");
+
+                Chunk.new($type, "$*CTX[{quote_string($var.name)}]", [], :node($var));
             }
             else {
                 if $*BLOCK.ctx_for_var($var) -> $ctx {

@@ -1,6 +1,6 @@
 use QAST;
 
-plan(81);
+plan(83);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -1256,6 +1256,24 @@ else {
         'Mmmmm...Highland Park!',
         'a QAST::Var with a param decl can have children which are executed');
 
+    is_qast_args(
+        QAST::Block.new(
+            QAST::Var.new( :name('other'), :scope('lexical'), :decl('var')),
+            QAST::Var.new( :name('arg'), :scope('lexical'), :decl('param'), :returns(str),
+                QAST::Op.new( :op('bind'),
+                    QAST::Var.new( :name('other'), :scope('lexical')),
+                    QAST::Op.new(:op<concat>,
+                        QAST::SVal.new(:value<Mmmmm...>),
+                        QAST::Var.new( :name('arg'), :scope('lexical')),
+                    )
+                )
+            ),
+            QAST::Var.new( :name('other'), :scope('lexical'))
+        ),
+        ['Highland Park!'],
+        'Mmmmm...Highland Park!',
+        'a QAST::Var with a param decl can have children which are executed - lexicals');
+
     my $log;
     class Log {
         method add($thing) {
@@ -1289,6 +1307,32 @@ else {
         ['#1'],
         "#1\n#2\n",
         'mixing a QAST::Var with children with a contvar');
+
+    $log := '';
+
+    is_qast_args(
+        QAST::Block.new(
+            QAST::Var.new( :name('log'), :scope('lexical'), :decl('contvar'), :value(Log) ),
+            QAST::Op.new(
+                :op('callmethod'), :name('add'),
+               QAST::Var.new( :name('log'), :scope('lexical')),
+               QAST::SVal.new(:value<#2>),
+            ),
+            QAST::Var.new( :name('arg'), :scope('lexical'), :decl('param'), :returns(str),
+                QAST::Op.new(
+                    :op('callmethod'), :name('add'),
+                   QAST::Var.new( :name('log'), :scope('lexical')),
+                   QAST::Var.new( :name('arg'), :scope('lexical'))
+                ),
+            ),
+            QAST::Op.new(
+                :op('callmethod'), :name('get'),
+                QAST::Var.new( :name('log'), :scope('lexical'))
+            )
+        ),
+        ['#1'],
+        "#1\n#2\n",
+        'mixing a QAST::Var with children with a contvar - lexicals');
 }
 
 test_qast_result(
