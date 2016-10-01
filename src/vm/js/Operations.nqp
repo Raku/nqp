@@ -602,42 +602,20 @@ class QAST::OperationsJS {
 
             my $compiled_args := $comp.args($args, :$cont);
 
-            my @setup;
-            @setup.push($callee);
+            my @setup := nqp::clone($compiled_args.setup);
+            @setup.unshift($callee);
 
-            if nqp::islist($compiled_args) {
-                for $compiled_args -> $arg_group {
-                    for $arg_group.setup -> $arg {
-                        @setup.push($arg);
-                    }
-                }
-                $compiled_args := $comp.merge_arg_groups($compiled_args);
-                $call := '.$$applyCPS(';
-            }
-            else {
-                for $compiled_args.setup -> $arg {
-                    @setup.push($arg);
-                }
-                $call := '.$$callCPS(';
-            }
-
+            my $call := $compiled_args.is_args_array ?? '.$$applyCPS(' !! '.$$callCPS(';
             
             my $call_chunk := ChunkCPS.new($T_OBJ, $result, ['return ' ~ $callee.expr ~ $call ~ $compiled_args.expr ~ ");\n"], $cont);
-
-            @setup.push($call_chunk);
 
             $comp.chunk_sequence($T_OBJ, @setup, :$node, :result_child(nqp::elems(@setup) - 1));
         }
         else {
             my $compiled_args := $comp.args($args);
 
-            if nqp::islist($compiled_args) {
-                $compiled_args := $comp.merge_arg_groups($compiled_args);
-                $call := '.$$apply(';
-            }
-            else {
-                $call := '.$$call(';
-            }
+            my $call := $compiled_args.is_args_array ?? '.$$apply(' !! '.$$call(';
+
             $comp.stored_result(
                 Chunk.new($T_OBJ, $callee.expr ~ $call ~ $compiled_args.expr ~ ')' , [$callee, $compiled_args], :$node), :$want);
         }
@@ -710,14 +688,8 @@ class QAST::OperationsJS {
 
         my $compiled_args := $comp.args(@args, :invocant($invocant.expr));
 
-        my $call;
-        if nqp::islist($compiled_args) {
-            $compiled_args := $comp.merge_arg_groups($compiled_args);
-            $call := ".apply({$invocant.expr},";
-        }
-        else {
-            $call := '(';
-        }
+        my $call := $compiled_args.is_args_array ?? ".apply({$invocant.expr}," !! '(';
+
         @setup.push($compiled_args);
 
         $comp.stored_result(

@@ -7,6 +7,8 @@ my $T_BOOL := 4; # Something that can be used in boolean context in javascript. 
 my $T_VOID := -1; # Value of this type shouldn't exist, we use a "" as the expr
 my $T_NONVAL := -2; # something that is not a nqp value
 
+my $T_ARGS := -3; # comma separated arguments to a js call
+my $T_ARGS_ARRAY := -4; # an array of arguments to a js call
 
 role Joinable {
     method join() {
@@ -107,6 +109,10 @@ class Chunk does Joinable {
 
     method node() {
         $!node;
+    }
+
+    method is_args_array() {
+        $!type == $T_ARGS_ARRAY;
     }
 }
 

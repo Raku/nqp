@@ -268,18 +268,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         0;
     }
 
-    sub join_exprs($delim, @chunks) {
-        my @exprs;
-        for @chunks -> $chunk {
-            @exprs.push($chunk.expr);
-        }
-        nqp::join($delim, @exprs);
-    }
-
-    # TODO improve comments
     # turns a list of arguments for a call into a js code according to our most generall calling convention
     # $args is the list of QAST::Node arguments
-    # returns either a js code string which contains the arguments, or a list of js code strings that when executed create arrays of arguments (suitable for concatenating and passing into Function.apply) 
+    # returns a Chunk containing either a comma separated list of arguments or an expression that evaluates to a array of arguments
 
     method args($args, :$cont, :$invocant) {
         my @setup;
@@ -299,42 +290,47 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 if $arg.flat {
                     if $arg.named {
                         my $arg_chunk := self.as_js($arg, :want($T_OBJ), :$cps);
-                        my $unwraped := Chunk.new($T_OBJ, "nqp.unwrapNamed({$arg_chunk.expr})", [$arg_chunk]);
-                        @named_groups.push($unwraped);
+                        @setup.push($arg_chunk);
+                        @named_groups.push("nqp.unwrapNamed({$arg_chunk.expr})");
                     }
                     else {
                         my $arg_chunk := self.as_js($arg, :want($T_OBJ), :$cps);
-                        @groups.push(Chunk.new($T_OBJ, "({$arg_chunk.expr}).array", [$arg_chunk]));
+                        @setup.push($arg_chunk);
+                        @groups.push("({$arg_chunk.expr}).array");
                         @groups.push([]);
                     }
                 }
                 elsif $arg.named {
                     my $compiled_arg := self.as_js($arg, :want($T_OBJ), :$cps);
-                    @named.push($compiled_arg);
+                    @setup.push($compiled_arg);
                     @named_exprs.push(quote_string($arg.named) ~ ":" ~ $compiled_arg.expr);
 
                 }
                 else {
-                    @groups[@groups-1].push(self.as_js($arg, :want($T_OBJ), :$cps));
+                    my $compiled_arg := self.as_js($arg, :want($T_OBJ), :$cps);
+                    @setup.push($compiled_arg);
+                    @groups[@groups-1].push($compiled_arg.expr);
                 }
             }
             else {
-                @groups[@groups-1].push(self.as_js($arg, :want($T_OBJ), :$cps));
+                my $compiled_arg := self.as_js($arg, :want($T_OBJ), :$cps);
+                @setup.push($compiled_arg);
+                @groups[@groups-1].push($compiled_arg.expr);
             }
         }
 
         # We want to always have at leat 1 thing to pass as the named argument
-        if @named || @named_groups == 0 {
+        if @named_exprs || @named_groups == 0 {
             if @named_exprs == 0 {
-                @named_groups.push(Chunk.new($T_OBJ, 'null', []));
+                @named_groups.push('null');
             }
             else {
-                @named_groups.push(Chunk.new($T_OBJ,'{' ~ nqp::join(',',@named_exprs) ~ '}', @named));
+                @named_groups.push('{' ~ nqp::join(',',@named_exprs) ~ '}');
             }
         }
 
         if $invocant {
-            @groups[0].unshift(Chunk.new($T_OBJ, $invocant, []));
+            @groups[0].unshift($invocant);
         }
 
         if $cont {
@@ -342,7 +338,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
 
         if +@named_groups > 1 {
-            @groups[0].unshift(Chunk.new($T_NONVAL, 'nqp.named([' ~ join_exprs(',', @named_groups) ~ '])', @named_groups));
+            @groups[0].unshift('nqp.named([' ~ nqp::join(',', @named_groups) ~ '])');
         }
         else {
             @groups[0].unshift(@named_groups[0]);
@@ -351,47 +347,21 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         @groups[0].unshift($*CTX);
         
 
-        my sub chunkify(@group, $pre = '', $post = '') {
-            my @exprs;
-            my @setup;
-            for @group -> $arg {
-                if nqp::isstr($arg) {
-                    @exprs.push($arg);
-                }
-                else {
-                    @exprs.push($arg.expr);
-                    @setup.push($arg);
-                }
-            }
-            Chunk.new($T_NONVAL, $pre ~ nqp::join(',', @exprs) ~ $post, @setup);
-        } 
-
         if +@groups == 1 {
-            return chunkify(@groups[0]);
+            return Chunk.new($T_ARGS, nqp::join(',', @groups[0]), @setup);
         }
 
         my @js_args;
         for @groups -> $group {
             if nqp::islist($group) {
-                @js_args.push(chunkify($group, '[', ']')) if +$group
+                @js_args.push('[' ~ nqp::join(',', $group) ~ ']') if +$group;
             }
             else {
                 @js_args.push($group);
             }
         }
-        @js_args;
-    }
 
-    method merge_arg_groups($groups) {
-        if nqp::islist($groups) {
-            my @exprs;
-
-            for $groups -> $group {
-                @exprs.push($group.expr);
-            }
-
-            Chunk.new($T_NONVAL, @exprs.shift ~ '.concat(' ~ nqp::join(',', @exprs) ~ ')', $groups);
-        }
+        Chunk.new($T_ARGS_ARRAY, @js_args.shift ~ '.concat(' ~ nqp::join(',', @js_args) ~ ')', @setup);
     }
 
     method compile_sig(@params, :$cps) {

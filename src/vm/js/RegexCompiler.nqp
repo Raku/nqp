@@ -330,14 +330,7 @@ class RegexCompiler {
             my $method := @args.shift.value;
             my $compiled_args := $!compiler.args(@args, :invocant($!cursor));
 
-            my $invocation;
-            if nqp::islist($compiled_args) {
-                $compiled_args := $!compiler.merge_arg_groups($compiled_args);
-                $invocation := ".apply({$!cursor},";
-            }
-            else {
-                $invocation := '(';
-            }
+            my $invocation := $compiled_args.is_args_array ?? ".apply({$!cursor}," !! '(';
 
             $call := Chunk.new($T_OBJ,
                 $!cursor ~ '[' ~ quote_string($method) ~ "]" ~ $invocation ~ $compiled_args.expr ~ ')',
