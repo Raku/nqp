@@ -27,7 +27,7 @@ ok($a.HOW.name($a) eq 'Bar+{BarOverride}','the role name is part of the generate
 
 my $parents := $a.HOW.parents($a,:local(1));
 ok(nqp::elems($parents) == 1,"the generated class has only one parent" );
-ok($parents[0].HOW.name($parents[0] eq 'Bar'),"...and it's the correct one");
+ok($parents[0].HOW.name($parents[0]) eq 'Bar',"...and it's the correct one");
 
 my $roles := $a.HOW.roles($a,:local(1));
 ok(nqp::elems($roles) == 1,"the generated class does only one role" );
