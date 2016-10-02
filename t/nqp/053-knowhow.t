@@ -10,20 +10,20 @@ knowhow Foo {
 
 plan(12);
 
-ok(Foo.lol eq "yay, methods", "method calls on knowhow type object");
+is(Foo.lol, "yay, methods", "method calls on knowhow type object");
 
 my $x := Foo.new;
-ok($x.lol eq "yay, methods", "method calls on knowhow instance");
+is($x.lol, "yay, methods", "method calls on knowhow instance");
 
 $x.set_bbq("wurst");
-ok($x.get_bbq eq "wurst", "attributes on knowhow instance");
-ok(Foo.HOW.name(Foo) eq 'Foo', "getting the name using the HOW works correctly");
+is($x.get_bbq, "wurst", "attributes on knowhow instance");
+is(Foo.HOW.name(Foo), 'Foo', "getting the name using the HOW works correctly");
 
 my $attrs := Foo.HOW.attributes(Foo);
-ok($attrs[0].name eq '$!bbq',"we can get the attributes");
+is($attrs[0].name, '$!bbq',"we can get the attributes");
 
 my $foo_attr := nqp::knowhowattr().new(:name('$!foo'));
-ok($foo_attr.name eq '$!foo',"created attribute has correct name");
+is($foo_attr.name, '$!foo',"created attribute has correct name");
 
 knowhow Bar {
     has $!foo;

@@ -12,8 +12,8 @@ ok(nqp::isconcrete(Foo) == 0, 'nqp::isconcrete on typeobject');
 ok(nqp::defined($foo) == 1, 'nqp::defined on normal object');
 ok(nqp::defined(Foo) == 0, 'nqp::defined with typeobject');
 
-ok($foo.REPR eq 'P6opaque', 'calling nqp::reprname using the .REPR syntax');
-ok(nqp::reprname($foo) eq 'P6opaque', 'nqp::reprname on P6opaque');
+is($foo.REPR, 'P6opaque', 'calling nqp::reprname using the .REPR syntax');
+is(nqp::reprname($foo), 'P6opaque', 'nqp::reprname on P6opaque');
 
 
 class Foo2 is Foo {
@@ -27,8 +27,8 @@ my $foo2 := Foo.new;
 my $ret := nqp::rebless($foo2, Foo2);
 ok(nqp::eqaddr($ret, $foo2), "return value of nqp::rebless");
 
-ok($foo.foo eq 'bar', "other objects of that class don't change");
-ok($foo2.foo eq 'reblessed bar', "the rebless object has new methods");
+is($foo.foo, 'bar', "other objects of that class don't change");
+is($foo2.foo, 'reblessed bar', "the rebless object has new methods");
 
 class Foo3 {
 }
@@ -39,7 +39,7 @@ ok(nqp::istype($foo, Foo3), "nqp::settypecache works");
 
 nqp::setmethcache(Foo, nqp::hash('baz', sub ($invocant) {'baz method called'}));
 
-ok($foo.baz eq 'baz method called', "nqp::setmethcache works");
+is($foo.baz, 'baz method called', "nqp::setmethcache works");
 
 ok(nqp::objprimspec(int) == 1, 'nqp::objprimspec on int');
 ok(nqp::objprimspec(str) == 3, 'nqp::objprimspec on str');

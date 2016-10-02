@@ -35,7 +35,7 @@ ok(nqp::elems($foo) == 2, "nqp::elems works with positional_delegate");
 ok($foo<1> == 678,"associative access is seperate");
 
 
-ok($foo<bar> eq 'hello',"assosiative storage takes strings as keys");
+is($foo<bar>, 'hello',"assosiative storage takes strings as keys");
 ok($foo.get_pos_1 == 456,"positional are stored in the attribute");
 ok($foo.get_assoc_1 == 678,"associatives are stored in the attribute");
 
@@ -59,10 +59,10 @@ ok($assoc_attr.positional_delegate == 0,"associative_delegate is not set incorre
 ok($assoc_attr.associative_delegate == 1,"associative_delegate is set correctly");
 
 my $obj := Foo.new();
-ok(nqp::unshift($obj, 'a100') eq 'a100', 'nqp::unshift on object with positional_delegate');
+is(nqp::unshift($obj, 'a100'), 'a100', 'nqp::unshift on object with positional_delegate');
 nqp::unshift($obj, 'b200');
-ok(nqp::shift($obj) eq 'b200', 'nqp::shift on object with positional_delegate');
+is(nqp::shift($obj), 'b200', 'nqp::shift on object with positional_delegate');
 ok(nqp::push($obj, 'c300'), 'nqp::push on object with positional_delegate');
 nqp::push($obj, 'd400');
-ok(nqp::pop($obj) eq 'd400', 'nqp::pop on object with positional_delegate');
-ok($obj.all_pos eq 'a100,c300', 'object has correct elements after op calls');
+is(nqp::pop($obj), 'd400', 'nqp::pop on object with positional_delegate');
+is($obj.all_pos, 'a100,c300', 'object has correct elements after op calls');

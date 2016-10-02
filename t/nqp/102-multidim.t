@@ -49,8 +49,8 @@ is-dims(nqp::list_i(1), [1], 'dimensions on normal array (3)');
 # Can use n-dimensional access ops with a single dimension on a normal array.
 {
     my @normal_a := ('a', 'b');
-    ok(nqp::atposnd(@normal_a, nqp::list_i(0)) eq 'a', 'normal object array can be read with multi-dim op (1)');
-    ok(nqp::atposnd(@normal_a, nqp::list_i(1)) eq 'b', 'normal object array can be read with multi-dim op (2)');
+    is(nqp::atposnd(@normal_a, nqp::list_i(0)), 'a', 'normal object array can be read with multi-dim op (1)');
+    is(nqp::atposnd(@normal_a, nqp::list_i(1)), 'b', 'normal object array can be read with multi-dim op (2)');
     my @normal_b := nqp::list_i(41, 42);
     ok(nqp::atposnd_i(@normal_b, nqp::list_i(0)) == 41, 'normal int array can be read with multi-dim op (1)');
     ok(nqp::atposnd_i(@normal_b, nqp::list_i(1)) == 42, 'normal int array can be read with multi-dim op (2)');
@@ -58,8 +58,8 @@ is-dims(nqp::list_i(1), [1], 'dimensions on normal array (3)');
     ok(nqp::atposnd_n(@normal_c, nqp::list_i(0)) == 4.1e0, 'normal num array can be read with multi-dim op (1)');
     ok(nqp::atposnd_n(@normal_c, nqp::list_i(1)) == 4.2e0, 'normal num array can be read with multi-dim op (2)');
     my @normal_d := nqp::list_s('omg', 'wat');
-    ok(nqp::atposnd_s(@normal_d, nqp::list_i(0)) eq 'omg', 'normal str array can be read with multi-dim op (1)');
-    ok(nqp::atposnd_s(@normal_d, nqp::list_i(1)) eq 'wat', 'normal str array can be read with multi-dim op (2)');
+    is(nqp::atposnd_s(@normal_d, nqp::list_i(0)), 'omg', 'normal str array can be read with multi-dim op (1)');
+    is(nqp::atposnd_s(@normal_d, nqp::list_i(1)), 'wat', 'normal str array can be read with multi-dim op (2)');
     dies-ok({ nqp::atposnd([], nqp::list_i()) }, 'access to normal array with zero-elem indices list dies');
     dies-ok({ nqp::atposnd([[1]], nqp::list_i(0, 0)) }, 'access to normal array with two-elem indices list dies');
 }
@@ -69,8 +69,8 @@ is-dims(nqp::list_i(1), [1], 'dimensions on normal array (3)');
     my @normal_a;
     nqp::bindposnd(@normal_a, nqp::list_i(0), 'a');
     nqp::bindposnd(@normal_a, nqp::list_i(1), 'b');
-    ok(@normal_a[0] eq 'a', 'normal object array can be bound with multi-dim op (1)');
-    ok(@normal_a[1] eq 'b', 'normal object array can be bound with multi-dim op (2)');
+    is(@normal_a[0], 'a', 'normal object array can be bound with multi-dim op (1)');
+    is(@normal_a[1], 'b', 'normal object array can be bound with multi-dim op (2)');
     my @normal_b := nqp::list_i();
     nqp::bindposnd_i(@normal_b, nqp::list_i(0), 41);
     nqp::bindposnd_i(@normal_b, nqp::list_i(1), 42);
@@ -84,8 +84,8 @@ is-dims(nqp::list_i(1), [1], 'dimensions on normal array (3)');
     my @normal_d := nqp::list_s();
     nqp::bindposnd_s(@normal_d, nqp::list_i(0), 'omg');
     nqp::bindposnd_s(@normal_d, nqp::list_i(1), 'wat');
-    ok(nqp::atpos_s(@normal_d, 0) eq 'omg', 'normal str array can be bound with multi-dim op (1)');
-    ok(nqp::atpos_s(@normal_d, 1) eq 'wat', 'normal str array can be bound with multi-dim op (2)');
+    is(nqp::atpos_s(@normal_d, 0), 'omg', 'normal str array can be bound with multi-dim op (1)');
+    is(nqp::atpos_s(@normal_d, 1), 'wat', 'normal str array can be bound with multi-dim op (2)');
     dies-ok({ nqp::bindposnd([], nqp::list_i(), 0) }, 'bind to normal array with zero-elem indices list dies');
     dies-ok({ nqp::bindposnd([[1]], nqp::list_i(0, 0), 0) }, 'bind to normal array with two-elem indices list dies');
 }
@@ -201,9 +201,9 @@ dies-ok({
         'Bind to 1D array with negative index dies');
     dies-ok({ nqp::bindposnd($test_1d, nqp::list_i(3), 'cola') },
         'Bind to 1D array with out-of-range index dies');
-    ok(nqp::atposnd($test_1d, nqp::list_i(0)) eq 'cwrw', 'Access to 1D array works (1)');
-    ok(nqp::atposnd($test_1d, nqp::list_i(1)) eq 'pivo', 'Access to 1D array works (2)');
-    ok(nqp::atposnd($test_1d, nqp::list_i(2)) eq 'biru', 'Access to 1D array works (3)');
+    is(nqp::atposnd($test_1d, nqp::list_i(0)), 'cwrw', 'Access to 1D array works (1)');
+    is(nqp::atposnd($test_1d, nqp::list_i(1)), 'pivo', 'Access to 1D array works (2)');
+    is(nqp::atposnd($test_1d, nqp::list_i(2)), 'biru', 'Access to 1D array works (3)');
     dies-ok({ nqp::atposnd($test_1d, nqp::list_i()) },
         'Access to 1D array with 0 indices dies');
     dies-ok({ nqp::atposnd($test_1d, nqp::list_i(0, 1)) },
@@ -311,9 +311,9 @@ dies-ok({
         'Using bindpos on 1D array with negative index dies');
     dies-ok({ nqp::bindpos($test_1d, 3, 'cola') },
         'Using bindpos on 1D array with out-of-range index dies');
-    ok(nqp::atpos($test_1d, 0) eq 'cwrw', 'Access to 1D array with bindpos/atpos works (1)');
-    ok(nqp::atpos($test_1d, 1) eq 'pivo', 'Access to 1D array with bindpos/atpos works (2)');
-    ok(nqp::atpos($test_1d, 2) eq 'biru', 'Access to 1D array with bindpos/atpos works (3)');
+    is(nqp::atpos($test_1d, 0), 'cwrw', 'Access to 1D array with bindpos/atpos works (1)');
+    is(nqp::atpos($test_1d, 1), 'pivo', 'Access to 1D array with bindpos/atpos works (2)');
+    is(nqp::atpos($test_1d, 2), 'biru', 'Access to 1D array with bindpos/atpos works (3)');
     dies-ok({ nqp::atpos($test_1d, -1) },
         'Using atpos on 1D array with negative index dies');
     dies-ok({ nqp::atpos($test_1d, 3) },
@@ -469,12 +469,12 @@ sub add_to_sc($sc, $idx, $obj) {
 
     # Check we get a 2D array type back out.
     my $type_out := nqp::scgetobj($dsc, 0);
-    ok(nqp::reprname($type_out) eq 'MultiDimArray', 'Got a MultiDimArray type serialized/deserialized');
+    is(nqp::reprname($type_out), 'MultiDimArray', 'Got a MultiDimArray type serialized/deserialized');
     ok(!nqp::isconcrete($type_out), 'It really is a type');
 
     # Check we get a 2D array as expected back.
     my $value_out := nqp::scgetobj($dsc, 1);
-    ok(nqp::reprname($value_out) eq 'MultiDimArray', 'Got a MultiDimArray object serialized/deserialized');
+    is(nqp::reprname($value_out), 'MultiDimArray', 'Got a MultiDimArray object serialized/deserialized');
     ok(nqp::isconcrete($value_out), 'It really is a concrete object');
     ok(nqp::numdimensions($value_out) == 2, 'Number of dimensions preserved');
     is-dims($value_out, [2,2], 'Dimensions themselves preserved');
@@ -494,7 +494,7 @@ sub add_to_sc($sc, $idx, $obj) {
     my $dsc := nqp::createsc('TEST_SC_OUT_2');
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
     my $type_out := nqp::scgetobj($dsc, 0);
-    ok(nqp::reprname($type_out) eq 'MultiDimArray',
+    is(nqp::reprname($type_out), 'MultiDimArray',
         'Got uncomposed MultiDimArray type serialized/deserialized');
 }
 

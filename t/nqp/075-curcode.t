@@ -13,11 +13,11 @@ foo(1);
 sub bar($arg) {
   my $this := nqp::curcode();
   if $arg == 1 {
-    ok(nqp::getcodeobj($this) eq "first","nqp::getcodeobj works on result of nqp::curcode");
+    is(nqp::getcodeobj($this), "first","nqp::getcodeobj works on result of nqp::curcode");
     nqp::setcodeobj($this,"second");
     $this(7);
   } elsif $arg == 7 {
-    ok(nqp::getcodeobj($this) eq "second","nqp::setcodeobj works on result of nqp::curcode");
+    is(nqp::getcodeobj($this), "second","nqp::setcodeobj works on result of nqp::curcode");
   }
 }
 nqp::setcodeobj(&bar,"first");
@@ -30,7 +30,7 @@ class Foo {
       nqp::setcodeobj($this,"third");
       $this(self, 7);
     } elsif $arg == 7 {
-      ok(nqp::getcodeobj($this) eq "third","nqp::curcode in combination with methods");
+      is(nqp::getcodeobj($this), "third","nqp::curcode in combination with methods");
     }
   }
 }

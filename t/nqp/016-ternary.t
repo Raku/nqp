@@ -6,16 +6,16 @@ ok( 1 ?? 1 !! 0 );
 ok( 0 ?? 0 !! 1 );
 
 my $a := 1 ?? 'yes' !! 'no';
-ok( $a eq 'yes' );
+is( $a, 'yes' );
 
 my $b := 0 ?? 'yes' !! 'no';
-ok( $b eq 'no' );
+is( $b, 'no' );
 
 my $c := 1 ?? 'yes' !! ( $a := 'no' );
-ok( $c eq 'yes' );
-ok( $a eq 'yes' );
+is( $c, 'yes' );
+is( $a, 'yes' );
 
 my $d := 0 ?? ( $a := 'no' ) !! 'yes';
-ok( $d eq 'yes' );
-ok( $a eq 'yes' );
+is( $d, 'yes' );
+is( $a, 'yes' );
 

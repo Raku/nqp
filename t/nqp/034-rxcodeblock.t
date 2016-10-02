@@ -8,7 +8,7 @@ grammar ABC {
 ABC.parse('abc');
 
 grammar BCD {
-    token TOP { $<bcd>=[.*] { ok( $<bcd> eq 'bcd', 'match in assertion' ); } }
+    token TOP { $<bcd>=[.*] { is( $<bcd>, 'bcd', 'match in assertion' ); } }
 }
 BCD.parse('bcd');
 

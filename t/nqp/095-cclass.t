@@ -47,7 +47,7 @@ my %const := nqp::hash(
 );
 
 for %const -> $cclass {
-    ok( test_cclass($cclass.key, $teststr) eq %matches{$cclass.key}, "nqp::iscclass CCLASS_{$cclass.value}");
+    is( test_cclass($cclass.key, $teststr), %matches{$cclass.key}, "nqp::iscclass CCLASS_{$cclass.value}");
 }
 
 sub mock_find_cclass($c, $str, $start, $len) {
@@ -86,7 +86,7 @@ sub test_mock_findcclass($c, $str, $len) {
 for %const -> $cclass {
     my $got := test_findcclass($cclass.key, $teststr, 10);
     my $expected := test_mock_findcclass($cclass.key, $teststr, 10);
-    ok($got eq $expected, "nqp::findcclass CCLASS_{$cclass.value}");
+    is($got, $expected, "nqp::findcclass CCLASS_{$cclass.value}");
     if ($got ne $expected) {
         say("# GOT: $got");
         say("# EXPECTED: $expected");
@@ -130,5 +130,5 @@ sub test_findnotcclass($c, $str, $len) {
 for %const -> $cclass {
     my $got := test_findnotcclass($cclass.key, $teststr, 10);
     my $expected := test_mock_findnotcclass($cclass.key, $teststr, 10);
-    ok($got eq $expected, "nqp::findnotcclass CCLASS_{$cclass.value}");
+    is($got, $expected, "nqp::findnotcclass CCLASS_{$cclass.value}");
 }

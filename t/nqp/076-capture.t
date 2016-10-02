@@ -39,7 +39,7 @@ sub namedhash(:$known, *%c) {
   my $hash := nqp::capturenamedshash($capture);
   ok(nqp::ishash($hash), "nqp::capturenamedhash returns a hash");
   ok($hash<a> == 100 && $hash<b> == 200, "...which contains the right values");
-  ok($hash<d> eq "Hello", "string with nqp::capturenamedhash");
+  is($hash<d>, "Hello", "string with nqp::capturenamedhash");
   ok($hash<e> == 2.4, "number with nqp::capturenamedhash");
   nqp::deletekey($hash, 'b');
   ok(nqp::existskey($hash, 'a') && !nqp::existskey($hash, 'b'), "...which allows deletion of keys");
@@ -56,7 +56,7 @@ class Foo {
     ok(nqp::captureposelems($capture) == 4,"nqp::captureposelems on result of usecapture in a class");
     ok(nqp::captureposarg($capture,2) == 20,"nqp::captureposarg on result of usecapture in a class");
     ok(nqp::capturehasnameds($capture) == 0,"nqp::capturehasnameds with no nameds in a class");
-    ok(nqp::captureposarg($capture,0).attr eq 'foobar' ,"nqp::captureposarg on an invocant");
+    is(nqp::captureposarg($capture,0).attr, 'foobar' ,"nqp::captureposarg on an invocant");
   }
 }
 

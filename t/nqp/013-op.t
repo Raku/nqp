@@ -23,9 +23,9 @@ ok(    8%3+2  == 4, 'Checking compound statement 8%3+2');
 ok(  8%(3+2)  == 3, 'Checking compound statement 8%(3+2)');
 
 ##Concatenation operator
-ok( 'a' ~ 'b' eq 'ab', 'Checking concatenation "a" ~ "b"');
-ok(  1  ~ 'b' eq '1b', 'Checking concatenation  1  ~ "b"');
-ok( 'a' ~  2  eq 'a2', 'Checking concatenation "a" ~  2 ');
+is( 'a' ~ 'b', 'ab', 'Checking concatenation "a" ~ "b"');
+is(  1  ~ 'b', '1b', 'Checking concatenation  1  ~ "b"');
+is( 'a' ~  2, 'a2', 'Checking concatenation "a" ~  2 ');
 
 ##Postfix operators
 my $x := 0;

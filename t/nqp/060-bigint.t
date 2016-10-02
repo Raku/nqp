@@ -15,8 +15,8 @@ my $one := box(1);
 my $b := nqp::fromstr_I('-123', $one);
 my $c := box(-123);
 
-ok(str($b) eq '-123', 'can round-trip negative number (string)');
-ok(str($c) eq '-123', 'can round-trip negative number (string) by boxing');
+is(str($b), '-123', 'can round-trip negative number (string)');
+is(str($c), '-123', 'can round-trip negative number (string) by boxing');
 ok(nqp::unbox_i($b) == -123, 'can round-trip negative number by unboxing');
 ok(!nqp::iseq_I($one, $b), 'nqp::iseq_I can return false');
 ok(nqp::iseq_I($one, $one), 'nqp::iseq_I can return true');
@@ -96,7 +96,7 @@ ok(nqp::unbox_i(nqp::getattr($box_val_3, $bi_boxer, '$!value')) == 7, "you can e
 # so $bi_type is wrong here. But so far we only test the integer case,
 # so we can get away with it.
 my $big := nqp::pow_I($c, box(42), $bi_type, $bi_type);
-ok(str($big) eq '5970554685064519004265641008828923248442340700473500698131071806779372733915289638628729', 'pow (int, positive)');
+is(str($big), '5970554685064519004265641008828923248442340700473500698131071806779372733915289638628729', 'pow (int, positive)');
 ok(iseq(nqp::pow_I(box(0), $big, $bi_type, $bi_type), 0), 'pow 0 ** large_number');
 ok(iseq(nqp::pow_I($one, $big, $bi_type, $bi_type), 1), 'pow 1 ** large_number');
 
@@ -129,15 +129,15 @@ $float := -$float;
 ok(nqp::iseq_n($float, nqp::tonum_I(nqp::fromnum_I($float, $bi_type))),
     'to_num and from_num round-trip (negative number)');
 
-ok(nqp::base_I(box(-1234), 10) eq '-1234', 'base_I with base 10');
-ok(nqp::base_I(box(-1234), 16) eq '-4D2',  'base_I with base 16');
-ok(nqp::base_I(box(0), 2) eq '0', 'base_I with base 2 for 0');
-ok(nqp::base_I(box(0), 16) eq '0', 'base_I with base 16 for 0');
-ok(nqp::base_I(box(807), 16) eq '327', 'base_I with base 16 for 807');
-ok(nqp::base_I(box(-807), 16) eq '-327', 'base_I with base 16 for 807');
-ok(nqp::base_I(box(-1234), 15) eq '-574', 'base_I with base 15 for 1234');
-ok(nqp::base_I(box(1234), 15) eq '574', 'base_I with base 15 for 1234');
-ok(nqp::base_I(box(-25), 15) eq '-1A', 'base_I with base 15 for -25');
+is(nqp::base_I(box(-1234), 10), '-1234', 'base_I with base 10');
+is(nqp::base_I(box(-1234), 16), '-4D2',  'base_I with base 16');
+is(nqp::base_I(box(0), 2), '0', 'base_I with base 2 for 0');
+is(nqp::base_I(box(0), 16), '0', 'base_I with base 16 for 0');
+is(nqp::base_I(box(807), 16), '327', 'base_I with base 16 for 807');
+is(nqp::base_I(box(-807), 16), '-327', 'base_I with base 16 for 807');
+is(nqp::base_I(box(-1234), 15), '-574', 'base_I with base 15 for 1234');
+is(nqp::base_I(box(1234), 15), '574', 'base_I with base 15 for 1234');
+is(nqp::base_I(box(-25), 15), '-1A', 'base_I with base 15 for -25');
 
 ok(str(nqp::expmod_I(
     nqp::fromstr_I('2988348162058574136915891421498819466320163312926952423791023078876139', $bi_type),
@@ -170,9 +170,9 @@ ok(nqp::iseq_I(nqp::lcm_I(box(18), box(12), $bi_type), box(36)), 'nqp::lcm_I');
 ok(nqp::bool_I(box(42)), 'bool_I(42)');
 ok(!nqp::bool_I(box(0)), 'bool_I(0)');
 
-ok(str(nqp::abs_I(box(189), $bi_type)) eq '189', 'nqp::abs_I with positive number');
+is(str(nqp::abs_I(box(189), $bi_type)), '189', 'nqp::abs_I with positive number');
 
-ok(str(nqp::abs_I(box(-18), $bi_type)) eq '18', 'nqp::abs_I with negative number');
+is(str(nqp::abs_I(box(-18), $bi_type)), '18', 'nqp::abs_I with negative number');
 
 
 ok(iseq(nqp::neg_I(box(-234), $bi_type), 234), 'nqp::neg_I with negative number');

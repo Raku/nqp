@@ -15,15 +15,15 @@ ok(!("acccccd" ~~ /a @foo d/), 'plain array interpolates as alternations of lite
 
 my @ltm := [ "b", "bb", "bbc", "bc" ];
 
-ok(("abd" ~~ / @ltm /) eq 'b', 'array finds longest match 1');
-ok(("abbd" ~~ / @ltm /) eq 'bb', 'array finds longest match 2');
-ok(("abbcd" ~~ / @ltm /) eq 'bbc', 'array finds longest match 3');
-ok(("abccd" ~~ / @ltm /) eq 'bc', 'array finds longest match 4');
+is(("abd" ~~ / @ltm /), 'b', 'array finds longest match 1');
+is(("abbd" ~~ / @ltm /), 'bb', 'array finds longest match 2');
+is(("abbcd" ~~ / @ltm /), 'bbc', 'array finds longest match 3');
+is(("abccd" ~~ / @ltm /), 'bc', 'array finds longest match 4');
 
-ok(("abd" ~~ / || @ltm /) eq 'b', '|| array hits first match 1');
-ok(("abbd" ~~ / || @ltm /) eq 'b', '|| array hits first match 2');
-ok(("abbcd" ~~ / || @ltm /) eq 'b', '|| array hits first match 3');
-ok(("abccd" ~~ / || @ltm /) eq 'b', '|| array hits first match 4');
+is(("abd" ~~ / || @ltm /), 'b', '|| array hits first match 1');
+is(("abbd" ~~ / || @ltm /), 'b', '|| array hits first match 2');
+is(("abbcd" ~~ / || @ltm /), 'b', '|| array hits first match 3');
+is(("abccd" ~~ / || @ltm /), 'b', '|| array hits first match 4');
 
 ok(!("ab+d"  ~~ /a <$b> d/), 'scalar assertion interpolates as regex 1');
 ok("abbbbbd" ~~ /a <$b> d/, 'scalar assertion interpolates as regex 2');

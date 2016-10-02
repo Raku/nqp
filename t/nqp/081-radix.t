@@ -14,8 +14,8 @@ sub str($x) { nqp::tostr_I($x) };
 
 sub test_radix_I($radix,$str,$pos,$flags,$value,$mult,$offset,$desc) {
     my $result := nqp::radix_I($radix,$str,$pos,$flags,$bi_type);
-    ok(str($result[0]) eq $value,"radix_I: $desc - correct converted value");
-    ok(str($result[1]) eq $mult,"radix_I: $desc - correct radix ** (number of digits converted)");
+    is(str($result[0]), $value,"radix_I: $desc - correct converted value");
+    is(str($result[1]), $mult,"radix_I: $desc - correct radix ** (number of digits converted)");
     ok($result[2] == $offset,"radix_I: $desc - correct offset");
 }
 

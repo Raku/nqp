@@ -4,7 +4,7 @@ plan(12);
 
 class XYZ {
     method foo($x) {
-        ok($x eq 'ok 1');
+        is($x, 'ok 1');
     }
 }
 
@@ -17,7 +17,7 @@ $xyz.foo('ok 1');
 
 class QRS {
     method foo($x) {
-        ok($x eq 'ok 2');
+        is($x, 'ok 2');
     }
 }
 

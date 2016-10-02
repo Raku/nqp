@@ -21,7 +21,7 @@ try {
     $msg := nqp::getmessage($_);
   }
 }
-ok($msg eq "oops!", "nqp::getmessage");
+is($msg, "oops!", "nqp::getmessage");
 
 my $ok := 1;
 try {
@@ -93,13 +93,13 @@ $ok := "";
   }
 }
 
-ok($ok eq "oops!", "combination of both try and CATCH");
+is($ok, "oops!", "combination of both try and CATCH");
 
 {
         CATCH {$ok := $_}
         oops_s();
 }
-ok($ok eq "oops_s!", "nqp::die_s");
+is($ok, "oops_s!", "nqp::die_s");
 
 
 {
@@ -108,8 +108,8 @@ ok($ok eq "oops_s!", "nqp::die_s");
     nqp::setpayload($exception, "cute payload");
     nqp::throw($exception);
     CATCH {
-       ok(nqp::getmessage($_) eq "a cute exception", "nqp::setmessage/nqp::getmessage"); 
-       ok(nqp::getpayload($_) eq "cute payload", "nqp::setpayload/nqp::getpayload"); 
+       is(nqp::getmessage($_), "a cute exception", "nqp::setmessage/nqp::getmessage"); 
+       is(nqp::getpayload($_), "cute payload", "nqp::setpayload/nqp::getpayload"); 
     }
 }
 
@@ -129,14 +129,14 @@ ok($ok eq "oops_s!", "nqp::die_s");
 
     my $exception := Foo.new(custom_attr=>'custom');
     my $msg := "a custom exception";
-    ok(nqp::setmessage($exception, $msg) eq $msg, "correct return value for nqp::setmessage");
+    is(nqp::setmessage($exception, $msg), $msg, "correct return value for nqp::setmessage");
     my $payload := "custom payload";
-    ok(nqp::setpayload($exception, $payload) eq $payload, "correct return value for nqp::setpayload");
+    is(nqp::setpayload($exception, $payload), $payload, "correct return value for nqp::setpayload");
     nqp::throw($exception);
     CATCH {
-       ok($_.custom_stuff eq "cool stuff", "calling method on custom exception");
-       ok(nqp::getmessage($_) eq "a custom exception", "nqp::setmessage/nqp::getmessage on custom exception"); 
-       ok(nqp::getpayload($_) eq "custom payload", "nqp::setpayload/nqp::getpayload on custom exception"); 
+       is($_.custom_stuff, "cool stuff", "calling method on custom exception");
+       is(nqp::getmessage($_), "a custom exception", "nqp::setmessage/nqp::getmessage on custom exception"); 
+       is(nqp::getpayload($_), "custom payload", "nqp::setpayload/nqp::getpayload on custom exception"); 
     }
 }
 
@@ -157,7 +157,7 @@ my $ex;
     }
     CATCH { $log := $log ~ "#4" }
 }
-ok($log eq '#1#3', 'rethrow works from a scope higher then CATCH');
+is($log, '#1#3', 'rethrow works from a scope higher then CATCH');
 
 $log := '';
 my $ex2;
@@ -178,7 +178,7 @@ my $ex2;
     CATCH { $log := $log ~ "#4" }
 }
 
-ok($log eq '#1#3', 'rethrow works from a scope that is not a direct ancestor');
+is($log, '#1#3', 'rethrow works from a scope that is not a direct ancestor');
 
 {
     oops();
@@ -190,5 +190,5 @@ ok($value == 200, "returning values from try works");
 
 # regression test for issue #170
 my $var := 100; try {nqp::die('okohnoes'); $var};
-ok($var eq 100, "variable does get overwriten by bug");
+is($var,100, "variable does get overwriten by bug");
 

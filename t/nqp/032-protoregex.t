@@ -19,9 +19,9 @@ grammar ABC {
 
 my $/ := ABC.parse('abcdef');
 ok( ?$/ ,           'successfully matched grammar' );
-ok( $/ eq 'abcdef', 'successful string match' );
-ok( $<symbols> eq 'abc', 'successful protoregex match');
-ok( $<symbols><sym> eq 'abc', 'correct proto candidate match' );
+is( $/, 'abcdef', 'successful string match' );
+is( $<symbols>, 'abc', 'successful protoregex match');
+is( $<symbols><sym>, 'abc', 'correct proto candidate match' );
 
 $/ := ABC.parse('adef');
 ok( ?$/ ,           'successfully matched grammar' );

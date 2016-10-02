@@ -25,7 +25,7 @@ if $output eq "%NQP_SHELL_TEST_ENV_VAR%\n" {
     nqp::shell("echo \$NQP_SHELL_TEST_ENV_VAR > $tmp-file",nqp::cwd(),$env, nqp::null(), nqp::null(), nqp::null(),
         nqp::const::PIPE_INHERIT_IN + nqp::const::PIPE_INHERIT_OUT + nqp::const::PIPE_INHERIT_ERR);
     my $output := slurp($tmp-file);
-    ok($output eq "123foo\n","passing env variables to child processes works linux");
+    is($output, "123foo\n","passing env variables to child processes works linux");
 } else {
   ok($output ~~ /^123foo/,"passing env variables to child processes works on windows");
 }

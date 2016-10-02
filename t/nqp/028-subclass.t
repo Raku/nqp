@@ -24,9 +24,9 @@ class XYZ is ABC {
 my $abc := ABC.new();
 my $xyz := XYZ.new();
 
-ok($abc.foo() eq 'ok 1');
-ok($xyz.foo() eq 'ok 2');
-ok($xyz.bar() eq 'ok 3');
+is($abc.foo(), 'ok 1');
+is($xyz.foo(), 'ok 2');
+is($xyz.bar(), 'ok 3');
 my $xyzhow := $xyz.HOW;
 ok($xyzhow.isa($xyz, ABC));
 ok($xyzhow.isa($xyz, XYZ));

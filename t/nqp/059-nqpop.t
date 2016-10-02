@@ -33,8 +33,8 @@ ok( nqp::mul_n(5,2) == 10, 'nqp::mul_n');
 ok( nqp::div_n(5,2) == 2.5e0, 'nqp::div_n');
 
 ok( nqp::chars('hello') == 5, 'nqp::chars');
-ok( nqp::concat('hello ', 'world') eq 'hello world', 'nqp::concat');
-ok( nqp::join(' ', ('abc', 'def', 'ghi')) eq 'abc def ghi', 'nqp::join');
+is( nqp::concat('hello ', 'world'), 'hello world', 'nqp::concat');
+is( nqp::join(' ', ('abc', 'def', 'ghi')), 'abc def ghi', 'nqp::join');
 
 ok( nqp::index('rakudo', 'do') == 4, 'nqp::index found');
 ok( nqp::index('rakudo', 'dont') == -1, 'nqp::index not found');
@@ -62,13 +62,13 @@ ok( nqp::rindex('Hello World', '', 1) == 1, 'nqp::rindex with empty match at off
 ok( nqp::rindex('Hello World', '', 11) == 11, 'nqp::rindex with empty match at end returns length');
 ok( nqp::rindex('Hello World', '', 100) == -1, 'nqp::rindex with empty match at offset outside string returns -1');
 
-ok( nqp::chr(120) eq 'x', 'nqp::chr');
-ok( nqp::ord('xyz') eq 120, 'nqp::ord');
-ok( nqp::ord('xyz',2) eq 122, '2 argument nqp::ord');
-ok( nqp::ordat('xyz',2) eq 122, 'nqp::ordat');
-ok( nqp::lc('Hello World') eq 'hello world', 'nqp::lc');
-ok( nqp::uc("Don't Panic") eq "DON'T PANIC", 'nqp::uc');
-ok( nqp::flip("foo") eq "oof", "nqp::flip");
+is( nqp::chr(120), 'x', 'nqp::chr');
+is( nqp::ord('xyz'),120, 'nqp::ord');
+is( nqp::ord('xyz',2),122, '2 argument nqp::ord');
+is( nqp::ordat('xyz',2),122, 'nqp::ordat');
+is( nqp::lc('Hello World'), 'hello world', 'nqp::lc');
+is( nqp::uc("Don't Panic"), "DON'T PANIC", 'nqp::uc');
+is( nqp::flip("foo"), "oof", "nqp::flip");
 
 my @items := nqp::split(' ', 'a little lamb');
 ok( nqp::elems(@items) == 3 && @items[0] eq 'a' && @items[1] eq 'little' && @items[2] eq 'lamb', 'nqp::split');
@@ -79,7 +79,7 @@ ok( nqp::elems(@items) == 12, 'nqp::split zero length delimiter');
 @items := nqp::split('a', 'a man a plan a canal panama');
 ok( nqp::elems(@items) == 11 && @items[0] eq '' && @items[10] eq '', 'nqp::split delimiter at ends');
 @items := nqp::split('', 'a little lamb');
-ok( nqp::join('|', @items) eq 'a| |l|i|t|t|l|e| |l|a|m|b', 'nqp::split("", ...)');
+is( nqp::join('|', @items), 'a| |l|i|t|t|l|e| |l|a|m|b', 'nqp::split("", ...)');
 
 
 ok( nqp::cmp_i(2, 0) ==  1, 'nqp::cmp_i');
@@ -97,10 +97,10 @@ ok( nqp::cmp_s("c", "e") == -1, 'nqp::cmp_s');
 my @array := ['zero', 'one', 'two'];
 ok( nqp::elems(@array) == 3, 'nqp::elems');
 
-ok( nqp::if(0, 'true', 'false') eq 'false', 'nqp::if(false)');
-ok( nqp::if(1, 'true', 'false') eq 'true',  'nqp::if(true)');
-ok( nqp::unless(0, 'true', 'false') eq 'true', 'nqp::unless(false)');
-ok( nqp::unless(1, 'true', 'false') eq 'false',  'nqp::unless(true)');
+is( nqp::if(0, 'true', 'false'), 'false', 'nqp::if(false)');
+is( nqp::if(1, 'true', 'false'), 'true',  'nqp::if(true)');
+is( nqp::unless(0, 'true', 'false'), 'true', 'nqp::unless(false)');
+is( nqp::unless(1, 'true', 'false'), 'false',  'nqp::unless(true)');
 
 my $a := 10;
 
@@ -128,23 +128,23 @@ ok( nqp::floor_n(-5.0) == -5.0, 'nqp::floor_n');
 
 ok( nqp::sqrt_n(6.25) == 2.5, 'nqp::sqrt_n');
 
-ok( nqp::substr('rakudo', 1, 3) eq 'aku', 'nqp::substr');
-ok( nqp::substr('rakudo', 1) eq 'akudo', 'nqp::substr');
-ok( nqp::substr('rakudo', 6, 3) eq '', 'nqp::substr');
-ok( nqp::substr('rakudo', 6) eq '', 'nqp::substr');
-ok( nqp::substr('rakudo', 0, 4) eq 'raku', 'nqp::substr');
-ok( nqp::substr('rakudo', 0) eq 'rakudo', 'nqp::substr');
+is( nqp::substr('rakudo', 1, 3), 'aku', 'nqp::substr');
+is( nqp::substr('rakudo', 1), 'akudo', 'nqp::substr');
+is( nqp::substr('rakudo', 6, 3), '', 'nqp::substr');
+is( nqp::substr('rakudo', 6), '', 'nqp::substr');
+is( nqp::substr('rakudo', 0, 4), 'raku', 'nqp::substr');
+is( nqp::substr('rakudo', 0), 'rakudo', 'nqp::substr');
 
-ok( nqp::x('abc', 5) eq 'abcabcabcabcabc', 'nqp::x');
-ok( nqp::x('abc', 0) eq '', 'nqp::x');
+is( nqp::x('abc', 5), 'abcabcabcabcabc', 'nqp::x');
+is( nqp::x('abc', 0), '', 'nqp::x');
 
 ok( nqp::not_i(0) == 1, 'nqp::not_i');
 ok( nqp::not_i(1) == 0, 'nqp::not_i');
 ok( nqp::not_i(-1) == 0, 'nqp::not_i');
 
-ok(nqp::escape("\b \n \r \f \t \" \r\n \\ \e foo") eq '\\b \\n \\r \\f \\t \\" \\r\\n \\\\ \e foo','nqp::escape');
+is(nqp::escape("\b \n \r \f \t \" \r\n \\ \e foo"), '\\b \\n \\r \\f \\t \\" \\r\\n \\\\ \e foo','nqp::escape');
 my $var := 'foo';
-ok(nqp::escape($var) eq 'foo','nqp::escape works with literal');
+is(nqp::escape($var), 'foo','nqp::escape works with literal');
 
 ok( nqp::isnull(nqp::null()) == 1, 'nqp::isnull/nqp::null' );
 ok( nqp::isnull("hello") == 0, '!nqp::isnull(string)' );
@@ -164,20 +164,20 @@ ok( nqp::istrue(nqp::list(1,2,3)) == 1, 'nqp::istrue on nonempty list');
 my $list := nqp::list(0, 'a', 'b', 3.0);
 ok( nqp::elems($list) == 4, 'nqp::elems');
 ok( nqp::atpos($list, 0) == 0, 'nqp::atpos');
-ok( nqp::atpos($list, 2) eq 'b', 'nqp::atpos');
+is( nqp::atpos($list, 2), 'b', 'nqp::atpos');
 nqp::push($list, 'four');
-ok( nqp::atpos($list, -1) eq 'four', 'nqp::atpos with -1 index');
+is( nqp::atpos($list, -1), 'four', 'nqp::atpos with -1 index');
 ok( nqp::atpos($list, -2) == 3.0, 'nqp::atpos with -2 index');
 ok( nqp::elems($list) == 5, 'nqp::push');
 ok( nqp::shift($list) == 0, 'nqp::shift');
-ok( nqp::pop($list) eq 'four', 'nqp::pop');
+is( nqp::pop($list), 'four', 'nqp::pop');
 my $iter := nqp::iterator($list);
-ok( nqp::shift($iter) eq 'a', 'nqp::iterator');
-ok( nqp::shift($iter) eq 'b', 'nqp::iterator');
+is( nqp::shift($iter), 'a', 'nqp::iterator');
+is( nqp::shift($iter), 'b', 'nqp::iterator');
 ok( nqp::shift($iter) == 3.0, 'nqp::iterator');
 ok( nqp::elems($list) == 3, "iterator doesn't modify list");
 ok( nqp::islist($list), "nqp::islist works");
-ok( nqp::unshift($list,'zero') eq 'zero', "nqp::unshift");
+is( nqp::unshift($list,'zero'), 'zero', "nqp::unshift");
 ok( nqp::elems($list) == 4, 'nqp::unshift adds 1 element');
 ok( nqp::atpos($list,0) == 'zero', 'nqp::unshift the correct element');
 
@@ -230,18 +230,18 @@ ok(nqp::eqat("foobar","foobarbaz", 0) == 0, "eqat with needle argument longer th
     my $source := nqp::list("100", "200", "300");
     my $a := nqp::list("1", "2", "3");
     nqp::splice($a, $source, 0, 0);
-    ok(nqp::join(",", $a) eq '100,200,300,1,2,3', "splice");
+    is(nqp::join(",", $a), '100,200,300,1,2,3', "splice");
 
     my $b := nqp::list("1", "2", "3", "4");
     nqp::splice($b, $source, 1, 2);
-    ok(nqp::join(",", $b) eq '1,100,200,300,4', "splice");
+    is(nqp::join(",", $b), '1,100,200,300,4', "splice");
 }
 
 {
     my $list := nqp::list("1","2","3","4","5");
     my $ret := nqp::setelems($list, 3);
-    ok(nqp::join(",", $list) eq '1,2,3', 'nqp::setelems reduces list length properly');
-    ok(nqp::join(",", $ret) eq '1,2,3', 'nqp::setelems return value');
+    is(nqp::join(",", $list), '1,2,3', 'nqp::setelems reduces list length properly');
+    is(nqp::join(",", $ret), '1,2,3', 'nqp::setelems return value');
 }
 
 ok(nqp::isge_i(10, 10) == 1, "isge_i =");
@@ -302,13 +302,13 @@ ok(12.5 % -5 == -2.5, '% test');
 ok(-12.5 % -5 == -2.5, '% test');
 ok(20 % 7 == 6, '% with integer arguments');
 
-ok(nqp::sha1("Hello World") eq '0A4D55A8D778E5022FAB701977C5D840BBC486D0', "sha1");
-ok( nqp::sha1("ab\x[0]c") eq "DBDD4F85D8A56500AA5C9C8A0D456F96280C92E5", "nqp::sha1 null bytes");
+is(nqp::sha1("Hello World"), '0A4D55A8D778E5022FAB701977C5D840BBC486D0', "sha1");
+is( nqp::sha1("ab\x[0]c"), "DBDD4F85D8A56500AA5C9C8A0D456F96280C92E5", "nqp::sha1 null bytes");
 
 nqp::bindcomp("noSuchLanguageEver1", nqp::list("compiler1"));
-ok(nqp::bindcomp("noSuchLanguageEver2", "compiler2") eq "compiler2", "correct return value for bindcomp");
+is(nqp::bindcomp("noSuchLanguageEver2", "compiler2"), "compiler2", "correct return value for bindcomp");
 
-ok(nqp::getcomp("noSuchLanguageEver1")[0] eq "compiler1", "nqp::getcomp");
+is(nqp::getcomp("noSuchLanguageEver1")[0], "compiler1", "nqp::getcomp");
 
 ok(nqp::isnull(nqp::getcomp("no_SuchLanguageNo_or_ever")), "nqp::getcomp for a missing language returns null");
 
@@ -352,22 +352,22 @@ ok(nqp::isnull(nqp::getcomp("no_SuchLanguageNo_or_ever")), "nqp::getcomp for a m
     nqp::push_s($a, "B");
     nqp::push_s($a, "C");
     ok(nqp::elems($a) == 3, 'nqp::elems/nqp::push_s');
-    ok(nqp::pop_s($a) eq "C", 'nqp::pop_s');
+    is(nqp::pop_s($a), "C", 'nqp::pop_s');
     ok(nqp::elems($a) == 2, 'nqp::pop_s reduces the number of elements correctly');
     ok(nqp::islist($a) == 1, 'nqp::islist(nqp::list_s())');
 
-    ok(nqp::shift_s($a) eq "A", "shift_s");
+    is(nqp::shift_s($a), "A", "shift_s");
     ok(nqp::elems($a) == 1, 'nqp::shit_s reduces the number of elements correctly');
 
-    ok(nqp::unshift_s($a, "X") eq "X", "unshift_s");
+    is(nqp::unshift_s($a, "X"), "X", "unshift_s");
 
     ok(nqp::elems($a) == 2, 'nqp::unshift_s increases the number of elements correctly');
     ok(nqp::shift_s($a) == "X", 'the element get placed at the start');
 
     my $b := nqp::list_s("A","B","C");
     ok(nqp::bindpos_s($b, 2, "D"), 'nqp::bindpos_s');
-    ok(nqp::atpos_s($b,2) eq "D", 'nqp::atpos_s');
-    ok(nqp::atpos_s($b, -2) eq "B", 'nqp::atpos_s with negative index');
+    is(nqp::atpos_s($b,2), "D", 'nqp::atpos_s');
+    is(nqp::atpos_s($b, -2), "B", 'nqp::atpos_s with negative index');
     ok(nqp::isnull_s(nqp::atpos_s($a, 10)), 'nqp::atpos_s with element outside of array');
 }
 
@@ -398,7 +398,7 @@ ok(nqp::isnull(nqp::getcomp("no_SuchLanguageNo_or_ever")), "nqp::getcomp for a m
 {
     my $a := nqp::list();
     nqp::bindpos($a, 1, "Hello World");
-    ok($a[1] eq 'Hello World', 'nqp::bindpos')
+    is($a[1], 'Hello World', 'nqp::bindpos')
 }
 
 ok(nqp::isnanorinf(nqp::nan()) == 1, "nqp::isnanorinf - nan");
@@ -426,17 +426,17 @@ my $b2 := nqp::rand_n(4);
 ok($a1 == $a2, "after calling srand the first generated number is the same");
 ok($b1 == $b2, "after calling srand the second generated number is the same");
 
-ok(nqp::replace("0123456789", 2, 4, "abc") eq "01abc6789", "nqp::replace");
+is(nqp::replace("0123456789", 2, 4, "abc"), "01abc6789", "nqp::replace");
 
 # TODO higher unicode values
-ok(nqp::bitand_s('blabla12$#@', '9$dfa23219') eq ' $`b` 12 !', "nqp::bitand_s");
-ok(nqp::bitor_s('blabla12$#@', '9$dfa23219') eq '{lefms325;@', "nqp::bitor_s");
-ok(nqp::bitxor_s(nqp::chr(1146) ~ nqp::chr(120), nqp::chr(1152)) eq nqp::chr(250) ~ nqp::chr(120), "nqp::bitxor_s");
+is(nqp::bitand_s('blabla12$#@', '9$dfa23219'), ' $`b` 12 !', "nqp::bitand_s");
+is(nqp::bitor_s('blabla12$#@', '9$dfa23219'), '{lefms325;@', "nqp::bitor_s");
+is(nqp::bitxor_s(nqp::chr(1146) ~ nqp::chr(120), nqp::chr(1152)),nqp::chr(250) ~ nqp::chr(120), "nqp::bitxor_s");
 
-ok(nqp::unbox_s("hello") eq "hello", "nqp::unbox_s on a string");
+is(nqp::unbox_s("hello"), "hello", "nqp::unbox_s on a string");
 
 my $value_say := nqp::say("#comment from say");
 my $value_print := nqp::print("#comment from print\n");
 
-ok($value_say eq "#comment from say", "nqp::say returns correct value");
-ok($value_print eq "#comment from print\n", "nqp::say returns correct value");
+is($value_say, "#comment from say", "nqp::say returns correct value");
+is($value_print, "#comment from print\n", "nqp::say returns correct value");

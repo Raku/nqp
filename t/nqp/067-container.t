@@ -51,9 +51,9 @@ ok(nqp::isnull(nqp::decont(nqp::null())), 'nqp::decont works on nqp::null');
     ok(nqp::iscont(Foo) == 0, "iscont on a type object");
     ok(nqp::iscont(SomeCont) == 1, "iscont on a type object that is a container");
 
-    ok($cont.foo eq "foo", "calling a method on a container deconts");
-    ok(SomeCont.foo eq "container", "a method call on a type object dosen't decont");
-    ok($cont.HOW.name($cont) eq "Foo", "HOW deconts");
+    is($cont.foo, "foo", "calling a method on a container deconts");
+    is(SomeCont.foo, "container", "a method call on a type object dosen't decont");
+    is($cont.HOW.name($cont), "Foo", "HOW deconts");
     ok(nqp::eqaddr($cont.WHAT, Foo), "WHAT deconts"); 
 
     class FooMore is Foo {
@@ -63,7 +63,7 @@ ok(nqp::isnull(nqp::decont(nqp::null())), 'nqp::decont works on nqp::null');
     }
 
     nqp::rebless($cont, FooMore);
-    ok($obj.foo eq "more foo", "nqp::rebless deconts");
+    is($obj.foo, "more foo", "nqp::rebless deconts");
 }
 
 {
@@ -102,9 +102,9 @@ ok(nqp::isnull(nqp::decont(nqp::null())), 'nqp::decont works on nqp::null');
             "content1";
         }
         method check_self($self:) {
-            ok($self.foo eq 'content1', '$self deconts to the initial object at first');
+            is($self.foo, 'content1', '$self deconts to the initial object at first');
             $flag := 0;
-            ok($self.foo eq 'content2', '... and the deconts to a different object');
+            is($self.foo, 'content2', '... and the deconts to a different object');
         }
     }
     nqp::setcontspec(FlaggyCont, 'code_pair', nqp::hash(

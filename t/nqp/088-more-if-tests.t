@@ -4,14 +4,14 @@ my $foo := 0;
 ok($foo == 1, "the if condition is evaluated once");
 
 if "value001" -> $value {
-    ok($value eq "value001", "if statement with an arrow");
+    is($value, "value001", "if statement with an arrow");
 } else {
 }
 
 if 0 -> $value {
 } elsif 0 -> $value {
 } elsif "value002" -> $value {
-    ok($value eq "value002", "elsif statement with an arrow");
+    is($value, "value002", "elsif statement with an arrow");
 }
 
 if nqp::list() {
@@ -31,7 +31,7 @@ sub side-effect() {
 }
 
 if side-effect() -> $value {
-    ok($value eq "value003", "we get the correct value without reinvoking sideffect");
+    is($value, "value003", "we get the correct value without reinvoking sideffect");
 }
 
 ok($count == 10, "side effect happens once");
@@ -42,6 +42,6 @@ sub log($msg, $value) {
     $value;
 }
 
-ok(nqp::ifnull(log('a', nqp::null()), log('b', 'value1')) eq 'value1', 'ifnull with null');
-ok(nqp::ifnull(log('c', 'value2'), log('d', 'value3')) eq 'value2', 'ifnull without null');
-ok($log eq 'abc', 'only the right things are evaled');
+is(nqp::ifnull(log('a', nqp::null()), log('b', 'value1')), 'value1', 'ifnull with null');
+is(nqp::ifnull(log('c', 'value2'), log('d', 'value3')), 'value2', 'ifnull without null');
+is($log, 'abc', 'only the right things are evaled');

@@ -1,6 +1,6 @@
 plan(3);
 sub foo() {
 }
-ok(nqp::getcodename(&foo) eq 'foo');
+is(nqp::getcodename(&foo), 'foo');
 ok(nqp::eqaddr(nqp::setcodename(&foo, 'bar'), &foo));
-ok(nqp::getcodename(&foo) eq 'bar');
+is(nqp::getcodename(&foo), 'bar');

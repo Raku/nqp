@@ -11,8 +11,8 @@ class Foo {
 }
 
 my $foo := Foo.new(attr => 'frob');
-ok(nqp::findmethod($foo, 'foo')($foo) eq 'foo', 'calling result of findmethod only with invocant');
-ok(nqp::findmethod($foo, 'bar')($foo, 'baz') eq 'barfrobbaz', 'calling result of findmethod with argument');
+is(nqp::findmethod($foo, 'foo')($foo), 'foo', 'calling result of findmethod only with invocant');
+is(nqp::findmethod($foo, 'bar')($foo, 'baz'), 'barfrobbaz', 'calling result of findmethod with argument');
 
 ok(nqp::can($foo, 'foo') == 1, 'nqp::can with existing method');
 ok(nqp::can($foo, 'no_such_method_ever') == 0, 'nqp::can with missing method');
@@ -30,8 +30,8 @@ knowhow Bar {
 }
 
 my $bar := Bar.new(attr => 'frob');
-ok(nqp::findmethod($bar, 'foo')($bar) eq 'foo', 'calling result of findmethod only with invocant - knowhow instance');
-ok(nqp::findmethod($bar, 'bar')($bar, 'baz') eq 'barfrobbaz', 'calling result of findmethod with argument - knowhow instance');
+is(nqp::findmethod($bar, 'foo')($bar), 'foo', 'calling result of findmethod only with invocant - knowhow instance');
+is(nqp::findmethod($bar, 'bar')($bar, 'baz'), 'barfrobbaz', 'calling result of findmethod with argument - knowhow instance');
 
 ok(nqp::can($bar, 'bar') == 1, 'nqp::can with existing method - knowhow instance');
 ok(nqp::can($bar, 'no_such_method_ever') == 0, 'nqp::can with missing method - knowhow instance');

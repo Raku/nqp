@@ -31,11 +31,11 @@ for %h {
   }
 
   if $_.key eq 'a' {
-    ok($_ eq 'a', 'keyvalue pair stringifies correctly for key a');
+    is($_, 'a', 'keyvalue pair stringifies correctly for key a');
     ok($_.value == 1000,'correct value for key a');
   }
   elsif $_.key eq 'b' {
-    ok($_ eq 'b', 'keyvalue pair stringifies correctly for key b');
+    is($_, 'b', 'keyvalue pair stringifies correctly for key b');
     ok($_.value == 200,'correct value for key b');
   }
   elsif $_.key eq '1' {
@@ -65,5 +65,5 @@ my %h1;
 %h1<foo> := 123;
 my $it_h1 := nqp::iterator(%h1);
 my $kv := nqp::shift($it_h1);
-ok(nqp::iterkey_s($kv) eq 'foo', 'nqp::iterkey_s on the thing returned by shifting an iterator');
+is(nqp::iterkey_s($kv), 'foo', 'nqp::iterkey_s on the thing returned by shifting an iterator');
 ok(nqp::iterval($kv) == 123, 'nqp::iterkey_s on the thing returned by shifting an iterator');

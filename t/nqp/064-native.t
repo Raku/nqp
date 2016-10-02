@@ -2,7 +2,7 @@ plan(4);
 
 {
     my int $x;
-    ok(~$x eq '0', 'native int initialized to 0');
+    is(~$x, '0', 'native int initialized to 0');
     
     $x := 42;
     ok($x == 42, 'can set native int');

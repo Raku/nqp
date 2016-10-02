@@ -18,12 +18,12 @@ sub bar($arg) {
     bar(2);
   } elsif $arg == 2 {
     my $this := nqp::callercode();
-    ok(nqp::getcodeobj($this) eq "first","nqp::getcodeobj works on result of nqp::callercode");
+    is(nqp::getcodeobj($this), "first","nqp::getcodeobj works on result of nqp::callercode");
     nqp::setcodeobj($this,"second");
     $this(7);
   } elsif $arg == 7 {
     my $this := nqp::callercode();
-    ok(nqp::getcodeobj($this) eq "second","nqp::setcodeobj works on result of nqp::callercode");
+    is(nqp::getcodeobj($this), "second","nqp::setcodeobj works on result of nqp::callercode");
   }
 }
 nqp::setcodeobj(&bar,"first");

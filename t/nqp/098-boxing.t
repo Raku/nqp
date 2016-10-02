@@ -38,4 +38,4 @@ $str_boxer.HOW.compose($str_boxer);
 # Try some basic operations with it.
 my $box_val_3 := nqp::box_s('hello', $str_boxer);
 
-ok(nqp::unbox_s($box_val_3) eq 'hello');
+is(nqp::unbox_s($box_val_3), 'hello');

@@ -48,12 +48,12 @@ nqp::bindattr($low, Lowlevel, '$!obj', $obj);
 
 ok($low.get_int == 456, 'nqp::bindattr_i');
 ok($low.get_num == 12.3, 'nqp::bindattr_n');
-ok($low.get_str eq "hello world", 'nqp::bindattr_s');
+is($low.get_str, "hello world", 'nqp::bindattr_s');
 ok(nqp::eqaddr($low.get_obj,$obj), 'nqp::bindattr');
 
 ok(nqp::getattr_i($low, Lowlevel, '$!int') == 456, 'nqp::getattr_i');
 ok(nqp::getattr_n($low, Lowlevel, '$!num') == 12.3, 'nqp::getattr_n');
-ok(nqp::getattr_s($low, Lowlevel, '$!str') eq 'hello world', 'nqp::getattr_s');
+is(nqp::getattr_s($low, Lowlevel, '$!str'), 'hello world', 'nqp::getattr_s');
 ok(nqp::eqaddr(nqp::getattr($low, Lowlevel, '$!obj'), $obj), 'nqp::getattr');
 
 class ClassA {

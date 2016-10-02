@@ -51,16 +51,16 @@ nqp::setinvokespec(Second, nqp::null(), nqp::null_s(), -> $invokee, $arg1, :$nam
 
 my $second := Second.new(attr => "hello", ret => "peculiar");
 
-ok($second("world", :named('brave new')) eq 'peculiar','correct value from invocation');
+is($second("world", :named('brave new')), 'peculiar','correct value from invocation');
 
-ok($called.attr eq 'hello', 'got right invokee to invocation handler');
-ok($called_arg eq 'world', 'got positional');
-ok($called_name eq 'brave new', 'got named');
+is($called.attr, 'hello', 'got right invokee to invocation handler');
+is($called_arg, 'world', 'got positional');
+is($called_name, 'brave new', 'got named');
 
 ok(nqp::isinvokable($second) == 1, "nqp::isinvokable on object with 2nd form of setinvokespec");
 
 my $differently := Second.new(attr => "hello", ret => "not yet again");
 
 my @args := nqp::list("again");
-ok($differently(|@args) eq "not yet again", "calling with slurpy args");
-ok($called_arg eq 'again', "...and got right arg");
+is($differently(|@args), "not yet again", "calling with slurpy args");
+is($called_arg, 'again', "...and got right arg");

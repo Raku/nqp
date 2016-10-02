@@ -44,8 +44,8 @@ ok( nqp::defined(nqp::closefh($credits)), 'nqp::closefh');
     nqp::setinputlinesep($data, "a");
     my $line1 := nqp::readlinefh($data);
     my $line2 := nqp::readlinefh($data);
-    ok($line1 eq 'This is a', "setinputlinesep with a input separator containing of one character... reading first line");
-    ok($line2 eq ' ra', "setinputlinesep with a input separator containing of one character... reading first line");
+    is($line1, 'This is a', "setinputlinesep with a input separator containing of one character... reading first line");
+    is($line2, ' ra', "setinputlinesep with a input separator containing of one character... reading first line");
 }
 
 if nqp::getcomp('nqp').backend.name eq 'js' {
@@ -54,10 +54,10 @@ if nqp::getcomp('nqp').backend.name eq 'js' {
     my $line1 := nqp::readlinefh($data);
     my $line2 := nqp::readlinefh($data);
     my $line3 := nqp::readlinefh($data);
-    ok($line1 eq 'This is a random line ending with ba', "setinputlinesep with a input separator containing of two character... reading first line");
+    is($line1, 'This is a random line ending with ba', "setinputlinesep with a input separator containing of two character... reading first line");
     my $long := ' and not a newline...............................................................ba';
-    ok($line2 eq $long, '... reading second line');
-    ok(nqp::substr($line3, 0, 9) eq '123456789' && (nqp::chars($line3) == 10 || nqp::chars($line3) == 11), '... reading last line not ending with input separator');
+    is($line2, $long, '... reading second line');
+    is(nqp::substr($line3, 0, 9), '123456789' && (nqp::chars($line3) == 10 || nqp::chars($line3) == 11), '... reading last line not ending with input separator');
 }
 else {
    skip("setinputlinesep with multiple chars is broken for the MoarVM and possibly others", 3);
@@ -84,7 +84,7 @@ ok($fh, 'we can open an existing file for writing');
 nqp::closefh($fh);
 
 $fh := nqp::open($test-file, 'r');
-ok(nqp::readallfh($fh) eq '', 'test file is empty');
+is(nqp::readallfh($fh), '', 'test file is empty');
 nqp::closefh($fh);
 
 $fh := nqp::open($test-file, 'wa');
@@ -93,7 +93,7 @@ ok(nqp::printfh($fh, " thing!!") == 8, 'appended a string to that file... again'
 nqp::closefh($fh);
 
 $fh := nqp::open($test-file, 'r');
-ok(nqp::readallfh($fh) eq "awesome thing!!", 'test file contains the strings');
+is(nqp::readallfh($fh), "awesome thing!!", 'test file contains the strings');
 ok(nqp::tellfh($fh) == 15, 'tellfh gives correct position');
 nqp::closefh($fh);
 
@@ -103,13 +103,13 @@ nqp::seekfh($fh, 0, 2);
 ok(nqp::tellfh($fh) == $size, 'seekfh to end gives correct position');
 nqp::seekfh($fh, 8, 0);
 ok(nqp::tellfh($fh) == 8, 'seekfh relative to start gives correct position');
-ok(nqp::readallfh($fh) eq "thing!!", 'seekfh relative to start gives correct content');
+is(nqp::readallfh($fh), "thing!!", 'seekfh relative to start gives correct content');
 nqp::seekfh($fh, -7, 2);
 ok(nqp::tellfh($fh) == 8, 'seekfh relative to end gives correct position');
-ok(nqp::readallfh($fh) eq "thing!!", 'seekfh relative to end gives correct content');
+is(nqp::readallfh($fh), "thing!!", 'seekfh relative to end gives correct content');
 nqp::seekfh($fh, -8, 1);
 ok(nqp::tellfh($fh) == 7, 'seekfh relative to current pos gives correct position');
-ok(nqp::readallfh($fh) eq " thing!!", 'seekfh relative to current pos gives correct content');
+is(nqp::readallfh($fh), " thing!!", 'seekfh relative to current pos gives correct content');
 my $ok := 1;
 try { nqp::seekfh($fh, -5, 0); $ok := 0; 1 }
 ok($ok, 'seekfh before start of file fails');
@@ -121,7 +121,7 @@ nqp::closefh($fh);
 $fh := nqp::open($test-file, 'w');
 nqp::closefh($fh);
 $fh := nqp::open($test-file, 'r');
-ok(nqp::readallfh($fh) eq '', 'opening for writing truncates the file');
+is(nqp::readallfh($fh), '', 'opening for writing truncates the file');
 nqp::closefh($fh);
 
 
@@ -135,7 +135,7 @@ nqp::printfh($fh, "!");
 nqp::closefh($fh);
 
 $fh := nqp::open($test-file, 'r');
-ok(nqp::readallfh($fh) eq "pretty awesome thing!!", 'test file contains the string after multiple write with w mode');
+is(nqp::readallfh($fh), "pretty awesome thing!!", 'test file contains the string after multiple write with w mode');
 ok(nqp::tellfh($fh) == 22, 'tellfh gives correct position');
 nqp::closefh($fh);
 
@@ -149,7 +149,7 @@ $fh := nqp::open($test-file, 'r');
 nqp::setencoding($fh, 'utf8'); # XXX let ascii be the default
 my $str := nqp::readallfh($fh);
 ok(nqp::chars($str) == 1, 'utf8 means one char for an umlaut');
-ok($str eq "ä", 'utf8 reads the umlaut correct');
+is($str, "ä", 'utf8 reads the umlaut correct');
 nqp::closefh($fh);
 
 $fh := nqp::open($test-file, 'r');
@@ -195,11 +195,11 @@ if $crlf-conversion {
 }
 else {
     $fh := nqp::open('t/nqp/19-readline.txt', 'r');
-    ok(nqp::readlinefh($fh) eq "line1\r",   'reading a line till CR');
-    ok(nqp::readlinefh($fh) eq "line2\r\n", 'reading a line till CRLF');
-    ok(nqp::readlinefh($fh) eq "line3\n",   'reading a line till LF');
-    ok(nqp::readlinefh($fh) eq "\n",          'reading an empty line');
-    ok(nqp::readlinefh($fh) eq "line4",     'reading a line till EOF');
+    is(nqp::readlinefh($fh), "line1\r",   'reading a line till CR');
+    is(nqp::readlinefh($fh), "line2\r\n", 'reading a line till CRLF');
+    is(nqp::readlinefh($fh), "line3\n",   'reading a line till LF');
+    is(nqp::readlinefh($fh), "\n",          'reading an empty line');
+    is(nqp::readlinefh($fh), "line4",     'reading a line till EOF');
     nqp::closefh($fh);
 }
 
@@ -256,7 +256,7 @@ else {
     nqp::printfh($fh, 'Hello');
     nqp::closefh($fh);
     nqp::symlink($test-file, $test-file ~ '-symlink');
-    ok(nqp::readlink($test-file ~ '-symlink') eq $test-file, 'nqp::readlink');
+    is(nqp::readlink($test-file ~ '-symlink'), $test-file, 'nqp::readlink');
     ok(nqp::stat($test-file ~ '-symlink', nqp::const::STAT_EXISTS), 'the symbolic link should exist');
     ok(nqp::lstat($test-file ~ '-symlink', nqp::const::STAT_EXISTS), 'the symbolic link should exist');
     ok(nqp::stat($test-file ~ '-symlink', nqp::const::STAT_ISLNK), 'the symbolic link should actually *be* a symbolic link');
@@ -277,7 +277,7 @@ if $crlf-conversion {
 
     my $fh := nqp::open($test-file, 'r');
     my $input := nqp::readallfh($fh);
-    ok($input eq "abc\ndef\nghi", "reading a whole file");
+    is($input, "abc\ndef\nghi", "reading a whole file");
     nqp::closefh($fh);
 } else {
     skip("readallfh doesn't convert \\r\\n on $backend");
@@ -313,10 +313,10 @@ else {
 
 {
     my $fh := nqp::open('t/nqp/019-chars.txt', 'r');
-    ok(nqp::readcharsfh($fh, 3) eq 'lin', 'nqp::readcharsfh');
-    ok(nqp::readcharsfh($fh, 2) eq 'π1', 'nqp::readcharsfh the second time with a multi byte character');
+    is(nqp::readcharsfh($fh, 3), 'lin', 'nqp::readcharsfh');
+    is(nqp::readcharsfh($fh, 2), 'π1', 'nqp::readcharsfh the second time with a multi byte character');
     nqp::readlinefh($fh);
-    ok(nqp::readcharsfh($fh, 5) eq 'line3', 'nqp::readcharsfh after nqp::readlinefh');
-    ok(nqp::readcharsfh($fh, 150) eq "line4\n", 'nqp::readcharsfh with more chars then they are in the file');
+    is(nqp::readcharsfh($fh, 5), 'line3', 'nqp::readcharsfh after nqp::readlinefh');
+    is(nqp::readcharsfh($fh, 150), "line4\n", 'nqp::readcharsfh with more chars then they are in the file');
     nqp::closefh($fh);
 }
