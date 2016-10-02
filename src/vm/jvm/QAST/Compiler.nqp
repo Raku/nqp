@@ -3363,16 +3363,22 @@ class QAST::CompilerJAST {
             {*}
         }
     }
-    
-    my %want_char := nqp::hash($RT_INT, 'I', $RT_NUM, 'N', $RT_STR, 'S');
+
     sub want($node, $type) {
-        my @possibles := nqp::clone($node.list);
-        my $best := @possibles.shift;
-        my $char := %want_char{$type};
-        for @possibles -> $sel, $ast {
-            if nqp::chars($char) == 0 || nqp::index($sel, $char) >= 0 {
-                $best := $ast;
+        my @possibles := $node.list;
+        my $best      := nqp::atpos(@possibles, 0);
+        my $char := $type == $RT_INT  ?? 'I' !!
+                    $type == $RT_NUM  ?? 'N' !!
+                    $type == $RT_STR  ?? 'S' !!
+                                         'v';
+        my int $i := 1;
+        my int $n := nqp::elems(@possibles);
+        while $i < $n {
+            if nqp::index(nqp::atpos(@possibles, $i), $char) >= 0 {
+                $best := nqp::atpos(@possibles, $i + 1);
+                last;
             }
+            $i := $i + 2;
         }
         $best
     }
