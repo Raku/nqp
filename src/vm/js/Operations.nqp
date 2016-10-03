@@ -249,13 +249,13 @@ class QAST::OperationsJS {
 
     add_simple_op('clone', $T_OBJ, [$T_OBJ], :decont(0));
 
-    my sub static_attr($node) {
+    my sub static_hint($node) {
         my int $hint := -1;
         if $node[1].has_compile_time_value && nqp::istype($node[2], QAST::SVal) {
             $hint := nqp::hintfor($node[1].compile_time_value, $node[2].value);
         }
 
-        $hint != -1 ?? 'attr$' ~ $hint !! NQPMu;
+        $hint != -1 ?? $hint !! NQPMu;
     }
 
     my sub bindattr($type, :$inverted_result) {
@@ -264,8 +264,8 @@ class QAST::OperationsJS {
             my $value := $comp.as_js(:want($type), $node[3]);
             my @setup;
             my $action;
-            if static_attr($node) -> $attr {
-                $action := "({$obj.expr}\.$attr = {$value.expr})";
+            if static_hint($node) -> $hint {
+                $action := "{$obj.expr}\.\$\$bindattr\${$hint}({$value.expr})";
                 @setup := [$obj, $value];
             }
             else {
@@ -294,8 +294,8 @@ class QAST::OperationsJS {
 
         add_op('getattr' ~ $suffix, sub ($comp, $node, :$want, :$cps) {
             my $obj := $comp.as_js(:want($T_OBJ), $node[0]);
-            if static_attr($node) -> $attr {
-                Chunk.new($type, "({$obj.expr}\.$attr)", [$obj]);
+            if static_hint($node) -> $hint {
+                Chunk.new($type, "{$obj.expr}\.\$\$getattr\${$hint}()", [$obj]);
             }
             else {
                 my $classHandle := $comp.as_js(:want($T_OBJ), $node[1]);
