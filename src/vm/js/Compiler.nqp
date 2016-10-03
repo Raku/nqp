@@ -1833,13 +1833,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     Chunk.new($type, "{$self.expr}.\$\$getattr({$class_handle.expr}, $name)", [$self, $class_handle]);
                 }
             } else {
-                my $attr := Chunk.new($type, "{$self.expr}.{'attr$' ~ $hint}", [$self]);
                 if $*BINDVAL {
                     my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($type), :$cps);
-                    Chunk.new($type, $bindval.expr, [$attr, $bindval, "{$attr.expr} = {$bindval.expr};\n"]);
+                    Chunk.new($type, $bindval.expr, [$self, $bindval, "{$self.expr}.\$\$bindattr\${$hint}({$bindval.expr});\n"]);
                 }
                 else {
-                    $attr;
+                    Chunk.new($type, "{$self.expr}.\$\$getattr\${$hint}()", [$self]);
                 }
             }
         }

@@ -173,6 +173,8 @@ class P6opaque {
     }
 
     /* TODO make auto viv values work */
+
+    this.generateAccessors(STable);
   }
 
   hintfor(classHandle, attrName) {
@@ -394,7 +396,25 @@ class P6opaque {
 
     this.precalculate();
 
+    this.generateAccessors(STable);
+  }
 
+  generateAccessors(STable) {
+    for (var i = 0; i < this.nameToIndexMapping.length; i++) {
+      for (var j = 0; j < this.nameToIndexMapping[i].slots.length; j++) {
+        let slot = this.nameToIndexMapping[i].slots[j];
+        let attr = slotToAttr(slot);
+
+        STable.addInternalMethod('$$bindattr$' + slot, function(value) {
+          this[attr] = value;
+        });
+
+        STable.addInternalMethod('$$getattr$' + slot, function() {
+          return this[attr];
+        });
+      }
+    }
+    return -1;
   }
 
   setupSTable(STable) {
