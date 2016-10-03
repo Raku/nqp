@@ -57,7 +57,7 @@ if nqp::getcomp('nqp').backend.name eq 'js' {
     is($line1, 'This is a random line ending with ba', "setinputlinesep with a input separator containing of two character... reading first line");
     my $long := ' and not a newline...............................................................ba';
     is($line2, $long, '... reading second line');
-    is(nqp::substr($line3, 0, 9), '123456789' && (nqp::chars($line3) == 10 || nqp::chars($line3) == 11), '... reading last line not ending with input separator');
+    ok(nqp::substr($line3, 0, 9) eq '123456789' && (nqp::chars($line3) == 10 || nqp::chars($line3) == 11), '... reading last line not ending with input separator');
 }
 else {
    skip("setinputlinesep with multiple chars is broken for the MoarVM and possibly others", 3);
