@@ -3367,6 +3367,8 @@ class QAST::CompilerJAST {
     sub want($node, $type) {
         my @possibles := $node.list;
         my $best      := nqp::atpos(@possibles, 0);
+        ## TODO 'v' should only be used for void context here
+        ##      atm, testing for $RT_VOID leads to failing spectests
         my $char := $type == $RT_INT  ?? 'I' !!
                     $type == $RT_NUM  ?? 'N' !!
                     $type == $RT_STR  ?? 'S' !!
