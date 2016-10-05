@@ -15,8 +15,7 @@ my @serialization = glob "t/serialization/{01,02,03}*.t";
 my @qast = glob "t/qast/02*";
 my @js_specific = "t/js/getcomp-js.t";
 
-# temporarily turned of test 060
-my @nqp_tests = grep {$_ !~ /regex-interpolation|060/} glob "t/nqp/*.t";
+my @nqp_tests = grep {$_ !~ /regex-interpolation/} glob "t/nqp/*.t";
 
 my @moar_tests = qw(t/moar/03-line-seps.t);
 
