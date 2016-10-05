@@ -3367,20 +3367,21 @@ class QAST::CompilerJAST {
     sub want($node, $type) {
         my @possibles := $node.list;
         my $best      := nqp::atpos(@possibles, 0);
-        ## TODO 'v' should only be used for void context here
-        ##      atm, testing for $RT_VOID leads to failing spectests
-        my $char := $type == $RT_INT  ?? 'I' !!
-                    $type == $RT_NUM  ?? 'N' !!
-                    $type == $RT_STR  ?? 'S' !!
-                                         'v';
-        my int $i := 1;
-        my int $n := nqp::elems(@possibles);
-        while $i < $n {
-            if nqp::index(nqp::atpos(@possibles, $i), $char) >= 0 {
-                $best := nqp::atpos(@possibles, $i + 1);
-                last;
+        if $type != $RT_OBJ {
+            my $char := $type == $RT_VOID ?? 'v' !!
+                        $type == $RT_INT  ?? 'I' !!
+                        $type == $RT_NUM  ?? 'N' !!
+                        $type == $RT_STR  ?? 'S' !!
+                                             'X';
+            my int $i := 1;
+            my int $n := nqp::elems(@possibles);
+            while $i < $n {
+                if nqp::index(nqp::atpos(@possibles, $i), $char) >= 0 {
+                    $best := nqp::atpos(@possibles, $i + 1);
+                    last;
+                }
+                $i := $i + 2;
             }
-            $i := $i + 2;
         }
         $best
     }
@@ -4194,9 +4195,9 @@ class QAST::CompilerJAST {
             my $void := $all_void || $i != $resultchild;
             if $void {
                 if nqp::istype($_, QAST::Want) {
-                    $_ := want($_, 'v');
+                    $_ := want($_, $RT_VOID);
                 }
-                $last_res := self.as_jast($_, :want('v'));
+                $last_res := self.as_jast($_, :want($RT_VOID));
             }
             else {
                 $last_res := self.as_jast($_);
