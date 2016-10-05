@@ -262,17 +262,18 @@ class QAST::OperationsJS {
         sub ($comp, $node, :$want, :$cps) {
             my $obj := $comp.as_js(:want($T_OBJ), $node[0]);
             my $value := $comp.as_js(:want($type), $node[3]);
+            my $suffix := $comp.suffix_from_type($type);
             my @setup;
             my $action;
             if static_hint($node) -> $hint {
-                $action := "{$obj.expr}\.\$\$bindattr\${$hint}({$value.expr})";
+                $action := "{$obj.expr}\.\$\$bindattr\${$hint}{$suffix}({$value.expr})";
                 @setup := [$obj, $value];
             }
             else {
                 my $classHandle := $comp.as_js(:want($T_OBJ), $node[1]);
                 my $attrName := $comp.as_js(:want($T_STR), $node[2]);
 
-                $action := "{$obj.expr}\.\$\$bindattr({$classHandle.expr}, {$attrName.expr}, {$value.expr})";
+                $action := "{$obj.expr}\.\$\$bindattr{$suffix}({$classHandle.expr}, {$attrName.expr}, {$value.expr})";
                 @setup := [$obj, $classHandle, $attrName, $value];
             }
 
@@ -295,13 +296,13 @@ class QAST::OperationsJS {
         add_op('getattr' ~ $suffix, sub ($comp, $node, :$want, :$cps) {
             my $obj := $comp.as_js(:want($T_OBJ), $node[0]);
             if static_hint($node) -> $hint {
-                Chunk.new($type, "{$obj.expr}\.\$\$getattr\${$hint}()", [$obj]);
+                Chunk.new($type, "{$obj.expr}\.\$\$getattr\${$hint}{$suffix}()", [$obj]);
             }
             else {
                 my $classHandle := $comp.as_js(:want($T_OBJ), $node[1]);
                 my $attrName := $comp.as_js(:want($T_STR), $node[2]);
 
-                Chunk.new($type, "{$obj.expr}\.\$\$getattr({$classHandle.expr}, {$attrName.expr})",
+                Chunk.new($type, "{$obj.expr}\.\$\$getattr{$suffix}({$classHandle.expr}, {$attrName.expr})",
                     [$obj, $classHandle, $attrName]);
             }
         });

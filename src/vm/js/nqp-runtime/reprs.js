@@ -46,6 +46,7 @@ REPR.prototype.createObjConstructor = basicConstructor;
 class P6opaque {
   allocate(STable) {
     var obj = new STable.objConstructor();
+    obj.$$setDefaults();
     return obj;
   }
 
@@ -128,6 +129,7 @@ class P6opaque {
     /* TODO make auto viv values work */
 
     this.generateAccessors(STable);
+    this.generateDefaults(STable);
   }
 
   hintfor(classHandle, attrName) {
@@ -356,40 +358,66 @@ class P6opaque {
     this.mi = mi ? 1 : 0;
 
     this.generateAccessors(STable);
+    this.generateDefaults(STable);
+  }
+
+  generateNormalAccessors(STable, slot) {
+    var attr = slotToAttr(slot);
+
+    STable.addInternalMethod('$$bindattr$' + slot, function(value) {
+      this[attr] = value;
+    });
+
+    if (this.autoVivValues && this.autoVivValues[slot]) {
+      var autoViv = this.autoVivValues[slot];
+
+      if (!this.autoVivValues[slot].typeObject_) {
+        console.warn('We currently only implement autoviv with type object values: ' + name);
+      }
+      STable.addInternalMethod('$$getattr$' + slot, function() {
+        var value = this[attr];
+        if (value === undefined) {
+          this[attr] = autoViv;
+          return autoViv;
+        }
+        return value;
+      });
+    } else {
+      STable.addInternalMethod('$$getattr$' + slot, function() {
+        var value = this[attr];
+        if (value === undefined) {
+          return null;
+        }
+        return value;
+      });
+    }
+
+  }
+
+  generateDefaults(STable) {
+    var defaults = {};
+    for (var i = 0; i < this.nameToIndexMapping.length; i++) {
+      for (var j = 0; j < this.nameToIndexMapping[i].slots.length; j++) {
+        let slot = this.nameToIndexMapping[i].slots[j];
+        if (this.flattenedStables[slot]) {
+          defaults[slotToAttr(slot)] = this.flattenedStables[slot].REPR.flattenedDefault;
+        }
+      }
+    }
+
+    STable.addInternalMethod('$$setDefaults', function() {
+      Object.assign(this, defaults);
+    });
   }
 
   generateAccessors(STable) {
     for (var i = 0; i < this.nameToIndexMapping.length; i++) {
       for (var j = 0; j < this.nameToIndexMapping[i].slots.length; j++) {
         let slot = this.nameToIndexMapping[i].slots[j];
-        let attr = slotToAttr(slot);
-
-        STable.addInternalMethod('$$bindattr$' + slot, function(value) {
-          this[attr] = value;
-        });
-
-        if (this.autoVivValues && this.autoVivValues[slot]) {
-          var autoViv = this.autoVivValues[slot];
-
-          if (!this.autoVivValues[slot].typeObject_) {
-            console.warn('We currently only implement autoviv with type object values: ' + name);
-          }
-          STable.addInternalMethod('$$getattr$' + slot, function() {
-            var value = this[attr];
-            if (value === undefined) {
-              this[attr] = autoViv;
-              return autoViv;
-            }
-            return value;
-          });
+        if (this.flattenedStables[slot]) {
+          this.flattenedStables[slot].REPR.generateFlattenedAccessors(STable, this.flattenedStables[slot], slot);
         } else {
-          STable.addInternalMethod('$$getattr$' + slot, function() {
-            var value = this[attr];
-            if (value === undefined) {
-              return null;
-            }
-            return value;
-          });
+          this.generateNormalAccessors(STable, slot);
         }
       }
     }
@@ -398,14 +426,16 @@ class P6opaque {
 
   setupSTable(STable) {
     var repr = this;
-    STable.addInternalMethod('$$bindattr', function(classHandle, attrName, value) {
-      this[repr.setterForAttr(classHandle, attrName)](value);
-      return value;
-    });
+    for (let suffix of ['', '_s', '_i', '_n']) {
+      STable.addInternalMethod('$$bindattr' + suffix, function(classHandle, attrName, value) {
+        this[repr.setterForAttr(classHandle, attrName) + suffix](value);
+        return value;
+      });
 
-    STable.addInternalMethod('$$getattr', function(classHandle, attrName) {
-      return this[repr.getterForAttr(classHandle, attrName)]();
-    });
+      STable.addInternalMethod('$$getattr' + suffix, function(classHandle, attrName) {
+        return this[repr.getterForAttr(classHandle, attrName) + suffix]();
+      });
+    }
 
     STable.addInternalMethod('$$attrinited', function(classHandle, attrName) {
       var attr = slotToAttr(repr.getHint(classHandle, attrName));
@@ -522,6 +552,22 @@ class P6int extends REPR {
       return this[name];
     });
   }
+
+  generateFlattenedAccessors(ownerSTable, attrContentSTable, slot) {
+    var attr = slotToAttr(slot);
+    /* TODO - use actual type instead of NQPInt */
+    ownerSTable.addInternalMethod('$$getattr$' + slot, function() {
+      return new NQPInt(this[attr]);
+    });
+
+    ownerSTable.addInternalMethod('$$getattr$' + slot + '_i', function() {
+      return this[attr];
+    });
+
+    ownerSTable.addInternalMethod('$$bindattr$' + slot + '_i', function(value) {
+      this[attr] = value;
+    });
+  }
 };
 
 P6int.prototype.flattenedDefault = 0;
@@ -568,6 +614,24 @@ class P6num extends REPR {
       return this[name];
     });
   }
+
+  generateFlattenedAccessors(ownerSTable, attrContentSTable, slot) {
+    var attr = slotToAttr(slot);
+
+    /* TODO wrap object more correctly */
+
+    ownerSTable.addInternalMethod('$$getattr$' + slot, function() {
+      return this[attr];
+    });
+
+    ownerSTable.addInternalMethod('$$getattr$' + slot + '_n', function() {
+      return this[attr];
+    });
+
+    ownerSTable.addInternalMethod('$$bindattr$' + slot + '_n', function(value) {
+      this[attr] = value;
+    });
+  }
 };
 
 P6num.prototype.boxedPrimitive = 2;
@@ -609,6 +673,21 @@ class P6str extends REPR {
 
     STable.addInternalMethod('$$getStr', function() {
       return this[name];
+    });
+  }
+
+  generateFlattenedAccessors(ownerSTable, attrContentSTable, slot) {
+    var attr = slotToAttr(slot);
+    ownerSTable.addInternalMethod('$$getattr$' + slot, function() {
+      return this[attr];
+    });
+
+    ownerSTable.addInternalMethod('$$getattr$' + slot + '_s', function() {
+      return this[attr];
+    });
+
+    ownerSTable.addInternalMethod('$$bindattr$' + slot + '_s', function(value) {
+      this[attr] = value;
     });
   }
 };
@@ -705,6 +784,20 @@ class P6bigint extends REPR {
     });
   }
 
+  generateFlattenedAccessors(ownerSTable, attrContentSTable, slot) {
+    var attr = slotToAttr(slot);
+    console.log("generating for P6bigint");
+
+    ownerSTable.addInternalMethod('$$getattr$' + slot, function() {
+      var value = this[attr] || bignum(0);
+      return makeBI(attrContentSTable, value);;
+    });
+
+    ownerSTable.addInternalMethod('$$bindattr$' + slot, function(value) {
+      this[attr] = getBI(value);
+    });
+  }
+
   deserializeFinish(obj, data) {
     if (data.varint() == 1) { /* Is it small int? */
       obj.value = bignum(data.varint());
@@ -743,7 +836,7 @@ class P6bigint extends REPR {
     }
   }
 
-  generateBoxingMethods(STable, name, attrSTable) {
+  generateBoxingMethods(STable, name) {
     STable.addInternalMethod('$$setInt', function(value) {
       this[name] = bignum(value);
     });

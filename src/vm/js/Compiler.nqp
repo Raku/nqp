@@ -1791,6 +1791,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             @setup.push($self);
 
+            my $suffix := self.suffix_from_type($type);
+
             if 0 {
                 # TODO - use hint
                 # OPTIMALIZATION OPPORTUNITY 
@@ -1801,11 +1803,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 @setup.push($class_handle);
                 my $name := quote_string($var.name);
 
-                $get := "{$self.expr}.\$\$getattr({$class_handle.expr}, $name)";
-                $set := "{$self.expr}.\$\$bindattr({$class_handle.expr}, $name, value)";
+                $get := "{$self.expr}.\$\$getattr{$suffix}({$class_handle.expr}, $name)";
+                $set := "{$self.expr}.\$\$bindattr{$suffix}({$class_handle.expr}, $name, value)";
             }
 
-            my $suffix := self.suffix_from_type($type);
 
             Chunk.new($T_OBJ, "nqp.op.getattrref{$suffix}({quote_string($*HLL)}, function() \{return $get\}, function(value) \{$set\})", [], :node($var));
         }
@@ -1818,6 +1819,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 $hint := nqp::hintfor($var[1].compile_time_value, $var.name);
             }
 
+            my $suffix := self.suffix_from_type($type);
+
             my $self := self.as_js_clear_bindval($var[0], :want($T_OBJ), :$cps);
 
             if $hint == -1 {
@@ -1826,19 +1829,19 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 if $*BINDVAL {
                     my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($type), :$cps);
                     Chunk.new($type, $bindval.expr, [$self, $class_handle, $bindval,
-                        "{$self.expr}.\$\$bindattr({$class_handle.expr}, $name, {$bindval.expr});\n"
+                        "{$self.expr}.\$\$bindattr$suffix({$class_handle.expr}, $name, {$bindval.expr});\n"
                     ]);
                 }
                 else {
-                    Chunk.new($type, "{$self.expr}.\$\$getattr({$class_handle.expr}, $name)", [$self, $class_handle]);
+                    Chunk.new($type, "{$self.expr}.\$\$getattr$suffix({$class_handle.expr}, $name)", [$self, $class_handle]);
                 }
             } else {
                 if $*BINDVAL {
                     my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($type), :$cps);
-                    Chunk.new($type, $bindval.expr, [$self, $bindval, "{$self.expr}.\$\$bindattr\${$hint}({$bindval.expr});\n"]);
+                    Chunk.new($type, $bindval.expr, [$self, $bindval, "{$self.expr}.\$\$bindattr\${$hint}$suffix({$bindval.expr});\n"]);
                 }
                 else {
-                    Chunk.new($type, "{$self.expr}.\$\$getattr\${$hint}()", [$self]);
+                    Chunk.new($type, "{$self.expr}.\$\$getattr\${$hint}$suffix()", [$self]);
                 }
             }
         }
