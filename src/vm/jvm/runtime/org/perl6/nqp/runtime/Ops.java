@@ -2819,6 +2819,8 @@ public final class Ops {
         }
     }
     public static long getattr_i(SixModelObject obj, SixModelObject ch, String name, long hint, ThreadContext tc) {
+        if (((P6OpaqueREPRData) obj.st.REPRData).mi)
+            hint = STable.NO_HINT;
         obj.get_attribute_native(tc, decont(ch, tc), name, hint);
         if (tc.native_type == ThreadContext.NATIVE_INT)
             return tc.native_i;
@@ -2826,6 +2828,8 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc, "Attribute '" + name + "' is not a native int");
     }
     public static double getattr_n(SixModelObject obj, SixModelObject ch, String name, long hint, ThreadContext tc) {
+        if (((P6OpaqueREPRData) obj.st.REPRData).mi)
+            hint = STable.NO_HINT;
         obj.get_attribute_native(tc, decont(ch, tc), name, hint);
         if (tc.native_type == ThreadContext.NATIVE_NUM)
             return tc.native_n;
@@ -2833,6 +2837,8 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc, "Attribute '" + name + "' is not a native num");
     }
     public static String getattr_s(SixModelObject obj, SixModelObject ch, String name, long hint, ThreadContext tc) {
+        if (((P6OpaqueREPRData) obj.st.REPRData).mi)
+            hint = STable.NO_HINT;
         obj.get_attribute_native(tc, decont(ch, tc), name, hint);
         if (tc.native_type == ThreadContext.NATIVE_STR)
             return tc.native_s;
