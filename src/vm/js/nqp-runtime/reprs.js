@@ -366,6 +366,7 @@ class P6opaque {
 
     STable.addInternalMethod('$$bindattr$' + slot, function(value) {
       this[attr] = value;
+      return value;
     });
 
     if (this.autoVivValues && this.autoVivValues[slot]) {
@@ -566,6 +567,7 @@ class P6int extends REPR {
 
     ownerSTable.addInternalMethod('$$bindattr$' + slot + '_i', function(value) {
       this[attr] = value;
+      return value;
     });
   }
 };
@@ -630,6 +632,7 @@ class P6num extends REPR {
 
     ownerSTable.addInternalMethod('$$bindattr$' + slot + '_n', function(value) {
       this[attr] = value;
+      return value;
     });
   }
 };
@@ -688,6 +691,7 @@ class P6str extends REPR {
 
     ownerSTable.addInternalMethod('$$bindattr$' + slot + '_s', function(value) {
       this[attr] = value;
+      return value;
     });
   }
 };
@@ -795,6 +799,7 @@ class P6bigint extends REPR {
 
     ownerSTable.addInternalMethod('$$bindattr$' + slot, function(value) {
       this[attr] = getBI(value);
+      return value;
     });
   }
 
