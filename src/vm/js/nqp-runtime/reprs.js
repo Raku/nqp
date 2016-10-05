@@ -407,6 +407,11 @@ class P6opaque {
       return this[repr.getterForAttr(classHandle, attrName)]();
     });
 
+    STable.addInternalMethod('$$attrinited', function(classHandle, attrName) {
+      var attr = slotToAttr(repr.getHint(classHandle, attrName));
+      return (this[attr] == undefined) ? 0 : 1;
+    });
+
   }
 
 };

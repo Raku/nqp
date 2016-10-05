@@ -307,6 +307,10 @@ class QAST::OperationsJS {
         });
     }
 
+    add_simple_op('attrinited', $T_INT, [$T_OBJ, $T_OBJ, $T_STR], :decont(1), sub ($obj, $classHandle, $attrName) {
+        "$obj.\$\$attrinited($classHandle, $attrName)"
+    });
+
     add_simple_op('hintfor', $T_INT, [$T_OBJ, $T_STR]);
 
 
