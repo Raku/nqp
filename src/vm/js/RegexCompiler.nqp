@@ -285,6 +285,8 @@ class RegexCompiler {
         $invocant ~ "[" ~ quote_string($method) ~ "](" ~ nqp::join(",", @args) ~ ")";
     }
 
+    # We never autovifiy $!from and $!pos so we can access them directly
+
     method cursor_attr($cursor, $attr) {
         my int $hint := nqp::hintfor($!cursor_type, $attr);
         if $hint == -1 {

@@ -46,52 +46,7 @@ REPR.prototype.createObjConstructor = basicConstructor;
 class P6opaque {
   allocate(STable) {
     var obj = new STable.objConstructor();
-
-    Object.assign(obj, this.template);
-
     return obj;
-  }
-
-  precalculate() {
-    var autovived = {};
-    for (var mapping of this.nameToIndexMapping) {
-      for (var slotIndex in mapping.slots) {
-        var slot = mapping.slots[slotIndex];
-        var name = mapping.names[slotIndex];
-        if (this.flattenedStables[slot]) {
-          if (this.flattenedStables[slot].REPR.flattenedDefault !== undefined) {
-            autovived[slotToAttr(slot)] = this.flattenedStables[slot].REPR.flattenedDefault;
-          } else {
-            console.warn("we don't have a default for flattened attr " + name + " of REPR", this.flattenedStables[slot].REPR.name);
-          }
-        } else if (this.autoVivValues && this.autoVivValues[slot]) {
-          if (!this.autoVivValues[slot].typeObject_) {
-
-            console.warn('We currently only implement autoviv with type object values: ' + name);
-          }
-          /* TODO autoviving things that aren't typeobjects */
-          autovived[slotToAttr(slot)] = this.autoVivValues[slot];
-        }
-      }
-    }
-
-    if (Object.keys(autovived).length != 0) {
-      this.autovived = autovived;
-    }
-
-    this.template = {};
-    /* TODO think about attribute types */
-    for (var mapping of this.nameToIndexMapping) {
-      for (var slot of mapping.slots) {
-        this.template[slotToAttr(slot)] = null;
-      }
-    }
-
-    if (this.autovived) {
-      for (var attr in this.autovived) {
-        this.template[attr] = this.autovived[attr];
-      }
-    }
   }
 
   deserializeReprData(cursor, STable) {
@@ -153,8 +108,6 @@ class P6opaque {
     }
 
 
-    this.precalculate();
-
     this.positionalDelegateSlot = cursor.varint();
     this.associativeDelegateSlot = cursor.varint();
 
@@ -193,13 +146,21 @@ class P6opaque {
     return -1;
   }
 
-  getAttr(classHandle, attrName) {
+  getHint(classHandle, attrName) {
     var hint = this.hintfor(classHandle, attrName);
     if (hint == -1) {
       throw new NQPException("Can't find: " + attrName);
     } else {
-      return slotToAttr(hint);
+      return hint;
     }
+  }
+
+  getterForAttr(classHandle, attrName) {
+    return '$$getattr$' + this.getHint(classHandle, attrName);
+  }
+
+  setterForAttr(classHandle, attrName) {
+    return '$$bindattr$' + this.getHint(classHandle, attrName);
   }
 
   serializeReprData(st, cursor) {
@@ -394,8 +355,6 @@ class P6opaque {
     /* Populate some REPR data. */
     this.mi = mi ? 1 : 0;
 
-    this.precalculate();
-
     this.generateAccessors(STable);
   }
 
@@ -409,9 +368,29 @@ class P6opaque {
           this[attr] = value;
         });
 
-        STable.addInternalMethod('$$getattr$' + slot, function() {
-          return this[attr];
-        });
+        if (this.autoVivValues && this.autoVivValues[slot]) {
+          var autoViv = this.autoVivValues[slot];
+
+          if (!this.autoVivValues[slot].typeObject_) {
+            console.warn('We currently only implement autoviv with type object values: ' + name);
+          }
+          STable.addInternalMethod('$$getattr$' + slot, function() {
+            var value = this[attr];
+            if (value === undefined) {
+              this[attr] = autoViv;
+              return autoViv;
+            }
+            return value;
+          });
+        } else {
+          STable.addInternalMethod('$$getattr$' + slot, function() {
+            var value = this[attr];
+            if (value === undefined) {
+              return null;
+            }
+            return value;
+          });
+        }
       }
     }
     return -1;
@@ -420,12 +399,12 @@ class P6opaque {
   setupSTable(STable) {
     var repr = this;
     STable.addInternalMethod('$$bindattr', function(classHandle, attrName, value) {
-      this[repr.getAttr(classHandle, attrName)] = value;
+      this[repr.setterForAttr(classHandle, attrName)](value);
       return value;
     });
 
     STable.addInternalMethod('$$getattr', function(classHandle, attrName) {
-      return this[repr.getAttr(classHandle, attrName)];
+      return this[repr.getterForAttr(classHandle, attrName)]();
     });
 
   }

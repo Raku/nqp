@@ -77,17 +77,20 @@ class STable {
 
   setinvokespec(classHandle, attrName, invocationHandler) {
     if (classHandle) {
-      var attr = this.REPR.getAttr(classHandle, attrName);
+      /* TODO  - think if we can use direct access here */
+      var getter = this.REPR.getterForAttr(classHandle, attrName);
       this.objConstructor.prototype.$$call = function() {
-        return this[attr].$$call.apply(this[attr], arguments);
+        var value = this[getter]();
+        return value.$$call.apply(value, arguments);
       };
       this.objConstructor.prototype.$$apply = function(args) {
-        return this[attr].$$apply(args);
+        return this[getter]().$$apply(args);
       };
 
       this.objConstructor.prototype.$$injectMethod = function(proto, name) {
-        if (this[attr] && this[attr].$$injectMethod) {
-          return this[attr].$$injectMethod(proto, name);
+        var value = this[getter]();
+        if (value && value.$$injectMethod) {
+          return value.$$injectMethod(proto, name);
         }
       };
     } else {
