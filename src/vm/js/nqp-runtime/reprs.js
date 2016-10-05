@@ -790,7 +790,6 @@ class P6bigint extends REPR {
 
   generateFlattenedAccessors(ownerSTable, attrContentSTable, slot) {
     var attr = slotToAttr(slot);
-    console.log("generating for P6bigint");
 
     ownerSTable.addInternalMethod('$$getattr$' + slot, function() {
       var value = this[attr] || bignum(0);
