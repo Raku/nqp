@@ -1,6 +1,6 @@
 #! nqp
 
-plan(21);
+plan(25);
 
 class Foo {
     has $!answer;
@@ -112,3 +112,41 @@ $partial.get_attr1;
 ok(nqp::attrinited($partial, AttrInitedTest, '$!attr1'), 'nqp::attrinitied on a attr that has been autovivified');
 $partial.set_attr2;
 ok(nqp::attrinited($partial, AttrInitedTest, '$!attr2'), 'nqp::attrinitied on a attr that has been bound to');
+
+use nqpmo;
+
+class Mutable {
+    has $!counter;
+    method get() {
+        $!counter;
+    }
+    method inc() {
+        $!counter := $!counter + 1;
+    }
+}
+
+my $knowhow := nqp::knowhow();
+
+my $type := NQPClassHOW.new_type(:name('TestAutoviv'), :repr('P6opaque'));
+$type.HOW.add_attribute($type, NQPAttribute.new(
+    :name('$!value'), :default(Mutable.new(counter=>10)),
+));
+$type.HOW.add_attribute($type, NQPAttribute.new(
+    :name('$!type_object'), :default(Mutable)
+));
+$type.HOW.add_parent($type, NQPMu);
+$type.HOW.compose($type);
+
+my $a := $type.new;
+my $b := $type.new;
+
+my $got1 := nqp::getattr($a, $type, '$!value');
+ok($got1.get == 10, 'autoviving a value for an attribute');
+
+$got1.inc;
+
+ok(nqp::getattr($a, $type, '$!value').get == 11, 'got the same value from the same object when fetching twice');
+
+ok(nqp::getattr($b, $type, '$!value').get == 10, 'got a fresh copy when autoviving from a different object');
+
+ok(nqp::eqaddr(nqp::getattr($a, $type, '$!type_object'), Mutable), 'autoviving type object');
