@@ -1,6 +1,6 @@
 #! nqp
 
-plan(20);
+plan(21);
 
 class Foo {
     has $!answer;
@@ -47,7 +47,7 @@ class Lowlevel {
 my $obj := nqp::list(1000,2000);
 
 my $low := Lowlevel.new;
-nqp::bindattr_i($low, Lowlevel, '$!int', 456);
+ok(nqp::bindattr_i($low, Lowlevel, '$!int', 456) == 456, 'correct return value of nqp::bindattr_i');
 nqp::bindattr_n($low, Lowlevel, '$!num', 12.3);
 nqp::bindattr_s($low, Lowlevel, '$!str', "hello world");
 nqp::bindattr($low, Lowlevel, '$!obj', $obj);
