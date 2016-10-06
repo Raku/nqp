@@ -315,7 +315,7 @@ op.newtype = function(how, repr) {
 
 /* HACK - we need to handle can properly */
 op.can = function(obj, method) {
-  if (typeof obj === "string" || obj instanceof NQPInt || obj instanceof CodeRef) return 0;
+  if (typeof obj !== "object" || obj instanceof NQPInt || obj instanceof CodeRef || obj instanceof Hash || obj instanceof NQPArray) return 0;
   if (!obj._STable.methodCache) {
     console.log("we have no method cache, checking: " + method);
     return 0;
@@ -528,6 +528,7 @@ compilerRegistry.set('JavaScript', {
     if (/PRINTME/.test(code)) {
       console.log("evaling [", code, "]");
     }
+    //console.log("evaling [", code, "]");
     return fromJS(eval(code));
   }
 });
