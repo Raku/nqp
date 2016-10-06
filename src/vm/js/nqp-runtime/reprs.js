@@ -372,17 +372,25 @@ class P6opaque {
     if (this.autoVivValues && this.autoVivValues[slot]) {
       var autoViv = this.autoVivValues[slot];
 
-      if (!this.autoVivValues[slot].typeObject_) {
-        console.warn('We currently only implement autoviv with type object values: ' + name);
+      if (this.autoVivValues[slot].typeObject_) {
+        STable.addInternalMethod('$$getattr$' + slot, function() {
+          var value = this[attr];
+          if (value === undefined) {
+            this[attr] = autoViv;
+            return autoViv;
+          }
+          return value;
+        });
+      } else {
+        STable.addInternalMethod('$$getattr$' + slot, function() {
+          var value = this[attr];
+          if (value === undefined) {
+            value = autoViv.$$clone();
+            this[attr] = value;
+          }
+          return value;
+        });
       }
-      STable.addInternalMethod('$$getattr$' + slot, function() {
-        var value = this[attr];
-        if (value === undefined) {
-          this[attr] = autoViv;
-          return autoViv;
-        }
-        return value;
-      });
     } else {
       STable.addInternalMethod('$$getattr$' + slot, function() {
         var value = this[attr];
