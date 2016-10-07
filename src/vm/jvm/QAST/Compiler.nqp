@@ -4186,7 +4186,7 @@ class QAST::CompilerJAST {
         }
         
         for @stmts {
-            if $_.node {
+            if $_.node && nqp::can($_.node,'orig') {
                 my $node := $_.node;
                 my $line := HLL::Compiler.lineof($node.orig(), $node.from(), :cache(1));            
                 $il.append(JAST::Annotation.new( :line($line) ));
