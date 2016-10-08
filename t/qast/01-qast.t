@@ -1,6 +1,6 @@
 use QAST;
 
-plan(88);
+plan(94);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -1451,3 +1451,73 @@ test_qast_result(
        ok($r[1] eq 'b', 'a static QAST::Var after binding to it contains a correct value');
     }
 );
+
+
+{
+    my class Counter {
+        has $!count;
+        method inc() {
+            $!count := $!count + 1;
+        }
+        method get() {
+            $!count;
+        }
+    }
+    my $counter := Counter.new(count=>100);
+    my $sc := nqp::createsc('exampleHandle');
+    nqp::scsetobj($sc, 0, $counter);
+    nqp::setobjsc($counter, $sc);
+
+    test_qast_result(
+        QAST::Block.new(
+            QAST::Block.new(
+                QAST::Block.new(
+                    QAST::Var.new( :name('counter'), :scope('lexical') , :decl('statevar'), :value($counter)),
+                    QAST::Var.new( :name('counter'), :scope('lexical'))
+                )
+           )
+        ),
+        -> $factory {
+            my $closure1 := $factory();
+            my $closure2 := $factory();
+            $closure1().inc;
+            $closure1().inc;
+            $closure1().inc;
+            is($closure1().get, '103', "statevar is shared between calls to a closures");
+            is($closure2().get, '100', "a new closure gets it's own copy of the statevar");
+            $closure2().inc;
+            is($closure2().get, '101', "...that get preserved across calls");
+            is($closure1().get, '103', "...and is independent from the first closure");
+        }
+    );
+
+    my class Orginal {
+    }
+    my class New {
+    }
+
+    test_qast_result(
+        QAST::Block.new(
+            QAST::Block.new(
+                QAST::Var.new( :name('value'), :scope('lexical') , :decl('var')),
+                QAST::Var.new( :name('state'), :scope('lexical') , :decl('statevar'), :value(Orginal)),
+                QAST::Op.new( :op<bind>,
+                    QAST::Var.new( :name<value>, :scope<lexical>),
+                    QAST::Var.new( :name<state>, :scope<lexical>),
+                ),
+                QAST::Op.new( :op<bind>,
+                    QAST::Var.new( :name<state>, :scope<lexical>),
+                    QAST::WVal.new( :value(New))
+                ),
+                QAST::Var.new( :name<value>, :scope<lexical>),
+            )
+        ),
+        -> $closure {
+            my $new := $closure();
+            my $old := $closure();
+            ok(nqp::istype($new, Orginal), "an object is passed in a statevar");
+            ok(nqp::istype($new, Orginal), "after rebinding a statevar it's restored in the next invocation");
+        }
+    );
+
+}
