@@ -49,6 +49,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         has @!var_setup;
 
+        has %!statevars;
+
         method new($qast, $outer) {
             my $obj := nqp::create(self);
             $obj.BUILD($qast, $outer);
@@ -71,6 +73,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             %!mangled_lexicals := nqp::hash();
             %!lexicalref_types := nqp::hash();
             @!var_setup := nqp::list();
+            %!statevars := nqp::hash();
         }
 
         method add_var_setup($setup) {
@@ -194,6 +197,16 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         method add_param($param) {
             @!params.push($param);
+        }
+
+        method statevars() {
+            %!statevars;
+        }
+
+        method add_statevar($value) {
+            my $js_var := QAST::Node.unique('statevar');
+            %!statevars{$js_var} := $value;
+            $js_var;
         }
 
         method tmps() {
@@ -911,6 +924,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             my $reg   := $kv.value;
             my $cuid := self.mangled_cuid($kv.key);
 
+            if nqp::existskey(%*BLOCKS_STATEVARS, $kv.key) {
+                @clone_inners.push(%*BLOCKS_STATEVARS{$kv.key});
+            }
+
             self.wrap_static_block(%*BLOCKS_INFO{$kv.key}.outer, @clone_inners, -> {
                 if !$block.need_direct{$kv.key} {
                     # we know the block won't be ever called in direct mode
@@ -954,6 +971,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         for $block.captured_inners -> $kv {
             my $cuid := self.mangled_cuid($kv.key);
             my $reg   := $kv.value;
+
+            if nqp::existskey(%*BLOCKS_STATEVARS, $kv.key) {
+                @capture_inners.push(%*BLOCKS_STATEVARS{$kv.key});
+            }
 
             self.wrap_static_block(%*BLOCKS_INFO{$kv.key}.outer, @capture_inners, -> {
                 @capture_inners.push("$reg = $cuid.capture");
@@ -1030,6 +1051,14 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     "\}"
                 ];
                 %*BLOCKS_DONE{$node.cuid} := Chunk.void("(", |@function, ")");
+
+                if $*BLOCK.statevars {
+                    my @vars;
+                    for $*BLOCK.statevars -> $kv {
+                        @vars.push($kv.key ~ " = " ~ "nqp.op.clone({self.value_as_js($kv.value)})");
+                    }
+                    %*BLOCKS_STATEVARS{$node.cuid} := "var " ~ nqp::join(',', @vars) ~ ";\n";
+                }
 
                 if 1 { # TODO make sure that only blocks that take part in serialization have that info emitted
                     my $outer_cuid;
@@ -1491,7 +1520,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 $*BLOCK.add_js_lexical($*BLOCK.add_mangled_var($node));
             }
         }
-        elsif $node.decl eq 'var' || $node.decl eq 'contvar' || $node.decl eq 'static' {
+        elsif $node.decl eq 'var' || $node.decl eq 'contvar' || $node.decl eq 'static' || $node.decl eq 'statevar' {
             $*BLOCK.add_variable($node);
 
             if !self.is_dynamic_var($*BLOCK, $node) {
@@ -1501,6 +1530,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 }
                 elsif $node.decl eq 'static' {
                     $*BLOCK.add_js_lexical_with_value($mangled_name, self.value_as_js($node.value));
+                }
+                elsif $node.decl eq 'statevar' {
+                    $*BLOCK.add_js_lexical_with_value($mangled_name, $*BLOCK.add_statevar($node.value));
                 }
                 else {
                     $*BLOCK.add_js_lexical($mangled_name);
@@ -1654,6 +1686,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 }
                 elsif $var.decl eq 'static' {
                     $initial_value := self.value_as_js($var.value);
+                }
+                elsif $var.decl eq 'statevar' {
+                    $initial_value := $*BLOCK.add_statevar($var.value);
                 }
                 else {
                     nqp::die("can't handle:" ~ $var.decl);
@@ -1880,6 +1915,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my %*BLOCKS_DONE;
         my %*BLOCKS_INFO;
         my %*BLOCKS_DONE_CPS;
+        my %*BLOCKS_STATEVARS;
 
         my $compile_block := -> {self.as_js($ast, :want($instant ?? $T_VOID !! $T_OBJ))};
 
