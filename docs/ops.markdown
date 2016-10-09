@@ -310,7 +310,7 @@ generation in QAST nodes.
 
 When invoking them directly, you'll need to prefix them with nqp::, e.g.
 
-    nqp::mul_n(6,9);
+    nqp::mul_i(6,9);
 
 The ops are listed below by type. Each entry shows the name of the op,
 its variants, and their arguments and types, and may provide a short
