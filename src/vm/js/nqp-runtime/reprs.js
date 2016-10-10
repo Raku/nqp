@@ -364,10 +364,10 @@ class P6opaque {
   generateNormalAccessors(STable, slot) {
     var attr = slotToAttr(slot);
 
-    STable.addInternalMethod('$$bindattr$' + slot, function(value) {
-      this[attr] = value;
-      return value;
-    });
+    STable.compileAccessor('$$bindattr$' + slot, 'function(value) {\n'
+      + 'this.' + attr + ' = value;\n'
+      + 'return value;\n'
+      + '}\n');
 
     if (this.autoVivValues && this.autoVivValues[slot]) {
       var autoViv = this.autoVivValues[slot];
@@ -430,6 +430,7 @@ class P6opaque {
         }
       }
     }
+    STable.evalGatheredCode();
     return -1;
   }
 

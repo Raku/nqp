@@ -218,6 +218,19 @@ class STable {
   addInternalMethod(name, func) {
     this.objConstructor.prototype[name] = func;
   }
+
+  compileAccessor(accessor, code) {
+    this.code = this.code || '';
+    this.code += 'STable.addInternalMethod("' + accessor + '",' +  code + ');\n';
+  }
+
+  evalGatheredCode() {
+    if (this.code) {
+      var STable = this;
+      eval(this.code);
+      this.code = '';
+    }
+  }
 };
 
 module.exports.STable = STable;
