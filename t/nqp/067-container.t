@@ -39,6 +39,9 @@ ok(nqp::isnull(nqp::decont(nqp::null())), 'nqp::decont works on nqp::null');
 
     ok(!$cont, 'checking container for truthness - negative');
 
+    nqp::assign($cont, "just a string");
+    ok(nqp::unbox_s($cont) eq "just a string", "unbox_s works correctly with containers");
+
     class Foo {
         method foo() {
             "foo";
