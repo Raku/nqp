@@ -1,4 +1,4 @@
-plan(18);
+plan(19);
 
 ok(nqp::isnull(nqp::decont(nqp::null())), 'nqp::decont works on nqp::null');
 
