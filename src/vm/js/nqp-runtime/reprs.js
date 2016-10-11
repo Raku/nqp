@@ -129,7 +129,6 @@ class P6opaque {
     /* TODO make auto viv values work */
 
     this.generateAccessors(STable);
-    this.generateDefaults(STable);
   }
 
   hintfor(classHandle, attrName) {
@@ -358,7 +357,6 @@ class P6opaque {
     this.mi = mi ? 1 : 0;
 
     this.generateAccessors(STable);
-    this.generateDefaults(STable);
   }
 
   generateNormalAccessors(STable, slot) {
@@ -404,20 +402,20 @@ class P6opaque {
   }
 
   generateDefaults(STable) {
+    var code = "";
+
     var defaults = {};
     for (var i = 0; i < this.nameToIndexMapping.length; i++) {
       for (var j = 0; j < this.nameToIndexMapping[i].slots.length; j++) {
         let slot = this.nameToIndexMapping[i].slots[j];
         if (this.flattenedStables[slot]) {
-          defaults[slotToAttr(slot)] = this.flattenedStables[slot].REPR.flattenedDefault;
+          code += 'this.' + slotToAttr(slot) + ' = ' + this.flattenedStables[slot].REPR.flattenedDefault + ';\n';
         }
       }
     }
 
-    STable.addInternalMethod('$$setDefaults', function() {
-      Object.assign(this, defaults);
-    });
-
+    STable.compileAccessor('$$setDefaults', 'function() {\n' + code + '}');
+    STable.evalGatheredCode();
   }
 
   generateUniversalAccessors(STable) {
@@ -466,6 +464,8 @@ class P6opaque {
     }
 
     this.generateUniversalAccessors(STable);
+
+    this.generateDefaults(STable);
 
     STable.evalGatheredCode();
   }
@@ -606,7 +606,7 @@ class P6int extends REPR {
   }
 };
 
-P6int.prototype.flattenedDefault = 0;
+P6int.prototype.flattenedDefault = "0";
 P6int.prototype.boxedPrimitive = 1;
 P6int.prototype.flattenSTable = true;
 
@@ -673,7 +673,7 @@ class P6num extends REPR {
 
 P6num.prototype.boxedPrimitive = 2;
 P6num.prototype.flattenSTable = true;
-P6num.prototype.flattenedDefault = 0.0;
+P6num.prototype.flattenedDefault = "0";
 
 reprs.P6num = P6num;
 
@@ -732,7 +732,7 @@ class P6str extends REPR {
 
 P6str.prototype.boxedPrimitive = 3;
 P6str.prototype.flattenSTable = true;
-P6str.prototype.flattenedDefault = null;
+P6str.prototype.flattenedDefault = "null";
 
 
 reprs.P6str = P6str;
@@ -894,7 +894,9 @@ class P6bigint extends REPR {
 };
 
 P6bigint.prototype.flattenSTable = true;
-P6bigint.prototype.flattenedDefault = bignum(0);
+P6bigint.prototype.ZERO = bignum(0);
+P6bigint.prototype.flattenedDefault = "STable.REPR.ZERO";
+
 
 reprs.P6bigint = P6bigint;
 
