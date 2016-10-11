@@ -877,6 +877,9 @@ reprs.NativeCall = NativeCall;
 class CPointer extends REPR {};
 reprs.CPointer = CPointer;
 
+class AsyncTask extends REPR {};
+reprs.AsyncTask = AsyncTask;
+
 class ReentrantMutex {};
 ReentrantMutex.prototype.createObjConstructor = basicConstructor;
 ReentrantMutex.prototype.allocate = basicAllocate;
