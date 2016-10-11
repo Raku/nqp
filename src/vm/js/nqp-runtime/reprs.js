@@ -589,15 +589,6 @@ class P6int extends REPR {
     ownerSTable.addInternalMethod('$$getattr$' + slot, function() {
       return new NQPInt(this[attr]);
     });
-
-    ownerSTable.addInternalMethod('$$getattr$' + slot + '_i', function() {
-      return this[attr];
-    });
-
-    ownerSTable.addInternalMethod('$$bindattr$' + slot + '_i', function(value) {
-      this[attr] = value;
-      return value;
-    });
   }
 };
 
@@ -654,15 +645,6 @@ class P6num extends REPR {
     ownerSTable.addInternalMethod('$$getattr$' + slot, function() {
       return this[attr];
     });
-
-    ownerSTable.addInternalMethod('$$getattr$' + slot + '_n', function() {
-      return this[attr];
-    });
-
-    ownerSTable.addInternalMethod('$$bindattr$' + slot + '_n', function(value) {
-      this[attr] = value;
-      return value;
-    });
   }
 };
 
@@ -712,15 +694,6 @@ class P6str extends REPR {
     var attr = slotToAttr(slot);
     ownerSTable.addInternalMethod('$$getattr$' + slot, function() {
       return this[attr];
-    });
-
-    ownerSTable.addInternalMethod('$$getattr$' + slot + '_s', function() {
-      return this[attr];
-    });
-
-    ownerSTable.addInternalMethod('$$bindattr$' + slot + '_s', function(value) {
-      this[attr] = value;
-      return value;
     });
   }
 };

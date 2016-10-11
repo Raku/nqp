@@ -1871,12 +1871,24 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     Chunk.new($type, "{$self.expr}.\$\$getattr$suffix({$class_handle.expr}, $name)", [$self, $class_handle]);
                 }
             } else {
-                if $*BINDVAL {
-                    my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($type), :$cps);
-                    Chunk.new($type, $bindval.expr, [$self, $bindval, "{$self.expr}.\$\$bindattr\${$hint}$suffix({$bindval.expr});\n"]);
+                if $type == $T_OBJ {
+                    if $*BINDVAL {
+                        my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ), :$cps);
+                        Chunk.new($T_OBJ, $bindval.expr, [$self, $bindval, "{$self.expr}.\$\$bindattr\${$hint}({$bindval.expr});\n"]);
+                    }
+                    else {
+                        Chunk.new($T_OBJ, "{$self.expr}.\$\$getattr\${$hint}()", [$self]);
+                    }
                 }
                 else {
-                    Chunk.new($type, "{$self.expr}.\$\$getattr\${$hint}$suffix()", [$self]);
+                    my $attr := $self.expr ~ '.attr$' ~ $hint;
+                    if $*BINDVAL {
+                        my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($type), :$cps);
+                        Chunk.new($type, $bindval.expr, [$self, $bindval, "$attr = {$bindval.expr};\n"]);
+                    }
+                    else {
+                        Chunk.new($type, $attr, [$self]);
+                    }
                 }
             }
         }
