@@ -160,10 +160,6 @@ class P6opaque {
     return '$$getattr$' + this.getHint(classHandle, attrName);
   }
 
-  setterForAttr(classHandle, attrName) {
-    return '$$bindattr$' + this.getHint(classHandle, attrName);
-  }
-
   serializeReprData(st, cursor) {
     var numAttrs = st.REPR.flattenedStables.length;
     cursor.varint(numAttrs);
