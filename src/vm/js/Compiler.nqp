@@ -1510,7 +1510,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         if $node.decl eq 'var' && ($node.scope eq 'local' || $node.scope eq 'lexical') {
             my $type := self.type_from_typeobj($node.returns);
             $*BLOCK.register_var_type($node, $type);
-            self.log("type {$node.name} = $type");
         }
 
         if $node.decl eq 'var' && $node.scope eq 'lexicalref' {
@@ -1604,8 +1603,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     method figure_out_type(QAST::Var $var) {
-        self.log("searching for type {$var.name}");
-
         my $type := $*BLOCK.var_type($var);
         if nqp::defined($type) {
             return $type;
@@ -1617,7 +1614,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             while nqp::istype($cur_block, BlockInfo) {
                 $type := $cur_block.var_type($var);
                 if nqp::defined($type) {
-                    self.log("found type {$var.name} -> $type");
                     return $type;
                 }
                 else {
