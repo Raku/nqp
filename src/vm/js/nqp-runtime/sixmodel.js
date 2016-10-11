@@ -219,15 +219,17 @@ class STable {
     this.objConstructor.prototype[name] = func;
   }
 
-  compileAccessor(accessor, code) {
+  compileAccessor(accessor, code, setup) {
     this.code = this.code || '';
+    this.setup = this.setup || '';
+    if (setup) this.setup += setup;
     this.code += 'STable.addInternalMethod("' + accessor + '",' +  code + ');\n';
   }
 
   evalGatheredCode() {
     if (this.code) {
       var STable = this;
-      eval(this.code);
+      eval(this.setup + this.code);
       this.code = '';
     }
   }

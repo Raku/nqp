@@ -417,6 +417,40 @@ class P6opaque {
     STable.addInternalMethod('$$setDefaults', function() {
       Object.assign(this, defaults);
     });
+
+  }
+
+  generateUniversalAccessors(STable) {
+    for (let suffix of ['', '_s', '_i', '_n']) {
+      this.generateUniversalAccessor(STable, '$$getattr' + suffix, function(slot) {
+        return 'return this.$$getattr$' + slot + suffix + "()";
+      }, '');
+
+      this.generateUniversalAccessor(STable, '$$bindattr' + suffix, function(slot) {
+        return 'return this.$$bindattr$' + slot + suffix + "(value)";
+      }, ', value');
+    }
+  }
+
+  generateUniversalAccessor(STable, name, action, extraSig) {
+    var code = 'function(classHandle, attrName' + extraSig + ') {\n' + 'switch (classHandle) {\n';
+    var classKeyIndex = 0;
+    var setup = "";
+    if (this.nameToIndexMapping) {
+      for (var i = 0; i < this.nameToIndexMapping.length; i++) {
+        let classKey = 'classKey' + classKeyIndex;
+        setup += 'var ' + classKey + ' = STable.REPR.nameToIndexMapping[' + i + '].classKey;\n';
+        code += 'case ' + classKey + ': switch (attrName) {\n';
+        for (var j = 0; j < this.nameToIndexMapping[i].slots.length; j++) {
+          let slot = this.nameToIndexMapping[i].slots[j];
+          code += 'case \'' + this.nameToIndexMapping[i].names[j] + '\':' + action(slot) + ";\n";
+        }
+        code += '}\n';
+        classKeyIndex++;
+      }
+    }
+    code += '}\n}\n';
+    STable.compileAccessor(name, code, setup);
   }
 
   generateAccessors(STable) {
@@ -430,23 +464,14 @@ class P6opaque {
         }
       }
     }
+
+    this.generateUniversalAccessors(STable);
+
     STable.evalGatheredCode();
-    return -1;
   }
 
   setupSTable(STable) {
     var repr = this;
-    for (let suffix of ['', '_s', '_i', '_n']) {
-      STable.addInternalMethod('$$bindattr' + suffix, function(classHandle, attrName, value) {
-        this[repr.setterForAttr(classHandle, attrName) + suffix](value);
-        return value;
-      });
-
-      STable.addInternalMethod('$$getattr' + suffix, function(classHandle, attrName) {
-        return this[repr.getterForAttr(classHandle, attrName) + suffix]();
-      });
-    }
-
     STable.addInternalMethod('$$attrinited', function(classHandle, attrName) {
       var attr = slotToAttr(repr.getHint(classHandle, attrName));
       return (this[attr] == undefined) ? 0 : 1;
