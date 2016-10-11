@@ -368,35 +368,25 @@ class P6opaque {
       + '}\n');
 
     if (this.autoVivValues && this.autoVivValues[slot]) {
-      var autoViv = this.autoVivValues[slot];
+      var isTypeObject = this.autoVivValues[slot].typeObject_;
 
-      if (this.autoVivValues[slot].typeObject_) {
-        STable.addInternalMethod('$$getattr$' + slot, function() {
-          var value = this[attr];
-          if (value === undefined) {
-            this[attr] = autoViv;
-            return autoViv;
-          }
-          return value;
-        });
-      } else {
-        STable.addInternalMethod('$$getattr$' + slot, function() {
-          var value = this[attr];
-          if (value === undefined) {
-            value = autoViv.$$clone();
-            this[attr] = value;
-          }
-          return value;
-        });
-      }
+      STable.compileAccessor('$$getattr$' + slot, 'function(value) {\n'
+        + 'var value = this.' + attr + ';\n'
+        + 'if (value === undefined) {\n'
+        + 'value = autoViv' + slot + (isTypeObject ? '' : '.$$clone()') + ';\n'
+        + 'this.' + attr + ' =  value;\n'
+        + '}\n'
+        + 'return value;\n'
+        + '}\n', 'var autoViv' + slot + ' = STable.REPR.autoVivValues[' + slot + '];\n');
     } else {
-      STable.addInternalMethod('$$getattr$' + slot, function() {
-        var value = this[attr];
-        if (value === undefined) {
-          return null;
-        }
-        return value;
-      });
+      STable.compileAccessor('$$getattr$' + slot, 'function(value) {\n'
+        + 'var value = this.' + attr + ';\n'
+        + 'if (value === undefined) {\n'
+        + 'return null;\n'
+        + '}\n'
+        + 'return value;'
+        + '}\n'
+      );
     }
 
   }
