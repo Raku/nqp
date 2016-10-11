@@ -405,13 +405,22 @@ class P6opaque {
   }
 
   generateUniversalAccessors(STable) {
-    for (let suffix of ['', '_s', '_i', '_n']) {
+    this.generateUniversalAccessor(STable, '$$getattr', function(slot) {
+      return 'return this.$$getattr$' + slot + "()";
+    }, '');
+
+    this.generateUniversalAccessor(STable, '$$bindattr', function(slot) {
+      return 'return this.$$bindattr$' + slot + "(value)";
+    }, ', value');
+
+    for (let suffix of ['_s', '_i', '_n']) {
+      /* TODO only check attributes of proper type */
       this.generateUniversalAccessor(STable, '$$getattr' + suffix, function(slot) {
-        return 'return this.$$getattr$' + slot + suffix + "()";
+        return 'return this.' + slotToAttr(slot);
       }, '');
 
       this.generateUniversalAccessor(STable, '$$bindattr' + suffix, function(slot) {
-        return 'return this.$$bindattr$' + slot + suffix + "(value)";
+        return 'return (this.' + slotToAttr(slot) + " = value)";
       }, ', value');
     }
   }
