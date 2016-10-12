@@ -2277,6 +2277,7 @@ QAST::MASTOperations.add_core_moarop_mapping('decodertakeline', 'decodertakeline
 QAST::MASTOperations.add_core_moarop_mapping('decoderbytesavailable', 'decoderbytesavailable');
 QAST::MASTOperations.add_core_moarop_mapping('decodertakebytes', 'decodertakebytes');
 QAST::MASTOperations.add_core_moarop_mapping('decoderempty', 'decoderempty');
+QAST::MASTOperations.add_core_moarop_mapping('indexingoptimized', 'indexingoptimized');
 
 QAST::MASTOperations.add_core_op('tclc', -> $qastcomp, $op {
     my @operands := $op.list;
