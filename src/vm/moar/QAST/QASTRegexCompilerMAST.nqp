@@ -155,7 +155,6 @@ class QAST::MASTRegexCompiler {
         merge_ins(@ins, [
             op('getattr_s', $tgt, $shared, $sharedclass, sval('$!target'),
                 ival(nqp::hintfor(ParseShared, '$!target'))),
-            op('flattenropes', $tgt),
             op('getattr_i', $pos, $cur, $curclass, sval('$!from'),
                 ival(nqp::hintfor($!cursor_type, '$!from'))),
             op('getattr_o', $bstack, $cur, $curclass, sval('$!bstack'),
