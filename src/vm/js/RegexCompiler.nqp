@@ -424,7 +424,7 @@ class RegexCompiler {
     }
 
     method qastnode($node) {
-        my $code := $!compiler.as_js($node[0], :want($T_BOOL));
+        my $code := $!compiler.as_js($node[0], :want($node.subtype eq 'zerowidth' ?? $T_BOOL !! $T_VOID));
 
         Chunk.void(
             self.set_cursor_pos,
