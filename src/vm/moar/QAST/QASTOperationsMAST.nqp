@@ -1390,15 +1390,12 @@ my $call_gen := sub ($qastcomp, $op) {
     }
     elsif +@args {
         @args := nqp::clone(@args);
-        $callee := $qastcomp.as_mast(@args.shift());
+        $callee := $qastcomp.as_mast(@args.shift(), :want($MVM_reg_obj));
     }
     else {
         nqp::die("No name for call and empty children list");
     }
     @args := arrange_args(@args);
-
-    nqp::die("callee expression must be an object")
-        unless $callee.result_kind == $MVM_reg_obj;
 
     nqp::die("callee code did not result in a MAST::Local")
         unless $callee.result_reg && $callee.result_reg ~~ MAST::Local;
