@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(273);
+plan(275);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -440,3 +440,6 @@ my $value_print := nqp::print("#comment from print\n");
 
 is($value_say, "#comment from say", "nqp::say returns correct value");
 is($value_print, "#comment from print\n", "nqp::say returns correct value");
+
+is(nqp::indexingoptimized("foobar"), "foobar", "nqp::indexingoptimized result is equal to it's argument");
+ok(nqp::isstr(nqp::indexingoptimized(123)), "nqp::indexingoptimized returns a string");
