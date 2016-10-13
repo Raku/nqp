@@ -502,6 +502,8 @@ class QAST::OperationsJS {
         $comp.as_js($node[0], :want($want), :$cps);
     });
 
+    add_simple_op('indexingoptimized', $T_STR, [$T_STR], sub ($str) {$str});
+
     # TODO decont
     add_op('istrue', sub ($comp, $node, :$want, :$cps) {
         $comp.as_js($node[0], :want($T_BOOL), :$cps);
