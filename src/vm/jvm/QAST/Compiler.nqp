@@ -2320,6 +2320,10 @@ QAST::OperationsJAST.map_classlib_core_op('escape', $TYPE_OPS, 'escape', [$RT_ST
 QAST::OperationsJAST.map_classlib_core_op('flip', $TYPE_OPS, 'flip', [$RT_STR], $RT_STR);
 QAST::OperationsJAST.map_classlib_core_op('replace', $TYPE_OPS, 'replace', [$RT_STR, $RT_INT, $RT_INT, $RT_STR], $RT_STR);
 
+QAST::OperationsJAST.add_core_op('indexingoptimized', -> $qastcomp, $op {
+    $qastcomp.as_jast($op[0], :want($RT_STR));
+});
+
 # substr can take 2 or 3 args, so needs special handling.
 QAST::OperationsJAST.map_classlib_core_op('substr2', $TYPE_OPS, 'substr2', [$RT_STR, $RT_INT], $RT_STR);
 QAST::OperationsJAST.map_classlib_core_op('substr3', $TYPE_OPS, 'substr3', [$RT_STR, $RT_INT, $RT_INT], $RT_STR);
