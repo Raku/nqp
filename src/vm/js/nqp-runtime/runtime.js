@@ -205,6 +205,21 @@ exports.toBool = function(maybeContainer, ctx) {
   }
 };
 
+exports.intToObj = function(hllName, i) {
+  var currentHLL = hll.hllConfigs[hllName];
+  var type;
+  if (currentHLL) type = currentHLL.get('int_box');
+  if (!type) { 
+    return new NQPInt(i);
+  }
+  else {
+    var repr = type._STable.REPR;
+    var obj = repr.allocate(type._STable);
+    obj.$$setInt(i);
+    return obj;
+  }
+};
+
 
 if (!Math.imul) {
   /* Polyfill from:
