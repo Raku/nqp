@@ -1,6 +1,6 @@
 use QAST;
 
-plan(94);
+plan(96);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -1520,4 +1520,37 @@ test_qast_result(
         }
     );
 
+}
+
+{
+    use nqpmo;
+    my $int_boxer := NQPClassHOW.new_type(:name('boxed_int'), :repr('P6opaque'));
+    $int_boxer.HOW.add_attribute($int_boxer, NQPAttribute.new(
+        :name('$!value'), :type(int), :box_target(1)
+    ));
+    $int_boxer.HOW.add_parent($int_boxer, NQPMu);
+    $int_boxer.HOW.add_method($int_boxer, 'twice', method () {~(nqp::getattr_i(self, $int_boxer, '$!value')*2)});
+    $int_boxer.HOW.compose($int_boxer);
+
+
+    nqp::sethllconfig('foo', nqp::hash(
+        'int_box', $int_boxer
+    ));
+    test_qast_result(
+        QAST::CompUnit.new(
+            :hll<foo>,
+            QAST::Block.new(
+                QAST::Var.new(:decl<var>, :scope<local>, :name<$foo>),
+                QAST::Op.new(:op<bind>,
+                    QAST::Var.new(:name<$foo>, :scope<local>),
+                    QAST::IVal.new(value => 123)
+                ),
+                QAST::Var.new(:name<$foo>, :scope<local>)
+            )
+        ),
+        -> $r {
+            ok(nqp::istype($r, $int_boxer), 'an automatically boxed int is of the correct type');
+            ok($r.twice eq '246', '...and it has the correct value');
+        }
+    );
 }
