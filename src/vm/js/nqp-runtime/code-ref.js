@@ -29,7 +29,6 @@ class CodeRef {
     if (codeRefAttr === null) {
       return;
     } else if (codeRefAttr === undefined) {
-      console.warn('unknown codeRefAttr');
       return;
     }
 
