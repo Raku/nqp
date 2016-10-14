@@ -144,7 +144,7 @@ public class CallSiteDescriptor {
                     }
                 }
                 else {
-                    throw ExceptionHandling.dieInternal(cf.tc, "Flattening named argument must have VMHash REPR");
+                    throw ExceptionHandling.dieInternal(cf.tc, "Flattening named argument must have VMHash REPR instead of " + flatHash.st.REPR.name);
                 }
                 break;
             case ARG_OBJ | ARG_NAMED:
