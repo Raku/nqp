@@ -2,7 +2,7 @@
 
 use nqpmo;
 
-plan(49);
+plan(52);
 
 sub add_to_sc($sc, $idx, $obj) {
     nqp::scsetobj($sc, $idx, $obj);
@@ -80,6 +80,10 @@ sub add_to_sc($sc, $idx, $obj) {
     nqp::bindattr_i($instance, $type, '$!age', 5);
     nqp::bindattr_n($instance, $type, '$!weight', 2.3);
     add_to_sc($sc, 1, $instance);
+
+    my $defaults := nqp::create($type);
+
+    add_to_sc($sc, 2, $defaults);
     
     my $serialized := nqp::serialize($sc, $sh);
     
@@ -97,6 +101,13 @@ sub add_to_sc($sc, $idx, $obj) {
                                               'int attribute declared in P6opaque-based type is OK');
     ok(nqp::getattr_n(nqp::scgetobj($dsc, 1), nqp::scgetobj($dsc, 0), '$!weight') == 2.3,
                                               'num attribute declared in P6opaque-based type is OK');
+
+    ok(nqp::isnull_s(nqp::getattr_s(nqp::scgetobj($dsc, 2), nqp::scgetobj($dsc, 0), '$!eats')),
+        'default str value is OK');
+    ok(nqp::getattr_i(nqp::scgetobj($dsc, 2), nqp::scgetobj($dsc, 0), '$!age') == 0,
+        'default int value is OK');
+    ok(nqp::getattr_n(nqp::scgetobj($dsc, 2), nqp::scgetobj($dsc, 0), '$!weight') == 0,
+        'default num value is OK');
 
     my $other_instance := nqp::create(nqp::scgetobj($dsc, 0));
     ok(nqp::isconcrete($other_instance), 'can make new instance of deserialized type');
