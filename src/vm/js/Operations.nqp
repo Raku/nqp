@@ -422,8 +422,8 @@ class QAST::OperationsJS {
 
     add_simple_op('isnull', $T_BOOL, [$T_OBJ], sub ($obj) {"($obj === null)"});
 
-    add_simple_op('null_s', $T_STR, [], sub () {"null"});
-    add_simple_op('isnull_s', $T_BOOL, [$T_STR], sub ($obj) {"($obj === null)"});
+    add_simple_op('null_s', $T_STR, [], sub () {"nqp.null_s"});
+    add_simple_op('isnull_s', $T_BOOL, [$T_STR], sub ($obj) {"($obj === nqp.null_s)"});
 
     add_simple_op('time_n', $T_NUM, [], sub () {"(new Date().getTime() / 1000)"}, :sideffects);
     add_simple_op('time_i', $T_NUM, [], sub () {"Math.floor(new Date().getTime() / 1000)"}, :sideffects);

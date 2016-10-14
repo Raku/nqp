@@ -1,6 +1,7 @@
 'use strict';
 
 var incompleteMethodCaches = [];
+var null_s = require('./null_s.js'); /* Used when evaling runtime compiled methods */
 
 
 class STable {

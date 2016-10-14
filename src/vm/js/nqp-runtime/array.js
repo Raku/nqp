@@ -1,6 +1,7 @@
 'use strict';
 var NQPException = require('./nqp-exception.js');
 var Iter = require('./iter.js');
+var null_s = require('./null_s.js');
 
 class NQPArray {
   constructor(array) {
@@ -37,7 +38,7 @@ class NQPArray {
 
   $$atpos_s(index) {
     var value = this.array[index < 0 ? this.array.length + index : index];
-    if (value === undefined) return null;
+    if (value === undefined) return null_s;
     return value;
   }
 

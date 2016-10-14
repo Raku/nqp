@@ -3,6 +3,9 @@ exports.op = op;
 
 var NQPInt = require('./nqp-int.js');
 var NQPException = require('./nqp-exception.js');
+
+var null_s = require('./null_s.js');
+
 exports.NQPInt = NQPInt;
 
 function loadOps(module) {
@@ -126,6 +129,8 @@ exports.toStr = function(arg, ctx) {
   } else if (typeof arg == 'string') {
     return arg;
   } else if (arg === null) {
+    return '';
+  } else if (arg === null_s) {
     return arg;
   } else if (arg !== undefined && arg !== null && arg.typeObject_) {
     return '';
@@ -344,3 +349,6 @@ exports.setCodeRefHLL = function(codeRefs, hllName) {
 };
 
 exports.ControlReturn = ControlReturn;
+
+
+exports.null_s = null_s;

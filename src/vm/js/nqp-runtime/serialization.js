@@ -4,6 +4,7 @@ var CodeRef = require('./code-ref.js');
 var NQPInt = require('./nqp-int.js');
 var Int64 = require('node-int64');
 var NQPArray = require('./array.js');
+var null_s = require('./null_s.js');
 
 var constants = require('./constants.js');
 
@@ -468,7 +469,7 @@ class SerializationWriter {
     this.contexts = [];
     this.sc = sc;
     this.sh = sh;
-    this.sh.push(null);
+    this.sh.push(null_s);
     this.numClosures = 0;
 
     this.stables = new BinaryWriteCursor(this);

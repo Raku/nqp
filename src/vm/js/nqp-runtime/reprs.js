@@ -700,7 +700,7 @@ class P6str extends REPR {
 
 P6str.prototype.boxedPrimitive = 3;
 P6str.prototype.flattenSTable = true;
-P6str.prototype.flattenedDefault = "null";
+P6str.prototype.flattenedDefault = "null_s";
 
 
 reprs.P6str = P6str;

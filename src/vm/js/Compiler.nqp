@@ -561,8 +561,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
 
             if $desired == $T_BOOL {
-                if $got == $T_INT || $got == $T_NUM || $got == $T_STR {
+                if $got == $T_INT || $got == $T_NUM {
                     return Chunk.new($T_BOOL, $chunk.expr, [$chunk]);
+                } elsif $got == $T_STR {
+                    return Chunk.new($T_BOOL, "({$chunk.expr} && {$chunk.expr} !== nqp.null_s)", [$chunk]);
                 }
             }
 
@@ -1321,7 +1323,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my $i := 0;
         while $i < nqp::elems($sc_sh) {
             my $s := nqp::atpos_s($sc_sh,$i);
-            my $got := nqp::isnull_s($s) ?? 'null' !! quote_string($s);
+            my $got := nqp::isnull_s($s) ?? 'nqp.null_s' !! quote_string($s);
             @sh.push($got);
             $i := $i + 1;
         }
