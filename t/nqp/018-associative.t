@@ -1,6 +1,6 @@
 # check hash access methods
 
-plan(15);
+plan(17);
 
 my %h;
 
@@ -32,6 +32,9 @@ ok(%h<c> == 0,"a missing key behaves properly when used as number");
 my $h := nqp::hash('foo', 123,'bar','hello');
 ok($h<foo> == 123, 'hash access on a hash created with nqp::hash');
 is($h<bar>, 'hello', 'hash access on a hash created with nqp::hash');
+
+ok(nqp::isnull($h<foo> := nqp::null()), 'when binding the null results the fallback does not happen');
+ok(nqp::eqaddr($h<foo>, NQPMu), 'when getting a null from a hash it\'s turned into a NQPMu');
 
 ok(nqp::elems($h) == 2, 'nqp::elems on a hash');
 
