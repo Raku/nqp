@@ -190,7 +190,7 @@ exports.toInt = function(arg, ctx) {
 };
 
 exports.toBool = function(maybeContainer, ctx) {
-  if (maybeContainer === undefined || maybeContainer == null) {
+  if (maybeContainer == null) {
     return 0;
   }
   var value = maybeContainer.$$decont ? maybeContainer.$$decont(ctx) : maybeContainer;
@@ -198,7 +198,7 @@ exports.toBool = function(maybeContainer, ctx) {
     return value ? 1 : 0;
   } else if (typeof value == 'string') {
     return value == '' ? 0 : 1;
-  } else if (value === undefined || value == null) {
+  } else if (value == null) {
     return 0;
   } else if (value.$$toBool) {
     return value.$$toBool(ctx);
