@@ -1567,19 +1567,22 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         self.compile_var($node, :$want);
     }
 
+    # TODO CPS
     multi method as_js(QAST::VarWithFallback $node, :$want, :$cps) {
-        # TODO CPS
-
-        my $var := self.compile_var($node, :want($T_OBJ));
-
-        my $fallback := self.as_js($node.fallback, :want($T_OBJ));
-        my $tmp := $*BLOCK.add_tmp();
-        Chunk.new($T_OBJ, $tmp, [
-            $var,
-            "if ({$var.expr} == null) \{\n"
-                ,$fallback
-                ,"$tmp = {$fallback.expr};\n\} else \{\n$tmp = {$var.expr};\n\}\n"
-                ]);
+        my $compiled := self.compile_var($node, :$want);
+        if $*BINDVAL || $compiled.type != $T_OBJ {
+            $compiled
+        }
+        else {
+            my $fallback := self.as_js($node.fallback, :want($T_OBJ));
+            my $tmp := $*BLOCK.add_tmp();
+            Chunk.new($T_OBJ, $tmp, [
+                $compiled,
+                "if ({$compiled.expr} == null) \{\n"
+                    ,$fallback
+                    ,"$tmp = {$fallback.expr};\n\} else \{\n$tmp = {$compiled.expr};\n\}\n"
+                    ]);
+        }
     }
 
     multi method as_js(QAST::Regex $node, :$want, :$cps) {
