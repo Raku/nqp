@@ -81,7 +81,7 @@ COMMON_NQP_SOURCES  = \
 
 NQP_COMBINED = NQP.nqp
 
-// No QAST_SOURCES, just one file, no need to combine
+# No QAST_SOURCES, just one file, no need to combine
 
 QAST_COMBINED = QAST.nqp
 
