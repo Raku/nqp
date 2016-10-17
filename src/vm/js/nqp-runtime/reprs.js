@@ -880,19 +880,20 @@ reprs.CPointer = CPointer;
 class AsyncTask extends REPR {};
 reprs.AsyncTask = AsyncTask;
 
-class ReentrantMutex {};
-ReentrantMutex.prototype.createObjConstructor = basicConstructor;
-ReentrantMutex.prototype.allocate = basicAllocate;
-ReentrantMutex.prototype.typeObjectFor = basicTypeObjectFor;
-
+class ReentrantMutex extends REPR {};
 reprs.ReentrantMutex = ReentrantMutex;
 
-class ConditionVariable {};
-
-ConditionVariable.prototype.createObjConstructor = basicConstructor;
-
+class ConditionVariable extends REPR {};
 reprs.ConditionVariable = ConditionVariable;
 
+class Semaphore extends REPR {};
+reprs.Semaphore = Semaphore;
+
+class ConcBlockingQueue extends REPR {}
+reprs.ConcBlockingQueue = ConcBlockingQueue;
+
+class Decoder extends REPR {}
+reprs.Decoder = Decoder;
 
 class MultiDimArray extends REPR {
   compose(STable, reprInfoHash) {
