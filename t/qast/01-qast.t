@@ -1,6 +1,6 @@
 use QAST;
 
-plan(96);
+plan(100);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -1206,7 +1206,7 @@ test_qast_result(
         QAST::Op.new(
             :op<list>,
             QAST::Op.new( :op<chain>, :name<op1>, sval('a'), sval('b')),
-            QAST::Op.new( :op<chain>, :name<op1>, 
+            QAST::Op.new( :op<chain>, :name<op1>,
                 QAST::Op.new( :op<chain>, :name<op2>,
                     QAST::Op.new( :op<chain>, :name<op2>, sval('A'), sval('B')
                     ),
@@ -1532,10 +1532,31 @@ test_qast_result(
     $int_boxer.HOW.add_method($int_boxer, 'twice', method () {~(nqp::getattr_i(self, $int_boxer, '$!value')*2)});
     $int_boxer.HOW.compose($int_boxer);
 
+    my $num_boxer := NQPClassHOW.new_type(:name('boxing_num'), :repr('P6opaque'));
+    $num_boxer.HOW.add_attribute($num_boxer, NQPAttribute.new(
+        :name('$!value'), :type(num), :box_target(1)
+    ));
+    $num_boxer.HOW.add_parent($num_boxer, NQPMu);
+    $num_boxer.HOW.add_method($num_boxer, 'twice', method () {~(nqp::getattr_n(self, $num_boxer, '$!value')*2)});
+    $num_boxer.HOW.compose($num_boxer);
+
+    my $str_boxer := NQPClassHOW.new_type(:name('boxing_str'), :repr('P6opaque'));
+    $str_boxer.HOW.add_attribute($str_boxer, NQPAttribute.new(
+        :name('$!value'), :type(str), :box_target(1)
+    ));
+    $str_boxer.HOW.add_parent($str_boxer, NQPMu);
+    $str_boxer.HOW.add_method($str_boxer, 'twice', method () {
+        nqp::getattr_s(self, $str_boxer, '$!value') * 2;
+    });
+    $str_boxer.HOW.compose($str_boxer);
+
 
     nqp::sethllconfig('foo', nqp::hash(
-        'int_box', $int_boxer
+        'int_box', $int_boxer,
+        'num_box', $num_boxer,
+        'str_box', $str_boxer
     ));
+
     test_qast_result(
         QAST::CompUnit.new(
             :hll<foo>,
@@ -1551,6 +1572,42 @@ test_qast_result(
         -> $r {
             ok(nqp::istype($r, $int_boxer), 'an automatically boxed int is of the correct type');
             ok($r.twice eq '246', '...and it has the correct value');
+        }
+    );
+
+    test_qast_result(
+        QAST::CompUnit.new(
+            :hll<foo>,
+            QAST::Block.new(
+                QAST::Var.new(:decl<var>, :scope<local>, :name<$foo>),
+                QAST::Op.new(:op<bind>,
+                    QAST::Var.new(:name<$foo>, :scope<local>),
+                    QAST::NVal.new(value => 122.5)
+                ),
+                QAST::Var.new(:name<$foo>, :scope<local>)
+            )
+        ),
+        -> $r {
+            ok(nqp::istype($r, $num_boxer), 'an automatically boxed num is of the correct type');
+            ok($r.twice eq '245', '...and it has the correct value');
+        }
+    );
+
+    test_qast_result(
+        QAST::CompUnit.new(
+            :hll<foo>,
+            QAST::Block.new(
+                QAST::Var.new(:decl<var>, :scope<local>, :name<$foo>),
+                QAST::Op.new(:op<bind>,
+                    QAST::Var.new(:name<$foo>, :scope<local>),
+                    QAST::SVal.new(value => 122)
+                ),
+                QAST::Var.new(:name<$foo>, :scope<local>)
+            )
+        ),
+        -> $r {
+            ok(nqp::istype($r, $str_boxer), 'an automatically boxed str is of the correct type');
+            ok($r.twice eq '244', '...and it has the correct value');
         }
     );
 }
