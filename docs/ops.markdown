@@ -79,6 +79,7 @@
     - [encodefromcodes](#encodefromcodes)
     - [encodenorm](#encodenorm)
     - [escape](#escape)
+    - [fc](#fc)
     - [findcclass](#findcclass)
     - [findnotcclass](#findnotcclass)
     - [flip](#flip)
@@ -866,6 +867,12 @@ NORMALIZE_NONE is equivalent to NFC.
 Given a string, return an escaped version that replaces the following
 characters with their escaped equivalents: "\\", "\b", "\n", "\r",
 "\t", "\f", "\"", "\a", and "\e".
+
+## fc
+* `fc(str $str)`
+
+Returns a Unicode "fold case" operation copy of string, suitable for doing
+caseless string comparisons.
 
 ## findcclass
 * `findcclass(int $class, str $str, int $i, int $count)`
