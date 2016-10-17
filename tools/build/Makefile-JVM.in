@@ -148,42 +148,42 @@ $(J_STAGE1_DIR)/$(QASTNODE_JAR): $(J_STAGE0_DIR) $(QASTNODE_SOURCES) $(J_STAGE1_
 	$(MKPATH) $(J_STAGE1_DIR)
 	$(PERL) tools/build/gen-cat.pl jvm $(QASTNODE_SOURCES) > $(J_STAGE1_DIR)/$(QASTNODE_COMBINED)
 	$(J_STAGE0_NQP) --module-path=$(J_STAGE1_DIR) --setting-path=$(J_STAGE1_DIR) \
-         --setting=NQPCORE --no-regex-lib --target=jar \
+	    --setting=NQPCORE --no-regex-lib --target=jar \
 	    --output=$(J_STAGE1_DIR)/$(QASTNODE_JAR) $(J_STAGE1_DIR)/$(QASTNODE_COMBINED)
 
 $(J_STAGE1_DIR)/$(QREGEX_JAR): $(J_STAGE0_DIR) $(QREGEX_SOURCES) $(J_STAGE1_DIR)/$(QASTNODE_JAR)
 	$(MKPATH) $(J_STAGE1_DIR)
 	$(PERL) tools/build/gen-cat.pl jvm $(QREGEX_SOURCES) > $(J_STAGE1_DIR)/$(QREGEX_COMBINED)
 	$(J_STAGE0_NQP) --module-path=$(J_STAGE1_DIR) --setting-path=$(J_STAGE1_DIR) \
-         --setting=NQPCORE --no-regex-lib --target=jar \
+	    --setting=NQPCORE --no-regex-lib --target=jar \
 	    --output=$(J_STAGE1_DIR)/$(QREGEX_JAR) $(J_STAGE1_DIR)/$(QREGEX_COMBINED)
 
 $(J_STAGE1_DIR)/$(HLL_JAR): $(J_STAGE0_DIR) $(J_HLL_SOURCES) $(J_STAGE1_DIR)/$(QREGEX_JAR) $(J_STAGE1_DIR)/$(JASTNODES_JAR)
 	$(MKPATH) $(J_STAGE1_DIR)
 	$(PERL) tools/build/gen-cat.pl jvm $(J_HLL_SOURCES) > $(J_STAGE1_DIR)/$(HLL_COMBINED)
 	$(J_STAGE0_NQP) --module-path=$(J_STAGE1_DIR) --setting-path=$(J_STAGE1_DIR) \
-         --setting=NQPCORE --no-regex-lib --target=jar \
+	    --setting=NQPCORE --no-regex-lib --target=jar \
 	    --output=$(J_STAGE1_DIR)/$(HLL_JAR) $(J_STAGE1_DIR)/$(HLL_COMBINED)
 
 $(J_STAGE1_DIR)/$(JASTNODES_JAR): $(J_STAGE0_DIR) $(JASTNODES_SOURCES) $(J_STAGE1_DIR)/$(CORE_SETTING_JAR)
 	$(MKPATH) $(J_STAGE1_DIR)
 	$(PERL) tools/build/gen-cat.pl jvm $(JASTNODES_SOURCES) > $(J_STAGE1_DIR)/$(JASTNODES_COMBINED)
 	$(J_STAGE0_NQP) --module-path=$(J_STAGE1_DIR) --setting-path=$(J_STAGE1_DIR) \
-         --setting=NQPCORE --no-regex-lib --target=jar \
+	    --setting=NQPCORE --no-regex-lib --target=jar \
 	    --output=$(J_STAGE1_DIR)/$(JASTNODES_JAR) $(J_STAGE1_DIR)/$(JASTNODES_COMBINED)
 
 $(J_STAGE1_DIR)/$(QAST_JAR): $(J_STAGE0_DIR) $(J_QAST_SOURCES) $(J_STAGE1_DIR)/$(HLL_JAR) $(J_STAGE1_DIR)/$(JASTNODES_JAR)
 	$(MKPATH) $(J_STAGE1_DIR)
 	$(PERL) tools/build/gen-cat.pl jvm $(J_QAST_SOURCES) > $(J_STAGE1_DIR)/$(QAST_COMBINED)
 	$(J_STAGE0_NQP) --module-path=$(J_STAGE1_DIR) --setting-path=$(J_STAGE1_DIR) \
-         --setting=NQPCORE --no-regex-lib --target=jar \
+	    --setting=NQPCORE --no-regex-lib --target=jar \
 	    --output=$(J_STAGE1_DIR)/$(QAST_JAR) $(J_STAGE1_DIR)/$(QAST_COMBINED)
 
 $(J_STAGE1_DIR)/$(P6QREGEX_JAR): $(J_STAGE0_DIR) $(P6QREGEX_SOURCES) $(J_STAGE1_DIR)/$(QAST_JAR)
 	$(MKPATH) $(J_STAGE1_DIR)
 	$(PERL) tools/build/gen-cat.pl jvm $(P6QREGEX_SOURCES) > $(J_STAGE1_DIR)/$(P6QREGEX_COMBINED)
 	$(J_STAGE0_NQP) --module-path=$(J_STAGE1_DIR) --setting-path=$(J_STAGE1_DIR) \
-         --setting=NQPCORE --no-regex-lib --target=jar \
+	   --setting=NQPCORE --no-regex-lib --target=jar \
 	    --output=$(J_STAGE1_DIR)/$(P6QREGEX_JAR) $(J_STAGE1_DIR)/$(P6QREGEX_COMBINED)
 
 $(J_STAGE1_DIR)/$(NQP_JAR): $(J_STAGE0_DIR) $(J_NQP_SOURCES) $(J_STAGE1_DIR)/$(P6QREGEX_JAR)
@@ -191,7 +191,7 @@ $(J_STAGE1_DIR)/$(NQP_JAR): $(J_STAGE0_DIR) $(J_NQP_SOURCES) $(J_STAGE1_DIR)/$(P
 	$(PERL) tools/build/gen-version.pl > $(J_STAGE1_DIR)/nqp-config.nqp
 	$(PERL) tools/build/gen-cat.pl jvm $(J_NQP_SOURCES) $(J_STAGE1_DIR)/nqp-config.nqp > $(J_STAGE1_DIR)/$(NQP_COMBINED)
 	$(J_STAGE0_NQP) --module-path=$(J_STAGE1_DIR) --setting-path=$(J_STAGE1_DIR) \
-         --setting=NQPCORE --target=jar --no-regex-lib --javaclass=nqp \
+	    --setting=NQPCORE --target=jar --no-regex-lib --javaclass=nqp \
 	    --output=$(J_STAGE1_DIR)/$(NQP_JAR) $(J_STAGE1_DIR)/$(NQP_COMBINED)
 
 $(J_STAGE2_DIR): $(J_STAGE2_OUTPUT)
@@ -216,42 +216,42 @@ $(J_STAGE2_DIR)/$(QASTNODE_JAR): $(J_STAGE1_DIR) $(QASTNODE_SOURCES) $(J_STAGE2_
 	$(MKPATH) $(J_STAGE2_DIR)
 	$(PERL) tools/build/gen-cat.pl jvm $(QASTNODE_SOURCES) > $(J_STAGE2_DIR)/$(QASTNODE_COMBINED)
 	$(J_STAGE1_NQP) --module-path=$(J_STAGE2_DIR) --setting-path=$(J_STAGE2_DIR) \
-         --setting=NQPCORE --no-regex-lib --target=jar \
+	    --setting=NQPCORE --no-regex-lib --target=jar \
 	    --output=$(J_STAGE2_DIR)/$(QASTNODE_JAR) $(J_STAGE2_DIR)/$(QASTNODE_COMBINED)
 
 $(J_STAGE2_DIR)/$(QREGEX_JAR): $(J_STAGE1_DIR) $(QREGEX_SOURCES) $(J_STAGE2_DIR)/$(QASTNODE_JAR)
 	$(MKPATH) $(J_STAGE2_DIR)
 	$(PERL) tools/build/gen-cat.pl jvm $(QREGEX_SOURCES) > $(J_STAGE2_DIR)/$(QREGEX_COMBINED)
 	$(J_STAGE1_NQP) --module-path=$(J_STAGE2_DIR) --setting-path=$(J_STAGE2_DIR) \
-         --setting=NQPCORE --no-regex-lib --target=jar \
+	    --setting=NQPCORE --no-regex-lib --target=jar \
 	    --output=$(J_STAGE2_DIR)/$(QREGEX_JAR) $(J_STAGE2_DIR)/$(QREGEX_COMBINED)
 
 $(J_STAGE2_DIR)/$(HLL_JAR): $(J_STAGE1_DIR) $(J_HLL_SOURCES) $(J_STAGE2_DIR)/$(QREGEX_JAR) $(J_STAGE2_DIR)/$(JASTNODES_JAR)
 	$(MKPATH) $(J_STAGE2_DIR)/gen
 	$(PERL) tools/build/gen-cat.pl jvm $(J_HLL_SOURCES) > $(J_STAGE2_DIR)/$(HLL_COMBINED)
 	$(J_STAGE1_NQP) --module-path=$(J_STAGE2_DIR) --setting-path=$(J_STAGE2_DIR) \
-         --setting=NQPCORE --no-regex-lib --target=jar \
+	    --setting=NQPCORE --no-regex-lib --target=jar \
 	    --output=$(J_STAGE2_DIR)/$(HLL_JAR) $(J_STAGE2_DIR)/$(HLL_COMBINED)
 
 $(J_STAGE2_DIR)/$(JASTNODES_JAR): $(J_STAGE1_DIR) $(JASTNODES_SOURCES) $(J_STAGE2_DIR)/$(CORE_SETTING_JAR)
 	$(MKPATH) $(J_STAGE2_DIR)
 	$(PERL) tools/build/gen-cat.pl jvm $(JASTNODES_SOURCES) > $(J_STAGE2_DIR)/$(JASTNODES_COMBINED)
 	$(J_STAGE1_NQP) --module-path=$(J_STAGE2_DIR) --setting-path=$(J_STAGE2_DIR) \
-         --setting=NQPCORE --no-regex-lib --target=jar \
+	    --setting=NQPCORE --no-regex-lib --target=jar \
 	    --output=$(J_STAGE2_DIR)/$(JASTNODES_JAR) $(J_STAGE2_DIR)/$(JASTNODES_COMBINED)
 
 $(J_STAGE2_DIR)/$(QAST_JAR): $(J_STAGE1_DIR) $(J_QAST_SOURCES) $(J_STAGE2_DIR)/$(HLL_JAR) $(J_STAGE2_DIR)/$(JASTNODES_JAR)
 	$(MKPATH) $(J_STAGE2_DIR)
 	$(PERL) tools/build/gen-cat.pl jvm $(J_QAST_SOURCES) > $(J_STAGE2_DIR)/$(QAST_COMBINED)
 	$(J_STAGE1_NQP) --module-path=$(J_STAGE2_DIR) --setting-path=$(J_STAGE2_DIR) \
-         --setting=NQPCORE --no-regex-lib --target=jar \
+	    --setting=NQPCORE --no-regex-lib --target=jar \
 	    --output=$(J_STAGE2_DIR)/$(QAST_JAR) $(J_STAGE2_DIR)/$(QAST_COMBINED)
 
 $(J_STAGE2_DIR)/$(P6QREGEX_JAR): $(J_STAGE1_DIR) $(P6QREGEX_SOURCES) $(J_STAGE2_DIR)/$(QAST_JAR)
 	$(MKPATH) $(J_STAGE2_DIR)
 	$(PERL) tools/build/gen-cat.pl jvm $(P6QREGEX_SOURCES) > $(J_STAGE2_DIR)/$(P6QREGEX_COMBINED)
 	$(J_STAGE1_NQP) --module-path=$(J_STAGE2_DIR) --setting-path=$(J_STAGE2_DIR) \
-         --setting=NQPCORE --no-regex-lib --target=jar \
+	    --setting=NQPCORE --no-regex-lib --target=jar \
 	    --output=$(J_STAGE2_DIR)/$(P6QREGEX_JAR) $(J_STAGE2_DIR)/$(P6QREGEX_COMBINED)
 
 $(J_STAGE2_DIR)/$(NQP_JAR): $(J_STAGE1_DIR) $(J_NQP_SOURCES) $(J_STAGE2_DIR)/$(P6QREGEX_JAR)
@@ -259,7 +259,7 @@ $(J_STAGE2_DIR)/$(NQP_JAR): $(J_STAGE1_DIR) $(J_NQP_SOURCES) $(J_STAGE2_DIR)/$(P
 	$(PERL) tools/build/gen-version.pl > $(J_STAGE2_DIR)/nqp-config.nqp
 	$(PERL) tools/build/gen-cat.pl jvm $(J_NQP_SOURCES) $(J_STAGE2_DIR)/nqp-config.nqp > $(J_STAGE2_DIR)/$(NQP_COMBINED)
 	$(J_STAGE1_NQP) --module-path=$(J_STAGE2_DIR) --setting-path=$(J_STAGE2_DIR) \
-         --setting=NQPCORE --target=jar --no-regex-lib --javaclass=nqp \
+	    --setting=NQPCORE --target=jar --no-regex-lib --javaclass=nqp \
 	    --output=$(J_STAGE2_DIR)/$(NQP_JAR) $(J_STAGE2_DIR)/$(NQP_COMBINED)
 
 $(ALL_OUTPUT): $(J_STAGE2_OUTPUT)
