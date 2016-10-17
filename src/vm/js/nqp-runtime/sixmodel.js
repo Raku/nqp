@@ -40,7 +40,7 @@ class STable {
     this.boolificationSpec = {mode: mode, method: method};
     if (mode == 0) {
       this.objConstructor.prototype.$$toBool = function(ctx) {
-        return method.$$call(ctx, {}, this);
+        return method.$$call(ctx, {}, this).$$toBool(ctx);
       };
     } else if (mode == 1) {
       this.objConstructor.prototype.$$toBool = function(ctx) {

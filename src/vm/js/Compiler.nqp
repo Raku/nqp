@@ -542,21 +542,29 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
 
             if $desired == $T_OBJ {
-                if $got == $T_NUM || $got == $T_STR {
-                    return $chunk;
-                }
-                elsif $got == $T_INT {
-                      return $*HLL eq 'nqp'
-                          ?? Chunk.new($T_OBJ, "new nqp.NQPInt({$chunk.expr})", [$chunk])
-                          !! Chunk.new($T_OBJ, "nqp.intToObj({quote_string($*HLL)}, {$chunk.expr})", [$chunk]);
-
-                }
-                elsif $got == $T_BOOL {
-                    return Chunk.new($T_OBJ, "({$chunk.expr} ? 1 : 0)", [$chunk]);
+                if $got == $T_BOOL {
+                    $chunk := Chunk.new($T_INT, "({$chunk.expr} ? 1 : 0)", [$chunk]);
+                    $got := $T_INT;
                 }
                 elsif $got == $T_VOID {
                     # TODO think what's the correct thing here
                     return Chunk.new($T_OBJ, "null", [$chunk]);
+                }
+
+                if $*HLL eq 'nqp' {
+                    if $got == $T_NUM || $got == $T_STR {
+                        return $chunk;
+                    }
+                    elsif $got == $T_INT {
+                        return Chunk.new($T_OBJ, "new nqp.NQPInt({$chunk.expr})", [$chunk]);
+                    }
+                }
+                else {
+                    my %convert;
+                    %convert{$T_INT} := 'intToObj';
+                    %convert{$T_NUM} := 'numToObj';
+                    %convert{$T_STR} := 'strToObj';
+                    return Chunk.new($T_OBJ, "nqp.{%convert{$got}}({quote_string($*HLL)}, {$chunk.expr})", [$chunk]);
                 }
             }
 

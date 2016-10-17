@@ -225,6 +225,35 @@ exports.intToObj = function(hllName, i) {
   }
 };
 
+exports.numToObj = function(hllName, n) {
+  var currentHLL = hll.hllConfigs[hllName];
+  var type;
+  if (currentHLL) type = currentHLL.get('num_box');
+  if (!type) {
+    return n;
+  }
+  else {
+    var repr = type._STable.REPR;
+    var obj = repr.allocate(type._STable);
+    obj.$$setNum(n);
+    return obj;
+  }
+};
+
+exports.strToObj = function(hllName, s) {
+  var currentHLL = hll.hllConfigs[hllName];
+  var type;
+  if (currentHLL) type = currentHLL.get('str_box');
+  if (!type) {
+    return s;
+  }
+  else {
+    var repr = type._STable.REPR;
+    var obj = repr.allocate(type._STable);
+    obj.$$setStr(s);
+    return obj;
+  }
+};
 
 if (!Math.imul) {
   /* Polyfill from:
