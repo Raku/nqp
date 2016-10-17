@@ -1,4 +1,4 @@
-plan(21);
+plan(23);
 
 my str $typed_str := 'a string';
 my     $just_str  := 'a string';
@@ -30,3 +30,6 @@ ok(nqp::isnum($typed_num), 'isnum on typed variable +');
 ok(!nqp::isnum($typed_str), 'isnum on typed variable -');
 ok(nqp::isnum($just_num), 'isnum on untyped variable +');
 ok(!nqp::isnum($just_str), 'isnum on untyped variable -');
+
+ok(nqp::isint(nqp::isle_i(1, 10)), 'isint on result of nqp::isle_i');
+ok(!nqp::isnum(nqp::isle_i(1, 10)), 'isnum on result of nqp::isle_i');
