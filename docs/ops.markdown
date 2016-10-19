@@ -16,8 +16,7 @@
     - [exp](#exp)
     - [floor](#floor)
     - [inf](#inf)
-    - [log](#log)
-    - [ln](#ln)
+    - [log_n](#log_n)
     - [expmod](#expmod)
     - [nan](#nan)
     - [neginf](#neginf)
@@ -486,10 +485,10 @@ Return the floor of a number.
 
 Return infinity.
 
-## log
+## log_n
 * `log_n(num $n)`
 
-Return the log base 10 of a number.
+Return the natural logarithm (base 𝑒) of a number.
 
 ## expmod
 * `expmod_I(Int $base, Int $exponent, Int $modulus, Mu:T $type)`
