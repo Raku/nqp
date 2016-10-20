@@ -1,4 +1,4 @@
-plan(11);
+plan(12);
 sub more-inner() {
     my $outer := nqp::ctxcaller(nqp::ctx());
     my $outermost := nqp::ctxcaller(nqp::ctxcaller(nqp::ctx()));
@@ -68,3 +68,5 @@ outer();
         }
     }
 }
+
+ok(nqp::istrue(nqp::ctx()) == 1, 'ctxs are true');
