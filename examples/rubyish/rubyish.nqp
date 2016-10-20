@@ -297,108 +297,107 @@ grammar Rubyish::Grammar is HLL::Grammar {
         ] <!ww>
     }
 
-    INIT {
-        # Operator precedence levels
-        # see http://www.tutorialspoint.com/ruby/ruby_operators.htm
-        # y: **
-        Rubyish::Grammar.O(':prec<y=>, :assoc<left>',  '%exponentiation');
-        # x: ! ~ + - (unary)
-        Rubyish::Grammar.O(':prec<x=>, :assoc<unary>', '%unary');
-        # w: * / %
-        Rubyish::Grammar.O(':prec<w=>, :assoc<left>',  '%multiplicative');
-        # u: + -
-        Rubyish::Grammar.O(':prec<u=>, :assoc<left>',  '%additive');
-        # t: >> <<
-        Rubyish::Grammar.O(':prec<t=>, :assoc<left>',  '%bitshift');
-        # s: &
-        Rubyish::Grammar.O(':prec<s=>, :assoc<left>',  '%bitand');
-        # r: ^ |
-        Rubyish::Grammar.O(':prec<r=>, :assoc<left>',  '%bitor');
-        # q: <= < > >= le lt gt ge
-        Rubyish::Grammar.O(':prec<q=>, :assoc<left>',  '%comparison');
-        # n: <=> == === != =~ !~ eq ne cmp
-        Rubyish::Grammar.O(':prec<n=>, :assoc<left>',  '%equality');
-        # l: &&
-        Rubyish::Grammar.O(':prec<l=>, :assoc<left>',  '%logical_and');
-        # k: ||
-        Rubyish::Grammar.O(':prec<k=>, :assoc<left>',  '%logical_or');
-        # q: ?:
-        Rubyish::Grammar.O(':prec<g=>, :assoc<right>', '%conditional');
-        # f: = %= { /= -= += |= &= >>= <<= *= &&= ||= **=
-        Rubyish::Grammar.O(':prec<f=>, :assoc<right>', '%assignment');
-        # e: not (unary)
-        Rubyish::Grammar.O(':prec<e=>, :assoc<unary>', '%loose_not');
-        # c: or and
-        Rubyish::Grammar.O(':prec<c=>, :assoc<left>',  '%loose_logical');
-    }
+    ## Operator precedence levels
+    #  -- see http://www.tutorialspoint.com/ruby/ruby_operators.htmw
+    my %methodop       := nqp::hash('prec', 'y=', 'assoc', 'unary');
+    # y: **
+    my %exponentiation := nqp::hash('prec', 'y=', 'assoc', 'left');
+    # x: ! ~ + - (unary)
+    my %unary          := nqp::hash('prec', 'x=', 'assoc', 'unary');
+    # w: * / %
+    my %multiplicative := nqp::hash('prec', 'w=', 'assoc', 'left');
+    # u: + -
+    my %additive       := nqp::hash('prec', 'u=', 'assoc', 'left');
+    # t: >> <<
+    my %bitshift       := nqp::hash('prec', 't=', 'assoc', 'left');
+    # s: &
+    my %bitand         := nqp::hash('prec', 's=', 'assoc', 'left');
+    # r: ^ |
+    my %bitor          := nqp::hash('prec', 'r=', 'assoc', 'left');
+    # q: <= < > >= le lt gt ge
+    my %comparison     := nqp::hash('prec', 'q=', 'assoc', 'left');
+    # n: <=> == === != =~ !~ eq ne cmp
+     my %equality      := nqp::hash('prec', 'n=', 'assoc', 'left'); 
+    # l: &&
+     my %logical_and   := nqp::hash('prec', 'l=', 'assoc', 'left'); 
+    # k: ||
+     my %logical_or    := nqp::hash('prec', 'k=', 'assoc', 'left'); 
+    # q: ?:
+     my %conditional   := nqp::hash('prec', 'g=', 'assoc', 'right');
+    # f: = %= { /= -= += |= &= >>= <<= *= &&= ||= **=
+     my %assignment    := nqp::hash('prec', 'f=', 'assoc', 'right');
+    # e: not (unary)
+     my %loose_not     := nqp::hash('prec', 'e=', 'assoc', 'unary');
+    # c: or and
+     my %loose_logical :=  nqp::hash('prec', 'c=', 'assoc', 'left');
 
     # Operators - mostly stolen from NQP
-    token infix:sym<**> { <sym>  <O('%exponentiation, :op<pow_n>')> }
+    token infix:sym<**>   { <sym>       <O(|%exponentiation, :op<pow_n>)> }
 
-    token prefix:sym<-> { <sym><![>]>  <O('%unary, :op<neg_n>')> }
-    token prefix:sym<!> { <sym>  <O('%unary, :op<not_i>')> }
+    token prefix:sym<->   { <sym><![>]> <O(|%unary, :op<neg_n>)> }
+    token prefix:sym<!>   { <sym>       <O(|%unary, :op<not_i>)> }
 
-    token infix:sym<*>  { <sym> <O('%multiplicative, :op<mul_n>')> }
-    token infix:sym</>  { <sym> <O('%multiplicative, :op<div_n>')> }
-    token infix:sym<%>  { <sym><![>]> <O('%multiplicative, :op<mod_n>')> }
+    token infix:sym<*>    { <sym>       <O(|%multiplicative, :op<mul_n>)> }
+    token infix:sym</>    { <sym>       <O(|%multiplicative, :op<div_n>)> }
+    token infix:sym<%>    { <sym><![>]> <O(|%multiplicative, :op<mod_n>)> }
 
-    token infix:sym<+>  { <sym> <O('%additive, :op<add_n>')> }
-    token infix:sym<->  { <sym> <O('%additive, :op<sub_n>')> }
-    token infix:sym<~>  { <sym> <O('%additive, :op<concat>')> }
+    token infix:sym<+>    { <sym>       <O(|%additive,       :op<add_n>)> }
+    token infix:sym<->    { <sym>       <O(|%additive, :op<sub_n>)> }
+    token infix:sym<~>    { <sym>       <O(|%additive, :op<concat>)> }
 
-    token infix:sym«<<»   { <sym>  <O('%bitshift, :op<bitshiftl_i>')> }
-    token infix:sym«>>»   { <sym>  <O('%bitshift, :op<bitshiftr_i>')> }
+    token infix:sym«<<»   { <sym>       <O(|%bitshift, :op<bitshiftl_i>)> }
+    token infix:sym«>>»   { <sym>       <O(|%bitshift, :op<bitshiftr_i>)> }
 
-    token infix:sym<&>  { <sym> <O('%bitand, :op<bitand_i>')> }
-    token infix:sym<|>  { <sym> <O('%bitor,  :op<bitor_i>')> }
-    token infix:sym<^>  { <sym> <O('%bitor,  :op<bitxor_i>')> }
+    token infix:sym<&>    { <sym>       <O(|%bitand, :op<bitand_i>)> }
+    token infix:sym<|>    { <sym>       <O(|%bitor,  :op<bitor_i>)> }
+    token infix:sym<^>    { <sym>       <O(|%bitor,  :op<bitxor_i>)> }
 
-    token infix:sym«<=»   { <sym><![>]>  <O('%comparison, :op<isle_n>')> }
-    token infix:sym«>=»   { <sym>  <O('%comparison, :op<isge_n>')> }
-    token infix:sym«<»    { <sym>  <O('%comparison, :op<islt_n>')> }
-    token infix:sym«>»    { <sym>  <O('%comparison, :op<isgt_n>')> }
-    token infix:sym«le»   { <sym>  <O('%comparison, :op<isle_s>')> }
-    token infix:sym«ge»   { <sym>  <O('%comparison, :op<isge_s>')> }
-    token infix:sym«lt»   { <sym>  <O('%comparison, :op<islt_s>')> }
-    token infix:sym«gt»   { <sym>  <O('%comparison, :op<isgt_s>')> }
+    token infix:sym«<=»   { <sym><![>]> <O(|%comparison, :op<isle_n>)> }
+    token infix:sym«>=»   { <sym>       <O(|%comparison, :op<isge_n>)> }
+    token infix:sym«<»    { <sym>       <O(|%comparison, :op<islt_n>)> }
+    token infix:sym«>»    { <sym>       <O(|%comparison, :op<isgt_n>)> }
+    token infix:sym«le»   { <sym>       <O(|%comparison, :op<isle_s>)> }
+    token infix:sym«ge»   { <sym>       <O(|%comparison, :op<isge_s>)> }
+    token infix:sym«lt»   { <sym>       <O(|%comparison, :op<islt_s>)> }
+    token infix:sym«gt»   { <sym>       <O(|%comparison, :op<isgt_s>)> }
 
-    token infix:sym«==»   { <sym>  <O('%equality, :op<iseq_n>')> }
-    token infix:sym«!=»   { <sym>  <O('%equality, :op<isne_n>')> }
-    token infix:sym«<=>»  { <sym>  <O('%equality, :op<cmp_n>')> }
-    token infix:sym«eq»   { <sym>  <O('%equality, :op<iseq_s>')> }
-    token infix:sym«ne»   { <sym>  <O('%equality, :op<isne_s>')> }
-    token infix:sym«cmp»  { <sym>  <O('%equality, :op<cmp_s>')> }
+    token infix:sym«==»   { <sym>       <O(|%equality, :op<iseq_n>)> }
+    token infix:sym«!=»   { <sym>       <O(|%equality, :op<isne_n>)> }
+    token infix:sym«<=>»  { <sym>       <O(|%equality, :op<cmp_n>)> }
+    token infix:sym«eq»   { <sym>       <O(|%equality, :op<iseq_s>)> }
+    token infix:sym«ne»   { <sym>       <O(|%equality, :op<isne_s>)> }
+    token infix:sym«cmp»  { <sym>       <O(|%equality, :op<cmp_s>)> }
 
-    token infix:sym<&&>   { <sym>  <O('%logical_and, :op<if>')> }
-    token infix:sym<||>   { <sym>  <O('%logical_or,  :op<unless>')> }
+    token infix:sym<&&>   { <sym>       <O(|%logical_and, :op<if>)> }
+    token infix:sym<||>   { <sym>       <O(|%logical_or,  :op<unless>)> }
 
     token infix:sym<? :>  {:s '?' <EXPR('i=')>
-                             ':' <O('%conditional, :reducecheck<ternary>, :op<if>')>
+                              ':' <O(|%conditional, :reducecheck<ternary>, :op<if>)>
     }
 
     token bind-op       {'='<![>=]>}
-    token infix:sym<=>  { <.bind-op> <O('%assignment, :op<bind>')> }
+    token infix:sym<=>  { <.bind-op> <O(|%assignment, :op<bind>)> }
 
-    token prefix:sym<not> { <sym>  <O('%loose_not,     :op<not_i>')> }
-    token infix:sym<and>  { <sym>  <O('%loose_logical, :op<if>')> }
-    token infix:sym<or>   { <sym>  <O('%loose_logical, :op<unless>')> }
+    token prefix:sym<not> { <sym>  <O(|%loose_not,     :op<not_i>)> }
+    token infix:sym<and>  { <sym>  <O(|%loose_logical, :op<if>)> }
+    token infix:sym<or>   { <sym>  <O(|%loose_logical, :op<unless>)> }
 
     # Parenthesis
     token circumfix:sym<( )> { :my $*IN_PARENS := 1;
-                               '(' ~ ')' <EXPR> <O('%methodop')> }
+                               '(' ~ ')' <EXPR> <O(|%methodop)> }
 
     # Method call
     token postfix:sym<.>  {
         '.' <operation> [ '(' ~ ')' <call-args=.paren-args>? ]?
-        <O('%methodop')>
+        <O(|%methodop)>
     }
 
     # Array and hash indices
-    token postcircumfix:sym<[ ]> { '[' ~ ']' [ <EXPR> ] <O('%methodop')> }
-    token postcircumfix:sym<{ }> { '{' ~ '}' [ <EXPR> ] <O('%methodop')> }
+    token postcircumfix:sym<[ ]> { '[' ~ ']' [ <EXPR> ] <O(|%methodop)> }
+    token postcircumfix:sym<{ }> { '{' ~ '}' [ <EXPR> ] <O(|%methodop)> }
     token postcircumfix:sym<ang> {
         <?[<]> <quote_EXPR: ':q'>
-        <O('%methodop')>
+        <O(|%methodop)>
     }
 
     # Statement control
@@ -843,7 +842,7 @@ class Rubyish::Actions is HLL::Actions {
     method stmt:sym<EXPR>($/) { make $<EXPR>.ast; }
 
     method term:sym<infix=>($/) {
-        my $op := $<OPER><O><op>;
+        my $op := $<OPER><O>.made<op>;
         make  QAST::Op.new( :op('bind'),
                             $<var>.ast,
                             QAST::Op.new( :op($op),
