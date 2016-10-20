@@ -153,6 +153,10 @@ class Ctx {
   $$iterator() {
     return new Iter(Object.keys(this).filter(key => key.substr(0, 2) != '$$'));
   }
+
+  $$toBool(ctx) {
+    return 1;
+  }
 };
 
 Ctx.prototype.$$atkey_i = Ctx.prototype.$$atkey_n = Ctx.prototype.$$atkey_s = Ctx.prototype.$$atkey;
