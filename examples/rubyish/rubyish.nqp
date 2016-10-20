@@ -252,14 +252,14 @@ grammar Rubyish::Grammar is HLL::Grammar {
     token value:sym<heredoc> {'<<'<heredoc>}
 
     proto token heredoc {*}
-    #| non-interpolating heredoc
-    token heredoc:sym<literal>  {[$<marker>=<.ident> | \' $<marker>=<- [\' \n]>+? \' ]\n
+    #| non-interpolating heredoc: <<'MARKER' ... MARKER  
+    token heredoc:sym<literal>  {[$<marker>=<.ident> | \' $<marker>=.+? \' ]\n
                                      $<text>=.*?
                                  \n$<marker>$$
     }
 
-    #| interpolating heredoc
-    token heredoc:sym<interp> {\" $<marker>=<- [\" \n]>+? \"\n
+    #| interpolating heredoc: <<"MARKER" ... MARKER  
+    token heredoc:sym<interp> {\" $<marker>=.+? \" \n
                                    [<text=.interp> | <text=.heredoc-line> ]*?
                                \n$<marker>$$
     }
