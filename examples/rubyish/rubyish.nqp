@@ -632,15 +632,15 @@ class Rubyish::Actions is HLL::Actions {
             # pseudo-code:
             #
             # def new(*call-args)
-            #     $new-obj$ = Class.new;
+            #     $new-obj = Class.new;
             #     if call-args then
             #        # always try to call initialize, when new has arguments
-            #        $new-obj$.initialize(call-args)
+            #        $new-obj.initialize(call-args)
             #     else
-            #        $new-obj$.initialize() \
-            #           if $new-obj$.can('initialize')
+            #        $new-obj.initialize() \
+            #           if $new-obj.can('initialize')
             #     end
-            #     return $new-obj$
+            #     return $new-obj
             # end
 
             # create the new object
