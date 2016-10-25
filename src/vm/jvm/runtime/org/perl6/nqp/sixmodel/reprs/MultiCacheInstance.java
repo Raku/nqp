@@ -9,9 +9,10 @@ import org.perl6.nqp.sixmodel.TypeObject;
 public class MultiCacheInstance extends SixModelObject {
     private static final int MD_CACHE_MAX_ARITY = 4;
     private static final int MD_CACHE_MAX_ENTRIES = 16;
-    private static final int MD_CACHE_INT = 1;
-    private static final int MD_CACHE_NUM = 2;
-    private static final int MD_CACHE_STR = 3;
+    private static final int MD_CACHE_INT  = 1;
+    private static final int MD_CACHE_NUM  = 2;
+    private static final int MD_CACHE_STR  = 3;
+    private static final int MD_CACHE_NULL = 0;
     
     private SixModelObject zeroArity;
     private ArityCache[] arityCaches = new ArityCache[MD_CACHE_MAX_ARITY];
@@ -74,10 +75,15 @@ public class MultiCacheInstance extends SixModelObject {
                 if (numArgs >= MD_CACHE_MAX_ARITY)
                     return;
                 SixModelObject decont = Ops.decont((SixModelObject)args[i], tc);
-                long flag = ((long)decont.st.hashCode()) << 1;
-                if (!(decont instanceof TypeObject))
-                    flag |= 1;
-                argTup[numArgs++] = flag;
+                if ( decont == null ) {
+                    argTup[numArgs++] = MD_CACHE_NULL;
+                }
+                else {
+                    long flag = ((long)decont.st.hashCode()) << 1;
+                    if (!(decont instanceof TypeObject))
+                        flag |= 1;
+                    argTup[numArgs++] = flag;
+                }
                 break;
             default:
                 if ((argFlags[i] & CallSiteDescriptor.ARG_FLAT) != 0)
@@ -145,10 +151,15 @@ public class MultiCacheInstance extends SixModelObject {
                 if (numArgs >= MD_CACHE_MAX_ARITY)
                     return null;
                 SixModelObject decont = Ops.decont((SixModelObject)args[i], tc);
-                long flag = ((long)decont.st.hashCode()) << 1;
-                if (!(decont instanceof TypeObject))
-                    flag |= 1;
-                argTup[numArgs++] = flag;
+                if ( decont == null ) {
+                    argTup[numArgs++] = MD_CACHE_NULL;
+                }
+                else {
+                    long flag = ((long)decont.st.hashCode()) << 1;
+                    if (!(decont instanceof TypeObject))
+                        flag |= 1;
+                    argTup[numArgs++] = flag;
+                }
                 break;
             default:
                 if ((argFlags[i] & CallSiteDescriptor.ARG_FLAT) != 0)
