@@ -621,6 +621,7 @@ class QAST::OperationsJS {
 
             my $call := $compiled_args.is_args_array ?? '.$$applyCPS(' !! '.$$callCPS(';
             
+            # TODO decont
             my $call_chunk := ChunkCPS.new($T_OBJ, $result, ['return ' ~ $callee.expr ~ $call ~ $compiled_args.expr ~ ");\n"], $cont);
 
             $comp.chunk_sequence($T_OBJ, @setup, :$node, :result_child(nqp::elems(@setup) - 1));
@@ -631,7 +632,7 @@ class QAST::OperationsJS {
             my $call := $compiled_args.is_args_array ?? '.$$apply(' !! '.$$call(';
 
             $comp.stored_result(
-                Chunk.new($T_OBJ, $callee.expr ~ $call ~ $compiled_args.expr ~ ')' , [$callee, $compiled_args], :$node), :$want);
+                Chunk.new($T_OBJ, "nqp.op.decont($*CTX, " ~ $callee.expr ~ ")" ~ $call ~ $compiled_args.expr ~ ')' , [$callee, $compiled_args], :$node), :$want);
         }
     });
 
