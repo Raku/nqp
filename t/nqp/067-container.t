@@ -1,4 +1,4 @@
-plan(19);
+plan(20);
 
 ok(nqp::isnull(nqp::decont(nqp::null())), 'nqp::decont works on nqp::null');
 
@@ -41,6 +41,10 @@ ok(nqp::isnull(nqp::decont(nqp::null())), 'nqp::decont works on nqp::null');
 
     nqp::assign($cont, "just a string");
     ok(nqp::unbox_s($cont) eq "just a string", "unbox_s works correctly with containers");
+
+    nqp::assign($cont, sub () {234});
+
+    ok($cont() == 234, "a call deconts the callee");
 
     class Foo {
         method foo() {
