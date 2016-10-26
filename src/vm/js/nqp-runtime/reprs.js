@@ -526,10 +526,11 @@ KnowHOWAttribute.prototype.allocate = basicAllocate;
 
 reprs.KnowHOWAttribute = KnowHOWAttribute;
 
-class Uninstantiable {
+class Uninstantiable extends REPR {
+  allocate(STable) {
+    throw new NQPException("You cannot create an instance of this type (" + STable.debugName + ")");
+  }
 };
-Uninstantiable.prototype.createObjConstructor = basicConstructor;
-Uninstantiable.prototype.typeObjectFor = basicTypeObjectFor;
 reprs.Uninstantiable = Uninstantiable;
 
 class P6int extends REPR {
