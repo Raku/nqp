@@ -735,7 +735,8 @@ class QAST::OperationsJS {
             my $*HANDLER_CTX := $comp.unique_var('ctx');
             my $unwind_marker := $*BLOCK.add_tmp;
 
-            my $try_ret := $want == $T_VOID ?? '' !! $*BLOCK.add_tmp;
+            my $try_ret := '';
+            my $set_try_ret := '';
 
             my $handle := '';
             for @children -> $type, $handler {
@@ -761,6 +762,13 @@ class QAST::OperationsJS {
             {
                 my $*CTX := $*HANDLER_CTX;
                 my $body := $comp.as_js($protected, :$want);
+
+                if $want != $T_VOID {
+                    $try_ret := $*BLOCK.add_tmp;
+                    my $coerced_ret := $comp.coerce(Chunk.new($T_OBJ, "$unwind_marker.ret", []), $want);
+                    $set_try_ret := Chunk.new($T_VOID, '', [$coerced_ret, "$try_ret = {$coerced_ret.expr};\n"]);
+                }
+
                 return Chunk.new($want, $try_ret, [
                     "var $*CTX = new nqp.Ctx($outer_ctx, $outer_ctx, $outer_ctx.\$\$callThis, $outer_ctx.\$\$codeRefAttr);\n",
                     $handle,
@@ -769,7 +777,7 @@ class QAST::OperationsJS {
                     # HACK we need to check $body.type if we handle something like return
                     (($want == $T_VOID || $body.type == $T_VOID) ?? '' !! "$try_ret = {$body.expr};\n"),
                     "\} catch (e) \{if (e === $unwind_marker) \{",
-                    ($want == $T_VOID ?? '' !! "$try_ret = $unwind_marker.ret;\n"),
+                    $set_try_ret,
                     "\} else if (e instanceof nqp.NQPException) \{\n",
                     "$*CTX.catchException(e);\n",
                     # HACK - we should catch more exceptions
