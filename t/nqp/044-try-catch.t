@@ -2,7 +2,7 @@
 
 # Tests for try and catch
 
-plan(24);
+plan(26);
 
 sub oops($msg = "oops!") { # throw an exception
     nqp::die($msg);
@@ -192,3 +192,14 @@ ok($value == 200, "returning values from try works");
 my $var := 100; try {nqp::die('okohnoes'); $var};
 is($var,100, "variable does get overwriten by bug");
 
+my int $int_try_result := try {
+    nqp::die("foo");
+    200;
+};
+ok(nqp::iseq_i($int_try_result, 0), "can get a native int result of a try block that catches an exception");
+
+my str $str_try_result := try {
+    nqp::die("foo");
+    200;
+};
+ok($str_try_result eq "", "can get a native str result of a try block that catches an exception");
