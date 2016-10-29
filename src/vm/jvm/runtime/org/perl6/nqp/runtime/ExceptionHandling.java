@@ -15,14 +15,15 @@ public class ExceptionHandling {
     public static final int EX_CAT_NEXT = 4;
     public static final int EX_CAT_REDO = 8;
     public static final int EX_CAT_LAST = 16;
-    public static final int EX_CAT_TAKE = 32;
-    public static final int EX_CAT_WARN = 64;
-    public static final int EX_CAT_SUCCEED = 128;
+    public static final int EX_CAT_RETURN = 32;
+    public static final int EX_CAT_TAKE = 128;
+    public static final int EX_CAT_WARN = 256;
+    public static final int EX_CAT_SUCCEED = 512;
+    public static final int EX_CAT_PROCEED = 1024;
     public static final int EX_CAT_LABELED = 4096;
     public static final int EX_CAT_AWAIT = 8192;
     public static final int EX_CAT_EMIT = 16384;
     public static final int EX_CAT_DONE = 32768;
-    public static final int EX_CAT_RETURN = 65536;
     
     /* Exception handler kinds. */
     public static final int EX_UNWIND_SIMPLE = 0;
