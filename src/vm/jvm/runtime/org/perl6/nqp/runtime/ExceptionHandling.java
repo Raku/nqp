@@ -19,6 +19,7 @@ public class ExceptionHandling {
     public static final int EX_CAT_TAKE = 128;
     public static final int EX_CAT_WARN = 256;
     public static final int EX_CAT_SUCCEED = 512;
+    public static final int EX_CAT_PROCEED = 1024;
     public static final int EX_CAT_LABELED = 4096;
     public static final int EX_CAT_AWAIT = 8192;
     public static final int EX_CAT_EMIT = 16384;
