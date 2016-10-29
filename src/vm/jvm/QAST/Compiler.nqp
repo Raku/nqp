@@ -74,20 +74,20 @@ my $EX_CAT_CATCH   := 1;
 my $EX_CAT_NEXT    := 4;
 my $EX_CAT_REDO    := 8;
 my $EX_CAT_LAST    := 16;
-my $EX_CAT_TAKE    := 32;
-my $EX_CAT_WARN    := 64;
-my $EX_CAT_SUCCEED := 128;
-my $EX_CAT_PROCEED := 256;
+my $EX_CAT_RETURN  := 32;
+my $EX_CAT_TAKE    := 128;
+my $EX_CAT_WARN    := 256;
+my $EX_CAT_SUCCEED := 512;
+my $EX_CAT_PROCEED := 1024;
+my $EX_CAT_LABELED := 4096;
 my $EX_CAT_AWAIT   := 8192;
 my $EX_CAT_EMIT    := 16384;
 my $EX_CAT_DONE    := 32768;
-my $EX_CAT_RETURN  := 65536;
 my $EX_CAT_CONTROL := $EX_CAT_NEXT +| $EX_CAT_REDO +| $EX_CAT_LAST +|
                       $EX_CAT_TAKE +| $EX_CAT_WARN +|
                       $EX_CAT_SUCCEED +| $EX_CAT_PROCEED +|
                       $EX_CAT_AWAIT +| $EX_CAT_EMIT +| $EX_CAT_DONE +|
                       $EX_CAT_RETURN;
-my $EX_CAT_LABELED := 4096;
 
 # Exception handler kinds.
 my $EX_UNWIND_SIMPLE := 0;
@@ -2028,18 +2028,18 @@ my %const_map := nqp::hash(
     'HLL_ROLE_HASH',        5,
     'HLL_ROLE_CODE',        6,
     
-    'CONTROL_TAKE',         32,
-    'CONTROL_LAST',         16,
     'CONTROL_NEXT',         4,
     'CONTROL_REDO',         8,
-    'CONTROL_SUCCEED',      128,
-    'CONTROL_PROCEED',      256,
-    'CONTROL_WARN',         64,
+    'CONTROL_LAST',         16,
+    'CONTROL_RETURN',       32,
+    'CONTROL_TAKE',         128,
+    'CONTROL_WARN',         256,
+    'CONTROL_SUCCEED',      512,
+    'CONTROL_PROCEED',      1024,
     'CONTROL_LABELED',      4096,
     'CONTROL_AWAIT',        8192,
     'CONTROL_EMIT',         16384,
     'CONTROL_DONE',         32768,
-    'CONTROL_RETURN',       65536,
     
     'STAT_EXISTS',             0,
     'STAT_FILESIZE',           1,
