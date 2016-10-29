@@ -2,7 +2,7 @@
 
 # Test nqp::op file operations.
 
-plan(93);
+plan(97);
 
 ok( nqp::stat('CREDITS', nqp::const::STAT_EXISTS) == 1, 'nqp::stat exists');
 ok( nqp::stat('AARDVARKS', nqp::const::STAT_EXISTS) == 0, 'nqp::stat not exists');
@@ -222,6 +222,44 @@ if $backend eq 'moar' || $backend eq 'js' || $backend eq 'jvm' {
 else {
     skip("no stat_time op on $backend", 3);
 }
+
+# copy
+nqp::unlink($test-file ~ '-copied') if nqp::stat($test-file ~ '-copied', nqp::const::STAT_EXISTS);
+$fh := nqp::open($test-file, 'w');
+nqp::printfh($fh, 'Hello');
+nqp::closefh($fh);
+nqp::copy($test-file, $test-file ~ '-copied');
+$fh := nqp::open($test-file ~ '-copied', 'r');
+is(nqp::readallfh($fh), "Hello", 'copied file has expected content');
+nqp::closefh($fh);
+$fh := nqp::open($test-file, 'w');
+nqp::printfh($fh, 'Holla');
+nqp::closefh($fh);
+nqp::copy($test-file, $test-file ~ '-copied');
+$fh := nqp::open($test-file ~ '-copied', 'r');
+is(nqp::readallfh($fh), "Holla", 'copied file (overwritten) has expected content');
+nqp::closefh($fh);
+nqp::unlink($test-file);
+nqp::unlink($test-file ~ '-copied');
+
+# rename/move
+nqp::unlink($test-file ~ '-moved') if nqp::stat($test-file ~ '-moved', nqp::const::STAT_EXISTS);
+$fh := nqp::open($test-file, 'w');
+nqp::printfh($fh, 'Hello');
+nqp::closefh($fh);
+nqp::rename($test-file, $test-file ~ '-moved');
+$fh := nqp::open($test-file ~ '-moved', 'r');
+is(nqp::readallfh($fh), "Hello", 'moved file has expected content');
+nqp::closefh($fh);
+$fh := nqp::open($test-file, 'w');
+nqp::printfh($fh, 'Holla');
+nqp::closefh($fh);
+nqp::rename($test-file, $test-file ~ '-moved');
+$fh := nqp::open($test-file ~ '-moved', 'r');
+is(nqp::readallfh($fh), "Holla", 'moved file (overwritten) has expected content');
+nqp::closefh($fh);
+nqp::unlink($test-file);
+nqp::unlink($test-file ~ '-moved');
 
 # link
 nqp::unlink($test-file ~ '-linked') if nqp::stat($test-file ~ '-linked', nqp::const::STAT_EXISTS);
