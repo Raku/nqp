@@ -61,6 +61,7 @@ class QAST::OperationsJS {
     sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op, @argument_types), :$sideffects, :$ctx, :$required_cps, :$cps_aware, :$inlinable = 1, :$decont) {
 
         add_op($op, sub ($comp, $node, :$want, :$cps) {
+            return $comp.NYI("CPS op: $op") if $required_cps;
             my $use_cps := $required_cps || ($cps_aware && $cps);
             my $chunk := op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx, :cps($use_cps), :$decont);
             ($sideffects && !$use_cps) ?? $comp.stored_result($chunk, :$want) !! $chunk;

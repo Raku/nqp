@@ -745,42 +745,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             $result := $result_var;
         }
 
-        my $needs_cont;
-        my $cont_expr;
-
-        my $used_cps := 0;
-
-        my sub compile_statements($i) {
-            if $i >= $n {
-                return;
-            }
-
+        my int $i := 0;
+        while $i < $n {
             my $chunk := @chunks[$i];
             if nqp::istype($chunk, ChunkCPS) {
-                $used_cps := 1;
-                if $i == $n - 1 {
-                    if $i == $result_child {
-                        $needs_cont := $chunk.cont;
-                        $cont_expr  := $chunk.expr;
-                    }
-                    else {
-                        $needs_cont := self.unique_var('cont');
-                        $cont_expr := self.unique_var('result');
-                        @setup.push("var {$chunk.cont} = function({$chunk.expr}) \{\n");
-                        @setup.push("return function() \{return $needs_cont\($result\)\}\n");
-                        @setup.push("\};\n");
-                    }
-                }
-                else {
-                    @setup.push("var {$chunk.cont} = function({$chunk.expr}) \{\n");
-                    $result := $chunk.expr if $i == $result_child;
-                    compile_statements($i+1);
-                    @setup.push("\};\n");
-                }
-                @setup.push($chunk);
+                return self.NYI("CPS currently is broken");
             }
             elsif nqp::istype($chunk, Chunk) || nqp::isstr($chunk) {
-
                 my $chunk_expr := nqp::isstr($chunk) ?? $chunk !! $chunk.expr;
 
                 nqp::push(@setup, $chunk);
@@ -794,27 +765,11 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     }
                 }
 
-                compile_statements($i+1);
-
-                if $i == $n - 1 && $used_cps {
-                    $needs_cont := self.unique_var('cont');
-                    $cont_expr := self.unique_var('result');
-                    @setup.push("return function() \{return $needs_cont\($result\)\}\n");
-                }
             }
-            else {
-                nqp::die("Unknown type seen by compile_all_the_statements");
-            }
+            $i := $i + 1;
         }
 
-        compile_statements(0);
-
-        if $needs_cont {
-            ChunkCPS.new($type, $cont_expr, @setup, $needs_cont, :$node);
-        }
-        else {
-            Chunk.new($type, $result, @setup, :$node);
-        }
+        Chunk.new($type, $result, @setup, :$node);
     }
     
     method compile_all_the_statements(QAST::Stmts $node, $want, :$result_child, :$cps) {
