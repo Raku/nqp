@@ -1,6 +1,6 @@
 #! nqp
 
-plan(1485);
+plan(1488);
 
 {
     my $sc := nqp::createsc('exampleHandle');
@@ -410,6 +410,38 @@ sub add_to_sc($sc, $idx, $obj) {
     ok(nqp::atpos_s(nqp::scgetobj($dsc, 0).a, 0) eq 'cow',   'string array first element is correct');
     ok(nqp::atpos_s(nqp::scgetobj($dsc, 0).a, 1) eq 'sheep', 'string array second element is correct');
     ok(nqp::atpos_s(nqp::scgetobj($dsc, 0).a, 2) eq 'pig',   'string array third element is correct');
+}
+
+# Serializing an SC with a P6opaque containing a MultiCache
+{
+    my $sc := nqp::createsc('TEST_SC_13_IN');
+    my $sh := nqp::list_s();
+
+    class T8 {
+        has $!cache;
+        method new() {
+            my $obj := nqp::create(self);
+            $obj.BUILD();
+            $obj;
+        }
+        method cache() {
+            $!cache;
+        }
+        method BUILD() {
+            $!cache := nqp::multicacheadd(nqp::null(), nqp::usecapture(), 123);
+        }
+    }
+    my $v := T8.new();
+    add_to_sc($sc, 0, $v);
+
+    my $serialized := nqp::serialize($sc, $sh);
+
+    my $dsc := nqp::createsc('TEST_SC_13_OUT');
+    nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
+
+    ok(nqp::scobjcount($dsc) == 1, 'deserialized SC has a single object');
+    ok(nqp::istype(nqp::scgetobj($dsc, 0), T8), 'deserialized object has correct type');
+    ok(nqp::isnull(nqp::scgetobj($dsc, 0).cache), 'Multi cache ends up null');
 }
 
 # integers
