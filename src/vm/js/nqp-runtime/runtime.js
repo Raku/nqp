@@ -40,6 +40,8 @@ loadOps(cclass);
 var hll = require('./hll.js');
 loadOps(hll);
 
+loadOps(require('./multicache.js'));
+
 var deserialization = require('./deserialization.js');
 exports.wval = deserialization.wval;
 loadOps(deserialization);

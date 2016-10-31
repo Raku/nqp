@@ -5,6 +5,7 @@ var NQPInt = require('./nqp-int.js');
 var Int64 = require('node-int64');
 var NQPArray = require('./array.js');
 var null_s = require('./null_s.js');
+var MultiCache = require('./multicache.js').MultiCache;
 
 var constants = require('./constants.js');
 
@@ -358,10 +359,11 @@ class BinaryWriteCursor {
   //       * the lexpad, for no really good reason. */
   //      discrim = REFVAR_VM_NULL;
   //  }
-  //  else if (ref.st.REPR instanceof MultiCache) {
-  //      /* These are re-computed each time. */
-  //      discrim = REFVAR_VM_NULL;
-  //  }
+
+    else if (ref instanceof MultiCache) {
+      discrim = REFVAR_VM_NULL;
+    }
+
     else if (ref instanceof NQPInt) {
       discrim = REFVAR_VM_INT;
     }
