@@ -31,24 +31,18 @@ class MAST::InstructionList {
     has @!instructions;
     has $!result_reg;
     has int $!result_kind;
-    has str $!filename;
-    has int $!lineno;
 
-    method new(@instructions, $result_reg, $result_kind, str :$filename = '<anon>', int :$lineno = 0) {
+    method new(@instructions, $result_reg, $result_kind) {
         my $obj := nqp::create(self);
         nqp::bindattr($obj, MAST::InstructionList, '@!instructions', @instructions);
         nqp::bindattr($obj, MAST::InstructionList, '$!result_reg', $result_reg);
         nqp::bindattr_i($obj, MAST::InstructionList, '$!result_kind', $result_kind);
-        nqp::bindattr_s($obj, MAST::InstructionList, '$!filename', $filename);
-        nqp::bindattr_i($obj, MAST::InstructionList, '$!lineno', $lineno);
         $obj
     }
 
     method instructions() { @!instructions }
     method result_reg()   { $!result_reg }
     method result_kind()  { $!result_kind }
-    method filename()     { $!filename }
-    method lineno()       { $!lineno }
 
     method append(MAST::InstructionList $other) {
         push_ilist(@!instructions, $other);
