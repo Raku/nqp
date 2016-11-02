@@ -321,7 +321,13 @@ op.sayfh = function(fh, content) {
 };
 
 op.unlink = function(filename) {
-  fs.unlinkSync(filename);
+  try {
+    fs.unlinkSync(filename);
+  } catch (e) {
+    if (e.code !== 'ENOENT') {
+      throw e;
+    }
+  }
 };
 
 op.link = function(srcpath, dstpath) {
@@ -460,4 +466,12 @@ op.chmod = function(path, mode) {
 op.sleep = function(seconds) {
   sleep.usleep(Math.floor(seconds * 1000000));
   return seconds;
+};
+
+op.copy = function(source, target) {
+  fs.writeFileSync(target, fs.readFileSync(source));
+};
+
+op.rename = function(oldPath, newPath) {
+  fs.renameSync(oldPath, newPath);
 };

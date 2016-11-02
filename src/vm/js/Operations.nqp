@@ -458,6 +458,8 @@ class QAST::OperationsJS {
     add_simple_op('isttyfh', $T_INT, [$T_OBJ]);
     add_simple_op('setinputlinesep', $T_OBJ, [$T_OBJ, $T_STR], :sideffects);
     add_simple_op('setinputlineseps', $T_OBJ, [$T_OBJ, $T_OBJ], :sideffects);
+    add_simple_op('copy', $T_VOID, [$T_STR, $T_STR], :sideffects);
+    add_simple_op('rename', $T_VOID, [$T_STR, $T_STR], :sideffects);
 
     add_simple_op('bootarray', $T_OBJ, []);
 
