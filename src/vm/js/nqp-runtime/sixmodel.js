@@ -14,17 +14,15 @@ class STable {
     this.objConstructor = REPR.createObjConstructor(this);
 
     /* HACK - it's a bit hackish - think how correct it is */
-    if (!this.objConstructor.prototype.hasOwnProperty('$$clone')) {
-      this.objConstructor.prototype.$$clone = function() {
-        var clone = new this._STable.objConstructor();
-        for (var i in this) {
-          if (this.hasOwnProperty(i) && i != '_SC') {
-            clone[i] = this[i];
-          }
+    this.objConstructor.prototype.$$clone = function() {
+      var clone = new this._STable.objConstructor();
+      for (var i in this) {
+        if (this.hasOwnProperty(i) && i != '_SC') {
+          clone[i] = this[i];
         }
-        return clone;
-      };
-    }
+      }
+      return clone;
+    };
 
     /* Default boolification mode 5 */
     this.objConstructor.prototype.$$toBool = function(ctx) {
