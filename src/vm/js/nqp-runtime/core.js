@@ -417,11 +417,6 @@ op.isrwcont = function(cont) {
   return cont.$$decont ? 1 : 0;
 };
 
-op.decont = function(ctx, cont) {
-  if (cont === Null) return cont;
-  return cont.$$decont ? cont.$$decont(ctx) : cont;
-};
-
 op.box_n = function(n, type) {
   var repr = type._STable.REPR;
   var obj = repr.allocate(type._STable);

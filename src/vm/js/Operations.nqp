@@ -35,7 +35,7 @@ class QAST::OperationsJS {
         my $i := 0;
         for $node.list -> $arg {
             my $chunk := $comp.as_js($arg, :want(@argument_types[$i]));
-            @exprs.push(@decont[$i] ?? "nqp.op.decont($*CTX, {$chunk.expr})" !! $chunk.expr);
+            @exprs.push(@decont[$i] ?? "{$chunk.expr}.\$\$decont($*CTX)" !! $chunk.expr);
             @setup.push($chunk);
             $i := $i + 1;
         }
@@ -152,7 +152,7 @@ class QAST::OperationsJS {
     add_native_assign_op('assign_s', $T_STR);
 
 
-    add_simple_op('decont', $T_OBJ, [$T_OBJ], :ctx);
+    add_simple_op('decont', $T_OBJ, [$T_OBJ], sub ($cont) {"$cont\.\$\$decont($*CTX)"});
     add_simple_op('iscont', $T_INT, [$T_OBJ]);
     add_simple_op('isrwcont', $T_INT, [$T_OBJ]);
 
@@ -635,7 +635,7 @@ class QAST::OperationsJS {
             my $call := $compiled_args.is_args_array ?? '.$$apply(' !! '.$$call(';
 
             $comp.stored_result(
-                Chunk.new($T_OBJ, "nqp.op.decont($*CTX, " ~ $callee.expr ~ ")" ~ $call ~ $compiled_args.expr ~ ')' , [$callee, $compiled_args], :$node), :$want);
+                Chunk.new($T_OBJ, $callee.expr ~ ".\$\$decont($*CTX)" ~ $call ~ $compiled_args.expr ~ ')' , [$callee, $compiled_args], :$node), :$want);
         }
     });
 
@@ -711,7 +711,7 @@ class QAST::OperationsJS {
         @setup.push($compiled_args);
 
         $comp.stored_result(
-            Chunk.new($T_OBJ, "nqp.op.decont($*CTX, {$invocant.expr})" ~ $method ~ $call ~ $compiled_args.expr ~ ')' , @setup, :$node), :$want);
+            Chunk.new($T_OBJ, "{$invocant.expr}.\$\$decont($*CTX)" ~ $method ~ $call ~ $compiled_args.expr ~ ')' , @setup, :$node), :$want);
 
     });
 
