@@ -77,6 +77,8 @@ var STABLE_HAS_HLL_ROLE = 0x80;
 var STRING_HEAP_LOC_PACKED_OVERFLOW = 0x00008000;
 var STRING_HEAP_LOC_PACKED_SHIFT = 16;
 
+
+
 /**
   We define a BinaryCursor class so we can read sequential things easily
   @constructor
@@ -655,7 +657,7 @@ class BinaryCursor {
   }
 
   deserializeCtx(context, outers) {
-    var outerCtx = outers.length != 0 ? outers[outers.length-1] : null;
+    var outerCtx = outers.length != 0 ? outers[outers.length - 1] : null;
     var callerCtx = null;
 
     // TODO - think if we should set codeObj

@@ -358,37 +358,37 @@ class P6opaque {
   generateNormalAccessors(STable, slot) {
     var attr = slotToAttr(slot);
 
-    STable.compileAccessor('$$bindattr$' + slot, 'function(value) {\n'
-      + 'this.' + attr + ' = value;\n'
-      + 'return value;\n'
-      + '}\n');
+    STable.compileAccessor('$$bindattr$' + slot, 'function(value) {\n' +
+        'this.' + attr + ' = value;\n' +
+        'return value;\n' +
+        '}\n');
 
     if (this.autoVivValues && this.autoVivValues[slot]) {
       var isTypeObject = this.autoVivValues[slot].typeObject_;
 
-      STable.compileAccessor('$$getattr$' + slot, 'function(value) {\n'
-        + 'var value = this.' + attr + ';\n'
-        + 'if (value === undefined) {\n'
-        + 'value = autoViv' + slot + (isTypeObject ? '' : '.$$clone()') + ';\n'
-        + 'this.' + attr + ' =  value;\n'
-        + '}\n'
-        + 'return value;\n'
-        + '}\n', 'var autoViv' + slot + ' = STable.REPR.autoVivValues[' + slot + '];\n');
+      STable.compileAccessor('$$getattr$' + slot, 'function(value) {\n' +
+          'var value = this.' + attr + ';\n' +
+          'if (value === undefined) {\n' +
+          'value = autoViv' + slot + (isTypeObject ? '' : '.$$clone()') + ';\n' +
+          'this.' + attr + ' =  value;\n' +
+          '}\n' +
+          'return value;\n' +
+          '}\n', 'var autoViv' + slot + ' = STable.REPR.autoVivValues[' + slot + '];\n');
     } else {
-      STable.compileAccessor('$$getattr$' + slot, 'function(value) {\n'
-        + 'var value = this.' + attr + ';\n'
-        + 'if (value === undefined) {\n'
-        + 'return null;\n'
-        + '}\n'
-        + 'return value;'
-        + '}\n'
+      STable.compileAccessor('$$getattr$' + slot, 'function(value) {\n' +
+          'var value = this.' + attr + ';\n' +
+          'if (value === undefined) {\n' +
+          'return null;\n' +
+          '}\n' +
+          'return value;' +
+          '}\n'
       );
     }
 
   }
 
   generateDefaults(STable) {
-    var code = "";
+    var code = '';
 
     var defaults = {};
     for (var i = 0; i < this.nameToIndexMapping.length; i++) {
@@ -406,14 +406,14 @@ class P6opaque {
 
   generateUniversalAccessors(STable) {
     this.generateUniversalAccessor(STable, '$$getattr', function(slot) {
-      return 'return this.$$getattr$' + slot + "()";
+      return 'return this.$$getattr$' + slot + '()';
     }, '');
 
     this.generateUniversalAccessor(STable, '$$bindattr', function(slot) {
-      return 'return this.$$bindattr$' + slot + "(value)";
+      return 'return this.$$bindattr$' + slot + '(value)';
     }, ', value');
 
-    for (let suffix of ['_s', '_i', '_n']) {
+    for (let suffix of['_s', '_i', '_n']) {
       /* TODO only check attributes of proper type */
       this.generateUniversalAccessor(STable, '$$getattr' + suffix, function(slot) {
         return 'return this.' + slotToAttr(slot);

@@ -269,7 +269,7 @@ op.settypecache = function(obj, cache) {
 };
 
 op.settypecheckmode = function(obj, mode) {
-  console.log("NYI settypecheckmode");
+  console.log('NYI settypecheckmode');
   return obj;
 };
 
@@ -315,9 +315,9 @@ op.newtype = function(how, repr) {
 
 /* HACK - we need to handle can properly */
 op.can = function(obj, method) {
-  if (typeof obj !== "object" || obj instanceof NQPInt || obj instanceof CodeRef || obj instanceof Hash || obj instanceof NQPArray) return 0;
+  if (typeof obj !== 'object' || obj instanceof NQPInt || obj instanceof CodeRef || obj instanceof Hash || obj instanceof NQPArray) return 0;
   if (!obj._STable.methodCache) {
-    console.log("we have no method cache, checking: " + method);
+    console.log('we have no method cache, checking: ' + method);
     return 0;
   }
   return obj._STable.methodCache.hasOwnProperty(method) ? 1 : 0;
@@ -526,7 +526,7 @@ function toJS(obj) {
 compilerRegistry.set('JavaScript', {
   eval: function(ctx, _NAMED, self, code) {
     if (/PRINTME/.test(code)) {
-      console.log("evaling [", code, "]");
+      console.log('evaling [', code, ']');
     }
     //console.log("evaling [", code, "]");
     return fromJS(eval(code));
@@ -992,7 +992,7 @@ op.forceouterctx = function(code, ctx) {
 op.getattrref_i = function(hllName, get, set) {
   var refType = hll.hllConfigs[hllName].get('int_attr_ref');
   if (refType == null) {
-    throw "No int attribute reference type registered for current HLL";
+    throw 'No int attribute reference type registered for current HLL';
   }
   var STable = refType._STable;
   var ref = STable.REPR.allocate(STable);
@@ -1004,7 +1004,7 @@ op.getattrref_i = function(hllName, get, set) {
 op.getattrref_n = function(hllName, get, set) {
   var refType = hll.hllConfigs[hllName].get('num_attr_ref');
   if (refType == null) {
-    throw "No num attribute reference type registered for current HLL";
+    throw 'No num attribute reference type registered for current HLL';
   }
   var STable = refType._STable;
   var ref = STable.REPR.allocate(STable);
@@ -1016,7 +1016,7 @@ op.getattrref_n = function(hllName, get, set) {
 op.getattrref_s = function(hllName, get, set) {
   var refType = hll.hllConfigs[hllName].get('str_attr_ref');
   if (refType == null) {
-    throw "No str attribute reference type registered for current HLL";
+    throw 'No str attribute reference type registered for current HLL';
   }
   var STable = refType._STable;
   var ref = STable.REPR.allocate(STable);
@@ -1028,7 +1028,7 @@ op.getattrref_s = function(hllName, get, set) {
 op.getlexref_i = function(hllName, get, set) {
   var refType = hll.hllConfigs[hllName].get('int_lex_ref');
   if (refType == null) {
-    throw "No int lexical reference type registered for current HLL";
+    throw 'No int lexical reference type registered for current HLL';
   }
   var STable = refType._STable;
   var ref = STable.REPR.allocate(STable);
@@ -1040,7 +1040,7 @@ op.getlexref_i = function(hllName, get, set) {
 op.getlexref_s = function(hllName, get, set) {
   var refType = hll.hllConfigs[hllName].get('str_lex_ref');
   if (refType == null) {
-    throw "No str lexical reference type registered for current HLL";
+    throw 'No str lexical reference type registered for current HLL';
   }
   var STable = refType._STable;
   var ref = STable.REPR.allocate(STable);
@@ -1052,7 +1052,7 @@ op.getlexref_s = function(hllName, get, set) {
 op.getlexref_n = function(hllName, get, set) {
   var refType = hll.hllConfigs[hllName].get('num_lex_ref');
   if (refType == null) {
-    throw "No num lexical reference type registered for current HLL";
+    throw 'No num lexical reference type registered for current HLL';
   }
   var STable = refType._STable;
   var ref = STable.REPR.allocate(STable);

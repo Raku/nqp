@@ -118,7 +118,7 @@ class NativeRef {
       });
     } else if (primitiveType == 2) { // num
       this.STable.addInternalMethod('$$getInt', function(ctx, value) {
-        return this.get()|0;
+        return this.get() | 0;
       });
 
       this.STable.addInternalMethod('$$getNum', function(ctx, value) {
@@ -159,7 +159,7 @@ class NativeRef {
     } else if (primitiveType == 3) { // str
       this.STable.addInternalMethod('$$getInt', function(ctx, value) {
         var ret = parseFloat(this.get());
-        return isNaN(ret) ? 0 : ret|0;
+        return isNaN(ret) ? 0 : ret | 0;
       });
 
       this.STable.addInternalMethod('$$getNum', function(ctx, value) {
@@ -202,7 +202,7 @@ class NativeRef {
         }
       });
     } else {
-      throw "incorrect type of NativeRef: " + primitiveType;
+      throw 'incorrect type of NativeRef: ' + primitiveType;
     }
   }
 };

@@ -222,7 +222,7 @@ class STable {
     this.code = this.code || '';
     this.setup = this.setup || '';
     if (setup) this.setup += setup;
-    this.code += 'STable.addInternalMethod("' + accessor + '",' +  code + ');\n';
+    this.code += 'STable.addInternalMethod("' + accessor + '",' + code + ');\n';
   }
 
   evalGatheredCode() {

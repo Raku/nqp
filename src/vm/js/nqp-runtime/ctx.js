@@ -109,7 +109,7 @@ class Ctx {
   }
 
   lookupFromOuter(name) {
-    console.log("looking up from outer", name);
+    console.log('looking up from outer', name);
     return this.$$outer.lookup(name);
   }
 

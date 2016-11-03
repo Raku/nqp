@@ -86,7 +86,7 @@ op.loadbytecode = function(ctx, file) {
 
   var oldLoaderCtx = exports.loaderCtx;
   exports.loaderCtx = ctx;
-  var mangled =  file.replace(/::/g, '-');
+  var mangled = file.replace(/::/g, '-');
 
   var prefixes = (process.env.NQPJS_LIB || '').split(':');
   prefixes.push('./', 'nqp-js-on-js/');
@@ -96,13 +96,13 @@ op.loadbytecode = function(ctx, file) {
       loadFrom.require(prefix + mangled);
       found = true;
       break;
-    } catch(e) {
+    } catch (e) {
       if (e.code !== 'MODULE_NOT_FOUND') {
         throw e;
       }
     }
   }
-  if (!found) throw "can't find: " + file + ", looking in: " + prefixes.join(', ') + " from " + loadFrom.filename;
+  if (!found) throw "can't find: " + file + ', looking in: ' + prefixes.join(', ') + ' from ' + loadFrom.filename;
   exports.loaderCtx = oldLoaderCtx;
 
   return file;
@@ -216,7 +216,7 @@ exports.intToObj = function(hllName, i) {
   var currentHLL = hll.hllConfigs[hllName];
   var type;
   if (currentHLL) type = currentHLL.get('int_box');
-  if (!type) { 
+  if (!type) {
     return new NQPInt(i);
   }
   else {
