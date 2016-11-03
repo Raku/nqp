@@ -1,5 +1,4 @@
 'use strict';
-// Serialization stubs
 var op = {};
 module.exports.op = op;
 
