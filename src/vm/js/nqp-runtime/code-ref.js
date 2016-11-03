@@ -1,5 +1,7 @@
 'use strict';
 
+var NQPObject = require('./nqp-object.js');
+
 class WrappedCtx {
   constructor(wrap) {
     this.$$outer = wrap;
@@ -14,8 +16,9 @@ class StaticCtx {
   }
 };
 
-class CodeRef {
+class CodeRef extends NQPObject {
   constructor(name, cuid) {
+    super();
     this.name = name;
     this.cuid = cuid;
     this.staticCode = this;

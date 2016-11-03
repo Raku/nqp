@@ -2,9 +2,11 @@
 var NQPException = require('./nqp-exception.js');
 var Iter = require('./iter.js');
 var null_s = require('./null_s.js');
+var NQPObject = require('./nqp-object.js');
 
-class NQPArray {
+class NQPArray extends NQPObject {
   constructor(array) {
+    super();
     this.array = array;
   }
 

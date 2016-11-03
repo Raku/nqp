@@ -16,6 +16,8 @@ var hll = require('./hll.js');
 
 var NQPArray = require('./array.js');
 
+var NQPObject = require('./nqp-object.js');
+
 var bootstrap = require('./bootstrap.js');
 
 var nqp = require('nqp-runtime');
@@ -158,13 +160,15 @@ op.setboolspec = function(obj, mode, method) {
   return obj;
 };
 
-function Capture(named, pos, skip) {
-  this.pos = pos;
-  this.named = named;
-}
-
-Capture.prototype.$$clone = function() {
-  return this; // captures are immutable
+class Capture extends NQPObject {
+  constructor(named, pos, skip) {
+    super();
+    this.pos = pos;
+    this.named = named;
+  }
+  $$clone() {
+    return this;
+  }
 };
 
 op.savecapture = function(args) {
@@ -483,20 +487,23 @@ op.bindcomp = function(language, compiler) {
   return compiler;
 };
 
-function WrappedFunction(func) {
-  this.func = func;
-}
-
-WrappedFunction.prototype.$$apply = function(args) {
-  var converted = [];
-  for (var i = 2; i < args.length; i++) {
-    converted.push(toJS(args[i]));
+class WrappedFunction extends NQPObject {
+  constructor(func) {
+    super();
+    this.func = func;
   }
-  return fromJS(this.func.apply(null, converted));
-};
 
-WrappedFunction.prototype.$$call = function(args) {
-  return this.$$apply(arguments);
+  $$apply(args) {
+    var converted = [];
+    for (var i = 2; i < args.length; i++) {
+      converted.push(toJS(args[i]));
+    }
+    return fromJS(this.func.apply(null, converted));
+  }
+
+  $$call(args) {
+    return this.$$apply(arguments);
+  }
 };
 
 function fromJS(obj) {
@@ -523,26 +530,35 @@ function toJS(obj) {
   }
 }
 
-compilerRegistry.set('JavaScript', {
-  eval: function(ctx, _NAMED, self, code) {
+class JavaScriptCompiler extends NQPObject {
+  eval(ctx, _NAMED, self, code) {
     if (/PRINTME/.test(code)) {
       console.log('evaling [', code, ']');
     }
     //console.log("evaling [", code, "]");
     return fromJS(eval(code));
   }
-});
+};
 
-compilerRegistry.set('nqp', {
-  backend: function(ctx, named) {
-    return {
-      name: function(ctx, named) {
-        return 'js';
-      }
-    };
+compilerRegistry.set('JavaScript', new JavaScriptCompiler());
+
+class JSBackendStub extends NQPObject {
+  name(ctx, named) {
+    return 'js';
   }
-});
+};
 
+class NQPStub extends NQPObject {
+  constructor() {
+    super();
+    this.backend_ = new JSBackendStub();
+  }
+  backend(ctx, named) {
+    return this.backend_;
+  }
+};
+
+compilerRegistry.set('nqp', new NQPStub());
 
 op.getcomp = function(language) {
   return compilerRegistry.has(language) ? compilerRegistry.get(language) : null;

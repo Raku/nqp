@@ -1,4 +1,7 @@
 'use strict';
+
+var NQPObject = require('./nqp-object.js');
+
 /**
  * A serialization context holds a list of objects and code references that live
  * within a serialization boundary.
@@ -17,8 +20,9 @@
  * @public repScs
 */
 
-class SerializationContext {
+class SerializationContext extends NQPObject {
   constructor(handle) {
+    super();
     this.description = '???';
     this.handle = handle;
     SerializationContext.contexts[handle] = this;

@@ -1,7 +1,10 @@
 'use strict';
 
-class HashIter {
+var NQPObject = require('./nqp-object.js');
+
+class HashIter extends NQPObject {
   constructor(hash) {
+    super();
     this.hash = hash.content;
     this.keys = Object.keys(hash.$$toObject());
     this.target = this.keys.length;
@@ -17,8 +20,9 @@ class HashIter {
   }
 };
 
-class IterPair {
+class IterPair extends NQPObject {
   constructor(hash, key) {
+    super();
     this._key = key;
     this._hash = hash;
   }
@@ -44,8 +48,9 @@ class IterPair {
   }
 };
 
-class Hash {
+class Hash extends NQPObject {
   constructor() {
+    super();
     this.content = new Map();
   }
 

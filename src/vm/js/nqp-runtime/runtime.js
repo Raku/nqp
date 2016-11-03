@@ -382,5 +382,15 @@ exports.setCodeRefHLL = function(codeRefs, hllName) {
 
 exports.ControlReturn = ControlReturn;
 
+/* TODO - make monkey patching builtin things optional */
+
+Number.prototype.$$decont = function(ctx) {
+  return this;
+};
+
+String.prototype.$$decont = function(ctx) {
+  return this;
+};
+
 
 exports.null_s = null_s;

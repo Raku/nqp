@@ -2,9 +2,11 @@
 var CodeRef = require('./code-ref.js');
 var NQPException = require('./nqp-exception.js');
 var Iter = require('./iter.js');
+var NQPObject = require('./nqp-object.js');
 
-class Ctx {
+class Ctx extends NQPObject {
   constructor(callerCtx, outerCtx, callThis, codeRefAttr) {
+    super();
     this.$$caller = callerCtx;
     this.$$outer = outerCtx;
     this.$$callThis = callThis;

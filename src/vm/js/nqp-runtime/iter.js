@@ -1,6 +1,10 @@
 'use strict';
-class Iter {
+
+var NQPObject = require('./nqp-object.js');
+
+class Iter extends NQPObject {
   constructor(array) {
+    super();
     this.array = array;
     this.target = array.length;
     this.idx = 0;

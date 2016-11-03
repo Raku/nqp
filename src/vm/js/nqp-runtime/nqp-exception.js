@@ -14,4 +14,8 @@ NQPException.prototype.$$toBool = function(ctx) {
   return 1;
 };
 
+NQPException.prototype.$$decont = function(ctx) {
+  return this;
+};
+
 module.exports = NQPException;

@@ -1,6 +1,10 @@
 'use strict';
-class NQPInt {
+
+var NQPObject = require('./nqp-object.js');
+
+class NQPInt extends NQPObject {
   constructor(value) {
+    super();
     this.value = value | 0;
   }
 

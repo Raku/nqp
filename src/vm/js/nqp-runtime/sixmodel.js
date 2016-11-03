@@ -29,6 +29,10 @@ class STable {
       return this.typeObject_ ? 0 : 1;
     };
 
+    this.objConstructor.prototype.$$decont = function(ctx) {
+      return this;
+    };
+
     if (this.REPR.setupSTable) {
       this.REPR.setupSTable(this);
     }

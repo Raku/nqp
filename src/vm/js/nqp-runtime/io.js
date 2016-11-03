@@ -12,6 +12,8 @@ var core = require('./core.js');
 
 var child_process = require('child_process');
 
+var NQPObject = require('./nqp-object.js');
+
 function boolish(bool) {
   return bool ? 1 : 0;
 }
@@ -113,8 +115,9 @@ op.lstat_time = function(file, code) {
   return stat(file, code, true);
 };
 
-class FileHandle {
+class FileHandle extends NQPObject {
   constructor(fd) {
+    super();
     this.fd = fd;
   }
 
@@ -392,7 +395,7 @@ op.getenvhash = function() {
   return hash;
 };
 
-class Stderr {
+class Stderr extends NQPObject {
   printfh(msg) {
     process.stderr.write(msg);
   }
@@ -410,7 +413,7 @@ op.getstderr = function() {
   return new Stderr();
 };
 
-class Stdout {
+class Stdout extends NQPObject {
   isttyfh() {
     return (process.stdout.isTTY ? 1 : 0);
   }
@@ -433,7 +436,7 @@ op.flushfh = function(fh) {
   return fh;
 };
 
-class Stdin {
+class Stdin extends NQPObject {
   $$toBool(ctx) {
     return 1;
   }
