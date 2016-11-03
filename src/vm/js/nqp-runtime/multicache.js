@@ -1,7 +1,7 @@
 var NQPInt = require('./nqp-int.js');
 
-var MAX_ARITY = 4;
-var MAX_PER_ARITY = 16;
+const MAX_ARITY = 4;
+const MAX_PER_ARITY = 16;
 
 function MultiCache() {
   this.cache = [];

@@ -35,26 +35,26 @@ op.say = function(arg) {
 };
 
 function stat(file, code, lstat) {
-  var EXISTS = 0;
-  var FILESIZE = 1;
-  var ISDIR = 2;
-  var ISREG = 3;
-  var ISDEV = 4;
-  var CREATETIME = 5;
-  var ACCESSTIME = 6;
-  var MODIFYTIME = 7;
-  var CHANGETIME = 8;
-  var BACKUPTIME = 9;
-  var UID = 10;
-  var GID = 11;
-  var ISLNK = 12;
-  var PLATFORM_DEV = -1;
-  var PLATFORM_INODE = -2;
-  var PLATFORM_MODE = -3;
-  var PLATFORM_NLINKS = -4;
-  var PLATFORM_DEVTYPE = -5;
-  var PLATFORM_BLOCKSIZE = -6;
-  var PLATFORM_BLOCKS = -7;
+  const EXISTS = 0;
+  const FILESIZE = 1;
+  const ISDIR = 2;
+  const ISREG = 3;
+  const ISDEV = 4;
+  const CREATETIME = 5;
+  const ACCESSTIME = 6;
+  const MODIFYTIME = 7;
+  const CHANGETIME = 8;
+  const BACKUPTIME = 9;
+  const UID = 10;
+  const GID = 11;
+  const ISLNK = 12;
+  const PLATFORM_DEV = -1;
+  const PLATFORM_INODE = -2;
+  const PLATFORM_MODE = -3;
+  const PLATFORM_NLINKS = -4;
+  const PLATFORM_DEVTYPE = -5;
+  const PLATFORM_BLOCKSIZE = -6;
+  const PLATFORM_BLOCKS = -7;
 
   // we can't use fs.existsSync(file) as it follows symlinks
   try {
@@ -236,7 +236,7 @@ function readline(fh, chomp) {
   return string.replace(/\r\n/, '\n');
 }
 
-var CHUNK_SIZE = 32768;
+const CHUNK_SIZE = 32768;
 op.readallfh = function(fh) {
   if (fh instanceof nqpIo.SyncPipe) {
     return fh.slurp().toString(fh.encoding || 'utf8');
@@ -354,18 +354,18 @@ op.mkdir = function(dir, mode) {
   }
 };
 
-var PIPE_INHERIT = 1;
-var PIPE_IGNORE = 2;
-var PIPE_CAPTURE = 4;
-var PIPE_INHERIT_IN = 1;
-var PIPE_IGNORE_IN = 2;
-var PIPE_CAPTURE_IN = 4;
-var PIPE_INHERIT_OUT = 8;
-var PIPE_IGNORE_OUT = 16;
-var PIPE_CAPTURE_OUT = 32;
-var PIPE_INHERIT_ERR = 64;
-var PIPE_IGNORE_ERR = 128;
-var PIPE_CAPTURE_ERR = 256;
+const PIPE_INHERIT = 1;
+const PIPE_IGNORE = 2;
+const PIPE_CAPTURE = 4;
+const PIPE_INHERIT_IN = 1;
+const PIPE_IGNORE_IN = 2;
+const PIPE_CAPTURE_IN = 4;
+const PIPE_INHERIT_OUT = 8;
+const PIPE_IGNORE_OUT = 16;
+const PIPE_CAPTURE_OUT = 32;
+const PIPE_INHERIT_ERR = 64;
+const PIPE_IGNORE_ERR = 128;
+const PIPE_CAPTURE_ERR = 256;
 
 op.spawn = function(command, dir, env, input, output, error, flags) {
   nqpIo.spawn(command.array, dir, env.$$toObject(), input, output, error, flags);
