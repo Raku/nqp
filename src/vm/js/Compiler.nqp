@@ -560,7 +560,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 }
                 elsif $got == $T_VOID {
                     # TODO think what's the correct thing here
-                    return Chunk.new($T_OBJ, "null", [$chunk]);
+                    return Chunk.new($T_OBJ, "nqp.Null", [$chunk]);
                 }
 
                 if $*HLL eq 'nqp' {
@@ -1559,7 +1559,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             my $tmp := $*BLOCK.add_tmp();
             Chunk.new($T_OBJ, $tmp, [
                 $compiled,
-                "if ({$compiled.expr} == null) \{\n"
+                "if ({$compiled.expr} === nqp.Null) \{\n"
                     ,$fallback
                     ,"$tmp = {$fallback.expr};\n\} else \{\n$tmp = {$compiled.expr};\n\}\n"
                     ]);

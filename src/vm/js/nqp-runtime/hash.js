@@ -1,6 +1,7 @@
 'use strict';
 
 var NQPObject = require('./nqp-object.js');
+var Null = require('./null.js');
 
 class HashIter extends NQPObject {
   constructor(hash) {
@@ -60,7 +61,7 @@ class Hash extends NQPObject {
   }
 
   $$atkey(key) {
-    return this.content.has(key) ? this.content.get(key) : null;
+    return this.content.has(key) ? this.content.get(key) : Null;
   }
 
   $$existskey(key) {

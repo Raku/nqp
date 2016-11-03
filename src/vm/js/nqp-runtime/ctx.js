@@ -3,6 +3,7 @@ var CodeRef = require('./code-ref.js');
 var NQPException = require('./nqp-exception.js');
 var Iter = require('./iter.js');
 var NQPObject = require('./nqp-object.js');
+var Null = require('./null.js');
 
 class Ctx extends NQPObject {
   constructor(callerCtx, outerCtx, callThis, codeRefAttr) {
@@ -65,7 +66,7 @@ class Ctx extends NQPObject {
       }
       ctx = ctx.$$caller;
     }
-    return null;
+    return Null;
     /* Looking up of a contextual is allowed to fail,
        nqp code usually fallbacks to looking up of global */
   }
@@ -78,7 +79,7 @@ class Ctx extends NQPObject {
       }
       ctx = ctx.$$caller;
     }
-    return null;
+    return Null;
     /* Looking up of a contextual is allowed to fail,
        nqp code usually fallbacks to looking up of global */
   }
@@ -95,7 +96,7 @@ class Ctx extends NQPObject {
       }
       currentCallerCtx = currentCallerCtx.$$caller;
     }
-    return null;
+    return Null;
   }
 
   lookup(name) {
@@ -107,7 +108,7 @@ class Ctx extends NQPObject {
       ctx = ctx.$$outer;
     }
     /* Rakudo depends on returning null when we can't lookup a lexical */
-    return null;
+    return Null;
   }
 
   lookupFromOuter(name) {

@@ -1,4 +1,7 @@
 'use strict';
+
+var Null = require('./null.js');
+
 class CurLexpad {
   constructor(get, set) {
     this.get = get;
@@ -19,7 +22,7 @@ class CurLexpad {
   }
 
   lookup(key) {
-    return this.get.hasOwnProperty(key) ? this.get[key]() : null;
+    return this.get.hasOwnProperty(key) ? this.get[key]() : Null;
   }
 };
 

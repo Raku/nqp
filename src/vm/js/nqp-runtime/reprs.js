@@ -4,6 +4,7 @@ var Hash = require('./hash.js');
 var NQPInt = require('./nqp-int.js');
 var NQPException = require('./nqp-exception.js');
 var NQPArray = require('./array.js');
+var Null = require('./null.js');
 
 var reprs = {};
 var reprById = [];
@@ -254,7 +255,7 @@ class P6opaque {
       var value = obj[slotToAttr(i)];
 
       if (flattened[i] == null) {
-        cursor.ref(value);
+        cursor.ref(value === undefined ? Null : value);
       } else {
         flattened[i].REPR.serializeInline(cursor, value);
       }
@@ -318,7 +319,7 @@ class P6opaque {
           slots.push(curAttr);
           names.push(attr.get('name'));
 
-          if (attrType && attrType._STable.REPR.flattenSTable) {
+          if (attrType !== undefined && attrType !== Null && attrType._STable.REPR.flattenSTable) {
             this.flattenedStables.push(attrType._STable);
           } else {
             this.flattenedStables.push(null);
@@ -336,6 +337,8 @@ class P6opaque {
 
           if (attr.get('auto_viv_container')) {
             this.autoVivValues[curAttr] = attr.get('auto_viv_container');
+          } else {
+            this.autoVivValues[curAttr] = Null;
           }
 
           curAttr++;
@@ -363,7 +366,7 @@ class P6opaque {
         'return value;\n' +
         '}\n');
 
-    if (this.autoVivValues && this.autoVivValues[slot]) {
+    if (this.autoVivValues && this.autoVivValues[slot] !== Null) {
       var isTypeObject = this.autoVivValues[slot].typeObject_;
 
       STable.compileAccessor('$$getattr$' + slot, 'function(value) {\n' +
@@ -378,7 +381,7 @@ class P6opaque {
       STable.compileAccessor('$$getattr$' + slot, 'function(value) {\n' +
           'var value = this.' + attr + ';\n' +
           'if (value === undefined) {\n' +
-          'return null;\n' +
+          'return Null;\n' +
           '}\n' +
           'return value;' +
           '}\n'
@@ -730,7 +733,7 @@ class VMArray extends REPR {
   }
 
   deserializeArray(obj, data) {
-    if (this.type !== null) {
+    if (this.type !== Null) {
       console.log('NYI: VMArrays of a type different then null');
     }
     var size = data.varint();
@@ -909,7 +912,7 @@ class MultiDimArray extends REPR {
       STable.primType = 0;
     }
 
-    STable.type = type || null;
+    STable.type = type || Null;
 
     if (dimensions instanceof NQPInt) {
       dimensions = dimensions.value;
@@ -1069,7 +1072,7 @@ class MultiDimArray extends REPR {
     if (dims > 0) {
       STable.dimensions = dims;
       STable.type = cursor.variant();
-      STable.primType = STable.type ? STable.type._STable.REPR.boxedPrimitive : 0;
+      STable.primType = STable.type !== Null ? STable.type._STable.REPR.boxedPrimitive : 0;
     }
   }
 

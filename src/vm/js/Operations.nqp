@@ -419,9 +419,9 @@ class QAST::OperationsJS {
 
     add_simple_op('getcodelocation', $T_OBJ, [$T_OBJ]);
 
-    add_simple_op('null', $T_OBJ, [], sub () {"null"});
+    add_simple_op('null', $T_OBJ, [], sub () {"nqp.Null"});
 
-    add_simple_op('isnull', $T_BOOL, [$T_OBJ], sub ($obj) {"($obj === null)"});
+    add_simple_op('isnull', $T_BOOL, [$T_OBJ], sub ($obj) {"($obj === nqp.Null)"});
 
     add_simple_op('null_s', $T_STR, [], sub () {"nqp.null_s"});
     add_simple_op('isnull_s', $T_BOOL, [$T_STR], sub ($obj) {"($obj === nqp.null_s)"});
@@ -995,7 +995,7 @@ class QAST::OperationsJS {
         Chunk.new($T_OBJ, $result, [
             $expr,
             "$result = {$expr.expr};\n",
-            "if ($result === null) \{\n",
+            "if ($result === nqp.Null) \{\n",
             $then,
             "$result = {$then.expr};\n",
             "\}\n"], :node($node));
@@ -1378,7 +1378,7 @@ class QAST::OperationsJS {
 
     # HACK
     # TODO think what we should return on 1.WHAT and "foo".WHAT
-    add_simple_op('what', $T_OBJ, [$T_OBJ], sub ($obj) {"($obj._STable ? $obj._STable.WHAT : null)"}, :decont(0));
+    add_simple_op('what', $T_OBJ, [$T_OBJ], sub ($obj) {"($obj._STable ? $obj._STable.WHAT : nqp.Null)"}, :decont(0));
 
     add_simple_op('knowhowattr', $T_OBJ, [], sub () {"nqp.knowhowattr"});
     add_simple_op('knowhow', $T_OBJ, [], sub () {"nqp.knowhow"});

@@ -1,5 +1,6 @@
 'use strict';
 var NQPInt = require('./nqp-int.js');
+var Null = require('./null.js');
 
 const MAX_ARITY = 4;
 const MAX_PER_ARITY = 16;
@@ -32,7 +33,7 @@ function posTypes(capture) {
 var op = {};
 
 op.multicachefind = function(cache, capture) {
-  if (!cache) return null;
+  if (cache === Null) return Null;
   var arity = capture.pos.length;
   var hasNamed = capture.named ? true : false;
 
@@ -40,11 +41,11 @@ op.multicachefind = function(cache, capture) {
     if (!hasNamed && cache.zeroArity) {
       return cache.zeroArity;
     } else {
-      return null;
+      return Null;
     }
   }
 
-  if (arity > MAX_ARITY) return null;
+  if (arity > MAX_ARITY) return Null;
 
   var types = posTypes(capture);
 
@@ -58,11 +59,11 @@ op.multicachefind = function(cache, capture) {
     return arityCache[i].result;
   }
 
-  return null;
+  return Null;
 };
 
 op.multicacheadd = function(cache, capture, result) {
-  var c = cache ? cache : new MultiCache();
+  var c = cache === Null ? new MultiCache() : cache;
   var arity = capture.pos.length;
   var hasNamed = capture.named ? true : false;
 

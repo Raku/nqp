@@ -13,6 +13,7 @@ var core = require('./core.js');
 var child_process = require('child_process');
 
 var NQPObject = require('./nqp-object.js');
+var Null = require('./null.js');
 
 function boolish(bool) {
   return bool ? 1 : 0;
@@ -370,8 +371,12 @@ const PIPE_INHERIT_ERR = 64;
 const PIPE_IGNORE_ERR = 128;
 const PIPE_CAPTURE_ERR = 256;
 
+function convertNull(obj) {
+  return obj === Null ? null : obj;
+}
+
 op.spawn = function(command, dir, env, input, output, error, flags) {
-  nqpIo.spawn(command.array, dir, env.$$toObject(), input, output, error, flags);
+  nqpIo.spawn(command.array, dir, env.$$toObject(), convertNull(input), convertNull(output), convertNull(error), flags);
 };
 
 
@@ -380,7 +385,7 @@ op.syncpipe = function() {
 };
 
 op.shell = function(command, dir, env, input, output, error, flags) {
-  nqpIo.shell(command, dir, env.$$toObject(), input, output, error, flags);
+  nqpIo.shell(command, dir, env.$$toObject(), convertNull(input), convertNull(output), convertNull(error), flags);
 };
 
 op.cwd = function() {

@@ -26,6 +26,8 @@ var constants = require('./constants.js');
 
 var containerSpecs = require('./container-specs.js');
 
+var Null = require('./null.js');
+
 exports.CodeRef = CodeRef;
 
 op.isinvokable = function(obj) {
@@ -142,7 +144,7 @@ op.bootarray = function(obj) {
 
 op.defined = function(obj) {
   // TODO - handle more things that aren't defined
-  if (obj === undefined || obj === null || obj.typeObject_) {
+  if (obj === Null || obj.typeObject_) {
     return 0;
   }
   return 1;
@@ -224,8 +226,7 @@ op.findmethod = function(obj, method) {
 
 op.istype = function(ctx, obj, type) {
   /* Null always type checks false. */
-  /* HACK - undefined */
-  if (obj === null || obj === undefined) {
+  if (obj === Null) {
     return 0;
   }
 
@@ -417,7 +418,7 @@ op.isrwcont = function(cont) {
 };
 
 op.decont = function(ctx, cont) {
-  if (cont === null || cont === undefined) return cont;
+  if (cont === Null) return cont;
   return cont.$$decont ? cont.$$decont(ctx) : cont;
 };
 
@@ -561,7 +562,7 @@ class NQPStub extends NQPObject {
 compilerRegistry.set('nqp', new NQPStub());
 
 op.getcomp = function(language) {
-  return compilerRegistry.has(language) ? compilerRegistry.get(language) : null;
+  return compilerRegistry.has(language) ? compilerRegistry.get(language) : Null;
 };
 
 op.backendconfig = function() {
@@ -587,7 +588,7 @@ op.setmessage = function(exception, message) {
 };
 
 op.getpayload = function(exception) {
-  return exception.hasOwnProperty('payload') ? exception.payload : null;
+  return exception.hasOwnProperty('payload') ? exception.payload : Null;
 };
 
 op.setpayload = function(exception, payload) {
@@ -661,7 +662,7 @@ op.decode = function(buf, encoding_) {
 };
 
 op.objprimspec = function(obj) {
-  if (obj === null) return 0;
+  if (obj === Null) return 0;
   return (obj._STable && obj._STable.REPR.boxedPrimitive ? obj._STable.REPR.boxedPrimitive : 0);
 };
 
@@ -671,10 +672,10 @@ op.setparameterizer = function(ctx, type, parameterizer) {
   /* Ensure that the type is not already parametric or parameterized. */
   if (st.parameterizer) {
     ctx.die('This type is already parametric');
-    return null;
+    return Null;
   } else if (st.parametricType) {
     ctx.die('Cannot make a parameterized type also be parametric');
-    return null;
+    return Null;
   }
 
   /* Set up the type as parameterized. */
@@ -778,7 +779,7 @@ op.typeparameterat = function(ctx, type, idx) {
 op.typeparameterized = function(type) {
   var st = type._STable;
   var nqp = require('nqp-runtime');
-  return st.parametricType ? st.parametricType : null;
+  return st.parametricType ? st.parametricType : Null;
 };
 
 function startTrampoline(thunk_) {
@@ -795,7 +796,7 @@ op.continuationreset = function(ctx, tag, continuation) {
     return continuation.$$callCPS(ctx, {}, function(value) {
       resetValue = value;
       invokeValue = value;
-      return null;
+      return Null;
     });
   });
   return resetValue;
@@ -808,9 +809,9 @@ op.continuationresetCPS = function(ctx, tag, continuation, continuation) {
 op.continuationcontrolCPS = function(ctx, protect, tag, run, cont) {
   startTrampoline(run.$$callCPS(ctx, {}, function(value) {
     resetValue = value;
-    return null;
+    return Null;
   }, cont));
-  return null;
+  return Null;
 };
 
 op.continuationinvoke = function(ctx, cont, inject) {
@@ -1007,7 +1008,7 @@ op.forceouterctx = function(code, ctx) {
 
 op.getattrref_i = function(hllName, get, set) {
   var refType = hll.hllConfigs[hllName].get('int_attr_ref');
-  if (refType == null) {
+  if (refType === undefined) {
     throw 'No int attribute reference type registered for current HLL';
   }
   var STable = refType._STable;
@@ -1019,7 +1020,7 @@ op.getattrref_i = function(hllName, get, set) {
 
 op.getattrref_n = function(hllName, get, set) {
   var refType = hll.hllConfigs[hllName].get('num_attr_ref');
-  if (refType == null) {
+  if (refType === undefined) {
     throw 'No num attribute reference type registered for current HLL';
   }
   var STable = refType._STable;
@@ -1031,7 +1032,7 @@ op.getattrref_n = function(hllName, get, set) {
 
 op.getattrref_s = function(hllName, get, set) {
   var refType = hll.hllConfigs[hllName].get('str_attr_ref');
-  if (refType == null) {
+  if (refType === undefined) {
     throw 'No str attribute reference type registered for current HLL';
   }
   var STable = refType._STable;
@@ -1043,7 +1044,7 @@ op.getattrref_s = function(hllName, get, set) {
 
 op.getlexref_i = function(hllName, get, set) {
   var refType = hll.hllConfigs[hllName].get('int_lex_ref');
-  if (refType == null) {
+  if (refType === undefined) {
     throw 'No int lexical reference type registered for current HLL';
   }
   var STable = refType._STable;
@@ -1055,7 +1056,7 @@ op.getlexref_i = function(hllName, get, set) {
 
 op.getlexref_s = function(hllName, get, set) {
   var refType = hll.hllConfigs[hllName].get('str_lex_ref');
-  if (refType == null) {
+  if (refType === undefined) {
     throw 'No str lexical reference type registered for current HLL';
   }
   var STable = refType._STable;
@@ -1067,7 +1068,7 @@ op.getlexref_s = function(hllName, get, set) {
 
 op.getlexref_n = function(hllName, get, set) {
   var refType = hll.hllConfigs[hllName].get('num_lex_ref');
-  if (refType == null) {
+  if (refType === undefined) {
     throw 'No num lexical reference type registered for current HLL';
   }
   var STable = refType._STable;

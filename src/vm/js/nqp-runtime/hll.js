@@ -3,6 +3,7 @@ var Hash = require('./hash.js');
 var CodeRef = require('./code-ref.js');
 var NQPArray = require('./array.js');
 var NQPInt = require('./nqp-int.js');
+var Null = require('./null.js');
 
 var op = {};
 exports.op = op;
@@ -13,7 +14,7 @@ op.gethllsym = function(hllName, name, value) {
   if (hllSyms.has(hllName) && hllSyms.get(hllName).has(name)) {
     return hllSyms.get(hllName).get(name);
   } else {
-    return null;
+    return Null;
   }
 };
 
@@ -69,7 +70,7 @@ op.hllizefor = function(ctx, obj, language) {
     var boxed = repr.allocate(foreignTypeStr._STable);
     boxed.$$setStr(obj);
     return boxed;
-  } else if (obj == null) {
+  } else if (obj === Null) {
     var nullValue = config.get('null_value');
     if (nullValue === undefined) return obj;
     return nullValue;

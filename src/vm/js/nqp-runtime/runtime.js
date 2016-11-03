@@ -6,6 +6,7 @@ var NQPInt = require('./nqp-int.js');
 var NQPException = require('./nqp-exception.js');
 
 var null_s = require('./null_s.js');
+var Null = require('./null.js');
 
 exports.NQPInt = NQPInt;
 
@@ -110,9 +111,11 @@ op.loadbytecode = function(ctx, file) {
 };
 
 op.ctxlexpad = function(ctx) {
+  if (ctx === null) console.log("we got a null to ctxlexpad");
   if (ctx instanceof Ctx) {
     return ctx;
   } else {
+    console.trace('ctxlexpad needs a ctx as an argument');
     throw 'ctxlexpad needs a ctx as an argument';
   }
 };
@@ -123,7 +126,7 @@ op.lexprimspec = function(pad, key) {
 };
 
 op.ctxouter = function(ctx) {
-  return ctx.$$outer;
+  return ctx.$$outer === null ? Null : ctx.$$outer;
 };
 
 exports.toStr = function(arg, ctx) {
@@ -131,11 +134,11 @@ exports.toStr = function(arg, ctx) {
     return arg.toString();
   } else if (typeof arg == 'string') {
     return arg;
-  } else if (arg === null) {
+  } else if (arg === Null) {
     return '';
   } else if (arg === null_s) {
     return arg;
-  } else if (arg !== undefined && arg !== null && arg.typeObject_) {
+  } else if (arg.typeObject_) {
     return '';
   } else if (arg.$$getStr) {
     return arg.$$getStr();
@@ -153,7 +156,7 @@ exports.toStr = function(arg, ctx) {
 exports.toNum = function(arg, ctx) {
   if (typeof arg == 'number') {
     return arg;
-  } else if (arg === null) {
+  } else if (arg === Null) {
     return 0;
   } else if (typeof arg == 'string') {
     var ret = parseFloat(arg);
@@ -176,7 +179,7 @@ exports.toNum = function(arg, ctx) {
 exports.toInt = function(arg, ctx) {
   if (typeof arg == 'number') {
     return arg | 0;
-  } else if (arg === null) {
+  } else if (arg === Null) {
     return 0;
   } else if (arg.$$getInt) {
     return arg.$$getInt();
@@ -193,7 +196,7 @@ exports.toInt = function(arg, ctx) {
 };
 
 exports.toBool = function(maybeContainer, ctx) {
-  if (maybeContainer == null) {
+  if (maybeContainer == Null) {
     return 0;
   }
   var value = maybeContainer.$$decont ? maybeContainer.$$decont(ctx) : maybeContainer;
@@ -201,7 +204,7 @@ exports.toBool = function(maybeContainer, ctx) {
     return value ? 1 : 0;
   } else if (typeof value == 'string') {
     return value == '' ? 0 : 1;
-  } else if (value == null) {
+  } else if (value == Null) {
     return 0;
   } else if (value.$$toBool) {
     return value.$$toBool(ctx);
@@ -394,3 +397,4 @@ String.prototype.$$decont = function(ctx) {
 
 
 exports.null_s = null_s;
+exports.Null = Null;

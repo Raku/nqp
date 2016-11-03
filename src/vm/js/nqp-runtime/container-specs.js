@@ -101,7 +101,7 @@ class NativeRef {
       });
       this.STable.addInternalMethod('$$decont', function(ctx, value) {
         var hll = STable.hllOwner;
-        if (hll == null) {
+        if (hll === undefined) {
           hll = ctx.codeRef().staticCode.hll;
         }
 
@@ -141,7 +141,7 @@ class NativeRef {
       });
       this.STable.addInternalMethod('$$decont', function(ctx, value) {
         var hll = STable.hllOwner;
-        if (hll == null) {
+        if (hll === undefined) {
           hll = ctx.codeRef().staticCode.hll;
         }
 
@@ -186,7 +186,7 @@ class NativeRef {
       });
       this.STable.addInternalMethod('$$decont', function(ctx, value) {
         var hll = STable.hllOwner;
-        if (hll == null) {
+        if (hll === undefined) {
           hll = ctx.codeRef().staticCode.hll;
         }
 

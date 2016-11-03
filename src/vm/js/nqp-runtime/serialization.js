@@ -5,6 +5,7 @@ var NQPInt = require('./nqp-int.js');
 var Int64 = require('node-int64');
 var NQPArray = require('./array.js');
 var null_s = require('./null_s.js');
+var Null = require('./null.js');
 var MultiCache = require('./multicache.js').MultiCache;
 
 var constants = require('./constants.js');
@@ -347,7 +348,7 @@ class BinaryWriteCursor {
     //  cnsole.log('got to ref',value);
     var discrim = 0;
 
-    if (ref == null) {
+    if (ref == Null) {
       discrim = REFVAR_VM_NULL;
     }
   //  else if (ref.st.REPR instanceof IOHandle) {
@@ -542,7 +543,7 @@ class SerializationWriter {
 
     this.stablesData.objRef(st.HOW);
     this.stablesData.objRef(st.WHAT);
-    this.stablesData.ref(st.WHO || null);
+    this.stablesData.ref(st.WHO || Null);
 
     /* Method cache*/
     if (st.methodCache) {
@@ -553,7 +554,7 @@ class SerializationWriter {
       this.stablesData.ref(hash);
     }
     else {
-      this.stablesData.ref(null);
+      this.stablesData.ref(Null);
     }
 
     /* Type check cache. */
@@ -632,7 +633,7 @@ class SerializationWriter {
       this.stablesData.str(st.invocationSpec.attrName);
       this.stablesData.varint(0); // hint
       this.stablesData.ref(st.invocationSpec.invocationHandler);
-      this.stablesData.ref(null); // md_class_handle
+      this.stablesData.ref(Null); // md_class_handle
       this.stablesData.str(''); // md_cache_attr_name
       this.stablesData.varint(0); // md_cache_hint
       this.stablesData.str(''); // md_valid_attr_name
@@ -1042,7 +1043,7 @@ op.scgetobj = function(sc, idx) {
 };
 
 op.getobjsc = function(obj) {
-  return obj._SC || null;
+  return obj._SC || Null;
 };
 
 op.scgetobjidx = function(sc, obj) {

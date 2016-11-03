@@ -3,6 +3,8 @@ var NQPException = require('./nqp-exception.js');
 var Iter = require('./iter.js');
 var null_s = require('./null_s.js');
 var NQPObject = require('./nqp-object.js');
+var Null = require('./null.js');
+
 
 class NQPArray extends NQPObject {
   constructor(array) {
@@ -22,19 +24,19 @@ class NQPArray extends NQPObject {
 
   shift(ctx, _NAMED, self) {
     var value = this.array.shift();
-    if (value === undefined) return null;
+    if (value === undefined) return Null;
     return value;
   }
 
   pop(ctx, _NAMED, self) {
     var value = this.array.pop();
-    if (value === undefined) return null;
+    if (value === undefined) return Null;
     return value;
   }
 
   $$atpos(index) {
     var value = this.array[index < 0 ? this.array.length + index : index];
-    if (value === undefined) return null;
+    if (value === undefined) return Null;
     return value;
   }
 
@@ -71,13 +73,13 @@ class NQPArray extends NQPObject {
 
   $$pop() {
     var value = this.array.pop();
-    if (value === undefined) return null;
+    if (value === undefined) return Null;
     return value;
   }
 
   $$shift() {
     var value = this.array.shift();
-    if (value === undefined) return null;
+    if (value === undefined) return Null;
     return value;
   }
 
@@ -143,7 +145,7 @@ class NQPArray extends NQPObject {
     }
     var index = idx.array[0];
     var value = this.array[index < 0 ? this.array.length + index : index];
-    if (value === undefined) return null;
+    if (value === undefined) return Null;
     return value;
   }
 

@@ -2,6 +2,7 @@
 
 var incompleteMethodCaches = [];
 var null_s = require('./null_s.js'); /* Used when evaling runtime compiled methods */
+var Null = require('./null.js');
 
 
 class STable {
@@ -79,7 +80,7 @@ class STable {
   }
 
   setinvokespec(classHandle, attrName, invocationHandler) {
-    if (classHandle) {
+    if (classHandle !== Null) {
       /* TODO  - think if we can use direct access here */
       var getter = this.REPR.getterForAttr(classHandle, attrName);
       this.objConstructor.prototype.$$call = function() {
@@ -133,10 +134,10 @@ class STable {
     var obj = new this.objConstructor();
     obj.typeObject_ = 1;
     obj.$$atkey = function(key) {
-      return null;
+      return Null;
     };
     obj.$$atpos = function(index) {
-      return null;
+      return Null;
     };
     obj.$$decont = function(ctx) {
       return this;

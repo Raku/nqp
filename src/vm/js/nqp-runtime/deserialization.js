@@ -12,6 +12,8 @@ var CodeRef = require('./code-ref.js');
 var constants = require('./constants.js');
 var NQPArray = require('./array.js');
 
+var Null = require('./null.js');
+
 var Ctx = require('./ctx.js');
 
 var containerSpecs = require('./container-specs.js');
@@ -271,7 +273,7 @@ class BinaryCursor {
         return this.objRef();
       case 1:
       case 3:
-        return null;
+        return Null;
       case 4:
         // TODO deserialize bigger integers then can fit into a 32bit number
         return this.varint();

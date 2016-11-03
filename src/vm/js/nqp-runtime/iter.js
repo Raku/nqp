@@ -1,6 +1,7 @@
 'use strict';
 
 var NQPObject = require('./nqp-object.js');
+var Null = require('./null.js');
 
 class Iter extends NQPObject {
   constructor(array) {
@@ -12,7 +13,7 @@ class Iter extends NQPObject {
 
   $$shift() {
     var value = this.array[this.idx++];
-    if (value === undefined) return null;
+    if (value === undefined) return Null;
     return value;
   }
 
