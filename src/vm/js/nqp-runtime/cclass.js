@@ -1,3 +1,4 @@
+'use strict';
 var xregexp = require('xregexp');
 var op = {};
 exports.op = op;

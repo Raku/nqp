@@ -1,3 +1,4 @@
+'use strict';
 var op = {};
 var ffi = require('ffi');
 var ref = require('ref');

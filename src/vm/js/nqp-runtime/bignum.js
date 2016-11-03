@@ -1,3 +1,4 @@
+'use strict';
 var reprs = require('./reprs.js');
 
 var bignum = require('bignum');

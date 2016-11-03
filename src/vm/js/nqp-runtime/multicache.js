@@ -1,3 +1,4 @@
+'use strict';
 var NQPInt = require('./nqp-int.js');
 
 const MAX_ARITY = 4;

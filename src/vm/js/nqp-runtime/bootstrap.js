@@ -1,3 +1,4 @@
+'use strict';
 var SerializationContext = require('./serialization-context.js');
 var reprs = require('./reprs.js');
 

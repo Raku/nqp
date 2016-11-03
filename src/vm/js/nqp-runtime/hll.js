@@ -1,3 +1,4 @@
+'use strict';
 var Hash = require('./hash.js');
 var CodeRef = require('./code-ref.js');
 var NQPArray = require('./array.js');
