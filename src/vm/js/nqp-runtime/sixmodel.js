@@ -18,7 +18,7 @@ class STable {
     this.objConstructor.prototype.$$clone = function() {
       var clone = new this._STable.objConstructor();
       for (var i in this) {
-        if (this.hasOwnProperty(i) && i != '_SC') {
+        if (Object.prototype.hasOwnProperty.call(this, i) && i != '_SC') {
           clone[i] = this[i];
         }
       }
@@ -33,6 +33,11 @@ class STable {
     this.objConstructor.prototype.$$decont = function(ctx) {
       return this;
     };
+
+    this.objConstructor.prototype.typeObject_ = 0;
+
+    this.objConstructor.prototype.$$call = undefined;
+    this.objConstructor.prototype.$$injectMethod = undefined;
 
     if (this.REPR.setupSTable) {
       this.REPR.setupSTable(this);

@@ -397,9 +397,10 @@ class P6opaque {
     for (var i = 0; i < this.nameToIndexMapping.length; i++) {
       for (var j = 0; j < this.nameToIndexMapping[i].slots.length; j++) {
         let slot = this.nameToIndexMapping[i].slots[j];
-        if (this.flattenedStables[slot]) {
-          code += 'this.' + slotToAttr(slot) + ' = ' + this.flattenedStables[slot].REPR.flattenedDefault + ';\n';
-        }
+        let defaultValue = this.flattenedStables[slot]
+            ? this.flattenedStables[slot].REPR.flattenedDefault
+            : 'undefined';
+        code += 'this.' + slotToAttr(slot) + ' = ' + defaultValue + ';\n';
       }
     }
 

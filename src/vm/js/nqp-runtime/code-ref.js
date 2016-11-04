@@ -35,9 +35,12 @@ class CodeRef extends NQPObject {
       return;
     }
 
-    if (proto.hasOwnProperty(codeRefAttr) && proto[codeRefAttr] !== this) {
+    if (Object.prototype.hasOwnProperty.call(proto, codeRefAttr) && proto[codeRefAttr] !== this) {
       return;
     }
+
+    /* HACK - think how forcedOuterCtx on injected methods should work */
+    proto.forcedOuterCtx = undefined;
 
     proto[codeRefAttr] = this;
 
