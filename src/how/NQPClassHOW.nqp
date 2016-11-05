@@ -336,7 +336,7 @@ knowhow NQPClassHOW {
             if nqp::elems(@immediate_parents) == 1 {
                 @result := compute_c3_mro(@immediate_parents[0]);
             } else {
-                # Build merge list of lineraizations of all our parents, add
+                # Build merge list of linearizations of all our parents, add
                 # immediate parents and merge.
                 my @merge_list;
                 for @immediate_parents {

@@ -293,7 +293,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         0;
     }
 
-    # turns a list of arguments for a call into a js code according to our most generall calling convention
+    # turns a list of arguments for a call into a js code according to our most general calling convention
     # $args is the list of QAST::Node arguments
     # returns a Chunk containing either a comma separated list of arguments or an expression that evaluates to a array of arguments
 
@@ -627,7 +627,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
 
-    # It's more usefull for me during this development to emit partial code instead of quiting
+    # It's more useful for me during this development to emit partial code instead of quitting
     method NYI($msg) {
         if $!nyi eq 'ignore' {
         }
@@ -1424,7 +1424,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my @pre;
         {
-            # We create this context so that dependecies are loaded relative to this file
+            # We create this context so that dependencies are loaded relative to this file
             my $*CTX := 'ctxWithPath';
             @pre.push(
                 "var ctxWithPath = new nqp.Ctx(null, null, null, null);\n"

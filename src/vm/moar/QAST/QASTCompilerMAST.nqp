@@ -995,7 +995,7 @@ my class MASTCompilerInstance {
                 # when we enter a QAST::Stmt, the contextual will be cloned, and the locals of
                 # newly declared QAST::Vars of local scope inside the Stmt will be stashed here,
                 # so they can be released at the end of the QAST::Stmt in which they were
-                # declared.  Inability to declare duplicate names is still enfoced, and types are
+                # declared.  Inability to declare duplicate names is still enforced, and types are
                 # still enforced.
                 my %*STMTTEMPS := nqp::hash();
                 my $*INSTMT := 0;

@@ -235,7 +235,7 @@ my knowhow NQPRoutine {
         # Initialize dispatcher state.
         my @possibles;
 
-        # Go thorugh candidates.
+        # Go through candidates.
         my int $type_mismatch;
         my int $type_check_count;
         my int $i;
@@ -260,13 +260,13 @@ my knowhow NQPRoutine {
                 }
             }
 
-            # Check if it's admissable by arity.
+            # Check if it's admissible by arity.
             if $num_args < $cur_candidate<min_arity> || $num_args > $cur_candidate<max_arity> {
                 $cur_idx++;
                 next;
             }
 
-            # Check if it's admissable by type.
+            # Check if it's admissible by type.
             $type_check_count := $cur_candidate<num_types> > $num_args
                              ?? $num_args
                              !! $cur_candidate<num_types>;
@@ -297,7 +297,7 @@ my knowhow NQPRoutine {
                 next;
             }
 
-            # If we get here, it's an admissable candidate; add to list. */
+            # If we get here, it's an admissible candidate; add to list. */
             nqp::push(@possibles, $cur_candidate);
             $cur_idx++;
         }

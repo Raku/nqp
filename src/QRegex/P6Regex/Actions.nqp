@@ -530,7 +530,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         my $qast;
         my $name := ~$<identifier>;
         if $name eq 'c' {
-            # codepoint boundaries alway match in
+            # codepoint boundaries always match in
             # our current Unicode abstraction level
             $qast := 0;
         }

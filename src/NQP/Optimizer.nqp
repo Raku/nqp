@@ -395,7 +395,7 @@ class NQP::Optimizer {
                                     }
                                 }
 
-                                # If we reach here, unknown. Poision.
+                                # If we reach here, unknown. Poison.
                                 self.poison_lowering();
                                 return $node;
                             }),

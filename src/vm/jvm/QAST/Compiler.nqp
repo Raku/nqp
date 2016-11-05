@@ -896,7 +896,7 @@ for <if unless with without> -> $op_name {
             }
         }
         
-        # Add final label and load result if neded.
+        # Add final label and load result if needed.
         $il.append($end_lbl);
         if $res_temp {
             $il.append(JAST::Instruction.new( :op(load_ins($res_type)), $res_temp ));
@@ -1447,7 +1447,7 @@ my $call_codegen := sub ($qastcomp, $node) {
         # Ensure we have a thing to invoke.
         nqp::die("A 'call' node must have a name or at least one child") unless +@($node) >= 1;
         
-        # Proces arguments, making sure first one is an object (since that is
+        # Process arguments, making sure first one is an object (since that is
         # the thing to invoke).
         my @argstuff := process_args_onto_stack($qastcomp, @($node), $il, :inv_first);
         my $cs_idx := @argstuff[0];
@@ -5073,7 +5073,7 @@ class QAST::CompilerJAST {
         $il.append($LCMP);
         $il.append(JAST::Instruction.new( :op('ifgt'), %*REG<fail> ));
         
-        # Compile the regex body itself; if we make it thorugh it, we go to
+        # Compile the regex body itself; if we make it through it, we go to
         # the end and are finished.
         $il.append(self.regex_jast($node));
         $il.append(JAST::Instruction.new( :op('goto'), $endlabel ));
@@ -5209,7 +5209,7 @@ class QAST::CompilerJAST {
         $*STACK.obtain($il, $fail_res);
         $il.append($POP);
 
-        # Evaluate to the curosr.
+        # Evaluate to the cursor.
         $il.append($endlabel);
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<cur> ));
         result($il, $RT_OBJ)

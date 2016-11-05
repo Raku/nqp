@@ -208,7 +208,7 @@ class QAST::MASTOperations {
                 nqp::push(@release_kinds, $arg_kind);
             }
 
-            # put the arg exression's generation code in the instruction list
+            # put the arg expression's generation code in the instruction list
             nqp::splice(@all_ins, $arg.instructions, +@all_ins, 0)
                 unless $constant_operand;
             if @deconts[$arg_num] &&
