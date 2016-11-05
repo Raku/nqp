@@ -81,7 +81,7 @@ op.loadbytecode = function(ctx, file) {
   }
 
   var loadFrom;
-  if (ctx && (loadFrom = ctx.lookupDynamic('$*LOADBYTECODE_FROM'))) {
+  if (ctx && ((loadFrom = ctx.lookupDynamic('$*LOADBYTECODE_FROM')) !== Null)) {
   } else {
     loadFrom = module;
   }

@@ -438,7 +438,7 @@ class BinaryWriteCursor {
       case REFVAR_VM_ARR_VAR:
         this.varint(ref.array.length);
         for (var i = 0; i < ref.array.length; i++) {
-          this.ref(ref.array[i]);
+          this.ref(ref.array[i] || Null);
         }
         break;
       case REFVAR_VM_HASH_STR_VAR:
