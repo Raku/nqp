@@ -851,35 +851,11 @@ my class MASTCompilerInstance {
         }
     }
 
-    # This method is a hook point so that we can override serialization when cross-compiling
-    method serialize_sc($sc) {
-        my $sh := nqp::list_s();
-        my str $serialized := nqp::serialize($sc, $sh);
-        [$serialized, nqp::null()];
-    }
-
     method deserialization_code($sc, @code_ref_blocks, $repo_conf_res) {
-        my $sc_tuple := self.serialize_sc($sc);
-        my str $serialized := $sc_tuple[0];
-        my $sh := $sc_tuple[1];
+        my str $serialized := nqp::serialize($sc, nqp::list_s());
 
         # String heap QAST.
-        my $sh_ast;
-
-        if nqp::islist($sh) {
-            $sh_ast := QAST::Op.new( :op('list_s') );
-            my $sh_elems := nqp::elems($sh);
-            my $i := 0;
-            while $i < $sh_elems {
-                $sh_ast.push(nqp::isnull_s(nqp::atpos_s($sh, $i))
-                    ?? QAST::Op.new( :op('null_s') )
-                    !! QAST::SVal.new( :value(nqp::atpos_s($sh, $i)) ));
-                $i := $i + 1;
-            }
-        }
-        else {
-            $sh_ast := QAST::Op.new( :op('null') );
-        }
+        my $sh_ast := QAST::Op.new( :op('null') );
 
         # Code references.
         my $cr_ast := QAST::Op.new( :op('list_b'), |@code_ref_blocks );
