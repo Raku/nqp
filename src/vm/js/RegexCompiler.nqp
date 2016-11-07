@@ -33,7 +33,6 @@ class RegexCompiler {
     }
 
     method compile($node) {
-        $*BLOCK.add_mangled_lexical('$¢');
 
         # TODO better name for $start
         # we need to unpack the array we !cursor_start_all into a bunch of variables 
