@@ -717,7 +717,7 @@ class QAST::OperationsJS {
 
     add_simple_op('settypefinalize', $T_VOID, [$T_OBJ, $T_INT]);
 
-    # TODO - implement and benchmark different ways of preventing the try/catch from murdering performance 
+    # TODO - implement and benchmark different ways of preventing the try/catch from murdering performance
     add_op('handle', :!inlinable, sub ($comp, $node, :$want, :$cps) {
         # TODO CPS
         my @children := nqp::clone($node.list());
