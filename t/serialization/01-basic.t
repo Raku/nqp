@@ -1,6 +1,6 @@
 #! nqp
 
-plan(1488);
+plan(1489);
 
 {
     my $sc := nqp::createsc('exampleHandle');
@@ -419,6 +419,7 @@ sub add_to_sc($sc, $idx, $obj) {
 
     class T8 {
         has $!cache;
+        has $!fh;
         method new() {
             my $obj := nqp::create(self);
             $obj.BUILD();
@@ -427,7 +428,11 @@ sub add_to_sc($sc, $idx, $obj) {
         method cache() {
             $!cache;
         }
+        method fh() {
+            $!fh;
+        }
         method BUILD() {
+            $!fh := nqp::open('t/nqp/019-chars.txt', 'r');
             $!cache := nqp::multicacheadd(nqp::null(), nqp::usecapture(), 123);
         }
     }
@@ -442,6 +447,7 @@ sub add_to_sc($sc, $idx, $obj) {
     ok(nqp::scobjcount($dsc) == 1, 'deserialized SC has a single object');
     ok(nqp::istype(nqp::scgetobj($dsc, 0), T8), 'deserialized object has correct type');
     ok(nqp::isnull(nqp::scgetobj($dsc, 0).cache), 'Multi cache ends up null');
+    ok(nqp::isnull(nqp::scgetobj($dsc, 0).fh), 'File handle ends up null');
 }
 
 # integers
