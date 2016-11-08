@@ -7,6 +7,7 @@ var NQPArray = require('./array.js');
 var null_s = require('./null_s.js');
 var Null = require('./null.js');
 var MultiCache = require('./multicache.js').MultiCache;
+var FileHandle = require('./io.js').FileHandle;
 
 var constants = require('./constants.js');
 
@@ -350,10 +351,9 @@ class BinaryWriteCursor {
     if (ref == Null) {
       discrim = REFVAR_VM_NULL;
     }
-  //  else if (ref.st.REPR instanceof IOHandle) {
-  //      /* Can't serialize handles. */
-  //      discrim = REFVAR_VM_NULL;
-  //  }
+    else if (ref instanceof FileHandle) {
+      discrim = REFVAR_VM_NULL;
+    }
   //  else if (ref.st.REPR instanceof CallCapture) {
   //      /* This is a hack for Rakudo's sake; it keeps a CallCapture around in
   //       * the lexpad, for no really good reason. */

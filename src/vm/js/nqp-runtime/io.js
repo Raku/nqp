@@ -140,6 +140,8 @@ class FileHandle extends NQPObject {
   }
 };
 
+exports.FileHandle = FileHandle;
+
 op.open = function(name, mode) {
   var modes = {r: 'r', w: 'w', wa: 'a', '-ct': 'w', '-ca': 'a'};
   if (!modes[mode]) { throw 'unknown mode to open: ' + mode }
