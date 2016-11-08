@@ -426,7 +426,6 @@ class BinaryWriteCursor {
         break;
       case REFVAR_VM_NUM:
         this.double(ref);
-        //          writeNum(ref.get_num(tc));
         break;
       case REFVAR_VM_STR:
         this.str(ref);
