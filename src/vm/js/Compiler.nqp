@@ -1278,6 +1278,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         if $ast.code_ref_blocks() -> $code_ref_blocks {
             for $code_ref_blocks -> $block {
+                self.register_cuid($block);
                 @blocks.push(self.mangled_cuid($block.cuid));
             }
          }
