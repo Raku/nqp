@@ -127,8 +127,6 @@ class P6opaque {
       }
     }
 
-    /* TODO make auto viv values work */
-
     this.generateAccessors(STable);
   }
 
