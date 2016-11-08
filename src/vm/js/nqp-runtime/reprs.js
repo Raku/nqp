@@ -745,7 +745,9 @@ class VMArray extends REPR {
 
   compose(STable, reprInfoHash) {
     if (reprInfoHash.content.get('array')) {
-      this.type = reprInfoHash.content.get('array').content.get('type');
+      this.type = reprInfoHash.content.get('array').content.get('type') || Null;
+    } else {
+      this.type = Null;
     }
   }
 };
