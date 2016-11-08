@@ -888,7 +888,13 @@ reprs.CPointer = CPointer;
 class AsyncTask extends REPR {};
 reprs.AsyncTask = AsyncTask;
 
-class ReentrantMutex extends REPR {};
+class ReentrantMutex extends REPR {
+  serialize(cursor, obj) {
+    /* Nothing to do, we just re-create the lock on deserialization on backend that support them.
+     * The JS backend doesn't support concurrency.
+     */
+  }
+};
 reprs.ReentrantMutex = ReentrantMutex;
 
 class ConditionVariable extends REPR {};
