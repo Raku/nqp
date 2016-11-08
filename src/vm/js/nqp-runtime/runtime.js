@@ -111,7 +111,7 @@ op.loadbytecode = function(ctx, file) {
 };
 
 op.ctxlexpad = function(ctx) {
-  if (ctx === null) console.log("we got a null to ctxlexpad");
+  if (ctx === null) console.log('we got a null to ctxlexpad');
   if (ctx instanceof Ctx) {
     return ctx;
   } else {

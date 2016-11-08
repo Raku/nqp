@@ -397,9 +397,9 @@ class P6opaque {
     for (var i = 0; i < this.nameToIndexMapping.length; i++) {
       for (var j = 0; j < this.nameToIndexMapping[i].slots.length; j++) {
         let slot = this.nameToIndexMapping[i].slots[j];
-        let defaultValue = this.flattenedStables[slot]
-            ? this.flattenedStables[slot].REPR.flattenedDefault
-            : 'undefined';
+        let defaultValue = this.flattenedStables[slot] ?
+            this.flattenedStables[slot].REPR.flattenedDefault :
+            'undefined';
         code += 'this.' + slotToAttr(slot) + ' = ' + defaultValue + ';\n';
       }
     }
@@ -417,14 +417,15 @@ class P6opaque {
       return 'return this.$$bindattr$' + slot + '(value)';
     }, ', value');
 
-    for (let suffix of['_s', '_i', '_n']) {
+    var suffixes = ['_s', '_i', '_n'];
+    for (let suffix of suffixes) {
       /* TODO only check attributes of proper type */
       this.generateUniversalAccessor(STable, '$$getattr' + suffix, function(slot) {
         return 'return this.' + slotToAttr(slot);
       }, '');
 
       this.generateUniversalAccessor(STable, '$$bindattr' + suffix, function(slot) {
-        return 'return (this.' + slotToAttr(slot) + " = value)";
+        return 'return (this.' + slotToAttr(slot) + ' = value)';
       }, ', value');
     }
   }
@@ -432,7 +433,7 @@ class P6opaque {
   generateUniversalAccessor(STable, name, action, extraSig) {
     var code = 'function(classHandle, attrName' + extraSig + ') {\n' + 'switch (classHandle) {\n';
     var classKeyIndex = 0;
-    var setup = "";
+    var setup = '';
     if (this.nameToIndexMapping) {
       for (var i = 0; i < this.nameToIndexMapping.length; i++) {
         let classKey = 'classKey' + classKeyIndex;
@@ -440,7 +441,7 @@ class P6opaque {
         code += 'case ' + classKey + ': switch (attrName) {\n';
         for (var j = 0; j < this.nameToIndexMapping[i].slots.length; j++) {
           let slot = this.nameToIndexMapping[i].slots[j];
-          code += 'case \'' + this.nameToIndexMapping[i].names[j] + '\':' + action(slot) + ";\n";
+          code += 'case \'' + this.nameToIndexMapping[i].names[j] + '\':' + action(slot) + ';\n';
         }
         code += '}\n';
         classKeyIndex++;
@@ -532,7 +533,7 @@ reprs.KnowHOWAttribute = KnowHOWAttribute;
 
 class Uninstantiable extends REPR {
   allocate(STable) {
-    throw new NQPException("You cannot create an instance of this type (" + STable.debugName + ")");
+    throw new NQPException('You cannot create an instance of this type (' + STable.debugName + ')');
   }
 };
 reprs.Uninstantiable = Uninstantiable;
@@ -597,7 +598,7 @@ class P6int extends REPR {
   }
 };
 
-P6int.prototype.flattenedDefault = "0";
+P6int.prototype.flattenedDefault = '0';
 P6int.prototype.boxedPrimitive = 1;
 P6int.prototype.flattenSTable = true;
 
@@ -655,7 +656,7 @@ class P6num extends REPR {
 
 P6num.prototype.boxedPrimitive = 2;
 P6num.prototype.flattenSTable = true;
-P6num.prototype.flattenedDefault = "0";
+P6num.prototype.flattenedDefault = '0';
 
 reprs.P6num = P6num;
 
@@ -705,7 +706,7 @@ class P6str extends REPR {
 
 P6str.prototype.boxedPrimitive = 3;
 P6str.prototype.flattenSTable = true;
-P6str.prototype.flattenedDefault = "null_s";
+P6str.prototype.flattenedDefault = 'null_s';
 
 
 reprs.P6str = P6str;
@@ -802,7 +803,7 @@ class P6bigint extends REPR {
 
     ownerSTable.addInternalMethod('$$getattr$' + slot, function() {
       var value = this[attr] || bignum(0);
-      return makeBI(attrContentSTable, value);;
+      return makeBI(attrContentSTable, value);
     });
 
     ownerSTable.addInternalMethod('$$bindattr$' + slot, function(value) {
@@ -870,7 +871,7 @@ class P6bigint extends REPR {
 
 P6bigint.prototype.flattenSTable = true;
 P6bigint.prototype.ZERO = bignum(0);
-P6bigint.prototype.flattenedDefault = "STable.REPR.ZERO";
+P6bigint.prototype.flattenedDefault = 'STable.REPR.ZERO';
 
 
 reprs.P6bigint = P6bigint;
@@ -896,10 +897,10 @@ reprs.ConditionVariable = ConditionVariable;
 class Semaphore extends REPR {};
 reprs.Semaphore = Semaphore;
 
-class ConcBlockingQueue extends REPR {}
+class ConcBlockingQueue extends REPR {};
 reprs.ConcBlockingQueue = ConcBlockingQueue;
 
-class Decoder extends REPR {}
+class Decoder extends REPR {};
 reprs.Decoder = Decoder;
 
 class MultiDimArray extends REPR {
