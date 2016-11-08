@@ -345,7 +345,6 @@ class BinaryWriteCursor {
 
   ref(ref) {
     /* Work out what kind of thing we have and determine the discriminator. */
-    //  cnsole.log('got to ref',value);
     var discrim = 0;
 
     if (ref == Null) {
