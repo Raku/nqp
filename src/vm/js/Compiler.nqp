@@ -1463,7 +1463,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             
         }
         else {
-            $body := $instant ?? Chunk.void($block_js, $block_js.expr ~ ".\$\$apply([null, null].concat(nqp.args(module)));\n") !! $block_js;
+            $body := $instant ?? Chunk.void($block_js, $block_js.expr ~ ".\$\$apply([nqp.loaderCtx, null].concat(nqp.args(module)));\n") !! $block_js;
         }
 
 
