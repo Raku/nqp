@@ -71,7 +71,7 @@ class QAST::Node {
 	    nqp::push(@flags, 'final')   if self.final;
 	    nqp::push(@flags, 'okifnil') if self.okifnil;
 	}
-	'<' ~ nqp::join(' ',@flags) ~ '>';
+	@flags ?? '<' ~ nqp::join(' ',@flags) ~ '>' !! '';
     }
 
     method has_compile_time_value() {
