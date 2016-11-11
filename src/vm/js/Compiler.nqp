@@ -1923,6 +1923,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         Chunk.void(
             $shebang ?? "#!/usr/bin/env node\n" !! '',
+            "'use strict'\n",
             "var nqp = require('nqp-runtime');\n",
             self.setup_cuids,
             self.set_static_info,
