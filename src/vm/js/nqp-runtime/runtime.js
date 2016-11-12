@@ -128,7 +128,8 @@ op.ctxouter = function(ctx) {
   return ctx.$$outer === null ? Null : ctx.$$outer;
 };
 
-exports.toStr = function(arg, ctx) {
+exports.toStr = function(arg_, ctx) {
+  var arg = arg_.$$decont(ctx);
   if (typeof arg == 'number') {
     return arg.toString();
   } else if (typeof arg == 'string') {

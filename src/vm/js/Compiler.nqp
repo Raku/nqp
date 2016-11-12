@@ -1473,7 +1473,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my $set_hll := $*HLL ?? "nqp.setCodeRefHLL(cuids, {quote_string($*HLL)});\n" !! '';
 
-        my @setup := [$pre , $comp_mode ?? self.create_sc($node) !! '', self.set_code_objects,  self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $set_hll, self.set_static_vars, $post, $body];
+        my $set_code_objects := self.set_code_objects;
+        my @setup := [$pre , $comp_mode ?? self.create_sc($node) !! '', self.setup_wvals, $set_code_objects,  self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $set_hll, self.set_static_vars, $post, $body];
         if !$instant {
             @setup.push("new nqp.EvalResult({$body.expr}, new nqp.NQPArray(cuids))");
         }
@@ -1572,11 +1573,37 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         RegexCompiler.new(compiler => self).compile($node);
     }
 
+    has %!wval;
+    has %!wval_mangling;
+
     method value_as_js($value) {
         my $sc     := nqp::getobjsc($value);
-        my $handle := nqp::scgethandle($sc);
-        my $idx    := nqp::scgetobjidx($sc, $value);
-        "nqp.wval({quote_string($handle)},$idx)";
+        my str $handle := nqp::scgethandle($sc);
+        my int $idx    := nqp::scgetobjidx($sc, $value);
+
+        my $key := $handle ~ "@" ~ $idx;
+
+        if !nqp::existskey(%!wval, $key) {
+          %!wval{$key} := "nqp.wval({quote_string($handle)},$idx)";
+          %!wval_mangling{$key} := 'wval' ~ +%!wval_mangling;
+        }
+        %!wval_mangling{$key};
+    }
+
+    method setup_wvals() {
+       my $setup;
+       for %!wval_mangling -> $kv {
+           $setup := $setup ~ $kv.value ~ ' = ' ~ %!wval{$kv.key} ~ "\n";
+       }
+       $setup;
+    }
+
+    method declare_wvals() {
+       my @vars;
+       for %!wval_mangling -> $kv {
+           @vars.push($kv.value);
+       }
+       self.declare_js_vars(@vars);
     }
 
     multi method as_js(QAST::WVal $node, :$want, :$cps) {
@@ -1925,6 +1952,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             $shebang ?? "#!/usr/bin/env node\n" !! '',
             "'use strict'\n",
             "var nqp = require('nqp-runtime');\n",
+            self.declare_wvals,
             self.setup_cuids,
             self.set_static_info,
             $chunk
