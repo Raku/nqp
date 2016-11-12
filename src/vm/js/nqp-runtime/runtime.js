@@ -195,27 +195,6 @@ exports.toInt = function(arg, ctx) {
   }
 };
 
-exports.toBool = function(maybeContainer, ctx) {
-  if (maybeContainer == Null) {
-    return 0;
-  }
-  var value = maybeContainer.$$decont ? maybeContainer.$$decont(ctx) : maybeContainer;
-  if (typeof value == 'number') {
-    return value ? 1 : 0;
-  } else if (typeof value == 'string') {
-    return value == '' ? 0 : 1;
-  } else if (value == Null) {
-    return 0;
-  } else if (value.$$toBool) {
-    return value.$$toBool(ctx);
-  } else if (typeof value == 'function') {
-    // needed for continuations
-    return 1;
-  } else {
-    throw "Can't decide if value is true";
-  }
-};
-
 exports.intToObj = function(hllName, i) {
   var currentHLL = hll.hllConfigs[hllName];
   var type;
@@ -391,8 +370,21 @@ Number.prototype.$$decont = function(ctx) {
   return this;
 };
 
+Number.prototype.$$toBool = function(ctx) {
+  return this === 0 ? 0 : 1;
+};
+
 String.prototype.$$decont = function(ctx) {
   return this;
+};
+
+String.prototype.$$toBool = function(ctx) {
+  return this === '' ? 0 : 1;
+};
+
+// needed for continuations
+Function.prototype.$$toBool = function(ctx) {
+  return 1;
 };
 
 
