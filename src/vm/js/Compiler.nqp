@@ -778,7 +778,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my @chunks;
         my @stmts := $node.list;
 
-        unless nqp::defined($result_child) {
+        if $want == $T_VOID {
+            $result_child := -1;
+        }
+        elsif !nqp::defined($result_child) {
             $result_child := +$node.list - 1;
         }
 
