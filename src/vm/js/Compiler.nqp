@@ -1126,7 +1126,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         }
 
-        if $node.blocktype eq 'immediate' {
+        if $node.blocktype eq 'raw' {
+            Chunk.void();
+        } elsif $node.blocktype eq 'immediate' {
             my $setup := [];
             my $cloned_block := $outer.clone_inner($node, :cps($cps), :direct(!$cps));
 
