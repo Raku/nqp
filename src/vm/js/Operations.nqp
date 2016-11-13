@@ -232,7 +232,7 @@ class QAST::OperationsJS {
 
                 @setup.push($left);
 
-                @setup.push("if (nqp.toBool($ret, $*CTX)) \{\n") if is_chain($part[0]);
+                @setup.push("if ($ret.\$\$toBool($*CTX)) \{\n") if is_chain($part[0]);
                 @setup.push($callee);
                 @setup.push($right);
                 @setup.push("$ret = {$callee.expr}.\$\$call($*CTX, null, {$left.expr}, {$right.expr});\n");

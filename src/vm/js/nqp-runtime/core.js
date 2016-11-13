@@ -263,7 +263,7 @@ op.istype = function(ctx, obj, type) {
     }
 
 
-    return nqp.toBool(HOW.type_check(ctx, null, HOW, obj, type));
+    return HOW.type_check(ctx, null, HOW, obj, type).$$toBool(ctx);
   }
   return 0;
 };
