@@ -51,6 +51,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         has %!statevars;
 
+        has $!pass_on_exceptions;
+
         method new($qast, $outer) {
             my $obj := nqp::create(self);
             $obj.BUILD($qast, $outer);
@@ -74,6 +76,15 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             %!lexicalref_types := nqp::hash();
             @!var_setup := nqp::list();
             %!statevars := nqp::hash();
+            $!pass_on_exceptions := 0;
+        }
+
+        method pass_on_exceptions() {
+            $!pass_on_exceptions;
+        }
+
+        method use_passing_on_of_exceptions() {
+            $!pass_on_exceptions := 1;
         }
 
         method add_var_setup($setup) {
@@ -1024,6 +1035,21 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
                 my $first_time_marker := $*BLOCK.maybe_first_time_marker;
 
+                my $pass_exceptions_start := '';
+                my $pass_exceptions_end := '';
+
+                if $*BLOCK.pass_on_exceptions {
+                    $pass_exceptions_start := "try \{\n";
+                    $pass_exceptions_end :=
+                        ~ "\} catch (e) \{\n"
+                        ~ "if (e instanceof nqp.PassExceptionToCaller) \{\n"
+                        ~ "throw e.exception;\n"
+                        ~ "\} else \{"
+                        ~ "throw e;\n"
+                        ~ "\}"
+                        ~ "\}";
+                }
+
                 my @function := [
                     "function({$sig.expr}) \{\n" ,
                     $first_time_marker ?? "$first_time_marker = 1;\n" !! '',
@@ -1034,8 +1060,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     $sig,
                     self.clone_inners($*BLOCK),
                     self.capture_inners($*BLOCK),
+                    $pass_exceptions_start,
                     $stmts,
                     "return {$stmts.expr};\n",
+                    $pass_exceptions_end,
                     "\}"
                 ];
                 %*BLOCKS_DONE{$node.cuid} := Chunk.void("(", |@function, ")");

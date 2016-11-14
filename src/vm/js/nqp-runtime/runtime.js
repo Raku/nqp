@@ -355,6 +355,12 @@ exports.wrapException = function(e) {
 function ControlReturn(payload) {
   this.payload = payload;
 }
+exports.ControlReturn = ControlReturn;
+
+function PassExceptionToCaller(exception) {
+  this.exception = exception;
+}
+exports.PassExceptionToCaller = PassExceptionToCaller;
 
 exports.setCodeRefHLL = function(codeRefs, hllName) {
   for (var i = 0; i < codeRefs.length; i++) {
@@ -362,7 +368,6 @@ exports.setCodeRefHLL = function(codeRefs, hllName) {
   }
 };
 
-exports.ControlReturn = ControlReturn;
 
 /* TODO - make monkey patching builtin things optional */
 

@@ -1298,7 +1298,8 @@ class QAST::OperationsJS {
 
         my $protected := $comp.as_js(:want($T_OBJ), $node[0]);
 
-        if $*RETURN.is_used {
+        # HACK - we assume how return is used on the nqp backend and avoid handling some exceptions
+        if $*HLL ne 'nqp' || $*RETURN.is_used {
             my $handle_result := $comp.as_js(:want($T_OBJ), $node[2]);
 
             Chunk.new($T_OBJ, $result, [
@@ -1321,11 +1322,16 @@ class QAST::OperationsJS {
 
     });
 
+    my sub is_CONTROL_RETURN($category) {
+        $category ~~ QAST::IVal && $category.value == nqp::const::CONTROL_RETURN
+            || $category ~~ QAST::Op && $category.op eq 'const' && $category.name eq 'CONTROL_RETURN';
+    }
+
     add_op('throwpayloadlex', :!inlinable, sub ($comp, $node, :$want, :$cps) {
         my $category := $node[0];
         my $payload := $comp.as_js(:want($T_OBJ), $node[1]);
 
-        unless $category ~~ QAST::IVal && $category.value == nqp::const::CONTROL_RETURN {
+        unless is_CONTROL_RETURN($category) {
             return $comp.NYI("throwpayloadlex with something else then a CONTROL_RETURN literal");
         }
 
@@ -1342,6 +1348,22 @@ class QAST::OperationsJS {
         Chunk.new($T_VOID, "", [
             $payload,
             "throw new nqp.ControlReturn({$payload.expr});\n"
+        ]);
+    });
+
+    add_op('throwpayloadlexcaller', :!inlinable, sub ($comp, $node, :$want, :$cps) {
+        my $category := $node[0];
+        my $payload := $comp.as_js(:want($T_OBJ), $node[1]);
+
+        unless is_CONTROL_RETURN($category) {
+            return $comp.NYI("throwpayloadlexcaller with something else then a CONTROL_RETURN literal");
+        }
+
+        $*BLOCK.use_passing_on_of_exceptions();
+
+        Chunk.new($T_VOID, "", [
+            $payload,
+            "throw new nqp.PassExceptionToCaller(new nqp.ControlReturn({$payload.expr}));\n"
         ]);
     });
 
