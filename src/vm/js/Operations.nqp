@@ -213,9 +213,6 @@ class QAST::OperationsJS {
     add_simple_op('gcd_i', $T_INT, [$T_INT, $T_INT]);
     add_simple_op('lcm_i', $T_INT, [$T_INT, $T_INT]);
 
-    add_simple_op('istype', $T_BOOL, [$T_OBJ, $T_OBJ], sub ($value, $type) {"($value instanceof $type.constructor)"});
-
-
     add_op('chain', sub ($comp, $node, :$want, :$cps) {
         my $ret := $*BLOCK.add_tmp;
 
