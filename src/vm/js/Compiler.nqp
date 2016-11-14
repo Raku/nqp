@@ -1025,7 +1025,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 my $first_time_marker := $*BLOCK.maybe_first_time_marker;
 
                 my @function := [
-                    "function({$sig.expr}) \{\n" ,#~ "/* serializable {self.is_serializable($node.cuid)} */\n",
+                    "function({$sig.expr}) \{\n" ,
                     $first_time_marker ?? "$first_time_marker = 1;\n" !! '',
                     self.declare_js_vars($*BLOCK.tmps),
                     self.declare_js_vars($*BLOCK.js_lexicals),
