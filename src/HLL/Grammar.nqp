@@ -127,6 +127,10 @@ grammar HLL::Grammar {
         ]
     }
 
+    regex comment:sym<line_directive> {
+        ^^ '#' \s* 'line' \s+ $<line>=(\d+) [ \s+ $<filename>=(\S+) ]? $$
+    }
+
 =begin 
 
 =item O(*%spec)

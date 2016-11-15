@@ -661,8 +661,26 @@ class HLL::Compiler does HLL::Backend::Default {
         nqp::list_i(nqp::add_i($lo, 1), nqp::add_i($column, 1));
     }
 
-    method lineof($target, int $pos, int :$cache = 0) {
-        nqp::atpos_i(self.line_and_column_of($target, $pos, :$cache), 0);
+    method lineof($target, int $pos, int :$cache = 0, int :$directives = 0) {
+        self.linefileof($target, $pos, :$cache, :$directives)[0]
+    }
+
+    method linefileof($target, int $pos, int :$cache = 0, int :$directives = 0) {
+        my int $line := nqp::atpos_i(self.line_and_column_of($target, $pos, :$cache), 0);
+        my str $file := '';
+        if $directives && (my @clds := @*comp_line_directives) {
+            my int $i := nqp::elems(@clds);
+            while $i > 0 {
+                $i := $i - 1;
+                last if $line > @clds[$i][0];
+            }
+            if $line > @clds[$i][0] {
+                my @directive := @clds[$i];
+                $line := $line - @directive[0] + @directive[1] - 1;
+                $file := @directive[2];
+            }
+        }
+        [$line, $file];
     }
 
     

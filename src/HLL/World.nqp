@@ -82,6 +82,9 @@ class HLL::World {
 
     has $!is_nested;
 
+    # List of any line number/filename directives in the file.
+    my @*comp_line_directives := nqp::hash();
+
     method BUILD(:$handle!, :$description = '<unknown>', :$context) {
         if $context {
             $!context   := $context;
@@ -180,5 +183,12 @@ class HLL::World {
     # Gets the list of tasks to do at fixup time.
     method fixup_tasks() {
         $!context.fixup_tasks
+    }
+
+    method add_comp_line_directive(@directive) {
+        my int $elems := nqp::elems(@*comp_line_directives);
+        if $elems == 0 || !(@*comp_line_directives[$elems - 1][0] eq @directive[0]) {
+            nqp::push(@*comp_line_directives, @directive);
+        }
     }
 }

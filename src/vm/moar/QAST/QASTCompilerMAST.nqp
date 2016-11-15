@@ -1402,9 +1402,11 @@ my class MASTCompilerInstance {
             # Annotate with line number if we have one.
             my $node := $_.node;
             if nqp::isconcrete($node) && nqp::can($node,'orig') {
-                my $line := HLL::Compiler.lineof($node.orig(), $node.from(), :cache(1));
+                my @line_file := HLL::Compiler.linefileof($node.orig(), $node.from(), :cache(1), :directives(1));
+                my $line := @line_file[0];
+                my $file := @line_file[1] || $!file;
                 nqp::push(@all_ins, MAST::Annotated.new(
-                    :$!file, :$line, :instructions($last_stmt.instructions) ));
+                    :$file, :$line, :instructions($last_stmt.instructions) ));
             }
             else {
                 nqp::splice(@all_ins, $last_stmt.instructions, +@all_ins, 0);

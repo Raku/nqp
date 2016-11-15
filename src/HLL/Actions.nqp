@@ -224,4 +224,9 @@ class HLL::Actions {
                          !! self.string_to_int( $/, 10 )
                         );
     }
+
+    method comment:sym<line_directive>($/) {
+        my $orig_line := HLL::Compiler.lineof($/.orig(), $/.from(), :cache(1), :directives(0));
+        $*W.add_comp_line_directive([$orig_line, nqp::radix(10, $<line>, 0, 0)[0], $<filename>]);
+    }
 }
