@@ -244,7 +244,6 @@ op.istype = function(ctx, obj, type) {
     }
   }
 
-  // TODO cases where the typeCheckCache isn't authoritative
   var cache = obj._STable.typeCheckCache;
   if (cache) {
     for (var i = 0; i < cache.length; i++) {
@@ -262,9 +261,15 @@ op.istype = function(ctx, obj, type) {
       return 0;
     }
 
-
-    return HOW.type_check(ctx, null, HOW, obj, type).$$toBool(ctx);
+    if (HOW.type_check(ctx, null, HOW, obj, type).$$toBool(ctx)) {
+      return 1;
+    }
   }
+
+  if (type._STable.typeCheckNeedsAccepts) {
+    return type._STable.HOW.accepts_type(ctx, null, type._STable.HOW, type, obj).$$toBool(ctx);
+  }
+
   return 0;
 };
 
@@ -274,7 +279,9 @@ op.settypecache = function(obj, cache) {
 };
 
 op.settypecheckmode = function(obj, mode) {
-  console.log('NYI settypecheckmode');
+  if (mode & 2) {
+    obj._STable.typeCheckNeedsAccepts = true;
+  }
   return obj;
 };
 
