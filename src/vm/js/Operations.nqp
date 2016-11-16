@@ -879,7 +879,9 @@ class QAST::OperationsJS {
         }
     });
 
-    add_simple_op('splice', $T_OBJ, [$T_OBJ, $T_OBJ, $T_INT, $T_INT], :side-effects);
+    add_simple_op('splice', $T_OBJ, [$T_OBJ, $T_OBJ, $T_INT, $T_INT],
+        sub ($target, $source, $offset, $length) {"$target.\$\$splice($source, $offset, $length)"},
+        :side-effects);
 
     add_simple_op('setelems', $T_OBJ, [$T_OBJ, $T_INT], :side-effects);
 

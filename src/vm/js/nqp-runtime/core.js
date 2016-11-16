@@ -209,17 +209,6 @@ op.getcodeobj = function(codeRef) {
   return codeRef.codeObj;
 };
 
-// TODO benchmark and pick a fast way of doing this
-op.splice = function(target, source, offset, length) {
-  if (target.$$splice) return target.$$splice(source, offset, length);
-  var args = [offset, length];
-  for (var i = 0; i < source.length; i++) {
-    args.push(source[i]);
-  }
-  target.splice.apply(target, args);
-  return target;
-};
-
 op.findmethod = function(obj, method) {
   return obj._STable.methodCache[method];
 };
