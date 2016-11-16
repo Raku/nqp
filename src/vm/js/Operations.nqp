@@ -10,7 +10,7 @@ class QAST::OperationsJS {
         %inlinable{$op} := $inlinable;
     }
 
-    sub op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx, :$cps, :$decont) {
+    sub op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx, :$cps, :$decont, :$method_call) {
         my @exprs;
         my @setup;
 
@@ -28,16 +28,20 @@ class QAST::OperationsJS {
             nqp::die("{+$node.list} arguments for {$node.op}, the maximum is {+@argument_types}");
         } 
 
-        if $ctx {
-          @exprs.push($*CTX);
-        }
-
         my $i := 0;
         for $node.list -> $arg {
             my $chunk := $comp.as_js($arg, :want(@argument_types[$i]));
             @exprs.push(@decont[$i] ?? "{$chunk.expr}.\$\$decont($*CTX)" !! $chunk.expr);
             @setup.push($chunk);
             $i := $i + 1;
+        }
+
+        if $ctx {
+            if $method_call {
+                nqp::splice(@exprs, nqp::list($*CTX), 1, 0);
+            } else {
+                @exprs.unshift($*CTX);
+            }
         }
 
         if $cps {
@@ -70,7 +74,7 @@ class QAST::OperationsJS {
             return $comp.NYI("CPS op: $op") if $required_cps;
             my $use_cps := $required_cps || ($cps_aware && $cps);
             my $gen_code := $method_call ?? method_call($op) !! $cb;
-            my $chunk := op_template($comp, $node, $return_type, @argument_types, $gen_code, :$ctx, :cps($use_cps), :$decont);
+            my $chunk := op_template($comp, $node, $return_type, @argument_types, $gen_code, :$ctx, :cps($use_cps), :$decont, :$method_call);
             ($side-effects && !$use_cps) ?? $comp.stored_result($chunk, :$want) !! $chunk;
         }, :$inlinable);
 
@@ -145,13 +149,13 @@ class QAST::OperationsJS {
     method new_chunk(*@args) { Chunk.new(|@args) }
 
     add_simple_op('setcontspec', $T_OBJ, [$T_OBJ, $T_STR, $T_OBJ], :side-effects, :decont(0));
-    add_simple_op('assign',  $T_OBJ, [$T_OBJ, $T_OBJ], sub ($cont, $value) {"$cont.\$\$assign({$*CTX},$value)"}, :side-effects, :decont(1));
-    add_simple_op('assignunchecked',  $T_OBJ, [$T_OBJ, $T_OBJ], sub ($cont, $value) {"$cont.\$\$assignunchecked({$*CTX},$value)"}, :side-effects);
+    add_simple_op('assign',  $T_OBJ, [$T_OBJ, $T_OBJ], :method_call, :ctx, :side-effects, :decont(1));
+    add_simple_op('assignunchecked',  $T_OBJ, [$T_OBJ, $T_OBJ], :method_call, :ctx, :side-effects);
 
     sub add_native_assign_op($op_name, $kind) {
         # TODO If possible lower it to a bind instead just like on the moarvm backend
         # POTENTIAL OPTIMALIZATION
-        add_simple_op($op_name,  $kind, [$T_OBJ, $kind], sub ($cont, $value) {"$cont.\$\${$op_name}({$*CTX},$value)"}, :side-effects);
+        add_simple_op($op_name,  $kind, [$T_OBJ, $kind], :method_call, :ctx, :side-effects);
     }
 
     add_native_assign_op('assign_i', $T_INT);
@@ -159,7 +163,7 @@ class QAST::OperationsJS {
     add_native_assign_op('assign_s', $T_STR);
 
 
-    add_simple_op('decont', $T_OBJ, [$T_OBJ], sub ($cont) {"$cont\.\$\$decont($*CTX)"});
+    add_simple_op('decont', $T_OBJ, [$T_OBJ], :method_call, :ctx);
     add_simple_op('iscont', $T_INT, [$T_OBJ]);
     add_simple_op('isrwcont', $T_INT, [$T_OBJ]);
 
