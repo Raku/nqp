@@ -56,7 +56,7 @@ class QAST::OperationsJS {
         }
     }
 
-    sub runtime_op($op, @argument_types) {
+    sub runtime_op($op) {
         sub (*@args, :$cps) {
             "nqp.op.$op{$cps ?? 'CPS' !! ''}({nqp::join(',', @args)})";
         }
@@ -68,7 +68,7 @@ class QAST::OperationsJS {
         }
     }
 
-    sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op, @argument_types), :$side-effects, :$ctx, :$required_cps, :$cps_aware, :$inlinable = 1, :$decont, :$method_call) {
+    sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op), :$side-effects, :$ctx, :$required_cps, :$cps_aware, :$inlinable = 1, :$decont, :$method_call) {
 
         add_op($op, sub ($comp, $node, :$want, :$cps) {
             return $comp.NYI("CPS op: $op") if $required_cps;
