@@ -1,6 +1,6 @@
 #! nqp
 
-plan(1489);
+plan(1494);
 
 {
     my $sc := nqp::createsc('exampleHandle');
@@ -412,6 +412,9 @@ sub add_to_sc($sc, $idx, $obj) {
     ok(nqp::atpos_s(nqp::scgetobj($dsc, 0).a, 2) eq 'pig',   'string array third element is correct');
 }
 
+
+
+
 # Serializing an SC with a P6opaque containing a MultiCache
 {
     my $sc := nqp::createsc('TEST_SC_13_IN');
@@ -448,6 +451,31 @@ sub add_to_sc($sc, $idx, $obj) {
     ok(nqp::istype(nqp::scgetobj($dsc, 0), T8), 'deserialized object has correct type');
     ok(nqp::isnull(nqp::scgetobj($dsc, 0).cache), 'Multi cache ends up null');
     ok(nqp::isnull(nqp::scgetobj($dsc, 0).fh), 'File handle ends up null');
+}
+
+# Serializing an SC with a VMArray
+{
+    my $sc := nqp::createsc('TEST_SC_14_IN');
+    my $sh := nqp::list_s();
+
+    class VMArrayClass is repr('VMArray') {
+    }
+
+    my $v := VMArrayClass.new();
+    nqp::push($v, 123);
+    nqp::push($v, 456);
+    add_to_sc($sc, 0, $v);
+
+    my $serialized := nqp::serialize($sc, $sh);
+
+    my $dsc := nqp::createsc('TEST_SC_14_OUT');
+    nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
+
+    ok(nqp::scobjcount($dsc) == 1, 'deserialized SC has a single object');
+    ok(nqp::istype(nqp::scgetobj($dsc, 0), VMArrayClass), 'deserialized array has correct type');
+    is(nqp::elems(nqp::scgetobj($dsc, 0)), 2, 'deserialize array has correct number of elements');
+    is(nqp::scgetobj($dsc, 0)[0], 123, '0th element of array is correct');
+    is(nqp::scgetobj($dsc, 0)[1], 456, '1st element of array is correct');
 }
 
 # integers
@@ -491,7 +519,7 @@ sub round_trip_int_array($seq, $desc, @a) {
         nqp::push(@a, $i);
         $i := $i + 1;
     }
-    round_trip_int_array(13, 'small integers', @a);
+    round_trip_int_array(14, 'small integers', @a);
 }
 
 {
