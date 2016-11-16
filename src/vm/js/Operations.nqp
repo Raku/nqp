@@ -1169,7 +1169,7 @@ class QAST::OperationsJS {
 
             ChunkCPS.new($T_OBJ, $result, [
                 $list,
-                "$iterator = nqp.op.iterator({$list.expr});\n",
+                "$iterator = {$list.expr}.\$\$iterator();\n",
                 "var $loop = function() \{\n",
                 "if ($iterator.idx < $iterator.target) \{\n",
                 $*BLOCK.set_cont($body, $loop),
@@ -1184,7 +1184,7 @@ class QAST::OperationsJS {
         else {
             Chunk.new($T_OBJ, 'null', [
                 $list,
-                "$iterator = nqp.op.iterator({$list.expr});\n",
+                "$iterator = {$list.expr}.\$\$iterator();\n",
                 "while ($iterator.idx < $iterator.target) \{\n",
                 $comp.handle_control($loop, $body),
                 "\}\n"

@@ -85,11 +85,6 @@ op.setdebugtypename = function(type, debugName) {
   return type;
 };
 
-op.iterator = function(obj) {
-  return obj.$$iterator();
-};
-
-
 exports.hash = function() {
   return new Hash();
 };
