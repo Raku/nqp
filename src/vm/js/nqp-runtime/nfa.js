@@ -12,8 +12,8 @@ const EDGE_CHARLIST = 6, EDGE_CHARLIST_NEG = 7, EDGE_SUBRULE = 8, EDGE_CODEPOINT
 const EDGE_GENERIC_VAR = 11, EDGE_CHARRANGE = 12, EDGE_CHARRANGE_NEG = 13, EDGE_CODEPOINT_LL = 14, EDGE_CODEPOINT_I_LL = 15;
 
 function convertState(thing) {
-  if (thing instanceof NQPArray) {
-    return thing.array.map(function(x) { return convertState(x) });
+  if (thing.$$toArray) {
+    return thing.$$toArray().map(function(x) { return convertState(x) });
   } else {
     return thing;
   }

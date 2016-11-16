@@ -5,6 +5,7 @@ var NQPInt = require('./nqp-int.js');
 var NQPException = require('./nqp-exception.js');
 var NQPArray = require('./array.js');
 var Null = require('./null.js');
+var Iter = require('./iter.js');
 
 var reprs = {};
 var reprById = [];
@@ -719,13 +720,130 @@ reprs.NFA = NFA;
 
 // TODO rework VMArray to be more correct
 class VMArray extends REPR {
+
+  allocate(STable) {
+    var obj = new STable.objConstructor();
+    obj.array = [];
+    return obj;
+  }
+
+  setupSTable(STable) {
+    STable.addInternalMethod('$$push', function(value) {
+      this.array.push(value);
+      return value;
+    });
+
+    STable.addInternalMethod('$$push', function(value) {
+      this.array.push(value);
+      return value;
+    });
+
+    STable.addInternalMethod('$$atpos', function(index) {
+      var value = this.array[index < 0 ? this.array.length + index : index];
+      if (value === undefined) return Null;
+      return value;
+    });
+
+    STable.addInternalMethod('$$bindpos', function(index, value) {
+      return this.array[index < 0 ? this.array.length + index : index] = value;
+    });
+
+    STable.addInternalMethod('$$join', function(delim) {
+      return this.array.join(delim);
+    });
+
+
+    STable.addInternalMethod('$$pop', function() {
+      var value = this.array.pop();
+      if (value === undefined) return Null;
+      return value;
+    });
+
+    STable.addInternalMethod('$$shift', function() {
+      var value = this.array.shift();
+      if (value === undefined) return Null;
+      return value;
+    });
+
+    STable.addInternalMethod('$$unshift', function(value) {
+      this.array.unshift(value);
+      return value;
+    });
+
+    STable.addInternalMethod('$$elems', function() {
+      return this.array.length;
+    });
+
+    STable.addInternalMethod('$$existspos', function(index) {
+      if (index < 0) index += this.array.length;
+      return this.array.hasOwnProperty(index) ? 1 : 0;
+    });
+
+    STable.addInternalMethod('$$setelems', function(elems) {
+      this.array.length = elems;
+    });
+
+    STable.addInternalMethod('$$numdimensions', function() {
+      return 1;
+    });
+
+    STable.addInternalMethod('$$setdimensions', function(dimensions) {
+      if (dimensions.array.length != 1) {
+        throw new NQPException('A dynamic array can only have a single dimension');
+      } else {
+        this.array.length = dimensions.array[0];
+      }
+    });
+
+    STable.addInternalMethod('$$toArray', function() {
+      return this.array;
+    });
+
+    STable.addInternalMethod('$$iterator', function() {
+      return new Iter(this.array);
+    });
+
+    STable.addInternalMethod('Num', function() {
+      return this.array.length;
+    });
+
+    STable.addInternalMethod('$$splice', function(source, offset, length) {
+      // TODO think about the case when the source is not NQPArrray or VMArray
+      var args = [offset, length];
+      for (var i = 0; i < source.array.length; i++) {
+        args.push(source.array[i]);
+      }
+      this.array.splice.apply(this.array, args);
+      return this;
+    });
+  }
+
   deserializeFinish(obj, data) {
-    // STUB
+    if (this.type !== Null) {
+      console.log('NYI: VMArrays of a type different then null');
+    }
+
+    obj.array = [];
+    var size = data.varint();
+    for (var i = 0; i < size; i++) {
+      obj.array[i] = data.variant();
+    }
+  }
+
+
+  serialize(cursor, obj) {
+    if (this.type !== Null) {
+      console.log('NYI: VMArrays of a type different then null');
+    }
+
+    cursor.varint(obj.array.length);
+    for (var i = 0; i < obj.array.length; i++) {
+      cursor.ref(obj.array[i]);
+    }
   }
 
   deserializeReprData(cursor) {
     this.type = cursor.variant();
-    /* TODO - type */
   }
 
   serializeReprData(st, cursor) {

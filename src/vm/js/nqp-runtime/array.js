@@ -160,6 +160,10 @@ class NQPArray extends NQPObject {
     var index = idx.array[0];
     return (this.array[index] = value);
   }
+
+  $$toArray() {
+    return this.array;
+  }
 };
 
 NQPArray.prototype.$$atposnd_i = NQPArray.prototype.$$atposnd;

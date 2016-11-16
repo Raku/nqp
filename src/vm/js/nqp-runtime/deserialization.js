@@ -550,17 +550,10 @@ class BinaryCursor {
         console.log('Missing stable', objects[i].STable[0], objects[i].STable[1], deps[objects[i].STable[0]].rootStables);
       }
 
-      objects[i].isArray = objects[i].isConcrete && STableForObj.REPR.name == 'VMArray';
-      objects[i].arrayRepr = STableForObj.REPR;
-
-      if (objects[i].isArray) {
-        sc.rootObjects[i] = new NQPArray([]);
-      } else {
-        sc.rootObjects[i] = objects[i].isConcrete ?
-            new (STableForObj.objConstructor)() :
-            STableForObj.createTypeObject();
-        sc.rootObjects[i]._SC = sc;
-      }
+      sc.rootObjects[i] = objects[i].isConcrete ?
+          new (STableForObj.objConstructor)() :
+          STableForObj.createTypeObject();
+      sc.rootObjects[i]._SC = sc;
     }
 
 
@@ -587,10 +580,7 @@ class BinaryCursor {
 
     /* Finish up objects */
     for (var i = 0; i < objects.length; i++) {
-      if (objects[i].isArray) {
-        var repr = objects[i].arrayRepr;
-        repr.deserializeArray(sc.rootObjects[i], objects[i].data);
-      } else if (objects[i].isConcrete) {
+      if (objects[i].isConcrete) {
         var repr = sc.rootObjects[i]._STable.REPR;
         if (repr.deserializeFinish) {
           repr.deserializeFinish(sc.rootObjects[i], objects[i].data);
