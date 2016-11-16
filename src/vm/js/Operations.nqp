@@ -58,12 +58,19 @@ class QAST::OperationsJS {
         }
     }
 
-    sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op, @argument_types), :$side-effects, :$ctx, :$required_cps, :$cps_aware, :$inlinable = 1, :$decont) {
+    sub method_call($op) {
+        sub (*@args, :$cps) {
+            nqp::shift(@args) ~ '.$$' ~ $op ~ '(' ~ nqp::join(',', @args) ~ ')'
+        }
+    }
+
+    sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op, @argument_types), :$side-effects, :$ctx, :$required_cps, :$cps_aware, :$inlinable = 1, :$decont, :$method_call) {
 
         add_op($op, sub ($comp, $node, :$want, :$cps) {
             return $comp.NYI("CPS op: $op") if $required_cps;
             my $use_cps := $required_cps || ($cps_aware && $cps);
-            my $chunk := op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx, :cps($use_cps), :$decont);
+            my $gen_code := $method_call ?? method_call($op) !! $cb;
+            my $chunk := op_template($comp, $node, $return_type, @argument_types, $gen_code, :$ctx, :cps($use_cps), :$decont);
             ($side-effects && !$use_cps) ?? $comp.stored_result($chunk, :$want) !! $chunk;
         }, :$inlinable);
 
@@ -313,10 +320,7 @@ class QAST::OperationsJS {
         });
     }
 
-    add_simple_op('attrinited', $T_INT, [$T_OBJ, $T_OBJ, $T_STR], :decont(1), sub ($obj, $classHandle, $attrName) {
-        "$obj.\$\$attrinited($classHandle, $attrName)"
-    });
-
+    add_simple_op('attrinited', $T_INT, [$T_OBJ, $T_OBJ, $T_STR], :decont(1), :method_call);
     add_simple_op('hintfor', $T_INT, [$T_OBJ, $T_STR]);
 
 
@@ -558,7 +562,7 @@ class QAST::OperationsJS {
         });
 
         add_simple_op('bindpos' ~ $suffix, $type, [$T_OBJ, $T_INT, $type], sub ($list, $index, $value) {"$list.\$\$bindpos($index, $value)"}, :side-effects);
-        add_simple_op('atpos' ~ $suffix, $type, [$T_OBJ, $T_INT], sub ($list, $index) {"$list.\$\$atpos$suffix($index)"});
+        add_simple_op('atpos' ~ $suffix, $type, [$T_OBJ, $T_INT], :method_call);
         
         add_simple_op('pop' ~ $suffix, $type, [$T_OBJ], sub ($array) {"$array.\$\$pop()"}, :side-effects);
         add_simple_op('push' ~ $suffix, $type, [$T_OBJ, $type], sub ($array, $elem) {"$array.\$\$push($elem)"}, :side-effects);
@@ -574,8 +578,8 @@ class QAST::OperationsJS {
         add_simple_op('bindpos2d' ~ $suffix, $type, [$T_OBJ, $T_INT, $T_INT, $type], :side-effects);
         add_simple_op('bindpos3d' ~ $suffix, $type, [$T_OBJ, $T_INT, $T_INT, $T_INT, $type], :side-effects);
 
-        add_simple_op('atkey' ~ $suffix, $type, [$T_OBJ, $T_STR], sub ($hash, $key) {"$hash.\$\$atkey$suffix($key)"});
-        add_simple_op('bindkey' ~ $suffix, $type, [$T_OBJ, $T_STR, $type], sub ($hash, $key, $value) {"$hash.\$\$bindkey$suffix($key, $value)"}, :side-effects);
+        add_simple_op('atkey' ~ $suffix, $type, [$T_OBJ, $T_STR], :method_call);
+        add_simple_op('bindkey' ~ $suffix, $type, [$T_OBJ, $T_STR, $type], :method_call, :side-effects);
     }
 
     add_simple_op('numdimensions', $T_INT, [$T_OBJ]);
@@ -880,19 +884,18 @@ class QAST::OperationsJS {
     });
 
     add_simple_op('splice', $T_OBJ, [$T_OBJ, $T_OBJ, $T_INT, $T_INT],
-        sub ($target, $source, $offset, $length) {"$target.\$\$splice($source, $offset, $length)"},
-        :side-effects);
+        :method_call, :side-effects);
 
     add_simple_op('setelems', $T_OBJ, [$T_OBJ, $T_INT], :side-effects);
 
 
-    add_simple_op('iterator', $T_OBJ, [$T_OBJ], sub ($over) {"$over.\$\$iterator()"}, :side-effects);
+    add_simple_op('iterator', $T_OBJ, [$T_OBJ], :method_call, :side-effects);
 
     add_simple_op('iterval', $T_OBJ, [$T_OBJ], sub ($iter) {"$iter.iterval()"});
     add_simple_op('iterkey_s', $T_STR, [$T_OBJ], sub ($iter) {"$iter.iterkey_s()"});
 
-    add_simple_op('existskey', $T_BOOL, [$T_OBJ, $T_STR], sub ($hash, $key) {"$hash.\$\$existskey($key)"});
-    add_simple_op('deletekey', $T_OBJ, [$T_OBJ, $T_STR], sub ($hash, $key) {"$hash.\$\$deletekey($key)"}, :side-effects);
+    add_simple_op('existskey', $T_BOOL, [$T_OBJ, $T_STR], :method_call);
+    add_simple_op('deletekey', $T_OBJ, [$T_OBJ, $T_STR], :method_call, :side-effects);
 
     add_simple_op('existspos', $T_BOOL, [$T_OBJ, $T_INT]);
 
