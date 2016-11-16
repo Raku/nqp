@@ -68,14 +68,14 @@ class QAST::OperationsJS {
         }
     }
 
-    sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op), :$side-effects, :$ctx, :$required_cps, :$cps_aware, :$inlinable = 1, :$decont, :$method_call) {
+    sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op), :$side_effects, :$ctx, :$required_cps, :$cps_aware, :$inlinable = 1, :$decont, :$method_call) {
 
         add_op($op, sub ($comp, $node, :$want, :$cps) {
             return $comp.NYI("CPS op: $op") if $required_cps;
             my $use_cps := $required_cps || ($cps_aware && $cps);
             my $gen_code := $method_call ?? method_call($op) !! $cb;
             my $chunk := op_template($comp, $node, $return_type, @argument_types, $gen_code, :$ctx, :cps($use_cps), :$decont, :$method_call);
-            ($side-effects && !$use_cps) ?? $comp.stored_result($chunk, :$want) !! $chunk;
+            ($side_effects && !$use_cps) ?? $comp.stored_result($chunk, :$want) !! $chunk;
         }, :$inlinable);
 
         set_op_result_type($op, $return_type);
@@ -148,14 +148,14 @@ class QAST::OperationsJS {
 
     method new_chunk(*@args) { Chunk.new(|@args) }
 
-    add_simple_op('setcontspec', $T_OBJ, [$T_OBJ, $T_STR, $T_OBJ], :side-effects, :decont(0));
-    add_simple_op('assign',  $T_OBJ, [$T_OBJ, $T_OBJ], :method_call, :ctx, :side-effects, :decont(1));
-    add_simple_op('assignunchecked',  $T_OBJ, [$T_OBJ, $T_OBJ], :method_call, :ctx, :side-effects);
+    add_simple_op('setcontspec', $T_OBJ, [$T_OBJ, $T_STR, $T_OBJ], :side_effects, :decont(0));
+    add_simple_op('assign',  $T_OBJ, [$T_OBJ, $T_OBJ], :method_call, :ctx, :side_effects, :decont(1));
+    add_simple_op('assignunchecked',  $T_OBJ, [$T_OBJ, $T_OBJ], :method_call, :ctx, :side_effects);
 
     sub add_native_assign_op($op_name, $kind) {
         # TODO If possible lower it to a bind instead just like on the moarvm backend
         # POTENTIAL OPTIMALIZATION
-        add_simple_op($op_name,  $kind, [$T_OBJ, $kind], :method_call, :ctx, :side-effects);
+        add_simple_op($op_name,  $kind, [$T_OBJ, $kind], :method_call, :ctx, :side_effects);
     }
 
     add_native_assign_op('assign_i', $T_INT);
@@ -332,8 +332,8 @@ class QAST::OperationsJS {
     add_hll_op('sprintfdirectives');
     add_hll_op('sprintfaddargumenthandler');
 
-    add_simple_op('setinvokespec', $T_OBJ, [$T_OBJ, $T_OBJ, $T_STR, $T_OBJ], :side-effects, :decont(0));
-    add_simple_op('setboolspec', $T_OBJ, [$T_OBJ, $T_INT, $T_OBJ], :side-effects, :decont(0));
+    add_simple_op('setinvokespec', $T_OBJ, [$T_OBJ, $T_OBJ, $T_STR, $T_OBJ], :side_effects, :decont(0));
+    add_simple_op('setboolspec', $T_OBJ, [$T_OBJ, $T_INT, $T_OBJ], :side_effects, :decont(0));
 
     sub add_cmp_op($op, $type) {
         add_simple_op($op, $T_INT, [$type, $type], sub ($a, $b) {
@@ -342,7 +342,7 @@ class QAST::OperationsJS {
     }
 
     add_simple_op('reprname', $T_STR, [$T_OBJ], :decont(0));
-    add_simple_op('newtype', $T_OBJ, [$T_OBJ, $T_STR], :side-effects, :decont(0));
+    add_simple_op('newtype', $T_OBJ, [$T_OBJ, $T_STR], :side_effects, :decont(0));
 
     add_cmp_op('cmp_i', $T_INT);
     add_cmp_op('cmp_n', $T_NUM);
@@ -431,68 +431,68 @@ class QAST::OperationsJS {
     add_simple_op('null_s', $T_STR, [], sub () {"nqp.null_s"});
     add_simple_op('isnull_s', $T_BOOL, [$T_STR], sub ($obj) {"($obj === nqp.null_s)"});
 
-    add_simple_op('time_n', $T_NUM, [], sub () {"(new Date().getTime() / 1000)"}, :side-effects);
-    add_simple_op('time_i', $T_NUM, [], sub () {"Math.floor(new Date().getTime() / 1000)"}, :side-effects);
+    add_simple_op('time_n', $T_NUM, [], sub () {"(new Date().getTime() / 1000)"}, :side_effects);
+    add_simple_op('time_i', $T_NUM, [], sub () {"Math.floor(new Date().getTime() / 1000)"}, :side_effects);
 
     add_simple_op('escape', $T_STR, [$T_STR]);
     add_simple_op('x', $T_STR, [$T_STR, $T_INT], sub ($what, $times) {"$what.repeat($times)"});
 
-    add_simple_op('getcomp', $T_OBJ, [$T_STR], :side-effects);
+    add_simple_op('getcomp', $T_OBJ, [$T_STR], :side_effects);
 
-    add_simple_op('say', $T_STR, [$T_STR], :side-effects);
-    add_simple_op('print', $T_STR, [$T_STR], :side-effects);
+    add_simple_op('say', $T_STR, [$T_STR], :side_effects);
+    add_simple_op('print', $T_STR, [$T_STR], :side_effects);
 
-    add_simple_op('getstderr', $T_OBJ, [], :side-effects);
-    add_simple_op('getstdout', $T_OBJ, [], :side-effects);
-    add_simple_op('getstdin', $T_OBJ, [], :side-effects);
+    add_simple_op('getstderr', $T_OBJ, [], :side_effects);
+    add_simple_op('getstdout', $T_OBJ, [], :side_effects);
+    add_simple_op('getstdin', $T_OBJ, [], :side_effects);
 
-    add_simple_op('open', $T_OBJ, [$T_STR, $T_STR], :side-effects);
+    add_simple_op('open', $T_OBJ, [$T_STR, $T_STR], :side_effects);
 
-    add_simple_op('tellfh', $T_INT, [$T_OBJ], :side-effects);
-    add_simple_op('seekfh', $T_INT, [$T_OBJ, $T_INT, $T_INT], :ctx, :side-effects);
-    add_simple_op('eoffh', $T_INT, [$T_OBJ], :side-effects);
-    add_simple_op('readlinefh', $T_STR, [$T_OBJ], :side-effects);
-    add_simple_op('readcharsfh', $T_STR, [$T_OBJ, $T_INT], :side-effects);
-    add_simple_op('readlinechompfh', $T_STR, [$T_OBJ], :side-effects);
-    add_simple_op('readallfh', $T_STR, [$T_OBJ], :side-effects);
-    add_simple_op('printfh', $T_OBJ, [$T_OBJ, $T_STR], :side-effects);
-    add_simple_op('sayfh', $T_OBJ, [$T_OBJ, $T_STR], :side-effects);
-    add_simple_op('flushfh', $T_OBJ, [$T_OBJ], :side-effects);
-    add_simple_op('closefh', $T_OBJ, [$T_OBJ], :side-effects);
-    add_simple_op('closefh_i', $T_INT, [$T_OBJ], :side-effects);
+    add_simple_op('tellfh', $T_INT, [$T_OBJ], :side_effects);
+    add_simple_op('seekfh', $T_INT, [$T_OBJ, $T_INT, $T_INT], :ctx, :side_effects);
+    add_simple_op('eoffh', $T_INT, [$T_OBJ], :side_effects);
+    add_simple_op('readlinefh', $T_STR, [$T_OBJ], :side_effects);
+    add_simple_op('readcharsfh', $T_STR, [$T_OBJ, $T_INT], :side_effects);
+    add_simple_op('readlinechompfh', $T_STR, [$T_OBJ], :side_effects);
+    add_simple_op('readallfh', $T_STR, [$T_OBJ], :side_effects);
+    add_simple_op('printfh', $T_OBJ, [$T_OBJ, $T_STR], :side_effects);
+    add_simple_op('sayfh', $T_OBJ, [$T_OBJ, $T_STR], :side_effects);
+    add_simple_op('flushfh', $T_OBJ, [$T_OBJ], :side_effects);
+    add_simple_op('closefh', $T_OBJ, [$T_OBJ], :side_effects);
+    add_simple_op('closefh_i', $T_INT, [$T_OBJ], :side_effects);
     add_simple_op('isttyfh', $T_INT, [$T_OBJ]);
-    add_simple_op('setinputlinesep', $T_OBJ, [$T_OBJ, $T_STR], :side-effects);
-    add_simple_op('setinputlineseps', $T_OBJ, [$T_OBJ, $T_OBJ], :side-effects);
-    add_simple_op('copy', $T_VOID, [$T_STR, $T_STR], :side-effects);
-    add_simple_op('rename', $T_VOID, [$T_STR, $T_STR], :side-effects);
+    add_simple_op('setinputlinesep', $T_OBJ, [$T_OBJ, $T_STR], :side_effects);
+    add_simple_op('setinputlineseps', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects);
+    add_simple_op('copy', $T_VOID, [$T_STR, $T_STR], :side_effects);
+    add_simple_op('rename', $T_VOID, [$T_STR, $T_STR], :side_effects);
 
     add_simple_op('bootarray', $T_OBJ, []);
 
     add_simple_op('getpid', $T_INT, []);
 
-    add_simple_op('exit', $T_VOID, [$T_INT], :side-effects);
+    add_simple_op('exit', $T_VOID, [$T_INT], :side_effects);
 
 
-    add_simple_op('symlink', $T_VOID, [$T_STR, $T_STR], :side-effects);
-    add_simple_op('link', $T_VOID, [$T_STR, $T_STR], :side-effects);
-    add_simple_op('unlink', $T_VOID, [$T_STR], :side-effects);
-    add_simple_op('setencoding', $T_VOID, [$T_OBJ, $T_STR], :side-effects);
+    add_simple_op('symlink', $T_VOID, [$T_STR, $T_STR], :side_effects);
+    add_simple_op('link', $T_VOID, [$T_STR, $T_STR], :side_effects);
+    add_simple_op('unlink', $T_VOID, [$T_STR], :side_effects);
+    add_simple_op('setencoding', $T_VOID, [$T_OBJ, $T_STR], :side_effects);
 
     add_simple_op('readlink', $T_STR, [$T_STR]);
 
-    add_simple_op('chdir', $T_VOID, [$T_STR], :side-effects);
-    add_simple_op('rmdir', $T_VOID, [$T_STR], :side-effects);
-    add_simple_op('mkdir', $T_VOID, [$T_STR, $T_INT], :side-effects);
+    add_simple_op('chdir', $T_VOID, [$T_STR], :side_effects);
+    add_simple_op('rmdir', $T_VOID, [$T_STR], :side_effects);
+    add_simple_op('mkdir', $T_VOID, [$T_STR, $T_INT], :side_effects);
 
-    add_simple_op('chmod', $T_VOID, [$T_STR, $T_INT], :side-effects);
+    add_simple_op('chmod', $T_VOID, [$T_STR, $T_INT], :side_effects);
 
-    add_simple_op('getenvhash', $T_OBJ, [], :side-effects);
-    add_simple_op('cwd', $T_STR, [], :side-effects);
+    add_simple_op('getenvhash', $T_OBJ, [], :side_effects);
+    add_simple_op('cwd', $T_STR, [], :side_effects);
 
-    add_simple_op('shell', $T_VOID, [$T_STR, $T_STR, $T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ, $T_INT], :side-effects);
-    add_simple_op('syncpipe', $T_OBJ, [], :side-effects);
+    add_simple_op('shell', $T_VOID, [$T_STR, $T_STR, $T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ, $T_INT], :side_effects);
+    add_simple_op('syncpipe', $T_OBJ, [], :side_effects);
 
-    add_simple_op('spawn', $T_VOID, [$T_OBJ, $T_STR, $T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ, $T_INT], :side-effects);
+    add_simple_op('spawn', $T_VOID, [$T_OBJ, $T_STR, $T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ, $T_INT], :side_effects);
 
 
     add_simple_op('sha1', $T_STR, [$T_STR]);
@@ -500,7 +500,7 @@ class QAST::OperationsJS {
 
     add_simple_op('isinvokable', $T_INT, [$T_OBJ]);
 
-    add_simple_op('encode', $T_OBJ, [$T_STR, $T_STR, $T_OBJ], :side-effects);
+    add_simple_op('encode', $T_OBJ, [$T_STR, $T_STR, $T_OBJ], :side_effects);
     add_simple_op('decode', $T_STR, [$T_OBJ, $T_STR]);
 
     add_simple_op('gethostname', $T_STR, [$T_STR]);
@@ -565,30 +565,30 @@ class QAST::OperationsJS {
            $comp.cpsify_chunk(Chunk.new($T_OBJ, $list , @setup, :$node));
         });
 
-        add_simple_op('bindpos' ~ $suffix, $type, [$T_OBJ, $T_INT, $type], sub ($list, $index, $value) {"$list.\$\$bindpos($index, $value)"}, :side-effects);
+        add_simple_op('bindpos' ~ $suffix, $type, [$T_OBJ, $T_INT, $type], sub ($list, $index, $value) {"$list.\$\$bindpos($index, $value)"}, :side_effects);
         add_simple_op('atpos' ~ $suffix, $type, [$T_OBJ, $T_INT], :method_call);
         
-        add_simple_op('pop' ~ $suffix, $type, [$T_OBJ], sub ($array) {"$array.\$\$pop()"}, :side-effects);
-        add_simple_op('push' ~ $suffix, $type, [$T_OBJ, $type], sub ($array, $elem) {"$array.\$\$push($elem)"}, :side-effects);
-        add_simple_op('unshift' ~ $suffix, $type, [$T_OBJ, $type], sub ($array, $elem) {"$array.\$\$unshift($elem)"}, :side-effects);
-        add_simple_op('shift' ~ $suffix, $type, [$T_OBJ], sub ($array) {"$array.\$\$shift()"}, :side-effects);
+        add_simple_op('pop' ~ $suffix, $type, [$T_OBJ], sub ($array) {"$array.\$\$pop()"}, :side_effects);
+        add_simple_op('push' ~ $suffix, $type, [$T_OBJ, $type], sub ($array, $elem) {"$array.\$\$push($elem)"}, :side_effects);
+        add_simple_op('unshift' ~ $suffix, $type, [$T_OBJ, $type], sub ($array, $elem) {"$array.\$\$unshift($elem)"}, :side_effects);
+        add_simple_op('shift' ~ $suffix, $type, [$T_OBJ], sub ($array) {"$array.\$\$shift()"}, :side_effects);
  
 
         add_simple_op('atposnd' ~ $suffix, $type, [$T_OBJ, $T_OBJ]);
-        add_simple_op('atpos2d' ~ $suffix, $type, [$T_OBJ, $T_INT, $T_INT, $type],  :side-effects);
-        add_simple_op('atpos3d' ~ $suffix, $type, [$T_OBJ, $T_INT, $T_INT, $T_INT, $type], :side-effects);
+        add_simple_op('atpos2d' ~ $suffix, $type, [$T_OBJ, $T_INT, $T_INT, $type],  :side_effects);
+        add_simple_op('atpos3d' ~ $suffix, $type, [$T_OBJ, $T_INT, $T_INT, $T_INT, $type], :side_effects);
 
-        add_simple_op('bindposnd' ~ $suffix, $type, [$T_OBJ, $T_OBJ, $type], :side-effects);
-        add_simple_op('bindpos2d' ~ $suffix, $type, [$T_OBJ, $T_INT, $T_INT, $type], :side-effects);
-        add_simple_op('bindpos3d' ~ $suffix, $type, [$T_OBJ, $T_INT, $T_INT, $T_INT, $type], :side-effects);
+        add_simple_op('bindposnd' ~ $suffix, $type, [$T_OBJ, $T_OBJ, $type], :side_effects);
+        add_simple_op('bindpos2d' ~ $suffix, $type, [$T_OBJ, $T_INT, $T_INT, $type], :side_effects);
+        add_simple_op('bindpos3d' ~ $suffix, $type, [$T_OBJ, $T_INT, $T_INT, $T_INT, $type], :side_effects);
 
         add_simple_op('atkey' ~ $suffix, $type, [$T_OBJ, $T_STR], :method_call);
-        add_simple_op('bindkey' ~ $suffix, $type, [$T_OBJ, $T_STR, $type], :method_call, :side-effects);
+        add_simple_op('bindkey' ~ $suffix, $type, [$T_OBJ, $T_STR, $type], :method_call, :side_effects);
     }
 
     add_simple_op('numdimensions', $T_INT, [$T_OBJ]);
     add_simple_op('dimensions', $T_OBJ, [$T_OBJ]);
-    add_simple_op('setdimensions', $T_OBJ, [$T_OBJ, $T_OBJ], :side-effects);
+    add_simple_op('setdimensions', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects);
 
     add_op('hash', sub ($comp, $node, :$want, :$cps) {
         # TODO CPS
@@ -646,20 +646,20 @@ class QAST::OperationsJS {
 
     %ops<callstatic> := %ops<call>;
 
-    add_simple_op('serialize', $T_STR, [$T_OBJ, $T_OBJ], :side-effects);
+    add_simple_op('serialize', $T_STR, [$T_OBJ, $T_OBJ], :side_effects);
     add_simple_op('scobjcount', $T_INT, [$T_OBJ]);
-    add_simple_op('createsc', $T_OBJ, [$T_STR], :side-effects);
-    add_simple_op('deserialize', $T_OBJ, [$T_STR, $T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ], :side-effects);
-    add_simple_op('scsetobj', $T_OBJ, [$T_OBJ, $T_INT, $T_OBJ], :side-effects);
-    add_simple_op('scgetobj', $T_OBJ, [$T_OBJ, $T_INT], :side-effects);
-    add_simple_op('scsetcode', $T_OBJ, [$T_OBJ, $T_INT, $T_OBJ], :side-effects);
-    add_simple_op('setobjsc', $T_OBJ, [$T_OBJ, $T_OBJ], :side-effects);
-    add_simple_op('markcodestatic', $T_OBJ, [$T_OBJ], :side-effects);
+    add_simple_op('createsc', $T_OBJ, [$T_STR], :side_effects);
+    add_simple_op('deserialize', $T_OBJ, [$T_STR, $T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ], :side_effects);
+    add_simple_op('scsetobj', $T_OBJ, [$T_OBJ, $T_INT, $T_OBJ], :side_effects);
+    add_simple_op('scgetobj', $T_OBJ, [$T_OBJ, $T_INT], :side_effects);
+    add_simple_op('scsetcode', $T_OBJ, [$T_OBJ, $T_INT, $T_OBJ], :side_effects);
+    add_simple_op('setobjsc', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects);
+    add_simple_op('markcodestatic', $T_OBJ, [$T_OBJ], :side_effects);
 
     add_simple_op('freshcoderef', $T_OBJ, [$T_OBJ]);
-    add_simple_op('markcodestub', $T_OBJ, [$T_OBJ], :side-effects);
+    add_simple_op('markcodestub', $T_OBJ, [$T_OBJ], :side_effects);
 
-    add_simple_op('scsetdesc', $T_STR, [$T_OBJ, $T_STR], :side-effects);
+    add_simple_op('scsetdesc', $T_STR, [$T_OBJ, $T_STR], :side_effects);
     add_simple_op('scgetdesc', $T_STR, [$T_OBJ]);
 
     add_simple_op('scgethandle', $T_STR, [$T_OBJ]);
@@ -667,8 +667,8 @@ class QAST::OperationsJS {
     add_simple_op('getobjsc', $T_OBJ, [$T_OBJ]);
     add_simple_op('scgetobjidx', $T_INT, [$T_OBJ, $T_OBJ]);
 
-    add_simple_op('pushcompsc', $T_OBJ, [$T_OBJ], :side-effects);
-    add_simple_op('popcompsc', $T_OBJ, [], :side-effects);
+    add_simple_op('pushcompsc', $T_OBJ, [$T_OBJ], :side_effects);
+    add_simple_op('popcompsc', $T_OBJ, [], :side_effects);
 
     add_simple_op('getstaticcode', $T_OBJ, [$T_OBJ]);
 
@@ -678,8 +678,8 @@ class QAST::OperationsJS {
 
     # Ops for NFA
 
-    add_simple_op('nfafromstatelist', $T_OBJ, [$T_OBJ, $T_OBJ], :ctx, :side-effects);
-    add_simple_op('nfarunproto', $T_OBJ, [$T_OBJ, $T_STR, $T_INT], :side-effects);
+    add_simple_op('nfafromstatelist', $T_OBJ, [$T_OBJ, $T_OBJ], :ctx, :side_effects);
+    add_simple_op('nfarunproto', $T_OBJ, [$T_OBJ, $T_STR, $T_INT], :side_effects);
     add_simple_op('nfarunalt', $T_OBJ, [$T_OBJ, $T_STR, $T_INT, $T_OBJ, $T_OBJ, $T_OBJ]);
 
     # TODO 
@@ -802,24 +802,24 @@ class QAST::OperationsJS {
 
 
     add_simple_op('exception', $T_OBJ, [], sub () {"$*HANDLER_CTX.exception"});
-    add_simple_op('rethrow', $T_VOID, [$T_OBJ], sub ($exception) {"$*CTX.rethrow($exception)"}, :side-effects);
-    add_simple_op('resume', $T_VOID, [$T_OBJ], sub ($exception) {"$*CTX.resume($exception)"}, :side-effects);
-    add_simple_op('throw', $T_VOID, [$T_OBJ], :side-effects, sub ($exception) {"{$*CTX}.throw($exception)"});
+    add_simple_op('rethrow', $T_VOID, [$T_OBJ], sub ($exception) {"$*CTX.rethrow($exception)"}, :side_effects);
+    add_simple_op('resume', $T_VOID, [$T_OBJ], sub ($exception) {"$*CTX.resume($exception)"}, :side_effects);
+    add_simple_op('throw', $T_VOID, [$T_OBJ], :side_effects, sub ($exception) {"{$*CTX}.throw($exception)"});
 
-    add_simple_op('setpayload', $T_OBJ, [$T_OBJ, $T_OBJ], :side-effects);
+    add_simple_op('setpayload', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects);
     add_simple_op('getpayload', $T_OBJ, [$T_OBJ, $T_OBJ]);
 
-    add_simple_op('setmessage', $T_OBJ, [$T_OBJ, $T_OBJ], :side-effects);
+    add_simple_op('setmessage', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects);
     add_simple_op('getmessage', $T_STR, [$T_OBJ]);
 
-    add_simple_op('newexception', $T_OBJ, [], :side-effects);
+    add_simple_op('newexception', $T_OBJ, [], :side_effects);
 
     add_simple_op('backtracestrings', $T_OBJ, [$T_OBJ]);
 
-    add_simple_op('findmethod', $T_OBJ, [$T_OBJ, $T_STR], :side-effects, :decont(0));
-    add_simple_op('can', $T_INT, [$T_OBJ, $T_STR], :side-effects, :decont(0));
+    add_simple_op('findmethod', $T_OBJ, [$T_OBJ, $T_STR], :side_effects, :decont(0));
+    add_simple_op('can', $T_INT, [$T_OBJ, $T_STR], :side_effects, :decont(0));
 
-    add_simple_op('istype', $T_INT, [$T_OBJ, $T_OBJ], :side-effects, :ctx, :decont(0, 1));
+    add_simple_op('istype', $T_INT, [$T_OBJ, $T_OBJ], :side_effects, :ctx, :decont(0, 1));
 
     add_simple_op('split', $T_OBJ, [$T_STR, $T_STR], sub ($separator, $string) {
         "new nqp.NQPArray({$string} == '' ? [] : {$string}.split({$separator}))"
@@ -831,9 +831,9 @@ class QAST::OperationsJS {
 
     add_simple_op('ctxouter', :!inlinable, $T_OBJ, [$T_OBJ]);
 
-    add_simple_op('forceouterctx', $T_OBJ, [$T_OBJ, $T_OBJ], :side-effects);
+    add_simple_op('forceouterctx', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects);
 
-    add_simple_op('loadbytecode', $T_STR, [$T_STR], :ctx, :side-effects);
+    add_simple_op('loadbytecode', $T_STR, [$T_STR], :ctx, :side_effects);
 
     add_simple_op('elems', $T_INT, [$T_OBJ]);
 
@@ -888,18 +888,18 @@ class QAST::OperationsJS {
     });
 
     add_simple_op('splice', $T_OBJ, [$T_OBJ, $T_OBJ, $T_INT, $T_INT],
-        :method_call, :side-effects);
+        :method_call, :side_effects);
 
-    add_simple_op('setelems', $T_OBJ, [$T_OBJ, $T_INT], :side-effects);
+    add_simple_op('setelems', $T_OBJ, [$T_OBJ, $T_INT], :side_effects);
 
 
-    add_simple_op('iterator', $T_OBJ, [$T_OBJ], :method_call, :side-effects);
+    add_simple_op('iterator', $T_OBJ, [$T_OBJ], :method_call, :side_effects);
 
     add_simple_op('iterval', $T_OBJ, [$T_OBJ], sub ($iter) {"$iter.iterval()"});
     add_simple_op('iterkey_s', $T_STR, [$T_OBJ], sub ($iter) {"$iter.iterkey_s()"});
 
     add_simple_op('existskey', $T_BOOL, [$T_OBJ, $T_STR], :method_call);
-    add_simple_op('deletekey', $T_OBJ, [$T_OBJ, $T_STR], :method_call, :side-effects);
+    add_simple_op('deletekey', $T_OBJ, [$T_OBJ, $T_STR], :method_call, :side_effects);
 
     add_simple_op('existspos', $T_BOOL, [$T_OBJ, $T_INT]);
 
@@ -916,7 +916,7 @@ class QAST::OperationsJS {
     add_simple_op('abs_i', $T_INT, [$T_INT], sub ($arg) {"Math.abs($arg)"});
     add_simple_op('pow_n', $T_NUM, [$T_NUM, $T_NUM], sub ($base, $exponent) {"Math.pow($base, $exponent)"});
 
-    add_simple_op('srand', $T_INT, [$T_INT], :side-effects);
+    add_simple_op('srand', $T_INT, [$T_INT], :side_effects);
     add_simple_op('rand_n', $T_NUM, [$T_NUM]);
 
     add_simple_op('radix', $T_OBJ, [$T_INT, $T_STR, $T_INT, $T_INT]);
@@ -935,32 +935,32 @@ class QAST::OperationsJS {
     add_simple_op('scwbdisable', $T_VOID, [], -> {''});
     add_simple_op('neverrepossess', $T_OBJ, [$T_OBJ]);
 
-    add_simple_op('settypehllrole', $T_OBJ, [$T_OBJ, $T_INT], :side-effects);
-    add_simple_op('settypehll', $T_OBJ, [$T_OBJ, $T_STR], :side-effects);
+    add_simple_op('settypehllrole', $T_OBJ, [$T_OBJ, $T_INT], :side_effects);
+    add_simple_op('settypehll', $T_OBJ, [$T_OBJ, $T_STR], :side_effects);
 
-    add_simple_op('sethllconfig', $T_OBJ,  [$T_STR, $T_OBJ], :side-effects);
+    add_simple_op('sethllconfig', $T_OBJ,  [$T_STR, $T_OBJ], :side_effects);
 
-    add_simple_op('bindcurhllsym', $T_OBJ, [$T_STR, $T_OBJ], :side-effects, sub ($sym, $value) {
+    add_simple_op('bindcurhllsym', $T_OBJ, [$T_STR, $T_OBJ], :side_effects, sub ($sym, $value) {
         "nqp.op.bindhllsym({quote_string($*HLL)}, $sym, $value)"
     });
     add_simple_op('getcurhllsym', $T_OBJ, [$T_STR], sub ($sym) {
         "nqp.op.gethllsym({quote_string($*HLL)}, $sym)"
     });
 
-    add_simple_op('bindhllsym', $T_OBJ, [$T_STR, $T_STR, $T_OBJ], :side-effects);
+    add_simple_op('bindhllsym', $T_OBJ, [$T_STR, $T_STR, $T_OBJ], :side_effects);
     add_simple_op('gethllsym', $T_OBJ, [$T_STR, $T_STR]);
 
-    add_simple_op('hllizefor', $T_OBJ, [$T_OBJ, $T_STR], :ctx, :side-effects);
+    add_simple_op('hllizefor', $T_OBJ, [$T_OBJ, $T_STR], :ctx, :side_effects);
 
-    add_simple_op('hllize', $T_OBJ, [$T_OBJ], :ctx, :side-effects, sub ($ctx, $obj) {
+    add_simple_op('hllize', $T_OBJ, [$T_OBJ], :ctx, :side_effects, sub ($ctx, $obj) {
         "nqp.op.hllizefor($ctx, $obj, {quote_string($*HLL)})"
     });
 
-    add_simple_op('bindcomp', $T_OBJ, [$T_STR, $T_OBJ], :side-effects);
-    add_simple_op('getcomp', $T_OBJ, [$T_STR], :side-effects);
+    add_simple_op('bindcomp', $T_OBJ, [$T_STR, $T_OBJ], :side_effects);
+    add_simple_op('getcomp', $T_OBJ, [$T_STR], :side_effects);
 
-    add_simple_op('setparameterizer', $T_OBJ, [$T_OBJ, $T_OBJ], :side-effects, :ctx, :decont(0,1));
-    add_simple_op('parameterizetype', $T_OBJ, [$T_OBJ, $T_OBJ], :side-effects, :ctx, :decont(0,1));
+    add_simple_op('setparameterizer', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :ctx, :decont(0,1));
+    add_simple_op('parameterizetype', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :ctx, :decont(0,1));
     add_simple_op('typeparameterized', $T_OBJ, [$T_OBJ], :decont(0));
     add_simple_op('typeparameters', $T_OBJ, [$T_OBJ], :ctx, :decont(0));
     add_simple_op('typeparameterat', $T_OBJ, [$T_OBJ, $T_INT], :ctx, :decont(0));
@@ -1373,7 +1373,7 @@ class QAST::OperationsJS {
         ]);
     });
 
-    add_simple_op('lastexpayload', $T_OBJ, [], sub () { '$$e.payload' }, :!inlinable, :side-effects);
+    add_simple_op('lastexpayload', $T_OBJ, [], sub () { '$$e.payload' }, :!inlinable, :side_effects);
 
 
     add_op('control', sub ($comp, $node, :$want, :$cps) {
@@ -1381,19 +1381,19 @@ class QAST::OperationsJS {
         $comp.throw_control_exception($node.name, $*LOOP, $node[0]);
     });
 
-    add_simple_op('create', $T_OBJ, [$T_OBJ], :side-effects);
+    add_simple_op('create', $T_OBJ, [$T_OBJ], :side_effects);
 
-    add_simple_op('die', $T_VOID, [$T_STR], :side-effects, sub ($msg) {"{$*CTX}.die($msg)"});
+    add_simple_op('die', $T_VOID, [$T_STR], :side_effects, sub ($msg) {"{$*CTX}.die($msg)"});
     %ops<die_s> := %ops<die>;
 
 
     add_simple_op('how', $T_OBJ, [$T_OBJ], sub ($obj) {"$obj._STable.HOW"}, :decont(0));
     add_simple_op('who', $T_OBJ, [$T_OBJ], sub ($obj) {"$obj._STable.WHO"}, :decont(0));
-    add_simple_op('setwho', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($obj, $who) {"($obj._STable.WHO = $who, $obj)"}, :side-effects, :decont(0));
+    add_simple_op('setwho', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($obj, $who) {"($obj._STable.WHO = $who, $obj)"}, :side_effects, :decont(0));
 
     # TODO decont second argument
-    add_simple_op('rebless', $T_OBJ, [$T_OBJ, $T_OBJ], :side-effects, :decont(0, 1));
-    add_simple_op('composetype', $T_OBJ, [$T_OBJ, $T_OBJ], :side-effects);
+    add_simple_op('rebless', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :decont(0, 1));
+    add_simple_op('composetype', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects);
 
     add_simple_op('where', $T_INT, [$T_OBJ], :decont(0));
     add_simple_op('objectid', $T_INT, [$T_OBJ], :decont(0));
@@ -1414,7 +1414,7 @@ class QAST::OperationsJS {
 
     add_simple_op('savecapture', :!inlinable, $T_OBJ, [], sub () {
         "nqp.op.savecapture(Array.prototype.slice.call(arguments))"
-    } , :side-effects);
+    } , :side_effects);
     %ops<usecapture> := %ops<savecapture>;
 
     add_simple_op('getlexdyn', $T_OBJ, [$T_STR], sub ($name) {"{$*CTX}.lookupDynamicFromCaller($name)"});
@@ -1431,23 +1431,23 @@ class QAST::OperationsJS {
 
     add_simple_op('invokewithcapture', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($invokee, $capture) {
         "$invokee.\$\$apply([{$*CTX}].concat($capture.named, $capture.pos))"
-    }, :side-effects);
+    }, :side_effects);
 
 
     add_simple_op('multicachefind', $T_OBJ, [$T_OBJ, $T_OBJ]);
     add_simple_op('multicacheadd', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ]);
 
-    add_simple_op('settypecache', $T_OBJ, [$T_OBJ, $T_OBJ], :side-effects);
-    add_simple_op('setmethcache', $T_OBJ, [$T_OBJ, $T_OBJ], :side-effects, :decont(0));
-    add_simple_op('setmethcacheauth', $T_OBJ, [$T_OBJ, $T_INT], :side-effects, :decont(0));
+    add_simple_op('settypecache', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects);
+    add_simple_op('setmethcache', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :decont(0));
+    add_simple_op('setmethcacheauth', $T_OBJ, [$T_OBJ, $T_INT], :side_effects, :decont(0));
 
-    add_simple_op('settypecheckmode', $T_OBJ, [$T_OBJ, $T_INT], :side-effects, :decont(0));
+    add_simple_op('settypecheckmode', $T_OBJ, [$T_OBJ, $T_INT], :side_effects, :decont(0));
 
     add_simple_op('getcodename', $T_OBJ, [$T_OBJ]);
-    add_simple_op('setcodename', $T_OBJ, [$T_OBJ, $T_STR], :side-effects);
+    add_simple_op('setcodename', $T_OBJ, [$T_OBJ, $T_STR], :side_effects);
 
     add_simple_op('getcodeobj', $T_OBJ, [$T_OBJ]);
-    add_simple_op('setcodeobj', $T_OBJ, [$T_OBJ, $T_OBJ], :side-effects);
+    add_simple_op('setcodeobj', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects);
 
     add_simple_op('getcodecuid', $T_STR, [$T_OBJ]);
 
@@ -1460,7 +1460,7 @@ class QAST::OperationsJS {
     add_simple_op('box_s', $T_OBJ, [$T_STR, $T_OBJ]);
     add_simple_op('unbox_s', $T_STR, [$T_OBJ], :decont(0));
 
-    add_simple_op('setdebugtypename', $T_OBJ, [$T_OBJ, $T_STR], :side-effects);
+    add_simple_op('setdebugtypename', $T_OBJ, [$T_OBJ, $T_STR], :side_effects);
 
     add_simple_op('iseq_I', $T_INT, [$T_OBJ, $T_OBJ]);
     add_simple_op('isne_I', $T_INT, [$T_OBJ, $T_OBJ]);
@@ -1517,14 +1517,14 @@ class QAST::OperationsJS {
     add_simple_op('callercode', :!inlinable, $T_OBJ, [], sub () {"caller_ctx.codeRef()"});
 
     # Native Call
-    add_simple_op('buildnativecall',  $T_INT, [$T_OBJ, $T_STR, $T_STR, $T_STR, $T_OBJ, $T_OBJ], :side-effects, :ctx);
-    add_simple_op('nativecall', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ], :side-effects);
+    add_simple_op('buildnativecall',  $T_INT, [$T_OBJ, $T_STR, $T_STR, $T_STR, $T_OBJ, $T_OBJ], :side_effects, :ctx);
+    add_simple_op('nativecall', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ], :side_effects);
 
-    add_simple_op('initnativecall', $T_INT, [], :side-effects);
+    add_simple_op('initnativecall', $T_INT, [], :side_effects);
 
     # Continuations
-    add_simple_op('continuationreset', $T_OBJ, [$T_OBJ, $T_OBJ], :side-effects, :ctx);
-    add_simple_op('continuationinvoke', $T_OBJ, [$T_OBJ, $T_OBJ], :side-effects, :ctx, :cps_aware);
+    add_simple_op('continuationreset', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :ctx);
+    add_simple_op('continuationinvoke', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :ctx, :cps_aware);
 
     add_simple_op('continuationcontrol', $T_OBJ, [$T_INT, $T_OBJ, $T_OBJ], :ctx, :required_cps);
 
@@ -1561,15 +1561,15 @@ class QAST::OperationsJS {
             ~ "\}\n"
         );
     });
-    add_simple_op('cleardispatcher', $T_VOID, [], sub () {"nqp.currentDispatcher = undefined"}, :side-effects);
-    add_simple_op('setdispatcher', $T_VOID, [$T_OBJ], sub ($value) {"nqp.currentDispatcher = $value"}, :side-effects);
+    add_simple_op('cleardispatcher', $T_VOID, [], sub () {"nqp.currentDispatcher = undefined"}, :side_effects);
+    add_simple_op('setdispatcher', $T_VOID, [$T_OBJ], sub ($value) {"nqp.currentDispatcher = $value"}, :side_effects);
     add_simple_op('ctxcaller', $T_OBJ, [$T_OBJ], :!inlinable);
     add_simple_op('ctx', $T_OBJ, [], :!inlinable, sub () {$*CTX});
 
     add_simple_op('lock', $T_OBJ, [$T_OBJ], sub ($lock) {$lock});
     add_simple_op('unlock', $T_OBJ, [$T_OBJ], sub ($lock) {$lock});
 
-    add_simple_op('sleep', $T_NUM, [$T_NUM], :side-effects);
+    add_simple_op('sleep', $T_NUM, [$T_NUM], :side_effects);
 
     add_op('js', sub ($comp, $node, :$want, :$cps) {
         my %want_char := nqp::hash($T_INT, 'I', $T_NUM, 'N', $T_STR, 'S', $T_VOID, 'v');
