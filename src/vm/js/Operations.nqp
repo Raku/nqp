@@ -829,9 +829,7 @@ class QAST::OperationsJS {
 
     add_simple_op('istype', $T_INT, [$T_OBJ, $T_OBJ], :side_effects, :ctx, :decont(0, 1));
 
-    add_simple_op('split', $T_OBJ, [$T_STR, $T_STR], sub ($separator, $string) {
-        "new nqp.NQPArray({$string} == '' ? [] : {$string}.split({$separator}))"
-    });
+    add_simple_op('split', $T_OBJ, [$T_STR, $T_STR], :hll);
 
     add_simple_op('ctxlexpad', :!inlinable, $T_OBJ, [$T_OBJ]);
     add_simple_op('lexprimspec', $T_INT, [$T_OBJ, $T_STR]);
