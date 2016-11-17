@@ -845,7 +845,7 @@ class QAST::OperationsJS {
 
     add_simple_op('elems', $T_INT, [$T_OBJ]);
 
-    add_simple_op('islist', $T_BOOL, [$T_OBJ], sub ($obj) {"($obj instanceof nqp.NQPArray)"}, :decont(0));
+    add_simple_op('islist', $T_INT, [$T_OBJ], :decont(0));
 
 
 

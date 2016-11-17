@@ -1068,3 +1068,7 @@ op.getlexref_n = function(hllName, get, set) {
 op.fc = function(string) {
   return string.toLowerCase();
 };
+
+op.islist = function(list) {
+  return (list instanceof NQPArray || list._STable && list._STable.REPR instanceof reprs.VMArray) ? 1 : 0;
+};
