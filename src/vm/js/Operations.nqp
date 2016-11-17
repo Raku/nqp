@@ -10,7 +10,7 @@ class QAST::OperationsJS {
         %inlinable{$op} := $inlinable;
     }
 
-    sub op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx, :$cps, :$decont, :$method_call) {
+    sub op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx, :$cps, :$decont, :$method_call, :$hll) {
         my @exprs;
         my @setup;
 
@@ -34,6 +34,14 @@ class QAST::OperationsJS {
             @exprs.push(@decont[$i] ?? "{$chunk.expr}.\$\$decont($*CTX)" !! $chunk.expr);
             @setup.push($chunk);
             $i := $i + 1;
+        }
+
+        if $hll {
+            if $method_call {
+                nqp::splice(@exprs, nqp::list(quote_string($*HLL)), 1, 0);
+            } else {
+                @exprs.unshift(quote_string($*HLL));
+            }
         }
 
         if $ctx {
@@ -68,13 +76,13 @@ class QAST::OperationsJS {
         }
     }
 
-    sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op), :$side_effects, :$ctx, :$required_cps, :$cps_aware, :$inlinable = 1, :$decont, :$method_call) {
+    sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op), :$side_effects, :$ctx, :$required_cps, :$cps_aware, :$inlinable = 1, :$decont, :$method_call, :$hll) {
 
         add_op($op, sub ($comp, $node, :$want, :$cps) {
             return $comp.NYI("CPS op: $op") if $required_cps;
             my $use_cps := $required_cps || ($cps_aware && $cps);
             my $gen_code := $method_call ?? method_call($op) !! $cb;
-            my $chunk := op_template($comp, $node, $return_type, @argument_types, $gen_code, :$ctx, :cps($use_cps), :$decont, :$method_call);
+            my $chunk := op_template($comp, $node, $return_type, @argument_types, $gen_code, :$ctx, :cps($use_cps), :$decont, :$method_call, :$hll);
             ($side_effects && !$use_cps) ?? $comp.stored_result($chunk, :$want) !! $chunk;
         }, :$inlinable);
 
@@ -919,7 +927,7 @@ class QAST::OperationsJS {
     add_simple_op('srand', $T_INT, [$T_INT], :side_effects);
     add_simple_op('rand_n', $T_NUM, [$T_NUM]);
 
-    add_simple_op('radix', $T_OBJ, [$T_INT, $T_STR, $T_INT, $T_INT]);
+    add_simple_op('radix', $T_OBJ, [$T_INT, $T_STR, $T_INT, $T_INT], :hll);
 
     add_simple_op('stat', $T_INT, [$T_STR, $T_INT]);
     add_simple_op('stat_time', $T_NUM, [$T_STR, $T_INT]);
@@ -1511,7 +1519,7 @@ class QAST::OperationsJS {
     add_simple_op('tonum_I', $T_NUM, [$T_OBJ]);
     add_simple_op('fromnum_I', $T_OBJ, [$T_NUM, $T_OBJ]);
 
-    add_simple_op('radix_I', $T_OBJ, [$T_INT, $T_STR, $T_INT, $T_INT, $T_OBJ]);
+    add_simple_op('radix_I', $T_OBJ, [$T_INT, $T_STR, $T_INT, $T_INT, $T_OBJ], :hll);
 
     add_simple_op('curcode', :!inlinable, $T_OBJ, [], sub () {"$*CTX.codeRef()"});
     add_simple_op('callercode', :!inlinable, $T_OBJ, [], sub () {"caller_ctx.codeRef()"});

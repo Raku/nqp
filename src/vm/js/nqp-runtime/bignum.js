@@ -7,6 +7,8 @@ var core = require('./core.js');
 
 var NQPArray = require('./array.js');
 
+var hll = require('./hll.js');
+
 var op = {};
 exports.op = op;
 
@@ -219,15 +221,15 @@ op.bool_I = function(n) {
   return intishBool(getBI(n).toNumber());
 };
 
-op.radix_I = function(radix, str, zpos, flags, type) {
+op.radix_I = function(hllName, radix, str, zpos, flags, type) {
   var extracted = core.radixHelper(radix, str, zpos, flags);
   if (extracted == null) {
-    return new NQPArray([makeBI(type, bignum(0)), makeBI(type, bignum(1)), -1]);
+    return hll.slurpyArray3(hllName, makeBI(type, bignum(0)), makeBI(type, bignum(1)), -1);
   }
 
   if (radix == 10 || radix == 16) {
     var pow = bignum(radix).pow(extracted.power);
-    return new NQPArray([makeBI(type, bignum(extracted.number, radix)), makeBI(type, pow), extracted.offset]);
+    return hll.slurpyArray3(hllName, makeBI(type, bignum(extracted.number, radix)), makeBI(type, pow), extracted.offset);
   } else {
     var n = extracted.number;
     var base = bignum(1);
@@ -247,6 +249,6 @@ op.radix_I = function(radix, str, zpos, flags, type) {
 
     if (n[0] == '-') result = result.neg();
 
-    return new NQPArray([makeBI(type, result), makeBI(type, base), extracted.offset]);
+    return hll.slurpyArray3(hllName, makeBI(type, result), makeBI(type, base), extracted.offset);
   }
 };

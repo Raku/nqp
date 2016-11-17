@@ -71,13 +71,13 @@ function radixHelper(radix, str, zpos, flags) {
 
 exports.radixHelper = radixHelper;
 
-op.radix = function(radix, str, zpos, flags) {
+op.radix = function(hllName, radix, str, zpos, flags) {
   var extracted = radixHelper(radix, str, zpos, flags);
   if (extracted == null) {
-    return new NQPArray([0, 1, -1]);
+    return hll.slurpyArray3(hllName, 0, 1, -1);
   }
   var pow = Math.pow(radix, extracted.power);
-  return new NQPArray([parseInt(extracted.number, radix), pow, extracted.offset]);
+  return hll.slurpyArray3(hllName, parseInt(extracted.number, radix), pow, extracted.offset);
 };
 
 op.setdebugtypename = function(type, debugName) {
