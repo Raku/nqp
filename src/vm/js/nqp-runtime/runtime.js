@@ -162,7 +162,6 @@ exports.toNum = function(arg, ctx) {
     var ret = parseFloat(arg);
     return isNaN(ret) ? 0 : ret;
   } else if (arg.typeObject_) {
-    // TODO - is that a correct way to do that?
     return 0;
   } else if (arg.Num) {
     return arg.Num(ctx, null, arg);
