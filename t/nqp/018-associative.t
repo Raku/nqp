@@ -1,6 +1,6 @@
 # check hash access methods
 
-plan(17);
+plan(18);
 
 my %h;
 
@@ -37,6 +37,8 @@ ok(nqp::isnull($h<foo> := nqp::null()), 'when binding the null results the fallb
 ok(nqp::eqaddr($h<foo>, NQPMu), 'when getting a null from a hash it\'s turned into a NQPMu');
 
 ok(nqp::elems($h) == 2, 'nqp::elems on a hash');
+
+ok($h == 2, 'hash can be converted to number');
 
 ok(nqp::istrue(nqp::hash('foo', 1, 'bar', 2)) == 1, 'a hash with 2 elements is true');
 ok(nqp::istrue(nqp::hash()) == 0, 'a hash with 0 elements is false');
