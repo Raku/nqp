@@ -1088,7 +1088,7 @@ op.split = function(hllName, separator, string) {
   var array = hll.slurpyArray(hllName);
   if (string !== '') {
     var parts = string.split(separator);
-    for (var i = 0;i < parts.length; i++) {
+    for (var i = 0; i < parts.length; i++) {
       array.$$push(parts[i]);
     }
   }

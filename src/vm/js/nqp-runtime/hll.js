@@ -120,7 +120,7 @@ exports.slurpyArray = function(hllName) {
   return slurpyArray._STable.REPR.allocate(slurpyArray._STable);
 };
 
-exports.slurpyArray3 = function(hllName, a, b,c) {
+exports.slurpyArray3 = function(hllName, a, b, c) {
   var array = exports.slurpyArray(hllName);
   array.$$push(a);
   array.$$push(b);
