@@ -11,6 +11,8 @@ var repr = new reprs.KnowHOWREPR();
 
 var CodeRef = require('./code-ref.js');
 
+var constants = require('./constants.js');
+
 var core = new SerializationContext('__6MODEL_CORE__');
 core.description = 'core SC';
 
@@ -48,6 +50,7 @@ function create_KnowHOWAttribute() {
   };
 
   typeObj._STable.methodCache = {};
+  typeObj._STable.modeFlags = constants.METHOD_CACHE_AUTHORITATIVE;
 
   for (var method in methods) {
     typeObj._STable.objConstructor.prototype[method] = methods[method];
@@ -75,7 +78,9 @@ KnowHOW._STable.id = 'KnowHOW';
 KnowHOW._STable.HOW = KnowHOW_HOW;
 
 KnowHOW._STable.methodCache = {};
+KnowHOW._STable.modeFlags = constants.METHOD_CACHE_AUTHORITATIVE;
 KnowHOW_HOW._STable.methodCache = {};
+KnowHOW_HOW._STable.modeFlags = constants.METHOD_CACHE_AUTHORITATIVE;
 
 function wrapMethod(name, method) {
   var codeRef = new CodeRef(name, undefined).setCodeRefAttr(null);
@@ -141,6 +146,7 @@ addKnowhowHowMethod('add_method', function(ctx, _NAMED, self, type, name, code) 
 addKnowhowHowMethod('compose', function(ctx, _NAMED, self, typeObject) {
   /* Set method cache */
   typeObject._STable.setMethodCache(self.__methods.$$toObject());
+  typeObject._STable.modeFlags = constants.METHOD_CACHE_AUTHORITATIVE;
 
   /* Set type check cache. */
 

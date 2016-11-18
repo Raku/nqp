@@ -275,7 +275,11 @@ op.setmethcache = function(obj, cache) {
 };
 
 op.setmethcacheauth = function(obj, isAuth) {
-  obj._STable.methodCacheAuth = isAuth;
+  if (isAuth) {
+    obj._STable.modeFlags |= constants.METHOD_CACHE_AUTHORITATIVE;
+  } else {
+    obj._STable.modeFlags &= ~constants.METHOD_CACHE_AUTHORITATIVE;
+  }
   return obj;
 };
 
@@ -311,7 +315,7 @@ function find_method(ctx, obj, name) {
     if (hasMethod) {
       return obj._STable.methodCache[name];
     }
-    if (obj._STable.methodCacheAuth) {
+    if (obj._STable.modeFlags & constants.METHOD_CACHE_AUTHORITATIVE) {
       return Null;
     }
   }
