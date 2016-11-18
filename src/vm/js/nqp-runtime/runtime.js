@@ -177,22 +177,7 @@ exports.toNum = function(arg, ctx) {
 };
 
 exports.toInt = function(arg, ctx) {
-  if (typeof arg == 'number') {
-    return arg | 0;
-  } else if (arg === Null) {
-    return 0;
-  } else if (arg.$$getInt) {
-    return arg.$$getInt();
-  } else if (arg.Int) {
-    return arg.Int(ctx);
-  } else if (typeof arg == 'string') {
-    var ret = parseInt(arg);
-    return isNaN(ret) ? 0 : ret;
-  } else if (arg.typeObject_) {
-    return 0;
-  } else {
-    throw "Can't convert to int";
-  }
+  return (exports.toNum(arg, ctx) | 0);
 };
 
 exports.intToObj = function(hllName, i) {
