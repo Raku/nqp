@@ -596,8 +596,6 @@ function renameEncoding(encoding) {
 exports.renameEncoding = renameEncoding;
 
 function byteSize(buf) {
-  if (buf.bytes) return buf.bytes;
-
   var bits = buf._STable.REPR.type._STable.REPR.bits;
 
   if (bits % 8) {
@@ -606,9 +604,6 @@ function byteSize(buf) {
 
   return bits / 8;
 }
-
-// HACK should be using buf instead of creating a new one
-// TODO needs to be fixed after an Array handling refactor
 
 op.encode = function(str, encoding_, buf) {
   var encoding = renameEncoding(encoding_);
@@ -621,13 +616,11 @@ op.encode = function(str, encoding_, buf) {
 
   var offset = 0;
   for (var i = 0; i < buffer.length / elementSize; i++) {
-    ret[i] = buffer.readIntLE(offset, elementSize);
+    buf.array[i] = buffer.readIntLE(offset, elementSize);
     offset += elementSize;
   }
 
-  ret = new NQPArray(ret);
-  ret.bytes = elementSize;
-  return ret;
+  return buf;
 };
 
 op.decode = function(buf, encoding_) {

@@ -744,6 +744,26 @@ class VMArray extends REPR {
       return value;
     });
 
+    /* TODO test how things should be converted */
+
+    STable.addInternalMethod('$$atpos_s', function(index) {
+      var value = this.array[index < 0 ? this.array.length + index : index];
+      if (value === undefined) return null_s;
+      return value;
+    });
+
+    STable.addInternalMethod('$$atpos_n', function(index) {
+      var value = this.array[index < 0 ? this.array.length + index : index];
+      if (value === undefined) return 0.0;
+      return value;
+    });
+
+    STable.addInternalMethod('$$atpos_i', function(index) {
+      var value = this.array[index < 0 ? this.array.length + index : index];
+      if (value === undefined) return 0;
+      return value;
+    });
+
     STable.addInternalMethod('$$bindpos', function(index, value) {
       return this.array[index < 0 ? this.array.length + index : index] = value;
     });
