@@ -204,9 +204,6 @@ op.getcodeobj = function(codeRef) {
   return codeRef.codeObj;
 };
 
-op.findmethod = function(obj, method) {
-  return obj._STable.methodCache[method];
-};
 
 op.istype = function(ctx, obj, type) {
   /* Null always type checks false. */
@@ -278,8 +275,7 @@ op.setmethcache = function(obj, cache) {
 };
 
 op.setmethcacheauth = function(obj, isAuth) {
-  /* TODO we currently assume method caches are always authorative
-    sadly that's not always the case*/
+  obj._STable.methodCacheAuth = isAuth;
   return obj;
 };
 
@@ -309,14 +305,32 @@ op.newtype = function(how, repr) {
   return REPR.typeObjectFor(how);
 };
 
-/* HACK - we need to handle can properly */
-op.can = function(obj, method) {
-  if (typeof obj !== 'object' || obj instanceof NQPInt || obj instanceof CodeRef || obj instanceof Hash || obj instanceof NQPArray) return 0;
-  if (!obj._STable.methodCache) {
-    console.warn('we have no method cache, checking: ' + method);
-    return 0;
+function find_method(ctx, obj, name) {
+  if (obj._STable.methodCache) {
+    var hasMethod = obj._STable.methodCache.hasOwnProperty(name);
+    if (hasMethod) {
+      return obj._STable.methodCache[name];
+    }
+    if (obj._STable.methodCacheAuth) {
+      return Null;
+    }
   }
-  return obj._STable.methodCache.hasOwnProperty(method) ? 1 : 0;
+  return obj._STable.HOW.find_method(ctx, null, obj._STable.HOW, obj, name);
+}
+
+op.can = function(ctx, obj, name) {
+  /* HACK those things should have an STable rather then be special cased */
+  if (typeof obj !== 'object' || obj instanceof NQPInt || obj instanceof CodeRef || obj instanceof Hash || obj instanceof NQPArray) return 0;
+
+  return find_method(ctx, obj, name) === Null ? 0 : 1;
+};
+
+op.findmethod = function(ctx, obj, name) {
+  var method = find_method(ctx, obj, name);
+  if (method === Null) {
+    throw new NQPException("Cannot find method '" + name + "' on object of type " + obj._STable.debugName);
+  }
+  return method;
 };
 
 op.getcodename = function(code) {

@@ -824,8 +824,8 @@ class QAST::OperationsJS {
 
     add_simple_op('backtracestrings', $T_OBJ, [$T_OBJ]);
 
-    add_simple_op('findmethod', $T_OBJ, [$T_OBJ, $T_STR], :side_effects, :decont(0));
-    add_simple_op('can', $T_INT, [$T_OBJ, $T_STR], :side_effects, :decont(0));
+    add_simple_op('findmethod', $T_OBJ, [$T_OBJ, $T_STR], :side_effects, :decont(0), :ctx);
+    add_simple_op('can', $T_INT, [$T_OBJ, $T_STR], :side_effects, :decont(0), :ctx);
 
     add_simple_op('istype', $T_INT, [$T_OBJ, $T_OBJ], :side_effects, :ctx, :decont(0, 1));
 
