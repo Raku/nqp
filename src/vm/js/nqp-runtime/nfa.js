@@ -5,6 +5,7 @@ exports.op = op;
 var iscclass = require('./cclass.js').op.iscclass;
 var nqp = require('nqp-runtime');
 
+var Null = require('./null.js');
 var NQPArray = require('./array.js');
 
 const EDGE_FATE = 0, EDGE_EPSILON = 1, EDGE_CODEPOINT = 2, EDGE_CODEPOINT_NEG = 3, EDGE_CHARCLASS = 4, EDGE_CHARCLASS_NEG = 5;
@@ -257,10 +258,14 @@ op.nfarunproto = function(nfa, target, pos) {
   return runNFA(nfa, target, pos);
 };
 
-op.nfarunalt = function(nfa, target, pos, bstack, cstack, marks) {
-  cstack = cstack instanceof NQPArray ? cstack.array : cstack;
-  bstack = bstack instanceof NQPArray ? bstack.array : bstack;
-  marks = marks instanceof NQPArray ? marks.array : marks;
+op.nfarunalt = function(nfa, target, pos, bstackWrapped, cstackWrapped, marksWrapped) {
+  var cstack;
+
+  if (cstackWrapped !== Null && !cstackWrapped.typeObject_) {
+    cstack = cstackWrapped.$$toArray();
+  }
+  var bstack = bstackWrapped.$$toArray();
+  var marks = marksWrapped.$$toArray();
 
   /* Run the NFA. */
   var fates = runNFA(nfa, target, pos).array;
