@@ -836,6 +836,12 @@ class VMArray extends REPR {
       this.array.splice.apply(this.array, args);
       return this;
     });
+
+    STable.addInternalMethod('$$clone', function() {
+      var cloned = new STable.objConstructor();
+      cloned.array = this.array.slice();
+      return cloned;
+    });
   }
 
   deserializeFinish(obj, data) {
