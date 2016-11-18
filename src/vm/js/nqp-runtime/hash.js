@@ -85,7 +85,7 @@ class Hash extends NQPObject {
     return this.content.size;
   }
 
-  Num() {
+  $$numify() {
     return this.$$elems();
   }
 

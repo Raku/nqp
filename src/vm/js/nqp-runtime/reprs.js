@@ -823,7 +823,7 @@ class VMArray extends REPR {
       return new Iter(this.array);
     });
 
-    STable.addInternalMethod('Num', function() {
+    STable.addInternalMethod('$$numify', function() {
       return this.array.length;
     });
 

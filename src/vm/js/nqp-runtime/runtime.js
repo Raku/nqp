@@ -161,14 +161,16 @@ exports.toNum = function(arg, ctx) {
   } else if (typeof arg == 'string') {
     var ret = parseFloat(arg);
     return isNaN(ret) ? 0 : ret;
+  } else if (arg._STable && arg._STable.methodCache.Num) {
+    return arg.Num(ctx, null, arg);
   } else if (arg.typeObject_) {
     return 0;
-  } else if (arg.Num) {
-    return arg.Num(ctx, null, arg);
   } else if (arg.$$getNum) {
     return arg.$$getNum();
   } else if (arg.$$getInt) {
     return arg.$$getInt();
+  } else if (arg.$$numify) {
+    return arg.$$numify();
   } else {
     console.log(arg);
     throw "Can't convert to num";

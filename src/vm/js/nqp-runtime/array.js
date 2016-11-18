@@ -101,7 +101,7 @@ class NQPArray extends NQPObject {
     return this.array.hasOwnProperty(index) ? 1 : 0;
   }
 
-  Num() {
+  $$numify() {
     return this.array.length;
   }
 
