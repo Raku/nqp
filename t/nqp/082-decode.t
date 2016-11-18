@@ -1,4 +1,4 @@
-plan(5);
+plan(6);
 
 class int8 is repr('P6int') {}
 class buf8 is repr('VMArray') {}
@@ -37,3 +37,7 @@ sub buf_dump($buf) {
 
 is(buf_dump($hello), "72,101,108,108,111,32,87,111,114,108,100", "Hello World is encoded to utf8 correctly");
 is(nqp::decode($hello, "utf8"), "Hello World", "round-tripping Hello World");
+
+my $hello2 := buf8.new;
+nqp::encode('Hello World', 'utf8', $hello2);
+is(buf_dump($hello2), "72,101,108,108,111,32,87,111,114,108,100", "the buf passed to nqp::encode is actually changed");
