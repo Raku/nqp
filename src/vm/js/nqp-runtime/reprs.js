@@ -392,7 +392,6 @@ class P6opaque {
   generateDefaults(STable) {
     var code = '';
 
-    var defaults = {};
     for (var i = 0; i < this.nameToIndexMapping.length; i++) {
       for (var j = 0; j < this.nameToIndexMapping[i].slots.length; j++) {
         let slot = this.nameToIndexMapping[i].slots[j];
