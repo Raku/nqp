@@ -1,4 +1,4 @@
-plan(16);
+plan(19);
 class Foo {
     method foo() {
         'bar';
@@ -46,3 +46,21 @@ ok(nqp::objprimspec(str) == 3, 'nqp::objprimspec on str');
 ok(nqp::objprimspec(num) == 2, 'nqp::objprimspec on num');
 ok(nqp::objprimspec(Foo) == 0, 'nqp::objprimspec on Foo');
 ok(nqp::objprimspec(nqp::null()) == 0, 'nqp::objprimspec on a null');
+
+class Base {
+}
+
+class Extended is Base {
+    has int $!int_attr;
+    has str $!str_attr;
+    has num $!num_attr;
+    method attrs_ok() {
+        ok(nqp::isint($!int_attr), 'test that an new int attr is added');
+        ok(nqp::isstr($!str_attr), 'test that an new str attr is added');
+        ok(nqp::isnum($!num_attr), 'test that an new num attr is added');
+    }
+}
+
+my $obj := Base.new;
+nqp::rebless($obj, Extended);
+$obj.attrs_ok;
