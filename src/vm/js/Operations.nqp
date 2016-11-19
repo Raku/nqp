@@ -389,7 +389,7 @@ class QAST::OperationsJS {
        });
     }
 
-    add_simple_op('isstr', $T_BOOL, [$T_OBJ], sub ($obj) {"(typeof $obj == 'string')"}, :decont(0));
+    add_simple_op('isstr', $T_BOOL, [$T_OBJ], sub ($obj) {"(typeof $obj == 'string' || $obj === nqp.null_s)"}, :decont(0));
     add_simple_op('isint', $T_INT, [$T_OBJ], :decont(0));
     add_simple_op('isnum', $T_INT, [$T_OBJ], :decont(0));
 
