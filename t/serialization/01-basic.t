@@ -449,9 +449,8 @@ sub add_to_sc($sc, $idx, $obj) {
 
     ok(nqp::scobjcount($dsc) == 1, 'deserialized SC has a single object');
     ok(nqp::istype(nqp::scgetobj($dsc, 0), T8), 'deserialized object has correct type');
-skip('JVM failures; fudge for release', 2);
-    #ok(nqp::isnull(nqp::scgetobj($dsc, 0).cache), 'Multi cache ends up null');
-#    ok(nqp::isnull(nqp::scgetobj($dsc, 0).fh), 'File handle ends up null');
+    ok(nqp::isnull(nqp::scgetobj($dsc, 0).cache), 'Multi cache ends up null');
+    ok(nqp::isnull(nqp::scgetobj($dsc, 0).fh), 'File handle ends up null');
 }
 
 # Serializing an SC with a VMArray
@@ -520,8 +519,7 @@ sub round_trip_int_array($seq, $desc, @a) {
         nqp::push(@a, $i);
         $i := $i + 1;
     }
-    skip('JVM failures; fudge for release', 519);
-  #  round_trip_int_array(14, 'small integers', @a);
+    round_trip_int_array(14, 'small integers', @a);
 }
 
 {
