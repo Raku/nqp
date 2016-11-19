@@ -5,7 +5,11 @@ var NQPInt = require('./nqp-int.js');
 var NQPException = require('./nqp-exception.js');
 var NQPArray = require('./array.js');
 var Null = require('./null.js');
+var null_s = require('./null_s.js');
 var Iter = require('./iter.js');
+
+var bignum = require('bignum');
+var ZERO = bignum(0);
 
 var reprs = {};
 var reprById = [];
@@ -263,6 +267,22 @@ class P6opaque {
 
   changeType(obj, newType) {
     // TODO some sanity checks for the new mro being a subset and newType being also a P6opaque
+
+    let newREPR = newType._STable.REPR;
+
+    for (var i = 0; i < newREPR.nameToIndexMapping.length; i++) {
+      for (var j = 0; j < newREPR.nameToIndexMapping[i].slots.length; j++) {
+        let slot = newREPR.nameToIndexMapping[i].slots[j];
+        let defaultValue = newREPR.flattenedStables[slot] ?
+            newREPR.flattenedStables[slot].REPR.flattenedDefaultObj :
+            undefined;
+        let attr = slotToAttr(slot);
+        if (!Object.prototype.hasOwnProperty.call(obj, attr)) {
+          obj[attr] = defaultValue;
+        }
+      }
+    }
+
     Object.setPrototypeOf(obj, newType._STable.objConstructor.prototype);
   }
 
@@ -908,7 +928,6 @@ VMIter.prototype.createObjConstructor = basicConstructor;
 VMIter.prototype.typeObjectFor = basicTypeObjectFor;
 reprs.VMIter = VMIter;
 
-var bignum = require('bignum');
 
 function makeBI(STable, num) {
   var instance = STable.REPR.allocate(STable);
@@ -1011,8 +1030,7 @@ class P6bigint extends REPR {
 };
 
 P6bigint.prototype.flattenSTable = true;
-P6bigint.prototype.ZERO = bignum(0);
-P6bigint.prototype.flattenedDefault = 'STable.REPR.ZERO';
+P6bigint.prototype.flattenedDefault = 'ZERO';
 
 
 reprs.P6bigint = P6bigint;
@@ -1324,5 +1342,8 @@ for (var name in reprs) {
   module.exports[name] = reprs[name];
   reprs[name].prototype.ID = ID;
   reprById[ID] = reprs[name];
+  if (reprs[name].prototype.flattenedDefault) {
+    reprs[name].prototype.flattenedDefaultObj = eval(reprs[name].prototype.flattenedDefault);
+  }
   ID++;
 }

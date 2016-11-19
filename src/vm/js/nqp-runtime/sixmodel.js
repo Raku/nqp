@@ -4,6 +4,10 @@ var incompleteMethodCaches = [];
 var null_s = require('./null_s.js'); /* Used when evaling runtime compiled methods */
 var Null = require('./null.js');
 
+/* Needed for setting defaults values of attrs for objects */
+var bignum = require('bignum');
+var ZERO = bignum(0);
+
 
 class STable {
   constructor(REPR, HOW) {
