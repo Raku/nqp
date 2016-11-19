@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(281);
+plan(282);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -448,6 +448,7 @@ ok(nqp::isstr(nqp::indexingoptimized(123)), "nqp::indexingoptimized returns a st
 
 ok(!nqp::isnull(nqp::null_s()));
 ok(!nqp::isnull_s(nqp::null()));
+ok(nqp::isstr(nqp::null_s()));
 ok(nqp::null() eq '');
 {
     my $var := nqp::null_s();
