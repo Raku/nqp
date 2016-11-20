@@ -2,7 +2,7 @@
 
 # Tests for try and catch
 
-plan(26);
+plan(30);
 
 sub oops($msg = "oops!") { # throw an exception
     nqp::die($msg);
@@ -203,3 +203,27 @@ my str $str_try_result := try {
     200;
 };
 ok($str_try_result eq "", "can get a native str result of a try block that catches an exception");
+
+my $result := try {
+    my $foo;
+    $foo.bar;
+}
+ok(nqp::istype($result, NQPMu), "we get correct return value from a try that catches a missing method");
+
+my int $result_int := try {
+    my $foo;
+    $foo.bar;
+}
+ok($result_int + 0 == 0, "we get correct return value from a try that catches a missing method used as int");
+
+my num $result_num := try {
+    my $foo;
+    $foo.bar;
+}
+ok($result_num + 0 == 0, "we get correct return value from a try that catches a missing method used as num");
+
+my str $result_str := try {
+    my $foo;
+    $foo.bar;
+}
+ok($result_str ~ '' eq '', "we get correct return value from a try that catches a missing method used as str");
