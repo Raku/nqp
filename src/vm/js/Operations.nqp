@@ -779,10 +779,25 @@ class QAST::OperationsJS {
                 my $*CTX := $*HANDLER_CTX;
                 my $body := $comp.as_js($protected, :$want);
 
+                my $catch_wrapped_exception := "$*CTX.catchException(nqp.wrapException(e))";
+                my $catch_exception := "$*CTX.catchException(e)";
+
                 if $want != $T_VOID {
                     $try_ret := $*BLOCK.add_tmp;
                     my $coerced_ret := $comp.coerce(Chunk.new($T_OBJ, "$unwind_marker.ret", []), $want);
                     $set_try_ret := Chunk.new($T_VOID, '', [$coerced_ret, "$try_ret = {$coerced_ret.expr};\n"]);
+
+                    my %convert;
+                    %convert{$T_STR} := 'toStr';
+                    %convert{$T_NUM} := 'toNum';
+                    %convert{$T_INT} := 'toInt';
+                    if nqp::existskey(%convert, $want) {
+                        $catch_exception := 'nqp.' ~ %convert{$want} ~ '(' ~ $catch_exception ~ ')';
+                        $catch_wrapped_exception := 'nqp.' ~ %convert{$want} ~ '(' ~ $catch_wrapped_exception ~ ')';
+                    }
+
+                    $catch_exception := "$try_ret = $catch_exception";
+                    $catch_wrapped_exception := "$try_ret = $catch_wrapped_exception";
                 }
 
                 return Chunk.new($want, $try_ret, [
@@ -795,10 +810,10 @@ class QAST::OperationsJS {
                     "\} catch (e) \{if (e === $unwind_marker) \{",
                     $set_try_ret,
                     "\} else if (e instanceof nqp.NQPException) \{\n",
-                    "$*CTX.catchException(e);\n",
+                    "$catch_exception\n",
                     # HACK - we should catch more exceptions
                     "\} else if (e instanceof TypeError) \{\n",
-                    "$*CTX.catchException(nqp.wrapException(e));\n",
+                    "$catch_wrapped_exception;\n",
                     "\} else \{\n",
                     "throw e;\n",
                     "\}\n",

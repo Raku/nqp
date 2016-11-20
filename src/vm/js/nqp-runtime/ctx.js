@@ -39,7 +39,7 @@ class Ctx extends NQPObject {
 
   catchException(exception) {
     this.exception = exception;
-    this.$$CATCH();
+    return this.$$CATCH();
   }
 
   rethrow(exception) {
