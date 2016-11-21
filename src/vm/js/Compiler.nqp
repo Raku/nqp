@@ -2000,7 +2000,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my $chunk := self.as_js_with_prelude($ast, :$instant, :$shebang);
         nqp::printfh(nqp::getstderr(), nqp::sprintf("[as_js %.3f] ", [nqp::time_n() - $timestamp])) if $substagestats;
 
-        snapshot() if $snapshot;
+        $snapshot() if $snapshot;
 
         $timestamp := nqp::time_n();
         my $source := $chunk.join();
