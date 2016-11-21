@@ -29,11 +29,8 @@ class JavaScriptBackend {
         nqp::sayfh(nqp::getstderr(), "Writing profiling data to $filename");
         $filename;
     }
-    
-    method run_profiled($what, $kind, $filename?) {
 
-        my $comp := nqp::getcomp('JavaScript');
-
+    method v8-profiler($comp) {
         my $v8-profiler := $comp.eval('
             var v8profiler = null;
             try {
@@ -52,6 +49,30 @@ class JavaScriptBackend {
             say("Cannot find module 'v8-profiler'. Install it from npm to enable profiling.");
             nqp::exit(1);
         }
+        $v8-profiler;
+    }
+
+    method snapshot_memory($file) {
+        my $comp := nqp::getcomp('JavaScript');
+
+        my $v8-profiler := self.v8-profiler($comp);
+
+        my &snapshot := $comp.eval('(function(profiler, filename) {
+            var snapshot = profiler.takeSnapshot();
+            var fs = require("fs");
+            snapshot.export(function(error, result) {
+                fs.writeFileSync(filename, result);
+                snapshot.delete();
+            });
+        })');
+
+        snapshot($v8-profiler, $file);
+    }
+
+    method run_profiled($what, $kind, $filename?) {
+        my $comp := nqp::getcomp('JavaScript');
+
+        my $v8-profiler := self.v8-profiler($comp);
 
         my &start := $comp.eval('(function(profiler, name) {profiler.startProfiling(name)})');
         my &write := $comp.eval('(function(profiler, name, filename) {
@@ -107,12 +128,18 @@ class JavaScriptBackend {
 
         my $shebang := nqp::defined(%adverbs<shebang>);
 
+        if %adverbs<snapshot> {
+            self.snapshot_memory(%adverbs<snapshot> ~ '-have-qast.heapsnapshot');
+        }
+
         if %adverbs<source-map-debug> {
             $backend.emit_with_source_map_debug($qast, :$instant, :$shebang);
         } elsif %adverbs<source-map> {
             $backend.emit_with_source_map($qast, :$instant, :$shebang);
         } else {
-            my $code := $backend.emit($qast, :$instant, :$substagestats, :$shebang);
+            my $code := $backend.emit($qast, :$instant, :$substagestats, :$shebang, :snapshot(sub () {
+                self.snapshot_memory(%adverbs<snapshot> ~ '-have-chunks.heapsnapshot') if %adverbs<snapshot>;
+            }));
             $code := self.beautify($code) if %adverbs<beautify>;
             $code;
         }
