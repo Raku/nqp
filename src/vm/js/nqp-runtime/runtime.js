@@ -161,8 +161,18 @@ exports.toNum = function(arg, ctx) {
   } else if (typeof arg == 'string') {
     var ret = parseFloat(arg);
     return isNaN(ret) ? 0 : ret;
-  } else if (arg._STable && arg._STable.methodCache.Num) {
-    return arg.Num(ctx, null, arg);
+  } else if (arg._STable && arg._STable.methodCache && arg._STable.methodCache.Num) {
+    var result = arg.Num(ctx, null, arg);
+    if (result.$$getNum) {
+      return result.$$getNum();
+    } else if (result.$$numify) {
+      return result.$$numify();
+    } else if (typeof result == 'number') {
+      return result;
+    } else {
+      console.trace("we can't numify result of toNum");
+      process.exit();
+    }
   } else if (arg.typeObject_) {
     return 0;
   } else if (arg.$$getNum) {
