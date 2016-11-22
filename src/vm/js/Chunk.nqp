@@ -24,7 +24,7 @@ class Chunk does Joinable {
     has $!node; # a QAST::Node that contains info for source maps
     has $!setup; # stuff that needs to be executed before the value of $!expr can be used, this contains strings and Chunks.
 
-    method new($type, $expr, $setup = [], :$node) {
+    method new($type, $expr, $setup = nqp::null(), :$node) {
         my $obj := nqp::create(self);
         $obj.BUILD($type, $expr, $setup, :$node);
         $obj
@@ -42,24 +42,38 @@ class Chunk does Joinable {
     }
 
     method collect(@strs, :$escape) {
-        for $!setup -> $part {
-            if nqp::isstr($part) {
-                nqp::push_s(@strs, $escape ?? nqp::escape($part) !! $part);
-            }
-            else {
-                $part.collect(@strs, :$escape);
+        if nqp::isnull($!setup) {
+        }
+        elsif nqp::istype($!setup, Chunk) {
+            $!setup.collect(@strs, :$escape);
+        }
+        else {
+            for $!setup -> $part {
+                if nqp::isstr($part) {
+                    nqp::push_s(@strs, $escape ?? nqp::escape($part) !! $part);
+                }
+                else {
+                    $part.collect(@strs, :$escape);
+                }
             }
         }
     }
     
     method with_source_map_info() {
         my @parts;
-        for $!setup -> $part {
-            if nqp::isstr($part) {
-                nqp::push(@parts,quote_string($part, :json));
-            }
-            else {
-                nqp::push(@parts,$part.with_source_map_info);
+        if nqp::isnull($!setup) {
+        }
+        elsif nqp::istype($!setup, Chunk) {
+            nqp::push(@parts, $!setup.with_source_map_info);
+        }
+        else {
+            for $!setup -> $part {
+                if nqp::isstr($part) {
+                    nqp::push(@parts,quote_string($part, :json));
+                }
+                else {
+                    nqp::push(@parts,$part.with_source_map_info);
+                }
             }
         }
         my $parts := '[' ~ nqp::join(',', @parts) ~ ']';
@@ -75,13 +89,20 @@ class Chunk does Joinable {
 
     method source_map_debug() {
         my $js := ''; 
-        for $!setup -> $part {
-           if nqp::isstr($part) {
-              $js := $js ~ $part;
-           }
-           else {
-              $js := $js ~ $part.source_map_debug;
-           }
+        if nqp::isnull($!setup) {
+        }
+        elsif nqp::istype($!setup, Chunk) {
+            $js := $js ~ $!setup.source_map_debug;
+        }
+        else {
+            for $!setup -> $part {
+               if nqp::isstr($part) {
+                  $js := $js ~ $part;
+               }
+               else {
+                  $js := $js ~ $part.source_map_debug;
+               }
+            }
         }
 
         if nqp::defined($!node) && $!node.node {

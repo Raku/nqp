@@ -523,10 +523,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             if $desired == $T_NUM {
                 if $got == $T_INT {
                     # we store both as a javascript number, and 32bit integers fit into doubles
-                    return Chunk.new($T_NUM, $chunk.expr, [$chunk]);
+                    return Chunk.new($T_NUM, $chunk.expr, $chunk);
                 }
                 if $got == $T_BOOL {
-                    return Chunk.new($T_NUM, "({$chunk.expr} ? 1 : 0)", [$chunk]);
+                    return Chunk.new($T_NUM, "({$chunk.expr} ? 1 : 0)", $chunk);
                 }
                 if $got == $T_STR {
                     my $tmp := $*BLOCK.add_tmp();
@@ -536,44 +536,44 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             if $desired == $T_INT {
                 if $got == $T_STR {
-                    return Chunk.new($T_INT, "parseInt({$chunk.expr})", [$chunk]);
+                    return Chunk.new($T_INT, "parseInt({$chunk.expr})", $chunk);
                 }
                 if $got == $T_NUM {
-                    return Chunk.new($T_INT, "({$chunk.expr}|0)", [$chunk]);
+                    return Chunk.new($T_INT, "({$chunk.expr}|0)", $chunk);
                 }
                 if $got == $T_BOOL {
-                    return Chunk.new($T_INT, "({$chunk.expr} ? 1 : 0)", [$chunk]);
+                    return Chunk.new($T_INT, "({$chunk.expr} ? 1 : 0)", $chunk);
                 }
             }
 
             if $got == $T_OBJ {
                 if $desired == $T_BOOL {
-                    return Chunk.new($desired, "{$chunk.expr}.\$\$decont($*CTX).\$\$toBool($*CTX)", [$chunk]);
+                    return Chunk.new($desired, "{$chunk.expr}.\$\$decont($*CTX).\$\$toBool($*CTX)", $chunk);
                 }
                 my %convert;
                 %convert{$T_STR} := 'toStr';
                 %convert{$T_NUM} := 'toNum';
                 %convert{$T_INT} := 'toInt';
-                return Chunk.new($desired, 'nqp.' ~ %convert{$desired} ~ '(' ~ $chunk.expr ~ ", {$*CTX})", [$chunk]);
+                return Chunk.new($desired, 'nqp.' ~ %convert{$desired} ~ '(' ~ $chunk.expr ~ ", {$*CTX})", $chunk);
             }
 
             if $desired == $T_STR {
                 if $got == $T_INT || $got == $T_NUM {
-                    return Chunk.new($T_STR, $chunk.expr ~ '.toString()', [$chunk]);
+                    return Chunk.new($T_STR, $chunk.expr ~ '.toString()', $chunk);
                 }
                 if $got == $T_BOOL {
-                    return Chunk.new($T_STR, "({$chunk.expr} ? '1' : '0')", [$chunk]);
+                    return Chunk.new($T_STR, "({$chunk.expr} ? '1' : '0')", $chunk);
                 }
             }
 
             if $desired == $T_OBJ {
                 if $got == $T_BOOL {
-                    $chunk := Chunk.new($T_INT, "({$chunk.expr} ? 1 : 0)", [$chunk]);
+                    $chunk := Chunk.new($T_INT, "({$chunk.expr} ? 1 : 0)", $chunk);
                     $got := $T_INT;
                 }
                 elsif $got == $T_VOID {
                     # TODO think what's the correct thing here
-                    return Chunk.new($T_OBJ, "nqp.Null", [$chunk]);
+                    return Chunk.new($T_OBJ, "nqp.Null", $chunk);
                 }
 
                 if $*HLL eq 'nqp' {
@@ -581,7 +581,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                         return $chunk;
                     }
                     elsif $got == $T_INT {
-                        return Chunk.new($T_OBJ, "new nqp.NQPInt({$chunk.expr})", [$chunk]);
+                        return Chunk.new($T_OBJ, "new nqp.NQPInt({$chunk.expr})", $chunk);
                     }
                 }
                 else {
@@ -589,15 +589,15 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     %convert{$T_INT} := 'intToObj';
                     %convert{$T_NUM} := 'numToObj';
                     %convert{$T_STR} := 'strToObj';
-                    return Chunk.new($T_OBJ, "nqp.{%convert{$got}}({quote_string($*HLL)}, {$chunk.expr})", [$chunk]);
+                    return Chunk.new($T_OBJ, "nqp.{%convert{$got}}({quote_string($*HLL)}, {$chunk.expr})", $chunk);
                 }
             }
 
             if $desired == $T_BOOL {
                 if $got == $T_INT || $got == $T_NUM {
-                    return Chunk.new($T_BOOL, $chunk.expr, [$chunk]);
+                    return Chunk.new($T_BOOL, $chunk.expr, $chunk);
                 } elsif $got == $T_STR {
-                    return Chunk.new($T_BOOL, "({$chunk.expr} && {$chunk.expr} !== nqp.null_s)", [$chunk]);
+                    return Chunk.new($T_BOOL, "({$chunk.expr} && {$chunk.expr} !== nqp.null_s)", $chunk);
                 }
             }
 
@@ -805,12 +805,15 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         self.chunk_sequence($want, @chunks, :$result_child, :$node);
     }
 
-    proto method cpsify_chunk($chunk) { * }
-    multi method cpsify_chunk(ChunkCPS $chunk) { $chunk }
-    multi method cpsify_chunk(Chunk $chunk) {
-        my $ret := self.chunk_sequence($chunk.type, $chunk.setup, :expr($chunk.expr), :node($chunk.node));
-        $ret;
-    }
+#    proto method cpsify_chunk($chunk) { * }
+#    multi method cpsify_chunk(ChunkCPS $chunk) { $chunk }
+#    multi method cpsify_chunk(Chunk $chunk) {
+#        my $ret := self.chunk_sequence($chunk.type, $chunk.setup, :expr($chunk.expr), :node($chunk.node));
+#        $ret;
+#    }
+
+    method cpsify_chunk($chunk) { $chunk }
+    # TODO restore CPS
 
     multi method as_js(QAST::Block $node, :$want, :$cps) {
         my $outer     := try $*BLOCK;
@@ -1710,15 +1713,15 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         if $*BINDVAL {
             my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($type), :$cps);
             if $var.decl eq 'var' {
-                self.stored_result(Chunk.new($type, "({$*CTX}[{quote_string($var.name)}] = {$bindval.expr})",  [$bindval]), :$want);
+                self.stored_result(Chunk.new($type, "({$*CTX}[{quote_string($var.name)}] = {$bindval.expr})",  $bindval), :$want);
             }
             else {
                 if $*BLOCK.ctx_for_var($var) -> $ctx {
-                    self.stored_result(Chunk.new($type, "({$ctx}[{quote_string($var.name)}] = {$bindval.expr})",  [$bindval]), :$want);
+                    self.stored_result(Chunk.new($type, "({$ctx}[{quote_string($var.name)}] = {$bindval.expr})",  $bindval), :$want);
                 } 
                 else {
                     # nqp::die("we can't find ctx for {$var.name}");
-                    self.stored_result(Chunk.new($type, "{$*CTX}.bind({quote_string($var.name)}, {$bindval.expr})",  [$bindval]), :$want);
+                    self.stored_result(Chunk.new($type, "{$*CTX}.bind({quote_string($var.name)}, {$bindval.expr})",  $bindval), :$want);
                 }
             }
         }
@@ -1925,7 +1928,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                         Chunk.new($T_OBJ, $bindval.expr, [$self, $bindval, "{$self.expr}.\$\$bindattr\${$hint}({$bindval.expr});\n"]);
                     }
                     else {
-                        Chunk.new($T_OBJ, "{$self.expr}.\$\$getattr\${$hint}()", [$self]);
+                        Chunk.new($T_OBJ, "{$self.expr}.\$\$getattr\${$hint}()", $self);
                     }
                 }
                 else {
@@ -1935,7 +1938,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                         Chunk.new($type, $bindval.expr, [$self, $bindval, "$attr = {$bindval.expr};\n"]);
                     }
                     else {
-                        Chunk.new($type, $attr, [$self]);
+                        Chunk.new($type, $attr, $self);
                     }
                 }
             }
@@ -1943,7 +1946,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         elsif $var.scope eq 'contextual' {
             if $*BINDVAL {
                 my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ), :$cps);
-                self.stored_result(Chunk.new($T_OBJ, "{$*CTX}.bindDynamic({quote_string($var.name)},{$bindval.expr})", [$bindval]), :$want);
+                self.stored_result(Chunk.new($T_OBJ, "{$*CTX}.bindDynamic({quote_string($var.name)},{$bindval.expr})", $bindval), :$want);
             }
             else {
                 Chunk.new($T_OBJ, "{$*CTX}.lookupDynamic({quote_string($var.name)})");

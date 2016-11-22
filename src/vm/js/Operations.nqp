@@ -316,10 +316,10 @@ class QAST::OperationsJS {
             my $obj := $comp.as_js(:want($T_OBJ), $node[0]);
             if static_hint($node) -> $hint {
                 if $type == $T_OBJ {
-                    Chunk.new($T_OBJ, "{$obj.expr}\.\$\$getattr\${$hint}()", [$obj]);
+                    Chunk.new($T_OBJ, "{$obj.expr}\.\$\$getattr\${$hint}()", $obj);
                 }
                 else {
-                    Chunk.new($type, "{$obj.expr}\.attr\${$hint}", [$obj]);
+                    Chunk.new($type, "{$obj.expr}\.attr\${$hint}", $obj);
                 }
             }
             else {
@@ -632,7 +632,8 @@ class QAST::OperationsJS {
 
             my $compiled_args := $comp.args($args, :$cont);
 
-            my @setup := nqp::clone($compiled_args.setup);
+            ### setup_as_array NYI
+            my @setup := nqp::clone($compiled_args.setup_as_array);
             @setup.unshift($callee);
 
             my $call := $compiled_args.is_args_array ?? '.$$applyCPS(' !! '.$$callCPS(';
