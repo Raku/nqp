@@ -784,7 +784,7 @@ class QAST::OperationsJS {
 
                 if $want != $T_VOID {
                     $try_ret := $*BLOCK.add_tmp;
-                    my $coerced_ret := $comp.coerce(Chunk.new($T_OBJ, "$unwind_marker.ret", []), $want);
+                    my $coerced_ret := $comp.coerce(Chunk.new($T_OBJ, "$unwind_marker.ret"), $want);
                     $set_try_ret := Chunk.new($T_VOID, '', [$coerced_ret, "$try_ret = {$coerced_ret.expr};\n"]);
 
                     my %convert;
@@ -881,7 +881,7 @@ class QAST::OperationsJS {
                    ~ 'return ' ~ $storage ~ ''
                    ~ '}');
             }
-            Chunk.new($T_OBJ, "new nqp.CurLexpad(\{{nqp::join(',', @get)}\}, \{{nqp::join(',', @set)}\})", [], :$node);
+            Chunk.new($T_OBJ, "new nqp.CurLexpad(\{{nqp::join(',', @get)}\}, \{{nqp::join(',', @set)}\})", :$node);
     });
 
     add_op('getlexouter', :!inlinable, sub ($comp, $node, :$want, :$cps) {
@@ -898,13 +898,13 @@ class QAST::OperationsJS {
         # TODO type 
 
         if !$block {
-            Chunk.new($T_OBJ, "{$*BLOCK.ctx}.lookupFromOuter({quote_string($var_name)})", [], :$node);
+            Chunk.new($T_OBJ, "{$*BLOCK.ctx}.lookupFromOuter({quote_string($var_name)})", :$node);
         }
         elsif $comp.is_dynamic_var($block, QAST::Var.new(:name($var_name), :scope<lexical>)) {
-            Chunk.new($T_OBJ, $block.ctx ~ "[" ~ quote_string($var_name) ~ "]", [], :$node);
+            Chunk.new($T_OBJ, $block.ctx ~ "[" ~ quote_string($var_name) ~ "]", :$node);
         }
         else {
-            Chunk.new($T_OBJ, $*BLOCK.outer.mangle_lexical($var_name) , [], :$node);
+            Chunk.new($T_OBJ, $*BLOCK.outer.mangle_lexical($var_name) , :$node);
         }
     });
 
@@ -1063,7 +1063,7 @@ class QAST::OperationsJS {
 
             my $boolifed_cond := $comp.coerce($cond, $T_BOOL);
 
-            my $cond_without_sideeffects := Chunk.new($cond.type, $cond.expr, []);
+            my $cond_without_sideeffects := Chunk.new($cond.type, $cond.expr);
 
 
             my sub compile_block($node) {

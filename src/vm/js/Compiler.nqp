@@ -602,7 +602,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
 
 
-            return Chunk.new($desired, "nqp.coercion($got, $desired, {$chunk.expr})", []) #TODO
+            return Chunk.new($desired, "nqp.coercion($got, $desired, {$chunk.expr})") #TODO
         }
         $chunk;
     }
@@ -1193,7 +1193,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
             else {
                 my $cloned_block := $outer.clone_inner($node);
-                Chunk.new($T_OBJ, $cloned_block, []);
+                Chunk.new($T_OBJ, $cloned_block);
             }
         }
         elsif $node.blocktype eq 'declaration_static' {
@@ -1203,7 +1203,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
             else {
                 my $cloned_block := $outer.clone_inner($node);
-                Chunk.new($T_OBJ, $cloned_block, []);
+                Chunk.new($T_OBJ, $cloned_block);
             }
         }
         else {
@@ -1228,19 +1228,19 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     multi method as_js(QAST::IVal $node, :$want, :$cps) {
-        Chunk.new($T_INT,'('~$node.value()~')',[],:$node);
+        Chunk.new($T_INT,'('~$node.value()~')', :$node);
     }
 
     multi method as_js(QAST::NVal $node, :$want, :$cps) {
-        Chunk.new($T_NUM,'('~$node.value()~')',[],:$node);
+        Chunk.new($T_NUM,'('~$node.value()~')', :$node);
     }
 
     multi method as_js(QAST::SVal $node, :$want, :$cps) {
-        Chunk.new($T_STR,quote_string($node.value()),[],:$node);
+        Chunk.new($T_STR,quote_string($node.value()), :$node);
     }
 
     multi method as_js(QAST::BVal $node, :$want, :$cps) {
-        Chunk.new($T_OBJ, self.mangled_cuid($node.value.cuid), [], :$node);
+        Chunk.new($T_OBJ, self.mangled_cuid($node.value.cuid), :$node);
     }
 
     # Helps with register allocation on other backends
@@ -1642,7 +1642,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     multi method as_js(QAST::WVal $node, :$want, :$cps) {
-        Chunk.new($T_OBJ, self.value_as_js($node.value), []);
+        Chunk.new($T_OBJ, self.value_as_js($node.value));
     }
     
     method var_is_lexicalish(QAST::Var $var) {
@@ -1701,7 +1701,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             self.cpsify_chunk(Chunk.new($type, $bindval.expr, [$bindval, self.set_var($var, $bindval.expr)]));
         }
         else {
-            self.cpsify_chunk(Chunk.new($type, self.get_var($var), [], :node($var)));
+            self.cpsify_chunk(Chunk.new($type, self.get_var($var), :node($var)));
         }
     }
 
@@ -1744,15 +1744,15 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
                 $*BLOCK.add_var_setup("{$*CTX}[{quote_string($var.name)}] = $initial_value;\n");
 
-                Chunk.new($type, "$*CTX[{quote_string($var.name)}]", [], :node($var));
+                Chunk.new($type, "$*CTX[{quote_string($var.name)}]", :node($var));
             }
             else {
                 if $*BLOCK.ctx_for_var($var) -> $ctx {
-                    Chunk.new($type, "$ctx[{quote_string($var.name)}]", [], :node($var));
+                    Chunk.new($type, "$ctx[{quote_string($var.name)}]", :node($var));
                 }
                 else {
                     # nqp::die("we can't find ctx for {$var.name}");
-                    Chunk.new($type, "{$*CTX}.lookup({quote_string($var.name)})", [], :node($var));
+                    Chunk.new($type, "{$*CTX}.lookup({quote_string($var.name)})", :node($var));
                 }
             }
         }
@@ -1799,7 +1799,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     self.cpsify_chunk(Chunk.new($T_OBJ, $bindval.expr, [$bindval, self.set_var($var, $bindval.expr)]));
                 }
                 else {
-                    self.cpsify_chunk(Chunk.new($T_OBJ, self.get_var($var), [], :node($var)));
+                    self.cpsify_chunk(Chunk.new($T_OBJ, self.get_var($var), :node($var)));
                 }
             }
             else {
@@ -1817,7 +1817,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     my $suffix := self.suffix_from_type($type);
                     my $get := self.get_var($var);
                     my $set := self.set_var($var, 'value');
-                    Chunk.new($T_OBJ, "nqp.op.getlexref{$suffix}({quote_string($*HLL)}, function() \{return $get\}, function(value) \{$set\})", [], :node($var));
+                    Chunk.new($T_OBJ, "nqp.op.getlexref{$suffix}({quote_string($*HLL)}, function() \{return $get\}, function(value) \{$set\})", :node($var));
                 }
             }
         }
@@ -1830,7 +1830,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     }
                     else {
                         my $suffix := self.suffix_from_type($ref_type);
-                        return Chunk.new($ref_type, self.get_var($var) ~ ".\$\$decont{$suffix}()", [], :node($var));
+                        return Chunk.new($ref_type, self.get_var($var) ~ ".\$\$decont{$suffix}()", :node($var));
                     }
                 }
             }
@@ -1891,7 +1891,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
 
 
-            Chunk.new($T_OBJ, "nqp.op.getattrref{$suffix}({quote_string($*HLL)}, function() \{return $get\}, function(value) \{$set\})", [], :node($var));
+            Chunk.new($T_OBJ, "nqp.op.getattrref{$suffix}({quote_string($*HLL)}, function() \{return $get\}, function(value) \{$set\})", :node($var));
         }
         elsif $var.scope eq 'attribute' {
             my @types := [$T_OBJ, $T_INT, $T_NUM, $T_STR];
@@ -1946,7 +1946,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 self.stored_result(Chunk.new($T_OBJ, "{$*CTX}.bindDynamic({quote_string($var.name)},{$bindval.expr})", [$bindval]), :$want);
             }
             else {
-                Chunk.new($T_OBJ, "{$*CTX}.lookupDynamic({quote_string($var.name)})", []);
+                Chunk.new($T_OBJ, "{$*CTX}.lookupDynamic({quote_string($var.name)})");
             }
         }
         else {
