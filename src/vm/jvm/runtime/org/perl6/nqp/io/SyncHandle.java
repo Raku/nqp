@@ -227,6 +227,7 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
 
     public synchronized String getc(ThreadContext tc) {
         try {
+            dec.reset();
             int maxBytes = (int)enc.maxBytesPerChar();
             ByteBuffer toDecode = ByteBuffer.allocate(maxBytes);
             CharBuffer decoded = CharBuffer.allocate(1);
