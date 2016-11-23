@@ -227,12 +227,13 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
 
     public synchronized String getc(ThreadContext tc) {
         try {
+            dec.reset();
             int maxBytes = (int)enc.maxBytesPerChar();
             ByteBuffer toDecode = ByteBuffer.allocate(maxBytes);
             CharBuffer decoded = CharBuffer.allocate(1);
             for (int i = 0; i < maxBytes; i++) {
-                /* Ensure we have a read buffer available. */
-                if (readBuffer == null) {
+                /* Ensure we have a (non empty) read buffer available. */
+                if ( readBuffer == null || readBuffer.remaining() == 0 ) {
                     readBuffer = ByteBuffer.allocate(32768);
                     if (chan.read(readBuffer) == -1) {
                         /* End of file. */

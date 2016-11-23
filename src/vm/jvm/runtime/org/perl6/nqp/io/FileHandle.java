@@ -91,6 +91,8 @@ public class FileHandle extends SyncHandle implements IIOSeekable, IIOLockable {
         } catch (IllegalArgumentException e) {
             throw ExceptionHandling.dieInternal(tc, e);
         }
+        /* Reset readBuffer since content is out of sync after fc.position. */
+        readBuffer = null;
     }
     
     public long tell(ThreadContext tc) {
