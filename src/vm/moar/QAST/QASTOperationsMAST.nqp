@@ -2773,6 +2773,7 @@ QAST::MASTOperations.add_core_moarop_mapping('markcodestatic', 'markcodestatic')
 QAST::MASTOperations.add_core_moarop_mapping('markcodestub', 'markcodestub');
 QAST::MASTOperations.add_core_moarop_mapping('getstaticcode', 'getstaticcode');
 QAST::MASTOperations.add_core_moarop_mapping('getcodecuid', 'getcodecuid');
+QAST::MASTOperations.add_core_moarop_mapping('captureinnerlex', 'captureinnerlex', 0);
 
 # language/compiler ops
 QAST::MASTOperations.add_core_moarop_mapping('getcomp', 'getcomp');
