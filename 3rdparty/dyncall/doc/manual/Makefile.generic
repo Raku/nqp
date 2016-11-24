@@ -1,8 +1,0 @@
-all: manual.pdf
-
-manual.pdf:
-	cd ${VPATH} && pdflatex -output-directory=${PWD} manual.tex
-	cd ${VPATH} && pdflatex -output-directory=${PWD} manual.tex
-
-clean:
-	for i in pdf aux lof log lol lot out toc; do rm -f manual.$$i || true; done
