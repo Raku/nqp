@@ -24,7 +24,7 @@ sub is($actual, $expected, $description) {
     }
 }
 
-plan(265);
+plan(271);
 
 is(nqp::sprintf('Walter Bishop', []), 'Walter Bishop', 'no directives' );
 
@@ -328,3 +328,13 @@ is(nqp::sprintf('%17.3g', [3.000000000000e+12]), '            3e+12', '%17.3g 3.
 
 is(nqp::sprintf('%2$d %1$d',    [12, 34]),  '34 12', 'parameter index');
 is(nqp::sprintf('%3$d %d %1$d', [1, 2, 3]), '3 1 1', 'parameter index');
+
+# RT#128821: https://rt.perl.org/Ticket/Display.html?id=128821
+{ # negative/positive zero differentiation
+    is(nqp::sprintf('%f', [-0e0]), '-0.000000',     '%f, -0e0');
+    is(nqp::sprintf('%f', [ 0e0]),  '0.000000',     '%f, +0e0');
+    is(nqp::sprintf('%e', [-0e0]), '-0.000000e+00', '%e, -0e0');
+    is(nqp::sprintf('%e', [ 0e0]),  '0.000000e+00', '%e, +0e0');
+    is(nqp::sprintf('%g', [-0e0]), '-0',            '%g, -0e0');
+    is(nqp::sprintf('%g', [ 0e0]),  '0',            '%g, +0e0');
+}

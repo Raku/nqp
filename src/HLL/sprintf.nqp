@@ -295,18 +295,24 @@ my module sprintf {
 #?endif
         }
         sub fixed-point($float, $precision, $size, $pad, $/) {
-            my $sign := $float < 0 ?? '-' 
-                     !! has_flag($/, 'plus') ?? '+' 
-                     !! has_flag($/, 'space') ?? ' ' 
+            # if we have zero; handle its sign: 1/0e0 == +Inf, 1/-0e0 == -Inf
+            my $sign := $float < 0
+                || ( $float == 0 && nqp::islt_n(nqp::div_n(1e0,$float), 0e0) )
+                ?? '-'
+                     !! has_flag($/, 'plus') ?? '+'
+                     !! has_flag($/, 'space') ?? ' '
                      !! '';
             $float := nqp::abs_n($float);
             $float := stringify-to-precision($float, $precision) unless nqp::isnanorinf($float);
             pad-with-sign($sign, $float, $size, $pad);
         }
         sub scientific($float, $e, $precision, $size, $pad, $/) {
-            my $sign := $float < 0 ?? '-' 
-                     !! has_flag($/, 'plus') ?? '+' 
-                     !! has_flag($/, 'space') ?? ' ' 
+            # if we have zero; handle its sign: 1/0e0 == +Inf, 1/-0e0 == -Inf
+            my $sign := $float < 0
+                || ( $float == 0 && nqp::islt_n(nqp::div_n(1e0,$float), 0e0) )
+                ?? '-'
+                     !! has_flag($/, 'plus') ?? '+'
+                     !! has_flag($/, 'space') ?? ' '
                      !! '';
             $float := nqp::abs_n($float);
             unless nqp::isnanorinf($float) {
@@ -323,9 +329,12 @@ my module sprintf {
             pad-with-sign($sign, $float, $size, $pad);
         }
         sub shortest($float, $e, $precision, $size, $pad, $/) {
-            my $sign := $float < 0 ?? '-' 
-                     !! has_flag($/, 'plus') ?? '+' 
-                     !! has_flag($/, 'space') ?? ' ' 
+            # if we have zero; handle its sign: 1/0e0 == +Inf, 1/-0e0 == -Inf
+            my $sign := $float < 0
+                || ( $float == 0 && nqp::islt_n(nqp::div_n(1e0,$float), 0e0) )
+                ?? '-'
+                     !! has_flag($/, 'plus') ?? '+'
+                     !! has_flag($/, 'space') ?? ' '
                      !! '';
             $float := nqp::abs_n($float);
 
