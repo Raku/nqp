@@ -7,14 +7,14 @@ my module sprintf {
             :my $*ARGS_USED := 0;
             ^ <statement>* $
         }
-        
-        method panic($message, $payload) { 
+
+        method panic($message, $payload) {
             my $ex := nqp::newexception();
             nqp::setmessage($ex, $message);
             nqp::setpayload($ex, $payload);
             nqp::throw($ex);
         }
-        
+
         token statement {
             [
             | <?[%]> [ [ <directive> | <escape> ]
@@ -37,13 +37,13 @@ my module sprintf {
 
         proto token escape { <...> }
         token escape:sym<%> { '%' <flags>* <size>? <sym> }
-        
+
         token literal { <-[%]>+ }
-        
+
         token idx {
             $<param_index>=[\d+] '$'
         }
-        
+
         token flags {
             | $<space> = ' '
             | $<plus>  = '+'
@@ -51,7 +51,7 @@ my module sprintf {
             | $<zero>  = '0'
             | $<hash>  = '#'
         }
-        
+
         token size {
             \d* | $<star>='*'
         }
@@ -71,7 +71,7 @@ my module sprintf {
                     ~ (+@*ARGS_HAVE < 1      ?? "no argument was"
                         !! +@*ARGS_HAVE == 1 ?? "1 argument was"
                                              !! +@*ARGS_HAVE ~ " arguments were")
-                    ~ " supplied", nqp::hash('DIRECTIVES_COUNT', 
+                    ~ " supplied", nqp::hash('DIRECTIVES_COUNT',
                             nqp::hash('ARGS_HAVE', +@*ARGS_HAVE, 'ARGS_USED', $*ARGS_USED)))
             }
             make nqp::join('', @statements);
@@ -86,11 +86,11 @@ my module sprintf {
 
         sub bad-type-for-directive($type, $directive) {
             my $message := "Directive $directive not applicable for type " ~ $type.HOW.name($type);
-            my $payload := nqp::hash('BAD_TYPE_FOR_DIRECTIVE', 
+            my $payload := nqp::hash('BAD_TYPE_FOR_DIRECTIVE',
                 nqp::hash('TYPE', $type.HOW.name($type), 'DIRECTIVE', $directive));
             panic($message, $payload);
         }
-        
+
         sub infix_x($s, $n) {
             my @strings;
             my int $i := 0;
@@ -198,8 +198,8 @@ my module sprintf {
             my $int := intify($next);
             my $pad := padding_char($/);
             my $sign := nqp::islt_I($int, $zero) ?? '-'
-                     !! has_flag($/, 'plus') ?? '+' 
-                     !! has_flag($/, 'space') ?? ' ' 
+                     !! has_flag($/, 'plus') ?? '+'
+                     !! has_flag($/, 'space') ?? ' '
                      !! '';
             $int := nqp::tostr_I(nqp::abs_I($int, $knowhow));
             $int := nqp::substr($int, 0, $<precision>.made) if nqp::chars($<precision>);
@@ -264,12 +264,12 @@ my module sprintf {
 
             my $e := nqp::fromnum_I($d > $precision ?? $d - $precision !! 0, $knowhow);
             my $pot := nqp::pow_I(nqp::fromnum_I(10, $knowhow), $e, $knowhow, $knowhow);   # power of ten
-            my $rounder := nqp::mul_I(nqp::fromnum_I(5, $knowhow), $pot, $knowhow);          
+            my $rounder := nqp::mul_I(nqp::fromnum_I(5, $knowhow), $pot, $knowhow);
 
             $rhs_I := nqp::add_I($rhs_I, $rounder, $knowhow);
             $rhs_s := nqp::tostr_I($rhs_I);
 
-            $lhs_I := nqp::add_I($lhs_I, nqp::fromnum_I(1,$knowhow), $knowhow) 
+            $lhs_I := nqp::add_I($lhs_I, nqp::fromnum_I(1,$knowhow), $knowhow)
                 if nqp::substr($rhs_s,0,1) ne '1';          # we had a carry
 
             $lhs_s := nqp::tostr_I($lhs_I);
@@ -347,7 +347,7 @@ my module sprintf {
                 } else {
                     $sci := $float ~ $e ~ '+' ~ ($exp < 10 ?? '0' !! '') ~ $exp;
                 }
-                
+
                 pad-with-sign($sign, $sci, $size, $pad);
             }
         }
@@ -424,7 +424,7 @@ my module sprintf {
             my $int := intify($next);
             if nqp::islt_I($int, $zero) {
                     my $err := nqp::getstderr();
-                    nqp::printfh($err, "negative value '" 
+                    nqp::printfh($err, "negative value '"
                                     ~ $int
                                     ~ "' for %u in sprintf");
                     $int := 0;
@@ -491,9 +491,9 @@ my module sprintf {
             make $<directive> && !$<directive><idx> ?? 1 !! 0
         }
     }
-    
+
     my $directives := Directives.new();
-    
+
     sub sprintfdirectives($format) {
         return Syntax.parse( $format, :actions($directives) ).made;
     }
