@@ -28,6 +28,7 @@ src/gen/*.pm
 src/gen/*.setting
 src/stage1
 src/stage2
+tools/build/install-jvm-runner.pl
 config.status
 config.default
 3rdparty/dyncall/ConfigVars
