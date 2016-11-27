@@ -1,6 +1,6 @@
 use QAST;
 
-plan(100);
+plan(102);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -1611,3 +1611,19 @@ test_qast_result(
         }
     );
 }
+
+test_qast_result(
+    QAST::CompUnit.new(
+        :hll<foo>,
+        QAST::Block.new(
+            QAST::Op.new(:op<split>,
+                QAST::SVal.new(value => ':'),
+                QAST::SVal.new(value => 'abc:def')
+            )
+        )
+    ),
+    -> $r {
+        ok(nqp::islist($r), "split returns a list when the hll doesn't define slurpyArray");
+        ok(nqp::atpos($r, 0) eq 'abc' && nqp::atpos($r, 1) eq 'def', "...and it contains the right elements");
+    }
+);
