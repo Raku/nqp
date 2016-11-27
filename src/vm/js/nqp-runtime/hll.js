@@ -4,6 +4,7 @@ var CodeRef = require('./code-ref.js');
 var NQPArray = require('./array.js');
 var NQPInt = require('./nqp-int.js');
 var Null = require('./null.js');
+var bootstrap = require('./bootstrap.js');
 
 var op = {};
 exports.op = op;
@@ -117,6 +118,7 @@ op.settypehllrole = function(type, role) {
 
 exports.slurpyArray = function(hllName, array) {
   var slurpyArray = hllConfigs[hllName].get('slurpy_array');
+  if (slurpyArray === undefined) slurpyArray = bootstrap.BOOTArray;
   return slurpyArray._STable.REPR.allocateFromArray(slurpyArray._STable, array);
 };
 

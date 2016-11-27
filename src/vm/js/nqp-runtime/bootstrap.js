@@ -238,3 +238,5 @@ function bootType(typeName, reprName) {
 module.exports.bootType = bootType;
 
 module.exports.core = core;
+
+exports.BOOTArray = bootType("BOOTArray", "VMArray");
