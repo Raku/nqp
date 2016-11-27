@@ -5,8 +5,6 @@ var bignum = require('bignum');
 
 var core = require('./core.js');
 
-var NQPArray = require('./array.js');
-
 var hll = require('./hll.js');
 
 var op = {};

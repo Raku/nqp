@@ -568,7 +568,7 @@ class QAST::OperationsJS {
                @exprs.push($chunk.expr);
            }
 
-           @setup.push("$list = new nqp.NQPArray([" ~ nqp::join(',', @exprs) ~ "]);\n");
+           @setup.push("$list = nqp.list({quote_string($*HLL)}, [" ~ nqp::join(',', @exprs) ~ "]);\n");
 
            $comp.cpsify_chunk(Chunk.new($T_OBJ, $list , @setup, :$node));
         });

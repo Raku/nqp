@@ -4,7 +4,7 @@ var CodeRef = require('./code-ref.js');
 var NQPArray = require('./array.js');
 var NQPInt = require('./nqp-int.js');
 var Null = require('./null.js');
-var bootstrap = require('./bootstrap.js');
+var BOOT = require('./BOOT.js');
 
 var op = {};
 exports.op = op;
@@ -118,7 +118,13 @@ op.settypehllrole = function(type, role) {
 
 exports.slurpyArray = function(hllName, array) {
   var slurpyArray = hllConfigs[hllName].get('slurpy_array');
-  if (slurpyArray === undefined) slurpyArray = bootstrap.BOOTArray;
+  if (slurpyArray === undefined) slurpyArray = BOOT.Array;
   return slurpyArray._STable.REPR.allocateFromArray(slurpyArray._STable, array);
 };
 
+exports.list = function(hllName, array) {
+  var list;
+  if (hllConfigs[hllName]) list = hllConfigs[hllName].get('list');
+  if (list === undefined) list = BOOT.Array;
+  return list._STable.REPR.allocateFromArray(list._STable, array);
+};

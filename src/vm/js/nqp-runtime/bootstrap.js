@@ -13,6 +13,8 @@ var CodeRef = require('./code-ref.js');
 
 var constants = require('./constants.js');
 
+var BOOT = require('./BOOT.js');
+
 var core = new SerializationContext('__6MODEL_CORE__');
 core.description = 'core SC';
 
@@ -239,4 +241,4 @@ module.exports.bootType = bootType;
 
 module.exports.core = core;
 
-exports.BOOTArray = bootType("BOOTArray", "VMArray");
+BOOT.Array = bootType("BOOTArray", "VMArray");

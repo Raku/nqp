@@ -7,6 +7,7 @@ var NQPArray = require('./array.js');
 var Null = require('./null.js');
 var null_s = require('./null_s.js');
 var Iter = require('./iter.js');
+var BOOT = require('./BOOT.js');
 
 var bignum = require('bignum');
 var ZERO = bignum(0);
@@ -840,6 +841,10 @@ class VMArray extends REPR {
       }
     });
 
+    STable.addInternalMethod('$$dimensions', function(dimensions) {
+      return BOOT.createArray([this.array.length]);
+    });
+
     STable.addInternalMethod('$$toArray', function() {
       return this.array;
     });
@@ -867,6 +872,33 @@ class VMArray extends REPR {
       cloned.array = this.array.slice();
       return cloned;
     });
+
+
+    var $$atposnd = function(idx) {
+      if (idx.array.length != 1) {
+        throw new NQPException('A dynamic array can only be indexed with a single dimension');
+      }
+      var index = idx.array[0];
+      var value = this.array[index < 0 ? this.array.length + index : index];
+      if (value === undefined) return Null;
+      return value;
+    };
+
+
+    var $$bindposnd = function(idx, value) {
+      if (idx.array.length != 1) {
+        throw new NQPException('A dynamic array can only be indexed with a single dimension');
+      }
+      var index = idx.array[0];
+      return (this.array[index] = value);
+    };
+
+
+    var suffixes = ['', '_s', '_i', '_n'];
+    for (let suffix of suffixes) {
+      STable.addInternalMethod('$$atposnd' + suffix, $$atposnd);
+      STable.addInternalMethod('$$bindposnd' + suffix, $$bindposnd);
+    }
   }
 
   deserializeFinish(obj, data) {

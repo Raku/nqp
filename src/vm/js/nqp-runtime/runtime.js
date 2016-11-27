@@ -389,3 +389,5 @@ Function.prototype.$$toBool = function(ctx) {
 
 exports.null_s = null_s;
 exports.Null = Null;
+
+exports.list = hll.list;
