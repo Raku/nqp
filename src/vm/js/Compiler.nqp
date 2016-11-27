@@ -1463,6 +1463,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my @pre;
         {
+            my $*IN_PRE_SERIALIZE := 1;
             # We create this context so that dependencies are loaded relative to this file
             my $*CTX := 'ctxWithPath';
             @pre.push(
@@ -1618,6 +1619,11 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my $sc     := nqp::getobjsc($value);
         my str $handle := nqp::scgethandle($sc);
         my int $idx    := nqp::scgetobjidx($sc, $value);
+
+        if $*IN_PRE_SERIALIZE {
+            # We can't setup all the wvals yet
+            return "nqp.wval({quote_string($handle)},$idx)";
+        }
 
         my $key := $handle ~ "@" ~ $idx;
 
@@ -1973,6 +1979,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     method as_js_with_prelude($ast, :$instant, :$shebang) {
         my $*INSTANT := $instant;
+
+        # We handle wval in the pre-serialization code specially.
+        my $*IN_PRE_SERIALIZE := 0;
 
         # Blocks we've seen while compiling.
         my %*BLOCKS_DONE;
