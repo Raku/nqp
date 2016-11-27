@@ -1968,7 +1968,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my $chunk := $code();
 
-        Chunk.new($chunk.type, $chunk.expr, [self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $chunk]);
+        Chunk.new($chunk.type, $chunk.expr, [self.setup_wvals, self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $chunk]);
     }
 
     method as_js_with_prelude($ast, :$instant, :$shebang) {
