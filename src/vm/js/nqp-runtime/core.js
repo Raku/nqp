@@ -974,7 +974,7 @@ op.getstaticcode = function(codeRef) {
 };
 
 op.backtracestrings = function(exception) {
-  return new NQPArray(['backtrace NYI']);
+  return new NQPArray([exception.stack.replace(/^Error: .*\n/, '')]);
 };
 
 op.hintfor = function(classHandle, attrName) {

@@ -1,21 +1,19 @@
-function NQPException(message) {
-  this.name = 'NQPException';
-  this.message = message;
-}
+class NQPException extends Error {
+  constructor(message) {
+    super(message);
+  }
 
-NQPException.prototype = Object.create(Error.prototype);
-NQPException.prototype.constructor = NQPException;
+  Str(ctx, _NAMED, self) {
+    return this.message;
+  }
 
-NQPException.prototype.Str = function(ctx, _NAMED, self) {
-  return this.message;
-};
+  $$toBool(ctx) {
+    return 1;
+  }
 
-NQPException.prototype.$$toBool = function(ctx) {
-  return 1;
-};
-
-NQPException.prototype.$$decont = function(ctx) {
-  return this;
+  $$decont(ctx) {
+    return this;
+  }
 };
 
 module.exports = NQPException;

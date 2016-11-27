@@ -34,7 +34,7 @@ class Ctx extends NQPObject {
       }
       ctx = ctx.$$caller;
     }
-    throw exception.message;
+    throw exception;
   }
 
   catchException(exception) {
