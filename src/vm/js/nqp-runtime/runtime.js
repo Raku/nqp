@@ -343,8 +343,6 @@ exports.runCPS = runCPS;
 exports.NQPException = NQPException;
 
 exports.wrapException = function(e) {
-  console.log(e);
-  console.log(e.stack);
   return new NQPException(e.message);
 };
 
