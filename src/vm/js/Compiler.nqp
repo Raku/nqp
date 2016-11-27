@@ -1635,7 +1635,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     method setup_wvals() {
-       my $setup;
+       my $setup := '';
        for %!wval_mangling -> $kv {
            $setup := $setup ~ $kv.value ~ ' = ' ~ %!wval{$kv.key} ~ "\n";
        }
