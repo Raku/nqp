@@ -74,10 +74,10 @@ exports.radixHelper = radixHelper;
 op.radix = function(hllName, radix, str, zpos, flags) {
   var extracted = radixHelper(radix, str, zpos, flags);
   if (extracted == null) {
-    return hll.slurpyArray3(hllName, 0, 1, -1);
+    return hll.slurpyArray(hllName, [0, 1, -1]);
   }
   var pow = Math.pow(radix, extracted.power);
-  return hll.slurpyArray3(hllName, parseInt(extracted.number, radix), pow, extracted.offset);
+  return hll.slurpyArray(hllName, [parseInt(extracted.number, radix), pow, extracted.offset]);
 };
 
 op.setdebugtypename = function(type, debugName) {
@@ -1085,12 +1085,5 @@ op.islist = function(list) {
 };
 
 op.split = function(hllName, separator, string) {
-  var array = hll.slurpyArray(hllName);
-  if (string !== '') {
-    var parts = string.split(separator);
-    for (var i = 0; i < parts.length; i++) {
-      array.$$push(parts[i]);
-    }
-  }
-  return array;
+  return hll.slurpyArray(hllName, string !== '' ? string.split(separator) : []);
 };

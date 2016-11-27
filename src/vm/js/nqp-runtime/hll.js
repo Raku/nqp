@@ -115,15 +115,8 @@ op.settypehllrole = function(type, role) {
   return type;
 };
 
-exports.slurpyArray = function(hllName) {
+exports.slurpyArray = function(hllName, array) {
   var slurpyArray = hllConfigs[hllName].get('slurpy_array');
-  return slurpyArray._STable.REPR.allocate(slurpyArray._STable);
+  return slurpyArray._STable.REPR.allocateFromArray(slurpyArray._STable, array);
 };
 
-exports.slurpyArray3 = function(hllName, a, b, c) {
-  var array = exports.slurpyArray(hllName);
-  array.$$push(a);
-  array.$$push(b);
-  array.$$push(c);
-  return array;
-};

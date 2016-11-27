@@ -746,6 +746,12 @@ class VMArray extends REPR {
     return obj;
   }
 
+  allocateFromArray(STable, array) {
+    var obj = new STable.objConstructor();
+    obj.array = array;
+    return obj;
+  }
+
   setupSTable(STable) {
     STable.addInternalMethod('$$push', function(value) {
       this.array.push(value);
