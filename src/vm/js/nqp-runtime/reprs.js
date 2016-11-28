@@ -1154,7 +1154,7 @@ class MultiDimArray extends REPR {
       if (this.typeObject_) {
         throw new NQPException('Cannot get dimensions of a type object');
       }
-      return new NQPArray(this.dimensions);
+      return BOOT.createArray(this.dimensions);
     });
 
     STable.addInternalMethod('$$setdimensions', function(value) {
@@ -1245,13 +1245,13 @@ class MultiDimArray extends REPR {
       return (this.storage[this.$$calculateIndex(idx)] = value);
     });
 
-    // TODO optimize access
+    // TODO optimize and avoid creating a temporary array
     STable.addInternalMethod('$$bindpos', function(index, value) {
-      return this.$$bindposnd(new NQPArray([index]), value);
+      return this.$$bindposnd(BOOT.createArray([index]), value);
     });
 
     STable.addInternalMethod('$$setelems', function(elems) {
-      this.$$setdimensions(new NQPArray([elems]));
+      this.$$setdimensions(BOOT.createArray([elems]));
     });
 
     STable.addInternalMethod('$$elems', function(elems) {
@@ -1259,7 +1259,7 @@ class MultiDimArray extends REPR {
     });
 
     STable.addInternalMethod('$$atpos', function(index) {
-      return this.$$atposnd(new NQPArray([index]));
+      return this.$$atposnd(BOOT.createArray([index]));
     });
   }
 
