@@ -1321,7 +1321,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
          }
 
-        "var code_refs = new nqp.NQPArray([{nqp::join(',',@blocks)}]);\n" # TODO
+        "var code_refs = nqp.createArray([{nqp::join(',',@blocks)}]);\n" # TODO
     }
 
 
@@ -1352,7 +1352,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
 
         Chunk.void(
-            "var sh= new nqp.NQPArray([{nqp::join(',',@sh)}]);\n"
+            "var sh = nqp.createArray([{nqp::join(',',@sh)}]);\n"
             ~ "var sc = nqp.op.createsc({quote_string(nqp::scgethandle($sc))});\n"
             ~ self.emit_code_refs_list($ast)
             , "nqp.op.deserialize($quoted_data,sc,sh,code_refs,null);\n"
@@ -1515,7 +1515,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my $set_code_objects := self.set_code_objects;
         my @setup := [$pre , $comp_mode ?? self.create_sc($node) !! '', self.setup_wvals, $set_code_objects,  self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $set_hll, self.set_static_vars, $post, $body];
         if !$instant {
-            @setup.push("new nqp.EvalResult({$body.expr}, new nqp.NQPArray(cuids))");
+            @setup.push("new nqp.EvalResult({$body.expr}, nqp.createArray(cuids))");
         }
         Chunk.new($T_VOID, "", @setup);
     }

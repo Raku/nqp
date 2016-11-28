@@ -10,7 +10,6 @@ var Hash = require('./hash.js');
 var Int64 = require('node-int64');
 var CodeRef = require('./code-ref.js');
 var constants = require('./constants.js');
-var NQPArray = require('./array.js');
 
 var Null = require('./null.js');
 
@@ -19,6 +18,8 @@ var Ctx = require('./ctx.js');
 var containerSpecs = require('./container-specs.js');
 
 var hll = require('./hll.js');
+
+var BOOT = require('./BOOT.js');
 
 
 /** All the loaded serialization contexts using their unique IDs as keys */
@@ -132,7 +133,7 @@ class BinaryCursor {
     for (var i = 0; i < elems; i++) {
       array.push(readElem(this));
     }
-    return new NQPArray(array);
+    return BOOT.createArray(array);
   }
 
 
@@ -388,7 +389,7 @@ class BinaryCursor {
         ptable.parameterizerCache = [];
       }
 
-      STable.parameters = new NQPArray(params);
+      STable.parameters = BOOT.createArray(params);
 
       ptable.parameterizerCache.push({type: STable.WHAT, params: params});
     }

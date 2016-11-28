@@ -559,7 +559,9 @@ class RegexCompiler {
         Chunk.void(
             "$!subcur = [{nqp::join(',',@alt_labels)}];\n",
              self.mark($end_label, -1, 0),
-             call($!cursor, '!alt', $!pos, quote_string($node.name), "new nqp.NQPArray($!subcur)") ~ ";\n",
+             # use a special array of ints
+             # TODO: use a single persistent one instead of allocating a fresh one
+             call($!cursor, '!alt', $!pos, quote_string($node.name), "nqp.createArray($!subcur)") ~ ";\n",
              self.fail,
              Chunk.void(|@alt_code),
              self.case($end_label),
