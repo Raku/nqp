@@ -508,20 +508,20 @@ reprs.P6opaque = P6opaque;
 class KnowHOWREPR {
   deserializeFinish(obj, data) {
     obj.__name = data.str();
-    obj.__attributes = data.variant();
+    obj.__attributes = data.variant().array;
     obj.__methods = data.variant();
   }
 
   serialize(data, obj) {
     data.str(obj.__name);
-    data.ref(obj.__attributes);
+    data.ref(BOOT.createArray(obj.__attributes));
     data.ref(obj.__methods);
   }
 
   allocate(STable) {
     var obj = new STable.objConstructor();
     obj.__methods = new Hash();
-    obj.__attributes = new NQPArray([]);
+    obj.__attributes = [];
     obj.__name = '<anon>';
     return obj;
   }

@@ -392,4 +392,5 @@ exports.Null = Null;
 
 exports.list = hll.list;
 
+exports.slurpyArray = hll.slurpyArray;
 exports.createArray = require('./BOOT').createArray;

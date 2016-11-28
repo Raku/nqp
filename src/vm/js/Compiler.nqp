@@ -497,7 +497,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
 
         if $slurpy {
-            set_variable($slurpy, "new nqp.NQPArray(Array.prototype.slice.call(arguments,{+@sig}))");
+            set_variable($slurpy, "nqp.slurpyArray({quote_string($*HLL)}, Array.prototype.slice.call(arguments,{+@sig}))");
         }
         if $slurpy_named {
             set_variable($slurpy_named, "nqp.slurpyNamed(_NAMED, {known_named(@*KNOWN_NAMED)})");

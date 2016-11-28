@@ -923,19 +923,19 @@ op.setdimensions = function(array, dimensions) {
   };
 
   op['atpos2d' + type] = function(array, x, y) {
-    return op['atposnd' + type](array, new NQPArray([x, y]));
+    return op['atposnd' + type](array, BOOT.createArray([x, y]));
   };
 
   op['atpos3d' + type] = function(array, x, y, z) {
-    return op['atposnd' + type](array, new NQPArray([x, y, z]));
+    return op['atposnd' + type](array, BOOT.createArray([x, y, z]));
   };
 
   op['bindpos2d' + type] = function(array, x, y, value) {
-    return op['bindposnd' + type](array, new NQPArray([x, y]), value);
+    return op['bindposnd' + type](array, BOOT.createArray([x, y]), value);
   };
 
   op['bindpos3d' + type] = function(array, x, y, z, value) {
-    return op['bindposnd' + type](array, new NQPArray([x, y, z]), value);
+    return op['bindposnd' + type](array, BOOT.createArray([x, y, z]), value);
   };
 });
 
@@ -969,8 +969,8 @@ op.getstaticcode = function(codeRef) {
   return codeRef.staticCode;
 };
 
-op.backtracestrings = function(exception) {
-  return new NQPArray([exception.stack.replace(/^Error: .*\n/, '')]);
+op.backtracestrings = function(hllName, exception) {
+  return hll.list(hllName, [exception.stack.replace(/^Error: .*\n/, '')]);
 };
 
 op.hintfor = function(classHandle, attrName) {

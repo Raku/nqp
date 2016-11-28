@@ -117,7 +117,8 @@ op.settypehllrole = function(type, role) {
 };
 
 exports.slurpyArray = function(hllName, array) {
-  var slurpyArray = hllConfigs[hllName].get('slurpy_array');
+  var slurpyArray;
+  if (hllConfigs[hllName]) slurpyArray = hllConfigs[hllName].get('slurpy_array');
   if (slurpyArray === undefined) slurpyArray = BOOT.Array;
   return slurpyArray._STable.REPR.allocateFromArray(slurpyArray._STable, array);
 };

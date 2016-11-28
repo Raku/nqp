@@ -107,7 +107,7 @@ addKnowhowHowMethod('name', function(ctx, _NAMED, self) {
 });
 
 addKnowhowHowMethod('attributes', function(ctx, _NAMED, self) {
-  return self.__attributes;
+  return BOOT.createArray(self.__attributes);
 });
 
 addKnowhowHowMethod('methods', function(ctx, _NAMED, self) {
@@ -140,7 +140,7 @@ addKnowhowHowMethod('new_type', function(ctx, _NAMED, self) {
 });
 
 addKnowhowHowMethod('add_attribute', function(ctx, _NAMED, self, type, attr) {
-  self.__attributes.$$push(attr);
+  self.__attributes.push(attr);
 });
 
 addKnowhowHowMethod('add_method', function(ctx, _NAMED, self, type, name, code) {
@@ -162,19 +162,19 @@ addKnowhowHowMethod('compose', function(ctx, _NAMED, self, typeObject) {
 
   /* ...which contains an array per MRO entry... */
   var typeInfo = [];
-  reprInfo.push(new NQPArray(typeInfo));
+  reprInfo.push(BOOT.createArray(typeInfo));
 
   /* ...which in turn contains this type... */
   typeInfo.push(typeObject);
 
   /* ...then an array of hashes per attribute... */
   var attrInfoList = [];
-  typeInfo.push(new NQPArray(attrInfoList));
+  typeInfo.push(BOOT.createArray(attrInfoList));
 
   /* ...then an array of hashes per attribute... */
-  for (var i = 0; i < self.__attributes.array.length; i++) {
+  for (var i = 0; i < self.__attributes.length; i++) {
     var attrInfo = new Hash();
-    var attr = self.__attributes.array[i];
+    var attr = self.__attributes[i];
     attrInfo.content.set('name', attr.__name);
     attrInfo.content.set('type', attr.__type);
     if (attr.__boxTarget) {
@@ -185,11 +185,11 @@ addKnowhowHowMethod('compose', function(ctx, _NAMED, self, typeObject) {
 
   /* ...followed by a list of parents (none). */
   var parentInfo = [];
-  typeInfo.push(new NQPArray(parentInfo));
+  typeInfo.push(BOOT.createArray(parentInfo));
 
   /* All of this goes in a hash. */
   var reprInfoHash = new Hash();
-  reprInfoHash.content.set('attribute', new NQPArray(reprInfo));
+  reprInfoHash.content.set('attribute', BOOT.createArray(reprInfo));
 
 
   /* Compose the representation using it. */
