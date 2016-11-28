@@ -469,7 +469,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 }
             }
             else {
-                my $default := '';
                 my $name := $*BLOCK.mangle_var($param);
 
                 if $param.default {
