@@ -6,7 +6,7 @@ var iscclass = require('./cclass.js').op.iscclass;
 var nqp = require('nqp-runtime');
 
 var Null = require('./null.js');
-var NQPArray = require('./array.js');
+var BOOT = require('./BOOT.js');
 
 const EDGE_FATE = 0, EDGE_EPSILON = 1, EDGE_CODEPOINT = 2, EDGE_CODEPOINT_NEG = 3, EDGE_CHARCLASS = 4, EDGE_CHARCLASS_NEG = 5;
 const EDGE_CHARLIST = 6, EDGE_CHARLIST_NEG = 7, EDGE_SUBRULE = 8, EDGE_CODEPOINT_I = 9, EDGE_CODEPOINT_I_NEG = 10;
@@ -251,7 +251,7 @@ function runNFA(nfa, target, pos) {
     }
   }
 
-  return new NQPArray(fates);
+  return BOOT.createArray(fates);
 }
 
 op.nfarunproto = function(nfa, target, pos) {

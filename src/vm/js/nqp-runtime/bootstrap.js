@@ -15,6 +15,8 @@ var constants = require('./constants.js');
 
 var BOOT = require('./BOOT.js');
 
+var Null = require('./null.js');
+
 var core = new SerializationContext('__6MODEL_CORE__');
 core.description = 'core SC';
 
@@ -242,3 +244,4 @@ module.exports.bootType = bootType;
 module.exports.core = core;
 
 BOOT.Array = bootType("BOOTArray", "VMArray");
+BOOT.Array._STable.setboolspec(8, Null);

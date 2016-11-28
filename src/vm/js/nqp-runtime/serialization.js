@@ -9,6 +9,8 @@ var Null = require('./null.js');
 var MultiCache = require('./multicache.js').MultiCache;
 var FileHandle = require('./io.js').FileHandle;
 
+var BOOT = require('./BOOT.js');
+
 var constants = require('./constants.js');
 
 var op = {};
@@ -373,7 +375,7 @@ class BinaryWriteCursor {
     else if (typeof ref == 'string') {
       discrim = REFVAR_VM_STR;
     }
-    else if (ref instanceof NQPArray) {
+    else if (ref instanceof NQPArray || ref._STable === BOOT.Array._STable) {
       discrim = REFVAR_VM_ARR_VAR;
     }
   //  else if (ref.st.WHAT == tc.gc.BOOTIntArray) {

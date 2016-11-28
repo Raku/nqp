@@ -391,3 +391,5 @@ exports.null_s = null_s;
 exports.Null = Null;
 
 exports.list = hll.list;
+
+exports.createArray = require('./BOOT').createArray;
