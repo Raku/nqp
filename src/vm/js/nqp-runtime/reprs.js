@@ -3,7 +3,6 @@ var sixmodel = require('./sixmodel.js');
 var Hash = require('./hash.js');
 var NQPInt = require('./nqp-int.js');
 var NQPException = require('./nqp-exception.js');
-var NQPArray = require('./array.js');
 var Null = require('./null.js');
 var null_s = require('./null_s.js');
 var Iter = require('./iter.js');
@@ -858,7 +857,7 @@ class VMArray extends REPR {
     });
 
     STable.addInternalMethod('$$splice', function(source, offset, length) {
-      // TODO think about the case when the source is not NQPArrray or VMArray
+      // TODO think about the case when the source is not VMArray
       var args = [offset, length];
       for (var i = 0; i < source.array.length; i++) {
         args.push(source.array[i]);

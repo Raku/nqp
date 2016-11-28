@@ -5,8 +5,6 @@ var reprs = require('./reprs.js');
 var Hash = require('./hash.js');
 var STable = require('./sixmodel.js').STable;
 
-var NQPArray = require('./array.js');
-
 var repr = new reprs.KnowHOWREPR();
 
 var CodeRef = require('./code-ref.js');

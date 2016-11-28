@@ -1,7 +1,6 @@
 'use strict';
 var Hash = require('./hash.js');
 var CodeRef = require('./code-ref.js');
-var NQPArray = require('./array.js');
 var NQPInt = require('./nqp-int.js');
 var Null = require('./null.js');
 var BOOT = require('./BOOT.js');
@@ -44,7 +43,7 @@ op.hllizefor = function(ctx, obj, language) {
     var foreignTransformHash = config.get('foreign_transform_hash');
     if (foreignTransformHash === undefined) return obj;
     return foreignTransformHash.$$call(ctx, {}, obj);
-  } else if (obj instanceof NQPArray || role == 4) {
+  } else if (role == 4) {
     var foreignTransformArray = config.get('foreign_transform_array');
     if (foreignTransformArray === undefined) return obj;
     return foreignTransformArray.$$call(ctx, {}, obj);

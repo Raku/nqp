@@ -14,8 +14,6 @@ var reprs = require('./reprs.js');
 
 var hll = require('./hll.js');
 
-var NQPArray = require('./array.js');
-
 var NQPObject = require('./nqp-object.js');
 
 var bootstrap = require('./bootstrap.js');
@@ -27,6 +25,8 @@ var constants = require('./constants.js');
 var containerSpecs = require('./container-specs.js');
 
 var Null = require('./null.js');
+
+var BOOT = require('./BOOT.js');
 
 exports.CodeRef = CodeRef;
 
@@ -212,15 +212,6 @@ op.istype = function(ctx, obj, type) {
     return 0;
   }
 
-  // HACK
-  if (obj instanceof NQPArray) {
-    if (hll.hllConfigs.nqp && type == hll.hllConfigs.nqp.get('list')) {
-      return 1;
-    } else {
-      return 0;
-    }
-  }
-
   var cache = obj._STable.typeCheckCache;
   if (cache) {
     for (var i = 0; i < cache.length; i++) {
@@ -320,7 +311,7 @@ function find_method(ctx, obj, name) {
 
 op.can = function(ctx, obj, name) {
   /* HACK those things should have an STable rather then be special cased */
-  if (typeof obj !== 'object' || obj instanceof NQPInt || obj instanceof CodeRef || obj instanceof Hash || obj instanceof NQPArray) return 0;
+  if (typeof obj !== 'object' || obj instanceof NQPInt || obj instanceof CodeRef || obj instanceof Hash) return 0;
 
   return find_method(ctx, obj, name) === Null ? 0 : 1;
 };
@@ -1077,7 +1068,7 @@ op.fc = function(string) {
 };
 
 op.islist = function(list) {
-  return (list instanceof NQPArray || list._STable && list._STable.REPR instanceof reprs.VMArray) ? 1 : 0;
+  return (list._STable && list._STable.REPR instanceof reprs.VMArray) ? 1 : 0;
 };
 
 op.split = function(hllName, separator, string) {

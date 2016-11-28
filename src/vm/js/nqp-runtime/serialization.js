@@ -3,7 +3,6 @@ var Hash = require('./hash.js');
 var CodeRef = require('./code-ref.js');
 var NQPInt = require('./nqp-int.js');
 var Int64 = require('node-int64');
-var NQPArray = require('./array.js');
 var null_s = require('./null_s.js');
 var Null = require('./null.js');
 var MultiCache = require('./multicache.js').MultiCache;
@@ -375,7 +374,7 @@ class BinaryWriteCursor {
     else if (typeof ref == 'string') {
       discrim = REFVAR_VM_STR;
     }
-    else if (ref instanceof NQPArray || ref._STable === BOOT.Array._STable) {
+    else if (ref._STable === BOOT.Array._STable) {
       discrim = REFVAR_VM_ARR_VAR;
     }
   //  else if (ref.st.WHAT == tc.gc.BOOTIntArray) {

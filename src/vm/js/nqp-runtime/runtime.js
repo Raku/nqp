@@ -70,8 +70,6 @@ var bootstrap = require('./bootstrap.js');
 module.exports.knowhowattr = bootstrap.knowhowattr;
 module.exports.knowhow = bootstrap.knowhow;
 
-module.exports.NQPArray = require('./array.js');
-
 exports.loaderCtx = null;
 
 op.loadbytecode = function(ctx, file) {
