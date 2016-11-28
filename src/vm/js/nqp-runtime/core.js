@@ -129,12 +129,8 @@ op.create = function(obj) {
   return obj._STable.REPR.allocate(obj._STable);
 };
 
-// HACK - till the array refactor we hack this
-
-op.bootarray = function(obj) {
-  return {_STable: {REPR: {allocate: function(STable) {
-    return new NQPArray([]);
-  }}}};
+op.bootarray = function() {
+  return BOOT.Array;
 };
 
 op.defined = function(obj) {
