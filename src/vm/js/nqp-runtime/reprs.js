@@ -884,7 +884,6 @@ class VMArray extends REPR {
       return value;
     };
 
-
     var $$bindposnd = function(idx, value) {
       if (idx.array.length != 1) {
         throw new NQPException('A dynamic array can only be indexed with a single dimension');
@@ -892,7 +891,6 @@ class VMArray extends REPR {
       var index = idx.array[0];
       return (this.array[index] = value);
     };
-
 
     var suffixes = ['', '_s', '_i', '_n'];
     for (let suffix of suffixes) {
