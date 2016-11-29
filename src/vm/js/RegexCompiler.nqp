@@ -1,27 +1,27 @@
 class RegexCompiler {
     has $!compiler; # a QAST::CompilerJS instance
 
-    has $!label; # the label we will jump to on the next while loop iteration
+    has str $!label; # the label we will jump to on the next while loop iteration
 
-    has $!js_loop_label; # we need this call break to stop the while loop 
+    has str $!js_loop_label; # we need this call break to stop the while loop 
 
-    has $!unique_label; # we need a supply of unique labels
+    has int $!unique_label; # we need a supply of unique labels
 
-    has $!fail_label; # when we fail and need to backtrack
-    has $!done_label; # when we can't backtrack no more
-    has $!initial_label; # when we can't backtrack no more
+    has str $!fail_label; # when we fail and need to backtrack
+    has str $!done_label; # when we can't backtrack no more
+    has str $!initial_label; # when we can't backtrack no more
 
-    has $!cursor;
-    has $!target; # the string we are matching against
-    has $!pos; # the position in $!target we are currently at
+    has str $!cursor;
+    has str $!target; # the string we are matching against
+    has str $!pos; # the position in $!target we are currently at
     has $!cursor_type_runtime; # the register with class of the object in $!cursor
-    has $!bstack;
-    has $!restart;
-    has $!cstack;
-    has $!subcur;
-    has $!rep;
+    has str $!bstack;
+    has str $!restart;
+    has str $!cstack;
+    has str $!subcur;
+    has str $!rep;
 
-    has $!has_cursor_type; # do we know the class of the object in $!cursor at compile time
+    has int $!has_cursor_type; # do we know the class of the object in $!cursor at compile time
     has $!cursor_type; # the class of the object in $!cursor - if we know it at compile time
 
     method set_cursor_var() {
@@ -36,12 +36,12 @@ class RegexCompiler {
 
         # TODO better name for $start
         # we need to unpack the array we !cursor_start_all into a bunch of variables 
-        my $start := $*BLOCK.add_tmp();
+        my str $start := $*BLOCK.add_tmp();
 
-        my $jump := $*BLOCK.add_tmp();
-        my $cstack_top := $*BLOCK.add_tmp();
+        my str $jump := $*BLOCK.add_tmp();
+        my str $cstack_top := $*BLOCK.add_tmp();
 
-        my $restart_label := self.new_label;
+        my str $restart_label := self.new_label;
 
         $!has_cursor_type := $node.has_cursor_type();
         if $!has_cursor_type {
@@ -123,11 +123,11 @@ class RegexCompiler {
     }
 
     method literal($node) {
-        my $const := $node.subtype eq 'ignorecase' ?? nqp::lc($node[0]) !! $node[0];
-        my $qconst := quote_string($const);
-        my $constlen := nqp::chars($const);
-        my $cmpop := $node.negate ?? '==' !! '!=';
-        my $str := "{$!target}.substr({$!pos},$constlen)";
+        my str $const := $node.subtype eq 'ignorecase' ?? nqp::lc($node[0]) !! $node[0];
+        my str $qconst := quote_string($const);
+        my int $constlen := nqp::chars($const);
+        my str $cmpop := $node.negate ?? '==' !! '!=';
+        my str $str := "{$!target}.substr({$!pos},$constlen)";
         if $node.subtype eq 'ignorecase' {
             $str := "$str.toLowerCase()";
         }
@@ -136,9 +136,9 @@ class RegexCompiler {
     }
 
     method scan($node) {
-        my $loop := self.new_label;
-        my $scan := self.new_label;
-        my $done := self.new_label;
+        my str $loop := self.new_label;
+        my str $scan := self.new_label;
+        my str $done := self.new_label;
 
         "if ({self.get_cursor_attr($*BLOCK.mangle_local('self'), '$!from')} != -1) \{{self.goto($done)}\}\n"
         ~ self.goto($scan)
@@ -156,10 +156,10 @@ class RegexCompiler {
     }
 
     method enumcharlist($node) {
-        my $charlist := quote_string($node[0]);
-        my $testop := $node.negate ?? '!=' !! '==';
+        my str $charlist := quote_string($node[0]);
+        my str $testop := $node.negate ?? '!=' !! '==';
 
-        my $end_of_string := ($node.negate && $node.subtype eq 'zerowidth') ?? "$!pos < $!target.length &&" !! "$!pos >= $!target.length ||";
+        my str $end_of_string := ($node.negate && $node.subtype eq 'zerowidth') ?? "$!pos < $!target.length &&" !! "$!pos >= $!target.length ||";
 
         "if ($end_of_string $charlist.indexOf($!target.substr($!pos,1)) $testop -1) \{{self.fail()}\}"
         ~ ($node.subtype eq 'zerowidth' ?? '' !! "$!pos++;\n")
@@ -202,7 +202,7 @@ class RegexCompiler {
             ~ self.cclass_check('CCLASS_WORD', :pos("$!pos-1"));
         }
         elsif $node.subtype eq 'bol' {
-            my $done_label := self.new_label;
+            my str $done_label := self.new_label;
 
             "if ($!pos == 0) \{{self.goto($done_label)}\}\n"
             ~ "if ($!pos >= $!target.length) \{{self.fail}\}\n"
@@ -210,7 +210,7 @@ class RegexCompiler {
             ~ self.case($done_label);
         }
         elsif $node.subtype eq 'eol' {
-            my $done_label := self.new_label;
+            my str $done_label := self.new_label;
 
             "if (nqp.op.iscclass({%const_map<CCLASS_NEWLINE>},$!target,$!pos)) \{{self.goto($done_label)}\}\n"
             ~ "if ($!pos != $!target.length) \{{self.fail}\}\n"
@@ -231,8 +231,6 @@ class RegexCompiler {
 
 
     method pass($node) {
-        my $name;
-
         my @setup;
         
         @setup.push(
@@ -244,7 +242,7 @@ class RegexCompiler {
             @setup.push("," ~ quote_string($node.name));
         } 
         elsif +@($node) == 1 {
-            $name := $!compiler.as_js($node[0], :want($T_STR));
+            my $name := $!compiler.as_js($node[0], :want($T_STR));
             @setup.unshift($name);
             @setup.push(',');
             @setup.push($name.expr);
@@ -264,7 +262,7 @@ class RegexCompiler {
         %cclass_code<w>  := %const_map<CCLASS_WORD>;
         %cclass_code<n>  := %const_map<CCLASS_NEWLINE>;
 
-        my $cclass := %cclass_code{ $node.name };
+        my int $cclass := %cclass_code{ $node.name };
         my $code := "if ($!pos >= $!target.length) \{{self.fail()}\}\n";
 
         if $node.name ne '.' {
@@ -321,17 +319,17 @@ class RegexCompiler {
     }
 
     method subrule($node) {
-        my $captured := 0;
+        my int $captured := 0;
 
 
         my $call;
 
         if nqp::istype($node[0][0], QAST::SVal) {
             my @args := nqp::clone($node[0].list);
-            my $method := @args.shift.value;
+            my str $method := @args.shift.value;
             my $compiled_args := $!compiler.args(@args, :invocant($!cursor));
 
-            my $invocation := $compiled_args.is_args_array ?? ".apply({$!cursor}," !! '(';
+            my str $invocation := $compiled_args.is_args_array ?? ".apply({$!cursor}," !! '(';
 
             $call := Chunk.new($T_OBJ,
                 $!cursor ~ '[' ~ quote_string($method) ~ "]" ~ $invocation ~ $compiled_args.expr ~ ')',
@@ -343,22 +341,20 @@ class RegexCompiler {
             $call := Chunk.new($T_OBJ, $block.expr ~ ".\$\$call({$*CTX}, null, $!cursor)", $block);
         }
 
-        my $testop := $node.negate ?? '>=' !! '<';
+        my str $testop := $node.negate ?? '>=' !! '<';
 
 
-        my $capture_code := '';
+        my str $capture_code := '';
 
         if $node.subtype ne 'zerowidth' {
-            my $pass_label := self.new_label();
+            my str $pass_label := self.new_label();
             if $node.backtrack eq 'r' {
                 unless $node.subtype eq 'method' {
                     $capture_code := self.mark($pass_label,-1,0) ~ self.case($pass_label);
                 }
             }
             else {
-
-
-                my $back_label := self.new_label();
+                my str $back_label := self.new_label();
 
                 $capture_code := $capture_code
                     ~ self.goto($pass_label)
@@ -402,10 +398,10 @@ class RegexCompiler {
 
 
     method subcapture($node) {
-        my $done_label := self.new_label; 
-        my $fail_label := self.new_label; 
+        my str $done_label := self.new_label; 
+        my str $fail_label := self.new_label; 
 
-        my $subcapture_from := $*BLOCK.add_tmp;
+        my str $subcapture_from := $*BLOCK.add_tmp;
 
         Chunk.void(
             self.mark($fail_label,$!pos,0),
@@ -436,15 +432,15 @@ class RegexCompiler {
     }
 
     method quant($node) {
-        my $min       := $node.min;
-        my $max       := $node.max;
-        my $needrep   := $min > 1 || $max > 1;
-        my $needmark  := $needrep || $node.backtrack eq 'r';
-        my $sep       := $node[1];
-        my $loop := self.new_label;
-        my $done := self.new_label;
+        my int $min       := $node.min;
+        my int $max       := $node.max;
+        my int $needrep   := $min > 1 || $max > 1;
+        my int $needmark  := $needrep || $node.backtrack eq 'r';
+        my str $sep       := $node[1];
+        my str $loop := self.new_label;
+        my str $done := self.new_label;
 
-        my $rep := $*BLOCK.add_tmp();
+        my str $rep := $*BLOCK.add_tmp();
 
         # TODO - think about removing irep
 
@@ -453,8 +449,8 @@ class RegexCompiler {
             "";
         }
         elsif $node.backtrack eq 'f' {
-            my $irep := $*BLOCK.add_tmp();
-            my $seplabel := self.new_label;
+            my str $irep := $*BLOCK.add_tmp();
+            my str $seplabel := self.new_label;
 
             Chunk.void(
                 "$rep = 0;\n",
@@ -508,8 +504,8 @@ class RegexCompiler {
         my @code;
 
         my $iter     := nqp::iterator($node.list);
-        my $endlabel := self.new_label;
-        my $altlabel := self.new_label;
+        my str $endlabel := self.new_label;
+        my str $altlabel := self.new_label;
         my $acode    := self.compile_rx(nqp::shift($iter));
 
         while $iter {
@@ -538,7 +534,7 @@ class RegexCompiler {
         # Calculate all the branches to try, which populates the bstack
         # with the options. Then immediately fail to start iterating it.
 
-        my $end_label := self.new_label;
+        my str $end_label := self.new_label;
 
 
         my @alt_code;
@@ -571,14 +567,14 @@ class RegexCompiler {
 
     method conjseq($node) {
 
-        my $conj_label := self.new_label;
-        my $first_label := self.new_label;
+        my str $conj_label := self.new_label;
+        my str $first_label := self.new_label;
 
         my $iter := nqp::iterator($node.list);
         # make a mark that holds our starting position in the pos slot
 
-        my $start_pos := $*BLOCK.add_tmp;
-        my $end_pos := $*BLOCK.add_tmp;
+        my str $start_pos := $*BLOCK.add_tmp;
+        my str $end_pos := $*BLOCK.add_tmp;
 
         my @code;
 
@@ -653,7 +649,7 @@ class RegexCompiler {
     }
 
     method peek($mark, *@regs) {
-        my $code := "var peek = nqp.regexPeek($!bstack, $mark);\n";
+        my str $code := "var peek = nqp.regexPeek($!bstack, $mark);\n";
         for @regs {
             $code := $code ~ "peek++;\n";
             $code := $code ~ "$_ = $!bstack[peek]\n;" if $_ ne '*';
