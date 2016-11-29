@@ -918,7 +918,7 @@ class VMArray extends REPR {
 
     cursor.varint(obj.array.length);
     for (var i = 0; i < obj.array.length; i++) {
-      cursor.ref(obj.array[i]);
+      cursor.ref(obj.array[i] === undefined ? Null : obj.array[i]);
     }
   }
 
