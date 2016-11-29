@@ -3,10 +3,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     has $!cps; # If it's set to "off" we don't support continuations
 
-    my sub literal_subst($source, $pattern, $replacement) {
-        my $where := 0;
-        my $result := $source;
-        while (my $found := nqp::index($result, $pattern, $where)) != -1 {
+    my sub literal_subst(str $source, str $pattern, str $replacement) {
+        my int $where := 0;
+        my str $result := $source;
+        while (my int $found := nqp::index($result, $pattern, $where)) != -1 {
             $where := $found + nqp::chars($replacement);
             $result := nqp::replace($result, $found, nqp::chars($pattern), $replacement);
         };
@@ -29,8 +29,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         has $!qast;             # The QAST::Block
         has $!outer;            # Outer block's BlockInfo
         has @!js_lexicals;      # javascript variables we need to declare for the block
-        has $!tmp;              # We use a bunch of TMP{$n} to store intermediate javascript results
-        has $!ctx;              # The object we keep dynamic variables and exception handlers in
+        has int $!tmp;              # We use a bunch of TMP{$n} to store intermediate javascript results
+        has str $!ctx;              # The object we keep dynamic variables and exception handlers in
         has @!params;           # the parameters the block takes
         has @!variables;        # the variables declared in this block
         has %!variables;        # the variables declared in this block
@@ -51,7 +51,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         has %!statevars;
 
-        has $!pass_on_exceptions;
+        has int $!pass_on_exceptions;
 
         method new($qast, $outer) {
             my $obj := nqp::create(self);
@@ -140,8 +140,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
 
         method clone_inner($block, :$cps = 1, :$direct = 1) {
-            my $cuid    := $block.cuid;
-            my $already := %!cloned_inners{$cuid};
+            my int $cuid    := $block.cuid;
+            my str $already := %!cloned_inners{$cuid};
 
             %!need_cps{$cuid} := $cps || %!need_cps{$cuid};
             %!need_direct{$cuid} := $direct || %!need_direct{$cuid};
@@ -150,7 +150,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 $already
             }
             else {
-                my $reg := self.add_tmp;
+                my str $reg := self.add_tmp;
                 %!cloned_inners{$cuid} := $reg;
                 $reg
             }
@@ -159,13 +159,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         method cloned_inners() { %!cloned_inners }
 
         method capture_inner($block) {
-            my $cuid    := $block.cuid;
-            my $already := %!captured_inners{$cuid};
+            my int $cuid    := $block.cuid;
+            my str $already := %!captured_inners{$cuid};
             if $already {
                 $already
             }
             else {
-                my $reg := self.add_tmp;
+                my str $reg := self.add_tmp;
                 %!captured_inners{$cuid} := $reg;
                 $reg
             }
@@ -215,14 +215,14 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
 
         method add_statevar($value) {
-            my $js_var := QAST::Node.unique('statevar');
+            my str $js_var := QAST::Node.unique('statevar');
             %!statevars{$js_var} := $value;
             $js_var;
         }
 
         method tmps() {
             my @tmps;
-            my $i := 1;
+            my int $i := 1;
             while $i <= $!tmp {
                 @tmps.push('TMP'~$i);
                 $i := $i+1;
@@ -244,7 +244,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         method params() { @!params }
         method variables() { @!variables }
 
-        has $!first_time_marker;
+        has str $!first_time_marker;
         method first_time_marker() {
             if !$!first_time_marker {
                 $!first_time_marker :=  QAST::Node.unique('first_time');
@@ -271,7 +271,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     method is_dynamic_var(BlockInfo $info, QAST::Var $var) {
         # HACK due to a nqp misdesign we need to check the name for the * twigil
         # TODO Make nqp mark dynamic variables explicitly
-        my $name := $var.name;
+        my str $name := $var.name;
         if nqp::chars($name) > 2 {
             my str $sigil := nqp::substr($name, 0, 1);
             my str $twigil := nqp::substr($name, 1, 1);
@@ -319,7 +319,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my @groups := [[]];
         
-        my $cps := nqp::istrue($cont);
+        my int $cps := nqp::istrue($cont);
 
         for $args -> $arg {
             if nqp::istype($arg,QAST::SpecialArg) {
@@ -416,13 +416,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 @setup.push("{$*CTX}[{quote_string($var.name)}] = $value;\n");
             }
             else {
-                my $mangled := $*BLOCK.mangle_var($var);
+                my str $mangled := $*BLOCK.mangle_var($var);
                 $*BLOCK.add_js_lexical($mangled);
                 @setup.push("$mangled = $value;\n");
             }
         }
 
-        my $bind_named := '';
         for @params -> $param {
             if $param.slurpy {
                 if $param.named {
@@ -433,9 +432,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 }
             }
             elsif $param.named {
-                my $quoted := quote_string($param.named);
+                my str $quoted := quote_string($param.named);
                 @*KNOWN_NAMED.push($quoted);
-                my $value := "_NAMED[$quoted]";
+                my str $value := "_NAMED[$quoted]";
                 if $param.default {
                     # TODO types
 
@@ -452,9 +451,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 set_variable($param, $value);
             }
             elsif self.is_dynamic_var($*BLOCK, $param) {
-                my $set := "{$*CTX}[{quote_string($param.name)}] = ";
+                my str $set := "{$*CTX}[{quote_string($param.name)}] = ";
 
-                my $tmp := self.unique_var('param');
+                my str $tmp := self.unique_var('param');
                 @sig.push($tmp);
                 if $param.default {
                     my $default_value := self.as_js($param.default, :want($T_OBJ), :$cps);
@@ -469,11 +468,11 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 }
             }
             else {
-                my $name := $*BLOCK.mangle_var($param);
+                my str $name := $*BLOCK.mangle_var($param);
 
                 if $param.default {
                     # Overwriting a parameter makes the v8 optimizer bail out so to avoid that we introduce a new variable
-                    my $tmp := self.unique_var($name~'_');
+                    my str $tmp := self.unique_var($name~'_');
 
                     $*BLOCK.add_js_lexical($name);
                     @sig.push($tmp);
@@ -513,7 +512,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     multi method coerce(Chunk $chunk, $desired) {
-        my $got := $chunk.type;
+        my int $got := $chunk.type;
         if $got != $desired {
             if $desired == $T_VOID {
                 return Chunk.new($T_VOID, "", $chunk.setup);
@@ -528,7 +527,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     return Chunk.new($T_NUM, "({$chunk.expr} ? 1 : 0)", $chunk);
                 }
                 if $got == $T_STR {
-                    my $tmp := $*BLOCK.add_tmp();
+                    my str $tmp := $*BLOCK.add_tmp();
                     return Chunk.new($T_NUM, "(isNaN($tmp) ? 0 : $tmp)", [$chunk,"$tmp = parseFloat({$chunk.expr});\n"]);
                 }
             }
@@ -609,7 +608,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     method handle_control($loop, $body) {
         if nqp::elems($loop.handled) > 0 {
             my $setup_label := "";
-            my $check_label := "e.label === null";
+            my str $check_label := "e.label === null";
 
             if $loop.label {
                 $setup_label := self.as_js($loop.label, :want($T_OBJ));
@@ -675,7 +674,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     method mark_children_serializable(QAST::Children $node) {
         my int $serializable := 0;
         for $node.list -> $child {
-            my $is_child_serializable := self.is_ctxsave($node) || self.mark_serializable($child);
+            my int $is_child_serializable := self.is_ctxsave($node) || self.mark_serializable($child);
             $serializable := $serializable || $is_child_serializable;
         }
         $serializable;
@@ -743,9 +742,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my int $n := nqp::elems(@chunks);
 
-        my $result_var;
+        my str $result_var;
 
-        my $result;
+        my str $result;
 
         if nqp::defined($expr) {
             $result := $expr;
@@ -764,7 +763,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 return self.NYI("CPS currently is broken");
             }
             elsif nqp::istype($chunk, Chunk) || nqp::isstr($chunk) {
-                my $chunk_expr := nqp::isstr($chunk) ?? $chunk !! $chunk.expr;
+                my str $chunk_expr := nqp::isstr($chunk) ?? $chunk !! $chunk.expr;
 
                 nqp::push(@setup, $chunk);
 
@@ -795,7 +794,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             $result_child := +$node.list - 1;
         }
 
-        my $i := 0;
+        my int $i := 0;
         for @stmts -> $stmt {
             my $chunk := self.as_js(@stmts[$i], :want($i == $result_child ?? $want !! $T_VOID), :$cps);
             @chunks.push($chunk);
@@ -838,7 +837,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     my %code_ref_attr;
     method code_ref_attr($cuid) {
         if !nqp::existskey(%code_ref_attr, $cuid) {
-            %code_ref_attr{$cuid} := '$codeRef$' ~ $cuid ~ '_' ~ literal_subst(nqp::time_n(), '.', '_');
+            %code_ref_attr{$cuid} := '$codeRef$' ~ $cuid ~ '_' ~ literal_subst(~nqp::time_n(), '.', '_');
         }
         %code_ref_attr{$cuid};
     }
@@ -847,7 +846,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my @declared;
         my @vars;
         for %!cuids {
-            my $var := self.mangled_cuid($_.key);
+            my str $var := self.mangled_cuid($_.key);
             @vars.push($var);
             @declared.push("$var = new nqp.CodeRef({quote_string($_.value.name)},{quote_string($_.key)}).setCodeRefAttr({quote_string(self.code_ref_attr($_.key))})");
         }
@@ -856,7 +855,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     method set_code_objects() {
-        my $set := "";
+        my str $set := "";
         for %!cuids {
             my $code_obj := $_.value.code_object;
             if nqp::isconcrete($code_obj) {
@@ -871,7 +870,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             Chunk.void($chunk, $chunk.expr~";\n", :node($chunk.node));
         }
         else {
-            my $tmp := $*BLOCK.add_tmp();
+            my str $tmp := $*BLOCK.add_tmp();
             Chunk.new($chunk.type, $tmp, [$chunk, "$tmp = {$chunk.expr};\n"], :node($chunk.node));
         }
     }
@@ -902,7 +901,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
     
     method wrap_static_block($expected_outer, @output, $block) {
-        my $missing_outer := $expected_outer.cuid ne $*BLOCK.cuid && $expected_outer.ctx ne 'null';
+        my int $missing_outer := $expected_outer.cuid ne $*BLOCK.cuid && $expected_outer.ctx ne 'null';
         if $missing_outer {
             @output.push("//Static wrapping\n");
             @output.push("(function() \{\n");
@@ -919,8 +918,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     method clone_inners($block) {
         my @clone_inners;
         for $block.cloned_inners -> $kv {
-            my $reg   := $kv.value;
-            my $cuid := self.mangled_cuid($kv.key);
+            my str $reg   := $kv.value;
+            my str $cuid := self.mangled_cuid($kv.key);
 
             if nqp::existskey(%*BLOCKS_STATEVARS, $kv.key) {
                 @clone_inners.push(%*BLOCKS_STATEVARS{$kv.key});
@@ -967,8 +966,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     method capture_inners($block) {
         my @capture_inners;
         for $block.captured_inners -> $kv {
-            my $cuid := self.mangled_cuid($kv.key);
-            my $reg   := $kv.value;
+            my str $cuid := self.mangled_cuid($kv.key);
+            my str $reg   := $kv.value;
 
             if nqp::existskey(%*BLOCKS_STATEVARS, $kv.key) {
                 @capture_inners.push(%*BLOCKS_STATEVARS{$kv.key});
@@ -1005,7 +1004,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     method compile_block(QAST::Block $node, $outer, $outer_loop, :$want, :@extra_args=[], :$cps) {
 
-        my $outer_ctx := try $*CTX // "null";
+        my str $outer_ctx := try $*CTX // "null";
 
         if self.is_known_cuid($node) {
         }
@@ -1023,22 +1022,22 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             %*BLOCKS_INFO{$node.cuid} := $*BLOCK;
 
-            my $body_want := $node.blocktype eq 'immediate' ?? $want !! $T_OBJ;
+            my int $body_want := $node.blocktype eq 'immediate' ?? $want !! $T_OBJ;
 
             my $stmts := self.compile_all_the_statements($node, $body_want);
 
-            my $code_ref_attr := self.code_ref_attr($node.cuid);
+            my str $code_ref_attr := self.code_ref_attr($node.cuid);
 
-            my $create_ctx := self.create_ctx($*CTX, :code_ref('this'), :code_ref_attr(quote_string($code_ref_attr)));
+            my str $create_ctx := self.create_ctx($*CTX, :code_ref('this'), :code_ref_attr(quote_string($code_ref_attr)));
             if nqp::istype($stmts, ChunkCPS) {
             }
             else {
                 my $sig := self.compile_sig($*BLOCK.params);
 
-                my $first_time_marker := $*BLOCK.maybe_first_time_marker;
+                my str $first_time_marker := $*BLOCK.maybe_first_time_marker;
 
-                my $pass_exceptions_start := '';
-                my $pass_exceptions_end := '';
+                my str $pass_exceptions_start := '';
+                my str $pass_exceptions_end := '';
 
                 if $*BLOCK.pass_on_exceptions {
                     $pass_exceptions_start := "try \{\n";
@@ -1086,7 +1085,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     if nqp::defined($*BLOCK.outer) && $*BLOCK.outer.cuid {
                         $outer_cuid := self.mangled_cuid($*BLOCK.outer.cuid);
                     }
-                    my $lexicals_type_info := self.type_info_for_lexicals($*BLOCK);
+                    my str $lexicals_type_info := self.type_info_for_lexicals($*BLOCK);
                     my $closure_template;
                     if $node.blocktype ne 'immediate' {
                         my @closure_template := nqp::clone(@function);
@@ -1163,8 +1162,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             my $cloned_block := $outer.clone_inner($node, :cps($cps), :direct(!$cps));
 
             if $cps {
-                my $cont := self.unique_var('cont');
-                my $result := self.unique_var('result');
+                my str $cont := self.unique_var('cont');
+                my str $result := self.unique_var('result');
 
                 my @args := [$outer_ctx, 'null'];
 
@@ -1335,19 +1334,19 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
 
         my $sc_tuple := self.serialize_sc($sc);
-        my $sc_data := $sc_tuple[0];
+        my str $sc_data := $sc_tuple[0];
         my $sc_sh := $sc_tuple[1];
 
 
-        my $i := 0;
+        my int $i := 0;
         while $i < nqp::elems($sc_sh) {
             my $s := nqp::atpos_s($sc_sh,$i);
-            my $got := nqp::isnull_s($s) ?? 'nqp.null_s' !! quote_string($s);
+            my str $got := nqp::isnull_s($s) ?? 'nqp.null_s' !! quote_string($s);
             @sh.push($got);
             $i := $i + 1;
         }
 
-        my $quoted_data := nqp::isnull_s($sc_data) ?? 'null' !! quote_string($sc_data);
+        my str $quoted_data := nqp::isnull_s($sc_data) ?? 'null' !! quote_string($sc_data);
 
 
         Chunk.void(
@@ -1375,7 +1374,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     method throw_control_exception($type, $loop, $label) {
-        my $direct := 1;
+        my int $direct := 1;
         while nqp::defined($loop) {
             if nqp::istype($loop, LoopInfo) {
                 if $label {
@@ -1420,7 +1419,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     my sub loadable($name) {
         # workaround for webpack
-        my $path := literal_subst($name, '::', '/');
+        my str $path := literal_subst($name, '::', '/');
         quote_string($name) ~ ", function() \{return require({quote_string($path)})\}";
     }
 
@@ -1507,9 +1506,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         # TODO nested compunits, we need to handle is_nested the same as the moar backend
 
-        my $comp_mode := $node.compilation_mode;
+        my int $comp_mode := $node.compilation_mode;
 
-        my $set_hll := $*HLL ?? "nqp.setCodeRefHLL(cuids, {quote_string($*HLL)});\n" !! '';
+        my str $set_hll := $*HLL ?? "nqp.setCodeRefHLL(cuids, {quote_string($*HLL)});\n" !! '';
 
         my $set_code_objects := self.set_code_objects;
         my @setup := [$pre , $comp_mode ?? self.create_sc($node) !! '', self.setup_wvals, $set_code_objects,  self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $set_hll, self.set_static_vars, $post, $body];
@@ -1534,7 +1533,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         # TODO vars more complex the non-dynamic lexicals
 
         if $node.decl eq 'var' && ($node.scope eq 'local' || $node.scope eq 'lexical') {
-            my $type := self.type_from_typeobj($node.returns);
+            my int $type := self.type_from_typeobj($node.returns);
             $*BLOCK.register_var_type($node, $type);
         }
 
@@ -1549,7 +1548,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             $*BLOCK.add_variable($node);
 
             if !self.is_dynamic_var($*BLOCK, $node) {
-                my $mangled_name := $*BLOCK.add_mangled_var($node);
+                my str $mangled_name := $*BLOCK.add_mangled_var($node);
                 if $node.decl eq 'contvar' {
                     $*BLOCK.add_js_lexical_with_value($mangled_name, "nqp.op.clone({self.value_as_js($node.value)})");
                 }
@@ -1596,7 +1595,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
         else {
             my $fallback := self.as_js($node.fallback, :want($T_OBJ));
-            my $tmp := $*BLOCK.add_tmp();
+            my str $tmp := $*BLOCK.add_tmp();
             Chunk.new($T_OBJ, $tmp, [
                 $compiled,
                 "if ({$compiled.expr} === nqp.Null) \{\n"
@@ -1624,7 +1623,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             return "nqp.wval({quote_string($handle)},$idx)";
         }
 
-        my $key := $handle ~ "@" ~ $idx;
+        my str $key := $handle ~ "@" ~ $idx;
 
         if !nqp::existskey(%!wval, $key) {
           %!wval{$key} := "nqp.wval({quote_string($handle)},$idx)";
@@ -1634,7 +1633,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     method setup_wvals() {
-       my $setup := '';
+       my str $setup := '';
        for %!wval_mangling -> $kv {
            $setup := $setup ~ $kv.value ~ ' = ' ~ %!wval{$kv.key} ~ "\n";
        }
@@ -1732,7 +1731,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
         else {
             if $var.decl && $var.decl ne 'param' {
-                my $initial_value;
+                my str $initial_value;
                 if $var.decl eq 'var' {
                     my %default_value := nqp::hash($T_OBJ, 'null', $T_INT, '0', $T_NUM, '0', $T_STR, '""');
                     $initial_value := %default_value{$type};
@@ -1776,7 +1775,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
         }
         else {
-            my $mangled := $*BLOCK.mangle_var($var);
+            my str $mangled := $*BLOCK.mangle_var($var);
             '('~$mangled~' = ('~ $js_expr ~ "));\n"
         }
     }
@@ -1875,8 +1874,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
 
             my @setup;
-            my $get;
-            my $set;
+            my str $get;
+            my str $set;
 
             my $self := self.as_js_clear_bindval($var[0], :want($T_OBJ), :$cps);
 
@@ -1937,7 +1936,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     }
                 }
                 else {
-                    my $attr := $self.expr ~ '.attr$' ~ $hint;
+                    my str $attr := $self.expr ~ '.attr$' ~ $hint;
                     if $*BINDVAL {
                         my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($type), :$cps);
                         Chunk.new($type, $bindval.expr, [$self, $bindval, "$attr = {$bindval.expr};\n"]);
@@ -2007,7 +2006,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     method emit($ast, :$instant, :$substagestats, :$shebang, :$snapshot) {
 
-        my $timestamp := nqp::time_n();
+        my num $timestamp := nqp::time_n();
         my $chunk := self.as_js_with_prelude($ast, :$instant, :$shebang);
         nqp::printfh(nqp::getstderr(), nqp::sprintf("[as_js %.3f] ", [nqp::time_n() - $timestamp])) if $substagestats;
 
