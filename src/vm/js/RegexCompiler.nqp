@@ -436,7 +436,7 @@ class RegexCompiler {
         my int $max       := $node.max;
         my int $needrep   := $min > 1 || $max > 1;
         my int $needmark  := $needrep || $node.backtrack eq 'r';
-        my str $sep       := $node[1];
+        my $sep       := $node[1];
         my str $loop := self.new_label;
         my str $done := self.new_label;
 
