@@ -1,6 +1,6 @@
 #! nqp
 
-plan(1494);
+plan(1495);
 
 {
     my $sc := nqp::createsc('exampleHandle');
@@ -464,6 +464,7 @@ sub add_to_sc($sc, $idx, $obj) {
     my $v := VMArrayClass.new();
     nqp::push($v, 123);
     nqp::push($v, 456);
+    $v[3] := 789;
     add_to_sc($sc, 0, $v);
 
     my $serialized := nqp::serialize($sc, $sh);
@@ -473,9 +474,10 @@ sub add_to_sc($sc, $idx, $obj) {
 
     ok(nqp::scobjcount($dsc) == 1, 'deserialized SC has a single object');
     ok(nqp::istype(nqp::scgetobj($dsc, 0), VMArrayClass), 'deserialized array has correct type');
-    is(nqp::elems(nqp::scgetobj($dsc, 0)), 2, 'deserialize array has correct number of elements');
+    is(nqp::elems(nqp::scgetobj($dsc, 0)), 4, 'deserialize array has correct number of elements');
     is(nqp::scgetobj($dsc, 0)[0], 123, '0th element of array is correct');
     is(nqp::scgetobj($dsc, 0)[1], 456, '1st element of array is correct');
+    is(nqp::scgetobj($dsc, 0)[3], 789, '3st element of array is correct');
 }
 
 # integers
