@@ -23,7 +23,7 @@ class HLL::Compiler does HLL::Backend::Default {
         @!stages     := nqp::split(' ', 'start parse ast ' ~ $!backend.stages());
         
         # Command options and usage.
-        @!cmdoptions := nqp::split(' ', 'e=s help|h target=s trace|t=s encoding=s output|o=s source-name=s combine version|v show-config verbose-config|V stagestats=s? ll-exception rxtrace nqpevent=s profile=s? profile-compile=s? profile-filename=s');
+        @!cmdoptions := nqp::split(' ', 'e=s help|h target=s trace|t=s encoding=s output|o=s source-name=s combine version|v show-config verbose-config|V stagestats=s? ll-exception rxtrace nqpevent=s profile=s? profile-compile=s? profile-filename=s profile-stage=s');
         %!config     := nqp::hash();
     }
     
@@ -426,15 +426,23 @@ class HLL::Compiler does HLL::Backend::Default {
             }
             nqp::printfh($stderr, nqp::sprintf("Stage %-11s: ", [$_])) if nqp::defined($stagestats);
             my $timestamp := nqp::time_n();
-            if nqp::can(self, $_) {
-                $result := self."$_"($result, |%adverbs);
+
+            my sub run() {
+                if nqp::can(self, $_) {
+                    self."$_"($result, |%adverbs);
+                }
+                elsif nqp::can($!backend, $_) {
+                    $!backend."$_"($result, |%adverbs);
+                }
+                else {
+                    nqp::die("Unknown compilation stage '$_'");
+                }
             }
-            elsif nqp::can($!backend, $_) {
-                $result := $!backend."$_"($result, |%adverbs);
-            }
-            else {
-                nqp::die("Unknown compilation stage '$_'");
-            }
+
+            $result := %adverbs<profile-stage> eq $_
+                ?? $!backend.run_profiled(&run, '', %adverbs<profile-filename>)
+                !! run();
+
             my $diff := nqp::time_n() - $timestamp;
             if nqp::defined($stagestats) {
                 nqp::printfh($stderr, nqp::sprintf("%7.3f", [$diff]));
