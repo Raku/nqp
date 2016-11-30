@@ -306,7 +306,12 @@ function find_method(ctx, obj, name) {
       return Null;
     }
   }
-  return obj._STable.HOW.find_method(ctx, null, obj._STable.HOW, obj, name);
+
+  if (obj._STable.HOW.find_method) {
+    return obj._STable.HOW.find_method(ctx, null, obj._STable.HOW, obj, name);
+  } else {
+    return Null;
+  }
 }
 
 op.can = function(ctx, obj, name) {
@@ -579,7 +584,7 @@ op.setmessage = function(exception, message) {
 };
 
 op.getpayload = function(exception) {
-  return exception.hasOwnProperty('payload') ? exception.payload : Null;
+  return Object.prototype.hasOwnProperty.call(exception, 'payload') ? exception.payload : Null;
 };
 
 op.setpayload = function(exception, payload) {

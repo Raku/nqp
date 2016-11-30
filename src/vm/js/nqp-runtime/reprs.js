@@ -11,6 +11,8 @@ var BOOT = require('./BOOT.js');
 var bignum = require('bignum');
 var ZERO = bignum(0);
 
+var constants = require('./constants.js');
+
 var reprs = {};
 var reprById = [];
 
@@ -34,7 +36,37 @@ function noopCompose(obj, reprInfo) {
 
 function basicConstructor(STable) {
   var objConstructor = function() {};
+  var handler = {};
+  handler.get = function(target, name) {
+    if (STable.modeFlags & constants.METHOD_CACHE_AUTHORITATIVE) {
+      return undefined;
+    }
+
+    /* are we trying to access an internal property? */
+    if (name.substr(0, 2) === '$$') {
+      return undefined;
+    }
+
+    return function() {
+      let how = this._STable.HOW;
+
+      var method = how.find_method(null, null, how, this, name);
+
+      var args = [];
+      for (var i = 0; i < arguments.length; i++) {
+        args.push(arguments[i]);
+      }
+      return method.$$apply(args);
+    };
+  };
+
+
+  objConstructor.prototype = Object.create(new Proxy({}, handler));
   objConstructor.prototype._STable = STable;
+
+  objConstructor.prototype._SC = undefined;
+  objConstructor.prototype._WHERE = undefined;
+
   return objConstructor;
 }
 
@@ -1104,6 +1136,12 @@ class Decoder extends REPR {};
 reprs.Decoder = Decoder;
 
 class MultiDimArray extends REPR {
+  allocate(STable) {
+    var obj = new STable.objConstructor();
+    obj.dimensions = undefined;
+    return obj;
+  }
+
   compose(STable, reprInfoHash) {
     var array = reprInfoHash.content.get('array');
     var dimensions = array.content.get('dimensions');
