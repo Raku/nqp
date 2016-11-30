@@ -28,7 +28,7 @@ class QAST::OperationsJS {
             nqp::die("{+$node.list} arguments for {$node.op}, the maximum is {+@argument_types}");
         } 
 
-        my $i := 0;
+        my int $i := 0;
         for $node.list -> $arg {
             my $chunk := $comp.as_js($arg, :want(@argument_types[$i]));
             @exprs.push(@decont[$i] ?? "{$chunk.expr}.\$\$decont($*CTX)" !! $chunk.expr);
@@ -53,8 +53,8 @@ class QAST::OperationsJS {
         }
 
         if $cps {
-            my $cont := $comp.unique_var('cont');
-            my $result := $comp.unique_var('result');
+            my str $cont := $comp.unique_var('cont');
+            my str $result := $comp.unique_var('result');
             @exprs.push($cont);
             @setup.push('return ' ~ $cb(|@exprs, :$cps) ~ ";\n");
             ChunkCPS.new($return_type, $result, @setup, $cont, :$node);
@@ -127,7 +127,7 @@ class QAST::OperationsJS {
 
     # Sets returns on an op node if we it has a native result type.
     method attach_result_type($hll, $node) {
-        my $op := $node.op;
+        my str $op := $node.op;
         if nqp::existskey(%result_type, $op) {
             $node.returns(%result_type{$op});
         }
@@ -233,7 +233,7 @@ class QAST::OperationsJS {
     add_simple_op('lcm_i', $T_INT, [$T_INT, $T_INT]);
 
     add_op('chain', sub ($comp, $node, :$want, :$cps) {
-        my $ret := $*BLOCK.add_tmp;
+        my str $ret := $*BLOCK.add_tmp;
 
         my sub is_chain($part) {
             $part ~~ QAST::Op && $part.op eq 'chain';
@@ -279,9 +279,9 @@ class QAST::OperationsJS {
         sub ($comp, $node, :$want, :$cps) {
             my $obj := $comp.as_js(:want($T_OBJ), $node[0]);
             my $value := $comp.as_js(:want($type), $node[3]);
-            my $suffix := $comp.suffix_from_type($type);
+            my str $suffix := $comp.suffix_from_type($type);
             my @setup;
-            my $action;
+            my str $action;
             if static_hint($node) -> $hint {
                 @setup := [$obj, $value];
                 $action := $type == $T_OBJ
@@ -358,7 +358,7 @@ class QAST::OperationsJS {
 
     for <preinc predec> -> $op {
         add_op($op, sub ($comp, $node, :$want, :$cps) {
-            my $action := $op eq 'preinc' ?? 'add_i' !! 'sub_i';
+            my str $action := $op eq 'preinc' ?? 'add_i' !! 'sub_i';
             $comp.as_js(
                 QAST::Op.new(
                     :op('bind'),
@@ -374,9 +374,9 @@ class QAST::OperationsJS {
     for <postinc postdec> -> $op {
         add_op($op, sub ($comp, $node, :$want, :$cps) {
             # TODO CPS
-            my $tmp := $*BLOCK.add_tmp();
+            my str $tmp := $*BLOCK.add_tmp();
             my $var := $comp.as_js($node[0], :want($T_INT));
-            my $action := $op eq 'postinc' ?? 'add_i' !! 'sub_i';
+            my str $action := $op eq 'postinc' ?? 'add_i' !! 'sub_i';
             my $do_action := $comp.as_js(
                 QAST::Op.new(
                     :op('bind'),
@@ -560,7 +560,7 @@ class QAST::OperationsJS {
            my @setup;
            my @exprs;
 
-           my $list := $*BLOCK.add_tmp();
+           my str $list := $*BLOCK.add_tmp();
 
            for $node.list -> $elem {
                my $chunk := $comp.as_js($elem, :want($type));
@@ -600,7 +600,7 @@ class QAST::OperationsJS {
 
     add_op('hash', sub ($comp, $node, :$want, :$cps) {
         # TODO CPS
-        my $hash := $*BLOCK.add_tmp();
+        my str $hash := $*BLOCK.add_tmp();
         my @setup;
         @setup.push("$hash = nqp.hash();\n");
         for $node.list -> $key, $val {
@@ -622,13 +622,9 @@ class QAST::OperationsJS {
             ?? $comp.as_js(QAST::Var.new(:name($node.name),:scope('lexical')), :want($T_OBJ))
             !! $comp.as_js(nqp::shift($args), :want($T_OBJ));
 
-
-        my $call;
-
-
         if $cps {
-            my $cont := $comp.unique_var('cont');
-            my $result := $comp.unique_var('result');
+            my str $cont := $comp.unique_var('cont');
+            my str $result := $comp.unique_var('result');
 
             my $compiled_args := $comp.args($args, :$cont);
 
@@ -646,7 +642,7 @@ class QAST::OperationsJS {
         else {
             my $compiled_args := $comp.args($args);
 
-            my $call := $compiled_args.is_args_array ?? '.$$apply(' !! '.$$call(';
+            my str $call := $compiled_args.is_args_array ?? '.$$apply(' !! '.$$call(';
 
             $comp.stored_result(
                 Chunk.new($T_OBJ, $callee.expr ~ ".\$\$decont($*CTX)" ~ $call ~ $compiled_args.expr ~ ')' , [$callee, $compiled_args], :$node), :$want);
@@ -703,7 +699,7 @@ class QAST::OperationsJS {
 
         my @setup := [$invocant];
 
-        my $method;
+        my str $method;
         if $node.name {
             if $comp.is_valid_js_identifier($node.name) {
                 $method := '.' ~ $node.name;
@@ -720,7 +716,7 @@ class QAST::OperationsJS {
 
         my $compiled_args := $comp.args(@args, :invocant($invocant.expr));
 
-        my $call := $compiled_args.is_args_array ?? ".apply({$invocant.expr}," !! '(';
+        my str $call := $compiled_args.is_args_array ?? ".apply({$invocant.expr}," !! '(';
 
         @setup.push($compiled_args);
 
@@ -747,12 +743,12 @@ class QAST::OperationsJS {
         }
         
 
-        my $outer_ctx := $*CTX;
+        my str $outer_ctx := $*CTX;
         {
             my $*HANDLER_CTX := $comp.unique_var('ctx');
             my $unwind_marker := $*BLOCK.add_tmp;
 
-            my $try_ret := '';
+            my str $try_ret := '';
             my $set_try_ret := '';
 
             my $handle := '';
@@ -780,8 +776,8 @@ class QAST::OperationsJS {
                 my $*CTX := $*HANDLER_CTX;
                 my $body := $comp.as_js($protected, :$want);
 
-                my $catch_wrapped_exception := "$*CTX.catchException(nqp.wrapException(e))";
-                my $catch_exception := "$*CTX.catchException(e)";
+                my str $catch_wrapped_exception := "$*CTX.catchException(nqp.wrapException(e))";
+                my str $catch_exception := "$*CTX.catchException(e)";
 
                 if $want != $T_VOID {
                     $try_ret := $*BLOCK.add_tmp;
@@ -869,7 +865,7 @@ class QAST::OperationsJS {
             my @set;
 
             for $*BLOCK.variables -> $var {
-                my $storage := $comp.is_dynamic_var($*BLOCK, $var)
+                my str $storage := $comp.is_dynamic_var($*BLOCK, $var)
                     ?? "{$*CTX}[{quote_string($var.name)}]"
                     !! $*BLOCK.mangle_var($var);
 
@@ -889,7 +885,7 @@ class QAST::OperationsJS {
         unless nqp::istype($node[0], QAST::SVal) {
             $comp.NYI("getlexouter with an argument that isn't a string literal");
         }
-        my $var_name := $node[0].value;
+        my str $var_name := $node[0].value;
         my $block := $*BLOCK.outer;
         while $block {
             last if $block.has_own_variable($var_name);
@@ -993,7 +989,7 @@ class QAST::OperationsJS {
         if +$node.list != 2 {
             nqp::die("Operation 'defor' needs 2 operands");
         }
-        my $tmp := $node.unique('defined');
+        my str $tmp := $node.unique('defined');
         $comp.as_js(QAST::Stmts.new(
             QAST::Op.new(
                 :op('bind'),
@@ -1017,7 +1013,7 @@ class QAST::OperationsJS {
             nqp::die("Operation 'ifnull' needs 2 operands");
         }
 
-        my $result := $*BLOCK.add_tmp();
+        my str $result := $*BLOCK.add_tmp();
         my $expr := $comp.as_js($node[0], :want($T_OBJ));
         my $then := $comp.as_js($node[1], :want($T_OBJ));
         Chunk.new($T_OBJ, $result, [
@@ -1047,7 +1043,7 @@ class QAST::OperationsJS {
             }
 
 
-            my $cond_type := (needs_cond_passed($node[1]) || needs_cond_passed($node[2]))
+            my int $cond_type := (needs_cond_passed($node[1]) || needs_cond_passed($node[2]))
                 ?? $T_OBJ
                 !! (($operands == 3 || $want == $T_VOID) ?? $T_BOOL !! $want);
 
@@ -1056,7 +1052,7 @@ class QAST::OperationsJS {
             my $then;
             my $else;
 
-            my $result;
+            my str $result;
 
             if $want != $T_VOID {
                 $result := $*BLOCK.add_tmp();
@@ -1110,8 +1106,8 @@ class QAST::OperationsJS {
                     return $comp.NYI("if in CPS mode with CPSish condition");
                 }
                 else {
-                    my $cont := $comp.unique_var('cont');
-                    my $result := $comp.unique_var('result');
+                    my str $cont := $comp.unique_var('cont');
+                    my str $result := $comp.unique_var('result');
                     return ChunkCPS.new($want, $result, [
                         $boolifed_cond,
                         "if ({$boolifed_cond.expr}) \{\n",
@@ -1144,7 +1140,7 @@ class QAST::OperationsJS {
         #TODO CPS
         # TODO redo etc.
 
-        my $handler := 1;
+        my int $handler := 1;
         my @operands;
         my $label;
         for $node.list {
@@ -1164,7 +1160,7 @@ class QAST::OperationsJS {
             nqp::die("Operation 'for' expects the block to have blocktype to be immediate, is: {@operands[1].blocktype}");
         }
 
-        my $iterator := $*BLOCK.add_tmp();
+        my str $iterator := $*BLOCK.add_tmp();
 
         my $list := $comp.as_js(@operands[0], :want($T_OBJ), :$cps);
 
@@ -1177,7 +1173,7 @@ class QAST::OperationsJS {
         my @body_args;
         my $arity := @operands[1].arity || 1;
         while $arity > 0 {
-            my $iterval := $*BLOCK.add_tmp();
+            my str $iterval := $*BLOCK.add_tmp();
             @body_args.push(Chunk.new($T_OBJ, $iterval, ["$iterval = $iterator.\$\$shift();\n"]));
             $arity := $arity - 1;
         }
@@ -1192,9 +1188,9 @@ class QAST::OperationsJS {
 
         if nqp::istype($body, ChunkCPS) {
             # TODO handle_control
-            my $cont := $comp.unique_var('cont');
-            my $result := $comp.unique_var('result');
-            my $loop := $comp.unique_var('cont');
+            my str $cont := $comp.unique_var('cont');
+            my str $result := $comp.unique_var('result');
+            my str $loop := $comp.unique_var('cont');
 
             ChunkCPS.new($T_OBJ, $result, [
                 $list,
@@ -1226,7 +1222,7 @@ class QAST::OperationsJS {
         add_op($op, sub ($comp, $node, :$want, :$cps) {
             #TODO CPS
             my $label;
-            my $handler := 1;
+            my int $handler := 1;
             my @operands;
             for $node.list {
                 if $_.named eq 'nohandler' { $handler := 0; }
@@ -1249,7 +1245,7 @@ class QAST::OperationsJS {
             }
 
             if $op eq 'while' || $op eq 'until' {
-                my $neg := $op eq 'while' ?? '!' !! '';
+                my str $neg := $op eq 'while' ?? '!' !! '';
 
                 # handle_control can set redo so we call it here
                 my $handled := $comp.handle_control($loop, $body);
@@ -1269,7 +1265,7 @@ class QAST::OperationsJS {
             }
             else {
                 # TODO redo
-                my $neg := $op eq 'repeat_while' ?? '' !! '!';
+                my str $neg := $op eq 'repeat_while' ?? '' !! '!';
                 Chunk.void(
                     "do \{\n",
                     $body,
@@ -1304,7 +1300,7 @@ class QAST::OperationsJS {
         my str $type := $node[1];
 
 
-        my $result := $*BLOCK.add_tmp;
+        my str $result := $*BLOCK.add_tmp;
         if $type ne 'RETURN' {
             $comp.NYI("handlepayload with type '$type'");
         }
@@ -1570,7 +1566,7 @@ class QAST::OperationsJS {
         if +@($node) != 1 || !nqp::istype($node[0], QAST::SVal) {
             nqp::die('takedispatcher requires one string literal operand');
         }
-        my $var := $node[0].value;
+        my str $var := $node[0].value;
 
         my $set_var := $comp.is_dynamic_var($*BLOCK, QAST::Var.new(:name($var), :scope<lexical>))
             ?? "{$*CTX}.bind({quote_string($var)}, nqp.currentDispatcher);\n" 
@@ -1599,7 +1595,7 @@ class QAST::OperationsJS {
             my @possibles := nqp::clone($node.list);
             my $best := @possibles.shift;
             return $best unless %want_char{$type};
-            my $char := %want_char{$type};
+            my str $char := %want_char{$type};
             for @possibles -> $sel, $ast {
                 if nqp::index($sel, $char) >= 0 {
                     $best := $ast;
