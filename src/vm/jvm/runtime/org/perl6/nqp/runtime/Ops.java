@@ -3713,7 +3713,7 @@ public final class Ops {
         case BoolificationSpec.MODE_UNBOX_NUM:
             return obj instanceof TypeObject || obj.get_num(tc) == 0.0 ? 0 : 1;
         case BoolificationSpec.MODE_UNBOX_STR_NOT_EMPTY:
-            return obj instanceof TypeObject || obj.get_str(tc).equals("") ? 0 : 1;
+            return obj instanceof TypeObject || obj.get_str(tc) == null || obj.get_str(tc).equals("") ? 0 : 1;
         case BoolificationSpec.MODE_UNBOX_STR_NOT_EMPTY_OR_ZERO:
             if (obj instanceof TypeObject)
                 return 0;
@@ -3747,6 +3747,10 @@ public final class Ops {
     /* Smart coercions. */
     public static String smart_stringify(SixModelObject obj, ThreadContext tc) {
         obj = decont(obj, tc);
+
+        // If it's null, it's "", 'cause that way we at least don't NPE.
+        if (obj == null)
+            return "";
 
         // If it can unbox to a string, that wins right off.
         StorageSpec ss = obj.st.REPR.get_storage_spec(tc, obj.st);
@@ -3783,6 +3787,10 @@ public final class Ops {
     }
     public static double smart_numify(SixModelObject obj, ThreadContext tc) {
         obj = decont(obj, tc);
+
+        // If it's null, it's 0.0
+        if (obj == null)
+            return 0.0;
 
         // If it can unbox as an int or a num, that wins right off.
         StorageSpec ss = obj.st.REPR.get_storage_spec(tc, obj.st);
