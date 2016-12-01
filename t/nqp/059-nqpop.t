@@ -446,12 +446,12 @@ is($value_print, "#comment from print\n", "nqp::say returns correct value");
 is(nqp::indexingoptimized("foobar"), "foobar", "nqp::indexingoptimized result is equal to it's argument");
 ok(nqp::isstr(nqp::indexingoptimized(123)), "nqp::indexingoptimized returns a string");
 
-ok(!nqp::isnull(nqp::null_s()));
-ok(!nqp::isnull_s(nqp::null()));
-ok(nqp::isstr(nqp::null_s()));
-ok(nqp::null() eq '');
+ok(!nqp::isnull(nqp::null_s()), "null_s isn't null");
+ok(!nqp::isnull_s(nqp::null()), "null isn't null_s");
+ok(nqp::isstr(nqp::null_s()), "null_s is still a str");
+ok(nqp::null() eq '', "null_s is and empty str");
 {
     my $var := nqp::null_s();
-    ok(nqp::isnull_s($var));
+    ok(nqp::isnull_s($var), "null_s can be stuck into a var and stays null_s");
 }
-ok(nqp::istrue(nqp::null_s()) == 0);
+ok(nqp::istrue(nqp::null_s()) == 0, "null_s isn't true");
