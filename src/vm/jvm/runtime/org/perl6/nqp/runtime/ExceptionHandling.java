@@ -309,11 +309,11 @@ all:
             String kls = info.compUnit.getClass().getName();
             String method = info.methodName;
 
-            while (jcursor < ex.nativeTrace.length && !kls.equals(ex.nativeTrace[jcursor].getClassName()) &&
+            while (ex.nativeTrace != null && jcursor < ex.nativeTrace.length && !kls.equals(ex.nativeTrace[jcursor].getClassName()) &&
                         (method == null || !method.equals(ex.nativeTrace[jcursor].getMethodName())))
                 jcursor++;
 
-            StackTraceElement el = jcursor < ex.nativeTrace.length ? ex.nativeTrace[jcursor++] : null;
+            StackTraceElement el = ex.nativeTrace != null && jcursor < ex.nativeTrace.length ? ex.nativeTrace[jcursor++] : null;
 
             result.add(new TraceElement(ncursor, el != null ? el.getFileName() : null, el != null ? el.getLineNumber() : -1));
             ncursor = ncursor.caller;
