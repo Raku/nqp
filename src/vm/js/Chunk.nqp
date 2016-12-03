@@ -155,37 +155,3 @@ class ChunkCPS is Chunk {
         $!cont;
     }
 }
-
-class ChunkEscaped does Joinable {
-    has @!setup;
-
-    method new(@setup) {
-        my $obj := nqp::create(self);
-        $obj.BUILD(@setup);
-        $obj
-    }
-
-    method BUILD(@setup) {
-        @!setup := @setup;
-    }
-
-    method with_source_map_info() {
-        self.join;
-    }
-
-    method collect(@strs, :$escape) {
-        if $escape {
-            nqp::die("Double escaping NIY");
-        }
-        nqp::push_s(@strs, '"');
-        for @!setup -> $part {
-            if nqp::isstr($part) {
-                nqp::push_s(@strs, nqp::escape($part));
-            }
-            else {
-                $part.collect(@strs, :escape(1));
-            }
-        }
-        nqp::push_s(@strs, '"');
-    }
-}
