@@ -86,6 +86,7 @@ class HLL::Backend::MoarVM {
         nqp::sayfh(nqp::getstderr(), "Writing profiler output to $filename");
         my $profile_fh := open($filename, :w);
         my $want_json  := nqp::substr($filename, -5) eq '.json';
+        my $want_sql   := nqp::substr($filename, -4) eq '.sql';
 
         my $escaped_backslash;
         my $escaped_dquote;
@@ -277,6 +278,68 @@ class HLL::Backend::MoarVM {
             }
         }
 
+        sub to_sql($obj) {
+            my @profile;
+            for $obj[0] -> $k {
+                my $v := $obj[0]{$k};
+                if nqp::ishash($v) {
+                    nqp::sayfh($profile_fh, "INSERT INTO routines VALUES ('" ~ nqp::join("','", nqp::list(nqp::iterkey_s($k), ~$v<name>, ~$v<line>, ~$v<file>)) ~ "');");
+                }
+                else {
+                    nqp::sayfh($profile_fh, "INSERT INTO allocators VALUES ('" ~ nqp::join("','", nqp::list(nqp::iterkey_s($k), ~$v)) ~ "');");
+                }
+            }
+            for $obj[1] -> $k {
+                my $v := $obj[1]{$k};
+                if $k eq 'total_time' {
+                    @profile[0] := ~$v;
+                }
+                elsif $k eq 'spesh_time' {
+                    @profile[1] := ~$v;
+                }
+                elsif $k eq 'gcs' {
+                    for $v -> $gc {
+                        my @g;
+                        for <time retained_bytes promoted_bytes gen2_roots full cleared_bytes> -> $f {
+                            nqp::push(@g, ~($gc{$f} // 'NULL'));
+                        }
+                        nqp::sayfh($profile_fh, 'INSERT INTO gcs VALUES (' ~ nqp::join(',', @g) ~ ');');
+                    }
+                }
+                elsif $k eq 'call_graph' {
+                    my %callee_rec_depth;
+                    sub collect_callees($caller, %call_graph) {
+                        my @callee := [~$caller];
+                        for <id osr spesh_entries jit_entries inlined_entries inclusive_time exclusive_time entries deopt_one> -> $f {
+                            nqp::push(@callee, ~(%call_graph{$f} // 'NULL'));
+                        }
+                        my str $id := ~%call_graph<id>;
+                        %callee_rec_depth{$id} := 0 unless %callee_rec_depth{$id};
+                        nqp::push(@callee, ~%callee_rec_depth{$id});
+                        nqp::sayfh($profile_fh, 'INSERT INTO callees VALUES (' ~ nqp::join(',', @callee) ~ ');');
+                        if %call_graph<allocations> {
+                            for %call_graph<allocations> -> $a {
+                                my @a;
+                                for <id spesh jit count> -> $f {
+                                    nqp::push(@a, ~($a{$f} // 'NULL'));
+                                }
+                                nqp::sayfh($profile_fh, 'INSERT INTO allocations VALUES (' ~ nqp::join(',', @a) ~ ');');
+                            }
+                        }
+                        if %call_graph<callees> {
+                            %callee_rec_depth{$id}++;
+                            for %call_graph<callees> -> $c {
+                                collect_callees($id, $c);
+                            }
+                            %callee_rec_depth{$id}--;
+                        }
+                    }
+                    collect_callees(-1, $v);
+                }
+            }
+            nqp::sayfh($profile_fh, 'INSERT INTO profile VALUES (' ~ nqp::join(',', @profile) ~ ');');
+        }
+
         # Post-process the call data, turning objects into flat data.
         for $data {
             post_process_call_graph_node($_<call_graph>);
@@ -287,6 +350,17 @@ class HLL::Backend::MoarVM {
         if $want_json {
             to_json($data);
             nqp::printfh($profile_fh, nqp::join('', @pieces));
+        }
+        elsif $want_sql {
+            nqp::sayfh($profile_fh, 'BEGIN;');
+            nqp::sayfh($profile_fh, 'CREATE TABLE allocators(id INTEGER PRIMARY KEY ASC, name TEXT);');
+            nqp::sayfh($profile_fh, 'CREATE TABLE routines(id INTEGER PRIMARY KEY ASC, name TEXT, line INT, file TEXT);');
+            nqp::sayfh($profile_fh, 'CREATE TABLE profile(total_time INT, spesh_time INT);');
+            nqp::sayfh($profile_fh, 'CREATE TABLE gcs(time INT, retained_bytes INT, promoted_bytes INT, gen2_roots INT, full INT, cleared_bytes INT);');
+            nqp::sayfh($profile_fh, 'CREATE TABLE callees(caller_id INT, id INT, osr INT, spech_entries INT, jit_entries INT, inlined_entries INT, inclusive_time INT, exclusive_time INT, entries INT, deopt_one INT, rec_depth INT);');
+            nqp::sayfh($profile_fh, 'CREATE TABLE allocations(id INT, spesh INT, jit INT, count INT);');
+            to_sql($data);
+            nqp::sayfh($profile_fh, 'END;');
         }
         else {
             # Get profiler template, split it in half, and write those either
