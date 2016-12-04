@@ -353,7 +353,8 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     proto token backslash { <...> }
     token backslash:sym<s> { $<sym>=[<[dDnNsSwW]>] }
-    token backslash:sym<b> { $<sym>=[<[bB]>] }
+    token backslash:sym<B> { $<sym>='B' }
+    token backslash:sym<b> { $<sym>='b' }
     token backslash:sym<e> { $<sym>=[<[eE]>] }
     token backslash:sym<f> { $<sym>=[<[fF]>] }
     token backslash:sym<h> { $<sym>=[<[hH]>] }
