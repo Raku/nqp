@@ -7,6 +7,7 @@ use warnings;
 use Text::ParseWords;
 use Getopt::Long;
 use Cwd qw/abs_path cwd/;
+use File::Spec;
 use lib "tools/lib";
 use NQP::Configure qw(cmp_rev gen_moar
                       fill_template_file fill_template_text
@@ -177,6 +178,7 @@ MAIN: {
         $config{'make'} = `$moar_path --libpath="src/vm/moar/stage0" "src/vm/moar/stage0/nqp.moarvm" -e "print(nqp::backendconfig()<make>)"`
                         || 'make';
         $config{moar} = $moar_path;
+        $config{moar_prefix} = File::Spec->catpath((File::Spec->splitpath($moar_path))[0, 1], File::Spec->updir);
         fill_template_file(
             'tools/build/Makefile-Moar.in',
             $MAKEFILE,
@@ -296,6 +298,8 @@ General Options:
     --gen-moar         Download, build, and install a copy of MoarVM to use before writing the Makefile
     --moar-option='--option=value'
                        Options to pass to MoarVM configuration for --gen-moar
+    --with-moar='/path/to/moar'
+                       Provide path to already installed moar binary
     --with-asm='/path/to/jar'
     --with-asm-tree='/path/to/jar'
     --with-jline='/path/to/jar'
