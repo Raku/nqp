@@ -71,7 +71,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                 }
                 else {
                     $qast.push($_.ast);
-                    $lastlit := $ast.rxtype eq 'literal' 
+                    $lastlit := $ast.rxtype eq 'literal'
                                 && !QAST::Node.ACCEPTS($ast[0])
                                   ?? $ast !! 0;
                 }
@@ -118,7 +118,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         }
         make $qast;
     }
-    
+
     method separator($/) {
         make $<quantified_atom>.ast;
     }
@@ -300,7 +300,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                 $qast := QAST::Regex.new( :rxtype<quant>, :min(1), :max(1), $qast) if $<wantarray>;
             }
             else {
-                $qast := QAST::Regex.new( $qast, :name($name), 
+                $qast := QAST::Regex.new( $qast, :name($name),
                                           :rxtype<subcapture>, :node($/) );
             }
         }
@@ -326,7 +326,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                     QAST::SVal.new( :value(~$<GOAL>) ),
                     |@dba) ) );
     }
-    
+
     method metachar:sym<mod>($/) { make $<mod_internal>.ast; }
 
     method backslash:sym<s>($/) {
@@ -558,7 +558,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                 self.subrule_alias($qast, $name);
             }
             else {
-                $qast := QAST::Regex.new( $qast, :name($name), 
+                $qast := QAST::Regex.new( $qast, :name($name),
                                           :rxtype<subcapture>, :node($/) );
             }
         }
@@ -616,10 +616,10 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         if $qast.negate && $qast.rxtype eq 'subrule' {
             $qast.subtype('zerowidth');
             $qast := QAST::Regex.new(:rxtype<concat>, :node($/),
-                                     $qast, 
+                                     $qast,
                                      QAST::Regex.new( :rxtype<cclass>, :name<.> ));
         }
-        
+
         my int $i := 1;
         my int $n := nqp::elems($clist);
         while $i < $n {
@@ -632,7 +632,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             if $ast.negate || $ast.rxtype eq 'cclass' && ~$ast.node le 'Z' {
                 $ast.subtype('zerowidth');
                 $qast := QAST::Regex.new( :rxtype<concat>, :node($/), :subtype<zerowidth>, :negate(1),
-                        QAST::Regex.new( :rxtype<conj>, :subtype<zerowidth>, $ast ), 
+                        QAST::Regex.new( :rxtype<conj>, :subtype<zerowidth>, $ast ),
                         $qast );
             }
             else {
@@ -642,7 +642,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         }
         make $qast;
     }
-    
+
     method arg($/) {
         make $<quote_EXPR>
             ?? $<quote_EXPR>.ast
@@ -844,7 +844,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                                        QAST::Var.new(
                                            :name(nqp::substr(%*RX<name>, 12)),
                                            :scope('lexical')
-                                       ) 
+                                       )
                                    )
                               )));
         if %*RX<r> {
@@ -853,7 +853,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         $block.push($qast);
 
         self.set_cursor_type($qast);
-        
+
         $block;
     }
 
@@ -869,7 +869,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                 my %x := capnames($_, $count);
                 for %x { %capnames{$_.key} := +%capnames{$_.key} + $_.value; }
                 $count := %x{''};
-            } 
+            }
         }
         elsif $rxtype eq 'altseq' || $rxtype eq 'alt' {
             my $max := $count;
@@ -928,7 +928,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         %capnames{''} := $count;  # will be deleted in SET_CAPS
         %capnames;
     }
-    
+
     method alt_nfas($code_obj, $block, $ast) {
         my $rxtype := $ast.rxtype;
         if $rxtype eq 'alt' {
@@ -976,7 +976,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         }
         return -1;
     }
- 
+
     method flip_ast($qast) {
         return $qast unless nqp::istype($qast, QAST::Regex);
         if $qast.rxtype eq 'literal' {
@@ -992,23 +992,23 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         }
         $qast
     }
-    
+
     # This is overridden by a compiler that wants to create code objects
     # for regexes. We just use the standard NQP one in standalone mode.
     method create_regex_code_object($block) {
         $*W.create_code($block, $block.name);
     }
-    
+
     # Stores the captures info for a regex.
     method store_regex_caps($code_obj, $block, %caps) {
         $code_obj.SET_CAPS(%caps);
     }
-    
+
     # Stores the NFA for the regex overall.
     method store_regex_nfa($code_obj, $block, $nfa) {
         $code_obj.SET_NFA($nfa.save);
     }
-    
+
     # Stores the NFA for a regex alternation.
     method store_regex_alt_nfa($code_obj, $block, $key, @alternatives) {
         my @saved;
