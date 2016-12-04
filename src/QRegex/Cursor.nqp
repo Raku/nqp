@@ -929,19 +929,19 @@ class NQPCursor does NQPCursorRole {
             # For captures with lists, initialize the lists.
             my %caplist := $NO_CAPS;
             my $rxsub   := nqp::getattr(self, NQPCursor, '$!regexsub');
-	    my $onlyname := '';
-	    my int $namecount := 0;
+            my $onlyname := '';
+            my int $namecount := 0;
             if !nqp::isnull($rxsub) && nqp::defined($rxsub) {
                 %caplist := nqp::can($rxsub, 'CAPS') ?? $rxsub.CAPS() !! nqp::null();
                 if !nqp::isnull(%caplist) && nqp::istrue(%caplist) {
                     my $iter := nqp::iterator(%caplist);
                     while $iter {
                         my $curcap := nqp::shift($iter);
-			my str $name := nqp::iterkey_s($curcap);
-			$namecount++;
+                        my str $name := nqp::iterkey_s($curcap);
+                        $namecount++;
                         if nqp::iterval($curcap) >= 2 {
-			    $onlyname := $name if $namecount == 1;
-			    nqp::ord($name) < 58
+                            $onlyname := $name if $namecount == 1;
+                            nqp::ord($name) < 58
                                 ?? nqp::bindpos(
                                         nqp::defor($list, $list := nqp::list()),
                                         $name, nqp::list())
@@ -953,28 +953,28 @@ class NQPCursor does NQPCursorRole {
 
             # Walk the Cursor stack and populate the Cursor.
             my $cs := nqp::getattr(self, NQPCursor, '$!cstack');
-	    if nqp::isnull($cs) || !nqp::istrue($cs) {}
-	    elsif $namecount == 1 && $onlyname ne '' && !nqp::eqat($onlyname,'$!',0) {
-		# If there's only one destination, avoid repeated hash lookups
-		my int $cselems := nqp::elems($cs);
-		my int $csi;
-		my $dest;
-		if nqp::ord($onlyname) < 58 {
-		    $dest := nqp::atpos($list, $onlyname);
-		}
-		else {
-		    $dest := nqp::atkey($hash, $onlyname);
-		}
-		while $csi < $cselems {
-		    my $subcur := nqp::atpos($cs, $csi);
-		    my $name := nqp::getattr($subcur, $?CLASS, '$!name');
-		    if !nqp::isnull($name) && nqp::defined($name) {
-			my $submatch := $subcur.MATCH();
-			nqp::push($dest, $submatch);
-		    }
+            if nqp::isnull($cs) || !nqp::istrue($cs) {}
+            elsif $namecount == 1 && $onlyname ne '' && !nqp::eqat($onlyname,'$!',0) {
+                # If there's only one destination, avoid repeated hash lookups
+                my int $cselems := nqp::elems($cs);
+                my int $csi;
+                my $dest;
+                if nqp::ord($onlyname) < 58 {
+                    $dest := nqp::atpos($list, $onlyname);
+                }
+                else {
+                    $dest := nqp::atkey($hash, $onlyname);
+                }
+                while $csi < $cselems {
+                    my $subcur := nqp::atpos($cs, $csi);
+                    my $name := nqp::getattr($subcur, $?CLASS, '$!name');
+                    if !nqp::isnull($name) && nqp::defined($name) {
+                        my $submatch := $subcur.MATCH();
+                        nqp::push($dest, $submatch);
+                    }
                     $csi++;
-		}
-	    }
+                }
+            }
             elsif !nqp::isnull(%caplist) && %caplist  {
                 my int $cselems := nqp::elems($cs);
                 my int $csi;
@@ -989,7 +989,7 @@ class NQPCursor does NQPCursorRole {
                         }
                         elsif nqp::index($name, '=') < 0 {
                             my int $needs_list := %caplist{$name} >= 2;
-			    if nqp::ord($name) < 58 {
+                            if nqp::ord($name) < 58 {
                                 $list := nqp::list() unless nqp::isconcrete($list);
                                 $needs_list
                                     ?? nqp::push(nqp::atpos($list, $name), $submatch)
@@ -1004,7 +1004,7 @@ class NQPCursor does NQPCursorRole {
                         else {
                             for nqp::split('=', $name) -> $name {
                                 my int $needs_list := %caplist{$name} >= 2;
-				if nqp::ord($name) < 58 {
+                                if nqp::ord($name) < 58 {
                                     $list := nqp::list() unless nqp::isconcrete($list);
                                     $needs_list
                                         ?? nqp::push(nqp::atpos($list, $name), $submatch)
