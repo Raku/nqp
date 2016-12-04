@@ -353,8 +353,6 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     proto token backslash { <...> }
     token backslash:sym<s> { $<sym>=[<[dDnNsSwW]>] }
-    token backslash:sym<B> { $<sym>='B' }
-    token backslash:sym<b> { $<sym>='b' }
     token backslash:sym<e> { $<sym>=[<[eE]>] }
     token backslash:sym<f> { $<sym>=[<[fF]>] }
     token backslash:sym<h> { $<sym>=[<[hH]>] }
@@ -365,6 +363,15 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token backslash:sym<x> { $<sym>=[<[xX]>] [ <hexint> | '[' <hexints> ']' ] }
     token backslash:sym<c> { $<sym>=[<[cC]>] <charspec> }
     token backslash:sym<0> { $<sym>=['0'] }
+    token backslash:sym<B> { 'B' <.obs:
+        '\\B', '<!|w> for negated word boundary. If you meant a negated'
+        ~ ' backspace character, use it in a negated character class (<-[\b]>).'
+    >}
+    token backslash:sym<b> { 'b' <.obs:
+        '\\b', '<|w> for word boundary (or « and » for left/right boundaries).'
+        ~ ' If you meant the backspace character, quote it ("\b") or use it as'
+        ~ ' inside a character class (<[\b]>)'
+    >}
     token backslash:sym<A> { 'A' <.obs: '\\A as beginning-of-string matcher', '^'> }
     token backslash:sym<z> { 'z' <.obs: '\\z as end-of-string matcher', '$'> }
     token backslash:sym<Z> { 'Z' <.obs: '\\Z as end-of-string matcher', '\\n?$'> }

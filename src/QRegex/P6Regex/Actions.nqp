@@ -334,21 +334,6 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                              :negate($<sym> le 'Z'), :node($/));
     }
 
-    method backslash:sym<B>($/) {
-        $/.CURSOR.panic('Unsupported use of \B. If you meant a negated'
-            ~ ' word boundary, use <!|w>. If you meant a negated backspace'
-            ~ ' character, use it in a negated character class (<-[\b]>).'
-        );
-    }
-
-    method backslash:sym<b>($/) {
-        $/.CURSOR.panic('Unsupported use of \b. If you meant a word boundary,'
-            ~ ' use <|w> (or « and » for left/right boundaries). If you meant'
-            ~ ' the backspace character, quote it ("\b") or use it as inside a'
-            ~ ' character class (<[\b]>).'
-        );
-    }
-
     method backslash:sym<e>($/) {
         my $qast := QAST::Regex.new( "\c[27]", :rxtype('enumcharlist'),
                         :negate($<sym> eq 'E'), :node($/) );
