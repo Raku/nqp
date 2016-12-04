@@ -929,7 +929,7 @@ class NQPCursor does NQPCursorRole {
             # For captures with lists, initialize the lists.
             my %caplist := $NO_CAPS;
             my $rxsub   := nqp::getattr(self, NQPCursor, '$!regexsub');
-            my $onlyname := '';
+            my str $onlyname := '';
             my int $namecount := 0;
             if !nqp::isnull($rxsub) && nqp::defined($rxsub) {
                 %caplist := nqp::can($rxsub, 'CAPS') ?? $rxsub.CAPS() !! nqp::null();
