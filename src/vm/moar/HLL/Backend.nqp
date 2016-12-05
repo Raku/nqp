@@ -357,7 +357,7 @@ class HLL::Backend::MoarVM {
             nqp::sayfh($profile_fh, 'CREATE TABLE routines(id INTEGER PRIMARY KEY ASC, name TEXT, line INT, file TEXT);');
             nqp::sayfh($profile_fh, 'CREATE TABLE profile(total_time INT, spesh_time INT);');
             nqp::sayfh($profile_fh, 'CREATE TABLE gcs(time INT, retained_bytes INT, promoted_bytes INT, gen2_roots INT, full INT, cleared_bytes INT);');
-            nqp::sayfh($profile_fh, 'CREATE TABLE callees(caller_id INT, id INT, osr INT, spech_entries INT, jit_entries INT, inlined_entries INT, inclusive_time INT, exclusive_time INT, entries INT, deopt_one INT, rec_depth INT);');
+            nqp::sayfh($profile_fh, 'CREATE TABLE callees(caller_id INT, id INT, osr INT, spesh_entries INT, jit_entries INT, inlined_entries INT, inclusive_time INT, exclusive_time INT, entries INT, deopt_one INT, rec_depth INT);');
             nqp::sayfh($profile_fh, 'CREATE TABLE allocations(id INT, spesh INT, jit INT, count INT);');
             to_sql($data);
             nqp::sayfh($profile_fh, 'END;');
