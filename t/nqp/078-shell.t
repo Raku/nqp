@@ -1,4 +1,4 @@
-plan(5);
+plan(6);
 
 my $a := nqp::getenvhash();
 $a<foo> := 123;
@@ -30,3 +30,7 @@ if $output eq "%NQP_SHELL_TEST_ENV_VAR%\n" {
   ok($output ~~ /^123foo/,"passing env variables to child processes works on windows");
 }
 nqp::unlink($tmp-file);
+
+my $ret := nqp::shell("exit 42",nqp::cwd(),nqp::getenvhash(), nqp::null(), nqp::null(), nqp::null(),
+    nqp::const::PIPE_INHERIT_IN + nqp::const::PIPE_INHERIT_OUT + nqp::const::PIPE_INHERIT_ERR);
+is(nqp::bitshiftr_i($ret,8), 42, 'correct return code from shell');
