@@ -497,10 +497,10 @@ class QAST::OperationsJS {
     add_simple_op('getenvhash', $T_OBJ, [], :side_effects);
     add_simple_op('cwd', $T_STR, [], :side_effects);
 
-    add_simple_op('shell', $T_VOID, [$T_STR, $T_STR, $T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ, $T_INT], :side_effects);
+    add_simple_op('shell', $T_INT, [$T_STR, $T_STR, $T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ, $T_INT], :side_effects);
     add_simple_op('syncpipe', $T_OBJ, [], :side_effects);
 
-    add_simple_op('spawn', $T_VOID, [$T_OBJ, $T_STR, $T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ, $T_INT], :side_effects);
+    add_simple_op('spawn', $T_INT, [$T_OBJ, $T_STR, $T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ, $T_INT], :side_effects);
 
 
     add_simple_op('sha1', $T_STR, [$T_STR]);
