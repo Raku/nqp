@@ -992,7 +992,7 @@ class NQPCursor does NQPCursorRole {
                     my $name   := nqp::getattr($subcur, $?CLASS, '$!name');
                     if !nqp::isnull($name) && nqp::defined($name) && $name ne '' {
                         my $submatch := $subcur.MATCH();
-                        if nqp::ordat($name, 0) == 36 && ($name eq '$!from' || $name eq '$!to') {
+                        if nqp::ord($name) == 36 && ($name eq '$!from' || $name eq '$!to') {
                             nqp::bindattr_i($match, NQPMatch, $name, $submatch.from);
                         }
                         elsif nqp::index($name, '=') < 0 {
