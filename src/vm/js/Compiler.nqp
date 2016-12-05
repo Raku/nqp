@@ -925,16 +925,29 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 @clone_inners.push(%*BLOCKS_STATEVARS{$kv.key});
             }
 
+            if nqp::existskey(%*BLOCKS_STATEVARS, $kv.key) && nqp::existskey($block.captured_inners, $kv.key){
+                @clone_inners.push(%*BLOCKS_STATEVARS{$kv.key});
+            }
+
             self.wrap_static_block(%*BLOCKS_INFO{$kv.key}.outer, @clone_inners, -> {
                 if !$block.need_direct{$kv.key} {
                     # we know the block won't be ever called in direct mode
                     @clone_inners.push("$reg = $cuid");
                 }
                 elsif %*BLOCKS_DONE{$kv.key} {
-                    @clone_inners.push("$reg = $cuid.closure");
-                    @clone_inners.push(%*BLOCKS_DONE{$kv.key});
-                    if self.is_serializable($kv.key) {
-                        @clone_inners.push(".setOuter(" ~ %*BLOCKS_INFO{$kv.key}.outer.ctx ~ ")");
+                    # Avoid emitting duplicated code with both .capture and .closure
+                    if nqp::existskey($block.captured_inners, $kv.key) {
+                        my $outer := self.is_serializable($kv.key) ?? %*BLOCKS_INFO{$kv.key}.outer.ctx !! 'null';
+                        @clone_inners.push("$reg = $cuid.captureAndClosure($outer, ");
+                        @clone_inners.push(%*BLOCKS_DONE{$kv.key});
+                        @clone_inners.push(")");
+                    }
+                    else {
+                        @clone_inners.push("$reg = $cuid.closure");
+                        @clone_inners.push(%*BLOCKS_DONE{$kv.key});
+                        if self.is_serializable($kv.key) {
+                            @clone_inners.push(".setOuter(" ~ %*BLOCKS_INFO{$kv.key}.outer.ctx ~ ")");
+                        }
                     }
                 }
                 elsif %*BLOCKS_DONE_CPS{$kv.key} {
@@ -966,25 +979,29 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     method capture_inners($block) {
         my @capture_inners;
         for $block.captured_inners -> $kv {
-            my str $cuid := self.mangled_cuid($kv.key);
-            my str $reg   := $kv.value;
-
-            if nqp::existskey(%*BLOCKS_STATEVARS, $kv.key) {
-                @capture_inners.push(%*BLOCKS_STATEVARS{$kv.key});
+            if nqp::existskey($block.cloned_inners, $kv.key) && %*BLOCKS_DONE{$kv.key} {
+                # We emit captureAndClosure in clone_inners
             }
+            else {
+                my str $cuid := self.mangled_cuid($kv.key);
+                my str $reg   := $kv.value;
 
-            self.wrap_static_block(%*BLOCKS_INFO{$kv.key}.outer, @capture_inners, -> {
-                @capture_inners.push("$reg = $cuid.capture");
-
-                @capture_inners.push(%*BLOCKS_DONE{$kv.key});
-
-                if 1 { # TODO check if we need to have this closure serializable
-                    @capture_inners.push(".setOuter(" ~ %*BLOCKS_INFO{$kv.key}.outer.ctx ~ ")");
+                if nqp::existskey(%*BLOCKS_STATEVARS, $kv.key) {
+                    @capture_inners.push(%*BLOCKS_STATEVARS{$kv.key});
                 }
 
-                @capture_inners.push(";\n");
-            });
+                self.wrap_static_block(%*BLOCKS_INFO{$kv.key}.outer, @capture_inners, -> {
+                    @capture_inners.push("$reg = $cuid.capture");
 
+                    @capture_inners.push(%*BLOCKS_DONE{$kv.key});
+
+                    if 1 { # TODO check if we need to have this closure serializable
+                        @capture_inners.push(".setOuter(" ~ %*BLOCKS_INFO{$kv.key}.outer.ctx ~ ")");
+                    }
+
+                    @capture_inners.push(";\n");
+                });
+            }
 
         }
         Chunk.void(|@capture_inners);

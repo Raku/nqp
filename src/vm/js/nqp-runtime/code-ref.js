@@ -132,6 +132,16 @@ class CodeRef extends NQPObject {
     return closure;
   }
 
+  captureAndClosure(outer, block) {
+    this.capture(block);
+    var closure = this.closure(block);
+    if (outer !== null) {
+      this.outerCtx = outer;
+      closure.outerCtx = outer;
+    }
+    return closure;
+  }
+
   CPS(block) {
     this.$$callCPS = block;
     return this;
