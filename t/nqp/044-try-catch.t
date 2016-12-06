@@ -236,7 +236,6 @@ ok($result_str ~ '' eq '', "we get correct return value from a try that catches 
         nqp::throw($exception);
     }
     my sub catch() {
-       nqp::say("in handle");
        is(nqp::getmessage(nqp::exception()), "a cute exception", "nqp::setmessage/nqp::getmessage with calling nqp::handle directly");
        is(nqp::getpayload(nqp::exception()), "cute payload", "nqp::setpayload/nqp::getpayload with calling nqp::handle directly");
     }
