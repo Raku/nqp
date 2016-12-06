@@ -2,7 +2,7 @@
 
 # Tests for try and catch
 
-plan(30);
+plan(32);
 
 sub oops($msg = "oops!") { # throw an exception
     nqp::die($msg);
@@ -227,3 +227,18 @@ my str $result_str := try {
     $foo.bar;
 }
 ok($result_str ~ '' eq '', "we get correct return value from a try that catches a missing method used as str");
+
+{
+    my sub block() {
+        my $exception := nqp::newexception();
+        nqp::setmessage($exception, "a cute exception");
+        nqp::setpayload($exception, "cute payload");
+        nqp::throw($exception);
+    }
+    my sub catch() {
+       nqp::say("in handle");
+       is(nqp::getmessage(nqp::exception()), "a cute exception", "nqp::setmessage/nqp::getmessage with calling nqp::handle directly");
+       is(nqp::getpayload(nqp::exception()), "cute payload", "nqp::setpayload/nqp::getpayload with calling nqp::handle directly");
+    }
+    nqp::handle(block(), 'CATCH', catch());
+}
