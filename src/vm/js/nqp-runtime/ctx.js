@@ -4,6 +4,7 @@ var NQPException = require('./nqp-exception.js');
 var Iter = require('./iter.js');
 var NQPObject = require('./nqp-object.js');
 var Null = require('./null.js');
+var exceptionsStack = require('./exceptions-stack.js');
 
 class Ctx extends NQPObject {
   constructor(callerCtx, outerCtx, callThis, codeRefAttr) {
@@ -25,7 +26,14 @@ class Ctx extends NQPObject {
         exception.caught = ctx;
         exception.resume = false;
         ctx.exception = exception;
-        ctx.unwind.ret = ctx.$$CATCH();
+
+        exceptionsStack.push(exception);
+        try {
+          ctx.unwind.ret = ctx.$$CATCH();
+        } finally {
+          exceptionsStack.pop();
+        }
+
         if (exception.resume) {
           return;
         } else {
@@ -39,7 +47,12 @@ class Ctx extends NQPObject {
 
   catchException(exception) {
     this.exception = exception;
-    return this.$$CATCH();
+    exceptionsStack.push(exception);
+    try {
+      return this.$$CATCH();
+    } finally {
+      exceptionsStack.pop();
+    }
   }
 
   rethrow(exception) {

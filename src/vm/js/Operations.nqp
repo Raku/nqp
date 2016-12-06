@@ -745,7 +745,7 @@ class QAST::OperationsJS {
 
         my str $outer_ctx := $*CTX;
         {
-            my $*HANDLER_CTX := $comp.unique_var('ctx');
+            my $handler_ctx := $comp.unique_var('ctx');
             my $unwind_marker := $*BLOCK.add_tmp;
 
             my str $try_ret := '';
@@ -757,11 +757,11 @@ class QAST::OperationsJS {
                     my $catch_body := $comp.as_js($handler, :want($T_OBJ));
                     $handle := Chunk.void(
                         "$unwind_marker = \{\};\n",
-                        "$*HANDLER_CTX.\$\$CATCH = function() \{\n",
+                        "$handler_ctx.\$\$CATCH = function() \{\n",
                         $catch_body,
                         "return {$catch_body.expr};\n",
                         "\};\n",
-                        "$*HANDLER_CTX.unwind = $unwind_marker;\n" 
+                        "$handler_ctx.unwind = $unwind_marker;\n"
                     );
                 }
                 elsif $type eq 'CONTROL' {
@@ -773,11 +773,11 @@ class QAST::OperationsJS {
             }
 
             {
-                my $*CTX := $*HANDLER_CTX;
+                my $*CTX := $handler_ctx;
                 my $body := $comp.as_js($protected, :$want);
 
-                my str $catch_wrapped_exception := "$*CTX.catchException(nqp.wrapException(e))";
-                my str $catch_exception := "$*CTX.catchException(e)";
+                my str $catch_wrapped_exception := "$handler_ctx.catchException(nqp.wrapException(e))";
+                my str $catch_exception := "$handler_ctx.catchException(e)";
 
                 if $want != $T_VOID {
                     $try_ret := $*BLOCK.add_tmp;
@@ -798,7 +798,7 @@ class QAST::OperationsJS {
                 }
 
                 return Chunk.new($want, $try_ret, [
-                    "var $*CTX = new nqp.Ctx($outer_ctx, $outer_ctx, $outer_ctx.\$\$callThis, $outer_ctx.\$\$codeRefAttr);\n",
+                    "var $handler_ctx = new nqp.Ctx($outer_ctx, $outer_ctx, $outer_ctx.\$\$callThis, $outer_ctx.\$\$codeRefAttr);\n",
                     $handle,
                     "try \{",
                     $body,
@@ -821,7 +821,7 @@ class QAST::OperationsJS {
     });
 
 
-    add_simple_op('exception', $T_OBJ, [], sub () {"$*HANDLER_CTX.exception"});
+    add_simple_op('exception', $T_OBJ, []);
     add_simple_op('rethrow', $T_VOID, [$T_OBJ], sub ($exception) {"$*CTX.rethrow($exception)"}, :side_effects);
     add_simple_op('resume', $T_VOID, [$T_OBJ], sub ($exception) {"$*CTX.resume($exception)"}, :side_effects);
     add_simple_op('throw', $T_VOID, [$T_OBJ], :side_effects, sub ($exception) {"{$*CTX}.throw($exception)"});

@@ -28,6 +28,8 @@ var Null = require('./null.js');
 
 var BOOT = require('./BOOT.js');
 
+var exceptionsStack = require('./exceptions-stack.js');
+
 exports.CodeRef = CodeRef;
 
 op.isinvokable = function(obj) {
@@ -1078,4 +1080,8 @@ op.islist = function(list) {
 
 op.split = function(hllName, separator, string) {
   return hll.slurpyArray(hllName, string !== '' ? string.split(separator) : []);
+};
+
+op.exception = function() {
+  return exceptionsStack[exceptionsStack.length - 1];
 };
