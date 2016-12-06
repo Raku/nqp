@@ -125,7 +125,6 @@ class Ctx extends NQPObject {
   }
 
   lookupFromOuter(name) {
-    console.log('looking up from outer', name);
     return this.$$outer.lookup(name);
   }
 
