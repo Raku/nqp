@@ -6536,7 +6536,7 @@ public final class Ops {
                 } else {
                     /* Otherwise, do floating point infinity of the right sign. */
                     SixModelObject result = nType.st.REPR.allocate(tc, nType.st);
-                    result.set_num(tc, exponent.mod(BigInteger.valueOf(2)) == BigInteger.ZERO
+                    result.set_num(tc, cmp > 0 || exponent.mod(BigInteger.valueOf(2)) == BigInteger.ZERO
                                         ? Double.POSITIVE_INFINITY
                                         : Double.NEGATIVE_INFINITY);
                     return result;
