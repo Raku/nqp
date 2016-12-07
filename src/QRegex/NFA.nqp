@@ -333,7 +333,8 @@ class QRegex::NFA {
         my $indent := dentin();
         my $subtype := $node.subtype;
         note("$indent subrule $from -> $to {$node.name}") if $nfadeb;
-        if $node.name eq 'before' && !$node.negate {
+        if $node.name eq 'before' && !$node.negate &&
+                nqp::istype((try $node[0][1].ann('orig_qast')), QAST::Regex) {
             my int $end := self.addstate();
             self.regex_nfa($node[0][1].ann('orig_qast'), $from, $end);
             dentout(self.fate($node, $end, $to));
