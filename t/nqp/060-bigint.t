@@ -1,11 +1,15 @@
 #! nqp
 use nqpmo;
 
-plan(89);
+plan(97);
 
 my $knowhow := nqp::knowhow();
 my $bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
 $bi_type.HOW.compose($bi_type);
+
+my $n_type := nqp::knowhow().new_type(:name('TestNum'), :repr('P6num'));
+$n_type.HOW.compose($n_type);
+
 sub str($x) { nqp::tostr_I($x) };
 sub iseq($x, $y) { nqp::iseq_I($x, nqp::box_i($y, $bi_type)) }
 sub box($x) { nqp::box_i($x, $bi_type) }
@@ -92,20 +96,47 @@ ok(nqp::istype(nqp::getattr($box_val_3, $bi_boxer, '$!value'), $bi_type), "the b
 ok(nqp::unbox_i(nqp::getattr($box_val_3, $bi_boxer, '$!value')) == 7, "you can extract it and then unbox it");
 
 
-# Note that the last argument to pow_I should be capable of boxing a num,
-# so $bi_type is wrong here. But so far we only test the integer case,
-# so we can get away with it.
-my $big := nqp::pow_I($c, box(42), $bi_type, $bi_type);
+my $big := nqp::pow_I($c, box(42), $n_type, $bi_type);
 is(str($big), '5970554685064519004265641008828923248442340700473500698131071806779372733915289638628729', 'pow (int, positive)');
-ok(iseq(nqp::pow_I(box(0), $big, $bi_type, $bi_type), 0), 'pow 0 ** large_number');
-ok(iseq(nqp::pow_I($one, $big, $bi_type, $bi_type), 1), 'pow 1 ** large_number');
+ok(iseq(nqp::pow_I(box(0), $big, $n_type, $bi_type), 0), 'pow 0 ** large_number');
+
+my $big_even := nqp::fromstr_I('597055468506451900426564100882892324844234070047350069813107180677937273391528963862870004', $bi_boxer);
+my $big_odd := nqp::fromstr_I('597055468506451900426564100882892324844234070047350069813107180677937273391528963862870003', $bi_boxer);
+
+is(str(nqp::pow_I(box(1), $big_even, $n_type, $bi_type)), 1, 'pow 1 ** large_even_number');
+is(str(nqp::pow_I(box(1), $big_odd, $n_type, $bi_type)),  1, 'pow 1 ** large_odd_number');
+
+is(str(nqp::pow_I(box(-1), $big_even, $n_type, $bi_type)), 1, 'pow -1 ** large_even_number');
+is(str(nqp::pow_I(box(-1), $big_odd, $n_type, $bi_type)), -1, 'pow -1 ** large_odd_number');
+
+{
+    my $r := nqp::pow_I(box(-2), $big_even, $n_type, $bi_type);
+    ok($r == nqp::inf() && nqp::istype($r, $n_type), 'pow -2 ** large_even_number');
+}
+{
+    my $r := nqp::pow_I(box(-2), $big_odd, $n_type, $bi_type);
+    ok($r == nqp::neginf() && nqp::istype($r, $n_type), 'pow -2 ** large_odd_number');
+}
+{
+    my $r := nqp::pow_I(box(2), $big_odd, $n_type, $bi_type);
+    ok($r == nqp::inf() && nqp::istype($r, $n_type), 'pow 2 ** large_even_number');
+}
+{
+    my $r := nqp::pow_I(box(2), $big_even, $n_type, $bi_type);
+    ok($r == nqp::inf() && nqp::istype($r, $n_type), 'pow 2 ** large_odd_number');
+}
+
+{
+    my $r := nqp::pow_I(box(2), box(-3), $n_type, $bi_type);
+    ok($r == 0.125 && nqp::istype($r, $n_type), 'pow 2 ** -3');
+}
 
 # test conversion to float
 # try it with 2 ** 100, because that's big enough not to fit into a single
 # int, but can be represented exactly in a double
-$big := nqp::pow_I(box(2), box(100), $bi_type, $bi_type);
+$big := nqp::pow_I(box(2), box(100), $n_type, $bi_type);
 ok(nqp::iseq_n(nqp::tonum_I($big), nqp::pow_n(2, 100)), '2**100 to float');
-$big := nqp::pow_I(box(-2), box(101), $bi_type, $bi_type);
+$big := nqp::pow_I(box(-2), box(101), $n_type, $bi_type);
 ok(nqp::iseq_n(nqp::tonum_I($big), nqp::pow_n(-2, 101)), '(-2)**101 to float');
 # the mantissa can hold much information accurately, so test that too
 my $factor := 123456789;
@@ -148,8 +179,8 @@ ok(str(nqp::expmod_I(
 
 ok(nqp::div_In(box(1234500), box(100)) == 12345, 'div_In santiy');
 my $n := nqp::div_In(
-    nqp::pow_I(box(203), box(200), $bi_type, $bi_type),
-    nqp::pow_I(box(200), box(200), $bi_type, $bi_type),
+    nqp::pow_I(box(203), box(200), $n_type, $bi_type),
+    nqp::pow_I(box(200), box(200), $n_type, $bi_type),
 );
 ok(nqp::abs_n($n - 19.6430286394751) < 1e-10, 'div_In with big numbers');
 
