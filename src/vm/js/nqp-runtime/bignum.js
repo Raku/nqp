@@ -26,6 +26,12 @@ function intishBool(b) {
   return b ? 1 : 0;
 }
 
+function makeNum(type, num) {
+  var instance = type._STable.REPR.allocate(type._STable);
+  instance.$$setNum(num);
+  return instance;
+}
+
 function makeBI(type, num) {
   var instance = type._STable.REPR.allocate(type._STable);
   instance.$$setBignum(num);
@@ -93,8 +99,22 @@ op.div_I = function(a, b, type) {
   return makeBI(type, getBI(a).div(getBI(b)));
 };
 
-op.pow_I = function(a, b, type) {
-  return makeBI(type, getBI(a).pow(getBI(b)));
+op.pow_I = function(a, b, numType, biType) {
+  var base = getBI(a);
+  var exponent = getBI(b);
+  if (exponent.lt(0)) {
+    return makeNum(numType, Math.pow(base.toNumber(), exponent.toNumber()));
+  } else {
+    if (exponent.gt(4294967296) && !base.eq(1) && !base.eq(0)) {
+      if (base.eq(-1)) {
+        // workaround a bug in bignum
+        return makeBI(biType, bignum(exponent.mod(2).eq(0) ? 1 : -1));
+      } else {
+        return makeNum(numType, base.lt(0) && exponent.mod(2).eq(1) ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY);
+      }
+    }
+    return makeBI(biType, base.pow(exponent));
+  }
 };
 
 op.mod_I = function(n, m, type) {
