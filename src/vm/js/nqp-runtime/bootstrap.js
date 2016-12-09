@@ -241,5 +241,5 @@ module.exports.bootType = bootType;
 
 module.exports.core = core;
 
-BOOT.Array = bootType("BOOTArray", "VMArray");
+BOOT.Array = bootType('BOOTArray', 'VMArray');
 BOOT.Array._STable.setboolspec(8, Null);
