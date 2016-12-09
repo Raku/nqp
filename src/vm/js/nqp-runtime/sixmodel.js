@@ -232,6 +232,12 @@ class STable {
     this.objConstructor.prototype[name] = func;
   }
 
+  addInternalMethods(klass) {
+    for (let methodName of Object.getOwnPropertyNames(klass.prototype)) {
+      this.addInternalMethod(methodName, klass.prototype[methodName]);
+    }
+  }
+
   compileAccessor(accessor, code, setup) {
     this.code = this.code || '';
     this.setup = this.setup || '';

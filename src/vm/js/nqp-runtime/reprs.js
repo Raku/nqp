@@ -522,9 +522,11 @@ class P6opaque {
 
   setupSTable(STable) {
     var repr = this;
-    STable.addInternalMethod('$$attrinited', function(classHandle, attrName) {
-      var attr = slotToAttr(repr.getHint(classHandle, attrName));
-      return (this[attr] == undefined) ? 0 : 1;
+    STable.addInternalMethods(class {
+      $$attrinited(classHandle, attrName) {
+        var attr = slotToAttr(repr.getHint(classHandle, attrName));
+        return (this[attr] == undefined) ? 0 : 1;
+      }
     });
 
   }
@@ -590,11 +592,13 @@ reprs.Uninstantiable = Uninstantiable;
 
 class P6int extends REPR {
   setupSTable(STable) {
-    STable.addInternalMethod('$$setInt', function(value) {
-      this.value = value;
-    });
-    STable.addInternalMethod('$$getInt', function() {
-      return this.value;
+    STable.addInternalMethods(class {
+      $$setInt(value) {
+        this.value = value;
+      }
+      $$getInt(value) {
+        return this.value;
+      }
     });
   }
 
@@ -630,12 +634,14 @@ class P6int extends REPR {
   }
 
   generateBoxingMethods(STable, name) {
-    STable.addInternalMethod('$$setInt', function(value) {
-      this[name] = value;
-    });
+    STable.addInternalMethods(class {
+      $$setInt(value) {
+        this[name] = value;
+      }
 
-    STable.addInternalMethod('$$getInt', function() {
-      return this[name];
+      $$getInt() {
+        return this[name];
+      }
     });
   }
 
@@ -659,11 +665,14 @@ reprs.P6int = P6int;
 // TODO:  handle float/bits stuff in compose
 class P6num extends REPR {
   setupSTable(STable) {
-    STable.addInternalMethod('$$setNum', function(value) {
-      this.value = value;
-    });
-    STable.addInternalMethod('$$getNum', function() {
-      return this.value;
+    STable.addInternalMethods(class {
+      $$setNum(value) {
+        this.value = value;
+      }
+
+      $$getNum() {
+        return this.value;
+      }
     });
   }
 
@@ -684,12 +693,14 @@ class P6num extends REPR {
   }
 
   generateBoxingMethods(STable, name) {
-    STable.addInternalMethod('$$setNum', function(value) {
-      this[name] = value;
-    });
+    STable.addInternalMethods(class {
+      $$setNum(value) {
+        this[name] = value;
+      }
 
-    STable.addInternalMethod('$$getNum', function() {
-      return this[name];
+      $$getNum() {
+        return this[name];
+      }
     });
   }
 
@@ -712,11 +723,14 @@ reprs.P6num = P6num;
 
 class P6str extends REPR {
   setupSTable(STable) {
-    STable.addInternalMethod('$$setStr', function(value) {
-      this.value = value;
-    });
-    STable.addInternalMethod('$$getStr', function() {
-      return this.value;
+    STable.addInternalMethods(class {
+      $$setStr(value) {
+        this.value = value;
+      }
+
+      $$getStr() {
+        return this.value;
+      }
     });
   }
 
@@ -737,13 +751,16 @@ class P6str extends REPR {
   }
 
   generateBoxingMethods(STable, name) {
-    STable.addInternalMethod('$$setStr', function(value) {
-      this[name] = value;
+    STable.addInternalMethods(class {
+      $$setStr(value) {
+        this[name] = value;
+      }
+
+      $$getStr() {
+        return this[name];
+      }
     });
 
-    STable.addInternalMethod('$$getStr', function() {
-      return this[name];
-    });
   }
 
   generateFlattenedAccessors(ownerSTable, attrContentSTable, slot) {
@@ -785,123 +802,125 @@ class VMArray extends REPR {
   }
 
   setupSTable(STable) {
-    STable.addInternalMethod('$$push', function(value) {
-      this.array.push(value);
-      return value;
-    });
-
-    STable.addInternalMethod('$$push', function(value) {
-      this.array.push(value);
-      return value;
-    });
-
-    STable.addInternalMethod('$$atpos', function(index) {
-      var value = this.array[index < 0 ? this.array.length + index : index];
-      if (value === undefined) return Null;
-      return value;
-    });
-
-    /* TODO test how things should be converted */
-
-    STable.addInternalMethod('$$atpos_s', function(index) {
-      var value = this.array[index < 0 ? this.array.length + index : index];
-      if (value === undefined) return null_s;
-      return value;
-    });
-
-    STable.addInternalMethod('$$atpos_n', function(index) {
-      var value = this.array[index < 0 ? this.array.length + index : index];
-      if (value === undefined) return 0.0;
-      return value;
-    });
-
-    STable.addInternalMethod('$$atpos_i', function(index) {
-      var value = this.array[index < 0 ? this.array.length + index : index];
-      if (value === undefined) return 0;
-      return value;
-    });
-
-    STable.addInternalMethod('$$bindpos', function(index, value) {
-      return this.array[index < 0 ? this.array.length + index : index] = value;
-    });
-
-    STable.addInternalMethod('$$join', function(delim) {
-      return this.array.join(delim);
-    });
-
-
-    STable.addInternalMethod('$$pop', function() {
-      var value = this.array.pop();
-      if (value === undefined) return Null;
-      return value;
-    });
-
-    STable.addInternalMethod('$$shift', function() {
-      var value = this.array.shift();
-      if (value === undefined) return Null;
-      return value;
-    });
-
-    STable.addInternalMethod('$$unshift', function(value) {
-      this.array.unshift(value);
-      return value;
-    });
-
-    STable.addInternalMethod('$$elems', function() {
-      return this.array.length;
-    });
-
-    STable.addInternalMethod('$$existspos', function(index) {
-      if (index < 0) index += this.array.length;
-      return this.array.hasOwnProperty(index) ? 1 : 0;
-    });
-
-    STable.addInternalMethod('$$setelems', function(elems) {
-      this.array.length = elems;
-    });
-
-    STable.addInternalMethod('$$numdimensions', function() {
-      return 1;
-    });
-
-    STable.addInternalMethod('$$setdimensions', function(dimensions) {
-      if (dimensions.array.length != 1) {
-        throw new NQPException('A dynamic array can only have a single dimension');
-      } else {
-        this.array.length = dimensions.array[0];
+    STable.addInternalMethods(class {
+      $$push(value) {
+        this.array.push(value);
+        return value;
       }
-    });
 
-    STable.addInternalMethod('$$dimensions', function(dimensions) {
-      return BOOT.createArray([this.array.length]);
-    });
-
-    STable.addInternalMethod('$$toArray', function() {
-      return this.array;
-    });
-
-    STable.addInternalMethod('$$iterator', function() {
-      return new Iter(this.array);
-    });
-
-    STable.addInternalMethod('$$numify', function() {
-      return this.array.length;
-    });
-
-    STable.addInternalMethod('$$splice', function(source, offset, length) {
-      // TODO think about the case when the source is not VMArray
-      var args = [offset, length];
-      for (var i = 0; i < source.array.length; i++) {
-        args.push(source.array[i]);
+      $$push(value) {
+        this.array.push(value);
+        return value;
       }
-      this.array.splice.apply(this.array, args);
-      return this;
-    });
 
-    STable.addInternalMethod('$$clone', function() {
-      var cloned = new STable.objConstructor();
-      cloned.array = this.array.slice();
-      return cloned;
+      $$atpos(index) {
+        var value = this.array[index < 0 ? this.array.length + index : index];
+        if (value === undefined) return Null;
+        return value;
+      }
+
+      /* TODO test how things should be converted */
+
+      $$atpos_s(index) {
+        var value = this.array[index < 0 ? this.array.length + index : index];
+        if (value === undefined) return null_s;
+        return value;
+      }
+
+      $$atpos_n(index) {
+        var value = this.array[index < 0 ? this.array.length + index : index];
+        if (value === undefined) return 0.0;
+        return value;
+      }
+
+      $$atpos_i(index) {
+        var value = this.array[index < 0 ? this.array.length + index : index];
+        if (value === undefined) return 0;
+        return value;
+      }
+
+      $$bindpos(index, value) {
+        return this.array[index < 0 ? this.array.length + index : index] = value;
+      }
+
+      $$join(delim) {
+        return this.array.join(delim);
+      }
+
+
+      $$pop() {
+        var value = this.array.pop();
+        if (value === undefined) return Null;
+        return value;
+      }
+
+      $$shift() {
+        var value = this.array.shift();
+        if (value === undefined) return Null;
+        return value;
+      }
+
+      $$unshift(value) {
+        this.array.unshift(value);
+        return value;
+      }
+
+      $$elems() {
+        return this.array.length;
+      }
+
+      $$existspos(index) {
+        if (index < 0) index += this.array.length;
+        return this.array.hasOwnProperty(index) ? 1 : 0;
+      }
+
+      $$setelems(elems) {
+        this.array.length = elems;
+      }
+
+      $$numdimensions() {
+        return 1;
+      }
+
+      $$setdimensions(dimensions) {
+        if (dimensions.array.length != 1) {
+          throw new NQPException('A dynamic array can only have a single dimension');
+        } else {
+          this.array.length = dimensions.array[0];
+        }
+      }
+
+      $$dimensions(dimensions) {
+        return BOOT.createArray([this.array.length]);
+      }
+
+      $$toArray() {
+        return this.array;
+      }
+
+      $$iterator() {
+        return new Iter(this.array);
+      }
+
+      $$numify() {
+        return this.array.length;
+      }
+
+      $$splice(source, offset, length) {
+        // TODO think about the case when the source is not VMArray
+        var args = [offset, length];
+        for (var i = 0; i < source.array.length; i++) {
+          args.push(source.array[i]);
+        }
+        this.array.splice.apply(this.array, args);
+        return this;
+      }
+
+      $$clone() {
+        var cloned = new STable.objConstructor();
+        cloned.array = this.array.slice();
+        return cloned;
+      }
     });
 
 
@@ -1008,20 +1027,22 @@ function getBI(obj) {
 
 class P6bigint extends REPR {
   setupSTable(STable) {
-    STable.addInternalMethod('$$setInt', function(value) {
-      this.value = bignum(value);
-    });
+    STable.addInternalMethods(class {
+      $$setInt(value) {
+        this.value = bignum(value);
+      }
 
-    STable.addInternalMethod('$$getInt', function() {
-      return this.value.toNumber() | 0;
-    });
+      $$getInt() {
+        return this.value.toNumber() | 0;
+      }
 
-    STable.addInternalMethod('$$setBignum', function(value) {
-      this.value = value;
-    });
+      $$setBignum(value) {
+        this.value = value;
+      }
 
-    STable.addInternalMethod('$$getBignum', function() {
-      return this.value;
+      $$getBignum() {
+        return this.value;
+      }
     });
   }
 
@@ -1078,20 +1099,22 @@ class P6bigint extends REPR {
   }
 
   generateBoxingMethods(STable, name) {
-    STable.addInternalMethod('$$setInt', function(value) {
-      this[name] = bignum(value);
-    });
+    STable.addInternalMethods(class {
+      $$setInt(value) {
+        this[name] = bignum(value);
+      }
 
-    STable.addInternalMethod('$$getInt', function() {
-      return this[name].toNumber();
-    });
+      $$getInt() {
+        return this[name].toNumber();
+      }
 
-    STable.addInternalMethod('$$getBignum', function() {
-      return this[name];
-    });
+      $$getBignum() {
+        return this[name];
+      }
 
-    STable.addInternalMethod('$$setBignum', function(num) {
-      this[name] = num;
+      $$setBignum(num) {
+        this[name] = num;
+      }
     });
   }
 };
@@ -1173,130 +1196,132 @@ class MultiDimArray extends REPR {
 
 
   setupSTable(STable) {
-    STable.addInternalMethod('$$numdimensions', function(value) {
-      if (this.typeObject_) {
-        throw new NQPException('Cannot get number of dimensions of a type object');
-      }
-      return STable.dimensions;
-    });
-
-    STable.addInternalMethod('$$clone', function() {
-      var clone = new this._STable.objConstructor();
-      clone.storage = this.storage.slice();
-      clone.dimensions = this.dimensions;
-      return clone;
-    });
-
-    STable.addInternalMethod('$$dimensions', function() {
-      if (this.typeObject_) {
-        throw new NQPException('Cannot get dimensions of a type object');
-      }
-      return BOOT.createArray(this.dimensions);
-    });
-
-    STable.addInternalMethod('$$setdimensions', function(value) {
-      if (value.array.length != STable.dimensions) {
-        throw new NQPException('Array type of ' + STable.dimensions + ' dimensions cannot be intialized with ' + value.length + ' dimensions');
-      } else if (this.dimensions) {
-        throw new NQPException('Can only set dimensions once');
-      }
-      this.storage = [];
-      return (this.dimensions = value.array);
-    });
-
-    STable.addInternalMethod('$$pop', function() {
-      throw new NQPException('Cannot pop a fixed dimension array');
-    });
-
-    STable.addInternalMethod('$$shift', function() {
-      throw new NQPException('Cannot shift a fixed dimension array');
-    });
-
-    STable.addInternalMethod('$$unshift', function(value) {
-      throw new NQPException('Cannot unshift a fixed dimension array');
-    });
-
-    STable.addInternalMethod('$$push', function(value) {
-      throw new NQPException('Cannot push a fixed dimension array');
-    });
-
-    STable.addInternalMethod('$$splice', function(value) {
-      throw new NQPException('Cannot splice a fixed dimension array');
-    });
-
-    STable.addInternalMethod('$$calculateIndex', function(idx, value) {
-      idx = idx.array;
-      if (idx.length != STable.dimensions) {
-        throw new NQPException('Cannot access ' + STable.dimensions + ' dimension array with ' + idx.length + ' indices');
-      }
-
-      for (var i = 0; i < idx.length; i++) {
-        if (idx[i] < 0 || idx[i] >= this.dimensions[i]) {
-          throw new NQPException('Index ' + idx[i] + ' for dimension ' + (i + 1) + ' out of range (must be 0..' + this.dimensions[i] + ')');
+    STable.addInternalMethods(class {
+      $$numdimensions(value) {
+        if (this.typeObject_) {
+          throw new NQPException('Cannot get number of dimensions of a type object');
         }
+        return STable.dimensions;
       }
-      var calculatedIdx = 0;
-      for (var i = 0; i < idx.length; i++) {
-        calculatedIdx = calculatedIdx * this.dimensions[i] + idx[i];
+
+      $$clone() {
+        var clone = new this._STable.objConstructor();
+        clone.storage = this.storage.slice();
+        clone.dimensions = this.dimensions;
+        return clone;
       }
-      return calculatedIdx;
-    });
 
-    STable.addInternalMethod('$$atposnd', function(idx) {
-      if (STable.primType != 0) throw new NQPException('wrong type');
-      return this.storage[this.$$calculateIndex(idx)];
-    });
+      $$dimensions() {
+        if (this.typeObject_) {
+          throw new NQPException('Cannot get dimensions of a type object');
+        }
+        return BOOT.createArray(this.dimensions);
+      }
 
-    STable.addInternalMethod('$$bindposnd', function(idx, value) {
-      if (STable.primType != 0) throw new NQPException('wrong type: ' + STable.primType);
-      return (this.storage[this.$$calculateIndex(idx)] = value);
-    });
+      $$setdimensions(value) {
+        if (value.array.length != STable.dimensions) {
+          throw new NQPException('Array type of ' + STable.dimensions + ' dimensions cannot be intialized with ' + value.length + ' dimensions');
+        } else if (this.dimensions) {
+          throw new NQPException('Can only set dimensions once');
+        }
+        this.storage = [];
+        return (this.dimensions = value.array);
+      }
 
-    STable.addInternalMethod('$$atposnd_i', function(idx) {
-      if (STable.primType != 1) throw new NQPException('wrong type: ' + STable.primType);
-      return this.storage[this.$$calculateIndex(idx)];
-    });
+      $$pop() {
+        throw new NQPException('Cannot pop a fixed dimension array');
+      }
 
-    STable.addInternalMethod('$$bindposnd_i', function(idx, value) {
-      if (STable.primType != 1) throw new NQPException('wrong type' + STable.primType);
-      return (this.storage[this.$$calculateIndex(idx)] = value);
-    });
+      $$shift() {
+        throw new NQPException('Cannot shift a fixed dimension array');
+      }
 
-    STable.addInternalMethod('$$atposnd_n', function(idx) {
-      if (STable.primType != 2) throw new NQPException('wrong type');
-      return this.storage[this.$$calculateIndex(idx)];
-    });
+      $$unshift(value) {
+        throw new NQPException('Cannot unshift a fixed dimension array');
+      }
 
-    STable.addInternalMethod('$$bindposnd_n', function(idx, value) {
-      if (STable.primType != 2) throw new NQPException('wrong type');
-      return (this.storage[this.$$calculateIndex(idx)] = value);
-    });
+      $$push(value) {
+        throw new NQPException('Cannot push a fixed dimension array');
+      }
 
-    STable.addInternalMethod('$$atposnd_s', function(idx) {
-      if (STable.primType != 3) throw new NQPException('wrong type');
-      return this.storage[this.$$calculateIndex(idx)];
-    });
+      $$splice(value) {
+        throw new NQPException('Cannot splice a fixed dimension array');
+      }
 
-    STable.addInternalMethod('$$bindposnd_s', function(idx, value) {
-      if (STable.primType != 3) throw new NQPException('wrong type');
-      return (this.storage[this.$$calculateIndex(idx)] = value);
-    });
+      $$calculateIndex(idx, value) {
+        idx = idx.array;
+        if (idx.length != STable.dimensions) {
+          throw new NQPException('Cannot access ' + STable.dimensions + ' dimension array with ' + idx.length + ' indices');
+        }
 
-    // TODO optimize and avoid creating a temporary array
-    STable.addInternalMethod('$$bindpos', function(index, value) {
-      return this.$$bindposnd(BOOT.createArray([index]), value);
-    });
+        for (var i = 0; i < idx.length; i++) {
+          if (idx[i] < 0 || idx[i] >= this.dimensions[i]) {
+            throw new NQPException('Index ' + idx[i] + ' for dimension ' + (i + 1) + ' out of range (must be 0..' + this.dimensions[i] + ')');
+          }
+        }
+        var calculatedIdx = 0;
+        for (var i = 0; i < idx.length; i++) {
+          calculatedIdx = calculatedIdx * this.dimensions[i] + idx[i];
+        }
+        return calculatedIdx;
+      }
 
-    STable.addInternalMethod('$$setelems', function(elems) {
-      this.$$setdimensions(BOOT.createArray([elems]));
-    });
+      $$atposnd(idx) {
+        if (STable.primType != 0) throw new NQPException('wrong type');
+        return this.storage[this.$$calculateIndex(idx)];
+      }
 
-    STable.addInternalMethod('$$elems', function(elems) {
-      return this.dimensions[0];
-    });
+      $$bindposnd(idx, value) {
+        if (STable.primType != 0) throw new NQPException('wrong type: ' + STable.primType);
+        return (this.storage[this.$$calculateIndex(idx)] = value);
+      }
 
-    STable.addInternalMethod('$$atpos', function(index) {
-      return this.$$atposnd(BOOT.createArray([index]));
+      $$atposnd_i(idx) {
+        if (STable.primType != 1) throw new NQPException('wrong type: ' + STable.primType);
+        return this.storage[this.$$calculateIndex(idx)];
+      }
+
+      $$bindposnd_i(idx, value) {
+        if (STable.primType != 1) throw new NQPException('wrong type' + STable.primType);
+        return (this.storage[this.$$calculateIndex(idx)] = value);
+      }
+
+      $$atposnd_n(idx) {
+        if (STable.primType != 2) throw new NQPException('wrong type');
+        return this.storage[this.$$calculateIndex(idx)];
+      }
+
+      $$bindposnd_n(idx, value) {
+        if (STable.primType != 2) throw new NQPException('wrong type');
+        return (this.storage[this.$$calculateIndex(idx)] = value);
+      }
+
+      $$atposnd_s(idx) {
+        if (STable.primType != 3) throw new NQPException('wrong type');
+        return this.storage[this.$$calculateIndex(idx)];
+      }
+
+      $$bindposnd_s(idx, value) {
+        if (STable.primType != 3) throw new NQPException('wrong type');
+        return (this.storage[this.$$calculateIndex(idx)] = value);
+      }
+
+      // TODO optimize and avoid creating a temporary array
+      $$bindpos(index, value) {
+        return this.$$bindposnd(BOOT.createArray([index]), value);
+      }
+
+      $$setelems(elems) {
+        this.$$setdimensions(BOOT.createArray([elems]));
+      }
+
+      $$elems(elems) {
+        return this.dimensions[0];
+      }
+
+      $$atpos(index) {
+        return this.$$atposnd(BOOT.createArray([index]));
+      }
     });
   }
 
@@ -1380,8 +1405,11 @@ reprs.MultiDimArray = MultiDimArray;
 
 class VMException extends REPR {
   setupSTable(STable) {
-    STable.addInternalMethod('$$getStr', function() {
-      return this.message;
+
+    STable.addInternalMethods(class {
+      $$getStr() {
+        return this.message;
+      }
     });
   }
 };
