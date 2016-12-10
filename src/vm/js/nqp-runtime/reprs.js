@@ -91,10 +91,10 @@ class P6opaque {
   deserializeReprData(cursor, STable) {
     this.deserialized = 1;
     var numAttributes = cursor.varint();
-    this.flattenedStables = [];
+    this.flattenedSTables = [];
     for (var i = 0; i < numAttributes; i++) {
       var notNull = cursor.varint();
-      this.flattenedStables.push(notNull != 0 ? cursor.locateThing('rootStables') : null);
+      this.flattenedSTables.push(notNull != 0 ? cursor.locateThing('rootSTables') : null);
     }
     this.mi = cursor.varint();
     var hasAutoVivValues = cursor.varint();
@@ -160,7 +160,7 @@ class P6opaque {
     if (this.unboxSlots) {
       for (var i = 0; i < this.unboxSlots.length; i++) {
         var slot = this.unboxSlots[i].slot;
-        (new reprById[this.unboxSlots[i].reprId]).generateBoxingMethods(STable, slotToAttr(slot), this.flattenedStables[slot]);
+        (new reprById[this.unboxSlots[i].reprId]).generateBoxingMethods(STable, slotToAttr(slot), this.flattenedSTables[slot]);
       }
     }
 
@@ -197,16 +197,16 @@ class P6opaque {
   }
 
   serializeReprData(st, cursor) {
-    var numAttrs = st.REPR.flattenedStables.length;
+    var numAttrs = st.REPR.flattenedSTables.length;
     cursor.varint(numAttrs);
 
     for (var i = 0; i < numAttrs; i++) {
-      if (st.REPR.flattenedStables[i] == null) {
+      if (st.REPR.flattenedSTables[i] == null) {
         cursor.varint(0);
       }
       else {
         cursor.varint(1);
-        cursor.STableRef(st.REPR.flattenedStables[i]);
+        cursor.STableRef(st.REPR.flattenedSTables[i]);
       }
     }
 
@@ -264,9 +264,9 @@ class P6opaque {
   deserializeFinish(obj, data) {
     var attrs = [];
 
-    for (var i = 0; i < this.flattenedStables.length; i++) {
-      if (this.flattenedStables[i]) {
-        attrs.push(this.flattenedStables[i].REPR.deserializeInline(data));
+    for (var i = 0; i < this.flattenedSTables.length; i++) {
+      if (this.flattenedSTables[i]) {
+        attrs.push(this.flattenedSTables[i].REPR.deserializeInline(data));
       } else {
         attrs.push(data.variant());
       }
@@ -280,7 +280,7 @@ class P6opaque {
   }
 
   serialize(cursor, obj) {
-    var flattened = obj._STable.REPR.flattenedStables;
+    var flattened = obj._STable.REPR.flattenedSTables;
     var nqp = require('nqp-runtime');
     if (!flattened) {
       throw 'Representation must be composed before it can be serialized';
@@ -305,8 +305,8 @@ class P6opaque {
     for (var i = 0; i < newREPR.nameToIndexMapping.length; i++) {
       for (var j = 0; j < newREPR.nameToIndexMapping[i].slots.length; j++) {
         let slot = newREPR.nameToIndexMapping[i].slots[j];
-        let defaultValue = newREPR.flattenedStables[slot] ?
-            newREPR.flattenedStables[slot].REPR.flattenedDefaultObj :
+        let defaultValue = newREPR.flattenedSTables[slot] ?
+            newREPR.flattenedSTables[slot].REPR.flattenedDefaultObj :
             undefined;
         let attr = slotToAttr(slot);
         if (!Object.prototype.hasOwnProperty.call(obj, attr)) {
@@ -337,7 +337,7 @@ class P6opaque {
 
     var curAttr = 0;
     this.nameToIndexMapping = [];
-    this.flattenedStables = [];
+    this.flattenedSTables = [];
     var mi = false;
 
     this.autoVivValues = [];
@@ -371,9 +371,9 @@ class P6opaque {
           names.push(attr.get('name'));
 
           if (attrType !== undefined && attrType !== Null && attrType._STable.REPR.flattenSTable) {
-            this.flattenedStables.push(attrType._STable);
+            this.flattenedSTables.push(attrType._STable);
           } else {
-            this.flattenedStables.push(null);
+            this.flattenedSTables.push(null);
           }
 
           if (attr.get('positional_delegate')) {
@@ -447,8 +447,8 @@ class P6opaque {
     for (var i = 0; i < this.nameToIndexMapping.length; i++) {
       for (var j = 0; j < this.nameToIndexMapping[i].slots.length; j++) {
         let slot = this.nameToIndexMapping[i].slots[j];
-        let defaultValue = this.flattenedStables[slot] ?
-            this.flattenedStables[slot].REPR.flattenedDefault :
+        let defaultValue = this.flattenedSTables[slot] ?
+            this.flattenedSTables[slot].REPR.flattenedDefault :
             'undefined';
         code += 'this.' + slotToAttr(slot) + ' = ' + defaultValue + ';\n';
       }
@@ -505,8 +505,8 @@ class P6opaque {
     for (var i = 0; i < this.nameToIndexMapping.length; i++) {
       for (var j = 0; j < this.nameToIndexMapping[i].slots.length; j++) {
         let slot = this.nameToIndexMapping[i].slots[j];
-        if (this.flattenedStables[slot]) {
-          this.flattenedStables[slot].REPR.generateFlattenedAccessors(STable, this.flattenedStables[slot], slot);
+        if (this.flattenedSTables[slot]) {
+          this.flattenedSTables[slot].REPR.generateFlattenedAccessors(STable, this.flattenedSTables[slot], slot);
         } else {
           this.generateNormalAccessors(STable, slot);
         }

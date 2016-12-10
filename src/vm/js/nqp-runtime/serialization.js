@@ -841,7 +841,7 @@ class SerializationWriter {
     var contextsListPos = 0;
     while (workTodo) {
       /* Current work list sizes. */
-      var sTablesTodo = this.sc.rootStables.length;
+      var sTablesTodo = this.sc.rootSTables.length;
       var objectsTodo = this.sc.rootObjects.length;
       var contextsTodo = this.contexts.length;
 
@@ -851,7 +851,7 @@ class SerializationWriter {
 
       /* Serialize any STables on the todo list. */
       while (sTablesListPos < sTablesTodo) {
-        this.serializeSTable(this.sc.rootStables[sTablesListPos]);
+        this.serializeSTable(this.sc.rootSTables[sTablesListPos]);
         sTablesListPos++;
         workTodo = true;
       }
@@ -933,10 +933,10 @@ class SerializationWriter {
     /* Add to this SC if needed. */
     if (!st._SC) {
       st._SC = this.sc;
-      this.sc.rootStables.push(st);
+      this.sc.rootSTables.push(st);
     }
 
-    return [this.getSCId(st._SC), st._SC.rootStables.indexOf(st)];
+    return [this.getSCId(st._SC), st._SC.rootSTables.indexOf(st)];
   }
 
 
@@ -971,7 +971,7 @@ class SerializationWriter {
 
     /* Put STables table in place, and set location/rows in header. */
     this.header_I32(this.offset);
-    this.header_I32(this.sc.rootStables.length);
+    this.header_I32(this.sc.rootSTables.length);
 
     this.writeChunk(this.stables);
 

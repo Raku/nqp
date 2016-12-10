@@ -20,7 +20,7 @@ core.description = 'core SC';
 
 function addToScWithSt(obj) {
   core.rootObjects.push(obj);
-  core.rootStables.push(obj._STable);
+  core.rootSTables.push(obj._STable);
   obj._SC = core;
   obj._STable._SC = core;
 }

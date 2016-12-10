@@ -12,7 +12,7 @@ var NQPObject = require('./nqp-object.js');
  * @public handle The handle of this SC.
  * @public description Description (probably the file name) if any.
  * @public rootObjects The root set of objects that live in this SC.
- * @public rootStables The root set of STables that live in this SC.
+ * @public rootSTables The root set of STables that live in this SC.
  * @public rootCodes The root set of code refs that live in this SC.
  * @public repIndexes Repossession info. The following lists have matching indexes, each
  * representing the integer of an object in our root set along with the SC
@@ -27,7 +27,7 @@ class SerializationContext extends NQPObject {
     this.handle = handle;
     SerializationContext.contexts[handle] = this;
     this.rootObjects = [];
-    this.rootStables = [];
+    this.rootSTables = [];
     this.rootCodes = [];
     this.repIndexes = [];
     this.repScs = [];
@@ -42,7 +42,7 @@ class SerializationContext extends NQPObject {
   setObj(idx, obj) {
     this.rootObjects[idx] = obj;
     if (!obj._STable._SC) {
-      this.rootStables.push(obj._STable);
+      this.rootSTables.push(obj._STable);
       obj._STable._SC = this;
     }
   }

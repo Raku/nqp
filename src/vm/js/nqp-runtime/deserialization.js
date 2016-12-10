@@ -539,16 +539,16 @@ class BinaryCursor {
       var REPR = new reprs[repr]();
       REPR.name = repr;
       var HOW = null; /* We will fill that in later once objects are stubbed */
-      sc.rootStables[i] = new sixmodel.STable(REPR, HOW);
-      sc.rootStables[i]._SC = sc;
+      sc.rootSTables[i] = new sixmodel.STable(REPR, HOW);
+      sc.rootSTables[i]._SC = sc;
     }
 
     /* Stub objects */
     for (var i = 0; i < objects.length; i++) {
       var STableForObj =
-          deps[objects[i].STable[0]].rootStables[objects[i].STable[1]];
+          deps[objects[i].STable[0]].rootSTables[objects[i].STable[1]];
       if (!STableForObj) {
-        console.log('Missing stable', objects[i].STable[0], objects[i].STable[1], deps[objects[i].STable[0]].rootStables);
+        console.log('Missing stable', objects[i].STable[0], objects[i].STable[1], deps[objects[i].STable[0]].rootSTables);
       }
 
       sc.rootObjects[i] = objects[i].isConcrete ?
@@ -576,7 +576,7 @@ class BinaryCursor {
     }
 
     for (var i = 0; i < STables.length; i++) {
-      STables[i][1].STable(sc.rootStables[i]);
+      STables[i][1].STable(sc.rootSTables[i]);
     }
 
     /* Finish up objects */
@@ -641,7 +641,7 @@ class BinaryCursor {
 
     /* We set the method caches after everything else is ready */
     for (var i = 0; i < STables.length; i++) {
-      var STable = sc.rootStables[i];
+      var STable = sc.rootSTables[i];
       if (STable._methodCache instanceof Hash) {
         STable.setMethodCache(STable._methodCache.$$toObject());
       }
