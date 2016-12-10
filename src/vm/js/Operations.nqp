@@ -1583,6 +1583,7 @@ class QAST::OperationsJS {
     add_simple_op('setdispatcher', $T_VOID, [$T_OBJ], sub ($value) {"nqp.currentDispatcher = $value"}, :side_effects);
     add_simple_op('ctxcaller', $T_OBJ, [$T_OBJ], :!inlinable);
     add_simple_op('ctx', $T_OBJ, [], :!inlinable, sub () {$*CTX});
+    add_simple_op('ctxcode', $T_OBJ, [$T_OBJ], :!inlinable, sub ($ctx) {"$ctx.codeRef()"});
 
     add_simple_op('lock', $T_OBJ, [$T_OBJ], sub ($lock) {$lock});
     add_simple_op('unlock', $T_OBJ, [$T_OBJ], sub ($lock) {$lock});
