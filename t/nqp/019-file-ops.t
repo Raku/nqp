@@ -2,7 +2,7 @@
 
 # Test nqp::op file operations.
 
-plan(99);
+plan(100);
 
 ok( nqp::stat('CREDITS', nqp::const::STAT_EXISTS) == 1, 'nqp::stat exists');
 ok( nqp::stat('AARDVARKS', nqp::const::STAT_EXISTS) == 0, 'nqp::stat not exists');
@@ -300,6 +300,7 @@ else {
     ok(nqp::stat($test-file ~ '-symlink', nqp::const::STAT_EXISTS), 'the symbolic link should exist');
     ok(nqp::lstat($test-file ~ '-symlink', nqp::const::STAT_EXISTS), 'the symbolic link should exist');
     ok(nqp::stat($test-file ~ '-symlink', nqp::const::STAT_ISLNK), 'the symbolic link should actually *be* a symbolic link');
+    ok(!nqp::stat($test-file, nqp::const::STAT_ISLNK), 'the normal test file should not *be* a symbolic link');
     nqp::unlink($test-file);
     nqp::unlink($test-file ~ '-symlink');
 
