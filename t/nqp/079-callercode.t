@@ -1,4 +1,4 @@
-plan(5);
+plan(8);
 
 sub foo_inner() {
   my $caller := nqp::callercode();
@@ -48,3 +48,21 @@ class Foo {
 }
 my $foo := Foo.new();
 $foo.a(1);
+
+sub bottom($mode) {
+    return 'this is bottom' if $mode == 1;
+    nqp::ctx();
+}
+sub middle($mode) {
+    return 'this is middle' if $mode == 1;
+    my $bottom_ctx := bottom(0);
+    is(nqp::ctxcode($bottom_ctx)(1), "this is bottom", 'ctxcode on a ctx from a sub we called');
+    is(nqp::ctxcode(nqp::ctxcaller(nqp::ctx()))(1), 'this is toplevel', 'ctxcode on a caller ctx');
+    is(nqp::ctxcode(nqp::ctx())(1), 'this is middle', 'ctxcode on current ctx');
+}
+sub toplevel($mode) {
+    return 'this is toplevel' if $mode == 1;
+    middle(0);
+}
+
+toplevel(0);
