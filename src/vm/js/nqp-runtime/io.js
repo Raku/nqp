@@ -99,6 +99,9 @@ function stat(file, code, lstat) {
   }
 }
 
+op.fileislink = function(file) {
+  return boolish(fs.lstatSync(file).isSymbolicLink());
+};
 
 op.stat = function(file, code) {
   return stat(file, code, false) | 0;
