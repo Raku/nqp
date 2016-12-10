@@ -46,7 +46,7 @@
     - [islt](#islt)
     - [isle](#isle)
     - [isne](#isne)
-    - [not](#not)
+    - [not_i](#not_i)
 - [Array Opcodes](#-array-opcodes)
     - [atpos](#atpos)
     - [bindpos](#bindpos)
@@ -634,7 +634,7 @@ Return non-zero if $l is less than or equal to $r.
 
 Return non-zero if the two parameters are not equal.
 
-## not
+## not_i
 * `not_i(int $val)`
 
 Return 1 if `$val` is 0, 0 otherwise.
