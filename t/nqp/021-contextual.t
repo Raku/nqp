@@ -2,7 +2,7 @@
 
 # Tests for contextual variables
 
-plan(17);
+plan(23);
 
 sub foo() { $*VAR }
 
@@ -108,3 +108,30 @@ my sub layer1() {
     layer1();
 }
 
+{
+    my $*var := 'outermost var';
+    my $*var3 := 'outermost var 3';
+    my sub top() {
+        my $*var := 'top var';
+        my $*var2 := 'top var 2';
+        my $*var3 := 'top var 3';
+        middle(nqp::ctx());
+    }
+    my sub middle($top) {
+        my $*var := 'middle var';
+        my $*var2 := 'middle var 2';
+        bottom($top, nqp::ctx());
+    }
+    my sub bottom($top, $middle) {
+        my $*var := 'bottom var';
+        my $*var3 := 'bottom var 3';
+        is(nqp::getlexreldyn(nqp::ctx(), '$*var'), 'bottom var', 'nqp::getlexreldyn - current context');
+        is(nqp::getlexreldyn($middle, '$*var'), 'middle var', 'nqp::getlexreldyn - caller contex');
+        is(nqp::getlexreldyn($top, '$*var'), 'top var', 'nqp::getlexreldyn - caller of caller ctx');
+        is(nqp::getlexreldyn($top, '$*var2'), 'top var 2', 'nqp::getlexreldyn - checking with different variable name');
+        is(nqp::getlexreldyn($middle, '$*var3'), 'top var 3', 'nqp::getlexreldyn - walks contexts');
+        ok(nqp::isnull(nqp::getlexreldyn($middle, '$*no_such_var')), "nqp::getlexreldyn - null when it can't find var");
+    }
+
+    top();
+}
