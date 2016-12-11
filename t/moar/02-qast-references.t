@@ -418,9 +418,9 @@ test_qast_result(
         ok(nqp::iseq_i(nqp::atpos($r, 1), 3), 'can use num lexicalref as int');
         ok(nqp::iseq_i(nqp::atpos($r, 2), 6), 'can use str lexicalref as int');
 
-        ok(nqp::atpos($r, 0) == 7, 'can use num lexicalref as num');
+        ok(nqp::atpos($r, 0) == 7, 'can use int lexicalref as num');
         ok(nqp::atpos($r, 1) == 3.14, 'can use num lexicalref as num');
-        ok(nqp::atpos($r, 2) == 6, 'can use num lexicalref as num');
+        ok(nqp::atpos($r, 2) == 6, 'can use str lexicalref as num');
 
         ok(nqp::atpos($r, 0) eq '7', 'can use int lexicalref as str');
         ok(nqp::atpos($r, 1) eq '3.14', 'can use num lexicalref as str');
