@@ -2,7 +2,7 @@
 
 # Tests for contextual variables
 
-plan(23);
+plan(31);
 
 sub foo() { $*VAR }
 
@@ -111,26 +111,42 @@ my sub layer1() {
 {
     my $*var := 'outermost var';
     my $*var3 := 'outermost var 3';
+    my $*var4 := 'outermost var 4';
     my sub top() {
         my $*var := 'top var';
         my $*var2 := 'top var 2';
         my $*var3 := 'top var 3';
         middle(nqp::ctx());
     }
-    my sub middle($top) {
-        my $*var := 'middle var';
-        my $*var2 := 'middle var 2';
-        bottom($top, nqp::ctx());
+    my &middle;
+    {
+        my $*var3 := 'in outer scope of middle';
+        my $*var4 := 'in outer scope of middle';
+        &middle := sub ($top) {
+            my $*var := 'middle var';
+            my $*var2 := 'middle var 2';
+            bottom($top, nqp::ctx());
+        }
     }
     my sub bottom($top, $middle) {
         my $*var := 'bottom var';
         my $*var3 := 'bottom var 3';
+
         is(nqp::getlexreldyn(nqp::ctx(), '$*var'), 'bottom var', 'nqp::getlexreldyn - current context');
         is(nqp::getlexreldyn($middle, '$*var'), 'middle var', 'nqp::getlexreldyn - caller contex');
         is(nqp::getlexreldyn($top, '$*var'), 'top var', 'nqp::getlexreldyn - caller of caller ctx');
         is(nqp::getlexreldyn($top, '$*var2'), 'top var 2', 'nqp::getlexreldyn - checking with different variable name');
         is(nqp::getlexreldyn($middle, '$*var3'), 'top var 3', 'nqp::getlexreldyn - walks contexts');
         ok(nqp::isnull(nqp::getlexreldyn($middle, '$*no_such_var')), "nqp::getlexreldyn - null when it can't find var");
+        is(nqp::getlexreldyn(nqp::ctx(), '$*var4'), 'outermost var 4', 'nqp::getlexreldyn - walks contexts');
+
+        is(nqp::getlexrelcaller(nqp::ctx(), '$*var'), 'bottom var', 'nqp::getlexrelcaller - current context');
+        is(nqp::getlexrelcaller($middle, '$*var'), 'middle var', 'nqp::getlexrelcaller - caller contex');
+        is(nqp::getlexrelcaller($top, '$*var'), 'top var', 'nqp::getlexrelcaller - caller of caller ctx');
+        is(nqp::getlexrelcaller($top, '$*var2'), 'top var 2', 'nqp::getlexrelcaller - checking with different variable name');
+        is(nqp::getlexrelcaller($middle, '$*var3'), 'in outer scope of middle', 'nqp::getlexrelcaller - outer of caller');
+        ok(nqp::isnull(nqp::getlexrelcaller($middle, '$*no_such_var')), "nqp::getlexrelcaller - null when it can't find var");
+        is(nqp::getlexrelcaller(nqp::ctx(), '$*var4'), 'outermost var 4', 'nqp::getlexrelcaller - directt outer before outer of caller');
     }
 
     top();
