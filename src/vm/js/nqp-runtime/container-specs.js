@@ -95,6 +95,10 @@ class NativeRef {
           return 1;
         }
 
+        $$iscont() {
+          return 1;
+        }
+
         $$assign_i(ctx, value) {
           this.set(value);
           return value;
@@ -137,6 +141,10 @@ class NativeRef {
         }
 
         $$iscont_n() {
+          return 1;
+        }
+
+        $$iscont() {
           return 1;
         }
 
@@ -184,6 +192,10 @@ class NativeRef {
         }
 
         $$iscont_s() {
+          return 1;
+        }
+
+        $$iscont() {
           return 1;
         }
 
