@@ -1439,7 +1439,8 @@ class QAST::OperationsJS {
 
     add_simple_op('getlexdyn', $T_OBJ, [$T_STR], sub ($name) {"{$*CTX}.lookupDynamicFromCaller($name)"});
     add_simple_op('getlexreldyn', $T_OBJ, [$T_OBJ, $T_STR], sub ($ctx, $name) {"$ctx.lookupDynamic($name)"});
-    add_simple_op('getlexcaller', $T_OBJ, [$T_STR], sub ($name) {"{$*CTX}.lookupFromSomeCaller($name)"});
+    add_simple_op('getlexcaller', $T_OBJ, [$T_STR], sub ($name) {"{$*CTX}.\$\$caller.lookupWithCallers($name)"});
+    add_simple_op('getlexrelcaller', $T_OBJ, [$T_OBJ, $T_STR], sub ($ctx, $name) {"$ctx.lookupWithCallers($name)"});
     add_simple_op('getlexrel', $T_OBJ, [$T_OBJ, $T_STR]);
 
     add_simple_op('captureexistsnamed', $T_INT, [$T_OBJ, $T_STR]);

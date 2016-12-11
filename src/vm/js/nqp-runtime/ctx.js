@@ -97,8 +97,8 @@ class Ctx extends NQPObject {
        nqp code usually fallbacks to looking up of global */
   }
 
-  lookupFromSomeCaller(name) {
-    var currentCallerCtx = this.$$caller;
+  lookupWithCallers(name) {
+    var currentCallerCtx = this;
     while (currentCallerCtx) {
       var currentCtx = currentCallerCtx;
       while (currentCtx) {
