@@ -41,7 +41,7 @@ public class CArray extends REPR {
     private void fillREPRData(ThreadContext tc, STable st) {
         CArrayREPRData data = new CArrayREPRData();
 
-        SixModelObject meth = Ops.findmethod(st.WHAT, "of", tc);
+        SixModelObject meth = Ops.findmethodNonFatal(st.WHAT, "of", tc);
         if (meth == null)
             ExceptionHandling.dieInternal(tc, "CArray representation expects an 'of' method, specifying the element type");
 

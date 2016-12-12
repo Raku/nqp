@@ -497,7 +497,7 @@ public final class NativeCallOps {
             /* TODO: Handle encodings. */
             o = Ops.decont(o, tc);
             if (Ops.isconcrete(o, tc) == 0) return null;
-            SixModelObject meth = Ops.findmethod(o, "cstr", tc);
+            SixModelObject meth = Ops.findmethodNonFatal(o, "cstr", tc);
             if (meth != null) {
                 Ops.invokeDirect(tc, meth, new CallSiteDescriptor(new byte[] { ARG_OBJ }, null), new Object[] { o });
                 CStrInstance cstr = (CStrInstance) Ops.decont(Ops.result_o(tc.resultFrame()), tc);

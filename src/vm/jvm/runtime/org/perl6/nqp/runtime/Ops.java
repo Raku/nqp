@@ -2509,7 +2509,7 @@ public final class Ops {
     public static SixModelObject hllhash(ThreadContext tc) {
         return tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.hashType;
     }
-    public static SixModelObject findmethod(ThreadContext tc, SixModelObject invocant, String name) {
+    public static SixModelObject findmethodInCache(ThreadContext tc, SixModelObject invocant, String name) {
         if (invocant == null)
             throw ExceptionHandling.dieInternal(tc, "Cannot call method '" + name + "' on a null object");
         invocant = decont(invocant, tc);
@@ -2521,6 +2521,13 @@ public final class Ops {
         return meth;
     }
     public static SixModelObject findmethod(SixModelObject invocant, String name, ThreadContext tc) {
+        SixModelObject method = findmethodNonFatal(invocant, name, tc);
+        if (method == null)
+                throw ExceptionHandling.dieInternal(tc,
+                    "Method '" + name + "' not found for invocant of class '" + typeName(invocant, tc) + "'");
+        return method;
+    }
+    public static SixModelObject findmethodNonFatal(SixModelObject invocant, String name, ThreadContext tc) {
         if (invocant == null)
             throw ExceptionHandling.dieInternal(tc, "Cannot call method '" + name + "' on a null object");
         invocant = decont(invocant, tc);
@@ -2546,12 +2553,12 @@ public final class Ops {
     public static String typeName(SixModelObject invocant, ThreadContext tc) {
         invocant = decont(invocant, tc);
         SixModelObject how = invocant.st.HOW;
-        SixModelObject nameMeth = findmethod(tc, how, "name");
+        SixModelObject nameMeth = findmethodInCache(tc, how, "name");
         invokeDirect(tc, nameMeth, howObjCallSite, new Object[] { how, invocant });
         return result_s(tc.curFrame);
     }
     public static long can(SixModelObject invocant, String name, ThreadContext tc) {
-        return findmethod(invocant, name, tc) == null ? 0 : 1;
+        return findmethodNonFatal(invocant, name, tc) == null ? 0 : 1;
     }
     public static long eqaddr(SixModelObject a, SixModelObject b) {
         return a == b ? 1 : 0;
@@ -2656,7 +2663,7 @@ public final class Ops {
         /* If we get here, need to call .^type_check on the value we're
          * checking. */
         if (cache == null || (typeCheckMode & STable.TYPE_CHECK_CACHE_THEN_METHOD) != 0) {
-            SixModelObject tcMeth = findmethod(obj.st.HOW, "type_check", tc);
+            SixModelObject tcMeth = findmethodNonFatal(obj.st.HOW, "type_check", tc);
             if (tcMeth == null)
                 return 0;
                 /* TODO: Review why the following busts stuff. */
@@ -2675,7 +2682,7 @@ public final class Ops {
 
         /* If the flag to call .accepts_type on the target value is set, do so. */
         if ((typeCheckMode & STable.TYPE_CHECK_NEEDS_ACCEPTS) != 0) {
-            SixModelObject atMeth = findmethod(type.st.HOW, "accepts_type", tc);
+            SixModelObject atMeth = findmethodNonFatal(type.st.HOW, "accepts_type", tc);
             if (atMeth == null)
                 throw ExceptionHandling.dieInternal(tc,
                     "Expected accepts_type method, but none found in meta-object");
