@@ -481,12 +481,14 @@ sub add_to_sc($sc, $idx, $obj) {
 }
 
 # integers
-sub round_trip_int_array($seq, $desc, @a) {
-    $seq := 'TEST_SC_' ~ $seq;
+my $seq := 1;
+sub round_trip_int_array($desc, @a) {
+    my $name := 'ROUND_TRIP_SC_' ~ $seq;
+    $seq := $seq + 1;
     $desc := 'for ' ~ $desc ~ ', ';
     my $elems := nqp::elems(@a);
 
-    my $sc := nqp::createsc($seq ~ '_IN');
+    my $sc := nqp::createsc($name ~ '_IN');
     my $sh := nqp::list_s();
 
     class T12 {
@@ -500,7 +502,7 @@ sub round_trip_int_array($seq, $desc, @a) {
 
     my $serialized := nqp::serialize($sc, $sh);
 
-    my $dsc := nqp::createsc($seq ~ '_OUT');
+    my $dsc := nqp::createsc($name ~ '_OUT');
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
 
     ok(nqp::istype(nqp::scgetobj($dsc, 0), T12), $desc ~ 'deserialized object has correct type');
@@ -521,7 +523,7 @@ sub round_trip_int_array($seq, $desc, @a) {
         nqp::push(@a, $i);
         $i := $i + 1;
     }
-    round_trip_int_array(14, 'small integers', @a);
+    round_trip_int_array('small integers', @a);
 }
 
 {
@@ -551,7 +553,7 @@ sub round_trip_int_array($seq, $desc, @a) {
             nqp::push(@a, nqp::neg_i(nqp::add_i($b, $j)));
             $j := nqp::add_i($j, 1);
         }
-        round_trip_int_array($i + 7, 'integers around 2 ** ' ~ $i, @a);
+        round_trip_int_array('integers around 2 ** ' ~ $i, @a);
         ++$i;
         $b := nqp::add_i($b, $b);
     }
@@ -582,7 +584,7 @@ sub round_trip_int_array($seq, $desc, @a) {
         nqp::push(@a, nqp::unbox_i($bi));
     }
 
-    round_trip_int_array(70, 'special case integers', @a);
+    round_trip_int_array('special case integers', @a);
 }
 
 {
@@ -593,5 +595,5 @@ sub round_trip_int_array($seq, $desc, @a) {
         ++$i;
     }
 
-    round_trip_int_array(71, 'integers with one zero bit', @a);
+    round_trip_int_array('integers with one zero bit', @a);
 }
