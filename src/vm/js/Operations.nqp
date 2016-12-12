@@ -1138,6 +1138,56 @@ class QAST::OperationsJS {
         });
     }
 
+    add_op('xor', sub ($comp, $node, :$want, :$cps) {
+        my @childlist;
+        my $f_ast;
+        for $node.list {
+            if $_.named eq 'false' {
+                $f_ast := $_;
+            }
+            else {
+                nqp::push(@childlist, $comp.as_js(:want($T_OBJ), $_));
+            }
+        }
+
+        my $ret := $*BLOCK.add_tmp;
+        my $true_count := $*BLOCK.add_tmp;
+
+        my @setup;
+
+        @setup.push("$true_count = 0;\n");
+
+        for @childlist -> $chunk {
+            @setup.push("if ($true_count < 2) \{");
+            @setup.push($chunk);
+            @setup.push(
+                "if ({$chunk.expr}.\$\$toBool($*CTX)) \{\n"
+                ~ "$true_count++;\n"
+                ~ "$ret = {$chunk.expr};\n"
+                ~ "\}\n"
+            );
+
+            @setup.push("\}\n");
+        }
+
+        @setup.push("if ($true_count == 2) \{\n");
+        if $f_ast {
+            my $chunk := $comp.as_js(:want($T_OBJ), $f_ast);
+            @setup.push($chunk);
+            @setup.push("$ret = {$chunk.expr};\n");
+        }
+        else {
+            @setup.push("$ret = nqp.Null;\n");
+        }
+        @setup.push(
+            "\} else if ($true_count == 0) \{\n"
+            ~ "$ret = {@childlist[@childlist-1].expr};\n"
+            ~ "\}"
+        );
+
+        Chunk.new($T_OBJ, $ret, @setup);
+    });
+
     add_op('for', sub ($comp, $node, :$want, :$cps) {
         #TODO CPS
         # TODO redo etc.
