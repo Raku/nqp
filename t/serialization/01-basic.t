@@ -449,8 +449,13 @@ sub add_to_sc($sc, $idx, $obj) {
 
     ok(nqp::scobjcount($dsc) == 1, 'deserialized SC has a single object');
     ok(nqp::istype(nqp::scgetobj($dsc, 0), T8), 'deserialized object has correct type');
-    ok(nqp::isnull(nqp::scgetobj($dsc, 0).cache), 'Multi cache ends up null');
-    ok(nqp::isnull(nqp::scgetobj($dsc, 0).fh), 'File handle ends up null');
+    if nqp::getcomp('nqp').backend.name eq 'jvm' {
+        skip("accessing a attribute containing a null is broken on the jvm", 2);
+    }
+    else {
+        ok(nqp::isnull(nqp::scgetobj($dsc, 0).cache), 'Multi cache ends up null');
+        ok(nqp::isnull(nqp::scgetobj($dsc, 0).fh), 'File handle ends up null');
+    }
 }
 
 # Serializing an SC with a VMArray
