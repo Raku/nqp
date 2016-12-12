@@ -1899,8 +1899,7 @@ QAST::OperationsJAST.add_core_op('control', -> $qastcomp, $op {
     }
 });
 
-# Default ways to box/unbox (for no particular HLL).
-QAST::OperationsJAST.add_hll_box('', $RT_INT, -> $qastcomp {
+QAST::OperationsJAST.add_hll_box('nqp', $RT_INT, -> $qastcomp {
     my $il := JAST::InstructionList.new();
     $il.append($ALOAD_1);
     $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
@@ -1910,7 +1909,7 @@ QAST::OperationsJAST.add_hll_box('', $RT_INT, -> $qastcomp {
         'box_i', $TYPE_SMO, 'Long', $TYPE_SMO, $TYPE_TC ));
     $il
 });
-QAST::OperationsJAST.add_hll_box('', $RT_NUM, -> $qastcomp {
+QAST::OperationsJAST.add_hll_box('nqp', $RT_NUM, -> $qastcomp {
     my $il := JAST::InstructionList.new();
     $il.append($ALOAD_1);
     $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
@@ -1920,7 +1919,7 @@ QAST::OperationsJAST.add_hll_box('', $RT_NUM, -> $qastcomp {
         'box_n', $TYPE_SMO, 'Double', $TYPE_SMO, $TYPE_TC ));
     $il
 });
-QAST::OperationsJAST.add_hll_box('', $RT_STR, -> $qastcomp {
+QAST::OperationsJAST.add_hll_box('nqp', $RT_STR, -> $qastcomp {
     my $il := JAST::InstructionList.new();
     $il.append($ALOAD_1);
     $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
@@ -1928,6 +1927,30 @@ QAST::OperationsJAST.add_hll_box('', $RT_STR, -> $qastcomp {
     $il.append($ALOAD_1);
     $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
         'box_s', $TYPE_SMO, $TYPE_STR, $TYPE_SMO, $TYPE_TC ));
+    $il
+});
+
+# Default ways to box/unbox (for no particular HLL).
+# Boxing and unboxing configuration.
+QAST::OperationsJAST.add_hll_box('', $RT_INT, -> $qastcomp {
+    my $il := JAST::InstructionList.new();
+    $il.append($ALOAD_1);
+    $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+        'hllboxtype_i', $TYPE_SMO, 'Long', $TYPE_TC ));
+    $il
+});
+QAST::OperationsJAST.add_hll_box('', $RT_NUM, -> $qastcomp {
+    my $il := JAST::InstructionList.new();
+    $il.append($ALOAD_1);
+    $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+        'hllboxtype_n', $TYPE_SMO, 'Double', $TYPE_TC ));
+    $il
+});
+QAST::OperationsJAST.add_hll_box('', $RT_STR, -> $qastcomp {
+    my $il := JAST::InstructionList.new();
+    $il.append($ALOAD_1);
+    $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+        'hllboxtype_s', $TYPE_SMO, $TYPE_STR, $TYPE_TC ));
     $il
 });
 QAST::OperationsJAST.add_hll_unbox('', $RT_INT, -> $qastcomp {

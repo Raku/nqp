@@ -2729,6 +2729,26 @@ public final class Ops {
         return decont(obj, tc).st.REPR.getClass().equals(P6str.class) ? 1 : 0;
     }
 
+    /* HLL aware boxing operations */
+    public static SixModelObject hllboxtype_i(long value, ThreadContext tc) {
+        SixModelObject type = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intBoxType;
+        SixModelObject res = type.st.REPR.allocate(tc, type.st);
+        res.set_int(tc, value);
+        return res;
+    }
+    public static SixModelObject hllboxtype_n(double value, ThreadContext tc) {
+        SixModelObject type = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.numBoxType;
+        SixModelObject res = type.st.REPR.allocate(tc, type.st);
+        res.set_num(tc, value);
+        return res;
+    }
+    public static SixModelObject hllboxtype_s(String value, ThreadContext tc) {
+        SixModelObject type = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strBoxType;
+        SixModelObject res = type.st.REPR.allocate(tc, type.st);
+        res.set_str(tc, value);
+        return res;
+    }
+
     /* Attribute operations. */
     public static SixModelObject getattr(SixModelObject obj, SixModelObject ch, String name, ThreadContext tc) {
         try {
