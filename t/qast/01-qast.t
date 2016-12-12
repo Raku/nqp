@@ -1471,9 +1471,11 @@ test_qast_result(
     test_qast_result(
         QAST::Block.new(
             QAST::Block.new(
-                QAST::Block.new(
-                    QAST::Var.new( :name('counter'), :scope('lexical') , :decl('statevar'), :value($counter)),
-                    QAST::Var.new( :name('counter'), :scope('lexical'))
+                QAST::Op.new(:op<takeclosure>, # needed for JVM
+                    QAST::Block.new(
+                        QAST::Var.new( :name('counter'), :scope('lexical') , :decl('statevar'), :value($counter)),
+                        QAST::Var.new( :name('counter'), :scope('lexical'))
+                    )
                 )
            )
         ),
