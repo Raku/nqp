@@ -4,6 +4,9 @@ var incompleteMethodCaches = [];
 var null_s = require('./null_s.js'); /* Used when evaling runtime compiled methods */
 var Null = require('./null.js');
 
+var repossession = require('./repossession.js');
+var compilingSCs = repossession.compilingSCs;
+
 /* Needed for setting defaults values of attrs for objects */
 var bignum = require('bignum');
 var ZERO = bignum(0);
@@ -15,6 +18,8 @@ class STable {
     this.HOW = HOW;
 
     this.modeFlags = 0;
+
+    this._SC = null;
 
     this.objConstructor = REPR.createObjConstructor(this);
 
@@ -250,6 +255,13 @@ class STable {
       var STable = this;
       eval(this.setup + this.code);
       this.code = '';
+    }
+  }
+
+  scwb() {
+    if (compilingSCs.length == 0 || repossession.scwbDisableDepth) return;
+    if (compilingSCs[compilingSCs.length - 1] !== this._SC) {
+      compilingSCs[compilingSCs.length - 1].repossessSTable(this);
     }
   }
 };

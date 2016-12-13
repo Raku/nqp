@@ -529,18 +529,29 @@ class BinaryCursor {
     });
 
 
+    var reposTable = this.at(4 * 14).I32();
+    var numRepos = this.at(4 * 15).I32();
+
+    var repossessed = this.at(reposTable).times(numRepos, function(cursor) {
+      return {type: cursor.I32(), index: cursor.I32(), origSC: cursor.I32(), origIndex: cursor.I32()};
+    });
+
+    this.repossessSTables(repossessed);
 
     /* Stub STables */
     for (var i = 0; i < STables.length; i++) {
-      var repr = STables[i][0];
-      if (!reprs[repr]) {
-        throw 'Unknown REPR: ' + repr;
+      // May already have it, due to repossession.
+      if (!sc.rootSTables[i]) {
+        var repr = STables[i][0];
+        if (!reprs[repr]) {
+          throw 'Unknown REPR: ' + repr;
+        }
+        var REPR = new reprs[repr]();
+        REPR.name = repr;
+        var HOW = null; /* We will fill that in later once objects are stubbed */
+        sc.rootSTables[i] = new sixmodel.STable(REPR, HOW);
+        sc.rootSTables[i]._SC = sc;
       }
-      var REPR = new reprs[repr]();
-      REPR.name = repr;
-      var HOW = null; /* We will fill that in later once objects are stubbed */
-      sc.rootSTables[i] = new sixmodel.STable(REPR, HOW);
-      sc.rootSTables[i]._SC = sc;
     }
 
     /* Stub objects */
@@ -629,8 +640,11 @@ class BinaryCursor {
     }
 
 
-    var reposTable = this.I32();
-    var numRepos = this.I32();
+    // reposTable
+    this.I32();
+    //numRepos
+    this.I32();
+
     var paramInternsData = this.I32();
     var numParamInterns = this.I32();
 
@@ -644,6 +658,16 @@ class BinaryCursor {
       var STable = sc.rootSTables[i];
       if (STable._methodCache instanceof Hash) {
         STable.setMethodCache(STable._methodCache.$$toObject());
+      }
+    }
+  }
+
+  repossessSTables(repossessed) {
+    for (let entry of repossessed) {
+      if (entry.type === 1) {
+        let origSTable = this.sc.deps[entry.origSC].rootSTables[entry.origIndex];
+        this.sc.rootSTables[entry.index] = origSTable;
+        origSTable._SC = this.sc;
       }
     }
   }

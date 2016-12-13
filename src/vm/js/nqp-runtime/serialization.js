@@ -482,6 +482,7 @@ class SerializationWriter {
     this.closures = new BinaryWriteCursor(this);
     this.contextsHeaders = new BinaryWriteCursor(this);
     this.contextsData = new BinaryWriteCursor(this);
+    this.repossessionsData = new BinaryWriteCursor(this);
   }
 
   serializeObject(obj) {
@@ -878,7 +879,31 @@ class SerializationWriter {
 
 
   serializeRepossessions() {
-    /* TODO */
+    /* Make entries. */
+    for (let i = 0; i < this.sc.repIndexes; i++) {
+      let objIdx = this.sc.repIndexes[i] >> 1;
+      let isST = this.sc.repIndexes[i] & 1;
+
+      let origSC = this.sc.repScs[i];
+
+      /* Work out original object's SC location. */
+      let origSCIdx = this.getSCId(origSC);
+      let origIdx = isST != 0
+          ? origSC.rootSTables.indexOf(this.sc.rootSTables[objIdx])
+          : origSC.rootObjects.indexOf(this.sc.rootObjects[objIdx]);
+
+      if (origIdx < 0)
+        throw "Could not find object when writing repossessions; " +
+          (isST != 0
+              ? "STable"
+              : "REPR = " + this.sc.rootObjects[objIdx]._STable.REPR.name);
+
+      /* Write table row. */
+      this.repossessionsData.I32(isST);
+      this.repossessionsData.I32(objIdx);
+      this.repossessionsData.I32(origSCIdx);
+      this.repossessionsData.I32(origIdx);
+    }
   }
 
 
@@ -956,6 +981,7 @@ class SerializationWriter {
     outputSize += this.closures.offset;
     outputSize += this.contextsData.offset;
     outputSize += this.contextsHeaders.offset;
+    outputSize += this.repossessionsData.offset;
 
     this.buffer = new Buffer(outputSize);
 
@@ -1012,6 +1038,8 @@ class SerializationWriter {
     /* Put repossessions table in place, and set location/rows in header. */
     this.header_I32(this.offset);
     this.header_I32(this.sc.repScs.length);
+
+    this.writeChunk(this.repossessionsData);
 
 
     //  /* Sanity check. */

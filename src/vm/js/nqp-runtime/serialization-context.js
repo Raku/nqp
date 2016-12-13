@@ -36,6 +36,7 @@ class SerializationContext extends NQPObject {
      * where not everything was a 6model object. This maps such owned
      * objects to their owner. It is used to determine what object should
      * be repossessed in the case a write barrier is hit. */
+    /* TODO - think if that's really a parrot legacy issue or just a sad fact of serialization */
     //  this.owned_objects = new HashMap<SixModelObject, SixModelObject>();
   }
 
@@ -49,6 +50,16 @@ class SerializationContext extends NQPObject {
 
   getCodeIndex(codeRef) {
     return this.rootCodes.indexOf(codeRef);
+  }
+
+  repossessSTable(STable) {
+    var newSlot = this.rootSTables.length;
+    this.rootSTables.push(STable);
+
+    this.repIndexes.push((newSlot << 1) | 1);
+    this.repScs.push(STable._SC);
+
+    STable._SC = this;
   }
 };
 

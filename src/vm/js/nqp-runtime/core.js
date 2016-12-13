@@ -30,6 +30,8 @@ var BOOT = require('./BOOT.js');
 
 var exceptionsStack = require('./exceptions-stack.js');
 
+var repossession = require('./repossession.js');
+
 exports.CodeRef = CodeRef;
 
 op.isinvokable = function(obj) {
@@ -245,6 +247,7 @@ op.istype = function(ctx, obj, type) {
 
 op.settypecache = function(obj, cache) {
   obj._STable.typeCheckCache = cache.array;
+  if (obj._STable._SC !== null) obj._STable.scwb();
   return obj;
 };
 
@@ -260,6 +263,7 @@ op.setmethcache = function(obj, cache) {
     console.log('we expect a hash here');
   }
   obj._STable.setMethodCache(cache.$$toObject());
+  if (obj._STable._SC !== null) obj._STable.scwb();
   return obj;
 };
 
@@ -269,6 +273,7 @@ op.setmethcacheauth = function(obj, isAuth) {
   } else {
     obj._STable.modeFlags &= ~constants.METHOD_CACHE_AUTHORITATIVE;
   }
+  if (obj._STable._SC !== null) obj._STable.scwb();
   return obj;
 };
 
@@ -468,15 +473,21 @@ op.freshcoderef = function(code) {
   return fresh;
 };
 
-/* TODO - make serialization take this into account */
-var compilingSCs = [];
 op.pushcompsc = function(sc) {
-  compilingSCs.push(sc);
+  repossession.compilingSCs.push(sc);
   return sc;
 };
 
 op.popcompsc = function(sc) {
-  return compilingSCs.pop();
+  return repossession.compilingSCs.pop();
+};
+
+op.scwbenable = function() {
+  return --repossession.scwbDisableDepth;
+};
+
+op.scwbdisable = function() {
+  return ++repossession.scwbDisableDepth;
 };
 
 var compilerRegistry = new Map();
