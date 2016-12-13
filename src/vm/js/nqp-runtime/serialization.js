@@ -888,15 +888,13 @@ class SerializationWriter {
 
       /* Work out original object's SC location. */
       let origSCIdx = this.getSCId(origSC);
-      let origIdx = isST != 0
-          ? origSC.rootSTables.indexOf(this.sc.rootSTables[objIdx])
-          : origSC.rootObjects.indexOf(this.sc.rootObjects[objIdx]);
+      let origIdx = isST != 0 ?
+          origSC.rootSTables.indexOf(this.sc.rootSTables[objIdx]) :
+          origSC.rootObjects.indexOf(this.sc.rootObjects[objIdx]);
 
       if (origIdx < 0)
-        throw "Could not find object when writing repossessions; " +
-          (isST != 0
-              ? "STable"
-              : "REPR = " + this.sc.rootObjects[objIdx]._STable.REPR.name);
+        throw 'Could not find object when writing repossessions; ' +
+            (isST != 0 ? 'STable' : 'REPR = ' + this.sc.rootObjects[objIdx]._STable.REPR.name);
 
       /* Write table row. */
       this.repossessionsData.I32(isST);
