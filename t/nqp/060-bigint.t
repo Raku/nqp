@@ -68,13 +68,8 @@ ok(iseq(nqp::mod_I(box(-12), box(-5), $bi_type), -2), "mod_I - both negative");
 ok(iseq(nqp::mod_I(box(12), box(-5), $bi_type), -3), "mod_I - positive and negative");
 ok(iseq(nqp::mod_I(box(12), box(-4), $bi_type), 0), "mod_I - positive and negative");
 
-if nqp::getcomp('nqp').backend.name eq 'js' {
-    ok(1, "skipping bitand on negative numbers untill the bignum library supports them");
-}
-else {
-    ok(iseq(nqp::bitand_I(nqp::fromstr_I('-1073741825', $one), $one, $one), 1),
-        'Bit ops (RT 109740)');
-}
+ok(iseq(nqp::bitand_I(nqp::fromstr_I('-1073741825', $one), $one, $one), 1),
+    'Bit ops (RT 109740)');
 
 # Now we'll create a type that boxes a P6bigint.
 my $bi_boxer := NQPClassHOW.new_type(:name('TestPerl6Int'), :repr('P6opaque'));
