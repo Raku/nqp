@@ -48,6 +48,17 @@ class STable {
     this.objConstructor.prototype.$$call = undefined;
     this.objConstructor.prototype.$$injectMethod = undefined;
 
+    this.objConstructor.prototype.$$scwb = function() {
+
+      if (compilingSCs.length == 0 || repossession.scwbDisableDepth || repossession.neverRepossess.get(this)) {
+        return;
+      }
+
+      if (compilingSCs[compilingSCs.length - 1] !== this._SC) {
+        compilingSCs[compilingSCs.length - 1].repossessObject(this);
+      }
+    };
+
     if (this.REPR.setupSTable) {
       this.REPR.setupSTable(this);
     }

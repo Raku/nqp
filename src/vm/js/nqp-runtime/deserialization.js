@@ -133,7 +133,12 @@ class BinaryCursor {
     for (var i = 0; i < elems; i++) {
       array.push(readElem(this));
     }
-    return BOOT.createArray(array);
+    var bootArray = BOOT.createArray(array);
+    if (this.sc.currentObject) {
+        bootArray._SC = this.sc;
+        this.sc.ownedObjects.set(bootArray, this.sc.currentObject);
+    }
+    return bootArray;
   }
 
 
@@ -212,6 +217,12 @@ class BinaryCursor {
       var str = this.str();
       hash.content.set(str, this.variant());
     }
+
+    if (this.sc.currentObject) {
+        hash._SC = this.sc;
+        this.sc.ownedObjects.set(hash, this.sc.currentObject);
+    }
+
     return hash;
   }
 
@@ -540,9 +551,9 @@ class BinaryCursor {
 
     this.stubSTables(STables);
 
-    this.stubObjects(objects);
+    this.repossessObjects(repossessed);
 
-    /* Stub objects */
+    this.stubObjects(objects);
 
 
     var closuresOffset = this.I32();
@@ -653,16 +664,18 @@ class BinaryCursor {
 
   stubObjects(objects) {
     for (var i = 0; i < objects.length; i++) {
-      var STableForObj =
-          this.sc.deps[objects[i].STable[0]].rootSTables[objects[i].STable[1]];
-      if (!STableForObj) {
-        console.log('Missing stable', objects[i].STable[0], objects[i].STable[1], deps[objects[i].STable[0]].rootSTables);
-      }
+      if (!this.sc.rootObjects[i]) {
+        var STableForObj =
+            this.sc.deps[objects[i].STable[0]].rootSTables[objects[i].STable[1]];
+        if (!STableForObj) {
+          console.log('Missing stable', objects[i].STable[0], objects[i].STable[1], deps[objects[i].STable[0]].rootSTables);
+        }
 
-      this.sc.rootObjects[i] = objects[i].isConcrete ?
-          new (STableForObj.objConstructor)() :
-          STableForObj.createTypeObject();
-      this.sc.rootObjects[i]._SC = this.sc;
+        this.sc.rootObjects[i] = objects[i].isConcrete ?
+            new (STableForObj.objConstructor)() :
+            STableForObj.createTypeObject();
+        this.sc.rootObjects[i]._SC = this.sc;
+      }
     }
   }
 
@@ -671,7 +684,9 @@ class BinaryCursor {
       if (objects[i].isConcrete) {
         var repr = this.sc.rootObjects[i]._STable.REPR;
         if (repr.deserializeFinish) {
+          this.sc.currentObject = this.sc.rootObjects[i];
           repr.deserializeFinish(this.sc.rootObjects[i], objects[i].data);
+          this.sc.currentObject = undefined;
         }
       }
     }
@@ -683,6 +698,23 @@ class BinaryCursor {
         let origSTable = this.sc.deps[entry.origSC].rootSTables[entry.origIndex];
         this.sc.rootSTables[entry.index] = origSTable;
         origSTable._SC = this.sc;
+      }
+    }
+  }
+
+  repossessObjects(repossessed) {
+    for (let entry of repossessed) {
+      if (entry.type === 0) {
+        let origObj = this.sc.deps[entry.origSC].rootObjects[entry.origIndex];
+        this.sc.rootObjects[entry.index] = origObj;
+        origObj._SC = this.sc;
+
+        /* The object's STable may have changed as a result of the
+         * repossession (perhaps due to mixing in to it), so put the
+         * STable it should now have in place. */
+
+        /* TODO */
+        // origObj.st = lookupSTable(orig.getInt(), orig.getInt());
       }
     }
   }

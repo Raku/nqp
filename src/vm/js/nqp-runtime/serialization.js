@@ -8,6 +8,8 @@ var Null = require('./null.js');
 var MultiCache = require('./multicache.js').MultiCache;
 var FileHandle = require('./io.js').FileHandle;
 
+var repossession = require('./repossession.js');
+
 var BOOT = require('./BOOT.js');
 
 var constants = require('./constants.js');
@@ -880,7 +882,7 @@ class SerializationWriter {
 
   serializeRepossessions() {
     /* Make entries. */
-    for (let i = 0; i < this.sc.repIndexes; i++) {
+    for (let i = 0; i < this.sc.repIndexes.length; i++) {
       let objIdx = this.sc.repIndexes[i] >> 1;
       let isST = this.sc.repIndexes[i] & 1;
 
@@ -1090,6 +1092,7 @@ op.scsetcode = function(sc, idx, obj) {
 };
 
 op.neverrepossess = function(obj) {
+  repossession.neverRepossess.set(obj, true);
   return obj;
 };
 
