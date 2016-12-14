@@ -1,9 +1,10 @@
 use nqpmo;
 
-plan(15);
+my $plan := 23;
+plan($plan);
 
 if nqp::getcomp('nqp').backend.name eq 'jvm' {
-    skip("This test doesn't work on the jvm", 10);
+    skip("This test doesn't work on the jvm", $plan);
     nqp::exit(0);
 }
 
@@ -260,6 +261,78 @@ sub fresh_sc_name() {
 
     is($new_obj.get, 123, "nqp::scwbdisable turns off object repossession");
     is($new_obj2.get, 2460, "nqp::scwbenable turns on object repossession");
+
+    is(nqp::elems($conflicts), 0, "we don't have any conflicts");
+}
+
+{
+    my class Foo {
+        has int $!int;
+        method set($value) {
+            $!int := $value;
+        }
+        method get() {
+            $!int;
+        }
+    }
+    my class Bar is Foo {
+        has num $!num;
+        method set_num($value) {
+            $!num := $value;
+        }
+        method get_num() {
+            $!num;
+        }
+    }
+
+    my $sc1 := fresh_sc_name();
+    my $sc2 := fresh_sc_name();
+
+    my $old_sc := nqp::createsc($sc1);
+    my $old_sh := nqp::list_s();
+
+    my $obj := Foo.new;
+
+    $obj.set(123);
+
+    add_to_sc($old_sc, 0, $obj);
+
+
+    my $old_serialized := nqp::serialize($old_sc, $old_sh);
+
+    my $new_sc := nqp::createsc($sc2);
+    my $new_sh := nqp::list_s();
+
+    nqp::pushcompsc($new_sc);
+
+    nqp::rebless($obj, Bar);
+    nqp::popcompsc();
+
+    $obj.set_num(246);
+
+
+    my $new_serialized := nqp::serialize($new_sc, $new_sh);
+
+
+    my $old_dsc := nqp::createsc($sc1);
+    nqp::deserialize($old_serialized, $old_dsc, $old_sh, nqp::list(), nqp::null());
+
+
+    my $new_obj := nqp::scgetobj($old_dsc, 0);
+    is($new_obj.get, 123, 'the object deserializes and has the value from before the repossesion');
+    ok(nqp::istype($new_obj, Foo), 'object has the base type before repossession');
+    ok(!nqp::istype($new_obj, Bar), "object doesn't have the subclass type before repossession");
+
+    my $new_dsc := nqp::createsc($sc2);
+
+    my $conflicts := nqp::list();
+    nqp::deserialize($new_serialized, $new_dsc, $new_sh, nqp::list(), $conflicts);
+
+    ok(nqp::istype($new_obj, Foo), 'object has the base type after repossession');
+    ok(nqp::istype($new_obj, Bar), 'object has the subclass type after repossesion');
+
+    is($new_obj.get, 123, "the object has the correct value in an original attribute");
+    is($new_obj.get_num, 246, "the object has the correct value in an added attribute");
 
     is(nqp::elems($conflicts), 0, "we don't have any conflicts");
 }
