@@ -551,7 +551,7 @@ class BinaryCursor {
 
     this.stubSTables(STables);
 
-    this.repossessObjects(repossessed);
+    this.repossessObjects(objects, repossessed);
 
     this.stubObjects(objects);
 
@@ -702,19 +702,23 @@ class BinaryCursor {
     }
   }
 
-  repossessObjects(repossessed) {
+  repossessObjects(objects, repossessed) {
     for (let entry of repossessed) {
       if (entry.type === 0) {
         let origObj = this.sc.deps[entry.origSC].rootObjects[entry.origIndex];
         this.sc.rootObjects[entry.index] = origObj;
         origObj._SC = this.sc;
 
+        var STableForObj =
+            this.sc.deps[objects[entry.index].STable[0]].rootSTables[objects[entry.index].STable[1]];
+
         /* The object's STable may have changed as a result of the
          * repossession (perhaps due to mixing in to it), so put the
          * STable it should now have in place. */
 
-        /* TODO */
-        // origObj.st = lookupSTable(orig.getInt(), orig.getInt());
+        if (STableForObj !== origObj._STable) {
+          Object.setPrototypeOf(origObj, STableForObj.objConstructor.prototype);
+        }
       }
     }
   }

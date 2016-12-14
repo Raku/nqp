@@ -347,6 +347,7 @@ op.setcodename = function(code, name) {
 
 op.rebless = function(obj, newType) {
   obj._STable.REPR.changeType(obj, newType);
+  if (obj._SC !== null) obj.$$scwb();
   return obj;
 };
 
