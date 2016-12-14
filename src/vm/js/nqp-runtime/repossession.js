@@ -1,3 +1,3 @@
 exports.compilingSCs = [];
-exports.scwbDisable = 0;
+exports.scwbDisableDepth = 0;
 exports.neverRepossess = new Map();
