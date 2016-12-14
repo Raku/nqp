@@ -91,6 +91,6 @@ class QAST::Block is QAST::Node does QAST::Children {
     }
 
     method dump_extra_node_info() {
-        nqp::chars(self.blocktype) ?? ":decl($!blocktype)" !! "";
+        nqp::chars(self.blocktype) ?? ":blocktype($!blocktype)" !! "";
     }
 }
