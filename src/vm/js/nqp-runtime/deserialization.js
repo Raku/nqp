@@ -538,35 +538,11 @@ class BinaryCursor {
 
     this.repossessSTables(repossessed);
 
-    /* Stub STables */
-    for (var i = 0; i < STables.length; i++) {
-      // May already have it, due to repossession.
-      if (!sc.rootSTables[i]) {
-        var repr = STables[i][0];
-        if (!reprs[repr]) {
-          throw 'Unknown REPR: ' + repr;
-        }
-        var REPR = new reprs[repr]();
-        REPR.name = repr;
-        var HOW = null; /* We will fill that in later once objects are stubbed */
-        sc.rootSTables[i] = new sixmodel.STable(REPR, HOW);
-        sc.rootSTables[i]._SC = sc;
-      }
-    }
+    this.stubSTables(STables);
+
+    this.stubObjects(objects);
 
     /* Stub objects */
-    for (var i = 0; i < objects.length; i++) {
-      var STableForObj =
-          deps[objects[i].STable[0]].rootSTables[objects[i].STable[1]];
-      if (!STableForObj) {
-        console.log('Missing stable', objects[i].STable[0], objects[i].STable[1], deps[objects[i].STable[0]].rootSTables);
-      }
-
-      sc.rootObjects[i] = objects[i].isConcrete ?
-          new (STableForObj.objConstructor)() :
-          STableForObj.createTypeObject();
-      sc.rootObjects[i]._SC = sc;
-    }
 
 
     var closuresOffset = this.I32();
@@ -586,19 +562,9 @@ class BinaryCursor {
       sc.rootCodes.push(closures[i]);
     }
 
-    for (var i = 0; i < STables.length; i++) {
-      STables[i][1].STable(sc.rootSTables[i]);
-    }
+    this.deserializeSTables(STables);
 
-    /* Finish up objects */
-    for (var i = 0; i < objects.length; i++) {
-      if (objects[i].isConcrete) {
-        var repr = sc.rootObjects[i]._STable.REPR;
-        if (repr.deserializeFinish) {
-          repr.deserializeFinish(sc.rootObjects[i], objects[i].data);
-        }
-      }
-    }
+    this.deserializeObjects(objects);
 
     var contextsOffset = this.I32();
     var contextsNumber = this.I32();
@@ -658,6 +624,55 @@ class BinaryCursor {
       var STable = sc.rootSTables[i];
       if (STable._methodCache instanceof Hash) {
         STable.setMethodCache(STable._methodCache.$$toObject());
+      }
+    }
+  }
+
+  stubSTables(STables) {
+    for (var i = 0; i < STables.length; i++) {
+      // May already have it, due to repossession.
+      if (!this.sc.rootSTables[i]) {
+        var repr = STables[i][0];
+        if (!reprs[repr]) {
+          throw 'Unknown REPR: ' + repr;
+        }
+        var REPR = new reprs[repr]();
+        REPR.name = repr;
+        var HOW = null; /* We will fill that in later once objects are stubbed */
+        this.sc.rootSTables[i] = new sixmodel.STable(REPR, HOW);
+        this.sc.rootSTables[i]._SC = this.sc;
+      }
+    }
+  }
+
+  deserializeSTables(STables) {
+    for (var i = 0; i < STables.length; i++) {
+      STables[i][1].STable(this.sc.rootSTables[i]);
+    }
+  }
+
+  stubObjects(objects) {
+    for (var i = 0; i < objects.length; i++) {
+      var STableForObj =
+          this.sc.deps[objects[i].STable[0]].rootSTables[objects[i].STable[1]];
+      if (!STableForObj) {
+        console.log('Missing stable', objects[i].STable[0], objects[i].STable[1], deps[objects[i].STable[0]].rootSTables);
+      }
+
+      this.sc.rootObjects[i] = objects[i].isConcrete ?
+          new (STableForObj.objConstructor)() :
+          STableForObj.createTypeObject();
+      this.sc.rootObjects[i]._SC = this.sc;
+    }
+  }
+
+  deserializeObjects(objects) {
+    for (var i = 0; i < objects.length; i++) {
+      if (objects[i].isConcrete) {
+        var repr = this.sc.rootObjects[i]._STable.REPR;
+        if (repr.deserializeFinish) {
+          repr.deserializeFinish(this.sc.rootObjects[i], objects[i].data);
+        }
       }
     }
   }
