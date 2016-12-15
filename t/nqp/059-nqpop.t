@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(282);
+plan(286);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -455,3 +455,20 @@ ok(nqp::null() eq '', "null_s is and empty str");
     ok(nqp::isnull_s($var), "null_s can be stuck into a var and stays null_s");
 }
 ok(nqp::istrue(nqp::null_s()) == 0, "null_s isn't true");
+
+
+if nqp::getcomp('nqp').backend.name eq 'jvm' {
+    skip("with/without are broken on the jvm", 4);
+} else {
+    my class Defined {
+        method defined() { 1 }
+    }
+    my class NotDefined {
+        method defined() { 0 }
+    }
+    is(nqp::with(Defined.new, "good", "bad"), "good");
+    is(nqp::with(NotDefined.new, "good", "bad"), "bad");
+
+    is(nqp::without(Defined.new, "good", "bad"), "bad");
+    is(nqp::without(NotDefined.new, "good", "bad"), "good");
+}
