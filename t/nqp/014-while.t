@@ -1,6 +1,6 @@
 # while, until statements
 
-plan(14);
+plan(15);
 
 my $a; my $sum;
 
@@ -92,4 +92,11 @@ repeat until $a == 1 {
 };
 ok($sum == 99, 'repeat_until always executes at least once');
 
+my $i := 4;
+my $log := '';
+while $i*10 -> $cond {
+    $i := $i - 1;
+    $log := $log ~ $cond ~ ';';
+}
+is($log, '40;30;20;10;', 'while ... -> $param {...}');
 
