@@ -1027,6 +1027,10 @@ class QAST::OperationsJS {
             "\}\n"], :node($node));
     });
 
+    my sub needs_cond_passed($n) {
+        nqp::istype($n, QAST::Block) && $n.arity > 0 &&
+            ($n.blocktype eq 'immediate' || $n.blocktype eq 'immediate_static')
+    }
 
     for <if unless with without> -> $op_name {
         add_op($op_name, sub ($comp, $node, :$want, :$cps) {
@@ -1041,10 +1045,6 @@ class QAST::OperationsJS {
             nqp::die("Operation '"~$node.op~"' needs either 2 or 3 operands")
                 if $operands < 2 || $operands > 3;
 
-            my sub needs_cond_passed($n) {
-                nqp::istype($n, QAST::Block) && $n.arity > 0 &&
-                    ($n.blocktype eq 'immediate' || $n.blocktype eq 'immediate_static')
-            }
 
 
             my int $cond_type := (needs_cond_passed($node[1]) || needs_cond_passed($node[2]) || $is_withy)
@@ -1101,9 +1101,10 @@ class QAST::OperationsJS {
             }
 
 
-            # TODO ->
 
             if nqp::istype($cond, ChunkCPS) || nqp::istype($then, ChunkCPS) || nqp::istype($else, ChunkCPS) {
+                # TODO ->
+
                 if needs_cond_passed($then) || needs_cond_passed($else) {
                     return $comp.NYI("if ... -> \{...\} in CPS mode");
                 }
@@ -1288,17 +1289,31 @@ class QAST::OperationsJS {
             }
 
             return $comp.NYI("3 argument $op") if +@operands == 3 && $op ne 'while';
-            # TODO while ... -> $cond {} 
 
             my $loop := LoopInfo.new($*LOOP, :$label);
 
-            my $cond;
+
+            my int $cond_type := needs_cond_passed($node[1]) ?? $T_OBJ !! $T_BOOL;
+
+
+            my $check_cond;
             my $body;
             {
                 my $*LOOP := $loop;
-                $cond := $comp.as_js(@operands[0], :want($T_BOOL));
-                $body := $comp.as_js(@operands[1], :want($T_VOID));
+                my $cond := $comp.as_js(@operands[0], :want($T_BOOL));
+                $check_cond := $comp.coerce($cond, $T_BOOL);
+                my $cond_without_sideeffects := Chunk.new($cond.type, $cond.expr);
+
+                if needs_cond_passed(@operands[1]) {
+                    my $block := try $*BLOCK;
+                    my $loop := try $*LOOP;
+                    $body := $comp.compile_block(@operands[1], $block, $loop, :want($T_VOID), :extra_args([$cond_without_sideeffects]));
+                }
+                else {
+                    $body := $comp.as_js(@operands[1], :want($T_VOID), :$cps);
+                }
             }
+
 
             my $post := '';
 
@@ -1318,8 +1333,8 @@ class QAST::OperationsJS {
                             ~ "{$loop.redo} = false;\n"
                             ~  "\} else \{\n"
                         !! ''), 
-                    $cond,
-                    "if ($neg {$cond.expr}) \{break;\}\n",
+                    $check_cond,
+                    "if ($neg {$check_cond.expr}) \{break;\}\n",
                     ($loop.has_redo ?? "\}\n" !! ''),
                     $handled,
                     "\}"
@@ -1331,8 +1346,8 @@ class QAST::OperationsJS {
                 Chunk.void(
                     "do \{\n",
                     $body,
-                    $cond,
-                    "\} while ($neg {$cond.expr});"
+                    $check_cond,
+                    "\} while ($neg {$check_cond.expr});"
                 );
             }
         });
