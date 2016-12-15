@@ -1028,12 +1028,14 @@ class QAST::OperationsJS {
     });
 
 
-    for <if unless> -> $op_name {
+    for <if unless with without> -> $op_name {
         add_op($op_name, sub ($comp, $node, :$want, :$cps) {
             #TODO CPS
             unless nqp::defined($want) {
                 nqp::die("Unknown want");
             }
+
+            my $is_withy := $op_name eq 'with' || $op_name eq 'without';
 
             my $operands := +$node.list;
             nqp::die("Operation '"~$node.op~"' needs either 2 or 3 operands")
@@ -1045,7 +1047,7 @@ class QAST::OperationsJS {
             }
 
 
-            my int $cond_type := (needs_cond_passed($node[1]) || needs_cond_passed($node[2]))
+            my int $cond_type := (needs_cond_passed($node[1]) || needs_cond_passed($node[2]) || $is_withy)
                 ?? $T_OBJ
                 !! (($operands == 3 || $want == $T_VOID) ?? $T_BOOL !! $want);
 
@@ -1060,7 +1062,9 @@ class QAST::OperationsJS {
                 $result := $*BLOCK.add_tmp();
             }
 
-            my $boolifed_cond := $comp.coerce($cond, $T_BOOL);
+            my $check_cond := $is_withy
+                ?? Chunk.new($T_INT, "{$cond.expr}.defined($*CTX, null, {$cond.expr}).\$\$toBool($*CTX)", $cond)
+                !! $comp.coerce($cond, $T_BOOL);
 
             my $cond_without_sideeffects := Chunk.new($cond.type, $cond.expr);
 
@@ -1076,7 +1080,7 @@ class QAST::OperationsJS {
                 }
             }
 
-            if $node.op eq 'if' {
+            if $node.op eq 'if' || $node.op eq 'with' {
                 $then := compile_block($node[1]);
 
                 if $operands == 3 {
@@ -1110,9 +1114,10 @@ class QAST::OperationsJS {
                 else {
                     my str $cont := $comp.unique_var('cont');
                     my str $result := $comp.unique_var('result');
+                    # TODO make with and without work in CPS mode
                     return ChunkCPS.new($want, $result, [
-                        $boolifed_cond,
-                        "if ({$boolifed_cond.expr}) \{\n",
+                        $check_cond,
+                        "if ({$check_cond.expr}) \{\n",
                         nqp::istype($then, ChunkCPS) ?? $*BLOCK.set_cont($then, $cont) !! "",
                         $then,
                         nqp::istype($then, ChunkCPS) ?? "" !! "return $cont({$then.expr});\n",
@@ -1126,8 +1131,8 @@ class QAST::OperationsJS {
             }
 
             Chunk.new($want, $result, [
-                $boolifed_cond,
-                "if ({$boolifed_cond.expr}) \{\n",
+                $check_cond,
+                "if ({$check_cond.expr}) \{\n",
                 $then,
                 $want != $T_VOID ?? "$result = {$then.expr};\n" !! '',
                 "\} else \{\n",
