@@ -1288,7 +1288,6 @@ class QAST::OperationsJS {
             }
 
             return $comp.NYI("3 argument $op") if +@operands == 3;
-            # TODO - return value
             # TODO while ... -> $cond {} 
 
             my $loop := LoopInfo.new($*LOOP, :$label);
