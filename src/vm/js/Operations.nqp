@@ -1287,7 +1287,7 @@ class QAST::OperationsJS {
                 else { @operands.push($_) }
             }
 
-            return $comp.NYI("3 argument $op") if +@operands == 3;
+            return $comp.NYI("3 argument $op") if +@operands == 3 && $op ne 'while';
             # TODO while ... -> $cond {} 
 
             my $loop := LoopInfo.new($*LOOP, :$label);
@@ -1300,13 +1300,19 @@ class QAST::OperationsJS {
                 $body := $comp.as_js(@operands[1], :want($T_VOID));
             }
 
+            my $post := '';
+
+            if +@operands == 3 {
+                $post := Chunk.void('(function() {', $comp.as_js(@operands[2], :want($T_VOID)), '})()');
+            }
+
             if $op eq 'while' || $op eq 'until' {
                 my str $neg := $op eq 'while' ?? '!' !! '';
 
                 # handle_control can set redo so we call it here
                 my $handled := $comp.handle_control($loop, $body);
                 Chunk.void(
-                    "for (;;) \{\n",
+                    "for (;;", $post, ") \{\n",
                     ($loop.has_redo
                         ?? "if ({$loop.redo}) \{;\n"
                             ~ "{$loop.redo} = false;\n"
