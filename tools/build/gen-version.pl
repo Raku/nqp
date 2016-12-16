@@ -9,6 +9,7 @@ gen-version.pl -- script to generate version information for HLL compilers
 use POSIX 'strftime';
 
 my $prefix = shift;
+my $libdir = shift;
 
 open(my $fh, '<', 'VERSION') or die $!;
 my $VERSION = <$fh>;
@@ -29,6 +30,7 @@ sub hll-config(\$config) {
     \$config<version>    := '$VERSION';
     \$config<build-date> := '$builddate';
     \$config<prefix>     := '$prefix';
+    \$config<libdir>     := '$libdir';
 }
 END_VERSION
 

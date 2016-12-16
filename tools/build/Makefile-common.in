@@ -104,7 +104,7 @@ SYSROOT         = @sysroot@
 PREFIX          = @prefix@
 BIN_DIR         = $(PREFIX)/bin
 NQP_LANG_DIR    = $(PREFIX)/share/nqp
-NQP_LIB_DIR     = $(NQP_LANG_DIR)/lib
+NQP_LIB_DIR     = @nqplibdir@
 PROVE           = prove
 
 # nqp::makefile <-- tells NQP::Configure to treat this file as a makefile,

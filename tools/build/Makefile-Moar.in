@@ -164,7 +164,7 @@ $(M_STAGE1)/$(P6QREGEX_MOAR): $(M_STAGE0) $(P6QREGEX_SOURCES) $(M_STAGE1)/$(QAST
 
 $(M_STAGE1)/$(NQP_MOAR): $(M_STAGE0) $(M_NQP_SOURCES) $(M_STAGE1)/$(P6QREGEX_MOAR)
 	$(MKPATH) $(M_STAGE1)/gen
-	$(PERL) tools/build/gen-version.pl $(PREFIX) > $(M_STAGE1)/nqp-config.nqp
+	$(PERL) tools/build/gen-version.pl $(PREFIX) $(NQP_LIB_DIR) > $(M_STAGE1)/nqp-config.nqp
 	$(PERL) tools/build/gen-cat.pl moar $(M_NQP_SOURCES) $(M_STAGE1)/nqp-config.nqp > $(M_STAGE1)/$(NQP_COMBINED)
 	$(M_STAGE0_NQP) --module-path=$(M_STAGE1) --setting-path=$(M_STAGE1) \
 	    --setting=NQPCORE --target=mbc --no-regex-lib \
@@ -235,7 +235,7 @@ $(M_STAGE2)/$(P6QREGEX_MOAR): $(M_STAGE1) $(P6QREGEX_SOURCES) $(M_STAGE2)/$(QAST
 
 $(M_STAGE2)/$(NQP_MOAR): $(M_STAGE1) $(M_NQP_SOURCES) $(M_STAGE2)/$(P6QREGEX_MOAR)
 	$(MKPATH) $(M_STAGE2)/gen
-	$(PERL) tools/build/gen-version.pl $(PREFIX) > $(M_STAGE2)/nqp-config.nqp
+	$(PERL) tools/build/gen-version.pl $(PREFIX) $(NQP_LIB_DIR) > $(M_STAGE2)/nqp-config.nqp
 	$(PERL) tools/build/gen-cat.pl moar $(M_NQP_SOURCES) $(M_STAGE2)/nqp-config.nqp > $(M_STAGE2)/$(NQP_COMBINED)
 	$(M_STAGE1_NQP) --module-path=$(M_STAGE2) --setting-path=$(M_STAGE2) \
 	    --setting=NQPCORE --target=mbc --no-regex-lib \

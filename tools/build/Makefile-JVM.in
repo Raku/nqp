@@ -170,7 +170,7 @@ $(J_STAGE1)/$(P6QREGEX_JAR): $(J_STAGE0) $(P6QREGEX_SOURCES) $(J_STAGE1)/$(QAST_
 
 $(J_STAGE1)/$(NQP_JAR): $(J_STAGE0) $(J_NQP_SOURCES) $(J_STAGE1)/$(P6QREGEX_JAR)
 	$(MKPATH) $(J_STAGE1)
-	$(PERL) tools/build/gen-version.pl > $(J_STAGE1)/nqp-config.nqp
+	$(PERL) tools/build/gen-version.pl $(PREFIX) $(NQP_LIB_DIR) > $(J_STAGE1)/nqp-config.nqp
 	$(PERL) tools/build/gen-cat.pl jvm $(J_NQP_SOURCES) $(J_STAGE1)/nqp-config.nqp > $(J_STAGE1)/$(NQP_COMBINED)
 	$(J_STAGE0_NQP) --module-path=$(J_STAGE1) --setting-path=$(J_STAGE1) \
          --setting=NQPCORE --target=jar --no-regex-lib --javaclass=nqp \
@@ -238,7 +238,7 @@ $(J_STAGE2)/$(P6QREGEX_JAR): $(J_STAGE1) $(P6QREGEX_SOURCES) $(J_STAGE2)/$(QAST_
 
 $(J_STAGE2)/$(NQP_JAR): $(J_STAGE1) $(J_NQP_SOURCES) $(J_STAGE2)/$(P6QREGEX_JAR)
 	$(MKPATH) $(J_STAGE2)
-	$(PERL) tools/build/gen-version.pl > $(J_STAGE2)/nqp-config.nqp
+	$(PERL) tools/build/gen-version.pl $(PREFIX) $(NQP_LIB_DIR) > $(J_STAGE2)/nqp-config.nqp
 	$(PERL) tools/build/gen-cat.pl jvm $(J_NQP_SOURCES) $(J_STAGE2)/nqp-config.nqp > $(J_STAGE2)/$(NQP_COMBINED)
 	$(J_STAGE1_NQP) --module-path=$(J_STAGE2) --setting-path=$(J_STAGE2) \
          --setting=NQPCORE --target=jar --no-regex-lib --javaclass=nqp \

@@ -29,7 +29,7 @@ MAIN: {
     my $exe = $NQP::Configure::exe;
 
     my %options;
-    GetOptions(\%options, 'help!', 'prefix=s',
+    GetOptions(\%options, 'help!', 'prefix=s', 'libdir=s',
                'sysroot=s', 'sdkroot=s',
                'backends=s',
                'no-clean',
@@ -127,9 +127,10 @@ MAIN: {
                     : ($options{sysroot}
 		      ? '/usr'
 		      : File::Spec->catdir(cwd, 'install'));
-    $config{prefix} = $prefix;
-    $config{sysroot} = $options{sysroot};
-    $config{sdkroot} = $options{sdkroot};
+    $config{prefix}    = $prefix;
+    $config{nqplibdir} = $options{libdir} ? "$options{libdir}/nqp" : '$(NQP_LANG_DIR)/lib';
+    $config{sysroot}   = $options{sysroot};
+    $config{sdkroot}   = $options{sdkroot};
 
     # Save options in config.status
     unlink('config.status');
