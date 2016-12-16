@@ -6,15 +6,14 @@ use warnings;
 use 5.008;
 use File::Spec;
 
-my ($destdir, $prefix, $moar) = @ARGV;
+my ($destdir, $prefix, $lib_dir, $moar) = @ARGV;
 my $realpath = $destdir.$prefix;
 
 unless (File::Spec->file_name_is_absolute($prefix)) {
     $prefix = File::Spec->rel2abs($prefix);
 }
 
-my $lib_dir = File::Spec->catfile($prefix, 'share', 'nqp', 'lib');
-my $nqp_mvm = File::Spec->catfile($prefix, 'share', 'nqp', 'lib', 'nqp.moarvm');
+my $nqp_mvm = File::Spec->catfile($lib_dir, 'nqp.moarvm');
 
 if ($^O eq 'MSWin32') {
     my $install_to = File::Spec->catfile($realpath, 'bin', 'nqp-m.bat');
