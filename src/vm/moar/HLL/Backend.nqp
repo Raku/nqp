@@ -283,10 +283,10 @@ class HLL::Backend::MoarVM {
             for $obj[0] -> $k {
                 my $v := $obj[0]{$k};
                 if nqp::ishash($v) {
-                    nqp::sayfh($profile_fh, "INSERT INTO routines VALUES ('" ~ nqp::join("','", nqp::list(nqp::iterkey_s($k), ~$v<name>, ~$v<line>, ~$v<file>)) ~ "');");
+                    nqp::sayfh($profile_fh, "INSERT INTO routines VALUES ('" ~ nqp::join("','", nqp::list(nqp::iterkey_s($k), literal_subst(~$v<name>, "'", "''"), ~$v<line>, ~$v<file>)) ~ "');");
                 }
                 else {
-                    nqp::sayfh($profile_fh, "INSERT INTO allocators VALUES ('" ~ nqp::join("','", nqp::list(nqp::iterkey_s($k), ~$v)) ~ "');");
+                    nqp::sayfh($profile_fh, "INSERT INTO allocators VALUES ('" ~ nqp::join("','", nqp::list(nqp::iterkey_s($k), literal_subst(~$v, "'", "''"))) ~ "');");
                 }
             }
             for $obj[1] -> $k {
