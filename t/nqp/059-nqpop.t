@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(286);
+plan(298);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -472,3 +472,17 @@ if nqp::getcomp('nqp').backend.name eq 'jvm' {
     is(nqp::without(Defined.new, "good", "bad"), "bad");
     is(nqp::without(NotDefined.new, "good", "bad"), "good");
 }
+
+is(nqp::tclc('aBcD'), 'Abcd', 'tclc sub form on mixed-case latin string');
+is(nqp::tclc('ßß'), 'Ssß', 'tclc and German sharp s');
+is(nqp::tclc('ǉenčariti'), 'ǈenčariti', 'lj => Lj (in one character)');
+is(nqp::tclc('Ångstrom'), 'Ångstrom', 'Å remains Å');
+is(nqp::tclc("\x1044E TEST"), "\x10426 test", 'tclc works on codepoints greater than 0xffff');
+
+is(nqp::tc("hello world"), "HELLO WORLD", "simple");
+is(nqp::tc(""), "", "empty string");
+is(nqp::tc("ü"), "Ü", "umlaut");
+is(nqp::tc("ó"), "Ó", "accented chars");
+is(nqp::tc('ß'), 'Ss', 'sharp s => Ss');
+is(nqp::tc('$'), '$', "character that don't have title case remain unchanged");
+is(nqp::tc("\x1044E"), "\x10426", 'tc works on codepoints greater than 0xffff');
