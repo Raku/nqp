@@ -3969,6 +3969,29 @@ public final class Ops {
         return val.toUpperCase();
     }
 
+    static String codepointToTitleCase(int codepoint) {
+        if (codepoint == 223) return "Ss";
+        return new String(Character.toChars(Character.toTitleCase(codepoint)));
+    }
+
+    public static String tc(String val) {
+        String ret = "";
+        for (int offset = 0; offset < val.length(); ) {
+            int codepoint = val.codePointAt(offset);
+            ret += codepointToTitleCase(codepoint);
+            offset += Character.charCount(codepoint);
+        }
+        return ret;
+    }
+
+    public static String tclc(String in) {
+        if (in.length() == 0)
+            return in;
+        int first = in.codePointAt(0);
+        return codepointToTitleCase(first)
+            + in.substring(Character.charCount(first)).toLowerCase();
+    }
+
     public static String x(String val, long count, ThreadContext tc) {
         if (count < 0)
             throw ExceptionHandling.dieInternal(tc, "repeat count (" + count + ") cannot be negative");
