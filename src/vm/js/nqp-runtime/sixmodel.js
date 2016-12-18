@@ -55,7 +55,8 @@ class STable {
       }
 
       if (compilingSCs[compilingSCs.length - 1] !== this._SC) {
-        compilingSCs[compilingSCs.length - 1].repossessObject(this);
+        var owned = this._SC.ownedObjects.get(this);
+        compilingSCs[compilingSCs.length - 1].repossessObject(owned === undefined ? this : owned);
       }
     };
 

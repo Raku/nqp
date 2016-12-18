@@ -414,6 +414,7 @@ class P6opaque {
 
     STable.compileAccessor('$$bindattr$' + slot, 'function(value) {\n' +
         'this.' + attr + ' = value;\n' +
+        'if (this._SC !== null) this.$$scwb();\n' +
         'return value;\n' +
         '}\n');
 
@@ -461,27 +462,29 @@ class P6opaque {
   generateUniversalAccessors(STable) {
     this.generateUniversalAccessor(STable, '$$getattr', function(slot) {
       return 'return this.$$getattr$' + slot + '()';
-    }, '');
+    }, '', false);
 
     this.generateUniversalAccessor(STable, '$$bindattr', function(slot) {
       return 'return this.$$bindattr$' + slot + '(value)';
-    }, ', value');
+    }, ', value', false);
 
     var suffixes = ['_s', '_i', '_n'];
     for (let suffix of suffixes) {
       /* TODO only check attributes of proper type */
       this.generateUniversalAccessor(STable, '$$getattr' + suffix, function(slot) {
         return 'return this.' + slotToAttr(slot);
-      }, '');
+      }, '', false);
 
       this.generateUniversalAccessor(STable, '$$bindattr' + suffix, function(slot) {
         return 'return (this.' + slotToAttr(slot) + ' = value)';
-      }, ', value');
+      }, ', value', true);
     }
   }
 
-  generateUniversalAccessor(STable, name, action, extraSig) {
-    var code = 'function(classHandle, attrName' + extraSig + ') {\n' + 'switch (classHandle) {\n';
+  generateUniversalAccessor(STable, name, action, extraSig, scwb) {
+    var code = 'function(classHandle, attrName' + extraSig + ') {\n' +
+      (scwb ? 'if (this._SC !== null) this.$$scwb();\n' : '') +
+      'switch (classHandle) {\n';
     var classKeyIndex = 0;
     var setup = '';
     if (this.nameToIndexMapping) {
@@ -804,6 +807,7 @@ class VMArray extends REPR {
   setupSTable(STable) {
     STable.addInternalMethods(class {
       $$push(value) {
+        if (this._SC !== null) this.$$scwb();
         this.array.push(value);
         return value;
       }
@@ -840,6 +844,7 @@ class VMArray extends REPR {
       }
 
       $$bindpos(index, value) {
+        if (this._SC !== null) this.$$scwb();
         return this.array[index < 0 ? this.array.length + index : index] = value;
       }
 
