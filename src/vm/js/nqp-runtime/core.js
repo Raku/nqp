@@ -1086,6 +1086,36 @@ op.fc = function(string) {
   return string.toLowerCase();
 };
 
+function tcChar(c) {
+  if (c === 'ß') return 'Ss';
+  var unicharadata = require('unicharadata');
+  var titled = unicharadata.title(c);
+  return titled === '' ? c : titled;
+}
+
+op.tc = function(string) {
+  var ret = '';
+  for (let c of string) {
+    ret += tcChar(c);
+  }
+  return ret;
+};
+
+op.tclc = function(string) {
+  let isFirst = true;
+  let lower = '';
+  let first = '';
+  for (let c of string) {
+    if (isFirst) {
+      isFirst = false;
+      first = tcChar(c);
+    } else {
+      lower += c;
+    }
+  }
+  return first + lower.toLowerCase();
+};
+
 op.islist = function(list) {
   return (list._STable && list._STable.REPR instanceof reprs.VMArray) ? 1 : 0;
 };
