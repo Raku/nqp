@@ -1750,7 +1750,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             if $var.decl && $var.decl ne 'param' {
                 my str $initial_value;
                 if $var.decl eq 'var' {
-                    my %default_value := nqp::hash($T_OBJ, 'null', $T_INT, '0', $T_NUM, '0', $T_STR, '""');
+                    my %default_value := nqp::hash($T_OBJ, 'nqp.Null', $T_INT, '0', $T_NUM, '0', $T_STR, '""');
                     $initial_value := %default_value{$type};
                 }
                 elsif $var.decl eq 'contvar' {
