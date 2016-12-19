@@ -1,4 +1,4 @@
-#! perl
+#!/usr/bin/env perl
 # Copyright (C) 2009 The Perl Foundation
 
 use 5.008;
@@ -223,7 +223,7 @@ MAIN: {
                     last;
                 }
             }
-            
+
             if (!$jvm_found) {
                 push @errors,
                     "No JVM (java executable) in path; cannot continue";
