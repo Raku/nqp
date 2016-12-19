@@ -3,6 +3,9 @@
 var NQPObject = require('./nqp-object.js');
 var Null = require('./null.js');
 
+var repossession = require('./repossession.js');
+var compilingSCs = repossession.compilingSCs;
+
 class HashIter extends NQPObject {
   constructor(hash) {
     super();
@@ -52,13 +55,13 @@ class IterPair extends NQPObject {
 class Hash extends NQPObject {
   constructor() {
     super();
-    this._SC = null;
+    this._SC = undefined;
     this.content = new Map();
   }
 
   $$bindkey(key, value) {
     this.content.set(key, value);
-    if (this._SC !== null) this.$$scwb();
+    if (this._SC !== undefined) this.$$scwb();
     return value;
   }
 
@@ -71,7 +74,7 @@ class Hash extends NQPObject {
   }
 
   $$deletekey(key) {
-    if (this._SC !== null) this.$$scwb();
+    if (this._SC !== undefined) this.$$scwb();
     this.content.delete(key);
     return this;
   }
@@ -106,6 +109,18 @@ class Hash extends NQPObject {
 
   $$iterator() {
     return new HashIter(this);
+  }
+
+  //TODO: avoid copy and paste
+  $$scwb() {
+    if (compilingSCs.length == 0 || repossession.scwbDisableDepth || repossession.neverRepossess.get(this)) {
+      return;
+    }
+
+    if (compilingSCs[compilingSCs.length - 1] !== this._SC) {
+      var owned = this._SC.ownedObjects.get(this);
+      compilingSCs[compilingSCs.length - 1].repossessObject(owned === undefined ? this : owned);
+    }
   }
 };
 

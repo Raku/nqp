@@ -19,7 +19,7 @@ class STable {
 
     this.modeFlags = 0;
 
-    this._SC = null;
+    this._SC = undefined;
 
     this.objConstructor = REPR.createObjConstructor(this);
 

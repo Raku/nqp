@@ -247,7 +247,7 @@ op.istype = function(ctx, obj, type) {
 
 op.settypecache = function(obj, cache) {
   obj._STable.typeCheckCache = cache.array;
-  if (obj._STable._SC !== null) obj._STable.scwb();
+  if (obj._STable._SC !== undefined) obj._STable.scwb();
   return obj;
 };
 
@@ -263,7 +263,7 @@ op.setmethcache = function(obj, cache) {
     console.log('we expect a hash here');
   }
   obj._STable.setMethodCache(cache.$$toObject());
-  if (obj._STable._SC !== null) obj._STable.scwb();
+  if (obj._STable._SC !== undefined) obj._STable.scwb();
   return obj;
 };
 
@@ -273,7 +273,7 @@ op.setmethcacheauth = function(obj, isAuth) {
   } else {
     obj._STable.modeFlags &= ~constants.METHOD_CACHE_AUTHORITATIVE;
   }
-  if (obj._STable._SC !== null) obj._STable.scwb();
+  if (obj._STable._SC !== undefined) obj._STable.scwb();
   return obj;
 };
 
@@ -347,7 +347,7 @@ op.setcodename = function(code, name) {
 
 op.rebless = function(obj, newType) {
   obj._STable.REPR.changeType(obj, newType);
-  if (obj._SC !== null) obj.$$scwb();
+  if (obj._SC !== undefined) obj.$$scwb();
   return obj;
 };
 

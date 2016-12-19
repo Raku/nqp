@@ -414,7 +414,7 @@ class P6opaque {
 
     STable.compileAccessor('$$bindattr$' + slot, 'function(value) {\n' +
         'this.' + attr + ' = value;\n' +
-        'if (this._SC !== null) this.$$scwb();\n' +
+        'if (this._SC !== undefined) this.$$scwb();\n' +
         'return value;\n' +
         '}\n');
 
@@ -483,7 +483,7 @@ class P6opaque {
 
   generateUniversalAccessor(STable, name, action, extraSig, scwb) {
     var code = 'function(classHandle, attrName' + extraSig + ') {\n' +
-      (scwb ? 'if (this._SC !== null) this.$$scwb();\n' : '') +
+      (scwb ? 'if (this._SC !== undefined) this.$$scwb();\n' : '') +
       'switch (classHandle) {\n';
     var classKeyIndex = 0;
     var setup = '';
@@ -807,7 +807,7 @@ class VMArray extends REPR {
   setupSTable(STable) {
     STable.addInternalMethods(class {
       $$push(value) {
-        if (this._SC !== null) this.$$scwb();
+        if (this._SC !== undefined) this.$$scwb();
         this.array.push(value);
         return value;
       }
@@ -844,7 +844,7 @@ class VMArray extends REPR {
       }
 
       $$bindpos(index, value) {
-        if (this._SC !== null) this.$$scwb();
+        if (this._SC !== undefined) this.$$scwb();
         return this.array[index < 0 ? this.array.length + index : index] = value;
       }
 
