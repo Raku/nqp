@@ -158,7 +158,7 @@ op.setboolspec = function(obj, mode, method) {
 };
 
 class Capture extends NQPObject {
-  constructor(named, pos, skip) {
+  constructor(named, pos) {
     super();
     this.pos = pos;
     this.named = named;
