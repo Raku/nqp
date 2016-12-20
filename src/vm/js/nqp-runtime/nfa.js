@@ -21,10 +21,13 @@ function convertState(thing) {
 }
 
 // TODO think about type conversions of the stuff inside the array
-op.nfafromstatelist = function(ctx, states, type) {
-  states = convertState(states);
+op.nfafromstatelist = function(ctx, rawStates, type) {
   var nfa = type._STable.REPR.allocate(type._STable);
-  nfa.fates = states[0];
+
+  nfa.fates = rawStates.$$toArray()[0];
+
+  let states = convertState(rawStates);
+
   nfa.states = [];
   for (var i = 1; i < states.length; i++) {
     nfa.states[i - 1] = [];

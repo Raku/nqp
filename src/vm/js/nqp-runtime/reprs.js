@@ -13,6 +13,10 @@ var ZERO = bignum(0);
 
 var constants = require('./constants.js');
 
+const EDGE_FATE = 0, EDGE_EPSILON = 1, EDGE_CODEPOINT = 2, EDGE_CODEPOINT_NEG = 3, EDGE_CHARCLASS = 4, EDGE_CHARCLASS_NEG = 5;
+const EDGE_CHARLIST = 6, EDGE_CHARLIST_NEG = 7, EDGE_SUBRULE = 8, EDGE_CODEPOINT_I = 9, EDGE_CODEPOINT_I_NEG = 10;
+const EDGE_GENERIC_VAR = 11, EDGE_CHARRANGE = 12, EDGE_CHARRANGE_NEG = 13, EDGE_CODEPOINT_LL = 14, EDGE_CODEPOINT_I_LL = 15;
+
 var reprs = {};
 var reprById = [];
 
@@ -783,9 +787,114 @@ reprs.P6str = P6str;
 
 class NFA extends REPR {
   deserializeFinish(obj, data) {
-    // STUB
+    /* Read fates. */
+
+    obj.fates = data.variant();
+
+    /* Read number of states. */
+
+    let numStates = data.varint();
+
+    /* Read state graph. */
+
+    obj.states = []
+
+    let edgeCount = [];
+
+    for (let i = 0; i < numStates; i++) {
+      edgeCount[i] = data.varint();
+    }
+
+    for (let i = 0; i < numStates; i++) {
+      obj.states[i] = [];
+      for (let j = 0; j < edgeCount[i]; j++) {
+        var edge = {act: data.varint(), to: data.varint()};
+        switch (edge.act & 0xff) {
+          case EDGE_EPSILON:
+            break;
+          case EDGE_FATE:
+          case EDGE_CODEPOINT:
+          case EDGE_CODEPOINT_LL:
+          case EDGE_CODEPOINT_NEG:
+          case EDGE_CHARCLASS:
+          case EDGE_CHARCLASS_NEG:
+            edge.argI = data.varint();
+            break;
+          case EDGE_CHARLIST:
+          case EDGE_CHARLIST_NEG:
+            edge.argS = data.varint();
+            break;
+
+          case EDGE_CODEPOINT_I:
+          case EDGE_CODEPOINT_I_LL:
+          case EDGE_CODEPOINT_I_NEG:
+          case EDGE_CHARRANGE:
+          case EDGE_CHARRANGE_NEG:
+            edge.argLc = data.varint();
+            edge.argUc = data.varint();
+            break;
+          default:
+            throw 'NFA deserialization: unknown codepoint type: ' + edge.act;
+        }
+        obj.states[i].push(edge);
+      }
+    }
   }
-};
+
+  serialize(cursor, obj) {
+    /* Write fates. */
+
+    cursor.ref(obj.fates);
+
+    /* Write number of states. */
+
+    cursor.varint(obj.states.length);
+
+    /* Write state edge list counts. */
+
+    for (let i = 0; i < obj.states.length; i++) {
+      cursor.varint(obj.states[i].length);
+    }
+
+    /* Write state graph. */
+
+    for (let i = 0; i < obj.states.length; i++) {
+      for (let j = 0; j < obj.states[j].length; j++) {
+        let edge = obj.states[i][j];
+
+        cursor.varint(edge.act);
+        cursor.varint(edge.to);
+
+        switch (edge.act & 0xff) {
+          case EDGE_EPSILON:
+            break;
+          case EDGE_FATE:
+          case EDGE_CODEPOINT:
+          case EDGE_CODEPOINT_LL:
+          case EDGE_CODEPOINT_NEG:
+          case EDGE_CHARCLASS:
+          case EDGE_CHARCLASS_NEG:
+            cursor.varint(edge.argI);
+            break;
+          case EDGE_CHARLIST:
+          case EDGE_CHARLIST_NEG:
+            cursor.varint(edge.argS);
+            break;
+          case EDGE_CODEPOINT_I:
+          case EDGE_CODEPOINT_I_LL:
+          case EDGE_CODEPOINT_I_NEG:
+          case EDGE_CHARRANGE:
+          case EDGE_CHARRANGE_NEG:
+            cursor.varint(edge.argLc);
+            cursor.varint(edge.argUc);
+            break;
+          default:
+            throw 'NFA serialization - unknown codepoint type: ' + edge.act;
+        }
+      }
+    }
+  }
+}
 
 reprs.NFA = NFA;
 
