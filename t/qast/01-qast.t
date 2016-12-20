@@ -1,6 +1,6 @@
 use QAST;
 
-plan(106);
+plan(108);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -880,6 +880,87 @@ is_qast(
         ),
         'ba',
         'call with named flattened argument works');
+}
+
+
+{
+    my sub wrap(int $value, int $thunk, $content) {
+        my $block := QAST::Block.new(
+            :blocktype('immediate'),
+            QAST::Op.new(
+                :op<bind>,
+                QAST::Var.new( :name('a'), :scope('lexical'), :decl('var')),
+                QAST::IVal.new( :value($value) )
+            ),
+            $content
+        );
+        $block.is_thunk($thunk);
+        $block;
+    }
+
+    test_qast_result(
+        QAST::Block.new(
+            QAST::Op.new(:op<takeclosure>, # needed for JVM
+                QAST::Block.new(
+                    wrap(100, 0,
+                        wrap(200, 0,
+                            wrap(300, 1,
+                                wrap(400, 1,
+                                    wrap(500, 1,
+                                        QAST::Op.new(:op<ctx>)
+                                    )
+                                )
+                            )
+                        )
+                   )
+                )
+            )
+        ),
+        -> $r {
+            my $ctx := nqp::ctxouterskipthunks($r());
+            is($ctx<a>, 200, 'nqp::ctxouterskipthunks returns the correct context');
+        });
+}
+
+{
+    my sub block($name, $is_thunk, $value, $content) {
+        my $block := QAST::Block.new(
+            QAST::Op.new(
+                :op<bind>,
+                 QAST::Var.new( :name('value'), :decl('var'), :scope('lexical')),
+                 QAST::IVal.new( :value($value) )
+            ),
+            $content
+        );
+
+        $block.is_thunk($is_thunk);
+
+        QAST::Op.new(
+            :op<bind>,
+            QAST::Var.new( :name($name), :decl('var'), :scope('lexical')),
+            QAST::Op.new(:op<takeclosure>, # needed for JVM
+                $block
+            )
+        )
+    }
+
+    test_qast_result(
+        QAST::Block.new(
+            block('a', 0, 500, QAST::Op.new(:op<ctx>)),
+            block('b', 1, 400, QAST::Op.new(:op<call>, :name<a>)),
+            block('c', 1, 300, QAST::Op.new(:op<call>, :name<b>)),
+            block('d', 0, 200, QAST::Op.new(:op<call>, :name<c>)),
+            block('e', 0, 100, QAST::Op.new(:op<call>, :name<d>)),
+            QAST::Var.new(
+                :name('e'),
+                :scope('lexical')
+            )
+        ),
+        -> $e {
+            my $ctx := nqp::ctxcallerskipthunks($e());
+            is($ctx<value>, 200, 'nqp::ctxouterskipthunks return the correct context');
+        }
+    );
 }
 
 is_qast(
