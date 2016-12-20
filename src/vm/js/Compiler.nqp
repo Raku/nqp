@@ -865,6 +865,16 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         $set;
     }
 
+    method set_is_thunk_flags() {
+        my str $set := "";
+        for %!cuids {
+            if $_.value.is_thunk {
+                $set := $set ~ "{self.mangled_cuid($_.key)}.isThunk = true;\n";
+            }
+        }
+        $set;
+    }
+
     method stored_result($chunk, :$want) {
         if $chunk.type == $T_VOID || $want == $T_VOID {
             Chunk.void($chunk, $chunk.expr~";\n", :node($chunk.node));
@@ -2016,6 +2026,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             "var nqp = require('nqp-runtime');\n",
             self.declare_wvals,
             self.setup_cuids,
+            self.set_is_thunk_flags,
             self.set_static_info,
             $chunk
         );

@@ -992,6 +992,26 @@ op.ctxcaller = function(ctx) {
   return ctx.$$caller;
 };
 
+op.ctxcallerskipthunks = function(ctx) {
+  var caller = ctx.$$caller;
+
+  // FIXME - ctxs that don't have a codeRef
+  while (caller && caller.codeRef().staticCode.isThunk) {
+    caller = caller.$$caller;
+  }
+  return caller || Null;
+};
+
+op.ctxouterskipthunks = function(ctx) {
+  var outer = ctx.$$outer;
+
+  // FIXME - ctxs that don't have a codeRef
+  while (outer && outer.codeRef().staticCode.isThunk) {
+    outer = outer.$$outer;
+  }
+  return outer || Null;
+};
+
 op.captureposprimspec = function(capture, idx) {
   return 0;
 };

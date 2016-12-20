@@ -851,6 +851,9 @@ class QAST::OperationsJS {
 
     add_simple_op('ctxouter', :!inlinable, $T_OBJ, [$T_OBJ]);
 
+    add_simple_op('ctxouterskipthunks', :!inlinable, $T_OBJ, [$T_OBJ]);
+    add_simple_op('ctxcallerskipthunks', :!inlinable, $T_OBJ, [$T_OBJ]);
+
     add_simple_op('forceouterctx', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects);
 
     add_simple_op('loadbytecode', $T_STR, [$T_STR], :ctx, :side_effects);
