@@ -1,6 +1,6 @@
 #! nqp
 
-plan(1495);
+plan(1498);
 
 {
     my $sc := nqp::createsc('exampleHandle');
@@ -483,6 +483,43 @@ sub add_to_sc($sc, $idx, $obj) {
     is(nqp::scgetobj($dsc, 0)[0], 123, '0th element of array is correct');
     is(nqp::scgetobj($dsc, 0)[1], 456, '1st element of array is correct');
     is(nqp::scgetobj($dsc, 0)[3], 789, '3st element of array is correct');
+}
+
+{
+    my knowhow NFAType is repr('NFA') { }
+
+    my $EDGE_FATE            := 0;
+    my $EDGE_EPSILON         := 1;
+    my $EDGE_CODEPOINT       := 2;
+    my $EDGE_CODEPOINT_NEG   := 3;
+    my $EDGE_CHARCLASS       := 4;
+    my $EDGE_CHARCLASS_NEG   := 5;
+    my $EDGE_CHARLIST        := 6;
+    my $EDGE_CHARLIST_NEG    := 7;
+    my $EDGE_SUBRULE         := 8;
+    my $EDGE_CODEPOINT_I     := 9;
+    my $EDGE_CODEPOINT_I_NEG := 10;
+    my $EDGE_GENERIC_VAR     := 11;
+
+    # the target state of a FATE transition is ignore so we can pass anything
+    my $nfa := nqp::nfafromstatelist([[11],[$EDGE_CODEPOINT,102,2],[$EDGE_CODEPOINT,111,3],[$EDGE_CODEPOINT,111,4],[$EDGE_FATE,11,666]],NFAType);
+
+    my $sc := nqp::createsc('TEST_SC_15_IN');
+    my $sh := nqp::list_s();
+
+    add_to_sc($sc, 0, $nfa);
+
+    my $serialized := nqp::serialize($sc, $sh);
+
+    my $dsc := nqp::createsc('TEST_SC_15_OUT');
+    nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
+
+    my $deserialized_nfa := nqp::scgetobj($dsc, 0);
+    ok(nqp::istype($deserialized_nfa, NFAType), 'deserialized object has correct type');
+
+    my $matching := nqp::nfarunproto($deserialized_nfa,"foo",0);
+    ok(nqp::elems($matching) == 1,"we can match a simple string using the deserialized NFA");
+    ok(nqp::atpos_i($matching, 0) == 11,"...and we get the right fate");
 }
 
 # integers
