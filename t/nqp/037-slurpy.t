@@ -1,6 +1,6 @@
 # slurpy args
 
-plan(9);
+plan(10);
 
 sub slurpy_pos(*@pos) {
     ok(@pos[0] == 1);
@@ -30,3 +30,11 @@ sub empty_slurpy(*@pos, *%named) {
 empty_slurpy();
 
 named_and_slurpy(1, :x("ok x"));
+
+sub slurpy_sandwitched($a, $b, $c, $d) {
+    is("$a:$b:$c:$d", 'a:b:c:d', 'slurpy positional between regular ones');
+}
+my @bc;
+@bc[0] := 'b';
+@bc[1] := 'c';
+slurpy_sandwitched('a', |@bc, 'd');
