@@ -2,7 +2,7 @@
 
 # Tests for try and catch
 
-plan(32);
+plan(43);
 
 sub oops($msg = "oops!") { # throw an exception
     nqp::die($msg);
@@ -241,3 +241,68 @@ ok($result_str ~ '' eq '', "we get correct return value from a try that catches 
     }
     nqp::handle(block(), 'CATCH', catch());
 }
+
+sub THROW(int $type, $arg) {
+    my $ex := nqp::newexception();
+    nqp::setpayload($ex, $arg);
+    nqp::setextype($ex, $type);
+    nqp::throw($ex);
+    $arg;
+}
+
+my $next_payload;
+my $redo_payload;
+my $last_payload;
+my $return_payload;
+my $take_payload;
+my $warn_payload;
+my $succeed_payload;
+my $proceed_payload;
+my $emit_payload;
+my $done_payload;
+
+sub handle($throws) {
+   nqp::handle(
+       $throws(),
+       'NEXT', $next_payload := nqp::getpayload(nqp::exception()),
+       'REDO', $redo_payload := nqp::getpayload(nqp::exception()),
+       'LAST', $last_payload := nqp::getpayload(nqp::exception()),
+       'RETURN', $return_payload := nqp::getpayload(nqp::exception()),
+       'TAKE', $take_payload := nqp::getpayload(nqp::exception()),
+       'WARN', $warn_payload := nqp::getpayload(nqp::exception()),
+       'SUCCEED', $succeed_payload := nqp::getpayload(nqp::exception()),
+       'PROCEED', $proceed_payload := nqp::getpayload(nqp::exception()),
+       'EMIT', $emit_payload := nqp::getpayload(nqp::exception()),
+       'DONE', $done_payload := nqp::getpayload(nqp::exception()),
+    );
+}
+
+handle(-> { THROW(nqp::const::CONTROL_NEXT, 'next'); });
+handle(-> { THROW(nqp::const::CONTROL_REDO, 'redo'); });
+handle(-> { THROW(nqp::const::CONTROL_LAST, 'last'); });
+handle(-> { THROW(nqp::const::CONTROL_RETURN, 'return'); });
+handle(-> { THROW(nqp::const::CONTROL_TAKE, 'take'); });
+handle(-> { THROW(nqp::const::CONTROL_WARN, 'warn'); });
+handle(-> { THROW(nqp::const::CONTROL_SUCCEED, 'succeed'); });
+handle(-> { THROW(nqp::const::CONTROL_PROCEED, 'proceed'); });
+handle(-> { THROW(nqp::const::CONTROL_EMIT, 'emit'); });
+handle(-> { THROW(nqp::const::CONTROL_DONE, 'done'); });
+
+is($next_payload, 'next', 'caught NEXT exception');
+is($redo_payload, 'redo', 'caught REDO exception');
+is($last_payload, 'last', 'caught LAST exception');
+is($return_payload, 'return', 'caught RETURN exception');
+is($take_payload, 'take', 'caught TAKE exception');
+is($warn_payload, 'warn', 'caught WARN exception');
+is($succeed_payload, 'succeed', 'caught SUCCEED exception');
+is($proceed_payload, 'proceed', 'caught PROCEED exception');
+is($emit_payload, 'emit', 'caught EMIT exception');
+is($done_payload, 'done', 'caught DONE exception');
+
+my $control_payload;
+{
+    THROW(nqp::const::CONTROL_NEXT, 'fancy payload');
+    CONTROL { $control_payload := $!; }
+}
+
+is(nqp::getpayload($control_payload), 'fancy payload', 'CONTROL block works');
