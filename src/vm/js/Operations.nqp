@@ -753,26 +753,18 @@ class QAST::OperationsJS {
             my str $try_ret := '';
             my $set_try_ret := '';
 
-            my $handle := '';
+
+            my @handlers;
+
             for @children -> $type, $handler {
-                if $type eq 'CATCH' {  
-                    my $catch_body := $comp.as_js($handler, :want($T_OBJ));
-                    $handle := Chunk.void(
-                        "$unwind_marker = \{\};\n",
-                        "$handler_ctx.\$\$CATCH = function() \{\n",
-                        $catch_body,
-                        "return {$catch_body.expr};\n",
-                        "\};\n",
-                        "$handler_ctx.unwind = $unwind_marker;\n"
-                    );
-                }
-                elsif $type eq 'CONTROL' {
-                    # STUB - we are nooping this, needs to be implemented
-                }
-                else {
-                    return $comp.NYI("Not implemented type with handle: $type");
-                }
+                my $catch_body := $comp.as_js($handler, :want($T_OBJ));
+                @handlers.push("$handler_ctx.\$\${$type} = function() \{\n");
+                @handlers.push($catch_body);
+                @handlers.push( "return {$catch_body.expr};\n" ~ "\};\n");
             }
+
+            @handlers.push("$unwind_marker = \{\};\n");
+            @handlers.push("$handler_ctx.unwind = $unwind_marker;\n");
 
             {
                 my $*CTX := $handler_ctx;
@@ -801,7 +793,7 @@ class QAST::OperationsJS {
 
                 return Chunk.new($want, $try_ret, [
                     "var $handler_ctx = new nqp.Ctx($outer_ctx, $outer_ctx, $outer_ctx.\$\$callThis, $outer_ctx.\$\$codeRefAttr);\n",
-                    $handle,
+                    Chunk.void(|@handlers),
                     "try \{",
                     $body,
                     # HACK we need to check $body.type if we handle something like return
@@ -831,7 +823,12 @@ class QAST::OperationsJS {
     add_simple_op('setpayload', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects);
     add_simple_op('getpayload', $T_OBJ, [$T_OBJ, $T_OBJ]);
 
-    add_simple_op('setmessage', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects);
+    add_simple_op('setmessage', $T_STR, [$T_OBJ, $T_STR], :side_effects);
+    add_simple_op('getmessage', $T_STR, [$T_OBJ]);
+
+    add_simple_op('setextype', $T_INT, [$T_OBJ, $T_INT], :side_effects);
+    add_simple_op('getextype', $T_INT, [$T_OBJ]);
+
     add_simple_op('getmessage', $T_STR, [$T_OBJ]);
 
     add_simple_op('newexception', $T_OBJ, [], :side_effects);

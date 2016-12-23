@@ -6,6 +6,21 @@ var NQPObject = require('./nqp-object.js');
 var Null = require('./null.js');
 var exceptionsStack = require('./exceptions-stack.js');
 
+var categoryToName = {
+  4: 'NEXT',
+  8: 'REDO',
+  16: 'LAST',
+  32: 'RETURN',
+  128: 'TAKE',
+  256: 'WARN',
+  512: 'SUCCEED',
+  1024: 'PROCEED',
+  4096: 'LABELED',
+  8192: 'AWAIT',
+  16384: 'EMIT',
+  32768: 'DONE'
+};
+
 class Ctx extends NQPObject {
   constructor(callerCtx, outerCtx, callThis, codeRefAttr) {
     super();
@@ -19,8 +34,45 @@ class Ctx extends NQPObject {
     return (this.$$callThis instanceof CodeRef ? this.$$callThis : this.$$callThis[this.$$codeRefAttr]);
   }
 
-  propagateException(exception) {
+  propagateControlException(exception) {
+    var handler = '$$' + categoryToName[exception.$$category];
+
     var ctx = this;
+
+    while (ctx) {
+      if (ctx[handler] || ctx.$$CONTROL) {
+        exception.caught = ctx;
+        exception.resume = false;
+        ctx.exception = exception;
+
+        exceptionsStack.push(exception);
+        try {
+          if (ctx[handler]) {
+            ctx.unwind.ret = ctx[handler]();
+          } else {
+            ctx.unwind.ret = ctx.$$CONTROL();
+          }
+        } finally {
+          exceptionsStack.pop();
+        }
+
+        if (exception.resume) {
+          return;
+        } else {
+          throw ctx.unwind;
+        }
+      }
+      ctx = ctx.$$caller;
+    }
+
+    throw exception;
+  }
+
+  propagateException(exception) {
+    if (exception.$$category) this.propagateControlException(exception);
+
+    var ctx = this;
+
     while (ctx) {
       if (ctx.$$CATCH) {
         exception.caught = ctx;

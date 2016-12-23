@@ -1147,3 +1147,16 @@ op.split = function(hllName, separator, string) {
 op.exception = function() {
   return exceptionsStack[exceptionsStack.length - 1];
 };
+
+op.setextype = function(exception, category) {
+  exception.$$category = category;
+  return exception;
+};
+
+op.getextype = function(exception) {
+  if (exception.$$category === undefined) {
+    return 0;
+  } else {
+    return exception.$$category;
+  }
+};
