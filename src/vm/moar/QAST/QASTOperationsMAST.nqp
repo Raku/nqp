@@ -2928,4 +2928,8 @@ sub push_ilist(@dest, $src) is export {
     nqp::splice(@dest, $src.instructions, +@dest, 0);
 }
 
+QAST::MASTOperations.add_core_op('js', -> $qastcomp, $op {
+    $qastcomp.as_mast(QAST::Op.new( :op('die'), QAST::SVal.new( :value('Running JS NYI on MoarVM') )))
+});
+
 # vim: ft=perl6 expandtab sw=4

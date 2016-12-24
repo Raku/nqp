@@ -859,7 +859,7 @@ class NFA extends REPR {
     /* Write state graph. */
 
     for (let i = 0; i < obj.states.length; i++) {
-      for (let j = 0; j < obj.states[j].length; j++) {
+      for (let j = 0; j < obj.states[i].length; j++) {
         let edge = obj.states[i][j];
 
         cursor.varint(edge.act);
