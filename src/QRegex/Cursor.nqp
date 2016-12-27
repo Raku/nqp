@@ -1,7 +1,7 @@
 # Some things that all cursors involved in a given parse share.
 my class ParseShared is export {
     has $!CUR_CLASS;
-    has $!orig;
+    has str $!orig;
     has str $!target;
     has int $!highwater;
     has @!highexpect;
@@ -36,7 +36,7 @@ role NQPCursorRole is export {
     has $!regexsub;
     has $!restart;
 
-    method orig()   { nqp::getattr($!shared, ParseShared, '$!orig') }
+    method orig()   { nqp::getattr_s($!shared, ParseShared, '$!orig') }
     method target() { nqp::getattr_s($!shared, ParseShared, '$!target') }
     method from()   { $!from }
     method pos()    { $!pos }
@@ -49,9 +49,9 @@ role NQPCursorRole is export {
     }
 
     method !APPEND_TO_ORIG($value) {
-        my $orig := nqp::getattr($!shared, ParseShared, '$!orig');
+        my $orig := nqp::getattr_s($!shared, ParseShared, '$!orig');
         $orig := $orig ~ $value;
-        nqp::bindattr($!shared, ParseShared, '$!orig', $orig);
+        nqp::bindattr_s($!shared, ParseShared, '$!orig', $orig);
         my $target := nqp::getattr_s($!shared, ParseShared, '$!target');
         $target := $target ~ $value;
         nqp::bindattr_s($!shared, ParseShared, '$!target', $target);
@@ -120,7 +120,7 @@ role NQPCursorRole is export {
         unless $shared {
             $shared := nqp::create(ParseShared);
             nqp::bindattr($shared, ParseShared, '$!CUR_CLASS', $?CLASS);
-            nqp::bindattr($shared, ParseShared, '$!orig', nqp::decont($orig));
+            nqp::bindattr_s($shared, ParseShared, '$!orig', nqp::decont($orig));
             nqp::bindattr_s($shared, ParseShared, '$!target', nqp::indexingoptimized($orig));
             nqp::bindattr_i($shared, ParseShared, '$!highwater', 0);
             nqp::bindattr($shared, ParseShared, '@!highexpect', nqp::list_s());
@@ -799,7 +799,7 @@ role NQPCursorRole is export {
 
 
 class NQPMatch is NQPCapture {
-    has $!orig;
+    has str $!orig;
     has int $!from;
     has int $!to;
     has $!made;
@@ -930,7 +930,7 @@ class NQPCursor does NQPCursorRole {
             $match   := nqp::create(NQPMatch);
             nqp::bindattr(self, NQPCursor, '$!match', $match);
             nqp::bindattr($match, NQPMatch, '$!cursor', self);
-            nqp::bindattr($match, NQPMatch, '$!orig', self.orig());
+            nqp::bindattr_s($match, NQPMatch, '$!orig', self.orig());
             nqp::bindattr_i($match, NQPMatch, '$!from', nqp::getattr_i(self, NQPCursor, '$!from'));
             nqp::bindattr_i($match, NQPMatch, '$!to', nqp::getattr_i(self, NQPCursor, '$!pos'));
 
