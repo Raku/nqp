@@ -1556,6 +1556,7 @@ var ID = 0;
 for (var name in reprs) {
   module.exports[name] = reprs[name];
   reprs[name].prototype.ID = ID;
+  reprs[name].prototype.name = name;
   reprById[ID] = reprs[name];
   if (reprs[name].prototype.flattenedDefault) {
     reprs[name].prototype.flattenedDefaultObj = eval(reprs[name].prototype.flattenedDefault);
