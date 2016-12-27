@@ -1,6 +1,8 @@
 var op = {};
 exports.op = op;
 
+var os = require('os');
+
 var Hash = require('./hash.js');
 var CodeRef = require('./code-ref.js');
 
@@ -578,6 +580,7 @@ op.getcomp = function(language) {
 op.backendconfig = function() {
   var config = new Hash();
   config.content.set('intvalsize', 4);
+  config.content.set('osname', os.platform());
   return config;
 };
 
