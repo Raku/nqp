@@ -1512,6 +1512,13 @@ my class MASTCompilerInstance {
         'decont',
         'decont_u'
     ];
+    my @decont_reg := [
+        $MVM_reg_int64,
+        $MVM_reg_num64,
+        $MVM_reg_str,
+        $MVM_reg_obj,
+        $MVM_reg_uint64
+    ];
 
     multi method compile_node(QAST::Var $node, :$want) {
         self.compile_var($node, :$want)
@@ -1652,8 +1659,15 @@ my class MASTCompilerInstance {
                     nqp::die('Cannot bind to QAST::Var resolving to a localref');
                 }
                 $res_kind := $*BLOCK.localref_kind($name);
-                $res_reg := $*REGALLOC.fresh_register($res_kind);
+                # We have to make sure the destination register for the decont_*
+                # opcodes is of the appropriate type, coercion is done at a
+                # later stage if needed.
+                my $res_reg_type := @decont_reg[@kind_to_op_slot[$res_kind]];
+                $res_reg := $*REGALLOC.fresh_register($res_reg_type);
                 push_op(@ins, @decont_opnames[@kind_to_op_slot[$res_kind]], $res_reg, $localref);
+                if $res_reg_type ne $res_kind {
+                    nqp::die('Coercion is NYI for lexicalrefs');
+                }
             }
             else {
                 nqp::die("Cannot reference undeclared local '$name'");
@@ -1739,10 +1753,17 @@ my class MASTCompilerInstance {
                     $lexref := MAST::Lexical.new( :index($lexref.index), :frames_out($outer) );
                 }
                 my $tmp_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
-                $res_reg := $*REGALLOC.fresh_register($res_kind);
+                # We have to make sure the destination register for the decont_*
+                # opcodes is of the appropriate type, coercion is done at a
+                # later stage if needed.
+                my $res_reg_type := @decont_reg[@kind_to_op_slot[$res_kind]];
+                $res_reg := $*REGALLOC.fresh_register($res_reg_type);
                 push_op(@ins, 'getlex', $tmp_reg, $lexref);
                 push_op(@ins, @decont_opnames[@kind_to_op_slot[$res_kind]], $res_reg, $tmp_reg);
                 $*REGALLOC.release_register($tmp_reg, $MVM_reg_obj);
+                if $res_reg_type ne $res_kind {
+                    nqp::die('Coercion is NYI for lexicalrefs');
+                }
             }
             else {
                 $res_kind := self.type_to_register_kind($node.returns);
