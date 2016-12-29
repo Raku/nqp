@@ -1,7 +1,7 @@
 #! nqp
 use nqpmo;
 
-plan(97);
+plan(100);
 
 my $knowhow := nqp::knowhow();
 my $bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
@@ -22,6 +22,9 @@ my $c := box(-123);
 is(str($b), '-123', 'can round-trip negative number (string)');
 is(str($c), '-123', 'can round-trip negative number (string) by boxing');
 ok(nqp::unbox_i($b) == -123, 'can round-trip negative number by unboxing');
+
+ok(nqp::decont_i($b) == -123, 'can unbox using decont_i');
+
 ok(!nqp::iseq_I($one, $b), 'nqp::iseq_I can return false');
 ok(nqp::iseq_I($one, $one), 'nqp::iseq_I can return true');
 ok(nqp::isne_I($one, $b) == 1, 'nqp::isne_I can return false');
@@ -90,6 +93,8 @@ my $box_val_3 := nqp::box_i(7, $bi_boxer);
 ok(nqp::istype(nqp::getattr($box_val_3, $bi_boxer, '$!value'), $bi_type), "the boxed value is stored in the attribute as a bigint");
 ok(nqp::unbox_i(nqp::getattr($box_val_3, $bi_boxer, '$!value')) == 7, "you can extract it and then unbox it");
 
+ok(nqp::unbox_i($box_val_3) == 7, 'can unbox box_target bigint using unbox_i');
+ok(nqp::decont_i($box_val_3) == 7, 'can unbox box_target bigint using decont_i');
 
 my $big := nqp::pow_I($c, box(42), $n_type, $bi_type);
 is(str($big), '5970554685064519004265641008828923248442340700473500698131071806779372733915289638628729', 'pow (int, positive)');
