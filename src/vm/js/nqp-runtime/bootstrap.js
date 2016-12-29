@@ -221,7 +221,7 @@ add_to_sc_with_st_and_mo(BOOTCode);*/
 
 function bootType(typeName, reprName) {
   var metaObj = KnowHOW_HOW._STable.REPR.allocate(KnowHOW_HOW._STable);
-  metaObj.name = typeName;
+  metaObj.__name = typeName;
 
   var typeObj = (new reprs[reprName]).typeObjectFor(metaObj);
 
