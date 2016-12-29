@@ -260,6 +260,26 @@ public class JASTCompiler {
             else if (value >= Short.MIN_VALUE && value <= Short.MAX_VALUE) {
                 m.visitIntInsn(Opcodes.SIPUSH, value);
             }
+            // bandaid for rakudo: reduce number of constant pool entries
+            else if (value > Short.MAX_VALUE) {
+                int value_remain = value - Short.MAX_VALUE;
+                m.visitIntInsn(Opcodes.SIPUSH, Short.MAX_VALUE);
+                while (value_remain > Short.MAX_VALUE) {
+                    value_remain = value_remain - Short.MAX_VALUE;
+                    m.visitIntInsn(Opcodes.SIPUSH, Short.MAX_VALUE);
+                    m.visitInsn(Opcodes.IADD);
+                }
+                if (value_remain <= 5) {
+                    m.visitInsn(Opcodes.ICONST_0 + value_remain);
+                }
+                else if (value_remain <= Byte.MAX_VALUE) {
+                    m.visitIntInsn(Opcodes.BIPUSH, value_remain);
+                }
+                else {
+                    m.visitIntInsn(Opcodes.SIPUSH, value_remain);
+                }
+                m.visitInsn(Opcodes.IADD);
+            }
             else {
                 m.visitLdcInsn(value);
             }
