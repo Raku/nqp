@@ -172,6 +172,11 @@ class QAST::OperationsJS {
 
 
     add_simple_op('decont', $T_OBJ, [$T_OBJ], :method_call, :ctx);
+
+    add_simple_op('decont_i', $T_INT, [$T_OBJ], :method_call, :ctx);
+    add_simple_op('decont_n', $T_NUM, [$T_OBJ], :method_call, :ctx);
+    add_simple_op('decont_s', $T_STR, [$T_OBJ], :method_call, :ctx);
+
     add_simple_op('iscont', $T_INT, [$T_OBJ]);
     add_simple_op('isrwcont', $T_INT, [$T_OBJ]);
 

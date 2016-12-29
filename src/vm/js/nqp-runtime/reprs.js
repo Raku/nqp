@@ -603,7 +603,12 @@ class P6int extends REPR {
       $$setInt(value) {
         this.value = value;
       }
+
       $$getInt(value) {
+        return this.value;
+      }
+
+      $$decont_i(value) {
         return this.value;
       }
     });
@@ -649,6 +654,10 @@ class P6int extends REPR {
       $$getInt() {
         return this[name];
       }
+
+      $$decont_i(ctx) {
+        return this[name];
+      }
     });
   }
 
@@ -680,6 +689,10 @@ class P6num extends REPR {
       $$getNum() {
         return this.value;
       }
+
+      $$decont_n(value) {
+        return this.value;
+      }
     });
   }
 
@@ -706,6 +719,10 @@ class P6num extends REPR {
       }
 
       $$getNum() {
+        return this[name];
+      }
+
+      $$decont_n(ctx) {
         return this[name];
       }
     });
@@ -738,6 +755,10 @@ class P6str extends REPR {
       $$getStr() {
         return this.value;
       }
+
+      $$decont_s(value) {
+        return this.value;
+      }
     });
   }
 
@@ -764,6 +785,10 @@ class P6str extends REPR {
       }
 
       $$getStr() {
+        return this[name];
+      }
+
+      $$decont_s(ctx) {
         return this[name];
       }
     });
@@ -1157,6 +1182,10 @@ class P6bigint extends REPR {
       $$getBignum() {
         return this.value;
       }
+
+      $$decont_i(ctx) {
+        return this.value.toNumber() | 0;
+      }
     });
   }
 
@@ -1219,7 +1248,11 @@ class P6bigint extends REPR {
       }
 
       $$getInt() {
-        return this[name].toNumber();
+        return this[name].toNumber() | 0;
+      }
+
+      $$decont_i(ctx) {
+        return this[name].toNumber() | 0;
       }
 
       $$getBignum() {
