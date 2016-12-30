@@ -246,7 +246,7 @@ position C<pos>.
         # peek at the next character
         my str $start := nqp::substr($target, $pos, 1);
         # Only if it's not a punctuation symbol should we have to check for word or whitespace props
-        unless nqp::iscclass(nqp::const::CCLASS_PUNCTUATION, $start, 0) {
+        if ! nqp::iscclass(nqp::const::CCLASS_PUNCTUATION, $start, 0) {
             if nqp::iscclass(nqp::const::CCLASS_WORD, $start, 0) {
                 self.panic('Alphanumeric character is not allowed as a delimiter');
             }
@@ -255,6 +255,23 @@ position C<pos>.
                 self.panic('Whitespace character (0x' ~ $code ~ ') is not allowed as a delimiter');
             }
         }
+        #?if moar
+        else {
+            my int $start-cp := nqp::ord($start);
+            if (nqp::getuniprop_int($start-cp, nqp::unipropcode('Bidi_Mirrored'))) {
+                  my str $stop := nqp::chr(nqp::getuniprop_int($start-cp, nqp::unipropcode('Bidi_Mirroring_Glyph')));
+                  my int $len := 1;
+                  while nqp::substr($target, ++$pos, 1) eq $start {
+                      $len++;
+                  }
+                  if $len > 1 {
+                      $start := nqp::x($start, $len);
+                      $stop  := nqp::x($stop, $len);
+                  }
+                  return [$start, $stop];
+            }
+        }
+        #?endif
 
         # assume stop delim is same as start, for the moment
         my str $stop := $start;
