@@ -321,7 +321,7 @@ variants (e.g. `mul_i`, `mul_n`) together with a single description.
 Opcode variants may contain a type suffix, which usually indicates:
 
 * `_i` argument is a native int
-* `_u` argument is an unsigned int 
+* `_u` argument is an unsigned int
 * `_n` argument is a native float
 * `_s` argument is a native string
 * `_b` argument is a code block
@@ -1091,7 +1091,12 @@ Translate a codepoint to its Unicode name.
 ## unipropcode
 * `unipropcode(str $propname)`
 
-Translates a property name to the property category it's in.
+Translates a property name to the backend's property code. This is not distinct
+across backends and is expected to change over time. For the most part only
+useful for calling getuniprop_int, get_uniprop_str or get_uniprop_bool or
+comparing whether two unicode property names resolve to the same propcode, for
+example 'Alpha', 'alpha', 'alphabetic' and 'Alphabetic' should return the same
+property code.
 
 ## unipvalcode `moar`
 * `unipvalcode(int $propcode, str $propname)`
@@ -1894,7 +1899,7 @@ of the type indicated by the opcode suffix.
 
 ## attrinited
 * `attrinited(Mu $obj. Mu:T $type, str $attributename)`
- 
+
 Test if the attribute of name `$attributename` of object `$obj`
 has been binded, see `bindattr`. Note that any access to the atribute
 that results in a `getattr` call causes it to be inited.
