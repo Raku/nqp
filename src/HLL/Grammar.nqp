@@ -245,17 +245,15 @@ position C<pos>.
     method peek_delimiters(str $target, int $pos) {
         # peek at the next character
         my str $start := nqp::substr($target, $pos, 1);
-
-        # colon, word and whitespace characters aren't valid delimiters
-        if $start eq ':' {
-            self.panic('Colons may not be used to delimit quoting constructs');
-        }
-        if nqp::iscclass(nqp::const::CCLASS_WORD, $start, 0) {
-            self.panic('Alphanumeric character is not allowed as a delimiter');
-        }
-        if nqp::iscclass(nqp::const::CCLASS_WHITESPACE, $start, 0) {
-            my $code := nqp::sprintf('%X', [nqp::ord($start)]);
-            self.panic('Whitespace character (0x' ~ $code ~ ') is not allowed as a delimiter');
+        # Only if it's not a punctuation symbol should we have to check for word or whitespace props
+        unless nqp::iscclass(nqp::const::CCLASS_PUNCTUATION, $start, 0) {
+            if nqp::iscclass(nqp::const::CCLASS_WORD, $start, 0) {
+                self.panic('Alphanumeric character is not allowed as a delimiter');
+            }
+            if nqp::iscclass(nqp::const::CCLASS_WHITESPACE, $start, 0) {
+                my $code := nqp::sprintf('%X', [nqp::ord($start)]);
+                self.panic('Whitespace character (0x' ~ $code ~ ') is not allowed as a delimiter');
+            }
         }
 
         # assume stop delim is same as start, for the moment
@@ -279,8 +277,15 @@ position C<pos>.
                 $start := nqp::x($start, $len);
                 $stop := nqp::x($stop, $len);
             }
-          }
-          [$start, $stop]
+        }
+        else {
+            # If we ended up here it's not a bracket, so make sure it's not a colon just to be sure
+            # Colon, word and whitespace characters aren't valid delimiters
+            if $start eq ':' {
+                self.panic('Colons may not be used to delimit quoting constructs');
+            }
+        }
+        [$start, $stop]
     }
 
     my $TRUE := 1;
