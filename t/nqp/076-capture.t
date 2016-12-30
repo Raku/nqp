@@ -1,7 +1,7 @@
-plan(19);
+plan(20);
 
 my $x;
-sub savecapture($arg) {
+sub savecapture($arg, *%named) {
   my $capture := nqp::savecapture();
   $capture;
 }
@@ -25,12 +25,13 @@ sub bar($a,$b,:$c,:$d) {
 bar(1, 2, :c(3));
 
 
-my $saved := savecapture(100);
+my $saved := savecapture(100, :named_arg_1(200));
 savecapture(200);
 ok(nqp::captureposarg($saved,0) == 100,"the capture returned by nqp::savecapture survives the next call to savecapture");
 
-sub invokee($arg) {
+sub invokee($arg, :$named_arg_1) {
   ok($arg == 100,"nqp::invokewithcapture");
+  ok($named_arg_1 == 200, "nqp::invokewithcapture takes a named argument");
 }
 nqp::invokewithcapture(&invokee,$saved);
 
