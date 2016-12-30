@@ -20,6 +20,7 @@ Makefile
 *.bundle
 *~
 /nqp
+/*.html
 nqp.c
 nqp_group.c
 nqp_group.h
