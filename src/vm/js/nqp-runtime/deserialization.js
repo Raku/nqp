@@ -21,6 +21,19 @@ var hll = require('./hll.js');
 
 var BOOT = require('./BOOT.js');
 
+/* Possible reference types we can serialize. */
+const REFVAR_NULL = 1;
+const REFVAR_OBJECT = 2;
+const REFVAR_VM_NULL = 3;
+const REFVAR_VM_INT = 4;
+const REFVAR_VM_NUM = 5;
+const REFVAR_VM_STR = 6;
+const REFVAR_VM_ARR_VAR = 7;
+const REFVAR_VM_ARR_STR = 8;
+const REFVAR_VM_ARR_INT = 9;
+const REFVAR_VM_HASH_STR_VAR = 10;
+const REFVAR_STATIC_CODEREF = 11;
+const REFVAR_CLONED_CODEREF = 12;
 
 /** All the loaded serialization contexts using their unique IDs as keys */
 var serializationContexts = SerializationContext.contexts;
@@ -281,29 +294,29 @@ class BinaryCursor {
   variant() {
     var type = this.I8();
     switch (type) {
-      case 2:
+      case REFVAR_OBJECT:
         return this.objRef();
-      case 1:
-      case 3:
+      case REFVAR_NULL:
+      case REFVAR_VM_NULL:
         return Null;
-      case 4:
+      case REFVAR_VM_INT:
         // TODO deserialize bigger integers then can fit into a 32bit number
         return this.varint();
-      case 5:
+      case REFVAR_VM_NUM:
         return this.double();
-      case 6:
+      case REFVAR_VM_STR :
         return this.str();
-      case 7:
+      case REFVAR_VM_ARR_VAR:
         return this.array(function(cursor) {return cursor.variant()});
-      case 8:
+      case REFVAR_VM_ARR_STR:
         return this.array(function(cursor) {return cursor.str()});
         /* TODO varints */
       /*    case 9:
         return this.array(function(cursor) {return cursor.I64()});*/
-      case 10:
+      case REFVAR_VM_HASH_STR_VAR:
         return this.hashOfVariants(this);
-      case 11:
-      case 12:
+      case REFVAR_STATIC_CODEREF:
+      case REFVAR_CLONED_CODEREF:
         var codeRef = this.locateThing('codeRefs');
         if (!codeRef) {
           console.log('missing code ref while deserializing');
