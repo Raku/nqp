@@ -353,6 +353,8 @@ class BinaryWriteCursor {
 
     if (ref == Null) {
       discrim = REFVAR_VM_NULL;
+    } else if (ref === undefined) {
+      discrim = REFVAR_NULL;
     }
     else if (ref instanceof FileHandle) {
       discrim = REFVAR_VM_NULL;

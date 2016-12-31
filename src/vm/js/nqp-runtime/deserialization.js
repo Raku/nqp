@@ -290,13 +290,14 @@ class BinaryCursor {
   }
 
 
-  /** Read a variant reference */
-  variant() {
+  /** Read a variant reference, REFVAR_NULL is returned as undefined */
+  variantWithUndefined() {
     var type = this.I8();
     switch (type) {
       case REFVAR_OBJECT:
         return this.objRef();
       case REFVAR_NULL:
+        return undefined;
       case REFVAR_VM_NULL:
         return Null;
       case REFVAR_VM_INT:
@@ -330,7 +331,11 @@ class BinaryCursor {
 
   }
 
-
+  /** Read a variant reference, REFVAR_NULL is returned as Null */
+  variant() {
+    var result = this.variantWithUndefined();
+    return result === undefined ? Null : result;
+  }
 
   /** Read an entry from the STable table */
   STable(STable) {

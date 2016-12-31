@@ -272,7 +272,7 @@ class P6opaque {
       if (this.flattenedSTables[i]) {
         attrs.push(this.flattenedSTables[i].REPR.deserializeInline(data));
       } else {
-        attrs.push(data.variant());
+        attrs.push(data.variantWithUndefined());
       }
     }
 
@@ -294,7 +294,7 @@ class P6opaque {
       var value = obj[slotToAttr(i)];
 
       if (flattened[i] == null) {
-        cursor.ref(value === undefined ? Null : value);
+        cursor.ref(value);
       } else {
         flattened[i].REPR.serializeInline(cursor, value);
       }
