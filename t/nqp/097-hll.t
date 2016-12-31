@@ -1,4 +1,4 @@
-plan(32);
+plan(33);
 
 is(nqp::bindhllsym("blabla", "key1", "value1"), 'value1', 'nqp::bindhllsym');
 nqp::bindhllsym("blabla", "key2", "value2");
@@ -37,7 +37,15 @@ nqp::sethllconfig('empty', nqp::hash(
 ));
 
 is(nqp::hllizefor(nqp::hash('key', 'value1'), 'foobar'), 'HASH:value1', 'hllizefor with hash');
+
 is(nqp::hllizefor(nqp::list('the 0th one', 'the 1st one', 'the 2nd'), 'foobar'), 'ARRAY:the 2nd', 'hllizefor with nqp::list');
+
+my $boot_array := nqp::create(nqp::bootarray());
+nqp::push($boot_array, 'the 0th boot one');
+nqp::push($boot_array, 'the 1th boot one');
+nqp::push($boot_array, 'the 2nd boot one');
+is(nqp::hllizefor($boot_array, 'foobar'), 'ARRAY:the 2nd boot one', 'hllizefor with nqp::bootarray');
+
 my $sub := nqp::hllizefor(sub ($value) {$value+2}, 'foobar');
 ok($sub(5) == 70, 'hllizerfor with coderef');
 is(nqp::hllizefor(nqp::null(), 'foobar'), 'fearsome *NULL*', 'hllizerfor with null');
