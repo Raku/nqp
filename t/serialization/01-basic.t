@@ -1,6 +1,6 @@
 #! nqp
 
-plan(1498);
+plan(1502);
 
 {
     my $sc := nqp::createsc('exampleHandle');
@@ -520,6 +520,45 @@ sub add_to_sc($sc, $idx, $obj) {
     my $matching := nqp::nfarunproto($deserialized_nfa,"foo",0);
     ok(nqp::elems($matching) == 1,"we can match a simple string using the deserialized NFA");
     ok(nqp::atpos_i($matching, 0) == 11,"...and we get the right fate");
+}
+
+# nqp::attrinitied works after serialization
+{
+    my $sc := nqp::createsc('TEST_SC_9_IN');
+    my $sh := nqp::list_s();
+
+    my class TestAttrinitied {
+        has $!written;
+        has $!read;
+        has $!not_inited;
+        has $!null;
+        method write() {
+            $!written := 123;
+            $!null := nqp::null();
+        }
+        method read() {
+            if $!read {
+                ok(0);
+            }
+        }
+    }
+
+    my $v := TestAttrinitied.new();
+    $v.write();
+    $v.read();
+
+    add_to_sc($sc, 0, $v);
+
+    my $serialized := nqp::serialize($sc, $sh);
+
+    my $dsc := nqp::createsc('TEST_SC_9_OUT');
+    nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
+
+    ok(nqp::attrinited(nqp::scgetobj($dsc, 0), TestAttrinitied, '$!written'), 'nqp::attrinited on an attribute that has been written to');
+    ok(!nqp::attrinited(nqp::scgetobj($dsc, 0), TestAttrinitied, '$!not_inited'), 'nqp::attinitied on an attribute that has not be initialized');
+    ok(nqp::attrinited(nqp::scgetobj($dsc, 0), TestAttrinitied, '$!read'), 'nqp::attrinited on an attribute that has been autovivified');
+    ok(nqp::attrinited(nqp::scgetobj($dsc, 0), TestAttrinitied, '$!null'), 'nqp::attrinited on an attribute that has been set with null');
+
 }
 
 # integers
