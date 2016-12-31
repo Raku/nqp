@@ -30,7 +30,7 @@ role NQPCursorRole is export {
     has int $!from;
     has int $!pos;
     has $!match;
-    has $!name;
+    has str $!name;
     has $!bstack;
     has $!cstack;
     has $!regexsub;
@@ -68,7 +68,7 @@ role NQPCursorRole is export {
         my int $cselems;
         my $subcur;
         my $submatch;
-        my $name;
+        my str $name;
         
         if !nqp::isnull($!regexsub) && nqp::defined($!regexsub) {
             %caplist := nqp::can($!regexsub, 'CAPS') ?? $!regexsub.CAPS() !! nqp::null();
@@ -86,8 +86,8 @@ role NQPCursorRole is export {
             while $csi < $cselems {
                 $subcur   := nqp::atpos($cs, $csi);
                 $submatch := $subcur.MATCH;
-                $name     := nqp::getattr($subcur, $?CLASS, '$!name');
-                if !nqp::isnull($name) && nqp::defined($name) {
+                $name     := nqp::getattr_s($subcur, $?CLASS, '$!name');
+                if !nqp::isnull_s($name) && nqp::defined($name) {
                     if nqp::index($name, '=') < 0 {
                         %caplist{$name} >= 2
                             ?? nqp::push($caps{$name}, $submatch)
@@ -231,7 +231,7 @@ role NQPCursorRole is export {
         $!match  := nqp::null();
         $!cstack := [] unless nqp::defined($!cstack);
         nqp::push($!cstack, $capture);
-        nqp::bindattr($capture, $?CLASS, '$!name', $name);
+        nqp::bindattr_s($capture, $?CLASS, '$!name', $name);
         nqp::push_i($!bstack, 0);
         nqp::push_i($!bstack, $!pos);
         nqp::push_i($!bstack, 0);
@@ -247,14 +247,14 @@ role NQPCursorRole is export {
             nqp::push($!cstack, $capture);
         }
         elsif !nqp::isnull($capture) {
-            my $name := nqp::getattr($capture, $?CLASS, '$!name');
-            if !nqp::isnull($name) && nqp::defined($name) {
+            my $name := nqp::getattr_s($capture, $?CLASS, '$!name');
+            if !nqp::isnull_s($name) && nqp::defined($name) {
                 nqp::push($!cstack, $capture);
             }
             else {  # is top capture anonymous enough to be reused?
-                my $top     := nqp::atpos($!cstack,-1);
-                my $topname := nqp::getattr($top, $?CLASS, '$!name');
-                if !nqp::isnull($topname) && nqp::defined($topname) {
+                my $top         := nqp::atpos($!cstack,-1);
+                my str $topname := nqp::getattr_s($top, $?CLASS, '$!name');
+                if !nqp::isnull_s($topname) && nqp::defined($topname) {
                     nqp::push($!cstack, $capture);
                 }
                 else {
@@ -486,9 +486,9 @@ role NQPCursorRole is export {
         my $last;
         my $first;
         while $n >= 0 {
-            my $cs_cur  := $!cstack[$n];
-            my $cs_name := nqp::getattr($cs_cur, $?CLASS, '$!name');
-            if !nqp::isnull($cs_name) && $cs_name eq $name {
+            my     $cs_cur  := $!cstack[$n];
+            my str $cs_name := nqp::getattr_s($cs_cur, $?CLASS, '$!name');
+            if !nqp::isnull_s($cs_name) && $cs_name eq $name {
                 if nqp::isconcrete($last) {
                     last unless $cs_cur.pos == $first.from;
                 }
@@ -513,8 +513,8 @@ role NQPCursorRole is export {
     method !BACKREF-LATEST-CAPTURE($name) {
         my $cur   := self."!cursor_start_cur"();
         my int $n := $!cstack ?? nqp::elems($!cstack) - 1 !! -1;
-        $n-- while $n >= 0 && (nqp::isnull(nqp::getattr($!cstack[$n], $?CLASS, '$!name')) ||
-                               nqp::getattr($!cstack[$n], $?CLASS, '$!name') ne $name);
+        $n-- while $n >= 0 && (nqp::isnull_s(nqp::getattr_s($!cstack[$n], $?CLASS, '$!name')) ||
+                               nqp::getattr_s($!cstack[$n], $?CLASS, '$!name') ne $name);
         if $n >= 0 {
             my $subcur     := $!cstack[$n];
             my int $litlen := $subcur.pos - $subcur.from;
@@ -974,9 +974,9 @@ class NQPCursor does NQPCursorRole {
                     $dest := nqp::atkey($hash, $onlyname);
                 }
                 while $csi < $cselems {
-                    my $subcur := nqp::atpos($cs, $csi);
-                    my $name   := nqp::getattr($subcur, $?CLASS, '$!name');
-                    if !nqp::isnull($name) && nqp::defined($name) {
+                    my $subcur   := nqp::atpos($cs, $csi);
+                    my str $name := nqp::getattr_s($subcur, $?CLASS, '$!name');
+                    if !nqp::isnull_s($name) && nqp::defined($name) {
                         my $submatch := $subcur.MATCH();
                         nqp::push($dest, $submatch);
                     }
@@ -988,9 +988,9 @@ class NQPCursor does NQPCursorRole {
                 my int $csi;
 #                note($cselems);
                 while $csi < $cselems {
-                    my $subcur := nqp::atpos($cs, $csi);
-                    my $name   := nqp::getattr($subcur, $?CLASS, '$!name');
-                    if !nqp::isnull($name) && nqp::defined($name) && $name ne '' {
+                    my $subcur   := nqp::atpos($cs, $csi);
+                    my str $name := nqp::getattr_s($subcur, $?CLASS, '$!name');
+                    if !nqp::isnull_s($name) && nqp::defined($name) && $name ne '' {
                         my $submatch := $subcur.MATCH();
                         if nqp::ord($name) == 36 && ($name eq '$!from' || $name eq '$!to') {
                             nqp::bindattr_i($match, NQPMatch, $name, $submatch.from);
