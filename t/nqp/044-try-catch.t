@@ -2,7 +2,7 @@
 
 # Tests for try and catch
 
-plan(45);
+plan(46);
 
 sub oops($msg = "oops!") { # throw an exception
     nqp::die($msg);
