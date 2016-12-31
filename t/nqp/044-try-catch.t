@@ -2,7 +2,7 @@
 
 # Tests for try and catch
 
-plan(43);
+plan(45);
 
 sub oops($msg = "oops!") { # throw an exception
     nqp::die($msg);
@@ -306,3 +306,30 @@ my $control_payload;
 }
 
 is(nqp::getpayload($control_payload), 'fancy payload', 'CONTROL block works');
+
+{
+    my $control_payload;
+    {
+        THROW(nqp::const::CONTROL_WARN, 'fancy warn payload');
+        CONTROL { $control_payload := $!; }
+    }
+
+    is(nqp::getpayload($control_payload), 'fancy warn payload', 'CONTROL block works with WARN');
+}
+
+my $control_called := 0;
+my $caught := 0;
+{
+    CATCH {
+        $caught := 1;
+    }
+    {
+        1.no_such_method;
+        CONTROL {
+            $control_called := 1;
+        }
+    }
+}
+
+ok(!$control_called, 'CONTROL not caught');
+ok($caught, 'CATCH caught the lowlevel error');
