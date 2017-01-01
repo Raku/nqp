@@ -1,9 +1,15 @@
 # vi: filetype=perl6:
+my $out := '';
+
+sub out(*@args) {
+    $out := $out ~ nqp::join('', @args) ~ "\n";
+}
+
 sub comment($comment) {
-    say("# $comment");
+    out("# $comment");
 }
 sub constant($name, $value) {
-    say("$name = $value");
+    out("$name = $value");
 }
 
 sub stage_path($stage) {
@@ -23,7 +29,7 @@ sub rule($target, $source, *@actions) {
             $rule := $rule ~ "\t$action\n";
         }
     }
-    say($rule);
+    out($rule);
     $target;
 }
 
@@ -45,7 +51,7 @@ sub nqp($prefix, $file, $stage, :$source=$prefix ~ '/' ~ $file ~ '.nqp', :$deps=
 }
 
 sub deps($target, *@deps) {
-    say("$target : {nqp::join(' ',@deps)}");
+    out("$target : {nqp::join(' ',@deps)}");
 }
 
 # TODO is the version regenerated as often as it should
@@ -94,7 +100,7 @@ constant('JS_STAGE2','$(JS_BUILD_DIR)/stage2');
 constant('JS_NQP','./$(M_RUNNER)$(BAT)');
 
 
-say('js-runner-default: js-all');
+out('js-runner-default: js-all');
 
 my $QASTCompiler-combined := combine(:stage(1), :sources('src/vm/js/Utils.nqp src/vm/js/SerializeOnce.nqp src/vm/js/const_map.nqp src/vm/js/LoopInfo.nqp src/vm/js/ReturnInfo.nqp src/vm/js/BlockBarrier.nqp src/vm/js/DWIMYNameMangling.nqp src/vm/js/Chunk.nqp src/vm/js/Operations.nqp src/vm/js/RegexCompiler.nqp src/vm/js/Compiler.nqp'), :file('QASTCompiler.nqp'));
 
@@ -125,16 +131,16 @@ my $sprintf-moarvm := cross-compile(:stage(2), :source('src/HLL/sprintf.nqp'), :
 
 deps('js-stage1-compiler', '$(JS_STAGE1_COMPILER)');
 
-say('js-test: js-all gen/js/qregex.t
+out('js-test: js-all gen/js/qregex.t
 	perl src/vm/js/bin/run_tests.pl');
 
-say('js-test-bootstrapped: js-bootstrap gen/js/qregex.t
+out('js-test-bootstrapped: js-bootstrap gen/js/qregex.t
 	perl src/vm/js/bin/run_tests_bootstrapped.pl');
 
-say('gen/js/qregex.t: tools/build/process-qregex-tests
+out('gen/js/qregex.t: tools/build/process-qregex-tests
 	$(JS_NQP) tools/build/process-qregex-tests > gen/js/qregex.t');
 
-say("\n\njs-clean:
+out("\n\njs-clean:
 	\$(RM_RF) gen/js/stage1 gen/js/stage2
 ");
 
@@ -143,10 +149,10 @@ my $ModuleLoader := "$nqp-js-on-js/ModuleLoader.js";
 deps("js-all", 'm-all', 'js-stage1-compiler', $nqpcore-moarvm, $nqpcore-combined, $QASTNode-moarvm, $QRegex-moarvm, $sprintf-moarvm, $ModuleLoader);
 
 # Enforce the google coding standards
-say("js-lint:
+out("js-lint:
 	gjslint --strict --max_line_length=200 --nojsdoc src/vm/js/nqp-runtime/*.js");
 
-say('js-install: js-all
+out('js-install: js-all
 	@echo "*** The JavaScript backend can\'t be installed yet, sorry! ***"');
 
 constant('JS_NQP_SOURCES', '$(COMMON_NQP_SOURCES)');
@@ -182,14 +188,17 @@ my $NQPP6QRegex-moarvm := cross-compile(:stage(2), :source($p6qregex-combined), 
 my $nqp-bootstrapped := "$nqp-js-on-js/nqp-bootstrapped.js";
 
 
-say("$nqp-js-on-js/ModuleLoader.js: $nqpcore-moarvm src/vm/js/ModuleLoader.nqp \$(JS_STAGE1_COMPILER)
+out("$nqp-js-on-js/ModuleLoader.js: $nqpcore-moarvm src/vm/js/ModuleLoader.nqp \$(JS_STAGE1_COMPILER)
 	./nqp-js --setting=NULL --no-regex-lib --target=js --output $ModuleLoader src/vm/js/ModuleLoader.nqp
 ");
 
-say("$nqp-bootstrapped: $QAST-moarvm $NQPP5QRegex-moarvm $NQPP6QRegex-moarvm $nqp-combined $QRegex-moarvm
+out("$nqp-bootstrapped: $QAST-moarvm $NQPP5QRegex-moarvm $NQPP6QRegex-moarvm $nqp-combined $QRegex-moarvm
 	./nqp-js --target=js --shebang $nqp-combined > $nqp-bootstrapped
 ");
 
 
 deps("js-bootstrap", "js-all", $nqp-bootstrapped);
 
+sub MAIN($program, $output-file) {
+    spew($output-file, $out);
+}
