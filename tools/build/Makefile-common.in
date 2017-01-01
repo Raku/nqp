@@ -81,14 +81,22 @@ COMMON_NQP_SOURCES  = \
 
 NQP_COMBINED = NQP.nqp
 
+# No QAST_SOURCES because it's just a single file that does not need combining
+
 QAST_COMBINED = QAST.nqp
 
-NQP_MO_SOURCES = src/how/Archetypes.nqp src/how/RoleToRoleApplier.nqp \
-                 src/how/NQPConcreteRoleHOW.nqp src/how/RoleToClassApplier.nqp \
-                 src/how/NQPCurriedRoleHOW.nqp src/how/NQPParametricRoleHOW.nqp \
-                 src/how/NQPClassHOW.nqp src/how/NQPNativeHOW.nqp \
-                 src/how/NQPAttribute.nqp src/how/NQPModuleHOW.nqp \
-                 src/how/EXPORTHOW.nqp \
+NQP_MO_SOURCES = \
+  src/how/Archetypes.nqp \
+  src/how/RoleToRoleApplier.nqp \
+  src/how/NQPConcreteRoleHOW.nqp \
+  src/how/RoleToClassApplier.nqp \
+  src/how/NQPCurriedRoleHOW.nqp \
+  src/how/NQPParametricRoleHOW.nqp \
+  src/how/NQPClassHOW.nqp \
+  src/how/NQPNativeHOW.nqp \
+  src/how/NQPAttribute.nqp \
+  src/how/NQPModuleHOW.nqp \
+  src/how/EXPORTHOW.nqp \
 
 NQP_MO_COMBINED = nqpmo.nqp
 
