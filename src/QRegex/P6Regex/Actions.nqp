@@ -400,7 +400,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     method backslash:sym<misc>($/) {
-        my $qast := QAST::Regex.new( ~$/ , :rxtype('enumcharlist'), :node($/) );
+        my $qast := QAST::Regex.new( ~$/ , :rxtype('literal'), :node($/) );
         make $qast;
     }
 
