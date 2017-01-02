@@ -1,4 +1,4 @@
-plan(20);
+plan(21);
 
 ok(nqp::isnull(nqp::decont(nqp::null())), 'nqp::decont works on nqp::null');
 
@@ -18,6 +18,8 @@ ok(nqp::isnull(nqp::decont(nqp::null())), 'nqp::decont works on nqp::null');
         'store', &store
     ));
     
+    ok(!nqp::isrwcont(42), 'isrwcont on something that is not a rwcontainer');
+
     my $cont := nqp::create(SomeCont);
     ok(nqp::iscont($cont), 'correct result from iscont');
 
