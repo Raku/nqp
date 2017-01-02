@@ -401,7 +401,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
 
     method backslash:sym<misc>($/) {
         my $qast := QAST::Regex.new( ~$/ , :rxtype('literal'), :node($/) );
-        make $qast;
+        make self.apply_literal_modifiers($qast);
     }
 
     method cclass_backslash:sym<s>($/) {
