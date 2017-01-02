@@ -476,8 +476,8 @@ class QAST::OperationsJS {
     add_simple_op('closefh', $T_OBJ, [$T_OBJ], :side_effects);
     add_simple_op('closefh_i', $T_INT, [$T_OBJ], :side_effects);
     add_simple_op('isttyfh', $T_INT, [$T_OBJ]);
-    add_simple_op('setinputlinesep', $T_OBJ, [$T_OBJ, $T_STR], :side_effects);
-    add_simple_op('setinputlineseps', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects);
+    add_simple_op('setinputlinesep', $T_VOID, [$T_OBJ, $T_STR], :side_effects);
+    add_simple_op('setinputlineseps', $T_VOID, [$T_OBJ, $T_OBJ], :side_effects);
     add_simple_op('copy', $T_VOID, [$T_STR, $T_STR], :side_effects);
     add_simple_op('rename', $T_VOID, [$T_STR, $T_STR], :side_effects);
 
