@@ -749,6 +749,7 @@ class QAST::OperationsJS {
             return $comp.as_js($protected, :$want);
         }
         
+        my $*RETURN_FROM_HANDLER; # needed to implement nqp::p6return
 
         my str $outer_ctx := $*CTX;
         {
@@ -761,11 +762,14 @@ class QAST::OperationsJS {
 
             my @handlers;
 
+            my $has_catch := 0;
+
             for @children -> $type, $handler {
                 my $catch_body := $comp.as_js($handler, :want($T_OBJ));
                 @handlers.push("$handler_ctx.\$\${$type} = function() \{\n");
                 @handlers.push($catch_body);
                 @handlers.push( "return {$catch_body.expr};\n" ~ "\};\n");
+                $has_catch := 1 if $type eq 'CATCH';
             }
 
             @handlers.push("$unwind_marker = \{\};\n");
@@ -796,6 +800,13 @@ class QAST::OperationsJS {
                     $catch_wrapped_exception := "$try_ret = $catch_wrapped_exception";
                 }
 
+                my $catch_unresumable := $has_catch
+                    ?? "\} else if (e instanceof nqp.NQPException) \{\n"
+                    ~ "$catch_exception\n"
+                    ~ "\} else if (e instanceof TypeError) \{\n" # HACK - we should catch more exceptions
+                    ~ "$catch_wrapped_exception;\n"
+                    !! '';
+
                 return Chunk.new($want, $try_ret, [
                     "var $handler_ctx = new nqp.Ctx($outer_ctx, $outer_ctx, $outer_ctx.\$\$callThis, $outer_ctx.\$\$codeRefAttr);\n",
                     Chunk.void(|@handlers),
@@ -805,15 +816,12 @@ class QAST::OperationsJS {
                     (($want == $T_VOID || $body.type == $T_VOID) ?? '' !! "$try_ret = {$body.expr};\n"),
                     "\} catch (e) \{if (e === $unwind_marker) \{",
                     $set_try_ret,
-                    "\} else if (e instanceof nqp.NQPException) \{\n",
-                    "$catch_exception\n",
-                    # HACK - we should catch more exceptions
-                    "\} else if (e instanceof TypeError) \{\n",
-                    "$catch_wrapped_exception;\n",
+                    $catch_unresumable,
                     "\} else \{\n",
                     "throw e;\n",
                     "\}\n",
-                    "\}\n"
+                    "\}\n",
+                    ($*RETURN_FROM_HANDLER ?? "if ($*RETURN_FROM_HANDLER !== undefined) return $*RETURN_FROM_HANDLER;\n" !! '')
                 ], :$node);
             }
         }
