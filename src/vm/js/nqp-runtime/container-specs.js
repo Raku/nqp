@@ -33,6 +33,10 @@ class CodePair {
         return 1;
       }
 
+      $$isrwcont() {
+        return 1;
+      }
+
 
       $$decont(ctx) {
         return fetch.$$call(ctx, {}, this);
@@ -99,6 +103,10 @@ class NativeRef {
           return 1;
         }
 
+        $$isrwcont() {
+          return 1;
+        }
+
         $$assign_i(ctx, value) {
           this.set(value);
           return value;
@@ -145,6 +153,10 @@ class NativeRef {
         }
 
         $$iscont() {
+          return 1;
+        }
+
+        $$isrwcont() {
           return 1;
         }
 
@@ -196,6 +208,10 @@ class NativeRef {
         }
 
         $$iscont() {
+          return 1;
+        }
+
+        $$isrwcont() {
           return 1;
         }
 

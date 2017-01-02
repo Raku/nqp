@@ -425,7 +425,7 @@ op.iscont_s = function(cont) {
 };
 
 op.isrwcont = function(cont) {
-  return cont.$$decont ? 1 : 0;
+  return cont.$$isrwcont ? cont.$$isrwcont() : 0;
 };
 
 op.box_n = function(n, type) {
