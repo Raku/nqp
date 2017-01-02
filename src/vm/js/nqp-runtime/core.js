@@ -986,6 +986,11 @@ op.backtracestrings = function(hllName, exception) {
   return hll.list(hllName, [exception.stack.replace(/^Error: .*\n/, '')]);
 };
 
+op.backtrace = function(hllName, exception) {
+  console.trace("Stubbed backtrace);
+  return hll.list(hllName, []);
+};
+
 op.hintfor = function(classHandle, attrName) {
   if (!classHandle._STable.REPR.hintfor) return -1;
   return classHandle._STable.REPR.hintfor(classHandle, attrName);
