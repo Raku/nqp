@@ -645,7 +645,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         elsif $!nyi eq 'warn' {
             nqp::printfh(nqp::getstderr(), "NYI: $msg\n");
         }
-        Chunk.new($T_VOID,"nqp.NYI({quote_string($msg)})",["console.trace(\"NYI: \"+{quote_string($msg)});\n"]);
+        Chunk.new($T_OBJ,"nqp.NYI({quote_string($msg)})",["console.trace(\"NYI: \"+{quote_string($msg)});\n"]);
         #nqp::die("NYI: $msg");
     }
 
