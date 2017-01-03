@@ -6513,7 +6513,11 @@ public final class Ops {
     }
 
     public static double div_In(SixModelObject a, SixModelObject b, ThreadContext tc) {
-        return new BigDecimal(getBI(tc, a)).divide(new BigDecimal(getBI(tc, b)), 309, RoundingMode.HALF_UP).doubleValue();
+        BigInteger divisor = getBI(tc, b);
+	// Use IEEE 754-2008 semantics for division by zero
+        return (divisor.compareTo(BigInteger.ZERO) == 0)
+            ? getBI(tc, a).doubleValue() / 0
+            : new BigDecimal(getBI(tc, a)).divide(new BigDecimal(divisor), 309, RoundingMode.HALF_UP).doubleValue();
     }
 
     public static SixModelObject mod_I(SixModelObject a, SixModelObject b, SixModelObject type, ThreadContext tc) {
