@@ -21,10 +21,8 @@ knowhow ModuleLoader {
         if !nqp::isnull($explicit) && nqp::defined($explicit) {
             nqp::push(@search_paths, $explicit);
         }
-        else {
-            for nqp::jvmclasspaths() {
-                nqp::push(@search_paths, $_)
-            }
+        for nqp::jvmclasspaths() {
+            nqp::push(@search_paths, $_)
         }
         
         # Add CWD and blib.
