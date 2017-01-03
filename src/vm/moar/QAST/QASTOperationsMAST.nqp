@@ -2747,6 +2747,7 @@ QAST::MASTOperations.add_core_moarop_mapping('getcodename', 'getcodename');
 QAST::MASTOperations.add_core_moarop_mapping('setcodename', 'setcodename', 0);
 QAST::MASTOperations.add_core_moarop_mapping('forceouterctx', 'forceouterctx', 0);
 QAST::MASTOperations.add_core_moarop_mapping('setdispatcher', 'setdispatcher', 0);
+QAST::MASTOperations.add_core_moarop_mapping('setdispatcherfor', 'setdispatcherfor', 0);
 QAST::MASTOperations.add_core_op('takedispatcher', -> $qastcomp, $op {
     my $regalloc := $*REGALLOC;
     unless nqp::istype($op[0], QAST::SVal) {
