@@ -2,7 +2,7 @@
 
 # Tests for try and catch
 
-plan(47);
+plan(48);
 
 sub oops($msg = "oops!") { # throw an exception
     nqp::die($msg);
@@ -336,3 +336,20 @@ my $caught := 0;
 
 ok(!$control_called, 'CONTROL not caught');
 ok($caught, 'CATCH caught the lowlevel error');
+
+{
+    my $caught_next := 0;
+    sub throw_next() {
+        nqp::throwextype(nqp::const::CONTROL_NEXT);
+        nqp::null();
+    }
+    sub catch_next() {
+        ($caught_next := 1);
+    }
+    nqp::handle(
+        throw_next(),
+        'NEXT', catch_next()
+    );
+
+    ok($caught_next, 'throwextype works');
+}
