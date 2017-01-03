@@ -79,9 +79,11 @@ public class ThreadContext {
     public CallCaptureInstance savedCC;
     
     /**
-     * The currently set dispatcher, for the next interested call to take.
+     * The currently set dispatcher, for the next interested call (or the
+     * one matching currentDispatcherFor, if set) to take.
      */
     public SixModelObject currentDispatcher;
+    public SixModelObject currentDispatcherFor;
     
     /**
      * Serialization context write barrier disabled depth (anything non-zero

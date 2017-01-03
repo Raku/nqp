@@ -2706,20 +2706,8 @@ QAST::OperationsJAST.map_classlib_core_op('freshcoderef', $TYPE_OPS, 'freshcoder
 QAST::OperationsJAST.map_classlib_core_op('markcodestatic', $TYPE_OPS, 'markcodestatic', [$RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('markcodestub', $TYPE_OPS, 'markcodestub', [$RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getstaticcode', $TYPE_OPS, 'getstaticcode', [$RT_OBJ], $RT_OBJ, :tc);
-QAST::OperationsJAST.add_core_op('setdispatcher', -> $qastcomp, $op {
-    if +@($op) != 1 {
-        nqp::die('setdispatcher requires one operand');
-    }
-    my $il := JAST::InstructionList.new();
-    my $dispres := $qastcomp.as_jast($op[0], :want($RT_OBJ));
-    $il.append($dispres.jast);
-    $*STACK.obtain($il, $dispres);
-    $il.append($DUP);
-    $il.append($ALOAD_1);
-    $il.append($SWAP);
-    $il.append(JAST::Instruction.new( :op('putfield'), $TYPE_TC, 'currentDispatcher', $TYPE_SMO ));
-    result($il, $RT_OBJ);
-});
+QAST::OperationsJAST.map_classlib_core_op('setdispatcher', $TYPE_OPS, 'setdispatcher', [$RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('setdispatcherfor', $TYPE_OPS, 'setdispatcherfor', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.add_core_op('takedispatcher', -> $qastcomp, $op {
     if +@($op) != 1 || !nqp::istype($op[0], QAST::SVal) {
         nqp::die('takedispatcher requires one string literal operand');

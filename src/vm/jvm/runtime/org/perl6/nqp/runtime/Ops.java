@@ -5167,10 +5167,34 @@ public final class Ops {
         else
             throw ExceptionHandling.dieInternal(tc, "getstaticcode can only be used with a CodeRef");
     }
+    public static SixModelObject setdispatcher(SixModelObject disp, ThreadContext tc) {
+        tc.currentDispatcher = disp;
+        return disp;
+    }
+    public static SixModelObject setdispatcherfor(SixModelObject disp, SixModelObject dispFor, ThreadContext tc) {
+        tc.currentDispatcher = disp;
+        if (dispFor instanceof CodeRef) {
+            tc.currentDispatcherFor = dispFor;
+        }
+        else {
+            InvocationSpec is = dispFor.st.InvocationSpec;
+            if (is == null)
+                throw ExceptionHandling.dieInternal(tc, "setdispatcherfor needs invokable target");
+                if (is.ClassHandle != null)
+                    tc.currentDispatcherFor = (CodeRef)dispFor.get_attribute_boxed(tc,
+                            is.ClassHandle, is.AttrName, is.Hint);
+                else
+                    throw ExceptionHandling.dieInternal(tc, "setdispatcherfor needs simple invokable target");
+        }
+        return disp;
+    }
     public static void takedispatcher(int lexIdx, ThreadContext tc) {
         if (tc.currentDispatcher != null) {
-            tc.curFrame.oLex[lexIdx] = tc.currentDispatcher;
-            tc.currentDispatcher = null;
+            if (tc.currentDispatcherFor == null ||
+                    tc.currentDispatcherFor == tc.curFrame.codeRef) {
+                tc.curFrame.oLex[lexIdx] = tc.currentDispatcher;
+                tc.currentDispatcher = null;
+            }
         }
     }
 
