@@ -959,6 +959,13 @@ op.newexception = function() {
   return exType._STable.REPR.allocate(exType._STable);
 };
 
+op.throwextype = function(ctx, category) {
+  var exType = BOOTException;
+  let ex = exType._STable.REPR.allocate(exType._STable);
+  ex.$$category = category;
+  ctx.throw(ex);
+};
+
 function EvalResult(mainline, codeRefs) {
   this.mainline = mainline;
   this.codeRefs = codeRefs;

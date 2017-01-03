@@ -1484,6 +1484,8 @@ class QAST::OperationsJS {
         ]);
     });
 
+    add_simple_op('throwextype', $T_VOID, [$T_INT], :side_effects, :ctx);
+
     add_simple_op('lastexpayload', $T_OBJ, [], sub () { '$$e.payload' }, :!inlinable, :side_effects);
 
 
