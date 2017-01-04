@@ -13,7 +13,7 @@ sub is_qast($qast, $value, $desc) {
         my $code := compile_qast($qast);
         my $result := $code();
         ok($result eq $value, $desc);
-        CATCH { ok(0, $desc ~ $!) }
+        CATCH { ok(0, $desc ~ ': ' ~ $!) }
     }
 }
 
