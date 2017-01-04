@@ -1,7 +1,7 @@
 #! nqp
 use nqpmo;
 
-plan(100);
+plan(105);
 
 my $knowhow := nqp::knowhow();
 my $bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
@@ -215,3 +215,15 @@ ok(nqp::isbig_I(box(2)) == 0, 'isbig on small value');
 ok(nqp::isbig_I(box(-2)) == 0, 'isbig on small value');
 ok(nqp::isbig_I(box(12)) == 0, 'isbig on small value');
 ok(nqp::isbig_I(nqp::fromstr_I('2988348162058574136915891421498819466320163312926952423791023078876139', $bi_type)) == 1, 'isbig on huge value');
+
+ok(nqp::div_In(box(-1), box(0)) == nqp::neginf(), 'nqp::div_In -1/0 == Inf');
+ok(nqp::div_In(box(1), box(0)) == nqp::inf(), 'nqp::div_In 1/0 == Inf');
+
+ok(nqp::div_In(box(-12), box(0)) == nqp::neginf(), 'nqp::div_In -12/0 = -Inf');
+ok(nqp::div_In(box(12), box(0)) == nqp::inf(), 'nqp::div_In 12/0 == Inf');
+
+my sub isnan($n) {
+    nqp::isnanorinf($n) && $n != nqp::inf() && $n != nqp::neginf();
+}
+
+ok(isnan(nqp::div_In(box(0), box(0))), 'nqp::div_In 0/0 == NaN');
