@@ -147,8 +147,12 @@ op.expmod_I = function(a, b, c, type) {
 };
 
 op.div_In = function(a, b) {
-  var digits = 1e+20;
-  return getBI(a).mul(bignum(digits)).div(getBI(b)).toNumber() / digits;
+  let digits = 1e+20;
+  let divisor = getBI(b);
+  if (divisor.eq(0)) {
+    return getBI(a).toNumber() / 0;
+  }
+  return getBI(a).mul(bignum(digits)).div(divisor).toNumber() / digits;
 };
 
 op.rand_I = function(max, type) {
