@@ -2,6 +2,8 @@
 var op = {};
 exports.op = op;
 
+var refs = require('./refs.js');
+
 var NQPInt = require('./nqp-int.js');
 var NQPException = require('./nqp-exception.js');
 
@@ -69,6 +71,11 @@ module.exports.CtxWithStatic = require('./ctx-with-static.js');
 var bootstrap = require('./bootstrap.js');
 module.exports.knowhowattr = bootstrap.knowhowattr;
 module.exports.knowhow = bootstrap.knowhow;
+
+loadOps(refs);
+for (let name in refs.helpers) {
+  exports[name] = refs.helpers[name];
+}
 
 exports.loaderCtx = null;
 

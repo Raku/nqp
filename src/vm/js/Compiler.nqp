@@ -1851,7 +1851,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     my $suffix := self.suffix_from_type($type);
                     my $get := self.get_var($var);
                     my $set := self.set_var($var, 'value');
-                    Chunk.new($T_OBJ, "nqp.op.getlexref{$suffix}({quote_string($*HLL)}, function() \{return $get\}, function(value) \{$set\})", :node($var));
+                    Chunk.new($T_OBJ, "nqp.lexRef{$suffix}({quote_string($*HLL)}, function() \{return $get\}, function(value) \{$set\})", :node($var));
                 }
             }
         }
@@ -1925,7 +1925,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
 
 
-            Chunk.new($T_OBJ, "nqp.op.getattrref{$suffix}({quote_string($*HLL)}, function() \{return $get\}, function(value) \{$set\})", :node($var));
+            Chunk.new($T_OBJ, "nqp.attrRef{$suffix}({quote_string($*HLL)}, function() \{return $get\}, function(value) \{$set\})", :node($var));
         }
         elsif $var.scope eq 'attribute' {
             my @types := [$T_OBJ, $T_INT, $T_NUM, $T_STR];
