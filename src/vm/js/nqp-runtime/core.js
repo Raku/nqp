@@ -994,7 +994,7 @@ op.backtracestrings = function(hllName, exception) {
 };
 
 op.backtrace = function(hllName, exception) {
-  console.trace("Stubbed backtrace);
+  console.trace("Stubbed backtrace");
   return hll.list(hllName, []);
 };
 
