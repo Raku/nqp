@@ -337,6 +337,11 @@ class QAST::OperationsJS {
         });
     }
 
+    for ['_i', '_n', '_s'] -> $suffix {
+        add_simple_op('getattrref' ~ $suffix, $T_OBJ, [$T_OBJ, $T_OBJ, $T_STR], :hll);
+        add_simple_op('atposref' ~ $suffix, $T_OBJ, [$T_OBJ, $T_INT], :hll);
+    }
+
     add_simple_op('attrinited', $T_INT, [$T_OBJ, $T_OBJ, $T_STR], :decont(1), :method_call);
     add_simple_op('hintfor', $T_INT, [$T_OBJ, $T_STR]);
 
