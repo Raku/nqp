@@ -338,8 +338,7 @@ role NQPCursorRole is export {
         my @fates := $nfa.run(nqp::getattr_s($shared, ParseShared, '$!target'), $!pos);
         
         # Update highwater mark.
-        my int $highwater := nqp::getattr_i($shared, ParseShared, '$!highwater');
-        if $!pos > $highwater {
+        if $!pos > nqp::getattr_i($shared, ParseShared, '$!highwater') {
             nqp::bindattr_i($shared, ParseShared, '$!highwater', $!pos);
         }
         
@@ -389,9 +388,8 @@ role NQPCursorRole is export {
 
     method !alt(int $pos, str $name, @labels = []) {
         # Update highwater mark.
-        my $shared        := $!shared;
-        my int $highwater := nqp::getattr_i($shared, ParseShared, '$!highwater');
-        if $pos > $highwater {
+        my $shared := $!shared;
+        if $pos > nqp::getattr_i($shared, ParseShared, '$!highwater') {
             nqp::bindattr_i($shared, ParseShared, '$!highwater', $pos);
         }
         
@@ -946,7 +944,7 @@ class NQPCursor does NQPCursorRole {
                     while $iter {
                         my $curcap   := nqp::shift($iter);
                         my str $name := nqp::iterkey_s($curcap);
-                        $namecount++;
+                        ++$namecount;
                         if nqp::iterval($curcap) >= 2 {
                             $onlyname := $name if $namecount == 1;
                             nqp::ord($name) < 58
@@ -980,7 +978,7 @@ class NQPCursor does NQPCursorRole {
                         my $submatch := $subcur.MATCH();
                         nqp::push($dest, $submatch);
                     }
-                    $csi++;
+                    ++$csi;
                 }
             }
             elsif !nqp::isnull(%caplist) && %caplist  {
@@ -1026,7 +1024,7 @@ class NQPCursor does NQPCursorRole {
                             }
                         }
                     }
-                    $csi++;
+                    ++$csi;
                 }
 #		{
 #                    my $iter := nqp::iterator(%caplist);
