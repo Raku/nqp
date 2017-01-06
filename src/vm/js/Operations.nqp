@@ -1402,7 +1402,7 @@ class QAST::OperationsJS {
         my $*RETURN;
         $*RETURN := ReturnInfo.new(block => $*BLOCK) if $is_return;
 
-        my $protected := $comp.as_js($node[0], :$want);
+        my $protected := $comp.as_js($node[0], :want($T_OBJ));
 
         # When compiling nqp assume that nqp::throwpayloadlexcaller is not used
         if $*HLL eq 'nqp' && $is_return && !$*RETURN.is_used {
