@@ -130,8 +130,6 @@ my class MASTCompilerInstance {
         has %!local_names_by_index; # Locals' names by their indexes
         has %!locals;               # Mapping of local names to locals
         has %!local_kinds;          # Mapping of local registers to kinds
-        has %!localrefs;            # Mapping of localref names to locals
-        has %!localref_kinds;       # Mapping of localref registers to kinds
         has %!lexicals;             # Mapping of lexical names to lexicals
         has %!lexical_kinds;        # Mapping of lexical names to kinds
         has %!lexical_params;       # Mapping of lexical param names to their initial result reg
@@ -158,8 +156,6 @@ my class MASTCompilerInstance {
             %!local_names_by_index := nqp::hash();
             %!locals := nqp::hash();
             %!local_kinds := nqp::hash();
-            %!localrefs := nqp::hash();
-            %!localref_kinds := nqp::hash();
             %!lexicals := nqp::hash();
             %!lexical_kinds := nqp::hash();
             %!lexical_params := nqp::hash();
@@ -241,9 +237,9 @@ my class MASTCompilerInstance {
         method register_local($var, :$is_cont) {
             my $name := $var.name;
             my $temporary := ?$*INSTMT;
-            if nqp::existskey(%!locals, $name) || nqp::existskey(%!localrefs, $name) ||
+            if nqp::existskey(%!locals, $name) ||
                     $temporary && nqp::existskey(%*STMTTEMPS, $name) {
-                nqp::die("Local (or localref) '$name' already declared");
+                nqp::die("Local '$name' already declared");
             }
             my $kind := $!compiler.type_to_register_kind($var.returns);
             %!local_kinds{$name} := $kind;
@@ -258,25 +254,6 @@ my class MASTCompilerInstance {
                 nqp::push(@!contvar_locals, $var);
             }
             $local;
-        }
-
-        method register_localref($var) {
-            my $name := $var.name;
-            my $temporary := ?$*INSTMT;
-            if nqp::existskey(%!localrefs, $name) || nqp::existskey(%!locals, $name) ||
-                    $temporary && nqp::existskey(%*STMTTEMPS, $name) {
-                nqp::die("Localref (or local) '$name' already declared");
-            }
-            my $kind := $!compiler.type_to_register_kind($var.returns);
-            %!localref_kinds{$name} := $kind;
-            # pass a 1 meaning get a Totally New MAST::Local
-            my $localref := $*REGALLOC.fresh_register($MVM_reg_obj, !$temporary);
-            %!localrefs{$name} := $localref;
-            %!local_names_by_index{$localref.index} := $name;
-            if $temporary {
-                %*STMTTEMPS{$name} := $localref;
-            }
-            $localref;
         }
 
         # returns whether a MAST::Local is a variable in this block
@@ -312,8 +289,6 @@ my class MASTCompilerInstance {
         method lexicalrefs() { %!lexicalrefs }
         method local($name) { %!locals{$name} }
         method local_kind($name) { %!local_kinds{$name} }
-        method localref($name) { %!localrefs{$name} }
-        method localref_kind($name) { %!localref_kinds{$name} }
         method lexical_kind($name) { %!lexical_kinds{$name} }
         method lexical_kinds() { %!lexical_kinds }
         method lexicalref_kind($name) { %!lexicalref_kinds{$name} }
@@ -1489,22 +1464,6 @@ my class MASTCompilerInstance {
         'getlexref_nu',
     ];
 
-    my @localref_opnames := [
-        '',
-        'getregref_i8',
-        'getregref_i16',
-        'getregref_i32',
-        'getregref_i',
-        'getregref_n32',
-        'getregref_n',
-        'getregref_s',
-        '', '',  '',  '',  '',  '',  '',  '',  '',
-        'getregref_u8',
-        'getregref_u16',
-        'getregref_u32',
-        'getregref_u'
-    ];
-
     my @decont_opnames := [
         'decont_i',
         'decont_n',
@@ -1580,11 +1539,8 @@ my class MASTCompilerInstance {
                 elsif $scope eq 'lexicalref' {
                     $*BLOCK.add_lexicalref($node);
                 }
-                elsif $scope eq 'localref' {
-                    $*BLOCK.register_localref($node);
-                }
                 else {
-                    nqp::die("Cannot declare variable with scope '$scope'; use one of 'local', 'lexical', 'localref' or 'lexicalref'");
+                    nqp::die("Cannot declare variable with scope '$scope'; use one of 'local', 'lexical', or 'lexicalref'");
                 }
             }
             elsif $decl eq 'static' {
@@ -1636,8 +1592,6 @@ my class MASTCompilerInstance {
         my @ins;
         if $scope eq 'local' {
             my $local := $*BLOCK.local($name);
-            my $localref := $*BLOCK.localref($name);
-
             if $local {
                 $res_kind := $*BLOCK.local_kind($name);
                 if $*BINDVAL {
@@ -1647,42 +1601,6 @@ my class MASTCompilerInstance {
                     $*REGALLOC.release_register($valmast.result_reg, $res_kind);
                 }
                 $res_reg := $local;
-            } elsif $localref {
-                if $*BINDVAL {
-                    nqp::die('Cannot bind to QAST::Var resolving to a localref');
-                }
-                $res_kind := $*BLOCK.localref_kind($name);
-                $res_reg := $*REGALLOC.fresh_register($res_kind);
-                push_op(@ins, @decont_opnames[@kind_to_op_slot[$res_kind]], $res_reg, $localref);
-            }
-            else {
-                nqp::die("Cannot reference undeclared local '$name'");
-            }
-        }
-        elsif $scope eq 'localref' {
-            my $localref := $*BLOCK.localref($name);
-            my $local    := $*BLOCK.local($name);
-            if $localref {
-                $res_kind := $MVM_reg_obj;
-                if $*BINDVAL {
-                    my $valmast := self.as_mast_clear_bindval($*BINDVAL, :want($MVM_reg_obj));
-                    push_ilist(@ins, $valmast);
-                    push_op(@ins, 'set', $localref, $valmast.result_reg);
-                    $*REGALLOC.release_register($valmast.result_reg, $MVM_reg_obj);
-                }
-                $res_reg := $localref;
-            }
-            elsif $local {
-                if $*BINDVAL {
-                    nqp::die('Cannot bind to a local resolving to a localref');
-                }
-                my $local_kind := $*BLOCK.local_kind($name);
-                if $local_kind == $MVM_reg_obj {
-                    nqp::die('Cannot take a reference to non-native local ' ~ $name);
-                }
-                $res_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
-                $res_kind := $MVM_reg_obj;
-                push_op(@ins, @localref_opnames[$local_kind], $res_reg, $local);
             }
             else {
                 nqp::die("Cannot reference undeclared local '$name'");
