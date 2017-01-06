@@ -2894,8 +2894,7 @@ QAST::MASTOperations.add_core_moarop_mapping('compunitmainline', 'compunitmainli
 QAST::MASTOperations.add_core_moarop_mapping('compunitcodes', 'compunitcodes');
 QAST::MASTOperations.add_core_moarop_mapping('backendconfig', 'backendconfig');
 
-# MoarVM-specific (though matching NQP JVM API) continuation ops.
-QAST::MASTOperations.add_core_moarop_mapping('continuationclone', 'continuationclone');
+# MoarVM-specific (matching NQP JVM API, though no clone and one-shot only) continuation ops.
 QAST::MASTOperations.add_core_moarop_mapping('continuationreset', 'continuationreset');
 QAST::MASTOperations.add_core_moarop_mapping('continuationcontrol', 'continuationcontrol');
 QAST::MASTOperations.add_core_moarop_mapping('continuationinvoke', 'continuationinvoke');
