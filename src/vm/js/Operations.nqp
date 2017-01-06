@@ -1397,28 +1397,37 @@ class QAST::OperationsJS {
         }
         my str $type := $node[1];
 
-        my $unwind_marker := $*BLOCK.add_tmp;
+        my int $is_return := $type eq 'RETURN' && $node[2] ~~ QAST::Op && $node[2].op eq 'lastexpayload';
 
-        my $handle_result := $comp.as_js(:want($T_OBJ), $node[2]);
-        my str $result := $*BLOCK.add_tmp;
-
-        my $*RETURN := ReturnInfo.new(block => $*BLOCK);
+        my $*RETURN;
+        $*RETURN := ReturnInfo.new(block => $*BLOCK) if $is_return;
 
         my $protected := $comp.as_js($node[0], :$want);
 
+        # When compiling nqp assume that nqp::throwpayloadlexcaller is not used
+        if $*HLL eq 'nqp' && $is_return && !$*RETURN.is_used {
+            $protected;
+        }
+        else {
+            my $unwind_marker := $*BLOCK.add_tmp;
 
-        Chunk.new($T_OBJ, $result, [
-            "$unwind_marker = \{\};\n",
-            "$*CTX.unwind = $unwind_marker;\n",
-            "$*CTX.\$\${$type} = function() \{\n",
-                $handle_result,
-                "$result = {$handle_result.expr};\n",
-            "\};\n",
-            "try \{",
-                $protected,
-                "$result = {$protected.expr};\n",
-            "\} catch (e) \{if (e === $unwind_marker) \{\} else \{throw e\}\}",
-        ]);
+            my $handle_result := $comp.as_js(:want($T_OBJ), $node[2]);
+            my str $result := $*BLOCK.add_tmp;
+
+
+            Chunk.new($T_OBJ, $result, [
+                "$unwind_marker = \{\};\n",
+                "$*CTX.unwind = $unwind_marker;\n",
+                "$*CTX.\$\${$type} = function() \{\n",
+                    $handle_result,
+                    "$result = {$handle_result.expr};\n",
+                "\};\n",
+                "try \{",
+                    $protected,
+                    "$result = {$protected.expr};\n",
+                "\} catch (e) \{if (e === $unwind_marker) \{\} else \{throw e\}\}",
+            ]);
+        }
     });
 
     my sub is_CONTROL_RETURN($category) {
@@ -1432,7 +1441,7 @@ class QAST::OperationsJS {
     add_op('throwpayloadlex', :!inlinable, sub ($comp, $node, :$want, :$cps) {
         my $payload := $comp.as_js(:want($T_OBJ), $node[1]);
 
-        if is_CONTROL_RETURN($node[0]) {
+        if $*RETURN && is_CONTROL_RETURN($node[0]) {
             if $*RETURN.as_return {
                 return Chunk.void($payload, "return {$payload.expr};\n");
             }
