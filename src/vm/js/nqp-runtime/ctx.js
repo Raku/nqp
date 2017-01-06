@@ -6,6 +6,8 @@ var NQPObject = require('./nqp-object.js');
 var Null = require('./null.js');
 var exceptionsStack = require('./exceptions-stack.js');
 
+var BOOT = require('./BOOT.js');
+
 var categoryToName = {
   4: 'NEXT',
   8: 'REDO',
@@ -121,6 +123,54 @@ class Ctx extends NQPObject {
 
   throw (exception) {
     this.propagateException(exception);
+  }
+
+  throwpayloadlexcaller(category, payload) {
+    let ctx = this.$$caller;
+
+    let isThunkOrCompilerStub = code => {code.isThunk || code.isCompilerStub};
+    while (ctx && isThunkOrCompilerStub(ctx.codeRef().staticCode)) {
+      ctx = ctx.$$caller;
+    }
+
+    ctx.throwpayloadlex(category, payload);
+  }
+
+  throwpayloadlex(category, payload) {
+    let exType = BOOT.Exception;
+    let exception = exType._STable.REPR.allocate(exType._STable);
+    exception.$$category = category;
+    exception.$$payload = payload;
+    let handler = '$$' + categoryToName[category];
+
+    let ctx = this;
+
+
+    while (ctx) {
+      if (ctx[handler] || ctx.$$CONTROL) {
+        exception.caught = ctx;
+        exception.resume = false;
+        ctx.exception = exception;
+
+        exceptionsStack.push(exception);
+        try {
+          if (ctx[handler]) {
+            ctx.unwind.ret = ctx[handler]();
+          } else {
+            ctx.unwind.ret = ctx.$$CONTROL();
+          }
+        } finally {
+          exceptionsStack.pop();
+        }
+
+        if (exception.resume) {
+          return;
+        } else {
+          throw ctx.unwind;
+        }
+      }
+      ctx = ctx.$$outer;
+    }
   }
 
   lookupDynamic(name) {

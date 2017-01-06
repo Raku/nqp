@@ -601,11 +601,11 @@ op.setmessage = function(exception, message) {
 };
 
 op.getpayload = function(exception) {
-  return Object.prototype.hasOwnProperty.call(exception, 'payload') ? exception.payload : Null;
+  return Object.prototype.hasOwnProperty.call(exception, '$$payload') ? exception.$$payload : Null;
 };
 
 op.setpayload = function(exception, payload) {
-  return (exception.payload = payload);
+  return (exception.$$payload = payload);
 };
 
 op.isnum = function(value) {
@@ -952,15 +952,14 @@ op.setdimensions = function(array, dimensions) {
   };
 });
 
-var BOOTException = bootstrap.bootType('BOOTException', 'VMException');
 /* TODO HLL support */
 op.newexception = function() {
-  var exType = BOOTException;
+  var exType = BOOT.Exception;
   return exType._STable.REPR.allocate(exType._STable);
 };
 
 op.throwextype = function(ctx, category) {
-  var exType = BOOTException;
+  var exType = BOOT.Exception;
   let ex = exType._STable.REPR.allocate(exType._STable);
   ex.$$category = category;
   ctx.throw(ex);
@@ -1089,6 +1088,10 @@ op.split = function(hllName, separator, string) {
 
 op.exception = function() {
   return exceptionsStack[exceptionsStack.length - 1];
+};
+
+op.lastexpayload = function() {
+  return exceptionsStack[exceptionsStack.length - 1].$$payload;
 };
 
 op.setextype = function(exception, category) {

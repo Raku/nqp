@@ -351,16 +351,6 @@ exports.wrapException = function(e) {
   return new NQPException(e.message);
 };
 
-function ControlReturn(payload) {
-  this.payload = payload;
-}
-exports.ControlReturn = ControlReturn;
-
-function PassExceptionToCaller(exception) {
-  this.exception = exception;
-}
-exports.PassExceptionToCaller = PassExceptionToCaller;
-
 exports.setCodeRefHLL = function(codeRefs, hllName) {
   for (var i = 0; i < codeRefs.length; i++) {
     codeRefs[i].hll = hll.hllConfigs[hllName];

@@ -1390,58 +1390,35 @@ class QAST::OperationsJS {
     add_simple_op('findnotcclass', $T_INT, [$T_INT, $T_STR, $T_INT, $T_INT]);
     add_simple_op('iscclass', $T_INT, [$T_INT, $T_STR, $T_INT]);
 
-    # Simple payload handler.
+    # We assume if handlepayload is present is contains the whole meat of the function
     add_op('handlepayload', :!inlinable, sub ($comp, $node, :$want, :$cps) {
         if +$node.list != 3 {
             nqp::die("The 'handlepayload' op requires three children");
         }
         my str $type := $node[1];
 
+        my $unwind_marker := $*BLOCK.add_tmp;
 
+        my $handle_result := $comp.as_js(:want($T_OBJ), $node[2]);
         my str $result := $*BLOCK.add_tmp;
-        if $type ne 'RETURN' {
-            $comp.NYI("handlepayload with type '$type'");
-        }
 
-        my $*RETURN;
+        my $*RETURN := ReturnInfo.new(block => $*BLOCK);
 
-        my @toplevels := $*BLOCK.qast.list;
+        my $protected := $comp.as_js($node[0], :$want);
 
-        my $is_last_toplevel := +@toplevels && nqp::eqaddr(@toplevels[+@toplevels - 1], $node);
 
-        my $just_return_payload := $node[2] ~~ QAST::Op && $node[2].op eq 'lastexpayload';
-
-        if $is_last_toplevel && $just_return_payload {
-           $*RETURN := TopLevelInBlock.new(block => $*BLOCK);
-        }
-        else {
-           $*RETURN := NotTopLevel.new();
-        }
-
-        my $protected := $comp.as_js(:want($T_OBJ), $node[0]);
-
-        # HACK - we assume how return is used on the nqp backend and avoid handling some exceptions
-        if $*HLL ne 'nqp' || $*RETURN.is_used {
-            my $handle_result := $comp.as_js(:want($T_OBJ), $node[2]);
-
-            Chunk.new($T_OBJ, $result, [
-                "try \{\n",
-                    $protected,
-                    "$result = {$protected.expr};\n",
-                "\} catch (\$\$e) \{\n",
-                    "if (\$\$e instanceof nqp.ControlReturn) \{\n",
-                        $handle_result,
-                        "$result = {$handle_result.expr};\n",
-                    "\} else \{",
-                        "throw \$\$e;\n",
-                    "\}",
-                "\}"
-            ]);
-        }
-        else {
-            $protected;
-        }
-
+        Chunk.new($T_OBJ, $result, [
+            "$unwind_marker = \{\};\n",
+            "$*CTX.unwind = $unwind_marker;\n",
+            "$*CTX.\$\${$type} = function() \{\n",
+                $handle_result,
+                "$result = {$handle_result.expr};\n",
+            "\};\n",
+            "try \{",
+                $protected,
+                "$result = {$protected.expr};\n",
+            "\} catch (e) \{if (e === $unwind_marker) \{\} else \{throw e\}\}",
+        ]);
     });
 
     my sub is_CONTROL_RETURN($category) {
@@ -1449,49 +1426,28 @@ class QAST::OperationsJS {
             || $category ~~ QAST::Op && $category.op eq 'const' && $category.name eq 'CONTROL_RETURN';
     }
 
+    add_simple_op('throwpayloadlexcaller', $T_VOID, [$T_INT, $T_OBJ], :side_effects, :!inlinable,
+       sub ($category, $payload) {"$*CTX.throwpayloadlexcaller($category, $payload)"});
+
     add_op('throwpayloadlex', :!inlinable, sub ($comp, $node, :$want, :$cps) {
-        my $category := $node[0];
         my $payload := $comp.as_js(:want($T_OBJ), $node[1]);
 
-        unless is_CONTROL_RETURN($category) {
-            return $comp.NYI("throwpayloadlex with something else then a CONTROL_RETURN literal");
+        if is_CONTROL_RETURN($node[0]) {
+            if $*RETURN.as_return {
+                return Chunk.void($payload, "return {$payload.expr};\n");
+            }
+            else {
+                $*RETURN.mark_used;
+            }
         }
 
-        if $*RETURN.as_return {
-            return Chunk.new($T_VOID, "", [
-                $payload,
-                "return {$payload.expr};\n"
-            ]);
-        }
-        else {
-            $*RETURN.mark_used();
-        }
-
-        Chunk.new($T_VOID, "", [
-            $payload,
-            "throw new nqp.ControlReturn({$payload.expr});\n"
-        ]);
-    });
-
-    add_op('throwpayloadlexcaller', :!inlinable, sub ($comp, $node, :$want, :$cps) {
-        my $category := $node[0];
-        my $payload := $comp.as_js(:want($T_OBJ), $node[1]);
-
-        unless is_CONTROL_RETURN($category) {
-            return $comp.NYI("throwpayloadlexcaller with something else then a CONTROL_RETURN literal");
-        }
-
-        $*BLOCK.use_passing_on_of_exceptions();
-
-        Chunk.new($T_VOID, "", [
-            $payload,
-            "throw new nqp.PassExceptionToCaller(new nqp.ControlReturn({$payload.expr}));\n"
-        ]);
+        my $category := $comp.as_js(:want($T_INT), $node[0]);
+        Chunk.void($category, $payload, "$*CTX.throwpayloadlex({$category.expr}, {$payload.expr});\n");
     });
 
     add_simple_op('throwextype', $T_VOID, [$T_INT], :side_effects, :ctx);
 
-    add_simple_op('lastexpayload', $T_OBJ, [], sub () { '$$e.payload' }, :!inlinable, :side_effects);
+    add_simple_op('lastexpayload', $T_OBJ, [], :!inlinable);
 
 
     add_op('control', sub ($comp, $node, :$want, :$cps) {
