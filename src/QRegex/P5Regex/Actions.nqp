@@ -515,7 +515,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
 
     method metachar:sym<var>($/) {
         my $qast;
-        my $name := $<pos> ?? +$<pos> !! ~$<name>;
+        my $name := $<pos> ?? nqp::radix(10, $<pos>, 0, 0)[0] !! ~$<name>;
         if $<quantified_atom> {
             $qast := $<quantified_atom>[0].ast;
             if $qast.rxtype eq 'quant' && $qast[0].rxtype eq 'subrule' {
