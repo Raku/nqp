@@ -520,7 +520,7 @@ class SerializationWriter {
     /* Delegate to its serialization REPR function. */
     if (!obj.typeObject_) {
       if (!obj._STable.REPR.serialize) {
-        console.trace("don't know how to serialize");
+        console.trace("don't know how to serialize", obj._STable.REPR.name);
       } else {
         obj._STable.REPR.serialize(this.objectsData, obj);
       }
