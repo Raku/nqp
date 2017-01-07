@@ -153,8 +153,8 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     regex infixstopper {
         :dba('infix stopper')
         [
-        | <?before <[\) \} \]]> >
-        | <?before '>' <-[>]> >
+        | <?before <.[\) \} \]]> >
+        | <?before '>' <.-[>]> >
         | <?rxstopper>
         ]
     }
@@ -192,8 +192,8 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         :my $*VARDEF := 0;
         [
         || <noun=.quantified_atom>+
-        || <?before <rxstopper> | <[&|~]> > <.throw_null_pattern>
-        || <?before <infixstopper> > <.throw_null_pattern> # XXX Check if unmatched bracket
+        || <?before <.rxstopper> | <.[&|~]> > <.throw_null_pattern>
+        || <?before <.infixstopper> > <.throw_null_pattern> # XXX Check if unmatched bracket
         || $$ <.throw_regex_not_terminated>
         || (\W) { self.throw_unrecognized_metachar: ~$/[0] }
         || <.throw_regex_not_terminated>

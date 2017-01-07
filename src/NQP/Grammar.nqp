@@ -146,7 +146,7 @@ grammar NQP::Grammar is HLL::Grammar {
         ''
         [
         | $
-        | <?before <[\)\]\}]>>
+        | <?before <.[\)\]\}]>>
         | [ <statement> <.eat_terminator> ]*
         ]
     }
@@ -162,7 +162,7 @@ grammar NQP::Grammar is HLL::Grammar {
     }
 
     token statement($*LABEL = '') {
-        <!before <[\])}]> | $ >
+        <!before <.[\])}]> | $ >
         [
         | <label> <statement($*LABEL)> { $*LABEL := '' if $*LABEL }
         | <statement_control>
@@ -828,7 +828,7 @@ grammar NQP::Regex is QRegex::P6Regex::Grammar {
     }
 
     token metachar:sym<nqpvar> {
-        <?before <sigil> [\W\w | \w]> <var=.LANG('MAIN', 'variable')> <.SIGOK>
+        <?before <.sigil> [\W\w | \w]> <var=.LANG('MAIN', 'variable')> <.SIGOK>
     }
 
     token assertion:sym<{ }> {
