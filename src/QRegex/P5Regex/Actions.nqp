@@ -344,8 +344,8 @@ class QRegex::P5Regex::Actions is HLL::Actions {
     
     method p5quantifier:sym<{ }>($/) {
         my $qast;
-        $qast := QAST::Regex.new( :rxtype<quant>, :min(+$<start>), :node($/) );
-        if $<end> && ~$<end>[0] ne '' { $qast.max(+$<end>[0]); }
+        $qast := QAST::Regex.new( :rxtype<quant>, :min(nqp::radix(10, $<start>, 0, 0)[0]), :node($/) );
+        if $<end> && ~$<end>[0] ne '' { $qast.max(nqp::radix(10, $<end>[0], 0, 0)[0]); }
         elsif $<comma>                { $qast.max(-1); }
         else                          { $qast.max($qast.min); }
         make quantmod($qast, $<quantmod>);

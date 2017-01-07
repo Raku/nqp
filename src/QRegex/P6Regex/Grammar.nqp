@@ -273,14 +273,14 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
               ]
               [
               | $<upto>='^'? <max=.integer> {
-                  $/.CURSOR.panic("Negative numbers are not allowed as quantifiers") if $<max>.Str < 0;
+                  $/.CURSOR.panic("Negative numbers are not allowed as quantifiers") if nqp::radix(10, $<max>, 0, 0)[0] < 0;
                 }
               | $<max>=['*']
               | <.throw_malformed_range>
               ]
             ]?
           ]
-          { $/.CURSOR.panic("Negative numbers are not allowed as quantifiers") if $<min>.Str < 0 }
+          { $/.CURSOR.panic("Negative numbers are not allowed as quantifiers") if nqp::radix(10, $<min>, 0, 0)[0] < 0 }
         | <?[{]> <codeblock>
         ]
     }

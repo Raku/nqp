@@ -169,7 +169,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         }
         else {
             my $min := 0;
-            if $<min> { $min := $<min>.ast; }
+            if $<min> { $min := nqp::radix(10, $<min>, 0, 0)[0]; }
 
             my $max := -1;
             my $upto := $<upto>;
@@ -180,7 +180,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                 $max := $min
             }
             elsif $<max> ne '*' {
-                $max := $<max>.ast;
+                $max := nqp::radix(10, $<max>, 0, 0)[0];
                 if $<upto> eq '^' {
                     $max--;
                 }
