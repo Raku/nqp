@@ -47,7 +47,7 @@ class NQP::Actions is HLL::Actions {
     }
 
     sub colonpair_str($ast) {
-	my $s;
+        my $s;
         if nqp::istype($ast, QAST::Op) {
             my @parts;
             for $ast.list { @parts.push($_.value) }
@@ -55,7 +55,7 @@ class NQP::Actions is HLL::Actions {
         } else {
             $s := $ast.value
         }
-	$s ~~ /<[ < > ]>/ ?? '«' ~ $s ~ '»' !! '<' ~ $s ~ '>';
+        $s ~~ /<[ < > ]>/ ?? '«' ~ $s ~ '»' !! '<' ~ $s ~ '>';
     }
 
     method comp_unit($/) {
