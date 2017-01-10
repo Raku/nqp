@@ -65,8 +65,10 @@ class QRegex::NFA {
 
     has $!known;
 
+    has %!method_cache;
+
     method new() {
-        my $new := self.bless(:states(nqp::list()), :edges(0), :LITEND(0), :known([]));
+        my $new := self.bless(:states(nqp::list()), :edges(0), :LITEND(0), :known([]), :method_cache(nqp::hash()));
         $new.addstate();  # storage for fates
         $new.addstate();  # entry point, mostly fanout epsilons
         $new;
@@ -533,7 +535,14 @@ class QRegex::NFA {
             nqp::printfh($err,"$indent mergesubrule $name start $start to $to fate $fate\n") if $nfadeb;
             $n := $name;
             if !nqp::existskey(%seen, $name) {
-                $meth := $cursor.HOW.find_method($cursor, $name, :no_trace(1));
+                my $key := self.HOW.name($cursor) ~ ':::' ~ $name;
+                if nqp::existskey(%!method_cache, $key) {
+                    $meth := nqp::atkey(%!method_cache, $key);
+                }
+                else {
+                    $meth := $cursor.HOW.find_method($cursor, $name, :no_trace(1));
+                    nqp::bindkey(%!method_cache, $key, $meth);
+                }
                 if nqp::can($meth, 'NFA') {
                     @substates := $meth.NFA();
                     @substates := [] if nqp::isnull(@substates);
