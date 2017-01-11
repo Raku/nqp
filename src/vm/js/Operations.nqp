@@ -1399,34 +1399,52 @@ class QAST::OperationsJS {
 
         my int $is_return := $type eq 'RETURN' && $node[2] ~~ QAST::Op && $node[2].op eq 'lastexpayload';
 
-        my $*RETURN;
-        $*RETURN := ReturnInfo.new(block => $*BLOCK) if $is_return;
+        my @toplevels := $*BLOCK.qast.list;
+        my $is_last_toplevel;
 
-        my $protected := $comp.as_js($node[0], :want($T_OBJ));
+        # TODO actually call p6typecheckrv rather than treat it as a noop
 
-        # When compiling nqp assume that nqp::throwpayloadlexcaller is not used
-        if $*HLL eq 'nqp' && $is_return && !$*RETURN.is_used {
-            $protected;
+        if +@toplevels {
+            my $last := @toplevels[+@toplevels - 1];
+            $is_last_toplevel := nqp::eqaddr($last, $node)
+                || ($last.op eq 'p6typecheckrv' && nqp::eqaddr($last[0], $node));
+        }
+
+        if $is_last_toplevel {
+
+            my $*RETURN;
+            $*RETURN := ReturnInfo.new(block => $*BLOCK) if $is_return;
+
+            my $protected := $comp.as_js($node[0], :want($T_OBJ));
+
+            # When compiling nqp assume that nqp::throwpayloadlexcaller is not used
+            if $*HLL eq 'nqp' && $is_return && !$*RETURN.is_used {
+                $protected;
+            }
+            else {
+                my $unwind_marker := $*BLOCK.add_tmp;
+
+                my $handle_result := $comp.as_js(:want($T_OBJ), $node[2]);
+                my str $result := $*BLOCK.add_tmp;
+
+
+                Chunk.new($T_OBJ, $result, [
+                    "$unwind_marker = \{\};\n",
+                    "$*CTX.unwind = $unwind_marker;\n",
+                    "$*CTX.\$\${$type} = function() \{\n",
+                        $handle_result,
+                        "$result = {$handle_result.expr};\n",
+                    "\};\n",
+                    "try \{",
+                        $protected,
+                        "$result = {$protected.expr};\n",
+                    "\} catch (e) \{if (e === $unwind_marker) \{\} else \{throw e\}\}",
+                ]);
+            }
         }
         else {
-            my $unwind_marker := $*BLOCK.add_tmp;
-
-            my $handle_result := $comp.as_js(:want($T_OBJ), $node[2]);
-            my str $result := $*BLOCK.add_tmp;
-
-
-            Chunk.new($T_OBJ, $result, [
-                "$unwind_marker = \{\};\n",
-                "$*CTX.unwind = $unwind_marker;\n",
-                "$*CTX.\$\${$type} = function() \{\n",
-                    $handle_result,
-                    "$result = {$handle_result.expr};\n",
-                "\};\n",
-                "try \{",
-                    $protected,
-                    "$result = {$protected.expr};\n",
-                "\} catch (e) \{if (e === $unwind_marker) \{\} else \{throw e\}\}",
-            ]);
+            say("/*\n", $*BLOCK.qast.dump, "*/\n");
+            $comp.NYI("handlepayload when it's not toplevel");
         }
     });
 
