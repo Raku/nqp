@@ -762,11 +762,20 @@ class BinaryCursor {
       this.deserializeCtx(inner, newOuters);
     }
 
+    ctx.closuresUsingThis = [];
     for (var closure of context.closures) {
       var closureTemplate = closure.staticCode.closureTemplate;
       var codeRef = this.sc.codeRefs[closure.index];
       while (newOuters.length < closure.staticCode.closureTemplate.length) newOuters.unshift(null);
       codeRef.capture(closureTemplate.apply(null, newOuters));
+
+      ctx.closuresUsingThis.push(codeRef);
+      for (let outer of outers) {
+        if (!outer.closuresUsingThis) outer.closuresUsingThis = [];
+        outer.closuresUsingThis.push(codeRef);
+      }
+
+      codeRef.outerCtx = ctx;
     }
 
   }
