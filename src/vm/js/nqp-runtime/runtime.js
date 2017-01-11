@@ -314,20 +314,6 @@ exports.Next = function(label) {
   this.label = label;
 };
 
-/* For debugging purposes */
-exports.dumpObj = function(obj) {
-  var seen = [];
-
-  return JSON.stringify(obj, function(key, value) {
-    if (key == '_SC') return undefined;
-    for (var i = 0; i < seen.length; i++) {
-      if (typeof value !== 'string' && typeof value !== 'number' && seen[i] === value) return 'circular';
-    }
-    seen.push(value);
-    return value;
-  }, '  ');
-};
-
 exports.NYI = function(msg) {
   console.trace(msg);
   return null;
@@ -389,3 +375,17 @@ exports.list = hll.list;
 
 exports.slurpyArray = hll.slurpyArray;
 exports.createArray = require('./BOOT').createArray;
+
+exports.dumpObj = function(obj) {
+  console.log(typeof obj);
+  if (typeof obj === 'object') {
+    if (obj._STable) {
+      console.log(obj._STable.REPR.name);
+      console.log(obj._STable.HOW.name(null, null, obj._STable.HOW, obj));
+    } else {
+      console.log('no STable', obj.constructor.name);
+    }
+  } else {
+    console.log(obj);
+  }
+};
