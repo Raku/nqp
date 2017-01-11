@@ -204,7 +204,8 @@ class HLL::Actions {
 
     method charname($/) {
 #?if !moar
-        my $codepoint := ?? $<integer>.made
+        my $codepoint := $<integer>
+                         ?? $<integer>.made
                          !! nqp::codepointfromname(~$/);
                          $/.CURSOR.panic("Unrecognized character name $/") if $codepoint < 0;
         make nqp::chr($codepoint);
