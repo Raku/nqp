@@ -2386,6 +2386,7 @@ QAST::MASTOperations.add_core_moarop_mapping('isge_n', 'ge_n');
 
 QAST::MASTOperations.add_core_moarop_mapping('cmp_s', 'cmp_s');
 QAST::MASTOperations.add_core_moarop_mapping('unicmp_s', 'unicmp_s');
+QAST::MASTOperations.add_core_moarop_mapping('getstrfromname', 'getstrfromname');
 QAST::MASTOperations.add_core_moarop_mapping('iseq_s', 'eq_s');
 QAST::MASTOperations.add_core_moarop_mapping('isne_s', 'ne_s');
 QAST::MASTOperations.add_core_moarop_mapping('islt_s', 'lt_s');
