@@ -533,7 +533,9 @@ class QRegex::NFA {
             nqp::printfh($err,"$indent mergesubrule $name start $start to $to fate $fate\n") if $nfadeb;
             $n := $name;
             if !nqp::existskey(%seen, $name) {
-                $meth := $cursor.HOW.find_method($cursor, $name, :no_trace(1));
+                $meth := nqp::can($cursor.HOW, 'traced') && $cursor.HOW.traced($cursor)
+                    ?? $cursor.HOW.find_method($cursor, $name, :no_trace(1))
+                    !! nqp::findmethod($cursor, $name);
                 if nqp::can($meth, 'NFA') {
                     @substates := $meth.NFA();
                     @substates := [] if nqp::isnull(@substates);
