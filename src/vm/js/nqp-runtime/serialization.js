@@ -8,6 +8,8 @@ var Null = require('./null.js');
 var MultiCache = require('./multicache.js').MultiCache;
 var FileHandle = require('./io.js').FileHandle;
 
+var StaticCtx = require('./static-ctx.js');
+
 var repossession = require('./repossession.js');
 
 var BOOT = require('./BOOT.js');
@@ -736,6 +738,13 @@ class SerializationWriter {
 
   getSerializedContextIdx(ctx) {
     if (!ctx._SC) {
+      /* TODO - think if it's truly correct */
+
+      if (ctx instanceof StaticCtx) {
+        /* A StaticCtx is used when a closure is invoke when it's outer doesn't exist yet */
+        return 0;
+      }
+
       /* Make sure we should chase a level down. */
       if (this.closureToStaticCodeRef(ctx.codeRef(), false) == null) {
         return 0;

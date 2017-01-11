@@ -1,6 +1,7 @@
 'use strict';
 
 var NQPObject = require('./nqp-object.js');
+var StaticCtx = require('./static-ctx.js');
 
 class WrappedCtx {
   constructor(wrap) {
@@ -8,11 +9,6 @@ class WrappedCtx {
   }
   codeRef() {
     return {statiCode: null};
-  }
-};
-
-class StaticCtx {
-  constructor() {
   }
 };
 
