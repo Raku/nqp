@@ -4215,14 +4215,19 @@ public final class Ops {
     public static long codepointfromname(String name) {
         HashMap<String, Character> names = cpNameMap;
         if (names == null) {
-            names = new HashMap< >();
+            /* Initialize the size as Character.MAX_VALUE */
+            names = new HashMap< >(Character.MAX_VALUE);
             for (char i = 0; i < Character.MAX_VALUE; i++)
                 if (Character.isValidCodePoint(i))
                     names.put(Character.getName(i), i);
-            names.put("LF",  (char)10);
-            names.put("FF",  (char)12);
-            names.put("CR",  (char)13);
-            names.put("NEL", (char)133);
+            names.put("LF",               (char)10);
+            names.put("LINE FEED",        (char)10);
+            names.put("FF",               (char)12);
+            names.put("FORM FEED",        (char)12);
+            names.put("CR",               (char)13);
+            names.put("CARRIAGE RETURN",  (char)13);
+            names.put("NEL",              (char)133);
+            names.put("NEXT LINE",        (char)133);
             cpNameMap = names;
         }
         Character found = names.get(name);
