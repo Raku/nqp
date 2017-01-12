@@ -24,6 +24,7 @@
     "xorshift": "*",
     "ffi": "*",
     "xregexp": "*",
-    "ref": "*"
+    "ref": "*",
+    "unicharadata": "*"
   }
 }
