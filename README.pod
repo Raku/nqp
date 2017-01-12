@@ -123,4 +123,4 @@ To build nqp-js-on-js (that is nqp-js itself running on node.js):
 
 To run nqp-js-on-js:
 
-    $ node nqp-bootstrapped.js -e "say('Hello World')"
+    $ node nqp-js-on-js/nqp-bootstrapped.js -e "say('Hello World')"
