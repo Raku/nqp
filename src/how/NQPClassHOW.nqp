@@ -421,8 +421,16 @@ knowhow NQPClassHOW {
 
     method publish_type_cache($obj) {
         my @tc;
-        for @!mro { nqp::push(@tc, $_); }
-        for @!done { nqp::push(@tc, $_); }
+
+        for self.mro($obj) {
+            nqp::push(@tc, $_);
+            if nqp::can($_.HOW, 'role_typecheck_list') {
+                for $_.HOW.role_typecheck_list($_) {
+                    nqp::push(@tc, $_);
+                }
+            }
+        }
+
         nqp::settypecache($obj, @tc)
     }
     
@@ -541,6 +549,10 @@ knowhow NQPClassHOW {
 
     method roles($obj, :$local!) {
         @!roles
+    }
+
+    method role_typecheck_list($obj) {
+        @!done;
     }
 
     method methods($obj, :$local = 0) {

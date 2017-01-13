@@ -1,4 +1,4 @@
-plan(13);
+plan(15);
 
 role R1 {
     has $!a;
@@ -38,3 +38,12 @@ ok(!C3.HOW.does(C3, R1));
 ok(C3.HOW.does(C3, R3));
 ok(C3.HOW.does(C3, R4));
 
+role Foo {
+}
+class Parent does Foo {
+}
+class Child is Parent {
+};
+
+ok(nqp::istype(Parent, Foo), 'nqp::istype with a role directly on class');
+ok(nqp::istype(Child, Foo), 'nqp::istype with a role on a parent class');
