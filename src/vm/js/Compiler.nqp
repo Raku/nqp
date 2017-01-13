@@ -953,10 +953,15 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                         @clone_inners.push(")");
                     }
                     else {
-                        @clone_inners.push("$reg = $cuid.closure");
-                        @clone_inners.push(%*BLOCKS_DONE{$kv.key});
-                        if self.is_serializable($kv.key) {
-                            @clone_inners.push(".setOuter(" ~ %*BLOCKS_INFO{$kv.key}.outer.ctx ~ ")");
+                        if self.is_serializable($kv.key) && %*BLOCKS_INFO{$kv.key}.qast.blocktype ne 'immediate' {
+                            @clone_inners.push("$reg = $cuid.closureCtx({self.outer_ctxs(%*BLOCKS_INFO{$kv.key})})");
+                        }
+                        else {
+                            @clone_inners.push("$reg = $cuid.closure");
+                            @clone_inners.push(%*BLOCKS_DONE{$kv.key});
+                            if self.is_serializable($kv.key) {
+                                @clone_inners.push(".setOuter(" ~ %*BLOCKS_INFO{$kv.key}.outer.ctx ~ ")");
+                            }
                         }
                     }
                 }
