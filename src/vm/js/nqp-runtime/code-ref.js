@@ -48,6 +48,11 @@ class CodeRef extends NQPObject {
     }
   }
 
+  captureCtx() {
+    this.capture(this.closureTemplate.apply(null, arguments));
+    this.outerCtx = arguments[arguments.length - 1];
+  }
+
   capture(block) {
     this.$$call = block;
     if (this.inject) {
@@ -144,6 +149,20 @@ class CodeRef extends NQPObject {
   captureAndClosure(outer, block) {
     this.capture(block);
     var closure = this.closure(block);
+    if (outer !== null) {
+      this.outerCtx = outer;
+      closure.outerCtx = outer;
+    }
+    return closure;
+  }
+
+  captureAndClosureCtx() {
+    let block = this.closureTemplate.apply(null, arguments);
+    let outer = arguments[arguments.length-1];
+    this.capture(block);
+    var closure = this.closure(block);
+
+    /* TODO - think if we should set this */
     if (outer !== null) {
       this.outerCtx = outer;
       closure.outerCtx = outer;

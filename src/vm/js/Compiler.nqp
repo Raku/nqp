@@ -925,21 +925,22 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
     }
 
+    method has_closure_template($block_info) {
+        $block_info.qast.blocktype ne 'immediate'
+    }
+
     method clone_inners($block) {
         my @clone_inners;
         for $block.cloned_inners -> $kv {
             my str $reg   := $kv.value;
             my str $cuid := self.mangled_cuid($kv.key);
+            my $block_info := %*BLOCKS_INFO{$kv.key};
 
-            if nqp::existskey(%*BLOCKS_STATEVARS, $kv.key) {
+            if nqp::existskey(%*BLOCKS_STATEVARS, $kv.key) && !self.has_closure_template($block_info) {
                 @clone_inners.push(%*BLOCKS_STATEVARS{$kv.key});
             }
 
-            if nqp::existskey(%*BLOCKS_STATEVARS, $kv.key) && nqp::existskey($block.captured_inners, $kv.key){
-                @clone_inners.push(%*BLOCKS_STATEVARS{$kv.key});
-            }
-
-            self.wrap_static_block(%*BLOCKS_INFO{$kv.key}.outer, @clone_inners, -> {
+            self.wrap_static_block($block_info.outer, @clone_inners, -> {
                 if !$block.need_direct{$kv.key} {
                     # we know the block won't be ever called in direct mode
                     @clone_inners.push("$reg = $cuid");
@@ -947,20 +948,25 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 elsif %*BLOCKS_DONE{$kv.key} {
                     # Avoid emitting duplicated code with both .capture and .closure
                     if nqp::existskey($block.captured_inners, $kv.key) {
-                        my $outer := self.is_serializable($kv.key) ?? %*BLOCKS_INFO{$kv.key}.outer.ctx !! 'null';
-                        @clone_inners.push("$reg = $cuid.captureAndClosure($outer, ");
-                        @clone_inners.push(%*BLOCKS_DONE{$kv.key});
-                        @clone_inners.push(")");
+                        if self.has_closure_template($block_info) {
+                            @clone_inners.push("$reg = $cuid.captureAndClosureCtx({self.outer_ctxs($block_info)})");
+                        }
+                        else {
+                            my $outer := self.is_serializable($kv.key) ?? $block_info.outer.ctx !! 'null';
+                            @clone_inners.push("$reg = $cuid.captureAndClosure($outer, ");
+                            @clone_inners.push(%*BLOCKS_DONE{$kv.key});
+                            @clone_inners.push(")");
+                        }
                     }
                     else {
-                        if self.is_serializable($kv.key) && %*BLOCKS_INFO{$kv.key}.qast.blocktype ne 'immediate' {
-                            @clone_inners.push("$reg = $cuid.closureCtx({self.outer_ctxs(%*BLOCKS_INFO{$kv.key})})");
+                        if self.has_closure_template($block_info) {
+                            @clone_inners.push("$reg = $cuid.closureCtx({self.outer_ctxs($block_info)})");
                         }
                         else {
                             @clone_inners.push("$reg = $cuid.closure");
                             @clone_inners.push(%*BLOCKS_DONE{$kv.key});
                             if self.is_serializable($kv.key) {
-                                @clone_inners.push(".setOuter(" ~ %*BLOCKS_INFO{$kv.key}.outer.ctx ~ ")");
+                                @clone_inners.push(".setOuter(" ~ $block_info.outer.ctx ~ ")");
                             }
                         }
                     }
@@ -1005,16 +1011,21 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     @capture_inners.push(%*BLOCKS_STATEVARS{$kv.key});
                 }
 
-                self.wrap_static_block(%*BLOCKS_INFO{$kv.key}.outer, @capture_inners, -> {
-                    @capture_inners.push("$reg = $cuid.capture");
+                my $block_info := %*BLOCKS_INFO{$kv.key};
+                self.wrap_static_block($block_info.outer, @capture_inners, -> {
+                    if self.has_closure_template($block_info) {
+                        @capture_inners.push("$reg = $cuid.captureCtx({self.outer_ctxs($block_info)});\n");
+                    } else {
+                        @capture_inners.push("$reg = $cuid.capture");
 
-                    @capture_inners.push(%*BLOCKS_DONE{$kv.key});
+                        @capture_inners.push(%*BLOCKS_DONE{$kv.key});
 
-                    if 1 { # TODO check if we need to have this closure serializable
-                        @capture_inners.push(".setOuter(" ~ %*BLOCKS_INFO{$kv.key}.outer.ctx ~ ")");
+                        if 1 { # TODO check if we need to have this closure serializable
+                            @capture_inners.push(".setOuter(" ~ $block_info.outer.ctx ~ ")");
+                        }
+                        @capture_inners.push(";\n");
                     }
 
-                    @capture_inners.push(";\n");
                 });
             }
 
@@ -1121,8 +1132,11 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     my $closure_template;
                     if $node.blocktype ne 'immediate' {
                         my @closure_template := nqp::clone(@function);
-                        @closure_template.unshift("function({self.outer_ctxs($*BLOCK)}) \{ return ");
-                        @closure_template.push("}");
+                        @closure_template.unshift(
+                            "function({self.outer_ctxs($*BLOCK)}) \{\n"
+                            ~ %*BLOCKS_STATEVARS{$node.cuid}
+                            ~ "return ");
+                        @closure_template.push('}');
                         $closure_template := Chunk.new($T_NONVAL, '', @closure_template);
                     }
 
@@ -1362,7 +1376,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         # TODO refactor
         if !nqp::defined($ast.sc) {
             # TODO the code_refs are empty here - think what to do about it
-            return self.emit_code_refs_list($ast);
+            return self.emit_code_refs_list($ast) ~ self.setup_wvals;
         }
 
         my $sc_tuple := self.serialize_sc($sc);
@@ -1385,7 +1399,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             "var sh = nqp.createArray([{nqp::join(',',@sh)}]);\n"
             ~ "var sc = nqp.op.createsc({quote_string(nqp::scgethandle($sc))});\n"
             ~ self.emit_code_refs_list($ast)
-            , "nqp.op.deserialize($quoted_data,sc,sh,code_refs,null);\n"
+            , "nqp.op.deserialize($quoted_data,sc,sh,code_refs,null, function() \{{self.setup_wvals}\});\n"
             ~ "nqp.op.scsetdesc(sc,{quote_string(nqp::scgetdesc($sc))});\n");
     }
 
@@ -1543,7 +1557,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my str $set_hll := $*HLL ?? "nqp.setCodeRefHLL(cuids, {quote_string($*HLL)});\n" !! '';
 
         my $set_code_objects := self.set_code_objects;
-        my @setup := [$pre , $comp_mode ?? self.create_sc($node) !! '', self.setup_wvals, $set_code_objects,  self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $set_hll, self.set_static_vars, $post, $body];
+        my @setup := [$pre , $comp_mode ?? self.create_sc($node) !! self.setup_wvals, $set_code_objects,  self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $set_hll, self.set_static_vars, $post, $body];
         if !$instant {
             @setup.push("new nqp.EvalResult({$body.expr}, nqp.createArray(cuids))");
         }
