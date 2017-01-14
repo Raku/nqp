@@ -41,20 +41,20 @@ function attrRef_s(hllName, get, set) {
 
 op.getattrref_i = function(hllName, obj, classHandle, attrName) {
   return attrRef_i(hllName,
-    function() {return obj.$$getattr_i(classHandle, attrName)},
-    function(value) {obj.$$bindattr_i(classHandle, attrName, value)});
+      function() {return obj.$$getattr_i(classHandle, attrName)},
+      function(value) {obj.$$bindattr_i(classHandle, attrName, value)});
 };
 
 op.getattrref_n = function(hllName, obj, classHandle, attrName) {
   return attrRef_n(hllName,
-    function() {return obj.$$getattr_n(classHandle, attrName)},
-    function(value) {obj.$$bindattr_n(classHandle, attrName, value)});
+      function() {return obj.$$getattr_n(classHandle, attrName)},
+      function(value) {obj.$$bindattr_n(classHandle, attrName, value)});
 };
 
 op.getattrref_s = function(hllName, obj, classHandle, attrName) {
   return attrRef_s(hllName,
-    function() {return obj.$$getattr_s(classHandle, attrName)},
-    function(value) {obj.$$bindattr_s(classHandle, attrName, value)});
+      function() {return obj.$$getattr_s(classHandle, attrName)},
+      function(value) {obj.$$bindattr_s(classHandle, attrName, value)});
 };
 
 helpers.lexRef_i = function(hllName, get, set) {

@@ -487,8 +487,8 @@ class P6opaque {
 
   generateUniversalAccessor(STable, name, action, extraSig, scwb) {
     var code = 'function(classHandle, attrName' + extraSig + ') {\n' +
-      (scwb ? 'if (this._SC !== undefined) this.$$scwb();\n' : '') +
-      'switch (classHandle) {\n';
+        (scwb ? 'if (this._SC !== undefined) this.$$scwb();\n' : '') +
+        'switch (classHandle) {\n';
     var classKeyIndex = 0;
     var setup = '';
     if (this.nameToIndexMapping) {
@@ -822,7 +822,7 @@ class NFA extends REPR {
 
     /* Read state graph. */
 
-    obj.states = []
+    obj.states = [];
 
     let edgeCount = [];
 
@@ -919,7 +919,7 @@ class NFA extends REPR {
       }
     }
   }
-}
+};
 
 reprs.NFA = NFA;
 

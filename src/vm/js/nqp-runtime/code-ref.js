@@ -158,7 +158,7 @@ class CodeRef extends NQPObject {
 
   captureAndClosureCtx() {
     let block = this.closureTemplate.apply(null, arguments);
-    let outer = arguments[arguments.length-1];
+    let outer = arguments[arguments.length - 1];
     this.capture(block);
     var closure = this.closure(block);
 

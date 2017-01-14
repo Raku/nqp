@@ -127,7 +127,7 @@ class Ctx extends NQPObject {
 
   throwpayloadlexcaller(category, payload) {
     let ctx = this.$$caller;
-    let isThunkOrCompilerStub = code => {return(code.staticCode.isThunk || code.isCompilerStub)};
+    let isThunkOrCompilerStub = code => {return (code.staticCode.isThunk || code.isCompilerStub)};
     while (ctx && isThunkOrCompilerStub(ctx.codeRef())) {
       ctx = ctx.$$caller;
     }

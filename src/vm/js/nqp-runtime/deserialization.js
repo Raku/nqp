@@ -35,6 +35,7 @@ const REFVAR_VM_HASH_STR_VAR = 10;
 const REFVAR_STATIC_CODEREF = 11;
 const REFVAR_CLONED_CODEREF = 12;
 
+
 /** All the loaded serialization contexts using their unique IDs as keys */
 var serializationContexts = SerializationContext.contexts;
 
@@ -148,8 +149,8 @@ class BinaryCursor {
     }
     var bootArray = BOOT.createArray(array);
     if (this.sc.currentObject) {
-        bootArray._SC = this.sc;
-        this.sc.ownedObjects.set(bootArray, this.sc.currentObject);
+      bootArray._SC = this.sc;
+      this.sc.ownedObjects.set(bootArray, this.sc.currentObject);
     }
     return bootArray;
   }
@@ -232,8 +233,8 @@ class BinaryCursor {
     }
 
     if (this.sc.currentObject) {
-        hash._SC = this.sc;
-        this.sc.ownedObjects.set(hash, this.sc.currentObject);
+      hash._SC = this.sc;
+      this.sc.ownedObjects.set(hash, this.sc.currentObject);
     }
 
     return hash;
@@ -305,7 +306,7 @@ class BinaryCursor {
         return this.varint();
       case REFVAR_VM_NUM:
         return this.double();
-      case REFVAR_VM_STR :
+      case REFVAR_VM_STR:
         return this.str();
       case REFVAR_VM_ARR_VAR:
         return this.array(function(cursor) {return cursor.variant()});
