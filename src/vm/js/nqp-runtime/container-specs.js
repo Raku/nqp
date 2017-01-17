@@ -83,18 +83,6 @@ class NativeRef {
 
     if (primitiveType == 1) { // int
       this.STable.addInternalMethods(class {
-        $getInt(ctx, value) {
-          return this.get();
-        }
-
-        $$getNum() {
-          return this.get();
-        }
-
-        $$getStr() {
-          return this.get().toString();
-        }
-
         $$iscont_i() {
           return 1;
         }
@@ -136,18 +124,6 @@ class NativeRef {
       });
     } else if (primitiveType == 2) { // num
       this.STable.addInternalMethods(class {
-        $$getInt(ctx, value) {
-          return this.get() | 0;
-        }
-
-        $$getNum(ctx, value) {
-          return this.get();
-        }
-
-        $$getStr(ctx, value) {
-          return this.get().toString();
-        }
-
         $$iscont_n() {
           return 1;
         }
@@ -189,20 +165,6 @@ class NativeRef {
       });
     } else if (primitiveType == 3) { // str
       this.STable.addInternalMethods(class {
-        $$getInt(ctx, value) {
-          var ret = parseFloat(this.get());
-          return isNaN(ret) ? 0 : ret | 0;
-        }
-
-        $$getNum(ctx, value) {
-          var ret = parseFloat(this.get());
-          return isNaN(ret) ? 0 : ret;
-        }
-
-        $$getStr(ctx, value) {
-          return this.get().toString();
-        }
-
         $$iscont_s() {
           return 1;
         }
@@ -221,10 +183,6 @@ class NativeRef {
         }
 
         $$decont_s(ctx, value) {
-          return this.get();
-        }
-
-        $$getStr(ctx, value) {
           return this.get();
         }
 

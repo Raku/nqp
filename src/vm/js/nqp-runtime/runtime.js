@@ -158,7 +158,8 @@ exports.toStr = function(arg_, ctx) {
   }
 };
 
-exports.toNum = function(arg, ctx) {
+exports.toNum = function(arg_, ctx) {
+  let arg = arg_.$$decont(ctx);
   if (typeof arg == 'number') {
     return arg;
   } else if (arg === Null) {
