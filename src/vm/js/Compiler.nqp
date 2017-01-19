@@ -1576,8 +1576,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     method declare_var(QAST::Var $node) {
-        # TODO vars more complex the non-dynamic lexicals
-
         if $node.decl eq 'var' && ($node.scope eq 'local' || $node.scope eq 'lexical') {
             my int $type := self.type_from_typeobj($node.returns);
             $*BLOCK.register_var_type($node, $type);
