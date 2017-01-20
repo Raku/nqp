@@ -346,8 +346,10 @@ role NQPCursorRole is export {
         my @rxfate := $nfa.states[0];
         my $cur;
         my $rxname;
-        my int $fbeg := nqp::getattr_i($nfa, QRegex::NFA, '$!fatebeg') // 0;
+        my $fbegend := @rxfate[0];
+        my $fbeg := nqp::bitand_i($fbegend,0xffff_ffff);
         $fbeg := $fbeg - 1;  # account for @rxfate being 1-based
+        my $fend := nqp::bitshiftr_i($fbegend,32);
         while @fates {
             $rxname := nqp::atpos(@rxfate, nqp::pop_i(@fates) - $fbeg);
             # nqp::printfh(nqp::getstderr(), "invoking $rxname\n");
@@ -359,11 +361,11 @@ role NQPCursorRole is export {
 
     my int $nextfate := 1;
 
-    method !reserve_fates($nfa, int $n) {
+    method !reserve_fates(int $n) {
         # XXX this needs to be atomicer
-        nqp::bindattr_i($nfa, QRegex::NFA, '$!fatebeg', $nextfate);
+        my int $fbeg := $nextfate;
         $nextfate := $nextfate + $n;
-        nqp::bindattr_i($nfa, QRegex::NFA, '$!fateend', $nextfate);
+        $fbeg + $nextfate * 0x1_0000_0000;
     }
 
     method !protoregex_nfa($name) {
@@ -373,8 +375,8 @@ role NQPCursorRole is export {
         my int $start := 1;
         my int $fate  := 0;
         if nqp::existskey(%protorx, $name) {
-            self."!reserve_fates"($nfa, nqp::elems(%protorx{$name}));
-	    my int $fbeg := nqp::getattr_i($nfa, QRegex::NFA, '$!fatebeg') // 0;
+            @fates[0] := self."!reserve_fates"(nqp::elems(%protorx{$name}));
+            my int $fbeg := nqp::bitand_i(@fates[0], 0xffff_ffff);
             for %protorx{$name} -> $rxname {
                 $nfa.mergesubrule($start, 0, $fate + $fbeg, self, $rxname);
                 $fate := $fate + 1;
@@ -412,27 +414,17 @@ role NQPCursorRole is export {
             $nfa := self.'!alt_nfa'($!regexsub, $name);
             self.HOW.cache_add(self, $name, $nfa);
         }
-	my $bcur := nqp::defined($!bstack) ?? nqp::elems($!bstack) !! 0;
-        my $result := $nfa.run_alt(nqp::getattr_s($shared, ParseShared, '$!target'), $pos, $!bstack, $!cstack, @labels);
-	my $bend := nqp::defined($!bstack) ?? nqp::elems($!bstack) !! 0;
-        my int $fbeg := nqp::getattr_i($nfa, QRegex::NFA, '$!fatebeg') // 0;
-	if $fbeg {
-	    while $bcur < $bend {
-		$!bstack[$bcur] := $!bstack[$bcur] - $fbeg;
-		$bcur := $bcur + 4;
-	    }
-	}
-	$result;
+        $nfa.run_alt(nqp::getattr_s($shared, ParseShared, '$!target'), $pos, $!bstack, $!cstack, @labels);
     }
 
     method !alt_nfa($regex, str $name) {
         my $nfa       := QRegex::NFA.new;
         my int $start := 1;
         my int $fate  := 0;
+        my @fates     := $nfa.states[0];
         my $alt := $regex.ALT_NFA($name);
-	# XXX Disable for the moment on alts
-        # self."!reserve_fates"($nfa, nqp::elems($alt));
-        my int $fbeg := nqp::getattr_i($nfa, QRegex::NFA, '$!fatebeg') // 0;
+        @fates[0] := self."!reserve_fates"(nqp::elems($alt));
+        my int $fbeg := nqp::bitand_i(@fates[0], 0xffff_ffff);
 
         for $alt {
             $nfa.mergesubstates($start, 0, $fate + $fbeg, $_, self);

@@ -65,15 +65,10 @@ class QRegex::NFA {
 
     has $!known;
 
-    has int $!fatebeg;
-    has int $!fateend;
-
     method new() {
         my $new := self.bless(:states(nqp::list()), :edges(0), :LITEND(0), :known([]));
         $new.addstate();  # storage for fates
         $new.addstate();  # entry point, mostly fanout epsilons
-        nqp::bindattr_i($new, QRegex::NFA, '$!fatebeg', 0);
-        nqp::bindattr_i($new, QRegex::NFA, '$!fateend', 0);
         $new;
     }
     
