@@ -346,26 +346,13 @@ role NQPCursorRole is export {
         my @rxfate := $nfa.states[0];
         my $cur;
         my $rxname;
-        my $fbegend := @rxfate[0];
-        my $fbeg := nqp::bitand_i($fbegend,0xffff_ffff);
-        $fbeg := $fbeg - 1;  # account for @rxfate being 1-based
-        my $fend := nqp::bitshiftr_i($fbegend,32);
         while @fates {
-            $rxname := nqp::atpos(@rxfate, nqp::pop_i(@fates) - $fbeg);
+            $rxname := nqp::atpos(@rxfate, nqp::pop_i(@fates));
             # nqp::printfh(nqp::getstderr(), "invoking $rxname\n");
             $cur    := self."$rxname"();
             @fates  := @EMPTY if nqp::getattr_i($cur, $?CLASS, '$!pos') >= 0;
         }
         $cur // nqp::getattr($shared, ParseShared, '$!fail_cursor');
-    }
-
-    my int $nextfate := 1;
-
-    method !reserve_fates(int $n) {
-        # XXX this needs to be atomicer
-        my int $fbeg := $nextfate;
-        $nextfate := $nextfate + $n;
-        $fbeg + $nextfate * 0x1_0000_0000;
     }
 
     method !protoregex_nfa($name) {
@@ -375,11 +362,9 @@ role NQPCursorRole is export {
         my int $start := 1;
         my int $fate  := 0;
         if nqp::existskey(%protorx, $name) {
-            @fates[0] := self."!reserve_fates"(nqp::elems(%protorx{$name}));
-            my int $fbeg := nqp::bitand_i(@fates[0], 0xffff_ffff);
             for %protorx{$name} -> $rxname {
-                $nfa.mergesubrule($start, 0, $fate + $fbeg, self, $rxname);
                 $fate := $fate + 1;
+                $nfa.mergesubrule($start, 0, $fate, self, $rxname);
                 @fates[$fate] := $rxname;  # override default fate #
             }
         }
@@ -421,13 +406,8 @@ role NQPCursorRole is export {
         my $nfa       := QRegex::NFA.new;
         my int $start := 1;
         my int $fate  := 0;
-        my @fates     := $nfa.states[0];
-        my $alt := $regex.ALT_NFA($name);
-        @fates[0] := self."!reserve_fates"(nqp::elems($alt));
-        my int $fbeg := nqp::bitand_i(@fates[0], 0xffff_ffff);
-
-        for $alt {
-            $nfa.mergesubstates($start, 0, $fate + $fbeg, $_, self);
+        for $regex.ALT_NFA($name) {
+            $nfa.mergesubstates($start, 0, $fate, $_, self);
             $fate++;
         }
         $nfa.optimize();
@@ -1180,5 +1160,3 @@ class NQPRegex is NQPRegexMethod {
     }
 }
 nqp::setinvokespec(NQPRegex, NQPRegexMethod, '$!code', nqp::null);
-
-# vim: ft=perl6 expandtab sw=4
