@@ -1537,8 +1537,8 @@ class QAST::OperationsJS {
     }, :side_effects);
 
 
-    add_simple_op('multicachefind', $T_OBJ, [$T_OBJ, $T_OBJ]);
-    add_simple_op('multicacheadd', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ]);
+    add_simple_op('multicachefind', $T_OBJ, [$T_OBJ, $T_OBJ], :ctx);
+    add_simple_op('multicacheadd', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ], :ctx);
 
     add_simple_op('settypecache', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects);
     add_simple_op('setmethcache', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :decont(0));

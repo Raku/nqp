@@ -12,13 +12,13 @@ function MultiCache() {
   }
 }
 
-function posTypes(capture) {
+function posTypes(ctx, capture) {
   var arity = capture.pos.length;
   var types = new Array(arity);
   for (var i = 0; i < arity; i++) {
     var obj = capture.pos[i];
     if (obj._STable) {
-      types[i] = obj._STable;
+      types[i] = obj.$$decont(ctx)._STable;
     } else if (obj instanceof NQPInt) {
       types[i] = 1;
     } else if (typeof obj == 'number') {
@@ -32,7 +32,7 @@ function posTypes(capture) {
 
 var op = {};
 
-op.multicachefind = function(cache, capture) {
+op.multicachefind = function(ctx, cache, capture) {
   if (cache === Null) return Null;
   var arity = capture.pos.length;
   var hasNamed = capture.named ? true : false;
@@ -47,7 +47,7 @@ op.multicachefind = function(cache, capture) {
 
   if (arity > MAX_ARITY) return Null;
 
-  var types = posTypes(capture);
+  var types = posTypes(ctx, capture);
 
   var arityCache = cache.cache[arity - 1];
 
@@ -62,7 +62,7 @@ op.multicachefind = function(cache, capture) {
   return Null;
 };
 
-op.multicacheadd = function(cache, capture, result) {
+op.multicacheadd = function(ctx, cache, capture, result) {
   var c = cache === Null ? new MultiCache() : cache;
   var arity = capture.pos.length;
   var hasNamed = capture.named ? true : false;
@@ -78,7 +78,7 @@ op.multicacheadd = function(cache, capture, result) {
     return c;
   }
 
-  c.cache[arity - 1].push({types: posTypes(capture), hasNamed: hasNamed, result: result});
+  c.cache[arity - 1].push({types: posTypes(ctx, capture), hasNamed: hasNamed, result: result});
   return c;
 };
 
