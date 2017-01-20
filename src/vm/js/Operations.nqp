@@ -1555,10 +1555,10 @@ class QAST::OperationsJS {
     add_simple_op('getcodecuid', $T_STR, [$T_OBJ]);
 
     add_simple_op('box_i', $T_OBJ, [$T_INT, $T_OBJ]);
-    add_simple_op('unbox_i', $T_INT, [$T_OBJ]);
+    add_simple_op('unbox_i', $T_INT, [$T_OBJ], :decont(0));
 
     add_simple_op('box_n', $T_OBJ, [$T_NUM, $T_OBJ]);
-    add_simple_op('unbox_n', $T_NUM, [$T_OBJ]);
+    add_simple_op('unbox_n', $T_NUM, [$T_OBJ], :decont(0));
 
     add_simple_op('box_s', $T_OBJ, [$T_STR, $T_OBJ]);
     add_simple_op('unbox_s', $T_STR, [$T_OBJ], :decont(0));
