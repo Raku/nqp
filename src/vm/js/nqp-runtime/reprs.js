@@ -604,7 +604,7 @@ class P6int extends REPR {
         this.value = value;
       }
 
-      $$getInt(value) {
+      $$getInt() {
         return this.value;
       }
 
