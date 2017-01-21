@@ -145,7 +145,7 @@ class RegexCompiler {
         ~ self.case($loop)
         ~ "$!pos++;\n"
         ~ "if ($!pos >= $!target.length) \{{self.fail}\}\n"
-        ~ self.set_cursor_attr($!cursor, '$!from', $!pos)
+        ~ self.set_cursor_attr_int($!cursor, '$!from', $!pos)
         ~ self.case($scan)
         ~ self.mark($loop,$!pos,0)
         ~ self.case($done);
@@ -305,17 +305,17 @@ class RegexCompiler {
         self.get_cursor_attr($cursor, '$!pos');
     }
     
-    method set_cursor_attr($cursor, $attr, $value) {
+    method set_cursor_attr_int($cursor, $attr, $value) {
         if $!has_cursor_type {
             "{self.cursor_attr($cursor, $attr)} = $value;\n";
         }
         else {
-            "$cursor.\$\$bindattr($!cursor_type_runtime, {quote_string($attr)}, $value);\n";
+            "$cursor.\$\$bindattr_i($!cursor_type_runtime, {quote_string($attr)}, $value);\n";
         }
     }
 
     method set_cursor_pos() {
-        self.set_cursor_attr($!cursor, '$!pos', $!pos);
+        self.set_cursor_attr_int($!cursor, '$!pos', $!pos);
     }
 
     method subrule($node) {
