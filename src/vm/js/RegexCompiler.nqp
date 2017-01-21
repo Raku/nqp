@@ -140,7 +140,7 @@ class RegexCompiler {
         my str $scan := self.new_label;
         my str $done := self.new_label;
 
-        "if ({self.get_cursor_attr($*BLOCK.mangle_local('self'), '$!from')} != -1) \{{self.goto($done)}\}\n"
+        "if ({self.get_cursor_attr_int($*BLOCK.mangle_local('self'), '$!from')} != -1) \{{self.goto($done)}\}\n"
         ~ self.goto($scan)
         ~ self.case($loop)
         ~ "$!pos++;\n"
@@ -301,8 +301,17 @@ class RegexCompiler {
         }
     }
 
+    method get_cursor_attr_int($cursor, $attr) {
+        if $!has_cursor_type {
+            "{self.cursor_attr($cursor, $attr)}";
+        }
+        else {
+            "$cursor.\$\$getattr_i($!cursor_type_runtime, {quote_string($attr)})";
+        }
+    }
+
     method pos_from_cursor($cursor) {
-        self.get_cursor_attr($cursor, '$!pos');
+        self.get_cursor_attr_int($cursor, '$!pos');
     }
     
     method set_cursor_attr_int($cursor, $attr, $value) {
