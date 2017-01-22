@@ -22,7 +22,7 @@ sub is($actual, $expected, $description) {
     }
 }
 
-plan(271);
+plan(276);
 
 is(nqp::sprintf('Walter Bishop', []), 'Walter Bishop', 'no directives' );
 
@@ -335,4 +335,12 @@ is(nqp::sprintf('%3$d %d %1$d', [1, 2, 3]), '3 1 1', 'parameter index');
     is(nqp::sprintf('%e', [ 0e0]),  '0.000000e+00', '%e, +0e0');
     is(nqp::sprintf('%g', [-0e0]), '-0',            '%g, -0e0');
     is(nqp::sprintf('%g', [ 0e0]),  '0',            '%g, +0e0');
+}
+
+{ # https://irclog.perlgeek.de/perl6-dev/2017-01-22#i_13966753
+    is(nqp::sprintf( '%.3d', [42]),   '042', '%.3d' );
+    is(nqp::sprintf('%2.4d', [42]),  '0042', '%2.4d');
+    is(nqp::sprintf('%5.3d', [42]), '  042', '%5.3d');
+    is(nqp::sprintf( '%.0d', [42]),    '42', '%.0d (non-zero number)');
+    is(nqp::sprintf( '%.0d', [ 0]),      '', '%.0d (number is zero)' );
 }

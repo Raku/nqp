@@ -202,7 +202,21 @@ my module sprintf {
                      !! has_flag($/, 'space') ?? ' '
                      !! '';
             $int := nqp::tostr_I(nqp::abs_I($int, $knowhow));
-            $int := nqp::substr($int, 0, $<precision>.made) if nqp::chars($<precision>);
+
+            # For `d`, precision is how many digits long the number should be,
+            # prefixing it with zeros, as needed. If precision is zero and
+            # our number is zero, then the result is an empty string.
+            if nqp::chars($<precision>) {
+                if my $prec := +$<precision>.made {
+                    if (my $rep := $prec - nqp::chars($int)) > 0 {
+                        $int := infix_x('0', $rep) ~ $int;
+                    }
+                }
+                else {
+                    $int := '' if $int == 0;
+                }
+            }
+
             if $pad ne ' ' && $<size> {
                 $int := $sign ~ infix_x($pad, $<size>.made - nqp::chars($int) - 1) ~ $int;
             }
