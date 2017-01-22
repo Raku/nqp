@@ -22,7 +22,7 @@ sub is($actual, $expected, $description) {
     }
 }
 
-plan(276);
+plan(281);
 
 is(nqp::sprintf('Walter Bishop', []), 'Walter Bishop', 'no directives' );
 
@@ -343,4 +343,10 @@ is(nqp::sprintf('%3$d %d %1$d', [1, 2, 3]), '3 1 1', 'parameter index');
     is(nqp::sprintf('%5.3d', [42]), '  042', '%5.3d');
     is(nqp::sprintf( '%.0d', [42]),    '42', '%.0d (non-zero number)');
     is(nqp::sprintf( '%.0d', [ 0]),      '', '%.0d (number is zero)' );
+
+    is(nqp::sprintf( '%.*d', [3, 42]),   '042', '%.*d' );
+    is(nqp::sprintf('%2.*d', [4, 42]),  '0042', '%2.*d');
+    is(nqp::sprintf('%5.*d', [3, 42]), '  042', '%5.*d');
+    is(nqp::sprintf( '%.*d', [0, 42]),    '42', '%.*d (non-zero number)');
+    is(nqp::sprintf( '%.*d', [0,  0]),      '', '%.*d (number is zero)' );
 }
