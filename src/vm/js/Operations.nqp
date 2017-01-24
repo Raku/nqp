@@ -857,7 +857,7 @@ class QAST::OperationsJS {
     add_simple_op('findmethod', $T_OBJ, [$T_OBJ, $T_STR], :side_effects, :decont(0), :ctx);
     add_simple_op('can', $T_INT, [$T_OBJ, $T_STR], :side_effects, :decont(0), :ctx);
 
-    add_simple_op('istype', $T_INT, [$T_OBJ, $T_OBJ], :side_effects, :ctx, :decont(0, 1));
+    add_simple_op('istype', $T_INT, [$T_OBJ, $T_OBJ], :side_effects, :ctx, :decont(0, 1), :method_call);
 
     add_simple_op('split', $T_OBJ, [$T_STR, $T_STR], :hll);
 

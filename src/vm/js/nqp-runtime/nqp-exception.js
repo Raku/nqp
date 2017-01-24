@@ -14,6 +14,10 @@ class NQPException extends Error {
   $$decont(ctx) {
     return this;
   }
+
+  $$istype(ctx, type) {
+    return 0;
+  }
 };
 
 NQPException.prototype._STable = {

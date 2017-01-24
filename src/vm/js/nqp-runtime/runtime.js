@@ -357,12 +357,20 @@ Number.prototype.$$toBool = function(ctx) {
   return this === 0 ? 0 : 1;
 };
 
+Number.prototype.$$istype = function(ctx, type) {
+  return 0;
+};
+
 String.prototype.$$decont = function(ctx) {
   return this;
 };
 
 String.prototype.$$toBool = function(ctx) {
   return this === '' ? 0 : 1;
+};
+
+String.prototype.$$istype = function(ctx, type) {
+  return 0;
 };
 
 // needed for continuations

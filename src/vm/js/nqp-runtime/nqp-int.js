@@ -19,6 +19,10 @@ class NQPInt extends NQPObject {
   $$numify() {
     return this.value;
   }
+
+  $$istype(ctx, type) {
+    return 0;
+  }
 };
 
 module.exports = NQPInt;

@@ -60,6 +60,36 @@ class STable {
       }
     };
 
+    this.objConstructor.prototype.$$istype = function(ctx, type) {
+      var cache = this._STable.typeCheckCache;
+      if (cache) {
+        for (var i = 0; i < cache.length; i++) {
+          if (cache[i] === type) {
+            return 1;
+          }
+        }
+      } else {
+        /* If we get here, need to call .^type_check on the value we're
+         * checking. */
+
+        var HOW = this._STable.HOW;
+        /* This "hack" is stolen from the JVM */
+        if (!HOW.type_check) {
+          return 0;
+        }
+
+        if (HOW.type_check(ctx, null, HOW, this, type).$$toBool(ctx)) {
+          return 1;
+        }
+      }
+
+      if (type._STable.typeCheckNeedsAccepts) {
+        return type._STable.HOW.accepts_type(ctx, null, type._STable.HOW, type, this).$$toBool(ctx);
+      }
+
+      return 0;
+    };
+
     if (this.REPR.setupSTable) {
       this.REPR.setupSTable(this);
     }

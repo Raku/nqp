@@ -122,6 +122,10 @@ class Hash extends NQPObject {
       compilingSCs[compilingSCs.length - 1].repossessObject(owned === undefined ? this : owned);
     }
   }
+
+  $$istype(ctx, type) {
+    return 0;
+  }
 };
 
 module.exports = Hash;

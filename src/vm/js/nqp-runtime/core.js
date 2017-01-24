@@ -206,47 +206,6 @@ op.getcodeobj = function(codeRef) {
   return codeRef.codeObj;
 };
 
-
-op.istype = function(ctx, obj, type) {
-  /* Null always type checks false. */
-  if (obj === Null) {
-    return 0;
-  }
-
-  // HACK
-  if (typeof obj === 'number' || typeof obj === 'string' || obj instanceof Hash || obj instanceof NQPInt || obj instanceof NQPException) {
-    return 0;
-  }
-
-  var cache = obj._STable.typeCheckCache;
-  if (cache) {
-    for (var i = 0; i < cache.length; i++) {
-      if (cache[i] === type) {
-        return 1;
-      }
-    }
-  } else {
-    /* If we get here, need to call .^type_check on the value we're
-     * checking. */
-
-    var HOW = obj._STable.HOW;
-    /* This "hack" is stolen from the JVM */
-    if (!HOW.type_check) {
-      return 0;
-    }
-
-    if (HOW.type_check(ctx, null, HOW, obj, type).$$toBool(ctx)) {
-      return 1;
-    }
-  }
-
-  if (type._STable.typeCheckNeedsAccepts) {
-    return type._STable.HOW.accepts_type(ctx, null, type._STable.HOW, type, obj).$$toBool(ctx);
-  }
-
-  return 0;
-};
-
 op.settypecache = function(obj, cache) {
   obj._STable.typeCheckCache = cache.array;
   if (obj._STable._SC !== undefined) obj._STable.scwb();
