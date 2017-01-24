@@ -483,13 +483,13 @@ my module sprintf {
         }
 
         method idx($/) {
-            my $index := $<param_index> - 1;
+            my $index := nqp::radix(10, $<param_index>, 0, 0)[0] - 1;
             nqp::die("Parameter index starts to count at 1 but 0 was passed") if $index < 0;
             make $index
         }
 
         method size($/) {
-            make $<star> ?? next_argument({}) !! ~$/
+            make $<star> ?? next_argument({}) !! ~nqp::radix(10, $/, 0, 0)[0]
         }
     }
 
