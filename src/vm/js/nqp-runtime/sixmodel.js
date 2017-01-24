@@ -7,10 +7,29 @@ var Null = require('./null.js');
 var repossession = require('./repossession.js');
 var compilingSCs = repossession.compilingSCs;
 
+var constants = require('./constants.js');
+
 /* Needed for setting defaults values of attrs for objects */
 var bignum = require('bignum');
 var ZERO = bignum(0);
 
+function findMethod(ctx, obj, name) {
+  if (obj._STable.methodCache) {
+    var hasMethod = obj._STable.methodCache.hasOwnProperty(name);
+    if (hasMethod) {
+      return obj._STable.methodCache[name];
+    }
+    if (obj._STable.modeFlags & constants.METHOD_CACHE_AUTHORITATIVE) {
+      return Null;
+    }
+  }
+
+  if (obj._STable.HOW.find_method) {
+    return obj._STable.HOW.find_method(ctx, null, obj._STable.HOW, obj, name);
+  } else {
+    return Null;
+  }
+}
 
 class STable {
   constructor(REPR, HOW) {
@@ -309,3 +328,4 @@ class STable {
 };
 
 module.exports.STable = STable;
+module.exports.findMethod = findMethod;

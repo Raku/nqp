@@ -34,6 +34,8 @@ var exceptionsStack = require('./exceptions-stack.js');
 
 var repossession = require('./repossession.js');
 
+var sixmodel = require('./sixmodel.js');
+
 exports.CodeRef = CodeRef;
 
 op.isinvokable = function(obj) {
@@ -264,33 +266,16 @@ op.newtype = function(how, repr) {
   return REPR.typeObjectFor(how);
 };
 
-function find_method(ctx, obj, name) {
-  if (obj._STable.methodCache) {
-    var hasMethod = obj._STable.methodCache.hasOwnProperty(name);
-    if (hasMethod) {
-      return obj._STable.methodCache[name];
-    }
-    if (obj._STable.modeFlags & constants.METHOD_CACHE_AUTHORITATIVE) {
-      return Null;
-    }
-  }
-
-  if (obj._STable.HOW.find_method) {
-    return obj._STable.HOW.find_method(ctx, null, obj._STable.HOW, obj, name);
-  } else {
-    return Null;
-  }
-}
 
 op.can = function(ctx, obj, name) {
   /* HACK those things should have an STable rather then be special cased */
   if (typeof obj !== 'object' || obj instanceof NQPInt || obj instanceof CodeRef || obj instanceof Hash) return 0;
 
-  return find_method(ctx, obj, name) === Null ? 0 : 1;
+  return sixmodel.findMethod(ctx, obj, name) === Null ? 0 : 1;
 };
 
 op.findmethod = function(ctx, obj, name) {
-  var method = find_method(ctx, obj, name);
+  var method = sixmodel.findMethod(ctx, obj, name);
   if (method === Null) {
     throw new NQPException("Cannot find method '" + name + "' on object of type " + obj._STable.debugName);
   }
