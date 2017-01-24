@@ -23,6 +23,10 @@ class NQPInt extends NQPObject {
   $$istype(ctx, type) {
     return 0;
   }
+
+  $$can(ctx, name) {
+    return 0;
+  }
 };
 
 module.exports = NQPInt;

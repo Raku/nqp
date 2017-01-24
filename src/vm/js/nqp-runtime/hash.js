@@ -126,6 +126,10 @@ class Hash extends NQPObject {
   $$istype(ctx, type) {
     return 0;
   }
+
+  $$can(obj, name) {
+    return 0;
+  }
 };
 
 module.exports = Hash;

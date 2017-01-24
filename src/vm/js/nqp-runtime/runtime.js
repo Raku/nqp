@@ -361,12 +361,20 @@ Number.prototype.$$istype = function(ctx, type) {
   return 0;
 };
 
+Number.prototype.$$can = function(ctx, name) {
+  return 0;
+};
+
 String.prototype.$$decont = function(ctx) {
   return this;
 };
 
 String.prototype.$$toBool = function(ctx) {
   return this === '' ? 0 : 1;
+};
+
+String.prototype.$$can = function(ctx, name) {
+  return 0;
 };
 
 String.prototype.$$istype = function(ctx, type) {

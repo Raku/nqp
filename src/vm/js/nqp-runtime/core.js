@@ -266,14 +266,6 @@ op.newtype = function(how, repr) {
   return REPR.typeObjectFor(how);
 };
 
-
-op.can = function(ctx, obj, name) {
-  /* HACK those things should have an STable rather then be special cased */
-  if (typeof obj !== 'object' || obj instanceof NQPInt || obj instanceof CodeRef || obj instanceof Hash) return 0;
-
-  return sixmodel.findMethod(ctx, obj, name) === Null ? 0 : 1;
-};
-
 op.findmethod = function(ctx, obj, name) {
   var method = sixmodel.findMethod(ctx, obj, name);
   if (method === Null) {

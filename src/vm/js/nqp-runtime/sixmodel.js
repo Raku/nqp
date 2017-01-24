@@ -109,6 +109,10 @@ class STable {
       return 0;
     };
 
+    this.objConstructor.prototype.$$can = function(ctx, name) {
+      return findMethod(ctx, this, name) === Null ? 0 : 1;
+    };
+
     if (this.REPR.setupSTable) {
       this.REPR.setupSTable(this);
     }
