@@ -148,7 +148,9 @@ exports.toStr = function(arg_, ctx) {
   } else if (arg.$$getStr) {
     return arg.$$getStr();
   } else if (arg.Str) {
-    return arg.Str(ctx, null, arg);
+    let ret = arg.Str(ctx, null, arg);
+    if (typeof ret == 'string') return ret;
+    return ret.$$getStr();
   } else if (arg.$$getNum) {
     return arg.$$getNum().toString();
   } else if (arg.$$getInt) {
