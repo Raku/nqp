@@ -16,4 +16,19 @@ class NQPException extends Error {
   }
 };
 
+NQPException.prototype._STable = {
+  HOW: {
+    name: function(ctx, _NAMED, how, obj) {
+      console.log("fake HOW.name");
+      return 'BOOTException';
+    },
+    $$decont(ctx) {
+      return this;
+    }
+  },
+  REPR: {
+    name: "NQPException"
+  }
+};
+
 module.exports = NQPException;

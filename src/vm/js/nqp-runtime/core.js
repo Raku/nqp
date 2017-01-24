@@ -214,7 +214,7 @@ op.istype = function(ctx, obj, type) {
   }
 
   // HACK
-  if (typeof obj === 'number' || typeof obj === 'string' || obj instanceof Hash || obj instanceof NQPInt) {
+  if (typeof obj === 'number' || typeof obj === 'string' || obj instanceof Hash || obj instanceof NQPInt || obj instanceof NQPException) {
     return 0;
   }
 
