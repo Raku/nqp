@@ -834,21 +834,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         nqp::existskey(%!cuids, $node.cuid);
     }
 
-    my %code_ref_attr;
-    method code_ref_attr($cuid) {
-        if !nqp::existskey(%code_ref_attr, $cuid) {
-            %code_ref_attr{$cuid} := '$codeRef$' ~ $cuid ~ '_' ~ literal_subst(~nqp::time_n(), '.', '_');
-        }
-        %code_ref_attr{$cuid};
-    }
-
     method setup_cuids() {
         my @declared;
         my @vars;
         for %!cuids {
             my str $var := self.mangled_cuid($_.key);
             @vars.push($var);
-            @declared.push("$var = new nqp.CodeRef({quote_string($_.value.name)},{quote_string($_.key)}).setCodeRefAttr({quote_string(self.code_ref_attr($_.key))})");
+            @declared.push("$var = new nqp.CodeRef({quote_string($_.value.name)},{quote_string($_.key)})");
         }
         @declared.push("cuids = [{nqp::join(',', @vars)}]");
         self.declare_js_vars(@declared);
@@ -1069,9 +1061,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             my $stmts := self.compile_all_the_statements($node, $body_want);
 
-            my str $code_ref_attr := self.code_ref_attr($node.cuid);
-
-            my str $create_ctx := self.create_ctx($*CTX, :code_ref('this'), :code_ref_attr(quote_string($code_ref_attr)));
+            my str $create_ctx := self.create_ctx($*CTX, :code_ref('this'));
             if nqp::istype($stmts, ChunkCPS) {
             }
             else {
@@ -1270,8 +1260,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         $*BLOCK.outer ?? $*BLOCK.outer.ctx !! 'null';
     }
 
-    method create_ctx($name, :$code_ref, :$code_ref_attr) {
-        "var $name = new nqp.Ctx(caller_ctx, this.forcedOuterCtx || {self.outer_ctx}, $code_ref, $code_ref_attr);\n";
+    method create_ctx($name, :$code_ref) {
+        "var $name = new nqp.Ctx(caller_ctx, this.forcedOuterCtx || {self.outer_ctx}, $code_ref);\n";
     }
 
     multi method as_js(QAST::IVal $node, :$want, :$cps) {
@@ -1511,7 +1501,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             # We create this context so that dependencies are loaded relative to this file
             my $*CTX := 'ctxWithPath';
             @pre.push(
-                "var ctxWithPath = new nqp.Ctx(null, null, null, null);\n"
+                "var ctxWithPath = new nqp.Ctx(null, null, null);\n"
                 ~ "ctxWithPath['\$*LOADBYTECODE_FROM'] = module;\n");
             for $node.pre_deserialize -> $node {
                 @pre.push(self.as_js($node, :want($T_VOID)));

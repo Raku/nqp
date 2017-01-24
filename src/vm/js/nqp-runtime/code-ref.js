@@ -20,34 +20,6 @@ class CodeRef extends NQPObject {
     this.staticCode = this;
   }
 
-  $$injectMethod(proto, name) {
-    if (this.isCompilerStub) {
-      return;
-    }
-    var codeRefAttr = this.staticCode.codeRefAttr;
-    if (codeRefAttr === null) {
-      return;
-    } else if (codeRefAttr === undefined) {
-      return;
-    }
-
-    if (Object.prototype.hasOwnProperty.call(proto, codeRefAttr) && proto[codeRefAttr] !== this) {
-      return;
-    }
-
-    /* HACK - think how forcedOuterCtx on injected methods should work */
-    proto.forcedOuterCtx = undefined;
-
-    proto[codeRefAttr] = this;
-
-    if (!this.inject) this.inject = [];
-    this.inject.push({name: name, proto: proto});
-
-    if (this.hasOwnProperty('$$call')) {
-      proto[name] = this.$$call;
-    }
-  }
-
   captureCtx() {
     this.capture(this.closureTemplate.apply(null, arguments));
     this.outerCtx = arguments[arguments.length - 1];
@@ -55,11 +27,6 @@ class CodeRef extends NQPObject {
 
   capture(block) {
     this.$$call = block;
-    if (this.inject) {
-      for (var i = 0; i < this.inject.length; i++) {
-        this.inject[i].proto[this.inject[i].name] = block;
-      }
-    }
     return this;
   }
 
@@ -205,11 +172,6 @@ class CodeRef extends NQPObject {
 
   setStaticVars(staticVars) {
     this.staticVars = staticVars;
-  }
-
-  setCodeRefAttr(codeRefAttr) {
-    this.codeRefAttr = codeRefAttr;
-    return this;
   }
 
   $$clone() {

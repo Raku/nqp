@@ -85,7 +85,7 @@ KnowHOW_HOW._STable.methodCache = {};
 KnowHOW_HOW._STable.modeFlags = constants.METHOD_CACHE_AUTHORITATIVE;
 
 function wrapMethod(name, method) {
-  var codeRef = new CodeRef(name, undefined).setCodeRefAttr(null);
+  var codeRef = new CodeRef(name, undefined);
   codeRef.$$call = method;
   return codeRef;
 }

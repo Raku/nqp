@@ -3,8 +3,8 @@ var Ctx = require('./ctx.js');
 var Iter = require('./iter.js');
 
 class CtxWithStatic extends Ctx {
-  constructor(callerCtx, outerCtx, callThis, codeRefAttr, statics) {
-    super(callerCtx, outerCtx, callThis, codeRefAttr);
+  constructor(callerCtx, outerCtx, callThis, statics) {
+    super(callerCtx, outerCtx, callThis);
     this.$$statics = statics;
   }
 

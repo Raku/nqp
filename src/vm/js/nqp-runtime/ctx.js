@@ -24,16 +24,15 @@ var categoryToName = {
 };
 
 class Ctx extends NQPObject {
-  constructor(callerCtx, outerCtx, callThis, codeRefAttr) {
+  constructor(callerCtx, outerCtx, callThis) {
     super();
     this.$$caller = callerCtx;
     this.$$outer = outerCtx;
     this.$$callThis = callThis;
-    this.$$codeRefAttr = codeRefAttr;
   }
 
   codeRef() {
-    return (this.$$callThis instanceof CodeRef ? this.$$callThis : this.$$callThis[this.$$codeRefAttr]);
+    return this.$$callThis;
   }
 
   propagateControlException(exception) {

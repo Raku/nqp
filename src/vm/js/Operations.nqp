@@ -813,7 +813,7 @@ class QAST::OperationsJS {
                     !! '';
 
                 return Chunk.new($want, $try_ret, [
-                    "var $handler_ctx = new nqp.Ctx($outer_ctx, $outer_ctx, $outer_ctx.\$\$callThis, $outer_ctx.\$\$codeRefAttr);\n",
+                    "var $handler_ctx = new nqp.Ctx($outer_ctx, $outer_ctx, $outer_ctx.\$\$callThis);\n",
                     Chunk.void(|@handlers),
                     "try \{",
                     $body,

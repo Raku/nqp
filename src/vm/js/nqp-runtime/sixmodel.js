@@ -65,7 +65,6 @@ class STable {
     this.objConstructor.prototype.typeObject_ = 0;
 
     this.objConstructor.prototype.$$call = undefined;
-    this.objConstructor.prototype.$$injectMethod = undefined;
 
     this.objConstructor.prototype.$$scwb = function() {
 
@@ -169,13 +168,6 @@ class STable {
       this.objConstructor.prototype.$$apply = function(args) {
         return this[getter]().$$apply(args);
       };
-
-      this.objConstructor.prototype.$$injectMethod = function(proto, name) {
-        var value = this[getter]();
-        if (value && value.$$injectMethod) {
-          return value.$$injectMethod(proto, name);
-        }
-      };
     } else {
       this.objConstructor.prototype.$$call = function() {
         var args = [];
@@ -228,10 +220,6 @@ class STable {
     proto[name] = function() {
       return method.$$call.apply(method, arguments);
     };
-
-    if (method.$$injectMethod) {
-      method.$$injectMethod(proto, name);
-    }
   }
 
   setMethodCache(methodCache) {
