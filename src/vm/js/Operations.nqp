@@ -269,7 +269,7 @@ class QAST::OperationsJS {
         Chunk.new($T_OBJ, $ret, [chain_part($node)]);
     });
 
-    add_simple_op('clone', $T_OBJ, [$T_OBJ], :decont(0));
+    add_simple_op('clone', $T_OBJ, [$T_OBJ], :decont(0), :method_call);
 
     my sub static_hint($node) {
         my int $hint := -1;

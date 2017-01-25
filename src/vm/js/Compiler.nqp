@@ -1105,7 +1105,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 if $*BLOCK.statevars {
                     my @vars;
                     for $*BLOCK.statevars -> $kv {
-                        @vars.push($kv.key ~ " = " ~ "nqp.op.clone({self.value_as_js($kv.value)})");
+                        @vars.push($kv.key ~ " = " ~ "{self.value_as_js($kv.value)}.\$\$clone()");
                     }
                     if $first_time_marker {
                         @vars.push($first_time_marker ~ " = 0");
@@ -1584,7 +1584,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             if !self.is_dynamic_var($*BLOCK, $node) {
                 my str $mangled_name := $*BLOCK.add_mangled_var($node);
                 if $node.decl eq 'contvar' {
-                    $*BLOCK.add_js_lexical_with_value($mangled_name, "nqp.op.clone({self.value_as_js($node.value)})");
+                    $*BLOCK.add_js_lexical_with_value($mangled_name, "{self.value_as_js($node.value)}.\$\$clone()");
                 }
                 elsif $node.decl eq 'static' {
                     $*BLOCK.add_js_lexical_with_value($mangled_name, self.value_as_js($node.value));
@@ -1771,7 +1771,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     $initial_value := %default_value{$type};
                 }
                 elsif $var.decl eq 'contvar' {
-                    $initial_value := "nqp.op.clone({self.value_as_js($var.value)})";
+                    $initial_value := "{self.value_as_js($var.value)}.\$\$clone()";
                 }
                 elsif $var.decl eq 'static' {
                     $initial_value := self.value_as_js($var.value);

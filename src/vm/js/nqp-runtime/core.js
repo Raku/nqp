@@ -293,16 +293,6 @@ op.composetype = function(obj, reprinfo) {
   obj._STable.REPR.compose(obj._STable, reprinfo);
 };
 
-op.clone = function(obj) {
-  if (obj.$$clone) {
-    return obj.$$clone();
-  } else {
-    // STUB
-    console.log('NYI cloning', obj);
-    return obj;
-  }
-};
-
 var whereCounter = 0;
 op.where = function(obj) {
   if (obj._STable || obj instanceof CodeRef) { // HACK
