@@ -446,8 +446,9 @@ class P6opaque {
 
   }
 
-  generateDefaults(STable) {
-    var code = '';
+  generateDefaultsAndClone(STable) {
+    var defaults = '';
+    var clone = '';
 
     for (var i = 0; i < this.nameToIndexMapping.length; i++) {
       for (var j = 0; j < this.nameToIndexMapping[i].slots.length; j++) {
@@ -455,11 +456,14 @@ class P6opaque {
         let defaultValue = this.flattenedSTables[slot] ?
             this.flattenedSTables[slot].REPR.flattenedDefault :
             'undefined';
-        code += 'this.' + slotToAttr(slot) + ' = ' + defaultValue + ';\n';
+        let attr = slotToAttr(slot);
+        defaults += 'this.' + attr + ' = ' + defaultValue + ';\n';
+        clone += 'cloned.' + attr + ' = this.' + attr + ';';
       }
     }
 
-    STable.compileAccessor('$$setDefaults', 'function() {\n' + code + '}');
+    STable.compileAccessor('$$setDefaults', 'function() {\n' + defaults + '}');
+    STable.compileAccessor('$$clone', 'function() {var cloned = new this._STable.objConstructor();' + clone + 'return cloned}');
     STable.evalGatheredCode();
   }
 
@@ -522,7 +526,7 @@ class P6opaque {
 
     this.generateUniversalAccessors(STable);
 
-    this.generateDefaults(STable);
+    this.generateDefaultsAndClone(STable);
 
     STable.evalGatheredCode();
   }
