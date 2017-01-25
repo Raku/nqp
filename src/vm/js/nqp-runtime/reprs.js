@@ -266,20 +266,9 @@ class P6opaque {
   }
 
   deserializeFinish(obj, data) {
-    var attrs = [];
-
     for (var i = 0; i < this.flattenedSTables.length; i++) {
-      if (this.flattenedSTables[i]) {
-        attrs.push(this.flattenedSTables[i].REPR.deserializeInline(data));
-      } else {
-        attrs.push(data.variantWithUndefined());
-      }
-    }
-
-    for (var mapping of this.nameToIndexMapping) {
-      for (var slot of mapping.slots) {
-        obj[slotToAttr(slot)] = attrs[slot];
-      }
+      let attr = this.flattenedSTables[i] ? this.flattenedSTables[i].REPR.deserializeInline(data) : data.variantWithUndefined();
+      obj[slotToAttr(i)] = attr;
     }
   }
 
