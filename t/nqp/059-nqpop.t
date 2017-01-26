@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(298);
+plan(299);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -486,3 +486,12 @@ is(nqp::tc("ó"), "Ó", "accented chars");
 is(nqp::tc('ß'), 'Ss', 'sharp s => Ss');
 is(nqp::tc('$'), '$', "character that don't have title case remain unchanged");
 is(nqp::tc("\x1044E"), "\x10426", 'tc works on codepoints greater than 0xffff');
+
+{
+    class Stringish is repr('P6str') {
+    };
+    my $a := nqp::box_s('a', Stringish);
+    my $b := nqp::box_s('b', Stringish);
+    my $c := 'c';
+    is(nqp::join(",", nqp::list($a, $b, $c)), 'a,b,c', 'nqp::join supports boxed elements in the array');
+}
