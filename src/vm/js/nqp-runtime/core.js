@@ -714,49 +714,52 @@ op.typeparameterized = function(type) {
   return st.parametricType ? st.parametricType : Null;
 };
 
-function startTrampoline(thunk_) {
-  var thunk = thunk_;
-  while (thunk) {
-    thunk = thunk();
+var Fiber = require('fibers');
+
+function runTagged(tag, fiber, val) {
+  var control = fiber.run(val);
+  while (1) {
+    if (control.tag == tag || control.tag === Null) {
+      return control.value;
+    } else {
+      Fiber.yield(control);
+    }
   }
 }
 
-var resetValue;
-var invokeValue;
-op.continuationreset = function(ctx, tag, continuation) {
-  startTrampoline(function() {
-    return continuation.$$callCPS(ctx, {}, function(value) {
-      resetValue = value;
-      invokeValue = value;
-      return Null;
-    });
-  });
-  return resetValue;
+class Cont {
+  constructor(tag, fiber) {
+    this.tag = tag;
+    this.fiber = fiber;
+  }
+
+  $$decont(ctx) {
+    return this;
+  }
+
+  $$toBool(ctx) {
+    return 1;
+  }
+}
+
+op.continuationreset = function(ctx, tag, block) {
+  if (block instanceof Cont) {
+    return runTagged(tag, block.fiber, Null);
+  } else {
+    return runTagged(tag, Fiber(function() {
+      return {value: block.$$call(ctx, null), tag: tag};
+    }), Null);
+  }
 };
 
-op.continuationresetCPS = function(ctx, tag, continuation, continuation) {
-  console.log('continuation reset in CPS mode');
-};
 
-op.continuationcontrolCPS = function(ctx, protect, tag, run, cont) {
-  startTrampoline(run.$$callCPS(ctx, {}, function(value) {
-    resetValue = value;
-    return Null;
-  }, cont));
-  return Null;
+op.continuationcontrol = function(ctx, protect, tag, closure) {
+  return Fiber.yield({value: closure.$$call(ctx, null, new Cont(tag, Fiber.current)), tag: tag});
 };
 
 op.continuationinvoke = function(ctx, cont, inject) {
-  // TODO really place inject inside the cont
-  var value = inject.$$call(ctx, {});
-  startTrampoline(cont(value));
-  return invokeValue;
-};
-
-op.continuationinvokeCPS = function(ctx, invokedCont, inject, cont) {
-  // TODO really place inject inside the cont, use callCPS
-  var value = inject.$$call(ctx, {});
-  return invokedCont(value);
+  var val = inject.$$call(ctx, null);
+  return runTagged(cont.tag, cont.fiber, val);
 };
 
 var generator = Math;

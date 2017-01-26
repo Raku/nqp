@@ -1626,10 +1626,12 @@ class QAST::OperationsJS {
     add_simple_op('initnativecall', $T_INT, [], :side_effects);
 
     # Continuations
-    add_simple_op('continuationreset', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :ctx);
-    add_simple_op('continuationinvoke', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :ctx, :cps_aware);
 
-    add_simple_op('continuationcontrol', $T_OBJ, [$T_INT, $T_OBJ, $T_OBJ], :ctx, :required_cps);
+    add_simple_op('continuationreset', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :ctx);
+    add_simple_op('continuationinvoke', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :ctx);
+
+    add_simple_op('continuationcontrol', $T_OBJ, [$T_INT, $T_OBJ, $T_OBJ], :side_effects, :ctx);
+
 
     # Dealing with compiled compunits
 

@@ -25,6 +25,7 @@
     "ffi": "*",
     "xregexp": "*",
     "ref": "*",
-    "unicharadata": "*"
+    "unicharadata": "*",
+    "fibers": "*"
   }
 }

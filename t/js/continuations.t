@@ -2,7 +2,7 @@
 
 # continuations.
 
-plan(10);
+plan(14);
 
 {
     # unique objects
@@ -20,26 +20,6 @@ plan(10);
 
     my $ex := '';
     $run := 0;
-
-    # These tests are problematic.  Currently the continuation bubbles up to the nearest
-    # continuation barrier in invokeMain and dies there, with no chance to catch the
-    # resulting exception
-
-    # try {
-    #     nqp::continuationcontrol(0, nqp::null(), { $run++ });
-    #     CATCH { $ex := $! }
-    # }
-    # ok( $ex ~~ /'no matching'/, 'shift dies with no reset' );
-    # ok( $run == 0, '...without running argument' );
-
-    # $ex := '';
-    # try {
-    #     nqp::continuationreset($A, {
-    #         nqp::continuationcontrol(0, $B, { $run++ });
-    #     });
-    #     CATCH { $ex := $! }
-    # }
-    # ok( $ex ~~ /'no matching'/, 'control dies with mismatched reset' );
 
     my str $log := '';
     $log := $log ~ 1;
@@ -67,8 +47,31 @@ plan(10);
     ok( $shift_returned == 15, 'continuation invoke argument is shift return value' );
     ok( $reset_returned == 30, 'reset block return value is continuation invoke return value' );
 
-    ok( nqp::continuationinvoke($savecont, {25}) == 50, 'continuation can be used more than once' );
+}
 
+{
+    my $log := '';
+
+    my $next;
+    nqp::continuationreset(nqp::null(), {
+        $log := $log ~ 1;
+        nqp::continuationcontrol(0, nqp::null(), -> $cont { $next := $cont });
+        $log := $log ~ 2;
+        nqp::continuationcontrol(0, nqp::null(), -> $cont { $next := $cont });
+        $log := $log ~ 3;
+        nqp::continuationcontrol(0, nqp::null(), -> $cont { $next := $cont });
+        $log := $log ~ 4;
+        777;
+    });
+
+    is($log, '1', 'passing a continuation to nqp::continuationreset 1/4');
+    nqp::continuationreset(nqp::null(), $next);
+    is($log, '12', 'passing a continuation to nqp::continuationreset 2/4');
+    nqp::continuationreset(nqp::null(), $next);
+    is($log, '123', 'passing a continuation to nqp::continuationreset 3/4');
+    my $ret := nqp::continuationreset(nqp::null(), $next);
+    is($log, '1234', 'passing a continuation to nqp::continuationreset 4/4');
+    is($ret, 777, 'passing a continuation to nqp::continuationreset - correct return value');
 }
 
 

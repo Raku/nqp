@@ -5,7 +5,6 @@ my ($skip_qregex) = @ARGV;
 my $harness = TAP::Harness->new({
     exec => sub {
         my ($harness, $test_file) = @_;
-        return ['./nqp-js', '--cps=on', $test_file] if $test_file =~ /continuations.t$/;
         return ['./nqp-js', $test_file] if $test_file =~ /\.t$/;
         return ['node', $test_file] if $test_file =~ /\.js$/;
     }
@@ -20,7 +19,7 @@ my @nqp_tests = grep {$_ !~ /regex-interpolation/} glob "t/nqp/*.t";
 my @moar_tests = qw(t/moar/03-line-seps.t);
 
 my @runtime_unit_tests = qw(t/js/varint.js);
-my @continuation_tests; # = qw(t/js/continuations.t);
+my @continuation_tests = qw(t/js/continuations.t);
 
 my @native_call_tests = qw(t/nativecall/01-basic.t);
 my @hll_tests = qw(t/hll/06-sprintf.t);
