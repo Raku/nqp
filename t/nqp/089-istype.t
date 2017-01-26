@@ -1,6 +1,6 @@
 #! nqp
 
-plan(10);
+plan(11);
 
 class Foo {}
 
@@ -21,6 +21,7 @@ ok(!nqp::istype($foo, FooSub), 'istype with subclass, -');
 ok(nqp::istype(FooSub, Foo), 'istype with subclass type, +');
 
 ok(!nqp::istype(nqp::null(), Foo), 'istype on nqp::null()');
+ok(!nqp::istype(nqp::null_s(), Foo), 'istype on nqp::null_s()');
 
 ok(!nqp::istype(nqp::hash(), Foo), 'istype on nqp::hash');
 ok(!nqp::istype(nqp::list(), Foo), 'istype on nqp::list');
