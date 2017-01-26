@@ -1,4 +1,5 @@
 'use strict';
+let singleton;
 class Null {
   $$decont(ctx) {
     return this;
@@ -12,5 +13,13 @@ class Null {
     return 0;
   }
 
+  $$atpos(index) {
+    return singleton;
+  }
+
+  $$atkey(key) {
+    return singleton;
+  }
 };
-module.exports = new Null();
+singleton = new Null()
+module.exports = singleton;
