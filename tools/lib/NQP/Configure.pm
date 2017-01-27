@@ -292,7 +292,7 @@ sub gen_moar {
         return $moar_exe;
     }
     elsif ($moar_have) {
-        print "Found $moar_exe version $moar_have, which is too old.\n";
+        print "Found $moar_exe version $moar_have, which is too old. Wanted at least $moar_want\n";
     }
 
     return unless defined $gen_moar;
