@@ -803,16 +803,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         self.chunk_sequence($want, @chunks, :$result_child, :$node);
     }
 
-#    proto method cpsify_chunk($chunk) { * }
-#    multi method cpsify_chunk(ChunkCPS $chunk) { $chunk }
-#    multi method cpsify_chunk(Chunk $chunk) {
-#        my $ret := self.chunk_sequence($chunk.type, $chunk.setup, :expr($chunk.expr), :node($chunk.node));
-#        $ret;
-#    }
-
-    method cpsify_chunk($chunk) { $chunk }
-    # TODO restore CPS
-
     multi method as_js(QAST::Block $node, :$want, :$cps) {
         my $outer     := try $*BLOCK;
         my $outer_loop := try $*LOOP;
@@ -1739,10 +1729,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         if $*BINDVAL {
             # TODO better source mapping
             my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($type), :$cps);
-            self.cpsify_chunk(Chunk.new($type, $bindval.expr, [$bindval, self.set_var($var, $bindval.expr)]));
+            self.stored_result(Chunk.new($type, self.set_var($var, $bindval.expr), [$bindval]));
         }
         else {
-            self.cpsify_chunk(Chunk.new($type, self.get_var($var), :node($var)));
+            Chunk.new($type, self.get_var($var), :node($var));
         }
     }
 
@@ -1837,10 +1827,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             if nqp::defined($ref_type) {
                 if $*BINDVAL {
                     my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ), :$cps);
-                    self.cpsify_chunk(Chunk.new($T_OBJ, $bindval.expr, [$bindval, self.set_var($var, $bindval.expr)]));
+                    self.stored_result(Chunk.new($T_OBJ, self.set_var($var, $bindval.expr), [$bindval]));
                 }
                 else {
-                    self.cpsify_chunk(Chunk.new($T_OBJ, self.get_var($var), :node($var)));
+                    Chunk.new($T_OBJ, self.get_var($var), :node($var));
                 }
             }
             else {

@@ -108,7 +108,7 @@ class QAST::OperationsJS {
         %ops{$op} := sub ($comp, $node, :$want, :$cps) {
             my $left  := $comp.as_js($node[0], :want($left_type), :$cps);
             my $right := $comp.as_js($node[1], :want($right_type), :$cps);
-            $comp.cpsify_chunk(Chunk.new($return_type, "({$left.expr} $syntax {$right.expr})", [$left, $right], :$node));
+            Chunk.new($return_type, "({$left.expr} $syntax {$right.expr})", [$left, $right], :$node);
         };
     }
 
@@ -582,7 +582,7 @@ class QAST::OperationsJS {
 
            @setup.push("$list = nqp.list({quote_string($*HLL)}, [" ~ nqp::join(',', @exprs) ~ "]);\n");
 
-           $comp.cpsify_chunk(Chunk.new($T_OBJ, $list , @setup, :$node));
+           Chunk.new($T_OBJ, $list , @setup, :$node);
         });
 
         add_simple_op('bindpos' ~ $suffix, $type, [$T_OBJ, $T_INT, $type], sub ($list, $index, $value) {"$list.\$\$bindpos($index, $value)"}, :side_effects);
