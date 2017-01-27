@@ -1,6 +1,6 @@
 # check variables
 
-say('1..13');
+say('1..14');
 
 my $o1 := 'ok 1'; print($o1); say(" # direct binding and scoping");
 
@@ -72,3 +72,14 @@ $m3 := 'not ok 13';
     $m3 := 'ok 13';
 }
 print($m3); say(' # our variables written inside block keep their values outside');
+
+{
+    my $foo := 0;
+    if ($foo := $foo + 1) == 1 {
+        print("ok 14");
+    }
+    else {
+        print("not ok 14");
+    }
+    say(' # binding to a variable with side effects is used as value');
+}
