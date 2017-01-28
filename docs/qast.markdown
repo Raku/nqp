@@ -381,7 +381,15 @@ don't yet know in what context it will be used, like 123.
 Each sub-node of the Want provides a value for one context out of int, str,
 num, object and void. When a context is known, the last of the matching
 sub-nodes will be used, or the first one if none match. In the case of 123,
-it may be a boxed integer or a native integer value
+it may be a boxed integer or a native integer value:
+    
+    QAST::Want.new(
+      QAST::WVal.new( :value($boxed-constant) ), # default boxed value
+      'Ii', QAST::IVal.new( :value($the_value) ) # native int value
+    )
+
+The type indicators are `Ii`, `Nn`, and `Ss` for native int, num, and str,
+respectively. The `v` indicates void context.
 
 This notion of context is very code-generation centric, so a want-value of 123
 would not create a sub-node for string context, or else
