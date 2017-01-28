@@ -384,7 +384,7 @@ sub-nodes will be used, or the first one if none match. In the case of 123,
 it may be a boxed integer or a native integer value:
     
     QAST::Want.new(
-      QAST::WVal.new( :value($boxed-constant) ), # default boxed value
+      QAST::WVal.new( :value($boxed_constant) ), # default boxed value
       'Ii', QAST::IVal.new( :value($the_value) ) # native int value
     )
 
