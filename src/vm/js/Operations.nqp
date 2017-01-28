@@ -525,7 +525,7 @@ class QAST::OperationsJS {
 
     add_simple_op('gethostname', $T_STR, [$T_STR]);
 
-    # XXX explicit takeclosure will go away under new model (which nqp-m uses); for now, no-op it.
+    # XXX explicit takeclosure is used by the JVM backend we no-op it.
     add_op('takeclosure', sub ($comp, $node, :$want, :$cps) {
         $comp.as_js($node[0], :want($want), :$cps);
     });

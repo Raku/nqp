@@ -85,11 +85,6 @@ class CodeRef extends NQPObject {
     return this.$$call.apply(this, argsArray);
   }
 
-  takeclosure() {
-    console.trace("takeclosure shouldn't be used");
-  }
-
-
   closure(block) {
     var closure = new CodeRef(this.name, this.cuid);
     closure.codeObj = this.codeObj;

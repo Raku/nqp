@@ -378,6 +378,9 @@ op.unbox_s = function(obj) {
 };
 
 op.elems = function(obj) {
+  if (!obj.$$elems) {
+    nqp.dumpObj(obj);
+  }
   return obj.$$elems();
 };
 
@@ -922,6 +925,7 @@ op.backtracestrings = function(hllName, exception) {
 };
 
 op.backtrace = function(hllName, exception) {
+  require('nqp-runtime').dumpObj(exception);
   console.trace('Stubbed backtrace');
   return hll.list(hllName, []);
 };
