@@ -1784,7 +1784,7 @@ discarding any decimal portion.
 Convert string value to a Big Integer of the given type.
 
 ## isbig
-* `isbig_I(Mu $obj)`
+* `isbig_I(Int $obj)`
 
 Returns a 1 if the object's numerical representation requires a big int, 0 otherwise.
 
