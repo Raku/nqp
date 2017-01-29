@@ -400,19 +400,20 @@ would work without complaining.
 
 ##QAST::ParamTypeCheck
 
-Used by rakudo to generate code to multidispatch or
-enforce signatures at runtime.
+Used by rakudo to enforce signatures at runtime.
 
-For example `sub f(Mu:D) { ... }` leads to the generation of
-the following code, where `$name` is the name of the checked variable.
-Probably the first because the binder does a check too. That would be
-redundant.
+It placed inside QAST::Vars with a 'param' decls. If the assertion inside
+returns 0 the 'bind_error' of the current HLL is called.
 
-    $var.push(QAST::ParamTypeCheck.new(QAST::Op.new(
-        :op('isconcrete'),
-         QAST::Var.new( :name($name), :scope('local') )
-    )));
-
+    QAST::Var.new(
+        :decl('param'), :scope('lexical')
+        QAST::ParamTypeCheck.new(
+            QAST::Op.new(
+                :op('isconcrete'),
+                QAST::Var.new( :name($name), :scope('local') )
+            )
+        )
+    )
 
 
 ## QAST::VM
