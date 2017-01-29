@@ -14,7 +14,7 @@ order to do this.
 The protocol is defined entirely in terms of arrays and hashes. Why? So we
 don't have to define a particularly complex object system in order to define
 an object system. :-) At the top level, a hash is always passed. Its keys
-indicate the configuration for a specific part of the protocol, the the values
+indicate the configuration for a specific part of the protocol, the values
 are a data structure providing the appropriate information.
 
 The rest of this documentation describes these protocols; each heading is a
