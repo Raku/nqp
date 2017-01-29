@@ -402,7 +402,7 @@ would work without complaining.
 
 Used by rakudo to enforce signatures at runtime.
 
-It placed inside QAST::Vars with a 'param' decls. If the assertion inside
+It is placed inside QAST::Vars with a 'param' decls. If the assertion inside
 returns 0 the 'bind_error' of the current HLL is called.
 
     QAST::Var.new(
