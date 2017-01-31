@@ -21,12 +21,10 @@ class CodePair {
     this.STable.addInternalMethods(class {
       $$assignunchecked(ctx, value) {
         store.$$call(ctx, {}, this, value);
-        return value;
       }
 
       $$assign(ctx, value) {
         store.$$call(ctx, {}, this, value);
-        return value;
       }
 
       $$iscont() {
@@ -97,7 +95,6 @@ class NativeRef {
 
         $$assign_i(ctx, value) {
           this.set(value);
-          return value;
         }
 
         $$decont_i(ctx, value) {
@@ -138,7 +135,6 @@ class NativeRef {
 
         $$assign_n(ctx, value) {
           this.set(value);
-          return value;
         }
 
         $$decont_n(ctx, value) {
@@ -179,7 +175,6 @@ class NativeRef {
 
         $$assign_s(ctx, value) {
           this.set(value);
-          return value;
         }
 
         $$decont_s(ctx, value) {

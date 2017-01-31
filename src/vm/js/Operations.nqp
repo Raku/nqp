@@ -157,18 +157,29 @@ class QAST::OperationsJS {
     method new_chunk(*@args) { Chunk.new(|@args) }
 
     add_simple_op('setcontspec', $T_OBJ, [$T_OBJ, $T_STR, $T_OBJ], :side_effects, :decont(0));
-    add_simple_op('assign',  $T_OBJ, [$T_OBJ, $T_OBJ], :method_call, :ctx, :side_effects, :decont(1));
-    add_simple_op('assignunchecked',  $T_OBJ, [$T_OBJ, $T_OBJ], :method_call, :ctx, :side_effects);
 
-    sub add_native_assign_op($op_name, $kind) {
+    sub add_assign_op($op_name, $value_kind) {
         # TODO If possible lower it to a bind instead just like on the moarvm backend
         # POTENTIAL OPTIMALIZATION
-        add_simple_op($op_name,  $kind, [$T_OBJ, $kind], :method_call, :ctx, :side_effects);
+
+        add_op($op_name, sub ($comp, $node, :$want, :$cps) {
+            my $cont := $comp.as_js($node[0], :want($T_OBJ));
+            my $value := $comp.as_js($node[1], :want($value_kind));
+
+            my $decont := $value_kind == $T_OBJ ?? ".\$\$decont($*CTX)" !! "";
+            Chunk.new($T_OBJ, $cont.expr, [
+                $value,
+                $cont.expr ~ '.$$' ~ $op_name ~ '(' ~ $*CTX ~ ', ' ~ $value.expr ~ $decont ~ ");\n"
+            ]);
+        });
     }
 
-    add_native_assign_op('assign_i', $T_INT);
-    add_native_assign_op('assign_n', $T_NUM);
-    add_native_assign_op('assign_s', $T_STR);
+    add_assign_op('assignunchecked', $T_OBJ);
+    add_assign_op('assign', $T_OBJ);
+
+    add_assign_op('assign_i', $T_INT);
+    add_assign_op('assign_n', $T_NUM);
+    add_assign_op('assign_s', $T_STR);
 
 
     add_simple_op('decont', $T_OBJ, [$T_OBJ], :method_call, :ctx);
