@@ -1575,8 +1575,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     method declare_var(QAST::Var $node) {
+        my int $type := self.type_from_typeobj($node.returns);
+
         if $node.decl eq 'var' && ($node.scope eq 'local' || $node.scope eq 'lexical') {
-            my int $type := self.type_from_typeobj($node.returns);
             $*BLOCK.register_var_type($node, $type);
         }
 
@@ -1602,7 +1603,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     $*BLOCK.add_js_lexical_with_value($mangled_name, $*BLOCK.add_statevar($node.value));
                 }
                 else {
-                    $*BLOCK.add_js_lexical($mangled_name);
+                    my %default_value := nqp::hash($T_OBJ, 'nqp.Null', $T_INT, '0', $T_NUM, '0', $T_STR, '""');
+                    $*BLOCK.add_js_lexical_with_value($mangled_name, %default_value{$type});
                 }
             }
         }
