@@ -489,9 +489,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 }
             }
 
-            for $param.list -> $param_setup {
-                @setup.push(self.as_js($param_setup, :want($T_OBJ)));
-            }
         }
 
         if $slurpy {
@@ -499,6 +496,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
         if $slurpy_named {
             set_variable($slurpy_named, "nqp.slurpyNamed(_NAMED, {known_named(@*KNOWN_NAMED)})");
+        }
+
+        for @params -> $param {
+            for $param.list -> $param_setup {
+                @setup.push(self.as_js($param_setup, :want($T_OBJ)));
+            }
         }
 
         Chunk.new($T_NONVAL, nqp::join(',', @sig), @setup);
