@@ -1,6 +1,6 @@
 use QAST;
 
-plan(109);
+plan(110);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -776,6 +776,51 @@ is_qast(
         ),
         'OH HAI kathy',
         'call with named arguments works');
+}
+
+if nqp::getcomp('nqp').backend.name eq 'jvm' {
+    skip('passing a list as :named to a QAST::Var with param is NYI on the JVM', 1);
+}
+else {
+    my $quote := QAST::Block.new(
+        QAST::Var.new( :name('arg'), :named(nqp::list('foo', 'bar')), :scope('local'), :decl('param'), :returns(str) ),
+        QAST::Var.new( :name('quote'), :named('quote'), :scope('local'), :decl('param'), :returns(str) ),
+        QAST::Op.new(
+            :op('concat'),
+            QAST::Var.new( :name('quote'), :scope('local') ),
+            QAST::Op.new(
+                :op('concat'),
+                QAST::Var.new( :name('arg'), :scope('local') ),
+                QAST::Var.new( :name('quote'), :scope('local') ),
+            ),
+        )
+    );
+
+    is_qast(
+        QAST::Block.new(
+            $quote,
+            QAST::Op.new(
+                :op('concat'),
+                QAST::Op.new(
+                    :op('call'),
+                    QAST::BVal.new( :value($quote) ),
+                    QAST::SVal.new( :named('foo'), :value('Hello') ),
+                    QAST::SVal.new( :named('quote'), :value('"') ),
+                ),
+                QAST::Op.new(
+                    :op('concat'),
+                    QAST::SVal.new( :value(' ') ),
+                    QAST::Op.new(
+                        :op('call'),
+                        QAST::BVal.new( :value($quote) ),
+                        QAST::SVal.new( :named('bar'), :value('World') ),
+                        QAST::SVal.new( :named('quote'), :value("'") ),
+                    )
+               )
+           )
+        ),
+        '"Hello" \'World\'',
+        'declaring and using a param with multiple names works');
 }
 
 is_qast(
