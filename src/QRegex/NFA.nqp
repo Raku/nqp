@@ -403,18 +403,17 @@ class QRegex::NFA {
         
         if $max > 1 || $min > 1 {
             my int $count := 0;
-            my int $st;
+            my int $st := -1;
             my int $has_sep := nqp::defined($node[1]);
             while $count < $max || $count < $min {
                 if $count >= $min {
-                    my int $f := self.addedge($from, $to, $EDGE_EPSILON, 0);
-                    note("$indent ...quant f = $f") if $nfadeb;
-                    $st := $st || $f;
+                    $st := self.addedge($from, $to, $EDGE_EPSILON, 0);
+                    note("$indent ...quant sf = $st") if $nfadeb;
                 }
                 if $has_sep && $count > 0 {
                     $from := self.regex_nfa($node[1], $from, -1);
                 }
-                $from := self.regex_nfa($node[0], $from, -1);
+                $from := self.regex_nfa($node[0], $from, $st);
                 $count := $count + 1;
             }
             $st := self.addedge($from, $to, $EDGE_EPSILON, 0);
