@@ -1569,6 +1569,11 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         return 0;
     }
 
+    multi method as_js(QAST::ParamTypeCheck $node) {
+        my $check := self.as_js($node[0], :want($T_BOOL));
+        Chunk.void($check, "if (!{$check.expr}) nqp.paramcheckfailed({quote_string($*HLL)}, Array.prototype.slice.call(arguments));\n");
+    }
+
     method declare_var(QAST::Var $node) {
         if $node.decl eq 'var' && ($node.scope eq 'local' || $node.scope eq 'lexical') {
             my int $type := self.type_from_typeobj($node.returns);

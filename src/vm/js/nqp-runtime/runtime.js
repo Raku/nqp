@@ -10,6 +10,8 @@ var NQPException = require('./nqp-exception.js');
 var null_s = require('./null_s.js');
 var Null = require('./null.js');
 
+var Capture = require('./capture.js');
+
 exports.NQPInt = NQPInt;
 
 function loadOps(module) {
@@ -408,4 +410,9 @@ exports.dumpObj = function(obj) {
   } else {
     console.log(obj);
   }
+};
+
+exports.paramcheckfailed = function(hllName, args) {
+  let capture = new Capture(args[1], Array.prototype.slice.call(args, 2));
+  hll.hllConfigs[hllName].get('bind_error').$$call(args[0], null, capture);
 };

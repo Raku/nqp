@@ -36,6 +36,8 @@ var repossession = require('./repossession.js');
 
 var sixmodel = require('./sixmodel.js');
 
+var Capture = require('./capture.js');
+
 exports.CodeRef = CodeRef;
 
 op.isinvokable = function(obj) {
@@ -161,16 +163,6 @@ op.setboolspec = function(obj, mode, method) {
   return obj;
 };
 
-class Capture extends NQPObject {
-  constructor(named, pos) {
-    super();
-    this.pos = pos;
-    this.named = named;
-  }
-  $$clone() {
-    return this;
-  }
-};
 
 op.savecapture = function(args) {
   return new Capture(args[1], Array.prototype.slice.call(args, 2));
