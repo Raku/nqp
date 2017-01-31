@@ -1,6 +1,6 @@
 use QAST;
 
-plan(115);
+plan(119);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -12,7 +12,7 @@ sub is_qast($qast, $value, $desc) {
     try {
         my $code := compile_qast($qast);
         is($code(), $value, $desc);
-        CATCH { ok(0, $desc) }
+        CATCH { ok(0, 'Exception in is_qast: ' ~ $! ~ ", test: $desc") }
     }
 }
 sub is_qast_args($qast, @args, $value, $desc) {
@@ -274,6 +274,41 @@ is_qast(
     ),
     25,
     'local int bound to a value then used in addition');
+
+is_qast(
+    QAST::Block.new(
+        QAST::Var.new( :name('not_set'), :scope('local'), :decl('var') ),
+        QAST::Op.new(
+            :op('isnull'),
+            QAST::Var.new(:name('not_set'), :scope('local'))
+        )
+    ),
+    1,
+    'local has a null default');
+
+is_qast(
+    QAST::Block.new(
+        QAST::Var.new( :name('not_set'), :scope('local'), :decl('var'), :returns(int) ),
+        QAST::Var.new(:name('not_set'), :scope('local'))
+    ),
+    0,
+    'int local has a zero default');
+
+is_qast(
+    QAST::Block.new(
+        QAST::Var.new( :name('not_set'), :scope('local'), :decl('var'), :returns(str) ),
+        QAST::Var.new(:name('not_set'), :scope('local'))
+    ),
+    '',
+    'str local has a zero default');
+
+is_qast(
+    QAST::Block.new(
+        QAST::Var.new( :name('not_set'), :scope('local'), :decl('var'), :returns(num) ),
+        QAST::Var.new(:name('not_set'), :scope('local'))
+    ),
+    0,
+    'num local has a zero default');
 
 is_qast_args(
     QAST::Block.new(
