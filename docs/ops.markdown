@@ -276,6 +276,7 @@
 - [Variable Opcodes](#-variable-opcodes)
     - [bind](#bind)
 - [Miscellaneous Opcodes](#-miscellaneous-opcodes)
+    - [locallifetime](#locallifetime)
     - [const](#const)
     - [debugnoop](#debugnoop)
     - [exit](#exit)
@@ -2208,6 +2209,14 @@ Binds `$value` to the `$variable`. Dies if `$variable` isn't actually a
 variable. Same as the `:=` operator in NQP.
 
 # <a id="misc"></a> Miscellaneous Opcodes
+
+## locallifetime
+```perl6
+QAST::Op.new( :op('locallifetime'), :node($/), QAST::Stmt.new(...))
+```
+
+Defines when local variables can be considered dead. E.g. the temporary setting
+of `$_` on the right side of `~~` uses that.
 
 ## const
 * `const()`
