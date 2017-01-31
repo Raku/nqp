@@ -1,6 +1,6 @@
 use QAST;
 
-plan(110);
+plan(115);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -1840,3 +1840,66 @@ test_qast_result(
         ok(nqp::atpos($r, 0) eq 'abc' && nqp::atpos($r, 1) eq 'def', "...and it contains the right elements");
     }
 );
+
+if nqp::getcomp('nqp').backend.name eq 'jvm' {
+    skip("QAST::ParamTypeCheck is not implemented on the JVM", 5);
+}
+else {
+    my $in_bind_error := 0;
+    my $wrongly_bound_capture;
+    my $throw_exception := 0;
+    nqp::sethllconfig('hll_with_bind_error_handler', nqp::hash(
+        'bind_error', -> $capture {
+            $in_bind_error := $in_bind_error + 1;
+            $wrongly_bound_capture := $capture;
+            if $throw_exception {
+                my $exception := nqp::newexception();
+                nqp::setpayload($exception, nqp::captureposarg($capture, 0));
+                nqp::throw($exception);
+            }
+         }
+    ));
+
+    test_qast_result(
+       QAST::CompUnit.new(
+           :hll<hll_with_bind_error_handler>,
+            QAST::Block.new(
+                QAST::Block.new(
+                    QAST::Var.new(
+                        :name('a'), :scope('lexical'), :decl('param'), :returns(int),
+                        QAST::ParamTypeCheck.new(
+                            QAST::Op.new(
+                                :op<islt_i>,
+                                QAST::Var.new( :name('a'), :scope('lexical')),
+                                QAST::IVal.new( :value(10))
+                            )
+                        )
+                    ),
+                    QAST::Op.new(
+                        :op<add_i>,
+                        QAST::Var.new( :name('a'), :scope('lexical')),
+                        QAST::IVal.new( :value(100))
+                    )
+                )
+            )
+        ),
+        -> $r {
+            is($r(7), 107, 'calling a block when QAST::ParamTypeCheck passes');
+            is($in_bind_error, 0, 'the bind_error handler is not called');
+            $r(207);
+            is($in_bind_error, 1, "the bind_error handler is called when the type check doesn't pass");
+            ok(nqp::captureposelems($wrongly_bound_capture) == 1 && nqp::captureposarg($wrongly_bound_capture, 0) == 207, 'correct capture passed to bind_error handler');
+
+            $throw_exception := 1;
+
+            my $exception_thrown := 0;
+            {
+                $r(307);
+                CATCH {
+                    $exception_thrown := nqp::getpayload($!);
+                }
+            }
+            is($exception_thrown, 307, 'throwing an exception from bind_error handler works');
+        }
+    );
+};
