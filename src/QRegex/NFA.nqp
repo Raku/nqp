@@ -257,14 +257,15 @@ class QRegex::NFA {
             if $node.subtype eq 'zerowidth' {
                 my $next := self.addedge($from, -1, $base_edge + ?$node.negate,
                     [$ord0, $ord1]);
-                $result := dentout(self.addedge($next, 0, $EDGE_FATE, 0));
+                $result := self.addedge($next, 0, $EDGE_FATE, 0);
             }
             else {
-                $result := dentout(self.addedge($from, $to, $base_edge + ?$node.negate,
-                    [$ord0, $ord1]));
+                $result := self.addedge($from, $to, $base_edge + ?$node.negate,
+                    [$ord0, $ord1]);
+                $to := $result if $to < 0 && $result > 0;
             }
         }
-        $result
+        dentout($result)
     }
 
     # Synthetics must be conveyed as strings; anything else can go as an
