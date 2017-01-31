@@ -168,6 +168,7 @@ class QAST::OperationsJS {
 
             my $decont := $value_kind == $T_OBJ ?? ".\$\$decont($*CTX)" !! "";
             Chunk.new($T_OBJ, $cont.expr, [
+                $cont,
                 $value,
                 $cont.expr ~ '.$$' ~ $op_name ~ '(' ~ $*CTX ~ ', ' ~ $value.expr ~ $decont ~ ");\n"
             ]);
