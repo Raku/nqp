@@ -37,13 +37,18 @@ class QRegex::NFA {
     sub dentin() {
         if $nfadeb {
             $ind := $ind + 2;
-            nqp::x(' ', $ind);
+            nqp::x(' ', nqp::if($ind >= 0, $ind, 0));
         }
         else { '' }
     }
 
     sub dentout($x) {
-        $ind := $ind - 2 if $nfadeb;
+        if $nfadeb {
+            $ind := $ind - 2;
+            if $ind < 0 {
+                note("                inconsistent indentation! NFA debugger tried to dentout to $ind.");
+            }
+        }
         $x;
     }
 
@@ -779,6 +784,7 @@ class QRegex::NFA {
         my int $send := nqp::elems($!states);
         my $err := nqp::getstderr();
         nqp::printfh($err, "------------------------------------------\n   $send states\n") if $nfadeb;
+        $ind := 0 if $nfadeb;
         my $remap := nqp::list_i();
         nqp::setelems($remap, $send + 1);
         my $refs := nqp::list_i();
