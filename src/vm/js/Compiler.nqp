@@ -434,21 +434,26 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             elsif $param.named {
                 my str $quoted := quote_string($param.named);
                 @*KNOWN_NAMED.push($quoted);
-                my str $value := "_NAMED[$quoted]";
+
+                @setup.push("if (_NAMED !== null && _NAMED.hasOwnProperty($quoted)) \{\n");
+
+                set_variable($param, "_NAMED[$quoted]");
+
+                @setup.push("\} else \{\n");
+
                 if $param.default {
                     # TODO types
 
                     my $default := self.as_js($param.default, :want($T_OBJ), :$cps);
                     @setup.push($default);
-                    $value := "((_NAMED !== null && _NAMED.hasOwnProperty($quoted)) ? $value : {$default.expr})";
+                    set_variable($param, $default.expr);
                 }
                 else {
-                    $value := "(_NAMED !== null ? $value : null)";
+                    # TODO required named arguments
+                    set_variable($param, "nqp.Null");
                 }
 
-                # TODO required named arguments and defaultless optional ones
-
-                set_variable($param, $value);
+                @setup.push("\}\n");
             }
             elsif self.is_dynamic_var($*BLOCK, $param) {
                 my str $set := "{$*CTX}[{quote_string($param.name)}] = ";
