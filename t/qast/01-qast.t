@@ -1,6 +1,6 @@
 use QAST;
 
-plan(108);
+plan(109);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -1381,7 +1381,7 @@ if nqp::getcomp('nqp').backend.name eq 'jvm' {
 }
 
 if nqp::getcomp('nqp').backend.name eq 'jvm' {
-    skip('children of a QAST::Var with a "param" decl are not implemented', 4);
+    skip('children of a QAST::Var with a "param" decl are not implemented', 5);
 }
 else {
     is_qast_args(
@@ -1429,6 +1429,26 @@ else {
             $log;
         }
     }
+
+    is_qast_args(
+        QAST::Block.new(
+            QAST::Var.new( :name<out>, :scope<local>, :decl<var> ),
+            QAST::Var.new( :name<args>, :scope<local>, :decl<param>, :slurpy(1),
+                QAST::Op.new(
+                    :op<bind>,
+                    QAST::Var.new( :name<out>, :scope<local>),
+                    QAST::Op.new(
+                        :op<join>,
+                        QAST::SVal.new( :value<,> ),
+                        QAST::Var.new( :name<args>, :scope<local>),
+                    )
+                )
+            ),
+            QAST::Var.new( :name<out>, :scope<local> ),
+        ),
+        ["1", "2", "3", "4", "5"],
+        "1,2,3,4,5",
+        'a slurpy QAST::Var with children');
 
     is_qast_args(
         QAST::Block.new(
