@@ -1,4 +1,4 @@
-plan(21);
+plan(23);
 
 ok(nqp::isnull(nqp::decont(nqp::null())), 'nqp::decont works on nqp::null');
 
@@ -27,12 +27,13 @@ ok(nqp::isnull(nqp::decont(nqp::null())), 'nqp::decont works on nqp::null');
     
     ok(nqp::decont($cont) == 42, 'initial decontainerization OK');
     
-    nqp::assign($cont, 101);
+    ok(nqp::eqaddr(nqp::assign($cont, 101), $cont), "assign return container");
     ok(nqp::decont($cont) == 101, 'assigned value stuck');
     
     ok($value == 101, 'updated captured value also');
     
-    nqp::assignunchecked($cont, 69);
+    ok(nqp::eqaddr(nqp::assignunchecked($cont, 69), $cont), "assignunchecked returns container");
+
     ok(nqp::decont($cont) == 69, 'assignunchecked value stuck');
 
     ok($cont, 'checking container for truthness - positive');
