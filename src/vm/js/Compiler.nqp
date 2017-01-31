@@ -432,14 +432,20 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 }
             }
             elsif $param.named {
-                my str $quoted := quote_string($param.named);
-                @*KNOWN_NAMED.push($quoted);
+                my @names := nqp::islist($param.named) ?? $param.named !! nqp::list($param.named);
 
-                @setup.push("if (_NAMED !== null && _NAMED.hasOwnProperty($quoted)) \{\n");
+                for @names -> $name {
+                    my str $quoted := quote_string($name);
+                    @*KNOWN_NAMED.push($quoted);
 
-                set_variable($param, "_NAMED[$quoted]");
+                    @setup.push("if (_NAMED !== null && _NAMED.hasOwnProperty($quoted)) \{\n");
 
-                @setup.push("\} else \{\n");
+                    set_variable($param, "_NAMED[$quoted]");
+
+                    @setup.push("\} else ");
+                }
+
+                @setup.push("\{\n");
 
                 if $param.default {
                     # TODO types
