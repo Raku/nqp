@@ -612,11 +612,13 @@ An operator precedence parser.
     }
 
     method LANG($lang, $regex, *@args) {
-        my $lang_cursor := %*LANG{$lang}.'!cursor_init'(self.orig(), :p(self.pos()), :shared(self.'!shared'()));
+        my $actions     := %*LANG{$lang ~ '-actions'};
+        my $lang_cursor := %*LANG{$lang}.'!cursor_init'(self.orig(), :p(self.pos()), :shared(self.'!shared'()), actions => $actions);
         if self.HOW.traced(self) {
             $lang_cursor.HOW.trace-on($lang_cursor, self.HOW.trace_depth(self));
         }
-        my $*ACTIONS    := %*LANG{$lang ~ '-actions'};
-        $lang_cursor."$regex"(|@args);
+        my $result := $lang_cursor."$regex"(|@args);
+	nqp::bindattr($result,NQPCursor,'$!actions', nqp::getattr(self, NQPCursor, '$!actions'));
+	$result;
     }
 }
