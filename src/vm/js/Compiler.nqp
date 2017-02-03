@@ -1574,6 +1574,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         Chunk.void($check, "if (!{$check.expr}) nqp.paramcheckfailed({quote_string($*HLL)}, Array.prototype.slice.call(arguments));\n");
     }
 
+    my %default_value := nqp::hash($T_OBJ, 'nqp.Null', $T_INT, '0', $T_NUM, '0', $T_STR, 'nqp.null_s');
+
     method declare_var(QAST::Var $node) {
         my int $type := self.type_from_typeobj($node.returns);
 
@@ -1603,7 +1605,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     $*BLOCK.add_js_lexical_with_value($mangled_name, $*BLOCK.add_statevar($node.value));
                 }
                 else {
-                    my %default_value := nqp::hash($T_OBJ, 'nqp.Null', $T_INT, '0', $T_NUM, '0', $T_STR, '""');
                     $*BLOCK.add_js_lexical_with_value($mangled_name, %default_value{$type});
                 }
             }
@@ -1778,7 +1779,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             if $var.decl && $var.decl ne 'param' {
                 my str $initial_value;
                 if $var.decl eq 'var' {
-                    my %default_value := nqp::hash($T_OBJ, 'nqp.Null', $T_INT, '0', $T_NUM, '0', $T_STR, '""');
                     $initial_value := %default_value{$type};
                 }
                 elsif $var.decl eq 'contvar' {

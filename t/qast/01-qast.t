@@ -297,10 +297,13 @@ is_qast(
 is_qast(
     QAST::Block.new(
         QAST::Var.new( :name('not_set'), :scope('local'), :decl('var'), :returns(str) ),
-        QAST::Var.new(:name('not_set'), :scope('local'))
+        QAST::Op.new(
+            :op('isnull_s'),
+            QAST::Var.new(:name('not_set'), :scope('local'))
+        )
     ),
-    '',
-    'str local has a zero default');
+    1,
+    'str local has a null_s default');
 
 is_qast(
     QAST::Block.new(
