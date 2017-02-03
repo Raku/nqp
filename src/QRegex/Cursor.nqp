@@ -25,6 +25,16 @@ my class ParseShared is export {
     }
 }
 
+my class Braid is export {
+    has $!actions;
+
+    method !braid_init(:$actions, *%ignore) {
+        my $new := nqp::create(self);
+	nqp::bindattr($new, Braid, '$!actions', $actions);
+	$new;
+    }
+}
+
 role NQPCursorRole is export {
     has $!shared;
     has int $!from;
@@ -35,12 +45,18 @@ role NQPCursorRole is export {
     has $!cstack;
     has $!regexsub;
     has $!restart;
-    has $!actions;
+    has $!braid;
 
     method orig()   { nqp::getattr($!shared, ParseShared, '$!orig') }
     method target() { nqp::getattr_s($!shared, ParseShared, '$!target') }
     method from()   { $!from }
     method pos()    { $!pos }
+
+    # delegation to braid
+    method actions() { nqp::die("No braid!") unless $!braid; nqp::getattr($!braid, Braid, '$!actions') }
+    method setactions($actions) { nqp::bindattr($!braid, Braid, '$!actions', $actions); self }
+
+    method copy_braid_from($other) { nqp::bindattr(self, $?CLASS, '$!braid', nqp::getattr($other, $?CLASS, '$!braid')); self }
 
     method prune() {
         $!match    := NQPMu;
@@ -50,8 +66,8 @@ role NQPCursorRole is export {
     }
 
 #    method AOK($actions, $where) {
-#        my $got := nqp::getattr(self,NQPCursor,'$!actions');
-#	if nqp::objectid(nqp::getattr(self,NQPCursor,'$!actions')) != nqp::objectid($actions) {
+#        my $got := self.actions();
+#	if nqp::objectid($got) != nqp::objectid($actions) {
 #	    nqp::printfh(nqp::getstderr(), "actions bad in $where (expected " ~ $actions.HOW.name($actions) ~ " but got " ~ $got.HOW.name($got) ~ ")\n");
 #	}
 #	self;
@@ -136,7 +152,7 @@ role NQPCursorRole is export {
             nqp::bindattr($shared, ParseShared, '%!marks', nqp::hash());
         }
         nqp::bindattr($new, $?CLASS, '$!shared', $shared);
-	nqp::bindattr($new, $?CLASS, '$!actions', $actions);
+        nqp::bindattr($new, $?CLASS, '$!braid', Braid."!braid_init"(:$actions));
         if nqp::defined($c) {
             nqp::bindattr_i($new, $?CLASS, '$!from', -1);
             nqp::bindattr_i($new, $?CLASS, '$!pos', $c);
@@ -146,7 +162,7 @@ role NQPCursorRole is export {
             nqp::bindattr_i($new, $?CLASS, '$!pos', $p);
         }
         nqp::bindattr($shared, ParseShared, '$!fail_cursor', $new.'!cursor_start_cur'());
-        $new;
+        $new
     }
     
     # Starts a new Cursor, returning all information relating to it in an array.
@@ -160,7 +176,7 @@ role NQPCursorRole is export {
         # Uncomment following to log cursor creation.
         #$!shared.log_cc(nqp::getcodename($sub));
         nqp::bindattr($new, $?CLASS, '$!shared', $!shared);
-	nqp::bindattr($new, $?CLASS, '$!actions', $!actions) if nqp::isconcrete(self);
+        nqp::bindattr($new, $?CLASS, '$!braid', nqp::isconcrete(self) ?? $!braid !! Braid."!braid_init"());
         nqp::bindattr($new, $?CLASS, '$!regexsub', nqp::ifnull(nqp::getcodeobj($sub), $sub));
         if nqp::defined($!restart) {
             nqp::bindattr_i($new, $?CLASS, '$!pos', $!pos);
@@ -193,7 +209,7 @@ role NQPCursorRole is export {
         # Uncomment following to log cursor creation.
         #$!shared.log_cc(nqp::getcodename($sub));
         nqp::bindattr($new, $?CLASS, '$!shared', $!shared);
-	nqp::bindattr($new, $?CLASS, '$!actions', $!actions) if nqp::isconcrete(self);
+        nqp::bindattr($new, $?CLASS, '$!braid', nqp::isconcrete(self) ?? $!braid !! Braid."!braid_init"());
         nqp::bindattr($new, $?CLASS, '$!regexsub', nqp::ifnull(nqp::getcodeobj($sub), $sub));
         if nqp::defined($!restart) {
             nqp::bindattr_i($new, $?CLASS, '$!pos', $!pos);
@@ -217,7 +233,7 @@ role NQPCursorRole is export {
         # Uncomment following to log cursor creation.
         #$!shared.log_cc(nqp::getcodename($sub));
         nqp::bindattr($new, $?CLASS, '$!shared', $!shared);
-	nqp::bindattr($new, $?CLASS, '$!actions', $!actions) if nqp::isconcrete(self);
+        nqp::bindattr($new, $?CLASS, '$!braid', nqp::isconcrete(self) ?? $!braid !! Braid."!braid_init"());
         nqp::bindattr($new, $?CLASS, '$!regexsub', nqp::ifnull(nqp::getcodeobj($sub), $sub));
         if nqp::defined($!restart) {
             nqp::die("!cursor_start_cur cannot restart a cursor");
@@ -235,7 +251,7 @@ role NQPCursorRole is export {
     method !cursor_start_subcapture($from) {
         my $new := nqp::create(self);
         nqp::bindattr($new, $?CLASS, '$!shared', $!shared);
-	nqp::bindattr($new, $?CLASS, '$!actions', $!actions) if nqp::isconcrete(self);
+        nqp::bindattr($new, $?CLASS, '$!braid', nqp::isconcrete(self) ?? $!braid !! Braid."!braid_init"());
         nqp::bindattr_i($new, $?CLASS, '$!from', $from);
         nqp::bindattr_i($new, $?CLASS, '$!pos', -3);
         $new;
@@ -319,6 +335,7 @@ role NQPCursorRole is export {
         return self."!cursor_next"() if %opts<ex>;
         my $new := self.CREATE();
         nqp::bindattr($new, $?CLASS, '$!shared', $!shared);
+        nqp::bindattr($new, $?CLASS, '$!braid', $!braid);
         nqp::bindattr_i($new, $?CLASS, '$!from', -1);
         nqp::bindattr_i($new, $?CLASS, '$!pos',
             (%opts<ov> || $!from >= $!pos) ?? $!from+1 !! $!pos);
@@ -326,19 +343,20 @@ role NQPCursorRole is export {
     }
 
     method !reduce(str $name) {
-	my $actions := $!actions;
+	my $actions := self.actions;
         nqp::findmethod($actions, $name)($actions, self.MATCH)
             if !nqp::isnull($actions) && nqp::can($actions, $name);
         self;
     }
 
     method !reduce_with_match(str $name, str $key, $match) {
-	my $actions := $!actions;
+	my $actions := self.actions;
         nqp::findmethod($actions, $name)($actions, $match, $key)
             if !nqp::isnull($actions) && nqp::can($actions, $name);
     }
     
     method !shared() { $!shared }
+    method !braid()  { $!braid }
 
     my @EMPTY := [];
     method !protoregex($name) {

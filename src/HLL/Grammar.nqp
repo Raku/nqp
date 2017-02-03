@@ -618,7 +618,6 @@ An operator precedence parser.
             $lang_cursor.HOW.trace-on($lang_cursor, self.HOW.trace_depth(self));
         }
         my $result := $lang_cursor."$regex"(|@args);
-	nqp::bindattr($result,NQPCursor,'$!actions', nqp::getattr(self, NQPCursor, '$!actions'));
-	$result;
+	$result.copy_braid_from(self)
     }
 }
