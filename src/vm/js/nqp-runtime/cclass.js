@@ -37,9 +37,16 @@ function iscclass(cclass, target, offset) {
     case 32: return boolish(WHITESPACE.test(target[offset]));
     //BLANK
     case 256: return boolish(BLANK.test(target[offset]));
+    //PRINTING
+    case 64: {
+        let cp = target.codePointAt(offset);
+        return boolish(!((cp >= 0 && cp < 32) || (cp >= 127 && cp < 160)));
+    }
     //CONTROL
-    /* TODO - all character*/
-    case 512: return boolish('\n\t\r'.indexOf(target[offset]) != -1); //HACK - not all such chars
+    case 512: {
+        let cp = target.codePointAt(offset);
+        return boolish((cp >= 0 && cp < 32) || (cp >= 127 && cp < 160));
+    }
     //PUNCTUATION
     case 1024: return boolish(PUNCTUATION.test(target[offset])); //HACK
     //ALPHANUMERIC
