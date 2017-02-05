@@ -1,28 +1,28 @@
-my $MVM_operand_literal     := 0;
-my $MVM_operand_read_reg    := 1;
-my $MVM_operand_write_reg   := 2;
-my $MVM_operand_read_lex    := 3;
-my $MVM_operand_write_lex   := 4;
-my $MVM_operand_rw_mask     := 7;
+my int $MVM_operand_literal     := 0;
+my int $MVM_operand_read_reg    := 1;
+my int $MVM_operand_write_reg   := 2;
+my int $MVM_operand_read_lex    := 3;
+my int $MVM_operand_write_lex   := 4;
+my int $MVM_operand_rw_mask     := 7;
 
-my $MVM_operand_int8        := ($MVM_reg_int8 * 8);
-my $MVM_operand_int16       := ($MVM_reg_int16 * 8);
-my $MVM_operand_int32       := ($MVM_reg_int32 * 8);
-my $MVM_operand_int64       := ($MVM_reg_int64 * 8);
-my $MVM_operand_num32       := ($MVM_reg_num32 * 8);
-my $MVM_operand_num64       := ($MVM_reg_num64 * 8);
-my $MVM_operand_str         := ($MVM_reg_str * 8);
-my $MVM_operand_obj         := ($MVM_reg_obj * 8);
-my $MVM_operand_ins         := (9 * 8);
-my $MVM_operand_type_var    := (10 * 8);
-my $MVM_operand_lex_outer   := (11 * 8);
-my $MVM_operand_coderef     := (12 * 8);
-my $MVM_operand_callsite    := (13 * 8);
-my $MVM_operand_type_mask   := (31 * 8);
-my $MVM_operand_uint8       := ($MVM_reg_uint8 * 8);
-my $MVM_operand_uint16      := ($MVM_reg_uint16 * 8);
-my $MVM_operand_uint32      := ($MVM_reg_uint32 * 8);
-my $MVM_operand_uint64      := ($MVM_reg_uint64 * 8);
+my int $MVM_operand_int8        := ($MVM_reg_int8 * 8);
+my int $MVM_operand_int16       := ($MVM_reg_int16 * 8);
+my int $MVM_operand_int32       := ($MVM_reg_int32 * 8);
+my int $MVM_operand_int64       := ($MVM_reg_int64 * 8);
+my int $MVM_operand_num32       := ($MVM_reg_num32 * 8);
+my int $MVM_operand_num64       := ($MVM_reg_num64 * 8);
+my int $MVM_operand_str         := ($MVM_reg_str * 8);
+my int $MVM_operand_obj         := ($MVM_reg_obj * 8);
+my int $MVM_operand_ins         := (9 * 8);
+my int $MVM_operand_type_var    := (10 * 8);
+my int $MVM_operand_lex_outer   := (11 * 8);
+my int $MVM_operand_coderef     := (12 * 8);
+my int $MVM_operand_callsite    := (13 * 8);
+my int $MVM_operand_type_mask   := (31 * 8);
+my int $MVM_operand_uint8       := ($MVM_reg_uint8 * 8);
+my int $MVM_operand_uint16      := ($MVM_reg_uint16 * 8);
+my int $MVM_operand_uint32      := ($MVM_reg_uint32 * 8);
+my int $MVM_operand_uint64      := ($MVM_reg_uint64 * 8);
 
 # This is used as a return value from all of the various compilation routines.
 # It groups together a set of instructions along with a result register and a
@@ -310,7 +310,7 @@ class QAST::MASTOperations {
         self.set_hll_op_result_type($hll, $op, moarop_return_type($moarop));
     }
 
-    method check_ret_val(str $moarop, $ret) {
+    method check_ret_val(str $moarop, int $ret) {
         my int $num_operands;
         my int $operands_offset;
         my @operands_values;
@@ -338,7 +338,7 @@ class QAST::MASTOperations {
     # Returns a mapper closure for turning an operation into a Moar op.
     # $ret is the 0-based index of which arg to use as the result when
     # the moarop is void.
-    method moarop_mapper(str $moarop, $ret, $decont_in) {
+    method moarop_mapper(str $moarop, int $ret, $decont_in) {
         # do a little checking of input values
 
         my $self := self;
@@ -389,7 +389,7 @@ class QAST::MASTOperations {
     }
 
     # Sets op native result type at a core level.
-    method set_core_op_result_type(str $op, $type) {
+    method set_core_op_result_type(str $op, int $type) {
         if $type == $MVM_reg_int64 {
             %core_result_type{$op} := int;
         }
@@ -403,7 +403,7 @@ class QAST::MASTOperations {
 
     # Sets op inlinability at a HLL level. (Can override at HLL level whether
     # or not the HLL overrides the op itself.)
-    method set_hll_op_result_type(str $hll, str $op, $type) {
+    method set_hll_op_result_type(str $hll, str $op, int $type) {
         %hll_result_type{$hll} := {} unless nqp::existskey(%hll_result_type, $hll);
         if $type == $MVM_reg_int64 {
             %hll_result_type{$hll}{$op} := int;
@@ -431,7 +431,7 @@ class QAST::MASTOperations {
     }
 
     # Adds a HLL box handler.
-    method add_hll_box(str $hll, $type, $handler) {
+    method add_hll_box(str $hll, int $type, $handler) {
         unless $type == $MVM_reg_int64 || $type == $MVM_reg_num64 || $type == $MVM_reg_str ||
                 $type == $MVM_reg_uint64 || $type == $MVM_reg_void {
             nqp::die("Unknown box type '$type'");
@@ -441,7 +441,7 @@ class QAST::MASTOperations {
     }
 
     # Adds a HLL unbox handler.
-    method add_hll_unbox(str $hll, $type, $handler) {
+    method add_hll_unbox(str $hll, int $type, $handler) {
         unless $type == $MVM_reg_int64 || $type == $MVM_reg_num64 ||
                 $type == $MVM_reg_str || $type == $MVM_reg_uint64 {
             nqp::die("Unknown unbox type '$type'");

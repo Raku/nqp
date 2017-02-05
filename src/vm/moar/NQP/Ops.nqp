@@ -1,8 +1,8 @@
 my $ops := QAST::MASTCompiler.operations();
-my $MVM_reg_int64           := 4;
-my $MVM_reg_num64           := 6;
-my $MVM_reg_str             := 7;
-my $MVM_reg_obj             := 8;
+my int $MVM_reg_int64           := 4;
+my int $MVM_reg_num64           := 6;
+my int $MVM_reg_str             := 7;
+my int $MVM_reg_obj             := 8;
 
 $ops.add_hll_op('nqp', 'preinc', -> $qastcomp, $op {
     my $var := $op[0];
