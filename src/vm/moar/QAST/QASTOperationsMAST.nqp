@@ -152,12 +152,12 @@ class QAST::MASTOperations {
             $*BLOCK.return_kind($MVM_reg_void);
         }
 
-        my $arg_num := 0;
+        my int $arg_num := 0;
         # Compile provided args.
         for @args {
-            my $operand := nqp::atpos_i(@operands_values, $operands_offset + $operand_num++);
+            my int $operand := nqp::atpos_i(@operands_values, $operands_offset + $operand_num++);
             my int $operand_kind := ($operand +& $MVM_operand_type_mask);
-            my $constant_operand := !($operand +& $MVM_operand_rw_mask);
+            my int $constant_operand := !($operand +& $MVM_operand_rw_mask);
             my $arg := $operand_kind == $MVM_operand_type_var
                 ?? $qastcomp.as_mast($_)
                 !! $qastcomp.as_mast($_, :want($operand_kind/8));
