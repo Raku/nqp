@@ -82,6 +82,7 @@
     - [findcclass](#findcclass)
     - [findnotcclass](#findnotcclass)
     - [flip](#flip)
+    - [unicmp_s](#unicmp_s)
     - [hash](#hash)
     - [index](#index)
     - [iscclass](#iscclass)
@@ -896,6 +897,52 @@ is smaller.
 * `flip(str $str)`
 
 Return a string with the characters of `$string` in reverse order.
+
+## unicmp_s
+(Currently only on MoarVM)
+`unicmp_s(str, str, int, int, int)`
+
+Parameters:
+string, string, # strings to compare
+collation mode (int), # bitmask
+ISO 639 Language code (int),
+ISO 3166 Country code (int)
+
+The collation mode is to sort using Primary, Secondary, and Tertiary.
+The bitmask is as follows:
+1 => Unicode Collation Primary
+2 => Unicode Collation Secondary
+4 => Unicode Collation Tertiary
+8 => Break ties by codepoint
+
+The default, 15 will apply all of them as most users will expect things
+to be sorted, and also break any possible ties by checking codepoint number.
+
+The default language and country code is 0, meaning to sort without
+respect to country or language.
+
+While the Primary, Secondary and Tertiary mean different things for
+different scripts, for the Latin script used in English they mostly
+correspond with Primary being Alphabetic, Secondary being Diacritics
+and Tertiary being Case.
+
+Setting 0 for language and country will collate all scripts according to
+their own distinctions for Primary, Secondary, and Tertiary, although it
+will not take into account certain languages.
+
+For example, some language based differences in collation
+“…include ch as in traditional Spanish, ä as in traditional German,
+and å as in Danish”.
+
+For more information see: http://unicode.org/reports/tr10/
+
+*** Note ***
+ - Currently only language and country insensitive sorting methods are implemented.
+ - We have implemented the language and country insensitive sorting
+ using only the Primary level, and if they evaluate as the same on the
+ primary level it will fall back to comparing by codepoint. For Latin
+ script this will take case into account in most cases. In worst case it
+ will not do any worse than the current cmp_s op
 
 ## hash
 * `hash(...)`
