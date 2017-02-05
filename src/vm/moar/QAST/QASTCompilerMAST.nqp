@@ -103,7 +103,7 @@ my class MASTCompilerInstance {
         method release_s($reg) { self.release_register($reg, $MVM_reg_str) }
         method release_o($reg) { self.release_register($reg, $MVM_reg_obj) }
 
-        method release_register($reg, $kind, $force = 0) {
+        method release_register($reg, int $kind, int $force = 0) {
             return 1 if $kind == $MVM_reg_void || !$force && $*BLOCK.is_var($reg)
                 || nqp::existskey(%!released_indexes, $reg.index);
             %!released_indexes{$reg.index} := 1;

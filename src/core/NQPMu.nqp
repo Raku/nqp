@@ -12,8 +12,8 @@ my class NQPMu {
     method BUILDALL(NQPMu:D $self: *%attrinit) {
         # Get the build plan.
         my $build_plan := self.HOW.BUILDALLPLAN(self);
-        my $count      := nqp::elems($build_plan);
-        my $i          := 0;
+        my int $count  := nqp::elems($build_plan);
+        my int $i      := 0;
         while $i < $count {
             my $task := nqp::atpos($build_plan, $i);
             my int $code := nqp::atpos($task, 0);

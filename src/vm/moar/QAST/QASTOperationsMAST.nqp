@@ -119,12 +119,12 @@ class QAST::MASTOperations {
             nqp::die("MoarVM op '$op' is unknown as a core or extension op");
         }
 
-        my $num_args := +@args;
-        my $operand_num := 0;
-        my $result_kind := $MVM_reg_void;
+        my int $num_args := +@args;
+        my int $operand_num := 0;
+        my int $result_kind := $MVM_reg_void;
         my $result_reg := MAST::VOID;
-        my $needs_write := 0;
-        my $type_var_kind := 0;
+        my int $needs_write := 0;
+        my int $type_var_kind := 0;
         my $regalloc := $*REGALLOC;
 
         my @arg_regs;
@@ -156,12 +156,12 @@ class QAST::MASTOperations {
         # Compile provided args.
         for @args {
             my $operand := nqp::atpos_i(@operands_values, $operands_offset + $operand_num++);
-            my $operand_kind := ($operand +& $MVM_operand_type_mask);
+            my int $operand_kind := ($operand +& $MVM_operand_type_mask);
             my $constant_operand := !($operand +& $MVM_operand_rw_mask);
             my $arg := $operand_kind == $MVM_operand_type_var
                 ?? $qastcomp.as_mast($_)
                 !! $qastcomp.as_mast($_, :want($operand_kind/8));
-            my $arg_kind := $arg.result_kind;
+            my int $arg_kind := $arg.result_kind;
 
             if $arg_num == 0 && nqp::substr($op, 0, 7) eq 'return_' {
                 $*BLOCK.return_kind($arg.result_kind);
@@ -229,7 +229,7 @@ class QAST::MASTOperations {
         }
 
         # release the registers to the allocator. See comment there.
-        my $release_i := 0;
+        my int $release_i := 0;
         $regalloc.release_register($_, @release_kinds[$release_i++]) for @release_regs;
 
         # unshift in a generated write register arg if it needs one
