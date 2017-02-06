@@ -27,11 +27,19 @@ my class ParseShared is export {
 
 my class Braid is export {
     has $!actions;
+    has $!lang;
 
     method !braid_init(:$actions, *%ignore) {
         my $new := nqp::create(self);
 	nqp::bindattr($new, Braid, '$!actions', $actions);
-	$new;
+	nqp::bindattr($new, Braid, '$!lang', nqp::hash());
+	$new
+    }
+    method !clone() {
+	my $new := nqp::create(self);
+	nqp::bindattr($new, Braid, '$!actions', $!actions);
+	nqp::bindattr($new, Braid, '$!lang', nqp::clone($!lang));
+	$new
     }
 }
 
@@ -52,11 +60,63 @@ role NQPCursorRole is export {
     method from()   { $!from }
     method pos()    { $!pos }
 
-    # delegation to braid
-    method actions() { nqp::die("No braid!") unless $!braid; nqp::getattr($!braid, Braid, '$!actions') }
-    method setactions($actions) { nqp::bindattr($!braid, Braid, '$!actions', $actions); self }
+    # delegations to braid
+    method lang($name) {
+	nqp::die("No braid!") unless $!braid;
+	my $ret := nqp::atkey(nqp::getattr($!braid, Braid, '$!lang'),$name);
+	if nqp::isnull($ret) {
+	    $ret := %*LANG{$name};
+	    if !nqp::isnull($ret) {
+		nqp::printfh(nqp::getstderr(), "missing braid language for $name, should be " ~ $ret.HOW.name($ret) ~ "\n");
+		nqp::backtracestrings("");
+	    }
+	}
+	$ret;
+    }
+    method actions($name) {
+    	nqp::die("No braid!") unless $!braid;
+	my $ret := nqp::atkey(nqp::getattr($!braid, Braid, '$!lang'),$name ~ "-actions");
+	if nqp::isnull($ret) {
+	    $ret := %*LANG{$name ~ "-actions"};
+	    nqp::printfh(nqp::getstderr(), "missing braid actions for $name, should be " ~ $ret.HOW.name($ret) ~ "\n");
+	}
+	$ret;
+    }
+    method setlang($name,$lang,$actions) {
+    	nqp::die("No braid!") unless $!braid;
+	nqp::bindkey(nqp::getattr($!braid, Braid, '$!lang'),$name, $lang);
+	nqp::bindkey(nqp::getattr($!braid, Braid, '$!lang'),$name ~ "-actions", $actions) unless nqp::isnull($actions);
+	self
+    }
+
+    method check_LANG_oopsies($tag?) {
+    	nqp::die("No braid!") unless $!braid;
+	$tag := $tag ?? "(in $tag) " !! "";
+        for %*LANG {
+	    my $name := $_.key;
+	    my $value := $_.value;
+	    my $bvalue := nqp::atkey(nqp::getattr($!braid, Braid, '$!lang'),$name);
+	    if nqp::isnull($bvalue) {
+		nqp::printfh(nqp::getstderr(), $tag ~ "no setlang braid entry for %*LANG\<$name>\n");
+		nqp::bindkey(nqp::getattr($!braid, Braid, '$!lang'), $name, $value);
+            #    my $err := nqp::getstderr();
+            #    nqp::printfh($err, nqp::join("\n", nqp::backtracestrings("")));
+            #    nqp::printfh($err, "\n");
+            #    nqp::exit(1);
+	    }
+	    elsif nqp::objectid($bvalue) != nqp::objectid($value) {
+		nqp::printfh(nqp::getstderr(), $tag ~ "wrong setlang braid entry for %*LANG\<$name>\n");
+		nqp::bindkey(nqp::getattr($!braid, Braid, '$!lang'), $name, $value);
+	    }
+        }
+	self
+    }
+
+    method curactions() { nqp::die("No braid!") unless $!braid; nqp::getattr($!braid, Braid, '$!actions') }
+    method setcuractions($actions) { nqp::bindattr($!braid, Braid, '$!actions', $actions); self }
 
     method copy_braid_from($other) { nqp::bindattr(self, $?CLASS, '$!braid', nqp::getattr($other, $?CLASS, '$!braid')); self }
+    method clone_braid_from($other) { nqp::bindattr(self, $?CLASS, '$!braid', nqp::getattr($other, $?CLASS, '$!braid')."!clone"()); self }
 
     method prune() {
         $!match    := NQPMu;
@@ -66,7 +126,7 @@ role NQPCursorRole is export {
     }
 
 #    method AOK($actions, $where) {
-#        my $got := self.actions();
+#        my $got := self.curactions();
 #	if nqp::objectid($got) != nqp::objectid($actions) {
 #	    nqp::printfh(nqp::getstderr(), "actions bad in $where (expected " ~ $actions.HOW.name($actions) ~ " but got " ~ $got.HOW.name($got) ~ ")\n");
 #	}
@@ -140,7 +200,7 @@ role NQPCursorRole is export {
         $caps;
     }
 
-    method !cursor_init($orig, :$p = 0, :$c, :$shared, :$actions, *%ignore) {
+    method !cursor_init($orig, :$p = 0, :$c, :$shared, :$braid, *%ignore) {
         my $new := self.CREATE();
         unless $shared {
             $shared := nqp::create(ParseShared);
@@ -152,7 +212,7 @@ role NQPCursorRole is export {
             nqp::bindattr($shared, ParseShared, '%!marks', nqp::hash());
         }
         nqp::bindattr($new, $?CLASS, '$!shared', $shared);
-        nqp::bindattr($new, $?CLASS, '$!braid', Braid."!braid_init"(:$actions));
+        nqp::bindattr($new, $?CLASS, '$!braid', $braid ?? $braid !! nqp::isconcrete(self) ?? $!braid !! Braid."!braid_init"());
         if nqp::defined($c) {
             nqp::bindattr_i($new, $?CLASS, '$!from', -1);
             nqp::bindattr_i($new, $?CLASS, '$!pos', $c);
@@ -343,14 +403,14 @@ role NQPCursorRole is export {
     }
 
     method !reduce(str $name) {
-	my $actions := self.actions;
+	my $actions := self.curactions;
         nqp::findmethod($actions, $name)($actions, self.MATCH)
             if !nqp::isnull($actions) && nqp::can($actions, $name);
         self;
     }
 
     method !reduce_with_match(str $name, str $key, $match) {
-	my $actions := self.actions;
+	my $actions := self.curactions;
         nqp::findmethod($actions, $name)($actions, $match, $key)
             if !nqp::isnull($actions) && nqp::can($actions, $name);
     }
@@ -1102,7 +1162,8 @@ class NQPCursor does NQPCursorRole {
     }
 
     method parse($target, :$rule = 'TOP', :$actions, *%options) {
-        my $cur      := self.'!cursor_init'($target, :actions($actions), |%options);
+	my $braid := Braid.'!braid_init'(:actions($actions));
+        my $cur      := self.'!cursor_init'($target, :braid($braid), |%options);
 
         nqp::isinvokable($rule) ??
             $rule($cur).MATCH() !!

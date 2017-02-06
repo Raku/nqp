@@ -612,8 +612,10 @@ An operator precedence parser.
     }
 
     method LANG($lang, $regex, *@args) {
-        my $actions     := %*LANG{$lang ~ '-actions'};
-        my $lang_cursor := %*LANG{$lang}.'!cursor_init'(self.orig(), :p(self.pos()), :shared(self.'!shared'()), actions => $actions);
+        my $actions     := self.actions($lang);
+        my $lang_cursor := self.lang($lang).'!cursor_init'(self.orig(), :p(self.pos()), :shared(self.'!shared'()));
+        $lang_cursor.clone_braid_from(self);
+        $lang_cursor.setcuractions($actions);
         if self.HOW.traced(self) {
             $lang_cursor.HOW.trace-on($lang_cursor, self.HOW.trace_depth(self));
         }

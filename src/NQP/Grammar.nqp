@@ -6,6 +6,8 @@ grammar NQP::Grammar is HLL::Grammar {
         %*LANG<Regex-actions> := NQP::RegexActions;
         %*LANG<MAIN>          := NQP::Grammar;
         %*LANG<MAIN-actions>  := NQP::Actions;
+	self.setlang('MAIN',  NQP::Grammar, NQP::Actions);
+	self.setlang('Regex', NQP::Regex,   NQP::RegexActions);
 
         # Package declarator to meta-package mapping. Note that there is
         # one universal KnowHOW from the 6model core, and an attribute
@@ -314,6 +316,7 @@ grammar NQP::Grammar is HLL::Grammar {
         <multi_declarator>
     }
     token term:sym<regex_declarator>   { <regex_declarator> }
+	
     token term:sym<statement_prefix>   { <statement_prefix> }
     token term:sym<lambda>             { <?lambda> <pblock> }
     token term:sym<last>               { <sym> [<.ws> <identifier> <?{ $*W.is_lexical(~$<identifier>) }>]? { $*CONTROL_USED := 1 } }
