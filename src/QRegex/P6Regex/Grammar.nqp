@@ -99,7 +99,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         nqp::printfh(nqp::getstderr(), nqp::join('', @args) ~ "\n");
     }
 
-    token ws { [ \s+ | '#' \N* ]* }
+    token ws { [ \s | '#' \N* ]* }
 
     token normspace { <?[\s#]> <.ws> }
 
