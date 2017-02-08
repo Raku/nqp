@@ -50,6 +50,7 @@
 - [Array Opcodes](#-array-opcodes)
     - [atpos](#atpos)
     - [bindpos](#bindpos)
+    - [atposref](#atposref)
     - [elems](#elems)
     - [existspos](#existspos)
     - [list](#list)
@@ -659,6 +660,13 @@ Return whatever is bound to @arr at position $i.
 * `bindpos_s(@arr, int $i, str $v)`
 
 Bind $v to @arr at position $i and return $v.
+
+## atposref
+* atposref_i(@arr, int $idx)
+* atposref_n(@arr, int $idx)
+* atposref_s(@arr, int $idx)
+
+Returns a container (of type `IntPosRef`, `NumPosRef`, or `StrPosRef`) that you can assign to or read from which will directly access `@arr` at index `$idx`.
 
 ## elems
 * `elems(@arr)`
