@@ -886,7 +886,7 @@ class QAST::OperationsJS {
 
     add_simple_op('loadbytecode', $T_STR, [$T_STR], :ctx, :side_effects);
 
-    add_simple_op('elems', $T_INT, [$T_OBJ]);
+    add_simple_op('elems', $T_INT, [$T_OBJ], :method_call);
 
     add_simple_op('islist', $T_INT, [$T_OBJ], :decont(0));
 
