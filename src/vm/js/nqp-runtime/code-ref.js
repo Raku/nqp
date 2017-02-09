@@ -38,9 +38,9 @@ class CodeRef extends NQPObject {
   // HACK - do this properly
   $$call() {
     //console.log("doing a hack with closure template", this.closureTemplate);
-    if (this.closureTemplate) {
-
-      var searched = this;
+    let staticCode = this.staticCode;
+    if (staticCode.closureTemplate) {
+      var searched = staticCode;
       var forcedOuterCtx = null;
       while (searched) {
         if (searched.forcedOuterCtx) {
@@ -50,9 +50,9 @@ class CodeRef extends NQPObject {
         searched = searched.outerCodeRef;
       }
 
-      var i = this.closureTemplate.length - 1;
+      var i = staticCode.closureTemplate.length - 1;
 
-      var codeRefForCtx = this.outerCodeRef;
+      var codeRefForCtx = staticCode.outerCodeRef;
       var fakeCtxs = [];
 
       fakeCtxs.unshift(forcedOuterCtx ? new WrappedCtx(forcedOuterCtx) : new StaticCtx());
@@ -76,8 +76,10 @@ class CodeRef extends NQPObject {
       }
 
 
-      this.$$call = this.closureTemplate.apply(null, fakeCtxs);
-      return this.$$call.apply(this, arguments);
+      this.$$call = staticCode.closureTemplate.apply(null, fakeCtxs);
+      return staticCode.$$call.apply(staticCode, arguments);
+    } else {
+      console.log("can't autoclose - BAD");
     }
   }
 
