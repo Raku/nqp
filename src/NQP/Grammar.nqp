@@ -1,13 +1,16 @@
 grammar NQP::Grammar is HLL::Grammar {
     method TOP() {
-        # Language braids.
+	# Language braid.
+	my $*LANG := self;
+	self.add_slang('MAIN',  self,       self.actions);
+	self.add_slang('Regex', NQP::Regex, NQP::RegexActions);
+
+        # Old language braids, going away.
         my %*LANG;
         %*LANG<Regex>         := NQP::Regex;
         %*LANG<Regex-actions> := NQP::RegexActions;
         %*LANG<MAIN>          := NQP::Grammar;
         %*LANG<MAIN-actions>  := NQP::Actions;
-	self.add_slang('MAIN',  self,       self.actions);
-	self.add_slang('Regex', NQP::Regex, NQP::RegexActions);
 
         # Package declarator to meta-package mapping. Note that there is
         # one universal KnowHOW from the 6model core, and an attribute
