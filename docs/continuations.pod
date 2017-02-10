@@ -1,7 +1,7 @@
 =head1 Continuations in NQP
 
-This document describes a somewhat experimental and JVM-only NQP feature: the
-ability to freeze and thaw stack frames for implementing unusual control flow.
+This document describes the ability to freeze and thaw stack frames
+for implementing unusual control flow.
 
 =head2 Interface
 
