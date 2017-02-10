@@ -85,24 +85,11 @@ role NQPCursorRole is export {
     }
     method slang_grammar($name) {
         nqp::die("No braid in grammar!") unless $!braid;
-        my $ret := nqp::atkey(nqp::getattr($!braid, Braid, '$!slangs'),$name);
-        if nqp::isnull($ret) {
-            $ret := %*LANG{$name};
-            if !nqp::isnull($ret) {
-                nqp::printfh(nqp::getstderr(), "missing braid grammar for $name, should be " ~ $ret.HOW.name($ret) ~ "\n");
-                nqp::backtracestrings("");
-            }
-        }
-        $ret;
+        nqp::atkey(nqp::getattr($!braid, Braid, '$!slangs'),$name);
     }
     method slang_actions($name) {
         nqp::die("No braid in actions!") unless $!braid;
-        my $ret := nqp::atkey(nqp::getattr($!braid, Braid, '$!slangs'),$name ~ "-actions");
-        if nqp::isnull($ret) {
-            $ret := %*LANG{$name ~ "-actions"};
-            nqp::printfh(nqp::getstderr(), "missing braid actions for $name, should be " ~ $ret.HOW.name($ret) ~ "\n");
-        }
-        $ret;
+        nqp::atkey(nqp::getattr($!braid, Braid, '$!slangs'),$name ~ "-actions");
     }
     method add_slang($name,$grammar,$actions) {
         nqp::die("No braid in add_slang!") unless $!braid;
@@ -124,7 +111,7 @@ role NQPCursorRole is export {
             my $value := $_.value;
             my $bvalue := nqp::atkey(nqp::getattr($!braid, Braid, '$!slangs'),$name);
             if nqp::isnull($bvalue) {
-                nqp::printfh(nqp::getstderr(), $tag ~ "no braid entry for %*LANG\<$name>\n");
+                nqp::printfh(nqp::getstderr(), $tag ~ "Deprecated use of %*LANG\<$name> interface detected in $tag; please use braid methods instead\n");
                 nqp::bindkey(nqp::getattr($!braid, Braid, '$!slangs'), $name, $value);
             #    my $err := nqp::getstderr();
             #    nqp::printfh($err, nqp::join("\n", nqp::backtracestrings("")));
@@ -132,10 +119,10 @@ role NQPCursorRole is export {
             #    nqp::exit(1);
             }
             elsif nqp::objectid($bvalue) != nqp::objectid($value) {
-                nqp::printfh(nqp::getstderr(), $tag ~ "wrong braid entry for %*LANG\<$name>\n");
-                nqp::printfh(nqp::getstderr(), "  (braid " ~ $bvalue.HOW.name($bvalue) ~ " LANG " ~ $value.HOW.name($value) ~ ")\n");
-                self.blurgh;
-                %*LANG{$name} := $bvalue;
+                nqp::printfh(nqp::getstderr(), $tag ~ "Deprecated use of %*LANG\<$name> interface detected in $tag; please use braid methods instead\n");
+                # nqp::printfh(nqp::getstderr(), "  (braid " ~ $bvalue.HOW.name($bvalue) ~ " LANG " ~ $value.HOW.name($value) ~ ")\n");
+
+                nqp::bindkey(nqp::getattr($!braid, Braid, '$!slangs'), $name, $value);
             }
         }
         self
@@ -145,7 +132,7 @@ role NQPCursorRole is export {
     method actions() { nqp::die("No braid!") unless $!braid; nqp::getattr($!braid, Braid, '$!actions') }
 
     method set_actions($actions) {
-        nqp::die("No braid!") unless $!braid;
+        nqp::die("No braid in set_actions!") unless $!braid;
         nqp::bindattr($!braid, Braid, '$!grammar', self);
         nqp::bindattr($!braid, Braid, '$!actions', $actions);
         self
@@ -154,6 +141,7 @@ role NQPCursorRole is export {
     method set_braid_from($other) { nqp::bindattr(self, $?CLASS, '$!braid', nqp::getattr($other, $?CLASS, '$!braid')); self }
     method clone_braid_from($other) { nqp::bindattr(self, $?CLASS, '$!braid', nqp::getattr($other, $?CLASS, '$!braid')."!clone"()); self }
 
+    method braid() { $!braid }
     method snapshot_braid() { $!braid."!clone"() }
     method set_braid($braid) { nqp::bindattr(self, $?CLASS, '$!braid', $braid); self }
 
@@ -256,8 +244,8 @@ role NQPCursorRole is export {
                 $braid := $!braid."!clone"();  # usually called when switching into a slang
             }
             else {
-                if nqp::isconcrete(self) {
-                    $braid := Braid."!braid_init"(:grammar(self), :actions(self.actions));
+                if nqp::isconcrete(self) && $!braid {
+                    $braid := Braid."!braid_init"(:grammar(self), self.actions);
                 }
                 else {
                     $braid := Braid."!braid_init"(:grammar(self));
