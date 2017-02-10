@@ -50,6 +50,7 @@
 - [Array Opcodes](#-array-opcodes)
     - [atpos](#atpos)
     - [bindpos](#bindpos)
+    - [atposref](#atposref)
     - [elems](#elems)
     - [existspos](#existspos)
     - [list](#list)
@@ -71,6 +72,7 @@
     - [chars](#chars)
     - [chr](#chr)
     - [codepointfromname](#codepointfromname)
+    - [getstrfromname] (#getstrfromname)
     - [concat](#concat)
     - [decode](#decode)
     - [decodetocodes](#decodetocodes)
@@ -659,6 +661,13 @@ Return whatever is bound to @arr at position $i.
 
 Bind $v to @arr at position $i and return $v.
 
+## atposref
+* atposref_i(@arr, int $idx)
+* atposref_n(@arr, int $idx)
+* atposref_s(@arr, int $idx)
+
+Returns a container (of type `IntPosRef`, `NumPosRef`, or `StrPosRef`) that you can assign to or read from which will directly access `@arr` at index `$idx`.
+
 ## elems
 * `elems(@arr)`
 * `elems(%hash)`
@@ -823,6 +832,25 @@ throw an exception on invalid codepoints.
 Returns the codepoint for the given unicode character name, or -1 if no
 match was found.
 
+## getstrfromname
+* `getstrfromname(str $name)` (Currently only on MoarVM)
+
+Like `codepointfromname` except it returns a string instead of a codepoint.
+This function is able to return not just Unicode codepoints by name, but also
+Unicode Named Sequences, including Emoji Sequences and Emoji ZWJ Sequences
+and Name Aliases.
+
+In addition it is also case-insensitive, unlike codepointfromname
+
+See these links for a full list of [Named Sequences][Named-Sequences],
+[Emoji Sequences][Emoji-Sequences], [Emoji ZWJ Sequences][Emoji-ZWJ-Sequences]
+and [Name Aliases][Name-Aliases].
+
+[Named-Sequences]: http://www.unicode.org/Public/UCD/latest/ucd/NamedSequences.txt
+[Emoji-Sequences]: http://www.unicode.org/Public/emoji/4.0/emoji-sequences.txt
+[Emoji-ZWJ-Sequences]: http://www.unicode.org/Public/emoji/4.0/emoji-zwj-sequences.txt
+[Name-Aliases]: http://www.unicode.org/Public/UCD/latest/ucd/NameAliases.txt
+
 ## concat
 * `concat(str $l, str $r)`
 
@@ -899,27 +927,39 @@ is smaller.
 Return a string with the characters of `$string` in reverse order.
 
 ## unicmp_s
+* `unicmp_s(str, str, int, int, int)`
 (Currently only on MoarVM)
-`unicmp_s(str, str, int, int, int)`
 
-Parameters:
-string, string, # strings to compare
-collation mode (int), # bitmask
-ISO 639 Language code (int),
-ISO 3166 Country code (int)
+Compares strings using the [Unicode Collation Algorithm][UCA] (UCA).
+#### Parameters:
+```
+str, str, # strings to compare
+int,      # collation mode (bitmask)
+int,      # ISO 639 Language code
+int       # ISO 3166 Country code
+```
 
-The collation mode is to sort using Primary, Secondary, and Tertiary.
+The collation mode defines whether we use Primary, Secondary, Tertiary and/or
+Quaternary sorting.
+
 The bitmask is as follows:
-1 => Unicode Collation Primary
-2 => Unicode Collation Secondary
-4 => Unicode Collation Tertiary
-8 => Break ties by codepoint
+* 1 => Unicode Collation Primary
+* 2 => Unicode Collation Secondary
+* 4 => Unicode Collation Tertiary
+* 8 => Quaternary (Break ties by codepoint)
 
-The default, 15 will apply all of them as most users will expect things
-to be sorted, and also break any possible ties by checking codepoint number.
+15 will apply all four levels which is how most users will expect things
+to be sorted, breaking any possible ties by checking codepoint number. This
+should be the default for user facing applications.
 
 The default language and country code is 0, meaning to sort without
 respect to country or language.
+
+* Returns -1 if string a is less than (sorted before) string b
+* Returns 0 if strings are equal for the selected collation levels
+ * Note: Will never return 0 for different strings unless you don't use the
+  Quaternary level
+* Returns 1 if string a is more than (sorted after) string b
 
 While the Primary, Secondary and Tertiary mean different things for
 different scripts, for the Latin script used in English they mostly
@@ -930,19 +970,16 @@ Setting 0 for language and country will collate all scripts according to
 their own distinctions for Primary, Secondary, and Tertiary, although it
 will not take into account certain languages.
 
-For example, some language based differences in collation
-“…include ch as in traditional Spanish, ä as in traditional German,
-and å as in Danish”.
+For example, some language based differences in collation:
+* “…include ch as in traditional Spanish, ä as in traditional German,
+  and å as in Danish” ― [Unicode Technical Report 10][UCA].
 
-For more information see: http://unicode.org/reports/tr10/
+For more information see [Unicode TR10][UCA].
 
 *** Note ***
  - Currently only language and country insensitive sorting methods are implemented.
- - We have implemented the language and country insensitive sorting
- using only the Primary level, and if they evaluate as the same on the
- primary level it will fall back to comparing by codepoint. For Latin
- script this will take case into account in most cases. In worst case it
- will not do any worse than the current cmp_s op
+
+[UCA]: http://unicode.org/reports/tr10/
 
 ## hash
 * `hash(...)`

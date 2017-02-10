@@ -18,11 +18,11 @@ HLL::CommandLine - command line parsing tools
 
     # -e "program" also treats everything after it as arguments
     # to the program:
-    $paser.add-stopper('-e');
+    $parser.add-stopper('-e');
 
     my $results := $parser.parse(@*ARGS);
     my %options := $parser.options;
-    my @args    := $pasre.arguments; # remaining arguments from @*ARGS
+    my @args    := $parser.arguments; # remaining arguments from @*ARGS
 
 =head1 DESCRIPTION
 

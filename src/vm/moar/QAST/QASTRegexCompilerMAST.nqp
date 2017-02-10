@@ -4,19 +4,19 @@ use MASTNodes;
 use MASTOps;
 use QRegex;
 
-my $MVM_reg_void            := 0; # not really a register; just a result/return kind marker
-my $MVM_reg_int8            := 1;
-my $MVM_reg_int16           := 2;
-my $MVM_reg_int32           := 3;
-my $MVM_reg_int64           := 4;
-my $MVM_reg_num32           := 5;
-my $MVM_reg_num64           := 6;
-my $MVM_reg_str             := 7;
-my $MVM_reg_obj             := 8;
-my $MVM_reg_uint8           := 17;
-my $MVM_reg_uint16          := 18;
-my $MVM_reg_uint32          := 19;
-my $MVM_reg_uint64          := 20;
+my int $MVM_reg_void            := 0; # not really a register; just a result/return kind marker
+my int $MVM_reg_int8            := 1;
+my int $MVM_reg_int16           := 2;
+my int $MVM_reg_int32           := 3;
+my int $MVM_reg_int64           := 4;
+my int $MVM_reg_num32           := 5;
+my int $MVM_reg_num64           := 6;
+my int $MVM_reg_str             := 7;
+my int $MVM_reg_obj             := 8;
+my int $MVM_reg_uint8           := 17;
+my int $MVM_reg_uint16          := 18;
+my int $MVM_reg_uint32          := 19;
+my int $MVM_reg_uint64          := 20;
 
 class QAST::MASTRegexCompiler {
     # The compiler we're working against.
