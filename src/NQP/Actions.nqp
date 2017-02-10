@@ -1289,7 +1289,7 @@ class NQP::Actions is HLL::Actions {
             $block.symbol('$¢', :scope<lexical>);
             $block.symbol('$/', :scope<lexical>);
             my $code  := %*RX<code>;
-            my $regex := $/.CURSOR.actions('Regex').qbuildsub($<p6regex>.ast, $block,
+            my $regex := $/.CURSOR.slang_actions('Regex').qbuildsub($<p6regex>.ast, $block,
                 code_obj => $code);
             $regex.name($name);
 
@@ -1580,7 +1580,7 @@ class NQP::Actions is HLL::Actions {
         $block.symbol('$¢', :scope<lexical>);
         $block.symbol('$/', :scope<lexical>);
 
-        my $regex := $/.CURSOR.actions('Regex').qbuildsub($<p6regex>.ast, $block);
+        my $regex := $/.CURSOR.slang_actions('Regex').qbuildsub($<p6regex>.ast, $block);
         my $ast := QAST::Op.new(
             :op<callmethod>, :name<new>,
             lexical_package_lookup(['NQPRegex'], $/),

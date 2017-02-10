@@ -6,8 +6,8 @@ grammar NQP::Grammar is HLL::Grammar {
         %*LANG<Regex-actions> := NQP::RegexActions;
         %*LANG<MAIN>          := NQP::Grammar;
         %*LANG<MAIN-actions>  := NQP::Actions;
-	self.setlang('MAIN',  NQP::Grammar, NQP::Actions);
-	self.setlang('Regex', NQP::Regex,   NQP::RegexActions);
+	self.add_slang('MAIN',  self,       self.actions);
+	self.add_slang('Regex', NQP::Regex, NQP::RegexActions);
 
         # Package declarator to meta-package mapping. Note that there is
         # one universal KnowHOW from the 6model core, and an attribute

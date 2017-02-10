@@ -472,12 +472,21 @@ class HLL::Compiler does HLL::Backend::Default {
 
     method parse($source, *%adverbs) {
         my $s := $source;
+        my $grammar;
+        my $actions;
         if %adverbs<transcode> {
             $s := $!backend.apply_transcodings($s, %adverbs<transcode>);
         }
-        my $grammar := self.parsegrammar;
-        my $actions;
-        $actions    := self.parseactions;
+	my $outer_ctx := %adverbs<outer_ctx>;
+        if nqp::existskey(%adverbs, 'grammar') {
+	    $grammar := %adverbs<grammar>;
+	    $actions := %adverbs<actions>;
+	    nqp::printfh(nqp::getstderr(), "  (" ~ $grammar.HOW.name($grammar) ~ " with " ~ $actions.HOW.name($actions) ~ "\n");
+	}
+	else {
+	    $grammar := self.parsegrammar;
+	    $actions := self.parseactions;
+	}
         $grammar.HOW.trace-on($grammar) if %adverbs<rxtrace>;
         my $match   := $grammar.parse($s, p => 0, actions => $actions);
         $grammar.HOW.trace-off($grammar) if %adverbs<rxtrace>;

@@ -26,20 +26,38 @@ my class ParseShared is export {
 }
 
 my class Braid is export {
+    has $!grammar;
     has $!actions;
-    has $!lang;
+    has $!slangs;
 
-    method !braid_init(:$actions, *%ignore) {
+    method !braid_init(:$grammar, :$actions, *%ignore) {
         my $new := nqp::create(self);
-	nqp::bindattr($new, Braid, '$!actions', $actions);
-	nqp::bindattr($new, Braid, '$!lang', nqp::hash());
-	$new
+        nqp::bindattr($new, Braid, '$!actions', $grammar);
+        nqp::bindattr($new, Braid, '$!actions', $actions);
+        nqp::bindattr($new, Braid, '$!slangs', nqp::hash());
+        $new
     }
     method !clone() {
-	my $new := nqp::create(self);
-	nqp::bindattr($new, Braid, '$!actions', $!actions);
-	nqp::bindattr($new, Braid, '$!lang', nqp::clone($!lang));
-	$new
+        my $new := nqp::create(self);
+        nqp::bindattr($new, Braid, '$!grammar', $!grammar);
+        nqp::bindattr($new, Braid, '$!actions', $!actions);
+        nqp::bindattr($new, Braid, '$!slangs', nqp::clone($!slangs));
+        $new
+    }
+    method !switch($name) {
+        nqp::bindattr(self, Braid, '$!grammar', $!slangs{$name});
+        nqp::bindattr(self, Braid, '$!actions', $!slangs{$name ~ '-actions'});
+        self
+    }
+    method !dump($tag) {
+        my $err := nqp::getstderr();
+        nqp::printfh($err, nqp::sprintf("Braid %x in %s\n", [nqp::objectid(self), $tag]));
+        nqp::printfh($err, "  grammar: " ~ $!grammar.HOW.name($!grammar) ~ "\n");
+        nqp::printfh($err, "  actions: " ~ $!actions.HOW.name($!actions) ~ "\n");
+        for $!slangs {
+            nqp::printfh($err, "    " ~ $_.key ~ ' ' ~ $_.value.HOW.name($_.value) ~ (nqp::isconcrete($_.value) ?? ":D" !! ":U") ~ "\n");
+        }
+        self
     }
 }
 
@@ -61,62 +79,83 @@ role NQPCursorRole is export {
     method pos()    { $!pos }
 
     # delegations to braid
-    method lang($name) {
-	nqp::die("No braid!") unless $!braid;
-	my $ret := nqp::atkey(nqp::getattr($!braid, Braid, '$!lang'),$name);
-	if nqp::isnull($ret) {
-	    $ret := %*LANG{$name};
-	    if !nqp::isnull($ret) {
-		nqp::printfh(nqp::getstderr(), "missing braid language for $name, should be " ~ $ret.HOW.name($ret) ~ "\n");
-		nqp::backtracestrings("");
-	    }
-	}
-	$ret;
+    method slangs() {
+        nqp::die("No braid in slangs!") unless $!braid;
+        nqp::getattr($!braid, Braid, '$!slangs')
     }
-    method actions($name) {
-    	nqp::die("No braid!") unless $!braid;
-	my $ret := nqp::atkey(nqp::getattr($!braid, Braid, '$!lang'),$name ~ "-actions");
-	if nqp::isnull($ret) {
-	    $ret := %*LANG{$name ~ "-actions"};
-	    nqp::printfh(nqp::getstderr(), "missing braid actions for $name, should be " ~ $ret.HOW.name($ret) ~ "\n");
-	}
-	$ret;
+    method slang_grammar($name) {
+        nqp::die("No braid in grammar!") unless $!braid;
+        my $ret := nqp::atkey(nqp::getattr($!braid, Braid, '$!slangs'),$name);
+        if nqp::isnull($ret) {
+            $ret := %*LANG{$name};
+            if !nqp::isnull($ret) {
+                nqp::printfh(nqp::getstderr(), "missing braid grammar for $name, should be " ~ $ret.HOW.name($ret) ~ "\n");
+                nqp::backtracestrings("");
+            }
+        }
+        $ret;
     }
-    method setlang($name,$lang,$actions) {
-    	nqp::die("No braid!") unless $!braid;
-	nqp::bindkey(nqp::getattr($!braid, Braid, '$!lang'),$name, $lang);
-	nqp::bindkey(nqp::getattr($!braid, Braid, '$!lang'),$name ~ "-actions", $actions) unless nqp::isnull($actions);
-	self
+    method slang_actions($name) {
+        nqp::die("No braid in actions!") unless $!braid;
+        my $ret := nqp::atkey(nqp::getattr($!braid, Braid, '$!slangs'),$name ~ "-actions");
+        if nqp::isnull($ret) {
+            $ret := %*LANG{$name ~ "-actions"};
+            nqp::printfh(nqp::getstderr(), "missing braid actions for $name, should be " ~ $ret.HOW.name($ret) ~ "\n");
+        }
+        $ret;
+    }
+    method add_slang($name,$grammar,$actions) {
+        nqp::die("No braid in add_slang!") unless $!braid;
+        nqp::bindkey(nqp::getattr($!braid, Braid, '$!slangs'),$name, $grammar);
+        nqp::bindkey(nqp::getattr($!braid, Braid, '$!slangs'),$name ~ "-actions", $actions) unless nqp::isnull($actions);
+        self
+    }
+    method switch_to_slang($name) {
+        nqp::die("No braid in switch_to_slang!") unless $!braid;
+        $!braid."!switch"($name);
+        self
     }
 
     method check_LANG_oopsies($tag?) {
-    	nqp::die("No braid!") unless $!braid;
-	$tag := $tag ?? "(in $tag) " !! "";
+        nqp::die("No braid!") unless $!braid;
+        $tag := $tag ?? "(in $tag) " !! "";
         for %*LANG {
-	    my $name := $_.key;
-	    my $value := $_.value;
-	    my $bvalue := nqp::atkey(nqp::getattr($!braid, Braid, '$!lang'),$name);
-	    if nqp::isnull($bvalue) {
-		nqp::printfh(nqp::getstderr(), $tag ~ "no setlang braid entry for %*LANG\<$name>\n");
-		nqp::bindkey(nqp::getattr($!braid, Braid, '$!lang'), $name, $value);
+            my $name := $_.key;
+            my $value := $_.value;
+            my $bvalue := nqp::atkey(nqp::getattr($!braid, Braid, '$!slangs'),$name);
+            if nqp::isnull($bvalue) {
+                nqp::printfh(nqp::getstderr(), $tag ~ "no braid entry for %*LANG\<$name>\n");
+                nqp::bindkey(nqp::getattr($!braid, Braid, '$!slangs'), $name, $value);
             #    my $err := nqp::getstderr();
             #    nqp::printfh($err, nqp::join("\n", nqp::backtracestrings("")));
             #    nqp::printfh($err, "\n");
             #    nqp::exit(1);
-	    }
-	    elsif nqp::objectid($bvalue) != nqp::objectid($value) {
-		nqp::printfh(nqp::getstderr(), $tag ~ "wrong setlang braid entry for %*LANG\<$name>\n");
-		nqp::bindkey(nqp::getattr($!braid, Braid, '$!lang'), $name, $value);
-	    }
+            }
+            elsif nqp::objectid($bvalue) != nqp::objectid($value) {
+                nqp::printfh(nqp::getstderr(), $tag ~ "wrong braid entry for %*LANG\<$name>\n");
+                nqp::printfh(nqp::getstderr(), "  (braid " ~ $bvalue.HOW.name($bvalue) ~ " LANG " ~ $value.HOW.name($value) ~ ")\n");
+                self.blurgh;
+                %*LANG{$name} := $bvalue;
+            }
         }
-	self
+        self
     }
 
-    method curactions() { nqp::die("No braid!") unless $!braid; nqp::getattr($!braid, Braid, '$!actions') }
-    method setcuractions($actions) { nqp::bindattr($!braid, Braid, '$!actions', $actions); self }
+    method grammar() { nqp::die("No braid!") unless $!braid; nqp::getattr($!braid, Braid, '$!grammar') }
+    method actions() { nqp::die("No braid!") unless $!braid; nqp::getattr($!braid, Braid, '$!actions') }
 
-    method copy_braid_from($other) { nqp::bindattr(self, $?CLASS, '$!braid', nqp::getattr($other, $?CLASS, '$!braid')); self }
+    method set_actions($actions) {
+        nqp::die("No braid!") unless $!braid;
+        nqp::bindattr($!braid, Braid, '$!grammar', self);
+        nqp::bindattr($!braid, Braid, '$!actions', $actions);
+        self
+    }
+
+    method set_braid_from($other) { nqp::bindattr(self, $?CLASS, '$!braid', nqp::getattr($other, $?CLASS, '$!braid')); self }
     method clone_braid_from($other) { nqp::bindattr(self, $?CLASS, '$!braid', nqp::getattr($other, $?CLASS, '$!braid')."!clone"()); self }
+
+    method snapshot_braid() { $!braid."!clone"() }
+    method set_braid($braid) { nqp::bindattr(self, $?CLASS, '$!braid', $braid); self }
 
     method prune() {
         $!match    := NQPMu;
@@ -126,11 +165,11 @@ role NQPCursorRole is export {
     }
 
 #    method AOK($actions, $where) {
-#        my $got := self.curactions();
-#	if nqp::objectid($got) != nqp::objectid($actions) {
-#	    nqp::printfh(nqp::getstderr(), "actions bad in $where (expected " ~ $actions.HOW.name($actions) ~ " but got " ~ $got.HOW.name($got) ~ ")\n");
-#	}
-#	self;
+#        my $got := self.actions();
+#        if nqp::objectid($got) != nqp::objectid($actions) {
+#            nqp::printfh(nqp::getstderr(), "actions bad in $where (expected " ~ $actions.HOW.name($actions) ~ " but got " ~ $got.HOW.name($got) ~ ")\n");
+#        }
+#        self;
 #    }
 
     method !APPEND_TO_ORIG($value) {
@@ -212,7 +251,21 @@ role NQPCursorRole is export {
             nqp::bindattr($shared, ParseShared, '%!marks', nqp::hash());
         }
         nqp::bindattr($new, $?CLASS, '$!shared', $shared);
-        nqp::bindattr($new, $?CLASS, '$!braid', $braid ?? $braid !! nqp::isconcrete(self) ?? $!braid !! Braid."!braid_init"());
+        unless $braid {
+            if nqp::isconcrete(self) && $!braid {
+                $braid := $!braid."!clone"();  # usually called when switching into a slang
+            }
+            else {
+                if nqp::isconcrete(self) {
+                    $braid := Braid."!braid_init"(:grammar(self), :actions(self.actions));
+                }
+                else {
+                    $braid := Braid."!braid_init"(:grammar(self));
+                }
+            }
+        }
+        nqp::die("No braid in cursor_init!") unless $braid;
+        nqp::bindattr($new, $?CLASS, '$!braid', $braid );
         if nqp::defined($c) {
             nqp::bindattr_i($new, $?CLASS, '$!from', -1);
             nqp::bindattr_i($new, $?CLASS, '$!pos', $c);
@@ -403,14 +456,14 @@ role NQPCursorRole is export {
     }
 
     method !reduce(str $name) {
-	my $actions := self.curactions;
+        my $actions := self.actions;
         nqp::findmethod($actions, $name)($actions, self.MATCH)
             if !nqp::isnull($actions) && nqp::can($actions, $name);
         self;
     }
 
     method !reduce_with_match(str $name, str $key, $match) {
-	my $actions := self.curactions;
+        my $actions := self.actions;
         nqp::findmethod($actions, $name)($actions, $match, $key)
             if !nqp::isnull($actions) && nqp::can($actions, $name);
     }
@@ -1118,30 +1171,30 @@ class NQPCursor does NQPCursorRole {
                     }
                     ++$csi;
                 }
-#		{
+#                {
 #                    my $iter := nqp::iterator(%caplist);
 #                    while $iter {
 #                        my $curcap := nqp::shift($iter);
-#			my str $name := nqp::iterkey_s($curcap);
-#			my int $iv := nqp::iterval($curcap);
+#                        my str $name := nqp::iterkey_s($curcap);
+#                        my int $iv := nqp::iterval($curcap);
 #                        if $iv >= 2 {
-#			    if nqp::iscclass(nqp::const::CCLASS_NUMERIC, $name, 0) {
-#				note("\t" ~ $name ~ "\t" ~ nqp::elems(nqp::atpos($list, $name)));
-#			    }
-#			    else {
-#				note("\t" ~ $name ~ "\t" ~ nqp::elems(nqp::atkey($hash, $name)));
-#			    }
+#                            if nqp::iscclass(nqp::const::CCLASS_NUMERIC, $name, 0) {
+#                                note("\t" ~ $name ~ "\t" ~ nqp::elems(nqp::atpos($list, $name)));
+#                            }
+#                            else {
+#                                note("\t" ~ $name ~ "\t" ~ nqp::elems(nqp::atkey($hash, $name)));
+#                            }
 #                        }
-#			elsif $iv >= 1 {
-#			    if nqp::iscclass(nqp::const::CCLASS_NUMERIC, $name, 0) {
-#				note("\t" ~ $name ~ "\t" ~ nqp::defined(nqp::atpos($list, $name)));
-#			    }
-#			    else {
-#				note("\t" ~ $name ~ "\t" ~ nqp::defined(nqp::atkey($hash, $name)));
-#			    }
-#			}
+#                        elsif $iv >= 1 {
+#                            if nqp::iscclass(nqp::const::CCLASS_NUMERIC, $name, 0) {
+#                                note("\t" ~ $name ~ "\t" ~ nqp::defined(nqp::atpos($list, $name)));
+#                            }
+#                            else {
+#                                note("\t" ~ $name ~ "\t" ~ nqp::defined(nqp::atkey($hash, $name)));
+#                            }
+#                        }
 #                    }
-#		}
+#                }
             }
             nqp::bindattr($match, NQPCapture, '@!array', nqp::isconcrete($list) ?? $list !! @EMPTY_LIST);
             nqp::bindattr($match, NQPCapture, '%!hash', $hash);
@@ -1162,9 +1215,10 @@ class NQPCursor does NQPCursorRole {
     }
 
     method parse($target, :$rule = 'TOP', :$actions, *%options) {
-	my $braid := Braid.'!braid_init'(:actions($actions));
+        my $braid := Braid.'!braid_init'(:grammar(self), :actions($actions));
         my $cur      := self.'!cursor_init'($target, :braid($braid), |%options);
 
+#        nqp::printfh(nqp::getstderr(), "Cursor.parse grammar " ~ $cur.HOW.name($cur) ~ " actions " ~ $actions.HOW.name($actions) ~ ")\n");
         nqp::isinvokable($rule) ??
             $rule($cur).MATCH() !!
             nqp::findmethod($cur, $rule)($cur).MATCH()
