@@ -170,6 +170,7 @@
     - [readcharsfh](#readcharsfh)
     - [say](#say)
     - [sayfh](#sayfh)
+    - [seekfh](#seekfh)
     - [setencoding](#setencoding)
     - [setinputlinesep](#setinputlinesep)
     - [tellfh](#tellfh)
@@ -1555,6 +1556,11 @@ Output the given string to stdout, followed by a newline.
 * `sayfh(Handle $fh, str $str)`
 
 Output the given string to the filehandle, followed by a newline. Returns the number of bytes written.
+
+## seekfh
+* `seekfh(Handle $fh, int $offset, int $whence)`
+
+Seek in the filehandle to the location specified by the offset and whence.
 
 ## setencoding
 * `setencoding(Handle $fh, str $encoding)`
