@@ -1522,7 +1522,7 @@ Output the given string to stdout.
 ## printfh
 * `printfh(Handle $fh, str $str)`
 
-Output the given string to the filehandle.
+Output the given string to the filehandle. Returns the number of bytes written.
 
 ## readallfh
 * `readallfh(Handle $fh)`
@@ -1554,7 +1554,7 @@ Output the given string to stdout, followed by a newline.
 ## sayfh
 * `sayfh(Handle $fh, str $str)`
 
-Output the given string to the filehandle, followed by a newline.
+Output the given string to the filehandle, followed by a newline. Returns the number of bytes written.
 
 ## setencoding
 * `setencoding(Handle $fh, str $encoding)`
@@ -1575,7 +1575,7 @@ Return current access position for an open handle.
 ## writefh
 * `writefh(Handle $fh, Mu $str)`
 
-Output the given object to the filehandle.
+Output the given object to the filehandle. Returns the number of bytes written.
 
 # <a id="extern"></a> External command Opcodes
 
