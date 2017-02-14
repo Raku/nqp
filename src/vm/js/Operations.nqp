@@ -1333,7 +1333,7 @@ class QAST::OperationsJS {
             my $body;
             {
                 my $*LOOP := $loop;
-                my $cond := $comp.as_js(@operands[0], :want($T_BOOL));
+                my $cond := $comp.as_js(@operands[0], :want($cond_type));
                 $check_cond := $comp.coerce($cond, $T_BOOL);
                 my $cond_without_sideeffects := Chunk.new($cond.type, $cond.expr);
 
