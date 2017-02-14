@@ -80,25 +80,25 @@ role NQPCursorRole is export {
 
     # delegations to braid
     method slangs() {
-        nqp::die("No braid in slangs!") unless $!braid;
+#        nqp::die("No braid in slangs!") unless $!braid;
         nqp::getattr($!braid, Braid, '$!slangs')
     }
     method slang_grammar($name) {
-        nqp::die("No braid in grammar!") unless $!braid;
+#        nqp::die("No braid in grammar!") unless $!braid;
         nqp::atkey(nqp::getattr($!braid, Braid, '$!slangs'),$name);
     }
     method slang_actions($name) {
-        nqp::die("No braid in actions!") unless $!braid;
+#        nqp::die("No braid in actions!") unless $!braid;
         nqp::atkey(nqp::getattr($!braid, Braid, '$!slangs'),$name ~ "-actions");
     }
     method define_slang($name,$grammar,$actions) {
-        nqp::die("No braid in define_slang!") unless $!braid;
+#        nqp::die("No braid in define_slang!") unless $!braid;
         nqp::bindkey(nqp::getattr($!braid, Braid, '$!slangs'),$name, $grammar);
         nqp::bindkey(nqp::getattr($!braid, Braid, '$!slangs'),$name ~ "-actions", $actions) unless nqp::isnull($actions);
         self
     }
     method switch_to_slang($name) {
-        nqp::die("No braid in switch_to_slang!") unless $!braid;
+#        nqp::die("No braid in switch_to_slang!") unless $!braid;
         $!braid."!switch"($name);
         self
     }
@@ -122,11 +122,17 @@ role NQPCursorRole is export {
         self
     }
 
-    method grammar() { nqp::die("No braid!") unless $!braid; nqp::getattr($!braid, Braid, '$!grammar') }
-    method actions() { nqp::die("No braid!") unless $!braid; nqp::getattr($!braid, Braid, '$!actions') }
+    method grammar() {
+#        nqp::die("No braid!") unless $!braid;
+        nqp::getattr($!braid, Braid, '$!grammar')
+    }
+    method actions() {
+#        nqp::die("No braid!") unless $!braid;
+        nqp::getattr($!braid, Braid, '$!actions')
+    }
 
     method set_actions($actions) {
-        nqp::die("No braid in set_actions!") unless $!braid;
+#        nqp::die("No braid in set_actions!") unless $!braid;
         nqp::bindattr($!braid, Braid, '$!grammar', self);
         nqp::bindattr($!braid, Braid, '$!actions', $actions);
         self
