@@ -946,8 +946,8 @@ class QAST::OperationsJS {
 
     add_simple_op('iterator', $T_OBJ, [$T_OBJ], :method_call, :side_effects);
 
-    add_simple_op('iterval', $T_OBJ, [$T_OBJ], sub ($iter) {"$iter.iterval()"});
-    add_simple_op('iterkey_s', $T_STR, [$T_OBJ], sub ($iter) {"$iter.iterkey_s()"});
+    add_simple_op('iterval', $T_OBJ, [$T_OBJ], :method_call);
+    add_simple_op('iterkey_s', $T_STR, [$T_OBJ], :method_call);
 
     add_simple_op('existskey', $T_BOOL, [$T_OBJ, $T_STR], :method_call);
     add_simple_op('deletekey', $T_OBJ, [$T_OBJ, $T_STR], :method_call, :side_effects);
@@ -1287,7 +1287,7 @@ class QAST::OperationsJS {
                 $list,
                 "$iterator = {$list.expr}.\$\$iterator();\n",
                 "var $loop = function() \{\n",
-                "if ($iterator.idx < $iterator.target) \{\n",
+                "if ($iterator.\$\$idx < $iterator.\$\$target) \{\n",
                 $*BLOCK.set_cont($body, $loop),
                 $body,
                 "\} else \{\n",
@@ -1301,7 +1301,7 @@ class QAST::OperationsJS {
             Chunk.new($T_OBJ, 'null', [
                 $list,
                 "$iterator = {$list.expr}.\$\$iterator();\n",
-                "while ($iterator.idx < $iterator.target) \{\n",
+                "while ($iterator.\$\$idx < $iterator.\$\$target) \{\n",
                 $comp.handle_control($loop, $body),
                 "\}\n"
             ], :node($node));
