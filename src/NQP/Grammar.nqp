@@ -2,8 +2,8 @@ grammar NQP::Grammar is HLL::Grammar {
     method TOP() {
 	# Language braid.
 	my $*LANG := self;
-	self.add_slang('MAIN',  self,       self.actions);
-	self.add_slang('Regex', NQP::Regex, NQP::RegexActions);
+	self.define_slang('MAIN',  self,       self.actions);
+	self.define_slang('Regex', NQP::Regex, NQP::RegexActions);
 
         # Old language braids, going away.
         my %*LANG;

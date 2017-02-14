@@ -91,8 +91,8 @@ role NQPCursorRole is export {
         nqp::die("No braid in actions!") unless $!braid;
         nqp::atkey(nqp::getattr($!braid, Braid, '$!slangs'),$name ~ "-actions");
     }
-    method add_slang($name,$grammar,$actions) {
-        nqp::die("No braid in add_slang!") unless $!braid;
+    method define_slang($name,$grammar,$actions) {
+        nqp::die("No braid in define_slang!") unless $!braid;
         nqp::bindkey(nqp::getattr($!braid, Braid, '$!slangs'),$name, $grammar);
         nqp::bindkey(nqp::getattr($!braid, Braid, '$!slangs'),$name ~ "-actions", $actions) unless nqp::isnull($actions);
         self
@@ -111,7 +111,7 @@ role NQPCursorRole is export {
             my $value := $_.value;
             my $bvalue := nqp::atkey(nqp::getattr($!braid, Braid, '$!slangs'),$name);
             if nqp::isnull($bvalue) || nqp::objectid($bvalue) != nqp::objectid($value) {
-                nqp::printfh(nqp::getstderr(), "Deprecated use of %*LANG\<$name> assignment detected in $tag; module should export syntax using \$*LANG.add_slang(\"$name\",<grammar>,<actions>) instead\n")
+                nqp::printfh(nqp::getstderr(), "Deprecated use of %*LANG\<$name> assignment detected in $tag; module should export syntax using \$*LANG.define_slang(\"$name\",<grammar>,<actions>) instead\n")
                     unless nqp::index($name,"-actions") > 0;
                 nqp::printfh(nqp::getstderr(), "  (value in braid: " ~ $bvalue.HOW.name($bvalue) ~ ", value in %*LANG: " ~ $value.HOW.name($value) ~ ")\n")
                     unless nqp::isnull($bvalue);
