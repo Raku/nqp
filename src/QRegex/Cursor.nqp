@@ -105,23 +105,17 @@ role NQPCursorRole is export {
 
     method check_LANG_oopsies($tag?) {
         nqp::die("No braid!") unless $!braid;
-        $tag := $tag ?? "(in $tag) " !! "";
+        $tag := "" unless $tag;
         for %*LANG {
             my $name := $_.key;
             my $value := $_.value;
             my $bvalue := nqp::atkey(nqp::getattr($!braid, Braid, '$!slangs'),$name);
-            if nqp::isnull($bvalue) {
-                nqp::printfh(nqp::getstderr(), $tag ~ "Deprecated use of %*LANG\<$name> interface detected in $tag; please use braid methods instead\n");
-                nqp::bindkey(nqp::getattr($!braid, Braid, '$!slangs'), $name, $value);
-            #    my $err := nqp::getstderr();
-            #    nqp::printfh($err, nqp::join("\n", nqp::backtracestrings("")));
-            #    nqp::printfh($err, "\n");
-            #    nqp::exit(1);
-            }
-            elsif nqp::objectid($bvalue) != nqp::objectid($value) {
-                nqp::printfh(nqp::getstderr(), $tag ~ "Deprecated use of %*LANG\<$name> interface detected in $tag; please use braid methods instead\n");
-                # nqp::printfh(nqp::getstderr(), "  (braid " ~ $bvalue.HOW.name($bvalue) ~ " LANG " ~ $value.HOW.name($value) ~ ")\n");
-
+            if nqp::isnull($bvalue) || nqp::objectid($bvalue) != nqp::objectid($value) {
+                nqp::printfh(nqp::getstderr(), "Deprecated use of %*LANG\<$name> assignment detected in $tag; module should export syntax using \$*LANG.add_slang(\"$name\",<grammar>,<actions>) instead\n")
+                    unless nqp::index($name,"-actions") > 0;
+                nqp::printfh(nqp::getstderr(), "  (value in braid: " ~ $bvalue.HOW.name($bvalue) ~ ", value in %*LANG: " ~ $value.HOW.name($value) ~ ")\n")
+                    unless nqp::isnull($bvalue);
+                # XXX Override braid from %*LANG until after everyone fixes their modules.
                 nqp::bindkey(nqp::getattr($!braid, Braid, '$!slangs'), $name, $value);
             }
         }
