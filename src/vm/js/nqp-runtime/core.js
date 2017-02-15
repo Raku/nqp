@@ -622,7 +622,7 @@ op.parameterizetype = function(ctx, type, params) {
       var match = true;
       for (var j = 0; j < unpackedParams.length; j++) {
         /* XXX More cases to consider here. - copied over from the jvm backend, need to consider what they are*/
-        if (unpackedParams[j] != lookup[i].params[j]) {
+        if (unpackedParams[j] !== lookup[i].params[j]) {
           match = false;
           break;
         }
