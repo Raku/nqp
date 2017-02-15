@@ -124,7 +124,7 @@ grammar NQP::Grammar is HLL::Grammar {
 
         # This is also the starting package.
         :my $*PACKAGE := $*GLOBALish;
-        { $*W.install_lexical_symbol($*UNIT, '$?PACKAGE', $*PACKAGE); }
+        { $/.CURSOR.set_package($*PACKAGE); $*W.install_lexical_symbol($*UNIT, '$?PACKAGE', $*PACKAGE); }
 
         # Create EXPORT::DEFAULT.
         :my $*EXPORT;
@@ -144,10 +144,13 @@ grammar NQP::Grammar is HLL::Grammar {
         <.outerctx>
 
         <statementlist>
+	<.set_braid_from(self)>
+	<.check_PACKAGE_oopsies('comp_unit')>
         [ $ || <.panic: 'Confused'> ]
     }
 
     rule statementlist {
+	:my $*LANG := self;
         ''
         [
         | $
@@ -353,37 +356,48 @@ grammar NQP::Grammar is HLL::Grammar {
 
     proto token package_declarator { <...> }
     token package_declarator:sym<module> {
-        :my $*OUTERPACKAGE := $*PACKAGE;
+        :my $*OUTERPACKAGE := self.package;
         :my $*PKGDECL := 'module';
         <sym> <package_def>
+	<.set_braid_from(self)>
+	<.check_PACKAGE_oopsies('package_declarator_module')>
     }
     token package_declarator:sym<knowhow> {
-        :my $*OUTERPACKAGE := $*PACKAGE;
+        :my $*OUTERPACKAGE := self.package;
         :my $*PKGDECL := 'knowhow';
         <sym> <package_def>
+	<.set_braid_from(self)>
+	<.check_PACKAGE_oopsies('package_declarator_knowhow')>
     }
     token package_declarator:sym<class> {
-        :my $*OUTERPACKAGE := $*PACKAGE;
+        :my $*OUTERPACKAGE := self.package;
         :my $*PKGDECL := 'class';
         <sym> <package_def>
+	<.set_braid_from(self)>
+	<.check_PACKAGE_oopsies('package_declarator_class')>
     }
     token package_declarator:sym<grammar> {
-        :my $*OUTERPACKAGE := $*PACKAGE;
+        :my $*OUTERPACKAGE := self.package;
         :my $*PKGDECL := 'grammar';
         <sym> <package_def>
+	<.set_braid_from(self)>
+	<.check_PACKAGE_oopsies('package_declarator_grammar')>
     }
     token package_declarator:sym<role> {
-        :my $*OUTERPACKAGE := $*PACKAGE;
+        :my $*OUTERPACKAGE := self.package;
         :my $*PKGDECL := 'role';
         <sym> <package_def>
+	<.set_braid_from(self)>
+	<.check_PACKAGE_oopsies('package_declarator_role')>
     }
     token package_declarator:sym<native> {
-        :my $*OUTERPACKAGE := $*PACKAGE;
+        :my $*OUTERPACKAGE := self.package;
         :my $*PKGDECL := 'native';
         <sym> <package_def>
+	<.set_braid_from(self)>
     }
     rule package_declarator:sym<stub> {
-        :my $*OUTERPACKAGE := $*PACKAGE;
+        :my $*OUTERPACKAGE := self.package;
         :my $*PKGDECL := 'stub';
         <sym> <name>
         'metaclass' <metaclass=.name>
@@ -392,7 +406,9 @@ grammar NQP::Grammar is HLL::Grammar {
 
     rule package_def {
         :my $*PACKAGE;     # The type object for this package.
+	:my $*LANG := self;
         :my $OUTER := $*W.cur_lexpad();
+	<!!{ $/.CURSOR.clone_braid_from(self) }>
         ''
         [
         <name>
@@ -410,47 +426,54 @@ grammar NQP::Grammar is HLL::Grammar {
             }
             my $how := %*HOW{$*PKGDECL};
             my $INNER := $*W.cur_lexpad();
-            $*PACKAGE := $*W.pkg_create_mo($how, |%args);
+	    my $package := $*W.pkg_create_mo($how, |%args);
+	    $*PACKAGE := $package;
+	    $/.CURSOR.set_package($package);
+	    $/.CURSOR.check_PACKAGE_oopsies('package_def1');
+	    $*LANG := $/.CURSOR;
 
             # these need to be installed early so that they may be referenced from subs in the block
             if nqp::can($how, 'parametric') && $how.parametric($how) {
-                $*W.install_lexical_symbol($INNER, '$?PACKAGE', $*PACKAGE);
-                $*W.install_lexical_symbol($INNER, '$?ROLE', $*PACKAGE);
+                $*W.install_lexical_symbol($INNER, '$?PACKAGE', $package);
+                $*W.install_lexical_symbol($INNER, '$?ROLE', $package);
             }
             else {
-                $*W.install_lexical_symbol($INNER, '$?PACKAGE', $*PACKAGE);
-                $*W.install_lexical_symbol($INNER, '$?CLASS', $*PACKAGE);
+                $*W.install_lexical_symbol($INNER, '$?PACKAGE', $package);
+                $*W.install_lexical_symbol($INNER, '$?CLASS', $package);
             }
 
             # Install it in the current package or current lexpad as needed.
             if $*SCOPE eq 'our' || $*SCOPE eq '' {
-                $*W.install_package_symbol($*OUTERPACKAGE, $<name><identifier>, $*PACKAGE);
+                $*W.install_package_symbol($*OUTERPACKAGE, $<name><identifier>, $package);
                 if +$<name><identifier> == 1 {
-                    $*W.install_lexical_symbol($OUTER, ~$<name><identifier>[0], $*PACKAGE);
+                    $*W.install_lexical_symbol($OUTER, ~$<name><identifier>[0], $package);
                 }
             }
             elsif $*SCOPE eq 'my' {
                 if +$<name><identifier> != 1 {
                     $<name>.CURSOR.panic("A my scoped package cannot have a multi-part name yet");
                 }
-                $*W.install_lexical_symbol($OUTER, ~$<name><identifier>[0], $*PACKAGE);
+                $*W.install_lexical_symbol($OUTER, ~$<name><identifier>[0], $package);
             }
             else {
                 $/.CURSOR.panic("$*SCOPE scoped packages are not supported");
             }
         }
 
+	<.check_PACKAGE_oopsies('package_def2')>
         [ $<export>=['is export'] ]?
         [ $<nativesize>=['is nativesize(' $<size>=[\d+] ')' ] ]?
         [ $<unsigned>=['is unsigned'] ]?
         [ 'is' <parent=.name> ]?
         [ 'does' <role=.name> ]*
+	<.check_PACKAGE_oopsies('package_def2')>
         [
-        || ';' <statementlist> [ $ || <.panic: 'Confused'> ]
-        || <?[{]> <blockoid>
+        || ';' <.check_PACKAGE_oopsies('package_defu')><statementlist> [ $ || <.panic: 'Confused'> ]
+        || <?[{]> <.check_PACKAGE_oopsies('package_defb')><blockoid>
         || <.panic: 'Malformed package declaration'>
         ]
         ]
+	<.check_PACKAGE_oopsies('package_defx')>
     }
 
     rule role_params {

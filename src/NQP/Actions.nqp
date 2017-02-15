@@ -507,12 +507,13 @@ class NQP::Actions is HLL::Actions {
             elsif $<twigil> eq '!' {
                 my $name := ~@name.pop;
                 my $ch;
+		my $package := $/.CURSOR.package;
                 if $*PKGDECL eq 'role' {
                     $ch := QAST::Var.new( :name('$?CLASS'), :scope('typevar') );
-                    $ch.set_compile_time_value($*PACKAGE);
+                    $ch.set_compile_time_value($package);
                 }
                 else {
-                    $ch := QAST::WVal.new( :value($*PACKAGE) );
+                    $ch := QAST::WVal.new( :value($package) );
                 }
                 $ast := QAST::Var.new(
                     :name($name), :scope('attribute'),
@@ -524,7 +525,7 @@ class NQP::Actions is HLL::Actions {
                 # Make sure the attribute exists and add type info.
                 unless $*IN_DECL {
                     my $attr;
-                    for $*PACKAGE.HOW.attributes($*PACKAGE, :local(1)) {
+                    for $package.HOW.attributes($package, :local(1)) {
                         if $_.name eq $name {
                             $attr := $_;
                             last;
@@ -606,6 +607,7 @@ class NQP::Actions is HLL::Actions {
         my @ns := nqp::clone($<name><identifier>);
         my $name := ~@ns.pop;
         my $how := %*HOW{$*PKGDECL};
+	my $package := $/.CURSOR.package;
 
         # Get the body code.
         my $ast;
@@ -634,7 +636,7 @@ class NQP::Actions is HLL::Actions {
             $ast.unshift($params);
             $ast.push(QAST::Op.new( :op('curlexpad') ));
             $ast.symbol('$?CLASS', :scope('lexical'));
-            $*W.pkg_set_body_block($*PACKAGE, $ast);
+            $*W.pkg_set_body_block($package, $ast);
         }
         else {
             $ast.blocktype('immediate');
@@ -649,7 +651,7 @@ class NQP::Actions is HLL::Actions {
                 $parent_found := 1;
             }
             if $parent_found {
-                $*W.pkg_add_parent_or_role($*PACKAGE, "add_parent", $parent);
+                $*W.pkg_add_parent_or_role($package, "add_parent", $parent);
             }
             else {
                 $/.CURSOR.panic("Could not find parent class '" ~ ~$<parent> ~ "'");
@@ -657,7 +659,7 @@ class NQP::Actions is HLL::Actions {
         }
         elsif nqp::can($how, 'set_default_parent') {
             my $default := $*PKGDECL eq 'grammar' ?? ['NQPCursor'] !! ['NQPMu'];
-            $*W.pkg_add_parent_or_role($*PACKAGE, "set_default_parent",
+            $*W.pkg_add_parent_or_role($package, "set_default_parent",
                 $*W.find_sym($default));
         }
 
@@ -671,7 +673,7 @@ class NQP::Actions is HLL::Actions {
                     $role_found := 1;
                 }
                 if $role_found {
-                    $*W.pkg_add_parent_or_role($*PACKAGE, "add_role", $role);
+                    $*W.pkg_add_parent_or_role($package, "add_role", $role);
                 }
                 else {
                     $/.CURSOR.panic("Could not find role '" ~ ~$_ ~ "'");
@@ -681,23 +683,23 @@ class NQP::Actions is HLL::Actions {
 
         # Extra traits, if present.
         if $<nativesize> {
-            $*PACKAGE.HOW.set_nativesize($*PACKAGE, nqp::add_i($<size>, 0));
+            $package.HOW.set_nativesize($package, nqp::add_i($<size>, 0));
         }
         if $<unsigned> {
-            $*PACKAGE.HOW.set_unsigned($*PACKAGE, 1);
+            $package.HOW.set_unsigned($package, 1);
         }
 
         # Finally, compose.
-        $*W.pkg_compose($*PACKAGE);
+        $*W.pkg_compose($package);
 
         # If it's a grammar, pre-compute the NFAs.
-        if $*PKGDECL eq 'grammar' && nqp::can($*PACKAGE, '!precompute_nfas') {
-            $*PACKAGE.'!precompute_nfas'();
+        if $*PKGDECL eq 'grammar' && nqp::can($package, '!precompute_nfas') {
+            $package.'!precompute_nfas'();
         }
 
         # Export if needed.
         if $<export> {
-            $*EXPORT.WHO<DEFAULT>.WHO{$name} := $*PACKAGE;
+            $*EXPORT.WHO<DEFAULT>.WHO{$name} := $package;
         }
 
         make $ast;
@@ -772,7 +774,7 @@ class NQP::Actions is HLL::Actions {
             }
 
             # Add it.
-            $*DECLARAND_ATTR := $*W.pkg_add_attribute($*PACKAGE, %*HOW{$*PKGDECL ~ '-attr'},
+            $*DECLARAND_ATTR := $*W.pkg_add_attribute($/.CURSOR.package, %*HOW{$*PKGDECL ~ '-attr'},
                 %lit_args, %obj_args);
 
             $ast := QAST::Stmts.new();
@@ -947,7 +949,7 @@ class NQP::Actions is HLL::Actions {
                     if $*SCOPE eq 'our' {
                         # Need to install it at loadinit time but also re-bind
                         # it per invocation.
-                        $*W.install_package_routine($*PACKAGE, $name, $ast);
+                        $*W.install_package_routine($/.CURSOR.package, $name, $ast);
                         $BLOCK[0].push(QAST::Op.new(
                             :op('bind'),
                             lexical_package_lookup([$name], $/),
@@ -997,6 +999,7 @@ class NQP::Actions is HLL::Actions {
         # Otherwise, build method block QAST.
         my $ast;
         my int $onlystar;
+	my $package := $/.CURSOR.package;
         if $<onlystar> {
             $ast := only_star_block();
             $onlystar := 1;
@@ -1013,7 +1016,7 @@ class NQP::Actions is HLL::Actions {
         unless $ast.ann('signature_has_invocant') {
             $ast[0].unshift(QAST::Var.new(
                 :name('self'), :scope('lexical'), :decl('param'),
-                :returns($*PACKAGE)
+                :returns($package)
             ));
         }
         $ast.symbol('self', :scope('lexical') );
@@ -1038,12 +1041,12 @@ class NQP::Actions is HLL::Actions {
             my $is_dispatcher := $*MULTINESS eq 'proto';
             my $code := $*W.create_code($ast, $name, $is_dispatcher, :$onlystar);
             if $*MULTINESS eq 'multi' { attach_multi_signature($code, $ast); }
-            $*W.pkg_add_method($*PACKAGE, $meta_meth, $name, $code);
+            $*W.pkg_add_method($package, $meta_meth, $name, $code);
             $ast.annotate('code_obj', $code);
 
             # Install it in the package also if needed.
             if $*SCOPE eq 'our' {
-                $*W.install_package_routine($*PACKAGE, $name, $ast);
+                $*W.install_package_routine($package, $name, $ast);
             }
 
             # If it's a proto, also stash the current lexical dispatcher, for the {*}
@@ -1252,6 +1255,7 @@ class NQP::Actions is HLL::Actions {
 
     method regex_declarator($/, $key?) {
         my $name;
+	my $package := $/.CURSOR.package;
         if $<deflongname> {
             $name := ~$<deflongname>.ast;
         }
@@ -1274,7 +1278,7 @@ class NQP::Actions is HLL::Actions {
                     :blocktype('declaration_static'),
                     :node($/)
                 );
-                $*W.pkg_add_method($*PACKAGE, 'add_method', $name,
+                $*W.pkg_add_method($package, 'add_method', $name,
                     $*W.create_code($ast, $name, 0, :code_type_name<NQPRegex>));
         }
         else {
@@ -1293,11 +1297,11 @@ class NQP::Actions is HLL::Actions {
                 code_obj => $code);
             $regex.name($name);
 
-            if $*PKGDECL && nqp::can($*PACKAGE.HOW, 'add_method') {
+            if $*PKGDECL && nqp::can($package.HOW, 'add_method') {
                 # Add the actual method, marking it as a static declaration
                 # since it's reachable through the method table.
                 $block.blocktype('declaration_static');
-                $*W.pkg_add_method($*PACKAGE, 'add_method', $name, $code);
+                $*W.pkg_add_method($package, 'add_method', $name, $code);
             }
 
             # If this appears in a role, its NFA may depend on generic args.

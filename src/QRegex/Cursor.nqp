@@ -28,12 +28,14 @@ my class ParseShared is export {
 my class Braid is export {
     has $!grammar;
     has $!actions;
+    has $!package;
     has $!slangs;
 
-    method !braid_init(:$grammar, :$actions, *%ignore) {
+    method !braid_init(:$grammar, :$actions, :$package, *%ignore) {
         my $new := nqp::create(self);
         nqp::bindattr($new, Braid, '$!actions', $grammar);
         nqp::bindattr($new, Braid, '$!actions', $actions);
+        nqp::bindattr($new, Braid, '$!package', $package);
         nqp::bindattr($new, Braid, '$!slangs', nqp::hash());
         $new
     }
@@ -41,6 +43,7 @@ my class Braid is export {
         my $new := nqp::create(self);
         nqp::bindattr($new, Braid, '$!grammar', $!grammar);
         nqp::bindattr($new, Braid, '$!actions', $!actions);
+        nqp::bindattr($new, Braid, '$!package', $!package);
         nqp::bindattr($new, Braid, '$!slangs', nqp::clone($!slangs));
         $new
     }
@@ -54,6 +57,7 @@ my class Braid is export {
         nqp::printfh($err, nqp::sprintf("Braid %x in %s\n", [nqp::objectid(self), $tag]));
         nqp::printfh($err, "  grammar: " ~ $!grammar.HOW.name($!grammar) ~ "\n");
         nqp::printfh($err, "  actions: " ~ $!actions.HOW.name($!actions) ~ "\n");
+        nqp::printfh($err, "  package: " ~ $!package.HOW.name($!package) ~ "\n");
         for $!slangs {
             nqp::printfh($err, "    " ~ $_.key ~ ' ' ~ $_.value.HOW.name($_.value) ~ (nqp::isconcrete($_.value) ?? ":D" !! ":U") ~ "\n");
         }
@@ -103,6 +107,22 @@ role NQPCursorRole is export {
         self
     }
 
+    method check_PACKAGE_oopsies($tag?) {
+        nqp::die("No braid!") unless $!braid;
+        $tag := "" unless $tag;
+        my $value := $*PACKAGE;
+        my $bvalue := nqp::getattr($!braid, Braid, '$!package');
+        if nqp::isnull($bvalue) || nqp::objectid($bvalue) != nqp::objectid($value) {
+            my $target := nqp::getattr_s($!shared, ParseShared, '$!target');
+            nqp::printfh(nqp::getstderr(), "Out-of-sync package detected in $tag at " ~ nqp::substr($target, $!pos-10, 30) ~ "\n");
+            nqp::printfh(nqp::getstderr(), "  (value in braid: " ~ $bvalue.HOW.name($bvalue) ~ ", value in \$*PACKAGE: " ~ $value.HOW.name($value) ~ ")\n")
+                unless nqp::isnull($bvalue);
+            # nqp::die("croak");
+            nqp::bindattr($!braid, Braid, '$!package', $value);
+        }
+        self
+    }
+
     method check_LANG_oopsies($tag?) {
         nqp::die("No braid!") unless $!braid;
         $tag := "" unless $tag;
@@ -136,6 +156,17 @@ role NQPCursorRole is export {
         nqp::bindattr($!braid, Braid, '$!grammar', self);
         nqp::bindattr($!braid, Braid, '$!actions', $actions);
         self
+    }
+
+    method package() {
+#        nqp::die("No braid!") unless $!braid;
+#        self.check_PACKAGE_oopsies('package');
+        nqp::getattr($!braid, Braid, '$!package');
+    }
+
+    method set_package($package) {
+#        nqp::die("No braid!") unless $!braid;
+        nqp::bindattr($!braid, Braid, '$!package', $package);
     }
 
     method set_braid_from($other) { nqp::bindattr(self, $?CLASS, '$!braid', nqp::getattr($other, $?CLASS, '$!braid')); self }
@@ -245,7 +276,7 @@ role NQPCursorRole is export {
             }
             else {
                 if nqp::isconcrete(self) && $!braid {
-                    $braid := Braid."!braid_init"(:grammar(self), self.actions);
+                    $braid := Braid."!braid_init"(:grammar(self), :actions(self.actions), :package(nqp::getattr($!braid, Braid, '$!package')));
                 }
                 else {
                     $braid := Braid."!braid_init"(:grammar(self));
@@ -1203,7 +1234,7 @@ class NQPCursor does NQPCursorRole {
     }
 
     method parse($target, :$rule = 'TOP', :$actions, *%options) {
-        my $braid := Braid.'!braid_init'(:grammar(self), :actions($actions));
+        my $braid := Braid.'!braid_init'(:grammar(self), :actions($actions), :package($*PACKAGE));
         my $cur      := self.'!cursor_init'($target, :braid($braid), |%options);
 
 #        nqp::printfh(nqp::getstderr(), "Cursor.parse grammar " ~ $cur.HOW.name($cur) ~ " actions " ~ $actions.HOW.name($actions) ~ ")\n");

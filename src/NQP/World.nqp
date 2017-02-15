@@ -197,9 +197,12 @@ class NQP::World is HLL::World {
         # See if NQPRoutine is available to wrap this up in.
         my $code_type;
         my $have_code_type := 0;
+	my $cursor := $*LANG;
+	my $package := $cursor.package;
+	$cursor.check_PACKAGE_oopsies('create_code');
         try {
             $code_type := self.find_sym([$code_type_name]);
-            $have_code_type := $*PACKAGE.HOW.name($*PACKAGE) ne $code_type_name;
+            $have_code_type := $package.HOW.name($package) ne $code_type_name;
         }
 
         # For code refs, we need a "stub" that we'll clone and use for the
