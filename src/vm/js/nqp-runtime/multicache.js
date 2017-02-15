@@ -33,7 +33,6 @@ function posTypes(ctx, capture) {
 var op = {};
 
 op.multicachefind = function(ctx, cache, capture) {
-  return Null;
   if (cache === Null) return Null;
   var arity = capture.pos.length;
   var hasNamed = capture.named ? true : false;

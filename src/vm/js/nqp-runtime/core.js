@@ -369,13 +369,6 @@ op.unbox_s = function(obj) {
   return obj.$$getStr();
 };
 
-op.elems = function(obj) {
-  if (!obj.$$elems) {
-    nqp.dumpObj(obj);
-  }
-  return obj.$$elems();
-};
-
 op.setelems = function(obj, elems) {
   obj.$$setelems(elems);
   return obj;

@@ -401,9 +401,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     method compile_sig(@params, :$cps) {
-        my $slurpy_named; # *%foo
-        my $slurpy;       # *@foo
-
         my @sig := ['caller_ctx','_NAMED'];
         my @setup;
 
@@ -425,10 +422,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         for @params -> $param {
             if $param.slurpy {
                 if $param.named {
-                    $slurpy_named := $param; 
+                    set_variable($param, "nqp.slurpyNamed(_NAMED, {known_named(@*KNOWN_NAMED)})");
                 }
                 else {
-                    $slurpy := $param;
+                    set_variable($param, "nqp.slurpyArray({quote_string($*HLL)}, Array.prototype.slice.call(arguments,{+@sig}))");
                 }
             }
             elsif $param.named {
@@ -500,16 +497,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 }
             }
 
-        }
-
-        if $slurpy {
-            set_variable($slurpy, "nqp.slurpyArray({quote_string($*HLL)}, Array.prototype.slice.call(arguments,{+@sig}))");
-        }
-        if $slurpy_named {
-            set_variable($slurpy_named, "nqp.slurpyNamed(_NAMED, {known_named(@*KNOWN_NAMED)})");
-        }
-
-        for @params -> $param {
             for $param.list -> $param_setup {
                 @setup.push(self.as_js($param_setup, :want($T_OBJ)));
             }

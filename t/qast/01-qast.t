@@ -1,6 +1,6 @@
 use QAST;
 
-plan(119);
+plan(120);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -1464,7 +1464,7 @@ if nqp::getcomp('nqp').backend.name eq 'jvm' {
 }
 
 if nqp::getcomp('nqp').backend.name eq 'jvm' {
-    skip('children of a QAST::Var with a "param" decl are not implemented', 5);
+    skip('children of a QAST::Var with a "param" decl are not implemented', 6);
 }
 else {
     is_qast_args(
@@ -1502,6 +1502,32 @@ else {
         ['Highland Park!'],
         'Mmmmm...Highland Park!',
         'a QAST::Var with a param decl can have children which are executed - lexicals');
+
+    is_qast_args(
+        QAST::Block.new(
+            QAST::Var.new( :name('other'), :scope('lexical'), :decl('var')),
+            QAST::Var.new( :name('param1'), :scope('lexical'), :decl('param'), :returns(str),
+                QAST::Op.new( :op('bind'),
+                    QAST::Var.new( :name('other'), :scope('lexical')),
+                    QAST::Op.new(:op<concat>,
+                        QAST::SVal.new(:value("Highland ")),
+                        QAST::Var.new( :name('param1'), :scope('lexical')),
+                    )
+                )
+            ),
+            QAST::Var.new( :name('param2'), :scope('lexical'), :decl('param'), :returns(str),
+                :default(
+                    QAST::Op.new(:op<concat>,
+                        QAST::SVal.new(:value("Hmmmm...")),
+                        QAST::Var.new( :name('other'), :scope('lexical'))
+                    )
+                )
+            ),
+            QAST::Var.new( :name('param2'), :scope('lexical'))
+        ),
+        ['Park!'],
+        'Hmmmm...Highland Park!',
+        'a QAST::Var with children interacts with defaults properly');
 
     my $log;
     class Log {

@@ -1,6 +1,6 @@
 # while, until statements
 
-plan(15);
+plan(16);
 
 my $a; my $sum;
 
@@ -100,3 +100,8 @@ while $i*10 -> $cond {
 }
 is($log, '40;30;20;10;', 'while ... -> $param {...}');
 
+my $str := 'hello there';
+while $str -> $got {
+    is($got, 'hello there', 'regression test for a bug in type conversion');
+    $str := '';
+}

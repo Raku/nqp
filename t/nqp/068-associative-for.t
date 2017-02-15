@@ -1,6 +1,6 @@
 # check hash access methods
 
-plan(16);
+plan(19);
 
 my %h;
 
@@ -51,7 +51,7 @@ for %h {
 }
 
 ok($sum == 1234,"we iterate over the correct keys");
-ok($count == 4,"we iterate the correct number of times");
+ok($count == 4, "we iterate the correct number of times");
 
 my $it := nqp::iterator(%h);
 nqp::shift($it);
@@ -61,9 +61,28 @@ ok(nqp::istrue($it) == 1, "iterator is true while we haven't iterator over every
 nqp::shift($it);
 ok(nqp::istrue($it) == 0, "iterator is false when we have iterated over everything");
 
-my %h1;
-%h1<foo> := 123;
-my $it_h1 := nqp::iterator(%h1);
-my $kv := nqp::shift($it_h1);
-is(nqp::iterkey_s($kv), 'foo', 'nqp::iterkey_s on the thing returned by shifting an iterator');
-ok(nqp::iterval($kv) == 123, 'nqp::iterkey_s on the thing returned by shifting an iterator');
+
+{
+    my %h;
+    %h<a> := 100;
+    %h<b> := 7;
+    my $iter := nqp::iterator(%h);
+
+    ok(nqp::eqaddr(nqp::shift($iter), $iter), 'iterator returns itself');
+
+
+    my str $first_key := nqp::iterkey_s($iter);
+    my $first_val := nqp::iterval($iter);
+
+    ok(nqp::eqaddr(nqp::shift($iter), $iter), 'iterator returns itself again');
+
+    my str $second_key := nqp::iterkey_s($iter);
+    my $second_val := nqp::iterval($iter);
+
+    ok(
+        ($first_key eq 'a' && $second_key eq  'b') || ($first_key eq 'b' && $second_key eq 'a'),
+        "got correct keys from iterator");
+
+    is($first_val, %h{$first_key}, "got correct value in first iteration");
+    is($second_val, %h{$second_key}, "got correct value in second iteration");
+}

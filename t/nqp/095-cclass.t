@@ -1,4 +1,4 @@
-plan(39);
+plan(42);
 sub test_cclass($c, $str) { 
   my $s := '';
   my $i := 0;
@@ -26,6 +26,7 @@ my %matches := nqp::hash(
     nqp::const::CCLASS_HEXADECIMAL,  '1100100000',
     nqp::const::CCLASS_BLANK,        '0000011000',
     nqp::const::CCLASS_CONTROL,      '0010001000',
+    nqp::const::CCLASS_PRINTING,     '1101110111',
     nqp::const::CCLASS_PUNCTUATION,  '0001000101',
     nqp::const::CCLASS_ALPHANUMERIC, '1100100010',
 );
@@ -44,6 +45,7 @@ my %const := nqp::hash(
     nqp::const::CCLASS_CONTROL, 'CONTROL', 
     nqp::const::CCLASS_PUNCTUATION, 'PUNCTUATION', 
     nqp::const::CCLASS_ALPHANUMERIC, 'ALPHANUMERIC', 
+    nqp::const::CCLASS_PRINTING, 'PRINTING', 
 );
 
 for %const -> $cclass {

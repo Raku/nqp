@@ -32,7 +32,9 @@ knowhow NQPClassHOW {
     # Full list of roles that we do.
     has @!done;
     
-    # Cached values, which are thrown away if the class changes.
+    # Cached values, which are thrown away if the class changes. We don't ever
+    # mutate the %!caches hash, but instead clone/mutate/replace; additions
+    # are rare compared to lookups, and this beats locking.
     has %!caches;
     has $!is_mixin;
 
@@ -678,10 +680,10 @@ knowhow NQPClassHOW {
     ##
 
     method cache($obj, $key, $value_generator) {
-        %!caches := nqp::hash() unless nqp::ishash(%!caches);
-        nqp::existskey(%!caches, $key) ??
-            %!caches{$key} !!
-            (%!caches{$key} := $value_generator())
+        my %orig_cache := %!caches;
+        nqp::ishash(%orig_cache) && nqp::existskey(%!caches, $key)
+            ?? %!caches{$key}
+            !! self.cache_add($obj, $key, $value_generator())
     }
     
     method flush_cache($obj) {
@@ -696,8 +698,13 @@ knowhow NQPClassHOW {
     }
 
     method cache_add($obj, $key, $value) {
-        %!caches := nqp::hash() unless nqp::ishash(%!caches);
-        %!caches{$key} := $value;
+        my %orig_cache := %!caches;
+        my %copy := nqp::ishash(%orig_cache) ?? nqp::clone(%orig_cache) !! {};
+        %copy{$key} := $value;
+        nqp::scwbdisable();
+        %!caches := %copy;
+        nqp::scwbenable();
+        $value
     }
 
     ##

@@ -886,7 +886,7 @@ class QAST::OperationsJS {
 
     add_simple_op('loadbytecode', $T_STR, [$T_STR], :ctx, :side_effects);
 
-    add_simple_op('elems', $T_INT, [$T_OBJ]);
+    add_simple_op('elems', $T_INT, [$T_OBJ], :method_call);
 
     add_simple_op('islist', $T_INT, [$T_OBJ], :decont(0));
 
@@ -946,8 +946,8 @@ class QAST::OperationsJS {
 
     add_simple_op('iterator', $T_OBJ, [$T_OBJ], :method_call, :side_effects);
 
-    add_simple_op('iterval', $T_OBJ, [$T_OBJ], sub ($iter) {"$iter.iterval()"});
-    add_simple_op('iterkey_s', $T_STR, [$T_OBJ], sub ($iter) {"$iter.iterkey_s()"});
+    add_simple_op('iterval', $T_OBJ, [$T_OBJ], :method_call);
+    add_simple_op('iterkey_s', $T_STR, [$T_OBJ], :method_call);
 
     add_simple_op('existskey', $T_BOOL, [$T_OBJ, $T_STR], :method_call);
     add_simple_op('deletekey', $T_OBJ, [$T_OBJ, $T_STR], :method_call, :side_effects);
@@ -1287,7 +1287,7 @@ class QAST::OperationsJS {
                 $list,
                 "$iterator = {$list.expr}.\$\$iterator();\n",
                 "var $loop = function() \{\n",
-                "if ($iterator.idx < $iterator.target) \{\n",
+                "if ($iterator.\$\$idx < $iterator.\$\$target) \{\n",
                 $*BLOCK.set_cont($body, $loop),
                 $body,
                 "\} else \{\n",
@@ -1301,7 +1301,7 @@ class QAST::OperationsJS {
             Chunk.new($T_OBJ, 'null', [
                 $list,
                 "$iterator = {$list.expr}.\$\$iterator();\n",
-                "while ($iterator.idx < $iterator.target) \{\n",
+                "while ($iterator.\$\$idx < $iterator.\$\$target) \{\n",
                 $comp.handle_control($loop, $body),
                 "\}\n"
             ], :node($node));
@@ -1333,7 +1333,7 @@ class QAST::OperationsJS {
             my $body;
             {
                 my $*LOOP := $loop;
-                my $cond := $comp.as_js(@operands[0], :want($T_BOOL));
+                my $cond := $comp.as_js(@operands[0], :want($cond_type));
                 $check_cond := $comp.coerce($cond, $T_BOOL);
                 my $cond_without_sideeffects := Chunk.new($cond.type, $cond.expr);
 
@@ -1466,7 +1466,7 @@ class QAST::OperationsJS {
     }
 
     add_simple_op('throwpayloadlexcaller', $T_VOID, [$T_INT, $T_OBJ], :side_effects, :!inlinable,
-       sub ($category, $payload) {"$*CTX.throwpayloadlexcaller($category, $payload)"});
+       sub ($category, $payload) {"{$*BLOCK.ctx}.throwpayloadlexcaller($category, $payload)"});
 
     add_op('throwpayloadlex', :!inlinable, sub ($comp, $node, :$want, :$cps) {
         my $payload := $comp.as_js(:want($T_OBJ), $node[1]);
