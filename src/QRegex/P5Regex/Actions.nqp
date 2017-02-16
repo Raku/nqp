@@ -358,6 +358,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
     }
     
     method qbuildsub($qast, $block = QAST::Block.new(), :$anon, :$addself, *%rest) {
+	my $*LANG := $qast.node.CURSOR;
         my $code_obj := nqp::existskey(%rest, 'code_obj')
             ?? %rest<code_obj>
             !! self.create_regex_code_object($block);
