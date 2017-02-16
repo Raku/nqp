@@ -130,6 +130,7 @@ role NQPCursorRole is export {
             my $name := $_.key;
             my $value := $_.value;
             my $bvalue := nqp::atkey(nqp::getattr($!braid, Braid, '$!slangs'),$name);
+            next unless $name eq 'MAIN' || $name eq 'MAIN-actions';
             if nqp::isnull($bvalue) || nqp::objectid($bvalue) != nqp::objectid($value) {
                 nqp::printfh(nqp::getstderr(), "Deprecated use of %*LANG\<$name> assignment detected in $tag; module should export syntax using \$*LANG.define_slang(\"$name\",<grammar>,<actions>) instead\n")
                     unless nqp::index($name,"-actions") > 0;
@@ -167,6 +168,16 @@ role NQPCursorRole is export {
     method set_package($package) {
 #        nqp::die("No braid!") unless $!braid;
         nqp::bindattr($!braid, Braid, '$!package', $package);
+    }
+
+    # For now, we simply forbid overlap between slang and pragma names.
+    # Could do some namespace isolation here if it ever becomes an issue.
+    method pragma($name) {
+        nqp::atkey(nqp::getattr($!braid, Braid, '$!slangs'),$name);
+    }
+    method set_pragma($name,$value) {
+        nqp::bindkey(nqp::getattr($!braid, Braid, '$!slangs'),$name, $value);
+        self;
     }
 
     method set_braid_from($other) { nqp::bindattr(self, $?CLASS, '$!braid', nqp::getattr($other, $?CLASS, '$!braid')); self }
