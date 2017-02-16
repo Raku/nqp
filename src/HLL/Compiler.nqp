@@ -420,6 +420,18 @@ class HLL::Compiler does HLL::Backend::Default {
         return 0;
     }
 
+    method execute_stage($stage, $result, %adverbs) {
+        if nqp::can(self, $stage) {
+            self."$stage"($result, |%adverbs);
+        }
+        elsif nqp::can($!backend, $stage) {
+            $!backend."$stage"($result, |%adverbs);
+        }
+        else {
+            nqp::die("Unknown compilation stage '$stage'");
+        }
+    }
+
     method compile($source, :$from, :$lineposcache, *%adverbs) {
         my %*COMPILING<%?OPTIONS> := %adverbs;
         my $*LINEPOSCACHE := $lineposcache;
@@ -446,15 +458,7 @@ class HLL::Compiler does HLL::Backend::Default {
             my $timestamp := nqp::time_n();
 
             my sub run() {
-                if nqp::can(self, $_) {
-                    self."$_"($result, |%adverbs);
-                }
-                elsif nqp::can($!backend, $_) {
-                    $!backend."$_"($result, |%adverbs);
-                }
-                else {
-                    nqp::die("Unknown compilation stage '$_'");
-                }
+                self.execute_stage($_, $result, %adverbs)
             }
 
             $result := %adverbs<profile-stage> eq $_
