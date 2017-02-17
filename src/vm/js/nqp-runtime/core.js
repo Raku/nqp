@@ -207,9 +207,8 @@ op.settypecache = function(obj, cache) {
 };
 
 op.settypecheckmode = function(obj, mode) {
-  if (mode & 2) {
-    obj._STable.typeCheckNeedsAccepts = true;
-  }
+  const TYPE_CHECK_CACHE_FLAG_MASK = 3;
+  obj._STable.modeFlags = mode | (obj.STable.modeFlags & TYPE_CHECK_CACHE_FLAG_MASK);
   return obj;
 };
 

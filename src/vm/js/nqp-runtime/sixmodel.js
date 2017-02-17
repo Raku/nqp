@@ -101,7 +101,8 @@ class STable {
         }
       }
 
-      if (type._STable.typeCheckNeedsAccepts) {
+      const TYPE_CHECK_NEEDS_ACCEPTS = 2;
+      if (type._STable.modeFlags & TYPE_CHECK_NEEDS_ACCEPTS) {
         return type._STable.HOW.accepts_type(ctx, null, type._STable.HOW, type, this).$$toBool(ctx);
       }
 
