@@ -2,7 +2,7 @@
 
 use nqpmo;
 
-plan(56);
+plan(58);
 
 sub add_to_sc($sc, $idx, $obj) {
     nqp::scsetobj($sc, $idx, $obj);
@@ -495,4 +495,49 @@ sub add_to_sc($sc, $idx, $obj) {
 
     my $hllized := nqp::hllizefor($obj, "somelang");
     ok(nqp::isstr($hllized) && $hllized eq "fooifed", "hll role is preserved correctly");
+}
+
+# Setting the type check mode nqp::const::TYPE_CHECK_NEEDS_ACCEPTS is preserved by serialization
+{
+    my class AcceptingType {
+        has int $!accepts_type_called;
+
+        has $!accepts;
+        
+        method accepts_type_called() {
+            $!accepts_type_called;
+        }
+        method accepts_type($type, $obj) {
+            $!accepts_type_called := $!accepts_type_called + 1;
+            $!accepts;
+        }
+        method new_type() {
+            nqp::newtype(self, 'Uninstantiable');
+        }
+    }
+
+    my class Bar { }
+
+    my $type := AcceptingType.new(accepts => 1).new_type;
+    nqp::composetype($type, nqp::hash());
+
+    my $sc := nqp::createsc('TEST_SC_13_IN');
+    my $sh := nqp::list_s();
+
+    my $cr := nqp::list();
+
+    add_to_sc($sc, 0, $type);
+
+    nqp::settypecheckmode($type, nqp::const::TYPE_CHECK_NEEDS_ACCEPTS);
+
+    my $serialized := nqp::serialize($sc, $sh);
+
+    my $dsc := nqp::createsc('TEST_SC_13_OUT');
+    nqp::deserialize($serialized, $dsc, $sh, $cr, nqp::null());
+
+    my $dsc_type := nqp::scgetobj($dsc, 0);
+
+    ok(nqp::istype(Bar, $dsc_type), 'nqp::const::TYPE_CHECK_NEEDS_ACCEPTS is preserved after serialization');
+    is($dsc_type.HOW.accepts_type_called, 1, 'accepts_type is called when needed');
+
 }
