@@ -78,12 +78,12 @@ Sign the tarball:
 =item 8
 
 Upload the release tarball and signature to L<http://rakudo.org/downloads/nqp>
-and L<https://rakudo.perl6.org/downloads/source/nqp/>:
+and L<https://rakudo.perl6.org/downloads/nqp/>:
 
   scp nqp-2013.12.tar.gz nqp-2013.12.tar.gz.asc \
         rakudo@rakudo.org:public_html/downloads/nqp/
   scp nqp-2013.12.tar.gz nqp-2013.12.tar.gz.asc \
-        rakudo@www.p6c.org:public_html/downloads/source/nqp/
+        rakudo@www.p6c.org:public_html/downloads/nqp/
 
 If you do not have permissions for that, ask one of (pmichaud, jnthn, FROGGS,
 masak, tadzik, moritz, PerlJam/perlpilot, [Coke], lizmat, timotimo, fsergot,
