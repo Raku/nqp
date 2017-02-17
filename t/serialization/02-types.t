@@ -2,7 +2,7 @@
 
 use nqpmo;
 
-plan(52);
+plan(56);
 
 sub add_to_sc($sc, $idx, $obj) {
     nqp::scsetobj($sc, $idx, $obj);
@@ -382,9 +382,16 @@ sub add_to_sc($sc, $idx, $obj) {
 
     my $hi := $with_param.HOW.parameterize($with_param, ["Hi"]);
 
+    class Foo {}
+    class Bar {}
+
+    my $with_foo := $with_param.HOW.parameterize($with_param, [Foo]);
+
     add_to_sc($sc, 0, $with_param);
 
     add_to_sc($sc, 1, $hi);
+
+    add_to_sc($sc, 2, $with_foo);
 
     my $serialized := nqp::serialize($sc, $sh);
 
@@ -399,6 +406,19 @@ sub add_to_sc($sc, $idx, $obj) {
     my $dsc_hi := nqp::scgetobj($dsc, 1);
 
     ok(nqp::typeparameterat($dsc_hi, 0) eq "Hi", "We can serialize a parameterized type");
+
+    my $dsc_with_foo := nqp::scgetobj($dsc, 2);
+
+    ok(nqp::eqaddr(nqp::typeparameterat($dsc_with_foo, 0), Foo), "Type parameterized with type object is serialized correctly");
+
+    my $new_with_foo := $type.HOW.parameterize($type, [Foo]);
+    my $new_with_bar := $type.HOW.parameterize($type, [Bar]);
+
+    ok(nqp::eqaddr(nqp::typeparameterat($new_with_foo, 0), Foo), "We can parameterize with a type object using a deserialized parameterizer ");
+
+    ok(nqp::eqaddr($new_with_foo, $dsc_with_foo), "We get stuff from the type cache");
+    ok(!nqp::eqaddr($new_with_bar, $dsc_with_foo), "Parameterizing with a type object that's not in cache");
+
 }
 
 # Serializing a type with HLL owner
