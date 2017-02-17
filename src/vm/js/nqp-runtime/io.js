@@ -37,6 +37,18 @@ op.say = function(arg) {
   return arg;
 };
 
+op.filewritable = function(path) {
+  return boolish(fs.accessSync(path, fs.constants.W_OK));
+};
+
+op.fileexecutable = function(path) {
+  return boolish(fs.accessSync(path, fs.constants.X_OK));
+};
+
+op.filereadable = function(path) {
+  return boolish(fs.accessSync(path, fs.constants.R_OK));
+};
+
 function stat(file, code, lstat) {
   const EXISTS = 0;
   const FILESIZE = 1;
