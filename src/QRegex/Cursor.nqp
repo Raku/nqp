@@ -130,7 +130,6 @@ role NQPCursorRole is export {
             my $name := $_.key;
             my $value := $_.value;
             my $bvalue := nqp::atkey(nqp::getattr($!braid, Braid, '$!slangs'),$name);
-            next unless $name eq 'MAIN' || $name eq 'MAIN-actions';
             if nqp::isnull($bvalue) || nqp::objectid($bvalue) != nqp::objectid($value) {
                 nqp::printfh(nqp::getstderr(), "Deprecated use of %*LANG\<$name> assignment detected in $tag; module should export syntax using \$*LANG.define_slang(\"$name\",<grammar>,<actions>) instead\n")
                     unless nqp::index($name,"-actions") > 0;
