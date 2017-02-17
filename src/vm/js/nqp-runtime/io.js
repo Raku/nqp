@@ -357,7 +357,7 @@ op.rmdir = function(dir) {
 
 op.mkdir = function(dir, mode) {
   try {
-    fs.accessSync(dir, fs.F_OK);
+    fs.accessSync(dir, fs.constant.F_OK);
   } catch (e) {
     fs.mkdirSync(dir, mode);
   }
