@@ -207,9 +207,8 @@ op.settypecache = function(obj, cache) {
 };
 
 op.settypecheckmode = function(obj, mode) {
-  if (mode & 2) {
-    obj._STable.typeCheckNeedsAccepts = true;
-  }
+  const TYPE_CHECK_CACHE_FLAG_MASK = 3;
+  obj._STable.modeFlags = mode | (obj.STable.modeFlags & TYPE_CHECK_CACHE_FLAG_MASK);
   return obj;
 };
 
@@ -622,7 +621,7 @@ op.parameterizetype = function(ctx, type, params) {
       var match = true;
       for (var j = 0; j < unpackedParams.length; j++) {
         /* XXX More cases to consider here. - copied over from the jvm backend, need to consider what they are*/
-        if (unpackedParams[j] != lookup[i].params[j]) {
+        if (unpackedParams[j] !== lookup[i].params[j]) {
           match = false;
           break;
         }

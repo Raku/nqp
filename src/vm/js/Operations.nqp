@@ -980,6 +980,10 @@ class QAST::OperationsJS {
 
     add_simple_op('fileislink', $T_INT, [$T_STR], :side_effects);
 
+    add_simple_op('filewritable', $T_INT, [$T_STR], :side_effects);
+    add_simple_op('filereadable', $T_INT, [$T_STR], :side_effects);
+    add_simple_op('fileexecutable', $T_INT, [$T_STR], :side_effects);
+
     add_simple_op('defined', $T_INT, [$T_OBJ], :decont(0));
     %ops<isconcrete> := %ops<defined>;
 

@@ -2,7 +2,7 @@
 
 use nqpmo;
 
-plan(52);
+plan(58);
 
 sub add_to_sc($sc, $idx, $obj) {
     nqp::scsetobj($sc, $idx, $obj);
@@ -382,9 +382,16 @@ sub add_to_sc($sc, $idx, $obj) {
 
     my $hi := $with_param.HOW.parameterize($with_param, ["Hi"]);
 
+    class Foo {}
+    class Bar {}
+
+    my $with_foo := $with_param.HOW.parameterize($with_param, [Foo]);
+
     add_to_sc($sc, 0, $with_param);
 
     add_to_sc($sc, 1, $hi);
+
+    add_to_sc($sc, 2, $with_foo);
 
     my $serialized := nqp::serialize($sc, $sh);
 
@@ -399,6 +406,19 @@ sub add_to_sc($sc, $idx, $obj) {
     my $dsc_hi := nqp::scgetobj($dsc, 1);
 
     ok(nqp::typeparameterat($dsc_hi, 0) eq "Hi", "We can serialize a parameterized type");
+
+    my $dsc_with_foo := nqp::scgetobj($dsc, 2);
+
+    ok(nqp::eqaddr(nqp::typeparameterat($dsc_with_foo, 0), Foo), "Type parameterized with type object is serialized correctly");
+
+    my $new_with_foo := $type.HOW.parameterize($type, [Foo]);
+    my $new_with_bar := $type.HOW.parameterize($type, [Bar]);
+
+    ok(nqp::eqaddr(nqp::typeparameterat($new_with_foo, 0), Foo), "We can parameterize with a type object using a deserialized parameterizer ");
+
+    ok(nqp::eqaddr($new_with_foo, $dsc_with_foo), "We get stuff from the type cache");
+    ok(!nqp::eqaddr($new_with_bar, $dsc_with_foo), "Parameterizing with a type object that's not in cache");
+
 }
 
 # Serializing a type with HLL owner
@@ -475,4 +495,49 @@ sub add_to_sc($sc, $idx, $obj) {
 
     my $hllized := nqp::hllizefor($obj, "somelang");
     ok(nqp::isstr($hllized) && $hllized eq "fooifed", "hll role is preserved correctly");
+}
+
+# Setting the type check mode nqp::const::TYPE_CHECK_NEEDS_ACCEPTS is preserved by serialization
+{
+    my class AcceptingType {
+        has int $!accepts_type_called;
+
+        has $!accepts;
+        
+        method accepts_type_called() {
+            $!accepts_type_called;
+        }
+        method accepts_type($type, $obj) {
+            $!accepts_type_called := $!accepts_type_called + 1;
+            $!accepts;
+        }
+        method new_type() {
+            nqp::newtype(self, 'Uninstantiable');
+        }
+    }
+
+    my class Bar { }
+
+    my $type := AcceptingType.new(accepts => 1).new_type;
+    nqp::composetype($type, nqp::hash());
+
+    my $sc := nqp::createsc('TEST_SC_13_IN');
+    my $sh := nqp::list_s();
+
+    my $cr := nqp::list();
+
+    add_to_sc($sc, 0, $type);
+
+    nqp::settypecheckmode($type, nqp::const::TYPE_CHECK_NEEDS_ACCEPTS);
+
+    my $serialized := nqp::serialize($sc, $sh);
+
+    my $dsc := nqp::createsc('TEST_SC_13_OUT');
+    nqp::deserialize($serialized, $dsc, $sh, $cr, nqp::null());
+
+    my $dsc_type := nqp::scgetobj($dsc, 0);
+
+    ok(nqp::istype(Bar, $dsc_type), 'nqp::const::TYPE_CHECK_NEEDS_ACCEPTS is preserved after serialization');
+    is($dsc_type.HOW.accepts_type_called, 1, 'accepts_type is called when needed');
+
 }
