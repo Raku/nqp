@@ -481,7 +481,7 @@ class HLL::Compiler does HLL::Backend::Default {
         if nqp::existskey(%adverbs, 'grammar') {
 	    $grammar := %adverbs<grammar>;
 	    $actions := %adverbs<actions>;
-	    nqp::printfh(nqp::getstderr(), "  (" ~ $grammar.HOW.name($grammar) ~ " with " ~ $actions.HOW.name($actions) ~ "\n");
+	    # nqp::printfh(nqp::getstderr(), "  (" ~ $grammar.HOW.name($grammar) ~ " with " ~ $actions.HOW.name($actions) ~ "\n");
 	}
 	else {
 	    $grammar := self.parsegrammar;
