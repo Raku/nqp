@@ -679,8 +679,8 @@ class P6int extends REPR {
 
 
   serializeReprData(st, cursor) {
-    cursor.ref(this.bits);
-    cursor.ref(this.is_unsigned);
+    cursor.varint(this.bits);
+    cursor.varint(this.is_unsigned);
   }
 
   deserializeReprData(cursor) {
