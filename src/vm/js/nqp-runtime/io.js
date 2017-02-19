@@ -216,6 +216,11 @@ op.readfh = function(fh, buf, bytes) {
   return buf;
 };
 
+op.writefh = function(fh, buf) {
+  var buffer = core.toRawBuffer(buf);
+  return fs.writeSync(fh.fd, buffer, 0, buffer.length);
+};
+
 function readline(fh, chomp) {
   var line = '';
   var buffer = new Buffer(16);

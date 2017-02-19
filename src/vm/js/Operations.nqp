@@ -481,6 +481,7 @@ class QAST::OperationsJS {
     add_simple_op('open', $T_OBJ, [$T_STR, $T_STR], :side_effects);
 
     add_simple_op('readfh', $T_OBJ, [$T_OBJ, $T_OBJ, $T_INT], :side_effects);
+    add_simple_op('writefh', $T_INT, [$T_OBJ, $T_OBJ], :side_effects);
     add_simple_op('tellfh', $T_INT, [$T_OBJ], :side_effects);
     add_simple_op('seekfh', $T_INT, [$T_OBJ, $T_INT, $T_INT], :ctx, :side_effects);
     add_simple_op('eoffh', $T_INT, [$T_OBJ], :side_effects);

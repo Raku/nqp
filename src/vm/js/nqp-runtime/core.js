@@ -563,27 +563,30 @@ op.encode = function(str, encoding_, buf) {
   return buf;
 };
 
-op.decode = function(buf, encoding_) {
-  let encoding = renameEncoding(encoding_);
+function toRawBuffer(buf) {
   let elementSize = byteSize(buf);
-
   let is_unsigned = buf._STable.REPR.type._STable.REPR.is_unsigned;
+  let array = buf.array;
 
-  buf = buf.array;
-
-  var buffer = new Buffer(buf.length * elementSize);
+  let buffer = new Buffer(array.length * elementSize);
 
   let offset = 0;
-  for (let i = 0; i < buf.length; i++) {
+  for (let i = 0; i < array.length; i++) {
     if (is_unsigned) {
-      buffer.writeUIntLE(buf[i], offset, elementSize);
+      buffer.writeUIntLE(array[i], offset, elementSize);
     } else {
-      buffer.writeIntLE(buf[i], offset, elementSize);
+      buffer.writeIntLE(array[i], offset, elementSize);
     }
     offset += elementSize;
   }
 
-  return buffer.toString(encoding);
+  return buffer;
+}
+
+exports.toRawBuffer = toRawBuffer;
+
+op.decode = function(buf, encoding) {
+  return toRawBuffer(buf).toString(renameEncoding(encoding));
 };
 
 op.objprimspec = function(obj) {
