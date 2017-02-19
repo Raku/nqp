@@ -2,7 +2,7 @@
 
 # Test nqp::op file operations.
 
-plan(100);
+plan(106);
 
 ok( nqp::stat('CREDITS', nqp::const::STAT_EXISTS) == 1, 'nqp::stat exists');
 ok( nqp::stat('AARDVARKS', nqp::const::STAT_EXISTS) == 0, 'nqp::stat not exists');
@@ -359,5 +359,40 @@ else {
     nqp::readlinefh($fh);
     is(nqp::readcharsfh($fh, 5), 'line3', 'nqp::readcharsfh after nqp::readlinefh');
     is(nqp::readcharsfh($fh, 150), "line4\n", 'nqp::readcharsfh with more chars then they are in the file');
+    nqp::closefh($fh);
+}
+
+my sub buf_dump($buf) {
+    my @parts;
+    my $i := 0;
+    while $i < nqp::elems($buf) {
+        @parts.push(~nqp::atpos_i($buf, $i));
+        $i := $i + 1;
+    }
+    nqp::join(",", @parts);
+}
+
+my sub create_buf($type) {
+    my $buf := nqp::newtype(nqp::null(), 'VMArray');
+    nqp::composetype($buf, nqp::hash('array', nqp::hash('type', $type)));
+    nqp::setmethcache($buf, nqp::hash('new', method () {nqp::create($buf)}));
+    $buf;
+};
+
+{
+    my $fh := nqp::open('t/nqp/019-chars.txt', 'r');
+    my $buf := create_buf(uint8).new;
+    ok(nqp::eqaddr(nqp::readfh($fh, $buf, 5), $buf), 'nqp::readfh should return the buffer');
+    is(buf_dump($buf), '108,105,110,207,128', 'nqp::readfh read in correct unsigned bytes');
+    is(buf_dump(nqp::readfh($fh, $buf, 4)), '49,46,108,105', 'nqp::readfh read in the next bytes correctly');
+    nqp::closefh($fh);
+}
+
+{
+    my $fh := nqp::open('t/nqp/019-chars.txt', 'r');
+    my $buf := create_buf(int8).new;
+    ok(nqp::eqaddr(nqp::readfh($fh, $buf, 5), $buf), 'nqp::readfh should return the buffer');
+    is(buf_dump($buf), '108,105,110,-49,-128', 'nqp::readfh read in correct signed bytes');
+    is(buf_dump(nqp::readfh($fh, $buf, 4)), '49,46,108,105', 'nqp::readfh read in the next signed bytes correctly');
     nqp::closefh($fh);
 }
