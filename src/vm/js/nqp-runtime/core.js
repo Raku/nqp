@@ -915,8 +915,7 @@ op.backtracestrings = function(hllName, exception) {
 };
 
 op.backtrace = function(hllName, exception) {
-  require('nqp-runtime').dumpObj(exception);
-  console.trace('Stubbed backtrace');
+  /* TODO - have a real stacktrace */
   return hll.list(hllName, []);
 };
 
