@@ -591,6 +591,12 @@ class Uninstantiable extends REPR {
 reprs.Uninstantiable = Uninstantiable;
 
 class P6int extends REPR {
+  constructor() {
+    super();
+    this.bits = 32;
+    this.is_unsigned = 0;
+  }
+
   setupSTable(STable) {
     STable.addInternalMethods(class {
       $$setInt(value) {
@@ -608,13 +614,22 @@ class P6int extends REPR {
   }
 
   compose(STable, reprInfoHash) {
-    var integer = reprInfoHash.content.get('integer');
+    let integer = reprInfoHash.content.get('integer');
     if (integer) {
-      var bits = integer.content.get('bits');
+      let bits = integer.content.get('bits');
       if (bits instanceof NQPInt) {
         this.bits = bits.value;
       } else {
         throw 'bits to P6int.compose must be a native int';
+      }
+
+      let unsigned = integer.content.get('unsigned');
+      if (unsigned) {
+        if (unsigned instanceof NQPInt) {
+          this.is_unsigned = unsigned.value;
+        } else {
+          throw 'unsigned to P6int.compose must be a native int';
+        }
       }
     }
   }
@@ -660,6 +675,17 @@ class P6int extends REPR {
     ownerSTable.addInternalMethod('$$getattr$' + slot, function() {
       return new NQPInt(this[attr]);
     });
+  }
+
+
+  serializeReprData(st, cursor) {
+    cursor.ref(this.bits);
+    cursor.ref(this.is_unsigned);
+  }
+
+  deserializeReprData(cursor) {
+    this.bits = cursor.varint();
+    this.is_unsigned = cursor.varint();
   }
 };
 
