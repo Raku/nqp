@@ -1,6 +1,6 @@
 use nqpmo;
 
-plan(6);
+plan(8);
 
 
 my sub create_buf($type) {
@@ -11,8 +11,8 @@ my sub create_buf($type) {
 }
 
 
-my $buf8 := create_buf(int8);
-my $buf16 := create_buf(int16);
+my $buf8 := create_buf(uint8);
+my $buf16 := create_buf(uint16);
 
 
 my $buf := nqp::encode('', 'utf8', $buf8.new);
@@ -45,3 +45,13 @@ is(nqp::decode($hello, "utf8"), "Hello World", "round-tripping Hello World");
 my $hello2 := $buf8.new;
 nqp::encode('Hello World', 'utf8', $hello2);
 is(buf_dump($hello2), "72,101,108,108,111,32,87,111,114,108,100", "the buf passed to nqp::encode is actually changed");
+
+my $pi_unsigned := $buf8.new;
+nqp::push_i($pi_unsigned, 207);
+nqp::push_i($pi_unsigned, 128);
+is(nqp::decode($pi_unsigned, "utf8"), 'π', 'nqp::decode with a buffer of unsigned ints');
+
+my $pi_signed := create_buf(int8).new;
+nqp::push_i($pi_signed, -49);
+nqp::push_i($pi_signed, -128);
+is(nqp::decode($pi_signed, "utf8"), 'π', 'nqp::decode with a buffer of signed ints');
