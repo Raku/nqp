@@ -2,7 +2,7 @@
 
 # Test nqp::op file operations.
 
-plan(106);
+plan(107);
 
 ok( nqp::stat('CREDITS', nqp::const::STAT_EXISTS) == 1, 'nqp::stat exists');
 ok( nqp::stat('AARDVARKS', nqp::const::STAT_EXISTS) == 0, 'nqp::stat not exists');
@@ -395,4 +395,33 @@ my sub create_buf($type) {
     is(buf_dump($buf), '108,105,110,-49,-128', 'nqp::readfh read in correct signed bytes');
     is(buf_dump(nqp::readfh($fh, $buf, 4)), '49,46,108,105', 'nqp::readfh read in the next signed bytes correctly');
     nqp::closefh($fh);
+}
+
+{
+    my $out := nqp::open($test-file, 'w');
+
+    my $buf1 := create_buf(uint8).new;
+    nqp::push_i($buf1, 108);
+    nqp::push_i($buf1, 105);
+    nqp::push_i($buf1, 110);
+    nqp::push_i($buf1, 207);
+    nqp::push_i($buf1, 128);
+
+    my $buf2 := create_buf(uint8).new;
+    nqp::push_i($buf2, 49);
+    nqp::push_i($buf2, 46);
+    nqp::push_i($buf2, 108);
+    nqp::push_i($buf2, 105);
+
+    nqp::writefh($out, $buf1);
+    nqp::writefh($out, $buf2);
+
+    nqp::closefh($out);
+
+    my $in := nqp::open($test-file, 'r');
+    my $line := nqp::readlinefh($in);
+    is($line, 'linπ1.li', 'reading with nqp::readlinefh stuff written by nqp::writefh');
+    nqp::closefh($in);
+
+    nqp::unlink($test-file);
 }
