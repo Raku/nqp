@@ -564,16 +564,22 @@ op.encode = function(str, encoding_, buf) {
 };
 
 op.decode = function(buf, encoding_) {
-  var encoding = renameEncoding(encoding_);
-  var elementSize = byteSize(buf);
+  let encoding = renameEncoding(encoding_);
+  let elementSize = byteSize(buf);
+
+  let is_unsigned = buf._STable.REPR.type._STable.REPR.is_unsigned;
 
   buf = buf.array;
 
   var buffer = new Buffer(buf.length * elementSize);
 
-  var offset = 0;
-  for (var i = 0; i < buf.length; i++) {
-    buffer.writeIntLE(buf[i], offset, elementSize);
+  let offset = 0;
+  for (let i = 0; i < buf.length; i++) {
+    if (is_unsigned) {
+      buffer.writeUIntLE(buf[i], offset, elementSize);
+    } else {
+      buffer.writeIntLE(buf[i], offset, elementSize);
+    }
     offset += elementSize;
   }
 
