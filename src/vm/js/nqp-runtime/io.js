@@ -197,6 +197,21 @@ op.readlinechompfh = function(fh) {
   return readline(fh, true);
 };
 
+op.readfh = function(fh, buf, bytes) {
+  let is_unsigned = buf._STable.REPR.type._STable.REPR.is_unsigned;
+  let buffer = Buffer.allocUnsafe(bytes);
+  let read = fs.readSync(fh.fd, buffer, 0, bytes, null);
+  buf.array.length = read;
+  for (let i = 0; i < read; i++) {
+    if (is_unsigned) {
+      buf.array[i] = buffer[i];
+    } else {
+      buf.array[i] = buffer[i] > 127 ? buffer[i] - 256 : buffer[i];
+    }
+  }
+  return buf;
+};
+
 function readline(fh, chomp) {
   var line = '';
   var buffer = new Buffer(16);
