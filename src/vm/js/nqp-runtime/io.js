@@ -153,6 +153,10 @@ class FileHandle extends NQPObject {
   $$toBool(ctx) {
     return 1;
   }
+
+  $$can(ctx, name) {
+    return 0;
+  }
 };
 
 exports.FileHandle = FileHandle;
