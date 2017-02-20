@@ -95,10 +95,10 @@ role NQPCursorRole is export {
 #        nqp::die("No braid in actions!") unless $!braid;
         nqp::atkey(nqp::getattr($!braid, Braid, '$!slangs'),$name ~ "-actions");
     }
-    method define_slang($name,$grammar,$actions) {
+    method define_slang($name,$grammar,$actions = "none") {
 #        nqp::die("No braid in define_slang!") unless $!braid;
         nqp::bindkey(nqp::getattr($!braid, Braid, '$!slangs'),$name, $grammar);
-        nqp::bindkey(nqp::getattr($!braid, Braid, '$!slangs'),$name ~ "-actions", $actions) unless nqp::isnull($actions);
+        nqp::bindkey(nqp::getattr($!braid, Braid, '$!slangs'),$name ~ "-actions", $actions) unless nqp::isnull($actions) || $actions eq 'none';
         self
     }
     method switch_to_slang($name) {
