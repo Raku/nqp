@@ -2,12 +2,13 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(299);
+plan(300);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
 ok( nqp::mul_i(5,2) == 10, 'nqp::mul_i');
 ok( nqp::div_i(5,2) == 2, 'nqp::div_i');
+is(nqp::div_i(-8, 3), 3, 'nqp::div_i - with a negative number');
 ok( nqp::mod_i(5,2) == 1, 'nqp::mod_i');
 ok( nqp::pow_i(6, 4) == 1296, 'nqp::pow_i');
 ok( nqp::gcd_i(8, 12) == 4, 'nqp::gcd_i');
