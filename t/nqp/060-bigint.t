@@ -1,7 +1,7 @@
 #! nqp
 use nqpmo;
 
-plan(105);
+plan(107);
 
 my $knowhow := nqp::knowhow();
 my $bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
@@ -33,6 +33,10 @@ ok(iseq(nqp::mul_I($b, $b, $b), 15129,), 'multiplication');
 ok(iseq(nqp::add_I($b, $b, $b),  -246,), 'addition');
 ok(nqp::iseq_I(nqp::sub_I($b, $b, $b), nqp::box_i(0, $bi_type)), 'subtraction');
 ok(nqp::iseq_I(nqp::div_I($b, $b, $b), $one), 'division');
+
+is(str(nqp::div_I(box(-8), box(3), $bi_type)), '-3', '-8 div 3 == -3');
+
+is(str(nqp::div_I(box(8), box(3), $bi_type)), '2', '8 div 3 == 2');
 
 ok(iseq(nqp::bitshiftl_I($one, 3, $one), 8), 'bitshift left');
 ok(iseq($one, 1), 'original not modified by bitshift left');
