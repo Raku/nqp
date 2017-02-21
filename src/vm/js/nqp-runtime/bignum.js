@@ -96,7 +96,13 @@ op.sub_I = function(a, b, type) {
 };
 
 op.div_I = function(a, b, type) {
-  return makeBI(type, getBI(a).div(getBI(b)));
+  let divident = getBI(a);
+  let divisor = getBI(b);
+  // workaround for .div rounding to zero not down
+  if (divident.mod(divisor).lt(0)) {
+    return makeBI(type, divident.div(divisor)-1);
+  }
+  return makeBI(type, divident.div(divisor));
 };
 
 op.pow_I = function(a, b, numType, biType) {
