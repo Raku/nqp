@@ -436,19 +436,16 @@ class P6opaque {
   }
 
   generateDefaultsAndClone(STable) {
-    var defaults = '';
-    var clone = '';
+    let defaults = '';
+    let clone = '';
 
-    for (var i = 0; i < this.nameToIndexMapping.length; i++) {
-      for (var j = 0; j < this.nameToIndexMapping[i].slots.length; j++) {
-        let slot = this.nameToIndexMapping[i].slots[j];
-        let defaultValue = this.flattenedSTables[slot] ?
-            this.flattenedSTables[slot].REPR.flattenedDefault :
-            'undefined';
-        let attr = slotToAttr(slot);
-        defaults += 'this.' + attr + ' = ' + defaultValue + ';\n';
-        clone += 'cloned.' + attr + ' = this.' + attr + ';';
-      }
+    for (let slot = 0; slot < this.flattenedSTables.length; slot++) {
+      let attr = slotToAttr(slot);
+      let defaultValue = this.flattenedSTables[slot] ?
+          this.flattenedSTables[slot].REPR.flattenedDefault :
+          'undefined';
+      defaults += 'this.' + attr + ' = ' + defaultValue + ';\n';
+      clone += 'cloned.' + attr + ' = this.' + attr + ';';
     }
 
     STable.compileAccessor('$$setDefaults', 'function() {\n' + defaults + '}');
