@@ -736,7 +736,7 @@ class Cont {
   $$toBool(ctx) {
     return 1;
   }
-}
+};
 
 op.continuationreset = function(ctx, tag, block) {
   if (block instanceof Cont) {

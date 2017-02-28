@@ -21,5 +21,5 @@ class Null {
     return singleton;
   }
 };
-singleton = new Null()
+singleton = new Null();
 module.exports = singleton;

@@ -1000,7 +1000,7 @@ class VMArray extends REPR {
 
       $$join(delim) {
         var stringified = [];
-        for (let i=0;i < this.array.length;i++) {
+        for (let i = 0; i < this.array.length; i++) {
           stringified.push(typeof this.array[i] == 'string' ? this.array[i] : this.array[i].$$getStr());
         }
         return stringified.join(delim);

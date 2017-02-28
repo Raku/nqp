@@ -30,7 +30,7 @@ NQPException.prototype._STable = {
     }
   },
   REPR: {
-    name: "NQPException"
+    name: 'NQPException'
   }
 };
 

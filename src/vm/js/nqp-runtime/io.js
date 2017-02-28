@@ -235,7 +235,7 @@ function readline(fh, chomp) {
 
   READ_LINE:
   while ((bytesRead =
-        fs.readSync(fh.fd, buffer, bufferedBytes, READ_SIZE, position)) != 0) {
+      fs.readSync(fh.fd, buffer, bufferedBytes, READ_SIZE, position)) != 0) {
 
     position += bytesRead;
     bufferedBytes += bytesRead;
