@@ -1,6 +1,5 @@
 'use strict';
 
-var incompleteMethodCaches = [];
 var null_s = require('./null_s.js'); /* Used when evaling runtime compiled methods */
 var Null = require('./null.js');
 
@@ -193,12 +192,6 @@ class STable {
       };
     }
     this.invocationSpec = {classHandle: classHandle, attrName: attrName, invocationHandler: invocationHandler};
-
-    var setAgain = incompleteMethodCaches;
-    incompleteMethodCaches = [];
-    for (var i = 0; i < setAgain.length; i++) {
-      setAgain[i].setMethodCache(setAgain[i].methodCache);
-    }
   }
 
 
@@ -227,18 +220,10 @@ class STable {
     // TODO delete old methods
     var proto = this.objConstructor.prototype;
     this.methodCache = methodCache;
-    var notReadyYet = false;
     for (var name in methodCache) {
       if (methodCache.hasOwnProperty(name)) {
         this.injectMethod(proto, name, methodCache[name]);
-        if (!methodCache[name].$$call) {
-          notReadyYet = true;
-        }
       }
-    }
-
-    if (notReadyYet) {
-      incompleteMethodCaches.push(this);
     }
   }
 
