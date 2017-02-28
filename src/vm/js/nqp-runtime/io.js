@@ -220,25 +220,37 @@ op.writefh = function(fh, buf) {
   var buffer = core.toRawBuffer(buf);
   return fs.writeSync(fh.fd, buffer, 0, buffer.length);
 };
-
+//TODO: benchmark and optimize
 function readline(fh, chomp) {
-  var line = '';
-  var buffer = new Buffer(16);
-  var starting = fs.seekSync(fh.fd, 0, 1);
-  var position = starting;
-  var bytesRead;
-  READ_LINE:
-  var string = '';
-  while ((bytesRead =
-              fs.readSync(fh.fd, buffer, 0, buffer.length, position)) != 0) {
-    position += bytesRead;
-    var string = string + buffer.slice(0, bytesRead).toString(fh.encoding);
 
-    var newline;
+  const READ_SIZE = 16;
+  let starting = fs.seekSync(fh.fd, 0, 1);
+  let position = starting;
+  let bytesRead;
+  let bufferedBytes = 0;
+
+  let buffer = new Buffer(READ_SIZE * 2);
+
+  let string = '';
+
+  READ_LINE:
+  while ((bytesRead =
+        fs.readSync(fh.fd, buffer, bufferedBytes, READ_SIZE, position)) != 0) {
+
+    position += bytesRead;
+    bufferedBytes += bytesRead;
+
+    if (bufferedBytes + READ_SIZE > buffer.length) {
+      let oldBuffer = buffer;
+      buffer = new Buffer(buffer.length * 2);
+      oldBuffer.copy(buffer, 0, 0, bufferedBytes);
+    }
+
+    string = buffer.slice(0, bufferedBytes).toString(fh.encoding);
+
     // TODO think/ask about a "" sep
-    var offset;
-    var sep;
-    var newline = -1;
+    let sep;
+    let newline = -1;
     if (fh.seps) {
       for (var i = 0; i < fh.seps.length; i++) {
         var offset = string.indexOf(fh.seps[i]);
@@ -249,8 +261,8 @@ function readline(fh, chomp) {
       }
 
     } else {
-      var cr = string.indexOf('\r');
-      var nl = string.indexOf('\n');
+      let cr = string.indexOf('\r');
+      let nl = string.indexOf('\n');
       if (cr != -1 && cr < nl) {
         if (cr < nl) {
           newline = cr;
