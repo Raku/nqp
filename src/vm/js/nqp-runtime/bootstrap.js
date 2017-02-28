@@ -51,12 +51,12 @@ function create_KnowHOWAttribute() {
     return attr;
   };
 
-  typeObj._STable.methodCache = {};
+  typeObj._STable.methodCache = new Map();
   typeObj._STable.modeFlags = constants.METHOD_CACHE_AUTHORITATIVE;
 
   for (var method in methods) {
     typeObj._STable.objConstructor.prototype[method] = methods[method];
-    typeObj._STable.methodCache[method] = wrapMethod(method, methods[method]);
+    typeObj._STable.methodCache.set(method, wrapMethod(method, methods[method]));
   }
 
   return typeObj;
@@ -79,9 +79,9 @@ KnowHOW_HOW.id = 'KnowHOW_HOW';
 KnowHOW._STable.id = 'KnowHOW';
 KnowHOW._STable.HOW = KnowHOW_HOW;
 
-KnowHOW._STable.methodCache = {};
+KnowHOW._STable.methodCache = new Map();
 KnowHOW._STable.modeFlags = constants.METHOD_CACHE_AUTHORITATIVE;
-KnowHOW_HOW._STable.methodCache = {};
+KnowHOW_HOW._STable.methodCache = new Map();
 KnowHOW_HOW._STable.modeFlags = constants.METHOD_CACHE_AUTHORITATIVE;
 
 function wrapMethod(name, method) {
@@ -96,8 +96,8 @@ function addKnowhowHowMethod(name, method) {
   KnowHOW._STable.objConstructor.prototype[name] = method;
 
   var wrapped = wrapMethod(name, method);
-  KnowHOW._STable.methodCache[name] = wrapped;
-  KnowHOW_HOW._STable.methodCache[name] = wrapped;
+  KnowHOW._STable.methodCache.set(name, wrapped);
+  KnowHOW_HOW._STable.methodCache.set(name, wrapped);
 }
 
 addKnowhowHowMethod('name', function(ctx, _NAMED, self) {
@@ -147,7 +147,7 @@ addKnowhowHowMethod('add_method', function(ctx, _NAMED, self, type, name, code) 
 
 addKnowhowHowMethod('compose', function(ctx, _NAMED, self, typeObject) {
   /* Set method cache */
-  typeObject._STable.setMethodCache(self.__methods.$$toObject());
+  typeObject._STable.setMethodCache(self.__methods.content);
   typeObject._STable.modeFlags = constants.METHOD_CACHE_AUTHORITATIVE;
 
   /* Set type check cache. */

@@ -14,9 +14,9 @@ var ZERO = bignum(0);
 
 function findMethod(ctx, obj, name) {
   if (obj._STable.methodCache) {
-    var hasMethod = obj._STable.methodCache.hasOwnProperty(name);
-    if (hasMethod) {
-      return obj._STable.methodCache[name];
+    let method = obj._STable.methodCache.get(name);
+    if (method !== undefined) {
+      return method;
     }
     if (obj._STable.modeFlags & constants.METHOD_CACHE_AUTHORITATIVE) {
       return Null;
@@ -210,21 +210,18 @@ class STable {
     return obj;
   }
 
-  injectMethod(proto, name, method) {
-    proto[name] = function() {
-      return method.$$call.apply(method, arguments);
-    };
-  }
-
   setMethodCache(methodCache) {
     // TODO delete old methods
-    var proto = this.objConstructor.prototype;
+
     this.methodCache = methodCache;
-    for (var name in methodCache) {
-      if (methodCache.hasOwnProperty(name)) {
-        this.injectMethod(proto, name, methodCache[name]);
-      }
-    }
+
+    let proto = this.objConstructor.prototype;
+
+    methodCache.forEach(function (method, name, map) {
+      proto[name] = function() {
+        return method.$$call.apply(method, arguments);
+      };
+    });
   }
 
   setPositionalDelegate(attr) {

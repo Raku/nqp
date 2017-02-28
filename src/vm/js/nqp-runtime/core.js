@@ -216,7 +216,7 @@ op.setmethcache = function(obj, cache) {
   if (!cache instanceof Hash) {
     console.log('we expect a hash here');
   }
-  obj._STable.setMethodCache(cache.$$toObject());
+  obj._STable.setMethodCache(cache.content);
   if (obj._STable._SC !== undefined) obj._STable.scwb();
   return obj;
 };

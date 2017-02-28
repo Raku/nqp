@@ -171,7 +171,7 @@ exports.toNum = function(arg_, ctx) {
   } else if (typeof arg == 'string') {
     var ret = parseFloat(arg);
     return isNaN(ret) ? 0 : ret;
-  } else if (arg._STable && arg._STable.methodCache && arg._STable.methodCache.Num) {
+  } else if (arg._STable && arg._STable.methodCache && arg._STable.methodCache.get('Num')) {
     var result = arg.Num(ctx, null, arg);
     if (result.$$getNum) {
       return result.$$getNum();

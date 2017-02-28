@@ -553,10 +553,8 @@ class SerializationWriter {
 
     /* Method cache*/
     if (st.methodCache) {
-      var hash = new Hash();
-      for (var key in st.methodCache) {
-        hash.content.set(key, st.methodCache[key]);
-      }
+      let hash = new Hash();
+      hash.content = st.methodCache;
       this.stablesData.ref(hash);
     }
     else {
