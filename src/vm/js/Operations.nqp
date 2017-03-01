@@ -557,6 +557,7 @@ class QAST::OperationsJS {
         $comp.as_js($node[0], :want($T_NUM), :$cps);
     });
 
+    add_simple_op('isfalse', $T_BOOL, [$T_BOOL], sub ($boolified) {"(!$boolified)"});
     add_simple_op('falsey', $T_BOOL, [$T_BOOL], sub ($boolified) {"(!$boolified)"});
 
     add_simple_op('not_i', $T_BOOL, [$T_INT], sub ($int) {"(!$int)"});
