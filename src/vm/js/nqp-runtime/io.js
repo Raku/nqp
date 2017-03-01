@@ -157,6 +157,10 @@ class FileHandle extends NQPObject {
   $$can(ctx, name) {
     return 0;
   }
+
+  $$filenofh() {
+    return this.fd;
+  }
 };
 
 exports.FileHandle = FileHandle;
@@ -199,6 +203,10 @@ op.readlinefh = function(fh) {
 
 op.readlinechompfh = function(fh) {
   return readline(fh, true);
+};
+
+op.filenofh = function(fh) {
+  return fh.$$filenofh();
 };
 
 op.readfh = function(fh, buf, bytes) {
@@ -458,6 +466,10 @@ class Stderr extends NQPObject {
     process.stderr.write(msg);
   }
 
+  $$filenofh() {
+    return process.stderr.fd;
+  }
+
   isttyfh() {
     return (process.stderr.isTTY ? 1 : 0);
   }
@@ -474,6 +486,10 @@ op.getstderr = function() {
 class Stdout extends NQPObject {
   isttyfh() {
     return (process.stdout.isTTY ? 1 : 0);
+  }
+
+  $$filenofh() {
+    return process.stdout.fd;
   }
 
   printfh(msg) {
@@ -497,6 +513,10 @@ op.flushfh = function(fh) {
 class Stdin extends NQPObject {
   $$toBool(ctx) {
     return 1;
+  }
+
+  $$filenofh() {
+    return process.stdin.fd;
   }
 
   isttyfh() {
