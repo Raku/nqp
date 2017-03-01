@@ -42,6 +42,14 @@ function basicConstructor(STable) {
   var objConstructor = function() {};
   var handler = {};
   handler.get = function(target, name) {
+    if (STable.lazyMethodCache) {
+      STable.setMethodCache(STable.methodCache);
+      let method = STable.methodCache.get(name);
+      if (method !== undefined) {
+        return STable.objConstructor.prototype[name];
+      }
+    }
+
     if (STable.modeFlags & constants.METHOD_CACHE_AUTHORITATIVE) {
       return undefined;
     }

@@ -655,7 +655,7 @@ class BinaryCursor {
     for (var i = 0; i < STables.length; i++) {
       var STable = sc.rootSTables[i];
       if (STable._methodCache instanceof Hash) {
-        STable.setMethodCache(STable._methodCache.content);
+        STable.setLazyMethodCache(STable._methodCache.content);
       }
     }
   }

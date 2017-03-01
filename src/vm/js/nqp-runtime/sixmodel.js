@@ -37,6 +37,8 @@ class STable {
 
     this.modeFlags = 0;
 
+    this.lazyMethodCache = false;
+
     this._SC = undefined;
 
     this.objConstructor = REPR.createObjConstructor(this);
@@ -210,10 +212,17 @@ class STable {
     return obj;
   }
 
+  setLazyMethodCache(methodCache) {
+    this.methodCache = methodCache;
+    this.lazyMethodCache = true;
+  }
+
   setMethodCache(methodCache) {
     // TODO delete old methods
 
     this.methodCache = methodCache;
+
+    this.lazyMethodCache = false;
 
     let proto = this.objConstructor.prototype;
 
