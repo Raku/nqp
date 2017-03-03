@@ -1419,7 +1419,7 @@ class MultiDimArray extends REPR {
         throw new NQPException('Cannot push a fixed dimension array');
       }
 
-      $$splice(value) {
+      $$splice(source, offset, length) {
         throw new NQPException('Cannot splice a fixed dimension array');
       }
 
