@@ -505,14 +505,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         Chunk.new($T_NONVAL, nqp::join(',', @sig), @setup);
     }
 
-    proto method coerce($chunk, $desired) { * }
-    
-    multi method coerce(ChunkCPS $chunk, $desired) {
-        # TODO 
-        $chunk;
-    }
-
-    multi method coerce(Chunk $chunk, $desired) {
+    method coerce(Chunk $chunk, $desired) {
         my int $got := $chunk.type;
         if $got != $desired {
             if $desired == $T_VOID {
@@ -760,24 +753,20 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my int $i := 0;
         while $i < $n {
             my $chunk := @chunks[$i];
-            if nqp::istype($chunk, ChunkCPS) {
-                return self.NYI("CPS currently is broken");
-            }
-            elsif nqp::istype($chunk, Chunk) || nqp::isstr($chunk) {
-                my str $chunk_expr := nqp::isstr($chunk) ?? $chunk !! $chunk.expr;
 
-                nqp::push(@setup, $chunk);
+            my str $chunk_expr := nqp::isstr($chunk) ?? $chunk !! $chunk.expr;
 
-                if $i == $result_child {
-                    if $result_var {
-                        @setup.push("$result_var = $chunk_expr;\n");
-                    }
-                    else {
-                        $result := $chunk_expr;
-                    }
+            nqp::push(@setup, $chunk);
+
+            if $i == $result_child {
+                if $result_var {
+                    @setup.push("$result_var = $chunk_expr;\n");
                 }
-
+                else {
+                    $result := $chunk_expr;
+                }
             }
+
             $i := $i + 1;
         }
 
@@ -1053,133 +1042,91 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             my $stmts := self.compile_all_the_statements($node, $body_want);
 
             my str $create_ctx := self.create_ctx($*CTX, :code_ref('this'));
-            if nqp::istype($stmts, ChunkCPS) {
-            }
-            else {
-                my $sig := self.compile_sig($*BLOCK.params);
 
-                my str $first_time_marker := $*BLOCK.maybe_first_time_marker;
+            my $sig := self.compile_sig($*BLOCK.params);
 
-                my str $pass_exceptions_start := '';
-                my str $pass_exceptions_end := '';
+            my str $first_time_marker := $*BLOCK.maybe_first_time_marker;
 
-                if $*BLOCK.pass_on_exceptions {
-                    $pass_exceptions_start := "try \{\n";
-                    $pass_exceptions_end :=
-                        ~ "\} catch (e) \{\n"
-                        ~ "if (e instanceof nqp.PassExceptionToCaller) \{\n"
-                        ~ "throw e.exception;\n"
-                        ~ "\} else \{"
-                        ~ "throw e;\n"
-                        ~ "\}"
-                        ~ "\}";
-                }
+            my str $pass_exceptions_start := '';
+            my str $pass_exceptions_end := '';
 
-                my @function := [
-                    "function({$sig.expr}) \{\n" ,
-                    $first_time_marker ?? "$first_time_marker = 1;\n" !! '',
-                    self.declare_js_vars($*BLOCK.tmps),
-                    self.declare_js_vars($*BLOCK.js_lexicals),
-                    $create_ctx,
-                    $*BLOCK.var_setup,
-                    $sig,
-                    self.clone_inners($*BLOCK),
-                    self.capture_inners($*BLOCK),
-                    $pass_exceptions_start,
-                    $stmts,
-                    "return {$stmts.expr};\n",
-                    $pass_exceptions_end,
-                    "\}"
-                ];
-                %*BLOCKS_DONE{$node.cuid} := Chunk.void("(", |@function, ")");
-
-                if $*BLOCK.statevars {
-                    my @vars;
-                    for $*BLOCK.statevars -> $kv {
-                        @vars.push($kv.key ~ " = " ~ "{self.value_as_js($kv.value)}.\$\$clone()");
-                    }
-                    if $first_time_marker {
-                        @vars.push($first_time_marker ~ " = 0");
-                    }
-                    %*BLOCKS_STATEVARS{$node.cuid} := "var " ~ nqp::join(',', @vars) ~ ";\n";
-                }
-
-                if 1 { # TODO make sure that only blocks that take part in serialization have that info emitted
-                    my $outer_cuid;
-                    if nqp::defined($*BLOCK.outer) && $*BLOCK.outer.cuid {
-                        $outer_cuid := self.mangled_cuid($*BLOCK.outer.cuid);
-                    }
-                    my str $lexicals_type_info := self.type_info_for_lexicals($*BLOCK);
-                    my $closure_template;
-                    if $node.blocktype ne 'immediate' {
-                        my @closure_template := nqp::clone(@function);
-                        @closure_template.unshift(
-                            "function({self.outer_ctxs($*BLOCK)}) \{\n"
-                            ~ %*BLOCKS_STATEVARS{$node.cuid}
-                            ~ "return ");
-                        @closure_template.push('}');
-                        $closure_template := Chunk.new($T_NONVAL, '', @closure_template);
-                    }
-
-                    my @static;
-                    for $*BLOCK.variables -> $var {
-                        if $var.decl eq 'static' {
-                            @static.push(quote_string($var.name) ~ ': ' ~ self.value_as_js($var.value));
-                        }
-                    }
-
-                    my $static_lexicals;
-                    if +@static {
-                       $static_lexicals := '{' ~ nqp::join(',', @static) ~ '}';
-                    }
-
-                    %!serialized_code_ref_info{$node.cuid} := SerializedCodeRefInfo.new(
-                        :$closure_template,
-                        :$outer_cuid,
-                        :$lexicals_type_info,
-                        :$static_lexicals
-                    );
-                }
+            if $*BLOCK.pass_on_exceptions {
+                $pass_exceptions_start := "try \{\n";
+                $pass_exceptions_end :=
+                    ~ "\} catch (e) \{\n"
+                    ~ "if (e instanceof nqp.PassExceptionToCaller) \{\n"
+                    ~ "throw e.exception;\n"
+                    ~ "\} else \{"
+                    ~ "throw e;\n"
+                    ~ "\}"
+                    ~ "\}";
             }
 
+            my @function := [
+                "function({$sig.expr}) \{\n" ,
+                $first_time_marker ?? "$first_time_marker = 1;\n" !! '',
+                self.declare_js_vars($*BLOCK.tmps),
+                self.declare_js_vars($*BLOCK.js_lexicals),
+                $create_ctx,
+                $*BLOCK.var_setup,
+                $sig,
+                self.clone_inners($*BLOCK),
+                self.capture_inners($*BLOCK),
+                $pass_exceptions_start,
+                $stmts,
+                "return {$stmts.expr};\n",
+                $pass_exceptions_end,
+                "\}"
+            ];
+            %*BLOCKS_DONE{$node.cuid} := Chunk.void("(", |@function, ")");
 
-            # The CPS version
-
-            # TODO recreate other things than block
-
-            if $!cps ne 'off' {
-                my @*KNOWN_NAMED;
-                my $*BLOCK := BlockInfo.new($node, (nqp::defined($outer) ?? $outer !! NQPMu));
-
-                my $stmts_cps := self.compile_all_the_statements($node, $body_want, :cps);
-
-                if nqp::istype($stmts_cps, ChunkCPS) {
-                    my $sig_cps := self.compile_sig($*BLOCK.params, :cps($stmts_cps.cont));
-
-
-                    my @function_cps := [
-                        "function({$sig_cps.expr}) \{\n",
-                        self.declare_js_vars($*BLOCK.tmps),
-                        self.declare_js_vars($*BLOCK.js_lexicals),
-                        $create_ctx,
-                        $sig_cps,
-                        self.clone_inners($*BLOCK),
-                        self.capture_inners($*BLOCK),
-                        $stmts_cps,
-                        "\}"
-                    ];
-                    %*BLOCKS_DONE_CPS{$node.cuid} := Chunk.void("(", |@function_cps, ")");
+            if $*BLOCK.statevars {
+                my @vars;
+                for $*BLOCK.statevars -> $kv {
+                    @vars.push($kv.key ~ " = " ~ "{self.value_as_js($kv.value)}.\$\$clone()");
                 }
-                else {
-                    #say("/* SKIPPING: {$stmts_cps.join} */\n");
+                if $first_time_marker {
+                    @vars.push($first_time_marker ~ " = 0");
                 }
+                %*BLOCKS_STATEVARS{$node.cuid} := "var " ~ nqp::join(',', @vars) ~ ";\n";
             }
 
+            if 1 { # TODO make sure that only blocks that take part in serialization have that info emitted
+                my $outer_cuid;
+                if nqp::defined($*BLOCK.outer) && $*BLOCK.outer.cuid {
+                    $outer_cuid := self.mangled_cuid($*BLOCK.outer.cuid);
+                }
+                my str $lexicals_type_info := self.type_info_for_lexicals($*BLOCK);
+                my $closure_template;
+                if $node.blocktype ne 'immediate' {
+                    my @closure_template := nqp::clone(@function);
+                    @closure_template.unshift(
+                        "function({self.outer_ctxs($*BLOCK)}) \{\n"
+                        ~ %*BLOCKS_STATEVARS{$node.cuid}
+                        ~ "return ");
+                    @closure_template.push('}');
+                    $closure_template := Chunk.new($T_NONVAL, '', @closure_template);
+                }
 
+                my @static;
+                for $*BLOCK.variables -> $var {
+                    if $var.decl eq 'static' {
+                        @static.push(quote_string($var.name) ~ ': ' ~ self.value_as_js($var.value));
+                    }
+                }
 
+                my $static_lexicals;
+                if +@static {
+                   $static_lexicals := '{' ~ nqp::join(',', @static) ~ '}';
+                }
 
-                
-
+                %!serialized_code_ref_info{$node.cuid} := SerializedCodeRefInfo.new(
+                    :$closure_template,
+                    :$outer_cuid,
+                    :$lexicals_type_info,
+                    :$static_lexicals
+                );
+            }
         }
 
         if $node.blocktype eq 'raw' {
@@ -1188,32 +1135,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             my $setup := [];
             my $cloned_block := $outer.clone_inner($node, :cps($cps), :direct(!$cps));
 
-            if $cps {
-                my str $cont := self.unique_var('cont');
-                my str $result := self.unique_var('result');
-
-                my @args := [$outer_ctx, 'null'];
-
-                @args.push($cont);
-
-                for @extra_args -> $arg {
-                    @args.push($arg.expr);
-                    $setup.push($arg);
-                }
-
-                $setup.push('return ' ~ $cloned_block ~ ".\$\$callCPS({nqp::join(',', @args)})");
-
-                ChunkCPS.new($T_OBJ, $result, $setup, $cont, :$node);
+            my @args := [$outer_ctx, 'null'];
+            for @extra_args -> $arg {
+                @args.push($arg.expr);
+                $setup.push($arg);
             }
-            else {
-                my @args := [$outer_ctx, 'null'];
-                for @extra_args -> $arg {
-                    @args.push($arg.expr);
-                    $setup.push($arg);
-                }
 
-                self.stored_result(Chunk.new($want, $cloned_block~".\$\$call({nqp::join(',', @args)})", $setup, :$node), :$want);
-            }
+            self.stored_result(Chunk.new($want, $cloned_block~".\$\$call({nqp::join(',', @args)})", $setup, :$node), :$want);
         }
         elsif $node.blocktype eq 'declaration' ||  $node.blocktype eq '' {
             if $want == $T_VOID {

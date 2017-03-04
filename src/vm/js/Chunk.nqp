@@ -136,22 +136,3 @@ class Chunk does Joinable {
         $!type == $T_ARGS_ARRAY;
     }
 }
-
-class ChunkCPS is Chunk {
-    has $!cont;
-
-    method new($type, $expr, @setup, $cont, :$node) {
-        my $obj := nqp::create(self);
-        $obj.BUILD($type, $expr, @setup, $cont, :$node);
-        $obj
-    }
-
-    method BUILD($type, $expr, @setup, $cont, :$node) {
-        Chunk.HOW.method_table(Chunk)<BUILD>(self, $type, $expr, @setup, :$node);
-        $!cont := $cont;
-    }
-
-    method cont() {
-        $!cont;
-    }
-}

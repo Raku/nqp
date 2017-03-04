@@ -52,16 +52,7 @@ class QAST::OperationsJS {
             }
         }
 
-        if $cps {
-            my str $cont := $comp.unique_var('cont');
-            my str $result := $comp.unique_var('result');
-            @exprs.push($cont);
-            @setup.push('return ' ~ $cb(|@exprs, :$cps) ~ ";\n");
-            ChunkCPS.new($return_type, $result, @setup, $cont, :$node);
-        }
-        else {
-            Chunk.new($return_type, $cb(|@exprs), @setup, :$node);
-        }
+        Chunk.new($return_type, $cb(|@exprs), @setup, :$node);
     }
 
     sub runtime_op($op) {
@@ -650,31 +641,12 @@ class QAST::OperationsJS {
             ?? $comp.as_js(QAST::Var.new(:name($node.name),:scope('lexical')), :want($T_OBJ))
             !! $comp.as_js(nqp::shift($args), :want($T_OBJ));
 
-        if $cps {
-            my str $cont := $comp.unique_var('cont');
-            my str $result := $comp.unique_var('result');
+        my $compiled_args := $comp.args($args);
 
-            my $compiled_args := $comp.args($args, :$cont);
+        my str $call := $compiled_args.is_args_array ?? '.$$apply(' !! '.$$call(';
 
-            ### setup_as_array NYI
-            my @setup := nqp::clone($compiled_args.setup_as_array);
-            @setup.unshift($callee);
-
-            my $call := $compiled_args.is_args_array ?? '.$$applyCPS(' !! '.$$callCPS(';
-            
-            # TODO decont
-            my $call_chunk := ChunkCPS.new($T_OBJ, $result, ['return ' ~ $callee.expr ~ $call ~ $compiled_args.expr ~ ");\n"], $cont);
-
-            $comp.chunk_sequence($T_OBJ, @setup, :$node, :result_child(nqp::elems(@setup) - 1));
-        }
-        else {
-            my $compiled_args := $comp.args($args);
-
-            my str $call := $compiled_args.is_args_array ?? '.$$apply(' !! '.$$call(';
-
-            $comp.stored_result(
-                Chunk.new($T_OBJ, $callee.expr ~ ".\$\$decont($*CTX)" ~ $call ~ $compiled_args.expr ~ ')' , [$callee, $compiled_args], :$node), :$want);
-        }
+        $comp.stored_result(
+            Chunk.new($T_OBJ, $callee.expr ~ ".\$\$decont($*CTX)" ~ $call ~ $compiled_args.expr ~ ')' , [$callee, $compiled_args], :$node), :$want);
     });
 
     %ops<callstatic> := %ops<call>;
@@ -1141,37 +1113,6 @@ class QAST::OperationsJS {
                 $else := compile_block($node[1]);
             }
 
-
-
-            if nqp::istype($cond, ChunkCPS) || nqp::istype($then, ChunkCPS) || nqp::istype($else, ChunkCPS) {
-                # TODO ->
-
-                if needs_cond_passed($then) || needs_cond_passed($else) {
-                    return $comp.NYI("if ... -> \{...\} in CPS mode");
-                }
-
-                if nqp::istype($cond, ChunkCPS) {
-                    return $comp.NYI("if in CPS mode with CPSish condition");
-                }
-                else {
-                    my str $cont := $comp.unique_var('cont');
-                    my str $result := $comp.unique_var('result');
-                    # TODO make with and without work in CPS mode
-                    return ChunkCPS.new($want, $result, [
-                        $check_cond,
-                        "if ({$check_cond.expr}) \{\n",
-                        nqp::istype($then, ChunkCPS) ?? $*BLOCK.set_cont($then, $cont) !! "",
-                        $then,
-                        nqp::istype($then, ChunkCPS) ?? "" !! "return $cont({$then.expr});\n",
-                        "\} else \{\n",
-                        nqp::istype($else, ChunkCPS) ?? $*BLOCK.set_cont($else, $cont) !! "",
-                        $else,
-                        nqp::istype($else, ChunkCPS) ?? "" !! "return $cont({$else.expr});\n",
-                        "\}\n"
-                    ], $cont, :$node);
-                }
-            }
-
             Chunk.new($want, $result, [
                 $check_cond,
                 "if ({$check_cond.expr}) \{\n",
@@ -1263,10 +1204,6 @@ class QAST::OperationsJS {
 
         my $list := $comp.as_js(@operands[0], :want($T_OBJ), :$cps);
 
-        if nqp::istype($list, ChunkCPS) {
-            return $comp.NYI("interating over a CPS list");
-        }
-
         # TODO think if creating the block once, and the calling it multiple times would be faster
 
         my @body_args;
@@ -1284,36 +1221,13 @@ class QAST::OperationsJS {
 
         my $body := $comp.compile_block(@operands[1], $outer, $loop , :want($T_VOID), :extra_args(@body_args), :$cps);
 
-
-        if nqp::istype($body, ChunkCPS) {
-            # TODO handle_control
-            my str $cont := $comp.unique_var('cont');
-            my str $result := $comp.unique_var('result');
-            my str $loop := $comp.unique_var('cont');
-
-            ChunkCPS.new($T_OBJ, $result, [
-                $list,
-                "$iterator = {$list.expr}.\$\$iterator();\n",
-                "var $loop = function() \{\n",
-                "if ($iterator.\$\$idx < $iterator.\$\$target) \{\n",
-                $*BLOCK.set_cont($body, $loop),
-                $body,
-                "\} else \{\n",
-                "return $cont(null);\n",
-                "\}\n",
-                "\}\n",
-                "return $loop;"
-            ], $cont);
-        }
-        else {
-            Chunk.new($T_OBJ, 'null', [
-                $list,
-                "$iterator = {$list.expr}.\$\$iterator();\n",
-                "while ($iterator.\$\$idx < $iterator.\$\$target) \{\n",
-                $comp.handle_control($loop, $body),
-                "\}\n"
-            ], :node($node));
-        }
+        Chunk.new($T_OBJ, 'null', [
+            $list,
+            "$iterator = {$list.expr}.\$\$iterator();\n",
+            "while ($iterator.\$\$idx < $iterator.\$\$target) \{\n",
+            $comp.handle_control($loop, $body),
+            "\}\n"
+        ], :node($node));
 
     });
 
