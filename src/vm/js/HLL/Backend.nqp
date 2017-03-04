@@ -120,7 +120,7 @@ class JavaScriptBackend {
     
     
     method js($qast, *%adverbs) {
-        my $backend := QAST::CompilerJS.new(nyi=>%adverbs<nyi> // 'ignore', cps=>%adverbs<cps> // 'off');
+        my $backend := QAST::CompilerJS.new(nyi=>%adverbs<nyi> // 'ignore');
 
         my $substagestats := nqp::defined(%adverbs<substagestats>);
 

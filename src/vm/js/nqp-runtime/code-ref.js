@@ -134,27 +134,6 @@ class CodeRef extends NQPObject {
     return closure;
   }
 
-  CPS(block) {
-    this.$$callCPS = block;
-    return this;
-  }
-
-  sameCPS(block) {
-    this.$$callCPS = function() {
-      var args = Array.prototype.slice.call(arguments);
-      var cont = args.splice(2, 1)[0];
-      return cont(this.$$call.apply(this, args));
-    };
-    return this;
-  }
-
-  onlyCPS(block) {
-    this.$$call = function() {
-      throw 'this block can be only called in CPS mode';
-    };
-    return this;
-  }
-
   setCodeObj(codeObj) {
     this.codeObj = codeObj;
     return this;

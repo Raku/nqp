@@ -41,7 +41,6 @@ $nqpcomp.addstage('classname', :after<start>);
 @clo.push('source-map');
 @clo.push('source-map-debug');
 @clo.push('beautify');
-@clo.push('cps=s');
 @clo.push('nyi=s');
 @clo.push('shebang');
 @clo.push('snapshot=s');
