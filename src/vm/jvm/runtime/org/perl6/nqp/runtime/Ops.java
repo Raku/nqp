@@ -4234,6 +4234,14 @@ public final class Ops {
         return found == null ? -1 : found;
     }
 
+    public static String getstrfromname(String name) {
+        long cp = codepointfromname(name.toUpperCase());
+        /* nqp::chr has been inlined, since it needs a thread context */
+        return cp < 0
+            ? ""
+            : ( new StringBuffer() ).append( Character.toChars( (int) cp) ).toString();
+    }
+
     private static String javaEncodingName(String nameIn) {
         if (nameIn.equals("utf8"))
             return "UTF-8";
