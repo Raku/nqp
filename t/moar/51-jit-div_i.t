@@ -1,11 +1,13 @@
 #!/usr/bin/env nqp-m
 
-nqp::say("plan 1..1");
+nqp::say("1..12");
 sub foo(int $i, int $j) {
     my int $x := nqp::div_i($i, $j);
 }
 
-sub test-div() {
+my int $foo-is-hot := 0;
+
+sub heat-foo() {
     my int $i := 0;
     while ($i < 200) {
         my int $y := foo(-1, 10);
@@ -14,11 +16,39 @@ sub test-div() {
         }
         $i := $i + 1;
     }
+    $foo-is-hot := 1;
 }
 
-if (test-div()) {
-    nqp::say("ok div_i");
-} else {
-    my int $result := foo(-1,10);
-    nqp::say("not ok div_i $result");
+sub test-foo(int $num, int $denom) {
+    # should be cold!
+    # nqp::no_jit();
+    my int $result := foo($num, $denom);
+    my int $expect := nqp::div_i($num, $denom);
+    if ($result == $expect) {
+        nqp::say("ok     $result = div_i($num,$denom) == $expect");
+    } else {
+        nqp::say("not ok $result = div_i($num,$denom) != $expect");
+    }
 }
+
+heat-foo();
+
+# round to minus infinity, positive num/denom
+test-foo(1,10);
+test-foo(10,10);
+test-foo(19,10);
+
+# round to minus infinity, negative num
+test-foo(-1,10);
+test-foo(-10,10);
+test-foo(-11,10);
+
+# round to minus infinity, negative denom
+test-foo(1,-10);
+test-foo(10,-10);
+test-foo(11,-10);
+
+# round to minus infinity, negative num/denom
+test-foo(-1,-10);
+test-foo(-10,-10);
+test-foo(-19,-10);
