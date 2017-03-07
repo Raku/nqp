@@ -25,9 +25,9 @@ sub test-foo(int $num, int $denom) {
     my int $result := foo($num, $denom);
     my int $expect := nqp::div_i($num, $denom);
     if ($result == $expect) {
-        nqp::say("ok     $result = div_i($num,$denom) == $expect");
+        nqp::say("ok     # $result = div_i($num,$denom) == $expect");
     } else {
-        nqp::say("not ok $result = div_i($num,$denom) != $expect");
+        nqp::say("not ok # $result = div_i($num,$denom) != $expect");
     }
 }
 
