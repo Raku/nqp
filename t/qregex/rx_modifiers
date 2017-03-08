@@ -1,4 +1,5 @@
 ##  modifiers
+:i ﬆ			st	y	ignorecase with ligature ﬆ (:i)
 :i bcd			abcdef	y	ignorecase (:i)
 :i bcd			aBcdef	y	ignorecase (:i)
 :i bcd			abCdef	y	ignorecase (:i)

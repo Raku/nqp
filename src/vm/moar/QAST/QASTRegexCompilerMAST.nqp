@@ -1000,7 +1000,7 @@ class QAST::MASTRegexCompiler {
         }
         elsif $node.list && $node.subtype eq 'ignorecase' {
             my $lit := $!regalloc.fresh_s();
-            nqp::push(@ins, op('const_s', $lit, sval(nqp::lc($node[0]))));
+            nqp::push(@ins, op('const_s', $lit, sval(nqp::fc($node[0]))));
             unless nqp::existskey(%!reg, 'haystacklc') {
                 %!reg<haystacklc> := $!regalloc.fresh_s();
             }
