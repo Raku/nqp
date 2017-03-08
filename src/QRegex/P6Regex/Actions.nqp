@@ -735,11 +735,11 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                 }
                 elsif $RXim {
                     my $c := nqp::chr(nqp::ordbaseat(~$_[0], 0));
-                    $str := $str ~ nqp::lc($c) ~ nqp::uc($c);
+                    $str := $str ~ nqp::fc($c) ~ nqp::uc($c);
                 }
                 elsif $RXi {
                     my $c := ~$_[0];
-                    $str := $str ~ nqp::lc($c) ~ nqp::uc($c);
+                    $str := $str ~ nqp::fc($c) ~ nqp::uc($c);
                 }
                 elsif $RXm {
                     $str := $str ~ nqp::chr(nqp::ordbaseat(~$_[0], 0));
