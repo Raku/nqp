@@ -591,6 +591,13 @@ and 1 if $r is greater than $l.
 Return 1 if the string `$haystack` has the string `$needle` at position `$pos`,
 or 0 otherwise.
 
+## eqatic
+MoarVM only
+
+* `eqatic(str haystack, str $needle, int $pos)`
+
+Case insensitive version of eqat
+
 ## iseq
 * `iseq_i(int $l, int $r)`
 * `iseq_n(num $l, num $r)`

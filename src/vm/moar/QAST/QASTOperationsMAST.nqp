@@ -2287,6 +2287,7 @@ QAST::MASTOperations.add_core_op('tclc', -> $qastcomp, $op {
 });
 
 QAST::MASTOperations.add_core_moarop_mapping('eqat', 'eqat_s');
+QAST::MASTOperations.add_core_moarop_mapping('eqatic', 'eqatic_s');
 
 QAST::MASTOperations.add_core_op('substr', -> $qastcomp, $op {
     my @operands := $op.list;
