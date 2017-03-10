@@ -254,7 +254,7 @@ class NQP::Actions is HLL::Actions {
         # See if we've exported any HOWs.
         if nqp::existskey($UNIT, 'EXPORTHOW') {
             for $UNIT<EXPORTHOW>.WHO {
-                %*HOW{$_.key} := $_.value;
+		$*LANG.set_how($_.key, $_.value);
             }
         }
     }
@@ -606,7 +606,7 @@ class NQP::Actions is HLL::Actions {
         # Get name and meta-object.
         my @ns := nqp::clone($<name><identifier>);
         my $name := ~@ns.pop;
-        my $how := %*HOW{$*PKGDECL};
+        my $how := $/.CURSOR.how($*PKGDECL);
 	my $package := $/.CURSOR.package;
 
         # Get the body code.
@@ -753,7 +753,7 @@ class NQP::Actions is HLL::Actions {
             }
 
             # Locate the type of meta-attribute we need.
-            unless nqp::existskey(%*HOW, $*PKGDECL ~ '-attr') {
+            unless $/.CURSOR.know_how($*PKGDECL ~ '-attr') {
                 $/.CURSOR.panic("$*PKGDECL packages do not support attributes");
             }
 
@@ -774,7 +774,7 @@ class NQP::Actions is HLL::Actions {
             }
 
             # Add it.
-            $*DECLARAND_ATTR := $*W.pkg_add_attribute($/.CURSOR.package, %*HOW{$*PKGDECL ~ '-attr'},
+            $*DECLARAND_ATTR := $*W.pkg_add_attribute($/.CURSOR.package, $/.CURSOR.how($*PKGDECL ~ '-attr'),
                 %lit_args, %obj_args);
 
             $ast := QAST::Stmts.new();

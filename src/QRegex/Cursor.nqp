@@ -179,6 +179,17 @@ role NQPCursorRole is export {
         self;
     }
 
+    method how($name) {
+        nqp::atkey(nqp::getattr($!braid, Braid, '$!slangs'),"H:$name");
+    }
+    method set_how($name,$value) {
+        nqp::bindkey(nqp::getattr($!braid, Braid, '$!slangs'),"H:$name", $value);
+        self;
+    }
+    method know_how($name) {
+        nqp::existskey(nqp::getattr($!braid, Braid, '$!slangs'),"H:$name");
+    }
+
     method set_braid_from($other) { nqp::bindattr(self, $?CLASS, '$!braid', nqp::getattr($other, $?CLASS, '$!braid')); self }
     method clone_braid_from($other) { nqp::bindattr(self, $?CLASS, '$!braid', nqp::getattr($other, $?CLASS, '$!braid')."!clone"()); self }
 

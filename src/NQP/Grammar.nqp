@@ -15,9 +15,8 @@ grammar NQP::Grammar is HLL::Grammar {
         # Package declarator to meta-package mapping. Note that there is
         # one universal KnowHOW from the 6model core, and an attribute
         # meta-object to go with it.
-        my %*HOW;
-        %*HOW<knowhow>      := nqp::knowhow();
-        %*HOW<knowhow-attr> := nqp::knowhowattr();
+	self.set_how('knowhow',      nqp::knowhow());
+	self.set_how('knowhow-attr', nqp::knowhowattr());
 
         # Serialization context builder - keeps track of objects that
         # cross the compile-time/run-time boundary that are associated
@@ -116,7 +115,7 @@ grammar NQP::Grammar is HLL::Grammar {
 
         # Create GLOBALish - the current GLOBAL view, created fresh
         # for each compilation unit so we get separate compilation.
-        :my $*GLOBALish := $*W.pkg_create_mo(%*HOW<knowhow>, :name('GLOBALish'));
+        :my $*GLOBALish := $*W.pkg_create_mo(self.how('knowhow'), :name('GLOBALish'));
         {
             $*GLOBALish.HOW.compose($*GLOBALish);
             $*W.install_lexical_symbol($*UNIT, 'GLOBALish', $*GLOBALish);
@@ -130,10 +129,10 @@ grammar NQP::Grammar is HLL::Grammar {
         :my $*EXPORT;
         {
             unless %*COMPILING<%?OPTIONS><setting> eq 'NULL' {
-                $*EXPORT := $*W.pkg_create_mo(%*HOW<knowhow>, :name('EXPORT'));
+                $*EXPORT := $*W.pkg_create_mo(self.how('knowhow'), :name('EXPORT'));
                 $*EXPORT.HOW.compose($*EXPORT);
                 $*W.install_lexical_symbol($*UNIT, 'EXPORT', $*EXPORT);
-                my $DEFAULT := $*W.pkg_create_mo(%*HOW<knowhow>, :name('DEFAULT'));
+                my $DEFAULT := $*W.pkg_create_mo(self.how('knowhow'), :name('DEFAULT'));
                 $DEFAULT.HOW.compose($DEFAULT);
                 ($*EXPORT.WHO)<DEFAULT> := $DEFAULT;
             }
@@ -424,7 +423,7 @@ grammar NQP::Grammar is HLL::Grammar {
             if $<repr> {
                 %args<repr> := ~$<repr><quote_delimited><quote_atom>[0];
             }
-            my $how := %*HOW{$*PKGDECL};
+            my $how := self.how($*PKGDECL);
             my $INNER := $*W.cur_lexpad();
 	    my $package := $*W.pkg_create_mo($how, |%args);
 	    $*PACKAGE := $package;

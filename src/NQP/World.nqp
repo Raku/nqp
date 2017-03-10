@@ -158,9 +158,9 @@ class NQP::World is HLL::World {
                 $target := nqp::atkey($target.WHO, $part);
             }
             else {
-                my $pkgtype := nqp::existskey(%*HOW, 'package')
-                    ?? nqp::atkey(%*HOW, 'package')
-                    !! nqp::atkey(%*HOW, 'knowhow');
+                my $pkgtype := $*LANG.know_how('package')
+                    ?? $*LANG.how('package')
+                    !! $*LANG.how('knowhow');
                 my $pkg := $pkgtype.new_type(:name($part));
                 $pkg.HOW.compose($pkg);
                 $target := nqp::bindkey($target.WHO, $part, $pkg);
