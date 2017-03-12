@@ -6558,7 +6558,7 @@ public final class Ops {
     }
 
     public static long div_i(long a, long b) {
-        return (long)Math.floor((double) a / b);
+        return (b == 0) ? a / b : (long)Math.floor((double) a / b);
     }
 
     public static SixModelObject mod_I(SixModelObject a, SixModelObject b, SixModelObject type, ThreadContext tc) {
