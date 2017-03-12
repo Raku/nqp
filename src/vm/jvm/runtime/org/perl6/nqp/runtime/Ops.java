@@ -6557,6 +6557,10 @@ public final class Ops {
             : new BigDecimal(getBI(tc, a)).divide(new BigDecimal(divisor), 309, RoundingMode.HALF_UP).doubleValue();
     }
 
+    public static long div_i(long a, long b) {
+        return (long)Math.floor((double) a / b);
+    }
+
     public static SixModelObject mod_I(SixModelObject a, SixModelObject b, SixModelObject type, ThreadContext tc) {
         BigInteger divisor = getBI(tc, b, type);
         if (divisor.compareTo(BigInteger.ZERO) < 0) {
