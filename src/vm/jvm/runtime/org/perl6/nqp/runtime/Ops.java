@@ -3474,8 +3474,7 @@ public final class Ops {
         for (int i = 0; i < numLookups; i++) {
             Map.Entry<SixModelObject, SixModelObject> entry = lookup.get(i);
             SixModelObject compare = entry.getKey();
-            long comapreElems = compare.elems(tc);
-            if (paramsElems == comapreElems) {
+            if (paramsElems == compare.elems(tc)) {
                 boolean match = true;
                 for (long j = 0; j < paramsElems; j++) {
                     SixModelObject want = params.at_pos_boxed(tc, j);

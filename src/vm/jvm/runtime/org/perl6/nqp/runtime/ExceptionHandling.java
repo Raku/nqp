@@ -278,7 +278,7 @@ all:
         List<String> result = new ArrayList<String>();
         for (TraceElement e : backtrace(ex)) {
             String name = e.frame.codeRef.name;
-            if (name == null || name == "")
+            if (name == null || name.equals(""))
                 name = "<anon>";
 
             result.add("  in " + name + (e.file == null ? "" : " (" + e.file + (e.line >= 0 ? ":" + e.line : "") + ")"));
