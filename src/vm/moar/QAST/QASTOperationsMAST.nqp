@@ -2246,6 +2246,7 @@ QAST::MASTOperations.add_core_moarop_mapping('ordfirst', 'ordfirst');
 QAST::MASTOperations.add_core_moarop_mapping('ordat', 'ordat');
 QAST::MASTOperations.add_core_moarop_mapping('ordbaseat', 'ordbaseat');
 QAST::MASTOperations.add_core_moarop_mapping('indexfrom', 'index_s');
+QAST::MASTOperations.add_core_moarop_mapping('indexic', 'indexic_s');
 QAST::MASTOperations.add_core_moarop_mapping('rindexfrom', 'rindexfrom');
 QAST::MASTOperations.add_core_moarop_mapping('substr_s', 'substr_s');
 QAST::MASTOperations.add_core_moarop_mapping('codepointfromname', 'getcpbyname');
