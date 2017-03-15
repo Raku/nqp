@@ -87,6 +87,7 @@
     - [unicmp_s](#unicmp_s)
     - [hash](#hash)
     - [index](#index)
+    - [indexic](#indexic)
     - [iscclass](#iscclass)
     - [join](#join)
     - [lc](#lc)
@@ -1007,6 +1008,15 @@ or at 0, otherwise.
 * `indexfrom(str $haystack, str $needle, int $pos)` _Internal_
 
 `index` is converted to this internal opcode by the compiler.
+
+## indexic
+* `index(str $haystack, str $needle, int $pos)`
+
+This op has the same arguments and functionality as nqp::index,
+except it is case-insensitive. For now we only have it under MoarVM,
+but the plan is to support it on other platforms as well.
+
+On MoarVM uses proper Unicode foldcase type comparison.
 
 ## iscclass
 * `iscclass(int $class, str $str, int $i)`
