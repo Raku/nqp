@@ -1,4 +1,9 @@
 ##  modifiers
+:i ﬆ			st	y	ignorecase with ligature ﬆ (:i)
+:i ﬆ			ST	y	ignorecase with ligature ﬆ (:i)
+:i ﬆ			St	y	ignorecase with ligature ﬆ (:i)
+:i ﬆ			sT	y	ignorecase with ligature ﬆ (:i)
+:i st			ﬆ	y	reversed haystack and needle ignorecase with ligature ﬆ (:i)
 :i bcd			abcdef	y	ignorecase (:i)
 :i bcd			aBcdef	y	ignorecase (:i)
 :i bcd			abCdef	y	ignorecase (:i)
