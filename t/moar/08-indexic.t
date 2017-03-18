@@ -11,9 +11,9 @@ my @array :=
     ('aaﬆaa', 'st', 2 ),
     ('aaﬆaaz', 'z', 5 ),
     ('aaﬆzaa', 'z', 3 ),
-    # TODO
-    ('chars that expand on casefolding at the end are broken with equatic', 4),
     ('aaaﬆ', 'st', 3 ),
+    # TODO
+    ('chars that expand on casefolding at the end are broken with equatic', 1),
     ('ﬆ', 'st', 0),
     ('aaaaﬆ', 'st', 4 ),
     ('AAAAﬆ', 'st', 4),
@@ -33,7 +33,6 @@ for @array -> $elem {
 test-it('ﬆ', 'st',  20, 1);
 test-it('ﬆ', 'st',  20, 0);
 test-it('st', 'ﬆ',  20, 1);
-todo('chars that expand on casefolding at the end are broken with equatic', 19);
 test-it('st', 'ﬆ',  20, 0);
 
 # Without codepoint which expand when casefolded
