@@ -1010,7 +1010,7 @@ or at 0, otherwise.
 `index` is converted to this internal opcode by the compiler.
 
 ## indexic
-* `index(str $haystack, str $needle, int $pos)`
+* `indexic(str $haystack, str $needle, int $pos)`
 
 This op has the same arguments and functionality as nqp::index,
 except it is case-insensitive. For now we only have it under MoarVM,
