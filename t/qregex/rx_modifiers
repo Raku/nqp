@@ -1,4 +1,5 @@
 ##  modifiers
+# todo 6 :jvm<ligature problem>
 :i ﬆ			st	y	ignorecase with ligature ﬆ (:i)
 :i ﬆ			ST	y	ignorecase with ligature ﬆ (:i)
 :i ﬆ			St	y	ignorecase with ligature ﬆ (:i)
