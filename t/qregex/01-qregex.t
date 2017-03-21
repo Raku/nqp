@@ -3,6 +3,9 @@
 # for string_to_int
 use QRegex;
 
+my %backendconfig := nqp::backendconfig();
+my $vm := nqp::existskey(%backendconfig, 'moar') ?? 'moar' !!
+          nqp::existskey(%backendconfig, 'runtime.jars') ?? 'jvm' !! '';
 my @files := [
     'rx_captures',
     'rx_qcaps',
@@ -81,9 +84,10 @@ for @files -> $fn {
         !! nqp::split("\n", $contents);
 
     for @lines -> $l {
-        my $m := $l ~~ /'# todo ' .*? ':pge<' (.*?) '>'/;
+        my $m := $l ~~ / ^ '# todo ' .*? ':' (\S+) '<' (.*) '>'/;
+        #$m := $l ~~ /'#?' (\S+) 
         if $m {
-            todo($m[0], 1);
+            todo($m[1], 1) if $m[0] eq $vm || $m[0] eq 'any';
         }
         else {
             next if $l ~~ /^ \s* '#' | ^ \s* $ /;

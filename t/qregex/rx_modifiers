@@ -4,6 +4,9 @@
 :i ﬆ			St	y	ignorecase with ligature ﬆ (:i)
 :i ﬆ			sT	y	ignorecase with ligature ﬆ (:i)
 :i st			ﬆ	y	reversed haystack and needle ignorecase with ligature ﬆ (:i)
+
+# todo :moar<ligature problem>
+:i abcdefgﬆ			sT	y	ignorecase with ligature ﬆ (:i)
 :i bcd			abcdef	y	ignorecase (:i)
 :i bcd			aBcdef	y	ignorecase (:i)
 :i bcd			abCdef	y	ignorecase (:i)
@@ -129,19 +132,21 @@ foo '-'? bar			foo - bar	n	basic non-match
 # todo :pugs<feature>
 :s foo '-'? bar			foo-bar		y	basic ws match \s* \s*
 :s foo '-'? bar			foobar		n	basic ws non-match
-# todo :pge<feature>
+# todo :any<feature>
 :s()foo '-'? bar		foo - bar	n	basic ws match
-# todo :pugs<feature> :pge<feature>
+# todo :pugs<feature>
+# todo :any<feature>
 :s[]foo '-'? bar		foo - bar	y	basic ws match
 # todo :pugs<feature>
 :s<?wb>foo '-'? bar		foo - bar	y	basic ws match with boundary modifier separation
-# todo :pge<::>
+# todo :any<::>
 :s::foo '-'? bar			foo - bar	y	basic ws match with backtrack no-op modifier separation
-# todo :pge<::>
+# todo :any<::>
 :s::(\w+) ':=' (\S+)		dog := spot	/mob 0: <dog @ 0>/	sigspace and capture together
-# todo :pge<::>
+# todo :any<::>
 :s::(\w+) ':=' (\S+)		dog := spot	/mob 1: <spot @ 7>/	sigspace and capture together
-# todo :pugs<feature> :pge<feature>
+# todo :pugs<feature>
+# todo :any<feature>
 :perl5 \A.*? bcd\Q$\E..\z	a bcd$ef	y	perl5 syntax (:perl5)
 :s^[\d+ ]* abc			11 12 13 abc	y	<?ws> before closing bracket
 

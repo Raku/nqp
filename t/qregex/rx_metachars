@@ -89,13 +89,13 @@ $$ \n			\n		y	line beginnings and endings ($$)
 ^ [ <[a..d]>+ | <[b..e]>+ ] $	bcd		y	alternation (|)
 ^ [ <[a..c]>+ | <[b..e]>+ ] $	bcd		y	alternation (|)
 ^ [ <[a..d]>+ | <[c..e]>+ ] $	bcd		y	alternation (|)
-# todo :pge<feature>
+# todo :any<feature>
 b|			bcd		<Null pattern>	alternation (|) - null right arg illegal
 |b			bcd		y	alternation (|) - null left arg ignored
-# todo :pge<feature>
+# todo :any<feature>
 |			bcd		<Null pattern>	alternation (|) - null both args illegal
 \|			|		y	alternation (|) - literal must be escaped
-# todo :pge<feature>
+# todo :any<feature>
 |			|		<Null pattern>	alternation (|) - literal must be escaped
 # todo :pugs<feature>
 <[a..d]> && <[b..e]>	c		y	conjunction (&&)
@@ -110,26 +110,27 @@ b|			bcd		<Null pattern>	alternation (|) - null right arg illegal
 <[a..c]>+ && <[b..e]>+	bcd		y	conjunction (&&)
 # todo :pugs<feature>
 <[a..d]>+ && <[c..e]>+	bcd		y	conjunction (&&)
-# todo :pge<&-conjunciton>
+# todo :any<&-conjunciton>
 b&			bcd		<rule error>	conjunction (&) - null right arg illegal
-# todo :pge<&-conjunciton>
+# todo :any<&-conjunciton>
 &b			bcd		<rule error>	conjunction (&) - null left arg illegal
-# todo :pge<&-conjunciton>
+# todo :any<&-conjunciton>
 &			bcd		<rule error>	conjunction (&) - null both args illegal
 \&			&		y	conjunction (&) - literal must be escaped
-# todo :pge<&-conjunciton>
+# todo :any<&-conjunciton>
 &			&		<rule error>	conjunction (&) - literal must be escaped
-# todo :pge<leading |>
+# todo :any<leading |>
 a&|b			a&|b		<rule error>	alternation and conjunction (&|) - parse error
-# todo :pge<&-conjunciton>
+# todo :any<&-conjunciton>
 &			&		<rule error>	conjunction (&) - literal must be escaped
-# todo :pge<&-conjunciton>
+# todo :any<&-conjunciton>
 a|&b			a|&b		<rule error>	alternation and conjunction (|&) - parse error
 |d|b			abc		y	leading alternation ignored
  |d|b			abc		y	leading alternation ignored
 |d |b			abc		y	leading alternation ignored
  | d | b		abc		y	leading alternation ignored
-# todo :pugs<feature> :pge<feature>
+# todo :pugs<feature>
+# todo :any<feature>
  b |  | d		abc		n	null pattern invalid
 \pabc			pabc		<Unrecognized>	retired metachars (\p)
 \p{InConsonant}		a		<Unrecognized>	retired metachars (\p)
@@ -139,9 +140,9 @@ a|&b			a|&b		<rule error>	alternation and conjunction (|&) - parse error
 \LABC\E			abc		<Unrecognized>	retired metachars (\L...\E)
 \Uabc\E			UabcE		<Unrecognized>	retired metachars (\U...\E)
 \Uabc\E			ABC		<Unrecognized>	retired metachars (\U...\E)
-# todo :pge<error messages>
+# todo :any<error messages>
 \Qabc\E			QabcE		<Unrecognized>	retired metachars (\Q...\E)
-# todo :pge<error messages>
+# todo :any<error messages>
 \Qabc d?\E		abc d		<Unrecognized>	retired metachars (\Q...\E)
 \Gabc			Gabc		<Unrecognized>	retired metachars (\G)
 \1abc			1abc		<Unrecognized>	retired metachars (\1)
