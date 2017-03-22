@@ -22,7 +22,7 @@
 # todo :pugs<feature>
 <- [b..d]>		abcdef		y	negated allows ws
 <-[b..d]>		bbccdd		n	negated character range
-# todo :pge<reversed character range>
+# todo :any<reversed character range>
 <-[d..b]>		bbccdd		/parse error/	illegal character range
 <[x-z]>			ab-def		<Unsupported>	perl5 range
 <[-]>			ab-def		y	unescaped hyphen, the only thing
@@ -47,7 +47,7 @@
 <-[+\-]>		------		n	negated escaped hyphen in range
 <["\\]>			\\			y	escaped backslash
 <[\]]>			]			y	escaped close bracket
-# todo :pge<backslash escapes in char classes>
+# todo :any<backslash escapes in char classes>
 <[\]>			\\]]		/error/	unescaped backslash (or no closing brace)
 ^\><[<]>		><		y	lt character class
 ^<[>]>\<		><		y	gt character class
@@ -75,9 +75,11 @@
 "ab<'>cd"		ab<'>cd		y	literal match with quote
 # todo :pugs<feature>
 "ab\\cd"		ab\x005ccd	y	literal match with backslash
-# todo :pugs<feature> :pge<feature>
+# todo :pugs<feature>
+# todo :any<feature>
 (ab)x"$0"		abxab		y	literal match with interpolation
-# todo :pugs<feature> :pge<feature>
+# todo :pugs<feature>
+# todo :any<feature>
 (ab)"x$0"		abxab		y	literal match with interpolation
 '?'			ab<?		y	literal match with question mark
 '<'			ab<?		y	literal match with lt

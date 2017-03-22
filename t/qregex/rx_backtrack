@@ -7,29 +7,29 @@ a*: a			bazaar		n	basic
 \d+:			123abc		y	cut on character class shortcut
 \d+:			abc		n	cut on character class shortcut
 [ if    not | ify ]	verify		y	control
-# todo :pge<::>
+# todo :any<::>
 [ if :: not | ify ]	verify		n	inside a group
-# todo :pge<::>
+# todo :any<::>
   if :: not | ify	verify		n	the default all group
 [ if :  not | ify ]	verify		y	simple backtrack still works
-# todo :pge<::>
+# todo :any<::>
 [ if :: not | ify ] | verify	verify	y	rule continues
 [ when     ever ] | whence	whence	y	full backtrack failure
-# todo :pge<::>
+# todo :any<::>
 [ when ::: ever ] | whence	whence	n	full backtrack failure
-# todo :pge<::>
+# todo :any<::>
 ab::cd | gh::ij		xyabghij	y	group cut at top
-# todo :pge<::>
+# todo :any<::>
 ab:::cd | gh:::ij	xyabghij	n	rule cut at top
-# todo :pge<::>
+# todo :any<::>
 [ab::cd | gh::ij]	xyabghij	y	group cut in group
-# todo :pge<::>
+# todo :any<::>
 [ab:::cd | gh:::ij]	xyabghij	n	rule cut in group
-# todo :pge<:>
+# todo :any<:>
 [ ab | abc ]: de	xyzabcde	n	no backtrack into group
-# todo :pge<:>
+# todo :any<:>
 ( ab | abc ): de	xyzabcde	n	no backtrack into subpattern
-# todo :pge<:>
+# todo :any<:>
 [ when <commit> ever ] | whence	whence	n	full backtrack failure
 
 :ratchet a* a		bazaar		n	ratchet modifier
