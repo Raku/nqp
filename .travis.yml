@@ -29,6 +29,6 @@ env:
     - NQP_OPTIONS="--gen-moar=master"
     - NQP_OPTIONS="--backends=jvm"
 
-matrix:
-  allow_failures:
-    - env: NQP_OPTIONS="--backends=jvm"
+#matrix:
+#  allow_failures:
+#    - env: NQP_OPTIONS="--backends=jvm"
