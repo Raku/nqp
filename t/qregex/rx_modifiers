@@ -16,22 +16,15 @@
 :ignorecase bcd		abcdef	y	ignorecase (:ignorecase)
 :ignorecase bcd		aBCDef	y	ignorecase (:ignorecase)
 :ignorecase bcd		abc-ef	n	ignorecase (:ignorecase)
-# todo :pugs<feature>
 :i(0) bcd		abcdef	y	ignorecase, repetition (:i(0))
 :i(0) bcd		abCdef	n	ignorecase, repetition (:i(0))
-# todo :pugs<feature>
 :i(1) bcd		abcdef	y	ignorecase, repetition (:i(1))
-# todo :pugs<feature>
 :i(1) bcd		abCdef	y	ignorecase, repetition (:i(1))
 :i(1) bcd		aBxDef	n	ignorecase, repetition (:i(1))
-# todo :pugs<feature>
 :0i bcd			abcdef	y	ignorecase, repetition (:0i)
 :0i bcd			abCdef	n	ignorecase, repetition (:0i)
-# todo :pugs<feature>
 :1i bcd			abcdef	y	ignorecase, repetition (:1i)
-# todo :pugs<feature>
 :1i bcd			abCdef	y	ignorecase, repetition (:1i)
-# todo :pugs<feature>
 :1i bcd			aBCDef	y	ignorecase, repetition (:1i)
 :1i bcd			aBxDef	n	ignorecase, repetition (:1i)
 A :i B			Ab		y	ignorecase in the middle, literals on both sides
@@ -44,73 +37,50 @@ ab [:i cd ] ef		abCDEf	n	ignorecase, lexical (:i)
 :i ab [:i cd ] ef	abCDef	y	ignorecase, lexical (:i)
 :i ab [:i cd ] ef	AbCDeF	y	ignorecase, lexical (:i)
 :i ab [:i cd ] ef	AbcdeF	y	ignorecase, lexical (:i)
-# todo :pugs<feature>
 :i a [:i(0) b [:i(1) c [:0i d [:1i e [:i(0) f ] ] ] ] ]		AbCdEf		y	ignorecase, lexical (:i)
-# todo :pugs<feature>
 :i aa [:i(0) bb [:i(1) cc [:0i dd [:1i ee [:i(0) ff ] ] ] ] ]	AabbCcddEeff	y	ignorecase, lexical (:i)
 :i a [:i(0) b [:i(1) c [:0i d [:1i e [:i(0) f ] ] ] ] ]		AbCdEF		n	ignorecase, lexical (:i)
 :i aa [:i(0) bb [:i(1) cc [:0i dd [:1i ee [:i(0) ff ] ] ] ] ]	AabbCcddEeFf	n	ignorecase, lexical (:i)
-# todo :pugs<feature>
 :i ab [:i(0) cd ] ef	AbcdeF	y	ignorecase, lexical repetition (:i)
-# todo :pugs<feature>
 :i ab [:!i cd ] ef	AbcdeF	y	ignorecase, lexical repetition (:i)
-# todo :pugs<feature>
 :i ab [:0i cd ] ef	AbcdeF	y	ignorecase, lexical repetition (:i)
-# todo :pugs<feature>
 :0i ab [:1i cd ] ef	abCDef	y	ignorecase, lexical repetition (:i)
 :0i ab [:1i cd ] ef	AbCDeF	n	ignorecase, lexical repetition (:i)
 :0i ab [:1i cd ] ef	AbcdeF	n	ignorecase, lexical repetition (:i)
-# todo :pugs<feature>
 :0i ab [:i(0) cd ] ef	abcdef	y	ignorecase, lexical repetition (:i)
 :0i ab [:1i cd ] ef	AbcdeF	n	ignorecase, lexical repetition (:i)
-# todo :pugs<feature>
 :i(1) ab [:1i cd ] ef	AbCdeF	y	ignorecase, lexical repetition (:i)
-# todo :pugs<feature>
 :i(1) ab [:i(0) cd ] ef	AbcdeF	y	ignorecase, lexical repetition (:i)
 :i(1) ab [:i(0) cd ] ef	AbcDeF	n	ignorecase, lexical repetition (:i)
-# todo :pugs<feature>
 :i(2) ab [:i(999) cd ] ef	ABCDEF	y	ignorecase, lexical repetition (:i)
-# todo :pugs<feature>
 :1i ab [:i(1) cd ] ef		ABCDEF	y	ignorecase, lexical repetition (:i)
 :0i ab [:1i cd ] ef		abcDeF	n	ignorecase, lexical repetition (:i)
-# todo :pugs<feature>
 :2i ab [:999i cd ] ef		ABCDEF	y	ignorecase, lexical repetition (:i)
 ab [:ignorecase cd ] ef		abCDef	y	ignorecase, lexical (:ignorecase)
 ab [:ignorecase cd ] ef		aBCDef	n	ignorecase, lexical (:ignorecase)
-# todo :pugs<feature>
 :1ignorecase ab [:ignorecase(1) cd ] ef	ABCDEF	y	ignorecase, lexical repetition (:ignorecase)
-# todo :pugs<feature>
 :s bcd			a bcdef		y	sigspace (:s)
-# todo :pugs<feature>
 :s bcd			a bcd ef	y	sigspace (:s)
 :s bcd			abcdef		y	sigspace (:s)
 :s bcd			abcd ef		y	sigspace (:s)
 :s bcd			ab cdef		n	sigspace (:s)
-# todo :pugs<feature>
 :s b c d		a b c d ef	y	sigspace (:s)
-# todo :pugs<feature>
 :s b c d		a b c def	y	sigspace (:s)
 :s b c d		ab c d ef	y	sigspace (:s)
 :s b c d		a bcdef		n	sigspace (:s)
 :s b c d		abcdef		n	sigspace (:s)
-# todo :pugs<feature>
 :sigspace bcd		a bcdef		y	sigspace (:sigspace)
-# todo :pugs<feature>
 :sigspace bcd		a bcd ef	y	sigspace (:sigspace)
 :sigspace bcd		abcdef		y	sigspace (:sigspace)
-# todo :pugs<feature>
 :sigspace b c d		a b c d ef	y	sigspace (:sigspace)
-# todo :pugs<feature>
 :sigspace b c d		a b c def	y	sigspace (:sigspace)
 :sigspace b c d		ab c d ef	y	sigspace (:sigspace)
-# todo :pugs<feature>
 :s(1) b c [:s(0) d \w f ]	a b c def	y	sigspace, lexical repetition (:s)
 :s b c [:!s d \w f ]	a b c def	y	sigspace, lexical repetition (:s)
 :s(0) b \w [:s(1) d \w f ]	a b c def	n	sigspace, lexical repetition (:s)
 :!s b \w [:s d \w f ]	a b c def	n	sigspace, lexical repetition (:s)
 :s(0) b \w [:s(0) d \w f ]	a b c def	n	sigspace, lexical repetition (:s)
 :!s b \w [:!s d \w f ]	a b c def	n	sigspace, lexical repetition (:s)
-# todo :pugs<feature>
 :s ab 				ab		y	sigspace, trailing ws
 foo\s*'-'?\s*bar		foo\t \n-\n\t bar	y	basic match
 foo\s*'-'?\s*bar		foo - bar	y	basic match
@@ -120,25 +90,17 @@ foo\s*'-'?\s+bar		foo-  bar	y	basic match \s* \s+
 foo '-'? bar			foo-bar		y	basic match \s* \s*
 foo '-'? bar			foobar		y	basic match
 foo '-'? bar			foo - bar	n	basic non-match
-# todo :pugs<feature>
 :s foo '-'? bar			foo\n \t- \t\t\nbar	y	basic ws match
-# todo :pugs<feature>
 :s foo '-'? bar			foo - bar	y	basic ws match
-# todo :pugs<feature>
 :s foo '-'? bar			foo   bar	y	basic ws match \s+ \s*
-# todo :pugs<feature>
 :s foo '-'? bar			foo  -bar	y	basic ws match \s+ \s*
-# todo :pugs<feature>
 :s foo '-'? bar			foo-  bar	y	basic ws match \s* \s+
-# todo :pugs<feature>
 :s foo '-'? bar			foo-bar		y	basic ws match \s* \s*
 :s foo '-'? bar			foobar		n	basic ws non-match
 # todo :any<feature>
 :s()foo '-'? bar		foo - bar	n	basic ws match
-# todo :pugs<feature>
 # todo :any<feature>
 :s[]foo '-'? bar		foo - bar	y	basic ws match
-# todo :pugs<feature>
 :s<?wb>foo '-'? bar		foo - bar	y	basic ws match with boundary modifier separation
 # todo :any<::>
 :s::foo '-'? bar			foo - bar	y	basic ws match with backtrack no-op modifier separation
@@ -146,7 +108,6 @@ foo '-'? bar			foo - bar	n	basic non-match
 :s::(\w+) ':=' (\S+)		dog := spot	/mob 0: <dog @ 0>/	sigspace and capture together
 # todo :any<::>
 :s::(\w+) ':=' (\S+)		dog := spot	/mob 1: <spot @ 7>/	sigspace and capture together
-# todo :pugs<feature>
 # todo :any<feature>
 :perl5 \A.*? bcd\Q$\E..\z	a bcd$ef	y	perl5 syntax (:perl5)
 :s^[\d+ ]* abc			11 12 13 abc	y	<?ws> before closing bracket

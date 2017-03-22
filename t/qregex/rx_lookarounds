@@ -3,31 +3,31 @@
 <before c> ....		abacad		n				lookahead <before>
 <before> .		abcd		n				null <before>
 <!before ..b> aa	aabaaa		/mob: <aa @ 3>/			negated lookahead
-# todo :pugs<feature> :pge<after>
+# todo :any<after>
 <after a>b		ab		y				lookbehind <after>
-# todo :pge<after>
+# todo :any<after>
 <after a>b		cb		n				lookbehind <after>
-# todo :pge<after>
+# todo :any<after>
 <after a>b		b		n				lookbehind <after>
-# todo :pge<after>
+# todo :any<after>
 <!after c>b		ab		y				lookbehind <!after>
-# todo :pge<after>
+# todo :any<after>
 <!after c>b		cb		n				lookbehind <!after>
-# todo :pge<after>
+# todo :any<after>
 <!after c>b		b		y				lookbehind <!after>
-# todo :pge<after>
+# todo :any<after>
 <!after <[cd]>>b	dbcb		n				lookbehind <!after>
-# todo :pge<after>
+# todo :any<after>
 <!after <[cd]>><[ab]>	dbaacb		y				lookbehind <!after>
-# todo :pge<after>
+# todo :any<after>
 <!after c|d>b		dbcb		n				lookbehind <!after>
-# todo :pge<after>
+# todo :any<after>
 <!after c|d><[ab]>	dbaacb		y				lookbehind <!after>
-# todo :pge<after>
+# todo :any<after>
 <!after cd><[ab]>	cbaccb		y				lookbehind <!after>
-# todo :pge<after>
+# todo :any<after>
 $ <after ^a>		a		y				lookbehind <after>
-# todo :pge<after>
+# todo :any<after>
 <after x+>y		axxbxxyc	y				lookbehind <after>
 <[a..z]>+		az		y				metasyntax with leading + (<+...>)
 <+[a..z]>+		az		y				metasyntax with leading + (<+...>)
@@ -42,7 +42,7 @@ x | y | <?>	\t\n\r !"#$%&'()*+,-./:;<=>?@[\]^`_{|}0123456789ABCDEFGHIJabcdefghij
 
 abc <!> def	\t\n\r !"#$%&'()*+,-./:;<=>?@[\]^`_{|}0123456789ABCDEFGHIJabcdefghij	n	fail pattern <!>
 
-# todo :pge<parsing>
+# todo :any<parsing>
 a[b}		\t\n\r !"#$%&'()*+,-./:;<=>?@[\]^`_{|}0123456789ABCDEFGHIJabcdefghij	/error/	mismatched close
 
 c <before .d>		abacad		/mob: <c @ 3>/				one character and lookahead <before>

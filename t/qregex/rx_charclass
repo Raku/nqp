@@ -1,8 +1,6 @@
 ##   Enumerated character lists
 <[c]>			abcdef		y	character class
-# todo :pugs<feature>
 <[ z ]>			abc def		n	character class ignores ws
-# todo :pugs<feature>
 <[dcb]>**3		abcdef		y	repeated character class
 ^<[a]>			abcdef		y	anchored character class
 <-[e]>			abcdef		y	negated character class
@@ -12,14 +10,12 @@
 ^<-[e]>			abcdef		y	anchored negated character class
 ^<-[a]>			abcdef		n	anchored negated character class
 <[b..d]>		abcdef		y	character range
-# todo :pugs<feature>
 <[b .. d]>		c		y	character range ignores ws
 <[b..d]>		abxxef		y	character range
 <[b..d]>		axcxef		y	character range
 <[b..d]>		axxdef		y	character range
 <[b..d]>		axxxef		n	character range
 <-[b..d]>		abcdef		y	negated character range
-# todo :pugs<feature>
 <- [b..d]>		abcdef		y	negated allows ws
 <-[b..d]>		bbccdd		n	negated character range
 # todo :any<reversed character range>
@@ -51,34 +47,23 @@
 <[\]>			\\]]		/error/	unescaped backslash (or no closing brace)
 ^\><[<]>		><		y	lt character class
 ^<[>]>\<		><		y	gt character class
-# todo :pugs<feature>
 ^<[><]>**2		><		y	gt, lt character class
-# todo :pugs<feature>
 ^<[<>]>**2		><		y	lt, gt  character class
 ^<-[><]>		><		n	not gt, lt character class
 ^<-[<>]>		><		n	not lt, gt  character class
 '... --- ...'		... --- ...	y	literal match (\')
 '... --- ...'		...---...	n	literal match (\')
-# todo :pugs<feature>
 'ab\'>cd'		ab'>cd		y	literal match with quote
 'ab\\yz'		ab\x005cyz	y	literal match with backslash
 'ab"cd'			ab"cd		y	literal match with quote
-# todo :pugs<feature>
 'ab\\yz'		ab\x005cyz	y	literal match with backslash
-# todo :pugs<feature>
 "... --- ..."		... --- ...	y	literal match (\")
-# todo :pugs<feature>
 "... --- ..."		...---...	n	literal match (\")
-# todo :pugs<feature>
 "ab<\">cd"		ab<">cd		y	literal match with quote
-# todo :pugs<feature>
 "ab<'>cd"		ab<'>cd		y	literal match with quote
-# todo :pugs<feature>
 "ab\\cd"		ab\x005ccd	y	literal match with backslash
-# todo :pugs<feature>
 # todo :any<feature>
 (ab)x"$0"		abxab		y	literal match with interpolation
-# todo :pugs<feature>
 # todo :any<feature>
 (ab)"x$0"		abxab		y	literal match with interpolation
 '?'			ab<?		y	literal match with question mark
