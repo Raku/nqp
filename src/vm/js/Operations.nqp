@@ -893,11 +893,13 @@ class QAST::OperationsJS {
 
         # TODO type 
 
+        my $var := QAST::Var.new(:name($var_name), :scope<lexical>);
+
         if !$block {
             Chunk.new($T_OBJ, "{$*BLOCK.ctx}.lookupFromOuter({quote_string($var_name)})", :$node);
         }
-        elsif $comp.is_dynamic_var($block, QAST::Var.new(:name($var_name), :scope<lexical>)) {
-            Chunk.new($T_OBJ, $block.ctx ~ "[" ~ quote_string($var_name) ~ "]", :$node);
+        elsif $comp.is_dynamic_var($block, $var) {
+            Chunk.new($T_OBJ, $*BLOCK.ctx_for_var($var, :from_outer) ~ "[" ~ quote_string($var_name) ~ "]", :$node);
         }
         else {
             Chunk.new($T_OBJ, $*BLOCK.outer.mangle_lexical($var_name) , :$node);

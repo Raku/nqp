@@ -621,14 +621,7 @@ class BinaryCursor {
     }
 
     for (var closure of noContextClosures) {
-      var closureTemplate = closure.staticCode.closureTemplate;
-      var fakeCtxs = [];
-      var i = closureTemplate.length;
-      while (i--) {
-        fakeCtxs.push(null);
-      }
-      var built = closureTemplate.apply(null, fakeCtxs);
-      sc.codeRefs[closure.index].capture(built);
+      sc.codeRefs[closure.index].capture(closure.staticCode.freshBlock());
     }
 
     for (var i = 0; i < contexts.length; i++) {
@@ -767,10 +760,9 @@ class BinaryCursor {
 
     ctx.closuresUsingThis = [];
     for (var closure of context.closures) {
-      var closureTemplate = closure.staticCode.closureTemplate;
       var codeRef = this.sc.codeRefs[closure.index];
-      while (newOuters.length < closure.staticCode.closureTemplate.length) newOuters.unshift(null);
-      codeRef.capture(closureTemplate.apply(null, newOuters));
+
+      codeRef.capture(closure.staticCode.freshBlock());
 
       ctx.closuresUsingThis.push(codeRef);
       for (let outer of outers) {

@@ -12,6 +12,8 @@ var Null = require('./null.js');
 
 var Capture = require('./capture.js');
 
+var StaticCtx = require('./static-ctx.js');
+
 exports.NQPInt = NQPInt;
 
 function loadOps(module) {
@@ -60,6 +62,8 @@ loadOps(nativecall);
 
 var CodeRef = require('./code-ref.js');
 exports.CodeRef = CodeRef;
+
+exports.CodeRefWithStateVars = require('./code-ref-with-statevars.js');
 
 exports.CurLexpad = require('./curlexpad.js');
 
@@ -119,6 +123,8 @@ op.loadbytecode = function(ctx, file) {
 
 op.ctxlexpad = function(ctx) {
   if (ctx instanceof Ctx) {
+    return ctx;
+  } else if (ctx instanceof StaticCtx) {
     return ctx;
   } else {
     console.trace('ctxlexpad needs a ctx as an argument');

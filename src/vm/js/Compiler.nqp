@@ -239,13 +239,30 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
 
 
-        method ctx_for_var($var) {
+        method ctx_for_var($var, :$from_outer) {
             my $info := self;
+            my int $depth := 0;
+
+            my $reached_closure_template := 0;
+
+            if $from_outer {
+                $reached_closure_template := $info.qast.blocktype ne 'immediate';
+                $depth := $depth + 1 if $reached_closure_template;
+                $info := $info.outer;
+            }
+
+
             while $info {
+                $reached_closure_template := $reached_closure_template || $info.qast.blocktype ne 'immediate';
+
                 if $info.has_own_variable($var.name) {
+                    %*USED_CTXS{$info.ctx} := $depth unless nqp::existskey(%*USED_CTXS, $info.ctx);
                     return $info.ctx;
                 }
                 $info := $info.outer;
+
+                $depth := $depth + 1 if $reached_closure_template;
+
             }
         }
     }
@@ -786,13 +803,32 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         nqp::existskey(%!cuids, $node.cuid);
     }
 
+    has %!serialized_code_ref_info;
+
+    my class SerializedCodeRefInfo {
+        has $!closure_template;
+        has $!lexicals_type_info;
+        has $!outer_cuid;
+        has $!static_lexicals;
+        has $!statevars;
+        method outer_cuid() {$!outer_cuid}
+        method lexicals_type_info() {$!lexicals_type_info}
+        method closure_template() {$!closure_template}
+        method static_lexicals() {$!static_lexicals}
+        method statevars() {$!statevars}
+    }
+
     method setup_cuids() {
         my @declared;
         my @vars;
         for %!cuids {
             my str $var := self.mangled_cuid($_.key);
             @vars.push($var);
-            @declared.push("$var = new nqp.CodeRef({quote_string($_.value.name)},{quote_string($_.key)})");
+
+            my int $has_statevars := nqp::existskey(%!serialized_code_ref_info, $_.key) && %!serialized_code_ref_info{$_.key}.statevars;
+
+            my $class := $has_statevars ?? 'CodeRefWithStateVars' !! 'CodeRef';
+            @declared.push("$var = new nqp.$class({quote_string($_.value.name)},{quote_string($_.key)})");
         }
         @declared.push("cuids = [{nqp::join(',', @vars)}]");
         self.declare_js_vars(@declared);
@@ -829,18 +865,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
     }
 
-    has %!serialized_code_ref_info;
-
-    my class SerializedCodeRefInfo {
-        has $!closure_template;
-        has $!lexicals_type_info;
-        has $!outer_cuid;
-        has $!static_lexicals;
-        method outer_cuid() {$!outer_cuid}
-        method lexicals_type_info() {$!lexicals_type_info}
-        method closure_template() {$!closure_template}
-        method static_lexicals() {$!static_lexicals}
-    }
 
     method type_info_for_lexicals(BlockInfo $block) {
         my @type_info;
@@ -885,39 +909,38 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
 
             self.wrap_static_block($block_info.outer, @clone_inners, -> {
-                if %*BLOCKS_DONE{$kv.key} {
-                    # Avoid emitting duplicated code with both .capture and .closure
+                my $outer := $block_info.outer.ctx;
+                if self.has_closure_template($block_info) {
                     if nqp::existskey($block.captured_inners, $kv.key) {
-                        if self.has_closure_template($block_info) {
-                            @clone_inners.push("$reg = $cuid.captureAndClosureCtx({self.outer_ctxs($block_info)});\n");
-                        }
-                        else {
-                            my $outer := self.is_serializable($kv.key) ?? $block_info.outer.ctx !! 'null';
-                            @clone_inners.push("$reg = $cuid.captureAndClosure($outer, ");
-                            @clone_inners.push(%*BLOCKS_DONE{$kv.key});
-                            @clone_inners.push(");\n");
-                        }
+                        @clone_inners.push("$reg = $cuid.captureAndClosureCtx($outer);\n");
                     }
                     else {
-                        if self.has_closure_template($block_info) {
-                            @clone_inners.push("$reg = $cuid.closureCtx({self.outer_ctxs($block_info)});\n");
-                        }
-                        else {
-                            @clone_inners.push("$reg = $cuid.closure");
-                            @clone_inners.push(%*BLOCKS_DONE{$kv.key});
-                            if self.is_serializable($kv.key) {
-                                @clone_inners.push(".setOuter(" ~ $block_info.outer.ctx ~ ");\n");
-                            }
-                            else {
-                                @clone_inners.push(";\n");
-                            }
-                        }
+                        @clone_inners.push("$reg = $cuid.closureCtx($outer);\n");
                     }
                 }
                 else {
-                    nqp::die("//Broken block: {$kv.key}");
-                }
+                    unless %*BLOCKS_DONE{$kv.key} {
+                        nqp::die("//clone_inners - broken block: {$kv.key}");
+                    }
 
+                    # Avoid emitting duplicated code with both .capture and .closure
+                    if nqp::existskey($block.captured_inners, $kv.key) {
+                        my $set_outer := self.is_serializable($kv.key) ?? $outer !! 'null';
+                        @clone_inners.push("$reg = $cuid.captureAndClosure($set_outer, ");
+                        @clone_inners.push(%*BLOCKS_DONE{$kv.key});
+                        @clone_inners.push(");\n");
+                    }
+                    else {
+                        @clone_inners.push("$reg = $cuid.closure");
+                        @clone_inners.push(%*BLOCKS_DONE{$kv.key});
+                        if self.is_serializable($kv.key) {
+                            @clone_inners.push(".setOuter($outer);\n");
+                        }
+                        else {
+                            @clone_inners.push(";\n");
+                        }
+                    }
+                }
             });
         }
         Chunk.void(|@clone_inners);
@@ -940,7 +963,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 my $block_info := %*BLOCKS_INFO{$kv.key};
                 self.wrap_static_block($block_info.outer, @capture_inners, -> {
                     if self.has_closure_template($block_info) {
-                        @capture_inners.push("$reg = $cuid.captureCtx({self.outer_ctxs($block_info)});\n");
+                        @capture_inners.push("$reg = $cuid.captureCtx({$block_info.outer.ctx});\n");
                     } else {
                         @capture_inners.push("$reg = $cuid.capture");
 
@@ -959,21 +982,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         Chunk.void(|@capture_inners);
     }
 
-    method outer_ctxs(BlockInfo $block) {
-        my @ctxs;
-        my $info := $block.outer;
-
-        # Avoid the ctx from the fake outer ctx
-        while $info && !($info.ctx eq 'null' && !$info.outer) {
-            @ctxs.unshift($info.ctx);
-            $info := $info.outer;
-        }
-        nqp::join(',', @ctxs);
-    }
-
     method compile_block(QAST::Block $node, $outer, $outer_loop, :$want, :@extra_args=[]) {
 
         my str $outer_ctx := try $*CTX // "null";
+
+        my $outer_used_ctx := try %*USED_CTXS;
+
 
         if self.is_known_cuid($node) {
         }
@@ -993,9 +1007,19 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             my int $body_want := $node.blocktype eq 'immediate' ?? $want !! $T_OBJ;
 
+            my int $has_closure_template := $node.blocktype ne 'immediate';
+
+            my %*USED_CTXS;
+
+            %*USED_CTXS := $outer_used_ctx unless $has_closure_template;
+
             my $stmts := self.compile_all_the_statements($node, $body_want);
 
-            my str $create_ctx := self.create_ctx($*CTX, :code_ref('this'));
+
+            my $outer_ctx := $has_closure_template ?? "this.outerCtx" !! ($*BLOCK.outer ?? $*BLOCK.outer.ctx !! 'null');
+            my str $create_ctx :=  "var $*CTX = new nqp.Ctx(caller_ctx, $outer_ctx, this);\n";
+
+            %*USED_CTXS{$*CTX} := 0;
 
             my $sig := self.compile_sig($*BLOCK.params);
 
@@ -1032,7 +1056,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 $pass_exceptions_end,
                 "\}"
             ];
-            %*BLOCKS_DONE{$node.cuid} := Chunk.void("(", |@function, ")");
 
             if $*BLOCK.statevars {
                 my @vars;
@@ -1045,42 +1068,66 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 %*BLOCKS_STATEVARS{$node.cuid} := "var " ~ nqp::join(',', @vars) ~ ";\n";
             }
 
-            if 1 { # TODO make sure that only blocks that take part in serialization have that info emitted
-                my $outer_cuid;
-                if nqp::defined($*BLOCK.outer) && $*BLOCK.outer.cuid {
-                    $outer_cuid := self.mangled_cuid($*BLOCK.outer.cuid);
-                }
-                my str $lexicals_type_info := self.type_info_for_lexicals($*BLOCK);
-                my $closure_template;
-                if $node.blocktype ne 'immediate' {
-                    my @closure_template := nqp::clone(@function);
-                    @closure_template.unshift(
-                        "function({self.outer_ctxs($*BLOCK)}) \{\n"
-                        ~ %*BLOCKS_STATEVARS{$node.cuid}
-                        ~ "return ");
-                    @closure_template.push('}');
-                    $closure_template := Chunk.new($T_NONVAL, '', @closure_template);
-                }
-
-                my @static;
-                for $*BLOCK.variables -> $var {
-                    if $var.decl eq 'static' {
-                        @static.push(quote_string($var.name) ~ ': ' ~ self.value_as_js($var.value));
-                    }
-                }
-
-                my $static_lexicals;
-                if +@static {
-                   $static_lexicals := '{' ~ nqp::join(',', @static) ~ '}';
-                }
-
-                %!serialized_code_ref_info{$node.cuid} := SerializedCodeRefInfo.new(
-                    :$closure_template,
-                    :$outer_cuid,
-                    :$lexicals_type_info,
-                    :$static_lexicals
-                );
+            my $outer_cuid;
+            if nqp::defined($*BLOCK.outer) && $*BLOCK.outer.cuid {
+                $outer_cuid := self.mangled_cuid($*BLOCK.outer.cuid);
             }
+            my str $lexicals_type_info := self.type_info_for_lexicals($*BLOCK);
+            my $closure_template;
+
+            my int $statevars;
+
+            if $has_closure_template {
+                my @closure_template := nqp::clone(@function);
+
+
+                my @used_ctxs;
+                for %*USED_CTXS -> $kv {
+                    my int $depth := $kv.value;
+                    next if $depth == 0;
+                    my str $ctx := 'this.outerCtx';
+                    while $depth > 1 {
+                        $ctx := $ctx ~ '.$$outer';
+                        $depth := $depth - 1;
+                    }
+                    @used_ctxs.push("let {$kv.key} = $ctx;\n");
+                }
+
+                nqp::splice(@closure_template, @used_ctxs, 5, 0);
+
+                $statevars := nqp::existskey(%*BLOCKS_STATEVARS, $node.cuid);
+
+                @closure_template.unshift(
+                    "function() \{\n"
+                    ~ %*BLOCKS_STATEVARS{$node.cuid}
+                    ~ "return ") if $statevars;
+                @closure_template.push('}') if $statevars;
+
+                $closure_template := Chunk.new($T_NONVAL, '', @closure_template);
+            }
+            else {
+                %*BLOCKS_DONE{$node.cuid} := Chunk.void("(", |@function, ")");
+            }
+
+            my @static;
+            for $*BLOCK.variables -> $var {
+                if $var.decl eq 'static' {
+                    @static.push(quote_string($var.name) ~ ': ' ~ self.value_as_js($var.value));
+                }
+            }
+
+            my $static_lexicals;
+            if +@static {
+               $static_lexicals := '{' ~ nqp::join(',', @static) ~ '}';
+            }
+
+            %!serialized_code_ref_info{$node.cuid} := SerializedCodeRefInfo.new(
+                :$statevars,
+                :$closure_template,
+                :$outer_cuid,
+                :$lexicals_type_info,
+                :$static_lexicals
+            );
         }
 
         if $node.blocktype eq 'raw' {
@@ -1129,13 +1176,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         $prefix~$!unique_vars;
     }
 
-    method outer_ctx() {
-        $*BLOCK.outer ?? $*BLOCK.outer.ctx !! 'null';
-    }
-
-    method create_ctx($name, :$code_ref) {
-        "var $name = new nqp.Ctx(caller_ctx, this.forcedOuterCtx || {self.outer_ctx}, $code_ref);\n";
-    }
 
     multi method as_js(QAST::IVal $node, :$want) {
         Chunk.new($T_INT,'('~$node.value()~')', :$node);

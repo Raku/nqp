@@ -963,7 +963,7 @@ op.forceouterctx = function(code, ctx) {
     throw 'forceouterctx second operand must be a Ctx';
   }
 
-  code.forcedOuterCtx = ctx;
+  code.outerCtx = ctx;
 
   return code;
 };
