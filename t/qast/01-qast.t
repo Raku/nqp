@@ -1,6 +1,6 @@
 use QAST;
 
-plan(120);
+plan(123);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -1765,6 +1765,18 @@ test_qast_result(
             $closure2().inc;
             is($closure2().get, '101', "...that get preserved across calls");
             is($closure1().get, '103', "...and is independent from the first closure");
+
+            my $closure3 := $factory();
+            $closure3().inc;
+            my $closure4 := nqp::clone($closure3);
+            is($closure4().get, '100', 'a clone of a closure gets fresh statevars');
+            $closure4().inc;
+            $closure4().inc;
+            $closure4().inc;
+            $closure4().inc;
+            is($closure3().get, '101', "...and they are not shared with the one it's cloned from");
+            my $closure5 := nqp::clone($closure4);
+            is($closure5().get, '100', 'a clone of a clone gets fresh statevars');
         }
     );
 
