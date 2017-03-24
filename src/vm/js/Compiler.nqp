@@ -1078,9 +1078,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             my int $statevars;
 
             if $has_closure_template {
-                my @closure_template := nqp::clone(@function);
-
-
                 my @used_ctxs;
                 for %*USED_CTXS -> $kv {
                     my int $depth := $kv.value;
@@ -1093,17 +1090,19 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     @used_ctxs.push("let {$kv.key} = $ctx;\n");
                 }
 
-                nqp::splice(@closure_template, @used_ctxs, 5, 0);
+                nqp::splice(@function, @used_ctxs, 5, 0);
 
                 $statevars := nqp::existskey(%*BLOCKS_STATEVARS, $node.cuid);
 
-                @closure_template.unshift(
-                    "function() \{\n"
-                    ~ %*BLOCKS_STATEVARS{$node.cuid}
-                    ~ "return ") if $statevars;
-                @closure_template.push('}') if $statevars;
+                if $statevars {
+                    @function.unshift(
+                        "function() \{\n"
+                        ~ %*BLOCKS_STATEVARS{$node.cuid}
+                        ~ "return ");
+                    @function.push('}');
+                }
 
-                $closure_template := Chunk.new($T_NONVAL, '', @closure_template);
+                $closure_template := Chunk.new($T_NONVAL, '', @function);
             }
             else {
                 %*BLOCKS_DONE{$node.cuid} := Chunk.void("(", |@function, ")");
