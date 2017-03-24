@@ -1003,6 +1003,16 @@ op.tclc = function(string) {
   return first + lower.toLowerCase();
 };
 
+op.getstrfromname = function(name) {
+  let unicharadata = require('unicharadata');
+  return unicharadata.lookup(name);
+};
+
+op.codepointfromname = function(name) {
+  let unicharadata = require('unicharadata');
+  return unicharadata.lookup(name).codePointAt(0);
+};
+
 op.islist = function(list) {
   return (list._STable && list._STable.REPR instanceof reprs.VMArray) ? 1 : 0;
 };

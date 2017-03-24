@@ -1597,6 +1597,9 @@ class QAST::OperationsJS {
 
     add_simple_op('sleep', $T_NUM, [$T_NUM], :side_effects);
 
+    add_simple_op('getstrfromname', $T_STR, [$T_STR]);
+    add_simple_op('codepointfromname', $T_INT, [$T_STR]);
+
     add_op('js', sub ($comp, $node, :$want) {
         my %want_char := nqp::hash($T_INT, 'I', $T_NUM, 'N', $T_STR, 'S', $T_VOID, 'v');
         my sub want($node, $type) {
