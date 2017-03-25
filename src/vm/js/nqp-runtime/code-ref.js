@@ -43,7 +43,7 @@ class CodeRef extends NQPObject {
   $$call() {
     let staticCode = this.staticCode;
     if (staticCode.closureTemplate) {
-      //console.log("autoclosing", staticCode.closureTemplate);
+      /* HACK */
       var searched = staticCode;
       var forcedOuterCtx = null;
       while (searched) {
@@ -54,38 +54,20 @@ class CodeRef extends NQPObject {
         searched = searched.outerCodeRef;
       }
 
-      var i = 0; //staticCode.closureTemplate.length - 1;
-
       var codeRefForCtx = staticCode.outerCodeRef;
-      var fakeCtxs = [];
+      var fakeCtx;
 
-      fakeCtxs.unshift(forcedOuterCtx ? new WrappedCtx(forcedOuterCtx) : new StaticCtx());
+      fakeCtx = forcedOuterCtx ? new WrappedCtx(forcedOuterCtx) : new StaticCtx();
 
 
       if (codeRefForCtx && codeRefForCtx.staticVars) {
         for (var staticVarName in codeRefForCtx.staticVars) {
-          fakeCtxs[0][staticVarName] = codeRefForCtx.staticVars[staticVarName];
+          fakeCtx[staticVarName] = codeRefForCtx.staticVars[staticVarName];
         }
       }
 
-      while (i-- > 0) {
-        codeRefForCtx = codeRefForCtx.outerCodeRef;
-        if (codeRefForCtx.outerCtx) {
-          console.log("we have an outer ctx!");
-        }
-        fakeCtxs.unshift(new StaticCtx());
-        fakeCtxs[0].$$outer = fakeCtxs[1];
-
-        if (codeRefForCtx && codeRefForCtx.staticVars) {
-          for (var staticVarName in codeRefForCtx.staticVars) {
-            fakeCtxs[0][staticVarName] = codeRefForCtx.staticVars[staticVarName];
-          }
-        }
-      }
-
-
-      this.outerCtx = fakeCtxs[fakeCtxs.length - 1];
-      this.$$call = staticCode.closureTemplate;
+      this.outerCtx = fakeCtx;
+      this.$$call = staticCode.freshBlock();
       return staticCode.$$call.apply(staticCode, arguments);
     } else {
       console.log("can't autoclose - BAD");
