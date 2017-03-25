@@ -226,7 +226,7 @@ class STable {
 
     let proto = this.objConstructor.prototype;
 
-    methodCache.forEach(function (method, name, map) {
+    methodCache.forEach(function(method, name, map) {
       proto[name] = function() {
         return method.$$call.apply(method, arguments);
       };
