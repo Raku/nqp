@@ -65,6 +65,8 @@ my class Braid is export {
     }
 }
 
+my class NO_VALUE { }
+
 role NQPCursorRole is export {
     has $!shared;
     has int $!from;
@@ -95,10 +97,10 @@ role NQPCursorRole is export {
 #        nqp::die("No braid in actions!") unless $!braid;
         nqp::atkey(nqp::getattr($!braid, Braid, '$!slangs'),$name ~ "-actions");
     }
-    method define_slang($name,$grammar,$actions = "none") {
+    method define_slang($name,$grammar,$actions = NO_VALUE) {
 #        nqp::die("No braid in define_slang!") unless $!braid;
         nqp::bindkey(nqp::getattr($!braid, Braid, '$!slangs'),$name, $grammar);
-        nqp::bindkey(nqp::getattr($!braid, Braid, '$!slangs'),$name ~ "-actions", $actions) unless nqp::isnull($actions) || $actions eq 'none';
+        nqp::bindkey(nqp::getattr($!braid, Braid, '$!slangs'),$name ~ "-actions", $actions) unless nqp::isnull($actions) || $actions =:= NO_VALUE;
         self
     }
     method switch_to_slang($name) {
