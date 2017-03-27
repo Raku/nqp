@@ -198,10 +198,6 @@ op.bitshiftr_I = function(a, b, type) {
   return makeBI(type, getBI(a).shiftRight(b));
 };
 
-op.bitshiftr_I = function(a, b, type) {
-  return makeBI(type, getBI(a).shiftRight(b));
-};
-
 op.bitand_I = function(a, b, type) {
   return makeBI(type, getBI(a).and(getBI(b)));
 };
