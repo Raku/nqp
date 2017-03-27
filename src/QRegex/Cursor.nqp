@@ -95,10 +95,10 @@ role NQPCursorRole is export {
 #        nqp::die("No braid in actions!") unless $!braid;
         nqp::atkey(nqp::getattr($!braid, Braid, '$!slangs'),$name ~ "-actions");
     }
-    method define_slang($name,$grammar,$actions = "none") {
+    method define_slang($name,$grammar,$actions = nqp::null) {
 #        nqp::die("No braid in define_slang!") unless $!braid;
         nqp::bindkey(nqp::getattr($!braid, Braid, '$!slangs'),$name, $grammar);
-        nqp::bindkey(nqp::getattr($!braid, Braid, '$!slangs'),$name ~ "-actions", $actions) unless nqp::isnull($actions) || $actions eq 'none';
+        nqp::bindkey(nqp::getattr($!braid, Braid, '$!slangs'),$name ~ "-actions", $actions) unless nqp::isnull($actions);
         self
     }
     method switch_to_slang($name) {
@@ -190,10 +190,10 @@ role NQPCursorRole is export {
         nqp::existskey(nqp::getattr($!braid, Braid, '$!slangs'),"H:$name");
     }
 
-    method set_braid_from($other) { nqp::bindattr(self, $?CLASS, '$!braid', nqp::getattr($other, $?CLASS, '$!braid')); self }
-    method clone_braid_from($other) { nqp::bindattr(self, $?CLASS, '$!braid', nqp::getattr($other, $?CLASS, '$!braid')."!clone"()); self }
-
     method braid() { $!braid }
+    method set_braid_from($other) { nqp::bindattr(self, $?CLASS, '$!braid', $other.braid); self }
+    method clone_braid_from($other) { nqp::bindattr(self, $?CLASS, '$!braid', $other.braid."!clone"()); self }
+
     method snapshot_braid() { $!braid."!clone"() }
     method set_braid($braid) { nqp::bindattr(self, $?CLASS, '$!braid', $braid); self }
 
