@@ -191,11 +191,23 @@ op.isprime_I = function(n) {
 };
 
 op.bitshiftl_I = function(a, b, type) {
-  return makeBI(type, getBI(a).shiftLeft(b));
+  let n = getBI(a);
+  if (b < 0 && n.lt(0)) {
+    let shifted = n.shiftLeft(b);
+    return makeBI(type, shifted.shiftRight(b).eq(n) ? shifted : shifted.sub(1));
+  } else {
+    return makeBI(type, n.shiftLeft(b));
+  }
 };
 
 op.bitshiftr_I = function(a, b, type) {
-  return makeBI(type, getBI(a).shiftRight(b));
+  let n = getBI(a);
+  if (b >= 0 && n.lt(0)) {
+    let shifted = n.shiftRight(b);
+    return makeBI(type, shifted.shiftLeft(b).eq(n) ? shifted : shifted.sub(1));
+  } else {
+    return makeBI(type, n.shiftRight(b));
+  }
 };
 
 op.bitand_I = function(a, b, type) {
