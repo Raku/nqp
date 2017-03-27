@@ -100,7 +100,7 @@ op.div_I = function(a, b, type) {
   let divisor = getBI(b);
   // workaround for .div rounding to zero not down
   if (divident.mod(divisor).lt(0)) {
-    return makeBI(type, divident.div(divisor) - 1);
+    return makeBI(type, divident.div(divisor).sub(1));
   }
   return makeBI(type, divident.div(divisor));
 };
