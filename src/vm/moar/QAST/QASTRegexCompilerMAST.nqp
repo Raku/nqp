@@ -1001,15 +1001,25 @@ class QAST::MASTRegexCompiler {
         elsif $node.list && $node.subtype eq 'ignorecase' {
             my $lit := $!regalloc.fresh_s();
             nqp::push(@ins, op('const_s', $lit, sval(nqp::fc($node[0]))));
-            unless nqp::existskey(%!reg, 'haystacklc') {
-                %!reg<haystacklc> := $!regalloc.fresh_s();
+            unless nqp::existskey(%!reg, 'haystackfc') {
+                %!reg<haystackfc> := $!regalloc.fresh_s();
             }
             my $no_need_lc := label();
-            nqp::push(@ins, op('isnull_s', $ireg0, %!reg<haystacklc>));
+            nqp::push(@ins, op('isnull_s', $ireg0, %!reg<haystackfc>));
             nqp::push(@ins, op('unless_i', $ireg0, $no_need_lc));
-            nqp::push(@ins, op('lc', %!reg<haystacklc>, %!reg<tgt>));
+#?if moar
+            #nqp::push(@ins, op('fc', %!reg<haystackfc>, %!reg<tgt>));
+#?endif
+#?if !moar
+            nqp::push(@ins, op('fc', %!reg<haystackfc>, %!reg<tgt>));
+#?endif
             nqp::push(@ins, $no_need_lc);
-            nqp::push(@ins, op('index_s', %!reg<pos>, %!reg<haystacklc>, $lit, %!reg<pos>));
+#?if moar
+            nqp::push(@ins, op('indexic_s', %!reg<pos>, %!reg<tgt>, $lit, %!reg<pos>));
+#?endif
+#?if !moar
+            nqp::push(@ins, op('index_s', %!reg<pos>, %!reg<haystackfc>, $lit, %!reg<pos>));
+#?endif
             nqp::push(@ins, op('eq_i', $ireg0, %!reg<pos>, %!reg<negone>));
             $!regalloc.release_register($lit, $MVM_reg_str);
         }
