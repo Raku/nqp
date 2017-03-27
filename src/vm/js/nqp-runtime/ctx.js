@@ -1,6 +1,7 @@
 'use strict';
 var CodeRef = require('./code-ref.js');
 var NQPException = require('./nqp-exception.js');
+var NQPExceptionWithCtx = require('./nqp-exception-with-ctx.js');
 var Iter = require('./iter.js');
 var NQPObject = require('./nqp-object.js');
 var Null = require('./null.js');
@@ -113,7 +114,7 @@ class Ctx extends NQPObject {
   }
 
   die(msg) {
-    this.propagateException(new NQPException(msg));
+    this.propagateException(new NQPExceptionWithCtx(msg, this));
   }
 
   resume(exception) {

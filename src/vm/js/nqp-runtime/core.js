@@ -918,8 +918,31 @@ op.backtracestrings = function(hllName, exception) {
 };
 
 op.backtrace = function(hllName, exception) {
-  /* TODO - have a real stacktrace */
-  return hll.list(hllName, []);
+  /* TODO - have real file and line */
+  if (exception.ctx) {
+    let ctx = exception.ctx;
+
+    let rows = [];
+
+    while (ctx) {
+      let row = new Hash();
+      let annotations = new Hash();
+      row.content.set('annotations', annotations);
+      if (ctx instanceof Ctx) {
+        row.content.set('sub', ctx.codeRef());
+      }
+
+      annotations.content.set("file", "NYI");
+      annotations.content.set("line", 0);
+
+      rows.push(row);
+
+      ctx = ctx.$$outer;
+    }
+    return hll.list(hllName, rows);
+  } else {
+    return hll.list(hllName, []);
+  }
 };
 
 op.hintfor = function(classHandle, attrName) {
