@@ -1,7 +1,7 @@
 #! nqp
 use nqpmo;
 
-plan(113);
+plan(114);
 
 my $knowhow := nqp::knowhow();
 my $bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
@@ -35,6 +35,14 @@ ok(nqp::iseq_I(nqp::sub_I($b, $b, $b), nqp::box_i(0, $bi_type)), 'subtraction');
 ok(nqp::iseq_I(nqp::div_I($b, $b, $b), $one), 'division');
 
 is(str(nqp::div_I(box(-8), box(3), $bi_type)), '-3', '-8 div 3 == -3');
+
+my $big_dividend := '-800000000000000000000000000000000000000000000';
+my $big_result := '-266666666666666666666666666666666666666666667';
+
+is(
+    str(nqp::div_I(nqp::fromstr_I($big_dividend, $bi_type), box(3), $bi_type)),
+    $big_result,
+    'rounding a bignumer down');
 
 is(str(nqp::div_I(box(8), box(3), $bi_type)), '2', '8 div 3 == 2');
 
