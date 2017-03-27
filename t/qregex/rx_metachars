@@ -119,7 +119,6 @@ a|&b			a|&b		<rule error>	alternation and conjunction (|&) - parse error
 |d |b			abc		y	leading alternation ignored
  | d | b		abc		y	leading alternation ignored
 # todo :any<feature>
- b |  | d		abc		n	null pattern invalid
 \pabc			pabc		<Unrecognized>	retired metachars (\p)
 \p{InConsonant}		a		<Unrecognized>	retired metachars (\p)
 \Pabc			Pabc		<Unrecognized>	retired metachars (\P)
@@ -128,10 +127,8 @@ a|&b			a|&b		<rule error>	alternation and conjunction (|&) - parse error
 \LABC\E			abc		<Unrecognized>	retired metachars (\L...\E)
 \Uabc\E			UabcE		<Unrecognized>	retired metachars (\U...\E)
 \Uabc\E			ABC		<Unrecognized>	retired metachars (\U...\E)
-# todo :any<error messages>
-\Qabc\E			QabcE		<Unrecognized>	retired metachars (\Q...\E)
-# todo :any<error messages>
-\Qabc d?\E		abc d		<Unrecognized>	retired metachars (\Q...\E)
+\Qabc\E			QabcE		<Unsupported>	retired metachars (\Q...\E)
+\Qabc d?\E		abc d		<Unsupported>	retired metachars (\Q...\E)
 \Gabc			Gabc		<Unrecognized>	retired metachars (\G)
 \1abc			1abc		<Unrecognized>	retired metachars (\1)
 ^ \s+ $			\x0009\x0020\x00a0\x000a\x000b\x000c\x000d\x0085	y	0-255 whitespace (\s)

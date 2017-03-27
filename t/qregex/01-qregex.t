@@ -42,7 +42,7 @@ sub test_line($line) {
     $target := '' if $target eq "''";
     $target := unescape($target);
 
-    my $expect_substr := nqp::substr($expect, 0, 1) eq '<'
+    my $expect_substr := nqp::eqat($expect, '<', 0)
                            ?? nqp::substr($expect, 1, nqp::chars($expect) - 2)
                            !! '';
 
@@ -52,6 +52,7 @@ sub test_line($line) {
         my $cursor := NQPCursor."!cursor_init"($target, :c(0));
         my $match  := $rxsub($cursor).MATCH;
         if $expect_substr {
+            say('expecttttttttttt');
             my $got := ~$match."!dump_str"('mob');
             my $m := nqp::index($got, $expect_substr) >= 0;
             ok($m, $desc);
