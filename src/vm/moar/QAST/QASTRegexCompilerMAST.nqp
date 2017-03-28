@@ -1000,13 +1000,6 @@ class QAST::MASTRegexCompiler {
         }
         elsif $node.list && $node.subtype eq 'ignorecase' {
             my $lit := $!regalloc.fresh_s();
-            nqp::push(@ins, op('const_s', $lit, sval(nqp::fc($node[0]))));
-            #my $no_need_lc := label();
-            #nqp::push(@ins, op('unless_i', $ireg0, $no_need_lc));
-# Unless we have the indexic_s op availible we must first foldcase the string
-# before we can use index_s on the fc'd string
-            # Not sure what this is
-            #nqp::push(@ins, $no_need_lc);
             nqp::push(@ins, op('indexic_s', %!reg<pos>, %!reg<tgt>, $lit, %!reg<pos>));
             nqp::push(@ins, op('eq_i', $ireg0, %!reg<pos>, %!reg<negone>));
             $!regalloc.release_register($lit, $MVM_reg_str);
