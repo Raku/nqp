@@ -151,7 +151,7 @@ class QAST::MASTRegexCompiler {
                 op('getattr_o', $curclass, $shared, $sharedclass, sval('$!CUR_CLASS'), ival(-1))
             ]);
         }
-        
+
         merge_ins(@ins, [
             op('getattr_s', $tgt, $shared, $sharedclass, sval('$!target'),
                 ival(nqp::hintfor(ParseShared, '$!target'))),
@@ -1001,29 +1001,13 @@ class QAST::MASTRegexCompiler {
         elsif $node.list && $node.subtype eq 'ignorecase' {
             my $lit := $!regalloc.fresh_s();
             nqp::push(@ins, op('const_s', $lit, sval(nqp::fc($node[0]))));
-#?if !moar
-            unless nqp::existskey(%!reg, 'haystackfc') {
-                %!reg<haystackfc> := $!regalloc.fresh_s();
-            }
-#?endif
-            my $no_need_lc := label();
-#?if !moar
-            nqp::push(@ins, op('isnull_s', $ireg0, %!reg<haystackfc>));
-#?endif
-            nqp::push(@ins, op('unless_i', $ireg0, $no_need_lc));
+            #my $no_need_lc := label();
+            #nqp::push(@ins, op('unless_i', $ireg0, $no_need_lc));
 # Unless we have the indexic_s op availible we must first foldcase the string
 # before we can use index_s on the fc'd string
-#?if !moar
-            nqp::push(@ins, op('fc', %!reg<haystackfc>, %!reg<tgt>));
-#?endif
             # Not sure what this is
-            nqp::push(@ins, $no_need_lc);
-#?if moar
+            #nqp::push(@ins, $no_need_lc);
             nqp::push(@ins, op('indexic_s', %!reg<pos>, %!reg<tgt>, $lit, %!reg<pos>));
-#?endif
-#?if !moar
-            nqp::push(@ins, op('index_s', %!reg<pos>, %!reg<haystackfc>, $lit, %!reg<pos>));
-#?endif
             nqp::push(@ins, op('eq_i', $ireg0, %!reg<pos>, %!reg<negone>));
             $!regalloc.release_register($lit, $MVM_reg_str);
         }
