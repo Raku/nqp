@@ -1001,18 +1001,22 @@ class QAST::MASTRegexCompiler {
         elsif $node.list && $node.subtype eq 'ignorecase' {
             my $lit := $!regalloc.fresh_s();
             nqp::push(@ins, op('const_s', $lit, sval(nqp::fc($node[0]))));
+#?if !moar
             unless nqp::existskey(%!reg, 'haystackfc') {
                 %!reg<haystackfc> := $!regalloc.fresh_s();
             }
-            my $no_need_lc := label();
-            nqp::push(@ins, op('isnull_s', $ireg0, %!reg<haystackfc>));
-            nqp::push(@ins, op('unless_i', $ireg0, $no_need_lc));
-#?if moar
-            #nqp::push(@ins, op('fc', %!reg<haystackfc>, %!reg<tgt>));
 #?endif
+            my $no_need_lc := label();
+#?if !moar
+            nqp::push(@ins, op('isnull_s', $ireg0, %!reg<haystackfc>));
+#?endif
+            nqp::push(@ins, op('unless_i', $ireg0, $no_need_lc));
+# Unless we have the indexic_s op availible we must first foldcase the string
+# before we can use index_s on the fc'd string
 #?if !moar
             nqp::push(@ins, op('fc', %!reg<haystackfc>, %!reg<tgt>));
 #?endif
+            # Not sure what this is
             nqp::push(@ins, $no_need_lc);
 #?if moar
             nqp::push(@ins, op('indexic_s', %!reg<pos>, %!reg<tgt>, $lit, %!reg<pos>));
