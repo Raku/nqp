@@ -1,3 +1,5 @@
+=pod
+
 =head1 NQP - Not Quite Perl (6)
 
 NQP is Copyright (C) 2009-2016 by The Perl Foundation.  See F<LICENSE>
@@ -93,11 +95,11 @@ The L<examples directory|https://github.com/perl6/nqp/tree/master/examples> is a
 L<loops|https://github.com/perl6/nqp/blob/master/examples/loops.nqp> and other files. Opcodes are listed in
 L<the docs directory|https://github.com/perl6/nqp/blob/master/docs/ops.markdown>. You can use NQP from this
 release, it will be already installed if you have built Perl6 from
-scratch. 
+scratch.
 
 =head2 JavaScript backend
 
-The JavaScript backend is currently undergoing a refactor/rewrite of parts to generate decently performing javascript, add source maps and remove some old hack as well as clean up the code. 
+The JavaScript backend is currently undergoing a refactor/rewrite of parts to generate decently performing javascript, add source maps and remove some old hack as well as clean up the code.
 As a result of that it's in a really rough state so the best thing before playing with it/hacking on it is to contact pmurias via IRC at #perl6 on irc.freenode.org.
 
 Building the JavaScript backend currently requires building the moar backend:
@@ -124,3 +126,5 @@ To build nqp-js-on-js (that is nqp-js itself running on node.js):
 To run nqp-js-on-js:
 
     $ node nqp-js-on-js/nqp-bootstrapped.js -e "say('Hello World')"
+
+=cut
