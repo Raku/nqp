@@ -52,15 +52,19 @@ for %const -> $cclass {
     is( test_cclass($cclass.key, $teststr), %matches{$cclass.key}, "nqp::iscclass CCLASS_{$cclass.value}");
 }
 
-sub mock_find_cclass($c, $str, $start, $len) {
-    my $i := $start;
-    while $i < $len && $i < nqp::chars($str) {
+sub mock_find_cclass($c, $str, $offset, $count) {
+    my $i := $offset;
+    my int $end := $offset + $count;
+
+    $end := nqp::chars($str) < $end ?? nqp::chars($str) !! $end;
+
+    while $i < $end {
         if nqp::substr(%matches{$c}, $i, 1) eq '1' {
             return $i;
         }
         $i++;
     }
-    nqp::chars($str) < $len ?? nqp::chars($str) !! $len;
+    $end;
 }
 
 sub test_findcclass($c, $str, $len) {
@@ -96,15 +100,19 @@ for %const -> $cclass {
 }
 
 
-sub mock_find_notcclass($c, $str, $start, $len) {
-    my $i := $start;
-    while $i < $len && $i < nqp::chars($str) {
+sub mock_find_notcclass($c, $str, $offset, $count) {
+    my $i := $offset;
+    my int $end := $offset + $count;
+
+    $end := nqp::chars($str) < $end ?? nqp::chars($str) !! $end;
+
+    while $i < $end {
         if nqp::substr(%matches{$c}, $i, 1) eq '0' {
             return $i;
         }
         $i++;
     }
-    nqp::chars($str) < $len ?? nqp::chars($str) !! $len;
+    $end;
 }
 
 sub test_mock_findnotcclass($c, $str, $len) {
