@@ -11,24 +11,24 @@ sub test_cclass($c, $str) {
 }
 
 #               012 3456 789
-my $teststr := "aB\n.8 \t!π_";
+my $teststr := "aB\n.8 \t!π_\c[EN QUAD]\c[EM QUAD]";
 
 #                                     0123456789
 my %matches := nqp::hash(
-    nqp::const::CCLASS_ANY,          '1111111111',
-    nqp::const::CCLASS_NUMERIC,      '0000100000',
-    nqp::const::CCLASS_WHITESPACE,   '0010011000',
-    nqp::const::CCLASS_WORD,         '1100100011',
-    nqp::const::CCLASS_NEWLINE,      '0010000000',
-    nqp::const::CCLASS_ALPHABETIC,   '1100000010',
-    nqp::const::CCLASS_UPPERCASE,    '0100000000',
-    nqp::const::CCLASS_LOWERCASE,    '1000000010',
-    nqp::const::CCLASS_HEXADECIMAL,  '1100100000',
-    nqp::const::CCLASS_BLANK,        '0000011000',
-    nqp::const::CCLASS_CONTROL,      '0010001000',
-    nqp::const::CCLASS_PRINTING,     '1101110111',
-    nqp::const::CCLASS_PUNCTUATION,  '0001000101',
-    nqp::const::CCLASS_ALPHANUMERIC, '1100100010',
+    nqp::const::CCLASS_ANY,          '111111111111',
+    nqp::const::CCLASS_NUMERIC,      '000010000000',
+    nqp::const::CCLASS_WHITESPACE,   '001001100011',
+    nqp::const::CCLASS_WORD,         '110010001100',
+    nqp::const::CCLASS_NEWLINE,      '001000000000',
+    nqp::const::CCLASS_ALPHABETIC,   '110000001000',
+    nqp::const::CCLASS_UPPERCASE,    '010000000000',
+    nqp::const::CCLASS_LOWERCASE,    '100000001000',
+    nqp::const::CCLASS_HEXADECIMAL,  '110010000000',
+    nqp::const::CCLASS_BLANK,        '000001100011',
+    nqp::const::CCLASS_CONTROL,      '001000100000',
+    nqp::const::CCLASS_PRINTING,     '110111011111',
+    nqp::const::CCLASS_PUNCTUATION,  '000100010100',
+    nqp::const::CCLASS_ALPHANUMERIC, '110010001000',
 );
 
 my %const := nqp::hash(
@@ -138,7 +138,7 @@ sub test_findnotcclass($c, $str, $len) {
 }
 
 for %const -> $cclass {
-    my $got := test_findnotcclass($cclass.key, $teststr, 10);
-    my $expected := test_mock_findnotcclass($cclass.key, $teststr, 10);
+    my $got := test_findnotcclass($cclass.key, $teststr, 12);
+    my $expected := test_mock_findnotcclass($cclass.key, $teststr, 12);
     is($got, $expected, "nqp::findnotcclass CCLASS_{$cclass.value}");
 }
