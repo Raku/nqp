@@ -6,9 +6,9 @@ use File::Copy qw(copy);
 
 use base qw(Exporter);
 our @EXPORT_OK = qw(sorry slurp system_or_die
-                    cmp_rev 
+                    cmp_rev
                     read_config
-                    fill_template_file fill_template_text 
+                    fill_template_file fill_template_text
                     git_checkout
                     verify_install gen_moar
                     github_url
@@ -175,7 +175,7 @@ sub git_checkout {
 
     if ($checkout) {
         system_or_die('git', 'checkout', $checkout);
-        system_or_die('git', 'pull') 
+        system_or_die('git', 'pull')
             if slurp('.git/HEAD') =~ /^ref:/;
     }
 
@@ -285,7 +285,7 @@ sub gen_moar {
             : File::Spec->catfile( $prefix, 'bin', "moar$exe" ));
     my $moar_version_output  = qx{ $moar_exe --version };
     if ($moar_version_output) {
-        $moar_have = $moar_have =~ /version (\S+)/ ? $1 : undef;
+        $moar_have = $moar_version_output =~ /version (\S+)/ ? $1 : undef;
     }
 
     my $moar_ok   = $moar_have && cmp_rev($moar_have, $moar_want) >= 0;
