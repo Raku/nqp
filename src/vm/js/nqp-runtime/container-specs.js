@@ -93,6 +93,10 @@ class NativeRef {
           return 1;
         }
 
+        $$assign(ctx, value) {
+          this.set(value.$$getInt());
+        }
+
         $$assign_i(ctx, value) {
           this.set(value);
         }
@@ -158,6 +162,10 @@ class NativeRef {
             return obj;
           }
         }
+
+        $$assign(ctx, value) {
+          this.set(value.$$getNum());
+        }
       });
     } else if (primitiveType == 3) { // str
       this.STable.addInternalMethods(class {
@@ -197,6 +205,10 @@ class NativeRef {
             obj.$$setStr(this.get());
             return obj;
           }
+        }
+
+        $$assign(ctx, value) {
+          this.set(value.$$getStr());
         }
       });
     } else {
