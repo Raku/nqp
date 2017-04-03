@@ -169,11 +169,12 @@ MAIN: {
     if ($backends{moar}) {
         my @errors;
         my ($moar_want) = split(' ', slurp('tools/build/MOAR_REVISION'));
-        my $moar_path = gen_moar($moar_want, %config, %options);
+        my ($moar_path, @moar_errors) = gen_moar($moar_want, %config, %options);
         if (!$moar_path) {
             push @errors,
                 "No suitable MoarVM (moar executable) found using the --prefix\n" .
                 "(You can get a MoarVM built automatically with --gen-moar.)";
+            unshift @errors, @moar_errors if @moar_errors;
         }
         sorry(@errors) if @errors;
         $config{'make'} = `$moar_path --libpath="src/vm/moar/stage0" "src/vm/moar/stage0/nqp.moarvm" -e "print(nqp::backendconfig()<make>)"`

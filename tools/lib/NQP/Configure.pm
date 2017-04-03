@@ -268,6 +268,8 @@ sub gen_nqp {
 
 sub gen_moar {
     my $moar_want = shift;
+    my $moar_have;
+    my @errors;
     my %options  = @_;
 
     my $prefix     = $options{'prefix'} || cwd()."/install";
@@ -281,21 +283,26 @@ sub gen_moar {
         $sdkroot
             ? File::Spec->catfile( $sdkroot, $prefix, 'bin', "moar$exe" )
             : File::Spec->catfile( $prefix, 'bin', "moar$exe" ));
-    my $moar_have  = qx{ $moar_exe --version };
-    if ($moar_have) {
+    my $moar_version_output  = qx{ $moar_exe --version };
+    if ($moar_version_output) {
         $moar_have = $moar_have =~ /version (\S+)/ ? $1 : undef;
     }
 
     my $moar_ok   = $moar_have && cmp_rev($moar_have, $moar_want) >= 0;
     if ($moar_ok) {
-        print "Found $moar_exe version $moar_have, which is new enough.\n";
-        return $moar_exe;
+        push @errors, "Found $moar_exe version $moar_have, which is new enough.\n";
+        return ($moar_exe, @errors);
     }
     elsif ($moar_have) {
-        print "Found $moar_exe version $moar_have, which is too old. Wanted at least $moar_want\n";
+        push @errors, "Found $moar_exe version $moar_have, which is too old. Wanted at least $moar_want\n";
+    }
+    elsif ($moar_version_output =~ /This is MoarVM version/i ) {
+        push @errors, "Found a MoarVM binary but was not able to get its version number.\n"
+        . "If running `git describe` inside the MoarVM repository does not work,\n"
+        . "you need to make sure to checkout tags of the repository and run \nConfigure.pl and make install again\n";
     }
 
-    return unless defined $gen_moar;
+    return ($gen_moar, @errors) unless defined $gen_moar;
 
     my $moar_repo = git_checkout(
         github_url($git_protocol, 'MoarVM', 'MoarVM'),
@@ -319,7 +326,7 @@ sub gen_moar {
 
     chdir($startdir);
 
-    return $moar_exe;
+    return ($moar_exe, @errors);
 }
 
 sub github_url {
