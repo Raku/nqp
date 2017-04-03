@@ -1669,7 +1669,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         if $*BINDVAL {
             my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($type));
             if $var.decl eq 'var' {
-                self.stored_result(Chunk.new($type, "({$*CTX}[{quote_string($var.name)}] = {$bindval.expr})",  $bindval), :$want);
+                self.stored_result(Chunk.new($type, "({$*BLOCK.ctx}[{quote_string($var.name)}] = {$bindval.expr})",  $bindval), :$want);
             }
             else {
                 if $*BLOCK.ctx_for_var($var) -> $ctx {
@@ -1677,7 +1677,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 } 
                 else {
                     # nqp::die("we can't find ctx for {$var.name}");
-                    self.stored_result(Chunk.new($type, "{$*CTX}.bind({quote_string($var.name)}, {$bindval.expr})",  $bindval), :$want);
+                    self.stored_result(Chunk.new($type, "{$*BLOCK.ctx}.bind({quote_string($var.name)}, {$bindval.expr})",  $bindval), :$want);
                 }
             }
         }
@@ -1700,9 +1700,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     nqp::die("can't handle:" ~ $var.decl);
                 }
 
-                $*BLOCK.add_var_setup("{$*CTX}[{quote_string($var.name)}] = $initial_value;\n");
+                $*BLOCK.add_var_setup("{$*BLOCK.ctx}[{quote_string($var.name)}] = $initial_value;\n");
 
-                Chunk.new($type, "$*CTX[{quote_string($var.name)}]", :node($var));
+                Chunk.new($type, "{$*BLOCK.ctx}[{quote_string($var.name)}]", :node($var));
             }
             else {
                 if $*BLOCK.ctx_for_var($var) -> $ctx {
@@ -1710,7 +1710,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 }
                 else {
                     # nqp::die("we can't find ctx for {$var.name}");
-                    Chunk.new($type, "{$*CTX}.lookup({quote_string($var.name)})", :node($var));
+                    Chunk.new($type, "{$*BLOCK.ctx}.lookup({quote_string($var.name)})", :node($var));
                 }
             }
         }
@@ -1722,7 +1722,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 "{$ctx}[{quote_string($var.name)}] = $js_expr;\n";
             }
             else {
-                "{$*CTX}.bind({quote_string($var.name)}, $js_expr);\n";
+                "{$*BLOCK.ctx}.bind({quote_string($var.name)}, $js_expr);\n";
             }
         }
         else {
@@ -1737,7 +1737,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 "$ctx[{quote_string($var.name)}]";
             }
             else {
-                "{$*CTX}.lookup({quote_string($var.name)})";
+                "{$*BLOCK.ctx}.lookup({quote_string($var.name)})";
             }
         }
         else {
