@@ -18,7 +18,8 @@ function posTypes(ctx, capture) {
   for (var i = 0; i < arity; i++) {
     var obj = capture.pos[i];
     if (obj._STable) {
-      types[i] = obj.$$decont(ctx)._STable;
+      let deconted = obj.$$decont(ctx);
+      types[i] = deconted.typeObject_ ? deconted : deconted._STable;
     } else if (obj instanceof NQPInt) {
       types[i] = 1;
     } else if (typeof obj == 'number') {
