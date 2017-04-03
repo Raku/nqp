@@ -14,6 +14,7 @@ const NUMERIC = xregexp('^\\p{Nd}');
 const HEXADECIMAL = xregexp('^[0-9A-Fa-f]');
 const WHITESPACE = xregexp('^\\p{White_Space}');
 const BLANK = xregexp('^[\t\\p{Zs}]');
+const NEWLINE = xregexp('[\n\r\u0085\u2029\f\u000b\u2028]');
 const PUNCTUATION = xregexp('^\\pP');
 const ALPHANUMERIC = xregexp('^[\\pL\\p{Nd}]');
 const WORD = xregexp('^[\\pL_\\p{Nd}]');
@@ -52,8 +53,7 @@ function iscclass(cclass, target, offset) {
     //ALPHANUMERIC
     case 2048: return boolish(ALPHANUMERIC.test(target[offset]));
     //NEWLINE
-    /* TODO - all characters*/
-    case 4096: return boolish(target[offset] == '\n' || target[offset] == '\r' || target[offset] == '\u0085'); //HACK
+    case 4096: return boolish(NEWLINE.test(target[offset]));
     //WORD
     case 8192: return boolish(WORD.test(target[offset]));
     default: throw 'cclass ' + cclass + ' not yet implemented';
