@@ -1,10 +1,11 @@
 class NQPException extends Error {
   constructor(message) {
     super(message);
+    this.$$message = message;
   }
 
   Str(ctx, _NAMED, self) {
-    return this.message;
+    return this.$$message;
   }
 
   $$toBool(ctx) {

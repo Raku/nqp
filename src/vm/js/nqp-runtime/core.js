@@ -506,11 +506,11 @@ op.getpid = function() {
 };
 
 op.getmessage = function(exception) {
-  return exception.message;
+  return exception.$$message;
 };
 
 op.setmessage = function(exception, message) {
-  return (exception.message = message);
+  return (exception.$$message = message);
 };
 
 op.getpayload = function(exception) {

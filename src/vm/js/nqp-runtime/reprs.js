@@ -1583,7 +1583,7 @@ class VMException extends REPR {
 
     STable.addInternalMethods(class {
       $$getStr() {
-        return this.message;
+        return this.$$message;
       }
     });
   }
