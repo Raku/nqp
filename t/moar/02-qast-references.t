@@ -1,7 +1,7 @@
 use QAST;
 use nqpmo;
 
-plan(45);
+plan(48);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -138,7 +138,7 @@ is_qast(
         )
     ),
     23,
-    'lexicalref of type int with value 23 assigned to it'
+    'lexicalref of type int with value 23 assigned to it (nqp::assign_i)'
 );
 
 is_qast(
@@ -154,7 +154,7 @@ is_qast(
         )
     ),
     99e2,
-    'lexicalref of type num with value 99e2 assigned to it'
+    'lexicalref of type num with value 99e2 assigned to it (nqp::assign_n)'
 );
 
 is_qast(
@@ -170,8 +170,57 @@ is_qast(
         )
     ),
     'What do we have here?',
-    'lexicalref of type str with a value assigned to it'
+    'lexicalref of type str with a value assigned to it (assign_s)'
 );
+
+is_qast(
+    QAST::CompUnit.new( :hll<nqp>,
+        QAST::Block.new(
+            QAST::Var.new( :name<intloc>, :scope<lexical>, :decl<var>, :returns(int) ),
+            QAST::Op.new(
+                :op<assign>,
+                QAST::Var.new( :name<intloc>, :scope<lexicalref> ),
+                QAST::IVal.new( :value(23) )
+            ),
+            QAST::Var.new( :name<intloc>, :scope<lexical> )
+        )
+    ),
+    23,
+    'lexicalref of type int with value 23 assigned to it (nqp::assign)'
+);
+
+is_qast(
+    QAST::CompUnit.new( :hll<nqp>,
+        QAST::Block.new(
+            QAST::Var.new( :name<numloc>, :scope<lexical>, :decl<var>, :returns(num) ),
+            QAST::Op.new(
+                :op<assign>,
+                QAST::Var.new( :name<numloc>, :scope<lexicalref> ),
+                QAST::NVal.new( :value(99e2) )
+            ),
+            QAST::Var.new( :name<numloc>, :scope<lexical> )
+        )
+    ),
+    99e2,
+    'lexicalref of type num with value 99e2 assigned to it (nqp::assign)'
+);
+
+is_qast(
+    QAST::CompUnit.new( :hll<nqp>,
+        QAST::Block.new(
+            QAST::Var.new( :name<strloc>, :scope<lexical>, :decl<var>, :returns(str) ),
+            QAST::Op.new(
+                :op<assign>,
+                QAST::Var.new( :name<strloc>, :scope<lexicalref> ),
+                QAST::SVal.new( :value('What do we have here?') )
+            ),
+            QAST::Var.new( :name<strloc>, :scope<lexical> )
+        )
+    ),
+    'What do we have here?',
+    'lexicalref of type str with a value assigned to it (nqp::assign)'
+);
+
 
 is_qast(
     QAST::CompUnit.new( :hll<nqp>,
