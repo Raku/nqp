@@ -24,6 +24,12 @@ var categoryToName = {
   32768: 'DONE'
 };
 
+class ResumeException {
+  constructor(exception) {
+    this.exception = exception;
+  }
+}
+
 class Ctx extends NQPObject {
   constructor(callerCtx, outerCtx, callThis) {
     super();
@@ -44,7 +50,6 @@ class Ctx extends NQPObject {
     while (ctx) {
       if (ctx[handler] || ctx.$$CONTROL) {
         exception.caught = ctx;
-        exception.resume = false;
         ctx.exception = exception;
 
         exceptionsStack.push(exception);
@@ -54,15 +59,17 @@ class Ctx extends NQPObject {
           } else {
             ctx.unwind.ret = ctx.$$CONTROL();
           }
+        } catch (e) {
+          if (e instanceof ResumeException && e.exception === exception) {
+            return;
+          } else {
+            throw e;
+          }
         } finally {
           exceptionsStack.pop();
         }
 
-        if (exception.resume) {
-          return;
-        } else {
-          throw ctx.unwind;
-        }
+        throw ctx.unwind;
       }
       ctx = ctx.$$caller;
     }
@@ -71,28 +78,32 @@ class Ctx extends NQPObject {
   }
 
   propagateException(exception) {
-    if (exception.$$category) this.propagateControlException(exception);
+    if (exception.$$category) {
+      this.propagateControlException(exception);
+      return;
+    }
 
     var ctx = this;
 
     while (ctx) {
       if (ctx.$$CATCH) {
         exception.caught = ctx;
-        exception.resume = false;
         ctx.exception = exception;
 
         exceptionsStack.push(exception);
         try {
           ctx.unwind.ret = ctx.$$CATCH();
+        } catch (e) {
+          if (e instanceof ResumeException && e.exception === exception) {
+            return;
+          } else {
+            throw e;
+          }
         } finally {
           exceptionsStack.pop();
         }
 
-        if (exception.resume) {
-          return;
-        } else {
-          throw ctx.unwind;
-        }
+        throw ctx.unwind;
       }
       ctx = ctx.$$caller;
     }
@@ -118,7 +129,7 @@ class Ctx extends NQPObject {
   }
 
   resume(exception) {
-    exception.resume = true;
+    throw new ResumeException(exception);
   }
 
   throw (exception) {
@@ -144,11 +155,9 @@ class Ctx extends NQPObject {
 
     let ctx = this;
 
-
     while (ctx) {
       if (ctx[handler] || ctx.$$CONTROL) {
         exception.caught = ctx;
-        exception.resume = false;
         ctx.exception = exception;
 
         exceptionsStack.push(exception);
@@ -158,15 +167,17 @@ class Ctx extends NQPObject {
           } else {
             ctx.unwind.ret = ctx.$$CONTROL();
           }
+        } catch (e) {
+          if (e instanceof ResumeException && e.exception === exception) {
+            return;
+          } else {
+            throw e;
+          }
         } finally {
           exceptionsStack.pop();
         }
 
-        if (exception.resume) {
-          return;
-        } else {
-          throw ctx.unwind;
-        }
+        throw ctx.unwind;
       }
       ctx = ctx.$$outer;
     }
