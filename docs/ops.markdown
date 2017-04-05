@@ -72,7 +72,7 @@
     - [chars](#chars)
     - [chr](#chr)
     - [codepointfromname](#codepointfromname)
-    - [getstrfromname] (#getstrfromname)
+    - [getstrfromname](#getstrfromname)
     - [concat](#concat)
     - [decode](#decode)
     - [decodetocodes](#decodetocodes)
@@ -161,6 +161,7 @@
     - [getstderr](#getstderr)
     - [getstdin](#getstdin)
     - [getstdout](#getstdout)
+    - [filenofh](#filenofh)
     - [open](#open)
     - [openasync `jvm`](#openasync-jvm)
     - [print](#print)
@@ -1518,6 +1519,10 @@ Return the filehandle for standard input.
 * `getstdout()`
 
 Return the filehandle for standard output.
+
+## filenofh
+* `filenofh(Handle $fh)`
+Returns the handle number
 
 ## open
 * `open(str $filename, str $mode)`
