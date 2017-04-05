@@ -2,7 +2,7 @@
 
 # Tests for try and catch
 
-plan(48);
+plan(50);
 
 sub oops($msg = "oops!") { # throw an exception
     nqp::die($msg);
@@ -353,3 +353,33 @@ ok($caught, 'CATCH caught the lowlevel error');
 
     ok($caught_next, 'throwextype works');
 }
+
+$log := '';
+{
+    $log := $log ~ '#1';
+    oops();
+    $log := $log ~ '#2';
+    CATCH {
+        $log := $log ~ '#3';
+        nqp::resume($!);
+        $log := $log ~ '#4';
+    }
+}
+
+is($log, '#1#3#2', 'nqp::resume exits from the nqp::handle block');
+
+$log := '';
+{
+    $log := $log ~ '#1';
+
+    THROW(nqp::const::CONTROL_WARN, 'warn');
+
+    $log := $log ~ '#2';
+    CONTROL {
+        $log := $log ~ '#3';
+        nqp::resume($!);
+        $log := $log ~ '#4';
+    }
+}
+
+is($log, '#1#3#2', 'nqp::resume works with a CONTROL block');
