@@ -118,7 +118,6 @@ a|&b			a|&b		<rule error>	alternation and conjunction (|&) - parse error
  |d|b			abc		y	leading alternation ignored
 |d |b			abc		y	leading alternation ignored
  | d | b		abc		y	leading alternation ignored
-# todo :any<feature>
 \pabc			pabc		<Unrecognized>	retired metachars (\p)
 \p{InConsonant}		a		<Unrecognized>	retired metachars (\p)
 \Pabc			Pabc		<Unrecognized>	retired metachars (\P)

@@ -12,8 +12,8 @@ my @array :=
     ('aaﬆaaz', 'z', 5 ),
     ('aaﬆzaa', 'z', 3 ),
     ('aaaﬆ', 'st', 3 ),
-    # TODO
-    ('chars that expand on casefolding at the end are broken with equatic', 1),
+    # working TODO example: commented out in case someone else needs to todo one of these tests
+    #('chars that expand on casefolding at the end are broken with equatic', 1),
     ('ﬆ', 'st', 0),
     ('aaaaﬆ', 'st', 4 ),
     ('AAAAﬆ', 'st', 4),
