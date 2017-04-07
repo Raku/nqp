@@ -490,6 +490,7 @@ grammar NQP::Grammar is HLL::Grammar {
         | <declarator>
         | <multi_declarator>
         | <package_declarator>
+        | <constant_declarator>
     }
 
     token typename {
@@ -509,6 +510,14 @@ grammar NQP::Grammar is HLL::Grammar {
         { $*IN_DECL := 0; }
         <trait>*
         <initializer>?
+    }
+
+    token constant_declarator {
+        'constant' <.ws> <identifier> <.ws> ':=' <.ws>
+        [
+        || <typename>
+        || <.panic: 'Only typename on RHS of constant implemented so far'>
+        ]
     }
 
     token initializer {

@@ -720,9 +720,10 @@ class NQP::Actions is HLL::Actions {
     method scope_declarator:sym<has>($/) { make $<scoped>.ast; $/.prune }
 
     method scoped($/) {
-        make $<declarator>       ?? $<declarator>.ast !!
-             $<multi_declarator> ?? $<multi_declarator>.ast !!
-                                    $<package_declarator>.ast;
+        make $<declarator>         ?? $<declarator>.ast !!
+             $<multi_declarator>   ?? $<multi_declarator>.ast !!
+             $<package_declarator> ?? $<package_declarator>.ast !!
+                                      $<constant_declarator>.ast;
         $/.prune;
     }
 
@@ -836,6 +837,21 @@ class NQP::Actions is HLL::Actions {
     method initializer($/) {
         make $<EXPR>.ast;
         $/.prune;
+    }
+
+    method constant_declarator($/) {
+        my $sym := ~$<identifier>;
+        my $type := $<typename>.ast.value;
+        if $*SCOPE eq 'my' || $*SCOPE eq 'our' {
+            $*W.install_lexical_symbol($*W.cur_lexpad(), $sym, $type);
+            if $*SCOPE eq 'our' {
+                $*W.install_package_symbol($*PACKAGE, [$sym], $type);
+            }
+        }
+        else {
+            $/.CURSOR.panic("Cannot have a $*SCOPE scoped constant");
+        }
+        make QAST::WVal.new( :value($type) );
     }
 
     method routine_declarator:sym<sub>($/) { make $<routine_def>.ast; $/.prune }
