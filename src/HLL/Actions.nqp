@@ -77,7 +77,7 @@ class HLL::Actions {
     }
 
     method O($/) {
-        make %*SPEC
+        make %*SPEC;
     }
 
     method EXPR($/, $key?) {

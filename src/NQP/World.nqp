@@ -610,6 +610,10 @@ class NQP::World is HLL::World {
             if nqp::existskey($result.WHO, ~$_) {
                 $result := ($result.WHO){$_};
             }
+	    # XXX temp shim to avoid bootstrapping funniness
+	    elsif nqp::elems(@name) == 1 && @name[0] eq 'NQPCursor' {
+		return self.find_sym(['NQPMatch']);
+	    }
             else {
                 nqp::die("Could not locate compile-time value for symbol " ~
                     join('::', @name));
