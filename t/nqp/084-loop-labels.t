@@ -93,13 +93,3 @@ MAIN_LOOP: while $i < 10 {
     nqp::push(@not_skipped, ~$i);
 }
 is(nqp::join(',', @not_skipped), '1,2,3,5,8,9,10', 'testing next with a loop label');
-
-sub is($a, $b, $text) {
-    if $a == $b {
-        ok(1, $text)
-    }
-    else {
-        ok(0, $text);
-        say("# Expected '$b' bot got '$a'")
-    }
-}
