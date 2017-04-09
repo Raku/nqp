@@ -1,10 +1,24 @@
 # string indexing tests.
 my int $x := 200;
-
 plan(
-    (26 * $x) * 1
-    + 26 * 7
+    (26 * $x)
+    + 26 * 8
+    + 28
 );
+my int $j := 1;
+#2**7 and then 2 ** 24 on little, and on big test 2**24, 2**0
+while $j < 28 {
+    my $big := "\x[80]\x[100000]🐧"; # Big endian
+    my $little := "\x[100000]\x[1]🐧"; # Little endian
+    my $string-big := nqp::x('A', $j) ~ $big;
+    my $string-little := nqp::x('A', $j) ~ $little;
+    is(nqp::index($string-big, "\x[0]", 0), -1, "Doesn't find big endian null byte incorrectly across 32 bit numbers");
+    is(nqp::index($string-little, "\x[0]", 0), -1, "Doesn't find little endian null byte incorrectly across 32 bit numbers");
+    #my str $one := nqp::x("\x[1]", $j);
+    #my str $string := $one ~ $null ~ '🐧'; # High codepoint character to force >8bit representationn
+    #is(nqp::index($string, "\x[0]", 0), $j, "nqp::index(\\x[1] x $j ~ \\x[0], 0) = $j");
+    $j++;
+}
 # XXX TODO rework this stuff into indexic.t
 # If changing this file, also add equivalent changes to moar/xx-indexic.t
 my str $abc-string := 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -32,7 +46,7 @@ test-it($russian, 1, "Stresstest: Finds needle when needle at start point in hay
 
 sub test-it ($string, $range, $label, str $message, int :$offset, :$should-succeed, :$named, :$begin = 'A') {
     $message := "‘$string’" unless $message;
-    note($label);
+    say($label);
     my $i := 0;
     while ($i < nqp::chars($string)) {
         my int $j := $i % nqp::chars($abc-string);
