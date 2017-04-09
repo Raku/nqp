@@ -315,16 +315,6 @@ exports.regexCommit = function(bstack, mark) {
   }
 };
 
-exports.Last = function(label) {
-  this.label = label;
-};
-exports.Redo = function(label) {
-  this.label = label;
-};
-exports.Next = function(label) {
-  this.label = label;
-};
-
 exports.NYI = function(msg) {
   console.trace(msg);
   return null;

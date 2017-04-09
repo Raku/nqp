@@ -588,35 +588,51 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         $chunk;
     }
 
-    method handle_control($loop, $body) {
+    my %control_id;
+    %control_id<last> := 1;
+    %control_id<redo> := 2;
+    %control_id<next> := 3;
+
+    method handle_control($loop, $ctx, $body) {
         if nqp::elems($loop.handled) > 0 {
-            my $setup_label := "";
-            my str $check_label := "e.label === null";
+            my @setup;
 
             if $loop.label {
-                $setup_label := self.as_js($loop.label, :want($T_OBJ));
-                $check_label := $check_label ~ ' || e.label === ' ~ $setup_label.expr;
+                my $label := self.as_js($loop.label, :want($T_OBJ));
+                @setup.push($label);
+                @setup.push("$ctx.\$\$label = {$label.expr};\n");
             }
 
 
             my @handle_exceptions;
 
+            my str $action := $*BLOCK.add_tmp;
+
             for $loop.handled -> $type {
-                @handle_exceptions.push("if (e instanceof nqp.{ucfirst($type)} && ($check_label)) \{ {self.do_control($type, $loop) } \}\n");
+                my int $id := %control_id{$type};
+                @setup.push("$ctx.\$\${nqp::uc($type)} = function() \{$action = $id\};\n");
+                @handle_exceptions.push("if ($action === $id) \{ {self.do_control($type, $loop) } \}\n");
             }
 
+            my str $unwind_marker := $*BLOCK.add_tmp;
             Chunk.new($body.type, $body.expr, [
-                $setup_label,
+                "$action = 0;\n",
                 "try \{\n",
+                "$ctx = new nqp.Ctx($*CTX, $*CTX, $*CTX.\$\$callThis);\n",
+                Chunk.void(|@setup),
+                "$unwind_marker = \{\};\n",
+                "$ctx.unwind = $unwind_marker;\n",
                 $body,
                 "\} catch (e) \{\n",
+                "if (e === $unwind_marker) \{\n",
                 Chunk.void(|@handle_exceptions),
+                "\}\n",
                 "throw (e);",
                 "\}\n"
             ]);
         }
         else {
-            $body;
+            Chunk.new($body.type, $body.expr, ["$ctx = $*CTX;", $body]);
         }
     }
 
@@ -1137,8 +1153,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             my @args := [$outer_ctx, 'null'];
             for @extra_args -> $arg {
-                @args.push($arg.expr);
-                $setup.push($arg);
+                @args.push($arg);
             }
 
             self.stored_result(Chunk.new($want, $cloned_block~".\$\$call({nqp::join(',', @args)})", $setup, :$node), :$want);
@@ -1306,14 +1321,15 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     method do_control($type, $loop) {
+        my str $label := " {$loop.js_label}";
         if $type eq 'last' {
-            "break;\n";
+            "break$label;\n";
         }
         elsif $type eq 'next' {
-            "continue;\n";
+            "continue$label;\n";
         }
         elsif $type eq 'redo' {
-            "{$loop.redo} = 1;\n;continue;\n";
+            "{$loop.redo} = true;\n;continue{$loop.redo_label ?? ' ' ~ $loop.redo_label !! $label};\n";
         }
     }
 
@@ -1345,7 +1361,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     }
                     else {
                         $loop.handle($type);
-                        return Chunk.void("throw new nqp.{ucfirst($type)}(null);\n");
+                        return Chunk.void("$*CTX.$type();\n");
                     }
                 }
             }
@@ -1357,7 +1373,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         if $label {
             my $compiled_label := self.as_js($label, :want($T_OBJ));
-            Chunk.void($compiled_label, "throw new nqp.{ucfirst($type)}({$compiled_label.expr});\n");
+            Chunk.void($compiled_label, "$*CTX.{$type}Labeled({$compiled_label.expr});\n");
         }
         else {
             self.NYI("can't find surrounding loop for $type");

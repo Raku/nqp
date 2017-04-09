@@ -9,20 +9,37 @@ var exceptionsStack = require('./exceptions-stack.js');
 
 var BOOT = require('./BOOT.js');
 
-var categoryToName = {
-  4: 'NEXT',
-  8: 'REDO',
-  16: 'LAST',
-  32: 'RETURN',
-  128: 'TAKE',
-  256: 'WARN',
-  512: 'SUCCEED',
-  1024: 'PROCEED',
-  4096: 'LABELED',
-  8192: 'AWAIT',
-  16384: 'EMIT',
-  32768: 'DONE'
+const NEXT = 4;
+const REDO = 8;
+const LAST = 16;
+const RETURN = 32;
+const TAKE = 128;
+const WARN = 256;
+const SUCCEED = 512;
+const PROCEED = 1024;
+const LABELED = 4096
+const AWAIT = 8192;
+const EMIT = 16384;
+const DONE = 32768;
+
+let categoryIDs = {
+  NEXT: NEXT,
+  REDO: REDO,
+  LAST: LAST,
+  RETURN: RETURN,
+  TAKE: TAKE,
+  WARN: WARN,
+  SUCCEED: SUCCEED,
+  PROCEED: PROCEED,
+  AWAIT: AWAIT,
+  EMIT: EMIT,
+  DONE: DONE
 };
+
+let categoryToName = {};
+for (let name in categoryIDs) {
+  categoryToName[categoryIDs[name]] = name;
+}
 
 class ResumeException {
   constructor(exception) {
@@ -42,13 +59,53 @@ class Ctx extends NQPObject {
     return this.$$callThis;
   }
 
+  last() {
+    this.controlException(LAST);
+  }
+
+  lastLabeled(label) {
+    this.controlExceptionLabeled(label, LAST);
+  }
+
+  next() {
+    this.controlException(NEXT);
+  }
+
+  nextLabeled(label) {
+    this.controlExceptionLabeled(label, NEXT);
+  }
+
+  redo() {
+    this.controlException(REDO);
+  }
+
+  redoLabeled(label) {
+    this.controlExceptionLabeled(label, REDO);
+  }
+
+  controlException(category) {
+    let exType = BOOT.Exception;
+    let exception = exType._STable.REPR.allocate(exType._STable);
+    exception.$$category = category;
+    this.propagateControlException(exception);
+  }
+
+  controlExceptionLabeled(label, category) {
+    let exType = BOOT.Exception;
+    let exception = exType._STable.REPR.allocate(exType._STable);
+    exception.$$category = category | LABELED;
+    exception.$$payload = label;
+    this.propagateControlException(exception);
+  }
+
   propagateControlException(exception) {
-    var handler = '$$' + categoryToName[exception.$$category];
+    let handler = '$$' + categoryToName[exception.$$category & ~LABELED];
+    let labeled = exception.$$category & LABELED;
 
     var ctx = this;
 
     while (ctx) {
-      if (ctx[handler] || ctx.$$CONTROL) {
+      if ((ctx[handler] || ctx.$$CONTROL) && (!labeled || !ctx.$$label || ctx.$$label === exception.$$payload)) {
         exception.caught = ctx;
         ctx.exception = exception;
 
