@@ -1,4 +1,4 @@
-plan(14);
+plan(15);
 
 my $i := 0; # counter
 my $k := 0; # counter
@@ -113,3 +113,11 @@ is(nqp::join(',', @not_skipped), '1,2,3,5,8,9,10', 'testing next with a loop lab
     }
     is(nqp::join(',', @out), '1:1,1:3,1:4,1:5,2:1,2:2,3:1,3:2,3:4,3:5', 'loop labels in nested subs' );
 }
+
+my @out;
+for nqp::split('', '12345678') {
+    next if $_ == 3;
+    last if $_ == 6;
+    @out.push($_);
+}
+is(nqp::join(',', @out), '1,2,4,5', 'next and last work inside for');
