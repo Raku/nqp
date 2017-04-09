@@ -1,4 +1,4 @@
-plan(13);
+plan(14);
 
 my $i := 0; # counter
 my $k := 0; # counter
@@ -93,3 +93,23 @@ MAIN_LOOP: while $i < 10 {
     nqp::push(@not_skipped, ~$i);
 }
 is(nqp::join(',', @not_skipped), '1,2,3,5,8,9,10', 'testing next with a loop label');
+
+{
+    my @out;
+    my $i := 0;
+    OUTER: while $i < 3 {
+        $i := $i + 1;
+        my $j := 0;
+        INNER: while $j < 5 {
+            $j := $j + 1;
+            my $next_outer := sub () {next OUTER};
+            my $next_inner := sub () {next INNER};
+            my $next := sub () {next};
+            $next_outer() if $i == 2 && $j == 3;
+            $next_inner() if $i == 1 && $j == 2;
+            $next_inner() if $i == 3 && $j == 3;
+            nqp::push(@out, "$i:$j");
+        }
+    }
+    is(nqp::join(',', @out), '1:1,1:3,1:4,1:5,2:1,2:2,3:1,3:2,3:4,3:5', 'loop labels in nested subs' );
+}
