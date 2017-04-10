@@ -273,7 +273,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
 
     method metachar:sym<to>($/) {
         make QAST::Regex.new( :rxtype<subrule>, :subtype<capture>,
-            :backtrack<r>, :name<$!to>, :node($/),
+            :backtrack<r>, :name<$!pos>, :node($/),
             QAST::NodeList.new(
                 QAST::SVal.new( :value('!LITERAL') ),
                 QAST::SVal.new( :value('') ) ) );

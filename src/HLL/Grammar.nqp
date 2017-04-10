@@ -368,7 +368,7 @@ An operator precedence parser.
 
     method EXPR(str $preclim = '', int :$noinfix = 0) {
         my $here          := self.'!cursor_start_cur'();
-        my int $pos       := nqp::getattr_i($here, NQPCursor, '$!from');
+        my int $pos       := nqp::getattr_i($here, NQPMatch, '$!from');
         my str $termishrx := 'termish';
         my @opstack;
         my @termstack;
@@ -388,10 +388,10 @@ An operator precedence parser.
         my int $term_done;
 
         while 1 {
-            nqp::bindattr_i($here, NQPCursor, '$!pos', $pos);
+            nqp::bindattr_i($here, NQPMatch, '$!pos', $pos);
             $termcur := $here."$termishrx"();
-            $pos := nqp::getattr_i($termcur, NQPCursor, '$!pos');
-            nqp::bindattr_i($here, NQPCursor, '$!pos', $pos);
+            $pos := nqp::getattr_i($termcur, NQPMatch, '$!pos');
+            nqp::bindattr_i($here, NQPMatch, '$!pos', $pos);
             if $pos < 0 {
                 $here.panic('Missing required term after infix') if @opstack;
                 return $here;
@@ -443,18 +443,18 @@ An operator precedence parser.
             while $more_infix {
                 # Now see if we can fetch an infix operator
                 # First, we need ws to match.
-                nqp::bindattr_i($here, NQPCursor, '$!pos', $pos);
+                nqp::bindattr_i($here, NQPMatch, '$!pos', $pos);
                 $wscur := $here.ws();
-                $pos   := nqp::getattr_i($wscur, NQPCursor, '$!pos');
+                $pos   := nqp::getattr_i($wscur, NQPMatch, '$!pos');
                 if $pos < 0 {
                     $term_done := 1;
                     last;
                 }
 
                 # Next, try the infix itself.
-                nqp::bindattr_i($here, NQPCursor, '$!pos', $pos);
+                nqp::bindattr_i($here, NQPMatch, '$!pos', $pos);
                 $infixcur := $here.infixish();
-                $pos := nqp::getattr_i($infixcur, NQPCursor, '$!pos');
+                $pos := nqp::getattr_i($infixcur, NQPMatch, '$!pos');
                 if $pos < 0 {
                     $term_done := 1;
                     last;
@@ -510,20 +510,19 @@ An operator precedence parser.
             }
 
             nqp::push(@opstack, $infix); # The Shift
-            nqp::bindattr_i($here, NQPCursor, '$!pos', $pos);
+            nqp::bindattr_i($here, NQPMatch, '$!pos', $pos);
             $wscur := $here.ws();
-            $pos := nqp::getattr_i($wscur, NQPCursor, '$!pos');
-            nqp::bindattr_i($here, NQPCursor, '$!pos', $pos);
+            $pos := nqp::getattr_i($wscur, NQPMatch, '$!pos');
+            nqp::bindattr_i($here, NQPMatch, '$!pos', $pos);
             return $here if $pos < 0;
         }
 
         self.EXPR_reduce(@termstack, @opstack) while @opstack;
-        $pos := nqp::getattr_i($here, NQPCursor, '$!pos');
-        $here := nqp::pop(@termstack);
-        $here.'!cursor_pass'($pos);
-        nqp::bindattr_i($here, NQPCursor, '$!pos', $pos);
-        $here.'!reduce'('EXPR');
-        $here;
+
+	self.'!clone_match_at'(
+	    nqp::pop(@termstack),
+	    nqp::getattr_i($here, NQPMatch, '$!pos')
+	).'!reduce'('EXPR')
     }
 
     method EXPR_reduce(@termstack, @opstack) {
@@ -584,7 +583,7 @@ An operator precedence parser.
 
     method MARKER(str $markname) {
         my %markhash := nqp::getattr(
-            nqp::getattr(self, NQPCursor, '$!shared'),
+            nqp::getattr(self, NQPMatch, '$!shared'),
             ParseShared, '%!marks');
         my $cur := nqp::atkey(%markhash, $markname);
         if nqp::isnull($cur) {
@@ -593,7 +592,7 @@ An operator precedence parser.
             nqp::bindkey(%markhash, $markname, $cur);
         }
         else {
-	    nqp::bindattr_i($cur, NQPCursor, '$!from', self.from);
+	    nqp::bindattr_i($cur, NQPMatch, '$!from', self.from);
             $cur."!cursor_pos"(self.pos());
             $cur
         }
@@ -601,10 +600,10 @@ An operator precedence parser.
 
     method MARKED(str $markname) {
         my %markhash := nqp::getattr(
-            nqp::getattr(self, NQPCursor, '$!shared'),
+            nqp::getattr(self, NQPMatch, '$!shared'),
             ParseShared, '%!marks');
         my $cur := nqp::atkey(%markhash, $markname);
-        unless nqp::istype($cur, NQPCursor) && $cur.pos() == self.pos() {
+        unless nqp::istype($cur, NQPMatch) && $cur.pos() == self.pos() {
             $cur := self.'!cursor_start_fail'();
         }
         $cur

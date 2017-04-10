@@ -658,7 +658,7 @@ class NQP::Actions is HLL::Actions {
             }
         }
         elsif nqp::can($how, 'set_default_parent') {
-            my $default := $*PKGDECL eq 'grammar' ?? ['NQPCursor'] !! ['NQPMu'];
+            my $default := $*PKGDECL eq 'grammar' ?? ['NQPMatch'] !! ['NQPMu'];
             $*W.pkg_add_parent_or_role($package, "set_default_parent",
                 $*W.find_sym($default));
         }
@@ -1932,7 +1932,7 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
     method set_cursor_type($qast) {
         my $cursor_type := nqp::null();
         try {
-            $cursor_type := $*W.find_sym(['NQPCursor']);
+            $cursor_type := $*W.find_sym(['NQPMatch']);
         };
         $qast.cursor_type($cursor_type) unless nqp::isnull($cursor_type);
     }

@@ -65,7 +65,7 @@ my class Braid is export {
     }
 }
 
-role NQPCursorRole is export {
+role NQPMatchRole is export {
     has $!shared;
     has int $!from;
     has int $!pos;
@@ -610,6 +610,18 @@ role NQPCursorRole is export {
         $!regexsub($new);
     }
 
+    method !clone_match_at($term, int $pos) {
+        my $new := self.'!cursor_start_cur'();
+        $new.'!cursor_pass'($pos);
+        nqp::bindattr_i($new, NQPMatch,   '$!pos',   $pos);
+        nqp::bindattr_i($new, NQPMatch,   '$!from',  nqp::getattr($term, NQPMatch,   '$!from' ));
+        nqp::bindattr(  $new, NQPMatch,   '$!made',  nqp::getattr($term, NQPMatch,   '$!made' ));
+        nqp::bindattr(  $new, NQPCapture, '@!array', nqp::getattr($term, NQPCapture, '@!array'));
+        nqp::bindattr(  $new, NQPCapture, '%!hash',  nqp::getattr($term, NQPCapture, '%!hash' ));
+        nqp::bindattr(  $new, NQPMatch,   '$!match', nqp::getattr($term, NQPMatch,   '$!match'));
+        $new;
+    }
+
     method !reduce(str $name) {
         my $actions := self.actions;
         nqp::findmethod($actions, $name)($actions, self.MATCH)
@@ -1100,24 +1112,24 @@ class NQPOldMatch {
     method Bool()      { 1 }
 }
 
-class NQPCursor is NQPCapture does NQPCursorRole {
+class NQPMatch is NQPCapture does NQPMatchRole {
     my @EMPTY_LIST := [];
     my $NO_CAPS    := nqp::hash();
     method MATCH() {
-        my $match := nqp::getattr(self, NQPCursor, '$!match');
+        my $match := nqp::getattr(self, NQPMatch, '$!match');
         if nqp::isnull($match) || (!nqp::istype($match, NQPOldMatch) && !nqp::ishash($match)) {
             # Set up basic state of (old) Match.
             my $list;
             my $hash := nqp::hash();
             $match   := nqp::create(NQPOldMatch);
-            nqp::bindattr(self, NQPCursor, '$!match',
-                nqp::getattr_i(self, NQPCursor, '$!pos') >= nqp::getattr_i(self, NQPCursor, '$!from')
+            nqp::bindattr(self, NQPMatch, '$!match',
+                nqp::getattr_i(self, NQPMatch, '$!pos') >= nqp::getattr_i(self, NQPMatch, '$!from')
                     ?? $match
                     !! nqp::null());
 
             # For captures with lists, initialize the lists.
             my %caplist       := $NO_CAPS;
-            my $rxsub         := nqp::getattr(self, NQPCursor, '$!regexsub');
+            my $rxsub         := nqp::getattr(self, NQPMatch, '$!regexsub');
             my str $onlyname  := '';
             my int $namecount := 0;
             if !nqp::isnull($rxsub) && nqp::defined($rxsub) {
@@ -1141,7 +1153,7 @@ class NQPCursor is NQPCapture does NQPCursorRole {
             }
 
             # Walk the Cursor stack and populate the Cursor.
-            my $cs := nqp::getattr(self, NQPCursor, '$!cstack');
+            my $cs := nqp::getattr(self, NQPMatch, '$!cstack');
             if nqp::isnull($cs) || !nqp::istrue($cs) {}
             elsif $namecount == 1 && $onlyname ne '' && !nqp::eqat($onlyname, '$!', 0) {
                 # If there's only one destination, avoid repeated hash lookups
@@ -1173,8 +1185,8 @@ class NQPCursor is NQPCapture does NQPCursorRole {
                     my str $name := nqp::getattr_s($subcur, $?CLASS, '$!name');
                     if !nqp::isnull_s($name) && nqp::defined($name) && $name ne '' {
                         my $submatch := $subcur.MATCH();
-                        if nqp::ord($name) == 36 && ($name eq '$!from' || $name eq '$!to') {
-                            nqp::bindattr_i($match, NQPOldMatch, $name, $submatch.from);
+                        if nqp::ord($name) == 36 && ($name eq '$!from' || $name eq '$!pos') {
+                            nqp::bindattr_i(self, NQPMatch, $name, $submatch.from);
                         }
                         elsif nqp::index($name, '=') < 0 {
                             my int $needs_list := %caplist{$name} >= 2;
@@ -1239,9 +1251,9 @@ class NQPCursor is NQPCapture does NQPCursorRole {
 
             # Once we've produced the captures, and if we know we're finished and
             # will never be backtracked into, we can release cstack and regexsub.
-            unless nqp::defined(nqp::getattr(self, NQPCursor, '$!bstack')) {
-                nqp::bindattr(self, NQPCursor, '$!cstack', nqp::null());
-                nqp::bindattr(self, NQPCursor, '$!regexsub', nqp::null());
+            unless nqp::defined(nqp::getattr(self, NQPMatch, '$!bstack')) {
+                nqp::bindattr(self, NQPMatch, '$!cstack', nqp::null());
+                nqp::bindattr(self, NQPMatch, '$!regexsub', nqp::null());
             }
         }
         self
@@ -1322,7 +1334,7 @@ class NQPCursor is NQPCapture does NQPCursorRole {
     }
 }
 
-my constant NQPMatch := NQPCursor;
+my constant NQPCursor := NQPMatch;
 
 class NQPRegexMethod {
     has $!code;
@@ -1330,7 +1342,7 @@ class NQPRegexMethod {
         self.bless(:code($code));
     }
     multi method ACCEPTS(NQPRegexMethod:D $self: $target) {
-        NQPCursor.parse($target, :rule(self))
+        NQPMatch.parse($target, :rule(self))
     }
     method name() {
         nqp::getcodename($!code)
@@ -1343,7 +1355,7 @@ nqp::setinvokespec(NQPRegexMethod, NQPRegexMethod, '$!code', nqp::null);
 
 class NQPRegex is NQPRegexMethod {
     multi method ACCEPTS(NQPRegex:D $self: $target) {
-        NQPCursor.parse($target, :rule(self), :c(0))
+        NQPMatch.parse($target, :rule(self), :c(0))
     }
 }
 nqp::setinvokespec(NQPRegex, NQPRegexMethod, '$!code', nqp::null);
