@@ -1212,9 +1212,9 @@ class QAST::OperationsJS {
         my $outer     := try $*BLOCK;
         my $outer_loop := try $*LOOP;
 
-        my $loop := LoopInfo.new($outer_loop, :$label);
+        my $loop := $handler ?? LoopInfo.new($outer_loop, :$label) !! $outer_loop;
 
-        my str $control_ctx := $*BLOCK.add_tmp();
+        my str $control_ctx := $handler ?? $*BLOCK.add_tmp() !! $*CTX;
 
         my $body;
         {
@@ -1222,18 +1222,20 @@ class QAST::OperationsJS {
             $body := $comp.compile_block(@operands[1], $outer, $loop , :want($T_VOID), :extra_args(@body_args));
         }
 
-        if $loop.has_redo {
+        my int $has_redo := $handler && $loop.has_redo;
+
+        if $has_redo {
             $loop.redo_label(QAST::Node.unique('redo_label'));
         }
 
         Chunk.new($T_OBJ, 'null', [
             $list,
             "$iterator = {$list.expr}.\$\$iterator();\n",
-            "{$loop.js_label}: while ($iterator.\$\$idx < $iterator.\$\$target) \{\n",
+            "{$handler ?? $loop.js_label ~ ':' !! ''} while ($iterator.\$\$idx < $iterator.\$\$target) \{\n",
             Chunk.void(|@setup),
-            ($loop.has_redo ?? "{$loop.redo_label}: do \{{$loop.redo} = false;\n" !! ''),
-            $comp.handle_control($loop, $control_ctx, $body),
-            ($loop.has_redo ?? "\} while ({$loop.redo});\n" !! ''),
+            ($has_redo ?? "{$loop.redo_label}: do \{{$loop.redo} = false;\n" !! ''),
+            $handler ?? $comp.handle_control($loop, $control_ctx, $body) !! $body,
+            ($has_redo ?? "\} while ({$loop.redo});\n" !! ''),
             "\}\n"
         ], :node($node));
 
