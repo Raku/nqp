@@ -743,21 +743,27 @@ class QAST::OperationsJS {
             my str $try_ret := '';
             my $set_try_ret := '';
 
-
-            my @handlers;
+            my @setup;
 
             my $has_catch := 0;
 
             for @children -> $type, $handler {
-                my $catch_body := $comp.as_js($handler, :want($T_OBJ));
-                @handlers.push("$handler_ctx.\$\${$type} = function() \{\n");
-                @handlers.push($catch_body);
-                @handlers.push( "return {$catch_body.expr};\n" ~ "\};\n");
-                $has_catch := 1 if $type eq 'CATCH';
+                if $type eq 'LABELED' {
+                    my $label := $comp.as_js($handler, :want($T_OBJ));
+                    @setup.push($label);
+                    @setup.push("$handler_ctx.\$\$label = {$label.expr};\n");
+                }
+                else {
+                    my $catch_body := $comp.as_js($handler, :want($T_OBJ));
+                    @setup.push("$handler_ctx.\$\${$type} = function() \{\n");
+                    @setup.push($catch_body);
+                    @setup.push( "return {$catch_body.expr};\n" ~ "\};\n");
+                    $has_catch := 1 if $type eq 'CATCH';
+                }
             }
 
-            @handlers.push("$unwind_marker = \{\};\n");
-            @handlers.push("$handler_ctx.unwind = $unwind_marker;\n");
+            @setup.push("$unwind_marker = \{\};\n");
+            @setup.push("$handler_ctx.unwind = $unwind_marker;\n");
 
             {
                 my $*CTX := $handler_ctx;
@@ -793,7 +799,7 @@ class QAST::OperationsJS {
 
                 return Chunk.new($want, $try_ret, [
                     "var $handler_ctx = new nqp.Ctx($outer_ctx, $outer_ctx, $outer_ctx.\$\$callThis);\n",
-                    Chunk.void(|@handlers),
+                    Chunk.void(|@setup),
                     "try \{",
                     $body,
                     # HACK we need to check $body.type if we handle something like return
