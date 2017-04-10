@@ -1252,12 +1252,12 @@ class QAST::OperationsJS {
 
             return $comp.NYI("3 argument $op") if +@operands == 3 && $op ne 'while';
 
-            my $loop := LoopInfo.new($*LOOP, :$label);
+            my $loop := $handler ?? LoopInfo.new($*LOOP, :$label) !! $*LOOP;
 
 
             my int $cond_type := needs_cond_passed($node[1]) ?? $T_OBJ !! $T_BOOL;
 
-            my $control_ctx := $*BLOCK.add_tmp;
+            my $control_ctx := $handler ?? $*BLOCK.add_tmp !! $*CTX;
 
             my $check_cond;
             my $body;
@@ -1288,21 +1288,32 @@ class QAST::OperationsJS {
             if $op eq 'while' || $op eq 'until' {
                 my str $neg := $op eq 'while' ?? '!' !! '';
 
-                Chunk.void(
-                    "{$loop.js_label}: for (;;", $post, ") \{\n",
-                    $comp.handle_control($loop, $control_ctx, Chunk.void(
-                        ($loop.has_redo
-                            ?? "if ({$loop.redo}) \{;\n"
-                                ~ "{$loop.redo} = false;\n"
-                                ~  "\} else \{\n"
-                            !! ''),
-                        $check_cond,
-                        "if ($neg {$check_cond.expr}) \{break;\}\n",
-                        ($loop.has_redo ?? "\}\n" !! ''),
-                        $body,
-                    )),
-                    "\}"
-                );
+                if $handler {
+                    Chunk.void(
+                        "{$loop.js_label}: for (;;", $post, ") \{\n",
+                        $comp.handle_control($loop, $control_ctx, Chunk.void(
+                            ($loop.has_redo
+                                ?? "if ({$loop.redo}) \{;\n"
+                                    ~ "{$loop.redo} = false;\n"
+                                    ~  "\} else \{\n"
+                                !! ''),
+                            $check_cond,
+                            "if ($neg {$check_cond.expr}) \{break;\}\n",
+                            ($loop.has_redo ?? "\}\n" !! ''),
+                            $body,
+                        )),
+                        "\}"
+                    );
+               }
+               else {
+                    Chunk.void(
+                        "for (;;", $post, ") \{\n",
+                            $check_cond,
+                            "if ($neg {$check_cond.expr}) \{break;\}\n",
+                            $body,
+                        "\}"
+                    );
+               }
             }
             else {
                 # TODO redo
