@@ -2,7 +2,7 @@
 
 # Tests for try and catch
 
-plan(50);
+plan(53);
 
 sub oops($msg = "oops!") { # throw an exception
     nqp::die($msg);
@@ -383,3 +383,39 @@ $log := '';
 }
 
 is($log, '#1#3#2', 'nqp::resume works with a CONTROL block');
+
+class Label1 {
+}
+class Label2 {
+}
+
+
+sub catch($throws) {
+    my $caught;
+    my sub caught($arg) {
+        $caught := $arg;
+    }
+    nqp::handle(
+        nqp::handle(
+            $throws(),
+            'LABELED', Label1,
+            'TAKE', caught('caught1'),
+        ),
+        'LABELED', Label2,
+        'TAKE', caught('caught2')
+    );
+    $caught;
+}
+
+is(catch(
+    -> {THROW(nqp::add_i(nqp::const::CONTROL_TAKE, nqp::const::CONTROL_LABELED), Label1)}),
+    'caught1',
+    'catching labeled exception - outer handle'
+);
+is(catch(
+    -> {THROW(nqp::add_i(nqp::const::CONTROL_TAKE, nqp::const::CONTROL_LABELED), Label2)}),
+    'caught2',
+    'catching labeled exception - inner handle'
+);
+is(
+    catch(-> {THROW(nqp::const::CONTROL_TAKE, Label2)}), 'caught1', 'a nqp::handle with label catches unlabeled exception');

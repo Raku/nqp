@@ -743,21 +743,27 @@ class QAST::OperationsJS {
             my str $try_ret := '';
             my $set_try_ret := '';
 
-
-            my @handlers;
+            my @setup;
 
             my $has_catch := 0;
 
             for @children -> $type, $handler {
-                my $catch_body := $comp.as_js($handler, :want($T_OBJ));
-                @handlers.push("$handler_ctx.\$\${$type} = function() \{\n");
-                @handlers.push($catch_body);
-                @handlers.push( "return {$catch_body.expr};\n" ~ "\};\n");
-                $has_catch := 1 if $type eq 'CATCH';
+                if $type eq 'LABELED' {
+                    my $label := $comp.as_js($handler, :want($T_OBJ));
+                    @setup.push($label);
+                    @setup.push("$handler_ctx.\$\$label = {$label.expr};\n");
+                }
+                else {
+                    my $catch_body := $comp.as_js($handler, :want($T_OBJ));
+                    @setup.push("$handler_ctx.\$\${$type} = function() \{\n");
+                    @setup.push($catch_body);
+                    @setup.push( "return {$catch_body.expr};\n" ~ "\};\n");
+                    $has_catch := 1 if $type eq 'CATCH';
+                }
             }
 
-            @handlers.push("$unwind_marker = \{\};\n");
-            @handlers.push("$handler_ctx.unwind = $unwind_marker;\n");
+            @setup.push("$unwind_marker = \{\};\n");
+            @setup.push("$handler_ctx.unwind = $unwind_marker;\n");
 
             {
                 my $*CTX := $handler_ctx;
@@ -793,7 +799,7 @@ class QAST::OperationsJS {
 
                 return Chunk.new($want, $try_ret, [
                     "var $handler_ctx = new nqp.Ctx($outer_ctx, $outer_ctx, $outer_ctx.\$\$callThis);\n",
-                    Chunk.void(|@handlers),
+                    Chunk.void(|@setup),
                     "try \{",
                     $body,
                     # HACK we need to check $body.type if we handle something like return
@@ -1075,7 +1081,7 @@ class QAST::OperationsJS {
                 if needs_cond_passed($node) {
                     my $block := try $*BLOCK;
                     my $loop := try $*LOOP;
-                    $comp.compile_block($node, $block, $loop, :$want, :extra_args([$cond_without_sideeffects]));
+                    $comp.compile_block($node, $block, $loop, :$want, :extra_args([$cond.expr]));
                 }
                 else {
                     $comp.as_js($node, :$want);
@@ -1166,7 +1172,6 @@ class QAST::OperationsJS {
     });
 
     add_op('for', sub ($comp, $node, :$want) {
-        # TODO redo etc.
 
         my int $handler := 1;
         my @operands;
@@ -1195,25 +1200,42 @@ class QAST::OperationsJS {
         # TODO think if creating the block once, and the calling it multiple times would be faster
 
         my @body_args;
+        my @setup;
         my $arity := @operands[1].arity || 1;
         while $arity > 0 {
             my str $iterval := $*BLOCK.add_tmp();
-            @body_args.push(Chunk.new($T_OBJ, $iterval, ["$iterval = $iterator.\$\$shift();\n"]));
+            @setup.push("$iterval = $iterator.\$\$shift();\n");
+            @body_args.push($iterval);
             $arity := $arity - 1;
         }
 
         my $outer     := try $*BLOCK;
         my $outer_loop := try $*LOOP;
 
-        my $loop := LoopInfo.new($outer_loop, :$label);
+        my $loop := $handler ?? LoopInfo.new($outer_loop, :$label) !! $outer_loop;
 
-        my $body := $comp.compile_block(@operands[1], $outer, $loop , :want($T_VOID), :extra_args(@body_args));
+        my str $control_ctx := $handler ?? $*BLOCK.add_tmp() !! $*CTX;
+
+        my $body;
+        {
+            my $*CTX := $control_ctx;
+            $body := $comp.compile_block(@operands[1], $outer, $loop , :want($T_VOID), :extra_args(@body_args));
+        }
+
+        my int $has_redo := $handler && $loop.has_redo;
+
+        if $has_redo {
+            $loop.redo_label(QAST::Node.unique('redo_label'));
+        }
 
         Chunk.new($T_OBJ, 'null', [
             $list,
             "$iterator = {$list.expr}.\$\$iterator();\n",
-            "while ($iterator.\$\$idx < $iterator.\$\$target) \{\n",
-            $comp.handle_control($loop, $body),
+            "{$handler ?? $loop.js_label ~ ':' !! ''} while ($iterator.\$\$idx < $iterator.\$\$target) \{\n",
+            Chunk.void(|@setup),
+            ($has_redo ?? "{$loop.redo_label}: do \{{$loop.redo} = false;\n" !! ''),
+            $handler ?? $comp.handle_control($loop, $control_ctx, $body) !! $body,
+            ($has_redo ?? "\} while ({$loop.redo});\n" !! ''),
             "\}\n"
         ], :node($node));
 
@@ -1232,24 +1254,26 @@ class QAST::OperationsJS {
 
             return $comp.NYI("3 argument $op") if +@operands == 3 && $op ne 'while';
 
-            my $loop := LoopInfo.new($*LOOP, :$label);
+            my $loop := $handler ?? LoopInfo.new($*LOOP, :$label) !! $*LOOP;
 
 
             my int $cond_type := needs_cond_passed($node[1]) ?? $T_OBJ !! $T_BOOL;
 
+            my $control_ctx := $handler ?? $*BLOCK.add_tmp !! $*CTX;
 
             my $check_cond;
             my $body;
             {
                 my $*LOOP := $loop;
+                my $*CTX := $control_ctx;
+
                 my $cond := $comp.as_js(@operands[0], :want($cond_type));
                 $check_cond := $comp.coerce($cond, $T_BOOL);
-                my $cond_without_sideeffects := Chunk.new($cond.type, $cond.expr);
 
                 if needs_cond_passed(@operands[1]) {
                     my $block := try $*BLOCK;
                     my $loop := try $*LOOP;
-                    $body := $comp.compile_block(@operands[1], $block, $loop, :want($T_VOID), :extra_args([$cond_without_sideeffects]));
+                    $body := $comp.compile_block(@operands[1], $block, $loop, :want($T_VOID), :extra_args([$cond.expr]));
                 }
                 else {
                     $body := $comp.as_js(@operands[1], :want($T_VOID));
@@ -1266,21 +1290,32 @@ class QAST::OperationsJS {
             if $op eq 'while' || $op eq 'until' {
                 my str $neg := $op eq 'while' ?? '!' !! '';
 
-                # handle_control can set redo so we call it here
-                my $handled := $comp.handle_control($loop, $body);
-                Chunk.void(
-                    "for (;;", $post, ") \{\n",
-                    ($loop.has_redo
-                        ?? "if ({$loop.redo}) \{;\n"
-                            ~ "{$loop.redo} = false;\n"
-                            ~  "\} else \{\n"
-                        !! ''), 
-                    $check_cond,
-                    "if ($neg {$check_cond.expr}) \{break;\}\n",
-                    ($loop.has_redo ?? "\}\n" !! ''),
-                    $handled,
-                    "\}"
-                );
+                if $handler {
+                    Chunk.void(
+                        "{$loop.js_label}: for (;;", $post, ") \{\n",
+                        $comp.handle_control($loop, $control_ctx, Chunk.void(
+                            ($loop.has_redo
+                                ?? "if ({$loop.redo}) \{;\n"
+                                    ~ "{$loop.redo} = false;\n"
+                                    ~  "\} else \{\n"
+                                !! ''),
+                            $check_cond,
+                            "if ($neg {$check_cond.expr}) \{break;\}\n",
+                            ($loop.has_redo ?? "\}\n" !! ''),
+                            $body,
+                        )),
+                        "\}"
+                    );
+               }
+               else {
+                    Chunk.void(
+                        "for (;;", $post, ") \{\n",
+                            $check_cond,
+                            "if ($neg {$check_cond.expr}) \{break;\}\n",
+                            $body,
+                        "\}"
+                    );
+               }
             }
             else {
                 # TODO redo

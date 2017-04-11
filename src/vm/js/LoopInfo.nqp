@@ -5,6 +5,8 @@ my class LoopInfo {
     has $!redo;
 
     has $!label;
+    has str $!js_label;
+    has str $!redo_label;
 
     has %!handled;
 
@@ -15,20 +17,30 @@ my class LoopInfo {
         $!redo;
     }
     method has_redo() {
-        nqp::defined($!redo);
+        nqp::existskey(%!handled, 'redo') || nqp::defined($!redo);
     }
+
     method new($outer, :$label) {
         my $obj := nqp::create(self);
         $obj.BUILD($outer, $label);
         $obj
     }
+
     method BUILD($outer, $label) {
         $!outer := $outer;
         $!label := $label;
         %!handled := nqp::hash();
+        $!js_label := QAST::Node.unique('loop_label');
     }
 
     method outer() { $!outer }
+
+    method js_label() { $!js_label }
+
+    method redo_label($value = NO_VALUE) {
+        $!redo_label := $value unless $value =:= NO_VALUE;
+        $!redo_label;
+    }
 
     # do we have to catch the control exception? 
 

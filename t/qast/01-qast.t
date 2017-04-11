@@ -1,6 +1,6 @@
 use QAST;
 
-plan(123);
+plan(125);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -1979,3 +1979,114 @@ else {
         }
     );
 };
+
+is_qast(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op<bind>,
+            QAST::Var.new( :name('$i'), :scope<lexical>, :decl<var>, :returns(int) ),
+            QAST::IVal.new( :value(5) )
+        ),
+        QAST::Op.new(
+            :op<while>,
+            QAST::Var.new( :name('$i'), :scope<lexical> ),
+            QAST::Stmts.new(
+                QAST::Op.new(
+                    :op<bind>,
+                    QAST::Var.new( :name('$i'), :scope<lexical> ),
+                    QAST::Op.new(
+                        :op<sub_i>,
+                        QAST::Var.new( :name('$i'), :scope<lexical> ),
+                        QAST::IVal.new( :value(1) )
+                    )
+                ),
+                QAST::Op.new(
+                    :op<bind>,
+                    QAST::Var.new( :name('$j'), :scope<lexical>, :decl<var>, :returns(int) ),
+                    QAST::Var.new( :name('$i'), :scope<lexical> ),
+                ),
+                QAST::Op.new(
+                    :op<while>,
+                    QAST::IVal.new( :value(1), :named('nohandler') ),
+                    QAST::Op.new(
+                        :op<iseq_i>,
+                        QAST::Var.new( :name('$j'), :scope<lexical> ),
+                        QAST::IVal.new( :value(3) )
+                    ),
+                    QAST::Stmts.new(
+                        QAST::Op.new(
+                            :op<bind>,
+                            QAST::Var.new( :name('$j'), :scope<lexical> ),
+                            QAST::Op.new(
+                                :op<sub_i>,
+                                QAST::Var.new( :name('$j'), :scope<lexical> ),
+                                QAST::IVal.new( :value(1) )
+                            )
+                        ),
+                        QAST::Op.new( :op<control>, :name<last> )
+                    )
+                )
+            )
+        ),
+        QAST::Var.new( :name('$i'), :scope('lexical') ),
+    ),
+    3,
+    'while loop nohandler');
+
+{
+    my sub with_arity($arity, $block) {
+        $block.arity($arity);
+        $block;
+    }
+
+    is_qast(
+        QAST::Block.new(
+            QAST::Op.new(
+                :op<bind>,
+                QAST::Var.new( :name('$i'), :scope<lexical>, :decl<var>, :returns(int) ),
+                QAST::IVal.new( :value(10) )
+            ),
+            QAST::Op.new(
+                :op<while>,
+                QAST::Var.new( :name('$i'), :scope<lexical> ),
+                QAST::Stmts.new(
+                    QAST::Op.new(
+                        :op<bind>,
+                        QAST::Var.new( :name('$i'), :scope<lexical> ),
+                        QAST::Op.new(
+                            :op<sub_i>,
+                            QAST::Var.new( :name('$i'), :scope<lexical> ),
+                            QAST::IVal.new( :value(1) )
+                        )
+                    ),
+                    QAST::Op.new(
+                        :op<for>,
+                        QAST::IVal.new( :value(1), :named('nohandler') ),
+                        QAST::Op.new(
+                            :op<list>,
+                            QAST::IVal.new( :value(3) ),
+                            QAST::IVal.new( :value(7) ),
+                            QAST::IVal.new( :value(20) )
+                        ),
+                        with_arity(1, QAST::Block.new(
+                            :blocktype<immediate>,
+                            QAST::Op.new(
+                                :op<if>, 
+                                QAST::Op.new(
+                                    :op<iseq_i>,
+                                    QAST::Var.new( :name('$j'), :scope<lexical>, :decl<param> ),
+                                    QAST::Var.new( :name('$i'), :scope<lexical> )
+                                ),
+                                QAST::Op.new( :op<control>, :name<last> )
+                            ),
+                            QAST::Op.new(:op<null>)
+                        ))
+                    )
+                )
+            ),
+            QAST::Var.new( :name('$i'), :scope('lexical') ),
+        ),
+        7,
+        'for loop nohandler');
+
+}
