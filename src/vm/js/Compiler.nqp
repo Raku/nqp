@@ -593,8 +593,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     %control_id<redo> := 2;
     %control_id<next> := 3;
 
+    my @handle_all := <last next redo>;
     method handle_control($loop, $ctx, $body) {
-        if nqp::elems($loop.handled) > 0 {
+        my @handled := $*HLL eq 'nqp' ?? $loop.handled !! @handle_all;
+        if nqp::elems(@handled) > 0 {
             my @setup;
 
             if $loop.label {
@@ -608,7 +610,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             my str $action := $*BLOCK.add_tmp;
 
-            for $loop.handled -> $type {
+            for @handled -> $type {
                 my int $id := %control_id{$type};
                 @setup.push("$ctx.\$\${nqp::uc($type)} = function() \{$action = $id\};\n");
                 @handle_exceptions.push("if ($action === $id) \{ {self.do_control($type, $loop) } \}\n");
