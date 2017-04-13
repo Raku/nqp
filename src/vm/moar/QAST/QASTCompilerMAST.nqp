@@ -85,7 +85,7 @@ my class MASTCompilerInstance {
             elsif $kind == $MVM_reg_uint32 { @arr := @!uint32s; $type := uint32 }
             elsif $kind == $MVM_reg_uint16 { @arr := @!uint16s; $type := uint16 }
             elsif $kind == $MVM_reg_uint8  { @arr := @!uint8s; $type := uint8 }
-            else { nqp::die("unhandled reg kind $kind") }
+            else { nqp::die("Unhandled reg kind $kind") }
 
             my $reg;
             if nqp::elems(@arr) && !$new {
@@ -119,7 +119,7 @@ my class MASTCompilerInstance {
             return nqp::push(@!uint32s, $reg) if $kind == $MVM_reg_uint32;
             return nqp::push(@!uint16s, $reg) if $kind == $MVM_reg_uint16;
             return nqp::push(@!uint8s, $reg) if $kind == $MVM_reg_uint8;
-            nqp::die("unhandled reg kind $kind");
+            nqp::die("Unhandled reg kind $kind");
         }
     }
 
@@ -263,7 +263,7 @@ my class MASTCompilerInstance {
 
         method return_kind(*@value) {
             if @value {
-                nqp::die("inconsistent immediate block return type")
+                nqp::die("Inconsistent immediate block return type")
                     if ($!qast.blocktype eq 'immediate' || $!qast.blocktype eq 'immediate_static') &&
                         nqp::defined($!return_kind) && @value[0] != $!return_kind;
                 $!return_kind := @value[0];
@@ -305,7 +305,7 @@ my class MASTCompilerInstance {
                 $out++;
                 $block := $block.outer;
             }
-            nqp::die("could not resolve lexical $name");
+            nqp::die("Could not resolve lexical $name");
         }
         
         method capture_inner($block) {
@@ -737,9 +737,14 @@ my class MASTCompilerInstance {
     proto method compile_node($node, :$want) { * }
     
     multi method compile_node(QAST::CompUnit $cu, :$want) {
-        # Should have a single child which is the outer block.
-        if +@($cu) != 1 || !nqp::istype($cu[0], QAST::Block) {
-            nqp::die("QAST::CompUnit should have one child that is a QAST::Block");
+        # Should have a single child
+        if +@($cu) != 1 {
+            nqp::die("QAST::CompUnit should have 1 child, got " ~ +@($cu));
+        }
+
+        # Which is the outer block.
+        if !nqp::istype($cu[0], QAST::Block) {
+            nqp::die("QAST::CompUnit should have 1 child that is a QAST::Block, got " ~ $cu[0].HOW.name($cu[0]));
         }
 
         # Set HLL and serialization context.
@@ -1090,7 +1095,7 @@ my class MASTCompilerInstance {
                     # build up instructions to bind the params
                     for $block.params -> $var {
                         my $scope := $var.scope;
-                        nqp::die("Param scope must be 'local' or 'lexical'")
+                        nqp::die("Param scope must be 'local' or 'lexical', got '$scope'")
                             if $scope ne 'lexical' && $scope ne 'local';
 
                         my $param_kind := self.type_to_register_kind($var.returns);
@@ -1118,7 +1123,7 @@ my class MASTCompilerInstance {
                             my $name := $var.named;
                             if nqp::islist($name) {
                                 unless nqp::elems($name) == 2 {
-                                    nqp::die("Can only support a single fallback name for a named parameter");
+                                    nqp::die("Can only support 1 fallback name for a named parameter, '" ~ $name[0] ~ "' has " ~ nqp::elems($name) - 1);
                                 }
                                 $val := MAST::SVal.new( :value($name[0]) );
                                 $val2 := MAST::SVal.new( :value($name[1]) );
@@ -1315,7 +1320,7 @@ my class MASTCompilerInstance {
 
     multi method compile_node(QAST::Stmts $node, :$want) {
         my $resultchild := $node.resultchild;
-        nqp::die("resultchild out of range")
+        nqp::die("resultchild out of range, max allowed is " ~ +@($node) - 1 ~ ", got $resultchild")
             if (nqp::defined($resultchild) && $resultchild >= +@($node));
         self.compile_all_the_stmts(@($node), $resultchild)
     }
@@ -1335,7 +1340,7 @@ my class MASTCompilerInstance {
         my %*STMTTEMPS  := %stmt_temps;
         my $*INSTMT     := 1;
         my $resultchild := $node.resultchild;
-        nqp::die("resultchild out of range")
+        nqp::die("resultchild out of range, max allowed is " ~ +@($node) - 1 ~ ", got $resultchild")
             if (nqp::defined($resultchild) && $resultchild >= +@($node));
         self.compile_all_the_stmts(@($node), $resultchild);
     }
@@ -1429,7 +1434,7 @@ my class MASTCompilerInstance {
     }
 
     sub check_kinds($a, $b) {
-        nqp::die("register types $a and $b don't match") unless $a == $b;
+        nqp::die("Register types $a and $b don't match") unless $a == $b;
     }
 
     my @lex_n_opnames := [
@@ -1545,7 +1550,7 @@ my class MASTCompilerInstance {
             }
             elsif $decl eq 'static' {
                 if $scope ne 'lexical' {
-                    nqp::die("Can only use 'static' decl with scope 'lexical'");
+                    nqp::die("Can only use 'static' decl with scope 'lexical', got scope '$scope'");
                 }
                 $*BLOCK.add_lexical($node, :is_static);
             }
@@ -1557,12 +1562,12 @@ my class MASTCompilerInstance {
                     $*BLOCK.add_lexical($node, :is_cont);
                 }
                 else {
-                    nqp::die("Can only use 'contvar' decl with scope 'lexical' or 'local'");
+                    nqp::die("Can only use 'contvar' decl with scope 'lexical' or 'local', got scope '$scope'");
                 }
             }
             elsif $decl eq 'statevar' {
                 if $scope ne 'lexical' {
-                    nqp::die("Can only use 'statevar' decl with scope 'lexical'");
+                    nqp::die("Can only use 'statevar' decl with scope 'lexical', got scope '$scope'");
                 }
                 $*BLOCK.add_lexical($node, :is_state);
             }
@@ -1789,7 +1794,7 @@ my class MASTCompilerInstance {
             # Ensure we have object and class handle.
             my @args := $node.list();
             if +@args != 2 {
-                nqp::die("An attribute lookup needs an object and a class handle");
+                nqp::die("An attribute lookup needs 2 args (an object and a class handle), got " ~ +@args);
             }
 
             # Compile object and handle.
@@ -1842,7 +1847,7 @@ my class MASTCompilerInstance {
             # Ensure we have object and class handle, and aren't binding.
             my @args := $node.list();
             if +@args != 2 {
-                nqp::die("An attribute reference needs an object and a class handle");
+                nqp::die("An attribute reference needs 2 args (an object and a class handle), got" ~ +@args);
             }
             if $*BINDVAL {
                 nqp::die("Cannot bind to QAST::Var '{$name}' with scope attributeref");
@@ -1930,10 +1935,10 @@ my class MASTCompilerInstance {
         if $op.op eq 'const' && nqp::existskey(%const_map, $op.name) {
             return MAST::IVal.new( :value(%const_map{$op.name}) );
         }
-        nqp::die("expected QAST constant; got op " ~ $op.op);
+        nqp::die("Expected QAST constant, got op '" ~ $op.op ~ "'");
     }
     multi method as_mast_constant(QAST::Node $qast) {
-        nqp::die("expected QAST constant; didn't get one");
+        nqp::die("Expected QAST constant, got QAST::Node");
     }
 
     multi method compile_node(QAST::Want $node, :$want) {
@@ -2059,7 +2064,7 @@ my class MASTCompilerInstance {
                     elsif $size == 32 { $MVM_reg_uint32 }
                     elsif $size == 16 { $MVM_reg_uint16 }
                     elsif $size == 8  { $MVM_reg_uint8 }
-                    else { nqp::die("Unknown int size $size") }
+                    else { nqp::die("Unknown uint size $size") }
                 }
                 else {
                     if $size == 64    { $MVM_reg_int64 }
