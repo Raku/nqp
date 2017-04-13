@@ -1583,7 +1583,7 @@ QAST::MASTOperations.add_core_op('bind', -> $qastcomp, $op {
     # Sanity checks.
     my @children := $op.list;
     if +@children != 2 {
-        nqp::die("The 'bind' op needs two children, got " ~ +@children);
+        nqp::die("The 'bind' op needs 2 children, got " ~ +@children);
     }
     unless nqp::istype(@children[0], QAST::Var) {
         nqp::die("First child of a 'bind' op must be a QAST::Var, got " ~ @children[0].HOW.name(@children[0]));
