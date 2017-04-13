@@ -135,7 +135,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
                 my $rhs;
                 if $_[0]<backslash> {
                     $node := $_[0]<backslash>.ast;
-                    $/.CURSOR.panic("Illegal range endpoint in regex: " ~ ~$_)
+                    $/.panic("Illegal range endpoint in regex: " ~ ~$_)
                         if $node.rxtype ne 'literal' && $node.rxtype ne 'enumcharlist'
                             || $node.negate || nqp::chars($node[0]) != 1;
                     $lhs := $node[0];
@@ -145,7 +145,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
                 }
                 if $_[1][0]<backslash> {
                     $node := $_[1][0]<backslash>.ast;
-                    $/.CURSOR.panic("Illegal range endpoint in regex: " ~ ~$_)
+                    $/.panic("Illegal range endpoint in regex: " ~ ~$_)
                         if $node.rxtype ne 'literal' && $node.rxtype ne 'enumcharlist'
                             || $node.negate || nqp::chars($node[0]) != 1;
                     $rhs := $node[0];
@@ -156,7 +156,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
                 sub add_range($from, $to) {
                     my int $ord0 := nqp::ord($from);
                     my int $ord1 := nqp::ord($to);
-                    $/.CURSOR.panic("Illegal reversed character range in regex: " ~ ~$_)
+                    $/.panic("Illegal reversed character range in regex: " ~ ~$_)
                         if $ord0 > $ord1;
                     $str := nqp::concat($str, nqp::chr($ord0++)) while $ord0 <= $ord1;
                 }
@@ -358,7 +358,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
     }
     
     method qbuildsub($qast, $block = QAST::Block.new(), :$anon, :$addself, *%rest) {
-	my $*LANG := $qast.node.CURSOR;
+	my $*LANG := $qast.node;
         my $code_obj := nqp::existskey(%rest, 'code_obj')
             ?? %rest<code_obj>
             !! self.create_regex_code_object($block);

@@ -215,7 +215,7 @@ class NQP::Actions is HLL::Actions {
         }
         else {
             if $*HAS_YOU_ARE_HERE {
-                $/.CURSOR.panic('{YOU_ARE_HERE} may only appear once in a setting');
+                $/.panic('{YOU_ARE_HERE} may only appear once in a setting');
             }
             $*HAS_YOU_ARE_HERE := 1;
             make $<you_are_here>.ast;
@@ -487,7 +487,7 @@ class NQP::Actions is HLL::Actions {
             my @name := NQP::Compiler.parse_name(~$/);
             if +@name > 1 {
                 if $<twigil> {
-                    $/.CURSOR.panic("Twigil not allowed on multi-part name");
+                    $/.panic("Twigil not allowed on multi-part name");
                 }
                 $ast := lexical_package_lookup(@name, $/);
             }
@@ -507,7 +507,7 @@ class NQP::Actions is HLL::Actions {
             elsif $<twigil> eq '!' {
                 my $name := ~@name.pop;
                 my $ch;
-		my $package := $/.CURSOR.package;
+		my $package := $/.package;
                 if $*PKGDECL eq 'role' {
                     $ch := QAST::Var.new( :name('$?CLASS'), :scope('typevar') );
                     $ch.set_compile_time_value($package);
@@ -537,7 +537,7 @@ class NQP::Actions is HLL::Actions {
                         }
                     }
                     else {
-                        $/.CURSOR.panic("Attribute '$name' not declared");
+                        $/.panic("Attribute '$name' not declared");
                     }
                 }
             }
@@ -561,7 +561,7 @@ class NQP::Actions is HLL::Actions {
                     $ast.returns($*W.lexical_type($name)) if $is_lex;
                 }
                 else {
-                    $/.CURSOR.panic("Use of undeclared variable '$name'");
+                    $/.panic("Use of undeclared variable '$name'");
                 }
             }
         }
@@ -590,12 +590,12 @@ class NQP::Actions is HLL::Actions {
         }
         elsif $*SCOPE eq 'my' {
             if +$<name><identifier> != 1 {
-                $<name>.CURSOR.panic("A my scoped package cannot have a multi-part name yet");
+                $<name>.panic("A my scoped package cannot have a multi-part name yet");
             }
             $*W.install_lexical_symbol($*W.cur_lexpad(), ~$<name><identifier>[0], $PACKAGE);
         }
         else {
-            $/.CURSOR.panic("$*SCOPE scoped packages are not supported");
+            $/.panic("$*SCOPE scoped packages are not supported");
         }
 
         make QAST::Stmts.new();
@@ -606,8 +606,8 @@ class NQP::Actions is HLL::Actions {
         # Get name and meta-object.
         my @ns := nqp::clone($<name><identifier>);
         my $name := ~@ns.pop;
-        my $how := $/.CURSOR.how($*PKGDECL);
-	my $package := $/.CURSOR.package;
+        my $how := $/.how($*PKGDECL);
+	my $package := $/.package;
 
         # Get the body code.
         my $ast;
@@ -654,7 +654,7 @@ class NQP::Actions is HLL::Actions {
                 $*W.pkg_add_parent_or_role($package, "add_parent", $parent);
             }
             else {
-                $/.CURSOR.panic("Could not find parent class '" ~ ~$<parent> ~ "'");
+                $/.panic("Could not find parent class '" ~ ~$<parent> ~ "'");
             }
         }
         elsif nqp::can($how, 'set_default_parent') {
@@ -676,7 +676,7 @@ class NQP::Actions is HLL::Actions {
                     $*W.pkg_add_parent_or_role($package, "add_role", $role);
                 }
                 else {
-                    $/.CURSOR.panic("Could not find role '" ~ ~$_ ~ "'");
+                    $/.panic("Could not find role '" ~ ~$_ ~ "'");
                 }
             }
         }
@@ -745,17 +745,17 @@ class NQP::Actions is HLL::Actions {
         my $BLOCK := $*W.cur_lexpad();
         my $*DECLARAND_ATTR;
         if $name && $BLOCK.symbol($name) {
-            $/.CURSOR.panic("Redeclaration of symbol ", $name);
+            $/.panic("Redeclaration of symbol ", $name);
         }
         if $*SCOPE eq 'has' {
             # Initializer not allowed.
             if $<initializer> {
-                $/.CURSOR.panic('Initiailizers not supported on has-scoped variables');
+                $/.panic('Initiailizers not supported on has-scoped variables');
             }
 
             # Locate the type of meta-attribute we need.
-            unless $/.CURSOR.know_how($*PKGDECL ~ '-attr') {
-                $/.CURSOR.panic("$*PKGDECL packages do not support attributes");
+            unless $/.know_how($*PKGDECL ~ '-attr') {
+                $/.panic("$*PKGDECL packages do not support attributes");
             }
 
             # Set up arguments for meta-attribute instantiation.
@@ -775,7 +775,7 @@ class NQP::Actions is HLL::Actions {
             }
 
             # Add it.
-            $*DECLARAND_ATTR := $*W.pkg_add_attribute($/.CURSOR.package, $/.CURSOR.how($*PKGDECL ~ '-attr'),
+            $*DECLARAND_ATTR := $*W.pkg_add_attribute($/.package, $/.how($*PKGDECL ~ '-attr'),
                 %lit_args, %obj_args);
 
             $ast := QAST::Stmts.new();
@@ -785,7 +785,7 @@ class NQP::Actions is HLL::Actions {
             # we may or may not have got a node in $var that's set up
             # right already. We build it here just to be sure.
             if $<typename> {
-                $/.CURSOR.panic("Cannot put types on our-scoped variables");
+                $/.panic("Cannot put types on our-scoped variables");
             }
             $name := ~$<variable>;
             $ast := lexical_package_lookup([$name], $/);
@@ -799,14 +799,14 @@ class NQP::Actions is HLL::Actions {
             my $default;
             if $<typename> {
                 unless $sigil eq '$' {
-                    $/.CURSOR.panic("Only typed scalars are currently supported in NQP");
+                    $/.panic("Only typed scalars are currently supported in NQP");
                 }
                 $type := $*W.find_sym([~$<typename>]);
                 if nqp::objprimspec($type) -> $prim_spec {
                     $default := default_value_for_prim($prim_spec);
                 }
                 else {
-                    $/.CURSOR.panic("Only native types are currently supported/checked");
+                    $/.panic("Only native types are currently supported/checked");
                 }
             }
             else {
@@ -849,7 +849,7 @@ class NQP::Actions is HLL::Actions {
             }
         }
         else {
-            $/.CURSOR.panic("Cannot have a $*SCOPE scoped constant");
+            $/.panic("Cannot have a $*SCOPE scoped constant");
         }
         make QAST::WVal.new( :value($type) );
     }
@@ -899,13 +899,13 @@ class NQP::Actions is HLL::Actions {
                                 $found_proto := 1;
                             }
                             elsif %sym {
-                                $/.CURSOR.panic("Cannot declare a multi when an only is already in scope.");
+                                $/.panic("Cannot declare a multi when an only is already in scope.");
                             }
                         }
 
                         # If we didn't find a proto, error for now.
                         unless $found_proto {
-                            $/.CURSOR.panic("Sorry, no proto sub in scope, and auto-generation of protos is not yet implemented.");
+                            $/.panic("Sorry, no proto sub in scope, and auto-generation of protos is not yet implemented.");
                         }
 
                         # Set up dispatch routine in this scope.
@@ -965,7 +965,7 @@ class NQP::Actions is HLL::Actions {
                     if $*SCOPE eq 'our' {
                         # Need to install it at loadinit time but also re-bind
                         # it per invocation.
-                        $*W.install_package_routine($/.CURSOR.package, $name, $ast);
+                        $*W.install_package_routine($/.package, $name, $ast);
                         $BLOCK[0].push(QAST::Op.new(
                             :op('bind'),
                             lexical_package_lookup([$name], $/),
@@ -984,7 +984,7 @@ class NQP::Actions is HLL::Actions {
                 $ast := QAST::Var.new( :name('&' ~ $name), :scope('lexical') );
             }
             else {
-                $/.CURSOR.panic("$*SCOPE scoped routines are not supported yet");
+                $/.panic("$*SCOPE scoped routines are not supported yet");
             }
 
             # Is it the MAIN sub?
@@ -1015,7 +1015,7 @@ class NQP::Actions is HLL::Actions {
         # Otherwise, build method block QAST.
         my $ast;
         my int $onlystar;
-	my $package := $/.CURSOR.package;
+	my $package := $/.package;
         if $<onlystar> {
             $ast := only_star_block();
             $onlystar := 1;
@@ -1044,7 +1044,7 @@ class NQP::Actions is HLL::Actions {
         }
         elsif $<latename> {
             if $*PKGDECL ne 'role' {
-                $/.CURSOR.panic("Late-bound method name only valid in role");
+                $/.panic("Late-bound method name only valid in role");
             }
             $name := "!!LATENAME!!" ~ ~$<latename>;
         }
@@ -1182,10 +1182,10 @@ class NQP::Actions is HLL::Actions {
         }
         if $<default_value> {
             if $quant eq '*' {
-                $/.CURSOR.panic("Can't put default on slurpy parameter");
+                $/.panic("Can't put default on slurpy parameter");
             }
             if $quant eq '!' {
-                $/.CURSOR.panic("Can't put default on required parameter");
+                $/.panic("Can't put default on required parameter");
             }
             $ast.default( $<default_value>[0]<EXPR>.ast );
         }
@@ -1238,7 +1238,7 @@ class NQP::Actions is HLL::Actions {
             $found := 1;
         }
         unless $found {
-            $/.CURSOR.panic("Use of undeclared type '" ~ ~$/ ~ "'");
+            $/.panic("Use of undeclared type '" ~ ~$/ ~ "'");
         }
         $/.prune;
     }
@@ -1264,20 +1264,20 @@ class NQP::Actions is HLL::Actions {
             };
         }
         else {
-            $/.CURSOR.panic("Trait '$<longname>' not implemented");
+            $/.panic("Trait '$<longname>' not implemented");
         }
         $/.prune;
     }
 
     method regex_declarator($/, $key?) {
         my $name;
-	my $package := $/.CURSOR.package;
+	my $package := $/.package;
         if $<deflongname> {
             $name := ~$<deflongname>.ast;
         }
         else {
             if $*PKGDECL ne 'role' {
-                $/.CURSOR.panic("Late-bound method name only valid in role");
+                $/.panic("Late-bound method name only valid in role");
             }
             $name := "!!LATENAME!!" ~ ~$<latename>;
         }
@@ -1309,7 +1309,7 @@ class NQP::Actions is HLL::Actions {
             $block.symbol('$¢', :scope<lexical>);
             $block.symbol('$/', :scope<lexical>);
             my $code  := %*RX<code>;
-            my $regex := $/.CURSOR.slang_actions('Regex').qbuildsub($<p6regex>.ast, $block,
+            my $regex := $/.slang_actions('Regex').qbuildsub($<p6regex>.ast, $block,
                 code_obj => $code);
             $regex.name($name);
 
@@ -1600,7 +1600,7 @@ class NQP::Actions is HLL::Actions {
         $block.symbol('$¢', :scope<lexical>);
         $block.symbol('$/', :scope<lexical>);
 
-        my $regex := $/.CURSOR.slang_actions('Regex').qbuildsub($<p6regex>.ast, $block);
+        my $regex := $/.slang_actions('Regex').qbuildsub($<p6regex>.ast, $block);
         my $ast := QAST::Op.new(
             :op<callmethod>, :name<new>,
             lexical_package_lookup(['NQPRegex'], $/),
@@ -1679,7 +1679,7 @@ class NQP::Actions is HLL::Actions {
     # QAST to look it up using NQP package semantics.
     sub lexical_package_lookup(@name, $/) {
         # Catch empty names and die helpfully.
-        if +@name == 0 { $/.CURSOR.panic("Cannot compile empty name"); }
+        if +@name == 0 { $/.panic("Cannot compile empty name"); }
 
         # The final lookup will always be just a keyed access to a
         # symbol table.

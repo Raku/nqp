@@ -88,10 +88,10 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         $qast := QAST::Regex.new(:rxtype<concat>, $qast, $sigmaybe) if $sigmaybe;
 
         if $<quantifier> {
-            $/.CURSOR.panic('Quantifier quantifies nothing')
+            $/.panic('Quantifier quantifies nothing')
                 unless $qast;
             my str $rxtype := $qast.rxtype;
-            $/.CURSOR.throw_non_quantifiable()
+            $/.throw_non_quantifiable()
                 if $rxtype eq 'qastnode' || $rxtype eq 'anchor';
             my $ast := $<quantifier>.ast;
             $ast.unshift($qast);
@@ -99,7 +99,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         }
         if $<separator> {
             if $qast.rxtype ne 'quant' && $qast.rxtype ne 'dynquant' {
-                $/.CURSOR.panic("'" ~ $<separator><septype> ~
+                $/.panic("'" ~ $<separator><septype> ~
                     "' may only be used immediately following a quantifier")
             }
             $qast.push($<separator>.ast);
@@ -184,7 +184,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                 if $<upto> eq '^' {
                     $max--;
                 }
-                $/.CURSOR.panic("Empty range") if $min > $max;
+                $/.panic("Empty range") if $min > $max;
             }
             $qast := QAST::Regex.new( :rxtype<quant>, :min($min), :max($max), :node($/) );
         }
@@ -618,7 +618,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         my int $n := nqp::elems($clist);
         while $i < $n {
 	    unless ~$clist[$i]<sign> {
-		my $curse := $clist[$i]<sign>.CURSOR;
+		my $curse := $clist[$i]<sign>;
 		$curse."!clear_highwater"();
 		$curse.panic('Missing + or - between character class elements')
 	    }
@@ -680,13 +680,13 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                     sub non_synth_ord($chr) {
                         my int $ord := nqp::ord($chr);
                         if nqp::chr($ord) ne $chr {
-                            $/.CURSOR.panic("Cannot use $chr as a range endpoint, as it is not a single codepoint");
+                            $/.panic("Cannot use $chr as a range endpoint, as it is not a single codepoint");
                         }
                         $ord
                     }
                     if $_[0]<cclass_backslash> {
                         $node := $_[0]<cclass_backslash>.ast;
-                        $/.CURSOR.panic("Illegal range endpoint in regex: " ~ ~$_)
+                        $/.panic("Illegal range endpoint in regex: " ~ ~$_)
                             if $node.rxtype ne 'literal' && $node.rxtype ne 'enumcharlist'
                                 || $node.negate || nqp::chars($node[0]) != 1;
                         $ord0 := $node.ann('codepoint') // ($RXm
@@ -700,7 +700,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                     }
                     if $_[1][0]<cclass_backslash> {
                         $node := $_[1][0]<cclass_backslash>.ast;
-                        $/.CURSOR.panic("Illegal range endpoint in regex: " ~ ~$_)
+                        $/.panic("Illegal range endpoint in regex: " ~ ~$_)
                             if $node.rxtype ne 'literal' && $node.rxtype ne 'enumcharlist'
                                 || $node.negate || nqp::chars($node[0]) != 1;
                         $ord1 := $node.ann('codepoint') // ($RXm
@@ -712,7 +712,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                             ?? nqp::ordbaseat(~$_[1][0][0], 0)
                             !! non_synth_ord(~$_[1][0][0]);
                     }
-                    $/.CURSOR.panic("Illegal reversed character range in regex: " ~ ~$_)
+                    $/.panic("Illegal reversed character range in regex: " ~ ~$_)
                         if $ord0 > $ord1;
                     @alts.push(QAST::Regex.new(
                         $RXim ?? 'ignorecase+ignoremark' !!
@@ -772,7 +772,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                     !! 0;
             }
             else {
-                $/.CURSOR.panic("Internal modifier strings must be literals");
+                $/.panic("Internal modifier strings must be literals");
             }
         }
     }
@@ -798,7 +798,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     method qbuildsub($qast, $block = QAST::Block.new(), :$anon, :$addself, *%rest) {
-	my $*LANG := $qast.node.CURSOR;
+	my $*LANG := $qast.node;
         my $code_obj := nqp::existskey(%rest, 'code_obj')
             ?? %rest<code_obj>
             !! self.create_regex_code_object($block);

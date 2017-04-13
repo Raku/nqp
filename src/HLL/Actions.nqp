@@ -3,7 +3,7 @@ class HLL::Actions {
 
     method string_to_int($src, $base) {
         my $res := nqp::radix($base, $src, 0, 2);
-        $src.CURSOR.panic("'$src' is not a valid number")
+        $src.panic("'$src' is not a valid number")
             unless nqp::atpos($res, 2) == nqp::chars($src);
         nqp::atpos($res, 0);
     }
@@ -133,7 +133,7 @@ class HLL::Actions {
                 }
             }
             else {            
-                $/.CURSOR.panic("Can't form :w list from non-constant strings (yet)");
+                $/.panic("Can't form :w list from non-constant strings (yet)");
             }
         }
         make $ast;
@@ -206,7 +206,7 @@ class HLL::Actions {
         my $codepoint := $<integer>
                          ?? nqp::chr($<integer>.made)
                          !! nqp::getstrfromname(~$/);
-        $/.CURSOR.panic("Unrecognized character name '$/'") if $codepoint eq '';
+        $/.panic("Unrecognized character name '$/'") if $codepoint eq '';
         make $codepoint;
     }
 

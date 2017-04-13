@@ -123,7 +123,7 @@ grammar NQP::Grammar is HLL::Grammar {
 
         # This is also the starting package.
         :my $*PACKAGE := $*GLOBALish;
-        { $/.CURSOR.set_package($*PACKAGE); $*W.install_lexical_symbol($*UNIT, '$?PACKAGE', $*PACKAGE); }
+        { $/.set_package($*PACKAGE); $*W.install_lexical_symbol($*UNIT, '$?PACKAGE', $*PACKAGE); }
 
         # Create EXPORT::DEFAULT.
         :my $*EXPORT;
@@ -407,7 +407,7 @@ grammar NQP::Grammar is HLL::Grammar {
         :my $*PACKAGE;     # The type object for this package.
 	:my $*LANG := self;
         :my $OUTER := $*W.cur_lexpad();
-	<!!{ $/.CURSOR.clone_braid_from(self) }>
+	<!!{ $/.clone_braid_from(self) }>
         ''
         [
         <name>
@@ -427,9 +427,9 @@ grammar NQP::Grammar is HLL::Grammar {
             my $INNER := $*W.cur_lexpad();
 	    my $package := $*W.pkg_create_mo($how, |%args);
 	    $*PACKAGE := $package;
-	    $/.CURSOR.set_package($package);
-	    $/.CURSOR.check_PACKAGE_oopsies('package_def1');
-	    $*LANG := $/.CURSOR;
+	    $/.set_package($package);
+	    $/.check_PACKAGE_oopsies('package_def1');
+	    $*LANG := $/;
 
             # these need to be installed early so that they may be referenced from subs in the block
             if nqp::can($how, 'parametric') && $how.parametric($how) {
@@ -450,12 +450,12 @@ grammar NQP::Grammar is HLL::Grammar {
             }
             elsif $*SCOPE eq 'my' {
                 if +$<name><identifier> != 1 {
-                    $<name>.CURSOR.panic("A my scoped package cannot have a multi-part name yet");
+                    $<name>.panic("A my scoped package cannot have a multi-part name yet");
                 }
                 $*W.install_lexical_symbol($OUTER, ~$<name><identifier>[0], $package);
             }
             else {
-                $/.CURSOR.panic("$*SCOPE scoped packages are not supported");
+                $/.panic("$*SCOPE scoped packages are not supported");
             }
         }
 
