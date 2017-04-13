@@ -394,8 +394,8 @@ role NQPMatchRole is export {
         $caps;
     }
 
-    method !cursor_init($orig, :$p = 0, :$c, :$shared, :$braid, *%ignore) {
-        my $new := self.CREATE();
+    method !cursor_init($orig, :$p = 0, :$c, :$shared, :$braid, :$build, *%ignore) {
+        my $new := $build ?? self !! self.CREATE();
         unless $shared {
             $shared := nqp::create(ParseShared);
             nqp::bindattr($shared, ParseShared, '$!CUR_CLASS', $?CLASS);
