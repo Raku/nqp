@@ -1000,6 +1000,7 @@ class QAST::MASTRegexCompiler {
         }
         elsif $node.list && $node.subtype eq 'ignorecase' {
             my $lit := $!regalloc.fresh_s();
+            nqp::push(@ins, op('const_s', $lit, sval($node[0])));
             nqp::push(@ins, op('indexic_s', %!reg<pos>, %!reg<tgt>, $lit, %!reg<pos>));
             nqp::push(@ins, op('eq_i', $ireg0, %!reg<pos>, %!reg<negone>));
             $!regalloc.release_register($lit, $MVM_reg_str);
