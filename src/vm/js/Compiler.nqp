@@ -620,7 +620,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             Chunk.new($body.type, $body.expr, [
                 "$action = 0;\n",
                 "try \{\n",
-                "$ctx = new nqp.Ctx($*CTX, $*CTX, $*CTX.\$\$callThis);\n",
+                "$ctx = new nqp.CtxJustHandler($*CTX, $*CTX, $*CTX.\$\$callThis);\n",
                 Chunk.void(|@setup),
                 "$unwind_marker = \{\};\n",
                 "$ctx.unwind = $unwind_marker;\n",

@@ -310,6 +310,10 @@ class Ctx extends NQPObject {
     return (this.hasOwnProperty(key) ? 1 : 0);
   }
 
+  $$skipHandlers() {
+    return this;
+  }
+
   bind(name, value) {
     var ctx = this;
     while (ctx) {

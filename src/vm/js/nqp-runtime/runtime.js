@@ -73,6 +73,7 @@ var Ctx = require('./ctx.js');
 module.exports.Ctx = Ctx;
 
 module.exports.CtxWithStatic = require('./ctx-with-static.js');
+module.exports.CtxJustHandler = require('./ctx-just-handler.js');
 
 var bootstrap = require('./bootstrap.js');
 module.exports.knowhowattr = bootstrap.knowhowattr;
