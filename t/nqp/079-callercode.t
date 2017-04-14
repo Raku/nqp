@@ -1,4 +1,4 @@
-plan(8);
+plan(10);
 
 sub foo_inner() {
   my $caller := nqp::callercode();
@@ -66,3 +66,17 @@ sub toplevel($mode) {
 }
 
 toplevel(0);
+{
+    my sub outer() {
+        my $*foo := "wow!";
+        nqp::handle(nqp::ctx()<$*foo> := 'hello', 'NEXT', say("handling NEXT"));
+        is($*foo, 'hello', "nqp::handle doesn't interfere with nqp::ctx");
+        nqp::handle(inner(), 'NEXT', say("handling NEXT"));
+        is($*foo, 'hi', "nqp::handle doesn't interfere with nqp::ctxcaller");
+    }
+    my sub inner() {
+        nqp::ctxcaller(nqp::ctx())<$*foo> :=  'hi';
+    }
+
+    outer();
+}
