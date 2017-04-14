@@ -665,16 +665,6 @@ knowhow NQPClassHOW {
         nqp::null()
     }
 
-    method make_tracer($name, $found) {
-        -> *@pos, *%named { 
-            nqp::say(nqp::x('  ', $!trace_depth) ~ "Calling $name");
-            $!trace_depth := $!trace_depth + 1;
-            my $result := $found(|@pos, |%named);
-            $!trace_depth := $!trace_depth - 1;
-            $result
-        }
-    }
-
     ##
     ## Cache-related
     ##
@@ -766,11 +756,30 @@ knowhow NQPClassHOW {
         $!trace := 1;
         $!trace_depth := $depth // 0;
         @!trace_exclude := @exclude;
-        nqp::setmethcacheauth($obj, 0);
-        nqp::setmethcache($obj, nqp::hash());
+        my %trace_cache;
+        my @mro_reversed := reverse(@!mro);
+        for @mro_reversed {
+            for $_.HOW.method_table($_) {
+                my $name := nqp::iterkey_s($_);
+                %trace_cache{$name} := self.should_trace($obj, $name)
+                    ?? self.make_tracer($name, nqp::iterval($_))
+                    !! nqp::iterval($_);
+            }
+        }
+        nqp::setmethcache($obj, %trace_cache);
     }
     method trace-off($obj) {
+        self.publish_method_cache($obj);
         $!trace := 0;
+    }
+    method make_tracer($name, $found) {
+        -> *@pos, *%named {
+            nqp::say(nqp::x('  ', $!trace_depth) ~ "Calling $name");
+            $!trace_depth := $!trace_depth + 1;
+            my $result := $found(|@pos, |%named);
+            $!trace_depth := $!trace_depth - 1;
+            $result
+        }
     }
     method should_trace($obj, $name) {
         return 0 if nqp::substr($name, 0, 1) eq '!';
