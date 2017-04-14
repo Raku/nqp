@@ -1287,44 +1287,45 @@ class QAST::OperationsJS {
                 $post := Chunk.void('(function() {', $comp.as_js(@operands[2], :want($T_VOID)), '})()');
             }
 
-            if $op eq 'while' || $op eq 'until' {
-                my str $neg := $op eq 'while' ?? '!' !! '';
+            my int $repeat_variant := ($op eq 'repeat_while' || $op eq 'repeat_until');
 
-                if $handler {
-                    Chunk.void(
-                        "{$loop.js_label}: for (;;", $post, ") \{\n",
-                        $comp.handle_control($loop, $control_ctx, Chunk.void(
-                            ($loop.has_redo
-                                ?? "if ({$loop.redo}) \{;\n"
-                                    ~ "{$loop.redo} = false;\n"
-                                    ~  "\} else \{\n"
-                                !! ''),
-                            $check_cond,
-                            "if ($neg {$check_cond.expr}) \{break;\}\n",
-                            ($loop.has_redo ?? "\}\n" !! ''),
-                            $body,
-                        )),
-                        "\}"
-                    );
-               }
-               else {
-                    Chunk.void(
-                        "for (;;", $post, ") \{\n",
-                            $check_cond,
-                            "if ($neg {$check_cond.expr}) \{break;\}\n",
-                            $body,
-                        "\}"
-                    );
-               }
-            }
-            else {
-                # TODO redo
+            if $handler {
+
+                my str $neg := ($op eq 'while' || $op eq 'repeat_while') ?? '!' !! '';
+                my $has_redo := $loop.has_redo || $repeat_variant; # we don't use 'my int' due to NQP bug
+
+                Chunk.void(
+                    $repeat_variant ?? "{$loop.redo} = true;\n" !! '',
+                    "{$loop.js_label}: for (;;", $post, ") \{\n",
+                    $comp.handle_control($loop, $control_ctx, Chunk.void(
+                        ($has_redo
+                            ?? "if ({$loop.redo}) \{;\n"
+                                ~ "{$loop.redo} = false;\n"
+                                ~  "\} else \{\n"
+                            !! ''),
+                        $check_cond,
+                        "if ($neg {$check_cond.expr}) \{break;\}\n",
+                        ($has_redo ?? "\}\n" !! ''),
+                        $body,
+                    )),
+                    "\}"
+                );
+            } elsif $repeat_variant {
                 my str $neg := $op eq 'repeat_while' ?? '' !! '!';
                 Chunk.void(
                     "do \{\n",
                     $body,
                     $check_cond,
                     "\} while ($neg {$check_cond.expr});"
+                );
+            } else {
+                my str $neg := $op eq 'while' ?? '!' !! '';
+                Chunk.void(
+                    "for (;;", $post, ") \{\n",
+                        $check_cond,
+                        "if ($neg {$check_cond.expr}) \{break;\}\n",
+                        $body,
+                    "\}"
                 );
             }
         });
