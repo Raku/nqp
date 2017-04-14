@@ -178,7 +178,7 @@ class QAST::MASTOperations {
                     # if we've already seen a type-var
                     if ($arg_kind != $type_var_kind) {
                         # the arg types must match
-                        nqp::die("variable-type op requires same-typed args");
+                        nqp::die("variable-type op '$op' requires same-typed args");
                     }
                 }
                 else {
@@ -328,7 +328,7 @@ class QAST::MASTOperations {
         else {
             nqp::die("MoarVM op '$moarop' is unknown as a core or extension op");
         }
-        nqp::die("moarop $moarop return arg index out of range")
+        nqp::die("moarop $moarop return arg index $ret out of range -1.." ~ $num_operands - 1)
             if $ret < -1 || $ret >= $num_operands;
         nqp::die("moarop $moarop is not void")
             if $num_operands && (nqp::atpos_i(@operands_values, $operands_offset) +& $MVM_operand_rw_mask) ==
@@ -584,7 +584,7 @@ QAST::MASTOperations.add_core_op('list_b', -> $qastcomp, $op {
         # Push things to the list.
         my $item_reg := $regalloc.fresh_register($MVM_reg_obj);
         for $op.list {
-            nqp::die("list_b must have a list of blocks")
+            nqp::die("The 'list_b' op needs a list of blocks, got " ~ $_.HOW.name($_))
                 unless nqp::istype($_, QAST::Block);
             my $cuid  := $_.cuid();
             my $frame := $qastcomp.mast_frames{$cuid};
@@ -689,7 +689,7 @@ for <if unless with without> -> $op_name {
     QAST::MASTOperations.add_core_op($op_name, -> $qastcomp, $op {
         # Check operand count.
         my $operands := +$op.list;
-        nqp::die("Operation '$op_name' needs either 2 or 3 operands")
+        nqp::die("The '$op_name' op needs 2 or 3 operands, got $operands")
             if $operands < 2 || $operands > 3;
 
         # Create labels.
@@ -749,7 +749,7 @@ for <if unless with without> -> $op_name {
         }
 
         if (@comp_ops[0].result_kind == $MVM_reg_void) {
-            nqp::die("operation '$op_name' condition cannot be void");
+            nqp::die("The '$op_name' op condition cannot be void, cannot use the results of '" ~ $op[0].op ~ "'");
         }
 
         my $res_kind;
@@ -850,7 +850,7 @@ for <if unless with without> -> $op_name {
 
 QAST::MASTOperations.add_core_op('defor', -> $qastcomp, $op {
     if +$op.list != 2 {
-        nqp::die("Operation 'defor' needs 2 operands");
+        nqp::die("The 'defor' op needs 2 operands, got " ~ +$op.list);
     }
 
     # Compile the expression.
@@ -960,7 +960,7 @@ QAST::MASTOperations.add_core_op('xor', -> $qastcomp, $op {
 
 QAST::MASTOperations.add_core_op('ifnull', -> $qastcomp, $op {
     if +$op.list != 2 {
-        nqp::die("The 'ifnull' op expects two children");
+        nqp::die("The 'ifnull' op needs 2 operands, got " ~ +$op.list);
     }
 
     # Compile the expression.
@@ -1051,7 +1051,7 @@ for ('', 'repeat_') -> $repness {
 
             # Check operand count.
             my $operands := +@comp_ops;
-            nqp::die("Operation '$repness$op_name' needs 2 or 3 operands")
+            nqp::die("The '$repness$op_name' op needs 2 or 3 operands, got $operands")
                 if $operands != 2 && $operands != 3;
 
             # Test the condition and jump to the loop end if it's
@@ -1172,10 +1172,10 @@ QAST::MASTOperations.add_core_op('for', -> $qastcomp, $op {
     }
 
     if +@operands != 2 {
-        nqp::die("Operation 'for' needs 2 operands");
+        nqp::die("The 'for' op needs 2 operands, got " ~ +@operands);
     }
     unless nqp::istype(@operands[1], QAST::Block) {
-        nqp::die("Operation 'for' expects a block as its second operand");
+        nqp::die("The 'for' op expects a block as its second operand, got " ~ @operands[1].HOW.name(@operands[1]));
     }
 
 
@@ -1330,10 +1330,10 @@ sub handle_arg($arg, $qastcomp, @ins, @arg_regs, @arg_flags, @arg_kinds) {
         $arg_mast := $qastcomp.coerce($arg_mast, $MVM_reg_int64);
     }
 
-    nqp::die("arg expression cannot be void")
+    nqp::die("Arg expression cannot be void, cannot use the return of " ~ $arg.op)
         if $arg_mast.result_kind == $MVM_reg_void;
 
-    nqp::die("arg code did not result in a MAST::Local")
+    nqp::die("Arg code did not result in a MAST::Local")
         unless $arg_mast.result_reg && $arg_mast.result_reg ~~ MAST::Local;
 
     nqp::push(@arg_kinds, $arg_mast.result_kind);
@@ -1391,7 +1391,7 @@ my $call_gen := sub ($qastcomp, $op) {
     }
     @args := arrange_args(@args);
 
-    nqp::die("callee code did not result in a MAST::Local")
+    nqp::die("Callee code did not result in a MAST::Local")
         unless $callee.result_reg && $callee.result_reg ~~ MAST::Local;
 
     # main instruction list
@@ -1466,10 +1466,10 @@ QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
     }
     @args := arrange_args(@args);
 
-    nqp::die("invocant expression must be an object")
+    nqp::die("Invocant expression must be an object, got " ~ $invocant.result_kind)
         unless $invocant.result_kind == $MVM_reg_obj;
 
-    nqp::die("invocant code did not result in a MAST::Local")
+    nqp::die("Invocant code did not result in a MAST::Local")
         unless $invocant.result_reg && $invocant.result_reg ~~ MAST::Local;
 
     # main instruction list
@@ -1583,10 +1583,10 @@ QAST::MASTOperations.add_core_op('bind', -> $qastcomp, $op {
     # Sanity checks.
     my @children := $op.list;
     if +@children != 2 {
-        nqp::die("A 'bind' op must have exactly two children");
+        nqp::die("The 'bind' op needs 2 children, got " ~ +@children);
     }
     unless nqp::istype(@children[0], QAST::Var) {
-        nqp::die("First child of a 'bind' op must be a QAST::Var");
+        nqp::die("First child of a 'bind' op must be a QAST::Var, got " ~ @children[0].HOW.name(@children[0]));
     }
 
     # Set the QAST of the think we're to bind, then delegate to
@@ -1727,7 +1727,7 @@ QAST::MASTOperations.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
 QAST::MASTOperations.add_core_op('handlepayload', :!inlinable, sub ($qastcomp, $op) {
     my @children := $op.list;
     if @children != 3 {
-        nqp::die("The 'handlepayload' op requires three children");
+        nqp::die("The 'handlepayload' op needs 3 children, got " ~ +@children);
     }
     my str $type := @children[1];
     unless nqp::existskey(%handler_names, $type) {
@@ -2274,7 +2274,7 @@ QAST::MASTOperations.add_core_moarop_mapping('indexingoptimized', 'indexingoptim
 QAST::MASTOperations.add_core_op('tclc', -> $qastcomp, $op {
     my @operands := $op.list;
     unless +@operands == 1 {
-        nqp::die('tclc op requires one argument');
+        nqp::die("The 'tclc' op needs 1 argument, got " ~ +@operands);
     }
     $qastcomp.as_mast(
             QAST::Op.new( :op('concat'),
@@ -2674,7 +2674,7 @@ sub add_native_assign_op($op_name, $kind) {
     QAST::MASTOperations.add_core_op($op_name, -> $qastcomp, $op {
         my @operands := $op.list;
         unless +@operands == 2 {
-            nqp::die($op ~ ' op requires two arguments');
+            nqp::die("The '$op' op needs 2 arguments, got " ~ +@operands);
         }
         my $target := @operands[0];
         if try_get_bind_scope($target) -> $bind_scope {
@@ -2740,7 +2740,7 @@ QAST::MASTOperations.add_core_op('locallifetime', -> $qastcomp, $op {
 # XXX explicit takeclosure will go away under new model; for now, no-op it.
 QAST::MASTOperations.add_core_op('takeclosure', -> $qastcomp, $op {
     unless +@($op) == 1 {
-        nqp::die('takeclosure op requires one argument');
+        nqp::die("The 'takeclosure' op needs 1 argument, got " ~ +@($op));
     }
     $qastcomp.as_mast($op[0])
 });
@@ -2754,7 +2754,7 @@ QAST::MASTOperations.add_core_moarop_mapping('setdispatcherfor', 'setdispatcherf
 QAST::MASTOperations.add_core_op('takedispatcher', -> $qastcomp, $op {
     my $regalloc := $*REGALLOC;
     unless nqp::istype($op[0], QAST::SVal) {
-        nqp::die("takedispatcher must have a single QAST::SVal child");
+        nqp::die("The 'takedispatcher' op must have a single QAST::SVal child, got " ~ $op[0].HOW.name($op[0]));
     }
     my @ops;
     my $disp_reg   := $regalloc.fresh_register($MVM_reg_obj);
@@ -2915,12 +2915,12 @@ sub resolve_condition_op($kind, $negated) {
         $kind == $MVM_reg_num64 ?? 'unless_n' !!
         $kind == $MVM_reg_str   ?? 'unless_s0' !!
         $kind == $MVM_reg_obj   ?? 'unless_o' !!
-        nqp::die("unhandled kind $kind")
+        nqp::die("Unhandled kind $kind")
      !! $kind == $MVM_reg_int64 ?? 'if_i' !!
         $kind == $MVM_reg_num64 ?? 'if_n' !!
         $kind == $MVM_reg_str   ?? 'if_s0' !!
         $kind == $MVM_reg_obj   ?? 'if_o' !!
-        nqp::die("unhandled kind $kind")
+        nqp::die("Unhandled kind $kind")
 }
 
 sub push_op(@dest, str $op, *@args) {
