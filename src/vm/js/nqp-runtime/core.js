@@ -919,8 +919,8 @@ op.backtracestrings = function(hllName, exception) {
 
 op.backtrace = function(hllName, exception) {
   /* TODO - have real file and line */
-  if (exception.ctx) {
-    let ctx = exception.ctx;
+  if (exception.$$ctx) {
+    let ctx = exception.$$ctx;
 
     let rows = [];
 
