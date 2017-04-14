@@ -65,18 +65,20 @@ my class Braid is export {
     }
 }
 
+my class NQPdidMATCH is export { method Bool() { 1 } }
+
 role NQPMatchRole is export {
-    has $!shared;
     has int $!from;
     has int $!pos;
-    has $!match;
-    has str $!name;
+    has $!shared;
     has $!bstack;
     has $!cstack;
     has $!regexsub;
     has $!restart;
     has $!braid;
     has $!made;
+    has $!match;
+    has str $!name;
 
     method orig()   { nqp::getattr($!shared, ParseShared, '$!orig') }
     method target() { nqp::getattr_s($!shared, ParseShared, '$!target') }
@@ -1107,24 +1109,19 @@ role NQPMatchRole is export {
     }
 }
 
-
-class NQPOldMatch {
-    method Bool()      { 1 }
-}
-
 class NQPMatch is NQPCapture does NQPMatchRole {
     my @EMPTY_LIST := [];
     my $NO_CAPS    := nqp::hash();
+    my $DID_MATCH := nqp::create(NQPdidMATCH);
     method MATCH() {
         my $match := nqp::getattr(self, NQPMatch, '$!match');
-        if nqp::isnull($match) || (!nqp::istype($match, NQPOldMatch) && !nqp::ishash($match)) {
+        if nqp::isnull($match) || !nqp::istype($match, NQPdidMATCH) {
             # Set up basic state of (old) Match.
             my $list;
             my $hash := nqp::hash();
-            $match   := nqp::create(NQPOldMatch);
             nqp::bindattr(self, NQPMatch, '$!match',
                 nqp::getattr_i(self, NQPMatch, '$!pos') >= nqp::getattr_i(self, NQPMatch, '$!from')
-                    ?? $match
+                    ?? $DID_MATCH
                     !! nqp::null());
 
             # For captures with lists, initialize the lists.
