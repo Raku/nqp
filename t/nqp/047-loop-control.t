@@ -1,6 +1,6 @@
 #! nqp
 
-plan(5);
+plan(11);
 
 my $runs := 0;
 
@@ -53,4 +53,109 @@ ok($runs == 4 && $sum == 321, "last works in for");
         $log := $log ~ ":even",
     ), $log := $log ~ '|');
     is($log,'10:even|9|8:even|7|6:even|5|4:even|3|2:even|1|0:even|', 'next works correctly with 3 argument while');
+}
+{
+    my int $i := 5;
+    my @log;
+    my sub check($arg) {
+        @log.push("check($arg)");
+        $arg >= 0;
+    }
+
+    repeat while check($i) {
+        @log.push("[$i]");
+        $i := $i - 1;
+        next if $i % 2 == 0 ;
+        @log.push("even");
+    }
+
+    is(nqp::join(',', @log), '[5],check(4),[4],even,check(3),[3],check(2),[2],even,check(1),[1],check(0),[0],even,check(-1)', 'next works with repeat while');
+}
+
+{
+    my int $i := 5;
+    my @log;
+    my sub check($arg) {
+        @log.push("check($arg)");
+        $arg < 0;
+    }
+
+    repeat until check($i) {
+        @log.push("[$i]");
+        $i := $i - 1;
+        next if $i % 2 == 0;
+        @log.push("even");
+    }
+
+    is(nqp::join(',', @log), '[5],check(4),[4],even,check(3),[3],check(2),[2],even,check(1),[1],check(0),[0],even,check(-1)', 'next works with repeat while');
+}
+
+{
+    my int $i := 5;
+    my @log;
+    my sub check($arg) {
+        @log.push("check($arg)");
+        $arg < 0;
+    }
+
+    repeat until check($i) {
+        @log.push("[$i]");
+        $i := $i - 1;
+        last if $i == 2;
+    }
+
+    is(nqp::join(',', @log), '[5],check(4),[4],check(3),[3]', 'last works with repeat until');
+}
+
+{
+    my int $i := 5;
+    my @log;
+    my sub check($arg) {
+        @log.push("check($arg)");
+        $arg >= 0;
+    }
+
+    repeat while check($i) {
+        @log.push("[$i]");
+        $i := $i - 1;
+        last if $i == 2;
+    }
+
+    is(nqp::join(',', @log), '[5],check(4),[4],check(3),[3]', 'last works with repeat while');
+}
+
+{
+    my int $i := 5;
+    my @log;
+    my sub check($arg) {
+        @log.push("check($arg)");
+        $arg >= 0;
+    }
+
+    repeat while check($i) {
+        @log.push("[$i]");
+        $i := $i - 1;
+        redo if $i % 2 == 0 ;
+        @log.push("even");
+    }
+
+    is(nqp::join(',', @log), '[5],[4],even,check(3),[3],[2],even,check(1),[1],[0],even,check(-1)', 'redo works with repeat while');
+}
+
+{
+    my int $i := 5;
+    my @log;
+    my sub check($arg) {
+        @log.push("check($arg)");
+        $arg < 0;
+    }
+
+    repeat until check($i) {
+        @log.push("[$i]");
+        $i := $i - 1;
+        redo if $i % 2 == 0;
+        @log.push("even");
+    }
+
+    is(nqp::join(',', @log), '[5],[4],even,check(3),[3],[2],even,check(1),[1],[0],even,check(-1)', 'redo works with repeat while');
 }

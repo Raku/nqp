@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(310);
+plan(311);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -467,6 +467,7 @@ ok(nqp::null() eq '', "null_s is and empty str");
     ok(nqp::isnull_s($var), "null_s can be stuck into a var and stays null_s");
 }
 ok(nqp::istrue(nqp::null_s()) == 0, "null_s isn't true");
+ok(nqp::istrue(nqp::atpos(nqp::list(nqp::null_s()), 0)) == 0, "null_s isn't true");
 
 
 if nqp::getcomp('nqp').backend.name eq 'jvm' {

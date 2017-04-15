@@ -1,4 +1,4 @@
-plan(15);
+plan(16);
 
 my $i := 0; # counter
 my $k := 0; # counter
@@ -112,6 +112,35 @@ is(nqp::join(',', @not_skipped), '1,2,3,5,8,9,10', 'testing next with a loop lab
         }
     }
     is(nqp::join(',', @out), '1:1,1:3,1:4,1:5,2:1,2:2,3:1,3:2,3:4,3:5', 'loop labels in nested subs' );
+}
+
+{
+    my @out;
+    my sub check_i($i) {
+        @out.push("check($i)");
+        $i < 3;
+    }
+    my sub check_j($j) {
+        @out.push("check($j)");
+        $j < 5;
+    }
+    my $i := 0;
+    OUTER: repeat while check_i($i) {
+        $i := $i + 1;
+        my $j := 0;
+        INNER: repeat while check_j($j) {
+            $j := $j + 1;
+            my $next_outer := sub () {next OUTER};
+            my $next_inner := sub () {next INNER};
+            my $next := sub () {next};
+            $next_outer() if $i == 2 && $j == 3;
+            $next_inner() if $i == 1 && $j == 2;
+            $next_inner() if $i == 3 && $j == 3;
+            nqp::push(@out, "$i:$j");
+        }
+    }
+
+    is(nqp::join(',', @out), '1:1,check(1),check(2),1:3,check(3),1:4,check(4),1:5,check(5),check(1),2:1,check(1),2:2,check(2),check(2),3:1,check(1),3:2,check(2),check(3),3:4,check(4),3:5,check(5),check(3)', 'loop labels in nested subs - repeat while' );
 }
 
 my @out;

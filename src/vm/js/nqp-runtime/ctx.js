@@ -105,7 +105,7 @@ class Ctx extends NQPObject {
     var ctx = this;
 
     while (ctx) {
-      if ((ctx[handler] || ctx.$$CONTROL) && (!labeled || !ctx.$$label || ctx.$$label === exception.$$payload)) {
+      if ((ctx[handler] || ctx.$$CONTROL) && (!labeled || ctx.$$label === exception.$$payload)) {
         exception.caught = ctx;
         ctx.exception = exception;
 
@@ -308,6 +308,10 @@ class Ctx extends NQPObject {
 
   $$existskey(key) {
     return (this.hasOwnProperty(key) ? 1 : 0);
+  }
+
+  $$skipHandlers() {
+    return this;
   }
 
   bind(name, value) {

@@ -73,6 +73,7 @@ var Ctx = require('./ctx.js');
 module.exports.Ctx = Ctx;
 
 module.exports.CtxWithStatic = require('./ctx-with-static.js');
+module.exports.CtxJustHandler = require('./ctx-just-handler.js');
 
 var bootstrap = require('./bootstrap.js');
 module.exports.knowhowattr = bootstrap.knowhowattr;
@@ -404,3 +405,5 @@ exports.paramcheckfailed = function(hllName, args) {
   let capture = new Capture(args[1], Array.prototype.slice.call(args, 2));
   hll.hllConfigs[hllName].get('bind_error').$$call(args[0], null, capture);
 };
+
+exports.NativeRef = require('./reprs.js').NativeRef;
