@@ -997,7 +997,7 @@
         }
     });
 
-    moarProfApp.controller('AllocationsController', function ($scope, $modal) {
+    moarProfApp.controller('AllocationsController', function ($scope, $uibModal) {
         // Traverse all call nodes, counting up the allocations.
         var typeIdToName         = {};
         var typeIdToAllocations  = {};
@@ -1082,7 +1082,7 @@
             // Show modal dialog with data.
             $scope.CurrentAllocatingRoutine      = alloc.Name;
             $scope.CurrentAllocatingRoutineStats = alloc.RoutineStats;
-            var modalInstance = $modal.open({
+            var modalInstance = $uibModal.open({
                 templateUrl: 'myModalContent.html',
                 scope: $scope
             });
