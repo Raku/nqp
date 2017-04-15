@@ -1060,7 +1060,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             my @function := [
                 "function({$sig.expr}) \{\n" ,
-                $first_time_marker ?? "$first_time_marker = 1;\n" !! '',
+                $first_time_marker ?? "let {$first_time_marker}Init = $first_time_marker;\n" !! '',
+                $first_time_marker ?? "$first_time_marker = 0;\n" !! '',
                 self.declare_js_vars($*BLOCK.tmps),
                 self.declare_js_vars($*BLOCK.js_lexicals),
                 $create_ctx,
@@ -1075,13 +1076,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 "\}"
             ];
 
-            if $*BLOCK.statevars {
+            if $*BLOCK.statevars || $first_time_marker {
                 my @vars;
                 for $*BLOCK.statevars -> $kv {
                     @vars.push($kv.key ~ " = " ~ "{self.value_as_js($kv.value)}.\$\$clone()");
                 }
                 if $first_time_marker {
-                    @vars.push($first_time_marker ~ " = 0");
+                    @vars.push($first_time_marker ~ " = 1");
                 }
                 %*BLOCKS_STATEVARS{$node.cuid} := "var " ~ nqp::join(',', @vars) ~ ";\n";
             }
