@@ -71,11 +71,11 @@ role NQPMatchRole is export {
     has int $!from;
     has int $!pos;
     has $!shared;
+    has $!braid;
     has $!bstack;
     has $!cstack;
     has $!regexsub;
     has $!restart;
-    has $!braid;
     has $!made;
     has $!match;
     has str $!name;
