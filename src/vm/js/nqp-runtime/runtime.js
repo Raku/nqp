@@ -405,3 +405,5 @@ exports.paramcheckfailed = function(hllName, args) {
   let capture = new Capture(args[1], Array.prototype.slice.call(args, 2));
   hll.hllConfigs[hllName].get('bind_error').$$call(args[0], null, capture);
 };
+
+exports.NativeRef = require('./reprs.js').NativeRef;
