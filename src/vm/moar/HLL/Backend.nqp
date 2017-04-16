@@ -286,7 +286,7 @@ class HLL::Backend::MoarVM {
                     nqp::sayfh($profile_fh, "INSERT INTO routines VALUES ('" ~ nqp::join("','", nqp::list(nqp::iterkey_s($k), literal_subst(~$v<name>, "'", "''"), ~$v<line>, ~$v<file>)) ~ "');");
                 }
                 else {
-                    nqp::sayfh($profile_fh, "INSERT INTO allocators VALUES ('" ~ nqp::join("','", nqp::list(nqp::iterkey_s($k), literal_subst(~$v, "'", "''"))) ~ "');");
+                    nqp::sayfh($profile_fh, "INSERT INTO types VALUES ('" ~ nqp::join("','", nqp::list(nqp::iterkey_s($k), literal_subst(~$v, "'", "''"))) ~ "');");
                 }
             }
             for $obj[1] -> $k {
@@ -353,12 +353,12 @@ class HLL::Backend::MoarVM {
         }
         elsif $want_sql {
             nqp::sayfh($profile_fh, 'BEGIN;');
-            nqp::sayfh($profile_fh, 'CREATE TABLE allocators(id INTEGER PRIMARY KEY ASC, name TEXT);');
+            nqp::sayfh($profile_fh, 'CREATE TABLE types(id INTEGER PRIMARY KEY ASC, name TEXT);');
             nqp::sayfh($profile_fh, 'CREATE TABLE routines(id INTEGER PRIMARY KEY ASC, name TEXT, line INT, file TEXT);');
             nqp::sayfh($profile_fh, 'CREATE TABLE profile(total_time INT, spesh_time INT);');
             nqp::sayfh($profile_fh, 'CREATE TABLE gcs(time INT, retained_bytes INT, promoted_bytes INT, gen2_roots INT, full INT, cleared_bytes INT);');
             nqp::sayfh($profile_fh, 'CREATE TABLE callees(caller_id INT, id INT, osr INT, spesh_entries INT, jit_entries INT, inlined_entries INT, inclusive_time INT, exclusive_time INT, entries INT, deopt_one INT, rec_depth INT);');
-            nqp::sayfh($profile_fh, 'CREATE TABLE allocations(id INT, spesh INT, jit INT, count INT);');
+            nqp::sayfh($profile_fh, 'CREATE TABLE allocations(type_id INT, spesh INT, jit INT, count INT);');
             to_sql($data);
             nqp::sayfh($profile_fh, 'END;');
         }
