@@ -420,24 +420,24 @@ is(catch(
 is(
     catch(-> {THROW(nqp::const::CONTROL_TAKE, Label2)}), 'caught1', 'a nqp::handle with label catches unlabeled exception');
 
-#sub catch_unlabeled_first($throws) {
-#    my $caught;
-#    my sub caught($arg) {
-#        $caught := $arg;
-#    }
-#    nqp::handle(
-#        nqp::handle(
-#            $throws(),
-#            'TAKE', caught('unlabeled')
-#        ),
-#        'LABELED', Label2,
-#        'TAKE', caught('labeled')
-#    );
-#    $caught;
-#};
-#
-is(1,1,
-#    catch_unlabeled_first(-> {THROW(nqp::add_i(nqp::const::CONTROL_TAKE, nqp::const::CONTROL_LABELED), Label2)}),
-#    'labeled',
-    "[fudged] a nqp::handle without label doesn't catch  labeled exceptions"
+sub catch_unlabeled_first($throws) {
+    my $caught;
+    my sub caught($arg) {
+        $caught := $arg;
+    }
+    nqp::handle(
+        nqp::handle(
+            $throws(),
+            'TAKE', caught('unlabeled')
+        ),
+        'LABELED', Label2,
+        'TAKE', caught('labeled')
+    );
+    $caught;
+};
+
+is(
+    catch_unlabeled_first(-> {THROW(nqp::add_i(nqp::const::CONTROL_TAKE, nqp::const::CONTROL_LABELED), Label2)}),
+    'labeled',
+    "a nqp::handle without label doesn't catch  labeled exceptions"
 );
