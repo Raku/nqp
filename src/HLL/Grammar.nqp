@@ -519,10 +519,9 @@ An operator precedence parser.
 
         self.EXPR_reduce(@termstack, @opstack) while @opstack;
         $pos := nqp::getattr_i($here, NQPCursor, '$!pos');
-        $here := self.'!cursor_start_cur'();
+        $here := nqp::pop(@termstack);
         $here.'!cursor_pass'($pos);
         nqp::bindattr_i($here, NQPCursor, '$!pos', $pos);
-        nqp::bindattr($here, NQPCursor, '$!match', nqp::pop(@termstack));
         $here.'!reduce'('EXPR');
         $here;
     }
