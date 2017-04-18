@@ -84,7 +84,6 @@
     - [findcclass](#findcclass)
     - [findnotcclass](#findnotcclass)
     - [flip](#flip)
-    - [unicmp_s](#unicmp_s)
     - [hash](#hash)
     - [index](#index)
     - [indexic](#indexic)
@@ -96,24 +95,25 @@
     - [radix](#radix)
     - [replace](#replace)
     - [rindex](#rindex)
-    - [uc](#uc)
     - [split](#split)
+    - [sprintf](#sprintf)
+    - [sprintfdirectives](#sprintfdirectives)
+    - [sprintfaddargumenthandler](#sprintfaddargumenthandler)
     - [strfromcodes](#strfromcodes)
     - [strtocodes](#strtocodes)
     - [substr](#substr)
     - [tc](#tc)
+    - [uc](#uc)
+    - [unicmp_s](#unicmp_s)
     - [x](#x)
-    - [sprintf](#sprintf)
-    - [sprintfdirectives](#sprintfdirectives)
-    - [sprintfaddargumenthandler](#sprintfaddargumenthandler)
 - [Unicode Property Opcodes](#-unicode-property-opcodes)
     - [getuniname](#getuniname)
-    - [unipropcode](#unipropcode)
-    - [unipvalcode](#unipvalcode)
     - [getuniprop_int](#getuniprop_int)
     - [getuniprop_str](#getuniprop_str)
     - [getuniprop_bool](#getuniprop_bool)
     - [matchuniprop](#matchuniprop)
+    - [unipropcode](#unipropcode)
+    - [unipvalcode](#unipvalcode)
 - [VM-Provided Streaming Decoder Opcodes](#-vm-provided-streaming-decoder-opcodes)
     - [decoderconfigure](#decoderconfigure)
     - [decodersetlineseps](#decodersetlineseps)
@@ -156,12 +156,12 @@
 - [Input/Output Opcodes](#-inputoutput-opcodes)
     - [closefh](#closefh)
     - [eoffh](#eoffh)
+    - [filenofh](#filenofh)
     - [flushfh](#flushfh)
     - [getcfh](#getcfh)
     - [getstderr](#getstderr)
     - [getstdin](#getstdin)
     - [getstdout](#getstdout)
-    - [filenofh](#filenofh)
     - [open](#open)
     - [openasync `jvm`](#openasync-jvm)
     - [print](#print)
@@ -936,61 +936,6 @@ is smaller.
 
 Return a string with the characters of `$string` in reverse order.
 
-## unicmp_s
-* `unicmp_s(str, str, int, int, int)`
-(Currently only on MoarVM)
-
-Compares strings using the [Unicode Collation Algorithm][UCA] (UCA).
-#### Parameters:
-```
-str, str, # strings to compare
-int,      # collation mode (bitmask)
-int,      # ISO 639 Language code
-int       # ISO 3166 Country code
-```
-
-The collation mode defines whether we use Primary, Secondary, Tertiary and/or
-Quaternary sorting.
-
-The bitmask is as follows:
-* 1 => Unicode Collation Primary
-* 2 => Unicode Collation Secondary
-* 4 => Unicode Collation Tertiary
-* 8 => Quaternary (Break ties by codepoint)
-
-15 will apply all four levels which is how most users will expect things
-to be sorted, breaking any possible ties by checking codepoint number. This
-should be the default for user facing applications.
-
-The default language and country code is 0, meaning to sort without
-respect to country or language.
-
-* Returns -1 if string a is less than (sorted before) string b
-* Returns 0 if strings are equal for the selected collation levels
- * Note: Will never return 0 for different strings unless you don't use the
-  Quaternary level
-* Returns 1 if string a is more than (sorted after) string b
-
-While the Primary, Secondary and Tertiary mean different things for
-different scripts, for the Latin script used in English they mostly
-correspond with Primary being Alphabetic, Secondary being Diacritics
-and Tertiary being Case.
-
-Setting 0 for language and country will collate all scripts according to
-their own distinctions for Primary, Secondary, and Tertiary, although it
-will not take into account certain languages.
-
-For example, some language based differences in collation:
-* “…include ch as in traditional Spanish, ä as in traditional German,
-  and å as in Danish” ― [Unicode Technical Report 10][UCA].
-
-For more information see [Unicode TR10][UCA].
-
-*** Note ***
- - Currently only language and country insensitive sorting methods are implemented.
-
-[UCA]: http://unicode.org/reports/tr10/
-
 ## hash
 * `hash(...)`
 
@@ -1099,11 +1044,6 @@ specified, otherwise start from the last position.
 
 `rindex` is converted to this internal opcode by the compiler.
 
-## uc
-* `uc(str $str)`
-
-Return uppercase copy of string.
-
 ## split
 * `split(str $delimiter, str $string)`
 
@@ -1112,6 +1052,35 @@ the substrings between delimiters in the original string.
 
 If the original string begins or ends with the delimiter, the resulting
 array will begin or end with an empty element.
+
+## sprintf
+* `sprintf(str $pattern, @values)`
+
+Returns a string formatted by the printf conventions similar to Perl 5 / C.
+Machine sized numeric types, their limits and therefore overflows are not
+implemented though.
+
+## sprintfdirectives
+* `sprintfdirectives(str $pattern)`
+
+This takes the same pattern as `sprintf` does, and computes the needed
+value-count that `sprintf` would have to provide.
+
+## sprintfaddargumenthandler
+* `sprintfaddargumenthandler(Mu $handler)`
+
+Lets you register a handler-instance that supports the sprintf op when it
+has to numify custom types. This handler has to provide two methods, `mine`
+and `int`. `mine` gets the the value in question and returns true if this
+handler is in charge for this type, false otherwise.
+The method `int` does the conversion for patterns like %d.
+
+```perl
+my class MyHandler {
+    method mine($x) { $x ~~ MyType }
+    method int($x) { $x.Int }
+}
+```
 
 ## strfromcodes `moar`
 * `strfromcodes($codes)`
@@ -1151,39 +1120,70 @@ A JVM specific internal opcode for `substr`.
 
 Return titlecase copy of string.
 
+## uc
+* `uc(str $str)`
+
+Return uppercase copy of string.
+
+## unicmp_s
+* `unicmp_s(str, str, int, int, int)`
+(Currently only on MoarVM)
+
+Compares strings using the [Unicode Collation Algorithm][UCA] (UCA).
+#### Parameters:
+```
+str, str, # strings to compare
+int,      # collation mode (bitmask)
+int,      # ISO 639 Language code
+int       # ISO 3166 Country code
+```
+
+The collation mode defines whether we use Primary, Secondary, Tertiary and/or
+Quaternary sorting.
+
+The bitmask is as follows:
+* 1 => Unicode Collation Primary
+* 2 => Unicode Collation Secondary
+* 4 => Unicode Collation Tertiary
+* 8 => Quaternary (Break ties by codepoint)
+
+15 will apply all four levels which is how most users will expect things
+to be sorted, breaking any possible ties by checking codepoint number. This
+should be the default for user facing applications.
+
+The default language and country code is 0, meaning to sort without
+respect to country or language.
+
+* Returns -1 if string a is less than (sorted before) string b
+* Returns 0 if strings are equal for the selected collation levels
+ * Note: Will never return 0 for different strings unless you don't use the
+  Quaternary level
+* Returns 1 if string a is more than (sorted after) string b
+
+While the Primary, Secondary and Tertiary mean different things for
+different scripts, for the Latin script used in English they mostly
+correspond with Primary being Alphabetic, Secondary being Diacritics
+and Tertiary being Case.
+
+Setting 0 for language and country will collate all scripts according to
+their own distinctions for Primary, Secondary, and Tertiary, although it
+will not take into account certain languages.
+
+For example, some language based differences in collation:
+* “…include ch as in traditional Spanish, ä as in traditional German,
+  and å as in Danish” ― [Unicode Technical Report 10][UCA].
+
+For more information see [Unicode TR10][UCA].
+
+*** Note ***
+ - Currently only language and country insensitive sorting methods are implemented.
+
+[UCA]: http://unicode.org/reports/tr10/
+
 ## x
 * `x(str $str, int $count)`
 
 Return a new string containing `$count` copies of `$str`.
-
-## sprintf
-* `sprintf(str $pattern, @values)`
-
-Returns a string formatted by the printf conventions similar to Perl 5 / C.
-Machine sized numeric types, their limits and therefore overflows are not
-implemented though.
-
-## sprintfdirectives
-* `sprintfdirectives(str $pattern)`
-
-This takes the same pattern as `sprintf` does, and computes the needed
-value-count that `sprintf` would have to provide.
-
-## sprintfaddargumenthandler
-* `sprintfaddargumenthandler(Mu $handler)`
-
-Lets you register a handler-instance that supports the sprintf op when it
-has to numify custom types. This handler has to provide two methods, `mine`
-and `int`. `mine` gets the the value in question and returns true if this
-handler is in charge for this type, false otherwise.
-The method `int` does the conversion for patterns like %d.
-
-```perl
-my class MyHandler {
-    method mine($x) { $x ~~ MyType }
-    method int($x) { $x.Int }
-}
-```
 
 # <a id="unicode"></a> Unicode Property Opcodes
 
@@ -1191,22 +1191,6 @@ my class MyHandler {
 * `getuniname(int $codepoint)`
 
 Translate a codepoint to its Unicode name.
-
-## unipropcode
-* `unipropcode(str $propname)`
-
-Translates a property name to the backend's property code. This is not distinct
-across backends and is expected to change over time. For the most part only
-useful for calling getuniprop_int, get_uniprop_str or get_uniprop_bool or
-comparing whether two unicode property names resolve to the same propcode, for
-example 'Alpha', 'alpha', 'alphabetic' and 'Alphabetic' should return the same
-property code.
-
-## unipvalcode `moar`
-* `unipvalcode(int $propcode, str $propname)`
-
-Looks up a property name in its property category, and returns which
-table within that category to use.
 
 ## getuniprop_int `moar`
 * `getuniprop_int(int $codepoint, int $propcode)`
@@ -1234,6 +1218,22 @@ Looks up a codepoint property and return 1 if it matches the pval, 0
 otherwise.  The propcode and pvalcode may be looked up with the opcodes
 above.  (Note that you can use the property value name (e.g. Nd) for both
 lookups.)
+
+## unipropcode
+* `unipropcode(str $propname)`
+
+Translates a property name to the backend's property code. This is not distinct
+across backends and is expected to change over time. For the most part only
+useful for calling getuniprop_int, get_uniprop_str or get_uniprop_bool or
+comparing whether two unicode property names resolve to the same propcode, for
+example 'Alpha', 'alpha', 'alphabetic' and 'Alphabetic' should return the same
+property code.
+
+## unipvalcode `moar`
+* `unipvalcode(int $propcode, str $propname)`
+
+Looks up a property name in its property category, and returns which
+table within that category to use.
 
 # <a id="-vm-provided-streaming-decoder-opcodes"></a> VM-Provided Streaming Decoder Opcodes
 
@@ -1495,10 +1495,14 @@ Close the filehandle.
 
 Return 1 if this filehandle is at the end of the file, otherwise 0.
 
+## filenofh
+* `filenofh(Handle $fh)`
+Returns the filehandle number.
+
 ## flushfh
 * `flushfh(Handle $fh)`
 
-Flushes the file handle, forcing it to write any buffered output.
+Flushes the filehandle, forcing it to write any buffered output.
 
 ## getcfh
 * `getcfh(Handle $in)`
@@ -1520,15 +1524,11 @@ Return the filehandle for standard input.
 
 Return the filehandle for standard output.
 
-## filenofh
-* `filenofh(Handle $fh)`
-Returns the handle number
-
 ## open
 * `open(str $filename, str $mode)`
 
 Open the specified file in the given mode. Valid modes include `r` for read,
-`w` for write, and `wa` for write with append.
+`w` for write, and `wa` for write with append. Returns a filehandle.
 
 ## openasync `jvm`
 _Experimental_
@@ -1587,18 +1587,18 @@ Seek in the filehandle to the location specified by the offset and whence.
 ## setencoding
 * `setencoding(Handle $fh, str $encoding)`
 
-Set the encoding for the given handle. Valid encodings are: ascii,
+Set the encoding for the given filehandle. Valid encodings are: ascii,
 iso-8859-1, windows-1252, utf8, utf16, and binary.
 
 ## setinputlinesep
 * `setinputlinesep(Handle $fh, str $sep)`
 
-Set the input line separator on the given file handle.
+Set the input line separator on the given filehandle.
 
 ## tellfh
 * `tellfh(Handle $fh)`
 
-Return current access position for an open handle.
+Return current access position for an open filehandle.
 
 ## writefh
 * `writefh(Handle $fh, Mu $str)`
