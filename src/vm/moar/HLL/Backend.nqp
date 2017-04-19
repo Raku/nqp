@@ -119,7 +119,6 @@ class HLL::Backend::MoarVM {
                 }
                 if nqp::existskey($node, "allocations") {
                     for $node<allocations> -> %alloc_info {
-                        my $type := %alloc_info<type>;
                         if nqp::existskey($id_remap, %alloc_info<id>) {
                             %alloc_info<id> := $id_remap{%alloc_info<id>};
                         } else {
@@ -130,6 +129,7 @@ class HLL::Backend::MoarVM {
                         unless nqp::existskey($id_to_thing, %alloc_info<id>) {
                             my $typename;
                             try {
+                                my $type := %alloc_info<type>;
                                 $typename := $type.HOW.name($type);
                             }
                             unless $typename {
@@ -220,7 +220,7 @@ class HLL::Backend::MoarVM {
         sub to_json($obj) {
             if nqp::islist($obj) {
                 nqp::push_s(@pieces, '[');
-                my $first := 1;
+                my int $first := 1;
                 for $obj {
                     if $first {
                         $first := 0;
@@ -234,7 +234,7 @@ class HLL::Backend::MoarVM {
             }
             elsif nqp::ishash($obj) {
                 nqp::push_s(@pieces, '{');
-                my $first := 1;
+                my int $first := 1;
                 for sorted_keys($obj) {
                     if $first {
                         $first := 0;
@@ -299,9 +299,9 @@ class HLL::Backend::MoarVM {
                 }
                 elsif $k eq 'gcs' {
                     for $v -> $gc {
-                        my @g;
+                        my @g := nqp::list_s();
                         for <time retained_bytes promoted_bytes gen2_roots full cleared_bytes> -> $f {
-                            nqp::push(@g, ~($gc{$f} // 'NULL'));
+                            nqp::push_s(@g, ~($gc{$f} // 'NULL'));
                         }
                         nqp::sayfh($profile_fh, 'INSERT INTO gcs VALUES (' ~ nqp::join(',', @g) ~ ');');
                     }
@@ -309,19 +309,19 @@ class HLL::Backend::MoarVM {
                 elsif $k eq 'call_graph' {
                     my %callee_rec_depth;
                     sub collect_callees($caller, %call_graph) {
-                        my @callee := [~$caller];
+                        my @callee := nqp::list_s(~$caller);
                         for <id osr spesh_entries jit_entries inlined_entries inclusive_time exclusive_time entries deopt_one> -> $f {
-                            nqp::push(@callee, ~(%call_graph{$f} // 'NULL'));
+                            nqp::push_s(@callee, ~(%call_graph{$f} // 'NULL'));
                         }
                         my str $id := ~%call_graph<id>;
                         %callee_rec_depth{$id} := 0 unless %callee_rec_depth{$id};
-                        nqp::push(@callee, ~%callee_rec_depth{$id});
+                        nqp::push_s(@callee, ~%callee_rec_depth{$id});
                         nqp::sayfh($profile_fh, 'INSERT INTO callees VALUES (' ~ nqp::join(',', @callee) ~ ');');
                         if %call_graph<allocations> {
                             for %call_graph<allocations> -> $a {
-                                my @a;
+                                my @a := nqp::list_s();
                                 for <id spesh jit count> -> $f {
-                                    nqp::push(@a, ~($a{$f} // 'NULL'));
+                                    nqp::push_s(@a, ~($a{$f} // 'NULL'));
                                 }
                                 nqp::sayfh($profile_fh, 'INSERT INTO allocations VALUES (' ~ nqp::join(',', @a) ~ ');');
                             }
