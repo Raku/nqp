@@ -301,7 +301,7 @@ class HLL::Backend::MoarVM {
                     for $v -> $gc {
                         my @g := nqp::list_s();
                         for <time retained_bytes promoted_bytes gen2_roots full cleared_bytes> -> $f {
-                            nqp::push_s(@g, ~($gc{$f} // 0));
+                            nqp::push_s(@g, ~($gc{$f} // '0'));
                         }
                         nqp::sayfh($profile_fh, 'INSERT INTO gcs VALUES (' ~ nqp::join(',', @g) ~ ');');
                     }
@@ -311,9 +311,9 @@ class HLL::Backend::MoarVM {
                     sub collect_callees($caller, %call_graph) {
                         my @callee := nqp::list_s(~$caller);
                         for <id osr spesh_entries jit_entries inlined_entries inclusive_time exclusive_time entries deopt_one> -> $f {
-                            nqp::push_s(@callee, ~(%call_graph{$f} // 0));
+                            nqp::push_s(@callee, ~(%call_graph{$f} // '0'));
                         }
-                        my str $id := ~%call_graph<id>;
+                        my str $id := ~$caller;
                         %callee_rec_depth{$id} := 0 unless %callee_rec_depth{$id};
                         nqp::push_s(@callee, ~%callee_rec_depth{$id});
                         nqp::sayfh($profile_fh, 'INSERT INTO callees VALUES (' ~ nqp::join(',', @callee) ~ ');');
@@ -321,7 +321,7 @@ class HLL::Backend::MoarVM {
                             for %call_graph<allocations> -> $a {
                                 my @a := nqp::list_s();
                                 for <id spesh jit count> -> $f {
-                                    nqp::push_s(@a, ~($a{$f} // 0));
+                                    nqp::push_s(@a, ~($a{$f} // '0'));
                                 }
                                 nqp::sayfh($profile_fh, 'INSERT INTO allocations VALUES (' ~ nqp::join(',', @a) ~ ');');
                             }
