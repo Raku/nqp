@@ -626,7 +626,7 @@ class BinaryCursor {
 
     for (var i = 0; i < contexts.length; i++) {
       if (contexts[i].outer == 0) {
-        this.deserializeCtx(contexts[i], []);
+        this.deserializeCtx(contexts[i], null);
       }
     }
 
@@ -737,8 +737,7 @@ class BinaryCursor {
     }
   }
 
-  deserializeCtx(context, outers) {
-    var outerCtx = outers.length != 0 ? outers[outers.length - 1] : null;
+  deserializeCtx(context, outerCtx) {
     var callerCtx = null;
 
     // TODO - think if we should set codeObj
@@ -750,12 +749,8 @@ class BinaryCursor {
       ctx[name] = context.lexicals[name];
     }
 
-    var newOuters = outers.slice();
-    newOuters.push(ctx);
-
-
     for (var inner of context.inner) {
-      this.deserializeCtx(inner, newOuters);
+      this.deserializeCtx(inner, ctx);
     }
 
     ctx.closuresUsingThis = [];
@@ -763,12 +758,6 @@ class BinaryCursor {
       var codeRef = this.sc.codeRefs[closure.index];
 
       codeRef.capture(closure.staticCode.freshBlock());
-
-      ctx.closuresUsingThis.push(codeRef);
-      for (let outer of outers) {
-        if (!outer.closuresUsingThis) outer.closuresUsingThis = [];
-        outer.closuresUsingThis.push(codeRef);
-      }
 
       codeRef.outerCtx = ctx;
     }
