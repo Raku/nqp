@@ -4144,11 +4144,21 @@ public final class Ops {
     }
 
     public static long ordfirst(String str) {
-        return str.codePointAt(0);
+        if (str.isEmpty()) {
+            return -1;
+	}
+	else {
+            return str.codePointAt(0);
+	}
     }
 
     public static long ordat(String str, long offset) {
-        return str.codePointAt((int)offset);
+        if (offset < 0 || offset >= str.length()) {
+            return -1;
+        }
+	else {
+            return str.codePointAt((int)offset);
+        }
     }
 
     public static long ordbaseat(String str, long offset) {
