@@ -751,7 +751,6 @@ class BinaryCursor {
       this.deserializeCtx(inner, ctx);
     }
 
-    ctx.closuresUsingThis = [];
     for (var closure of context.closures) {
       var codeRef = this.sc.codeRefs[closure.index];
 
