@@ -1,4 +1,4 @@
-plan(15);
+plan(16);
 
 role R1 {
     has $!a;
@@ -47,3 +47,12 @@ class Child is Parent {
 
 ok(nqp::istype(Parent, Foo), 'nqp::istype with a role directly on class');
 ok(nqp::istype(Child, Foo), 'nqp::istype with a role on a parent class');
+
+role PackageUsingRole {
+    method name() {
+        $?PACKAGE.HOW.name($?PACKAGE);
+    }
+}
+class X does PackageUsingRole {
+}
+is(X.name(), 'PackageUsingRole', 'using $?PACKAGE from a role');
