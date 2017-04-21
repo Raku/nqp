@@ -43,7 +43,7 @@ module.exports.wval = function(handle, idx) {
   return serializationContexts[handle].rootObjects[idx];
 };
 
-op.deserialize = function(blob, sc, sh, codeRefs, conflict) {
+op.deserialize = function(blob, sc, sh, codeRefs, conflict, cuids) {
   var buffer = new Buffer(blob, 'base64');
   sc.codeRefs = codeRefs.array;
 
@@ -56,7 +56,7 @@ op.deserialize = function(blob, sc, sh, codeRefs, conflict) {
   sh = sh.array;
   var cursor = new BinaryCursor(buffer, 0, sh, sc);
 
-  cursor.deserialize(sc);
+  cursor.deserialize(sc, cuids);
 };
 
 op.createsc = function(handle) {
@@ -488,7 +488,7 @@ class BinaryCursor {
 
       switch (info[name]) {
         case 0: // obj
-          lexicals[name] = data.variant();
+          lexicals[name] = data.variantWithUndefined();
           break;
         case 1: // int
           lexicals[name] = data.varint();
@@ -508,7 +508,7 @@ class BinaryCursor {
 
 
   /** Read a whole serialization context, if defined call the setupWVals before the closures are created */
-  deserialize(sc) {
+  deserialize(sc, cuids) {
     var version = this.I32();
 
     this.sc = sc;
@@ -595,6 +595,20 @@ class BinaryCursor {
     this.deserializeSTables(STables);
 
     this.deserializeObjects(objects);
+
+    if (cuids) {
+      for (let codeRef of cuids) {
+        if (codeRef.staticVars) {
+          for (let name in codeRef.staticVars) {
+            if (codeRef.staticVars[name] instanceof Array) {
+              codeRef.staticVars[name] = serializationContexts[codeRef.staticVars[name][0]].rootObjects[codeRef.staticVars[name][1]];
+            } else if (typeof codeRef.staticVars[name] === 'number') {
+              codeRef.staticVars[name] = sc.rootObjects[codeRef.staticVars[name]];
+            }
+          }
+        }
+      }
+    }
 
     var contextsOffset = this.I32();
     var contextsNumber = this.I32();
@@ -744,7 +758,11 @@ class BinaryCursor {
     var lexicals = [];
 
     for (var name in context.lexicals) {
-      ctx[name] = context.lexicals[name];
+      if (context.lexicals[name] === undefined) {
+        ctx[name] = context.staticCode.staticVars[name];
+      } else {
+        ctx[name] = context.lexicals[name];
+      }
     }
 
     for (var inner of context.inner) {

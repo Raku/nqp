@@ -131,15 +131,12 @@ class CodeRef extends NQPObject {
     return this;
   }
 
-  setInfo(outerCodeRef, closureTemplate, lexicalsTypeInfo) {
+  setInfo(outerCodeRef, closureTemplate, lexicalsTypeInfo, staticVars) {
     this.closureTemplate = closureTemplate;
     this.outerCodeRef = outerCodeRef;
     this.lexicalsTypeInfo = lexicalsTypeInfo;
-    return this;
-  }
-
-  setStaticVars(staticVars) {
     this.staticVars = staticVars;
+    return this;
   }
 
   $$clone() {
