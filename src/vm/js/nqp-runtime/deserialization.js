@@ -507,7 +507,7 @@ class BinaryCursor {
   }
 
 
-  /** Read a whole serialization context, if defined call the setupWVals before the closures are created */
+  /** Read a whole serialization context */
   deserialize(sc, cuids) {
     var version = this.I32();
 
