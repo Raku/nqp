@@ -432,7 +432,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         }
         %capnames{''} := $count;
         nqp::deletekey(%capnames, '$!from');
-        nqp::deletekey(%capnames, '$!pos');
+        nqp::deletekey(%capnames, '$!to');
         %capnames;
     }
     
@@ -504,7 +504,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
 
     method metachar:sym<to>($/) {
         make QAST::Regex.new( :rxtype<subrule>, :subtype<capture>,
-            :backtrack<r>, :name<$!pos>, :node($/),
+            :backtrack<r>, :name<$!to>, :node($/),
             QAST::NodeList.new(
                 QAST::SVal.new( :value('!LITERAL') ),
                 QAST::SVal.new( :value('') ) ) );
