@@ -34,7 +34,7 @@ function posTypes(ctx, capture) {
 var op = {};
 
 op.multicachefind = function(ctx, cache, capture) {
-  if (cache === Null) return Null;
+  if (!(cache instanceof MultiCache)) return Null;
   var arity = capture.pos.length;
   var hasNamed = capture.named ? true : false;
 
@@ -64,7 +64,7 @@ op.multicachefind = function(ctx, cache, capture) {
 };
 
 op.multicacheadd = function(ctx, cache, capture, result) {
-  var c = cache === Null ? new MultiCache() : cache;
+  var c = cache instanceof MultiCache ? cache : new MultiCache();
   var arity = capture.pos.length;
   var hasNamed = capture.named ? true : false;
 
