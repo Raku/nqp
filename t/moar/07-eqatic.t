@@ -1,5 +1,7 @@
 #!/usr/bin/env nqp
-plan(99);
+plan(100);
+todo("MVM index/equatic bug", 1);
+ok(!nqp::eqatic('b', 'bb', 0), "MVM index/equatic bug");
 ok( nqp::eqatic('aBcdef', 'bcd', 1));
 # With ligatures that expand under casefolding
 ok( nqp::eqatic('aaﬆaa', 'ﬆ', 2) );
