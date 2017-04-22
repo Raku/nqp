@@ -308,18 +308,21 @@ class HLL::Backend::MoarVM {
                 }
                 elsif $k eq 'call_graph' {
                     my %callee_rec_depth;
-                    sub collect_callees($caller, %call_graph) {
-                        my @callee := nqp::list_s(~$caller);
+                    my int $node_id := 0;
+                    sub collect_callees(str $caller_id, %call_graph) {
+                        my str $callee_id := ~$node_id;
+                        $node_id++;
+                        my @callee := nqp::list_s($caller_id, $callee_id);
                         for <id osr spesh_entries jit_entries inlined_entries inclusive_time exclusive_time entries deopt_one> -> $f {
                             nqp::push_s(@callee, ~(%call_graph{$f} // '0'));
                         }
-                        my str $id := ~$caller;
-                        %callee_rec_depth{$id} := 0 unless %callee_rec_depth{$id};
-                        nqp::push_s(@callee, ~%callee_rec_depth{$id});
-                        nqp::sayfh($profile_fh, 'INSERT INTO callees VALUES (' ~ nqp::join(',', @callee) ~ ');');
+                        my str $routine_id := ~%call_graph<id>;
+                        %callee_rec_depth{$routine_id} := 0 unless %callee_rec_depth{$routine_id};
+                        nqp::push_s(@callee, ~%callee_rec_depth{$routine_id});
+                        nqp::sayfh($profile_fh, 'INSERT INTO calls VALUES (' ~ nqp::join(',', @callee) ~ ');');
                         if %call_graph<allocations> {
                             for %call_graph<allocations> -> $a {
-                                my @a := nqp::list_s();
+                                my @a := nqp::list_s($caller_id, $callee_id);
                                 for <id spesh jit count> -> $f {
                                     nqp::push_s(@a, ~($a{$f} // '0'));
                                 }
@@ -327,14 +330,14 @@ class HLL::Backend::MoarVM {
                             }
                         }
                         if %call_graph<callees> {
-                            %callee_rec_depth{$id}++;
+                            %callee_rec_depth{$routine_id}++;
                             for %call_graph<callees> -> $c {
-                                collect_callees($id, $c);
+                                collect_callees(~$callee_id, $c);
                             }
-                            %callee_rec_depth{$id}--;
+                            %callee_rec_depth{$routine_id}--;
                         }
                     }
-                    collect_callees(-1, $v);
+                    collect_callees(~$node_id, $v);
                 }
             }
             nqp::sayfh($profile_fh, 'INSERT INTO profile VALUES (' ~ nqp::join(',', @profile) ~ ');');
@@ -357,8 +360,8 @@ class HLL::Backend::MoarVM {
             nqp::sayfh($profile_fh, 'CREATE TABLE routines(id INTEGER PRIMARY KEY ASC, name TEXT, line INT, file TEXT);');
             nqp::sayfh($profile_fh, 'CREATE TABLE profile(total_time INT, spesh_time INT);');
             nqp::sayfh($profile_fh, 'CREATE TABLE gcs(time INT, retained_bytes INT, promoted_bytes INT, gen2_roots INT, full INT, cleared_bytes INT);');
-            nqp::sayfh($profile_fh, 'CREATE TABLE callees(caller_id INT, id INT, osr INT, spesh_entries INT, jit_entries INT, inlined_entries INT, inclusive_time INT, exclusive_time INT, entries INT, deopt_one INT, rec_depth INT);');
-            nqp::sayfh($profile_fh, 'CREATE TABLE allocations(type_id INT, spesh INT, jit INT, count INT);');
+            nqp::sayfh($profile_fh, 'CREATE TABLE calls(caller_id INT, callee_id INT, routine_id INT, osr INT, spesh_entries INT, jit_entries INT, inlined_entries INT, inclusive_time INT, exclusive_time INT, entries INT, deopt_one INT, rec_depth INT);');
+            nqp::sayfh($profile_fh, 'CREATE TABLE allocations(caller_id INT, callee_id INT, type_id INT, spesh INT, jit INT, count INT);');
             to_sql($data);
             nqp::sayfh($profile_fh, 'END;');
         }
