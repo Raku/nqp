@@ -1,7 +1,10 @@
 #!/usr/bin/env nqp
-plan(100);
-todo("MVM index/equatic bug", 1);
+## TODO XXX need MORE tests to check failures, not just succeses
+plan(103);
 ok(!nqp::eqatic('b', 'bb', 0), "MVM index/equatic bug");
+ok(!nqp::eqatic('st', 'ﬆa', 0));
+ok(!nqp::eqatic('st', 'ﬆassssssss', 0));
+ok(!nqp::eqatic('ﬆ', 'ﬆassssssss', 0));
 ok( nqp::eqatic('aBcdef', 'bcd', 1));
 # With ligatures that expand under casefolding
 ok( nqp::eqatic('aaﬆaa', 'ﬆ', 2) );

@@ -1,11 +1,13 @@
 #!/usr/bin/env nqp
-plan(117);
+plan(119);
 my @array :=
 # (haystack, needle, result)
 # line below is a todo example: commented out in case someone else needs to todo one of these tests
 ## ('chars that expand on casefolding at the end are broken with equatic', 1),
     # Make sure it doesn't find a partial match at end of the haystack and then
     # return a partial match.
+    ('st', 'ﬆa', -1),
+    ('st', 'sta', -1),
     ('abcdefg', 'fghi', -1),
     ('aBcdef', 'bcd', 1),
     # With ligatures that expand under casefolding
