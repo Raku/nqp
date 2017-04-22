@@ -71,6 +71,10 @@ class SerializationContext extends NQPObject {
 
     obj._SC = this;
   }
+
+  $$toBool(ctx) {
+    return 1;
+  }
 };
 
 SerializationContext.contexts = {};
