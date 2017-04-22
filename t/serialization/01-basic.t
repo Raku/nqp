@@ -1,9 +1,10 @@
 #! nqp
 
-plan(1508);
+plan(1509);
 
 {
     my $sc := nqp::createsc('exampleHandle');
+    is(nqp::istrue($sc), 1, 'sc works with istrue');
     ok(nqp::scsetdesc($sc, "foobar") eq 'foobar', 'scsetdesc has correct return value');
     ok(nqp::scgetdesc($sc) eq 'foobar', 'scgetdesc');
     ok(nqp::scgethandle($sc) eq 'exampleHandle', 'scgethandle');
