@@ -126,7 +126,7 @@ exports.named = function(parts) {
 };
 
 exports.op.ishash = function(obj) {
-  return obj instanceof Hash ? 1 : 0;
+  return obj instanceof Hash || (obj._STable && obj._STable.REPR instanceof reprs.VMHash) ? 1 : 0;
 };
 
 op.existspos = function(array, idx) {

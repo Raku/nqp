@@ -1169,6 +1169,87 @@ class VMArray extends REPR {
 
 reprs.VMArray = VMArray;
 
+let HashIter = require('./hash-iter.js');
+
+class VMHash extends REPR {
+  allocate(STable) {
+    var obj = new STable.objConstructor();
+    obj.content = new Map();
+    return obj;
+  }
+
+  setupSTable(STable) {
+    STable.addInternalMethods(class {
+      $$clone() {
+        var cloned = new STable.objConstructor();
+        cloned.content = new Map();
+        this.content.forEach(function(value, key, map) {
+          cloned.content.set(key, value);
+        });
+        return cloned;
+      }
+
+      $$bindkey(key, value) {
+        this.content.set(key, value);
+        if (this._SC !== undefined) this.$$scwb();
+        return value;
+      }
+
+      $$atkey(key) {
+        return this.content.has(key) ? this.content.get(key) : Null;
+      }
+
+      $$existskey(key) {
+        return this.content.has(key);
+      }
+
+      $$deletekey(key) {
+        if (this._SC !== undefined) this.$$scwb();
+        this.content.delete(key);
+        return this;
+      }
+
+      $$elems() {
+        return this.content.size;
+      }
+
+      $$numify() {
+        return this.$$elems();
+      }
+
+      $$iterator() {
+        return new HashIter(this);
+      }
+
+      $$toObject() {
+        var ret = {};
+        this.content.forEach(function(value, key, map) {
+          ret[key] = value;
+        });
+        return ret;
+      }
+    });
+  }
+
+  deserializeFinish(obj, data) {
+    obj.content = new Map();
+    let elems = data.varint();
+    for (var i = 0; i < elems; i++) {
+      let str = data.str();
+      obj.content.set(str, data.variant());
+    }
+  }
+
+  serialize(cursor, obj) {
+    cursor.varint(obj.$$elems());
+    obj.content.forEach(function(value, key, map) {
+      cursor.str(key);
+      cursor.ref(value);
+    }, this);
+  }
+};
+
+reprs.VMHash = VMHash;
 
 class VMIter {
   deserializeFinish(obj, data) {
