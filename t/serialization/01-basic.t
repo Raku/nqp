@@ -1,6 +1,6 @@
 #! nqp
 
-plan(1502);
+plan(1508);
 
 {
     my $sc := nqp::createsc('exampleHandle');
@@ -565,6 +565,33 @@ sub add_to_sc($sc, $idx, $obj) {
         ok(nqp::attrinited(nqp::scgetobj($dsc, 0), TestAttrinitied, '$!null'), 'nqp::attrinited on an attribute that has been set with null');
     }
 
+}
+
+# Serializing an SC with a VMArray
+{
+    my $sc := nqp::createsc('TEST_SC_17_IN');
+    my $sh := nqp::list_s();
+
+    class VMHashClass is repr('VMHash') {
+    }
+
+    my $v := VMHashClass.new();
+    $v<hi> := 123;
+    $v<hello> := 456;
+    $v<ciao> := 789;
+    add_to_sc($sc, 0, $v);
+
+    my $serialized := nqp::serialize($sc, $sh);
+
+    my $dsc := nqp::createsc('TEST_SC_17_OUT');
+    nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
+
+    ok(nqp::scobjcount($dsc) == 1, 'deserialized SC has a single object');
+    ok(nqp::istype(nqp::scgetobj($dsc, 0), VMHashClass), 'deserialized hash has correct type');
+    is(nqp::scgetobj($dsc, 0) + 0, 3, 'deserialized hash has correct number of keys');
+    is(nqp::scgetobj($dsc, 0)<hi>, 123, 'element of hash is correct');
+    is(nqp::scgetobj($dsc, 0)<hello>, 456, 'element of hash is correct');
+    is(nqp::scgetobj($dsc, 0)<ciao>, 789, 'element of hash is correct');
 }
 
 # integers
