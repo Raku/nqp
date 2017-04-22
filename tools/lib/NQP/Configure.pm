@@ -47,17 +47,18 @@ sub system_or_die {
 
 sub parse_revision {
     my $rev = shift;
+    my $what = shift;
     my $sep = qr/[_.]/;
     $rev =~ /(\d+)$sep(\d+)(?:$sep(\d+))?(?:-(\d+)-g[a-f0-9]*)?$/
-        or die "Unrecognized revision specifier '$rev'\n";
+        or die "Unrecognized revision specifier '$rev' $what\n";
     return ($1, $2, $3 || 0, $4 || 0);
 }
 
 
 sub cmp_rev {
-    my ($a, $b) = @_;
-    my @a = parse_revision($a);
-    my @b = parse_revision($b);
+    my ($a, $b, $what) = @_;
+    my @a = parse_revision($a, "$what have");
+    my @b = parse_revision($b, "$what want");
     my $cmp = 0;
     for (0..3) {
         $cmp = $a[$_] <=> $b[$_];
@@ -225,7 +226,7 @@ sub gen_nqp {
             $impls{$b}{bin} = $bin;
             my %c = read_config($bin);
             my $nqp_have = $c{'nqp::version'} || '';
-            my $nqp_ok   = $nqp_have && cmp_rev($nqp_have, $nqp_want) >= 0;
+            my $nqp_ok   = $nqp_have && cmp_rev($nqp_have, $nqp_want, "nqp") >= 0;
             if ($nqp_ok) {
                 $impls{$b}{config} = \%c;
             }
@@ -288,7 +289,7 @@ sub gen_moar {
         $moar_have = $moar_version_output =~ /version (\S+)/ ? $1 : undef;
     }
 
-    my $moar_ok   = $moar_have && cmp_rev($moar_have, $moar_want) >= 0;
+    my $moar_ok   = $moar_have && cmp_rev($moar_have, $moar_want, "moar") >= 0;
     if ($moar_ok) {
         push @errors, "Found $moar_exe version $moar_have, which is new enough.\n";
         return ($moar_exe, @errors);
@@ -312,7 +313,7 @@ sub gen_moar {
         $options{'git-reference'} ? "--reference=$options{'git-reference'}/MoarVM" : '',
     );
 
-    unless (cmp_rev($moar_repo, $moar_want) >= 0) {
+    unless (cmp_rev($moar_repo, $moar_want, "moar") >= 0) {
         die "You asked me to build $gen_moar, but $moar_repo is not new enough to satisfy version $moar_want\n";
     }
 
