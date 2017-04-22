@@ -55,7 +55,6 @@ sub test-it ($needle, $text, $max, $opt) {
     my int $i := 1;
     my $long-end := $opt +& 1;
     my $should-fail := $opt +& 2;
-    note("long end $long-end should-fail $should-fail");
     while ($i < $max) {
         my str $str := nqp::x('a', $max - $i);
         $str := $str ~ $text;
