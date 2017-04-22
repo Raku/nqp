@@ -622,7 +622,8 @@ class P6int extends REPR {
     let integer = reprInfoHash.content.get('integer');
     if (integer) {
       let bits = integer.content.get('bits');
-      if (bits instanceof NQPInt) {
+      if (bits === undefined) {
+      } else if (bits instanceof NQPInt) {
         this.bits = bits.value;
       } else {
         throw 'bits to P6int.compose must be a native int';
