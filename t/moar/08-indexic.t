@@ -2,9 +2,10 @@
 plan(117);
 my @array :=
 # (haystack, needle, result)
+# line below is a todo example: commented out in case someone else needs to todo one of these tests
+## ('chars that expand on casefolding at the end are broken with equatic', 1),
     # Make sure it doesn't find a partial match at end of the haystack and then
     # return a partial match.
-    ('indexic bug MVM', 1),
     ('abcdefg', 'fghi', -1),
     ('aBcdef', 'bcd', 1),
     # With ligatures that expand under casefolding
@@ -16,8 +17,6 @@ my @array :=
     ('aaﬆaaz', 'z', 5 ),
     ('aaﬆzaa', 'z', 3 ),
     ('aaaﬆ', 'st', 3 ),
-    # working TODO example: commented out in case someone else needs to todo one of these tests
-    #('chars that expand on casefolding at the end are broken with equatic', 1),
     ('ﬆ', 'st', 0),
     ('aaaaﬆ', 'st', 4 ),
     ('AAAAﬆ', 'st', 4),
@@ -38,7 +37,6 @@ test-it('ﬆ', 'st',  20, 1);
 test-it('ﬆ', 'st',  20, 0);
 test-it('st', 'ﬆ',  20, 1);
 test-it('st', 'ﬆ',  20, 0);
-todo("MVM indexic/equatic bug", 14);
 test-it('stbbbbbbbbbbbbbbbbbbbbbb', 'st',  20, 2);
 
 # Without codepoint which expand when casefolded
