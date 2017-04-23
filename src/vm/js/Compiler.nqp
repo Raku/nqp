@@ -1313,8 +1313,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             "var sh = nqp.createArray([{nqp::join(',',@sh)}]);\n"
             ~ "var sc = nqp.op.createsc({quote_string(nqp::scgethandle($sc))});\n"
             ~ self.emit_code_refs_list($ast)
-            , "nqp.op.deserialize($quoted_data,sc,sh,code_refs,null,cuids);\n"
-            ~ self.setup_wvals
+            , "nqp.op.deserialize($quoted_data,sc,sh,code_refs,null,cuids,function() \{{self.setup_wvals}\});\n"
             ~ "nqp.op.scsetdesc(sc,{quote_string(nqp::scgetdesc($sc))});\n");
     }
 

@@ -43,7 +43,7 @@ module.exports.wval = function(handle, idx) {
   return serializationContexts[handle].rootObjects[idx];
 };
 
-op.deserialize = function(blob, sc, sh, codeRefs, conflict, cuids) {
+op.deserialize = function(blob, sc, sh, codeRefs, conflict, cuids, setupWVals) {
   var buffer = new Buffer(blob, 'base64');
   sc.codeRefs = codeRefs.array;
 
@@ -56,7 +56,7 @@ op.deserialize = function(blob, sc, sh, codeRefs, conflict, cuids) {
   sh = sh.array;
   var cursor = new BinaryCursor(buffer, 0, sh, sc);
 
-  cursor.deserialize(sc, cuids);
+  cursor.deserialize(sc, cuids, setupWVals);
 };
 
 op.createsc = function(handle) {
@@ -507,8 +507,12 @@ class BinaryCursor {
   }
 
 
-  /** Read a whole serialization context */
-  deserialize(sc, cuids) {
+  /** Read a whole serialization context.
+    If defined call the setupWVals before the closures are created.
+    Resolve the static variables in all CodeRefs contained in cuids
+   */
+
+  deserialize(sc, cuids, setupWVals) {
     var version = this.I32();
 
     this.sc = sc;
@@ -609,6 +613,7 @@ class BinaryCursor {
         }
       }
     }
+    if (setupWVals) setupWVals();
 
     var contextsOffset = this.I32();
     var contextsNumber = this.I32();
