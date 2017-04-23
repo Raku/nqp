@@ -328,8 +328,7 @@ exports.args = function(module) {
 exports.NQPException = NQPException;
 
 exports.wrapException = function(e) {
-  console.log(e);
-  return new NQPException(e.message);
+  return new NQPException("<<wrapped exception:\n" + e.stack + "\n>>\n");
 };
 
 exports.setCodeRefHLL = function(codeRefs, hllName) {
