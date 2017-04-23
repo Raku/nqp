@@ -1,4 +1,4 @@
-plan(61);
+plan(63);
 
 # Basic tests for a bunch of mathematical functions
 
@@ -31,6 +31,13 @@ is_approx(nqp::cos_n(1), 0.54030230586814, "nqp::cos_n(1)");
 is_approx(nqp::cos_n(2), -0.416146836547142, "nqp::cos_n(2)");
 is_approx(nqp::cos_n(3), -0.989992496600445, "nqp::cos_n(3)");
 is_approx(nqp::cos_n(4), -0.653643620863612, "nqp::cos_n(4)");
+
+my sub isnan($n) {
+    nqp::isnanorinf($n) && $n != nqp::inf() && $n != nqp::neginf();
+}
+
+ok(isnan(nqp::cos_n(nqp::neginf)) , "nqp::cos_n(nqp::neginf)");
+ok(isnan(nqp::cos_n(nqp::inf)), "nqp::cos_n(nqp::inf)");
 
 is_approx(nqp::tan_n(1), 1.5574077246549, "nqp::tan_n(1)");
 is_approx(nqp::tan_n(2), -2.18503986326152, "nqp::tan_n(2)");
