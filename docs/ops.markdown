@@ -1008,7 +1008,7 @@ Convert string $str into a number starting at offset $pos and using radix $radix
 The result of the conversion returns an array with
 
     out[0] = converted value
-    out[1] = radix ** (number of digits converted)
+    out[1] = $radix ** $number-of-digits-converted
     out[2] = offset after consuming digits, -1 if no digits consumed
 
 The opcode skips single underscores between pairs of digits, per the Perl 6
