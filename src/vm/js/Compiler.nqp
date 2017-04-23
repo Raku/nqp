@@ -1130,13 +1130,17 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             my @static;
             for $*BLOCK.variables -> $var {
                 if $var.decl eq 'static' {
-                    my $sc     := nqp::getobjsc($var.value);
-                    my int $idx    := nqp::scgetobjidx($sc, $var.value);
-
-                    @static.push(quote_string($var.name) ~ ':' ~ (
-                        ($sc =:= try $*COMPUNIT.sc)
-                        ?? $idx
-                        !! "[{quote_string(nqp::scgethandle($sc))}, $idx]"));
+                    if $*COMPUNIT && $*COMPUNIT.sc && $*COMPUNIT.compilation_mode {
+                        my $sc     := nqp::getobjsc($var.value);
+                        my int $idx    := nqp::scgetobjidx($sc, $var.value);
+                        @static.push(quote_string($var.name) ~ ':' ~ (
+                            ($sc =:= $*COMPUNIT.sc)
+                            ?? $idx
+                            !! "[{quote_string(nqp::scgethandle($sc))}, $idx]"));
+                    }
+                    else {
+                        @static.push(quote_string($var.name) ~ ':' ~ self.value_as_js($var.value));
+                    }
 
                 }
             }
@@ -1469,7 +1473,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my str $set_hll := $*HLL ?? "nqp.setCodeRefHLL(cuids, {quote_string($*HLL)});\n" !! '';
 
         my $set_code_objects := self.set_code_objects;
-        my @setup := [$pre , $comp_mode ?? self.create_sc($node) !! self.setup_wvals, $set_code_objects,  self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $set_hll, $post, $body];
+        my @setup := [$pre , $comp_mode ?? self.create_sc($node) !! '', $set_code_objects,  self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $set_hll, $post, $body];
         if !$instant {
             @setup.push("new nqp.EvalResult({$body.expr}, nqp.createArray(cuids))");
         }
@@ -1933,7 +1937,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my $chunk := $code();
 
-        Chunk.new($chunk.type, $chunk.expr, [self.setup_wvals, self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $chunk]);
+        Chunk.new($chunk.type, $chunk.expr, [self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $chunk]);
     }
 
     method as_js_with_prelude($ast, :$instant, :$shebang) {
@@ -1947,17 +1951,22 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my %*BLOCKS_INFO;
         my %*BLOCKS_STATEVARS;
 
+        my $*COMPUNIT;
+
         my $compile_block := -> {self.as_js($ast, :want($instant ?? $T_VOID !! $T_OBJ))};
 
         my $chunk := nqp::istype($ast, QAST::CompUnit) ?? 
             $compile_block()
             !! self.wrap_in_fake_block($compile_block);
 
+        my int $deserializes := nqp::istype($ast, QAST::CompUnit) && $ast.compilation_mode;
+
         Chunk.void(
             $shebang ?? "#!/usr/bin/env node\n" !! '',
             "'use strict'\n",
             "var nqp = require('nqp-runtime');\n",
             self.declare_wvals,
+            $deserializes ?? '' !! self.setup_wvals,
             self.setup_cuids,
             self.set_is_thunk_flags,
             self.set_static_info,
