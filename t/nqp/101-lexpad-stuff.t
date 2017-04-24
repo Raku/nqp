@@ -1,4 +1,4 @@
-plan(15);
+plan(16);
 sub more-inner() {
     my $outer := nqp::ctxcaller(nqp::ctx());
     my $outermost := nqp::ctxcaller(nqp::ctxcaller(nqp::ctx()));
@@ -13,14 +13,21 @@ sub more-inner() {
     my $seen_baz := 0;
     my $seen_outervar := 0;
     my $seen_other := 0;
+
+    my $foo_value;
+    my $baz_value;
+    my $outervar_value;
+
     for $outermost -> $var {
         if $var eq '$*foo' {
             $seen_foo := $seen_foo + 1;
+            $foo_value := nqp::iterval($var);
         }
-        elsif $var eq '$*baz' {
+        elsif nqp::iterkey_s($var) eq '$*baz' {
             $seen_baz := $seen_baz + 1;
+            $baz_value := $var.value;
         }
-        elsif $var eq '$*outervar' {
+        elsif $var.key eq '$*outervar' {
             $seen_outervar := $seen_outervar + 1;
         }
         else {
@@ -28,6 +35,7 @@ sub more-inner() {
         }
     }
     ok($seen_foo == 1 && $seen_baz == 1 && $seen_outervar == 1 && $seen_other == 0, 'iterating over the variables in a ctx');
+    ok($foo_value == 245 && $baz_value == 103, 'the variables we iterate over have correct values');
 }
 sub inner() {
     my $*baz;
