@@ -329,8 +329,8 @@ class HLL::Compiler does HLL::Backend::Default {
         try {
             $res := $p.parse(@args);
             CATCH {
-                nqp::say($_);
-                self.usage;
+                nqp::sayfh(nqp::getstderr(), $_);
+                self.usage(:use-stderr);
                 nqp::exit(1);
             }
         }
@@ -512,15 +512,16 @@ class HLL::Compiler does HLL::Backend::Default {
         }
     }
 
-    method usage($name?) {
+    method usage($name?, :$use-stderr = False) {
+        my $print-func := $use-stderr ?? &note !! &say; # RT #130760
         if $name {
-            say($name);
+            $print-func($name);
         }
         my $usage := "This compiler is based on HLL::Compiler.\n\nOptions:\n";
         for @!cmdoptions {
             $usage := $usage ~ "    $_\n";
         }
-        nqp::say($usage);
+        $print-func($usage);
         nqp::exit(0);
     }
 
