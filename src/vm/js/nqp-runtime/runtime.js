@@ -145,7 +145,7 @@ op.ctxouter = function(ctx) {
 exports.currentDispatcherFor = undefined;
 
 op.setdispatcherfor = function(dispatcher, dispatcherFor) {
-  exports.currentDispatcher = dispatcher
+  exports.currentDispatcher = dispatcher;
   let spec;
   if (dispatcherFor instanceof CodeRef) {
     exports.currentDispatcherFor = dispatcherFor;
@@ -153,10 +153,10 @@ op.setdispatcherfor = function(dispatcher, dispatcherFor) {
     if (spec.classHandle) {
       exports.currentDispatcherFor = dispatcherFor.$$getattr(spec.classHandle, spec.attrName);
     } else {
-      throw "setdispatcherfor needs simple invokable target"
+      throw 'setdispatcherfor needs simple invokable target';
     }
   } else {
-    throw "setdispatcherfor needs invokable target";
+    throw 'setdispatcherfor needs invokable target';
   }
 };
 
@@ -346,7 +346,7 @@ exports.args = function(module) {
 exports.NQPException = NQPException;
 
 exports.wrapException = function(e) {
-  return new NQPException("<<wrapped exception:\n" + e.stack + "\n>>\n");
+  return new NQPException('<<wrapped exception:\n' + e.stack + '\n>>\n');
 };
 
 exports.setCodeRefHLL = function(codeRefs, hllName) {

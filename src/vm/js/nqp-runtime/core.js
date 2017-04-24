@@ -932,8 +932,8 @@ op.backtrace = function(hllName, exception) {
         row.content.set('sub', ctx.codeRef());
       }
 
-      annotations.content.set("file", "NYI");
-      annotations.content.set("line", 0);
+      annotations.content.set('file', 'NYI');
+      annotations.content.set('line', 0);
 
       rows.push(row);
 

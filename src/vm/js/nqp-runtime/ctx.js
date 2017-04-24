@@ -17,7 +17,7 @@ const TAKE = 128;
 const WARN = 256;
 const SUCCEED = 512;
 const PROCEED = 1024;
-const LABELED = 4096
+const LABELED = 4096;
 const AWAIT = 8192;
 const EMIT = 16384;
 const DONE = 32768;
@@ -45,7 +45,7 @@ class ResumeException {
   constructor(exception) {
     this.exception = exception;
   }
-}
+};
 
 class Ctx extends NQPObject {
   constructor(callerCtx, outerCtx, callThis) {
