@@ -342,6 +342,10 @@ class Ctx extends NQPObject {
     return new Iter(Object.keys(this).filter(key => key.substr(0, 2) != '$$'));
   }
 
+  $$elems() {
+    return Object.keys(this).filter(key => key.substr(0, 2) != '$$').length;
+  }
+
   $$toBool(ctx) {
     return 1;
   }
