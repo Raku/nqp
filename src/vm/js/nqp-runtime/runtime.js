@@ -142,6 +142,24 @@ op.ctxouter = function(ctx) {
   return ctx.$$outer === null ? Null : ctx.$$outer;
 };
 
+exports.currentDispatcherFor = undefined;
+
+op.setdispatcherfor = function(dispatcher, dispatcherFor) {
+  exports.currentDispatcher = dispatcher
+  let spec;
+  if (dispatcherFor instanceof CodeRef) {
+    exports.currentDispatcherFor = dispatcherFor;
+  } else if (spec = dispatcherFor._STable.invocationSpec) {
+    if (spec.classHandle) {
+      exports.currentDispatcherFor = dispatcherFor.$$getattr(spec.classHandle, spec.attrName);
+    } else {
+      throw "setdispatcherfor needs simple invokable target"
+    }
+  } else {
+    throw "setdispatcherfor needs invokable target";
+  }
+};
+
 exports.toStr = function(arg_, ctx) {
   var arg = arg_.$$decont(ctx);
   if (typeof arg == 'number') {

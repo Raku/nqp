@@ -1616,7 +1616,7 @@ class QAST::OperationsJS {
             !! $*BLOCK.mangle_lexical($var) ~ " = nqp.currentDispatcher;\n";
 
         Chunk.void(
-            "if (nqp.currentDispatcher !== undefined) \{"
+            "if (nqp.currentDispatcher !== undefined && (nqp.currentDispatcherFor === undefined || nqp.currentDispatcherFor === $*CTX.codeRef())) \{"
             ~ $set_var
             ~ "nqp.currentDispatcher = undefined;\n"
             ~ "\}\n"
@@ -1624,6 +1624,8 @@ class QAST::OperationsJS {
     });
     add_simple_op('cleardispatcher', $T_VOID, [], sub () {"nqp.currentDispatcher = undefined"}, :side_effects);
     add_simple_op('setdispatcher', $T_VOID, [$T_OBJ], sub ($value) {"nqp.currentDispatcher = $value"}, :side_effects);
+    add_simple_op('setdispatcherfor', $T_VOID, [$T_OBJ, $T_OBJ], :side_effects);
+
     add_simple_op('ctxcaller', $T_OBJ, [$T_OBJ], :!inlinable);
     add_simple_op('ctx', $T_OBJ, [], :!inlinable, sub () {$*BLOCK.ctx});
     add_simple_op('ctxcode', $T_OBJ, [$T_OBJ], :!inlinable, sub ($ctx) {"$ctx.codeRef()"});
