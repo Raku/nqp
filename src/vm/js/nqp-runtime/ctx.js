@@ -339,7 +339,7 @@ class Ctx extends NQPObject {
   }
 
   $$iterator() {
-    return new Iter(Object.keys(this).filter(key => key.substr(0, 2) != '$$'));
+    return new CtxIter(this);
   }
 
   $$elems() {
@@ -348,6 +348,45 @@ class Ctx extends NQPObject {
 
   $$toBool(ctx) {
     return 1;
+  }
+};
+
+class CtxIter extends NQPObject {
+  constructor(ctx) {
+    super();
+    this.$$ctx = ctx;
+    this.$$keys = Object.keys(ctx).filter(key => key.substr(0, 2) != '$$');
+    this.$$target = this.$$keys.length - 1;
+    this.$$idx = -1;
+  }
+
+  $$shift() {
+    this.$$idx++;
+    return this;
+  }
+
+  $$iterval() {
+    return this.$$ctx[this.$$keys[this.$$idx]];
+  }
+
+  $$iterkey_s() {
+    return this.$$keys[this.$$idx];
+  }
+
+  $$toBool(ctx) {
+    return this.$$idx < this.$$target;
+  }
+
+  Str(ctx, _NAMED, self) {
+    return this.$$iterkey_s();
+  }
+
+  key(ctx, _NAMED, self) {
+    return this.$$iterkey_s();
+  }
+
+  value(ctx, _NAMED, self) {
+    return this.$$iterval();
   }
 };
 
