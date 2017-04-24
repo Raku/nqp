@@ -1,4 +1,4 @@
-plan(14);
+plan(15);
 sub more-inner() {
     my $outer := nqp::ctxcaller(nqp::ctx());
     my $outermost := nqp::ctxcaller(nqp::ctxcaller(nqp::ctx()));
@@ -84,3 +84,14 @@ outer();
 }
 
 ok(nqp::istrue(nqp::ctx()) == 1, 'ctxs are true');
+
+
+my sub elems_on_caller() {
+    is(nqp::elems(nqp::ctxcaller(nqp::ctx())), 3, 'nqp::elems on a ctx');
+}
+{
+    my $*a := 100;
+    my $*b := 200;
+    my $*c := 300;
+    elems_on_caller();
+}
