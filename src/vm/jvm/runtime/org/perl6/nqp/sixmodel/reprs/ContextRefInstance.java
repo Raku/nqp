@@ -64,6 +64,14 @@ public class ContextRefInstance extends SixModelObject {
         }
         throw ExceptionHandling.dieInternal(tc, "No lexical " + key + " in this lexpad");
     }
+
+    public long elems(ThreadContext tc) {
+        StaticCodeInfo info = context.codeRef.staticInfo;
+        return (info.oLexicalNames != null ? info.oLexicalNames.length : 0) +
+               (info.iLexicalNames != null ? info.iLexicalNames.length : 0) +
+               (info.nLexicalNames != null ? info.nLexicalNames.length : 0) +
+               (info.sLexicalNames != null ? info.sLexicalNames.length : 0);
+    }
     
     public long exists_key(ThreadContext tc, String key) {
         StaticCodeInfo sci = context.codeRef.staticInfo;
