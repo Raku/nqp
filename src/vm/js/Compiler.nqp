@@ -711,7 +711,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     proto method as_js($node, :$want) {
         if nqp::defined($want) {
             if nqp::istype($node, QAST::Want) {
-                self.NYI("QAST::Want");
                 self.coerce(self.as_js(want($node, $want), :$want), $want)
             }
             else {
