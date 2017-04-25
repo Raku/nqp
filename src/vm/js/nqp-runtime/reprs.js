@@ -320,8 +320,6 @@ class P6opaque {
   }
 
   compose(STable, reprInfoHash) {
-    // TODO
-
     /* Get attribute part of the protocol from the hash. */
     var reprInfo = reprInfoHash.content.get('attribute').array;
 
