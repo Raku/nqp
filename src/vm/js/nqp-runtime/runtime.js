@@ -187,6 +187,20 @@ exports.toStr = function(arg_, ctx) {
   }
 };
 
+function strToNum(str) {
+  if (str === 'NaN') return NaN;
+  if (str === 'Inf') return Infinity;
+  if (str === '-Inf') return -Infinity;
+  if (str === '+Inf') return Infinity;
+  let parsed = parseFloat(str);
+  if (isNaN(parsed)) {
+    return 0;
+  }
+  return parsed;
+}
+
+exports.strToNum = strToNum;
+
 exports.toNum = function(arg_, ctx) {
   let arg = arg_.$$decont(ctx);
   if (typeof arg == 'number') {
@@ -194,8 +208,7 @@ exports.toNum = function(arg_, ctx) {
   } else if (arg === Null) {
     return 0;
   } else if (typeof arg == 'string') {
-    var ret = parseFloat(arg);
-    return isNaN(ret) ? 0 : ret;
+    return strToNum(arg);
   } else if (arg._STable && arg._STable.methodCache && arg._STable.methodCache.get('Num')) {
     var result = arg.Num(ctx, null, arg);
     if (result.$$getNum) {

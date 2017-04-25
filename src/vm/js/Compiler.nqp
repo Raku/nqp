@@ -510,8 +510,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     return Chunk.new($T_NUM, "({$chunk.expr} ? 1 : 0)", $chunk);
                 }
                 if $got == $T_STR {
-                    my str $tmp := $*BLOCK.add_tmp();
-                    return Chunk.new($T_NUM, "(isNaN($tmp) ? 0 : $tmp)", [$chunk,"$tmp = parseFloat({$chunk.expr});\n"]);
+                    return Chunk.new($T_NUM, "nqp.strToNum({$chunk.expr})", $chunk);
                 }
             }
 
