@@ -1,6 +1,6 @@
 use QAST;
 
-plan(125);
+plan(130);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -2090,3 +2090,90 @@ is_qast(
         'for loop nohandler');
 
 }
+
+is_qast(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op<add_i>,
+            QAST::IVal.new( :value(0) ),
+            QAST::Want.new(
+                QAST::IVal.new( :value(100) ),
+                'N',
+                QAST::NVal.new( :value(200) ),
+                'I',
+                QAST::IVal.new( :value(300) ),
+                'S',
+                QAST::SVal.new( :value('400') ),
+            )
+         )
+    ), 300, 'QAST::Want - choosing int'
+);
+
+is_qast(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op<add_n>,
+            QAST::NVal.new( :value(0) ),
+            QAST::Want.new(
+                QAST::IVal.new( :value(100) ),
+                'N',
+                QAST::NVal.new( :value(200) ),
+                'I',
+                QAST::IVal.new( :value(300) ),
+                'S',
+                QAST::SVal.new( :value('400') ),
+            )
+         )
+    ), 200, 'QAST::Want - choosing num'
+);
+
+is_qast(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op<concat>,
+            QAST::SVal.new( :value('') ),
+            QAST::Want.new(
+                QAST::IVal.new( :value(100) ),
+                'N',
+                QAST::NVal.new( :value(200) ),
+                'I',
+                QAST::IVal.new( :value(300) ),
+                'S',
+                QAST::SVal.new( :value('400') ),
+            )
+         )
+    ), '400', 'QAST::Want - choosing str'
+);
+
+is_qast(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op<clone>,
+            QAST::Want.new(
+                QAST::IVal.new( :value(100) ),
+                'N',
+                QAST::NVal.new( :value(200) ),
+                'I',
+                QAST::IVal.new( :value(300) ),
+                'S',
+                QAST::SVal.new( :value('400') ),
+            )
+         )
+    ), 100, 'QAST::Want - choose first for objects'
+);
+
+is_qast(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op<concat>,
+            QAST::SVal.new( :value('x') ),
+            QAST::Want.new(
+                QAST::IVal.new( :value(100) ),
+                'N',
+                QAST::NVal.new( :value(200) ),
+                'I',
+                QAST::IVal.new( :value(300) ),
+            )
+         )
+    ), 'x100', 'QAST::Want - choose first when no match'
+);
