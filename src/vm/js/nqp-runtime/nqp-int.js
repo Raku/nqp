@@ -27,6 +27,10 @@ class NQPInt extends NQPObject {
   $$can(ctx, name) {
     return 0;
   }
+
+  $$clone() {
+    return this;
+  }
 };
 
 module.exports = NQPInt;
