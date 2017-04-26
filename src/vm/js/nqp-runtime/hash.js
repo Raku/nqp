@@ -84,7 +84,7 @@ class Hash extends NQPObject {
     return 0;
   }
 
-  $$can(obj, name) {
+  $$can(ctx, name) {
     return 0;
   }
 };
