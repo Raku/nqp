@@ -1,4 +1,4 @@
-plan(33);
+plan(45);
 
 is(nqp::bindhllsym("blabla", "key1", "value1"), 'value1', 'nqp::bindhllsym');
 nqp::bindhllsym("blabla", "key2", "value2");
@@ -147,3 +147,70 @@ ok(nqp::istype($str, BoxxyStr), 'got the right type for str');
 is(nqp::unbox_s($str), "trolling", 'got the right value for str');
 ok(nqp::istype($int, BoxxyInt), 'got the right type for int');
 ok(nqp::unbox_i($int) == 1, 'got the right value for int');
+
+
+if nqp::getcomp('nqp').backend.name eq 'jvm' {
+    skip('method_not_found is not implemented on the JVM', 12);
+} else {
+    my $method_not_found_called;
+    my $missing_on_object;
+    my $method_not_found;
+
+    nqp::sethllconfig('nqp', nqp::hash('method_not_found_error', -> $obj, $name {
+        $missing_on_object := $obj;
+        $method_not_found := $name;
+        $method_not_found_called := $method_not_found_called + 1;
+        nqp::die("We don't have $name!");
+    }));
+
+    my class Foo {
+        method exists() {
+        }
+    }
+
+    my $instance := Foo.new;
+
+    my sub test($desc, $instance) {
+
+        $method_not_found_called := 0;
+        $missing_on_object := NQPMu;
+        $method_not_found := NQPMu;
+
+        $instance.exists;
+
+        is($method_not_found_called, 0, "$desc - method_not_found not called when method exists");
+
+        my $caught_exception;
+        {
+            $instance.does_not_exist;
+            CATCH {
+                $caught_exception := $!;
+            }
+        }
+
+        ok(nqp::defined($caught_exception), "$desc - method_not_found throws and exception");
+        is(nqp::getmessage($caught_exception), "We don't have does_not_exist!", "$desc - the thrown exception has correct message");
+
+        is($method_not_found_called, 1, "$desc - method_not_found handler called once");
+        is($method_not_found, 'does_not_exist', "$desc - correct method name");
+        ok($missing_on_object =:= $instance, "$desc - correct obj passed to handler");
+    }
+
+
+    class TestHOW {
+        method new_type() {
+            nqp::newtype(self, 'P6opaque');
+        }
+
+        method find_method($obj, $name, :$no_fallback = 0, :$no_trace = 0) {
+            if $name eq 'exists' {
+                method () { "found" }
+            } else {
+                nqp::null();
+            }
+        }
+    }
+
+    test('method cache', Foo);
+    test('find_method', TestHOW.new.new_type);
+}
