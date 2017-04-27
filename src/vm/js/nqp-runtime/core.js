@@ -550,13 +550,15 @@ op.encode = function(str, encoding_, buf) {
 
   var elementSize = byteSize(buf);
 
+  var isUnsigned = buf._STable.REPR.type._STable.REPR.is_unsigned;
+
   var ret = [];
 
   var buffer = new Buffer(str, encoding);
 
   var offset = 0;
   for (var i = 0; i < buffer.length / elementSize; i++) {
-    buf.array[i] = buffer.readIntLE(offset, elementSize);
+    buf.array[i] = isUnsigned ? buffer.readUIntLE(offset, elementSize) : buffer.readIntLE(offset, elementSize);
     offset += elementSize;
   }
 
