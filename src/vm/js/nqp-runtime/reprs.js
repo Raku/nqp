@@ -38,6 +38,16 @@ function noopCompose(obj, reprInfo) {
 }
 
 
+
+function methodNotFoundError(ctx, obj, name) {
+  let handler = ctx ? ctx.$$getHLL().get('method_not_found_error') : undefined;
+  if (handler === undefined) {
+    throw new NQPException("Cannot find method '" + name + "' on object of type " + obj._STable.debugName);
+  } else {
+    handler.$$call(ctx, null, obj, name);
+  }
+}
+
 function basicConstructor(STable) {
   var objConstructor = function() {};
   var handler = {};
@@ -50,19 +60,26 @@ function basicConstructor(STable) {
       }
     }
 
-    if (STable.modeFlags & constants.METHOD_CACHE_AUTHORITATIVE) {
-      return undefined;
-    }
-
     /* are we trying to access an internal property? */
     if (name.substr(0, 2) === '$$') {
       return undefined;
     }
 
+    if (STable.modeFlags & constants.METHOD_CACHE_AUTHORITATIVE) {
+      return function(ctx, _NAMED, obj) {
+        methodNotFoundError(ctx, obj, name);
+      };
+    }
+
+
     return function() {
       let how = this._STable.HOW;
 
       var method = how.find_method(null, null, how, this, name);
+
+      if (method === Null) {
+        methodNotFoundError(arguments[0], arguments[2], name);
+      }
 
       var args = [];
       for (var i = 0; i < arguments.length; i++) {

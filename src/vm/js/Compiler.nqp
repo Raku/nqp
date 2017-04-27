@@ -998,7 +998,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         Chunk.void(|@capture_inners);
     }
 
-    method compile_block(QAST::Block $node, $outer, $outer_loop, :$want, :@extra_args=[]) {
+    method compile_block(QAST::Block $node, $outer, $outer_loop, :$want, :@extra_args=[], :$hll) {
 
         my str $outer_ctx := try $*CTX // "null";
 
@@ -1033,7 +1033,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
 
             my $outer_ctx := $has_closure_template ?? "this.outerCtx" !! ($*BLOCK.outer ?? $*BLOCK.outer.ctx !! 'null');
-            my str $create_ctx :=  "var $*CTX = new nqp.Ctx(caller_ctx, $outer_ctx, this);\n";
+            my str $create_ctx :=  "var $*CTX = new nqp.Ctx(caller_ctx, $outer_ctx, this);\n"
+                ~ ($hll ?? "$*CTX.\$\$hll = nqp.getHLL({quote_string($hll)});\n" !! '');
 
             %*USED_CTXS{$*CTX} := 0;
 
@@ -1311,7 +1312,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             "var sh = nqp.createArray([{nqp::join(',',@sh)}]);\n"
             ~ "var sc = nqp.op.createsc({quote_string(nqp::scgethandle($sc))});\n"
             ~ self.emit_code_refs_list($ast)
-            , "nqp.op.deserialize($quoted_data,sc,sh,code_refs,null,cuids,function() \{{self.setup_wvals}\});\n"
+            , "nqp.op.deserialize({quote_string($*HLL)}, $quoted_data,sc,sh,code_refs,null,cuids,function() \{{self.setup_wvals}\});\n"
             ~ "nqp.op.scsetdesc(sc,{quote_string(nqp::scgetdesc($sc))});\n");
     }
 
@@ -1439,7 +1440,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         self.mark_serializable($node[0]);
 
         # Compile the block.
-        my $block_js := self.as_js($node[0], :want(($instant && nqp::defined($node.main)) ?? $T_VOID !! $T_OBJ));
+        my $block_js := self.compile_block($node[0], $*BLOCK, $*LOOP, :hll($node.hll), :want(($instant && nqp::defined($node.main)) ?? $T_VOID !! $T_OBJ));
 
         my @post;
         for $node.post_deserialize -> $node {
@@ -1949,6 +1950,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my %*BLOCKS_STATEVARS;
 
         my $*COMPUNIT;
+
+        my $*LOOP;
 
         my $compile_block := -> {self.as_js($ast, :want($instant ?? $T_VOID !! $T_OBJ))};
 

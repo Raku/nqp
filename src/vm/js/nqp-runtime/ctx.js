@@ -297,6 +297,16 @@ class Ctx extends NQPObject {
     return this.$$outer.lookup(name);
   }
 
+  $$getHLL() {
+    var ctx = this;
+    while (ctx) {
+      if (ctx.$$hll) {
+        return ctx.$$hll;
+      }
+      ctx = ctx.$$outer;
+    }
+  }
+
   $$atkey(key) {
     return this.lookup(key);
   }

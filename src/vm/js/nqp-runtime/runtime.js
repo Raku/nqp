@@ -437,3 +437,5 @@ exports.paramcheckfailed = function(hllName, args) {
 };
 
 exports.NativeRef = require('./reprs.js').NativeRef;
+
+exports.getHLL = hll.getHLL;

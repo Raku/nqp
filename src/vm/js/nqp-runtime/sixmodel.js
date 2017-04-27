@@ -23,7 +23,7 @@ function findMethod(ctx, obj, name) {
     }
   }
 
-  if (obj._STable.HOW.find_method) {
+  if (obj._STable.HOW.$$can(ctx, 'find_method')) {
     return obj._STable.HOW.find_method(ctx, null, obj._STable.HOW, obj, name);
   } else {
     return Null;
@@ -93,7 +93,7 @@ class STable {
 
         var HOW = this._STable.HOW;
         /* This "hack" is stolen from the JVM */
-        if (!HOW.type_check) {
+        if (!HOW.$$can(ctx, 'type_check')) {
           return 0;
         }
 

@@ -43,7 +43,7 @@ module.exports.wval = function(handle, idx) {
   return serializationContexts[handle].rootObjects[idx];
 };
 
-op.deserialize = function(blob, sc, sh, codeRefs, conflict, cuids, setupWVals) {
+op.deserialize = function(hllName, blob, sc, sh, codeRefs, conflict, cuids, setupWVals) {
   var buffer = new Buffer(blob, 'base64');
   sc.codeRefs = codeRefs.array;
 
@@ -56,7 +56,7 @@ op.deserialize = function(blob, sc, sh, codeRefs, conflict, cuids, setupWVals) {
   sh = sh.array;
   var cursor = new BinaryCursor(buffer, 0, sh, sc);
 
-  cursor.deserialize(sc, cuids, setupWVals);
+  cursor.deserialize(sc, cuids, setupWVals, hll.getHLL(hllName));
 };
 
 op.createsc = function(handle) {
@@ -512,7 +512,7 @@ class BinaryCursor {
     Resolve the static variables in all CodeRefs contained in cuids
    */
 
-  deserialize(sc, cuids, setupWVals) {
+  deserialize(sc, cuids, setupWVals, currentHLL) {
     var version = this.I32();
 
     this.sc = sc;
@@ -643,7 +643,7 @@ class BinaryCursor {
 
     for (var i = 0; i < contexts.length; i++) {
       if (contexts[i].outer == 0) {
-        this.deserializeCtx(contexts[i], null);
+        this.deserializeCtx(contexts[i], null, currentHLL);
       }
     }
 
@@ -754,7 +754,7 @@ class BinaryCursor {
     }
   }
 
-  deserializeCtx(context, outerCtx) {
+  deserializeCtx(context, outerCtx, currentHLL) {
     var callerCtx = null;
 
     // TODO - think if we should set codeObj
@@ -771,7 +771,7 @@ class BinaryCursor {
     }
 
     for (var inner of context.inner) {
-      this.deserializeCtx(inner, ctx);
+      this.deserializeCtx(inner, ctx, currentHLL);
     }
 
     for (var closure of context.closures) {

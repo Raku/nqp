@@ -648,7 +648,7 @@ class QAST::OperationsJS {
     add_simple_op('serialize', $T_STR, [$T_OBJ, $T_OBJ], :side_effects);
     add_simple_op('scobjcount', $T_INT, [$T_OBJ]);
     add_simple_op('createsc', $T_OBJ, [$T_STR], :side_effects);
-    add_simple_op('deserialize', $T_OBJ, [$T_STR, $T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ], :side_effects);
+    add_simple_op('deserialize', $T_OBJ, [$T_STR, $T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ], :side_effects, :hll);
     add_simple_op('scsetobj', $T_OBJ, [$T_OBJ, $T_INT, $T_OBJ], :side_effects);
     add_simple_op('scgetobj', $T_OBJ, [$T_OBJ, $T_INT], :side_effects);
     add_simple_op('scsetcode', $T_OBJ, [$T_OBJ, $T_INT, $T_OBJ], :side_effects);
