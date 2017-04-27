@@ -349,6 +349,9 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     method backslash:sym<h>($/) {
 
         my $qast := QAST::Regex.new(
+#?if js
+            nqp::chr(0x2000) ~ nqp::chr(0x2001) ~ # HACK workaround for a cross compiling problem
+#?endif
             "\x[09,20,a0,1680,180e,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,200a,202f,205f,3000]",
             :rxtype('enumcharlist'),
             :negate($<sym> eq 'H'),
@@ -434,6 +437,9 @@ class QRegex::P6Regex::Actions is HLL::Actions {
 
     method cclass_backslash:sym<h>($/) {
         my $qast := QAST::Regex.new(
+#?if js
+            nqp::chr(0x2000) ~ nqp::chr(0x2001) ~ # HACK workaround for a cross compiling problem
+#?endif
             "\x[09,20,a0,1680,180e,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,200a,202f,205f,3000]",
             :rxtype('enumcharlist'),
             :negate($<sym> eq 'H'),
