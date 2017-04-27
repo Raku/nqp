@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(311);
+plan(312);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -507,4 +507,26 @@ is(nqp::tc("\x1044E"), "\x10426", 'tc works on codepoints greater than 0xffff');
     my $b := nqp::box_s('b', Stringish);
     my $c := 'c';
     is(nqp::join(",", nqp::list($a, $b, $c)), 'a,b,c', 'nqp::join supports boxed elements in the array');
+}
+
+{
+    my sub create_buf($type) {
+        my $buf := nqp::newtype(nqp::null(), 'VMArray');
+        nqp::composetype($buf, nqp::hash('array', nqp::hash('type', $type)));
+        nqp::setmethcache($buf, nqp::hash('new', method () {nqp::create($buf)}));
+        $buf;
+    }
+
+    sub buf_dump($buf) {
+      my @parts;
+      my $i := 0;
+      while $i < nqp::elems($buf) {
+        @parts.push(nqp::sprintf("0x%X", [nqp::atpos_i($buf, $i)]));
+        $i := $i + 1;
+      }
+      nqp::join(" ", @parts);
+    };
+
+    my $buf := nqp::encode(nqp::chr(0x28B81), 'utf8', create_buf(uint8).new);
+    is(buf_dump($buf), "0xF0 0xA8 0xAE 0x81", 'nqp::chr with 0x28B81 works properly');
 }
