@@ -426,7 +426,7 @@ class QAST::OperationsJS {
 
 
 
-    add_simple_op('chr', $T_STR, [$T_INT], sub ($code) {"String.fromCharCode($code)"});
+    add_simple_op('chr', $T_STR, [$T_INT], sub ($code) {"String.fromCodePoint($code)"});
 
     add_simple_op('lc', $T_STR, [$T_STR], sub ($string) {"$string.toLowerCase()"});
     add_simple_op('fc', $T_STR, [$T_STR]);
