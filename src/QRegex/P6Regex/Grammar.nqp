@@ -479,7 +479,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         ]
         {
             if !$<quote_EXPR> {
-                my $n := $<n>[0] gt '' ?? +$<n>[0] !! 1;
+                my $n := $<n>[0] gt '' ?? ($<n>[0] eq '!' ?? 0 !! +$<n>[0]) !! 1;
                 %*RX{ ~$<mod_ident><sym> } := $n;
             }
         }
