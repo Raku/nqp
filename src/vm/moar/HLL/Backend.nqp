@@ -307,22 +307,22 @@ class HLL::Backend::MoarVM {
                     }
                 }
                 elsif $k eq 'call_graph' {
-                    my %callee_rec_depth;
+                    my %call_rec_depth;
                     my int $node_id := 0;
-                    sub collect_callees(str $caller_id, %call_graph) {
-                        my str $callee_id := ~$node_id;
+                    sub collect_calls(str $parent_id, %call_graph) {
+                        my str $call_id := ~$node_id;
                         $node_id++;
-                        my @callee := nqp::list_s($caller_id, $callee_id);
-                        for <id osr spesh_entries jit_entries inlined_entries inclusive_time exclusive_time entries deopt_one> -> $f {
-                            nqp::push_s(@callee, ~(%call_graph{$f} // '0'));
+                        my @call := nqp::list_s($call_id, $parent_id);
+                        for <id osr spesh_entries jit_entries inlined_entries inclusive_time exclusive_time entries deopt_one deopt_all> -> $f {
+                            nqp::push_s(@call, ~(%call_graph{$f} // '0'));
                         }
                         my str $routine_id := ~%call_graph<id>;
-                        %callee_rec_depth{$routine_id} := 0 unless %callee_rec_depth{$routine_id};
-                        nqp::push_s(@callee, ~%callee_rec_depth{$routine_id});
-                        nqp::sayfh($profile_fh, 'INSERT INTO calls VALUES (' ~ nqp::join(',', @callee) ~ ');');
+                        %call_rec_depth{$routine_id} := 0 unless %call_rec_depth{$routine_id};
+                        nqp::push_s(@call, ~%call_rec_depth{$routine_id});
+                        nqp::sayfh($profile_fh, 'INSERT INTO calls VALUES (' ~ nqp::join(',', @call) ~ ');');
                         if %call_graph<allocations> {
                             for %call_graph<allocations> -> $a {
-                                my @a := nqp::list_s($caller_id, $callee_id);
+                                my @a := nqp::list_s($call_id);
                                 for <id spesh jit count> -> $f {
                                     nqp::push_s(@a, ~($a{$f} // '0'));
                                 }
@@ -330,14 +330,14 @@ class HLL::Backend::MoarVM {
                             }
                         }
                         if %call_graph<callees> {
-                            %callee_rec_depth{$routine_id}++;
+                            %call_rec_depth{$routine_id}++;
                             for %call_graph<callees> -> $c {
-                                collect_callees(~$callee_id, $c);
+                                collect_calls(~$call_id, $c);
                             }
-                            %callee_rec_depth{$routine_id}--;
+                            %call_rec_depth{$routine_id}--;
                         }
                     }
-                    collect_callees(~$node_id, $v);
+                    collect_calls(~$node_id, $v);
                 }
             }
             nqp::sayfh($profile_fh, 'INSERT INTO profile VALUES (' ~ nqp::join(',', @profile) ~ ');');
@@ -360,8 +360,8 @@ class HLL::Backend::MoarVM {
             nqp::sayfh($profile_fh, 'CREATE TABLE routines(id INTEGER PRIMARY KEY ASC, name TEXT, line INT, file TEXT);');
             nqp::sayfh($profile_fh, 'CREATE TABLE profile(total_time INT, spesh_time INT);');
             nqp::sayfh($profile_fh, 'CREATE TABLE gcs(time INT, retained_bytes INT, promoted_bytes INT, gen2_roots INT, full INT, cleared_bytes INT);');
-            nqp::sayfh($profile_fh, 'CREATE TABLE calls(caller_id INT, callee_id INT, routine_id INT, osr INT, spesh_entries INT, jit_entries INT, inlined_entries INT, inclusive_time INT, exclusive_time INT, entries INT, deopt_one INT, rec_depth INT);');
-            nqp::sayfh($profile_fh, 'CREATE TABLE allocations(caller_id INT, callee_id INT, type_id INT, spesh INT, jit INT, count INT);');
+            nqp::sayfh($profile_fh, 'CREATE TABLE calls(id INTEGER PRIMARY KEY ASC, parent_id INT, routine_id INT, osr INT, spesh_entries INT, jit_entries INT, inlined_entries INT, inclusive_time INT, exclusive_time INT, entries INT, deopt_one INT, deopt_all INT, rec_depth INT, FOREIGN KEY(routine_id) REFERENCES routines(id));');
+            nqp::sayfh($profile_fh, 'CREATE TABLE allocations(call_id INT, type_id INT, spesh INT, jit INT, count INT, PRIMARY KEY(call_id, type_id), FOREIGN KEY(call_id) REFERENCES calls(id), FOREIGN KEY(type_id) REFERENCES types(id));');
             to_sql($data);
             nqp::sayfh($profile_fh, 'END;');
         }
