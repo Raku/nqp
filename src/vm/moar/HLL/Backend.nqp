@@ -360,8 +360,8 @@ class HLL::Backend::MoarVM {
             nqp::sayfh($profile_fh, 'CREATE TABLE routines(id INTEGER PRIMARY KEY ASC, name TEXT, line INT, file TEXT);');
             nqp::sayfh($profile_fh, 'CREATE TABLE profile(total_time INT, spesh_time INT);');
             nqp::sayfh($profile_fh, 'CREATE TABLE gcs(time INT, retained_bytes INT, promoted_bytes INT, gen2_roots INT, full INT, cleared_bytes INT);');
-            nqp::sayfh($profile_fh, 'CREATE TABLE calls(id INTEGER PRIMARY KEY ASC, parent_id INT, routine_id INT, osr INT, spesh_entries INT, jit_entries INT, inlined_entries INT, inclusive_time INT, exclusive_time INT, entries INT, deopt_one INT, deopt_all INT, rec_depth INT);');
-            nqp::sayfh($profile_fh, 'CREATE TABLE allocations(call_id INT, type_id INT, spesh INT, jit INT, count INT);');
+            nqp::sayfh($profile_fh, 'CREATE TABLE calls(id INTEGER PRIMARY KEY ASC, parent_id INT, routine_id INT, osr INT, spesh_entries INT, jit_entries INT, inlined_entries INT, inclusive_time INT, exclusive_time INT, entries INT, deopt_one INT, deopt_all INT, rec_depth INT, FOREIGN KEY(routine_id) REFERENCES routines(id));');
+            nqp::sayfh($profile_fh, 'CREATE TABLE allocations(call_id INT, type_id INT, spesh INT, jit INT, count INT, PRIMARY KEY(call_id, type_id), FOREIGN KEY(call_id) REFERENCES calls(id), FOREIGN KEY(type_id) REFERENCES types(id));');
             to_sql($data);
             nqp::sayfh($profile_fh, 'END;');
         }
