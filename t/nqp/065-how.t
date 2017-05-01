@@ -25,7 +25,7 @@ my $NQPAttribute := @Foo-attrs[0].WHAT;
 is($NQPAttribute.HOW.name($NQPAttribute), 'NQPAttribute',"attributes are NQPAttributes");
 $baz.HOW.add_attribute($baz,$NQPAttribute.new(:name('$!baz_attr')));
 ok($baz.HOW.attributes($baz) == 1,"the right numer of attributes after adding");
-ok($baz.HOW.attributes($baz)[0].name == '$!baz_attr',"we can add an attribute");
+ok($baz.HOW.attributes($baz)[0].name eq '$!baz_attr',"we can add an attribute");
 
 
 class Descendant is Bar {

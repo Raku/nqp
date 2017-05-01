@@ -191,7 +191,7 @@ ok( nqp::elems($list) == 3, "iterator doesn't modify list");
 ok( nqp::islist($list), "nqp::islist works");
 is( nqp::unshift($list,'zero'), 'zero', "nqp::unshift");
 ok( nqp::elems($list) == 4, 'nqp::unshift adds 1 element');
-ok( nqp::atpos($list,0) == 'zero', 'nqp::unshift the correct element');
+ok( nqp::atpos($list,0) eq 'zero', 'nqp::unshift the correct element');
 
 my %hash;
 %hash<foo> := 1;
@@ -376,7 +376,7 @@ ok(nqp::isnull(nqp::getcomp("no_SuchLanguageNo_or_ever")), "nqp::getcomp for a m
     is(nqp::unshift_s($a, "X"), "X", "unshift_s");
 
     ok(nqp::elems($a) == 2, 'nqp::unshift_s increases the number of elements correctly');
-    ok(nqp::shift_s($a) == "X", 'the element get placed at the start');
+    ok(nqp::shift_s($a) eq "X", 'the element get placed at the start');
 
     my $b := nqp::list_s("A","B","C");
     ok(nqp::bindpos_s($b, 2, "D"), 'nqp::bindpos_s');

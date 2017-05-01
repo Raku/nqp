@@ -39,7 +39,7 @@ ok( !nqp::ishash($a), 'non-empty braces');
 sub xyz(*@a) {
     ok( +@a == 1, "brackets as single argument #1" );
     ok( +@a[0] == 2, "brackets as single argument #2");
-    ok( @a[0][1] == 'b', "brackets as single argument #3");
+    ok( @a[0][1] eq 'b', "brackets as single argument #3");
 }
 
 xyz(['a', 'b']);
