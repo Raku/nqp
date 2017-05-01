@@ -425,7 +425,7 @@ test_qast_result(
             QAST::Op.new(
                 :op<bind>,
                 QAST::Var.new( :name<strloc>, :scope<lexical> ),
-                QAST::SVal.new( :value('6 cute') )
+                QAST::SVal.new( :value(' 6 ') )
             ),
             QAST::Op.new( :op<bind>,
                 QAST::Var.new( :name<numref>, :scope<lexicalref> ),
@@ -473,7 +473,7 @@ test_qast_result(
 
         ok(nqp::atpos($r, 0) eq '7', 'can use int lexicalref as str');
         ok(nqp::atpos($r, 1) eq '3.14', 'can use num lexicalref as str');
-        ok(nqp::atpos($r, 2) eq '6 cute', 'can use str lexicalref as str');
+        ok(nqp::atpos($r, 2) eq ' 6 ', 'can use str lexicalref as str');
     }
 );
 
