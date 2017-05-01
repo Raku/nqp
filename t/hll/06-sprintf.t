@@ -22,7 +22,7 @@ sub is($actual, $expected, $description) {
     }
 }
 
-plan(281);
+plan(280);
 
 is(nqp::sprintf('Walter Bishop', []), 'Walter Bishop', 'no directives' );
 
@@ -71,7 +71,6 @@ is(nqp::sprintf('<%0*%>', [5]), '<0000%>', 'right-justified %% with 0-padding, s
 is(nqp::sprintf('<%2s>', ['long']), '<long>', '%s string longer than specified size');
 
 is(nqp::sprintf('<%d>', [1]), '<1>', '%d without size or precision');
-is(nqp::sprintf('<%d>', ["lol, I am a string"]), '<0>', '%d on a non-number');
 is(nqp::sprintf('<%d>', [42.18]), '<42>', '%d on a float');
 is(nqp::sprintf('<%d>', [-18.42]), '<-18>', '%d on a negative float');
 is(nqp::sprintf('<%03d>', [1]), '<001>', '%d on decimal with 0-padding');
