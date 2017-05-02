@@ -1,7 +1,7 @@
 #! nqp
 use nqpmo;
 
-plan(114);
+plan(120);
 
 my $knowhow := nqp::knowhow();
 my $bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
@@ -35,6 +35,13 @@ ok(nqp::iseq_I(nqp::sub_I($b, $b, $b), nqp::box_i(0, $bi_type)), 'subtraction');
 ok(nqp::iseq_I(nqp::div_I($b, $b, $b), $one), 'division');
 
 is(str(nqp::div_I(box(-8), box(3), $bi_type)), '-3', '-8 div 3 == -3');
+
+is(str(nqp::div_I(box(9), box(-4), $bi_type)), '-3', '9 div -4 == -3, div_I should round down');
+is(str(nqp::div_I(box(-9), box(4), $bi_type)), '-3', '9 div -4 == -3, div_I should round down');
+is(str(nqp::div_I(box(-9), box(-4), $bi_type)), '2', '-9 div -4 == 2');
+is(str(nqp::div_I(box(-8), box(4), $bi_type)), '-2', '-8 div 4 == 2');
+is(str(nqp::div_I(box(8), box(-4), $bi_type)), '-2', '-8 div 4 == 2');
+is(str(nqp::div_I(box(9), box(4), $bi_type)), '2', '9 div 4 == 2');
 
 my $big_dividend := '-800000000000000000000000000000000000000000000';
 my $big_result := '-266666666666666666666666666666666666666666667';
