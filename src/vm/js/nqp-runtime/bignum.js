@@ -98,8 +98,10 @@ op.sub_I = function(a, b, type) {
 op.div_I = function(a, b, type) {
   let divident = getBI(a);
   let divisor = getBI(b);
+  let divident_neg = divident.lt(0);
+  let divisor_neg = divisor.lt(0);
   // workaround for .div rounding to zero not down
-  if (divident.mod(divisor).lt(0)) {
+  if (divisor_neg != divident_neg && divident.mod(divisor).ne(0)) {
     return makeBI(type, divident.div(divisor).sub(1));
   }
   return makeBI(type, divident.div(divisor));
