@@ -125,7 +125,9 @@ public class VMArrayInstance extends VMArrayInstanceBase {
         if (elems < 1)
             throw ExceptionHandling.dieInternal(tc, "VMArray: Can't pop from an empty array");
         elems--;
-        return slots[start + elems];
+        SixModelObject popped = slots[start + elems];
+        slots[start + elems] = null;
+        return popped;
     }
 
     public void unshift_boxed(ThreadContext tc, SixModelObject value) {
