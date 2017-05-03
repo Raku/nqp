@@ -939,7 +939,7 @@ class QAST::OperationsJS {
     add_simple_op('sech_n', $T_NUM, [$T_NUM]);
 
     add_simple_op('abs_i', $T_INT, [$T_INT], sub ($arg) {"Math.abs($arg)"});
-    add_simple_op('pow_n', $T_NUM, [$T_NUM, $T_NUM], sub ($base, $exponent) {"Math.pow($base, $exponent)"});
+    add_simple_op('pow_n', $T_NUM, [$T_NUM, $T_NUM]);
 
     add_simple_op('srand', $T_INT, [$T_INT], :side_effects);
     add_simple_op('rand_n', $T_NUM, [$T_NUM]);

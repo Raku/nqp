@@ -1066,3 +1066,9 @@ op.getextype = function(exception) {
     return exception.$$category;
   }
 };
+
+op.pow_n = function(base, exponent) {
+  if (exponent === Infinity) return 1;
+  if (exponent === -Infinity) return 1;
+  return Math.pow(base, exponent);
+};
