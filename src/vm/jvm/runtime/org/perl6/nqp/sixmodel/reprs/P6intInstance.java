@@ -13,4 +13,14 @@ public class P6intInstance extends SixModelObject {
     public long get_int(ThreadContext tc) {
         return value;
     }
+
+    public SixModelObject clone(ThreadContext tc) {
+        try {
+            P6intInstance clone = (P6intInstance) this.clone();
+            clone.sc = null;
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
