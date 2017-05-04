@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(313);
+plan(315);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -109,7 +109,10 @@ my $a := 10;
 ok( nqp::if(0, ($a++), ($a--)) == 10, 'nqp::if shortcircuit');
 ok( $a == 9, 'nqp::if shortcircuit');
 
+ok( nqp::pow_n(1, nqp::inf) == 1, 'nqp::pow_n(1, nqp::inf)');
+ok( nqp::pow_n(1, nqp::neginf) == 1, 'nqp::pow_n(1, nqp::neginf)');
 ok( nqp::pow_n(2.0, 4) == 16.0, 'nqp::pow_n');
+
 ok( nqp::neg_i(5) == -5, 'nqp::neg_i');
 ok( nqp::neg_i(-10) == 10, 'nqp::neg_i');
 ok( nqp::neg_n(5.2) == -5.2, 'nqp::neg_n');
