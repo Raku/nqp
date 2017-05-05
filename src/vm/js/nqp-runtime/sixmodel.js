@@ -63,6 +63,10 @@ class STable {
       return this;
     };
 
+    this.objConstructor.prototype.$$isrwcont = function() {
+      return 0;
+    };
+
     this.objConstructor.prototype.typeObject_ = 0;
 
     this.objConstructor.prototype.$$call = undefined;

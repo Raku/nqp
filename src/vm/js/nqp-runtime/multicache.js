@@ -19,7 +19,28 @@ function posTypes(ctx, capture) {
     var obj = capture.pos[i];
     if (obj._STable) {
       let deconted = obj.$$decont(ctx);
-      types[i] = deconted.typeObject_ ? deconted : deconted._STable;
+      if (!obj.$$isrwcont) {
+        console.log("attempting to cache");
+        require('nqp-runtime').dumpObj(obj);
+      }
+
+      /* TODO - think if having flags wouldn't be faster/cleaner then weird objects */
+      if (obj.$$isrwcont()) {
+        if (deconted.typeObject_) {
+          if (deconted._STable.typeObjectCachedAsRW === undefined) {
+            deconted._STable.typeObjectCachedAsRW = {};
+          }
+          types[i] = deconted._STable.typeObjectCachedAsRW;
+        } else {
+          if (deconted._STable.cachedAsRW === undefined) {
+            deconted._STable.cachedAsRW = {};
+          }
+          types[i] = deconted._STable.cachedAsRW;
+        }
+
+      } else {
+        types[i] = deconted.typeObject_ ? deconted : deconted._STable;
+      }
     } else if (obj instanceof NQPInt) {
       types[i] = 1;
     } else if (typeof obj == 'number') {

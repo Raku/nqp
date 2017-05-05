@@ -396,6 +396,10 @@ Number.prototype.$$can = function(ctx, name) {
   return 0;
 };
 
+Number.prototype.$$isrwcont = function(ctx) {
+  return 0;
+};
+
 String.prototype.$$decont = function(ctx) {
   return this;
 };
@@ -409,6 +413,10 @@ String.prototype.$$can = function(ctx, name) {
 };
 
 String.prototype.$$istype = function(ctx, type) {
+  return 0;
+};
+
+String.prototype.$$isrwcont = function(ctx) {
   return 0;
 };
 

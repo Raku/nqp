@@ -1,12 +1,9 @@
 'use strict';
-class NullS {
+let NQPObject = require('./nqp-object.js');
+class NullS extends NQPObject {
   toString() {
     console.trace('here');
     throw 'doing string stuff on a null_s';
-  }
-
-  $$decont(ctx) {
-    return this;
   }
 
   $$istype(ctx, type) {

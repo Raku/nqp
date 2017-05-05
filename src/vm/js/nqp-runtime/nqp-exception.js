@@ -19,6 +19,10 @@ class NQPException extends Error {
   $$istype(ctx, type) {
     return 0;
   }
+
+  $$isrwcont() {
+    return 0;
+  }
 };
 
 NQPException.prototype._STable = {

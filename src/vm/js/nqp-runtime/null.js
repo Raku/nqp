@@ -1,10 +1,7 @@
 'use strict';
+let NQPObject = require('./nqp-object.js');
 let singleton;
-class Null {
-  $$decont(ctx) {
-    return this;
-  }
-
+class Null extends NQPObject {
   $$toBool(ctx) {
     return 0;
   }
