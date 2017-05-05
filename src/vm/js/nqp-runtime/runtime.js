@@ -163,7 +163,7 @@ op.setdispatcherfor = function(dispatcher, dispatcherFor) {
 exports.toStr = function(arg_, ctx) {
   var arg = arg_.$$decont(ctx);
   if (typeof arg == 'number') {
-    return arg.toString();
+    return numToStr(arg);
   } else if (typeof arg == 'string') {
     return arg;
   } else if (arg === Null) {
@@ -179,7 +179,7 @@ exports.toStr = function(arg_, ctx) {
     if (typeof ret == 'string') return ret;
     return ret.$$getStr();
   } else if (arg.$$getNum) {
-    return arg.$$getNum().toString();
+    return numToStr(arg.$$getNum());
   } else if (arg.$$getInt) {
     return arg.$$getInt().toString();
   } else {
@@ -200,6 +200,15 @@ function strToNum(str) {
 }
 
 exports.strToNum = strToNum;
+
+function numToStr(num) {
+  if (num === Infinity) return 'Inf';
+  if (num === -Infinity) return '-Inf';
+
+  return num.toString();
+}
+
+exports.numToStr = numToStr;
 
 exports.toNum = function(arg_, ctx) {
   let arg = arg_.$$decont(ctx);

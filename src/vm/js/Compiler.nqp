@@ -538,10 +538,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
 
             if $desired == $T_STR {
-                if $got == $T_INT || $got == $T_NUM {
+                if $got == $T_INT {
                     return Chunk.new($T_STR, $chunk.expr ~ '.toString()', $chunk);
                 }
-                if $got == $T_BOOL {
+                elsif $got == $T_NUM {
+                    return Chunk.new($T_STR, "nqp.numToStr({$chunk.expr})", $chunk);
+                }
+                elsif $got == $T_BOOL {
                     return Chunk.new($T_STR, "({$chunk.expr} ? '1' : '0')", $chunk);
                 }
             }
