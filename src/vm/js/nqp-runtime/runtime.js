@@ -431,9 +431,9 @@ exports.dumpObj = function(obj) {
   }
 };
 
-exports.paramcheckfailed = function(hllName, args) {
+exports.paramcheckfailed = function(hllName, ctx, args) {
   let capture = new Capture(args[1], Array.prototype.slice.call(args, 2));
-  hll.hllConfigs[hllName].get('bind_error').$$call(args[0], null, capture);
+  return hll.hllConfigs[hllName].get('bind_error').$$call(ctx, null, capture);
 };
 
 exports.NativeRef = require('./reprs.js').NativeRef;
