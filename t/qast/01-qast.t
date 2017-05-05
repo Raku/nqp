@@ -1,6 +1,6 @@
 use QAST;
 
-plan(130);
+plan(132);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -1918,12 +1918,14 @@ test_qast_result(
 );
 
 if nqp::getcomp('nqp').backend.name eq 'jvm' {
-    skip("QAST::ParamTypeCheck is not implemented on the JVM", 5);
+    skip("QAST::ParamTypeCheck is not implemented on the JVM", 7);
 }
 else {
     my $in_bind_error := 0;
     my $wrongly_bound_capture;
     my $throw_exception := 0;
+    my $used_caller;
+
     nqp::sethllconfig('hll_with_bind_error_handler', nqp::hash(
         'bind_error', -> $capture {
             $in_bind_error := $in_bind_error + 1;
@@ -1932,6 +1934,11 @@ else {
                 my $exception := nqp::newexception();
                 nqp::setpayload($exception, nqp::captureposarg($capture, 0));
                 nqp::throw($exception);
+            }
+            else {
+                my $caller := nqp::callercode();
+                $used_caller := $caller(6);
+                1000;
             }
          }
     ));
@@ -1976,6 +1983,12 @@ else {
                 }
             }
             is($exception_thrown, 307, 'throwing an exception from bind_error handler works');
+
+            $throw_exception := 0;
+
+            my $result := $r(666);
+            is($result, 1000, "bind error can return a value");
+            is($used_caller, 106, 'we can get the proper caller from bind_error');
         }
     );
 };
