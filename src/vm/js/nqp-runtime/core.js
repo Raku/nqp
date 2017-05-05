@@ -962,7 +962,7 @@ op.ctxcallerskipthunks = function(ctx) {
   // FIXME - ctxs that don't have a codeRef
   while (caller && caller.codeRef().staticCode.isThunk) {
     caller = caller.$$caller;
-    if (caller) caller = caller.$$skipHandlers()
+    if (caller) caller = caller.$$skipHandlers();
   }
   return caller || Null;
 };
