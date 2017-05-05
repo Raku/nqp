@@ -56,7 +56,7 @@ for @files -> $fn {
 
     my $todo := 0;
     for @lines -> $line {
-        my $m := $line ~~ /'# todo ' .*? ':pge<' (.*) '>'/;
+        my $m := $line ~~ /'# todo '/;
         if $m {
           $todo := 1;
         }
@@ -73,6 +73,9 @@ for @files -> $fn {
             my $regex  := @parts[0];
             my $target := @parts[1];
             my $expect := @parts[2];
+            if $expect ~~ /Illegal/ {
+                next;
+            }
             my $desc   := @parts[3];
 
             my $expect_substr := nqp::substr($expect, 0, 1) eq "<"
