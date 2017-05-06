@@ -165,6 +165,8 @@ public final class Ops {
     public static final int STAT_PLATFORM_BLOCKSIZE = -6;
     public static final int STAT_PLATFORM_BLOCKS    = -7;
 
+    public static final int MAX_GRAPHEMES           = 2147483647;
+
     public static long stat(String filename, long status) {
         return stat_internal(filename, status);
     }
@@ -3992,10 +3994,26 @@ public final class Ops {
     }
 
     public static String x(String val, long count, ThreadContext tc) {
+        /* Validate count; handle common cases. */
+        if (count == 0)
+            return "";
+        if (count == 1)
+            return val;
         if (count < 0)
             throw ExceptionHandling.dieInternal(tc, "repeat count (" + count + ") cannot be negative");
+        if (count > MAX_GRAPHEMES)
+            throw ExceptionHandling.dieInternal(tc, "repeat count (" + count + ") cannot be greater than max allowed number of graphemes " + MAX_GRAPHEMES);
 
-        StringBuilder retval = new StringBuilder((int)Math.min(Integer.MAX_VALUE, val.length() * count));
+        /* If input string is empty, repeating it is empty. */
+        if (val.length() == 0)
+            return "";
+
+        /* Total size of the resulting string can't be bigger than a String is allowed to be. */
+        long total_count = val.length() * count;
+        if (total_count > MAX_GRAPHEMES)
+            throw ExceptionHandling.dieInternal(tc, "Can't repeat string, required number of graphemes " + total_count + " > max allowed of " + MAX_GRAPHEMES);
+
+        StringBuilder retval = new StringBuilder((int)total_count);
         for (long ii = 1; ii <= count; ii++) {
             retval.append(val);
         }
