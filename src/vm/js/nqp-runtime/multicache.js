@@ -19,10 +19,6 @@ function posTypes(ctx, capture) {
     var obj = capture.pos[i];
     if (obj._STable) {
       let deconted = obj.$$decont(ctx);
-      if (!obj.$$isrwcont) {
-        console.log("attempting to cache");
-        require('nqp-runtime').dumpObj(obj);
-      }
 
       /* TODO - think if having flags wouldn't be faster/cleaner then weird objects */
       if (obj.$$isrwcont()) {
@@ -37,7 +33,6 @@ function posTypes(ctx, capture) {
           }
           types[i] = deconted._STable.cachedAsRW;
         }
-
       } else {
         types[i] = deconted.typeObject_ ? deconted : deconted._STable;
       }
