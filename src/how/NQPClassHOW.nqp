@@ -782,7 +782,7 @@ knowhow NQPClassHOW {
         }
     }
     method should_trace($obj, $name) {
-        return 0 if nqp::substr($name, 0, 1) eq '!';
+        return 0 if nqp::eqat($name, '!', 0);
         for @!trace_exclude {
             return 0 if $name eq $_;
         }

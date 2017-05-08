@@ -105,7 +105,7 @@ class HLL::Compiler does HLL::Backend::Default {
                 if self.input-incomplete($output) {
                     # Need to get more code before we execute
                     # Strip the trailing \, but reinstate the newline
-                    if nqp::substr($code, 0, nqp::chars($code) - 2) eq "\\\n" {
+                    if nqp::eqat($code, "\\\n", 0) {
                         $code := nqp::substr($code, 0, nqp::chars($code) - 2) ~ "\n";
                     }
                     if $code {
@@ -153,7 +153,7 @@ class HLL::Compiler does HLL::Backend::Default {
     method eval($code, *@args, *%adverbs) {
         my $output;
 
-        if $code && nqp::substr($code, nqp::chars($code) - 2) eq "\\\n" {
+        if $code && nqp::eqat($code, "\\\n", nqp::chars($code) - 2) {
             return self.needs-more-input();
         }
 
@@ -650,7 +650,7 @@ class HLL::Compiler does HLL::Backend::Default {
                 # Treat \r\n as a single logical newline. Note that NFG
                 # implementations, we should check it really is a lone \r,
                 # not the first bit of a \r\n grapheme.
-                if nqp::iseq_i($ord, 13) && nqp::substr($s, $jpos - 1, 1) eq "\r" &&
+                if nqp::iseq_i($ord, 13) && nqp::eqat($s, "\r", $jpos - 1) &&
                    $jpos < $eos && nqp::iseq_i(nqp::ord($s, $jpos), 10)
                 {
                     $jpos := nqp::add_i($jpos, 1);

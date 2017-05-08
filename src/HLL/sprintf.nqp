@@ -237,7 +237,7 @@ my module sprintf {
         sub normalize($float) {
             my @parts := nqp::split('e', nqp::lc($float));
             my $sign := '';
-            if nqp::substr(@parts[0],0,1) eq '-' {
+            if nqp::eqat(@parts[0], '-', 0) {
                 $sign := '-';
                 @parts[0] := nqp::substr(@parts[0], 1);
             }
@@ -271,7 +271,7 @@ my module sprintf {
 
             my $zeroes := infix_x("0", 1 + ($precision > $d ?? $precision - $d  !! 0));
 
-            $lhs_s := nqp::substr($lhs_s, 1) if nqp::substr($lhs_s, 0, 1) eq '-';
+            $lhs_s := nqp::substr($lhs_s, 1) if nqp::eqat($lhs_s, '-', 0);
             my $lhs_I := nqp::fromstr_I($lhs_s, $knowhow);
             my $rhs_I := nqp::fromstr_I("1" ~ $rhs_s ~ $zeroes, $knowhow);      # The leading 1 is to preserve leading zeroes
             my $cc := nqp::chars(nqp::tostr_I($rhs_I));
