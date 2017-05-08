@@ -174,10 +174,32 @@ class FileHandle extends NQPObject {
 
 exports.FileHandle = FileHandle;
 
+function modeToFlags(mode) {
+  let flags;
+
+  if (mode === 'w') {
+    flags = fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_TRUNC;
+  } else {
+    if (mode[0] === 'r') flags = fs.constants.O_RDONLY;
+    else if (mode[0] === '-') flags = fs.constants.O_WRONLY;
+    else if (mode[0] === '+') flags = fs.constants.O_RDWR;
+    else if (mode[0] === 'w') flags = fs.constants.O_WRONLY | fs.constants.O_CREAT;
+    else throw 'unknown mode to open: ' + mode;
+  }
+
+  for (let c of mode.substr(1)) {
+    if (c === 'a') flags |= fs.constants.O_APPEND;
+    else if (c === 'c') flags |= fs.constants.O_CREAT;
+    else if (c === 't') flags |= fs.constants.O_TRUNC;
+    else if (c === 'x') flags |= fs.constants.O_EXCL;
+    else throw 'unknown mode to open: ' + mode;
+  }
+
+  return flags;
+}
+
 op.open = function(name, mode) {
-  var modes = {r: 'r', w: 'w', wa: 'a', '-ct': 'w', '-ca': 'a'};
-  if (!modes[mode]) { throw 'unknown mode to open: ' + mode }
-  var fh = new FileHandle(fs.openSync(name, modes[mode]));
+  let fh = new FileHandle(fs.openSync(name, modeToFlags(mode)));
   fh.encoding = 'utf8';
   return fh;
 };
