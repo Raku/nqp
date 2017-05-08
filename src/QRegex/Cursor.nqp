@@ -854,8 +854,16 @@ role NQPMatchRole is export {
             my int $litlen := nqp::chars($str);
             my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
             if $litlen < 1 ||
+#?if jvm
                 ($i ?? nqp::lc(nqp::substr($target, $!pos, $litlen)) eq nqp::lc($str)
-                    !! nqp::substr($target, $!pos, $litlen) eq $str) {
+#?endif
+#?if js
+                ($i ?? nqp::lc(nqp::substr($target, $!pos, $litlen)) eq nqp::lc($str)
+#?endif
+#?if moar
+                ($i ?? nqp::eqatic($target, $str, $!pos)
+#?endif
+                    !! nqp::eqat($target, $str, $!pos)) {
                 my $cur := self."!cursor_start_cur"();
                 $cur."!cursor_pass"($!pos + $litlen);
                 $cur
@@ -1300,7 +1308,7 @@ class NQPMatch is NQPCapture does NQPMatchRole {
                 else {
                     my int $len := nqp::chars($_);
                     $maxlen     := $len if $len > $maxlen && $pos + $len <= $eos
-                        && nqp::substr($tgt, $pos, $len) eq $_;
+                        && nqp::eqat($tgt, $_, $pos);
                 }
                 last if $s && $maxlen > -1;
             }

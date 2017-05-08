@@ -85,8 +85,8 @@ class HLL::Backend::MoarVM {
         }
         nqp::sayfh(nqp::getstderr(), "Writing profiler output to $filename");
         my $profile_fh := open($filename, :w);
-        my $want_json  := nqp::substr($filename, -5) eq '.json';
-        my $want_sql   := nqp::substr($filename, -4) eq '.sql';
+        my $want_json  := nqp::eqat($filename, '.json', -5);
+        my $want_sql   := nqp::eqat($filename, '.sql', -4);
 
         my $escaped_backslash;
         my $escaped_dquote;

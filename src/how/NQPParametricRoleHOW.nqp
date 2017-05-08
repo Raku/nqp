@@ -143,7 +143,7 @@ knowhow NQPParametricRoleHOW {
             my $meth := nqp::can(nqp::iterval($_), 'instantiate_generic')
                 ?? nqp::iterval($_).instantiate_generic($pad)
                 !! nqp::iterval($_).clone();
-            if nqp::substr($name, 0, 12) eq '!!LATENAME!!' {
+            if nqp::eqat($name, '!!LATENAME!!', 0) {
                 $name := nqp::atkey($pad, nqp::substr($name, 12));
                 $meth.'!set_name'($name);
             }

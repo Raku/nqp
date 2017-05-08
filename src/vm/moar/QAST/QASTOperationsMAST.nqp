@@ -163,7 +163,7 @@ class QAST::MASTOperations {
                 !! $qastcomp.as_mast($_, :want($operand_kind/8));
             my int $arg_kind := $arg.result_kind;
 
-            if $arg_num == 0 && nqp::substr($op, 0, 7) eq 'return_' {
+            if $arg_num == 0 && nqp::eqat($op, 'return_', 0) {
                 $*BLOCK.return_kind($arg.result_kind);
             }
 

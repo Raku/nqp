@@ -137,7 +137,7 @@ class NQP::Optimizer {
         self.visit_children($block);
 
         # Methods with late-bound names poison lowering.
-        if nqp::substr($block.name, 0, 12) eq '!!LATENAME!!' {
+        if nqp::eqat($block.name, '!!LATENAME!!', 0) {
             self.poison_lowering();
         }
 
