@@ -107,7 +107,6 @@ Building the JavaScript backend currently requires building the moar backend:
     $ perl Configure.pl --backends=moar,js
     $ make
 
-    $ mkdir node_modules
     $ npm install src/vm/js/nqp-runtime
     $ npm install tap
 

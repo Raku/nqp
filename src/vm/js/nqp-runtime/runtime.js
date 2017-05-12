@@ -103,7 +103,7 @@ op.loadbytecode = function(ctx, file) {
   var mangled = file.replace(/::/g, '-');
 
   var prefixes = (process.env.NQPJS_LIB || '').split(':');
-  prefixes.push('./', 'nqp-js-on-js/');
+  prefixes.push('./', './nqp-js-on-js/');
   var found = false;
   for (var prefix of prefixes) {
     try {
