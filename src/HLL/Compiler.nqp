@@ -553,7 +553,6 @@ class HLL::Compiler does HLL::Backend::Default {
         for %!config {
             nqp::say($!language ~ '::' ~ $_.key ~ '=' ~ $_.value);
         }
-        try { self.eval('$*SAY-ADDITIONAL-CONFIG-INFO') }
         nqp::exit(0);
     }
     
