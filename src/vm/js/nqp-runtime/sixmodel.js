@@ -9,7 +9,7 @@ var compilingSCs = repossession.compilingSCs;
 var constants = require('./constants.js');
 
 /* Needed for setting defaults values of attrs for objects */
-var bignum = require('bignum');
+var bignum = require('bignum-browserify');
 var ZERO = bignum(0);
 
 function findMethod(ctx, obj, name) {

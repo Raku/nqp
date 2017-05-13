@@ -1,7 +1,7 @@
 'use strict';
 var reprs = require('./reprs.js');
 
-var bignum = require('bignum');
+var bignum = require('bignum-browserify');
 
 var core = require('./core.js');
 

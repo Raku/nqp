@@ -8,7 +8,7 @@ var null_s = require('./null_s.js');
 var Iter = require('./iter.js');
 var BOOT = require('./BOOT.js');
 
-var bignum = require('bignum');
+var bignum = require('bignum-browserify');
 var ZERO = bignum(0);
 
 var constants = require('./constants.js');

@@ -15,7 +15,7 @@
   "repository": "http://github.com/perl6/nqp/",
   "main": "runtime.js",
   "dependencies": {
-    "bignum": "*",
+    "bignum-browserify": "*",
     "fs-ext": "*",
     "node-int64": "*",
     "nqp-js-io": "pmurias/nqp-js-io",

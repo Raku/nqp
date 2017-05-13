@@ -97,8 +97,6 @@ b|			bcd		[Null regex]	alternation (|) - null right arg illegal
 <[a..c]>+ && <[b..e]>+	bcd		y	conjunction (&&)
 <[a..d]>+ && <[c..e]>+	bcd		y	conjunction (&&)
 b&			bcd		[Null regex]	conjunction (&) - null right arg illegal
-# todo :any<bug>
-&b			bcd		[Null regex]	conjunction (&) - null left arg illegal
 &			bcd		[Null regex]	conjunction (&) - null both args illegal
 \&			&		y	conjunction (&) - literal must be escaped
 &			&		[Null regex]	conjunction (&) - literal must be escaped
