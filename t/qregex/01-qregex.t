@@ -42,7 +42,8 @@ sub test_line($line) {
     $target := '' if $target eq "''";
     $target := unescape($target);
 
-    my $expect_substr := nqp::eqat($expect, '<', 0)
+    my $expect_error := nqp::eqat($expect, '[', 0);
+    my $expect_substr := (nqp::eqat($expect, '<', 0) || nqp::eqat($expect, '[', 0))
                            ?? nqp::substr($expect, 1, nqp::chars($expect) - 2)
                            !! '';
 
@@ -51,7 +52,11 @@ sub test_line($line) {
         my $rxsub  := $rxcomp.compile($regex);
         my $cursor := NQPCursor."!cursor_init"($target, :c(0));
         my $match  := $rxsub($cursor).MATCH;
-        if $expect_substr {
+
+        if $expect_error {
+            ok(0, "$desc - expected an error");
+        }
+        elsif $expect_substr {
             my $got := ~$match."!dump_str"('mob');
             my $m := nqp::index($got, $expect_substr) >= 0;
             ok($m, $desc);
@@ -61,10 +66,10 @@ sub test_line($line) {
             ok($expect eq 'y' ?? $match !! !$match, $desc);
         }
         CATCH {
-            if $expect_substr {
+            if $expect_error {
                 my $m := nqp::index(~$_, $expect_substr) >= 0;
                 ok($m, $desc);
-                say("#      got: $_\n# expected: $expect") unless $m;
+                say("#      got error: $_\n# expected error: $expect_substr") unless $m;
             }
             else {
                 ok(0, $desc);

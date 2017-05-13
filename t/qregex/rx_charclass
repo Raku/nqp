@@ -18,8 +18,8 @@
 <-[b..d]>		abcdef		y	negated character range
 <- [b..d]>		abcdef		y	negated allows ws
 <-[b..d]>		bbccdd		n	negated character range
-<-[d..b]>		bbccdd		<Illegal reversed character range in regex>	illegal character range
-<[x-z]>			ab-def		<Unsupported>	perl5 range
+<-[d..b]>		bbccdd		[Illegal reversed character range in regex]	illegal character range
+<[x-z]>			ab-def		[Unsupported]	perl5 range
 <[-]>			ab-def		y	unescaped hyphen, the only thing
 <[ - ]>			ab-def		y	unescaped hyphen, the only thing w spaces
 <[x-]>			ab-def		y	unescaped hyphen, at the end
@@ -43,7 +43,7 @@
 <["\\]>			\\			y	escaped backslash
 <[\]]>			]			y	escaped close bracket
 # todo :any<backslash escapes in char classes>
-<[\]>			\\]]		/error/	unescaped backslash (or no closing brace)
+<[\]>			\\]]		[error]	unescaped backslash (or no closing brace)
 ^\><[<]>		><		y	lt character class
 ^<[>]>\<		><		y	gt character class
 ^<[><]>**2		><		y	gt, lt character class

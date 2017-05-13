@@ -55,12 +55,12 @@ a\N+f			abcdef		y	not logical newline (\N)
 c \N d			abc\n\rdef	n	not logical newline (\N)
 c \N d			abc\r\ndef	n	not logical newline (\N)
 b \N \n			abc\ndef	y	not logical newline (\N)
-\Aabc			Aabc		<Unsupported>	retired metachars (\A)
-\Aabc			abc\ndef	<Unsupported>	retired metachars (\A)
-abc\Z			abcZ		<Unsupported>	retired metachars (\Z)
-abc\Z			abc\ndef	<Unsupported>	retired metachars (\Z)
-abc\z			abcz		<Unsupported>	retired metachars (\z)
-def\z			abc\ndef	<Unsupported>	retired metachars (\z)
+\Aabc			Aabc		[Unsupported]	retired metachars (\A)
+\Aabc			abc\ndef	[Unsupported]	retired metachars (\A)
+abc\Z			abcZ		[Unsupported]	retired metachars (\Z)
+abc\Z			abc\ndef	[Unsupported]	retired metachars (\Z)
+abc\z			abcz		[Unsupported]	retired metachars (\z)
+def\z			abc\ndef	[Unsupported]	retired metachars (\z)
 abc # def		abc#def		y	comments (#)
 abc # xyz		abc#def		y	comments (#)
 abc # def \n \$		abc#def		y	comments (#)
@@ -84,13 +84,13 @@ $$ \n			\n		y	line beginnings and endings ($$)
 ^ [ <[a..c]>+ | <[b..e]>+ ] $	bcd		y	alternation (|)
 ^ [ <[a..d]>+ | <[c..e]>+ ] $	bcd		y	alternation (|)
 # todo :any<feature>
-b|			bcd		<Null pattern>	alternation (|) - null right arg illegal
+b|			bcd		[Null pattern]	alternation (|) - null right arg illegal
 |b			bcd		y	alternation (|) - null left arg ignored
 # todo :any<feature>
-|			bcd		<Null pattern>	alternation (|) - null both args illegal
+|			bcd		[Null pattern]	alternation (|) - null both args illegal
 \|			|		y	alternation (|) - literal must be escaped
 # todo :any<feature>
-|			|		<Null pattern>	alternation (|) - literal must be escaped
+|			|		[Null pattern]	alternation (|) - literal must be escaped
 <[a..d]> && <[b..e]>	c		y	conjunction (&&)
 <[a..d]> && <[d..e]>	c		n	conjunction (&&)
 <[a..b]> && <[b..e]>	c		n	conjunction (&&)
@@ -100,36 +100,36 @@ b|			bcd		<Null pattern>	alternation (|) - null right arg illegal
 <[a..c]>+ && <[b..e]>+	bcd		y	conjunction (&&)
 <[a..d]>+ && <[c..e]>+	bcd		y	conjunction (&&)
 # todo :any<&-conjunciton>
-b&			bcd		<rule error>	conjunction (&) - null right arg illegal
+b&			bcd		[rule error]	conjunction (&) - null right arg illegal
 # todo :any<&-conjunciton>
-&b			bcd		<rule error>	conjunction (&) - null left arg illegal
+&b			bcd		[rule error]	conjunction (&) - null left arg illegal
 # todo :any<&-conjunciton>
-&			bcd		<rule error>	conjunction (&) - null both args illegal
+&			bcd		[rule error]	conjunction (&) - null both args illegal
 \&			&		y	conjunction (&) - literal must be escaped
 # todo :any<&-conjunciton>
-&			&		<rule error>	conjunction (&) - literal must be escaped
+&			&		[rule error]	conjunction (&) - literal must be escaped
 # todo :any<leading |>
-a&|b			a&|b		<rule error>	alternation and conjunction (&|) - parse error
+a&|b			a&|b		[rule error]	alternation and conjunction (&|) - parse error
 # todo :any<&-conjunciton>
-&			&		<rule error>	conjunction (&) - literal must be escaped
+&			&		[rule error]	conjunction (&) - literal must be escaped
 # todo :any<&-conjunciton>
-a|&b			a|&b		<rule error>	alternation and conjunction (|&) - parse error
+a|&b			a|&b		[rule error]	alternation and conjunction (|&) - parse error
 |d|b			abc		y	leading alternation ignored
  |d|b			abc		y	leading alternation ignored
 |d |b			abc		y	leading alternation ignored
  | d | b		abc		y	leading alternation ignored
-\pabc			pabc		<Unrecognized>	retired metachars (\p)
-\p{InConsonant}		a		<Unrecognized>	retired metachars (\p)
-\Pabc			Pabc		<Unrecognized>	retired metachars (\P)
-\P{InConsonant}		a		<Unrecognized>	retired metachars (\P)
-\Labc\E			LabcE		<Unrecognized>	retired metachars (\L...\E)
-\LABC\E			abc		<Unrecognized>	retired metachars (\L...\E)
-\Uabc\E			UabcE		<Unrecognized>	retired metachars (\U...\E)
-\Uabc\E			ABC		<Unrecognized>	retired metachars (\U...\E)
-\Qabc\E			QabcE		<Unsupported>	retired metachars (\Q...\E)
-\Qabc d?\E		abc d		<Unsupported>	retired metachars (\Q...\E)
-\Gabc			Gabc		<Unrecognized>	retired metachars (\G)
-\1abc			1abc		<Unrecognized>	retired metachars (\1)
+\pabc			pabc		[Unrecognized]	retired metachars (\p)
+\p{InConsonant}		a		[Unrecognized]	retired metachars (\p)
+\Pabc			Pabc		[Unrecognized]	retired metachars (\P)
+\P{InConsonant}		a		[Unrecognized]	retired metachars (\P)
+\Labc\E			LabcE		[Unrecognized]	retired metachars (\L...\E)
+\LABC\E			abc		[Unrecognized]	retired metachars (\L...\E)
+\Uabc\E			UabcE		[Unrecognized]	retired metachars (\U...\E)
+\Uabc\E			ABC		[Unrecognized]	retired metachars (\U...\E)
+\Qabc\E			QabcE		[Unsupported]	retired metachars (\Q...\E)
+\Qabc d?\E		abc d		[Unsupported]	retired metachars (\Q...\E)
+\Gabc			Gabc		[Unrecognized]	retired metachars (\G)
+\1abc			1abc		[Unrecognized]	retired metachars (\1)
 ^ \s+ $			\x0009\x0020\x00a0\x000a\x000b\x000c\x000d\x0085	y	0-255 whitespace (\s)
 ^ \h+ $			\x0009\x0020\x00a0	y	0-255 horizontal whitespace (\h)
 ^ \V+ $			\x0009\x0020\x00a0	y	0-255 horizontal whitespace (\V)
