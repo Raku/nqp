@@ -42,8 +42,7 @@
 <-[+\-]>		------		n	negated escaped hyphen in range
 <["\\]>			\\			y	escaped backslash
 <[\]]>			]			y	escaped close bracket
-# todo :any<backslash escapes in char classes>
-<[\]>			\\]]		[error]	unescaped backslash (or no closing brace)
+<[\]>			\\]]		[Unrecognized]	unescaped backslash (or no closing brace)
 ^\><[<]>		><		y	lt character class
 ^<[>]>\<		><		y	gt character class
 ^<[><]>**2		><		y	gt, lt character class

@@ -83,14 +83,11 @@ $$ \n			\n		y	line beginnings and endings ($$)
 ^ [ <[a..d]>+ | <[b..e]>+ ] $	bcd		y	alternation (|)
 ^ [ <[a..c]>+ | <[b..e]>+ ] $	bcd		y	alternation (|)
 ^ [ <[a..d]>+ | <[c..e]>+ ] $	bcd		y	alternation (|)
-# todo :any<feature>
-b|			bcd		[Null pattern]	alternation (|) - null right arg illegal
+b|			bcd		[Null regex]	alternation (|) - null right arg illegal
 |b			bcd		y	alternation (|) - null left arg ignored
-# todo :any<feature>
-|			bcd		[Null pattern]	alternation (|) - null both args illegal
+|			bcd		[Null regex]	alternation (|) - null both args illegal
 \|			|		y	alternation (|) - literal must be escaped
-# todo :any<feature>
-|			|		[Null pattern]	alternation (|) - literal must be escaped
+|			|		[Null regex]	alternation (|) - literal must be escaped
 <[a..d]> && <[b..e]>	c		y	conjunction (&&)
 <[a..d]> && <[d..e]>	c		n	conjunction (&&)
 <[a..b]> && <[b..e]>	c		n	conjunction (&&)
@@ -99,21 +96,15 @@ b|			bcd		[Null pattern]	alternation (|) - null right arg illegal
 ^ [ <[a..d]>+ && <[b..e]>+ ] $	bcd		y	conjunction (&&)
 <[a..c]>+ && <[b..e]>+	bcd		y	conjunction (&&)
 <[a..d]>+ && <[c..e]>+	bcd		y	conjunction (&&)
-# todo :any<&-conjunciton>
-b&			bcd		[rule error]	conjunction (&) - null right arg illegal
-# todo :any<&-conjunciton>
-&b			bcd		[rule error]	conjunction (&) - null left arg illegal
-# todo :any<&-conjunciton>
-&			bcd		[rule error]	conjunction (&) - null both args illegal
+b&			bcd		[Null regex]	conjunction (&) - null right arg illegal
+# todo :any<bug>
+&b			bcd		[Null regex]	conjunction (&) - null left arg illegal
+&			bcd		[Null regex]	conjunction (&) - null both args illegal
 \&			&		y	conjunction (&) - literal must be escaped
-# todo :any<&-conjunciton>
-&			&		[rule error]	conjunction (&) - literal must be escaped
-# todo :any<leading |>
-a&|b			a&|b		[rule error]	alternation and conjunction (&|) - parse error
-# todo :any<&-conjunciton>
-&			&		[rule error]	conjunction (&) - literal must be escaped
-# todo :any<&-conjunciton>
-a|&b			a|&b		[rule error]	alternation and conjunction (|&) - parse error
+&			&		[Null regex]	conjunction (&) - literal must be escaped
+a&|b			a&|b		[Null regex]	alternation and conjunction (&|) - parse error
+&			&		[Null regex]	conjunction (&) - literal must be escaped
+a|&b			a|&b		[Null regex]	alternation and conjunction (|&) - parse error
 |d|b			abc		y	leading alternation ignored
  |d|b			abc		y	leading alternation ignored
 |d |b			abc		y	leading alternation ignored
