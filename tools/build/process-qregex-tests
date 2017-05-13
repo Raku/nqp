@@ -56,15 +56,16 @@ for @files -> $fn {
 
     my $todo := 0;
     for @lines -> $line {
-        my $m := $line ~~ /'# todo '/;
+        my $m := $line ~~ /'# todo ' (\d*)/;
         if $m {
-          $todo := 1;
+          $todo := $m[0] eq '' ?? 1 !! +$m[0];
+	  say("#TODO: <{$m[0]}> $todo");
         }
         else {
             next if $line ~~ /^\s*\# | ^\s*$ /;
 
             if $todo {
-               $todo := 0;
+               $todo := $todo - 1;
                next;
             }
 
@@ -73,7 +74,7 @@ for @files -> $fn {
             my $regex  := @parts[0];
             my $target := @parts[1];
             my $expect := @parts[2];
-            if $expect ~~ /Illegal/ {
+            if $expect ~~ /^'['/ {
                 next;
             }
             my $desc   := @parts[3];
