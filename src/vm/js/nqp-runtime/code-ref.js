@@ -44,29 +44,37 @@ class CodeRef extends NQPObject {
     let staticCode = this.staticCode;
     if (staticCode.closureTemplate) {
       /* HACK */
-      var searched = staticCode;
-      var forcedOuterCtx = null;
+      let searched = staticCode;
+
+      let fakeCtx = new StaticCtx();
+
+      let fakeOuterCtx = fakeCtx;
+
       while (searched) {
+        let staticVars;
+        if (searched.outerCodeRef && (staticVars = searched.outerCodeRef.staticVars)) {
+          for (var staticVarName in staticVars) {
+            fakeCtx[staticVarName] = staticVars[staticVarName];
+          }
+        }
         if (searched.outerCtx) {
-          forcedOuterCtx = searched.outerCtx;
+          fakeCtx.$$outer = searched.outerCtx;
           break;
         }
+
         searched = searched.outerCodeRef;
-      }
 
-      var codeRefForCtx = staticCode.outerCodeRef;
-      var fakeCtx;
-
-      fakeCtx = forcedOuterCtx ? new WrappedCtx(forcedOuterCtx) : new StaticCtx();
-
-
-      if (codeRefForCtx && codeRefForCtx.staticVars) {
-        for (var staticVarName in codeRefForCtx.staticVars) {
-          fakeCtx[staticVarName] = codeRefForCtx.staticVars[staticVarName];
+        if (searched) {
+          let newFakeCtx = new StaticCtx();
+          fakeCtx.$$outer = newFakeCtx;
+          fakeCtx = newFakeCtx;
+        } else {
+          fakeCtx.$$outer = null;
         }
       }
 
-      this.outerCtx = fakeCtx;
+      this.outerCtx = fakeOuterCtx;
+
       this.$$call = staticCode.freshBlock();
       return staticCode.$$call.apply(staticCode, arguments);
     } else {
