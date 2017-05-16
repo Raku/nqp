@@ -27,9 +27,9 @@ my $table := Foo.HOW.method_table(Foo);
 my $method := $table{'half-true'};
 my $foo := Foo.new();
 nqp::setboolspec(Foo, $MODE_CALL_METHOD, $method);
-ok(nqp::istrue($foo) == 0);
-ok(nqp::istrue($foo) == 1);
-ok(nqp::istrue($foo) == 0);
+ok(nqp::istrue($foo) == 0, 'MODE_CALL_METHOD');
+ok(nqp::istrue($foo) == 1, 'MODE_CALL_METHOD');
+ok(nqp::istrue($foo) == 0, 'MODE_CALL_METHOD');
 
 {
     my $int := NQPClassHOW.new_type(:name('boxing_int'), :repr('P6opaque'));
@@ -102,9 +102,9 @@ ok(nqp::istrue($foo) == 0);
     my $empty := nqp::box_s('', $not_empty);
     my $zero  := nqp::box_s('0', $not_empty);
 
-    ok(nqp::istrue($hello), 'MODE_UNBOX_STR_NOT_EMPTY_OR_ZERO - "hello" is true');
-    ok(nqp::istrue($zero), 'MODE_UNBOX_STR_NOT_EMPTY_OR_ZERO - "0" is true');
-    ok(!nqp::istrue($empty), 'MODE_UNBOX_STR_NOT_EMPTY_OR_ZERO - "" is false');
+    ok(nqp::istrue($hello), 'MODE_UNBOX_STR_NOT_EMPT - "hello" is true');
+    ok(nqp::istrue($zero), 'MODE_UNBOX_STR_NOT_EMPTY - "0" is true');
+    ok(!nqp::istrue($empty), 'MODE_UNBOX_STR_NOT_EMPTY - "" is false');
 }
 
 
