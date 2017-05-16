@@ -46,30 +46,40 @@ class CodeRef extends NQPObject {
       /* HACK */
       let searched = staticCode;
 
-      let fakeCtx = new StaticCtx();
+      let fakeCtx;
+      let fakeOuterCtx;
 
-      let fakeOuterCtx = fakeCtx;
-
-      while (searched) {
-        let staticVars;
-        if (searched.outerCodeRef && (staticVars = searched.outerCodeRef.staticVars)) {
-          for (var staticVarName in staticVars) {
-            fakeCtx[staticVarName] = staticVars[staticVarName];
-          }
-        }
-        if (searched.outerCtx) {
-          fakeCtx.$$outer = searched.outerCtx;
-          break;
-        }
-
-        searched = searched.outerCodeRef;
-
-        if (searched) {
-          let newFakeCtx = new StaticCtx();
-          fakeCtx.$$outer = newFakeCtx;
-          fakeCtx = newFakeCtx;
+      let setOuter = outer => {
+        if (fakeCtx) {
+          fakeCtx.$$outer = outer;
         } else {
-          fakeCtx.$$outer = null;
+          fakeOuterCtx = outer;
+        }
+      };
+
+      while (true) {
+        if (searched.outerCtx) {
+          setOuter(searched.outerCtx);
+          break;
+        } else if (searched.outerCodeRef) {
+          let newFakeCtx = new StaticCtx();
+
+          setOuter(newFakeCtx);
+
+          fakeCtx = newFakeCtx;
+
+          let outerCode = searched.outerCodeRef;
+          fakeCtx.$$cuid = searched.outerCodeRef.cuid;
+          let staticVars = outerCode.staticVars;
+          if (staticVars) {
+           for (var staticVarName in staticVars) {
+              fakeCtx[staticVarName] = staticVars[staticVarName];
+            }
+          }
+          searched = searched.outerCodeRef;
+        } else {
+          setOuter(null);
+          break;
         }
       }
 
