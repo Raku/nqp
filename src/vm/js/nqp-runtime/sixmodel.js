@@ -131,20 +131,20 @@ class STable {
       };
     } else if (mode == 1) {
       this.objConstructor.prototype.$$toBool = function(ctx) {
-        return this.$$getInt() == 0 ? 0 : 1;
+        return this.typeObject_ || this.$$getInt() == 0 ? 0 : 1;
       };
     } else if (mode == 2) {
       this.objConstructor.prototype.$$toBool = function(ctx) {
-        return this.$$getNum() == 0 ? 0 : 1;
+        return this.typeObject_ || this.$$getNum() == 0 ? 0 : 1;
       };
     } else if (mode == 3) {
       this.objConstructor.prototype.$$toBool = function(ctx) {
-        return this.$$getStr() == '' ? 0 : 1;
+        return this.typeObject_ || this.$$getStr() == '' ? 0 : 1;
       };
     } else if (mode == 4) {
       this.objConstructor.prototype.$$toBool = function(ctx) {
         var str = this.$$getStr();
-        return (str == '' || str == '0') ? 0 : 1;
+        return this.typeObject_ || (str == '' || str == '0') ? 0 : 1;
       };
     } else if (mode == 5) {
     // this is the default - do nothing
