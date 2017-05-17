@@ -146,15 +146,15 @@ class FileHandle extends NQPObject {
     this.fd = fd;
   }
 
-  closefh() {
+  $$closefh() {
     fs.closeSync(this.fd);
   }
 
-  isttyfh() {
+  $$isttyfh() {
     return tty.isatty(this.fd) ? 1 : 0;
   }
 
-  printfh(content) {
+  $$printfh(content) {
     var buffer = new Buffer(content, this.encoding);
     return fs.writeSync(this.fd, buffer, 0, buffer.length);
   }
@@ -173,6 +173,14 @@ class FileHandle extends NQPObject {
 
   $$serializeAsNull() {
     return 1;
+  }
+
+  $$readlinefh() {
+    return readline(this, false);
+  }
+
+  $$readlinechompfh() {
+    return readline(this, true);
   }
 };
 
@@ -233,11 +241,11 @@ op.setinputlineseps = function(fh, seps) {
 };
 
 op.readlinefh = function(fh) {
-  return readline(fh, false);
+  return fh.$$readlinefh();
 };
 
 op.readlinechompfh = function(fh) {
-  return readline(fh, true);
+  return fh.$$readlinechompfh();
 };
 
 op.filenofh = function(fh) {
@@ -395,7 +403,7 @@ op.closefh = function(fh) {
     fh.close();
     return fh;
   }
-  fh.closefh();
+  fh.$$closefh();
   return fh;
 };
 
@@ -409,15 +417,15 @@ op.closefh_i = function(fh) {
 };
 
 op.isttyfh = function(fh) {
-  return fh.isttyfh();
+  return fh.$$isttyfh();
 };
 
 op.printfh = function(fh, content) {
-  return fh.printfh(content);
+  return fh.$$printfh(content);
 };
 
 op.sayfh = function(fh, content) {
-  return fh.printfh(content + '\n');
+  return fh.$$printfh(content + '\n');
 };
 
 op.unlink = function(filename) {
