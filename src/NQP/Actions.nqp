@@ -367,6 +367,14 @@ class NQP::Actions is HLL::Actions {
         make default_for('$');
     }
 
+    method statement_control:sym<return>($/) {
+        my $ast := QAST::Op.new( :op('call'), :name('RETURN') );
+
+        $ast.push(QAST::WVal.new( :value(NQPMu) ));
+        make $ast;
+    }
+
+
     sub set_block_handler($/, $block, $type) {
         if nqp::existskey(%*HANDLERS, $type) {
             nqp::die("Duplicate $type handler in block");
