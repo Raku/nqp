@@ -358,19 +358,9 @@ class BinaryWriteCursor {
     } else if (ref === undefined) {
       discrim = REFVAR_NULL;
     }
-    else if (ref instanceof FileHandle) {
+    else if (ref.$$serializeAsNull) {
       discrim = REFVAR_VM_NULL;
     }
-  //  else if (ref.st.REPR instanceof CallCapture) {
-  //      /* This is a hack for Rakudo's sake; it keeps a CallCapture around in
-  //       * the lexpad, for no really good reason. */
-  //      discrim = REFVAR_VM_NULL;
-  //  }
-
-    else if (ref instanceof MultiCache) {
-      discrim = REFVAR_VM_NULL;
-    }
-
     else if (ref instanceof NQPInt) {
       discrim = REFVAR_VM_INT;
     }

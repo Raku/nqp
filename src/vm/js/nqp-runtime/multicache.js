@@ -5,12 +5,18 @@ var Null = require('./null.js');
 const MAX_ARITY = 4;
 const MAX_PER_ARITY = 16;
 
-function MultiCache() {
-  this.cache = [];
-  for (var i = 0; i < MAX_ARITY; i++) {
-    this.cache[i] = [];
+class MultiCache {
+  constructor() {
+    this.cache = [];
+    for (var i = 0; i < MAX_ARITY; i++) {
+      this.cache[i] = [];
+    }
   }
-}
+
+  $$serializeAsNull() {
+    return 1;
+  }
+};
 
 function posTypes(ctx, capture) {
   var arity = capture.pos.length;

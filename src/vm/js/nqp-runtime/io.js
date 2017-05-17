@@ -170,6 +170,10 @@ class FileHandle extends NQPObject {
   $$filenofh() {
     return this.fd;
   }
+
+  $$serializeAsNull() {
+    return 1;
+  }
 };
 
 exports.FileHandle = FileHandle;
@@ -508,6 +512,10 @@ class Stderr extends NQPObject {
   $$toBool(ctx) {
     return 1;
   }
+
+  $$serializeAsNull() {
+    return 1;
+  }
 };
 
 op.getstderr = function() {
@@ -528,6 +536,10 @@ class Stdout extends NQPObject {
   }
 
   $$toBool(ctx) {
+    return 1;
+  }
+
+  $$serializeAsNull() {
     return 1;
   }
 };
@@ -552,6 +564,10 @@ class Stdin extends NQPObject {
 
   isttyfh() {
     return (process.stdin.isTTY ? 1 : 0);
+  }
+
+  $$serializeAsNull() {
+    return 1;
   }
 };
 
