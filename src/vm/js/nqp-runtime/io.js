@@ -607,3 +607,13 @@ op.copy = function(source, target) {
 op.rename = function(oldPath, newPath) {
   fs.renameSync(oldPath, newPath);
 };
+
+op.lockfh = function(fh, flags) {
+  fs.flockSync(fh.fd, (flags & 0x01 ? 'sh' : 'ex') + (flags & 0x10 ? 'nb' : ''));
+  return fh;
+};
+
+op.unlockfh = function(fh, flags) {
+  fs.flockSync(fh.fd, 'un');
+  return fh;
+};
