@@ -472,7 +472,11 @@ function convertNull(obj) {
 }
 
 op.spawn = function(command, dir, env, input, output, error, flags) {
-  return nqpIo.spawn(command.array, dir, env.$$toObject(), convertNull(input), convertNull(output), convertNull(error), flags);
+  let stringified = [];
+  for (let c of command.array) {
+    stringified.push(nqp.toStr(c, null));
+  }
+  return nqpIo.spawn(stringified, dir, env.$$toObject(), convertNull(input), convertNull(output), convertNull(error), flags);
 };
 
 
