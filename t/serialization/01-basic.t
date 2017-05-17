@@ -1,6 +1,6 @@
 #! nqp
 
-plan(1509);
+plan(1512);
 
 {
     my $sc := nqp::createsc('exampleHandle');
@@ -424,6 +424,9 @@ sub add_to_sc($sc, $idx, $obj) {
     class T8 {
         has $!cache;
         has $!fh;
+        has $!stdin;
+        has $!stderr;
+        has $!stdout;
         method new() {
             my $obj := nqp::create(self);
             $obj.BUILD();
@@ -435,9 +438,21 @@ sub add_to_sc($sc, $idx, $obj) {
         method fh() {
             $!fh;
         }
+        method stdin() {
+            $!stdin;
+        }
+        method stderr() {
+            $!stderr;
+        }
+        method stdout() {
+            $!stdout;
+        }
         method BUILD() {
             $!fh := nqp::open('t/nqp/019-chars.txt', 'r');
             $!cache := nqp::multicacheadd(nqp::null(), nqp::usecapture(), 123);
+            $!stdin := nqp::getstdin();
+            $!stderr := nqp::getstderr();
+            $!stdout := nqp::getstdout();
         }
     }
     my $v := T8.new();
@@ -451,11 +466,14 @@ sub add_to_sc($sc, $idx, $obj) {
     ok(nqp::scobjcount($dsc) == 1, 'deserialized SC has a single object');
     ok(nqp::istype(nqp::scgetobj($dsc, 0), T8), 'deserialized object has correct type');
     if nqp::getcomp('nqp').backend.name eq 'jvm' {
-        skip("accessing a attribute containing a null is broken on the jvm", 2);
+        skip("accessing a attribute containing a null is broken on the jvm", 5);
     }
     else {
         ok(nqp::isnull(nqp::scgetobj($dsc, 0).cache), 'Multi cache ends up null');
         ok(nqp::isnull(nqp::scgetobj($dsc, 0).fh), 'File handle ends up null');
+        ok(nqp::isnull(nqp::scgetobj($dsc, 0).stdin), 'stdin ends up null');
+        ok(nqp::isnull(nqp::scgetobj($dsc, 0).stderr), 'stderr ends up null');
+        ok(nqp::isnull(nqp::scgetobj($dsc, 0).stdout), 'stdout up null');
     }
 }
 
