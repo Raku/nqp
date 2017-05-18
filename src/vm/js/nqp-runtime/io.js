@@ -542,7 +542,7 @@ op.getenvhash = function() {
 };
 
 class Stderr extends NQPObject {
-  printfh(msg) {
+  $$printfh(msg) {
     process.stderr.write(msg);
   }
 
@@ -576,7 +576,7 @@ class Stdout extends NQPObject {
     return process.stdout.fd;
   }
 
-  printfh(msg) {
+  $$printfh(msg) {
     process.stdout.write(msg);
   }
 
