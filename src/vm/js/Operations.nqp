@@ -467,6 +467,10 @@ class QAST::OperationsJS {
 
     add_simple_op('open', $T_OBJ, [$T_STR, $T_STR], :side_effects);
 
+    add_simple_op('opendir', $T_OBJ, [$T_STR], :side_effects);
+    add_simple_op('nextfiledir', $T_STR, [$T_OBJ], :side_effects, :method_call);
+    add_simple_op('closedir', $T_VOID, [$T_OBJ], :side_effects, :method_call);
+
     add_simple_op('readfh', $T_OBJ, [$T_OBJ, $T_OBJ, $T_INT], :side_effects);
     add_simple_op('writefh', $T_INT, [$T_OBJ, $T_OBJ], :side_effects);
     add_simple_op('tellfh', $T_INT, [$T_OBJ], :side_effects);

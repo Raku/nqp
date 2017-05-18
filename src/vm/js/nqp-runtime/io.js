@@ -459,7 +459,29 @@ op.mkdir = function(dir, mode) {
     fs.accessSync(dir, fs.constant.F_OK);
   } catch (e) {
     fs.mkdirSync(dir, mode);
+};
+
+class DirHandle {
+  constructor(contents) {
+    this.contents = contents;
+    this.idx = 0;
   }
+
+  $$nextfiledir() {
+    if (this.idx === this.contents.length) return '';
+    return this.contents[this.idx++];
+  }
+
+  $$decont(ctx) {
+    return this;
+  }
+
+  $$closedir() {
+  }
+};
+
+op.opendir = function(path) {
+  return new DirHandle(fs.readdirSync(path));
 };
 
 const PIPE_INHERIT = 1;
