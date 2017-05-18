@@ -479,12 +479,23 @@ function convertNull(obj) {
   return obj === Null ? null : obj;
 }
 
-op.spawn = function(command, dir, env, input, output, error, flags) {
+function stringifyEnv(ctx, hash) {
+  let stringifed= {};
+
+  hash.content.forEach(function(value, key, map) {
+    stringifed[key] = nqp.toStr(value, ctx);
+  });
+
+  return stringifed;
+}
+
+op.spawn = function(ctx, command, dir, env, input, output, error, flags) {
   let stringified = [];
   for (let c of command.array) {
-    stringified.push(nqp.toStr(c, null));
+    stringified.push(nqp.toStr(c, ctx));
   }
-  return nqpIo.spawn(stringified, dir, env.$$toObject(), convertNull(input), convertNull(output), convertNull(error), flags);
+
+  return nqpIo.spawn(stringified, dir, stringifyEnv(ctx, env), convertNull(input), convertNull(output), convertNull(error), flags);
 };
 
 
@@ -492,8 +503,8 @@ op.syncpipe = function() {
   return new nqpIo.SyncPipe();
 };
 
-op.shell = function(command, dir, env, input, output, error, flags) {
-  return nqpIo.shell(command, dir, env.$$toObject(), convertNull(input), convertNull(output), convertNull(error), flags);
+op.shell = function(ctx, command, dir, env, input, output, error, flags) {
+  return nqpIo.shell(command, dir, stringifyEnv(ctx, env), convertNull(input), convertNull(output), convertNull(error), flags);
 };
 
 op.cwd = function() {
