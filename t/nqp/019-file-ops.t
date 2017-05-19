@@ -2,7 +2,7 @@
 
 # Test nqp::op file operations.
 
-plan(107);
+plan(108);
 
 ok( nqp::stat('CREDITS', nqp::const::STAT_EXISTS) == 1, 'nqp::stat exists');
 ok( nqp::stat('AARDVARKS', nqp::const::STAT_EXISTS) == 0, 'nqp::stat not exists');
@@ -424,4 +424,9 @@ my sub create_buf($type) {
     nqp::closefh($in);
 
     nqp::unlink($test-file);
+}
+
+{ # RT#131301: https://rt.perl.org/Ticket/Display.html?id=131301
+    nqp::closedir(my $fh := nqp::opendir(".")); try nqp::nextfiledir($fh);
+    ok( 1, 'no segfault when trying to nextfiledir() a closed dir handle' );
 }
