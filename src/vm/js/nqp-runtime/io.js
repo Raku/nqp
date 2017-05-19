@@ -456,9 +456,13 @@ op.rmdir = function(dir) {
 
 op.mkdir = function(dir, mode) {
   try {
-    fs.accessSync(dir, fs.constant.F_OK);
-  } catch (e) {
     fs.mkdirSync(dir, mode);
+  } catch (e) {
+    if (e.code === 'EEXIST') {
+    } else {
+      throw e;
+    }
+  }
 };
 
 class DirHandle {
