@@ -543,7 +543,8 @@ op.getenvhash = function() {
 
 class Stderr extends NQPObject {
   $$printfh(msg) {
-    process.stderr.write(msg);
+    process.stderr.write(msg, 'utf8');
+    return Buffer.byteLength(msg, 'utf8');
   }
 
   $$filenofh() {
