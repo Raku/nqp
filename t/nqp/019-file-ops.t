@@ -2,7 +2,7 @@
 
 # Test nqp::op file operations.
 
-plan(108);
+plan(110);
 
 ok( nqp::stat('CREDITS', nqp::const::STAT_EXISTS) == 1, 'nqp::stat exists');
 ok( nqp::stat('AARDVARKS', nqp::const::STAT_EXISTS) == 0, 'nqp::stat not exists');
@@ -429,4 +429,33 @@ my sub create_buf($type) {
 { # RT#131301: https://rt.perl.org/Ticket/Display.html?id=131301
     nqp::closedir(my $fh := nqp::opendir(".")); try nqp::nextfiledir($fh);
     ok( 1, 'no segfault when trying to nextfiledir() a closed dir handle' );
+
+    my $dir := 'test-nqp-dir';
+
+    nqp::mkdir($dir, 0o777);
+    nqp::mkdir($dir, 0o777);
+
+    ok(1, 'mkdir lives when the dir we create already exists');
+
+    my $file1 := nqp::open($dir ~ '/file1', 'w');
+    nqp::closefh($file1);
+
+    my $file2 := nqp::open($dir ~ '/file2', 'w');
+    nqp::closefh($file2);
+
+    my $opened_dir := nqp::opendir($dir);
+
+    my %got;
+
+    while nqp::nextfiledir($opened_dir) -> $file {
+      %got{$file} := 1;
+    }
+
+    nqp::closedir($opened_dir);
+
+    ok(%got<file1> && %got<file2>, 'found the files we created');
+
+    nqp::unlink($dir ~ '/file1');
+    nqp::unlink($dir ~ '/file2');
+    nqp::rmdir($dir);
 }
