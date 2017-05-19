@@ -17,6 +17,17 @@ var Null = require('./null.js');
 
 var nqp = require('nqp-runtime');
 
+nqpIo.SyncPipe.prototype.$$decont = function(ctx) {
+  return this;
+};
+
+nqpIo.SyncPipe.prototype.$$can = function(method) {
+  return 0;
+};
+
+nqpIo.SyncPipe.prototype.$$setencoding = function(encoding) {
+  this.encoding = core.renameEncoding(encoding);
+};
 function boolish(bool) {
   return bool ? 1 : 0;
 }
@@ -142,7 +153,30 @@ op.lstat_time = function(file, code) {
   return stat(file, code, true);
 };
 
-class FileHandle extends NQPObject {
+class IOHandle extends NQPObject {
+  $$toBool(ctx) {
+    return 1;
+  }
+
+  $$serializeAsNull() {
+    return 1;
+  }
+
+  $$setinputlinesep(sep) {
+    this.seps = [sep];
+  }
+
+  $$setinputlineseps(seps) {
+    this.seps = seps.array;
+  }
+
+  $$setencoding(encoding) {
+    this.encoding = core.renameEncoding(encoding);
+  }
+}
+
+const CHUNK_SIZE = 32768;
+class FileHandle extends IOHandle {
   constructor(fd) {
     super();
     this.fd = fd;
@@ -173,16 +207,103 @@ class FileHandle extends NQPObject {
     return this.fd;
   }
 
-  $$serializeAsNull() {
-    return 1;
-  }
-
   $$readlinefh() {
     return readline(this, false);
   }
 
   $$readlinechompfh() {
     return readline(this, true);
+  }
+
+  $$eoffh() {
+    // I haven't found a way to implement this directly in node.js
+    var current = fs.seekSync(this.fd, 0, 1);
+    var end = fs.seekSync(this.fd, 0, 2);
+    fs.seekSync(this.fd, current, 0);
+    return current == end ? 1 : 0;
+  }
+
+  $$tellfh() {
+    return fs.seekSync(this.fd, 0, 1);
+  }
+
+  $$lockfh(fh, flags) {
+    fs.flockSync(this.fd, (flags & 0x01 ? 'sh' : 'ex') + (flags & 0x10 ? 'nb' : ''));
+    return this;
+  }
+
+  $$unlockfh(flags) {
+    fs.flockSync(this.fd, 'un');
+    return this;
+  }
+
+  $$readallfh() {
+    var all = new Buffer(0);
+    var buf = new Buffer(CHUNK_SIZE);
+    var total = 0;
+    var bytesRead;
+    while ((bytesRead = fs.readSync(this.fd, buf, 0, buf.length, null)) != 0) {
+      total += bytesRead;
+      var all = Buffer.concat([all, buf], total);
+    }
+    return all.toString(this.encoding).replace(/\r\n/, '\n');
+  }
+
+  $$readcharsfh(count) {
+    var all = new Buffer(0);
+    var buf = new Buffer(CHUNK_SIZE);
+    var bytesRead;
+    var total = 0;
+
+    var starting = fs.seekSync(this.fd, 0, 1);
+
+    while ((bytesRead = fs.readSync(this.fd, buf, 0, buf.length, null)) != 0 && all.toString(this.encoding).length < count) {
+      total += bytesRead;
+      all = Buffer.concat([all, buf], total);
+    }
+    var encoded = all.toString(this.encoding);
+
+    if (encoded.length < count) {
+      return encoded;
+    }
+
+    while (encoded.length > count) {
+      /* We assume that n bytes contain at most n chars */
+      all = all.slice(0, all.length - (encoded.length - count));
+      encoded = all.toString(this.encoding);
+    }
+
+    fs.seekSync(this.fd, all.length + starting, 0);
+    return encoded;
+  }
+
+  $$flushfh() {
+    // STUB - will require custom io to implement
+    return this;
+  }
+
+  $$writefh(buf) {
+    var buffer = core.toRawBuffer(buf);
+    return fs.writeSync(this.fd, buffer, 0, buffer.length);
+  }
+
+  $$setencoding(encoding) {
+    this.encoding = core.renameEncoding(encoding);
+  }
+
+  $$readfh(buf, bytes) {
+    let is_unsigned = buf._STable.REPR.type._STable.REPR.is_unsigned;
+    let buffer = Buffer.allocUnsafe(bytes);
+    let read = fs.readSync(this.fd, buffer, 0, bytes, null);
+    buf.array.length = read;
+    for (let i = 0; i < read; i++) {
+      if (is_unsigned) {
+        buf.array[i] = buffer[i];
+      } else {
+        buf.array[i] = buffer[i] > 127 ? buffer[i] - 256 : buffer[i];
+      }
+    }
+    return buf;
   }
 };
 
@@ -218,61 +339,8 @@ op.open = function(name, mode) {
   return fh;
 };
 
-op.tellfh = function(fh) {
-  return fs.seekSync(fh.fd, 0, 1);
-};
 
-op.eoffh = function(fh) {
-  // I haven't found a way to implement this directly in node.js
-  var current = fs.seekSync(fh.fd, 0, 1);
-  var end = fs.seekSync(fh.fd, 0, 2);
-  fs.seekSync(fh.fd, current, 0);
-  return current == end ? 1 : 0;
-};
 
-op.setencoding = function(fh, encoding) {
-  fh.encoding = core.renameEncoding(encoding);
-};
-
-op.setinputlinesep = function(fh, sep) {
-  fh.seps = [sep];
-};
-
-op.setinputlineseps = function(fh, seps) {
-  fh.seps = seps.array;
-};
-
-op.readlinefh = function(fh) {
-  return fh.$$readlinefh();
-};
-
-op.readlinechompfh = function(fh) {
-  return fh.$$readlinechompfh();
-};
-
-op.filenofh = function(fh) {
-  return fh.$$filenofh();
-};
-
-op.readfh = function(fh, buf, bytes) {
-  let is_unsigned = buf._STable.REPR.type._STable.REPR.is_unsigned;
-  let buffer = Buffer.allocUnsafe(bytes);
-  let read = fs.readSync(fh.fd, buffer, 0, bytes, null);
-  buf.array.length = read;
-  for (let i = 0; i < read; i++) {
-    if (is_unsigned) {
-      buf.array[i] = buffer[i];
-    } else {
-      buf.array[i] = buffer[i] > 127 ? buffer[i] - 256 : buffer[i];
-    }
-  }
-  return buf;
-};
-
-op.writefh = function(fh, buf) {
-  var buffer = core.toRawBuffer(buf);
-  return fs.writeSync(fh.fd, buffer, 0, buffer.length);
-};
 //TODO: benchmark and optimize
 function readline(fh, chomp) {
 
@@ -346,49 +414,6 @@ function readline(fh, chomp) {
   return string.replace(/\r\n/, '\n');
 }
 
-const CHUNK_SIZE = 32768;
-op.readallfh = function(fh) {
-  if (fh instanceof nqpIo.SyncPipe) {
-    return fh.slurp().toString(fh.encoding || 'utf8');
-  }
-  var all = new Buffer(0);
-  var buf = new Buffer(CHUNK_SIZE);
-  var total = 0;
-  var bytesRead;
-  while ((bytesRead = fs.readSync(fh.fd, buf, 0, buf.length, null)) != 0) {
-    total += bytesRead;
-    var all = Buffer.concat([all, buf], total);
-  }
-  return all.toString(fh.encoding).replace(/\r\n/, '\n');
-};
-
-op.readcharsfh = function(fh, count) {
-  var all = new Buffer(0);
-  var buf = new Buffer(CHUNK_SIZE);
-  var bytesRead;
-  var total = 0;
-
-  var starting = fs.seekSync(fh.fd, 0, 1);
-
-  while ((bytesRead = fs.readSync(fh.fd, buf, 0, buf.length, null)) != 0 && all.toString(fh.encoding).length < count) {
-    total += bytesRead;
-    all = Buffer.concat([all, buf], total);
-  }
-  var encoded = all.toString(fh.encoding);
-
-  if (encoded.length < count) {
-    return encoded;
-  }
-
-  while (encoded.length > count) {
-    /* We assume that n bytes contain at most n chars */
-    all = all.slice(0, all.length - (encoded.length - count));
-    encoded = all.toString(fh.encoding);
-  }
-
-  fs.seekSync(fh.fd, all.length + starting, 0);
-  return encoded;
-};
 
 op.seekfh = function(ctx, fh, offset, whence) {
   if (whence == 0 && offset < 0) {
@@ -416,14 +441,6 @@ op.closefh_i = function(fh) {
   op.closefh(fh);
   /* TODO proper return value */
   return 0;
-};
-
-op.isttyfh = function(fh) {
-  return fh.$$isttyfh();
-};
-
-op.printfh = function(fh, content) {
-  return fh.$$printfh(content);
 };
 
 op.sayfh = function(fh, content) {
@@ -547,26 +564,29 @@ op.getenvhash = function() {
   return hash;
 };
 
-class Stderr extends NQPObject {
+class StdHandle extends IOHandle {
+    constructor() {
+      super();
+      this.encoding = 'utf8';
+    }
+}
+
+class Stderr extends StdHandle {
+  constructor() {
+    super();
+  }
+
   $$printfh(msg) {
-    process.stderr.write(msg, 'utf8');
-    return Buffer.byteLength(msg, 'utf8');
+    process.stderr.write(msg, this.encoding);
+    return Buffer.byteLength(msg, this.encoding);
   }
 
   $$filenofh() {
     return process.stderr.fd;
   }
 
-  isttyfh() {
+  $$isttyfh() {
     return (process.stderr.isTTY ? 1 : 0);
-  }
-
-  $$toBool(ctx) {
-    return 1;
-  }
-
-  $$serializeAsNull() {
-    return 1;
   }
 };
 
@@ -574,7 +594,7 @@ op.getstderr = function() {
   return new Stderr();
 };
 
-class Stdout extends NQPObject {
+class Stdout extends StdHandle {
   isttyfh() {
     return (process.stdout.isTTY ? 1 : 0);
   }
@@ -586,40 +606,20 @@ class Stdout extends NQPObject {
   $$printfh(msg) {
     process.stdout.write(msg);
   }
-
-  $$toBool(ctx) {
-    return 1;
-  }
-
-  $$serializeAsNull() {
-    return 1;
-  }
 };
 
 op.getstdout = function() {
   return new Stdout();
 };
 
-op.flushfh = function(fh) {
-  // STUB - will require custom io to implement
-  return fh;
-};
 
-class Stdin extends NQPObject {
-  $$toBool(ctx) {
-    return 1;
-  }
-
+class Stdin extends StdHandle {
   $$filenofh() {
     return process.stdin.fd;
   }
 
-  isttyfh() {
+  $$isttyfh() {
     return (process.stdin.isTTY ? 1 : 0);
-  }
-
-  $$serializeAsNull() {
-    return 1;
   }
 };
 
@@ -656,12 +656,3 @@ op.rename = function(oldPath, newPath) {
   fs.renameSync(oldPath, newPath);
 };
 
-op.lockfh = function(fh, flags) {
-  fs.flockSync(fh.fd, (flags & 0x01 ? 'sh' : 'ex') + (flags & 0x10 ? 'nb' : ''));
-  return fh;
-};
-
-op.unlockfh = function(fh, flags) {
-  fs.flockSync(fh.fd, 'un');
-  return fh;
-};

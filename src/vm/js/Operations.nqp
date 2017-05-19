@@ -471,29 +471,31 @@ class QAST::OperationsJS {
     add_simple_op('nextfiledir', $T_STR, [$T_OBJ], :side_effects, :method_call);
     add_simple_op('closedir', $T_VOID, [$T_OBJ], :side_effects, :method_call);
 
-    add_simple_op('readfh', $T_OBJ, [$T_OBJ, $T_OBJ, $T_INT], :side_effects);
-    add_simple_op('writefh', $T_INT, [$T_OBJ, $T_OBJ], :side_effects);
-    add_simple_op('tellfh', $T_INT, [$T_OBJ], :side_effects);
+    add_simple_op('readfh', $T_OBJ, [$T_OBJ, $T_OBJ, $T_INT], :side_effects, :method_call);
+    add_simple_op('writefh', $T_INT, [$T_OBJ, $T_OBJ], :side_effects, :method_call);
+    add_simple_op('tellfh', $T_INT, [$T_OBJ], :side_effects, :method_call);
     add_simple_op('seekfh', $T_INT, [$T_OBJ, $T_INT, $T_INT], :ctx, :side_effects);
-    add_simple_op('eoffh', $T_INT, [$T_OBJ], :side_effects);
-    add_simple_op('readlinefh', $T_STR, [$T_OBJ], :side_effects);
-    add_simple_op('readcharsfh', $T_STR, [$T_OBJ, $T_INT], :side_effects);
-    add_simple_op('readlinechompfh', $T_STR, [$T_OBJ], :side_effects);
-    add_simple_op('readallfh', $T_STR, [$T_OBJ], :side_effects);
-    add_simple_op('printfh', $T_OBJ, [$T_OBJ, $T_STR], :side_effects);
+    add_simple_op('eoffh', $T_INT, [$T_OBJ], :side_effects, :method_call);
+    add_simple_op('filenofh', $T_INT, [$T_OBJ], :method_call);
+
+    add_simple_op('readlinefh', $T_STR, [$T_OBJ], :side_effects, :method_call);
+    add_simple_op('readcharsfh', $T_STR, [$T_OBJ, $T_INT], :side_effects, :method_call);
+    add_simple_op('readlinechompfh', $T_STR, [$T_OBJ], :side_effects, :method_call);
+    add_simple_op('readallfh', $T_STR, [$T_OBJ], :side_effects, :method_call);
+    add_simple_op('printfh', $T_OBJ, [$T_OBJ, $T_STR], :side_effects, :method_call);
+    add_simple_op('setencoding', $T_VOID, [$T_OBJ, $T_STR], :side_effects, :method_call);
     add_simple_op('sayfh', $T_OBJ, [$T_OBJ, $T_STR], :side_effects);
-    add_simple_op('flushfh', $T_OBJ, [$T_OBJ], :side_effects);
+    add_simple_op('flushfh', $T_OBJ, [$T_OBJ], :side_effects, :method_call);
     add_simple_op('closefh', $T_OBJ, [$T_OBJ], :side_effects);
     add_simple_op('closefh_i', $T_INT, [$T_OBJ], :side_effects);
-    add_simple_op('isttyfh', $T_INT, [$T_OBJ]);
-    add_simple_op('setinputlinesep', $T_VOID, [$T_OBJ, $T_STR], :side_effects);
-    add_simple_op('setinputlineseps', $T_VOID, [$T_OBJ, $T_OBJ], :side_effects);
+    add_simple_op('isttyfh', $T_INT, [$T_OBJ], :method_call);
+    add_simple_op('setinputlinesep', $T_VOID, [$T_OBJ, $T_STR], :side_effects, :method_call);
+    add_simple_op('setinputlineseps', $T_VOID, [$T_OBJ, $T_OBJ], :side_effects, :method_call);
     add_simple_op('copy', $T_VOID, [$T_STR, $T_STR], :side_effects);
     add_simple_op('rename', $T_VOID, [$T_STR, $T_STR], :side_effects);
-    add_simple_op('filenofh', $T_INT, [$T_OBJ]);
 
-    add_simple_op('lockfh', $T_OBJ, [$T_OBJ, $T_INT], :side_effects);
-    add_simple_op('unlockfh', $T_OBJ, [$T_OBJ], :side_effects);
+    add_simple_op('lockfh', $T_OBJ, [$T_OBJ, $T_INT], :side_effects, :method_call);
+    add_simple_op('unlockfh', $T_OBJ, [$T_OBJ], :side_effects, :method_call);
 
     add_simple_op('bootarray', $T_OBJ, []);
 
@@ -505,7 +507,6 @@ class QAST::OperationsJS {
     add_simple_op('symlink', $T_VOID, [$T_STR, $T_STR], :side_effects);
     add_simple_op('link', $T_VOID, [$T_STR, $T_STR], :side_effects);
     add_simple_op('unlink', $T_VOID, [$T_STR], :side_effects);
-    add_simple_op('setencoding', $T_VOID, [$T_OBJ, $T_STR], :side_effects);
 
     add_simple_op('readlink', $T_STR, [$T_STR]);
 
