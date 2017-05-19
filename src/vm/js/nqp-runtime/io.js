@@ -15,6 +15,8 @@ var child_process = require('child_process');
 var NQPObject = require('./nqp-object.js');
 var Null = require('./null.js');
 
+var nqp = require('nqp-runtime');
+
 function boolish(bool) {
   return bool ? 1 : 0;
 }
