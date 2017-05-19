@@ -129,7 +129,7 @@ op.pow_I = function(a, b, numType, biType) {
 
 op.mod_I = function(n, m, type) {
   /* TODO - think if this can be optimized. */
-  /* We are doing this in complicated because,
+  /* We are doing this in complicated way because,
      bignum returns the module with the sign equal to the dividend not the divisor. */
   var a = getBI(n);
   var b = getBI(m);
