@@ -3,6 +3,8 @@ var reprs = require('./reprs.js');
 
 var bignum = require('bignum-browserify');
 
+var sslBignum = require('bignum');
+
 var core = require('./core.js');
 
 var hll = require('./hll.js');
@@ -164,7 +166,7 @@ op.div_In = function(a, b) {
 };
 
 op.rand_I = function(max, type) {
-  return makeBI(type, getBI(max).rand());
+  return makeBI(type, bignum(sslBignum(getBI(max).toString()).rand().toString()));
 };
 
 op.isle_I = function(a, b) {
@@ -189,7 +191,7 @@ op.cmp_I = function(a, b) {
 };
 
 op.isprime_I = function(n) {
-  return intishBool(getBI(n).probPrime(50));
+  return intishBool(sslBignum(getBI(n).toString()).probPrime(50));
 };
 
 op.bitshiftl_I = function(a, b, type) {
