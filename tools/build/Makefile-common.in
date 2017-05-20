@@ -113,7 +113,8 @@ PREFIX          = @prefix@
 BIN_DIR         = $(PREFIX)/bin
 NQP_LANG_DIR    = $(PREFIX)/share/nqp
 NQP_LIB_DIR     = @nqplibdir@
-PROVE           = prove -j0$(TEST_JOBS)
+PROVE_OPTIONS   = -j0$(TEST_JOBS)
+PROVE           = prove $(PROVE_OPTIONS)
 
 # nqp::makefile <-- tells NQP::Configure to treat this file as a makefile,
 #                   performing win32 slash and makefile conversions
