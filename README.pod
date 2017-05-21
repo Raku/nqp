@@ -100,7 +100,7 @@ scratch.
 =head2 JavaScript backend
 
 The best thing before playing with it/hacking on it is to contact pmurias via IRC at #perl6 on irc.freenode.org.
-
+It's recommended that you use node 7.10.0 as it's the version of node.js the JavaScript backend is developed with.
 
 Building the JavaScript backend currently requires building the moar backend:
 
