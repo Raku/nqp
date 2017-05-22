@@ -122,6 +122,14 @@ op.loadbytecode = function(ctx, file) {
   return file;
 };
 
+op.loadbytecodefh = function(ctx, fh, file) {
+  let oldLoaderCtx = exports.loaderCtx;
+  exports.loaderCtx = ctx;
+  let js = fh.$$readallfh();
+  eval(js);
+  exports.loaderCtx = oldLoaderCtx;
+};
+
 op.ctxlexpad = function(ctx) {
   if (ctx instanceof Ctx) {
     return ctx;
