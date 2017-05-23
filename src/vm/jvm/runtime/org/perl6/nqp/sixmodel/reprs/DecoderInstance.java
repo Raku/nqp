@@ -24,6 +24,7 @@ public class DecoderInstance extends SixModelObject {
         if (decoder == null) {
             charset = Charset.forName(encoding);
             decoder = charset.newDecoder();
+            decoded = new ArrayList<CharBuffer>();
             lineSeps = new ArrayList<String>();
             lineSeps.add("\n");
             lineSeps.add("\r\n");
@@ -71,8 +72,6 @@ public class DecoderInstance extends SixModelObject {
             String result = normalized.substring(0, (int)chars);
             String remaining = normalized.substring((int)chars, normalized.length());
             if (remaining.length() > 0) {
-                if (decoded == null)
-                    decoded = new ArrayList<CharBuffer>();
                 decoded.add(CharBuffer.wrap(remaining));
             }
             return result;
@@ -152,8 +151,6 @@ public class DecoderInstance extends SixModelObject {
             CharBuffer target = CharBuffer.allocate(decodee.limit());
             decoder.decode(decodee, target, eof && toDecode.size() == 1);
             target.rewind();
-            if (decoded == null)
-                decoded = new ArrayList<CharBuffer>();
             decoded.add(target);
             toDecode.remove(0);
         }
@@ -284,8 +281,6 @@ public class DecoderInstance extends SixModelObject {
     }
 
     private void forceDecodedBackToBytes() {
-        if (decoded == null)
-            return;
         for (int i = decoded.size() - 1; i >= 0; i--) {
             toDecode.add(0, charset.encode(decoded.get(i)));
             decoded.remove(i);
