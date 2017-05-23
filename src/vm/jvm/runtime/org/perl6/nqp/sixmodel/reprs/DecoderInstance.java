@@ -61,8 +61,8 @@ public class DecoderInstance extends SixModelObject {
             return "";
 
         CharBuffer target = CharBuffer.allocate((int)chars + 1);
-        eatAllDecodedChars(target);
-        if (target.position() != chars)
+        eatDecodedChars(target, (int)(chars + 1));
+        if (target.position() != chars + 1)
             eatUndecodedBytes(target, false);
 
         String normalized = Normalizer.normalize(
