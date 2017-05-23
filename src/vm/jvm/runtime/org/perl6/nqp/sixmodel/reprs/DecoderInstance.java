@@ -13,6 +13,7 @@ import org.perl6.nqp.sixmodel.SixModelObject;
 import org.perl6.nqp.sixmodel.StorageSpec;
 
 public class DecoderInstance extends SixModelObject {
+    private Charset charset;
     private CharsetDecoder decoder;
     private List<ByteBuffer> toDecode;
     private List<CharBuffer> decoded;
@@ -20,7 +21,8 @@ public class DecoderInstance extends SixModelObject {
 
     public void configure(ThreadContext tc, String encoding, SixModelObject config) {
         if (decoder == null) {
-            decoder = Charset.forName(encoding).newDecoder();
+            charset = Charset.forName(encoding);
+            decoder = charset.newDecoder();
             lineSeps = new ArrayList<String>();
             lineSeps.add("\n");
             lineSeps.add("\r\n");
@@ -158,6 +160,12 @@ public class DecoderInstance extends SixModelObject {
         return eof ? takeAllChars(tc) : null;
     }
 
+    public long bytesAvailable(ThreadContext tc) {
+        ensureConfigured(tc);
+        forceDecodedBackToBytes();
+        return availableUndecodedBytes();
+    }
+
     private boolean sepMatchAt(int decStart, int charStart, String sep) {
         int sepIndex = 0;
         boolean firstBuffer = true;
@@ -195,7 +203,7 @@ public class DecoderInstance extends SixModelObject {
         int available = 0;
         if (toDecode != null)
             for (int i = 0; i < toDecode.size(); i++)
-                available += toDecode.get(i).capacity();
+                available += toDecode.get(i).remaining();
         return available;
     }
 
@@ -247,6 +255,15 @@ public class DecoderInstance extends SixModelObject {
         int pos = buf.position();
         buf.rewind();
         return buf.subSequence(0, pos);
+    }
+
+    private void forceDecodedBackToBytes() {
+        if (decoded == null)
+            return;
+        for (int i = decoded.size() - 1; i >= 0; i--) {
+            toDecode.add(0, charset.encode(decoded.get(i)));
+            decoded.remove(i);
+        }
     }
 
     public long isEmpty(ThreadContext tc) {

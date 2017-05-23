@@ -4460,6 +4460,13 @@ public final class Ops {
         }
     }
 
+    public static long decoderbytesavailable(SixModelObject decoder, ThreadContext tc) {
+        if (decoder instanceof DecoderInstance)
+            return ((DecoderInstance)decoder).bytesAvailable(tc);
+        else
+            throw ExceptionHandling.dieInternal(tc, "decoderbytesavailable requires an instance with the Decoder REPR");
+    }
+
     private static final int CCLASS_ANY          = 65535;
     private static final int CCLASS_UPPERCASE    = 1;
     private static final int CCLASS_LOWERCASE    = 2;
