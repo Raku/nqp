@@ -76,35 +76,35 @@ nqp::composetype($buf_type, nqp::hash('array', nqp::hash('type', uint8)));
     ok(nqp::decoderempty($dec), 'Empty after taking all chars');
 }
 
-#{
-#    my $testbuf1 := nqp::encode("line 1\nli", 'utf8', nqp::create($buf_type));
-#    my $testbuf2 := nqp::encode("ne 2\nline 3", 'utf8', nqp::create($buf_type));
-#    my $dec := nqp::create(VMDecoder);
-#    nqp::decoderconfigure($dec, 'utf8', nqp::hash());
-#    nqp::decoderaddbytes($dec, $testbuf1);
-#    ok(nqp::decodertakeline($dec, 1, 0) eq 'line 1', 'read 1 line, chomped');
-#    ok(nqp::isnull_s(nqp::decodertakeline($dec, 1, 0)), 'cannot lead a complete line now');
-#    nqp::decoderaddbytes($dec, $testbuf2);
-#    ok(nqp::decodertakeline($dec, 0, 0) eq "line 2\n", 'read line 2, not chomped');
-#    ok(nqp::isnull_s(nqp::decodertakeline($dec, 1, 0)), 'cannot lead a complete line now');
-#    ok(nqp::decodertakeline($dec, 1, 1) eq "line 3", 'with incomplete flag, read final line');
-#}
-#
-#{
-#    my $testbuf1 := nqp::encode("line 1AAli", 'utf8', nqp::create($buf_type));
-#    my $testbuf2 := nqp::encode("ne 2BBline 3", 'utf8', nqp::create($buf_type));
-#    my $dec := nqp::create(VMDecoder);
-#    nqp::decoderconfigure($dec, 'utf8', nqp::hash());
-#    nqp::decodersetlineseps($dec, nqp::list_s('AA', 'BB'));
-#    nqp::decoderaddbytes($dec, $testbuf1);
-#    ok(nqp::decodertakeline($dec, 1, 0) eq 'line 1', 'read 1 line, chomped (custom seps)');
-#    ok(nqp::isnull_s(nqp::decodertakeline($dec, 1, 0)), 'cannot lead a complete line now (custom seps)');
-#    nqp::decoderaddbytes($dec, $testbuf2);
-#    ok(nqp::decodertakeline($dec, 0, 0) eq "line 2BB", 'read line 2, not chomped (custom seps)');
-#    ok(nqp::isnull_s(nqp::decodertakeline($dec, 1, 0)), 'cannot lead a complete line now (custom seps)');
-#    ok(nqp::decodertakeline($dec, 1, 1) eq "line 3", 'with incomplete flag, read final line (custom seps)');
-#}
-#
+{
+    my $testbuf1 := nqp::encode("line 1\nli", 'utf8', nqp::create($buf_type));
+    my $testbuf2 := nqp::encode("ne 2\nline 3", 'utf8', nqp::create($buf_type));
+    my $dec := nqp::create(VMDecoder);
+    nqp::decoderconfigure($dec, 'utf8', nqp::hash());
+    nqp::decoderaddbytes($dec, $testbuf1);
+    ok(nqp::decodertakeline($dec, 1, 0) eq 'line 1', 'read 1 line, chomped');
+    ok(nqp::isnull_s(nqp::decodertakeline($dec, 1, 0)), 'cannot lead a complete line now');
+    nqp::decoderaddbytes($dec, $testbuf2);
+    ok(nqp::decodertakeline($dec, 0, 0) eq "line 2\n", 'read line 2, not chomped');
+    ok(nqp::isnull_s(nqp::decodertakeline($dec, 1, 0)), 'cannot lead a complete line now');
+    ok(nqp::decodertakeline($dec, 1, 1) eq "line 3", 'with incomplete flag, read final line');
+}
+
+{
+    my $testbuf1 := nqp::encode("line 1AAli", 'utf8', nqp::create($buf_type));
+    my $testbuf2 := nqp::encode("ne 2BBline 3", 'utf8', nqp::create($buf_type));
+    my $dec := nqp::create(VMDecoder);
+    nqp::decoderconfigure($dec, 'utf8', nqp::hash());
+    nqp::decodersetlineseps($dec, nqp::list_s('AA', 'BB'));
+    nqp::decoderaddbytes($dec, $testbuf1);
+    ok(nqp::decodertakeline($dec, 1, 0) eq 'line 1', 'read 1 line, chomped (custom seps)');
+    ok(nqp::isnull_s(nqp::decodertakeline($dec, 1, 0)), 'cannot lead a complete line now (custom seps)');
+    nqp::decoderaddbytes($dec, $testbuf2);
+    ok(nqp::decodertakeline($dec, 0, 0) eq "line 2BB", 'read line 2, not chomped (custom seps)');
+    ok(nqp::isnull_s(nqp::decodertakeline($dec, 1, 0)), 'cannot lead a complete line now (custom seps)');
+    ok(nqp::decodertakeline($dec, 1, 1) eq "line 3", 'with incomplete flag, read final line (custom seps)');
+}
+
 #{
 #    my $testbuf1 := nqp::encode("над\nп", 'utf8', nqp::create($buf_type));
 #    my $testbuf2 := nqp::encode('од', 'utf8', nqp::create($buf_type));
@@ -127,4 +127,3 @@ nqp::composetype($buf_type, nqp::hash('array', nqp::hash('type', uint8)));
 #    ok(nqp::decoderbytesavailable($dec) == 0, 'Now no bytes available');
 #    ok(nqp::decoderempty($dec), 'And so the decoder is empty');
 #}
-#

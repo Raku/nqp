@@ -10,17 +10,37 @@ import java.util.List;
 import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.SixModelObject;
+import org.perl6.nqp.sixmodel.StorageSpec;
 
 public class DecoderInstance extends SixModelObject {
     private CharsetDecoder decoder;
     private List<ByteBuffer> toDecode;
     private List<CharBuffer> decoded;
+    private List<String> lineSeps;
 
     public void configure(ThreadContext tc, String encoding, SixModelObject config) {
-        if (decoder == null)
+        if (decoder == null) {
             decoder = Charset.forName(encoding).newDecoder();
-        else
+            lineSeps = new ArrayList<String>();
+            lineSeps.add("\n");
+            lineSeps.add("\r\n");
+        }
+        else {
             throw ExceptionHandling.dieInternal(tc, "Decoder already configured");
+        }
+    }
+
+    public void setLineSeps(ThreadContext tc, SixModelObject seps) {
+        final int prim = seps.st.REPR.get_value_storage_spec(tc, seps.st).boxed_primitive;
+        if (prim != StorageSpec.BP_STR)
+            ExceptionHandling.dieInternal(tc,
+                    "Line separators must be provided as an array of native strings");
+        lineSeps.clear();
+        long numSeps = seps.elems(tc);
+        for (long i = 0; i < numSeps; i++) {
+            seps.at_pos_native(tc, i);
+            lineSeps.add(tc.native_s);
+        }
     }
 
     public void addBytes(ThreadContext tc, ByteBuffer bytes) {
@@ -37,7 +57,7 @@ public class DecoderInstance extends SixModelObject {
             return "";
 
         CharBuffer target = CharBuffer.allocate((int)chars + 1);
-        eatDecodedChars(target);
+        eatAllDecodedChars(target);
         if (target.position() != chars)
             eatUndecodedBytes(target, false);
 
@@ -68,7 +88,7 @@ public class DecoderInstance extends SixModelObject {
 
         int maxChars = availableDecodedChars() + availableUndecodedBytes();
         CharBuffer target = CharBuffer.allocate(maxChars);
-        eatDecodedChars(target);
+        eatAllDecodedChars(target);
         eatUndecodedBytes(target, true);
 
         String normalized = Normalizer.normalize(
@@ -86,7 +106,7 @@ public class DecoderInstance extends SixModelObject {
         ensureConfigured(tc);
         int maxChars = availableDecodedChars() + availableUndecodedBytes();
         CharBuffer target = CharBuffer.allocate(maxChars);
-        eatDecodedChars(target);
+        eatAllDecodedChars(target);
         if (toDecode != null) {
             if (toDecode.size() == 0)
                 toDecode.add(ByteBuffer.allocate(0));
@@ -95,6 +115,72 @@ public class DecoderInstance extends SixModelObject {
             decoder.reset();
         }
         return Normalizer.normalize(decodedBuffer(target), Normalizer.Form.NFC);
+    }
+
+    public String takeLine(ThreadContext tc, boolean chomp, boolean eof) {
+        ensureConfigured(tc);
+        while (true) {
+            /* See if we can find the separator in any of the decoded chars. */
+            int charsToTake = 0;
+            for (int i = 0; i < (decoded == null ? 0 : decoded.size()); i++) {
+                CharBuffer search = decoded.get(i);
+                for (int j = 0; j < search.remaining(); j++) {
+                    char c = search.charAt(j);
+                    for (int k = 0; k < lineSeps.size(); k++) {
+                        String sep = lineSeps.get(k);
+                        if (sep.charAt(0) == c) {
+                            if (sep.length() == 1 || sepMatchAt(i, j, sep)) {
+                                return takeCharsSkipChars(
+                                        chomp ? charsToTake : charsToTake + sep.length(),
+                                        chomp ? sep.length() : 0);
+                            }
+                        }
+                    }
+                    charsToTake++;
+                }
+            }
+
+            /* If there are no more buffers to decode then we're done. */
+            if (toDecode == null || toDecode.size() == 0)
+                break;
+
+            /* Otherwise decode one of them. */
+            ByteBuffer decodee = toDecode.get(0);
+            CharBuffer target = CharBuffer.allocate(decodee.limit());
+            decoder.decode(decodee, target, eof && toDecode.size() == 1);
+            target.rewind();
+            if (decoded == null)
+                decoded = new ArrayList<CharBuffer>();
+            decoded.add(target);
+            toDecode.remove(0);
+        }
+
+        return eof ? takeAllChars(tc) : null;
+    }
+
+    private boolean sepMatchAt(int decStart, int charStart, String sep) {
+        int sepIndex = 0;
+        boolean firstBuffer = true;
+        for (int i = decStart; i < decoded.size(); i++) {
+            CharBuffer search = decoded.get(i);
+            for (int j = firstBuffer ? charStart : 0; j < search.remaining(); j++) {
+                if (search.charAt(j) != sep.charAt(sepIndex++))
+                    return false;
+                if (sepIndex == sep.length())
+                    return true;
+            }
+            firstBuffer = false;
+        }
+        return false;
+    }
+
+    private String takeCharsSkipChars(int take, int skip) {
+        CharBuffer target = CharBuffer.allocate(take);
+        eatDecodedChars(target, take);
+        if (skip > 0)
+            eatDecodedChars(CharBuffer.allocate(skip), skip);
+        target.rewind();
+        return Normalizer.normalize(target, Normalizer.Form.NFC);
     }
 
     private int availableDecodedChars() {
@@ -113,11 +199,29 @@ public class DecoderInstance extends SixModelObject {
         return available;
     }
 
-    private void eatDecodedChars(CharBuffer target) {
+    private void eatAllDecodedChars(CharBuffer target) {
         if (decoded != null) {
-            for (int i = 0; i < decoded.size(); i++)
+            for (int i = 0; i < decoded.size(); i++) {
                 target.append(decoded.get(i));
+            }
             decoded.clear();
+        }
+    }
+
+    private void eatDecodedChars(CharBuffer target, int n) {
+        int remaining = n;
+        while (remaining > 0 && decoded.size() > 0) {
+            CharBuffer source = decoded.get(0);
+            if (source.remaining() <= remaining) {
+                target.append(source);
+                remaining -= source.remaining();
+                decoded.remove(0);
+            }
+            else {
+                target.append(source.subSequence(0, remaining));
+                decoded.set(0, source.subSequence(remaining, source.remaining()));
+                remaining = 0;
+            }
         }
     }
 
@@ -156,6 +260,6 @@ public class DecoderInstance extends SixModelObject {
 
     private void ensureConfigured(ThreadContext tc) {
         if (decoder == null)
-            throw ExceptionHandling.dieInternal(tc, "Docder not yet configured");
+            throw ExceptionHandling.dieInternal(tc, "Decoder not yet configured");
     }
 }
