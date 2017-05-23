@@ -98,7 +98,11 @@ constant('JS_BUILD_DIR', 'gen/js');
 constant('JS_STAGE1', '$(JS_BUILD_DIR)/stage1');
 constant('JS_STAGE2', '$(JS_BUILD_DIR)/stage2');
 constant('JS_NQP', './$(M_RUNNER)$(BAT)');
+constant('JS_RUNNER', 'nqp-js$(BAT)');
+constant('JS_CROSS_RUNNER', 'nqp-js-cross$(BAT)');
 
+rule('$(JS_RUNNER)', 'tools/build/gen-js-runner.pl','$(PERL) tools/build/gen-js-runner.pl');
+rule('$(JS_CROSS_RUNNER)', 'tools/build/gen-js-cross-runner.pl','$(PERL) tools/build/gen-js-cross-runner.pl .@slash@$(M_RUNNER)');
 
 out('js-runner-default: js-all');
 
@@ -131,7 +135,7 @@ my $sprintf-moarvm := cross-compile(:stage(2), :source('src/HLL/sprintf.nqp'), :
 
 deps('js-stage1-compiler', '$(JS_STAGE1_COMPILER)');
 
-out('js-test: js-all gen/js/qregex.t
+out('js-test: js-all gen/js/qregex.t $(JS_CROSS_RUNNER)
 	perl src/vm/js/bin/run_tests.pl');
 
 out('js-test-bootstrapped: js-bootstrap gen/js/qregex.t
@@ -146,7 +150,7 @@ out("\n\njs-clean:
 
 my $ModuleLoader := "$nqp-js-on-js/ModuleLoader.js";
 
-deps("js-all", 'm-all', 'js-stage1-compiler', $nqpcore-moarvm, $nqpcore-combined, $QASTNode-moarvm, $QRegex-moarvm, $sprintf-moarvm, $ModuleLoader);
+deps("js-all", 'm-all', 'js-stage1-compiler', $nqpcore-moarvm, $nqpcore-combined, $QASTNode-moarvm, $QRegex-moarvm, $sprintf-moarvm, $ModuleLoader, '$(JS_RUNNER)');
 
 # Enforce the google coding standards
 out("js-lint:
@@ -188,12 +192,12 @@ my $NQPP6QRegex-moarvm := cross-compile(:stage(2), :source($p6qregex-combined), 
 my $nqp-bootstrapped := "$nqp-js-on-js/nqp-bootstrapped.js";
 
 
-rule("$nqp-js-on-js/ModuleLoader.js", "$nqpcore-moarvm src/vm/js/ModuleLoader.nqp \$(JS_STAGE1_COMPILER)",
-    "./nqp-js --setting=NULL --no-regex-lib --target=js --output $ModuleLoader src/vm/js/ModuleLoader.nqp"
+rule("$nqp-js-on-js/ModuleLoader.js", "$nqpcore-moarvm src/vm/js/ModuleLoader.nqp \$(JS_STAGE1_COMPILER) \$(JS_CROSS_RUNNER)",
+    ".@slash@\$(JS_CROSS_RUNNER) --setting=NULL --no-regex-lib --target=js --output $ModuleLoader src/vm/js/ModuleLoader.nqp"
 );
 
-rule("$nqp-bootstrapped", "$QAST-moarvm $NQPP5QRegex-moarvm $NQPP6QRegex-moarvm $nqp-combined $QRegex-moarvm",
-    "./nqp-js --target=js --shebang $nqp-combined > $nqp-bootstrapped"
+rule("$nqp-bootstrapped", "$QAST-moarvm $NQPP5QRegex-moarvm $NQPP6QRegex-moarvm $nqp-combined $QRegex-moarvm \$(JS_CROSS_RUNNER)",
+    ".@slash@\$(JS_CROSS_RUNNER) --target=js --shebang $nqp-combined > $nqp-bootstrapped"
 );
 
 
