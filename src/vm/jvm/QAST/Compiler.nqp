@@ -2399,7 +2399,7 @@ QAST::OperationsJAST.map_classlib_core_op('decoderaddbytes', $TYPE_OPS, 'decoder
 QAST::OperationsJAST.map_classlib_core_op('decodertakechars', $TYPE_OPS, 'decodertakechars', [$RT_OBJ, $RT_INT], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('decodertakeallchars', $TYPE_OPS, 'decodertakeallchars', [$RT_OBJ], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('decodertakeavailablechars', $TYPE_OPS, 'decodertakeavailablechars', [$RT_OBJ], $RT_STR, :tc);
-QAST::OperationsJAST.map_classlib_core_op('decodertakeline', $TYPE_OPS, 'decodertakeline', [$RT_OBJ, $RT_INT, $RT_INT], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('decodertakeline', $TYPE_OPS, 'decodertakeline', [$RT_OBJ, $RT_INT, $RT_INT], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('decoderbytesavailable', $TYPE_OPS, 'decoderbytesavailable', [$RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('decodertakebytes', $TYPE_OPS, 'decodertakebytes', [$RT_OBJ, $RT_OBJ, $RT_INT], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('decoderempty', $TYPE_OPS, 'decoderempty', [$RT_OBJ], $RT_INT, :tc);
