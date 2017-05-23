@@ -7,6 +7,7 @@ import java.nio.charset.CharsetDecoder;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
+import org.perl6.nqp.runtime.Buffers;
 import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.SixModelObject;
@@ -164,6 +165,31 @@ public class DecoderInstance extends SixModelObject {
         ensureConfigured(tc);
         forceDecodedBackToBytes();
         return availableUndecodedBytes();
+    }
+
+    public SixModelObject takeBytes(ThreadContext tc, SixModelObject bufType, long lBytes) {
+        int available = (int)bytesAvailable(tc); // Implicitly forces decoded back to bytes
+        SixModelObject res = bufType.st.REPR.allocate(tc, bufType.st);
+        byte[] resBytes = new byte[available];
+        int bytes = (int)lBytes;
+        if (bytes > available)
+            bytes = available;
+        int need = bytes;
+        while (need > 0) {
+            ByteBuffer takeFrom = toDecode.get(0);
+            int fromAvailable = takeFrom.remaining();
+            if (need >= fromAvailable) {
+                takeFrom.get(resBytes, bytes - need, fromAvailable);
+                need -= fromAvailable;
+                toDecode.remove(0);
+            }
+            else {
+                takeFrom.get(resBytes, bytes - need, need);
+                need = 0;
+            }
+        }
+        Buffers.stashBytes(tc, res, resBytes);
+        return res;
     }
 
     private boolean sepMatchAt(int decStart, int charStart, String sep) {

@@ -4467,6 +4467,14 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc, "decoderbytesavailable requires an instance with the Decoder REPR");
     }
 
+    public static SixModelObject decodertakebytes(SixModelObject decoder, SixModelObject bufType,
+                                                  long bytes, ThreadContext tc) {
+        if (decoder instanceof DecoderInstance)
+            return ((DecoderInstance)decoder).takeBytes(tc, bufType, bytes);
+        else
+            throw ExceptionHandling.dieInternal(tc, "decodertakebytes requires an instance with the Decoder REPR");
+    }
+
     private static final int CCLASS_ANY          = 65535;
     private static final int CCLASS_UPPERCASE    = 1;
     private static final int CCLASS_LOWERCASE    = 2;
