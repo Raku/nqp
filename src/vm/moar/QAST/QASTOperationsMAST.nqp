@@ -2089,6 +2089,7 @@ QAST::MASTOperations.add_core_moarop_mapping('socket', 'socket');
 QAST::MASTOperations.add_core_moarop_mapping('connect', 'connect_sk', 0);
 QAST::MASTOperations.add_core_moarop_mapping('bindsock', 'bind_sk', 0);
 QAST::MASTOperations.add_core_moarop_mapping('accept', 'accept_sk');
+QAST::MASTOperations.add_core_moarop_mapping('getport', 'getport_sk');
 QAST::MASTOperations.add_core_moarop_mapping('readcharsfh', 'read_fhs');
 QAST::MASTOperations.add_core_moarop_mapping('setinputlinesep', 'setinputlinesep_fh', 0);
 QAST::MASTOperations.add_core_moarop_mapping('setinputlineseps', 'setinputlineseps_fh', 0);
