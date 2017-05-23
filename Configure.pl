@@ -193,7 +193,7 @@ MAIN: {
     }
 
     if ($backends{js}) {
-        system_or_die($config{moar}, '--libpath=src/vm/moar/stage0', 'src/vm/moar/stage0/nqp.moarvm', 'tools/build/gen-js-makefile.nqp', 'tools/build/Makefile-JS.in');
+        system_or_die($config{moar}, '--libpath=src/vm/moar/stage0', 'src/vm/moar/stage0/nqp.moarvm', 'tools/build/gen-js-makefile.nqp', 'gen/js/Makefile-JS.in');
         $config{'make'}   = $^O eq 'MSWin32' ? 'nmake' : 'make';
         my $node   = probe_node();
 
@@ -205,7 +205,7 @@ MAIN: {
         }
 
         fill_template_file(
-            'tools/build/Makefile-JS.in',
+            'gen/js/Makefile-JS.in',
             $MAKEFILE,
             %config,
         );
