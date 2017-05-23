@@ -135,7 +135,7 @@ my $sprintf-moarvm := cross-compile(:stage(2), :source('src/HLL/sprintf.nqp'), :
 
 deps('js-stage1-compiler', '$(JS_STAGE1_COMPILER)');
 
-out('js-test: js-all gen/js/qregex.t $(JS_CROSS_RUNNER)
+out('js-test: js-cross gen/js/qregex.t $(JS_CROSS_RUNNER)
 	perl src/vm/js/bin/run_tests.pl');
 
 out('js-test-bootstrapped: js-bootstrap gen/js/qregex.t
@@ -150,7 +150,7 @@ out("\n\njs-clean:
 
 my $ModuleLoader := "$nqp-js-on-js/ModuleLoader.js";
 
-deps("js-all", 'm-all', 'js-stage1-compiler', $nqpcore-moarvm, $nqpcore-combined, $QASTNode-moarvm, $QRegex-moarvm, $sprintf-moarvm, $ModuleLoader, '$(JS_RUNNER)');
+deps("js-cross", 'm-all', 'js-stage1-compiler', $nqpcore-moarvm, $nqpcore-combined, $QASTNode-moarvm, $QRegex-moarvm, $sprintf-moarvm, $ModuleLoader, '$(JS_RUNNER)');
 
 # Enforce the google coding standards
 out("js-lint:
@@ -201,7 +201,7 @@ rule("$nqp-bootstrapped", "$QAST-moarvm $NQPP5QRegex-moarvm $NQPP6QRegex-moarvm 
 );
 
 
-deps("js-bootstrap", "js-all", $nqp-bootstrapped);
+deps("js-all", "js-cross", $nqp-bootstrapped);
 
 sub MAIN($program, $output-file) {
     spew($output-file, $out);
