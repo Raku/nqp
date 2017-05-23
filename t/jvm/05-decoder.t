@@ -1,4 +1,4 @@
-plan(22);
+plan(45);
 
 sub dies-ok(&code, $message) {
     my int $died := 0;
