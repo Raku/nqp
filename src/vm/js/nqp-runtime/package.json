@@ -16,6 +16,7 @@
   "main": "runtime.js",
   "dependencies": {
     "bignum-browserify": "pmurias/bigint-browserify",
+    "bignum": "^0.12.5",
     "fs-ext": "*",
     "node-int64": "*",
     "nqp-js-io": "pmurias/nqp-js-io",

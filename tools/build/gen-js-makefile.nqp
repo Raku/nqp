@@ -156,8 +156,23 @@ deps("js-cross", 'm-all', 'js-stage1-compiler', $nqpcore-moarvm, $nqpcore-combin
 out("js-lint:
 	gjslint --strict --max_line_length=200 --nojsdoc src/vm/js/nqp-runtime/*.js");
 
-out('js-install: js-all
-	@echo "*** The JavaScript backend can\'t be installed yet, sorry! ***"');
+
+my @install := <nqp-js-on-js/nqp-bootstrapped.js nqp-js-on-js/ModuleLoader.js nqp-js-on-js/package.json nqp-js-on-js/NQPCORE.setting.js nqp-js-on-js/NQPHLL.js nqp-js-on-js/nqpmo.js nqp-js-on-js/NQPP5QRegex.js nqp-js-on-js/NQPP6QRegex.js nqp-js-on-js/QAST-Compiler.js nqp-js-on-js/QAST.js nqp-js-on-js/QASTNode.js nqp-js-on-js/QRegex.js nqp-js-on-js/sprintf.js>;
+
+my @cp_all;
+for @install -> $file {
+
+  @cp_all.push("\$(CP) $file \$(DESTDIR)\$(NQP_LIB_DIR)/nqp-js-on-js");
+}
+
+rule('js-install', 'js-all',
+  '$(MKPATH) $(DESTDIR)$(BIN_DIR)',
+  '$(MKPATH) $(DESTDIR)$(NQP_LIB_DIR)',
+  '$(MKPATH) $(DESTDIR)$(NQP_LIB_DIR)/nqp-js-on-js',
+  '$(PERL) tools/build/npm-install-or-link.pl $(DESTDIR)$(NQP_LIB_DIR)/nqp-js-on-js src/vm/js/nqp-runtime nqp-runtime @link@',
+  '$(PERL) tools/build/install-js-runner.pl "$(DESTDIR)" $(PREFIX) $(NQP_LIB_DIR)',
+  |@cp_all
+);
 
 constant('JS_NQP_SOURCES', '$(COMMON_NQP_SOURCES)');
 
@@ -192,11 +207,11 @@ my $NQPP6QRegex-moarvm := cross-compile(:stage(2), :source($p6qregex-combined), 
 my $nqp-bootstrapped := "$nqp-js-on-js/nqp-bootstrapped.js";
 
 
-rule("$nqp-js-on-js/ModuleLoader.js", "$nqpcore-moarvm src/vm/js/ModuleLoader.nqp \$(JS_STAGE1_COMPILER) \$(JS_CROSS_RUNNER)",
+rule($ModuleLoader, "$nqpcore-moarvm src/vm/js/ModuleLoader.nqp \$(JS_STAGE1_COMPILER) \$(JS_CROSS_RUNNER)",
     ".@slash@\$(JS_CROSS_RUNNER) --setting=NULL --no-regex-lib --target=js --output $ModuleLoader src/vm/js/ModuleLoader.nqp"
 );
 
-rule("$nqp-bootstrapped", "$QAST-moarvm $NQPP5QRegex-moarvm $NQPP6QRegex-moarvm $nqp-combined $QRegex-moarvm \$(JS_CROSS_RUNNER)",
+rule($nqp-bootstrapped, "$QAST-moarvm $NQPP5QRegex-moarvm $NQPP6QRegex-moarvm $nqp-combined $QRegex-moarvm \$(JS_CROSS_RUNNER)",
     ".@slash@\$(JS_CROSS_RUNNER) --target=js --shebang $nqp-combined > $nqp-bootstrapped"
 );
 

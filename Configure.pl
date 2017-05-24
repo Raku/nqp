@@ -37,6 +37,7 @@ MAIN: {
                'with-asm=s', 'with-asm-tree=s', 'with-jline=s', 'with-jna=s',
                'make-install!', 'makefile-timing!',
                'git-protocol=s',
+               'link',
                'git-depth=s', 'git-reference=s',);
 
     # Print help if it's requested
@@ -195,6 +196,7 @@ MAIN: {
     if ($backends{js}) {
         system_or_die($config{moar}, '--libpath=src/vm/moar/stage0', 'src/vm/moar/stage0/nqp.moarvm', 'tools/build/gen-js-makefile.nqp', 'gen/js/Makefile-JS.in');
         $config{'make'}   = $^O eq 'MSWin32' ? 'nmake' : 'make';
+        $config{link} = $options{link};
         my $node   = probe_node();
 
         if ($node eq 'nodejs') {
