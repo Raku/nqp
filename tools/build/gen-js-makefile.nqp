@@ -167,9 +167,9 @@ rule('js-install', 'js-all',
   '$(MKPATH) $(DESTDIR)$(BIN_DIR)',
   '$(MKPATH) $(DESTDIR)$(NQP_LIB_DIR)',
   '$(MKPATH) $(DESTDIR)$(NQP_LIB_DIR)/nqp-js-on-js',
+  |@cp_all,
   '$(PERL) tools/build/npm-install-or-link.pl $(DESTDIR)$(NQP_LIB_DIR)/nqp-js-on-js src/vm/js/nqp-runtime nqp-runtime @link@',
   '$(PERL) tools/build/install-js-runner.pl "$(DESTDIR)" $(PREFIX) $(NQP_LIB_DIR)',
-  |@cp_all
 );
 
 constant('JS_NQP_SOURCES', '$(COMMON_NQP_SOURCES)');
@@ -214,7 +214,10 @@ rule($nqp-bootstrapped, "$QAST-moarvm $NQPP5QRegex-moarvm $NQPP6QRegex-moarvm $n
 );
 
 
-deps("js-all", "js-cross", $nqp-bootstrapped);
+rule('js-deps', '',
+  '$(PERL) tools/build/npm-install-or-link.pl . src/vm/js/nqp-runtime nqp-runtime @link@');
+
+deps("js-all", "js-deps", "js-cross", $nqp-bootstrapped);
 
 sub MAIN($program, $output-file) {
     spew($output-file, $out);

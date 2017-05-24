@@ -107,23 +107,8 @@ Building the JavaScript backend currently requires building the moar backend:
     $ perl Configure.pl --backends=moar,js
     $ make
 
-    $ npm install src/vm/js/nqp-runtime
-    $ npm install tap
-
 Currently it needs to be run like:
 
     $ ./nqp-js file.nqp
-
-To run the tests:
-
-    $ make js-test
-
-To build nqp-js-on-js (that is nqp-js itself running on node.js):
-
-    $ make js-bootstrap
-
-To run nqp-js-on-js:
-
-    $ node nqp-js-on-js/nqp-bootstrapped.js -e "say('Hello World')"
 
 =cut
