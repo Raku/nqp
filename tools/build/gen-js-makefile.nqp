@@ -144,9 +144,7 @@ out('js-test-bootstrapped: js-bootstrap gen/js/qregex.t
 out('gen/js/qregex.t: tools/build/process-qregex-tests
 	$(JS_NQP) tools/build/process-qregex-tests > gen/js/qregex.t');
 
-out("\n\njs-clean:
-	\$(RM_RF) gen/js/stage1 gen/js/stage2
-");
+rule('js-clean', '', '$(RM_RF) gen/js/stage1 gen/js/stage2 gen/js/qregex.t gen/js/Makefile-JS.in');
 
 my $ModuleLoader := "$nqp-js-on-js/ModuleLoader.js";
 
