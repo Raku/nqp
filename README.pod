@@ -111,4 +111,9 @@ Currently it needs to be run like:
 
     $ ./nqp-js file.nqp
 
+If you are developing nqp-js, you may want to pass the --link option to configure to have the nqp-runtime linked instead of installed
+
+    $ cd src/vm/js/nqp-runtime; npm link .
+    $ perl Configure --backends=moar,js
+
 =cut
