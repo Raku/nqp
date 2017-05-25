@@ -62,7 +62,7 @@ sub combine(:$sources, :$stage, :$file, :$gen-version = 0) {
 
     rule($target, $sources,
         make_parents($target),
-        $gen-version ?? "\$(PERL) tools/build/gen-version.pl > $version" !! '',
+        $gen-version ?? "\$(PERL) tools/build/gen-version.pl \$(PREFIX) \$(NQP_LIB_DIR) > $version" !! '',
         "\$(PERL) tools/build/gen-cat.pl js $sources {$gen-version ?? $version !! ''} > $target"
     ); 
 }
