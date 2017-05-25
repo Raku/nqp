@@ -8,7 +8,7 @@ class JavaScriptBackend {
     }
     
     method config() {
-        nqp::hash()
+        nqp::backendconfig()
     }
     
     method force_gc() {
