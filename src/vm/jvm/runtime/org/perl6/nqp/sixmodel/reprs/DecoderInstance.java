@@ -166,6 +166,8 @@ public class DecoderInstance extends SixModelObject {
 
     public SixModelObject takeBytes(ThreadContext tc, SixModelObject bufType, long lBytes) {
         int available = (int)bytesAvailable(tc); // Implicitly forces decoded back to bytes
+        if (available < lBytes)
+            return null;
         SixModelObject res = bufType.st.REPR.allocate(tc, bufType.st);
         byte[] resBytes = new byte[available];
         int bytes = (int)lBytes;
