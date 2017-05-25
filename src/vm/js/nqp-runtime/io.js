@@ -606,6 +606,9 @@ class Stdout extends StdHandle {
   $$printfh(msg) {
     process.stdout.write(msg);
   }
+
+  $$flushfh() {
+  }
 };
 
 op.getstdout = function() {
