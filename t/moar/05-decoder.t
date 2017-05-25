@@ -1,4 +1,4 @@
-plan(45);
+plan(46);
 
 sub dies-ok(&code, $message) {
     my int $died := 0;
@@ -116,6 +116,8 @@ nqp::composetype($buf_type, nqp::hash('array', nqp::hash('type', uint8)));
     ok(nqp::decoderbytesavailable($dec) == 2, 'Correct bytes available afterwards');
     nqp::decoderaddbytes($dec, $testbuf2);
     ok(nqp::decoderbytesavailable($dec) == 6, 'Adding more bytes is tracked');
+    ok(nqp::isnull(nqp::decodertakebytes($dec, $buf_type, 60)),
+        'Trying to take more bytes than are available gives back null');
     my $bytes := nqp::decodertakebytes($dec, $buf_type, 6);
     ok(nqp::elems($bytes), 'Could take 6 bytes as byte array');
     ok(nqp::atpos_i($bytes, 0) == 0xd0, 'Byte 1 correct');
