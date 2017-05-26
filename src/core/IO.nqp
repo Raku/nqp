@@ -101,6 +101,14 @@ my class NQPFileHandle {
         $line
     }
 
+     method slurp() {
+        $!decoder || die("Cannot 'slurp' on a binary file handle");
+        while nqp::elems(my $buf := nqp::readfh($!vmio, nqp::create($NQPBuf), 0x100000)) {
+            $!decoder.add-bytes($buf);
+        }
+        $!decoder.consume-all-chars()
+    }
+
 	method print($str) {
         $!decoder || die("Cannot 'print' on a binary file handle");
 		nqp::writefh($!vmio, nqp::encode($str, $!encoding, nqp::create($NQPBuf)));
