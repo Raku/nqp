@@ -127,14 +127,10 @@ my class NQPFileHandle {
 Open file.
 =end item
 
-sub open($filename, :$r, :$w, :$a, :$bin) {
-    my $mode := $w ?? 'w' !! ($a ?? 'wa' !! 'r');
-    my $handle := nqp::open($filename, $mode);
-#?if jvm
-    nqp::setinputlinesep($handle, "\n") if $r;
-#?endif
-    nqp::setencoding($handle, 'utf8') unless $bin;
-    $handle;
+sub open($filename, *%options) {
+    my $handle := NQPFileHandle.new;
+    $handle.open($filename, |%options);
+    $handle
 }
 
 =begin item close
@@ -142,7 +138,7 @@ Close handle
 =end item
 
 sub close($handle) {
-    nqp::closefh($handle);
+    $handle.close;
 }
 
 =begin item slurp
@@ -151,11 +147,10 @@ Returns the contents of C<$filename> as a single string.
 
 sub slurp ($filename) {
     my $handle := open($filename, :r);
-    my $contents := nqp::readallfh($handle);
-    nqp::closefh($handle);
-    $contents;
+    my $contents := $handle.slurp;
+    $handle.close;
+    $contents
 }
-
 
 =begin item spew
 Write the string value of C<$contents> to C<$filename>.
@@ -163,8 +158,8 @@ Write the string value of C<$contents> to C<$filename>.
 
 sub spew($filename, $contents) {
     my $handle := open($filename, :w);
-    nqp::printfh($handle, $contents);
-    nqp::closefh($handle);
+    $handle.print($contents);
+    $handle.close;
 }
 
 sub print(*@args) {
