@@ -109,14 +109,14 @@ my class NQPFileHandle {
         $!decoder.consume-all-chars()
     }
 
-	method print($str) {
+    method print($str) {
         $!decoder || die("Cannot 'print' on a binary file handle");
-		nqp::writefh($!vmio, nqp::encode($str, $!encoding, nqp::create($NQPBuf)));
-	}
+        nqp::writefh($!vmio, nqp::encode($str, $!encoding, nqp::create($NQPBuf)));
+    }
 
-	method say($str) {
-		self.print($str ~ "\n")
-	}
+    method say($str) {
+        self.print($str ~ "\n")
+    }
 
     method close() {
         nqp::closefh($!vmio);
