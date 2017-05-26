@@ -44,6 +44,7 @@ $nqpcomp.addstage('classname', :after<start>);
 @clo.push('nyi=s');
 @clo.push('shebang');
 @clo.push('snapshot=s');
+@clo.push('nqp-runtime=s');
 #?endif
 
 #?if moar

@@ -128,16 +128,18 @@ class JavaScriptBackend {
 
         my $shebang := nqp::defined(%adverbs<shebang>);
 
+        my $nqp-runtime := %adverbs<nqp-runtime>;
+
         if %adverbs<snapshot> {
             self.snapshot_memory(%adverbs<snapshot> ~ '-have-qast.heapsnapshot');
         }
 
         if %adverbs<source-map-debug> {
-            $backend.emit_with_source_map_debug($qast, :$instant, :$shebang);
+            $backend.emit_with_source_map_debug($qast, :$instant, :$shebang, :$nqp-runtime);
         } elsif %adverbs<source-map> {
-            $backend.emit_with_source_map($qast, :$instant, :$shebang);
+            $backend.emit_with_source_map($qast, :$instant, :$shebang, :$nqp-runtime);
         } else {
-            my $code := $backend.emit($qast, :$instant, :$substagestats, :$shebang, :snapshot(sub () {
+            my $code := $backend.emit($qast, :$instant, :$substagestats, :$shebang, :$nqp-runtime, :snapshot(sub () {
                 self.snapshot_memory(%adverbs<snapshot> ~ '-have-chunks.heapsnapshot') if %adverbs<snapshot>;
             }));
             $code := self.beautify($code) if %adverbs<beautify>;
