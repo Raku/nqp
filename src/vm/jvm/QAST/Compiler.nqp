@@ -2167,7 +2167,6 @@ QAST::OperationsJAST.map_classlib_core_op('readcharsfh', $TYPE_OPS, 'readcharsfh
 QAST::OperationsJAST.map_classlib_core_op('readlinefh', $TYPE_OPS, 'readlinefh', [$RT_OBJ], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('readlinechompfh', $TYPE_OPS, 'readlinechompfh', [$RT_OBJ], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('readallfh', $TYPE_OPS, 'readallfh', [$RT_OBJ], $RT_STR, :tc);
-QAST::OperationsJAST.map_classlib_core_op('getcfh', $TYPE_OPS, 'getcfh', [$RT_OBJ], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('eoffh', $TYPE_OPS, 'eoffh', [$RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('closefh', $TYPE_OPS, 'closefh', [$RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('closefh_i', $TYPE_OPS, 'closefhi', [$RT_OBJ], $RT_INT, :tc);

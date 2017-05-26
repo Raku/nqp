@@ -158,7 +158,6 @@
     - [eoffh](#eoffh)
     - [filenofh](#filenofh)
     - [flushfh](#flushfh)
-    - [getcfh](#getcfh)
     - [getstderr](#getstderr)
     - [getstdin](#getstdin)
     - [getstdout](#getstdout)
@@ -1503,11 +1502,6 @@ Returns the filehandle number.
 * `flushfh(Handle $fh)`
 
 Flushes the filehandle, forcing it to write any buffered output.
-
-## getcfh
-* `getcfh(Handle $in)`
-
-Reads a single character from the supplied filehandle.
 
 ## getstderr
 * `getstderr()`

@@ -103,23 +103,6 @@ public class StandardReadHandle implements IIOClosable, IIOEncodable, IIOSyncRea
         }
     }
     
-    public synchronized String getc(ThreadContext tc) {
-        try {
-            if (br == null)
-                br = new BufferedReader(new InputStreamReader(is, cs));
-            int read = br.read();
-            if (read == -1) {
-                eof = true;
-                return "";
-            }
-            else {
-                return String.valueOf(read);
-            }
-        } catch (IOException e) {
-            throw ExceptionHandling.dieInternal(tc, e);
-        }
-    }
-    
     public synchronized String readlineInteractive(ThreadContext tc, String prompt) {
         try {
             if (cr == null)

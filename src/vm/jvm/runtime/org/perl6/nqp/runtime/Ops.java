@@ -800,21 +800,6 @@ public final class Ops {
         }
     }
 
-    public static String getcfh(SixModelObject obj, ThreadContext tc) {
-        if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-            if (h.handle instanceof IIOSyncReadable)
-                return ((IIOSyncReadable)h.handle).getc(tc);
-            else
-                throw ExceptionHandling.dieInternal(tc,
-                    "This handle does not support getc");
-        }
-        else {
-            throw ExceptionHandling.dieInternal(tc,
-                "getcfh requires an object with the IOHandle REPR");
-        }
-    }
-
     public static long eoffh(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
             IOHandleInstance h = (IOHandleInstance)obj;
