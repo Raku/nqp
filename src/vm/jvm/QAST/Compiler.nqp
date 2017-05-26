@@ -2810,7 +2810,7 @@ QAST::OperationsJAST.map_classlib_core_op('semacquire', $TYPE_OPS, 'semacquire',
 QAST::OperationsJAST.map_classlib_core_op('semtryacquire', $TYPE_OPS, 'semtryacquire', [$RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('semrelease', $TYPE_OPS, 'semrelease', [$RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('queuepoll', $TYPE_OPS, 'queuepoll', [$RT_OBJ], $RT_OBJ, :tc);
-QAST::OperationsJAST.map_classlib_core_op('hardware_concurrency', $TYPE_OPS, 'hardware_concurrency', [], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('cpucores', $TYPE_OPS, 'cpucores', [], $RT_INT, :tc);
 
 # asynchrony related ops
 QAST::OperationsJAST.map_classlib_core_op('timer', $TYPE_OPS, 'timer', [$RT_OBJ, $RT_OBJ, $RT_INT, $RT_INT, $RT_OBJ], $RT_OBJ, :tc);

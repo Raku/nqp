@@ -5408,7 +5408,7 @@ public final class Ops {
         return thread;
     }
 
-    public static long hardware_concurrency(ThreadContext tc) {
+    public static long cpucores(ThreadContext tc) {
         return Runtime.getRuntime().availableProcessors();
     }
 
