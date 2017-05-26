@@ -316,7 +316,7 @@ op.setcontspec = function(type, specType, conf) {
     type._STable.containerSpec = new containerSpecs[specType](type._STable);
     type._STable.containerSpec.configure(conf);
   } else {
-    console.warn('NYI cont spec: ' + specType);
+   throw 'NYI cont spec: ' + specType;
   }
 };
 
