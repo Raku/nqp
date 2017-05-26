@@ -150,9 +150,9 @@ public class DecoderInstance extends SixModelObject {
             ByteBuffer decodee = toDecode.get(0);
             CharBuffer target = CharBuffer.allocate(decodee.limit());
             decoder.decode(decodee, target, eof && toDecode.size() == 1);
-            target.rewind();
-            decoded.add(target);
-            toDecode.remove(0);
+            decoded.add(decodedBuffer(target));
+            if (decodee.remaining() == 0)
+                toDecode.remove(0);
         }
 
         return eof ? takeAllChars(tc) : null;
