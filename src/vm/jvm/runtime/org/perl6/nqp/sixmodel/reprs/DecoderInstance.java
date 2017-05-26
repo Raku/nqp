@@ -169,8 +169,8 @@ public class DecoderInstance extends SixModelObject {
         if (available < lBytes)
             return null;
         SixModelObject res = bufType.st.REPR.allocate(tc, bufType.st);
-        byte[] resBytes = new byte[available];
         int bytes = (int)lBytes;
+        byte[] resBytes = new byte[bytes];
         if (bytes > available)
             bytes = available;
         int need = bytes;
