@@ -288,7 +288,7 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
             }
             else {
                 ByteBuffer buffer = ByteBuffer.allocate(bytes);
-                chan.read(buffer);
+                eof = chan.read(buffer) == -1;
                 buffer.flip();
                 byte[] res = new byte[buffer.limit()];
                 buffer.get(res);
