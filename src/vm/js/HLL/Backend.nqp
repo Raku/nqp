@@ -52,23 +52,6 @@ class JavaScriptBackend {
         $v8-profiler;
     }
 
-    method snapshot_memory($file) {
-        my $comp := nqp::getcomp('JavaScript');
-
-        my $v8-profiler := self.v8-profiler($comp);
-
-        my &snapshot := $comp.eval('(function(profiler, filename) {
-            var snapshot = profiler.takeSnapshot();
-            var fs = require("fs");
-            snapshot.export(function(error, result) {
-                fs.writeFileSync(filename, result);
-                snapshot.delete();
-            });
-        })');
-
-        snapshot($v8-profiler, $file);
-    }
-
     method run_profiled($what, $kind, $filename?) {
         my $comp := nqp::getcomp('JavaScript');
 
@@ -130,18 +113,12 @@ class JavaScriptBackend {
 
         my $nqp-runtime := %adverbs<nqp-runtime>;
 
-        if %adverbs<snapshot> {
-            self.snapshot_memory(%adverbs<snapshot> ~ '-have-qast.heapsnapshot');
-        }
-
         if %adverbs<source-map-debug> {
             $backend.emit_with_source_map_debug($qast, :$instant, :$shebang, :$nqp-runtime);
         } elsif %adverbs<source-map> {
             $backend.emit_with_source_map($qast, :$instant, :$shebang, :$nqp-runtime);
         } else {
-            my $code := $backend.emit($qast, :$instant, :$substagestats, :$shebang, :$nqp-runtime, :snapshot(sub () {
-                self.snapshot_memory(%adverbs<snapshot> ~ '-have-chunks.heapsnapshot') if %adverbs<snapshot>;
-            }));
+            my $code := $backend.emit($qast, :$instant, :$substagestats, :$shebang, :$nqp-runtime);
             $code := self.beautify($code) if %adverbs<beautify>;
             $code;
         }

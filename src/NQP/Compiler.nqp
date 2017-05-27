@@ -37,14 +37,9 @@ $nqpcomp.addstage('classname', :after<start>);
 @clo.push('bootstrap');
 #?endif
 #?if js
-@clo.push('substagestats');
 @clo.push('source-map');
 @clo.push('source-map-debug');
-@clo.push('beautify');
 @clo.push('nyi=s');
-@clo.push('shebang');
-@clo.push('snapshot=s');
-@clo.push('nqp-runtime=s');
 #?endif
 
 #?if moar

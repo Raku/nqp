@@ -143,6 +143,8 @@ class QAST::OperationsJS {
     method BOOL() { $T_BOOL }
     method VOID() { $T_VOID }
 
+    method quote_string($str) { quote_string($str) }
+
     method new_chunk(*@args) { Chunk.new(|@args) }
 
     add_simple_op('setcontspec', $T_OBJ, [$T_OBJ, $T_STR, $T_OBJ], :side_effects, :decont(0));

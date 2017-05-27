@@ -1964,10 +1964,20 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my int $deserializes := nqp::istype($ast, QAST::CompUnit) && $ast.compilation_mode;
 
+        my $libpath := '';
+
+        if try $*LIBPATH {
+            my @libpath;
+            for $*LIBPATH -> $dir {
+                nqp::push(@libpath, quote_string($dir));
+            }
+            $libpath := "nqp.libpath([{nqp::join(',', @libpath)}]);\n";
+        }
         Chunk.void(
             $shebang ?? "#!/usr/bin/env node\n" !! '',
             "'use strict'\n",
             "var nqp = require({quote_string($nqp-runtime || 'nqp-runtime')});\n",
+            $libpath,
             self.declare_wvals,
             $deserializes ?? '' !! self.setup_wvals,
             self.setup_cuids,
@@ -1977,13 +1987,11 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         );
     }
 
-    method emit($ast, :$instant, :$substagestats, :$shebang, :$snapshot, :$nqp-runtime) {
+    method emit($ast, :$substagestats, *%named) {
 
         my num $timestamp := nqp::time_n();
-        my $chunk := self.as_js_with_prelude($ast, :$instant, :$shebang, :$nqp-runtime);
+        my $chunk := self.as_js_with_prelude($ast, |%named);
         nqp::printfh(nqp::getstderr(), nqp::sprintf("[as_js %.3f] ", [nqp::time_n() - $timestamp])) if $substagestats;
-
-        $snapshot() if $snapshot;
 
         $timestamp := nqp::time_n();
         my $source := $chunk.join();
@@ -1992,12 +2000,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     # return a json datastructure we later process into a source map
-    method emit_with_source_map($ast, :$instant, :$shebang, :$nqp-runtime) {
-       self.as_js_with_prelude($ast, :$instant, :$shebang, :$nqp-runtime).with_source_map_info
+    method emit_with_source_map($ast, *%named) {
+       self.as_js_with_prelude($ast, |%named).with_source_map_info
     }
 
-    method emit_with_source_map_debug($ast, :$instant, :$shebang, :$nqp-runtime) {
-       self.as_js_with_prelude($ast, :$instant, :$shebang, :$nqp-runtime).source_map_debug
+    method emit_with_source_map_debug($ast, *%named) {
+       self.as_js_with_prelude($ast, |%named).source_map_debug
     }
 }
 

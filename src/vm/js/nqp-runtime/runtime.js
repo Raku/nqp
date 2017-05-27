@@ -84,6 +84,11 @@ for (let name in refs.helpers) {
   exports[name] = refs.helpers[name];
 }
 
+let libpath = [];
+exports.libpath = function(paths) {
+  libpath = paths;
+};
+
 exports.loaderCtx = null;
 
 op.loadbytecode = function(ctx, file) {
@@ -102,7 +107,7 @@ op.loadbytecode = function(ctx, file) {
   exports.loaderCtx = ctx;
   var mangled = file.replace(/::/g, '-');
 
-  var prefixes = (process.env.NQPJS_LIB || '').split(':');
+  var prefixes = libpath.slice();
   prefixes.push('./', './nqp-js-on-js/');
   var found = false;
   for (var prefix of prefixes) {
@@ -453,6 +458,16 @@ exports.dumpObj = function(obj) {
     }
   } else {
     console.log(obj);
+  }
+};
+
+let containerSpecs = require('./container-specs.js');
+exports.extraRuntime = function(lang, path) {
+  if (lang != 'perl6') throw 'only loading extra runtime for perl 6 is supported';
+  let runtime = require(path);
+  if (!runtime.loaded) {
+    runtime.loaded = true;
+    runtime.load(exports, CodeRef, containerSpecs);
   }
 };
 
