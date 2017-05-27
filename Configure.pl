@@ -121,7 +121,7 @@ MAIN: {
         $default_backend = 'moar';
     }
     if ($backends{js} and !$backends{moar}) {
-        print "===SORRY!===\nWhen building the js backend you must also build moar\nPlease build with -backends=moar,js\n";
+        print "===SORRY!===\nWhen building the js backend you must also build moar\nPlease build with --backends=moar,js\n";
         exit 1;
     }
 
