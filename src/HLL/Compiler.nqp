@@ -258,12 +258,12 @@ class HLL::Compiler does HLL::Backend::Default {
 
         my $*PERL6_RUNTIME;
 
-        if (%adverbs<perl6-runtime>) {
+        if %adverbs<perl6-runtime> {
             $*PERL6_RUNTIME := %adverbs<perl6-runtime>;
         }
 
         my $*LIBPATH;
-        if (%adverbs<libpath>) {
+        if %adverbs<libpath> {
             $*LIBPATH := nqp::split('|||', %adverbs<libpath>);
             nqp::getcomp('JavaScript').eval('(function(paths) {nqp.libpath(paths.array)})')($*LIBPATH);
         }
