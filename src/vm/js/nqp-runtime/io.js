@@ -28,6 +28,15 @@ nqpIo.SyncPipe.prototype.$$can = function(method) {
 nqpIo.SyncPipe.prototype.$$setencoding = function(encoding) {
   this.encoding = core.renameEncoding(encoding);
 };
+
+nqpIo.SyncPipe.prototype.$$setinputlinesep = function(sep) {
+  this.seps = [sep];
+};
+
+nqpIo.SyncPipe.prototype.$$readallfh = function() {
+  return this.slurp().toString(this.encoding || 'utf8');
+};
+
 function boolish(bool) {
   return bool ? 1 : 0;
 }
