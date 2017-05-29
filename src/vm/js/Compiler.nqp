@@ -1978,6 +1978,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             "'use strict'\n",
             "var nqp = require({quote_string($nqp-runtime || 'nqp-runtime')});\n",
             $libpath,
+            (try $*EXECNAME) ?? "nqp.execname({quote_string($*EXECNAME)});\n" !! '',
             self.declare_wvals,
             $deserializes ?? '' !! self.setup_wvals,
             self.setup_cuids,

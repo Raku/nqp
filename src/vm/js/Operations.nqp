@@ -1670,5 +1670,7 @@ class QAST::OperationsJS {
 
     add_simple_op('loadbytecode', $T_STR, [$T_STR], :ctx, :side_effects);
     add_simple_op('loadbytecodefh', $T_VOID, [$T_OBJ, $T_STR], :ctx, :side_effects);
+
+    add_simple_op('execname', $T_STR, []);
 }
 

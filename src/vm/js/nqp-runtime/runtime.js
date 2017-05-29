@@ -476,6 +476,15 @@ exports.paramcheckfailed = function(hllName, ctx, args) {
   return hll.hllConfigs[hllName].get('bind_error').$$call(ctx, null, capture);
 };
 
+let execname;
+exports.execname = function(path) {
+  execname = path;
+};
+
+op.execname = function() {
+  return execname;
+};
+
 exports.NativeRef = require('./reprs.js').NativeRef;
 
 exports.getHLL = hll.getHLL;
