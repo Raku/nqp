@@ -33,6 +33,13 @@ nqpIo.SyncPipe.prototype.$$setinputlinesep = function(sep) {
   this.seps = [sep];
 };
 
+
+/* HACK - workaround to make rakudo precomp work before we really implement readlinechompfh*/
+nqpIo.SyncPipe.prototype.$$readlinechompfh = function() {
+  this.slurp();
+  return '';
+};
+
 nqpIo.SyncPipe.prototype.$$readallfh = function() {
   return this.slurp().toString(this.encoding || 'utf8');
 };
