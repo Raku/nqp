@@ -2,7 +2,7 @@
 
 # Testing nqp::shell wrt capturing output.
 
-plan(11);
+plan(13);
 
 my $read_out         := nqp::const::PIPE_INHERIT_IN + nqp::const::PIPE_CAPTURE_OUT + nqp::const::PIPE_INHERIT_ERR;
 my $read_out_and_err := nqp::const::PIPE_INHERIT_IN + nqp::const::PIPE_CAPTURE_OUT + nqp::const::PIPE_CAPTURE_ERR;
@@ -15,8 +15,12 @@ my $read_out_and_err := nqp::const::PIPE_INHERIT_IN + nqp::const::PIPE_CAPTURE_O
     nqp::setencoding($out, 'utf8');
     nqp::shell('echo aardvarks', nqp::cwd(), nqp::getenvhash(), $in, $out, $err, $read_out);
 
+    ok( !nqp::eoffh($out), 'nqp::eoffh on a pipe while it still has data' );
+
     my $pstr := nqp::readallfh($out);
     ok( $pstr ~~ / 'aardvarks' /, 'nqp::readallfh with a pipe');
+
+    ok( nqp::eoffh($out), 'nqp::eoffh on a pipe we have read everything out of');
 
     # What should the return value of nqp::close be? MoarVM and JVM always return 1.
     nqp::closefh($out); ok( 1, 'nqp::closefh with a pipe');
