@@ -347,13 +347,13 @@ else {
 }
 
 {
-    my $fh := nqp::open('t/nqp/019-chars.txt', 'r');
-    is(nqp::readcharsfh($fh, 3), 'lin', 'nqp::readcharsfh');
-    is(nqp::readcharsfh($fh, 2), 'π1', 'nqp::readcharsfh the second time with a multi byte character');
-    nqp::readlinefh($fh);
-    is(nqp::readcharsfh($fh, 5), 'line3', 'nqp::readcharsfh after nqp::readlinefh');
-    is(nqp::readcharsfh($fh, 150), "line4\n", 'nqp::readcharsfh with more chars then they are in the file');
-    nqp::closefh($fh);
+    my $fh := open('t/nqp/019-chars.txt', :r);
+    is($fh.readchars(3), 'lin', 'readchars');
+    is($fh.readchars(2), 'π1', 'readchars the second time with a multi byte character');
+    $fh.get;
+    is($fh.readchars(5), 'line3', 'readchars after get');
+    is($fh.readchars(150), "line4\n", 'readchars with more chars then they are in the file');
+    close($fh);
 }
 
 my sub buf_dump($buf) {
