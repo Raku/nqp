@@ -122,8 +122,23 @@ my class NQPFileHandle {
         self.print($str ~ "\n")
     }
 
+    method tell() {
+        nqp::tellfh($!vmio) - ($!decoder ?? $!decoder.bytes-available !! 0)
+    }
+
+    method t() {
+        nqp::isttyfh($!vmio)
+    }
+
+    method eof() {
+        $!decoder
+            ?? $!decoder.is-empty && nqp::eoffh($!vmio)
+            !! nqp::eoffh($!vmio)
+    }
+
     method close() {
         nqp::closefh($!vmio);
+        1
     }
 }
 
