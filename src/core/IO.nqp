@@ -113,6 +113,30 @@ my class NQPFileHandle {
         $!decoder.consume-all-chars()
     }
 
+    method readchars($chars) {
+        $!decoder || die("Cannot 'readchars' on a binary file handle");
+        $!decoder.consume-exactly-chars($chars) // self.'!readchars-slow-path'($chars)
+    }
+
+    method !readchars-slow-path($chars) {
+        my $result := '';
+        unless nqp::eoffh($!vmio) && $!decoder.is-empty {
+            while 1 {
+                my $buf := nqp::readfh($!vmio, nqp::create($NQPBuf), 0x100000);
+                if nqp::elems($buf) {
+                    $!decoder.add-bytes($buf);
+                    $result := $!decoder.consume-exactly-chars($chars);
+                    last if nqp::isconcrete($result);
+                }
+                else {
+                    $result := $!decoder.consume-all-chars();
+                    last;
+                }
+            }
+        }
+        $result
+    }
+
     method print($str) {
         $!decoder || die("Cannot 'print' on a binary file handle");
         nqp::writefh($!vmio, nqp::encode($str, $!encoding, nqp::create($NQPBuf)));
