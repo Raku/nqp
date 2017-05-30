@@ -6,7 +6,7 @@
 
 my %documented_ops := nqp::hash();
 
-my @doc_lines := nqp::split("\n", nqp::readallfh(nqp::open("docs/ops.markdown","r")));
+my @doc_lines := nqp::split("\n", slurp("docs/ops.markdown"));
 for @doc_lines -> $line {
     next unless $line ~~ / ^ '* ' .* '(' /;
     $line := nqp::substr($line, 3);
@@ -39,7 +39,7 @@ while (nqp::elems(@folders)) {
 my %tested_ops := nqp::hash();
 
 for @files -> $file {
-    my @test_lines := nqp::split("\n", nqp::readallfh(nqp::open($file,"r")));
+    my @test_lines := nqp::split("\n", slurp($file));
     for @test_lines -> $line {
         my $match := $line ~~ / 'nqp::' (<[a..z0..9_]>+?) '(' /;
         if (?$match) {
