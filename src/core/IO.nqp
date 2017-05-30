@@ -153,6 +153,10 @@ my class NQPFileHandle {
         self.print($str ~ "\n")
     }
 
+    method flush() {
+        nqp::flushfh($!vmio)
+    }
+
     method tell() {
         nqp::tellfh($!vmio) - ($!decoder ?? $!decoder.bytes-available !! 0)
     }
