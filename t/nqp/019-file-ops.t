@@ -2,7 +2,7 @@
 
 # Test nqp::op file operations.
 
-plan(110);
+plan(111);
 
 ok( nqp::stat('CREDITS', nqp::const::STAT_EXISTS) == 1, 'nqp::stat exists');
 ok( nqp::stat('AARDVARKS', nqp::const::STAT_EXISTS) == 0, 'nqp::stat not exists');
@@ -185,6 +185,38 @@ else {
 
     nqp::rmdir($test-file ~ '-dir');
     nqp::unlink($test-file);
+
+    my $parts := [$test-file ~ '-dir-nested1', 'nested2', 'nested4', 'nested5', 'nested6', 'nested7'];
+
+
+    my $nested := nqp::join('/', $parts);
+    nqp::mkdir($nested, 0o777);
+
+    {
+        my $wfh := nqp::open("$nested/test-file", 'w');
+        nqp::printfh($wfh, "hi");
+        nqp::closefh($wfh);
+
+        my $rfh := nqp::open("$nested/test-file", 'r');
+        my $input := nqp::readallfh($rfh);
+        is($input, "hi", "can read and write to a file in our nested directory");
+        nqp::closefh($rfh);
+
+        nqp::unlink("$nested/test-file");
+    }
+
+    my @delete;
+    my $path := nqp::shift($parts);
+    nqp::unshift(@delete, $path);
+    for $parts -> $part {
+        $path := $path ~ "/$part";
+        nqp::unshift(@delete, $path);
+    }
+
+    for @delete -> $dir {
+        nqp::rmdir($dir);
+    }
+
 }
 
 my $backend := nqp::getcomp('nqp').backend.name;
