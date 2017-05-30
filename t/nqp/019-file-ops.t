@@ -14,28 +14,28 @@ ok( nqp::stat('CREDITS', nqp::const::STAT_ISREG) == 1, 'nqp::stat is regular fil
 ok( nqp::stat('t', nqp::const::STAT_ISREG) == 0, 'nqp::stat not regular file');
 
 
-my $credits := nqp::open('CREDITS', 'r');
-ok( $credits, 'nqp::open for read');
-ok( nqp::tellfh($credits) == 0, 'nqp::tellfh start of file');
-ok( !nqp::eoffh($credits), 'Not at EOF after open');
-my $line := nqp::readlinefh($credits);
-ok( !nqp::eoffh($credits), 'Not at EOF after first line read');
-ok( nqp::chars($line) == 5 || nqp::chars($line) == 6, 'nqp::readlinefh line to read'); # =pod\r?\n
-ok( nqp::tellfh($credits) == 5 || nqp::tellfh($credits) == 6, 'nqp::tellfh line two');
-my $rest := nqp::readallfh($credits);
-ok( nqp::eoffh($credits), 'At EOF after readallfh');
-ok( nqp::chars($rest) > 100, 'nqp::readallfh lines to read');
-ok( nqp::substr($rest,0,4) ne '=pod', 'nqp::readallfh after nqp::readlinefh did not read line twice');
-ok( nqp::tellfh($credits) >= nqp::chars($line) + nqp::chars($rest), 'nqp::tellfh end of file');
+my $credits := open('CREDITS', :r, :!chomp);
+ok( $credits, 'open for read');
+ok( $credits.tell == 0, 'tell start of file');
+ok( !$credits.eof, 'Not at EOF after open');
+my $line := $credits.get;
+ok( !$credits.eof, 'Not at EOF after first line read');
+ok( nqp::chars($line) == 5 || nqp::chars($line) == 6, 'get line to read'); # =pod\r?\n
+ok( $credits.tell == 5 || nqp::tellfh($credits) == 6, 'tell line two');
+my $rest := $credits.slurp;
+ok( $credits.eof, 'At EOF after slurp');
+ok( nqp::chars($rest) > 100, 'slurp read a lot');
+ok( nqp::substr($rest,0,4) ne '=pod', 'slurp after get did not read line twice');
+ok( $credits.tell >= nqp::chars($line) + nqp::chars($rest), 'tell end of file');
 
-ok( nqp::chars(nqp::readlinefh($credits)) == 0, 'nqp::readlinefh end of file');
-ok( nqp::chars(nqp::readlinefh($credits)) == 0, 'nqp::readlinefh end of file repeat');
-ok( nqp::chars(nqp::readallfh($credits)) == 0, 'nqp::readallfh end of file');
-ok( nqp::chars(nqp::readlinefh($credits)) == 0, 'nqp::readlinefh end of file repeat');
+ok( nqp::chars($credits.get) == 0, 'get end of file');
+ok( nqp::chars($credits.get) == 0, 'get end of file repeat');
+ok( nqp::chars($credits.slurp) == 0, 'slurp end of file');
+ok( nqp::chars($credits.get) == 0, 'get end of file repeat');
 
-ok( !nqp::isttyfh($credits), "nqp::isttyfh on a regular file");
+ok( !$credits.t, ".t on a regular file");
 
-ok( nqp::defined(nqp::closefh($credits)), 'nqp::closefh');
+ok( nqp::defined(close($credits)), 'close');
 
 # setinputlinesep tests
 
@@ -71,31 +71,31 @@ ok( nqp::istrue(nqp::getstdin()), 'nqp::getstdin');
 ok( nqp::istrue(nqp::getstdout()), 'nqp::getstdout');
 ok( nqp::istrue(nqp::getstderr()), 'nqp::getstderr');
 
-## open, printfh, readallfh, closefh
+## open, print, slurp, close
 my $test-file := 'test-nqp-19';
 nqp::unlink($test-file) if nqp::stat($test-file, 0); # XXX let mvm die on nonexistent file
 
-my $fh := nqp::open($test-file, 'w');
+my $fh := open($test-file, :w);
 ok($fh, 'we can open a nonexisting file for writing');
-nqp::closefh($fh);
+close($fh);
 
-$fh := nqp::open($test-file, 'w');
+$fh := open($test-file, :w);
 ok($fh, 'we can open an existing file for writing');
-nqp::closefh($fh);
+close($fh);
 
-$fh := nqp::open($test-file, 'r');
-is(nqp::readallfh($fh), '', 'test file is empty');
-nqp::closefh($fh);
+$fh := open($test-file, :r);
+is($fh.slurp, '', 'test file is empty');
+close($fh);
 
-$fh := nqp::open($test-file, 'wa');
-ok(nqp::printfh($fh, "awesome") == 7, 'appended a string to that file');
-ok(nqp::printfh($fh, " thing!!") == 8, 'appended a string to that file... again');
-nqp::closefh($fh);
+$fh := open($test-file, :a);
+ok($fh.print("awesome") == 7, 'appended a string to that file');
+ok($fh.print(" thing!!") == 8, 'appended a string to that file... again');
+close($fh);
 
-$fh := nqp::open($test-file, 'r');
-is(nqp::readallfh($fh), "awesome thing!!", 'test file contains the strings');
-ok(nqp::tellfh($fh) == 15, 'tellfh gives correct position');
-nqp::closefh($fh);
+$fh := open($test-file, :r);
+is($fh.slurp, "awesome thing!!", 'test file contains the strings');
+ok($fh.tell == 15, 'tellfh gives correct position');
+close($fh);
 
 my $size := nqp::stat($test-file, nqp::const::STAT_FILESIZE);
 $fh := nqp::open($test-file, 'r');
@@ -118,44 +118,41 @@ try { nqp::seekfh($fh, 0, 5); $ok := 0; 1 }
 ok($ok, 'seekfh with invalid whence fails');
 nqp::closefh($fh);
 
-$fh := nqp::open($test-file, 'w');
-nqp::closefh($fh);
-$fh := nqp::open($test-file, 'r');
-is(nqp::readallfh($fh), '', 'opening for writing truncates the file');
-nqp::closefh($fh);
+$fh := open($test-file, :w);
+close($fh);
+$fh := open($test-file, :r);
+is($fh.slurp(), '', 'opening for writing truncates the file');
+close($fh);
 
 
-$fh := nqp::open($test-file, 'w');
-nqp::printfh($fh, "pretty awesome");
-nqp::printfh($fh, " th");
-nqp::printfh($fh, "i");
-nqp::printfh($fh, "n");
-nqp::printfh($fh, "g!");
-nqp::printfh($fh, "!");
-nqp::closefh($fh);
+$fh := open($test-file, :w);
+$fh.print("pretty awesome");
+$fh.print(" th");
+$fh.print("i");
+$fh.print("n");
+$fh.print("g!");
+$fh.print("!");
+close($fh);
 
-$fh := nqp::open($test-file, 'r');
-is(nqp::readallfh($fh), "pretty awesome thing!!", 'test file contains the string after multiple write with w mode');
-ok(nqp::tellfh($fh) == 22, 'tellfh gives correct position');
-nqp::closefh($fh);
+$fh := open($test-file, :r);
+is($fh.slurp, "pretty awesome thing!!", 'test file contains the string after multiple write with w mode');
+ok($fh.tell == 22, 'tellfh gives correct position');
+close($fh);
 
 ## setencoding
-$fh := nqp::open($test-file, 'w');
-nqp::setencoding($fh, 'utf8');
-ok(nqp::printfh($fh, "ä") == 2, 'umlauts are printed as two bytes');
-nqp::closefh($fh);
+$fh := open($test-file, :w, :enc<utf8>);
+ok($fh.print("ä") == 2, 'umlauts are printed as two bytes');
+close($fh);
 
-$fh := nqp::open($test-file, 'r');
-nqp::setencoding($fh, 'utf8'); # XXX let ascii be the default
-my $str := nqp::readallfh($fh);
+$fh := open($test-file, :r, :enc<utf8>);
+my $str := $fh.slurp;
 ok(nqp::chars($str) == 1, 'utf8 means one char for an umlaut');
 is($str, "ä", 'utf8 reads the umlaut correct');
-nqp::closefh($fh);
+close($fh);
 
-$fh := nqp::open($test-file, 'r');
-nqp::setencoding($fh, 'iso-8859-1');
-ok(nqp::chars(nqp::readallfh($fh)) == 2, 'switching to ansi results in 2 chars for an umlaut');
-nqp::closefh($fh);
+$fh := open($test-file, :r, :enc<iso-8859-1>);
+ok(nqp::chars($fh.slurp) == 2, 'switching to ansi results in 2 chars for an umlaut');
+close($fh);
 
 ## chdir
 if nqp::getcomp('nqp').backend.name eq 'jvm' {
@@ -163,24 +160,21 @@ if nqp::getcomp('nqp').backend.name eq 'jvm' {
 }
 else {
     nqp::chdir('t');
-    $fh := nqp::open('../' ~ $test-file, 'r');
-    nqp::setencoding($fh, 'utf8');
-    ok(nqp::chars(nqp::readallfh($fh)) == 1, 'we can chdir into a subdir');
-    nqp::closefh($fh);
+    $fh := open('../' ~ $test-file, :r);
+    ok(nqp::chars($fh.slurp) == 1, 'we can chdir into a subdir');
+    close($fh);
 
     nqp::chdir('..');
-    $fh := nqp::open($test-file, 'r');
-    nqp::setencoding($fh, 'utf8');
-    ok(nqp::chars(nqp::readallfh($fh)) == 1, 'we can chdir back to the parent dir');
-    nqp::closefh($fh);
+    $fh := open($test-file, :r);
+    ok(nqp::chars($fh.slurp) == 1, 'we can chdir back to the parent dir');
+    close($fh);
 
     ## mkdir
     nqp::mkdir($test-file ~ '-dir', 0o777);
     nqp::chdir($test-file ~ '-dir');
-    $fh := nqp::open('../' ~ $test-file, 'r');
-    nqp::setencoding($fh, 'utf8');
-    ok(nqp::chars(nqp::readallfh($fh)) == 1, 'we can create a new directory');
-    nqp::closefh($fh);
+    $fh := open('../' ~ $test-file, :r);
+    ok(nqp::chars($fh.slurp) == 1, 'we can create a new directory');
+    close($fh);
     nqp::chdir('..');
 
     nqp::rmdir($test-file ~ '-dir');
@@ -194,13 +188,13 @@ if $crlf-conversion {
     skip("readlinefh won't match \\r on $backend", 5);
 }
 else {
-    $fh := nqp::open('t/nqp/19-readline.txt', 'r');
-    is(nqp::readlinefh($fh), "line1\r",   'reading a line till CR');
-    is(nqp::readlinefh($fh), "line2\r\n", 'reading a line till CRLF');
-    is(nqp::readlinefh($fh), "line3\n",   'reading a line till LF');
-    is(nqp::readlinefh($fh), "\n",          'reading an empty line');
-    is(nqp::readlinefh($fh), "line4",     'reading a line till EOF');
-    nqp::closefh($fh);
+    $fh := open('t/nqp/19-readline.txt', :r, :!chomp);
+    is($fh.get, "line1\r",   'reading a line till CR');
+    is($fh.get, "line2\r\n", 'reading a line till CRLF');
+    is($fh.get, "line3\n",   'reading a line till LF');
+    is($fh.get, "\n",          'reading an empty line');
+    is($fh.get, "line4",     'reading a line till EOF');
+    close($fh);
 }
 
 # file times
@@ -225,47 +219,47 @@ else {
 
 # copy
 nqp::unlink($test-file ~ '-copied') if nqp::stat($test-file ~ '-copied', nqp::const::STAT_EXISTS);
-$fh := nqp::open($test-file, 'w');
-nqp::printfh($fh, 'Hello');
-nqp::closefh($fh);
+$fh := open($test-file, :w);
+$fh.print('Hello');
+close($fh);
 nqp::copy($test-file, $test-file ~ '-copied');
-$fh := nqp::open($test-file ~ '-copied', 'r');
-is(nqp::readallfh($fh), "Hello", 'copied file has expected content');
-nqp::closefh($fh);
-$fh := nqp::open($test-file, 'w');
-nqp::printfh($fh, 'Holla');
-nqp::closefh($fh);
+$fh := open($test-file ~ '-copied', :r);
+is($fh.slurp, "Hello", 'copied file has expected content');
+close($fh);
+$fh := open($test-file, :w);
+$fh.print('Holla');
+close($fh);
 nqp::copy($test-file, $test-file ~ '-copied');
-$fh := nqp::open($test-file ~ '-copied', 'r');
-is(nqp::readallfh($fh), "Holla", 'copied file (overwritten) has expected content');
-nqp::closefh($fh);
+$fh := open($test-file ~ '-copied', :r);
+is($fh.slurp, "Holla", 'copied file (overwritten) has expected content');
+close($fh);
 nqp::unlink($test-file);
 nqp::unlink($test-file ~ '-copied');
 
 # rename/move
 nqp::unlink($test-file ~ '-moved') if nqp::stat($test-file ~ '-moved', nqp::const::STAT_EXISTS);
-$fh := nqp::open($test-file, 'w');
-nqp::printfh($fh, 'Hello');
-nqp::closefh($fh);
+$fh := open($test-file, :w);
+$fh.print('Hello');
+close($fh);
 nqp::rename($test-file, $test-file ~ '-moved');
-$fh := nqp::open($test-file ~ '-moved', 'r');
-is(nqp::readallfh($fh), "Hello", 'moved file has expected content');
-nqp::closefh($fh);
-$fh := nqp::open($test-file, 'w');
-nqp::printfh($fh, 'Holla');
-nqp::closefh($fh);
+$fh := open($test-file ~ '-moved', :r);
+is($fh.slurp, "Hello", 'moved file has expected content');
+close($fh);
+$fh := open($test-file, :w);
+$fh.print('Holla');
+close($fh);
 nqp::rename($test-file, $test-file ~ '-moved');
-$fh := nqp::open($test-file ~ '-moved', 'r');
-is(nqp::readallfh($fh), "Holla", 'moved file (overwritten) has expected content');
-nqp::closefh($fh);
+$fh := open($test-file ~ '-moved', :r);
+is($fh.slurp, "Holla", 'moved file (overwritten) has expected content');
+close($fh);
 nqp::unlink($test-file);
 nqp::unlink($test-file ~ '-moved');
 
 # link
 nqp::unlink($test-file ~ '-linked') if nqp::stat($test-file ~ '-linked', nqp::const::STAT_EXISTS);
-$fh := nqp::open($test-file, 'w');
-nqp::printfh($fh, 'Hello');
-nqp::closefh($fh);
+$fh := open($test-file, :w);
+$fh.print('Hello');
+close($fh);
 nqp::link($test-file, $test-file ~ '-linked');
 ok(nqp::stat($test-file ~ '-linked', nqp::const::STAT_EXISTS), 'the hard link should exist');
 ok(nqp::stat($test-file, nqp::const::STAT_PLATFORM_DEV) == nqp::stat($test-file ~ '-linked', nqp::const::STAT_PLATFORM_DEV), "a hard link should share the original's device number");
@@ -290,9 +284,9 @@ if $is-windows {
 }
 else {
     nqp::unlink($test-file ~ '-symlink') if nqp::stat($test-file ~ '-symlink', nqp::const::STAT_EXISTS);
-    $fh := nqp::open($test-file, 'w');
-    nqp::printfh($fh, 'Hello');
-    nqp::closefh($fh);
+    $fh := open($test-file, :w);
+    $fh.print('Hello');
+    close($fh);
     nqp::symlink($test-file, $test-file ~ '-symlink');
     ok(!nqp::fileislink($test-file), 'nqp::fileislink on a file that is not a symbolic link');
     ok(nqp::fileislink($test-file ~ '-symlink'), 'nqp::fileislink on a symbolic link');
@@ -312,14 +306,14 @@ else {
 }
 
 if $crlf-conversion {
-    my $wfh := nqp::open($test-file, 'w');
-    nqp::printfh($wfh, "abc\ndef\r\nghi");
-    nqp::closefh($wfh);
+    my $wfh := open($test-file, :w);
+    $wfh.print("abc\ndef\r\nghi");
+    close($wfh);
 
-    my $fh := nqp::open($test-file, 'r');
-    my $input := nqp::readallfh($fh);
+    my $fh := open($test-file, :r);
+    my $input := $fh.slurp;
     is($input, "abc\ndef\nghi", "reading a whole file");
-    nqp::closefh($fh);
+    close($fh);
 } else {
     skip("readallfh doesn't convert \\r\\n on $backend");
 }
