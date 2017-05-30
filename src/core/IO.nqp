@@ -65,7 +65,11 @@ my class NQPFileHandle {
 
     method open($filename, :$r, :$w, :$a, :$bin, :$enc, :$chomp) {
         my $mode := $w ?? 'w' !! ($a ?? 'wa' !! 'r');
-        $!vmio := nqp::open($filename, $mode);
+        self.wrap(nqp::open($filename, $mode), :$bin, :$enc, :$chomp)
+    }
+
+    method wrap($handle, :$bin, :$enc, :$chomp) {
+        $!vmio := $handle;
         if $bin {
             die("Cannot pass open with :bin and :enc<...>") if $enc;
         }
@@ -132,6 +136,13 @@ sub open($filename, *%options) {
     $handle.open($filename, |%options);
     $handle
 }
+
+my $IN := NQPFileHandle.new.wrap(nqp::getstdin());
+my $OUT := NQPFileHandle.new.wrap(nqp::getstdout());
+my $ERR := NQPFileHandle.new.wrap(nqp::getstderr());
+sub stdin() { $IN }
+sub stdout() { $OUT }
+sub stderr() { $ERR }
 
 =begin item close
 Close handle
