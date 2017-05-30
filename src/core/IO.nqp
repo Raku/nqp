@@ -72,7 +72,7 @@ my class NQPFileHandle {
     method wrap($handle, :$bin, :$enc, :$chomp) {
         $!vmio := $handle;
         if $bin {
-            die("Cannot pass open with :bin and :enc<...>") if $enc;
+            nqp::die("Cannot pass open with :bin and :enc<...>") if $enc;
         }
         else {
             $!encoding := $enc // 'utf8';
