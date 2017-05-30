@@ -126,6 +126,19 @@ my class NQPFileHandle {
         nqp::tellfh($!vmio) - ($!decoder ?? $!decoder.bytes-available !! 0)
     }
 
+    method seek($offset, $whence) {
+        my int $rewind := 0;
+        if $!decoder {
+            # consider bytes we pre-read, when seeking from current position:
+            $rewind := $!decoder.bytes-available if $whence == 1;
+
+            # Freshen decoder, so we won't have stuff left over from earlier reads
+            # that were in the wrong place.
+            $!decoder := NQPDecoder.new($!encoding, :translate-nl);
+        }
+        nqp::seekfh($!vmio, $offset - $rewind, $whence);
+    }
+
     method t() {
         nqp::isttyfh($!vmio)
     }
