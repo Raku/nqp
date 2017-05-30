@@ -15,6 +15,8 @@ var child_process = require('child_process');
 var NQPObject = require('./nqp-object.js');
 var Null = require('./null.js');
 
+var mkdirp = require('mkdirp');
+
 var nqp = require('nqp-runtime');
 
 nqpIo.SyncPipe.prototype.$$decont = function(ctx) {
@@ -490,14 +492,7 @@ op.rmdir = function(dir) {
 };
 
 op.mkdir = function(dir, mode) {
-  try {
-    fs.mkdirSync(dir, mode);
-  } catch (e) {
-    if (e.code === 'EEXIST') {
-    } else {
-      throw e;
-    }
-  }
+  mkdirp.sync(dir, mode);
 };
 
 class DirHandle {

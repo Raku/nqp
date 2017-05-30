@@ -27,6 +27,7 @@
     "xregexp": "*",
     "ref": "*",
     "unicharadata": "*",
-    "fibers": "*"
+    "fibers": "*",
+    "mkdirp": "^0.5.1"
   }
 }
