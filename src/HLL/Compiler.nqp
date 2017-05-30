@@ -377,14 +377,14 @@ class HLL::Compiler does HLL::Backend::Default {
             my $in-handle;
             try {
                 if $filename eq '-' {
-                    $in-handle := nqp::getstdin();
+                    $in-handle := stdin();
                 }
                 elsif nqp::stat($filename, nqp::const::STAT_ISDIR) {
                     nqp::sayfh(nqp::getstderr(), "Can not run directory $filename.");
                     $err := 1;
                 }
                 else {
-                    $in-handle := nqp::open($filename, 'r');
+                    $in-handle := open($filename, :r, :enc($encoding));
                 }
                 CATCH {
                     nqp::sayfh(nqp::getstderr(), "Could not open $filename. $_");
@@ -393,9 +393,8 @@ class HLL::Compiler does HLL::Backend::Default {
             }
             nqp::exit(1) if $err;
             try {
-                nqp::setencoding($in-handle, $encoding);
-                nqp::push(@codes, nqp::readallfh($in-handle));
-                nqp::closefh($in-handle);
+                nqp::push(@codes, $in-handle.slurp());
+                $in-handle.close;
                 CATCH {
                     nqp::sayfh(nqp::getstderr(), "Error while reading from file: $_");
                     $err := 1;
