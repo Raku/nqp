@@ -96,7 +96,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     }
 
     method worry(*@args) {
-        nqp::printfh(nqp::getstderr(), nqp::join('', @args) ~ "\n");
+        note(nqp::join('', @args) ~ "\n");
     }
 
     token ws { [ \s | '#' \N* ]* }

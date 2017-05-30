@@ -446,10 +446,7 @@ my module sprintf {
             }
             my $int := intify($next);
             if nqp::islt_I($int, $zero) {
-                    my $err := nqp::getstderr();
-                    nqp::printfh($err, "negative value '"
-                                    ~ $int
-                                    ~ "' for %u in sprintf");
+                    note("negative value '$int' for %u in sprintf");
                     $int := 0;
             }
 

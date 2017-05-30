@@ -15,9 +15,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     method log(*@msgs) {
         my %env := nqp::getenvhash();
         if %env<NQPJS_LOG> {
-            my $log := nqp::open('nqpjs.log', 'wa');
-            nqp::printfh($log, nqp::join(',', @msgs) ~ "\n");
-            nqp::closefh($log);
+            my $log := open('nqpjs.log', :a);
+            $log.say(nqp::join(',', @msgs));
+            close($log);
         }
     }
 
@@ -646,7 +646,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         if $!nyi eq 'ignore' {
         }
         elsif $!nyi eq 'warn' {
-            nqp::printfh(nqp::getstderr(), "NYI: $msg\n");
+            note("NYI: $msg");
         }
         Chunk.new($T_OBJ,"nqp.NYI({quote_string($msg)})",["console.trace(\"NYI: \"+{quote_string($msg)});\n"]);
         #nqp::die("NYI: $msg");
@@ -1992,11 +1992,11 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my num $timestamp := nqp::time_n();
         my $chunk := self.as_js_with_prelude($ast, |%named);
-        nqp::printfh(nqp::getstderr(), nqp::sprintf("[as_js %.3f] ", [nqp::time_n() - $timestamp])) if $substagestats;
+        stderr().print(nqp::sprintf("[as_js %.3f] ", [nqp::time_n() - $timestamp])) if $substagestats;
 
         $timestamp := nqp::time_n();
         my $source := $chunk.join();
-        nqp::printfh(nqp::getstderr(), nqp::sprintf("[join %.3f] ", [nqp::time_n() - $timestamp])) if $substagestats;
+        stderr().print(nqp::sprintf("[join %.3f] ", [nqp::time_n() - $timestamp])) if $substagestats;
         $source;
     }
 

@@ -128,9 +128,9 @@ class JavaScriptBackend {
         my $tmp_file := self.tmp_file();
 
 
-        my $fh := nqp::open($tmp_file, 'w');
-        nqp::printfh($fh, $code);
-        nqp::closefh($fh);
+        my $fh := open($tmp_file, :w);
+        $fh.print($code);
+        close($fh);
 
         my $pipe   := nqp::syncpipe();
         my $status := nqp::shell("js-beautify $tmp_file", nqp::cwd(), nqp::getenvhash(),
@@ -159,9 +159,9 @@ class JavaScriptBackend {
         
         my $tmp_file := self.tmp_file;
 
-        my $code := nqp::open($tmp_file, 'w');
-        nqp::printfh($code, $js);
-        nqp::closefh($code);
+        my $code := open($tmp_file, :w);
+        $code.print($js);
+        close($code);
 
         sub (*@args) {
             my @cmd := ["node",$tmp_file];
