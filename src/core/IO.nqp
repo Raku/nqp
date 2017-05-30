@@ -189,17 +189,17 @@ sub spew($filename, $contents) {
 }
 
 sub print(*@args) {
-    nqp::print(join('', @args));
+    stdout().print(join('', @args));
     1;
 }
 
 sub say(*@args) {
-    nqp::say(join('', @args));
+    stdout().say(join('', @args));
     1;
 }
 
 sub note(*@args) {
-    nqp::sayfh(nqp::getstderr(), join('', @args));
+    stderr().say(join('', @args));
     1;
 }
 
