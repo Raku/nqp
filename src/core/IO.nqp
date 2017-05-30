@@ -125,7 +125,7 @@ my class NQPFileHandle {
     }
 
     method get() {
-        $!decoder || die("Cannot 'get' on a binary file handle");
+        $!decoder || nqp::die("Cannot 'get' on a binary file handle");
         $!decoder.consume-line-chars(:$!chomp) // self.'!get-slow-path'()
     }
 
@@ -148,7 +148,7 @@ my class NQPFileHandle {
     }
 
      method slurp() {
-        $!decoder || die("Cannot 'slurp' on a binary file handle");
+        $!decoder || nqp::die("Cannot 'slurp' on a binary file handle");
         while nqp::elems(my $buf := nqp::readfh($!vmio, nqp::create($NQPBuf), 0x100000)) {
             $!decoder.add-bytes($buf);
         }
@@ -156,7 +156,7 @@ my class NQPFileHandle {
     }
 
     method readchars($chars) {
-        $!decoder || die("Cannot 'readchars' on a binary file handle");
+        $!decoder || nqp::die("Cannot 'readchars' on a binary file handle");
         $!decoder.consume-exactly-chars($chars) // self.'!readchars-slow-path'($chars)
     }
 
@@ -180,7 +180,7 @@ my class NQPFileHandle {
     }
 
     method print($str) {
-        $!decoder || die("Cannot 'print' on a binary file handle");
+        $!decoder || nqp::die("Cannot 'print' on a binary file handle");
         nqp::writefh($!vmio, nqp::encode($str, $!encoding, nqp::create($NQPBuf)));
     }
 
