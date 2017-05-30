@@ -184,7 +184,7 @@ my $backend := nqp::getcomp('nqp').backend.name;
 my $crlf-conversion := $backend eq 'moar' || $backend eq 'js';
 
 if $crlf-conversion {
-    skip("readlinefh won't match \\r on $backend", 5);
+    skip("get won't match \\r on $backend", 5);
 }
 else {
     $fh := open('t/nqp/19-readline.txt', :r, :!chomp);
