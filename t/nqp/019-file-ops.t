@@ -98,25 +98,25 @@ ok($fh.tell == 15, 'tellfh gives correct position');
 close($fh);
 
 my $size := nqp::stat($test-file, nqp::const::STAT_FILESIZE);
-$fh := nqp::open($test-file, 'r');
-nqp::seekfh($fh, 0, 2);
-ok(nqp::tellfh($fh) == $size, 'seekfh to end gives correct position');
-nqp::seekfh($fh, 8, 0);
-ok(nqp::tellfh($fh) == 8, 'seekfh relative to start gives correct position');
-is(nqp::readallfh($fh), "thing!!", 'seekfh relative to start gives correct content');
-nqp::seekfh($fh, -7, 2);
-ok(nqp::tellfh($fh) == 8, 'seekfh relative to end gives correct position');
-is(nqp::readallfh($fh), "thing!!", 'seekfh relative to end gives correct content');
-nqp::seekfh($fh, -8, 1);
-ok(nqp::tellfh($fh) == 7, 'seekfh relative to current pos gives correct position');
-is(nqp::readallfh($fh), " thing!!", 'seekfh relative to current pos gives correct content');
+$fh := open($test-file, :r);
+$fh.seek(0, 2);
+ok($fh.tell == $size, 'seekfh to end gives correct position');
+$fh.seek(8, 0);
+ok($fh.tell == 8, 'seekfh relative to start gives correct position');
+is($fh.slurp, "thing!!", 'seekfh relative to start gives correct content');
+$fh.seek(-7, 2);
+ok($fh.tell == 8, 'seekfh relative to end gives correct position');
+is($fh.slurp, "thing!!", 'seekfh relative to end gives correct content');
+$fh.seek(-8, 1);
+ok($fh.tell == 7, 'seekfh relative to current pos gives correct position');
+is($fh.slurp, " thing!!", 'seekfh relative to current pos gives correct content');
 my $ok := 1;
-try { nqp::seekfh($fh, -5, 0); $ok := 0; 1 }
+try { $fh.seek(-5, 0); $ok := 0; 1 }
 ok($ok, 'seekfh before start of file fails');
 $ok := 1;
-try { nqp::seekfh($fh, 0, 5); $ok := 0; 1 }
+try { $fh.seek(0, 5); $ok := 0; 1 }
 ok($ok, 'seekfh with invalid whence fails');
-nqp::closefh($fh);
+close($fh);
 
 $fh := open($test-file, :w);
 close($fh);
