@@ -40,27 +40,26 @@ ok( nqp::defined(close($credits)), 'close');
 # setinputlinesep tests
 
 {
-    my $data := nqp::open('t/nqp/19-setinputlinesep.txt', 'r');
-    nqp::setinputlinesep($data, "a");
-    my $line1 := nqp::readlinefh($data);
-    my $line2 := nqp::readlinefh($data);
+    my $data := open('t/nqp/19-setinputlinesep.txt', :r, :!chomp);
+    $data.set-nl-in(["a"]);
+    my $line1 := $data.get;
+    my $line2 := $data.get;
     is($line1, 'This is a', "setinputlinesep with a input separator containing of one character... reading first line");
     is($line2, ' ra', "setinputlinesep with a input separator containing of one character... reading first line");
+    close($data);
 }
 
-if nqp::getcomp('nqp').backend.name eq 'js' {
-    my $data := nqp::open('t/nqp/19-setinputlinesep.txt', 'r');
-    nqp::setinputlinesep($data, "ba");
-    my $line1 := nqp::readlinefh($data);
-    my $line2 := nqp::readlinefh($data);
-    my $line3 := nqp::readlinefh($data);
+{
+    my $data := open('t/nqp/19-setinputlinesep.txt', :r, :!chomp);
+    $data.set-nl-in(["ba"]);
+    my $line1 := $data.get;
+    my $line2 := $data.get;
+    my $line3 := $data.get;
     is($line1, 'This is a random line ending with ba', "setinputlinesep with a input separator containing of two character... reading first line");
     my $long := ' and not a newline...............................................................ba';
     is($line2, $long, '... reading second line');
     ok(nqp::substr($line3, 0, 9) eq '123456789' && (nqp::chars($line3) == 10 || nqp::chars($line3) == 11), '... reading last line not ending with input separator');
-}
-else {
-   skip("setinputlinesep with multiple chars is broken for the MoarVM and possibly others", 3);
+    close($data);
 }
 
 ok( nqp::defined(nqp::getstdin()), 'nqp::getstdin');
@@ -315,7 +314,7 @@ if $crlf-conversion {
     is($input, "abc\ndef\nghi", "reading a whole file");
     close($fh);
 } else {
-    skip("readallfh doesn't convert \\r\\n on $backend");
+    skip("slurp doesn't convert \\r\\n on $backend");
 }
 nqp::unlink($test-file) if nqp::stat($test-file, nqp::const::STAT_EXISTS); # clean up test-file
 
@@ -412,10 +411,10 @@ my sub create_buf($type) {
 
     nqp::closefh($out);
 
-    my $in := nqp::open($test-file, 'r');
-    my $line := nqp::readlinefh($in);
-    is($line, 'linπ1.li', 'reading with nqp::readlinefh stuff written by nqp::writefh');
-    nqp::closefh($in);
+    my $in := open($test-file, :r);
+    my $line := $in.get;
+    is($line, 'linπ1.li', 'reading with get stuff written by nqp::writefh');
+    close($in);
 
     nqp::unlink($test-file);
 }
