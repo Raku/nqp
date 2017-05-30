@@ -89,6 +89,41 @@ my class NQPFileHandle {
         $!decoder.set-line-separators($!nl-in);
     }
 
+    method set-encoding($new-encoding) {
+        if $new-encoding {
+            return $!encoding if $!encoding && $new-encoding eq $!encoding;
+        }
+        else {
+            $new-encoding := 'bin';
+        }
+        if $!decoder {
+            # We're switching encoding, or back to binary mode. First grab any
+            # bytes the current decoder is holding on to but has not yet done
+            # decoding of.
+            my $available := $!decoder.bytes-available;
+            if $new-encoding ne 'bin' {
+                my $prev-decoder := $!decoder;
+                $!decoder := NQPDecoder.new($new-encoding, :translate-nl);
+                $!decoder.set-line-separators($!nl-in);
+                $!decoder.add-bytes($prev-decoder.consume-exactly-bytes($available))
+                    if $available;
+            }
+            else {
+                nqp::seekfh($!vmio, -$available, SeekFromCurrent) if $available;
+                $!decoder := NQPDecoder;
+            }
+            $!encoding := $new-encoding;
+        }
+        else {
+            # No previous decoder; make a new one if needed, otherwise no change.
+            if $new-encoding ne 'bin' {
+                $!decoder := NQPDecoder.new($new-encoding, :translate-nl);
+                $!decoder.set-line-separators($!nl-in);
+            }
+            $!encoding := $new-encoding;
+        }
+    }
+
     method get() {
         $!decoder || die("Cannot 'get' on a binary file handle");
         $!decoder.consume-line-chars(:$!chomp) // self.'!get-slow-path'()
