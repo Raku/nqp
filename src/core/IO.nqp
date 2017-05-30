@@ -62,6 +62,7 @@ my class NQPFileHandle {
     has $!decoder;
     has $!encoding;
     has $!chomp;
+    has $!nl-in;
 
     method open($filename, :$r, :$w, :$a, :$bin, :$enc, :$chomp) {
         my $mode := $w ?? 'w' !! ($a ?? 'wa' !! 'r');
@@ -77,9 +78,15 @@ my class NQPFileHandle {
             $!encoding := $enc // 'utf8';
             $!chomp := $chomp // 1;
             $!decoder := NQPDecoder.new($!encoding, :translate-nl);
-            $!decoder.set-line-separators(["\n", "\r\n"]);
+            $!nl-in := ["\n", "\r\n"];
+            $!decoder.set-line-separators($!nl-in);
         }
         self
+    }
+
+    method set-nl-in(@list) {
+        $!nl-in := @list;
+        $!decoder.set-line-separators($!nl-in);
     }
 
     method get() {
@@ -159,6 +166,7 @@ my class NQPFileHandle {
             # Freshen decoder, so we won't have stuff left over from earlier reads
             # that were in the wrong place.
             $!decoder := NQPDecoder.new($!encoding, :translate-nl);
+            $!decoder.set-line-separators($!nl-in);
         }
         nqp::seekfh($!vmio, $offset - $rewind, $whence);
     }
