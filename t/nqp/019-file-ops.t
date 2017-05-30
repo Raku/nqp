@@ -138,7 +138,7 @@ is($fh.slurp, "pretty awesome thing!!", 'test file contains the string after mul
 ok($fh.tell == 22, 'tellfh gives correct position');
 close($fh);
 
-## setencoding
+## :enc
 $fh := open($test-file, :w, :enc<utf8>);
 ok($fh.print("ä") == 2, 'umlauts are printed as two bytes');
 close($fh);
