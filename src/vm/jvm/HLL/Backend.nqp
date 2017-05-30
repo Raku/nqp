@@ -26,9 +26,8 @@ class HLL::Backend::JVM {
     }
     
     method run_profiled($what, $kind, $filename?) {
-        nqp::printfh(nqp::getstderr(),
-            "Attach a profiler (e.g. JVisualVM) and press enter");
-        nqp::readlinefh(nqp::getstdin());
+        stderr().print("Attach a profiler (e.g. JVisualVM) and press enter");
+        stdin().get;
         $what();
     }
     
