@@ -83,7 +83,7 @@ class HLL::Backend::MoarVM {
         unless nqp::defined($filename) {
             $filename := 'profile-' ~ nqp::time_n() ~ '.html';
         }
-        nqp::sayfh(nqp::getstderr(), "Writing profiler output to $filename");
+        note("Writing profiler output to $filename");
         my $profile_fh := open($filename, :w);
         my $want_json  := nqp::eqat($filename, '.json', -5);
         my $want_sql   := nqp::eqat($filename, '.sql', -4);
@@ -386,7 +386,7 @@ class HLL::Backend::MoarVM {
         unless nqp::defined($filename) {
             $filename := 'heap-snapshot-' ~ nqp::time_n();
         }
-        nqp::sayfh(nqp::getstderr(), "Writing heap snapshot to $filename");
+        note("Writing heap snapshot to $filename");
         my $hs_fh := open($filename, :w);
 
         sub write_json($obj) {

@@ -350,7 +350,7 @@ class HLL::Compiler does HLL::Backend::Default {
         try {
             $res := $p.parse(@args);
             CATCH {
-                nqp::sayfh(nqp::getstderr(), $_);
+                note($_);
                 self.usage(:use-stderr);
                 nqp::exit(1);
             }
@@ -380,14 +380,14 @@ class HLL::Compiler does HLL::Backend::Default {
                     $in-handle := stdin();
                 }
                 elsif nqp::stat($filename, nqp::const::STAT_ISDIR) {
-                    nqp::sayfh(nqp::getstderr(), "Can not run directory $filename.");
+                    note("Can not run directory $filename.");
                     $err := 1;
                 }
                 else {
                     $in-handle := open($filename, :r, :enc($encoding));
                 }
                 CATCH {
-                    nqp::sayfh(nqp::getstderr(), "Could not open $filename. $_");
+                    note("Could not open $filename. $_");
                     $err := 1;
                 }
             }
@@ -396,7 +396,7 @@ class HLL::Compiler does HLL::Backend::Default {
                 nqp::push(@codes, $in-handle.slurp());
                 $in-handle.close;
                 CATCH {
-                    nqp::sayfh(nqp::getstderr(), "Error while reading from file: $_");
+                    note("Error while reading from file: $_");
                     $err := 1;
                 }
             }

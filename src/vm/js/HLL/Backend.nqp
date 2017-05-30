@@ -26,7 +26,7 @@ class JavaScriptBackend {
 
     method fresh_profile_filename() {
         my $filename := 'profile-' ~ nqp::time_n() ~ '.cpuprofile';
-        nqp::sayfh(nqp::getstderr(), "Writing profiling data to $filename");
+        note("Writing profiling data to $filename");
         $filename;
     }
 
