@@ -2,7 +2,7 @@
 
 =head1 NQP - Not Quite Perl (6)
 
-NQP is Copyright (C) 2009-2016 by The Perl Foundation.  See F<LICENSE>
+NQP is Copyright (C) 2009-2017 by The Perl Foundation.  See F<LICENSE>
 for licensing details.
 
 This is "Not Quite Perl" -- a lightweight Perl 6-like environment for
@@ -33,8 +33,8 @@ If you don't have git installed, you can get a tarball or zip of NQP from
 github by visiting http://github.com/perl6/nqp/tree/master and clicking
 "Download".  Then unpack the tarball or zip.
 
-NQP can run on three different backends: MoarVM, the JVM, and JavaScript
-But JavaScript is currently still experimental.
+NQP can run on three different backends: MoarVM, the JVM, and JavaScript.
+The JVM and JavaScript backends are currently experimental.
 
 Decide on which backends you want it to run, and configure and build it as
 follows:
