@@ -467,7 +467,7 @@ exports.extraRuntime = function(lang, path) {
   let runtime = require(path);
   if (!runtime.loaded) {
     runtime.loaded = true;
-    runtime.load(exports, CodeRef, containerSpecs);
+    runtime.load(exports, CodeRef, Capture, containerSpecs);
   }
 };
 
