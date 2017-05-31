@@ -155,7 +155,7 @@ close($fh);
 
 ## chdir
 if nqp::getcomp('nqp').backend.name eq 'jvm' {
-    skip("chdir is not possible on jvm", 3);
+    skip("chdir is not possible on jvm", 4);
 }
 else {
     nqp::chdir('t');
