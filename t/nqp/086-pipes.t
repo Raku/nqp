@@ -11,16 +11,15 @@ my $read_out_and_err := nqp::const::PIPE_INHERIT_IN + nqp::const::PIPE_CAPTURE_O
     my $in  := nqp::null();
     my $out := nqp::syncpipe();
     my $err := nqp::null();
-    nqp::setinputlinesep($out, "\n");
-    nqp::setencoding($out, 'utf8');
+    my $out-wrap := NQPFileHandle.new.wrap($out);
     nqp::shell('echo aardvarks', nqp::cwd(), nqp::getenvhash(), $in, $out, $err, $read_out);
 
-    ok( !nqp::eoffh($out), 'nqp::eoffh on a pipe while it still has data' );
+    ok( !$out-wrap.eof, 'eof on a pipe while it still has data' );
 
-    my $pstr := nqp::readallfh($out);
-    ok( $pstr ~~ / 'aardvarks' /, 'nqp::readallfh with a pipe');
+    my $pstr := $out-wrap.slurp;
+    ok( $pstr ~~ / 'aardvarks' /, 'nqp::slurp with a pipe');
 
-    ok( nqp::eoffh($out), 'nqp::eoffh on a pipe we have read everything out of');
+    ok( $out-wrap.eof, 'eof on a pipe we have read everything out of');
 
     # What should the return value of nqp::close be? MoarVM and JVM always return 1.
     nqp::closefh($out); ok( 1, 'nqp::closefh with a pipe');
@@ -31,15 +30,13 @@ my $read_out_and_err := nqp::const::PIPE_INHERIT_IN + nqp::const::PIPE_CAPTURE_O
     my $in  := nqp::null();
     my $out := nqp::syncpipe();
     my $err := nqp::syncpipe();
-    nqp::setinputlinesep($out, "\n");
-    nqp::setinputlinesep($err, "\n");
-    nqp::setencoding($out, 'utf8');
-    nqp::setencoding($err, 'utf8');
+    my $out-wrap := NQPFileHandle.new.wrap($out);
+    my $err-wrap := NQPFileHandle.new.wrap($err);
     nqp::shell('doesnotexist', nqp::cwd(), nqp::getenvhash(), $in, $out, $err, $read_out_and_err);
 
-    my $str_out := nqp::readallfh($out);
-    my $str_err := nqp::readallfh($err);
-    is( $str_out, '' && $str_err ~~ / 'doesnotexist' /, 'nqp::readallfh with a pipe nonexistent command');
+    my $str_out := $out-wrap.slurp;
+    my $str_err := $err-wrap.slurp;
+    is( $str_out, '' && $str_err ~~ / 'doesnotexist' /, 'nqp::slurp with a pipe nonexistent command');
 
     nqp::closefh($out); ok( 1, 'nqp::closefh with a pipe nonexistent command');
     nqp::closefh($err); ok( 1, 'nqp::closefh with a pipe nonexistent command');
@@ -50,12 +47,11 @@ my $read_out_and_err := nqp::const::PIPE_INHERIT_IN + nqp::const::PIPE_CAPTURE_O
     my $in  := nqp::null();
     my $out := nqp::syncpipe();
     my $err := nqp::null();
-    nqp::setinputlinesep($out, "\n");
-    nqp::setencoding($out, 'utf8');
+    my $out-wrap := NQPFileHandle.new.wrap($out);
     nqp::shell('echo aardvarks', nqp::cwd(), nqp::getenvhash(), $in, $out, $err, $read_out);
 
-    my $str := nqp::readallfh($out);
-    ok( $str ~~ / 'aardvarks' /, 'nqp::readallfh with a pipe');
+    my $str := $out-wrap.slurp;
+    ok( $str ~~ / 'aardvarks' /, 'nqp::slurp with a pipe');
 
     ok( nqp::closefh_i($out) == 0, 'nqp::closefh_i with a pipe');
     ok( nqp::closefh_i($out) == 0, 'nqp::closefh_i with a pipe already closed');
@@ -65,15 +61,13 @@ my $read_out_and_err := nqp::const::PIPE_INHERIT_IN + nqp::const::PIPE_CAPTURE_O
     my $in  := nqp::null();
     my $out := nqp::syncpipe();
     my $err := nqp::syncpipe();
-    nqp::setinputlinesep($out, "\n");
-    nqp::setinputlinesep($err, "\n");
-    nqp::setencoding($out, 'utf8');
-    nqp::setencoding($err, 'utf8');
+    my $out-wrap := NQPFileHandle.new.wrap($out);
+    my $err-wrap := NQPFileHandle.new.wrap($err);
     nqp::shell('doesnotexist', nqp::cwd(), nqp::getenvhash(), $in, $out, $err, $read_out_and_err);
 
-    my $str_out := nqp::readallfh($out);
-    my $str_err := nqp::readallfh($err);
-    is( $str_out, '' && $str_err ~~ / 'doesnotexist' /, 'nqp::readallfh with a pipe nonexistent command');
+    my $str_out := $out-wrap.slurp;
+    my $str_err := $err-wrap.slurp;
+    is( $str_out, '' && $str_err ~~ / 'doesnotexist' /, 'nqp::slurp with a pipe nonexistent command');
 
     ok( nqp::closefh_i($out) != 0, 'nqp::closefh_i with a pipe nonexistent command');
 }

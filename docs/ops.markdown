@@ -164,16 +164,9 @@
     - [open](#open)
     - [openasync `jvm`](#openasync-jvm)
     - [print](#print)
-    - [printfh](#printfh)
-    - [readallfh](#readallfh)
     - [readfh](#readfh)
-    - [readlinefh](#readlinefh)
-    - [readcharsfh](#readcharsfh)
     - [say](#say)
-    - [sayfh](#sayfh)
     - [seekfh](#seekfh)
-    - [setencoding](#setencoding)
-    - [setinputlinesep](#setinputlinesep)
     - [tellfh](#tellfh)
     - [writefh](#writefh)
 - [External command Opcodes](#-external-command-opcodes)
@@ -1536,58 +1529,21 @@ See `open` for valid modes.
 
 Output the given string to stdout.
 
-## printfh
-* `printfh(Handle $fh, str $str)`
-
-Output the given string to the filehandle. Returns the number of bytes written.
-
-## readallfh
-* `readallfh(Handle $fh)`
-
-Return the contents of the open filehandle.
-
 ## readfh
 * `readfh(Handle $fh, @arr, long $count)`
 
 Given a readable `$fh`, and an array of `Buf[int8]` or a `Buf[uint8]`, read
 in the next `$count` bytes from the filehandle and store them in the array.
 
-## readlinefh
-* `readlinefh(Handle $fh)`
-
-Return the next line of the open filehandle.
-
-## readcharsfh
-* `readcharsfh(Handle $fh, int $count)`
-
-Given a readable `$fh`, read in the next `$count` bytes from the filehandle
-and return them as a string.
-
 ## say
 * `say(str $str)`
 
 Output the given string to stdout, followed by a newline.
 
-## sayfh
-* `sayfh(Handle $fh, str $str)`
-
-Output the given string to the filehandle, followed by a newline. Returns the number of bytes written.
-
 ## seekfh
 * `seekfh(Handle $fh, int $offset, int $whence)`
 
 Seek in the filehandle to the location specified by the offset and whence.
-
-## setencoding
-* `setencoding(Handle $fh, str $encoding)`
-
-Set the encoding for the given filehandle. Valid encodings are: ascii,
-iso-8859-1, windows-1252, utf8, utf16, and binary.
-
-## setinputlinesep
-* `setinputlinesep(Handle $fh, str $sep)`
-
-Set the input line separator on the given filehandle.
 
 ## tellfh
 * `tellfh(Handle $fh)`

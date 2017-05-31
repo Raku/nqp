@@ -72,7 +72,7 @@ public class DecoderInstance extends SixModelObject {
             String result = normalized.substring(0, (int)chars);
             String remaining = normalized.substring((int)chars, normalized.length());
             if (remaining.length() > 0) {
-                decoded.add(CharBuffer.wrap(remaining));
+                decoded.add(0, CharBuffer.wrap(remaining));
             }
             return result;
         }

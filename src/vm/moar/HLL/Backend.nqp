@@ -83,7 +83,7 @@ class HLL::Backend::MoarVM {
         unless nqp::defined($filename) {
             $filename := 'profile-' ~ nqp::time_n() ~ '.html';
         }
-        nqp::sayfh(nqp::getstderr(), "Writing profiler output to $filename");
+        note("Writing profiler output to $filename");
         my $profile_fh := open($filename, :w);
         my $want_json  := nqp::eqat($filename, '.json', -5);
         my $want_sql   := nqp::eqat($filename, '.sql', -4);
@@ -273,7 +273,7 @@ class HLL::Backend::MoarVM {
                 nqp::die("Don't know how to dump a " ~ $obj.HOW.name($obj));
             }
             if nqp::elems(@pieces) > 4096 {
-                nqp::printfh($profile_fh, nqp::join('', @pieces));
+                $profile_fh.print(nqp::join('', @pieces));
                 nqp::setelems(@pieces, 0);
             }
         }
@@ -283,10 +283,10 @@ class HLL::Backend::MoarVM {
             for $obj[0] -> $k {
                 my $v := $obj[0]{$k};
                 if nqp::ishash($v) {
-                    nqp::sayfh($profile_fh, "INSERT INTO routines VALUES ('" ~ nqp::join("','", nqp::list(nqp::iterkey_s($k), literal_subst(~$v<name>, "'", "''"), ~$v<line>, ~$v<file>)) ~ "');");
+                    $profile_fh.say("INSERT INTO routines VALUES ('" ~ nqp::join("','", nqp::list(nqp::iterkey_s($k), literal_subst(~$v<name>, "'", "''"), ~$v<line>, ~$v<file>)) ~ "');");
                 }
                 else {
-                    nqp::sayfh($profile_fh, "INSERT INTO types VALUES ('" ~ nqp::join("','", nqp::list(nqp::iterkey_s($k), literal_subst(~$v, "'", "''"))) ~ "');");
+                    $profile_fh.say("INSERT INTO types VALUES ('" ~ nqp::join("','", nqp::list(nqp::iterkey_s($k), literal_subst(~$v, "'", "''"))) ~ "');");
                 }
             }
             for $obj[1] -> $k {
@@ -303,7 +303,7 @@ class HLL::Backend::MoarVM {
                         for <time retained_bytes promoted_bytes gen2_roots full cleared_bytes> -> $f {
                             nqp::push_s(@g, ~($gc{$f} // '0'));
                         }
-                        nqp::sayfh($profile_fh, 'INSERT INTO gcs VALUES (' ~ nqp::join(',', @g) ~ ');');
+                        $profile_fh.say('INSERT INTO gcs VALUES (' ~ nqp::join(',', @g) ~ ');');
                     }
                 }
                 elsif $k eq 'call_graph' {
@@ -319,14 +319,14 @@ class HLL::Backend::MoarVM {
                         my str $routine_id := ~%call_graph<id>;
                         %call_rec_depth{$routine_id} := 0 unless %call_rec_depth{$routine_id};
                         nqp::push_s(@call, ~%call_rec_depth{$routine_id});
-                        nqp::sayfh($profile_fh, 'INSERT INTO calls VALUES (' ~ nqp::join(',', @call) ~ ');');
+                        $profile_fh.say('INSERT INTO calls VALUES (' ~ nqp::join(',', @call) ~ ');');
                         if %call_graph<allocations> {
                             for %call_graph<allocations> -> $a {
                                 my @a := nqp::list_s($call_id);
                                 for <id spesh jit count> -> $f {
                                     nqp::push_s(@a, ~($a{$f} // '0'));
                                 }
-                                nqp::sayfh($profile_fh, 'INSERT INTO allocations VALUES (' ~ nqp::join(',', @a) ~ ');');
+                                $profile_fh.say('INSERT INTO allocations VALUES (' ~ nqp::join(',', @a) ~ ');');
                             }
                         }
                         if %call_graph<callees> {
@@ -340,7 +340,7 @@ class HLL::Backend::MoarVM {
                     collect_calls(~$node_id, $v);
                 }
             }
-            nqp::sayfh($profile_fh, 'INSERT INTO profile VALUES (' ~ nqp::join(',', @profile) ~ ');');
+            $profile_fh.say('INSERT INTO profile VALUES (' ~ nqp::join(',', @profile) ~ ');');
         }
 
         # Post-process the call data, turning objects into flat data.
@@ -352,18 +352,18 @@ class HLL::Backend::MoarVM {
 
         if $want_json {
             to_json($data);
-            nqp::printfh($profile_fh, nqp::join('', @pieces));
+            $profile_fh.print(nqp::join('', @pieces));
         }
         elsif $want_sql {
-            nqp::sayfh($profile_fh, 'BEGIN;');
-            nqp::sayfh($profile_fh, 'CREATE TABLE types(id INTEGER PRIMARY KEY ASC, name TEXT);');
-            nqp::sayfh($profile_fh, 'CREATE TABLE routines(id INTEGER PRIMARY KEY ASC, name TEXT, line INT, file TEXT);');
-            nqp::sayfh($profile_fh, 'CREATE TABLE profile(total_time INT, spesh_time INT);');
-            nqp::sayfh($profile_fh, 'CREATE TABLE gcs(time INT, retained_bytes INT, promoted_bytes INT, gen2_roots INT, full INT, cleared_bytes INT);');
-            nqp::sayfh($profile_fh, 'CREATE TABLE calls(id INTEGER PRIMARY KEY ASC, parent_id INT, routine_id INT, osr INT, spesh_entries INT, jit_entries INT, inlined_entries INT, inclusive_time INT, exclusive_time INT, entries INT, deopt_one INT, deopt_all INT, rec_depth INT, FOREIGN KEY(routine_id) REFERENCES routines(id));');
-            nqp::sayfh($profile_fh, 'CREATE TABLE allocations(call_id INT, type_id INT, spesh INT, jit INT, count INT, PRIMARY KEY(call_id, type_id), FOREIGN KEY(call_id) REFERENCES calls(id), FOREIGN KEY(type_id) REFERENCES types(id));');
+            $profile_fh.say('BEGIN;');
+            $profile_fh.say('CREATE TABLE types(id INTEGER PRIMARY KEY ASC, name TEXT);');
+            $profile_fh.say('CREATE TABLE routines(id INTEGER PRIMARY KEY ASC, name TEXT, line INT, file TEXT);');
+            $profile_fh.say('CREATE TABLE profile(total_time INT, spesh_time INT);');
+            $profile_fh.say('CREATE TABLE gcs(time INT, retained_bytes INT, promoted_bytes INT, gen2_roots INT, full INT, cleared_bytes INT);');
+            $profile_fh.say('CREATE TABLE calls(id INTEGER PRIMARY KEY ASC, parent_id INT, routine_id INT, osr INT, spesh_entries INT, jit_entries INT, inlined_entries INT, inclusive_time INT, exclusive_time INT, entries INT, deopt_one INT, deopt_all INT, rec_depth INT, FOREIGN KEY(routine_id) REFERENCES routines(id));');
+            $profile_fh.say('CREATE TABLE allocations(call_id INT, type_id INT, spesh INT, jit INT, count INT, PRIMARY KEY(call_id, type_id), FOREIGN KEY(call_id) REFERENCES calls(id), FOREIGN KEY(type_id) REFERENCES types(id));');
             to_sql($data);
-            nqp::sayfh($profile_fh, 'END;');
+            $profile_fh.say('END;');
         }
         else {
             # Get profiler template, split it in half, and write those either
@@ -374,19 +374,19 @@ class HLL::Backend::MoarVM {
             }
             my @tpl_pieces := nqp::split('{{{PROFILER_OUTPUT}}}', $template);
 
-            nqp::printfh($profile_fh, @tpl_pieces[0]);
+            $profile_fh.print(@tpl_pieces[0]);
             to_json($data);
-            nqp::printfh($profile_fh, nqp::join('', @pieces));
-            nqp::printfh($profile_fh, @tpl_pieces[1]);
+            $profile_fh.print(nqp::join('', @pieces));
+            $profile_fh.print(@tpl_pieces[1]);
         }
-        nqp::closefh($profile_fh);
+        $profile_fh.close;
     }
 
     method dump_heap_profile_data($data, $filename) {
         unless nqp::defined($filename) {
             $filename := 'heap-snapshot-' ~ nqp::time_n();
         }
-        nqp::sayfh(nqp::getstderr(), "Writing heap snapshot to $filename");
+        note("Writing heap snapshot to $filename");
         my $hs_fh := open($filename, :w);
 
         sub write_json($obj) {
@@ -446,32 +446,32 @@ class HLL::Backend::MoarVM {
                     nqp::die("Don't know how to dump a " ~ $obj.HOW.name($obj));
                 }
                 if nqp::elems(@pieces) > 4096 {
-                    nqp::printfh($hs_fh, nqp::join('', @pieces));
+                    $hs_fh.print(nqp::join('', @pieces));
                     nqp::setelems(@pieces, 0);
                 }
             }
             to_json($obj);
-            nqp::printfh($hs_fh, nqp::join('', @pieces));
+            $hs_fh.print(nqp::join('', @pieces));
         }
 
-        nqp::printfh($hs_fh, 'strings: ');
+        $hs_fh.print('strings: ');
         write_json($data<strings>);
-        nqp::printfh($hs_fh, "\ntypes: ");
-        nqp::printfh($hs_fh, $data<types>);
-        nqp::printfh($hs_fh, "\nstatic_frames: ");
-        nqp::printfh($hs_fh, $data<static_frames>);
-        nqp::printfh($hs_fh, "\n\n");
+        $hs_fh.print("\ntypes: ");
+        $hs_fh.print($data<types>);
+        $hs_fh.print("\nstatic_frames: ");
+        $hs_fh.print($data<static_frames>);
+        $hs_fh.print("\n\n");
 
         my int $i := 0;
         for $data<snapshots> {
-            nqp::printfh($hs_fh, "snapshot $i\n");
-            nqp::printfh($hs_fh, "collectables: " ~ $_<collectables> ~ "\n");
-            nqp::printfh($hs_fh, "references: " ~ $_<references> ~ "\n");
-            nqp::printfh($hs_fh, "\n");
+            $hs_fh.print("snapshot $i\n");
+            $hs_fh.print("collectables: " ~ $_<collectables> ~ "\n");
+            $hs_fh.print("references: " ~ $_<references> ~ "\n");
+            $hs_fh.print("\n");
             $i++;
         }
 
-        nqp::closefh($hs_fh);
+        $hs_fh.close;
     }
 
     method run_traced($level, $what) {

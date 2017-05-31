@@ -65,7 +65,7 @@ for @*vms -> $vm {
 sub find_opcodes(:@files, :@keywords) {
     my %ops := nqp::hash();
     for @files -> $file {
-        my @lines := nqp::split("\n", nqp::readallfh(nqp::open($file,"r")));
+        my @lines := nqp::split("\n", slurp($file));
         for @lines -> $line {
             if $line ~~ / @keywords / {
                 my @pieces := nqp::split("'", $line);
@@ -105,7 +105,7 @@ sub find_documented_opcodes() {
     my %documented_ops := hash_of_vms();
     %documented_ops<any> := nqp::hash();
 
-    my @doc_lines := nqp::split("\n", nqp::readallfh(nqp::open("docs/ops.markdown","r")));
+    my @doc_lines := nqp::split("\n", slurp("docs/ops.markdown"));
     my @opcode_vms := nqp::list();
     for @doc_lines -> $line {
         my $match := $line ~~ /^ '##' \s* <[a..zA..Z0..9_]>+ \s* ('`' .* '`')? /;

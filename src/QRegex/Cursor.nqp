@@ -53,13 +53,12 @@ my class Braid is export {
         self
     }
     method !dump($tag) {
-        my $err := nqp::getstderr();
-        nqp::printfh($err, nqp::sprintf("Braid %x in %s\n", [nqp::objectid(self), $tag]));
-        nqp::printfh($err, "  grammar: " ~ $!grammar.HOW.name($!grammar) ~ "\n");
-        nqp::printfh($err, "  actions: " ~ $!actions.HOW.name($!actions) ~ "\n");
-        nqp::printfh($err, "  package: " ~ $!package.HOW.name($!package) ~ "\n");
+        note(nqp::sprintf("Braid %x in %s", [nqp::objectid(self), $tag]));
+        note("  grammar: " ~ $!grammar.HOW.name($!grammar));
+        note("  actions: " ~ $!actions.HOW.name($!actions));
+        note("  package: " ~ $!package.HOW.name($!package));
         for $!slangs {
-            nqp::printfh($err, "    " ~ $_.key ~ ' ' ~ $_.value.HOW.name($_.value) ~ (nqp::isconcrete($_.value) ?? ":D" !! ":U") ~ "\n");
+            note("    " ~ $_.key ~ ' ' ~ $_.value.HOW.name($_.value) ~ (nqp::isconcrete($_.value) ?? ":D" !! ":U"));
         }
         self
     }
@@ -232,8 +231,8 @@ role NQPMatchRole is export {
         my $bvalue := nqp::getattr($!braid, Braid, '$!package');
         if nqp::isnull($bvalue) || nqp::objectid($bvalue) != nqp::objectid($value) {
             my $target := nqp::getattr_s($!shared, ParseShared, '$!target');
-            nqp::printfh(nqp::getstderr(), "Out-of-sync package detected in $tag at " ~ nqp::substr($target, $!pos-10, 30) ~ "\n");
-            nqp::printfh(nqp::getstderr(), "  (value in braid: " ~ $bvalue.HOW.name($bvalue) ~ ", value in \$*PACKAGE: " ~ $value.HOW.name($value) ~ ")\n")
+            note("Out-of-sync package detected in $tag at " ~ nqp::substr($target, $!pos-10, 30) ~ "");
+            note("  (value in braid: " ~ $bvalue.HOW.name($bvalue) ~ ", value in \$*PACKAGE: " ~ $value.HOW.name($value) ~ ")")
                 unless nqp::isnull($bvalue);
             # nqp::die("croak");
             nqp::bindattr($!braid, Braid, '$!package', $value);
@@ -249,9 +248,9 @@ role NQPMatchRole is export {
             my $value := $_.value;
             my $bvalue := nqp::atkey(nqp::getattr($!braid, Braid, '$!slangs'),$name);
             if nqp::isnull($bvalue) || nqp::objectid($bvalue) != nqp::objectid($value) {
-                nqp::printfh(nqp::getstderr(), "Deprecated use of %*LANG\<$name> assignment detected in $tag; module should export syntax using \$*LANG.define_slang(\"$name\",<grammar>,<actions>) instead\n")
+                note("Deprecated use of %*LANG\<$name> assignment detected in $tag; module should export syntax using \$*LANG.define_slang(\"$name\",<grammar>,<actions>) instead")
                     unless nqp::index($name,"-actions") > 0;
-                nqp::printfh(nqp::getstderr(), "  (value in braid: " ~ $bvalue.HOW.name($bvalue) ~ ", value in %*LANG: " ~ $value.HOW.name($value) ~ ")\n")
+                note("  (value in braid: " ~ $bvalue.HOW.name($bvalue) ~ ", value in %*LANG: " ~ $value.HOW.name($value) ~ ")")
                     unless nqp::isnull($bvalue);
                 # XXX Override braid from %*LANG until after everyone fixes their modules.
                 nqp::bindkey(nqp::getattr($!braid, Braid, '$!slangs'), $name, $value);
@@ -325,7 +324,7 @@ role NQPMatchRole is export {
 #    method AOK($actions, $where) {
 #        my $got := self.actions();
 #        if nqp::objectid($got) != nqp::objectid($actions) {
-#            nqp::printfh(nqp::getstderr(), "actions bad in $where (expected " ~ $actions.HOW.name($actions) ~ " but got " ~ $got.HOW.name($got) ~ ")\n");
+#            note("actions bad in $where (expected " ~ $actions.HOW.name($actions) ~ " but got " ~ $got.HOW.name($got) ~ ")");
 #        }
 #        self;
 #    }
@@ -672,7 +671,7 @@ role NQPMatchRole is export {
         my $rxname;
         while @fates {
             $rxname := nqp::atpos(@rxfate, nqp::pop_i(@fates));
-            # nqp::printfh(nqp::getstderr(), "invoking $rxname\n");
+            # note("invoking $rxname");
             $cur    := self."$rxname"();
             @fates  := @EMPTY if nqp::getattr_i($cur, $?CLASS, '$!pos') >= 0;
         }
@@ -1244,18 +1243,18 @@ class NQPMatch is NQPCapture does NQPMatchRole {
 #                        my int $iv := nqp::iterval($curcap);
 #                        if $iv >= 2 {
 #                            if nqp::iscclass(nqp::const::CCLASS_NUMERIC, $name, 0) {
-#                                note("\t" ~ $name ~ "\t" ~ nqp::elems(nqp::atpos($list, $name)));
+#                                stderr().print("\t" ~ $name ~ "\t" ~ nqp::elems(nqp::atpos($list, $name)));
 #                            }
 #                            else {
-#                                note("\t" ~ $name ~ "\t" ~ nqp::elems(nqp::atkey($hash, $name)));
+#                                stderr().print("\t" ~ $name ~ "\t" ~ nqp::elems(nqp::atkey($hash, $name)));
 #                            }
 #                        }
 #                        elsif $iv >= 1 {
 #                            if nqp::iscclass(nqp::const::CCLASS_NUMERIC, $name, 0) {
-#                                note("\t" ~ $name ~ "\t" ~ nqp::defined(nqp::atpos($list, $name)));
+#                                stderr().print("\t" ~ $name ~ "\t" ~ nqp::defined(nqp::atpos($list, $name)));
 #                            }
 #                            else {
-#                                note("\t" ~ $name ~ "\t" ~ nqp::defined(nqp::atkey($hash, $name)));
+#                                stderr().print("\t" ~ $name ~ "\t" ~ nqp::defined(nqp::atkey($hash, $name)));
 #                            }
 #                        }
 #                    }
@@ -1283,7 +1282,7 @@ class NQPMatch is NQPCapture does NQPMatchRole {
         my $braid := Braid.'!braid_init'(:grammar(self), :actions($actions), :package($*PACKAGE));
         my $cur      := self.'!cursor_init'($target, :braid($braid), |%options);
 
-#        nqp::printfh(nqp::getstderr(), "Cursor.parse grammar " ~ $cur.HOW.name($cur) ~ " actions " ~ $actions.HOW.name($actions) ~ ")\n");
+#        note("Cursor.parse grammar " ~ $cur.HOW.name($cur) ~ " actions " ~ $actions.HOW.name($actions) ~ ")");
         nqp::isinvokable($rule) ??
             $rule($cur).MATCH() !!
             nqp::findmethod($cur, $rule)($cur).MATCH()

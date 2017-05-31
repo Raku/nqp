@@ -59,8 +59,8 @@ class HLL::Compiler does HLL::Backend::Default {
     }
 
     method readline($stdin, $stdout, $prompt) {
-        nqp::printfh(nqp::getstdout(), $prompt);
-        return nqp::readlinechompfh($stdin);
+        $stdout.print($prompt);
+        return $stdin.get;
     }
 
     method context() {
@@ -68,20 +68,20 @@ class HLL::Compiler does HLL::Backend::Default {
     }
 
     method interactive(*%adverbs) {
-        nqp::printfh(nqp::getstderr(), self.interactive_banner);
+        stderr().print(self.interactive_banner);
 
-        my $stdin    := nqp::getstdin();
-        my $stdout   := nqp::getstdout();
+        my $stdin    := stdin();
+        my $stdout   := stdout();
         my $encoding := ~%adverbs<encoding>;
         if $encoding && $encoding ne 'fixed_8' {
-            nqp::setencoding($stdin, $encoding);
+            $stdin.set-encoding($encoding);
         }
 
         my $target := nqp::lc(%adverbs<target>);
         my $prompt := self.interactive_prompt // '> ';
         my $code;
         while 1 {
-            last if nqp::eoffh($stdin);
+            last if $stdin.eof;
 
             my str $newcode := self.readline($stdin, $stdout, ~$prompt);
             if nqp::isnull_s($newcode) || !nqp::defined($newcode) {
@@ -304,12 +304,12 @@ class HLL::Compiler does HLL::Backend::Default {
                 if !nqp::isnull($result) && ($!backend.is_textual_stage($target) || %adverbs<output>) {
                     my $output := %adverbs<output>;
                     my $fh := ($output eq '' || $output eq '-')
-                            ?? nqp::getstdout()
-                            !! nqp::open($output, 'w');
+                            ?? stdout()
+                            !! open($output, :w);
                     self.panic("Cannot write to $output") unless $fh;
-                    nqp::printfh($fh, $result);
-                    nqp::flushfh($fh);
-                    nqp::closefh($fh) unless ($output eq '' || $output eq '-');
+                    $fh.print($result);
+                    $fh.flush();
+                    close($fh) unless ($output eq '' || $output eq '-');
                 }
                 CONTROL {
                     if nqp::can(self, 'handle-control') {
@@ -326,11 +326,9 @@ class HLL::Compiler does HLL::Backend::Default {
         }
         if ($has_error) {
             if %adverbs<ll-exception> || !nqp::can(self, 'handle-exception') {
-                my $err := nqp::getstderr();
-                nqp::printfh($err, nqp::getmessage($error));
-                nqp::printfh($err, "\n");
-                nqp::printfh($err, nqp::join("\n", nqp::backtracestrings($error)));
-                nqp::printfh($err, "\n");
+                my $err := stderr();
+                $err.say(nqp::getmessage($error));
+                $err.say(nqp::join("\n", nqp::backtracestrings($error)));
                 nqp::exit(1);
             } else {
                 self.handle-exception($error);
@@ -350,7 +348,7 @@ class HLL::Compiler does HLL::Backend::Default {
         try {
             $res := $p.parse(@args);
             CATCH {
-                nqp::sayfh(nqp::getstderr(), $_);
+                note($_);
                 self.usage(:use-stderr);
                 nqp::exit(1);
             }
@@ -377,27 +375,26 @@ class HLL::Compiler does HLL::Backend::Default {
             my $in-handle;
             try {
                 if $filename eq '-' {
-                    $in-handle := nqp::getstdin();
+                    $in-handle := stdin();
                 }
                 elsif nqp::stat($filename, nqp::const::STAT_ISDIR) {
-                    nqp::sayfh(nqp::getstderr(), "Can not run directory $filename.");
+                    note("Can not run directory $filename.");
                     $err := 1;
                 }
                 else {
-                    $in-handle := nqp::open($filename, 'r');
+                    $in-handle := open($filename, :r, :enc($encoding));
                 }
                 CATCH {
-                    nqp::sayfh(nqp::getstderr(), "Could not open $filename. $_");
+                    note("Could not open $filename. $_");
                     $err := 1;
                 }
             }
             nqp::exit(1) if $err;
             try {
-                nqp::setencoding($in-handle, $encoding);
-                nqp::push(@codes, nqp::readallfh($in-handle));
-                nqp::closefh($in-handle);
+                nqp::push(@codes, $in-handle.slurp());
+                $in-handle.close;
                 CATCH {
-                    nqp::sayfh(nqp::getstderr(), "Error while reading from file: $_");
+                    note("Error while reading from file: $_");
                     $err := 1;
                 }
             }
@@ -429,8 +426,8 @@ class HLL::Compiler does HLL::Backend::Default {
 
         my $target := nqp::lc(%adverbs<target>);
         my $result := $source;
-        my $stderr := nqp::getstderr();
-        my $stdin  := nqp::getstdin();
+        my $stderr := stderr();
+        my $stdin  := stdin();
         my $stagestats := %adverbs<stagestats>;
         unless $from eq '' || self.exists_stage($from) {
             nqp::die("Unknown compilation input '$from'");
@@ -445,7 +442,7 @@ class HLL::Compiler does HLL::Backend::Default {
                 }
                 next;
             }
-            nqp::printfh($stderr, nqp::sprintf("Stage %-11s: ", [$_])) if nqp::defined($stagestats);
+            $stderr.print(nqp::sprintf("Stage %-11s: ", [$_])) if nqp::defined($stagestats);
             my $timestamp := nqp::time_n();
 
             my sub run() {
@@ -466,14 +463,14 @@ class HLL::Compiler does HLL::Backend::Default {
 
             my $diff := nqp::time_n() - $timestamp;
             if nqp::defined($stagestats) {
-                nqp::printfh($stderr, nqp::sprintf("%7.3f", [$diff]));
+                $stderr.print(nqp::sprintf("%7.3f", [$diff]));
                 $!backend.force_gc() if nqp::bitand_i($stagestats, 0x4);
-                nqp::printfh($stderr, $!backend.vmstat())
+                $stderr.print($!backend.vmstat())
                     if nqp::bitand_i($stagestats, 0x2);
-                nqp::printfh($stderr, "\n");
+                $stderr.print("\n");
                 if nqp::bitand_i($stagestats, 0x8) {
-                   nqp::printfh($stderr, "continue> ");
-                   nqp::readlinefh($stdin);
+                   $stderr.print("continue> ");
+                   $stdin.get;
                 }
             }
             last if $_ eq $target;
@@ -502,7 +499,6 @@ class HLL::Compiler does HLL::Backend::Default {
         if nqp::existskey(%adverbs, 'grammar') {
 	    $grammar := %adverbs<grammar>;
 	    $actions := %adverbs<actions>;
-	    # nqp::printfh(nqp::getstderr(), "  (" ~ $grammar.HOW.name($grammar) ~ " with " ~ $actions.HOW.name($actions) ~ "\n");
 	}
 	else {
 	    $grammar := self.parsegrammar;
@@ -524,9 +520,9 @@ class HLL::Compiler does HLL::Backend::Default {
 
     method dumper($obj, $name, *%options) {
         if nqp::can($obj, 'dump') {
-            my $out := nqp::getstdout();
-            nqp::printfh($out, $obj.dump());
-            nqp::flushfh($out);
+            my $out := stdout();
+            $out.print($obj.dump());
+            $out.flush();
         }
         else {
             nqp::die("Cannot dump this object; no dump method");
