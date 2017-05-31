@@ -27,25 +27,6 @@ nqpIo.SyncPipe.prototype.$$can = function(method) {
   return 0;
 };
 
-nqpIo.SyncPipe.prototype.$$setencoding = function(encoding) {
-  this.encoding = core.renameEncoding(encoding);
-};
-
-nqpIo.SyncPipe.prototype.$$setinputlinesep = function(sep) {
-  this.seps = [sep];
-};
-
-
-/* HACK - workaround to make rakudo precomp work before we really implement readlinechompfh*/
-nqpIo.SyncPipe.prototype.$$readlinechompfh = function() {
-  this.slurp();
-  return '';
-};
-
-nqpIo.SyncPipe.prototype.$$readallfh = function() {
-  return this.slurp().toString(this.encoding || 'utf8');
-};
-
 function boolish(bool) {
   return bool ? 1 : 0;
 }
@@ -208,10 +189,6 @@ class FileHandle extends IOHandle {
     return tty.isatty(this.fd) ? 1 : 0;
   }
 
-  $$printfh(content) {
-    var buffer = new Buffer(content, this.encoding);
-    return fs.writeSync(this.fd, buffer, 0, buffer.length);
-  }
 
   $$toBool(ctx) {
     return 1;
@@ -223,14 +200,6 @@ class FileHandle extends IOHandle {
 
   $$filenofh() {
     return this.fd;
-  }
-
-  $$readlinefh() {
-    return readline(this, false);
-  }
-
-  $$readlinechompfh() {
-    return readline(this, true);
   }
 
   $$eoffh() {
@@ -253,46 +222,6 @@ class FileHandle extends IOHandle {
   $$unlockfh(flags) {
     fs.flockSync(this.fd, 'un');
     return this;
-  }
-
-  $$readallfh() {
-    var all = new Buffer(0);
-    var buf = new Buffer(CHUNK_SIZE);
-    var total = 0;
-    var bytesRead;
-    while ((bytesRead = fs.readSync(this.fd, buf, 0, buf.length, null)) != 0) {
-      total += bytesRead;
-      var all = Buffer.concat([all, buf], total);
-    }
-    return all.toString(this.encoding).replace(/\r\n/, '\n');
-  }
-
-  $$readcharsfh(count) {
-    var all = new Buffer(0);
-    var buf = new Buffer(CHUNK_SIZE);
-    var bytesRead;
-    var total = 0;
-
-    var starting = fs.seekSync(this.fd, 0, 1);
-
-    while ((bytesRead = fs.readSync(this.fd, buf, 0, buf.length, null)) != 0 && all.toString(this.encoding).length < count) {
-      total += bytesRead;
-      all = Buffer.concat([all, buf], total);
-    }
-    var encoded = all.toString(this.encoding);
-
-    if (encoded.length < count) {
-      return encoded;
-    }
-
-    while (encoded.length > count) {
-      /* We assume that n bytes contain at most n chars */
-      all = all.slice(0, all.length - (encoded.length - count));
-      encoded = all.toString(this.encoding);
-    }
-
-    fs.seekSync(this.fd, all.length + starting, 0);
-    return encoded;
   }
 
   $$flushfh() {
@@ -357,82 +286,6 @@ op.open = function(name, mode) {
   return fh;
 };
 
-
-
-//TODO: benchmark and optimize
-function readline(fh, chomp) {
-
-  const READ_SIZE = 16;
-  let starting = fs.seekSync(fh.fd, 0, 1);
-  let position = starting;
-  let bytesRead;
-  let bufferedBytes = 0;
-
-  let buffer = new Buffer(READ_SIZE * 2);
-
-  let string = '';
-
-  READ_LINE:
-  while ((bytesRead =
-      fs.readSync(fh.fd, buffer, bufferedBytes, READ_SIZE, position)) != 0) {
-
-    position += bytesRead;
-    bufferedBytes += bytesRead;
-
-    if (bufferedBytes + READ_SIZE > buffer.length) {
-      let oldBuffer = buffer;
-      buffer = new Buffer(buffer.length * 2);
-      oldBuffer.copy(buffer, 0, 0, bufferedBytes);
-    }
-
-    string = buffer.slice(0, bufferedBytes).toString(fh.encoding);
-
-    // TODO think/ask about a "" sep
-    let sep;
-    let newline = -1;
-    if (fh.seps) {
-      for (var i = 0; i < fh.seps.length; i++) {
-        var offset = string.indexOf(fh.seps[i]);
-        if (offset != -1 && (newline == -1 || offset < newline)) {
-          newline = offset;
-          sep = fh.seps[i];
-        }
-      }
-
-    } else {
-      let cr = string.indexOf('\r');
-      let nl = string.indexOf('\n');
-      if (cr != -1 && cr < nl) {
-        if (cr < nl) {
-          newline = cr;
-          if (cr + 1 == nl) {
-            sep = '\r\n';
-          } else {
-            sep = '\r';
-          }
-        }
-      } else {
-        newline = nl;
-        sep = '\n';
-      }
-    }
-
-    if (newline != -1) {
-      var upToNewline = string.slice(0, newline);
-      // THINK ABOUT decoding and encoding might give a different offset
-
-      fs.seekSync(fh.fd,
-          Buffer.byteLength(upToNewline + sep, fh.encoding) + starting, 0);
-
-      return (chomp ? upToNewline : upToNewline + sep).replace(/\r\n/, '\n');
-    }
-  }
-
-  fs.seekSync(fh.fd, position, 0);
-  return string.replace(/\r\n/, '\n');
-}
-
-
 op.seekfh = function(ctx, fh, offset, whence) {
   if (whence == 0 && offset < 0) {
     ctx.die("Can't seek to position: " + offset);
@@ -461,9 +314,6 @@ op.closefh_i = function(fh) {
   return 0;
 };
 
-op.sayfh = function(fh, content) {
-  return fh.$$printfh(content + '\n');
-};
 
 op.unlink = function(filename) {
   try {
@@ -587,11 +437,6 @@ class Stderr extends StdHandle {
     super();
   }
 
-  $$printfh(msg) {
-    process.stderr.write(msg, this.encoding);
-    return Buffer.byteLength(msg, this.encoding);
-  }
-
   $$filenofh() {
     return process.stderr.fd;
   }
@@ -617,10 +462,6 @@ class Stdout extends StdHandle {
 
   $$filenofh() {
     return process.stdout.fd;
-  }
-
-  $$printfh(msg) {
-    process.stdout.write(msg);
   }
 
   $$flushfh() {
