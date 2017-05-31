@@ -599,6 +599,11 @@ class Stderr extends StdHandle {
   $$isttyfh() {
     return (process.stderr.isTTY ? 1 : 0);
   }
+
+  $$writefh(buf) {
+    var buffer = core.toRawBuffer(buf);
+    process.stdout.write(buffer);
+  }
 };
 
 op.getstderr = function() {
@@ -619,6 +624,11 @@ class Stdout extends StdHandle {
   }
 
   $$flushfh() {
+  }
+
+  $$writefh(buf) {
+    var buffer = core.toRawBuffer(buf);
+    process.stdout.write(buffer);
   }
 };
 

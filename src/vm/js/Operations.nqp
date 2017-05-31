@@ -1672,5 +1672,18 @@ class QAST::OperationsJS {
     add_simple_op('loadbytecodefh', $T_VOID, [$T_OBJ, $T_STR], :ctx, :side_effects);
 
     add_simple_op('execname', $T_STR, []);
+
+    add_simple_op('decoderconfigure', $T_OBJ, [$T_OBJ, $T_STR, $T_OBJ], :side_effects, :method_call);
+    add_simple_op('decodersetlineseps', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :method_call);
+    add_simple_op('decoderaddbytes', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :method_call);
+    add_simple_op('decodertakechars', $T_STR, [$T_OBJ, $T_INT], :side_effects, :method_call);
+    add_simple_op('decodertakeallchars', $T_STR, [$T_OBJ], :side_effects, :method_call);
+    add_simple_op('decodertakeavailablechars', $T_STR, [$T_OBJ], :side_effects, :method_call);
+    add_simple_op('decodertakeline', $T_STR, [$T_OBJ, $T_INT, $T_INT], :side_effects, :method_call);
+    add_simple_op('decoderbytesavailable', $T_INT, [$T_OBJ], :method_call);
+    add_simple_op('decodertakebytes', $T_OBJ, [$T_OBJ, $T_OBJ, $T_INT], :side_effects, :method_call);
+    add_simple_op('decoderempty', $T_INT, [$T_OBJ], :method_call);
+
+
 }
 

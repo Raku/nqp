@@ -7,6 +7,7 @@ var Null = require('./null.js');
 var null_s = require('./null_s.js');
 var Iter = require('./iter.js');
 var BOOT = require('./BOOT.js');
+var core = require('./core.js');
 
 var bignum = require('bignum-browserify');
 var ZERO = bignum(0);
@@ -1427,7 +1428,37 @@ reprs.Semaphore = Semaphore;
 class ConcBlockingQueue extends REPR {};
 reprs.ConcBlockingQueue = ConcBlockingQueue;
 
-class Decoder extends REPR {};
+let emptyBuffer = Buffer.allocUnsafe(0);
+
+class Decoder extends REPR {
+  setupSTable(STable) {
+    STable.addInternalMethods(class {
+      $$decoderconfigure(encoding, config) {
+        this.$$encoding = core.renameEncoding(encoding);
+        this.$$config = config;
+        this.$$buffer = emptyBuffer;
+        return this;
+      }
+
+      $$decodersetlineseps(seps) {
+        this.$$seps = seps;
+      }
+
+      $$decoderaddbytes(bytes) {
+        let buf = core.toRawBuffer(bytes);
+        this.$$buffer = Buffer.concat([this.$$buffer, buf]);
+      }
+
+      $$decodertakeallchars() {
+        let ret = this.$$buffer.toString(this.$$encoding);
+        this.$$buffer = emptyBuffer;
+        return ret;
+      }
+
+    });
+
+  }
+};
 reprs.Decoder = Decoder;
 
 class MultiDimArray extends REPR {
