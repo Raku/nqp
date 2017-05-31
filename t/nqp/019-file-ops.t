@@ -2,7 +2,7 @@
 
 # Test nqp::op file operations.
 
-plan(110);
+plan(105);
 
 ok( nqp::stat('CREDITS', nqp::const::STAT_EXISTS) == 1, 'nqp::stat exists');
 ok( nqp::stat('AARDVARKS', nqp::const::STAT_EXISTS) == 0, 'nqp::stat not exists');
@@ -180,22 +180,6 @@ else {
     nqp::unlink($test-file);
 }
 
-my $backend := nqp::getcomp('nqp').backend.name;
-my $crlf-conversion := $backend eq 'moar' || $backend eq 'js';
-
-if $crlf-conversion {
-    skip("get won't match \\r on $backend", 5);
-}
-else {
-    $fh := open('t/nqp/19-readline.txt', :r, :!chomp);
-    is($fh.get, "line1\r",   'reading a line till CR');
-    is($fh.get, "line2\r\n", 'reading a line till CRLF');
-    is($fh.get, "line3\n",   'reading a line till LF');
-    is($fh.get, "\n",          'reading an empty line');
-    is($fh.get, "line4",     'reading a line till EOF');
-    close($fh);
-}
-
 # file times
 my $mtime := nqp::stat('t/nqp/019-file-ops.t', nqp::const::STAT_MODIFYTIME);
 ok($mtime > 0, 'integer mtime');
@@ -204,6 +188,7 @@ ok($atime > 0, 'integer atime');
 my $ctime := nqp::stat('t/nqp/019-file-ops.t', nqp::const::STAT_CHANGETIME);
 ok($ctime > 0, 'integer ctime');
 
+my $backend := nqp::getcomp('nqp').backend.name;
 if $backend eq 'moar' || $backend eq 'js' || $backend eq 'jvm' {
     my $mtime_n := nqp::stat_time('t/nqp/019-file-ops.t', nqp::const::STAT_MODIFYTIME);
     ok($mtime_n >= $mtime, 'float mtime >= integer');
@@ -304,6 +289,7 @@ else {
     nqp::unlink($test-file ~ '-missing-symlink') if nqp::lstat($test-file ~ '-missing-symlink', nqp::const::STAT_EXISTS);
 }
 
+my $crlf-conversion := $backend eq 'moar' || $backend eq 'js';
 if $crlf-conversion {
     my $wfh := open($test-file, :w);
     $wfh.print("abc\ndef\r\nghi");
