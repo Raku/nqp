@@ -1444,7 +1444,11 @@ class Decoder extends REPR {
         }
       }
 
-      $$decoderconfigure(encoding, config) {
+      $$translate(str) {
+        return this.$$shouldTranslate ? str.replace(/\r\n/g, '\n') : str;
+      }
+
+      $$decoderconfigure(ctx, encoding, config) {
         if (this.$$encoding !== undefined) {
           throw new NQPException('Decoder already configured');
         }
@@ -1452,7 +1456,9 @@ class Decoder extends REPR {
         if (!core.isKnownEncoding(this.$$encoding)) {
           throw new NQPException("Unknown string encoding: '" + this.$$encoding + "'");
         }
-        this.$$config = config;
+        let translate = config.content.get('translate_newlines');
+        this.$$shouldTranslate = translate && nqp.toInt(translate, ctx) !== 0;
+
         this.$$seps = defaultSeps;
         this.$$buffer = emptyBuffer;
         return this;
@@ -1479,7 +1485,7 @@ class Decoder extends REPR {
           return null_s;
         } else {
           this.$$buffer = this.$$buffer.slice(Buffer.byteLength(chars, this.$$encoding));
-          return chars;
+          return this.$$translate(chars);
         }
       }
 
@@ -1488,14 +1494,14 @@ class Decoder extends REPR {
         let decoder = new StringDecoder(this.$$encoding);
         let available = decoder.write(this.$$buffer);
         this.$$buffer = this.$$buffer.slice(0, Buffer.byteLength(available, available));
-        return available;
+        return this.$$translate(available);
       }
 
       $$decodertakeallchars() {
         this.$$check();
         let ret = this.$$buffer.toString(this.$$encoding);
         this.$$buffer = emptyBuffer;
-        return ret;
+        return this.$$translate(ret);
       }
 
       /* TODO: NFG */
@@ -1520,12 +1526,12 @@ class Decoder extends REPR {
 
           this.$$buffer = this.$$buffer.slice(Buffer.byteLength(upToNewline + sep, this.$$encoding));
 
-          return (chomp ? upToNewline : upToNewline + sep);
+          return this.$$translate(chomp ? upToNewline : upToNewline + sep);
         } else {
           if (incompleteOk) {
             let ret = this.$$buffer.toString(this.$$encoding);
             this.$$buffer = emptyBuffer;
-            return ret;
+            return this.$$translate(ret);
           } else {
             return null_s;
           }

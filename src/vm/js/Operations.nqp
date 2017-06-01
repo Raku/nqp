@@ -1664,7 +1664,7 @@ class QAST::OperationsJS {
 
     add_simple_op('execname', $T_STR, []);
 
-    add_simple_op('decoderconfigure', $T_OBJ, [$T_OBJ, $T_STR, $T_OBJ], :side_effects, :method_call);
+    add_simple_op('decoderconfigure', $T_OBJ, [$T_OBJ, $T_STR, $T_OBJ], :ctx, :side_effects, :method_call);
     add_simple_op('decodersetlineseps', $T_OBJ, [$T_OBJ, $T_OBJ], :ctx, :side_effects, :method_call);
     add_simple_op('decoderaddbytes', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :method_call);
     add_simple_op('decodertakechars', $T_STR, [$T_OBJ, $T_INT], :side_effects, :method_call);
