@@ -27,6 +27,27 @@ nqpIo.SyncPipe.prototype.$$can = function(method) {
   return 0;
 };
 
+nqpIo.SyncPipe.prototype.$$readfh = function(buf, size) {
+  let lowlevel = this.$$readBuffer(size);
+
+  let elementSize = core.byteSize(buf);
+
+  let isUnsigned = buf._STable.REPR.type._STable.REPR.is_unsigned;
+
+  if (lowlevel) {
+    let offset = 0;
+    buf.array.length = lowlevel.length / elementSize;
+    for (var i = 0; i < lowlevel.length / elementSize; i++) {
+      buf.array[i] = isUnsigned ? lowlevel.readUIntLE(offset, elementSize) : lowlevel.readIntLE(offset, elementSize);
+      offset += elementSize;
+    }
+  } else {
+    buf.array.length = 0;
+  }
+
+  return buf;
+};
+
 function boolish(bool) {
   return bool ? 1 : 0;
 }
