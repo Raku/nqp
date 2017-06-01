@@ -532,8 +532,14 @@ op.isint = function(value) {
 function renameEncoding(encoding) {
   return {utf16: 'utf16le', 'iso-8859-1': 'binary'}[encoding] || encoding;
 }
-
 exports.renameEncoding = renameEncoding;
+
+let encodings = ['ascii', 'utf8', 'utf16le', 'ucs2', 'base64', 'latin1', 'binary', 'hex'];
+function isKnownEncoding(encoding) {
+  return encodings.indexOf(encoding) == -1 ? false : true;
+}
+exports.isKnownEncoding = isKnownEncoding;
+
 
 function byteSize(buf) {
   var bits = buf._STable.REPR.type._STable.REPR.bits;
@@ -544,6 +550,8 @@ function byteSize(buf) {
 
   return bits / 8;
 }
+
+exports.byteSize = byteSize;
 
 op.encode = function(str, encoding_, buf) {
   var encoding = renameEncoding(encoding_);

@@ -8,6 +8,7 @@ var null_s = require('./null_s.js');
 var Iter = require('./iter.js');
 var BOOT = require('./BOOT.js');
 var core = require('./core.js');
+var nqp = require('nqp-runtime');
 
 var bignum = require('bignum-browserify');
 var ZERO = bignum(0);
@@ -1428,33 +1429,141 @@ reprs.Semaphore = Semaphore;
 class ConcBlockingQueue extends REPR {};
 reprs.ConcBlockingQueue = ConcBlockingQueue;
 
-let emptyBuffer = Buffer.allocUnsafe(0);
+const emptyBuffer = Buffer.allocUnsafe(0);
+
+const StringDecoder = require('string_decoder').StringDecoder;
+
+const defaultSeps = ['\r\n', '\n'];
 
 class Decoder extends REPR {
   setupSTable(STable) {
     STable.addInternalMethods(class {
+      $$check() {
+        if (this.$$encoding === undefined) {
+          throw new NQPException('Decoder not yet configured');
+        }
+      }
+
       $$decoderconfigure(encoding, config) {
+        if (this.$$encoding !== undefined) {
+          throw new NQPException('Decoder already configured');
+        }
         this.$$encoding = core.renameEncoding(encoding);
+        if (!core.isKnownEncoding(this.$$encoding)) {
+          throw new NQPException("Unknown string encoding: '" + this.$$encoding + "'");
+        }
         this.$$config = config;
+        this.$$seps = defaultSeps;
         this.$$buffer = emptyBuffer;
         return this;
       }
 
-      $$decodersetlineseps(seps) {
-        this.$$seps = seps;
+      $$decodersetlineseps(ctx, seps) {
+        this.$$check();
+        this.$$seps = seps.array.map(sep => nqp.toStr(sep, ctx));
       }
 
       $$decoderaddbytes(bytes) {
+        this.$$check();
         let buf = core.toRawBuffer(bytes);
         this.$$buffer = Buffer.concat([this.$$buffer, buf]);
       }
 
+      /* TODO NFG, codepoints that don't fit into 2 bytes */
+      $$decodertakechars(count) {
+        this.$$check();
+        let decoder = new StringDecoder(this.$$encoding);
+        let everything = decoder.write(this.$$buffer);
+        let chars = everything.substr(0, count);
+        if (chars.length < count) {
+          return null_s;
+        } else {
+          this.$$buffer = this.$$buffer.slice(Buffer.byteLength(chars, this.$$encoding));
+          return chars;
+        }
+      }
+
+      $$decodertakeavailablechars() {
+        this.$$check();
+        let decoder = new StringDecoder(this.$$encoding);
+        let available = decoder.write(this.$$buffer);
+        this.$$buffer = this.$$buffer.slice(0, Buffer.byteLength(available, available));
+        return available;
+      }
+
       $$decodertakeallchars() {
+        this.$$check();
         let ret = this.$$buffer.toString(this.$$encoding);
         this.$$buffer = emptyBuffer;
         return ret;
       }
 
+      /* TODO: NFG */
+
+      $$decodertakeline(chomp, incompleteOk) {
+        this.$$check();
+        let decoder = new StringDecoder(this.$$encoding);
+        let string = decoder.write(this.$$buffer);
+
+        let newline = -1;
+        let sep;
+        for (let i = 0; i < this.$$seps.length; i++) {
+          let offset = string.indexOf(this.$$seps[i]);
+          if (offset != -1 && (newline == -1 || offset < newline)) {
+            newline = offset;
+            sep = this.$$seps[i];
+          }
+        }
+
+        if (newline != -1) {
+          let upToNewline = string.slice(0, newline);
+
+          this.$$buffer = this.$$buffer.slice(Buffer.byteLength(upToNewline + sep, this.$$encoding));
+
+          return (chomp ? upToNewline : upToNewline + sep);
+        } else {
+          if (incompleteOk) {
+            let ret = this.$$buffer.toString(this.$$encoding);
+            this.$$buffer = emptyBuffer;
+            return ret;
+          } else {
+            return null_s;
+          }
+        }
+      }
+
+      $$decoderempty() {
+        this.$$check();
+        return this.$$buffer.length === 0 ? 1 : 0;
+      }
+
+      $$decoderbytesavailable() {
+        this.$$check();
+        return this.$$buffer.length;
+      }
+
+      $$decodertakebytes(bufType, bytes) {
+        this.$$check();
+        if (bytes > this.$$buffer.length) {
+          return Null;
+        }
+
+        let buf = bufType._STable.REPR.allocate(bufType._STable);
+
+        let elementSize = core.byteSize(buf);
+        let isUnsigned = buf._STable.REPR.type._STable.REPR.is_unsigned;
+
+
+        let offset = 0;
+        for (var i = 0; i < bytes / elementSize; i++) {
+          buf.array[i] = isUnsigned ? this.$$buffer.readUIntLE(offset, elementSize) : this.$$buffer.readIntLE(offset, elementSize);
+          offset += elementSize;
+        }
+
+        this.$$buffer = this.$$buffer.slice(bytes);
+
+        return buf;
+      }
     });
 
   }
