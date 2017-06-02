@@ -458,9 +458,6 @@ function toJS(obj) {
 
 class JavaScriptCompiler extends NQPObject {
   eval(ctx, _NAMED, self, code) {
-    if (/PRINTME/.test(code)) {
-      console.log('evaling [', code, ']');
-    }
     //console.log("evaling [", code, "]");
     return fromJS(eval(code));
   }
