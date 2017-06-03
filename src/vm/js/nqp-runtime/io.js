@@ -193,7 +193,7 @@ class IOHandle extends NQPObject {
   $$setencoding(encoding) {
     this.encoding = core.renameEncoding(encoding);
   }
-}
+};
 
 const CHUNK_SIZE = 32768;
 class FileHandle extends IOHandle {
@@ -407,7 +407,7 @@ function convertNull(obj) {
 }
 
 function stringifyEnv(ctx, hash) {
-  let stringifed= {};
+  let stringifed = {};
 
   hash.content.forEach(function(value, key, map) {
     stringifed[key] = nqp.toStr(value, ctx);
@@ -447,11 +447,11 @@ op.getenvhash = function() {
 };
 
 class StdHandle extends IOHandle {
-    constructor() {
-      super();
-      this.encoding = 'utf8';
-    }
-}
+  constructor() {
+    super();
+    this.encoding = 'utf8';
+  }
+};
 
 class Stderr extends StdHandle {
   constructor() {

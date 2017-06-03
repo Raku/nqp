@@ -72,7 +72,7 @@ class CodeRef extends NQPObject {
           fakeCtx.$$cuid = searched.outerCodeRef.cuid;
           let staticVars = outerCode.staticVars;
           if (staticVars) {
-           for (var staticVarName in staticVars) {
+            for (var staticVarName in staticVars) {
               fakeCtx[staticVarName] = staticVars[staticVarName];
             }
           }
