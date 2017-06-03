@@ -33,11 +33,11 @@ proto._STable = {
     },
     $$decont(ctx) {
       return this;
-    }
+    },
   },
   REPR: {
-    name: 'NQPException'
-  }
+    name: 'NQPException',
+  },
 };
 
 module.exports = NQPException;

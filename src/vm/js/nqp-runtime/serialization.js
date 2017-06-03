@@ -18,8 +18,6 @@ var op = {};
 exports.op = op;
 
 const CURRENT_VERSION = 20;
-const OBJECTS_TABLE_ENTRY_SC_MASK = 0x7FF;
-const OBJECTS_TABLE_ENTRY_SC_IDX_MASK = 0x000FFFFF;
 const OBJECTS_TABLE_ENTRY_SC_IDX_MAX = 0x000FFFFF;
 const OBJECTS_TABLE_ENTRY_SC_MAX = 0x7FE;
 const OBJECTS_TABLE_ENTRY_SC_SHIFT = 20;
@@ -46,7 +44,6 @@ const REFVAR_VM_HASH_STR_VAR = 10;
 const REFVAR_STATIC_CODEREF = 11;
 const REFVAR_CLONED_CODEREF = 12;
 
-const STABLE_BOOLIFICATION_SPEC_MODE_MASK = 0x0F;
 const STABLE_HAS_CONTAINER_SPEC = 0x10;
 const STABLE_HAS_INVOCATION_SPEC = 0x20;
 const STABLE_HAS_HLL_OWNER = 0x40;
@@ -357,20 +354,15 @@ class BinaryWriteCursor {
       discrim = REFVAR_VM_NULL;
     } else if (ref === undefined) {
       discrim = REFVAR_NULL;
-    }
-    else if (ref.$$serializeAsNull) {
+    } else if (ref.$$serializeAsNull) {
       discrim = REFVAR_VM_NULL;
-    }
-    else if (ref instanceof NQPInt) {
+    } else if (ref instanceof NQPInt) {
       discrim = REFVAR_VM_INT;
-    }
-    else if (typeof ref == 'number') {
+    } else if (typeof ref == 'number') {
       discrim = REFVAR_VM_NUM;
-    }
-    else if (typeof ref == 'string') {
+    } else if (typeof ref == 'string') {
       discrim = REFVAR_VM_STR;
-    }
-    else if (ref._STable === BOOT.Array._STable) {
+    } else if (ref._STable === BOOT.Array._STable) {
       discrim = REFVAR_VM_ARR_VAR;
     }
   //  else if (ref.st.WHAT == tc.gc.BOOTIntArray) {
@@ -381,27 +373,22 @@ class BinaryWriteCursor {
   //  }
     else if (ref instanceof Hash) {
       discrim = REFVAR_VM_HASH_STR_VAR;
-    }
-    else if (ref instanceof CodeRef || typeof ref == 'function') {
-      //      console.log("serializing code ref");
+    } else if (ref instanceof CodeRef || typeof ref == 'function') {
       discrim = REFVAR_VM_NULL;
       if (ref._SC && ref.isStatic) {
         /* Static code reference. */
         discrim = REFVAR_STATIC_CODEREF;
-      }
-      else if (ref._SC) {
+      } else if (ref._SC) {
         /* Closure, but already seen and serialization already handled. */
         discrim = REFVAR_CLONED_CODEREF;
-      }
-      else {
+      } else {
         /* Closure but didn't see it yet. Take care of it serialization, which
              * gets it marked with this SC. Then it's just a normal code ref that
              * needs serializing. */
         this.writer.serializeClosure(ref);
         discrim = REFVAR_CLONED_CODEREF;
       }
-    }
-    else {
+    } else {
       /* Just a normal object, with no special serialization needs. */
       discrim = REFVAR_OBJECT;
     }
@@ -437,7 +424,6 @@ class BinaryWriteCursor {
         }
         break;
       case REFVAR_VM_HASH_STR_VAR:
-        var count = 0;
         this.varint(ref.$$elems());
         ref.content.forEach(function(value, key, map) {
           this.str(key);

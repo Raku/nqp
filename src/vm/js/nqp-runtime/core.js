@@ -553,8 +553,6 @@ op.encode = function(str, encoding_, buf) {
 
   var isUnsigned = buf._STable.REPR.type._STable.REPR.isUnsigned;
 
-  var ret = [];
-
   var buffer = new Buffer(str, encoding);
 
   var offset = 0;

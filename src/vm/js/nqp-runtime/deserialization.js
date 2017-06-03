@@ -5,7 +5,6 @@ module.exports.op = op;
 var reprs = require('./reprs.js');
 var sixmodel = require('./sixmodel.js');
 var SerializationContext = require('./serialization-context');
-var __6MODEL_CORE__ = require('./bootstrap.js').core;
 var Hash = require('./hash.js');
 var Int64 = require('node-int64');
 var CodeRef = require('./code-ref.js');
@@ -84,7 +83,6 @@ function int64(high, low) {
   return new Int64(high, low).toNumber();
 }
 
-const STABLE_BOOLIFICATION_SPEC_MODE_MASK = 0x0F;
 const STABLE_HAS_CONTAINER_SPEC = 0x10;
 const STABLE_HAS_INVOCATION_SPEC = 0x20;
 const STABLE_HAS_HLL_OWNER = 0x40;
@@ -92,8 +90,6 @@ const STABLE_HAS_HLL_ROLE = 0x80;
 
 const STRING_HEAP_LOC_PACKED_OVERFLOW = 0x00008000;
 const STRING_HEAP_LOC_PACKED_SHIFT = 16;
-
-
 
 /**
   We define a BinaryCursor class so we can read sequential things easily
@@ -190,7 +186,6 @@ class BinaryCursor {
     var packed;
     var scId;
     var index;
-    var sc;
 
     const PACKED_SC_SHIFT = 20;
     const PACKED_SC_OVERFLOW = 0xfff;
@@ -385,7 +380,6 @@ class BinaryCursor {
       this.varint(); // md_cache_hint
       this.str(); // md_valid_attr_name
       this.varint(); // md_valid_hint
-
     }
 
     if (flags & STABLE_HAS_HLL_OWNER) {
@@ -402,7 +396,6 @@ class BinaryCursor {
       if (!STable.parameterizerCache) {
         STable.parameterizerCache = [];
       }
-
     }
 
     if (STable.modeFlags & constants.PARAMETERIZED_TYPE) {
@@ -759,8 +752,6 @@ class BinaryCursor {
 
     // TODO - think if we should set codeObj
     var ctx = new Ctx(outerCtx, callerCtx);
-
-    var lexicals = [];
 
     for (var name in context.lexicals) {
       if (context.lexicals[name] === undefined) {

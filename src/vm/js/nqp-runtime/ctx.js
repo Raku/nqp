@@ -31,7 +31,7 @@ let categoryIDs = {
   PROCEED: PROCEED,
   AWAIT: AWAIT,
   EMIT: EMIT,
-  DONE: DONE
+  DONE: DONE,
 };
 
 let categoryToName = {};
@@ -187,13 +187,13 @@ class Ctx extends NQPObject {
     throw new ResumeException(exception);
   }
 
-  throw (exception) {
+  throw(exception) {
     this.propagateException(exception);
   }
 
   throwpayloadlexcaller(category, payload) {
     let ctx = this.$$caller;
-    let isThunkOrCompilerStub = code => {return (code.staticCode.isThunk || code.isCompilerStub)};
+    let isThunkOrCompilerStub = code => code.staticCode.isThunk || code.isCompilerStub;
     while (ctx && isThunkOrCompilerStub(ctx.codeRef())) {
       ctx = ctx.$$caller;
     }

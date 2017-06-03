@@ -68,7 +68,7 @@ class Hash extends NQPObject {
     return new HashIter(this);
   }
 
-  //TODO: avoid copy and paste
+  // TODO: avoid copy and paste
   $$scwb() {
     if (compilingSCs.length == 0 || repossession.scwbDisableDepth || repossession.neverRepossess.get(this)) {
       return;

@@ -8,9 +8,22 @@ var nqp = require('nqp-runtime');
 var Null = require('./null.js');
 var BOOT = require('./BOOT.js');
 
-const EDGE_FATE = 0, EDGE_EPSILON = 1, EDGE_CODEPOINT = 2, EDGE_CODEPOINT_NEG = 3, EDGE_CHARCLASS = 4, EDGE_CHARCLASS_NEG = 5;
-const EDGE_CHARLIST = 6, EDGE_CHARLIST_NEG = 7, EDGE_SUBRULE = 8, EDGE_CODEPOINT_I = 9, EDGE_CODEPOINT_I_NEG = 10;
-const EDGE_GENERIC_VAR = 11, EDGE_CHARRANGE = 12, EDGE_CHARRANGE_NEG = 13, EDGE_CODEPOINT_LL = 14, EDGE_CODEPOINT_I_LL = 15;
+const EDGE_FATE = 0;
+const EDGE_EPSILON = 1;
+const EDGE_CODEPOINT = 2;
+const EDGE_CODEPOINT_NEG = 3;
+const EDGE_CHARCLASS = 4;
+const EDGE_CHARCLASS_NEG = 5;
+const EDGE_CHARLIST = 6;
+const EDGE_CHARLIST_NEG = 7;
+const EDGE_SUBRULE = 8;
+const EDGE_CODEPOINT_I = 9;
+const EDGE_CODEPOINT_I_NEG = 10;
+const EDGE_GENERIC_VAR = 11;
+const EDGE_CHARRANGE = 12;
+const EDGE_CHARRANGE_NEG = 13;
+const EDGE_CODEPOINT_LL = 14;
+const EDGE_CODEPOINT_I_LL = 15;
 
 function convertState(thing) {
   if (thing.$$toArray) {
@@ -107,8 +120,9 @@ function runNFA(nfa, target, pos) {
     while (curst.length) {
       var st = curst.pop();
       if (st <= numStates) {
-        if (done[st] == gen)
+        if (done[st] == gen) {
           continue;
+        }
         done[st] = gen;
       }
 
@@ -133,8 +147,9 @@ function runNFA(nfa, target, pos) {
               }
               if (fates[j] == arg) {
                 foundFate = true;
-                if (j < prevFates)
+                if (j < prevFates) {
                   prevFates--;
+                }
               }
             }
 

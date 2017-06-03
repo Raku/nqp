@@ -49,7 +49,7 @@ function iscclass(cclass, target, offset) {
       return boolish((cp >= 0 && cp < 32) || (cp >= 127 && cp < 160));
     }
     // PUNCTUATION
-    case 1024: return boolish(PUNCTUATION.test(target[offset])); //HACK
+    case 1024: return boolish(PUNCTUATION.test(target[offset])); // HACK
     // ALPHANUMERIC
     case 2048: return boolish(ALPHANUMERIC.test(target[offset]));
     // NEWLINE

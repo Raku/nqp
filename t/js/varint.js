@@ -1,4 +1,5 @@
 var tap = require('tap');
+require('nqp-runtime/bootstrap');
 var BinaryWriteCursor = require('nqp-runtime/serialization').BinaryWriteCursor;
 var BinaryCursor = require('nqp-runtime/deserialization').BinaryCursor;
 

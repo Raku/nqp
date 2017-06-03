@@ -67,8 +67,6 @@ exports.CodeRefWithStateVars = require('./code-ref-with-statevars.js');
 
 exports.CurLexpad = require('./curlexpad.js');
 
-var Hash = require('./hash.js');
-
 var Ctx = require('./ctx.js');
 module.exports.Ctx = Ctx;
 
@@ -330,8 +328,7 @@ exports.topContext = function() {
 exports.regexPeek = function(bstack, mark) {
   var ptr = bstack.length;
   while (ptr >= 0) {
-    if (bstack[ptr] == mark)
-      break;
+    if (bstack[ptr] == mark) break;
     ptr -= 4;
   }
   return ptr;
