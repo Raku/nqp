@@ -557,7 +557,7 @@ knowhow NQPClassHOW {
         @!done;
     }
 
-    method methods($obj, :$local = 0) {
+    method methods($obj, :$local = 0, :$all) {
         if $local {
             @!method_order
         }

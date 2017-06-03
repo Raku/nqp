@@ -123,7 +123,7 @@ knowhow NQPConcreteRoleHOW {
     ## Introspecty
     ##
 
-    method methods($obj, :$local) {
+    method methods($obj, :$local, :$all) {
         my @meths;
         for %!methods {
             nqp::push(@meths, nqp::iterval($_));
