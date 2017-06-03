@@ -18,10 +18,6 @@ var hll = require('./hll.js');
 
 var NQPObject = require('./nqp-object.js');
 
-var bootstrap = require('./bootstrap.js');
-
-var nqp = require('nqp-runtime');
-
 var constants = require('./constants.js');
 
 var containerSpecs = require('./container-specs.js');
@@ -527,7 +523,7 @@ op.isint = function(value) {
 };
 
 function renameEncoding(encoding) {
-  return {utf16: 'utf16le', 'iso-8859-1': 'binary'}[encoding] || encoding;
+  return {'utf16': 'utf16le', 'iso-8859-1': 'binary'}[encoding] || encoding;
 }
 exports.renameEncoding = renameEncoding;
 
@@ -555,7 +551,7 @@ op.encode = function(str, encoding_, buf) {
 
   var elementSize = byteSize(buf);
 
-  var isUnsigned = buf._STable.REPR.type._STable.REPR.is_unsigned;
+  var isUnsigned = buf._STable.REPR.type._STable.REPR.isUnsigned;
 
   var ret = [];
 
@@ -572,14 +568,14 @@ op.encode = function(str, encoding_, buf) {
 
 function toRawBuffer(buf) {
   let elementSize = byteSize(buf);
-  let is_unsigned = buf._STable.REPR.type._STable.REPR.is_unsigned;
+  let isUnsigned = buf._STable.REPR.type._STable.REPR.isUnsigned;
   let array = buf.array;
 
   let buffer = new Buffer(array.length * elementSize);
 
   let offset = 0;
   for (let i = 0; i < array.length; i++) {
-    if (is_unsigned) {
+    if (isUnsigned) {
       buffer.writeUIntLE(array[i], offset, elementSize);
     } else {
       buffer.writeIntLE(array[i], offset, elementSize);
@@ -713,7 +709,6 @@ op.typeparameterat = function(ctx, type, idx) {
 
 op.typeparameterized = function(type) {
   var st = type._STable;
-  var nqp = require('nqp-runtime');
   return st.parametricType ? st.parametricType : Null;
 };
 

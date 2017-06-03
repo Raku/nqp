@@ -25,13 +25,8 @@ function addToScWithSt(obj) {
   obj._STable._SC = core;
 }
 
-function addToScWithStAndMo() {
-  throw '...';
-}
-
-
 /* Creates and installs the KnowHOWAttribute type. */
-function create_KnowHOWAttribute() {
+function createKnowHOWAttribute() {
   var metaObj = KnowHOW_HOW._STable.REPR.allocate(KnowHOW_HOW._STable);
 
   var r = new reprs.KnowHOWAttribute();
@@ -43,10 +38,10 @@ function create_KnowHOWAttribute() {
   };
   methods['new'] = function(ctx, _NAMED, self) {
     var attr = r.allocate(self._STable);
-    //TODO convert to string
+    // TODO convert to string
     attr.__name = _NAMED.name;
     attr.__type = _NAMED.type;
-    //TODO convert to int
+    // TODO convert to int
     attr.__boxTarget = _NAMED.box_target ? _NAMED.box_target : 0;
     return attr;
   };
@@ -200,24 +195,12 @@ addKnowhowHowMethod('compose', function(ctx, _NAMED, self, typeObject) {
 module.exports.knowhow = KnowHOW;
 
 
-/* KnowHOW.HOW */
-//add_to_sc_with_st(STABLE(tc->instance->KnowHOW)->HOW);
-
-var KnowHOWAttribute = create_KnowHOWAttribute();
+var KnowHOWAttribute = createKnowHOWAttribute();
 
 module.exports.knowhowattr = KnowHOWAttribute;
 
 /* KnowHOWAttribute */
 addToScWithSt(KnowHOWAttribute);
-
-/* BOOT* */
-/*add_to_sc_with_st_and_mo(BOOTArray);
-add_to_sc_with_st_and_mo(BOOTHash);
-add_to_sc_with_st_and_mo(BOOTIter);
-add_to_sc_with_st_and_mo(BOOTInt);
-add_to_sc_with_st_and_mo(BOOTNum);
-add_to_sc_with_st_and_mo(BOOTStr);
-add_to_sc_with_st_and_mo(BOOTCode);*/
 
 function bootType(typeName, reprName) {
   var metaObj = KnowHOW_HOW._STable.REPR.allocate(KnowHOW_HOW._STable);

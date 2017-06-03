@@ -1,6 +1,4 @@
 'use strict';
-var reprs = require('./reprs.js');
-
 var bignum = require('bignum-browserify');
 
 var sslBignum = require('bignum');
@@ -100,10 +98,8 @@ op.sub_I = function(a, b, type) {
 op.div_I = function(a, b, type) {
   let divident = getBI(a);
   let divisor = getBI(b);
-  let divident_neg = divident.lt(0);
-  let divisor_neg = divisor.lt(0);
   // workaround for .div rounding to zero not down
-  if (divisor_neg != divident_neg && divident.mod(divisor).ne(0)) {
+  if (divisor.lt(0) != divident.lt(0) && divident.mod(divisor).ne(0)) {
     return makeBI(type, divident.div(divisor).sub(1));
   }
   return makeBI(type, divident.div(divisor));
@@ -284,7 +280,6 @@ op.radix_I = function(hllName, radix, str, zpos, flags, type) {
 
       result = result.add(base.mul(digit));
       base = base.mul(radix);
-
     }
 
     if (n[0] == '-') result = result.neg();

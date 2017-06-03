@@ -67,7 +67,6 @@ op.nfafromstatelist = function(ctx, rawStates, type) {
 };
 
 function runNFA(nfa, target, pos) {
-
   var origPos = pos;
 
   var longlit = [];

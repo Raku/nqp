@@ -50,7 +50,6 @@ class CodePair {
   deserialize(cursor) {
     this.fetch = cursor.variant();
     this.store = cursor.variant();
-
   }
 };
 

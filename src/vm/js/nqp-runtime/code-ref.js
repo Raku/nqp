@@ -3,15 +3,6 @@
 var NQPObject = require('./nqp-object.js');
 var StaticCtx = require('./static-ctx.js');
 
-class WrappedCtx {
-  constructor(wrap) {
-    this.$$outer = wrap;
-  }
-  codeRef() {
-    return {statiCode: null};
-  }
-};
-
 class CodeRef extends NQPObject {
   freshBlock() {
     return this.closureTemplate;

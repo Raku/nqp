@@ -32,7 +32,7 @@ nqpIo.SyncPipe.prototype.$$readfh = function(buf, size) {
 
   let elementSize = core.byteSize(buf);
 
-  let isUnsigned = buf._STable.REPR.type._STable.REPR.is_unsigned;
+  let isUnsigned = buf._STable.REPR.type._STable.REPR.isUnsigned;
 
   if (lowlevel) {
     let offset = 0;
@@ -195,7 +195,6 @@ class IOHandle extends NQPObject {
   }
 };
 
-const CHUNK_SIZE = 32768;
 class FileHandle extends IOHandle {
   constructor(fd) {
     super();
@@ -260,12 +259,12 @@ class FileHandle extends IOHandle {
   }
 
   $$readfh(buf, bytes) {
-    let is_unsigned = buf._STable.REPR.type._STable.REPR.is_unsigned;
+    let isUnsigned = buf._STable.REPR.type._STable.REPR.isUnsigned;
     let buffer = Buffer.allocUnsafe(bytes);
     let read = fs.readSync(this.fd, buffer, 0, bytes, null);
     buf.array.length = read;
     for (let i = 0; i < read; i++) {
-      if (is_unsigned) {
+      if (isUnsigned) {
         buf.array[i] = buffer[i];
       } else {
         buf.array[i] = buffer[i] > 127 ? buffer[i] - 256 : buffer[i];

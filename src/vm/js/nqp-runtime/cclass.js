@@ -22,39 +22,39 @@ const WORD = xregexp('^[\\pL_\\p{Nd}]');
 function iscclass(cclass, target, offset) {
   if (offset < 0 || offset >= target.length) return 0;
   switch (cclass) {
-    //ANY
+    // ANY
     case 65535: return 1;
-    //UPPERCASE
+    // UPPERCASE
     case 1: return boolish(UPPERCASE.test(target[offset]));
-    //LOWERCASE
+    // LOWERCASE
     case 2: return boolish(LOWERCASE.test(target[offset]));
-    //ALPHABETIC
+    // ALPHABETIC
     case 4: return boolish(ALPHABETIC.test(target[offset]));
-    //NUMERIC
+    // NUMERIC
     case 8: return boolish(NUMERIC.test(target[offset]));
-    //HEXADECIMAL
+    // HEXADECIMAL
     case 16: return boolish(HEXADECIMAL.test(target[offset]));
-    //WHITESPACE
+    // WHITESPACE
     case 32: return boolish(WHITESPACE.test(target[offset]));
-    //BLANK
+    // BLANK
     case 256: return boolish(BLANK.test(target[offset]));
-    //PRINTING
+    // PRINTING
     case 64: {
       let cp = target.codePointAt(offset);
       return boolish(!((cp >= 0 && cp < 32) || (cp >= 127 && cp < 160)));
     }
-    //CONTROL
+    // CONTROL
     case 512: {
       let cp = target.codePointAt(offset);
       return boolish((cp >= 0 && cp < 32) || (cp >= 127 && cp < 160));
     }
-    //PUNCTUATION
+    // PUNCTUATION
     case 1024: return boolish(PUNCTUATION.test(target[offset])); //HACK
-    //ALPHANUMERIC
+    // ALPHANUMERIC
     case 2048: return boolish(ALPHANUMERIC.test(target[offset]));
-    //NEWLINE
+    // NEWLINE
     case 4096: return boolish(NEWLINE.test(target[offset]));
-    //WORD
+    // WORD
     case 8192: return boolish(WORD.test(target[offset]));
     default: throw 'cclass ' + cclass + ' not yet implemented';
   }

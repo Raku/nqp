@@ -1,8 +1,6 @@
 'use strict';
-var CodeRef = require('./code-ref.js');
 var NQPException = require('./nqp-exception.js');
 var NQPExceptionWithCtx = require('./nqp-exception-with-ctx.js');
-var Iter = require('./iter.js');
 var NQPObject = require('./nqp-object.js');
 var Null = require('./null.js');
 var exceptionsStack = require('./exceptions-stack.js');

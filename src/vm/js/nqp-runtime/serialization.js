@@ -5,8 +5,6 @@ var NQPInt = require('./nqp-int.js');
 var Int64 = require('node-int64');
 var null_s = require('./null_s.js');
 var Null = require('./null.js');
-var MultiCache = require('./multicache.js').MultiCache;
-var FileHandle = require('./io.js').FileHandle;
 
 var StaticCtx = require('./static-ctx.js');
 
@@ -199,15 +197,17 @@ class BinaryWriteCursor {
     } else {
       var absVal = value < 0 ? -value - 1 : value;
 
-      if (absVal <= 0x7FF)
+      if (absVal <= 0x7FF) {
         storageNeeded = 2;
-      else if (absVal <= 0x000000000007FFFF)
+      } else if (absVal <= 0x000000000007FFFF) {
         storageNeeded = 3;
-      else if (absVal <= 0x0000000007FFFFFF)
+      } else if (absVal <= 0x0000000007FFFFFF) {
         storageNeeded = 4;
-      else if (absVal <= 0x00000007FFFFFFFF)
+      } else if (absVal <= 0x00000007FFFFFFFF) {
         storageNeeded = 5;
-      else console.log('TODO serializing bigger integers');
+      } else {
+        console.log('TODO serializing bigger integers');
+      }
 
       /* TODO bigger numbers */
       /*else if (absVal <= 0x000007FFFFFFFFFFLL)
@@ -918,7 +918,7 @@ class SerializationWriter {
   }
 
 
-  header_I32(value) {
+  headerI32(value) {
     this.buffer.writeUInt32LE(value, this.headerOffset);
     this.headerOffset += 4;
   }
@@ -985,58 +985,58 @@ class SerializationWriter {
     this.buffer = new Buffer(outputSize);
 
     /* Write version into header. */
-    this.header_I32(CURRENT_VERSION);
+    this.headerI32(CURRENT_VERSION);
 
     /* Put dependencies table in place and set location/rows in header. */
-    this.header_I32(this.offset);
-    this.header_I32(this.dependentSCs.length);
+    this.headerI32(this.offset);
+    this.headerI32(this.dependentSCs.length);
 
 
     this.writeChunk(this.deps);
 
     /* Put STables table in place, and set location/rows in header. */
-    this.header_I32(this.offset);
-    this.header_I32(this.sc.rootSTables.length);
+    this.headerI32(this.offset);
+    this.headerI32(this.sc.rootSTables.length);
 
     this.writeChunk(this.stables);
 
     /* Put STables data in place. */
-    this.header_I32(this.offset);
+    this.headerI32(this.offset);
 
     this.writeChunk(this.stablesData);
 
     /* Put objects table in place, and set location/rows in header. */
 
-    this.header_I32(this.offset);
-    this.header_I32(this.sc.rootObjects.length);
+    this.headerI32(this.offset);
+    this.headerI32(this.sc.rootObjects.length);
 
     this.writeChunk(this.objects);
 
     /* Put objects data in place. */
-    this.header_I32(this.offset);
+    this.headerI32(this.offset);
 
     this.writeChunk(this.objectsData);
 
     /* Put closures table in place, and set location/rows in header. */
-    this.header_I32(this.offset);
-    this.header_I32(this.numClosures);
+    this.headerI32(this.offset);
+    this.headerI32(this.numClosures);
 
     this.writeChunk(this.closures);
 
     /* Put contexts table in place, and set location/rows in header. */
-    this.header_I32(this.offset);
-    this.header_I32(this.contexts.length);
+    this.headerI32(this.offset);
+    this.headerI32(this.contexts.length);
 
     this.writeChunk(this.contextsHeaders);
 
     /* Put contexts data in place. */
-    this.header_I32(this.offset);
+    this.headerI32(this.offset);
 
     this.writeChunk(this.contextsData);
 
     /* Put repossessions table in place, and set location/rows in header. */
-    this.header_I32(this.offset);
-    this.header_I32(this.sc.repScs.length);
+    this.headerI32(this.offset);
+    this.headerI32(this.sc.repScs.length);
 
     this.writeChunk(this.repossessionsData);
 

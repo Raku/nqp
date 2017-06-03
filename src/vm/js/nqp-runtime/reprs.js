@@ -616,7 +616,7 @@ class P6int extends REPR {
   constructor() {
     super();
     this.bits = 32;
-    this.is_unsigned = 0;
+    this.isUnsigned = 0;
   }
 
   setupSTable(STable) {
@@ -649,7 +649,7 @@ class P6int extends REPR {
       let unsigned = integer.content.get('unsigned');
       if (unsigned) {
         if (unsigned instanceof NQPInt) {
-          this.is_unsigned = unsigned.value;
+          this.isUnsigned = unsigned.value;
         } else {
           throw 'unsigned to P6int.compose must be a native int';
         }
@@ -703,12 +703,12 @@ class P6int extends REPR {
 
   serializeReprData(st, cursor) {
     cursor.varint(this.bits);
-    cursor.varint(this.is_unsigned);
+    cursor.varint(this.isUnsigned);
   }
 
   deserializeReprData(cursor) {
     this.bits = cursor.varint();
-    this.is_unsigned = cursor.varint();
+    this.isUnsigned = cursor.varint();
   }
 };
 
@@ -1557,7 +1557,7 @@ class Decoder extends REPR {
         let buf = bufType._STable.REPR.allocate(bufType._STable);
 
         let elementSize = core.byteSize(buf);
-        let isUnsigned = buf._STable.REPR.type._STable.REPR.is_unsigned;
+        let isUnsigned = buf._STable.REPR.type._STable.REPR.isUnsigned;
 
 
         let offset = 0;
