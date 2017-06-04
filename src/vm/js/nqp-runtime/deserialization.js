@@ -121,7 +121,7 @@ class BinaryCursor {
 
   /**
   * Return a copy of a cursor at given offset
-  * @param {Number} offset
+  * @param {number} offset
   * @return {BinaryCursor} a copy of the cursor at given offset
   */
   at(offset) {
@@ -135,7 +135,7 @@ class BinaryCursor {
 
   /**
   * Read a given element a number of times
-  * @param {Number} count
+  * @param {number} count
   * @param {Function} cb - the callback that's called count times
   * @return {Array} - the read in objects
   */
@@ -169,7 +169,7 @@ class BinaryCursor {
 
 
   /** Read an entry from the objects table
-   * @param {Number} objectsData - the offset where the data is
+   * @param {number} objectsData - the offset where the data is
    * @return {{data:BinaryCursor, isConcrete: boolean, STable: Array<Number>}}
    */
   objectEntry(objectsData) {
