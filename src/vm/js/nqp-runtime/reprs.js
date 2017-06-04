@@ -46,7 +46,7 @@ function basicTypeObjectFor(HOW) {
 }
 
 function basicAllocate(STable) {
-  return new STable.objConstructor();
+  return new STable.ObjConstructor();
 }
 
 function noopCompose(obj, reprInfo) {
@@ -62,14 +62,14 @@ function methodNotFoundError(ctx, obj, name) {
 }
 
 function basicConstructor(STable) {
-  var objConstructor = function() {};
+  var ObjConstructor = function() {};
   var handler = {};
   handler.get = function(target, name) {
     if (STable.lazyMethodCache) {
       STable.setMethodCache(STable.methodCache);
       let method = STable.methodCache.get(name);
       if (method !== undefined) {
-        return STable.objConstructor.prototype[name];
+        return STable.ObjConstructor.prototype[name];
       }
     }
 
@@ -103,13 +103,13 @@ function basicConstructor(STable) {
   };
 
 
-  objConstructor.prototype = Object.create(new Proxy({}, handler));
-  objConstructor.prototype._STable = STable;
+  ObjConstructor.prototype = Object.create(new Proxy({}, handler));
+  ObjConstructor.prototype._STable = STable;
 
-  objConstructor.prototype._SC = undefined;
-  objConstructor.prototype._WHERE = undefined;
+  ObjConstructor.prototype._SC = undefined;
+  ObjConstructor.prototype._WHERE = undefined;
 
-  return objConstructor;
+  return ObjConstructor;
 }
 
 function slotToAttr(slot) {
@@ -125,7 +125,7 @@ REPR.prototype.createObjConstructor = basicConstructor;
 
 class P6opaque {
   allocate(STable) {
-    var obj = new STable.objConstructor();
+    var obj = new STable.ObjConstructor();
     obj.$$setDefaults();
     return obj;
   }
@@ -341,7 +341,7 @@ class P6opaque {
       }
     }
 
-    Object.setPrototypeOf(obj, newType._STable.objConstructor.prototype);
+    Object.setPrototypeOf(obj, newType._STable.ObjConstructor.prototype);
   }
 
   compose(STable, reprInfoHash) {
@@ -479,7 +479,7 @@ class P6opaque {
     }
 
     STable.compileAccessor('$$setDefaults', 'function() {\n' + defaults + '}');
-    STable.compileAccessor('$$clone', 'function() {var cloned = new this._STable.objConstructor();' + clone + 'return cloned}');
+    STable.compileAccessor('$$clone', 'function() {var cloned = new this._STable.ObjConstructor();' + clone + 'return cloned}');
     STable.evalGatheredCode();
   }
 
@@ -578,7 +578,7 @@ class KnowHOWREPR {
   }
 
   allocate(STable) {
-    var obj = new STable.objConstructor();
+    var obj = new STable.ObjConstructor();
     obj.__methods = new Hash();
     obj.__attributes = [];
     obj.__name = '<anon>';
@@ -971,13 +971,13 @@ reprs.NFA = NFA;
 class VMArray extends REPR {
 
   allocate(STable) {
-    var obj = new STable.objConstructor();
+    var obj = new STable.ObjConstructor();
     obj.array = [];
     return obj;
   }
 
   allocateFromArray(STable, array) {
-    var obj = new STable.objConstructor();
+    var obj = new STable.ObjConstructor();
     obj.array = array;
     return obj;
   }
@@ -1104,7 +1104,7 @@ class VMArray extends REPR {
       }
 
       $$clone() {
-        var cloned = new STable.objConstructor();
+        var cloned = new STable.ObjConstructor();
         cloned.array = this.array.slice();
         return cloned;
       }
@@ -1193,7 +1193,7 @@ let HashIter = require('./hash-iter.js');
 
 class VMHash extends REPR {
   allocate(STable) {
-    var obj = new STable.objConstructor();
+    var obj = new STable.ObjConstructor();
     obj.content = new Map();
     return obj;
   }
@@ -1201,7 +1201,7 @@ class VMHash extends REPR {
   setupSTable(STable) {
     STable.addInternalMethods(class {
       $$clone() {
-        var cloned = new STable.objConstructor();
+        var cloned = new STable.ObjConstructor();
         cloned.content = new Map();
         this.content.forEach(function(value, key, map) {
           cloned.content.set(key, value);
@@ -1579,7 +1579,7 @@ reprs.Decoder = Decoder;
 
 class MultiDimArray extends REPR {
   allocate(STable) {
-    var obj = new STable.objConstructor();
+    var obj = new STable.ObjConstructor();
     obj.dimensions = undefined;
     return obj;
   }
@@ -1622,7 +1622,7 @@ class MultiDimArray extends REPR {
       }
 
       $$clone() {
-        var clone = new this._STable.objConstructor();
+        var clone = new this._STable.ObjConstructor();
         clone.storage = this.storage.slice();
         clone.dimensions = this.dimensions;
         return clone;

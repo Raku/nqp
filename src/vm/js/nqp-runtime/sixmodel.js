@@ -41,11 +41,11 @@ class STable {
 
     this._SC = undefined;
 
-    this.objConstructor = REPR.createObjConstructor(this);
+    this.ObjConstructor = REPR.createObjConstructor(this);
 
     /* HACK - it's a bit hackish - think how correct it is */
-    this.objConstructor.prototype.$$clone = function() {
-      var clone = new this._STable.objConstructor();
+    this.ObjConstructor.prototype.$$clone = function() {
+      var clone = new this._STable.ObjConstructor();
       for (var i in this) {
         if (Object.prototype.hasOwnProperty.call(this, i) && i != '_SC') {
           clone[i] = this[i];
@@ -55,23 +55,23 @@ class STable {
     };
 
     /* Default boolification mode 5 */
-    this.objConstructor.prototype.$$toBool = function(ctx) {
+    this.ObjConstructor.prototype.$$toBool = function(ctx) {
       return this.typeObject_ ? 0 : 1;
     };
 
-    this.objConstructor.prototype.$$decont = function(ctx) {
+    this.ObjConstructor.prototype.$$decont = function(ctx) {
       return this;
     };
 
-    this.objConstructor.prototype.$$isrwcont = function() {
+    this.ObjConstructor.prototype.$$isrwcont = function() {
       return 0;
     };
 
-    this.objConstructor.prototype.typeObject_ = 0;
+    this.ObjConstructor.prototype.typeObject_ = 0;
 
-    this.objConstructor.prototype.$$call = undefined;
+    this.ObjConstructor.prototype.$$call = undefined;
 
-    this.objConstructor.prototype.$$scwb = function() {
+    this.ObjConstructor.prototype.$$scwb = function() {
       if (compilingSCs.length == 0 || repossession.scwbDisableDepth || repossession.neverRepossess.get(this)) {
         return;
       }
@@ -82,7 +82,7 @@ class STable {
       }
     };
 
-    this.objConstructor.prototype.$$istype = function(ctx, type) {
+    this.ObjConstructor.prototype.$$istype = function(ctx, type) {
       var cache = this._STable.typeCheckCache;
       if (cache) {
         for (var i = 0; i < cache.length; i++) {
@@ -113,7 +113,7 @@ class STable {
       return 0;
     };
 
-    this.objConstructor.prototype.$$can = function(ctx, name) {
+    this.ObjConstructor.prototype.$$can = function(ctx, name) {
       return findMethod(ctx, this, name) === Null ? 0 : 1;
     };
 
@@ -125,36 +125,36 @@ class STable {
   setboolspec(mode, method) {
     this.boolificationSpec = {mode: mode, method: method};
     if (mode == 0) {
-      this.objConstructor.prototype.$$toBool = function(ctx) {
+      this.ObjConstructor.prototype.$$toBool = function(ctx) {
         return method.$$call(ctx, {}, this).$$toBool(ctx);
       };
     } else if (mode == 1) {
-      this.objConstructor.prototype.$$toBool = function(ctx) {
+      this.ObjConstructor.prototype.$$toBool = function(ctx) {
         return this.typeObject_ || this.$$getInt() == 0 ? 0 : 1;
       };
     } else if (mode == 2) {
-      this.objConstructor.prototype.$$toBool = function(ctx) {
+      this.ObjConstructor.prototype.$$toBool = function(ctx) {
         return this.typeObject_ || this.$$getNum() == 0 ? 0 : 1;
       };
     } else if (mode == 3) {
-      this.objConstructor.prototype.$$toBool = function(ctx) {
+      this.ObjConstructor.prototype.$$toBool = function(ctx) {
         return this.typeObject_ || this.$$getStr() == '' ? 0 : 1;
       };
     } else if (mode == 4) {
-      this.objConstructor.prototype.$$toBool = function(ctx) {
+      this.ObjConstructor.prototype.$$toBool = function(ctx) {
         var str = this.$$getStr();
         return this.typeObject_ || (str == '' || str == '0') ? 0 : 1;
       };
     } else if (mode == 5) {
     // this is the default - do nothing
     } else if (mode == 6) {
-      this.objConstructor.prototype.$$toBool = function(ctx) {
+      this.ObjConstructor.prototype.$$toBool = function(ctx) {
         return this.$$getBignum().eq(0) ? 0 : 1;
       };
     } else if (mode == 7) {
     // STUB
     } else if (mode == 8) {
-      this.objConstructor.prototype.$$toBool = function(ctx) {
+      this.ObjConstructor.prototype.$$toBool = function(ctx) {
         return this.$$elems() ? 1 : 0;
       };
     } else {
@@ -166,15 +166,15 @@ class STable {
     if (classHandle !== Null) {
       /* TODO  - think if we can use direct access here */
       var getter = this.REPR.getterForAttr(classHandle, attrName);
-      this.objConstructor.prototype.$$call = function() {
+      this.ObjConstructor.prototype.$$call = function() {
         var value = this[getter]();
         return value.$$call.apply(value, arguments);
       };
-      this.objConstructor.prototype.$$apply = function(args) {
+      this.ObjConstructor.prototype.$$apply = function(args) {
         return this[getter]().$$apply(args);
       };
     } else {
-      this.objConstructor.prototype.$$call = function() {
+      this.ObjConstructor.prototype.$$call = function() {
         var args = [];
         args.push(arguments[0]);
         args.push(arguments[1]);
@@ -185,7 +185,7 @@ class STable {
         return invocationHandler.$$apply(args);
       };
 
-      this.objConstructor.prototype.$$apply = function(args) {
+      this.ObjConstructor.prototype.$$apply = function(args) {
         var newArgs = [];
         newArgs.push(args[0]);
         newArgs.push(args[1]);
@@ -201,7 +201,7 @@ class STable {
 
 
   createTypeObject() {
-    var obj = new this.objConstructor();
+    var obj = new this.ObjConstructor();
     obj.typeObject_ = 1;
     obj.$$atkey = function(key) {
       return Null;
@@ -227,7 +227,7 @@ class STable {
 
     this.lazyMethodCache = false;
 
-    let proto = this.objConstructor.prototype;
+    let proto = this.ObjConstructor.prototype;
 
     methodCache.forEach(function(method, name, map) {
       proto[name] = function() {
@@ -237,52 +237,52 @@ class STable {
   }
 
   setPositionalDelegate(attr) {
-    this.objConstructor.prototype.$$bindpos = function(index, value) {
+    this.ObjConstructor.prototype.$$bindpos = function(index, value) {
       return this[attr].$$bindpos(index, value);
     };
 
-    this.objConstructor.prototype.$$atpos = function(index) {
+    this.ObjConstructor.prototype.$$atpos = function(index) {
       return this[attr].$$atpos(index);
     };
 
-    this.objConstructor.prototype.$$unshift = function(value) {
+    this.ObjConstructor.prototype.$$unshift = function(value) {
       return this[attr].$$unshift(value);
     };
 
-    this.objConstructor.prototype.$$pop = function(value) {
+    this.ObjConstructor.prototype.$$pop = function(value) {
       return this[attr].$$pop(value);
     };
 
-    this.objConstructor.prototype.$$push = function(value) {
+    this.ObjConstructor.prototype.$$push = function(value) {
       return this[attr].$$push(value);
     };
 
-    this.objConstructor.prototype.$$shift = function(value) {
+    this.ObjConstructor.prototype.$$shift = function(value) {
       return this[attr].$$shift(value);
     };
 
-    this.objConstructor.prototype.$$elems = function(value) {
+    this.ObjConstructor.prototype.$$elems = function(value) {
       return this[attr].$$elems();
     };
   }
 
   setAssociativeDelegate(attr) {
-    this.objConstructor.prototype.$$bindkey = function(key, value) {
+    this.ObjConstructor.prototype.$$bindkey = function(key, value) {
       return this[attr].$$bindkey(key, value);
     };
-    this.objConstructor.prototype.$$atkey = function(key) {
+    this.ObjConstructor.prototype.$$atkey = function(key) {
       return this[attr].$$atkey(key);
     };
-    this.objConstructor.prototype.$$existskey = function(key) {
+    this.ObjConstructor.prototype.$$existskey = function(key) {
       return this[attr].$$existskey(key);
     };
-    this.objConstructor.prototype.$$deletekey = function(key) {
+    this.ObjConstructor.prototype.$$deletekey = function(key) {
       return this[attr].$$deletekey(key);
     };
   }
 
   addInternalMethod(name, func) {
-    this.objConstructor.prototype[name] = func;
+    this.ObjConstructor.prototype[name] = func;
   }
 
   addInternalMethods(klass) {

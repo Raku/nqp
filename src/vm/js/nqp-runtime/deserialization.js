@@ -705,7 +705,7 @@ class BinaryCursor {
         }
 
         this.sc.rootObjects[i] = objects[i].isConcrete ?
-            new (STableForObj.objConstructor)() :
+            new (STableForObj.ObjConstructor)() :
             STableForObj.createTypeObject();
         this.sc.rootObjects[i]._SC = this.sc;
       }
@@ -750,7 +750,7 @@ class BinaryCursor {
          * STable it should now have in place. */
 
         if (STableForObj !== origObj._STable) {
-          Object.setPrototypeOf(origObj, STableForObj.objConstructor.prototype);
+          Object.setPrototypeOf(origObj, STableForObj.ObjConstructor.prototype);
         }
       }
     }
