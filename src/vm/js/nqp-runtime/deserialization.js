@@ -151,6 +151,7 @@ class BinaryCursor {
   /**
   * Read an array of elements parsed by the callback
   * @param {Function} readElem - a callback that reads in a single element
+  * @return {Object} bootArray containing the elements
   */
   array(readElem) {
     var elems = this.varint();
@@ -167,7 +168,10 @@ class BinaryCursor {
   }
 
 
-  /** Read an entry from the objects table */
+  /** Read an entry from the objects table
+   * @param {Number} objectsData - the offset where the data is
+   * @return {{data:BinaryCursor, isConcrete: boolean, STable: Array<Number>}}
+   */
   objectEntry(objectsData) {
     const OBJECTS_TABLE_ENTRY_SC_MASK = 0x7FF;
     const OBJECTS_TABLE_ENTRY_SC_IDX_MASK = 0x000FFFFF;
@@ -224,13 +228,17 @@ class BinaryCursor {
   }
 
 
-  /**  */
+  /** Deserialize an object reference
+   * @return {Object}
+   */
   objRef() {
     return this.locateThing('rootObjects');
   }
 
 
-  /** Read a hash of variants */
+  /** Read a hash of variants
+   * @return {Hash}
+   */
   hashOfVariants() {
     var elems = this.varint();
     var hash = new Hash();

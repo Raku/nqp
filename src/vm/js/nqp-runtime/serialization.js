@@ -6,6 +6,8 @@ var Int64 = require('node-int64');
 var nullStr = require('./null_s.js');
 var Null = require('./null.js');
 
+const NQPException = require('./nqp-exception.js');
+
 var StaticCtx = require('./static-ctx.js');
 
 var repossession = require('./repossession.js');
@@ -94,7 +96,9 @@ class BinaryWriteCursor {
   }
 
 
-  /** Write a C String */
+  /** Write a C String
+   * @param {string} string
+   */
   cstr(string) {
     if (string === undefined) {
       this.varint(0);
@@ -224,11 +228,7 @@ class BinaryWriteCursor {
   objRef(ref) {
     var writerSc = this.writer.sc;
     if (!ref._STable) {
-      console.log(ref);
-      console.trace("can't serialize this for sure");
-      console.log(typeof ref);
-      console.log(ref.codeRef());
-      process.exit();
+      throw new NQPException('trying to serialize an object without an STable');
     }
     if (!ref._SC) {
       /* This object doesn't belong to an SC yet, so it must be serialized
@@ -238,17 +238,11 @@ class BinaryWriteCursor {
       this.writer.sc.rootObjects.push(ref);
     }
 
-    var sc = ref._SC;
-    if (!sc) {
-      console.log('!sc', !ref._SC, ref._SC);
-      console.trace('!sc');
-      //process.exit();
-    }
     /* Write SC index, then object index. */
-    this.idIdx(this.writer.getSCId(sc), sc.rootObjects.indexOf(ref));
+    this.idIdx(this.writer.getSCId(ref._SC), ref._SC.rootObjects.indexOf(ref));
   }
 
-  STableRef(STable) {
+  stableRef(STable) {
     var ref = this.writer.getSTableRefInfo(STable);
     this.idIdx(ref[0], ref[1]);
   }
@@ -370,9 +364,7 @@ class SerializationWriter {
   serializeObject(obj) {
     /* Get index of SC that holds the STable and its index. */
     if (!obj._STable) {
-      console.log('obj:', obj.constructor.name, obj);
-      console.trace("can't serialize");
-      //process.exit();
+      throw new NQPException(`Can't serialize an object without an STable`);
     }
     var ref = this.getSTableRefInfo(obj._STable);
     var sc = ref[0];
@@ -810,8 +802,7 @@ class SerializationWriter {
 
   getSCId(sc) {
     if (!sc) {
-      console.trace('undefined sc');
-      process.exit();
+      throw new NQPException('getting an id of an undefined SC');
     }
 
     /* Easy if it's in the current SC. */

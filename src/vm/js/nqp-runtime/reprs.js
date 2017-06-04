@@ -244,7 +244,7 @@ class P6opaque {
         cursor.varint(0);
       } else {
         cursor.varint(1);
-        cursor.STableRef(st.REPR.flattenedSTables[i]);
+        cursor.stableRef(st.REPR.flattenedSTables[i]);
       }
     }
 
