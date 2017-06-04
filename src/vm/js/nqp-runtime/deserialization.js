@@ -833,24 +833,6 @@ class BinaryCursor {
   }
 
 
-  /** Read a flag stored as a 64bit integer */
-  flag64() {
-    var low = this.buffer.readUInt32LE(this.offset);
-    var high = this.buffer.readUInt32LE(this.offset + 4);
-    this.offset += 8;
-    if (high) {
-      console.trace('here');
-      throw 'the high part of a flag should be empty , got: ' + high;
-    }
-    if (low != 0 && low != 1) {
-      console.trace('here');
-      throw 'the low part of a flag should be 1 or 0, got: ' + low;
-    }
-    return low;
-  }
-
-
-  /** Read a String */
   /**
    * Read a String
    * @return {string} the string at current offset
