@@ -153,11 +153,11 @@ class BinaryWriteCursor {
     }
 
     if (heapLoc <= STRING_HEAP_LOC_PACKED_MAX) {
-      this.U16(heapLoc);
+      this.uint16(heapLoc);
     } else {
-      this.U16((heapLoc >> STRING_HEAP_LOC_PACKED_SHIFT) |
+      this.uint16((heapLoc >> STRING_HEAP_LOC_PACKED_SHIFT) |
           STRING_HEAP_LOC_PACKED_OVERFLOW);
-      this.U16(heapLoc & STRING_HEAP_LOC_PACKED_LOW_MASK);
+      this.uint16(heapLoc & STRING_HEAP_LOC_PACKED_LOW_MASK);
     }
   }
 
@@ -179,7 +179,7 @@ class BinaryWriteCursor {
   }
 
   str32(str) {
-    this.I32(this.writer.stringIndex(str));
+    this.int32(this.writer.stringIndex(str));
   }
 
   /* Writing function for variable sized integers. Writes out a 64 bit value
@@ -217,10 +217,10 @@ class BinaryWriteCursor {
     }
 
     if (storageNeeded == 1) {
-      this.U8(0x80 | (value + 129));
+      this.uint8(0x80 | (value + 129));
     } else if (storageNeeded == 9) {
-      this.I8(0x00);
-      this.I64(value);
+      this.int8(0x00);
+      this.int64(value);
     } else {
       var rest = storageNeeded - 1;
       var nybble = rest == 4 ? 0 : value >> 8 * rest;
@@ -230,7 +230,7 @@ class BinaryWriteCursor {
 
       console.assert((nybble >> 3) == 0 || (nybble >> 3) == ~0);
 
-      this.I8((rest << 4) | (nybble & 0xF));
+      this.int8((rest << 4) | (nybble & 0xF));
 
       var tmp = new Int64(value).toBuffer();
       this.growToHold(rest);
@@ -245,26 +245,26 @@ class BinaryWriteCursor {
   }
 
 
-  I8(value) {
+  int8(value) {
     this.growToHold(1);
     this.buffer.writeInt8(value, this.offset);
     this.offset += 1;
   }
 
-  U8(value) {
+  uint8(value) {
     this.growToHold(1);
     this.buffer.writeUInt8(value, this.offset);
     this.offset += 1;
   }
 
-  U16(value) {
+  uint16(value) {
     this.growToHold(2);
     this.buffer.writeUInt16LE(value, this.offset);
     this.offset += 2;
   }
 
 
-  I32(value) {
+  int32(value) {
     this.start('I32');
 
     this.growToHold(4);
@@ -276,14 +276,14 @@ class BinaryWriteCursor {
 
 
   /* TODO - numbers bigger than 32bit */
-  I64(value) {
+  int64(value) {
     this.growToHold(8);
     this.buffer.writeInt32LE(value, this.offset);
     this.buffer.writeInt32LE(0, this.offset + 4);
     this.offset += 8;
   }
 
-  I16(value) {
+  int16(value) {
     this.growToHold(2);
     this.buffer.writeInt16LE(value, this.offset);
     this.offset += 2;
@@ -391,7 +391,7 @@ class BinaryWriteCursor {
     }
 
 
-    this.I8(discrim);
+    this.int8(discrim);
 
     /* Now take appropriate action. */
     switch (discrim) {
@@ -481,14 +481,14 @@ class SerializationWriter {
       packed |= (sc << OBJECTS_TABLE_ENTRY_SC_SHIFT) | scIdx;
     } else {
       packed |= OBJECTS_TABLE_ENTRY_SC_OVERFLOW << OBJECTS_TABLE_ENTRY_SC_SHIFT;
-      this.objectsData.I32(sc);
-      this.objectsData.I32(scIdx);
+      this.objectsData.int32(sc);
+      this.objectsData.int32(scIdx);
     }
 
     /* Make objects table entry. */
 
-    this.objects.I32(packed);
-    this.objects.I32(this.objectsData.offset);
+    this.objects.int32(packed);
+    this.objects.int32(this.objectsData.offset);
 
 
 
@@ -510,7 +510,7 @@ class SerializationWriter {
 
     /* Make STables table entry. */
     this.stables.str32(st.REPR.constructor.name);
-    this.stables.I32(this.stablesData.offset);
+    this.stables.int32(this.stablesData.offset);
 
     /* Write HOW, WHAT and WHO. */
 
@@ -551,7 +551,7 @@ class SerializationWriter {
        convey, and hence show buggy behaviour. And if we're bumping the
        serialisation version, then we can increase the storage size.  */
 
-    this.stablesData.U8(st.modeFlags);
+    this.stablesData.uint8(st.modeFlags);
 
     /* Boolification spec. */
     /* As this only needs 4 bits, also use the same byte to store various
@@ -585,7 +585,7 @@ class SerializationWriter {
       flags |= STABLE_HAS_HLL_ROLE;
     }
 
-    this.stablesData.U8(flags);
+    this.stablesData.uint8(flags);
 
     /* Boolification spec. */
 
@@ -644,7 +644,7 @@ class SerializationWriter {
     this.stablesData.cstr(st.debugName);
 
     /* Location of REPR data. */
-    this.stables.I32(this.stablesData.offset);
+    this.stables.int32(this.stablesData.offset);
 
     /* If the REPR has a function to serialize representation data, call it. */
     if (st.REPR.serializeReprData) {
@@ -667,16 +667,16 @@ class SerializationWriter {
 
 
     /* Make contexts table entry. */
-    this.contextsHeaders.I32(staticSCId);
-    this.contextsHeaders.I32(staticIdx);
-    this.contextsHeaders.I32(this.contextsData.offset);
+    this.contextsHeaders.int32(staticSCId);
+    this.contextsHeaders.int32(staticIdx);
+    this.contextsHeaders.int32(this.contextsData.offset);
 
     /* See if there's any relevant outer context, and if so set it up to
      * be serialized. */
     if (ctx.$$outer != null) {
-      this.contextsHeaders.I32(this.getSerializedContextIdx(ctx.$$outer));
+      this.contextsHeaders.int32(this.getSerializedContextIdx(ctx.$$outer));
     } else {
-      this.contextsHeaders.I32(0);
+      this.contextsHeaders.int32(0);
     }
 
 
@@ -776,15 +776,15 @@ class SerializationWriter {
      * needed). */
     var contextIdx = this.getSerializedOuterContextIdx(closure);
 
-    this.closures.I32(staticSCId);
-    this.closures.I32(staticIdx);
-    this.closures.I32(contextIdx);
+    this.closures.int32(staticSCId);
+    this.closures.int32(staticIdx);
+    this.closures.int32(contextIdx);
 
 
     /* Check if it has a static code object. */
     if (closure.codeObj) {
       var codeObj = closure.codeObj;
-      this.closures.I32(1);
+      this.closures.int32(1);
 
       if (!codeObj._SC) {
       }
@@ -793,12 +793,12 @@ class SerializationWriter {
         this.writer.sc.rootObjects.push(ref);
       }
 
-      this.closures.I32(this.getSCId(codeObj._SC));
-      this.closures.I32(codeObj._SC.rootObjects.indexOf(codeObj));
+      this.closures.int32(this.getSCId(codeObj._SC));
+      this.closures.int32(codeObj._SC.rootObjects.indexOf(codeObj));
     } else {
-      this.closures.I32(0);
-      this.closures.I32(0);
-      this.closures.I32(0);
+      this.closures.int32(0);
+      this.closures.int32(0);
+      this.closures.int32(0);
     }
 
     /* Increment count of closures in the table. */
@@ -876,10 +876,10 @@ class SerializationWriter {
             (isST != 0 ? 'STable' : 'REPR = ' + this.sc.rootObjects[objIdx]._STable.REPR.name);
 
       /* Write table row. */
-      this.repossessionsData.I32(isST);
-      this.repossessionsData.I32(objIdx);
-      this.repossessionsData.I32(origSCIdx);
-      this.repossessionsData.I32(origIdx);
+      this.repossessionsData.int32(isST);
+      this.repossessionsData.int32(objIdx);
+      this.repossessionsData.int32(origSCIdx);
+      this.repossessionsData.int32(origIdx);
     }
   }
 
@@ -895,7 +895,7 @@ class SerializationWriter {
   }
 
 
-  headerI32(value) {
+  headerInt32(value) {
     this.buffer.writeUInt32LE(value, this.headerOffset);
     this.headerOffset += 4;
   }
@@ -962,58 +962,58 @@ class SerializationWriter {
     this.buffer = new Buffer(outputSize);
 
     /* Write version into header. */
-    this.headerI32(CURRENT_VERSION);
+    this.headerInt32(CURRENT_VERSION);
 
     /* Put dependencies table in place and set location/rows in header. */
-    this.headerI32(this.offset);
-    this.headerI32(this.dependentSCs.length);
+    this.headerInt32(this.offset);
+    this.headerInt32(this.dependentSCs.length);
 
 
     this.writeChunk(this.deps);
 
     /* Put STables table in place, and set location/rows in header. */
-    this.headerI32(this.offset);
-    this.headerI32(this.sc.rootSTables.length);
+    this.headerInt32(this.offset);
+    this.headerInt32(this.sc.rootSTables.length);
 
     this.writeChunk(this.stables);
 
     /* Put STables data in place. */
-    this.headerI32(this.offset);
+    this.headerInt32(this.offset);
 
     this.writeChunk(this.stablesData);
 
     /* Put objects table in place, and set location/rows in header. */
 
-    this.headerI32(this.offset);
-    this.headerI32(this.sc.rootObjects.length);
+    this.headerInt32(this.offset);
+    this.headerInt32(this.sc.rootObjects.length);
 
     this.writeChunk(this.objects);
 
     /* Put objects data in place. */
-    this.headerI32(this.offset);
+    this.headerInt32(this.offset);
 
     this.writeChunk(this.objectsData);
 
     /* Put closures table in place, and set location/rows in header. */
-    this.headerI32(this.offset);
-    this.headerI32(this.numClosures);
+    this.headerInt32(this.offset);
+    this.headerInt32(this.numClosures);
 
     this.writeChunk(this.closures);
 
     /* Put contexts table in place, and set location/rows in header. */
-    this.headerI32(this.offset);
-    this.headerI32(this.contexts.length);
+    this.headerInt32(this.offset);
+    this.headerInt32(this.contexts.length);
 
     this.writeChunk(this.contextsHeaders);
 
     /* Put contexts data in place. */
-    this.headerI32(this.offset);
+    this.headerInt32(this.offset);
 
     this.writeChunk(this.contextsData);
 
     /* Put repossessions table in place, and set location/rows in header. */
-    this.headerI32(this.offset);
-    this.headerI32(this.sc.repScs.length);
+    this.headerInt32(this.offset);
+    this.headerInt32(this.sc.repScs.length);
 
     this.writeChunk(this.repossessionsData);
 

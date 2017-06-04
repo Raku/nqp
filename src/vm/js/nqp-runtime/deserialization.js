@@ -162,8 +162,8 @@ class BinaryCursor {
     const OBJECTS_TABLE_ENTRY_SC_OVERFLOW = 0x7FF;
     const OBJECTS_TABLE_ENTRY_IS_CONCRETE = 0x80000000;
 
-    var packed = this.I32();
-    var offset = this.I32();
+    var packed = this.int32();
+    var offset = this.int32();
 
     var sc = (packed >> OBJECTS_TABLE_ENTRY_SC_SHIFT) & OBJECTS_TABLE_ENTRY_SC_MASK;
     var scIdx;
@@ -287,7 +287,7 @@ class BinaryCursor {
 
   /** Read a variant reference, REFVAR_NULL is returned as undefined */
   variantWithUndefined() {
-    var type = this.I8();
+    var type = this.int8();
     switch (type) {
       case REFVAR_OBJECT:
         return this.objRef();
@@ -350,9 +350,9 @@ class BinaryCursor {
       STable.typeCheckCache = typeCheckCache;
     }
 
-    STable.modeFlags = this.U8();
+    STable.modeFlags = this.uint8();
 
-    var flags = this.U8();
+    var flags = this.uint8();
     var boolificationMode = flags & 0xF;
 
     if (boolificationMode != 0xF) {
@@ -437,30 +437,30 @@ class BinaryCursor {
 
   closureEntry() {
     var entry = {};
-    var staticScId = this.I32();
-    var staticIndex = this.I32();
+    var staticScId = this.int32();
+    var staticIndex = this.int32();
     entry.staticCode = this.sc.deps[staticScId].codeRefs[staticIndex];
-    entry.context = this.I32();
-    var hasCodeObj = this.I32();
+    entry.context = this.int32();
+    var hasCodeObj = this.int32();
     if (hasCodeObj) {
-      var objectScId = this.I32();
-      var objectIndex = this.I32();
+      var objectScId = this.int32();
+      var objectIndex = this.int32();
       entry.codeObj = this.sc.deps[objectScId].rootObjects[objectIndex];
     } else {
       // we're packed along a 24-byte alignment
-      this.I32();
-      this.I32();
+      this.int32();
+      this.int32();
     }
     return entry;
   }
 
   contextEntry(contextsData) {
     var entry = {};
-    var staticScId = this.I32();
-    var staticIndex = this.I32();
+    var staticScId = this.int32();
+    var staticIndex = this.int32();
     entry.staticCode = this.sc.deps[staticScId].codeRefs[staticIndex];
-    var data = this.at(contextsData + this.I32());
-    entry.outer = this.I32();
+    var data = this.at(contextsData + this.int32());
+    entry.outer = this.int32();
     entry.inner = [];
     entry.closures = [];
 
@@ -503,7 +503,7 @@ class BinaryCursor {
    */
 
   deserialize(sc, cuids, setupWVals, currentHLL) {
-    var version = this.I32();
+    var version = this.int32();
 
     this.sc = sc;
 
@@ -511,8 +511,8 @@ class BinaryCursor {
       throw 'Unsupported serialization format version: ' + version;
     }
 
-    var depsOffset = this.I32();
-    var depsNumber = this.I32();
+    var depsOffset = this.int32();
+    var depsNumber = this.int32();
 
 
     var dependencies = this.at(depsOffset).times(depsNumber, cursor => [cursor.str32(), cursor.str32()]);
@@ -534,29 +534,29 @@ class BinaryCursor {
     }
 
 
-    var STablesOffset = this.I32();
-    var STablesNumber = this.I32();
-    var STablesData = this.I32();
+    var STablesOffset = this.int32();
+    var STablesNumber = this.int32();
+    var STablesData = this.int32();
 
     var STables = this.at(STablesOffset).times(STablesNumber,
         function(cursor) {
-          return [cursor.str32(), cursor.at(STablesData + cursor.I32()), cursor.at(STablesData + cursor.I32())];
+          return [cursor.str32(), cursor.at(STablesData + cursor.int32()), cursor.at(STablesData + cursor.int32())];
         });
 
 
-    var objectsOffset = this.I32();
-    var objectsNumber = this.I32();
-    var objectsData = this.I32();
+    var objectsOffset = this.int32();
+    var objectsNumber = this.int32();
+    var objectsData = this.int32();
     var objects = this.at(objectsOffset).times(objectsNumber, function(cursor) {
       return cursor.objectEntry(objectsData);
     });
 
 
-    var reposTable = this.at(4 * 14).I32();
-    var numRepos = this.at(4 * 15).I32();
+    var reposTable = this.at(4 * 14).int32();
+    var numRepos = this.at(4 * 15).int32();
 
     var repossessed = this.at(reposTable).times(numRepos, function(cursor) {
-      return {type: cursor.I32(), index: cursor.I32(), origSC: cursor.I32(), origIndex: cursor.I32()};
+      return {type: cursor.int32(), index: cursor.int32(), origSC: cursor.int32(), origIndex: cursor.int32()};
     });
 
     this.repossessSTables(repossessed);
@@ -568,8 +568,8 @@ class BinaryCursor {
     this.stubObjects(objects);
 
 
-    var closuresOffset = this.I32();
-    var closuresNumber = this.I32();
+    var closuresOffset = this.int32();
+    var closuresNumber = this.int32();
     var closures = this.at(closuresOffset).times(closuresNumber, function(cursor) {
       return cursor.closureEntry();
     });
@@ -604,9 +604,9 @@ class BinaryCursor {
     }
     if (setupWVals) setupWVals();
 
-    var contextsOffset = this.I32();
-    var contextsNumber = this.I32();
-    var contextsData = this.I32();
+    var contextsOffset = this.int32();
+    var contextsNumber = this.int32();
+    var contextsData = this.int32();
     var contexts = this.at(contextsOffset).times(contextsNumber, function(cursor) {
       return cursor.contextEntry(contextsData);
     });
@@ -638,12 +638,12 @@ class BinaryCursor {
 
 
     // reposTable
-    this.I32();
+    this.int32();
     //numRepos
-    this.I32();
+    this.int32();
 
-    var paramInternsData = this.I32();
-    var numParamInterns = this.I32();
+    var paramInternsData = this.int32();
+    var numParamInterns = this.int32();
 
     if (numParamInterns != 0) {
       // XXX do we need to care?
@@ -772,31 +772,31 @@ class BinaryCursor {
 
 
   /** Read a 32bit integer */
-  I32() {
+  int32() {
     var ret = this.buffer.readInt32LE(this.offset);
     this.offset += 4;
     return ret;
   }
 
-  U8() {
+  uint8() {
     var ret = this.buffer.readUInt8(this.offset);
     this.offset += 1;
     return ret;
   }
 
-  U16() {
+  uint16() {
     var ret = this.buffer.readUInt16LE(this.offset);
     this.offset += 2;
     return ret;
   }
 
-  U32() {
+  uint32() {
     var ret = this.buffer.readUInt32LE(this.offset);
     this.offset += 4;
     return ret;
   }
 
-  I8() {
+  int8() {
     var ret = this.buffer.readInt8(this.offset);
     this.offset += 1;
     return ret;
@@ -804,7 +804,7 @@ class BinaryCursor {
 
 
   /** Read a 64bit integer */
-  I64() {
+  int64() {
     var low = this.buffer.readUInt32LE(this.offset);
     var high = this.buffer.readUInt32LE(this.offset + 4);
     this.offset += 8;
@@ -839,11 +839,11 @@ class BinaryCursor {
 
   /** Read a String */
   str() {
-    var offset = this.U16();
+    var offset = this.uint16();
     if (offset & STRING_HEAP_LOC_PACKED_OVERFLOW) {
       offset ^= STRING_HEAP_LOC_PACKED_OVERFLOW;
       offset <<= STRING_HEAP_LOC_PACKED_SHIFT;
-      offset |= this.U16();
+      offset |= this.uint16();
     }
     if (!this.sh.hasOwnProperty(offset)) {
       throw 'can\'t read str: ' + offset;
@@ -861,7 +861,7 @@ class BinaryCursor {
   }
 
   str32() {
-    return this.sh[this.I32()];
+    return this.sh[this.int32()];
   }
 };
 
