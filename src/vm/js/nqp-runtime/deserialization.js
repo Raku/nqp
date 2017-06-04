@@ -306,10 +306,8 @@ class BinaryCursor {
         return this.array(cursor => cursor.variant());
       case REFVAR_VM_ARR_STR:
         return this.array(cursor => cursor.str());
-});
-        /* TODO varints */
-      /*    case 9:
-        return this.array(function(cursor) {return cursor.I64()});*/
+      case REFVAR_VM_ARR_INT:
+        return this.array(cursor => cursor.varint());
       case REFVAR_VM_HASH_STR_VAR:
         return this.hashOfVariants(this);
       case REFVAR_STATIC_CODEREF:
