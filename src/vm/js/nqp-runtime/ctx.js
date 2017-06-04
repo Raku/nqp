@@ -1,5 +1,4 @@
 'use strict';
-var NQPException = require('./nqp-exception.js');
 var NQPExceptionWithCtx = require('./nqp-exception-with-ctx.js');
 var NQPObject = require('./nqp-object.js');
 var Null = require('./null.js');
@@ -35,7 +34,7 @@ let categoryIDs = {
 };
 
 let categoryToName = {};
-for (let name in categoryIDs) {
+for (let name of Object.keys(categoryIDs)) {
   categoryToName[categoryIDs[name]] = name;
 }
 

@@ -335,12 +335,12 @@ class BinaryWriteCursor {
         var scId = this.writer.getSCId(ref._SC);
         var idx = ref._SC.rootCodes.indexOf(ref);
         if (idx == -1) {
-          throw "can't write code ref";
+          throw `can't write code ref`;
         }
         this.idIdx(scId, idx);
         break;
       default:
-        throw 'Serialization Error: Unimplemented object type: ' + discrim;
+        throw `Serialization Error: Unimplemented object type: ${discrim}`;
     }
   }
 };

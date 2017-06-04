@@ -454,7 +454,6 @@ function toJS(obj) {
 
 class JavaScriptCompiler extends NQPObject {
   eval(ctx, _NAMED, self, code) {
-    //console.log("evaling [", code, "]");
     return fromJS(eval(code));
   }
 };
@@ -710,7 +709,7 @@ op.typeparameterized = function(type) {
   return st.parametricType ? st.parametricType : Null;
 };
 
-var Fiber = require('fibers');
+let fibers = require('fibers');
 
 function runTagged(tag, fiber, val) {
   var control = fiber.run(val);
@@ -718,7 +717,7 @@ function runTagged(tag, fiber, val) {
     if (control.tag == tag || control.tag === Null) {
       return control.value;
     } else {
-      Fiber.yield(control);
+      fibers.yield(control);
     }
   }
 }
@@ -742,7 +741,7 @@ op.continuationreset = function(ctx, tag, block) {
   if (block instanceof Cont) {
     return runTagged(tag, block.fiber, Null);
   } else {
-    return runTagged(tag, Fiber(function() {
+    return runTagged(tag, fibers(function() {
       return {value: block.$$call(ctx, null), tag: tag};
     }), Null);
   }
@@ -750,7 +749,7 @@ op.continuationreset = function(ctx, tag, block) {
 
 
 op.continuationcontrol = function(ctx, protect, tag, closure) {
-  return Fiber.yield({value: closure.$$call(ctx, null, new Cont(tag, Fiber.current)), tag: tag});
+  return fibers.yield({value: closure.$$call(ctx, null, new Cont(tag, fibers.current)), tag: tag});
 };
 
 op.continuationinvoke = function(ctx, cont, inject) {
