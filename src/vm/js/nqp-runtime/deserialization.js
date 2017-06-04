@@ -301,7 +301,9 @@ class BinaryCursor {
   }
 
 
-  /** Read a variant reference, REFVAR_NULL is returned as undefined */
+  /** Read a variant reference, REFVAR_NULL is returned as undefined
+   * @return {*}
+   */
   variantWithUndefined() {
     var type = this.int8();
     switch (type) {
@@ -340,14 +342,18 @@ class BinaryCursor {
     }
   }
 
-  /** Read a variant reference, REFVAR_NULL is returned as Null */
+  /** Read a variant reference, REFVAR_NULL is returned as Null
+   * @return {*}
+   */
   variant() {
     var result = this.variantWithUndefined();
     return result === undefined ? Null : result;
   }
 
-  /** Read an entry from the STable table */
-  STable(STable) {
+  /** Read an entry from the STable table
+   * @param {STable} STable - the STable object we fill in
+   */
+  stable(STable) {
     STable.HOW = this.objRef();
     STable.WHAT = this.objRef();
     STable.WHO = this.variant();
@@ -787,7 +793,9 @@ class BinaryCursor {
   }
 
 
-  /** Read a 32bit integer */
+  /** Read a 32bit integer
+   * @return {number}
+   */
   int32() {
     var ret = this.buffer.readInt32LE(this.offset);
     this.offset += 4;
