@@ -106,7 +106,10 @@ class BinaryCursor {
   /* Export for unit testing*/
 
 
-  /** Clone the cursor */
+  /**
+  * Clone the cursor
+  * @return {BinaryCursor} a clone of the cursor
+  */
   clone() {
     if (!this.sc) {
       console.trace('at', this.sc);
@@ -116,7 +119,11 @@ class BinaryCursor {
   }
 
 
-  /** Return a copy of a cursor at given offset */
+  /**
+  * Return a copy of a cursor at given offset
+  * @param {Number} offset
+  * @return {BinaryCursor} a copy of the cursor at given offset
+  */
   at(offset) {
     if (!this.sc) {
       console.trace('at', this.sc);
@@ -126,7 +133,12 @@ class BinaryCursor {
   }
 
 
-  /** Read a given element a number of times */
+  /**
+  * Read a given element a number of times
+  * @param {Number} count
+  * @param {Function} cb - the callback that's called count times
+  * @return {Array} - the read in objects
+  */
   times(count, cb) {
     var array = [];
     for (var i = 0; i < count; i++) {
@@ -136,7 +148,10 @@ class BinaryCursor {
   }
 
 
-  /** Read an array of elements parsed by the callback */
+  /**
+  * Read an array of elements parsed by the callback
+  * @param {Function} readElem - a callback that reads in a single element
+  */
   array(readElem) {
     var elems = this.varint();
     var array = [];
@@ -836,6 +851,10 @@ class BinaryCursor {
 
 
   /** Read a String */
+  /**
+   * Read a String
+   * @return {string} the string at current offset
+   */
   str() {
     var offset = this.uint16();
     if (offset & STRING_HEAP_LOC_PACKED_OVERFLOW) {
@@ -850,7 +869,9 @@ class BinaryCursor {
   }
 
 
-  /** Read a C String */
+  /** Read a C String
+   * @return {string} the string at current offset
+   */
   cstr() {
     var len = this.varint();
     var str = this.buffer.slice(this.offset, len).toString('utf8');
