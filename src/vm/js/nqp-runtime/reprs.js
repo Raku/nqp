@@ -4,7 +4,7 @@ var Hash = require('./hash.js');
 var NQPInt = require('./nqp-int.js');
 var NQPException = require('./nqp-exception.js');
 var Null = require('./null.js');
-var null_s = require('./null_s.js');
+var nullStr = require('./null_s.js');
 var Iter = require('./iter.js');
 var BOOT = require('./BOOT.js');
 var core = require('./core.js');
@@ -849,7 +849,7 @@ class P6str extends REPR {
 
 P6str.prototype.boxedPrimitive = 3;
 P6str.prototype.flattenSTable = true;
-P6str.prototype.flattenedDefault = 'null_s';
+P6str.prototype.flattenedDefault = 'nullStr';
 
 
 reprs.P6str = P6str;
@@ -1005,7 +1005,7 @@ class VMArray extends REPR {
 
       $$atpos_s(index) {
         var value = this.array[index < 0 ? this.array.length + index : index];
-        if (value === undefined) return null_s;
+        if (value === undefined) return nullStr;
         return value;
       }
 
@@ -1484,7 +1484,7 @@ class Decoder extends REPR {
         let everything = decoder.write(this.$$buffer);
         let chars = everything.substr(0, count);
         if (chars.length < count) {
-          return null_s;
+          return nullStr;
         } else {
           this.$$buffer = this.$$buffer.slice(Buffer.byteLength(chars, this.$$encoding));
           return this.$$translate(chars);
@@ -1535,7 +1535,7 @@ class Decoder extends REPR {
             this.$$buffer = emptyBuffer;
             return this.$$translate(ret);
           } else {
-            return null_s;
+            return nullStr;
           }
         }
       }

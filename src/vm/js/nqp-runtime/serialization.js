@@ -3,7 +3,7 @@ var Hash = require('./hash.js');
 var CodeRef = require('./code-ref.js');
 var NQPInt = require('./nqp-int.js');
 var Int64 = require('node-int64');
-var null_s = require('./null_s.js');
+var nullStr = require('./null_s.js');
 var Null = require('./null.js');
 
 var StaticCtx = require('./static-ctx.js');
@@ -368,7 +368,7 @@ class SerializationWriter {
     this.contexts = [];
     this.sc = sc;
     this.sh = sh;
-    this.sh.push(null_s);
+    this.sh.push(nullStr);
     this.numClosures = 0;
 
     this.stables = new BinaryWriteCursor(this);

@@ -7,7 +7,7 @@ var refs = require('./refs.js');
 var NQPInt = require('./nqp-int.js');
 var NQPException = require('./nqp-exception.js');
 
-var null_s = require('./null_s.js');
+var nullStr = require('./null_s.js');
 var Null = require('./null.js');
 
 var Capture = require('./capture.js');
@@ -179,7 +179,7 @@ exports.toStr = function(arg_, ctx) {
     return arg;
   } else if (arg === Null) {
     return '';
-  } else if (arg === null_s) {
+  } else if (arg === nullStr) {
     return arg;
   } else if (arg.typeObject_) {
     return '';
@@ -432,7 +432,7 @@ Function.prototype.$$toBool = function(ctx) {
 };
 
 
-exports.null_s = null_s;
+exports.null_s = nullStr;
 exports.Null = Null;
 
 exports.list = hll.list;

@@ -1,6 +1,6 @@
 'use strict';
 
-var null_s = require('./null_s.js'); /* Used when evaling runtime compiled methods */
+var nullStr = require('./null_s.js'); /* Used when evaling runtime compiled methods */
 var Null = require('./null.js');
 
 var repossession = require('./repossession.js');
