@@ -64,74 +64,6 @@ class BinaryWriteCursor {
     this.currentMetadata = [];
   }
 
-  // TODO disable when not needed, Object.assign is not fully portable
-
-  start(tag) {
-    var meta = {tag: tag, start: this.offset};
-
-    this.metadata.push(meta);
-    this.currentMetadata.push(meta);
-  }
-
-  end(tag, extra) {
-    this.currentMetadata[this.currentMetadata.length - 1].end = this.offset;
-    this.currentMetadata.pop();
-  }
-
-  tagged() {
-    var out = '';
-    var events = [];
-    for (var i = 0; i < this.metadata.length; i++) {
-      events.push({offset: this.metadata[i].start, start: this.metadata[i], i: i});
-      events.push({offset: this.metadata[i].end, end: this.metadata[i], i: i});
-    }
-
-    events.sort(function(a, b) {
-      if (a.offset < b.offset) return -1;
-      if (a.offset > b.offset) return 1;
-
-      if (a.end && b.start) return -1;
-      if (a.start && b.end) return 1;
-
-      if (a.start && b.start) {
-        if (a.i < b.i) return -1;
-        if (a.i > b.i) return 1;
-      } else {
-        if (a.i < b.i) return 1;
-        if (a.i > b.i) return -1;
-      }
-
-      return 0;
-    });
-
-    var offset = 0;
-    for (var i = 0; i < events.length; i++) {
-      var e = events[i];
-
-      var bytes = [];
-      while (offset < e.offset) {
-        bytes.push(this.buffer.readUInt8(offset));
-        offset++;
-      }
-      out += bytes.join(' ');
-
-      if (e.start) {
-        out += '<' + e.start.tag + '>';
-      } else if (e.end) {
-        out += '</' + e.end.tag + '>';
-      }
-    }
-
-    var bytes = [];
-    while (offset < this.offset) {
-      bytes.push(this.buffer.readUInt8(offset));
-      offset++;
-    }
-    out += bytes.join(' ');
-
-    return out;
-  }
-
   growToHold(space) {
     if (this.offset + space > this.buffer.length) {
       var old = this.buffer;
@@ -185,7 +117,6 @@ class BinaryWriteCursor {
   /* Writing function for variable sized integers. Writes out a 64 bit value
      using between 1 and 9 bytes. */
   varint(value) {
-    this.start('varint');
     var storageNeeded;
 
     if (value >= -1 && value <= 126) {
@@ -240,8 +171,6 @@ class BinaryWriteCursor {
 
       this.offset += rest;
     }
-
-    this.end();
   }
 
 
@@ -265,13 +194,9 @@ class BinaryWriteCursor {
 
 
   int32(value) {
-    this.start('I32');
-
     this.growToHold(4);
     this.buffer.writeInt32LE(value, this.offset);
     this.offset += 4;
-
-    this.end();
   }
 
 
@@ -498,8 +423,6 @@ class SerializationWriter {
    * its representation data also. */
 
   serializeSTable(st) {
-    this.stablesData.start('stable');
-
     /* Make STables table entry. */
     this.stables.str32(st.REPR.constructor.name);
     this.stables.int32(this.stablesData.offset);
@@ -642,8 +565,6 @@ class SerializationWriter {
     if (st.REPR.serializeReprData) {
       st.REPR.serializeReprData(st, this.stablesData);
     }
-
-    this.stablesData.end();
   }
 
 
