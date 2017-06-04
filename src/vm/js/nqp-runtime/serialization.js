@@ -114,8 +114,8 @@ class BinaryWriteCursor {
     this.int32(this.writer.stringIndex(str));
   }
 
-  /* Writing function for variable sized integers. Writes out a 64 bit value
-     using between 1 and 9 bytes. */
+  /* Writing function for variable sized integers. Writes out a 32 bit value
+     using between 1 and 5 bytes. */
   varint(value) {
     var storageNeeded;
 
@@ -132,26 +132,11 @@ class BinaryWriteCursor {
         storageNeeded = 4;
       } else if (absVal <= 0x00000007FFFFFFFF) {
         storageNeeded = 5;
-      } else {
-        console.log('TODO serializing bigger integers');
       }
-
-      /* TODO bigger numbers */
-      /*else if (absVal <= 0x000007FFFFFFFFFFLL)
-              storageNeeded = 6;
-          else if (absVal <= 0x0007FFFFFFFFFFFFLL)
-              storageNeeded = 7;
-          else if (absVal <= 0x07FFFFFFFFFFFFFFLL)
-              storageNeeded = 8;
-          else
-              storageNeeded = 9;*/
     }
 
     if (storageNeeded == 1) {
       this.uint8(0x80 | (value + 129));
-    } else if (storageNeeded == 9) {
-      this.int8(0x00);
-      this.int64(value);
     } else {
       var rest = storageNeeded - 1;
       var nybble = rest == 4 ? 0 : value >> 8 * rest;
