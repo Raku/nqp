@@ -186,7 +186,7 @@ exports.toStr = function(arg_, ctx) {
   } else if (arg.$$getStr) {
     return arg.$$getStr();
   } else if (arg.Str) {
-    let ret = arg.Str(ctx, null, arg);
+    let ret = arg.Str(ctx, null, arg); // eslint-disable-line new-cap
     if (typeof ret == 'string') return ret;
     return ret.$$getStr();
   } else if (arg.$$getNum) {
@@ -230,7 +230,7 @@ exports.toNum = function(arg_, ctx) {
   } else if (typeof arg == 'string') {
     return strToNum(arg);
   } else if (arg._STable && arg._STable.methodCache && arg._STable.methodCache.get('Num')) {
-    var result = arg.Num(ctx, null, arg);
+    var result = arg.Num(ctx, null, arg); // eslint-disable-line new-cap
     if (result.$$getNum) {
       return result.$$getNum();
     } else if (result.$$numify) {

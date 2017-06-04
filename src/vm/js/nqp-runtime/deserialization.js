@@ -545,7 +545,6 @@ class BinaryCursor {
     for (var i in dependencies) {
       var dep = serializationContexts[dependencies[i][0]];
       if (!dep) {
-        //console.log(Object.keys(serializationContexts));
         console.log(
             'Missing dependencie, can\'t find serialization context handle:',
             dependencies[i][0],
@@ -661,7 +660,7 @@ class BinaryCursor {
 
     // reposTable
     this.int32();
-    //numRepos
+    // numRepos
     this.int32();
 
     var paramInternsData = this.int32();
@@ -700,7 +699,7 @@ class BinaryCursor {
 
   deserializeSTables(STables) {
     for (var i = 0; i < STables.length; i++) {
-      STables[i][1].STable(this.sc.rootSTables[i]);
+      STables[i][1].stable(this.sc.rootSTables[i]);
     }
   }
 
@@ -826,13 +825,14 @@ class BinaryCursor {
     return ret;
   }
 
-  /** Read a 64bit floating point number */
+  /** Read a 64bit floating point number
+   * @return {number}
+   */
   double() {
     var ret = this.buffer.readDoubleLE(this.offset);
     this.offset += 8;
     return ret;
   }
-
 
   /**
    * Read a String
