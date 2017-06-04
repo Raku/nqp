@@ -6,7 +6,6 @@ var reprs = require('./reprs.js');
 var sixmodel = require('./sixmodel.js');
 var SerializationContext = require('./serialization-context');
 var Hash = require('./hash.js');
-var Int64 = require('node-int64');
 var CodeRef = require('./code-ref.js');
 var constants = require('./constants.js');
 
@@ -78,10 +77,6 @@ op.scgethandle = function(sc) {
 op.scobjcount = function(sc) {
   return sc.rootObjects.length;
 };
-
-function int64(high, low) {
-  return new Int64(high, low).toNumber();
-}
 
 const STABLE_HAS_CONTAINER_SPEC = 0x10;
 const STABLE_HAS_INVOCATION_SPEC = 0x20;
@@ -822,16 +817,6 @@ class BinaryCursor {
     this.offset += 1;
     return ret;
   }
-
-
-  /** Read a 64bit integer */
-  int64() {
-    var low = this.buffer.readUInt32LE(this.offset);
-    var high = this.buffer.readUInt32LE(this.offset + 4);
-    this.offset += 8;
-    return int64(high, low);
-  }
-
 
   /** Read a 64bit floating point number */
   double() {

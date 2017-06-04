@@ -188,15 +188,6 @@ class BinaryWriteCursor {
     this.offset += 4;
   }
 
-
-  /* TODO - numbers bigger than 32bit */
-  int64(value) {
-    this.growToHold(8);
-    this.buffer.writeInt32LE(value, this.offset);
-    this.buffer.writeInt32LE(0, this.offset + 4);
-    this.offset += 8;
-  }
-
   int16(value) {
     this.growToHold(2);
     this.buffer.writeInt16LE(value, this.offset);
