@@ -256,7 +256,7 @@ op.newtype = function(how, repr) {
 op.findmethod = function(ctx, obj, name) {
   var method = sixmodel.findMethod(ctx, obj, name);
   if (method === Null) {
-    throw new NQPException("Cannot find method '" + name + "' on object of type " + obj._STable.debugName);
+    throw new NQPException(`Cannot find method '${name}' on object of type '${obj._STable.debugName}'`);
   }
   return method;
 };

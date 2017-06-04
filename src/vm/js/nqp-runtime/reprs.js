@@ -242,8 +242,7 @@ class P6opaque {
     for (var i = 0; i < numAttrs; i++) {
       if (st.REPR.flattenedSTables[i] == null) {
         cursor.varint(0);
-      }
-      else {
+      } else {
         cursor.varint(1);
         cursor.STableRef(st.REPR.flattenedSTables[i]);
       }
@@ -464,7 +463,6 @@ class P6opaque {
           '}\n'
       );
     }
-
   }
 
   generateDefaultsAndClone(STable) {
@@ -557,7 +555,6 @@ class P6opaque {
         return (this[attr] == undefined) ? 0 : 1;
       }
     });
-
   }
 
 };
@@ -591,7 +588,6 @@ class KnowHOWREPR {
 
 KnowHOWREPR.prototype.typeObjectFor = basicTypeObjectFor;
 KnowHOWREPR.prototype.createObjConstructor = basicConstructor;
-
 
 
 reprs.KnowHOWREPR = KnowHOWREPR;
@@ -841,7 +837,6 @@ class P6str extends REPR {
         return this[name];
       }
     });
-
   }
 
   generateFlattenedAccessors(ownerSTable, attrContentSTable, slot) {
@@ -1578,7 +1573,6 @@ class Decoder extends REPR {
         return buf;
       }
     });
-
   }
 };
 reprs.Decoder = Decoder;
@@ -1609,7 +1603,6 @@ class MultiDimArray extends REPR {
       if (dimensions === 0) {
         throw new NQPException('MultiDimArray REPR must be composed with at least 1 dimension');
       }
-
     } else {
       throw 'dimensions to MultiDimArray.compose must be a native int';
     }
@@ -1617,7 +1610,6 @@ class MultiDimArray extends REPR {
     //  console.log('dimensions', dimensions);
     STable.dimensions = dimensions;
   }
-
 
 
   setupSTable(STable) {
@@ -1830,7 +1822,6 @@ reprs.MultiDimArray = MultiDimArray;
 
 class VMException extends REPR {
   setupSTable(STable) {
-
     STable.addInternalMethods(class {
       $$getStr() {
         return this.$$message;

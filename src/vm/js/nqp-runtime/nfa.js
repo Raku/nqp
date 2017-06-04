@@ -27,7 +27,7 @@ const EDGE_CODEPOINT_I_LL = 15;
 
 function convertState(thing) {
   if (thing.$$toArray) {
-    return thing.$$toArray().map(function(x) { return convertState(x) });
+    return thing.$$toArray().map(x => convertState(x));
   } else {
     return thing;
   }
@@ -157,13 +157,13 @@ function runNFA(nfa, target, pos) {
               arg -= longlit[arg] << 24;
             }
 
-            if (foundFate)
+            if (foundFate) {
               fates[fates.length - 1] = arg;
-            else
+            } else {
               fates.push(arg);
+            }
             continue;
-          }
-          else if (act == EDGE_EPSILON && to <= numStates && done[to] != gen) {
+          } else if (act == EDGE_EPSILON && to <= numStates && done[to] != gen) {
             if (to != 0) {
               curst.push(to);
             }

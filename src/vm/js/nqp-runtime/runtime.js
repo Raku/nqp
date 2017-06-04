@@ -238,7 +238,7 @@ exports.toNum = function(arg_, ctx) {
     } else if (typeof result == 'number') {
       return result;
     } else {
-      console.trace("we can't numify result of toNum");
+      console.trace('we can\'t numify result of toNum');
       process.exit();
     }
   } else if (arg.typeObject_) {
@@ -251,7 +251,7 @@ exports.toNum = function(arg_, ctx) {
     return arg.$$numify();
   } else {
     console.log(arg);
-    throw "Can't convert to num";
+    throw 'Can\'t convert to num';
   }
 };
 
@@ -265,8 +265,7 @@ exports.intToObj = function(hllName, i) {
   if (currentHLL) type = currentHLL.get('int_box');
   if (!type) {
     return new NQPInt(i);
-  }
-  else {
+  } else {
     var repr = type._STable.REPR;
     var obj = repr.allocate(type._STable);
     obj.$$setInt(i);
@@ -280,8 +279,7 @@ exports.numToObj = function(hllName, n) {
   if (currentHLL) type = currentHLL.get('num_box');
   if (!type) {
     return n;
-  }
-  else {
+  } else {
     var repr = type._STable.REPR;
     var obj = repr.allocate(type._STable);
     obj.$$setNum(n);
@@ -295,8 +293,7 @@ exports.strToObj = function(hllName, s) {
   if (currentHLL) type = currentHLL.get('str_box');
   if (!type) {
     return s;
-  }
-  else {
+  } else {
     var repr = type._STable.REPR;
     var obj = repr.allocate(type._STable);
     obj.$$setStr(s);
@@ -339,8 +336,7 @@ exports.regexCommit = function(bstack, mark) {
   var caps;
   if (ptr > 0) {
     caps = bstack[ptr - 1];
-  }
-  else {
+  } else {
     caps = 0;
   }
 

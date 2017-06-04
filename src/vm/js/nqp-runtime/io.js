@@ -308,7 +308,7 @@ op.open = function(name, mode) {
 
 op.seekfh = function(ctx, fh, offset, whence) {
   if (whence == 0 && offset < 0) {
-    ctx.die("Can't seek to position: " + offset);
+    ctx.die(`Can't seek to position: ${offset}`);
   }
   if (!(whence == 0 || whence == 1 || whence == 2)) {
     ctx.die('Invalid whence passed to seekfh: ' + whence);

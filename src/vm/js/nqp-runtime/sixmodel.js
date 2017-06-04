@@ -72,7 +72,6 @@ class STable {
     this.objConstructor.prototype.$$call = undefined;
 
     this.objConstructor.prototype.$$scwb = function() {
-
       if (compilingSCs.length == 0 || repossession.scwbDisableDepth || repossession.neverRepossess.get(this)) {
         return;
       }

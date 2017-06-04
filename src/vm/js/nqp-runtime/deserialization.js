@@ -152,7 +152,6 @@ class BinaryCursor {
   }
 
 
-
   /** Read an entry from the objects table */
   objectEntry(objectsData) {
     const OBJECTS_TABLE_ENTRY_SC_MASK = 0x7FF;
@@ -178,7 +177,7 @@ class BinaryCursor {
     return {
       STable: [sc, scIdx],
       data: this.at(objectsData + offset),
-      isConcrete: packed & OBJECTS_TABLE_ENTRY_IS_CONCRETE
+      isConcrete: packed & OBJECTS_TABLE_ENTRY_IS_CONCRETE,
     };
   }
 
@@ -304,9 +303,10 @@ class BinaryCursor {
       case REFVAR_VM_STR:
         return this.str();
       case REFVAR_VM_ARR_VAR:
-        return this.array(function(cursor) {return cursor.variant()});
+        return this.array(cursor => cursor.variant());
       case REFVAR_VM_ARR_STR:
-        return this.array(function(cursor) {return cursor.str()});
+        return this.array(cursor => cursor.str());
+});
         /* TODO varints */
       /*    case 9:
         return this.array(function(cursor) {return cursor.I64()});*/
@@ -324,7 +324,6 @@ class BinaryCursor {
         console.trace('unknown variant');
         throw 'unknown variant: ' + type;
     }
-
   }
 
   /** Read a variant reference, REFVAR_NULL is returned as Null */
@@ -518,8 +517,7 @@ class BinaryCursor {
     var depsNumber = this.I32();
 
 
-    var dependencies = this.at(depsOffset).times(depsNumber,
-        function(cursor) { return [cursor.str32(), cursor.str32()]; });
+    var dependencies = this.at(depsOffset).times(depsNumber, cursor => [cursor.str32(), cursor.str32()]);
 
     var deps = [sc];
     this.sc.deps = deps;
@@ -529,7 +527,7 @@ class BinaryCursor {
       if (!dep) {
         //console.log(Object.keys(serializationContexts));
         console.log(
-            "Missing dependencie, can't find serialization context handle:",
+            'Missing dependencie, can\'t find serialization context handle:',
             dependencies[i][0],
             'desc:', dependencies[i][1]);
         process.exit();
@@ -772,7 +770,6 @@ class BinaryCursor {
 
       codeRef.outerCtx = ctx;
     }
-
   }
 
 
@@ -806,8 +803,6 @@ class BinaryCursor {
     this.offset += 1;
     return ret;
   }
-
-
 
 
   /** Read a 64bit integer */
@@ -844,7 +839,6 @@ class BinaryCursor {
   }
 
 
-
   /** Read a String */
   str() {
     var offset = this.U16();
@@ -854,7 +848,7 @@ class BinaryCursor {
       offset |= this.U16();
     }
     if (!this.sh.hasOwnProperty(offset)) {
-      throw "can't read str: " + offset;
+      throw 'can\'t read str: ' + offset;
     }
     return this.sh[offset];
   }

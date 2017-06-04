@@ -120,7 +120,6 @@ class BinaryWriteCursor {
       } else if (e.end) {
         out += '</' + e.end.tag + '>';
       }
-
     }
 
     var bytes = [];
@@ -295,8 +294,6 @@ class BinaryWriteCursor {
     this.buffer.writeDoubleLE(value, this.offset);
     this.offset += 8;
   }
-
-
 
 
   /* Writes the ID, index pair that identifies an entry in a Serialization
@@ -532,8 +529,7 @@ class SerializationWriter {
       let hash = new Hash();
       hash.content = st.methodCache;
       this.stablesData.ref(hash);
-    }
-    else {
+    } else {
       this.stablesData.ref(Null);
     }
 
@@ -684,7 +680,6 @@ class SerializationWriter {
     }
 
 
-
     var lexicalsTypeInfo = staticCodeRef.lexicalsTypeInfo;
 
     var lexicals = 0;
@@ -722,14 +717,12 @@ class SerializationWriter {
       /* Make sure we should chase a level down. */
       if (this.closureToStaticCodeRef(ctx.codeRef(), false) == null) {
         return 0;
-      }
-      else {
+      } else {
         this.contexts.push(ctx);
         ctx._SC = this.sc;
         return this.contexts.length;
       }
-    }
-    else {
+    } else {
       if (ctx._SC != this.sc) {
         throw 'Serialization Error: reference to context outside of SC';
       }
@@ -802,8 +795,7 @@ class SerializationWriter {
 
       this.closures.I32(this.getSCId(codeObj._SC));
       this.closures.I32(codeObj._SC.rootObjects.indexOf(codeObj));
-    }
-    else {
+    } else {
       this.closures.I32(0);
       this.closures.I32(0);
       this.closures.I32(0);
@@ -890,7 +882,6 @@ class SerializationWriter {
       this.repossessionsData.I32(origIdx);
     }
   }
-
 
 
   stringIndex(str) {

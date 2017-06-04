@@ -208,10 +208,6 @@ function bootType(typeName, reprName) {
 
   var typeObj = (new reprs[reprName]).typeObjectFor(metaObj);
 
-  //TODO?
-  //typeObj.st.MethodCache = meta_obj.methods;
-  //type_obj.st.ModeFlags = STable.METHOD_CACHE_AUTHORITATIVE;
-
   core.rootObjects.push(metaObj);
   metaObj._SC = core;
 

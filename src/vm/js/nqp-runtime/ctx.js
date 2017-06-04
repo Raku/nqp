@@ -331,7 +331,7 @@ class Ctx extends NQPObject {
       }
       ctx = ctx.$$outer;
     }
-    throw "Can't bind: " + name;
+    throw `Can't bind: ${name}`;
   }
 
   bindDynamic(name, value) {
@@ -343,7 +343,7 @@ class Ctx extends NQPObject {
       }
       ctx = ctx.$$caller;
     }
-    throw "Can't bind dynamic: " + name;
+    throw `Can't bind dynamic: ${name}`;
   }
 
   $$iterator() {
