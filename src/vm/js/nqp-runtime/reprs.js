@@ -55,7 +55,7 @@ function noopCompose(obj, reprInfo) {
 function methodNotFoundError(ctx, obj, name) {
   let handler = ctx ? ctx.$$getHLL().get('method_not_found_error') : undefined;
   if (handler === undefined) {
-    throw new NQPException("Cannot find method '" + name + "' on object of type " + obj._STable.debugName);
+    throw new NQPException(`Cannot find method '${name}' on object of type ${obj._STable.debugName}`);
   } else {
     handler.$$call(ctx, null, obj, name);
   }
@@ -225,7 +225,7 @@ class P6opaque {
   getHint(classHandle, attrName) {
     var hint = this.hintfor(classHandle, attrName);
     if (hint == -1) {
-      throw new NQPException("Can't find: " + attrName);
+      throw new NQPException(`Can't find: ${attrName}`);
     } else {
       return hint;
     }
@@ -1456,7 +1456,7 @@ class Decoder extends REPR {
         }
         this.$$encoding = core.renameEncoding(encoding);
         if (!core.isKnownEncoding(this.$$encoding)) {
-          throw new NQPException("Unknown string encoding: '" + this.$$encoding + "'");
+          throw new NQPException(`Unknown string encoding: '${this.$$encoding}'`);
         }
         let translate = config.content.get('translate_newlines');
         this.$$shouldTranslate = translate && nqp.toInt(translate, ctx) !== 0;

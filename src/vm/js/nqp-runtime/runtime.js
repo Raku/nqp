@@ -119,7 +119,7 @@ op.loadbytecode = function(ctx, file) {
       }
     }
   }
-  if (!found) throw "can't find: " + file + ', looking in: ' + prefixes.join(', ') + ' from ' + loadFrom.filename;
+  if (!found) throw `can't find: ${file}, looking in: ${prefixes.join(', ')} from ${loadFrom.filename}`;
   exports.loaderCtx = oldLoaderCtx;
 
   return file;
@@ -194,7 +194,7 @@ exports.toStr = function(arg_, ctx) {
   } else if (arg.$$getInt) {
     return arg.$$getInt().toString();
   } else {
-    throw new NQPException("Can't convert to str");
+    throw new NQPException(`Can't convert to str`);
   }
 };
 

@@ -27,7 +27,7 @@ function addToScWithSt(obj) {
 
 /* Creates and installs the KnowHOWAttribute type. */
 function createKnowHOWAttribute() {
-  var metaObj = KnowHOW_HOW._STable.REPR.allocate(KnowHOW_HOW._STable);
+  var metaObj = KnowHowHOW._STable.REPR.allocate(KnowHowHOW._STable);
 
   var r = new reprs.KnowHOWAttribute();
   var typeObj = r.typeObjectFor(metaObj);
@@ -49,7 +49,7 @@ function createKnowHOWAttribute() {
   typeObj._STable.methodCache = new Map();
   typeObj._STable.modeFlags = constants.METHOD_CACHE_AUTHORITATIVE;
 
-  for (var method in methods) {
+  for (let method of Object.keys(methods)) {
     typeObj._STable.objConstructor.prototype[method] = methods[method];
     typeObj._STable.methodCache.set(method, wrapMethod(method, methods[method]));
   }
@@ -65,19 +65,17 @@ addToScWithSt(KnowHOW);
 
 var st = new STable(repr, null);
 
-var KnowHOW_HOW = repr.allocate(st);
-KnowHOW_HOW.__name = 'KnowHOW';
+var KnowHowHOW = repr.allocate(st);
+KnowHowHOW.__name = 'KnowHOW';
 
-addToScWithSt(KnowHOW_HOW);
+addToScWithSt(KnowHowHOW);
 
-KnowHOW_HOW.id = 'KnowHOW_HOW';
-KnowHOW._STable.id = 'KnowHOW';
-KnowHOW._STable.HOW = KnowHOW_HOW;
+KnowHOW._STable.HOW = KnowHowHOW;
 
 KnowHOW._STable.methodCache = new Map();
 KnowHOW._STable.modeFlags = constants.METHOD_CACHE_AUTHORITATIVE;
-KnowHOW_HOW._STable.methodCache = new Map();
-KnowHOW_HOW._STable.modeFlags = constants.METHOD_CACHE_AUTHORITATIVE;
+KnowHowHOW._STable.methodCache = new Map();
+KnowHowHOW._STable.modeFlags = constants.METHOD_CACHE_AUTHORITATIVE;
 
 function wrapMethod(name, method) {
   var codeRef = new CodeRef(name, undefined);
@@ -87,12 +85,12 @@ function wrapMethod(name, method) {
 function addKnowhowHowMethod(name, method) {
   /* TODO - think if setting the object cache would be better */
 
-  KnowHOW_HOW._STable.objConstructor.prototype[name] = method;
+  KnowHowHOW._STable.objConstructor.prototype[name] = method;
   KnowHOW._STable.objConstructor.prototype[name] = method;
 
   var wrapped = wrapMethod(name, method);
   KnowHOW._STable.methodCache.set(name, wrapped);
-  KnowHOW_HOW._STable.methodCache.set(name, wrapped);
+  KnowHowHOW._STable.methodCache.set(name, wrapped);
 }
 
 addKnowhowHowMethod('name', function(ctx, _NAMED, self) {
@@ -203,7 +201,7 @@ module.exports.knowhowattr = KnowHOWAttribute;
 addToScWithSt(KnowHOWAttribute);
 
 function bootType(typeName, reprName) {
-  var metaObj = KnowHOW_HOW._STable.REPR.allocate(KnowHOW_HOW._STable);
+  var metaObj = KnowHowHOW._STable.REPR.allocate(KnowHowHOW._STable);
   metaObj.__name = typeName;
 
   var typeObj = (new reprs[reprName]).typeObjectFor(metaObj);

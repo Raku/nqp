@@ -173,72 +173,55 @@ function runNFA(nfa, target, pos) {
 
 
         if (pos >= eos) {
-        /* Can't match, so drop state. */
-        }
-        else if (act == EDGE_CODEPOINT) {
-          if (target.charCodeAt(pos) == edgeInfo[i].argI)
+          /* Can't match, so drop state. */
+        } else if (act == EDGE_CODEPOINT) {
+          if (target.charCodeAt(pos) == edgeInfo[i].argI) {
             nextst.push(to);
-        }
-        else if (act == EDGE_CODEPOINT_LL) {
+          }
+        } else if (act == EDGE_CODEPOINT_LL) {
           if (target.charCodeAt(pos) == edgeInfo[i].argI) {
             var fate = (edgeInfo[i].act >> 8) & 0xfffff;  /* act is probably signed 32 bits */
             nextst.push(to);
-            while (usedlonglit <= fate)
+            while (usedlonglit <= fate) {
               longlit[usedlonglit++] = 0;
+            }
             longlit[fate] = pos - origPos;
           }
-        }
-        else if (act == EDGE_CODEPOINT_NEG) {
-          if (target.charCodeAt(pos) != edgeInfo[i].argI)
+        } else if (act == EDGE_CODEPOINT_NEG) {
+          if (target.charCodeAt(pos) != edgeInfo[i].argI) {
             nextst.push(to);
-        }
-        else if (act == EDGE_CHARCLASS) {
-          if (iscclass(edgeInfo[i].argI, target, pos) != 0)
+          }
+        } else if (act == EDGE_CHARCLASS) {
+          if (iscclass(edgeInfo[i].argI, target, pos) != 0) {
             nextst.push(to);
-        }
-        else if (act == EDGE_CHARCLASS_NEG) {
-          if (iscclass(edgeInfo[i].argI, target, pos) == 0)
+          }
+        } else if (act == EDGE_CHARCLASS_NEG) {
+          if (iscclass(edgeInfo[i].argI, target, pos) == 0) {
             nextst.push(to);
-        }
-        else if (act == EDGE_CHARLIST) {
+          }
+        } else if (act == EDGE_CHARLIST) {
           if (edgeInfo[i].argS.indexOf(target[pos]) >= 0) {
             nextst.push(to);
           }
-        }
-        else if (act == EDGE_CHARLIST_NEG) {
+        } else if (act == EDGE_CHARLIST_NEG) {
           if (edgeInfo[i].argS.indexOf(target[pos]) < 0) {
             nextst.push(to);
           }
-        }
-        else if (act == EDGE_CODEPOINT_I_LL) {
+        } else if (act == EDGE_CODEPOINT_I_LL) {
           console.log('TODO CODEPOINT I LL');
-        }
-        else if (act == EDGE_CODEPOINT_I) {
+        } else if (act == EDGE_CODEPOINT_I) {
           console.log('TODO CODEPOINT I');
-        /*char ucArg = edgeInfo[i].argUc;
-              char lcArg = edgeInfo[i].argLc;
-              char ord = target.charAt((int)pos);
-              if (ord == lcArg || ord == ucArg)
-                  nextst.push(to);*/
-        }
-        else if (act == EDGE_CODEPOINT_I_NEG) {
+        } else if (act == EDGE_CODEPOINT_I_NEG) {
           console.log('TODO CODEPOINT NEG');
-          /*char ucArg = edgeInfo[i].argUc;
-              char lcArg = edgeInfo[i].argLc;
-              char ord = target.charAt((int)pos);
-              if (ord != lcArg && ord != ucArg)
-                  nextst.push(to);*/
-        }
-        else if (act == EDGE_CHARRANGE) {
+        } else if (act == EDGE_CHARRANGE) {
           var ucArg = edgeInfo[i].argUc;
           var lcArg = edgeInfo[i].argLc;
           var ord = target.charCodeAt(pos);
           if (ord >= lcArg && ord <= ucArg) {
             nextst.push(to);
           }
-        }
-        else if (act == EDGE_CHARRANGE_NEG) {
-        // TODO
+        } else if (act == EDGE_CHARRANGE_NEG) {
+          console.log('TODO EDGE_CHARRANGE_NEG');
         } else if (act == EDGE_EPSILON) {
         } else {
           console.log('runNFA: unknown codepoint', act);
@@ -254,9 +237,9 @@ function runNFA(nfa, target, pos) {
        * future, we'll want to factor in longest literal prefix too. */
     var charFates = fates.length - prevFates;
     if (charFates > 1) {
-      //TODO do it more efficiently
+      // TODO do it more efficiently
       var charFateList = fates.slice(prevFates);
-      charFateList.sort(function(a, b) {return b - a;});
+      charFateList.sort((a, b) => b - a);
       fates = fates.slice(0, prevFates).concat(charFateList);
     }
   }

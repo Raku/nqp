@@ -21,7 +21,7 @@ op.buildnativecall = function(ctx, target, libname, symbol, convention, args, re
   try {
     var symbols = {};
     symbols[symbol] = [mapType(returns), args.array.map(mapType)];
-    target.lib = ffi.Library(libname === '' ? null : libname, symbols);
+    target.lib = ffi.Library(libname === '' ? null : libname, symbols); // eslint-disable-line new-cap
     target.symbol = symbol;
   } catch (e) {
     ctx.die(e.message);

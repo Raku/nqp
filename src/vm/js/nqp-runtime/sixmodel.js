@@ -300,7 +300,7 @@ class STable {
 
   evalGatheredCode() {
     if (this.code) {
-      var STable = this;
+      var STable = this; // eslint-disable-line no-unused-vars
       eval(this.setup + this.code);
       this.code = '';
     }

@@ -149,7 +149,7 @@ class BinaryWriteCursor {
     var heapLoc = this.writer.stringIndex(str);
 
     if (!(heapLoc >= 0 && heapLoc <= STRING_HEAP_LOC_MAX)) {
-      throw 'Serialization error: string offset ' + heapLoc + "can't be serialized";
+      throw `Serialization error: string offset ${heapLoc} can't be serialized`;
     }
 
     if (heapLoc <= STRING_HEAP_LOC_PACKED_MAX) {
@@ -361,14 +361,7 @@ class BinaryWriteCursor {
       discrim = REFVAR_VM_STR;
     } else if (ref._STable === BOOT.Array._STable) {
       discrim = REFVAR_VM_ARR_VAR;
-    }
-  //  else if (ref.st.WHAT == tc.gc.BOOTIntArray) {
-  //      discrim = REFVAR_VM_ARR_INT;
-  //  }
-  //  else if (ref.st.WHAT == tc.gc.BOOTStrArray) {
-  //      discrim = REFVAR_VM_ARR_STR;
-  //  }
-    else if (ref instanceof Hash) {
+    } else if (ref instanceof Hash) {
       discrim = REFVAR_VM_HASH_STR_VAR;
     } else if (ref instanceof CodeRef || typeof ref == 'function') {
       discrim = REFVAR_VM_NULL;
@@ -491,11 +484,10 @@ class SerializationWriter {
     this.objects.int32(this.objectsData.offset);
 
 
-
     /* Delegate to its serialization REPR function. */
     if (!obj.typeObject_) {
       if (!obj._STable.REPR.serialize) {
-        console.trace("don't know how to serialize", obj._STable.REPR.name);
+        console.trace(`don't know how to serialize ${obj._STable.REPR.name}`);
       } else {
         obj._STable.REPR.serialize(this.objectsData, obj);
       }
@@ -562,7 +554,7 @@ class SerializationWriter {
     if (st.boolificationSpec) {
       var mode = st.boolificationSpec.mode;
       if (mode >= 0xF) {
-        throw 'Serialization error: boolification spec mode ' + mode + " out of range and can't be serialized";
+        throw `Serialization error: boolification spec mode ${mode} out of range and can't be serialized`;
       }
       flags = mode;
     } else {
@@ -735,10 +727,12 @@ class SerializationWriter {
   }
 
   getSerializedOuterContextIdx(closure) {
-    if (closure.isCompilerStub)
+    if (closure.isCompilerStub) {
       return 0;
-    if (closure.outerCtx == null)
+    }
+    if (closure.outerCtx == null) {
       return 0;
+    }
     return this.getSerializedContextIdx(closure.outerCtx);
   }
 
@@ -871,9 +865,10 @@ class SerializationWriter {
           origSC.rootSTables.indexOf(this.sc.rootSTables[objIdx]) :
           origSC.rootObjects.indexOf(this.sc.rootObjects[objIdx]);
 
-      if (origIdx < 0)
+      if (origIdx < 0) {
         throw 'Could not find object when writing repossessions; ' +
-            (isST != 0 ? 'STable' : 'REPR = ' + this.sc.rootObjects[objIdx]._STable.REPR.name);
+          (isST != 0 ? 'STable' : 'REPR = ' + this.sc.rootObjects[objIdx]._STable.REPR.name);
+      }
 
       /* Write table row. */
       this.repossessionsData.int32(isST);
@@ -912,14 +907,17 @@ class SerializationWriter {
       console.trace('undefined sc');
       process.exit();
     }
+
     /* Easy if it's in the current SC. */
-    if (sc == this.sc)
+    if (sc == this.sc) {
       return 0;
+    }
 
     /* If not, try to find it in our dependencies list. */
     var found = this.dependentSCs.indexOf(sc);
-    if (found >= 0)
+    if (found >= 0) {
       return found + 1;
+    }
 
     /* Otherwise, need to add it to our dependencies list. */
     this.dependentSCs.push(sc);
@@ -1018,9 +1016,10 @@ class SerializationWriter {
     this.writeChunk(this.repossessionsData);
 
 
-    //  /* Sanity check. */
-    if (this.offset != outputSize)
-      throw 'Serialization sanity check failed: offset != outputSize (' + offset + ' != ' + outputSize + ')';
+    /* Sanity check. */
+    if (this.offset != outputSize) {
+      throw `Serialization sanity check failed: offset != outputSize (${offset} != ${outputSize})`;
+    }
 
     return this.buffer.toString('base64');
   }
@@ -1051,8 +1050,9 @@ op.getobjsc = function(obj) {
 
 op.scgetobjidx = function(sc, obj) {
   var idx = sc.rootObjects.indexOf(obj);
-  if (idx < 0)
+  if (idx < 0) {
     throw 'Object does not exist in this SC';
+  }
   return idx;
 };
 
