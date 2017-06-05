@@ -2,7 +2,7 @@
 
 # Testing nqp::shell wrt capturing output.
 
-plan(13);
+plan(14);
 
 my $read_out         := nqp::const::PIPE_INHERIT_IN + nqp::const::PIPE_CAPTURE_OUT + nqp::const::PIPE_INHERIT_ERR;
 my $read_out_and_err := nqp::const::PIPE_INHERIT_IN + nqp::const::PIPE_CAPTURE_OUT + nqp::const::PIPE_CAPTURE_ERR;
@@ -70,4 +70,18 @@ my $read_out_and_err := nqp::const::PIPE_INHERIT_IN + nqp::const::PIPE_CAPTURE_O
     is( $str_out, '' && $str_err ~~ / 'doesnotexist' /, 'nqp::slurp with a pipe nonexistent command');
 
     ok( nqp::closefh_i($out) != 0, 'nqp::closefh_i with a pipe nonexistent command');
+}
+
+{
+    my $in  := nqp::null();
+    my $out := nqp::syncpipe();
+    my $err := nqp::syncpipe();
+    my $out-wrap := NQPFileHandle.new.wrap($out);
+    my $err-wrap := NQPFileHandle.new.wrap($err);
+    nqp::shell('exit 42', nqp::cwd(), nqp::getenvhash(), $in, $out, $err, $read_out_and_err);
+
+    my $str_out := $out-wrap.slurp;
+    my $str_err := $err-wrap.slurp;
+
+    is(nqp::bitshiftr_i(nqp::closefh_i($out), 8), 42, 'correct exit value from closefh_i');
 }
