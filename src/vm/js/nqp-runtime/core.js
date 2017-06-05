@@ -452,6 +452,9 @@ function toJS(obj) {
   }
 }
 
+/* For use inside the eval */
+const nqp = require('nqp-runtime');
+
 class JavaScriptCompiler extends NQPObject {
   eval(ctx, _NAMED, self, code) {
     return fromJS(eval(code));
