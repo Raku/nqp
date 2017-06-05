@@ -441,7 +441,7 @@ function run(isShell, ctx, command, dir, env, input, output, error, flags) {
     shell: isShell,
     cwd: dir,
     env: stringifyEnv(ctx, env),
-    stdio: [process.stdin, 'pipe', 'pipe']
+    stdio: [process.stdin, 'pipe', 'pipe'],
   };
 
   let result;
