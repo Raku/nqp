@@ -313,7 +313,7 @@ op.seekfh = function(ctx, fh, offset, whence) {
   if (!(whence == 0 || whence == 1 || whence == 2)) {
     ctx.die('Invalid whence passed to seekfh: ' + whence);
   }
-  fs.seekSync(fh.fd, offset, whence);
+  return fs.seekSync(fh.fd, offset, whence);
 };
 
 op.closefh = function(fh) {
