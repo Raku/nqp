@@ -14,6 +14,8 @@ var Capture = require('./capture.js');
 
 var StaticCtx = require('./static-ctx.js');
 
+const fs = require('fs');
+
 exports.NQPInt = NQPInt;
 
 function loadOps(module) {
@@ -128,7 +130,7 @@ op.loadbytecode = function(ctx, file) {
 op.loadbytecodefh = function(ctx, fh, file) {
   let oldLoaderCtx = exports.loaderCtx;
   exports.loaderCtx = ctx;
-  let js = fh.$$readallfh();
+  let js = fs.readFileSync(fh.fd, {encoding: 'utf8'});
   eval(js);
   exports.loaderCtx = oldLoaderCtx;
 };
