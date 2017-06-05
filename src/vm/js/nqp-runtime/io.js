@@ -4,7 +4,6 @@ var os = require('os');
 var sleep = require('sleep');
 
 var tty = require('tty');
-var nqpIo = require('nqp-js-io');
 
 var Hash = require('./hash.js');
 
@@ -17,35 +16,54 @@ var Null = require('./null.js');
 
 var mkdirp = require('mkdirp');
 
+const NQPException = require('./nqp-exception.js');
+
 var nqp = require('nqp-runtime');
 
-nqpIo.SyncPipe.prototype.$$decont = function(ctx) {
-  return this;
-};
-
-nqpIo.SyncPipe.prototype.$$can = function(method) {
-  return 0;
-};
-
-nqpIo.SyncPipe.prototype.$$readfh = function(buf, size) {
-  let lowlevel = this.$$readBuffer(size);
-
-  let elementSize = core.byteSize(buf);
-
-  let isUnsigned = buf._STable.REPR.type._STable.REPR.isUnsigned;
-
-  if (lowlevel) {
-    let offset = 0;
-    buf.array.length = lowlevel.length / elementSize;
-    for (var i = 0; i < lowlevel.length / elementSize; i++) {
-      buf.array[i] = isUnsigned ? lowlevel.readUIntLE(offset, elementSize) : lowlevel.readIntLE(offset, elementSize);
-      offset += elementSize;
+class SyncPipe extends NQPObject {
+  $$eoffh() {
+    if (this.$$buffer) {
+      return (this.$$buffer.length ? 0 : 1);
+    } else {
+      throw new NQPException(`Can't use eoffh, this syncpipe is not connected yet`);
     }
-  } else {
-    buf.array.length = 0;
   }
 
-  return buf;
+  /* TODO: optimize to use the lowlevel Buffer inside the highlevel one without copying */
+
+  $$readfh(buf, size) {
+    if (!this.$$buffer) {
+      throw new NQPException(`Can't use readfh, this syncpipe is not connected yet`);
+    }
+
+    let lowlevel = this.$$buffer.slice(0, size);
+    this.$$buffer = this.$$buffer.slice(size);
+
+    let elementSize = core.byteSize(buf);
+
+    let isUnsigned = buf._STable.REPR.type._STable.REPR.isUnsigned;
+
+    if (lowlevel) {
+      let offset = 0;
+      buf.array.length = lowlevel.length / elementSize;
+      for (var i = 0; i < lowlevel.length / elementSize; i++) {
+        buf.array[i] = isUnsigned ? lowlevel.readUIntLE(offset, elementSize) : lowlevel.readIntLE(offset, elementSize);
+        offset += elementSize;
+      }
+    } else {
+      buf.array.length = 0;
+    }
+
+    return buf;
+  }
+
+  $$closefh_i() {
+    return this.$$status;
+  }
+
+  $$can() {
+    return 0;
+  }
 };
 
 function boolish(bool) {
@@ -201,8 +219,9 @@ class FileHandle extends IOHandle {
     this.fd = fd;
   }
 
-  $$closefh() {
+  $$closefh_i() {
     fs.closeSync(this.fd);
+    return 0;
   }
 
   $$isttyfh() {
@@ -317,21 +336,11 @@ op.seekfh = function(ctx, fh, offset, whence) {
 };
 
 op.closefh = function(fh) {
-  if (fh instanceof nqpIo.SyncPipe) {
-    fh.close();
-    return fh;
-  }
-  fh.$$closefh();
-  return fh;
+  fh.$$closefh_i();
 };
 
 op.closefh_i = function(fh) {
-  if (fh instanceof nqpIo.SyncPipe) {
-    return fh.close();
-  }
-  op.closefh(fh);
-  /* TODO proper return value */
-  return 0;
+  return fh.$$closefh_i();
 };
 
 
@@ -415,22 +424,57 @@ function stringifyEnv(ctx, hash) {
   return stringifed;
 }
 
-op.spawn = function(ctx, command, dir, env, input, output, error, flags) {
+function stringifyArray(ctx, array) {
   let stringified = [];
-  for (let c of command.array) {
-    stringified.push(nqp.toStr(c, ctx));
+  for (let element of array.array) {
+    stringified.push(nqp.toStr(element, ctx));
   }
-
-  return nqpIo.spawn(stringified, dir, stringifyEnv(ctx, env), convertNull(input), convertNull(output), convertNull(error), flags);
-};
-
+  return stringified;
+}
 
 op.syncpipe = function() {
-  return new nqpIo.SyncPipe();
+  return new SyncPipe();
+};
+
+function run(isShell, ctx, command, dir, env, input, output, error, flags) {
+  const options = {
+    shell: isShell,
+    cwd: dir,
+    env: stringifyEnv(ctx, env),
+    stdio: [process.stdin, 'pipe', 'pipe']
+  };
+
+  let result;
+  if (isShell) {
+    result = child_process.spawnSync(command, options);
+  } else {
+    let stringified = stringifyArray(ctx, command);
+    result = child_process.spawnSync(stringified.shift(), stringified, options);
+  }
+
+  if (flags & PIPE_CAPTURE_IN) {
+    throw new NQPException('nqp::shell with PIPE_CAPTURE_IN NYI');
+  }
+
+  if (flags & PIPE_CAPTURE_OUT) {
+    output.$$buffer = result.output[1];
+    output.$$status = result.status;
+  }
+
+  if (flags & PIPE_CAPTURE_ERR) {
+    error.$$buffer = result.output[2];
+    error.$$status = result.status;
+  }
+
+  return result.status;
 };
 
 op.shell = function(ctx, command, dir, env, input, output, error, flags) {
-  return nqpIo.shell(command, dir, stringifyEnv(ctx, env), convertNull(input), convertNull(output), convertNull(error), flags);
+  return run(true, ctx, command, dir, env, input, output, error, flags);
+};
+
+op.spawn = function(ctx, command, dir, env, input, output, error, flags) {
+  return run(false, ctx, command, dir, env, input, output, error, flags);
 };
 
 op.cwd = function() {
