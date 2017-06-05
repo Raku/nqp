@@ -6,9 +6,15 @@ module.exports = {
     "rules": {
       "require-jsdoc": "off",
       "max-len": "off",
-      "no-var": "off",
       "arrow-parens": "off",
-      "no-throw-literal": "off",
-      "no-extend-native": "off"
+      "no-extend-native": "off",
+      "camelcase": "off",
+      "guard-for-in": "off",
+      "prefer-rest-params": "off",
+      "prefer-spread": "off",
+      "no-invalid-this": "off",
+      "no-unused-vars": "off",
+      "no-var": "off",
+      "no-throw-literal": "off"
     }
 };
