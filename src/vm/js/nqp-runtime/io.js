@@ -458,15 +458,15 @@ function run(isShell, ctx, command, dir, env, input, output, error, flags) {
 
   if (flags & PIPE_CAPTURE_OUT) {
     output.$$buffer = result.output[1];
-    output.$$status = result.status;
+    output.$$status = result.status << 8;
   }
 
   if (flags & PIPE_CAPTURE_ERR) {
     error.$$buffer = result.output[2];
-    error.$$status = result.status;
+    error.$$status = result.status << 8;
   }
 
-  return result.status;
+  return result.status << 8;
 };
 
 op.shell = function(ctx, command, dir, env, input, output, error, flags) {
