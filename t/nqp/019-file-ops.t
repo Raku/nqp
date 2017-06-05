@@ -21,7 +21,7 @@ ok( !$credits.eof, 'Not at EOF after open');
 my $line := $credits.get;
 ok( !$credits.eof, 'Not at EOF after first line read');
 ok( nqp::chars($line) == 5 || nqp::chars($line) == 6, 'get line to read'); # =pod\r?\n
-ok( $credits.tell == 5 || nqp::tellfh($credits) == 6, 'tell line two');
+ok( $credits.tell == 5 || $credits.tell == 6, 'tell line two');
 my $rest := $credits.slurp;
 ok( $credits.eof, 'At EOF after slurp');
 ok( nqp::chars($rest) > 100, 'slurp read a lot');
