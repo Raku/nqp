@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(315);
+plan(318);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -534,3 +534,15 @@ is(nqp::tc("\x1044E"), "\x10426", 'tc works on codepoints greater than 0xffff');
     my $buf := nqp::encode(nqp::chr(0x28B81), 'utf8', create_buf(uint8).new);
     is(buf_dump($buf), "0xF0 0xA8 0xAE 0x81", 'nqp::chr with 0x28B81 works properly');
 }
+
+is(
+  nqp::join(',', nqp::splice(nqp::split(',', '0,1,2,3,4,5,6,7,8,9'), nqp::split(',', 'a,b,c'), 4, 0)),
+  '0,1,2,3,a,b,c,4,5,6,7,8,9', 'nqp::splice test');
+
+is(
+  nqp::join(',', nqp::splice(nqp::split(',', '0,1,2,3,4,5,6,7,8,9'), [], 4, 3)),
+  '0,1,2,3,7,8,9', 'nqp::splice test');
+
+is(
+  nqp::join(',', nqp::splice(nqp::split(',', '0,1,2,3,4,5,6,7,8,9'), nqp::split(',', 'a,b,c'), 4, 1)),
+  '0,1,2,3,a,b,c,5,6,7,8,9', 'nqp::splice test');
