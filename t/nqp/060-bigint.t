@@ -1,7 +1,7 @@
 #! nqp
 use nqpmo;
 
-plan(120);
+plan(121);
 
 my $knowhow := nqp::knowhow();
 my $bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
@@ -190,6 +190,9 @@ ok(nqp::iseq_n($medium_float, nqp::tonum_I(nqp::fromnum_I($medium_float, $bi_typ
 $float := -$float;
 ok(nqp::iseq_n($float, nqp::tonum_I(nqp::fromnum_I($float, $bi_type))),
     'to_num and from_num round-trip (negative number)');
+
+is(str(nqp::fromnum_I(5.3, $bi_type)), 5, 'nqp::tonum_I with 5.3');
+is(str(nqp::fromnum_I(-5.3, $bi_type)), -5, 'nqp::tonum_I with -5.3');
 
 is(nqp::base_I(box(-1234), 10), '-1234', 'base_I with base 10');
 is(nqp::base_I(box(-1234), 16), '-4D2',  'base_I with base 16');
