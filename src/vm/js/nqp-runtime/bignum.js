@@ -247,9 +247,9 @@ op.tonum_I = function(n) {
 op.fromnum_I = function(num, type) {
   // node-bignum bug workaround, when a negative number is too big it gets turned into 0
   if (num < 0) {
-    return makeBI(type, bignum(-num).neg());
+    return makeBI(type, bignum(Math.floor(-num)).neg());
   } else {
-    return makeBI(type, bignum(num));
+    return makeBI(type, bignum(Math.floor(num)));
   }
 };
 
