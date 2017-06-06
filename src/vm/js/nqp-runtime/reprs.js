@@ -1171,20 +1171,12 @@ class VMArray extends REPR {
 
   deserializeReprData(cursor) {
     this.type = cursor.variant();
+    console.log("got repr data:");
+    nqp.dumpObj(this.type);
   }
 
   serializeReprData(st, cursor) {
     cursor.ref(this.type);
-  }
-
-  deserializeArray(obj, data) {
-    if (this.type !== Null) {
-      console.log('NYI: VMArrays of a type different then null');
-    }
-    var size = data.varint();
-    for (var i = 0; i < size; i++) {
-      obj.array[i] = data.variant();
-    }
   }
 
   compose(STable, reprInfoHash) {
