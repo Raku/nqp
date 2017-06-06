@@ -549,6 +549,10 @@ function byteSize(buf) {
 exports.byteSize = byteSize;
 
 op.encode = function(str, encoding_, buf) {
+  if (buf.array.length) {
+    throw new NQPException('encode requires an empty array');
+  }
+
   var encoding = renameEncoding(encoding_);
 
   var elementSize = byteSize(buf);
