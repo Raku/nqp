@@ -219,6 +219,7 @@ module.exports.bootType = bootType;
 module.exports.core = core;
 
 BOOT.Array = bootType('BOOTArray', 'VMArray');
+BOOT.Array._STable.REPR.type = Null;
 BOOT.Array._STable.setboolspec(8, Null);
 BOOT.Array._STable.hllRole = 4;
 
