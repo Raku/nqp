@@ -1171,8 +1171,6 @@ class VMArray extends REPR {
 
   deserializeReprData(cursor) {
     this.type = cursor.variant();
-    console.log("got repr data:");
-    nqp.dumpObj(this.type);
   }
 
   serializeReprData(st, cursor) {
