@@ -598,7 +598,19 @@ op.decode = function(buf, encoding) {
 
 op.objprimspec = function(obj) {
   if (obj === Null) return 0;
-  return (obj._STable && obj._STable.REPR.boxedPrimitive ? obj._STable.REPR.boxedPrimitive : 0);
+  if (typeof obj === "object") {
+    if (obj instanceof NQPInt) {
+      return 1;
+    } else {
+      return (obj._STable && obj._STable.REPR.boxedPrimitive ? obj._STable.REPR.boxedPrimitive : 0);
+    }
+  } else if (typeof obj == "number") {
+    return 2;
+  } else if (typeof obj == "string") {
+    return 3;
+  } else {
+    throw new NQPException(`objprimspec can't handle things of type: ${typeof obj}`);
+  }
 };
 
 /* Parametricity operations. */
@@ -982,7 +994,7 @@ op.ctxouterskipthunks = function(ctx) {
 };
 
 op.captureposprimspec = function(capture, idx) {
-  return 0;
+  return op.objprimspec(capture.pos[idx]);
 };
 
 op.forceouterctx = function(code, ctx) {
