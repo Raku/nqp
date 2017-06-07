@@ -1,4 +1,4 @@
-plan(20);
+plan(26);
 
 my $x;
 sub savecapture($arg, *%named) {
@@ -69,3 +69,18 @@ my $capture := savecapture(100);
 
 my $clone := nqp::clone($capture);
 ok(nqp::captureposarg($clone, 0) == 100,"nqp::captureposarg on a cloned capture");
+
+sub savecapture_both($arg1, $arg2) {
+  my $capture := nqp::savecapture();
+  $capture;
+}
+
+{
+  is(nqp::captureposprimspec(savecapture(nqp::list()), 0), 0, 'nqp::captureposprimspec with nqp::list');
+  is(nqp::captureposprimspec(savecapture(100), 0), 1, 'nqp::captureposprimspec with int');
+  is(nqp::captureposprimspec(savecapture(13.2), 0), 2, 'nqp::captureposprimspec with num');
+  is(nqp::captureposprimspec(savecapture("foo"), 0), 3, 'nqp::captureposprimspec with str');
+
+  is(nqp::captureposprimspec(savecapture_both(100, "foo"), 0), 1, 'nqp::captureposprimspec works at index 0');
+  is(nqp::captureposprimspec(savecapture_both(100, "foo"), 1), 3, 'nqp::captureposprimspec works at index 0');
+}
