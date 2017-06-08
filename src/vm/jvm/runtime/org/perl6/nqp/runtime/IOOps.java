@@ -1,5 +1,6 @@
 package org.perl6.nqp.runtime;
 
+import org.perl6.nqp.io.AsyncProcessHandle;
 import org.perl6.nqp.io.AsyncServerSocketHandle;
 import org.perl6.nqp.io.AsyncSocketHandle;
 import org.perl6.nqp.sixmodel.SixModelObject;
@@ -109,5 +110,14 @@ public final class IOOps {
             throw ExceptionHandling.dieInternal(tc, "This handle does not support asyncreadbytes");
         }
         return task;
+    }
+
+    public static SixModelObject spawnprocasync(SixModelObject queue, SixModelObject args,
+            String cwd, SixModelObject env, SixModelObject config, ThreadContext tc) {
+        HLLConfig hllConfig = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig;
+        final SixModelObject IOType = hllConfig.ioType;
+        IOHandleInstance ioHandle = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
+        ioHandle.handle = new AsyncProcessHandle(tc, queue, args, cwd, env, config);
+        return ioHandle;
     }
 }
