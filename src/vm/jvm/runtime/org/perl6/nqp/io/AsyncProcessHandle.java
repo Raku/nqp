@@ -26,11 +26,11 @@ public class AsyncProcessHandle implements IIOClosable {
 
     public AsyncProcessHandle(ThreadContext tc, SixModelObject queue, SixModelObject argsObj,
             String cwd, SixModelObject envObj, SixModelObject configObj) {
-        List<String> args = getArgs(tc, argsObj);
-        Map<String, String> env = getEnv(tc, envObj);
-        Map<String, SixModelObject> config = getConfig(tc, configObj);
+        final List<String> args = getArgs(tc, argsObj);
+        final Map<String, String> env = getEnv(tc, envObj);
+        final Map<String, SixModelObject> config = getConfig(tc, configObj);
 
-        ProcessBuilder pb = new ProcessBuilder(args);
+        final ProcessBuilder pb = new ProcessBuilder(args);
         pb.directory(new File(cwd));
         pb.environment().clear();
         pb.environment().putAll(env);
@@ -39,27 +39,39 @@ public class AsyncProcessHandle implements IIOClosable {
         this.queue = queue;
         this.tc = tc;
         this.hllConfig = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig;
-        try {
-            this.proc = pb.start();
-            SixModelObject ready = config.get("ready");
-            if (ready != null)
-                send(ready);
-        }
-        catch (Throwable t) {
-            SixModelObject message = boxError(t.getMessage());
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    AsyncProcessHandle.this.proc = pb.start();
 
-            SixModelObject error = config.get("error");
-            if (error != null)
-                send(error, message);
+                    SixModelObject ready = config.get("ready");
+                    if (ready != null)
+                        send(ready);
 
-            SixModelObject stdoutBytes = config.get("stdout_bytes");
-            if (stdoutBytes != null)
-                send(stdoutBytes, this.hllConfig.intBoxType, this.hllConfig.strBoxType, message);
+                    int outcome = AsyncProcessHandle.this.proc.waitFor();
+                    SixModelObject done = config.get("done");
+                    if (done != null)
+                        send(done, boxInt(outcome));
+                }
+                catch (Throwable t) {
+                    SixModelObject message = boxError(t.getMessage());
 
-            SixModelObject stderrBytes = config.get("stderr_bytes");
-            if (stderrBytes != null)
-                send(stderrBytes, this.hllConfig.intBoxType, this.hllConfig.strBoxType, message);
-        }
+                    SixModelObject error = config.get("error");
+                    if (error != null)
+                        send(error, message);
+
+                    SixModelObject stdoutBytes = config.get("stdout_bytes");
+                    if (stdoutBytes != null)
+                        send(stdoutBytes, AsyncProcessHandle.this.hllConfig.intBoxType,
+                                AsyncProcessHandle.this.hllConfig.strBoxType, message);
+
+                    SixModelObject stderrBytes = config.get("stderr_bytes");
+                    if (stderrBytes != null)
+                        send(stderrBytes, AsyncProcessHandle.this.hllConfig.intBoxType,
+                                AsyncProcessHandle.this.hllConfig.strBoxType, message);
+                }
+            }
+        }).start();
     }
 
     private List<String> getArgs(ThreadContext tc, SixModelObject argsObj) {
@@ -110,6 +122,10 @@ public class AsyncProcessHandle implements IIOClosable {
 
     private SixModelObject boxError(String error) {
         return Ops.box_s(error, this.hllConfig.strBoxType, this.tc);
+    }
+
+    private SixModelObject boxInt(int value) {
+        return Ops.box_i(value, this.hllConfig.intBoxType, this.tc);
     }
 
     public void writeBytes(ThreadContext tc, AsyncTaskInstance task, SixModelObject toWrite) {
