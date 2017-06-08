@@ -1,9 +1,9 @@
 #!/usr/bin/env nqp
-plan(119);
+plan(119 * 2);
 my @array :=
 # (haystack, needle, result)
 # line below is a todo example: commented out in case someone else needs to todo one of these tests
-## ('chars that expand on casefolding at the end are broken with equatic', 1),
+## todo example: ('chars that expand on casefolding at the end are broken with equatic', 1),
     # Make sure it doesn't find a partial match at end of the haystack and then
     # return a partial match.
     ('st', 'ﬆa', -1),
@@ -33,6 +33,8 @@ for @array -> $elem {
     else {
         is( nqp::indexic($elem[0], $elem[1], 0), $elem[2],
             "nqp::indexic('" ~ $elem[0] ~ "', " ~ $elem[1] ~ "', 0)");
+        is( nqp::indexicim($elem[0], $elem[1], 0), $elem[2],
+            "nqp::indexic('" ~ $elem[0] ~ "', " ~ $elem[1] ~ "', 0)");
     }
 }
 test-it('ﬆ', 'st',  20, 1);
@@ -45,6 +47,7 @@ test-it('stbbbbbbbbbbbbbbbbbbbbbb', 'st',  20, 2);
 for (0,1,2,3,4,5,6) -> $val {
     my str $letter := nqp::chr($val + nqp::ord('A'));
     is( nqp::indexic('ABCDEFG', $letter, 0), $val, "nqp::indexic('ABCDEFG', '$letter', $val)");
+    is( nqp::indexicim('ABCDEFG', $letter, 0), $val, "nqp::indexicim('ABCDEFG', '$letter', $val)");
 }
 # TODO comment on what the options for this function do…
 # $opt: Bitfield type
@@ -64,6 +67,11 @@ sub test-it ($needle, $text, $max, $opt) {
           nqp::indexic($str, $needle, 0),
           $expect,
           "nqp::indexic(haystack = '$str', needle = '$needle', 0) ==  " ~ $expect
+        );
+        is(
+          nqp::indexicim($str, $needle, 0),
+          $expect,
+          "nqp::indexicim(haystack = '$str', needle = '$needle', 0) ==  " ~ $expect
         );
         $i++
     }
