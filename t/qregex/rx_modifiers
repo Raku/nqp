@@ -1,3 +1,5 @@
+:i:m ﬆ			st	y	ignorecase ignoremark with ligature ﬆ (:i:m)
+:i:m "All hell is breaking loose"			"All is fine, I am sure of it" 	n	RT128875 :i:m combined matches whole string when a single character match is found
 ##  modifiers
 # todo 6 :jvm<ligature problem>
 :i ﬆ			st	y	ignorecase with ligature ﬆ (:i)
