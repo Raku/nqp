@@ -79,21 +79,6 @@ public final class IOOps {
         return task;
     }
 
-    public static SixModelObject asyncwritestr(SixModelObject handle, SixModelObject queue,
-            SixModelObject schedulee, String toWrite, SixModelObject asyncType, ThreadContext tc) {
-        AsyncTaskInstance task = (AsyncTaskInstance) asyncType.st.REPR.allocate(tc, asyncType.st);
-        task.queue = queue;
-        task.schedulee = schedulee;
-        task.handle = ((IOHandleInstance)handle).handle;
-
-        if (task.handle instanceof AsyncSocketHandle) {
-            ((AsyncSocketHandle)task.handle).writeStr(tc, task, toWrite);
-        } else {
-            throw ExceptionHandling.dieInternal(tc, "This handle does not support asyncwritestr");
-        }
-        return task;
-    }
-
     public static SixModelObject asyncwritebytes(SixModelObject handle, SixModelObject queue,
             SixModelObject schedulee, SixModelObject toWrite, SixModelObject asyncType,
             ThreadContext tc) {
@@ -106,21 +91,6 @@ public final class IOOps {
             ((AsyncSocketHandle)task.handle).writeBytes(tc, task, toWrite);
         } else {
             throw ExceptionHandling.dieInternal(tc, "This handle does not support asyncwritebytes");
-        }
-        return task;
-    }
-
-    public static SixModelObject asyncreadchars(SixModelObject handle, SixModelObject queue,
-            SixModelObject schedulee, SixModelObject asyncType, ThreadContext tc) {
-        AsyncTaskInstance task = (AsyncTaskInstance) asyncType.st.REPR.allocate(tc, asyncType.st);
-        task.queue = queue;
-        task.schedulee = schedulee;
-        task.handle = ((IOHandleInstance)handle).handle;
-
-        if (task.handle instanceof AsyncSocketHandle) {
-            ((AsyncSocketHandle)task.handle).readChars(tc, task);
-        } else {
-            throw ExceptionHandling.dieInternal(tc, "This handle does not support asyncreadchars");
         }
         return task;
     }
