@@ -649,25 +649,14 @@ class QAST::MASTRegexCompiler {
         # XXX or make a specialized eqat_sc op that takes a constant string.
         # also, consider making the op branch directly from the comparison
         # instead of storing an integer to a temporary register
-        if $node.subtype eq 'ignorecase+ignoremark' {
-            my $op := $node.negate ?? 'indexnat' !! 'indexat';
-            my $c  := nqp::chr(nqp::ordbaseat($litconst, 0));
-            merge_ins(@ins, [
-                op('ge_i', $i0, %!reg<pos>, %!reg<eos>),
-                op('if_i', $i0, %!reg<fail>),
-                op('ordbaseat', $i0, %!reg<tgt>, %!reg<pos>),
-                op('chr', $s0, $i0),
-                op($op, $s0, %!reg<zero>, sval(nqp::lc($c) ~ nqp::uc($c)), %!reg<fail>),
-            ]);
-        }
-        else {
-            my $eq_op := $node.subtype eq 'ignorecase' ?? 'eqatic_s' !!
-                         $node.subtype eq 'ignoremark' ?? 'eqatim_s' !! 'eqat_s';
-            my $cmpop := $node.negate ?? 'if_i' !! 'unless_i';
-            nqp::push(@ins, op('const_s', $s0, sval($litconst)));
-            nqp::push(@ins, op($eq_op, $i0, %!reg<tgt>, $s0, %!reg<pos>));
-            nqp::push(@ins, op($cmpop, $i0, %!reg<fail>));
-        }
+        my $eq_op := $node.subtype eq 'ignorecase' ?? 'eqatic_s' !!
+                     $node.subtype eq 'ignoremark' ?? 'eqatim_s' !!
+                     $node.subtype eq 'ignorecase+ignoremark' ?? 'eqaticim_s' !! 'eqat_s';
+
+        my $cmpop := $node.negate ?? 'if_i' !! 'unless_i';
+        nqp::push(@ins, op('const_s', $s0, sval($litconst)));
+        nqp::push(@ins, op($eq_op, $i0, %!reg<tgt>, $s0, %!reg<pos>));
+        nqp::push(@ins, op($cmpop, $i0, %!reg<fail>));
         unless $node.subtype eq 'zerowidth' {
             nqp::push(@ins, op('const_i64', $i0, ival(nqp::chars($litconst))));
             nqp::push(@ins, op('add_i', %!reg<pos>, %!reg<pos>, $i0));
@@ -998,10 +987,11 @@ class QAST::MASTRegexCompiler {
             nqp::push(@ins, op('eq_i', $ireg0, %!reg<pos>, %!reg<negone>));
             $!regalloc.release_register($lit, $MVM_reg_str);
         }
-        elsif $node.list && $node.subtype eq 'ignorecase' {
+        elsif $node.list && ($node.subtype eq 'ignorecase'|| $node.subtype eq 'ignorecase+ignoremark') {
             my $lit := $!regalloc.fresh_s();
+            my $op  := $node.subtype eq 'ignorecase' ?? 'indexic_s' !! 'indexicim_s';
             nqp::push(@ins, op('const_s', $lit, sval($node[0])));
-            nqp::push(@ins, op('indexic_s', %!reg<pos>, %!reg<tgt>, $lit, %!reg<pos>));
+            nqp::push(@ins, op($op, %!reg<pos>, %!reg<tgt>, $lit, %!reg<pos>));
             nqp::push(@ins, op('eq_i', $ireg0, %!reg<pos>, %!reg<negone>));
             $!regalloc.release_register($lit, $MVM_reg_str);
         }
