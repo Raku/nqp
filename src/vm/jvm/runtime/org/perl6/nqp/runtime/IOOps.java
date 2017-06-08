@@ -90,6 +90,8 @@ public final class IOOps {
 
         if (task.handle instanceof AsyncSocketHandle) {
             ((AsyncSocketHandle)task.handle).writeBytes(tc, task, toWrite);
+        } else if (task.handle instanceof AsyncProcessHandle) {
+            ((AsyncProcessHandle)task.handle).writeBytes(tc, task, toWrite);
         } else {
             throw ExceptionHandling.dieInternal(tc, "This handle does not support asyncwritebytes");
         }

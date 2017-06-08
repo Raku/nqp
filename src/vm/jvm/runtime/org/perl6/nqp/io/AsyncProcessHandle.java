@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ProcessBuilder;
 import java.lang.ProcessBuilder.Redirect;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -211,9 +212,28 @@ public class AsyncProcessHandle implements IIOClosable {
     }
 
     public void writeBytes(ThreadContext tc, AsyncTaskInstance task, SixModelObject toWrite) {
+        ByteBuffer buffer = Buffers.unstashBytes(toWrite, tc);
+        OutputStream stream = this.proc.getOutputStream();
+        SixModelObject Array = this.hllConfig.listType;
+        SixModelObject result = Array.st.REPR.allocate(tc, Array.st);
+        result.push_boxed(tc, task.schedulee);
+        try {
+            byte[] bytes = new byte[buffer.remaining()];
+            buffer.get(bytes);
+            stream.write(bytes);
+            result.push_boxed(tc, boxInt(bytes.length));
+            result.push_boxed(tc, this.hllConfig.strBoxType);
+        }
+        catch (Throwable t) {
+            result.push_boxed(tc, this.hllConfig.strBoxType);
+            result.push_boxed(tc, boxError(t.getMessage()));
+        }
+        ((ConcBlockingQueueInstance)task.queue).push_boxed(tc, result);
     }
 
     @Override
     public void close(ThreadContext tc) {
+        try { this.proc.getOutputStream().close(); }
+        catch (Throwable t) { }
     }
 }
