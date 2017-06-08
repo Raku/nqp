@@ -2823,6 +2823,8 @@ QAST::OperationsJAST.map_classlib_core_op('asyncwritestr', $TYPE_IO_OPS, 'asyncw
 QAST::OperationsJAST.map_classlib_core_op('asyncwritebytes', $TYPE_IO_OPS, 'asyncwritebytes', [$RT_OBJ, $RT_OBJ, $RT_OBJ, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('asyncreadchars', $TYPE_IO_OPS, 'asyncreadchars', [$RT_OBJ, $RT_OBJ, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('asyncreadbytes', $TYPE_IO_OPS, 'asyncreadbytes', [$RT_OBJ, $RT_OBJ, $RT_OBJ, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('spawnprocasync', $TYPE_IO_OPS, 'spawnprocasync', [$RT_OBJ, $RT_OBJ, $RT_STR, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('killprocasync', $TYPE_IO_OPS, 'killprocasync', [$RT_OBJ, $RT_INT], $RT_OBJ, :tc);
 
 # JVM-specific ops for compilation unit handling
 QAST::OperationsJAST.map_classlib_core_op('compilejast', $TYPE_OPS, 'compilejast', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
