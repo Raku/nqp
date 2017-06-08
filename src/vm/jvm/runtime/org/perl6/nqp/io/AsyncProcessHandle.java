@@ -1,6 +1,8 @@
 package org.perl6.nqp.io;
 
 import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.ProcessBuilder;
 import java.lang.ProcessBuilder.Redirect;
 import java.util.ArrayList;
@@ -23,6 +25,9 @@ public class AsyncProcessHandle implements IIOClosable {
     private SixModelObject queue;
     private ThreadContext tc;
     private HLLConfig hllConfig;
+    private SixModelObject bufType;
+    private int outSeq = 0;
+    private int errSeq = 0;
 
     public AsyncProcessHandle(ThreadContext tc, SixModelObject queue, SixModelObject argsObj,
             String cwd, SixModelObject envObj, SixModelObject configObj) {
@@ -39,6 +44,7 @@ public class AsyncProcessHandle implements IIOClosable {
         this.queue = queue;
         this.tc = tc;
         this.hllConfig = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig;
+        this.bufType = config.get("buf_type");
         new Thread(new Runnable() {
             public void run() {
                 try {
@@ -47,6 +53,16 @@ public class AsyncProcessHandle implements IIOClosable {
                     SixModelObject ready = config.get("ready");
                     if (ready != null)
                         send(ready);
+
+                    SixModelObject outputCallback = config.get("merge_bytes");
+                    if (outputCallback == null)
+                        outputCallback = config.get("stdout_bytes");
+                    if (outputCallback != null)
+                        launchReader(outputCallback, false);
+
+                    SixModelObject errorCallback = config.get("stderr_bytes");
+                    if (errorCallback != null)
+                        launchReader(errorCallback, true);
 
                     int outcome = AsyncProcessHandle.this.proc.waitFor();
                     SixModelObject done = config.get("done");
@@ -109,7 +125,73 @@ public class AsyncProcessHandle implements IIOClosable {
 
     private void setupInputOutput(ThreadContext tc, ProcessBuilder pb,
             Map<String, SixModelObject> config) {
-        // TODO Implement this
+        SixModelObject desc;
+
+        if (config.get("write") != null) {
+            pb.redirectInput(Redirect.PIPE);
+        }
+        else if ((desc = config.get("stdin_fd")) != null) {
+        }
+        else {
+            pb.redirectInput(Redirect.INHERIT);
+        }
+
+        if (config.get("merge_bytes") != null) {
+            pb.redirectOutput(Redirect.PIPE);
+            pb.redirectErrorStream(true);
+        }
+        else {
+            if (config.get("stdout_bytes") != null) {
+                pb.redirectOutput(Redirect.PIPE);
+            }
+            else if ((desc = config.get("stdout_fd")) != null) {
+            }
+            else {
+                pb.redirectOutput(Redirect.INHERIT);
+            }
+            if (config.get("stderr_bytes") != null) {
+                pb.redirectError(Redirect.PIPE);
+            }
+            else if ((desc = config.get("stderr_fd")) != null) {
+            }
+            else {
+                pb.redirectError(Redirect.INHERIT);
+            }
+        }
+    }
+
+    private void launchReader(final SixModelObject callback, final boolean stderr) {
+        final InputStream stream = stderr
+            ? this.proc.getErrorStream()
+            : this.proc.getInputStream();
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    byte[] buffer;
+                    int read;
+                    while ((read = stream.read(buffer = new byte[32768])) != -1) {
+                        SixModelObject result = Ops.create(AsyncProcessHandle.this.bufType, tc);
+                        Buffers.stashBytes(tc, result, buffer, read);
+                        send(callback,
+                                boxInt(stderr
+                                    ? AsyncProcessHandle.this.errSeq++
+                                    : AsyncProcessHandle.this.outSeq++),
+                                result,
+                                AsyncProcessHandle.this.hllConfig.strBoxType);
+                    }
+                    send(callback,
+                            boxInt(stderr
+                                ? AsyncProcessHandle.this.errSeq++
+                                : AsyncProcessHandle.this.outSeq++),
+                            AsyncProcessHandle.this.hllConfig.strBoxType,
+                            AsyncProcessHandle.this.hllConfig.strBoxType);
+                }
+                catch (Throwable t) {
+                    send(callback, boxInt(-1), AsyncProcessHandle.this.hllConfig.strBoxType,
+                            boxError(t.getMessage()));
+                }
+            }
+        }).start();
     }
 
     private void send(SixModelObject... args) {

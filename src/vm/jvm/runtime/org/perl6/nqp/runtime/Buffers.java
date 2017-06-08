@@ -9,21 +9,25 @@ import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_u8;
 public class Buffers {
 
     public static void stashBytes(ThreadContext tc, SixModelObject res, byte[] bytes) {
+        stashBytes(tc, res, bytes, bytes.length);
+    }
+
+    public static void stashBytes(ThreadContext tc, SixModelObject res, byte[] bytes, int elems) {
         if (res instanceof VMArrayInstance_i8) {
             VMArrayInstance_i8 arr = (VMArrayInstance_i8)res;
-            arr.elems = bytes.length;
+            arr.elems = elems;
             arr.start = 0;
             arr.slots = bytes;
         }
         else if (res instanceof VMArrayInstance_u8) {
             VMArrayInstance_u8 arr = (VMArrayInstance_u8)res;
-            arr.elems = bytes.length;
+            arr.elems = elems;
             arr.start = 0;
             arr.slots = bytes;
         }
         else {
-            res.set_elems(tc, bytes.length);
-            for (int i = 0; i < bytes.length; i++) {
+            res.set_elems(tc, elems);
+            for (int i = 0; i < elems; i++) {
                 tc.native_i = bytes[i];
                 res.bind_pos_native(tc, i);
             }
