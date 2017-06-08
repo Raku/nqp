@@ -2236,6 +2236,7 @@ QAST::MASTOperations.add_core_moarop_mapping('ordat', 'ordat');
 QAST::MASTOperations.add_core_moarop_mapping('ordbaseat', 'ordbaseat');
 QAST::MASTOperations.add_core_moarop_mapping('indexfrom', 'index_s');
 QAST::MASTOperations.add_core_moarop_mapping('indexic', 'indexic_s');
+QAST::MASTOperations.add_core_moarop_mapping('indexicim', 'indexicim_s');
 QAST::MASTOperations.add_core_moarop_mapping('rindexfrom', 'rindexfrom');
 QAST::MASTOperations.add_core_moarop_mapping('substr_s', 'substr_s');
 QAST::MASTOperations.add_core_moarop_mapping('codepointfromname', 'getcpbyname');
@@ -2278,6 +2279,8 @@ QAST::MASTOperations.add_core_op('tclc', -> $qastcomp, $op {
 
 QAST::MASTOperations.add_core_moarop_mapping('eqat', 'eqat_s');
 QAST::MASTOperations.add_core_moarop_mapping('eqatic', 'eqatic_s');
+QAST::MASTOperations.add_core_moarop_mapping('eqaticim', 'eqaticim_s');
+
 
 QAST::MASTOperations.add_core_op('substr', -> $qastcomp, $op {
     my @operands := $op.list;
