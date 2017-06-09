@@ -1,7 +1,7 @@
 #! nqp
 use nqpmo;
 
-plan(121);
+plan(122);
 
 my $knowhow := nqp::knowhow();
 my $bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
