@@ -164,6 +164,10 @@ class CodeRef extends NQPObject {
   $$can(ctx, name) {
     return 0;
   }
+
+  $$istype(ctx, type) {
+    return 0;
+  }
 };
 
 module.exports = CodeRef;
