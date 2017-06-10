@@ -891,7 +891,7 @@ class NFA extends REPR {
             break;
           case EDGE_CHARLIST:
           case EDGE_CHARLIST_NEG:
-            edge.argS = data.varint();
+            edge.argS = data.str();
             break;
 
           case EDGE_CODEPOINT_I:
@@ -947,7 +947,7 @@ class NFA extends REPR {
             break;
           case EDGE_CHARLIST:
           case EDGE_CHARLIST_NEG:
-            cursor.varint(edge.argS);
+            cursor.str(edge.argS);
             break;
           case EDGE_CODEPOINT_I:
           case EDGE_CODEPOINT_I_LL:
