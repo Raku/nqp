@@ -511,7 +511,7 @@ class Stderr extends StdHandle {
 
   $$writefh(buf) {
     var buffer = core.toRawBuffer(buf);
-    process.stdout.write(buffer);
+    process.stderr.write(buffer);
   }
 };
 
