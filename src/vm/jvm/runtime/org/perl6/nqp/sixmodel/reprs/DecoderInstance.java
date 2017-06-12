@@ -47,14 +47,14 @@ public class DecoderInstance extends SixModelObject {
         }
     }
 
-    public void addBytes(ThreadContext tc, ByteBuffer bytes) {
+    public synchronized void addBytes(ThreadContext tc, ByteBuffer bytes) {
         ensureConfigured(tc);
         if (toDecode == null)
             toDecode = new ArrayList<ByteBuffer>();
         toDecode.add(bytes);
     }
 
-    public String takeChars(ThreadContext tc, long chars) {
+    public synchronized String takeChars(ThreadContext tc, long chars) {
         ensureConfigured(tc);
 
         if (chars == 0)
@@ -85,7 +85,7 @@ public class DecoderInstance extends SixModelObject {
         return null;
     }
 
-    public String takeAvailableChars(ThreadContext tc) {
+    public synchronized String takeAvailableChars(ThreadContext tc) {
         ensureConfigured(tc);
 
         int maxChars = availableDecodedChars() + availableUndecodedBytes();
@@ -104,7 +104,7 @@ public class DecoderInstance extends SixModelObject {
         return result;
     }
 
-    public String takeAllChars(ThreadContext tc) {
+    public synchronized String takeAllChars(ThreadContext tc) {
         ensureConfigured(tc);
         int maxChars = availableDecodedChars() + availableUndecodedBytes();
         CharBuffer target = CharBuffer.allocate(maxChars);
@@ -119,7 +119,7 @@ public class DecoderInstance extends SixModelObject {
         return Normalizer.normalize(decodedBuffer(target), Normalizer.Form.NFC);
     }
 
-    public String takeLine(ThreadContext tc, boolean chomp, boolean eof) {
+    public synchronized String takeLine(ThreadContext tc, boolean chomp, boolean eof) {
         ensureConfigured(tc);
         while (true) {
             /* See if we can find the separator in any of the decoded chars. */
@@ -158,13 +158,13 @@ public class DecoderInstance extends SixModelObject {
         return eof ? takeAllChars(tc) : null;
     }
 
-    public long bytesAvailable(ThreadContext tc) {
+    public synchronized long bytesAvailable(ThreadContext tc) {
         ensureConfigured(tc);
         forceDecodedBackToBytes();
         return availableUndecodedBytes();
     }
 
-    public SixModelObject takeBytes(ThreadContext tc, SixModelObject bufType, long lBytes) {
+    public synchronized SixModelObject takeBytes(ThreadContext tc, SixModelObject bufType, long lBytes) {
         int available = (int)bytesAvailable(tc); // Implicitly forces decoded back to bytes
         if (available < lBytes)
             return null;
