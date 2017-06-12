@@ -1045,19 +1045,26 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             my str $first_time_marker := $*BLOCK.maybe_first_time_marker;
 
-            my str $pass_exceptions_start := '';
-            my str $pass_exceptions_end := '';
+            my str $pass_exceptions := '';
+
+            my int $wrap_in_try := 0;
+            my str $exit_handler;
+            my str $result_for_exit_handler;
+
+            if $node.has_exit_handler {
+              $result_for_exit_handler := $*BLOCK.add_tmp;
+              $wrap_in_try := 1;
+              $exit_handler := "\} finally \{nqp.exitHandler($*CTX, {quote_string($*HLL)}, $result_for_exit_handler);\n";
+            }
 
             if $*BLOCK.pass_on_exceptions {
-                $pass_exceptions_start := "try \{\n";
-                $pass_exceptions_end :=
+                $wrap_in_try := 1;
+                $pass_exceptions :=
                     ~ "\} catch (e) \{\n"
                     ~ "if (e instanceof nqp.PassExceptionToCaller) \{\n"
                     ~ "throw e.exception;\n"
                     ~ "\} else \{"
                     ~ "throw e;\n"
-                    ~ "\}"
-                    ~ "\}";
             }
 
             my str $save_args := $*BLOCK.has_own_variable('$*DISPATCHER') ?? "$*CTX.\$\$args = Array.prototype.slice.call(arguments);\n" !! '';
@@ -1074,10 +1081,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 $sig,
                 self.clone_inners($*BLOCK),
                 self.capture_inners($*BLOCK),
-                $pass_exceptions_start,
+                $wrap_in_try ?? "try \{\n" !! '',
                 $stmts,
+                $result_for_exit_handler ?? "$result_for_exit_handler = {$stmts.expr};\n" !! '',
                 "return {$stmts.expr};\n",
-                $pass_exceptions_end,
+                $pass_exceptions,
+                $exit_handler,
+                $wrap_in_try ?? "\}\n" !! '',
                 "\}"
             ];
 

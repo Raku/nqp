@@ -252,7 +252,7 @@ exports.toNum = function(arg_, ctx) {
   } else if (arg.$$numify) {
     return arg.$$numify();
   } else {
-    console.log(arg);
+    //console.log(arg);
     throw 'Can\'t convert to num';
   }
 };
@@ -478,6 +478,10 @@ exports.execname = function(path) {
 
 op.execname = function() {
   return execname;
+};
+
+exports.exitHandler = function(ctx, hllName, value) {
+  hll.hllConfigs[hllName].get('exit_handler').$$call(ctx.$$caller, null, ctx.codeRef(), value === undefined ? Null : value);
 };
 
 exports.NativeRef = require('./reprs.js').NativeRef;
