@@ -9,19 +9,6 @@ var hll = require('./hll.js');
 
 var op = {};
 exports.op = op;
-
-op.box_i = function(i, type) {
-  var repr = type._STable.REPR;
-  var obj = repr.allocate(type._STable);
-  obj.$$setInt(i);
-  return obj;
-};
-
-op.unbox_i = function(obj) {
-  if (typeof obj == 'number') return obj;
-  return obj.$$getInt();
-};
-
 function intishBool(b) {
   return b ? 1 : 0;
 }

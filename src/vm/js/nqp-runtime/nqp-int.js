@@ -31,6 +31,10 @@ class NQPInt extends NQPObject {
   $$clone() {
     return this;
   }
+
+  $$getInt() {
+    return this.value;
+  }
 };
 
 module.exports = NQPInt;

@@ -172,6 +172,18 @@ op.captureposarg = function(capture, i) {
   return capture.pos[i];
 };
 
+op.captureposarg_i = function(capture, i) {
+  return op.unbox_i(capture.pos[i]);
+};
+
+op.captureposarg_s = function(capture, i) {
+  return op.unbox_s(capture.pos[i]);
+};
+
+op.captureposarg_n = function(capture, i) {
+  return op.unbox_n(capture.pos[i]);
+};
+
 op.capturehasnameds = function(capture) {
   return (!capture.named || Object.keys(capture.named).length == 0) ? 0 : 1;
 };
@@ -349,6 +361,7 @@ op.box_n = function(n, type) {
 };
 
 op.unbox_n = function(obj) {
+  if (typeof obj == 'number') return obj;
   return obj.$$getNum();
 };
 
@@ -362,6 +375,19 @@ op.box_s = function(value, type) {
 op.unbox_s = function(obj) {
   if (typeof obj == 'string') return obj;
   return obj.$$getStr();
+};
+
+
+op.box_i = function(i, type) {
+  var repr = type._STable.REPR;
+  var obj = repr.allocate(type._STable);
+  obj.$$setInt(i);
+  return obj;
+};
+
+op.unbox_i = function(obj) {
+  if (typeof obj == 'number') return obj;
+  return obj.$$getInt();
 };
 
 op.setelems = function(obj, elems) {
@@ -994,7 +1020,11 @@ op.ctxouterskipthunks = function(ctx) {
 };
 
 op.captureposprimspec = function(capture, idx) {
-  return op.objprimspec(capture.pos[idx]);
+  if (capture.pos[idx].typeObject_) {
+    return 0;
+  } else {
+    return op.objprimspec(capture.pos[idx]);
+  }
 };
 
 op.forceouterctx = function(code, ctx) {
