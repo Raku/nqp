@@ -1,6 +1,6 @@
 use QAST;
 
-plan(132);
+plan(140);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -28,7 +28,7 @@ sub test_qast_result($qast, $tester) {
         $tester($code());
         CATCH { ok(0, 'Compilation failure in test_qast_result: ' ~ $!) }
     }
-}
+};
 
 # Couple of handly classes, which we may want to refer as WVals in tests.
 class A { method m() { 'a' } }
@@ -2190,3 +2190,95 @@ is_qast(
          )
     ), 'x100', 'QAST::Want - choose first when no match'
 );
+
+
+{
+    my class BlockCodeObject {
+    }
+
+    my $called_exit_handler := 0;
+    my $exit_handler_return_value;
+    my $exit_handler_coderef;
+
+    nqp::sethllconfig('exit_handler_lang', nqp::hash(
+        'exit_handler', -> $coderef, $resultish {
+            $called_exit_handler := $called_exit_handler + 1;
+            $exit_handler_return_value := $resultish;
+            $exit_handler_coderef := $coderef;
+        }
+    ));
+
+
+    my $with_handler := QAST::Block.new(
+        QAST::SVal.new( :value('block return value') )
+    );
+    $with_handler.has_exit_handler(1);
+
+    is_qast(
+        QAST::CompUnit.new(
+            :hll<exit_handler_lang>,
+            QAST::Block.new(
+                $with_handler,
+                QAST::Op.new(
+                    :op('bind'),
+                    QAST::Var.new( :name('$block'), :scope('local'), :decl('var')),
+                    QAST::BVal.new( :value($with_handler) )
+                ),
+                QAST::Op.new(
+                    :op('setcodeobj'),
+                    QAST::Var.new( :name('$block'), :scope('local')),
+                    QAST::WVal.new( :value(BlockCodeObject))
+                ),
+                QAST::Op.new(
+                    :op('call'),
+                    QAST::Var.new( :name('$block'), :scope('local')),
+                )
+            )
+        ),
+        'block return value',
+        'we survive running a CompUnit with a has_exit_handler Block');
+
+    is($called_exit_handler, 1, 'we have called the exit_handler');
+    is($exit_handler_return_value, 'block return value', 'the exit_handler gets correct return value');
+
+    ok(nqp::istype(nqp::getcodeobj($exit_handler_coderef), BlockCodeObject) , 'got the correct code ref to exit handler');
+    is($exit_handler_coderef(), 'block return value', 'the code ref when called returns correct value');
+
+    my $throws_exception := QAST::Block.new(
+        QAST::Op.new(
+            :op('die'),
+            QAST::SVal.new( :value('planned emergency') )
+        )
+    );
+    $throws_exception.has_exit_handler(1);
+
+    $called_exit_handler := 0;
+    $exit_handler_return_value := NQPMu;
+    $exit_handler_coderef := NQPMu;
+
+    is_qast(
+        QAST::CompUnit.new(
+            :hll<exit_handler_lang>,
+            QAST::Block.new(
+                $throws_exception,
+                QAST::Op.new(
+                    :op('bind'),
+                    QAST::Var.new( :name('$block'), :scope('local'), :decl('var')),
+                    QAST::BVal.new( :value($throws_exception) )
+                ),
+                QAST::Op.new(
+                    :op('handle'),
+                    QAST::Op.new(
+                        :op('call'),
+                        QAST::Var.new( :name('$block'), :scope('local')),
+                    ),
+                    'CATCH', QAST::SVal.new( :value('caught') )
+                )
+            )
+        ),
+        'caught',
+        'we survive running a CompUnit with a has_exit_handler Block and throws an exception');
+
+    is($called_exit_handler, 1, 'we have called the exit_handler');
+    ok(nqp::isnull($exit_handler_return_value), 'the exit_handler gets a null return value when throwing an exception');
+}
