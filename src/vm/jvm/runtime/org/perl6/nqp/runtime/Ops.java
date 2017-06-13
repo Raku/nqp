@@ -2206,6 +2206,51 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc, "captureposarg requires a CallCapture");
         }
     }
+    public static long captureposarg_i(SixModelObject obj, long idx, ThreadContext tc) {
+        if (obj instanceof CallCaptureInstance) {
+            CallCaptureInstance cc = (CallCaptureInstance)obj;
+            int i = (int)idx;
+            if (cc.descriptor.argFlags[i] == CallSiteDescriptor.ARG_INT) {
+                return (long)cc.args[i];
+            }
+            else {
+                throw ExceptionHandling.dieInternal(tc, "Expected native int argument");
+            }
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc, "captureposarg_i requires a CallCapture");
+        }
+    }
+    public static String captureposarg_s(SixModelObject obj, long idx, ThreadContext tc) {
+        if (obj instanceof CallCaptureInstance) {
+            CallCaptureInstance cc = (CallCaptureInstance)obj;
+            int i = (int)idx;
+            if (cc.descriptor.argFlags[i] == CallSiteDescriptor.ARG_STR) {
+                return (String)cc.args[i];
+            }
+            else {
+                throw ExceptionHandling.dieInternal(tc, "Expected native str argument");
+            }
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc, "captureposarg_s requires a CallCapture");
+        }
+    }
+    public static double captureposarg_n(SixModelObject obj, long idx, ThreadContext tc) {
+        if (obj instanceof CallCaptureInstance) {
+            CallCaptureInstance cc = (CallCaptureInstance)obj;
+            int i = (int)idx;
+            if (cc.descriptor.argFlags[i] == CallSiteDescriptor.ARG_NUM) {
+                return (double)cc.args[i];
+            }
+            else {
+                throw ExceptionHandling.dieInternal(tc, "Expected native num argument");
+            }
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc, "captureposarg_n requires a CallCapture");
+        }
+    }
     public static long captureexistsnamed(SixModelObject obj, String name, ThreadContext tc) {
         if (obj instanceof CallCaptureInstance) {
             CallCaptureInstance cc = (CallCaptureInstance)obj;
