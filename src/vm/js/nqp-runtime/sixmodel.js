@@ -149,7 +149,7 @@ class STable {
     // this is the default - do nothing
     } else if (mode == 6) {
       this.ObjConstructor.prototype.$$toBool = function(ctx) {
-        return this.$$getBignum().eq(0) ? 0 : 1;
+        return (this.typeObject_ || this.$$getBignum().eq(0)) ? 0 : 1;
       };
     } else if (mode == 7) {
     // STUB
