@@ -481,7 +481,7 @@ op.execname = function() {
 };
 
 exports.exitHandler = function(ctx, hllName, value) {
-  hll.hllConfigs[hllName].get('exit_handler').$$call(ctx.$$caller, null, ctx.codeRef(), value === undefined ? Null : value);
+  hll.hllConfigs[hllName].get('exit_handler').$$call(ctx, null, ctx.codeRef(), value === undefined ? Null : value);
 };
 
 exports.NativeRef = require('./reprs.js').NativeRef;
