@@ -1,6 +1,6 @@
 use QAST;
 
-plan(140);
+plan(141);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -2196,20 +2196,34 @@ is_qast(
     my class BlockCodeObject {
     }
 
+    my class Inner {
+        method from() {'inside the sub'}
+    }
+    my class Caller {
+        method from() {'caller of the sub'}
+    }
+
     my $called_exit_handler := 0;
     my $exit_handler_return_value;
     my $exit_handler_coderef;
+    my $caller;
 
     nqp::sethllconfig('exit_handler_lang', nqp::hash(
         'exit_handler', -> $coderef, $resultish {
             $called_exit_handler := $called_exit_handler + 1;
             $exit_handler_return_value := $resultish;
             $exit_handler_coderef := $coderef;
+            $caller := nqp::ctxcaller(nqp::ctx());
         }
     ));
 
 
     my $with_handler := QAST::Block.new(
+        QAST::Op.new(
+            :op('bind'),
+            QAST::Var.new( :name('$*DYNAMIC_VAR'), :scope('lexical'), :decl('var')),
+            QAST::WVal.new( :value(Inner) )
+        ),
         QAST::SVal.new( :value('block return value') )
     );
     $with_handler.has_exit_handler(1);
@@ -2219,6 +2233,11 @@ is_qast(
             :hll<exit_handler_lang>,
             QAST::Block.new(
                 $with_handler,
+                QAST::Op.new(
+                    :op('bind'),
+                    QAST::Var.new( :name('$*DYNAMIC_VAR'), :scope('lexical'), :decl('var')),
+                    QAST::WVal.new( :value(OUter) )
+                ),
                 QAST::Op.new(
                     :op('bind'),
                     QAST::Var.new( :name('$block'), :scope('local'), :decl('var')),
@@ -2237,6 +2256,9 @@ is_qast(
         ),
         'block return value',
         'we survive running a CompUnit with a has_exit_handler Block');
+
+
+    is($caller<$*DYNAMIC_VAR>.from, 'inside the sub', 'the exit_handler get the sub as the caller');
 
     is($called_exit_handler, 1, 'we have called the exit_handler');
     is($exit_handler_return_value, 'block return value', 'the exit_handler gets correct return value');
