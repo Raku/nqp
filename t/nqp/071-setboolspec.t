@@ -1,6 +1,6 @@
 use nqpmo;
 
-plan(23);
+plan(24);
 
 my $MODE_CALL_METHOD := 0;
 my $MODE_UNBOX_INT := 1;
@@ -142,6 +142,7 @@ ok(nqp::istrue(Bar) == 0, "setboolspec MODE_NOT_TYPE_OBJECT = 5 works correctly 
 
     ok(nqp::istrue($two), 'MODE_BIGINT - 2 is true');
     ok(!nqp::istrue($zero), 'MODE_BIGINT - 0 is false');
+    ok(!nqp::istrue($bignum), 'MODE_BIGINT - type object is false');
 }
 {
     class HasElems {
