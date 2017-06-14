@@ -1,6 +1,6 @@
 use QAST;
 
-plan(141);
+plan(147);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -2303,4 +2303,73 @@ is_qast(
 
     is($called_exit_handler, 1, 'we have called the exit_handler');
     ok(nqp::isnull($exit_handler_return_value), 'the exit_handler gets a null return value when throwing an exception');
+}
+
+{
+    my $throw;
+    my $called := 0;
+    my $got_cat;
+    nqp::sethllconfig('handler_not_found_lang', nqp::hash(
+        'lexical_handler_not_found_error', -> int $cat, int $out_of_dyn_scope {
+            $called := $called + 1;
+            $got_cat := $cat;
+            nqp::die('throwing from lexical_handler_not_found_error') if $throw;
+        }
+    ));
+
+    my $returns := QAST::Block.new(
+        QAST::Op.new(
+            :op('throwpayloadlexcaller'),
+            QAST::Op.new( :op('const'), :name('CONTROL_RETURN') ),
+            QAST::SVal.new( :value('failed return') )
+        ),
+        QAST::SVal.new( :value('survived') )
+    );
+
+    is_qast(
+        QAST::CompUnit.new(
+            :hll<handler_not_found_lang>,
+            QAST::Block.new(
+                QAST::Op.new(
+                    :op('call'),
+                    QAST::Op.new(:op<takeclosure>, # needed for JVM
+                        $returns,
+                    )
+                ),
+            )
+        ),
+        'survived',
+        'we survived a throwpayloadlexcaller with a lexical_handler_not_found_error');
+
+    is($called, '1', 'called the lexical_handler_not_found_error handler - with throwpayloadlexcaller');
+    is($got_cat, nqp::const::CONTROL_RETURN, '...got right category of handler');
+
+    $called := 0;
+    $got_cat := NQPMu;
+
+    $throw := 1;
+
+    is_qast(
+        QAST::CompUnit.new(
+            :hll<handler_not_found_lang>,
+            QAST::Block.new(
+                QAST::Op.new(
+                    :op('handle'),
+                    QAST::Op.new(
+                        :op('throwpayloadlexcaller'),
+                        QAST::Op.new( :op('const'), :name('CONTROL_RETURN') ),
+                        QAST::SVal.new( :value('failed return') )
+                    ),
+                    'CATCH', QAST::Op.new(
+                        :op('getmessage'),
+                        QAST::Op.new( :op('exception') )
+                    )
+                )
+            )
+        ),
+        'throwing from lexical_handler_not_found_error',
+        'throwing from a  lexical_handler_not_found_error cause by throwpayloadlexcaller');
+
+    is($called, '1', 'called the lexical_handler_not_found_error handler - with throwpayloadlex');
+    is($got_cat, nqp::const::CONTROL_RETURN, '...got right category of handler');
 }
