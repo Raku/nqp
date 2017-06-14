@@ -1410,7 +1410,7 @@ class QAST::OperationsJS {
     }
 
     add_simple_op('throwpayloadlexcaller', $T_VOID, [$T_INT, $T_OBJ], :side_effects, :!inlinable,
-       sub ($category, $payload) {"{$*BLOCK.ctx}.throwpayloadlexcaller($category, $payload)"});
+       sub ($category, $payload) {"$*CTX.throwpayloadlexcaller($category, $payload)"});
 
     add_op('throwpayloadlex', :!inlinable, sub ($comp, $node, :$want) {
         my $payload := $comp.as_js(:want($T_OBJ), $node[1]);

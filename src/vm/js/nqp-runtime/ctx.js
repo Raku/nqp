@@ -191,23 +191,27 @@ class Ctx extends NQPObject {
   }
 
   throwpayloadlexcaller(category, payload) {
-    let ctx = this.$$caller;
+    let ctx = this.$$skipHandlers().$$caller;
     let isThunkOrCompilerStub = code => code.staticCode.isThunk || code.isCompilerStub;
     while (ctx && isThunkOrCompilerStub(ctx.codeRef())) {
       ctx = ctx.$$caller;
     }
 
-    ctx.throwpayloadlex(category, payload);
+    this.$$throwLexicalException(ctx, category, payload);
   }
 
   throwpayloadlex(category, payload) {
+    this.$$throwLexicalException(this, category, payload);
+  }
+
+  $$throwLexicalException(lookFrom, category, payload) {
     let exType = BOOT.Exception;
     let exception = exType._STable.REPR.allocate(exType._STable);
     exception.$$category = category;
     exception.$$payload = payload;
     let handler = '$$' + categoryToName[category];
 
-    let ctx = this;
+    let ctx = lookFrom;
 
     while (ctx) {
       if (ctx[handler] || ctx.$$CONTROL) {
@@ -235,6 +239,8 @@ class Ctx extends NQPObject {
       }
       ctx = ctx.$$outer;
     }
+
+    this.$$getHLL().get('lexical_handler_not_found_error').$$call(this, null, category, 0);
   }
 
   lookupDynamic(name) {
