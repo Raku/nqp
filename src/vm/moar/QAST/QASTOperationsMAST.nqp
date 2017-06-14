@@ -158,9 +158,10 @@ class QAST::MASTOperations {
             my int $operand := nqp::atpos_i(@operands_values, $operands_offset + $operand_num++);
             my int $operand_kind := ($operand +& $MVM_operand_type_mask);
             my int $constant_operand := !($operand +& $MVM_operand_rw_mask);
+            my $want-decont := @deconts[$arg_num];
             my $arg := $operand_kind == $MVM_operand_type_var
-                ?? $qastcomp.as_mast($_)
-                !! $qastcomp.as_mast($_, :want($operand_kind/8));
+                ?? $qastcomp.as_mast($_, :$want-decont)
+                !! $qastcomp.as_mast($_, :want($operand_kind/8), :$want-decont);
             my int $arg_kind := $arg.result_kind;
 
             if $arg_num == 0 && nqp::eqat($op, 'return_', 0) {
@@ -732,7 +733,7 @@ for <if unless with without> -> $op_name {
             $op[1].blocktype($orig_type);
         }
         else {
-            @comp_ops[1] := $qastcomp.as_mast($op[1], :want($wanted));
+            @comp_ops[1] := $qastcomp.as_mast($op[1], :want($wanted), :want-decont($*WANT-DECONT));
         }
         if needs_cond_passed($op[2]) {
             my $orig_type := $op[2].blocktype;
@@ -745,7 +746,7 @@ for <if unless with without> -> $op_name {
             $op[2].blocktype($orig_type);
         }
         elsif $op[2] {
-            @comp_ops[2] := $qastcomp.as_mast($op[2], :want($wanted));
+            @comp_ops[2] := $qastcomp.as_mast($op[2], :want($wanted), :want-decont($*WANT-DECONT));
         }
 
         if (@comp_ops[0].result_kind == $MVM_reg_void) {
@@ -2521,6 +2522,17 @@ QAST::MASTOperations.add_core_moarop_mapping('iscont_i', 'iscont_i');
 QAST::MASTOperations.add_core_moarop_mapping('iscont_n', 'iscont_n');
 QAST::MASTOperations.add_core_moarop_mapping('iscont_s', 'iscont_s');
 QAST::MASTOperations.add_core_moarop_mapping('isrwcont', 'isrwcont');
+QAST::MASTOperations.add_core_op('decont', -> $qastcomp, $op {
+    if +$op.list != 1 {
+        nqp::die("The 'decont' op needs 1 operand, got " ~ +$op.list);
+    }
+    my $regalloc := $*REGALLOC;
+    my $res_reg := $regalloc.fresh_o();
+    my $expr := $qastcomp.as_mast($op[0], :want($MVM_reg_obj), :want-decont);
+    push_op($expr.instructions, 'decont', $res_reg, $expr.result_reg);
+    $regalloc.release_register($expr.result_reg, $MVM_reg_obj);
+    MAST::InstructionList.new($expr.instructions, $res_reg, $MVM_reg_obj)
+});
 QAST::MASTOperations.add_core_moarop_mapping('decont', 'decont');
 QAST::MASTOperations.add_core_moarop_mapping('decont_i', 'decont_i');
 QAST::MASTOperations.add_core_moarop_mapping('decont_n', 'decont_n');

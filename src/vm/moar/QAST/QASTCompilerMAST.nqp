@@ -610,8 +610,9 @@ my class MASTCompilerInstance {
         MAST::InstructionList.new($il, $reg, $desired)
     }
 
-    method as_mast($qast, :$want) {
+    method as_mast($qast, :$want, :$want-decont) {
         my $*WANT;
+        my $*WANT-DECONT := $want-decont;
         if nqp::defined($want) {
             $*WANT := $want;
             if nqp::istype($qast, QAST::Want) {
@@ -1367,9 +1368,10 @@ my class MASTCompilerInstance {
             # the last statement,
                     || $resultchild == -1 && $result_count == $final_stmt_idx) {
                 # compile $_ with an explicit $want, either what's given or obj
+                my $want-decont := $*WANT-DECONT;
                 $last_stmt := nqp::defined($WANT)
-                    ?? self.as_mast($_, :want($WANT))
-                    !! self.as_mast($_);
+                    ?? self.as_mast($_, :want($WANT), :$want-decont)
+                    !! self.as_mast($_, :$want-decont);
                 if $last_stmt.result_kind == $MVM_reg_void {
                     $last_stmt := self.coerce($last_stmt, $MVM_reg_obj);
                 }
@@ -1590,6 +1592,13 @@ my class MASTCompilerInstance {
                 $scope := 'lexical'   if $scope eq 'lexicalref';
                 $scope := 'attribute' if $scope eq 'attributeref';
             }
+        }
+
+        # If we want a decontainerized value, then we don't ever need a
+        # reference in this context either.
+        if $*WANT-DECONT {
+            $scope := 'lexical'   if $scope eq 'lexicalref';
+            $scope := 'attribute' if $scope eq 'attributeref';
         }
 
         # Now go by scope.
@@ -1943,7 +1952,7 @@ my class MASTCompilerInstance {
 
     multi method compile_node(QAST::Want $node, :$want) {
         # If we're not in a coercive context, take the default.
-        self.as_mast($node[0])
+        self.as_mast($node[0], :want-decont($*WANT-DECONT))
     }
 
     multi method compile_node(QAST::IVal $iv, :$want) {
