@@ -299,14 +299,10 @@ class BinaryWriteCursor {
       case REFVAR_VM_STR:
         this.str(ref);
         break;
-      //      case REFVAR_VM_ARR_INT:
-      //      case REFVAR_VM_ARR_STR:
-      //          ref.st.REPR.serialize(tc, this, ref);
+      case REFVAR_VM_ARR_INT:
+      case REFVAR_VM_ARR_STR:
       case REFVAR_VM_ARR_VAR:
-        this.varint(ref.array.length);
-        for (var i = 0; i < ref.array.length; i++) {
-          this.ref(ref.array[i] || Null);
-        }
+        ref._STable.REPR.serialize(this, ref);
         break;
       case REFVAR_VM_HASH_STR_VAR:
         this.varint(ref.$$elems());
