@@ -12,7 +12,6 @@ var core = require('./core.js');
 var child_process = require('child_process');
 
 var NQPObject = require('./nqp-object.js');
-var Null = require('./null.js');
 
 var mkdirp = require('mkdirp');
 
@@ -409,10 +408,6 @@ const PIPE_CAPTURE_OUT = 32;
 const PIPE_INHERIT_ERR = 64;
 const PIPE_IGNORE_ERR = 128;
 const PIPE_CAPTURE_ERR = 256;
-
-function convertNull(obj) {
-  return obj === Null ? null : obj;
-}
 
 function stringifyEnv(ctx, hash) {
   let stringifed = {};
