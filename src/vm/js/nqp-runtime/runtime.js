@@ -252,7 +252,6 @@ exports.toNum = function(arg_, ctx) {
   } else if (arg.$$numify) {
     return arg.$$numify();
   } else {
-    //console.log(arg);
     throw 'Can\'t convert to num';
   }
 };

@@ -624,15 +624,15 @@ op.decode = function(buf, encoding) {
 
 op.objprimspec = function(obj) {
   if (obj === Null) return 0;
-  if (typeof obj === "object") {
+  if (typeof obj === 'object') {
     if (obj instanceof NQPInt) {
       return 1;
     } else {
       return (obj._STable && obj._STable.REPR.boxedPrimitive ? obj._STable.REPR.boxedPrimitive : 0);
     }
-  } else if (typeof obj == "number") {
+  } else if (typeof obj == 'number') {
     return 2;
-  } else if (typeof obj == "string") {
+  } else if (typeof obj == 'string') {
     return 3;
   } else {
     throw new NQPException(`objprimspec can't handle things of type: ${typeof obj}`);
