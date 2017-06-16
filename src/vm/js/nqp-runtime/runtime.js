@@ -188,7 +188,7 @@ exports.toStr = function(arg_, ctx) {
   } else if (arg.$$getStr) {
     return arg.$$getStr();
   } else if (arg.Str) {
-    let ret = arg.Str(ctx, null, arg); // eslint-disable-line new-cap
+    let ret = arg.Str(ctx, null, arg).$$decont(ctx); // eslint-disable-line new-cap
     if (typeof ret == 'string') return ret;
     return ret.$$getStr();
   } else if (arg.$$getNum) {
