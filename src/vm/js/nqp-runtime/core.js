@@ -999,7 +999,8 @@ op.ctxcaller = function(ctx) {
 };
 
 op.ctxcallerskipthunks = function(ctx) {
-  var caller = ctx.$$skipHandlers().$$caller;
+  let caller = ctx.$$skipHandlers().$$caller;
+  if (caller) caller = caller.$$skipHandlers();
 
   // FIXME - ctxs that don't have a codeRef
   while (caller && caller.codeRef().staticCode.isThunk) {
@@ -1010,11 +1011,12 @@ op.ctxcallerskipthunks = function(ctx) {
 };
 
 op.ctxouterskipthunks = function(ctx) {
-  var outer = ctx.$$outer;
+  var outer = ctx.$$skipHandlers().$$outer;
 
   // FIXME - ctxs that don't have a codeRef
   while (outer && outer.codeRef().staticCode.isThunk) {
     outer = outer.$$outer;
+    if (outer) outer = outer.$$skipHandlers();
   }
   return outer || Null;
 };
