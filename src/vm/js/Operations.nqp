@@ -583,7 +583,8 @@ class QAST::OperationsJS {
                @exprs.push($chunk.expr);
            }
 
-           @setup.push("$list = nqp.list({quote_string($*HLL)}, [" ~ nqp::join(',', @exprs) ~ "]);\n");
+           my $hll := $type == $T_OBJ ?? quote_string($*HLL) ~ ',' !! '';
+           @setup.push($list ~ " = nqp.list" ~ $suffix ~ "(" ~ $hll ~ "[" ~ nqp::join(',', @exprs) ~ "]);\n");
 
            Chunk.new($T_OBJ, $list , @setup, :$node);
         });

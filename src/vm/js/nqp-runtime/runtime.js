@@ -14,6 +14,8 @@ var Capture = require('./capture.js');
 
 var StaticCtx = require('./static-ctx.js');
 
+const BOOT = require('./BOOT.js');
+
 const fs = require('fs');
 
 exports.NQPInt = NQPInt;
@@ -437,6 +439,22 @@ exports.null_s = nullStr;
 exports.Null = Null;
 
 exports.list = hll.list;
+
+
+exports.list_i = function lowlevelList(array) {
+  let stable = BOOT.IntArray._STable;
+  return stable.REPR.allocateFromArray(stable, array);
+};
+
+exports.list_n = function lowlevelList(array) {
+  let stable = BOOT.NumArray._STable;
+  return stable.REPR.allocateFromArray(stable, array);
+};
+
+exports.list_s = function lowlevelList(array) {
+  let stable = BOOT.StrArray._STable;
+  return stable.REPR.allocateFromArray(stable, array);
+};
 
 exports.slurpyArray = hll.slurpyArray;
 exports.createArray = require('./BOOT').createArray;
