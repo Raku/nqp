@@ -615,6 +615,41 @@ sub add_to_sc($sc, $idx, $obj) {
     is(nqp::scgetobj($dsc, 0)<ciao>, 789, 'element of hash is correct');
 }
 
+{
+    my $sc := nqp::createsc('TEST_SC_18_IN');
+    my $sh := nqp::list_s();
+
+    class WithNumArray {
+        has $!a;
+        method new() {
+            my $obj := nqp::create(self);
+            $obj.BUILD();
+            $obj;
+        }
+        method BUILD() {
+            my @a := nqp::list_n();
+            nqp::bindpos_n(@a, 0, 101);
+            nqp::bindpos_n(@a, 1, 102);
+            nqp::bindpos_n(@a, 2, 103);
+            $!a := @a;
+        }
+        method a() { $!a }
+    }
+    my $v := WithNumArray.new();
+    add_to_sc($sc, 0, $v);
+
+    my $serialized := nqp::serialize($sc, $sh);
+
+    my $dsc := nqp::createsc('TEST_SC_18_OUT');
+    nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
+
+    ok(nqp::istype(nqp::scgetobj($dsc, 0), T18),          'deserialized object has correct type');
+    ok(nqp::elems(nqp::scgetobj($dsc, 0).a) == 3,         'num array came back with correct element count');
+    ok(nqp::atpos_n(nqp::scgetobj($dsc, 0).a, 0) == 101,  'num array first element is correct');
+    ok(nqp::atpos_n(nqp::scgetobj($dsc, 0).a, 1) == 102,  'num array second element is correct');
+    ok(nqp::atpos_n(nqp::scgetobj($dsc, 0).a, 2) == 103,  'num array third element is correct');
+}
+
 # integers
 my $seq := 1;
 sub round_trip_int_array($desc, @a) {
@@ -650,40 +685,6 @@ sub round_trip_int_array($desc, @a) {
     }
 };
 
-{
-    my $sc := nqp::createsc('TEST_SC_13_IN');
-    my $sh := nqp::list_s();
-
-    class T13 {
-        has $!a;
-        method new() {
-            my $obj := nqp::create(self);
-            $obj.BUILD();
-            $obj;
-        }
-        method BUILD() {
-            my @a := nqp::list_n();
-            nqp::bindpos_n(@a, 0, 101);
-            nqp::bindpos_n(@a, 1, 102);
-            nqp::bindpos_n(@a, 2, 103);
-            $!a := @a;
-        }
-        method a() { $!a }
-    }
-    my $v := T13.new();
-    add_to_sc($sc, 0, $v);
-
-    my $serialized := nqp::serialize($sc, $sh);
-
-    my $dsc := nqp::createsc('TEST_SC_13_OUT');
-    nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
-
-    ok(nqp::istype(nqp::scgetobj($dsc, 0), T13),          'deserialized object has correct type');
-    ok(nqp::elems(nqp::scgetobj($dsc, 0).a) == 3,         'num array came back with correct element count');
-    ok(nqp::atpos_n(nqp::scgetobj($dsc, 0).a, 0) == 101,  'num array first element is correct');
-    ok(nqp::atpos_n(nqp::scgetobj($dsc, 0).a, 1) == 102,  'num array second element is correct');
-    ok(nqp::atpos_n(nqp::scgetobj($dsc, 0).a, 2) == 103,  'num array third element is correct');
-}
 
 {
     my @a;
