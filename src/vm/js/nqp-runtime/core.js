@@ -727,6 +727,7 @@ op.asec_n = function(x) {
 };
 
 op.sech_n = function(x) {
+  if (x == Infinity || x == -Infinity) return 0;
   return (2 * Math.cosh(x)) / (Math.cosh(2 * x) + 1);
 };
 
