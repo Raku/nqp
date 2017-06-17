@@ -23,9 +23,22 @@ sub add_to_sc($sc, $idx, $obj) {
     nqp::setobjsc($obj, $sc);
 }
 
+my $in_sc := -1;
+sub fresh_in_sc() {
+  $in_sc := $in_sc + 1;
+  'TEST_SC_'  ~ $in_sc ~ '_IN';
+}
+
+my $out_sc := -1;
+sub fresh_out_sc() {
+  $out_sc := $out_sc + 1;
+  'TEST_SC_'  ~ $out_sc ~ '_OUT';
+}
+
 # Test nqp::getobjsc/nqp::scgetobjidx
 {
-    my $sc := nqp::createsc('TEST_SC_0_IN');
+    say(fresh_in_sc());
+    my $sc := nqp::createsc(fresh_in_sc);
     class T0 is repr('P6int') { }
     my $v1 := nqp::box_i(42, T0);
     my $v2 := nqp::box_i(43, T0);
@@ -41,14 +54,14 @@ sub add_to_sc($sc, $idx, $obj) {
 
 # Serializing an empty SC.
 {
-    my $sc := nqp::createsc('TEST_SC_1_IN');
+    my $sc := nqp::createsc(fresh_in_sc());
     my $sh := nqp::list_s();
     
     my $serialized := nqp::serialize($sc, $sh);
     ok(nqp::chars($serialized) > 0,   'serialized empty SC to non-empty string');
     ok(nqp::chars($serialized) >= 36, 'output is at least as long as the header');
 
-    my $dsc := nqp::createsc('TEST_SC_1_OUT');
+    my $dsc := nqp::createsc(fresh_out_sc());
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
     
     ok(nqp::scobjcount($dsc) == 0, 'deserialized SC is also empty');
@@ -56,7 +69,7 @@ sub add_to_sc($sc, $idx, $obj) {
 
 # Serializing an SC with a single object with P6int REPR.
 {
-    my $sc := nqp::createsc('TEST_SC_2_IN');
+    my $sc := nqp::createsc(fresh_in_sc());
     my $sh := nqp::list_s();
     
     class T1 is repr('P6int') { }
@@ -66,7 +79,7 @@ sub add_to_sc($sc, $idx, $obj) {
     my $serialized := nqp::serialize($sc, $sh);
     ok(nqp::chars($serialized) > 36, 'serialized SC with P6int output longer than a header');
     
-    my $dsc := nqp::createsc('TEST_SC_2_OUT');
+    my $dsc := nqp::createsc(fresh_out_sc());
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
     
     ok(nqp::scobjcount($dsc) == 1,  'deserialized SC has a single object');
@@ -76,7 +89,7 @@ sub add_to_sc($sc, $idx, $obj) {
     
 # Serializing an SC with a single object with P6num REPR.
 {
-    my $sc := nqp::createsc('TEST_SC_3_IN');
+    my $sc := nqp::createsc(fresh_in_sc());
     my $sh := nqp::list_s();
     
     class T2 is repr('P6num') { }
@@ -86,7 +99,7 @@ sub add_to_sc($sc, $idx, $obj) {
     my $serialized := nqp::serialize($sc, $sh);
     ok(nqp::chars($serialized) > 36, 'serialized SC with P6num output longer than a header');
     
-    my $dsc := nqp::createsc('TEST_SC_3_OUT');
+    my $dsc := nqp::createsc(fresh_out_sc());
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
     
     ok(nqp::scobjcount($dsc) == 1,   'deserialized SC has a single object');
@@ -96,7 +109,7 @@ sub add_to_sc($sc, $idx, $obj) {
 
 # Serializing an SC with a single object with P6str REPR.
 {
-    my $sc := nqp::createsc('TEST_SC_4_IN');
+    my $sc := nqp::createsc(fresh_in_sc());
     my $sh := nqp::list_s();
     
     class T3 is repr('P6str') { }
@@ -106,7 +119,7 @@ sub add_to_sc($sc, $idx, $obj) {
     my $serialized := nqp::serialize($sc, $sh);
     ok(nqp::chars($serialized) > 36, 'serialized SC with P6str output longer than a header');
     
-    my $dsc := nqp::createsc('TEST_SC_4_OUT');
+    my $dsc := nqp::createsc(fresh_out_sc());
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
     
     ok(nqp::scobjcount($dsc) == 1,        'deserialized SC has a single object');
@@ -116,7 +129,7 @@ sub add_to_sc($sc, $idx, $obj) {
 
 # Serializing an SC with a P6opaque containing a P6int, P6num and P6str.
 {
-    my $sc := nqp::createsc('TEST_SC_5_IN');
+    my $sc := nqp::createsc(fresh_in_sc());
     my $sh := nqp::list_s();
     
     class T4 {
@@ -143,7 +156,7 @@ sub add_to_sc($sc, $idx, $obj) {
     my $serialized := nqp::serialize($sc, $sh);
     ok(nqp::chars($serialized) > 36, 'serialized SC with P6opaque output longer than a header');
     
-    my $dsc := nqp::createsc('TEST_SC_5_OUT');
+    my $dsc := nqp::createsc(fresh_out_sc());
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
 
     ok(nqp::scobjcount($dsc) == 1,        'deserialized SC has a single object');
@@ -155,7 +168,7 @@ sub add_to_sc($sc, $idx, $obj) {
 
 # Serializing an SC with P6opaues and circular references
 {
-    my $sc := nqp::createsc('TEST_SC_6_IN');
+    my $sc := nqp::createsc(fresh_in_sc());
     my $sh := nqp::list_s();
     
     class T5 {
@@ -175,7 +188,7 @@ sub add_to_sc($sc, $idx, $obj) {
     my $serialized := nqp::serialize($sc, $sh);
     ok(nqp::chars($serialized) > 36, 'serialized SC with P6opaque output longer than a header');
     
-    my $dsc := nqp::createsc('TEST_SC_6_OUT');
+    my $dsc := nqp::createsc(fresh_out_sc());
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
     
     ok(nqp::scobjcount($dsc) == 2,  'deserialized SC has 2 objects');
@@ -187,7 +200,7 @@ sub add_to_sc($sc, $idx, $obj) {
 
 # Tracing an object graph.
 {
-    my $sc := nqp::createsc('TEST_SC_7_IN');
+    my $sc := nqp::createsc(fresh_in_sc());
     my $sh := nqp::list_s();
     
     class T6 {
@@ -214,7 +227,7 @@ sub add_to_sc($sc, $idx, $obj) {
     add_to_sc($sc, 0, $v1);
     my $serialized := nqp::serialize($sc, $sh);
     
-    my $dsc := nqp::createsc('TEST_SC_7_OUT');
+    my $dsc := nqp::createsc(fresh_out_sc());
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
     
     ok(nqp::scobjcount($dsc) == 3,  'deserialized SC has 3 objects - the one we added and two discovered');
@@ -230,7 +243,7 @@ sub add_to_sc($sc, $idx, $obj) {
 
 # Serializing an SC with a P6opaque containing VM Integer/Float/String
 {
-    my $sc := nqp::createsc('TEST_SC_8_IN');
+    my $sc := nqp::createsc(fresh_in_sc());
     my $sh := nqp::list_s();
     
     class T7 {
@@ -256,7 +269,7 @@ sub add_to_sc($sc, $idx, $obj) {
 
     my $serialized := nqp::serialize($sc, $sh);
     
-    my $dsc := nqp::createsc('TEST_SC_8_OUT');
+    my $dsc := nqp::createsc(fresh_out_sc());
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
 
     ok(nqp::scobjcount($dsc) == 1,        'deserialized SC has a single object');
@@ -268,7 +281,7 @@ sub add_to_sc($sc, $idx, $obj) {
 
 # Array in an object attribute
 {
-    my $sc := nqp::createsc('TEST_SC_9_IN');
+    my $sc := nqp::createsc(fresh_in_sc());
     my $sh := nqp::list_s();
     
     class T8 {
@@ -291,7 +304,7 @@ sub add_to_sc($sc, $idx, $obj) {
 
     my $serialized := nqp::serialize($sc, $sh);
     
-    my $dsc := nqp::createsc('TEST_SC_9_OUT');
+    my $dsc := nqp::createsc(fresh_out_sc());
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
 
     ok(nqp::istype(nqp::scgetobj($dsc, 0), T8),          'deserialized object has correct type');
@@ -309,7 +322,7 @@ sub add_to_sc($sc, $idx, $obj) {
 
 # Hash in an object attribute.
 {
-    my $sc := nqp::createsc('TEST_SC_10_IN');
+    my $sc := nqp::createsc(fresh_in_sc());
     my $sh := nqp::list_s();
     
     class T9 {
@@ -332,7 +345,7 @@ sub add_to_sc($sc, $idx, $obj) {
 
     my $serialized := nqp::serialize($sc, $sh);
     
-    my $dsc := nqp::createsc('TEST_SC_10_OUT');
+    my $dsc := nqp::createsc(fresh_out_sc());
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
 
     ok(nqp::istype(nqp::scgetobj($dsc, 0), T9),          'deserialized object has correct type');
@@ -343,7 +356,7 @@ sub add_to_sc($sc, $idx, $obj) {
 
 # Integer array (probably needed for NFA serialization).
 {
-    my $sc := nqp::createsc('TEST_SC_11_IN');
+    my $sc := nqp::createsc(fresh_in_sc());
     my $sh := nqp::list_s();
     
     class T10 {
@@ -367,7 +380,7 @@ sub add_to_sc($sc, $idx, $obj) {
 
     my $serialized := nqp::serialize($sc, $sh);
     
-    my $dsc := nqp::createsc('TEST_SC_11_OUT');
+    my $dsc := nqp::createsc(fresh_out_sc());
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
 
     ok(nqp::istype(nqp::scgetobj($dsc, 0), T10),          'deserialized object has correct type');
@@ -381,7 +394,7 @@ sub add_to_sc($sc, $idx, $obj) {
 
 # String array (used by Rakudo in signatures)
 {
-    my $sc := nqp::createsc('TEST_SC_12_IN');
+    my $sc := nqp::createsc(fresh_in_sc());
     my $sh := nqp::list_s();
     
     class T11 {
@@ -405,7 +418,7 @@ sub add_to_sc($sc, $idx, $obj) {
 
     my $serialized := nqp::serialize($sc, $sh);
     
-    my $dsc := nqp::createsc('TEST_SC_12_OUT');
+    my $dsc := nqp::createsc(fresh_out_sc());
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
 
     ok(nqp::istype(nqp::scgetobj($dsc, 0), T11),             'deserialized object has correct type');
@@ -420,7 +433,7 @@ sub add_to_sc($sc, $idx, $obj) {
 
 # Serializing an SC with a P6opaque containing a MultiCache
 {
-    my $sc := nqp::createsc('TEST_SC_13_IN');
+    my $sc := nqp::createsc(fresh_in_sc());
     my $sh := nqp::list_s();
 
     class T8 {
@@ -462,7 +475,7 @@ sub add_to_sc($sc, $idx, $obj) {
 
     my $serialized := nqp::serialize($sc, $sh);
 
-    my $dsc := nqp::createsc('TEST_SC_13_OUT');
+    my $dsc := nqp::createsc(fresh_out_sc());
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
 
     ok(nqp::scobjcount($dsc) == 1, 'deserialized SC has a single object');
@@ -481,7 +494,7 @@ sub add_to_sc($sc, $idx, $obj) {
 
 # Serializing an SC with a VMArray
 {
-    my $sc := nqp::createsc('TEST_SC_14_IN');
+    my $sc := nqp::createsc(fresh_in_sc());
     my $sh := nqp::list_s();
 
     class VMArrayClass is repr('VMArray') {
@@ -495,7 +508,7 @@ sub add_to_sc($sc, $idx, $obj) {
 
     my $serialized := nqp::serialize($sc, $sh);
 
-    my $dsc := nqp::createsc('TEST_SC_14_OUT');
+    my $dsc := nqp::createsc(fresh_out_sc());
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
 
     ok(nqp::scobjcount($dsc) == 1, 'deserialized SC has a single object');
@@ -525,14 +538,14 @@ sub add_to_sc($sc, $idx, $obj) {
     # the target state of a FATE transition is ignore so we can pass anything
     my $nfa := nqp::nfafromstatelist([[11],[$EDGE_CODEPOINT,102,2],[$EDGE_CODEPOINT,111,3],[$EDGE_CODEPOINT,111,4],[$EDGE_FATE,11,666]],NFAType);
 
-    my $sc := nqp::createsc('TEST_SC_15_IN');
+    my $sc := nqp::createsc(fresh_in_sc());
     my $sh := nqp::list_s();
 
     add_to_sc($sc, 0, $nfa);
 
     my $serialized := nqp::serialize($sc, $sh);
 
-    my $dsc := nqp::createsc('TEST_SC_15_OUT');
+    my $dsc := nqp::createsc(fresh_out_sc());
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
 
     my $deserialized_nfa := nqp::scgetobj($dsc, 0);
@@ -545,7 +558,7 @@ sub add_to_sc($sc, $idx, $obj) {
 
 # nqp::attrinitied works after serialization
 {
-    my $sc := nqp::createsc('TEST_SC_16_IN');
+    my $sc := nqp::createsc(fresh_in_sc());
     my $sh := nqp::list_s();
 
     my class TestAttrinitied {
@@ -572,7 +585,7 @@ sub add_to_sc($sc, $idx, $obj) {
 
     my $serialized := nqp::serialize($sc, $sh);
 
-    my $dsc := nqp::createsc('TEST_SC_16_OUT');
+    my $dsc := nqp::createsc(fresh_out_sc());
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
 
     ok(nqp::attrinited(nqp::scgetobj($dsc, 0), TestAttrinitied, '$!written'), 'nqp::attrinited on an attribute that has been written to');
@@ -590,7 +603,7 @@ sub add_to_sc($sc, $idx, $obj) {
 
 # Serializing an SC with a VMArray
 {
-    my $sc := nqp::createsc('TEST_SC_17_IN');
+    my $sc := nqp::createsc(fresh_in_sc());
     my $sh := nqp::list_s();
 
     class VMHashClass is repr('VMHash') {
@@ -604,7 +617,7 @@ sub add_to_sc($sc, $idx, $obj) {
 
     my $serialized := nqp::serialize($sc, $sh);
 
-    my $dsc := nqp::createsc('TEST_SC_17_OUT');
+    my $dsc := nqp::createsc(fresh_out_sc());
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
 
     ok(nqp::scobjcount($dsc) == 1, 'deserialized SC has a single object');
@@ -616,7 +629,7 @@ sub add_to_sc($sc, $idx, $obj) {
 }
 
 {
-    my $sc := nqp::createsc('TEST_SC_18_IN');
+    my $sc := nqp::createsc(fresh_in_sc());
     my $sh := nqp::list_s();
 
     class WithNumArray {
@@ -640,7 +653,7 @@ sub add_to_sc($sc, $idx, $obj) {
 
     my $serialized := nqp::serialize($sc, $sh);
 
-    my $dsc := nqp::createsc('TEST_SC_18_OUT');
+    my $dsc := nqp::createsc(fresh_out_sc());
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
 
     ok(nqp::istype(nqp::scgetobj($dsc, 0), T18),          'deserialized object has correct type');
