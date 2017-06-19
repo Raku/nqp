@@ -242,8 +242,7 @@ exports.toNum = function(arg_, ctx) {
     } else if (typeof result == 'number') {
       return result;
     } else {
-      console.trace('we can\'t numify result of toNum');
-      process.exit();
+      throw new NQPException('we can\'t numify result of toNum');
     }
   } else if (arg.typeObject_) {
     return 0;

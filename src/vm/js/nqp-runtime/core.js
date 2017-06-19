@@ -550,8 +550,9 @@ op.isint = function(value) {
   return (value instanceof NQPInt) ? 1 : 0;
 };
 
+/* HACK - utf8-c is a different encoding than utf8 */
 function renameEncoding(encoding) {
-  return {'utf16': 'utf16le', 'iso-8859-1': 'binary'}[encoding] || encoding;
+  return {'utf8-c8': 'utf8', 'utf16': 'utf16le', 'iso-8859-1': 'binary'}[encoding] || encoding;
 }
 exports.renameEncoding = renameEncoding;
 
