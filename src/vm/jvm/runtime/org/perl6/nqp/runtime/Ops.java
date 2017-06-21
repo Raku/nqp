@@ -900,6 +900,16 @@ public final class Ops {
         return -1;
     }
 
+    public static SixModelObject setbuffersizefh(SixModelObject obj, long size, ThreadContext tc) {
+        if (obj instanceof IOHandleInstance) {
+            // TODO: Implement this
+        }
+        else {
+            die_s("setbuffersizefh requires an object with the IOHandle REPR", tc);
+        }
+        return obj;
+    }
+
     public static long isttyfh(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
             IOHandleInstance h = (IOHandleInstance)obj;
