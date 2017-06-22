@@ -80,4 +80,10 @@ my %const_map := nqp::hash(
     'TYPE_CHECK_CACHE_DEFINITIVE',  0,
     'TYPE_CHECK_CACHE_THEN_METHOD', 1,
     'TYPE_CHECK_NEEDS_ACCEPTS',     2,
+
+    'NORMALIZE_NONE',            0,
+    'NORMALIZE_NFC',             1,
+    'NORMALIZE_NFD',             2,
+    'NORMALIZE_NFKC',            3,
+    'NORMALIZE_NFKD',            4,
 );

@@ -1089,6 +1089,31 @@ op.codepointfromname = function(name) {
   return unicharadata.lookup(name).codePointAt(0);
 };
 
+const forms = ['NONE', 'NFC', 'NFD', 'NFKC', 'NFKD'];
+op.normalizecodes = function(input, form, output) {
+  const stringified = input.array.map(codePoint => String.fromCodePoint(codePoint)).join('');
+  const normalized = form == 0 ? stringified : stringified.normalize(forms[form]);
+
+  for (let c of normalized) {
+    output.array.push(c.codePointAt(0));
+  }
+
+  return output;
+};
+
+op.strfromcodes = function(codes) {
+  return codes.array.map(codePoint => String.fromCodePoint(codePoint)).join('');
+};
+
+op.strtocodes = function(str, form, codes) {
+  const normalized = form == 0 ? str : str.normalize(forms[form]);
+
+  for (let c of normalized) {
+    codes.array.push(c.codePointAt(0));
+  }
+  return codes;
+};
+
 op.islist = function(list) {
   return (list._STable && list._STable.REPR instanceof reprs.VMArray) ? 1 : 0;
 };
