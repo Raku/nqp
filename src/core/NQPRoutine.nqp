@@ -346,6 +346,10 @@ my knowhow NQPRoutine {
     }
     
     method signature() { $!signature }
+
+    method gist() {
+        self.name()
+    }
 }
 nqp::setinvokespec(NQPRoutine, NQPRoutine, '$!do', nqp::null);
 #?if moar
