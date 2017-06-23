@@ -289,6 +289,7 @@
 - [Native Call / Interoperability Opcodes](#-native-call--interoperability-opcodes)
     - [x_posixerrno](#x_posixerrno)
 - [Asynchronous Operations](#-asynchronous-operations)
+    - [permit](#permit)
     - [cancel](#cancel)
     - [timer](#timer)
     - [signal](#signal)
@@ -2456,6 +2457,26 @@ object with the AsyncTask REPR, the exact details of which are highly
 specific to a given backend. The type to use for that is given as $handle_type.
 
 [As of 2014.04, these are very new and subject to revision and additions.]
+
+## permit
+* `permit(AsyncTask $handle, int $channel, int $permits)`
+
+Takes something with the AsyncTask REPR and permits it to emit up to `$permits`
+more notifications. This is used as a back-pressure mechanism for asynchronous
+tasks that produce a stream of events, such as representing data arriving over
+a socket. Some kinds of tasks may emit on multiple channels, for example an
+asynchronous process may emit events for STDOUT and STDERR if both are of
+interest. The `$channel` argument is used to specify which channel is to get
+the permits if needed. If `$permits` is less than zero then it means there is
+no limit to the emits. If it is set to any value greater than or equal to
+zero, then:
+
+* In the case unlimited emits were permitted previously, the permits will be
+  set to the new value. If the new value is zero then the reader will be
+  stopped.
+* Otherwise the number of permits will be incremented by the specified value.
+  If the resulting number of permits allowed is greater than zero and the
+  reader is not running, it will be started.
 
 ## cancel
 * `cancel(AsyncTask $handle)`
