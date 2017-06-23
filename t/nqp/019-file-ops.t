@@ -286,14 +286,9 @@ nqp::unlink($test-file ~ '-linked');
 # symlink
 
 my $tmp-file := "tmp";
-my $env := nqp::getenvhash();
-$env<NQP_SHELL_TEST_ENV_VAR> := "123foo";
-nqp::shell("echo %NQP_SHELL_TEST_ENV_VAR% > $tmp-file",nqp::cwd(),$env, nqp::null(), nqp::null(), nqp::null(),
-    nqp::const::PIPE_INHERIT_IN + nqp::const::PIPE_INHERIT_OUT + nqp::const::PIPE_INHERIT_ERR
-);
-my $output := slurp($tmp-file);
+spew($tmp-file, "\n");
+my $is-windows := nqp::stat($tmp-file, nqp::const::STAT_FILESIZE) == 2;
 nqp::unlink($tmp-file);
-my $is-windows := $output ne "%NQP_SHELL_TEST_ENV_VAR%\n";
 
 if $is-windows {
     skip("symlink not tested on Windows", 9);
