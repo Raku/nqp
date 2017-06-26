@@ -5592,6 +5592,12 @@ public final class Ops {
         handle.handle = tt;
         return handle;
     }
+    public static SixModelObject permit(SixModelObject handle, long channel, long permits,
+                                        ThreadContext tc) {
+        AsyncTaskInstance task = (AsyncTaskInstance) handle;
+        // TODO Implement permit handling properly
+        return handle;
+    }
     public static SixModelObject cancel(SixModelObject handle, ThreadContext tc) {
         AsyncTaskInstance task = (AsyncTaskInstance) handle;
         if (task.handle instanceof IIOCancelable) {
