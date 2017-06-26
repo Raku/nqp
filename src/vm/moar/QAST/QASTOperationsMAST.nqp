@@ -2874,6 +2874,7 @@ QAST::MASTOperations.add_core_moarop_mapping('queuepoll', 'queuepoll');
 
 # asynchrony related ops
 QAST::MASTOperations.add_core_moarop_mapping('timer', 'timer');
+QAST::MASTOperations.add_core_moarop_mapping('permit', 'permit', 0);
 QAST::MASTOperations.add_core_moarop_mapping('cancel', 'cancel', 0);
 QAST::MASTOperations.add_core_moarop_mapping('cancelnotify', 'cancelnotify', 0);
 QAST::MASTOperations.add_core_moarop_mapping('signal', 'signal');
