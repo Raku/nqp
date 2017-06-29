@@ -1494,7 +1494,7 @@ class Decoder extends REPR {
         this.$$check();
         let decoder = new StringDecoder(this.$$encoding);
         let available = decoder.write(this.$$buffer);
-        this.$$buffer = this.$$buffer.slice(0, Buffer.byteLength(available, available));
+        this.$$buffer = this.$$buffer.slice(Buffer.byteLength(available, available));
         return this.$$translate(available);
       }
 
