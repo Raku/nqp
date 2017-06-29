@@ -584,3 +584,52 @@ op.rename = function(oldPath, newPath) {
   fs.renameSync(oldPath, newPath);
 };
 
+function wrapBuffer(buffer, type) {
+  const elementSize = core.byteSize(type);
+
+  const isUnsigned = type._STable.REPR.type._STable.REPR.isUnsigned;
+
+  const wrapped = type._STable.REPR.allocate(type._STable);
+
+  let offset = 0;
+  for (let i = 0; i < buffer.length / elementSize; i++) {
+    wrapped.array[i] = isUnsigned ? buffer.readUIntLE(offset, elementSize) : buffer.readIntLE(offset, elementSize);
+    offset += elementSize;
+  }
+
+  return wrapped;
+}
+
+op.spawnprocasync = function(ctx, queue, args, cwd, env, config) {
+  const options = {
+    shell: false,
+    cwd: cwd,
+    env: stringifyEnv(ctx, env),
+    stdio: [process.stdin, 'pipe', 'pipe'],
+  };
+
+  const stringified = stringifyArray(ctx, args);
+
+  const result = child_process.spawnSync(stringified.shift(), stringified, options);
+
+  if (config.content.get('ready')) {
+    config.content.get('ready').$$call(ctx, null);
+  }
+
+
+  let str_box = ctx.$$getHLL().get('str_box');
+
+  if (config.content.get('stdout_bytes')) {
+    config.content.get('stdout_bytes').$$call(ctx, null, 0, wrapBuffer(result.output[1], config.content.get('buf_type')), str_box);
+    config.content.get('stdout_bytes').$$call(ctx, null, 1, str_box, str_box);
+  }
+
+  if (config.content.get('stderr_bytes')) {
+    config.content.get('stderr_bytes').$$call(ctx, null, 0, wrapBuffer(result.output[2], config.content.get('buf_type')), str_box);
+    config.content.get('stderr_bytes').$$call(ctx, null, 1, str_box, str_box);
+  }
+
+  if (config.content.get('done')) {
+    config.content.get('done').$$call(ctx, null, result.status << 8);
+  }
+};

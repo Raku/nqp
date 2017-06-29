@@ -1685,5 +1685,6 @@ class QAST::OperationsJS {
     add_simple_op('strfromcodes', $T_STR, [$T_OBJ]);
 
     add_simple_op('strtocodes', $T_OBJ, [$T_STR, $T_INT, $T_OBJ], :side_effects);
+    add_simple_op('spawnprocasync', $T_OBJ, [$T_OBJ, $T_OBJ, $T_STR, $T_OBJ, $T_OBJ], :ctx, :side_effects);
 }
 
