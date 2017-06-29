@@ -210,6 +210,10 @@ class IOHandle extends NQPObject {
   $$setencoding(encoding) {
     this.encoding = core.renameEncoding(encoding);
   }
+
+  $$setbuffersizefh(size) {
+    return this;
+  }
 };
 
 class FileHandle extends IOHandle {

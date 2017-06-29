@@ -479,6 +479,7 @@ class QAST::OperationsJS {
     add_simple_op('seekfh', $T_INT, [$T_OBJ, $T_INT, $T_INT], :ctx, :side_effects);
     add_simple_op('eoffh', $T_INT, [$T_OBJ], :side_effects, :method_call);
     add_simple_op('filenofh', $T_INT, [$T_OBJ], :method_call);
+    add_simple_op('setbuffersizefh', $T_OBJ, [$T_OBJ, $T_INT], :side_effects, :method_call);
 
     add_simple_op('flushfh', $T_OBJ, [$T_OBJ], :side_effects, :method_call);
     add_simple_op('closefh', $T_OBJ, [$T_OBJ], :side_effects);
