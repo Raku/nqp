@@ -1424,7 +1424,23 @@ reprs.ReentrantMutex = ReentrantMutex;
 class ConditionVariable extends REPR {};
 reprs.ConditionVariable = ConditionVariable;
 
-class Semaphore extends REPR {};
+class Semaphore extends REPR {
+  setupSTable(STable) {
+    STable.addInternalMethods(class {
+      $$setInt(value) {
+        this.value = value;
+      }
+
+      $$getInt() {
+        return this.value;
+      }
+
+      $$decont_i(value) {
+        return this.value;
+      }
+    });
+  }
+};
 reprs.Semaphore = Semaphore;
 
 class ConcBlockingQueue extends REPR {};
