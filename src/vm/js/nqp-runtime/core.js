@@ -1148,3 +1148,43 @@ op.pow_n = function(base, exponent) {
   if (exponent === -Infinity && base === 1) return 1;
   return Math.pow(base, exponent);
 };
+
+op.getlockcondvar = function(lock, type) {
+  // STUB
+  return type._STable.REPR.allocate(type._STable);
+};
+
+op.condwait = function(cv) {
+  // STUB
+  console.log('condwait NYI');
+  process.exit();
+  return cv;
+};
+
+op.condsignalall = function(cv) {
+  // STUB
+  return cv;
+};
+
+op.condsignalone = function(cv) {
+  // STUB
+  return cv;
+};
+
+op.semtryacquire = function(semaphore) {
+  console.log('sematrycquire NYI');
+  // STUB
+  return 1;
+};
+
+op.semacquire = function(semaphore) {
+  // STUB
+  console.log('semacquire NYI');
+  return semaphore;
+};
+
+op.semrelease = function(semaphore) {
+  // STUB
+  console.log('semrelease NYI');
+  return semaphore;
+};

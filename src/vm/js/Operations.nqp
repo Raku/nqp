@@ -1685,6 +1685,21 @@ class QAST::OperationsJS {
     add_simple_op('strfromcodes', $T_STR, [$T_OBJ]);
 
     add_simple_op('strtocodes', $T_OBJ, [$T_STR, $T_INT, $T_OBJ], :side_effects);
+
+    add_simple_op('getlockcondvar', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects);
+    add_simple_op('condwait', $T_OBJ, [$T_OBJ], :side_effects);
+    add_simple_op('condsignalall', $T_OBJ, [$T_OBJ], :side_effects);
+    add_simple_op('condsignalone', $T_OBJ, [$T_OBJ], :side_effects);
+
+    add_simple_op('asyncconnect', $T_OBJ, [$T_OBJ, $T_OBJ, $T_STR, $T_INT, $T_OBJ], :side_effects);
+    add_simple_op('asynclisten', $T_OBJ, [$T_OBJ, $T_OBJ, $T_STR, $T_INT, $T_INT, $T_OBJ], :side_effects);
+    add_simple_op('asyncwritebytes', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ], :side_effects);
+    add_simple_op('asyncreadbyte', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ], :side_effects);
     add_simple_op('spawnprocasync', $T_OBJ, [$T_OBJ, $T_OBJ, $T_STR, $T_OBJ, $T_OBJ], :ctx, :side_effects);
+    add_simple_op('killprocasync', $T_OBJ, [$T_OBJ, $T_INT], :side_effects);
+
+    add_simple_op('semacquire', $T_OBJ, [$T_OBJ], :side_effects);
+    add_simple_op('semtryacquire', $T_INT, [$T_OBJ], :side_effects);
+    add_simple_op('semrelease', $T_OBJ, [$T_OBJ], :side_effects);
 }
 
