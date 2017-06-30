@@ -21,52 +21,6 @@ var nqp = require('nqp-runtime');
 
 const Null = require('./null.js');
 
-class SyncPipe extends NQPObject {
-  $$eoffh() {
-    if (this.$$buffer) {
-      return (this.$$buffer.length ? 0 : 1);
-    } else {
-      throw new NQPException(`Can't use eoffh, this syncpipe is not connected yet`);
-    }
-  }
-
-  /* TODO: optimize to use the lowlevel Buffer inside the highlevel one without copying */
-
-  $$readfh(buf, size) {
-    if (!this.$$buffer) {
-      throw new NQPException(`Can't use readfh, this syncpipe is not connected yet`);
-    }
-
-    let lowlevel = this.$$buffer.slice(0, size);
-    this.$$buffer = this.$$buffer.slice(size);
-
-    let elementSize = core.byteSize(buf);
-
-    let isUnsigned = buf._STable.REPR.type._STable.REPR.isUnsigned;
-
-    if (lowlevel) {
-      let offset = 0;
-      buf.array.length = lowlevel.length / elementSize;
-      for (var i = 0; i < lowlevel.length / elementSize; i++) {
-        buf.array[i] = isUnsigned ? lowlevel.readUIntLE(offset, elementSize) : lowlevel.readIntLE(offset, elementSize);
-        offset += elementSize;
-      }
-    } else {
-      buf.array.length = 0;
-    }
-
-    return buf;
-  }
-
-  $$closefh_i() {
-    return this.$$status;
-  }
-
-  $$can() {
-    return 0;
-  }
-};
-
 function boolish(bool) {
   return bool ? 1 : 0;
 }
@@ -224,9 +178,9 @@ class FileHandle extends IOHandle {
     this.fd = fd;
   }
 
-  $$closefh_i() {
+  $$closefh() {
     fs.closeSync(this.fd);
-    return 0;
+    return this;
   }
 
   $$isttyfh() {
@@ -340,15 +294,6 @@ op.seekfh = function(ctx, fh, offset, whence) {
   return fs.seekSync(fh.fd, offset, whence);
 };
 
-op.closefh = function(fh) {
-  fh.$$closefh_i();
-};
-
-op.closefh_i = function(fh) {
-  return fh.$$closefh_i();
-};
-
-
 op.unlink = function(filename) {
   try {
     fs.unlinkSync(filename);
@@ -400,82 +345,6 @@ class DirHandle {
 
 op.opendir = function(path) {
   return new DirHandle(fs.readdirSync(path));
-};
-
-const PIPE_INHERIT = 1;
-const PIPE_IGNORE = 2;
-const PIPE_CAPTURE = 4;
-const PIPE_INHERIT_IN = 1;
-const PIPE_IGNORE_IN = 2;
-const PIPE_CAPTURE_IN = 4;
-const PIPE_INHERIT_OUT = 8;
-const PIPE_IGNORE_OUT = 16;
-const PIPE_CAPTURE_OUT = 32;
-const PIPE_INHERIT_ERR = 64;
-const PIPE_IGNORE_ERR = 128;
-const PIPE_CAPTURE_ERR = 256;
-
-function stringifyEnv(ctx, hash) {
-  let stringifed = {};
-
-  hash.content.forEach(function(value, key, map) {
-    stringifed[key] = nqp.toStr(value, ctx);
-  });
-
-  return stringifed;
-}
-
-function stringifyArray(ctx, array) {
-  let stringified = [];
-  for (let element of array.array) {
-    stringified.push(nqp.toStr(element, ctx));
-  }
-  return stringified;
-}
-
-op.syncpipe = function() {
-  return new SyncPipe();
-};
-
-function run(isShell, ctx, command, dir, env, input, output, error, flags) {
-  const options = {
-    shell: isShell,
-    cwd: dir,
-    env: stringifyEnv(ctx, env),
-    stdio: [process.stdin, 'pipe', 'pipe'],
-  };
-
-  let result;
-  if (isShell) {
-    result = child_process.spawnSync(command, options);
-  } else {
-    let stringified = stringifyArray(ctx, command);
-    result = child_process.spawnSync(stringified.shift(), stringified, options);
-  }
-
-  if (flags & PIPE_CAPTURE_IN) {
-    throw new NQPException('nqp::shell with PIPE_CAPTURE_IN NYI');
-  }
-
-  if (flags & PIPE_CAPTURE_OUT) {
-    output.$$buffer = result.output[1];
-    output.$$status = result.status << 8;
-  }
-
-  if (flags & PIPE_CAPTURE_ERR) {
-    error.$$buffer = result.output[2];
-    error.$$status = result.status << 8;
-  }
-
-  return result.status << 8;
-};
-
-op.shell = function(ctx, command, dir, env, input, output, error, flags) {
-  return run(true, ctx, command, dir, env, input, output, error, flags);
-};
-
-op.spawn = function(ctx, command, dir, env, input, output, error, flags) {
-  return run(false, ctx, command, dir, env, input, output, error, flags);
 };
 
 op.cwd = function() {
@@ -600,6 +469,24 @@ function wrapBuffer(buffer, type) {
   }
 
   return wrapped;
+}
+
+function stringifyEnv(ctx, hash) {
+  let stringifed = {};
+
+  hash.content.forEach(function(value, key, map) {
+    stringifed[key] = nqp.toStr(value, ctx);
+  });
+
+  return stringifed;
+}
+
+function stringifyArray(ctx, array) {
+  let stringified = [];
+  for (let element of array.array) {
+    stringified.push(nqp.toStr(element, ctx));
+  }
+  return stringified;
 }
 
 op.spawnprocasync = function(ctx, queue, args, cwd, env, config) {

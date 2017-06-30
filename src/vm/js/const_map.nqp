@@ -56,16 +56,6 @@ my %const_map := nqp::hash(
     'STAT_PLATFORM_BLOCKSIZE', -6,
     'STAT_PLATFORM_BLOCKS',    -7,
 
-    'PIPE_INHERIT_IN',          1,
-    'PIPE_IGNORE_IN',           2,
-    'PIPE_CAPTURE_IN',          4,
-    'PIPE_INHERIT_OUT',         8,
-    'PIPE_IGNORE_OUT',          16,
-    'PIPE_CAPTURE_OUT',         32,
-    'PIPE_INHERIT_ERR',         64,
-    'PIPE_IGNORE_ERR',          128,
-    'PIPE_CAPTURE_ERR',         256,
-
     'C_TYPE_CHAR',              -1,
     'C_TYPE_SHORT',             -2,
     'C_TYPE_INT',               -3,
