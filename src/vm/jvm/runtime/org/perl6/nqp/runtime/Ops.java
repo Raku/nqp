@@ -31,6 +31,7 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.Normalizer;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -4307,6 +4308,70 @@ public final class Ops {
         return cp < 0
             ? ""
             : ( new StringBuffer() ).append( Character.toChars( (int) cp) ).toString();
+    }
+
+    public static String strfromcodes(SixModelObject codes, ThreadContext tc) {
+        StringBuilder builder = new StringBuilder();
+        int n = (int)codes.elems(tc);
+        for (int i = 0; i < n; i++) {
+            codes.at_pos_native(tc, i);
+            builder.appendCodePoint((int) tc.native_i);
+        }
+        return builder.toString();
+    }
+
+    private static Normalizer.Form javaNormalizationForm(long normalization, ThreadContext tc) {
+        if (normalization == 1) {
+            return Normalizer.Form.NFC;
+        }
+        else if (normalization == 1) {
+            return Normalizer.Form.NFD;
+        }
+        else if (normalization == 2) {
+            return Normalizer.Form.NFKC;
+        }
+        else if (normalization == 3) {
+            return Normalizer.Form.NFKD;
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc, "Unknown normalization form: '" + normalization + "'");
+        }
+    }
+
+    public static SixModelObject normalizecodes(SixModelObject in, long normalization, SixModelObject out, ThreadContext tc) {
+      if (normalization == 0) {
+          int n = (int)in.elems(tc);
+          out.set_elems(tc, n);
+          for (int i = 0; i < n; i++) {
+              in.at_pos_native(tc, i);
+              out.bind_pos_native(tc, i);
+          }
+      }
+      else {
+          StringBuilder builder = new StringBuilder();
+          int n = (int)in.elems(tc);
+          for (int i = 0; i < n; i++) {
+              in.at_pos_native(tc, i);
+              builder.appendCodePoint((int) tc.native_i);
+          }
+
+          int i = 0;
+          for (int c : Normalizer.normalize(builder, javaNormalizationForm(normalization, tc)).codePoints().toArray()) {
+              tc.native_i = c;
+              out.bind_pos_native(tc, i++);
+          }
+      }
+
+      return out;
+    }
+
+    public static SixModelObject strtocodes(String str, long normalization, SixModelObject codes, ThreadContext tc) {
+        int i = 0;
+        for (int c : Normalizer.normalize(str, javaNormalizationForm(normalization, tc)).codePoints().toArray()) {
+            tc.native_i = c;
+            codes.bind_pos_native(tc, i++);
+        }
+        return codes;
     }
 
     private static String javaEncodingName(String nameIn) {

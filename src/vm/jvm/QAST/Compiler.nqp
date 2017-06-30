@@ -2389,6 +2389,10 @@ QAST::OperationsJAST.add_core_op('rindex',  -> $qastcomp, $op {
         !! QAST::Op.new( :op('rindexfrom'), |@operands ));
 });
 
+QAST::OperationsJAST.map_classlib_core_op('strfromcodes', $TYPE_OPS, 'strfromcodes', [$RT_OBJ], $RT_STR, :tc);
+QAST::OperationsJAST.map_classlib_core_op('strtocodes', $TYPE_OPS, 'strtocodes', [$RT_STR, $RT_INT, $RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('normalizecodes', $TYPE_OPS, 'normalizecodes', [$RT_OBJ, $RT_INT, $RT_OBJ], $RT_OBJ, :tc);
+
 QAST::OperationsJAST.map_classlib_core_op('codepointfromname', $TYPE_OPS, 'codepointfromname', [$RT_STR], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('getstrfromname', $TYPE_OPS, 'getstrfromname', [$RT_STR], $RT_STR);
 QAST::OperationsJAST.map_classlib_core_op('encode', $TYPE_OPS, 'encode', [$RT_STR, $RT_STR, $RT_OBJ], $RT_OBJ, :tc);
