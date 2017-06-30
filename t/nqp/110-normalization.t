@@ -1,4 +1,4 @@
-plan(8);
+plan(11);
 
 my sub create_buf($type) {
     my $buf := nqp::newtype(nqp::null(), 'VMArray');
@@ -37,3 +37,9 @@ is(nqp::elems($codes), 2, 'nqp::strtocodes - right amount of code points');
 is(nqp::atpos_i($codes, 0), 104, 'nqp::strtocodes - first code point');
 is(nqp::atpos_i($codes, 1), 105, 'nqp::strtocodes - second code point');
 
+my $normalized_codes := create_buf(uint32).new;
+nqp::strtocodes(nqp::strfromcodes($input), nqp::const::NORMALIZE_NFC, $normalized_codes);
+
+is(nqp::elems($normalized_codes), 2, 'nqp::strtocode & nqp::strfromcodes: 1E0A 0323 -> NFC -> 1E0C 0307 # right amount of code points');
+is(nqp::atpos_i($normalized_codes, 0), 0x1E0C, 'nqp::strtocode & nqp::strfromcodes: 1E0A 0323 -> NFC -> 1E0C 0307 # first code point');
+is(nqp::atpos_i($normalized_codes, 1), 0x0307, 'nqp::strtocode & nqp::strfromcodes: 1E0A 0323 -> NFC -> 1E0C 0307 # second code point');
