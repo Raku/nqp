@@ -1087,7 +1087,7 @@ provided as a 32-bit integer array.
 Takes an NFG string, and places the codepoints from it into the codes array,
 which must be a 32-bit integer array. Applies the specified normalization,
 specified as one of the nqp::const::NORMALIZE_* values; NORMALIZE_NONE is
-equivalent to NORMALIZE_NFC.
+not allowed.
 
 ## substr
 * `substr(str $str, int $position)`
