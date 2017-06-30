@@ -1,6 +1,70 @@
 # Backend class for compiling to JavaScript.
 use QAST::Compiler;
 
+my class Queue is repr('ConcBlockingQueue') { }
+
+my sub create_buf($type) {
+    my $buf := nqp::newtype(nqp::null(), 'VMArray');
+    nqp::composetype($buf, nqp::hash('array', nqp::hash('type', $type)));
+    nqp::setmethcache($buf, nqp::hash('new', method () {nqp::create($buf)}));
+    $buf;
+}
+
+my sub run_command($command, :$stdout) {
+  my @stdout_bytes;
+  my $queue := nqp::create(Queue);
+
+  my $done;
+  my $read_all;
+
+  my $config := nqp::hash(
+      'done', -> $status {
+          $done := $done + 1;
+      }
+  );
+
+  if $stdout {
+      $config<stdout_bytes> := -> $seq, $data, $err {
+          if nqp::isconcrete($data) {
+              @stdout_bytes[$seq] := $data;
+          }
+          else {
+              $read_all := 1;
+          }
+      };
+      $config<buf_type> := create_buf(uint8);
+  } else {
+      $read_all := 1;
+  }
+
+  nqp::spawnprocasync($queue, $command, nqp::cwd(), nqp::getenvhash(), $config);
+
+  while !$done || !$read_all {
+      if nqp::shift($queue) -> $task {
+          if nqp::list($task) {
+              my $code := nqp::shift($task);
+              $code(|$task);
+          }
+          else {
+              $task();
+          }
+      }
+  }
+
+  if $stdout {
+      my class VMDecoder is repr('Decoder') {}
+      my $dec := nqp::create(VMDecoder);
+      nqp::decoderconfigure($dec, 'utf8', nqp::hash());
+      for @stdout_bytes -> $bytes {
+          nqp::decoderaddbytes($dec, $bytes);
+      }
+      nqp::decodertakeallchars($dec);
+  } else {
+      nqp::null();
+  }
+}
+
+
 # It can be called HLL::Backend::JavaScript due to problems while merging namespaces
 class JavaScriptBackend {
     method apply_transcodings($s, $transcode) {
@@ -132,12 +196,8 @@ class JavaScriptBackend {
         $fh.print($code);
         close($fh);
 
-        my $pipe   := nqp::syncpipe();
-        my $status := nqp::shell("js-beautify $tmp_file", nqp::cwd(), nqp::getenvhash(),
-            nqp::null(), $pipe, nqp::null(),
-            nqp::const::PIPE_INHERIT_IN + nqp::const::PIPE_CAPTURE_OUT + nqp::const::PIPE_INHERIT_ERR);
-        my $beautified := NQPFileHandle.new.wrap($pipe).slurp;
-        nqp::closefh($pipe);
+        my $beautified := run_command(:stdout, ['js-beautify', $tmp_file]);
+
 
         # TODO think about safety
         nqp::unlink($tmp_file);
@@ -172,10 +232,7 @@ class JavaScriptBackend {
                 $i := $i + 1;
             }
 
-            my $env := nqp::getenvhash();
-            nqp::spawn(@cmd,nqp::cwd(),nqp::getenvhash(),
-                nqp::null(), nqp::null(), nqp::null(),
-                nqp::const::PIPE_INHERIT_IN + nqp::const::PIPE_INHERIT_OUT + nqp::const::PIPE_INHERIT_ERR);
+            run_command(@cmd);
         
             nqp::unlink($tmp_file); # TODO think about safety
         };
