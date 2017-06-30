@@ -15,7 +15,7 @@ nqp::push_i($input, 0x1E0A);
 nqp::push_i($input, 0x0323);
 
 my $ret := nqp::normalizecodes($input, nqp::const::NORMALIZE_NFC, $output);
-ok(nqp::eqaddr($output, $ret), 'nqp::normalizecodes return the output buffer');
+ok(nqp::eqaddr($output, $ret), 'nqp::normalizecodes returns the output buffer');
 is(nqp::elems($output), 2, '1E0A 0323 -> NFC -> 1E0C 0307 # right amount of code points');
 is(nqp::atpos_i($output, 0), 0x1E0C, '1E0A 0323 -> NFC -> 1E0C 0307 # first code point');
 is(nqp::atpos_i($output, 1), 0x0307, '1E0A 0323 -> NFC -> 1E0C 0307 # second code point');
