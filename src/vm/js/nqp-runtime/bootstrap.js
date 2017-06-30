@@ -224,15 +224,15 @@ BOOT.Array._STable.setboolspec(8, Null);
 BOOT.Array._STable.hllRole = 4;
 
 BOOT.IntArray = bootType('BOOTIntArray', 'VMArray');
-BOOT.IntArray._STable.REPR.type = Null; //TODO correct type
+BOOT.IntArray._STable.REPR.type = Null; // TODO correct type
 BOOT.IntArray._STable.setboolspec(8, Null);
 
 BOOT.NumArray = bootType('BOOTNumArray', 'VMArray');
-BOOT.NumArray._STable.REPR.type = Null; //TODO correct type
+BOOT.NumArray._STable.REPR.type = Null; // TODO correct type
 BOOT.NumArray._STable.setboolspec(8, Null);
 
 BOOT.StrArray = bootType('BOOTStrArray', 'VMArray');
-BOOT.StrArray._STable.REPR.type = Null; //TODO correct type
+BOOT.StrArray._STable.REPR.type = Null; // TODO correct type
 BOOT.StrArray._STable.setboolspec(8, Null);
 
 BOOT.Exception = bootType('BOOTException', 'VMException');
