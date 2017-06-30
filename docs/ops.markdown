@@ -974,7 +974,7 @@ fields separated by the value of EXPR, and returns that new string.
 
 Return lowercase copy of string.
 
-## normalizecodes `moar`
+## normalizecodes
 * `normalizecodes($codes-in, int $normalization, $codes-out)`
 
 Takes the codepoints in $codes-in, applies the specified normalization, and
@@ -1075,13 +1075,13 @@ my class MyHandler {
 }
 ```
 
-## strfromcodes `moar`
+## strfromcodes
 * `strfromcodes($codes)`
 
 Returns an (NFG) string built from the specified codepoints, which must be
 provided as a 32-bit integer array.
 
-## strtocodes `moar`
+## strtocodes
 * `strtocodes(str $str, int $normalization, $codes)`
 
 Takes an NFG string, and places the codepoints from it into the codes array,
