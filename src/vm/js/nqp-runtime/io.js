@@ -19,6 +19,8 @@ const NQPException = require('./nqp-exception.js');
 
 var nqp = require('nqp-runtime');
 
+const Null = require('./null.js');
+
 class SyncPipe extends NQPObject {
   $$eoffh() {
     if (this.$$buffer) {
@@ -618,6 +620,8 @@ op.spawnprocasync = function(ctx, queue, args, cwd, env, config) {
 
 
   let str_box = ctx.$$getHLL().get('str_box');
+
+  if (str_box === undefined) str_box = Null;
 
   if (config.content.get('stdout_bytes')) {
     config.content.get('stdout_bytes').$$call(ctx, null, 0, wrapBuffer(result.output[1], config.content.get('buf_type')), str_box);
