@@ -515,7 +515,6 @@ class QAST::OperationsJS {
 
     add_simple_op('sha1', $T_STR, [$T_STR]);
 
-
     add_simple_op('isinvokable', $T_INT, [$T_OBJ]);
 
     add_simple_op('encode', $T_OBJ, [$T_STR, $T_STR, $T_OBJ], :side_effects);
@@ -1677,7 +1676,6 @@ class QAST::OperationsJS {
     add_simple_op('normalizecodes', $T_OBJ, [$T_OBJ, $T_INT, $T_OBJ], :side_effects);
 
     add_simple_op('strfromcodes', $T_STR, [$T_OBJ]);
-
     add_simple_op('strtocodes', $T_OBJ, [$T_STR, $T_INT, $T_OBJ], :side_effects);
 
     add_simple_op('getlockcondvar', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects);
