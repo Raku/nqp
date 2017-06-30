@@ -1701,5 +1701,7 @@ class QAST::OperationsJS {
     add_simple_op('semacquire', $T_OBJ, [$T_OBJ], :side_effects);
     add_simple_op('semtryacquire', $T_INT, [$T_OBJ], :side_effects);
     add_simple_op('semrelease', $T_OBJ, [$T_OBJ], :side_effects);
+
+    add_simple_op('getuniname', $T_STR, [$T_INT]);
 }
 

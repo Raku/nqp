@@ -27,6 +27,7 @@
     "ref": "*",
     "unicharadata": "*",
     "fibers": "*",
-    "mkdirp": "^0.5.1"
+    "mkdirp": "^0.5.1",
+    "nqp-js-ucd": "0.0.1"
   }
 }

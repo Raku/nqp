@@ -1079,14 +1079,39 @@ op.tclc = function(string) {
   return first + lower.toLowerCase();
 };
 
+let ucd = require('nqp-js-ucd');
+
 op.getstrfromname = function(name) {
-  let unicharadata = require('unicharadata');
-  return unicharadata.lookup(name);
+  const uppercased = name.toUpperCase();
+
+  let codePoint;
+  let codePoints;
+
+  if (codePoint = ucd.nameToCodePoint(uppercased)) {
+    return String.fromCodePoint(codePoint);
+  } else if (codePoint = ucd.aliasToCodePoint(uppercased)) {
+    return String.fromCodePoint(codePoint);
+  } else if (codePoints = ucd.sequenceToCodePoints(uppercased)) {
+    return codePoints.map(codePoint => String.fromCodePoint(codePoint)).join('');
+  } else {
+    return '';
+  }
 };
 
 op.codepointfromname = function(name) {
-  let unicharadata = require('unicharadata');
-  return unicharadata.lookup(name).codePointAt(0);
+  let codePoint
+
+  if (codePoint = ucd.nameToCodePoint(name)) {
+    return codePoint;
+  } else if (codePoint = ucd.aliasToCodePoint(name)) {
+    return codePoint;
+  } else {
+    return -1;
+  }
+};
+
+op.getuniname = function(codePoint) {
+  return ucd.codePointToName(codePoint);
 };
 
 const forms = ['NONE', 'NFC', 'NFD', 'NFKC', 'NFKD'];
