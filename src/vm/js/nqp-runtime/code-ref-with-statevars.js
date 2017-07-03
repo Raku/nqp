@@ -30,5 +30,17 @@ class CodeRefWithStateVars extends CodeRef {
 
     return closure;
   }
+
+  captureAndClosureCtx(outerCtx) {
+    this.capture(this.freshBlock());
+    var closure = this.closureCtx(outerCtx);
+
+    if (outerCtx !== null) {
+      this.outerCtx = outerCtx;
+      closure.outerCtx = outerCtx;
+    }
+
+    return closure;
+  }
 };
 module.exports = CodeRefWithStateVars;
