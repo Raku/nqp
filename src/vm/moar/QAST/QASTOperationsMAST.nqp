@@ -1546,39 +1546,6 @@ QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
     MAST::InstructionList.new(@ins, $res_reg, $res_kind)
 });
 
-QAST::MASTOperations.add_core_op('lexotic', :!inlinable, -> $qastcomp, $op {
-    my $lex_label := MAST::Label.new();
-    my $end_label := MAST::Label.new();
-
-    # Create new lexotic and install it lexically.
-    my @ins;
-    my $lex_tmp := $*REGALLOC.fresh_register($MVM_reg_obj);
-    $*BLOCK.add_lexical(QAST::Var.new( :name($op.name), :scope('lexical'), :decl('var') ));
-    push_op(@ins, 'newlexotic', $lex_tmp, $lex_label);
-    push_op(@ins, 'bindlex', $*BLOCK.lexical($op.name), $lex_tmp);
-
-    # Emit the body, and go to the end of the lexotic code; the body's result
-    # is what we want.
-    my $*WANT := $MVM_reg_obj;
-    my $body  := $qastcomp.compile_all_the_stmts($op.list);
-    nqp::push(@ins, MAST::HandlerScope.new(
-        :instructions($body.instructions),
-        :category_mask($HandlerCategory::return),
-        :action($HandlerAction::unwind_and_goto),
-        :goto($lex_label)
-    ));
-    push_op(@ins, 'goto', $end_label);
-
-    # Finally, emit the lexotic handler.
-    nqp::push(@ins, $lex_label);
-    push_op(@ins, 'lexoticresult', $body.result_reg, $lex_tmp);
-    nqp::push(@ins, $end_label);
-
-    $*REGALLOC.release_register($lex_tmp, $MVM_reg_obj);
-
-    MAST::InstructionList.new(@ins, $body.result_reg, $MVM_reg_obj)
-});
-
 # Binding
 QAST::MASTOperations.add_core_op('bind', -> $qastcomp, $op {
     # Sanity checks.
