@@ -44,7 +44,6 @@ public class KnowHOWBootstrapper {
         tc.gc.MultiCache = bootType(tc, "MultiCache", "MultiCache");
 
         tc.gc.Continuation = bootType(tc, "Continuation", "Continuation");
-        tc.gc.Lexotic = bootType(tc, "Lexotic", "Lexotic");
         tc.gc.BOOTJava = bootType(tc, "BOOTJavaObject", "JavaWrap");
         
         // fixup missing STable for knowhow_how methods

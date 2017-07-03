@@ -61,7 +61,6 @@ my $TYPE_CLASS      := 'Ljava/lang/Class;';
 my $TYPE_LONG       := 'Ljava/lang/Long;';
 my $TYPE_DOUBLE     := 'Ljava/lang/Double;';
 my $TYPE_EH         := 'Lorg/perl6/nqp/runtime/ExceptionHandling;';
-my $TYPE_EX_LEX     := 'Lorg/perl6/nqp/runtime/LexoticException;';
 my $TYPE_EX_UNWIND  := 'Lorg/perl6/nqp/runtime/UnwindException;';
 my $TYPE_EX_CONT    := 'Lorg/perl6/nqp/runtime/ControlException;';
 my $TYPE_EX_RT      := 'Ljava/lang/RuntimeException;';
@@ -1531,52 +1530,6 @@ QAST::OperationsJAST.add_core_op('callmethod', -> $qastcomp, $node {
     }
 
     result_from_cf($il, rttype_from_typeobj($node.returns));
-});
-
-my $num_lexotics := 0;
-QAST::OperationsJAST.add_core_op('lexotic', :!inlinable, -> $qastcomp, $op {
-    # Create the lexotic lexical.
-    my $target := nqp::floor_n(nqp::time_n() * 1000) * 10000 + $num_lexotics++;
-    my $il := JAST::InstructionList.new();
-    $*BLOCK.add_lexical(QAST::Var.new( :name($op.name) ));
-    $il.append(JAST::PushIVal.new( :value($target) ));
-    $il.append(JAST::Instruction.new( :op('aload'), 'tc' ));
-    $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
-        'lexotic_tc', $TYPE_SMO, 'Long', $TYPE_TC ));
-    $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
-    $il.append(JAST::PushIndex.new( :value($*BLOCK.lexical_idx($op.name)) ));
-    $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
-        'bindlex_o', $TYPE_SMO, $TYPE_SMO, $TYPE_CF, 'Integer' ));
-    $il.append($POP);
-    
-    # Compile the things inside the lexotic
-    my $*WANT := $RT_OBJ;
-    my $stmt_res := $qastcomp.coerce($qastcomp.compile_all_the_stmts($op.list()), $RT_OBJ);
-    $*STACK.obtain($il, $stmt_res);
-    
-    # Build up catch for the lexotic (rethrows if wrong thing).
-    my $miss_lbl := JAST::Label.new( :name($qastcomp.unique('lexotic_miss_')) );
-    my $done_lbl := JAST::Label.new( :name($qastcomp.unique('lexotic_done_')) );
-    my $catch_il := JAST::InstructionList.new();
-    $catch_il.append($DUP);
-    $catch_il.append(JAST::Instruction.new( :op('getfield'), $TYPE_EX_LEX, 'target', 'Long' ));
-    $catch_il.append(JAST::PushIVal.new( :value($target) ));
-    $catch_il.append($LCMP);
-    $catch_il.append(JAST::Instruction.new( :op('ifne'), $miss_lbl ));
-    $catch_il.append(JAST::Instruction.new( :op('getfield'), $TYPE_EX_LEX, 'payload', $TYPE_SMO ));
-    $catch_il.append(JAST::Instruction.new( :op('goto'), $done_lbl ));
-    $catch_il.append($miss_lbl);
-    $catch_il.append($ATHROW);
-    $catch_il.append($done_lbl);
-    
-    # Finally, assemble try/catch.
-    $il.append(JAST::TryCatch.new(
-        :try($stmt_res.jast),
-        :catch($catch_il),
-        :type($TYPE_EX_LEX)
-    ));
-    
-    result($il, $RT_OBJ);
 });
 
 # Binding

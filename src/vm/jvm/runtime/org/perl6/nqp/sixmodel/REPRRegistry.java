@@ -17,7 +17,6 @@ import org.perl6.nqp.sixmodel.reprs.IOHandle;
 import org.perl6.nqp.sixmodel.reprs.JavaWrap;
 import org.perl6.nqp.sixmodel.reprs.KnowHOWAttribute;
 import org.perl6.nqp.sixmodel.reprs.KnowHOWREPR;
-import org.perl6.nqp.sixmodel.reprs.Lexotic;
 import org.perl6.nqp.sixmodel.reprs.MultiCache;
 import org.perl6.nqp.sixmodel.reprs.NativeCall;
 import org.perl6.nqp.sixmodel.reprs.NFA;
@@ -82,7 +81,6 @@ public class REPRRegistry {
         addREPR("JavaWrap", new JavaWrap());
         addREPR("ContextRef", new ContextRef());
         addREPR("Continuation", new Continuation());
-        addREPR("Lexotic", new Lexotic());
         addREPR("CodeRef", new CodeRefREPR());
         addREPR("CallCapture", new CallCapture());
         addREPR("NFA", new NFA());

@@ -4,7 +4,6 @@ import java.lang.invoke.*;
 import java.lang.invoke.MethodHandles.Lookup;
 
 import org.perl6.nqp.sixmodel.*;
-import org.perl6.nqp.sixmodel.reprs.LexoticInstance;
 
 public class IndyBootstrap {
     public static CallSite wval_noa(Lookup caller, String name, MethodType type) {
@@ -86,10 +85,6 @@ public class IndyBootstrap {
             ? tc.curFrame.codeRef.staticInfo.compUnit.callSites[csIdx]
             : Ops.emptyCallSite;
         CallSiteDescriptor csdOrig = csd;
-
-        /* If it's lexotic, then resolve to something to do the throwing. */
-        if (invokee instanceof LexoticInstance)
-            throw setLexoticTarget(caller, cs, tc, invokee, csd, args, shared);
 
         /* Otherwise, get the code ref. */
         CodeRef cr;
@@ -210,10 +205,6 @@ public class IndyBootstrap {
             : Ops.emptyCallSite;
         CallSiteDescriptor csdOrig = csd;
 
-        /* If it's lexotic, then resolve to something to do the throwing. */
-        if (invokee instanceof LexoticInstance)
-            throw setLexoticTarget(caller, cs, tc, invokee, csd, args, shared);
-
         /* Otherwise, get the code ref. */
         CodeRef cr;
         if (invokee instanceof CodeRef) {
@@ -306,106 +297,6 @@ public class IndyBootstrap {
         ArgsExpectation.invokeByExpectation(tc, cr, csd, args);
     }
 
-    private static LexoticException setLexoticTarget(Lookup caller, MutableCallSite cs,
-            ThreadContext tc, SixModelObject invokee, CallSiteDescriptor csd,
-            Object[] args, boolean shared) {
-        /* Go by result type, updating callsite appropriately so we
-         * don't have to do this in the future. */
-        LexoticException throwee = tc.theLexotic;
-        throwee.target = ((LexoticInstance)invokee).target;
-        switch (csd.argFlags[0]) {
-        case CallSiteDescriptor.ARG_OBJ:
-            throwee.payload = (SixModelObject)args[0];
-            try {
-                if (!shared) cs.setTarget(MethodHandles.insertArguments(
-                    caller.findStatic(IndyBootstrap.class, "lexotic_o_noa",
-                        MethodType.methodType(void.class, long.class, String.class, int.class,
-                                ThreadContext.class, SixModelObject.class)),
-                    0, throwee.target));
-            }
-            catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            break;
-        case CallSiteDescriptor.ARG_INT:
-            SixModelObject intBoxType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intBoxType;
-            throwee.payload = Ops.box_i((long)args[0], intBoxType, tc);
-            try {
-                if (!shared) cs.setTarget(MethodHandles.insertArguments(
-                    caller.findStatic(IndyBootstrap.class, "lexotic_i_noa",
-                        MethodType.methodType(void.class, long.class,
-                                SixModelObject.class, String.class, int.class,
-                                ThreadContext.class, long.class)),
-                    0, throwee.target, intBoxType));
-            }
-            catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            break;
-        case CallSiteDescriptor.ARG_NUM:
-            SixModelObject numBoxType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.numBoxType;
-            throwee.payload = Ops.box_n((double)args[0], numBoxType, tc);
-            try {
-                if (!shared) cs.setTarget(MethodHandles.insertArguments(
-                    caller.findStatic(IndyBootstrap.class, "lexotic_n_noa",
-                        MethodType.methodType(void.class, long.class,
-                                SixModelObject.class, String.class, int.class,
-                                ThreadContext.class, double.class)),
-                    0, throwee.target, numBoxType));
-            }
-            catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            break;
-        case CallSiteDescriptor.ARG_STR:
-            SixModelObject strBoxType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strBoxType;
-            throwee.payload = Ops.box_s((String)args[0], strBoxType, tc);
-            try {
-                if (!shared) cs.setTarget(MethodHandles.insertArguments(
-                    caller.findStatic(IndyBootstrap.class, "lexotic_s_noa",
-                        MethodType.methodType(void.class, long.class,
-                                SixModelObject.class, String.class, int.class,
-                                ThreadContext.class, String.class)),
-                    0, throwee.target, strBoxType));
-            }
-            catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            break;
-        default:
-            throw ExceptionHandling.dieInternal(tc, "Invalid lexotic invocation argument");
-        }
-        return throwee;
-    }
-
-    public static void lexotic_o_noa(long target, String s, int i, ThreadContext tc, SixModelObject arg) {
-        LexoticException throwee = tc.theLexotic;
-        throwee.target = target;
-        throwee.payload = arg;
-        throw throwee;
-    }
-
-    public static void lexotic_i_noa(long target, SixModelObject boxType, String s, int i, ThreadContext tc, long arg) {
-        LexoticException throwee = tc.theLexotic;
-        throwee.target = target;
-        throwee.payload = Ops.box_i(arg, boxType, tc);
-        throw throwee;
-    }
-
-    public static void lexotic_n_noa(long target, SixModelObject boxType, String s, int i, ThreadContext tc, double arg) {
-        LexoticException throwee = tc.theLexotic;
-        throwee.target = target;
-        throwee.payload = Ops.box_n(arg, boxType, tc);
-        throw throwee;
-    }
-
-    public static void lexotic_s_noa(long target, SixModelObject boxType, String s, int i, ThreadContext tc, String arg) {
-        LexoticException throwee = tc.theLexotic;
-        throwee.target = target;
-        throwee.payload = Ops.box_s(arg, boxType, tc);
-        throw throwee;
-    }
-
     public static CallSite indcall_noa(Lookup caller, String s, MethodType type) {
         try {
             /* Look up indirect call invoker method. */
@@ -440,8 +331,6 @@ public class IndyBootstrap {
         /* Get the code ref. */
         CodeRef cr;
         invokee = Ops.decont(invokee, tc);
-        if (invokee instanceof LexoticInstance)
-            Ops.invokeLexotic(invokee, csd, args, tc);
         if (invokee instanceof CodeRef) {
             cr = (CodeRef)invokee;
         }

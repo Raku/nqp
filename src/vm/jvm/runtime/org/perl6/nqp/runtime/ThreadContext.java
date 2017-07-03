@@ -69,11 +69,6 @@ public class ThreadContext {
     public ArrayList<HandlerInfo> handlers;
     
     /**
-     * The current lexotic we're throwing.
-     */
-    public LexoticException theLexotic;
-    
-    /**
      * The currently saved capture for custom processing.
      */
     public CallCaptureInstance savedCC;
@@ -123,7 +118,6 @@ public class ThreadContext {
 
     public ThreadContext(GlobalContext gc) {
         this.gc = gc;
-        this.theLexotic = new LexoticException();
         this.unwinder = new UnwindException();
         this.handlers = new ArrayList<HandlerInfo>();
         this.hllThreadAll = new HashMap<ContextKey<?,?>, Object>();
