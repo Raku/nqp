@@ -1377,6 +1377,7 @@ class NQP::Actions is HLL::Actions {
     method term:sym<identifier>($/) {
         my $ast := $<args>.ast;
         $ast.name('&' ~ ~$<deflongname>);
+        $ast.node($/);
         make $ast;
         $/.prune;
     }
