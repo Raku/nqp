@@ -22,7 +22,7 @@ sub is($actual, $expected, $description) {
     }
 }
 
-plan(280);
+plan(284);
 
 is(nqp::sprintf('Walter Bishop', []), 'Walter Bishop', 'no directives' );
 
@@ -89,6 +89,10 @@ is(nqp::sprintf('%o', [12]), '14', 'simple %o');
 is(nqp::sprintf('%o', [22.01]), '26', 'decimal %o');
 is(nqp::sprintf('%06o', [127]), '000177', '%o with 0-padding');
 is(nqp::sprintf('%#6o', [127]), '  0177', '%o with space-padding and leading 0');
+is(nqp::sprintf('%.5o',  [83]),  '00123',  '%o with precision');
+is(nqp::sprintf('%#.5o', [83]),  '00123',  '%o with precision, leading 0 not required');
+is(nqp::sprintf('%.5o',  [5349]), '12345',  '%o with insufficient precision');
+is(nqp::sprintf('%#.5o',  [5349]), '012345', '%o with precision, required leading 0 added');
 
 is(nqp::sprintf('%x', [0]), '0', 'simple %x');
 is(nqp::sprintf('%x', [12]), 'c', 'simple %x');

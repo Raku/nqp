@@ -418,6 +418,7 @@ my module sprintf {
             my $pre := '0' if $int ne '0' && has_flag($/, 'hash');
             if nqp::chars($<precision>) {
                 $int := '' if $<precision>.made == 0 && $int == 0;
+                $pre := '' if $<precision>.made > nqp::chars($int);
                 $int := $pre ~ infix_x('0', intify($<precision>.made) - nqp::chars($int)) ~ $int;
             }
             else {
