@@ -17,7 +17,7 @@ function toNode(chunk) {
     return chunk.map(function(c) {return toNode(c)});
   } else {
       console.error(chunk);
-      throw "incorrect chunk";
+      throw new Error("incorrect chunk");
   }
 }
 
