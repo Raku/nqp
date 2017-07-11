@@ -25,7 +25,7 @@ class HLL::Compiler does HLL::Backend::Default {
         # Command options and usage.
         @!cmdoptions := nqp::split(' ', 'e=s help|h target=s trace|t=s encoding=s output|o=s source-name=s combine version|v show-config verbose-config|V stagestats=s? ll-exception rxtrace nqpevent=s profile=s? profile-compile=s? profile-filename=s profile-stage=s'
 #?if js
-        ~ ' substagestats beautify nqp-runtime=s perl6-runtime=s libpath=s shebang execname=s'
+        ~ ' substagestats beautify nqp-runtime=s perl6-runtime=s libpath=s shebang execname=s source-map'
 #?endif
         );
         %!config     := nqp::hash();

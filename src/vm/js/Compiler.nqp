@@ -2014,8 +2014,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     # return a json datastructure we later process into a source map
-    method emit_with_source_map($ast, *%named) {
-       self.as_js_with_prelude($ast, |%named).with_source_map_info
+    method emit_with_source_map($ast, $hll-compiler, *%named) {
+       self.as_js_with_prelude($ast, |%named).with_source_map_info($hll-compiler);
     }
 
     method emit_with_source_map_debug($ast, *%named) {

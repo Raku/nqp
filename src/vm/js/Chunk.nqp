@@ -59,12 +59,12 @@ class Chunk does Joinable {
         }
     }
     
-    method with_source_map_info() {
+    method with_source_map_info($hll-compiler) {
         my @parts;
         if nqp::isnull($!setup) {
         }
         elsif nqp::istype($!setup, Chunk) {
-            nqp::push(@parts, $!setup.with_source_map_info);
+            nqp::push(@parts, $!setup.with_source_map_info($hll-compiler));
         }
         else {
             for $!setup -> $part {
@@ -72,14 +72,14 @@ class Chunk does Joinable {
                     nqp::push(@parts,quote_string($part, :json));
                 }
                 else {
-                    nqp::push(@parts,$part.with_source_map_info);
+                    nqp::push(@parts,$part.with_source_map_info($hll-compiler));
                 }
             }
         }
         my $parts := '[' ~ nqp::join(',', @parts) ~ ']';
         if nqp::defined($!node) && $!node.node {
             my $node := $!node.node;
-            my $location := HLL::Compiler.line_and_column_of($node.orig(), $node.from(), :cache(1));
+            my $location := $hll-compiler.line_and_column_of($node.orig(), $node.from(), :cache(1));
             "\{\"line\": {nqp::atpos_i($location, 0)}, \"column\": {nqp::atpos_i($location, 1)}, \"parts\": $parts\}";
         }
         else {
