@@ -10,15 +10,7 @@ my $T_NONVAL := -2; # something that is not a nqp value
 my $T_ARGS := -3; # comma separated arguments to a js call
 my $T_ARGS_ARRAY := -4; # an array of arguments to a js call
 
-role Joinable {
-    method join() {
-        my @strs := nqp::list_s();
-        self.collect(@strs);
-        nqp::join('', @strs);
-    }
-}
-
-class Chunk does Joinable {
+class Chunk {
     has int $!type; # the js type of $!expr
     has str $!expr; # a javascript expression without side effects
     has $!node; # a QAST::Node that contains info for source maps
@@ -57,6 +49,12 @@ class Chunk does Joinable {
                 }
             }
         }
+    }
+
+    method join() {
+        my @strs := nqp::list_s();
+        self.collect(@strs);
+        nqp::join('', @strs);
     }
     
     method with_source_map_info($hll-compiler) {
