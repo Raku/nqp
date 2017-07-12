@@ -56,32 +56,31 @@ class Chunk {
         self.collect(@strs);
         nqp::join('', @strs);
     }
-    
-    method with_source_map_info($hll-compiler) {
-        my @parts;
+
+    method collect_with_source_map_info($offset, @strs, @mapping) {
+        if nqp::defined($!node) && $!node.node {
+            nqp::push_i(@mapping, $!node.node.from());
+            nqp::push_i(@mapping, $offset);
+        }
+
         if nqp::isnull($!setup) {
+          0;
         }
         elsif nqp::istype($!setup, Chunk) {
-            nqp::push(@parts, $!setup.with_source_map_info($hll-compiler));
+            $!setup.collect_with_source_map_info($offset, @strs, @mapping);
         }
         else {
+            my int $count := 0;
             for $!setup -> $part {
                 if nqp::isstr($part) {
-                    nqp::push(@parts,quote_string($part, :json));
+                    $count := $count + nqp::chars($part);
+                    nqp::push_s(@strs, $part);
                 }
                 else {
-                    nqp::push(@parts,$part.with_source_map_info($hll-compiler));
+                    $count := $count + $part.collect_with_source_map_info($offset + $count, @strs, @mapping);
                 }
             }
-        }
-        my $parts := '[' ~ nqp::join(',', @parts) ~ ']';
-        if nqp::defined($!node) && $!node.node {
-            my $node := $!node.node;
-            my $location := $hll-compiler.line_and_column_of($node.orig(), $node.from(), :cache(1));
-            "\{\"line\": {nqp::atpos_i($location, 0)}, \"column\": {nqp::atpos_i($location, 1)}, \"parts\": $parts\}";
-        }
-        else {
-            $parts;
+            $count;
         }
     }
 

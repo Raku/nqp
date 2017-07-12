@@ -178,7 +178,15 @@ class JavaScriptBackend {
         my $nqp-runtime := %adverbs<nqp-runtime>;
 
         if %adverbs<source-map> {
-            $backend.emit_with_source_map($qast, HLL::Compiler, :$instant, :$shebang, :$nqp-runtime);
+            my @js := nqp::list_s();
+            my @mapping := nqp::list_i();
+            $backend.emit_with_source_map($qast, @js, @mapping, :$instant, :$shebang, :$nqp-runtime);
+
+            my @mapping_str := nqp::list_s();
+            for @mapping -> $offset {
+                nqp::push_s(@mapping_str, $offset);
+            }
+            "\{\"js\": {$backend.quote_string(nqp::join('', @js))}, \"mapping\": [{nqp::join(',', @mapping_str)}]\}";
         } else {
             my $code := $backend.emit($qast, :$instant, :$substagestats, :$shebang, :$nqp-runtime);
             $code := self.beautify($code) if %adverbs<beautify>;
