@@ -41,19 +41,19 @@ class Chunk does Joinable {
         $!node := $node if nqp::defined($node);
     }
 
-    method collect(@strs, :$escape) {
+    method collect(@strs) {
         if nqp::isnull($!setup) {
         }
         elsif nqp::istype($!setup, Chunk) {
-            $!setup.collect(@strs, :$escape);
+            $!setup.collect(@strs);
         }
         else {
             for $!setup -> $part {
                 if nqp::isstr($part) {
-                    nqp::push_s(@strs, $escape ?? nqp::escape($part) !! $part);
+                    nqp::push_s(@strs, $part);
                 }
                 else {
-                    $part.collect(@strs, :$escape);
+                    $part.collect(@strs);
                 }
             }
         }
