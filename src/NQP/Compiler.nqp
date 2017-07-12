@@ -37,7 +37,6 @@ $nqpcomp.addstage('classname', :after<start>);
 @clo.push('bootstrap');
 #?endif
 #?if js
-@clo.push('source-map-debug');
 @clo.push('nyi=s');
 #?endif
 

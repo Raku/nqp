@@ -177,9 +177,7 @@ class JavaScriptBackend {
 
         my $nqp-runtime := %adverbs<nqp-runtime>;
 
-        if %adverbs<source-map-debug> {
-            $backend.emit_with_source_map_debug($qast, :$instant, :$shebang, :$nqp-runtime);
-        } elsif %adverbs<source-map> {
+        if %adverbs<source-map> {
             $backend.emit_with_source_map($qast, HLL::Compiler, :$instant, :$shebang, :$nqp-runtime);
         } else {
             my $code := $backend.emit($qast, :$instant, :$substagestats, :$shebang, :$nqp-runtime);

@@ -87,35 +87,6 @@ class Chunk does Joinable {
         }
     }
 
-    method source_map_debug() {
-        my $js := ''; 
-        if nqp::isnull($!setup) {
-        }
-        elsif nqp::istype($!setup, Chunk) {
-            $js := $js ~ $!setup.source_map_debug;
-        }
-        else {
-            for $!setup -> $part {
-               if nqp::isstr($part) {
-                  $js := $js ~ $part;
-               }
-               else {
-                  $js := $js ~ $part.source_map_debug;
-               }
-            }
-        }
-
-        if nqp::defined($!node) && $!node.node {
-            my $node := $!node.node;
-            my $line_and_column := HLL::Compiler.line_and_column_of($node.orig(), $node.from(), :cache(1));
-            my $where := nqp::atpos_i($line_and_column, 0) ~ ":" ~ nqp::atpos_i($line_and_column, 1);
-            "/* LINE $where */\n" ~ $js ~ "/* END $where */"
-        }
-        else {
-            $js;
-        }
-    }
-
     method type() {
         $!type;
     }
