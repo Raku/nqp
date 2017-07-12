@@ -2017,10 +2017,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     method emit_with_source_map($ast, $hll-compiler, *%named) {
        self.as_js_with_prelude($ast, |%named).with_source_map_info($hll-compiler);
     }
-
-    method emit_with_source_map_debug($ast, *%named) {
-       self.as_js_with_prelude($ast, |%named).source_map_debug
-    }
 }
 
 # Copy the MoarVM design, for now only support adding ops
