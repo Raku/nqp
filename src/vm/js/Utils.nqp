@@ -1,7 +1,7 @@
 use QASTNode;
 
 # turn a string into a javascript literal
-sub quote_string($str, :$json) {
+sub quote_string($str) {
     my $out := '';
     my $quoted := nqp::escape($str);
 
@@ -15,9 +15,6 @@ sub quote_string($str, :$json) {
         }
         elsif $backslash && $c eq 'a' {
             $out := $out ~ 'x07';
-        }
-        elsif $backslash && $c eq 'n' {
-            $out := $out ~ ($json ?? "n" !! "n\\\n");
         }
         else {
             if ($c eq "\x[2028]") {
