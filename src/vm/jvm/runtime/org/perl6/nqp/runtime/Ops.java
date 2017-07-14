@@ -4485,9 +4485,16 @@ public final class Ops {
 
     public static String decodertakechars(SixModelObject decoder, long chars, ThreadContext tc) {
         if (decoder instanceof DecoderInstance)
-            return ((DecoderInstance)decoder).takeChars(tc, chars);
+            return ((DecoderInstance)decoder).takeChars(tc, chars, false);
         else
             throw ExceptionHandling.dieInternal(tc, "decodertakechars requires an instance with the Decoder REPR");
+    }
+
+    public static String decodertakecharseof(SixModelObject decoder, long chars, ThreadContext tc) {
+        if (decoder instanceof DecoderInstance)
+            return ((DecoderInstance)decoder).takeChars(tc, chars, true);
+        else
+            throw ExceptionHandling.dieInternal(tc, "decodertakecharseof requires an instance with the Decoder REPR");
     }
 
     public static String decodertakeavailablechars(SixModelObject decoder, ThreadContext tc) {

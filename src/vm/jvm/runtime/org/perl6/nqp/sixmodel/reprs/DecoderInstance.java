@@ -54,7 +54,7 @@ public class DecoderInstance extends SixModelObject {
         toDecode.add(bytes);
     }
 
-    public synchronized String takeChars(ThreadContext tc, long chars) {
+    public synchronized String takeChars(ThreadContext tc, long chars, boolean eof) {
         ensureConfigured(tc);
 
         if (chars == 0)
@@ -81,8 +81,11 @@ public class DecoderInstance extends SixModelObject {
                 return normalized;
         }
 
-        decoded.add(CharBuffer.wrap(normalized));
-        return null;
+        if (eof)
+            return normalized;
+        else
+            decoded.add(CharBuffer.wrap(normalized));
+            return null;
     }
 
     public synchronized String takeAvailableChars(ThreadContext tc) {
