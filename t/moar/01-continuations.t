@@ -2,7 +2,7 @@
 
 # continuations.
 
-plan(19);
+plan(24);
 
 {
     # unique objects
@@ -128,6 +128,31 @@ plan(19);
     ok($A_in_control == 10, 'control does not see intervening scopes');
     ok($A_in_invoke == 30, 'invoke sees the continuation body');
     ok($B_in_invoke == 20, 'invoke also sees the invocation context');
+}
+
+{
+    my $log := '';
+
+    my $next;
+    nqp::continuationreset(nqp::null(), {
+        $log := $log ~ 1;
+        nqp::continuationcontrol(0, nqp::null(), -> $cont { $next := $cont });
+        $log := $log ~ 2;
+        nqp::continuationcontrol(0, nqp::null(), -> $cont { $next := $cont });
+        $log := $log ~ 3;
+        nqp::continuationcontrol(0, nqp::null(), -> $cont { $next := $cont });
+        $log := $log ~ 4;
+        777;
+    });
+
+    is($log, '1', 'passing a continuation to nqp::continuationreset 1/4');
+    nqp::continuationreset(nqp::null(), $next);
+    is($log, '12', 'passing a continuation to nqp::continuationreset 2/4');
+    nqp::continuationreset(nqp::null(), $next);
+    is($log, '123', 'passing a continuation to nqp::continuationreset 3/4');
+    my $ret := nqp::continuationreset(nqp::null(), $next);
+    is($log, '1234', 'passing a continuation to nqp::continuationreset 4/4');
+    is($ret, 777, 'passing a continuation to nqp::continuationreset - correct return value');
 }
 
 # gather/take example
