@@ -100,11 +100,23 @@ role NQPMatchRole is export {
     method dump($indent?) {
         unless nqp::defined($indent) {
             $indent := 0;
+            my $*dumpseen := nqp::hash();
+            return self.dump(0);
         }
         if self.Bool() {
             my @chunks;
 
             my sub dump_match(@chunks, $indent, $key, $value) {
+                if (nqp::existskey($*dumpseen, nqp::objectid($value))) {
+                    nqp::push(@chunks, nqp::x(' ', $indent));
+                    nqp::push(@chunks, "- ");
+                    nqp::push(@chunks, ~$key);
+                    nqp::push(@chunks, ': ');
+                    nqp::push(@chunks, "(already seen {nqp::objectid($value)})\n");
+                    return;
+                } else {
+                    nqp::bindkey($*dumpseen, nqp::objectid($value), 1);
+                }
                 nqp::push(@chunks, nqp::x(' ', $indent));
                 nqp::push(@chunks, '- ');
                 nqp::push(@chunks, ~$key);
