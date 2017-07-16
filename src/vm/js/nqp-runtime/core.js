@@ -759,12 +759,14 @@ op.typeparameterized = function(type) {
 let fibers = require('fibers');
 
 function runTagged(tag, fiber, val) {
-  var control = fiber.run(val);
+  let arg = val;
   while (1) {
+    let control = fiber.run(arg);
     if (control.tag == tag || control.tag === Null) {
       return control.value;
     } else {
-      fibers.yield(control);
+      control.cont.fiber = fibers.current;
+      arg = fibers.yield(control);
     }
   }
 }
@@ -788,15 +790,19 @@ op.continuationreset = function(ctx, tag, block) {
   if (block instanceof Cont) {
     return runTagged(tag, block.fiber, Null);
   } else {
-    return runTagged(tag, fibers(function() {
+    const fiber = fibers(function() {
       return {value: block.$$call(ctx, null), tag: tag};
-    }), Null);
+    });
+    fiber.tag = tag;
+    return runTagged(tag, fiber, Null);
   }
 };
 
 
 op.continuationcontrol = function(ctx, protect, tag, closure) {
-  return fibers.yield({value: closure.$$call(ctx, null, new Cont(tag, fibers.current)), tag: tag});
+  const cont = new Cont(tag, fibers.current);
+  let value = closure.$$call(ctx, null, cont);
+  return fibers.yield({cont: cont, value: value, tag: tag});
 };
 
 op.continuationinvoke = function(ctx, cont, inject) {
