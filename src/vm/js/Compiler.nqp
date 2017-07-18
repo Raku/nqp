@@ -1415,6 +1415,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         @suffix[$type];
     }
 
+    my sub run_with_module($code) {
+        $code ~ ".\$\$apply([nqp.loaderCtx, null].concat(nqp.args(module)));\n";
+    }
+
     multi method as_js(QAST::CompUnit $node, :$want) {
         # Should have a single child which is the outer block.
         if +@($node) != 1 || !nqp::istype($node[0], QAST::Block) {
@@ -1472,11 +1476,11 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             my $main := self.as_js($main_block, :want($T_OBJ));
 
-            $body := $instant ?? Chunk.void($block_js, $main, $main.expr ~ ".\$\$apply([nqp.loaderCtx, null].concat(nqp.args(module)));\n") !! $main;
+            $body := $instant ?? Chunk.void($block_js, $main, run_with_module($main.expr)) !! $main;
             
         }
         else {
-            $body := $instant ?? Chunk.void($block_js, $block_js.expr ~ ".\$\$apply([nqp.loaderCtx, null].concat(nqp.args(module)));\n") !! $block_js;
+            $body := $instant ?? Chunk.void($block_js, run_with_module($block_js.expr)) !! $block_js;
         }
 
 
