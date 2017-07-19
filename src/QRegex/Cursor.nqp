@@ -107,16 +107,22 @@ role NQPMatchRole is export {
             my @chunks;
 
             my sub dump_match(@chunks, $indent, $key, $value) {
+                my int $amount := 0;
                 if (nqp::existskey($*dumpseen, nqp::objectid($value))) {
+                    $amount := nqp::atkey($*dumpseen, nqp::objectid($value));
+                }
+                nqp::bindkey($*dumpseen, nqp::objectid($value), $amount + 1);
+
+                if $amount > 1 {
                     nqp::push(@chunks, nqp::x(' ', $indent));
                     nqp::push(@chunks, "- ");
                     nqp::push(@chunks, ~$key);
-                    nqp::push(@chunks, ': ');
-                    nqp::push(@chunks, "(already seen {nqp::objectid($value)})\n");
+                    nqp::push(@chunks, ' - already seen: ');
+                    nqp::push(@chunks, nqp::sprintf("%x", [nqp::objectid($value)]));
+                    nqp::push(@chunks, "\n");
                     return;
-                } else {
-                    nqp::bindkey($*dumpseen, nqp::objectid($value), 1);
                 }
+
                 nqp::push(@chunks, nqp::x(' ', $indent));
                 nqp::push(@chunks, '- ');
                 nqp::push(@chunks, ~$key);
@@ -129,6 +135,10 @@ role NQPMatchRole is export {
                 }
                 else {
                     nqp::push(@chunks, '<object> isa ' ~ $value.HOW.name($value));
+                }
+                if $amount == 1 {
+                    nqp::push(@chunks, " id: ");
+                    nqp::push(@chunks, nqp::sprintf("%x", [nqp::objectid($value)]));
                 }
                 nqp::push(@chunks, "\n");
                 if nqp::can($value, 'dump') {
