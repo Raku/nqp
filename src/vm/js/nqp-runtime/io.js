@@ -524,3 +524,8 @@ op.spawnprocasync = function(ctx, queue, args, cwd, env, config) {
     config.content.get('done').$$call(ctx, null, result.status << 8);
   }
 };
+
+op.permit = function(handle, channel, permits) {
+  // TODO Implement permit handling properly
+  return handle;
+};
