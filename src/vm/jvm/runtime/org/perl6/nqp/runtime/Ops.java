@@ -5624,7 +5624,6 @@ public final class Ops {
     }
     public static SixModelObject permit(SixModelObject handle, long channel, long permits,
                                         ThreadContext tc) {
-        AsyncTaskInstance task = (AsyncTaskInstance) handle;
         // TODO Implement permit handling properly
         return handle;
     }
