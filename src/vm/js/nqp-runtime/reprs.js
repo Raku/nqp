@@ -74,7 +74,8 @@ function basicConstructor(STable) {
     }
 
     /* are we trying to access an internal property? */
-    if (name.substr(0, 2) === '$$') {
+    /* HACK with then, we likely need to prefix p6 methods to avoid this problem */
+    if (name.substr(0, 2) === '$$' || name == 'then') {
       return undefined;
     }
 

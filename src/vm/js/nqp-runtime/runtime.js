@@ -93,7 +93,8 @@ exports.libpath = function(paths) {
 
 exports.loaderCtx = null;
 
-op.loadbytecode = function(ctx, file) {
+// THIS IS AWAIT/ASYNC specific
+op.loadbytecode = async function(ctx, file) {
   // HACK - temporary hack for rakudo-js
   if (file == '/share/nqp/lib/Perl6/BOOTSTRAP.js') {
     file = 'Perl6::BOOTSTRAP';
@@ -114,7 +115,8 @@ op.loadbytecode = function(ctx, file) {
   var found = false;
   for (var prefix of prefixes) {
     try {
-      loadFrom.require(prefix + mangled);
+      await loadFrom.require(prefix + mangled);
+
       found = true;
       break;
     } catch (e) {
@@ -503,3 +505,7 @@ exports.exitHandler = function(ctx, hllName, value) {
 exports.NativeRef = require('./reprs.js').NativeRef;
 
 exports.getHLL = hll.getHLL;
+
+exports.run = function(code) {
+  return code();
+};

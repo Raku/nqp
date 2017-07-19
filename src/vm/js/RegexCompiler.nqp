@@ -52,7 +52,7 @@ class RegexCompiler {
 
         Chunk.new($T_OBJ, $!cursor, [
             "{$!label} = {$!initial_label};\n",
-            "$start = $self['!cursor_start_all']({$*CTX}, null, $self).array;\n",
+            "$start = ({$!compiler.await}$self['!cursor_start_all']({$*CTX}, null, $self)).array;\n",
             "{$!cursor} = $start[0];\n",
             self.set_cursor_var(),
             "{$!target} = $start[1];\n",
@@ -85,7 +85,7 @@ class RegexCompiler {
             self.goto($jump),
 
             self.case($!done_label),
-            "{$!cursor}['!cursor_fail']({$*CTX}, null, $!cursor);\n",
+            $!compiler.await ~ "{$!cursor}['!cursor_fail']({$*CTX}, null, $!cursor);\n",
             "break {$!js_loop_label}\n",
             "\}\n\}\n"
         ]);
@@ -111,7 +111,7 @@ class RegexCompiler {
     }
 
     method dba($node) {
-        call($!cursor, "!dba", $!pos, quote_string($node.name)) ~ ";\n";
+        self.internal_call($!cursor, "!dba", $!pos, quote_string($node.name)) ~ ";\n";
     }
     
     method concat($node) {
@@ -234,7 +234,7 @@ class RegexCompiler {
         my @setup;
         
         @setup.push(
-            "{$!cursor}['!cursor_pass']({$*CTX},"
+            $!compiler.await ~ "{$!cursor}['!cursor_pass']({$*CTX},"
             ~ "\{backtrack: {$node.backtrack ne 'r'}\}, $!cursor, {$!pos}"
         );
 
@@ -275,11 +275,11 @@ class RegexCompiler {
         $code;
     }
 
-    my sub call($invocant, $method, *@args) {
+    method internal_call($invocant, $method, *@args) {
         nqp::unshift(@args, $invocant);
         nqp::unshift(@args, 'null');
         nqp::unshift(@args, $*CTX);
-        $invocant ~ "[" ~ quote_string($method) ~ "](" ~ nqp::join(",", @args) ~ ")";
+        $!compiler.await ~ $invocant ~ "[" ~ quote_string($method) ~ "](" ~ nqp::join(",", @args) ~ ")";
     }
 
     # We never autovifiy $!from and $!pos so we can access them directly
@@ -341,13 +341,13 @@ class RegexCompiler {
             my str $invocation := $compiled_args.is_args_array ?? ".apply({$!cursor}," !! '(';
 
             $call := Chunk.new($T_OBJ,
-                $!cursor ~ '[' ~ quote_string($method) ~ "]" ~ $invocation ~ $compiled_args.expr ~ ')',
+                $!compiler.await ~ $!cursor ~ '[' ~ quote_string($method) ~ "]" ~ $invocation ~ $compiled_args.expr ~ ')',
                 $compiled_args);
         }
         else {
             #TODO think if arguments are possible, etc.
             my $block := $!compiler.as_js($node[0][0], :want($T_OBJ));
-            $call := Chunk.new($T_OBJ, $block.expr ~ ".\$\$call({$*CTX}, null, $!cursor)", $block);
+            $call := Chunk.new($T_OBJ, $!compiler.await ~ $block.expr ~ ".\$\$call({$*CTX}, null, $!cursor)", $block);
         }
 
         my str $testop := $node.negate ?? '>=' !! '<';
@@ -368,20 +368,20 @@ class RegexCompiler {
                 $capture_code := $capture_code
                     ~ self.goto($pass_label)
                     ~ self.case($back_label)
-                    ~ "$!subcur =" ~ call($!subcur, "!cursor_next") ~ ";\n"
+                    ~ "$!subcur =" ~ self.internal_call($!subcur, "!cursor_next") ~ ";\n"
                     ~ "if({self.pos_from_cursor($!subcur)} $testop 0) \{{self.fail}\};\n"
                     ~ self.case($pass_label);
 
                 if $node.subtype eq 'capture' {
                     $capture_code := $capture_code
                         ~ "$!cstack = " 
-                        ~ call($!cursor, "!cursor_capture", $!subcur, quote_string($node.name)) ~ ".array;\n";
+                        ~ self.internal_call($!cursor, "!cursor_capture", $!subcur, quote_string($node.name)) ~ ".array;\n";
                     $captured := 1;
                 }
                 else {
                     $capture_code := $capture_code
                         ~ "$!cstack = "
-                        ~ call($!cursor, "!cursor_push_cstack", $!subcur) ~ ".array;\n";
+                        ~ self.internal_call($!cursor, "!cursor_push_cstack", $!subcur) ~ ".array;\n";
                 }
                 $capture_code := $capture_code ~  "$!bstack.push($back_label, $!pos, 0, $!cstack.length);\n";
                 
@@ -391,7 +391,7 @@ class RegexCompiler {
         if !$captured && $node.subtype eq 'capture' {
             $capture_code := $capture_code
                 ~ "$!cstack = " ~
-                call($!cursor, "!cursor_capture", $!subcur,  quote_string($node.name)) ~ ".array;\n"
+                self.internal_call($!cursor, "!cursor_capture", $!subcur,  quote_string($node.name)) ~ ".array;\n"
         }
 
         Chunk.void(
@@ -417,9 +417,9 @@ class RegexCompiler {
             self.compile_rx($node[0]),
             self.peek($fail_label,$subcapture_from),
             self.set_cursor_pos,
-            "$!subcur = " ~ call($!cursor, '!cursor_start_subcapture', $subcapture_from) ~ ";\n",
-            call($!subcur, '!cursor_pass', $!pos) ~ ";\n",
-            "$!cstack = " ~ call($!cursor, '!cursor_capture', $!subcur, quote_string($node.name)) ~ ".array;\n",
+            "$!subcur = " ~ self.internal_call($!cursor, '!cursor_start_subcapture', $subcapture_from) ~ ";\n",
+            self.internal_call($!subcur, '!cursor_pass', $!pos) ~ ";\n",
+            "$!cstack = " ~ self.internal_call($!cursor, '!cursor_capture', $!subcur, quote_string($node.name)) ~ ".array;\n",
             self.goto($done_label),
             self.case($fail_label),
             self.fail(),
@@ -566,7 +566,7 @@ class RegexCompiler {
              self.mark($end_label, -1, 0),
              # use a special array of ints
              # TODO: use a single persistent one instead of allocating a fresh one
-             call($!cursor, '!alt', $!pos, quote_string($node.name), "nqp.createArray($!subcur)") ~ ";\n",
+             self.internal_call($!cursor, '!alt', $!pos, quote_string($node.name), "nqp.createArray($!subcur)") ~ ";\n",
              self.fail,
              Chunk.void(|@alt_code),
              self.case($end_label),

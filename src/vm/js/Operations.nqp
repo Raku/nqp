@@ -10,7 +10,7 @@ class QAST::OperationsJS {
         %inlinable{$op} := $inlinable;
     }
 
-    sub op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx, :$decont, :$method_call, :$hll) {
+    sub op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx, :$decont, :$method_call, :$hll, :$await) {
         my @exprs;
         my @setup;
 
@@ -52,7 +52,7 @@ class QAST::OperationsJS {
             }
         }
 
-        Chunk.new($return_type, $cb(|@exprs), @setup, :$node);
+        Chunk.new($return_type, ($await ?? $comp.await !! '') ~ $cb(|@exprs), @setup, :$node);
     }
 
     sub runtime_op($op) {
@@ -67,11 +67,11 @@ class QAST::OperationsJS {
         }
     }
 
-    sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op), :$side_effects, :$ctx, :$inlinable = 1, :$decont, :$method_call, :$hll) {
+    sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op), :$side_effects, :$ctx, :$inlinable = 1, :$decont, :$method_call, :$hll, :$await) {
 
         add_op($op, sub ($comp, $node, :$want) {
             my $gen_code := $method_call ?? method_call($op) !! $cb;
-            my $chunk := op_template($comp, $node, $return_type, @argument_types, $gen_code, :$ctx, :$decont, :$method_call, :$hll);
+            my $chunk := op_template($comp, $node, $return_type, @argument_types, $gen_code, :$ctx, :$decont, :$method_call, :$hll, :$await);
             $side_effects ?? $comp.stored_result($chunk, :$want) !! $chunk;
         }, :$inlinable);
 
@@ -636,7 +636,7 @@ class QAST::OperationsJS {
         my str $call := $compiled_args.is_args_array ?? '.$$apply(' !! '.$$call(';
 
         $comp.stored_result(
-            Chunk.new($T_OBJ, $callee.expr ~ ".\$\$decont($*CTX)" ~ $call ~ $compiled_args.expr ~ ')' , [$callee, $compiled_args], :$node), :$want);
+            Chunk.new($T_OBJ, $comp.await ~ $callee.expr ~ ".\$\$decont($*CTX)" ~ $call ~ $compiled_args.expr ~ ')' , [$callee, $compiled_args], :$node), :$want);
     });
 
     %ops<callstatic> := %ops<call>;
@@ -709,7 +709,7 @@ class QAST::OperationsJS {
         @setup.push($compiled_args);
 
         $comp.stored_result(
-            Chunk.new($T_OBJ, "{$invocant.expr}.\$\$decont($*CTX)" ~ $method ~ $call ~ $compiled_args.expr ~ ')' , @setup, :$node), :$want);
+            Chunk.new($T_OBJ, $comp.await ~ $invocant.expr ~' .$$decont(' ~ $*CTX ~ ')' ~ $method ~ $call ~ $compiled_args.expr ~ ')' , @setup, :$node), :$want);
 
     });
 
@@ -751,7 +751,7 @@ class QAST::OperationsJS {
                 }
                 else {
                     my $catch_body := $comp.as_js($handler, :want($T_OBJ));
-                    @setup.push("$handler_ctx.\$\${$type} = function() \{\n");
+                    @setup.push("$handler_ctx.\$\${$type} = {$comp.async}function() \{\n");
                     @setup.push($catch_body);
                     @setup.push( "return {$catch_body.expr};\n" ~ "\};\n");
                     $has_catch := 1 if $type eq 'CATCH';
@@ -1278,7 +1278,7 @@ class QAST::OperationsJS {
             my $post := '';
 
             if +@operands == 3 {
-                $post := Chunk.void('(function() {', $comp.as_js(@operands[2], :want($T_VOID)), '})()');
+                $post := Chunk.void('{$comp.await} ({$comp.async}function() {', $comp.as_js(@operands[2], :want($T_VOID)), '})()');
             }
 
             my int $repeat_variant := ($op eq 'repeat_while' || $op eq 'repeat_until');
@@ -1382,7 +1382,7 @@ class QAST::OperationsJS {
                 Chunk.new($T_OBJ, $result, [
                     "$unwind_marker = \{\};\n",
                     "$*CTX.unwind = $unwind_marker;\n",
-                    "$*CTX.\$\${$type} = function() \{\n",
+                    "$*CTX.\$\${$type} = {$comp.async}function() \{\n",
                         $handle_result,
                         "$result = {$handle_result.expr};\n",
                     "\};\n",
@@ -1657,7 +1657,7 @@ class QAST::OperationsJS {
         Chunk.void($code.value ~ ";\n");
     });
 
-    add_simple_op('loadbytecode', $T_STR, [$T_STR], :ctx, :side_effects);
+    add_simple_op('loadbytecode', $T_STR, [$T_STR], :ctx, :side_effects, :await);
     add_simple_op('loadbytecodefh', $T_VOID, [$T_OBJ, $T_STR], :ctx, :side_effects);
 
     add_simple_op('execname', $T_STR, []);

@@ -125,8 +125,8 @@ class STable {
   setboolspec(mode, method) {
     this.boolificationSpec = {mode: mode, method: method};
     if (mode == 0) {
-      this.ObjConstructor.prototype.$$toBool = function(ctx) {
-        return method.$$call(ctx, {}, this).$$decont().$$toBool(ctx);
+      this.ObjConstructor.prototype.$$toBool = async function(ctx) {
+        return (await method.$$call(ctx, {}, this)).$$decont().$$toBool(ctx);
       };
     } else if (mode == 1) {
       this.ObjConstructor.prototype.$$toBool = function(ctx) {
