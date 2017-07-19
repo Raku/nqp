@@ -56,7 +56,7 @@ class RegexCompiler {
             "{$!cursor} = $start[0];\n",
             self.set_cursor_var(),
             "{$!target} = $start[1];\n",
-            "{$!pos} = nqp.toInt($start[2], $*CTX);\n",
+            "{$!pos} = await nqp.toInt($start[2], $*CTX);\n",
             ($!has_cursor_type ?? '' !! "{$!cursor_type_runtime} = $start[3];\n"),
             "{$!bstack} = $start[4].array;\n",
             "{$!restart} = $start[5];\n",

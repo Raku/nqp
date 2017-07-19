@@ -177,7 +177,7 @@ op.setdispatcherfor = function(dispatcher, dispatcherFor) {
   }
 };
 
-exports.toStr = function(arg_, ctx) {
+exports.toStr = async function(arg_, ctx) {
   var arg = arg_.$$decont(ctx);
   if (typeof arg == 'number') {
     return numToStr(arg);
@@ -192,7 +192,7 @@ exports.toStr = function(arg_, ctx) {
   } else if (arg.$$getStr) {
     return arg.$$getStr();
   } else if (arg.Str) {
-    let ret = arg.Str(ctx, null, arg).$$decont(ctx); // eslint-disable-line new-cap
+    let ret = (await arg.Str(ctx, null, arg)).$$decont(ctx); // eslint-disable-line new-cap
     if (typeof ret == 'string') return ret;
     return ret.$$getStr();
   } else if (arg.$$getNum) {
@@ -227,7 +227,7 @@ function numToStr(num) {
 
 exports.numToStr = numToStr;
 
-exports.toNum = function(arg_, ctx) {
+exports.toNum = async function(arg_, ctx) {
   let arg = arg_.$$decont(ctx);
   if (typeof arg == 'number') {
     return arg;
@@ -236,7 +236,7 @@ exports.toNum = function(arg_, ctx) {
   } else if (typeof arg == 'string') {
     return strToNum(arg);
   } else if (arg._STable && arg._STable.methodCache && arg._STable.methodCache.get('Num')) {
-    var result = arg.Num(ctx, null, arg); // eslint-disable-line new-cap
+    var result = await arg.Num(ctx, null, arg); // eslint-disable-line new-cap
     if (result.$$getNum) {
       return result.$$getNum();
     } else if (result.$$numify) {
@@ -259,8 +259,8 @@ exports.toNum = function(arg_, ctx) {
   }
 };
 
-exports.toInt = function(arg, ctx) {
-  return (exports.toNum(arg, ctx) | 0);
+exports.toInt = async function(arg, ctx) {
+  return ((await exports.toNum(arg, ctx)) | 0);
 };
 
 exports.intToObj = function(hllName, i) {
