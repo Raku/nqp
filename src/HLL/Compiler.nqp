@@ -328,8 +328,9 @@ class HLL::Compiler does HLL::Backend::Default {
             if %adverbs<ll-exception> || !nqp::can(self, 'handle-exception') {
                 my $err := stderr();
                 my $message := nqp::getmessage($error);
-                if nqp::isnull($message) && nqp::can($error, 'message') {
-                    $message := $error.message;
+                my $payload := nqp::getpayload($error);
+                if nqp::isnull_s($message) && nqp::can($payload, 'message') {
+                    $message := $payload.message;
                 }
                 $err.say($message);
                 $err.say(nqp::join("\n", nqp::backtracestrings($error)));
