@@ -975,7 +975,7 @@ class QAST::OperationsJS {
     add_simple_op('bindhllsym', $T_OBJ, [$T_STR, $T_STR, $T_OBJ], :side_effects);
     add_simple_op('gethllsym', $T_OBJ, [$T_STR, $T_STR]);
 
-    add_simple_op('hllizefor', $T_OBJ, [$T_OBJ, $T_STR], :ctx, :side_effects);
+    add_simple_op('hllizefor', $T_OBJ, [$T_OBJ, $T_STR], :ctx, :side_effects, :await);
 
     add_simple_op('hllize', $T_OBJ, [$T_OBJ], :ctx, :side_effects, sub ($ctx, $obj) {
         "nqp.op.hllizefor($ctx, $obj, {quote_string($*HLL)})"
@@ -1487,7 +1487,7 @@ class QAST::OperationsJS {
 
     add_simple_op('invokewithcapture', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($invokee, $capture) {
         "$invokee.\$\$apply([{$*CTX}].concat($capture.named, $capture.pos))"
-    }, :side_effects);
+    }, :side_effects, :await);
 
 
     add_simple_op('multicachefind', $T_OBJ, [$T_OBJ, $T_OBJ], :ctx);

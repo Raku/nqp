@@ -57,7 +57,7 @@ function methodNotFoundError(ctx, obj, name) {
   if (handler === undefined) {
     throw new NQPException(`Cannot find method '${name}' on object of type ${obj._STable.debugName}`);
   } else {
-    handler.$$call(ctx, null, obj, name);
+    return handler.$$call(ctx, null, obj, name);
   }
 }
 
@@ -81,18 +81,18 @@ function basicConstructor(STable) {
 
     if (STable.modeFlags & constants.METHOD_CACHE_AUTHORITATIVE) {
       return function(ctx, _NAMED, obj) {
-        methodNotFoundError(ctx, obj, name);
+        return methodNotFoundError(ctx, obj, name);
       };
     }
 
 
-    return function() {
+    return async function() {
       let how = this._STable.HOW;
 
-      var method = how.find_method(null, null, how, this, name);
+      var method = await how.find_method(null, null, how, this, name);
 
       if (method === Null) {
-        methodNotFoundError(arguments[0], arguments[2], name);
+        return methodNotFoundError(arguments[0], arguments[2], name);
       }
 
       var args = [];
