@@ -34,7 +34,7 @@ function convertState(thing) {
 }
 
 // TODO think about type conversions of the stuff inside the array
-op.nfafromstatelist = function(ctx, rawStates, type) {
+op.nfafromstatelist = async function(ctx, rawStates, type) {
   var nfa = type._STable.REPR.allocate(type._STable);
 
   nfa.fates = rawStates.$$toArray()[0];
@@ -45,7 +45,7 @@ op.nfafromstatelist = function(ctx, rawStates, type) {
   for (var i = 1; i < states.length; i++) {
     nfa.states[i - 1] = [];
     for (var j = 0; j < states[i].length; j += 3) {
-      var edge = {act: nqp.toInt(states[i][j], ctx), to: nqp.toInt(states[i][j + 2], ctx)};
+      var edge = {act: await nqp.toInt(states[i][j], ctx), to: await nqp.toInt(states[i][j + 2], ctx)};
       switch (edge.act & 0xff) {
         case EDGE_EPSILON:
           break;
@@ -55,11 +55,11 @@ op.nfafromstatelist = function(ctx, rawStates, type) {
         case EDGE_CODEPOINT_NEG:
         case EDGE_CHARCLASS:
         case EDGE_CHARCLASS_NEG:
-          edge.argI = nqp.toInt(states[i][j + 1], ctx);
+          edge.argI = await nqp.toInt(states[i][j + 1], ctx);
           break;
         case EDGE_CHARLIST:
         case EDGE_CHARLIST_NEG:
-          edge.argS = nqp.toStr(states[i][j + 1], ctx);
+          edge.argS = await nqp.toStr(states[i][j + 1], ctx);
           break;
 
         case EDGE_CODEPOINT_I:
@@ -67,8 +67,8 @@ op.nfafromstatelist = function(ctx, rawStates, type) {
         case EDGE_CODEPOINT_I_NEG:
         case EDGE_CHARRANGE:
         case EDGE_CHARRANGE_NEG:
-          edge.argLc = nqp.toInt(states[i][j + 1][0], ctx);
-          edge.argUc = nqp.toInt(states[i][j + 1][1], ctx);
+          edge.argLc = await nqp.toInt(states[i][j + 1][0], ctx);
+          edge.argUc = await nqp.toInt(states[i][j + 1][1], ctx);
           break;
         default:
           throw 'nfafromstatelist: unknown codepoint type: ' + edge.act;
