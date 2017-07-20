@@ -12,7 +12,7 @@ var constants = require('./constants.js');
 var bignum = require('bignum-browserify');
 var ZERO = bignum(0);
 
-function findMethod(ctx, obj, name) {
+async function findMethod(ctx, obj, name) {
   if (obj._STable.methodCache) {
     let method = obj._STable.methodCache.get(name);
     if (method !== undefined) {
@@ -23,8 +23,8 @@ function findMethod(ctx, obj, name) {
     }
   }
 
-  if (obj._STable.HOW.$$can(ctx, 'find_method')) {
-    return obj._STable.HOW.find_method(ctx, null, obj._STable.HOW, obj, name);
+  if (await obj._STable.HOW.$$can(ctx, 'find_method')) {
+    return await obj._STable.HOW.find_method(ctx, null, obj._STable.HOW, obj, name);
   } else {
     return Null;
   }
@@ -113,8 +113,8 @@ class STable {
       return 0;
     };
 
-    this.ObjConstructor.prototype.$$can = function(ctx, name) {
-      return findMethod(ctx, this, name) === Null ? 0 : 1;
+    this.ObjConstructor.prototype.$$can = async function(ctx, name) {
+      return (await findMethod(ctx, this, name)) === Null ? 0 : 1;
     };
 
     if (this.REPR.setupSTable) {
