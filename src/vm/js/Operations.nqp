@@ -1278,7 +1278,7 @@ class QAST::OperationsJS {
             my $post := '';
 
             if +@operands == 3 {
-                $post := Chunk.void('{$comp.await} ({$comp.async}function() {', $comp.as_js(@operands[2], :want($T_VOID)), '})()');
+                $post := Chunk.void("{$comp.await} ({$comp.async}function() \{", $comp.as_js(@operands[2], :want($T_VOID)), '})()');
             }
 
             my int $repeat_variant := ($op eq 'repeat_while' || $op eq 'repeat_until');
