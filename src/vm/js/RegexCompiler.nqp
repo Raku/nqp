@@ -279,7 +279,7 @@ class RegexCompiler {
         nqp::unshift(@args, $invocant);
         nqp::unshift(@args, 'null');
         nqp::unshift(@args, $*CTX);
-        $!compiler.await ~ $invocant ~ "[" ~ quote_string($method) ~ "](" ~ nqp::join(",", @args) ~ ")";
+        $!compiler.await($invocant ~ "[" ~ quote_string($method) ~ "](" ~ nqp::join(",", @args) ~ ")");
     }
 
     # We never autovifiy $!from and $!pos so we can access them directly
