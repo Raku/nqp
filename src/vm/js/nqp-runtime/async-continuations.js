@@ -11,11 +11,11 @@ class CtxJustReset extends Ctx {
   }
 };
 
-function findReset(ctx) {
+function findReset(tag, ctx) {
   /* TODO - tag */
   let search = ctx; 
   while (search) {
-    if (search instanceof CtxJustReset) {
+    if (search instanceof CtxJustReset && (tag === Null || search.$$tag == tag)) {
       return search;
     }
     search = search.$$caller; 
@@ -56,7 +56,7 @@ class Cont {
 
 op.continuationcontrol = function(ctx, protect, tag, closure) {
   return new Promise(function(resolve, error) {
-    const resetCtx = findReset(ctx);
+    const resetCtx = findReset(tag, ctx);
     const cont = new Cont(ctx, resolve, resetCtx);
     closure.$$call(resetCtx.$$caller, null, cont).then(value => resetCtx.$$outside(value));
   });
