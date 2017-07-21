@@ -57,7 +57,7 @@ op.continuationcontrol = function(ctx, protect, tag, closure) {
   return new Promise(function(resolve, reject) {
     const resetCtx = findReset(tag, ctx);
     const cont = new Cont(ctx, resolve, resetCtx);
-    closure.$$call(resetCtx.$$caller, null, cont).then(value => resetCtx.$$outside(value), reject);
+    closure.$$call(protect ? resetCtx : resetCtx.$$caller, null, cont).then(value => resetCtx.$$outside(value), reject);
   });
 };
 
