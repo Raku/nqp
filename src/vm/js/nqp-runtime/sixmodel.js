@@ -82,7 +82,7 @@ class STable {
       }
     };
 
-    this.ObjConstructor.prototype.$$istype = function(ctx, type) {
+    this.ObjConstructor.prototype.$$istype = async function(ctx, type) {
       var cache = this._STable.typeCheckCache;
       if (cache) {
         for (var i = 0; i < cache.length; i++) {
@@ -96,18 +96,18 @@ class STable {
 
         var HOW = this._STable.HOW;
         /* This "hack" is stolen from the JVM */
-        if (!HOW.$$can(ctx, 'type_check')) {
+        if (!await HOW.$$can(ctx, 'type_check')) {
           return 0;
         }
 
-        if (HOW.type_check(ctx, null, HOW, this, type).$$toBool(ctx)) {
+        if ((await HOW.type_check(ctx, null, HOW, this, type)).$$toBool(ctx)) {
           return 1;
         }
       }
 
       const TYPE_CHECK_NEEDS_ACCEPTS = 2;
       if (type._STable.modeFlags & TYPE_CHECK_NEEDS_ACCEPTS) {
-        return type._STable.HOW.accepts_type(ctx, null, type._STable.HOW, type, this).$$toBool(ctx);
+        return (await type._STable.HOW.accepts_type(ctx, null, type._STable.HOW, type, this)).$$toBool(ctx);
       }
 
       return 0;
