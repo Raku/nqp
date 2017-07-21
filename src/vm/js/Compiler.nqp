@@ -11,8 +11,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         $result;
     }
 
-    method await() {
-        'await ';
+    method await($expr = NO_VALUE) {
+        $expr =:= NO_VALUE ?? 'await ' !! '(await ' ~ $expr ~ ')';
     }
 
     method async() {
@@ -536,13 +536,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             if $got == $T_OBJ {
                 if $desired == $T_BOOL {
-                    return Chunk.new($desired, "({self.await}{$chunk.expr}.\$\$decont($*CTX).\$\$toBool($*CTX))", $chunk);
+                    return Chunk.new($desired, self.await(self.await("{$chunk.expr}.\$\$decont($*CTX)") ~ ".\$\$toBool($*CTX)"), $chunk);
                 }
                 my %convert;
                 %convert{$T_STR} := 'toStr';
                 %convert{$T_NUM} := 'toNum';
                 %convert{$T_INT} := 'toInt';
-                return Chunk.new($desired, '(' ~ self.await ~ 'nqp.' ~ %convert{$desired} ~ '(' ~ $chunk.expr ~ ", {$*CTX}))", $chunk);
+                return Chunk.new($desired, self.await('nqp.' ~ %convert{$desired} ~ '(' ~ $chunk.expr ~ ", {$*CTX})"), $chunk);
             }
 
             if $desired == $T_STR {

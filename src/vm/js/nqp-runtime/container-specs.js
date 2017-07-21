@@ -20,11 +20,11 @@ class CodePair {
 
     this.STable.addInternalMethods(class {
       $$assignunchecked(ctx, value) {
-        store.$$call(ctx, {}, this, value);
+        return store.$$call(ctx, {}, this, value);
       }
 
       $$assign(ctx, value) {
-        store.$$call(ctx, {}, this, value);
+        return store.$$call(ctx, {}, this, value);
       }
 
       $$iscont() {

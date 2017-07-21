@@ -181,7 +181,7 @@ op.setdispatcherfor = function(dispatcher, dispatcherFor) {
 };
 
 exports.toStr = async function(arg_, ctx) {
-  var arg = arg_.$$decont(ctx);
+  let arg = await arg_.$$decont(ctx);
   if (typeof arg == 'number') {
     return numToStr(arg);
   } else if (typeof arg == 'string') {
@@ -195,7 +195,7 @@ exports.toStr = async function(arg_, ctx) {
   } else if (arg.$$getStr) {
     return arg.$$getStr();
   } else if (arg.Str) {
-    let ret = (await arg.Str(ctx, null, arg)).$$decont(ctx); // eslint-disable-line new-cap
+    let ret = await (await arg.Str(ctx, null, arg)).$$decont(ctx); // eslint-disable-line new-cap
     if (typeof ret == 'string') return ret;
     return ret.$$getStr();
   } else if (arg.$$getNum) {
@@ -231,7 +231,7 @@ function numToStr(num) {
 exports.numToStr = numToStr;
 
 exports.toNum = async function(arg_, ctx) {
-  let arg = arg_.$$decont(ctx);
+  let arg = await arg_.$$decont(ctx);
   if (typeof arg == 'number') {
     return arg;
   } else if (arg === Null) {

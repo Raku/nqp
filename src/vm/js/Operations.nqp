@@ -31,7 +31,7 @@ class QAST::OperationsJS {
         my int $i := 0;
         for $node.list -> $arg {
             my $chunk := $comp.as_js($arg, :want(@argument_types[$i]));
-            @exprs.push(@decont[$i] ?? "{$chunk.expr}.\$\$decont($*CTX)" !! $chunk.expr);
+            @exprs.push(@decont[$i] ?? $comp.await("{$chunk.expr}.\$\$decont($*CTX)") !! $chunk.expr);
             @setup.push($chunk);
             $i := $i + 1;
         }
@@ -52,7 +52,8 @@ class QAST::OperationsJS {
             }
         }
 
-        Chunk.new($return_type, ($await ?? $comp.await !! '') ~ $cb(|@exprs), @setup, :$node);
+        my $expr := $cb(|@exprs);
+        Chunk.new($return_type, $await ?? $comp.await($expr) !! $expr, @setup, :$node);
     }
 
     sub runtime_op($op) {
@@ -157,11 +158,11 @@ class QAST::OperationsJS {
             my $cont := $comp.as_js($node[0], :want($T_OBJ));
             my $value := $comp.as_js($node[1], :want($value_kind));
 
-            my $decont := $value_kind == $T_OBJ ?? ".\$\$decont($*CTX)" !! "";
+            my $deconted := $value_kind == $T_OBJ ?? $comp.await("{$value.expr}.\$\$decont($*CTX)") !! $value.expr;
             Chunk.new($T_OBJ, $cont.expr, [
                 $cont,
                 $value,
-                $cont.expr ~ '.$$' ~ $op_name ~ '(' ~ $*CTX ~ ', ' ~ $value.expr ~ $decont ~ ");\n"
+                $comp.await ~ $cont.expr ~ '.$$' ~ $op_name ~ '(' ~ $*CTX ~ ', ' ~ $deconted ~ ");\n"
             ]);
         });
     }
@@ -174,11 +175,11 @@ class QAST::OperationsJS {
     add_assign_op('assign_s', $T_STR);
 
 
-    add_simple_op('decont', $T_OBJ, [$T_OBJ], :method_call, :ctx);
+    add_simple_op('decont', $T_OBJ, [$T_OBJ], :method_call, :ctx, :await);
 
-    add_simple_op('decont_i', $T_INT, [$T_OBJ], :method_call, :ctx);
-    add_simple_op('decont_n', $T_NUM, [$T_OBJ], :method_call, :ctx);
-    add_simple_op('decont_s', $T_STR, [$T_OBJ], :method_call, :ctx);
+    add_simple_op('decont_i', $T_INT, [$T_OBJ], :method_call, :ctx, :await);
+    add_simple_op('decont_n', $T_NUM, [$T_OBJ], :method_call, :ctx, :await);
+    add_simple_op('decont_s', $T_STR, [$T_OBJ], :method_call, :ctx, :await);
 
     add_simple_op('iscont', $T_INT, [$T_OBJ]);
     add_simple_op('isrwcont', $T_INT, [$T_OBJ]);
@@ -636,7 +637,7 @@ class QAST::OperationsJS {
         my str $call := $compiled_args.is_args_array ?? '.$$apply(' !! '.$$call(';
 
         $comp.stored_result(
-            Chunk.new($T_OBJ, $comp.await ~ $callee.expr ~ ".\$\$decont($*CTX)" ~ $call ~ $compiled_args.expr ~ ')' , [$callee, $compiled_args], :$node), :$want);
+            Chunk.new($T_OBJ, $comp.await ~ $comp.await($callee.expr ~ ".\$\$decont($*CTX)") ~ $call ~ $compiled_args.expr ~ ')' , [$callee, $compiled_args], :$node), :$want);
     });
 
     %ops<callstatic> := %ops<call>;
@@ -709,7 +710,7 @@ class QAST::OperationsJS {
         @setup.push($compiled_args);
 
         $comp.stored_result(
-            Chunk.new($T_OBJ, $comp.await ~ $invocant.expr ~' .$$decont(' ~ $*CTX ~ ')' ~ $method ~ $call ~ $compiled_args.expr ~ ')' , @setup, :$node), :$want);
+            Chunk.new($T_OBJ, $comp.await ~ $comp.await($invocant.expr ~' .$$decont(' ~ $*CTX ~ ')') ~ $method ~ $call ~ $compiled_args.expr ~ ')' , @setup, :$node), :$want);
 
     });
 
@@ -1490,8 +1491,8 @@ class QAST::OperationsJS {
     }, :side_effects, :await);
 
 
-    add_simple_op('multicachefind', $T_OBJ, [$T_OBJ, $T_OBJ], :ctx);
-    add_simple_op('multicacheadd', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ], :ctx);
+    add_simple_op('multicachefind', $T_OBJ, [$T_OBJ, $T_OBJ], :ctx, :await);
+    add_simple_op('multicacheadd', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ], :ctx, :await);
 
     add_simple_op('settypecache', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects);
     add_simple_op('setmethcache', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :decont(0));
