@@ -1580,10 +1580,10 @@ class QAST::OperationsJS {
 
     # Continuations
 
-    add_simple_op('continuationreset', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :ctx);
-    add_simple_op('continuationinvoke', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :ctx);
+    add_simple_op('continuationreset', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :ctx, :await);
+    add_simple_op('continuationinvoke', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :ctx, :await);
 
-    add_simple_op('continuationcontrol', $T_OBJ, [$T_INT, $T_OBJ, $T_OBJ], :side_effects, :ctx);
+    add_simple_op('continuationcontrol', $T_OBJ, [$T_INT, $T_OBJ, $T_OBJ], :side_effects, :ctx, :await);
 
 
     # Dealing with compiled compunits

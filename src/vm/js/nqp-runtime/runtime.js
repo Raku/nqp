@@ -67,6 +67,9 @@ loadOps(nativecall);
 var CodeRef = require('./code-ref.js');
 exports.CodeRef = CodeRef;
 
+const asyncContinuations = require('./async-continuations.js');
+loadOps(asyncContinuations);
+
 exports.CodeRefWithStateVars = require('./code-ref-with-statevars.js');
 
 exports.CurLexpad = require('./curlexpad.js');
