@@ -131,7 +131,7 @@ class Ctx extends NQPObject {
     throw exception;
   }
 
-  propagateException(exception) {
+  async propagateException(exception) {
     if (exception.$$category) {
       this.propagateControlException(exception);
       return;
@@ -146,7 +146,7 @@ class Ctx extends NQPObject {
 
         exceptionsStack.push(exception);
         try {
-          ctx.unwind.ret = ctx.$$CATCH();
+          ctx.unwind.ret = await ctx.$$CATCH();
         } catch (e) {
           if (e instanceof ResumeException && e.exception === exception) {
             return;
@@ -175,11 +175,11 @@ class Ctx extends NQPObject {
   }
 
   rethrow(exception) {
-    this.propagateException(exception);
+    return this.propagateException(exception);
   }
 
   die(msg) {
-    this.propagateException(new NQPExceptionWithCtx(msg, this));
+    return this.propagateException(new NQPExceptionWithCtx(msg, this));
   }
 
   resume(exception) {
@@ -187,7 +187,7 @@ class Ctx extends NQPObject {
   }
 
   throw(exception) {
-    this.propagateException(exception);
+    return this.propagateException(exception);
   }
 
   throwpayloadlexcaller(category, payload) {

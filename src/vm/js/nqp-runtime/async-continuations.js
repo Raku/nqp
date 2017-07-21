@@ -24,16 +24,15 @@ function findReset(tag, ctx) {
 }
 
 op.continuationreset = function(ctx, tag, block) {
-  let newCtx = new CtxJustReset(ctx, ctx, null);
-  
-  return new Promise(function(resolve, error) {
+  return new Promise(function(resolve, reject) {
     if (block instanceof Cont) {
       block.resetCtx.$$outside = resolve;
       block.inside(Null);
     } else {
+      let newCtx = new CtxJustReset(ctx, ctx, null);
       newCtx.$$outside = resolve;
       newCtx.$$tag = tag;
-      block.$$call(newCtx, null).then(value => newCtx.$$outside(value));
+      block.$$call(newCtx, null).then(value => newCtx.$$outside(value), reject);
     }
   });
 };
@@ -55,18 +54,19 @@ class Cont {
 };
 
 op.continuationcontrol = function(ctx, protect, tag, closure) {
-  return new Promise(function(resolve, error) {
+  return new Promise(function(resolve, reject) {
     const resetCtx = findReset(tag, ctx);
     const cont = new Cont(ctx, resolve, resetCtx);
-    closure.$$call(resetCtx.$$caller, null, cont).then(value => resetCtx.$$outside(value));
+    closure.$$call(resetCtx.$$caller, null, cont).then(value => resetCtx.$$outside(value), reject);
   });
 };
 
 op.continuationinvoke = function(ctx, cont, inject) {
-  return new Promise(function(resolve, error) {
+  return new Promise(function(resolve, reject) {
+    cont.resetCtx.$$caller = ctx;
     cont.resetCtx.$$outside = resolve;
     inject.$$call(cont.ctx, null).then(value => {
       cont.inside(value);
-    });
+    }, reject);
   });
 };
