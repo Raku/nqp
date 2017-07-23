@@ -1,3 +1,4 @@
+'use strict';
 var op = {};
 exports.op = op;
 
@@ -97,7 +98,7 @@ exports.hash = function() {
 
 exports.slurpyNamed = function(named, skip) {
   var hash = new Hash();
-  for (key in named) {
+  for (let key in named) {
     if (!skip[key]) {
       hash.content.set(key, named[key]);
     }
@@ -194,7 +195,7 @@ op.captureexistsnamed = function(capture, arg) {
 
 op.capturenamedshash = function(capture) {
   var hash = new Hash();
-  for (key in capture.named) {
+  for (let key in capture.named) {
     hash.content.set(key, capture.named[key]);
   }
   return hash;
