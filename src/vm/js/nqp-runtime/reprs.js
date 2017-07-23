@@ -1482,9 +1482,12 @@ class Decoder extends REPR {
         return this;
       }
 
-      $$decodersetlineseps(ctx, seps) {
+      async $$decodersetlineseps(ctx, seps) {
         this.$$check();
-        this.$$seps = seps.array.map(sep => nqp.toStr(sep, ctx));
+        this.$$seps = [];
+        for (let sep of seps.array) {
+          this.$$seps.push(await nqp.toStr(sep, ctx));
+        }
       }
 
       $$decoderaddbytes(bytes) {

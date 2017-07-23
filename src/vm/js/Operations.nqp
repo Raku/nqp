@@ -766,8 +766,8 @@ class QAST::OperationsJS {
                 my $*CTX := $handler_ctx;
                 my $body := $comp.as_js($protected, :$want);
 
-                my str $catch_wrapped_exception := "$handler_ctx.catchException(nqp.wrapException(e))";
-                my str $catch_exception := "$handler_ctx.catchException(e)";
+                my str $catch_wrapped_exception := "{$comp.await}$handler_ctx.catchException(nqp.wrapException(e))";
+                my str $catch_exception := "{$comp.await}$handler_ctx.catchException(e)";
 
                 if $want != $T_VOID {
                     $try_ret := $*BLOCK.add_tmp;
@@ -779,8 +779,8 @@ class QAST::OperationsJS {
                     %convert{$T_NUM} := 'toNum';
                     %convert{$T_INT} := 'toInt';
                     if nqp::existskey(%convert, $want) {
-                        $catch_exception := 'nqp.' ~ %convert{$want} ~ '(' ~ $catch_exception ~ ')';
-                        $catch_wrapped_exception := 'nqp.' ~ %convert{$want} ~ '(' ~ $catch_wrapped_exception ~ ')';
+                        $catch_exception := $comp.await ~ 'nqp.' ~ %convert{$want} ~ '(' ~ $catch_exception ~ ')';
+                        $catch_wrapped_exception := $comp.await ~ 'nqp.' ~ %convert{$want} ~ '(' ~ $catch_wrapped_exception ~ ')';
                     }
 
                     $catch_exception := "$try_ret = $catch_exception";
@@ -986,7 +986,7 @@ class QAST::OperationsJS {
     add_simple_op('getcomp', $T_OBJ, [$T_STR], :side_effects);
 
     add_simple_op('setparameterizer', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :ctx, :decont(0,1));
-    add_simple_op('parameterizetype', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :ctx, :decont(0,1));
+    add_simple_op('parameterizetype', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :ctx, :decont(0,1), :await);
     add_simple_op('typeparameterized', $T_OBJ, [$T_OBJ], :decont(0));
     add_simple_op('typeparameters', $T_OBJ, [$T_OBJ], :ctx, :decont(0));
     add_simple_op('typeparameterat', $T_OBJ, [$T_OBJ, $T_INT], :ctx, :decont(0));
@@ -1405,7 +1405,7 @@ class QAST::OperationsJS {
             || $category ~~ QAST::Op && $category.op eq 'const' && $category.name eq 'CONTROL_RETURN';
     }
 
-    add_simple_op('throwpayloadlexcaller', $T_VOID, [$T_INT, $T_OBJ], :side_effects, :!inlinable,
+    add_simple_op('throwpayloadlexcaller', $T_VOID, [$T_INT, $T_OBJ], :side_effects, :!inlinable, :await,
        sub ($category, $payload) {"$*CTX.throwpayloadlexcaller($category, $payload)"});
 
     add_op('throwpayloadlex', :!inlinable, sub ($comp, $node, :$want) {
@@ -1421,10 +1421,10 @@ class QAST::OperationsJS {
         }
 
         my $category := $comp.as_js(:want($T_INT), $node[0]);
-        Chunk.void($category, $payload, "$*CTX.throwpayloadlex({$category.expr}, {$payload.expr});\n");
+        Chunk.void($category, $payload, "{$comp.await}$*CTX.throwpayloadlex({$category.expr}, {$payload.expr});\n");
     });
 
-    add_simple_op('throwextype', $T_VOID, [$T_INT], :side_effects, :ctx);
+    add_simple_op('throwextype', $T_VOID, [$T_INT], :side_effects, :ctx, :await);
 
     add_simple_op('lastexpayload', $T_OBJ, [], :!inlinable);
 
@@ -1664,7 +1664,7 @@ class QAST::OperationsJS {
     add_simple_op('execname', $T_STR, []);
 
     add_simple_op('decoderconfigure', $T_OBJ, [$T_OBJ, $T_STR, $T_OBJ], :ctx, :side_effects, :method_call);
-    add_simple_op('decodersetlineseps', $T_OBJ, [$T_OBJ, $T_OBJ], :ctx, :side_effects, :method_call);
+    add_simple_op('decodersetlineseps', $T_OBJ, [$T_OBJ, $T_OBJ], :ctx, :side_effects, :method_call, :await);
     add_simple_op('decoderaddbytes', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :method_call);
     add_simple_op('decodertakechars', $T_STR, [$T_OBJ, $T_INT], :side_effects, :method_call);
     add_simple_op('decodertakeallchars', $T_STR, [$T_OBJ], :side_effects, :method_call);
@@ -1688,7 +1688,7 @@ class QAST::OperationsJS {
     add_simple_op('asynclisten', $T_OBJ, [$T_OBJ, $T_OBJ, $T_STR, $T_INT, $T_INT, $T_OBJ], :side_effects);
     add_simple_op('asyncwritebytes', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ], :side_effects);
     add_simple_op('asyncreadbyte', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ], :side_effects);
-    add_simple_op('spawnprocasync', $T_OBJ, [$T_OBJ, $T_OBJ, $T_STR, $T_OBJ, $T_OBJ], :ctx, :side_effects);
+    add_simple_op('spawnprocasync', $T_OBJ, [$T_OBJ, $T_OBJ, $T_STR, $T_OBJ, $T_OBJ], :ctx, :side_effects, :await);
     add_simple_op('killprocasync', $T_OBJ, [$T_OBJ, $T_INT], :side_effects);
 
     add_simple_op('permit', $T_OBJ, [$T_OBJ, $T_INT, $T_INT], :side_effects);

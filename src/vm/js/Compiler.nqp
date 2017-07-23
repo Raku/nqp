@@ -1381,7 +1381,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     }
                     else {
                         $loop.handle($type);
-                        return Chunk.void("$*CTX.$type();\n");
+                        return Chunk.void("{self.await}$*CTX.$type();\n");
                     }
                 }
             }
@@ -1393,7 +1393,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         if $label {
             my $compiled_label := self.as_js($label, :want($T_OBJ));
-            Chunk.void($compiled_label, "$*CTX.{$type}Labeled({$compiled_label.expr});\n");
+            Chunk.void($compiled_label, "{self.await}$*CTX.{$type}Labeled({$compiled_label.expr});\n");
         }
         else {
             self.NYI("can't find surrounding loop for $type");

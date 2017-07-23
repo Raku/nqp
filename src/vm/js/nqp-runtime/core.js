@@ -441,10 +441,10 @@ class WrappedFunction extends NQPObject {
     this.func = func;
   }
 
-  $$apply(args) {
+  async $$apply(args) {
     var converted = [];
     for (var i = 2; i < args.length; i++) {
-      converted.push(toJS(args[i]));
+      converted.push(await toJS(args[i]));
     }
     return fromJS(this.func.apply(null, converted));
   }
@@ -645,10 +645,10 @@ op.setparameterizer = function(ctx, type, parameterizer) {
   var st = type._STable;
   /* Ensure that the type is not already parametric or parameterized. */
   if (st.parameterizer) {
-    ctx.die('This type is already parametric');
+    throw new NQPException('This type is already parametric');
     return Null;
   } else if (st.parametricType) {
-    ctx.die('Cannot make a parameterized type also be parametric');
+    throw new NQPException('Cannot make a parameterized type also be parametric');
     return Null;
   }
 
@@ -661,11 +661,11 @@ op.setparameterizer = function(ctx, type, parameterizer) {
   return type;
 };
 
-op.parameterizetype = function(ctx, type, params) {
+op.parameterizetype = async function(ctx, type, params) {
   /* Ensure we have a parametric type. */
   var st = type._STable;
   if (!st.parameterizer) {
-    ctx.die('This type is not parametric');
+    throw new NQPException('This type is not parametric');
   }
 
   var unpackedParams = params.array;
@@ -688,7 +688,7 @@ op.parameterizetype = function(ctx, type, params) {
     }
   }
 
-  var result = st.parameterizer.$$call(ctx, {}, st.WHAT, params);
+  var result = await st.parameterizer.$$call(ctx, {}, st.WHAT, params);
 
   var newSTable = result._STable;
   newSTable.parametricType = type;
@@ -739,7 +739,7 @@ op.isnanorinf = function(n) {
 function typeparameters(ctx, type) {
   var st = type._STable;
   if (!st.parametricType) {
-    ctx.die('This type is not parameterized');
+    throw new NQPException('This type is not parameterized');
   }
 
   return st.parameters;
@@ -886,7 +886,7 @@ op.throwextype = function(ctx, category) {
   var exType = BOOT.Exception;
   let ex = exType._STable.REPR.allocate(exType._STable);
   ex.$$category = category;
-  ctx.throw(ex);
+  return ctx.throw(ex);
 };
 
 function EvalResult(mainline, codeRefs) {

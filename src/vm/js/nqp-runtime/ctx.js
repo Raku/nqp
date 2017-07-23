@@ -57,34 +57,34 @@ class Ctx extends NQPObject {
   }
 
   last() {
-    this.controlException(LAST);
+    return this.controlException(LAST);
   }
 
   lastLabeled(label) {
-    this.controlExceptionLabeled(label, LAST);
+    return this.controlExceptionLabeled(label, LAST);
   }
 
   next() {
-    this.controlException(NEXT);
+    return this.controlException(NEXT);
   }
 
   nextLabeled(label) {
-    this.controlExceptionLabeled(label, NEXT);
+    return this.controlExceptionLabeled(label, NEXT);
   }
 
   redo() {
-    this.controlException(REDO);
+    return this.controlException(REDO);
   }
 
   redoLabeled(label) {
-    this.controlExceptionLabeled(label, REDO);
+    return this.controlExceptionLabeled(label, REDO);
   }
 
   controlException(category) {
     let exType = BOOT.Exception;
     let exception = exType._STable.REPR.allocate(exType._STable);
     exception.$$category = category;
-    this.propagateControlException(exception);
+    return this.propagateControlException(exception);
   }
 
   controlExceptionLabeled(label, category) {
@@ -92,10 +92,10 @@ class Ctx extends NQPObject {
     let exception = exType._STable.REPR.allocate(exType._STable);
     exception.$$category = category | LABELED;
     exception.$$payload = label;
-    this.propagateControlException(exception);
+    return this.propagateControlException(exception);
   }
 
-  propagateControlException(exception) {
+  async propagateControlException(exception) {
     let handler = '$$' + categoryToName[exception.$$category & ~LABELED];
     let labeled = exception.$$category & LABELED;
 
@@ -111,7 +111,7 @@ class Ctx extends NQPObject {
           if (ctx[handler]) {
             ctx.unwind.ret = ctx[handler]();
           } else {
-            ctx.unwind.ret = ctx.$$CONTROL();
+            ctx.unwind.ret = await ctx.$$CONTROL();
           }
         } catch (e) {
           if (e instanceof ResumeException && e.exception === exception) {
@@ -133,7 +133,7 @@ class Ctx extends NQPObject {
 
   async propagateException(exception) {
     if (exception.$$category) {
-      this.propagateControlException(exception);
+      return this.propagateControlException(exception);
       return;
     }
 
@@ -164,11 +164,11 @@ class Ctx extends NQPObject {
     throw exception;
   }
 
-  catchException(exception) {
+  async catchException(exception) {
     this.exception = exception;
     exceptionsStack.push(exception);
     try {
-      return this.$$CATCH();
+      return await this.$$CATCH();
     } finally {
       exceptionsStack.pop();
     }
@@ -197,14 +197,14 @@ class Ctx extends NQPObject {
       ctx = ctx.$$caller;
     }
 
-    this.$$throwLexicalException(ctx, category, payload);
+    return this.$$throwLexicalException(ctx, category, payload);
   }
 
   throwpayloadlex(category, payload) {
-    this.$$throwLexicalException(this, category, payload);
+    return this.$$throwLexicalException(this, category, payload);
   }
 
-  $$throwLexicalException(lookFrom, category, payload) {
+  async $$throwLexicalException(lookFrom, category, payload) {
     let exType = BOOT.Exception;
     let exception = exType._STable.REPR.allocate(exType._STable);
     exception.$$category = category;
@@ -223,7 +223,7 @@ class Ctx extends NQPObject {
           if (ctx[handler]) {
             ctx.unwind.ret = ctx[handler]();
           } else {
-            ctx.unwind.ret = ctx.$$CONTROL();
+            ctx.unwind.ret = await ctx.$$CONTROL();
           }
         } catch (e) {
           if (e instanceof ResumeException && e.exception === exception) {
