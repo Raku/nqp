@@ -1499,10 +1499,14 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my str $set_hll := $*HLL ?? "nqp.setCodeRefHLL(cuids, {quote_string($*HLL)});\n" !! '';
 
         my $set_code_objects := self.set_code_objects;
-        my @setup := ["module.exports = nqp.run(async function() \{\n", $pre , $comp_mode ?? self.create_sc($node) !! '', $set_code_objects,  self.declare_js_vars($*BLOCK.tmps), self.declare_js_vars($*BLOCK.js_lexicals), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $set_hll, $post, $body, "\});\n"];
+        my @setup := [$pre , $comp_mode ?? self.create_sc($node) !! '', $set_code_objects,  self.declare_js_vars($*BLOCK.tmps), self.declare_js_vars($*BLOCK.js_lexicals), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $set_hll, $post, $body];
         if !$instant {
+            @setup.push('return ');
             @setup.push("new nqp.EvalResult({$body.expr}, nqp.createArray(cuids))");
         }
+
+        @setup.unshift((!$instant ?? '' !! "module.exports = ") ~ "nqp.run(async function() \{\n");
+        @setup.push("\});\n");
         Chunk.new($T_VOID, "", @setup);
     }
 
