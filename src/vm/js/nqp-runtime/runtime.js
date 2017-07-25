@@ -96,7 +96,6 @@ exports.libpath = function(paths) {
 
 exports.loaderCtx = null;
 
-// THIS IS AWAIT/ASYNC specific
 op.loadbytecode = async function(ctx, file) {
   // HACK - temporary hack for rakudo-js
   if (file == '/share/nqp/lib/Perl6/BOOTSTRAP.js') {
