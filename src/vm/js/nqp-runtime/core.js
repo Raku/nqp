@@ -483,7 +483,17 @@ const nqp = require('nqp-runtime');
 
 class JavaScriptCompiler extends NQPObject {
   eval(ctx, _NAMED, self, code) {
-    return fromJS(eval(code));
+    return fromJS(eval(nqp.toStr(code, ctx)));
+  }
+
+  compile(ctx, _NAMED, self, code) {
+    const evaled = '(function(ctx) {return ' + nqp.toStr(code, ctx) + '})';
+    const closure = eval(evaled);
+    const codeRef = new CodeRef();
+    codeRef.$$call = function(ctx, _NAMED) {
+      return fromJS(closure(ctx));
+    };
+    return codeRef;
   }
 };
 
