@@ -457,6 +457,8 @@ class WrappedFunction extends NQPObject {
 function fromJS(obj) {
   if (typeof obj === 'function') {
     return new WrappedFunction(obj);
+  } else if (obj === undefined) {
+    return Null;
   } else {
     return obj;
   }
