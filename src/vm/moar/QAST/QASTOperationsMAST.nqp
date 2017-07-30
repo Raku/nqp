@@ -2184,6 +2184,7 @@ QAST::MASTOperations.add_core_moarop_mapping('lcm_I', 'lcm_I');
 
 # string opcodes
 QAST::MASTOperations.add_core_moarop_mapping('chars', 'chars');
+QAST::MASTOperations.add_core_moarop_mapping('codes', 'codes_s');
 QAST::MASTOperations.add_core_moarop_mapping('uc', 'uc');
 QAST::MASTOperations.add_core_moarop_mapping('lc', 'lc');
 QAST::MASTOperations.add_core_moarop_mapping('tc', 'tc');
