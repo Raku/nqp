@@ -219,6 +219,7 @@ exports.strToNum = strToNum;
 function numToStr(num) {
   if (num === Infinity) return 'Inf';
   if (num === -Infinity) return '-Inf';
+  if (num === 0 && 1/num === -Infinity) return '-0';
 
   return num.toString();
 }
