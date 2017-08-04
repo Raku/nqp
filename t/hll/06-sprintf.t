@@ -29,23 +29,21 @@ is(nqp::sprintf('Walter Bishop', []), 'Walter Bishop', 'no directives' );
 is(nqp::sprintf('Peter %s', ['Bishop']), 'Peter Bishop', 'one %s directive' );
 is(nqp::sprintf('%s %s', ['William', 'Bell']), 'William Bell', 'two %s directives' );
 
-dies_ok({ nqp::sprintf('%s %s', ['Dr.', 'William', 'Bell']) }, 'arguments > directives' );
-is($die_message, 'Your printf-style directives specify 2 arguments, but 3 arguments were supplied',
-    'arguments > directives error message' );
+dies-ok({ nqp::sprintf('%s %s', ['Dr.', 'William', 'Bell']) }, 'arguments > directives',
+ :message('Your printf-style directives specify 2 arguments, but 3 arguments were supplied'));
 
-dies_ok({ nqp::sprintf('%s %s %s', ['Olivia', 'Dunham']) }, 'directives > arguments' );
-is($die_message, 'Your printf-style directives specify 3 arguments, but 2 arguments were supplied',
-    'directives > arguments error message' );
+dies-ok({ nqp::sprintf('%s %s', ['Dr.', 'William', 'Bell']) }, 'arguments > directives',
+  :message('Your printf-style directives specify 2 arguments, but 3 arguments were supplied'));
 
-dies_ok({ nqp::sprintf('%s %s', []) }, 'directives > 0 arguments' );
-is($die_message, 'Your printf-style directives specify 2 arguments, but no argument was supplied',
-    'directives > 0 arguments error message' );
+dies-ok({ nqp::sprintf('%s %s %s', ['Olivia', 'Dunham']) }, 'directives > arguments',
+  :message('Your printf-style directives specify 3 arguments, but 2 arguments were supplied'));
+
+dies-ok({ nqp::sprintf('%s %s', []) }, 'directives > 0 arguments',
+  :message('Your printf-style directives specify 2 arguments, but no argument was supplied'));
 
 is(nqp::sprintf('%% %% %%', []), '% % %', '%% escape' );
 
-dies_ok({ nqp::sprintf('%a', 'Science') }, 'unknown directive' );
-is($die_message, "'a' is not valid in sprintf format sequence '%a'",
-    'unknown directive error message' );
+dies-ok({ nqp::sprintf('%a', 'Science') }, 'unknown directive', :message("'a' is not valid in sprintf format sequence '%a'"));
 
 my class SprintfHandler {
     method mine($x) { try nqp::reprname($x) eq "P6bigint" }

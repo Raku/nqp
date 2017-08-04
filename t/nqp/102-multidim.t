@@ -13,15 +13,6 @@ sub is-dims(@arr, @expected-dims, $description) {
     }
     ok($ok, "$description - correct dimensions");
 }
-sub dies-ok($code, $description, :$message) {
-    my $died := 0;
-    my $got-message := '';
-    try { $code(); CATCH { $died := 1; $got-message := nqp::getmessage($_); } }
-    ok($died, $description);
-    if $message {
-        ok($got-message ~~ /$message/, "Exception message contained '$message'");
-    }
-}
 
 # Normal dynamic array has a single element, irrespective of type or contents.
 ok(nqp::numdimensions([]) == 1, 'numdimensions on normal array (1)');
@@ -292,11 +283,11 @@ dies-ok({
 {
     my $test_1d := nqp::create($array_type_1d);
     nqp::setdimensions($test_1d, nqp::list_i(3));
-    dies-ok({ nqp::pop($test_1d) }, :message('pop'), 'popping dies');
-    dies-ok({ nqp::push($test_1d, 1) }, :message('push'), 'pushing dies');
-    dies-ok({ nqp::shift($test_1d) }, :message('shift'), 'shifting dies');
-    dies-ok({ nqp::unshift($test_1d, 1) }, :message('unshift'), 'unshifting dies');
-    dies-ok({ nqp::splice($test_1d, [], 0, 3) }, :message('splice'), 'splicing dies');
+    dies-ok({ nqp::pop($test_1d) }, :message(/pop/), 'popping dies');
+    dies-ok({ nqp::push($test_1d, 1) }, :message(/push/), 'pushing dies');
+    dies-ok({ nqp::shift($test_1d) }, :message(/shift/), 'shifting dies');
+    dies-ok({ nqp::unshift($test_1d, 1) }, :message(/unshift/), 'unshifting dies');
+    dies-ok({ nqp::splice($test_1d, [], 0, 3) }, :message(/splice/), 'splicing dies');
 }
 
 # can use normal array access ops on a 1D multi-dimensioned array (this makes

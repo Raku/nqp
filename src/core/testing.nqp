@@ -49,4 +49,18 @@ sub skip($desc, $count=1) {
     }
 }
 
+sub dies-ok($code, $description, :$message) {
+    my $died := 0;
+    my $got-message := '';
+    try { $code(); CATCH { $died := 1; $got-message := nqp::getmessage($_); } }
+    ok($died, $description);
+    if $message {
+        if nqp::isstr($message) {
+          is($got-message, $message, 'got correct exception message');
+        } else {
+          ok($got-message ~~ $message, 'exception message matches');
+        }
+    }
+}
+
 # vim: ft=perl6
