@@ -294,7 +294,7 @@ op.composetype = function(obj, reprinfo) {
 
 var whereCounter = 0;
 op.where = function(obj) {
-  if (obj._STable || obj instanceof CodeRef) { // HACK
+  if (obj._STable || obj instanceof CodeRef || obj === Null) { // HACK
     if (!obj._WHERE) {
       obj._WHERE = ++whereCounter;
     }
