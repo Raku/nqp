@@ -22,7 +22,7 @@ sub is($actual, $expected, $description) {
     }
 }
 
-plan(284);
+plan(286);
 
 is(nqp::sprintf('Walter Bishop', []), 'Walter Bishop', 'no directives' );
 
