@@ -987,9 +987,10 @@ class QAST::MASTRegexCompiler {
             nqp::push(@ins, op('eq_i', $ireg0, %!reg<pos>, %!reg<negone>));
             $!regalloc.release_register($lit, $MVM_reg_str);
         }
-        elsif $node.list && ($node.subtype eq 'ignorecase'|| $node.subtype eq 'ignorecase+ignoremark') {
+        elsif $node.list && ($node.subtype eq 'ignorecase' || $node.subtype eq 'ignorecase+ignoremark' || $node.subtype eq 'ignoremark') {
             my $lit := $!regalloc.fresh_s();
-            my $op  := $node.subtype eq 'ignorecase' ?? 'indexic_s' !! 'indexicim_s';
+            my $op  := $node.subtype eq 'ignorecase' ?? 'indexic_s' !!
+                       $node.subtype eq 'ignoremark' ?? 'indexim_s' !! 'indexicim_s';
             nqp::push(@ins, op('const_s', $lit, sval($node[0])));
             nqp::push(@ins, op($op, %!reg<pos>, %!reg<tgt>, $lit, %!reg<pos>));
             nqp::push(@ins, op('eq_i', $ireg0, %!reg<pos>, %!reg<negone>));
