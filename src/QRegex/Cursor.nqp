@@ -659,6 +659,7 @@ role NQPMatchRole is export {
             if !nqp::isnull($actions) && nqp::can($actions, $name);
     }
 
+    method !shared_type() { ParseShared }
     method !shared() { $!shared }
     method !braid()  { $!braid }
 

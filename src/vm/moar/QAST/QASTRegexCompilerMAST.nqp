@@ -114,7 +114,6 @@ class QAST::MASTRegexCompiler {
         @!rxjumps := nqp::list($donelabel);
 
         my $shared := $!regalloc.fresh_o();
-        my $sharedclass := $!regalloc.fresh_o();
         my $i19 := $!regalloc.fresh_i(); # yes, I know, inheriting the name from ancestor method
         my $i0 := $!regalloc.fresh_i();
 
@@ -131,6 +130,7 @@ class QAST::MASTRegexCompiler {
             call($method, [ $Arg::obj ], :result($cur), $self )
         ];
 
+        my $sharedclass;
         my int $has_cursor_type := $node.has_cursor_type();
         if $has_cursor_type {
             $!cursor_type := $node.cursor_type();
@@ -142,8 +142,14 @@ class QAST::MASTRegexCompiler {
                     ival(nqp::hintfor($!cursor_type, '$!shared')))
             ]);
             $!regalloc.release_register($wval.result_reg, $MVM_reg_obj);
+
+            my $shared_wval := $!qastcomp.as_mast(
+                QAST::WVal.new( :value($!cursor_type.'!shared_type'()) ));
+            merge_ins(@ins, $shared_wval.instructions);
+            $sharedclass := $shared_wval.result_reg;
         }
         else {
+            $sharedclass := $!regalloc.fresh_o();
             merge_ins(@ins, [
                 op('findmeth', $shared, $self, sval('!shared')),
                 call($shared, [ $Arg::obj ], :result($shared), $self ),
