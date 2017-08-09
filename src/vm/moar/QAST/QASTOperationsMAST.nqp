@@ -2781,7 +2781,7 @@ QAST::MASTOperations.add_core_moarop_mapping('nfarunalt', 'nfarunalt', 0);
 # native call ops
 QAST::MASTOperations.add_core_moarop_mapping('initnativecall', 'no_op');
 QAST::MASTOperations.add_core_moarop_mapping('buildnativecall', 'nativecallbuild', 0);
-QAST::MASTOperations.add_core_moarop_mapping('nativecall', 'nativecallinvoke');
+QAST::MASTOperations.add_core_moarop_mapping('nativecallinvoke', 'nativecallinvoke');
 QAST::MASTOperations.add_core_op('nativecall', -> $qastcomp, $op {
     proto decont_all(@args) {
         my int $i := 0;
