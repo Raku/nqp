@@ -84,7 +84,7 @@ class HLL::Backend::MoarVM {
             $filename := 'profile-' ~ nqp::time_n() ~ '.html';
         }
         note("Writing profiler output to $filename");
-        my $profile_fh := open($filename, :w);
+        my $profile_fh;
         my $want_json  := nqp::eqat($filename, '.json', -5);
         my $want_sql   := nqp::eqat($filename, '.sql', -4);
 
@@ -350,6 +350,29 @@ class HLL::Backend::MoarVM {
 
         nqp::unshift($data, $id_to_thing);
 
+        # First make sure the template file exists if we want html
+        # if it doesn't exist, just spit out json instead.
+        my str $template;
+
+        if !$want_json && !$want_sql {
+            my $temppath := nqp::backendconfig()<prefix> ~ '/share/nqp/lib/profiler/template.html';
+            $template := try slurp('src/vm/moar/profiler/template.html');
+            unless $template {
+                $template := try slurp($temppath);
+            }
+            unless $template {
+                note("Could not locate profiler/template.html; should have been at $temppath; outputting sql data instead");
+                $want_sql := 1;
+                $filename := literal_subst($filename, ".html", ".sql");
+                unless nqp::eqat($filename, '.sql', -4) {
+                    $filename := $filename ~ '.sql';
+                }
+                note("Writing profiler output to $filename");
+            }
+        }
+
+        $profile_fh := open($filename, :w);
+
         if $want_json {
             to_json($data);
             $profile_fh.print(nqp::join('', @pieces));
@@ -368,10 +391,6 @@ class HLL::Backend::MoarVM {
         else {
             # Get profiler template, split it in half, and write those either
             # side of the JSON itself.
-            my $template := try slurp('src/vm/moar/profiler/template.html');
-            unless $template {
-                $template := slurp(nqp::backendconfig()<prefix> ~ '/share/nqp/lib/profiler/template.html');
-            }
             my @tpl_pieces := nqp::split('{{{PROFILER_OUTPUT}}}', $template);
 
             $profile_fh.print(@tpl_pieces[0]);
