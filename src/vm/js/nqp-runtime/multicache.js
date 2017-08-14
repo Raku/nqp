@@ -58,10 +58,10 @@ var op = {};
 op.multicachefind = function(ctx, cache, capture) {
   if (!(cache instanceof MultiCache)) return Null;
   var arity = capture.pos.length;
-  var hasNamed = capture.named ? true : false;
+  if (capture.named) return Null;
 
   if (arity == 0) {
-    if (!hasNamed && cache.zeroArity) {
+    if (cache.zeroArity) {
       return cache.zeroArity;
     } else {
       return Null;
@@ -78,7 +78,6 @@ op.multicachefind = function(ctx, cache, capture) {
     for (var j = 0; j < arityCache[i].types.length; j++) {
       if (arityCache[i].types[j] !== types[j]) continue CANDIDATES;
     }
-    if (arityCache[i].hasNamed !== hasNamed) continue CANDIDATES;
     return arityCache[i].result;
   }
 
@@ -87,13 +86,11 @@ op.multicachefind = function(ctx, cache, capture) {
 
 op.multicacheadd = function(ctx, cache, capture, result) {
   var c = cache instanceof MultiCache ? cache : new MultiCache();
+  if (c.named) return c;
   var arity = capture.pos.length;
-  var hasNamed = capture.named ? true : false;
 
   if (arity == 0) {
-    if (!hasNamed) {
-      c.zeroArity = result;
-    }
+    c.zeroArity = result;
     return c;
   }
 
@@ -101,7 +98,7 @@ op.multicacheadd = function(ctx, cache, capture, result) {
     return c;
   }
 
-  c.cache[arity - 1].push({types: posTypes(ctx, capture), hasNamed: hasNamed, result: result});
+  c.cache[arity - 1].push({types: posTypes(ctx, capture), result: result});
   return c;
 };
 
