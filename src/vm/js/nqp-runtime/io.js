@@ -412,18 +412,20 @@ op.getstdout = function() {
 };
 
 
-class Stdin extends StdHandle {
-  $$filenofh() {
-    return process.stdin.fd;
-  }
-
-  $$isttyfh() {
-    return (process.stdin.isTTY ? 1 : 0);
-  }
-};
-
+let stdin;
 op.getstdin = function() {
-  return new Stdin();
+  if (!stdin) {
+    let fd;
+    try {
+      fd = fs.openSync('/dev/stdin', 'rs');
+    } catch(e) {
+      /* this should work on Windows, we need to test it tho */
+      fd = 0;
+    };
+    stdin = new FileHandle(fd);
+  }
+
+  return stdin;
 };
 
 op.exit = function(code) {
