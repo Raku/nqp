@@ -302,6 +302,17 @@
     - [asyncreadbytes](#asyncreadbytes)
     - [spawnprocasync](#spawnprocasync)
     - [killprocasync](#killprocasync)
+- [Atomic Operations](#-atomic-operations)
+    - [cas](#cas)
+    - [cas_i](#cas_i))
+    - [atomicinc_i](#atomicinc_i)
+    - [atomicdec_i](#atomicdec_i)
+    - [atomicadd_i](#atomicadd_i)
+    - [atomicload](#atomicload)
+    - [atomicload_i](#atomicload_i)
+    - [atomicstore](#atomicstore)
+    - [atomicstore_i](#atomicstore_i)
+    - [barrierfull](#barrierfull)
 
 # NQP Opcodes
 
@@ -382,6 +393,7 @@ The opcodes are grouped into the following categories:
 * [Miscellaneous Opcodes](#misc)
 * [Native Call / Interoperability Opcodes](#nativecall)
 * [Asynchronous operations](#async)
+* [Atomic operations](#atomic)
 
 # <a id="arithmetic"></a> Arithmetic Opcodes
 
@@ -2569,3 +2581,88 @@ Cancel to stop reading.
 
 ## killprocasync `moar`
 * `killprocasync($handle, $signal)`
+
+# <a id="atomic"></a> Atomic Operations
+
+## cas `moar`
+* `cas(ObjectContainer $cont, Mu $expected, Mu $new)`
+
+Takes an object which has a container spec set on it that knows how to do an
+atomic compare and swap, and performs an atomic compare and swap operation.
+The operation atomically compares the `$expected` object with what is currently
+held in the container. If they are the same object, then it replaces it with
+`$new`. If not, no change takes place. The original object stored in the
+container is returned, which can be used with `eqaddr` to check if it is the
+same as the `$expected` object. The container may perform type checks on the
+`$new` object before it attempts the operation.
+
+## cas_i `moar`
+* `cas_i(NativeIntRef $i, int64 $expected, int64 $new)`
+
+Takes an object with the `NativeRef` representation, which must point to an
+integer of the machine's atomic operation size. Casts the expected and new
+parameters to the machine's atomic operation size, and then uses them to
+perform an atomic compare and swap operation on the referenced integer. The
+operation atomically compares the `$expected` value with the value currently
+at the referenced location. If they are equal, it replaces the value with
+`$new`. If they are not equal, nothing happens. The operation evaluates to the
+value originally at the location (which can be compared with `$expected` to
+see if the operation was a success).
+
+## atomicinc_i `moar`
+* `atomicinc_i(NativeIntRef $i)`
+
+Takes an object with the `NativeRef` representation, which must point to an
+integer of the machine's atomic operation size. Performs an atomic increment
+of the referenced integer. Returns the value **before** it was incremented.
+
+## atomicdec_i `moar
+* `atomicdec_i(NativeIntRef $i)`
+
+Takes an object with the `NativeRef` representation, which must point to an
+integer of the machine's atomic operation size. Performs an atomic decrement
+of the referenced integer. Returns the value **before** it was decremented.
+
+## atomicadd_i `moar`
+* `atomicadd_i(NativeIntRef $i, int $value)`
+
+Takes an object with the `NativeRef` representation, which must point to an
+integer of the machine's atomic operation size. Performs an atomic addition of
+the provided value, which will be cast to the machine's atomic operation size
+before the operation is performed. Returns the value at the memory location
+**before** the addition was performed.
+
+## atomicload `moar`
+* `atomicload(ObjectContainer $c)`
+
+Takes an object which has a container spec set on it that knows how to do an
+atomic load (that is, with appropriate barriering to ensure the latest value
+is read). Performs the atomic load, and returns the loaded object.
+
+## atomicload_i `moar`
+* `atomicload_i(NativeIntRef $i)`
+
+Takes an object with the `NativeRef` representation, which must point to an
+integer of the machine's atomic operation size. Performs an atomic load (that
+is, with appropriate barriering to ensure the latest value is read).
+
+## atomicstore `moar`
+* `atomicstore(ObjectContainer $c, Mu $value)`
+
+Takes an object which has a container spec set on it that knows how to do an
+atomic load. Performs the atomic store, which may fail if the value being
+stored does not, for example, meet type constraints. Evaluates to the stored
+value. The store performs appropriate barriering to ensure the changed value
+is "published".
+
+## atomicstore_i `moar`
+* `atomicstore_i(NativeIntRef $i, int64 $value)`
+
+Takes an object with the `NativeRef` representation, which must point to an
+integer of the machine's atomic operation size. Performs an atomic store (that
+is, with appropriate barriering to ensure the changed value is "published").
+
+## barrierfull `moar`
+* `barrierfull()`
+
+Performs a full memory barrier.
