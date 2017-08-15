@@ -2284,6 +2284,7 @@ QAST::MASTOperations.add_core_op('rindex',  -> $qastcomp, $op {
 # unicode properties
 QAST::MASTOperations.add_core_moarop_mapping('unipropcode', 'unipropcode');
 QAST::MASTOperations.add_core_moarop_mapping('unipvalcode', 'unipvalcode');
+QAST::MASTOperations.add_core_moarop_mapping('hasuniprop', 'hasuniprop');
 QAST::MASTOperations.add_core_moarop_mapping('getuniname', 'getuniname');
 QAST::MASTOperations.add_core_moarop_mapping('getuniprop_str', 'getuniprop_str');
 QAST::MASTOperations.add_core_moarop_mapping('getuniprop_bool', 'getuniprop_bool');
