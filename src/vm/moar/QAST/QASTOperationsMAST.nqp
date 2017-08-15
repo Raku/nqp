@@ -2880,6 +2880,9 @@ QAST::MASTOperations.add_core_moarop_mapping('mvmendprofile', 'endprofile');
 # MoarVM-specific GC ops
 QAST::MASTOperations.add_core_moarop_mapping('force_gc', 'force_gc');
 
+# MoarVM-specific coverage ops
+QAST::MASTOperations.add_core_moarop_mapping('coveragecontrol', 'coveragecontrol');
+
 sub resolve_condition_op($kind, $negated) {
     return $negated ??
         $kind == $MVM_reg_int64 ?? 'unless_i' !!
