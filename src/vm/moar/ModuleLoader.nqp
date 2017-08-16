@@ -12,10 +12,6 @@ knowhow ModuleLoader {
             nqp::push(@search_paths, $explicit);
         }
 
-        # Add CWD and blib.
-        nqp::push(@search_paths, '.');
-        nqp::push(@search_paths, 'blib');
-
         @search_paths
     }
 
