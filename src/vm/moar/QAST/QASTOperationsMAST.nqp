@@ -1990,6 +1990,7 @@ my %const_map := nqp::hash(
     'C_TYPE_LONGLONG',          -5,
     'C_TYPE_SIZE_T',            -6,
     'C_TYPE_BOOL',              -7,
+    'C_TYPE_ATOMIC_INT',        -8,
     'C_TYPE_FLOAT',             -1,
     'C_TYPE_DOUBLE',            -2,
     'C_TYPE_LONGDOUBLE',        -3,
@@ -2859,6 +2860,18 @@ QAST::MASTOperations.add_core_moarop_mapping('asyncwritebytesto', 'asyncwritebyt
 QAST::MASTOperations.add_core_moarop_mapping('asyncreadbytes', 'asyncreadbytes');
 QAST::MASTOperations.add_core_moarop_mapping('spawnprocasync', 'spawnprocasync');
 QAST::MASTOperations.add_core_moarop_mapping('killprocasync', 'killprocasync', 1);
+
+# Atomic ops
+QAST::MASTOperations.add_core_moarop_mapping('cas', 'cas_o', :decont(1,2));
+QAST::MASTOperations.add_core_moarop_mapping('cas_i', 'cas_i');
+QAST::MASTOperations.add_core_moarop_mapping('atomicinc_i', 'atomicinc_i');
+QAST::MASTOperations.add_core_moarop_mapping('atomicdec_i', 'atomicdec_i');
+QAST::MASTOperations.add_core_moarop_mapping('atomicadd_i', 'atomicadd_i');
+QAST::MASTOperations.add_core_moarop_mapping('atomicload', 'atomicload_o');
+QAST::MASTOperations.add_core_moarop_mapping('atomicload_i', 'atomicload_i');
+QAST::MASTOperations.add_core_moarop_mapping('atomicstore', 'atomicstore_o', 1, :decont(1));
+QAST::MASTOperations.add_core_moarop_mapping('atomicstore_i', 'atomicstore_i', 1);
+QAST::MASTOperations.add_core_moarop_mapping('barrierfull', 'barrierfull');
 
 # MoarVM-specific compilation ops
 QAST::MASTOperations.add_core_moarop_mapping('masttofile', 'masttofile', 2);
