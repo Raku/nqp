@@ -408,12 +408,17 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
         }
 
+        my $pos_slurpy := 0;
+        my $pos_required := 0;
+        my $pos_optional := 0;
+
         for @params -> $param {
             if $param.slurpy {
                 if $param.named {
                     set_variable($param, "nqp.slurpyNamed(_NAMED, {known_named(@*KNOWN_NAMED)})");
                 }
                 else {
+                    $pos_slurpy := 1;
                     set_variable($param, "nqp.slurpyArray({quote_string($*HLL)}, Array.prototype.slice.call(arguments,{+@sig}))");
                 }
             }
@@ -453,6 +458,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 my str $tmp := self.unique_var('param');
                 @sig.push($tmp);
                 if $param.default {
+                    $pos_optional := $pos_optional + 1;
                     my $default_value := self.as_js($param.default, :want($T_OBJ));
                     @setup.push(Chunk.void(
                         "if (arguments.length < {+@sig}) \{\n",
@@ -461,6 +467,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     ));
                 }
                 else {
+                    $pos_required := $pos_required + 1;
                     @setup.push($set ~ $tmp ~ ";\n");
                 }
             }
@@ -468,6 +475,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 my str $name := $*BLOCK.mangle_var($param);
 
                 if $param.default {
+                    $pos_optional := $pos_optional + 1;
                     # Overwriting a parameter makes the v8 optimizer bail out so to avoid that we introduce a new variable
                     my str $tmp := self.unique_var($name~'_');
 
@@ -482,6 +490,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
                 }
                 else {
+                    $pos_required := $pos_required + 1;
                     @sig.push($name);
                 }
             }
@@ -489,6 +498,15 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             for $param.list -> $param_setup {
                 @setup.push(self.as_js($param_setup, :want($T_OBJ)));
             }
+        }
+
+        if ($pos_required) {
+            @setup.push("if (arguments.length < {$pos_required+2}) nqp.tooFewPos(arguments.length, $pos_required);");
+        }
+
+        if (!$pos_slurpy) {
+            my $max := $pos_required + $pos_optional + 2;
+            @setup.push("if (arguments.length > $max) nqp.tooManyPos(arguments.length, $max);");
         }
 
         Chunk.new($T_NONVAL, nqp::join(',', @sig), @setup);
@@ -1041,7 +1059,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             %*USED_CTXS{$*CTX} := 0;
 
-            my $sig := self.compile_sig($*BLOCK.params);
+            my $sig := $node.custom_args ?? Chunk.new($T_NONVAL, 'caller_ctx') !! self.compile_sig($*BLOCK.params);
 
             my str $first_time_marker := $*BLOCK.maybe_first_time_marker;
 
