@@ -1,6 +1,6 @@
 use QAST;
 
-plan(147);
+plan(149);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -2372,4 +2372,52 @@ is_qast(
 
     is($called, '1', 'called the lexical_handler_not_found_error handler - with throwpayloadlex');
     is($got_cat, nqp::const::CONTROL_RETURN, '...got right category of handler');
+}
+
+{
+    my $no_custom_args := QAST::Block.new(
+        QAST::Var.new( :name('arg1'), :scope('lexical'), :decl('param')),
+        QAST::SVal.new( :value('survived') )
+    );
+
+    my $custom_args := QAST::Block.new(
+        QAST::SVal.new( :value('survived') )
+    );
+
+    $custom_args.custom_args(1);
+
+    is_qast(
+        QAST::CompUnit.new(
+            QAST::Block.new(
+              QAST::Op.new(
+                :op('handle'),
+                QAST::Op.new(
+                    :op('call'),
+                    QAST::Op.new(:op<takeclosure>, # needed for JVM
+                        $no_custom_args,
+                    ),
+                ),
+                'CATCH', QAST::SVal.new( :value('died') )
+              )
+            )
+        ),
+        'died', 'wrong number of arguments dies without custom_args');
+
+    is_qast(
+        QAST::CompUnit.new(
+            QAST::Block.new(
+              QAST::Op.new(
+                :op('handle'),
+                QAST::Op.new(
+                    :op('call'),
+                    QAST::Op.new(:op<takeclosure>, # needed for JVM
+                        $custom_args,
+                    ),
+                    QAST::SVal.new( :value('arg') )
+                ),
+                'CATCH', QAST::SVal.new( :value('died') )
+              )
+            )
+        ),
+        'survived', 'wrong number of arguments lives with custom_args');
 }
