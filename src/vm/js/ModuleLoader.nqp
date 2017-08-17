@@ -26,6 +26,10 @@ knowhow ModuleLoader {
 #                nqp::push(@search_paths, $_)
 #            }
         }
+        my %env := nqp::getenvhash();
+        if nqp::existskey(%env, 'NQP_LIB') {
+            nqp::push(@search_paths, %env<NQP_LIB>);
+        }
     
         @search_paths
     }
