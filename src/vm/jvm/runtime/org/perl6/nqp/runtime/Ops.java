@@ -5493,6 +5493,10 @@ public final class Ops {
         return thread;
     }
 
+    public static long cpucores(ThreadContext tc) {
+        return Runtime.getRuntime().availableProcessors();
+    }
+
     public static SixModelObject lock(SixModelObject lock, ThreadContext tc) {
         if (lock instanceof ReentrantMutexInstance)
             ((ReentrantMutexInstance)lock).lock.lock();
