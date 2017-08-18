@@ -173,7 +173,7 @@ class HLL::Actions {
     }
 
     method quote_escape:sym<backslash>($/) { make "\\"; }
-    method quote_escape:sym<stopper>($/) { make ~$<stopper> }
+    method quote_escape:sym<stopper>($/) { make ~$<dynstopper> }
 
     method quote_escape:sym<bs>($/)  { make "\b"; }
     method quote_escape:sym<nl>($/)  { make "\n"; }
