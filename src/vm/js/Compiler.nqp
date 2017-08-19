@@ -453,47 +453,31 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 @setup.push("\}\n");
             }
             else {
-                if self.is_dynamic_var($*BLOCK, $param) {
-                    my str $set := "{$*CTX}[{quote_string($param.name)}] = ";
+                my str $tmp := self.unique_var('param');
+                @sig.push($tmp);
 
-                    my str $tmp := self.unique_var('param');
-                    @sig.push($tmp);
-                    if $param.default {
-                        $pos_optional := $pos_optional + 1;
-                        my $default_value := self.as_js($param.default, :want($T_OBJ));
-                        @setup.push(Chunk.void(
-                            "if (arguments.length < {+@sig}) \{\n",
-                             $default_value,
-                             "$set {$default_value.expr};\n\} else \{\n$set $tmp;\n\}\n"
-                        ));
-                    }
-                    else {
-                        $pos_required := $pos_required + 1;
-                        @setup.push($set ~ $tmp ~ ";\n");
-                    }
+                my str $set;
+
+                if self.is_dynamic_var($*BLOCK, $param) {
+                   $set := "{$*CTX}[{quote_string($param.name)}] = ";
+                } else {
+                    my str $name := $*BLOCK.mangle_var($param);
+                    $*BLOCK.add_js_lexical($name);
+                    $set := "$name = ";
+                }
+
+                if $param.default {
+                    $pos_optional := $pos_optional + 1;
+                    my $default_value := self.as_js($param.default, :want($T_OBJ));
+                    @setup.push(Chunk.void(
+                        "if (arguments.length < {+@sig}) \{\n",
+                         $default_value,
+                         "$set {$default_value.expr};\n\} else \{\n$set $tmp;\n\}\n"
+                    ));
                 }
                 else {
-                    my str $name := $*BLOCK.mangle_var($param);
-
-                    if $param.default {
-                        $pos_optional := $pos_optional + 1;
-                        # Overwriting a parameter makes the v8 optimizer bail out so to avoid that we introduce a new variable
-                        my str $tmp := self.unique_var($name~'_');
-
-                        $*BLOCK.add_js_lexical($name);
-                        @sig.push($tmp);
-                        my $default_value := self.as_js($param.default, :want($T_OBJ));
-                        @setup.push(Chunk.void(
-                            "if (arguments.length < {+@sig}) \{\n",
-                             $default_value,
-                             "$name = {$default_value.expr};\n\} else \{\n$name = $tmp;\n\}\n"
-                        ));
-
-                    }
-                    else {
-                        $pos_required := $pos_required + 1;
-                        @sig.push($name);
-                    }
+                    $pos_required := $pos_required + 1;
+                    @setup.push($set ~ $tmp ~ ";\n");
                 }
             }
 
