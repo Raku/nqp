@@ -82,15 +82,15 @@ grammar HLL::Grammar {
     method nulltermish() { !self.terminator && self.termish || self.nullterm_alt }
 
     token quote_delimited {
-        <dynstarter> <quote_atom>* <dynstopper>
+        <starter> <quote_atom>* <stopper>
     }
 
     token quote_atom {
-        <!dynstopper>
+        <!stopper>
         [
         | <quote_escape>
-        | [ <-quote_escape - dynstopper - dynstarter> ]+
-        | <dynstarter> <quote_atom>* <dynstopper>
+        | [ <-quote_escape - stopper - starter> ]+
+        | <starter> <quote_atom>* <stopper>
         ]
     }
 
@@ -127,7 +127,7 @@ grammar HLL::Grammar {
 
     proto token quote_escape { <...> }
     token quote_escape:sym<backslash> { \\ \\ <?quotemod_check('q')> }
-    token quote_escape:sym<stopper>   { \\ <?quotemod_check('q')> <dynstopper> }
+    token quote_escape:sym<stopper>   { \\ <?quotemod_check('q')> <stopper> }
 
     token quote_escape:sym<bs>  { \\ b <?quotemod_check('b')> }
     token quote_escape:sym<nl>  { \\ n <?quotemod_check('b')> }
@@ -324,14 +324,14 @@ position C<pos>.
         <?{ %*QUOTEMOD{$mod} }>
     }
 
-    method dynstarter() {
+    method starter() {
         my $start := $*QUOTE_START;
         nqp::isconcrete($start)
             ?? self.'!LITERAL'($start)
             !! self.'!cursor_start_fail'()
     }
 
-    method dynstopper() {
+    method stopper() {
         my $stop := $*QUOTE_STOP;
         nqp::isconcrete($stop)
             ?? self.'!LITERAL'($stop)
