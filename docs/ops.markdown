@@ -2022,6 +2022,8 @@ Example:
 
 If the object has a method of the given name, return 1. Otherwise, return 0.
 
+Returns 1 if ``$obj`` object has FALLBACK method.
+
 ## clone
 * `clone(Mu $obj)`
 
