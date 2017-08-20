@@ -111,7 +111,7 @@ class RegexCompiler {
     }
 
     method dba($node) {
-        call($!cursor, "!dba", $!pos, quote_string($node.name)) ~ ";\n";
+        call($!cursor, "!dba", "new nqp.NQPInt($!pos)", quote_string($node.name)) ~ ";\n";
     }
     
     method concat($node) {
@@ -235,7 +235,7 @@ class RegexCompiler {
         
         @setup.push(
             "{$!cursor}['!cursor_pass']({$*CTX},"
-            ~ "\{backtrack: {$node.backtrack ne 'r'}\}, $!cursor, {$!pos}"
+            ~ "\{backtrack: new nqp.NQPInt({$node.backtrack ne 'r'})\}, $!cursor, new nqp.NQPInt({$!pos})"
         );
 
         if $node.name {
@@ -418,7 +418,7 @@ class RegexCompiler {
             self.peek($fail_label,$subcapture_from),
             self.set_cursor_pos,
             "$!subcur = " ~ call($!cursor, '!cursor_start_subcapture', $subcapture_from) ~ ";\n",
-            call($!subcur, '!cursor_pass', $!pos) ~ ";\n",
+            call($!subcur, '!cursor_pass', "new nqp.NQPInt($!pos)") ~ ";\n",
             "$!cstack = " ~ call($!cursor, '!cursor_capture', $!subcur, quote_string($node.name)) ~ ".array;\n",
             self.goto($done_label),
             self.case($fail_label),
@@ -566,7 +566,7 @@ class RegexCompiler {
              self.mark($end_label, -1, 0),
              # use a special array of ints
              # TODO: use a single persistent one instead of allocating a fresh one
-             call($!cursor, '!alt', $!pos, quote_string($node.name), "nqp.createArray($!subcur)") ~ ";\n",
+             call($!cursor, '!alt', "new nqp.NQPInt($!pos)", quote_string($node.name), "nqp.createArray($!subcur)") ~ ";\n",
              self.fail,
              Chunk.void(|@alt_code),
              self.case($end_label),

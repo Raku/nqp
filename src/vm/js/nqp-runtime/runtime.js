@@ -512,3 +512,45 @@ exports.tooFewPos = function(got, expected) {
 exports.tooManyPos = function(got, expected) {
   throw new NQPException(`Too many positionals passed; expected ${expected} arguments but got ${got-2}`);
 };
+
+exports.arg = function(ctx, arg) {
+  return arg;
+};
+
+exports.arg_i = function(ctx, contedArg) {
+  const arg = contedArg.$$decont(ctx);
+  if (arg instanceof NQPInt) {
+    return arg.value;
+  } else if (arg.$$getInt) {
+    return arg.$$getInt();
+  } else {
+    require('nqp-runtime').dumpObj(arg);
+    throw new NQPException('expected int got something else');
+  }
+};
+
+exports.arg_n = function(ctx, contedArg) {
+  const arg = contedArg.$$decont(ctx);
+  if (typeof arg === 'number') {
+    return arg;
+  } else if (arg.$$getNum) {
+    return arg.$$getNum();
+  } else {
+    throw new NQPException('expected num got something else');
+  }
+};
+
+exports.arg_s = function(ctx, contedArg) {
+  const arg = contedArg.$$decont(ctx);
+  if (typeof arg === 'string') {
+    return arg;
+  } else if (arg.$$getStr) {
+    return arg.$$getStr();
+  } else {
+    throw new NQPException('expected string got something else');
+  }
+};
+
+exports.missingNamed = function(name) {
+  throw new NQPException(`Required named parameter '${name}' not passed`);
+};

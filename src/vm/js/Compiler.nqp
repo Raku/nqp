@@ -423,6 +423,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 }
             }
             elsif $param.named {
+                my int $type := self.type_from_typeobj($param.returns);
+                my $suffix := self.suffix_from_type($type);
+
                 my @names := nqp::islist($param.named) ?? $param.named !! nqp::list($param.named);
 
                 for @names -> $name {
@@ -431,7 +434,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
                     @setup.push("if (_NAMED !== null && _NAMED.hasOwnProperty($quoted)) \{\n");
 
-                    set_variable($param, "_NAMED[$quoted]");
+                    set_variable($param, "nqp.arg$suffix($*CTX, _NAMED[$quoted])");
 
                     @setup.push("\} else ");
                 }
@@ -439,15 +442,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 @setup.push("\{\n");
 
                 if $param.default {
-                    # TODO types
-
-                    my $default := self.as_js($param.default, :want($T_OBJ));
+                    my $default := self.as_js($param.default, :want($type));
                     @setup.push($default);
                     set_variable($param, $default.expr);
                 }
                 else {
-                    # TODO required named arguments
-                    set_variable($param, "nqp.Null");
+                    my str $required := quote_string(@names[nqp::elems(@names) - 1]);
+                    @setup.push("nqp.missingNamed($required);\n");
                 }
 
                 @setup.push("\}\n");
@@ -455,6 +456,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             else {
                 my str $tmp := self.unique_var('param');
                 @sig.push($tmp);
+
+                my int $type := self.type_from_typeobj($param.returns);
+                my $suffix := self.suffix_from_type($type);
+                my $unpack := "nqp.arg$suffix($*CTX, $tmp)";
 
                 my str $set;
 
@@ -468,16 +473,16 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
                 if $param.default {
                     $pos_optional := $pos_optional + 1;
-                    my $default_value := self.as_js($param.default, :want($T_OBJ));
+                    my $default_value := self.as_js($param.default, :want($type));
                     @setup.push(Chunk.void(
                         "if (arguments.length < {+@sig}) \{\n",
                          $default_value,
-                         "$set {$default_value.expr};\n\} else \{\n$set $tmp;\n\}\n"
+                         "$set {$default_value.expr};\n\} else \{\n$set $unpack;\n\}\n"
                     ));
                 }
                 else {
                     $pos_required := $pos_required + 1;
-                    @setup.push($set ~ $tmp ~ ";\n");
+                    @setup.push($set ~ $unpack ~ ";\n");
                 }
             }
 
@@ -1552,6 +1557,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         elsif $node.decl eq 'param' {
             $*BLOCK.add_variable($node);
             if $node.scope eq 'local' || $node.scope eq 'lexical' {
+                $*BLOCK.register_var_type($node, $type);
                 if !self.is_dynamic_var($*BLOCK, $node) {
                     $*BLOCK.add_mangled_var($node);
                 }
