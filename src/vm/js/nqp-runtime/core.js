@@ -205,7 +205,8 @@ op.setcodeobj = function(codeRef, codeObj) {
   return codeRef;
 };
 op.getcodeobj = function(codeRef) {
-  return codeRef.codeObj;
+  const codeObj = codeRef.codeObj;
+  return (codeObj === undefined ? Null : codeObj);
 };
 
 op.settypecache = function(obj, cache) {
