@@ -1377,6 +1377,7 @@ sub arrange_args(@in) {
 my $call_gen := sub ($qastcomp, $op) {
     # Work out what callee is.
     my $callee;
+    my $return_type;
     my @args := $op.list;
     if $op.name {
         $callee := $qastcomp.as_mast($op.op eq 'callstatic'
@@ -1386,6 +1387,9 @@ my $call_gen := sub ($qastcomp, $op) {
     elsif +@args {
         @args := nqp::clone(@args);
         $callee := $qastcomp.as_mast(@args.shift(), :want($MVM_reg_obj));
+        if $op.op eq 'nativeinvoke' {
+            $return_type := $qastcomp.as_mast(@args.shift(), :want($MVM_reg_obj));
+        }
     }
     else {
         nqp::die("No name for call and empty children list");
@@ -1406,6 +1410,9 @@ my $call_gen := sub ($qastcomp, $op) {
 
     # Append the code to evaluate the callee expression
     push_ilist(@ins, $callee);
+    if $op.op eq 'nativeinvoke' {
+        push_ilist(@ins, $return_type);
+    }
 
     # Process arguments.
     for @args {
@@ -1436,18 +1443,22 @@ my $call_gen := sub ($qastcomp, $op) {
     # and allocate a register for it. Probably reuse an arg's or the callee's.
     my $res_reg := $regalloc.fresh_register($res_kind);
 
+    nqp::unshift(@arg_regs, $return_type.result_reg) if $op.op eq 'nativeinvoke';
+
     # Generate call.
     nqp::push(@ins, MAST::Call.new(
         :target($decont_reg),
         :flags(@arg_flags),
         |@arg_regs,
-        :result($res_reg)
+        :result($res_reg),
+        :op($op.op eq 'nativeinvoke' ?? 1 !! 0),
     ));
 
     MAST::InstructionList.new(@ins, $res_reg, $res_kind)
 };
 QAST::MASTOperations.add_core_op('call', $call_gen, :!inlinable);
 QAST::MASTOperations.add_core_op('callstatic', $call_gen, :!inlinable);
+QAST::MASTOperations.add_core_op('nativeinvoke', $call_gen, :!inlinable);
 
 QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
     my @args := nqp::clone($op.list);
@@ -2801,7 +2812,7 @@ QAST::MASTOperations.add_core_moarop_mapping('nfarunalt', 'nfarunalt', 0);
 
 # native call ops
 QAST::MASTOperations.add_core_moarop_mapping('initnativecall', 'no_op');
-QAST::MASTOperations.add_core_moarop_mapping('buildnativecall', 'nativecallbuild', 0);
+QAST::MASTOperations.add_core_moarop_mapping('buildnativecall', 'nativecallbuild');
 QAST::MASTOperations.add_core_moarop_mapping('nativecallinvoke', 'nativecallinvoke');
 QAST::MASTOperations.add_core_op('nativecall', -> $qastcomp, $op {
     proto decont_all(@args) {
