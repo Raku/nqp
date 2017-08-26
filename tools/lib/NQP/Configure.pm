@@ -23,8 +23,11 @@ our @required_nqp_files = qw(
 );
 
 sub sorry {
-    my @msg = @_;
-    die join("\n", '', '===SORRY!===', @msg, "\n");
+    my ($ignore_errors, @msg) = @_;
+    my $message = join("\n", '', '===SORRY!===', @msg, "\n");
+    die $message
+        unless $ignore_errors;
+    print $message;
 }
 
 sub slurp {
@@ -296,6 +299,7 @@ sub gen_moar {
     }
     elsif ($moar_have) {
         push @errors, "Found $moar_exe version $moar_have, which is too old. Wanted at least $moar_want\n";
+        return ($moar_exe, @errors) if $options{'ignore-errors'};
     }
     elsif ($moar_version_output =~ /This is MoarVM version/i ) {
         push @errors, "Found a MoarVM binary but was not able to get its version number.\n"
@@ -313,7 +317,7 @@ sub gen_moar {
         $options{'git-reference'} ? "--reference=$options{'git-reference'}/MoarVM" : '',
     );
 
-    unless (cmp_rev($moar_repo, $moar_want, "moar") >= 0) {
+    unless (0 <= cmp_rev($moar_repo, $moar_want, "moar") and !$options{'ignore-errors'}) {
         die "You asked me to build $gen_moar, but $moar_repo is not new enough to satisfy version $moar_want\n";
     }
 

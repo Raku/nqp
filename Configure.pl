@@ -36,7 +36,7 @@ MAIN: {
                'with-moar=s', 'gen-moar:s', 'moar-option=s@',
                'with-asm=s', 'with-asm-tree=s', 'with-jline=s', 'with-jna=s',
                'make-install!', 'makefile-timing!',
-               'git-protocol=s',
+               'git-protocol=s', 'ignore-errors',
                'link',
                'git-depth=s', 'git-reference=s',);
 
@@ -45,7 +45,9 @@ MAIN: {
         print_help();
         exit(0);
     }
-
+    if ($options{'ignore-errors'}) {
+        print "===WARNING!===\nErrors are being ignored.\nIn the case of any errors the script may behave unexpectedly.\n";
+    }
     if ($options{'with-asm'}) {
         if ($options{'with-asm'} ne '-') {
             $config{'asm'} = $options{'with-asm'};
@@ -121,8 +123,7 @@ MAIN: {
         $default_backend = 'moar';
     }
     if ($backends{js} and !$backends{moar}) {
-        print "===SORRY!===\nWhen building the js backend you must also build moar\nPlease build with --backends=moar,js\n";
-        exit 1;
+        sorry($options{'ignore-errors'}, "When building the js backend you must also build moar\nPlease build with --backends=moar,js\n");
     }
 
     # XXX mkpath instead?
@@ -181,7 +182,8 @@ MAIN: {
                 "(You can get a MoarVM built automatically with --gen-moar.)";
             unshift @errors, @moar_errors if @moar_errors;
         }
-        sorry(@errors) if @errors;
+        sorry($options{'ignore-errors'}, @errors) if @errors;
+        sorry($options{'ignore-errors'}, @moar_errors) if @moar_errors;
         $config{'make'} = `$moar_path --libpath="src/vm/moar/stage0" "src/vm/moar/stage0/nqp.moarvm" -e "print(nqp::backendconfig()<make>)"`
                         || 'make';
         $config{moar} = $moar_path;
@@ -200,10 +202,10 @@ MAIN: {
         my $node   = probe_node();
 
         if ($node eq 'nodejs') {
-            sorry('You have a broken node.js. Please install node.js as node instead of nodejs.')
+            sorry($options{'ignore-errors'}, 'You have a broken node.js. Please install node.js as node instead of nodejs.')
         }
         elsif (!$node) {
-            sorry("You don't have node.js. Please install node.js.");
+            sorry($options{'ignore-errors'}, "You don't have node.js. Please install node.js.");
         }
 
         fill_template_file(
@@ -242,8 +244,7 @@ MAIN: {
                     "Need at least JVM 1.7 (got $got)";
             }
         }
-
-        sorry(@errors) if @errors;
+        sorry($options{'ignore-errors'}, @errors) if @errors;
 
         print "Using $got\n";
 
@@ -324,6 +325,9 @@ General Options:
                        Use --git-reference option to identify local path where git repositories are stored
                        For example: --git-reference=/home/user/repo/for_perl6
                        Folders 'nqp', 'MoarVM' with corresponding git repos should be in for_perl6 folder
+    --ignore-errors
+                       Can ignore errors such as what version MoarVM or the JVM is. May not work for other
+                       errors currently.
 
 Please note that the --gen-moar option is there for convenience only and will
 actually immediately - at Configure time - compile and install moar. Moar will
