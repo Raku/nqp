@@ -183,7 +183,9 @@ MAIN: {
             unshift @errors, @moar_errors if @moar_errors;
         }
         sorry($options{'ignore-errors'}, @errors) if @errors;
-        sorry($options{'ignore-errors'}, @moar_errors) if @moar_errors;
+        # If we ignore errors, normally we'd print out the @moar_errors elsewhere
+        # so make sure to print them out now. Don't print unless errors are ignored
+        print join("\n", '', @moar_errors, "\n") if @moar_errors and $options{'ignore-errors'};
         $config{'make'} = `$moar_path --libpath="src/vm/moar/stage0" "src/vm/moar/stage0/nqp.moarvm" -e "print(nqp::backendconfig()<make>)"`
                         || 'make';
         $config{moar} = $moar_path;
