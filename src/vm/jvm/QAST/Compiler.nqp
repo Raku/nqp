@@ -5264,6 +5264,12 @@ class QAST::CompilerJAST {
         my $endlabel := JAST::Label.new( :name($prefix ~ 'end') );
         my $altlabel := JAST::Label.new( :name($prefix ~ $altcount) );
         my $ajast    := self.regex_jast(nqp::shift($iter));
+
+        my $mark_endlabel := &*REGISTER_MARK($endlabel);
+        self.regex_mark($il, $mark_endlabel,
+            $IVAL_MINUSONE,
+            $IVAL_ZERO);
+
         while $iter {
             $il.append($altlabel);
             $altcount++;
@@ -5273,6 +5279,7 @@ class QAST::CompilerJAST {
                 JAST::Instruction.new( :op('lload'), %*REG<pos> ),
                 $IVAL_ZERO);
             $il.append($ajast);
+            self.regex_commit($il, $mark_endlabel) if $node.backtrack eq 'r';
             $il.append(JAST::Instruction.new( :op('goto'), $endlabel ));
             $ajast := self.regex_jast(nqp::shift($iter));
         }
