@@ -274,7 +274,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         if nqp::chars($name) > 2 {
             my str $sigil := nqp::substr($name, 0, 1);
             my str $twigil := nqp::substr($name, 1, 1);
-            if $twigil eq '*' {
+            if $twigil eq '*' || $twigil eq '?' {
               return 1;
             }
         }
