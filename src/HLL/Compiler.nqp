@@ -432,11 +432,11 @@ class HLL::Compiler does HLL::Backend::Default {
     }
 
     method execute_stage($stage, $result, %adverbs) {
-        if nqp::can(self, $stage) {
-            self."$stage"($result, |%adverbs);
-        }
-        elsif nqp::can($!backend, $stage) {
+        if nqp::can($!backend, $stage) {
             $!backend."$stage"($result, |%adverbs);
+        }
+        elsif nqp::can(self, $stage) {
+            self."$stage"($result, |%adverbs);
         }
         else {
             nqp::die("Unknown compilation stage '$stage'");
