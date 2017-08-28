@@ -34,6 +34,8 @@ var sixmodel = require('./sixmodel.js');
 
 var Capture = require('./capture.js');
 
+const shortid = require('shortid');
+
 exports.CodeRef = CodeRef;
 
 op.isinvokable = function(obj) {
@@ -481,20 +483,88 @@ function toJS(obj) {
   }
 }
 
-/* For use inside the eval */
 const nqp = require('nqp-runtime');
+
+const Script = require('vm').Script;
+
+const sourceMaps = {};
+
+const SourceMapGenerator = require('source-map').SourceMapGenerator;
+const SourceMapConsumer = require('source-map').SourceMapConsumer;
+const SourceNode = require('source-map').SourceNode;
+
+const charProps = require('char-props');
+
+function createSourceMap(js, p6, mapping, jsFile, p6File) {
+  const generator = new SourceMapGenerator({file: jsFile});
+
+  let jsProps = charProps(js);
+  let p6Props = charProps(p6);
+
+
+  for (let i=0; i < mapping.length; i += 2) {
+    generator.addMapping({
+      generated: {
+        line: jsProps.lineAt(mapping[i+1])+1,
+        column: jsProps.columnAt(mapping[i+1])+1
+      },
+      original: {
+        line: p6Props.lineAt(mapping[i])+1,
+        column: p6Props.columnAt(mapping[i])+1
+      },
+      source: p6File
+    });
+  }
+
+  return new SourceMapConsumer(generator.toString());
+}
 
 class JavaScriptCompiler extends NQPObject {
   eval(ctx, _NAMED, self, code) {
-    return fromJS(eval(nqp.toStr(code, ctx)));
+
+    const fakeFilename = 'nqpEval' + shortid.generate();
+
+    const codeStr = nqp.toStr(code, ctx);
+
+    // TODO - think about the LOAD_BYTECODE_FROM_MODULE HACK
+    const preamble = 'module = global.nqpModule;const require = global.nqpRequire;';
+
+    if (_NAMED !== null && _NAMED.hasOwnProperty('mapping')) {
+      sourceMaps[fakeFilename] = createSourceMap(codeStr, _NAMED['p6-source'], _NAMED.mapping.array, fakeFilename, nqp.toStr(_NAMED.file, ctx));
+      const node = SourceNode.fromStringWithSourceMap(codeStr, sourceMaps[fakeFilename]);
+
+      //HACK
+      sourceMaps[fakeFilename] = new SourceMapConsumer(node.toStringWithSourceMap({file: fakeFilename}).map.toString())
+
+      const jsProps = charProps(codeStr);
+      const p6Props = charProps(_NAMED['p6-source']);
+      sourceMaps[fakeFilename].eachMapping(m => {
+        m.generatedPos = jsProps.indexAt({line: m.generatedLine, column: m.generatedColumn});
+        m.originalPos = p6Props.indexAt({line: m.originalLine, column: m.originalColumn});
+    }, undefined, SourceMapConsumer.GENERATED_ORDER);
+    }
+
+    const script = new Script(preamble + codeStr, {filename: fakeFilename});
+
+    global.nqpModule = module;
+
+    const oldNqpRequire = global.nqpRequire;
+    global.nqpRequire = function(path) {
+      return require(path);
+    };
+
+    const ret = fromJS(script.runInThisContext());
+    global.nqpRequire = oldNqpRequire;
+
+    return ret;
   }
 
   compile(ctx, _NAMED, self, code) {
-    const evaled = '(function(ctx) {return ' + nqp.toStr(code, ctx) + '})';
-    const closure = eval(evaled);
+    const script = new Script(code);
+
     const codeRef = new CodeRef();
     codeRef.$$call = function(ctx, _NAMED) {
-      return fromJS(closure(ctx));
+      return script.runInThisContext();
     };
     return codeRef;
   }
@@ -986,26 +1056,56 @@ op.backtracestrings = function(hllName, exception) {
 };
 
 op.backtrace = function(hllName, exception) {
-  /* TODO - have real file and line */
   if (exception.$$ctx) {
-    let ctx = exception.$$ctx;
+    let ctx = exception.$$ctx.$$skipHandlers();
 
-    let rows = [];
+    const stack = exception.$$stack;
+
+    const rows = [];
+
+
+    let stackIndex = 0;
 
     while (ctx) {
-      let row = new Hash();
-      let annotations = new Hash();
+      const row = new Hash();
+      const annotations = new Hash();
       row.content.set('annotations', annotations);
+
+      let file = '<unknown file>';
+      let line = 1;
+
       if (ctx instanceof Ctx) {
-        row.content.set('sub', ctx.codeRef());
+        ctx = ctx.$$skipHandlers();
+        const codeRef = ctx.codeRef();
+        const wanted = codeRef.$$call.name;
+        while (stackIndex < stack.length) {
+          if (stack[stackIndex].getFunctionName() == wanted) {
+            file = stack[stackIndex].getFileName();
+            line = stack[stackIndex].getLineNumber();
+            let column = stack[stackIndex].getColumnNumber();
+
+            if (sourceMaps.hasOwnProperty(file)) {
+              let original = sourceMaps[file].originalPositionFor({line: line, column: column});
+              if (original.source) {
+                file = original.source;
+                line = original.line;
+                column = original.column;
+              }
+            }
+            if (file === undefined) file = '?';
+            break;
+          }
+          stackIndex++;
+        }
+        row.content.set('sub', codeRef);
       }
 
-      annotations.content.set('file', 'NYI');
-      annotations.content.set('line', 0);
+      annotations.content.set('file', file);
+      annotations.content.set('line', line);
 
       rows.push(row);
 
-      ctx = ctx.$$outer;
+      ctx = ctx.$$caller;
     }
     return hll.list(hllName, rows);
   } else {
@@ -1019,7 +1119,7 @@ op.hintfor = function(classHandle, attrName) {
 };
 
 op.ctxcaller = function(ctx) {
-  return ctx.$$caller.$$skipHandlers();
+  return ctx.$$caller;
 };
 
 op.ctxcallerskipthunks = function(ctx) {

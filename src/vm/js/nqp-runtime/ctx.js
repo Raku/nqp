@@ -6,6 +6,8 @@ var exceptionsStack = require('./exceptions-stack.js');
 
 var BOOT = require('./BOOT.js');
 
+const stackTrace = require('stack-trace');
+
 const NEXT = 4;
 const REDO = 8;
 const LAST = 16;
@@ -161,6 +163,7 @@ class Ctx extends NQPObject {
       }
       ctx = ctx.$$caller;
     }
+
     throw exception;
   }
 
@@ -179,7 +182,7 @@ class Ctx extends NQPObject {
   }
 
   die(msg) {
-    this.propagateException(new NQPExceptionWithCtx(msg, this));
+    this.propagateException(new NQPExceptionWithCtx(msg, this, stackTrace.get()));
   }
 
   resume(exception) {

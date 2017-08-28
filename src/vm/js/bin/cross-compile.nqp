@@ -15,7 +15,7 @@ class HLL::Backend::JavaScriptAndMoar {
         'js ' ~ 'mast mbc moar'
     }
     method js($qast, *%adverbs) {
-        my $js_code := $!js.js($qast);
+        my $js_code := $!js.js(QASTWithMatch.new(ast=>$qast));
         say($js_code);
         $qast;
     }
@@ -54,7 +54,7 @@ sub MAIN(*@ARGS, *%ARGS) {
     nqp::bindcomp('QAST', $monkey_patched);
 
     my $moar := $nqpcomp-cc.backend;
-    my $js := JavaScriptBackend.new();
+    my $js := JavaScriptBackend.new(compiler => $nqpcomp-cc);
 
     my $combined := HLL::Backend::JavaScriptAndMoar.new($js);
 

@@ -1079,7 +1079,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             my str $save_args := $*BLOCK.has_own_variable('$*DISPATCHER') ?? "$*CTX.\$\$args = Array.prototype.slice.call(arguments);\n" !! '';
 
             my @function := [
-                "function({$sig.expr}) \{\n" ,
+                "function {self.mangled_cuid($node.cuid)}({$sig.expr}) \{\n" ,
                 $first_time_marker ?? "let {$first_time_marker}Init = $first_time_marker;\n" !! '',
                 $first_time_marker ?? "$first_time_marker = 0;\n" !! '',
                 self.declare_js_vars($*BLOCK.tmps),

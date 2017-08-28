@@ -23,6 +23,9 @@
     "unicharadata": "*",
     "fibers": "^2.0.0",
     "mkdirp": "^0.5.1",
-    "nqp-js-ucd": "0.0.1"
+    "nqp-js-ucd": "0.0.1",
+    "stack-trace": "0.0.10",
+    "shortid": "2.2.8",
+    "source-map": "0.5.7"
   }
 }

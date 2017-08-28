@@ -68,9 +68,28 @@ my sub run_command($command, :$stdout) {
   }
 }
 
+my class JSWithSourceMap {
+    has $!js;
+    has $!mapping;
+    has $!p6-source;
+    has $!file;
+    method js() {$!js}
+    method mapping() {$!mapping}
+    method p6-source() {$!p6-source}
+    method file() {$!file}
+}
+
+class QASTWithMatch {
+    has $!ast;
+    has $!match;
+    method ast() {$!ast}
+    method match() {$!match}
+}
 
 # It can be called HLL::Backend::JavaScript due to problems while merging namespaces
 class JavaScriptBackend {
+    has $!compiler;
+
     method apply_transcodings($s, $transcode) {
         $s
     }
@@ -168,9 +187,18 @@ class JavaScriptBackend {
         my $comp := nqp::getcomp('JavaScript');
         nqp::isnull($comp);
     }
+
+    method ast($source, *%adverbs) {
+        QASTWithMatch.new(ast => $!compiler.ast($source, |%adverbs), match => $source);
+    }
+
+    method optimize($ast_with_match, *%adverbs) {
+        QASTWithMatch.new(
+            ast => $!compiler.optimize($ast_with_match.ast, |%adverbs),
+            match => $ast_with_match.match);
+    }
     
-    
-    method js($qast, *%adverbs) {
+    method js($parsed, *%adverbs) {
         my $backend := QAST::CompilerJS.new(nyi=>%adverbs<nyi> // 'ignore');
 
         my $substagestats := nqp::defined(%adverbs<substagestats>);
@@ -184,15 +212,13 @@ class JavaScriptBackend {
         if %adverbs<source-map> {
             my @js := nqp::list_s();
             my @mapping := nqp::list_i();
-            $backend.emit_with_source_map($qast, @js, @mapping, :$instant, :$shebang, :$nqp-runtime);
 
-            my @mapping_str := nqp::list_s();
-            for @mapping -> $offset {
-                nqp::push_s(@mapping_str, $offset);
-            }
-            "\{\"js\": {$backend.quote_string(nqp::join('', @js))}, \"mapping\": [{nqp::join(',', @mapping_str)}]\}";
+            my $file := nqp::ifnull(nqp::getlexdyn('$?FILES'), "<unknown file>");
+            $backend.emit_with_source_map($parsed.ast, @js, @mapping, :$instant, :$shebang, :$nqp-runtime);
+
+            JSWithSourceMap.new(js => nqp::join('', @js), mapping => @mapping, p6-source => $parsed.match.orig, file => $file);
         } else {
-            my $code := $backend.emit($qast, :$instant, :$substagestats, :$shebang, :$nqp-runtime);
+            my $code := $backend.emit($parsed.ast, :$instant, :$substagestats, :$shebang, :$nqp-runtime);
             $code := self.beautify($code) if %adverbs<beautify>;
             $code;
         }
@@ -224,7 +250,11 @@ class JavaScriptBackend {
         # TODO source map support
 
         if !self.spawn_new_node {
-            return nqp::getcomp('JavaScript').eval($js);
+            if nqp::istype($js, JSWithSourceMap) {
+                return nqp::getcomp('JavaScript').eval($js.js, :mapping($js.mapping), :p6-source($js.p6-source), :file($js.file));
+            } else {
+                return nqp::getcomp('JavaScript').eval($js);
+            }
         }
         
         my $tmp_file := self.tmp_file;
@@ -276,5 +306,5 @@ class JavaScriptBackend {
 
 # Role specifying the default backend for this build.
 role HLL::Backend::Default {
-    method default_backend() { JavaScriptBackend }
+    method default_backend() { JavaScriptBackend.new(compiler=>self) }
 }
