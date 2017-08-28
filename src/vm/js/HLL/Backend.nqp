@@ -193,9 +193,13 @@ class JavaScriptBackend {
     }
 
     method optimize($ast_with_match, *%adverbs) {
-        QASTWithMatch.new(
+        nqp::istype($ast_with_match, QASTWithMatch) ?? QASTWithMatch.new(
             ast => $!compiler.optimize($ast_with_match.ast, |%adverbs),
-            match => $ast_with_match.match);
+            match => $ast_with_match.match) !! $ast_with_match;
+    }
+
+    method get_ast($got) {
+        nqp::istype($got, QASTWithMatch) ?? $got.ast !! $got;
     }
     
     method js($parsed, *%adverbs) {
@@ -218,7 +222,7 @@ class JavaScriptBackend {
 
             JSWithSourceMap.new(js => nqp::join('', @js), mapping => @mapping, p6-source => $parsed.match.orig, file => $file);
         } else {
-            my $code := $backend.emit($parsed.ast, :$instant, :$substagestats, :$shebang, :$nqp-runtime);
+            my $code := $backend.emit(self.get_ast($parsed), :$instant, :$substagestats, :$shebang, :$nqp-runtime);
             $code := self.beautify($code) if %adverbs<beautify>;
             $code;
         }

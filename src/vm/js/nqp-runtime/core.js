@@ -527,7 +527,9 @@ class JavaScriptCompiler extends NQPObject {
     const codeStr = nqp.toStr(code, ctx);
 
     // TODO - think about the LOAD_BYTECODE_FROM_MODULE HACK
-    const preamble = 'module = global.nqpModule;const require = global.nqpRequire;';
+    const preamble = 'var nqp = global.nqp; var module = global.nqpModule;var require = global.nqpRequire;';
+
+    global.nqp = nqp;
 
     if (_NAMED !== null && _NAMED.hasOwnProperty('mapping')) {
       sourceMaps[fakeFilename] = createSourceMap(codeStr, _NAMED['p6-source'], _NAMED.mapping.array, fakeFilename, nqp.toStr(_NAMED.file, ctx));
