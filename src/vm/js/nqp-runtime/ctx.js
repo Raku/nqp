@@ -190,6 +190,8 @@ class Ctx extends NQPObject {
   }
 
   throw(exception) {
+    exception.$$stack = stackTrace.get();
+    exception.$$ctx = this;
     this.propagateException(exception);
   }
 
