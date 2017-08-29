@@ -566,7 +566,7 @@ class JavaScriptCompiler extends NQPObject {
 
     const codeRef = new CodeRef();
     codeRef.$$call = function(ctx, _NAMED) {
-      return script.runInThisContext();
+      return fromJS(script.runInThisContext());
     };
     return codeRef;
   }
