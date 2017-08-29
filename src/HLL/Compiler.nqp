@@ -287,6 +287,7 @@ class HLL::Compiler does HLL::Backend::Default {
         my $error;
         my $has_error := 0;
         my $target := nqp::lc(%adverbs<target>);
+        my $interactive := stdin().t();
         try {
             {
                 if nqp::defined(%adverbs<e>) {
@@ -297,8 +298,9 @@ class HLL::Compiler does HLL::Backend::Default {
                         self.dumper($result, $target, |%adverbs);
                     }
                 }
-                elsif !@a { $result := self.interactive(|%adverbs) }
-                elsif %adverbs<combine> { $result := self.evalfiles(@a, |%adverbs) }
+                elsif !@a &&  $interactive { $result := self.interactive(|%adverbs) }
+                elsif !@a && !$interactive { $result := self.evalfiles('-', |%adverbs) }
+                elsif %adverbs<combine>    { $result := self.evalfiles(@a, |%adverbs) }
                 else { $result := self.evalfiles(@a[0], |@a, |%adverbs) }
 
                 if !nqp::isnull($result) && ($!backend.is_textual_stage($target) || %adverbs<output>) {
