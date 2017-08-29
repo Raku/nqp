@@ -1121,7 +1121,7 @@ op.hintfor = function(classHandle, attrName) {
 };
 
 op.ctxcaller = function(ctx) {
-  return ctx.$$caller;
+  return ctx.$$caller.$$skipHandlers();
 };
 
 op.ctxcallerskipthunks = function(ctx) {
