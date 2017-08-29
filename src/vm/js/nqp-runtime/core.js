@@ -522,6 +522,10 @@ function createSourceMap(js, p6, mapping, jsFile, p6File) {
 class JavaScriptCompiler extends NQPObject {
   eval(ctx, _NAMED, self, code) {
 
+    if (!(_NAMED !== null && _NAMED.hasOwnProperty('mapping'))) {
+      return fromJS(eval(nqp.toStr(code, ctx)));
+    }
+
     const fakeFilename = 'nqpEval' + shortid.generate();
 
     const codeStr = nqp.toStr(code, ctx);
@@ -562,6 +566,7 @@ class JavaScriptCompiler extends NQPObject {
   }
 
   compile(ctx, _NAMED, self, code) {
+    console.log('compiling');
     const script = new Script(code);
 
     const codeRef = new CodeRef();
