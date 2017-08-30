@@ -114,6 +114,7 @@
     - [matchuniprop](#matchuniprop)
     - [unipropcode](#unipropcode)
     - [unipvalcode](#unipvalcode)
+    - [hasuniprop](#hasuniprop)
 - [VM-Provided Streaming Decoder Opcodes](#-vm-provided-streaming-decoder-opcodes)
     - [decoderconfigure](#decoderconfigure)
     - [decodersetlineseps](#decodersetlineseps)
@@ -1239,6 +1240,12 @@ property code.
 
 Looks up a property name in its property category, and returns which
 table within that category to use.
+
+## hasuniprop `moar`
+* `hasuniprop(str $string, int offset, int propcode, int pvalcode)`
+
+Checks if the string has a specific property value at a specific offset.
+Requires both the propcode and the pvalcode to work.
 
 # <a id="-vm-provided-streaming-decoder-opcodes"></a> VM-Provided Streaming Decoder Opcodes
 
