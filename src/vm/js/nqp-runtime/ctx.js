@@ -6,6 +6,8 @@ var exceptionsStack = require('./exceptions-stack.js');
 
 var BOOT = require('./BOOT.js');
 
+const NQPInt = require('./nqp-int.js');
+
 const stackTrace = require('stack-trace');
 
 const NEXT = 4;
@@ -245,7 +247,7 @@ class Ctx extends NQPObject {
       ctx = ctx.$$outer;
     }
 
-    this.$$getHLL().get('lexical_handler_not_found_error').$$call(this, null, category, 0);
+    this.$$getHLL().get('lexical_handler_not_found_error').$$call(this, null, new NQPInt(category), new NQPInt(0));
   }
 
   lookupDynamic(name) {
