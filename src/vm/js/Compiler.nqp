@@ -421,68 +421,69 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     $pos_slurpy := 1;
                     set_variable($param, "nqp.slurpyArray({quote_string($*HLL)}, Array.prototype.slice.call(arguments,{+@sig}))");
                 }
-            }
-            elsif $param.named {
+            } else {
                 my int $type := self.type_from_typeobj($param.returns);
                 my $suffix := self.suffix_from_type($type);
-
-                my @names := nqp::islist($param.named) ?? $param.named !! nqp::list($param.named);
-
-                for @names -> $name {
-                    my str $quoted := quote_string($name);
-                    @*KNOWN_NAMED.push($quoted);
-
-                    @setup.push("if (_NAMED !== null && _NAMED.hasOwnProperty($quoted)) \{\n");
-
-                    set_variable($param, "nqp.arg$suffix($*CTX, _NAMED[$quoted])");
-
-                    @setup.push("\} else ");
+                my sub unpack($value) {
+                    "nqp.arg$suffix({$type == $T_OBJ ?? $*CTX !! 'HLL'}, $value)";
                 }
+                if $param.named {
 
-                @setup.push("\{\n");
+                    my @names := nqp::islist($param.named) ?? $param.named !! nqp::list($param.named);
 
-                if $param.default {
-                    my $default := self.as_js($param.default, :want($type));
-                    @setup.push($default);
-                    set_variable($param, $default.expr);
-                }
-                else {
-                    my str $required := quote_string(@names[nqp::elems(@names) - 1]);
-                    @setup.push("nqp.missingNamed($required);\n");
-                }
+                    for @names -> $name {
+                        my str $quoted := quote_string($name);
+                        @*KNOWN_NAMED.push($quoted);
 
-                @setup.push("\}\n");
-            }
-            else {
-                my str $tmp := self.unique_var('param');
-                @sig.push($tmp);
+                        @setup.push("if (_NAMED !== null && _NAMED.hasOwnProperty($quoted)) \{\n");
 
-                my int $type := self.type_from_typeobj($param.returns);
-                my $suffix := self.suffix_from_type($type);
-                my $unpack := "nqp.arg$suffix($*CTX, $tmp)";
+                        set_variable($param, unpack("_NAMED[$quoted]"));
 
-                my str $set;
+                        @setup.push("\} else ");
+                    }
 
-                if self.is_dynamic_var($*BLOCK, $param) {
-                   $set := "{$*CTX}[{quote_string($param.name)}] = ";
-                } else {
-                    my str $name := $*BLOCK.mangle_var($param);
-                    $*BLOCK.add_js_lexical($name);
-                    $set := "$name = ";
-                }
+                    @setup.push("\{\n");
 
-                if $param.default {
-                    $pos_optional := $pos_optional + 1;
-                    my $default_value := self.as_js($param.default, :want($type));
-                    @setup.push(Chunk.void(
-                        "if (arguments.length < {+@sig}) \{\n",
-                         $default_value,
-                         "$set {$default_value.expr};\n\} else \{\n$set $unpack;\n\}\n"
-                    ));
+                    if $param.default {
+                        my $default := self.as_js($param.default, :want($type));
+                        @setup.push($default);
+                        set_variable($param, $default.expr);
+                    }
+                    else {
+                        my str $required := quote_string(@names[nqp::elems(@names) - 1]);
+                        @setup.push("nqp.missingNamed($required);\n");
+                    }
+
+                    @setup.push("\}\n");
                 }
                 else {
-                    $pos_required := $pos_required + 1;
-                    @setup.push($set ~ $unpack ~ ";\n");
+                    my str $tmp := self.unique_var('param');
+                    @sig.push($tmp);
+
+
+                    my str $set;
+
+                    if self.is_dynamic_var($*BLOCK, $param) {
+                       $set := "{$*CTX}[{quote_string($param.name)}] = ";
+                    } else {
+                        my str $name := $*BLOCK.mangle_var($param);
+                        $*BLOCK.add_js_lexical($name);
+                        $set := "$name = ";
+                    }
+
+                    if $param.default {
+                        $pos_optional := $pos_optional + 1;
+                        my $default_value := self.as_js($param.default, :want($type));
+                        @setup.push(Chunk.void(
+                            "if (arguments.length < {+@sig}) \{\n",
+                             $default_value,
+                             "$set {$default_value.expr};\n\} else \{\n$set {unpack($tmp)};\n\}\n"
+                        ));
+                    }
+                    else {
+                        $pos_required := $pos_required + 1;
+                        @setup.push($set ~ unpack($tmp) ~ ";\n");
+                    }
                 }
             }
 
@@ -1979,13 +1980,15 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my $*LOOP;
 
+        my int $got_compunit := nqp::istype($ast, QAST::CompUnit);
+
         my $compile_block := -> {self.as_js($ast, :want($instant ?? $T_VOID !! $T_OBJ))};
 
-        my $chunk := nqp::istype($ast, QAST::CompUnit) ?? 
+        my $chunk := $got_compunit ??
             $compile_block()
             !! self.wrap_in_fake_block($compile_block);
 
-        my int $deserializes := nqp::istype($ast, QAST::CompUnit) && $ast.compilation_mode;
+        my int $deserializes := $got_compunit && $ast.compilation_mode;
 
         my $libpath := '';
 
@@ -2002,6 +2005,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             "var nqp = require({quote_string($nqp-runtime || 'nqp-runtime')});\n",
             $libpath,
             (try $*EXECNAME) ?? "nqp.execname({quote_string($*EXECNAME)});\n" !! '',
+            "const HLL=nqp.getHLL({quote_string($got_compunit ?? $ast.hll !! '')});\n",
             self.declare_wvals,
             $deserializes ?? '' !! self.setup_wvals,
             self.setup_cuids,

@@ -513,7 +513,7 @@ exports.tooManyPos = function(got, expected) {
   throw new NQPException(`Too many positionals passed; expected ${expected} arguments but got ${got-2}`);
 };
 
-exports.arg = function(ctx, arg) {
+exports.arg = function(HLL, arg) {
   return arg;
 };
 
