@@ -1147,24 +1147,26 @@ int       # ISO 3166 Country code
 The collation mode defines whether we use Primary, Secondary, Tertiary and/or
 Quaternary sorting.
 
-The bitmask is as follows:
-* 1 => Unicode Collation Primary
-* 2 => Unicode Collation Secondary
-* 4 => Unicode Collation Tertiary
-* 8 => Quaternary (Break ties by codepoint)
+Compares two strings, using the Unicode Collation Algorithm
+Return values:
+    0   The strings are identical for the collation levels requested
+ -1/1   String a is less than string b/String a is greater than string b
 
-15 will apply all four levels which is how most users will expect things
-to be sorted, breaking any possible ties by checking codepoint number. This
-should be the default for user facing applications.
-
-The default language and country code is 0, meaning to sort without
-respect to country or language.
-
-* Returns -1 if string a is less than (sorted before) string b
-* Returns 0 if strings are equal for the selected collation levels
- * Note: Will never return 0 for different strings unless you don't use the
-  Quaternary level
-* Returns 1 if string a is more than (sorted after) string b
+`collation_mode` acts like a bitfield. Each of primary, secondary and tertiary
+collation levels can be either: disabled, enabled, reversed.
+In the table below, where + designates sorting normal direction and
+- indicates reversed sorting for that collation level.
+```
+ Collation level | bitfield value
+        Primary+ |   1
+        Primary- |   2
+      Secondary+ |   4
+      Secondary- |   8
+       Tertiary+ |  16
+       Tertiary- |  32
+     Quaternary+ |  64
+     Quaternary- | 128
+```
 
 While the Primary, Secondary and Tertiary mean different things for
 different scripts, for the Latin script used in English they mostly
