@@ -319,31 +319,24 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my @groups := [[]];
         
         for $args -> $arg {
-            if nqp::istype($arg,QAST::SpecialArg) {
-                if $arg.flat {
-                    if $arg.named {
-                        my $arg_chunk := self.as_js($arg, :want($T_OBJ));
-                        @setup.push($arg_chunk);
-                        @named_groups.push("nqp.unwrapNamed({$arg_chunk.expr})");
-                    }
-                    else {
-                        my $arg_chunk := self.as_js($arg, :want($T_OBJ));
-                        @setup.push($arg_chunk);
-                        @groups.push("({$arg_chunk.expr}).array");
-                        @groups.push([]);
-                    }
-                }
-                elsif $arg.named {
-                    my $compiled_arg := self.as_js($arg, :want($T_OBJ));
-                    @setup.push($compiled_arg);
-                    @named_exprs.push(quote_string($arg.named) ~ ":" ~ $compiled_arg.expr);
-
+            if $arg.flat {
+                if $arg.named {
+                    my $arg_chunk := self.as_js($arg, :want($T_OBJ));
+                    @setup.push($arg_chunk);
+                    @named_groups.push("nqp.unwrapNamed({$arg_chunk.expr})");
                 }
                 else {
-                    my $compiled_arg := self.as_js($arg, :want($T_OBJ));
-                    @setup.push($compiled_arg);
-                    @groups[@groups-1].push($compiled_arg.expr);
+                    my $arg_chunk := self.as_js($arg, :want($T_OBJ));
+                    @setup.push($arg_chunk);
+                    @groups.push("({$arg_chunk.expr}).array");
+                    @groups.push([]);
                 }
+            }
+            elsif $arg.named {
+                my $compiled_arg := self.as_js($arg, :want($T_OBJ));
+                @setup.push($compiled_arg);
+                @named_exprs.push(quote_string($arg.named) ~ ":" ~ $compiled_arg.expr);
+
             }
             else {
                 my $compiled_arg := self.as_js($arg, :want($T_OBJ));

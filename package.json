@@ -10,5 +10,8 @@
   "devDependencies": {
     "eslint": "^3.19.0",
     "eslint-config-google": "^0.8.0"
+  },
+  "dependencies": {
+    "nqp-runtime": "file:src/vm/js/nqp-runtime"
   }
 }
