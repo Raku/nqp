@@ -4,6 +4,8 @@ my $T_INT  := 1; # We use a javascript number but always treat it as a 32bit int
 my $T_NUM  := 2; # We use a javascript number for that
 my $T_STR  := 3; # We use a javascript str for that
 my $T_BOOL := 4; # Something that can be used in boolean context in javascript. To the user it should be presented as a 0 or 1
+my $T_CALL_ARG := 5; # Something that will be passed to a sub/method call
+
 my $T_VOID := -1; # Value of this type shouldn't exist, we use a "" as the expr
 my $T_NONVAL := -2; # something that is not a nqp value
 

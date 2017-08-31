@@ -333,13 +333,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 }
             }
             elsif $arg.named {
-                my $compiled_arg := self.as_js($arg, :want($T_OBJ));
+                my $compiled_arg := self.as_js($arg, :want($T_CALL_ARG));
                 @setup.push($compiled_arg);
                 @named_exprs.push(quote_string($arg.named) ~ ":" ~ $compiled_arg.expr);
 
             }
             else {
-                my $compiled_arg := self.as_js($arg, :want($T_OBJ));
+                my $compiled_arg := self.as_js($arg, :want($T_CALL_ARG));
                 @setup.push($compiled_arg);
                 @groups[@groups-1].push($compiled_arg.expr);
             }
@@ -408,17 +408,17 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         for @params -> $param {
             if $param.slurpy {
                 if $param.named {
-                    set_variable($param, "nqp.slurpyNamed(_NAMED, {known_named(@*KNOWN_NAMED)})");
+                    set_variable($param, "nqp.slurpyNamed(HLL, _NAMED, {known_named(@*KNOWN_NAMED)})");
                 }
                 else {
                     $pos_slurpy := 1;
-                    set_variable($param, "nqp.slurpyArray(HLL, Array.prototype.slice.call(arguments,{+@sig}))");
+                    set_variable($param, "nqp.slurpyPos(HLL, arguments, {+@sig})");
                 }
             } else {
                 my int $type := self.type_from_typeobj($param.returns);
                 my $suffix := self.suffix_from_type($type);
                 my sub unpack($value) {
-                    "nqp.arg$suffix({$type == $T_OBJ ?? $*CTX !! 'HLL'}, $value)";
+                    "nqp.arg$suffix({$type == $T_OBJ ?? 'HLL' !! $*CTX}, $value)";
                 }
                 if $param.named {
 
@@ -502,6 +502,24 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         if $got != $desired {
             if $desired == $T_VOID {
                 return Chunk.new($T_VOID, "", $chunk.setup);
+            }
+
+            if $desired == $T_CALL_ARG {
+                if $got == $T_OBJ {
+                    return Chunk.new($T_CALL_ARG, $chunk.expr, $chunk);
+                }
+                if $got == $T_BOOL {
+                    return Chunk.new($T_CALL_ARG, "new nqp.NativeIntArg({$chunk.expr} ? 1 : 0)", $chunk);
+                }
+                if $got == $T_INT {
+                    return Chunk.new($T_CALL_ARG, "new nqp.NativeIntArg({$chunk.expr})", $chunk);
+                }
+                if $got == $T_NUM {
+                    return Chunk.new($T_CALL_ARG, "new nqp.NativeNumArg({$chunk.expr})", $chunk);
+                }
+                if $got == $T_STR {
+                    return Chunk.new($T_CALL_ARG, "new nqp.NativeStrArg({$chunk.expr})", $chunk);
+                }
             }
 
             if $desired == $T_NUM {

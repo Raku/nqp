@@ -97,11 +97,74 @@ exports.hash = function() {
   return new Hash();
 };
 
-exports.slurpyNamed = function(named, skip) {
-  var hash = new Hash();
+const nativeArgs = require('./native-args.js');
+const NativeIntArg = nativeArgs.NativeIntArg;
+const NativeNumArg = nativeArgs.NativeNumArg;
+const NativeStrArg = nativeArgs.NativeStrArg;
+
+const intToObj = exports.intToObj = function(currentHLL, i) {
+  const type = currentHLL.get('int_box');
+  if (!type) {
+    return new NQPInt(i);
+  } else {
+    var repr = type._STable.REPR;
+    var obj = repr.allocate(type._STable);
+    obj.$$setInt(i);
+    return obj;
+  }
+};
+
+const numToObj = exports.numToObj = function(currentHLL, n) {
+  const type = currentHLL.get('num_box');
+  if (!type) {
+    return n;
+  } else {
+    var repr = type._STable.REPR;
+    var obj = repr.allocate(type._STable);
+    obj.$$setNum(n);
+    return obj;
+  }
+};
+
+const strToObj = exports.strToObj = function(currentHLL, s) {
+  const type = currentHLL.get('str_box');
+  if (!type) {
+    return s;
+  } else {
+    var repr = type._STable.REPR;
+    var obj = repr.allocate(type._STable);
+    obj.$$setStr(s);
+    return obj;
+  }
+};
+
+const arg = exports.arg = function(currentHLL, arg) {
+  if (arg instanceof NativeIntArg) {
+    return intToObj(currentHLL, arg.value);
+  }
+  else if (arg instanceof NativeNumArg) {
+    return numToObj(currentHLL, arg.value);
+  }
+  else if (arg instanceof NativeStrArg) {
+    return strToObj(currentHLL, arg.value);
+  } else {
+    return arg;
+  }
+};
+
+exports.slurpyPos = function(currentHLL, args, from) {
+  const unpacked = new Array(args.length - from);
+  for (let i=from; i < args.length; i++) {
+    unpacked[i-from] = arg(currentHLL, args[i]);
+  }
+  return hll.slurpyArray(currentHLL, unpacked);
+};
+
+exports.slurpyNamed = function(currentHLL, named, skip) {
+  const hash = new Hash();
   for (key in named) {
     if (!skip[key]) {
-      hash.content.set(key, named[key]);
+      hash.content.set(key, arg(currentHLL, named[key]));
     }
   }
   return hash;
@@ -468,7 +531,13 @@ function fromJS(obj) {
 }
 
 function toJS(obj) {
-  if (obj instanceof NQPInt) {
+  if (obj instanceof NativeIntArg) {
+    return obj.value;
+  } else if (obj instanceof NativeNumArg) {
+    return obj.value;
+  } else if (obj instanceof NativeStrArg) {
+    return obj.value;
+  } else if (obj instanceof NQPInt) {
     return obj.value;
   } else if (obj instanceof CodeRef) {
     return function() {
@@ -1153,7 +1222,13 @@ op.ctxouterskipthunks = function(ctx) {
 };
 
 op.captureposprimspec = function(capture, idx) {
-  if (capture.pos[idx].typeObject_) {
+  if (capture.pos[idx] instanceof NativeIntArg) {
+    return 1;
+  } else if (capture.pos[idx] instanceof NativeNumArg) {
+    return 2;
+  } else if (capture.pos[idx] instanceof NativeStrArg) {
+    return 3;
+  } else if (capture.pos[idx].typeObject_) {
     return 0;
   } else {
     return op.objprimspec(capture.pos[idx]);

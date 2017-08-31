@@ -16,6 +16,12 @@ var StaticCtx = require('./static-ctx.js');
 
 const BOOT = require('./BOOT.js');
 
+const nativeArgs = require('./native-args.js');
+
+exports.NativeIntArg = nativeArgs.NativeIntArg;
+exports.NativeNumArg = nativeArgs.NativeNumArg;
+exports.NativeStrArg = nativeArgs.NativeStrArg;
+
 const fs = require('fs');
 
 exports.NQPInt = NQPInt;
@@ -32,8 +38,14 @@ var core = require('./core');
 loadOps(core);
 exports.hash = core.hash;
 exports.slurpyNamed = core.slurpyNamed;
+exports.slurpyPos = core.slurpyPos;
 exports.named = core.named;
 exports.unwrapNamed = core.unwrapNamed;
+exports.arg = core.arg;
+
+exports.intToObj = core.intToObj;
+exports.numToObj = core.numToObj;
+exports.strToObj = core.strToObj;
 
 exports.EvalResult = core.EvalResult;
 
@@ -262,41 +274,6 @@ exports.toInt = function(arg, ctx) {
   return (exports.toNum(arg, ctx) | 0);
 };
 
-exports.intToObj = function(currentHLL, i) {
-  const type = currentHLL.get('int_box');
-  if (!type) {
-    return new NQPInt(i);
-  } else {
-    var repr = type._STable.REPR;
-    var obj = repr.allocate(type._STable);
-    obj.$$setInt(i);
-    return obj;
-  }
-};
-
-exports.numToObj = function(currentHLL, n) {
-  const type = currentHLL.get('num_box');
-  if (!type) {
-    return n;
-  } else {
-    var repr = type._STable.REPR;
-    var obj = repr.allocate(type._STable);
-    obj.$$setNum(n);
-    return obj;
-  }
-};
-
-exports.strToObj = function(currentHLL, s) {
-  const type = currentHLL.get('str_box');
-  if (!type) {
-    return s;
-  } else {
-    var repr = type._STable.REPR;
-    var obj = repr.allocate(type._STable);
-    obj.$$setStr(s);
-    return obj;
-  }
-};
 
 if (!Math.imul) {
   /* Polyfill from:
@@ -507,9 +484,6 @@ exports.tooManyPos = function(got, expected) {
   throw new NQPException(`Too many positionals passed; expected ${expected} arguments but got ${got-2}`);
 };
 
-exports.arg = function(HLL, arg) {
-  return arg;
-};
 
 exports.arg_i = function(ctx, contedArg) {
   const arg = contedArg.$$decont(ctx);
@@ -547,4 +521,28 @@ exports.arg_s = function(ctx, contedArg) {
 
 exports.missingNamed = function(name) {
   throw new NQPException(`Required named parameter '${name}' not passed`);
+};
+
+
+const chunkNamesToTypes = {
+  T_OBJ: 0,
+  T_INT: 1,
+  T_NUM: 2,
+  T_STR: 3,
+  T_BOOL: 4,
+  T_CALL_ARG: 5,
+
+  T_VOID: -1,
+  T_NONVAL: -2,
+  T_ARGS: -3,
+  T_ARGS_ARRAY: -4,
+};
+
+const chunkTypesToNames = {};
+for (let name of Object.keys(chunkNamesToTypes)) {
+  chunkTypesToNames[chunkNamesToTypes[name]] = name;
+}
+
+exports.coercion = function(got, expected) {
+  throw new Error("Can't convert, got: " + chunkTypesToNames[got] + ' expected:' + chunkTypesToNames[expected]);
 };
