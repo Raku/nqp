@@ -244,15 +244,15 @@ op.bool_I = function(n) {
   return intishBool(getBI(n).toNumber());
 };
 
-op.radix_I = function(hllName, radix, str, zpos, flags, type) {
+op.radix_I = function(currentHLL, radix, str, zpos, flags, type) {
   var extracted = core.radixHelper(radix, str, zpos, flags);
   if (extracted == null) {
-    return hll.slurpyArray(hllName, [makeBI(type, bignum(0)), makeBI(type, bignum(1)), -1]);
+    return hll.slurpyArray(currentHLL, [makeBI(type, bignum(0)), makeBI(type, bignum(1)), -1]);
   }
 
   if (radix == 10 || radix == 16) {
     var pow = bignum(radix).pow(extracted.power);
-    return hll.slurpyArray(hllName, [makeBI(type, bignum(extracted.number, radix)), makeBI(type, pow), extracted.offset]);
+    return hll.slurpyArray(currentHLL, [makeBI(type, bignum(extracted.number, radix)), makeBI(type, pow), extracted.offset]);
   } else {
     var n = extracted.number;
     var base = bignum(1);
@@ -271,6 +271,6 @@ op.radix_I = function(hllName, radix, str, zpos, flags, type) {
 
     if (n[0] == '-') result = result.neg();
 
-    return hll.slurpyArray(hllName, [makeBI(type, result), makeBI(type, base), extracted.offset]);
+    return hll.slurpyArray(currentHLL, [makeBI(type, result), makeBI(type, base), extracted.offset]);
   }
 };

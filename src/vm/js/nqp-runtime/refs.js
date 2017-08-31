@@ -3,8 +3,8 @@ let hll = require('./hll.js');
 let helpers = exports.helpers = {};
 let op = exports.op = {};
 
-function attrRef_i(hllName, get, set) {
-  var refType = hll.hllConfigs[hllName].get('int_attr_ref');
+function attrRef_i(currentHLL, get, set) {
+  var refType = currentHLL.get('int_attr_ref');
   if (refType === undefined) {
     throw 'No int attribute reference type registered for current HLL';
   }
@@ -15,8 +15,8 @@ function attrRef_i(hllName, get, set) {
   return ref;
 }
 
-function attrRef_n(hllName, get, set) {
-  var refType = hll.hllConfigs[hllName].get('num_attr_ref');
+function attrRef_n(currentHLL, get, set) {
+  var refType = currentHLL.get('num_attr_ref');
   if (refType === undefined) {
     throw 'No num attribute reference type registered for current HLL';
   }
@@ -27,8 +27,8 @@ function attrRef_n(hllName, get, set) {
   return ref;
 }
 
-function attrRef_s(hllName, get, set) {
-  var refType = hll.hllConfigs[hllName].get('str_attr_ref');
+function attrRef_s(currentHLL, get, set) {
+  var refType = currentHLL.get('str_attr_ref');
   if (refType === undefined) {
     throw 'No str attribute reference type registered for current HLL';
   }
@@ -39,26 +39,26 @@ function attrRef_s(hllName, get, set) {
   return ref;
 }
 
-op.getattrref_i = function(hllName, obj, classHandle, attrName) {
-  return attrRef_i(hllName,
+op.getattrref_i = function(currentHLL, obj, classHandle, attrName) {
+  return attrRef_i(currentHLL,
       () => obj.$$getattr_i(classHandle, attrName),
       value => obj.$$bindattr_i(classHandle, attrName, value));
 };
 
-op.getattrref_n = function(hllName, obj, classHandle, attrName) {
-  return attrRef_n(hllName,
+op.getattrref_n = function(currentHLL, obj, classHandle, attrName) {
+  return attrRef_n(currentHLL,
       () => obj.$$getattr_n(classHandle, attrName),
       value => obj.$$bindattr_n(classHandle, attrName, value));
 };
 
-op.getattrref_s = function(hllName, obj, classHandle, attrName) {
-  return attrRef_s(hllName,
+op.getattrref_s = function(currentHLL, obj, classHandle, attrName) {
+  return attrRef_s(currentHLL,
       () => obj.$$getattr_s(classHandle, attrName),
       value => obj.$$bindattr_s(classHandle, attrName, value));
 };
 
-helpers.lexRef_i = function(hllName, get, set) {
-  var refType = hll.hllConfigs[hllName].get('int_lex_ref');
+helpers.lexRef_i = function(currentHLL, get, set) {
+  var refType = currentHLL.get('int_lex_ref');
   if (refType === undefined) {
     throw 'No int lexical reference type registered for current HLL';
   }
@@ -69,8 +69,8 @@ helpers.lexRef_i = function(hllName, get, set) {
   return ref;
 };
 
-helpers.lexRef_s = function(hllName, get, set) {
-  var refType = hll.hllConfigs[hllName].get('str_lex_ref');
+helpers.lexRef_s = function(currentHLL, get, set) {
+  var refType = currentHLL.get('str_lex_ref');
   if (refType === undefined) {
     throw 'No str lexical reference type registered for current HLL';
   }
@@ -81,8 +81,8 @@ helpers.lexRef_s = function(hllName, get, set) {
   return ref;
 };
 
-helpers.lexRef_n = function(hllName, get, set) {
-  var refType = hll.hllConfigs[hllName].get('num_lex_ref');
+helpers.lexRef_n = function(currentHLL, get, set) {
+  var refType = currentHLL.get('num_lex_ref');
   if (refType === undefined) {
     throw 'No num lexical reference type registered for current HLL';
   }
@@ -93,8 +93,8 @@ helpers.lexRef_n = function(hllName, get, set) {
   return ref;
 };
 
-op.atposref_i = function(hllName, obj, index) {
-  var refType = hll.hllConfigs[hllName].get('int_pos_ref');
+op.atposref_i = function(currentHLL, obj, index) {
+  var refType = currentHLL.get('int_pos_ref');
   if (refType === undefined) {
     throw 'No int lexical reference type registered for current HLL';
   }
@@ -105,8 +105,8 @@ op.atposref_i = function(hllName, obj, index) {
   return ref;
 };
 
-op.atposref_n = function(hllName, obj, index) {
-  var refType = hll.hllConfigs[hllName].get('num_pos_ref');
+op.atposref_n = function(currentHLL, obj, index) {
+  var refType = currentHLL.get('num_pos_ref');
   if (refType === undefined) {
     throw 'No num lexical reference type registered for current HLL';
   }
@@ -117,8 +117,8 @@ op.atposref_n = function(hllName, obj, index) {
   return ref;
 };
 
-op.atposref_s = function(hllName, obj, index) {
-  var refType = hll.hllConfigs[hllName].get('str_pos_ref');
+op.atposref_s = function(currentHLL, obj, index) {
+  var refType = currentHLL.get('str_pos_ref');
   if (refType === undefined) {
     throw 'No str lexical reference type registered for current HLL';
   }

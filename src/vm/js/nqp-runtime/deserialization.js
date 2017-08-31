@@ -41,7 +41,7 @@ module.exports.wval = function(handle, idx) {
   return serializationContexts[handle].rootObjects[idx];
 };
 
-op.deserialize = function(hllName, blob, sc, sh, codeRefs, conflict, cuids, setupWVals) {
+op.deserialize = function(currentHLL, blob, sc, sh, codeRefs, conflict, cuids, setupWVals) {
   var buffer = new Buffer(blob, 'base64');
   sc.codeRefs = codeRefs.array;
 
@@ -54,7 +54,7 @@ op.deserialize = function(hllName, blob, sc, sh, codeRefs, conflict, cuids, setu
   sh = sh.array;
   var cursor = new BinaryCursor(buffer, 0, sh, sc);
 
-  cursor.deserialize(sc, cuids, setupWVals, hll.getHLL(hllName));
+  cursor.deserialize(sc, cuids, setupWVals, currentHLL);
 };
 
 op.createsc = function(handle) {

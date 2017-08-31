@@ -79,13 +79,13 @@ function radixHelper(radix, str, zpos, flags) {
 
 exports.radixHelper = radixHelper;
 
-op.radix = function(hllName, radix, str, zpos, flags) {
+op.radix = function(currentHLL, radix, str, zpos, flags) {
   var extracted = radixHelper(radix, str, zpos, flags);
   if (extracted == null) {
-    return hll.slurpyArray(hllName, [0, 1, -1]);
+    return hll.slurpyArray(currentHLL, [0, 1, -1]);
   }
   var pow = Math.pow(radix, extracted.power);
-  return hll.slurpyArray(hllName, [parseInt(extracted.number, radix), pow, extracted.offset]);
+  return hll.slurpyArray(currentHLL, [parseInt(extracted.number, radix), pow, extracted.offset]);
 };
 
 op.setdebugtypename = function(type, debugName) {
@@ -1058,11 +1058,11 @@ op.getstaticcode = function(codeRef) {
   return codeRef.staticCode;
 };
 
-op.backtracestrings = function(hllName, exception) {
-  return hll.list(hllName, [exception.stack.replace(/^Error: .*\n/, '')]);
+op.backtracestrings = function(currentHLL, exception) {
+  return hll.list(currentHLL, [exception.stack.replace(/^Error: .*\n/, '')]);
 };
 
-op.backtrace = function(hllName, exception) {
+op.backtrace = function(currentHLL, exception) {
   if (exception.$$ctx) {
     let ctx = exception.$$ctx.$$skipHandlers();
 
@@ -1114,9 +1114,9 @@ op.backtrace = function(hllName, exception) {
 
       ctx = ctx.$$caller;
     }
-    return hll.list(hllName, rows);
+    return hll.list(currentHLL, rows);
   } else {
-    return hll.list(hllName, []);
+    return hll.list(currentHLL, []);
   }
 };
 
@@ -1272,8 +1272,8 @@ op.islist = function(list) {
   return (list._STable && list._STable.REPR instanceof reprs.VMArray) ? 1 : 0;
 };
 
-op.split = function(hllName, separator, string) {
-  return hll.slurpyArray(hllName, string !== '' ? string.split(separator) : []);
+op.split = function(currentHLL, separator, string) {
+  return hll.slurpyArray(currentHLL, string !== '' ? string.split(separator) : []);
 };
 
 op.exception = function() {

@@ -262,10 +262,8 @@ exports.toInt = function(arg, ctx) {
   return (exports.toNum(arg, ctx) | 0);
 };
 
-exports.intToObj = function(hllName, i) {
-  var currentHLL = hll.hllConfigs[hllName];
-  var type;
-  if (currentHLL) type = currentHLL.get('int_box');
+exports.intToObj = function(currentHLL, i) {
+  const type = currentHLL.get('int_box');
   if (!type) {
     return new NQPInt(i);
   } else {
@@ -276,10 +274,8 @@ exports.intToObj = function(hllName, i) {
   }
 };
 
-exports.numToObj = function(hllName, n) {
-  var currentHLL = hll.hllConfigs[hllName];
-  var type;
-  if (currentHLL) type = currentHLL.get('num_box');
+exports.numToObj = function(currentHLL, n) {
+  const type = currentHLL.get('num_box');
   if (!type) {
     return n;
   } else {
@@ -290,10 +286,8 @@ exports.numToObj = function(hllName, n) {
   }
 };
 
-exports.strToObj = function(hllName, s) {
-  var currentHLL = hll.hllConfigs[hllName];
-  var type;
-  if (currentHLL) type = currentHLL.get('str_box');
+exports.strToObj = function(currentHLL, s) {
+  const type = currentHLL.get('str_box');
   if (!type) {
     return s;
   } else {
@@ -380,9 +374,9 @@ exports.wrapException = function(e) {
   return new NQPException('<<wrapped exception:\n' + e.stack + '\n>>\n');
 };
 
-exports.setCodeRefHLL = function(codeRefs, hllName) {
+exports.setCodeRefHLL = function(codeRefs, currentHLL) {
   for (var i = 0; i < codeRefs.length; i++) {
-    codeRefs[i].hll = hll.hllConfigs[hllName];
+    codeRefs[i].hll = currentHLL;
   }
 };
 
@@ -483,9 +477,9 @@ exports.extraRuntime = function(lang, path) {
   }
 };
 
-exports.paramcheckfailed = function(hllName, ctx, args) {
+exports.paramcheckfailed = function(currentHLL, ctx, args) {
   let capture = new Capture(args[1], Array.prototype.slice.call(args, 2));
-  return hll.hllConfigs[hllName].get('bind_error').$$call(ctx, null, capture);
+  return currentHLL.get('bind_error').$$call(ctx, null, capture);
 };
 
 let execname;
@@ -497,8 +491,8 @@ op.execname = function() {
   return execname;
 };
 
-exports.exitHandler = function(ctx, hllName, value) {
-  hll.hllConfigs[hllName].get('exit_handler').$$call(ctx, null, ctx.codeRef(), value === undefined ? Null : value);
+exports.exitHandler = function(ctx, currentHLL, value) {
+  currentHLL.get('exit_handler').$$call(ctx, null, ctx.codeRef(), value === undefined ? Null : value);
 };
 
 exports.NativeRef = require('./reprs.js').NativeRef;

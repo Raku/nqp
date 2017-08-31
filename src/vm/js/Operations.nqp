@@ -38,9 +38,9 @@ class QAST::OperationsJS {
 
         if $hll {
             if $method_call {
-                nqp::splice(@exprs, nqp::list(quote_string($*HLL)), 1, 0);
+                nqp::splice(@exprs, 'HLL', 1, 0);
             } else {
-                @exprs.unshift(quote_string($*HLL));
+                @exprs.unshift('HLL');
             }
         }
 
@@ -577,7 +577,7 @@ class QAST::OperationsJS {
                @exprs.push($chunk.expr);
            }
 
-           my $hll := $type == $T_OBJ ?? quote_string($*HLL) ~ ',' !! '';
+           my $hll := $type == $T_OBJ ?? 'HLL,' !! '';
            @setup.push($list ~ " = nqp.list" ~ $suffix ~ "(" ~ $hll ~ "[" ~ nqp::join(',', @exprs) ~ "]);\n");
 
            Chunk.new($T_OBJ, $list , @setup, :$node);

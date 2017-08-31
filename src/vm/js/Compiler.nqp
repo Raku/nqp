@@ -412,7 +412,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 }
                 else {
                     $pos_slurpy := 1;
-                    set_variable($param, "nqp.slurpyArray({quote_string($*HLL)}, Array.prototype.slice.call(arguments,{+@sig}))");
+                    set_variable($param, "nqp.slurpyArray(HLL, Array.prototype.slice.call(arguments,{+@sig}))");
                 }
             } else {
                 my int $type := self.type_from_typeobj($param.returns);
@@ -575,7 +575,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     %convert{$T_INT} := 'intToObj';
                     %convert{$T_NUM} := 'numToObj';
                     %convert{$T_STR} := 'strToObj';
-                    return Chunk.new($T_OBJ, "nqp.{%convert{$got}}({quote_string($*HLL)}, {$chunk.expr})", $chunk);
+                    return Chunk.new($T_OBJ, "nqp.{%convert{$got}}(HLL, {$chunk.expr})", $chunk);
                 }
             }
 
@@ -1057,7 +1057,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             if $node.has_exit_handler {
               $result_for_exit_handler := $*BLOCK.add_tmp;
               $wrap_in_try := 1;
-              $exit_handler := "\} finally \{nqp.exitHandler($*CTX, {quote_string($*HLL)}, $result_for_exit_handler);\n";
+              $exit_handler := "\} finally \{nqp.exitHandler($*CTX, HLL, $result_for_exit_handler);\n";
             }
 
             if $*BLOCK.pass_on_exceptions {
@@ -1331,7 +1331,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             "var sh = nqp.createArray([{nqp::join(',',@sh)}]);\n"
             ~ "var sc = nqp.op.createsc({quote_string(nqp::scgethandle($sc))});\n"
             ~ self.emit_code_refs_list($ast)
-            , "nqp.op.deserialize({quote_string($*HLL)}, $quoted_data,sc,sh,code_refs,null,cuids,function() \{{self.setup_wvals}\});\n"
+            , "nqp.op.deserialize(HLL, $quoted_data,sc,sh,code_refs,null,cuids,function() \{{self.setup_wvals}\});\n"
             ~ "nqp.op.scsetdesc(sc,{quote_string(nqp::scgetdesc($sc))});\n");
     }
 
@@ -1487,7 +1487,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my int $comp_mode := $node.compilation_mode;
 
-        my str $set_hll := $*HLL ?? "nqp.setCodeRefHLL(cuids, {quote_string($*HLL)});\n" !! '';
+        my str $set_hll := "nqp.setCodeRefHLL(cuids, HLL);\n";
 
         my $set_code_objects := self.set_code_objects;
         my @setup := [$pre , $comp_mode ?? self.create_sc($node) !! '', $set_code_objects,  self.declare_js_vars($*BLOCK.tmps), self.declare_js_vars($*BLOCK.js_lexicals), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $set_hll, $post, $body];
@@ -1510,7 +1510,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     multi method as_js(QAST::ParamTypeCheck $node) {
         my $check := self.as_js($node[0], :want($T_BOOL));
-        Chunk.void($check, "if (!{$check.expr}) return nqp.paramcheckfailed({quote_string($*HLL)}, $*CTX, Array.prototype.slice.call(arguments));\n");
+        Chunk.void($check, "if (!{$check.expr}) return nqp.paramcheckfailed(HLL, $*CTX, Array.prototype.slice.call(arguments));\n");
     }
 
     my %default_value := nqp::hash($T_OBJ, 'nqp.Null', $T_INT, '0', $T_NUM, '0', $T_STR, 'nqp.null_s');
@@ -1807,7 +1807,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     my $suffix := self.suffix_from_type($type);
                     my $get := self.get_var($var);
                     my $set := self.set_var($var, 'value');
-                    Chunk.new($T_OBJ, "nqp.lexRef{$suffix}({quote_string($*HLL)}, function() \{return $get\}, function(value) \{$set\})", :node($var));
+                    Chunk.new($T_OBJ, "nqp.lexRef{$suffix}(HLL, function() \{return $get\}, function(value) \{$set\})", :node($var));
                 }
             }
         }
@@ -1881,7 +1881,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
 
 
-            Chunk.new($T_OBJ, "nqp.attrRef{$suffix}({quote_string($*HLL)}, function() \{return $get\}, function(value) \{$set\})", :node($var));
+            Chunk.new($T_OBJ, "nqp.attrRef{$suffix}(HLL, function() \{return $get\}, function(value) \{$set\})", :node($var));
         }
         elsif $var.scope eq 'attribute' {
             my @types := [$T_OBJ, $T_INT, $T_NUM, $T_STR];

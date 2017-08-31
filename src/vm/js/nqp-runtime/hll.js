@@ -85,6 +85,8 @@ exports.hllConfigs = hllConfigs;
 function getHLL(language) {
   if (!hllConfigs[language]) {
     hllConfigs[language] = new Map;
+    hllConfigs[language].set('slurpy_array', BOOT.Array)
+    hllConfigs[language].set('list', BOOT.Array)
 
     // For serialization purposes
     hllConfigs[language].set('name', language);
@@ -115,16 +117,12 @@ op.settypehllrole = function(type, role) {
   return type;
 };
 
-exports.slurpyArray = function(hllName, array) {
-  var slurpyArray;
-  if (hllConfigs[hllName]) slurpyArray = hllConfigs[hllName].get('slurpy_array');
-  if (slurpyArray === undefined) slurpyArray = BOOT.Array;
+exports.slurpyArray = function(currentHLL, array) {
+  const slurpyArray = currentHLL.get('slurpy_array');
   return slurpyArray._STable.REPR.allocateFromArray(slurpyArray._STable, array);
 };
 
-exports.list = function(hllName, array) {
-  var list;
-  if (hllConfigs[hllName]) list = hllConfigs[hllName].get('list');
-  if (list === undefined) list = BOOT.Array;
+exports.list = function(currentHLL, array) {
+  const list = currentHLL.get('list');
   return list._STable.REPR.allocateFromArray(list._STable, array);
 };
