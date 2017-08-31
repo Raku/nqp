@@ -39,7 +39,7 @@
     - [tanh](#tanh)
 - [Relational / Logic Opcodes](#-relational--logic-opcodes)
     - [cmp](#cmp)
-    - [eqat](#eqat)
+    - [eqat/eqatim/eqaticim](#eqat)
     - [iseq](#iseq)
     - [isgt](#isgt)
     - [isge](#isge)
@@ -85,8 +85,7 @@
     - [findnotcclass](#findnotcclass)
     - [flip](#flip)
     - [hash](#hash)
-    - [index](#index)
-    - [indexic](#indexic)
+    - [index/indexic/indexicim](#index)
     - [iscclass](#iscclass)
     - [join](#join)
     - [lc](#lc)
@@ -600,11 +599,24 @@ Return 1 if the string `$haystack` has the string `$needle` at position `$pos`,
 or 0 otherwise.
 
 ## eqatic
+
+MoarVM only
+* `eqatic(str haystack, str $needle, int $pos)`
+Case-insensitive `eqat`
+
+## eqatim
 MoarVM only
 
-* `eqatic(str haystack, str $needle, int $pos)`
+* `eqatim(str haystack, str $needle, int $pos)`
+Ignore-mark `eqat`, NFD decomposes and matches the base codepoint
 
-Case insensitive version of eqat
+Example: `eqat("á", "a", 0) → 1`
+
+## eqaticim
+
+MoarVM only
+* `eqaticim(str haystack, str $needle, int $pos)`
+Case-insensitive and ignore-mark `eqat`
 
 ## iseq
 * `iseq_i(int $l, int $r)`
@@ -969,6 +981,20 @@ except it is case-insensitive. For now we only have it under MoarVM,
 but the plan is to support it on other platforms as well.
 
 On MoarVM uses proper Unicode foldcase type comparison.
+
+## indexim
+MoarVM Only
+* `indexim(str $haystack, str $needle, int $pos)`
+
+Like index but decomposes and matches against the base character.
+
+Example: `indexim("bcá", "a", 0) → 2`
+
+## indexicim
+MoarVM Only
+* `indexicim(str $haystack, str $needle, int $pos)`
+
+Ignorecase and ignoremark `index`
 
 ## iscclass
 * `iscclass(int $class, str $str, int $i)`
