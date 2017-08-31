@@ -2202,6 +2202,9 @@ is_qast(
     my class Caller {
         method from() {'caller of the sub'}
     }
+    my class Outer {
+        method from() {'outside of the sub'}
+    }
 
     my $called_exit_handler := 0;
     my $exit_handler_return_value;
@@ -2236,7 +2239,7 @@ is_qast(
                 QAST::Op.new(
                     :op('bind'),
                     QAST::Var.new( :name('$*DYNAMIC_VAR'), :scope('lexical'), :decl('var')),
-                    QAST::WVal.new( :value(OUter) )
+                    QAST::WVal.new( :value(Outer) )
                 ),
                 QAST::Op.new(
                     :op('bind'),
