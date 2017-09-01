@@ -62,6 +62,7 @@ sub MAIN(*@ARGS, *%ARGS) {
     $combined.HOW.reparent($combined, $moar);
 
     $nqpcomp-cc.backend($combined);
+    $nqpcomp-cc.addstage('optimize', :after<ast>); # we need to re-add optimize after .backend removes it
 
     $nqpcomp-cc.command_line(@ARGS,:module-path('gen/js/stage2'),
         :setting-path('gen/js/stage2'),

@@ -84,6 +84,7 @@ class QASTWithMatch {
     has $!match;
     method ast() {$!ast}
     method match() {$!match}
+    method dump() {$!ast.dump}
 }
 
 # It can be called HLL::Backend::JavaScript due to problems while merging namespaces
