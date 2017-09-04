@@ -1,4 +1,4 @@
-plan(33);
+plan(36);
 
 my $x;
 sub savecapture($arg, *%named) {
@@ -95,4 +95,13 @@ sub savecapture_three($arg1, $arg2, $arg3) {
   ok(nqp::captureposarg_n($all, 1) == 12.3, 'nqp::captureposarg_n');
   is(nqp::captureposarg_s($all, 2), "foo", 'nqp::captureposarg_s');
 
+  my int $int := 100;
+  my num $num := 12.3;
+  my str $str := "foo";
+
+  my $natived := savecapture_three($int, $num, $str);
+
+  ok(nqp::captureposarg_i($natived, 0) == 100, 'nqp::captureposarg_i');
+  ok(nqp::captureposarg_n($natived, 1) == 12.3, 'nqp::captureposarg_n');
+  is(nqp::captureposarg_s($natived, 2), "foo", 'nqp::captureposarg_s');
 }
