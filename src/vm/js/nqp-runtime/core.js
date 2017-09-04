@@ -1127,11 +1127,7 @@ op.getstaticcode = function(codeRef) {
   return codeRef.staticCode;
 };
 
-op.backtracestrings = function(currentHLL, exception) {
-  return hll.list(currentHLL, [exception.stack.replace(/^Error: .*\n/, '')]);
-};
-
-op.backtrace = function(currentHLL, exception) {
+function backtrace(exception) {
   if (exception.$$ctx) {
     let ctx = exception.$$ctx.$$skipHandlers();
 
@@ -1183,10 +1179,26 @@ op.backtrace = function(currentHLL, exception) {
 
       ctx = ctx.$$caller;
     }
-    return hll.list(currentHLL, rows);
+    return rows;
   } else {
-    return hll.list(currentHLL, []);
+    return [];
   }
+};
+
+op.backtrace = function(currentHLL, exception) {
+  return hll.list(currentHLL, backtrace(exception));
+};
+
+op.backtracestrings = function(currentHLL, exception) {
+  const lines = [];
+  let first = true;
+  for (let row of backtrace(exception)) {
+    let annotations = row.$$atkey('annotations');
+    let sub = row.$$atkey('sub');
+    lines.push((first ? '  at ' : ' from ') + 'cuid' + sub.cuid + ' ' + annotations.$$atkey('file')+ ':'+ annotations.$$atkey('line'));
+    first = false;
+  }
+  return hll.list(currentHLL, lines);
 };
 
 op.hintfor = function(classHandle, attrName) {
