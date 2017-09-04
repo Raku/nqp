@@ -1593,7 +1593,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     multi method as_js(QAST::VarWithFallback $node, :$want) {
         my $compiled := self.compile_var($node, :$want);
-        if $*BINDVAL || $compiled.type != $T_OBJ {
+        if $*BINDVAL || ($compiled.type != $T_OBJ && $compiled.type != $T_CALL_ARG) {
             $compiled
         }
         else {

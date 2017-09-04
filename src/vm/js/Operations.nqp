@@ -1479,11 +1479,11 @@ class QAST::OperationsJS {
     add_simple_op('captureexistsnamed', $T_INT, [$T_OBJ, $T_STR]);
     add_simple_op('capturehasnameds', $T_INT, [$T_OBJ]);
     add_simple_op('captureposelems', $T_INT, [$T_OBJ]);
-    add_simple_op('captureposarg', $T_OBJ, [$T_OBJ, $T_INT]);
+    add_simple_op('captureposarg', $T_OBJ, [$T_OBJ, $T_INT], :hll);
     add_simple_op('captureposarg_s', $T_STR, [$T_OBJ, $T_INT]);
     add_simple_op('captureposarg_n', $T_NUM, [$T_OBJ, $T_INT]);
     add_simple_op('captureposarg_i', $T_INT, [$T_OBJ, $T_INT]);
-    add_simple_op('capturenamedshash', $T_OBJ, [$T_OBJ]);
+    add_simple_op('capturenamedshash', $T_OBJ, [$T_OBJ], :hll);
 
     add_simple_op('captureposprimspec', $T_INT, [$T_OBJ, $T_INT]);
 

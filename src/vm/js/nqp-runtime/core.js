@@ -233,8 +233,8 @@ op.captureposelems = function(capture) {
   return capture.pos.length;
 };
 
-op.captureposarg = function(capture, i) {
-  return capture.pos[i];
+op.captureposarg = function(currentHLL, capture, i) {
+  return arg(currentHLL, capture.pos[i]);
 };
 
 op.captureposarg_i = function(capture, i) {
@@ -257,10 +257,10 @@ op.captureexistsnamed = function(capture, arg) {
   return (capture.named && capture.named.hasOwnProperty(arg)) ? 1 : 0;
 };
 
-op.capturenamedshash = function(capture) {
+op.capturenamedshash = function(currentHLL, capture) {
   var hash = new Hash();
   for (key in capture.named) {
-    hash.content.set(key, capture.named[key]);
+    hash.content.set(key, arg(currentHLL, capture.named[key]));
   }
   return hash;
 };
@@ -592,7 +592,7 @@ class JavaScriptCompiler extends NQPObject {
   eval(ctx, _NAMED, self, code) {
 
     if (!(_NAMED !== null && _NAMED.hasOwnProperty('mapping'))) {
-      return fromJS(eval(nqp.toStr(code, ctx)));
+      return fromJS(eval(nqp.arg_s(ctx, code)));
     }
 
     const fakeFilename = 'nqpEval' + shortid.generate();

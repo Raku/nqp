@@ -117,7 +117,7 @@ addKnowhowHowMethod('new_type', function(ctx, _NAMED, self) {
 
   /* See if we were given a name; put it into the meta-object if so. */
   if (_NAMED && _NAMED.name) {
-    HOW.__name = typeof _NAMED.name === 'string' ? _NAMED.name : _NAMED.name.$$getStr();
+    HOW.__name = _NAMED.name.$$getStr();
   } else {
     HOW.__name = null;
   }

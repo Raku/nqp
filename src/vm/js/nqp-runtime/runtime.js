@@ -18,9 +18,9 @@ const BOOT = require('./BOOT.js');
 
 const nativeArgs = require('./native-args.js');
 
-exports.NativeIntArg = nativeArgs.NativeIntArg;
-exports.NativeNumArg = nativeArgs.NativeNumArg;
-exports.NativeStrArg = nativeArgs.NativeStrArg;
+const NativeIntArg = exports.NativeIntArg = nativeArgs.NativeIntArg;
+const NativeNumArg = exports.NativeNumArg = nativeArgs.NativeNumArg;
+const NativeStrArg = exports.NativeStrArg = nativeArgs.NativeStrArg;
 
 const fs = require('fs');
 
@@ -400,6 +400,10 @@ String.prototype.$$isrwcont = function(ctx) {
   return 0;
 };
 
+String.prototype.$$getStr = function() {
+  return this;
+};
+
 // needed for continuations
 Function.prototype.$$toBool = function(ctx) {
   return 1;
@@ -486,6 +490,9 @@ exports.tooManyPos = function(got, expected) {
 
 
 exports.arg_i = function(ctx, contedArg) {
+  if (contedArg instanceof NativeIntArg) {
+    return contedArg.value;
+  }
   const arg = contedArg.$$decont(ctx);
   if (arg instanceof NQPInt) {
     return arg.value;
@@ -498,6 +505,9 @@ exports.arg_i = function(ctx, contedArg) {
 };
 
 exports.arg_n = function(ctx, contedArg) {
+  if (contedArg instanceof NativeNumArg) {
+    return contedArg.value;
+  }
   const arg = contedArg.$$decont(ctx);
   if (typeof arg === 'number') {
     return arg;
@@ -509,6 +519,9 @@ exports.arg_n = function(ctx, contedArg) {
 };
 
 exports.arg_s = function(ctx, contedArg) {
+  if (contedArg instanceof NativeStrArg) {
+    return contedArg.value;
+  }
   const arg = contedArg.$$decont(ctx);
   if (typeof arg === 'string') {
     return arg;

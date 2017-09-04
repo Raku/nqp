@@ -2,8 +2,14 @@
 var NQPInt = require('./nqp-int.js');
 var Null = require('./null.js');
 
+const nativeArgs = require('./native-args.js');
+
 const MAX_ARITY = 4;
 const MAX_PER_ARITY = 16;
+
+const NativeIntArg = nativeArgs.NativeIntArg;
+const NativeNumArg = nativeArgs.NativeNumArg;
+const NativeStrArg = nativeArgs.NativeStrArg;
 
 class MultiCache {
   constructor() {
@@ -42,6 +48,12 @@ function posTypes(ctx, capture) {
       } else {
         types[i] = deconted.typeObject_ ? deconted : deconted._STable;
       }
+    } else if (obj instanceof NativeIntArg) {
+      types[i] = 1;
+    } else if (obj instanceof NativeNumArg) {
+      types[i] = 2;
+    } else if (obj instanceof NativeStrArg) {
+      types[i] = 3;
     } else if (obj instanceof NQPInt) {
       types[i] = 1;
     } else if (typeof obj == 'number') {
