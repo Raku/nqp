@@ -1,6 +1,6 @@
 use QAST;
 
-plan(149);
+plan(164);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -1897,6 +1897,80 @@ test_qast_result(
         -> $r {
             ok(nqp::istype($r, $str_boxer), 'an automatically boxed str is of the correct type');
             ok($r.twice eq '244', '...and it has the correct value');
+        }
+    );
+
+    test_qast_result(
+        QAST::CompUnit.new(
+            :hll<foo>,
+            QAST::Block.new(
+                QAST::Op.new(:op<takeclosure>, # needed for JVM
+                    QAST::Block.new(
+                        QAST::Var.new(:name<$foo>, :scope<local>, :decl<param>)
+                    )
+                )
+            )
+        ),
+        -> $block {
+            my int $int := 100;
+            my num $num := 10.5;
+            my str $str := 'hi';
+
+
+            my $boxed_int := $block($int);
+            ok(nqp::istype($boxed_int, $int_boxer), 'the native int passed as arg is boxed to the correct type');
+            is(nqp::unbox_i($boxed_int), 100, '...and has the right value');
+
+            my $boxed_num := $block($num);
+            ok(nqp::istype($boxed_num, $num_boxer), 'the native num passed as arg is boxed to the correct type');
+            is(nqp::unbox_n($boxed_num), 10.5, '...and has the right value');
+
+            my $boxed_str := $block($str);
+            ok(nqp::istype($boxed_str, $str_boxer), 'the native str passed as arg is boxed to the correct type');
+            is(nqp::unbox_s($boxed_str), 'hi', '...and has the right value');
+
+            my $autoboxed_int := $int;
+            my $not_boxed_twice_int := $block($autoboxed_int);
+            ok(nqp::eqaddr($autoboxed_int, $not_boxed_twice_int), "alread autoboxed ints don't get boxed twice");
+
+            my $autoboxed_str := $str;
+            my $not_boxed_twice_str := $block($autoboxed_str);
+            ok(nqp::eqaddr($autoboxed_str, $not_boxed_twice_str), "alread autoboxed strs don't get boxed twice");
+
+            my $autoboxed_num := $num;
+            my $not_boxed_twice_num := $block($autoboxed_num);
+            ok(nqp::eqaddr($autoboxed_num, $not_boxed_twice_num), "alread autoboxed nums don't get boxed twice");
+        }
+    );
+
+    test_qast_result(
+        QAST::CompUnit.new(
+            :hll<foo>,
+            QAST::Block.new(
+                QAST::Op.new(:op<takeclosure>, # needed for JVM
+                    QAST::Block.new(
+                        QAST::Var.new(:name<$foo>, :scope<local>, :decl<param>, :slurpy)
+                    )
+                )
+            )
+        ),
+        -> $block {
+            my int $int := 100;
+            my num $num := 10.5;
+            my str $str := 'hi';
+
+
+            my $boxed_int := $block($int)[0];
+            ok(nqp::istype($boxed_int, $int_boxer), 'the native int passed as slurpy arg is boxed to the correct type');
+            is(nqp::unbox_i($boxed_int), 100, '...and has the right value');
+
+            my $boxed_num := $block($num)[0];
+            ok(nqp::istype($boxed_num, $num_boxer), 'the native num passed as slurpy arg is boxed to the correct type');
+            is(nqp::unbox_n($boxed_num), 10.5, '...and has the right value');
+
+            my $boxed_str := $block($str)[0];
+            ok(nqp::istype($boxed_str, $str_boxer), 'the native str passed as slurpy arg is boxed to the correct type');
+            is(nqp::unbox_s($boxed_str), 'hi', '...and has the right value');
         }
     );
 }
