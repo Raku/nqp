@@ -56,7 +56,16 @@ class HLL::Backend::MoarVM {
             if nqp::defined(@END);
 
         self.ensure_prof_routines();
-        $prof_start_sub(nqp::hash('kind', $kind));
+
+        if $kind eq "heap" {
+            unless nqp::defined($filename) {
+                $filename := 'heap-snapshot-' ~ nqp::time_n();
+            }
+            $prof_start_sub(nqp::hash('kind', $kind, 'path', $filename));
+        } else {
+            $prof_start_sub(nqp::hash('kind', $kind));
+        }
+
         my $res  := $what();
         unless nqp::defined(@END) {
             my $data := $prof_end_sub();
@@ -402,95 +411,7 @@ class HLL::Backend::MoarVM {
     }
 
     method dump_heap_profile_data($data, $filename) {
-        unless nqp::defined($filename) {
-            $filename := 'heap-snapshot-' ~ nqp::time_n();
-        }
-        note("Writing heap snapshot to $filename");
-        my $hs_fh := open($filename, :w);
-
-        sub write_json($obj) {
-            my $escaped_backslash := q{\\\\};
-            my $escaped_dquote := q{\\"};
-            my @pieces := nqp::list_s();
-            sub to_json($obj) {
-                if nqp::islist($obj) {
-                    nqp::push_s(@pieces, '[');
-                    my $first := 1;
-                    for $obj {
-                        if $first {
-                            $first := 0;
-                        }
-                        else {
-                            nqp::push_s(@pieces, ',');
-                        }
-                        to_json($_);
-                    }
-                    nqp::push_s(@pieces, ']');
-                }
-                elsif nqp::ishash($obj) {
-                    nqp::push_s(@pieces, '{');
-                    my $first := 1;
-                    for sorted_keys($obj) {
-                        if $first {
-                            $first := 0;
-                        }
-                        else {
-                            nqp::push_s(@pieces, ',');
-                        }
-                        nqp::push_s(@pieces, '"');
-                        nqp::push_s(@pieces, $_);
-                        nqp::push_s(@pieces, '":');
-                        to_json($obj{$_});
-                    }
-                    nqp::push_s(@pieces, '}');
-                }
-                elsif nqp::isstr($obj) {
-                    if nqp::index($obj, '\\') {
-                        $obj := literal_subst($obj, '\\', $escaped_backslash);
-                    }
-                    if nqp::index($obj, '"') {
-                        $obj := literal_subst($obj, '"', $escaped_dquote);
-                    }
-                    nqp::push_s(@pieces, '"');
-                    nqp::push_s(@pieces, $obj);
-                    nqp::push_s(@pieces, '"');
-                }
-                elsif nqp::isint($obj) || nqp::isnum($obj) {
-                    nqp::push_s(@pieces, ~$obj);
-                }
-                elsif nqp::can($obj, 'Str') {
-                    to_json(nqp::unbox_s($obj.Str));
-                }
-                else {
-                    nqp::die("Don't know how to dump a " ~ $obj.HOW.name($obj));
-                }
-                if nqp::elems(@pieces) > 4096 {
-                    $hs_fh.print(nqp::join('', @pieces));
-                    nqp::setelems(@pieces, 0);
-                }
-            }
-            to_json($obj);
-            $hs_fh.print(nqp::join('', @pieces));
-        }
-
-        $hs_fh.print('strings: ');
-        write_json($data<strings>);
-        $hs_fh.print("\ntypes: ");
-        $hs_fh.print($data<types>);
-        $hs_fh.print("\nstatic_frames: ");
-        $hs_fh.print($data<static_frames>);
-        $hs_fh.print("\n\n");
-
-        my int $i := 0;
-        for $data<snapshots> {
-            $hs_fh.print("snapshot $i\n");
-            $hs_fh.print("collectables: " ~ $_<collectables> ~ "\n");
-            $hs_fh.print("references: " ~ $_<references> ~ "\n");
-            $hs_fh.print("\n");
-            $i++;
-        }
-
-        $hs_fh.close;
+        note("Heap snapshot written to $filename");
     }
 
     method run_traced($level, $what) {
