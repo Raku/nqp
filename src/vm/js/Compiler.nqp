@@ -486,12 +486,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
 
         if ($pos_required) {
-            @setup.push("if (arguments.length < {$pos_required+2}) nqp.tooFewPos(arguments.length, $pos_required);");
+            @setup.unshift("if (arguments.length < {$pos_required+2}) nqp.tooFewPos(arguments.length, $pos_required);");
         }
 
         if (!$pos_slurpy) {
             my $max := $pos_required + $pos_optional + 2;
-            @setup.push("if (arguments.length > $max) nqp.tooManyPos(arguments.length, $max);");
+            @setup.unshift("if (arguments.length > $max) nqp.tooManyPos(arguments.length, $max);");
         }
 
         Chunk.new($T_NONVAL, nqp::join(',', @sig), @setup);
