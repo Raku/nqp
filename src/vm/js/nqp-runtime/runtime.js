@@ -492,43 +492,57 @@ exports.tooManyPos = function(got, expected) {
 exports.arg_i = function(ctx, contedArg) {
   if (contedArg instanceof NativeIntArg) {
     return contedArg.value;
+  } else if (contedArg instanceof NativeNumArg) {
+    throw new NQPException('Expected native int argument, but got num');
+  } else if (contedArg instanceof NativeStrArg) {
+    throw new NQPException('Expected native int argument, but got str');
   }
+
   const arg = contedArg.$$decont(ctx);
   if (arg instanceof NQPInt) {
     return arg.value;
   } else if (arg.$$getInt) {
     return arg.$$getInt();
   } else {
-    require('nqp-runtime').dumpObj(arg);
-    throw new NQPException('expected int got something else');
+    throw new NQPException('Expected native int argument, but got something else');
   }
 };
 
 exports.arg_n = function(ctx, contedArg) {
   if (contedArg instanceof NativeNumArg) {
     return contedArg.value;
+  } else if (contedArg instanceof NativeIntArg) {
+    throw new NQPException('Expected native num argument, but got int');
+  } else if (contedArg instanceof NativeStrArg) {
+    throw new NQPException('Expected native num argument, but got str');
   }
+
   const arg = contedArg.$$decont(ctx);
   if (typeof arg === 'number') {
     return arg;
   } else if (arg.$$getNum) {
     return arg.$$getNum();
   } else {
-    throw new NQPException('expected num got something else');
+    throw new NQPException('Expected native num argument, but got something else');
   }
 };
 
 exports.arg_s = function(ctx, contedArg) {
   if (contedArg instanceof NativeStrArg) {
     return contedArg.value;
+  } else if (contedArg instanceof NativeIntArg) {
+    throw new NQPException('Expected native str argument, but got int');
+  } else if (contedArg instanceof NativeNumArg) {
+    throw new NQPException('Expected native str argument, but got num');
   }
+
   const arg = contedArg.$$decont(ctx);
   if (typeof arg === 'string') {
     return arg;
   } else if (arg.$$getStr) {
     return arg.$$getStr();
   } else {
-    throw new NQPException('expected string got something else');
+    throw new NQPException('Expected native str argument, but got something else');
   }
 };
 
