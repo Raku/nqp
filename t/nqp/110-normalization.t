@@ -1,4 +1,4 @@
-plan(11);
+plan(13);
 
 my sub create_buf($type) {
     my $buf := nqp::newtype(nqp::null(), 'VMArray');
@@ -43,3 +43,14 @@ nqp::strtocodes(nqp::strfromcodes($input), nqp::const::NORMALIZE_NFC, $normalize
 is(nqp::elems($normalized_codes), 2, 'nqp::strtocode & nqp::strfromcodes: 1E0A 0323 -> NFC -> 1E0C 0307 # right amount of code points');
 is(nqp::atpos_i($normalized_codes, 0), 0x1E0C, 'nqp::strtocode & nqp::strfromcodes: 1E0A 0323 -> NFC -> 1E0C 0307 # first code point');
 is(nqp::atpos_i($normalized_codes, 1), 0x0307, 'nqp::strtocode & nqp::strfromcodes: 1E0A 0323 -> NFC -> 1E0C 0307 # second code point');
+
+my $three_codes_grapheme := create_buf(uint32).new;
+nqp::push_i($three_codes_grapheme, 0x0071);
+nqp::push_i($three_codes_grapheme, 0x0323);
+nqp::push_i($three_codes_grapheme, 0x0307);
+is(nqp::codes(nqp::strfromcodes($three_codes_grapheme)), 3, 'nqp::codes with a 3 codes grapheme');
+
+my $two_codes_grapheme := create_buf(uint32).new;
+nqp::push_i($two_codes_grapheme, 0x1E0B);
+nqp::push_i($two_codes_grapheme, 0x0323);
+is(nqp::codes(nqp::strfromcodes($two_codes_grapheme)), 2, 'nqp::codes with a 2 codes grapheme');
