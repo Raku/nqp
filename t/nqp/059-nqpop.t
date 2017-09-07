@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(318);
+plan(326);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -63,6 +63,16 @@ ok( nqp::rindex('Hello World', '') == 11, 'nqp::rindex with empty match returns 
 ok( nqp::rindex('Hello World', '', 1) == 1, 'nqp::rindex with empty match at offset returns offset');
 ok( nqp::rindex('Hello World', '', 11) == 11, 'nqp::rindex with empty match at end returns length');
 ok( nqp::rindex('Hello World', '', 100) == -1, 'nqp::rindex with empty match at offset outside string returns -1');
+
+# Empty string tests
+ok(nqp::rindex('hi', '', 2) == 2, 'nqp::rindex finds empty string after last index');
+ok(nqp::rindex('hi', '', 0) == 0, 'nqp::rindex finds empty string at start');
+ok(nqp::rindex('hi', '', 1) == 1, 'nqp::rindex finds empty string in the middle');
+ok(nqp::rindex('hi', '', 3) == -1, 'nqp::rindex does not find empty string at graphs + 1');
+ok(nqp::index('hi', '', 2) == 2, 'nqp::index finds empty string after last index');
+ok(nqp::index('hi', '', 0) == 0, 'nqp::index finds empty string at start');
+ok(nqp::index('hi', '', 1) == 1, 'nqp::index finds empty string in the middle');
+ok(nqp::index('hi', '', 3) == -1, 'nqp::dindex does not find empty string at graphs + 1');
 
 is( nqp::chr(120), 'x', 'nqp::chr');
 is( nqp::ord('xyz'),120, 'nqp::ord');
@@ -311,7 +321,7 @@ ok(!nqp::isgt_s('abc', 'abc'), 'nqp::isge - both string equal');
 ok(!nqp::isgt_s('abcdaz', 'abcdbzefg'), 'nqp::isge left string greater');
 
 ok((1.1 != 1) == 1, '!= between floating point numbers (not equal)');
-ok((1.1 != 1.1) == 0,'!= between floating point numbers (equal)'); 
+ok((1.1 != 1.1) == 0,'!= between floating point numbers (equal)');
 
 ok(12.5 % 5 == 2.5, '% test');
 ok(3 % 2.5 == 0.5, '% test');
