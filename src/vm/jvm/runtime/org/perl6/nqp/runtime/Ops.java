@@ -4323,6 +4323,10 @@ public final class Ops {
       return out;
     }
 
+    public static long codes(String str) {
+        return Normalizer.normalize(str, Normalizer.Form.NFC).codePoints().count();
+    }
+
     public static SixModelObject strtocodes(String str, long normalization, SixModelObject codes, ThreadContext tc) {
         int i = 0;
         for (int c : Normalizer.normalize(str, javaNormalizationForm(normalization, tc)).codePoints().toArray()) {

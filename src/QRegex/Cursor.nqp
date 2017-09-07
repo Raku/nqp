@@ -88,7 +88,6 @@ role NQPMatchRole is export {
     method CURSOR() { self }
     method PRECURSOR() { self."!cursor_init"(nqp::getattr($!shared, ParseShared, '$!target'), :p($!from)) }
     method Str()       { $!pos >= $!from ?? nqp::substr(nqp::getattr($!shared, ParseShared, '$!target'), $!from, nqp::sub_i(self.to, $!from)) !! '' }
-    method Int()       { my int $i := +self.Str(); $i }  # XXX need a better way to do this
     method Num()       { +self.Str() }
     method Bool()      { $!pos >= $!from }
     method chars()     { $!pos >= $!from ?? nqp::sub_i(self.to, $!from) !! 0 }
@@ -1290,6 +1289,12 @@ class NQPMatch is NQPCapture does NQPMatchRole {
     method Bool() {
         !nqp::isnull(nqp::getattr(self, $?CLASS, '$!match'))
           && nqp::istrue(nqp::getattr(self, $?CLASS, '$!match'));
+    }
+
+    method Int() {
+        # XXX need a better way to do this
+        my int $i := +self.Str();
+        $i;
     }
 
     method parse($target, :$rule = 'TOP', :$actions, *%options) {

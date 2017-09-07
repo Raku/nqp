@@ -1355,6 +1355,10 @@ op.strtocodes = function(str, form, codes) {
   return codes;
 };
 
+op.codes = function(str) {
+  return str.normalize('NFC').length;
+}
+
 op.islist = function(list) {
   return (list._STable && list._STable.REPR instanceof reprs.VMArray) ? 1 : 0;
 };
