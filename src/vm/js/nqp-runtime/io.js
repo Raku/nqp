@@ -390,7 +390,7 @@ op.getstderr = function() {
 };
 
 class Stdout extends StdHandle {
-  isttyfh() {
+  $$isttyfh() {
     return (process.stdout.isTTY ? 1 : 0);
   }
 
