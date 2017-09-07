@@ -147,6 +147,10 @@ op.lstat_time = function(file, code) {
 };
 
 class IOHandle extends NQPObject {
+  $$can(ctx, name) {
+    return 0;
+  }
+
   $$toBool(ctx) {
     return 1;
   }
@@ -190,10 +194,6 @@ class FileHandle extends IOHandle {
 
   $$toBool(ctx) {
     return 1;
-  }
-
-  $$can(ctx, name) {
-    return 0;
   }
 
   $$filenofh() {
