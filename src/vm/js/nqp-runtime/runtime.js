@@ -107,7 +107,7 @@ exports.loaderCtx = null;
 
 op.loadbytecode = function(ctx, file) {
   // HACK - temporary hack for rakudo-js
-  if (file == '/share/nqp/lib/Perl6/BOOTSTRAP.js') {
+  if (file == '/nqp/lib/Perl6/BOOTSTRAP.js') {
     file = 'Perl6::BOOTSTRAP';
   }
 
