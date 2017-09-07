@@ -229,7 +229,7 @@ MAIN: {
                 print "got: $_";
                 if (/(?:java|jdk) version "(\d+)(?:\.(\d+))?/) {
                     $jvm_found = 1;
-                    if ($1 > 1 || $1 == 1 && $2 >= 7) {
+                    if ($1 > 1 || $1 == 1 && $2 >= 8) {
                         $jvm_ok = 1;
                     }
                     $got = $_;
@@ -243,7 +243,7 @@ MAIN: {
             }
             elsif (!$jvm_ok) {
                 push @errors,
-                    "Need at least JVM 1.7 (got $got)";
+                    "Need at least JVM 1.8 (got $got)";
             }
         }
         sorry($options{'ignore-errors'}, @errors) if @errors;
