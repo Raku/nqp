@@ -1773,9 +1773,9 @@ public final class Ops {
         case CallSiteDescriptor.ARG_INT:
             return (long)args[idx];
         case CallSiteDescriptor.ARG_NUM:
-            return (long)(double)args[idx];
+            throw ExceptionHandling.dieInternal(cf.tc, "Expected native int argument, but got num");
         case CallSiteDescriptor.ARG_STR:
-            return coerce_s2i((String)args[idx]);
+            throw ExceptionHandling.dieInternal(cf.tc, "Expected native int argument, but got str");
         case CallSiteDescriptor.ARG_OBJ:
             return decont(((SixModelObject)args[idx]), cf.tc).get_int(cf.tc);
         default:
@@ -1787,9 +1787,9 @@ public final class Ops {
         case CallSiteDescriptor.ARG_NUM:
             return (double)args[idx];
         case CallSiteDescriptor.ARG_INT:
-            return (double)(long)args[idx];
+            throw ExceptionHandling.dieInternal(cf.tc, "Expected native num argument, but got int");
         case CallSiteDescriptor.ARG_STR:
-            return coerce_s2n((String)args[idx]);
+            throw ExceptionHandling.dieInternal(cf.tc, "Expected native num argument, but got str");
         case CallSiteDescriptor.ARG_OBJ:
             return decont(((SixModelObject)args[idx]), cf.tc).get_num(cf.tc);
         default:
@@ -1801,9 +1801,9 @@ public final class Ops {
         case CallSiteDescriptor.ARG_STR:
             return (String)args[idx];
         case CallSiteDescriptor.ARG_INT:
-            return coerce_i2s((long)args[idx]);
+            throw ExceptionHandling.dieInternal(cf.tc, "Expected native str argument, but got int");
         case CallSiteDescriptor.ARG_NUM:
-            return coerce_n2s((double)args[idx]);
+            throw ExceptionHandling.dieInternal(cf.tc, "Expected native str argument, but got num");
         case CallSiteDescriptor.ARG_OBJ:
             return decont(((SixModelObject)args[idx]), cf.tc).get_str(cf.tc);
         default:
@@ -1912,9 +1912,9 @@ public final class Ops {
             case CallSiteDescriptor.ARG_INT:
                 return (long)args[lookup >> 3];
             case CallSiteDescriptor.ARG_NUM:
-                return (long)(double)args[lookup >> 3];
+                throw ExceptionHandling.dieInternal(cf.tc, "Expected native int argument, but got num");
             case CallSiteDescriptor.ARG_STR:
-                return coerce_s2i((String)args[lookup >> 3]);
+                throw ExceptionHandling.dieInternal(cf.tc, "Expected native int argument, but got str");
             case CallSiteDescriptor.ARG_OBJ:
                 return ((SixModelObject)args[lookup >> 3]).get_int(cf.tc);
             default:
@@ -1933,9 +1933,9 @@ public final class Ops {
             case CallSiteDescriptor.ARG_NUM:
                 return (double)args[lookup >> 3];
             case CallSiteDescriptor.ARG_INT:
-                return (double)(long)args[lookup >> 3];
+                throw ExceptionHandling.dieInternal(cf.tc, "Expected native num argument, but got int");
             case CallSiteDescriptor.ARG_STR:
-                return coerce_s2n((String)args[lookup >> 3]);
+                throw ExceptionHandling.dieInternal(cf.tc, "Expected native num argument, but got str");
             case CallSiteDescriptor.ARG_OBJ:
                 return ((SixModelObject)args[lookup >> 3]).get_num(cf.tc);
             default:
@@ -1954,9 +1954,9 @@ public final class Ops {
             case CallSiteDescriptor.ARG_STR:
                 return (String)args[lookup >> 3];
             case CallSiteDescriptor.ARG_INT:
-                return coerce_i2s((long)args[lookup >> 3]);
+                throw ExceptionHandling.dieInternal(cf.tc, "Expected native str argument, but got int");
             case CallSiteDescriptor.ARG_NUM:
-                return coerce_n2s((double)args[lookup >> 3]);
+                throw ExceptionHandling.dieInternal(cf.tc, "Expected native str argument, but got num");
             case CallSiteDescriptor.ARG_OBJ:
                 return ((SixModelObject)args[lookup >> 3]).get_str(cf.tc);
             default:
@@ -2002,9 +2002,9 @@ public final class Ops {
             case CallSiteDescriptor.ARG_INT:
                 return (long)args[lookup >> 3];
             case CallSiteDescriptor.ARG_NUM:
-                return (long)(double)args[lookup >> 3];
+                throw ExceptionHandling.dieInternal(cf.tc, "Expected native int argument, but got num");
             case CallSiteDescriptor.ARG_STR:
-                return coerce_s2i((String)args[lookup >> 3]);
+                throw ExceptionHandling.dieInternal(cf.tc, "Expected native int argument, but got str");
             case CallSiteDescriptor.ARG_OBJ:
                 return ((SixModelObject)args[lookup >> 3]).get_int(cf.tc);
             default:
@@ -2026,9 +2026,9 @@ public final class Ops {
             case CallSiteDescriptor.ARG_NUM:
                 return (double)args[lookup >> 3];
             case CallSiteDescriptor.ARG_INT:
-                return (double)(long)args[lookup >> 3];
+                throw ExceptionHandling.dieInternal(cf.tc, "Expected native num argument, but got int");
             case CallSiteDescriptor.ARG_STR:
-                return coerce_s2n((String)args[lookup >> 3]);
+                throw ExceptionHandling.dieInternal(cf.tc, "Expected native num argument, but got str");
             case CallSiteDescriptor.ARG_OBJ:
                 return ((SixModelObject)args[lookup >> 3]).get_num(cf.tc);
             default:
@@ -2050,9 +2050,9 @@ public final class Ops {
             case CallSiteDescriptor.ARG_STR:
                 return (String)args[lookup >> 3];
             case CallSiteDescriptor.ARG_INT:
-                return coerce_i2s((long)args[lookup >> 3]);
+                throw ExceptionHandling.dieInternal(cf.tc, "Expected native str argument, but got int");
             case CallSiteDescriptor.ARG_NUM:
-                return coerce_n2s((double)args[lookup >> 3]);
+                throw ExceptionHandling.dieInternal(cf.tc, "Expected native str argument, but got num");
             case CallSiteDescriptor.ARG_OBJ:
                 return ((SixModelObject)args[lookup >> 3]).get_str(cf.tc);
             default:
