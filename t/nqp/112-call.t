@@ -1,4 +1,4 @@
-plan(39);
+plan(51);
 
 sub one_arg_sub($arg) {
 }
@@ -80,6 +80,31 @@ dies-ok({str_named_arg(:arg(123))}, "can't pass int to an str named arg");
 dies-ok({str_named_arg(:arg(123.3))}, "can't pass num to an str named arg");
 dies-ok({str_named_arg(:arg(nqp::list()))}, "can't pass obj to an str named arg");
 is(str_named_arg(:arg('foo')), 'foo', "can pass str to an str named arg");
+
+my sub int_required_named_arg(int :$arg!) {
+  $arg;
+}
+my sub num_required_named_arg(num :$arg!) {
+  $arg;
+}
+my sub str_required_named_arg(str :$arg!) {
+  $arg;
+}
+
+dies-ok({int_required_named_arg(:arg('foo'))}, "can't pass str to an int required named arg");
+dies-ok({int_required_named_arg(:arg(123.3))}, "can't pass num to an int required named arg");
+dies-ok({int_required_named_arg(:arg(nqp::list()))}, "can't pass obj to an int required named arg");
+is(int_required_named_arg(:arg(123)), '123', "can pass int to an int required named arg");
+
+dies-ok({num_required_named_arg(:arg('foo'))}, "can't pass str to an num required named arg");
+dies-ok({num_required_named_arg(:arg(123))}, "can't pass int to an int required named arg");
+dies-ok({num_required_named_arg(:arg(nqp::list()))}, "can't pass obj to an num required named arg");
+is(num_required_named_arg(:arg(123.1)), '123.1', "can pass num to an num required named arg");
+
+dies-ok({str_required_named_arg(:arg(123))}, "can't pass int to an str required named arg");
+dies-ok({str_required_named_arg(:arg(123.3))}, "can't pass num to an str required named arg");
+dies-ok({str_required_named_arg(:arg(nqp::list()))}, "can't pass obj to an str required named arg");
+is(str_required_named_arg(:arg('foo')), 'foo', "can pass str to an str required named arg");
 
 sub foo(int $defaulted = 77) {
   nqp::add_i($defaulted, 700);
