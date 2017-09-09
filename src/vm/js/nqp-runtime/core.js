@@ -23,6 +23,7 @@ var constants = require('./constants.js');
 var containerSpecs = require('./container-specs.js');
 
 var Null = require('./null.js');
+const null_s = require('./null_s.js');
 
 var BOOT = require('./BOOT.js');
 
@@ -686,7 +687,7 @@ op.getpid = function() {
 };
 
 op.getmessage = function(exception) {
-  return exception.$$message;
+  return (exception.$$message === undefined ? null_s : exception.$$message);
 };
 
 op.setmessage = function(exception, message) {
