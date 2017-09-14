@@ -30,4 +30,8 @@ public class ConcBlockingQueueInstance extends SixModelObject {
             throw ExceptionHandling.dieInternal(tc, e);
         }
     }
+
+    public long elems(ThreadContext tc) {
+        return queue.size();
+    }
 }
