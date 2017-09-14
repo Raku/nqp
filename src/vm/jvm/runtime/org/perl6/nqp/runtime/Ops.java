@@ -1,14 +1,16 @@
 package org.perl6.nqp.runtime;
 
+import com.sun.management.OperatingSystemMXBean;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.management.ManagementFactory;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.ProcessBuilder.Redirect;
 import java.lang.Thread;
 import java.math.BigDecimal;
@@ -5403,6 +5405,22 @@ public final class Ops {
         catch (Throwable t) {
             throw ExceptionHandling.dieInternal(tc, t);
         }
+    }
+
+    /* There's not a getrusage (with Windows fakery) equivalent on JVM, sadly.
+     * The main reason this op exists is for the thread pool scheduler in
+     * Rakudo, and we can get (or fake up enough of) what it needs. */
+    public static SixModelObject getrusage(ThreadContext tc) {
+        SixModelObject BOOTIntArray = tc.gc.BOOTIntArray;
+        SixModelObject res = BOOTIntArray.st.REPR.allocate(tc, BOOTIntArray.st);
+        long cpuNanos = ((OperatingSystemMXBean)ManagementFactory.getOperatingSystemMXBean())
+            .getProcessCpuTime();
+        long cpuMillis = cpuNanos / 1000;
+        tc.native_i = cpuMillis / 1000000; // UTIME_SEC
+        res.bind_pos_native(tc, 0);
+        tc.native_i = cpuMillis % 1000000; // UTIME_MSEC
+        res.bind_pos_native(tc, 1);
+        return res;
     }
 
     public static SixModelObject jvmgetproperties(ThreadContext tc) {

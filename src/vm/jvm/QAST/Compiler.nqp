@@ -2074,6 +2074,25 @@ my %const_map := nqp::hash(
     'NORMALIZE_NFD',             2,
     'NORMALIZE_NFKC',            3,
     'NORMALIZE_NFKD',            4,
+
+    'RUSAGE_UTIME_SEC',          0,
+    'RUSAGE_UTIME_MSEC',         1,
+    'RUSAGE_STIME_SEC',          2,
+    'RUSAGE_STIME_MSEC',         3,
+    'RUSAGE_MAXRSS',             4,
+    'RUSAGE_IXRSS',              5,
+    'RUSAGE_IDRSS',              6,
+    'RUSAGE_ISRSS',              7,
+    'RUSAGE_MINFLT',             8,
+    'RUSAGE_MAJFLT',             9,
+    'RUSAGE_NSWAP',              10,
+    'RUSAGE_INBLOCK',            11,
+    'RUSAGE_OUBLOCK',            12,
+    'RUSAGE_MSGSND',             13,
+    'RUSAGE_MSGRCV',             14,
+    'RUSAGE_NSIGNALS',           15,
+    'RUSAGE_NVCSW',              16,
+    'RUSAGE_NIVCSW',             17,
 );
 QAST::OperationsJAST.add_core_op('const', -> $qastcomp, $op {
     if nqp::existskey(%const_map, $op.name) {
@@ -2754,6 +2773,7 @@ QAST::OperationsJAST.map_classlib_core_op('sleep', $TYPE_OPS, 'sleep', [$RT_NUM]
 QAST::OperationsJAST.map_classlib_core_op('getenvhash', $TYPE_OPS, 'getenvhash', [], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getpid', $TYPE_OPS, 'getpid', [], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('jvmgetproperties', $TYPE_OPS, 'jvmgetproperties', [], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('getrusage', $TYPE_OPS, 'getrusage', [], $RT_OBJ, :tc);
 
 # thread related opcodes
 QAST::OperationsJAST.map_classlib_core_op('newthread', $TYPE_OPS, 'newthread', [$RT_OBJ, $RT_INT], $RT_OBJ, :tc);
