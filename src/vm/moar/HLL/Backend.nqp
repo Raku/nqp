@@ -51,8 +51,31 @@ class HLL::Backend::MoarVM {
     method run_profiled($what, $kind, $filename?) {
         $kind := 'instrumented' unless $kind;
 
+        my %options;
+
+        if (my $colonpos := nqp::index($kind, ':', 0)) != -1 {
+            my $before := nqp::substr($kind, 0, $colonpos);
+            my $after := nqp::substr($kind, $colonpos + 1);
+            $kind := $before;
+            my $k;
+            my $v;
+            for nqp::split($after, ",") {
+                if (my $equalspos := nqp::index($after, '=', 0)) != 1 {
+                    $k := nqp::substr($after, 0, $equalspos);
+                    $v := nqp::substr($after, $equalspos + 1);
+                } else {
+                    $k := $kind;
+                    $v := "1";
+                }
+                note("option key: $k - value: $v");
+                nqp::bindkey(%options, $k, $v);
+            }
+        }
+
+        note("running a profile of $kind");
+
         my @END := nqp::gethllsym('perl6', '@END_PHASERS');
-        @END.push(-> { self.dump_profile_data($prof_end_sub(), $kind, $filename) })
+        @END.push(-> { self.dump_profile_data($prof_end_sub(), $kind, $filename, %options) })
             if nqp::defined(@END);
 
         self.ensure_prof_routines();
@@ -61,32 +84,34 @@ class HLL::Backend::MoarVM {
             unless nqp::defined($filename) {
                 $filename := 'heap-snapshot-' ~ nqp::time_n();
             }
-            $prof_start_sub(nqp::hash('kind', $kind, 'path', $filename));
-        } else {
-            $prof_start_sub(nqp::hash('kind', $kind));
+            nqp::bindkey(%options, 'path', $filename);
         }
+
+        nqp::bindkey(%options, 'kind', $kind);
+
+        $prof_start_sub(%options);
 
         my $res  := $what();
         unless nqp::defined(@END) {
             my $data := $prof_end_sub();
-            self.dump_profile_data($data, $kind, $filename);
+            self.dump_profile_data($data, $kind, $filename, %options);
         }
         $res;
     }
 
-    method dump_profile_data($data, $kind, $filename) {
+    method dump_profile_data($data, $kind, $filename, %options) {
         if $kind eq 'instrumented' {
-            self.dump_instrumented_profile_data($data, $filename);
+            self.dump_instrumented_profile_data($data, $filename, %options);
         }
         elsif $kind eq 'heap' {
-            self.dump_heap_profile_data($data, $filename);
+            self.dump_heap_profile_data($data, $filename, %options);
         }
         else {
             nqp::die("Don't know how to dump data for $kind profile");
         }
     }
 
-    method dump_instrumented_profile_data($data, $filename) {
+    method dump_instrumented_profile_data($data, $filename, %options) {
         my @pieces := nqp::list_s();
 
         unless nqp::defined($filename) {
@@ -410,7 +435,7 @@ class HLL::Backend::MoarVM {
         $profile_fh.close;
     }
 
-    method dump_heap_profile_data($data, $filename) {
+    method dump_heap_profile_data($data, $filename, %options) {
         note("Heap snapshot written to $filename");
     }
 
