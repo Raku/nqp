@@ -67,12 +67,9 @@ class HLL::Backend::MoarVM {
                     $k := $kind;
                     $v := "1";
                 }
-                note("option key: $k - value: $v");
                 nqp::bindkey(%options, $k, $v);
             }
         }
-
-        note("running a profile of $kind");
 
         my @END := nqp::gethllsym('perl6', '@END_PHASERS');
         @END.push(-> { self.dump_profile_data($prof_end_sub(), $kind, $filename, %options) })
