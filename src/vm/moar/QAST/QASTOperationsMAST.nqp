@@ -2000,6 +2000,25 @@ my %const_map := nqp::hash(
     'NORMALIZE_NFD',             2,
     'NORMALIZE_NFKC',            3,
     'NORMALIZE_NFKD',            4,
+
+    'RUSAGE_UTIME_SEC',          0,
+    'RUSAGE_UTIME_MSEC',         1,
+    'RUSAGE_STIME_SEC',          2,
+    'RUSAGE_STIME_MSEC',         3,
+    'RUSAGE_MAXRSS',             4,
+    'RUSAGE_IXRSS',              5,
+    'RUSAGE_IDRSS',              6,
+    'RUSAGE_ISRSS',              7,
+    'RUSAGE_MINFLT',             8,
+    'RUSAGE_MAJFLT',             9,
+    'RUSAGE_NSWAP',              10,
+    'RUSAGE_INBLOCK',            11,
+    'RUSAGE_OUBLOCK',            12,
+    'RUSAGE_MSGSND',             13,
+    'RUSAGE_MSGRCV',             14,
+    'RUSAGE_NSIGNALS',           15,
+    'RUSAGE_NVCSW',              16,
+    'RUSAGE_NIVCSW',             17,
 );
 QAST::MASTOperations.add_core_op('const', -> $qastcomp, $op {
     if nqp::existskey(%const_map, $op.name) {
@@ -2826,6 +2845,7 @@ QAST::MASTOperations.add_core_moarop_mapping('rand_i', 'rand_i');
 QAST::MASTOperations.add_core_moarop_mapping('rand_n', 'randscale_n');
 QAST::MASTOperations.add_core_moarop_mapping('srand', 'srand', 0);
 QAST::MASTOperations.add_core_moarop_mapping('execname', 'execname');
+QAST::MASTOperations.add_core_moarop_mapping('getrusage', 'getrusage');
 
 # thread related opcodes
 QAST::MASTOperations.add_core_moarop_mapping('newthread', 'newthread');
