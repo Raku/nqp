@@ -2865,6 +2865,7 @@ QAST::MASTOperations.add_core_moarop_mapping('semtryacquire', 'semtryacquire');
 QAST::MASTOperations.add_core_moarop_mapping('semrelease', 'semrelease');
 QAST::MASTOperations.add_core_moarop_mapping('queuepoll', 'queuepoll');
 QAST::MASTOperations.add_core_moarop_mapping('cpucores', 'cpucores');
+QAST::MASTOperations.add_core_moarop_mapping('threadlockcount', 'threadlockcount');
 
 # asynchrony related ops
 QAST::MASTOperations.add_core_moarop_mapping('timer', 'timer');
