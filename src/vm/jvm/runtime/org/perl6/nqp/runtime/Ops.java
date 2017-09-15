@@ -5500,6 +5500,14 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc, "threadid requires an operand with REPR VMThread");
     }
 
+    public static long threadlockcount(SixModelObject thread, ThreadContext tc) {
+        if (thread instanceof VMThreadInstance)
+            return ((VMThreadInstance)thread).lockCount;
+        else
+            throw ExceptionHandling.dieInternal(tc,
+                "threadlockcount requires an operand with REPR VMThread");
+    }
+
     public static long threadyield(ThreadContext tc) {
         Thread.yield();
         return 0;
@@ -5520,18 +5528,24 @@ public final class Ops {
     }
 
     public static SixModelObject lock(SixModelObject lock, ThreadContext tc) {
-        if (lock instanceof ReentrantMutexInstance)
+        if (lock instanceof ReentrantMutexInstance) {
             ((ReentrantMutexInstance)lock).lock.lock();
-        else
+            ((VMThreadInstance)currentthread(tc)).lockCount++;
+        }
+        else {
             throw ExceptionHandling.dieInternal(tc, "lock requires an operand with REPR ReentrantMutex");
+        }
         return lock;
     }
 
     public static SixModelObject unlock(SixModelObject lock, ThreadContext tc) {
-        if (lock instanceof ReentrantMutexInstance)
+        if (lock instanceof ReentrantMutexInstance) {
             ((ReentrantMutexInstance)lock).lock.unlock();
-        else
+            ((VMThreadInstance)currentthread(tc)).lockCount++;
+        }
+        else {
             throw ExceptionHandling.dieInternal(tc, "unlock requires an operand with REPR ReentrantMutex");
+        }
         return lock;
     }
 

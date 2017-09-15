@@ -5,5 +5,6 @@ import java.lang.Thread;
 import org.perl6.nqp.sixmodel.SixModelObject;
 
 public class VMThreadInstance extends SixModelObject {
-	public Thread thread;
+    public Thread thread;
+    public long lockCount = 0;
 }
