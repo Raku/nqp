@@ -5541,7 +5541,7 @@ public final class Ops {
     public static SixModelObject unlock(SixModelObject lock, ThreadContext tc) {
         if (lock instanceof ReentrantMutexInstance) {
             ((ReentrantMutexInstance)lock).lock.unlock();
-            ((VMThreadInstance)currentthread(tc)).lockCount++;
+            ((VMThreadInstance)currentthread(tc)).lockCount--;
         }
         else {
             throw ExceptionHandling.dieInternal(tc, "unlock requires an operand with REPR ReentrantMutex");
