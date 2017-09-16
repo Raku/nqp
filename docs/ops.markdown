@@ -25,6 +25,7 @@
   * [neginf](#neginf)
   * [pow](#pow)
   * [rand](#rand)
+  * [srand](#srand)
   * [sqrt](#sqrt)
 - [Trigonometric Opcodes](#-trigonometric-opcodes)
   * [asec](#asec)
@@ -547,6 +548,13 @@ and of type `$type_bigint` for positive exponents.
 Returns a psuedo-random bigint up to the value of the
 given number.
 `_I` variant returns an object of the given type.
+
+## srand
+* `srand(num $n)`
+
+Sets and returns seed number for `nqp::rand_*` variants. Decimal numbers will be silently
+truncated, `nqp::srand(1)` and `nqp::srand(1.1)` are the same so always pass `nqp::srand`
+an integer.
 
 ## sqrt
 * `sqrt_n(num $l, num $r)`
