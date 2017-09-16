@@ -1,7 +1,7 @@
 #! nqp
 use nqpmo;
 
-plan(122);
+plan(123);
 
 my $knowhow := nqp::knowhow();
 my $bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
@@ -130,6 +130,8 @@ ok(nqp::decont_i($box_val_3) == 7, 'can unbox box_target bigint using decont_i')
 my $big := nqp::pow_I($c, box(42), $n_type, $bi_type);
 is(str($big), '5970554685064519004265641008828923248442340700473500698131071806779372733915289638628729', 'pow (int, positive)');
 ok(iseq(nqp::pow_I(box(0), $big, $n_type, $bi_type), 0), 'pow 0 ** large_number');
+
+ok(iseq(nqp::pow_I(box(0), box(0), $n_type, $bi_type), 1), 'pow 0 ** 0');
 
 my $big_even := nqp::fromstr_I('597055468506451900426564100882892324844234070047350069813107180677937273391528963862870004', $bi_boxer);
 my $big_odd := nqp::fromstr_I('597055468506451900426564100882892324844234070047350069813107180677937273391528963862870003', $bi_boxer);
