@@ -5629,6 +5629,37 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc, "queuepoll requires an operand with REPR ConcBlockingQueue");
     }
 
+    /* Atomic operations. */
+
+    public static SixModelObject cas(SixModelObject cont, SixModelObject expected, SixModelObject value, ThreadContext tc) {
+        ContainerSpec cs = cont.st.ContainerSpec;
+        if (cs != null)
+            return cs.cas(tc, cont, decont(expected, tc), decont(value, tc));
+        else
+            throw ExceptionHandling.dieInternal(tc,
+                "Cannot atomic compare and swap to an immutable value");
+    }
+    public static SixModelObject atomicload(SixModelObject cont, ThreadContext tc) {
+        ContainerSpec cs = cont.st.ContainerSpec;
+        if (cs != null)
+            return cs.atomic_load(tc, cont);
+        else
+            throw ExceptionHandling.dieInternal(tc,
+                "Cannot atomic load from an immutable value");
+    }
+    public static SixModelObject atomicstore(SixModelObject cont, SixModelObject value, ThreadContext tc) {
+        ContainerSpec cs = cont.st.ContainerSpec;
+        if (cs != null) {
+            value = decont(value, tc);
+            cs.atomic_store(tc, cont, value);
+            return value;
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc,
+                "Cannot atomic store to an immutable value");
+        }
+    }
+
     /* Asynchronousy operations. */
 
     private static class AddToQueueTimerTask extends TimerTask implements IIOCancelable {

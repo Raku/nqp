@@ -1,5 +1,6 @@
 package org.perl6.nqp.sixmodel;
 import org.perl6.nqp.runtime.ThreadContext;
+import org.perl6.nqp.runtime.ExceptionHandling;
 
 /**
  * A scalar container has a ContainerSpec hung off its STable. It should be a
@@ -39,5 +40,21 @@ public abstract class ContainerSpec {
     /* Can the container store values. Usually yes, so default to true. */
     public boolean canStore(ThreadContext tc, SixModelObject cont) {
         return true;
+    }
+
+    /* Atomic reference operations; not supported by default. */
+    public SixModelObject cas(ThreadContext tc, SixModelObject cont,
+                              SixModelObject expected, SixModelObject value) {
+        throw ExceptionHandling.dieInternal(tc,
+            "This kind of container does not support atomic compare and swap");
+    }
+    public SixModelObject atomic_load(ThreadContext tc, SixModelObject cont) {
+        throw ExceptionHandling.dieInternal(tc,
+            "This kind of container does not support atomic load");
+    }
+    public void atomic_store(ThreadContext tc, SixModelObject cont,
+                             SixModelObject value) {
+        throw ExceptionHandling.dieInternal(tc,
+            "This kind of container does not support atomic store");
     }
 }
