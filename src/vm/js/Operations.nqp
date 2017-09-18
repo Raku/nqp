@@ -358,7 +358,7 @@ class QAST::OperationsJS {
 
     sub add_cmp_op($op, $type) {
         add_simple_op($op, $T_INT, [$type, $type], sub ($a, $b) {
-            "($a < $b ? -1 : ($a == $b ? 0 : 1))"
+            "($a < $b ? -1 : ($a > $b ? 1 : 0))"
         });
     }
 
