@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(327);
+plan(328);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -165,6 +165,7 @@ ok( nqp::isnull(nqp::null()) == 1, 'nqp::isnull/nqp::null' );
 ok( nqp::isnull("hello") == 0, '!nqp::isnull(string)' );
 ok( nqp::isnull(13232) == 0, 'nqp::isnull(number)' );
 
+ok( nqp::istrue(nqp::nan) == 1, 'nqp::istrue on NaN');
 ok( nqp::istrue(0) == 0, 'nqp::istrue');
 ok( nqp::istrue(1) == 1, 'nqp::istrue');
 ok( nqp::istrue('') == 0, 'nqp::istrue');
