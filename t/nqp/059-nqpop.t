@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(328);
+plan(330);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -97,6 +97,9 @@ is( nqp::join('|', @items), 'a| |l|i|t|t|l|e| |l|a|m|b', 'nqp::split("", ...)');
 ok( nqp::cmp_i(2, 0) ==  1, 'nqp::cmp_i');
 ok( nqp::cmp_i(2, 2) ==  0, 'nqp::cmp_i');
 ok( nqp::cmp_i(2, 5) == -1, 'nqp::cmp_i');
+
+ok( nqp::cmp_n(10, nqp::nan) ==  0, 'nqp::cmp_n with nan as left argument');
+ok( nqp::cmp_n(nqp::nan, 10) ==  0, 'nqp::cmp_n with nan as right argument');
 
 ok( nqp::cmp_n(2.5, 0.5) ==  1, 'nqp::cmp_n');
 ok( nqp::cmp_n(2.5, 2.5) ==  0, 'nqp::cmp_n');
