@@ -7,6 +7,9 @@ install:
   - appveyor-retry choco install strawberryperl --version 5.20.1.1 --allow-empty-checksums
   - SET PATH=C:\strawberry\c\bin;C:\strawberry\perl\site\bin;C:\strawberry\perl\bin;%PATH%
   - perl Configure.pl --prefix=%APPVEYOR_BUILD_FOLDER%\buildprefix --backend=moar --gen-moar
+  - echo running nmake
+  - nmake
+  - echo running nmake install
   - nmake install
   - echo nmake install finished
 
