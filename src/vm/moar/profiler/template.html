@@ -536,6 +536,9 @@
       <table class="table table-striped table-condensed table-bordered">
         <thead>
           <th>
+            <a href="" ng-click="reverse = predicate == 'StartTime' ? !reverse : false; predicate = 'StartTime';">Start Time</a>
+          </th>
+          <th>
             <a href="" ng-click="reverse = predicate == 'Run' ? !reverse : false; predicate = 'Run';">Run</a>
           </th>
           <th>Full</th>
@@ -551,6 +554,7 @@
         </thead>
         <tbody>
           <tr ng-repeat="gc in GCs | orderBy:predicate:reverse">
+            <td>{{gc.StartTime}}ms</td>
             <td><strong>{{gc.Run}}</strong></td>
             <td>
               <span class="text-success" ng-show="gc.Full">
@@ -1104,6 +1108,7 @@
             var totalBytes = gc.cleared_bytes + gc.retained_bytes + gc.promoted_bytes;
             return {
                 Run:               ++run,
+                StartTime:         +(gc.start_time / 1000).toFixed(2),
                 Time:              +(gc.time / 1000).toFixed(2),
                 Full:              (gc.full != 0),
                 TimePercent:       +(100 * gc.time / longestGC).toFixed(2),
