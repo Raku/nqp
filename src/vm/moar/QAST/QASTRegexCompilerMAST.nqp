@@ -316,6 +316,7 @@ class QAST::MASTRegexCompiler {
         my $altlabel_index := self.rxjump();
         my $altlabel := @!rxjumps[$altlabel_index];
         my @amast    := self.regex_mast(nqp::shift($iter));
+        self.regex_mark(@ins, $endlabel_index, %!reg<negone>, %!reg<zero>);
         while $iter {
             nqp::push(@ins, $altlabel);
             $altcount++;
@@ -323,6 +324,7 @@ class QAST::MASTRegexCompiler {
             $altlabel := @!rxjumps[$altlabel_index];
             self.regex_mark(@ins, $altlabel_index, %!reg<pos>, %!reg<zero>);
             merge_ins(@ins, @amast);
+            self.regex_commit(@ins, $endlabel_index) if $node.backtrack eq 'r';
             nqp::push(@ins, op('goto', $endlabel));
             @amast := self.regex_mast(nqp::shift($iter));
         }

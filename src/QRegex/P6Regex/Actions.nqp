@@ -113,7 +113,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         $qast := QAST::Regex.new(:rxtype<concat>, $qast, $sigfinal) if $sigfinal;
 
         if $qast {
-            $qast.backtrack('r') if !$qast.backtrack && (%*RX<r> || $<backmod> && ~$<backmod> eq ':');
+            $qast.backtrack('r') if !$qast.backtrack && nqp::if($<backmod>, (~$<backmod> eq ':'), %*RX<r>);
             $qast.node($/);
         }
         make $qast;
