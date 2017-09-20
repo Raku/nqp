@@ -309,7 +309,7 @@ class HLL::Backend::MoarVM {
                 elsif $k eq 'gcs' {
                     for $v -> $gc {
                         my @g := nqp::list_s();
-                        for <time retained_bytes promoted_bytes gen2_roots full cleared_bytes> -> $f {
+                        for <time retained_bytes promoted_bytes gen2_roots full cleared_bytes start_time> -> $f {
                             nqp::push_s(@g, ~($gc{$f} // '0'));
                         }
                         $profile_fh.say('INSERT INTO gcs VALUES (' ~ nqp::join(',', @g) ~ ');');
@@ -391,7 +391,7 @@ class HLL::Backend::MoarVM {
             $profile_fh.say('CREATE TABLE types(id INTEGER PRIMARY KEY ASC, name TEXT);');
             $profile_fh.say('CREATE TABLE routines(id INTEGER PRIMARY KEY ASC, name TEXT, line INT, file TEXT);');
             $profile_fh.say('CREATE TABLE profile(total_time INT, spesh_time INT);');
-            $profile_fh.say('CREATE TABLE gcs(time INT, retained_bytes INT, promoted_bytes INT, gen2_roots INT, full INT, cleared_bytes INT);');
+            $profile_fh.say('CREATE TABLE gcs(time INT, retained_bytes INT, promoted_bytes INT, gen2_roots INT, full INT, cleared_bytes INT, start_time INT);');
             $profile_fh.say('CREATE TABLE calls(id INTEGER PRIMARY KEY ASC, parent_id INT, routine_id INT, osr INT, spesh_entries INT, jit_entries INT, inlined_entries INT, inclusive_time INT, exclusive_time INT, entries INT, deopt_one INT, deopt_all INT, rec_depth INT, FOREIGN KEY(routine_id) REFERENCES routines(id));');
             $profile_fh.say('CREATE TABLE allocations(call_id INT, type_id INT, spesh INT, jit INT, count INT, PRIMARY KEY(call_id, type_id), FOREIGN KEY(call_id) REFERENCES calls(id), FOREIGN KEY(type_id) REFERENCES types(id));');
             to_sql($data);
