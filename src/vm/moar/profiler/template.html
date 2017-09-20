@@ -54,9 +54,10 @@
       <div ng-controller="OverviewController">
         <h3>Time Spent</h3>
         <p>The profiled code ran for <strong>{{TotalTime}}ms</strong>. Of this,
-          <strong>{{OverheadTime}}ms</strong> were spent on garbage collection
-          and dynamic optimization (that's <strong>{{OverheadTimePercent}}%</strong>).
+          <strong>{{GCOverheadTime}}ms</strong> were spent on garbage collection
+          (that's <strong>{{GCOverheadTimePercent}}%</strong>).
         </p>
+        <p>The dynamic optimizer was active for <strong>{{SpeshTimePercent}}%</strong> of the program's run time.
         <table class="table table-striped table-condensed table-bordered">
           <tbody>
             <tr>
@@ -783,17 +784,17 @@
         walkCallGraphNode(rawData[0].call_graph);
 
         // Time spent
-        var overheadTime            = speshTime + gcTime;
-        var executingTime           = totalTime - overheadTime;
-        $scope.TotalTime            = +(totalTime / 1000).toFixed(2);
-        $scope.OverheadTime         = +(overheadTime / 1000).toFixed(2);
-        $scope.OverheadTimePercent  = +(100 * overheadTime / totalTime).toFixed(2);
-        $scope.ExecutingTime        = +(executingTime / 1000).toFixed(2);
-        $scope.ExecutingTimePercent = +(100 * executingTime / totalTime).toFixed(2);
-        $scope.GCTime               = +(gcTime / 1000).toFixed(2);
-        $scope.GCTimePercent        = +(100 * gcTime / totalTime).toFixed(2);
-        $scope.SpeshTime            = +(speshTime / 1000).toFixed(2);
-        $scope.SpeshTimePercent     = +(100 * speshTime / totalTime).toFixed(2);
+        var overheadTime             = gcTime;
+        var executingTime            = totalTime - overheadTime;
+        $scope.TotalTime             = +(totalTime / 1000).toFixed(2);
+        $scope.GCOverheadTime        = +(overheadTime / 1000).toFixed(2);
+        $scope.GCOverheadTimePercent = +(100 * overheadTime / totalTime).toFixed(2);
+        $scope.ExecutingTime         = +(executingTime / 1000).toFixed(2);
+        $scope.ExecutingTimePercent  = +(100 * executingTime / totalTime).toFixed(2);
+        $scope.GCTime                = +(gcTime / 1000).toFixed(2);
+        $scope.GCTimePercent         = +(100 * gcTime / totalTime).toFixed(2);
+        $scope.SpeshTime             = +(speshTime / 1000).toFixed(2);
+        $scope.SpeshTimePercent      = +(100 * speshTime / totalTime).toFixed(2);
 
         // Routines
         var interpEntries           = totalEntries - (jitEntries + speshEntries);
