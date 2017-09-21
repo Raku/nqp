@@ -5761,13 +5761,10 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc, "setextype needs an object with VMException representation");
     }
     public static String getmessage(SixModelObject obj, ThreadContext tc) {
-        if (obj instanceof VMExceptionInstance) {
-            String msg = ((VMExceptionInstance)obj).message;
-            return msg == null ? "Died" : msg;
-        }
-        else {
+        if (obj instanceof VMExceptionInstance)
+            return ((VMExceptionInstance)obj).message;
+        else
             throw ExceptionHandling.dieInternal(tc, "getmessage needs an object with VMException representation");
-        }
     }
     public static String setmessage(SixModelObject obj, String msg, ThreadContext tc) {
         if (obj instanceof VMExceptionInstance) {
