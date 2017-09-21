@@ -1058,7 +1058,7 @@ class VMArray extends REPR {
 
       $$existspos(index) {
         if (index < 0) index += this.array.length;
-        return this.array.hasOwnProperty(index) ? 1 : 0;
+        return (this.array[index] === Null || this.array[index] === undefined) ? 0 : 1;
       }
 
       $$setelems(elems) {

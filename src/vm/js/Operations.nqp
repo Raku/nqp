@@ -920,7 +920,7 @@ class QAST::OperationsJS {
     add_simple_op('existskey', $T_BOOL, [$T_OBJ, $T_STR], :method_call);
     add_simple_op('deletekey', $T_OBJ, [$T_OBJ, $T_STR], :method_call, :side_effects);
 
-    add_simple_op('existspos', $T_BOOL, [$T_OBJ, $T_INT]);
+    add_simple_op('existspos', $T_BOOL, [$T_OBJ, $T_INT], :method_call);
 
     for <ceil floor abs log sqrt exp sin acos cos atan tan asin sinh cosh tanh> -> $func {
         add_simple_op($func ~ '_n', $T_NUM, [$T_NUM], sub ($arg) {"Math.$func($arg)"});

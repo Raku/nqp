@@ -191,12 +191,6 @@ exports.op.ishash = function(obj) {
   return obj instanceof Hash || (obj._STable && obj._STable.REPR instanceof reprs.VMHash) ? 1 : 0;
 };
 
-op.existspos = function(array, idx) {
-  if (array.$$existspos) return array.$$existspos(idx);
-  if (idx < 0) idx += array.length;
-  return array.hasOwnProperty(idx) ? 1 : 0;
-};
-
 op.create = function(obj) {
   return obj._STable.REPR.allocate(obj._STable);
 };
