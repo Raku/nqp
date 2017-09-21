@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(330);
+plan(331);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -232,6 +232,8 @@ ok(!nqp::existspos(@arr, -2), 'existspos with missing pos');
 ok(!nqp::existspos(@arr, -100), 'existspos with absurd values');
 @arr[1] := NQPMu;
 ok(nqp::existspos(@arr, 1), 'existspos with still existing pos');
+@arr[1] := nqp::null;
+ok(!nqp::existspos(@arr, 1), 'existspos is 0 for array elements containing null');
 
 sub test_splice_with_return() {
     my @children := [1, 2, 3];
