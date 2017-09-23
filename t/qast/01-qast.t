@@ -1,6 +1,6 @@
 use QAST;
 
-plan(164);
+plan(166);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -51,6 +51,20 @@ is_qast(
     ),
     6.9,
     'NVal node');
+
+is_qast(
+    QAST::Block.new(
+        QAST::NVal.new( :value(nqp::inf) )
+    ),
+    nqp::inf,
+    'NVal node with infinity as value');
+
+is_qast(
+    QAST::Block.new(
+        QAST::NVal.new( :value(nqp::neginf) )
+    ),
+    nqp::neginf,
+    'NVal node with negative infinity as value');
 
 is_qast(
     QAST::Block.new(
