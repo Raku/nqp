@@ -1,16 +1,22 @@
 class QAST::OperationsJS {
     my %ops;
+    my %hll_ops;
 
     my %inlinable;
 
     my %result_type;
 
-    sub add_op($op, $cb, :$inlinable = 1) {
-        %ops{$op} := $cb;
+    sub add_op($op, $cb, :$inlinable = 1, :$hll) {
+        if $hll {
+            %hll_ops{$hll} := nqp::hash() unless nqp::existskey(%hll_ops, $hll);
+            %hll_ops{$hll}{$op} := $cb;
+        } else {
+            %ops{$op} := $cb;
+        }
         %inlinable{$op} := $inlinable;
     }
 
-    sub op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx, :$decont, :$method_call, :$hll) {
+    sub op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx, :$decont, :$method_call, :$takes_hll) {
         my @exprs;
         my @setup;
 
@@ -36,7 +42,7 @@ class QAST::OperationsJS {
             $i := $i + 1;
         }
 
-        if $hll {
+        if $takes_hll {
             if $method_call {
                 nqp::splice(@exprs, 'HLL', 1, 0);
             } else {
@@ -67,13 +73,13 @@ class QAST::OperationsJS {
         }
     }
 
-    sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op), :$side_effects, :$ctx, :$inlinable = 1, :$decont, :$method_call, :$hll) {
+    sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op), :$side_effects, :$ctx, :$inlinable = 1, :$decont, :$method_call, :$takes_hll, :$hll) {
 
         add_op($op, sub ($comp, $node, :$want) {
             my $gen_code := $method_call ?? method_call($op) !! $cb;
-            my $chunk := op_template($comp, $node, $return_type, @argument_types, $gen_code, :$ctx, :$decont, :$method_call, :$hll);
+            my $chunk := op_template($comp, $node, $return_type, @argument_types, $gen_code, :$ctx, :$decont, :$method_call, :$takes_hll);
             $side_effects ?? $comp.stored_result($chunk, :$want) !! $chunk;
-        }, :$inlinable);
+        }, :$inlinable, :$hll);
 
         set_op_result_type($op, $return_type);
     }
@@ -128,12 +134,12 @@ class QAST::OperationsJS {
 
     # The code being compiled has access to this class as "nqp::getcomp('QAST').operations".
     # We expose &add_op as a method so that it can call it.
-    method add_op($op, $cb, :$inlinable = 1) {
-        add_op($op, $cb, :$inlinable);
+    method add_op(*@args, *%args) {
+        add_op(|@args, |%args);
     }
 
-    method add_simple_op(*@args, *%args, :$inlinable) {
-        add_simple_op(|@args, |%args, :$inlinable);
+    method add_simple_op(*@args, *%args) {
+        add_simple_op(|@args, |%args);
     }
 
     method OBJ() { $T_OBJ }
@@ -341,8 +347,8 @@ class QAST::OperationsJS {
     }
 
     for ['_i', '_n', '_s'] -> $suffix {
-        add_simple_op('getattrref' ~ $suffix, $T_OBJ, [$T_OBJ, $T_OBJ, $T_STR], :hll);
-        add_simple_op('atposref' ~ $suffix, $T_OBJ, [$T_OBJ, $T_INT], :hll);
+        add_simple_op('getattrref' ~ $suffix, $T_OBJ, [$T_OBJ, $T_OBJ, $T_STR], :takes_hll);
+        add_simple_op('atposref' ~ $suffix, $T_OBJ, [$T_OBJ, $T_INT], :takes_hll);
     }
 
     add_simple_op('attrinited', $T_INT, [$T_OBJ, $T_OBJ, $T_STR], :decont(1), :method_call);
@@ -644,7 +650,7 @@ class QAST::OperationsJS {
     add_simple_op('serialize', $T_STR, [$T_OBJ, $T_OBJ], :side_effects);
     add_simple_op('scobjcount', $T_INT, [$T_OBJ]);
     add_simple_op('createsc', $T_OBJ, [$T_STR], :side_effects);
-    add_simple_op('deserialize', $T_OBJ, [$T_STR, $T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ], :side_effects, :hll);
+    add_simple_op('deserialize', $T_OBJ, [$T_STR, $T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ], :side_effects, :takes_hll);
     add_simple_op('scsetobj', $T_OBJ, [$T_OBJ, $T_INT, $T_OBJ], :side_effects);
     add_simple_op('scgetobj', $T_OBJ, [$T_OBJ, $T_INT], :side_effects);
     add_simple_op('scsetcode', $T_OBJ, [$T_OBJ, $T_INT, $T_OBJ], :side_effects);
@@ -832,15 +838,15 @@ class QAST::OperationsJS {
 
     add_simple_op('newexception', $T_OBJ, [], :side_effects);
 
-    add_simple_op('backtracestrings', $T_OBJ, [$T_OBJ], :hll);
-    add_simple_op('backtrace', $T_OBJ, [$T_OBJ], :hll);
+    add_simple_op('backtracestrings', $T_OBJ, [$T_OBJ], :takes_hll);
+    add_simple_op('backtrace', $T_OBJ, [$T_OBJ], :takes_hll);
 
     add_simple_op('findmethod', $T_OBJ, [$T_OBJ, $T_STR], :side_effects, :decont(0), :ctx);
     add_simple_op('can', $T_INT, [$T_OBJ, $T_STR], :side_effects, :decont(0), :ctx, :method_call);
 
     add_simple_op('istype', $T_INT, [$T_OBJ, $T_OBJ], :side_effects, :ctx, :decont(0, 1), :method_call);
 
-    add_simple_op('split', $T_OBJ, [$T_STR, $T_STR], :hll);
+    add_simple_op('split', $T_OBJ, [$T_STR, $T_STR], :takes_hll);
 
     add_simple_op('ctxlexpad', :!inlinable, $T_OBJ, [$T_OBJ]);
     add_simple_op('lexprimspec', $T_INT, [$T_OBJ, $T_STR]);
@@ -938,7 +944,7 @@ class QAST::OperationsJS {
     add_simple_op('srand', $T_INT, [$T_INT], :side_effects);
     add_simple_op('rand_n', $T_NUM, [$T_NUM]);
 
-    add_simple_op('radix', $T_OBJ, [$T_INT, $T_STR, $T_INT, $T_INT], :hll);
+    add_simple_op('radix', $T_OBJ, [$T_INT, $T_STR, $T_INT, $T_INT], :takes_hll);
 
     add_simple_op('stat', $T_INT, [$T_STR, $T_INT], :side_effects);
     add_simple_op('stat_time', $T_NUM, [$T_STR, $T_INT], :side_effects);
@@ -1479,11 +1485,11 @@ class QAST::OperationsJS {
     add_simple_op('captureexistsnamed', $T_INT, [$T_OBJ, $T_STR]);
     add_simple_op('capturehasnameds', $T_INT, [$T_OBJ]);
     add_simple_op('captureposelems', $T_INT, [$T_OBJ]);
-    add_simple_op('captureposarg', $T_OBJ, [$T_OBJ, $T_INT], :hll);
+    add_simple_op('captureposarg', $T_OBJ, [$T_OBJ, $T_INT], :takes_hll);
     add_simple_op('captureposarg_s', $T_STR, [$T_OBJ, $T_INT]);
     add_simple_op('captureposarg_n', $T_NUM, [$T_OBJ, $T_INT]);
     add_simple_op('captureposarg_i', $T_INT, [$T_OBJ, $T_INT]);
-    add_simple_op('capturenamedshash', $T_OBJ, [$T_OBJ], :hll);
+    add_simple_op('capturenamedshash', $T_OBJ, [$T_OBJ], :takes_hll);
 
     add_simple_op('captureposprimspec', $T_INT, [$T_OBJ, $T_INT]);
 
@@ -1569,7 +1575,7 @@ class QAST::OperationsJS {
     add_simple_op('tonum_I', $T_NUM, [$T_OBJ]);
     add_simple_op('fromnum_I', $T_OBJ, [$T_NUM, $T_OBJ]);
 
-    add_simple_op('radix_I', $T_OBJ, [$T_INT, $T_STR, $T_INT, $T_INT, $T_OBJ], :hll);
+    add_simple_op('radix_I', $T_OBJ, [$T_INT, $T_STR, $T_INT, $T_INT, $T_OBJ], :takes_hll);
 
     add_simple_op('curcode', :!inlinable, $T_OBJ, [], sub () {"$*CTX.codeRef()"});
     add_simple_op('callercode', :!inlinable, $T_OBJ, [], sub () {"caller_ctx.codeRef()"});
@@ -1594,9 +1600,12 @@ class QAST::OperationsJS {
     add_simple_op('compunitcodes', $T_OBJ, [$T_OBJ]);
     add_simple_op('compunitmainline', $T_OBJ, [$T_OBJ]);
 
-    method compile_op($comp, $op, :$want) {
+    method compile_op($comp, $op, $hll, :$want) {
         my str $name := $op.op;
-        if nqp::existskey(%ops, $name) {
+        if nqp::existskey(%hll_ops, $hll) && nqp::existskey(%hll_ops{$hll}, $name) {
+            %hll_ops{$hll}{$name}($comp, $op, :$want);
+        }
+        elsif nqp::existskey(%ops, $name) {
             %ops{$name}($comp, $op, :$want);
         }
         else {

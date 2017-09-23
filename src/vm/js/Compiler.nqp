@@ -1279,7 +1279,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     multi method as_js(QAST::Op $node, :$want) {
-        QAST::OperationsJS.compile_op(self, $node, :$want);
+        QAST::OperationsJS.compile_op(self, $node, $*HLL, :$want);
     }
 
     method set_static_info() {
