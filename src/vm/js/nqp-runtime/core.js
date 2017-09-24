@@ -394,16 +394,19 @@ op.iscont = function(cont) {
 };
 
 op.iscont_i = function(cont) {
+  if (cont.typeObject_) return 0;
   if (cont.$$iscont_i) return cont.$$iscont_i();
   return 0;
 };
 
 op.iscont_n = function(cont) {
+  if (cont.typeObject_) return 0;
   if (cont.$$iscont_n) return cont.$$iscont_n();
   return 0;
 };
 
 op.iscont_s = function(cont) {
+  if (cont.typeObject_) return 0;
   if (cont.$$iscont_s) {
     return cont.$$iscont_s();
   }
