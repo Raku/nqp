@@ -1,4 +1,4 @@
-plan(12);
+plan(24);
 
 class Foo {
     has int $!int;
@@ -52,6 +52,12 @@ $foo.set_str('hi');
 $foo.set_num(3.14);
 
 my $int_ref := nqp::getattrref_i($foo, Foo, '$!int');
+
+ok(nqp::iscont_i($int_ref), 'nqp::iscont_i on int attribute ref instance');
+ok(!nqp::iscont_n($int_ref), 'nqp::iscont_n on int attribute ref instance');
+ok(!nqp::iscont_s($int_ref), 'nqp::iscont_s on int attribute ref instance');
+ok(!nqp::iscont_i(%hllconfig<int_attr_ref>), 'nqp::iscont_i on int arribute ref type object');
+
 is(nqp::decont_i($int_ref), 100, 'nqp::decont_i on result of nqp::getattrref_i works');
 nqp::assign_i($int_ref, 200);
 is($foo.get_int, 200, 'nqp::assign_i on result of nqp::getattrref_i works');
@@ -61,10 +67,20 @@ is(nqp::decont_n($num_ref), 3.14, 'nqp::decont_n on result of nqp::getattrref_n 
 nqp::assign_n($num_ref, 0.123);
 is($foo.get_num, 0.123, 'nqp::assign_n on result of nqp::getattrref_n works');
 
+ok(!nqp::iscont_i($num_ref), 'nqp::iscont_i on num attribute ref instance');
+ok(nqp::iscont_n($num_ref), 'nqp::iscont_n on num attribute ref instance');
+ok(!nqp::iscont_s($num_ref), 'nqp::iscont_s on num attribute ref instance');
+ok(!nqp::iscont_n(%hllconfig<num_attr_ref>), 'nqp::iscont_n on num arribute ref type object');
+
 my $str_ref := nqp::getattrref_s($foo, Foo, '$!str');
 is(nqp::decont_s($str_ref), 'hi', 'nqp::decont_s on result of nqp::getattrref_s works');
 nqp::assign_s($str_ref, 'hello');
 is($foo.get_str, 'hello', 'nqp::assign_s on result of nqp::getattrref_s works');
+
+ok(!nqp::iscont_i($str_ref), 'nqp::iscont_i on str attribute ref instance');
+ok(!nqp::iscont_n($str_ref), 'nqp::iscont_n on str attribute ref instance');
+ok(nqp::iscont_s($str_ref), 'nqp::iscont_s on str attribute ref instance');
+ok(!nqp::iscont_s(%hllconfig<str_attr_ref>), 'nqp::iscont_s on str arribute ref type object');
 
 my $array_i := nqp::list_i();
 nqp::bindpos_i($array_i, 2, 100);
