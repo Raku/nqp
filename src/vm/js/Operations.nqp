@@ -444,7 +444,8 @@ class QAST::OperationsJS {
 
     add_simple_op('flip', $T_STR, [$T_STR], sub ($string) {"$string.split('').reverse().join('')"});
 
-    add_simple_op('ord', $T_INT, [$T_STR, $T_INT], sub ($string, $pos='0') {"$string.charCodeAt($pos)"});
+    #TODO: make the offset be something better then a UTF16 offset
+    add_simple_op('ord', $T_INT, [$T_STR, $T_INT], sub ($string, $pos='0') {"$string.codePointAt($pos)"});
     %ops<ordat> := %ops<ord>;
 
     add_simple_op('ordbaseat', $T_INT, [$T_STR, $T_INT]);
