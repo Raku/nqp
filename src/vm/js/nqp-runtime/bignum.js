@@ -43,11 +43,12 @@ op.base_I = function(n, base) {
 
   if (base == 16 || base == 10) {
     return orig.toString(base).toUpperCase().replace(/^(-?)0+/, '$1');
-  } else if (base < 16 && base > 1) {
+  } else if (1 < base && base <= 36) {
     var orig = getBI(n);
     var num = orig.abs();
     var string = '';
-    var letters = '0123456789ABCDEF';
+    var letters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
     while (num.gt(0)) {
       string = letters[num.mod(base).toNumber()] + string;
       num = num.div(base);
