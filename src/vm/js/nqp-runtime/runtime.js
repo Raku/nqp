@@ -380,6 +380,14 @@ Number.prototype.$$isrwcont = function(ctx) {
   return 0;
 };
 
+Number.prototype.$$getNum = function() {
+  return this;
+};
+
+Number.prototype.$$getInt = function() {
+  return this;
+};
+
 String.prototype.$$decont = function(ctx) {
   return this;
 };

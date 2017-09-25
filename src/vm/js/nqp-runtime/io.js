@@ -21,6 +21,8 @@ var nqp = require('nqp-runtime');
 
 const Null = require('./null.js');
 
+const NQPInt = require('./nqp-int.js');
+
 function boolish(bool) {
   return bool ? 1 : 0;
 }
@@ -513,17 +515,17 @@ op.spawnprocasync = function(ctx, queue, args, cwd, env, config) {
   if (str_box === undefined) str_box = Null;
 
   if (config.content.get('stdout_bytes')) {
-    config.content.get('stdout_bytes').$$call(ctx, null, 0, wrapBuffer(result.output[1], config.content.get('buf_type')), str_box);
-    config.content.get('stdout_bytes').$$call(ctx, null, 1, str_box, str_box);
+    config.content.get('stdout_bytes').$$call(ctx, null, new NQPInt(0), wrapBuffer(result.output[1], config.content.get('buf_type')), str_box);
+    config.content.get('stdout_bytes').$$call(ctx, null, new NQPInt(1), str_box, str_box);
   }
 
   if (config.content.get('stderr_bytes')) {
-    config.content.get('stderr_bytes').$$call(ctx, null, 0, wrapBuffer(result.output[2], config.content.get('buf_type')), str_box);
-    config.content.get('stderr_bytes').$$call(ctx, null, 1, str_box, str_box);
+    config.content.get('stderr_bytes').$$call(ctx, null, new NQPInt(0), wrapBuffer(result.output[2], config.content.get('buf_type')), str_box);
+    config.content.get('stderr_bytes').$$call(ctx, null, new NQPInt(1), str_box, str_box);
   }
 
   if (config.content.get('done')) {
-    config.content.get('done').$$call(ctx, null, result.status << 8);
+    config.content.get('done').$$call(ctx, null, new NQPInt(result.status << 8));
   }
 };
 

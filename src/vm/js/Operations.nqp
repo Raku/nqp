@@ -6,6 +6,8 @@ class QAST::OperationsJS {
 
     my %result_type;
 
+    my %hll_unbox;
+
     sub add_op($op, $cb, :$inlinable = 1, :$hll) {
         if $hll {
             %hll_ops{$hll} := nqp::hash() unless nqp::existskey(%hll_ops, $hll);
@@ -1717,5 +1719,23 @@ class QAST::OperationsJS {
     add_simple_op('matchuniprop', $T_INT, [$T_INT, $T_INT, $T_INT]);
     add_simple_op('unipvalcode', $T_INT, [$T_INT, $T_STR]);
     add_simple_op('getuniname', $T_STR, [$T_INT]);
+
+    method add_hll_unbox($hll, $type, $method_name) {
+        unless nqp::existskey(%hll_unbox, $hll) {
+            %hll_unbox{$hll} := nqp::hash();
+        }
+        %hll_unbox{$hll}{$type} := $method_name;
+    }
+
+    method unbox($hll, $desired, $chunk) {
+        if nqp::existskey(%hll_unbox, $hll) && nqp::existskey(%hll_unbox{$hll}, $desired) {
+            return Chunk.new($desired, '(' ~ $chunk.expr ~ ").\$\${%hll_unbox{$hll}{$desired}}()", $chunk);
+        }
+        my %convert;
+        %convert{$T_STR} := 'toStr';
+        %convert{$T_NUM} := 'toNum';
+        %convert{$T_INT} := 'toInt';
+        return Chunk.new($desired, 'nqp.' ~ %convert{$desired} ~ '(' ~ $chunk.expr ~ ", {$*CTX})", $chunk);
+    }
 }
 

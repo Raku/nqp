@@ -104,6 +104,10 @@ class NativeRef {
           return this.get();
         }
 
+        $$getInt() {
+          return this.get();
+        }
+
         $$decont(ctx, value) {
           var hll = STable.hllOwner;
           if (hll === undefined) {
@@ -141,6 +145,10 @@ class NativeRef {
         }
 
         $$decont_n(ctx, value) {
+          return this.get();
+        }
+
+        $$getNum() {
           return this.get();
         }
 
@@ -185,6 +193,10 @@ class NativeRef {
         }
 
         $$decont_s(ctx, value) {
+          return this.get();
+        }
+
+        $$getStr() {
           return this.get();
         }
 
