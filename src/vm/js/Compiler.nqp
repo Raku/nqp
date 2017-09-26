@@ -418,7 +418,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 my int $type := self.type_from_typeobj($param.returns);
                 my $suffix := self.suffix_from_type($type);
                 my sub unpack($value) {
-                    "nqp.arg$suffix({$type == $T_OBJ ?? 'HLL' !! $*CTX}, $value)";
+                    if $type == $T_INT8 || $type == $T_INT16 {
+                        self.int_to_fancy_int($type, "nqp.arg_i($*CTX, $value)");
+                    }
+                    else {
+                        "nqp.arg$suffix({$type == $T_OBJ ?? 'HLL' !! $*CTX}, $value)";
+                    }
                 }
                 if $param.named {
 
@@ -497,8 +502,26 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         Chunk.new($T_NONVAL, nqp::join(',', @sig), @setup);
     }
 
+    #= Convert a 32bit integer which is a result of js expr $expr into integer type $type for storage
+    method int_to_fancy_int(int $type, str $expr) {
+        my int $shift := 32 - self.bits($type);
+        "($expr << $shift >> $shift)";
+    }
+
+    method bits(int $type) {
+        if $type == $T_INT8 {
+            8
+        } elsif $type == $T_INT16 {
+            16
+        } else {
+            nqp::die("We can't determine the number of bits for $type");
+        }
+    }
+
     method coerce(Chunk $chunk, $desired) {
         my int $got := $chunk.type;
+        my int $got_int := $got == $T_INT || $got == $T_INT16 || $got == $T_INT8;
+
         if $got != $desired {
             if $desired == $T_VOID {
                 return Chunk.new($T_VOID, "", $chunk.setup);
@@ -511,7 +534,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 if $got == $T_BOOL {
                     return Chunk.new($T_CALL_ARG, "new nqp.NativeIntArg({$chunk.expr} ? 1 : 0)", $chunk);
                 }
-                if $got == $T_INT {
+                if $got_int {
                     return Chunk.new($T_CALL_ARG, "new nqp.NativeIntArg({$chunk.expr})", $chunk);
                 }
                 if $got == $T_NUM {
@@ -523,7 +546,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
 
             if $desired == $T_NUM {
-                if $got == $T_INT {
+                if $got_int {
                     # we store both as a javascript number, and 32bit integers fit into doubles
                     return Chunk.new($T_NUM, $chunk.expr, $chunk);
                 }
@@ -545,6 +568,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 if $got == $T_BOOL {
                     return Chunk.new($T_INT, "({$chunk.expr} ? 1 : 0)", $chunk);
                 }
+                if $got_int {
+                    return Chunk.new($T_INT, $chunk.expr, $chunk);
+                }
             }
 
             if $got == $T_OBJ {
@@ -556,7 +582,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
 
             if $desired == $T_STR {
-                if $got == $T_INT {
+                if $got_int {
                     return Chunk.new($T_STR, $chunk.expr ~ '.toString()', $chunk);
                 }
                 elsif $got == $T_NUM {
@@ -588,6 +614,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 else {
                     my %convert;
                     %convert{$T_INT} := 'intToObj';
+                    %convert{$T_INT8} := 'intToObj';
+                    %convert{$T_INT16} := 'intToObj';
                     %convert{$T_NUM} := 'numToObj';
                     %convert{$T_STR} := 'strToObj';
                     return Chunk.new($T_OBJ, "nqp.{%convert{$got}}(HLL, {$chunk.expr})", $chunk);
@@ -595,7 +623,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
 
             if $desired == $T_BOOL {
-                if $got == $T_INT {
+                if $got_int {
                     return Chunk.new($T_BOOL, $chunk.expr, $chunk);
                 } elsif $got == $T_NUM {
                     return Chunk.new($T_BOOL, "({$chunk.expr} !== 0)", $chunk);
@@ -604,6 +632,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 }
             }
 
+            if $desired == $T_INT8 || $desired == $T_INT16 {
+                my $int_chunk := $got == $T_INT ?? $chunk !! self.coerce($chunk, $T_INT);
+                return Chunk.new($T_INT16, self.int_to_fancy_int($desired, $int_chunk.expr) , $int_chunk);
+            }
 
             return Chunk.new($desired, "nqp.coercion($got, $desired, {$chunk.expr})") #TODO
         }
@@ -1432,7 +1464,21 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     my @types := [$T_OBJ, $T_INT, $T_NUM, $T_STR];
     method type_from_typeobj($typeobj) {
-        @types[nqp::objprimspec($typeobj)];
+        my int $type := nqp::objprimspec($typeobj);
+        if $type == 1 {
+            my int $bits := nqp::objprimbits($typeobj);
+            if $bits == 8 {
+                $T_INT8;
+            }
+            elsif $bits == 16 {
+                $T_INT16;
+            }
+            else {
+                $T_INT;
+            }
+        } else {
+          @types[$type];
+        }
     }
 
     my @suffix := ['', '_i', '_n', '_s'];
@@ -1536,7 +1582,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         Chunk.void($check, "if (!{$check.expr}) return nqp.paramcheckfailed(HLL, $*CTX, Array.prototype.slice.call(arguments));\n");
     }
 
-    my %default_value := nqp::hash($T_OBJ, 'nqp.Null', $T_INT, '0', $T_NUM, '0', $T_STR, 'nqp.null_s');
+    my %default_value := nqp::hash($T_OBJ, 'nqp.Null', $T_INT, '0', $T_NUM, '0', $T_STR, 'nqp.null_s', $T_INT16, '0', $T_INT8, '0');
 
     method declare_var(QAST::Var $node) {
         my int $type := self.type_from_typeobj($node.returns);
@@ -1827,9 +1873,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     if $type == $T_OBJ {
                         nqp::die('Cannot take a reference to a non-native lexical');
                     }
-                    my $suffix := self.suffix_from_type($type);
+
+                    my int $is_fancy_int := $type == $T_INT8 || $type == $T_INT16;
+                    my $suffix := $is_fancy_int ?? '_i' !! self.suffix_from_type($type);
                     my $get := self.get_var($var);
-                    my $set := self.set_var($var, 'value');
+                    my $set := self.set_var($var,
+                        $is_fancy_int ?? self.int_to_fancy_int($type, 'value') !! 'value');
+
                     Chunk.new($T_OBJ, "nqp.lexRef{$suffix}(HLL, function() \{return $get\}, function(value) \{$set\})", :node($var));
                 }
             }

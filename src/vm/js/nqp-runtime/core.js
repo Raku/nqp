@@ -797,6 +797,10 @@ op.objprimspec = function(obj) {
   }
 };
 
+op.objprimbits = function(type) {
+  return type._STable.REPR.bits;
+};
+
 /* Parametricity operations. */
 op.setparameterizer = function(ctx, type, parameterizer) {
   var st = type._STable;

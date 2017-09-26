@@ -854,6 +854,7 @@ class QAST::OperationsJS {
     add_simple_op('ctxlexpad', :!inlinable, $T_OBJ, [$T_OBJ]);
     add_simple_op('lexprimspec', $T_INT, [$T_OBJ, $T_STR]);
     add_simple_op('objprimspec', $T_INT, [$T_OBJ]);
+    add_simple_op('objprimbits', $T_INT, [$T_OBJ]);
 
     add_simple_op('ctxouter', :!inlinable, $T_OBJ, [$T_OBJ]);
 
