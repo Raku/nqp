@@ -876,6 +876,14 @@ op.lcm_i = function(a, b) {
   return (a * b) / op.gcd_i(a, b);
 };
 
+op.div_i = function(a, b) {
+  if (b == 0) {
+    throw new NQPException("Division by zero");
+  } else {
+    return Math.floor(a/b);
+  }
+};
+
 op.mod_n = function(a, b) {
   return a - Math.floor(a / b) * b;
 };
