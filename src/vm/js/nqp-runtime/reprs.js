@@ -1443,7 +1443,38 @@ class Semaphore extends REPR {
 };
 reprs.Semaphore = Semaphore;
 
-class ConcBlockingQueue extends REPR {};
+class ConcBlockingQueue extends REPR {
+  allocate(STable) {
+    var obj = new STable.ObjConstructor();
+    obj.data = [];
+    return obj;
+  }
+
+  setupSTable(STable) {
+    STable.addInternalMethods(class {
+      $$push(value) {
+        this.data.push(value);
+        return value;
+      }
+
+      $$shift(value) {
+        if (this.data.length === 0) {
+          console.log('shifting on an empty ConcBlockingQueue NYI');
+        }
+        return this.data.shift();
+      }
+
+      $$elems(value) {
+        return this.data.length;
+      }
+
+      $$atpos(index) {
+        return this.data[index];
+      }
+    });
+  }
+};
+
 reprs.ConcBlockingQueue = ConcBlockingQueue;
 
 const emptyBuffer = Buffer.allocUnsafe(0);
