@@ -498,7 +498,11 @@ op.spawnprocasync = function(ctx, queue, args, cwd, env, config) {
     shell: false,
     cwd: cwd,
     env: stringifyEnv(ctx, env),
-    stdio: [process.stdin, 'pipe', 'pipe'],
+    stdio: [
+      process.stdin,
+      config.content.get('stdout_bytes') ? 'pipe' : process.stdout,
+      config.content.get('stderr_bytes') ? 'pipe' : process.stderr,
+    ],
   };
 
   const stringified = stringifyArray(ctx, args);
