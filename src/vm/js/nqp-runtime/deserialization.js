@@ -768,7 +768,7 @@ class BinaryCursor {
     var callerCtx = null;
 
     // TODO - think if we should set codeObj
-    var ctx = new Ctx(outerCtx, callerCtx);
+    var ctx = new Ctx(callerCtx, outerCtx);
 
     for (var name in context.lexicals) {
       if (context.lexicals[name] === undefined) {
