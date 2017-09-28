@@ -98,6 +98,11 @@ for (let name in refs.helpers) {
   exports[name] = refs.helpers[name];
 }
 
+const coercions = require('./coercions');
+
+exports.strToNum = coercions.strToNum;
+exports.numToStr = coercions.numToStr;
+
 let libpath = [];
 exports.libpath = function(paths) {
   libpath = paths;
@@ -190,7 +195,7 @@ op.setdispatcherfor = function(dispatcher, dispatcherFor) {
 exports.toStr = function(arg_, ctx) {
   var arg = arg_.$$decont(ctx);
   if (typeof arg == 'number') {
-    return numToStr(arg);
+    return coercions.numToStr(arg);
   } else if (typeof arg == 'string') {
     return arg;
   } else if (arg === Null) {
@@ -214,29 +219,6 @@ exports.toStr = function(arg_, ctx) {
   }
 };
 
-function strToNum(str) {
-  if (str === 'NaN') return NaN;
-  if (str === 'Inf') return Infinity;
-  if (str === '-Inf') return -Infinity;
-  if (str === '+Inf') return Infinity;
-  let parsed = parseFloat(str);
-  if (isNaN(parsed)) {
-    return 0;
-  }
-  return parsed;
-}
-
-exports.strToNum = strToNum;
-
-function numToStr(num) {
-  if (num === Infinity) return 'Inf';
-  if (num === -Infinity) return '-Inf';
-  if (num === 0 && 1/num === -Infinity) return '-0';
-
-  return num.toString();
-}
-
-exports.numToStr = numToStr;
 
 exports.toNum = function(arg_, ctx) {
   let arg = arg_.$$decont(ctx);
@@ -245,7 +227,7 @@ exports.toNum = function(arg_, ctx) {
   } else if (arg === Null) {
     return 0;
   } else if (typeof arg == 'string') {
-    return strToNum(arg);
+    return coercions.strToNum(arg);
   } else if (arg._STable && arg._STable.methodCache && arg._STable.methodCache.get('Num')) {
     var result = arg.Num(ctx, null, arg); // eslint-disable-line new-cap
     if (result.$$getNum) {

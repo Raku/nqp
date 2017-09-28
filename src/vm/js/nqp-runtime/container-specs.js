@@ -1,5 +1,7 @@
 'use strict';
 
+const coercions = require('./coercions');
+
 var NQPInt = require('./nqp-int.js');
 
 class CodePair {
@@ -108,6 +110,14 @@ class NativeRef {
           return this.get();
         }
 
+        $$getNum() {
+          return this.get();
+        }
+
+        $$getStr() {
+          return this.get().toString();
+        }
+
         $$decont(ctx, value) {
           var hll = STable.hllOwner;
           if (hll === undefined) {
@@ -148,8 +158,16 @@ class NativeRef {
           return this.get();
         }
 
+        $$getInt() {
+          return this.get()|0;
+        }
+
         $$getNum() {
           return this.get();
+        }
+
+        $$getStr() {
+          return this.get().toString();
         }
 
         $$decont(ctx, value) {
@@ -198,6 +216,14 @@ class NativeRef {
 
         $$getStr() {
           return this.get();
+        }
+
+        $$getInt() {
+          return coercions.strToInt(this.get());
+        }
+
+        $$getNum() {
+          return coercions.strToNum(this.get());
         }
 
         $$decont(ctx, value) {
