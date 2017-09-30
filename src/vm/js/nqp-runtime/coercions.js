@@ -21,5 +21,5 @@ exports.numToStr = function(num) {
 
 /* TODO - more error checking */
 exports.strToInt = function(str) {
-  return str.parseInt()|0;
+  return parseInt(str)|0;
 };
