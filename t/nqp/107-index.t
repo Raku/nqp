@@ -4,6 +4,7 @@ plan(
     (26 * $x)
     + 26 * 8
     + 28
+    + 4
 );
 my int $j := 1;
 #2**7 and then 2 ** 24 on little, and on big test 2**24, 2**0
@@ -43,6 +44,15 @@ my str $abc-x-string := nqp::x($abc-string, $x);
 # line below is not yet working replacement for the while loop below (so it can use the routine as well)
 test-it($abc-x-string, 1, "Stresstest: Finds needle when needle at start point in haystack",  "'$abc-string' x $x", :offset(0), :should-succeed);
 test-it($russian, 1, "Stresstest: Finds needle when needle at start point in haystack",  "'$russian' x $x", :offset(0), :should-succeed, :begin('А'));
+
+# Test a long repeated string, and also test it with and without indexingoptimized
+my int $repeat      := 10000;
+my str $long-string := nqp::x($abc-string, $repeat) ~ $russian;
+my str $needle      := $abc-string ~ $russian;
+is(nqp::index($long-string, $needle, 0), nqp::chars($abc-string) * ($repeat - 1), "nqp::index on a very long string");
+is(nqp::index(nqp::indexingoptimized($long-string), nqp::indexingoptimized($needle), 0), nqp::chars($abc-string) * ($repeat - 1), "nqp::index on a very long string, both indexingoptimized");
+is(nqp::index($long-string, nqp::indexingoptimized($needle), 0), nqp::chars($abc-string) * ($repeat - 1), "nqp::index on a very long string, needle indexingoptimized");
+is(nqp::index(nqp::indexingoptimized($long-string), $needle, 0), nqp::chars($abc-string) * ($repeat - 1), "nqp::index on a very long string, Haystack indexingoptimized");
 
 sub test-it ($string, $range, $label, str $message, int :$offset, :$should-succeed, :$named, :$begin = 'A') {
     $message := "‘$string’" unless $message;
