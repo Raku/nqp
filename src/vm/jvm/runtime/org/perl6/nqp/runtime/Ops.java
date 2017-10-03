@@ -6803,7 +6803,7 @@ public final class Ops {
     }
 
     public static double pow_n(double a, double b) {
-        if (a == 1 && !Double.isNaN(b)) {
+        if (a == 1) {
             return 1.0;
         }
         return Math.pow(a, b);
