@@ -1442,3 +1442,14 @@ op.semrelease = function(semaphore) {
   console.log('semrelease NYI');
   return semaphore;
 };
+
+const uniData = require('./unicode-data.js');
+op.unipropcode = function(name) {
+  const mangled = name.toLowerCase().replace(/_/g, '');
+  return uniData.propcodes[mangled];
+};
+
+op.getuniprop_str = function(codePoint, propCode) {
+  const got = uniData.props[propCode][codePoint];
+  return got === undefined ? 'NaN' : got;
+};
