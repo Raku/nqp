@@ -6761,8 +6761,11 @@ public final class Ops {
             : new BigDecimal(getBI(tc, a)).divide(new BigDecimal(divisor), 309, RoundingMode.HALF_UP).doubleValue();
     }
 
-    public static long div_i(long a, long b) {
-        return (b == 0) ? a / b : (long)Math.floor((double) a / b);
+    public static long div_i(long a, long b, ThreadContext tc) {
+        if (b == 0) {
+            die_s("Division by zero", tc);
+        }
+        return (long)Math.floor((double) a / b);
     }
 
     public static SixModelObject mod_I(SixModelObject a, SixModelObject b, SixModelObject type, ThreadContext tc) {
