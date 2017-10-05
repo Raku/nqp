@@ -1,4 +1,4 @@
-plan(19);
+plan(26);
 is(nqp::getstrfromname('FULL STOP'), '.', 'getstrfromname works');
 is(nqp::codepointfromname('FULL STOP'), nqp::ord('.'), 'codepointfromname works');
 is(nqp::getstrfromname('super fake not real name'), '', 'getstrfromname returns empty string for nonexistant codepoint names');
@@ -55,3 +55,10 @@ else {
 is(nqp::codepointfromname('LATIN SMALL LETTER E WITH OGONEK AND TILDE'), -1, 'nqp::codepointfromname doesn\'t accept sequences');
 
 is(nqp::getuniname(104), 'LATIN SMALL LETTER H', 'nqp::getuniname');
+is(nqp::getuniname(0x0), '<control-0000>', 'nqp::getuniname for controls');
+is(nqp::getuniname(0x1F), '<control-001F>', 'nqp::getuniname for controls');
+is(nqp::getuniname(0x20), 'SPACE', 'nqp::getuniname for SPACE');
+is(nqp::getuniname(0x7E), 'TILDE', 'nqp::getuniname for TILDE');
+is(nqp::getuniname(0x7F), '<control-007F>', 'nqp::getuniname for controls');
+is(nqp::getuniname(0x9F), '<control-009F>', 'nqp::getuniname for controls');
+is(nqp::getuniname(0xA0), 'NO-BREAK SPACE', 'nqp::getuniname for controls');

@@ -7173,7 +7173,12 @@ public final class Ops {
         try {
             if(codePoint < 0) {
                 name = "<illegal>";
-            } else {
+            }
+            /* Return <control-XXXX> for control characters */
+            else if (codePoint <= 0x1F || (0x7F <= codePoint && codePoint <= 0x9F)) {
+                name = String.format("<control-%04X>", codePoint);
+            }
+            else {
                 name = Character.getName(cp);
                 if(name == null) {
                     name = "<unassigned>";
