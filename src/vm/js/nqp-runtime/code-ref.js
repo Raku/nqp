@@ -168,6 +168,10 @@ class CodeRef extends NQPObject {
   $$istype(ctx, type) {
     return 0;
   }
+
+  getOuterCtx() {
+    return this.outerCtx || this.staticCode.outerCtx || null;
+  }
 };
 
 module.exports = CodeRef;

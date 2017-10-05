@@ -1087,7 +1087,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             my $stmts := self.compile_all_the_statements($node, $body_want);
 
 
-            my $outer_ctx := $has_closure_template ?? "this.outerCtx" !! ($*BLOCK.outer ?? $*BLOCK.outer.ctx !! 'null');
+            my $outer_ctx := $has_closure_template ?? "this.getOuterCtx()" !! ($*BLOCK.outer ?? $*BLOCK.outer.ctx !! 'null');
             my str $create_ctx :=  "var $*CTX = new nqp.Ctx(caller_ctx, $outer_ctx, this);\n"
                 ~ ($hll ?? "$*CTX.\$\$hll = nqp.getHLL({quote_string($hll)});\n" !! '');
 
@@ -1168,7 +1168,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 for %*USED_CTXS -> $kv {
                     my int $depth := $kv.value;
                     next if $depth == 0;
-                    my str $ctx := 'this.outerCtx';
+                    my str $ctx := 'this.getOuterCtx()';
                     while $depth > 1 {
                         $ctx := $ctx ~ '.$$outer';
                         $depth := $depth - 1;
