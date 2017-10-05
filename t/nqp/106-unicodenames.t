@@ -1,4 +1,4 @@
-plan(28);
+plan(29);
 is(nqp::getstrfromname('FULL STOP'), '.', 'getstrfromname works');
 is(nqp::codepointfromname('FULL STOP'), nqp::ord('.'), 'codepointfromname works');
 is(nqp::getstrfromname('super fake not real name'), '', 'getstrfromname returns empty string for nonexistant codepoint names');
@@ -58,3 +58,4 @@ is(nqp::getuniname(0x7F), '<control-007F>', 'nqp::getuniname for controls');
 is(nqp::getuniname(0x9F), '<control-009F>', 'nqp::getuniname for controls');
 is(nqp::getuniname(0xA0), 'NO-BREAK SPACE', 'nqp::getuniname for controls');
 is(nqp::getuniname(0x1F514), "BELL", 'nqp::getuniname for U+1F514 BELL');
+is(nqp::getuniname(0x10FFFF), "<noncharacter-10FFFF>", 'nqp::getuniname for U+10FFFF is a noncharacter');

@@ -7191,6 +7191,9 @@ public final class Ops {
             else if (codePoint <= 0x1F || (0x7F <= codePoint && codePoint <= 0x9F)) {
                 name = String.format("<control-%04X>", codePoint);
             }
+            else if ( (0xFDD0 <= codePoint && codePoint <= 0xFDEF) || (0xFFFE & codePoint) == 0xFFFE)  {
+                name = String.format("<noncharacter-%04X>", codePoint);
+            }
             else {
                 name = Character.getName(cp);
                 if(name == null) {
