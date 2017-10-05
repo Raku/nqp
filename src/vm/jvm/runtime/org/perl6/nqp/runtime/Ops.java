@@ -4239,26 +4239,39 @@ public final class Ops {
     }
 
     /* Brute force, but not normally needed for most programs. */
-    private static volatile HashMap<String, Character> cpNameMap;
+    private static volatile HashMap<String, Integer> cpNameMap;
+    private static volatile Boolean cpNameMapAboveBMP;
     public static long codepointfromname(String name) {
-        HashMap<String, Character> names = cpNameMap;
+        HashMap<String, Integer> names = cpNameMap;
+        /* Gets the first half (the BMP) */
         if (names == null) {
-            /* Initialize the size as Character.MAX_VALUE */
-            names = new HashMap< >(Character.MAX_VALUE);
-            for (char i = 0; i < Character.MAX_VALUE; i++)
+            /* Initialize the expected max hash size as 0x10FFFF */
+            names = new HashMap< >(0x10FFFF);
+            for (int i = 0; i < Character.MAX_VALUE; i++)
                 if (Character.isValidCodePoint(i))
                     names.put(Character.getName(i), i);
-            names.put("LF",               (char)10);
-            names.put("LINE FEED",        (char)10);
-            names.put("FF",               (char)12);
-            names.put("FORM FEED",        (char)12);
-            names.put("CR",               (char)13);
-            names.put("CARRIAGE RETURN",  (char)13);
-            names.put("NEL",              (char)133);
-            names.put("NEXT LINE",        (char)133);
+            names.put("LF",               (int)10);
+            names.put("LINE FEED",        (int)10);
+            names.put("FF",               (int)12);
+            names.put("FORM FEED",        (int)12);
+            names.put("CR",               (int)13);
+            names.put("CARRIAGE RETURN",  (int)13);
+            names.put("NEL",              (int)133);
+            names.put("NEXT LINE",        (int)133);
             cpNameMap = names;
+            cpNameMapAboveBMP = false;
         }
-        Character found = names.get(name);
+        Integer found = names.get(name);
+        /* If we have not found it yet, put all other possible codepoints into
+         * the hash */
+        if (found == null && !cpNameMapAboveBMP) {
+            for (int i = Character.MAX_VALUE; i <= 0x10FFFF; i++)
+                if (Character.isValidCodePoint(i))
+                    names.put(Character.getName(i), i);
+            names.put("BELL",             (int)0x1F514);
+            cpNameMapAboveBMP = true;
+            found = names.get(name);
+        }
         return found == null ? -1 : found;
     }
 

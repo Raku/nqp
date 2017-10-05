@@ -1,4 +1,4 @@
-plan(26);
+plan(28);
 is(nqp::getstrfromname('FULL STOP'), '.', 'getstrfromname works');
 is(nqp::codepointfromname('FULL STOP'), nqp::ord('.'), 'codepointfromname works');
 is(nqp::getstrfromname('super fake not real name'), '', 'getstrfromname returns empty string for nonexistant codepoint names');
@@ -16,12 +16,7 @@ else {
   is(nqp::getstrfromname('NL'), nqp::chr(10), 'nqp::getstrfromname accepts aliases');
 }
 
-if nqp::getcomp('nqp').backend.name eq 'jvm' {
-  skip("BELL broken on the  JVM");
-}
-else {
-  is(nqp::getstrfromname('BELL'), nqp::chr(128276), 'nqp::getstrfromname with BELL');
-}
+is(nqp::getstrfromname('BELL'), nqp::chr(0x1F514), 'nqp::getstrfromname with BELL');
 
 if nqp::getcomp('nqp').backend.name eq 'jvm' {
   skip("named sequences broken on the JVM");
@@ -29,15 +24,15 @@ if nqp::getcomp('nqp').backend.name eq 'jvm' {
 else {
   is(nqp::getstrfromname('LATIN SMALL LETTER E WITH OGONEK AND TILDE'), 'ę̃', 'nqp::getstrfromname with a Unicode Named Sequence');
 }
-
+is(nqp::getstrfromname('BOY'), nqp::chr(0x1F466), 'nqp::getstrfromname with an emoji');
 if nqp::getcomp('nqp').backend.name eq 'jvm' {
   skip("Emoji broken on the JVM", 3);
 }
 else {
-  is(nqp::getstrfromname('woman gesturing OK'), nqp::chr(0x1F646) ~ nqp::chr(0x200D) ~ nqp::chr(0x2640) ~ nqp::chr(0xFE0F), 'nqp::getstrfromaname with an Emoji ZWJ Sequences');
-
   is(nqp::getstrfromname('PLACE OF WORSHIP'), nqp::chr(0x1F6D0), 'nqp::getstrfromname with an emoji');
+  is(nqp::getstrfromname('woman gesturing OK'), nqp::chr(0x1F646) ~ nqp::chr(0x200D) ~ nqp::chr(0x2640) ~ nqp::chr(0xFE0F), 'nqp::getstrfromaname with an Emoji ZWJ Sequences');
   is(nqp::getstrfromname('princess: light skin tone'), nqp::chr(0x1F478) ~ nqp::chr(0x1F3FB), 'nqp::getstrfromaname wih an Emoji Sequences');
+
 }
 
 is(nqp::codepointfromname('LATIN CAPITAL LETTER A'), 65, 'nqp::codepointfromname');
@@ -62,3 +57,4 @@ is(nqp::getuniname(0x7E), 'TILDE', 'nqp::getuniname for TILDE');
 is(nqp::getuniname(0x7F), '<control-007F>', 'nqp::getuniname for controls');
 is(nqp::getuniname(0x9F), '<control-009F>', 'nqp::getuniname for controls');
 is(nqp::getuniname(0xA0), 'NO-BREAK SPACE', 'nqp::getuniname for controls');
+is(nqp::getuniname(0x1F514), "BELL", 'nqp::getuniname for U+1F514 BELL');
