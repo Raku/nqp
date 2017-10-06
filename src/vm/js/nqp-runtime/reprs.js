@@ -1293,6 +1293,15 @@ function getBI(obj) {
   return obj.$$getBignum();
 }
 
+function getIntFromBI(bignum) {
+  const bits = bignum.bitLength();
+  if (bits >= 64) {
+    throw new NQPException(`Cannot unbox ${bits} bit wide bigint into native integer`);
+  } else {
+    return bignum.toNumber() | 0;
+  }
+}
+
 class P6bigint extends REPR {
   setupSTable(STable) {
     STable.addInternalMethods(class {
@@ -1301,7 +1310,7 @@ class P6bigint extends REPR {
       }
 
       $$getInt() {
-        return this.value.toNumber() | 0;
+        return getIntFromBI(this.value);
       }
 
       $$setBignum(value) {
@@ -1313,7 +1322,7 @@ class P6bigint extends REPR {
       }
 
       $$decont_i(ctx) {
-        return this.value.toNumber() | 0;
+        return getIntFromBI(this.value);
       }
     });
   }
@@ -1377,11 +1386,11 @@ class P6bigint extends REPR {
       }
 
       $$getInt() {
-        return this[name].toNumber() | 0;
+        return getIntFromBI(this[name]);
       }
 
       $$decont_i(ctx) {
-        return this[name].toNumber() | 0;
+        return getIntFromBI(this[name]);
       }
 
       $$getBignum() {
