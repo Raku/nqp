@@ -12,6 +12,9 @@ var constants = require('./constants.js');
 var bignum = require('bignum-browserify');
 var ZERO = bignum(0);
 
+/* Needed for throwing exceptions from generated code */
+const NQPException = require('./nqp-exception.js');
+
 function findMethod(ctx, obj, name) {
   if (obj._STable.methodCache) {
     let method = obj._STable.methodCache.get(name);

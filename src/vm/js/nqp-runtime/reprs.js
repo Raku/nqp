@@ -486,26 +486,26 @@ class P6opaque {
   generateUniversalAccessors(STable) {
     this.generateUniversalAccessor(STable, '$$getattr', function(slot) {
       return 'return this.$$getattr$' + slot + '()';
-    }, '', false);
+    }, '', false, 'get a value');
 
     this.generateUniversalAccessor(STable, '$$bindattr', function(slot) {
       return 'return this.$$bindattr$' + slot + '(value)';
-    }, ', value', false);
+    }, ', value', false, 'bind a value');
 
     var suffixes = ['_s', '_i', '_n'];
     for (let suffix of suffixes) {
       /* TODO only check attributes of proper type */
       this.generateUniversalAccessor(STable, '$$getattr' + suffix, function(slot) {
         return 'return this.' + slotToAttr(slot);
-      }, '', false);
+      }, '', false, 'get a value');
 
       this.generateUniversalAccessor(STable, '$$bindattr' + suffix, function(slot) {
         return 'return (this.' + slotToAttr(slot) + ' = value)';
-      }, ', value', true);
+      }, ', value', true, 'bind a value');
     }
   }
 
-  generateUniversalAccessor(STable, name, action, extraSig, scwb) {
+  generateUniversalAccessor(STable, name, action, extraSig, scwb, actionDescription) {
     var code = 'function(classHandle, attrName' + extraSig + ') {\n' +
         (scwb ? 'if (this._SC !== undefined) this.$$scwb();\n' : '') +
         'switch (classHandle) {\n';
@@ -524,6 +524,7 @@ class P6opaque {
         classKeyIndex++;
       }
     }
+    code += `default: throw new NQPException('P6opaque: no such attribute \\'' + attrName + '\\' in type ' + classHandle._STable.debugName + ' when trying to ${actionDescription}')`;
     code += '}\n}\n';
     STable.compileAccessor(name, code, setup);
   }
