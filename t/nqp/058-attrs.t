@@ -1,6 +1,6 @@
 #! nqp
 
-plan(25);
+plan(29);
 
 class Foo {
     has $!answer;
@@ -15,6 +15,25 @@ $first.question(42);
 $second.question(23);
 ok($first.answer  == 42, "attributes work");
 ok($second.answer == 23, "... and are not shared among objects");
+
+class Bar {
+}
+
+dies-ok({
+  nqp::getattr(Foo.new, Foo, '$!no_such');
+}, "getting a attribute that's not in a class dies");
+
+dies-ok({
+  nqp::bindattr(Foo.new, Foo, '$!no_such', 123);
+}, "binding a attribute that's not in a class dies");
+
+dies-ok({
+  nqp::getattr(Foo.new, Bar, '$!answer');
+}, "getting a attribute that's not in a class dies");
+
+dies-ok({
+  nqp::bindattr(Foo.new, Bar, '$!answer', 123);
+}, "binding a attribute that's not in a class dies");
 
 class Lowlevel {
     has int $!int;
