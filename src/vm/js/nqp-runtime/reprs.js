@@ -1645,17 +1645,11 @@ class MultiDimArray extends REPR {
 
     STable.type = type || Null;
 
-    if (dimensions instanceof NQPInt) {
-      dimensions = dimensions.value;
-      if (dimensions === 0) {
-        throw new NQPException('MultiDimArray REPR must be composed with at least 1 dimension');
-      }
-    } else {
-      throw 'dimensions to MultiDimArray.compose must be a native int';
-    }
+    STable.dimensions = dimensions.$$getInt();
 
-    //  console.log('dimensions', dimensions);
-    STable.dimensions = dimensions;
+    if (STable.dimensions === 0) {
+      throw new NQPException('MultiDimArray REPR must be composed with at least 1 dimension');
+    }
   }
 
 
