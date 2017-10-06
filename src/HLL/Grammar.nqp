@@ -40,12 +40,11 @@ grammar HLL::Grammar {
     "\x[FE3D]\x[FE3E]\x[FE3F]\x[FE40]\x[FE41]\x[FE42]\x[FE43]\x[FE44]\x[FE47]\x[FE48]" ~
     "\x[FE59]\x[FE5A]\x[FE5B]\x[FE5C]\x[FE5D]\x[FE5E]\x[FF08]\x[FF09]\x[FF1C]\x[FF1E]" ~
     "\x[FF3B]\x[FF3D]\x[FF5B]\x[FF5D]\x[FF5F]\x[FF60]\x[FF62]\x[FF63]\x[27EE]\x[27EF]" ~
-    "\x[2E24]\x[2E25]\x[27EC]\x[27ED]\x[2E22]\x[2E23]\x[2E26]\x[2E27]" ~
+    "\x[2E24]\x[2E25]\x[27EC]\x[27ED]\x[2E22]\x[2E23]\x[2E26]\x[2E27]"
 #?if js
-    nqp::chr(0x2329) ~ nqp::chr(0x232A) ~
+    ~ nqp::chr(0x2329) ~ nqp::chr(0x232A)
 #?endif
-    "\x[FD3E]\x[FD3F]"; # All brackets have matching Ps/Pe or Pi/Pf except \x[FD3E]\x[FD3F]
-                        # (ORNATE PARENTHESIS), which are allowed since they are RTL Text characters
+    ;
 
     method perl() { self.HOW.name(self) ~ '.new() #`[' ~ nqp::where(self) ~ ']' }
 
