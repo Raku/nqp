@@ -253,8 +253,17 @@ position C<pos>.
                 self.panic('Alphanumeric character is not allowed as a delimiter');
             }
             if nqp::iscclass(nqp::const::CCLASS_WHITESPACE, $start, 0) {
-                my $code := nqp::sprintf('%X', [nqp::ord($start)]);
-                self.panic('Whitespace character (0x' ~ $code ~ ') is not allowed as a delimiter');
+                my str $code := nqp::sprintf('%X', [nqp::ord($start)]);
+                # If it's a synthetic grapheme then we must have combiners.
+                # Notify the user to avoid confusion.
+                my int $combining-chars := nqp::codes($start) - 1;
+                my str $character_s     := 1 < $combining-chars ?? 'characters' !! 'character';
+                my str $description     := (nqp::chr(nqp::ordbaseat($start, 0)) ne $start)
+                    ?? "with $combining-chars combining $character_s"
+                    !! '';
+                self.panic('Whitespace character ‘' ~
+                    nqp::getuniname(nqp::ord($start)) ~
+                    '’ (0x' ~ $code ~') ' ~ $description ~  ' is not allowed as a delimiter');
             }
         }
 
