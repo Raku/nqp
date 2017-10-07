@@ -23,7 +23,7 @@ class HLL::Compiler does HLL::Backend::Default {
         @!stages     := nqp::split(' ', 'start parse ast ' ~ $!backend.stages());
 
         # Command options and usage.
-        @!cmdoptions := nqp::split(' ', 'e=s help|h target=s trace|t=s encoding=s output|o=s source-name=s combine version|v show-config verbose-config|V stagestats=s? ll-exception rxtrace nqpevent=s profile=s? profile-compile=s? profile-filename=s profile-stage=s force-stdin-eval-mode=s'
+        @!cmdoptions := nqp::split(' ', 'e=s help|h target=s trace|t=s encoding=s output|o=s source-name=s combine version|v show-config verbose-config|V stagestats=s? ll-exception rxtrace nqpevent=s profile=s? profile-compile=s? profile-filename=s profile-stage=s repl-mode=s'
 #?if js
         ~ ' substagestats beautify nqp-runtime=s perl6-runtime=s libpath=s shebang execname=s source-map'
 #?endif
@@ -300,12 +300,12 @@ class HLL::Compiler does HLL::Backend::Default {
                 elsif !@a {
                     # Is STDIN a TTY display? If so, start the REPL, otherwise, simply
                     # assume the program to eval is given on STDIN.
-                    my $force := %adverbs<force-stdin-eval-mode>//'';
+                    my $force := %adverbs<repl-mode>//'';
                     my $wants-interactive := $force
                         ?? $force eq 'interactive'
                           ?? 1 !! $force eq 'non-interactive'
                             ?? 0 !! self.panic(
-                                "Unknown STDIN eval mode '$force'. Valid values"
+                                "Unknown REPL mode '$force'. Valid values"
                                 ~ " are 'non-interactive' and 'interactive'"
                             )
                         !! stdin().t();
