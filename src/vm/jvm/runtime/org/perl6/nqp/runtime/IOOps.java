@@ -122,4 +122,10 @@ public final class IOOps {
         ioHandle.handle = new AsyncProcessHandle(tc, queue, args, cwd, env, config);
         return ioHandle;
     }
+
+    public static long killprocasync(SixModelObject handle, long signal,
+            ThreadContext tc) {
+        ((AsyncProcessHandle)((IOHandleInstance)handle).handle).destroy(tc);
+        return signal;
+    }
 }
