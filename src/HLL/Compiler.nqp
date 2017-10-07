@@ -18,10 +18,10 @@ class HLL::Compiler does HLL::Backend::Default {
     method BUILD() {
         # Backend is set to the default one, by default.
         $!backend    := self.default_backend();
-        
+
         # Default stages.
         @!stages     := nqp::split(' ', 'start parse ast ' ~ $!backend.stages());
-        
+
         # Command options and usage.
         @!cmdoptions := nqp::split(' ', 'e=s help|h target=s trace|t=s encoding=s output|o=s source-name=s combine version|v show-config verbose-config|V stagestats=s? ll-exception rxtrace nqpevent=s profile=s? profile-compile=s? profile-filename=s profile-stage=s'
 #?if js
@@ -30,7 +30,7 @@ class HLL::Compiler does HLL::Backend::Default {
         );
         %!config     := nqp::hash();
     }
-    
+
     method backend(*@value) {
         if @value {
             $!backend := @value[0];
@@ -137,11 +137,11 @@ class HLL::Compiler does HLL::Backend::Default {
             }
         }
     }
-    
+
     method interactive_result($value) {
         nqp::say(~$value)
     }
-    
+
     method interactive_exception($ex) {
         nqp::print(~$ex ~ "\n")
     }
@@ -207,7 +207,7 @@ class HLL::Compiler does HLL::Backend::Default {
         }
         @!stages;
     }
-    
+
     method parsegrammar(*@value) {
         if +@value {
             $!parsegrammar := @value[0];
@@ -221,11 +221,11 @@ class HLL::Compiler does HLL::Backend::Default {
         }
         $!parseactions;
     }
-    
+
     method interactive_banner() { '' }
-    
+
     method interactive_prompt() { '> ' }
-    
+
     method compiler_progname($value?) {
         if nqp::defined($value) {
             $!compiler_progname := $value;
@@ -233,13 +233,13 @@ class HLL::Compiler does HLL::Backend::Default {
         $!compiler_progname;
     }
 
-    
+
     method commandline_options(@value?) {
         if +@value {
             @!cmdoptions := @value;
         }
         @!cmdoptions;
-    }    
+    }
 
     method command_line(@args, *%adverbs) {
         my $program-name := @args[0];
@@ -251,7 +251,7 @@ class HLL::Compiler does HLL::Backend::Default {
             %adverbs{$_.key} := $_.value;
         }
         self.usage($program-name) if %adverbs<help>  || %adverbs<h>;
-        
+
         if $!backend.is_precomp_stage(%adverbs<target>) {
             %adverbs<precomp> := 1;
         }
@@ -420,7 +420,7 @@ class HLL::Compiler does HLL::Backend::Default {
             return self.dumper($r, $target, |%adverbs);
         }
     }
-    
+
     method exists_stage($stage) {
         my $found := 0;
         for self.stages() {
@@ -490,7 +490,7 @@ class HLL::Compiler does HLL::Backend::Default {
             }
             last if $_ eq $target;
         }
-        
+
         if %adverbs<compunit_ok> {
             return $result
         }
@@ -587,7 +587,7 @@ class HLL::Compiler does HLL::Backend::Default {
         }
         nqp::exit(0);
     }
-    
+
     method nqpevent(*@pos) {
         $!backend.nqpevent(|@pos)
     }
@@ -654,7 +654,7 @@ class HLL::Compiler does HLL::Backend::Default {
         @actual_ns;
     }
 
-	
+
     method line_and_column_of($target, int $pos, int :$cache = 0) {
         my $linepos;
         if $cache {
@@ -689,7 +689,7 @@ class HLL::Compiler does HLL::Backend::Default {
                 }
             }
         }
-        
+
         # We have c<linepos>, so now we (binary) search the array
         # for the largest element that is not greater than c<pos>.
         my int $lo := 0;
@@ -705,7 +705,7 @@ class HLL::Compiler does HLL::Backend::Default {
         }
 
         my $column := nqp::iseq_i($lo, 0)
-            ?? $pos 
+            ?? $pos
             !! nqp::sub_i($pos, nqp::atpos_i($linepos, nqp::sub_i($lo, 1)));
 
         nqp::list_i(nqp::add_i($lo, 1), nqp::add_i($column, 1));
@@ -733,7 +733,7 @@ class HLL::Compiler does HLL::Backend::Default {
         [$line, $file];
     }
 
-    
+
 
     # the name of the file(s) that are executed, or -e  or 'interactive'
     method user-progname() { $!user_progname // 'interactive' }
@@ -741,7 +741,7 @@ class HLL::Compiler does HLL::Backend::Default {
     # command line options and arguments as provided by the user
     method cli-options()   { %!cli-options   }
     method cli-arguments() { @!cli-arguments }
-    
+
     # set a recursion limit, if the backend supports it
     method recursion_limit($limit) {
         if nqp::can($!backend, 'recursion_limit') {
