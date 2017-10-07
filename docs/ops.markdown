@@ -101,6 +101,7 @@
   * [lc](#lc)
   * [normalizecodes](#normalizecodes)
   * [ord](#ord)
+  * [ordbaseat](#ordbaseat)
   * [radix](#radix)
   * [replace](#replace)
   * [rindex](#rindex)
@@ -1045,6 +1046,13 @@ at the `$i`th character, if it's specified.
 * `ordfirst(str $str)` _Internal_
 
 `ord` is converted to these internal opcodes by the compiler.
+
+## ordbaseat
+`ordbaseat(str $str, int $pos)`
+
+Returns the Unicode codepoint which is the base (non extend/prepend character
+at that position). If it is a degenerate, and contains no base character,
+it then returns the first codepoint in that grapheme.
 
 ## radix
 * `radix(int $radix, String $str, int $pos, int $flags)`
