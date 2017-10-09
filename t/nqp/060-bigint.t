@@ -1,7 +1,7 @@
 #! nqp
 use nqpmo;
 
-plan(124);
+plan(127);
 
 my $knowhow := nqp::knowhow();
 my $bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
@@ -261,3 +261,7 @@ my sub isnan($n) {
 }
 
 ok(isnan(nqp::div_In(box(0), box(0))), 'nqp::div_In 0/0 == NaN');
+
+is(nqp::decont_i(nqp::fromstr_I('2147483647', $bi_type)), '2147483647',  'nqp::decont_i works on bignums');
+dies-ok({nqp::unbox_i(nqp::fromstr_I('18446744073709551616', $bi_type))}, 'can\'t nqp::unbox_i a too big bignum');
+dies-ok({nqp::decont_i(nqp::fromstr_I('18446744073709551616', $bi_type))}, 'can\'t unqp::decont_i a too big bignum');
