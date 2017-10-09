@@ -1,6 +1,6 @@
 #! nqp
 
-plan(190);
+plan(191);
 
 sub is-dims(@arr, @expected-dims, $description) {
     my $got-dims := nqp::dimensions(@arr);
