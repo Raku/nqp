@@ -1070,7 +1070,7 @@ op.dimensions = function(array) {
 
 op.setdimensions = function(array, dimensions) {
   array.$$setdimensions(dimensions);
-  return dimensions;
+  return array;
 };
 
 // TODO optimize
