@@ -1647,7 +1647,7 @@ class MultiDimArray extends REPR {
     var type = reprInfoHash.content.get('array').content.get('type');
 
     if (type) {
-      STable.primType = type._STable.REPR.boxedPrimitive;
+      STable.primType = type._STable.REPR.boxedPrimitive || 0;
     } else {
       STable.primType = 0;
     }
@@ -1806,7 +1806,7 @@ class MultiDimArray extends REPR {
     if (dims > 0) {
       STable.dimensions = dims;
       STable.type = cursor.variant();
-      STable.primType = STable.type !== Null ? STable.type._STable.REPR.boxedPrimitive : 0;
+      STable.primType = STable.type !== Null ? (STable.type._STable.REPR.boxedPrimitive || 0): 0;
     }
   }
 
