@@ -1735,7 +1735,9 @@ class MultiDimArray extends REPR {
 
       $$atposnd(idx) {
         if (STable.primType != 0) throw new NQPException('wrong type');
-        return this.storage[this.$$calculateIndex(idx)];
+        const value = this.storage[this.$$calculateIndex(idx)];
+        if (value === undefined) return Null;
+        return value;
       }
 
       $$bindposnd(idx, value) {
