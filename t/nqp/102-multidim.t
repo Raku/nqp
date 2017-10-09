@@ -31,7 +31,7 @@ is-dims(nqp::list_i(1), [1], 'dimensions on normal array (3)');
     dies-ok({ nqp::setdimensions(@a, nqp::list_i()) }, 'cannot set zero dimensions on normal array');
     dies-ok({ nqp::setdimensions(@a, nqp::list_i(3,3)) }, 'cannot set two dimensions on normal array');
     dies-ok({ nqp::setdimensions(@a, nqp::list_i(3,3,3)) }, 'cannot set three dimensions on normal array');
-    nqp::setdimensions(@a, nqp::list_i(24));
+    ok(nqp::eqaddr(nqp::setdimensions(@a, nqp::list_i(24)), @a), 'nqp::setdimensions has correct return value');
     ok(nqp::elems(@a) == 24, 'can set single dimension on normal array, and it influences elems');
     nqp::push(@a, 1);
     ok(nqp::elems(@a) == 25, 'normal array stays dynamic even with setdimensions');
