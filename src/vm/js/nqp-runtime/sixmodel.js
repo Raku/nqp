@@ -215,6 +215,9 @@ class STable {
     obj.$$decont = function(ctx) {
       return this;
     };
+    obj.$$clone = function(ctx) {
+      return this;
+    }
     return obj;
   }
 
