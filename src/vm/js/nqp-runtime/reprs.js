@@ -1027,6 +1027,21 @@ class VMArray extends REPR {
         return this.array[index < 0 ? this.array.length + index : index] = value;
       }
 
+      $$bindpos_i(index, value) {
+        if (this._SC !== undefined) this.$$scwb();
+        return this.array[index < 0 ? this.array.length + index : index] = value;
+      }
+
+      $$bindpos_n(index, value) {
+        if (this._SC !== undefined) this.$$scwb();
+        return this.array[index < 0 ? this.array.length + index : index] = value;
+      }
+
+      $$bindpos_s(index, value) {
+        if (this._SC !== undefined) this.$$scwb();
+        return this.array[index < 0 ? this.array.length + index : index] = value;
+      }
+
       $$join(delim) {
         var stringified = [];
         for (let i = 0; i < this.array.length; i++) {
@@ -1778,6 +1793,15 @@ class MultiDimArray extends REPR {
       // TODO optimize and avoid creating a temporary array
       $$bindpos(index, value) {
         return this.$$bindposnd(BOOT.createArray([index]), value);
+      }
+      $$bindpos_i(index, value) {
+        return this.$$bindposnd_i(BOOT.createArray([index]), value);
+      }
+      $$bindpos_s(index, value) {
+        return this.$$bindposnd_s(BOOT.createArray([index]), value);
+      }
+      $$bindpos_n(index, value) {
+        return this.$$bindposnd_n(BOOT.createArray([index]), value);
       }
 
       $$setelems(elems) {

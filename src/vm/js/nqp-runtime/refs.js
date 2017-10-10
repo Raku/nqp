@@ -101,7 +101,7 @@ op.atposref_i = function(currentHLL, obj, index) {
   var STable = refType._STable;
   var ref = STable.REPR.allocate(STable);
   ref.get = () => obj.$$atpos(index);
-  ref.set = value => obj.$$bindpos(index, value);
+  ref.set = value => obj.$$bindpos_i(index, value);
   return ref;
 };
 
@@ -113,7 +113,7 @@ op.atposref_n = function(currentHLL, obj, index) {
   var STable = refType._STable;
   var ref = STable.REPR.allocate(STable);
   ref.get = () => obj.$$atpos(index);
-  ref.set = value => obj.$$bindpos(index, value);
+  ref.set = value => obj.$$bindpos_n(index, value);
   return ref;
 };
 
@@ -125,7 +125,7 @@ op.atposref_s = function(currentHLL, obj, index) {
   var STable = refType._STable;
   var ref = STable.REPR.allocate(STable);
   ref.get = () => obj.$$atpos(index);
-  ref.set = value => obj.$$bindpos(index, value);
+  ref.set = value => obj.$$bindpos_s(index, value);
   return ref;
 };
 

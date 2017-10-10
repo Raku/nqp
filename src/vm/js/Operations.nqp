@@ -592,7 +592,7 @@ class QAST::OperationsJS {
            Chunk.new($T_OBJ, $list , @setup, :$node);
         });
 
-        add_simple_op('bindpos' ~ $suffix, $type, [$T_OBJ, $T_INT, $type], sub ($list, $index, $value) {"$list.\$\$bindpos($index, $value)"}, :side_effects);
+        add_simple_op('bindpos' ~ $suffix, $type, [$T_OBJ, $T_INT, $type], :side_effects, :method_call);
         add_simple_op('atpos' ~ $suffix, $type, [$T_OBJ, $T_INT], :method_call);
         
         add_simple_op('pop' ~ $suffix, $type, [$T_OBJ], sub ($array) {"$array.\$\$pop()"}, :side_effects);
