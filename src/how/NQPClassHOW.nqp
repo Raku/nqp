@@ -470,13 +470,16 @@ knowhow NQPClassHOW {
     # Creates the plan for building up the object. This works
     # out what we'll need to do up front, so we can just zip
     # through the "todo list" each time we need to make an object.
-    # The plan is an array of arrays. The first element of each
-    # nested array is an "op" representing the task to perform:
-    #   0 code = call specified BUILD method
-    #   1 class name attr_name = try to find initialization value
-    #   2 class name attr_name = try to find initialization value, or set nqp::list()
-    #   3 class name attr_name = try to find initialization value, or set nqp::hash()
-    #   4 class attr_name code = call default value closure if needed
+    # The plan is an array of tasks. A task is either a method to
+    # be called, or an array in which The first element is an "op"
+    # representing the task to perform:
+    #   code = call specified BUILD method
+    #   0 class name attr_name = find initialization value
+    #   4 class attr_name code = call default value closure if uninitialized
+    #   11 class name attr_name = find initialization value, or set nqp::list()
+    #   12 class name attr_name = find initialization value, or set nqp::hash()
+    # Note the numbers are a bit odd, but they are this way to conform to the
+    # HLL version of BUILDALL.
     method create_BUILDPLAN($obj) {
         # First, we'll create the build plan for just this class.
         my @plan;
@@ -486,7 +489,7 @@ knowhow NQPClassHOW {
         my $build := $obj.HOW.method_table($obj)<BUILD>;
         if nqp::defined($build) {
             # We'll call the custom one.
-            nqp::push(@plan, [0, $build]);
+            nqp::push(@plan, $build);
         }
         else {
             # No custom BUILD. Rather than having an actual BUILD
@@ -496,8 +499,8 @@ knowhow NQPClassHOW {
                 my $attr_name := $_.name;
                 my $name      := nqp::substr($attr_name, 2);
                 my $sigil     := nqp::substr($attr_name, 0, 1);
-                my $sigop     := $sigil eq '@' ?? 2 !! $sigil eq '%' ?? 3 !! 1;
-                nqp::push(@plan, [$sigop, $obj, $name, $attr_name]);
+                my $sigop     := $sigil eq '@' ?? 11 !! $sigil eq '%' ?? 12 !! 0;
+                nqp::push(@plan, [$sigop, $obj, $attr_name, $name]);
             }
         }
         
