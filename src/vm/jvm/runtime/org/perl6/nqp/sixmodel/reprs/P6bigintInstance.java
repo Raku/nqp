@@ -4,8 +4,10 @@ import java.math.BigInteger;
 
 import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.SixModelObject;
+import org.perl6.nqp.runtime.ExceptionHandling;
 
 public class P6bigintInstance extends SixModelObject {
+    private static final BigInteger SMALLEST_UNBOXABLE = new BigInteger(String.valueOf(Long.MIN_VALUE));
     public BigInteger value;
     
     public void set_int(ThreadContext tc, long value) {
@@ -13,6 +15,10 @@ public class P6bigintInstance extends SixModelObject {
     }
     
     public long get_int(ThreadContext tc) {
-        return value.longValue();
+        if (value.bitLength() >= 64 && !equals(SMALLEST_UNBOXABLE)) {
+            throw ExceptionHandling.dieInternal(tc, "Cannot unbox " + value.bitLength() + " bit wide bigint into native integer");
+        } else {
+            return value.longValue();
+        }
     }
 }
