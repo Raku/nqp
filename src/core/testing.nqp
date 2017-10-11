@@ -49,10 +49,18 @@ sub skip($desc, $count=1) {
     }
 }
 
-sub dies-ok($code, $description, :$message) {
+# Workaround for a JVM bug
+sub bug-workaround($code) {
     my $died := 0;
     my $got-message := '';
     try { $code(); CATCH { $died := 1; $got-message := nqp::getmessage($_); } }
+    nqp::hash('died', $died, 'got-message', $got-message);
+}
+
+sub dies-ok($code, $description, :$message) {
+    my $workaround := bug-workaround($code);
+    my $died := $workaround<died>;
+    my $got-message := $workaround<got-message>;
     ok($died, $description);
     if $message {
         if nqp::isstr($message) {
