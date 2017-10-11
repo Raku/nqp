@@ -237,8 +237,11 @@ public class AsyncProcessHandle implements IIOClosable {
         catch (Throwable t) { }
     }
 
-    public void destroy(ThreadContext tc) {
-        try { this.proc.destroy(); }
-        catch (Throwable t) { }
+    public void kill(ThreadContext tc) {
+        this.proc.destroy();
+    }
+
+    public void killForcibly(ThreadContext tc) {
+        this.proc.destroyForcibly();
     }
 }
