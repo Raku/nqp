@@ -1,6 +1,6 @@
 #! nqp
 
-plan(191);
+plan(194);
 
 sub is-dims(@arr, @expected-dims, $description) {
     my $got-dims := nqp::dimensions(@arr);
@@ -492,3 +492,32 @@ sub add_to_sc($sc, $idx, $obj) {
 # Can't use numdimensions or dimensions on a type object.
 dies-ok({ nqp::numdimensions($array_type_2d) }, "Can't use numdimensions on a type object");
 dies-ok({ nqp::dimensions($array_type_2d) }, "Can't use dimensions on a type object");
+
+{
+    my $array_type := nqp::newtype(nqp::knowhow(), 'MultiDimArray');
+    nqp::composetype($array_type, nqp::hash('array',
+        nqp::hash('dimensions', 1)));
+    my $array := nqp::create($array_type);
+    nqp::setdimensions($array, nqp::list_i(1));
+    nqp::bindposnd($array, nqp::list_i(0), 100);
+    is(nqp::atposnd($array, nqp::list_i(0)), '100', 'nqp::atposnd with no type');
+}
+
+{
+    my $array_type := nqp::newtype(nqp::knowhow(), 'MultiDimArray');
+    nqp::composetype($array_type, nqp::hash('array',
+        nqp::hash('dimensions', 1, 'type', NQPMu)));
+    my $array := nqp::create($array_type);
+    nqp::setdimensions($array, nqp::list_i(1));
+    nqp::bindposnd($array, nqp::list_i(0), 100);
+    is(nqp::atposnd($array, nqp::list_i(0)), '100', 'nqp::atposnd with a NQPMu type');
+}
+
+{
+    my $array_type := nqp::newtype(nqp::knowhow(), 'MultiDimArray');
+    nqp::composetype($array_type, nqp::hash('array',
+        nqp::hash('dimensions', 1, 'type', NQPMu)));
+    my $array := nqp::create($array_type);
+    nqp::setdimensions($array, nqp::list_i(1));
+    ok(nqp::isnull(nqp::atposnd($array, nqp::list_i(0))), 'nqp::atposnd returns null on not set elems');
+}
