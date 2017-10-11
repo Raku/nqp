@@ -1336,8 +1336,19 @@ op.codepointfromname = function(name) {
   }
 };
 
+function formatCodePoint(codePoint) {
+  let string = codePoint.toString(16).toUpperCase();
+  return '0'.repeat(Math.max(0, 4 - string.length)) + string;
+}
+
 op.getuniname = function(codePoint) {
-  return ucd.codePointToName(codePoint);
+  if (codePoint <= 0x1F || (0x7F <= codePoint && codePoint <= 0x9F)) {
+    return '<control-' + formatCodePoint(codePoint) + '>';
+  } else if ( (0xFDD0 <= codePoint && codePoint <= 0xFDEF) || (0xFFFE & codePoint) == 0xFFFE)  {
+    return '<noncharacter-' + formatCodePoint(codePoint) + '>';
+  } else {
+    return ucd.codePointToName(codePoint) || 'missing';
+  }
 };
 
 const forms = ['NONE', 'NFC', 'NFD', 'NFKC', 'NFKD'];
