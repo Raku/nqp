@@ -1762,7 +1762,8 @@ class MultiDimArray extends REPR {
 
       $$atposnd_i(idx) {
         if (STable.primType != 1) throw new NQPException('wrong type: ' + STable.primType);
-        return this.storage[this.$$calculateIndex(idx)];
+        const value = this.storage[this.$$calculateIndex(idx)];
+        return (value === undefined ? 0 : value);
       }
 
       $$bindposnd_i(idx, value) {
@@ -1772,7 +1773,8 @@ class MultiDimArray extends REPR {
 
       $$atposnd_n(idx) {
         if (STable.primType != 2) throw new NQPException('wrong type');
-        return this.storage[this.$$calculateIndex(idx)];
+        const value = this.storage[this.$$calculateIndex(idx)];
+        return (value === undefined ? 0 : value);
       }
 
       $$bindposnd_n(idx, value) {
@@ -1782,7 +1784,8 @@ class MultiDimArray extends REPR {
 
       $$atposnd_s(idx) {
         if (STable.primType != 3) throw new NQPException('wrong type');
-        return this.storage[this.$$calculateIndex(idx)];
+        const value = this.storage[this.$$calculateIndex(idx)];
+        return (value === undefined ? nullStr : value);
       }
 
       $$bindposnd_s(idx, value) {
@@ -1814,6 +1817,18 @@ class MultiDimArray extends REPR {
 
       $$atpos(index) {
         return this.$$atposnd(BOOT.createArray([index]));
+      }
+
+      $$atpos_i(index) {
+        return this.$$atposnd_i(BOOT.createArray([index]));
+      }
+
+      $$atpos_n(index) {
+        return this.$$atposnd_n(BOOT.createArray([index]));
+      }
+
+      $$atpos_s(index) {
+        return this.$$atposnd_s(BOOT.createArray([index]));
       }
     });
   }
