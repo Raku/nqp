@@ -46,7 +46,7 @@ public class AsyncProcessHandle implements IIOClosable {
         this.tc = tc;
         this.hllConfig = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig;
         this.bufType = config.get("buf_type");
-        new Thread(new Runnable() {
+        Thread thread = new Thread(new Runnable() {
             public void run() {
                 try {
                     AsyncProcessHandle.this.proc = pb.start();
@@ -88,7 +88,9 @@ public class AsyncProcessHandle implements IIOClosable {
                                 AsyncProcessHandle.this.hllConfig.strBoxType, message);
                 }
             }
-        }).start();
+        });
+        thread.setDaemon(true);
+        thread.start();
     }
 
     private List<String> getArgs(ThreadContext tc, SixModelObject argsObj) {
