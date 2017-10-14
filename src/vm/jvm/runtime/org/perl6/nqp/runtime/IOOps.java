@@ -122,4 +122,20 @@ public final class IOOps {
         ioHandle.handle = new AsyncProcessHandle(tc, queue, args, cwd, env, config);
         return ioHandle;
     }
+
+    public static long killprocasync(SixModelObject handle, long signal,
+            ThreadContext tc) {
+        switch((int)signal) {
+            case 1:    // SIGHUP (default used by Rakudo for 'kill')
+            case 15:   // SIGTERM
+                ((AsyncProcessHandle)((IOHandleInstance)handle).handle).kill(tc);
+                break;
+            case 9:    // SIGKILL
+                ((AsyncProcessHandle)((IOHandleInstance)handle).handle).killForcibly(tc);
+                break;
+            default:
+                throw ExceptionHandling.dieInternal(tc, "Unsupported signal for kill: " + signal);
+        }
+        return signal;
+    }
 }
