@@ -668,10 +668,45 @@ op.getcomp = function(language) {
   return compilerRegistry.has(language) ? compilerRegistry.get(language) : Null;
 };
 
+const child_process = require('child_process');
+
+function getConfigFromPerl() {
+  const perlScript = `
+  use Config;
+
+  my $ccdlflags = "$Config{cccdlflags} $Config{ccdlflags}";
+  my $ldout = $^O eq 'MSWin32'? '-out:' : '-o';
+
+  my %nativecall = (
+    o => $Config{_o},
+    so => $Config{so},
+    cc => $Config{cc},
+    ccflags => $Config{ccflags},
+    ccdlflags => $ccdlflags,
+    ld => $Config{ld},
+    ldout => $ldout,
+    ldflags => $Config{ldflags},
+    lddlflags => $Config{lddlflags},
+    libs => $Config{libs},
+    perllibs => $Config{perllibs},
+  );
+
+  # using a JSON module would be much better but we don't want a dependency
+  print "{" . (join ',', map {'"nativecall.' . $_ . '": "' . $nativecall{$_} . '"'} keys %nativecall) . "}\n";
+  `;
+
+
+  return JSON.parse(child_process.spawnSync('perl', ['-e', perlScript], {stdio: ['inherit', 'pipe', 'inherit']}).output[1].toString());
+}
+
 op.backendconfig = function() {
-  var config = new Hash();
+  const config = new Hash();
   config.content.set('intvalsize', 4);
   config.content.set('osname', os.platform());
+  const nativecallConfig = getConfigFromPerl();
+  for (let key of Object.keys(nativecallConfig)) {
+    config.content.set(key, nativecallConfig[key]);
+  }
   return config;
 };
 

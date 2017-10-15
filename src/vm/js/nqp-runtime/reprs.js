@@ -15,6 +15,8 @@ var ZERO = bignum(0);
 
 var constants = require('./constants.js');
 
+const ref = require('ref');
+
 const EDGE_FATE = 0;
 const EDGE_EPSILON = 1;
 const EDGE_CODEPOINT = 2;
@@ -388,6 +390,10 @@ class P6opaque {
             var REPR = attrType._STable.REPR;
             if (!this.unboxSlots) this.unboxSlots = [];
             this.unboxSlots.push({slot: curAttr, reprId: REPR.ID});
+            if (!REPR.generateBoxingMethods) {
+              console.log("we do not have a generateBoxingMethods");
+              console.log(REPR.name);
+            }
             REPR.generateBoxingMethods(STable, slotToAttr(curAttr), attrType._STable);
           }
 
@@ -616,11 +622,44 @@ class Uninstantiable extends REPR {
 };
 reprs.Uninstantiable = Uninstantiable;
 
+
+const C_TYPE_CHAR = -1;
+const C_TYPE_SHORT = -2;
+const C_TYPE_INT = -3;
+const C_TYPE_LONG = -4;
+const C_TYPE_LONGLONG = -5;
+const C_TYPE_SIZE_T = -6;
+const C_TYPE_BOOL = -7;
+
+function cType(ctype) {
+  switch (ctype) {
+    case C_TYPE_CHAR:
+      return ref.types.char;
+    case C_TYPE_SHORT:
+      return ref.types.short;
+    case C_TYPE_INT:
+      return ref.types.int;
+    case C_TYPE_LONG:
+      return ref.types.long;
+    case C_TYPE_LONGLONG:
+      return ref.types.longlong;
+    case C_TYPE_SIZE_T:
+      return ref.types.size_t;
+    case C_TYPE_BOOL:
+      return ref.types.bool;
+  }
+}
+
+
 class P6int extends REPR {
   constructor() {
     super();
     this.bits = 32;
     this.isUnsigned = 0;
+  }
+
+  nativeCallSize() {
+    return this.bits/8;
   }
 
   setupSTable(STable) {
@@ -645,7 +684,7 @@ class P6int extends REPR {
       let bits = integer.content.get('bits');
       if (bits === undefined) {
       } else if (bits instanceof NQPInt) {
-        this.bits = bits.value;
+        this.bits = bits < 0 ? cType(bits.value).size * 8 : bits;
       } else {
         throw 'bits to P6int.compose must be a native int';
       }
@@ -1428,7 +1467,11 @@ reprs.P6bigint = P6bigint;
 
 /* Stubs */
 
-class NativeCall extends REPR {};
+class NativeCall extends REPR {
+  generateBoxingMethods(STable, name) {
+    //TODO - figure out what if anything needs to be here
+  }
+};
 reprs.NativeCall = NativeCall;
 
 class CPointer extends REPR {};
@@ -1944,6 +1987,24 @@ class NativeRef extends REPR {
   }
 };
 reprs.NativeRef = NativeRef;
+
+class CArray extends REPR {
+  setupSTable(STable) {
+    STable.addInternalMethods(class {
+      $$setStr(str) {
+        //TODO
+        //console.log('CArray setting with str: ', str);
+      }
+    });
+  }
+};
+reprs.CArray = CArray;
+
+class CStr extends REPR {
+};
+reprs.CStr = CArray;
+
+
 
 var ID = 0;
 for (var name in reprs) {

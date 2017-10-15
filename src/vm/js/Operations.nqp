@@ -1588,6 +1588,14 @@ class QAST::OperationsJS {
     add_simple_op('buildnativecall',  $T_INT, [$T_OBJ, $T_STR, $T_STR, $T_STR, $T_OBJ, $T_OBJ], :side_effects, :ctx);
     add_simple_op('nativecall', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ], :side_effects);
 
+    add_simple_op('nativecallsizeof', $T_INT, [$T_OBJ], :decont(0));
+
+    add_simple_op('nativecallglobal', $T_OBJ, [$T_STR, $T_STR, $T_OBJ, $T_OBJ]);
+
+    add_simple_op('nativecallcast', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ]);
+
+    add_simple_op('nativecallrefresh', $T_OBJ, [$T_INT], :side_effects);
+
     add_simple_op('initnativecall', $T_INT, [], :side_effects);
 
     # Continuations
